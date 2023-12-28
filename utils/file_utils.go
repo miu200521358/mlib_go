@@ -1,4 +1,4 @@
-package mlib
+package utils
 
 import (
 	"encoding/json"
