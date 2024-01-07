@@ -11,7 +11,7 @@ const configFilePath = "config.json"
 // 設定の保存
 func SaveConfig(key string, values []string, limit int) error {
 	// Unmarshal the JSON data into a map
-	println(configFilePath)
+	println("SaveConfig: ", key, values[0], limit)
 	data, err := os.ReadFile(configFilePath)
 	if err != nil {
 		data = []byte("{}")
