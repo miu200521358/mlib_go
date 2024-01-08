@@ -4,6 +4,8 @@
         "gonum",
         "lerp",
         "Miku",
+        "mlib",
+        "mmath",
         "rtol",
         "ungerik"
     ]

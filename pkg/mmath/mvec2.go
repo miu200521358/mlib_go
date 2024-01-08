@@ -1,4 +1,4 @@
-package math
+package mmath
 
 import (
 	"fmt"
@@ -25,6 +25,6 @@ func (v MVec2) MMD() MVec2 {
 }
 
 // CalcByRatio ベクトルの線形補間を行います
-func (v MVec2) CalcByRatio(prev, next MVec2, x, y float64) MVec2 {
-	return MVec2{prev[0] + (next[0]-prev[0])*x, prev[1] + (next[1]-prev[1])*y}
+func (v MVec2) CalcByRatio(next MVec2, x, y float64) MVec2 {
+	return MVec2{v[0] + (next[0]-v[0])*x, v[1] + (next[1]-v[1])*y}
 }

@@ -1,9 +1,10 @@
-package math
+package mmath
 
 import (
 	"fmt"
 
 	"github.com/ungerik/go3d/float64/vec4"
+
 )
 
 type MVec4 vec4.T
@@ -24,6 +25,6 @@ func (v MVec4) MMD() MVec4 {
 }
 
 // CalcByRatio ベクトルの線形補間を行います
-func (v MVec4) CalcByRatio(prev, next MVec4, x, y, z, w float64) MVec4 {
-	return MVec4{prev[0] + (next[0]-prev[0])*x, prev[1] + (next[1]-prev[1])*y, prev[2] + (next[2]-prev[2])*z, prev[3] + (next[3]-prev[3])*w}
+func (v MVec4) CalcByRatio(next MVec4, x, y, z, w float64) MVec4 {
+	return MVec4{v[0] + (next[0]-v[0])*x, v[1] + (next[1]-v[1])*y, v[2] + (next[2]-v[2])*z, v[3] + (next[3]-v[3])*w}
 }
