@@ -1,12 +1,24 @@
 {
     "cSpell.words": [
+        "Adjugate",
+        "Adjugated",
         "atol",
         "gonum",
+        "Idxs",
         "lerp",
         "Miku",
         "mlib",
+        "mmat",
         "mmath",
+        "mquaternion",
+        "mrect",
+        "mvec",
         "rtol",
-        "ungerik"
+        "Slerp",
+        "Subed",
+        "ungerik",
+        "XYZW",
+        "zfar",
+        "znear"
     ]
 }
