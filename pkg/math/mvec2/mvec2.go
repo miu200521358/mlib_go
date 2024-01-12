@@ -314,3 +314,8 @@ func (v *T) Copy() *T {
 	copied := *v
 	return &copied
 }
+
+// Vector
+func (v *T) Vector() *[]float64 {
+	return &[]float64{v.GetX(), v.GetY()}
+}

@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/ungerik/go3d/float64/vec3"
+
 )
 
 type T vec3.T
@@ -314,4 +315,9 @@ func (v *T) Clamped01() T {
 func (v *T) Copy() *T {
 	copied := *v
 	return &copied
+}
+
+// Vector
+func (v *T) Vector() *[]float64 {
+	return &[]float64{v.GetX(), v.GetY(), v.GetZ()}
 }

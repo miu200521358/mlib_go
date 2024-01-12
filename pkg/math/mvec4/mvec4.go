@@ -9,6 +9,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/math/mvec2"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
+
 )
 
 type T vec4.T
@@ -373,4 +374,9 @@ func (v *T) Vec2() mvec2.T {
 func (v *T) Copy() *T {
 	copied := *v
 	return &copied
+}
+
+// Vector
+func (v *T) Vector() *[]float64 {
+	return &[]float64{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
 }

@@ -1,4 +1,4 @@
-package deform
+package vertex
 
 import (
 	"sort"
@@ -17,16 +17,16 @@ const (
 	SDEF  DeformType = 3
 )
 
-// T デフォーム既定構造体
-type T struct {
+// Deform デフォーム既定構造体
+type Deform struct {
 	Indexes []int
 	Weights []float64
 	Count   int
 }
 
 // NewDeform creates a new Deform instance.
-func NewDeform(indexes []int, weights []float64, count int) *T {
-	return &T{
+func NewDeform(indexes []int, weights []float64, count int) *Deform {
+	return &Deform{
 		Indexes: indexes,
 		Weights: weights,
 		Count:   count,
@@ -34,7 +34,7 @@ func NewDeform(indexes []int, weights []float64, count int) *T {
 }
 
 // GetIndexes ウェイト閾値以上のウェイトを持っているINDEXのみを取得する
-func (d *T) GetIndexes(weightThreshold float64) []int {
+func (d *Deform) GetIndexes(weightThreshold float64) []int {
 	var indexes []int
 	for i, weight := range d.Weights {
 		if weight >= weightThreshold {
@@ -45,7 +45,7 @@ func (d *T) GetIndexes(weightThreshold float64) []int {
 }
 
 // GetWeights ウェイト閾値以上のウェイトを持っているウェイトのみを取得する
-func (d *T) GetWeights(weightThreshold float64) []float64 {
+func (d *Deform) GetWeights(weightThreshold float64) []float64 {
 	var weights []float64
 	for _, weight := range d.Weights {
 		if weight >= weightThreshold {
@@ -56,7 +56,7 @@ func (d *T) GetWeights(weightThreshold float64) []float64 {
 }
 
 // Normalize ウェイト正規化
-func (d *T) Normalize(align bool) {
+func (d *Deform) Normalize(align bool) {
 	if align {
 		// ウェイトを統合する
 		indexWeights := make(map[int]float64)
@@ -105,7 +105,7 @@ func (d *T) Normalize(align bool) {
 }
 
 // NormalizedDeform ウェイト正規化して4つのボーンINDEXとウェイトを返す（合計8個）
-func (d *T) NormalizedDeform() []float64 {
+func (d *Deform) NormalizedDeform() []float64 {
 	// 揃える必要がある場合、ウェイトを統合する
 	indexWeights := make(map[int]float64)
 	for i, index := range d.Indexes {
@@ -175,13 +175,13 @@ func sortIndexesByWeight(indexes []int, weights []float64) {
 
 // Bdef1 represents the BDEF1 deformation.
 type Bdef1 struct {
-	T
+	Deform
 }
 
 // NewBdef1 creates a new Bdef1 instance.
 func NewBdef1(index0 int) *Bdef1 {
 	return &Bdef1{
-		T: T{
+		Deform: Deform{
 			Indexes: []int{index0},
 			Weights: []float64{1.0},
 			Count:   1,
@@ -196,13 +196,13 @@ func (b *Bdef1) Type() DeformType {
 
 // Bdef2 represents the BDEF2 deformation.
 type Bdef2 struct {
-	T
+	Deform
 }
 
 // NewBdef2 creates a new Bdef2 instance.
 func NewBdef2(index0, index1 int, weight0 float64) *Bdef2 {
 	return &Bdef2{
-		T: T{
+		Deform: Deform{
 			Indexes: []int{index0, index1},
 			Weights: []float64{weight0, 1 - weight0},
 			Count:   2,
@@ -217,13 +217,13 @@ func (b *Bdef2) Type() DeformType {
 
 // Bdef4 represents the BDEF4 deformation.
 type Bdef4 struct {
-	T
+	Deform
 }
 
 // NewBdef4 creates a new Bdef4 instance.
 func NewBdef4(index0, index1, index2, index3 int, weight0, weight1, weight2, weight3 float64) *Bdef4 {
 	return &Bdef4{
-		T: T{
+		Deform: Deform{
 			Indexes: []int{index0, index1, index2, index3},
 			Weights: []float64{weight0, weight1, weight2, weight3},
 			Count:   4,
@@ -238,7 +238,7 @@ func (b *Bdef4) Type() DeformType {
 
 // Sdef represents the SDEF deformation.
 type Sdef struct {
-	T
+	Deform
 	SdefC  *mvec3.T
 	SdefR0 *mvec3.T
 	SdefR1 *mvec3.T
@@ -247,7 +247,7 @@ type Sdef struct {
 // NewSdef creates a new Sdef instance.
 func NewSdef(index0, index1 int, weight0, sdefCX, sdefCY, sdefCZ, sdefR0X, sdefR0Y, sdefR0Z, sdefR1X, sdefR1Y, sdefR1Z float64) *Sdef {
 	return &Sdef{
-		T: T{
+		Deform: Deform{
 			Indexes: []int{index0, index1},
 			Weights: []float64{weight0, 1 - weight0},
 			Count:   2,

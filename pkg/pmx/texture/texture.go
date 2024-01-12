@@ -8,7 +8,7 @@ const (
 	SPHERE  TextureType = 2
 )
 
-type Texture struct {
+type T struct {
 	Index       int
 	Name        string
 	TextureType TextureType
@@ -16,12 +16,18 @@ type Texture struct {
 	Valid       bool
 }
 
-func NewTexture(index int, name string, textureType TextureType) *Texture {
-	return &Texture{
+func NewTexture(index int, name string, textureType TextureType) *T {
+	return &T{
 		Index:       index,
 		Name:        name,
 		TextureType: textureType,
 		Path:        "",
 		Valid:       false,
 	}
+}
+
+// Copy
+func (v *T) Copy() *T {
+	copied := *v
+	return &copied
 }

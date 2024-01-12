@@ -5,7 +5,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/math/mmat4"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
-
 )
 
 type IkLink struct {
@@ -33,14 +32,14 @@ func (ik *Ik) IsValid() bool {
 	return ik.BoneIndex >= 0
 }
 
-type Bone struct {
+type T struct {
 	Index                  int
 	Name                   string
 	EnglishName            string
 	Position               *mvec3.T
 	ParentIndex            int
 	Layer                  int
-	BoneFlag                BoneFlag
+	BoneFlag               BoneFlag
 	TailPosition           *mvec3.T
 	TailIndex              int
 	EffectIndex            int
@@ -95,15 +94,15 @@ func NewBone(
 	ik *Ik,
 	displaySlot int,
 	isSystem bool,
-) *Bone {
-	bone := &Bone{
+) *T {
+	bone := &T{
 		Index:                  index,
 		Name:                   name,
 		EnglishName:            englishName,
 		Position:               position,
 		ParentIndex:            parentIndex,
 		Layer:                  layer,
-		BoneFlag:                boneFlag,
+		BoneFlag:               boneFlag,
 		TailPosition:           tailPosition,
 		TailIndex:              tailIndex,
 		EffectIndex:            effectIndex,
@@ -145,133 +144,139 @@ func NewBone(
 	return bone
 }
 
-func (bone *Bone) CorrectFixedAxis(correctedFixedAxis mvec3.T) {
+// Copy
+func (v *T) Copy() *T {
+	copied := *v
+	return &copied
+}
+
+func (bone *T) CorrectFixedAxis(correctedFixedAxis mvec3.T) {
 	bone.CorrectedFixedAxis = correctedFixedAxis.Normalize()
 }
 
-func (bone *Bone) CorrectLocalVector(correctedLocalXVector mvec3.T) {
+func (bone *T) CorrectLocalVector(correctedLocalXVector mvec3.T) {
 	bone.CorrectedLocalXVector = correctedLocalXVector.Normalize()
 	bone.CorrectedLocalYVector = bone.CorrectedLocalXVector.Cross(mvec3.UnitZ.Invert())
 	bone.CorrectedLocalZVector = bone.CorrectedLocalXVector.Cross(bone.CorrectedLocalYVector)
 }
 
 // 表示先がボーンであるか
-func (bone *Bone) IsTailBone() bool {
+func (bone *T) IsTailBone() bool {
 	return bone.BoneFlag&TAIL_IS_BONE != 0
 }
 
 // 回転可能であるか
-func (bone *Bone) CanRotate() bool {
+func (bone *T) CanRotate() bool {
 	return bone.BoneFlag&CAN_ROTATE != 0
 }
 
 // 移動可能であるか
-func (bone *Bone) CanTranslate() bool {
+func (bone *T) CanTranslate() bool {
 	return bone.BoneFlag&CAN_TRANSLATE != 0
 }
 
 // 表示であるか
-func (bone *Bone) IsVisible() bool {
+func (bone *T) IsVisible() bool {
 	return bone.BoneFlag&IS_VISIBLE != 0
 }
 
 // 操作可であるか
-func (bone *Bone) CanManipulate() bool {
+func (bone *T) CanManipulate() bool {
 	return bone.BoneFlag&CAN_MANIPULATE != 0
 }
 
 // IKであるか
-func (bone *Bone) IsIK() bool {
+func (bone *T) IsIK() bool {
 	return bone.BoneFlag&IS_IK != 0
 }
 
 // ローカル付与であるか
-func (bone *Bone) IsExternalLocal() bool {
+func (bone *T) IsExternalLocal() bool {
 	return bone.BoneFlag&IS_EXTERNAL_LOCAL != 0
 }
 
 // 回転付与であるか
-func (bone *Bone) IsExternalRotation() bool {
+func (bone *T) IsExternalRotation() bool {
 	return bone.BoneFlag&IS_EXTERNAL_ROTATION != 0
 }
 
 // 移動付与であるか
-func (bone *Bone) IsExternalTranslation() bool {
+func (bone *T) IsExternalTranslation() bool {
 	return bone.BoneFlag&IS_EXTERNAL_TRANSLATION != 0
 }
 
 // 軸固定であるか
-func (bone *Bone) HasFixedAxis() bool {
+func (bone *T) HasFixedAxis() bool {
 	return bone.BoneFlag&HAS_FIXED_AXIS != 0
 }
 
 // ローカル軸を持つか
-func (bone *Bone) HasLocalCoordinate() bool {
+func (bone *T) HasLocalCoordinate() bool {
 	return bone.BoneFlag&HAS_LOCAL_COORDINATE != 0
 }
 
 // 物理後変形であるか
-func (bone *Bone) IsAfterPhysicsDeform() bool {
+func (bone *T) IsAfterPhysicsDeform() bool {
 	return bone.BoneFlag&IS_AFTER_PHYSICS_DEFORM != 0
 }
 
 // 外部親変形であるか
-func (bone *Bone) IsExternalParentDeform() bool {
+func (bone *T) IsExternalParentDeform() bool {
 	return bone.BoneFlag&IS_EXTERNAL_PARENT_DEFORM != 0
 }
 
 // 足D系列であるか
-func (bone *Bone) IsLegD() bool {
+func (bone *T) IsLegD() bool {
 	return bone.containCategory(CATEGORY_LEG_D)
 }
 
 // 肩P系列であるか
-func (bone *Bone) IsShoulderP() bool {
+func (bone *T) IsShoulderP() bool {
 	return bone.containCategory(CATEGORY_SHOULDER_P)
 }
 
 // 足FK系列であるか
-func (bone *Bone) IsLegFK() bool {
+func (bone *T) IsLegFK() bool {
 	return bone.containCategory(CATEGORY_LEG_FK)
 }
 
 // 足首から先であるか
-func (bone *Bone) IsAnkle() bool {
+func (bone *T) IsAnkle() bool {
 	return bone.containCategory(CATEGORY_ANKLE)
 }
 
 // 捩りボーンであるか
-func (bone *Bone) IsTwist() bool {
+func (bone *T) IsTwist() bool {
 	return bone.containCategory(CATEGORY_TWIST)
 }
 
 // 腕系ボーンであるか(指は含まない)
-func (bone *Bone) IsArm() bool {
+func (bone *T) IsArm() bool {
 	return bone.containCategory(CATEGORY_ARM)
 }
 
 // 指系ボーンであるか
-func (bone *Bone) IsFinger() bool {
+func (bone *T) IsFinger() bool {
 	return bone.containCategory(CATEGORY_FINGER)
 }
 
 // 頭系であるか
-func (bone *Bone) IsHead() bool {
+func (bone *T) IsHead() bool {
 	return bone.containCategory(CATEGORY_HEAD)
 }
 
 // 下半身系であるか
-func (bone *Bone) IsLower() bool {
+func (bone *T) IsLower() bool {
 	return bone.containCategory(CATEGORY_LOWER)
 }
 
 // 上半身系であるか
-func (bone *Bone) IsUpper() bool {
+func (bone *T) IsUpper() bool {
 	return bone.containCategory(CATEGORY_UPPER)
 }
 
 // ローカル軸行列計算で親のキャンセルをさせないボーンであるか
-func (bone *Bone) IsNoLocalCancel() bool {
+func (bone *T) IsNoLocalCancel() bool {
 	// 捩り分散ボーンも含む
 	if strings.Contains(bone.Name, "捩") {
 		return true
@@ -281,7 +286,7 @@ func (bone *Bone) IsNoLocalCancel() bool {
 }
 
 // 指定したカテゴリーに属するか
-func (bone *Bone) containCategory(category BoneCategory) bool {
+func (bone *T) containCategory(category BoneCategory) bool {
 	for _, boneConfig := range StandardBoneConfigs {
 		for _, c := range boneConfig.Categories {
 			if c == category && (boneConfig.Name.String() == bone.Name ||
