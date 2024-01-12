@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/ungerik/go3d/float64/vec2"
+
 )
 
 type T vec2.T
@@ -306,4 +307,10 @@ func (v *T) Rotate90DegLeft() *T {
 // Rotate90DegRight ベクトルを90度右回転します
 func (v *T) Rotate90DegRight() *T {
 	return (*T)((*vec2.T)(v).Rotate90DegRight())
+}
+
+// Copy
+func (v *T) Copy() *T {
+	copied := *v
+	return &copied
 }

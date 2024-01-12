@@ -309,3 +309,9 @@ func (v *T) Clamp01() *T {
 func (v *T) Clamped01() T {
 	return T((*vec3.T).Clamped01((*vec3.T)(v)))
 }
+
+// Copy
+func (v *T) Copy() *T {
+	copied := *v
+	return &copied
+}

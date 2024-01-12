@@ -368,3 +368,9 @@ func (v *T) Vec3() mvec3.T {
 func (v *T) Vec2() mvec2.T {
 	return mvec2.T{v.GetX(), v.GetY()}
 }
+
+// Copy
+func (v *T) Copy() *T {
+	copied := *v
+	return &copied
+}

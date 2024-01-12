@@ -11,7 +11,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/math/mquaternion"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec4"
-
 )
 
 type T mat4.T
@@ -176,10 +175,6 @@ func (mat *T) IsReflective() bool {
 	return (*mat4.T)(mat).IsReflective()
 }
 
-func swap(a, b *float64) {
-	*a, *b = *b, *a
-}
-
 func (mat *T) Transpose() *T {
 	return (*T)((*mat4.T)(mat).Transpose())
 }
@@ -188,3 +183,8 @@ func (mat *T) Transpose3x3() *T {
 	return (*T)((*mat4.T)(mat).Transpose3x3())
 }
 
+// Copy
+func (mat *T) Copy() *T {
+	copied := *mat
+	return &copied
+}

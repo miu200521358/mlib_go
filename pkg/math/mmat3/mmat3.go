@@ -168,3 +168,9 @@ func (mat *T) Inverted() (T, error) {
 	m, err := (*mat3.T)(mat).Inverted()
 	return (T)(m), err
 }
+
+// Copy
+func (mat *T) Copy() *T {
+	copied := *mat
+	return &copied
+}
