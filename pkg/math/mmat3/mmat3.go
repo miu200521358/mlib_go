@@ -1,6 +1,8 @@
 package mmat3
 
 import (
+	"fmt"
+
 	"github.com/ungerik/go3d/float64/mat3"
 	"github.com/ungerik/go3d/float64/quaternion"
 	"github.com/ungerik/go3d/float64/vec2"
@@ -171,6 +173,19 @@ func (mat *T) Inverted() (T, error) {
 
 // Copy
 func (mat *T) Copy() *T {
-	copied := *mat
-	return &copied
+	return &T{
+		vec3.T{mat[0].Slice()[0],
+			mat[0].Slice()[1],
+			mat[0].Slice()[2]},
+		vec3.T{mat[1].Slice()[0],
+			mat[1].Slice()[1],
+			mat[1].Slice()[2]},
+		vec3.T{mat[2].Slice()[0],
+			mat[2].Slice()[1],
+			mat[2].Slice()[2]},
+	}
+}
+
+func (mat *T) String() string {
+	return fmt.Sprintf("%v\n%v\n%v", mat[0], mat[1], mat[2])
 }

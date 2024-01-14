@@ -391,8 +391,7 @@ func (quat *T) SeparateByAxis(globalAxis *mvec3.T) (*T, *T, *T, *T) {
 
 // Copy
 func (qq *T) Copy() *T {
-	copied := *qq
-	return &copied
+	return &T{qq.GetX(), qq.GetY(), qq.GetZ(), qq.GetW()}
 }
 
 // Vector

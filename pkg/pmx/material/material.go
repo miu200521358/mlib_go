@@ -5,54 +5,83 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 )
 
+// スフィアモード
 type SphereMode int
 
 const (
-	INVALID        SphereMode = 0
-	MULTIPLICATION SphereMode = 1
-	ADDITION       SphereMode = 2
-	SUBTEXTURE     SphereMode = 3
+	// 無効
+	SPHERE_MODE_INVALID SphereMode = 0
+	// 乗算(sph)
+	SPHERE_MODE_MULTIPLICATION SphereMode = 1
+	// 加算(spa)
+	SPHERE_MODE_ADDITION SphereMode = 2
+	// サブテクスチャ(追加UV1のx,yをUV参照して通常テクスチャ描画を行う)
+	SPHERE_MODE_SUBTEXTURE SphereMode = 3
 )
 
 type DrawFlag int
 
 const (
-	NONE                        DrawFlag = 0x0000
-	DOUBLE_SIDED_DRAWING        DrawFlag = 0x0001
-	GROUND_SHADOW               DrawFlag = 0x0002
-	DRAWING_ON_SELF_SHADOW_MAPS DrawFlag = 0x0004
-	DRAWING_SELF_SHADOWS        DrawFlag = 0x0008
-	DRAWING_EDGE                DrawFlag = 0x0010
+	// 初期値
+	DRAW_FLAG_NONE DrawFlag = 0x0000
+	// 0x01:両面描画
+	DRAW_FLAG_DOUBLE_SIDED_DRAWING DrawFlag = 0x0001
+	// 0x02:地面影
+	DRAW_FLAG_GROUND_SHADOW DrawFlag = 0x0002
+	// 0x04:セルフシャドウマップへの描画
+	DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS DrawFlag = 0x0004
+	// 0x08:セルフシャドウの描画
+	DRAW_FLAG_DRAWING_SELF_SHADOWS DrawFlag = 0x0008
+	// 0x10:エッジ描画
+	DRAW_FLAG_DRAWING_EDGE DrawFlag = 0x0010
 )
 
+// 共有Toonフラグ
 type ToonSharing int
 
 const (
-	INDIVIDUAL ToonSharing = 0
-	SHARING    ToonSharing = 1
+	// 0:継続値は個別Toon
+	TOON_SHARING_INDIVIDUAL ToonSharing = 0
+	// 1:継続値は共有Toon
+	TOON_SHARING_SHARING ToonSharing = 1
 )
 
 type Material struct {
 	index_model.IndexModel
-	Index              int
-	Name               string
-	EnglishName        string
-	DiffuseColor       *mvec3.T
-	DiffuseAlpha       float64
-	SpecularColor      *mvec3.T
-	SpecularFactor     float64
-	AmbientColor       *mvec3.T
-	DrawFlag           DrawFlag
-	EdgeColor          *mvec3.T
-	EdgeAlpha          float64
-	EdgeSize           float64
-	TextureIndex       int
+	// 材質名
+	Name string
+	// 材質名英
+	EnglishName string
+	// Diffuse (R,G,B,A)(拡散色＋非透過度)
+	DiffuseColor *mvec3.T
+	DiffuseAlpha float64
+	// Specular (R,G,B)(反射色)
+	SpecularColor *mvec3.T
+	// Specular係数(反射強度)
+	SpecularFactor float64
+	// Ambient (R,G,B)(環境色)
+	AmbientColor *mvec3.T
+	// 描画フラグ(8bit) - 各bit 0:OFF 1:ON
+	DrawFlag DrawFlag
+	// エッジ色 (R,G,B,A)
+	EdgeColor *mvec3.T
+	EdgeAlpha float64
+	// エッジサイズ
+	EdgeSize float64
+	// 通常テクスチャINDEX
+	TextureIndex int
+	// スフィアテクスチャINDEX
 	SphereTextureIndex int
-	SphereMode         SphereMode
-	ToonSharingFlag    ToonSharing
-	ToonTextureIndex   int
-	Comment            string
-	VerticesCount      int
+	// スフィアモード
+	SphereMode SphereMode
+	// 共有Toonフラグ
+	ToonSharingFlag ToonSharing
+	// ToonテクスチャINDEX
+	ToonTextureIndex int
+	// メモ
+	Comment string
+	// 材質に対応する面(頂点)数 (必ず3の倍数になる)
+	VerticesCount int
 }
 
 func NewMaterial(
@@ -77,7 +106,7 @@ func NewMaterial(
 	verticesCount int,
 ) *Material {
 	return &Material{
-		Index:              index,
+		IndexModel:         index_model.IndexModel{Index: index},
 		Name:               name,
 		EnglishName:        englishName,
 		DiffuseColor:       diffuseColor,
@@ -102,6 +131,17 @@ func NewMaterial(
 func (m *Material) Copy() index_model.IndexModelInterface {
 	copied := *m
 	return &copied
+}
+
+// 材質リスト
+type Materials struct {
+	index_model.IndexModelCorrection[*Material]
+}
+
+func NewMaterials(name string) *Materials {
+	return &Materials{
+		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Material](),
+	}
 }
 
 // シェーダー用材質
@@ -244,16 +284,5 @@ func (sm *ShaderMaterial) IAdd(v interface{}) {
 		sm.ShaderTextureFactor.Add(v.ShaderTextureFactor)
 		sm.SphereShaderTextureFactor.Add(v.SphereShaderTextureFactor)
 		sm.ToonShaderTextureFactor.Add(v.ToonShaderTextureFactor)
-	}
-}
-
-// 材質リスト
-type Materials struct {
-	index_model.IndexModelCorrection[*Material]
-}
-
-func NewMaterials(name string) *Materials {
-	return &Materials{
-		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Material](),
 	}
 }

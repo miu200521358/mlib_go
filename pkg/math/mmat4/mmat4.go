@@ -1,6 +1,8 @@
 package mmat4
 
 import (
+	"fmt"
+
 	"github.com/ungerik/go3d/float64/mat3"
 	"github.com/ungerik/go3d/float64/mat4"
 	"github.com/ungerik/go3d/float64/quaternion"
@@ -11,6 +13,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/math/mquaternion"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec4"
+
 )
 
 type T mat4.T
@@ -185,6 +188,23 @@ func (mat *T) Transpose3x3() *T {
 
 // Copy
 func (mat *T) Copy() *T {
-	copied := *mat
-	return &copied
+	return &T{
+		vec4.T{mat[0].Slice()[0],
+			mat[0].Slice()[1],
+			mat[0].Slice()[2],
+			mat[0].Slice()[3]},
+		vec4.T{mat[1].Slice()[0],
+			mat[1].Slice()[1],
+			mat[1].Slice()[2],
+			mat[1].Slice()[3]},
+		vec4.T{mat[2].Slice()[0],
+			mat[2].Slice()[1],
+			mat[2].Slice()[2],
+			mat[2].Slice()[3]},
+	}
 }
+
+func (mat *T) String() string {
+	return fmt.Sprintf("[%v, %v, %v, %v]", mat[0], mat[1], mat[2], mat[3])
+}
+

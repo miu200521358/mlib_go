@@ -6,7 +6,6 @@ import (
 	"math"
 
 	"github.com/ungerik/go3d/float64/vec3"
-
 )
 
 type T vec3.T
@@ -40,6 +39,11 @@ var (
 	MaxVal = T{+math.MaxFloat64, +math.MaxFloat64, +math.MaxFloat64}
 )
 
+// String T の文字列表現を返します。
+func (v *T) String() string {
+	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f]", v.GetX(), v.GetY(), v.GetZ())
+}
+
 // GetX returns the value of the X coordinate
 func (v *T) GetX() float64 {
 	return v[0]
@@ -68,11 +72,6 @@ func (v *T) GetZ() float64 {
 // SetZ sets the value of the Z coordinate
 func (v *T) SetZ(z float64) {
 	v[2] = z
-}
-
-// String T の文字列表現を返します。
-func (v *T) String() string {
-	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f]", v.GetX(), v.GetY(), v.GetZ())
 }
 
 // GL OpenGL座標系に変換された2次元ベクトルを返します
@@ -313,8 +312,7 @@ func (v *T) Clamped01() T {
 
 // Copy
 func (v *T) Copy() *T {
-	copied := *v
-	return &copied
+	return &T{v.GetX(), v.GetY(), v.GetZ()}
 }
 
 // Vector

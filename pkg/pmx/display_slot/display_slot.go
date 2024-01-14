@@ -2,6 +2,7 @@ package display_slot
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/core/index_model"
+
 )
 
 // 表示枠要素タイプ
@@ -21,17 +22,18 @@ type Reference struct {
 	DisplayIndex int
 }
 
+// 特殊枠フラグ - 0:通常枠 1:特殊枠
 type SpecialFlag int
 
 const (
+	// 通常枠
 	SPECIAL_FLAG_OFF SpecialFlag = 0
-	SPECIAL_FLAG_ON  SpecialFlag = 1
+	// 特殊枠（Rootと表情）
+	SPECIAL_FLAG_ON SpecialFlag = 1
 )
 
 type DisplaySlot struct {
 	index_model.IndexModel
-	// 枠名
-	Index int
 	// 枠名
 	Name string
 	// 枠名英
@@ -47,7 +49,7 @@ type DisplaySlot struct {
 // NewDisplaySlot
 func NewDisplaySlot(name string, englishName string, specialFlag SpecialFlag) *DisplaySlot {
 	return &DisplaySlot{
-		Index:       0,
+		IndexModel: index_model.IndexModel{Index: -1},
 		Name:        name,
 		EnglishName: englishName,
 		SpecialFlag: specialFlag,

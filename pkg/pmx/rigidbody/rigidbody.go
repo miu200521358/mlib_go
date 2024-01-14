@@ -24,52 +24,51 @@ type Shape int
 
 const (
 	// 球
-	Sphere Shape = 0
+	SHAPE_SPHERE Shape = 0
 	// 箱
-	Box Shape = 1
+	SHAPE_BOX Shape = 1
 	// カプセル
-	Capsule Shape = 2
+	SHAPE_CAPSULE Shape = 2
 )
 
 // 剛体物理の計算モード
-type Mode int
+type PhysicsMode int
 
 const (
 	// ボーン追従(static)
-	Static Mode = 0
+	PHYSICS_MODE_STATIC PhysicsMode = 0
 	// 物理演算(dynamic)
-	Dynamic Mode = 1
+	PHYSICS_MODE_DYNAMIC PhysicsMode = 1
 	// 物理演算 + Bone位置合わせ
-	DynamicBone Mode = 2
+	PHYSICS_MODE_DYNAMIC_BONE PhysicsMode = 2
 )
 
 type CollisionGroup int
 
 const (
 	// 0:グループなし
-	None    CollisionGroup = 0x0000
-	Group01 CollisionGroup = 0x0001
-	Group02 CollisionGroup = 0x0002
-	Group03 CollisionGroup = 0x0004
-	Group04 CollisionGroup = 0x0008
-	Group05 CollisionGroup = 0x0010
-	Group06 CollisionGroup = 0x0020
-	Group07 CollisionGroup = 0x0040
-	Group08 CollisionGroup = 0x0080
-	Group09 CollisionGroup = 0x0100
-	Group10 CollisionGroup = 0x0200
-	Group11 CollisionGroup = 0x0400
-	Group12 CollisionGroup = 0x0800
-	Group13 CollisionGroup = 0x1000
-	Group14 CollisionGroup = 0x2000
-	Group15 CollisionGroup = 0x4000
-	Group16 CollisionGroup = 0x8000
+	COLLISION_NONE    CollisionGroup = 0x0000
+	COLLISION_GROUP01 CollisionGroup = 0x0001
+	COLLISION_GROUP02 CollisionGroup = 0x0002
+	COLLISION_GROUP03 CollisionGroup = 0x0004
+	COLLISION_GROUP04 CollisionGroup = 0x0008
+	COLLISION_GROUP05 CollisionGroup = 0x0010
+	COLLISION_GROUP06 CollisionGroup = 0x0020
+	COLLISION_GROUP07 CollisionGroup = 0x0040
+	COLLISION_GROUP08 CollisionGroup = 0x0080
+	COLLISION_GROUP09 CollisionGroup = 0x0100
+	COLLISION_GROUP10 CollisionGroup = 0x0200
+	COLLISION_GROUP11 CollisionGroup = 0x0400
+	COLLISION_GROUP12 CollisionGroup = 0x0800
+	COLLISION_GROUP13 CollisionGroup = 0x1000
+	COLLISION_GROUP14 CollisionGroup = 0x2000
+	COLLISION_GROUP15 CollisionGroup = 0x4000
+	// 床との衝突
+	COLLISION_GROUP16 CollisionGroup = 0x8000
 )
 
 type RigidBody struct {
 	index_model.IndexModel
-	// 剛体INDEX
-	Index int
 	// 剛体名
 	Name string
 	// 剛体名英
@@ -91,7 +90,7 @@ type RigidBody struct {
 	// 剛体パラ
 	Param Param
 	// 剛体の物理演算
-	Mode Mode
+	Mode PhysicsMode
 	// X軸方向
 	XDirection mvec3.T
 	// Y軸方向
@@ -104,7 +103,6 @@ type RigidBody struct {
 
 // NewRigidBody creates a new rigid body.
 func NewRigidBody(
-	index int,
 	name string,
 	englishName string,
 	boneIndex int,
@@ -115,14 +113,14 @@ func NewRigidBody(
 	shapePosition mvec3.T,
 	shapeRotation mrotation.T,
 	param Param,
-	mode Mode,
+	mode PhysicsMode,
 	xDirection mvec3.T,
 	yDirection mvec3.T,
 	zDirection mvec3.T,
 	isSystem bool,
 ) *RigidBody {
 	return &RigidBody{
-		Index:            index,
+		IndexModel:       index_model.IndexModel{Index: -1},
 		Name:             name,
 		EnglishName:      englishName,
 		BoneIndex:        boneIndex,

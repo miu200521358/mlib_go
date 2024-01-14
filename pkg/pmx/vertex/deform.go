@@ -4,7 +4,6 @@ import (
 	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
-
 )
 
 // DeformType ウェイト変形方式
@@ -17,11 +16,18 @@ const (
 	SDEF  DeformType = 3
 )
 
+type DeformInterface interface {
+	GetType() DeformType
+}
+
 // Deform デフォーム既定構造体
 type Deform struct {
+	// ボーンINDEXリスト
 	Indexes []int
+	// ウェイトリスト
 	Weights []float64
-	Count   int
+	// デフォームボーン個数
+	Count int
 }
 
 // NewDeform creates a new Deform instance.
@@ -189,8 +195,8 @@ func NewBdef1(index0 int) *Bdef1 {
 	}
 }
 
-// Type returns the deformation type.
-func (b *Bdef1) Type() DeformType {
+// GetType returns the deformation type.
+func (b *Bdef1) GetType() DeformType {
 	return BDEF1
 }
 
@@ -210,8 +216,8 @@ func NewBdef2(index0, index1 int, weight0 float64) *Bdef2 {
 	}
 }
 
-// Type returns the deformation type.
-func (b *Bdef2) Type() DeformType {
+// GetType returns the deformation type.
+func (b *Bdef2) GetType() DeformType {
 	return BDEF2
 }
 
@@ -231,8 +237,8 @@ func NewBdef4(index0, index1, index2, index3 int, weight0, weight1, weight2, wei
 	}
 }
 
-// Type returns the deformation type.
-func (b *Bdef4) Type() DeformType {
+// GetType returns the deformation type.
+func (b *Bdef4) GetType() DeformType {
 	return BDEF4
 }
 
@@ -258,7 +264,7 @@ func NewSdef(index0, index1 int, weight0, sdefCX, sdefCY, sdefCZ, sdefR0X, sdefR
 	}
 }
 
-// Type returns the deformation type.
-func (s *Sdef) Type() DeformType {
+// GetType returns the deformation type.
+func (s *Sdef) GetType() DeformType {
 	return SDEF
 }

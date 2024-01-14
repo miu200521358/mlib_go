@@ -12,33 +12,44 @@ type LimitParam struct {
 }
 
 type Param struct {
-	TranslationLimitMin       mvec3.T
-	TranslationLimitMax       mvec3.T
-	RotationLimitMin          mrotation.T
-	RotationLimitMax          mrotation.T
+	// 移動制限-下限(x,y,z)
+	TranslationLimitMin mvec3.T
+	// 移動制限-上限(x,y,z)
+	TranslationLimitMax mvec3.T
+	// 回転制限-下限
+	RotationLimitMin mrotation.T
+	// 回転制限-上限
+	RotationLimitMax mrotation.T
+	// バネ定数-移動(x,y,z)
 	SpringConstantTranslation mvec3.T
-	SpringConstantRotation    mvec3.T
+	// バネ定数-回転(x,y,z)
+	SpringConstantRotation mrotation.T
 }
 
 type Joint struct {
 	index_model.IndexModel
-	Index           int
-	Name            string
-	EnglishName     string
-	JointType       int
+	// Joint名
+	Name string
+	// Joint名英
+	EnglishName string
+	// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
+	JointType int
+	// 関連剛体AのIndex
 	RigidbodyIndexA int
+	// 関連剛体BのIndex
 	RigidbodyIndexB int
-	Position        mvec3.T
-	Rotation        mrotation.T
-	Param           Param
-	IsSystem        bool
+	// 位置(x,y,z)
+	Position mvec3.T
+	// 回転
+	Rotation mrotation.T
+	// ジョイントパラメーター
+	Param    Param
+	IsSystem bool
 }
 
 func NewJoint(
-	index int,
 	name string,
 	englishName string,
-	jointType int,
 	rigidbodyIndexA int,
 	rigidbodyIndexB int,
 	position mvec3.T,
@@ -47,10 +58,11 @@ func NewJoint(
 	isSystem bool,
 ) *Joint {
 	return &Joint{
-		Index:           index,
-		Name:            name,
-		EnglishName:     englishName,
-		JointType:       jointType,
+		IndexModel:  index_model.IndexModel{Index: -1},
+		Name:        name,
+		EnglishName: englishName,
+		// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
+		JointType:       0,
 		RigidbodyIndexA: rigidbodyIndexA,
 		RigidbodyIndexB: rigidbodyIndexB,
 		Position:        position,

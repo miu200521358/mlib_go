@@ -9,6 +9,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/math/mvec2"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
+
 )
 
 type T vec4.T
@@ -43,6 +44,11 @@ var (
 	// MaxVal holds a vector with the highest possible component values.
 	MaxVal = T{+math.MaxFloat64, +math.MaxFloat64, +math.MaxFloat64, 1}
 )
+
+// String T の文字列表現を返します。
+func (v *T) String() string {
+	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f, w=%.5f]", v.GetX(), v.GetY(), v.GetZ(), v.GetW())
+}
 
 // GetX returns the value of the X coordinate
 func (v *T) GetX() float64 {
@@ -82,11 +88,6 @@ func (v *T) GetW() float64 {
 // SetW sets the value of the W coordinate
 func (v *T) SetW(w float64) {
 	v[3] = w
-}
-
-// String T の文字列表現を返します。
-func (v *T) String() string {
-	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f, w=%.5f]", v.GetX(), v.GetY(), v.GetZ(), v.GetW())
 }
 
 // GL OpenGL座標系に変換された2次元ベクトルを返します
@@ -371,8 +372,7 @@ func (v *T) Vec2() mvec2.T {
 
 // Copy
 func (v *T) Copy() *T {
-	copied := *v
-	return &copied
+	return &T{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
 }
 
 // Vector

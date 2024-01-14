@@ -5,17 +5,24 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/math/mvec2"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec4"
+
 )
 
 type Vertex struct {
 	index_model.IndexModel
-	Index       int
+	// 頂点位置
 	Position    *mvec3.T
+	// 頂点法線
 	Normal      *mvec3.T
+	// UV
 	UV          *mvec2.T
+	// 追加UV
 	ExtendedUVs *[]mvec4.T
+	// ウェイト変形方式
 	DeformType  DeformType
-	Deform      Deform
+	// デフォーム
+	Deform      DeformInterface
+	// エッジ倍率
 	EdgeFactor  float64
 }
 
@@ -25,11 +32,11 @@ func NewVertex(
 	normal *mvec3.T,
 	uv *mvec2.T,
 	deformType DeformType,
-	deform Deform,
+	deform DeformInterface,
 	edgeFactor float64,
 ) *Vertex {
 	v := &Vertex{
-		Index:       index,
+		IndexModel:  index_model.IndexModel{Index: index},
 		Position:    position,
 		Normal:      normal,
 		UV:          uv,

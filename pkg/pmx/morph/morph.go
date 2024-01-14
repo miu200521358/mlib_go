@@ -5,6 +5,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec4"
+
 )
 
 // MorphPanel 操作パネル
@@ -68,8 +69,6 @@ const (
 // Morph represents a morph.
 type Morph struct {
 	index_model.IndexModel
-	// モーフINDEX
-	Index int
 	// モーフ名
 	Name string
 	// モーフ名英
@@ -188,11 +187,14 @@ type MaterialMorphOffset struct {
 	// エッジサイズ
 	EdgeSize float64
 	// テクスチャ係数 (R,G,B,A)
-	TextureFactor mvec4.T
+	TextureCoefficient mvec3.T
+	TextureAlpha       float64
 	// スフィアテクスチャ係数 (R,G,B,A)
-	SphereTextureFactor mvec4.T
+	SphereTextureCoefficient mvec3.T
+	SphereTextureAlpha       float64
 	// Toonテクスチャ係数 (R,G,B,A)
-	ToonTextureFactor mvec4.T
+	ToonTextureCoefficient mvec3.T
+	ToonTextureAlpha       float64
 }
 
 func (v *MaterialMorphOffset) GetType() int {
@@ -210,7 +212,7 @@ func NewMorph(
 	isSystem bool,
 ) *Morph {
 	return &Morph{
-		Index:       index,
+		IndexModel:  index_model.IndexModel{Index: index},
 		Name:        name,
 		EnglishName: englishName,
 		Panel:       panel,

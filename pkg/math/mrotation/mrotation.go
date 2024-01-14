@@ -5,7 +5,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/math/mquaternion"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
-
 )
 
 type T struct {
@@ -47,8 +46,8 @@ func NewBaseRotationModelByQuaternion(vQuaternion *mquaternion.T) *T {
 	return model
 }
 
-func (m *T) GetQuaternion() mquaternion.T {
-	return m.quaternion
+func (m *T) GetQuaternion() *mquaternion.T {
+	return &m.quaternion
 }
 
 func (m *T) SetQuaternion(v mquaternion.T) {
@@ -61,8 +60,8 @@ func (m *T) SetQuaternion(v mquaternion.T) {
 	}
 }
 
-func (m *T) GetRadians() mvec3.T {
-	return m.radians
+func (m *T) GetRadians() *mvec3.T {
+	return &m.radians
 }
 
 func (m *T) SetRadians(v mvec3.T) {
@@ -75,8 +74,8 @@ func (m *T) SetRadians(v mvec3.T) {
 	m.quaternion = mquaternion.FromEulerAngles(v.GetX(), v.GetY(), v.GetZ())
 }
 
-func (m *T) GetDegrees() mvec3.T {
-	return m.degrees
+func (m *T) GetDegrees() *mvec3.T {
+	return &m.degrees
 }
 
 func (m *T) SetDegrees(v mvec3.T) {
@@ -91,6 +90,5 @@ func (m *T) SetDegrees(v mvec3.T) {
 
 // Copy
 func (rot *T) Copy() *T {
-	copied := *rot
-	return &copied
+	return &T{*rot.radians.Copy(), *rot.degrees.Copy(), *rot.quaternion.Copy()}
 }

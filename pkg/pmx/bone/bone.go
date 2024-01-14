@@ -5,21 +5,25 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/core/index_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mmat4"
+	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 )
 
 type IkLink struct {
-	BoneIndex          int
-	AngleLimit         bool
-	MinAngleLimit      mvec3.T
-	MaxAngleLimit      mvec3.T
-	LocalAngleLimit    bool
-	LocalMinAngleLimit mvec3.T
-	LocalMaxAngleLimit mvec3.T
-}
-
-func (ikLink *IkLink) IsValid() bool {
-	return ikLink.BoneIndex >= 0
+	// リンクボーンのボーンIndex
+	BoneIndex int
+	// 角度制限有無
+	AngleLimit bool
+	// 下限
+	MinAngleLimit mrotation.T
+	// 上限
+	MaxAngleLimit mrotation.T
+	// ローカル軸の角度制限有無
+	LocalAngleLimit bool
+	// ローカル軸制限の下限
+	LocalMinAngleLimit mrotation.T
+	// ローカル軸制限の上限
+	LocalMaxAngleLimit mrotation.T
 }
 
 func (t *IkLink) Copy() *IkLink {
@@ -28,14 +32,14 @@ func (t *IkLink) Copy() *IkLink {
 }
 
 type Ik struct {
-	BoneIndex    int
-	LoopCount    int
-	UnitRotation float64
-	Links        []IkLink
-}
-
-func (ik *Ik) IsValid() bool {
-	return ik.BoneIndex >= 0
+	// IKターゲットボーンのボーンIndex
+	BoneIndex int
+	// IKループ回数 (最大255)
+	LoopCount int
+	// IKループ計算時の1回あたりの制限角度(Xにのみ値が入っている)
+	UnitRotation mrotation.T
+	// IKリンクリスト
+	Links []IkLink
 }
 
 func (t *Ik) Copy() *Ik {
@@ -49,69 +53,105 @@ func (t *Ik) Copy() *Ik {
 
 type Bone struct {
 	index_model.IndexModel
-	Index                  int
-	Name                   string
-	EnglishName            string
-	Position               *mvec3.T
-	ParentIndex            int
-	Layer                  int
-	BoneFlag               BoneFlag
-	TailPosition           *mvec3.T
-	TailIndex              int
-	EffectIndex            int
-	EffectFactor           float64
-	FixedAxis              *mvec3.T
-	LocalXVector           *mvec3.T
-	LocalZVector           *mvec3.T
-	ExternalKey            int
-	Ik                     *Ik
-	DisplaySlot            int
-	IsSystem               bool
-	CorrectedLocalYVector  *mvec3.T
-	CorrectedLocalZVector  *mvec3.T
-	CorrectedLocalXVector  *mvec3.T
-	LocalAxis              *mvec3.T
-	LocalMatrix            *mmat4.T
-	IkLinkIndexes          []int
-	IkTargetIndexes        []int
-	ParentRelativePosition *mvec3.T
-	TailRelativePosition   *mvec3.T
-	CorrectedFixedAxis     *mvec3.T
-	TreeIndexes            []int
-	ParentRevertMatrix     *mmat4.T
-	OffsetMatrix           *mmat4.T
-	RelativeBoneIndexes    []int
-	ChildBoneIndexes       []int
-	EffectiveTargetIndexes []int
-	AngleLimit             bool
-	MinAngleLimit          *mvec3.T
-	MaxAngleLimit          *mvec3.T
-	LocalAngleLimit        bool
-	LocalMinAngleLimit     *mvec3.T
-	LocalMaxAngleLimit     *mvec3.T
+	// ボーン名
+	Name string
+	// ボーン名英
+	EnglishName string
+	// ボーン位置
+	Position mvec3.T
+	// 親ボーンのボーンIndex
+	ParentIndex int
+	// 変形階層
+	Layer int
+	// ボーンフラグ(16bit) 各bit 0:OFF 1:ON
+	BoneFlag BoneFlag
+	// 接続先:0 の場合 座標オフセット, ボーン位置からの相対分
+	TailPosition mvec3.T
+	// 接続先:1 の場合 接続先ボーンのボーンIndex
+	TailIndex int
+	// 回転付与:1 または 移動付与:1 の場合 付与親ボーンのボーンIndex
+	EffectIndex int
+	// 付与率
+	EffectFactor float64
+	// 軸固定:1 の場合 軸の方向ベクトル
+	FixedAxis mvec3.T
+	// ローカル軸:1 の場合 X軸の方向ベクトル
+	LocalXVector mvec3.T
+	// ローカル軸:1 の場合 Z軸の方向ベクトル
+	LocalZVector mvec3.T
+	// 外部親変形:1 の場合 Key値
+	ExternalKey int
+	// IK:1 の場合 IKデータを格納
+	Ik *Ik
+	// 該当表示枠
+	DisplaySlot int
+	// システム計算用追加ボーン の場合 true
+	IsSystem bool
+	// 計算済みのX軸の方向ベクトル
+	CorrectedLocalYVector mvec3.T
+	// 計算済みのY軸の方向ベクトル
+	CorrectedLocalZVector mvec3.T
+	// 計算済みのZ軸の方向ベクトル
+	CorrectedLocalXVector mvec3.T
+	// 計算済みの軸制限ベクトル
+	CorrectedFixedAxis mvec3.T
+	// ローカル軸の方向ベクトル(CorrectedLocalXVectorの正規化ベクトル)
+	LocalAxis mvec3.T
+	// 親ボーンからの相対位置
+	ParentRelativePosition mvec3.T
+	// Tailボーンへの相対位置
+	TailRelativePosition mvec3.T
+	// 逆オフセット行列(親ボーンからの相対位置分を戻す)
+	ParentRevertMatrix mmat4.T
+	// オフセット行列 (自身の位置を原点に戻す行列)
+	OffsetMatrix mmat4.T
+	// 自分のボーンまでのボーンIndexのリスト
+	TreeBoneIndexes []int
+	// 関連ボーンINDEX一覧（付与親とかIKとか）
+	RelativeBoneIndexes []int
+	// 自分を親として登録しているボーンINDEX一覧
+	ChildBoneIndexes []int
+	// 自分を付与親として登録しているボーンINDEX一覧
+	EffectiveBoneIndexes []int
+	// IKリンクとして登録されているIKボーンのボーンIndex
+	IkLinkBoneIndexes []int
+	// IKターゲットとして登録されているIKボーンのボーンIndex
+	IkTargetBoneIndexes []int
+	// 自分がIKリンクボーンの角度制限がある場合、true
+	AngleLimit bool
+	// 自分がIKリンクボーンの角度制限の下限
+	MinAngleLimit mrotation.T
+	// 自分がIKリンクボーンの角度制限の上限
+	MaxAngleLimit mrotation.T
+	// 自分がIKリンクボーンのローカル軸角度制限がある場合、true
+	LocalAngleLimit bool
+	// 自分がIKリンクボーンのローカル軸角度制限の下限
+	LocalMinAngleLimit mrotation.T
+	// 自分がIKリンクボーンのローカル軸角度制限の上限
+	LocalMaxAngleLimit mrotation.T
 }
 
 func NewBone(
 	name string,
 	englishName string,
-	position *mvec3.T,
+	position mvec3.T,
 	parentIndex int,
 	layer int,
 	boneFlag BoneFlag,
-	tailPosition *mvec3.T,
+	tailPosition mvec3.T,
 	tailIndex int,
 	effectIndex int,
 	effectFactor float64,
-	fixedAxis *mvec3.T,
-	localXVector *mvec3.T,
-	localZVector *mvec3.T,
+	fixedAxis mvec3.T,
+	localXVector mvec3.T,
+	localZVector mvec3.T,
 	externalKey int,
 	ik *Ik,
 	displaySlot int,
 	isSystem bool,
 ) *Bone {
 	bone := &Bone{
-		Index:                  0,
+		IndexModel:             index_model.IndexModel{Index: -1},
 		Name:                   name,
 		EnglishName:            englishName,
 		Position:               position,
@@ -129,33 +169,32 @@ func NewBone(
 		Ik:                     ik,
 		DisplaySlot:            displaySlot,
 		IsSystem:               isSystem,
-		CorrectedLocalYVector:  &mvec3.T{},
-		CorrectedLocalZVector:  &mvec3.T{},
-		CorrectedLocalXVector:  &mvec3.T{},
-		LocalAxis:              &mvec3.UnitX,
-		LocalMatrix:            &mmat4.Ident,
-		IkLinkIndexes:          []int{},
-		IkTargetIndexes:        []int{},
-		ParentRelativePosition: &mvec3.T{},
-		TailRelativePosition:   &mvec3.T{},
-		CorrectedFixedAxis:     &mvec3.T{},
-		TreeIndexes:            []int{},
-		ParentRevertMatrix:     &mmat4.Ident,
-		OffsetMatrix:           &mmat4.Ident,
+		CorrectedLocalYVector:  mvec3.T{},
+		CorrectedLocalZVector:  mvec3.T{},
+		CorrectedLocalXVector:  mvec3.T{},
+		LocalAxis:              mvec3.UnitX,
+		IkLinkBoneIndexes:      []int{},
+		IkTargetBoneIndexes:    []int{},
+		ParentRelativePosition: mvec3.T{},
+		TailRelativePosition:   mvec3.T{},
+		CorrectedFixedAxis:     mvec3.T{},
+		TreeBoneIndexes:        []int{},
+		ParentRevertMatrix:     mmat4.Ident,
+		OffsetMatrix:           mmat4.Ident,
 		RelativeBoneIndexes:    []int{},
 		ChildBoneIndexes:       []int{},
-		EffectiveTargetIndexes: []int{},
+		EffectiveBoneIndexes:   []int{},
 		AngleLimit:             false,
-		MinAngleLimit:          &mvec3.T{},
-		MaxAngleLimit:          &mvec3.T{},
+		MinAngleLimit:          mrotation.T{},
+		MaxAngleLimit:          mrotation.T{},
 		LocalAngleLimit:        false,
-		LocalMinAngleLimit:     &mvec3.T{},
-		LocalMaxAngleLimit:     &mvec3.T{},
+		LocalMinAngleLimit:     mrotation.T{},
+		LocalMaxAngleLimit:     mrotation.T{},
 	}
-	bone.CorrectedLocalXVector = bone.LocalXVector.Copy()
-	bone.CorrectedLocalYVector = bone.LocalZVector.Cross(bone.CorrectedLocalXVector)
-	bone.CorrectedLocalZVector = bone.CorrectedLocalXVector.Cross(bone.CorrectedLocalYVector)
-	bone.CorrectedFixedAxis = bone.FixedAxis.Copy()
+	bone.CorrectedLocalXVector = *bone.LocalXVector.Copy()
+	bone.CorrectedLocalYVector = *bone.LocalZVector.Cross(&bone.CorrectedLocalXVector)
+	bone.CorrectedLocalZVector = *bone.CorrectedLocalXVector.Cross(&bone.CorrectedLocalYVector)
+	bone.CorrectedFixedAxis = *bone.FixedAxis.Copy()
 	return bone
 }
 
@@ -163,48 +202,47 @@ func NewBone(
 func (t *Bone) Copy() index_model.IndexModelInterface {
 	copied := *t
 	copied.Ik = t.Ik.Copy()
-	copied.Position = t.Position.Copy()
-	copied.TailPosition = t.TailPosition.Copy()
-	copied.FixedAxis = t.FixedAxis.Copy()
-	copied.LocalXVector = t.LocalXVector.Copy()
-	copied.LocalZVector = t.LocalZVector.Copy()
-	copied.CorrectedLocalXVector = t.CorrectedLocalXVector.Copy()
-	copied.CorrectedLocalYVector = t.CorrectedLocalYVector.Copy()
-	copied.CorrectedLocalZVector = t.CorrectedLocalZVector.Copy()
-	copied.LocalAxis = t.LocalAxis.Copy()
-	copied.LocalMatrix = t.LocalMatrix.Copy()
-	copied.ParentRelativePosition = t.ParentRelativePosition.Copy()
-	copied.TailRelativePosition = t.TailRelativePosition.Copy()
-	copied.CorrectedFixedAxis = t.CorrectedFixedAxis.Copy()
-	copied.IkLinkIndexes = make([]int, len(t.IkLinkIndexes))
-	copy(copied.IkLinkIndexes, t.IkLinkIndexes)
-	copied.IkTargetIndexes = make([]int, len(t.IkTargetIndexes))
-	copy(copied.IkTargetIndexes, t.IkTargetIndexes)
-	copied.TreeIndexes = make([]int, len(t.TreeIndexes))
-	copy(copied.TreeIndexes, t.TreeIndexes)
-	copied.ParentRevertMatrix = t.ParentRevertMatrix.Copy()
-	copied.OffsetMatrix = t.OffsetMatrix.Copy()
+	copied.Position = *t.Position.Copy()
+	copied.TailPosition = *t.TailPosition.Copy()
+	copied.FixedAxis = *t.FixedAxis.Copy()
+	copied.LocalXVector = *t.LocalXVector.Copy()
+	copied.LocalZVector = *t.LocalZVector.Copy()
+	copied.CorrectedLocalXVector = *t.CorrectedLocalXVector.Copy()
+	copied.CorrectedLocalYVector = *t.CorrectedLocalYVector.Copy()
+	copied.CorrectedLocalZVector = *t.CorrectedLocalZVector.Copy()
+	copied.LocalAxis = *t.LocalAxis.Copy()
+	copied.ParentRelativePosition = *t.ParentRelativePosition.Copy()
+	copied.TailRelativePosition = *t.TailRelativePosition.Copy()
+	copied.CorrectedFixedAxis = *t.CorrectedFixedAxis.Copy()
+	copied.IkLinkBoneIndexes = make([]int, len(t.IkLinkBoneIndexes))
+	copy(copied.IkLinkBoneIndexes, t.IkLinkBoneIndexes)
+	copied.IkTargetBoneIndexes = make([]int, len(t.IkTargetBoneIndexes))
+	copy(copied.IkTargetBoneIndexes, t.IkTargetBoneIndexes)
+	copied.TreeBoneIndexes = make([]int, len(t.TreeBoneIndexes))
+	copy(copied.TreeBoneIndexes, t.TreeBoneIndexes)
+	copied.ParentRevertMatrix = *t.ParentRevertMatrix.Copy()
+	copied.OffsetMatrix = *t.OffsetMatrix.Copy()
 	copied.RelativeBoneIndexes = make([]int, len(t.RelativeBoneIndexes))
 	copy(copied.RelativeBoneIndexes, t.RelativeBoneIndexes)
 	copied.ChildBoneIndexes = make([]int, len(t.ChildBoneIndexes))
 	copy(copied.ChildBoneIndexes, t.ChildBoneIndexes)
-	copied.EffectiveTargetIndexes = make([]int, len(t.EffectiveTargetIndexes))
-	copy(copied.EffectiveTargetIndexes, t.EffectiveTargetIndexes)
-	copied.MinAngleLimit = t.MinAngleLimit.Copy()
-	copied.MaxAngleLimit = t.MaxAngleLimit.Copy()
-	copied.LocalMinAngleLimit = t.LocalMinAngleLimit.Copy()
-	copied.LocalMaxAngleLimit = t.LocalMaxAngleLimit.Copy()
+	copied.EffectiveBoneIndexes = make([]int, len(t.EffectiveBoneIndexes))
+	copy(copied.EffectiveBoneIndexes, t.EffectiveBoneIndexes)
+	copied.MinAngleLimit = *t.MinAngleLimit.Copy()
+	copied.MaxAngleLimit = *t.MaxAngleLimit.Copy()
+	copied.LocalMinAngleLimit = *t.LocalMinAngleLimit.Copy()
+	copied.LocalMaxAngleLimit = *t.LocalMaxAngleLimit.Copy()
 	return &copied
 }
 
 func (bone *Bone) CorrectFixedAxis(correctedFixedAxis mvec3.T) {
-	bone.CorrectedFixedAxis = correctedFixedAxis.Normalize()
+	bone.CorrectedFixedAxis = correctedFixedAxis.Normalized()
 }
 
 func (bone *Bone) CorrectLocalVector(correctedLocalXVector mvec3.T) {
-	bone.CorrectedLocalXVector = correctedLocalXVector.Normalize()
-	bone.CorrectedLocalYVector = bone.CorrectedLocalXVector.Cross(mvec3.UnitZ.Invert())
-	bone.CorrectedLocalZVector = bone.CorrectedLocalXVector.Cross(bone.CorrectedLocalYVector)
+	bone.CorrectedLocalXVector = correctedLocalXVector.Normalized()
+	bone.CorrectedLocalYVector = *bone.CorrectedLocalXVector.Cross(mvec3.UnitZ.Invert())
+	bone.CorrectedLocalZVector = *bone.CorrectedLocalXVector.Cross(&bone.CorrectedLocalYVector)
 }
 
 // 表示先がボーンであるか

@@ -2,29 +2,35 @@ package texture
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/core/index_model"
-
 )
 
+// テクスチャ種別
 type TextureType int
 
 const (
-	TEXTURE TextureType = 0
-	TOON    TextureType = 1
-	SPHERE  TextureType = 2
+	// テクスチャ
+	TEXTURE_TYPE_TEXTURE TextureType = 0
+	// Toonテクスチャ
+	TEXTURE_TYPE_TOON TextureType = 1
+	// スフィアテクスチャ
+	TEXTURE_TYPE_SPHERE TextureType = 2
 )
 
 type Texture struct {
 	index_model.IndexModel
-	Index       int
-	Name        string
+	// テクスチャ名
+	Name string
+	// テクスチャ種別
 	TextureType TextureType
-	Path        string
-	Valid       bool
+	// テクスチャフルパス
+	Path string
+	// テクスチャフルパスが有効であるか否か
+	Valid bool
 }
 
 func NewTexture(index int, name string, textureType TextureType) *Texture {
 	return &Texture{
-		Index:       index,
+		IndexModel:  index_model.IndexModel{Index: index},
 		Name:        name,
 		TextureType: textureType,
 		Path:        "",

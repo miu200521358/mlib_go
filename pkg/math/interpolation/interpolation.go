@@ -20,6 +20,14 @@ var (
 	Max = 127.0
 )
 
+// Copy
+func (v *T) Copy() *T {
+	return &T{
+		Start: *v.Start.Copy(),
+		End:   *v.End.Copy(),
+	}
+}
+
 // https://pomax.github.io/bezierinfo
 // https://shspage.hatenadiary.org/entry/20140625/1403702735
 // https://bezier.readthedocs.io/en/stable/python/reference/bezier.curve.html#bezier.curve.Curve.evaluate
