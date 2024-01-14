@@ -1,17 +1,18 @@
 package joint
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/core/index_name_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 
 )
 
-type JointLimitParam struct {
+type LimitParam struct {
 	LimitMin mvec3.T
 	LimitMax mvec3.T
 }
 
-type JointParam struct {
+type Param struct {
 	TranslationLimitMin       mvec3.T
 	TranslationLimitMax       mvec3.T
 	RotationLimitMin          mrotation.T
@@ -20,7 +21,8 @@ type JointParam struct {
 	SpringConstantRotation    mvec3.T
 }
 
-type Joint struct {
+type T struct {
+	index_name_model.T
 	Index           int
 	Name            string
 	EnglishName     string
@@ -29,7 +31,7 @@ type Joint struct {
 	RigidbodyIndexB int
 	Position        mvec3.T
 	Rotation        mrotation.T
-	Param           JointParam
+	Param           Param
 	IsSystem        bool
 }
 
@@ -42,10 +44,10 @@ func NewJoint(
 	rigidbodyIndexB int,
 	position mvec3.T,
 	rotation mrotation.T,
-	param JointParam,
+	param Param,
 	isSystem bool,
-) *Joint {
-	return &Joint{
+) *T {
+	return &T{
 		Index:           index,
 		Name:            name,
 		EnglishName:     englishName,
@@ -56,5 +58,23 @@ func NewJoint(
 		Rotation:        rotation,
 		Param:           param,
 		IsSystem:        isSystem,
+	}
+}
+
+// ジョイントリスト
+type C struct {
+	index_name_model.C
+	Name    string
+	Indexes []int
+	data    map[int]T
+	names   map[string]int
+}
+
+func NewJoints(name string) *C {
+	return &C{
+		Name:    name,
+		Indexes: make([]int, 0),
+		data:    make(map[int]T),
+		names:   make(map[string]int),
 	}
 }

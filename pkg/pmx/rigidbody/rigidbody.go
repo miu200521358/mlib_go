@@ -1,11 +1,13 @@
 package rigidbody
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/core/index_name_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
+
 )
 
-type RigidBodyParam struct {
+type Param struct {
 	// 質量
 	Mass float64
 	// 移動減衰
@@ -19,53 +21,54 @@ type RigidBodyParam struct {
 }
 
 // 剛体の形状
-type RigidBodyShape int
+type Shape int
 
 const (
 	// 球
-	Sphere RigidBodyShape = 0
+	Sphere Shape = 0
 	// 箱
-	Box RigidBodyShape = 1
+	Box Shape = 1
 	// カプセル
-	Capsule RigidBodyShape = 2
+	Capsule Shape = 2
 )
 
 // 剛体物理の計算モード
-type RigidBodyMode int
+type Mode int
 
 const (
 	// ボーン追従(static)
-	Static RigidBodyMode = 0
+	Static Mode = 0
 	// 物理演算(dynamic)
-	Dynamic RigidBodyMode = 1
+	Dynamic Mode = 1
 	// 物理演算 + Bone位置合わせ
-	DynamicBone RigidBodyMode = 2
+	DynamicBone Mode = 2
 )
 
-type RigidBodyCollisionGroup int
+type CollisionGroup int
 
 const (
 	// 0:グループなし
-	None    RigidBodyCollisionGroup = 0x0000
-	Group01 RigidBodyCollisionGroup = 0x0001
-	Group02 RigidBodyCollisionGroup = 0x0002
-	Group03 RigidBodyCollisionGroup = 0x0004
-	Group04 RigidBodyCollisionGroup = 0x0008
-	Group05 RigidBodyCollisionGroup = 0x0010
-	Group06 RigidBodyCollisionGroup = 0x0020
-	Group07 RigidBodyCollisionGroup = 0x0040
-	Group08 RigidBodyCollisionGroup = 0x0080
-	Group09 RigidBodyCollisionGroup = 0x0100
-	Group10 RigidBodyCollisionGroup = 0x0200
-	Group11 RigidBodyCollisionGroup = 0x0400
-	Group12 RigidBodyCollisionGroup = 0x0800
-	Group13 RigidBodyCollisionGroup = 0x1000
-	Group14 RigidBodyCollisionGroup = 0x2000
-	Group15 RigidBodyCollisionGroup = 0x4000
-	Group16 RigidBodyCollisionGroup = 0x8000
+	None    CollisionGroup = 0x0000
+	Group01 CollisionGroup = 0x0001
+	Group02 CollisionGroup = 0x0002
+	Group03 CollisionGroup = 0x0004
+	Group04 CollisionGroup = 0x0008
+	Group05 CollisionGroup = 0x0010
+	Group06 CollisionGroup = 0x0020
+	Group07 CollisionGroup = 0x0040
+	Group08 CollisionGroup = 0x0080
+	Group09 CollisionGroup = 0x0100
+	Group10 CollisionGroup = 0x0200
+	Group11 CollisionGroup = 0x0400
+	Group12 CollisionGroup = 0x0800
+	Group13 CollisionGroup = 0x1000
+	Group14 CollisionGroup = 0x2000
+	Group15 CollisionGroup = 0x4000
+	Group16 CollisionGroup = 0x8000
 )
 
 type T struct {
+	index_name_model.T
 	// 剛体INDEX
 	Index int
 	// 剛体名
@@ -77,9 +80,9 @@ type T struct {
 	// グループ
 	CollisionGroup int
 	// 非衝突グループフラグ
-	NoCollisionGroup RigidBodyCollisionGroup
+	NoCollisionGroup CollisionGroup
 	// 形状
-	ShapeType RigidBodyShape
+	ShapeType Shape
 	// サイズ(x,y,z)
 	ShapeSize mvec3.T
 	// 位置(x,y,z)
@@ -87,9 +90,9 @@ type T struct {
 	// 回転(x,y,z) -> ラジアン角
 	ShapeRotation mrotation.T
 	// 剛体パラ
-	Param RigidBodyParam
+	Param Param
 	// 剛体の物理演算
-	Mode RigidBodyMode
+	Mode Mode
 	// X軸方向
 	XDirection mvec3.T
 	// Y軸方向
@@ -107,13 +110,13 @@ func NewRigidBody(
 	englishName string,
 	boneIndex int,
 	collisionGroup int,
-	noCollisionGroup RigidBodyCollisionGroup,
-	shapeType RigidBodyShape,
+	noCollisionGroup CollisionGroup,
+	shapeType Shape,
 	shapeSize mvec3.T,
 	shapePosition mvec3.T,
 	shapeRotation mrotation.T,
-	param RigidBodyParam,
-	mode RigidBodyMode,
+	param Param,
+	mode Mode,
 	xDirection mvec3.T,
 	yDirection mvec3.T,
 	zDirection mvec3.T,
@@ -143,4 +146,22 @@ func NewRigidBody(
 func (v *T) Copy() *T {
 	copied := *v
 	return &copied
+}
+
+// 剛体リスト
+type C struct {
+	index_name_model.C
+	Name    string
+	Indexes []int
+	data    map[int]T
+	names   map[string]int
+}
+
+func NewRigidBodies(name string) *C {
+	return &C{
+		Name:    name,
+		Indexes: make([]int, 0),
+		data:    make(map[int]T),
+		names:   make(map[string]int),
+	}
 }

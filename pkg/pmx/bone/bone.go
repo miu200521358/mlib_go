@@ -3,6 +3,7 @@ package bone
 import (
 	"strings"
 
+	"github.com/miu200521358/mlib_go/pkg/core/index_name_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mmat4"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 )
@@ -33,6 +34,7 @@ func (ik *Ik) IsValid() bool {
 }
 
 type T struct {
+	index_name_model.T
 	Index                  int
 	Name                   string
 	EnglishName            string
@@ -227,52 +229,52 @@ func (bone *T) IsExternalParentDeform() bool {
 
 // 足D系列であるか
 func (bone *T) IsLegD() bool {
-	return bone.containCategory(CATEGORY_LEG_D)
+	return bone.containsCategory(CATEGORY_LEG_D)
 }
 
 // 肩P系列であるか
 func (bone *T) IsShoulderP() bool {
-	return bone.containCategory(CATEGORY_SHOULDER_P)
+	return bone.containsCategory(CATEGORY_SHOULDER_P)
 }
 
 // 足FK系列であるか
 func (bone *T) IsLegFK() bool {
-	return bone.containCategory(CATEGORY_LEG_FK)
+	return bone.containsCategory(CATEGORY_LEG_FK)
 }
 
 // 足首から先であるか
 func (bone *T) IsAnkle() bool {
-	return bone.containCategory(CATEGORY_ANKLE)
+	return bone.containsCategory(CATEGORY_ANKLE)
 }
 
 // 捩りボーンであるか
 func (bone *T) IsTwist() bool {
-	return bone.containCategory(CATEGORY_TWIST)
+	return bone.containsCategory(CATEGORY_TWIST)
 }
 
 // 腕系ボーンであるか(指は含まない)
 func (bone *T) IsArm() bool {
-	return bone.containCategory(CATEGORY_ARM)
+	return bone.containsCategory(CATEGORY_ARM)
 }
 
 // 指系ボーンであるか
 func (bone *T) IsFinger() bool {
-	return bone.containCategory(CATEGORY_FINGER)
+	return bone.containsCategory(CATEGORY_FINGER)
 }
 
 // 頭系であるか
 func (bone *T) IsHead() bool {
-	return bone.containCategory(CATEGORY_HEAD)
+	return bone.containsCategory(CATEGORY_HEAD)
 }
 
 // 下半身系であるか
 func (bone *T) IsLower() bool {
-	return bone.containCategory(CATEGORY_LOWER)
+	return bone.containsCategory(CATEGORY_LOWER)
 }
 
 // 上半身系であるか
 func (bone *T) IsUpper() bool {
-	return bone.containCategory(CATEGORY_UPPER)
+	return bone.containsCategory(CATEGORY_UPPER)
 }
 
 // ローカル軸行列計算で親のキャンセルをさせないボーンであるか
@@ -282,11 +284,11 @@ func (bone *T) IsNoLocalCancel() bool {
 		return true
 	}
 
-	return bone.containCategory(CATEGORY_NO_LOCAL_CANCEL)
+	return bone.containsCategory(CATEGORY_NO_LOCAL_CANCEL)
 }
 
 // 指定したカテゴリーに属するか
-func (bone *T) containCategory(category BoneCategory) bool {
+func (bone *T) containsCategory(category BoneCategory) bool {
 	for _, boneConfig := range StandardBoneConfigs {
 		for _, c := range boneConfig.Categories {
 			if c == category && (boneConfig.Name.String() == bone.Name ||
@@ -297,4 +299,22 @@ func (bone *T) containCategory(category BoneCategory) bool {
 		}
 	}
 	return false
+}
+
+// ボーンリスト
+type C struct {
+	index_name_model.C
+	Name    string
+	Indexes []int
+	data    map[int]T
+	names   map[string]int
+}
+
+func NewBones(name string) *C {
+	return &C{
+		Name:    name,
+		Indexes: make([]int, 0),
+		data:    make(map[int]T),
+		names:   make(map[string]int),
+	}
 }

@@ -1,9 +1,11 @@
 package morph
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/core/index_name_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec4"
+
 )
 
 // MorphPanel 操作パネル
@@ -66,6 +68,7 @@ const (
 
 // T represents a morph.
 type T struct {
+	index_name_model.T
 	// モーフINDEX
 	Index int
 	// モーフ名
@@ -91,29 +94,36 @@ func (v *T) Copy() *T {
 }
 
 // TMorphOffset represents a morph offset.
-type TMorphOffset interface{}
+type TMorphOffset interface {
+	GetType() int
+}
 
 // VertexMorphOffset represents a vertex morph.
 type VertexMorphOffset struct {
-	TMorphOffset
 	// 頂点INDEX
 	VertexIndex int
 	// 座標オフセット量(x,y,z)
 	Position mvec3.T
 }
 
+func (v *VertexMorphOffset) GetType() int {
+	return int(VERTEX)
+}
+
 // UvMorphOffset represents a UV morph.
 type UvMorphOffset struct {
-	TMorphOffset
 	// 頂点INDEX
 	VertexIndex int
 	// UVオフセット量(x,y,z,w) ※通常UVはz,wが不要項目になるがモーフとしてのデータ値は記録しておく
 	Uv mvec4.T
 }
 
+func (v *UvMorphOffset) GetType() int {
+	return int(UV)
+}
+
 // BoneMorphOffset represents a bone morph.
 type BoneMorphOffset struct {
-	TMorphOffset
 	// ボーンIndex
 	BoneIndex int
 	// グローバル移動量(x,y,z)
@@ -130,13 +140,20 @@ type BoneMorphOffset struct {
 	LocalScale mvec3.T
 }
 
+func (v *BoneMorphOffset) GetType() int {
+	return int(BONE)
+}
+
 // GroupMorphOffset represents a group morph.
 type GroupMorphOffset struct {
-	TMorphOffset
 	// モーフINDEX
 	MorphIndex int
 	// モーフ変動量
 	MorphFactor float64
+}
+
+func (v *GroupMorphOffset) GetType() int {
+	return int(GROUP)
 }
 
 // MaterialMorphCalcMode 材質モーフ：計算モード
@@ -151,7 +168,6 @@ const (
 
 // MaterialMorphOffset represents a material morph.
 type MaterialMorphOffset struct {
-	TMorphOffset
 	// 材質Index -> -1:全材質対象
 	MaterialIndex int
 	// 0:乗算, 1:加算
@@ -178,6 +194,10 @@ type MaterialMorphOffset struct {
 	ToonTextureFactor mvec4.T
 }
 
+func (v *MaterialMorphOffset) GetType() int {
+	return int(MATERIAL)
+}
+
 // NewMorph
 func NewMorph(
 	index int,
@@ -197,5 +217,23 @@ func NewMorph(
 		Offsets:     offsets,
 		DisplaySlot: displaySlot,
 		IsSystem:    isSystem,
+	}
+}
+
+// モーフリスト
+type C struct {
+	index_name_model.C
+	Name    string
+	Indexes []int
+	data    map[int]T
+	names   map[string]int
+}
+
+func NewMorphs(name string) *C {
+	return &C{
+		Name:    name,
+		Indexes: make([]int, 0),
+		data:    make(map[int]T),
+		names:   make(map[string]int),
 	}
 }

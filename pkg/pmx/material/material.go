@@ -1,6 +1,7 @@
 package material
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/core/index_name_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 )
 
@@ -32,6 +33,7 @@ const (
 )
 
 type T struct {
+	index_name_model.T
 	Index              int
 	Name               string
 	EnglishName        string
@@ -97,12 +99,12 @@ func NewMaterial(
 	}
 }
 
-// Copy
-func (v *T) Copy() *T {
-	copied := *v
+func (m *T) Copy() *T {
+	copied := *m
 	return &copied
 }
 
+// シェーダー用材質
 type ShaderMaterial struct {
 	LightAmbient4             *mvec3.T
 	Material                  *T
@@ -242,5 +244,23 @@ func (sm *ShaderMaterial) IAdd(v interface{}) {
 		sm.ShaderTextureFactor.Add(v.ShaderTextureFactor)
 		sm.SphereShaderTextureFactor.Add(v.SphereShaderTextureFactor)
 		sm.ToonShaderTextureFactor.Add(v.ToonShaderTextureFactor)
+	}
+}
+
+// 材質リスト
+type C struct {
+	index_name_model.C
+	Name    string
+	Indexes []int
+	data    map[int]T
+	names   map[string]int
+}
+
+func NewMaterials(name string) *C {
+	return &C{
+		Name:    name,
+		Indexes: make([]int, 0),
+		data:    make(map[int]T),
+		names:   make(map[string]int),
 	}
 }

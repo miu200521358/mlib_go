@@ -1,5 +1,7 @@
 package display_slot
 
+import "github.com/miu200521358/mlib_go/pkg/core/index_name_model"
+
 // 表示枠要素タイプ
 type DisplayType int
 
@@ -25,6 +27,7 @@ const (
 )
 
 type T struct {
+	index_name_model.T
 	// 枠名
 	Index int
 	// 枠名
@@ -57,4 +60,22 @@ func (v *T) Copy() *T {
 	copied.References = make([]Reference, len(v.References))
 	copy(copied.References, v.References)
 	return &copied
+}
+
+// 表示枠リスト
+type C struct {
+	index_name_model.C
+	Name    string
+	Indexes []int
+	data    map[int]T
+	names   map[string]int
+}
+
+func NewDisplaySlots(name string) *C {
+	return &C{
+		Name:    name,
+		Indexes: make([]int, 0),
+		data:    make(map[int]T),
+		names:   make(map[string]int),
+	}
 }

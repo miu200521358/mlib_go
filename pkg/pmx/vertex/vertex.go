@@ -1,12 +1,15 @@
 package vertex
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/core/index_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec2"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec4"
+
 )
 
 type T struct {
+	index_model.T
 	Index       int
 	Position    *mvec3.T
 	Normal      *mvec3.T
@@ -39,8 +42,21 @@ func NewVertex(
 	return v
 }
 
-// Copy
-func (v *T) Copy() *T {
-	copied := *v
+func (m *T) Copy() *T {
+	copied := *m
 	return &copied
+}
+
+// 頂点リスト
+type C struct {
+	index_model.C
+	data    map[int]*T
+	Indexes []int
+}
+
+func NewVertices() *C {
+	return &C{
+		data:    make(map[int]*T),
+		Indexes: make([]int, 0),
+	}
 }
