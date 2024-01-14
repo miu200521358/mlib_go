@@ -1,7 +1,7 @@
 package material
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/core/index_name_model"
+	"github.com/miu200521358/mlib_go/pkg/core/index_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 )
 
@@ -32,8 +32,8 @@ const (
 	SHARING    ToonSharing = 1
 )
 
-type T struct {
-	index_name_model.T
+type Material struct {
+	index_model.IndexModel
 	Index              int
 	Name               string
 	EnglishName        string
@@ -75,8 +75,8 @@ func NewMaterial(
 	toonTextureIndex int,
 	comment string,
 	verticesCount int,
-) *T {
-	return &T{
+) *Material {
+	return &Material{
 		Index:              index,
 		Name:               name,
 		EnglishName:        englishName,
@@ -99,7 +99,7 @@ func NewMaterial(
 	}
 }
 
-func (m *T) Copy() *T {
+func (m *Material) Copy() index_model.IndexModelInterface {
 	copied := *m
 	return &copied
 }
@@ -107,14 +107,14 @@ func (m *T) Copy() *T {
 // シェーダー用材質
 type ShaderMaterial struct {
 	LightAmbient4             *mvec3.T
-	Material                  *T
+	Material                  *Material
 	ShaderTextureFactor       *mvec3.T
 	SphereShaderTextureFactor *mvec3.T
 	ToonShaderTextureFactor   *mvec3.T
 }
 
 func NewShaderMaterial(
-	material *T,
+	material *Material,
 	lightAmbient4 *mvec3.T,
 	textureFactor *mvec3.T,
 	toonTextureFactor *mvec3.T,
@@ -122,7 +122,7 @@ func NewShaderMaterial(
 ) *ShaderMaterial {
 	return &ShaderMaterial{
 		LightAmbient4:             lightAmbient4,
-		Material:                  material.Copy(),
+		Material:                  material.Copy().(*Material),
 		ShaderTextureFactor:       textureFactor,
 		SphereShaderTextureFactor: toonTextureFactor,
 		ToonShaderTextureFactor:   sphereTextureFactor,
@@ -248,19 +248,12 @@ func (sm *ShaderMaterial) IAdd(v interface{}) {
 }
 
 // 材質リスト
-type C struct {
-	index_name_model.C
-	Name    string
-	Indexes []int
-	data    map[int]T
-	names   map[string]int
+type Materials struct {
+	index_model.IndexModelCorrection[*Material]
 }
 
-func NewMaterials(name string) *C {
-	return &C{
-		Name:    name,
-		Indexes: make([]int, 0),
-		data:    make(map[int]T),
-		names:   make(map[string]int),
+func NewMaterials(name string) *Materials {
+	return &Materials{
+		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Material](),
 	}
 }

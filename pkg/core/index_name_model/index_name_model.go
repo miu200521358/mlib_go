@@ -7,8 +7,7 @@ import (
 
 type TInterface interface {
 	IsValid() bool
-	Add(v *TInterface) *T
-	Copy() *T
+	Copy() TInterface
 	GetIndex() int
 	SetIndex(index int)
 	GetName() string
@@ -29,50 +28,36 @@ func NewT(index int, name, englishName string) *T {
 	}
 }
 
-func (m *T) IsValid() bool {
-	return m.GetIndex() >= 0 && len(m.Name) >= 0
+func (t *T) IsValid() bool {
+	return t.GetIndex() >= 0 && len(t.Name) >= 0
 }
 
-func (m *T) Add(v *TInterface) *T {
-	// Implement your logic here
-	return nil
+func (t *T) GetIndex() int {
+	return t.Index
 }
 
-func (m *T) GetIndex() int {
-	return m.Index
+func (t *T) SetIndex(index int) {
+	t.Index = index
 }
 
-func (m *T) SetIndex(index int) {
-	m.Index = index
+func (t *T) GetName() string {
+	return t.Name
 }
 
-func (b *T) GetName() string {
-	return b.Name
-}
-
-func (b *T) SetName(name string) {
-	b.Name = name
+func (t *T) SetName(name string) {
+	t.Name = name
 }
 
 // Copy
-func (b *T) Copy() *T {
-	copied := *b
+func (t *T) Copy() TInterface {
+	copied := *t
 	return &copied
-}
-
-// Cのインタフェース
-type CInterface interface {
-	GetItem(index int) *T
-	Range(start, stop, step int) []*T
-	SetItem(index int, v TInterface)
-	Append(value TInterface, isSort bool)
 }
 
 type C struct {
 	Name    string
-	data    map[int]*T
+	Data    map[int]TInterface
 	Indexes []int
-	names   map[string]int
 	mu      sync.Mutex
 }
 
@@ -80,93 +65,97 @@ func NewC(name string) *C {
 	return &C{
 		Name:    name,
 		Indexes: make([]int, 0),
-		data:    make(map[int]*T),
-		names:   make(map[string]int),
+		Data:    make(map[int]TInterface),
 	}
 }
 
-func (m *C) GetByName(name string) *T {
-	index, ok := m.names[name]
+func (c *C) GetByName(name string) TInterface {
+	names := c.Names()
+	index, ok := names[name]
 	if !ok {
 		return nil
 	}
-	return m.GetByIndex(index)
+	return c.GetByIndex(index)
 }
 
-func (m *C) GetByIndex(index int) *T {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func (c *C) GetByIndex(index int) TInterface {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if index < 0 {
-		index = len(m.data) + index
+		index = len(c.Data) + index
 	}
 
-	return m.data[index]
+	return c.Data[index]
 }
 
-func (m *C) Append(value TInterface, isSort, isPositiveIndex bool) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func (c *C) Append(value TInterface, isSort, isPositiveIndex bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if value.GetIndex() < 0 && isPositiveIndex {
-		value.SetIndex(len(m.data))
+		value.SetIndex(len(c.Data))
 	}
 
-	if value.GetName() != "" && m.names[value.GetName()] == 0 {
-		m.names[value.GetName()] = value.GetIndex()
+	names := c.Names()
+
+	if value.GetName() != "" && names[value.GetName()] == 0 {
+		names[value.GetName()] = value.GetIndex()
 	}
 
-	m.data[value.GetIndex()] = value.(*T) // Perform type assertion to convert value to *T
+	c.Data[value.GetIndex()] = value.(*T)
 	if isSort {
-		m.SortIndexes(true)
+		c.SortIndexes()
 	} else {
-		m.Indexes = append(m.Indexes, value.GetIndex())
+		c.Indexes = append(c.Indexes, value.GetIndex())
 	}
 }
 
-func (m *C) Remove(value TInterface, isSort bool) map[int]int {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func (c *C) Remove(value T, isSort bool) map[int]int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	replacedMap := make(map[int]int)
 
-	if _, ok := m.data[value.GetIndex()]; !ok {
+	if _, ok := c.Data[value.GetIndex()]; !ok {
 		return replacedMap
 	}
 
-	delete(m.data, value.GetIndex())
-	for i := range m.Indexes {
+	delete(c.Data, value.GetIndex())
+	for i := range c.Indexes {
 		if i == value.GetIndex() {
-			m.Indexes = append(m.Indexes[:i], m.Indexes[i+1:]...)
+			c.Indexes = append(c.Indexes[:i], c.Indexes[i+1:]...)
 			break
 		}
 	}
-	for name, idx := range m.names {
+
+	names := c.Names()
+	for name, idx := range names {
 		if idx == value.GetIndex() {
-			delete(m.names, name)
+			delete(names, name)
 			break
 		}
 	}
 
 	replacedMap[value.GetIndex()] = value.GetIndex() - 1
 
-	for i := value.GetIndex() + 1; i <= m.lastIndex(); i++ {
-		v := m.data[i]
+	for i := value.GetIndex() + 1; i <= c.LastIndex(); i++ {
+		v := c.Data[i]
 		replacedMap[v.GetIndex()] = v.GetIndex() - 1
 		index := v.GetIndex() - 1
 		v.SetIndex(index)
-		m.data[v.GetIndex()] = v
-		m.names[v.Name] = v.GetIndex()
+		c.Data[v.GetIndex()] = v
+		names[v.GetName()] = v.GetIndex()
 	}
 	for i := value.GetIndex() - 1; i >= 0; i-- {
-		v := m.data[i]
+		v := c.Data[i]
 		replacedMap[v.GetIndex()] = v.GetIndex()
 	}
 
-	delete(m.data, m.lastIndex())
+	delete(c.Data, c.LastIndex())
 
 	if isSort {
-		m.SortIndexes(true)
+		c.SortIndexes()
 	}
 
 	if len(replacedMap) > 0 {
@@ -176,40 +165,40 @@ func (m *C) Remove(value TInterface, isSort bool) map[int]int {
 	return replacedMap
 }
 
-func (m *C) Insert(value TInterface, isSort, isPositiveIndex bool) map[int]int {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func (c *C) Insert(value T, isSort, isPositiveIndex bool) map[int]int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if value.GetIndex() < 0 && isPositiveIndex {
-		value.SetIndex(len(m.data))
+		value.SetIndex(len(c.Data))
 	}
 
+	names := c.Names()
 	replacedMap := make(map[int]int)
-	if _, ok := m.data[value.GetIndex()]; ok {
-		for i := m.lastIndex(); i >= value.GetIndex(); i-- {
-			v := m.data[i]
+	if _, ok := c.Data[value.GetIndex()]; ok {
+		for i := c.LastIndex(); i >= value.GetIndex(); i-- {
+			v := c.Data[i]
 			replacedMap[v.GetIndex()] = v.GetIndex() + 1
 			index := v.GetIndex() + 1
 			v.SetIndex(index)
-			m.data[v.GetIndex()] = v
-			m.names[v.Name] = v.GetIndex()
+			c.Data[v.GetIndex()] = v
+			names[v.GetName()] = v.GetIndex()
 		}
 		for i := value.GetIndex() - 1; i >= 0; i-- {
-			v := m.data[i]
+			v := c.Data[i]
 			replacedMap[v.GetIndex()] = v.GetIndex()
 		}
 	}
-	if v, ok := value.(*T); ok {
-		m.data[v.GetIndex()] = v
-	}
-	if value.GetName() != "" && m.names[value.GetName()] == 0 {
-		m.names[value.GetName()] = value.GetIndex()
+
+	c.Data[value.GetIndex()] = &value
+	if value.GetName() != "" && names[value.GetName()] == 0 {
+		names[value.GetName()] = value.GetIndex()
 	}
 
 	if isSort {
-		m.SortIndexes(false)
+		c.SortIndexes()
 	} else {
-		m.Indexes = append(m.Indexes, value.GetIndex())
+		c.Indexes = append(c.Indexes, value.GetIndex())
 	}
 
 	if len(replacedMap) > 0 {
@@ -219,37 +208,26 @@ func (m *C) Insert(value TInterface, isSort, isPositiveIndex bool) map[int]int {
 	return replacedMap
 }
 
-func (m *C) SortIndexes(isSortName bool) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func (c *C) SortIndexes() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	m.Indexes = make([]int, 0, len(m.data))
-	for index := range m.data {
-		m.Indexes = append(m.Indexes, index)
+	c.Indexes = make([]int, 0, len(c.Data))
+	for index := range c.Data {
+		c.Indexes = append(c.Indexes, index)
 	}
-	sort.Ints(m.Indexes)
-
-	if isSortName {
-		m.names = make(map[string]int)
-		for _, index := range m.Indexes {
-			m.names[m.data[index].Name] = index
-		}
-	}
+	sort.Ints(c.Indexes)
 }
 
-func (m *C) LastIndex() int {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func (c *C) LastIndex() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	return m.lastIndex()
-}
-
-func (m *C) lastIndex() int {
-	if len(m.data) == 0 {
+	if len(c.Data) == 0 {
 		return 0
 	}
 	maxIndex := 0
-	for index := range m.data {
+	for index := range c.Data {
 		if index > maxIndex {
 			maxIndex = index
 		}
@@ -257,47 +235,47 @@ func (m *C) lastIndex() int {
 	return maxIndex
 }
 
-func (m *C) Range(start, stop, step int) []*T {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func (c *C) Range(start, stop, step int) []TInterface {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if stop < 0 {
-		stop = len(m.data) + stop + 1
+		stop = len(c.Data) + stop + 1
 	}
 
-	result := make([]*T, 0, (stop-start)/step)
+	result := make([]TInterface, 0, (stop-start)/step)
 	for i := start; i < stop; i += step {
-		result = append(result, m.data[m.Indexes[i]])
+		result = append(result, c.Data[c.Indexes[i]])
 	}
 	return result
 }
 
-func (m *C) Len() int {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func (c *C) Len() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	return len(m.data)
+	return len(c.Data)
 }
 
-func (m *C) Names() []string {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func (c *C) Names() map[string]int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	names := make([]string, 0, len(m.names))
-	for name := range m.names {
-		names = append(names, name)
+	names := make(map[string]int, len(c.Data))
+	for k, v := range c.Data {
+		names[v.GetName()] = k
 	}
 	return names
 }
 
-func (m *C) RangeIndexes(index int, offFlg bool, indexes []int) (int, int, int) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+func (c *C) RangeIndexes(index int, offFlg bool, indexes []int) (int, int, int) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	if indexes == nil {
-		indexes = m.Indexes
+		indexes = c.Indexes
 	}
-	if !offFlg && (len(indexes) == 0 || m.data[index] != nil) {
+	if !offFlg && (len(indexes) == 0 || c.Data[index] != nil) {
 		return index, index, index
 	}
 

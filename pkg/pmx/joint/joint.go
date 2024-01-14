@@ -1,10 +1,9 @@
 package joint
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/core/index_name_model"
+	"github.com/miu200521358/mlib_go/pkg/core/index_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
-
 )
 
 type LimitParam struct {
@@ -21,8 +20,8 @@ type Param struct {
 	SpringConstantRotation    mvec3.T
 }
 
-type T struct {
-	index_name_model.T
+type Joint struct {
+	index_model.IndexModel
 	Index           int
 	Name            string
 	EnglishName     string
@@ -46,8 +45,8 @@ func NewJoint(
 	rotation mrotation.T,
 	param Param,
 	isSystem bool,
-) *T {
-	return &T{
+) *Joint {
+	return &Joint{
 		Index:           index,
 		Name:            name,
 		EnglishName:     englishName,
@@ -62,19 +61,12 @@ func NewJoint(
 }
 
 // ジョイントリスト
-type C struct {
-	index_name_model.C
-	Name    string
-	Indexes []int
-	data    map[int]T
-	names   map[string]int
+type Joints struct {
+	index_model.IndexModelCorrection[*Joint]
 }
 
-func NewJoints(name string) *C {
-	return &C{
-		Name:    name,
-		Indexes: make([]int, 0),
-		data:    make(map[int]T),
-		names:   make(map[string]int),
+func NewJoints(name string) *Joints {
+	return &Joints{
+		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Joint](),
 	}
 }

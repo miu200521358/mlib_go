@@ -5,11 +5,10 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/math/mvec2"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec4"
-
 )
 
-type T struct {
-	index_model.T
+type Vertex struct {
+	index_model.IndexModel
 	Index       int
 	Position    *mvec3.T
 	Normal      *mvec3.T
@@ -28,8 +27,8 @@ func NewVertex(
 	deformType DeformType,
 	deform Deform,
 	edgeFactor float64,
-) *T {
-	v := &T{
+) *Vertex {
+	v := &Vertex{
 		Index:       index,
 		Position:    position,
 		Normal:      normal,
@@ -42,21 +41,13 @@ func NewVertex(
 	return v
 }
 
-func (m *T) Copy() *T {
-	copied := *m
-	return &copied
-}
-
 // 頂点リスト
-type C struct {
-	index_model.C
-	data    map[int]*T
-	Indexes []int
+type Vertices struct {
+	index_model.IndexModelCorrection[*Vertex]
 }
 
-func NewVertices() *C {
-	return &C{
-		data:    make(map[int]*T),
-		Indexes: make([]int, 0),
+func NewVertices() *Vertices {
+	return &Vertices{
+		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Vertex](),
 	}
 }

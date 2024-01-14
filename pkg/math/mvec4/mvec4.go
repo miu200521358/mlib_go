@@ -9,7 +9,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/math/mvec2"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
-
 )
 
 type T vec4.T
@@ -184,12 +183,12 @@ func (v *T) Dived(other *T) T {
 }
 
 // Equal ベクトルが他のベクトルと等しいかどうかをチェックします
-func (v *T) Equal(other *T) bool {
+func (v *T) Equals(other *T) bool {
 	return v.GetX() == other.GetX() && v.GetY() == other.GetY() && v.GetZ() == other.GetZ() && v.GetW() == other.GetW()
 }
 
 // NotEqual ベクトルが他のベクトルと等しくないかどうかをチェックします
-func (v *T) NotEqual(other T) bool {
+func (v *T) NotEquals(other T) bool {
 	return v.GetX() != other.GetX() || v.GetY() != other.GetY() || v.GetZ() != other.GetZ() || v.GetW() != other.GetW()
 }
 
@@ -207,7 +206,7 @@ func (v *T) LessThan(other *T) bool {
 }
 
 // LessThanOrEqual ベクトルが他のベクトル以下かどうかをチェックします (<=)
-func (v *T) LessThanOrEqual(other *T) bool {
+func (v *T) LessThanOrEquals(other *T) bool {
 	return v.GetX() <= other.GetX() && v.GetY() <= other.GetY() && v.GetZ() <= other.GetZ() && v.GetW() <= other.GetW()
 }
 
@@ -217,7 +216,7 @@ func (v *T) GreaterThan(other *T) bool {
 }
 
 // GreaterThanOrEqual ベクトルが他のベクトル以上かどうかをチェックします (>=)
-func (v *T) GreaterThanOrEqual(other *T) bool {
+func (v *T) GreaterThanOrEquals(other *T) bool {
 	return v.GetX() >= other.GetX() && v.GetY() >= other.GetY() && v.GetZ() >= other.GetZ() && v.GetW() >= other.GetW()
 }
 

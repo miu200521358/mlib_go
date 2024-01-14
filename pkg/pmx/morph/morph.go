@@ -1,11 +1,10 @@
 package morph
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/core/index_name_model"
+	"github.com/miu200521358/mlib_go/pkg/core/index_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec4"
-
 )
 
 // MorphPanel 操作パネル
@@ -66,9 +65,9 @@ const (
 	AFTER_VERTEX MorphType = 9
 )
 
-// T represents a morph.
-type T struct {
-	index_name_model.T
+// Morph represents a morph.
+type Morph struct {
+	index_model.IndexModel
 	// モーフINDEX
 	Index int
 	// モーフ名
@@ -88,8 +87,10 @@ type T struct {
 }
 
 // Copy
-func (v *T) Copy() *T {
-	copied := *v
+func (t *Morph) Copy() index_model.IndexModelInterface {
+	copied := *t
+	copied.Offsets = make([]TMorphOffset, len(t.Offsets))
+	copy(copied.Offsets, t.Offsets)
 	return &copied
 }
 
@@ -207,8 +208,8 @@ func NewMorph(
 	offsets []TMorphOffset,
 	displaySlot int,
 	isSystem bool,
-) *T {
-	return &T{
+) *Morph {
+	return &Morph{
 		Index:       index,
 		Name:        name,
 		EnglishName: englishName,
@@ -221,19 +222,12 @@ func NewMorph(
 }
 
 // モーフリスト
-type C struct {
-	index_name_model.C
-	Name    string
-	Indexes []int
-	data    map[int]T
-	names   map[string]int
+type Morphs struct {
+	index_model.IndexModelCorrection[*Morph]
 }
 
-func NewMorphs(name string) *C {
-	return &C{
-		Name:    name,
-		Indexes: make([]int, 0),
-		data:    make(map[int]T),
-		names:   make(map[string]int),
+func NewMorphs(name string) *Morphs {
+	return &Morphs{
+		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Morph](),
 	}
 }

@@ -1,7 +1,7 @@
 package texture
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/core/index_name_model"
+	"github.com/miu200521358/mlib_go/pkg/core/index_model"
 
 )
 
@@ -13,8 +13,8 @@ const (
 	SPHERE  TextureType = 2
 )
 
-type T struct {
-	index_name_model.T
+type Texture struct {
+	index_model.IndexModel
 	Index       int
 	Name        string
 	TextureType TextureType
@@ -22,8 +22,8 @@ type T struct {
 	Valid       bool
 }
 
-func NewTexture(index int, name string, textureType TextureType) *T {
-	return &T{
+func NewTexture(index int, name string, textureType TextureType) *Texture {
+	return &Texture{
 		Index:       index,
 		Name:        name,
 		TextureType: textureType,
@@ -32,44 +32,24 @@ func NewTexture(index int, name string, textureType TextureType) *T {
 	}
 }
 
-// Copy
-func (v *T) Copy() *T {
-	copied := *v
-	return &copied
-}
-
 // テクスチャリスト
-type C struct {
-	index_name_model.C
-	Name    string
-	Indexes []int
-	data    map[int]T
-	names   map[string]int
+type Textures struct {
+	index_model.IndexModelCorrection[*Texture]
 }
 
-func NewTextures(name string) *C {
-	return &C{
-		Name:    name,
-		Indexes: make([]int, 0),
-		data:    make(map[int]T),
-		names:   make(map[string]int),
+func NewTextures(name string) *Textures {
+	return &Textures{
+		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Texture](),
 	}
 }
 
 // 共有テクスチャ辞書
-type ToonC struct {
-	index_name_model.C
-	Name    string
-	Indexes []int
-	data    map[int]T
-	names   map[string]int
+type ToonTextures struct {
+	index_model.IndexModelCorrection[*Texture]
 }
 
-func NewToonTextures(name string) *ToonC {
-	return &ToonC{
-		Name:    name,
-		Indexes: make([]int, 0),
-		data:    make(map[int]T),
-		names:   make(map[string]int),
+func NewToonTextures(name string) *ToonTextures {
+	return &ToonTextures{
+		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Texture](),
 	}
 }

@@ -1,144 +1,110 @@
 package index_model
 
-import "sort"
+import (
+	"slices"
 
-// Tのインタフェース
-type TInterface interface {
+)
+
+type IndexModelInterface interface {
+	IsValid() bool
+	Copy() IndexModelInterface
 	GetIndex() int
 	SetIndex(index int)
-	IsValid() bool
-	Add(v *TInterface) *T
-	Copy() *T
 }
 
 // INDEXを持つ基底クラス
-type T struct {
+type IndexModel struct {
 	Index int
 }
 
-func (v *T) GetIndex() int {
+func (v *IndexModel) GetIndex() int {
 	return v.Index
 }
 
-func (v *T) SetIndex(index int) {
+func (v *IndexModel) SetIndex(index int) {
 	v.Index = index
 }
 
-func NewT(index int) *T {
-	return &T{
-		Index: index,
-	}
-}
-
-func (b *T) IsValid() bool {
-	return b.GetIndex() >= 0
-}
-
-func (b *T) Add(v *TInterface) *T {
-	// Implement your logic here
-	return nil
+func (v *IndexModel) IsValid() bool {
+	return v.GetIndex() >= 0
 }
 
 // Copy
-func (b *T) Copy() *T {
-	copied := *b
+func (v *IndexModel) Copy() IndexModelInterface {
+	copied := *v
 	return &copied
 }
 
-// Cのインタフェース
-type CInterface interface {
-	GetItem(index int) *T
-	Range(start, stop, step int) []*T
-	SetItem(index int, v TInterface)
-	Append(value TInterface, isSort bool)
-}
-
 // Tのリスト基底クラス
-type C struct {
-	data    map[int]*T
+type IndexModelCorrection[T IndexModelInterface] struct {
+	Data    map[int]*T
 	Indexes []int
 }
 
-func NewC() *C {
-	return &C{
-		data:    make(map[int]*T),
+func NewIndexModelCorrection[T IndexModelInterface]() *IndexModelCorrection[T] {
+	return &IndexModelCorrection[T]{
+		Data:    make(map[int]*T),
 		Indexes: make([]int, 0),
 	}
 }
 
-func (b *C) GetItem(index int) *T {
+func (c *IndexModelCorrection[T]) GetItem(index int) T {
 	if index < 0 {
 		// マイナス指定の場合、後ろからの順番に置き換える
-		index = len(b.data) + index
-		return b.data[b.Indexes[index]]
+		index = len(c.Data) + index
+		return *c.Data[c.Indexes[index]]
 	}
-	if val, ok := b.data[index]; ok {
-		return val
+	if val, ok := c.Data[index]; ok {
+		return *val
 	}
 	// なかったらエラー
 	panic("[BaseIndexDictModel] index out of range: index: " + string(rune(index)))
 }
 
-func (b *C) Range(start, stop, step int) []*T {
-	if stop < 0 {
-		// マイナス指定の場合、後ろからの順番に置き換える
-		stop = len(b.data) + stop + 1
-	}
-	result := make([]*T, 0)
-	for i := start; i < stop; i += step {
-		result = append(result, b.data[b.Indexes[i]])
-	}
-	return result
+func (c *IndexModelCorrection[T]) SetItem(index int, v *T) {
+	c.Data[index] = v
 }
 
-func (b *C) SetItem(index int, v TInterface) {
-	b.data[index] = v.(*T)
-}
-
-func (b *C) Append(value TInterface, isSort bool) {
+func (c *IndexModelCorrection[T]) Append(value T, isSort bool) {
 	if value.GetIndex() < 0 {
-		value.SetIndex(len(b.data))
+		value.SetIndex(len(c.Data))
 	}
-	b.data[value.GetIndex()] = value.(*T)
+	c.Data[value.GetIndex()] = &value
 	if isSort {
-		b.SortIndexes()
+		c.SortIndexes()
 	} else {
-		b.Indexes = append(b.Indexes, value.GetIndex())
+		c.Indexes = append(c.Indexes, value.GetIndex())
 	}
 }
 
-func (b *C) SortIndexes() {
-	sort.Ints(b.Indexes)
+func (c *IndexModelCorrection[T]) SortIndexes() {
+	slices.Sort(c.Indexes)
 }
 
-func (b *C) DeleteItem(index int) {
-	delete(b.data, index)
+func (c *IndexModelCorrection[T]) DeleteItem(index int) {
+	delete(c.Data, index)
 }
 
-func (b *C) Len() int {
-	return len(b.data)
+func (c *IndexModelCorrection[T]) Len() int {
+	return len(c.Data)
 }
 
-func (b *C) Iterator() []*T {
-	result := make([]*T, 0)
-	for _, index := range b.Indexes {
-		result = append(result, b.data[index])
-	}
-	return result
-}
-
-func (b *C) Contains(key int) bool {
-	_, ok := b.data[key]
+func (c *IndexModelCorrection[T]) Contains(key int) bool {
+	_, ok := c.Data[key]
 	return ok
 }
 
-func (b *C) IsEmpty() bool {
-	return len(b.data) > 0
+func (c *IndexModelCorrection[T]) IsEmpty() bool {
+	return len(c.Data) == 0
 }
 
-func (b *C) LastIndex() int {
+func (c *IndexModelCorrection[T]) IsNotEmpty() bool {
+	return len(c.Data) > 0
+}
+
+func (c *IndexModelCorrection[T]) LastIndex() int {
 	maxIndex := 0
-	for index := range b.data {
+	for index := range c.Data {
 		if index > maxIndex {
 			maxIndex = index
 		}

@@ -1,10 +1,9 @@
 package rigidbody
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/core/index_name_model"
+	"github.com/miu200521358/mlib_go/pkg/core/index_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
-
 )
 
 type Param struct {
@@ -67,8 +66,8 @@ const (
 	Group16 CollisionGroup = 0x8000
 )
 
-type T struct {
-	index_name_model.T
+type RigidBody struct {
+	index_model.IndexModel
 	// 剛体INDEX
 	Index int
 	// 剛体名
@@ -121,8 +120,8 @@ func NewRigidBody(
 	yDirection mvec3.T,
 	zDirection mvec3.T,
 	isSystem bool,
-) *T {
-	return &T{
+) *RigidBody {
+	return &RigidBody{
 		Index:            index,
 		Name:             name,
 		EnglishName:      englishName,
@@ -142,26 +141,13 @@ func NewRigidBody(
 	}
 }
 
-// Copy
-func (v *T) Copy() *T {
-	copied := *v
-	return &copied
-}
-
 // 剛体リスト
-type C struct {
-	index_name_model.C
-	Name    string
-	Indexes []int
-	data    map[int]T
-	names   map[string]int
+type RigidBodies struct {
+	index_model.IndexModelCorrection[*RigidBody]
 }
 
-func NewRigidBodies(name string) *C {
-	return &C{
-		Name:    name,
-		Indexes: make([]int, 0),
-		data:    make(map[int]T),
-		names:   make(map[string]int),
+func NewRigidBodies(name string) *RigidBodies {
+	return &RigidBodies{
+		IndexModelCorrection: *index_model.NewIndexModelCorrection[*RigidBody](),
 	}
 }

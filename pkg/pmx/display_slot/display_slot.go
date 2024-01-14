@@ -1,15 +1,17 @@
 package display_slot
 
-import "github.com/miu200521358/mlib_go/pkg/core/index_name_model"
+import (
+	"github.com/miu200521358/mlib_go/pkg/core/index_model"
+)
 
 // 表示枠要素タイプ
 type DisplayType int
 
 const (
 	// ボーン
-	BONE DisplayType = 0
+	DISPLAY_TYPE_BONE DisplayType = 0
 	// モーフ
-	MORPH DisplayType = 1
+	DISPLAY_TYPE_MORPH DisplayType = 1
 )
 
 type Reference struct {
@@ -22,12 +24,12 @@ type Reference struct {
 type SpecialFlag int
 
 const (
-	NORMAL  SpecialFlag = 0
-	SPECIAL SpecialFlag = 1
+	SPECIAL_FLAG_OFF SpecialFlag = 0
+	SPECIAL_FLAG_ON  SpecialFlag = 1
 )
 
-type T struct {
-	index_name_model.T
+type DisplaySlot struct {
+	index_model.IndexModel
 	// 枠名
 	Index int
 	// 枠名
@@ -43,9 +45,9 @@ type T struct {
 }
 
 // NewDisplaySlot
-func NewDisplaySlot(index int, name string, englishName string, specialFlag SpecialFlag) *T {
-	return &T{
-		Index:       index,
+func NewDisplaySlot(name string, englishName string, specialFlag SpecialFlag) *DisplaySlot {
+	return &DisplaySlot{
+		Index:       0,
 		Name:        name,
 		EnglishName: englishName,
 		SpecialFlag: specialFlag,
@@ -55,7 +57,7 @@ func NewDisplaySlot(index int, name string, englishName string, specialFlag Spec
 }
 
 // Copy
-func (v *T) Copy() *T {
+func (v *DisplaySlot) Copy() index_model.IndexModelInterface {
 	copied := *v
 	copied.References = make([]Reference, len(v.References))
 	copy(copied.References, v.References)
@@ -63,19 +65,12 @@ func (v *T) Copy() *T {
 }
 
 // 表示枠リスト
-type C struct {
-	index_name_model.C
-	Name    string
-	Indexes []int
-	data    map[int]T
-	names   map[string]int
+type DisplaySlots struct {
+	index_model.IndexModelCorrection[*DisplaySlot]
 }
 
-func NewDisplaySlots(name string) *C {
-	return &C{
-		Name:    name,
-		Indexes: make([]int, 0),
-		data:    make(map[int]T),
-		names:   make(map[string]int),
+func NewDisplaySlots(name string) *DisplaySlots {
+	return &DisplaySlots{
+		IndexModelCorrection: *index_model.NewIndexModelCorrection[*DisplaySlot](),
 	}
 }

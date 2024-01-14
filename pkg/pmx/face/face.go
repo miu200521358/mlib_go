@@ -4,34 +4,26 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/core/index_model"
 )
 
-type T struct {
-	index_model.T
+type Face struct {
+	index_model.IndexModel
 	Index         int
 	VertexIndexes [3]int
 }
 
-func NewFace(index, vertexIndex0, vertexIndex1, vertexIndex2 int) *T {
-	return &T{
+func NewFace(index, vertexIndex0, vertexIndex1, vertexIndex2 int) *Face {
+	return &Face{
 		Index:         index,
 		VertexIndexes: [3]int{vertexIndex0, vertexIndex1, vertexIndex2},
 	}
 }
 
-func (m *T) Copy() *T {
-	copied := *m
-	return &copied
-}
-
 // 面リスト
-type C struct {
-	index_model.C
-	data    map[int]*T
-	Indexes []int
+type Faces struct {
+	index_model.IndexModelCorrection[*Face]
 }
 
-func NewFaces() *C {
-	return &C{
-		data:    make(map[int]*T),
-		Indexes: make([]int, 0),
+func NewFaces() *Faces {
+	return &Faces{
+		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Face](),
 	}
 }

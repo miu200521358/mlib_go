@@ -53,25 +53,25 @@ func TestLessThan(t *testing.T) {
 	}
 }
 
-func TestLessThanOrEqual(t *testing.T) {
+func TestLessThanOrEquals(t *testing.T) {
 	v1 := mvec2.T{1, 2}
 	v2 := mvec2.T{3, 4}
 
-	if !v1.LessThanOrEqual(&v2) {
+	if !v1.LessThanOrEquals(&v2) {
 		t.Errorf("LessThanOrEqual failed. Expected true, got false")
 	}
 
 	v3 := mvec2.T{3, 4}
 	v4 := mvec2.T{1, 2}
 
-	if v3.LessThanOrEqual(&v4) {
+	if v3.LessThanOrEquals(&v4) {
 		t.Errorf("LessThanOrEqual failed. Expected false, got true")
 	}
 
 	v5 := mvec2.T{1, 2}
 	v6 := mvec2.T{1, 2}
 
-	if !v5.LessThanOrEqual(&v6) {
+	if !v5.LessThanOrEquals(&v6) {
 		t.Errorf("LessThanOrEqual failed. Expected true, got false")
 	}
 }
@@ -92,25 +92,25 @@ func TestGreaterThan(t *testing.T) {
 	}
 }
 
-func TestGreaterThanOrEqual(t *testing.T) {
+func TestGreaterThanOrEquals(t *testing.T) {
 	v1 := mvec2.T{1, 2}
 	v2 := mvec2.T{3, 4}
 
-	if v1.GreaterThanOrEqual(&v2) {
+	if v1.GreaterThanOrEquals(&v2) {
 		t.Errorf("GreaterThanOrEqual failed. Expected false, got true")
 	}
 
 	v3 := mvec2.T{3, 4}
 	v4 := mvec2.T{1, 2}
 
-	if !v3.GreaterThanOrEqual(&v4) {
+	if !v3.GreaterThanOrEquals(&v4) {
 		t.Errorf("GreaterThanOrEqual failed. Expected true, got false")
 	}
 
 	v5 := mvec2.T{1, 2}
 	v6 := mvec2.T{1, 2}
 
-	if !v5.GreaterThanOrEqual(&v6) {
+	if !v5.GreaterThanOrEquals(&v6) {
 		t.Errorf("GreaterThanOrEqual failed. Expected true, got false")
 	}
 }
@@ -134,21 +134,21 @@ func TestAbs(t *testing.T) {
 	v1 := mvec2.T{-1, -2}
 	expected1 := mvec2.T{1, 2}
 	result1 := v1.Abs()
-	if !result1.Equal(&expected1) {
+	if !result1.Equals(&expected1) {
 		t.Errorf("Abs failed. Expected %v, got %v", expected1, result1)
 	}
 
 	v2 := mvec2.T{3, -4}
 	expected2 := mvec2.T{3, 4}
 	result2 := v2.Abs()
-	if !result2.Equal(&expected2) {
+	if !result2.Equals(&expected2) {
 		t.Errorf("Abs failed. Expected %v, got %v", expected2, result2)
 	}
 
 	v3 := mvec2.T{0, 0}
 	expected3 := mvec2.T{0, 0}
 	result3 := v3.Abs()
-	if !result3.Equal(&expected3) {
+	if !result3.Equals(&expected3) {
 		t.Errorf("Abs failed. Expected %v, got %v", expected3, result3)
 	}
 }
