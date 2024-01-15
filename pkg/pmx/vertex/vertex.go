@@ -9,21 +9,21 @@ import (
 )
 
 type Vertex struct {
-	index_model.IndexModel
+	*index_model.IndexModel
 	// 頂点位置
-	Position    *mvec3.T
+	Position *mvec3.T
 	// 頂点法線
-	Normal      *mvec3.T
+	Normal *mvec3.T
 	// UV
-	UV          *mvec2.T
+	UV *mvec2.T
 	// 追加UV
 	ExtendedUVs *[]mvec4.T
 	// ウェイト変形方式
-	DeformType  DeformType
+	DeformType DeformType
 	// デフォーム
-	Deform      DeformInterface
+	Deform DeformInterface
 	// エッジ倍率
-	EdgeFactor  float64
+	EdgeFactor float64
 }
 
 func NewVertex(
@@ -36,7 +36,7 @@ func NewVertex(
 	edgeFactor float64,
 ) *Vertex {
 	v := &Vertex{
-		IndexModel:  index_model.IndexModel{Index: index},
+		IndexModel:  &index_model.IndexModel{Index: index},
 		Position:    position,
 		Normal:      normal,
 		UV:          uv,
@@ -50,11 +50,11 @@ func NewVertex(
 
 // 頂点リスト
 type Vertices struct {
-	index_model.IndexModelCorrection[*Vertex]
+	*index_model.IndexModelCorrection[*Vertex]
 }
 
 func NewVertices() *Vertices {
 	return &Vertices{
-		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Vertex](),
+		IndexModelCorrection: index_model.NewIndexModelCorrection[*Vertex](),
 	}
 }

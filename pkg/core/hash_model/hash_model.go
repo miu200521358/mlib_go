@@ -5,15 +5,15 @@ import (
 	"encoding/hex"
 	"io"
 	"os"
-
 )
 
 type HashModelInterface interface {
 	GetName() string
 	SetName(name string)
-	UpdateDigest() error
 	IsNotEmpty() bool
 	IsEmpty() bool
+	GetDigest() string
+	UpdateDigest() error
 }
 
 type HashModel struct {
@@ -36,6 +36,10 @@ func (m *HashModel) GetName() string {
 func (m *HashModel) SetName(name string) {
 	// モデル内の名前に相当する値を設定する
 	panic("not implemented")
+}
+
+func (m *HashModel) GetDigest() string {
+	return m.Digest
 }
 
 func (m *HashModel) UpdateDigest() error {

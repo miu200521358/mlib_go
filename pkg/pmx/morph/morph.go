@@ -68,7 +68,7 @@ const (
 
 // Morph represents a morph.
 type Morph struct {
-	index_model.IndexModel
+	*index_model.IndexModel
 	// モーフ名
 	Name string
 	// モーフ名英
@@ -212,7 +212,7 @@ func NewMorph(
 	isSystem bool,
 ) *Morph {
 	return &Morph{
-		IndexModel:  index_model.IndexModel{Index: index},
+		IndexModel:  &index_model.IndexModel{Index: index},
 		Name:        name,
 		EnglishName: englishName,
 		Panel:       panel,
@@ -225,11 +225,11 @@ func NewMorph(
 
 // モーフリスト
 type Morphs struct {
-	index_model.IndexModelCorrection[*Morph]
+	*index_model.IndexModelCorrection[*Morph]
 }
 
 func NewMorphs(name string) *Morphs {
 	return &Morphs{
-		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Morph](),
+		IndexModelCorrection: index_model.NewIndexModelCorrection[*Morph](),
 	}
 }

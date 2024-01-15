@@ -1,4 +1,4 @@
-package pmx
+package pmx_model
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/core/hash_model"
@@ -11,11 +11,10 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/pmx/rigidbody"
 	"github.com/miu200521358/mlib_go/pkg/pmx/texture"
 	"github.com/miu200521358/mlib_go/pkg/pmx/vertex"
-
 )
 
 type PmxModel struct {
-	hash_model.HashModel
+	*hash_model.HashModel
 	Signature           string
 	Version             float64
 	ExtendedUVCount     int
@@ -47,7 +46,7 @@ type PmxModel struct {
 
 func NewPmxModel(path string) *PmxModel {
 	model := &PmxModel{}
-	model.HashModel = *hash_model.NewBaseHashModel(path)
+	model.HashModel = hash_model.NewBaseHashModel(path)
 	model.InitializeDisplaySlots()
 	return model
 }

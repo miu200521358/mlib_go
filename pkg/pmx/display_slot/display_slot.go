@@ -33,7 +33,7 @@ const (
 )
 
 type DisplaySlot struct {
-	index_model.IndexModel
+	*index_model.IndexModel
 	// 枠名
 	Name string
 	// 枠名英
@@ -49,7 +49,7 @@ type DisplaySlot struct {
 // NewDisplaySlot
 func NewDisplaySlot(name string, englishName string, specialFlag SpecialFlag) *DisplaySlot {
 	return &DisplaySlot{
-		IndexModel: index_model.IndexModel{Index: -1},
+		IndexModel:  &index_model.IndexModel{Index: -1},
 		Name:        name,
 		EnglishName: englishName,
 		SpecialFlag: specialFlag,
@@ -68,11 +68,11 @@ func (v *DisplaySlot) Copy() index_model.IndexModelInterface {
 
 // 表示枠リスト
 type DisplaySlots struct {
-	index_model.IndexModelCorrection[*DisplaySlot]
+	*index_model.IndexModelCorrection[*DisplaySlot]
 }
 
 func NewDisplaySlots(name string) *DisplaySlots {
 	return &DisplaySlots{
-		IndexModelCorrection: *index_model.NewIndexModelCorrection[*DisplaySlot](),
+		IndexModelCorrection: index_model.NewIndexModelCorrection[*DisplaySlot](),
 	}
 }

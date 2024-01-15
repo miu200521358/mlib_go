@@ -4,6 +4,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/core/index_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
+
 )
 
 type Param struct {
@@ -68,7 +69,7 @@ const (
 )
 
 type RigidBody struct {
-	index_model.IndexModel
+	*index_model.IndexModel
 	// 剛体名
 	Name string
 	// 剛体名英
@@ -120,7 +121,7 @@ func NewRigidBody(
 	isSystem bool,
 ) *RigidBody {
 	return &RigidBody{
-		IndexModel:       index_model.IndexModel{Index: -1},
+		IndexModel:       &index_model.IndexModel{Index: -1},
 		Name:             name,
 		EnglishName:      englishName,
 		BoneIndex:        boneIndex,
@@ -141,11 +142,11 @@ func NewRigidBody(
 
 // 剛体リスト
 type RigidBodies struct {
-	index_model.IndexModelCorrection[*RigidBody]
+	*index_model.IndexModelCorrection[*RigidBody]
 }
 
 func NewRigidBodies(name string) *RigidBodies {
 	return &RigidBodies{
-		IndexModelCorrection: *index_model.NewIndexModelCorrection[*RigidBody](),
+		IndexModelCorrection: index_model.NewIndexModelCorrection[*RigidBody](),
 	}
 }

@@ -47,7 +47,7 @@ const (
 )
 
 type Material struct {
-	index_model.IndexModel
+	*index_model.IndexModel
 	// 材質名
 	Name string
 	// 材質名英
@@ -106,7 +106,7 @@ func NewMaterial(
 	verticesCount int,
 ) *Material {
 	return &Material{
-		IndexModel:         index_model.IndexModel{Index: index},
+		IndexModel:         &index_model.IndexModel{Index: index},
 		Name:               name,
 		EnglishName:        englishName,
 		DiffuseColor:       diffuseColor,
@@ -135,12 +135,12 @@ func (m *Material) Copy() index_model.IndexModelInterface {
 
 // 材質リスト
 type Materials struct {
-	index_model.IndexModelCorrection[*Material]
+	*index_model.IndexModelCorrection[*Material]
 }
 
 func NewMaterials(name string) *Materials {
 	return &Materials{
-		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Material](),
+		IndexModelCorrection: index_model.NewIndexModelCorrection[*Material](),
 	}
 }
 

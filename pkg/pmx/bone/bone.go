@@ -7,6 +7,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/math/mmat4"
 	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
+
 )
 
 type IkLink struct {
@@ -52,7 +53,7 @@ func (t *Ik) Copy() *Ik {
 }
 
 type Bone struct {
-	index_model.IndexModel
+	*index_model.IndexModel
 	// ボーン名
 	Name string
 	// ボーン名英
@@ -151,7 +152,7 @@ func NewBone(
 	isSystem bool,
 ) *Bone {
 	bone := &Bone{
-		IndexModel:             index_model.IndexModel{Index: -1},
+		IndexModel:             &index_model.IndexModel{Index: -1},
 		Name:                   name,
 		EnglishName:            englishName,
 		Position:               position,
@@ -386,11 +387,11 @@ func (bone *Bone) containsCategory(category BoneCategory) bool {
 
 // ボーンリスト
 type Bones struct {
-	index_model.IndexModelCorrection[*Bone]
+	*index_model.IndexModelCorrection[*Bone]
 }
 
 func NewBones(name string) *Bones {
 	return &Bones{
-		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Bone](),
+		IndexModelCorrection: index_model.NewIndexModelCorrection[*Bone](),
 	}
 }

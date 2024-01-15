@@ -4,6 +4,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/core/index_model"
 	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
+
 )
 
 type LimitParam struct {
@@ -27,7 +28,7 @@ type Param struct {
 }
 
 type Joint struct {
-	index_model.IndexModel
+	*index_model.IndexModel
 	// Joint名
 	Name string
 	// Joint名英
@@ -58,7 +59,7 @@ func NewJoint(
 	isSystem bool,
 ) *Joint {
 	return &Joint{
-		IndexModel:  index_model.IndexModel{Index: -1},
+		IndexModel:  &index_model.IndexModel{Index: -1},
 		Name:        name,
 		EnglishName: englishName,
 		// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
@@ -74,11 +75,11 @@ func NewJoint(
 
 // ジョイントリスト
 type Joints struct {
-	index_model.IndexModelCorrection[*Joint]
+	*index_model.IndexModelCorrection[*Joint]
 }
 
 func NewJoints(name string) *Joints {
 	return &Joints{
-		IndexModelCorrection: *index_model.NewIndexModelCorrection[*Joint](),
+		IndexModelCorrection: index_model.NewIndexModelCorrection[*Joint](),
 	}
 }
