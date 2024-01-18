@@ -12,6 +12,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/pmx/bone"
 	"github.com/miu200521358/mlib_go/pkg/pmx/display_slot"
 	"github.com/miu200521358/mlib_go/pkg/pmx/face"
+	"github.com/miu200521358/mlib_go/pkg/pmx/joint"
 	"github.com/miu200521358/mlib_go/pkg/pmx/material"
 	"github.com/miu200521358/mlib_go/pkg/pmx/morph"
 	"github.com/miu200521358/mlib_go/pkg/pmx/pmx_model"
@@ -205,6 +206,11 @@ func (r *PmxReader) ReadData(model *pmx_model.PmxModel) error {
 	}
 
 	err = r.unpackRigidBodies(model)
+	if err != nil {
+		return err
+	}
+
+	err = r.unpackJoints(model)
 	if err != nil {
 		return err
 	}
@@ -1026,6 +1032,85 @@ func (r *PmxReader) unpackRigidBodies(model *pmx_model.PmxModel) error {
 		b.PhysicsType = rigidbody.PhysicsType(physicsType)
 
 		model.RigidBodies.Append(b, false)
+	}
+
+	return nil
+}
+
+func (r *PmxReader) unpackJoints(model *pmx_model.PmxModel) error {
+	totalJointCount, err := r.UnpackInt()
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < totalJointCount; i++ {
+		j := joint.NewJoint()
+
+		// 4 + n : TextBuf	| Joint名
+		j.Name = r.ReadText()
+		// 4 + n : TextBuf	| Joint名英
+		j.EnglishName = r.ReadText()
+		// 1  : byte	| Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
+		j.JointType, err = r.UnpackByte()
+		if err != nil {
+			return err
+		}
+		// n  : 剛体Indexサイズ  | 関連剛体AのIndex - 関連なしの場合は-1
+		j.RigidbodyIndexA, err = r.unpackRigidBodyIndex(model)
+		if err != nil {
+			return err
+		}
+		// n  : 剛体Indexサイズ  | 関連剛体BのIndex - 関連なしの場合は-1
+		j.RigidbodyIndexB, err = r.unpackRigidBodyIndex(model)
+		if err != nil {
+			return err
+		}
+		// 12 : float3	| 位置(x,y,z)
+		j.Position, err = r.UnpackVec3()
+		if err != nil {
+			return err
+		}
+		// 12 : float3	| 回転(x,y,z) -> ラジアン角
+		rads, err := r.UnpackVec3()
+		if err != nil {
+			return err
+		}
+		j.Rotation.SetRadians(rads)
+		// 12 : float3	| 移動制限-下限(x,y,z)
+		j.Param.TranslationLimitMin, err = r.UnpackVec3()
+		if err != nil {
+			return err
+		}
+		// 12 : float3	| 移動制限-上限(x,y,z)
+		j.Param.TranslationLimitMax, err = r.UnpackVec3()
+		if err != nil {
+			return err
+		}
+		// 12 : float3	| 回転制限-下限(x,y,z) -> ラジアン角
+		rotationLimitMin, err := r.UnpackVec3()
+		if err != nil {
+			return err
+		}
+		j.Param.RotationLimitMin.SetRadians(rotationLimitMin)
+		// 12 : float3	| 回転制限-上限(x,y,z) -> ラジアン角
+		rotationLimitMax, err := r.UnpackVec3()
+		if err != nil {
+			return err
+		}
+		j.Param.RotationLimitMax.SetRadians(rotationLimitMax)
+		// 12 : float3	| バネ定数-移動(x,y,z)
+		j.Param.SpringConstantTranslation, err = r.UnpackVec3()
+		if err != nil {
+			return err
+		}
+		// 12 : float3	| バネ定数-回転(x,y,z)
+		springConstantRotation, err := r.UnpackVec3()
+		if err != nil {
+			return err
+		}
+		j.Param.SpringConstantRotation.SetDegrees(springConstantRotation)
+
+		model.Joints.Append(j, false)
 	}
 
 	return nil

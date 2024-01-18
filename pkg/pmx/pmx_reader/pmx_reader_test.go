@@ -811,6 +811,58 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected PhysicsType to be %v, got %v", expectedPhysicsType, b.PhysicsType)
 		}
 	}
+
+	{
+		j := model.Joints.GetItem(13)
+		expectedName := "↓|頭|髪_06-01"
+		if j.Name != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, j.Name)
+		}
+		expectedEnglishName := "↓|頭|髪_06-01"
+		if j.EnglishName != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, j.EnglishName)
+		}
+		expectedRigidBodyIndexA := 5
+		if j.RigidbodyIndexA != expectedRigidBodyIndexA {
+			t.Errorf("Expected RigidBodyIndexA to be %v, got %v", expectedRigidBodyIndexA, j.RigidbodyIndexA)
+		}
+		expectedRigidBodyIndexB := 45
+		if j.RigidbodyIndexB != expectedRigidBodyIndexB {
+			t.Errorf("Expected RigidBodyIndexB to be %v, got %v", expectedRigidBodyIndexB, j.RigidbodyIndexB)
+		}
+		expectedPosition := &mvec3.T{-1.189768, 18.56266, 0.07277258}
+		if !j.Position.PracticallyEquals(expectedPosition, 1e-5) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, j.Position)
+		}
+		expectedRotation := &mvec3.T{-15.10554, 91.26718, -4.187446}
+		if !j.Rotation.GetDegrees().PracticallyEquals(expectedRotation, 1e-5) {
+			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, j.Rotation.GetDegrees())
+		}
+		expectedTranslationLimitMin := &mvec3.T{0.0, 0.0, 0.0}
+		if !j.Param.TranslationLimitMin.PracticallyEquals(expectedTranslationLimitMin, 1e-5) {
+			t.Errorf("Expected TranslationLimitation1 to be %v, got %v", expectedTranslationLimitMin, j.Param.TranslationLimitMin)
+		}
+		expectedTranslationLimitMax := &mvec3.T{0.0, 0.0, 0.0}
+		if !j.Param.TranslationLimitMax.PracticallyEquals(expectedTranslationLimitMax, 1e-5) {
+			t.Errorf("Expected TranslationLimitation2 to be %v, got %v", expectedTranslationLimitMax, j.Param.TranslationLimitMax)
+		}
+		expectedRotationLimitMin := &mvec3.T{-29.04, -14.3587, -29.04}
+		if !j.Param.RotationLimitMin.GetDegrees().PracticallyEquals(expectedRotationLimitMin, 1e-5) {
+			t.Errorf("Expected RotationLimitation1 to be %v, got %v", expectedRotationLimitMin, j.Param.RotationLimitMin.GetDegrees())
+		}
+		expectedRotationLimitMax := &mvec3.T{29.04, 14.3587, 29.04}
+		if !j.Param.RotationLimitMax.GetDegrees().PracticallyEquals(expectedRotationLimitMax, 1e-5) {
+			t.Errorf("Expected RotationLimitation2 to be %v, got %v", expectedRotationLimitMax, j.Param.RotationLimitMax.GetDegrees())
+		}
+		expectedSpringConstantTranslation := &mvec3.T{0.0, 0.0, 0.0}
+		if !j.Param.SpringConstantTranslation.PracticallyEquals(expectedSpringConstantTranslation, 1e-5) {
+			t.Errorf("Expected SpringConstantTranslation to be %v, got %v", expectedSpringConstantTranslation, j.Param.SpringConstantTranslation)
+		}
+		expectedSpringConstantRotation := &mvec3.T{60.0, 29.6667, 60.0}
+		if !j.Param.SpringConstantRotation.GetDegrees().PracticallyEquals(expectedSpringConstantRotation, 1e-5) {
+			t.Errorf("Expected SpringConstantRotation to be %v, got %v", expectedSpringConstantRotation, j.Param.SpringConstantRotation)
+		}
+	}
 }
 
 func TestPmxReader_ReadByFilepath_2_1(t *testing.T) {

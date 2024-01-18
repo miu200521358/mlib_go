@@ -27,6 +27,17 @@ type Param struct {
 	SpringConstantRotation mrotation.T
 }
 
+func NewParam() *Param {
+	return &Param{
+		TranslationLimitMin:       mvec3.T{},
+		TranslationLimitMax:       mvec3.T{},
+		RotationLimitMin:          mrotation.T{},
+		RotationLimitMax:          mrotation.T{},
+		SpringConstantTranslation: mvec3.T{},
+		SpringConstantRotation:    mrotation.T{},
+	}
+}
+
 type Joint struct {
 	*index_model.IndexModel
 	// Joint名
@@ -34,7 +45,7 @@ type Joint struct {
 	// Joint名英
 	EnglishName string
 	// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
-	JointType int
+	JointType byte
 	// 関連剛体AのIndex
 	RigidbodyIndexA int
 	// 関連剛体BのIndex
@@ -48,28 +59,19 @@ type Joint struct {
 	IsSystem bool
 }
 
-func NewJoint(
-	name string,
-	englishName string,
-	rigidbodyIndexA int,
-	rigidbodyIndexB int,
-	position mvec3.T,
-	rotation mrotation.T,
-	param Param,
-	isSystem bool,
-) *Joint {
+func NewJoint() *Joint {
 	return &Joint{
 		IndexModel:  &index_model.IndexModel{Index: -1},
-		Name:        name,
-		EnglishName: englishName,
+		Name:        "",
+		EnglishName: "",
 		// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
 		JointType:       0,
-		RigidbodyIndexA: rigidbodyIndexA,
-		RigidbodyIndexB: rigidbodyIndexB,
-		Position:        position,
-		Rotation:        rotation,
-		Param:           param,
-		IsSystem:        isSystem,
+		RigidbodyIndexA: -1,
+		RigidbodyIndexB: -1,
+		Position:        mvec3.T{},
+		Rotation:        mrotation.T{},
+		Param:           *NewParam(),
+		IsSystem:        false,
 	}
 }
 
