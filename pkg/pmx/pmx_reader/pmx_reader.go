@@ -15,6 +15,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/pmx/material"
 	"github.com/miu200521358/mlib_go/pkg/pmx/morph"
 	"github.com/miu200521358/mlib_go/pkg/pmx/pmx_model"
+	"github.com/miu200521358/mlib_go/pkg/pmx/rigidbody"
 	"github.com/miu200521358/mlib_go/pkg/pmx/texture"
 	"github.com/miu200521358/mlib_go/pkg/pmx/vertex"
 	"github.com/miu200521358/mlib_go/pkg/pmx/vertex/deform"
@@ -199,6 +200,11 @@ func (r *PmxReader) ReadData(model *pmx_model.PmxModel) error {
 	}
 
 	err = r.unpackDisplaySlots(model)
+	if err != nil {
+		return err
+	}
+
+	err = r.unpackRigidBodies(model)
 	if err != nil {
 		return err
 	}
@@ -929,8 +935,97 @@ func (r *PmxReader) unpackDisplaySlots(model *pmx_model.PmxModel) error {
 
 			d.References = append(d.References, *reference)
 		}
-
 		model.DisplaySlots.Append(d, false)
+	}
+
+	return nil
+}
+
+func (r *PmxReader) unpackRigidBodies(model *pmx_model.PmxModel) error {
+	totalRigidBodyCount, err := r.UnpackInt()
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < totalRigidBodyCount; i++ {
+		b := rigidbody.NewRigidBody()
+
+		// 4 + n : TextBuf	| 剛体名
+		b.Name = r.ReadText()
+		// 4 + n : TextBuf	| 剛体名英
+		b.EnglishName = r.ReadText()
+		// n  : ボーンIndexサイズ  | 関連ボーンIndex - 関連なしの場合は-1
+		b.BoneIndex, err = r.unpackBoneIndex(model)
+		if err != nil {
+			return err
+		}
+		// 1  : byte	| グループ
+		collisionGroup, err := r.UnpackByte()
+		if err != nil {
+			return err
+		}
+		b.CollisionGroup = collisionGroup
+		// 2  : ushort	| 非衝突グループフラグ
+		collisionGroupMask, err := r.UnpackUShort()
+		if err != nil {
+			return err
+		}
+		b.CollisionGroupMask.IsCollisions = rigidbody.NewCollisionGroup(collisionGroupMask)
+		// 1  : byte	| 形状 - 0:球 1:箱 2:カプセル
+		shapeType, err := r.UnpackByte()
+		if err != nil {
+			return err
+		}
+		b.ShapeType = rigidbody.Shape(shapeType)
+		// 12 : float3	| サイズ(x,y,z)
+		b.Size, err = r.UnpackVec3()
+		if err != nil {
+			return err
+		}
+		// 12 : float3	| 位置(x,y,z)
+		b.Position, err = r.UnpackVec3()
+		if err != nil {
+			return err
+		}
+		// 12 : float3	| 回転(x,y,z) -> ラジアン角
+		rads, err := r.UnpackVec3()
+		if err != nil {
+			return err
+		}
+		b.Rotation.SetRadians(rads)
+		// 4  : float	| 質量
+		b.Param.Mass, err = r.UnpackFloat()
+		if err != nil {
+			return err
+		}
+		// 4  : float	| 移動減衰
+		b.Param.LinearDamping, err = r.UnpackFloat()
+		if err != nil {
+			return err
+		}
+		// 4  : float	| 回転減衰
+		b.Param.AngularDamping, err = r.UnpackFloat()
+		if err != nil {
+			return err
+		}
+		// 4  : float	| 反発力
+		b.Param.Restitution, err = r.UnpackFloat()
+		if err != nil {
+			return err
+		}
+		// 4  : float	| 摩擦力
+		b.Param.Friction, err = r.UnpackFloat()
+		if err != nil {
+			return err
+		}
+		// 1  : byte	| 剛体の物理演算 - 0:ボーン追従(static) 1:物理演算(dynamic) 2:物理演算 + Bone位置合わせ
+		physicsType, err := r.UnpackByte()
+		if err != nil {
+			return err
+		}
+		b.PhysicsType = rigidbody.PhysicsType(physicsType)
+
+		model.RigidBodies.Append(b, false)
 	}
 
 	return nil

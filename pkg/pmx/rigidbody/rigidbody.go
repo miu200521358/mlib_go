@@ -33,40 +33,64 @@ const (
 )
 
 // 剛体物理の計算モード
-type PhysicsMode int
+type PhysicsType int
 
 const (
 	// ボーン追従(static)
-	PHYSICS_MODE_STATIC PhysicsMode = 0
+	PHYSICS_TYPE_STATIC PhysicsType = 0
 	// 物理演算(dynamic)
-	PHYSICS_MODE_DYNAMIC PhysicsMode = 1
+	PHYSICS_TYPE_DYNAMIC PhysicsType = 1
 	// 物理演算 + Bone位置合わせ
-	PHYSICS_MODE_DYNAMIC_BONE PhysicsMode = 2
+	PHYSICS_TYPE_DYNAMIC_BONE PhysicsType = 2
 )
 
-type CollisionGroup int
+type CollisionGroup struct {
+	IsCollisions []uint16
+}
 
-const (
-	// 0:グループなし
-	COLLISION_NONE    CollisionGroup = 0x0000
-	COLLISION_GROUP01 CollisionGroup = 0x0001
-	COLLISION_GROUP02 CollisionGroup = 0x0002
-	COLLISION_GROUP03 CollisionGroup = 0x0004
-	COLLISION_GROUP04 CollisionGroup = 0x0008
-	COLLISION_GROUP05 CollisionGroup = 0x0010
-	COLLISION_GROUP06 CollisionGroup = 0x0020
-	COLLISION_GROUP07 CollisionGroup = 0x0040
-	COLLISION_GROUP08 CollisionGroup = 0x0080
-	COLLISION_GROUP09 CollisionGroup = 0x0100
-	COLLISION_GROUP10 CollisionGroup = 0x0200
-	COLLISION_GROUP11 CollisionGroup = 0x0400
-	COLLISION_GROUP12 CollisionGroup = 0x0800
-	COLLISION_GROUP13 CollisionGroup = 0x1000
-	COLLISION_GROUP14 CollisionGroup = 0x2000
-	COLLISION_GROUP15 CollisionGroup = 0x4000
-	// 床との衝突
-	COLLISION_GROUP16 CollisionGroup = 0x8000
-)
+var CollisionGroupFlags = []uint16{
+	0x0001, // 0:グループ1
+	0x0002, // 1:グループ2
+	0x0004, // 2:グループ3
+	0x0008, // 3:グループ4
+	0x0010, // 4:グループ5
+	0x0020, // 5:グループ6
+	0x0040, // 6:グループ7
+	0x0080, // 7:グループ8
+	0x0100, // 8:グループ9
+	0x0200, // 9:グループ10
+	0x0400, // 10:グループ11
+	0x0800, // 11:グループ12
+	0x1000, // 12:グループ13
+	0x2000, // 13:グループ14
+	0x4000, // 14:グループ15
+	0x8000, // 15:グループ16
+}
+
+func NewCollisionGroupFromSlice(collisionGroup []uint16) CollisionGroup {
+	groups := CollisionGroup{}
+	collisionGroupMask := uint16(0)
+	for i, v := range collisionGroup {
+		if v == 1 {
+			collisionGroupMask |= CollisionGroupFlags[i]
+		}
+	}
+	groups.IsCollisions = NewCollisionGroup(collisionGroupMask)
+
+	return groups
+}
+
+func NewCollisionGroup(collisionGroupMask uint16) []uint16 {
+	collisionGroup := []uint16{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	for i, v := range CollisionGroupFlags {
+		if collisionGroupMask&v == v {
+			collisionGroup[i] = 0
+		} else {
+			collisionGroup[i] = 1
+		}
+	}
+	return collisionGroup
+}
 
 type RigidBody struct {
 	*index_model.IndexModel
@@ -77,21 +101,21 @@ type RigidBody struct {
 	// 関連ボーンIndex
 	BoneIndex int
 	// グループ
-	CollisionGroup int
+	CollisionGroup byte
 	// 非衝突グループフラグ
-	NoCollisionGroup CollisionGroup
+	CollisionGroupMask CollisionGroup
 	// 形状
 	ShapeType Shape
 	// サイズ(x,y,z)
-	ShapeSize mvec3.T
+	Size mvec3.T
 	// 位置(x,y,z)
-	ShapePosition mvec3.T
+	Position mvec3.T
 	// 回転(x,y,z) -> ラジアン角
-	ShapeRotation mrotation.T
+	Rotation mrotation.T
 	// 剛体パラ
 	Param Param
 	// 剛体の物理演算
-	Mode PhysicsMode
+	PhysicsType PhysicsType
 	// X軸方向
 	XDirection mvec3.T
 	// Y軸方向
@@ -103,40 +127,24 @@ type RigidBody struct {
 }
 
 // NewRigidBody creates a new rigid body.
-func NewRigidBody(
-	name string,
-	englishName string,
-	boneIndex int,
-	collisionGroup int,
-	noCollisionGroup CollisionGroup,
-	shapeType Shape,
-	shapeSize mvec3.T,
-	shapePosition mvec3.T,
-	shapeRotation mrotation.T,
-	param Param,
-	mode PhysicsMode,
-	xDirection mvec3.T,
-	yDirection mvec3.T,
-	zDirection mvec3.T,
-	isSystem bool,
-) *RigidBody {
+func NewRigidBody() *RigidBody {
 	return &RigidBody{
-		IndexModel:       &index_model.IndexModel{Index: -1},
-		Name:             name,
-		EnglishName:      englishName,
-		BoneIndex:        boneIndex,
-		CollisionGroup:   collisionGroup,
-		NoCollisionGroup: noCollisionGroup,
-		ShapeType:        shapeType,
-		ShapeSize:        shapeSize,
-		ShapePosition:    shapePosition,
-		ShapeRotation:    shapeRotation,
-		Param:            param,
-		Mode:             mode,
-		XDirection:       xDirection,
-		YDirection:       yDirection,
-		ZDirection:       zDirection,
-		IsSystem:         isSystem,
+		IndexModel:         &index_model.IndexModel{Index: -1},
+		Name:               "",
+		EnglishName:        "",
+		BoneIndex:          -1,
+		CollisionGroup:     0,
+		CollisionGroupMask: NewCollisionGroupFromSlice([]uint16{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
+		ShapeType:          SHAPE_BOX,
+		Size:               mvec3.T{},
+		Position:           mvec3.T{},
+		Rotation:           mrotation.T{},
+		Param:              Param{},
+		PhysicsType:        PHYSICS_TYPE_STATIC,
+		XDirection:         mvec3.T{},
+		YDirection:         mvec3.T{},
+		ZDirection:         mvec3.T{},
+		IsSystem:           false,
 	}
 }
 

@@ -10,6 +10,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/pmx/display_slot"
 	"github.com/miu200521358/mlib_go/pkg/pmx/material"
 	"github.com/miu200521358/mlib_go/pkg/pmx/morph"
+	"github.com/miu200521358/mlib_go/pkg/pmx/rigidbody"
 	"github.com/miu200521358/mlib_go/pkg/pmx/vertex/deform"
 )
 
@@ -745,6 +746,71 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 		}
 	}
 
+	{
+		b := model.RigidBodies.GetItem(14)
+		expectedName := "右腕"
+		if b.Name != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name)
+		}
+		expectedEnglishName := "J_Bip_R_UpperArm"
+		if b.EnglishName != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
+		}
+		expectedBoneIndex := 61
+		if b.BoneIndex != expectedBoneIndex {
+			t.Errorf("Expected BoneIndex to be %v, got %v", expectedBoneIndex, b.BoneIndex)
+		}
+		expectedGroupIndex := byte(2)
+		if b.CollisionGroup != expectedGroupIndex {
+			t.Errorf("Expected GroupIndex to be %v, got %v", expectedGroupIndex, b.CollisionGroup)
+		}
+		expectedCollisionGroupMasks := []uint16{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+		for i := 0; i < 16; i++ {
+			if b.CollisionGroupMask.IsCollisions[i] != expectedCollisionGroupMasks[i] {
+				t.Errorf("Expected CollisionGroupMask to be %v, got %v (%v)", expectedCollisionGroupMasks[i], b.CollisionGroupMask.IsCollisions[i], i)
+			}
+		}
+		expectedShapeType := rigidbody.SHAPE_CAPSULE
+		if b.ShapeType != expectedShapeType {
+			t.Errorf("Expected ShapeType to be %v, got %v", expectedShapeType, b.ShapeType)
+		}
+		expectedSize := &mvec3.T{0.5398922, 2.553789, 0.0}
+		if !b.Size.PracticallyEquals(expectedSize, 1e-5) {
+			t.Errorf("Expected Size to be %v, got %v", expectedSize, b.Size)
+		}
+		expectedPosition := &mvec3.T{-2.52586, 15.45157, 0.241455}
+		if !b.Position.PracticallyEquals(expectedPosition, 1e-5) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
+		}
+		expectedRotation := &mvec3.T{0.0, 0.0, 125.00}
+		if !b.Rotation.GetDegrees().PracticallyEquals(expectedRotation, 1e-5) {
+			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, b.Rotation.GetDegrees())
+		}
+		expectedMass := 1.0
+		if math.Abs(b.Param.Mass-expectedMass) > 1e-5 {
+			t.Errorf("Expected Mass to be %v, got %v", expectedMass, b.Param.Mass)
+		}
+		expectedLinearDamping := 0.5
+		if math.Abs(b.Param.LinearDamping-expectedLinearDamping) > 1e-5 {
+			t.Errorf("Expected LinearDamping to be %v, got %v", expectedLinearDamping, b.Param.LinearDamping)
+		}
+		expectedAngularDamping := 0.5
+		if math.Abs(b.Param.AngularDamping-expectedAngularDamping) > 1e-5 {
+			t.Errorf("Expected AngularDamping to be %v, got %v", expectedAngularDamping, b.Param.AngularDamping)
+		}
+		expectedRestitution := 0.0
+		if math.Abs(b.Param.Restitution-expectedRestitution) > 1e-5 {
+			t.Errorf("Expected Restitution to be %v, got %v", expectedRestitution, b.Param.Restitution)
+		}
+		expectedFriction := 0.0
+		if math.Abs(b.Param.Friction-expectedFriction) > 1e-5 {
+			t.Errorf("Expected Friction to be %v, got %v", expectedFriction, b.Param.Friction)
+		}
+		expectedPhysicsType := rigidbody.PHYSICS_TYPE_STATIC
+		if b.PhysicsType != expectedPhysicsType {
+			t.Errorf("Expected PhysicsType to be %v, got %v", expectedPhysicsType, b.PhysicsType)
+		}
+	}
 }
 
 func TestPmxReader_ReadByFilepath_2_1(t *testing.T) {
