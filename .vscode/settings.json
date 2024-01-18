@@ -59,6 +59,7 @@
     "mvec",
     "rigidbody",
     "rtol",
+    "sbyte",
     "SDEF",
     "Slerp",
     "Subed",
@@ -80,5 +81,10 @@
     "*.md",
     "*.json",
     "*.txt"
-  ]
+  ],
+  "[go][go.mod]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  }
 }

@@ -7,7 +7,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/math/mmat4"
 	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
-
 )
 
 type IkLink struct {
@@ -27,6 +26,18 @@ type IkLink struct {
 	LocalMaxAngleLimit mrotation.T
 }
 
+func NewIkLink() *IkLink {
+	return &IkLink{
+		BoneIndex:          -1,
+		AngleLimit:         false,
+		MinAngleLimit:      mrotation.T{},
+		MaxAngleLimit:      mrotation.T{},
+		LocalAngleLimit:    false,
+		LocalMinAngleLimit: mrotation.T{},
+		LocalMaxAngleLimit: mrotation.T{},
+	}
+}
+
 func (t *IkLink) Copy() *IkLink {
 	copied := *t
 	return &copied
@@ -41,6 +52,15 @@ type Ik struct {
 	UnitRotation mrotation.T
 	// IKリンクリスト
 	Links []IkLink
+}
+
+func NewIk() *Ik {
+	return &Ik{
+		BoneIndex:    -1,
+		LoopCount:    0,
+		UnitRotation: mrotation.T{},
+		Links:        []IkLink{},
+	}
 }
 
 func (t *Ik) Copy() *Ik {
@@ -77,9 +97,9 @@ type Bone struct {
 	// 軸固定:1 の場合 軸の方向ベクトル
 	FixedAxis mvec3.T
 	// ローカル軸:1 の場合 X軸の方向ベクトル
-	LocalXVector mvec3.T
+	LocalAxisX mvec3.T
 	// ローカル軸:1 の場合 Z軸の方向ベクトル
-	LocalZVector mvec3.T
+	LocalAxisZ mvec3.T
 	// 外部親変形:1 の場合 Key値
 	ExternalKey int
 	// IK:1 の場合 IKデータを格納
@@ -89,13 +109,13 @@ type Bone struct {
 	// システム計算用追加ボーン の場合 true
 	IsSystem bool
 	// 計算済みのX軸の方向ベクトル
-	CorrectedLocalYVector mvec3.T
+	NormalizedLocalAxisX mvec3.T
 	// 計算済みのY軸の方向ベクトル
-	CorrectedLocalZVector mvec3.T
+	NormalizedLocalAxisY mvec3.T
 	// 計算済みのZ軸の方向ベクトル
-	CorrectedLocalXVector mvec3.T
+	NormalizedLocalAxisZ mvec3.T
 	// 計算済みの軸制限ベクトル
-	CorrectedFixedAxis mvec3.T
+	NormalizedFixedAxis mvec3.T
 	// ローカル軸の方向ベクトル(CorrectedLocalXVectorの正規化ベクトル)
 	LocalAxis mvec3.T
 	// 親ボーンからの相対位置
@@ -132,53 +152,35 @@ type Bone struct {
 	LocalMaxAngleLimit mrotation.T
 }
 
-func NewBone(
-	name string,
-	englishName string,
-	position mvec3.T,
-	parentIndex int,
-	layer int,
-	boneFlag BoneFlag,
-	tailPosition mvec3.T,
-	tailIndex int,
-	effectIndex int,
-	effectFactor float64,
-	fixedAxis mvec3.T,
-	localXVector mvec3.T,
-	localZVector mvec3.T,
-	externalKey int,
-	ik *Ik,
-	displaySlot int,
-	isSystem bool,
-) *Bone {
+func NewBone() *Bone {
 	bone := &Bone{
 		IndexModel:             &index_model.IndexModel{Index: -1},
-		Name:                   name,
-		EnglishName:            englishName,
-		Position:               position,
-		ParentIndex:            parentIndex,
-		Layer:                  layer,
-		BoneFlag:               boneFlag,
-		TailPosition:           tailPosition,
-		TailIndex:              tailIndex,
-		EffectIndex:            effectIndex,
-		EffectFactor:           effectFactor,
-		FixedAxis:              fixedAxis,
-		LocalXVector:           localXVector,
-		LocalZVector:           localZVector,
-		ExternalKey:            externalKey,
-		Ik:                     ik,
-		DisplaySlot:            displaySlot,
-		IsSystem:               isSystem,
-		CorrectedLocalYVector:  mvec3.T{},
-		CorrectedLocalZVector:  mvec3.T{},
-		CorrectedLocalXVector:  mvec3.T{},
+		Name:                   "",
+		EnglishName:            "",
+		Position:               mvec3.T{},
+		ParentIndex:            -1,
+		Layer:                  -1,
+		BoneFlag:               BONE_FLAG_NONE,
+		TailPosition:           mvec3.T{},
+		TailIndex:              -1,
+		EffectIndex:            -1,
+		EffectFactor:           0.0,
+		FixedAxis:              mvec3.T{},
+		LocalAxisX:             mvec3.T{},
+		LocalAxisZ:             mvec3.T{},
+		ExternalKey:            -1,
+		Ik:                     NewIk(),
+		DisplaySlot:            -1,
+		IsSystem:               true,
+		NormalizedLocalAxisX:   mvec3.T{},
+		NormalizedLocalAxisY:   mvec3.T{},
+		NormalizedLocalAxisZ:   mvec3.T{},
 		LocalAxis:              mvec3.UnitX,
 		IkLinkBoneIndexes:      []int{},
 		IkTargetBoneIndexes:    []int{},
 		ParentRelativePosition: mvec3.T{},
 		TailRelativePosition:   mvec3.T{},
-		CorrectedFixedAxis:     mvec3.T{},
+		NormalizedFixedAxis:    mvec3.T{},
 		TreeBoneIndexes:        []int{},
 		ParentRevertMatrix:     mmat4.Ident,
 		OffsetMatrix:           mmat4.Ident,
@@ -192,10 +194,10 @@ func NewBone(
 		LocalMinAngleLimit:     mrotation.T{},
 		LocalMaxAngleLimit:     mrotation.T{},
 	}
-	bone.CorrectedLocalXVector = *bone.LocalXVector.Copy()
-	bone.CorrectedLocalYVector = *bone.LocalZVector.Cross(&bone.CorrectedLocalXVector)
-	bone.CorrectedLocalZVector = *bone.CorrectedLocalXVector.Cross(&bone.CorrectedLocalYVector)
-	bone.CorrectedFixedAxis = *bone.FixedAxis.Copy()
+	bone.NormalizedLocalAxisX = *bone.LocalAxisX.Copy()
+	bone.NormalizedLocalAxisZ = *bone.LocalAxisZ.Copy()
+	bone.NormalizedLocalAxisY = *bone.NormalizedLocalAxisZ.Cross(&bone.NormalizedLocalAxisX)
+	bone.NormalizedFixedAxis = *bone.FixedAxis.Copy()
 	return bone
 }
 
@@ -206,15 +208,15 @@ func (t *Bone) Copy() index_model.IndexModelInterface {
 	copied.Position = *t.Position.Copy()
 	copied.TailPosition = *t.TailPosition.Copy()
 	copied.FixedAxis = *t.FixedAxis.Copy()
-	copied.LocalXVector = *t.LocalXVector.Copy()
-	copied.LocalZVector = *t.LocalZVector.Copy()
-	copied.CorrectedLocalXVector = *t.CorrectedLocalXVector.Copy()
-	copied.CorrectedLocalYVector = *t.CorrectedLocalYVector.Copy()
-	copied.CorrectedLocalZVector = *t.CorrectedLocalZVector.Copy()
+	copied.LocalAxisX = *t.LocalAxisX.Copy()
+	copied.LocalAxisZ = *t.LocalAxisZ.Copy()
+	copied.NormalizedLocalAxisZ = *t.NormalizedLocalAxisZ.Copy()
+	copied.NormalizedLocalAxisX = *t.NormalizedLocalAxisX.Copy()
+	copied.NormalizedLocalAxisY = *t.NormalizedLocalAxisY.Copy()
 	copied.LocalAxis = *t.LocalAxis.Copy()
 	copied.ParentRelativePosition = *t.ParentRelativePosition.Copy()
 	copied.TailRelativePosition = *t.TailRelativePosition.Copy()
-	copied.CorrectedFixedAxis = *t.CorrectedFixedAxis.Copy()
+	copied.NormalizedFixedAxis = *t.NormalizedFixedAxis.Copy()
 	copied.IkLinkBoneIndexes = make([]int, len(t.IkLinkBoneIndexes))
 	copy(copied.IkLinkBoneIndexes, t.IkLinkBoneIndexes)
 	copied.IkTargetBoneIndexes = make([]int, len(t.IkTargetBoneIndexes))
@@ -236,79 +238,79 @@ func (t *Bone) Copy() index_model.IndexModelInterface {
 	return &copied
 }
 
-func (bone *Bone) CorrectFixedAxis(correctedFixedAxis mvec3.T) {
-	bone.CorrectedFixedAxis = correctedFixedAxis.Normalized()
+func (bone *Bone) NormalizeFixedAxis(fixedAxis mvec3.T) {
+	bone.NormalizedFixedAxis = fixedAxis.Normalized()
 }
 
-func (bone *Bone) CorrectLocalVector(correctedLocalXVector mvec3.T) {
-	bone.CorrectedLocalXVector = correctedLocalXVector.Normalized()
-	bone.CorrectedLocalYVector = *bone.CorrectedLocalXVector.Cross(mvec3.UnitZ.Invert())
-	bone.CorrectedLocalZVector = *bone.CorrectedLocalXVector.Cross(&bone.CorrectedLocalYVector)
+func (bone *Bone) NormalizeLocalAxis(localAxisX mvec3.T) {
+	bone.NormalizedLocalAxisX = localAxisX.Normalized()
+	bone.NormalizedLocalAxisY = *bone.NormalizedLocalAxisX.Cross(mvec3.UnitZ.Invert())
+	bone.NormalizedLocalAxisZ = *bone.NormalizedLocalAxisX.Cross(&bone.NormalizedLocalAxisY)
 }
 
 // 表示先がボーンであるか
 func (bone *Bone) IsTailBone() bool {
-	return bone.BoneFlag&TAIL_IS_BONE != 0
+	return bone.BoneFlag&BONE_FLAG_TAIL_IS_BONE != 0
 }
 
 // 回転可能であるか
 func (bone *Bone) CanRotate() bool {
-	return bone.BoneFlag&CAN_ROTATE != 0
+	return bone.BoneFlag&BONE_FLAG_CAN_ROTATE != 0
 }
 
 // 移動可能であるか
 func (bone *Bone) CanTranslate() bool {
-	return bone.BoneFlag&CAN_TRANSLATE != 0
+	return bone.BoneFlag&BONE_FLAG_CAN_TRANSLATE != 0
 }
 
 // 表示であるか
 func (bone *Bone) IsVisible() bool {
-	return bone.BoneFlag&IS_VISIBLE != 0
+	return bone.BoneFlag&BONE_FLAG_IS_VISIBLE != 0
 }
 
 // 操作可であるか
 func (bone *Bone) CanManipulate() bool {
-	return bone.BoneFlag&CAN_MANIPULATE != 0
+	return bone.BoneFlag&BONE_FLAG_CAN_MANIPULATE != 0
 }
 
 // IKであるか
 func (bone *Bone) IsIK() bool {
-	return bone.BoneFlag&IS_IK != 0
+	return bone.BoneFlag&BONE_FLAG_IS_IK != 0
 }
 
 // ローカル付与であるか
 func (bone *Bone) IsExternalLocal() bool {
-	return bone.BoneFlag&IS_EXTERNAL_LOCAL != 0
+	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_LOCAL != 0
 }
 
 // 回転付与であるか
 func (bone *Bone) IsExternalRotation() bool {
-	return bone.BoneFlag&IS_EXTERNAL_ROTATION != 0
+	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_ROTATION != 0
 }
 
 // 移動付与であるか
 func (bone *Bone) IsExternalTranslation() bool {
-	return bone.BoneFlag&IS_EXTERNAL_TRANSLATION != 0
+	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_TRANSLATION != 0
 }
 
 // 軸固定であるか
 func (bone *Bone) HasFixedAxis() bool {
-	return bone.BoneFlag&HAS_FIXED_AXIS != 0
+	return bone.BoneFlag&BONE_FLAG_HAS_FIXED_AXIS != 0
 }
 
 // ローカル軸を持つか
-func (bone *Bone) HasLocalCoordinate() bool {
-	return bone.BoneFlag&HAS_LOCAL_COORDINATE != 0
+func (bone *Bone) HasLocalAxis() bool {
+	return bone.BoneFlag&BONE_FLAG_HAS_LOCAL_AXIS != 0
 }
 
 // 物理後変形であるか
 func (bone *Bone) IsAfterPhysicsDeform() bool {
-	return bone.BoneFlag&IS_AFTER_PHYSICS_DEFORM != 0
+	return bone.BoneFlag&BONE_FLAG_IS_AFTER_PHYSICS_DEFORM != 0
 }
 
 // 外部親変形であるか
 func (bone *Bone) IsExternalParentDeform() bool {
-	return bone.BoneFlag&IS_EXTERNAL_PARENT_DEFORM != 0
+	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_PARENT_DEFORM != 0
 }
 
 // 足D系列であるか
@@ -390,7 +392,7 @@ type Bones struct {
 	*index_model.IndexModelCorrection[*Bone]
 }
 
-func NewBones(name string) *Bones {
+func NewBones() *Bones {
 	return &Bones{
 		IndexModelCorrection: index_model.NewIndexModelCorrection[*Bone](),
 	}

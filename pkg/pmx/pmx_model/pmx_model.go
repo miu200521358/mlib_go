@@ -23,7 +23,7 @@ type PmxModel struct {
 	MaterialCount       int
 	BoneCount           int
 	MorphCount          int
-	RigidbodyCount      int
+	RigidBodyCount      int
 	Name                string
 	EnglishName         string
 	Comment             string
@@ -46,15 +46,35 @@ type PmxModel struct {
 
 func NewPmxModel(path string) *PmxModel {
 	model := &PmxModel{}
-	model.HashModel = hash_model.NewBaseHashModel(path)
-	model.InitializeDisplaySlots()
+	model.HashModel = hash_model.NewHashModel(path)
+
+	model.Vertices = *vertex.NewVertices()
+	model.Faces = *face.NewFaces()
+	model.Textures = *texture.NewTextures()
+	model.ToonTextures = *texture.NewToonTextures()
+	model.Materials = *material.NewMaterials()
+	model.Bones = *bone.NewBones()
+	model.Morphs = *morph.NewMorphs()
+	model.DisplaySlots = *display_slot.NewDisplaySlots()
+	model.RigidBodies = *rigidbody.NewRigidBodies()
+	model.Joints = *joint.NewJoints()
+	model.VerticesByBones = make(map[int][]int)
+	model.VerticesByMaterials = make(map[int][]int)
+	model.FacesByMaterials = make(map[int][]int)
+
 	return model
 }
 
 func (pm *PmxModel) InitializeDisplaySlots() {
-	d01 := display_slot.NewDisplaySlot("Root", "Root", display_slot.SPECIAL_FLAG_ON)
+	d01 := display_slot.NewDisplaySlot()
+	d01.Name = "Root"
+	d01.EnglishName = "Root"
+	d01.SpecialFlag = display_slot.SPECIAL_FLAG_ON
 	pm.DisplaySlots.Append(d01, false)
 
-	d02 := display_slot.NewDisplaySlot("表情", "Exp", display_slot.SPECIAL_FLAG_ON)
+	d02 := display_slot.NewDisplaySlot()
+	d02.Name = "表情"
+	d02.EnglishName = "Exp"
+	d02.SpecialFlag = display_slot.SPECIAL_FLAG_ON
 	pm.DisplaySlots.Append(d02, false)
 }

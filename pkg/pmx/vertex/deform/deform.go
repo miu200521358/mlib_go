@@ -1,13 +1,14 @@
-package vertex
+package deform
 
 import (
 	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
+
 )
 
 // DeformType ウェイト変形方式
-type DeformType int
+type DeformType byte
 
 const (
 	BDEF1 DeformType = 0
@@ -18,6 +19,10 @@ const (
 
 type DeformInterface interface {
 	GetType() DeformType
+	GetAllIndexes() []int
+	GetAllWeights() []float64
+	GetIndexes(weightThreshold float64) []int
+	GetWeights(weightThreshold float64) []float64
 }
 
 // Deform デフォーム既定構造体
@@ -37,6 +42,14 @@ func NewDeform(indexes []int, weights []float64, count int) *Deform {
 		Weights: weights,
 		Count:   count,
 	}
+}
+
+func (d *Deform) GetAllIndexes() []int {
+	return d.Indexes
+}
+
+func (d *Deform) GetAllWeights() []float64 {
+	return d.Weights
 }
 
 // GetIndexes ウェイト閾値以上のウェイトを持っているINDEXのみを取得する
@@ -245,22 +258,22 @@ func (b *Bdef4) GetType() DeformType {
 // Sdef represents the SDEF deformation.
 type Sdef struct {
 	Deform
-	SdefC  *mvec3.T
-	SdefR0 *mvec3.T
-	SdefR1 *mvec3.T
+	SdefC  mvec3.T
+	SdefR0 mvec3.T
+	SdefR1 mvec3.T
 }
 
 // NewSdef creates a new Sdef instance.
-func NewSdef(index0, index1 int, weight0, sdefCX, sdefCY, sdefCZ, sdefR0X, sdefR0Y, sdefR0Z, sdefR1X, sdefR1Y, sdefR1Z float64) *Sdef {
+func NewSdef(index0, index1 int, weight0 float64, sdefC, sdefR0, sdefR1 mvec3.T) *Sdef {
 	return &Sdef{
 		Deform: Deform{
 			Indexes: []int{index0, index1},
 			Weights: []float64{weight0, 1 - weight0},
 			Count:   2,
 		},
-		SdefC:  &mvec3.T{sdefCX, sdefCY, sdefCZ},
-		SdefR0: &mvec3.T{sdefR0X, sdefR0Y, sdefR0Z},
-		SdefR1: &mvec3.T{sdefR1X, sdefR1Y, sdefR1Z},
+		SdefC:  sdefC,
+		SdefR0: sdefR0,
+		SdefR1: sdefR1,
 	}
 }
 

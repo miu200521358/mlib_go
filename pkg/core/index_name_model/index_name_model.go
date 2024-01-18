@@ -268,14 +268,14 @@ func (c *C) Names() map[string]int {
 	return names
 }
 
-func (c *C) RangeIndexes(index int, offFlg bool, indexes []int) (int, int, int) {
+func (c *C) RangeIndexes(index int, offFlag bool, indexes []int) (int, int, int) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	if indexes == nil {
 		indexes = c.Indexes
 	}
-	if !offFlg && (len(indexes) == 0 || c.Data[index] != nil) {
+	if !offFlag && (len(indexes) == 0 || c.Data[index] != nil) {
 		return index, index, index
 	}
 

@@ -2,7 +2,6 @@ package index_model
 
 import (
 	"slices"
-
 )
 
 type IndexModelInterface interface {
@@ -43,7 +42,7 @@ type IndexModelCorrection[T IndexModelInterface] struct {
 
 func NewIndexModelCorrection[T IndexModelInterface]() *IndexModelCorrection[T] {
 	return &IndexModelCorrection[T]{
-		Data:    make(map[int]*T),
+		Data:    make(map[int]*T, 0),
 		Indexes: make([]int, 0),
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/ungerik/go3d/float64/vec3"
+
 )
 
 type T vec3.T

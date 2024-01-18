@@ -78,7 +78,7 @@ type Joints struct {
 	*index_model.IndexModelCorrection[*Joint]
 }
 
-func NewJoints(name string) *Joints {
+func NewJoints() *Joints {
 	return &Joints{
 		IndexModelCorrection: index_model.NewIndexModelCorrection[*Joint](),
 	}

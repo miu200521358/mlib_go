@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"io"
 	"os"
+
 )
 
 type HashModelInterface interface {
@@ -21,7 +22,7 @@ type HashModel struct {
 	Digest string
 }
 
-func NewBaseHashModel(path string) *HashModel {
+func NewHashModel(path string) *HashModel {
 	return &HashModel{
 		Path:   path,
 		Digest: "",

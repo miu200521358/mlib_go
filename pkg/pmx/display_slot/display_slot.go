@@ -2,7 +2,6 @@ package display_slot
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/core/index_model"
-
 )
 
 // 表示枠要素タイプ
@@ -47,12 +46,12 @@ type DisplaySlot struct {
 }
 
 // NewDisplaySlot
-func NewDisplaySlot(name string, englishName string, specialFlag SpecialFlag) *DisplaySlot {
+func NewDisplaySlot() *DisplaySlot {
 	return &DisplaySlot{
 		IndexModel:  &index_model.IndexModel{Index: -1},
-		Name:        name,
-		EnglishName: englishName,
-		SpecialFlag: specialFlag,
+		Name:        "",
+		EnglishName: "",
+		SpecialFlag: SPECIAL_FLAG_OFF,
 		References:  make([]Reference, 0),
 		IsSystem:    false,
 	}
@@ -71,7 +70,7 @@ type DisplaySlots struct {
 	*index_model.IndexModelCorrection[*DisplaySlot]
 }
 
-func NewDisplaySlots(name string) *DisplaySlots {
+func NewDisplaySlots() *DisplaySlots {
 	return &DisplaySlots{
 		IndexModelCorrection: index_model.NewIndexModelCorrection[*DisplaySlot](),
 	}

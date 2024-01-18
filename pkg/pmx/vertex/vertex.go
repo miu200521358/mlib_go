@@ -5,7 +5,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/math/mvec2"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec4"
-
+	"github.com/miu200521358/mlib_go/pkg/pmx/vertex/deform"
 )
 
 type Vertex struct {
@@ -17,33 +17,25 @@ type Vertex struct {
 	// UV
 	UV *mvec2.T
 	// 追加UV
-	ExtendedUVs *[]mvec4.T
+	ExtendedUVs []mvec4.T
 	// ウェイト変形方式
-	DeformType DeformType
+	DeformType deform.DeformType
 	// デフォーム
-	Deform DeformInterface
+	Deform deform.DeformInterface
 	// エッジ倍率
 	EdgeFactor float64
 }
 
-func NewVertex(
-	index int,
-	position *mvec3.T,
-	normal *mvec3.T,
-	uv *mvec2.T,
-	deformType DeformType,
-	deform DeformInterface,
-	edgeFactor float64,
-) *Vertex {
+func NewVertex() *Vertex {
 	v := &Vertex{
-		IndexModel:  &index_model.IndexModel{Index: index},
-		Position:    position,
-		Normal:      normal,
-		UV:          uv,
-		ExtendedUVs: &[]mvec4.T{},
-		DeformType:  deformType,
-		Deform:      deform,
-		EdgeFactor:  edgeFactor,
+		IndexModel:  &index_model.IndexModel{Index: -1},
+		Position:    &mvec3.T{},
+		Normal:      &mvec3.T{},
+		UV:          &mvec2.T{},
+		ExtendedUVs: []mvec4.T{},
+		DeformType:  deform.BDEF1,
+		Deform:      deform.NewBdef1(0),
+		EdgeFactor:  0.0,
 	}
 	return v
 }

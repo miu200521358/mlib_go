@@ -2,6 +2,7 @@ package face
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/core/index_model"
+
 )
 
 // 面データ
@@ -11,10 +12,10 @@ type Face struct {
 	VertexIndexes [3]int
 }
 
-func NewFace(index, vertexIndex0, vertexIndex1, vertexIndex2 int) *Face {
+func NewFace() *Face {
 	return &Face{
-		IndexModel:    &index_model.IndexModel{Index: index},
-		VertexIndexes: [3]int{vertexIndex0, vertexIndex1, vertexIndex2},
+		IndexModel:    &index_model.IndexModel{Index: -1},
+		VertexIndexes: [3]int{0, 0, 0},
 	}
 }
 

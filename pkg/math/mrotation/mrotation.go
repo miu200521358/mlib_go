@@ -52,11 +52,11 @@ func (m *T) GetQuaternion() *mquaternion.T {
 
 func (m *T) SetQuaternion(v mquaternion.T) {
 	m.quaternion = v
-	m.degrees = v.ToEulerAngles()
-	m.radians = mvec3.T{
-		math.Pi * m.degrees.GetX() / 180.0,
-		math.Pi * m.degrees.GetY() / 180.0,
-		math.Pi * m.degrees.GetZ() / 180.0,
+	m.radians = v.ToEulerAngles()
+	m.degrees = mvec3.T{
+		180.0 * m.radians.GetX() / math.Pi,
+		180.0 * m.radians.GetY() / math.Pi,
+		180.0 * m.radians.GetZ() / math.Pi,
 	}
 }
 
@@ -67,9 +67,9 @@ func (m *T) GetRadians() *mvec3.T {
 func (m *T) SetRadians(v mvec3.T) {
 	m.radians = v
 	m.degrees = mvec3.T{
-		180.0 * m.radians.GetX() / math.Pi,
-		180.0 * m.radians.GetY() / math.Pi,
-		180.0 * m.radians.GetZ() / math.Pi,
+		180.0 * v.GetX() / math.Pi,
+		180.0 * v.GetY() / math.Pi,
+		180.0 * v.GetZ() / math.Pi,
 	}
 	m.quaternion = mquaternion.FromEulerAngles(v.GetX(), v.GetY(), v.GetZ())
 }
@@ -81,9 +81,9 @@ func (m *T) GetDegrees() *mvec3.T {
 func (m *T) SetDegrees(v mvec3.T) {
 	m.degrees = v
 	m.radians = mvec3.T{
-		math.Pi * m.degrees.GetX() / 180.0,
-		math.Pi * m.degrees.GetY() / 180.0,
-		math.Pi * m.degrees.GetZ() / 180.0,
+		math.Pi * v.GetX() / 180.0,
+		math.Pi * v.GetY() / 180.0,
+		math.Pi * v.GetZ() / 180.0,
 	}
 	m.quaternion = mquaternion.FromEulerAnglesDegrees(v.GetX(), v.GetY(), v.GetZ())
 }

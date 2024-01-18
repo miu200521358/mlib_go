@@ -145,7 +145,7 @@ type RigidBodies struct {
 	*index_model.IndexModelCorrection[*RigidBody]
 }
 
-func NewRigidBodies(name string) *RigidBodies {
+func NewRigidBodies() *RigidBodies {
 	return &RigidBodies{
 		IndexModelCorrection: index_model.NewIndexModelCorrection[*RigidBody](),
 	}

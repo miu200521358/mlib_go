@@ -2,7 +2,6 @@ package texture
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/core/index_model"
-
 )
 
 // テクスチャ種別
@@ -29,11 +28,11 @@ type Texture struct {
 	Valid bool
 }
 
-func NewTexture(index int, name string, textureType TextureType) *Texture {
+func NewTexture() *Texture {
 	return &Texture{
-		IndexModel:  &index_model.IndexModel{Index: index},
-		Name:        name,
-		TextureType: textureType,
+		IndexModel:  &index_model.IndexModel{Index: -1},
+		Name:        "",
+		TextureType: TEXTURE_TYPE_TEXTURE,
 		Path:        "",
 		Valid:       false,
 	}
@@ -44,7 +43,7 @@ type Textures struct {
 	*index_model.IndexModelCorrection[*Texture]
 }
 
-func NewTextures(name string) *Textures {
+func NewTextures() *Textures {
 	return &Textures{
 		IndexModelCorrection: index_model.NewIndexModelCorrection[*Texture](),
 	}
@@ -55,7 +54,7 @@ type ToonTextures struct {
 	*index_model.IndexModelCorrection[*Texture]
 }
 
-func NewToonTextures(name string) *ToonTextures {
+func NewToonTextures() *ToonTextures {
 	return &ToonTextures{
 		IndexModelCorrection: index_model.NewIndexModelCorrection[*Texture](),
 	}

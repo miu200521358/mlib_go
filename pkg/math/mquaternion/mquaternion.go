@@ -98,30 +98,30 @@ func FromZAxisAngle(angle float64) T {
 }
 
 // FromEulerAnglesは、オイラー角（ラジアン）回転を表す四元数を返します。
-func FromEulerAngles(xHead, yPitch, zRoll float64) T {
-	return T(quaternion.FromEulerAngles(xHead, yPitch, zRoll))
+func FromEulerAngles(yHead, xPitch, zRoll float64) T {
+	return T(quaternion.FromEulerAngles(yHead, xPitch, zRoll))
 }
 
 // ToEulerAnglesは、クォータニオンのオイラー角（ラジアン）回転を返します。
 func (quat *T) ToEulerAngles() mvec3.T {
-	xHead, yPitch, zRoll := (*quaternion.T)(quat).ToEulerAngles()
-	return mvec3.T{xHead, yPitch, zRoll}
+	yHead, xPitch, zRoll := (*quaternion.T)(quat).ToEulerAngles()
+	return mvec3.T{xPitch, yHead, zRoll}
 }
 
 // FromEulerAnglesDegreesは、オイラー角（度）回転を表す四元数を返します。
-func FromEulerAnglesDegrees(xHead, yPitch, zRoll float64) T {
-	xHeadRadian := math.Pi * xHead / 180.0
-	yPitchRadian := math.Pi * yPitch / 180.0
+func FromEulerAnglesDegrees(xPitch, yHead, zRoll float64) T {
+	xPitchRadian := math.Pi * xPitch / 180.0
+	yHeadRadian := math.Pi * yHead / 180.0
 	zRollRadian := math.Pi * zRoll / 180.0
-	return T(quaternion.FromEulerAngles(yPitchRadian, xHeadRadian, zRollRadian))
+	return T(quaternion.FromEulerAngles(xPitchRadian, yHeadRadian, zRollRadian))
 }
 
 // ToEulerAnglesDegreesは、クォータニオンのオイラー角（度）回転を返します。
 func (quat *T) ToEulerAnglesDegrees() mvec3.T {
-	xHead, yPitch, zRoll := (*quaternion.T)(quat).ToEulerAngles()
+	yHead, xPitch, zRoll := (*quaternion.T)(quat).ToEulerAngles()
 	return mvec3.T{
-		180.0 * xHead / math.Pi,
-		180.0 * yPitch / math.Pi,
+		180.0 * xPitch / math.Pi,
+		180.0 * yHead / math.Pi,
 		180.0 * zRoll / math.Pi,
 	}
 }

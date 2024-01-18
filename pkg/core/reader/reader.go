@@ -2,8 +2,10 @@ package reader
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/binary"
+	"fmt"
+	"io"
+	"math"
 	"os"
 
 	"golang.org/x/text/encoding"
@@ -11,109 +13,45 @@ import (
 	"golang.org/x/text/encoding/unicode"
 
 	"github.com/miu200521358/mlib_go/pkg/core/hash_model"
+	"github.com/miu200521358/mlib_go/pkg/math/mquaternion"
+	"github.com/miu200521358/mlib_go/pkg/math/mvec2"
+	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
+	"github.com/miu200521358/mlib_go/pkg/math/mvec4"
+	"github.com/miu200521358/mlib_go/pkg/utils/util_file"
 )
 
 type ReaderInterface interface {
-	ReadNameByFilepath(path string) (string, error)
-	ReadHashByFilepath(path string) (string, error)
-	ReadByFilepath(path string) (hash_model.HashModelInterface, error)
+	ReadHeader(hashData hash_model.HashModelInterface) error
+	ReadData(hashData hash_model.HashModelInterface) error
 	CreateModel(path string) hash_model.HashModelInterface
-	ReadHeader(hashData hash_model.HashModelInterface)
-	ReadData(hashData hash_model.HashModelInterface)
-	DefineEncoding(encoding encoding.Encoding)
+	ReadNameByFilepath(path string) (string, error)
+	ReadByFilepath(path string) (hash_model.HashModelInterface, error)
 }
 
 type BaseReader[T hash_model.HashModelInterface] struct {
+	file     *os.File
 	reader   *bufio.Reader
 	encoding encoding.Encoding
-	readText func() string
+	ReadText func() string
 }
 
-// 指定されたパスのファイルから該当名称を読み込む
-func (r *BaseReader[T]) ReadNameByFilepath(path string) (string, error) {
-	if !fileExists(path) {
-		return "", nil
-	}
+func (r *BaseReader[T]) Open(path string) error {
 
-	// モデルを新規作成
-	model := r.createModel(path)
-
-	err := r.open(path)
-	if err != nil {
-		return "", err
-	}
-
-	r.ReadHeader(model)
-
-	return model.GetName(), nil
-}
-
-// 指定されたパスのファイルからハッシュデータを読み込む
-func (r *BaseReader[T]) ReadHashByFilepath(path string) string {
-	if !fileExists(path) {
-		return ""
-	}
-
-	// モデルを新規作成
-	model := r.createModel(path)
-
-	err := model.UpdateDigest()
-	if err != nil {
-		return ""
-	}
-
-	// ハッシュデータを読み取り
-	return model.GetDigest()
-}
-
-// 指定されたパスのファイルからデータを読み込む
-func (r *BaseReader[T]) ReadByFilepath(path string) (T, error) {
-	// モデルを新規作成
-	hashData := r.createModel(path)
-
-	if !fileExists(path) {
-		return hashData, nil
-	}
-
-	err := r.open(path)
-	if err != nil {
-		return hashData, err
-	}
-
-	err = hashData.UpdateDigest()
-	if err != nil {
-		return hashData, err
-	}
-
-	r.ReadHeader(hashData)
-	r.ReadData(hashData)
-
-	return hashData, nil
-}
-
-// 指定されたパスがファイルとして存在しているか
-func fileExists(path string) bool {
-	info, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
-}
-
-func (r *BaseReader[T]) open(path string) error {
-	// ファイルを開く
-	file, err := os.Open(path)
+	file, err := util_file.Open(path)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
-
-	r.reader = bufio.NewReader(file)
+	r.file = file
+	r.reader = bufio.NewReader(r.file)
 
 	return nil
 }
 
-func (r *BaseReader[T]) createModel(path string) T {
+func (r *BaseReader[T]) Close() {
+	defer r.file.Close()
+}
+
+func (r *BaseReader[T]) CreateModel(path string) T {
 	panic("not implemented")
 }
 
@@ -125,9 +63,17 @@ func (r *BaseReader[T]) ReadData(hashData T) {
 	panic("not implemented")
 }
 
+func (r *BaseReader[T]) ReadNameByFilepath(path string) (T, error) {
+	panic("not implemented")
+}
+
+func (r *BaseReader[T]) ReadByFilepath(path string) (T, error) {
+	panic("not implemented")
+}
+
 func (r *BaseReader[T]) DefineEncoding(encoding encoding.Encoding) {
 	r.encoding = encoding
-	r.readText = r.defineReadText(encoding)
+	r.ReadText = r.defineReadText(encoding)
 }
 
 func (r *BaseReader[T]) defineReadText(encoding encoding.Encoding) func() string {
@@ -188,47 +134,162 @@ func (r *BaseReader[T]) decodeBytes(fbytes []byte, encoding encoding.Encoding) (
 	return string(decodedText), nil
 }
 
-// unpackInt はバイナリデータから int32 を読み出す
+// バイナリデータから bytes を読み出す
 func (r *BaseReader[T]) UnpackBytes(size int) ([]byte, error) {
-	v, err := r.unpack(size)
+	chunk, err := r.unpack(size)
 	if err != nil {
 		return nil, err
 	}
 
-	return v.([]byte), nil
+	return chunk, nil
 }
 
-// UnpackInt はバイナリデータから int32 を読み出す
-func (r *BaseReader[T]) UnpackInt() (int32, error) {
-	v, err := r.unpack(4)
+// バイナリデータから byte を読み出す
+func (r *BaseReader[T]) UnpackByte() (byte, error) {
+	chunk, err := r.unpack(1)
 	if err != nil {
 		return 0, err
 	}
 
-	return v.(int32), nil
+	return chunk[0], nil
 }
 
-// unpack はバイナリデータから any を読み出す
-func (r *BaseReader[T]) unpack(size int) (any, error) {
-	chunk := make([]byte, size)
-	n, err := r.reader.Read(chunk)
+// バイナリデータから sbyte を読み出す
+func (r *BaseReader[T]) UnpackSByte() (int8, error) {
+	chunk, err := r.unpack(1)
 	if err != nil {
-		if err.Error() == "EOF" {
-			return nil, nil
+		return 0, err
+	}
+
+	return int8(chunk[0]), nil
+}
+
+// バイナリデータから int16 を読み出す
+func (r *BaseReader[T]) UnpackShort() (int16, error) {
+	chunk, err := r.unpack(2)
+	if err != nil {
+		return 0, err
+	}
+
+	value := int16(binary.LittleEndian.Uint16(chunk))
+	return value, nil
+}
+
+// バイナリデータから uint16 を読み出す
+func (r *BaseReader[T]) UnpackUShort() (uint16, error) {
+	chunk, err := r.unpack(2)
+	if err != nil {
+		return 0, err
+	}
+
+	value := binary.LittleEndian.Uint16(chunk)
+	return value, nil
+}
+
+// バイナリデータから int を読み出す
+func (r *BaseReader[T]) UnpackInt() (int, error) {
+	chunk, err := r.unpack(4)
+	if err != nil {
+		return 0, err
+	}
+
+	value := int(binary.LittleEndian.Uint32(chunk))
+	return value, nil
+}
+
+// バイナリデータから float64 を読み出す
+func (r *BaseReader[T]) UnpackFloat() (float64, error) {
+	// 単精度実数(4byte)なので、一旦uint32にしてからfloat32に変換する
+	chunk, err := r.unpack(4)
+	if err != nil {
+		return 0, err
+	}
+
+	value := float64(math.Float32frombits(binary.LittleEndian.Uint32(chunk)))
+	return value, nil
+}
+
+func (r *BaseReader[T]) UnpackVec2() (mvec2.T, error) {
+	x, err := r.UnpackFloat()
+	if err != nil {
+		return mvec2.T{}, err
+	}
+	y, err := r.UnpackFloat()
+	if err != nil {
+		return mvec2.T{}, err
+	}
+	return mvec2.T{x, y}, nil
+}
+
+func (r *BaseReader[T]) UnpackVec3() (mvec3.T, error) {
+	x, err := r.UnpackFloat()
+	if err != nil {
+		return mvec3.T{}, err
+	}
+	y, err := r.UnpackFloat()
+	if err != nil {
+		return mvec3.T{}, err
+	}
+	z, err := r.UnpackFloat()
+	if err != nil {
+		return mvec3.T{}, err
+	}
+	return mvec3.T{x, y, z}, nil
+}
+
+func (r *BaseReader[T]) UnpackVec4() (mvec4.T, error) {
+	x, err := r.UnpackFloat()
+	if err != nil {
+		return mvec4.T{}, err
+	}
+	y, err := r.UnpackFloat()
+	if err != nil {
+		return mvec4.T{}, err
+	}
+	z, err := r.UnpackFloat()
+	if err != nil {
+		return mvec4.T{}, err
+	}
+	w, err := r.UnpackFloat()
+	if err != nil {
+		return mvec4.T{}, err
+	}
+	return mvec4.T{x, y, z, w}, nil
+}
+
+func (r *BaseReader[T]) UnpackQuaternion() (mquaternion.T, error) {
+	x, err := r.UnpackFloat()
+	if err != nil {
+		return mquaternion.T{}, err
+	}
+	y, err := r.UnpackFloat()
+	if err != nil {
+		return mquaternion.T{}, err
+	}
+	z, err := r.UnpackFloat()
+	if err != nil {
+		return mquaternion.T{}, err
+	}
+	w, err := r.UnpackFloat()
+	if err != nil {
+		return mquaternion.T{}, err
+	}
+	return mquaternion.T{x, y, z, w}, nil
+}
+
+func (r *BaseReader[T]) unpack(size int) ([]byte, error) {
+	if r.reader == nil {
+		return nil, fmt.Errorf("file is not opened")
+	}
+
+	chunk := make([]byte, size)
+	_, err := io.ReadFull(r.reader, chunk)
+	if err != nil {
+		if err == io.EOF {
+			return nil, fmt.Errorf("EOF")
 		}
-	}
-	if n < size {
-		return nil, err
+		return nil, fmt.Errorf("failed to read: %w", err)
 	}
 
-	// バイナリデータから Block 構造体への変換
-	buffer := bytes.NewReader(chunk)
-	var v any
-
-	// データ の読み出し
-	if err := binary.Read(buffer, binary.LittleEndian, &v); err != nil {
-		return nil, err
-	}
-
-	return v, nil
+	return chunk, nil
 }

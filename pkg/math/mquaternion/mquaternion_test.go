@@ -6,7 +6,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/math/mquaternion"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
-
 )
 
 func TestFromAxisAngle(t *testing.T) {
@@ -67,7 +66,7 @@ func TestFromEulerAngles(t *testing.T) {
 
 func TestToEulerAngles(t *testing.T) {
 	quat := mquaternion.T{0.7071067811865476, 0.0, 0.0, 0.7071067811865476}
-	expected := mvec3.T{0, 1.5707963267948966, 0}
+	expected := mvec3.T{1.5707963267948966, 0, 0}
 
 	result := quat.ToEulerAngles()
 

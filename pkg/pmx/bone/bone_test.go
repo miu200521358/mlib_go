@@ -77,79 +77,18 @@ func TestIk_Copy(t *testing.T) {
 	}
 }
 
-func TestBone_NewBone(t *testing.T) {
-	name := "bone"
-	englishName := "bone"
-	position := mvec3.T{}
-	parentIndex := 0
-	layer := 1
-	boneFlag := BoneFlag(0)
-	tailPosition := mvec3.T{}
-	tailIndex := 0
-	effectIndex := 0
-	effectFactor := 1.0
-	fixedAxis := mvec3.T{}
-	localXVector := mvec3.T{}
-	localZVector := mvec3.T{}
-	externalKey := 0
-	ik := &Ik{}
-	displaySlot := 0
-	isSystem := false
-
-	bone := NewBone(
-		name,
-		englishName,
-		position,
-		parentIndex,
-		layer,
-		boneFlag,
-		tailPosition,
-		tailIndex,
-		effectIndex,
-		effectFactor,
-		fixedAxis,
-		localXVector,
-		localZVector,
-		externalKey,
-		ik,
-		displaySlot,
-		isSystem,
-	)
-
-	if bone.Name != name ||
-		bone.EnglishName != englishName ||
-		bone.Position != position ||
-		bone.ParentIndex != parentIndex ||
-		bone.Layer != layer ||
-		bone.BoneFlag != boneFlag ||
-		bone.TailPosition != tailPosition ||
-		bone.TailIndex != tailIndex ||
-		bone.EffectIndex != effectIndex ||
-		bone.EffectFactor != effectFactor ||
-		bone.FixedAxis != fixedAxis ||
-		bone.LocalXVector != localXVector ||
-		bone.LocalZVector != localZVector ||
-		bone.ExternalKey != externalKey ||
-		bone.Ik != ik ||
-		bone.DisplaySlot != displaySlot ||
-		bone.IsSystem != isSystem {
-		t.Error("NewBone() returned a bone with incorrect values")
-	}
-}
-
-func TestBone_CorrectFixedAxis(t *testing.T) {
+func TestBone_NormalizeFixedAxis(t *testing.T) {
 	b := &Bone{}
 	correctedFixedAxis := mvec3.T{1, 0, 0}
-	b.CorrectFixedAxis(correctedFixedAxis)
+	b.NormalizeFixedAxis(correctedFixedAxis)
 
-	// Assert CorrectedFixedAxis is normalized
-	if !b.CorrectedFixedAxis.Equals(correctedFixedAxis.Normalize()) {
-		t.Errorf("Expected CorrectedFixedAxis to be normalized")
+	if !b.NormalizedFixedAxis.Equals(correctedFixedAxis.Normalize()) {
+		t.Errorf("Expected NormalizedFixedAxis to be normalized")
 	}
 }
 
 func TestBone_IsTailBone(t *testing.T) {
-	b := &Bone{BoneFlag: TAIL_IS_BONE}
+	b := &Bone{BoneFlag: BONE_FLAG_TAIL_IS_BONE}
 	if !b.IsTailBone() {
 		t.Errorf("Expected IsTailBone to return true")
 	}
@@ -179,15 +118,15 @@ func TestBone_Copy(t *testing.T) {
 			Position:               mvec3.T{},
 			TailPosition:           mvec3.T{},
 			FixedAxis:              mvec3.T{},
-			LocalXVector:           mvec3.T{},
-			LocalZVector:           mvec3.T{},
-			CorrectedLocalXVector:  mvec3.T{},
-			CorrectedLocalYVector:  mvec3.T{},
-			CorrectedLocalZVector:  mvec3.T{},
+			LocalAxisX:             mvec3.T{},
+			LocalAxisZ:             mvec3.T{},
+			NormalizedLocalAxisZ:   mvec3.T{},
+			NormalizedLocalAxisX:   mvec3.T{},
+			NormalizedLocalAxisY:   mvec3.T{},
 			LocalAxis:              mvec3.T{},
 			ParentRelativePosition: mvec3.T{},
 			TailRelativePosition:   mvec3.T{},
-			CorrectedFixedAxis:     mvec3.T{},
+			NormalizedFixedAxis:    mvec3.T{},
 			IkLinkBoneIndexes:      []int{},
 			IkTargetBoneIndexes:    []int{},
 			TreeBoneIndexes:        []int{},
@@ -231,35 +170,35 @@ func TestBone_Copy(t *testing.T) {
 		if &copied.FixedAxis == &b.FixedAxis {
 			t.Errorf("Expected copied FixedAxis to be a deep copy of original FixedAxis %s %s", copied.FixedAxis.String(), b.FixedAxis.String())
 		}
-		if copied.LocalXVector != b.LocalXVector {
-			t.Errorf("Expected copied LocalXVector to be a deep copy of original LocalXVector %s %s", copied.LocalXVector.String(), b.LocalXVector.String())
+		if copied.LocalAxisX != b.LocalAxisX {
+			t.Errorf("Expected copied LocalXVector to be a deep copy of original LocalXVector %s %s", copied.LocalAxisX.String(), b.LocalAxisX.String())
 		}
-		if &copied.LocalXVector == &b.LocalXVector {
-			t.Errorf("Expected copied LocalXVector to be a deep copy of original LocalXVector %s %s", copied.LocalXVector.String(), b.LocalXVector.String())
+		if &copied.LocalAxisX == &b.LocalAxisX {
+			t.Errorf("Expected copied LocalXVector to be a deep copy of original LocalXVector %s %s", copied.LocalAxisX.String(), b.LocalAxisX.String())
 		}
-		if copied.LocalZVector != b.LocalZVector {
-			t.Errorf("Expected copied LocalZVector to be a deep copy of original LocalZVector %s %s", copied.LocalZVector.String(), b.LocalZVector.String())
+		if copied.LocalAxisZ != b.LocalAxisZ {
+			t.Errorf("Expected copied LocalZVector to be a deep copy of original LocalZVector %s %s", copied.LocalAxisZ.String(), b.LocalAxisZ.String())
 		}
-		if &copied.LocalZVector == &b.LocalZVector {
-			t.Errorf("Expected copied LocalZVector to be a deep copy of original LocalZVector %s %s", copied.LocalZVector.String(), b.LocalZVector.String())
+		if &copied.LocalAxisZ == &b.LocalAxisZ {
+			t.Errorf("Expected copied LocalZVector to be a deep copy of original LocalZVector %s %s", copied.LocalAxisZ.String(), b.LocalAxisZ.String())
 		}
-		if copied.CorrectedLocalXVector != b.CorrectedLocalXVector {
-			t.Errorf("Expected copied CorrectedLocalXVector to be a deep copy of original CorrectedLocalXVector %s %s", copied.CorrectedLocalXVector.String(), b.CorrectedLocalXVector.String())
+		if copied.NormalizedLocalAxisZ != b.NormalizedLocalAxisZ {
+			t.Errorf("Expected copied NormalizedLocalXVector to be a deep copy of original NormalizedLocalXVector %s %s", copied.NormalizedLocalAxisZ.String(), b.NormalizedLocalAxisZ.String())
 		}
-		if &copied.CorrectedLocalXVector == &b.CorrectedLocalXVector {
-			t.Errorf("Expected copied CorrectedLocalXVector to be a deep copy of original CorrectedLocalXVector %s %s", copied.CorrectedLocalXVector.String(), b.CorrectedLocalXVector.String())
+		if &copied.NormalizedLocalAxisZ == &b.NormalizedLocalAxisZ {
+			t.Errorf("Expected copied NormalizedLocalXVector to be a deep copy of original NormalizedLocalXVector %s %s", copied.NormalizedLocalAxisZ.String(), b.NormalizedLocalAxisZ.String())
 		}
-		if copied.CorrectedLocalYVector != b.CorrectedLocalYVector {
-			t.Errorf("Expected copied CorrectedLocalYVector to be a deep copy of original CorrectedLocalYVector %s %s", copied.CorrectedLocalYVector.String(), b.CorrectedLocalYVector.String())
+		if copied.NormalizedLocalAxisX != b.NormalizedLocalAxisX {
+			t.Errorf("Expected copied NormalizedLocalYVector to be a deep copy of original NormalizedLocalYVector %s %s", copied.NormalizedLocalAxisX.String(), b.NormalizedLocalAxisX.String())
 		}
-		if &copied.CorrectedLocalYVector == &b.CorrectedLocalYVector {
-			t.Errorf("Expected copied CorrectedLocalYVector to be a deep copy of original CorrectedLocalYVector %s %s", copied.CorrectedLocalYVector.String(), b.CorrectedLocalYVector.String())
+		if &copied.NormalizedLocalAxisX == &b.NormalizedLocalAxisX {
+			t.Errorf("Expected copied NormalizedLocalYVector to be a deep copy of original NormalizedLocalYVector %s %s", copied.NormalizedLocalAxisX.String(), b.NormalizedLocalAxisX.String())
 		}
-		if copied.CorrectedLocalZVector != b.CorrectedLocalZVector {
-			t.Errorf("Expected copied CorrectedLocalZVector to be a deep copy of original CorrectedLocalZVector %s %s", copied.CorrectedLocalZVector.String(), b.CorrectedLocalZVector.String())
+		if copied.NormalizedLocalAxisY != b.NormalizedLocalAxisY {
+			t.Errorf("Expected copied NormalizedLocalZVector to be a deep copy of original NormalizedLocalZVector %s %s", copied.NormalizedLocalAxisY.String(), b.NormalizedLocalAxisY.String())
 		}
-		if &copied.CorrectedLocalZVector == &b.CorrectedLocalZVector {
-			t.Errorf("Expected copied CorrectedLocalZVector to be a deep copy of original CorrectedLocalZVector %s %s", copied.CorrectedLocalZVector.String(), b.CorrectedLocalZVector.String())
+		if &copied.NormalizedLocalAxisY == &b.NormalizedLocalAxisY {
+			t.Errorf("Expected copied NormalizedLocalZVector to be a deep copy of original NormalizedLocalZVector %s %s", copied.NormalizedLocalAxisY.String(), b.NormalizedLocalAxisY.String())
 		}
 		if copied.LocalAxis != b.LocalAxis {
 			t.Errorf("Expected copied LocalAxis to be a deep copy of original LocalAxis %s %s", copied.LocalAxis.String(), b.LocalAxis.String())
@@ -279,11 +218,11 @@ func TestBone_Copy(t *testing.T) {
 		if &copied.TailRelativePosition == &b.TailRelativePosition {
 			t.Errorf("Expected copied TailRelativePosition to be a deep copy of original TailRelativePosition %s %s", copied.TailRelativePosition.String(), b.TailRelativePosition.String())
 		}
-		if copied.CorrectedFixedAxis != b.CorrectedFixedAxis {
-			t.Errorf("Expected copied CorrectedFixedAxis to be a deep copy of original CorrectedFixedAxis %s %s", copied.CorrectedFixedAxis.String(), b.CorrectedFixedAxis.String())
+		if copied.NormalizedFixedAxis != b.NormalizedFixedAxis {
+			t.Errorf("Expected copied NormalizedFixedAxis to be a deep copy of original NormalizedFixedAxis %s %s", copied.NormalizedFixedAxis.String(), b.NormalizedFixedAxis.String())
 		}
-		if &copied.CorrectedFixedAxis == &b.CorrectedFixedAxis {
-			t.Errorf("Expected copied CorrectedFixedAxis to be a deep copy of original CorrectedFixedAxis %s %s", copied.CorrectedFixedAxis.String(), b.CorrectedFixedAxis.String())
+		if &copied.NormalizedFixedAxis == &b.NormalizedFixedAxis {
+			t.Errorf("Expected copied NormalizedFixedAxis to be a deep copy of original NormalizedFixedAxis %s %s", copied.NormalizedFixedAxis.String(), b.NormalizedFixedAxis.String())
 		}
 		if len(copied.IkLinkBoneIndexes) != len(b.IkLinkBoneIndexes) {
 			t.Errorf("Expected copied IkLinkIndexes to have the same length as original")
