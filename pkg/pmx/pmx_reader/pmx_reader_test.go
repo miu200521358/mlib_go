@@ -7,6 +7,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/math/mvec2"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 	"github.com/miu200521358/mlib_go/pkg/pmx/bone"
+	"github.com/miu200521358/mlib_go/pkg/pmx/display_slot"
 	"github.com/miu200521358/mlib_go/pkg/pmx/material"
 	"github.com/miu200521358/mlib_go/pkg/pmx/morph"
 	"github.com/miu200521358/mlib_go/pkg/pmx/vertex/deform"
@@ -647,6 +648,99 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			expectedFactor := 0.3
 			if math.Abs(o.MorphFactor-expectedFactor) > 1e-5 {
 				t.Errorf("Expected Factor to be %v, got %v", expectedFactor, o.MorphFactor)
+			}
+		}
+	}
+
+	{
+		d := model.DisplaySlots.GetItem(0)
+		expectedName := "Root"
+		if d.Name != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, d.Name)
+		}
+		expectedEnglishName := "Root"
+		if d.EnglishName != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, d.EnglishName)
+		}
+		expectedSpecialFlag := display_slot.SPECIAL_FLAG_ON
+		if d.SpecialFlag != expectedSpecialFlag {
+			t.Errorf("Expected SpecialFlag to be %v, got %v", expectedSpecialFlag, d.SpecialFlag)
+		}
+		expectedReferenceCount := 1
+		if len(d.References) != expectedReferenceCount {
+			t.Errorf("Expected ReferenceCount to be %v, got %v", expectedReferenceCount, len(d.References))
+		}
+		{
+			r := d.References[0]
+			expectedDisplayType := display_slot.DISPLAY_TYPE_BONE
+			if r.DisplayType != expectedDisplayType {
+				t.Errorf("Expected DisplayType to be %v, got %v", expectedDisplayType, r.DisplayType)
+			}
+			expectedIndex := 0
+			if r.DisplayIndex != expectedIndex {
+				t.Errorf("Expected DisplayIndex to be %v, got %v", expectedIndex, r.DisplayIndex)
+			}
+		}
+	}
+
+	{
+		d := model.DisplaySlots.GetItem(1)
+		expectedName := "表情"
+		if d.Name != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, d.Name)
+		}
+		expectedEnglishName := "Exp"
+		if d.EnglishName != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, d.EnglishName)
+		}
+		expectedSpecialFlag := display_slot.SPECIAL_FLAG_ON
+		if d.SpecialFlag != expectedSpecialFlag {
+			t.Errorf("Expected SpecialFlag to be %v, got %v", expectedSpecialFlag, d.SpecialFlag)
+		}
+		expectedReferenceCount := 143
+		if len(d.References) != expectedReferenceCount {
+			t.Errorf("Expected ReferenceCount to be %v, got %v", expectedReferenceCount, len(d.References))
+		}
+		{
+			r := d.References[50]
+			expectedDisplayType := display_slot.DISPLAY_TYPE_MORPH
+			if r.DisplayType != expectedDisplayType {
+				t.Errorf("Expected DisplayType to be %v, got %v", expectedDisplayType, r.DisplayType)
+			}
+			expectedIndex := 142
+			if r.DisplayIndex != expectedIndex {
+				t.Errorf("Expected DisplayIndex to be %v, got %v", expectedIndex, r.DisplayIndex)
+			}
+		}
+	}
+
+	{
+		d := model.DisplaySlots.GetItem(9)
+		expectedName := "右指"
+		if d.Name != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, d.Name)
+		}
+		expectedEnglishName := "right hand"
+		if d.EnglishName != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, d.EnglishName)
+		}
+		expectedSpecialFlag := display_slot.SPECIAL_FLAG_OFF
+		if d.SpecialFlag != expectedSpecialFlag {
+			t.Errorf("Expected SpecialFlag to be %v, got %v", expectedSpecialFlag, d.SpecialFlag)
+		}
+		expectedReferenceCount := 15
+		if len(d.References) != expectedReferenceCount {
+			t.Errorf("Expected ReferenceCount to be %v, got %v", expectedReferenceCount, len(d.References))
+		}
+		{
+			r := d.References[7]
+			expectedDisplayType := display_slot.DISPLAY_TYPE_BONE
+			if r.DisplayType != expectedDisplayType {
+				t.Errorf("Expected DisplayType to be %v, got %v", expectedDisplayType, r.DisplayType)
+			}
+			expectedIndex := 81
+			if r.DisplayIndex != expectedIndex {
+				t.Errorf("Expected DisplayIndex to be %v, got %v", expectedIndex, r.DisplayIndex)
 			}
 		}
 	}

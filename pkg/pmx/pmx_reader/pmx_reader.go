@@ -10,6 +10,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec4"
 	"github.com/miu200521358/mlib_go/pkg/pmx/bone"
+	"github.com/miu200521358/mlib_go/pkg/pmx/display_slot"
 	"github.com/miu200521358/mlib_go/pkg/pmx/face"
 	"github.com/miu200521358/mlib_go/pkg/pmx/material"
 	"github.com/miu200521358/mlib_go/pkg/pmx/morph"
@@ -193,6 +194,11 @@ func (r *PmxReader) ReadData(model *pmx_model.PmxModel) error {
 	}
 
 	err = r.unpackMorphs(model)
+	if err != nil {
+		return err
+	}
+
+	err = r.unpackDisplaySlots(model)
 	if err != nil {
 		return err
 	}
@@ -864,6 +870,67 @@ func (r *PmxReader) unpackMorphs(model *pmx_model.PmxModel) error {
 		}
 
 		model.Morphs.Append(m, false)
+	}
+
+	return nil
+}
+
+func (r *PmxReader) unpackDisplaySlots(model *pmx_model.PmxModel) error {
+	totalDisplaySlotCount, err := r.UnpackInt()
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < totalDisplaySlotCount; i++ {
+		d := display_slot.NewDisplaySlot()
+
+		// 4 + n : TextBuf	| 枠名
+		d.Name = r.ReadText()
+		// 4 + n : TextBuf	| 枠名英
+		d.EnglishName = r.ReadText()
+
+		// 1  : byte	| 特殊枠フラグ - 0:通常枠 1:特殊枠
+		specialFlag, err := r.UnpackByte()
+		if err != nil {
+			return err
+		}
+		d.SpecialFlag = display_slot.SpecialFlag(specialFlag)
+
+		// 4  : int  	| 枠内要素数 : 後続の要素数
+		referenceCount, err := r.UnpackInt()
+		if err != nil {
+			return err
+		}
+
+		for j := 0; j < referenceCount; j++ {
+			reference := display_slot.NewDisplaySlotReference()
+
+			// 1  : byte	| 要素種別 - 0:ボーン 1:モーフ
+			referenceType, err := r.UnpackByte()
+			if err != nil {
+				return err
+			}
+			reference.DisplayType = display_slot.DisplayType(referenceType)
+
+			switch reference.DisplayType {
+			case display_slot.DISPLAY_TYPE_BONE:
+				// n  : ボーンIndexサイズ  | ボーンIndex
+				reference.DisplayIndex, err = r.unpackBoneIndex(model)
+				if err != nil {
+					return err
+				}
+			case display_slot.DISPLAY_TYPE_MORPH:
+				// n  : モーフIndexサイズ  | モーフIndex
+				reference.DisplayIndex, err = r.unpackMorphIndex(model)
+				if err != nil {
+					return err
+				}
+			}
+
+			d.References = append(d.References, *reference)
+		}
+
+		model.DisplaySlots.Append(d, false)
 	}
 
 	return nil

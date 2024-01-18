@@ -2,6 +2,7 @@ package display_slot
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/core/index_model"
+
 )
 
 // 表示枠要素タイプ
@@ -19,6 +20,13 @@ type Reference struct {
 	DisplayType DisplayType
 	// ボーンIndex or モーフIndex
 	DisplayIndex int
+}
+
+func NewDisplaySlotReference() *Reference {
+	return &Reference{
+		DisplayType: 0,
+		DisplayIndex: -1,
+	}
 }
 
 // 特殊枠フラグ - 0:通常枠 1:特殊枠
