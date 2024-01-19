@@ -6,12 +6,14 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/miu200521358/mlib_go/cmd/resources"
 	"github.com/miu200521358/mlib_go/pkg/front/mtheme"
+	"github.com/miu200521358/mlib_go/pkg/front/widget/file_picker"
 	"github.com/miu200521358/mlib_go/pkg/utils/config"
 )
 
@@ -24,18 +26,24 @@ func main() {
 	a.Settings().SetTheme(&mtheme.MTheme{})
 	a.SetIcon(resources.AppIcon)
 	w := a.NewWindow(fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion))
-	w.SetContent(
-		fyne.NewContainerWithLayout(
-			layout.NewVBoxLayout(),
-			layout.NewSpacer(),
-			widget.NewLabel("こんにちは、ファイン"),
-			widget.NewLabel("これは日本語のラベルです"),
-			widget.NewButton("これはボタンです", func() {
-				dialog.ShowInformation("確認", "これはダイアログです", w)
-			}),
-			layout.NewSpacer(),
-		),
-	)
+	entry := widget.NewEntry()
+	p, _ := file_picker.NewFilePicker(w,
+		"PmxPath",
+		"Pmxファイル",
+		"Pmxファイルを選択してください",
+		map[string]string{"*.pmx": "Pmx Files (*.pmx)", "*.*": "All Files (*.*)"},
+		func(path string) { entry.SetText(path) })
+	container := container.New(layout.NewVBoxLayout(),
+		layout.NewSpacer(),
+		widget.NewLabel("こんにちは、ファイン"),
+		widget.NewLabel("これは日本語のラベルです"),
+		widget.NewButton("これはボタンです", func() {
+			dialog.ShowInformation("確認", "これはダイアログです", w)
+		}),
+		entry,
+		p.Container,
+		layout.NewSpacer())
+	w.SetContent(container)
 
 	w.Resize(fyne.NewSize(500, 400))
 	w.ShowAndRun()

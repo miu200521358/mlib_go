@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-
 )
 
 const configFilePath = "config.json"
 
 // 設定の保存
-func SaveConfig(key string, values []string, limit int) error {
+func SaveUserConfig(key string, values []string, limit int) error {
 	// Unmarshal the JSON data into a map
 	println("SaveConfig: ", key, values[0], limit)
 	data, err := os.ReadFile(configFilePath)
@@ -61,7 +60,7 @@ func SaveConfig(key string, values []string, limit int) error {
 }
 
 // 設定の読み込み
-func LoadConfig(key string) []string {
+func LoadUserConfig(key string) []string {
 	// Read the config.json file
 	data, err := os.ReadFile(configFilePath)
 	if err != nil {
