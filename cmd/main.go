@@ -13,7 +13,6 @@ import (
 	"github.com/miu200521358/mlib_go/cmd/resources"
 	"github.com/miu200521358/mlib_go/pkg/front/mtheme"
 	"github.com/miu200521358/mlib_go/pkg/utils/config"
-
 )
 
 //go:embed resources/app_config.json
