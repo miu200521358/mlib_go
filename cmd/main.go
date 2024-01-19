@@ -10,7 +10,8 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
-	"github.com/miu200521358/mlib_go/pkg/front/theme"
+	"github.com/miu200521358/mlib_go/cmd/resources"
+	"github.com/miu200521358/mlib_go/pkg/front/mtheme"
 	"github.com/miu200521358/mlib_go/pkg/utils/config"
 
 )
@@ -21,7 +22,8 @@ var appConfig embed.FS
 func main() {
 	appConfig := config.ReadAppConfig(appConfig)
 	a := app.New()
-	a.Settings().SetTheme(&theme.MTheme{})
+	a.Settings().SetTheme(&mtheme.MTheme{})
+	a.SetIcon(resources.AppIcon)
 	w := a.NewWindow(fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion))
 	w.SetContent(
 		fyne.NewContainerWithLayout(

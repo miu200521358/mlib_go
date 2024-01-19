@@ -29,3 +29,6 @@ go get fyne.io/fyne/v2/widget@v2.4.3
 go get fyne.io/fyne/v2/internal/painter@v2.4.3
 ```
 
+```
+fyne bundle icon.png > icon.go
+```

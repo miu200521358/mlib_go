@@ -21,6 +21,7 @@ print(f"app_name: {app_name}")
 print(f"app_version: {app_version}")
 
 # Build command
+# FYNE_THEME=light ライトテーマでビルド
 # -o 出力フォルダ
 # -trimpath ビルドパスを削除
 # -v ビルドログを出力
@@ -29,10 +30,12 @@ print(f"app_version: {app_version}")
 # -ldflags "-s -w" バイナリサイズを小さくする
 # -H=windowsgui コンソールを表示しない
 # -gcflags "all=-N -l" デバッグ情報を削除
-build_command = f"go build -o {workspace_folder}/build/{app_name}_{app_version}.exe -trimpath " \
+build_command = f"set FYNE_THEME=light && " \
+                f"go build -o {workspace_folder}/build/{app_name}_{app_version}.exe -trimpath " \
                 f"-v -a -buildmode=exe -ldflags \"-s -w -H=windowsgui -X 'main.Version={app_version}'\" {workspace_folder}/cmd/main.go"
 
-# Execute build command
+print(f"build_command: {build_command}")
+
 os.system(build_command)
 
 # Play beep sound
