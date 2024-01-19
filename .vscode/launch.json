@@ -5,12 +5,27 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch main",
+      "name": "go: Launch main",
       "type": "go",
       "request": "launch",
       "mode": "debug",
-      "program": "${workspaceFolder}/cmd/main/tutorial1.go",
+      "program": "${workspaceFolder}/cmd/main.go",
+      "env": {
+        "FYNE_THEME": "light"
+      },
       "preLaunchTask": "go: mod tidy",
+    },
+    {
+      "name": "python: Build exe",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/.vscode/scripts/build_exe.py",
+      "env": {
+        "GOOS": "windows",
+        "GOARCH": "amd64",
+        "FYNE_THEME": "light",
+        "WORKSPACE_FOLDER": "${workspaceFolder}",
+      },
     }
   ]
 }

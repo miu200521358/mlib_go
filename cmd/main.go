@@ -1,6 +1,9 @@
 package main
 
 import (
+	"embed"
+	"fmt"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/dialog"
@@ -8,12 +11,18 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/miu200521358/mlib_go/pkg/front/theme"
+	"github.com/miu200521358/mlib_go/pkg/utils/config"
+
 )
 
+//go:embed resources/app_config.json
+var appConfig embed.FS
+
 func main() {
+	appConfig := config.ReadAppConfig(appConfig)
 	a := app.New()
 	a.Settings().SetTheme(&theme.MTheme{})
-	w := a.NewWindow("font")
+	w := a.NewWindow(fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion))
 	w.SetContent(
 		fyne.NewContainerWithLayout(
 			layout.NewVBoxLayout(),

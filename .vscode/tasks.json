@@ -4,9 +4,10 @@
 		{
 			"label": "shell: delete pre debug exe",
 			"type": "shell",
-			"command": "${workspaceFolder}/.vscode/scripts/delete_pre_debug_exe.bat",
+			"command": "cmd.exe",
 			"args": [
-				"workspaceFolder=${workspaceFolder}",
+				"/c",
+				"set \"WORKSPACE_FOLDER=${workspaceFolder}\" && ${workspaceFolder}\\.vscode\\scripts\\delete_pre_debug_exe.bat"
 			],
 			"group": {
 				"kind": "none",
@@ -19,12 +20,16 @@
 				"panel": "shared",
 				"showReuseMessage": false,
 				"clear": true
-			},
+			}
 		},
 		{
 			"label": "go: mod tidy",
 			"type": "shell",
-			"command": "go mod tidy",
+			"command": "go",
+			"args": [
+				"mod",
+				"tidy"
+			],
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -39,7 +44,8 @@
 			},
 			"dependsOn": [
 				"shell: delete pre debug exe"
-			]
+			],
+			"problemMatcher": []
 		}
 	]
 }
