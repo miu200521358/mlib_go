@@ -1,6 +1,7 @@
 package file_picker
 
 import (
+	"path/filepath"
 	"syscall"
 	"unicode/utf16"
 	"unsafe"
@@ -11,8 +12,8 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
+	"github.com/miu200521358/mlib_go/pkg/core/reader"
 	"github.com/miu200521358/mlib_go/pkg/utils/config"
-
 )
 
 var (
@@ -53,9 +54,9 @@ type FilePicker struct {
 	// コンテナ
 	Container *fyne.Container
 	// 履歴用キー(空欄の場合、保存用ファイルと見なす)
-	HistoryKey string
+	historyKey string
 	// フィルタ拡張子
-	FilterExtension map[string]string
+	filterExtension map[string]string
 	// ピッカータイトル
 	Title *widget.Label
 	// ファイルパス入力欄
@@ -64,6 +65,14 @@ type FilePicker struct {
 	EntryName *widget.Label
 	// ツールチップ用テキスト
 	TooltipText string
+	// パス変更時のコールバック
+	onPathChanged func(string)
+	// 履歴リスト
+	limitHistory int
+	// reader
+	modelReader reader.ReaderInterface
+	// 初期ディレクトリのUTF-16エンコードされたバージョンを保持
+	initialDirUtf16 []uint16
 }
 
 func NewFilePicker(window fyne.Window,
@@ -71,11 +80,16 @@ func NewFilePicker(window fyne.Window,
 	title string,
 	tooltip string,
 	filterExtension map[string]string,
-	onChanged func(string),
+	limitHistory int,
+	modelReader reader.ReaderInterface,
+	onPathChanged func(string),
 ) (*FilePicker, error) {
 	picker := FilePicker{}
-	picker.HistoryKey = historyKey
-	picker.FilterExtension = filterExtension
+	picker.historyKey = historyKey
+	picker.filterExtension = filterExtension
+	picker.limitHistory = limitHistory
+	picker.modelReader = modelReader
+	picker.onPathChanged = onPathChanged
 
 	picker.ofn = OpenFileName{}
 	picker.ofn.lStructSize = uint32(unsafe.Sizeof(picker.ofn))
@@ -91,7 +105,7 @@ func NewFilePicker(window fyne.Window,
 
 	picker.Title = widget.NewLabel(title)
 	picker.PathEntry = widget.NewEntry()
-	picker.PathEntry.OnChanged = onChanged
+	picker.PathEntry.OnChanged = picker.OnChanged
 	picker.EntryName = widget.NewLabel("")
 	picker.TooltipText = tooltip
 
@@ -130,11 +144,45 @@ func convertFilterExtension(filterExtension map[string]string) []uint16 {
 	return filterString
 }
 
+func (picker *FilePicker) OnChanged(path string) {
+	picker.PathEntry.SetText(path)
+
+	if picker.modelReader != nil {
+		modelName, err := picker.modelReader.ReadNameByFilepath(path)
+		if err != nil {
+			picker.EntryName.SetText("読み込み失敗")
+		} else {
+			picker.EntryName.SetText(modelName)
+		}
+	}
+
+	if picker.historyKey != "" {
+		// 履歴用キーを指定して履歴リストを保存
+		config.SaveUserConfig(picker.historyKey, path, picker.limitHistory)
+	}
+
+	if picker.onPathChanged != nil {
+		picker.onPathChanged(path)
+	}
+}
+
 // ファイル選択ダイアログを表示する
 func (picker *FilePicker) ShowFileDialog() {
 	var fileBuf [4096]uint16
 	picker.ofn.lpstrFile = &fileBuf[0]
 	picker.ofn.nMaxFile = uint32(len(fileBuf))
+
+	if picker.historyKey != "" {
+		// 履歴用キーを指定して履歴リストを取得
+		choices, _ := config.LoadUserConfig(picker.historyKey)
+		if len(choices) > 0 {
+			// ファイルパスからディレクトリパスを取得
+			dirPath := filepath.Dir(choices[0])
+			// 履歴リストの先頭を初期パスとして設定
+			picker.initialDirUtf16 = utf16.Encode([]rune(dirPath))
+			picker.ofn.lpstrInitialDir = &picker.initialDirUtf16[0]
+		}
+	}
 
 	ret, _, _ := procGetOpenFileName.Call(uintptr(unsafe.Pointer(&picker.ofn)))
 	if ret != 0 {
@@ -144,12 +192,12 @@ func (picker *FilePicker) ShowFileDialog() {
 
 // 履歴リストを文字列選択ダイアログで表示する
 func (picker *FilePicker) ShowHistoryDialog() {
-	if picker.HistoryKey == "" {
+	if picker.historyKey == "" {
 		return
 	}
 
 	// 履歴用キーから履歴リストを取得
-	choices := config.LoadUserConfig(picker.HistoryKey)
+	choices, _ := config.LoadUserConfig(picker.historyKey)
 	selectEntry := widget.NewSelect(choices, func(value string) {
 		picker.PathEntry.SetText(value)
 	})

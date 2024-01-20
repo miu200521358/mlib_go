@@ -5,6 +5,7 @@ import (
 
 	"golang.org/x/text/encoding/unicode"
 
+	"github.com/miu200521358/mlib_go/pkg/core/hash_model"
 	"github.com/miu200521358/mlib_go/pkg/core/reader"
 	"github.com/miu200521358/mlib_go/pkg/math/mrotation"
 	"github.com/miu200521358/mlib_go/pkg/math/mvec3"
@@ -27,15 +28,15 @@ type PmxReader struct {
 	reader.BaseReader[*pmx_model.PmxModel]
 }
 
-func (r *PmxReader) CreateModel(path string) *pmx_model.PmxModel {
+func (r *PmxReader) createModel(path string) *pmx_model.PmxModel {
 	model := pmx_model.NewPmxModel(path)
 	return model
 }
 
 // 指定されたパスのファイルからデータを読み込む
-func (r *PmxReader) ReadByFilepath(path string) (*pmx_model.PmxModel, error) {
+func (r *PmxReader) ReadByFilepath(path string) (hash_model.HashModelInterface, error) {
 	// モデルを新規作成
-	model := r.CreateModel(path)
+	model := r.createModel(path)
 
 	// ファイルを開く
 	err := r.Open(path)
@@ -43,12 +44,12 @@ func (r *PmxReader) ReadByFilepath(path string) (*pmx_model.PmxModel, error) {
 		return model, err
 	}
 
-	err = r.ReadHeader(model)
+	err = r.readHeader(model)
 	if err != nil {
 		return model, err
 	}
 
-	err = r.ReadData(model)
+	err = r.readData(model)
 	if err != nil {
 		return model, err
 	}
@@ -60,7 +61,7 @@ func (r *PmxReader) ReadByFilepath(path string) (*pmx_model.PmxModel, error) {
 
 func (r *PmxReader) ReadNameByFilepath(path string) (string, error) {
 	// モデルを新規作成
-	model := r.CreateModel(path)
+	model := r.createModel(path)
 
 	// ファイルを開く
 	err := r.Open(path)
@@ -68,7 +69,7 @@ func (r *PmxReader) ReadNameByFilepath(path string) (string, error) {
 		return "", err
 	}
 
-	err = r.ReadHeader(model)
+	err = r.readHeader(model)
 	if err != nil {
 		return "", err
 	}
@@ -78,7 +79,7 @@ func (r *PmxReader) ReadNameByFilepath(path string) (string, error) {
 	return model.Name, nil
 }
 
-func (r *PmxReader) ReadHeader(model *pmx_model.PmxModel) error {
+func (r *PmxReader) readHeader(model *pmx_model.PmxModel) error {
 	fbytes, err := r.UnpackBytes(4)
 	if err != nil {
 		return err
@@ -169,48 +170,48 @@ func (r *PmxReader) ReadHeader(model *pmx_model.PmxModel) error {
 	return nil
 }
 
-func (r *PmxReader) ReadData(model *pmx_model.PmxModel) error {
-	err := r.unpackVertices(model)
+func (r *PmxReader) readData(model *pmx_model.PmxModel) error {
+	err := r.readVertices(model)
 	if err != nil {
 		return err
 	}
 
-	err = r.unpackFaces(model)
+	err = r.readFaces(model)
 	if err != nil {
 		return err
 	}
 
-	err = r.unpackTextures(model)
+	err = r.readTextures(model)
 	if err != nil {
 		return err
 	}
 
-	err = r.unpackMaterials(model)
+	err = r.readMaterials(model)
 	if err != nil {
 		return err
 	}
 
-	err = r.unpackBones(model)
+	err = r.readBones(model)
 	if err != nil {
 		return err
 	}
 
-	err = r.unpackMorphs(model)
+	err = r.readMorphs(model)
 	if err != nil {
 		return err
 	}
 
-	err = r.unpackDisplaySlots(model)
+	err = r.readDisplaySlots(model)
 	if err != nil {
 		return err
 	}
 
-	err = r.unpackRigidBodies(model)
+	err = r.readRigidBodies(model)
 	if err != nil {
 		return err
 	}
 
-	err = r.unpackJoints(model)
+	err = r.readJoints(model)
 	if err != nil {
 		return err
 	}
@@ -218,7 +219,7 @@ func (r *PmxReader) ReadData(model *pmx_model.PmxModel) error {
 	return nil
 }
 
-func (r *PmxReader) unpackVertices(model *pmx_model.PmxModel) error {
+func (r *PmxReader) readVertices(model *pmx_model.PmxModel) error {
 	totalVertexCount, err := r.UnpackInt()
 	if err != nil {
 		return err
@@ -392,7 +393,7 @@ func (r *PmxReader) unpackVertices(model *pmx_model.PmxModel) error {
 	return nil
 }
 
-func (r *PmxReader) unpackFaces(model *pmx_model.PmxModel) error {
+func (r *PmxReader) readFaces(model *pmx_model.PmxModel) error {
 	totalFaceCount, err := r.UnpackInt()
 	if err != nil {
 		return err
@@ -425,7 +426,7 @@ func (r *PmxReader) unpackFaces(model *pmx_model.PmxModel) error {
 	return nil
 }
 
-func (r *PmxReader) unpackTextures(model *pmx_model.PmxModel) error {
+func (r *PmxReader) readTextures(model *pmx_model.PmxModel) error {
 	totalTextureCount, err := r.UnpackInt()
 	if err != nil {
 		return err
@@ -443,7 +444,7 @@ func (r *PmxReader) unpackTextures(model *pmx_model.PmxModel) error {
 	return nil
 }
 
-func (r *PmxReader) unpackMaterials(model *pmx_model.PmxModel) error {
+func (r *PmxReader) readMaterials(model *pmx_model.PmxModel) error {
 	totalMaterialCount, err := r.UnpackInt()
 	if err != nil {
 		return err
@@ -556,7 +557,7 @@ func (r *PmxReader) unpackMaterials(model *pmx_model.PmxModel) error {
 	return nil
 }
 
-func (r *PmxReader) unpackBones(model *pmx_model.PmxModel) error {
+func (r *PmxReader) readBones(model *pmx_model.PmxModel) error {
 	totalBoneCount, err := r.UnpackInt()
 	if err != nil {
 		return err
@@ -714,7 +715,7 @@ func (r *PmxReader) unpackBones(model *pmx_model.PmxModel) error {
 	return nil
 }
 
-func (r *PmxReader) unpackMorphs(model *pmx_model.PmxModel) error {
+func (r *PmxReader) readMorphs(model *pmx_model.PmxModel) error {
 	totalMorphCount, err := r.UnpackInt()
 	if err != nil {
 		return err
@@ -887,7 +888,7 @@ func (r *PmxReader) unpackMorphs(model *pmx_model.PmxModel) error {
 	return nil
 }
 
-func (r *PmxReader) unpackDisplaySlots(model *pmx_model.PmxModel) error {
+func (r *PmxReader) readDisplaySlots(model *pmx_model.PmxModel) error {
 	totalDisplaySlotCount, err := r.UnpackInt()
 	if err != nil {
 		return err
@@ -947,7 +948,7 @@ func (r *PmxReader) unpackDisplaySlots(model *pmx_model.PmxModel) error {
 	return nil
 }
 
-func (r *PmxReader) unpackRigidBodies(model *pmx_model.PmxModel) error {
+func (r *PmxReader) readRigidBodies(model *pmx_model.PmxModel) error {
 	totalRigidBodyCount, err := r.UnpackInt()
 	if err != nil {
 		return err
@@ -1037,7 +1038,7 @@ func (r *PmxReader) unpackRigidBodies(model *pmx_model.PmxModel) error {
 	return nil
 }
 
-func (r *PmxReader) unpackJoints(model *pmx_model.PmxModel) error {
+func (r *PmxReader) readJoints(model *pmx_model.PmxModel) error {
 	totalJointCount, err := r.UnpackInt()
 	if err != nil {
 		return err

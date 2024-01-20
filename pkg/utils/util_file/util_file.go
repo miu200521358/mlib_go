@@ -3,6 +3,7 @@ package util_file
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 )
 
@@ -37,4 +38,14 @@ func Open(path string) (*os.File, error) {
 // 指定されたファイルを閉じる
 func Close(file *os.File) {
 	defer file.Close()
+}
+
+// アプリのルートディレクトリを取得
+func GetAppRootDir() string {
+	// ファイルのフルパスを取得
+	exePath, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	return filepath.Dir(exePath)
 }

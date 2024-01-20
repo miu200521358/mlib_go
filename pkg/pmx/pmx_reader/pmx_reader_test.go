@@ -10,6 +10,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/pmx/display_slot"
 	"github.com/miu200521358/mlib_go/pkg/pmx/material"
 	"github.com/miu200521358/mlib_go/pkg/pmx/morph"
+	"github.com/miu200521358/mlib_go/pkg/pmx/pmx_model"
 	"github.com/miu200521358/mlib_go/pkg/pmx/rigidbody"
 	"github.com/miu200521358/mlib_go/pkg/pmx/vertex/deform"
 )
@@ -62,7 +63,8 @@ func TestPmxReader_ReadNameByFilepath_NotExist(t *testing.T) {
 func TestPmxReader_ReadByFilepath(t *testing.T) {
 	r := &PmxReader{}
 
-	model, err := r.ReadByFilepath("../../../resources/test/サンプルモデル.pmx")
+	data, err := r.ReadByFilepath("../../../resources/test/サンプルモデル.pmx")
+	model := data.(*pmx_model.PmxModel)
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -868,7 +870,8 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 func TestPmxReader_ReadByFilepath_2_1(t *testing.T) {
 	r := &PmxReader{}
 
-	model, err := r.ReadByFilepath("../../../resources/test/サンプルモデル_PMX2.1_UTF-8.pmx")
+	data, err := r.ReadByFilepath("../../../resources/test/サンプルモデル_PMX2.1_UTF-8.pmx")
+	model := data.(*pmx_model.PmxModel)
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)

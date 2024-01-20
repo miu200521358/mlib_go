@@ -14,6 +14,7 @@ import (
 	"github.com/miu200521358/mlib_go/cmd/resources"
 	"github.com/miu200521358/mlib_go/pkg/front/mtheme"
 	"github.com/miu200521358/mlib_go/pkg/front/widget/file_picker"
+	"github.com/miu200521358/mlib_go/pkg/pmx/pmx_reader"
 	"github.com/miu200521358/mlib_go/pkg/utils/config"
 )
 
@@ -32,7 +33,11 @@ func main() {
 		"Pmxファイル",
 		"Pmxファイルを選択してください",
 		map[string]string{"*.pmx": "Pmx Files (*.pmx)", "*.*": "All Files (*.*)"},
-		func(path string) { entry.SetText(path) })
+		10,
+		&pmx_reader.PmxReader{},
+		func(path string) {
+			entry.SetText(path)
+		})
 	container := container.New(layout.NewVBoxLayout(),
 		layout.NewSpacer(),
 		widget.NewLabel("こんにちは、ファイン"),

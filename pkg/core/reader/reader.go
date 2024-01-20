@@ -21,9 +21,6 @@ import (
 )
 
 type ReaderInterface interface {
-	ReadHeader(hashData hash_model.HashModelInterface) error
-	ReadData(hashData hash_model.HashModelInterface) error
-	CreateModel(path string) hash_model.HashModelInterface
 	ReadNameByFilepath(path string) (string, error)
 	ReadByFilepath(path string) (hash_model.HashModelInterface, error)
 }
@@ -51,19 +48,7 @@ func (r *BaseReader[T]) Close() {
 	defer r.file.Close()
 }
 
-func (r *BaseReader[T]) CreateModel(path string) T {
-	panic("not implemented")
-}
-
-func (r *BaseReader[T]) ReadHeader(hashData T) {
-	panic("not implemented")
-}
-
-func (r *BaseReader[T]) ReadData(hashData T) {
-	panic("not implemented")
-}
-
-func (r *BaseReader[T]) ReadNameByFilepath(path string) (T, error) {
+func (r *BaseReader[T]) ReadNameByFilepath(path string) (string, error) {
 	panic("not implemented")
 }
 
