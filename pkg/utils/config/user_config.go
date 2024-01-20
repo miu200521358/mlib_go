@@ -6,27 +6,40 @@ import (
 	"path/filepath"
 
 	"github.com/miu200521358/mlib_go/pkg/utils/util_file"
-
 )
 
 const USER_CONFIG_FILE_NAME = "user_config.json"
 
 // 設定の保存
 func SaveUserConfig(key string, value string, limit int) error {
+	if value == "" {
+		return nil
+	}
 
 	// UserConfigファイルをロードする
 	existingValues, config := LoadUserConfig(key)
+	values := []string{value}
 
-	// Add key-value elements to the config map
-	values := append([]string{value}, existingValues...)
+	// Determine the upper limit based on the smaller value between len(existingValues) and limit
+	upperLimit := len(existingValues) + 1
+	if limit < upperLimit {
+		upperLimit = limit
+	}
 
-	// newSliceの長さがlimit以下であることを確認し、必要に応じて調整
-	if limit > len(values) {
-		limit = len(values)
+	// Remove the value if it already exists in existingValues
+	for i := 0; i < (upperLimit - 1); i++ {
+		if existingValues[i] != value {
+			values = append(values, existingValues[i:i+1]...)
+		}
+	}
+
+	// 同じ値があって、結果件数が変わらない場合、再設定
+	if len(values) < upperLimit {
+		upperLimit = len(values)
 	}
 
 	// Add key-value elements to the config map
-	config[key] = values[:limit]
+	config[key] = values[:upperLimit]
 
 	// Create a JSON representation of the config map without newlines and indentation
 	updatedData, err := json.Marshal(config)

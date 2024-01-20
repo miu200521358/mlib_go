@@ -28,12 +28,13 @@ func main() {
 	a.SetIcon(resources.AppIcon)
 	w := a.NewWindow(fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion))
 	entry := widget.NewEntry()
-	p, _ := file_picker.NewFilePicker(w,
+	p, _ := file_picker.NewFilePicker(
+		&w,
 		"PmxPath",
 		"Pmxファイル",
 		"Pmxファイルを選択してください",
 		map[string]string{"*.pmx": "Pmx Files (*.pmx)", "*.*": "All Files (*.*)"},
-		10,
+		20,
 		&pmx_reader.PmxReader{},
 		func(path string) {
 			entry.SetText(path)
@@ -50,6 +51,6 @@ func main() {
 		layout.NewSpacer())
 	w.SetContent(container)
 
-	w.Resize(fyne.NewSize(500, 400))
+	w.Resize(fyne.NewSize(1024, 768))
 	w.ShowAndRun()
 }

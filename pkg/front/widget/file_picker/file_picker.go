@@ -50,7 +50,7 @@ type OpenFileName struct {
 type FilePicker struct {
 	ofn OpenFileName
 	// ウィンドウ
-	Window *fyne.Window
+	AppWindow *fyne.Window
 	// コンテナ
 	Container *fyne.Container
 	// 履歴用キー(空欄の場合、保存用ファイルと見なす)
@@ -75,7 +75,8 @@ type FilePicker struct {
 	initialDirUtf16 []uint16
 }
 
-func NewFilePicker(window fyne.Window,
+func NewFilePicker(
+	window *fyne.Window,
 	historyKey string,
 	title string,
 	tooltip string,
@@ -90,6 +91,7 @@ func NewFilePicker(window fyne.Window,
 	picker.limitHistory = limitHistory
 	picker.modelReader = modelReader
 	picker.onPathChanged = onPathChanged
+	picker.AppWindow = window
 
 	picker.ofn = OpenFileName{}
 	picker.ofn.lStructSize = uint32(unsafe.Sizeof(picker.ofn))
@@ -118,8 +120,11 @@ func NewFilePicker(window fyne.Window,
 		widget.NewLabel(")"))
 	// ボタン入力欄コンテナ
 	buttonsContainer := container.New(layout.NewHBoxLayout(),
-		widget.NewButton("開く", picker.ShowFileDialog),
-		widget.NewButton("履歴", picker.ShowHistoryDialog))
+		widget.NewButton("開く", picker.ShowFileDialog))
+	if historyKey != "" {
+		// 履歴用キーが指定されている場合、履歴ボタンを追加
+		buttonsContainer.Add(widget.NewButton("履歴", picker.ShowHistoryDialog))
+	}
 	buttonsContainer.Resize(fyne.NewSize(200, buttonsContainer.MinSize().Height))
 
 	// ファイルパス入力コンテナ
@@ -186,24 +191,49 @@ func (picker *FilePicker) ShowFileDialog() {
 
 	ret, _, _ := procGetOpenFileName.Call(uintptr(unsafe.Pointer(&picker.ofn)))
 	if ret != 0 {
-		picker.PathEntry.SetText(syscall.UTF16ToString(fileBuf[:]))
+		path := syscall.UTF16ToString(fileBuf[:])
+		picker.PathEntry.SetText(path)
 	}
 }
 
 // 履歴リストを文字列選択ダイアログで表示する
 func (picker *FilePicker) ShowHistoryDialog() {
-	if picker.historyKey == "" {
-		return
+	// 履歴用キーから履歴リストを取得
+	loadedChoices, _ := config.LoadUserConfig(picker.historyKey)
+	choices := append([]string{"(未選択)"}, loadedChoices...)
+
+	listWidget := widget.NewList(
+		func() int {
+			return len(choices)
+		},
+		func() fyne.CanvasObject {
+			return widget.NewLabel("")
+		},
+		func(id widget.ListItemID, item fyne.CanvasObject) {
+			item.(*widget.Label).SetText(choices[id])
+		},
+	)
+	listWidget.OnSelected = func(id widget.ListItemID) {
+		if id > 0 {
+			path := choices[id]
+			picker.PathEntry.SetText(path)
+		}
 	}
 
-	// 履歴用キーから履歴リストを取得
-	choices, _ := config.LoadUserConfig(picker.historyKey)
-	selectEntry := widget.NewSelect(choices, func(value string) {
-		picker.PathEntry.SetText(value)
-	})
+	// 表示したい行数
+	linesToShow := 15
+	// リスト全体の高さを計算
+	listHeight := linesToShow * int(listWidget.MinSize().Height)
 
-	dialog.NewCustom("ファイル選択ダイアログ", "OK", container.NewVBox(
-		widget.NewLabel("選択してください:"),
-		selectEntry,
-	), *picker.Window).Show()
+	// スクロール可能なコンテナにリストを追加し、高さを設定
+	scrollContainer := container.NewVScroll(listWidget)
+	scrollContainer.SetMinSize(fyne.NewSize(500, float32(listHeight)))
+
+	d := dialog.NewCustom("ファイル選択ダイアログ", "OK", container.NewVBox(
+		widget.NewLabel("ファイルを選択すると、ファイルパスが入力欄に入力されます。\n"+
+			"OKボタンをクリックするとダイアログを閉じます"),
+		scrollContainer,
+	), *picker.AppWindow)
+	d.Resize(fyne.NewSize(600, 700))
+	d.Show()
 }
