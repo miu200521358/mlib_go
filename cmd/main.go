@@ -40,9 +40,6 @@ func main() {
 			entry.SetText(path)
 		})
 	container := container.New(layout.NewVBoxLayout(),
-		layout.NewSpacer(),
-		widget.NewLabel("こんにちは、ファイン"),
-		widget.NewLabel("これは日本語のラベルです"),
 		widget.NewButton("これはボタンです", func() {
 			dialog.ShowInformation("確認", "これはダイアログです", w)
 		}),
@@ -52,5 +49,6 @@ func main() {
 	w.SetContent(container)
 
 	w.Resize(fyne.NewSize(1024, 768))
+	w.CenterOnScreen()
 	w.ShowAndRun()
 }
