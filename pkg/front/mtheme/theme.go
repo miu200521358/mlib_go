@@ -5,7 +5,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
-
 )
 
 type MTheme struct{}
@@ -134,10 +133,5 @@ func (*MTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 }
 
 func (*MTheme) Size(name fyne.ThemeSizeName) float32 {
-	switch name {
-	case theme.SizeNameText:
-		// デフォルトフォントサイズ
-		return 16
-	}
 	return theme.DefaultTheme().Size(name)
 }

@@ -278,10 +278,6 @@ func (picker *FilePicker) NewHistoryDialog() *dialog.CustomDialog {
 			item.(*HistoryLabel).SetText(choices[id])
 		},
 	)
-	listWidget.OnSelected = func(id widget.ListItemID) {
-		path := choices[id]
-		picker.PathEntry.SetText(path)
-	}
 
 	// フォントサイズ
 	fontSize := int(listWidget.MinSize().Height)
@@ -294,9 +290,9 @@ func (picker *FilePicker) NewHistoryDialog() *dialog.CustomDialog {
 	scrollContainer := container.NewVScroll(listWidget)
 	scrollContainer.SetMinSize(fyne.NewSize(500, float32(listHeight)))
 
-	d := dialog.NewCustom("ファイル選択ダイアログ", "OK", container.NewVBox(
+	d := dialog.NewCustom("ファイル選択ダイアログ", "Close", container.NewVBox(
 		widget.NewLabel("ファイルを選択すると、ファイルパスが入力欄に入力されます。\n"+
-			"OKボタンをクリックするとダイアログを閉じます"),
+			"ダブルクリックすると、ファイルパスが入力欄に入力され、ダイアログを閉じます。"),
 		scrollContainer,
 	), *picker.appWindow)
 	d.Resize(fyne.NewSize(600, 700))
@@ -326,6 +322,11 @@ func (picker *FilePicker) NewHistoryLabel() *HistoryLabel {
 	label.Label = *widget.NewLabel("")
 	label.picker = picker
 	return &label
+}
+
+func (l *HistoryLabel) Tapped(_ *fyne.PointEvent) {
+	// シングルは履歴を入れるだけ
+	l.picker.PathEntry.SetText(l.Text)
 }
 
 func (l *HistoryLabel) DoubleTapped(_ *fyne.PointEvent) {
