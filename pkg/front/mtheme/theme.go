@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/theme"
+
 )
 
 type MTheme struct{}
@@ -28,8 +29,8 @@ func (*MTheme) Font(s fyne.TextStyle) fyne.Resource {
 	return resourceResourcesMPLUS1RegularTtf
 }
 
-func (*MTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
-	switch n {
+func (*MTheme) Color(name fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
+	switch name {
 	case theme.ColorRed:
 		// #C03221
 		return color.RGBA{R: 0xc0, G: 0x32, B: 0x21, A: 0xff}
@@ -132,6 +133,11 @@ func (*MTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return theme.DefaultTheme().Icon(n)
 }
 
-func (*MTheme) Size(n fyne.ThemeSizeName) float32 {
-	return theme.DefaultTheme().Size(n)
+func (*MTheme) Size(name fyne.ThemeSizeName) float32 {
+	switch name {
+	case theme.SizeNameText:
+		// デフォルトフォントサイズ
+		return 16
+	}
+	return theme.DefaultTheme().Size(name)
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"path/filepath"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -13,7 +14,6 @@ import (
 	"github.com/miu200521358/mlib_go/cmd/resources"
 	"github.com/miu200521358/mlib_go/pkg/front/mtheme"
 	"github.com/miu200521358/mlib_go/pkg/front/widget/file_picker"
-	"github.com/miu200521358/mlib_go/pkg/pmx/pmx_reader"
 	"github.com/miu200521358/mlib_go/pkg/utils/config"
 )
 
@@ -26,17 +26,22 @@ func main() {
 	a.Settings().SetTheme(&mtheme.MTheme{})
 	a.SetIcon(resources.AppIcon)
 	w := a.NewWindow(fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion))
-	entry := widget.NewEntry()
-	p, _ := file_picker.NewFilePicker(
+	pmx_output_file_picker, _ := file_picker.NewPmxSaveFilePicker(
+		&w,
+		"",
+		"出力Pmxファイル",
+		"出力Pmxファイルパスを入力もしくは選択してください",
+		func(path string) {})
+	pmx_file_picker, _ := file_picker.NewPmxReadFilePicker(
 		&w,
 		"PmxPath",
 		"Pmxファイル",
 		"Pmxファイルを選択してください",
-		map[string]string{"*.pmx": "Pmx Files (*.pmx)", "*.*": "All Files (*.*)"},
-		20,
-		&pmx_reader.PmxReader{},
 		func(path string) {
-			entry.SetText(path)
+			dir, file := filepath.Split(path)
+			ext := filepath.Ext(file)
+			outputPath := filepath.Join(dir, file[:len(file)-len(ext)]+"_out"+ext)
+			pmx_output_file_picker.PathEntry.SetText(outputPath)
 		})
 
 	// glWindow, err := gl_window.NewGlWindow(&a, "GL Window", resources.AppIcon, func() {}, func() {}, func(fyne.Position, []fyne.URI) {})
@@ -45,11 +50,11 @@ func main() {
 	// }
 
 	container := container.New(layout.NewVBoxLayout(),
-		widget.NewButton("これはボタンです", func() {
+		pmx_file_picker.Container,
+		pmx_output_file_picker.Container,
+		widget.NewButton("変換", func() {
 			// glWindow.ShowAndRun()
 		}),
-		entry,
-		p.Container,
 		layout.NewSpacer())
 	w.SetContent(container)
 
