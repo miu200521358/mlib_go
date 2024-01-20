@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
@@ -39,9 +38,15 @@ func main() {
 		func(path string) {
 			entry.SetText(path)
 		})
+
+	// glWindow, err := gl_window.NewGlWindow(&a, "GL Window", resources.AppIcon, func() {}, func() {}, func(fyne.Position, []fyne.URI) {})
+	// if err != nil {
+	// 	panic(err)
+	// }
+
 	container := container.New(layout.NewVBoxLayout(),
 		widget.NewButton("これはボタンです", func() {
-			dialog.ShowInformation("確認", "これはダイアログです", w)
+			// glWindow.ShowAndRun()
 		}),
 		entry,
 		p.Container,

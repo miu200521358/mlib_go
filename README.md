@@ -32,3 +32,8 @@ go get fyne.io/fyne/v2/internal/painter@v2.4.3
 ```
 fyne bundle icon.png > icon.go
 ```
+
+```
+go get github.com/go-gl/gl/v4.4-core/gl
+go get github.com/go-gl/glfw/v3.3/glfw
+```
