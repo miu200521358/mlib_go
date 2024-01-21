@@ -5,7 +5,7 @@ import winsound
 workspace_folder = os.environ.get('WORKSPACE_FOLDER')
 
 # 値を表示
-print("workspace_folder: %s", workspace_folder)
+print(f"workspace_folder: {workspace_folder}")
 
 # Read app_config.json file
 with open(f'{workspace_folder}/cmd/resources/app_config.json', 'r') as file:
@@ -31,7 +31,7 @@ print(f"app_version: {app_version}")
 # -H=windowsgui コンソールを表示しない
 # -gcflags "all=-N -l" デバッグ情報を削除
 build_command = f"go build -o {workspace_folder}/build/{app_name}_{app_version}.exe -trimpath " \
-                f"-v -a -buildmode=exe -ldflags \"-s -w -H=windowsgui -X\" {workspace_folder}/cmd/main.go"
+                f"-v -a -buildmode=exe -ldflags \"-s -w -H=windowsgui -X main.Version={app_version}\" {workspace_folder}/cmd/main.go"
 
 print(f"build_command: {build_command}")
 

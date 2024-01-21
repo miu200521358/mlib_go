@@ -37,15 +37,27 @@ fyne bundle icon.png > icon.go
 go get fyne.io/fyne/v2
 go get github.com/ungerik/go3d
 go get github.com/fyne-io/glfw-js
+go get fyne.io/fyne/v2/layout
 ```
 
 ```
-go get github.com/go-gl/gl/v2.1/gl
-go get github.com/go-gl/glfw/v3.1/glfw
+go get -u github.com/ungerik/go3d
+go get -u github.com/go-gl/gl/v4.4/gl
+go get -u github.com/go-gl/glfw/v3.3/glfw
 ```
 
 ```
 go clean --modcache
 go clean -cache
 go clean -testcache
+```
+
+```
+go get github.com/akavel/rsrc
+cd %GOPATH%\pkg\mod\github.com\akavel\rsrc@v0.10.2
+go build
+```
+
+```
+rsrc -manifest main.manifest -o rsrc.syso
 ```

@@ -3,21 +3,12 @@ package main
 import (
 	"embed"
 	"fmt"
-	"path/filepath"
 	"runtime"
 
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/widget"
+	"github.com/miu200521358/walk/pkg/declarative"
 
-	"github.com/miu200521358/mlib_go/cmd/resources"
-	"github.com/miu200521358/mlib_go/pkg/front/mtheme"
-	"github.com/miu200521358/mlib_go/pkg/front/widget/file_picker"
-	"github.com/miu200521358/mlib_go/pkg/front/widget/gl_window"
-	"github.com/miu200521358/mlib_go/pkg/pmx/pmx_model"
 	"github.com/miu200521358/mlib_go/pkg/utils/config"
+
 )
 
 //go:embed resources/app_config.json
@@ -27,66 +18,99 @@ func init() {
 	runtime.LockOSThread()
 }
 
+type Foo struct {
+	Bar string
+	Baz int
+}
+
 func main() {
 	appConfig := config.ReadAppConfig(appConfig)
-	a := app.New()
-	a.Settings().SetTheme(&mtheme.MTheme{})
-	a.SetIcon(resources.AppIcon)
-	w := a.NewWindow(fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion))
-	pmxOutputFilePicker, _ := file_picker.NewPmxSaveFilePicker(
-		&w,
-		"",
-		"出力Pmxファイル",
-		"出力Pmxファイルパスを入力もしくは選択してください",
-		func(path string) {})
-	pmxFilePicker, _ := file_picker.NewPmxReadFilePicker(
-		&w,
-		"PmxPath",
-		"Pmxファイル",
-		"Pmxファイルを選択してください",
-		func(path string) {
-			dir, file := filepath.Split(path)
-			ext := filepath.Ext(file)
-			outputPath := filepath.Join(dir, file[:len(file)-len(ext)]+"_out"+ext)
-			pmxOutputFilePicker.PathEntry.SetText(outputPath)
-		})
-	console := widget.NewMultiLineEntry()
 
-	glWindow, err := gl_window.NewGlWindow(
-		&a,
-		"GL Window",
-		resources.AppIcon,
-		func() {},
-		func() {},
-		func(fyne.Position, []fyne.URI) {},
-	)
-	if err != nil {
-		panic(err)
-	}
+	// window, err := declarative.NewMainWindowWithName(fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion))
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// window.Show()
+	// window.Run()
+	foo := &Foo{"b", 0}
 
-	container := container.New(layout.NewVBoxLayout(),
-		pmxFilePicker.Container,
-		pmxOutputFilePicker.Container,
-		widget.NewButton("変換", func() {
-			data, err := pmxFilePicker.GetData()
-			if err != nil {
-				panic(err)
-			}
-			model := data.(*pmx_model.PmxModel)
-			glWindow.AddData(model)
-
-			console.Append(fmt.Sprintf("モデル名: %s\n", model.Name))
-			console.Append(fmt.Sprintf("頂点数: %d\n", len(model.Vertices.Indexes)))
-			console.Append(fmt.Sprintf("面数: %d\n", len(model.Faces.Indexes)))
-			console.Append(fmt.Sprintf("材質数: %d\n", len(model.Materials.Indexes)))
-			console.Append(fmt.Sprintf("ボーン数: %d\n", len(model.Bones.Indexes)))
-			console.Append(fmt.Sprintf("表情数: %d\n", len(model.Morphs.Indexes)))
-		}),
-		console,
-		layout.NewSpacer())
-	w.SetContent(container)
-
-	w.Resize(fyne.NewSize(1024, 768))
-	w.CenterOnScreen()
-	w.ShowAndRun()
+	declarative.MainWindow{
+		Title:   fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion),
+		MinSize: declarative.Size{Width: 320, Height: 240},
+		Layout:  declarative.VBox{},
+		DataBinder: declarative.DataBinder{
+			DataSource: foo,
+			AutoSubmit: true,
+			OnSubmitted: func() {
+				fmt.Println(foo)
+			},
+		},
+		Children: []declarative.Widget{
+			// RadioButtonGroup is needed for data binding only.
+			declarative.RadioButtonGroup{
+				DataMember: "Bar",
+				Buttons: []declarative.RadioButton{
+					{
+						Name:  "aRB",
+						Text:  "A",
+						Value: "a",
+					},
+					{
+						Name:  "bRB",
+						Text:  "B",
+						Value: "b",
+					},
+					{
+						Name:  "cRB",
+						Text:  "C",
+						Value: "c",
+					},
+				},
+			},
+			declarative.Label{
+				Text:    "A",
+				Enabled: declarative.Bind("aRB.Checked"),
+			},
+			declarative.Label{
+				Text:    "B",
+				Enabled: declarative.Bind("bRB.Checked"),
+			},
+			declarative.Label{
+				Text:    "C",
+				Enabled: declarative.Bind("cRB.Checked"),
+			},
+			declarative.RadioButtonGroup{
+				DataMember: "Baz",
+				Buttons: []declarative.RadioButton{
+					{
+						Name:  "oneRB",
+						Text:  "1",
+						Value: 1,
+					},
+					{
+						Name:  "twoRB",
+						Text:  "2",
+						Value: 2,
+					},
+					{
+						Name:  "threeRB",
+						Text:  "3",
+						Value: 3,
+					},
+				},
+			},
+			declarative.Label{
+				Text:    "1",
+				Enabled: declarative.Bind("oneRB.Checked"),
+			},
+			declarative.Label{
+				Text:    "2",
+				Enabled: declarative.Bind("twoRB.Checked"),
+			},
+			declarative.Label{
+				Text:    "3",
+				Enabled: declarative.Bind("threeRB.Checked"),
+			},
+		},
+	}.Run()
 }
