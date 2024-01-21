@@ -8,7 +8,6 @@ import (
 	"github.com/miu200521358/walk/pkg/declarative"
 
 	"github.com/miu200521358/mlib_go/pkg/utils/config"
-
 )
 
 //go:embed resources/app_config.json
@@ -52,17 +51,17 @@ func main() {
 				Buttons: []declarative.RadioButton{
 					{
 						Name:  "aRB",
-						Text:  "A",
+						Text:  "あ",
 						Value: "a",
 					},
 					{
 						Name:  "bRB",
-						Text:  "B",
+						Text:  "い",
 						Value: "b",
 					},
 					{
 						Name:  "cRB",
-						Text:  "C",
+						Text:  "う",
 						Value: "c",
 					},
 				},
