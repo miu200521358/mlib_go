@@ -34,6 +34,18 @@ fyne bundle icon.png > icon.go
 ```
 
 ```
-go get github.com/go-gl/gl/v4.4-core/gl
-go get github.com/go-gl/glfw/v3.3/glfw
+go get fyne.io/fyne/v2
+go get github.com/ungerik/go3d
+go get github.com/fyne-io/glfw-js
+```
+
+```
+go get github.com/go-gl/gl/v2.1/gl
+go get github.com/go-gl/glfw/v3.1/glfw
+```
+
+```
+go clean --modcache
+go clean -cache
+go clean -testcache
 ```

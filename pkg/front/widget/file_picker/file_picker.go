@@ -1,6 +1,7 @@
 package file_picker
 
 import (
+	"fmt"
 	"path/filepath"
 	"syscall"
 	"unicode/utf16"
@@ -12,9 +13,12 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
+	"github.com/miu200521358/mlib_go/pkg/core/hash_model"
 	"github.com/miu200521358/mlib_go/pkg/core/reader"
 	"github.com/miu200521358/mlib_go/pkg/pmx/pmx_reader"
 	"github.com/miu200521358/mlib_go/pkg/utils/config"
+	"github.com/miu200521358/mlib_go/pkg/utils/util_file"
+
 )
 
 const (
@@ -310,6 +314,16 @@ func (picker *FilePicker) GetPath() string {
 
 func (picker *FilePicker) SetPath(path string) {
 	picker.PathEntry.SetText(path)
+}
+
+func (picker *FilePicker) GetData() (hash_model.HashModelInterface, error) {
+	if picker.PathEntry.Text == "" || picker.modelReader == nil {
+		return nil, nil
+	}
+	if isExist, err := util_file.ExistsFile(picker.PathEntry.Text); err != nil || !isExist {
+		return nil, fmt.Errorf("ファイルが存在しません")
+	}
+	return picker.modelReader.ReadByFilepath(picker.PathEntry.Text)
 }
 
 type HistoryLabel struct {

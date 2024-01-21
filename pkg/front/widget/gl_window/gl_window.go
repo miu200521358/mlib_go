@@ -2,9 +2,15 @@ package gl_window
 
 import (
 	"fyne.io/fyne/v2"
-	"github.com/go-gl/gl/v4.4-core/gl"
-	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/fyne-io/glfw-js"
+
+	"github.com/miu200521358/mlib_go/pkg/pmx/pmx_model"
+
 )
+
+type ModelData struct {
+	Model *pmx_model.PmxModel
+}
 
 type GlWindow struct {
 	app                    *fyne.App
@@ -16,6 +22,7 @@ type GlWindow struct {
 	callbackClose          func()
 	callbackCloseIntercept func()
 	callbackDrop           func(fyne.Position, []fyne.URI)
+	Data                   []ModelData
 }
 
 func NewGlWindow(
@@ -36,17 +43,12 @@ func NewGlWindow(
 		callbackCloseIntercept: callbackCloseIntercept,
 		callbackDrop:           callbackDrop,
 	}
+	w.Data = make([]ModelData, 0)
 
 	// GLFW の初期化
-	if err := glfw.Init(); err != nil {
+	if err := glfw.Init(nil); err != nil {
 		return nil, err
 	}
-
-	glfw.WindowHint(glfw.Resizable, glfw.True)
-	glfw.WindowHint(glfw.ContextVersionMajor, 4)
-	glfw.WindowHint(glfw.ContextVersionMinor, 4)
-	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
 	// ウィンドウの作成
 	window, err := glfw.CreateWindow(800, 600, "OpenGL with GLFW", nil, nil)
@@ -54,14 +56,12 @@ func NewGlWindow(
 		return nil, err
 	}
 	w.window = window
-	w.window.MakeContextCurrent()
-
-	// OpenGL の初期化
-	if err := gl.Init(); err != nil {
-		return nil, err
-	}
 
 	return &w, nil
+}
+
+func (w *GlWindow) AddData(pmxModel *pmx_model.PmxModel) {
+	w.Data = append(w.Data, ModelData{Model: pmxModel})
 }
 
 func (w *GlWindow) Title() string {
@@ -148,11 +148,8 @@ func (w *GlWindow) Close() {
 }
 
 func (w *GlWindow) ShowAndRun() {
-	w.window.Show()
 	for !w.window.ShouldClose() {
-		// Do OpenGL stuff.
-		w.window.SwapBuffers()
-		glfw.PollEvents()
+		glfw.WaitEvents()
 	}
 }
 
