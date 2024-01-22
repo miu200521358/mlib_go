@@ -7,14 +7,12 @@
 go: creating new go.mod: module github.com/miu200521358/mlib_go
 ```
 
-## fyne インストール
+## fyne (没)
 
 ```
 go get fyne.io/fyne/v2@latest
 go install fyne.io/fyne/v2/cmd/fyne@latest
 ```
-
-### 日本語設定
 
 ```
 C:\MMD\mlib_go>fyne bundle resources\MPLUS1-Regular.ttf > pkg\front\core\bundle.go
@@ -40,9 +38,11 @@ go get github.com/fyne-io/glfw-js
 go get fyne.io/fyne/v2/layout
 ```
 
+### walk
+
 ```
 go get -u github.com/ungerik/go3d
-go get -u github.com/go-gl/gl/v4.4/gl
+go get -u github.com/go-gl/gl/v4.4-core/gl
 go get -u github.com/go-gl/glfw/v3.3/glfw
 ```
 
@@ -60,4 +60,8 @@ go build
 
 ```
 rsrc -manifest main.manifest -o rsrc.syso
+```
+
+```
+go get -u golang.org/x/image
 ```
