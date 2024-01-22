@@ -3,11 +3,14 @@ package main
 import (
 	"embed"
 	"fmt"
+	"path/filepath"
 	"runtime"
 
 	"github.com/miu200521358/walk/pkg/declarative"
+	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/utils/config"
+	"github.com/miu200521358/mlib_go/pkg/widget/file_picker"
 )
 
 //go:embed resources/app_config.json
@@ -15,6 +18,10 @@ var appConfig embed.FS
 
 func init() {
 	runtime.LockOSThread()
+
+	walk.AppendToWalkInit(func() {
+		walk.MustRegisterWindowClass(file_picker.FilePickerClass)
+	})
 }
 
 type Foo struct {
@@ -25,91 +32,31 @@ type Foo struct {
 func main() {
 	appConfig := config.ReadAppConfig(appConfig)
 
-	// window, err := declarative.NewMainWindowWithName(fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion))
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// window.Show()
-	// window.Run()
-	foo := &Foo{"b", 0}
+	var mw *walk.MainWindow
 
-	declarative.MainWindow{
-		Title:   fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion),
-		MinSize: declarative.Size{Width: 320, Height: 240},
-		Layout:  declarative.VBox{},
-		DataBinder: declarative.DataBinder{
-			DataSource: foo,
-			AutoSubmit: true,
-			OnSubmitted: func() {
-				fmt.Println(foo)
-			},
-		},
-		Children: []declarative.Widget{
-			// RadioButtonGroup is needed for data binding only.
-			declarative.RadioButtonGroup{
-				DataMember: "Bar",
-				Buttons: []declarative.RadioButton{
-					{
-						Name:  "aRB",
-						Text:  "あ",
-						Value: "a",
-					},
-					{
-						Name:  "bRB",
-						Text:  "い",
-						Value: "b",
-					},
-					{
-						Name:  "cRB",
-						Text:  "う",
-						Value: "c",
-					},
-				},
-			},
-			declarative.Label{
-				Text:    "A",
-				Enabled: declarative.Bind("aRB.Checked"),
-			},
-			declarative.Label{
-				Text:    "B",
-				Enabled: declarative.Bind("bRB.Checked"),
-			},
-			declarative.Label{
-				Text:    "C",
-				Enabled: declarative.Bind("cRB.Checked"),
-			},
-			declarative.RadioButtonGroup{
-				DataMember: "Baz",
-				Buttons: []declarative.RadioButton{
-					{
-						Name:  "oneRB",
-						Text:  "1",
-						Value: 1,
-					},
-					{
-						Name:  "twoRB",
-						Text:  "2",
-						Value: 2,
-					},
-					{
-						Name:  "threeRB",
-						Text:  "3",
-						Value: 3,
-					},
-				},
-			},
-			declarative.Label{
-				Text:    "1",
-				Enabled: declarative.Bind("oneRB.Checked"),
-			},
-			declarative.Label{
-				Text:    "2",
-				Enabled: declarative.Bind("twoRB.Checked"),
-			},
-			declarative.Label{
-				Text:    "3",
-				Enabled: declarative.Bind("threeRB.Checked"),
-			},
-		},
-	}.Run()
+	if err := (declarative.MainWindow{
+		AssignTo: &mw,
+		Title:    fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion),
+		Size:     declarative.Size{Width: 1024, Height: 768},
+		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear},
+	}).Create(); err != nil {
+		panic(err)
+	}
+
+	if err := (file_picker.NewPmxReadFilePicker(
+		mw,
+		"PmxPath",
+		"Pmxファイル",
+		"Pmxファイルを選択してください",
+		func(path string) {
+			dir, file := filepath.Split(path)
+			ext := filepath.Ext(file)
+			outputPath := filepath.Join(dir, file[:len(file)-len(ext)]+"_out"+ext)
+			println(outputPath)
+			// pmxOutputFilePicker.PathEntry.SetText(outputPath)
+		})); err != nil {
+		panic(err)
+	}
+
+	mw.Run()
 }
