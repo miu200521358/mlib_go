@@ -5,6 +5,7 @@ import (
 	"hash/fnv"
 	"math"
 
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/ungerik/go3d/float64/vec2"
 
 )
@@ -53,8 +54,8 @@ func (v *MVec2) String() string {
 }
 
 // GL OpenGL座標系に変換された2次元ベクトルを返します
-func (v *MVec2) GL() MVec2 {
-	return MVec2{-v.GetX(), v.GetY()}
+func (v *MVec2) GL() mgl32.Vec2 {
+	return mgl32.Vec2{float32(-v.GetX()), float32(v.GetY())}
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します

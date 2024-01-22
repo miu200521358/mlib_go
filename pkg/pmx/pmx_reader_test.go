@@ -5,12 +5,13 @@ import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 func TestPmxReader_ReadNameByFilepath(t *testing.T) {
 	r := &PmxReader{}
 
-	modelName, err := r.ReadNameByFilepath("../../../resources/test/サンプルモデル.pmx")
+	modelName, err := r.ReadNameByFilepath("../../resources/test/サンプルモデル.pmx")
 
 	expectedName := "v2配布用素体03"
 	if modelName != expectedName {
@@ -25,9 +26,9 @@ func TestPmxReader_ReadNameByFilepath(t *testing.T) {
 func TestPmxReader_ReadNameByFilepath_2_1(t *testing.T) {
 	r := &PmxReader{}
 
-	modelName, err := r.ReadNameByFilepath("../../../resources/test/サンプルモデル_PMX2.1_UTF-8.pmx")
+	modelName, err := r.ReadNameByFilepath("../../resources/test/サンプルモデル_PMX2.1_UTF-8.pmx")
 
-	expectedName := "サンプルモデル迪?克"
+	expectedName := "サンプルモデル迪卢克"
 	if modelName != expectedName {
 		t.Errorf("Expected Name to be %q, got %q", expectedName, modelName)
 	}
@@ -40,7 +41,7 @@ func TestPmxReader_ReadNameByFilepath_2_1(t *testing.T) {
 func TestPmxReader_ReadNameByFilepath_NotExist(t *testing.T) {
 	r := &PmxReader{}
 
-	modelName, err := r.ReadNameByFilepath("../../../resources/test/サンプルモデル2.pmx")
+	modelName, err := r.ReadNameByFilepath("../../resources/test/サンプルモデル2.pmx")
 
 	expectedName := ""
 	if modelName != expectedName {
@@ -55,7 +56,7 @@ func TestPmxReader_ReadNameByFilepath_NotExist(t *testing.T) {
 func TestPmxReader_ReadByFilepath(t *testing.T) {
 	r := &PmxReader{}
 
-	data, err := r.ReadByFilepath("../../../resources/test/サンプルモデル.pmx")
+	data, err := r.ReadByFilepath("../../resources/test/サンプルモデル.pmx")
 	model := data.(*PmxModel)
 
 	if err != nil {
@@ -862,7 +863,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 func TestPmxReader_ReadByFilepath_2_1(t *testing.T) {
 	r := &PmxReader{}
 
-	data, err := r.ReadByFilepath("../../../resources/test/サンプルモデル_PMX2.1_UTF-8.pmx")
+	data, err := r.ReadByFilepath("../../resources/test/サンプルモデル_PMX2.1_UTF-8.pmx")
 	model := data.(*PmxModel)
 
 	if err != nil {
@@ -879,7 +880,7 @@ func TestPmxReader_ReadByFilepath_2_1(t *testing.T) {
 		t.Errorf("Expected Version to be %.8f, got %.8f", expectedVersion, model.Version)
 	}
 
-	expectedName := "サンプルモデル迪?克"
+	expectedName := "サンプルモデル迪卢克"
 	if model.Name != expectedName {
 		t.Errorf("Expected Name to be %q, got %q", expectedName, model.Name)
 	}

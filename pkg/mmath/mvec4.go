@@ -5,6 +5,7 @@ import (
 	"hash/fnv"
 	"math"
 
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/ungerik/go3d/float64/vec4"
 
 )
@@ -87,9 +88,9 @@ func (v *MVec4) SetW(w float64) {
 	v[3] = w
 }
 
-// GL OpenGL座標系に変換された2次元ベクトルを返します
-func (v *MVec4) GL() MVec4 {
-	return MVec4{-v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
+// GL OpenGL座標系に変換された4次元ベクトルを返します
+func (v *MVec4) GL() mgl32.Vec4 {
+	return mgl32.Vec4{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW())}
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します
