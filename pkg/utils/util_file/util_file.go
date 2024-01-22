@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
 )
 
 // 指定されたパスがファイルとして存在しているか
 func ExistsFile(path string) (bool, error) {
+	if path == "" {
+		return false, fmt.Errorf("path is empty")
+	}
+
 	info, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		return false, err

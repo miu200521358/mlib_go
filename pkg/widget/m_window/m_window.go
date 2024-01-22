@@ -9,7 +9,6 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/utils/config"
-
 )
 
 type MWindow struct {
@@ -29,6 +28,9 @@ func NewMWindow(appConfigFile embed.FS) (*MWindow, error) {
 	}).Create(); err != nil {
 		panic(err)
 	}
+	mw.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
+		walk.App().Exit(0)
+	})
 
 	return &MWindow{MainWindow: *mw}, nil
 }

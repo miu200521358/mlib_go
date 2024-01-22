@@ -9,11 +9,11 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/pmx/pmx_model"
+	"github.com/miu200521358/mlib_go/pkg/utils/util_file"
 	"github.com/miu200521358/mlib_go/pkg/widget/console_view"
 	"github.com/miu200521358/mlib_go/pkg/widget/file_picker"
 	"github.com/miu200521358/mlib_go/pkg/widget/gl_window"
 	"github.com/miu200521358/mlib_go/pkg/widget/m_window"
-
 )
 
 //go:embed resources/app_config.json
@@ -52,18 +52,12 @@ func main() {
 		panic(err)
 	}
 
-	pmxReadPicker.OnPathChanged = func(path string) {
-		dir, file := filepath.Split(path)
-		ext := filepath.Ext(file)
-		outputPath := filepath.Join(dir, file[:len(file)-len(ext)]+"_out"+ext)
-		pmxSavePicker.PathLineEdit.SetText(outputPath)
-	}
-
 	execButton, err := walk.NewPushButton(&mWindow.MainWindow)
 	if err != nil {
 		panic(err)
 	}
-	execButton.SetText("グリッド描画")
+	execButton.SetText("モデル描画")
+	execButton.SetEnabled(false)
 
 	console, err := (console_view.NewConsoleView(mWindow))
 	if err != nil {
@@ -71,30 +65,40 @@ func main() {
 	}
 
 	execButton.Clicked().Attach(func() {
-		if pmxReadPicker.PathLineEdit.Text() != "" {
-			data, err := pmxReadPicker.GetData()
-			if err != nil {
-				panic(err)
-			}
-			model := data.(*pmx_model.PmxModel)
-
-			console.AppendText(fmt.Sprintf("モデル名: %s", model.Name))
-			console.AppendText(fmt.Sprintf("頂点数: %d", len(model.Vertices.Indexes)))
-			console.AppendText(fmt.Sprintf("面数: %d", len(model.Faces.Indexes)))
-			console.AppendText(fmt.Sprintf("材質数: %d", len(model.Materials.Indexes)))
-			console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.Indexes)))
-			console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.Indexes)))
+		data, err := pmxReadPicker.GetData()
+		if err != nil {
+			panic(err)
 		}
+		model := data.(*pmx_model.PmxModel)
+
+		console.AppendText(fmt.Sprintf("モデル名: %s", model.Name))
+		console.AppendText(fmt.Sprintf("頂点数: %d", len(model.Vertices.Indexes)))
+		console.AppendText(fmt.Sprintf("面数: %d", len(model.Faces.Indexes)))
+		console.AppendText(fmt.Sprintf("材質数: %d", len(model.Materials.Indexes)))
+		console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.Indexes)))
+		console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.Indexes)))
 
 		glWindow, err := gl_window.NewGlWindow("モデル描画")
 		if err != nil {
 			panic(err)
 		}
 		glWindow.AddData()
-
-		// glWindow.Run()
-		// glWindow.Draw()
 	})
+
+	pmxReadPicker.OnPathChanged = func(path string) {
+		isExist, err := util_file.ExistsFile(path)
+		if !isExist || err != nil {
+			pmxSavePicker.PathLineEdit.SetText("")
+			execButton.SetEnabled(false)
+			return
+		}
+
+		dir, file := filepath.Split(path)
+		ext := filepath.Ext(file)
+		outputPath := filepath.Join(dir, file[:len(file)-len(ext)]+"_out"+ext)
+		pmxSavePicker.PathLineEdit.SetText(outputPath)
+		execButton.SetEnabled(true)
+	}
 
 	mWindow.Center()
 	mWindow.Run()
