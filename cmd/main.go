@@ -6,15 +6,17 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
-	"github.com/miu200521358/mlib_go/pkg/utils/config"
+	"github.com/miu200521358/mlib_go/pkg/pmx/pmx_model"
+	"github.com/miu200521358/mlib_go/pkg/widget/console_view"
 	"github.com/miu200521358/mlib_go/pkg/widget/file_picker"
+	"github.com/miu200521358/mlib_go/pkg/widget/m_window"
+
 )
 
 //go:embed resources/app_config.json
-var appConfig embed.FS
+var appConfigFile embed.FS
 
 func init() {
 	runtime.LockOSThread()
@@ -24,39 +26,65 @@ func init() {
 	})
 }
 
-type Foo struct {
-	Bar string
-	Baz int
-}
-
 func main() {
-	appConfig := config.ReadAppConfig(appConfig)
-
-	var mw *walk.MainWindow
-
-	if err := (declarative.MainWindow{
-		AssignTo: &mw,
-		Title:    fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion),
-		Size:     declarative.Size{Width: 1024, Height: 768},
-		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear},
-	}).Create(); err != nil {
+	mWindow, err := m_window.NewMWindow(appConfigFile)
+	if err != nil {
 		panic(err)
 	}
 
-	if err := (file_picker.NewPmxReadFilePicker(
-		mw,
+	pmxReadPicker, err := (file_picker.NewPmxReadFilePicker(
+		mWindow,
 		"PmxPath",
 		"Pmxファイル",
 		"Pmxファイルを選択してください",
-		func(path string) {
-			dir, file := filepath.Split(path)
-			ext := filepath.Ext(file)
-			outputPath := filepath.Join(dir, file[:len(file)-len(ext)]+"_out"+ext)
-			println(outputPath)
-			// pmxOutputFilePicker.PathEntry.SetText(outputPath)
-		})); err != nil {
+		func(path string) {}))
+	if err != nil {
 		panic(err)
 	}
 
-	mw.Run()
+	pmxSavePicker, err := (file_picker.NewPmxSaveFilePicker(
+		mWindow,
+		"出力Pmxファイル",
+		"出力Pmxファイルパスを入力もしくは選択してください",
+		func(path string) {}))
+	if err != nil {
+		panic(err)
+	}
+
+	pmxReadPicker.OnPathChanged = func(path string) {
+		dir, file := filepath.Split(path)
+		ext := filepath.Ext(file)
+		outputPath := filepath.Join(dir, file[:len(file)-len(ext)]+"_out"+ext)
+		pmxSavePicker.PathLineEdit.SetText(outputPath)
+	}
+
+	execButton, err := walk.NewPushButton(&mWindow.MainWindow)
+	if err != nil {
+		panic(err)
+	}
+	execButton.SetText("読み込み")
+
+	console, err := (console_view.NewConsoleView(mWindow))
+	if err != nil {
+		panic(err)
+	}
+
+	execButton.Clicked().Attach(func() {
+		data, err := pmxReadPicker.GetData()
+		if err != nil {
+			panic(err)
+		}
+		model := data.(*pmx_model.PmxModel)
+		// glWindow.AddData(model)
+
+		console.AppendText(fmt.Sprintf("モデル名: %s", model.Name))
+		console.AppendText(fmt.Sprintf("頂点数: %d", len(model.Vertices.Indexes)))
+		console.AppendText(fmt.Sprintf("面数: %d", len(model.Faces.Indexes)))
+		console.AppendText(fmt.Sprintf("材質数: %d", len(model.Materials.Indexes)))
+		console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.Indexes)))
+		console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.Indexes)))
+	})
+
+	mWindow.Center()
+	mWindow.Run()
 }

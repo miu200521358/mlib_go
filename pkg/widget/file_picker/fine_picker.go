@@ -1,14 +1,18 @@
 package file_picker
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/miu200521358/walk/pkg/walk"
 	"github.com/miu200521358/win"
 
+	"github.com/miu200521358/mlib_go/pkg/core/hash_model"
 	"github.com/miu200521358/mlib_go/pkg/core/reader"
 	"github.com/miu200521358/mlib_go/pkg/pmx/pmx_reader"
 	"github.com/miu200521358/mlib_go/pkg/utils/config"
+	"github.com/miu200521358/mlib_go/pkg/utils/util_file"
+	"github.com/miu200521358/mlib_go/pkg/widget/m_window"
 )
 
 const FilePickerClass = "FilePicker Class"
@@ -28,7 +32,7 @@ type FilePicker struct {
 	// ファイル名入力欄
 	NameLineEdit *walk.LineEdit
 	// パス変更時のコールバック
-	onPathChanged func(string)
+	OnPathChanged func(string)
 	// 履歴リスト
 	limitHistory int
 	// reader
@@ -38,12 +42,12 @@ type FilePicker struct {
 }
 
 func NewPmxReadFilePicker(
-	parent walk.Container,
+	parent *m_window.MWindow,
 	historyKey string,
 	title string,
 	tooltip string,
-	onPathChanged func(string),
-) error {
+	OnPathChanged func(string),
+) (*FilePicker, error) {
 	return NewFilePicker(
 		parent,
 		historyKey,
@@ -52,11 +56,28 @@ func NewPmxReadFilePicker(
 		map[string]string{"*.pmx": "Pmx Files (*.pmx)", "*.*": "All Files (*.*)"},
 		50,
 		&pmx_reader.PmxReader{},
+		OnPathChanged)
+}
+
+func NewPmxSaveFilePicker(
+	parent *m_window.MWindow,
+	title string,
+	tooltip string,
+	onPathChanged func(string),
+) (*FilePicker, error) {
+	return NewFilePicker(
+		parent,
+		"",
+		title,
+		tooltip,
+		map[string]string{"*.pmx": "Pmx Files (*.pmx)", "*.*": "All Files (*.*)"},
+		0,
+		nil,
 		onPathChanged)
 }
 
 func NewFilePicker(
-	parent walk.Container,
+	parent *m_window.MWindow,
 	historyKey string,
 	title string,
 	tooltip string,
@@ -64,12 +85,12 @@ func NewFilePicker(
 	limitHistory int,
 	modelReader reader.ReaderInterface,
 	onPathChanged func(string),
-) error {
+) (*FilePicker, error) {
 	picker := new(FilePicker)
 	picker.title = title
 	picker.historyKey = historyKey
 	picker.filterExtension = filterExtension
-	picker.onPathChanged = onPathChanged
+	picker.OnPathChanged = onPathChanged
 	picker.limitHistory = limitHistory
 	picker.modelReader = modelReader
 
@@ -80,13 +101,13 @@ func NewFilePicker(
 		win.WS_VISIBLE,
 		0); err != nil {
 
-		return err
+		return nil, err
 	}
 
 	// ピッカー全体
 	pickerComposite, err := walk.NewComposite(parent)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	pickerLayout := walk.NewVBoxLayout()
 	pickerComposite.SetLayout(pickerLayout)
@@ -94,65 +115,108 @@ func NewFilePicker(
 	// タイトル
 	titleComposite, err := walk.NewComposite(pickerComposite)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	titleLayout := walk.NewHBoxLayout()
 	titleComposite.SetLayout(titleLayout)
 
-	startBracket, err := walk.NewTextLabel(titleComposite)
+	titleLabel, err := walk.NewTextLabel(titleComposite)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	startBracket.SetText(title + "  (")
-	startBracket.SetToolTipText(tooltip)
+	titleLabel.SetText(title)
+	titleLabel.SetToolTipText(tooltip)
 
-	nameLineEdit, err := walk.NewLineEdit(titleComposite)
-	if err != nil {
-		return err
-	}
-	nameLineEdit.SetText(title)
-	nameLineEdit.SetToolTipText(tooltip)
-	nameLineEdit.SetReadOnly(true)
-	picker.NameLineEdit = nameLineEdit
+	if historyKey != "" {
+		startBracketLabel, err := walk.NewTextLabel(titleComposite)
+		if err != nil {
+			return nil, err
+		}
+		startBracketLabel.SetText("  (")
+		startBracketLabel.SetToolTipText(tooltip)
 
-	endBracket, err := walk.NewTextLabel(titleComposite)
-	if err != nil {
-		return err
+		nameLineEdit, err := walk.NewLineEdit(titleComposite)
+		if err != nil {
+			return nil, err
+		}
+		nameLineEdit.SetText("未設定")
+		nameLineEdit.SetToolTipText(tooltip)
+		nameLineEdit.SetReadOnly(true)
+		picker.NameLineEdit = nameLineEdit
+
+		endBracketLabel, err := walk.NewTextLabel(titleComposite)
+		if err != nil {
+			return nil, err
+		}
+		endBracketLabel.SetText(")")
 	}
-	endBracket.SetText(")")
 
 	// パス入力欄
 	inputComposite, err := walk.NewComposite(pickerComposite)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	inputLayout := walk.NewHBoxLayout()
 	inputComposite.SetLayout(inputLayout)
 
 	pathTextEdit, err := walk.NewLineEdit(inputComposite)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	pathTextEdit.SetToolTipText(tooltip)
 	picker.PathLineEdit = pathTextEdit
 
 	openPushButton, err := walk.NewPushButton(inputComposite)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	openPushButton.SetToolTipText(tooltip)
 	openPushButton.SetText("開く")
 	openPushButton.Clicked().Attach(picker.onClickOpenButton())
 
-	historyPushButton, err := walk.NewPushButton(inputComposite)
-	if err != nil {
-		return err
+	if historyKey != "" {
+		historyPushButton, err := walk.NewPushButton(inputComposite)
+		if err != nil {
+			return nil, err
+		}
+		historyPushButton.SetToolTipText(tooltip)
+		historyPushButton.SetText("履歴")
+		historyPushButton.Clicked().Attach(picker.onClickHistoryButton())
 	}
-	historyPushButton.SetToolTipText(tooltip)
-	historyPushButton.SetText("履歴")
-	historyPushButton.Clicked().Attach(picker.onClickHistoryButton())
 
-	return nil
+	return picker, nil
+}
+
+func (picker *FilePicker) GetData() (hash_model.HashModelInterface, error) {
+	if picker.PathLineEdit.Text() == "" || picker.modelReader == nil {
+		return nil, nil
+	}
+	if isExist, err := util_file.ExistsFile(picker.PathLineEdit.Text()); err != nil || !isExist {
+		return nil, fmt.Errorf("ファイルが存在しません")
+	}
+	return picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
+}
+
+func (picker *FilePicker) OnChanged(path string) {
+	picker.PathLineEdit.SetText(path)
+
+	if picker.modelReader != nil && picker.historyKey != "" {
+		modelName, err := picker.modelReader.ReadNameByFilepath(path)
+		if err != nil {
+			picker.NameLineEdit.SetText("読み込み失敗")
+		} else {
+			picker.NameLineEdit.SetText(modelName)
+		}
+	}
+
+	if picker.historyKey != "" {
+		// 履歴用キーを指定して履歴リストを保存
+		config.SaveUserConfig(picker.historyKey, path, picker.limitHistory)
+	}
+
+	if picker.OnPathChanged != nil {
+		picker.OnPathChanged(path)
+	}
 }
 
 func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
@@ -188,7 +252,7 @@ func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 			// パスを入力欄に設定
 			picker.PathLineEdit.SetText(item)
 			// コールバックを呼び出し
-			picker.onPathChanged(item)
+			picker.OnChanged(item)
 		}
 
 		historyListBox.SetModel(choices)
@@ -269,7 +333,7 @@ func (picker *FilePicker) onClickOpenButton() walk.EventHandler {
 			// パスを入力欄に設定
 			picker.PathLineEdit.SetText(dlg.FilePath)
 			// コールバックを呼び出し
-			picker.onPathChanged(dlg.FilePath)
+			picker.OnChanged(dlg.FilePath)
 		}
 	}
 }
