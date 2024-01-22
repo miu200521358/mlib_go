@@ -13,6 +13,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/widget/file_picker"
 	"github.com/miu200521358/mlib_go/pkg/widget/gl_window"
 	"github.com/miu200521358/mlib_go/pkg/widget/m_window"
+
 )
 
 //go:embed resources/app_config.json
@@ -62,7 +63,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	execButton.SetText("読み込み")
+	execButton.SetText("グリッド描画")
 
 	console, err := (console_view.NewConsoleView(mWindow))
 	if err != nil {
@@ -70,24 +71,27 @@ func main() {
 	}
 
 	execButton.Clicked().Attach(func() {
-		data, err := pmxReadPicker.GetData()
-		if err != nil {
-			panic(err)
-		}
-		model := data.(*pmx_model.PmxModel)
+		if pmxReadPicker.PathLineEdit.Text() != "" {
+			data, err := pmxReadPicker.GetData()
+			if err != nil {
+				panic(err)
+			}
+			model := data.(*pmx_model.PmxModel)
 
-		console.AppendText(fmt.Sprintf("モデル名: %s", model.Name))
-		console.AppendText(fmt.Sprintf("頂点数: %d", len(model.Vertices.Indexes)))
-		console.AppendText(fmt.Sprintf("面数: %d", len(model.Faces.Indexes)))
-		console.AppendText(fmt.Sprintf("材質数: %d", len(model.Materials.Indexes)))
-		console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.Indexes)))
-		console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.Indexes)))
+			console.AppendText(fmt.Sprintf("モデル名: %s", model.Name))
+			console.AppendText(fmt.Sprintf("頂点数: %d", len(model.Vertices.Indexes)))
+			console.AppendText(fmt.Sprintf("面数: %d", len(model.Faces.Indexes)))
+			console.AppendText(fmt.Sprintf("材質数: %d", len(model.Materials.Indexes)))
+			console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.Indexes)))
+			console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.Indexes)))
+		}
 
 		glWindow, err := gl_window.NewGlWindow("モデル描画")
 		if err != nil {
 			panic(err)
 		}
-		glWindow.AddData(model)
+		glWindow.AddData()
+
 		// glWindow.Run()
 		// glWindow.Draw()
 	})

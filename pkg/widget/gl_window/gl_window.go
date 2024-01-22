@@ -9,6 +9,7 @@ import (
 	_ "image/png"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -18,6 +19,7 @@ import (
 	_ "golang.org/x/image/tiff"
 
 	"github.com/miu200521358/mlib_go/pkg/pmx/pmx_model"
+	"github.com/miu200521358/mlib_go/pkg/utils/util_file"
 )
 
 type ModelData struct {
@@ -64,8 +66,8 @@ func NewGlWindow(
 	}, nil
 }
 
-func (w *GlWindow) AddData(pmxModel *pmx_model.PmxModel) {
-	w.Data = append(w.Data, ModelData{Model: pmxModel})
+func (w *GlWindow) AddData() {
+	// w.Data = append(w.Data, ModelData{Model: pmxModel})
 
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	fmt.Println("OpenGL version", version)
@@ -96,7 +98,7 @@ func (w *GlWindow) AddData(pmxModel *pmx_model.PmxModel) {
 	gl.BindFragDataLocation(program, 0, gl.Str("outputColor\x00"))
 
 	// Load the texture
-	texture, err := newTexture("C:/MMD/mlib_go/pkg/widget/gl_window/grid.png")
+	texture, err := newTexture("grid.png")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -153,6 +155,7 @@ func (w *GlWindow) AddData(pmxModel *pmx_model.PmxModel) {
 		w.SwapBuffers()
 		glfw.PollEvents()
 	}
+	w.Close()
 }
 
 func (w *GlWindow) Draw() {
@@ -175,6 +178,7 @@ func (w *GlWindow) Run() {
 		w.Window.SwapBuffers()
 		glfw.PollEvents()
 	}
+	w.Close()
 }
 
 func newProgram(vertexShaderSource, fragmentShaderSource string) (uint32, error) {
@@ -235,10 +239,12 @@ func compileShader(source string, shaderType uint32) (uint32, error) {
 	return shader, nil
 }
 
-func newTexture(file string) (uint32, error) {
-	imgFile, err := os.Open(file)
+func newTexture(fileName string) (uint32, error) {
+	filePath := filepath.Join(util_file.GetAppRootDir(), fileName)
+
+	imgFile, err := os.Open(filePath)
 	if err != nil {
-		return 0, fmt.Errorf("texture %q not found on disk: %v", file, err)
+		return 0, fmt.Errorf("texture %q not found on disk: %v", fileName, err)
 	}
 
 	img, _, err := image.Decode(imgFile)
