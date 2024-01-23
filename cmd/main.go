@@ -34,7 +34,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	mWindow.GlWindow = glWindow
+	mWindow.AddGlWindow(glWindow)
 
 	pmxReadPicker, err := (mwidget.NewPmxReadFilePicker(
 		mWindow,
@@ -80,7 +80,7 @@ func main() {
 		console.AppendText(fmt.Sprintf("材質数: %d", len(model.Materials.Indexes)))
 		console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.Indexes)))
 		console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.Indexes)))
-		mWindow.GlWindow.AddData()
+		mWindow.GetMainGlWindow().AddData()
 	})
 
 	pmxReadPicker.OnPathChanged = func(path string) {

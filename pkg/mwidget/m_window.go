@@ -17,10 +17,11 @@ const (
 )
 
 type MWindow struct {
+	walk.MainWindow
 	// 横並びであるか否か
 	isHorizontal bool
-	walk.MainWindow
-	GlWindow *GlWindow
+	// 描画ウィンドウ
+	GlWindows []*GlWindow
 }
 
 func NewMWindow(resourceFiles embed.FS, isHorizontal bool) (*MWindow, error) {
@@ -36,7 +37,14 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool) (*MWindow, error) {
 	}).Create(); err != nil {
 		return nil, err
 	}
-	mw.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
+
+	mainWindow := &MWindow{MainWindow: *mw, isHorizontal: isHorizontal, GlWindows: []*GlWindow{}}
+	mainWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
+		if len(mainWindow.GlWindows) > 0 {
+			for _, glWindow := range mainWindow.GlWindows {
+				glWindow.Close()
+			}
+		}
 		walk.App().Exit(0)
 	})
 	iconImg, err := mutil.ReadIconFile(resourceFiles)
@@ -47,44 +55,55 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool) (*MWindow, error) {
 	if err != nil {
 		return nil, err
 	}
-	mw.SetIcon(icon)
+	mainWindow.SetIcon(icon)
 
-	return &MWindow{MainWindow: *mw, isHorizontal: isHorizontal}, nil
+	return mainWindow, nil
 }
 
-func (mWindow *MWindow) Center() {
+func (w *MWindow) AddGlWindow(glWindow *GlWindow) {
+	w.GlWindows = append(w.GlWindows, glWindow)
+}
+
+func (w *MWindow) GetMainGlWindow() *GlWindow {
+	if len(w.GlWindows) > 0 {
+		return w.GlWindows[0]
+	}
+	return nil
+}
+
+func (w *MWindow) Center() {
 	// スクリーンの解像度を取得
 	screenWidth := GetSystemMetrics(SM_CXSCREEN)
 	screenHeight := GetSystemMetrics(SM_CYSCREEN)
 
 	// ウィンドウのサイズを取得
-	windowSize := mWindow.Size()
+	windowSize := w.Size()
 
 	glWindowSize := walk.Size{Width: 0, Height: 0}
-	if mWindow.GlWindow != nil {
-		glWindowSize = mWindow.GlWindow.Size()
+	if w.GetMainGlWindow() != nil {
+		glWindowSize = w.GetMainGlWindow().Size()
 	}
 
 	// ウィンドウを中央に配置
-	if mWindow.isHorizontal {
+	if w.isHorizontal {
 		centerX := (screenWidth - (windowSize.Width + glWindowSize.Width)) / 2
 		centerY := (screenHeight - windowSize.Height) / 2
 
-		mWindow.SetX(centerX + glWindowSize.Width)
-		mWindow.SetY(centerY)
+		w.SetX(centerX + glWindowSize.Width)
+		w.SetY(centerY)
 
-		if mWindow.GlWindow != nil {
-			mWindow.GlWindow.SetPos(centerX, centerY)
+		if w.GetMainGlWindow() != nil {
+			w.GetMainGlWindow().SetPos(centerX, centerY)
 		}
 	} else {
 		centerX := (screenWidth - windowSize.Width) / 2
 		centerY := (screenHeight - (windowSize.Height + glWindowSize.Height)) / 2
 
-		mWindow.SetX(centerX)
-		mWindow.SetY(centerY + glWindowSize.Height)
+		w.SetX(centerX)
+		w.SetY(centerY + glWindowSize.Height)
 
-		if mWindow.GlWindow != nil {
-			mWindow.GlWindow.SetPos(centerX, centerY)
+		if w.GetMainGlWindow() != nil {
+			w.GetMainGlWindow().SetPos(centerX, centerY)
 		}
 	}
 }

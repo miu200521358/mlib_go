@@ -162,6 +162,7 @@ func (w *GlWindow) Size() walk.Size {
 }
 
 func (w *GlWindow) Close() {
+	w.Shader.Delete()
 	w.Window.Destroy()
 	glfw.Terminate()
 }
