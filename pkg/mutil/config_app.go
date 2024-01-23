@@ -3,8 +3,11 @@ package mutil
 import (
 	"embed"
 	"encoding/json"
+	"fmt"
+	"image"
+	_ "image/png"
 	"io/fs"
-
+	"os"
 )
 
 type AppConfig struct {
@@ -14,8 +17,8 @@ type AppConfig struct {
 }
 
 // ReadAppConfig アプリ設定ファイルの読み込み
-func ReadAppConfig(appConfig embed.FS) AppConfig {
-	fileData, err := fs.ReadFile(appConfig, "resources/app_config.json")
+func ReadAppConfig(resourceFiles embed.FS) AppConfig {
+	fileData, err := fs.ReadFile(resourceFiles, "resources/app_config.json")
 	if err != nil {
 		return AppConfig{}
 	}
@@ -25,10 +28,16 @@ func ReadAppConfig(appConfig embed.FS) AppConfig {
 }
 
 // ReadIconFile アイコンファイルの読み込み
-func ReadIconFile(appConfig embed.FS) ([]byte, error) {
-	fileData, err := fs.ReadFile(appConfig, "resources/icon.ico")
+func ReadIconFile(resourceFiles embed.FS) (image.Image, error) {
+	imgFile, err := os.Open("resources/app.png")
+	if err != nil {
+		return nil, fmt.Errorf("app icon not found on disk: %v", err)
+	}
+
+	img, _, err := image.Decode(imgFile)
 	if err != nil {
 		return nil, err
 	}
-	return fileData, nil
+
+	return img, nil
 }

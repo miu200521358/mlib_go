@@ -2,8 +2,10 @@ package mutil
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+
 )
 
 // 指定されたパスがファイルとして存在しているか
@@ -51,4 +53,29 @@ func GetAppRootDir() string {
 		panic(err)
 	}
 	return filepath.Dir(exePath)
+}
+
+// テキストファイルの全文を読み込んでひとつの文字列で返す
+func ReadText(path string) (string, error) {
+	isExist, err := ExistsFile(path)
+	if err != nil {
+		return "", err
+	}
+	if !isExist {
+		return "", fmt.Errorf("path not found: %s", path)
+	}
+
+	file, err := Open(path)
+	if err != nil {
+		return "", err
+	}
+
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return "", err
+	}
+
+	defer Close(file)
+
+	return string(content), nil
 }

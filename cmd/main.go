@@ -13,9 +13,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
 
-//go:embed resources/app_config.json
-var appConfigFile embed.FS
-
 func init() {
 	runtime.LockOSThread()
 
@@ -24,11 +21,20 @@ func init() {
 	})
 }
 
+//go:embed resources/*
+var resourceFiles embed.FS
+
 func main() {
-	mWindow, err := mwidget.NewMWindow(appConfigFile)
+	mWindow, err := mwidget.NewMWindow(resourceFiles, true)
 	if err != nil {
 		panic(err)
 	}
+
+	glWindow, err := mwidget.NewGlWindow("モデル描画", resourceFiles)
+	if err != nil {
+		panic(err)
+	}
+	mWindow.GlWindow = glWindow
 
 	pmxReadPicker, err := (mwidget.NewPmxReadFilePicker(
 		mWindow,
@@ -74,12 +80,7 @@ func main() {
 		console.AppendText(fmt.Sprintf("材質数: %d", len(model.Materials.Indexes)))
 		console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.Indexes)))
 		console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.Indexes)))
-
-		glWindow, err := mwidget.NewGlWindow("モデル描画")
-		if err != nil {
-			panic(err)
-		}
-		glWindow.AddData()
+		mWindow.GlWindow.AddData()
 	})
 
 	pmxReadPicker.OnPathChanged = func(path string) {

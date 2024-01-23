@@ -1,6 +1,7 @@
 package mwidget
 
 import (
+	"embed"
 	"fmt"
 	"image"
 	"image/draw"
@@ -10,16 +11,22 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/walk/pkg/walk"
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/tiff"
 
+	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutil"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+)
+
+const (
+	GL_WINDOW_WIDTH  = 512
+	GL_WINDOW_HEIGHT = 768
 )
 
 type ModelData struct {
@@ -28,14 +35,13 @@ type ModelData struct {
 
 type GlWindow struct {
 	glfw.Window
-	Data []ModelData
+	Data   []ModelData
+	Shader *mgl.MShader
 }
-
-const windowWidth = 800
-const windowHeight = 600
 
 func NewGlWindow(
 	title string,
+	resourceFiles embed.FS,
 ) (*GlWindow, error) {
 	// GLFW の初期化
 	if err := glfw.Init(); err != nil {
@@ -49,53 +55,36 @@ func NewGlWindow(
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
 	// ウィンドウの作成
-	w, err := glfw.CreateWindow(windowWidth, windowHeight, title, nil, nil)
+	w, err := glfw.CreateWindow(GL_WINDOW_WIDTH, GL_WINDOW_HEIGHT, title, nil, nil)
 	if err != nil {
 		return nil, err
 	}
 	w.MakeContextCurrent()
+	iconImg, err := mutil.ReadIconFile(resourceFiles)
+	if err != nil {
+		w.SetIcon([]image.Image{iconImg})
+	}
 
 	// OpenGL の初期化
 	if err := gl.Init(); err != nil {
 		return nil, err
 	}
 
+	shader, err := mgl.NewMShader(GL_WINDOW_WIDTH, GL_WINDOW_HEIGHT, resourceFiles)
+	if err != nil {
+		return nil, err
+	}
+
 	return &GlWindow{
 		Window: *w,
 		Data:   make([]ModelData, 0),
+		Shader: shader,
 	}, nil
 }
 
 func (w *GlWindow) AddData() {
 	// w.Data = append(w.Data, ModelData{Model: pmxModel})
-
-	version := gl.GoStr(gl.GetString(gl.VERSION))
-	fmt.Println("OpenGL version", version)
-
-	// Configure the vertex and fragment shaders
-	program, err := newProgram(vertexShader, fragmentShader)
-	if err != nil {
-		panic(err)
-	}
-
-	gl.UseProgram(program)
-
-	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
-	projectionUniform := gl.GetUniformLocation(program, gl.Str("projection\x00"))
-	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
-
-	camera := mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	cameraUniform := gl.GetUniformLocation(program, gl.Str("camera\x00"))
-	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
-
 	model := mgl32.Ident4()
-	modelUniform := gl.GetUniformLocation(program, gl.Str("model\x00"))
-	gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
-
-	textureUniform := gl.GetUniformLocation(program, gl.Str("tex\x00"))
-	gl.Uniform1i(textureUniform, 0)
-
-	gl.BindFragDataLocation(program, 0, gl.Str("outputColor\x00"))
 
 	// Load the texture
 	texture, err := newTexture("grid.png")
@@ -113,11 +102,11 @@ func (w *GlWindow) AddData() {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, len(cubeVertices)*4, gl.Ptr(cubeVertices), gl.STATIC_DRAW)
 
-	vertAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vert\x00")))
+	vertAttrib := uint32(gl.GetAttribLocation(w.Shader.ModelProgram, gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
 	gl.VertexAttribPointerWithOffset(vertAttrib, 3, gl.FLOAT, false, 5*4, 0)
 
-	texCoordAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vertTexCoord\x00")))
+	texCoordAttrib := uint32(gl.GetAttribLocation(w.Shader.ModelProgram, gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
 	gl.VertexAttribPointerWithOffset(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 3*4)
 
@@ -141,8 +130,8 @@ func (w *GlWindow) AddData() {
 		model = mgl32.HomogRotate3D(float32(angle), mgl32.Vec3{0, 1, 0})
 
 		// Render
-		gl.UseProgram(program)
-		gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
+		gl.UseProgram(w.Shader.ModelProgram)
+		gl.UniformMatrix4fv(w.Shader.ModelUniform, 1, false, &model[0])
 
 		gl.BindVertexArray(vao)
 
@@ -167,6 +156,11 @@ func (w *GlWindow) Draw() {
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 }
 
+func (w *GlWindow) Size() walk.Size {
+	x, y := w.Window.GetSize()
+	return walk.Size{Width: x, Height: y}
+}
+
 func (w *GlWindow) Close() {
 	w.Window.Destroy()
 	glfw.Terminate()
@@ -179,64 +173,6 @@ func (w *GlWindow) Run() {
 		glfw.PollEvents()
 	}
 	w.Close()
-}
-
-func newProgram(vertexShaderSource, fragmentShaderSource string) (uint32, error) {
-	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
-	if err != nil {
-		return 0, err
-	}
-
-	fragmentShader, err := compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
-	if err != nil {
-		return 0, err
-	}
-
-	program := gl.CreateProgram()
-
-	gl.AttachShader(program, vertexShader)
-	gl.AttachShader(program, fragmentShader)
-	gl.LinkProgram(program)
-
-	var status int32
-	gl.GetProgramiv(program, gl.LINK_STATUS, &status)
-	if status == gl.FALSE {
-		var logLength int32
-		gl.GetProgramiv(program, gl.INFO_LOG_LENGTH, &logLength)
-
-		log := strings.Repeat("\x00", int(logLength+1))
-		gl.GetProgramInfoLog(program, logLength, nil, gl.Str(log))
-
-		return 0, fmt.Errorf("failed to link program: %v", log)
-	}
-
-	gl.DeleteShader(vertexShader)
-	gl.DeleteShader(fragmentShader)
-
-	return program, nil
-}
-
-func compileShader(source string, shaderType uint32) (uint32, error) {
-	shader := gl.CreateShader(shaderType)
-
-	csources, free := gl.Strs(source)
-	gl.ShaderSource(shader, 1, csources, nil)
-	free()
-	gl.CompileShader(shader)
-
-	var status int32
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
-	if status == gl.FALSE {
-		var logLength int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
-
-		log := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
-
-		return 0, fmt.Errorf("failed to compile %v: %v", source, log)
-	}
-
-	return shader, nil
 }
 
 func newTexture(fileName string) (uint32, error) {
@@ -279,38 +215,6 @@ func newTexture(fileName string) (uint32, error) {
 
 	return texture, nil
 }
-
-var vertexShader = `
-#version 330
-
-uniform mat4 projection;
-uniform mat4 camera;
-uniform mat4 model;
-
-in vec3 vert;
-in vec2 vertTexCoord;
-
-out vec2 fragTexCoord;
-
-void main() {
-    fragTexCoord = vertTexCoord;
-    gl_Position = projection * camera * model * vec4(vert, 1);
-}
-` + "\x00"
-
-var fragmentShader = `
-#version 330
-
-uniform sampler2D tex;
-
-in vec2 fragTexCoord;
-
-out vec4 outputColor;
-
-void main() {
-    outputColor = texture(tex, fragTexCoord);
-}
-` + "\x00"
 
 var cubeVertices = []float32{
 	//  X, Y, Z, U, V
