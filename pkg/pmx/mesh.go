@@ -6,6 +6,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type Mesh struct {
@@ -26,7 +27,6 @@ func NewMesh(
 
 func (m *Mesh) DrawModel(
 	shader *mgl.MShader,
-	faceDtype uint32,
 	windowIndex int,
 	boneMatrixes []mgl32.Mat4,
 ) {
@@ -47,10 +47,12 @@ func (m *Mesh) DrawModel(
 	// ------------------
 	// 材質色設定
 	// full.fx の AmbientColor相当
-	diffuse := mgl32.Vec4{1.0, 1.0, 1.0, 1.0}
 	gl.Uniform4f(
 		shader.DiffuseUniform[mgl.PROGRAM_TYPE_MODEL],
-		diffuse[0], diffuse[1], diffuse[2], diffuse[3],
+		m.material.Diffuse[0],
+		m.material.Diffuse[1],
+		m.material.Diffuse[2],
+		m.material.Diffuse[3],
 	)
 	mutils.CheckGLError()
 
@@ -58,7 +60,7 @@ func (m *Mesh) DrawModel(
 	gl.DrawElements(
 		gl.TRIANGLES,
 		int32(m.material.VerticesCount),
-		faceDtype,
+		gl.UNSIGNED_INT,
 		nil,
 	)
 	mutils.CheckGLError()

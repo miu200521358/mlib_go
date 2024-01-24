@@ -5,11 +5,11 @@ uniform mat4 camera;
 uniform mat4 model;
 
 in vec3 vert;
-in vec2 vertTexCoord;
 
-out vec2 fragTexCoord;
+uniform vec4 diffuse;
+out vec4 vertexColor;
 
 void main() {
-    fragTexCoord = vertTexCoord;
+    vertexColor = diffuse;
     gl_Position = projection * camera * model * vec4(vert, 1);
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 type Meshes struct {
@@ -94,7 +93,7 @@ func (m *Meshes) Draw(shader *mgl.MShader, boneMatrixes []mgl32.Mat4, windowInde
 		m.ibo.Bind()
 
 		shader.UseModelProgram()
-		mesh.DrawModel(shader, m.ibo.Dtype, windowIndex, boneMatrixes)
+		mesh.DrawModel(shader, windowIndex, boneMatrixes)
 		shader.Unuse()
 
 		m.ibo.Unbind()

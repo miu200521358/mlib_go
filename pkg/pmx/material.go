@@ -142,7 +142,7 @@ func (m *Material) GL(
 	}
 
 	return &MaterialGL{
-		Diffuse:       m.Diffuse.GL(),
+		Diffuse:       [4]float32{float32(m.Diffuse.GetX()), float32(m.Diffuse.GetY()), float32(m.Diffuse.GetZ()), float32(m.Diffuse.GetW())},
 		Ambient:       m.Ambient.GL(),
 		Specular:      m.Specular.GL(),
 		Edge:          m.Edge.GL(),

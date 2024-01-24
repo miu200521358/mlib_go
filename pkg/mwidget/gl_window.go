@@ -17,6 +17,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+
 )
 
 type ModelSet struct {
@@ -102,9 +103,9 @@ func NewGlWindow(
 		case gl.DEBUG_SEVERITY_LOW:
 			fmt.Printf("[LOW] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
 				source, glType, severity, message)
-		case gl.DEBUG_SEVERITY_NOTIFICATION:
-			fmt.Printf("[NOTIFICATION] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
-				source, glType, severity, message)
+		// case gl.DEBUG_SEVERITY_NOTIFICATION:
+		// 	fmt.Printf("[NOTIFICATION] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
+		// 		source, glType, severity, message)
 		}
 	}, gl.Ptr(nil))
 	gl.Enable(gl.DEBUG_OUTPUT)
@@ -171,16 +172,16 @@ func (w *GlWindow) Close() {
 	glfw.Terminate()
 }
 
-// func (w *GlWindow) Run() {
-// 	for !w.Window.ShouldClose() {
-// 		w.Draw()
-// 		w.Window.SwapBuffers()
-// 		glfw.PollEvents()
-// 	}
-// 	w.Close()
-// }
-
 func (w *GlWindow) Run() {
+	for !w.Window.ShouldClose() {
+		w.Draw()
+		w.Window.SwapBuffers()
+		glfw.PollEvents()
+	}
+	w.Close()
+}
+
+func (w *GlWindow) Run2() {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 

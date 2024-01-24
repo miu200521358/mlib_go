@@ -6,6 +6,7 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type IBO struct {
@@ -26,12 +27,8 @@ func NewIBO(facePtr unsafe.Pointer, count int, dtype uint32) *IBO {
 		id:      iboId,
 		target:  gl.ELEMENT_ARRAY_BUFFER,
 		facePtr: facePtr,
+		size: count * 4 * 3, // ひとつの面につき、dtype(UNSIGNED_INT) * 3(三角形)
 	}
-
-	ibo.Dtype = gl.UNSIGNED_INT
-	ibo.Dsize = 4
-
-	ibo.size = count * ibo.Dsize * 3 // ひとつの面につき、dtype(任意byte) * 3(三角形)
 
 	return ibo
 }
