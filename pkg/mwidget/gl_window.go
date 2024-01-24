@@ -33,10 +33,10 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int) {
 
 type GlWindow struct {
 	glfw.Window
-	ModelSets    []ModelSet
-	Shader       *mgl.MShader
-	WindowIndex  int
-	cubeVertices []float32
+	ModelSets   []ModelSet
+	Shader      *mgl.MShader
+	WindowIndex int
+	faces       []float32
 }
 
 func NewGlWindow(
@@ -127,17 +127,18 @@ func (w *GlWindow) AddData(pmxModel *pmx.PmxModel) {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 
-	// // TODO: モーションも追加する
-	// pmxModel.InitializeDraw(w.WindowIndex)
-	// w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel})
-	w.cubeVertices = make([]float32, 0)
+	// TODO: モーションも追加する
+	pmxModel.InitializeDraw(w.WindowIndex)
+	w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel})
+
+	w.faces = make([]float32, 0)
 	for _, face := range pmxModel.Faces.Data {
 		for _, vertexIndex := range (*face).VertexIndexes {
-			w.cubeVertices = append(w.cubeVertices, float32(pmxModel.Vertices.GetItem(vertexIndex).Position.GetX()))
-			w.cubeVertices = append(w.cubeVertices, float32(pmxModel.Vertices.GetItem(vertexIndex).Position.GetY()))
-			w.cubeVertices = append(w.cubeVertices, float32(pmxModel.Vertices.GetItem(vertexIndex).Position.GetZ()))
-			w.cubeVertices = append(w.cubeVertices, float32(pmxModel.Vertices.GetItem(vertexIndex).UV.GetX()))
-			w.cubeVertices = append(w.cubeVertices, float32(pmxModel.Vertices.GetItem(vertexIndex).UV.GetY()))
+			w.faces = append(w.faces, float32(pmxModel.Vertices.GetItem(vertexIndex).Position.GetX()))
+			w.faces = append(w.faces, float32(pmxModel.Vertices.GetItem(vertexIndex).Position.GetY()))
+			w.faces = append(w.faces, float32(pmxModel.Vertices.GetItem(vertexIndex).Position.GetZ()))
+			w.faces = append(w.faces, float32(pmxModel.Vertices.GetItem(vertexIndex).UV.GetX()))
+			w.faces = append(w.faces, float32(pmxModel.Vertices.GetItem(vertexIndex).UV.GetY()))
 		}
 	}
 }
@@ -209,7 +210,7 @@ func (w *GlWindow) Run() {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(w.cubeVertices)*4, gl.Ptr(w.cubeVertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(w.faces)*4, gl.Ptr(w.faces), gl.STATIC_DRAW)
 
 	vertAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
@@ -247,7 +248,7 @@ func (w *GlWindow) Run() {
 		gl.ActiveTexture(gl.TEXTURE0)
 		gl.BindTexture(gl.TEXTURE_2D, texture)
 
-		gl.DrawArrays(gl.TRIANGLES, 0, 6*2*3)
+		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(w.faces)*3))
 
 		// Maintenance
 		w.SwapBuffers()
