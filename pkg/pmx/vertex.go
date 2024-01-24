@@ -3,24 +3,18 @@ package pmx
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type Vertex struct {
 	*mcore.IndexModel
-	// 頂点位置
-	Position *mmath.MVec3
-	// 頂点法線
-	Normal *mmath.MVec3
-	// UV
-	UV *mmath.MVec2
-	// 追加UV
-	ExtendedUVs []mmath.MVec4
-	// ウェイト変形方式
-	DeformType DeformType
-	// デフォーム
-	Deform DeformInterface
-	// エッジ倍率
-	EdgeFactor float64
+	Position    *mmath.MVec3    // 頂点位置
+	Normal      *mmath.MVec3    // 頂点法線
+	UV          *mmath.MVec2    // UV
+	ExtendedUVs []mmath.MVec4   // 追加UV
+	DeformType  DeformType      // ウェイト変形方式
+	Deform      DeformInterface // デフォーム
+	EdgeFactor  float64         // エッジ倍率
 }
 
 func NewVertex() *Vertex {

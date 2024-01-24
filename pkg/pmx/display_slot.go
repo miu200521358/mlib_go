@@ -9,22 +9,18 @@ import (
 type DisplayType int
 
 const (
-	// ボーン
-	DISPLAY_TYPE_BONE DisplayType = 0
-	// モーフ
-	DISPLAY_TYPE_MORPH DisplayType = 1
+	DISPLAY_TYPE_BONE  DisplayType = 0 // ボーン
+	DISPLAY_TYPE_MORPH DisplayType = 1 // モーフ
 )
 
 type Reference struct {
-	// 要素対象 0:ボーン 1:モーフ
-	DisplayType DisplayType
-	// ボーンIndex or モーフIndex
-	DisplayIndex int
+	DisplayType  DisplayType // 要素対象 0:ボーン 1:モーフ
+	DisplayIndex int         // ボーンIndex or モーフIndex
 }
 
 func NewDisplaySlotReference() *Reference {
 	return &Reference{
-		DisplayType: 0,
+		DisplayType:  0,
 		DisplayIndex: -1,
 	}
 }
@@ -33,24 +29,17 @@ func NewDisplaySlotReference() *Reference {
 type SpecialFlag int
 
 const (
-	// 通常枠
-	SPECIAL_FLAG_OFF SpecialFlag = 0
-	// 特殊枠（Rootと表情）
-	SPECIAL_FLAG_ON SpecialFlag = 1
+	SPECIAL_FLAG_OFF SpecialFlag = 0 // 通常枠
+	SPECIAL_FLAG_ON  SpecialFlag = 1 // 特殊枠（Rootと表情）
 )
 
 type DisplaySlot struct {
 	*mcore.IndexModel
-	// 枠名
-	Name string
-	// 枠名英
-	EnglishName string
-	// 特殊枠フラグ - 0:通常枠 1:特殊枠
-	SpecialFlag SpecialFlag
-	// 表示枠要素
-	References []Reference
-	// ツール側で追加した表示枠
-	IsSystem bool
+	Name        string      // 枠名
+	EnglishName string      // 枠名英
+	SpecialFlag SpecialFlag // 特殊枠フラグ - 0:通常枠 1:特殊枠
+	References  []Reference // 表示枠要素
+	IsSystem    bool        // ツール側で追加した表示枠
 }
 
 // NewDisplaySlot

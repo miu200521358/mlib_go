@@ -8,20 +8,13 @@ import (
 )
 
 type IkLink struct {
-	// リンクボーンのボーンIndex
-	BoneIndex int
-	// 角度制限有無
-	AngleLimit bool
-	// 下限
-	MinAngleLimit mmath.MRotation
-	// 上限
-	MaxAngleLimit mmath.MRotation
-	// ローカル軸の角度制限有無
-	LocalAngleLimit bool
-	// ローカル軸制限の下限
-	LocalMinAngleLimit mmath.MRotation
-	// ローカル軸制限の上限
-	LocalMaxAngleLimit mmath.MRotation
+	BoneIndex          int             // リンクボーンのボーンIndex
+	AngleLimit         bool            // 角度制限有無
+	MinAngleLimit      mmath.MRotation // 下限
+	MaxAngleLimit      mmath.MRotation // 上限
+	LocalAngleLimit    bool            // ローカル軸の角度制限有無
+	LocalMinAngleLimit mmath.MRotation // ローカル軸制限の下限
+	LocalMaxAngleLimit mmath.MRotation // ローカル軸制限の上限
 }
 
 func NewIkLink() *IkLink {
@@ -42,14 +35,10 @@ func (t *IkLink) Copy() *IkLink {
 }
 
 type Ik struct {
-	// IKターゲットボーンのボーンIndex
-	BoneIndex int
-	// IKループ回数 (最大255)
-	LoopCount int
-	// IKループ計算時の1回あたりの制限角度(Xにのみ値が入っている)
-	UnitRotation mmath.MRotation
-	// IKリンクリスト
-	Links []IkLink
+	BoneIndex    int             // IKターゲットボーンのボーンIndex
+	LoopCount    int             // IKループ回数 (最大255)
+	UnitRotation mmath.MRotation // IKループ計算時の1回あたりの制限角度
+	Links        []IkLink        // IKリンクリスト
 }
 
 func NewIk() *Ik {
@@ -72,82 +61,44 @@ func (t *Ik) Copy() *Ik {
 
 type Bone struct {
 	*mcore.IndexModel
-	// ボーン名
-	Name string
-	// ボーン名英
-	EnglishName string
-	// ボーン位置
-	Position mmath.MVec3
-	// 親ボーンのボーンIndex
-	ParentIndex int
-	// 変形階層
-	Layer int
-	// ボーンフラグ(16bit) 各bit 0:OFF 1:ON
-	BoneFlag BoneFlag
-	// 接続先:0 の場合 座標オフセット, ボーン位置からの相対分
-	TailPosition mmath.MVec3
-	// 接続先:1 の場合 接続先ボーンのボーンIndex
-	TailIndex int
-	// 回転付与:1 または 移動付与:1 の場合 付与親ボーンのボーンIndex
-	EffectIndex int
-	// 付与率
-	EffectFactor float64
-	// 軸固定:1 の場合 軸の方向ベクトル
-	FixedAxis mmath.MVec3
-	// ローカル軸:1 の場合 X軸の方向ベクトル
-	LocalAxisX mmath.MVec3
-	// ローカル軸:1 の場合 Z軸の方向ベクトル
-	LocalAxisZ mmath.MVec3
-	// 外部親変形:1 の場合 Key値
-	ExternalKey int
-	// IK:1 の場合 IKデータを格納
-	Ik *Ik
-	// 該当表示枠
-	DisplaySlot int
-	// システム計算用追加ボーン の場合 true
-	IsSystem bool
-	// 計算済みのX軸の方向ベクトル
-	NormalizedLocalAxisX mmath.MVec3
-	// 計算済みのY軸の方向ベクトル
-	NormalizedLocalAxisY mmath.MVec3
-	// 計算済みのZ軸の方向ベクトル
-	NormalizedLocalAxisZ mmath.MVec3
-	// 計算済みの軸制限ベクトル
-	NormalizedFixedAxis mmath.MVec3
-	// ローカル軸の方向ベクトル(CorrectedLocalXVectorの正規化ベクトル)
-	LocalAxis mmath.MVec3
-	// 親ボーンからの相対位置
-	ParentRelativePosition mmath.MVec3
-	// Tailボーンへの相対位置
-	TailRelativePosition mmath.MVec3
-	// 逆オフセット行列(親ボーンからの相対位置分を戻す)
-	ParentRevertMatrix mmath.MMat4
-	// オフセット行列 (自身の位置を原点に戻す行列)
-	OffsetMatrix mmath.MMat4
-	// 自分のボーンまでのボーンIndexのリスト
-	TreeBoneIndexes []int
-	// 関連ボーンINDEX一覧（付与親とかIKとか）
-	RelativeBoneIndexes []int
-	// 自分を親として登録しているボーンINDEX一覧
-	ChildBoneIndexes []int
-	// 自分を付与親として登録しているボーンINDEX一覧
-	EffectiveBoneIndexes []int
-	// IKリンクとして登録されているIKボーンのボーンIndex
-	IkLinkBoneIndexes []int
-	// IKターゲットとして登録されているIKボーンのボーンIndex
-	IkTargetBoneIndexes []int
-	// 自分がIKリンクボーンの角度制限がある場合、true
-	AngleLimit bool
-	// 自分がIKリンクボーンの角度制限の下限
-	MinAngleLimit mmath.MRotation
-	// 自分がIKリンクボーンの角度制限の上限
-	MaxAngleLimit mmath.MRotation
-	// 自分がIKリンクボーンのローカル軸角度制限がある場合、true
-	LocalAngleLimit bool
-	// 自分がIKリンクボーンのローカル軸角度制限の下限
-	LocalMinAngleLimit mmath.MRotation
-	// 自分がIKリンクボーンのローカル軸角度制限の上限
-	LocalMaxAngleLimit mmath.MRotation
+	Name                   string          // ボーン名
+	EnglishName            string          // ボーン名英
+	Position               mmath.MVec3     // ボーン位置
+	ParentIndex            int             // 親ボーンのボーンIndex
+	Layer                  int             // 変形階層
+	BoneFlag               BoneFlag        // ボーンフラグ(16bit) 各bit 0:OFF 1:ON
+	TailPosition           mmath.MVec3     // 接続先:0 の場合 座標オフセット, ボーン位置からの相対分
+	TailIndex              int             // 接続先:1 の場合 接続先ボーンのボーンIndex
+	EffectIndex            int             // 回転付与:1 または 移動付与:1 の場合 付与親ボーンのボーンIndex
+	EffectFactor           float64         // 付与率
+	FixedAxis              mmath.MVec3     // 軸固定:1 の場合 軸の方向ベクトル
+	LocalAxisX             mmath.MVec3     // ローカル軸:1 の場合 X軸の方向ベクトル
+	LocalAxisZ             mmath.MVec3     // ローカル軸:1 の場合 Z軸の方向ベクトル
+	ExternalKey            int             // 外部親変形:1 の場合 Key値
+	Ik                     *Ik             // IK:1 の場合 IKデータを格納
+	DisplaySlot            int             // 該当表示枠
+	IsSystem               bool            // システム計算用追加ボーン の場合 true
+	NormalizedLocalAxisX   mmath.MVec3     // 計算済みのX軸の方向ベクトル
+	NormalizedLocalAxisY   mmath.MVec3     // 計算済みのY軸の方向ベクトル
+	NormalizedLocalAxisZ   mmath.MVec3     // 計算済みのZ軸の方向ベクトル
+	NormalizedFixedAxis    mmath.MVec3     // 計算済みの軸制限ベクトル
+	LocalAxis              mmath.MVec3     // ローカル軸の方向ベクトル(CorrectedLocalXVectorの正規化ベクトル)
+	ParentRelativePosition mmath.MVec3     // 親ボーンからの相対位置
+	TailRelativePosition   mmath.MVec3     // Tailボーンへの相対位置
+	ParentRevertMatrix     mmath.MMat4     // 逆オフセット行列(親ボーンからの相対位置分を戻す)
+	OffsetMatrix           mmath.MMat4     // オフセット行列 (自身の位置を原点に戻す行列)
+	TreeBoneIndexes        []int           // 自分のボーンまでのボーンIndexのリスト
+	RelativeBoneIndexes    []int           // 関連ボーンINDEX一覧（付与親とかIKとか）
+	ChildBoneIndexes       []int           // 自分を親として登録しているボーンINDEX一覧
+	EffectiveBoneIndexes   []int           // 自分を付与親として登録しているボーンINDEX一覧
+	IkLinkBoneIndexes      []int           // IKリンクとして登録されているIKボーンのボーンIndex
+	IkTargetBoneIndexes    []int           // IKターゲットとして登録されているIKボーンのボーンIndex
+	AngleLimit             bool            // 自分がIKリンクボーンの角度制限がある場合、true
+	MinAngleLimit          mmath.MRotation // 自分がIKリンクボーンの角度制限の下限
+	MaxAngleLimit          mmath.MRotation // 自分がIKリンクボーンの角度制限の上限
+	LocalAngleLimit        bool            // 自分がIKリンクボーンのローカル軸角度制限がある場合、true
+	LocalMinAngleLimit     mmath.MRotation // 自分がIKリンクボーンのローカル軸角度制限の下限
+	LocalMaxAngleLimit     mmath.MRotation // 自分がIKリンクボーンのローカル軸角度制限の上限
 }
 
 func NewBone() *Bone {

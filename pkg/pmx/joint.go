@@ -12,18 +12,12 @@ type LimitParam struct {
 }
 
 type JointParam struct {
-	// 移動制限-下限(x,y,z)
-	TranslationLimitMin mmath.MVec3
-	// 移動制限-上限(x,y,z)
-	TranslationLimitMax mmath.MVec3
-	// 回転制限-下限
-	RotationLimitMin mmath.MRotation
-	// 回転制限-上限
-	RotationLimitMax mmath.MRotation
-	// バネ定数-移動(x,y,z)
-	SpringConstantTranslation mmath.MVec3
-	// バネ定数-回転(x,y,z)
-	SpringConstantRotation mmath.MRotation
+	TranslationLimitMin       mmath.MVec3     // 移動制限-下限(x,y,z)
+	TranslationLimitMax       mmath.MVec3     // 移動制限-上限(x,y,z)
+	RotationLimitMin          mmath.MRotation // 回転制限-下限
+	RotationLimitMax          mmath.MRotation // 回転制限-上限
+	SpringConstantTranslation mmath.MVec3     // バネ定数-移動(x,y,z)
+	SpringConstantRotation    mmath.MRotation // バネ定数-回転(x,y,z)
 }
 
 func NewJointParam() *JointParam {
@@ -39,23 +33,15 @@ func NewJointParam() *JointParam {
 
 type Joint struct {
 	*mcore.IndexModel
-	// Joint名
-	Name string
-	// Joint名英
-	EnglishName string
-	// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
-	JointType byte
-	// 関連剛体AのIndex
-	RigidbodyIndexA int
-	// 関連剛体BのIndex
-	RigidbodyIndexB int
-	// 位置(x,y,z)
-	Position mmath.MVec3
-	// 回転
-	Rotation mmath.MRotation
-	// ジョイントパラメーター
-	JointParam JointParam
-	IsSystem   bool
+	Name            string          // Joint名
+	EnglishName     string          // Joint名英
+	JointType       byte            // Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
+	RigidbodyIndexA int             // 関連剛体AのIndex
+	RigidbodyIndexB int             // 関連剛体BのIndex
+	Position        mmath.MVec3     // 位置(x,y,z)
+	Rotation        mmath.MRotation // 回転
+	JointParam      JointParam      // ジョイントパラメーター
+	IsSystem        bool
 }
 
 func NewJoint() *Joint {

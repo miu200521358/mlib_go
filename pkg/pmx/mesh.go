@@ -12,16 +12,30 @@ import (
 type Mesh struct {
 	material          MaterialGL // 描画用材質
 	prevVerticesCount int        // 前の頂点数
+	ibo               *mgl.IBO   // 頂点インデックスバッファ
 }
 
 func NewMesh(
+	allFaces []uint32,
 	material *MaterialGL,
 	prevVerticesCount int,
 ) *Mesh {
+	faces := allFaces[prevVerticesCount:(prevVerticesCount + material.VerticesCount)]
+	// println(
+	// 	"faces",
+	// 	mutils.JoinSlice(mutils.ConvertUint32ToInterfaceSlice(faces)),
+	// 	"prevVerticesCount",
+	// 	prevVerticesCount,
+	// 	"material.VerticesCount",
+	// 	material.VerticesCount,
+	// )
+
+	ibo := mgl.NewIBO(gl.Ptr(faces), len(faces))
 
 	return &Mesh{
 		material:          *material,
 		prevVerticesCount: prevVerticesCount,
+		ibo:               ibo,
 	}
 }
 
@@ -30,6 +44,8 @@ func (m *Mesh) DrawModel(
 	windowIndex int,
 	boneMatrixes []mgl32.Mat4,
 ) {
+	m.ibo.Bind()
+
 	// if m.material.DrawFlag == DRAW_FLAG_DOUBLE_SIDED_DRAWING {
 	// 両面描画
 	// カリングOFF
@@ -179,6 +195,11 @@ func (m *Mesh) DrawModel(
 	// }
 
 	// m.UnbindBoneMatrixes()
+	m.ibo.Unbind()
+}
+
+func (m *Mesh) Delete() {
+	m.ibo.Delete()
 }
 
 // func (m *Mesh) BindBoneMatrixes(

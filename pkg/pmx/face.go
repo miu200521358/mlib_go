@@ -2,13 +2,13 @@ package pmx
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+
 )
 
 // 面データ
 type Face struct {
 	*mcore.IndexModel
-	// 頂点INDEXリスト
-	VertexIndexes [3]int
+	VertexIndexes [3]int // 頂点INDEXリスト
 }
 
 type FaceGL struct {

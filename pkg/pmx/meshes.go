@@ -11,30 +11,20 @@ type Meshes struct {
 	meshes []*Mesh
 	vao    *mgl.VAO
 	vbo    *mgl.VBO
-	ibo    *mgl.IBO
 }
 
 func NewMeshes(model *PmxModel, windowIndex int) *Meshes {
 	// 頂点情報
 	vertices := make([]float32, 0, len(model.Vertices.Indexes))
-	for _, v := range model.Vertices.Data {
+	for _, v := range model.Vertices.GetSortedData() {
 		vertices = append(vertices, (*v).GL()...)
 	}
-
-	var faceDtype uint32
-
-	if model.VertexCountType == 1 {
-		faceDtype = uint32(8)
-	} else if model.VertexCountType == 2 {
-		faceDtype = uint32(16)
-	} else {
-		faceDtype = uint32(32)
-	}
+	// println("vertices", mutils.JoinSlice(mutils.ConvertFloat32ToInterfaceSlice(vertices)))
 
 	// 面情報
 	faces := make([]uint32, 0, len(model.Faces.Indexes))
-	for _, f := range model.Faces.Data {
-		vertices := (*f).VertexIndexes
+	for _, f := range model.Faces.GetSortedData() {
+		vertices := f.VertexIndexes
 		faces = append(faces, uint32(vertices[2]))
 		faces = append(faces, uint32(vertices[1]))
 		faces = append(faces, uint32(vertices[0]))
@@ -42,28 +32,29 @@ func NewMeshes(model *PmxModel, windowIndex int) *Meshes {
 
 	meshes := make([]*Mesh, 0, len(model.Materials.Indexes))
 	prevVerticesCount := 0
-	for _, m := range model.Materials.Data {
-		materialGl := (*m).GL(
+	for _, m := range model.Materials.GetSortedData() {
+		materialGl := m.GL(
 			model.Path,
 			nil,
 			nil,
 			nil,
 			windowIndex,
+			prevVerticesCount,
 		)
 		mesh := NewMesh(
+			faces,
 			materialGl,
 			prevVerticesCount,
 		)
 		meshes = append(meshes, mesh)
+
+		prevVerticesCount += m.VerticesCount
 	}
 
 	vao := mgl.NewVAO()
 	vao.Bind()
 	vbo := mgl.NewVBO(gl.Ptr(vertices), len(vertices), 3)
 	vbo.Bind()
-	ibo := mgl.NewIBO(gl.Ptr(faces), len(faces), faceDtype)
-	ibo.Bind()
-	ibo.Unbind()
 	vbo.Unbind()
 	vao.Unbind()
 
@@ -71,12 +62,13 @@ func NewMeshes(model *PmxModel, windowIndex int) *Meshes {
 		meshes: meshes,
 		vao:    vao,
 		vbo:    vbo,
-		ibo:    ibo,
 	}
 }
 
 func (m *Meshes) Delete() {
-	m.ibo.Delete()
+	for _, mesh := range m.meshes {
+		mesh.Delete()
+	}
 	m.vao.Delete()
 	m.vbo.Delete()
 }
@@ -90,13 +82,11 @@ func (m *Meshes) Draw(shader *mgl.MShader, boneMatrixes []mgl32.Mat4, windowInde
 	for _, mesh := range m.meshes {
 		m.vao.Bind()
 		m.vbo.Bind()
-		m.ibo.Bind()
 
 		shader.UseModelProgram()
 		mesh.DrawModel(shader, windowIndex, boneMatrixes)
 		shader.Unuse()
 
-		m.ibo.Unbind()
 		m.vbo.Unbind()
 		m.vao.Unbind()
 	}

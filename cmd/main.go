@@ -81,6 +81,8 @@ func main() {
 			return
 		}
 		model := data.(*pmx.PmxModel)
+		println(fmt.Sprintf("頂点数: %d", len(model.Vertices.Indexes)))
+		println(fmt.Sprintf("面数: %d", len(model.Faces.Indexes)))
 
 		console.AppendText(fmt.Sprintf("モデル名: %s", model.Name))
 		console.AppendText(fmt.Sprintf("頂点数: %d", len(model.Vertices.Indexes)))

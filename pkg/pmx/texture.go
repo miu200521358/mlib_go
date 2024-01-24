@@ -9,18 +9,16 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 // テクスチャ種別
 type TextureType int
 
 const (
-	// テクスチャ
-	TEXTURE_TYPE_TEXTURE TextureType = 0
-	// Toonテクスチャ
-	TEXTURE_TYPE_TOON TextureType = 1
-	// スフィアテクスチャ
-	TEXTURE_TYPE_SPHERE TextureType = 2
+	TEXTURE_TYPE_TEXTURE TextureType = 0 // テクスチャ
+	TEXTURE_TYPE_TOON    TextureType = 1 // Toonテクスチャ
+	TEXTURE_TYPE_SPHERE  TextureType = 2 // スフィアテクスチャ
 )
 
 type TextureGL struct {
@@ -32,22 +30,14 @@ type TextureGL struct {
 
 type Texture struct {
 	*mcore.IndexModel
-	// テクスチャ名
-	Name string
-	// テクスチャ種別
-	TextureType TextureType
-	// テクスチャフルパス
-	Path string
-	// テクスチャフルパスが有効であるか否か
-	Valid bool
-	// OpenGLテクスチャID
-	glId uint32
-	// 描画初期化済みフラグ
-	Initialized bool
-	// テクスチャイメージ
-	Image image.Image
-	// テクスチャタイプID
-	textureTypeId uint32
+	Name          string      // テクスチャ名
+	TextureType   TextureType // テクスチャ種別
+	Path          string      // テクスチャフルパス
+	Valid         bool        // テクスチャフルパスが有効であるか否か
+	glId          uint32      // OpenGLテクスチャID
+	Initialized   bool        // 描画初期化済みフラグ
+	Image         image.Image // テクスチャイメージ
+	textureTypeId uint32      // テクスチャタイプID
 }
 
 func NewTexture() *Texture {

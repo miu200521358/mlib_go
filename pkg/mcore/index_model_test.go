@@ -77,7 +77,7 @@ func NewFaces() *Faces {
 func TestIndexModelCorrection_GetItem(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, &item)
+	model.SetItem(0, item)
 
 	result := model.GetItem(0)
 	if result != item {
@@ -96,7 +96,7 @@ func TestIndexModelCorrection_GetItem(t *testing.T) {
 func TestIndexModelCorrection_SetItem(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, &item)
+	model.SetItem(0, item)
 
 	result := model.GetItem(0)
 	if result != item {
@@ -129,7 +129,7 @@ func TestIndexModelCorrection_Append(t *testing.T) {
 func TestIndexModelCorrection_DeleteItem(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, &item)
+	model.SetItem(0, item)
 
 	model.DeleteItem(0)
 
@@ -145,7 +145,7 @@ func TestIndexModelCorrection_DeleteItem(t *testing.T) {
 func TestIndexModelCorrection_Len(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, &item)
+	model.SetItem(0, item)
 
 	result := model.Len()
 	if result != 1 {
@@ -156,7 +156,7 @@ func TestIndexModelCorrection_Len(t *testing.T) {
 func TestIndexModelCorrection_Contains(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, &item)
+	model.SetItem(0, item)
 
 	result := model.Contains(0)
 	if !result {
@@ -178,7 +178,7 @@ func TestIndexModelCorrection_IsEmpty(t *testing.T) {
 	}
 
 	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, &item)
+	model.SetItem(0, item)
 
 	result = model.IsEmpty()
 	if result {
@@ -189,7 +189,7 @@ func TestIndexModelCorrection_IsEmpty(t *testing.T) {
 func TestIndexModelCorrection_LastIndex(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(5, 0, 0, 0)
-	model.SetItem(5, &item)
+	model.SetItem(5, item)
 
 	result := model.LastIndex()
 	if result != 5 {

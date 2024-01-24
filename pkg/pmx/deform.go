@@ -27,12 +27,9 @@ type DeformInterface interface {
 
 // Deform デフォーム既定構造体
 type Deform struct {
-	// ボーンINDEXリスト
-	Indexes []int
-	// ウェイトリスト
-	Weights []float64
-	// デフォームボーン個数
-	Count int
+	Indexes []int     // ボーンINDEXリスト
+	Weights []float64 // ウェイトリスト
+	Count   int       // デフォームボーン個数
 }
 
 // NewDeform creates a new Deform instance.

@@ -23,16 +23,16 @@ type PmxModel struct {
 	Comment             string
 	EnglishComment      string
 	JsonData            map[string]interface{}
-	Vertices            Vertices
-	Faces               Faces
-	Textures            Textures
-	ToonTextures        ToonTextures
-	Materials           Materials
-	Bones               Bones
-	Morphs              Morphs
-	DisplaySlots        DisplaySlots
-	RigidBodies         RigidBodies
-	Joints              Joints
+	Vertices            *Vertices
+	Faces               *Faces
+	Textures            *Textures
+	ToonTextures        *ToonTextures
+	Materials           *Materials
+	Bones               *Bones
+	Morphs              *Morphs
+	DisplaySlots        *DisplaySlots
+	RigidBodies         *RigidBodies
+	Joints              *Joints
 	VerticesByBones     map[int][]int
 	VerticesByMaterials map[int][]int
 	FacesByMaterials    map[int][]int
@@ -43,16 +43,16 @@ func NewPmxModel(path string) *PmxModel {
 	model := &PmxModel{}
 	model.HashModel = mcore.NewHashModel(path)
 
-	model.Vertices = *NewVertices()
-	model.Faces = *NewFaces()
-	model.Textures = *NewTextures()
-	model.ToonTextures = *NewToonTextures()
-	model.Materials = *NewMaterials()
-	model.Bones = *NewBones()
-	model.Morphs = *NewMorphs()
-	model.DisplaySlots = *NewDisplaySlots()
-	model.RigidBodies = *NewRigidBodies()
-	model.Joints = *NewJoints()
+	model.Vertices = NewVertices()
+	model.Faces = NewFaces()
+	model.Textures = NewTextures()
+	model.ToonTextures = NewToonTextures()
+	model.Materials = NewMaterials()
+	model.Bones = NewBones()
+	model.Morphs = NewMorphs()
+	model.DisplaySlots = NewDisplaySlots()
+	model.RigidBodies = NewRigidBodies()
+	model.Joints = NewJoints()
 	model.VerticesByBones = make(map[int][]int)
 	model.VerticesByMaterials = make(map[int][]int)
 	model.FacesByMaterials = make(map[int][]int)

@@ -47,54 +47,37 @@ const (
 )
 
 type MaterialGL struct {
-	Diffuse       [4]float32
-	Ambient       [3]float32
-	Specular      [4]float32
-	Edge          [4]float32
-	EdgeSize      float32
-	Texture       *TextureGL
-	SphereTexture *TextureGL
-	ToonTexture   *TextureGL
-	// 描画フラグ(8bit) - 各bit 0:OFF 1:ON
-	DrawFlag DrawFlag
-	// スフィアモード
-	SphereMode SphereMode
-	// 頂点数
-	VerticesCount int
+	Diffuse           [4]float32
+	Ambient           [3]float32
+	Specular          [4]float32
+	Edge              [4]float32
+	EdgeSize          float32
+	Texture           *TextureGL
+	SphereTexture     *TextureGL
+	ToonTexture       *TextureGL
+	DrawFlag          DrawFlag   // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
+	SphereMode        SphereMode // スフィアモード
+	VerticesCount     int        // 頂点数
+	PrevVerticesCount int        // 前の材質までの頂点数
 }
 
 type Material struct {
 	*mcore.IndexModel
-	// 材質名
-	Name string
-	// 材質名英
-	EnglishName string
-	// Diffuse (R,G,B,A)(拡散色＋非透過度)
-	Diffuse mmath.MVec4
-	// Specular (R,G,B,A)(反射色 + 反射強度)
-	Specular mmath.MVec4
-	// Ambient (R,G,B)(環境色)
-	Ambient mmath.MVec3
-	// 描画フラグ(8bit) - 各bit 0:OFF 1:ON
-	DrawFlag DrawFlag
-	// エッジ色 (R,G,B,A)
-	Edge mmath.MVec4
-	// エッジサイズ
-	EdgeSize float64
-	// 通常テクスチャINDEX
-	TextureIndex int
-	// スフィアテクスチャINDEX
-	SphereTextureIndex int
-	// スフィアモード
-	SphereMode SphereMode
-	// 共有Toonフラグ
-	ToonSharingFlag ToonSharing
-	// ToonテクスチャINDEX
-	ToonTextureIndex int
-	// メモ
-	Memo string
-	// 材質に対応する面(頂点)数 (必ず3の倍数になる)
-	VerticesCount int
+	Name               string      // 材質名
+	EnglishName        string      // 材質名英
+	Diffuse            mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
+	Specular           mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
+	Ambient            mmath.MVec3 // Ambient (R,G,B)(環境色)
+	DrawFlag           DrawFlag    // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
+	Edge               mmath.MVec4 // エッジ色 (R,G,B,A)
+	EdgeSize           float64     // エッジサイズ
+	TextureIndex       int         // 通常テクスチャINDEX
+	SphereTextureIndex int         // スフィアテクスチャINDEX
+	SphereMode         SphereMode  // スフィアモード
+	ToonSharingFlag    ToonSharing // 共有Toonフラグ
+	ToonTextureIndex   int         // ToonテクスチャINDEX
+	Memo               string      // メモ
+	VerticesCount      int         // 材質に対応する面(頂点)数 (必ず3の倍数になる)
 }
 
 func NewMaterial() *Material {
@@ -124,6 +107,7 @@ func (m *Material) GL(
 	sphereTexture *Texture,
 	toonTexture *Texture,
 	windowIndex int,
+	prevVerticesCount int,
 ) *MaterialGL {
 	var textureGL *TextureGL
 	if texture != nil {
@@ -142,17 +126,18 @@ func (m *Material) GL(
 	}
 
 	return &MaterialGL{
-		Diffuse:       [4]float32{float32(m.Diffuse.GetX()), float32(m.Diffuse.GetY()), float32(m.Diffuse.GetZ()), float32(m.Diffuse.GetW())},
-		Ambient:       m.Ambient.GL(),
-		Specular:      m.Specular.GL(),
-		Edge:          m.Edge.GL(),
-		EdgeSize:      float32(m.EdgeSize),
-		Texture:       textureGL,
-		SphereTexture: sphereTextureGL,
-		ToonTexture:   tooTextureGL,
-		DrawFlag:      m.DrawFlag,
-		SphereMode:    m.SphereMode,
-		VerticesCount: m.VerticesCount,
+		Diffuse:           [4]float32{float32(m.Diffuse.GetX()), float32(m.Diffuse.GetY()), float32(m.Diffuse.GetZ()), float32(m.Diffuse.GetW())},
+		Ambient:           m.Ambient.GL(),
+		Specular:          m.Specular.GL(),
+		Edge:              m.Edge.GL(),
+		EdgeSize:          float32(m.EdgeSize),
+		Texture:           textureGL,
+		SphereTexture:     sphereTextureGL,
+		ToonTexture:       tooTextureGL,
+		DrawFlag:          m.DrawFlag,
+		SphereMode:        m.SphereMode,
+		VerticesCount:     m.VerticesCount,
+		PrevVerticesCount: prevVerticesCount * 4,
 	}
 }
 
