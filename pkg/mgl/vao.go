@@ -2,6 +2,9 @@ package mgl
 
 import (
 	"github.com/go-gl/gl/v4.4-core/gl"
+
+	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 // Vertex Array Object.
@@ -27,6 +30,7 @@ func (v *VAO) Delete() {
 // Binds VAO for rendering.
 func (v *VAO) Bind() {
 	gl.BindVertexArray(v.id)
+	mutils.CheckGLError()
 }
 
 // Unbinds.

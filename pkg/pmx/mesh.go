@@ -5,7 +5,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type Mesh struct {
@@ -26,15 +26,14 @@ func NewMesh(
 
 func (m *Mesh) DrawModel(
 	shader *mgl.MShader,
-	faceCount int32,
-	dtype uint32,
+	faceDtype uint32,
 	windowIndex int,
 	boneMatrixes []mgl32.Mat4,
 ) {
 	// if m.material.DrawFlag == DRAW_FLAG_DOUBLE_SIDED_DRAWING {
-	// 	// 両面描画
-	// 	// カリングOFF
-	// 	gl.Disable(gl.CULL_FACE)
+	// 両面描画
+	// カリングOFF
+	gl.Disable(gl.CULL_FACE)
 	// } else {
 	// 	// 片面描画
 	// 	// カリングON
@@ -48,11 +47,21 @@ func (m *Mesh) DrawModel(
 	// ------------------
 	// 材質色設定
 	// full.fx の AmbientColor相当
-	diffuse := m.material.Diffuse
+	diffuse := mgl32.Vec4{1.0, 1.0, 1.0, 1.0}
 	gl.Uniform4f(
 		shader.DiffuseUniform[mgl.PROGRAM_TYPE_MODEL],
 		diffuse[0], diffuse[1], diffuse[2], diffuse[3],
 	)
+	mutils.CheckGLError()
+
+	// 三角形描画
+	gl.DrawElements(
+		gl.TRIANGLES,
+		int32(m.material.VerticesCount),
+		faceDtype,
+		nil,
+	)
+	mutils.CheckGLError()
 
 	// ambient := m.material.Ambient
 	// gl.Uniform3f(
@@ -144,12 +153,6 @@ func (m *Mesh) DrawModel(
 
 	// prevVerticesSize := m.prevVerticesCount * int(ibo.Dtype)
 
-	gl.DrawElements(
-		gl.TRIANGLES,
-		faceCount,
-		dtype,
-		nil,
-	)
 	// if err := mutils.CheckGLError(); err != nil {
 	// 	panic(fmt.Errorf("Mesh DrawElements failed: %v", err))
 	// }

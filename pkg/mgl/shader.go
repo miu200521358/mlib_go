@@ -10,6 +10,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type ProgramType int
@@ -71,7 +72,7 @@ type MShader struct {
 	// BoneCountUniform                 map[ProgramType]int32
 	// IsShowBoneWeightUniform          map[ProgramType]int32
 	// ShowBoneIndexesUniform           map[ProgramType]int32
-	modelProgram uint32
+	ModelProgram uint32
 	EdgeProgram  uint32
 	BoneProgram  uint32
 }
@@ -85,7 +86,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		width:                       int32(width),
 		height:                      int32(height),
 		nearPlane:                   1.0,
-		farPlane:                    10.0,
+		farPlane:                    100.0,
 		lightPosition:               &mmath.MVec3{-20, INITIAL_CAMERA_POSITION_Y * 2, INITIAL_CAMERA_POSITION_Z * 2},
 		lightDirection:              &mmath.MVec3{-1, -1, -1},
 		msaa:                        NewMsaa(int32(width), int32(height)),
@@ -125,9 +126,9 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 	if err != nil {
 		return nil, err
 	}
-	shader.modelProgram = modelProgram
+	shader.ModelProgram = modelProgram
 	shader.UseModelProgram()
-	shader.initialize(shader.modelProgram, PROGRAM_TYPE_MODEL)
+	shader.initialize(shader.ModelProgram, PROGRAM_TYPE_MODEL)
 	shader.Unuse()
 
 	return shader, nil
@@ -236,7 +237,7 @@ func (s *MShader) initialize(program uint32, programType ProgramType) {
 	projectionUniform := gl.GetUniformLocation(program, gl.Str("projection\x00"))
 	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
-	camera := mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	camera := mgl32.LookAtV(mgl32.Vec3{0, 0, 10}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
 	cameraUniform := gl.GetUniformLocation(program, gl.Str("camera\x00"))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
@@ -374,7 +375,7 @@ func (s *MShader) UseBoneProgram() {
 func (s *MShader) Use(programType ProgramType) {
 	switch programType {
 	case PROGRAM_TYPE_MODEL:
-		gl.UseProgram(s.modelProgram)
+		gl.UseProgram(s.ModelProgram)
 	case PROGRAM_TYPE_EDGE:
 		gl.UseProgram(s.EdgeProgram)
 	case PROGRAM_TYPE_BONE:
@@ -387,7 +388,7 @@ func (s *MShader) Unuse() {
 }
 
 func (s *MShader) Delete() {
-	s.DeleteProgram(s.modelProgram)
+	s.DeleteProgram(s.ModelProgram)
 	s.DeleteProgram(s.EdgeProgram)
 	s.DeleteProgram(s.BoneProgram)
 }

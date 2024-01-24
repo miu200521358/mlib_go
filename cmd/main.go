@@ -11,7 +11,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mwidget"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 func init() {
@@ -119,6 +118,8 @@ func main() {
 		execButton.SetEnabled(true)
 		subExecButton.SetEnabled(true)
 	}
+
+	glWindow.Run2()
 
 	mWindow.Center()
 	mWindow.Run()
