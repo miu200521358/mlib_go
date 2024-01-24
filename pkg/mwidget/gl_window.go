@@ -128,6 +128,13 @@ func (w *GlWindow) AddData(pmxModel *pmx.PmxModel) {
 	w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel})
 }
 
+func (w *GlWindow) ClearData() {
+	for _, modelSet := range w.ModelSets {
+		modelSet.Model.Meshes.Delete()
+	}
+	w.ModelSets = make([]ModelSet, 0)
+}
+
 func (w *GlWindow) Draw() {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()

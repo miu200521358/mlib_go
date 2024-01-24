@@ -11,7 +11,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mwidget"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 func init() {
@@ -90,6 +89,7 @@ func main() {
 		console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.Indexes)))
 		console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.Indexes)))
 
+		mWindow.GetMainGlWindow().ClearData()
 		mWindow.GetMainGlWindow().AddData(model)
 		mWindow.GetMainGlWindow().Run()
 	})
