@@ -5,7 +5,7 @@ import (
 	"image/draw"
 	"path/filepath"
 
-	"github.com/go-gl/gl/v2.1/gl"
+	"github.com/go-gl/gl/v4.4-core/gl"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
@@ -24,8 +24,10 @@ const (
 )
 
 type TextureGL struct {
-	id     uint32
-	typeId uint32
+	id          uint32
+	typeId      uint32
+	Valid       bool
+	textureType TextureType
 }
 
 type Texture struct {
@@ -39,7 +41,7 @@ type Texture struct {
 	// テクスチャフルパスが有効であるか否か
 	Valid bool
 	// OpenGLテクスチャID
-	GlId uint32
+	glId uint32
 	// 描画初期化済みフラグ
 	Initialized bool
 	// テクスチャイメージ
@@ -55,23 +57,25 @@ func NewTexture() *Texture {
 		TextureType: TEXTURE_TYPE_TEXTURE,
 		Path:        "",
 		Valid:       false,
-		GlId:        0,
+		glId:        0,
 	}
 }
 
-func (t *Texture) GL(modelPath string, textureType TextureType, isIndividual bool, windowIndex int) *TextureGL {
-	t.InitGL(modelPath, textureType, isIndividual, windowIndex)
+func (t *Texture) GL(
+	modelPath string,
+	textureType TextureType,
+	isIndividual bool,
+	windowIndex int,
+) *TextureGL {
+	tGl := &TextureGL{}
 
-	return &TextureGL{
-		id:     t.GlId,
-		typeId: t.textureTypeId,
-	}
-}
-
-func (t *Texture) InitGL(modelPath string, textureType TextureType, isIndividual bool, windowIndex int) {
-	if t.Initialized {
+	if t.Initialized && t.Valid {
 		// 既にフラグが立ってたら描画初期化済み
-		return
+		tGl.id = t.glId
+		tGl.typeId = t.textureTypeId
+		tGl.Valid = t.Valid
+		tGl.textureType = t.TextureType
+		return tGl
 	}
 
 	// global texture
@@ -85,81 +89,93 @@ func (t *Texture) InitGL(modelPath string, textureType TextureType, isIndividual
 	// テクスチャがちゃんとある場合のみ初期化処理実施
 	valid, err := mutils.ExistsFile(texPath)
 	t.Valid = (valid && err == nil)
-	if t.Valid {
-		t.Path = texPath
-		img, err := mutils.LoadImage(texPath)
-		if err != nil {
-			t.Valid = false
-		} else {
-			rgba := image.NewRGBA(img.Bounds())
-			if rgba.Stride != rgba.Rect.Size().X*4 {
-				return
-			}
-			draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
+	if !t.Valid {
+		t.Initialized = true
+		return nil
+	}
 
-			t.Image = img
-			t.Image = mutils.FlipImage(t.Image)
+	t.Path = texPath
+	img, err := mutils.LoadImage(texPath)
+	if err != nil {
+		t.Valid = false
+	} else {
+		rgba := image.NewRGBA(img.Bounds())
+		if rgba.Stride != rgba.Rect.Size().X*4 {
+			return nil
+		}
+		draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
+
+		t.Image = img
+		t.Image = mutils.FlipImage(t.Image)
+	}
+
+	if !t.Valid {
+		t.Initialized = true
+		return nil
+	}
+
+	t.TextureType = textureType
+
+	// テクスチャオブジェクト生成
+	gl.GenTextures(1, &t.glId)
+
+	// テクスチャ種別によってテクスチャユニットを変更
+	if windowIndex == 0 {
+		t.textureTypeId = gl.TEXTURE0
+		if textureType == TEXTURE_TYPE_TOON {
+			t.textureTypeId = gl.TEXTURE1
+		} else if textureType == TEXTURE_TYPE_SPHERE {
+			t.textureTypeId = gl.TEXTURE2
+		}
+	} else if windowIndex == 1 {
+		t.textureTypeId = gl.TEXTURE3
+		if textureType == TEXTURE_TYPE_TOON {
+			t.textureTypeId = gl.TEXTURE4
+		} else if textureType == TEXTURE_TYPE_SPHERE {
+			t.textureTypeId = gl.TEXTURE5
+		}
+	} else if windowIndex == 2 {
+		t.textureTypeId = gl.TEXTURE6
+		if textureType == TEXTURE_TYPE_TOON {
+			t.textureTypeId = gl.TEXTURE7
+		} else if textureType == TEXTURE_TYPE_SPHERE {
+			t.textureTypeId = gl.TEXTURE8
 		}
 	}
 
-	if t.Valid {
-		t.TextureType = textureType
+	tGl.id = t.glId
+	tGl.typeId = t.textureTypeId
+	tGl.Valid = t.Valid
+	tGl.textureType = t.TextureType
 
-		// テクスチャオブジェクト生成
-		gl.GenTextures(1, &t.GlId)
-
-		// テクスチャ種別によってテクスチャユニットを変更
-		if windowIndex == 0 {
-			t.textureTypeId = gl.TEXTURE0
-			if textureType == TEXTURE_TYPE_TOON {
-				t.textureTypeId = gl.TEXTURE1
-			} else if textureType == TEXTURE_TYPE_SPHERE {
-				t.textureTypeId = gl.TEXTURE2
-			}
-		} else if windowIndex == 1 {
-			t.textureTypeId = gl.TEXTURE3
-			if textureType == TEXTURE_TYPE_TOON {
-				t.textureTypeId = gl.TEXTURE4
-			} else if textureType == TEXTURE_TYPE_SPHERE {
-				t.textureTypeId = gl.TEXTURE5
-			}
-		} else if windowIndex == 2 {
-			t.textureTypeId = gl.TEXTURE6
-			if textureType == TEXTURE_TYPE_TOON {
-				t.textureTypeId = gl.TEXTURE7
-			} else if textureType == TEXTURE_TYPE_SPHERE {
-				t.textureTypeId = gl.TEXTURE8
-			}
-		}
-
-		t.Bind()
-		gl.TexImage2D(
-			gl.TEXTURE_2D,
-			0,
-			gl.RGBA,
-			int32(t.Image.Bounds().Dx()),
-			int32(t.Image.Bounds().Dy()),
-			0,
-			gl.RGBA,
-			gl.UNSIGNED_BYTE,
-			gl.Ptr(t.Image.(*image.RGBA).Pix),
-		)
-		t.Unbind()
-	}
+	tGl.Bind()
+	gl.TexImage2D(
+		gl.TEXTURE_2D,
+		0,
+		gl.RGBA,
+		int32(t.Image.Bounds().Dx()),
+		int32(t.Image.Bounds().Dy()),
+		0,
+		gl.RGBA,
+		gl.UNSIGNED_BYTE,
+		gl.Ptr(t.Image.(*image.RGBA).Pix),
+	)
+	tGl.Unbind()
 
 	// 描画初期化
 	t.Initialized = true
+	return tGl
 }
 
-func (t *Texture) Bind() {
+func (t *TextureGL) Bind() {
 	if !t.Valid {
 		return
 	}
 
-	gl.ActiveTexture(t.textureTypeId)
-	gl.BindTexture(gl.TEXTURE_2D, t.GlId)
+	gl.ActiveTexture(t.typeId)
+	gl.BindTexture(gl.TEXTURE_2D, t.id)
 
-	if t.TextureType == TEXTURE_TYPE_TOON {
+	if t.textureType == TEXTURE_TYPE_TOON {
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	}
@@ -169,7 +185,11 @@ func (t *Texture) Bind() {
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 }
 
-func (t *Texture) Unbind() {
+func (t *TextureGL) Unbind() {
+	if !t.Valid {
+		return
+	}
+
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 

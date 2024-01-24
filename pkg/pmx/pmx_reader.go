@@ -106,43 +106,43 @@ func (r *PmxReader) readHeader(model *PmxModel) error {
 	if err != nil {
 		return err
 	}
-	model.ExtendedUVCount = int(extendedUVCount)
+	model.ExtendedUVCountType = int(extendedUVCount)
 	// [2] - 頂点Indexサイズ | 1,2,4 のいずれか
 	vertexCount, err := r.UnpackByte()
 	if err != nil {
 		return err
 	}
-	model.VertexCount = int(vertexCount)
+	model.VertexCountType = int(vertexCount)
 	// [3] - テクスチャIndexサイズ | 1,2,4 のいずれか
 	textureCount, err := r.UnpackByte()
 	if err != nil {
 		return err
 	}
-	model.TextureCount = int(textureCount)
+	model.TextureCountType = int(textureCount)
 	// [4] - 材質Indexサイズ | 1,2,4 のいずれか
 	materialCount, err := r.UnpackByte()
 	if err != nil {
 		return err
 	}
-	model.MaterialCount = int(materialCount)
+	model.MaterialCountType = int(materialCount)
 	// [5] - ボーンIndexサイズ | 1,2,4 のいずれか
 	boneCount, err := r.UnpackByte()
 	if err != nil {
 		return err
 	}
-	model.BoneCount = int(boneCount)
+	model.BoneCountType = int(boneCount)
 	// [6] - モーフIndexサイズ | 1,2,4 のいずれか
 	morphCount, err := r.UnpackByte()
 	if err != nil {
 		return err
 	}
-	model.MorphCount = int(morphCount)
+	model.MorphCountType = int(morphCount)
 	// [7] - 剛体Indexサイズ | 1,2,4 のいずれか
 	rigidBodyCount, err := r.UnpackByte()
 	if err != nil {
 		return err
 	}
-	model.RigidBodyCount = int(rigidBodyCount)
+	model.RigidBodyCountType = int(rigidBodyCount)
 
 	// 4 + n : TextBuf	| モデル名
 	model.Name = r.ReadText()
@@ -252,7 +252,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 
 		// 16 * n : float4[n] | 追加UV(x,y,z,w)  PMXヘッダの追加UV数による
 		v.ExtendedUVs = make([]mmath.MVec4, 0)
-		for j := 0; j < model.ExtendedUVCount; j++ {
+		for j := 0; j < model.ExtendedUVCountType; j++ {
 			extendedUV, err := r.UnpackVec4()
 			if err != nil {
 				return err
@@ -445,26 +445,17 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 		m.EnglishName = r.ReadText()
 
 		// 16 : float4	| Diffuse (R,G,B,A)
-		m.DiffuseColor, err = r.UnpackVec3()
+		m.Diffuse, err = r.UnpackVec4()
 		if err != nil {
 			return err
 		}
-		m.DiffuseAlpha, err = r.UnpackFloat()
-		if err != nil {
-			return err
-		}
-		// 12 : float3	| Specular (R,G,B)
-		m.SpecularColor, err = r.UnpackVec3()
-		if err != nil {
-			return err
-		}
-		// 4  : float	| Specular係数
-		m.SpecularPower, err = r.UnpackFloat()
+		// 12 : float3	| Specular (R,G,B,Specular係数)
+		m.Specular, err = r.UnpackVec4()
 		if err != nil {
 			return err
 		}
 		// 12 : float3	| Ambient (R,G,B)
-		m.AmbientColor, err = r.UnpackVec3()
+		m.Ambient, err = r.UnpackVec3()
 		if err != nil {
 			return err
 		}
@@ -475,11 +466,7 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 		}
 		m.DrawFlag = DrawFlag(drawFlag)
 		// 16 : float4	| エッジ色 (R,G,B,A)
-		m.EdgeColor, err = r.UnpackVec3()
-		if err != nil {
-			return err
-		}
-		m.EdgeAlpha, err = r.UnpackFloat()
+		m.Edge, err = r.UnpackVec4()
 		if err != nil {
 			return err
 		}
@@ -800,35 +787,22 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					return err
 				}
 				// 16 : float4	| Diffuse (R,G,B,A) - 乗算:1.0／加算:0.0 が初期値となる(同以下)
-				diffuseColor, err := r.UnpackVec3()
+				diffuse, err := r.UnpackVec4()
 				if err != nil {
 					return err
 				}
-				diffuseAlpha, err := r.UnpackFloat()
-				if err != nil {
-					return err
-				}
-				// 12 : float3	| Specular (R,G,B)
-				specularColor, err := r.UnpackVec3()
-				if err != nil {
-					return err
-				}
-				// 4  : float	| Specular係数
-				specularPower, err := r.UnpackFloat()
+				// 12 : float3	| Specular (R,G,B, Specular係数)
+				specular, err := r.UnpackVec4()
 				if err != nil {
 					return err
 				}
 				// 12 : float3	| Ambient (R,G,B)
-				ambientColor, err := r.UnpackVec3()
+				ambient, err := r.UnpackVec3()
 				if err != nil {
 					return err
 				}
 				// 16 : float4	| エッジ色 (R,G,B,A)
-				edgeColor, err := r.UnpackVec3()
-				if err != nil {
-					return err
-				}
-				edgeAlpha, err := r.UnpackFloat()
+				edge, err := r.UnpackVec4()
 				if err != nil {
 					return err
 				}
@@ -838,33 +812,32 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					return err
 				}
 				// 16 : float4	| テクスチャ係数 (R,G,B,A)
-				textureCoefficient, err := r.UnpackVec3()
-				if err != nil {
-					return err
-				}
-				textureAlpha, err := r.UnpackFloat()
+				textureFactor, err := r.UnpackVec4()
 				if err != nil {
 					return err
 				}
 				// 16 : float4	| スフィアテクスチャ係数 (R,G,B,A)
-				sphereTextureCoefficient, err := r.UnpackVec3()
-				if err != nil {
-					return err
-				}
-				sphereTextureAlpha, err := r.UnpackFloat()
+				sphereTextureFactor, err := r.UnpackVec4()
 				if err != nil {
 					return err
 				}
 				// 16 : float4	| Toonテクスチャ係数 (R,G,B,A)
-				toonTextureCoefficient, err := r.UnpackVec3()
+				toonTextureFactor, err := r.UnpackVec4()
 				if err != nil {
 					return err
 				}
-				toonTextureAlpha, err := r.UnpackFloat()
-				if err != nil {
-					return err
-				}
-				m.Offsets = append(m.Offsets, NewMaterialMorph(materialIndex, MaterialMorphCalcMode(calcMode), diffuseColor, diffuseAlpha, specularColor, specularPower, ambientColor, edgeColor, edgeAlpha, edgeSize, textureCoefficient, textureAlpha, sphereTextureCoefficient, sphereTextureAlpha, toonTextureCoefficient, toonTextureAlpha))
+				m.Offsets = append(m.Offsets, NewMaterialMorph(
+					materialIndex,
+					MaterialMorphCalcMode(calcMode),
+					diffuse,
+					specular,
+					ambient,
+					edge,
+					edgeSize,
+					textureFactor,
+					sphereTextureFactor,
+					toonTextureFactor,
+				))
 			}
 		}
 
@@ -1105,7 +1078,7 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 
 // テキストデータを読み取る
 func (r *PmxReader) unpackVertexIndex(model *PmxModel) (int, error) {
-	switch model.VertexCount {
+	switch model.VertexCountType {
 	case 1:
 		v, err := r.UnpackByte()
 		if err != nil {
@@ -1125,32 +1098,32 @@ func (r *PmxReader) unpackVertexIndex(model *PmxModel) (int, error) {
 		}
 		return v, nil
 	}
-	return 0, fmt.Errorf("未知のVertexIndexサイズです。vertexCount: %d", model.VertexCount)
+	return 0, fmt.Errorf("未知のVertexIndexサイズです。vertexCount: %d", model.VertexCountType)
 }
 
 // テクスチャIndexを読み取る
 func (r *PmxReader) unpackTextureIndex(model *PmxModel) (int, error) {
-	return r.unpackIndex(model, model.TextureCount)
+	return r.unpackIndex(model, model.TextureCountType)
 }
 
 // 材質Indexを読み取る
 func (r *PmxReader) unpackMaterialIndex(model *PmxModel) (int, error) {
-	return r.unpackIndex(model, model.MaterialCount)
+	return r.unpackIndex(model, model.MaterialCountType)
 }
 
 // ボーンIndexを読み取る
 func (r *PmxReader) unpackBoneIndex(model *PmxModel) (int, error) {
-	return r.unpackIndex(model, model.BoneCount)
+	return r.unpackIndex(model, model.BoneCountType)
 }
 
 // 表情Indexを読み取る
 func (r *PmxReader) unpackMorphIndex(model *PmxModel) (int, error) {
-	return r.unpackIndex(model, model.MorphCount)
+	return r.unpackIndex(model, model.MorphCountType)
 }
 
 // 剛体Indexを読み取る
 func (r *PmxReader) unpackRigidBodyIndex(model *PmxModel) (int, error) {
-	return r.unpackIndex(model, model.RigidBodyCount)
+	return r.unpackIndex(model, model.RigidBodyCountType)
 }
 
 func (r *PmxReader) unpackIndex(model *PmxModel, index int) (int, error) {

@@ -195,37 +195,25 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 		if m.EnglishName != expectedEnglishName {
 			t.Errorf("Expected Path to be %q, got %q", expectedEnglishName, m.EnglishName)
 		}
-		expectedDiffuseColor := &mmath.MVec3{1.0, 1.0, 1.0}
-		if !m.DiffuseColor.PracticallyEquals(expectedDiffuseColor, 1e-5) {
-			t.Errorf("Expected Diffuse to be %v, got %v", expectedDiffuseColor, m.DiffuseColor)
+		expectedDiffuse := &mmath.MVec4{1.0, 1.0, 1.0, 0.0}
+		if !m.Diffuse.PracticallyEquals(expectedDiffuse, 1e-5) {
+			t.Errorf("Expected Diffuse to be %v, got %v", expectedDiffuse, m.Diffuse)
 		}
-		expectedDiffuseAlpha := 0.0
-		if math.Abs(m.DiffuseAlpha-expectedDiffuseAlpha) > 1e-5 {
-			t.Errorf("Expected DiffuseAlpha to be %v, got %v", expectedDiffuseAlpha, m.DiffuseAlpha)
+		expectedSpecular := &mmath.MVec4{0.0, 0.0, 0.0, 0.0}
+		if !m.Specular.PracticallyEquals(expectedSpecular, 1e-5) {
+			t.Errorf("Expected Specular to be %v, got %v", expectedSpecular, m.Specular)
 		}
-		expectedSpecularColor := &mmath.MVec3{0.0, 0.0, 0.0}
-		if !m.SpecularColor.PracticallyEquals(expectedSpecularColor, 1e-5) {
-			t.Errorf("Expected Specular to be %v, got %v", expectedSpecularColor, m.SpecularColor)
-		}
-		expectedSpecularPower := 0.0
-		if math.Abs(m.SpecularPower-expectedSpecularPower) > 1e-5 {
-			t.Errorf("Expected SpecularPower to be %v, got %v", expectedSpecularPower, m.SpecularPower)
-		}
-		expectedAmbientColor := &mmath.MVec3{0.5, 0.5, 0.5}
-		if !m.AmbientColor.PracticallyEquals(expectedAmbientColor, 1e-5) {
-			t.Errorf("Expected Ambient to be %v, got %v", expectedAmbientColor, m.AmbientColor)
+		expectedAmbient := &mmath.MVec3{0.5, 0.5, 0.5}
+		if !m.Ambient.PracticallyEquals(expectedAmbient, 1e-5) {
+			t.Errorf("Expected Ambient to be %v, got %v", expectedAmbient, m.Ambient)
 		}
 		expectedDrawFlag := DRAW_FLAG_GROUND_SHADOW | DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS | DRAW_FLAG_DRAWING_SELF_SHADOWS
 		if m.DrawFlag != expectedDrawFlag {
 			t.Errorf("Expected DrawFlag to be %v, got %v", expectedDrawFlag, m.DrawFlag)
 		}
-		expectedEdgeColor := &mmath.MVec3{0.2745098, 0.09019607, 0.1254902}
-		if !m.EdgeColor.PracticallyEquals(expectedEdgeColor, 1e-5) {
-			t.Errorf("Expected Edge to be %v, got %v", expectedEdgeColor, m.EdgeColor)
-		}
-		expectedEdgeAlpha := 1.0
-		if math.Abs(m.EdgeAlpha-expectedEdgeAlpha) > 1e-5 {
-			t.Errorf("Expected EdgeAlpha to be %v, got %v", expectedEdgeAlpha, m.EdgeAlpha)
+		expectedEdge := &mmath.MVec4{0.2745098, 0.09019607, 0.1254902, 1.0}
+		if !m.Edge.PracticallyEquals(expectedEdge, 1e-5) {
+			t.Errorf("Expected Edge to be %v, got %v", expectedEdge, m.Edge)
 		}
 		expectedEdgeSize := 1.0
 		if math.Abs(m.EdgeSize-expectedEdgeSize) > 1e-5 {
@@ -561,57 +549,37 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			if o.CalcMode != expectedCalcMode {
 				t.Errorf("Expected CalcMode to be %v, got %v", expectedCalcMode, o.CalcMode)
 			}
-			expectedDiffuseColor := &mmath.MVec3{0.0, 0.0, 0.0}
-			if !o.DiffuseColor.PracticallyEquals(expectedDiffuseColor, 1e-5) {
-				t.Errorf("Expected DiffuseColor to be %v, got %v", expectedDiffuseColor, o.DiffuseColor)
+			expectedDiffuse := &mmath.MVec4{0.0, 0.0, 0.0, 1.0}
+			if !o.Diffuse.PracticallyEquals(expectedDiffuse, 1e-5) {
+				t.Errorf("Expected Diffuse to be %v, got %v", expectedDiffuse, o.Diffuse)
 			}
-			expectedDiffuseAlpha := 1.0
-			if math.Abs(o.DiffuseAlpha-expectedDiffuseAlpha) > 1e-5 {
-				t.Errorf("Expected DiffuseAlpha to be %v, got %v", expectedDiffuseAlpha, o.DiffuseAlpha)
+			expectedSpecular := &mmath.MVec4{0.0, 0.0, 0.0, 0.0}
+			if !o.Specular.PracticallyEquals(expectedSpecular, 1e-5) {
+				t.Errorf("Expected Specular to be %v, got %v", expectedSpecular, o.Specular)
 			}
-			expectedSpecularColor := &mmath.MVec3{0.0, 0.0, 0.0}
-			if !o.SpecularColor.PracticallyEquals(expectedSpecularColor, 1e-5) {
-				t.Errorf("Expected SpecularColor to be %v, got %v", expectedSpecularColor, o.SpecularColor)
+			expectedAmbient := &mmath.MVec3{0.0, 0.0, 0.0}
+			if !o.Ambient.PracticallyEquals(expectedAmbient, 1e-5) {
+				t.Errorf("Expected Ambient to be %v, got %v", expectedAmbient, o.Ambient)
 			}
-			expectedSpecularPower := 0.0
-			if math.Abs(o.SpecularPower-expectedSpecularPower) > 1e-5 {
-				t.Errorf("Expected SpecularPower to be %v, got %v", expectedSpecularPower, o.SpecularPower)
-			}
-			expectedAmbientColor := &mmath.MVec3{0.0, 0.0, 0.0}
-			if !o.AmbientColor.PracticallyEquals(expectedAmbientColor, 1e-5) {
-				t.Errorf("Expected AmbientColor to be %v, got %v", expectedAmbientColor, o.AmbientColor)
-			}
-			expectedEdgeColor := &mmath.MVec3{0.0, 0.0, 0.0}
-			if !o.EdgeColor.PracticallyEquals(expectedEdgeColor, 1e-5) {
-				t.Errorf("Expected EdgeColor to be %v, got %v", expectedEdgeColor, o.EdgeColor)
+			expectedEdge := &mmath.MVec4{0.0, 0.0, 0.0, 0.0}
+			if !o.Edge.PracticallyEquals(expectedEdge, 1e-5) {
+				t.Errorf("Expected Edge to be %v, got %v", expectedEdge, o.Edge)
 			}
 			expectedEdgeSize := 0.0
 			if math.Abs(o.EdgeSize-expectedEdgeSize) > 1e-5 {
 				t.Errorf("Expected EdgeSize to be %v, got %v", expectedEdgeSize, o.EdgeSize)
 			}
-			expectedTextureCoefficient := &mmath.MVec3{0.0, 0.0, 0.0}
-			if !o.TextureCoefficient.PracticallyEquals(expectedTextureCoefficient, 1e-5) {
-				t.Errorf("Expected TextureFactor to be %v, got %v", expectedTextureCoefficient, o.TextureCoefficient)
+			expectedTextureFactor := &mmath.MVec4{0.0, 0.0, 0.0, 0.0}
+			if !o.TextureFactor.PracticallyEquals(expectedTextureFactor, 1e-5) {
+				t.Errorf("Expected TextureFactor to be %v, got %v", expectedTextureFactor, o.TextureFactor)
 			}
-			expectedTextureAlpha := 0.0
-			if math.Abs(o.TextureAlpha-expectedTextureAlpha) > 1e-5 {
-				t.Errorf("Expected TextureAlpha to be %v, got %v", expectedTextureAlpha, o.TextureAlpha)
+			expectedSphereTextureFactor := &mmath.MVec4{0.0, 0.0, 0.0, 0.0}
+			if !o.SphereTextureFactor.PracticallyEquals(expectedSphereTextureFactor, 1e-5) {
+				t.Errorf("Expected SphereTextureFactor to be %v, got %v", expectedSphereTextureFactor, o.SphereTextureFactor)
 			}
-			expectedSphereTextureCoefficient := &mmath.MVec3{0.0, 0.0, 0.0}
-			if !o.SphereTextureCoefficient.PracticallyEquals(expectedSphereTextureCoefficient, 1e-5) {
-				t.Errorf("Expected SphereTextureFactor to be %v, got %v", expectedSphereTextureCoefficient, o.SphereTextureCoefficient)
-			}
-			expectedSphereTextureAlpha := 0.0
-			if math.Abs(o.SphereTextureAlpha-expectedSphereTextureAlpha) > 1e-5 {
-				t.Errorf("Expected SphereTextureAlpha to be %v, got %v", expectedSphereTextureAlpha, o.SphereTextureAlpha)
-			}
-			expectedToonTextureCoefficient := &mmath.MVec3{0.0, 0.0, 0.0}
-			if !o.ToonTextureCoefficient.PracticallyEquals(expectedToonTextureCoefficient, 1e-5) {
-				t.Errorf("Expected ToonTextureFactor to be %v, got %v", expectedToonTextureCoefficient, o.ToonTextureCoefficient)
-			}
-			expectedToonTextureAlpha := 0.0
-			if math.Abs(o.ToonTextureAlpha-expectedToonTextureAlpha) > 1e-5 {
-				t.Errorf("Expected ToonTextureAlpha to be %v, got %v", expectedToonTextureAlpha, o.ToonTextureAlpha)
+			expectedToonTextureFactor := &mmath.MVec4{0.0, 0.0, 0.0, 0.0}
+			if !o.ToonTextureFactor.PracticallyEquals(expectedToonTextureFactor, 1e-5) {
+				t.Errorf("Expected ToonTextureFactor to be %v, got %v", expectedToonTextureFactor, o.ToonTextureFactor)
 			}
 		}
 	}

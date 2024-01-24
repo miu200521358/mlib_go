@@ -1,18 +1,23 @@
 package pmx
 
-import "github.com/miu200521358/mlib_go/pkg/mcore"
+import (
+	"github.com/go-gl/mathgl/mgl32"
+
+	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mgl"
+)
 
 type PmxModel struct {
 	*mcore.HashModel
 	Signature           string
 	Version             float64
-	ExtendedUVCount     int
-	VertexCount         int
-	TextureCount        int
-	MaterialCount       int
-	BoneCount           int
-	MorphCount          int
-	RigidBodyCount      int
+	ExtendedUVCountType int
+	VertexCountType     int
+	TextureCountType    int
+	MaterialCountType   int
+	BoneCountType       int
+	MorphCountType      int
+	RigidBodyCountType  int
 	Name                string
 	EnglishName         string
 	Comment             string
@@ -69,5 +74,10 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 	pm.DisplaySlots.Append(d02, false)
 }
 
-func (pm *PmxModel) InitializeDraw() {
+func (pm *PmxModel) InitializeDraw(windowIndex int) {
+	pm.Meshes = NewMeshes(pm, windowIndex)
+}
+
+func (pm *PmxModel) Draw(shader *mgl.MShader, boneMatrixes []mgl32.Mat4, windowIndex int) {
+	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
 }

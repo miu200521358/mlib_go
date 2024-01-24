@@ -3,7 +3,6 @@ package pmx
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type Vertex struct {
@@ -24,12 +23,6 @@ type Vertex struct {
 	EdgeFactor float64
 }
 
-type VertexGL struct {
-	Position [3]float32
-	Normal   [3]float32
-	UV       [2]float32
-}
-
 func NewVertex() *Vertex {
 	v := &Vertex{
 		IndexModel:  &mcore.IndexModel{Index: -1},
@@ -44,11 +37,14 @@ func NewVertex() *Vertex {
 	return v
 }
 
-func (v *Vertex) GL() *VertexGL {
-	return &VertexGL{
-		Position: v.Position.GL(),
-		Normal:   v.Normal.GL(),
-		UV:       v.UV.GL(),
+func (v *Vertex) GL() []float32 {
+	p := v.Position.GL()
+	// n := v.Normal.GL()
+	// d := v.Deform.NormalizedDeform()
+	return []float32{
+		p[0], p[1], p[2],
+		// n[0], n[1], n[2],
+		// d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
 	}
 }
 

@@ -47,17 +47,20 @@ const (
 )
 
 type MaterialGL struct {
-	DiffuseColor  [3]float32
-	DiffuseAlpha  float32
-	SpecularColor [3]float32
-	SpecularPower float32
-	AmbientColor  [3]float32
-	EdgeColor     [3]float32
-	EdgeAlpha     float32
+	Diffuse       [4]float32
+	Ambient       [3]float32
+	Specular      [4]float32
+	Edge          [4]float32
 	EdgeSize      float32
 	Texture       *TextureGL
 	SphereTexture *TextureGL
 	ToonTexture   *TextureGL
+	// 描画フラグ(8bit) - 各bit 0:OFF 1:ON
+	DrawFlag DrawFlag
+	// スフィアモード
+	SphereMode SphereMode
+	// 頂点数
+	VerticesCount int
 }
 
 type Material struct {
@@ -67,19 +70,15 @@ type Material struct {
 	// 材質名英
 	EnglishName string
 	// Diffuse (R,G,B,A)(拡散色＋非透過度)
-	DiffuseColor mmath.MVec3
-	DiffuseAlpha float64
-	// Specular (R,G,B)(反射色)
-	SpecularColor mmath.MVec3
-	// Specular係数(反射強度)
-	SpecularPower float64
+	Diffuse mmath.MVec4
+	// Specular (R,G,B,A)(反射色 + 反射強度)
+	Specular mmath.MVec4
 	// Ambient (R,G,B)(環境色)
-	AmbientColor mmath.MVec3
+	Ambient mmath.MVec3
 	// 描画フラグ(8bit) - 各bit 0:OFF 1:ON
 	DrawFlag DrawFlag
 	// エッジ色 (R,G,B,A)
-	EdgeColor mmath.MVec3
-	EdgeAlpha float64
+	Edge mmath.MVec4
 	// エッジサイズ
 	EdgeSize float64
 	// 通常テクスチャINDEX
@@ -103,14 +102,11 @@ func NewMaterial() *Material {
 		IndexModel:         &mcore.IndexModel{Index: -1},
 		Name:               "",
 		EnglishName:        "",
-		DiffuseColor:       mmath.MVec3{},
-		DiffuseAlpha:       0.0,
-		SpecularColor:      mmath.MVec3{},
-		SpecularPower:      0.0,
-		AmbientColor:       mmath.MVec3{},
+		Diffuse:            mmath.MVec4{},
+		Specular:           mmath.MVec4{},
+		Ambient:            mmath.MVec3{},
 		DrawFlag:           DRAW_FLAG_NONE,
-		EdgeColor:          mmath.MVec3{},
-		EdgeAlpha:          0.0,
+		Edge:               mmath.MVec4{},
 		EdgeSize:           0.0,
 		TextureIndex:       -1,
 		SphereTextureIndex: -1,
@@ -146,17 +142,17 @@ func (m *Material) GL(
 	}
 
 	return &MaterialGL{
-		DiffuseColor:  m.DiffuseColor.GL(),
-		DiffuseAlpha:  float32(m.DiffuseAlpha),
-		SpecularColor: m.SpecularColor.GL(),
-		SpecularPower: float32(m.SpecularPower),
-		AmbientColor:  m.AmbientColor.GL(),
-		EdgeColor:     m.EdgeColor.GL(),
-		EdgeAlpha:     float32(m.EdgeAlpha),
+		Diffuse:       m.Diffuse.GL(),
+		Ambient:       m.Ambient.GL(),
+		Specular:      m.Specular.GL(),
+		Edge:          m.Edge.GL(),
 		EdgeSize:      float32(m.EdgeSize),
 		Texture:       textureGL,
 		SphereTexture: sphereTextureGL,
 		ToonTexture:   tooTextureGL,
+		DrawFlag:      m.DrawFlag,
+		SphereMode:    m.SphereMode,
+		VerticesCount: m.VerticesCount,
 	}
 }
 
@@ -178,7 +174,7 @@ func NewMaterials() *Materials {
 
 // シェーダー用材質
 type ShaderMaterial struct {
-	LightAmbient4             *mmath.MVec3
+	LightAmbient4             *mmath.MVec4
 	Material                  *Material
 	ShaderTextureFactor       *mmath.MVec4
 	SphereShaderTextureFactor *mmath.MVec4
@@ -187,7 +183,7 @@ type ShaderMaterial struct {
 
 func NewShaderMaterial(
 	material *Material,
-	lightAmbient4 *mmath.MVec3,
+	lightAmbient4 *mmath.MVec4,
 	textureFactor *mmath.MVec4,
 	toonTextureFactor *mmath.MVec4,
 	sphereTextureFactor *mmath.MVec4,
@@ -203,46 +199,36 @@ func NewShaderMaterial(
 
 func (sm *ShaderMaterial) Diffuse() []float32 {
 	diffuse := make([]float32, 3)
-	diffuse[0] = float32(sm.Material.DiffuseColor.GetX())*float32(sm.LightAmbient4.GetX()) + float32(sm.Material.AmbientColor.GetX())
-	diffuse[1] = float32(sm.Material.DiffuseColor.GetY())*float32(sm.LightAmbient4.GetY()) + float32(sm.Material.AmbientColor.GetY())
-	diffuse[2] = float32(sm.Material.DiffuseColor.GetZ())*float32(sm.LightAmbient4.GetZ()) + float32(sm.Material.AmbientColor.GetZ())
+	diffuse[0] = float32(sm.Material.Diffuse.GetX())*float32(sm.LightAmbient4.GetX()) + float32(sm.Material.Ambient.GetX())
+	diffuse[1] = float32(sm.Material.Diffuse.GetY())*float32(sm.LightAmbient4.GetY()) + float32(sm.Material.Ambient.GetY())
+	diffuse[2] = float32(sm.Material.Diffuse.GetZ())*float32(sm.LightAmbient4.GetZ()) + float32(sm.Material.Ambient.GetZ())
 	return diffuse
-}
-
-func (sm *ShaderMaterial) DiffuseAlpha() float32 {
-	return float32(sm.Material.DiffuseAlpha)
 }
 
 func (sm *ShaderMaterial) Ambient() []float32 {
 	ambient := make([]float32, 3)
-	ambient[0] = float32(sm.Material.DiffuseColor.GetX()) * float32(sm.LightAmbient4.GetX())
-	ambient[1] = float32(sm.Material.DiffuseColor.GetY()) * float32(sm.LightAmbient4.GetY())
-	ambient[2] = float32(sm.Material.DiffuseColor.GetZ()) * float32(sm.LightAmbient4.GetZ())
+	ambient[0] = float32(sm.Material.Diffuse.GetX()) * float32(sm.LightAmbient4.GetX())
+	ambient[1] = float32(sm.Material.Diffuse.GetY()) * float32(sm.LightAmbient4.GetY())
+	ambient[2] = float32(sm.Material.Diffuse.GetZ()) * float32(sm.LightAmbient4.GetZ())
 	return ambient
 }
 
 func (sm *ShaderMaterial) Specular() []float32 {
-	specular := make([]float32, 3)
-	specular[0] = float32(sm.Material.SpecularColor.GetX()) * float32(sm.LightAmbient4.GetX())
-	specular[1] = float32(sm.Material.SpecularColor.GetY()) * float32(sm.LightAmbient4.GetY())
-	specular[2] = float32(sm.Material.SpecularColor.GetZ()) * float32(sm.LightAmbient4.GetZ())
+	specular := make([]float32, 4)
+	specular[0] = float32(sm.Material.Specular.GetX()) * float32(sm.LightAmbient4.GetX())
+	specular[1] = float32(sm.Material.Specular.GetY()) * float32(sm.LightAmbient4.GetY())
+	specular[2] = float32(sm.Material.Specular.GetZ()) * float32(sm.LightAmbient4.GetZ())
+	specular[3] = float32(sm.Material.Specular.GetW()) * float32(sm.LightAmbient4.GetW())
 	return specular
 }
 
-func (sm *ShaderMaterial) SpecularPower() float32 {
-	return float32(sm.Material.SpecularPower)
-}
-
-func (sm *ShaderMaterial) EdgeColor() []float32 {
+func (sm *ShaderMaterial) Edge() []float32 {
 	edgeColor := make([]float32, 3)
-	edgeColor[0] = float32(sm.Material.EdgeColor.GetX()) * float32(sm.Material.DiffuseAlpha)
-	edgeColor[1] = float32(sm.Material.EdgeColor.GetY()) * float32(sm.Material.DiffuseAlpha)
-	edgeColor[2] = float32(sm.Material.EdgeColor.GetZ()) * float32(sm.Material.DiffuseAlpha)
+	edgeColor[0] = float32(sm.Material.Edge.GetX()) * float32(sm.Material.Diffuse.GetW())
+	edgeColor[1] = float32(sm.Material.Edge.GetY()) * float32(sm.Material.Diffuse.GetW())
+	edgeColor[2] = float32(sm.Material.Edge.GetZ()) * float32(sm.Material.Diffuse.GetW())
+	edgeColor[3] = float32(sm.Material.Edge.GetW()) * float32(sm.Material.Diffuse.GetW())
 	return edgeColor
-}
-
-func (sm *ShaderMaterial) EdgeAlpha() float32 {
-	return float32(sm.Material.EdgeAlpha)
 }
 
 func (sm *ShaderMaterial) EdgeSize() float32 {
@@ -279,26 +265,20 @@ func (sm *ShaderMaterial) ToonTextureFactor() []float32 {
 func (sm *ShaderMaterial) IMul(v interface{}) {
 	switch v := v.(type) {
 	case float64:
-		sm.Material.DiffuseColor.MulScalar(v)
-		sm.Material.DiffuseAlpha *= v
-		sm.Material.AmbientColor.MulScalar(v)
-		sm.Material.SpecularColor.MulScalar(v)
-		sm.Material.EdgeColor.MulScalar(v)
+		sm.Material.Diffuse.MulScalar(v)
+		sm.Material.Ambient.MulScalar(v)
+		sm.Material.Specular.MulScalar(v)
 		sm.Material.EdgeSize *= v
-		sm.Material.EdgeAlpha *= v
 		sm.ShaderTextureFactor.MulScalar(v)
 		sm.SphereShaderTextureFactor.MulScalar(v)
 		sm.ToonShaderTextureFactor.MulScalar(v)
 	case int:
 		sm.IMul(float32(v))
 	case *ShaderMaterial:
-		sm.Material.DiffuseColor.Mul(&v.Material.DiffuseColor)
-		sm.Material.DiffuseAlpha *= v.Material.DiffuseAlpha
-		sm.Material.AmbientColor.Mul(&v.Material.AmbientColor)
-		sm.Material.SpecularColor.Mul(&v.Material.SpecularColor)
-		sm.Material.EdgeColor.Mul(&v.Material.EdgeColor)
+		sm.Material.Diffuse.Mul(&v.Material.Diffuse)
+		sm.Material.Ambient.Mul(&v.Material.Ambient)
+		sm.Material.Specular.Mul(&v.Material.Specular)
 		sm.Material.EdgeSize *= v.Material.EdgeSize
-		sm.Material.EdgeAlpha *= v.Material.EdgeAlpha
 		sm.ShaderTextureFactor.Mul(v.ShaderTextureFactor)
 		sm.SphereShaderTextureFactor.Mul(v.SphereShaderTextureFactor)
 		sm.ToonShaderTextureFactor.Mul(v.ToonShaderTextureFactor)
@@ -308,26 +288,20 @@ func (sm *ShaderMaterial) IMul(v interface{}) {
 func (sm *ShaderMaterial) IAdd(v interface{}) {
 	switch v := v.(type) {
 	case float64:
-		sm.Material.DiffuseColor.AddScalar(v)
-		sm.Material.DiffuseAlpha += v
-		sm.Material.AmbientColor.AddScalar(v)
-		sm.Material.SpecularColor.AddScalar(v)
-		sm.Material.EdgeColor.AddScalar(v)
+		sm.Material.Diffuse.AddScalar(v)
+		sm.Material.Ambient.AddScalar(v)
+		sm.Material.Specular.AddScalar(v)
 		sm.Material.EdgeSize += v
-		sm.Material.EdgeAlpha += v
 		sm.ShaderTextureFactor.AddScalar(v)
 		sm.SphereShaderTextureFactor.AddScalar(v)
 		sm.ToonShaderTextureFactor.AddScalar(v)
 	case int:
 		sm.IAdd(float32(v))
 	case *ShaderMaterial:
-		sm.Material.DiffuseColor.Add(&v.Material.DiffuseColor)
-		sm.Material.DiffuseAlpha += v.Material.DiffuseAlpha
-		sm.Material.AmbientColor.Add(&v.Material.AmbientColor)
-		sm.Material.SpecularColor.Add(&v.Material.SpecularColor)
-		sm.Material.EdgeColor.Add(&v.Material.EdgeColor)
+		sm.Material.Diffuse.Add(&v.Material.Diffuse)
+		sm.Material.Ambient.Add(&v.Material.Ambient)
+		sm.Material.Specular.Add(&v.Material.Specular)
 		sm.Material.EdgeSize += v.Material.EdgeSize
-		sm.Material.EdgeAlpha += v.Material.EdgeAlpha
 		sm.ShaderTextureFactor.Add(v.ShaderTextureFactor)
 		sm.SphereShaderTextureFactor.Add(v.SphereShaderTextureFactor)
 		sm.ToonShaderTextureFactor.Add(v.ToonShaderTextureFactor)

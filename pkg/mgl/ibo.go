@@ -7,38 +7,49 @@ import (
 )
 
 type IBO struct {
-	id     uint32
-	target uint32
-	Dtype  uint32
-	dsize  int
+	id        uint32         // ID
+	target    uint32         // gl.ELEMENT_ARRAY_BUFFER
+	Dtype     uint32         // 面の型
+	FaceSize  int            // 一面のbyte数
+	FaceCount int32          // 面の数
+	facePtr   unsafe.Pointer // facePtr
 }
 
-func NewIBO(data []byte, isSub bool) (*IBO, error) {
+func NewIBO(facePtr unsafe.Pointer, faceCount int, faceDtype uint32) *IBO {
 	var iboId uint32
 
 	gl.GenBuffers(1, &iboId)
 
-	ibo := &IBO{target: gl.ELEMENT_ARRAY_BUFFER, id: iboId}
-	ibo.Dtype = gl.UNSIGNED_BYTE
-	ibo.dsize = int(unsafe.Sizeof(byte(0)))
+	ibo := &IBO{
+		id:        iboId,
+		target:    gl.ELEMENT_ARRAY_BUFFER,
+		FaceCount: int32(faceCount),
+		facePtr:   facePtr,
+	}
 
-	ibo.Bind(isSub)
-	ibo.SetIndices(data)
+	if faceDtype == uint32(8) {
+		ibo.Dtype = gl.UNSIGNED_BYTE
+	} else if faceDtype == uint32(16) {
+		ibo.Dtype = gl.UNSIGNED_SHORT
+	} else if faceDtype == uint32(32) {
+		ibo.Dtype = gl.UNSIGNED_INT
+	}
+
+	ibo.FaceSize = faceCount * int(ibo.Dtype)
+
+	ibo.Bind()
 	ibo.Unbind()
 
-	return ibo, nil
+	return ibo
 }
 
-func (ibo *IBO) Bind(isSub bool) {
+func (ibo *IBO) Bind() {
 	gl.BindBuffer(ibo.target, ibo.id)
+	gl.BufferData(ibo.target, ibo.FaceSize, ibo.facePtr, gl.STATIC_DRAW)
 }
 
 func (ibo *IBO) Unbind() {
 	gl.BindBuffer(ibo.target, 0)
-}
-
-func (ibo *IBO) SetIndices(data []byte) {
-	gl.BufferData(ibo.target, len(data), gl.Ptr(data), gl.STATIC_DRAW)
 }
 
 func (ibo *IBO) Delete() {

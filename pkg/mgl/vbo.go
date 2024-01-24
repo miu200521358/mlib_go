@@ -8,17 +8,23 @@ import (
 
 // Vertex Buffer Object.
 type VBO struct {
-	id     uint32
-	target uint32
-	size   int32
+	id          uint32         // ID
+	target      uint32         // gl.ARRAY_BUFFER
+	size        int            // size in bytes
+	verticesPtr unsafe.Pointer // verticesPtr
 }
 
-// Creates a new VBO with given target.
-func NewVBO(target uint32) *VBO {
+// Creates a new VBO with given faceDtype.
+func NewVBO(verticesPtr unsafe.Pointer, verticesSize int) *VBO {
 	var vboId uint32
 	gl.GenBuffers(1, &vboId)
 
-	vbo := &VBO{target: target, id: vboId}
+	vbo := &VBO{
+		id:          vboId,
+		target:      gl.ARRAY_BUFFER,
+		size:        verticesSize * 4,
+		verticesPtr: verticesPtr,
+	}
 
 	return vbo
 }
@@ -31,50 +37,20 @@ func (v *VBO) Delete() {
 // Binds VBO for rendering.
 func (v *VBO) Bind() {
 	gl.BindBuffer(v.target, v.id)
+	gl.BufferData(v.target, v.size, v.verticesPtr, gl.STATIC_DRAW)
+
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(
+		0,        // 属性のインデックス
+		3,        // 属性のサイズ（例: vec3 の場合は3）
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		0,        // ストライド（バイト単位）
+		0,        // オフセット（ポインタまたは整数値）
+	)
 }
 
 // Unbinds.
 func (v *VBO) Unbind() {
 	gl.BindBuffer(v.target, 0)
-}
-
-// Fills VBO with data.
-// An unsafe pointer must be used out of Gos unsafe package.
-func (v *VBO) Fill(data unsafe.Pointer, elements, size int, use uint32) {
-	v.size = int32(size)
-
-	v.Bind()
-	gl.BufferData(v.target, elements*size, data, use)
-	v.Unbind()
-}
-
-// Updates data or part of data.
-// An unsafe pointer must be used out of Gos unsafe package.
-func (v *VBO) Update(data unsafe.Pointer, elements, offset, size int) {
-	v.size = int32(size)
-
-	v.Bind()
-	gl.BufferSubData(v.target, offset, elements*size, data)
-	v.Unbind()
-}
-
-// Sets the attribute pointer for rendering.
-// Used together with shader.
-func (v *VBO) AttribPointer(attribLocation int32, size int32, btype uint32, normalized bool, stride int32) {
-	gl.VertexAttribPointer(uint32(attribLocation), size, btype, normalized, stride, nil)
-}
-
-// Returns the GL ID.
-func (v *VBO) GetId() uint32 {
-	return v.id
-}
-
-// Returns the target.
-func (v *VBO) GetTarget() uint32 {
-	return v.target
-}
-
-// Returns the number of elements within this VBO.
-func (v *VBO) Size() int32 {
-	return v.size
 }

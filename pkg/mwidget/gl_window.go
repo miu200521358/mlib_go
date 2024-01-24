@@ -2,10 +2,13 @@ package mwidget
 
 import (
 	"embed"
+	"fmt"
 	"image"
+	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
@@ -15,6 +18,14 @@ import (
 
 type ModelSet struct {
 	Model *pmx.PmxModel
+}
+
+func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int) {
+	// TODO: モーション計算
+	boneMatrixes := []mgl32.Mat4{
+		mgl32.Ident4(),
+	}
+	ms.Model.Draw(shader, boneMatrixes, windowIndex)
 }
 
 type GlWindow struct {
@@ -66,6 +77,35 @@ func NewGlWindow(
 		return nil, err
 	}
 
+	// デバッグコールバックを設定します。
+	gl.DebugMessageCallback(func(
+		source uint32,
+		glType uint32,
+		id uint32,
+		severity uint32,
+		length int32,
+		message string,
+		userParam unsafe.Pointer,
+	) {
+		switch severity {
+		case gl.DEBUG_SEVERITY_HIGH:
+			fmt.Printf("[HIGH] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
+				source, glType, severity, message)
+			panic("critical OpenGL error")
+		case gl.DEBUG_SEVERITY_MEDIUM:
+			fmt.Printf("[MEDIUM] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
+				source, glType, severity, message)
+		case gl.DEBUG_SEVERITY_LOW:
+			fmt.Printf("[LOW] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
+				source, glType, severity, message)
+		case gl.DEBUG_SEVERITY_NOTIFICATION:
+			fmt.Printf("[NOTIFICATION] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
+				source, glType, severity, message)
+		}
+	}, gl.Ptr(nil))
+	gl.Enable(gl.DEBUG_OUTPUT)
+	gl.Enable(gl.DEBUG_OUTPUT_SYNCHRONOUS) // 同期的なデバッグ出力を有効にします。
+
 	shader, err := mgl.NewMShader(width, height, resourceFiles)
 	if err != nil {
 		return nil, err
@@ -84,7 +124,7 @@ func (w *GlWindow) AddData(pmxModel *pmx.PmxModel) {
 	w.MakeContextCurrent()
 
 	// TODO: モーションも追加する
-	pmxModel.Meshes = pmx.NewMeshes(pmxModel, w.WindowIndex)
+	pmxModel.InitializeDraw(w.WindowIndex)
 	w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel})
 
 	// // OpenGLコンテキストをこのウィンドウに設定
@@ -162,9 +202,13 @@ func (w *GlWindow) Draw() {
 	w.MakeContextCurrent()
 
 	// 背景色をクリア
-	gl.ClearColor(0.0, 0.0, 0.0, 1.0) // 黒色でクリア
+	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 
+	// モデル描画
+	for _, modelSet := range w.ModelSets {
+		modelSet.Draw(w.Shader, w.WindowIndex)
+	}
 }
 
 func (w *GlWindow) Size() walk.Size {

@@ -3,6 +3,7 @@ package pmx
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 // MorphPanel 操作パネル
@@ -202,53 +203,51 @@ type MaterialMorphOffset struct {
 	MaterialIndex int
 	// 0:乗算, 1:加算
 	CalcMode MaterialMorphCalcMode
-	// DiffuseColor
-	DiffuseColor mmath.MVec3
-	DiffuseAlpha float64
-	// SpecularColor (R,G,B)
-	SpecularColor mmath.MVec3
-	// Specular係数
-	SpecularPower float64
+	// Diffuse (R,G,B,A)
+	Diffuse mmath.MVec4
+	// SpecularColor (R,G,B, 係数)
+	Specular mmath.MVec4
 	// AmbientColor (R,G,B)
-	AmbientColor mmath.MVec3
+	Ambient mmath.MVec3
 	// エッジ色 (R,G,B,A)
-	EdgeColor mmath.MVec3
-	EdgeAlpha float64
+	Edge mmath.MVec4
 	// エッジサイズ
 	EdgeSize float64
 	// テクスチャ係数 (R,G,B,A)
-	TextureCoefficient mmath.MVec3
-	TextureAlpha       float64
+	TextureFactor mmath.MVec4
 	// スフィアテクスチャ係数 (R,G,B,A)
-	SphereTextureCoefficient mmath.MVec3
-	SphereTextureAlpha       float64
+	SphereTextureFactor mmath.MVec4
 	// Toonテクスチャ係数 (R,G,B,A)
-	ToonTextureCoefficient mmath.MVec3
-	ToonTextureAlpha       float64
+	ToonTextureFactor mmath.MVec4
 }
 
 func (v *MaterialMorphOffset) GetType() int {
 	return int(MORPH_TYPE_MATERIAL)
 }
 
-func NewMaterialMorph(materialIndex int, calcMode MaterialMorphCalcMode, diffuseColor mmath.MVec3, diffuseAlpha float64, specularColor mmath.MVec3, specularPower float64, ambientColor mmath.MVec3, edgeColor mmath.MVec3, edgeAlpha float64, edgeSize float64, textureCoefficient mmath.MVec3, textureAlpha float64, sphereTextureCoefficient mmath.MVec3, sphereTextureAlpha float64, toonTextureCoefficient mmath.MVec3, toonTextureAlpha float64) *MaterialMorphOffset {
+func NewMaterialMorph(
+	materialIndex int,
+	calcMode MaterialMorphCalcMode,
+	diffuse mmath.MVec4,
+	specular mmath.MVec4,
+	ambient mmath.MVec3,
+	edge mmath.MVec4,
+	edgeSize float64,
+	textureFactor mmath.MVec4,
+	sphereTextureFactor mmath.MVec4,
+	toonTextureFactor mmath.MVec4,
+) *MaterialMorphOffset {
 	return &MaterialMorphOffset{
-		MaterialIndex:            materialIndex,
-		CalcMode:                 calcMode,
-		DiffuseColor:             diffuseColor,
-		DiffuseAlpha:             diffuseAlpha,
-		SpecularColor:            specularColor,
-		SpecularPower:            specularPower,
-		AmbientColor:             ambientColor,
-		EdgeColor:                edgeColor,
-		EdgeAlpha:                edgeAlpha,
-		EdgeSize:                 edgeSize,
-		TextureCoefficient:       textureCoefficient,
-		TextureAlpha:             textureAlpha,
-		SphereTextureCoefficient: sphereTextureCoefficient,
-		SphereTextureAlpha:       sphereTextureAlpha,
-		ToonTextureCoefficient:   toonTextureCoefficient,
-		ToonTextureAlpha:         toonTextureAlpha,
+		MaterialIndex:       materialIndex,
+		CalcMode:            calcMode,
+		Diffuse:             diffuse,
+		Specular:            specular,
+		Ambient:             ambient,
+		Edge:                edge,
+		EdgeSize:            edgeSize,
+		TextureFactor:       textureFactor,
+		SphereTextureFactor: sphereTextureFactor,
+		ToonTextureFactor:   toonTextureFactor,
 	}
 }
 

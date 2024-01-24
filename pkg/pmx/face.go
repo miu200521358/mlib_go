@@ -22,12 +22,6 @@ func NewFace() *Face {
 	}
 }
 
-func (f *Face) GL() *FaceGL {
-	return &FaceGL{
-		VertexIndexes: [3]uint32{uint32(f.VertexIndexes[2]), uint32(f.VertexIndexes[1]), uint32(f.VertexIndexes[0])},
-	}
-}
-
 // 面リスト
 type Faces struct {
 	*mcore.IndexModelCorrection[*Face]

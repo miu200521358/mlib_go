@@ -2,12 +2,11 @@ package mgl
 
 import (
 	"github.com/go-gl/gl/v4.4-core/gl"
-
 )
 
 // Vertex Array Object.
 type VAO struct {
-	id uint32
+	id uint32 // ID
 }
 
 // Creates a new VAO.

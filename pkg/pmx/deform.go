@@ -22,6 +22,7 @@ type DeformInterface interface {
 	GetAllWeights() []float64
 	GetIndexes(weightThreshold float64) []int
 	GetWeights(weightThreshold float64) []float64
+	NormalizedDeform() [8]float32
 }
 
 // Deform デフォーム既定構造体
@@ -123,7 +124,7 @@ func (d *Deform) Normalize(align bool) {
 }
 
 // NormalizedDeform ウェイト正規化して4つのボーンINDEXとウェイトを返す（合計8個）
-func (d *Deform) NormalizedDeform() []float64 {
+func (d *Deform) NormalizedDeform() [8]float32 {
 	// 揃える必要がある場合、ウェイトを統合する
 	indexWeights := make(map[int]float64)
 	for i, index := range d.Indexes {
@@ -168,9 +169,15 @@ func (d *Deform) NormalizedDeform() []float64 {
 		wlist[i] /= sum
 	}
 
-	normalizedDeform := make([]float64, 0, 8)
-	normalizedDeform = append(normalizedDeform, float64(ilist[0]), float64(ilist[1]), float64(ilist[2]), float64(ilist[3]))
-	normalizedDeform = append(normalizedDeform, wlist[0], wlist[1], wlist[2], wlist[3])
+	normalizedDeform := [8]float32{}
+	normalizedDeform[0] = float32(ilist[0])
+	normalizedDeform[1] = float32(ilist[1])
+	normalizedDeform[2] = float32(ilist[2])
+	normalizedDeform[3] = float32(ilist[3])
+	normalizedDeform[4] = float32(wlist[0])
+	normalizedDeform[5] = float32(wlist[1])
+	normalizedDeform[6] = float32(wlist[2])
+	normalizedDeform[7] = float32(wlist[3])
 
 	return normalizedDeform
 }
