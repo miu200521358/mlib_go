@@ -33,9 +33,10 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int) {
 
 type GlWindow struct {
 	glfw.Window
-	ModelSets   []ModelSet
-	Shader      *mgl.MShader
-	WindowIndex int
+	ModelSets    []ModelSet
+	Shader       *mgl.MShader
+	WindowIndex  int
+	cubeVertices []float32
 }
 
 func NewGlWindow(
@@ -129,7 +130,16 @@ func (w *GlWindow) AddData(pmxModel *pmx.PmxModel) {
 	// // TODO: モーションも追加する
 	// pmxModel.InitializeDraw(w.WindowIndex)
 	// w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel})
-
+	w.cubeVertices = make([]float32, 0)
+	for _, face := range pmxModel.Faces.Data {
+		for _, vertexIndex := range (*face).VertexIndexes {
+			w.cubeVertices = append(w.cubeVertices, float32(pmxModel.Vertices.GetItem(vertexIndex).Position.GetX()))
+			w.cubeVertices = append(w.cubeVertices, float32(pmxModel.Vertices.GetItem(vertexIndex).Position.GetY()))
+			w.cubeVertices = append(w.cubeVertices, float32(pmxModel.Vertices.GetItem(vertexIndex).Position.GetZ()))
+			w.cubeVertices = append(w.cubeVertices, float32(pmxModel.Vertices.GetItem(vertexIndex).UV.GetX()))
+			w.cubeVertices = append(w.cubeVertices, float32(pmxModel.Vertices.GetItem(vertexIndex).UV.GetY()))
+		}
+	}
 }
 
 func (w *GlWindow) Draw() {
@@ -160,29 +170,21 @@ func (w *GlWindow) Close() {
 	glfw.Terminate()
 }
 
-func (w *GlWindow) Run() {
-	for !w.Window.ShouldClose() {
-		w.Draw()
-		w.Window.SwapBuffers()
-		glfw.PollEvents()
-	}
-	w.Close()
-}
+// func (w *GlWindow) Run() {
+// 	for !w.Window.ShouldClose() {
+// 		w.Draw()
+// 		w.Window.SwapBuffers()
+// 		glfw.PollEvents()
+// 	}
+// 	w.Close()
+// }
 
-func (w *GlWindow) Run2() {
+func (w *GlWindow) Run() {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 
 	w.Shader.UseModelProgram()
 	program := w.Shader.ModelProgram
-
-	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(512)/768, 0.1, 10.0)
-	projectionUniform := gl.GetUniformLocation(program, gl.Str("projection\x00"))
-	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
-
-	camera := mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	cameraUniform := gl.GetUniformLocation(program, gl.Str("camera\x00"))
-	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
 	model := mgl32.Ident4()
 	modelUniform := gl.GetUniformLocation(program, gl.Str("model\x00"))
@@ -207,7 +209,7 @@ func (w *GlWindow) Run2() {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(cubeVertices)*4, gl.Ptr(cubeVertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(w.cubeVertices)*4, gl.Ptr(w.cubeVertices), gl.STATIC_DRAW)
 
 	vertAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
@@ -290,55 +292,4 @@ func newTexture(file string) (uint32, error) {
 		gl.Ptr(rgba.Pix))
 
 	return texture, nil
-}
-
-var cubeVertices = []float32{
-	//  X, Y, Z, U, V
-	// Bottom
-	-1.0, -1.0, -1.0, 0.0, 0.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	-1.0, -1.0, 1.0, 0.0, 1.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	1.0, -1.0, 1.0, 1.0, 1.0,
-	-1.0, -1.0, 1.0, 0.0, 1.0,
-
-	// Top
-	-1.0, 1.0, -1.0, 0.0, 0.0,
-	-1.0, 1.0, 1.0, 0.0, 1.0,
-	1.0, 1.0, -1.0, 1.0, 0.0,
-	1.0, 1.0, -1.0, 1.0, 0.0,
-	-1.0, 1.0, 1.0, 0.0, 1.0,
-	1.0, 1.0, 1.0, 1.0, 1.0,
-
-	// Front
-	-1.0, -1.0, 1.0, 1.0, 0.0,
-	1.0, -1.0, 1.0, 0.0, 0.0,
-	-1.0, 1.0, 1.0, 1.0, 1.0,
-	1.0, -1.0, 1.0, 0.0, 0.0,
-	1.0, 1.0, 1.0, 0.0, 1.0,
-	-1.0, 1.0, 1.0, 1.0, 1.0,
-
-	// Back
-	-1.0, -1.0, -1.0, 0.0, 0.0,
-	-1.0, 1.0, -1.0, 0.0, 1.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	-1.0, 1.0, -1.0, 0.0, 1.0,
-	1.0, 1.0, -1.0, 1.0, 1.0,
-
-	// Left
-	-1.0, -1.0, 1.0, 0.0, 1.0,
-	-1.0, 1.0, -1.0, 1.0, 0.0,
-	-1.0, -1.0, -1.0, 0.0, 0.0,
-	-1.0, -1.0, 1.0, 0.0, 1.0,
-	-1.0, 1.0, 1.0, 1.0, 1.0,
-	-1.0, 1.0, -1.0, 1.0, 0.0,
-
-	// Right
-	1.0, -1.0, 1.0, 1.0, 1.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	1.0, 1.0, -1.0, 0.0, 0.0,
-	1.0, -1.0, 1.0, 1.0, 1.0,
-	1.0, 1.0, -1.0, 0.0, 0.0,
-	1.0, 1.0, 1.0, 0.0, 1.0,
 }
