@@ -1,4 +1,4 @@
-package mutil
+package mutils
 
 func Contains(arr []string, str string) bool {
 	for _, a := range arr {

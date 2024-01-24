@@ -1,4 +1,4 @@
-package mutil
+package mutils
 
 import (
 	"encoding/json"

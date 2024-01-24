@@ -3,13 +3,11 @@ package mmath
 import (
 	"fmt"
 
-	"github.com/go-gl/mathgl/mgl32"
 	"github.com/ungerik/go3d/float64/mat3"
 	"github.com/ungerik/go3d/float64/mat4"
 	"github.com/ungerik/go3d/float64/quaternion"
 	"github.com/ungerik/go3d/float64/vec3"
 	"github.com/ungerik/go3d/float64/vec4"
-
 )
 
 type MMat4 mat4.T
@@ -28,13 +26,13 @@ var (
 )
 
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します
-func (m MMat4) GL() mgl32.Mat4 {
-	return mgl32.Mat4([16]float32{
+func (m MMat4) GL() [16]float32 {
+	return [16]float32{
 		float32(m[0][0]), float32(-m[0][1]), float32(-m[0][2]), float32(m[0][3]),
 		float32(-m[1][0]), float32(m[1][1]), float32(m[1][2]), float32(m[1][3]),
 		float32(-m[2][0]), float32(m[2][1]), float32(m[2][2]), float32(m[2][3]),
 		float32(-m[3][0]), float32(m[3][1]), float32(m[3][2]), float32(m[3][3]),
-	})
+	}
 }
 
 // IsZero

@@ -1,11 +1,10 @@
-package mutil
+package mutils
 
 import (
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
-
 )
 
 // 指定されたパスがファイルとして存在しているか

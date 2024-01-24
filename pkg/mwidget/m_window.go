@@ -8,7 +8,7 @@ import (
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
-	"github.com/miu200521358/mlib_go/pkg/mutil"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 const (
@@ -25,7 +25,7 @@ type MWindow struct {
 }
 
 func NewMWindow(resourceFiles embed.FS, isHorizontal bool) (*MWindow, error) {
-	appConfig := mutil.ReadAppConfig(resourceFiles)
+	appConfig := mutils.ReadAppConfig(resourceFiles)
 
 	var mw *walk.MainWindow
 
@@ -47,7 +47,7 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool) (*MWindow, error) {
 		}
 		walk.App().Exit(0)
 	})
-	iconImg, err := mutil.ReadIconFile(resourceFiles)
+	iconImg, err := mutils.ReadIconFile(resourceFiles)
 	if err != nil {
 		return nil, err
 	}

@@ -8,9 +8,8 @@ import (
 	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
-	"github.com/miu200521358/mlib_go/pkg/mutil"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 const FilePickerClass = "FilePicker Class"
@@ -189,7 +188,7 @@ func (picker *FilePicker) GetData() (mcore.HashModelInterface, error) {
 	if picker.PathLineEdit.Text() == "" || picker.modelReader == nil {
 		return nil, nil
 	}
-	if isExist, err := mutil.ExistsFile(picker.PathLineEdit.Text()); err != nil || !isExist {
+	if isExist, err := mutils.ExistsFile(picker.PathLineEdit.Text()); err != nil || !isExist {
 		return nil, fmt.Errorf("ファイルが存在しません")
 	}
 	return picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
@@ -209,7 +208,7 @@ func (picker *FilePicker) OnChanged(path string) {
 
 	if picker.historyKey != "" {
 		// 履歴用キーを指定して履歴リストを保存
-		mutil.SaveUserConfig(picker.historyKey, path, picker.limitHistory)
+		mutils.SaveUserConfig(picker.historyKey, path, picker.limitHistory)
 	}
 
 	if picker.OnPathChanged != nil {
@@ -220,7 +219,7 @@ func (picker *FilePicker) OnChanged(path string) {
 func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 	return func() {
 		// 履歴リストを取得
-		choices, _ := mutil.LoadUserConfig(picker.historyKey)
+		choices, _ := mutils.LoadUserConfig(picker.historyKey)
 
 		// 履歴ダイアログを開く
 		dlg, err := walk.NewDialog(picker.Form())
@@ -309,7 +308,7 @@ func (picker *FilePicker) onClickOpenButton() walk.EventHandler {
 			picker.initialDirPath = dirPath
 		} else if picker.historyKey != "" {
 			// 履歴用キーを指定して履歴リストを取得
-			choices, _ := mutil.LoadUserConfig(picker.historyKey)
+			choices, _ := mutils.LoadUserConfig(picker.historyKey)
 			if len(choices) > 0 {
 				// ファイルパスからディレクトリパスを取得
 				dirPath := filepath.Dir(choices[0])

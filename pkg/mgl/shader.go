@@ -10,6 +10,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type VsLayout int
@@ -60,7 +61,7 @@ type MShader struct {
 	lightDirection                   *mmath.MVec3
 	msaa                             *Msaa
 	BoneMatrixTextureUniform         map[ProgramType]int32
-	BoneMatrixTextureId              map[ProgramType]*uint32
+	BoneMatrixTextureId              map[ProgramType]uint32
 	BoneMatrixTextureWidth           map[ProgramType]int32
 	BoneMatrixTextureHeight          map[ProgramType]int32
 	ModelViewMatrixUniform           map[ProgramType]int32
@@ -110,7 +111,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		lightDirection:                   &mmath.MVec3{-1, -1, -1},
 		msaa:                             NewMsaa(int32(width), int32(height)),
 		BoneMatrixTextureUniform:         make(map[ProgramType]int32, 0),
-		BoneMatrixTextureId:              make(map[ProgramType]*uint32, 0),
+		BoneMatrixTextureId:              make(map[ProgramType]uint32, 0),
 		BoneMatrixTextureWidth:           make(map[ProgramType]int32, 0),
 		BoneMatrixTextureHeight:          make(map[ProgramType]int32, 0),
 		ModelViewMatrixUniform:           make(map[ProgramType]int32, 0),
@@ -296,7 +297,8 @@ func (s *MShader) initialize(program uint32, programType ProgramType) {
 	s.ModelViewProjectionMatrixUniform[programType] = gl.GetUniformLocation(program, gl.Str("modelViewProjectionMatrix\x00"))
 
 	// ボーン変形行列用テクスチャ
-	gl.GenTextures(1, s.BoneMatrixTextureId[programType])
+	boneMatrixTextureId := s.BoneMatrixTextureId[programType]
+	gl.GenTextures(1, &boneMatrixTextureId)
 	s.BoneMatrixTextureUniform[programType] = gl.GetUniformLocation(program, gl.Str("boneMatrixTexture\x00"))
 	s.BoneMatrixTextureWidth[programType] = gl.GetUniformLocation(program, gl.Str("boneMatrixWidth\x00"))
 	s.BoneMatrixTextureHeight[programType] = gl.GetUniformLocation(program, gl.Str("boneMatrixHeight\x00"))

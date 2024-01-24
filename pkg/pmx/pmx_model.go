@@ -31,6 +31,7 @@ type PmxModel struct {
 	VerticesByBones     map[int][]int
 	VerticesByMaterials map[int][]int
 	FacesByMaterials    map[int][]int
+	Meshes              *Meshes
 }
 
 func NewPmxModel(path string) *PmxModel {
@@ -66,4 +67,7 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 	d02.EnglishName = "Exp"
 	d02.SpecialFlag = SPECIAL_FLAG_ON
 	pm.DisplaySlots.Append(d02, false)
+}
+
+func (pm *PmxModel) InitializeDraw() {
 }

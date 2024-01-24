@@ -13,7 +13,7 @@ import (
 	"golang.org/x/text/encoding/unicode"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-	"github.com/miu200521358/mlib_go/pkg/mutil"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type ReaderInterface interface {
@@ -30,7 +30,7 @@ type BaseReader[T HashModelInterface] struct {
 
 func (r *BaseReader[T]) Open(path string) error {
 
-	file, err := mutil.Open(path)
+	file, err := mutils.Open(path)
 	if err != nil {
 		return err
 	}

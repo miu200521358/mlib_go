@@ -24,6 +24,12 @@ type Vertex struct {
 	EdgeFactor float64
 }
 
+type VertexGL struct {
+	Position [3]float32
+	Normal   [3]float32
+	UV       [2]float32
+}
+
 func NewVertex() *Vertex {
 	v := &Vertex{
 		IndexModel:  &mcore.IndexModel{Index: -1},
@@ -36,6 +42,14 @@ func NewVertex() *Vertex {
 		EdgeFactor:  0.0,
 	}
 	return v
+}
+
+func (v *Vertex) GL() *VertexGL {
+	return &VertexGL{
+		Position: v.Position.GL(),
+		Normal:   v.Normal.GL(),
+		UV:       v.UV.GL(),
+	}
 }
 
 // 頂点リスト
