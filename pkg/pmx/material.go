@@ -4,6 +4,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 // スフィアモード
@@ -48,29 +49,58 @@ const (
 )
 
 type MaterialGL struct {
-	Diffuse           *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
-	Specular          *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
-	Ambient           *mmath.MVec3 // Ambient (R,G,B)(環境色)
-	DrawFlag          DrawFlag     // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
-	Edge              *mmath.MVec4 // エッジ色 (R,G,B,A)
+	diffuse           *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
+	specular          *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
+	ambient           *mmath.MVec3 // Ambient (R,G,B)(環境色)
+	edge              *mmath.MVec4 // エッジ色 (R,G,B,A)
 	EdgeSize          float32      // エッジサイズ
-	Texture           *TextureGL
-	SphereTexture     *TextureGL
-	ToonTexture       *TextureGL
-	SphereMode        SphereMode // スフィアモード
-	VerticesCount     int        // 頂点数
-	PrevVerticesCount int        // 前の材質までの頂点数
+	DrawFlag          DrawFlag     // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
+	Texture           *TextureGL   // 通常テクスチャ
+	SphereTexture     *TextureGL   // スフィアテクスチャ
+	ToonTexture       *TextureGL   // トゥーンテクスチャ
+	SphereMode        SphereMode   // スフィアモード
+	VerticesCount     int          // 頂点数
+	PrevVerticesCount int          // 前の材質までの頂点数
 	lightAmbient      *mmath.MVec4
 }
 
-func (m *MaterialGL) DiffuseGL() [4]float32 {
+func (m *MaterialGL) Diffuse() [4]float32 {
 	diffuse := [4]float32{
-		float32(m.Diffuse.GetX())*float32(m.lightAmbient.GetX()) + float32(m.Ambient.GetX()),
-		float32(m.Diffuse.GetY())*float32(m.lightAmbient.GetY()) + float32(m.Ambient.GetY()),
-		float32(m.Diffuse.GetZ())*float32(m.lightAmbient.GetZ()) + float32(m.Ambient.GetZ()),
-		float32(m.Diffuse.GetW()),
+		float32(m.diffuse.GetX())*float32(m.lightAmbient.GetX()) + float32(m.ambient.GetX()),
+		float32(m.diffuse.GetY())*float32(m.lightAmbient.GetY()) + float32(m.ambient.GetY()),
+		float32(m.diffuse.GetZ())*float32(m.lightAmbient.GetZ()) + float32(m.ambient.GetZ()),
+		float32(m.diffuse.GetW()),
 	}
 	return diffuse
+}
+
+func (m *MaterialGL) Ambient() [3]float32 {
+	ambient := [3]float32{
+		float32(m.diffuse.GetX()) * float32(m.lightAmbient.GetX()),
+		float32(m.diffuse.GetY()) * float32(m.lightAmbient.GetY()),
+		float32(m.diffuse.GetZ()) * float32(m.lightAmbient.GetZ()),
+	}
+	return ambient
+}
+
+func (m *MaterialGL) Specular() [4]float32 {
+	specular := [4]float32{
+		float32(m.specular.GetX()) * float32(m.lightAmbient.GetX()),
+		float32(m.specular.GetY()) * float32(m.lightAmbient.GetY()),
+		float32(m.specular.GetZ()) * float32(m.lightAmbient.GetZ()),
+		float32(m.specular.GetW()),
+	}
+	return specular
+}
+
+func (m *MaterialGL) Edge() [4]float32 {
+	edge := [4]float32{
+		float32(m.edge.GetX()),
+		float32(m.edge.GetY()),
+		float32(m.edge.GetZ()),
+		float32(m.edge.GetW()) * float32(m.diffuse.GetW()),
+	}
+	return edge
 }
 
 type Material struct {
@@ -138,10 +168,10 @@ func (m *Material) GL(
 	}
 
 	return &MaterialGL{
-		Diffuse:           m.Diffuse,
-		Ambient:           m.Ambient,
-		Specular:          m.Specular,
-		Edge:              m.Edge,
+		diffuse:           m.Diffuse,
+		ambient:           m.Ambient,
+		specular:          m.Specular,
+		edge:              m.Edge,
 		EdgeSize:          float32(m.EdgeSize),
 		Texture:           textureGL,
 		SphereTexture:     sphereTextureGL,

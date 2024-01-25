@@ -5,7 +5,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type Mesh struct {
@@ -46,9 +45,9 @@ func (m *Mesh) DrawModel(
 	m.ibo.Bind()
 
 	// if m.material.DrawFlag == DRAW_FLAG_DOUBLE_SIDED_DRAWING {
-	// 両面描画
-	// カリングOFF
-	gl.Disable(gl.CULL_FACE)
+	// 	// 両面描画
+	// 	// カリングOFF
+	// 	gl.Disable(gl.CULL_FACE)
 	// } else {
 	// 	// 片面描画
 	// 	// カリングON
@@ -62,12 +61,23 @@ func (m *Mesh) DrawModel(
 	// ------------------
 	// 材質色設定
 	// full.fx の AmbientColor相当
-	diffuse := m.material.DiffuseGL()
+	diffuse := m.material.Diffuse()
 	gl.Uniform4f(
 		shader.DiffuseUniform[mgl.PROGRAM_TYPE_MODEL],
 		diffuse[0], diffuse[1], diffuse[2], diffuse[3],
 	)
-	mutils.CheckGLError()
+
+	ambient := m.material.Ambient()
+	gl.Uniform3f(
+		shader.AmbientUniform[mgl.PROGRAM_TYPE_MODEL],
+		ambient[0], ambient[1], ambient[2],
+	)
+
+	specular := m.material.Specular()
+	gl.Uniform4f(
+		shader.SpecularUniform[mgl.PROGRAM_TYPE_MODEL],
+		specular[0], specular[1], specular[2], specular[3],
+	)
 
 	// 三角形描画
 	gl.DrawElements(
@@ -76,7 +86,6 @@ func (m *Mesh) DrawModel(
 		gl.UNSIGNED_INT,
 		nil,
 	)
-	mutils.CheckGLError()
 
 	// ambient := m.material.Ambient
 	// gl.Uniform3f(

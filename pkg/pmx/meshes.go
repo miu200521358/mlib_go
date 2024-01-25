@@ -5,6 +5,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 type Meshes struct {
@@ -53,7 +54,7 @@ func NewMeshes(model *PmxModel, windowIndex int) *Meshes {
 
 	vao := mgl.NewVAO()
 	vao.Bind()
-	vbo := mgl.NewVBO(gl.Ptr(vertices), len(vertices), 3)
+	vbo := mgl.NewVBO(gl.Ptr(vertices), len(vertices))
 	vbo.Bind()
 	vbo.Unbind()
 	vao.Unbind()

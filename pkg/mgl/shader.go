@@ -51,9 +51,9 @@ type MShader struct {
 	// modelViewProjectionMatrixUniform map[ProgramType]int32
 	// LightDirectionUniform            map[ProgramType]int32
 	// cameraPositionUniform            map[ProgramType]int32
-	DiffuseUniform map[ProgramType]int32
-	// AmbientUniform                   map[ProgramType]int32
-	// SpecularUniform                  map[ProgramType]int32
+	DiffuseUniform  map[ProgramType]int32
+	AmbientUniform  map[ProgramType]int32
+	SpecularUniform map[ProgramType]int32
 	// SelectBoneColorUniform           map[ProgramType]int32
 	// UnselectBoneColorUniform         map[ProgramType]int32
 	// EdgeUniform                      map[ProgramType]int32
@@ -97,9 +97,9 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		// modelViewProjectionMatrixUniform: make(map[ProgramType]int32, 0),
 		// LightDirectionUniform:            make(map[ProgramType]int32, 0),
 		// cameraPositionUniform:            make(map[ProgramType]int32, 0),
-		DiffuseUniform: make(map[ProgramType]int32, 0),
-		// AmbientUniform:                   make(map[ProgramType]int32, 0),
-		// SpecularUniform:                  make(map[ProgramType]int32, 0),
+		DiffuseUniform:  make(map[ProgramType]int32, 0),
+		AmbientUniform:  make(map[ProgramType]int32, 0),
+		SpecularUniform: make(map[ProgramType]int32, 0),
 		// EdgeUniform:                      make(map[ProgramType]int32, 0),
 		// EdgeSizeUniform:                  make(map[ProgramType]int32, 0),
 		// SelectBoneColorUniform:           make(map[ProgramType]int32, 0),
@@ -120,7 +120,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 	}
 	modelProgram, err := shader.newProgram(
 		resourceFiles,
-		"resources/glsl/vertex.vert", "resources/glsl/vertex.frag",
+		"resources/glsl/model.vert", "resources/glsl/model.frag",
 		PROGRAM_TYPE_MODEL)
 	if err != nil {
 		return nil, err
@@ -249,6 +249,16 @@ func (s *MShader) initialize(program uint32, programType ProgramType) {
 	diffuseUniform := gl.GetUniformLocation(program, gl.Str("diffuse\x00"))
 	gl.Uniform4fv(diffuseUniform, 1, &diffuse[0])
 	s.DiffuseUniform[programType] = diffuseUniform
+
+	ambient := mgl32.Vec3{}
+	ambientUniform := gl.GetUniformLocation(program, gl.Str("ambient\x00"))
+	gl.Uniform3fv(ambientUniform, 1, &ambient[0])
+	s.AmbientUniform[programType] = ambientUniform
+
+	specular := mgl32.Vec4{}
+	specularUniform := gl.GetUniformLocation(program, gl.Str("specular\x00"))
+	gl.Uniform4fv(specularUniform, 1, &specular[0])
+	s.SpecularUniform[programType] = specularUniform
 
 	// // # モデルビュー行列
 	// projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(s.width)/float32(s.height), 0.1, 10.0)
