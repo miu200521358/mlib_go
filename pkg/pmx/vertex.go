@@ -34,11 +34,20 @@ func NewVertex() *Vertex {
 func (v *Vertex) GL() []float32 {
 	p := v.Position.GL()
 	n := v.Normal.GL()
-	// d := v.Deform.NormalizedDeform()
+	eu := [2]float32{0.0, 0.0}
+	if len(v.ExtendedUVs) > 0 {
+		eu[0] = float32(v.ExtendedUVs[0].GetX())
+		eu[1] = float32(v.ExtendedUVs[0].GetY())
+	}
+	d := v.Deform.NormalizedDeform()
 	return []float32{
-		p[0], p[1], p[2],
-		n[0], n[1], n[2],
-		// d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7],
+		p[0], p[1], p[2], // 位置
+		n[0], n[1], n[2], // 法線
+		float32(v.UV.GetX()), float32(1 - v.UV.GetY()), // UV
+		eu[0], eu[1], // 追加UV
+		float32(v.EdgeFactor),  // エッジ倍率
+		d[0], d[1], d[2], d[3], // デフォームボーンINDEX
+		d[4], d[5], d[6], d[7], // デフォームボーンウェイト
 	}
 }
 
