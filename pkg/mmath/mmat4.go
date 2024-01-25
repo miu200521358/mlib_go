@@ -37,6 +37,10 @@ func (m MMat4) GL() *[16]float32 {
 	return &mat
 }
 
+func (m MMat4) Mgl() mat4.T {
+	return (mat4.T)(m)
+}
+
 // IsZero
 func (m MMat4) IsZero() bool {
 	return m == MMat4Zero

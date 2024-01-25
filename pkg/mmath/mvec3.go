@@ -5,6 +5,7 @@ import (
 	"hash/fnv"
 	"math"
 
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/ungerik/go3d/float64/vec3"
 )
 
@@ -77,6 +78,10 @@ func (v *MVec3) SetZ(z float64) {
 // Gl OpenGL座標系に変換された2次元ベクトルを返します
 func (v *MVec3) GL() [3]float32 {
 	return [3]float32{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ())}
+}
+
+func (v *MVec3) Mgl() mgl32.Vec3 {
+	return mgl32.Vec3{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ())}
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します

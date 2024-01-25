@@ -32,9 +32,10 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int) {
 
 type GlWindow struct {
 	glfw.Window
-	ModelSets   []ModelSet
-	Shader      *mgl.MShader
-	WindowIndex int
+	ModelSets     []ModelSet
+	Shader        *mgl.MShader
+	WindowIndex   int
+	resourceFiles embed.FS
 }
 
 func NewGlWindow(
@@ -69,7 +70,7 @@ func NewGlWindow(
 		return nil, err
 	}
 	w.MakeContextCurrent()
-	iconImg, err := mutils.ReadIconFile(resourceFiles)
+	iconImg, err := mutils.LoadIconFile(resourceFiles)
 	if err == nil {
 		w.SetIcon([]image.Image{iconImg})
 	}
@@ -114,10 +115,11 @@ func NewGlWindow(
 	}
 
 	return &GlWindow{
-		Window:      *w,
-		ModelSets:   make([]ModelSet, 0),
-		Shader:      shader,
-		WindowIndex: windowIndex,
+		Window:        *w,
+		ModelSets:     make([]ModelSet, 0),
+		Shader:        shader,
+		WindowIndex:   windowIndex,
+		resourceFiles: resourceFiles,
 	}, nil
 }
 
@@ -126,7 +128,7 @@ func (w *GlWindow) AddData(pmxModel *pmx.PmxModel) {
 	w.MakeContextCurrent()
 
 	// TODO: モーションも追加する
-	pmxModel.InitializeDraw(w.WindowIndex)
+	pmxModel.InitializeDraw(w.WindowIndex, w.resourceFiles)
 	w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel})
 }
 
@@ -168,7 +170,7 @@ func (w *GlWindow) Close() {
 func (w *GlWindow) Run() {
 	angle := 0.0
 	previousTime := glfw.GetTime()
-	modelUniform := gl.GetUniformLocation(w.Shader.ModelProgram, gl.Str("boneTransformMatrix\x00"))
+	modelUniform := gl.GetUniformLocation(w.Shader.ModelProgram, gl.Str(mgl.SHADER_BONE_TRANSFORM_MATRIX))
 
 	for !w.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)

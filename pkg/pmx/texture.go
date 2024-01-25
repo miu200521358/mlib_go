@@ -1,6 +1,8 @@
 package pmx
 
 import (
+	"embed"
+	"fmt"
 	"image"
 	"image/draw"
 	"path/filepath"
@@ -24,7 +26,8 @@ type TextureGL struct {
 	Id            uint32      // OpenGLテクスチャID
 	Valid         bool        // テクスチャフルパスが有効であるか否か
 	TextureType   TextureType // テクスチャ種別
-	TextureTypeId uint32      // テクスチャ種類別描画先ユニットID
+	TextureUnitId uint32      // テクスチャ種類別描画先ユニットID
+	TextureUnitNo uint32      // テクスチャ種類別描画先ユニット番号
 }
 
 func (t *TextureGL) Bind() {
@@ -32,8 +35,17 @@ func (t *TextureGL) Bind() {
 		return
 	}
 
-	gl.ActiveTexture(t.TextureTypeId)
+	gl.ActiveTexture(t.TextureUnitId)
 	gl.BindTexture(gl.TEXTURE_2D, t.Id)
+
+	if t.TextureType == TEXTURE_TYPE_TOON {
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	}
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 }
 
 func (t *TextureGL) Unbind() {
@@ -59,7 +71,8 @@ type Texture struct {
 	glId          uint32      // OpenGLテクスチャID
 	Initialized   bool        // 描画初期化済みフラグ
 	Image         *image.RGBA // テクスチャイメージ
-	textureTypeId uint32      // テクスチャ種類別描画先ユニットID
+	textureUnitId uint32      // テクスチャ種類別描画先ユニットID
+	textureUnitNo uint32      // テクスチャ種類別描画先ユニット番号
 }
 
 func NewTexture() *Texture {
@@ -75,23 +88,24 @@ func NewTexture() *Texture {
 func (t *Texture) GL(
 	modelPath string,
 	textureType TextureType,
-	isIndividual bool,
 	windowIndex int,
+	resourceFiles embed.FS,
 ) *TextureGL {
 	tGl := &TextureGL{}
 
 	if t.Initialized && t.Valid {
-		// 既にフラグが立ってたら描画初期化済みなので一旦削除
-		gl.DeleteTextures(1, &t.glId)
+		// 既にフラグが立ってたら描画初期化済み
+		// 共有Toonテクスチャの場合、既に初期化済み
+		tGl.Id = t.glId
+		tGl.Valid = t.Valid
+		tGl.TextureType = t.TextureType
+		tGl.TextureUnitId = t.textureUnitId
+		tGl.TextureUnitNo = t.textureUnitNo
+		return tGl
 	}
 
-	// global texture
-	var texPath string
-	if isIndividual {
-		texPath = filepath.Join(filepath.Dir(modelPath), t.Name)
-	} else {
-		texPath = t.Name
-	}
+	// 通常テクスチャ
+	texPath := filepath.Join(filepath.Dir(modelPath), t.Name)
 
 	// テクスチャがちゃんとある場合のみ初期化処理実施
 	valid, err := mutils.ExistsFile(texPath)
@@ -129,46 +143,46 @@ func (t *Texture) GL(
 	if windowIndex == 0 {
 		switch textureType {
 		case TEXTURE_TYPE_TEXTURE:
-			t.textureTypeId = gl.TEXTURE0
+			t.textureUnitId = gl.TEXTURE0
+			t.textureUnitNo = 0
 		case TEXTURE_TYPE_TOON:
-			t.textureTypeId = gl.TEXTURE1
+			t.textureUnitId = gl.TEXTURE1
+			t.textureUnitNo = 1
 		case TEXTURE_TYPE_SPHERE:
-			t.textureTypeId = gl.TEXTURE2
+			t.textureUnitId = gl.TEXTURE2
+			t.textureUnitNo = 2
 		}
 	} else if windowIndex == 1 {
 		switch textureType {
 		case TEXTURE_TYPE_TEXTURE:
-			t.textureTypeId = gl.TEXTURE3
+			t.textureUnitId = gl.TEXTURE3
+			t.textureUnitNo = 3
 		case TEXTURE_TYPE_TOON:
-			t.textureTypeId = gl.TEXTURE4
+			t.textureUnitId = gl.TEXTURE4
+			t.textureUnitNo = 4
 		case TEXTURE_TYPE_SPHERE:
-			t.textureTypeId = gl.TEXTURE5
+			t.textureUnitId = gl.TEXTURE5
+			t.textureUnitNo = 5
 		}
 	} else if windowIndex == 2 {
 		switch textureType {
 		case TEXTURE_TYPE_TEXTURE:
-			t.textureTypeId = gl.TEXTURE6
+			t.textureUnitId = gl.TEXTURE6
+			t.textureUnitNo = 6
 		case TEXTURE_TYPE_TOON:
-			t.textureTypeId = gl.TEXTURE7
+			t.textureUnitId = gl.TEXTURE7
+			t.textureUnitNo = 7
 		case TEXTURE_TYPE_SPHERE:
-			t.textureTypeId = gl.TEXTURE8
+			t.textureUnitId = gl.TEXTURE8
+			t.textureUnitNo = 8
 		}
 	}
 
 	tGl.Valid = t.Valid
 	tGl.TextureType = t.TextureType
-	tGl.TextureTypeId = t.textureTypeId
+	tGl.TextureUnitId = t.textureUnitId
 
 	tGl.Bind()
-
-	if t.TextureType == TEXTURE_TYPE_TOON {
-		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	}
-
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 
 	gl.TexImage2D(
 		gl.TEXTURE_2D,
@@ -209,4 +223,74 @@ func NewToonTextures() *ToonTextures {
 	return &ToonTextures{
 		IndexModelCorrection: mcore.NewIndexModelCorrection[*Texture](),
 	}
+}
+
+func (t *ToonTextures) InitGl(
+	windowIndex int,
+	resourceFiles embed.FS,
+) error {
+	for i := 0; i < 10; i++ {
+		filePath := fmt.Sprintf("resources/toon/toon%02d.bmp", i+1)
+
+		toon := NewTexture()
+		toon.Index = i
+		toon.Name = filePath
+		toon.TextureType = TEXTURE_TYPE_TOON
+		toon.Path = filePath
+
+		img, err := mutils.LoadImageFromResources(resourceFiles, filePath)
+		if err != nil {
+			return err
+		}
+		rgba := image.NewRGBA(img.Bounds())
+		if rgba.Stride != rgba.Rect.Size().X*4 {
+			return err
+		}
+		draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
+		toon.Image = rgba
+		toon.Valid = true
+
+		tGl := &TextureGL{}
+
+		// テクスチャオブジェクト生成
+		gl.GenTextures(1, &tGl.Id)
+		toon.glId = tGl.Id
+
+		// Toon用テクスチャユニットを設定
+		if windowIndex == 0 {
+			toon.textureUnitId = gl.TEXTURE20
+			toon.textureUnitNo = 20
+		} else if windowIndex == 1 {
+			toon.textureUnitId = gl.TEXTURE21
+			toon.textureUnitNo = 21
+		} else if windowIndex == 2 {
+			toon.textureUnitId = gl.TEXTURE22
+			toon.textureUnitNo = 22
+		}
+
+		tGl.Valid = toon.Valid
+		tGl.TextureType = toon.TextureType
+		tGl.TextureUnitId = toon.textureUnitId
+
+		tGl.Bind()
+
+		gl.TexImage2D(
+			gl.TEXTURE_2D,
+			0,
+			gl.RGBA,
+			int32(rgba.Rect.Size().X),
+			int32(rgba.Rect.Size().Y),
+			0,
+			gl.RGBA,
+			gl.UNSIGNED_BYTE,
+			gl.Ptr(rgba.Pix),
+		)
+
+		tGl.Unbind()
+		toon.Initialized = true
+
+		t.Append(toon, false)
+	}
+
+	return nil
 }

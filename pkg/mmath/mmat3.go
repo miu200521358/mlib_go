@@ -30,6 +30,10 @@ func (m MMat3) GL() *mgl32.Mat3 {
 	return &mat
 }
 
+func (m MMat3) Mgl() mat3.T {
+	return (mat3.T)(m)
+}
+
 // IsZero
 func (m MMat3) IsZero() bool {
 	return m == MMat3Zero

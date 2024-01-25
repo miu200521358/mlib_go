@@ -1,6 +1,8 @@
 package pmx
 
 import (
+	"embed"
+
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
@@ -15,7 +17,11 @@ type Meshes struct {
 	vbo    *mgl.VBO
 }
 
-func NewMeshes(model *PmxModel, windowIndex int) *Meshes {
+func NewMeshes(
+	model *PmxModel,
+	windowIndex int,
+	resourceFiles embed.FS,
+) *Meshes {
 	// 頂点情報
 	vertices := make([]float32, 0, len(model.Vertices.Indexes))
 	for _, v := range model.Vertices.GetSortedData() {
@@ -40,13 +46,35 @@ func NewMeshes(model *PmxModel, windowIndex int) *Meshes {
 			texture = model.Textures.GetItem(m.TextureIndex)
 		}
 
+		var toonTexture *Texture
+		// 個別Toon
+		if m.ToonSharingFlag == TOON_SHARING_INDIVIDUAL &&
+			m.ToonTextureIndex != -1 &&
+			mutils.ContainsInt(model.Textures.Indexes, m.ToonTextureIndex) {
+			toonTexture = model.Textures.GetItem(m.ToonTextureIndex)
+		}
+		// 共有Toon
+		if m.ToonSharingFlag == TOON_SHARING_SHARING &&
+			m.ToonTextureIndex != -1 &&
+			mutils.ContainsInt(model.ToonTextures.Indexes, m.ToonTextureIndex) {
+			toonTexture = model.ToonTextures.GetItem(m.ToonTextureIndex)
+		}
+
+		var sphereTexture *Texture
+		if m.SphereMode != SPHERE_MODE_INVALID &&
+			m.SphereTextureIndex != -1 &&
+			mutils.ContainsInt(model.Textures.Indexes, m.SphereTextureIndex) {
+			sphereTexture = model.Textures.GetItem(m.SphereTextureIndex)
+		}
+
 		materialGl := m.GL(
 			model.Path,
 			texture,
-			nil,
-			nil,
+			toonTexture,
+			sphereTexture,
 			windowIndex,
 			prevVerticesCount,
+			resourceFiles,
 		)
 		mesh := NewMesh(
 			faces,

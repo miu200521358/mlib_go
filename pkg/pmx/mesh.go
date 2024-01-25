@@ -6,6 +6,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type Mesh struct {
@@ -63,61 +64,47 @@ func (m *Mesh) DrawModel(
 	// 材質色設定
 	// full.fx の AmbientColor相当
 	diffuse := m.material.Diffuse()
-	gl.Uniform4f(
-		shader.DiffuseUniform[mgl.PROGRAM_TYPE_MODEL],
-		diffuse[0], diffuse[1], diffuse[2], diffuse[3],
-	)
+	diffuseUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_DIFFUSE))
+	gl.Uniform4fv(diffuseUniform, 1, &diffuse[0])
 
 	ambient := m.material.Ambient()
-	gl.Uniform3f(
-		shader.AmbientUniform[mgl.PROGRAM_TYPE_MODEL],
-		ambient[0], ambient[1], ambient[2],
-	)
+	ambientUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_AMBIENT))
+	gl.Uniform3fv(ambientUniform, 1, &ambient[0])
 
 	specular := m.material.Specular()
-	gl.Uniform4f(
-		shader.SpecularUniform[mgl.PROGRAM_TYPE_MODEL],
-		specular[0], specular[1], specular[2], specular[3],
-	)
+	specularUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPECULAR))
+	gl.Uniform4fv(specularUniform, 1, &specular[0])
 
 	// テクスチャ使用有無
-	gl.Uniform1i(
-		shader.UseTextureUniform[mgl.PROGRAM_TYPE_MODEL],
-		mutils.BoolToInt(m.material.Texture != nil),
-	)
+	useTextureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_USE_TEXTURE))
+	gl.Uniform1i(useTextureUniform, mutils.BoolToInt(m.material.Texture != nil))
 	if m.material.Texture != nil {
 		m.material.Texture.Bind()
-		// gl.Uniform1i(
-		// 	shader.TextureUniform[mgl.PROGRAM_TYPE_MODEL],
-		// 	int32(m.material.Texture.Id),
-		// )
+		textureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TEXTURE_SAMPLER))
+		gl.Uniform1i(textureUniform, int32(m.material.Texture.TextureUnitNo))
 	}
 
-	// // Toon使用有無
-	// gl.Uniform1i(
-	// 	shader.UseToonUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 	mutils.BoolToInt(m.material.ToonTexture != nil && m.material.ToonTexture.Valid),
-	// )
-	// if m.material.ToonTexture != nil && m.material.ToonTexture.Valid {
-	// 	m.material.ToonTexture.Bind()
-	// 	gl.Uniform1i(
-	// 		shader.ToonUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 		int32(m.material.ToonTexture.TextureTypeId),
-	// 	)
-	// }
+	// Toon使用有無
+	useToonUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_USE_TOON))
+	gl.Uniform1i(useToonUniform, mutils.BoolToInt(m.material.ToonTexture != nil))
+	if m.material.ToonTexture != nil {
+		m.material.ToonTexture.Bind()
+		toonUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TOON_SAMPLER))
+		gl.Uniform1i(toonUniform, int32(m.material.ToonTexture.TextureUnitNo))
+	}
 
-	// // Sphere使用有無
-	// gl.Uniform1i(
-	// 	shader.UseSphereUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 	mutils.BoolToInt(m.material.SphereTexture != nil && m.material.SphereTexture.Valid && m.material.SphereMode != SPHERE_MODE_INVALID),
-	// )
-	// if m.material.SphereTexture != nil && m.material.SphereTexture.Valid {
-	// 	m.material.SphereTexture.Bind()
-	// 	gl.Uniform1i(
-	// 		shader.SphereUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 		int32(m.material.SphereTexture.TextureTypeId),
-	// 	)
-	// }
+	// Sphere使用有無
+	useSphereUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_USE_SPHERE))
+	gl.Uniform1i(useSphereUniform, mutils.BoolToInt(m.material.SphereTexture != nil && m.material.SphereTexture.Valid))
+	if m.material.SphereTexture != nil && m.material.SphereTexture.Valid {
+		m.material.SphereTexture.Bind()
+		sphereUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPHERE_SAMPLER))
+		gl.Uniform1i(sphereUniform, int32(m.material.SphereTexture.TextureUnitNo))
+	}
+
+	// SphereMode
+	sphereModeUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPHERE_MODE))
+	gl.Uniform1i(sphereModeUniform, int32(m.material.SphereMode))
 
 	// // ウェイト描写
 	// gl.Uniform1i(
@@ -155,13 +142,13 @@ func (m *Mesh) DrawModel(
 		m.material.Texture.Unbind()
 	}
 
-	// if m.material.ToonTexture != nil {
-	// 	m.material.ToonTexture.Unbind()
-	// }
+	if m.material.ToonTexture != nil {
+		m.material.ToonTexture.Unbind()
+	}
 
-	// if m.material.SphereTexture != nil {
-	// 	m.material.SphereTexture.Unbind()
-	// }
+	if m.material.SphereTexture != nil {
+		m.material.SphereTexture.Unbind()
+	}
 
 	// m.UnbindBoneMatrixes()
 	m.ibo.Unbind()

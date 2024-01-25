@@ -8,6 +8,7 @@ import (
 	"image"
 	_ "image/png"
 	"io/fs"
+
 )
 
 type AppConfig struct {
@@ -15,8 +16,8 @@ type AppConfig struct {
 	AppVersion string `json:"AppVersion"`
 }
 
-// ReadAppConfig アプリ設定ファイルの読み込み
-func ReadAppConfig(resourceFiles embed.FS) AppConfig {
+// LoadAppConfig アプリ設定ファイルの読み込み
+func LoadAppConfig(resourceFiles embed.FS) AppConfig {
 	fileData, err := fs.ReadFile(resourceFiles, "resources/app_config.json")
 	if err != nil {
 		return AppConfig{}
@@ -26,11 +27,16 @@ func ReadAppConfig(resourceFiles embed.FS) AppConfig {
 	return appConfigData
 }
 
+// LoadIconFile アイコンファイルの読み込み
+func LoadIconFile(resourceFiles embed.FS) (image.Image, error) {
+	return LoadImageFromResources(resourceFiles, "resources/app.png")
+}
+
 // ReadIconFile アイコンファイルの読み込み
-func ReadIconFile(resourceFiles embed.FS) (image.Image, error) {
-	fileData, err := fs.ReadFile(resourceFiles, "resources/app.png")
+func LoadImageFromResources(resourceFiles embed.FS, fileName string) (image.Image, error) {
+	fileData, err := fs.ReadFile(resourceFiles, fileName)
 	if err != nil {
-		return nil, fmt.Errorf("app icon not found: %v", err)
+		return nil, fmt.Errorf("image not found: %v", err)
 	}
 
 	img, _, err := image.Decode(bytes.NewReader(fileData))

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/ungerik/go3d/float64/mat3"
 	"github.com/ungerik/go3d/float64/quaternion"
 	"github.com/ungerik/go3d/float64/vec3"
@@ -67,6 +68,10 @@ func (v *MQuaternion) String() string {
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します
 func (v *MQuaternion) GL() [4]float32 {
 	return [4]float32{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW())}
+}
+
+func (v *MQuaternion) Mgl() mgl32.Vec4 {
+	return mgl32.Vec4{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW())}
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換されたクォータニオンベクトルを返します

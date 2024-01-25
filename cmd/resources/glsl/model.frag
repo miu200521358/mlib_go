@@ -34,26 +34,26 @@ void main() {
         outColor *= texture(textureSampler, vertexUv);
     }
 
-    // if (1 == useSphere) {
-    //     // Sphere適用
-    //     vec4 texColor = texture(sphereSampler, sphereUv);
-    //     if (2 == sphereMode) {
-    //         // スフィア加算
-    //         outColor.rgb += texColor.rgb;
-    //     }
-    //     else {
-    //         // スフィア乗算
-    //         outColor.rgb *= texColor.rgb;
-    //     }
-    //     outColor.a *= texColor.a;
-    // }
+    if (1 == useSphere) {
+        // Sphere適用
+        vec4 texColor = texture(sphereSampler, sphereUv);
+        if (2 == sphereMode) {
+            // スフィア加算
+            outColor.rgb += texColor.rgb;
+        }
+        else {
+            // スフィア乗算
+            outColor.rgb *= texColor.rgb;
+        }
+        outColor.a *= texColor.a;
+    }
 
-    // if (1 == useToon) {
-    //     // Toon適用
-    //     float lightNormal = dot( vetexNormal, -lightDirection );
-    //     outColor *= texture(toonSampler, vec2(0, lightNormal));
-    // }
+    if (1 == useToon) {
+        // Toon適用
+        float lightNormal = dot( vetexNormal, -lightDirection );
+        outColor *= texture(toonSampler, vec2(0, lightNormal));
+    }
 
-    // スペキュラ適用
-    outColor.rgb += vertexSpecular;
+    // // スペキュラ適用
+    // outColor.rgb += vertexSpecular;
 }

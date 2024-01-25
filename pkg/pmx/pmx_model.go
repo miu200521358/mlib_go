@@ -1,6 +1,8 @@
 package pmx
 
 import (
+	"embed"
+
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
@@ -74,8 +76,9 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 	pm.DisplaySlots.Append(d02, false)
 }
 
-func (pm *PmxModel) InitializeDraw(windowIndex int) {
-	pm.Meshes = NewMeshes(pm, windowIndex)
+func (pm *PmxModel) InitializeDraw(windowIndex int, resourceFiles embed.FS) {
+	pm.ToonTextures.InitGl(windowIndex, resourceFiles)
+	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
 }
 
 func (pm *PmxModel) Draw(shader *mgl.MShader, boneMatrixes []mgl32.Mat4, windowIndex int) {

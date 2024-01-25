@@ -13,7 +13,24 @@ import (
 )
 
 const (
+	SHADER_BONE_TRANSFORM_MATRIX        = "boneTransformMatrix\x00"
+	SHADER_MODEL_VIEW_MATRIX            = "modelViewMatrix\x00"
 	SHADER_MODEL_VIEW_PROJECTION_MATRIX = "modelViewProjectionMatrix\x00"
+	SHADER_CAMERA_POSITION              = "cameraPosition\x00"
+	SHADER_LIGHT_DIRECTION              = "lightDirection\x00"
+	SHADER_DIFFUSE                      = "diffuse\x00"
+	SHADER_AMBIENT                      = "ambient\x00"
+	SHADER_SPECULAR                     = "specular\x00"
+	SHADER_TEXTURE_SAMPLER              = "textureSampler\x00"
+	SHADER_TOON_SAMPLER                 = "toonSampler\x00"
+	SHADER_SPHERE_SAMPLER               = "sphereSampler\x00"
+	SHADER_USE_TEXTURE                  = "useTexture\x00"
+	SHADER_USE_TOON                     = "useToon\x00"
+	SHADER_USE_SPHERE                   = "useSphere\x00"
+	SHADER_SPHERE_MODE                  = "sphereMode\x00"
+	SHADER_MORPH_TEXTURE_FACTOR         = "textureFactor\x00"
+	SHADER_MORPH_TOON_FACTOR            = "toonFactor\x00"
+	SHADER_MORPH_SPHERE_FACTOR          = "sphereFactor\x00"
 )
 
 type ProgramType int
@@ -51,20 +68,20 @@ type MShader struct {
 	// BoneMatrixTextureId              map[ProgramType]uint32
 	// BoneMatrixTextureWidth           map[ProgramType]int32
 	// BoneMatrixTextureHeight          map[ProgramType]int32
-	modelViewMatrixUniform           map[ProgramType]int32
-	modelViewProjectionMatrixUniform map[ProgramType]int32
-	lightDirectionUniform            map[ProgramType]int32
-	cameraPositionUniform            map[ProgramType]int32
-	DiffuseUniform                   map[ProgramType]int32
-	AmbientUniform                   map[ProgramType]int32
-	SpecularUniform                  map[ProgramType]int32
-	UseTextureUniform                map[ProgramType]int32
-	TextureUniform                   map[ProgramType]int32
-	UseToonUniform                   map[ProgramType]int32
-	ToonUniform                      map[ProgramType]int32
-	UseSphereUniform                 map[ProgramType]int32
-	SphereModeUniform                map[ProgramType]int32
-	SphereUniform                    map[ProgramType]int32
+	// modelViewMatrixUniform           map[ProgramType]int32
+	// modelViewProjectionMatrixUniform map[ProgramType]int32
+	// lightDirectionUniform            map[ProgramType]int32
+	// cameraPositionUniform            map[ProgramType]int32
+	// DiffuseUniform                   map[ProgramType]int32
+	// AmbientUniform                   map[ProgramType]int32
+	// SpecularUniform                  map[ProgramType]int32
+	// UseTextureUniform                map[ProgramType]int32
+	// TextureUniform                   map[ProgramType]int32
+	// UseToonUniform                   map[ProgramType]int32
+	// ToonUniform                      map[ProgramType]int32
+	// UseSphereUniform                 map[ProgramType]int32
+	// SphereModeUniform                map[ProgramType]int32
+	// SphereUniform                    map[ProgramType]int32
 	// TextureFactorUniform             map[ProgramType]int32
 	// ToonFactorUniform                map[ProgramType]int32
 	// SphereFactorUniform              map[ProgramType]int32
@@ -97,17 +114,17 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		// BoneMatrixTextureId:              make(map[ProgramType]uint32, 0),
 		// BoneMatrixTextureWidth:           make(map[ProgramType]int32, 0),
 		// BoneMatrixTextureHeight:          make(map[ProgramType]int32, 0),
-		modelViewMatrixUniform:           make(map[ProgramType]int32, 0),
-		modelViewProjectionMatrixUniform: make(map[ProgramType]int32, 0),
-		lightDirectionUniform:            make(map[ProgramType]int32, 0),
-		cameraPositionUniform:            make(map[ProgramType]int32, 0),
-		DiffuseUniform:                   make(map[ProgramType]int32, 0),
-		AmbientUniform:                   make(map[ProgramType]int32, 0),
-		SpecularUniform:                  make(map[ProgramType]int32, 0),
-		UseTextureUniform:                make(map[ProgramType]int32, 0),
-		UseToonUniform:                   make(map[ProgramType]int32, 0),
-		UseSphereUniform:                 make(map[ProgramType]int32, 0),
-		SphereModeUniform:                make(map[ProgramType]int32, 0),
+		// modelViewMatrixUniform:           make(map[ProgramType]int32, 0),
+		// modelViewProjectionMatrixUniform: make(map[ProgramType]int32, 0),
+		// lightDirectionUniform:            make(map[ProgramType]int32, 0),
+		// cameraPositionUniform:            make(map[ProgramType]int32, 0),
+		// DiffuseUniform:                   make(map[ProgramType]int32, 0),
+		// AmbientUniform:                   make(map[ProgramType]int32, 0),
+		// SpecularUniform:                  make(map[ProgramType]int32, 0),
+		// UseTextureUniform:                make(map[ProgramType]int32, 0),
+		// UseToonUniform:                   make(map[ProgramType]int32, 0),
+		// UseSphereUniform:                 make(map[ProgramType]int32, 0),
+		// SphereModeUniform:                make(map[ProgramType]int32, 0),
 		// TextureUniform:                   make(map[ProgramType]int32, 0),
 		// ToonUniform:                      make(map[ProgramType]int32, 0),
 		// SphereUniform:                    make(map[ProgramType]int32, 0),
@@ -239,50 +256,51 @@ func (s *MShader) initialize(program uint32, programType ProgramType) {
 	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(s.width)/float32(s.height), s.nearPlane, s.farPlane)
 	projectionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_PROJECTION_MATRIX))
 	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
-	s.modelViewProjectionMatrixUniform[programType] = projectionUniform
 
 	// カメラの位置
-	s.cameraPositionUniform[programType] = gl.GetUniformLocation(program, gl.Str("cameraPosition\x00"))
+	cameraPosition := s.initialCameraPosition.Mgl()
+	cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_CAMERA_POSITION))
+	gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
 	// ライト
-	s.lightDirectionUniform[programType] = gl.GetUniformLocation(program, gl.Str("lightDirection\x00"))
-	gl.Uniform3f(s.lightDirectionUniform[programType],
-		float32(s.lightDirection.GetX()), float32(s.lightDirection.GetY()), float32(s.lightDirection.GetZ()))
+	lightDirection := s.lightDirection.Mgl()
+	lightDirectionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_LIGHT_DIRECTION))
+	gl.Uniform3fv(lightDirectionUniform, 1, &lightDirection[0])
 
-	camera := mgl32.LookAtV(mgl32.Vec3{0, 10, 30}, mgl32.Vec3{0, 10, 0}, mgl32.Vec3{0, 1, 0})
-	cameraUniform := gl.GetUniformLocation(program, gl.Str("modelViewMatrix\x00"))
+	lookAtCenter := s.initialLookAtCenterPosition.Mgl()
+	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
+	cameraUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_MATRIX))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
-	s.modelViewMatrixUniform[programType] = cameraUniform
 
 	model := mgl32.Ident4()
-	modelUniform := gl.GetUniformLocation(program, gl.Str("boneTransformMatrix\x00"))
+	modelUniform := gl.GetUniformLocation(program, gl.Str(SHADER_BONE_TRANSFORM_MATRIX))
 	gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
 
-	// マテリアル設定
-	diffuseUniform := gl.GetUniformLocation(program, gl.Str("diffuse\x00"))
-	s.DiffuseUniform[programType] = diffuseUniform
+	// // マテリアル設定
+	// diffuseUniform := gl.GetUniformLocation(program, gl.Str(SHADER_DIFFUSE))
+	// s.DiffuseUniform[programType] = diffuseUniform
 
-	ambientUniform := gl.GetUniformLocation(program, gl.Str("ambient\x00"))
-	s.AmbientUniform[programType] = ambientUniform
+	// ambientUniform := gl.GetUniformLocation(program, gl.Str(SHADER_AMBIENT))
+	// s.AmbientUniform[programType] = ambientUniform
 
-	specularUniform := gl.GetUniformLocation(program, gl.Str("specular\x00"))
-	s.SpecularUniform[programType] = specularUniform
+	// specularUniform := gl.GetUniformLocation(program, gl.Str(SHADER_SPECULAR))
+	// s.SpecularUniform[programType] = specularUniform
 
-	// テクスチャの設定
-	s.UseTextureUniform[programType] = gl.GetUniformLocation(program, gl.Str("useTexture\x00"))
-	// s.TextureUniform[programType] = gl.GetUniformLocation(program, gl.Str("textureSampler\x00"))
-	// s.TextureFactorUniform[programType] = gl.GetUniformLocation(program, gl.Str("textureFactor\x00"))
+	// // テクスチャの設定
+	// s.UseTextureUniform[programType] = gl.GetUniformLocation(program, gl.Str(SHADER_USE_TEXTURE))
+	// // s.TextureUniform[programType] = gl.GetUniformLocation(program, gl.Str("textureSampler\x00"))
+	// // s.TextureFactorUniform[programType] = gl.GetUniformLocation(program, gl.Str("textureFactor\x00"))
 
-	// Toonの設定
-	s.UseToonUniform[programType] = gl.GetUniformLocation(program, gl.Str("useToon\x00"))
-	// s.ToonUniform[programType] = gl.GetUniformLocation(program, gl.Str("toonSampler\x00"))
-	// s.ToonFactorUniform[programType] = gl.GetUniformLocation(program, gl.Str("toonFactor\x00"))
+	// // Toonの設定
+	// s.UseToonUniform[programType] = gl.GetUniformLocation(program, gl.Str(SHADER_USE_TOON))
+	// // s.ToonUniform[programType] = gl.GetUniformLocation(program, gl.Str("toonSampler\x00"))
+	// // s.ToonFactorUniform[programType] = gl.GetUniformLocation(program, gl.Str("toonFactor\x00"))
 
-	// Sphereの設定
-	s.UseSphereUniform[programType] = gl.GetUniformLocation(program, gl.Str("useSphere\x00"))
-	s.SphereModeUniform[programType] = gl.GetUniformLocation(program, gl.Str("sphereMode\x00"))
-	// s.SphereUniform[programType] = gl.GetUniformLocation(program, gl.Str("sphereSampler\x00"))
-	// s.SphereFactorUniform[programType] = gl.GetUniformLocation(program, gl.Str("sphereFactor\x00"))
+	// // Sphereの設定
+	// s.UseSphereUniform[programType] = gl.GetUniformLocation(program, gl.Str(SHADER_USE_SPHERE))
+	// s.SphereModeUniform[programType] = gl.GetUniformLocation(program, gl.Str(SHADER_SPHERE_MODE))
+	// // s.SphereUniform[programType] = gl.GetUniformLocation(program, gl.Str("sphereSampler\x00"))
+	// // s.SphereFactorUniform[programType] = gl.GetUniformLocation(program, gl.Str("sphereFactor\x00"))
 
 	// // ボーン変形行列用テクスチャ
 	// var boneMatrixTextureId uint32

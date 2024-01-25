@@ -1,9 +1,14 @@
 package pmx
 
 import (
+	"embed"
+
+	"github.com/go-gl/mathgl/mgl32"
+
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 // スフィアモード
@@ -64,8 +69,8 @@ type MaterialGL struct {
 	lightAmbient      *mmath.MVec4
 }
 
-func (m *MaterialGL) Diffuse() [4]float32 {
-	diffuse := [4]float32{
+func (m *MaterialGL) Diffuse() mgl32.Vec4 {
+	diffuse := mgl32.Vec4{
 		float32(m.diffuse.GetX())*float32(m.lightAmbient.GetX()) + float32(m.ambient.GetX()),
 		float32(m.diffuse.GetY())*float32(m.lightAmbient.GetY()) + float32(m.ambient.GetY()),
 		float32(m.diffuse.GetZ())*float32(m.lightAmbient.GetZ()) + float32(m.ambient.GetZ()),
@@ -74,8 +79,8 @@ func (m *MaterialGL) Diffuse() [4]float32 {
 	return diffuse
 }
 
-func (m *MaterialGL) Ambient() [3]float32 {
-	ambient := [3]float32{
+func (m *MaterialGL) Ambient() mgl32.Vec3 {
+	ambient := mgl32.Vec3{
 		float32(m.diffuse.GetX()) * float32(m.lightAmbient.GetX()),
 		float32(m.diffuse.GetY()) * float32(m.lightAmbient.GetY()),
 		float32(m.diffuse.GetZ()) * float32(m.lightAmbient.GetZ()),
@@ -83,8 +88,8 @@ func (m *MaterialGL) Ambient() [3]float32 {
 	return ambient
 }
 
-func (m *MaterialGL) Specular() [4]float32 {
-	specular := [4]float32{
+func (m *MaterialGL) Specular() mgl32.Vec4 {
+	specular := mgl32.Vec4{
 		float32(m.specular.GetX()) * float32(m.lightAmbient.GetX()),
 		float32(m.specular.GetY()) * float32(m.lightAmbient.GetY()),
 		float32(m.specular.GetZ()) * float32(m.lightAmbient.GetZ()),
@@ -146,25 +151,25 @@ func NewMaterial() *Material {
 func (m *Material) GL(
 	modelPath string,
 	texture *Texture,
-	sphereTexture *Texture,
 	toonTexture *Texture,
+	sphereTexture *Texture,
 	windowIndex int,
 	prevVerticesCount int,
+	resourceFiles embed.FS,
 ) *MaterialGL {
 	var textureGL *TextureGL
 	if texture != nil {
-		textureGL = texture.GL(modelPath, TEXTURE_TYPE_TEXTURE, true, windowIndex)
+		textureGL = texture.GL(modelPath, TEXTURE_TYPE_TEXTURE, windowIndex, resourceFiles)
 	}
 
 	var sphereTextureGL *TextureGL
 	if sphereTexture != nil {
-		sphereTextureGL = sphereTexture.GL(modelPath, TEXTURE_TYPE_SPHERE, true, windowIndex)
+		sphereTextureGL = sphereTexture.GL(modelPath, TEXTURE_TYPE_SPHERE, windowIndex, resourceFiles)
 	}
 
 	var tooTextureGL *TextureGL
 	if toonTexture != nil {
-		tooTextureGL = toonTexture.GL(
-			modelPath, TEXTURE_TYPE_TOON, m.ToonSharingFlag == TOON_SHARING_INDIVIDUAL, windowIndex)
+		tooTextureGL = toonTexture.GL(modelPath, TEXTURE_TYPE_TOON, windowIndex, resourceFiles)
 	}
 
 	return &MaterialGL{
