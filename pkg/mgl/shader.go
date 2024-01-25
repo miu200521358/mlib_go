@@ -49,11 +49,11 @@ type MShader struct {
 	// BoneMatrixTextureHeight          map[ProgramType]int32
 	// modelViewMatrixUniform           map[ProgramType]int32
 	// modelViewProjectionMatrixUniform map[ProgramType]int32
-	// LightDirectionUniform            map[ProgramType]int32
-	// cameraPositionUniform            map[ProgramType]int32
-	DiffuseUniform  map[ProgramType]int32
-	AmbientUniform  map[ProgramType]int32
-	SpecularUniform map[ProgramType]int32
+	lightDirectionUniform map[ProgramType]int32
+	cameraPositionUniform map[ProgramType]int32
+	DiffuseUniform        map[ProgramType]int32
+	AmbientUniform        map[ProgramType]int32
+	SpecularUniform       map[ProgramType]int32
 	// SelectBoneColorUniform           map[ProgramType]int32
 	// UnselectBoneColorUniform         map[ProgramType]int32
 	// EdgeUniform                      map[ProgramType]int32
@@ -95,11 +95,11 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		// BoneMatrixTextureHeight:          make(map[ProgramType]int32, 0),
 		// modelViewMatrixUniform:           make(map[ProgramType]int32, 0),
 		// modelViewProjectionMatrixUniform: make(map[ProgramType]int32, 0),
-		// LightDirectionUniform:            make(map[ProgramType]int32, 0),
-		// cameraPositionUniform:            make(map[ProgramType]int32, 0),
-		DiffuseUniform:  make(map[ProgramType]int32, 0),
-		AmbientUniform:  make(map[ProgramType]int32, 0),
-		SpecularUniform: make(map[ProgramType]int32, 0),
+		lightDirectionUniform: make(map[ProgramType]int32, 0),
+		cameraPositionUniform: make(map[ProgramType]int32, 0),
+		DiffuseUniform:        make(map[ProgramType]int32, 0),
+		AmbientUniform:        make(map[ProgramType]int32, 0),
+		SpecularUniform:       make(map[ProgramType]int32, 0),
 		// EdgeUniform:                      make(map[ProgramType]int32, 0),
 		// EdgeSizeUniform:                  make(map[ProgramType]int32, 0),
 		// SelectBoneColorUniform:           make(map[ProgramType]int32, 0),
@@ -233,15 +233,23 @@ func (s *MShader) initialize(program uint32, programType ProgramType) {
 	gl.UseProgram(program)
 
 	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(s.width)/float32(s.height), s.nearPlane, s.farPlane)
-	projectionUniform := gl.GetUniformLocation(program, gl.Str("projection\x00"))
+	projectionUniform := gl.GetUniformLocation(program, gl.Str("modelViewProjectionMatrix\x00"))
 	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
+	// カメラの位置
+	s.cameraPositionUniform[programType] = gl.GetUniformLocation(program, gl.Str("cameraPosition\x00"))
+
+	// ライト
+	s.lightDirectionUniform[programType] = gl.GetUniformLocation(program, gl.Str("lightDirection\x00"))
+	gl.Uniform3f(s.lightDirectionUniform[programType],
+		float32(s.lightDirection.GetX()), float32(s.lightDirection.GetY()), float32(s.lightDirection.GetZ()))
+
 	camera := mgl32.LookAtV(mgl32.Vec3{0, 10, 30}, mgl32.Vec3{0, 10, 0}, mgl32.Vec3{0, 1, 0})
-	cameraUniform := gl.GetUniformLocation(program, gl.Str("camera\x00"))
+	cameraUniform := gl.GetUniformLocation(program, gl.Str("modelViewMatrix\x00"))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
 	model := mgl32.Ident4()
-	modelUniform := gl.GetUniformLocation(program, gl.Str("model\x00"))
+	modelUniform := gl.GetUniformLocation(program, gl.Str("boneTransformMatrix\x00"))
 	gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
 
 	// マテリアル設定

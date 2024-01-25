@@ -76,13 +76,17 @@ func (m *Meshes) Delete() {
 
 func (m *Meshes) Draw(shader *mgl.MShader, boneMatrixes []mgl32.Mat4, windowIndex int) {
 	// 隠面消去
-	// // https://learnopengl.com/Advanced-OpenGL/Depth-testing
-	// gl.Enable(gl.DEPTH_TEST)
-	// gl.DepthFunc(gl.LEQUAL)
+	// https://learnopengl.com/Advanced-OpenGL/Depth-testing
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
 
 	for _, mesh := range m.meshes {
 		m.vao.Bind()
 		m.vbo.Bind()
+
+		// ブレンディングを有効にする
+		gl.Enable(gl.BLEND)
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 		shader.UseModelProgram()
 		mesh.DrawModel(shader, windowIndex, boneMatrixes)
@@ -90,5 +94,9 @@ func (m *Meshes) Draw(shader *mgl.MShader, boneMatrixes []mgl32.Mat4, windowInde
 
 		m.vbo.Unbind()
 		m.vao.Unbind()
+
+		gl.Disable(gl.BLEND)
 	}
+
+	gl.Disable(gl.DEPTH_TEST)
 }

@@ -44,16 +44,16 @@ func (m *Mesh) DrawModel(
 ) {
 	m.ibo.Bind()
 
-	// if m.material.DrawFlag == DRAW_FLAG_DOUBLE_SIDED_DRAWING {
-	// 	// 両面描画
-	// 	// カリングOFF
-	// 	gl.Disable(gl.CULL_FACE)
-	// } else {
-	// 	// 片面描画
-	// 	// カリングON
-	// 	gl.Enable(gl.CULL_FACE)
-	// 	gl.CullFace(gl.BACK)
-	// }
+	if m.material.DrawFlag == DRAW_FLAG_DOUBLE_SIDED_DRAWING {
+		// 両面描画
+		// カリングOFF
+		gl.Disable(gl.CULL_FACE)
+	} else {
+		// 片面描画
+		// カリングON
+		gl.Enable(gl.CULL_FACE)
+		gl.CullFace(gl.BACK)
+	}
 
 	// // ボーンデフォームテクスチャ設定
 	// m.BindBoneMatrixes(boneMatrixes, shader, mgl.PROGRAM_TYPE_MODEL, windowIndex)

@@ -166,7 +166,7 @@ func (w *GlWindow) Close() {
 func (w *GlWindow) Run() {
 	angle := 0.0
 	previousTime := glfw.GetTime()
-	modelUniform := gl.GetUniformLocation(w.Shader.ModelProgram, gl.Str("model\x00"))
+	modelUniform := gl.GetUniformLocation(w.Shader.ModelProgram, gl.Str("boneTransformMatrix\x00"))
 
 	for !w.ShouldClose() {
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
