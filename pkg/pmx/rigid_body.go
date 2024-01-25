@@ -3,7 +3,6 @@ package pmx
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type RigidBodyParam struct {
@@ -82,21 +81,21 @@ func NewCollisionGroup(collisionGroupMask uint16) []uint16 {
 
 type RigidBody struct {
 	*mcore.IndexModel
-	Name               string          // 剛体名
-	EnglishName        string          // 剛体名英
-	BoneIndex          int             // 関連ボーンIndex
-	CollisionGroup     byte            // グループ
-	CollisionGroupMask CollisionGroup  // 非衝突グループフラグ
-	ShapeType          Shape           // 形状
-	Size               mmath.MVec3     // サイズ(x,y,z)
-	Position           mmath.MVec3     // 位置(x,y,z)
-	Rotation           mmath.MRotation // 回転(x,y,z) -> ラジアン角
-	RigidBodyParam     RigidBodyParam  // 剛体パラ
-	PhysicsType        PhysicsType     // 剛体の物理演算
-	XDirection         mmath.MVec3     // X軸方向
-	YDirection         mmath.MVec3     // Y軸方向
-	ZDirection         mmath.MVec3     // Z軸方向
-	IsSystem           bool            // システムで追加した剛体か
+	Name               string           // 剛体名
+	EnglishName        string           // 剛体名英
+	BoneIndex          int              // 関連ボーンIndex
+	CollisionGroup     byte             // グループ
+	CollisionGroupMask CollisionGroup   // 非衝突グループフラグ
+	ShapeType          Shape            // 形状
+	Size               *mmath.MVec3     // サイズ(x,y,z)
+	Position           *mmath.MVec3     // 位置(x,y,z)
+	Rotation           *mmath.MRotation // 回転(x,y,z) -> ラジアン角
+	RigidBodyParam     *RigidBodyParam  // 剛体パラ
+	PhysicsType        PhysicsType      // 剛体の物理演算
+	XDirection         *mmath.MVec3     // X軸方向
+	YDirection         *mmath.MVec3     // Y軸方向
+	ZDirection         *mmath.MVec3     // Z軸方向
+	IsSystem           bool             // システムで追加した剛体か
 }
 
 // NewRigidBody creates a new rigid body.
@@ -109,14 +108,14 @@ func NewRigidBody() *RigidBody {
 		CollisionGroup:     0,
 		CollisionGroupMask: NewCollisionGroupFromSlice([]uint16{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
 		ShapeType:          SHAPE_BOX,
-		Size:               mmath.MVec3{},
-		Position:           mmath.MVec3{},
-		Rotation:           mmath.MRotation{},
-		RigidBodyParam:     RigidBodyParam{},
+		Size:               &mmath.MVec3{},
+		Position:           &mmath.MVec3{},
+		Rotation:           &mmath.MRotation{},
+		RigidBodyParam:     &RigidBodyParam{},
 		PhysicsType:        PHYSICS_TYPE_STATIC,
-		XDirection:         mmath.MVec3{},
-		YDirection:         mmath.MVec3{},
-		ZDirection:         mmath.MVec3{},
+		XDirection:         &mmath.MVec3{},
+		YDirection:         &mmath.MVec3{},
+		ZDirection:         &mmath.MVec3{},
 		IsSystem:           false,
 	}
 }

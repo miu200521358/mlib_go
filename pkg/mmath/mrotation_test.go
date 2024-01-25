@@ -2,7 +2,6 @@ package mmath
 
 import (
 	"testing"
-
 )
 
 func TestNewBaseRotationModelByRadians(t *testing.T) {
@@ -34,9 +33,9 @@ func TestNewBaseRotationModelByQuaternion(t *testing.T) {
 
 func TestT_Copy(t *testing.T) {
 	rot := &MRotation{
-		radians:    MVec3{1, 2, 3},
-		degrees:    MVec3{90, 180, 270},
-		quaternion: MQuaternion{1, 0, 0, 0},
+		radians:    &MVec3{1, 2, 3},
+		degrees:    &MVec3{90, 180, 270},
+		quaternion: &MQuaternion{1, 0, 0, 0},
 	}
 
 	copied := rot.Copy()

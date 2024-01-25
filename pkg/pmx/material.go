@@ -47,37 +47,48 @@ const (
 )
 
 type MaterialGL struct {
-	Diffuse           [4]float32
-	Ambient           [3]float32
-	Specular          [4]float32
-	Edge              [4]float32
-	EdgeSize          float32
+	Diffuse           *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
+	Specular          *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
+	Ambient           *mmath.MVec3 // Ambient (R,G,B)(環境色)
+	DrawFlag          DrawFlag     // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
+	Edge              *mmath.MVec4 // エッジ色 (R,G,B,A)
+	EdgeSize          float32      // エッジサイズ
 	Texture           *TextureGL
 	SphereTexture     *TextureGL
 	ToonTexture       *TextureGL
-	DrawFlag          DrawFlag   // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
 	SphereMode        SphereMode // スフィアモード
 	VerticesCount     int        // 頂点数
 	PrevVerticesCount int        // 前の材質までの頂点数
+	lightAmbient4     *mmath.MVec4
+}
+
+func (m *MaterialGL) DiffuseGL() [4]float32 {
+	diffuse := [4]float32{
+		float32(m.Diffuse.GetX())*float32(m.lightAmbient4.GetX()) + float32(m.Ambient.GetX()),
+		float32(m.Diffuse.GetY())*float32(m.lightAmbient4.GetY()) + float32(m.Ambient.GetY()),
+		float32(m.Diffuse.GetZ())*float32(m.lightAmbient4.GetZ()) + float32(m.Ambient.GetZ()),
+		float32(m.Diffuse.GetW()),
+	}
+	return diffuse
 }
 
 type Material struct {
 	*mcore.IndexModel
-	Name               string      // 材質名
-	EnglishName        string      // 材質名英
-	Diffuse            mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
-	Specular           mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
-	Ambient            mmath.MVec3 // Ambient (R,G,B)(環境色)
-	DrawFlag           DrawFlag    // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
-	Edge               mmath.MVec4 // エッジ色 (R,G,B,A)
-	EdgeSize           float64     // エッジサイズ
-	TextureIndex       int         // 通常テクスチャINDEX
-	SphereTextureIndex int         // スフィアテクスチャINDEX
-	SphereMode         SphereMode  // スフィアモード
-	ToonSharingFlag    ToonSharing // 共有Toonフラグ
-	ToonTextureIndex   int         // ToonテクスチャINDEX
-	Memo               string      // メモ
-	VerticesCount      int         // 材質に対応する面(頂点)数 (必ず3の倍数になる)
+	Name               string       // 材質名
+	EnglishName        string       // 材質名英
+	Diffuse            *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
+	Specular           *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
+	Ambient            *mmath.MVec3 // Ambient (R,G,B)(環境色)
+	DrawFlag           DrawFlag     // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
+	Edge               *mmath.MVec4 // エッジ色 (R,G,B,A)
+	EdgeSize           float64      // エッジサイズ
+	TextureIndex       int          // 通常テクスチャINDEX
+	SphereTextureIndex int          // スフィアテクスチャINDEX
+	SphereMode         SphereMode   // スフィアモード
+	ToonSharingFlag    ToonSharing  // 共有Toonフラグ
+	ToonTextureIndex   int          // ToonテクスチャINDEX
+	Memo               string       // メモ
+	VerticesCount      int          // 材質に対応する面(頂点)数 (必ず3の倍数になる)
 }
 
 func NewMaterial() *Material {
@@ -85,11 +96,11 @@ func NewMaterial() *Material {
 		IndexModel:         &mcore.IndexModel{Index: -1},
 		Name:               "",
 		EnglishName:        "",
-		Diffuse:            mmath.MVec4{},
-		Specular:           mmath.MVec4{},
-		Ambient:            mmath.MVec3{},
+		Diffuse:            &mmath.MVec4{},
+		Specular:           &mmath.MVec4{},
+		Ambient:            &mmath.MVec3{},
 		DrawFlag:           DRAW_FLAG_NONE,
-		Edge:               mmath.MVec4{},
+		Edge:               &mmath.MVec4{},
 		EdgeSize:           0.0,
 		TextureIndex:       -1,
 		SphereTextureIndex: -1,
@@ -126,10 +137,10 @@ func (m *Material) GL(
 	}
 
 	return &MaterialGL{
-		Diffuse:           [4]float32{float32(m.Diffuse.GetX()), float32(m.Diffuse.GetY()), float32(m.Diffuse.GetZ()), float32(m.Diffuse.GetW())},
-		Ambient:           m.Ambient.GL(),
-		Specular:          m.Specular.GL(),
-		Edge:              m.Edge.GL(),
+		Diffuse:           m.Diffuse,
+		Ambient:           m.Ambient,
+		Specular:          m.Specular,
+		Edge:              m.Edge,
 		EdgeSize:          float32(m.EdgeSize),
 		Texture:           textureGL,
 		SphereTexture:     sphereTextureGL,
@@ -139,6 +150,10 @@ func (m *Material) GL(
 		VerticesCount:     m.VerticesCount,
 		PrevVerticesCount: prevVerticesCount * 4,
 	}
+}
+
+func (m *Material) diffuseGL() [4]float32 {
+	return [4]float32{float32(m.Diffuse.GetX()), float32(m.Diffuse.GetY()), float32(m.Diffuse.GetZ()), float32(m.Diffuse.GetW())}
 }
 
 func (m *Material) Copy() mcore.IndexModelInterface {
@@ -157,138 +172,138 @@ func NewMaterials() *Materials {
 	}
 }
 
-// シェーダー用材質
-type ShaderMaterial struct {
-	LightAmbient4             *mmath.MVec4
-	Material                  *Material
-	ShaderTextureFactor       *mmath.MVec4
-	SphereShaderTextureFactor *mmath.MVec4
-	ToonShaderTextureFactor   *mmath.MVec4
-}
+// // シェーダー用材質
+// type ShaderMaterial struct {
+// 	LightAmbient4             *mmath.MVec4
+// 	Material                  *Material
+// 	ShaderTextureFactor       *mmath.MVec4
+// 	SphereShaderTextureFactor *mmath.MVec4
+// 	ToonShaderTextureFactor   *mmath.MVec4
+// }
 
-func NewShaderMaterial(
-	material *Material,
-	lightAmbient4 *mmath.MVec4,
-	textureFactor *mmath.MVec4,
-	toonTextureFactor *mmath.MVec4,
-	sphereTextureFactor *mmath.MVec4,
-) *ShaderMaterial {
-	return &ShaderMaterial{
-		LightAmbient4:             lightAmbient4,
-		Material:                  material.Copy().(*Material),
-		ShaderTextureFactor:       textureFactor,
-		SphereShaderTextureFactor: toonTextureFactor,
-		ToonShaderTextureFactor:   sphereTextureFactor,
-	}
-}
+// func NewShaderMaterial(
+// 	material *Material,
+// 	lightAmbient4 *mmath.MVec4,
+// 	textureFactor *mmath.MVec4,
+// 	toonTextureFactor *mmath.MVec4,
+// 	sphereTextureFactor *mmath.MVec4,
+// ) *ShaderMaterial {
+// 	return &ShaderMaterial{
+// 		LightAmbient4:             lightAmbient4,
+// 		Material:                  material.Copy().(*Material),
+// 		ShaderTextureFactor:       textureFactor,
+// 		SphereShaderTextureFactor: toonTextureFactor,
+// 		ToonShaderTextureFactor:   sphereTextureFactor,
+// 	}
+// }
 
-func (sm *ShaderMaterial) Diffuse() []float32 {
-	diffuse := make([]float32, 3)
-	diffuse[0] = float32(sm.Material.Diffuse.GetX())*float32(sm.LightAmbient4.GetX()) + float32(sm.Material.Ambient.GetX())
-	diffuse[1] = float32(sm.Material.Diffuse.GetY())*float32(sm.LightAmbient4.GetY()) + float32(sm.Material.Ambient.GetY())
-	diffuse[2] = float32(sm.Material.Diffuse.GetZ())*float32(sm.LightAmbient4.GetZ()) + float32(sm.Material.Ambient.GetZ())
-	return diffuse
-}
+// func (sm *ShaderMaterial) Diffuse() []float32 {
+// 	diffuse := make([]float32, 3)
+// 	diffuse[0] = float32(sm.Material.Diffuse.GetX())*float32(sm.LightAmbient4.GetX()) + float32(sm.Material.Ambient.GetX())
+// 	diffuse[1] = float32(sm.Material.Diffuse.GetY())*float32(sm.LightAmbient4.GetY()) + float32(sm.Material.Ambient.GetY())
+// 	diffuse[2] = float32(sm.Material.Diffuse.GetZ())*float32(sm.LightAmbient4.GetZ()) + float32(sm.Material.Ambient.GetZ())
+// 	return diffuse
+// }
 
-func (sm *ShaderMaterial) Ambient() []float32 {
-	ambient := make([]float32, 3)
-	ambient[0] = float32(sm.Material.Diffuse.GetX()) * float32(sm.LightAmbient4.GetX())
-	ambient[1] = float32(sm.Material.Diffuse.GetY()) * float32(sm.LightAmbient4.GetY())
-	ambient[2] = float32(sm.Material.Diffuse.GetZ()) * float32(sm.LightAmbient4.GetZ())
-	return ambient
-}
+// func (sm *ShaderMaterial) Ambient() []float32 {
+// 	ambient := make([]float32, 3)
+// 	ambient[0] = float32(sm.Material.Diffuse.GetX()) * float32(sm.LightAmbient4.GetX())
+// 	ambient[1] = float32(sm.Material.Diffuse.GetY()) * float32(sm.LightAmbient4.GetY())
+// 	ambient[2] = float32(sm.Material.Diffuse.GetZ()) * float32(sm.LightAmbient4.GetZ())
+// 	return ambient
+// }
 
-func (sm *ShaderMaterial) Specular() []float32 {
-	specular := make([]float32, 4)
-	specular[0] = float32(sm.Material.Specular.GetX()) * float32(sm.LightAmbient4.GetX())
-	specular[1] = float32(sm.Material.Specular.GetY()) * float32(sm.LightAmbient4.GetY())
-	specular[2] = float32(sm.Material.Specular.GetZ()) * float32(sm.LightAmbient4.GetZ())
-	specular[3] = float32(sm.Material.Specular.GetW()) * float32(sm.LightAmbient4.GetW())
-	return specular
-}
+// func (sm *ShaderMaterial) Specular() []float32 {
+// 	specular := make([]float32, 4)
+// 	specular[0] = float32(sm.Material.Specular.GetX()) * float32(sm.LightAmbient4.GetX())
+// 	specular[1] = float32(sm.Material.Specular.GetY()) * float32(sm.LightAmbient4.GetY())
+// 	specular[2] = float32(sm.Material.Specular.GetZ()) * float32(sm.LightAmbient4.GetZ())
+// 	specular[3] = float32(sm.Material.Specular.GetW()) * float32(sm.LightAmbient4.GetW())
+// 	return specular
+// }
 
-func (sm *ShaderMaterial) Edge() []float32 {
-	edgeColor := make([]float32, 3)
-	edgeColor[0] = float32(sm.Material.Edge.GetX()) * float32(sm.Material.Diffuse.GetW())
-	edgeColor[1] = float32(sm.Material.Edge.GetY()) * float32(sm.Material.Diffuse.GetW())
-	edgeColor[2] = float32(sm.Material.Edge.GetZ()) * float32(sm.Material.Diffuse.GetW())
-	edgeColor[3] = float32(sm.Material.Edge.GetW()) * float32(sm.Material.Diffuse.GetW())
-	return edgeColor
-}
+// func (sm *ShaderMaterial) Edge() []float32 {
+// 	edgeColor := make([]float32, 3)
+// 	edgeColor[0] = float32(sm.Material.Edge.GetX()) * float32(sm.Material.Diffuse.GetW())
+// 	edgeColor[1] = float32(sm.Material.Edge.GetY()) * float32(sm.Material.Diffuse.GetW())
+// 	edgeColor[2] = float32(sm.Material.Edge.GetZ()) * float32(sm.Material.Diffuse.GetW())
+// 	edgeColor[3] = float32(sm.Material.Edge.GetW()) * float32(sm.Material.Diffuse.GetW())
+// 	return edgeColor
+// }
 
-func (sm *ShaderMaterial) EdgeSize() float32 {
-	return float32(sm.Material.EdgeSize)
-}
+// func (sm *ShaderMaterial) EdgeSize() float32 {
+// 	return float32(sm.Material.EdgeSize)
+// }
 
-func (sm *ShaderMaterial) TextureFactor() []float32 {
-	textureFactor := make([]float32, 3)
-	textureFactor[0] = float32(sm.ShaderTextureFactor.GetX())
-	textureFactor[1] = float32(sm.ShaderTextureFactor.GetY())
-	textureFactor[2] = float32(sm.ShaderTextureFactor.GetZ())
-	textureFactor[3] = float32(sm.ShaderTextureFactor.GetW())
-	return textureFactor
-}
+// func (sm *ShaderMaterial) TextureFactor() []float32 {
+// 	textureFactor := make([]float32, 3)
+// 	textureFactor[0] = float32(sm.ShaderTextureFactor.GetX())
+// 	textureFactor[1] = float32(sm.ShaderTextureFactor.GetY())
+// 	textureFactor[2] = float32(sm.ShaderTextureFactor.GetZ())
+// 	textureFactor[3] = float32(sm.ShaderTextureFactor.GetW())
+// 	return textureFactor
+// }
 
-func (sm *ShaderMaterial) SphereTextureFactor() []float32 {
-	sphereTextureFactor := make([]float32, 3)
-	sphereTextureFactor[0] = float32(sm.SphereShaderTextureFactor.GetX())
-	sphereTextureFactor[1] = float32(sm.SphereShaderTextureFactor.GetY())
-	sphereTextureFactor[2] = float32(sm.SphereShaderTextureFactor.GetZ())
-	sphereTextureFactor[3] = float32(sm.SphereShaderTextureFactor.GetW())
-	return sphereTextureFactor
-}
+// func (sm *ShaderMaterial) SphereTextureFactor() []float32 {
+// 	sphereTextureFactor := make([]float32, 3)
+// 	sphereTextureFactor[0] = float32(sm.SphereShaderTextureFactor.GetX())
+// 	sphereTextureFactor[1] = float32(sm.SphereShaderTextureFactor.GetY())
+// 	sphereTextureFactor[2] = float32(sm.SphereShaderTextureFactor.GetZ())
+// 	sphereTextureFactor[3] = float32(sm.SphereShaderTextureFactor.GetW())
+// 	return sphereTextureFactor
+// }
 
-func (sm *ShaderMaterial) ToonTextureFactor() []float32 {
-	toonTextureFactor := make([]float32, 3)
-	toonTextureFactor[0] = float32(sm.ToonShaderTextureFactor.GetX())
-	toonTextureFactor[1] = float32(sm.ToonShaderTextureFactor.GetY())
-	toonTextureFactor[2] = float32(sm.ToonShaderTextureFactor.GetZ())
-	toonTextureFactor[3] = float32(sm.ToonShaderTextureFactor.GetW())
-	return toonTextureFactor
-}
+// func (sm *ShaderMaterial) ToonTextureFactor() []float32 {
+// 	toonTextureFactor := make([]float32, 3)
+// 	toonTextureFactor[0] = float32(sm.ToonShaderTextureFactor.GetX())
+// 	toonTextureFactor[1] = float32(sm.ToonShaderTextureFactor.GetY())
+// 	toonTextureFactor[2] = float32(sm.ToonShaderTextureFactor.GetZ())
+// 	toonTextureFactor[3] = float32(sm.ToonShaderTextureFactor.GetW())
+// 	return toonTextureFactor
+// }
 
-func (sm *ShaderMaterial) IMul(v interface{}) {
-	switch v := v.(type) {
-	case float64:
-		sm.Material.Diffuse.MulScalar(v)
-		sm.Material.Ambient.MulScalar(v)
-		sm.Material.Specular.MulScalar(v)
-		sm.Material.EdgeSize *= v
-		sm.ShaderTextureFactor.MulScalar(v)
-		sm.SphereShaderTextureFactor.MulScalar(v)
-		sm.ToonShaderTextureFactor.MulScalar(v)
-	case int:
-		sm.IMul(float32(v))
-	case *ShaderMaterial:
-		sm.Material.Diffuse.Mul(&v.Material.Diffuse)
-		sm.Material.Ambient.Mul(&v.Material.Ambient)
-		sm.Material.Specular.Mul(&v.Material.Specular)
-		sm.Material.EdgeSize *= v.Material.EdgeSize
-		sm.ShaderTextureFactor.Mul(v.ShaderTextureFactor)
-		sm.SphereShaderTextureFactor.Mul(v.SphereShaderTextureFactor)
-		sm.ToonShaderTextureFactor.Mul(v.ToonShaderTextureFactor)
-	}
-}
+// func (sm *ShaderMaterial) IMul(v interface{}) {
+// 	switch v := v.(type) {
+// 	case float64:
+// 		sm.Material.Diffuse.MulScalar(v)
+// 		sm.Material.Ambient.MulScalar(v)
+// 		sm.Material.Specular.MulScalar(v)
+// 		sm.Material.EdgeSize *= v
+// 		sm.ShaderTextureFactor.MulScalar(v)
+// 		sm.SphereShaderTextureFactor.MulScalar(v)
+// 		sm.ToonShaderTextureFactor.MulScalar(v)
+// 	case int:
+// 		sm.IMul(float32(v))
+// 	case *ShaderMaterial:
+// 		sm.Material.Diffuse.Mul(&v.Material.Diffuse)
+// 		sm.Material.Ambient.Mul(&v.Material.Ambient)
+// 		sm.Material.Specular.Mul(&v.Material.Specular)
+// 		sm.Material.EdgeSize *= v.Material.EdgeSize
+// 		sm.ShaderTextureFactor.Mul(v.ShaderTextureFactor)
+// 		sm.SphereShaderTextureFactor.Mul(v.SphereShaderTextureFactor)
+// 		sm.ToonShaderTextureFactor.Mul(v.ToonShaderTextureFactor)
+// 	}
+// }
 
-func (sm *ShaderMaterial) IAdd(v interface{}) {
-	switch v := v.(type) {
-	case float64:
-		sm.Material.Diffuse.AddScalar(v)
-		sm.Material.Ambient.AddScalar(v)
-		sm.Material.Specular.AddScalar(v)
-		sm.Material.EdgeSize += v
-		sm.ShaderTextureFactor.AddScalar(v)
-		sm.SphereShaderTextureFactor.AddScalar(v)
-		sm.ToonShaderTextureFactor.AddScalar(v)
-	case int:
-		sm.IAdd(float32(v))
-	case *ShaderMaterial:
-		sm.Material.Diffuse.Add(&v.Material.Diffuse)
-		sm.Material.Ambient.Add(&v.Material.Ambient)
-		sm.Material.Specular.Add(&v.Material.Specular)
-		sm.Material.EdgeSize += v.Material.EdgeSize
-		sm.ShaderTextureFactor.Add(v.ShaderTextureFactor)
-		sm.SphereShaderTextureFactor.Add(v.SphereShaderTextureFactor)
-		sm.ToonShaderTextureFactor.Add(v.ToonShaderTextureFactor)
-	}
-}
+// func (sm *ShaderMaterial) IAdd(v interface{}) {
+// 	switch v := v.(type) {
+// 	case float64:
+// 		sm.Material.Diffuse.AddScalar(v)
+// 		sm.Material.Ambient.AddScalar(v)
+// 		sm.Material.Specular.AddScalar(v)
+// 		sm.Material.EdgeSize += v
+// 		sm.ShaderTextureFactor.AddScalar(v)
+// 		sm.SphereShaderTextureFactor.AddScalar(v)
+// 		sm.ToonShaderTextureFactor.AddScalar(v)
+// 	case int:
+// 		sm.IAdd(float32(v))
+// 	case *ShaderMaterial:
+// 		sm.Material.Diffuse.Add(&v.Material.Diffuse)
+// 		sm.Material.Ambient.Add(&v.Material.Ambient)
+// 		sm.Material.Specular.Add(&v.Material.Specular)
+// 		sm.Material.EdgeSize += v.Material.EdgeSize
+// 		sm.ShaderTextureFactor.Add(v.ShaderTextureFactor)
+// 		sm.SphereShaderTextureFactor.Add(v.SphereShaderTextureFactor)
+// 		sm.ToonShaderTextureFactor.Add(v.ToonShaderTextureFactor)
+// 	}
+// }

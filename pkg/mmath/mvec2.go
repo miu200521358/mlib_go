@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/ungerik/go3d/float64/vec2"
+
 )
 
 type MVec2 vec2.T
@@ -57,8 +58,8 @@ func (v *MVec2) GL() [2]float32 {
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します
-func (v *MVec2) MMD() MVec2 {
-	return MVec2{v.GetX(), -v.GetY()}
+func (v *MVec2) MMD() *MVec2 {
+	return &MVec2{v.GetX(), -v.GetY()}
 }
 
 // Add ベクトルに他のベクトルを加算します

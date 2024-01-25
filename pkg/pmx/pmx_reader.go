@@ -251,7 +251,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 		}
 
 		// 16 * n : float4[n] | 追加UV(x,y,z,w)  PMXヘッダの追加UV数による
-		v.ExtendedUVs = make([]mmath.MVec4, 0)
+		v.ExtendedUVs = make([]*mmath.MVec4, 0)
 		for j := 0; j < model.ExtendedUVCountType; j++ {
 			extendedUV, err := r.UnpackVec4()
 			if err != nil {
@@ -601,7 +601,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 			if err != nil {
 				return err
 			}
-			b.NormalizeFixedAxis(b.FixedAxis.Normalized())
+			b.NormalizeFixedAxis(b.FixedAxis.Normalize())
 		}
 
 		// ローカル軸:1 の場合
@@ -616,7 +616,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 			if err != nil {
 				return err
 			}
-			b.NormalizeLocalAxis(b.LocalAxisX.Normalized())
+			b.NormalizeLocalAxis(b.LocalAxisX.Normalize())
 		}
 
 		// 外部親変形:1 の場合
@@ -645,7 +645,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 			if err != nil {
 				return err
 			}
-			b.Ik.UnitRotation.SetRadians(mmath.MVec3{unitRot, unitRot, unitRot})
+			b.Ik.UnitRotation.SetRadians(&mmath.MVec3{unitRot, unitRot, unitRot})
 			// 4  : int  	| IKリンク数 : 後続の要素数
 			ikLinkCount, err := r.UnpackInt()
 			if err != nil {
@@ -760,7 +760,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 				if err != nil {
 					return err
 				}
-				rotation := mmath.MRotation{}
+				rotation := &mmath.MRotation{}
 				rotation.SetQuaternion(qq)
 				m.Offsets = append(m.Offsets, NewBoneMorph(boneIndex, offset, rotation))
 			case MORPH_TYPE_UV, MORPH_TYPE_EXTENDED_UV1, MORPH_TYPE_EXTENDED_UV2, MORPH_TYPE_EXTENDED_UV3, MORPH_TYPE_EXTENDED_UV4:

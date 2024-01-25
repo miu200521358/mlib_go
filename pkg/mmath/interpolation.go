@@ -2,12 +2,11 @@ package mmath
 
 import (
 	"math"
-
 )
 
 type Interpolation struct {
-	Start MVec2
-	End   MVec2
+	Start *MVec2
+	End   *MVec2
 }
 
 var (
@@ -21,8 +20,8 @@ var (
 // Copy
 func (v *Interpolation) Copy() *Interpolation {
 	return &Interpolation{
-		Start: *v.Start.Copy(),
-		End:   *v.End.Copy(),
+		Start: v.Start.Copy(),
+		End:   v.End.Copy(),
 	}
 }
 

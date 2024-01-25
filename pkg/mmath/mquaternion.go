@@ -70,8 +70,8 @@ func (v *MQuaternion) GL() [4]float32 {
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換されたクォータニオンベクトルを返します
-func (v *MQuaternion) MMD() MQuaternion {
-	return MQuaternion{v.GetX(), -v.GetY(), -v.GetZ(), v.GetW()}
+func (v *MQuaternion) MMD() *MQuaternion {
+	return &MQuaternion{v.GetX(), -v.GetY(), -v.GetZ(), v.GetW()}
 }
 
 // FromAxisAngle は、軸周りの回転を表す四元数を返します。
@@ -100,9 +100,9 @@ func FromEulerAngles(yHead, xPitch, zRoll float64) MQuaternion {
 }
 
 // ToEulerAnglesは、クォータニオンのオイラー角（ラジアン）回転を返します。
-func (quat *MQuaternion) ToEulerAngles() MVec3 {
+func (quat *MQuaternion) ToEulerAngles() *MVec3 {
 	yHead, xPitch, zRoll := (*quaternion.T)(quat).ToEulerAngles()
-	return MVec3{xPitch, yHead, zRoll}
+	return &MVec3{xPitch, yHead, zRoll}
 }
 
 // FromEulerAnglesDegreesは、オイラー角（度）回転を表す四元数を返します。
@@ -114,9 +114,9 @@ func FromEulerAnglesDegrees(xPitch, yHead, zRoll float64) MQuaternion {
 }
 
 // ToEulerAnglesDegreesは、クォータニオンのオイラー角（度）回転を返します。
-func (quat *MQuaternion) ToEulerAnglesDegrees() MVec3 {
+func (quat *MQuaternion) ToEulerAnglesDegrees() *MVec3 {
 	yHead, xPitch, zRoll := (*quaternion.T)(quat).ToEulerAngles()
-	return MVec3{
+	return &MVec3{
 		180.0 * xPitch / math.Pi,
 		180.0 * yHead / math.Pi,
 		180.0 * zRoll / math.Pi,
@@ -124,8 +124,8 @@ func (quat *MQuaternion) ToEulerAnglesDegrees() MVec3 {
 }
 
 // FromVec4はvec4.Tをクォータニオンに変換する
-func FromVec4(v *MVec4) MQuaternion {
-	return MQuaternion(*v)
+func FromVec4(v *MVec4) *MQuaternion {
+	return &MQuaternion{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
 }
 
 // Vec4は四元数をvec4.Tに変換する

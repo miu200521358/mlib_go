@@ -261,13 +261,13 @@ func (b *Bdef4) GetType() DeformType {
 // Sdef represents the SDEF deformation.
 type Sdef struct {
 	Deform
-	SdefC  mmath.MVec3
-	SdefR0 mmath.MVec3
-	SdefR1 mmath.MVec3
+	SdefC  *mmath.MVec3
+	SdefR0 *mmath.MVec3
+	SdefR1 *mmath.MVec3
 }
 
 // NewSdef creates a new Sdef instance.
-func NewSdef(index0, index1 int, weight0 float64, sdefC, sdefR0, sdefR1 mmath.MVec3) *Sdef {
+func NewSdef(index0, index1 int, weight0 float64, sdefC, sdefR0, sdefR1 *mmath.MVec3) *Sdef {
 	return &Sdef{
 		Deform: Deform{
 			Indexes: []int{index0, index1},

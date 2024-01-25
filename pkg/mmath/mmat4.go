@@ -2,6 +2,7 @@ package mmath
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/ungerik/go3d/float64/mat3"
 	"github.com/ungerik/go3d/float64/mat4"
@@ -26,13 +27,14 @@ var (
 )
 
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します
-func (m MMat4) GL() [16]float32 {
-	return [16]float32{
+func (m MMat4) GL() *[16]float32 {
+	mat := [16]float32{
 		float32(m[0][0]), float32(-m[0][1]), float32(-m[0][2]), float32(m[0][3]),
 		float32(-m[1][0]), float32(m[1][1]), float32(m[1][2]), float32(m[1][3]),
 		float32(-m[2][0]), float32(m[2][1]), float32(m[2][2]), float32(m[2][3]),
 		float32(-m[3][0]), float32(m[3][1]), float32(m[3][2]), float32(m[3][3]),
 	}
+	return &mat
 }
 
 // IsZero
@@ -201,4 +203,23 @@ func (mat *MMat4) Copy() *MMat4 {
 
 func (mat *MMat4) String() string {
 	return fmt.Sprintf("[%v, %v, %v, %v]", mat[0], mat[1], mat[2], mat[3])
+}
+
+func (mat *MMat4) PracticallyEquals(compareVector *MMat4, allowedDelta float64) bool {
+	return (math.Abs(mat[0][0]-compareVector[0][0]) <= allowedDelta) &&
+		(math.Abs(mat[0][1]-compareVector[0][1]) <= allowedDelta) &&
+		(math.Abs(mat[0][2]-compareVector[0][2]) <= allowedDelta) &&
+		(math.Abs(mat[0][3]-compareVector[0][3]) <= allowedDelta) &&
+		(math.Abs(mat[1][0]-compareVector[1][0]) <= allowedDelta) &&
+		(math.Abs(mat[1][1]-compareVector[1][1]) <= allowedDelta) &&
+		(math.Abs(mat[1][2]-compareVector[1][2]) <= allowedDelta) &&
+		(math.Abs(mat[1][3]-compareVector[1][3]) <= allowedDelta) &&
+		(math.Abs(mat[2][0]-compareVector[2][0]) <= allowedDelta) &&
+		(math.Abs(mat[2][1]-compareVector[2][1]) <= allowedDelta) &&
+		(math.Abs(mat[2][2]-compareVector[2][2]) <= allowedDelta) &&
+		(math.Abs(mat[2][3]-compareVector[2][3]) <= allowedDelta) &&
+		(math.Abs(mat[3][0]-compareVector[3][0]) <= allowedDelta) &&
+		(math.Abs(mat[3][1]-compareVector[3][1]) <= allowedDelta) &&
+		(math.Abs(mat[3][2]-compareVector[3][2]) <= allowedDelta) &&
+		(math.Abs(mat[3][3]-compareVector[3][3]) <= allowedDelta)
 }

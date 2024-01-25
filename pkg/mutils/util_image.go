@@ -10,7 +10,6 @@ import (
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/riff"
 	_ "golang.org/x/image/tiff"
-
 )
 
 // 指定されたパスから画像を読み込む

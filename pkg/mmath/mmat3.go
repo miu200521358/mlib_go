@@ -8,7 +8,6 @@ import (
 	"github.com/ungerik/go3d/float64/quaternion"
 	"github.com/ungerik/go3d/float64/vec2"
 	"github.com/ungerik/go3d/float64/vec3"
-
 )
 
 type MMat3 mat3.T
@@ -22,12 +21,13 @@ var (
 )
 
 // GL OpenGL座標系に変換されたベクトルを返します
-func (m MMat3) GL() mgl32.Mat3 {
-	return mgl32.Mat3([9]float32{
+func (m MMat3) GL() *mgl32.Mat3 {
+	mat := mgl32.Mat3([9]float32{
 		float32(m[0][0]), float32(-m[0][1]), float32(-m[0][2]),
 		float32(-m[1][0]), float32(m[1][1]), float32(m[1][2]),
 		float32(-m[2][0]), float32(m[2][1]), float32(m[2][2]),
 	})
+	return &mat
 }
 
 // IsZero

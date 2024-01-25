@@ -6,7 +6,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type Mesh struct {
@@ -63,12 +62,10 @@ func (m *Mesh) DrawModel(
 	// ------------------
 	// 材質色設定
 	// full.fx の AmbientColor相当
+	diffuse := m.material.DiffuseGL()
 	gl.Uniform4f(
 		shader.DiffuseUniform[mgl.PROGRAM_TYPE_MODEL],
-		m.material.Diffuse[0],
-		m.material.Diffuse[1],
-		m.material.Diffuse[2],
-		m.material.Diffuse[3],
+		diffuse[0], diffuse[1], diffuse[2], diffuse[3],
 	)
 	mutils.CheckGLError()
 

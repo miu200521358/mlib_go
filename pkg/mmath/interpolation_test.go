@@ -8,8 +8,8 @@ import (
 
 func TestEvaluate(tst *testing.T) {
 	inter := &Interpolation{}
-	inter.Start = MVec2{20.0, 20.0}
-	inter.End = MVec2{107.0, 107.0}
+	inter.Start = &MVec2{20.0, 20.0}
+	inter.End = &MVec2{107.0, 107.0}
 
 	x, y, t := Evaluate(inter, 0, 50, 100)
 
@@ -28,8 +28,8 @@ func TestEvaluate(tst *testing.T) {
 
 func TestEvaluate2(tst *testing.T) {
 	inter := &Interpolation{}
-	inter.Start = MVec2{10.0, 30.0}
-	inter.End = MVec2{100.0, 80.0}
+	inter.Start = &MVec2{10.0, 30.0}
+	inter.End = &MVec2{100.0, 80.0}
 
 	x, y, t := Evaluate(inter, 0, 2, 10)
 
