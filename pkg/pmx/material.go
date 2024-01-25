@@ -2,6 +2,7 @@ package pmx
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
@@ -59,14 +60,14 @@ type MaterialGL struct {
 	SphereMode        SphereMode // スフィアモード
 	VerticesCount     int        // 頂点数
 	PrevVerticesCount int        // 前の材質までの頂点数
-	lightAmbient4     *mmath.MVec4
+	lightAmbient      *mmath.MVec4
 }
 
 func (m *MaterialGL) DiffuseGL() [4]float32 {
 	diffuse := [4]float32{
-		float32(m.Diffuse.GetX())*float32(m.lightAmbient4.GetX()) + float32(m.Ambient.GetX()),
-		float32(m.Diffuse.GetY())*float32(m.lightAmbient4.GetY()) + float32(m.Ambient.GetY()),
-		float32(m.Diffuse.GetZ())*float32(m.lightAmbient4.GetZ()) + float32(m.Ambient.GetZ()),
+		float32(m.Diffuse.GetX())*float32(m.lightAmbient.GetX()) + float32(m.Ambient.GetX()),
+		float32(m.Diffuse.GetY())*float32(m.lightAmbient.GetY()) + float32(m.Ambient.GetY()),
+		float32(m.Diffuse.GetZ())*float32(m.lightAmbient.GetZ()) + float32(m.Ambient.GetZ()),
 		float32(m.Diffuse.GetW()),
 	}
 	return diffuse
@@ -149,11 +150,8 @@ func (m *Material) GL(
 		SphereMode:        m.SphereMode,
 		VerticesCount:     m.VerticesCount,
 		PrevVerticesCount: prevVerticesCount * 4,
+		lightAmbient:      &mmath.MVec4{mgl.LIGHT_AMBIENT, mgl.LIGHT_AMBIENT, mgl.LIGHT_AMBIENT, 1},
 	}
-}
-
-func (m *Material) diffuseGL() [4]float32 {
-	return [4]float32{float32(m.Diffuse.GetX()), float32(m.Diffuse.GetY()), float32(m.Diffuse.GetZ()), float32(m.Diffuse.GetW())}
 }
 
 func (m *Material) Copy() mcore.IndexModelInterface {
