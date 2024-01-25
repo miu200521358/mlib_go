@@ -19,6 +19,10 @@ uniform vec4 specular;
 uniform vec3 cameraPosition;
 uniform vec3 lightDirection;
 
+uniform int useToon;
+uniform int useSphere;
+uniform int sphereMode;
+
 out float alpha;
 out vec4 vertexColor;
 out vec3 vertexSpecular;
@@ -45,6 +49,31 @@ void main() {
 
     // 頂点色設定
     vertexColor = clamp(diffuse, 0.0, 1.0);
+
+    if (0 == useToon) {
+        // ディフューズ色＋アンビエント色 計算
+        float lightNormal = clamp(dot( vetexNormal, -lightDirection ), 0.0, 1.0);
+        vertexColor.rgb += diffuse.rgb * lightNormal;
+        vertexColor = clamp(vertexColor, 0.0, 1.0);
+    }
+
+    // テクスチャ描画位置
+    vertexUv = uv;
+
+    if (1 == useSphere) {
+        // Sphereマップ計算
+        if (3 == sphereMode) {
+            // PMXサブテクスチャ座標
+            sphereUv = extendUv;
+        }
+        else {
+	        // スフィアマップテクスチャ座標
+            vec3 normalWv = mat3(modelViewMatrix) * vetexNormal;
+	        sphereUv.x = normalWv.x * 0.5f + 0.5f;
+	        sphereUv.y = 1 - (normalWv.y * -0.5f + 0.5f);
+        }
+        // sphereUv += morphUv1.xy;
+    }
 
     // カメラとの相対位置
     vec3 eye = cameraPosition - (boneTransformMatrix * position4).xyz;

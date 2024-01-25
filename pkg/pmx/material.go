@@ -4,7 +4,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 // スフィアモード
@@ -56,6 +55,7 @@ type MaterialGL struct {
 	EdgeSize          float32      // エッジサイズ
 	DrawFlag          DrawFlag     // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
 	Texture           *TextureGL   // 通常テクスチャ
+	TextureFactor     *mmath.MVec4 // テクスチャ係数
 	SphereTexture     *TextureGL   // スフィアテクスチャ
 	ToonTexture       *TextureGL   // トゥーンテクスチャ
 	SphereMode        SphereMode   // スフィアモード

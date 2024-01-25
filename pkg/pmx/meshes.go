@@ -5,6 +5,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 
 )
 
@@ -34,9 +35,14 @@ func NewMeshes(model *PmxModel, windowIndex int) *Meshes {
 	meshes := make([]*Mesh, 0, len(model.Materials.Indexes))
 	prevVerticesCount := 0
 	for _, m := range model.Materials.GetSortedData() {
+		var texture *Texture
+		if m.TextureIndex != -1 && mutils.ContainsInt(model.Textures.Indexes, m.TextureIndex) {
+			texture = model.Textures.GetItem(m.TextureIndex)
+		}
+
 		materialGl := m.GL(
 			model.Path,
-			nil,
+			texture,
 			nil,
 			nil,
 			windowIndex,

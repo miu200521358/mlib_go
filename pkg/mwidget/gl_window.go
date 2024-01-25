@@ -4,6 +4,8 @@ import (
 	"embed"
 	"fmt"
 	"image"
+	"image/draw"
+	"os"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -192,117 +194,209 @@ func (w *GlWindow) Run() {
 	w.Close()
 }
 
-// func (w *GlWindow) Run2() {
-// 	// OpenGLコンテキストをこのウィンドウに設定
-// 	w.MakeContextCurrent()
+func (w *GlWindow) Run2() {
+	// OpenGLコンテキストをこのウィンドウに設定
+	w.MakeContextCurrent()
 
-// 	w.Shader.UseModelProgram()
-// 	program := w.Shader.ModelProgram
+	windowWidth := w.Size().Width
+	windowHeight := w.Size().Height
 
-// 	model := mgl32.Ident4()
-// 	modelUniform := gl.GetUniformLocation(program, gl.Str("model\x00"))
-// 	gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
+	w.Shader.UseModelProgram()
+	program := w.Shader.ModelProgram
+	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/float32(windowHeight), 0.1, 10.0)
+	projectionUniform := gl.GetUniformLocation(program, gl.Str("projection\x00"))
+	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
-// 	textureUniform := gl.GetUniformLocation(program, gl.Str("tex\x00"))
-// 	gl.Uniform1i(textureUniform, 0)
+	camera := mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	cameraUniform := gl.GetUniformLocation(program, gl.Str("camera\x00"))
+	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
-// 	gl.BindFragDataLocation(program, 0, gl.Str("outputColor\x00"))
+	model := mgl32.Ident4()
+	modelUniform := gl.GetUniformLocation(program, gl.Str("model\x00"))
+	gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
 
-// 	// Load the texture
-// 	texture, err := newTexture("grid.png")
-// 	if err != nil {
-// 		log.Fatalln(err)
-// 	}
+	textureUniform := gl.GetUniformLocation(program, gl.Str("tex\x00"))
+	gl.Uniform1i(textureUniform, 0)
 
-// 	// Configure the vertex data
-// 	var vao uint32
-// 	gl.GenVertexArrays(1, &vao)
-// 	gl.BindVertexArray(vao)
+	gl.BindFragDataLocation(program, 0, gl.Str("outputColor\x00"))
 
-// 	var vbo uint32
-// 	gl.GenBuffers(1, &vbo)
-// 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-// 	gl.BufferData(gl.ARRAY_BUFFER, len(w.faces)*4, gl.Ptr(w.faces), gl.STATIC_DRAW)
+	// Load the texture
+	texture, err := newTexture("grid.png")
+	if err != nil {
+		panic(err)
+	}
 
-// 	vertAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vert\x00")))
-// 	gl.EnableVertexAttribArray(vertAttrib)
-// 	gl.VertexAttribPointerWithOffset(vertAttrib, 3, gl.FLOAT, false, 5*4, 0)
+	// Configure the vertex data
+	var vao uint32
+	gl.GenVertexArrays(1, &vao)
+	gl.BindVertexArray(vao)
 
-// 	texCoordAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vertTexCoord\x00")))
-// 	gl.EnableVertexAttribArray(texCoordAttrib)
-// 	gl.VertexAttribPointerWithOffset(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 3*4)
+	var vbo uint32
+	gl.GenBuffers(1, &vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, len(cubeVertices)*4, gl.Ptr(cubeVertices), gl.STATIC_DRAW)
 
-// 	// Configure global settings
-// 	gl.Enable(gl.DEPTH_TEST)
-// 	gl.DepthFunc(gl.LESS)
-// 	gl.ClearColor(1.0, 1.0, 1.0, 1.0)
+	vertAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vert\x00")))
+	gl.EnableVertexAttribArray(vertAttrib)
+	gl.VertexAttribPointerWithOffset(vertAttrib, 3, gl.FLOAT, false, 5*4, 0)
 
-// 	angle := 0.0
-// 	previousTime := glfw.GetTime()
+	texCoordAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vertTexCoord\x00")))
+	gl.EnableVertexAttribArray(texCoordAttrib)
+	gl.VertexAttribPointerWithOffset(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 3*4)
 
-// 	for !w.ShouldClose() {
-// 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	// Configure global settings
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LESS)
+	gl.ClearColor(1.0, 1.0, 1.0, 1.0)
 
-// 		// Update
-// 		time := glfw.GetTime()
-// 		elapsed := time - previousTime
-// 		previousTime = time
+	angle := 0.0
+	previousTime := glfw.GetTime()
 
-// 		angle += elapsed
-// 		model = mgl32.HomogRotate3D(float32(angle), mgl32.Vec3{0, 1, 0})
+	for !w.ShouldClose() {
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-// 		// Render
-// 		gl.UseProgram(program)
-// 		gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
+		// Update
+		time := glfw.GetTime()
+		elapsed := time - previousTime
+		previousTime = time
 
-// 		gl.BindVertexArray(vao)
+		angle += elapsed
+		model = mgl32.HomogRotate3D(float32(angle), mgl32.Vec3{0, 1, 0})
 
-// 		gl.ActiveTexture(gl.TEXTURE0)
-// 		gl.BindTexture(gl.TEXTURE_2D, texture)
+		// Render
+		gl.UseProgram(program)
+		gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
 
-// 		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(w.faces)*3))
+		gl.BindVertexArray(vao)
 
-// 		// Maintenance
-// 		w.SwapBuffers()
-// 		glfw.PollEvents()
-// 	}
-// 	w.Close()
-// }
+		gl.ActiveTexture(gl.TEXTURE0)
+		gl.BindTexture(gl.TEXTURE_2D, texture)
 
-// func newTexture(file string) (uint32, error) {
-// 	imgFile, err := os.Open(file)
-// 	if err != nil {
-// 		return 0, fmt.Errorf("texture %q not found on disk: %v", file, err)
-// 	}
-// 	img, _, err := image.Decode(imgFile)
-// 	if err != nil {
-// 		return 0, err
-// 	}
+		gl.DrawArrays(gl.TRIANGLES, 0, 6*2*3)
 
-// 	rgba := image.NewRGBA(img.Bounds())
-// 	if rgba.Stride != rgba.Rect.Size().X*4 {
-// 		return 0, fmt.Errorf("unsupported stride")
-// 	}
-// 	draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
+		// Maintenance
+		w.SwapBuffers()
+		glfw.PollEvents()
+	}
+}
 
-// 	var texture uint32
-// 	gl.GenTextures(1, &texture)
-// 	gl.ActiveTexture(gl.TEXTURE0)
-// 	gl.BindTexture(gl.TEXTURE_2D, texture)
-// 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-// 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-// 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-// 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-// 	gl.TexImage2D(
-// 		gl.TEXTURE_2D,
-// 		0,
-// 		gl.RGBA,
-// 		int32(rgba.Rect.Size().X),
-// 		int32(rgba.Rect.Size().Y),
-// 		0,
-// 		gl.RGBA,
-// 		gl.UNSIGNED_BYTE,
-// 		gl.Ptr(rgba.Pix))
+func newTexture(file string) (uint32, error) {
+	imgFile, err := os.Open(file)
+	if err != nil {
+		return 0, fmt.Errorf("texture %q not found on disk: %v", file, err)
+	}
+	img, _, err := image.Decode(imgFile)
+	if err != nil {
+		return 0, err
+	}
 
-// 	return texture, nil
-// }
+	rgba := image.NewRGBA(img.Bounds())
+	if rgba.Stride != rgba.Rect.Size().X*4 {
+		return 0, fmt.Errorf("unsupported stride")
+	}
+	draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
+
+	var texture uint32
+	gl.GenTextures(1, &texture)
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D, texture)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	gl.TexImage2D(
+		gl.TEXTURE_2D,
+		0,
+		gl.RGBA,
+		int32(rgba.Rect.Size().X),
+		int32(rgba.Rect.Size().Y),
+		0,
+		gl.RGBA,
+		gl.UNSIGNED_BYTE,
+		gl.Ptr(rgba.Pix))
+
+	return texture, nil
+}
+
+var vertexShader = `
+#version 330
+
+uniform mat4 projection;
+uniform mat4 camera;
+uniform mat4 model;
+
+in vec3 vert;
+in vec2 vertTexCoord;
+
+out vec2 fragTexCoord;
+
+void main() {
+    fragTexCoord = vertTexCoord;
+    gl_Position = projection * camera * model * vec4(vert, 1);
+}
+` + "\x00"
+
+var fragmentShader = `
+#version 330
+
+uniform sampler2D tex;
+
+in vec2 fragTexCoord;
+
+out vec4 outputColor;
+
+void main() {
+    outputColor = texture(tex, fragTexCoord);
+}
+` + "\x00"
+
+var cubeVertices = []float32{
+	//  X, Y, Z, U, V
+	// Bottom
+	-1.0, -1.0, -1.0, 0.0, 0.0,
+	1.0, -1.0, -1.0, 1.0, 0.0,
+	-1.0, -1.0, 1.0, 0.0, 1.0,
+	1.0, -1.0, -1.0, 1.0, 0.0,
+	1.0, -1.0, 1.0, 1.0, 1.0,
+	-1.0, -1.0, 1.0, 0.0, 1.0,
+
+	// Top
+	-1.0, 1.0, -1.0, 0.0, 0.0,
+	-1.0, 1.0, 1.0, 0.0, 1.0,
+	1.0, 1.0, -1.0, 1.0, 0.0,
+	1.0, 1.0, -1.0, 1.0, 0.0,
+	-1.0, 1.0, 1.0, 0.0, 1.0,
+	1.0, 1.0, 1.0, 1.0, 1.0,
+
+	// Front
+	-1.0, -1.0, 1.0, 1.0, 0.0,
+	1.0, -1.0, 1.0, 0.0, 0.0,
+	-1.0, 1.0, 1.0, 1.0, 1.0,
+	1.0, -1.0, 1.0, 0.0, 0.0,
+	1.0, 1.0, 1.0, 0.0, 1.0,
+	-1.0, 1.0, 1.0, 1.0, 1.0,
+
+	// Back
+	-1.0, -1.0, -1.0, 0.0, 0.0,
+	-1.0, 1.0, -1.0, 0.0, 1.0,
+	1.0, -1.0, -1.0, 1.0, 0.0,
+	1.0, -1.0, -1.0, 1.0, 0.0,
+	-1.0, 1.0, -1.0, 0.0, 1.0,
+	1.0, 1.0, -1.0, 1.0, 1.0,
+
+	// Left
+	-1.0, -1.0, 1.0, 0.0, 1.0,
+	-1.0, 1.0, -1.0, 1.0, 0.0,
+	-1.0, -1.0, -1.0, 0.0, 0.0,
+	-1.0, -1.0, 1.0, 0.0, 1.0,
+	-1.0, 1.0, 1.0, 1.0, 1.0,
+	-1.0, 1.0, -1.0, 1.0, 0.0,
+
+	// Right
+	1.0, -1.0, 1.0, 1.0, 1.0,
+	1.0, -1.0, -1.0, 1.0, 0.0,
+	1.0, 1.0, -1.0, 0.0, 0.0,
+	1.0, -1.0, 1.0, 1.0, 1.0,
+	1.0, 1.0, -1.0, 0.0, 0.0,
+	1.0, 1.0, 1.0, 0.0, 1.0,
+}

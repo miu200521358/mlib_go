@@ -9,7 +9,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 // テクスチャ種別
@@ -22,10 +21,33 @@ const (
 )
 
 type TextureGL struct {
-	id          uint32
-	typeId      uint32
-	Valid       bool
-	textureType TextureType
+	Id            uint32      // OpenGLテクスチャID
+	Valid         bool        // テクスチャフルパスが有効であるか否か
+	TextureType   TextureType // テクスチャ種別
+	TextureTypeId uint32      // テクスチャ種類別描画先ユニットID
+}
+
+func (t *TextureGL) Bind() {
+	if !t.Valid {
+		return
+	}
+
+	gl.ActiveTexture(t.TextureTypeId)
+	gl.BindTexture(gl.TEXTURE_2D, t.Id)
+}
+
+func (t *TextureGL) Unbind() {
+	if !t.Valid {
+		return
+	}
+
+	gl.BindTexture(gl.TEXTURE_2D, 0)
+}
+
+func (t *TextureGL) Delete() {
+	if t.Valid {
+		gl.DeleteTextures(1, &t.Id)
+	}
 }
 
 type Texture struct {
@@ -36,8 +58,8 @@ type Texture struct {
 	Valid         bool        // テクスチャフルパスが有効であるか否か
 	glId          uint32      // OpenGLテクスチャID
 	Initialized   bool        // 描画初期化済みフラグ
-	Image         image.Image // テクスチャイメージ
-	textureTypeId uint32      // テクスチャタイプID
+	Image         *image.RGBA // テクスチャイメージ
+	textureTypeId uint32      // テクスチャ種類別描画先ユニットID
 }
 
 func NewTexture() *Texture {
@@ -47,7 +69,6 @@ func NewTexture() *Texture {
 		TextureType: TEXTURE_TYPE_TEXTURE,
 		Path:        "",
 		Valid:       false,
-		glId:        0,
 	}
 }
 
@@ -60,12 +81,8 @@ func (t *Texture) GL(
 	tGl := &TextureGL{}
 
 	if t.Initialized && t.Valid {
-		// 既にフラグが立ってたら描画初期化済み
-		tGl.id = t.glId
-		tGl.typeId = t.textureTypeId
-		tGl.Valid = t.Valid
-		tGl.textureType = t.TextureType
-		return tGl
+		// 既にフラグが立ってたら描画初期化済みなので一旦削除
+		gl.DeleteTextures(1, &t.glId)
 	}
 
 	// global texture
@@ -94,9 +111,7 @@ func (t *Texture) GL(
 			return nil
 		}
 		draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
-
-		t.Image = img
-		t.Image = mutils.FlipImage(t.Image)
+		t.Image = rgba
 	}
 
 	if !t.Valid {
@@ -107,65 +122,46 @@ func (t *Texture) GL(
 	t.TextureType = textureType
 
 	// テクスチャオブジェクト生成
-	gl.GenTextures(1, &t.glId)
+	gl.GenTextures(1, &tGl.Id)
+	t.glId = tGl.Id
 
 	// テクスチャ種別によってテクスチャユニットを変更
 	if windowIndex == 0 {
-		t.textureTypeId = gl.TEXTURE0
-		if textureType == TEXTURE_TYPE_TOON {
+		switch textureType {
+		case TEXTURE_TYPE_TEXTURE:
+			t.textureTypeId = gl.TEXTURE0
+		case TEXTURE_TYPE_TOON:
 			t.textureTypeId = gl.TEXTURE1
-		} else if textureType == TEXTURE_TYPE_SPHERE {
+		case TEXTURE_TYPE_SPHERE:
 			t.textureTypeId = gl.TEXTURE2
 		}
 	} else if windowIndex == 1 {
-		t.textureTypeId = gl.TEXTURE3
-		if textureType == TEXTURE_TYPE_TOON {
+		switch textureType {
+		case TEXTURE_TYPE_TEXTURE:
+			t.textureTypeId = gl.TEXTURE3
+		case TEXTURE_TYPE_TOON:
 			t.textureTypeId = gl.TEXTURE4
-		} else if textureType == TEXTURE_TYPE_SPHERE {
+		case TEXTURE_TYPE_SPHERE:
 			t.textureTypeId = gl.TEXTURE5
 		}
 	} else if windowIndex == 2 {
-		t.textureTypeId = gl.TEXTURE6
-		if textureType == TEXTURE_TYPE_TOON {
+		switch textureType {
+		case TEXTURE_TYPE_TEXTURE:
+			t.textureTypeId = gl.TEXTURE6
+		case TEXTURE_TYPE_TOON:
 			t.textureTypeId = gl.TEXTURE7
-		} else if textureType == TEXTURE_TYPE_SPHERE {
+		case TEXTURE_TYPE_SPHERE:
 			t.textureTypeId = gl.TEXTURE8
 		}
 	}
 
-	tGl.id = t.glId
-	tGl.typeId = t.textureTypeId
 	tGl.Valid = t.Valid
-	tGl.textureType = t.TextureType
+	tGl.TextureType = t.TextureType
+	tGl.TextureTypeId = t.textureTypeId
 
 	tGl.Bind()
-	gl.TexImage2D(
-		gl.TEXTURE_2D,
-		0,
-		gl.RGBA,
-		int32(t.Image.Bounds().Dx()),
-		int32(t.Image.Bounds().Dy()),
-		0,
-		gl.RGBA,
-		gl.UNSIGNED_BYTE,
-		gl.Ptr(t.Image.(*image.RGBA).Pix),
-	)
-	tGl.Unbind()
 
-	// 描画初期化
-	t.Initialized = true
-	return tGl
-}
-
-func (t *TextureGL) Bind() {
-	if !t.Valid {
-		return
-	}
-
-	gl.ActiveTexture(t.typeId)
-	gl.BindTexture(gl.TEXTURE_2D, t.id)
-
-	if t.textureType == TEXTURE_TYPE_TOON {
+	if t.TextureType == TEXTURE_TYPE_TOON {
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	}
@@ -173,14 +169,24 @@ func (t *TextureGL) Bind() {
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-}
 
-func (t *TextureGL) Unbind() {
-	if !t.Valid {
-		return
-	}
+	gl.TexImage2D(
+		gl.TEXTURE_2D,
+		0,
+		gl.RGBA,
+		int32(t.Image.Rect.Size().X),
+		int32(t.Image.Rect.Size().Y),
+		0,
+		gl.RGBA,
+		gl.UNSIGNED_BYTE,
+		gl.Ptr(t.Image.Pix),
+	)
 
-	gl.BindTexture(gl.TEXTURE_2D, 0)
+	tGl.Unbind()
+
+	// 描画初期化
+	t.Initialized = true
+	return tGl
 }
 
 // テクスチャリスト

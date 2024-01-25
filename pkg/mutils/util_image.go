@@ -10,6 +10,7 @@ import (
 	_ "golang.org/x/image/bmp"
 	_ "golang.org/x/image/riff"
 	_ "golang.org/x/image/tiff"
+
 )
 
 // 指定されたパスから画像を読み込む
@@ -29,7 +30,7 @@ func LoadImage(path string) (image.Image, error) {
 }
 
 // 指定された画像を反転させる
-func FlipImage(img image.Image) image.Image {
+func FlipImage(img *image.RGBA) *image.RGBA {
 	bounds := img.Bounds()
 	width, height := bounds.Max.X, bounds.Max.Y
 

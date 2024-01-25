@@ -6,9 +6,18 @@ import (
 
 )
 
-func Contains(arr []string, str string) bool {
+func ContainsString(arr []string, str string) bool {
 	for _, a := range arr {
 		if a == str {
+			return true
+		}
+	}
+	return false
+}
+
+func ContainsInt(arr []int, i int) bool {
+	for _, a := range arr {
+		if a == i {
 			return true
 		}
 	}

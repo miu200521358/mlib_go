@@ -5,6 +5,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type Mesh struct {
@@ -79,50 +80,18 @@ func (m *Mesh) DrawModel(
 		specular[0], specular[1], specular[2], specular[3],
 	)
 
-	// 三角形描画
-	gl.DrawElements(
-		gl.TRIANGLES,
-		int32(m.material.VerticesCount),
-		gl.UNSIGNED_INT,
-		nil,
+	// テクスチャ使用有無
+	gl.Uniform1i(
+		shader.UseTextureUniform[mgl.PROGRAM_TYPE_MODEL],
+		mutils.BoolToInt(m.material.Texture != nil),
 	)
-
-	// ambient := m.material.Ambient
-	// gl.Uniform3f(
-	// 	shader.AmbientUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 	ambient[0],
-	// 	ambient[1],
-	// 	ambient[2],
-	// )
-
-	// specular := m.material.Specular
-	// gl.Uniform4f(
-	// 	shader.SpecularUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 	specular[0],
-	// 	specular[1],
-	// 	specular[2],
-	// 	specular[3],
-	// )
-
-	// // テクスチャ使用有無
-	// gl.Uniform1i(
-	// 	shader.UseTextureUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 	mutils.BoolToInt(m.material.Texture != nil && m.material.Texture.Valid),
-	// )
-	// if m.material.Texture != nil && m.material.Texture.Valid {
-	// 	gl.Uniform1i(
-	// 		shader.TextureUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 		int32(m.material.Texture.textureType),
-	// 	)
-	// 	textureFactor := shaderMaterial.TextureFactor()
-	// 	gl.Uniform4f(
-	// 		shader.TextureFactorUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 		textureFactor[0],
-	// 		textureFactor[1],
-	// 		textureFactor[2],
-	// 		textureFactor[3],
-	// 	)
-	// }
+	if m.material.Texture != nil {
+		m.material.Texture.Bind()
+		// gl.Uniform1i(
+		// 	shader.TextureUniform[mgl.PROGRAM_TYPE_MODEL],
+		// 	int32(m.material.Texture.Id),
+		// )
+	}
 
 	// // Toon使用有無
 	// gl.Uniform1i(
@@ -130,17 +99,10 @@ func (m *Mesh) DrawModel(
 	// 	mutils.BoolToInt(m.material.ToonTexture != nil && m.material.ToonTexture.Valid),
 	// )
 	// if m.material.ToonTexture != nil && m.material.ToonTexture.Valid {
+	// 	m.material.ToonTexture.Bind()
 	// 	gl.Uniform1i(
 	// 		shader.ToonUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 		int32(m.material.ToonTexture.textureType),
-	// 	)
-	// 	toonTextureFactor := shaderMaterial.ToonTextureFactor()
-	// 	gl.Uniform4f(
-	// 		shader.ToonFactorUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 		toonTextureFactor[0],
-	// 		toonTextureFactor[1],
-	// 		toonTextureFactor[2],
-	// 		toonTextureFactor[3],
+	// 		int32(m.material.ToonTexture.TextureTypeId),
 	// 	)
 	// }
 
@@ -150,17 +112,10 @@ func (m *Mesh) DrawModel(
 	// 	mutils.BoolToInt(m.material.SphereTexture != nil && m.material.SphereTexture.Valid && m.material.SphereMode != SPHERE_MODE_INVALID),
 	// )
 	// if m.material.SphereTexture != nil && m.material.SphereTexture.Valid {
+	// 	m.material.SphereTexture.Bind()
 	// 	gl.Uniform1i(
 	// 		shader.SphereUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 		int32(m.material.SphereTexture.textureType),
-	// 	)
-	// 	sphereTextureFactor := shaderMaterial.SphereTextureFactor()
-	// 	gl.Uniform4f(
-	// 		shader.SphereFactorUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 		sphereTextureFactor[0],
-	// 		sphereTextureFactor[1],
-	// 		sphereTextureFactor[2],
-	// 		sphereTextureFactor[3],
+	// 		int32(m.material.SphereTexture.TextureTypeId),
 	// 	)
 	// }
 
@@ -188,9 +143,17 @@ func (m *Mesh) DrawModel(
 	// 	unsafe.Pointer(&prevVerticesCount),
 	// )
 
-	// if m.material.Texture != nil {
-	// 	m.material.Texture.Unbind()
-	// }
+	// 三角形描画
+	gl.DrawElements(
+		gl.TRIANGLES,
+		int32(m.material.VerticesCount),
+		gl.UNSIGNED_INT,
+		nil,
+	)
+
+	if m.material.Texture != nil {
+		m.material.Texture.Unbind()
+	}
 
 	// if m.material.ToonTexture != nil {
 	// 	m.material.ToonTexture.Unbind()
@@ -206,6 +169,9 @@ func (m *Mesh) DrawModel(
 
 func (m *Mesh) Delete() {
 	m.ibo.Delete()
+	if m.material.Texture != nil {
+		m.material.Texture.Delete()
+	}
 }
 
 // func (m *Mesh) BindBoneMatrixes(
