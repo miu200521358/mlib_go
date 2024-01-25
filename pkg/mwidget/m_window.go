@@ -9,6 +9,7 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 const (
@@ -39,7 +40,7 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool) (*MWindow, error) {
 	}
 
 	mainWindow := &MWindow{MainWindow: *mw, isHorizontal: isHorizontal, GlWindows: []*GlWindow{}}
-	mainWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
+	mw.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
 		if len(mainWindow.GlWindows) > 0 {
 			for _, glWindow := range mainWindow.GlWindows {
 				glWindow.Close()
