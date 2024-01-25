@@ -65,3 +65,12 @@ rsrc -manifest main.manifest -o rsrc.syso
 ```
 go get -u golang.org/x/image
 ```
+
+## アイコンの組み込み
+
+1. .icoファイルを作成
+2. .rcファイルを作成
+    - `IDI_ICON1 ICON DISCARDABLE "app.ico"`
+3. .resファイルにコンパイル
+    - `windres -O coff -o app.res app.rc`
+4. ビルドスクリプトで実行

@@ -30,8 +30,11 @@ print(f"app_version: {app_version}")
 # -ldflags "-s -w" バイナリサイズを小さくする
 # -H=windowsgui コンソールを表示しない
 # -gcflags "all=-N -l" デバッグ情報を削除
+# -linkmode external -extldflags '-static -Wl,resources/app.res' リソースを埋め込む
 build_command = f"go build -o {workspace_folder}/build/{app_name}_{app_version}.exe -trimpath " \
-                f"-v -a -buildmode=exe -ldflags \"-s -w -H=windowsgui -X main.Version={app_version}\" {workspace_folder}/cmd/main.go"
+                f"-v -a -buildmode=exe -ldflags \"-s -w -H=windowsgui -X main.Version={app_version} " \
+                f"-linkmode external -extldflags '-static -Wl,{workspace_folder}/resources/app.res'\" " \
+                f"{workspace_folder}/cmd/main.go"
 
 print(f"build_command: {build_command}")
 
