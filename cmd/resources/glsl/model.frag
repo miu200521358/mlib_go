@@ -1,4 +1,4 @@
-#version 440
+#version 440 core
 
 uniform vec4 diffuse;
 uniform vec3 ambient;
@@ -54,6 +54,6 @@ void main() {
         outColor *= texture(toonSampler, vec2(0, lightNormal));
     }
 
-    // // スペキュラ適用
-    // outColor.rgb += vertexSpecular;
+    // スペキュラ適用
+    outColor.rgb += vertexSpecular;
 }
