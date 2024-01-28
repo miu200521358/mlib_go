@@ -70,7 +70,7 @@ void main() {
 	        // スフィアマップテクスチャ座標
             vec3 normalWv = mat3(modelViewMatrix) * vetexNormal;
 	        sphereUv.x = normalWv.x * 0.5f + 0.5f;
-	        sphereUv.y = 1 - (normalWv.y * -0.5f + 0.5f);
+	        sphereUv.y = normalWv.y * -0.5f + 0.5f;
         }
         // sphereUv += morphUv1.xy;
     }

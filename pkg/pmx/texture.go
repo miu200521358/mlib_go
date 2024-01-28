@@ -181,6 +181,7 @@ func (t *Texture) GL(
 	tGl.Valid = t.Valid
 	tGl.TextureType = t.TextureType
 	tGl.TextureUnitId = t.textureUnitId
+	tGl.TextureUnitNo = t.textureUnitNo
 
 	tGl.Bind()
 

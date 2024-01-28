@@ -1,13 +1,19 @@
 package mutils
 
 import (
+	"bytes"
+	"embed"
+	"fmt"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
-	_ "image/png"
+	"image/png"
+	"io/fs"
 	"os"
+	"strings"
 
-	_ "golang.org/x/image/bmp"
+	"github.com/ftrvxmtrx/tga"
+	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/riff"
 	_ "golang.org/x/image/tiff"
 
@@ -21,6 +27,29 @@ func LoadImage(path string) (image.Image, error) {
 	}
 	defer file.Close()
 
+	if strings.ToLower(path[len(path)-4:]) == ".png" {
+		img, err := png.Decode(file)
+		if err != nil {
+			return nil, err
+		}
+
+		return img, nil
+	} else if strings.ToLower(path[len(path)-4:]) == ".tga" {
+		img, err := tga.Decode(file)
+		if err != nil {
+			return nil, err
+		}
+
+		return img, nil
+	} else if strings.ToLower(path[len(path)-4:]) == ".spa" || strings.ToLower(path[len(path)-4:]) == ".bmp" {
+		// スフィアファイルはbmpとして読み込む
+		img, err := bmp.Decode(file)
+		if err != nil {
+			return nil, err
+		}
+
+		return img, nil
+	}
 	img, _, err := image.Decode(file)
 	if err != nil {
 		return nil, err
@@ -46,4 +75,19 @@ func FlipImage(img *image.RGBA) *image.RGBA {
 	}
 
 	return flipped
+}
+
+// ReadIconFile アイコンファイルの読み込み
+func LoadImageFromResources(resourceFiles embed.FS, fileName string) (image.Image, error) {
+	fileData, err := fs.ReadFile(resourceFiles, fileName)
+	if err != nil {
+		return nil, fmt.Errorf("image not found: %v", err)
+	}
+
+	img, err := png.Decode(bytes.NewReader(fileData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode image: %v", err)
+	}
+
+	return img, nil
 }

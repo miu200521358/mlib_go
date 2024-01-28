@@ -8,7 +8,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type Meshes struct {
@@ -109,6 +108,8 @@ func (m *Meshes) Delete() {
 }
 
 func (m *Meshes) Draw(shader *mgl.MShader, boneMatrixes []mgl32.Mat4, windowIndex int) {
+	// 深度バッファのクリア
+	gl.Clear(gl.DEPTH_BUFFER_BIT)
 	// 隠面消去
 	// https://learnopengl.com/Advanced-OpenGL/Depth-testing
 	gl.Enable(gl.DEPTH_TEST)

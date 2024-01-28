@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/ftrvxmtrx/tga v0.0.0-20150524081124-bd8e8d5be13a
 	golang.org/x/sys v0.5.0 // indirect
 	gopkg.in/Knetic/govaluate.v3 v3.0.0 // indirect
 )
