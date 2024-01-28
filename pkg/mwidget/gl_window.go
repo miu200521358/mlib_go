@@ -4,16 +4,17 @@ import (
 	"embed"
 	"fmt"
 	"image"
-	"image/draw"
-	"os"
+	"math"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
@@ -32,10 +33,16 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int) {
 
 type GlWindow struct {
 	glfw.Window
-	ModelSets     []ModelSet
-	Shader        *mgl.MShader
-	WindowIndex   int
-	resourceFiles embed.FS
+	ModelSets           []ModelSet
+	Shader              *mgl.MShader
+	WindowIndex         int
+	resourceFiles       embed.FS
+	prevCursorPos       *mmath.MVec2
+	yaw                 float64
+	pitch               float64
+	middleButtonPressed bool
+	rightButtonPressed  bool
+	updatedPrev         bool
 }
 
 func NewGlWindow(
@@ -114,18 +121,180 @@ func NewGlWindow(
 		return nil, err
 	}
 
-	return &GlWindow{
-		Window:        *w,
-		ModelSets:     make([]ModelSet, 0),
-		Shader:        shader,
-		WindowIndex:   windowIndex,
-		resourceFiles: resourceFiles,
-	}, nil
+	glWindow := GlWindow{
+		Window:              *w,
+		ModelSets:           make([]ModelSet, 0),
+		Shader:              shader,
+		WindowIndex:         windowIndex,
+		resourceFiles:       resourceFiles,
+		prevCursorPos:       &mmath.MVec2{0, 0},
+		yaw:                 89.0,
+		pitch:               0.0,
+		middleButtonPressed: false,
+		rightButtonPressed:  false,
+		updatedPrev:         false,
+	}
+
+	w.SetScrollCallback(glWindow.handleScrollEvent)
+	w.SetMouseButtonCallback(glWindow.handleMouseButtonEvent)
+	w.SetCursorPosCallback(glWindow.handleCursorPosEvent)
+	glWindow.Draw()
+
+	return &glWindow, nil
+}
+
+func (w *GlWindow) handleScrollEvent(window *glfw.Window, xoff float64, yoff float64) {
+	if yoff > 0 {
+		w.Shader.FieldOfViewAngle -= 1.0
+		if w.Shader.FieldOfViewAngle < 5.0 {
+			w.Shader.FieldOfViewAngle = 5.0
+		}
+	} else if yoff < 0 {
+		w.Shader.FieldOfViewAngle += 1.0
+	}
+}
+
+func (w *GlWindow) handleMouseButtonEvent(
+	window *glfw.Window,
+	button glfw.MouseButton,
+	action glfw.Action,
+	mod glfw.ModifierKey,
+) {
+	if button == glfw.MouseButtonMiddle {
+		if action == glfw.Press {
+			w.middleButtonPressed = true
+			w.updatedPrev = false
+		} else if action == glfw.Release {
+			w.middleButtonPressed = false
+		}
+	} else if button == glfw.MouseButtonRight {
+		if action == glfw.Press {
+			w.rightButtonPressed = true
+			w.updatedPrev = false
+		} else if action == glfw.Release {
+			w.rightButtonPressed = false
+		}
+	}
+
+}
+
+func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos float64) {
+	fmt.Printf("[start] yaw %.8f, pitch %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
+		w.yaw, w.pitch, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
+
+	if !w.updatedPrev {
+		w.prevCursorPos.SetX(xpos)
+		w.prevCursorPos.SetY(ypos)
+		w.updatedPrev = true
+		return
+	}
+
+	if w.rightButtonPressed {
+		// 右クリックはカメラ中心をそのままにカメラ位置を変える
+		xOffset := (w.prevCursorPos.GetX() - xpos) * 0.1
+		yOffset := (w.prevCursorPos.GetY() - ypos) * 0.1
+
+		// 方位角と仰角を更新
+		w.yaw += xOffset
+		w.pitch += yOffset
+
+		// 仰角の制限（水平面より上下に行き過ぎないようにする）
+		if w.pitch > 89.9 {
+			w.pitch = 89.9
+		} else if w.pitch < -89.9 {
+			w.pitch = -89.9
+		}
+
+		// 方位角の制限（360度を超えないようにする）
+		if w.yaw > 360.0 {
+			w.yaw -= 360.0
+		} else if w.yaw < -360.0 {
+			w.yaw += 360.0
+		}
+
+		// 球面座標系をデカルト座標系に変換
+		radius := float64(w.Shader.CameraPosition.Sub(w.Shader.LookAtCenterPosition).Length())
+		cameraX := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Cos(mgl64.DegToRad(w.yaw))
+		cameraY := radius * math.Sin(mgl64.DegToRad(w.pitch))
+		cameraZ := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw))
+
+		// カメラ位置を更新
+		w.Shader.CameraPosition.SetX(-cameraX)
+		w.Shader.CameraPosition.SetY(mgl.INITIAL_CAMERA_POSITION_Y + cameraY)
+		w.Shader.CameraPosition.SetZ(-cameraZ)
+		fmt.Printf("xOffset %.8f, yOffset %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
+			xOffset, yOffset, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
+	} else if w.middleButtonPressed {
+		// 中クリックはカメラ中心とカメラ位置を一緒に動かす
+		// カメラの方向ベクトルと上方ベクトルを計算
+		cameraDirection := mgl64.Vec3{
+			math.Cos(mgl64.DegToRad(w.pitch)) * math.Cos(mgl64.DegToRad(w.yaw)),
+			math.Sin(mgl64.DegToRad(w.pitch)),
+			math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw)),
+		}.Normalize()
+		upVector := mgl64.Vec3{0, 1, 0}
+
+		// カメラの横方向と縦方向のベクトルを計算
+		rightVector := cameraDirection.Cross(upVector).Normalize()
+		upCameraVector := rightVector.Cross(cameraDirection).Normalize()
+
+		// カメラがモデルの側面を向いているかを確認
+		var horizontalSign float64 = -1
+		if (w.yaw > 160 && w.yaw < 200) || (w.yaw > 340 && w.yaw < 380) {
+			horizontalSign = 1
+		}
+
+		xOffset := (w.prevCursorPos.GetX() - xpos) * 0.07 * horizontalSign
+		yOffset := (w.prevCursorPos.GetY() - ypos) * 0.07
+
+		// カメラの位置を更新（カメラの方向を考慮）
+		w.Shader.CameraPosition.SetX(
+			w.Shader.CameraPosition.GetX() +
+				float64(rightVector.X())*xOffset - float64(upCameraVector.X())*yOffset)
+		w.Shader.CameraPosition.SetY(
+			w.Shader.CameraPosition.GetY() +
+				float64(rightVector.Y())*xOffset - float64(upCameraVector.Y())*yOffset)
+		w.Shader.CameraPosition.SetZ(
+			w.Shader.CameraPosition.GetZ() +
+				float64(rightVector.Z())*xOffset - float64(upCameraVector.Z())*yOffset)
+
+		// カメラの中心位置も同様に更新
+		w.Shader.LookAtCenterPosition.SetX(
+			w.Shader.LookAtCenterPosition.GetX() +
+				float64(rightVector.X())*xOffset -
+				float64(upCameraVector.X())*yOffset)
+		w.Shader.LookAtCenterPosition.SetY(
+			w.Shader.LookAtCenterPosition.GetY() +
+				float64(rightVector.Y())*xOffset -
+				float64(upCameraVector.Y())*yOffset)
+		w.Shader.LookAtCenterPosition.SetZ(
+			w.Shader.LookAtCenterPosition.GetZ() +
+				float64(rightVector.Z())*xOffset -
+				float64(upCameraVector.Z())*yOffset)
+
+		fmt.Printf("xOffset %.8f, yOffset %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
+			xOffset, yOffset, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
+	}
+
+	w.prevCursorPos.SetX(xpos)
+	w.prevCursorPos.SetY(ypos)
+}
+
+func (w *GlWindow) Reset() {
+	// カメラとかリセット
+	w.Shader.Reset()
+	w.prevCursorPos = &mmath.MVec2{0, 0}
+	w.yaw = 89.0
+	w.pitch = 0.0
+	w.middleButtonPressed = false
+	w.rightButtonPressed = false
+
 }
 
 func (w *GlWindow) AddData(pmxModel *pmx.PmxModel) {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
+	w.Reset()
 
 	// TODO: モーションも追加する
 	pmxModel.InitializeDraw(w.WindowIndex, w.resourceFiles)
@@ -168,24 +337,34 @@ func (w *GlWindow) Close() {
 }
 
 func (w *GlWindow) Run() {
-	angle := 0.0
-	previousTime := glfw.GetTime()
-	modelUniform := gl.GetUniformLocation(w.Shader.ModelProgram, gl.Str(mgl.SHADER_BONE_TRANSFORM_MATRIX))
-
 	for !w.ShouldClose() {
+		// 深度バッファのクリア
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		// Update
-		time := glfw.GetTime()
-		elapsed := time - previousTime
-		previousTime = time
+		for _, program := range w.Shader.GetPrograms() {
+			// プログラムの切り替え
+			gl.UseProgram(program)
+			// カメラの再計算
+			projection := mgl32.Perspective(
+				mgl32.DegToRad(w.Shader.FieldOfViewAngle),
+				float32(w.Shader.Width)/float32(w.Shader.Height),
+				w.Shader.NearPlane,
+				w.Shader.FarPlane,
+			)
+			projectionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_PROJECTION_MATRIX))
+			gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
-		angle += elapsed
-		model := mgl32.HomogRotate3D(float32(angle), mgl32.Vec3{0, 1, 0})
+			// カメラの位置
+			cameraPosition := w.Shader.CameraPosition.Mgl()
+			cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_CAMERA_POSITION))
+			gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
-		// Render
-		gl.UseProgram(w.Shader.ModelProgram)
-		gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
+			// カメラの中心
+			lookAtCenter := w.Shader.LookAtCenterPosition.Mgl()
+			camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
+			cameraUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_MATRIX))
+			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
+		}
 
 		w.Draw()
 
@@ -194,211 +373,4 @@ func (w *GlWindow) Run() {
 		glfw.PollEvents()
 	}
 	w.Close()
-}
-
-func (w *GlWindow) Run2() {
-	// OpenGLコンテキストをこのウィンドウに設定
-	w.MakeContextCurrent()
-
-	windowWidth := w.Size().Width
-	windowHeight := w.Size().Height
-
-	w.Shader.UseModelProgram()
-	program := w.Shader.ModelProgram
-	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/float32(windowHeight), 0.1, 10.0)
-	projectionUniform := gl.GetUniformLocation(program, gl.Str("projection\x00"))
-	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
-
-	camera := mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	cameraUniform := gl.GetUniformLocation(program, gl.Str("camera\x00"))
-	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
-
-	model := mgl32.Ident4()
-	modelUniform := gl.GetUniformLocation(program, gl.Str("model\x00"))
-	gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
-
-	textureUniform := gl.GetUniformLocation(program, gl.Str("tex\x00"))
-	gl.Uniform1i(textureUniform, 0)
-
-	gl.BindFragDataLocation(program, 0, gl.Str("outputColor\x00"))
-
-	// Load the texture
-	texture, err := newTexture("grid.png")
-	if err != nil {
-		panic(err)
-	}
-
-	// Configure the vertex data
-	var vao uint32
-	gl.GenVertexArrays(1, &vao)
-	gl.BindVertexArray(vao)
-
-	var vbo uint32
-	gl.GenBuffers(1, &vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(cubeVertices)*4, gl.Ptr(cubeVertices), gl.STATIC_DRAW)
-
-	vertAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vert\x00")))
-	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointerWithOffset(vertAttrib, 3, gl.FLOAT, false, 5*4, 0)
-
-	texCoordAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vertTexCoord\x00")))
-	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointerWithOffset(texCoordAttrib, 2, gl.FLOAT, false, 5*4, 3*4)
-
-	// Configure global settings
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.LESS)
-	gl.ClearColor(1.0, 1.0, 1.0, 1.0)
-
-	angle := 0.0
-	previousTime := glfw.GetTime()
-
-	for !w.ShouldClose() {
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-		// Update
-		time := glfw.GetTime()
-		elapsed := time - previousTime
-		previousTime = time
-
-		angle += elapsed
-		model = mgl32.HomogRotate3D(float32(angle), mgl32.Vec3{0, 1, 0})
-
-		// Render
-		gl.UseProgram(program)
-		gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
-
-		gl.BindVertexArray(vao)
-
-		gl.ActiveTexture(gl.TEXTURE0)
-		gl.BindTexture(gl.TEXTURE_2D, texture)
-
-		gl.DrawArrays(gl.TRIANGLES, 0, 6*2*3)
-
-		// Maintenance
-		w.SwapBuffers()
-		glfw.PollEvents()
-	}
-}
-
-func newTexture(file string) (uint32, error) {
-	imgFile, err := os.Open(file)
-	if err != nil {
-		return 0, fmt.Errorf("texture %q not found on disk: %v", file, err)
-	}
-	img, _, err := image.Decode(imgFile)
-	if err != nil {
-		return 0, err
-	}
-
-	rgba := image.NewRGBA(img.Bounds())
-	if rgba.Stride != rgba.Rect.Size().X*4 {
-		return 0, fmt.Errorf("unsupported stride")
-	}
-	draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
-
-	var texture uint32
-	gl.GenTextures(1, &texture)
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, texture)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	gl.TexImage2D(
-		gl.TEXTURE_2D,
-		0,
-		gl.RGBA,
-		int32(rgba.Rect.Size().X),
-		int32(rgba.Rect.Size().Y),
-		0,
-		gl.RGBA,
-		gl.UNSIGNED_BYTE,
-		gl.Ptr(rgba.Pix))
-
-	return texture, nil
-}
-
-var vertexShader = `
-#version 330
-
-uniform mat4 projection;
-uniform mat4 camera;
-uniform mat4 model;
-
-in vec3 vert;
-in vec2 vertTexCoord;
-
-out vec2 fragTexCoord;
-
-void main() {
-    fragTexCoord = vertTexCoord;
-    gl_Position = projection * camera * model * vec4(vert, 1);
-}
-` + "\x00"
-
-var fragmentShader = `
-#version 330
-
-uniform sampler2D tex;
-
-in vec2 fragTexCoord;
-
-out vec4 outputColor;
-
-void main() {
-    outputColor = texture(tex, fragTexCoord);
-}
-` + "\x00"
-
-var cubeVertices = []float32{
-	//  X, Y, Z, U, V
-	// Bottom
-	-1.0, -1.0, -1.0, 0.0, 0.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	-1.0, -1.0, 1.0, 0.0, 1.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	1.0, -1.0, 1.0, 1.0, 1.0,
-	-1.0, -1.0, 1.0, 0.0, 1.0,
-
-	// Top
-	-1.0, 1.0, -1.0, 0.0, 0.0,
-	-1.0, 1.0, 1.0, 0.0, 1.0,
-	1.0, 1.0, -1.0, 1.0, 0.0,
-	1.0, 1.0, -1.0, 1.0, 0.0,
-	-1.0, 1.0, 1.0, 0.0, 1.0,
-	1.0, 1.0, 1.0, 1.0, 1.0,
-
-	// Front
-	-1.0, -1.0, 1.0, 1.0, 0.0,
-	1.0, -1.0, 1.0, 0.0, 0.0,
-	-1.0, 1.0, 1.0, 1.0, 1.0,
-	1.0, -1.0, 1.0, 0.0, 0.0,
-	1.0, 1.0, 1.0, 0.0, 1.0,
-	-1.0, 1.0, 1.0, 1.0, 1.0,
-
-	// Back
-	-1.0, -1.0, -1.0, 0.0, 0.0,
-	-1.0, 1.0, -1.0, 0.0, 1.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	-1.0, 1.0, -1.0, 0.0, 1.0,
-	1.0, 1.0, -1.0, 1.0, 1.0,
-
-	// Left
-	-1.0, -1.0, 1.0, 0.0, 1.0,
-	-1.0, 1.0, -1.0, 1.0, 0.0,
-	-1.0, -1.0, -1.0, 0.0, 0.0,
-	-1.0, -1.0, 1.0, 0.0, 1.0,
-	-1.0, 1.0, 1.0, 1.0, 1.0,
-	-1.0, 1.0, -1.0, 1.0, 0.0,
-
-	// Right
-	1.0, -1.0, 1.0, 1.0, 1.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	1.0, 1.0, -1.0, 0.0, 0.0,
-	1.0, -1.0, 1.0, 1.0, 1.0,
-	1.0, 1.0, -1.0, 0.0, 0.0,
-	1.0, 1.0, 1.0, 0.0, 1.0,
 }

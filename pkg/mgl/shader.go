@@ -42,102 +42,45 @@ const (
 )
 
 const (
-	INITIAL_VERTICAL_DEGREES  float64 = 40.0
 	INITIAL_CAMERA_POSITION_Y float64 = 11.0
 	INITIAL_CAMERA_POSITION_Z float64 = -40.0
 	INITIAL_LOOK_AT_CENTER_Y  float64 = 11.0
-	INITIAL_CAMERA_POSITION_X float64 = 40.0
 	LIGHT_AMBIENT             float64 = 154.0 / 255.0
+	FIELD_OF_VIEW_ANGLE       float32 = 40.0
 )
 
 type MShader struct {
-	lightAmbient                *mmath.MVec4
-	lightDiffuse                *mmath.MVec3
-	lightSpecular               *mmath.MVec3
-	initialCameraPosition       *mmath.MVec3
-	initialCameraOffsetPosition *mmath.MVec3
-	initialLookAtCenterPosition *mmath.MVec3
-	width                       int32
-	height                      int32
-	nearPlane                   float32
-	farPlane                    float32
-	lightPosition               *mmath.MVec3
-	lightDirection              *mmath.MVec3
-	msaa                        *Msaa
-	// BoneMatrixTextureUniform         map[ProgramType]int32
-	// BoneMatrixTextureId              map[ProgramType]uint32
-	// BoneMatrixTextureWidth           map[ProgramType]int32
-	// BoneMatrixTextureHeight          map[ProgramType]int32
-	// modelViewMatrixUniform           map[ProgramType]int32
-	// modelViewProjectionMatrixUniform map[ProgramType]int32
-	// lightDirectionUniform            map[ProgramType]int32
-	// cameraPositionUniform            map[ProgramType]int32
-	// DiffuseUniform                   map[ProgramType]int32
-	// AmbientUniform                   map[ProgramType]int32
-	// SpecularUniform                  map[ProgramType]int32
-	// UseTextureUniform                map[ProgramType]int32
-	// TextureUniform                   map[ProgramType]int32
-	// UseToonUniform                   map[ProgramType]int32
-	// ToonUniform                      map[ProgramType]int32
-	// UseSphereUniform                 map[ProgramType]int32
-	// SphereModeUniform                map[ProgramType]int32
-	// SphereUniform                    map[ProgramType]int32
-	// TextureFactorUniform             map[ProgramType]int32
-	// ToonFactorUniform                map[ProgramType]int32
-	// SphereFactorUniform              map[ProgramType]int32
-	// EdgeUniform                      map[ProgramType]int32
-	// EdgeSizeUniform                  map[ProgramType]int32
-	// SelectBoneColorUniform           map[ProgramType]int32
-	// UnselectBoneColorUniform         map[ProgramType]int32
-	// BoneCountUniform                 map[ProgramType]int32
-	// IsShowBoneWeightUniform          map[ProgramType]int32
-	// ShowBoneIndexesUniform           map[ProgramType]int32
-	ModelProgram uint32
-	EdgeProgram  uint32
-	BoneProgram  uint32
+	lightAmbient         *mmath.MVec4
+	lightDiffuse         *mmath.MVec3
+	lightSpecular        *mmath.MVec3
+	CameraPosition       *mmath.MVec3
+	LookAtCenterPosition *mmath.MVec3
+	FieldOfViewAngle     float32
+	Width                int32
+	Height               int32
+	NearPlane            float32
+	FarPlane             float32
+	lightPosition        *mmath.MVec3
+	lightDirection       *mmath.MVec3
+	msaa                 *Msaa
+	ModelProgram         uint32
+	EdgeProgram          uint32
+	BoneProgram          uint32
 }
 
 func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 	shader := &MShader{
-		lightAmbient:                &mmath.MVec4{LIGHT_AMBIENT, LIGHT_AMBIENT, LIGHT_AMBIENT, 1},
-		initialCameraPosition:       &mmath.MVec3{0.0, INITIAL_CAMERA_POSITION_Y, INITIAL_CAMERA_POSITION_Z},
-		initialCameraOffsetPosition: &mmath.MVec3{},
-		initialLookAtCenterPosition: &mmath.MVec3{0.0, INITIAL_LOOK_AT_CENTER_Y, 0.0},
-		width:                       int32(width),
-		height:                      int32(height),
-		nearPlane:                   1.0,
-		farPlane:                    100.0,
-		lightPosition:               &mmath.MVec3{-20, INITIAL_CAMERA_POSITION_Y * 2, INITIAL_CAMERA_POSITION_Z * 2},
-		lightDirection:              &mmath.MVec3{-1, -1, -1},
-		msaa:                        NewMsaa(int32(width), int32(height)),
-		// BoneMatrixTextureUniform:         make(map[ProgramType]int32, 0),
-		// BoneMatrixTextureId:              make(map[ProgramType]uint32, 0),
-		// BoneMatrixTextureWidth:           make(map[ProgramType]int32, 0),
-		// BoneMatrixTextureHeight:          make(map[ProgramType]int32, 0),
-		// modelViewMatrixUniform:           make(map[ProgramType]int32, 0),
-		// modelViewProjectionMatrixUniform: make(map[ProgramType]int32, 0),
-		// lightDirectionUniform:            make(map[ProgramType]int32, 0),
-		// cameraPositionUniform:            make(map[ProgramType]int32, 0),
-		// DiffuseUniform:                   make(map[ProgramType]int32, 0),
-		// AmbientUniform:                   make(map[ProgramType]int32, 0),
-		// SpecularUniform:                  make(map[ProgramType]int32, 0),
-		// UseTextureUniform:                make(map[ProgramType]int32, 0),
-		// UseToonUniform:                   make(map[ProgramType]int32, 0),
-		// UseSphereUniform:                 make(map[ProgramType]int32, 0),
-		// SphereModeUniform:                make(map[ProgramType]int32, 0),
-		// TextureUniform:                   make(map[ProgramType]int32, 0),
-		// ToonUniform:                      make(map[ProgramType]int32, 0),
-		// SphereUniform:                    make(map[ProgramType]int32, 0),
-		// TextureFactorUniform:             make(map[ProgramType]int32, 0),
-		// ToonFactorUniform:                make(map[ProgramType]int32, 0),
-		// SphereFactorUniform:              make(map[ProgramType]int32, 0),
-		// EdgeUniform:                      make(map[ProgramType]int32, 0),
-		// EdgeSizeUniform:                  make(map[ProgramType]int32, 0),
-		// SelectBoneColorUniform:           make(map[ProgramType]int32, 0),
-		// UnselectBoneColorUniform:         make(map[ProgramType]int32, 0),
-		// BoneCountUniform:                 make(map[ProgramType]int32, 0),
-		// IsShowBoneWeightUniform:          make(map[ProgramType]int32, 0),
-		// ShowBoneIndexesUniform:           make(map[ProgramType]int32, 0),
+		lightAmbient:         &mmath.MVec4{LIGHT_AMBIENT, LIGHT_AMBIENT, LIGHT_AMBIENT, 1},
+		CameraPosition:       &mmath.MVec3{0.0, INITIAL_CAMERA_POSITION_Y, INITIAL_CAMERA_POSITION_Z},
+		LookAtCenterPosition: &mmath.MVec3{0.0, INITIAL_LOOK_AT_CENTER_Y, 0.0},
+		FieldOfViewAngle:     FIELD_OF_VIEW_ANGLE,
+		Width:                int32(width),
+		Height:               int32(height),
+		NearPlane:            0.1,
+		FarPlane:             1000.0,
+		lightPosition:        &mmath.MVec3{-20, INITIAL_CAMERA_POSITION_Y * 2, INITIAL_CAMERA_POSITION_Z * 2},
+		lightDirection:       &mmath.MVec3{-1, -1, -1},
+		msaa:                 NewMsaa(int32(width), int32(height)),
 	}
 	modelProgram, err := shader.newProgram(
 		resourceFiles,
@@ -152,6 +95,14 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 	shader.Unuse()
 
 	return shader, nil
+}
+
+func (s *MShader) Reset() {
+	s.CameraPosition = &mmath.MVec3{0.0, INITIAL_CAMERA_POSITION_Y, INITIAL_CAMERA_POSITION_Z}
+	s.LookAtCenterPosition = &mmath.MVec3{0.0, INITIAL_LOOK_AT_CENTER_Y, 0.0}
+	s.FieldOfViewAngle = FIELD_OF_VIEW_ANGLE
+	s.msaa = NewMsaa(s.Width, s.Height)
+	s.updateCamera()
 }
 
 func (s *MShader) DeleteProgram(program uint32) {
@@ -253,12 +204,13 @@ func (s *MShader) initialize(program uint32, programType ProgramType) {
 
 	gl.UseProgram(program)
 
-	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(s.width)/float32(s.height), s.nearPlane, s.farPlane)
+	projection := mgl32.Perspective(
+		mgl32.DegToRad(s.FieldOfViewAngle), float32(s.Width)/float32(s.Height), s.NearPlane, s.FarPlane)
 	projectionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_PROJECTION_MATRIX))
 	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
 	// カメラの位置
-	cameraPosition := s.initialCameraPosition.Mgl()
+	cameraPosition := s.CameraPosition.Mgl()
 	cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_CAMERA_POSITION))
 	gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
@@ -267,7 +219,7 @@ func (s *MShader) initialize(program uint32, programType ProgramType) {
 	lightDirectionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_LIGHT_DIRECTION))
 	gl.Uniform3fv(lightDirectionUniform, 1, &lightDirection[0])
 
-	lookAtCenter := s.initialLookAtCenterPosition.Mgl()
+	lookAtCenter := s.LookAtCenterPosition.Mgl()
 	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 	cameraUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_MATRIX))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
@@ -345,21 +297,21 @@ func (s *MShader) initialize(program uint32, programType ProgramType) {
 	// 	// s.ShowBoneIndexesUniform[programType] = gl.GetUniformLocation(program, gl.Str("showBoneIndexes\x00"))
 	// }
 
-	s.Fit(int(s.width), int(s.height))
+	s.Fit(int(s.Width), int(s.Height))
 }
 
 func (s *MShader) Fit(
 	width int,
 	height int,
 ) {
-	s.width = int32(width)
-	s.height = int32(height)
+	s.Width = int32(width)
+	s.Height = int32(height)
 
 	// MSAAも作り直し
-	s.msaa = NewMsaa(s.width, s.height)
+	s.msaa = NewMsaa(s.Width, s.Height)
 
 	// ビューポートの設定
-	gl.Viewport(0, 0, s.width, s.height)
+	gl.Viewport(0, 0, s.Width, s.Height)
 
 	s.updateCamera()
 }
@@ -394,6 +346,10 @@ func (s *MShader) Use(programType ProgramType) {
 	case PROGRAM_TYPE_BONE:
 		gl.UseProgram(s.BoneProgram)
 	}
+}
+
+func (s *MShader) GetPrograms() []uint32 {
+	return []uint32{s.ModelProgram}
 }
 
 func (s *MShader) Unuse() {
