@@ -43,6 +43,8 @@ type GlWindow struct {
 	middleButtonPressed bool
 	rightButtonPressed  bool
 	updatedPrev         bool
+	shiftPressed        bool
+	ctrlPressed         bool
 }
 
 func NewGlWindow(
@@ -133,6 +135,8 @@ func NewGlWindow(
 		middleButtonPressed: false,
 		rightButtonPressed:  false,
 		updatedPrev:         false,
+		shiftPressed:        false,
+		ctrlPressed:         false,
 	}
 
 	w.SetScrollCallback(glWindow.handleScrollEvent)
@@ -169,7 +173,27 @@ func (w *GlWindow) handleKeyEvent(
 			key == glfw.KeyKP4 ||
 			key == glfw.KeyKP5 ||
 			key == glfw.KeyKP6 ||
-			key == glfw.KeyKP8) {
+			key == glfw.KeyKP8 ||
+			key == glfw.KeyLeftShift ||
+			key == glfw.KeyRightShift ||
+			key == glfw.KeyLeftControl ||
+			key == glfw.KeyRightControl) {
+		return
+	}
+
+	if key == glfw.KeyLeftShift || key == glfw.KeyRightShift {
+		if action == glfw.Press {
+			w.shiftPressed = true
+		} else if action == glfw.Release {
+			w.shiftPressed = false
+		}
+		return
+	} else if key == glfw.KeyLeftControl || key == glfw.KeyRightControl {
+		if action == glfw.Press {
+			w.ctrlPressed = true
+		} else if action == glfw.Release {
+			w.ctrlPressed = false
+		}
 		return
 	}
 
@@ -213,13 +237,20 @@ func (w *GlWindow) handleKeyEvent(
 }
 
 func (w *GlWindow) handleScrollEvent(window *glfw.Window, xoff float64, yoff float64) {
+	ratio := float32(1.0)
+	if w.shiftPressed {
+		ratio *= 10
+	} else if w.ctrlPressed {
+		ratio *= 0.1
+	}
+
 	if yoff > 0 {
-		w.Shader.FieldOfViewAngle -= 1.0
+		w.Shader.FieldOfViewAngle -= ratio
 		if w.Shader.FieldOfViewAngle < 5.0 {
 			w.Shader.FieldOfViewAngle = 5.0
 		}
 	} else if yoff < 0 {
-		w.Shader.FieldOfViewAngle += 1.0
+		w.Shader.FieldOfViewAngle += ratio
 	}
 }
 
@@ -258,9 +289,16 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 	}
 
 	if w.rightButtonPressed {
+		ratio := 0.1
+		if w.shiftPressed {
+			ratio *= 10
+		} else if w.ctrlPressed {
+			ratio *= 0.1
+		}
+
 		// 右クリックはカメラ中心をそのままにカメラ位置を変える
-		xOffset := (w.prevCursorPos.GetX() - xpos) * 0.1
-		yOffset := (w.prevCursorPos.GetY() - ypos) * 0.1
+		xOffset := (w.prevCursorPos.GetX() - xpos) * ratio
+		yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
 
 		// 方位角と仰角を更新
 		w.yaw += xOffset
@@ -294,6 +332,13 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 		fmt.Printf("xOffset %.8f, yOffset %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
 			xOffset, yOffset, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
 	} else if w.middleButtonPressed {
+		ratio := 0.07
+		if w.shiftPressed {
+			ratio *= 10
+		} else if w.ctrlPressed {
+			ratio *= 0.1
+		}
+
 		// 中クリックはカメラ中心とカメラ位置を一緒に動かす
 		// カメラの方向ベクトルと上方ベクトルを計算
 		cameraDirection := mgl64.Vec3{
@@ -313,8 +358,8 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 			horizontalSign = 1
 		}
 
-		xOffset := (w.prevCursorPos.GetX() - xpos) * 0.07 * horizontalSign
-		yOffset := (w.prevCursorPos.GetY() - ypos) * 0.07
+		xOffset := (w.prevCursorPos.GetX() - xpos) * ratio * horizontalSign
+		yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
 
 		// カメラの位置を更新（カメラの方向を考慮）
 		w.Shader.CameraPosition.SetX(
