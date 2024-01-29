@@ -10,11 +10,11 @@ func TestIkLink_Copy(t *testing.T) {
 	ikLink := &IkLink{
 		BoneIndex:          0,
 		AngleLimit:         true,
-		MinAngleLimit:      mmath.MRotation{},
-		MaxAngleLimit:      mmath.MRotation{},
+		MinAngleLimit:      &mmath.MRotation{},
+		MaxAngleLimit:      &mmath.MRotation{},
 		LocalAngleLimit:    true,
-		LocalMinAngleLimit: mmath.MRotation{},
-		LocalMaxAngleLimit: mmath.MRotation{},
+		LocalMinAngleLimit: &mmath.MRotation{},
+		LocalMaxAngleLimit: &mmath.MRotation{},
 	}
 
 	copied := ikLink.Copy()
@@ -38,16 +38,16 @@ func TestIk_Copy(t *testing.T) {
 	ik := &Ik{
 		BoneIndex:    0,
 		LoopCount:    1,
-		UnitRotation: *mmath.NewRotationModelByRadians(&mmath.MVec3{0, 0, 0}),
-		Links: []IkLink{
+		UnitRotation: mmath.NewRotationModelByDegrees(&mmath.MVec3{1, 2, 3}),
+		Links: []*IkLink{
 			{
 				BoneIndex:          0,
 				AngleLimit:         true,
-				MinAngleLimit:      mmath.MRotation{},
-				MaxAngleLimit:      mmath.MRotation{},
+				MinAngleLimit:      mmath.NewRotationModelByDegrees(&mmath.MVec3{1, 2, 3}),
+				MaxAngleLimit:      mmath.NewRotationModelByDegrees(&mmath.MVec3{4, 5, 6}),
 				LocalAngleLimit:    true,
-				LocalMinAngleLimit: mmath.MRotation{},
-				LocalMaxAngleLimit: mmath.MRotation{},
+				LocalMinAngleLimit: mmath.NewRotationModelByDegrees(&mmath.MVec3{7, 8, 9}),
+				LocalMaxAngleLimit: mmath.NewRotationModelByDegrees(&mmath.MVec3{10, 11, 12}),
 			},
 		},
 	}
@@ -62,7 +62,7 @@ func TestIk_Copy(t *testing.T) {
 		t.Error("Expected LoopCount to match the original")
 	}
 
-	if copied.UnitRotation != ik.UnitRotation {
+	if !copied.UnitRotation.GetDegrees().PracticallyEquals(ik.UnitRotation.GetDegrees(), 1e-8) {
 		t.Error("Expected UnitRotation to match the original")
 	}
 
@@ -112,7 +112,7 @@ func TestBone_IsLegD(t *testing.T) {
 func TestBone_Copy(t *testing.T) {
 	t.Run("Test Copy", func(t *testing.T) {
 		b := &Bone{
-			Ik:                     &Ik{},
+			Ik:                     NewIk(),
 			Position:               &mmath.MVec3{1, 2, 3},
 			TailPosition:           &mmath.MVec3{4, 5, 6},
 			FixedAxis:              &mmath.MVec3{7, 8, 9},

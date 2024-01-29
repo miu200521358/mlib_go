@@ -678,7 +678,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 					}
 					il.MaxAngleLimit.SetRadians(maxAngleLimit)
 				}
-				b.Ik.Links = append(b.Ik.Links, *il)
+				b.Ik.Links = append(b.Ik.Links, il)
 			}
 		}
 

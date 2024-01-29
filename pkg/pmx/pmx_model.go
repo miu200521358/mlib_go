@@ -8,7 +8,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 type PmxModel struct {
@@ -132,11 +131,11 @@ func (pm *PmxModel) SetUp() {
 					linkBone.IkLinkBoneIndexes = append(linkBone.IkLinkBoneIndexes, bone.Index)
 					// リンクの制限をコピーしておく
 					linkBone.AngleLimit = link.AngleLimit
-					linkBone.MinAngleLimit = &link.MinAngleLimit
-					linkBone.MaxAngleLimit = &link.MaxAngleLimit
+					linkBone.MinAngleLimit = link.MinAngleLimit
+					linkBone.MaxAngleLimit = link.MaxAngleLimit
 					linkBone.LocalAngleLimit = link.LocalAngleLimit
-					linkBone.LocalMinAngleLimit = &link.LocalMinAngleLimit
-					linkBone.LocalMaxAngleLimit = &link.LocalMaxAngleLimit
+					linkBone.LocalMinAngleLimit = link.LocalMinAngleLimit
+					linkBone.LocalMaxAngleLimit = link.LocalMaxAngleLimit
 				}
 			}
 			if pm.Bones.Contains(bone.Ik.BoneIndex) &&

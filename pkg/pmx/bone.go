@@ -9,24 +9,24 @@ import (
 )
 
 type IkLink struct {
-	BoneIndex          int             // リンクボーンのボーンIndex
-	AngleLimit         bool            // 角度制限有無
-	MinAngleLimit      mmath.MRotation // 下限
-	MaxAngleLimit      mmath.MRotation // 上限
-	LocalAngleLimit    bool            // ローカル軸の角度制限有無
-	LocalMinAngleLimit mmath.MRotation // ローカル軸制限の下限
-	LocalMaxAngleLimit mmath.MRotation // ローカル軸制限の上限
+	BoneIndex          int              // リンクボーンのボーンIndex
+	AngleLimit         bool             // 角度制限有無
+	MinAngleLimit      *mmath.MRotation // 下限
+	MaxAngleLimit      *mmath.MRotation // 上限
+	LocalAngleLimit    bool             // ローカル軸の角度制限有無
+	LocalMinAngleLimit *mmath.MRotation // ローカル軸制限の下限
+	LocalMaxAngleLimit *mmath.MRotation // ローカル軸制限の上限
 }
 
 func NewIkLink() *IkLink {
 	return &IkLink{
 		BoneIndex:          -1,
 		AngleLimit:         false,
-		MinAngleLimit:      mmath.MRotation{},
-		MaxAngleLimit:      mmath.MRotation{},
+		MinAngleLimit:      &mmath.MRotation{},
+		MaxAngleLimit:      &mmath.MRotation{},
 		LocalAngleLimit:    false,
-		LocalMinAngleLimit: mmath.MRotation{},
-		LocalMaxAngleLimit: mmath.MRotation{},
+		LocalMinAngleLimit: &mmath.MRotation{},
+		LocalMaxAngleLimit: &mmath.MRotation{},
 	}
 }
 
@@ -36,26 +36,29 @@ func (t *IkLink) Copy() *IkLink {
 }
 
 type Ik struct {
-	BoneIndex    int             // IKターゲットボーンのボーンIndex
-	LoopCount    int             // IKループ回数 (最大255)
-	UnitRotation mmath.MRotation // IKループ計算時の1回あたりの制限角度
-	Links        []IkLink        // IKリンクリスト
+	BoneIndex    int              // IKターゲットボーンのボーンIndex
+	LoopCount    int              // IKループ回数 (最大255)
+	UnitRotation *mmath.MRotation // IKループ計算時の1回あたりの制限角度
+	Links        []*IkLink        // IKリンクリスト
 }
 
 func NewIk() *Ik {
 	return &Ik{
 		BoneIndex:    -1,
 		LoopCount:    0,
-		UnitRotation: mmath.MRotation{},
-		Links:        []IkLink{},
+		UnitRotation: mmath.NewRotationModelByDegrees(&mmath.MVec3{}),
+		Links:        []*IkLink{},
 	}
 }
 
 func (t *Ik) Copy() *Ik {
 	copied := &Ik{}
-	copied.Links = make([]IkLink, len(t.Links))
+	copied.BoneIndex = t.BoneIndex
+	copied.LoopCount = t.LoopCount
+	copied.UnitRotation = t.UnitRotation.Copy()
+	copied.Links = make([]*IkLink, len(t.Links))
 	for i, link := range t.Links {
-		copied.Links[i] = *link.Copy()
+		copied.Links[i] = link.Copy()
 	}
 	return copied
 }
