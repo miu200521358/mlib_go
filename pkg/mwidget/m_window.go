@@ -42,7 +42,7 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool) (*MWindow, error) {
 	mw.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
 		if len(mainWindow.GlWindows) > 0 {
 			for _, glWindow := range mainWindow.GlWindows {
-				glWindow.Close()
+				glWindow.Close(&glWindow.Window)
 			}
 		}
 		walk.App().Exit(0)

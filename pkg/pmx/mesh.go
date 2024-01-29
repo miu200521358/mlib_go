@@ -46,12 +46,11 @@ func (m *Mesh) DrawModel(
 ) {
 	m.ibo.Bind()
 
-	if m.material.DrawFlag == DRAW_FLAG_DOUBLE_SIDED_DRAWING {
+	if m.material.DrawFlag.IsDoubleSidedDrawing() {
 		// 両面描画
 		// カリングOFF
 		gl.Disable(gl.CULL_FACE)
-	} else {
-		// 片面描画
+	} else { // 片面描画
 		// カリングON
 		gl.Enable(gl.CULL_FACE)
 		gl.CullFace(gl.BACK)

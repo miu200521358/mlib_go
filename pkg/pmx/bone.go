@@ -5,7 +5,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type IkLink struct {
@@ -200,67 +199,67 @@ func (bone *Bone) NormalizeLocalAxis(localAxisX *mmath.MVec3) {
 
 // 表示先がボーンであるか
 func (bone *Bone) IsTailBone() bool {
-	return bone.BoneFlag&BONE_FLAG_TAIL_IS_BONE != 0
+	return bone.BoneFlag&BONE_FLAG_TAIL_IS_BONE == BONE_FLAG_TAIL_IS_BONE
 }
 
 // 回転可能であるか
 func (bone *Bone) CanRotate() bool {
-	return bone.BoneFlag&BONE_FLAG_CAN_ROTATE != 0
+	return bone.BoneFlag&BONE_FLAG_CAN_ROTATE == BONE_FLAG_CAN_ROTATE
 }
 
 // 移動可能であるか
 func (bone *Bone) CanTranslate() bool {
-	return bone.BoneFlag&BONE_FLAG_CAN_TRANSLATE != 0
+	return bone.BoneFlag&BONE_FLAG_CAN_TRANSLATE == BONE_FLAG_CAN_TRANSLATE
 }
 
 // 表示であるか
 func (bone *Bone) IsVisible() bool {
-	return bone.BoneFlag&BONE_FLAG_IS_VISIBLE != 0
+	return bone.BoneFlag&BONE_FLAG_IS_VISIBLE == BONE_FLAG_IS_VISIBLE
 }
 
 // 操作可であるか
 func (bone *Bone) CanManipulate() bool {
-	return bone.BoneFlag&BONE_FLAG_CAN_MANIPULATE != 0
+	return bone.BoneFlag&BONE_FLAG_CAN_MANIPULATE == BONE_FLAG_CAN_MANIPULATE
 }
 
 // IKであるか
 func (bone *Bone) IsIK() bool {
-	return bone.BoneFlag&BONE_FLAG_IS_IK != 0
+	return bone.BoneFlag&BONE_FLAG_IS_IK == BONE_FLAG_IS_IK
 }
 
 // ローカル付与であるか
 func (bone *Bone) IsExternalLocal() bool {
-	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_LOCAL != 0
+	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_LOCAL == BONE_FLAG_IS_EXTERNAL_LOCAL
 }
 
 // 回転付与であるか
 func (bone *Bone) IsExternalRotation() bool {
-	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_ROTATION != 0
+	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_ROTATION == BONE_FLAG_IS_EXTERNAL_ROTATION
 }
 
 // 移動付与であるか
 func (bone *Bone) IsExternalTranslation() bool {
-	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_TRANSLATION != 0
+	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_TRANSLATION == BONE_FLAG_IS_EXTERNAL_TRANSLATION
 }
 
 // 軸固定であるか
 func (bone *Bone) HasFixedAxis() bool {
-	return bone.BoneFlag&BONE_FLAG_HAS_FIXED_AXIS != 0
+	return bone.BoneFlag&BONE_FLAG_HAS_FIXED_AXIS == BONE_FLAG_HAS_FIXED_AXIS
 }
 
 // ローカル軸を持つか
 func (bone *Bone) HasLocalAxis() bool {
-	return bone.BoneFlag&BONE_FLAG_HAS_LOCAL_AXIS != 0
+	return bone.BoneFlag&BONE_FLAG_HAS_LOCAL_AXIS == BONE_FLAG_HAS_LOCAL_AXIS
 }
 
 // 物理後変形であるか
 func (bone *Bone) IsAfterPhysicsDeform() bool {
-	return bone.BoneFlag&BONE_FLAG_IS_AFTER_PHYSICS_DEFORM != 0
+	return bone.BoneFlag&BONE_FLAG_IS_AFTER_PHYSICS_DEFORM == BONE_FLAG_IS_AFTER_PHYSICS_DEFORM
 }
 
 // 外部親変形であるか
 func (bone *Bone) IsExternalParentDeform() bool {
-	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_PARENT_DEFORM != 0
+	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_PARENT_DEFORM == BONE_FLAG_IS_EXTERNAL_PARENT_DEFORM
 }
 
 // 足D系列であるか

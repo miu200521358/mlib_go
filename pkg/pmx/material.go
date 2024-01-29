@@ -8,7 +8,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 // スフィアモード
@@ -42,6 +41,26 @@ const (
 	DRAW_FLAG_DRAWING_EDGE DrawFlag = 0x0010
 )
 
+func (d DrawFlag) IsDoubleSidedDrawing() bool {
+	return d&DRAW_FLAG_DOUBLE_SIDED_DRAWING == DRAW_FLAG_DOUBLE_SIDED_DRAWING
+}
+
+func (d DrawFlag) IsGroundShadow() bool {
+	return d&DRAW_FLAG_GROUND_SHADOW == DRAW_FLAG_GROUND_SHADOW
+}
+
+func (d DrawFlag) IsDrawingOnSelfShadowMaps() bool {
+	return d&DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS == DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
+}
+
+func (d DrawFlag) IsDrawingSelfShadows() bool {
+	return d&DRAW_FLAG_DRAWING_SELF_SHADOWS == DRAW_FLAG_DRAWING_SELF_SHADOWS
+}
+
+func (d DrawFlag) IsDrawingEdge() bool {
+	return d&DRAW_FLAG_DRAWING_EDGE == DRAW_FLAG_DRAWING_EDGE
+}
+
 // 共有Toonフラグ
 type ToonSharing byte
 
@@ -53,6 +72,7 @@ const (
 )
 
 type MaterialGL struct {
+	name              string       // 材質名
 	diffuse           *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
 	specular          *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
 	ambient           *mmath.MVec3 // Ambient (R,G,B)(環境色)
@@ -173,6 +193,7 @@ func (m *Material) GL(
 	}
 
 	return &MaterialGL{
+		name:              m.Name,
 		diffuse:           m.Diffuse,
 		ambient:           m.Ambient,
 		specular:          m.Specular,

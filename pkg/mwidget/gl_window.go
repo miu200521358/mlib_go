@@ -139,9 +139,21 @@ func NewGlWindow(
 	w.SetMouseButtonCallback(glWindow.handleMouseButtonEvent)
 	w.SetCursorPosCallback(glWindow.handleCursorPosEvent)
 	w.SetKeyCallback(glWindow.handleKeyEvent)
+	w.SetCloseCallback(glWindow.Close)
 	glWindow.Draw()
 
 	return &glWindow, nil
+}
+
+func (w *GlWindow) Close(window *glfw.Window) {
+	w.Shader.Delete()
+	for _, modelSet := range w.ModelSets {
+		modelSet.Model.Meshes.Delete()
+	}
+	w.Window.Destroy()
+	if w.WindowIndex == 0 {
+		glfw.Terminate()
+	}
 }
 
 func (w *GlWindow) handleKeyEvent(
@@ -383,15 +395,6 @@ func (w *GlWindow) Size() walk.Size {
 	return walk.Size{Width: x, Height: y}
 }
 
-func (w *GlWindow) Close() {
-	w.Shader.Delete()
-	for _, modelSet := range w.ModelSets {
-		modelSet.Model.Meshes.Delete()
-	}
-	w.Window.Destroy()
-	glfw.Terminate()
-}
-
 func (w *GlWindow) Run() {
 	for !w.ShouldClose() {
 		// 深度バッファのクリア
@@ -428,5 +431,5 @@ func (w *GlWindow) Run() {
 		w.SwapBuffers()
 		glfw.PollEvents()
 	}
-	w.Close()
+	w.Close(&w.Window)
 }
