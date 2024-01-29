@@ -108,6 +108,10 @@ func (v *MVec3) Added(other *MVec3) MVec3 {
 	return MVec3((*vec3.T).Added((*vec3.T)(v), (*vec3.T)(other)))
 }
 
+func (v *MVec3) AddedScalar(s float64) MVec3 {
+	return MVec3((*vec3.T).Added((*vec3.T)(v), &vec3.T{s, s}))
+}
+
 // Sub ベクトルから他のベクトルを減算します
 func (v *MVec3) Sub(other *MVec3) *MVec3 {
 	return (*MVec3)((*vec3.T).Sub((*vec3.T)(v), (*vec3.T)(other)))
@@ -123,6 +127,10 @@ func (v *MVec3) Subed(other *MVec3) MVec3 {
 	return MVec3((*vec3.T).Subed((*vec3.T)(v), (*vec3.T)(other)))
 }
 
+func (v *MVec3) SubedScalar(s float64) MVec3 {
+	return MVec3((*vec3.T).Subed((*vec3.T)(v), &vec3.T{s, s}))
+}
+
 // Mul ベクトルの各要素に他のベクトルの各要素を乗算します
 func (v *MVec3) Mul(other *MVec3) *MVec3 {
 	return (*MVec3)((*vec3.T).Mul((*vec3.T)(v), (*vec3.T)(other)))
@@ -136,6 +144,10 @@ func (v *MVec3) MulScalar(s float64) *MVec3 {
 // Muled ベクトルの各要素に他のベクトルの各要素を乗算した結果を返します
 func (v *MVec3) Muled(other *MVec3) MVec3 {
 	return MVec3((*vec3.T).Muled((*vec3.T)(v), (*vec3.T)(other)))
+}
+
+func (v *MVec3) MuledScalar(s float64) MVec3 {
+	return MVec3((*vec3.T).Muled((*vec3.T)(v), &vec3.T{s, s}))
 }
 
 // Div ベクトルの各要素を他のベクトルの各要素で除算します
@@ -162,6 +174,14 @@ func (v *MVec3) Dived(other *MVec3) MVec3 {
 		v.GetX() / other.GetX(),
 		v.GetY() / other.GetY(),
 		v.GetZ() / other.GetZ(),
+	}
+}
+
+func (v *MVec3) DivedScalar(s float64) MVec3 {
+	return MVec3{
+		v.GetX() / s,
+		v.GetY() / s,
+		v.GetZ() / s,
 	}
 }
 
@@ -389,4 +409,12 @@ func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
 	rotationMatrix[2][2] = zAxis.GetZ()
 
 	return rotationMatrix
+}
+
+func (v *MVec3) Round() *MVec3 {
+	return &MVec3{
+		math.Round(v.GetX()),
+		math.Round(v.GetY()),
+		math.Round(v.GetZ()),
+	}
 }

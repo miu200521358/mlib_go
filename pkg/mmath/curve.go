@@ -2,7 +2,6 @@ package mmath
 
 import (
 	"math"
-
 )
 
 type Curve struct {
@@ -34,9 +33,41 @@ func (v *Curve) Copy() *Curve {
 }
 
 func (v *Curve) Normalize(begin, finish *MVec2) {
-	diff := finish.Sub(begin)
-	v.Start = v.Start.Sub(begin).Div(diff)
-	v.End = v.End.Sub(begin).Div(diff)
+	diff := finish.Subed(begin)
+
+	v.Start = v.Start.Sub(begin)
+	v.Start = v.Start.Div(&diff)
+	v.Start = v.Start.MulScalar(CurveMax)
+	v.Start = v.Start.Round()
+
+	if v.Start.GetX() < 0 {
+		v.Start.SetX(0)
+	} else if v.Start.GetX() > CurveMax {
+		v.Start.SetX(CurveMax)
+	}
+
+	if v.Start.GetY() < 0 {
+		v.Start.SetY(0)
+	} else if v.Start.GetY() > CurveMax {
+		v.Start.SetY(CurveMax)
+	}
+
+	v.End = v.End.Sub(begin)
+	v.End = v.End.Div(&diff)
+	v.End = v.End.MulScalar(CurveMax)
+	v.End = v.End.Round()
+
+	if v.End.GetX() < 0 {
+		v.End.SetX(0)
+	} else if v.End.GetX() > CurveMax {
+		v.End.SetX(CurveMax)
+	}
+
+	if v.End.GetY() < 0 {
+		v.End.SetY(0)
+	} else if v.End.GetY() > CurveMax {
+		v.End.SetY(CurveMax)
+	}
 }
 
 // https://pomax.github.io/bezierinfo
@@ -105,24 +136,41 @@ func newton(x1, x2, x, t0, eps, err float64) float64 {
 }
 
 // SplitCurve 補間曲線を指定キーフレで前後に分割する
-func SplitCurve(interpolation *Curve, start, now, end int) (*Curve, *Curve) {
+func SplitCurve(curve *Curve, start, now, end int) (*Curve, *Curve) {
 	if (now-start) == 0 || (end-start) == 0 {
 		return NewCurve(), NewCurve()
 	}
 
-	_, _, t := Evaluate(interpolation, start, now, end)
+	_, _, t := Evaluate(curve, start, now, end)
 
 	iA := MVec2{0.0, 0.0}
-	iB := interpolation.Start.DivScalar(CurveMax)
-	iC := interpolation.End.DivScalar(CurveMax)
+	iB := curve.Start.DivedScalar(CurveMax)
+	iC := curve.End.DivedScalar(CurveMax)
 	iD := MVec2{1.0, 1.0}
 
-	iE := iA.MulScalar(1 - t).Added(iB.MulScalar(t))
-	iF := iB.MulScalar(1 - t).Added(iC.MulScalar(t))
-	iG := iC.MulScalar(1 - t).Added(iD.MulScalar(t))
-	iH := iE.MulScalar(1 - t).Added(iF.MulScalar(t))
-	iI := iF.MulScalar(1 - t).Added(iG.MulScalar(t))
-	iJ := iH.MulScalar(1 - t).Added(iI.MulScalar(t))
+	iAt1 := iA.MuledScalar(1 - t)
+	iBt1 := iB.MuledScalar(1 - t)
+	iBt2 := iB.MuledScalar(t)
+	iCt1 := iC.MuledScalar(1 - t)
+	iCt2 := iC.MuledScalar(t)
+	iDt2 := iD.MuledScalar(t)
+
+	iE := iAt1.Added(&iBt2)
+	iF := iBt1.Added(&iCt2)
+	iG := iCt1.Added(&iDt2)
+
+	iEt1 := iE.MuledScalar(1 - t)
+	iFt1 := iF.MuledScalar(1 - t)
+	iFt2 := iF.MuledScalar(t)
+	iGt2 := iG.MuledScalar(t)
+
+	iH := iEt1.Added(&iFt2)
+	iI := iFt1.Added(&iGt2)
+
+	iHt1 := iH.MuledScalar(1 - t)
+	iIt2 := iI.MuledScalar(t)
+
+	iJ := iHt1.Added(&iIt2)
 
 	// 新たな4つのベジェ曲線の制御点は、A側がAEHJ、C側がJIGDとなる。
 	startCurve := &Curve{

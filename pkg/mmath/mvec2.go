@@ -86,6 +86,10 @@ func (v *MVec2) Added(other *MVec2) MVec2 {
 	return MVec2((*vec2.T).Added((*vec2.T)(v), (*vec2.T)(other)))
 }
 
+func (v *MVec2) AddedScalar(s float64) MVec2 {
+	return MVec2((*vec2.T).Added((*vec2.T)(v), &vec2.T{s, s}))
+}
+
 // Sub ベクトルから他のベクトルを減算します
 func (v *MVec2) Sub(other *MVec2) *MVec2 {
 	return (*MVec2)((*vec2.T).Sub((*vec2.T)(v), (*vec2.T)(other)))
@@ -101,6 +105,10 @@ func (v *MVec2) Subed(other *MVec2) MVec2 {
 	return MVec2((*vec2.T).Subed((*vec2.T)(v), (*vec2.T)(other)))
 }
 
+func (v *MVec2) SubedScalar(s float64) MVec2 {
+	return MVec2((*vec2.T).Subed((*vec2.T)(v), &vec2.T{s, s}))
+}
+
 // Mul ベクトルの各要素に他のベクトルの各要素を乗算します
 func (v *MVec2) Mul(other *MVec2) *MVec2 {
 	return (*MVec2)((*vec2.T).Mul((*vec2.T)(v), (*vec2.T)(other)))
@@ -114,6 +122,10 @@ func (v *MVec2) MulScalar(s float64) *MVec2 {
 // Muled ベクトルの各要素に他のベクトルの各要素を乗算した結果を返します
 func (v *MVec2) Muled(other *MVec2) MVec2 {
 	return MVec2((*vec2.T).Muled((*vec2.T)(v), (*vec2.T)(other)))
+}
+
+func (v *MVec2) MuledScalar(s float64) MVec2 {
+	return MVec2((*vec2.T).Muled((*vec2.T)(v), &vec2.T{s, s}))
 }
 
 // Div ベクトルの各要素を他のベクトルの各要素で除算します
@@ -137,6 +149,14 @@ func (v *MVec2) Dived(other *MVec2) MVec2 {
 	return MVec2{
 		v.GetX() / other.GetX(),
 		v.GetY() / other.GetY(),
+	}
+}
+
+// DivedScalar ベクトルの各要素をスカラーで除算した結果を返します
+func (v *MVec2) DivedScalar(s float64) MVec2 {
+	return MVec2{
+		v.GetX() / s,
+		v.GetY() / s,
 	}
 }
 
@@ -331,4 +351,11 @@ func (v *MVec2) Vector() *[]float64 {
 // 線形補間
 func Lerp2(v1, v2 *MVec2, t float64) MVec2 {
 	return (v2.Sub(v1)).MulScalar(t).Added(v1)
+}
+
+func (v *MVec2) Round() *MVec2 {
+	return &MVec2{
+		math.Round(v.GetX()),
+		math.Round(v.GetY()),
+	}
 }
