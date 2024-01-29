@@ -2,12 +2,12 @@ package pmx
 
 import (
 	"fmt"
+	"slices"
 
 	"golang.org/x/text/encoding/unicode"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type PmxReader struct {
@@ -78,7 +78,7 @@ func (r *PmxReader) readHeader(model *PmxModel) error {
 	}
 
 	if model.Signature[:3] != "PMX" ||
-		!mutils.ContainsString([]string{"2.0", "2.1"}, fmt.Sprintf("%.1f", model.Version)) {
+		!slices.Contains([]string{"2.0", "2.1"}, fmt.Sprintf("%.1f", model.Version)) {
 		// 整合性チェック
 		return fmt.Errorf("PMX2.0/2.1形式外のデータです。signature: %s, version: %.1f ", model.Signature, model.Version)
 	}
@@ -373,7 +373,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 			return err
 		}
 
-		model.Vertices.Append(v, false)
+		model.Vertices.Append(v)
 	}
 
 	return nil
@@ -406,7 +406,7 @@ func (r *PmxReader) readFaces(model *PmxModel) error {
 			return err
 		}
 
-		model.Faces.Append(f, false)
+		model.Faces.Append(f)
 	}
 
 	return nil
@@ -424,7 +424,7 @@ func (r *PmxReader) readTextures(model *PmxModel) error {
 		// 4 + n : TextBuf	| テクスチャパス
 		t.Name = r.ReadText()
 
-		model.Textures.Append(t, false)
+		model.Textures.Append(t)
 	}
 
 	return nil
@@ -524,7 +524,7 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 			return err
 		}
 
-		model.Materials.Append(m, false)
+		model.Materials.Append(m)
 	}
 
 	return nil
@@ -682,7 +682,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 			}
 		}
 
-		model.Bones.Append(b, false)
+		model.Bones.Append(b)
 	}
 
 	return nil
@@ -841,7 +841,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 			}
 		}
 
-		model.Morphs.Append(m, false)
+		model.Morphs.Append(m)
 	}
 
 	return nil
@@ -901,7 +901,7 @@ func (r *PmxReader) readDisplaySlots(model *PmxModel) error {
 
 			d.References = append(d.References, *reference)
 		}
-		model.DisplaySlots.Append(d, false)
+		model.DisplaySlots.Append(d)
 	}
 
 	return nil
@@ -991,7 +991,7 @@ func (r *PmxReader) readRigidBodies(model *PmxModel) error {
 		}
 		b.PhysicsType = PhysicsType(physicsType)
 
-		model.RigidBodies.Append(b, false)
+		model.RigidBodies.Append(b)
 	}
 
 	return nil
@@ -1070,7 +1070,7 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 		}
 		j.JointParam.SpringConstantRotation.SetDegrees(springConstantRotation)
 
-		model.Joints.Append(j, false)
+		model.Joints.Append(j)
 	}
 
 	return nil

@@ -3,6 +3,7 @@ package pmx
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type JointParam struct {
@@ -26,9 +27,7 @@ func NewJointParam() *JointParam {
 }
 
 type Joint struct {
-	*mcore.IndexModel
-	Name            string           // Joint名
-	EnglishName     string           // Joint名英
+	*mcore.IndexNameModel
 	JointType       byte             // Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
 	RigidbodyIndexA int              // 関連剛体AのIndex
 	RigidbodyIndexB int              // 関連剛体BのIndex
@@ -40,9 +39,7 @@ type Joint struct {
 
 func NewJoint() *Joint {
 	return &Joint{
-		IndexModel:  &mcore.IndexModel{Index: -1},
-		Name:        "",
-		EnglishName: "",
+		IndexNameModel: &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 		// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
 		JointType:       0,
 		RigidbodyIndexA: -1,
@@ -54,13 +51,19 @@ func NewJoint() *Joint {
 	}
 }
 
+func NewJointByName(name string) *Joint {
+	j := NewJoint()
+	j.Name = name
+	return j
+}
+
 // ジョイントリスト
 type Joints struct {
-	*mcore.IndexModelCorrection[*Joint]
+	*mcore.IndexNameModelCorrection[*Joint]
 }
 
 func NewJoints() *Joints {
 	return &Joints{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*Joint](),
+		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Joint](),
 	}
 }

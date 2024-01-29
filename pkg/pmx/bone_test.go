@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 func TestIkLink_Copy(t *testing.T) {
@@ -99,12 +98,12 @@ func TestBone_IsTailBone(t *testing.T) {
 }
 
 func TestBone_IsLegD(t *testing.T) {
-	b1 := &Bone{Name: "左足D"}
+	b1 := NewBoneByName("左足D")
 	if !b1.IsLegD() {
 		t.Errorf("Expected IsLegD to return true")
 	}
 
-	b2 := &Bone{Name: "右腕"}
+	b2 := NewBoneByName("右腕")
 	if b2.IsLegD() {
 		t.Errorf("Expected IsLegD to return false")
 	}
@@ -124,7 +123,7 @@ func TestBone_Copy(t *testing.T) {
 			NormalizedLocalAxisY:   &mmath.MVec3{22, 23, 24},
 			LocalAxis:              &mmath.MVec3{25, 26, 27},
 			ParentRelativePosition: &mmath.MVec3{28, 29, 30},
-			TailRelativePosition:   &mmath.MVec3{31, 32, 33},
+			ChildRelativePosition:  &mmath.MVec3{31, 32, 33},
 			NormalizedFixedAxis:    &mmath.MVec3{34, 35, 36},
 			IkLinkBoneIndexes:      []int{1, 3, 5},
 			IkTargetBoneIndexes:    []int{2, 4, 6},
@@ -211,11 +210,11 @@ func TestBone_Copy(t *testing.T) {
 		if &copied.ParentRelativePosition == &b.ParentRelativePosition {
 			t.Errorf("Expected copied ParentRelativePosition to be a deep copy of original ParentRelativePosition %s %s", copied.ParentRelativePosition.String(), b.ParentRelativePosition.String())
 		}
-		if !copied.TailRelativePosition.PracticallyEquals(b.TailRelativePosition, 1e-10) {
-			t.Errorf("Expected copied TailRelativePosition to be a deep copy of original TailRelativePosition %s %s", copied.TailRelativePosition.String(), b.TailRelativePosition.String())
+		if !copied.ChildRelativePosition.PracticallyEquals(b.ChildRelativePosition, 1e-10) {
+			t.Errorf("Expected copied TailRelativePosition to be a deep copy of original TailRelativePosition %s %s", copied.ChildRelativePosition.String(), b.ChildRelativePosition.String())
 		}
-		if &copied.TailRelativePosition == &b.TailRelativePosition {
-			t.Errorf("Expected copied TailRelativePosition to be a deep copy of original TailRelativePosition %s %s", copied.TailRelativePosition.String(), b.TailRelativePosition.String())
+		if &copied.ChildRelativePosition == &b.ChildRelativePosition {
+			t.Errorf("Expected copied TailRelativePosition to be a deep copy of original TailRelativePosition %s %s", copied.ChildRelativePosition.String(), b.ChildRelativePosition.String())
 		}
 		if !copied.NormalizedFixedAxis.PracticallyEquals(b.NormalizedFixedAxis, 1e-10) {
 			t.Errorf("Expected copied NormalizedFixedAxis to be a deep copy of original NormalizedFixedAxis %s %s", copied.NormalizedFixedAxis.String(), b.NormalizedFixedAxis.String())

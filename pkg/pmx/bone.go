@@ -1,6 +1,7 @@
 package pmx
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
@@ -60,9 +61,7 @@ func (t *Ik) Copy() *Ik {
 }
 
 type Bone struct {
-	*mcore.IndexModel
-	Name                   string           // ボーン名
-	EnglishName            string           // ボーン名英
+	*mcore.IndexNameModel
 	Position               *mmath.MVec3     // ボーン位置
 	ParentIndex            int              // 親ボーンのボーンIndex
 	Layer                  int              // 変形階層
@@ -84,10 +83,12 @@ type Bone struct {
 	NormalizedFixedAxis    *mmath.MVec3     // 計算済みの軸制限ベクトル
 	LocalAxis              *mmath.MVec3     // ローカル軸の方向ベクトル(CorrectedLocalXVectorの正規化ベクトル)
 	ParentRelativePosition *mmath.MVec3     // 親ボーンからの相対位置
-	TailRelativePosition   *mmath.MVec3     // Tailボーンへの相対位置
+	ChildRelativePosition  *mmath.MVec3     // Tailボーンへの相対位置
+	LocalMatrix            *mmath.MMat4     // ローカル軸行列
 	ParentRevertMatrix     *mmath.MMat4     // 逆オフセット行列(親ボーンからの相対位置分を戻す)
 	OffsetMatrix           *mmath.MMat4     // オフセット行列 (自身の位置を原点に戻す行列)
 	TreeBoneIndexes        []int            // 自分のボーンまでのボーンIndexのリスト
+	ParentBoneIndexes      []int            // 自分の親ボーンからルートまでのボーンIndexのリスト
 	RelativeBoneIndexes    []int            // 関連ボーンINDEX一覧（付与親とかIKとか）
 	ChildBoneIndexes       []int            // 自分を親として登録しているボーンINDEX一覧
 	EffectiveBoneIndexes   []int            // 自分を付与親として登録しているボーンINDEX一覧
@@ -103,9 +104,7 @@ type Bone struct {
 
 func NewBone() *Bone {
 	bone := &Bone{
-		IndexModel:             &mcore.IndexModel{Index: -1},
-		Name:                   "",
-		EnglishName:            "",
+		IndexNameModel:         &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 		Position:               &mmath.MVec3{},
 		ParentIndex:            -1,
 		Layer:                  -1,
@@ -128,11 +127,12 @@ func NewBone() *Bone {
 		IkLinkBoneIndexes:      []int{},
 		IkTargetBoneIndexes:    []int{},
 		ParentRelativePosition: &mmath.MVec3{},
-		TailRelativePosition:   &mmath.MVec3{},
+		ChildRelativePosition:  &mmath.MVec3{},
 		NormalizedFixedAxis:    &mmath.MVec3{},
 		TreeBoneIndexes:        []int{},
 		ParentRevertMatrix:     &mmath.MMat4Ident,
 		OffsetMatrix:           &mmath.MMat4Ident,
+		ParentBoneIndexes:      []int{},
 		RelativeBoneIndexes:    []int{},
 		ChildBoneIndexes:       []int{},
 		EffectiveBoneIndexes:   []int{},
@@ -150,8 +150,14 @@ func NewBone() *Bone {
 	return bone
 }
 
+func NewBoneByName(name string) *Bone {
+	bone := NewBone()
+	bone.Name = name
+	return bone
+}
+
 // Copy
-func (t *Bone) Copy() mcore.IndexModelInterface {
+func (t *Bone) Copy() mcore.IndexNameModelInterface {
 	copied := *t
 	copied.Ik = t.Ik.Copy()
 	copied.Position = t.Position.Copy()
@@ -164,7 +170,7 @@ func (t *Bone) Copy() mcore.IndexModelInterface {
 	copied.NormalizedLocalAxisY = t.NormalizedLocalAxisY.Copy()
 	copied.LocalAxis = t.LocalAxis.Copy()
 	copied.ParentRelativePosition = t.ParentRelativePosition.Copy()
-	copied.TailRelativePosition = t.TailRelativePosition.Copy()
+	copied.ChildRelativePosition = t.ChildRelativePosition.Copy()
 	copied.NormalizedFixedAxis = t.NormalizedFixedAxis.Copy()
 	copied.IkLinkBoneIndexes = make([]int, len(t.IkLinkBoneIndexes))
 	copy(copied.IkLinkBoneIndexes, t.IkLinkBoneIndexes)
@@ -174,6 +180,8 @@ func (t *Bone) Copy() mcore.IndexModelInterface {
 	copy(copied.TreeBoneIndexes, t.TreeBoneIndexes)
 	copied.ParentRevertMatrix = t.ParentRevertMatrix.Copy()
 	copied.OffsetMatrix = t.OffsetMatrix.Copy()
+	copied.ParentBoneIndexes = make([]int, len(t.ParentBoneIndexes))
+	copy(copied.ParentBoneIndexes, t.ParentBoneIndexes)
 	copied.RelativeBoneIndexes = make([]int, len(t.RelativeBoneIndexes))
 	copy(copied.RelativeBoneIndexes, t.RelativeBoneIndexes)
 	copied.ChildBoneIndexes = make([]int, len(t.ChildBoneIndexes))
@@ -338,11 +346,49 @@ func (bone *Bone) containsCategory(category BoneCategory) bool {
 
 // ボーンリスト
 type Bones struct {
-	*mcore.IndexModelCorrection[*Bone]
+	*mcore.IndexNameModelCorrection[*Bone]
 }
 
 func NewBones() *Bones {
 	return &Bones{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*Bone](),
+		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Bone](),
 	}
+}
+
+func (b *Bones) getParentRelativePosition(boneIndex int) *mmath.MVec3 {
+	bone := b.GetItem(boneIndex)
+	if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
+		return bone.Position.Sub(b.GetItem(bone.ParentIndex).Position)
+	}
+	return mmath.NewMVec3()
+}
+
+func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
+	bone := b.GetItem(boneIndex)
+
+	fromPosition := *bone.Position
+	var toPosition *mmath.MVec3
+
+	if bone.IsTailBone() && bone.TailIndex >= 0 && slices.Contains(b.GetIndexes(), bone.TailIndex) {
+		toPosition = b.GetItem(bone.TailIndex).Position
+	} else if !bone.IsTailBone() && bone.TailPosition.Length() > 0 {
+		toPosition = bone.TailPosition.Add(bone.Position)
+	} else {
+		fromPosition = *b.GetItem(bone.ParentIndex).Position
+		toPosition = bone.Position
+	}
+
+	return toPosition.Sub(&fromPosition)
+}
+
+func (bone *Bone) normalizeFixedAxis(fixedAxis *mmath.MVec3) {
+	v := fixedAxis.Normalized()
+	bone.NormalizedFixedAxis = &v
+}
+
+func (bone *Bone) normalizeLocalAxis(localXVector *mmath.MVec3) {
+	v := localXVector.Normalized()
+	bone.NormalizedLocalAxisX = &v
+	bone.NormalizedLocalAxisY = v.Cross(&mmath.MVec3{0, 0, -1})
+	bone.NormalizedLocalAxisZ = v.Cross(bone.NormalizedLocalAxisY)
 }

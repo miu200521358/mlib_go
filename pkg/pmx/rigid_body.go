@@ -80,9 +80,7 @@ func NewCollisionGroup(collisionGroupMask uint16) []uint16 {
 }
 
 type RigidBody struct {
-	*mcore.IndexModel
-	Name               string           // 剛体名
-	EnglishName        string           // 剛体名英
+	*mcore.IndexNameModel
 	BoneIndex          int              // 関連ボーンIndex
 	CollisionGroup     byte             // グループ
 	CollisionGroupMask CollisionGroup   // 非衝突グループフラグ
@@ -101,9 +99,7 @@ type RigidBody struct {
 // NewRigidBody creates a new rigid body.
 func NewRigidBody() *RigidBody {
 	return &RigidBody{
-		IndexModel:         &mcore.IndexModel{Index: -1},
-		Name:               "",
-		EnglishName:        "",
+		IndexNameModel:     &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 		BoneIndex:          -1,
 		CollisionGroup:     0,
 		CollisionGroupMask: NewCollisionGroupFromSlice([]uint16{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
@@ -122,11 +118,11 @@ func NewRigidBody() *RigidBody {
 
 // 剛体リスト
 type RigidBodies struct {
-	*mcore.IndexModelCorrection[*RigidBody]
+	*mcore.IndexNameModelCorrection[*RigidBody]
 }
 
 func NewRigidBodies() *RigidBodies {
 	return &RigidBodies{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*RigidBody](),
+		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*RigidBody](),
 	}
 }

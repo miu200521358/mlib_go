@@ -13,9 +13,29 @@ import (
 
 type MMat4 mat4.T
 
+func NewMMat4() *MMat4 {
+	return &MMat4{
+		vec4.T{1, 0, 0, 0},
+		vec4.T{0, 1, 0, 0},
+		vec4.T{0, 0, 1, 0},
+		vec4.T{0, 0, 0, 1},
+	}
+}
+
+func NewMMat4FromQuaternion(rot *MQuaternion) *MMat4 {
+	mat := NewMMat4()
+	mat.AssignQuaternion(rot)
+	return mat
+}
+
 var (
 	// Zero holds a zero matrix.
-	MMat4Zero = MMat4{}
+	MMat4Zero = MMat4{
+		vec4.T{0, 0, 0, 0},
+		vec4.T{0, 0, 0, 0},
+		vec4.T{0, 0, 0, 0},
+		vec4.T{0, 0, 0, 0},
+	}
 
 	// Ident holds an ident matrix.
 	MMat4Ident = MMat4{
@@ -119,6 +139,12 @@ func (mat *MMat4) TranslateZ(dz float64) *MMat4 {
 	return (*MMat4)((*mat4.T)(mat).TranslateZ(dz))
 }
 
+// 行列の移動情報
+func (mat *MMat4) Translation() MVec3 {
+	return MVec3{mat[3][0], mat[3][1], mat[3][2]}
+}
+
+// 行列のスケール情報
 func (mat *MMat4) Scaling() MVec4 {
 	return (MVec4)((*mat4.T)(mat).Scaling())
 }
@@ -131,6 +157,7 @@ func (mat *MMat4) ScaleVec3(s *MVec3) *MMat4 {
 	return (*MMat4)((*mat4.T)(mat).ScaleVec3((*vec3.T)(s)))
 }
 
+// 行列の回転情報
 func (mat *MMat4) Quaternion() MQuaternion {
 	return (MQuaternion)((*mat4.T)(mat).Quaternion())
 }
@@ -226,4 +253,18 @@ func (mat *MMat4) PracticallyEquals(compareVector *MMat4, allowedDelta float64) 
 		(math.Abs(mat[3][1]-compareVector[3][1]) <= allowedDelta) &&
 		(math.Abs(mat[3][2]-compareVector[3][2]) <= allowedDelta) &&
 		(math.Abs(mat[3][3]-compareVector[3][3]) <= allowedDelta)
+}
+
+// Mul は行列の掛け算を行います
+func (mat *MMat4) Mul(a *MMat4) {
+	mat[0] = (*mat4.T)(mat).MulVec4(&a[0])
+	mat[1] = (*mat4.T)(mat).MulVec4(&a[1])
+	mat[2] = (*mat4.T)(mat).MulVec4(&a[2])
+	mat[3] = (*mat4.T)(mat).MulVec4(&a[3])
+}
+
+func (mat *MMat4) Muled(a *MMat4) MMat4 {
+	copied := mat.Copy()
+	copied.Mul(a)
+	return *copied
 }

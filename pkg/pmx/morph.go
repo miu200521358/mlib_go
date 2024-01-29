@@ -50,9 +50,7 @@ const (
 
 // Morph represents a morph.
 type Morph struct {
-	*mcore.IndexModel
-	Name        string         // モーフ名
-	EnglishName string         // モーフ名英
+	*mcore.IndexNameModel
 	Panel       MorphPanel     // モーフパネル
 	MorphType   MorphType      // モーフ種類
 	Offsets     []TMorphOffset // モーフオフセット
@@ -61,7 +59,7 @@ type Morph struct {
 }
 
 // Copy
-func (t *Morph) Copy() mcore.IndexModelInterface {
+func (t *Morph) Copy() mcore.IndexNameModelInterface {
 	copied := *t
 	copied.Offsets = make([]TMorphOffset, len(t.Offsets))
 	copy(copied.Offsets, t.Offsets)
@@ -206,24 +204,22 @@ func NewMaterialMorph(
 // NewMorph
 func NewMorph() *Morph {
 	return &Morph{
-		IndexModel:  &mcore.IndexModel{Index: -1},
-		Name:        "",
-		EnglishName: "",
-		Panel:       MORPH_PANEL_SYSTEM,
-		MorphType:   MORPH_TYPE_VERTEX,
-		Offsets:     make([]TMorphOffset, 0),
-		DisplaySlot: -1,
-		IsSystem:    false,
+		IndexNameModel: &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		Panel:          MORPH_PANEL_SYSTEM,
+		MorphType:      MORPH_TYPE_VERTEX,
+		Offsets:        make([]TMorphOffset, 0),
+		DisplaySlot:    -1,
+		IsSystem:       false,
 	}
 }
 
 // モーフリスト
 type Morphs struct {
-	*mcore.IndexModelCorrection[*Morph]
+	*mcore.IndexNameModelCorrection[*Morph]
 }
 
 func NewMorphs() *Morphs {
 	return &Morphs{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*Morph](),
+		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Morph](),
 	}
 }

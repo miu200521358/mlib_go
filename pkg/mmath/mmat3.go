@@ -12,12 +12,28 @@ import (
 
 type MMat3 mat3.T
 
+func NewMMat3() *MMat3 {
+	return &MMat3{
+		vec3.T{1, 0, 0},
+		vec3.T{0, 1, 0},
+		vec3.T{0, 0, 1},
+	}
+}
+
 var (
 	// Zero holds a zero matrix.
-	MMat3Zero = MMat3{}
+	MMat3Zero = MMat3{
+		vec3.T{0, 0, 0},
+		vec3.T{0, 0, 0},
+		vec3.T{0, 0, 0},
+	}
 
 	// Ident holds an ident matrix.
-	MMat3Ident = MMat3{}
+	MMat3Ident = MMat3{
+		vec3.T{1, 0, 0},
+		vec3.T{0, 1, 0},
+		vec3.T{0, 0, 1},
+	}
 )
 
 // GL OpenGL座標系に変換されたベクトルを返します

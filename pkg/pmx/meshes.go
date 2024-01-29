@@ -2,12 +2,12 @@ package pmx
 
 import (
 	"embed"
+	"slices"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type Meshes struct {
@@ -37,11 +37,11 @@ func NewMeshes(
 		faces = append(faces, uint32(vertices[0]))
 	}
 
-	meshes := make([]*Mesh, 0, len(model.Materials.Indexes))
+	meshes := make([]*Mesh, 0, len(model.Materials.GetIndexes()))
 	prevVerticesCount := 0
 	for _, m := range model.Materials.GetSortedData() {
 		var texture *Texture
-		if m.TextureIndex != -1 && mutils.ContainsInt(model.Textures.Indexes, m.TextureIndex) {
+		if m.TextureIndex != -1 && slices.Contains(model.Textures.Indexes, m.TextureIndex) {
 			texture = model.Textures.GetItem(m.TextureIndex)
 		}
 
@@ -49,20 +49,20 @@ func NewMeshes(
 		// 個別Toon
 		if m.ToonSharingFlag == TOON_SHARING_INDIVIDUAL &&
 			m.ToonTextureIndex != -1 &&
-			mutils.ContainsInt(model.Textures.Indexes, m.ToonTextureIndex) {
+			slices.Contains(model.Textures.Indexes, m.ToonTextureIndex) {
 			toonTexture = model.Textures.GetItem(m.ToonTextureIndex)
 		}
 		// 共有Toon
 		if m.ToonSharingFlag == TOON_SHARING_SHARING &&
 			m.ToonTextureIndex != -1 &&
-			mutils.ContainsInt(model.ToonTextures.Indexes, m.ToonTextureIndex) {
+			slices.Contains(model.ToonTextures.Indexes, m.ToonTextureIndex) {
 			toonTexture = model.ToonTextures.GetItem(m.ToonTextureIndex)
 		}
 
 		var sphereTexture *Texture
 		if m.SphereMode != SPHERE_MODE_INVALID &&
 			m.SphereTextureIndex != -1 &&
-			mutils.ContainsInt(model.Textures.Indexes, m.SphereTextureIndex) {
+			slices.Contains(model.Textures.Indexes, m.SphereTextureIndex) {
 			sphereTexture = model.Textures.GetItem(m.SphereTextureIndex)
 		}
 

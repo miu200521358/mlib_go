@@ -3,11 +3,10 @@ package mmath
 import (
 	"math"
 	"testing"
-
 )
 
 func TestEvaluate(tst *testing.T) {
-	inter := &Interpolation{}
+	inter := &Curve{}
 	inter.Start = &MVec2{20.0, 20.0}
 	inter.End = &MVec2{107.0, 107.0}
 
@@ -27,7 +26,7 @@ func TestEvaluate(tst *testing.T) {
 }
 
 func TestEvaluate2(tst *testing.T) {
-	inter := &Interpolation{}
+	inter := &Curve{}
 	inter.Start = &MVec2{10.0, 30.0}
 	inter.End = &MVec2{100.0, 80.0}
 

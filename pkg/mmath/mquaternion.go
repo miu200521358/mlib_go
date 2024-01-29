@@ -12,6 +12,10 @@ import (
 
 type MQuaternion quaternion.T
 
+func NewMQuaternion() *MQuaternion {
+	return &MQuaternion{0, 0, 0, 1}
+}
+
 var (
 	// Zero holds a zero quaternion.
 	MQuaternionZero = MQuaternion{}
@@ -399,4 +403,10 @@ func (qq *MQuaternion) Copy() *MQuaternion {
 // Vector
 func (v *MQuaternion) Vector() *[]float64 {
 	return &[]float64{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
+}
+
+func (v *MQuaternion) ToMat4() *MMat4 {
+	mat := NewMMat4()
+	mat.AssignQuaternion(v)
+	return mat
 }

@@ -11,6 +11,10 @@ import (
 
 type MVec4 vec4.T
 
+func NewMVec4() *MVec4 {
+	return &MVec4{0, 0, 0, 0}
+}
+
 var (
 	MVec4Zero = MVec4{}
 
@@ -379,4 +383,9 @@ func (v *MVec4) Copy() *MVec4 {
 // Vector
 func (v *MVec4) Vector() *[]float64 {
 	return &[]float64{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
+}
+
+// 線形補間
+func Lerp4(v1, v2 *MVec4, t float64) MVec4 {
+	return (v2.Sub(v1)).MulScalar(t).Added(v1)
 }

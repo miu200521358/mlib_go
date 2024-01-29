@@ -4,10 +4,13 @@ import (
 	"fmt"
 
 	"github.com/ungerik/go3d/float64/vec2"
-
 )
 
 type MRect vec2.Rect
+
+func NewMRect() *MRect {
+	return &MRect{Min: vec2.T{0, 0}, Max: vec2.T{0, 0}}
+}
 
 // String は MRect の文字列表現を返します。
 func (v MRect) String() string {

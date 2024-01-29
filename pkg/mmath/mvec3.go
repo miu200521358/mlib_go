@@ -11,6 +11,10 @@ import (
 
 type MVec3 vec3.T
 
+func NewMVec3() *MVec3 {
+	return &MVec3{0, 0, 0}
+}
+
 var (
 	MVec3Zero = MVec3{}
 
@@ -324,4 +328,65 @@ func (v *MVec3) Copy() *MVec3 {
 // Vector
 func (v *MVec3) Vector() *[]float64 {
 	return &[]float64{v.GetX(), v.GetY(), v.GetZ()}
+}
+
+// 線形補間
+func Lerp3(v1, v2 *MVec3, t float64) MVec3 {
+	return (v2.Sub(v1)).MulScalar(t).Added(v1)
+}
+
+// ToLocalMatrix4x4 自身をローカル軸とした場合の回転行列を取得します
+func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
+	if v.IsZero() {
+		return NewMMat4()
+	}
+
+	// ローカルX軸の方向ベクトル
+	xAxis := v.Copy()
+	normXAxis := xAxis.Length()
+	if normXAxis == 0 {
+		return NewMMat4()
+	}
+	xAxis.DivScalar(normXAxis)
+
+	if math.IsNaN(xAxis.GetX()) || math.IsNaN(xAxis.GetY()) || math.IsNaN(xAxis.GetZ()) {
+		return NewMMat4()
+	}
+
+	// ローカルZ軸の方向ベクトル
+	zAxis := &MVec3{0.0, 0.0, -1.0}
+	if zAxis.Equals(v) {
+		// 自身がほぼZ軸ベクトルの場合、別ベクトルを与える
+		zAxis = &MVec3{0.0, 1.0, 0.0}
+	}
+
+	// ローカルY軸の方向ベクトル
+	yAxis := v.Cross(zAxis)
+	normYAxis := yAxis.Length()
+	if normYAxis == 0 {
+		return NewMMat4()
+	}
+	yAxis.DivScalar(normYAxis)
+
+	if math.IsNaN(yAxis.GetX()) || math.IsNaN(yAxis.GetY()) || math.IsNaN(yAxis.GetZ()) {
+		return NewMMat4()
+	}
+
+	zAxis = xAxis.Cross(yAxis)
+	normZAxis := zAxis.Length()
+	zAxis.DivScalar(normZAxis)
+
+	// ローカル軸に合わせた回転行列を作成する
+	rotationMatrix := NewMMat4()
+	rotationMatrix[0][0] = xAxis.GetX()
+	rotationMatrix[0][1] = xAxis.GetY()
+	rotationMatrix[0][2] = xAxis.GetZ()
+	rotationMatrix[1][0] = yAxis.GetX()
+	rotationMatrix[1][1] = yAxis.GetY()
+	rotationMatrix[1][2] = yAxis.GetZ()
+	rotationMatrix[2][0] = zAxis.GetX()
+	rotationMatrix[2][1] = zAxis.GetY()
+	rotationMatrix[2][2] = zAxis.GetZ()
+
+	return rotationMatrix
 }

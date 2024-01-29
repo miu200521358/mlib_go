@@ -134,9 +134,7 @@ func (m *MaterialGL) Edge() [4]float32 {
 }
 
 type Material struct {
-	*mcore.IndexModel
-	Name               string       // 材質名
-	EnglishName        string       // 材質名英
+	*mcore.IndexNameModel
 	Diffuse            *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
 	Specular           *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
 	Ambient            *mmath.MVec3 // Ambient (R,G,B)(環境色)
@@ -154,9 +152,7 @@ type Material struct {
 
 func NewMaterial() *Material {
 	return &Material{
-		IndexModel:         &mcore.IndexModel{Index: -1},
-		Name:               "",
-		EnglishName:        "",
+		IndexNameModel:     &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 		Diffuse:            &mmath.MVec4{},
 		Specular:           &mmath.MVec4{},
 		Ambient:            &mmath.MVec3{},
@@ -171,6 +167,12 @@ func NewMaterial() *Material {
 		Memo:               "",
 		VerticesCount:      0,
 	}
+}
+
+func NewMaterialByName(name string) *Material {
+	m := NewMaterial()
+	m.Name = name
+	return m
 }
 
 func (m *Material) GL(
@@ -215,19 +217,19 @@ func (m *Material) GL(
 	}
 }
 
-func (m *Material) Copy() mcore.IndexModelInterface {
+func (m *Material) Copy() mcore.IndexNameModelInterface {
 	copied := *m
 	return &copied
 }
 
 // 材質リスト
 type Materials struct {
-	*mcore.IndexModelCorrection[*Material]
+	*mcore.IndexNameModelCorrection[*Material]
 }
 
 func NewMaterials() *Materials {
 	return &Materials{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*Material](),
+		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Material](),
 	}
 }
 

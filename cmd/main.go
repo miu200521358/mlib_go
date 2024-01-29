@@ -11,7 +11,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mwidget"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 func init() {
@@ -88,9 +87,9 @@ func main() {
 		console.AppendText(fmt.Sprintf("モデル名: %s", model.Name))
 		console.AppendText(fmt.Sprintf("頂点数: %d", len(model.Vertices.Indexes)))
 		console.AppendText(fmt.Sprintf("面数: %d", len(model.Faces.Indexes)))
-		console.AppendText(fmt.Sprintf("材質数: %d", len(model.Materials.Indexes)))
-		console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.Indexes)))
-		console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.Indexes)))
+		console.AppendText(fmt.Sprintf("材質数: %d", len(model.Materials.GetIndexes())))
+		console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.GetIndexes())))
+		console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.GetIndexes())))
 
 		mWindow.GetMainGlWindow().ClearData()
 		mWindow.GetMainGlWindow().AddData(model)

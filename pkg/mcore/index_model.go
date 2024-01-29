@@ -64,16 +64,15 @@ func (c *IndexModelCorrection[T]) SetItem(index int, v T) {
 	c.Data[index] = v
 }
 
-func (c *IndexModelCorrection[T]) Append(value T, isSort bool) {
+func (c *IndexModelCorrection[T]) Append(value T) {
 	if value.GetIndex() < 0 {
 		value.SetIndex(len(c.Data))
 	}
 	c.Data[value.GetIndex()] = value
-	if isSort {
-		c.SortIndexes()
-	} else {
+	if slices.Contains(c.Indexes, value.GetIndex()) {
 		c.Indexes = append(c.Indexes, value.GetIndex())
 	}
+	c.SortIndexes()
 }
 
 func (c *IndexModelCorrection[T]) SortIndexes() {

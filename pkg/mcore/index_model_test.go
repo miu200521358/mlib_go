@@ -107,7 +107,7 @@ func TestIndexModelCorrection_SetItem(t *testing.T) {
 func TestIndexModelCorrection_Append(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(0, 0, 0, 0)
-	model.Append(item, false)
+	model.Append(item)
 
 	result := model.GetItem(0)
 	if result != item {
@@ -116,7 +116,7 @@ func TestIndexModelCorrection_Append(t *testing.T) {
 
 	item2 := NewFace(1, 0, 0, 0)
 	// Test sorting
-	model.Append(item2, true)
+	model.Append(item2)
 	result = model.GetItem(0)
 	if result == item {
 		t.Errorf("Expected Append to sort the items, but got %v", result)

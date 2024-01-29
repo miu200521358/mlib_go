@@ -7,9 +7,14 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/ungerik/go3d/float64/vec2"
+
 )
 
 type MVec2 vec2.T
+
+func NewMVec2() *MVec2 {
+	return &MVec2{0, 0}
+}
 
 var (
 	MVec2Zero = MVec2{}
@@ -321,4 +326,9 @@ func (v *MVec2) Copy() *MVec2 {
 // Vector
 func (v *MVec2) Vector() *[]float64 {
 	return &[]float64{v.GetX(), v.GetY()}
+}
+
+// 線形補間
+func Lerp2(v1, v2 *MVec2, t float64) MVec2 {
+	return (v2.Sub(v1)).MulScalar(t).Added(v1)
 }

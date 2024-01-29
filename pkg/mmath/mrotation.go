@@ -2,7 +2,6 @@ package mmath
 
 import (
 	"math"
-
 )
 
 type MRotation struct {
