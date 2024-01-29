@@ -23,7 +23,6 @@ uniform int useToon;
 uniform int useSphere;
 uniform int sphereMode;
 
-out float alpha;
 out vec4 vertexColor;
 out vec3 vertexSpecular;
 out vec2 vertexUv;
@@ -44,11 +43,8 @@ void main() {
     // 頂点法線
     vetexNormal = normalize(normalTransformMatrix * normalize(normal)).xyz;
 
-    // 頂点色設定
+    // 頂点色設定(透過込み)
     vertexColor = clamp(diffuse, 0.0, 1.0);
-
-    // 材質の透過度
-    vertexColor.w = diffuse.w;
 
     if (0 == useToon) {
         // ディフューズ色＋アンビエント色 計算
