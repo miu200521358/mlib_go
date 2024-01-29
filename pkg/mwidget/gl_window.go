@@ -138,9 +138,66 @@ func NewGlWindow(
 	w.SetScrollCallback(glWindow.handleScrollEvent)
 	w.SetMouseButtonCallback(glWindow.handleMouseButtonEvent)
 	w.SetCursorPosCallback(glWindow.handleCursorPosEvent)
+	w.SetKeyCallback(glWindow.handleKeyEvent)
 	glWindow.Draw()
 
 	return &glWindow, nil
+}
+
+func (w *GlWindow) handleKeyEvent(
+	window *glfw.Window,
+	key glfw.Key,
+	scancode int,
+	action glfw.Action,
+	mods glfw.ModifierKey,
+) {
+	if action != glfw.Press ||
+		!(key == glfw.KeyKP0 ||
+			key == glfw.KeyKP2 ||
+			key == glfw.KeyKP4 ||
+			key == glfw.KeyKP5 ||
+			key == glfw.KeyKP6 ||
+			key == glfw.KeyKP8) {
+		return
+	}
+
+	w.Reset()
+
+	switch key {
+	case glfw.KeyKP0: // 下面から
+		w.yaw = 90
+		w.pitch = 90
+	case glfw.KeyKP2: // 正面から
+		w.yaw = 90
+		w.pitch = 0
+	case glfw.KeyKP4: // 左面から
+		w.yaw = 180
+		w.pitch = 0
+	case glfw.KeyKP5: // 上面から
+		w.yaw = 90
+		w.pitch = -90
+	case glfw.KeyKP6: // 右面から
+		w.yaw = 0
+		w.pitch = 0
+	case glfw.KeyKP8: // 背面から
+		w.yaw = -90
+		w.pitch = 0
+	default:
+		return
+	}
+
+	// カメラの新しい位置を計算
+	radius := mgl.INITIAL_CAMERA_POSITION_Z
+
+	// 球面座標系をデカルト座標系に変換
+	cameraX := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Cos(mgl64.DegToRad(w.yaw))
+	cameraY := radius * math.Sin(mgl64.DegToRad(w.pitch))
+	cameraZ := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw))
+
+	// カメラ位置を更新
+	w.Shader.CameraPosition.SetX(cameraX)
+	w.Shader.CameraPosition.SetY(mgl.INITIAL_CAMERA_POSITION_Y + cameraY)
+	w.Shader.CameraPosition.SetZ(cameraZ)
 }
 
 func (w *GlWindow) handleScrollEvent(window *glfw.Window, xoff float64, yoff float64) {
@@ -175,7 +232,6 @@ func (w *GlWindow) handleMouseButtonEvent(
 			w.rightButtonPressed = false
 		}
 	}
-
 }
 
 func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos float64) {
@@ -213,15 +269,15 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 		}
 
 		// 球面座標系をデカルト座標系に変換
-		radius := float64(w.Shader.CameraPosition.Sub(w.Shader.LookAtCenterPosition).Length())
+		radius := float64(-w.Shader.CameraPosition.Sub(w.Shader.LookAtCenterPosition).Length())
 		cameraX := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Cos(mgl64.DegToRad(w.yaw))
 		cameraY := radius * math.Sin(mgl64.DegToRad(w.pitch))
 		cameraZ := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw))
 
 		// カメラ位置を更新
-		w.Shader.CameraPosition.SetX(-cameraX)
+		w.Shader.CameraPosition.SetX(cameraX)
 		w.Shader.CameraPosition.SetY(mgl.INITIAL_CAMERA_POSITION_Y + cameraY)
-		w.Shader.CameraPosition.SetZ(-cameraZ)
+		w.Shader.CameraPosition.SetZ(cameraZ)
 		fmt.Printf("xOffset %.8f, yOffset %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
 			xOffset, yOffset, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
 	} else if w.middleButtonPressed {
