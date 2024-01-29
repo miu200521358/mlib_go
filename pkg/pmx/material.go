@@ -41,22 +41,27 @@ const (
 	DRAW_FLAG_DRAWING_EDGE DrawFlag = 0x0010
 )
 
+// 0x01:両面描画
 func (d DrawFlag) IsDoubleSidedDrawing() bool {
 	return d&DRAW_FLAG_DOUBLE_SIDED_DRAWING == DRAW_FLAG_DOUBLE_SIDED_DRAWING
 }
 
+// 0x02:地面影
 func (d DrawFlag) IsGroundShadow() bool {
 	return d&DRAW_FLAG_GROUND_SHADOW == DRAW_FLAG_GROUND_SHADOW
 }
 
+// 0x04:セルフシャドウマップへの描画
 func (d DrawFlag) IsDrawingOnSelfShadowMaps() bool {
 	return d&DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS == DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
 }
 
+// 0x08:セルフシャドウの描画
 func (d DrawFlag) IsDrawingSelfShadows() bool {
 	return d&DRAW_FLAG_DRAWING_SELF_SHADOWS == DRAW_FLAG_DRAWING_SELF_SHADOWS
 }
 
+// 0x10:エッジ描画
 func (d DrawFlag) IsDrawingEdge() bool {
 	return d&DRAW_FLAG_DRAWING_EDGE == DRAW_FLAG_DRAWING_EDGE
 }
