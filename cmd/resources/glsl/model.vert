@@ -44,11 +44,11 @@ void main() {
     // 頂点法線
     vetexNormal = normalize(normalTransformMatrix * normalize(normal)).xyz;
 
-    // 材質の透過度
-    alpha = diffuse.w;
-
     // 頂点色設定
     vertexColor = clamp(diffuse, 0.0, 1.0);
+
+    // 材質の透過度
+    vertexColor.w = diffuse.w;
 
     if (0 == useToon) {
         // ディフューズ色＋アンビエント色 計算

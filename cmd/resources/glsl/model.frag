@@ -15,7 +15,6 @@ uniform sampler2D sphereSampler;
 
 uniform vec3 lightDirection;
 
-in float alpha;
 in vec4 vertexColor;
 in vec3 vertexSpecular;
 in vec2 vertexUv;
