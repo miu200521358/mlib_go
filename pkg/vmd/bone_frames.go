@@ -17,6 +17,22 @@ func NewBoneFrames() *BoneFrames {
 	}
 }
 
+func (bfs *BoneFrames) Contains(boneName string) bool {
+	_, ok := bfs.Data[boneName]
+	return ok
+}
+
+func (bfs *BoneFrames) Append(bnfs *BoneNameFrames) {
+	bfs.Data[bnfs.Name] = bnfs
+}
+
+func (bfs *BoneFrames) GetItem(boneName string) *BoneNameFrames {
+	if !bfs.Contains(boneName) {
+		bfs.Append(NewBoneNameFrames(boneName))
+	}
+	return bfs.Data[boneName]
+}
+
 func (bfs *BoneFrames) Animate(
 	fnos []int,
 	model pmx.PmxModel,
@@ -194,7 +210,7 @@ func (bfs *BoneFrames) getPosition(fno int, boneName string) *mmath.MMat4 {
 // 該当キーフレにおけるボーンの回転角度
 func (bfs *BoneFrames) getRotation(fno int, boneName string) *mmath.MMat4 {
 	bf := bfs.Data[boneName].GetItem(fno)
-	rot := bf.Rotation.ToMat4()
+	rot := bf.Rotation.GetQuaternion().ToMat4()
 	return rot
 }
 

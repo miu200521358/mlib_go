@@ -8,6 +8,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type PmxReader struct {
@@ -41,6 +42,7 @@ func (r *PmxReader) ReadByFilepath(path string) (mcore.HashModelInterface, error
 	}
 
 	r.Close()
+	model.UpdateDigest()
 
 	return model, nil
 }
@@ -61,6 +63,7 @@ func (r *PmxReader) ReadNameByFilepath(path string) (string, error) {
 	}
 
 	r.Close()
+	model.UpdateDigest()
 
 	return model.Name, nil
 }

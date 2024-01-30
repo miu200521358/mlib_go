@@ -6,16 +6,16 @@ import (
 )
 
 type BoneFrame struct {
-	*BaseFrame                       // キーフレ
-	Position      *mmath.MVec3       // 位置
-	LocalPosition *mmath.MVec3       // ローカル位置
-	Rotation      *mmath.MQuaternion // 回転
-	LocalRotation *mmath.MQuaternion // ローカル回転
-	Scale         *mmath.MVec3       // スケール
-	LocalScale    *mmath.MVec3       // ローカルスケール
-	IkRotation    *mmath.MQuaternion // IK回転
-	Curves        *BoneCurves        // 補間曲線
-	IkRegistered  bool               // IK計算済み
+	*BaseFrame                     // キーフレ
+	Position      *mmath.MVec3     // 位置
+	LocalPosition *mmath.MVec3     // ローカル位置
+	Rotation      *mmath.MRotation // 回転
+	LocalRotation *mmath.MRotation // ローカル回転
+	Scale         *mmath.MVec3     // スケール
+	LocalScale    *mmath.MVec3     // ローカルスケール
+	IkRotation    *mmath.MRotation // IK回転
+	Curves        *BoneCurves      // 補間曲線
+	IkRegistered  bool             // IK計算済み
 }
 
 func NewBoneFrame(index int) *BoneFrame {
@@ -23,11 +23,11 @@ func NewBoneFrame(index int) *BoneFrame {
 		BaseFrame:     NewVmdBaseFrame(index),
 		Position:      mmath.NewMVec3(),
 		LocalPosition: mmath.NewMVec3(),
-		Rotation:      mmath.NewMQuaternion(),
-		LocalRotation: mmath.NewMQuaternion(),
+		Rotation:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		LocalRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 		Scale:         mmath.NewMVec3(),
 		LocalScale:    mmath.NewMVec3(),
-		IkRotation:    mmath.NewMQuaternion(),
+		IkRotation:    mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 		Curves:        NewBoneCurves(),
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"io"
 	"os"
+
 )
 
 type HashModelInterface interface {
@@ -14,6 +15,8 @@ type HashModelInterface interface {
 	IsEmpty() bool
 	GetDigest() string
 	UpdateDigest() error
+	GetPath() string
+	SetPath(path string)
 }
 
 type HashModel struct {
@@ -26,6 +29,14 @@ func NewHashModel(path string) *HashModel {
 		Path:   path,
 		Digest: "",
 	}
+}
+
+func (m *HashModel) GetPath() string {
+	return m.Path
+}
+
+func (m *HashModel) SetPath(path string) {
+	m.Path = path
 }
 
 func (m *HashModel) GetName() string {

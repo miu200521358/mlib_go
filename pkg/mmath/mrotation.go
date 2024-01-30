@@ -2,6 +2,7 @@ package mmath
 
 import (
 	"math"
+
 )
 
 type MRotation struct {
@@ -90,4 +91,10 @@ func (m *MRotation) SetDegrees(v *MVec3) {
 // Copy
 func (rot *MRotation) Copy() *MRotation {
 	return &MRotation{rot.radians.Copy(), rot.degrees.Copy(), rot.quaternion.Copy()}
+}
+
+// Add
+func (rot *MRotation) Mul(v *MRotation) {
+	qq := rot.quaternion.Mul(v.quaternion)
+	rot.SetQuaternion(qq)
 }

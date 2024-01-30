@@ -83,13 +83,13 @@ func (r *BaseReader[T]) DecodeText(mainEncoding encoding.Encoding, fbytes []byte
 		var err error
 		if targetEncoding == japanese.ShiftJIS {
 			// shift-jisは一旦cp932に変換してもう一度戻したので返す
-			decodedText, err = r.decodeShiftJIS(fbytes)
+			decodedText, err = r.DecodeShiftJIS(fbytes)
 			if err != nil {
 				continue
 			}
 		} else {
 			// 変換できなかった文字は「?」に変換する
-			decodedText, err = r.decodeBytes(fbytes, targetEncoding)
+			decodedText, err = r.DecodeBytes(fbytes, targetEncoding)
 			if err != nil {
 				continue
 			}
@@ -99,7 +99,7 @@ func (r *BaseReader[T]) DecodeText(mainEncoding encoding.Encoding, fbytes []byte
 	return ""
 }
 
-func (r *BaseReader[T]) decodeShiftJIS(fbytes []byte) (string, error) {
+func (r *BaseReader[T]) DecodeShiftJIS(fbytes []byte) (string, error) {
 	decodedText, err := japanese.ShiftJIS.NewDecoder().Bytes(fbytes)
 	if err != nil {
 		return "", err
@@ -107,7 +107,7 @@ func (r *BaseReader[T]) decodeShiftJIS(fbytes []byte) (string, error) {
 	return string(decodedText), nil
 }
 
-func (r *BaseReader[T]) decodeBytes(fbytes []byte, encoding encoding.Encoding) (string, error) {
+func (r *BaseReader[T]) DecodeBytes(fbytes []byte, encoding encoding.Encoding) (string, error) {
 	decodedText, err := encoding.NewDecoder().Bytes(fbytes)
 	if err != nil {
 		return "", err
@@ -165,6 +165,17 @@ func (r *BaseReader[T]) UnpackUShort() (uint16, error) {
 
 	value := binary.LittleEndian.Uint16(chunk)
 	return value, nil
+}
+
+// バイナリデータから uint を読み出す
+func (r *BaseReader[T]) UnpackUInt() (uint, error) {
+	chunk, err := r.unpack(4)
+	if err != nil {
+		return 0, err
+	}
+
+	value := binary.LittleEndian.Uint32(chunk)
+	return uint(value), nil
 }
 
 // バイナリデータから int を読み出す

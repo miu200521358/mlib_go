@@ -27,6 +27,9 @@ func NewBoneNameFrames(name string) *BoneNameFrames {
 
 // 指定したキーフレの前後のキーフレ番号を返す
 func (bnfs *BoneNameFrames) GetRangeIndexes(index int) (int, int) {
+	if len(bnfs.Indexes) == 0 {
+		return 0, 0
+	}
 
 	prevIndex := 0
 	nextIndex := index
@@ -91,14 +94,14 @@ func (bnfs *BoneNameFrames) GetItem(index int) *BoneFrame {
 
 	xy, yy, zy, ry := nextBf.Curves.Evaluate(prevIndex, index, nextIndex)
 
-	rot := mmath.Slerp(prevBf.Rotation, nextBf.Rotation, ry)
-	bf.Rotation = &rot
+	qq := mmath.Slerp(prevBf.Rotation.GetQuaternion(), nextBf.Rotation.GetQuaternion(), ry)
+	bf.Rotation.SetQuaternion(&qq)
 
 	prevX := mmath.MVec4{
 		prevBf.Position.GetX(), prevBf.LocalPosition.GetX(), prevBf.Scale.GetX(), prevBf.LocalScale.GetX()}
 	nextX := mmath.MVec4{
 		nextBf.Position.GetX(), nextBf.LocalPosition.GetX(), nextBf.Scale.GetX(), nextBf.LocalScale.GetX()}
-	nowX := mmath.Lerp4(&prevX, &nextX, xy)
+	nowX := mmath.LerpVec4(&prevX, &nextX, xy)
 	bf.Position.SetX(nowX[0])
 	bf.LocalPosition.SetX(nowX[1])
 	bf.Scale.SetX(nowX[2])
@@ -108,7 +111,7 @@ func (bnfs *BoneNameFrames) GetItem(index int) *BoneFrame {
 		prevBf.Position.GetY(), prevBf.LocalPosition.GetY(), prevBf.Scale.GetY(), prevBf.LocalScale.GetY()}
 	nextY := mmath.MVec4{
 		nextBf.Position.GetY(), nextBf.LocalPosition.GetY(), nextBf.Scale.GetY(), nextBf.LocalScale.GetY()}
-	nowY := mmath.Lerp4(&prevY, &nextY, yy)
+	nowY := mmath.LerpVec4(&prevY, &nextY, yy)
 	bf.Position.SetY(nowY[0])
 	bf.LocalPosition.SetY(nowY[1])
 	bf.Scale.SetY(nowY[2])
@@ -118,7 +121,7 @@ func (bnfs *BoneNameFrames) GetItem(index int) *BoneFrame {
 		prevBf.Position.GetZ(), prevBf.LocalPosition.GetZ(), prevBf.Scale.GetZ(), prevBf.LocalScale.GetZ()}
 	nextZ := mmath.MVec4{
 		nextBf.Position.GetZ(), nextBf.LocalPosition.GetZ(), nextBf.Scale.GetZ(), nextBf.LocalScale.GetZ()}
-	nowZ := mmath.Lerp4(&prevZ, &nextZ, zy)
+	nowZ := mmath.LerpVec4(&prevZ, &nextZ, zy)
 	bf.Position.SetZ(nowZ[0])
 	bf.LocalPosition.SetZ(nowZ[1])
 	bf.Scale.SetZ(nowZ[2])

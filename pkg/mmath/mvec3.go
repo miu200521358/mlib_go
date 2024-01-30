@@ -351,7 +351,7 @@ func (v *MVec3) Vector() *[]float64 {
 }
 
 // 線形補間
-func Lerp3(v1, v2 *MVec3, t float64) MVec3 {
+func LerpVec3(v1, v2 *MVec3, t float64) MVec3 {
 	return (v2.Sub(v1)).MulScalar(t).Added(v1)
 }
 

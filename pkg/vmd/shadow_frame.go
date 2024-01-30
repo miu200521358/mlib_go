@@ -1,5 +1,7 @@
 package vmd
 
+import "github.com/miu200521358/mlib_go/pkg/mcore"
+
 type ShadowFrame struct {
 	*BaseFrame         // キーフレ
 	ShadowMode int     // セルフ影モード
@@ -14,7 +16,7 @@ func NewShadowFrame(index int) *ShadowFrame {
 	}
 }
 
-func (sf *ShadowFrame) Copy() *ShadowFrame {
+func (sf *ShadowFrame) Copy() mcore.IndexModelInterface {
 	vv := &ShadowFrame{
 		ShadowMode: sf.ShadowMode,
 		Distance:   sf.Distance,

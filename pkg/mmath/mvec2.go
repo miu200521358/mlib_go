@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/ungerik/go3d/float64/vec2"
-
 )
 
 type MVec2 vec2.T
@@ -349,7 +348,7 @@ func (v *MVec2) Vector() *[]float64 {
 }
 
 // 線形補間
-func Lerp2(v1, v2 *MVec2, t float64) MVec2 {
+func LerpVec2(v1, v2 *MVec2, t float64) MVec2 {
 	return (v2.Sub(v1)).MulScalar(t).Added(v1)
 }
 

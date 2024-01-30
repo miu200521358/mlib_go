@@ -1,45 +1,47 @@
 package vmd
 
-type IkOnOffFrame struct {
+import "github.com/miu200521358/mlib_go/pkg/mcore"
+
+type IkEnabledFrame struct {
 	*BaseFrame        // キーフレ
-	Name       string // IK名
-	IkFrag     bool   // IKON/OFF
+	BoneName   string // IKボーン名
+	Enabled    bool   // IKON/OFF
 }
 
-func NewIkOnOffFrame(index int) *IkOnOffFrame {
-	return &IkOnOffFrame{
+func NewIkEnableFrame(index int) *IkEnabledFrame {
+	return &IkEnabledFrame{
 		BaseFrame: NewVmdBaseFrame(index),
-		Name:      "",
-		IkFrag:    true,
+		BoneName:  "",
+		Enabled:   true,
 	}
 }
 
-func (kf *IkOnOffFrame) Copy() *IkOnOffFrame {
-	vv := &IkOnOffFrame{
-		Name:   kf.Name,
-		IkFrag: kf.IkFrag,
+func (kf *IkEnabledFrame) Copy() *IkEnabledFrame {
+	vv := &IkEnabledFrame{
+		BoneName: kf.BoneName,
+		Enabled:  kf.Enabled,
 	}
 	return vv
 }
 
 type IkFrame struct {
-	*BaseFrame                 // キーフレ
-	Show       bool            // 表示ON/OFF
-	IkList     []*IkOnOffFrame // IKリスト
+	*BaseFrame                   // キーフレ
+	Visible    bool              // 表示ON/OFF
+	IkList     []*IkEnabledFrame // IKリスト
 }
 
 func NewIkFrame(index int) *IkFrame {
 	return &IkFrame{
 		BaseFrame: NewVmdBaseFrame(index),
-		Show:      true,
-		IkList:    []*IkOnOffFrame{},
+		Visible:   true,
+		IkList:    []*IkEnabledFrame{},
 	}
 }
 
-func (ikf *IkFrame) Copy() *IkFrame {
+func (ikf *IkFrame) Copy() mcore.IndexModelInterface {
 	vv := &IkFrame{
-		Show:   ikf.Show,
-		IkList: []*IkOnOffFrame{},
+		Visible: ikf.Visible,
+		IkList:  []*IkEnabledFrame{},
 	}
 	for _, v := range ikf.IkList {
 		vv.IkList = append(vv.IkList, v.Copy())

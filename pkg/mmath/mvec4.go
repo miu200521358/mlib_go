@@ -406,8 +406,16 @@ func (v *MVec4) Vector() *[]float64 {
 	return &[]float64{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
 }
 
+func LerpInt(v1, v2, t int) int {
+	return v1 + (v2-v1)*t
+}
+
+func LerpFloat(v1, v2, t float64) float64 {
+	return v1 + (v2-v1)*t
+}
+
 // 線形補間
-func Lerp4(v1, v2 *MVec4, t float64) MVec4 {
+func LerpVec4(v1, v2 *MVec4, t float64) MVec4 {
 	return (v2.Sub(v1)).MulScalar(t).Added(v1)
 }
 

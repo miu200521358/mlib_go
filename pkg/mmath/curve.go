@@ -9,18 +9,15 @@ type Curve struct {
 	End   *MVec2
 }
 
-var (
-	LinearStart = MVec2{20.0, 20.0}
-	LinearEnd   = MVec2{107.0, 107.0}
-
+const (
 	// MMDでの補間曲線の最大値
-	CurveMax = 127.0
+	CURVE_MAX = 127.0
 )
 
 func NewCurve() *Curve {
 	return &Curve{
-		Start: &LinearStart,
-		End:   &LinearEnd,
+		Start: &MVec2{20.0, 20.0},
+		End:   &MVec2{107.0, 107.0},
 	}
 }
 
@@ -37,36 +34,36 @@ func (v *Curve) Normalize(begin, finish *MVec2) {
 
 	v.Start = v.Start.Sub(begin)
 	v.Start = v.Start.Div(&diff)
-	v.Start = v.Start.MulScalar(CurveMax)
+	v.Start = v.Start.MulScalar(CURVE_MAX)
 	v.Start = v.Start.Round()
 
 	if v.Start.GetX() < 0 {
 		v.Start.SetX(0)
-	} else if v.Start.GetX() > CurveMax {
-		v.Start.SetX(CurveMax)
+	} else if v.Start.GetX() > CURVE_MAX {
+		v.Start.SetX(CURVE_MAX)
 	}
 
 	if v.Start.GetY() < 0 {
 		v.Start.SetY(0)
-	} else if v.Start.GetY() > CurveMax {
-		v.Start.SetY(CurveMax)
+	} else if v.Start.GetY() > CURVE_MAX {
+		v.Start.SetY(CURVE_MAX)
 	}
 
 	v.End = v.End.Sub(begin)
 	v.End = v.End.Div(&diff)
-	v.End = v.End.MulScalar(CurveMax)
+	v.End = v.End.MulScalar(CURVE_MAX)
 	v.End = v.End.Round()
 
 	if v.End.GetX() < 0 {
 		v.End.SetX(0)
-	} else if v.End.GetX() > CurveMax {
-		v.End.SetX(CurveMax)
+	} else if v.End.GetX() > CURVE_MAX {
+		v.End.SetX(CURVE_MAX)
 	}
 
 	if v.End.GetY() < 0 {
 		v.End.SetY(0)
-	} else if v.End.GetY() > CurveMax {
-		v.End.SetY(CurveMax)
+	} else if v.End.GetY() > CURVE_MAX {
+		v.End.SetY(CURVE_MAX)
 	}
 }
 
@@ -92,10 +89,10 @@ func Evaluate(curve *Curve, start, now, end int) (float64, float64, float64) {
 		return x, x, x
 	}
 
-	x1 := curve.Start.GetX() / CurveMax
-	y1 := curve.Start.GetY() / CurveMax
-	x2 := curve.End.GetX() / CurveMax
-	y2 := curve.End.GetY() / CurveMax
+	x1 := curve.Start.GetX() / CURVE_MAX
+	y1 := curve.Start.GetY() / CURVE_MAX
+	x2 := curve.End.GetX() / CURVE_MAX
+	y2 := curve.End.GetY() / CURVE_MAX
 
 	t := newton(x1, x2, x, 0.5, 1e-10, 1e-15)
 	s := 1.0 - t
@@ -144,8 +141,8 @@ func SplitCurve(curve *Curve, start, now, end int) (*Curve, *Curve) {
 	_, _, t := Evaluate(curve, start, now, end)
 
 	iA := MVec2{0.0, 0.0}
-	iB := curve.Start.DivedScalar(CurveMax)
-	iC := curve.End.DivedScalar(CurveMax)
+	iB := curve.Start.DivedScalar(CURVE_MAX)
+	iC := curve.End.DivedScalar(CURVE_MAX)
 	iD := MVec2{1.0, 1.0}
 
 	iAt1 := iA.MuledScalar(1 - t)
