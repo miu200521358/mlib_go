@@ -8,7 +8,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 type PmxModel struct {
@@ -97,14 +96,14 @@ func (pm *PmxModel) GetRelativeBoneIndexes(boneIndex int, parentBoneIndexes, rel
 	bone := pm.Bones.GetItem(boneIndex)
 	if pm.Bones.Contains(bone.ParentIndex) && !slices.Contains(relativeBoneIndexes, bone.ParentIndex) {
 		// 親ボーンを辿る
-		parentBoneIndexes = append([]int{bone.ParentIndex}, parentBoneIndexes...)
-		relativeBoneIndexes = append([]int{bone.ParentIndex}, relativeBoneIndexes...)
+		parentBoneIndexes = append(parentBoneIndexes, bone.ParentIndex)
+		relativeBoneIndexes = append(relativeBoneIndexes, bone.ParentIndex)
 		parentBoneIndexes, relativeBoneIndexes =
 			pm.GetRelativeBoneIndexes(bone.ParentIndex, parentBoneIndexes, relativeBoneIndexes)
 	}
 	if pm.Bones.Contains(bone.EffectIndex) && !slices.Contains(relativeBoneIndexes, bone.EffectIndex) {
 		// 付与親ボーンを辿る
-		relativeBoneIndexes = append([]int{bone.EffectIndex}, relativeBoneIndexes...)
+		relativeBoneIndexes = append(relativeBoneIndexes, bone.EffectIndex)
 		_, relativeBoneIndexes =
 			pm.GetRelativeBoneIndexes(bone.EffectIndex, parentBoneIndexes, relativeBoneIndexes)
 	}
@@ -121,7 +120,7 @@ func (pm *PmxModel) SetUp() {
 		bone.ChildBoneIndexes = []int{}
 	}
 
-	for _, bone := range pm.Bones.Data {
+	for _, bone := range pm.Bones.GetSortedData() {
 		if bone.IsIK() && bone.Ik != nil {
 			// IKのリンクとターゲット
 			for _, link := range bone.Ik.Links {
@@ -180,6 +179,6 @@ func (pm *PmxModel) SetUp() {
 		bone.OffsetMatrix.Translate(&v)
 
 		// 逆オフセット行列は親ボーンからの相対位置分
-		bone.ParentRevertMatrix.Translate(bone.ParentRelativePosition)
+		bone.RevertOffsetMatrix.Translate(bone.ParentRelativePosition.Copy())
 	}
 }

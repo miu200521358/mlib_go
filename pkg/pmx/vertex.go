@@ -3,7 +3,6 @@ package pmx
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type Vertex struct {
@@ -20,8 +19,8 @@ type Vertex struct {
 func NewVertex() *Vertex {
 	v := &Vertex{
 		IndexModel:  &mcore.IndexModel{Index: -1},
-		Position:    &mmath.MVec3{},
-		Normal:      &mmath.MVec3{},
+		Position:    mmath.NewMVec3(),
+		Normal:      mmath.NewMVec3(),
 		UV:          &mmath.MVec2{},
 		ExtendedUVs: []*mmath.MVec4{},
 		DeformType:  BDEF1,

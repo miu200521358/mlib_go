@@ -6,15 +6,6 @@ import (
 
 type MMat4 [4]MVec4
 
-func NewMMat4() *MMat4 {
-	return &MMat4{
-		MVec4{1, 0, 0, 0},
-		MVec4{0, 1, 0, 0},
-		MVec4{0, 0, 1, 0},
-		MVec4{0, 0, 0, 1},
-	}
-}
-
 func NewMMat4FromQuaternion(rot *MQuaternion) *MMat4 {
 	mat := NewMMat4()
 	mat.AssignQuaternion(rot)
@@ -38,6 +29,15 @@ var (
 		MVec4{0, 0, 0, 1},
 	}
 )
+
+func NewMMat4() *MMat4 {
+	return &MMat4{
+		MVec4{1, 0, 0, 0},
+		MVec4{0, 1, 0, 0},
+		MVec4{0, 0, 1, 0},
+		MVec4{0, 0, 0, 1},
+	}
+}
 
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します
 func (m MMat4) GL() *[16]float32 {

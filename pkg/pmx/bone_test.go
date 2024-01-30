@@ -10,11 +10,11 @@ func TestIkLink_Copy(t *testing.T) {
 	ikLink := &IkLink{
 		BoneIndex:          0,
 		AngleLimit:         true,
-		MinAngleLimit:      &mmath.MRotation{},
-		MaxAngleLimit:      &mmath.MRotation{},
+		MinAngleLimit:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		MaxAngleLimit:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 		LocalAngleLimit:    true,
-		LocalMinAngleLimit: &mmath.MRotation{},
-		LocalMaxAngleLimit: &mmath.MRotation{},
+		LocalMinAngleLimit: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		LocalMaxAngleLimit: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 	}
 
 	copied := ikLink.Copy()
@@ -128,7 +128,7 @@ func TestBone_Copy(t *testing.T) {
 			IkLinkBoneIndexes:      []int{1, 3, 5},
 			IkTargetBoneIndexes:    []int{2, 4, 6},
 			TreeBoneIndexes:        []int{3, 5, 7},
-			ParentRevertMatrix:     &mmath.MMat4{},
+			RevertOffsetMatrix:     &mmath.MMat4{},
 			OffsetMatrix:           &mmath.MMat4{},
 			RelativeBoneIndexes:    []int{8, 9, 10},
 			ChildBoneIndexes:       []int{10, 11, 12},
@@ -231,10 +231,10 @@ func TestBone_Copy(t *testing.T) {
 		if len(copied.TreeBoneIndexes) != len(b.TreeBoneIndexes) {
 			t.Errorf("Expected copied TreeIndexes to have the same length as original")
 		}
-		if !copied.ParentRevertMatrix.PracticallyEquals(b.ParentRevertMatrix, 1e-10) {
-			t.Errorf("Expected copied ParentRevertMatrix to be a deep copy %s %s", copied.ParentRevertMatrix.String(), b.ParentRevertMatrix.String())
+		if !copied.RevertOffsetMatrix.PracticallyEquals(b.RevertOffsetMatrix, 1e-10) {
+			t.Errorf("Expected copied ParentRevertMatrix to be a deep copy %s %s", copied.RevertOffsetMatrix.String(), b.RevertOffsetMatrix.String())
 		}
-		if &copied.ParentRevertMatrix == &b.ParentRevertMatrix {
+		if &copied.RevertOffsetMatrix == &b.RevertOffsetMatrix {
 			t.Errorf("Expected copied ParentRevertMatrix to be a deep copy")
 		}
 		if !copied.OffsetMatrix.PracticallyEquals(b.OffsetMatrix, 1e-10) {

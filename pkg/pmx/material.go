@@ -155,7 +155,7 @@ func NewMaterial() *Material {
 		IndexNameModel:     &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 		Diffuse:            &mmath.MVec4{},
 		Specular:           &mmath.MVec4{},
-		Ambient:            &mmath.MVec3{},
+		Ambient:            mmath.NewMVec3(),
 		DrawFlag:           DRAW_FLAG_NONE,
 		Edge:               &mmath.MVec4{},
 		EdgeSize:           0.0,

@@ -45,7 +45,8 @@ func (bfs *BoneFrames) Animate(
 	targetBoneNames := bfs.getAnimatedBoneNames(model, boneNames)
 
 	// ボーン行列作成
-	boneNameIndexes, boneOffsetMatrixes, bonePositionMatrixes := bfs.createBoneMatrixes(model, targetBoneNames)
+	boneNameIndexes, boneOffsetMatrixes, boneRevertOffsetMatrixes, bonePositionMatrixes :=
+		bfs.createBoneMatrixes(model, targetBoneNames)
 
 	// ボーン変形行列操作
 	positions, rotations, scales := bfs.getBoneMatrixes(fnos, model, targetBoneNames, isOutLog, description)
@@ -57,6 +58,7 @@ func (bfs *BoneFrames) Animate(
 		targetBoneNames,
 		boneNameIndexes,
 		boneOffsetMatrixes,
+		boneRevertOffsetMatrixes,
 		bonePositionMatrixes,
 		positions,
 		rotations,
@@ -71,7 +73,7 @@ func (bfs *BoneFrames) calc(
 	model *pmx.PmxModel,
 	targetBoneNames []string,
 	boneNameIndexes map[string]int,
-	boneOffsetMatrixes, bonePositionMatrixes []*mmath.MMat4,
+	boneOffsetMatrixes, boneRevertOffsetMatrixes, bonePositionMatrixes []*mmath.MMat4,
 	positions, rotations, scales [][]*mmath.MMat4,
 	isOutLog bool,
 	description string,
@@ -80,10 +82,10 @@ func (bfs *BoneFrames) calc(
 	matrixes := make([][]*mmath.MMat4, 0, len(fnos))
 	for i := range fnos {
 		matrixes = append(matrixes, make([]*mmath.MMat4, 0, len(targetBoneNames)))
-		for j := range targetBoneNames {
+		for j := range model.Bones.GetSortedData() {
 			matrixes[i] = append(matrixes[i], mmath.NewMMat4())
 			// 逆BOf行列(初期姿勢行列)
-			matrixes[i][j].Mul(boneOffsetMatrixes[j])
+			matrixes[i][j].Mul(boneRevertOffsetMatrixes[j])
 			// 位置
 			matrixes[i][j].Mul(positions[i][j])
 			// 回転
@@ -98,21 +100,24 @@ func (bfs *BoneFrames) calc(
 	resultMatrixes := make([][]*mmath.MMat4, 0, len(fnos))
 	for i, fno := range fnos {
 		resultMatrixes = append(resultMatrixes, make([]*mmath.MMat4, 0, len(targetBoneNames)))
-		for j, boneName := range targetBoneNames {
+		for j, bone := range model.Bones.GetSortedData() {
 			resultMatrixes[i] = append(resultMatrixes[i], matrixes[i][j])
-			for k := range model.Bones.GetItemByName(boneName).ParentBoneIndexes {
+			for k := range bone.ParentBoneIndexes {
 				// 親ボーンの変形行列を掛ける
-				resultMatrixes[i][j].Mul(matrixes[i][k])
+				v := matrixes[i][k].Muled(resultMatrixes[i][j])
+				resultMatrixes[i][j] = &v
 			}
-			globalMatrix := resultMatrixes[i][j].Muled(bonePositionMatrixes[j])
+			// BOf行列を掛けてローカル行列を作成
+			localMatrix := resultMatrixes[i][j].Muled(boneOffsetMatrixes[j])
+			// 初期位置行列を掛けてグローバル行列を作成
 			p := positions[i][j].Translation()
 			r := rotations[i][j].Quaternion()
 			s := scales[i][j].Scaling()
-			boneTrees.SetItem(boneName, fno, NewBoneTree(
-				boneName,
+			boneTrees.SetItem(bone.Name, fno, NewBoneTree(
+				bone.Name,
 				fno,
-				&globalMatrix,        // ボーンの初期位置行列を掛ける
-				resultMatrixes[i][j], // ローカル行列はそのまま
+				resultMatrixes[i][j], // グローバル行列はそのまま
+				&localMatrix,         // ローカル行列
 				&p,                   // 移動
 				&r,                   // 回転
 				&mmath.MVec3{s.GetX(), s.GetY(), s.GetZ()}, // 拡大率
@@ -127,26 +132,26 @@ func (bfs *BoneFrames) calc(
 func (bfs *BoneFrames) createBoneMatrixes(
 	model *pmx.PmxModel,
 	targetBoneNames []string,
-) (map[string]int, []*mmath.MMat4, []*mmath.MMat4) {
+) (map[string]int, []*mmath.MMat4, []*mmath.MMat4, []*mmath.MMat4) {
 	boneNameIndexes := make(map[string]int, 0)
 	boneOffsetMatrixes := make([]*mmath.MMat4, 0)
+	boneRevertOffsetMatrixes := make([]*mmath.MMat4, 0)
 	bonePositionMatrixes := make([]*mmath.MMat4, 0)
 
-	for _, boneName := range targetBoneNames {
-		bone := model.Bones.GetItemByName(boneName)
+	for _, bone := range model.Bones.GetSortedData() {
 		// ボーン名:インデックス
-		boneNameIndexes[boneName] = bone.GetIndex()
-		// ボーンの初期姿勢行列
+		boneNameIndexes[bone.Name] = bone.GetIndex()
+		// ボーンのBOf行列
 		boneOffsetMatrixes = append(boneOffsetMatrixes, bone.OffsetMatrix.Copy())
+		// ボーンの逆BOf行列
+		boneRevertOffsetMatrixes = append(boneRevertOffsetMatrixes, bone.RevertOffsetMatrix.Copy())
 		// ボーンの初期位置行列
 		posMat := mmath.NewMMat4()
-		posMat[0][3] = bone.Position.GetX()
-		posMat[1][3] = bone.Position.GetY()
-		posMat[2][3] = bone.Position.GetZ()
+		posMat.Translate(bone.Position)
 		bonePositionMatrixes = append(bonePositionMatrixes, posMat)
 	}
 
-	return boneNameIndexes, boneOffsetMatrixes, bonePositionMatrixes
+	return boneNameIndexes, boneOffsetMatrixes, boneRevertOffsetMatrixes, bonePositionMatrixes
 }
 
 // アニメーション対象ボーン一覧取得
@@ -200,10 +205,18 @@ func (bfs *BoneFrames) getBoneMatrixes(
 		positions = append(positions, make([]*mmath.MMat4, 0, len(targetBoneNames)))
 		rotations = append(rotations, make([]*mmath.MMat4, 0, len(targetBoneNames)))
 		scales = append(scales, make([]*mmath.MMat4, 0, len(targetBoneNames)))
-		for _, boneName := range targetBoneNames {
-			positions[i] = append(positions[i], bfs.getPosition(fno, boneName))
-			rotations[i] = append(rotations[i], bfs.getRotation(fno, boneName))
-			scales[i] = append(scales[i], bfs.getScale(fno, boneName))
+		for _, bone := range model.Bones.GetSortedData() {
+			if slices.Contains(targetBoneNames, bone.Name) {
+				// ボーンが対象の場合、そのボーンの移動位置、回転角度、拡大率を取得
+				positions[i] = append(positions[i], bfs.getPosition(fno, bone.Name))
+				rotations[i] = append(rotations[i], bfs.getRotation(fno, bone.Name))
+				scales[i] = append(scales[i], bfs.getScale(fno, bone.Name))
+			} else {
+				// ボーンが対象外の場合、空の行列を追加
+				positions[i] = append(positions[i], mmath.NewMMat4())
+				rotations[i] = append(rotations[i], mmath.NewMMat4())
+				scales[i] = append(scales[i], mmath.NewMMat4())
+			}
 		}
 	}
 
@@ -231,8 +244,8 @@ func (bfs *BoneFrames) getRotation(fno int, boneName string) *mmath.MMat4 {
 func (bfs *BoneFrames) getScale(fno int, boneName string) *mmath.MMat4 {
 	bf := bfs.Data[boneName].GetItem(fno)
 	mat := mmath.NewMMat4()
-	mat[0][0] = bf.Scale.GetX()
-	mat[1][1] = bf.Scale.GetY()
-	mat[2][2] = bf.Scale.GetZ()
+	mat[0][0] = bf.Scale.GetX() + 1.0
+	mat[1][1] = bf.Scale.GetY() + 1.0
+	mat[2][2] = bf.Scale.GetZ() + 1.0
 	return mat
 }

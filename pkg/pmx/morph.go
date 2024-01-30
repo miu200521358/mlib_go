@@ -3,6 +3,7 @@ package pmx
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 // MorphPanel 操作パネル
@@ -125,10 +126,10 @@ func NewBoneMorph(boneIndex int, position *mmath.MVec3, rotation *mmath.MRotatio
 		BoneIndex:     boneIndex,
 		Position:      position,
 		Rotation:      rotation,
-		Scale:         &mmath.MVec3{},
-		LocalPosition: &mmath.MVec3{},
-		LocalRotation: &mmath.MRotation{},
-		LocalScale:    &mmath.MVec3{},
+		Scale:         mmath.NewMVec3(),
+		LocalPosition: mmath.NewMVec3(),
+		LocalRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		LocalScale:    mmath.NewMVec3(),
 	}
 }
 

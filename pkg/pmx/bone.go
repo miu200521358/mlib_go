@@ -6,7 +6,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type IkLink struct {
@@ -23,11 +22,11 @@ func NewIkLink() *IkLink {
 	return &IkLink{
 		BoneIndex:          -1,
 		AngleLimit:         false,
-		MinAngleLimit:      &mmath.MRotation{},
-		MaxAngleLimit:      &mmath.MRotation{},
+		MinAngleLimit:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		MaxAngleLimit:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 		LocalAngleLimit:    false,
-		LocalMinAngleLimit: &mmath.MRotation{},
-		LocalMaxAngleLimit: &mmath.MRotation{},
+		LocalMinAngleLimit: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		LocalMaxAngleLimit: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 	}
 }
 
@@ -47,7 +46,7 @@ func NewIk() *Ik {
 	return &Ik{
 		BoneIndex:    -1,
 		LoopCount:    0,
-		UnitRotation: mmath.NewRotationModelByDegrees(&mmath.MVec3{}),
+		UnitRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 		Links:        []*IkLink{},
 	}
 }
@@ -89,7 +88,7 @@ type Bone struct {
 	ParentRelativePosition *mmath.MVec3     // 親ボーンからの相対位置
 	ChildRelativePosition  *mmath.MVec3     // Tailボーンへの相対位置
 	LocalMatrix            *mmath.MMat4     // ローカル軸行列
-	ParentRevertMatrix     *mmath.MMat4     // 逆オフセット行列(親ボーンからの相対位置分を戻す)
+	RevertOffsetMatrix     *mmath.MMat4     // 逆オフセット行列(親ボーンからの相対位置分を戻す)
 	OffsetMatrix           *mmath.MMat4     // オフセット行列 (自身の位置を原点に戻す行列)
 	TreeBoneIndexes        []int            // 自分のボーンまでのボーンIndexのリスト
 	ParentBoneIndexes      []int            // 自分の親ボーンからルートまでのボーンIndexのリスト
@@ -109,43 +108,43 @@ type Bone struct {
 func NewBone() *Bone {
 	bone := &Bone{
 		IndexNameModel:         &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
-		Position:               &mmath.MVec3{},
+		Position:               mmath.NewMVec3(),
 		ParentIndex:            -1,
 		Layer:                  -1,
 		BoneFlag:               BONE_FLAG_NONE,
-		TailPosition:           &mmath.MVec3{},
+		TailPosition:           mmath.NewMVec3(),
 		TailIndex:              -1,
 		EffectIndex:            -1,
 		EffectFactor:           0.0,
-		FixedAxis:              &mmath.MVec3{},
-		LocalAxisX:             &mmath.MVec3{},
-		LocalAxisZ:             &mmath.MVec3{},
+		FixedAxis:              mmath.NewMVec3(),
+		LocalAxisX:             mmath.NewMVec3(),
+		LocalAxisZ:             mmath.NewMVec3(),
 		ExternalKey:            -1,
 		Ik:                     NewIk(),
 		DisplaySlot:            -1,
 		IsSystem:               true,
-		NormalizedLocalAxisX:   &mmath.MVec3{},
-		NormalizedLocalAxisY:   &mmath.MVec3{},
-		NormalizedLocalAxisZ:   &mmath.MVec3{},
-		LocalAxis:              &mmath.MVec3UnitX,
+		NormalizedLocalAxisX:   mmath.NewMVec3(),
+		NormalizedLocalAxisY:   mmath.NewMVec3(),
+		NormalizedLocalAxisZ:   mmath.NewMVec3(),
+		LocalAxis:              &mmath.MVec3{1, 0, 0},
 		IkLinkBoneIndexes:      []int{},
 		IkTargetBoneIndexes:    []int{},
-		ParentRelativePosition: &mmath.MVec3{},
-		ChildRelativePosition:  &mmath.MVec3{},
-		NormalizedFixedAxis:    &mmath.MVec3{},
+		ParentRelativePosition: mmath.NewMVec3(),
+		ChildRelativePosition:  mmath.NewMVec3(),
+		NormalizedFixedAxis:    mmath.NewMVec3(),
 		TreeBoneIndexes:        []int{},
-		ParentRevertMatrix:     &mmath.MMat4Ident,
-		OffsetMatrix:           &mmath.MMat4Ident,
+		RevertOffsetMatrix:     mmath.NewMMat4(),
+		OffsetMatrix:           mmath.NewMMat4(),
 		ParentBoneIndexes:      []int{},
 		RelativeBoneIndexes:    []int{},
 		ChildBoneIndexes:       []int{},
 		EffectiveBoneIndexes:   []int{},
 		AngleLimit:             false,
-		MinAngleLimit:          mmath.NewRotationModelByRadians(&mmath.MVec3{}),
-		MaxAngleLimit:          mmath.NewRotationModelByRadians(&mmath.MVec3{}),
+		MinAngleLimit:          mmath.NewRotationModelByRadians(mmath.NewMVec3()),
+		MaxAngleLimit:          mmath.NewRotationModelByRadians(mmath.NewMVec3()),
 		LocalAngleLimit:        false,
-		LocalMinAngleLimit:     mmath.NewRotationModelByRadians(&mmath.MVec3{}),
-		LocalMaxAngleLimit:     mmath.NewRotationModelByRadians(&mmath.MVec3{}),
+		LocalMinAngleLimit:     mmath.NewRotationModelByRadians(mmath.NewMVec3()),
+		LocalMaxAngleLimit:     mmath.NewRotationModelByRadians(mmath.NewMVec3()),
 	}
 	bone.NormalizedLocalAxisX = bone.LocalAxisX.Copy()
 	bone.NormalizedLocalAxisZ = bone.LocalAxisZ.Copy()
@@ -182,7 +181,7 @@ func (t *Bone) Copy() mcore.IndexNameModelInterface {
 	copy(copied.IkTargetBoneIndexes, t.IkTargetBoneIndexes)
 	copied.TreeBoneIndexes = make([]int, len(t.TreeBoneIndexes))
 	copy(copied.TreeBoneIndexes, t.TreeBoneIndexes)
-	copied.ParentRevertMatrix = t.ParentRevertMatrix.Copy()
+	copied.RevertOffsetMatrix = t.RevertOffsetMatrix.Copy()
 	copied.OffsetMatrix = t.OffsetMatrix.Copy()
 	copied.ParentBoneIndexes = make([]int, len(t.ParentBoneIndexes))
 	copy(copied.ParentBoneIndexes, t.ParentBoneIndexes)
@@ -362,7 +361,8 @@ func NewBones() *Bones {
 func (b *Bones) getParentRelativePosition(boneIndex int) *mmath.MVec3 {
 	bone := b.GetItem(boneIndex)
 	if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
-		return bone.Position.Sub(b.GetItem(bone.ParentIndex).Position)
+		v := bone.Position.Subed(b.GetItem(bone.ParentIndex).Position)
+		return &v
 	}
 	return mmath.NewMVec3()
 }
@@ -384,7 +384,8 @@ func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 		toPosition = bone.Position
 	}
 
-	return toPosition.Sub(&fromPosition)
+	v := toPosition.Subed(&fromPosition)
+	return &v
 }
 
 func (bone *Bone) normalizeFixedAxis(fixedAxis *mmath.MVec3) {

@@ -8,7 +8,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type PmxReader struct {
@@ -763,7 +762,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 				if err != nil {
 					return err
 				}
-				rotation := &mmath.MRotation{}
+				rotation := mmath.NewRotationModelByDegrees(mmath.NewMVec3())
 				rotation.SetQuaternion(qq)
 				m.Offsets = append(m.Offsets, NewBoneMorph(boneIndex, offset, rotation))
 			case MORPH_TYPE_UV, MORPH_TYPE_EXTENDED_UV1, MORPH_TYPE_EXTENDED_UV2, MORPH_TYPE_EXTENDED_UV3, MORPH_TYPE_EXTENDED_UV4:

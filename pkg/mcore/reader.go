@@ -216,15 +216,15 @@ func (r *BaseReader[T]) UnpackVec2() (*mmath.MVec2, error) {
 func (r *BaseReader[T]) UnpackVec3() (*mmath.MVec3, error) {
 	x, err := r.UnpackFloat()
 	if err != nil {
-		return &mmath.MVec3{}, err
+		return mmath.NewMVec3(), err
 	}
 	y, err := r.UnpackFloat()
 	if err != nil {
-		return &mmath.MVec3{}, err
+		return mmath.NewMVec3(), err
 	}
 	z, err := r.UnpackFloat()
 	if err != nil {
-		return &mmath.MVec3{}, err
+		return mmath.NewMVec3(), err
 	}
 	return &mmath.MVec3{x, y, z}, nil
 }

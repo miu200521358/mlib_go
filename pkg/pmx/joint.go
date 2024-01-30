@@ -17,12 +17,12 @@ type JointParam struct {
 
 func NewJointParam() *JointParam {
 	return &JointParam{
-		TranslationLimitMin:       &mmath.MVec3{},
-		TranslationLimitMax:       &mmath.MVec3{},
-		RotationLimitMin:          &mmath.MRotation{},
-		RotationLimitMax:          &mmath.MRotation{},
-		SpringConstantTranslation: &mmath.MVec3{},
-		SpringConstantRotation:    &mmath.MRotation{},
+		TranslationLimitMin:       mmath.NewMVec3(),
+		TranslationLimitMax:       mmath.NewMVec3(),
+		RotationLimitMin:          mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		RotationLimitMax:          mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		SpringConstantTranslation: mmath.NewMVec3(),
+		SpringConstantRotation:    mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 	}
 }
 
@@ -44,8 +44,8 @@ func NewJoint() *Joint {
 		JointType:       0,
 		RigidbodyIndexA: -1,
 		RigidbodyIndexB: -1,
-		Position:        &mmath.MVec3{},
-		Rotation:        &mmath.MRotation{},
+		Position:        mmath.NewMVec3(),
+		Rotation:        mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 		JointParam:      NewJointParam(),
 		IsSystem:        false,
 	}

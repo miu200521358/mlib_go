@@ -3,6 +3,7 @@ package pmx
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type RigidBodyParam struct {
@@ -11,6 +12,16 @@ type RigidBodyParam struct {
 	AngularDamping float64 // 回転減衰
 	Restitution    float64 // 反発力
 	Friction       float64 // 摩擦力
+}
+
+func NewRigidBodyParam() *RigidBodyParam {
+	return &RigidBodyParam{
+		Mass:           0,
+		LinearDamping:  0,
+		AngularDamping: 0,
+		Restitution:    0,
+		Friction:       0,
+	}
 }
 
 // 剛体の形状
@@ -104,14 +115,14 @@ func NewRigidBody() *RigidBody {
 		CollisionGroup:     0,
 		CollisionGroupMask: NewCollisionGroupFromSlice([]uint16{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
 		ShapeType:          SHAPE_BOX,
-		Size:               &mmath.MVec3{},
-		Position:           &mmath.MVec3{},
-		Rotation:           &mmath.MRotation{},
-		RigidBodyParam:     &RigidBodyParam{},
+		Size:               mmath.NewMVec3(),
+		Position:           mmath.NewMVec3(),
+		Rotation:           mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		RigidBodyParam:     NewRigidBodyParam(),
 		PhysicsType:        PHYSICS_TYPE_STATIC,
-		XDirection:         &mmath.MVec3{},
-		YDirection:         &mmath.MVec3{},
-		ZDirection:         &mmath.MVec3{},
+		XDirection:         mmath.NewMVec3(),
+		YDirection:         mmath.NewMVec3(),
+		ZDirection:         mmath.NewMVec3(),
 		IsSystem:           false,
 	}
 }
