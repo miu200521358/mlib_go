@@ -5,7 +5,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 func TestVmdMotionReader_ReadNameByFilepath(t *testing.T) {
@@ -248,4 +247,95 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		}
 	}
 
+	{
+		// キーがないフレーム
+		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Left()).GetItem(384)
+
+		// フレーム番号
+		expectedFrameNo := 384
+		if bf.Index != expectedFrameNo {
+			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
+		}
+
+		// 位置
+		expectedPosition := &mmath.MVec3{-1.63, 0.05, 2.58}
+		if !bf.Position.PracticallyEquals(expectedPosition, 1e-2) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position)
+		}
+
+		// 回転
+		expectedDegrees := &mmath.MVec3{-1.4, 6.7, -5.2}
+		if bf.Rotation.GetDegrees().PracticallyEquals(expectedDegrees, 1e-2) {
+			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
+		}
+	}
+
+	{
+		// キーがないフレーム
+		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Left()).GetItem(394)
+
+		// フレーム番号
+		expectedFrameNo := 394
+		if bf.Index != expectedFrameNo {
+			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
+		}
+
+		// 位置
+		expectedPosition := &mmath.MVec3{0.76, 1.17, 1.34}
+		if !bf.Position.PracticallyEquals(expectedPosition, 1e-2) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position)
+		}
+
+		// 回転
+		expectedDegrees := &mmath.MVec3{-41.9, -1.6, 1.0}
+		if bf.Rotation.GetDegrees().PracticallyEquals(expectedDegrees, 1e-2) {
+			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
+		}
+	}
+
+	{
+		// キーがないフレーム
+		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Left()).GetItem(412)
+
+		// フレーム番号
+		expectedFrameNo := 412
+		if bf.Index != expectedFrameNo {
+			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
+		}
+
+		// 位置
+		expectedPosition := &mmath.MVec3{-0.76, -0.61, -1.76}
+		if !bf.Position.PracticallyEquals(expectedPosition, 1e-2) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position)
+		}
+
+		// 回転
+		expectedDegrees := &mmath.MVec3{43.1, 0.0, 0.0}
+		if bf.Rotation.GetDegrees().PracticallyEquals(expectedDegrees, 1e-2) {
+			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
+		}
+	}
+
+	{
+		// キーがないフレーム
+		bf := motion.BoneFrames.GetItem(pmx.ARM.Right()).GetItem(384)
+
+		// フレーム番号
+		expectedFrameNo := 384
+		if bf.Index != expectedFrameNo {
+			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
+		}
+
+		// 位置
+		expectedPosition := &mmath.MVec3{0.0, 0.0, 0.0}
+		if !bf.Position.PracticallyEquals(expectedPosition, 1e-2) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position)
+		}
+
+		// 回転
+		expectedDegrees := &mmath.MVec3{13.5, -4.3, 27.0}
+		if bf.Rotation.GetDegrees().PracticallyEquals(expectedDegrees, 1e-2) {
+			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
+		}
+	}
 }

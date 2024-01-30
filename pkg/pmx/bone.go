@@ -6,6 +6,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type IkLink struct {
@@ -376,6 +377,8 @@ func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 		toPosition = b.GetItem(bone.TailIndex).Position
 	} else if !bone.IsTailBone() && bone.TailPosition.Length() > 0 {
 		toPosition = bone.TailPosition.Add(bone.Position)
+	} else if bone.ParentIndex < 0 || !b.Contains(bone.ParentIndex) {
+		return mmath.NewMVec3()
 	} else {
 		fromPosition = *b.GetItem(bone.ParentIndex).Position
 		toPosition = bone.Position
