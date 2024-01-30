@@ -105,6 +105,17 @@ func (v *MVec4) MMD() *MVec4 {
 	return &MVec4{v.GetX(), -v.GetY(), -v.GetZ(), v.GetW()}
 }
 
+// FromVec3 returns a vector with the first 3 components copied from a vec3.T.
+func FromVec3(other *MVec3) MVec4 {
+	return MVec4{other[0], other[1], other[2], 1}
+}
+
+// Vec3DividedByW returns a vec3.T version of the vector by dividing the first three vector components (XYZ) by the last one (W).
+func (vec *MVec4) Vec3DividedByW() MVec3 {
+	oow := 1 / vec[3]
+	return MVec3{vec[0] * oow, vec[1] * oow, vec[2] * oow}
+}
+
 // Add ベクトルに他のベクトルを加算します
 func (v *MVec4) Add(other *MVec4) *MVec4 {
 	return (*MVec4)((*vec4.T).Add((*vec4.T)(v), (*vec4.T)(other)))
