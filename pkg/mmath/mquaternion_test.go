@@ -141,3 +141,15 @@ func TestMQuaternionSlerp(t *testing.T) {
 		t.Errorf("Slerp failed. Expected %v, got %v", expected, result)
 	}
 }
+
+func TestMQuaternionToFixedAxisRotation(t *testing.T) {
+	quat := MQuaternion{0.4738680537545347, 0.20131048764138487, -0.48170221425083437, 0.7091446481376844}
+	fixedAxis := MVec3{0.0, 1.0, 0.0}
+	expected := &MQuaternion{0.00000, 0.70506, 0.00000, 0.70914}
+
+	result := quat.ToFixedAxisRotation(&fixedAxis)
+
+	if result.PracticallyEquals(expected, 1e-10) {
+		t.Errorf("ToFixedAxisRotation failed. Expected %v, got %v", expected, result)
+	}
+}

@@ -78,4 +78,58 @@ func TestVmdMotion_AnimateBone(t *testing.T) {
 			t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.SHOULDER_P.Left(), fno).Position)
 		}
 	}
+	{
+		expectedPosition := &mmath.MVec3{0.324862, 16.470263, 0.419041}
+		if !matrixes.GetItem(pmx.SHOULDER.Left(), fno).Position.PracticallyEquals(expectedPosition, 1e-6) {
+			t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.SHOULDER.Left(), fno).Position)
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{1.369838, 16.312170, 0.676838}
+		if !matrixes.GetItem(pmx.ARM.Left(), fno).Position.PracticallyEquals(expectedPosition, 1e-6) {
+			t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ARM.Left(), fno).Position)
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{1.845001, 15.024807, 0.747681}
+		if !matrixes.GetItem(pmx.ARM_TWIST.Left(), fno).Position.PracticallyEquals(expectedPosition, 1e-6) {
+			t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ARM_TWIST.Left(), fno).Position)
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{2.320162, 13.737446, 0.818525}
+		if !matrixes.GetItem(pmx.ELBOW.Left(), fno).Position.PracticallyEquals(expectedPosition, 1e-6) {
+			t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ELBOW.Left(), fno).Position)
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{2.516700, 12.502447, 0.336127}
+		if !matrixes.GetItem(pmx.WRIST_TWIST.Left(), fno).Position.PracticallyEquals(expectedPosition, 1e-6) {
+			t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.WRIST_TWIST.Left(), fno).Position)
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{2.732219, 11.267447, -0.146273}
+		if !matrixes.GetItem(pmx.WRIST.Left(), fno).Position.PracticallyEquals(expectedPosition, 1e-6) {
+			t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.WRIST.Left(), fno).Position)
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{2.649188, 10.546797, -0.607412}
+		if !matrixes.GetItem(pmx.INDEX1.Left(), fno).Position.PracticallyEquals(expectedPosition, 1e-6) {
+			t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.INDEX1.Left(), fno).Position)
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{2.408238, 10.209290, -0.576288}
+		if !matrixes.GetItem(pmx.INDEX2.Left(), fno).Position.PracticallyEquals(expectedPosition, 1e-6) {
+			t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.INDEX2.Left(), fno).Position)
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{2.360455, 10.422402, -0.442668}
+		if !matrixes.GetItem(pmx.INDEX3.Left(), fno).Position.PracticallyEquals(expectedPosition, 1e-6) {
+			t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.INDEX3.Left(), fno).Position)
+		}
+	}
 }

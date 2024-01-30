@@ -81,7 +81,7 @@ func (bfs *BoneFrames) calc(
 	// 各ボーンの座標変換行列×逆BOf行列
 	matrixes := make([][]*mmath.MMat4, 0, len(fnos))
 	for i := range fnos {
-		matrixes = append(matrixes, make([]*mmath.MMat4, 0, len(targetBoneNames)))
+		matrixes = append(matrixes, make([]*mmath.MMat4, 0, len(model.Bones.Data)))
 		for j := range model.Bones.GetSortedData() {
 			matrixes[i] = append(matrixes[i], mmath.NewMMat4())
 			// 逆BOf行列(初期姿勢行列)
@@ -99,13 +99,12 @@ func (bfs *BoneFrames) calc(
 
 	resultMatrixes := make([][]*mmath.MMat4, 0, len(fnos))
 	for i, fno := range fnos {
-		resultMatrixes = append(resultMatrixes, make([]*mmath.MMat4, 0, len(targetBoneNames)))
+		resultMatrixes = append(resultMatrixes, make([]*mmath.MMat4, 0, len(model.Bones.Data)))
 		for j, bone := range model.Bones.GetSortedData() {
-			resultMatrixes[i] = append(resultMatrixes[i], matrixes[i][j])
-			for k := range bone.ParentBoneIndexes {
+			resultMatrixes[i] = append(resultMatrixes[i], matrixes[i][j].Copy())
+			for _, k := range bone.ParentBoneIndexes {
 				// 親ボーンの変形行列を掛ける
-				v := matrixes[i][k].Muled(resultMatrixes[i][j])
-				resultMatrixes[i][j] = &v
+				resultMatrixes[i][j].Mul(matrixes[i][k])
 			}
 			// BOf行列を掛けてローカル行列を作成
 			localMatrix := resultMatrixes[i][j].Muled(boneOffsetMatrixes[j])
@@ -134,9 +133,9 @@ func (bfs *BoneFrames) createBoneMatrixes(
 	targetBoneNames []string,
 ) (map[string]int, []*mmath.MMat4, []*mmath.MMat4, []*mmath.MMat4) {
 	boneNameIndexes := make(map[string]int, 0)
-	boneOffsetMatrixes := make([]*mmath.MMat4, 0)
-	boneRevertOffsetMatrixes := make([]*mmath.MMat4, 0)
-	bonePositionMatrixes := make([]*mmath.MMat4, 0)
+	boneOffsetMatrixes := make([]*mmath.MMat4, 0, len(model.Bones.Data))
+	boneRevertOffsetMatrixes := make([]*mmath.MMat4, 0, len(model.Bones.Data))
+	bonePositionMatrixes := make([]*mmath.MMat4, 0, len(model.Bones.Data))
 
 	for _, bone := range model.Bones.GetSortedData() {
 		// ボーン名:インデックス
@@ -208,9 +207,9 @@ func (bfs *BoneFrames) getBoneMatrixes(
 		for _, bone := range model.Bones.GetSortedData() {
 			if slices.Contains(targetBoneNames, bone.Name) {
 				// ボーンが対象の場合、そのボーンの移動位置、回転角度、拡大率を取得
-				positions[i] = append(positions[i], bfs.getPosition(fno, bone.Name))
-				rotations[i] = append(rotations[i], bfs.getRotation(fno, bone.Name))
-				scales[i] = append(scales[i], bfs.getScale(fno, bone.Name))
+				positions[i] = append(positions[i], bfs.getPosition(fno, bone.Name, model))
+				rotations[i] = append(rotations[i], bfs.getRotation(fno, bone.Name, model))
+				scales[i] = append(scales[i], bfs.getScale(fno, bone.Name, model))
 			} else {
 				// ボーンが対象外の場合、空の行列を追加
 				positions[i] = append(positions[i], mmath.NewMMat4())
@@ -224,7 +223,7 @@ func (bfs *BoneFrames) getBoneMatrixes(
 }
 
 // 該当キーフレにおけるボーンの移動位置
-func (bfs *BoneFrames) getPosition(fno int, boneName string) *mmath.MMat4 {
+func (bfs *BoneFrames) getPosition(fno int, boneName string, model *pmx.PmxModel) *mmath.MMat4 {
 	bf := bfs.Data[boneName].GetItem(fno)
 	mat := mmath.NewMMat4()
 	mat[0][3] = bf.Position.GetX()
@@ -234,14 +233,60 @@ func (bfs *BoneFrames) getPosition(fno int, boneName string) *mmath.MMat4 {
 }
 
 // 該当キーフレにおけるボーンの回転角度
-func (bfs *BoneFrames) getRotation(fno int, boneName string) *mmath.MMat4 {
+func (bfs *BoneFrames) getRotation(fno int, boneName string, model *pmx.PmxModel) *mmath.MMat4 {
+	bone := model.Bones.GetItemByName(boneName)
+
 	bf := bfs.Data[boneName].GetItem(fno)
-	rot := bf.Rotation.GetQuaternion().ToMat4()
-	return rot
+	rot := bf.Rotation.GetQuaternion()
+
+	if bone.IsExternalRotation() {
+		// 外部親変形ありの場合、外部親変形行列を掛ける
+		effectQ := bfs.getRotationWithEffect(fno, bone.Index, model, 0)
+		rot.Mul(effectQ)
+	}
+
+	if bone.HasFixedAxis() {
+		// 軸制限回転を求める
+		rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
+	}
+
+	return rot.ToMat4()
+}
+
+// 付与親を加味した回転角度
+func (bfs *BoneFrames) getRotationWithEffect(fno int, boneIndex int, model *pmx.PmxModel, loop int) *mmath.MQuaternion {
+	bone := model.Bones.GetItem(boneIndex)
+
+	if bone.EffectFactor == 0 && loop > 20 {
+		// 付与率が0の場合、常に0になる
+		// MMDエンジン対策で無限ループを避ける
+		return mmath.NewMQuaternion()
+	}
+
+	if !(bone.EffectIndex > 0 && model.Bones.Contains(bone.EffectIndex)) {
+		// 付与親が存在しない場合、常に0になる
+		return mmath.NewMQuaternion()
+	}
+
+	// 付与親が存在する場合、付与親の回転角度を掛ける
+	effectBone := model.Bones.GetItem(bone.EffectIndex)
+	rot := bfs.getRotation(fno, effectBone.Name, model)
+	qq := rot.Quaternion()
+
+	if bone.EffectFactor >= 0 {
+		// 正の付与親
+		effectQ := (&qq).MulFactor(bone.EffectFactor)
+		return &effectQ
+	} else {
+		// 負の付与親の場合、逆回転
+		effectQ := qq.MulFactor(-bone.EffectFactor)
+		(&effectQ).Invert()
+		return &effectQ
+	}
 }
 
 // 該当キーフレにおけるボーンの拡大率
-func (bfs *BoneFrames) getScale(fno int, boneName string) *mmath.MMat4 {
+func (bfs *BoneFrames) getScale(fno int, boneName string, model *pmx.PmxModel) *mmath.MMat4 {
 	bf := bfs.Data[boneName].GetItem(fno)
 	mat := mmath.NewMMat4()
 	mat[0][0] = bf.Scale.GetX() + 1.0

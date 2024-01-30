@@ -235,6 +235,15 @@ func Mul(a, b *MQuaternion) MQuaternion {
 	return MQuaternion(quaternion.Mul((*quaternion.T)(a), (*quaternion.T)(b)))
 }
 
+// MulFactor
+func (quat *MQuaternion) MulFactor(factor float64) MQuaternion {
+	if factor == 0.0 {
+		return *NewMQuaternion()
+	}
+	qq := MQuaternion{quat.GetX(), quat.GetY(), quat.GetZ(), quat.GetW() / factor}
+	return qq.Normalized()
+}
+
 // Slerp は t (0,1) における a と b の間の球面線形補間クォータニオンを返す。
 // See http://en.wikipedia.org/wiki/Slerp
 func Slerp(a, b *MQuaternion, t float64) MQuaternion {
@@ -409,4 +418,28 @@ func (v *MQuaternion) ToMat4() *MMat4 {
 	mat := NewMMat4()
 	mat.AssignQuaternion(v)
 	return mat
+}
+
+// ToFixedAxisRotation returns a quaternion representing the rotation with a fixed axis limitation.
+func (quat *MQuaternion) ToFixedAxisRotation(fixedAxis *MVec3) *MQuaternion {
+	normalizedFixedAxis := fixedAxis.Normalized()
+	quatVec := quat.Vec3().Normalized()
+	theta := math.Acos(math.Max(-1, math.Min(1, normalizedFixedAxis.Dot(&quatVec))))
+	fixedQuatAxis := normalizedFixedAxis.MulScalar(1).MulScalar((quat.Vec3()).Length())
+	if theta >= math.Pi/2 {
+		fixedQuatAxis = fixedQuatAxis.MulScalar(-1)
+	}
+
+	fixedQuat := MQuaternion{fixedQuatAxis.GetX(), fixedQuatAxis.GetY(), fixedQuatAxis.GetZ(), quat.GetW()}
+	fixedQuat.Normalize()
+
+	return &fixedQuat
+}
+
+// PracticallyEquals
+func (quat *MQuaternion) PracticallyEquals(other *MQuaternion, epsilon float64) bool {
+	return (math.Abs(quat[0]-other[0]) <= epsilon) &&
+		(math.Abs(quat[1]-other[1]) <= epsilon) &&
+		(math.Abs(quat[2]-other[2]) <= epsilon) &&
+		(math.Abs(quat[3]-other[3]) <= epsilon)
 }

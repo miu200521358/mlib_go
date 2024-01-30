@@ -280,23 +280,23 @@ func (mat *MMat4) AssignQuaternion(q *MQuaternion) *MMat4 {
 	wz := q[3] * q[2] * 2
 
 	mat[0][0] = 1 - (yy + zz)
-	mat[1][0] = xy - wz
-	mat[2][0] = xz + wy
-	mat[3][0] = 0
-
-	mat[0][1] = xy + wz
-	mat[1][1] = 1 - (xx + zz)
-	mat[2][1] = yz - wx
-	mat[3][1] = 0
-
-	mat[0][2] = xz - wy
-	mat[1][2] = yz + wx
-	mat[2][2] = 1 - (xx + yy)
-	mat[3][2] = 0
-
+	mat[0][1] = xy - wz
+	mat[0][2] = xz + wy
 	mat[0][3] = 0
+
+	mat[1][0] = xy + wz
+	mat[1][1] = 1 - (xx + zz)
+	mat[1][2] = yz - wx
 	mat[1][3] = 0
+
+	mat[2][0] = xz - wy
+	mat[2][1] = yz + wx
+	mat[2][2] = 1 - (xx + yy)
 	mat[2][3] = 0
+
+	mat[3][0] = 0
+	mat[3][1] = 0
+	mat[3][2] = 0
 	mat[3][3] = 1
 
 	return mat
@@ -308,23 +308,23 @@ func (mat *MMat4) AssignXRotation(angle float64) *MMat4 {
 	sine := math.Sin(angle)
 
 	mat[0][0] = 1
-	mat[1][0] = 0
-	mat[2][0] = 0
-	mat[3][0] = 0
-
 	mat[0][1] = 0
-	mat[1][1] = cosine
-	mat[2][1] = -sine
-	mat[3][1] = 0
-
 	mat[0][2] = 0
-	mat[1][2] = sine
-	mat[2][2] = cosine
-	mat[3][2] = 0
-
 	mat[0][3] = 0
+
+	mat[1][0] = 0
+	mat[1][1] = cosine
+	mat[1][2] = -sine
 	mat[1][3] = 0
+
+	mat[2][0] = 0
+	mat[2][1] = sine
+	mat[2][2] = cosine
 	mat[2][3] = 0
+
+	mat[3][0] = 0
+	mat[3][1] = 0
+	mat[3][2] = 0
 	mat[3][3] = 1
 
 	return mat
@@ -336,23 +336,23 @@ func (mat *MMat4) AssignYRotation(angle float64) *MMat4 {
 	sine := math.Sin(angle)
 
 	mat[0][0] = cosine
-	mat[1][0] = 0
-	mat[2][0] = sine
-	mat[3][0] = 0
-
 	mat[0][1] = 0
-	mat[1][1] = 1
-	mat[2][1] = 0
-	mat[3][1] = 0
-
-	mat[0][2] = -sine
-	mat[1][2] = 0
-	mat[2][2] = cosine
-	mat[3][2] = 0
-
+	mat[0][2] = sine
 	mat[0][3] = 0
+
+	mat[1][0] = 0
+	mat[1][1] = 1
+	mat[1][2] = 0
 	mat[1][3] = 0
+
+	mat[2][0] = -sine
+	mat[2][1] = 0
+	mat[2][2] = cosine
 	mat[2][3] = 0
+
+	mat[3][0] = 0
+	mat[3][1] = 0
+	mat[3][2] = 0
 	mat[3][3] = 1
 
 	return mat
@@ -364,23 +364,23 @@ func (mat *MMat4) AssignZRotation(angle float64) *MMat4 {
 	sine := math.Sin(angle)
 
 	mat[0][0] = cosine
-	mat[1][0] = -sine
-	mat[2][0] = 0
-	mat[3][0] = 0
-
-	mat[0][1] = sine
-	mat[1][1] = cosine
-	mat[2][1] = 0
-	mat[3][1] = 0
-
+	mat[0][1] = -sine
 	mat[0][2] = 0
-	mat[1][2] = 0
-	mat[2][2] = 1
-	mat[3][2] = 0
-
 	mat[0][3] = 0
+
+	mat[1][0] = sine
+	mat[1][1] = cosine
+	mat[1][2] = 0
 	mat[1][3] = 0
+
+	mat[2][0] = 0
+	mat[2][1] = 0
+	mat[2][2] = 1
 	mat[2][3] = 0
+
+	mat[3][0] = 0
+	mat[3][1] = 0
+	mat[3][2] = 0
 	mat[3][3] = 1
 
 	return mat
@@ -389,23 +389,23 @@ func (mat *MMat4) AssignZRotation(angle float64) *MMat4 {
 // AssignCoordinateSystem assigns the rotation of a orthogonal coordinates system to the rotation part of the matrix and sets the remaining elements to their ident value.
 func (mat *MMat4) AssignCoordinateSystem(x, y, z *MVec3) *MMat4 {
 	mat[0][0] = x[0]
-	mat[1][0] = x[1]
-	mat[2][0] = x[2]
-	mat[3][0] = 0
-
-	mat[0][1] = y[0]
-	mat[1][1] = y[1]
-	mat[2][1] = y[2]
-	mat[3][1] = 0
-
-	mat[0][2] = z[0]
-	mat[1][2] = z[1]
-	mat[2][2] = z[2]
-	mat[3][2] = 0
-
+	mat[0][1] = x[1]
+	mat[0][2] = x[2]
 	mat[0][3] = 0
+
+	mat[1][0] = y[0]
+	mat[1][1] = y[1]
+	mat[1][2] = y[2]
 	mat[1][3] = 0
+
+	mat[2][0] = z[0]
+	mat[2][1] = z[1]
+	mat[2][2] = z[2]
 	mat[2][3] = 0
+
+	mat[3][0] = 0
+	mat[3][1] = 0
+	mat[3][2] = 0
 	mat[3][3] = 1
 
 	return mat
@@ -421,23 +421,23 @@ func (mat *MMat4) AssignEulerRotation(yHead, xPitch, zRoll float64) *MMat4 {
 	cosR := math.Cos(zRoll)
 
 	mat[0][0] = cosR*cosH - sinR*sinP*sinH
-	mat[1][0] = -sinR * cosP
-	mat[2][0] = cosR*sinH + sinR*sinP*cosH
-	mat[3][0] = 0
-
-	mat[0][1] = sinR*cosH + cosR*sinP*sinH
-	mat[1][1] = cosR * cosP
-	mat[2][1] = sinR*sinH - cosR*sinP*cosH
-	mat[3][1] = 0
-
-	mat[0][2] = -cosP * sinH
-	mat[1][2] = sinP
-	mat[2][2] = cosP * cosH
-	mat[3][2] = 0
-
+	mat[0][1] = -sinR * cosP
+	mat[0][2] = cosR*sinH + sinR*sinP*cosH
 	mat[0][3] = 0
+
+	mat[1][0] = sinR*cosH + cosR*sinP*sinH
+	mat[1][1] = cosR * cosP
+	mat[1][2] = sinR*sinH - cosR*sinP*cosH
 	mat[1][3] = 0
+
+	mat[2][0] = -cosP * sinH
+	mat[2][1] = sinP
+	mat[2][2] = cosP * cosH
 	mat[2][3] = 0
+
+	mat[3][0] = 0
+	mat[3][1] = 0
+	mat[3][2] = 0
 	mat[3][3] = 1
 
 	return mat
@@ -463,23 +463,23 @@ func (mat *MMat4) AssignPerspectiveProjection(left, right, bottom, top, znear, z
 	ooFarNear := 1 / (zfar - znear)
 
 	mat[0][0] = near2 / (right - left)
-	mat[1][0] = 0
-	mat[2][0] = (right + left) / (right - left)
-	mat[3][0] = 0
-
 	mat[0][1] = 0
-	mat[1][1] = near2 / (top - bottom)
-	mat[2][1] = (top + bottom) / (top - bottom)
-	mat[3][1] = 0
-
-	mat[0][2] = 0
-	mat[1][2] = 0
-	mat[2][2] = -(zfar + znear) * ooFarNear
-	mat[3][2] = -2 * zfar * znear * ooFarNear
-
+	mat[0][2] = (right + left) / (right - left)
 	mat[0][3] = 0
+
+	mat[1][0] = 0
+	mat[1][1] = near2 / (top - bottom)
+	mat[1][2] = (top + bottom) / (top - bottom)
 	mat[1][3] = 0
-	mat[2][3] = -1
+
+	mat[2][0] = 0
+	mat[2][1] = 0
+	mat[2][2] = -(zfar + znear) * ooFarNear
+	mat[2][3] = -2 * zfar * znear * ooFarNear
+
+	mat[3][0] = 0
+	mat[3][1] = 0
+	mat[3][2] = -1
 	mat[3][3] = 0
 
 	return mat
@@ -492,23 +492,23 @@ func (mat *MMat4) AssignOrthogonalProjection(left, right, bottom, top, znear, zf
 	ooFarNear := 1 / (zfar - znear)
 
 	mat[0][0] = 2 * ooRightLeft
-	mat[1][0] = 0
-	mat[2][0] = 0
-	mat[3][0] = -(right + left) * ooRightLeft
-
 	mat[0][1] = 0
-	mat[1][1] = 2 * ooTopBottom
-	mat[2][1] = 0
-	mat[3][1] = -(top + bottom) * ooTopBottom
-
 	mat[0][2] = 0
-	mat[1][2] = 0
-	mat[2][2] = -2 * ooFarNear
-	mat[3][2] = -(zfar + znear) * ooFarNear
+	mat[0][3] = -(right + left) * ooRightLeft
 
-	mat[0][3] = 0
-	mat[1][3] = 0
-	mat[2][3] = 0
+	mat[1][0] = 0
+	mat[1][1] = 2 * ooTopBottom
+	mat[1][2] = 0
+	mat[1][3] = -(top + bottom) * ooTopBottom
+
+	mat[2][0] = 0
+	mat[2][1] = 0
+	mat[2][2] = -2 * ooFarNear
+	mat[2][3] = -(zfar + znear) * ooFarNear
+
+	mat[3][0] = 0
+	mat[3][1] = 0
+	mat[3][2] = 0
 	mat[3][3] = 1
 
 	return mat
