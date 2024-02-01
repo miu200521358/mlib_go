@@ -1,20 +1,14 @@
-package mmath
+package mmath2
 
 import (
 	"fmt"
 	"hash/fnv"
 	"math"
 
-	"github.com/go-gl/mathgl/mgl32"
-	"github.com/ungerik/go3d/float64/vec2"
+	"github.com/go-gl/mathgl/mgl64"
 
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
-
-type MVec2 vec2.T
-
-func NewMVec2() *MVec2 {
-	return &MVec2{0, 0}
-}
 
 var (
 	MVec2Zero = MVec2{}
@@ -31,6 +25,12 @@ var (
 	// MaxVal holds a vector with the highest possible component values.
 	MVec2MaxVal = MVec2{+math.MaxFloat64, +math.MaxFloat64}
 )
+
+type MVec2 mgl64.Vec2
+
+func NewMVec2() *MVec2 {
+	return &MVec2{0, 0}
+}
 
 // GetX returns the value of the X coordinate
 func (v *MVec2) GetX() float64 {
@@ -52,18 +52,14 @@ func (v *MVec2) SetY(y float64) {
 	v[1] = y
 }
 
-// String T の文字列表現を返します。
+// String 文字列表現を返します。
 func (v *MVec2) String() string {
 	return fmt.Sprintf("[x=%.5f, y=%.5f]", v.GetX(), v.GetY())
 }
 
 // GL OpenGL座標系に変換された2次元ベクトルを返します
-func (v *MVec2) GL() [2]float32 {
-	return [2]float32{float32(-v.GetX()), float32(v.GetY())}
-}
-
-func (v *MVec2) Mgl() mgl32.Vec2 {
-	return mgl32.Vec2{float32(-v.GetX()), float32(v.GetY())}
+func (v *MVec2) GL() [2]float64 {
+	return [2]float64{float64(-v.GetX()), float64(v.GetY())}
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します
@@ -73,91 +69,95 @@ func (v *MVec2) MMD() *MVec2 {
 
 // Add ベクトルに他のベクトルを加算します
 func (v *MVec2) Add(other *MVec2) *MVec2 {
-	return (*MVec2)((*vec2.T).Add((*vec2.T)(v), (*vec2.T)(other)))
+	v[0] += other[0]
+	v[1] += other[1]
+	return v
 }
 
 // AddScalar ベクトルの各要素にスカラーを加算します
 func (v *MVec2) AddScalar(s float64) *MVec2 {
-	return (*MVec2)((*vec2.T).Add((*vec2.T)(v), &vec2.T{s, s}))
+	v[0] += s
+	v[1] += s
+	return v
 }
 
 // Added ベクトルに他のベクトルを加算した結果を返します
 func (v *MVec2) Added(other *MVec2) MVec2 {
-	return MVec2((*vec2.T).Added((*vec2.T)(v), (*vec2.T)(other)))
+	return MVec2{v[0] + other[0], v[1] + other[1]}
 }
 
 func (v *MVec2) AddedScalar(s float64) MVec2 {
-	return MVec2((*vec2.T).Added((*vec2.T)(v), &vec2.T{s, s}))
+	return MVec2{v[0] + s, v[1] + s}
 }
 
 // Sub ベクトルから他のベクトルを減算します
 func (v *MVec2) Sub(other *MVec2) *MVec2 {
-	return (*MVec2)((*vec2.T).Sub((*vec2.T)(v), (*vec2.T)(other)))
+	v[0] -= other[0]
+	v[1] -= other[1]
+	return v
 }
 
 // SubScalar ベクトルの各要素からスカラーを減算します
 func (v *MVec2) SubScalar(s float64) *MVec2 {
-	return (*MVec2)((*vec2.T).Sub((*vec2.T)(v), &vec2.T{s, s}))
+	v[0] -= s
+	v[1] -= s
+	return v
 }
 
 // Subed ベクトルから他のベクトルを減算した結果を返します
 func (v *MVec2) Subed(other *MVec2) MVec2 {
-	return MVec2((*vec2.T).Subed((*vec2.T)(v), (*vec2.T)(other)))
+	return MVec2{v[0] - other[0], v[1] - other[1]}
 }
 
 func (v *MVec2) SubedScalar(s float64) MVec2 {
-	return MVec2((*vec2.T).Subed((*vec2.T)(v), &vec2.T{s, s}))
+	return MVec2{v[0] - s, v[1] - s}
 }
 
 // Mul ベクトルの各要素に他のベクトルの各要素を乗算します
 func (v *MVec2) Mul(other *MVec2) *MVec2 {
-	return (*MVec2)((*vec2.T).Mul((*vec2.T)(v), (*vec2.T)(other)))
+	v[0] *= other[0]
+	v[1] *= other[1]
+	return v
 }
 
 // MulScalar ベクトルの各要素にスカラーを乗算します
 func (v *MVec2) MulScalar(s float64) *MVec2 {
-	return (*MVec2)((*vec2.T).Mul((*vec2.T)(v), &vec2.T{s, s}))
+	v[0] *= s
+	v[1] *= s
+	return v
 }
 
 // Muled ベクトルの各要素に他のベクトルの各要素を乗算した結果を返します
 func (v *MVec2) Muled(other *MVec2) MVec2 {
-	return MVec2((*vec2.T).Muled((*vec2.T)(v), (*vec2.T)(other)))
+	return MVec2{v[0] * other[0], v[1] * other[1]}
 }
 
 func (v *MVec2) MuledScalar(s float64) MVec2 {
-	return MVec2((*vec2.T).Muled((*vec2.T)(v), &vec2.T{s, s}))
+	return MVec2{v[0] * s, v[1] * s}
 }
 
 // Div ベクトルの各要素を他のベクトルの各要素で除算します
 func (v *MVec2) Div(other *MVec2) *MVec2 {
-	return &MVec2{
-		v.GetX() / other.GetX(),
-		v.GetY() / other.GetY(),
-	}
+	v[0] /= other[0]
+	v[1] /= other[1]
+	return v
 }
 
 // DivScalar ベクトルの各要素をスカラーで除算します
 func (v *MVec2) DivScalar(s float64) *MVec2 {
-	return &MVec2{
-		v.GetX() / s,
-		v.GetY() / s,
-	}
+	v[0] /= s
+	v[1] /= s
+	return v
 }
 
 // Dived ベクトルの各要素を他のベクトルの各要素で除算した結果を返します
 func (v *MVec2) Dived(other *MVec2) MVec2 {
-	return MVec2{
-		v.GetX() / other.GetX(),
-		v.GetY() / other.GetY(),
-	}
+	return MVec2{v[0] / other[0], v[1] / other[1]}
 }
 
 // DivedScalar ベクトルの各要素をスカラーで除算した結果を返します
 func (v *MVec2) DivedScalar(s float64) MVec2 {
-	return MVec2{
-		v.GetX() / s,
-		v.GetY() / s,
-	}
+	return MVec2{v[0] / s, v[1] / s}
 }
 
 // Equal ベクトルが他のベクトルと等しいかどうかをチェックします
@@ -172,7 +172,8 @@ func (v *MVec2) NotEquals(other MVec2) bool {
 
 // PracticallyEquals ベクトルが他のベクトルとほぼ等しいかどうかをチェックします
 func (v *MVec2) PracticallyEquals(other *MVec2, epsilon float64) bool {
-	return (*vec2.T).PracticallyEquals((*vec2.T)(v), (*vec2.T)(other), epsilon)
+	return (math.Abs(v[0]-other[0]) <= epsilon) &&
+		(math.Abs(v[1]-other[1]) <= epsilon)
 }
 
 // LessThan ベクトルが他のベクトルより小さいかどうかをチェックします (<)
@@ -197,17 +198,26 @@ func (v *MVec2) GreaterThanOrEquals(other *MVec2) bool {
 
 // Invert ベクトルの各要素の符号を反転します (-v)
 func (v *MVec2) Invert() *MVec2 {
-	return (*MVec2)((*vec2.T).Invert((*vec2.T)(v)))
+	v[0] = -v[0]
+	v[1] = -v[1]
+	return v
 }
 
 // Inverted ベクトルの各要素の符号を反転した結果を返します (-v)
 func (v *MVec2) Inverted() MVec2 {
-	return MVec2((*vec2.T).Inverted((*vec2.T)(v)))
+	return MVec2{-v[0], -v[1]}
 }
 
 // Abs ベクトルの各要素の絶対値を返します
-func (v *MVec2) Abs() MVec2 {
-	return MVec2{math.Abs(v.GetX()), math.Abs(v.GetY())}
+func (v *MVec2) Abs() *MVec2 {
+	v[0] = math.Abs(v[0])
+	v[1] = math.Abs(v[1])
+	return v
+}
+
+// Absed ベクトルの各要素の絶対値を返します
+func (v *MVec2) Absed() MVec2 {
+	return MVec2{math.Abs(v[0]), math.Abs(v[1])}
 }
 
 // Hash ベクトルのハッシュ値を計算します
@@ -217,34 +227,47 @@ func (v *MVec2) Hash() uint64 {
 	return h.Sum64()
 }
 
-// Length ベクトルの長さを返します
-func (v *MVec2) Length() float64 {
-	return (*vec2.T).Length((*vec2.T)(v))
-}
-
 // IsZero ベクトルがゼロベクトルかどうかをチェックします
 func (v *MVec2) IsZero() bool {
-	return (*vec2.T).IsZero((*vec2.T)(v))
+	return v[0] == 0 && v[1] == 0
+}
+
+// Length ベクトルの長さを返します
+func (v *MVec2) Length() float64 {
+	return math.Hypot(v[0], v[1])
 }
 
 // LengthSqr ベクトルの長さの2乗を返します
 func (v *MVec2) LengthSqr() float64 {
-	return (*vec2.T).LengthSqr((*vec2.T)(v))
+	return v[0]*v[0] + v[1]*v[1]
 }
 
 // Normalize ベクトルを正規化します
 func (v *MVec2) Normalize() *MVec2 {
-	return (*MVec2)((*vec2.T).Normalize((*vec2.T)(v)))
+	sl := v.LengthSqr()
+	if sl == 0 || sl == 1 {
+		return v
+	}
+	return v.MulScalar(1 / math.Sqrt(sl))
 }
 
 // Normalized ベクトルを正規化した結果を返します
 func (v *MVec2) Normalized() MVec2 {
-	return MVec2((*vec2.T).Normalized((*vec2.T)(v)))
+	vec := *v
+	vec.Normalize()
+	return vec
 }
 
 // Angle ベクトルの角度(ラジアン角度)を返します
-func (v *MVec2) Angle(other *MVec2) float64 {
-	return vec2.Angle((*vec2.T)(v), (*vec2.T)(other))
+func (a *MVec2) Angle(b *MVec2) float64 {
+	v := a.Dot(b) / (a.Length() * b.Length())
+	// prevent NaN
+	if v > 1. {
+		v = v - 2
+	} else if v < -1. {
+		v = v + 2
+	}
+	return math.Acos(v)
 }
 
 // Degree ベクトルの角度(度数)を返します
@@ -256,23 +279,15 @@ func (v *MVec2) Degree(other *MVec2) float64 {
 
 // Dot ベクトルの内積を返します
 func (v *MVec2) Dot(other *MVec2) float64 {
-	return vec2.Dot((*vec2.T)(v), (*vec2.T)(other))
+	return v[0]*other[0] + v[1]*other[1]
 }
 
 // Cross ベクトルの外積を返します
 func (v *MVec2) Cross(other *MVec2) *MVec2 {
-	result := MVec2(vec2.Cross((*vec2.T)(v), (*vec2.T)(other)))
-	return &result
-}
-
-// IsLeftWinding ベクトルが他のベクトルより左回りかどうかをチェックします
-func (v *MVec2) IsLeftWinding(other *MVec2) bool {
-	return vec2.IsLeftWinding((*vec2.T)(v), (*vec2.T)(other))
-}
-
-// IsRightWinding ベクトルが他のベクトルより右回りかどうかをチェックします
-func (v *MVec2) IsRightWinding(other *MVec2) bool {
-	return vec2.IsRightWinding((*vec2.T)(v), (*vec2.T)(other))
+	return &MVec2{
+		v[1]*other[0] - v[0]*other[1],
+		v[0]*other[1] - v[1]*other[0],
+	}
 }
 
 // Min ベクトルの各要素の最小値をTの各要素に設定して返します
@@ -295,47 +310,78 @@ func (v *MVec2) Max() *MVec2 {
 
 // Interpolate ベクトルの線形補間を行います
 func (v *MVec2) Interpolate(other *MVec2, t float64) MVec2 {
-	return MVec2(vec2.Interpolate((*vec2.T)(v), (*vec2.T)(other), t))
+	t1 := 1 - t
+	return MVec2{
+		v[0]*t1 + other[0]*t,
+		v[1]*t1 + other[1]*t,
+	}
 }
 
 // Clamp ベクトルの各要素を指定された範囲内にクランプします
 func (v *MVec2) Clamp(min, max *MVec2) *MVec2 {
-	return (*MVec2)((*vec2.T).Clamp((*vec2.T)(v), (*vec2.T)(min), (*vec2.T)(max)))
+	for i := range v {
+		if v[i] < min[i] {
+			v[i] = min[i]
+		} else if v[i] > max[i] {
+			v[i] = max[i]
+		}
+	}
+	return v
 }
 
 // Clamped ベクトルの各要素を指定された範囲内にクランプした結果を返します
 func (v *MVec2) Clamped(min, max *MVec2) MVec2 {
-	return MVec2((*vec2.T).Clamped((*vec2.T)(v), (*vec2.T)(min), (*vec2.T)(max)))
+	result := *v
+	result.Clamp(min, max)
+	return result
 }
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
 func (v *MVec2) Clamp01() *MVec2 {
-	return (*MVec2)((*vec2.T).Clamp01((*vec2.T)(v)))
+	return v.Clamp(&MVec2Zero, &MVec2UnitXY)
 }
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します
 func (v *MVec2) Clamped01() MVec2 {
-	return MVec2((*vec2.T).Clamped01((*vec2.T)(v)))
+	result := *v
+	result.Clamp01()
+	return result
 }
 
-// Rotate ベクトルを回転します
-func (v *MVec2) Rotate(angle float64) MVec2 {
-	return MVec2((*vec2.T)(v).Rotated(angle))
+// Rotated ベクトルを回転します
+func (v *MVec2) Rotated(angle float64) MVec2 {
+	sinus := math.Sin(angle)
+	cosinus := math.Cos(angle)
+	return MVec2{
+		v[0]*cosinus - v[1]*sinus,
+		v[0]*sinus + v[1]*cosinus,
+	}
+}
+
+func (v *MVec2) Rotate(angle float64) *MVec2 {
+	*v = v.Rotated(angle)
+	return v
 }
 
 // RotateAroundPoint ベクトルを指定された点を中心に回転します
 func (v *MVec2) RotateAroundPoint(point *MVec2, angle float64) *MVec2 {
-	return (*MVec2)((*vec2.T)(v).RotateAroundPoint((*vec2.T)(point), angle))
+	return v.Sub(point).Rotate(angle).Add(point)
 }
 
 // Rotate90DegLeft ベクトルを90度左回転します
 func (v *MVec2) Rotate90DegLeft() *MVec2 {
-	return (*MVec2)((*vec2.T)(v).Rotate90DegLeft())
+	temp := v[0]
+	v[0] = -v[1]
+	v[1] = temp
+	return v
 }
 
 // Rotate90DegRight ベクトルを90度右回転します
 func (v *MVec2) Rotate90DegRight() *MVec2 {
-	return (*MVec2)((*vec2.T)(v).Rotate90DegRight())
+	temp := v[0]
+	v[0] = v[1]
+	v[1] = -temp
+	return v
 }
 
 // Copy
@@ -344,8 +390,8 @@ func (v *MVec2) Copy() *MVec2 {
 }
 
 // Vector
-func (v *MVec2) Vector() *[]float64 {
-	return &[]float64{v.GetX(), v.GetY()}
+func (v *MVec2) Vector() []float64 {
+	return []float64{v.GetX(), v.GetY()}
 }
 
 // 線形補間
@@ -358,4 +404,47 @@ func (v *MVec2) Round() *MVec2 {
 		math.Round(v.GetX()),
 		math.Round(v.GetY()),
 	}
+}
+
+// 標準偏差を加味したmean処理
+func StdMeanVec2(values []MVec2, err float64) MVec2 {
+	npStandardVectors := make([][]float64, len(values))
+	npStandardLengths := make([]float64, len(values))
+
+	for i, v := range values {
+		npStandardVectors[i] = v.Vector()
+		npStandardLengths[i] = v.Length()
+	}
+
+	medianStandardValues := mutils.Median(npStandardLengths)
+	stdStandardValues := mutils.Std(npStandardLengths)
+
+	// 中央値から標準偏差の一定範囲までの値を取得
+	var filteredStandardValues [][]float64
+	for i := 0; i < len(npStandardVectors); i++ {
+		if npStandardLengths[i] >= medianStandardValues-err*stdStandardValues &&
+			npStandardLengths[i] <= medianStandardValues+err*stdStandardValues {
+			filteredStandardValues = append(filteredStandardValues, npStandardVectors[i])
+		}
+	}
+
+	mean := mutils.Mean2DVertical(filteredStandardValues)
+	return MVec2{mean[0], mean[1]}
+}
+
+// One 0を1に変える
+func (v *MVec2) One() MVec2 {
+	vec := v.Vector()
+	epsilon := 1e-14
+	for i := 0; i < len(vec); i++ {
+		if math.Abs(vec[i]) < epsilon {
+			vec[i] = 1
+		}
+	}
+	return MVec2{vec[0], vec[1]}
+}
+
+func (v *MVec2) Distance(other *MVec2) float64 {
+	s := v.Subed(other)
+	return s.Length()
 }
