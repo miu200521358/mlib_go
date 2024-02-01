@@ -460,12 +460,12 @@ func (w *GlWindow) Run() {
 			gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
 			// カメラの位置
-			cameraPosition := w.Shader.CameraPosition.Mgl()
+			cameraPosition := w.Shader.CameraPosition.GL()
 			cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_CAMERA_POSITION))
 			gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
 			// カメラの中心
-			lookAtCenter := w.Shader.LookAtCenterPosition.Mgl()
+			lookAtCenter := w.Shader.LookAtCenterPosition.GL()
 			camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 			cameraUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_MATRIX))
 			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])

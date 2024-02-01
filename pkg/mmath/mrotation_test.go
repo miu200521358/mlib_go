@@ -24,10 +24,10 @@ func TestNewRotationModelByDegrees(t *testing.T) {
 }
 
 func TestNewRotationModelByQuaternion(t *testing.T) {
-	quaternion := MQuaternion{1, 0, 0, 0}
-	rotation := NewRotationModelByQuaternion(&quaternion)
+	quaternion := NewMQuaternionByValues(1, 0, 0, 0)
+	rotation := NewRotationModelByQuaternion(quaternion)
 
-	if *rotation.GetQuaternion() != quaternion {
+	if *rotation.GetQuaternion() != *quaternion {
 		t.Errorf("Expected GetQuaternion() to return %v, but got %v", quaternion, rotation.quaternion.String())
 	}
 }
@@ -36,7 +36,7 @@ func TestT_Copy(t *testing.T) {
 	rot := &MRotation{
 		radians:    &MVec3{1, 2, 3},
 		degrees:    &MVec3{90, 180, 270},
-		quaternion: &MQuaternion{1, 0, 0, 0},
+		quaternion: NewMQuaternionByValues(1, 0, 0, 0),
 	}
 
 	copied := rot.Copy()

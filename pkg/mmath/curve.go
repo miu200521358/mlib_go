@@ -2,6 +2,7 @@ package mmath
 
 import (
 	"math"
+
 )
 
 type Curve struct {

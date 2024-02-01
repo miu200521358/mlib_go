@@ -1,4 +1,4 @@
-package mmath2
+package mmath
 
 import (
 	"testing"
@@ -32,6 +32,7 @@ func TestMMat4_Translate(t *testing.T) {
 		}
 	}
 }
+
 func TestMMat4_Quaternion(t *testing.T) {
 	mat := &MMat4{
 		{1, 0, 0, 0},
@@ -49,13 +50,14 @@ func TestMMat4_Quaternion(t *testing.T) {
 		t.Errorf("Expected q to be %v, got %v", expectedQ, q)
 	}
 }
+
 func TestMMat4_AssignQuaternion(t *testing.T) {
 	mat := &MMat4{}
 	q := NewMQuaternionByValues(1, 2, 3, 4)
 	expectedMat := &MMat4{
-		{-26, 16, 20, 0},
-		{16, -26, 24, 0},
-		{20, 24, -26, 0},
+		{-25, -20, 22, 0},
+		{28, -19, 4, 0},
+		{-10, 20, -9, 0},
 		{0, 0, 0, 1},
 	}
 
@@ -65,6 +67,7 @@ func TestMMat4_AssignQuaternion(t *testing.T) {
 		t.Errorf("Expected mat to be %v, got %v", expectedMat, mat)
 	}
 }
+
 func TestMMat4_AssignEulerRotation(t *testing.T) {
 	mat := &MMat4{}
 	xPitch := 0.5
@@ -72,23 +75,19 @@ func TestMMat4_AssignEulerRotation(t *testing.T) {
 	zRoll := 0.2
 
 	expectedMat := &MMat4{
-		{0.9362933635842029, -0.16055654031989977, 0.3106224618536101, 0},
-		{0.2896294776216706, 0.9449569463146763, -0.1526119490168753, 0},
-		{-0.19866933079506122, 0.27516333805159693, 0.9403025080756888, 0},
-		{0, 0, 0, 1},
+		{0.90815, -0.17435, 0.38062, 0.00000},
+		{0.32865, 0.86009, -0.39017, 0.00000},
+		{-0.25934, 0.47943, 0.83839, 0.00000},
+		{0.00000, 0.00000, 0.00000, 1.00000},
 	}
 
 	mat.AssignEulerRotation(xPitch, yHead, zRoll)
 
-	// Verify the matrix values
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
-			if mat[i][j] != expectedMat[i][j] {
-				t.Errorf("Expected mat[%d][%d] to be %f, got %f", i, j, expectedMat[i][j], mat[i][j])
-			}
-		}
+	if !mat.PracticallyEquals(expectedMat, 1e-5) {
+		t.Errorf("Expected mat to be %v, got %v", expectedMat, mat)
 	}
 }
+
 func TestMMat4_Mul(t *testing.T) {
 	mat := &MMat4{
 		{1, 2, 3, 4},

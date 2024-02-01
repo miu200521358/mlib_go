@@ -6,15 +6,10 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/ungerik/go3d/float64/vec3"
+	"github.com/go-gl/mathgl/mgl64"
 
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
-
-type MVec3 vec3.T
-
-func NewMVec3() *MVec3 {
-	return &MVec3{0, 0, 0}
-}
 
 var (
 	MVec3Zero = MVec3{}
@@ -45,9 +40,10 @@ var (
 	MVec3MaxVal = MVec3{+math.MaxFloat64, +math.MaxFloat64, +math.MaxFloat64}
 )
 
-// String T の文字列表現を返します。
-func (v *MVec3) String() string {
-	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f]", v.GetX(), v.GetY(), v.GetZ())
+type MVec3 mgl64.Vec3
+
+func NewMVec3() *MVec3 {
+	return &MVec3{0, 0, 0}
 }
 
 // GetX returns the value of the X coordinate
@@ -80,12 +76,13 @@ func (v *MVec3) SetZ(z float64) {
 	v[2] = z
 }
 
-// Gl OpenGL座標系に変換された2次元ベクトルを返します
-func (v *MVec3) GL() [3]float32 {
-	return [3]float32{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ())}
+// String T の文字列表現を返します。
+func (v *MVec3) String() string {
+	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f]", v.GetX(), v.GetY(), v.GetZ())
 }
 
-func (v *MVec3) Mgl() mgl32.Vec3 {
+// Gl OpenGL座標系に変換された2次元ベクトルを返します
+func (v *MVec3) GL() mgl32.Vec3 {
 	return mgl32.Vec3{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ())}
 }
 
@@ -96,94 +93,103 @@ func (v *MVec3) MMD() *MVec3 {
 
 // Add ベクトルに他のベクトルを加算します
 func (v *MVec3) Add(other *MVec3) *MVec3 {
-	return (*MVec3)((*vec3.T).Add((*vec3.T)(v), (*vec3.T)(other)))
+	v[0] += other[0]
+	v[1] += other[1]
+	v[2] += other[2]
+	return v
 }
 
 // AddScalar ベクトルの各要素にスカラーを加算します
 func (v *MVec3) AddScalar(s float64) *MVec3 {
-	return (*MVec3)((*vec3.T).Add((*vec3.T)(v), &vec3.T{s, s}))
+	v[0] += s
+	v[1] += s
+	v[2] += s
+	return v
 }
 
 // Added ベクトルに他のベクトルを加算した結果を返します
 func (v *MVec3) Added(other *MVec3) MVec3 {
-	return MVec3((*vec3.T).Added((*vec3.T)(v), (*vec3.T)(other)))
+	return MVec3{v[0] + other[0], v[1] + other[1], v[2] + other[2]}
 }
 
 func (v *MVec3) AddedScalar(s float64) MVec3 {
-	return MVec3((*vec3.T).Added((*vec3.T)(v), &vec3.T{s, s}))
+	return MVec3{v[0] + s, v[1] + s, v[2] + s}
 }
 
 // Sub ベクトルから他のベクトルを減算します
 func (v *MVec3) Sub(other *MVec3) *MVec3 {
-	return (*MVec3)((*vec3.T).Sub((*vec3.T)(v), (*vec3.T)(other)))
+	v[0] -= other[0]
+	v[1] -= other[1]
+	v[2] -= other[2]
+	return v
 }
 
 // SubScalar ベクトルの各要素からスカラーを減算します
 func (v *MVec3) SubScalar(s float64) *MVec3 {
-	return (*MVec3)((*vec3.T).Sub((*vec3.T)(v), &vec3.T{s, s}))
+	v[0] -= s
+	v[1] -= s
+	v[2] -= s
+	return v
 }
 
 // Subed ベクトルから他のベクトルを減算した結果を返します
 func (v *MVec3) Subed(other *MVec3) MVec3 {
-	return MVec3((*vec3.T).Subed((*vec3.T)(v), (*vec3.T)(other)))
+	return MVec3{v[0] - other[0], v[1] - other[1], v[2] - other[2]}
 }
 
 func (v *MVec3) SubedScalar(s float64) MVec3 {
-	return MVec3((*vec3.T).Subed((*vec3.T)(v), &vec3.T{s, s}))
+	return MVec3{v[0] - s, v[1] - s, v[2] - s}
 }
 
 // Mul ベクトルの各要素に他のベクトルの各要素を乗算します
 func (v *MVec3) Mul(other *MVec3) *MVec3 {
-	return (*MVec3)((*vec3.T).Mul((*vec3.T)(v), (*vec3.T)(other)))
+	v[0] *= other[0]
+	v[1] *= other[1]
+	v[2] *= other[2]
+	return v
 }
 
 // MulScalar ベクトルの各要素にスカラーを乗算します
 func (v *MVec3) MulScalar(s float64) *MVec3 {
-	return (*MVec3)((*vec3.T).Mul((*vec3.T)(v), &vec3.T{s, s}))
+	v[0] *= s
+	v[1] *= s
+	v[2] *= s
+	return v
 }
 
 // Muled ベクトルの各要素に他のベクトルの各要素を乗算した結果を返します
 func (v *MVec3) Muled(other *MVec3) MVec3 {
-	return MVec3((*vec3.T).Muled((*vec3.T)(v), (*vec3.T)(other)))
+	return MVec3{v[0] * other[0], v[1] * other[1], v[2] * other[2]}
 }
 
 func (v *MVec3) MuledScalar(s float64) MVec3 {
-	return MVec3((*vec3.T).Muled((*vec3.T)(v), &vec3.T{s, s}))
+	return MVec3{v[0] * s, v[1] * s, v[2] * s}
 }
 
 // Div ベクトルの各要素を他のベクトルの各要素で除算します
 func (v *MVec3) Div(other *MVec3) *MVec3 {
-	return &MVec3{
-		v.GetX() / other.GetX(),
-		v.GetY() / other.GetY(),
-		v.GetZ() / other.GetZ(),
-	}
+	v[0] /= other[0]
+	v[1] /= other[1]
+	v[2] /= other[2]
+	return v
 }
 
 // DivScalar ベクトルの各要素をスカラーで除算します
 func (v *MVec3) DivScalar(s float64) *MVec3 {
-	return &MVec3{
-		v.GetX() / s,
-		v.GetY() / s,
-		v.GetZ() / s,
-	}
+	v[0] /= s
+	v[1] /= s
+	v[2] /= s
+	return v
 }
 
 // Dived ベクトルの各要素を他のベクトルの各要素で除算した結果を返します
 func (v *MVec3) Dived(other *MVec3) MVec3 {
-	return MVec3{
-		v.GetX() / other.GetX(),
-		v.GetY() / other.GetY(),
-		v.GetZ() / other.GetZ(),
-	}
+	return MVec3{v[0] / other[0], v[1] / other[1], v[2] / other[2]}
 }
 
+// DivedScalar ベクトルの各要素をスカラーで除算した結果を返します
 func (v *MVec3) DivedScalar(s float64) MVec3 {
-	return MVec3{
-		v.GetX() / s,
-		v.GetY() / s,
-		v.GetZ() / s,
-	}
+	return MVec3{v[0] / s, v[1] / s, v[2] / s}
 }
 
 // Equal ベクトルが他のベクトルと等しいかどうかをチェックします
@@ -198,7 +204,9 @@ func (v *MVec3) NotEquals(other MVec3) bool {
 
 // PracticallyEquals ベクトルが他のベクトルとほぼ等しいかどうかをチェックします
 func (v *MVec3) PracticallyEquals(other *MVec3, epsilon float64) bool {
-	return (*vec3.T).PracticallyEquals((*vec3.T)(v), (*vec3.T)(other), epsilon)
+	return (math.Abs(v[0]-other[0]) <= epsilon) &&
+		(math.Abs(v[1]-other[1]) <= epsilon) &&
+		(math.Abs(v[2]-other[2]) <= epsilon)
 }
 
 // LessThan ベクトルが他のベクトルより小さいかどうかをチェックします (<)
@@ -223,17 +231,28 @@ func (v *MVec3) GreaterThanOrEquals(other *MVec3) bool {
 
 // Invert ベクトルの各要素の符号を反転します (-v)
 func (v *MVec3) Invert() *MVec3 {
-	return (*MVec3)((*vec3.T).Invert((*vec3.T)(v)))
+	v[0] = -v[0]
+	v[1] = -v[1]
+	v[2] = -v[2]
+	return v
 }
 
 // Inverted ベクトルの各要素の符号を反転した結果を返します (-v)
 func (v *MVec3) Inverted() MVec3 {
-	return MVec3((*vec3.T).Inverted((*vec3.T)(v)))
+	return MVec3{-v[0], -v[1], -v[2]}
 }
 
 // Abs ベクトルの各要素の絶対値を返します
-func (v *MVec3) Abs() MVec3 {
-	return MVec3{math.Abs(v.GetX()), math.Abs(v.GetY()), math.Abs(v.GetZ())}
+func (v *MVec3) Abs() *MVec3 {
+	v[0] = math.Abs(v[0])
+	v[1] = math.Abs(v[1])
+	v[2] = math.Abs(v[2])
+	return v
+}
+
+// Absed ベクトルの各要素の絶対値を返します
+func (v *MVec3) Absed() MVec3 {
+	return MVec3{math.Abs(v[0]), math.Abs(v[1]), math.Abs(v[2])}
 }
 
 // Hash ベクトルのハッシュ値を計算します
@@ -243,34 +262,47 @@ func (v *MVec3) Hash() uint64 {
 	return h.Sum64()
 }
 
-// Length ベクトルの長さを返します
-func (v *MVec3) Length() float64 {
-	return (*vec3.T).Length((*vec3.T)(v))
-}
-
 // IsZero ベクトルがゼロベクトルかどうかをチェックします
 func (v *MVec3) IsZero() bool {
-	return (*vec3.T).IsZero((*vec3.T)(v))
+	return v[0] == 0 && v[1] == 0 && v[2] == 0
+}
+
+// Length ベクトルの長さを返します
+func (v *MVec3) Length() float64 {
+	return math.Sqrt(v.LengthSqr())
 }
 
 // LengthSqr ベクトルの長さの2乗を返します
 func (v *MVec3) LengthSqr() float64 {
-	return (*vec3.T).LengthSqr((*vec3.T)(v))
+	return v[0]*v[0] + v[1]*v[1] + v[2]*v[2]
 }
 
 // Normalize ベクトルを正規化します
 func (v *MVec3) Normalize() *MVec3 {
-	return (*MVec3)((*vec3.T).Normalize((*vec3.T)(v)))
+	sl := v.LengthSqr()
+	if sl == 0 || sl == 1 {
+		return v
+	}
+	return v.MulScalar(1 / math.Sqrt(sl))
 }
 
 // Normalized ベクトルを正規化した結果を返します
 func (v *MVec3) Normalized() MVec3 {
-	return MVec3((*vec3.T).Normalized((*vec3.T)(v)))
+	vec := *v
+	vec.Normalize()
+	return vec
 }
 
 // Angle ベクトルの角度(ラジアン角度)を返します
 func (v *MVec3) Angle(other *MVec3) float64 {
-	return vec3.Angle((*vec3.T)(v), (*vec3.T)(other))
+	vec := v.Dot(other) / (v.Length() * other.Length())
+	// prevent NaN
+	if vec > 1. {
+		return 0
+	} else if vec < -1. {
+		return math.Pi
+	}
+	return math.Acos(vec)
 }
 
 // Degree ベクトルの角度(度数)を返します
@@ -282,13 +314,12 @@ func (v *MVec3) Degree(other *MVec3) float64 {
 
 // Dot ベクトルの内積を返します
 func (v *MVec3) Dot(other *MVec3) float64 {
-	return vec3.Dot((*vec3.T)(v), (*vec3.T)(other))
+	return v[0]*other[0] + v[1]*other[1] + v[2]*other[2]
 }
 
 // Cross ベクトルの外積を返します
-func (v *MVec3) Cross(other *MVec3) *MVec3 {
-	result := MVec3(vec3.Cross((*vec3.T)(v), (*vec3.T)(other)))
-	return &result
+func (v1 *MVec3) Cross(v2 *MVec3) *MVec3 {
+	return &MVec3{v1[1]*v2[2] - v1[2]*v2[1], v1[2]*v2[0] - v1[0]*v2[2], v1[0]*v2[1] - v1[1]*v2[0]}
 }
 
 // Min ベクトルの各要素の最小値をTの各要素に設定して返します
@@ -317,43 +348,71 @@ func (v *MVec3) Max() *MVec3 {
 
 // Interpolate ベクトルの線形補間を行います
 func (v *MVec3) Interpolate(other *MVec3, t float64) MVec3 {
-	return MVec3(vec3.Interpolate((*vec3.T)(v), (*vec3.T)(other), t))
+	t1 := 1 - t
+	return MVec3{
+		v[0]*t1 + other[0]*t,
+		v[1]*t1 + other[1]*t,
+		v[2]*t1 + other[2]*t,
+	}
 }
 
 // Clamp ベクトルの各要素を指定された範囲内にクランプします
 func (v *MVec3) Clamp(min, max *MVec3) *MVec3 {
-	return (*MVec3)((*vec3.T).Clamp((*vec3.T)(v), (*vec3.T)(min), (*vec3.T)(max)))
+	for i := range v {
+		if v[i] < min[i] {
+			v[i] = min[i]
+		} else if v[i] > max[i] {
+			v[i] = max[i]
+		}
+	}
+	return v
 }
 
 // Clamped ベクトルの各要素を指定された範囲内にクランプした結果を返します
 func (v *MVec3) Clamped(min, max *MVec3) MVec3 {
-	return MVec3((*vec3.T).Clamped((*vec3.T)(v), (*vec3.T)(min), (*vec3.T)(max)))
+	result := *v
+	result.Clamp(min, max)
+	return result
 }
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
 func (v *MVec3) Clamp01() *MVec3 {
-	return (*MVec3)((*vec3.T).Clamp01((*vec3.T)(v)))
+	return v.Clamp(&MVec3Zero, &MVec3UnitXYZ)
 }
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します
 func (v *MVec3) Clamped01() MVec3 {
-	return MVec3((*vec3.T).Clamped01((*vec3.T)(v)))
+	result := *v
+	result.Clamp01()
+	return result
 }
 
 // Copy
 func (v *MVec3) Copy() *MVec3 {
-	copied := *v
-	return &copied
+	return &MVec3{v.GetX(), v.GetY(), v.GetZ()}
 }
 
 // Vector
-func (v *MVec3) Vector() *[]float64 {
-	return &[]float64{v.GetX(), v.GetY(), v.GetZ()}
+func (v *MVec3) Vector() []float64 {
+	return []float64{v.GetX(), v.GetY(), v.GetZ()}
+}
+
+// 線形補間
+func LerpFloat(v1, v2 float64, t float64) float64 {
+	return v1 + ((v2 - v1) * t)
 }
 
 // 線形補間
 func LerpVec3(v1, v2 *MVec3, t float64) MVec3 {
 	return (v2.Sub(v1)).MulScalar(t).Added(v1)
+}
+
+func (v *MVec3) Round() *MVec3 {
+	return &MVec3{
+		math.Round(v.GetX()),
+		math.Round(v.GetY()),
+		math.Round(v.GetZ()),
+	}
 }
 
 // ToLocalMatrix4x4 自身をローカル軸とした場合の回転行列を取得します
@@ -382,7 +441,7 @@ func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
 	}
 
 	// ローカルY軸の方向ベクトル
-	yAxis := v.Cross(zAxis)
+	yAxis := zAxis.Cross(xAxis)
 	normYAxis := yAxis.Length()
 	if normYAxis == 0 {
 		return NewMMat4()
@@ -400,22 +459,82 @@ func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
 	// ローカル軸に合わせた回転行列を作成する
 	rotationMatrix := NewMMat4()
 	rotationMatrix[0][0] = xAxis.GetX()
-	rotationMatrix[0][1] = xAxis.GetY()
-	rotationMatrix[0][2] = xAxis.GetZ()
-	rotationMatrix[1][0] = yAxis.GetX()
+	rotationMatrix[1][0] = xAxis.GetY()
+	rotationMatrix[2][0] = xAxis.GetZ()
+	rotationMatrix[0][1] = yAxis.GetX()
 	rotationMatrix[1][1] = yAxis.GetY()
-	rotationMatrix[1][2] = yAxis.GetZ()
-	rotationMatrix[2][0] = zAxis.GetX()
-	rotationMatrix[2][1] = zAxis.GetY()
+	rotationMatrix[2][1] = yAxis.GetZ()
+	rotationMatrix[0][2] = zAxis.GetX()
+	rotationMatrix[1][2] = zAxis.GetY()
 	rotationMatrix[2][2] = zAxis.GetZ()
 
 	return rotationMatrix
 }
 
-func (v *MVec3) Round() *MVec3 {
-	return &MVec3{
-		math.Round(v.GetX()),
-		math.Round(v.GetY()),
-		math.Round(v.GetZ()),
+// 標準偏差を加味したmean処理
+func StdMeanVec3(values []MVec3, err float64) MVec3 {
+	npStandardVectors := make([][]float64, len(values))
+	npStandardLengths := make([]float64, len(values))
+
+	for i, v := range values {
+		npStandardVectors[i] = v.Vector()
+		npStandardLengths[i] = v.Length()
 	}
+
+	medianStandardValues := mutils.Median(npStandardLengths)
+	stdStandardValues := mutils.Std(npStandardLengths)
+
+	// 中央値から標準偏差の一定範囲までの値を取得
+	var filteredStandardValues [][]float64
+	for i := 0; i < len(npStandardVectors); i++ {
+		if npStandardLengths[i] >= medianStandardValues-err*stdStandardValues &&
+			npStandardLengths[i] <= medianStandardValues+err*stdStandardValues {
+			filteredStandardValues = append(filteredStandardValues, npStandardVectors[i])
+		}
+	}
+
+	mean := mutils.Mean2DVertical(filteredStandardValues)
+	return MVec3{mean[0], mean[1], mean[2]}
+}
+
+// One 0を1に変える
+func (v *MVec3) One() MVec3 {
+	vec := v.Vector()
+	epsilon := 1e-14
+	for i := 0; i < len(vec); i++ {
+		if math.Abs(vec[i]) < epsilon {
+			vec[i] = 1
+		}
+	}
+	return MVec3{vec[0], vec[1], vec[2]}
+}
+
+func (v *MVec3) Distance(other *MVec3) float64 {
+	s := v.Subed(other)
+	return s.Length()
+}
+
+func (v *MVec3) Project(other *MVec3) MVec3 {
+	return other.MuledScalar(v.Dot(other) / other.LengthSqr())
+}
+
+// ボーンから見た頂点ローカル位置を求める
+// vertexPositions: グローバル頂点位置
+// startBonePosition: 親ボーン位置
+// endBonePosition: 子ボーン位置
+func GetVertexLocalPositions(vertexPositions []*MVec3, startBonePosition *MVec3, endBonePosition *MVec3) []*MVec3 {
+	vertexSize := len(vertexPositions)
+	boneVector := endBonePosition.Sub(startBonePosition)
+	boneDirection := boneVector.Normalized()
+
+	localPositions := make([]*MVec3, vertexSize)
+	for i := 0; i < vertexSize; i++ {
+		vertexPosition := vertexPositions[i]
+		subedVertexPosition := vertexPosition.Subed(startBonePosition)
+		projection := subedVertexPosition.Project(&boneDirection)
+		localPosition := endBonePosition.Added(&projection)
+		localPositions[i] = &localPosition
+	}
+
+	return localPositions
 }

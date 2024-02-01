@@ -2,6 +2,7 @@ package mcore
 
 import (
 	"testing"
+
 )
 
 func TestIndexModel_GetIndex(t *testing.T) {

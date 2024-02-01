@@ -2,6 +2,8 @@ package mmath
 
 import (
 	"math"
+
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 type MMat4 [4]MVec4
@@ -36,6 +38,24 @@ func NewMMat4() *MMat4 {
 		MVec4{0, 1, 0, 0},
 		MVec4{0, 0, 1, 0},
 		MVec4{0, 0, 0, 1},
+	}
+}
+
+func NewMMat4ByValues(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44 float64) *MMat4 {
+	return &MMat4{
+		MVec4{m11, m12, m13, m14},
+		MVec4{m21, m22, m23, m24},
+		MVec4{m31, m32, m33, m34},
+		MVec4{m41, m42, m43, m44},
+	}
+}
+
+func NewMMat4ByVec4(v1, v2, v3, v4 *MVec4) *MMat4 {
+	return &MMat4{
+		*v1,
+		*v2,
+		*v3,
+		*v4,
 	}
 }
 
@@ -139,6 +159,21 @@ func (mat *MMat4) MulVec4(v *MVec4) MVec4 {
 	}
 }
 
+func (m MMat4) MulScalar(s float64) *MMat4 {
+	return &MMat4{
+		m[0].MuledScalar(s),
+		m[1].MuledScalar(s),
+		m[2].MuledScalar(s),
+		m[3].MuledScalar(s),
+	}
+}
+
+func (m MMat4) MuledScalar(s float64) MMat4 {
+	copied := m.Copy()
+	copied.MulScalar(s)
+	return *copied
+}
+
 // TransformVec4 multiplies v with mat and saves the result in v.
 func (mat *MMat4) TransformVec4(v *MVec4) {
 	// Use intermediate variables to not alter further computations.
@@ -153,10 +188,21 @@ func (mat *MMat4) TransformVec4(v *MVec4) {
 
 // MulVec3 multiplies v (converted to a vec4 as (v_1, v_2, v_3, 1))
 // with mat and divides the result by w. Returns a new vec3.
-func (mat *MMat4) MulVec3(v *MVec3) MVec3 {
-	v4 := FromVec3(v)
-	v4 = mat.MulVec4(&v4)
-	return v4.Vec3DividedByW()
+func (mat *MMat4) MulVec3(other *MVec3) MVec3 {
+	s := [4]float64{
+		mat[0][0]*other[0] + mat[0][1]*other[1] + mat[0][2]*other[2] + mat[0][3],
+		mat[1][0]*other[0] + mat[1][1]*other[1] + mat[1][2]*other[2] + mat[1][3],
+		mat[2][0]*other[0] + mat[2][1]*other[1] + mat[2][2]*other[2] + mat[2][3],
+		mat[3][0]*other[0] + mat[3][1]*other[1] + mat[3][2]*other[2] + mat[3][3],
+	}
+
+	if s[3] == 1.0 {
+		return MVec3{s[0], s[1], s[2]}
+	} else if s[3] == 0.0 {
+		return MVec3{}
+	} else {
+		return MVec3{s[0] / s[3], s[1] / s[3], s[2] / s[3]}
+	}
 }
 
 // TransformVec3 multiplies v (converted to a vec4 as (v_1, v_2, v_3, 1))
@@ -258,26 +304,26 @@ func (mat *MMat4) Quaternion() MQuaternion {
 	w := s * 0.5
 	s = 0.5 / s
 
-	q := MQuaternion{
-		(mat[1][2] - mat[2][1]) * s,
-		(mat[2][0] - mat[0][2]) * s,
-		(mat[0][1] - mat[1][0]) * s,
+	q := NewMQuaternionByValues(
+		(mat[1][2]-mat[2][1])*s,
+		(mat[2][0]-mat[0][2])*s,
+		(mat[0][1]-mat[1][0])*s,
 		w,
-	}
+	)
 	return q.Normalized()
 }
 
 // AssignQuaternion assigns a quaternion to the rotations part of the matrix and sets the other elements to their ident value.
 func (mat *MMat4) AssignQuaternion(q *MQuaternion) *MMat4 {
-	xx := q[0] * q[0] * 2
-	yy := q[1] * q[1] * 2
-	zz := q[2] * q[2] * 2
-	xy := q[0] * q[1] * 2
-	xz := q[0] * q[2] * 2
-	yz := q[1] * q[2] * 2
-	wx := q[3] * q[0] * 2
-	wy := q[3] * q[1] * 2
-	wz := q[3] * q[2] * 2
+	xx := q.GetX() * q.GetX() * 2
+	yy := q.GetY() * q.GetY() * 2
+	zz := q.GetZ() * q.GetZ() * 2
+	xy := q.GetX() * q.GetY() * 2
+	xz := q.GetX() * q.GetZ() * 2
+	yz := q.GetY() * q.GetZ() * 2
+	wx := q.GetW() * q.GetX() * 2
+	wy := q.GetW() * q.GetY() * 2
+	wz := q.GetW() * q.GetZ() * 2
 
 	mat[0][0] = 1 - (yy + zz)
 	mat[0][1] = xy - wz
@@ -412,7 +458,7 @@ func (mat *MMat4) AssignCoordinateSystem(x, y, z *MVec3) *MMat4 {
 }
 
 // AssignEulerRotation assigns Euler angle rotations to the rotation part of the matrix and sets the remaining elements to their ident value.
-func (mat *MMat4) AssignEulerRotation(yHead, xPitch, zRoll float64) *MMat4 {
+func (mat *MMat4) AssignEulerRotation(xPitch, yHead, zRoll float64) *MMat4 {
 	sinH := math.Sin(yHead)
 	cosH := math.Cos(yHead)
 	sinP := math.Sin(xPitch)
@@ -444,7 +490,7 @@ func (mat *MMat4) AssignEulerRotation(yHead, xPitch, zRoll float64) *MMat4 {
 }
 
 // ExtractEulerAngles extracts the rotation part of the matrix as Euler angle rotation values.
-func (mat *MMat4) ExtractEulerAngles() (yHead, xPitch, zRoll float64) {
+func (mat *MMat4) ExtractEulerAngles() (xPitch, yHead, zRoll float64) {
 	xPitch = math.Asin(mat[1][2])
 	f12 := math.Abs(mat[1][2])
 	if f12 > (1.0-0.0001) && f12 < (1.0+0.0001) { // f12 == 1.0
@@ -550,11 +596,21 @@ func (mat *MMat4) Transpose3x3() *MMat4 {
 }
 
 // Mul は行列の掛け算を行います
-func (mat *MMat4) Mul(a *MMat4) {
-	mat[0] = mat.MulVec4(&a[0])
-	mat[1] = mat.MulVec4(&a[1])
-	mat[2] = mat.MulVec4(&a[2])
-	mat[3] = mat.MulVec4(&a[3])
+func (m1 *MMat4) Mul(m2 *MMat4) {
+	var result [4][4]float64
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
+			for k := 0; k < 4; k++ {
+				result[i][j] += m1[i][k] * m2[k][j]
+			}
+		}
+	}
+	*m1 = *NewMMat4ByValues(
+		result[0][0], result[0][1], result[0][2], result[0][3],
+		result[1][0], result[1][1], result[1][2], result[1][3],
+		result[2][0], result[2][1], result[2][2], result[2][3],
+		result[3][0], result[3][1], result[3][2], result[3][3],
+	)
 }
 
 func (mat *MMat4) Muled(a *MMat4) MMat4 {
@@ -566,4 +622,47 @@ func (mat *MMat4) Muled(a *MMat4) MMat4 {
 // 行列の移動情報
 func (mat *MMat4) Translation() MVec3 {
 	return MVec3{mat[0][3], mat[1][3], mat[2][3]}
+}
+
+func (m *MMat4) Det() float64 {
+	return m[0][0]*m[1][1]*m[2][2]*m[3][3] - m[0][0]*m[1][1]*m[2][3]*m[3][2] - m[0][0]*m[1][2]*m[2][1]*m[3][3] + m[0][0]*m[1][2]*m[2][3]*m[3][1] + m[0][0]*m[1][3]*m[2][1]*m[3][2] - m[0][0]*m[1][3]*m[2][2]*m[3][1] - m[0][1]*m[1][0]*m[2][2]*m[3][3] + m[0][1]*m[1][0]*m[2][3]*m[3][2] + m[0][1]*m[1][2]*m[2][0]*m[3][3] - m[0][1]*m[1][2]*m[2][3]*m[3][0] - m[0][1]*m[1][3]*m[2][0]*m[3][2] + m[0][1]*m[1][3]*m[2][2]*m[3][0] + m[0][2]*m[1][0]*m[2][1]*m[3][3] - m[0][2]*m[1][0]*m[2][3]*m[3][1] - m[0][2]*m[1][1]*m[2][0]*m[3][3] + m[0][2]*m[1][1]*m[2][3]*m[3][0] + m[0][2]*m[1][3]*m[2][0]*m[3][1] - m[0][2]*m[1][3]*m[2][1]*m[3][0] - m[0][3]*m[1][0]*m[2][1]*m[3][2] + m[0][3]*m[1][0]*m[2][2]*m[3][1] + m[0][3]*m[1][1]*m[2][0]*m[3][2] - m[0][3]*m[1][1]*m[2][2]*m[3][0] - m[0][3]*m[1][2]*m[2][0]*m[3][1] + m[0][3]*m[1][2]*m[2][1]*m[3][0]
+}
+
+// 逆行列
+func (m MMat4) Inverse() *MMat4 {
+	det := m.Det()
+	if mgl64.FloatEqual(det, float64(0.0)) {
+		return NewMMat4()
+	}
+
+	retMat := MMat4{
+		MVec4{
+			-m[1][3]*m[2][2]*m[3][1] + m[1][2]*m[2][3]*m[3][1] + m[1][3]*m[2][1]*m[3][2] - m[1][1]*m[2][3]*m[3][2] - m[1][2]*m[2][1]*m[3][3] + m[1][1]*m[2][2]*m[3][3],
+			m[0][3]*m[2][2]*m[3][1] - m[0][2]*m[2][3]*m[3][1] - m[0][3]*m[2][1]*m[3][2] + m[0][1]*m[2][3]*m[3][2] + m[0][2]*m[2][1]*m[3][3] - m[0][1]*m[2][2]*m[3][3],
+			-m[0][3]*m[1][2]*m[3][1] + m[0][2]*m[1][3]*m[3][1] + m[0][3]*m[1][1]*m[3][2] - m[0][1]*m[1][3]*m[3][2] - m[0][2]*m[1][1]*m[3][3] + m[0][1]*m[1][2]*m[3][3],
+			m[0][3]*m[1][2]*m[2][1] - m[0][2]*m[1][3]*m[2][1] - m[0][3]*m[1][1]*m[2][2] + m[0][1]*m[1][3]*m[2][2] + m[0][2]*m[1][1]*m[2][3] - m[0][1]*m[1][2]*m[2][3],
+		},
+		MVec4{
+			m[1][3]*m[2][2]*m[3][0] - m[1][2]*m[2][3]*m[3][0] - m[1][3]*m[2][0]*m[3][2] + m[1][0]*m[2][3]*m[3][2] + m[1][2]*m[2][0]*m[3][3] - m[1][0]*m[2][2]*m[3][3],
+			-m[0][3]*m[2][2]*m[3][0] + m[0][2]*m[2][3]*m[3][0] + m[0][3]*m[2][0]*m[3][2] - m[0][0]*m[2][3]*m[3][2] - m[0][2]*m[2][0]*m[3][3] + m[0][0]*m[2][2]*m[3][3],
+			m[0][3]*m[1][2]*m[3][0] - m[0][2]*m[1][3]*m[3][0] - m[0][3]*m[1][0]*m[3][2] + m[0][0]*m[1][3]*m[3][2] + m[0][2]*m[1][0]*m[3][3] - m[0][0]*m[1][2]*m[3][3],
+			-m[0][3]*m[1][2]*m[2][0] + m[0][2]*m[1][3]*m[2][0] + m[0][3]*m[1][0]*m[2][2] - m[0][0]*m[1][3]*m[2][2] - m[0][2]*m[1][0]*m[2][3] + m[0][0]*m[1][2]*m[2][3],
+		},
+		MVec4{
+			-m[1][3]*m[2][1]*m[3][0] + m[1][1]*m[2][3]*m[3][0] + m[1][3]*m[2][0]*m[3][1] - m[1][0]*m[2][3]*m[3][1] - m[1][1]*m[2][0]*m[3][3] + m[1][0]*m[2][1]*m[3][3],
+			m[0][3]*m[2][1]*m[3][0] - m[0][1]*m[2][3]*m[3][0] - m[0][3]*m[2][0]*m[3][1] + m[0][0]*m[2][3]*m[3][1] + m[0][1]*m[2][0]*m[3][3] - m[0][0]*m[2][1]*m[3][3],
+			-m[0][3]*m[1][1]*m[3][0] + m[0][1]*m[1][3]*m[3][0] + m[0][3]*m[1][0]*m[3][1] - m[0][0]*m[1][3]*m[3][1] - m[0][1]*m[1][0]*m[3][3] + m[0][0]*m[1][1]*m[3][3],
+			m[0][3]*m[1][1]*m[2][0] - m[0][1]*m[1][3]*m[2][0] - m[0][3]*m[1][0]*m[2][1] + m[0][0]*m[1][3]*m[2][1] + m[0][1]*m[1][0]*m[2][3] - m[0][0]*m[1][1]*m[2][3],
+		},
+		MVec4{
+			m[1][2]*m[2][1]*m[3][0] - m[1][1]*m[2][2]*m[3][0] - m[1][2]*m[2][0]*m[3][1] + m[1][0]*m[2][2]*m[3][1] + m[1][1]*m[2][0]*m[3][2] - m[1][0]*m[2][1]*m[3][2],
+			-m[0][2]*m[2][1]*m[3][0] + m[0][1]*m[2][2]*m[3][0] + m[0][2]*m[2][0]*m[3][1] - m[0][0]*m[2][2]*m[3][1] - m[0][1]*m[2][0]*m[3][2] + m[0][0]*m[2][1]*m[3][2],
+			m[0][2]*m[1][1]*m[3][0] - m[0][1]*m[1][2]*m[3][0] - m[0][2]*m[1][0]*m[3][1] + m[0][0]*m[1][2]*m[3][1] + m[0][1]*m[1][0]*m[3][2] - m[0][0]*m[1][1]*m[3][2],
+			-m[0][2]*m[1][1]*m[2][0] + m[0][1]*m[1][2]*m[2][0] + m[0][2]*m[1][0]*m[2][1] - m[0][0]*m[1][2]*m[2][1] - m[0][1]*m[1][0]*m[2][2] + m[0][0]*m[1][1]*m[2][2],
+		},
+	}
+
+	retMat.MulScalar(1 / det)
+
+	return &retMat
 }

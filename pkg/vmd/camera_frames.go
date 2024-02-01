@@ -6,6 +6,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type CameraFrames struct {
@@ -86,7 +87,7 @@ func (cfs *CameraFrames) GetItem(index int) *CameraFrame {
 
 	xy, yy, zy, ry, dy, vy := nextCf.Curves.Evaluate(prevIndex, index, nextIndex)
 
-	qq := mmath.Slerp(prevCf.Rotation.GetQuaternion(), nextCf.Rotation.GetQuaternion(), ry)
+	qq := prevCf.Rotation.GetQuaternion().Slerp(nextCf.Rotation.GetQuaternion(), ry)
 	cf.Rotation.SetQuaternion(&qq)
 
 	cf.Position.SetX(mmath.LerpFloat(prevCf.Position.GetX(), nextCf.Position.GetX(), xy))

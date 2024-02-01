@@ -266,7 +266,7 @@ func (r *BaseReader[T]) UnpackQuaternion() (*mmath.MQuaternion, error) {
 	if err != nil {
 		return &mmath.MQuaternion{}, err
 	}
-	return &mmath.MQuaternion{x, y, z, w}, nil
+	return mmath.NewMQuaternionByValues(x, y, z, w), nil
 }
 
 func (r *BaseReader[T]) unpack(size int) ([]byte, error) {

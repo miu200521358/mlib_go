@@ -2,7 +2,6 @@ package mmath
 
 import (
 	"math"
-
 )
 
 type MRotation struct {
@@ -69,7 +68,7 @@ func (m *MRotation) SetRadians(v *MVec3) {
 		180.0 * v.GetY() / math.Pi,
 		180.0 * v.GetZ() / math.Pi,
 	}
-	qq := FromEulerAngles(v.GetX(), v.GetY(), v.GetZ())
+	qq := NewMQuaternionFromEulerAngles(v.GetX(), v.GetY(), v.GetZ())
 	m.quaternion = &qq
 }
 
@@ -84,7 +83,7 @@ func (m *MRotation) SetDegrees(v *MVec3) {
 		math.Pi * v.GetY() / 180.0,
 		math.Pi * v.GetZ() / 180.0,
 	}
-	qq := FromEulerAngles(m.radians.GetX(), m.radians.GetY(), m.radians.GetZ())
+	qq := NewMQuaternionFromEulerAngles(m.radians.GetX(), m.radians.GetY(), m.radians.GetZ())
 	m.quaternion = &qq
 }
 

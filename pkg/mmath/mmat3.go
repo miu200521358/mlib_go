@@ -4,9 +4,7 @@ import (
 	"errors"
 	"math"
 
-	"github.com/go-gl/mathgl/mgl32"
-	"github.com/ungerik/go3d/float64/quaternion"
-
+	"github.com/go-gl/mathgl/mgl64"
 )
 
 type MMat3 [3]MVec3
@@ -36,11 +34,11 @@ var (
 )
 
 // GL OpenGL座標系に変換されたベクトルを返します
-func (m MMat3) GL() *mgl32.Mat3 {
-	mat := mgl32.Mat3([9]float32{
-		float32(m[0][0]), float32(-m[0][1]), float32(-m[0][2]),
-		float32(-m[1][0]), float32(m[1][1]), float32(m[1][2]),
-		float32(-m[2][0]), float32(m[2][1]), float32(m[2][2]),
+func (m MMat3) GL() *mgl64.Mat3 {
+	mat := mgl64.Mat3([9]float64{
+		m[0][0], -m[0][1], -m[0][2],
+		-m[1][0], m[1][1], m[1][2],
+		-m[2][0], m[2][1], m[2][2],
 	})
 	return &mat
 }
@@ -196,33 +194,33 @@ func (mat *MMat3) TransformVec3(v *MVec3) {
 }
 
 // Quaternion extracts a quaternion from the rotation part of the matrix.
-func (mat *MMat3) Quaternion() quaternion.T {
+func (mat *MMat3) Quaternion() MQuaternion {
 	tr := mat.Trace()
 
 	s := math.Sqrt(tr + 1)
 	w := s * 0.5
 	s = 0.5 / s
 
-	q := quaternion.T{
-		(mat[1][2] - mat[2][1]) * s,
-		(mat[2][0] - mat[0][2]) * s,
-		(mat[0][1] - mat[1][0]) * s,
+	q := NewMQuaternionByValues(
+		(mat[1][2]-mat[2][1])*s,
+		(mat[2][0]-mat[0][2])*s,
+		(mat[0][1]-mat[1][0])*s,
 		w,
-	}
+	)
 	return q.Normalized()
 }
 
 // AssignQuaternion assigns a quaternion to the rotations part of the matrix and sets the other elements to their ident value.
-func (mat *MMat3) AssignQuaternion(q *quaternion.T) *MMat3 {
-	xx := q[0] * q[0] * 2
-	yy := q[1] * q[1] * 2
-	zz := q[2] * q[2] * 2
-	xy := q[0] * q[1] * 2
-	xz := q[0] * q[2] * 2
-	yz := q[1] * q[2] * 2
-	wx := q[3] * q[0] * 2
-	wy := q[3] * q[1] * 2
-	wz := q[3] * q[2] * 2
+func (mat *MMat3) AssignQuaternion(q *MQuaternion) *MMat3 {
+	xx := q.V[0] * q.V[0] * 2
+	yy := q.V[1] * q.V[1] * 2
+	zz := q.V[2] * q.V[2] * 2
+	xy := q.V[0] * q.V[1] * 2
+	xz := q.V[0] * q.V[2] * 2
+	yz := q.V[1] * q.V[2] * 2
+	wx := q.W * q.V[0] * 2
+	wy := q.W * q.V[1] * 2
+	wz := q.W * q.V[2] * 2
 
 	mat[0][0] = 1 - (yy + zz)
 	mat[1][0] = xy - wz

@@ -6,6 +6,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type BoneNameFrames struct {
@@ -96,7 +97,7 @@ func (bnfs *BoneNameFrames) GetItem(index int) *BoneFrame {
 
 	xy, yy, zy, ry := nextBf.Curves.Evaluate(prevIndex, index, nextIndex)
 
-	qq := mmath.Slerp(prevBf.Rotation.GetQuaternion(), nextBf.Rotation.GetQuaternion(), ry)
+	qq := prevBf.Rotation.GetQuaternion().Slerp(nextBf.Rotation.GetQuaternion(), ry)
 	bf.Rotation.SetQuaternion(&qq)
 
 	prevX := mmath.MVec4{

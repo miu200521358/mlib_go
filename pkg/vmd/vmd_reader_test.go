@@ -18,7 +18,7 @@ func TestVmdMotionReader_ReadNameByFilepath(t *testing.T) {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
 
-	expectedModelName := "初音ミク準標"
+	expectedModelName := "初音ミク準標準"
 	if modelName != expectedModelName {
 		t.Errorf("Expected modelName to be %q, got %q", expectedModelName, modelName)
 	}
@@ -74,7 +74,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		}
 
 		// 回転
-		expectedRotation := &mmath.MQuaternion{0, 0, 0, 1}
+		expectedRotation := mmath.NewMQuaternionByValues(0, 0, 0, 1)
 		if 1-bf.Rotation.GetQuaternion().Dot(expectedRotation) > 1e-8 {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, bf.Rotation)
 		}

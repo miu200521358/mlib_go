@@ -3,7 +3,6 @@ package mmath
 import (
 	"math"
 	"testing"
-
 )
 
 func TestMVec2Interpolate(t *testing.T) {
