@@ -101,22 +101,22 @@ func (bfs *BoneFrames) calc(
 	for i, fno := range fnos {
 		resultMatrixes = append(resultMatrixes, make([]*mmath.MMat4, 0, len(model.Bones.Data)))
 		for j, bone := range model.Bones.GetSortedData() {
-			resultMatrixes[i] = append(resultMatrixes[i], matrixes[i][j].Copy())
+			jm := matrixes[i][j].Muled(boneOffsetMatrixes[j])
 			for _, k := range bone.ParentBoneIndexes {
 				// 親ボーンの変形行列を掛ける
-				resultMatrixes[i][j].Mul(matrixes[i][k])
+				jm = matrixes[i][k].Muled(&jm)
 			}
-			// BOf行列を掛けてローカル行列を作成
-			localMatrix := resultMatrixes[i][j].Muled(boneOffsetMatrixes[j])
+			resultMatrixes[i] = append(resultMatrixes[i], &jm)
 			// 初期位置行列を掛けてグローバル行列を作成
+			globalMatrix := resultMatrixes[i][j].Muled(bonePositionMatrixes[j])
 			p := positions[i][j].Translation()
 			r := rotations[i][j].Quaternion()
 			s := scales[i][j].Scaling()
 			boneTrees.SetItem(bone.Name, fno, NewBoneTree(
 				bone.Name,
 				fno,
-				resultMatrixes[i][j], // グローバル行列はそのまま
-				&localMatrix,         // ローカル行列
+				&globalMatrix,        // グローバル行列
+				resultMatrixes[i][j], // ローカル行列はそのまま
 				&p,                   // 移動
 				&r,                   // 回転
 				&mmath.MVec3{s.GetX(), s.GetY(), s.GetZ()}, // 拡大率
@@ -204,17 +204,15 @@ func (bfs *BoneFrames) getBoneMatrixes(
 		positions = append(positions, make([]*mmath.MMat4, 0, len(targetBoneNames)))
 		rotations = append(rotations, make([]*mmath.MMat4, 0, len(targetBoneNames)))
 		scales = append(scales, make([]*mmath.MMat4, 0, len(targetBoneNames)))
-		for _, bone := range model.Bones.GetSortedData() {
+		for j, bone := range model.Bones.GetSortedData() {
+			positions[i] = append(positions[i], mmath.NewMMat4())
+			rotations[i] = append(rotations[i], mmath.NewMMat4())
+			scales[i] = append(scales[i], mmath.NewMMat4())
 			if slices.Contains(targetBoneNames, bone.Name) {
 				// ボーンが対象の場合、そのボーンの移動位置、回転角度、拡大率を取得
-				positions[i] = append(positions[i], bfs.getPosition(fno, bone.Name, model))
-				rotations[i] = append(rotations[i], bfs.getRotation(fno, bone.Name, model))
-				scales[i] = append(scales[i], bfs.getScale(fno, bone.Name, model))
-			} else {
-				// ボーンが対象外の場合、空の行列を追加
-				positions[i] = append(positions[i], mmath.NewMMat4())
-				rotations[i] = append(rotations[i], mmath.NewMMat4())
-				scales[i] = append(scales[i], mmath.NewMMat4())
+				positions[i][j] = bfs.getPosition(fno, bone.Name, model)
+				rotations[i][j] = bfs.getRotation(fno, bone.Name, model).ToMat4()
+				scales[i][j] = bfs.getScale(fno, bone.Name, model)
 			}
 		}
 	}
@@ -233,7 +231,7 @@ func (bfs *BoneFrames) getPosition(fno int, boneName string, model *pmx.PmxModel
 }
 
 // 該当キーフレにおけるボーンの回転角度
-func (bfs *BoneFrames) getRotation(fno int, boneName string, model *pmx.PmxModel) *mmath.MMat4 {
+func (bfs *BoneFrames) getRotation(fno int, boneName string, model *pmx.PmxModel) *mmath.MQuaternion {
 	bone := model.Bones.GetItemByName(boneName)
 
 	bf := bfs.Data[boneName].GetItem(fno)
@@ -247,10 +245,10 @@ func (bfs *BoneFrames) getRotation(fno int, boneName string, model *pmx.PmxModel
 
 	if bone.HasFixedAxis() {
 		// 軸制限回転を求める
-		rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
+		rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
 	}
 
-	return rot.ToMat4()
+	return rot
 }
 
 // 付与親を加味した回転角度
@@ -270,17 +268,18 @@ func (bfs *BoneFrames) getRotationWithEffect(fno int, boneIndex int, model *pmx.
 
 	// 付与親が存在する場合、付与親の回転角度を掛ける
 	effectBone := model.Bones.GetItem(bone.EffectIndex)
-	rot := bfs.getRotation(fno, effectBone.Name, model)
-	qq := rot.Quaternion()
+	qq := bfs.getRotation(fno, effectBone.Name, model)
 
 	if bone.EffectFactor >= 0 {
 		// 正の付与親
-		effectQ := (&qq).MulFactor(bone.EffectFactor)
+		effectQ := qq.MulFactor(bone.EffectFactor)
+		effectQ.Normalize()
 		return &effectQ
 	} else {
 		// 負の付与親の場合、逆回転
 		effectQ := qq.MulFactor(-bone.EffectFactor)
-		(&effectQ).Invert()
+		effectQ.Invert()
+		effectQ.Normalize()
 		return &effectQ
 	}
 }

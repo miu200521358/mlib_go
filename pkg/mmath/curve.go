@@ -2,7 +2,6 @@ package mmath
 
 import (
 	"math"
-
 )
 
 type Curve struct {
@@ -95,7 +94,7 @@ func Evaluate(curve *Curve, start, now, end int) (float64, float64, float64) {
 	x2 := curve.End.GetX() / CURVE_MAX
 	y2 := curve.End.GetY() / CURVE_MAX
 
-	t := newton(x1, x2, x, 0.5, 1e-10, 1e-15)
+	t := newton(x1, x2, x, 0.5, 1e-15, 1e-20)
 	s := 1.0 - t
 
 	y := (3.0 * (math.Pow(s, 2.0)) * t * y1) + (3.0 * s * (math.Pow(t, 2.0)) * y2) + math.Pow(t, 3.0)
@@ -113,7 +112,7 @@ func newtonFuncF(x1, x2, x, t float64) float64 {
 func newton(x1, x2, x, t0, eps, err float64) float64 {
 	derivative := 2.0 * eps
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 20; i++ {
 		funcFValue := newtonFuncF(x1, x2, x, t0)
 		// 中心差分による微分値
 		funcDF := (newtonFuncF(x1, x2, x, t0+eps) - newtonFuncF(x1, x2, x, t0-eps)) / derivative

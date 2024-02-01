@@ -3,7 +3,6 @@ package mmath
 import (
 	"math"
 	"testing"
-
 )
 
 func TestMQuaternionFromXAxisAngle(t *testing.T) {
@@ -148,14 +147,49 @@ func TestMQuaternionSlerp(t *testing.T) {
 }
 
 func TestMQuaternionToFixedAxisRotation(t *testing.T) {
-	quat := NewMQuaternionByValues(0.4738680537545347, 0.20131048764138487, -0.48170221425083437, 0.7091446481376844)
-	fixedAxis := MVec3{0.0, 1.0, 0.0}
-	expected := NewMQuaternionByValues(0.00000, 0.70506, 0.00000, 0.70914)
+	{
+		quat := NewMQuaternionByValues(0.5, 0.5, 0.5, 0.5)
+		fixedAxis := MVec3{1, 0, 0}
+		expected := NewMQuaternionByValues(0.866025403784439, 0, 0, 0.5)
 
-	result := quat.ToFixedAxisRotation(&fixedAxis)
+		result := quat.ToFixedAxisRotation(&fixedAxis)
 
-	if result.PracticallyEquals(expected, 1e-10) {
-		t.Errorf("ToFixedAxisRotation failed. Expected %v, got %v", expected, result)
+		if !result.PracticallyEquals(expected, 1e-10) {
+			t.Errorf("ToFixedAxisRotation failed. Expected %v, got %v", expected, result)
+		}
+	}
+	{
+		quat := NewMQuaternionByValues(0.5, 0.5, 0.5, 0.5)
+		fixedAxis := MVec3{0, 1, 0}
+		expected := NewMQuaternionByValues(0, 0.866025403784439, 0, 0.5)
+
+		result := quat.ToFixedAxisRotation(&fixedAxis)
+
+		if !result.PracticallyEquals(expected, 1e-10) {
+			t.Errorf("ToFixedAxisRotation failed. Expected %v, got %v", expected, result)
+		}
+	}
+	{
+		quat := NewMQuaternionByValues(0.5, 0.5, 0.5, 0.5)
+		fixedAxis := MVec3{0, 0, 1}
+		expected := NewMQuaternionByValues(0, 0, 0.866025403784439, 0.5)
+
+		result := quat.ToFixedAxisRotation(&fixedAxis)
+
+		if !result.PracticallyEquals(expected, 1e-10) {
+			t.Errorf("ToFixedAxisRotation failed. Expected %v, got %v", expected, result)
+		}
+	}
+	{
+		quat := NewMQuaternionByValues(0.5, 0.5, 0.5, 0.5)
+		fixedAxis := MVec3{0.5, 0.7, 0.2}
+		expected := NewMQuaternionByValues(0.49029033784546, 0.686406472983644, 0.196116135138184, 0.5)
+
+		result := quat.ToFixedAxisRotation(&fixedAxis)
+
+		if !result.PracticallyEquals(expected, 1e-10) {
+			t.Errorf("ToFixedAxisRotation failed. Expected %v, got %v", expected, result)
+		}
 	}
 }
 

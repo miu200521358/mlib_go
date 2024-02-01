@@ -433,12 +433,12 @@ func (v *MVec4) Clamped01() MVec4 {
 
 // Copy
 func (v *MVec4) Copy() *MVec4 {
-	return &MVec4{v.GetX(), v.GetY(), v.GetZ()}
+	return &MVec4{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
 }
 
 // Vector
 func (v *MVec4) Vector() []float64 {
-	return []float64{v.GetX(), v.GetY(), v.GetZ()}
+	return []float64{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
 }
 
 // 線形補間

@@ -199,7 +199,15 @@ func (quat *MQuaternion) AxisAngle() (axis *MVec3, angle float64) {
 
 // Mul は、クォータニオンの積を返します。
 func (q1 *MQuaternion) Mul(q2 *MQuaternion) *MQuaternion {
-	return &MQuaternion{q1.W*q2.W - q1.V.Dot(q2.V), q1.V.Cross(q2.V).Add(q2.V.Mul(q1.W)).Add(q1.V.Mul(q2.W))}
+	q1.V = q1.V.Cross(q2.V).Add(q2.V.Mul(q1.W)).Add(q1.V.Mul(q2.W))
+	q1.W = q1.W*q2.W - q1.V.Dot(q2.V)
+	return q1
+}
+
+func (q1 *MQuaternion) Muled(q2 *MQuaternion) MQuaternion {
+	copied := q1.Copy()
+	copied.Mul(q2)
+	return *copied
 }
 
 // Norm はクォータニオンのノルム値を返します。
@@ -334,20 +342,7 @@ func (quat *MQuaternion) MulFactor(factor float64) MQuaternion {
 // Slerp は t (0,1) における a と b の間の球面線形補間クォータニオンを返す。
 // See http://en.wikipedia.org/wiki/Slerp
 func (a *MQuaternion) Slerp(b *MQuaternion, t float64) MQuaternion {
-	d := math.Acos(a.V[0]*b.V[0] + a.V[1]*b.V[1] + a.V[2]*b.V[2] + a.W*b.W)
-	ooSinD := 1 / math.Sin(d)
-
-	t1 := math.Sin(d*(1-t)) * ooSinD
-	t2 := math.Sin(d*t) * ooSinD
-
-	q := NewMQuaternionByValues(
-		a.V[0]*t1+b.V[0]*t2,
-		a.V[1]*t1+b.V[1]*t2,
-		a.V[2]*t1+b.V[2]*t2,
-		a.W*t1+b.W*t2,
-	)
-
-	return q.Normalized()
+	return MQuaternion(mgl64.QuatSlerp(mgl64.Quat(*a), mgl64.Quat(*b), t))
 }
 
 // Vec3Diff関数は、2つのベクトル間の回転四元数を返します。
@@ -529,16 +524,19 @@ func (v *MQuaternion) ToMat4() *MMat4 {
 	return mat
 }
 
-// ToFixedAxisRotation returns a quaternion representing the rotation with a fixed axis limitation.
+// ToFixedAxisRotation 軸制限されたクォータニオンの回転
+// fixedAxis: 軸制限を表す3次元ベクトル
 func (quat *MQuaternion) ToFixedAxisRotation(fixedAxis *MVec3) *MQuaternion {
 	normalizedFixedAxis := fixedAxis.Normalized()
 	quatVec := quat.Vec3().Normalized()
 	theta := math.Acos(math.Max(-1, math.Min(1, normalizedFixedAxis.Dot(&quatVec))))
-	fixedQuatAxis := normalizedFixedAxis.MulScalar(1).MulScalar((quat.Vec3()).Length())
+	var flag float64
 	if theta >= math.Pi/2 {
-		fixedQuatAxis = fixedQuatAxis.MulScalar(-1)
+		flag = -1
+	} else {
+		flag = 1
 	}
-
+	fixedQuatAxis := normalizedFixedAxis.MulScalar(flag).MulScalar((quat.Vec3()).Length())
 	fixedQuat := NewMQuaternionByValues(fixedQuatAxis.GetX(), fixedQuatAxis.GetY(), fixedQuatAxis.GetZ(), quat.GetW())
 	fixedQuat.Normalize()
 
