@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
+
 )
 
 type MQuaternion mgl64.Quat
@@ -69,6 +70,16 @@ func (v *MQuaternion) SetW(w float64) {
 	v.W = w
 }
 
+func (v *MQuaternion) GetXYZ() *MVec3 {
+	return &MVec3{v.GetX(), v.GetY(), v.GetZ()}
+}
+
+func (v *MQuaternion) SetXYZ(vec3 *MVec3) {
+	v.SetX(vec3.GetX())
+	v.SetY(vec3.GetY())
+	v.SetZ(vec3.GetZ())
+}
+
 func (v *MQuaternion) AssignVec3(vec3 *MVec3) {
 	v.SetX(vec3.GetX())
 	v.SetY(vec3.GetY())
@@ -128,7 +139,11 @@ func NewMQuaternionFromEulerAngles(xPitch, yHead, zRoll float64) MQuaternion {
 	return *q.Mul(&qz)
 }
 
-// ToEulerAnglesは、クォータニオンのオイラー角（ラジアン）回転を返します。
+// 参考URL:
+// https://qiita.com/aa_debdeb/items/abe90a9bd0b4809813da
+// https://site.nicovideo.jp/ch/userblomaga_thanks/archive/ar805999
+
+// ToEulerAnglesは、クォータニオンを三軸のオイラー角（ラジアン）回転を返します。
 func (v *MQuaternion) ToEulerAngles() *MVec3 {
 	sx := -(2*v.GetY()*v.GetZ() - 2*v.GetX()*v.GetW())
 	unlocked := math.Abs(sx) < 0.99999
@@ -199,8 +214,15 @@ func (quat *MQuaternion) AxisAngle() (axis *MVec3, angle float64) {
 
 // Mul は、クォータニオンの積を返します。
 func (q1 *MQuaternion) Mul(q2 *MQuaternion) *MQuaternion {
-	q1.V = q1.V.Cross(q2.V).Add(q2.V.Mul(q1.W)).Add(q1.V.Mul(q2.W))
-	q1.W = q1.W*q2.W - q1.V.Dot(q2.V)
+	mat1 := q1.ToMat4()
+	mat2 := q2.ToMat4()
+	mat1.Mul(mat2)
+	qq := mat1.Quaternion()
+
+	q1.SetX(qq.GetX())
+	q1.SetY(qq.GetY())
+	q1.SetZ(qq.GetZ())
+	q1.SetW(qq.GetW())
 	return q1
 }
 

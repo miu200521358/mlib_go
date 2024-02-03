@@ -159,21 +159,6 @@ func (mat *MMat4) MulVec4(v *MVec4) MVec4 {
 	}
 }
 
-func (m MMat4) MulScalar(s float64) *MMat4 {
-	return &MMat4{
-		m[0].MuledScalar(s),
-		m[1].MuledScalar(s),
-		m[2].MuledScalar(s),
-		m[3].MuledScalar(s),
-	}
-}
-
-func (m MMat4) MuledScalar(s float64) MMat4 {
-	copied := m.Copy()
-	copied.MulScalar(s)
-	return *copied
-}
-
 // TransformVec4 multiplies v with mat and saves the result in v.
 func (mat *MMat4) TransformVec4(v *MVec4) {
 	// Use intermediate variables to not alter further computations.
@@ -298,18 +283,37 @@ func (mat *MMat4) ScaleVec3(s *MVec3) *MMat4 {
 
 // Quaternion extracts a quaternion from the rotation part of the matrix.
 func (mat *MMat4) Quaternion() MQuaternion {
-	tr := mat.Trace()
+	trace := mat[0][0] + mat[1][1] + mat[2][2]
 
-	s := math.Sqrt(tr + 1)
-	w := s * 0.5
-	s = 0.5 / s
+	q := MQuaternion{}
+	if 0 < trace {
+		s := 0.5 / math.Sqrt(trace+1)
+		q.W = 0.25 / s
+		q.V[0] = (mat[2][1] - mat[1][2]) * s
+		q.V[1] = (mat[0][2] - mat[2][0]) * s
+		q.V[2] = (mat[1][0] - mat[0][1]) * s
+	} else {
+		if mat[0][0] > mat[1][1] && mat[0][0] > mat[2][2] {
+			s := 2 * math.Sqrt(1+mat[0][0]-mat[1][1]-mat[2][2])
+			q.W = (mat[2][1] - mat[1][2]) / s
+			q.V[0] = 0.25 * s
+			q.V[1] = (mat[0][1] + mat[1][0]) / s
+			q.V[2] = (mat[0][2] + mat[2][0]) / s
+		} else if mat[1][1] > mat[2][2] {
+			s := 2 * math.Sqrt(1+mat[1][1]-mat[0][0]-mat[2][2])
+			q.W = (mat[0][2] - mat[2][0]) / s
+			q.V[0] = (mat[0][1] + mat[1][0]) / s
+			q.V[1] = 0.25 * s
+			q.V[2] = (mat[1][2] + mat[2][1]) / s
+		} else {
+			s := 2 * math.Sqrt(1+mat[2][2]-mat[0][0]-mat[1][1])
+			q.W = (mat[1][0] - mat[0][1]) / s
+			q.V[0] = (mat[0][2] + mat[2][0]) / s
+			q.V[1] = (mat[1][2] + mat[2][1]) / s
+			q.V[2] = 0.25 * s
+		}
+	}
 
-	q := NewMQuaternionByValues(
-		(mat[1][2]-mat[2][1])*s,
-		(mat[2][0]-mat[0][2])*s,
-		(mat[0][1]-mat[1][0])*s,
-		w,
-	)
 	return q.Normalized()
 }
 
@@ -662,7 +666,13 @@ func (m MMat4) Inverse() *MMat4 {
 		},
 	}
 
-	retMat.MulScalar(1 / det)
+	invDet := 1 / det
+
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
+			retMat[i][j] *= invDet
+		}
+	}
 
 	return &retMat
 }

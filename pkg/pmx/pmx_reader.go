@@ -583,7 +583,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 		}
 
 		// 回転付与:1 または 移動付与:1 の場合
-		if b.IsExternalRotation() || b.IsExternalTranslation() {
+		if b.IsEffectorRotation() || b.IsEffectorTranslation() {
 			// n  : ボーンIndexサイズ  | 付与親ボーンのボーンIndex
 			b.EffectIndex, err = r.unpackBoneIndex(model)
 			if err != nil {
@@ -622,9 +622,9 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 		}
 
 		// 外部親変形:1 の場合
-		if b.IsExternalParentDeform() {
+		if b.IsEffectorParentDeform() {
 			// 4  : int	| Key値
-			b.ExternalKey, err = r.UnpackInt()
+			b.EffectorKey, err = r.UnpackInt()
 			if err != nil {
 				return err
 			}

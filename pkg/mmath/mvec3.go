@@ -9,6 +9,7 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 var (
@@ -400,6 +401,16 @@ func (v *MVec3) Vector() []float64 {
 // 線形補間
 func LerpFloat(v1, v2 float64, t float64) float64 {
 	return v1 + ((v2 - v1) * t)
+}
+
+// Clamp01 ベクトルの各要素をmin～maxの範囲内にクランプします
+func ClampFloat(v float64, min float64, max float64) float64 {
+	if v < min {
+		v = min
+	} else if v > max {
+		v = max
+	}
+	return v
 }
 
 // 線形補間

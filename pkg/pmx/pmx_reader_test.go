@@ -321,11 +321,11 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 		}
 		expectedEffectBoneIndex := 10
 		if b.EffectIndex != expectedEffectBoneIndex {
-			t.Errorf("Expected ExternalBoneIndex to be %v, got %v", expectedEffectBoneIndex, b.EffectIndex)
+			t.Errorf("Expected EffectorBoneIndex to be %v, got %v", expectedEffectBoneIndex, b.EffectIndex)
 		}
 		expectedEffectFactor := 0.3
 		if math.Abs(b.EffectFactor-expectedEffectFactor) > 1e-5 {
-			t.Errorf("Expected ExternalBoneIndex to be %v, got %v", expectedEffectFactor, b.EffectFactor)
+			t.Errorf("Expected EffectorBoneIndex to be %v, got %v", expectedEffectFactor, b.EffectFactor)
 		}
 	}
 

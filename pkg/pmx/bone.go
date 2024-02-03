@@ -76,7 +76,7 @@ type Bone struct {
 	FixedAxis              *mmath.MVec3     // 軸固定:1 の場合 軸の方向ベクトル
 	LocalAxisX             *mmath.MVec3     // ローカル軸:1 の場合 X軸の方向ベクトル
 	LocalAxisZ             *mmath.MVec3     // ローカル軸:1 の場合 Z軸の方向ベクトル
-	ExternalKey            int              // 外部親変形:1 の場合 Key値
+	EffectorKey            int              // 外部親変形:1 の場合 Key値
 	Ik                     *Ik              // IK:1 の場合 IKデータを格納
 	DisplaySlot            int              // 該当表示枠
 	IsSystem               bool             // システム計算用追加ボーン の場合 true
@@ -119,7 +119,7 @@ func NewBone() *Bone {
 		FixedAxis:              mmath.NewMVec3(),
 		LocalAxisX:             mmath.NewMVec3(),
 		LocalAxisZ:             mmath.NewMVec3(),
-		ExternalKey:            -1,
+		EffectorKey:            -1,
 		Ik:                     NewIk(),
 		DisplaySlot:            -1,
 		IsSystem:               true,
@@ -239,17 +239,17 @@ func (bone *Bone) IsIK() bool {
 }
 
 // ローカル付与であるか
-func (bone *Bone) IsExternalLocal() bool {
+func (bone *Bone) IsEffectorLocal() bool {
 	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_LOCAL == BONE_FLAG_IS_EXTERNAL_LOCAL
 }
 
 // 回転付与であるか
-func (bone *Bone) IsExternalRotation() bool {
+func (bone *Bone) IsEffectorRotation() bool {
 	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_ROTATION == BONE_FLAG_IS_EXTERNAL_ROTATION
 }
 
 // 移動付与であるか
-func (bone *Bone) IsExternalTranslation() bool {
+func (bone *Bone) IsEffectorTranslation() bool {
 	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_TRANSLATION == BONE_FLAG_IS_EXTERNAL_TRANSLATION
 }
 
@@ -269,7 +269,7 @@ func (bone *Bone) IsAfterPhysicsDeform() bool {
 }
 
 // 外部親変形であるか
-func (bone *Bone) IsExternalParentDeform() bool {
+func (bone *Bone) IsEffectorParentDeform() bool {
 	return bone.BoneFlag&BONE_FLAG_IS_EXTERNAL_PARENT_DEFORM == BONE_FLAG_IS_EXTERNAL_PARENT_DEFORM
 }
 

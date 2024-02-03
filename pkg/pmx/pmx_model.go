@@ -8,6 +8,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 type PmxModel struct {
@@ -101,11 +102,52 @@ func (pm *PmxModel) GetRelativeBoneIndexes(boneIndex int, parentBoneIndexes, rel
 		parentBoneIndexes, relativeBoneIndexes =
 			pm.GetRelativeBoneIndexes(bone.ParentIndex, parentBoneIndexes, relativeBoneIndexes)
 	}
-	if pm.Bones.Contains(bone.EffectIndex) && !slices.Contains(relativeBoneIndexes, bone.EffectIndex) {
+	if (bone.IsEffectorRotation() || bone.IsEffectorTranslation()) &&
+		pm.Bones.Contains(bone.EffectIndex) && !slices.Contains(relativeBoneIndexes, bone.EffectIndex) {
 		// 付与親ボーンを辿る
 		relativeBoneIndexes = append(relativeBoneIndexes, bone.EffectIndex)
 		_, relativeBoneIndexes =
 			pm.GetRelativeBoneIndexes(bone.EffectIndex, parentBoneIndexes, relativeBoneIndexes)
+	}
+	if bone.IsIK() {
+		if pm.Bones.Contains(bone.Ik.BoneIndex) && !slices.Contains(relativeBoneIndexes, bone.Ik.BoneIndex) {
+			// IKターゲットボーンを辿る
+			relativeBoneIndexes = append(relativeBoneIndexes, bone.Ik.BoneIndex)
+			_, relativeBoneIndexes =
+				pm.GetRelativeBoneIndexes(bone.Ik.BoneIndex, parentBoneIndexes, relativeBoneIndexes)
+		}
+		for _, link := range bone.Ik.Links {
+			if pm.Bones.Contains(link.BoneIndex) && !slices.Contains(relativeBoneIndexes, link.BoneIndex) {
+				// IKリンクボーンを辿る
+				relativeBoneIndexes = append(relativeBoneIndexes, link.BoneIndex)
+				_, relativeBoneIndexes =
+					pm.GetRelativeBoneIndexes(link.BoneIndex, parentBoneIndexes, relativeBoneIndexes)
+			}
+		}
+	}
+	for _, boneIndex := range bone.EffectiveBoneIndexes {
+		if pm.Bones.Contains(boneIndex) && !slices.Contains(relativeBoneIndexes, boneIndex) {
+			// 外部子ボーンを辿る
+			relativeBoneIndexes = append(relativeBoneIndexes, boneIndex)
+			_, relativeBoneIndexes =
+				pm.GetRelativeBoneIndexes(boneIndex, parentBoneIndexes, relativeBoneIndexes)
+		}
+	}
+	for _, boneIndex := range bone.IkTargetBoneIndexes {
+		if pm.Bones.Contains(boneIndex) && !slices.Contains(relativeBoneIndexes, boneIndex) {
+			// IKターゲットボーンを辿る
+			relativeBoneIndexes = append(relativeBoneIndexes, boneIndex)
+			_, relativeBoneIndexes =
+				pm.GetRelativeBoneIndexes(boneIndex, parentBoneIndexes, relativeBoneIndexes)
+		}
+	}
+	for _, boneIndex := range bone.IkLinkBoneIndexes {
+		if pm.Bones.Contains(boneIndex) && !slices.Contains(relativeBoneIndexes, boneIndex) {
+			// IKリンクボーンを辿る
+			relativeBoneIndexes = append(relativeBoneIndexes, boneIndex)
+			_, relativeBoneIndexes =
+				pm.GetRelativeBoneIndexes(boneIndex, parentBoneIndexes, relativeBoneIndexes)
+		}
 	}
 
 	return parentBoneIndexes, relativeBoneIndexes
@@ -120,6 +162,7 @@ func (pm *PmxModel) SetUp() {
 		bone.ChildBoneIndexes = []int{}
 	}
 
+	// 関連ボーンINDEX情報を設定
 	for _, bone := range pm.Bones.GetSortedData() {
 		if bone.IsIK() && bone.Ik != nil {
 			// IKのリンクとターゲット
@@ -149,7 +192,9 @@ func (pm *PmxModel) SetUp() {
 			// 付与親の方に付与子情報を保持
 			pm.Bones.GetItem(bone.EffectIndex).EffectiveBoneIndexes = append(pm.Bones.GetItem(bone.EffectIndex).EffectiveBoneIndexes, bone.Index)
 		}
+	}
 
+	for _, bone := range pm.Bones.GetSortedData() {
 		// 影響があるボーンINDEXリスト
 		bone.ParentBoneIndexes, bone.RelativeBoneIndexes = pm.GetRelativeBoneIndexes(bone.Index, []int{}, []int{})
 
