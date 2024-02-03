@@ -26,3 +26,10 @@ go.work
 build
 distribution
 cmd/user_config.json
+test_resources/好き雪_2794.vmd
+test_resources/好き雪.vmd
+test_resources/唱(ダンスのみ)_0-300F.vmd
+test_resources/唱(ダンスのみ)_0107F.vmd
+test_resources/唱(ダンスのみ)_0274F.vmd
+test_resources/唱(ダンスのみ)_0275F.vmd
+test_resources/唱(ダンスのみ)_0278F.vmd

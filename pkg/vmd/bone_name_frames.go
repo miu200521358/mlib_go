@@ -76,7 +76,8 @@ func (bnfs *BoneNameFrames) GetItem(index int) *BoneFrame {
 			LocalRotation: nextBf.LocalRotation.Copy(),
 			Scale:         nextBf.Scale.Copy(),
 			LocalScale:    nextBf.LocalScale.Copy(),
-			// # IKとかの計算値はコピーしない
+			// IKとかの計算値はコピーしないで初期値
+			IkRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 		}
 		return copied
 	}
