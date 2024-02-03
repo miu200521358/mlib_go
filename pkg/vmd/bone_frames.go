@@ -143,7 +143,7 @@ func (bfs *BoneFrames) calcIk(
 		bfs.createBoneMatrixes(model, effectorTargetBoneNames)
 	// エフェクタボーンの関連ボーンの初期値を取得
 	positions, rotations, scales, qqs :=
-		bfs.getBoneMatrixes([]int{fno}, model, effectorTargetBoneNames, true, isOutLog, description)
+		bfs.getBoneMatrixes([]int{fno}, model, effectorTargetBoneNames, true, false, "")
 
 		// IK計算
 ikLoop:
@@ -529,9 +529,6 @@ func (bfs *BoneFrames) getAnimatedBoneNames(
 	if boneNames != nil || len(boneNames) > 0 {
 		targetBoneNames := make([]string, 0)
 		for _, boneName := range boneNames {
-			if !slices.Contains(targetBoneNames, boneName) {
-				targetBoneNames = append(targetBoneNames, boneName)
-			}
 			relativeBoneIndexes := model.Bones.GetItemByName(boneName).RelativeBoneIndexes
 			for _, index := range relativeBoneIndexes {
 				boneName := model.Bones.GetItem(index).Name

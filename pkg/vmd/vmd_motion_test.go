@@ -612,7 +612,7 @@ func TestVmdMotion_AnimateBoneLegIk6_Snow(t *testing.T) {
 
 }
 
-func TestVmdMotion_AnimateBoneLegIk7_Syou_278(t *testing.T) {
+func TestVmdMotion_AnimateBoneLegIk7_Syou(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/唱(ダンスのみ)_0278F.vmd")
 
@@ -671,7 +671,7 @@ func TestVmdMotion_AnimateBoneLegIk7_Syou_278(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateBoneLegIk8_Syou_278(t *testing.T) {
+func TestVmdMotion_AnimateBoneLegIk8_Syou(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
@@ -723,6 +723,326 @@ func TestVmdMotion_AnimateBoneLegIk8_Syou_278(t *testing.T) {
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.578271, 2.874233, 3.669599}
+			if !matrixes.GetItem(pmx.TOE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.TOE.Right(), fno).Position)
+			}
+		}
+	}
+}
+
+func TestVmdMotion_AnimateBoneLegIk9_Syou(t *testing.T) {
+	vr := &VmdMotionReader{}
+	motionData, err := vr.ReadByFilepath("../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*VmdMotion)
+
+	pr := &pmx.PmxReader{}
+	modelData, err := pr.ReadByFilepath("../../test_resources/サンプルモデル.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+	model.SetUp()
+
+	matrixes := motion.AnimateBone([]int{274}, model, []string{pmx.TOE.Right()}, true, false, "")
+
+	{
+
+		fno := 274
+		{
+			expectedPosition := &mmath.MVec3{0.049523, 10.960778, 1.822612}
+			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LOWER.String(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.930675, 9.938401, 2.400088}
+			if !matrixes.GetItem(pmx.LEG.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LEG.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.710987, 6.669293, -0.459177}
+			if !matrixes.GetItem(pmx.KNEE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.KNEE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.773748, 2.387820, 2.340310}
+			if !matrixes.GetItem(pmx.ANKLE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ANKLE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.256876, 0.365575, 0.994345}
+			if !matrixes.GetItem(pmx.TOE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.TOE.Right(), fno).Position)
+			}
+		}
+	}
+}
+
+func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
+	vr := &VmdMotionReader{}
+	motionData, err := vr.ReadByFilepath("../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*VmdMotion)
+
+	pr := &pmx.PmxReader{}
+	modelData, err := pr.ReadByFilepath("../../test_resources/サンプルモデル.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+	model.SetUp()
+
+	matrixes := motion.AnimateBone([]int{100, 107, 272, 273, 274, 275, 278}, model, []string{pmx.TOE.Right()}, true, false, "")
+
+	{
+
+		fno := 100
+		{
+			expectedPosition := &mmath.MVec3{0.365000, 11.411437, 1.963828}
+			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LOWER.String(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.513678, 10.280550, 2.500991}
+			if !matrixes.GetItem(pmx.LEG.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LEG.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-2.891708, 8.162312, -0.553409}
+			if !matrixes.GetItem(pmx.KNEE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.KNEE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.826174, 4.330670, 2.292396}
+			if !matrixes.GetItem(pmx.ANKLE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ANKLE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.063101, 1.865613, 2.335564}
+			if !matrixes.GetItem(pmx.TOE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.TOE.Right(), fno).Position)
+			}
+		}
+	}
+	{
+
+		fno := 107
+		{
+			expectedPosition := &mmath.MVec3{0.365000, 12.042871, 2.034023}
+			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LOWER.String(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.488466, 10.920292, 2.626419}
+			if !matrixes.GetItem(pmx.LEG.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LEG.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.607765, 6.763937, 1.653586}
+			if !matrixes.GetItem(pmx.KNEE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.KNEE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.110289, 1.718307, 2.809817}
+			if !matrixes.GetItem(pmx.ANKLE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ANKLE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.753089, -0.026766, 1.173958}
+			if !matrixes.GetItem(pmx.TOE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.TOE.Right(), fno).Position)
+			}
+		}
+	}
+	{
+
+		fno := 272
+		{
+			expectedPosition := &mmath.MVec3{-0.330117, 10.811301, 1.914508}
+			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LOWER.String(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.325985, 9.797281, 2.479780}
+			if !matrixes.GetItem(pmx.LEG.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LEG.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.394679, 6.299243, -0.209150}
+			if !matrixes.GetItem(pmx.KNEE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.KNEE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.865021, 1.642431, 2.044760}
+			if !matrixes.GetItem(pmx.ANKLE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ANKLE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.191817, -0.000789, 0.220605}
+			if !matrixes.GetItem(pmx.TOE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.TOE.Right(), fno).Position)
+			}
+		}
+	}
+	{
+
+		fno := 273
+		{
+			expectedPosition := &mmath.MVec3{-0.154848, 10.862784, 1.868560}
+			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LOWER.String(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.153633, 9.846655, 2.436846}
+			if !matrixes.GetItem(pmx.LEG.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LEG.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.498977, 6.380789, -0.272370}
+			if !matrixes.GetItem(pmx.KNEE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.KNEE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.845777, 1.802650, 2.106815}
+			if !matrixes.GetItem(pmx.ANKLE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ANKLE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.239674, 0.026274, 0.426385}
+			if !matrixes.GetItem(pmx.TOE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.TOE.Right(), fno).Position)
+			}
+		}
+	}
+	{
+
+		fno := 274
+		{
+			expectedPosition := &mmath.MVec3{0.049523, 10.960778, 1.822612}
+			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LOWER.String(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.930675, 9.938401, 2.400088}
+			if !matrixes.GetItem(pmx.LEG.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LEG.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.710987, 6.669293, -0.459177}
+			if !matrixes.GetItem(pmx.KNEE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.KNEE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.773748, 2.387820, 2.340310}
+			if !matrixes.GetItem(pmx.ANKLE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ANKLE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.256876, 0.365575, 0.994345}
+			if !matrixes.GetItem(pmx.TOE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.TOE.Right(), fno).Position)
+			}
+		}
+	}
+	{
+
+		fno := 278
+		{
+			expectedPosition := &mmath.MVec3{0.721499, 11.767294, 1.638818}
+			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LOWER.String(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.133304, 10.693992, 2.314730}
+			if !matrixes.GetItem(pmx.LEG.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LEG.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-2.833401, 8.174604, -0.100545}
+			if !matrixes.GetItem(pmx.KNEE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.KNEE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.409387, 5.341005, 3.524572}
+			if !matrixes.GetItem(pmx.ANKLE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ANKLE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.578271, 2.874233, 3.669599}
+			if !matrixes.GetItem(pmx.TOE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.TOE.Right(), fno).Position)
+			}
+		}
+	}
+	{
+
+		fno := 275
+		{
+			expectedPosition := &mmath.MVec3{0.271027, 11.113775, 1.776663}
+			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LOWER.String(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.689199, 10.081417, 2.369725}
+			if !matrixes.GetItem(pmx.LEG.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LEG.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.955139, 7.141531, -0.667679}
+			if !matrixes.GetItem(pmx.KNEE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.KNEE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.639503, 3.472883, 2.775674}
+			if !matrixes.GetItem(pmx.ANKLE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ANKLE.Right(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.136614, 1.219771, 1.875187}
 			if !matrixes.GetItem(pmx.TOE.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
 				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.TOE.Right(), fno).Position)
 			}

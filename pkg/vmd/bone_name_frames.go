@@ -6,7 +6,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type BoneNameFrames struct {
@@ -27,23 +26,23 @@ func NewBoneNameFrames(name string) *BoneNameFrames {
 
 // 指定したキーフレの前後のキーフレ番号を返す
 func (bnfs *BoneNameFrames) GetRangeIndexes(index int) (int, int) {
-	if len(bnfs.Indexes) == 0 {
+	if len(bnfs.RegisteredIndexes) == 0 {
 		return 0, 0
 	}
 
 	prevIndex := 0
 	nextIndex := index
 
-	if idx := sort.SearchInts(bnfs.Indexes, index); idx == 0 {
+	if idx := sort.SearchInts(bnfs.RegisteredIndexes, index); idx == 0 {
 		prevIndex = 0
 	} else {
-		prevIndex = bnfs.Indexes[idx-1]
+		prevIndex = bnfs.RegisteredIndexes[idx-1]
 	}
 
-	if idx := sort.SearchInts(bnfs.Indexes, index); idx == len(bnfs.Indexes) {
-		nextIndex = slices.Max(bnfs.Indexes)
+	if idx := sort.SearchInts(bnfs.RegisteredIndexes, index); idx == len(bnfs.RegisteredIndexes) {
+		nextIndex = slices.Max(bnfs.RegisteredIndexes)
 	} else {
-		nextIndex = bnfs.Indexes[idx]
+		nextIndex = bnfs.RegisteredIndexes[idx]
 	}
 
 	return prevIndex, nextIndex
