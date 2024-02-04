@@ -2,6 +2,7 @@ package mcore
 
 import (
 	"slices"
+
 )
 
 type IndexModelInterface interface {
@@ -69,7 +70,7 @@ func (c *IndexModelCorrection[T]) Append(value T) {
 		value.SetIndex(len(c.Data))
 	}
 	c.Data[value.GetIndex()] = value
-	if slices.Contains(c.Indexes, value.GetIndex()) {
+	if !slices.Contains(c.Indexes, value.GetIndex()) {
 		c.Indexes = append(c.Indexes, value.GetIndex())
 	}
 	c.SortIndexes()
