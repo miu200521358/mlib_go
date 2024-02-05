@@ -57,8 +57,8 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 	m.IkFrames.Append(ikf)
 }
 
-func (m *VmdMotion) Animate(fno int, model *pmx.PmxModel) BoneTrees {
-	return m.AnimateBone([]int{fno}, model, nil, false, false, "")
+func (m *VmdMotion) Animate(fno float64, model *pmx.PmxModel) BoneTrees {
+	return m.AnimateBone([]int{int(fno)}, model, nil, false, false, "")
 }
 
 func (m *VmdMotion) AnimateBone(

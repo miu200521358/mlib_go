@@ -8,6 +8,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 type Meshes struct {
@@ -107,7 +108,7 @@ func (m *Meshes) Delete() {
 	m.vbo.Delete()
 }
 
-func (m *Meshes) Draw(shader *mgl.MShader, boneMatrixes []mgl32.Mat4, windowIndex int) {
+func (m *Meshes) Draw(shader *mgl.MShader, boneMatrixes []*mgl32.Mat4, windowIndex int) {
 	// 隠面消去
 	// https://learnopengl.com/Advanced-OpenGL/Depth-testing
 	gl.Enable(gl.DEPTH_TEST)

@@ -6,7 +6,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type Mesh struct {
@@ -42,7 +41,7 @@ func NewMesh(
 func (m *Mesh) DrawModel(
 	shader *mgl.MShader,
 	windowIndex int,
-	boneMatrixes []mgl32.Mat4,
+	boneMatrixes []*mgl32.Mat4,
 ) {
 	m.ibo.Bind()
 

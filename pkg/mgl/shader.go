@@ -10,7 +10,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 const (
@@ -230,75 +229,6 @@ func (s *MShader) initialize(program uint32, programType ProgramType) {
 	model := mgl32.Ident4()
 	modelUniform := gl.GetUniformLocation(program, gl.Str(SHADER_BONE_TRANSFORM_MATRIX))
 	gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
-
-	// // マテリアル設定
-	// diffuseUniform := gl.GetUniformLocation(program, gl.Str(SHADER_DIFFUSE))
-	// s.DiffuseUniform[programType] = diffuseUniform
-
-	// ambientUniform := gl.GetUniformLocation(program, gl.Str(SHADER_AMBIENT))
-	// s.AmbientUniform[programType] = ambientUniform
-
-	// specularUniform := gl.GetUniformLocation(program, gl.Str(SHADER_SPECULAR))
-	// s.SpecularUniform[programType] = specularUniform
-
-	// // テクスチャの設定
-	// s.UseTextureUniform[programType] = gl.GetUniformLocation(program, gl.Str(SHADER_USE_TEXTURE))
-	// // s.TextureUniform[programType] = gl.GetUniformLocation(program, gl.Str("textureSampler\x00"))
-	// // s.TextureFactorUniform[programType] = gl.GetUniformLocation(program, gl.Str("textureFactor\x00"))
-
-	// // Toonの設定
-	// s.UseToonUniform[programType] = gl.GetUniformLocation(program, gl.Str(SHADER_USE_TOON))
-	// // s.ToonUniform[programType] = gl.GetUniformLocation(program, gl.Str("toonSampler\x00"))
-	// // s.ToonFactorUniform[programType] = gl.GetUniformLocation(program, gl.Str("toonFactor\x00"))
-
-	// // Sphereの設定
-	// s.UseSphereUniform[programType] = gl.GetUniformLocation(program, gl.Str(SHADER_USE_SPHERE))
-	// s.SphereModeUniform[programType] = gl.GetUniformLocation(program, gl.Str(SHADER_SPHERE_MODE))
-	// // s.SphereUniform[programType] = gl.GetUniformLocation(program, gl.Str("sphereSampler\x00"))
-	// // s.SphereFactorUniform[programType] = gl.GetUniformLocation(program, gl.Str("sphereFactor\x00"))
-
-	// // ボーン変形行列用テクスチャ
-	// var boneMatrixTextureId uint32
-	// gl.GenTextures(1, &boneMatrixTextureId)
-	// s.BoneMatrixTextureId[programType] = boneMatrixTextureId
-	// s.BoneMatrixTextureUniform[programType] = gl.GetUniformLocation(program, gl.Str("boneMatrixTexture\x00"))
-	// s.BoneMatrixTextureWidth[programType] = gl.GetUniformLocation(program, gl.Str("boneMatrixWidth\x00"))
-	// s.BoneMatrixTextureHeight[programType] = gl.GetUniformLocation(program, gl.Str("boneMatrixHeight\x00"))
-
-	// if programType == PROGRAM_TYPE_EDGE {
-	// 	// エッジシェーダーへの割り当て
-	// 	// エッジ設定
-	// 	s.EdgeUniform[programType] = gl.GetUniformLocation(program, gl.Str("edge\x00"))
-	// 	s.EdgeSizeUniform[programType] = gl.GetUniformLocation(program, gl.Str("edgeSize\x00"))
-	// } else if programType == PROGRAM_TYPE_BONE {
-	// 	// 選択ボーン色
-	// 	s.SelectBoneColorUniform[programType] = gl.GetUniformLocation(program, gl.Str("selectBoneColor\x00"))
-	// 	// 非選択ボーン色
-	// 	s.UnselectBoneColorUniform[programType] = gl.GetUniformLocation(program, gl.Str("unselectBoneColor\x00"))
-	// 	// ボーン数
-	// 	s.BoneCountUniform[programType] = gl.GetUniformLocation(program, gl.Str("boneCount\x00"))
-	// } else {
-
-	// 	// // テクスチャの設定
-	// 	// s.UseTextureUniform[programType] = gl.GetUniformLocation(program, gl.Str("useTexture\x00"))
-	// 	// s.TextureUniform[programType] = gl.GetUniformLocation(program, gl.Str("textureSampler\x00"))
-	// 	// s.TextureFactorUniform[programType] = gl.GetUniformLocation(program, gl.Str("textureFactor\x00"))
-
-	// 	// // Toonの設定
-	// 	// s.UseToonUniform[programType] = gl.GetUniformLocation(program, gl.Str("useToon\x00"))
-	// 	// s.ToonUniform[programType] = gl.GetUniformLocation(program, gl.Str("toonSampler\x00"))
-	// 	// s.ToonFactorUniform[programType] = gl.GetUniformLocation(program, gl.Str("toonFactor\x00"))
-
-	// 	// // Sphereの設定
-	// 	// s.UseSphereUniform[programType] = gl.GetUniformLocation(program, gl.Str("useSphere\x00"))
-	// 	// s.SphereModeUniform[programType] = gl.GetUniformLocation(program, gl.Str("sphereMode\x00"))
-	// 	// s.SphereUniform[programType] = gl.GetUniformLocation(program, gl.Str("sphereSampler\x00"))
-	// 	// s.SphereFactorUniform[programType] = gl.GetUniformLocation(program, gl.Str("sphereFactor\x00"))
-
-	// 	// // ウェイトの描写
-	// 	// s.IsShowBoneWeightUniform[programType] = gl.GetUniformLocation(program, gl.Str("isShowBoneWeight\x00"))
-	// 	// s.ShowBoneIndexesUniform[programType] = gl.GetUniformLocation(program, gl.Str("showBoneIndexes\x00"))
-	// }
 
 	s.Fit(int(s.Width), int(s.Height))
 }

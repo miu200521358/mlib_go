@@ -10,6 +10,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
 const FilePickerClass = "FilePicker Class"
@@ -53,6 +54,24 @@ func NewPmxReadFilePicker(
 		map[string]string{"*.pmx": "Pmx Files (*.pmx)", "*.*": "All Files (*.*)"},
 		50,
 		&pmx.PmxReader{},
+		OnPathChanged)
+}
+
+func NewVmdReadFilePicker(
+	parent *MWindow,
+	historyKey string,
+	title string,
+	tooltip string,
+	OnPathChanged func(string),
+) (*FilePicker, error) {
+	return NewFilePicker(
+		parent,
+		historyKey,
+		title,
+		tooltip,
+		map[string]string{"*.vmd": "Vmd Files (*.vmd)", "*.*": "All Files (*.*)"},
+		50,
+		&vmd.VmdMotionReader{},
 		OnPathChanged)
 }
 
@@ -348,6 +367,17 @@ func (f *FilePicker) convertFilterExtension(filterExtension map[string]string) s
 
 func (*FilePicker) CreateLayoutItem(ctx *walk.LayoutContext) walk.LayoutItem {
 	return &filePickerLayoutItem{idealSize: walk.SizeFrom96DPI(walk.Size{Width: 50, Height: 50}, ctx.DPI())}
+}
+
+func (f *FilePicker) Exists() bool {
+	if f.PathLineEdit.Text() == "" {
+		return false
+	}
+	isExist, err := mutils.ExistsFile(f.PathLineEdit.Text())
+	if err != nil {
+		return false
+	}
+	return isExist
 }
 
 type filePickerLayoutItem struct {

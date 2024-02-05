@@ -82,7 +82,7 @@ func (pm *PmxModel) InitializeDraw(windowIndex int, resourceFiles embed.FS) {
 	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
 }
 
-func (pm *PmxModel) Draw(shader *mgl.MShader, boneMatrixes []mgl32.Mat4, windowIndex int) {
+func (pm *PmxModel) Draw(shader *mgl.MShader, boneMatrixes []*mgl32.Mat4, windowIndex int) {
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
 }
 
