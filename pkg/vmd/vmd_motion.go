@@ -3,7 +3,6 @@ package vmd
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 type VmdMotion struct {
@@ -20,14 +19,14 @@ type VmdMotion struct {
 
 func NewVmdMotion(path string) *VmdMotion {
 	return &VmdMotion{
-		HashModel:  mcore.NewHashModel(path),
-		ModelName:  "",
-		BoneFrames: NewBoneFrames(),
-		MorphFrames: NewMorphFrames(),
+		HashModel:    mcore.NewHashModel(path),
+		ModelName:    "",
+		BoneFrames:   NewBoneFrames(),
+		MorphFrames:  NewMorphFrames(),
 		CameraFrames: NewCameraFrames(),
-		LightFrames: NewLightFrames(),
+		LightFrames:  NewLightFrames(),
 		ShadowFrames: NewShadowFrames(),
-		IkFrames: NewIkFrames(),
+		IkFrames:     NewIkFrames(),
 	}
 }
 
@@ -63,8 +62,8 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 	m.IkFrames.Append(ikf)
 }
 
-func (m *VmdMotion) Animate(fno float64, model *pmx.PmxModel) BoneTrees {
-	return m.AnimateBone([]int{int(fno)}, model, nil, false, false, "")
+func (m *VmdMotion) Animate(fno int, model *pmx.PmxModel) BoneTrees {
+	return m.AnimateBone([]int{fno}, model, nil, false, false, "")
 }
 
 func (m *VmdMotion) AnimateBone(

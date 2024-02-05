@@ -26,19 +26,21 @@ type ModelSet struct {
 }
 
 func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float64) {
-	boneMatrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
+	matrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
 	if ms.Motion == nil {
 		for i := range ms.Model.Bones.GetIndexes() {
 			mat := mgl32.Ident4()
-			boneMatrixes[i] = &mat
+			matrixes[i] = &mat
 		}
 	} else {
-		matrixes := ms.Motion.Animate(frame, ms.Model)
+		frameNo := int(frame)
+		trees := ms.Motion.Animate(frameNo, ms.Model)
 		for i, bone := range ms.Model.Bones.GetSortedData() {
-			boneMatrixes[i] = matrixes.GetItem(bone.Name, int(frame)).LocalMatrix.GL()
+			mat := trees.GetItem(bone.Name, frameNo).LocalMatrix.GL()
+			matrixes[i] = mat
 		}
 	}
-	ms.Model.Draw(shader, boneMatrixes, windowIndex)
+	ms.Model.Draw(shader, matrixes, windowIndex)
 }
 
 type GlWindow struct {

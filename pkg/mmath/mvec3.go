@@ -9,7 +9,6 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 var (
@@ -396,6 +395,14 @@ func (v *MVec3) Copy() *MVec3 {
 // Vector
 func (v *MVec3) Vector() []float64 {
 	return []float64{v.GetX(), v.GetY(), v.GetZ()}
+}
+
+func (v *MVec3) ToMat4() *MMat4 {
+	mat := NewMMat4()
+	mat[0][3] = v.GetX()
+	mat[1][3] = v.GetY()
+	mat[2][3] = v.GetZ()
+	return mat
 }
 
 // 線形補間

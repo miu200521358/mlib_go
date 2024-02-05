@@ -34,7 +34,7 @@ var (
 )
 
 // GL OpenGL座標系に変換されたベクトルを返します
-func (m MMat3) GL() *mgl64.Mat3 {
+func (m *MMat3) GL() *mgl64.Mat3 {
 	mat := mgl64.Mat3([9]float64{
 		m[0][0], -m[0][1], -m[0][2],
 		-m[1][0], m[1][1], m[1][2],
@@ -44,17 +44,17 @@ func (m MMat3) GL() *mgl64.Mat3 {
 }
 
 // IsZero
-func (m MMat3) IsZero() bool {
-	return m == MMat3Zero
+func (m *MMat3) IsZero() bool {
+	return *m == MMat3Zero
 }
 
 // IsIdent
-func (m MMat3) IsIdent() bool {
+func (m *MMat3) IsIdent() bool {
 	return m.PracticallyEquals(&MMat3Ident, 1e-10)
 }
 
 // String
-func (m MMat3) String() string {
+func (m *MMat3) String() string {
 	return m[0].String() + "\n" +
 		m[1].String() + "\n" +
 		m[2].String()

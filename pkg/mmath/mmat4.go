@@ -61,7 +61,7 @@ func NewMMat4ByVec4(v1, v2, v3, v4 *MVec4) *MMat4 {
 }
 
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します
-func (m MMat4) GL() *mgl32.Mat4 {
+func (m *MMat4) GL() *mgl32.Mat4 {
 	tm := m.Transpose()
 	mat := mgl32.Mat4{
 		float32(tm[0][0]), float32(-tm[0][1]), float32(-tm[0][2]), float32(tm[0][3]),
@@ -73,17 +73,17 @@ func (m MMat4) GL() *mgl32.Mat4 {
 }
 
 // IsZero
-func (m MMat4) IsZero() bool {
-	return m == MMat4Zero
+func (m *MMat4) IsZero() bool {
+	return *m == MMat4Zero
 }
 
 // IsIdent
-func (m MMat4) IsIdent() bool {
+func (m *MMat4) IsIdent() bool {
 	return m.PracticallyEquals(&MMat4Ident, 1e-10)
 }
 
 // String
-func (m MMat4) String() string {
+func (m *MMat4) String() string {
 	return m[0].String() + "\n" +
 		m[1].String() + "\n" +
 		m[2].String() + "\n" +
@@ -100,7 +100,7 @@ func (m *MMat4) Copy() *MMat4 {
 }
 
 // PracticallyEquals
-func (m MMat4) PracticallyEquals(other *MMat4, tolerance float64) bool {
+func (m *MMat4) PracticallyEquals(other *MMat4, tolerance float64) bool {
 	return m[0].PracticallyEquals(&other[0], tolerance) &&
 		m[1].PracticallyEquals(&other[1], tolerance) &&
 		m[2].PracticallyEquals(&other[2], tolerance) &&
@@ -635,7 +635,7 @@ func (m *MMat4) Det() float64 {
 }
 
 // 逆行列
-func (m MMat4) Inverse() *MMat4 {
+func (m *MMat4) Inverse() *MMat4 {
 	det := m.Det()
 	if mgl64.FloatEqual(det, float64(0.0)) {
 		return NewMMat4()

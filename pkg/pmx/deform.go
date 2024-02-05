@@ -105,9 +105,7 @@ func (d *Deform) Normalize(align bool) {
 		}
 
 		// ウェイトの大きい順に指定個数までを対象とする
-		sortIndexesByWeight(ilist, wlist)
-		d.Indexes = ilist[:d.Count]
-		d.Weights = wlist[:d.Count]
+		d.Indexes, d.Weights = sortIndexesByWeight(ilist, wlist)
 	}
 
 	// ウェイト正規化
@@ -153,9 +151,7 @@ func (d *Deform) NormalizedDeform() [8]float32 {
 	}
 
 	// ウェイトの大きい順に指定個数までを対象とする
-	sortIndexesByWeight(ilist, wlist)
-	ilist = ilist[:4]
-	wlist = wlist[:4]
+	sortedIndexes, sortedWeights := sortIndexesByWeight(ilist, wlist)
 
 	// ウェイト正規化
 	sum = 0.0
@@ -167,32 +163,38 @@ func (d *Deform) NormalizedDeform() [8]float32 {
 	}
 
 	normalizedDeform := [8]float32{}
-	normalizedDeform[0] = float32(ilist[0])
-	normalizedDeform[1] = float32(ilist[1])
-	normalizedDeform[2] = float32(ilist[2])
-	normalizedDeform[3] = float32(ilist[3])
-	normalizedDeform[4] = float32(wlist[0])
-	normalizedDeform[5] = float32(wlist[1])
-	normalizedDeform[6] = float32(wlist[2])
-	normalizedDeform[7] = float32(wlist[3])
+	normalizedDeform[0] = float32(sortedIndexes[0])
+	normalizedDeform[1] = float32(sortedIndexes[1])
+	normalizedDeform[2] = float32(sortedIndexes[2])
+	normalizedDeform[3] = float32(sortedIndexes[3])
+	normalizedDeform[4] = float32(sortedWeights[0])
+	normalizedDeform[5] = float32(sortedWeights[1])
+	normalizedDeform[6] = float32(sortedWeights[2])
+	normalizedDeform[7] = float32(sortedWeights[3])
 
 	return normalizedDeform
 }
 
-// sortIndexesByWeight sorts the indexes and weights by weight in descending order.
-func sortIndexesByWeight(indexes []int, weights []float64) {
-	sortFunc := func(i, j int) bool {
+// sortIndexesByWeight ウェイトの大きい順に指定個数までを対象とする
+func sortIndexesByWeight(indexes []int, weights []float64) ([]int, []float64) {
+	sort.SliceStable(weights, func(i, j int) bool {
 		return weights[i] > weights[j]
+	})
+
+	sortedIndexes := make([]int, len(indexes))
+	sortedWeights := make([]float64, len(weights))
+
+	for i, weight := range weights {
+		for j, w := range weights {
+			if weight == w {
+				sortedIndexes[i] = indexes[j]
+				sortedWeights[i] = w
+				break
+			}
+		}
 	}
-	sortIndexes := make([]int, len(indexes))
-	for i := range sortIndexes {
-		sortIndexes[i] = i
-	}
-	sort.Slice(sortIndexes, sortFunc)
-	for i := range indexes {
-		indexes[i] = indexes[sortIndexes[i]]
-		weights[i] = weights[sortIndexes[i]]
-	}
+
+	return sortedIndexes, sortedWeights
 }
 
 // Bdef1 represents the BDEF1 deformation.

@@ -8,6 +8,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 type PmxModel struct {
@@ -95,8 +96,8 @@ func (pm *PmxModel) GetRelativeBoneIndexes(boneIndex int, parentBoneIndexes, rel
 
 	bone := pm.Bones.GetItem(boneIndex)
 	if pm.Bones.Contains(bone.ParentIndex) && !slices.Contains(relativeBoneIndexes, bone.ParentIndex) {
-		// 親ボーンを辿る
-		parentBoneIndexes = append(parentBoneIndexes, bone.ParentIndex)
+		// 親ボーンを辿る(親から子の順番)
+		parentBoneIndexes = append([]int{bone.ParentIndex}, parentBoneIndexes...)
 		relativeBoneIndexes = append(relativeBoneIndexes, bone.ParentIndex)
 		parentBoneIndexes, relativeBoneIndexes =
 			pm.GetRelativeBoneIndexes(bone.ParentIndex, parentBoneIndexes, relativeBoneIndexes)
