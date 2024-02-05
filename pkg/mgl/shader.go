@@ -80,9 +80,11 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		NearPlane:            0.1,
 		FarPlane:             1000.0,
 		lightPosition:        &mmath.MVec3{-20, INITIAL_CAMERA_POSITION_Y * 2, INITIAL_CAMERA_POSITION_Z * 2},
-		lightDirection:       &mmath.MVec3{-1, -1, -1},
 		msaa:                 NewMsaa(int32(width), int32(height)),
 	}
+	lightDirection := shader.lightPosition.Muled(&mmath.MVec3{-1, -1, -1})
+	lightDirection.Normalize()
+	shader.lightDirection = &lightDirection
 	modelProgram, err := shader.newProgram(
 		resourceFiles,
 		"resources/glsl/model.vert", "resources/glsl/model.frag",
