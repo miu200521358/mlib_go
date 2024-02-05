@@ -11,6 +11,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mwidget"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+	"github.com/miu200521358/mlib_go/pkg/vmd"
+
 )
 
 func init() {
@@ -44,6 +46,16 @@ func main() {
 		func(path string) {}))
 	if err != nil {
 		walk.MsgBox(&mWindow.MainWindow, "Pmxファイル選択エラー", err.Error(), walk.MsgBoxIconError)
+	}
+
+	vmdReadPicker, err := (mwidget.NewVmdReadFilePicker(
+		mWindow,
+		"VmdPath",
+		"Vmdファイル",
+		"Vmdファイルを選択してください",
+		func(path string) {}))
+	if err != nil {
+		walk.MsgBox(&mWindow.MainWindow, "Vmdファイル選択エラー", err.Error(), walk.MsgBoxIconError)
 	}
 
 	pmxSavePicker, err := (mwidget.NewPmxSaveFilePicker(
@@ -91,8 +103,18 @@ func main() {
 		console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.GetIndexes())))
 		console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.GetIndexes())))
 
+		var motion *vmd.VmdMotion
+		if vmdReadPicker.Exists() {
+			motionData, err := vmdReadPicker.GetData()
+			if err != nil {
+				walk.MsgBox(&mWindow.MainWindow, "Vmdファイル読み込みエラー", err.Error(), walk.MsgBoxIconError)
+				return
+			}
+			motion = motionData.(*vmd.VmdMotion)
+		}
+
 		mWindow.GetMainGlWindow().ClearData()
-		mWindow.GetMainGlWindow().AddData(model)
+		mWindow.GetMainGlWindow().AddData(model, motion)
 		mWindow.GetMainGlWindow().Run()
 	})
 
