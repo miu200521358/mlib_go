@@ -118,50 +118,15 @@ func (d *Deform) Normalize(align bool) {
 	}
 }
 
-// NormalizedDeform ウェイト正規化して4つのボーンINDEXとウェイトを返す（合計8個）
+// NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
 func (d *Deform) NormalizedDeform() [8]float32 {
-	// 揃える必要がある場合、ウェイトを統合する
-	indexWeights := make(map[int]float64)
+	normalizedDeform := [8]float32{0, 0, 0, 0, 0, 0, 0, 0}
 	for i, index := range d.Indexes {
-		if _, ok := indexWeights[index]; !ok {
-			indexWeights[index] = 0.0
-		}
-		indexWeights[index] += d.Weights[i]
+		normalizedDeform[i] = float32(index)
 	}
-
-	// 揃える必要がある場合、数が足りるよう、かさ増しする
-	ilist := make([]int, 0, len(indexWeights)+4)
-	wlist := make([]float64, 0, len(indexWeights)+4)
-	for index, weight := range indexWeights {
-		ilist = append(ilist, index)
-		wlist = append(wlist, weight)
+	for i, weight := range d.Weights {
+		normalizedDeform[i+4] = float32(weight)
 	}
-	for i := len(indexWeights); i < 4; i++ {
-		ilist = append(ilist, 0)
-		wlist = append(wlist, 0)
-	}
-
-	// 正規化
-	sum := 0.0
-	for _, weight := range wlist {
-		sum += weight
-	}
-	for i := range wlist {
-		wlist[i] /= sum
-	}
-
-	// ウェイトの大きい順に指定個数までを対象とする
-	sortedIndexes, sortedWeights := sortIndexesByWeight(ilist, wlist)
-
-	normalizedDeform := [8]float32{}
-	normalizedDeform[0] = float32(sortedIndexes[0])
-	normalizedDeform[1] = float32(sortedIndexes[1])
-	normalizedDeform[2] = float32(sortedIndexes[2])
-	normalizedDeform[3] = float32(sortedIndexes[3])
-	normalizedDeform[4] = float32(sortedWeights[0])
-	normalizedDeform[5] = float32(sortedWeights[1])
-	normalizedDeform[6] = float32(sortedWeights[2])
-	normalizedDeform[7] = float32(sortedWeights[3])
 
 	return normalizedDeform
 }
