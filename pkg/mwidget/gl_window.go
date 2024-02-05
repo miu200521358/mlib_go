@@ -17,13 +17,15 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
 type ModelSet struct {
-	Model *pmx.PmxModel
+	Model  *pmx.PmxModel
+	Motion *vmd.VmdMotion
 }
 
-func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int) {
+func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float64) {
 	// TODO: モーション計算
 	boneMatrixes := []mgl32.Mat4{
 		mgl32.Ident4(),
@@ -144,7 +146,6 @@ func NewGlWindow(
 	w.SetCursorPosCallback(glWindow.handleCursorPosEvent)
 	w.SetKeyCallback(glWindow.handleKeyEvent)
 	w.SetCloseCallback(glWindow.Close)
-	glWindow.Draw()
 
 	return &glWindow, nil
 }
@@ -405,14 +406,13 @@ func (w *GlWindow) Reset() {
 
 }
 
-func (w *GlWindow) AddData(pmxModel *pmx.PmxModel) {
+func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 	w.Reset()
 
-	// TODO: モーションも追加する
 	pmxModel.InitializeDraw(w.WindowIndex, w.resourceFiles)
-	w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel})
+	w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel, Motion: vmdMotion})
 }
 
 func (w *GlWindow) ClearData() {
@@ -422,7 +422,7 @@ func (w *GlWindow) ClearData() {
 	w.ModelSets = make([]ModelSet, 0)
 }
 
-func (w *GlWindow) Draw() {
+func (w *GlWindow) Draw(frame float64) {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 
@@ -432,7 +432,7 @@ func (w *GlWindow) Draw() {
 
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
-		modelSet.Draw(w.Shader, w.WindowIndex)
+		modelSet.Draw(w.Shader, w.WindowIndex, frame)
 	}
 }
 
@@ -442,6 +442,9 @@ func (w *GlWindow) Size() walk.Size {
 }
 
 func (w *GlWindow) Run() {
+	frame := 0.0
+	previousTime := glfw.GetTime()
+
 	for !w.ShouldClose() {
 		// 深度バッファのクリア
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -471,7 +474,14 @@ func (w *GlWindow) Run() {
 			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 		}
 
-		w.Draw()
+		// Update
+		time := glfw.GetTime()
+		elapsed := time - previousTime
+		previousTime = time
+		frame += elapsed
+
+		// 30fps
+		w.Draw(frame / 30.0)
 
 		// Maintenance
 		w.SwapBuffers()
