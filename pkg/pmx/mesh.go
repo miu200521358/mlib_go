@@ -1,6 +1,9 @@
 package pmx
 
 import (
+	"math"
+	"unsafe"
+
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
@@ -55,8 +58,8 @@ func (m *Mesh) DrawModel(
 		gl.CullFace(gl.BACK)
 	}
 
-	// // ボーンデフォームテクスチャ設定
-	// m.BindBoneMatrixes(boneMatrixes, shader, mgl.PROGRAM_TYPE_MODEL, windowIndex)
+	// ボーンデフォームテクスチャ設定
+	m.BindBoneMatrixes(boneMatrixes, shader, shader.ModelProgram, windowIndex)
 
 	// ------------------
 	// 材質色設定
@@ -159,56 +162,60 @@ func (m *Mesh) Delete() {
 	}
 }
 
-// func (m *Mesh) BindBoneMatrixes(
-// 	matrixes []mgl32.Mat4,
-// 	shader *mgl.MShader,
-// 	programType mgl.ProgramType,
-// 	windowIndex int,
-// ) {
-// 	// テクスチャをアクティブにする
-// 	gl.ActiveTexture(gl.TEXTURE20)
+func (m *Mesh) BindBoneMatrixes(
+	matrixes []*mgl32.Mat4,
+	shader *mgl.MShader,
+	program uint32,
+	windowIndex int,
+) {
 
-// 	// テクスチャをバインドする
-// 	gl.BindTexture(
-// 		gl.TEXTURE_2D, shader.BoneMatrixTextureId[programType],
-// 	)
+	// テクスチャをアクティブにする
+	gl.ActiveTexture(gl.TEXTURE20)
 
-// 	// テクスチャのパラメーターの設定
-// 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
-// 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-// 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-// 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-// 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	// テクスチャをバインドする
+	gl.BindTexture(gl.TEXTURE_2D, shader.BoneTextureId)
 
-// 	// テクスチャのサイズを計算する
-// 	numBones := len(matrixes)
-// 	texSize := int(math.Ceil(math.Sqrt(float64(numBones))))
-// 	width := int(math.Ceil(float64(texSize)/4) * 4 * 4)
-// 	height := int(math.Ceil((float64(numBones) * 4) / float64(width)))
+	// テクスチャのパラメーターの設定
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
 
-// 	paddedMatrixes := make([]float32, height*width*4)
-// 	for i, matrix := range matrixes {
-// 		copy(paddedMatrixes[i*16:], matrix[:])
-// 	}
+	// テクスチャのサイズを計算する
+	numBones := len(matrixes)
+	texSize := int(math.Ceil(math.Sqrt(float64(numBones))))
+	width := int(math.Ceil(float64(texSize)/4) * 4 * 4)
+	height := int(math.Ceil((float64(numBones) * 4) / float64(width)))
 
-// 	// テクスチャをシェーダーに渡す
-// 	gl.TexImage2D(
-// 		gl.TEXTURE_2D,
-// 		0,
-// 		gl.RGBA32F,
-// 		int32(width),
-// 		int32(height),
-// 		0,
-// 		gl.RGBA,
-// 		gl.FLOAT,
-// 		unsafe.Pointer(&paddedMatrixes[0]),
-// 	)
+	paddedMatrixes := make([]float32, height*width*4)
+	for i, matrix := range matrixes {
+		copy(paddedMatrixes[i*16:], matrix[:])
+	}
 
-// 	gl.Uniform1i(shader.BoneMatrixTextureUniform[programType], 20)
-// 	gl.Uniform1i(shader.BoneMatrixTextureWidth[programType], int32(width))
-// 	gl.Uniform1i(shader.BoneMatrixTextureHeight[programType], int32(height))
-// }
+	// テクスチャをシェーダーに渡す
+	gl.TexImage2D(
+		gl.TEXTURE_2D,
+		0,
+		gl.RGBA32F,
+		int32(width),
+		int32(height),
+		0,
+		gl.RGBA,
+		gl.FLOAT,
+		unsafe.Pointer(&paddedMatrixes[0]),
+	)
 
-// func (m *Mesh) UnbindBoneMatrixes() {
-// 	gl.BindTexture(gl.TEXTURE_2D, 0)
-// }
+	modelUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE))
+	gl.Uniform1i(modelUniform, 20)
+
+	modelWidthUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE_WIDTH))
+	gl.Uniform1i(modelWidthUniform, int32(width))
+
+	modelHeightUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE_HEIGHT))
+	gl.Uniform1i(modelHeightUniform, int32(height))
+}
+
+func (m *Mesh) UnbindBoneMatrixes() {
+	gl.BindTexture(gl.TEXTURE_2D, 0)
+}

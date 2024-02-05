@@ -27,7 +27,12 @@ type ModelSet struct {
 
 func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float64) {
 	boneMatrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
-	if ms.Motion != nil {
+	if ms.Motion == nil {
+		for i := range ms.Model.Bones.GetIndexes() {
+			mat := mgl32.Ident4()
+			boneMatrixes[i] = &mat
+		}
+	} else {
 		matrixes := ms.Motion.Animate(frame, ms.Model)
 		for i, bone := range ms.Model.Bones.GetSortedData() {
 			boneMatrixes[i] = matrixes.GetItem(bone.Name, int(frame)).LocalMatrix.GL()

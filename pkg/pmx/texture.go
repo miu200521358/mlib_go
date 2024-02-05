@@ -11,6 +11,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 // テクスチャ種別
@@ -259,14 +260,14 @@ func (t *ToonTextures) InitGl(
 
 		// Toon用テクスチャユニットを設定
 		if windowIndex == 0 {
-			toon.textureUnitId = gl.TEXTURE20
-			toon.textureUnitNo = 20
+			toon.textureUnitId = gl.TEXTURE10
+			toon.textureUnitNo = 10
 		} else if windowIndex == 1 {
-			toon.textureUnitId = gl.TEXTURE21
-			toon.textureUnitNo = 21
+			toon.textureUnitId = gl.TEXTURE11
+			toon.textureUnitNo = 11
 		} else if windowIndex == 2 {
-			toon.textureUnitId = gl.TEXTURE22
-			toon.textureUnitNo = 22
+			toon.textureUnitId = gl.TEXTURE12
+			toon.textureUnitNo = 12
 		}
 
 		tGl.Valid = toon.Valid

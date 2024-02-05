@@ -10,10 +10,13 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 const (
-	SHADER_BONE_TRANSFORM_MATRIX        = "boneTransformMatrix\x00"
+	SHADER_BONE_MATRIX_TEXTURE          = "boneMatrixTexture\x00"
+	SHADER_BONE_MATRIX_TEXTURE_WIDTH    = "boneMatrixWidth\x00"
+	SHADER_BONE_MATRIX_TEXTURE_HEIGHT   = "boneMatrixHeight\x00"
 	SHADER_MODEL_VIEW_MATRIX            = "modelViewMatrix\x00"
 	SHADER_MODEL_VIEW_PROJECTION_MATRIX = "modelViewProjectionMatrix\x00"
 	SHADER_CAMERA_POSITION              = "cameraPosition\x00"
@@ -66,6 +69,7 @@ type MShader struct {
 	ModelProgram         uint32
 	EdgeProgram          uint32
 	BoneProgram          uint32
+	BoneTextureId        uint32
 }
 
 func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
@@ -221,14 +225,14 @@ func (s *MShader) initialize(program uint32, programType ProgramType) {
 	lightDirectionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_LIGHT_DIRECTION))
 	gl.Uniform3fv(lightDirectionUniform, 1, &lightDirection[0])
 
+	// カメラ中心
 	lookAtCenter := s.LookAtCenterPosition.GL()
 	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 	cameraUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_MATRIX))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
-	model := mgl32.Ident4()
-	modelUniform := gl.GetUniformLocation(program, gl.Str(SHADER_BONE_TRANSFORM_MATRIX))
-	gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
+	// ボーン行列用テクスチャ生成
+	gl.GenTextures(1, &s.BoneTextureId)
 
 	s.Fit(int(s.Width), int(s.Height))
 }
