@@ -18,7 +18,7 @@ type BoneFrame struct {
 	IkRegistered  bool             // IK計算済み
 }
 
-func NewBoneFrame(index int) *BoneFrame {
+func NewBoneFrame(index float32) *BoneFrame {
 	return &BoneFrame{
 		BaseFrame:     NewVmdBaseFrame(index),
 		Position:      mmath.NewMVec3(),

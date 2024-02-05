@@ -2,11 +2,12 @@ package vmd
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type BoneTree struct {
 	BoneName      string
-	FrameNo       int
+	Frame         float32
 	GlobalMatrix  *mmath.MMat4
 	LocalMatrix   *mmath.MMat4
 	Position      *mmath.MVec3
@@ -17,7 +18,7 @@ type BoneTree struct {
 
 func NewBoneTree(
 	boneName string,
-	frameNo int,
+	frame float32,
 	globalMatrix, localMatrix *mmath.MMat4,
 	framePosition *mmath.MVec3,
 	frameRotation *mmath.MQuaternion,
@@ -26,7 +27,7 @@ func NewBoneTree(
 	p := globalMatrix.Translation()
 	return &BoneTree{
 		BoneName:      boneName,
-		FrameNo:       frameNo,
+		Frame:         frame,
 		GlobalMatrix:  globalMatrix,
 		LocalMatrix:   localMatrix,
 		Position:      &p,
@@ -38,7 +39,7 @@ func NewBoneTree(
 
 type BoneNameFrameNo struct {
 	BoneName string
-	FrameNo  int
+	Frame    float32
 }
 
 type BoneTrees struct {
@@ -51,12 +52,12 @@ func NewBoneTrees() *BoneTrees {
 	}
 }
 
-func (bts *BoneTrees) GetItem(boneName string, frameNo int) *BoneTree {
-	return bts.Data[BoneNameFrameNo{boneName, frameNo}]
+func (bts *BoneTrees) GetItem(boneName string, frame float32) *BoneTree {
+	return bts.Data[BoneNameFrameNo{boneName, frame}]
 }
 
-func (bts *BoneTrees) SetItem(boneName string, frameNo int, boneTree *BoneTree) {
-	bts.Data[BoneNameFrameNo{boneName, frameNo}] = boneTree
+func (bts *BoneTrees) SetItem(boneName string, frame float32, boneTree *BoneTree) {
+	bts.Data[BoneNameFrameNo{boneName, frame}] = boneTree
 }
 
 func (bts *BoneTrees) GetBoneNames() []string {
@@ -67,15 +68,15 @@ func (bts *BoneTrees) GetBoneNames() []string {
 	return boneNames
 }
 
-func (bts *BoneTrees) GetFrameNos() []int {
-	frameNos := make([]int, 0)
+func (bts *BoneTrees) GetFrameNos() []float32 {
+	frames := make([]float32, 0)
 	for key := range bts.Data {
-		frameNos = append(frameNos, key.FrameNo)
+		frames = append(frames, key.Frame)
 	}
-	return frameNos
+	return frames
 }
 
-func (bts *BoneTrees) Contains(boneName string, frameNo int) bool {
-	_, ok := bts.Data[BoneNameFrameNo{boneName, frameNo}]
+func (bts *BoneTrees) Contains(boneName string, frame float32) bool {
+	_, ok := bts.Data[BoneNameFrameNo{boneName, frame}]
 	return ok
 }

@@ -62,7 +62,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.CENTER.String()).GetItem(358)
 
 		// フレーム番号
-		expectedFrameNo := 358
+		expectedFrameNo := float32(358)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
 		}
@@ -125,7 +125,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.UPPER.String()).GetItem(689)
 
 		// フレーム番号
-		expectedFrameNo := 689
+		expectedFrameNo := float32(689)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
 		}
@@ -188,7 +188,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Right()).GetItem(384)
 
 		// フレーム番号
-		expectedFrameNo := 384
+		expectedFrameNo := float32(384)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
 		}
@@ -252,7 +252,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Left()).GetItem(384)
 
 		// フレーム番号
-		expectedFrameNo := 384
+		expectedFrameNo := float32(384)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
 		}
@@ -275,7 +275,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Left()).GetItem(394)
 
 		// フレーム番号
-		expectedFrameNo := 394
+		expectedFrameNo := float32(394)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
 		}
@@ -298,7 +298,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Left()).GetItem(412)
 
 		// フレーム番号
-		expectedFrameNo := 412
+		expectedFrameNo := float32(412)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
 		}
@@ -321,7 +321,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.ARM.Right()).GetItem(384)
 
 		// フレーム番号
-		expectedFrameNo := 384
+		expectedFrameNo := float32(384)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
 		}

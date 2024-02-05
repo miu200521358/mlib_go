@@ -2,38 +2,38 @@ package vmd
 
 import (
 	"slices"
-	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 
 )
 
 type ShadowFrames struct {
-	*mcore.IndexModelCorrection[*ShadowFrame]
-	RegisteredIndexes []int // 登録対象キーフレリスト
+	*mcore.IndexFloatModelCorrection[*ShadowFrame]
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewShadowFrames() *ShadowFrames {
 	return &ShadowFrames{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*ShadowFrame](),
-		RegisteredIndexes:    []int{},
+		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*ShadowFrame](),
+		RegisteredIndexes:         []float32{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (sfs *ShadowFrames) GetRangeIndexes(index int) (int, int) {
+func (sfs *ShadowFrames) GetRangeIndexes(index float32) (float32, float32) {
 
-	prevIndex := 0
+	prevIndex := float32(0)
 	nextIndex := index
 
-	if idx := sort.SearchInts(sfs.Indexes, index); idx == 0 {
+	if idx := mutils.SearchFloat32s(sfs.Indexes, index); idx == 0 {
 		prevIndex = 0
 	} else {
 		prevIndex = sfs.Indexes[idx-1]
 	}
 
-	if idx := sort.SearchInts(sfs.Indexes, index); idx == len(sfs.Indexes) {
+	if idx := mutils.SearchFloat32s(sfs.Indexes, index); idx == len(sfs.Indexes) {
 		nextIndex = slices.Max(sfs.Indexes)
 	} else {
 		nextIndex = sfs.Indexes[idx]
@@ -43,12 +43,7 @@ func (sfs *ShadowFrames) GetRangeIndexes(index int) (int, int) {
 }
 
 // キーフレ計算結果を返す
-func (sfs *ShadowFrames) GetItem(index int) *ShadowFrame {
-	if index < 0 {
-		// マイナス指定の場合、後ろからの順番に置き換える
-		index = len(sfs.Data) + index
-		return sfs.Data[sfs.Indexes[index]]
-	}
+func (sfs *ShadowFrames) GetItem(index float32) *ShadowFrame {
 	if val, ok := sfs.Data[index]; ok {
 		return val
 	}
@@ -88,12 +83,12 @@ func (sfs *ShadowFrames) GetItem(index int) *ShadowFrame {
 func (sfs *ShadowFrames) Append(value *ShadowFrame) {
 	if !slices.Contains(sfs.Indexes, value.Index) {
 		sfs.Indexes = append(sfs.Indexes, value.Index)
-		sort.Ints(sfs.Indexes)
+		mutils.SortFloat32s(sfs.Indexes)
 	}
 	if value.Registered {
 		if !slices.Contains(sfs.RegisteredIndexes, value.Index) {
 			sfs.RegisteredIndexes = append(sfs.RegisteredIndexes, value.Index)
-			sort.Ints(sfs.RegisteredIndexes)
+			mutils.SortFloat32s(sfs.RegisteredIndexes)
 		}
 	}
 

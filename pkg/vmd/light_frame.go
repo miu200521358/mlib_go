@@ -8,7 +8,7 @@ type LightFrame struct {
 	Color      *mmath.MVec3 // 色
 }
 
-func NewLightFrame(index int) *LightFrame {
+func NewLightFrame(index float32) *LightFrame {
 	return &LightFrame{
 		BaseFrame: NewVmdBaseFrame(index),
 		Position:  mmath.NewMVec3(),

@@ -153,15 +153,6 @@ func (d *Deform) NormalizedDeform() [8]float32 {
 	// ウェイトの大きい順に指定個数までを対象とする
 	sortedIndexes, sortedWeights := sortIndexesByWeight(ilist, wlist)
 
-	// ウェイト正規化
-	sum = 0.0
-	for _, weight := range wlist {
-		sum += weight
-	}
-	for i := range wlist {
-		wlist[i] /= sum
-	}
-
 	normalizedDeform := [8]float32{}
 	normalizedDeform[0] = float32(sortedIndexes[0])
 	normalizedDeform[1] = float32(sortedIndexes[1])

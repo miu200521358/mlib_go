@@ -180,7 +180,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 		if err != nil {
 			return err
 		}
-		v.Index = int(index)
+		v.Index = float32(index)
 
 		// 位置X,Y,Z
 		v.Position, err = r.UnpackVec3()
@@ -230,7 +230,7 @@ func (r *VmdMotionReader) readMorphs(motion *VmdMotion) error {
 		if err != nil {
 			return err
 		}
-		v.Index = int(index)
+		v.Index = float32(index)
 
 		// ratio
 		v.Ratio, err = r.UnpackFloat()
@@ -260,7 +260,7 @@ func (r *VmdMotionReader) readCameras(motion *VmdMotion) error {
 		if err != nil {
 			return err
 		}
-		v.Index = int(index)
+		v.Index = float32(index)
 
 		// 距離
 		v.Distance, err = r.UnpackFloat()
@@ -324,7 +324,7 @@ func (r *VmdMotionReader) readLights(motion *VmdMotion) error {
 		if err != nil {
 			return err
 		}
-		v.Index = int(index)
+		v.Index = float32(index)
 
 		// 照明色
 		v.Color, err = r.UnpackVec3()
@@ -360,7 +360,7 @@ func (r *VmdMotionReader) readShadows(motion *VmdMotion) error {
 		if err != nil {
 			return err
 		}
-		v.Index = int(index)
+		v.Index = float32(index)
 
 		// セルフ影タイプ
 		shadowMode, err := r.UnpackByte()
@@ -397,7 +397,7 @@ func (r *VmdMotionReader) readIks(motion *VmdMotion) error {
 		if err != nil {
 			return err
 		}
-		v.Index = int(index)
+		v.Index = float32(index)
 
 		// モデル表示
 		visible, err := r.UnpackByte()

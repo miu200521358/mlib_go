@@ -3,7 +3,6 @@ package mutils
 import (
 	"math"
 	"sort"
-
 )
 
 func BoolToInt(b bool) int32 {
@@ -67,3 +66,32 @@ func Mean2DHorizontal(nums [][]float64) []float64 {
 	}
 	return horizontal
 }
+
+func SearchFloat32s(a []float32, x float32) int {
+	return sort.Search(len(a), func(i int) bool { return a[i] >= x })
+}
+
+func SortFloat32s(x []float32) { sort.Sort(Float32Slice(x)) }
+
+// Float32Slice implements Interface for a []float32, sorting in increasing order,
+// with not-a-number (NaN) values ordered before other values.
+type Float32Slice []float32
+
+func (x Float32Slice) Len() int { return len(x) }
+
+// Less reports whether x[i] should be ordered before x[j], as required by the sort Interface.
+// Note that floating-point comparison by itself is not a transitive relation: it does not
+// report a consistent ordering for not-a-number (NaN) values.
+// This implementation of Less places NaN values before any others, by using:
+//
+//	x[i] < x[j] || (math.IsNaN(x[i]) && !math.IsNaN(x[j]))
+func (x Float32Slice) Less(i, j int) bool { return x[i] < x[j] || (isNaN(x[i]) && !isNaN(x[j])) }
+func (x Float32Slice) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
+
+// isNaN is a copy of math.IsNaN to avoid a dependency on the math package.
+func isNaN(f float32) bool {
+	return f != f
+}
+
+// Sort is a convenience method: x.Sort() calls Sort(x).
+func (x Float32Slice) Sort() { sort.Sort(x) }

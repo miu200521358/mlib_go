@@ -2,36 +2,36 @@ package vmd
 
 import (
 	"slices"
-	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type IkFrames struct {
-	*mcore.IndexModelCorrection[*IkFrame]
-	RegisteredIndexes []int // 登録対象キーフレリスト
+	*mcore.IndexFloatModelCorrection[*IkFrame]
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewIkFrames() *IkFrames {
 	return &IkFrames{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*IkFrame](),
-		RegisteredIndexes:    []int{},
+		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*IkFrame](),
+		RegisteredIndexes:         []float32{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (ifs *IkFrames) GetRangeIndexes(index int) (int, int) {
+func (ifs *IkFrames) GetRangeIndexes(index float32) (float32, float32) {
 
-	prevIndex := 0
+	prevIndex := float32(0)
 	nextIndex := index
 
-	if idx := sort.SearchInts(ifs.Indexes, index); idx == 0 {
+	if idx := mutils.SearchFloat32s(ifs.Indexes, index); idx == 0 {
 		prevIndex = 0
 	} else {
 		prevIndex = ifs.Indexes[idx-1]
 	}
 
-	if idx := sort.SearchInts(ifs.Indexes, index); idx == len(ifs.Indexes) {
+	if idx := mutils.SearchFloat32s(ifs.Indexes, index); idx == len(ifs.Indexes) {
 		nextIndex = slices.Max(ifs.Indexes)
 	} else {
 		nextIndex = ifs.Indexes[idx]
@@ -41,12 +41,7 @@ func (ifs *IkFrames) GetRangeIndexes(index int) (int, int) {
 }
 
 // キーフレ計算結果を返す
-func (ifs *IkFrames) GetItem(index int) *IkFrame {
-	if index < 0 {
-		// マイナス指定の場合、後ろからの順番に置き換える
-		index = len(ifs.Data) + index
-		return ifs.Data[ifs.Indexes[index]]
-	}
+func (ifs *IkFrames) GetItem(index float32) *IkFrame {
 	if val, ok := ifs.Data[index]; ok {
 		return val
 	}
@@ -74,12 +69,12 @@ func (ifs *IkFrames) GetItem(index int) *IkFrame {
 func (ifs *IkFrames) Append(value *IkFrame) {
 	if !slices.Contains(ifs.Indexes, value.Index) {
 		ifs.Indexes = append(ifs.Indexes, value.Index)
-		sort.Ints(ifs.Indexes)
+		mutils.SortFloat32s(ifs.Indexes)
 	}
 	if value.Registered {
 		if !slices.Contains(ifs.RegisteredIndexes, value.Index) {
 			ifs.RegisteredIndexes = append(ifs.RegisteredIndexes, value.Index)
-			sort.Ints(ifs.RegisteredIndexes)
+			mutils.SortFloat32s(ifs.RegisteredIndexes)
 		}
 	}
 

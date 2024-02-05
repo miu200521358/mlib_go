@@ -3,15 +3,15 @@ package vmd
 import "github.com/miu200521358/mlib_go/pkg/mcore"
 
 type BaseFrame struct {
-	*mcore.IndexModel
+	*mcore.IndexFloatModel
 	Registered bool // 登録対象のキーフレであるか
 	Read       bool // VMDファイルから読み込んだキーフレであるか
 }
 
-func NewVmdBaseFrame(index int) *BaseFrame {
+func NewVmdBaseFrame(index float32) *BaseFrame {
 	return &BaseFrame{
-		IndexModel: &mcore.IndexModel{Index: index},
-		Registered: false,
-		Read:       false,
+		IndexFloatModel: &mcore.IndexFloatModel{Index: index},
+		Registered:      false,
+		Read:            false,
 	}
 }

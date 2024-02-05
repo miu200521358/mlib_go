@@ -25,7 +25,7 @@ type ModelSet struct {
 	Motion *vmd.VmdMotion
 }
 
-func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float64) {
+func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32) {
 	matrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
 	if ms.Motion == nil {
 		for i := range ms.Model.Bones.GetIndexes() {
@@ -33,10 +33,9 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float64) {
 			matrixes[i] = &mat
 		}
 	} else {
-		frameNo := int(frame)
-		trees := ms.Motion.Animate(frameNo, ms.Model)
+		trees := ms.Motion.Animate(frame, ms.Model)
 		for i, bone := range ms.Model.Bones.GetSortedData() {
-			mat := trees.GetItem(bone.Name, frameNo).LocalMatrix.GL()
+			mat := trees.GetItem(bone.Name, frame).LocalMatrix.GL()
 			matrixes[i] = mat
 		}
 	}
@@ -432,13 +431,13 @@ func (w *GlWindow) ClearData() {
 	w.ModelSets = make([]ModelSet, 0)
 }
 
-func (w *GlWindow) Draw(frame float64) {
+func (w *GlWindow) Draw(frame float32) {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 
 	// 背景色をクリア
 	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
-	gl.Clear(gl.COLOR_BUFFER_BIT)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
@@ -452,7 +451,7 @@ func (w *GlWindow) Size() walk.Size {
 }
 
 func (w *GlWindow) Run() {
-	frame := 0.0
+	frame := float32(0)
 	previousTime := glfw.GetTime()
 
 	for !w.ShouldClose() {
@@ -488,10 +487,10 @@ func (w *GlWindow) Run() {
 		time := glfw.GetTime()
 		elapsed := time - previousTime
 		previousTime = time
-		frame += elapsed
+		frame += float32(elapsed)
 
 		// 30fps
-		w.Draw(frame / 30.0)
+		w.Draw(frame * 30.0)
 
 		// Maintenance
 		w.SwapBuffers()

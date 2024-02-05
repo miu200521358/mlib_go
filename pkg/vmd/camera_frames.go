@@ -2,37 +2,37 @@ package vmd
 
 import (
 	"slices"
-	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type CameraFrames struct {
-	*mcore.IndexModelCorrection[*CameraFrame]
-	RegisteredIndexes []int // 登録対象キーフレリスト
+	*mcore.IndexFloatModelCorrection[*CameraFrame]
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewCameraFrames() *CameraFrames {
 	return &CameraFrames{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*CameraFrame](),
-		RegisteredIndexes:    []int{},
+		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*CameraFrame](),
+		RegisteredIndexes:         []float32{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (cfs *CameraFrames) GetRangeIndexes(index int) (int, int) {
+func (cfs *CameraFrames) GetRangeIndexes(index float32) (float32, float32) {
 
-	prevIndex := 0
+	prevIndex := float32(0)
 	nextIndex := index
 
-	if idx := sort.SearchInts(cfs.Indexes, index); idx == 0 {
-		prevIndex = 0
+	if idx := mutils.SearchFloat32s(cfs.Indexes, index); idx == 0 {
+		prevIndex = 0.0
 	} else {
 		prevIndex = cfs.Indexes[idx-1]
 	}
 
-	if idx := sort.SearchInts(cfs.Indexes, index); idx == len(cfs.Indexes) {
+	if idx := mutils.SearchFloat32s(cfs.Indexes, index); idx == len(cfs.Indexes) {
 		nextIndex = slices.Max(cfs.Indexes)
 	} else {
 		nextIndex = cfs.Indexes[idx]
@@ -42,12 +42,7 @@ func (cfs *CameraFrames) GetRangeIndexes(index int) (int, int) {
 }
 
 // キーフレ計算結果を返す
-func (cfs *CameraFrames) GetItem(index int) *CameraFrame {
-	if index < 0 {
-		// マイナス指定の場合、後ろからの順番に置き換える
-		index = len(cfs.Data) + index
-		return cfs.Data[cfs.Indexes[index]]
-	}
+func (cfs *CameraFrames) GetItem(index float32) *CameraFrame {
 	if val, ok := cfs.Data[index]; ok {
 		return val
 	}
@@ -104,13 +99,13 @@ func (cfs *CameraFrames) GetItem(index int) *CameraFrame {
 func (cfs *CameraFrames) Append(value *CameraFrame) {
 	if !slices.Contains(cfs.Indexes, value.Index) {
 		cfs.Indexes = append(cfs.Indexes, value.Index)
-		sort.Ints(cfs.Indexes)
+		mutils.SortFloat32s(cfs.Indexes)
 	}
 
 	if value.Registered {
 		if !slices.Contains(cfs.RegisteredIndexes, value.Index) {
 			cfs.RegisteredIndexes = append(cfs.RegisteredIndexes, value.Index)
-			sort.Ints(cfs.RegisteredIndexes)
+			mutils.SortFloat32s(cfs.RegisteredIndexes)
 		}
 		// 補間曲線を分割する
 		prevIndex, nextIndex := cfs.GetRangeIndexes(value.Index)

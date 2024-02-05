@@ -2,38 +2,37 @@ package vmd
 
 import (
 	"slices"
-	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type LightFrames struct {
-	*mcore.IndexModelCorrection[*LightFrame]
-	RegisteredIndexes []int // 登録対象キーフレリスト
+	*mcore.IndexFloatModelCorrection[*LightFrame]
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewLightFrames() *LightFrames {
 	return &LightFrames{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*LightFrame](),
-		RegisteredIndexes:    []int{},
+		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*LightFrame](),
+		RegisteredIndexes:         []float32{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (lfs *LightFrames) GetRangeIndexes(index int) (int, int) {
+func (lfs *LightFrames) GetRangeIndexes(index float32) (float32, float32) {
 
-	prevIndex := 0
+	prevIndex := float32(0)
 	nextIndex := index
 
-	if idx := sort.SearchInts(lfs.Indexes, index); idx == 0 {
+	if idx := mutils.SearchFloat32s(lfs.Indexes, index); idx == 0 {
 		prevIndex = 0
 	} else {
 		prevIndex = lfs.Indexes[idx-1]
 	}
 
-	if idx := sort.SearchInts(lfs.Indexes, index); idx == len(lfs.Indexes) {
+	if idx := mutils.SearchFloat32s(lfs.Indexes, index); idx == len(lfs.Indexes) {
 		nextIndex = slices.Max(lfs.Indexes)
 	} else {
 		nextIndex = lfs.Indexes[idx]
@@ -43,12 +42,7 @@ func (lfs *LightFrames) GetRangeIndexes(index int) (int, int) {
 }
 
 // キーフレ計算結果を返す
-func (lfs *LightFrames) GetItem(index int) *LightFrame {
-	if index < 0 {
-		// マイナス指定の場合、後ろからの順番に置き換える
-		index = len(lfs.Data) + index
-		return lfs.Data[lfs.Indexes[index]]
-	}
+func (lfs *LightFrames) GetItem(index float32) *LightFrame {
 	if val, ok := lfs.Data[index]; ok {
 		return val
 	}
@@ -94,12 +88,12 @@ func (lfs *LightFrames) GetItem(index int) *LightFrame {
 func (lfs *LightFrames) Append(value *LightFrame) {
 	if !slices.Contains(lfs.Indexes, value.Index) {
 		lfs.Indexes = append(lfs.Indexes, value.Index)
-		sort.Ints(lfs.Indexes)
+		mutils.SortFloat32s(lfs.Indexes)
 	}
 	if value.Registered {
 		if !slices.Contains(lfs.RegisteredIndexes, value.Index) {
 			lfs.RegisteredIndexes = append(lfs.RegisteredIndexes, value.Index)
-			sort.Ints(lfs.RegisteredIndexes)
+			mutils.SortFloat32s(lfs.RegisteredIndexes)
 		}
 	}
 
