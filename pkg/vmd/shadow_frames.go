@@ -14,7 +14,7 @@ type ShadowFrames struct {
 	RegisteredIndexes []int // 登録対象キーフレリスト
 }
 
-func NewShadowNameFrames(name string) *ShadowFrames {
+func NewShadowFrames() *ShadowFrames {
 	return &ShadowFrames{
 		IndexModelCorrection: mcore.NewIndexModelCorrection[*ShadowFrame](),
 		RegisteredIndexes:    []int{},

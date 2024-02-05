@@ -6,7 +6,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type CameraFrames struct {
@@ -14,7 +13,7 @@ type CameraFrames struct {
 	RegisteredIndexes []int // 登録対象キーフレリスト
 }
 
-func NewCameraNameFrames() *CameraFrames {
+func NewCameraFrames() *CameraFrames {
 	return &CameraFrames{
 		IndexModelCorrection: mcore.NewIndexModelCorrection[*CameraFrame](),
 		RegisteredIndexes:    []int{},

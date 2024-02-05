@@ -14,7 +14,7 @@ type LightFrames struct {
 	RegisteredIndexes []int // 登録対象キーフレリスト
 }
 
-func NewLightNameFrames(name string) *LightFrames {
+func NewLightFrames() *LightFrames {
 	return &LightFrames{
 		IndexModelCorrection: mcore.NewIndexModelCorrection[*LightFrame](),
 		RegisteredIndexes:    []int{},

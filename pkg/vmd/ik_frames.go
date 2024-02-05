@@ -12,7 +12,7 @@ type IkFrames struct {
 	RegisteredIndexes []int // 登録対象キーフレリスト
 }
 
-func NewIkNameFrames(name string) *IkFrames {
+func NewIkFrames() *IkFrames {
 	return &IkFrames{
 		IndexModelCorrection: mcore.NewIndexModelCorrection[*IkFrame](),
 		RegisteredIndexes:    []int{},

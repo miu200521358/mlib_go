@@ -3,6 +3,7 @@ package vmd
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+
 )
 
 type VmdMotion struct {
@@ -22,6 +23,11 @@ func NewVmdMotion(path string) *VmdMotion {
 		HashModel:  mcore.NewHashModel(path),
 		ModelName:  "",
 		BoneFrames: NewBoneFrames(),
+		MorphFrames: NewMorphFrames(),
+		CameraFrames: NewCameraFrames(),
+		LightFrames: NewLightFrames(),
+		ShadowFrames: NewShadowFrames(),
+		IkFrames: NewIkFrames(),
 	}
 }
 
