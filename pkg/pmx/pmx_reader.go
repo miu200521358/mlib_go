@@ -376,6 +376,11 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 		}
 
 		model.Vertices.Append(v)
+
+		if v.DeformType == SDEF {
+			// SDEFの場合、INDEX保持
+			model.Vertices.SDEFs = append(model.Vertices.SDEFs, v.Index)
+		}
 	}
 
 	return nil

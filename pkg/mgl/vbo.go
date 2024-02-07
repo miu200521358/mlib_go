@@ -15,10 +15,11 @@ type VBO struct {
 	size        int            // size in bytes
 	verticesPtr unsafe.Pointer // verticesPtr
 	stride      int32          // stride
+	Vertices    []float32      // vertices
 }
 
 // Creates a new VBO with given faceDtype.
-func NewVBO(verticesPtr unsafe.Pointer, count int) *VBO {
+func NewVBO(verticesPtr unsafe.Pointer, count int, vertices []float32) *VBO {
 	var vboId uint32
 	gl.GenBuffers(1, &vboId)
 
@@ -26,10 +27,12 @@ func NewVBO(verticesPtr unsafe.Pointer, count int) *VBO {
 		id:          vboId,
 		target:      gl.ARRAY_BUFFER,
 		verticesPtr: verticesPtr,
+		Vertices:    vertices,
 	}
 	// 頂点構造体のサイズ
-	// position(3), normal(3), uv(2), extendedUV(2), edgeFactor(1), deformBoneIndex(4), deformBoneWeight(4)
-	vbo.stride = int32(4 * (3 + 3 + 2 + 2 + 1 + 4 + 4))
+	// position(3), normal(3), uv(2), extendedUV(2), edgeFactor(1), deformBoneIndex(4), deformBoneWeight(4),
+	// isSdef(1), sdefC(3), sdefR0(3), sdefR1(3), sdefB0(3), sdefB1(3)
+	vbo.stride = int32(4 * (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3 + 3 + 3))
 	vbo.size = count * 4
 
 	return vbo
@@ -121,6 +124,72 @@ func (v *VBO) Bind() {
 		false,    // 正規化するかどうか
 		v.stride, // ストライド
 		15*4,     // オフセット（構造体内のオフセット）
+	)
+
+	// 7: isSdef
+	gl.EnableVertexAttribArray(7)
+	gl.VertexAttribPointerWithOffset(
+		7,        // 属性のインデックス
+		1,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		19*4,     // オフセット
+	)
+
+	// 8: SDEF-C
+	gl.EnableVertexAttribArray(8)
+	gl.VertexAttribPointerWithOffset(
+		8,        // 属性のインデックス
+		3,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		20*4,     // オフセット
+	)
+
+	// 9: SDEF-R0
+	gl.EnableVertexAttribArray(9)
+	gl.VertexAttribPointerWithOffset(
+		9,        // 属性のインデックス
+		3,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		23*4,     // オフセット
+	)
+
+	// 10: SDEF-R1
+	gl.EnableVertexAttribArray(10)
+	gl.VertexAttribPointerWithOffset(
+		10,       // 属性のインデックス
+		3,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		26*4,     // オフセット
+	)
+
+	// 11: SDEF-Bone0
+	gl.EnableVertexAttribArray(11)
+	gl.VertexAttribPointerWithOffset(
+		11,       // 属性のインデックス
+		3,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		29*4,     // オフセット
+	)
+
+	// 12: SDEF-Bone1
+	gl.EnableVertexAttribArray(12)
+	gl.VertexAttribPointerWithOffset(
+		12,       // 属性のインデックス
+		3,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		32*4,     // オフセット
 	)
 
 }

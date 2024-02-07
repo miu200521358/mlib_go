@@ -8,6 +8,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 type Meshes struct {
@@ -25,6 +26,22 @@ func NewMeshes(
 	vertices := make([]float32, 0, len(model.Vertices.Indexes))
 	for _, v := range model.Vertices.GetSortedData() {
 		vertices = append(vertices, (*v).GL()...)
+
+		// SDEF用にボーンの位置を設定
+		if v.DeformType == SDEF {
+			bone0Position := model.Bones.GetItem(v.Deform.GetAllIndexes()[0]).Position.Inverted()
+			vertices = append(vertices, float32(bone0Position.GetX()))
+			vertices = append(vertices, float32(bone0Position.GetY()))
+			vertices = append(vertices, float32(bone0Position.GetZ()))
+
+			bone1Position := model.Bones.GetItem(v.Deform.GetAllIndexes()[1]).Position.Inverted()
+			vertices = append(vertices, float32(bone1Position.GetX()))
+			vertices = append(vertices, float32(bone1Position.GetY()))
+			vertices = append(vertices, float32(bone1Position.GetZ()))
+		} else {
+			// SDEFでない場合は0で埋める
+			vertices = append(vertices, []float32{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}...)
+		}
 	}
 	// println("vertices", mutils.JoinSlice(mutils.ConvertFloat32ToInterfaceSlice(vertices)))
 
@@ -87,7 +104,7 @@ func NewMeshes(
 
 	vao := mgl.NewVAO()
 	vao.Bind()
-	vbo := mgl.NewVBO(gl.Ptr(vertices), len(vertices))
+	vbo := mgl.NewVBO(gl.Ptr(vertices), len(vertices), vertices)
 	vbo.Bind()
 	vbo.Unbind()
 	vao.Unbind()
@@ -107,7 +124,11 @@ func (m *Meshes) Delete() {
 	m.vbo.Delete()
 }
 
-func (m *Meshes) Draw(shader *mgl.MShader, boneMatrixes []*mgl32.Mat4, windowIndex int) {
+func (m *Meshes) Draw(
+	shader *mgl.MShader,
+	boneMatrixes []*mgl32.Mat4,
+	windowIndex int,
+) {
 	// 隠面消去
 	// https://learnopengl.com/Advanced-OpenGL/Depth-testing
 	gl.Enable(gl.DEPTH_TEST)

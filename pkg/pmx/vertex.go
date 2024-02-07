@@ -3,6 +3,8 @@ package pmx
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type Vertex struct {
@@ -39,6 +41,23 @@ func (v *Vertex) GL() []float32 {
 		eu[1] = float32(v.ExtendedUVs[0].GetY())
 	}
 	d := v.Deform.NormalizedDeform()
+	s := float32(mutils.BoolToInt(v.DeformType == SDEF))
+	sdefC := [3]float32{0.0, 0.0, 0.0}
+	sdefR0 := [3]float32{0.0, 0.0, 0.0}
+	sdefR1 := [3]float32{0.0, 0.0, 0.0}
+	if v.DeformType == SDEF {
+		sdefC[0] = float32(v.Deform.(*Sdef).SdefC.GetX())
+		sdefC[1] = float32(v.Deform.(*Sdef).SdefC.GetY())
+		sdefC[2] = float32(v.Deform.(*Sdef).SdefC.GetZ())
+
+		sdefR0[0] = float32(v.Deform.(*Sdef).SdefR0.GetX())
+		sdefR0[1] = float32(v.Deform.(*Sdef).SdefR0.GetY())
+		sdefR0[2] = float32(v.Deform.(*Sdef).SdefR0.GetZ())
+
+		sdefR1[0] = float32(v.Deform.(*Sdef).SdefR1.GetX())
+		sdefR1[1] = float32(v.Deform.(*Sdef).SdefR1.GetY())
+		sdefR1[2] = float32(v.Deform.(*Sdef).SdefR1.GetZ())
+	}
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		n[0], n[1], n[2], // 法線
@@ -47,16 +66,22 @@ func (v *Vertex) GL() []float32 {
 		float32(v.EdgeFactor),  // エッジ倍率
 		d[0], d[1], d[2], d[3], // デフォームボーンINDEX
 		d[4], d[5], d[6], d[7], // デフォームボーンウェイト
+		s,                            // SDEFであるか否か
+		sdefC[0], sdefC[1], sdefC[2], // SDEF-C
+		sdefR0[0], sdefR0[1], sdefR0[2], // SDEF-R0
+		sdefR1[0], sdefR1[1], sdefR1[2], // SDEF-R1
 	}
 }
 
 // 頂点リスト
 type Vertices struct {
 	*mcore.IndexModelCorrection[*Vertex]
+	SDEFs []int // SDEF対象頂点INDEXリスト
 }
 
 func NewVertices() *Vertices {
 	return &Vertices{
 		IndexModelCorrection: mcore.NewIndexModelCorrection[*Vertex](),
+		SDEFs:                []int{},
 	}
 }

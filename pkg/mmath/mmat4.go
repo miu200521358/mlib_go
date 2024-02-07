@@ -625,6 +625,16 @@ func (mat *MMat4) Muled(a *MMat4) MMat4 {
 	return *copied
 }
 
+func (mat *MMat4) MuledFactor(v float64) MMat4 {
+	copied := mat.Copy()
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
+			copied[i][j] *= v
+		}
+	}
+	return *copied
+}
+
 // 行列の移動情報
 func (mat *MMat4) Translation() MVec3 {
 	return MVec3{mat[0][3], mat[1][3], mat[2][3]}
