@@ -216,9 +216,9 @@ void main() {
 
         float r1Bias = 0.0;
         if(len0 > 0.0 && len1 == 0.0) {
-            r1Bias = 1.0;
-        } else if(len0 == 0.0 && len1 > 0.0) {
             r1Bias = 0.0;
+        } else if(len0 == 0.0 && len1 > 0.0) {
+            r1Bias = 1.0;
         } else if(len0 + len1 != 0.0) {
             float bias = len0 / (len0 + len1);
             if(!isinf(bias) && !isnan(bias)) {
@@ -228,43 +228,43 @@ void main() {
         float r0Bias = 1.0 - r1Bias;
 
         // ボーンインデックスからボーン変形行列を取得
-        mat4 mat0 = getBoneMatrix(int(boneIndexes[0]));
-        mat4 mat1 = getBoneMatrix(int(boneIndexes[1]));
+        mat4 boneMatrix0 = getBoneMatrix(int(boneIndexes[0]));
+        mat4 boneMatrix1 = getBoneMatrix(int(boneIndexes[1]));
 
-        float w0 = boneWeights[0];
-        float w1 = boneWeights[1];
+        float boneWeight0 = boneWeights[0];
+        float boneWeight1 = boneWeights[1];
 
-        mat4 m0 = transposeMatrix(inverseMatrix(mat0));
-        mat4 m2 = transposeMatrix(inverseMatrix(mat1 * inverseMatrix(mat0)));
+        mat4 m0 = transposeMatrix(inverseMatrix(boneMatrix0));
+        mat4 m1 = transposeMatrix(inverseMatrix(boneMatrix1 * inverseMatrix(boneMatrix0)));
 
         vec4 q0 = mat4ToQuat(m0);
-        vec4 qR1 = mat4ToQuat(m2);
-        vec4 q1 = slerp(vec4Zero, qR1, w1);
+        vec4 qR1 = mat4ToQuat(m1);
+        vec4 q1 = slerp(vec4Zero, qR1, boneWeight1);
         mat4 matR = quatToMat4(q1) * quatToMat4(q0);
 
-        // // 回転行列からスケール成分を除去する
-        // vec3 scaleR = calculateScale(matR);
-        // float sx = 1.0 / scaleR.x;
-        // float sy = 1.0 / scaleR.y;
-        // float sz = 1.0 / scaleR.z;
-        // matR[0][0] *= sx;
-        // matR[0][1] *= sx;
-        // matR[0][2] *= sx;
-        // matR[1][0] *= sy;
-        // matR[1][1] *= sy;
-        // matR[1][2] *= sy;
-        // matR[2][0] *= sz;
-        // matR[2][1] *= sz;
-        // matR[2][2] *= sz;
+        // 回転行列からスケール成分を除去する
+        vec3 scaleR = calculateScale(matR);
+        float sx = 1.0 / scaleR.x;
+        float sy = 1.0 / scaleR.y;
+        float sz = 1.0 / scaleR.z;
+        matR[0][0] *= sx;
+        matR[0][1] *= sx;
+        matR[0][2] *= sx;
+        matR[1][0] *= sy;
+        matR[1][1] *= sy;
+        matR[1][2] *= sy;
+        matR[2][0] *= sz;
+        matR[2][1] *= sz;
+        matR[2][2] *= sz;
 
         // 変形後の交点Cの位置姿勢中間値
-        vec3 vecP0 = (createTranslationMatrix(vecCinB0) * mat0 * w0 * vec4Zero).xyz;
-        vec3 vecP1 = (createTranslationMatrix(vecCinB1) * mat1 * w1 * vec4Zero).xyz;
+        vec3 vecP0 = (createTranslationMatrix(vecCinB0) * boneMatrix0 * boneWeight0 * vec4Zero).xyz;
+        vec3 vecP1 = (createTranslationMatrix(vecCinB1) * boneMatrix1 * boneWeight1 * vec4Zero).xyz;
         vec3 vecMedianC = vecP0 + vecP1;
 
         // 補間点R0/R1をBDEF2移動させて交点Cを補正する
-        vec3 vecR0 = (createTranslationMatrix(vecR0inB0) * mat0 * vec4Zero).xyz;
-        vec3 vecR1 = (createTranslationMatrix(vecR1inB1) * mat1 * vec4Zero).xyz;
+        vec3 vecR0 = (createTranslationMatrix(vecR0inB0) * boneMatrix0 * vec4Zero).xyz;
+        vec3 vecR1 = (createTranslationMatrix(vecR1inB1) * boneMatrix1 * vec4Zero).xyz;
 
         // 補間点R0/R1はボーンに追従する
         vec3 vecFinalC = (vecMedianC + (vecR0 * r0Bias) + (vecR1 * r1Bias)) * 0.5;
@@ -273,11 +273,13 @@ void main() {
         vec3 vecCP = vecPinB0 - vecCinB0;
         // vec3 vecCPM = vecCP + morphOffset;
 
-        vec3 scale0 = calculateScale(mat0);
-        vec3 scale1 = calculateScale(mat1);
-        mat4 matS = createScaleMatrix((scale0 * w0) + (scale1 * w1));
+        vec3 scale0 = calculateScale(boneMatrix0);
+        vec3 scale1 = calculateScale(boneMatrix1);
+        mat4 matS = createScaleMatrix((scale0 * boneWeight0) + (scale1 * boneWeight1));
 
-        gl_Position = vec4(vecFinalC, 0.0);  // + (createTranslationMatrix(vecCP) * matR * matS * vec4Zero);
+        vec4 vecPosition = vec4(vecFinalC, 1.0) + (matS * matR * createTranslationMatrix(vecCP) * vec4Zero);
+
+        gl_Position = modelViewProjectionMatrix * modelViewMatrix * vecPosition;
     } else {
         for(int i = 0; i < 4; i++) {
             float boneWeight = boneWeights[i];

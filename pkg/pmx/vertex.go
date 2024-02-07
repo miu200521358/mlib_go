@@ -42,6 +42,7 @@ func (v *Vertex) GL() []float32 {
 	}
 	d := v.Deform.NormalizedDeform()
 	s := float32(mutils.BoolToInt(v.DeformType == SDEF))
+	// s = 0.0
 	sdefC := [3]float32{0.0, 0.0, 0.0}
 	sdefR0 := [3]float32{0.0, 0.0, 0.0}
 	sdefR1 := [3]float32{0.0, 0.0, 0.0}
@@ -50,13 +51,32 @@ func (v *Vertex) GL() []float32 {
 		sdefC[1] = float32(v.Deform.(*Sdef).SdefC.GetY())
 		sdefC[2] = float32(v.Deform.(*Sdef).SdefC.GetZ())
 
-		sdefR0[0] = float32(v.Deform.(*Sdef).SdefR0.GetX())
-		sdefR0[1] = float32(v.Deform.(*Sdef).SdefR0.GetY())
-		sdefR0[2] = float32(v.Deform.(*Sdef).SdefR0.GetZ())
+		// c := v.Deform.(*Sdef).SdefC
+		r0 := v.Deform.(*Sdef).SdefR0
+		r1 := v.Deform.(*Sdef).SdefR1
+		// rMuled0 := r0.MuledScalar(v.Deform.GetAllWeights()[0])
+		// rMuled1 := r1.MuledScalar(1 - v.Deform.GetAllWeights()[0])
+		// rOffset := rMuled0.Added(&rMuled1)
+		// r00 := c.Added(r0)
+		// r01 := c.Added(r1)
+		// normalizedR0 := r00.Subed(&rOffset)
+		// normalizedR1 := r01.Subed(&rOffset)
 
-		sdefR1[0] = float32(v.Deform.(*Sdef).SdefR1.GetX())
-		sdefR1[1] = float32(v.Deform.(*Sdef).SdefR1.GetY())
-		sdefR1[2] = float32(v.Deform.(*Sdef).SdefR1.GetZ())
+		// sdefR0[0] = float32(normalizedR0.GetX())
+		// sdefR0[1] = float32(normalizedR0.GetY())
+		// sdefR0[2] = float32(normalizedR0.GetZ())
+
+		// sdefR1[0] = float32(normalizedR1.GetX())
+		// sdefR1[1] = float32(normalizedR1.GetY())
+		// sdefR1[2] = float32(normalizedR1.GetZ())
+
+		sdefR0[0] = float32(r0.GetX())
+		sdefR0[1] = float32(r0.GetY())
+		sdefR0[2] = float32(r0.GetZ())
+
+		sdefR1[0] = float32(r1.GetX())
+		sdefR1[1] = float32(r1.GetY())
+		sdefR1[2] = float32(r1.GetZ())
 	}
 	return []float32{
 		p[0], p[1], p[2], // 位置
