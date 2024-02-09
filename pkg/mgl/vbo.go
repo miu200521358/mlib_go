@@ -15,11 +15,10 @@ type VBO struct {
 	size        int            // size in bytes
 	verticesPtr unsafe.Pointer // verticesPtr
 	stride      int32          // stride
-	Vertices    []float32      // vertices
 }
 
 // Creates a new VBO with given faceDtype.
-func NewVBO(verticesPtr unsafe.Pointer, count int, vertices []float32) *VBO {
+func NewVBO(verticesPtr unsafe.Pointer, count int) *VBO {
 	var vboId uint32
 	gl.GenBuffers(1, &vboId)
 
@@ -27,9 +26,8 @@ func NewVBO(verticesPtr unsafe.Pointer, count int, vertices []float32) *VBO {
 		id:          vboId,
 		target:      gl.ARRAY_BUFFER,
 		verticesPtr: verticesPtr,
-		Vertices:    vertices,
 	}
-	// 頂点構造体のサイズ
+	// 頂点構造体のサイズ(全部floatとする)
 	// position(3), normal(3), uv(2), extendedUV(2), edgeFactor(1), deformBoneIndex(4), deformBoneWeight(4),
 	// isSdef(1), sdefC(3), sdefR0(3), sdefR1(3), sdefB0(3), sdefB1(3)
 	vbo.stride = int32(4 * (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3 + 3 + 3))

@@ -104,7 +104,7 @@ func NewMeshes(
 
 	vao := mgl.NewVAO()
 	vao.Bind()
-	vbo := mgl.NewVBO(gl.Ptr(vertices), len(vertices), vertices)
+	vbo := mgl.NewVBO(gl.Ptr(vertices), len(vertices))
 	vbo.Bind()
 	vbo.Unbind()
 	vao.Unbind()
