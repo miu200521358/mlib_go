@@ -56,6 +56,7 @@ type GlWindow struct {
 	updatedPrev         bool
 	shiftPressed        bool
 	ctrlPressed         bool
+	closed              bool
 }
 
 func NewGlWindow(
@@ -72,9 +73,6 @@ func NewGlWindow(
 			return nil, err
 		}
 	}
-
-	// プログラムの終了時にGLFWを終了する
-	defer glfw.Terminate()
 
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
@@ -151,6 +149,7 @@ func NewGlWindow(
 		updatedPrev:         false,
 		shiftPressed:        false,
 		ctrlPressed:         false,
+		closed:              false,
 	}
 
 	w.SetScrollCallback(glWindow.handleScrollEvent)
@@ -163,13 +162,13 @@ func NewGlWindow(
 }
 
 func (w *GlWindow) Close(window *glfw.Window) {
+	w.closed = true
 	w.Shader.Delete()
 	for _, modelSet := range w.ModelSets {
 		modelSet.Model.Meshes.Delete()
 	}
-	w.Window.Destroy()
 	if w.WindowIndex == 0 {
-		glfw.Terminate()
+		defer glfw.Terminate()
 	}
 }
 
@@ -457,7 +456,7 @@ func (w *GlWindow) Run() {
 	frame := float32(0)
 	previousTime := glfw.GetTime()
 
-	for w != nil && !w.ShouldClose() {
+	for !w.closed && !w.ShouldClose() {
 		// 深度バッファのクリア
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -499,7 +498,7 @@ func (w *GlWindow) Run() {
 		w.SwapBuffers()
 		glfw.PollEvents()
 	}
-	if w != nil {
+	if w != nil && !w.closed {
 		w.Close(&w.Window)
 	}
 }
