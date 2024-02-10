@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 // DeformType ウェイト変形方式
@@ -23,6 +24,7 @@ type DeformInterface interface {
 	GetIndexes(weightThreshold float64) []int
 	GetWeights(weightThreshold float64) []float64
 	NormalizedDeform() [8]float32
+	GetSdefParams() ([3]float32, [3]float32, [3]float32)
 }
 
 // Deform デフォーム既定構造体
@@ -129,6 +131,11 @@ func (d *Deform) NormalizedDeform() [8]float32 {
 	}
 
 	return normalizedDeform
+}
+
+// SDEF用パラメーターを返す
+func (d *Deform) GetSdefParams() ([3]float32, [3]float32, [3]float32) {
+	return [3]float32{0, 0, 0}, [3]float32{0, 0, 0}, [3]float32{0, 0, 0}
 }
 
 // sortIndexesByWeight ウェイトの大きい順に指定個数までを対象とする
@@ -241,4 +248,9 @@ func NewSdef(index0, index1 int, weight0 float64, sdefC, sdefR0, sdefR1 *mmath.M
 // GetType returns the deformation type.
 func (s *Sdef) GetType() DeformType {
 	return SDEF
+}
+
+// SDEF用パラメーターを返す
+func (s *Sdef) GetSdefParams() ([3]float32, [3]float32, [3]float32) {
+	return s.SdefC.GL(), s.SdefR0.GL(), s.SdefR1.GL()
 }

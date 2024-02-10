@@ -45,14 +45,25 @@ out float totalBoneWeight;
 vec4 slerp(vec4 q1, vec4 q2, float t) {
     float dot = dot(q1, q2);
 
-    // dotが1.0に近い場合は、線形補間を使用
-    if(dot > 0.999999) {
-        return normalize((1.0 - t) * q1 + t * q2);
+    if(dot < 0.0) {
+        q1 = -q1; // q1の向きを反転させる
+        dot = -dot;
     }
 
-    // thetaはq1とq2の間の角度
-    float theta = acos(dot);
-    return (sin((1.0 - t) * theta) * q1 + sin(t * theta) * q2) / sin(theta);
+    if(dot > 0.9995) {
+        // クォータニオンが非常に近い場合は線形補間を使用し、正規化する
+        vec4 result = q1 + t * (q2 - q1);
+        return normalize(result);
+    }
+
+    dot = clamp(dot, -1.0, 1.0); // 数値誤差による範囲外の値を修正
+    float theta_0 = acos(dot); // q1とq2の間の角度
+    float theta = theta_0 * t; // 現在のtにおける角度
+
+    vec4 q3 = q2 - q1 * dot;
+    q3 = normalize(q3); // 正規直交基底を作成
+
+    return q1 * cos(theta) + q3 * sin(theta);
 }
 
 // 行列の逆行列を求める
@@ -97,6 +108,11 @@ mat4 inverseMatrix(mat4 m) {
     invM[3][3] = (m[2][0] * s3 - m[2][1] * s1 + m[2][2] * s0) * invdet;
 
     return invM;
+}
+
+// クォータニオンvec4の逆回転を求める
+vec4 inverseQuaternion(vec4 q) {
+    return vec4(-q.x, -q.y, -q.z, q.w);
 }
 
 // 行列の転置行列を求める
@@ -184,12 +200,84 @@ mat4 createScaleMatrix(vec3 scale) {
 }
 
 // スケールベクトルを計算する
-vec3 calculateScale(mat4 mat) {
+vec3 calculateScaleVector(mat4 mat) {
     vec3 scale;
     scale.x = length(vec3(mat[0][0], mat[0][1], mat[0][2]));
     scale.y = length(vec3(mat[1][0], mat[1][1], mat[1][2]));
     scale.z = length(vec3(mat[2][0], mat[2][1], mat[2][2]));
     return scale;
+}
+
+// SDEF変形中心Cの計算
+vec3 calculateSdefC(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1, vec4 transformedPosition0, vec4 transformedPosition1) {
+
+    // ボーンの位置を抽出
+    vec3 c0 = (boneMatrix0 * vec4(sdefC, 1.0)).xyz * boneWeight0;
+    vec3 c1 = (boneMatrix1 * vec4(sdefC, 1.0)).xyz * boneWeight1;
+
+    // C点をボーンのウェイトに基づいて補間
+    vec3 interpolatedC = (c0 + c1) / (boneWeight0 + boneWeight1);
+
+    return interpolatedC;
+}
+
+// C点から見たR0とR1の補間を行い、C点の補正を適用する
+vec3 interpolateCPoint(vec3 interpolatedC, mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1, vec4 transformedPosition0, vec4 transformedPosition1) {
+    vec3 vecR0inB0 = sdefR0 - sdefB0;
+    vec3 vecCinB0 = sdefC - sdefB0;
+    vec3 vecR1inB1 = sdefR1 - sdefB1;
+    vec3 vecCinB1 = sdefC - sdefB1;
+    vec3 vecR0inC = sdefR0 - sdefC;
+    vec3 vecR1inC = sdefR1 - sdefC;
+
+    // R0/R1影響係数算出
+    float len0 = length(vecR0inB0 - vecCinB0);
+    float len1 = length(vecR1inB1 - vecCinB1);
+
+    float r1Bias = 0.0;
+    if(len0 > 0.0 && len1 == 0.0) {
+        r1Bias = 1.0;
+    } else if(len0 == 0.0 && len1 > 0.0) {
+        r1Bias = 0.0;
+    } else if(len0 + len1 != 0.0) {
+        float bias = len0 / (len0 + len1);
+        if(!isinf(bias) && !isnan(bias)) {
+            r1Bias = clamp(bias, 0.0, 1.0);
+        }
+    }
+    float r0Bias = 1.0 - r1Bias;
+
+    // C点に基づいて変形されたR0とR1を計算
+    vec3 transformedR0 = (boneMatrix0 * vec4(vecR0inC, 0.0)).xyz;
+    vec3 transformedR1 = (boneMatrix1 * vec4(vecR1inC, 0.0)).xyz;
+
+    // C点の補正：ウェイトに基づいてR0とR1の変形後の位置の平均を取る
+    vec3 weightedAverage = (transformedR0 * r0Bias + transformedR1 * r1Bias) * 0.5;
+
+    // 最終的なC点の位置：補正Cに変形後のウェイト付き平均を加算
+    vec3 correctedC = interpolatedC + weightedAverage;
+
+    return correctedC;
+}
+
+// クォータニオンによるボーンの回転を計算し、頂点Pを変形させる
+vec4 applySdefRotation(vec3 correctedC, mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1) {
+    vec3 vecPinC = position - sdefC;
+
+    // ボーンのクォータニオン回転を取得
+    vec4 boneQuat0 = mat4ToQuat(boneMatrix0);
+    vec4 boneQuat1 = mat4ToQuat(boneMatrix1);
+
+    // ボーンのウェイトに基づいてクォータニオンをSLERPにより補間
+    vec4 slerpedQuat = slerp(boneQuat0, boneQuat1, boneWeight1);
+
+    // クォータニオンを回転行列に変換
+    mat4 rotationMatrix = quatToMat4(slerpedQuat);
+
+    // 回転行列を使用して頂点を変形
+    vec4 rotatedPosition = rotationMatrix * vec4(vecPinC, 1.0) + vec4(correctedC, 0.0);
+
+    return rotatedPosition;
 }
 
 void main() {
@@ -201,34 +289,7 @@ void main() {
     mat3 normalTransformMatrix = mat3(1.0);
 
     if(isSdef == 1.0) {
-        vec4 vec4Zero = vec4(0.0, 0.0, 0.0, 1.0);
-
         // SDEFの場合は、SDEF用の頂点位置を計算する
-        vec3 vecCinB0 = sdefC - sdefB0;
-        vec3 vecCinB1 = sdefC - sdefB1;
-        vec3 vecR0inB0 = sdefR0 - sdefB0;
-        vec3 vecR1inB1 = sdefR1 - sdefB1;
-
-        // 交点Cから頂点座標PへのベクトルCPを求める
-        vec3 vecPinB1 = position - sdefB1;
-        vec3 vecCtoP = vecPinB1 - vecCinB1;
-
-        // R0/R1影響係数算出
-        float len0 = length(vecR0inB0 - vecCinB0);
-        float len1 = length(vecR1inB1 - vecCinB1);
-
-        float r1Bias = 0.0;
-        if(len0 > 0.0 && len1 == 0.0) {
-            r1Bias = 0.0;
-        } else if(len0 == 0.0 && len1 > 0.0) {
-            r1Bias = 1.0;
-        } else if(len0 + len1 > 0.0) {
-            float bias = len0 / (len0 + len1);
-            if(!isinf(bias) && !isnan(bias)) {
-                r1Bias = clamp(bias, 0.0, 1.0);
-            }
-        }
-        float r0Bias = 1.0 - r1Bias;
 
         // ボーンインデックスからボーン変形行列を取得
         mat4 boneMatrix0 = getBoneMatrix(int(boneIndexes[0]));
@@ -237,52 +298,17 @@ void main() {
         float boneWeight0 = boneWeights[0];
         float boneWeight1 = boneWeights[1];
 
-        // mat4 m0 = transposeMatrix(inverseMatrix(boneMatrix0));
-        // mat4 m1 = transposeMatrix(inverseMatrix(boneMatrix1 * inverseMatrix(boneMatrix0)));
+        vec4 transformedPosition0 = boneMatrix0 * vec4(0.0, 0.0, 0.0, 1.0);
+        vec4 transformedPosition1 = boneMatrix1 * vec4(0.0, 0.0, 0.0, 1.0);
 
-        vec4 q0 = slerp(vec4Zero, mat4ToQuat(boneMatrix0), boneWeight0);
-        vec4 q1 = slerp(vec4Zero, mat4ToQuat(boneMatrix1), boneWeight1);
-        mat4 matR = quatToMat4(q1) * quatToMat4(q0);
+        // 1. 頂点Pに対する変形中心Cを計算
+        vec3 interpolatedC = calculateSdefC(boneMatrix0, boneMatrix1, boneWeight0, boneWeight1, transformedPosition0, transformedPosition1);
 
-        // // 回転行列からスケール成分を除去する
-        // vec3 scaleR = calculateScale(matR);
-        // float sx = 1.0 / scaleR.x;
-        // float sy = 1.0 / scaleR.y;
-        // float sz = 1.0 / scaleR.z;
-        // matR[0][0] *= sx;
-        // matR[0][1] *= sx;
-        // matR[0][2] *= sx;
-        // matR[1][0] *= sy;
-        // matR[1][1] *= sy;
-        // matR[1][2] *= sy;
-        // matR[2][0] *= sz;
-        // matR[2][1] *= sz;
-        // matR[2][2] *= sz;
+        // 変形中心Cの補正を計算
+        vec3 correctedC = interpolateCPoint(interpolatedC, boneMatrix0, boneMatrix1, boneWeight0, boneWeight1, transformedPosition0, transformedPosition1);
 
-        // 変形後の交点Cの位置姿勢中間値
-        vec4 vecP0 = createScaleMatrix(vec3(boneWeight0)) * boneMatrix0 * vec4(sdefC, 1.0);
-        vec4 vecP1 = createScaleMatrix(vec3(boneWeight1)) * boneMatrix1 * vec4(sdefC, 1.0);
-        vec4 vecMedianC = (vecP0 + vecP1) * 0.5;
-
-        // 補間点R0/R1をBDEF2移動させて交点Cを補正する
-        vec4 vecR0 = boneMatrix0 * vec4(sdefR0, 1.0);
-        vec4 vecR1 = boneMatrix1 * vec4(sdefR1, 1.0);
-        vec4 vecMedianR = ((vecR0 * r0Bias) + (vecR1 * r1Bias)) * 0.5;
-
-        // 補間点R0/R1はボーンに追従する
-        vec4 vecFinalC = vecMedianC + vecMedianR;
-
-        vec4 vecRP = matR * position4;
-        // vec3 vecCPM = vecPtoC + morphOffset;
-
-        // vec3 scale0 = calculateScale(boneMatrix0);
-        // vec3 scale1 = calculateScale(boneMatrix1);
-        // mat4 matS = createScaleMatrix((scale0 * boneWeight0) + (scale1 * boneWeight1));
-
-        // vec4 vecPosition = vec4(0.0, 2.0, 1.0, 1.0);
-        vec4 vecPosition = vecMedianC + vecRP;
-
-        // vec4 vecPosition = vec4(vecFinalC + (matR * createTranslationMatrix(vecCtoP) * vec4Zero).xyz, 1.0);
+        // ボーンの回転を適用して頂点Pを変形させる
+        vec4 vecPosition = applySdefRotation(correctedC, boneMatrix0, boneMatrix1, boneWeight0, boneWeight1);
 
         gl_Position = modelViewProjectionMatrix * modelViewMatrix * vecPosition;
     } else {
