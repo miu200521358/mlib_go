@@ -262,8 +262,8 @@ func (mat *MMat4) TranslateZ(dz float64) *MMat4 {
 }
 
 // Scaling returns the scaling diagonal of the matrix.
-func (mat *MMat4) Scaling() *MVec4 {
-	return &MVec4{mat[0][0], mat[1][1], mat[2][2], mat[3][3]}
+func (mat *MMat4) Scaling() *MVec3 {
+	return &MVec3{mat[0][0], mat[1][1], mat[2][2]}
 }
 
 // SetScaling sets the scaling diagonal of the matrix.

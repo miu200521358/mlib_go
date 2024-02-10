@@ -3,6 +3,7 @@ package vmd
 import (
 	"math"
 	"slices"
+	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
@@ -100,12 +101,12 @@ func (bfs *BoneFrames) prepareIkSolvers(
 	for _, frame := range frames {
 		for _, ikBoneIndex := range ikBoneIndexes {
 			// 各フレームでIK計算
-			qqs := bfs.calcIk(frame, ikBoneIndex, model, isOutLog, description)
+			quats := bfs.calcIk(frame, ikBoneIndex, model, isOutLog, description)
 
 			for _, ikLink := range model.Bones.GetItem(ikBoneIndex).Ik.Links {
 				// IKリンクボーンの回転量を更新
 				linkBf := bfs.GetItem(model.Bones.GetItem(ikLink.BoneIndex).Name).GetItem(frame)
-				linkBf.IkRotation.SetQuaternion(qqs[ikLink.BoneIndex])
+				linkBf.IkRotation.SetQuaternion(quats[ikLink.BoneIndex])
 
 				// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
 				bfs.GetItem(model.Bones.GetItem(ikLink.BoneIndex).Name).Append(linkBf)
@@ -131,7 +132,7 @@ func (bfs *BoneFrames) calcIk(
 	// 処理対象ボーン名取得
 	effectorTargetBoneNames := bfs.getAnimatedBoneNames(model, []string{effectorBone.Name})
 	// エフェクタボーンの関連ボーンの初期値を取得
-	positions, rotations, scales, qqs :=
+	positions, rotations, scales, quats :=
 		bfs.getBoneMatrixes([]float32{frame}, model, effectorTargetBoneNames, true, false, "")
 
 		// IK計算
@@ -198,7 +199,7 @@ ikLoop:
 					(normalizedIkLocalPosition.Length()*normalizedEffectorLocalPosition.Length()), 0, 1))
 
 			// リンクボーンの角度を取得
-			linkQuat := qqs[0][linkBone.Index]
+			linkQuat := quats[0][linkBone.Index]
 			var totalActualIkQuat *mmath.MQuaternion
 
 			if ikLink.AngleLimit {
@@ -282,12 +283,12 @@ ikLoop:
 			}
 
 			// IKの結果を更新
-			qqs[0][linkBone.Index] = totalActualIkQuat
+			quats[0][linkBone.Index] = totalActualIkQuat
 			rotations[0][linkBone.Index] = totalActualIkQuat.ToMat4()
 		}
 	}
 
-	return qqs[0]
+	return quats[0]
 }
 
 // 全ての角度をラジアン角度に分割して、そのうちのひとつの軸だけを動かす回転を取得する
@@ -517,33 +518,65 @@ func (bfs *BoneFrames) getBoneMatrixes(
 	isOutLog bool,
 	description string,
 ) ([][]*mmath.MMat4, [][]*mmath.MMat4, [][]*mmath.MMat4, [][]*mmath.MQuaternion) {
+	var frameWg sync.WaitGroup
 	positions := make([][]*mmath.MMat4, 0, len(frames))
 	rotations := make([][]*mmath.MMat4, 0, len(frames))
 	scales := make([][]*mmath.MMat4, 0, len(frames))
-	qqs := make([][]*mmath.MQuaternion, 0, len(frames))
+	quats := make([][]*mmath.MQuaternion, 0, len(frames))
 
-	for i, frame := range frames {
-		positions = append(positions, make([]*mmath.MMat4, 0, len(targetBoneNames)))
-		rotations = append(rotations, make([]*mmath.MMat4, 0, len(targetBoneNames)))
-		scales = append(scales, make([]*mmath.MMat4, 0, len(targetBoneNames)))
-		qqs = append(qqs, make([]*mmath.MQuaternion, 0, len(targetBoneNames)))
-		for j, bone := range model.Bones.GetSortedData() {
+	// 最初にフレーム数*ボーン数分のスライスを確保
+	for i := range frames {
+		boneCount := len(model.Bones.Data)
+		positions = append(positions, make([]*mmath.MMat4, 0, boneCount))
+		rotations = append(rotations, make([]*mmath.MMat4, 0, boneCount))
+		scales = append(scales, make([]*mmath.MMat4, 0, boneCount))
+		quats = append(quats, make([]*mmath.MQuaternion, 0, boneCount))
+		for j := 0; j < boneCount; j++ {
 			positions[i] = append(positions[i], mmath.NewMMat4())
 			rotations[i] = append(rotations[i], mmath.NewMMat4())
 			scales[i] = append(scales[i], mmath.NewMMat4())
-			qqs[i] = append(qqs[i], mmath.NewMQuaternion())
-			if slices.Contains(targetBoneNames, bone.Name) {
-				// ボーンが対象の場合、そのボーンの移動位置、回転角度、拡大率を取得
-				positions[i][j] = bfs.getPosition(frame, bone.Name, model)
-				rotWithEffect, rot := bfs.getRotation(frame, bone.Name, model, isCalcIk)
-				rotations[i][j] = rotWithEffect.ToMat4()
-				qqs[i][j] = rot
-				scales[i][j] = bfs.getScale(frame, bone.Name, model)
-			}
+			quats[i] = append(quats[i], mmath.NewMQuaternion())
 		}
 	}
 
-	return positions, rotations, scales, qqs
+	for i, frame := range frames {
+		frameWg.Add(1)
+		go func(i int, frame float32) {
+			defer frameWg.Done()
+
+			var boneWg sync.WaitGroup
+			// ボーンを一定件数ごとに並列処理（件数は変数保持）
+			count := 100
+			if len(targetBoneNames) < count {
+				count = len(targetBoneNames)
+			}
+			for j := 0; j < len(model.Bones.Data); j += count {
+				boneWg.Add(1)
+				go func(i, j int, frame float32) {
+					defer boneWg.Done()
+					for k := j; k < j+count; k++ {
+						if k >= len(model.Bones.Data) {
+							break
+						}
+						bone := model.Bones.GetItem(k)
+						if !slices.Contains(targetBoneNames, bone.Name) {
+							continue
+						}
+						// ボーンが対象の場合、そのボーンの移動位置、回転角度、拡大率を取得
+						positions[i][bone.Index] = bfs.getPosition(frame, bone.Name, model)
+						rotWithEffect, rotFk := bfs.getRotation(frame, bone.Name, model, isCalcIk)
+						rotations[i][bone.Index] = rotWithEffect.ToMat4()
+						quats[i][bone.Index] = rotFk
+						scales[i][bone.Index] = bfs.getScale(frame, bone.Name, model)
+					}
+				}(i, j, frame)
+			}
+			boneWg.Wait()
+		}(i, frame)
+	}
+	frameWg.Wait()
+
+	return positions, rotations, scales, quats
 }
 
 // 該当キーフレにおけるボーンの移動位置

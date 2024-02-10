@@ -73,6 +73,9 @@ func NewGlWindow(
 		}
 	}
 
+	// プログラムの終了時にGLFWを終了する
+	defer glfw.Terminate()
+
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
 	glfw.WindowHint(glfw.ContextVersionMinor, 4)
