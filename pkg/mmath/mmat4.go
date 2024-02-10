@@ -116,9 +116,9 @@ func (mat *MMat4) Scale(f float64) *MMat4 {
 }
 
 // Scaled returns a copy of the matrix with the diagonal scale elements multiplied by f.
-func (mat *MMat4) Scaled(f float64) MMat4 {
+func (mat *MMat4) Scaled(f float64) *MMat4 {
 	r := *mat
-	return *r.Scale(f)
+	return r.Scale(f)
 }
 
 // Trace returns the trace value for the matrix.
@@ -144,16 +144,16 @@ func (mat *MMat4) AssignMat3x3(m *MMat3) *MMat4 {
 
 // AssignMul multiplies a and b and assigns the result to T.
 func (mat *MMat4) AssignMul(a, b *MMat4) *MMat4 {
-	mat[0] = a.MulVec4(&b[0])
-	mat[1] = a.MulVec4(&b[1])
-	mat[2] = a.MulVec4(&b[2])
-	mat[3] = a.MulVec4(&b[3])
+	mat[0] = *a.MulVec4(&b[0])
+	mat[1] = *a.MulVec4(&b[1])
+	mat[2] = *a.MulVec4(&b[2])
+	mat[3] = *a.MulVec4(&b[3])
 	return mat
 }
 
 // MulVec4 multiplies v with mat and returns a new vector v' = M * v.
-func (mat *MMat4) MulVec4(v *MVec4) MVec4 {
-	return MVec4{
+func (mat *MMat4) MulVec4(v *MVec4) *MVec4 {
+	return &MVec4{
 		mat[0][0]*v[0] + mat[1][0]*v[1] + mat[2][0]*v[2] + mat[3][0]*v[3],
 		mat[0][1]*v[0] + mat[1][1]*v[1] + mat[2][1]*v[2] + mat[3][1]*v[3],
 		mat[0][2]*v[0] + mat[1][2]*v[1] + mat[2][2]*v[2] + mat[3][2]*v[3],
@@ -175,7 +175,7 @@ func (mat *MMat4) TransformVec4(v *MVec4) {
 
 // MulVec3 multiplies v (converted to a vec4 as (v_1, v_2, v_3, 1))
 // with mat and divides the result by w. Returns a new vec3.
-func (mat *MMat4) MulVec3(other *MVec3) MVec3 {
+func (mat *MMat4) MulVec3(other *MVec3) *MVec3 {
 	s := [4]float64{
 		mat[0][0]*other[0] + mat[0][1]*other[1] + mat[0][2]*other[2] + mat[0][3],
 		mat[1][0]*other[0] + mat[1][1]*other[1] + mat[1][2]*other[2] + mat[1][3],
@@ -184,11 +184,11 @@ func (mat *MMat4) MulVec3(other *MVec3) MVec3 {
 	}
 
 	if s[3] == 1.0 {
-		return MVec3{s[0], s[1], s[2]}
+		return &MVec3{s[0], s[1], s[2]}
 	} else if s[3] == 0.0 {
-		return MVec3{}
+		return NewMVec3()
 	} else {
-		return MVec3{s[0] / s[3], s[1] / s[3], s[2] / s[3]}
+		return &MVec3{s[0] / s[3], s[1] / s[3], s[2] / s[3]}
 	}
 }
 
@@ -208,10 +208,10 @@ func (mat *MMat4) TransformVec3(v *MVec3) {
 // MulVec3W multiplies v with mat with w as fourth component of the vector.
 // Useful to differentiate between vectors (w = 0) and points (w = 1)
 // without transforming them to vec4.
-func (mat *MMat4) MulVec3W(v *MVec3, w float64) MVec3 {
+func (mat *MMat4) MulVec3W(v *MVec3, w float64) *MVec3 {
 	result := *v
 	mat.TransformVec3W(&result, w)
-	return result
+	return &result
 }
 
 // TransformVec3W multiplies v with mat with w as fourth component of the vector and
@@ -262,8 +262,8 @@ func (mat *MMat4) TranslateZ(dz float64) *MMat4 {
 }
 
 // Scaling returns the scaling diagonal of the matrix.
-func (mat *MMat4) Scaling() MVec4 {
-	return MVec4{mat[0][0], mat[1][1], mat[2][2], mat[3][3]}
+func (mat *MMat4) Scaling() *MVec4 {
+	return &MVec4{mat[0][0], mat[1][1], mat[2][2], mat[3][3]}
 }
 
 // SetScaling sets the scaling diagonal of the matrix.
@@ -284,7 +284,7 @@ func (mat *MMat4) ScaleVec3(s *MVec3) *MMat4 {
 }
 
 // Quaternion extracts a quaternion from the rotation part of the matrix.
-func (mat *MMat4) Quaternion() MQuaternion {
+func (mat *MMat4) Quaternion() *MQuaternion {
 	trace := mat[0][0] + mat[1][1] + mat[2][2]
 
 	q := MQuaternion{}
@@ -316,7 +316,7 @@ func (mat *MMat4) Quaternion() MQuaternion {
 		}
 	}
 
-	return q.Normalized()
+	return q.Normalize()
 }
 
 // AssignQuaternion assigns a quaternion to the rotations part of the matrix and sets the other elements to their ident value.
@@ -616,25 +616,25 @@ func (m1 *MMat4) Mul(m2 *MMat4) {
 	*m1 = result
 }
 
-func (mat *MMat4) Muled(a *MMat4) MMat4 {
+func (mat *MMat4) Muled(a *MMat4) *MMat4 {
 	copied := mat.Copy()
 	copied.Mul(a)
-	return *copied
+	return copied
 }
 
-func (mat *MMat4) MuledFactor(v float64) MMat4 {
+func (mat *MMat4) MuledFactor(v float64) *MMat4 {
 	copied := mat.Copy()
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
 			copied[i][j] *= v
 		}
 	}
-	return *copied
+	return copied
 }
 
 // 行列の移動情報
-func (mat *MMat4) Translation() MVec3 {
-	return MVec3{mat[0][3], mat[1][3], mat[2][3]}
+func (mat *MMat4) Translation() *MVec3 {
+	return &MVec3{mat[0][3], mat[1][3], mat[2][3]}
 }
 
 func (m *MMat4) Det() float64 {

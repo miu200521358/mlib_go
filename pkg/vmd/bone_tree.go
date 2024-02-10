@@ -2,6 +2,7 @@ package vmd
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type BoneTree struct {
@@ -29,7 +30,7 @@ func NewBoneTree(
 		Frame:         frame,
 		GlobalMatrix:  globalMatrix,
 		LocalMatrix:   localMatrix,
-		Position:      &p,
+		Position:      p,
 		FramePosition: framePosition,
 		FrameRotation: frameRotation,
 		FrameScale:    frameScale,

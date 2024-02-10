@@ -76,11 +76,8 @@ func (lfs *LightFrames) GetItem(index float32) *LightFrame {
 
 	t := (float64(index) - float64(prevIndex)) / (float64(nextIndex) - float64(prevIndex))
 
-	position := mmath.LerpVec3(prevLf.Position, nextLf.Position, t)
-	lf.Position = &position
-
-	color := mmath.LerpVec3(prevLf.Color, nextLf.Color, t)
-	lf.Color = &color
+	lf.Position = mmath.LerpVec3(prevLf.Position, nextLf.Position, t)
+	lf.Color = mmath.LerpVec3(prevLf.Color, nextLf.Color, t)
 
 	return lf
 }

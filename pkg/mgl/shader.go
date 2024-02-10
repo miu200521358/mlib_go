@@ -10,7 +10,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 const (
@@ -85,9 +84,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		lightPosition:        &mmath.MVec3{-20, INITIAL_CAMERA_POSITION_Y * 2, INITIAL_CAMERA_POSITION_Z * 2},
 		msaa:                 NewMsaa(int32(width), int32(height)),
 	}
-	lightDirection := shader.lightPosition.Muled(&mmath.MVec3{-1, -1, -1})
-	lightDirection.Normalize()
-	shader.lightDirection = &lightDirection
+	shader.lightDirection = shader.lightPosition.Muled(&mmath.MVec3{-1, -1, -1}).Normalize()
 	modelProgram, err := shader.newProgram(
 		resourceFiles,
 		"resources/glsl/model.vert", "resources/glsl/model.frag",

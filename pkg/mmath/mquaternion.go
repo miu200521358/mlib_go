@@ -5,7 +5,6 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
-
 )
 
 type MQuaternion mgl64.Quat
@@ -102,41 +101,41 @@ func (v *MQuaternion) MMD() *MQuaternion {
 }
 
 // NewMQuaternionFromAxisAngles は、軸周りの回転を表す四元数を返します。
-func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) MQuaternion {
+func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
 	angle *= 0.5
 	sin := math.Sin(angle)
 	q := NewMQuaternionByValues(axis[0]*sin, axis[1]*sin, axis[2]*sin, math.Cos(angle))
-	return q.Normalized()
+	return q.Normalize()
 }
 
 // NewMQuaternionFromXAxisAngleは、X軸周りの回転を表す四元数を返します。
-func NewMQuaternionFromXAxisAngle(angle float64) MQuaternion {
+func NewMQuaternionFromXAxisAngle(angle float64) *MQuaternion {
 	angle *= 0.5
 	q := NewMQuaternionByValues(math.Sin(angle), 0, 0, math.Cos(angle))
-	return q.Normalized()
+	return q.Normalize()
 }
 
 // NewMQuaternionFromYAxisAngleは、Y軸周りの回転を表す四元数を返します。
-func NewMQuaternionFromYAxisAngle(angle float64) MQuaternion {
+func NewMQuaternionFromYAxisAngle(angle float64) *MQuaternion {
 	angle *= 0.5
 	q := NewMQuaternionByValues(0, math.Sin(angle), 0, math.Cos(angle))
-	return q.Normalized()
+	return q.Normalize()
 }
 
 // NewMQuaternionFromZAxisAngleは、Z軸周りの回転を表す四元数を返します。
-func NewMQuaternionFromZAxisAngle(angle float64) MQuaternion {
+func NewMQuaternionFromZAxisAngle(angle float64) *MQuaternion {
 	angle *= 0.5
 	q := NewMQuaternionByValues(0, 0, math.Sin(angle), math.Cos(angle))
-	return q.Normalized()
+	return q.Normalize()
 }
 
 // NewMQuaternionFromEulerAnglesは、オイラー角（ラジアン）回転を表す四元数を返します。
-func NewMQuaternionFromEulerAngles(xPitch, yHead, zRoll float64) MQuaternion {
+func NewMQuaternionFromEulerAngles(xPitch, yHead, zRoll float64) *MQuaternion {
 	qy := NewMQuaternionFromYAxisAngle(yHead)
 	qx := NewMQuaternionFromXAxisAngle(xPitch)
 	qz := NewMQuaternionFromZAxisAngle(zRoll)
-	q := qy.Mul(&qx)
-	return *q.Mul(&qz)
+	q := qy.Mul(qx)
+	return q.Mul(qz)
 }
 
 // 参考URL:
@@ -160,7 +159,7 @@ func (v *MQuaternion) ToEulerAngles() *MVec3 {
 }
 
 // NewMQuaternionFromEulerAnglesDegreesは、オイラー角（度）回転を表す四元数を返します。
-func NewMQuaternionFromEulerAnglesDegrees(xPitch, yHead, zRoll float64) MQuaternion {
+func NewMQuaternionFromEulerAnglesDegrees(xPitch, yHead, zRoll float64) *MQuaternion {
 	xPitchRadian := math.Pi * xPitch / 180.0
 	yHeadRadian := math.Pi * yHead / 180.0
 	zRollRadian := math.Pi * zRoll / 180.0
@@ -226,10 +225,10 @@ func (q1 *MQuaternion) Mul(q2 *MQuaternion) *MQuaternion {
 	return q1
 }
 
-func (q1 *MQuaternion) Muled(q2 *MQuaternion) MQuaternion {
+func (q1 *MQuaternion) Muled(q2 *MQuaternion) *MQuaternion {
 	copied := q1.Copy()
 	copied.Mul(q2)
-	return *copied
+	return copied
 }
 
 // Norm はクォータニオンのノルム値を返します。
@@ -257,7 +256,7 @@ func (quat *MQuaternion) Normalize() *MQuaternion {
 }
 
 // Normalizedは、単位を4進数に正規化したコピーを返す。
-func (quat *MQuaternion) Normalized() MQuaternion {
+func (quat *MQuaternion) Normalized() *MQuaternion {
 	norm := quat.Norm()
 	if norm != 1 && norm != 0 {
 		ool := 1 / math.Sqrt(norm)
@@ -267,9 +266,9 @@ func (quat *MQuaternion) Normalized() MQuaternion {
 			quat.V[2]*ool,
 			quat.W*ool,
 		)
-		return *q
+		return q
 	} else {
-		return *quat
+		return quat
 	}
 }
 
@@ -283,8 +282,8 @@ func (quat *MQuaternion) Negate() *MQuaternion {
 }
 
 // Negated returns a negated quaternion.
-func (quat *MQuaternion) Negated() MQuaternion {
-	return *NewMQuaternionByValues(-quat.V[0], -quat.V[1], -quat.V[2], -quat.W)
+func (quat *MQuaternion) Negated() *MQuaternion {
+	return NewMQuaternionByValues(-quat.V[0], -quat.V[1], -quat.V[2], -quat.W)
 }
 
 // Invert inverts the quaternion.
@@ -296,8 +295,8 @@ func (quat *MQuaternion) Invert() *MQuaternion {
 }
 
 // Inverted returns a inverted quaternion.
-func (quat *MQuaternion) Inverted() MQuaternion {
-	return *NewMQuaternionByValues(-quat.V[0], -quat.V[1], -quat.V[2], quat.W)
+func (quat *MQuaternion) Inverted() *MQuaternion {
+	return NewMQuaternionByValues(-quat.V[0], -quat.V[1], -quat.V[2], quat.W)
 }
 
 // SetShortestRotation は、クォータニオンが quat から other の方向への最短回転を表していない場合、そのクォータニオンを否定します。
@@ -337,14 +336,14 @@ func (quat *MQuaternion) RotateVec3(v *MVec3) {
 
 // RotatedVec3 は v の回転コピーを返す。
 // https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
-func (quat *MQuaternion) RotatedVec3(v *MVec3) MVec3 {
+func (quat *MQuaternion) RotatedVec3(v *MVec3) *MVec3 {
 	u := MVec3{quat.V[0], quat.V[1], quat.V[2]}
 	s := quat.W
 	vt1 := u.MuledScalar(2 * u.Dot(v))
 	vt2 := v.MuledScalar(s*s - u.Dot(&u))
 	vt3 := u.Cross(v)
 	vt3 = vt3.MulScalar(2 * s)
-	return MVec3{vt1[0] + vt2[0] + vt3[0], vt1[1] + vt2[1] + vt3[1], vt1[2] + vt2[2] + vt3[2]}
+	return &MVec3{vt1[0] + vt2[0] + vt3[0], vt1[1] + vt2[1] + vt3[1], vt1[2] + vt2[2] + vt3[2]}
 }
 
 // Dot は2つのクォータニオンの内積を返す。
@@ -353,28 +352,29 @@ func (quat *MQuaternion) Dot(other *MQuaternion) float64 {
 }
 
 // MulFactor
-func (quat *MQuaternion) MulFactor(factor float64) MQuaternion {
+func (quat *MQuaternion) MulFactor(factor float64) *MQuaternion {
 	if factor == 0.0 {
-		return *NewMQuaternion()
+		return NewMQuaternion()
 	}
 	qq := NewMQuaternionByValues(quat.GetX(), quat.GetY(), quat.GetZ(), quat.GetW()/factor)
-	return qq.Normalized()
+	return qq.Normalize()
 }
 
 // Slerp は t (0,1) における a と b の間の球面線形補間クォータニオンを返す。
 // See http://en.wikipedia.org/wiki/Slerp
-func (a *MQuaternion) Slerp(b *MQuaternion, t float64) MQuaternion {
-	return MQuaternion(mgl64.QuatSlerp(mgl64.Quat(*a), mgl64.Quat(*b), t))
+func (a *MQuaternion) Slerp(b *MQuaternion, t float64) *MQuaternion {
+	q := mgl64.QuatSlerp(mgl64.Quat(*a), mgl64.Quat(*b), t)
+	return (*MQuaternion)(&q)
 }
 
 // Vec3Diff関数は、2つのベクトル間の回転四元数を返します。
-func (a *MVec3) Vec3Diff(b *MVec3) MQuaternion {
+func (a *MVec3) Vec3Diff(b *MVec3) *MQuaternion {
 	cr := a.Cross(b)
 	sr := math.Sqrt(2 * (1 + a.Dot(b)))
 	oosr := 1 / sr
 
 	q := NewMQuaternionByValues(cr[0]*oosr, cr[1]*oosr, cr[2]*oosr, sr*0.5)
-	return q.Normalized()
+	return q.Normalize()
 }
 
 // ToDegree は、クォータニオンを度に変換します。
@@ -483,7 +483,7 @@ func NewMQuaternionFromAxes(xAxis, yAxis, zAxis *MVec3) *MQuaternion {
 	z := MVec3{xAxis.GetZ(), yAxis.GetZ(), zAxis.GetZ()}
 	mat := NewMMat3().AssignCoordinateSystem(&x, &y, &z)
 	qq := mat.Quaternion()
-	return &qq
+	return qq
 }
 
 // SeparateByAxis separates the quaternion into four quaternions based on the global axis.
@@ -507,7 +507,7 @@ func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuat
 	yzQQ := NewMQuaternionRotate(globalXAxis, globalXVec.Normalize())
 	// 元々の回転量 から YZ回転 を除去して、除去されたX成分を求める
 	invYzQQ := yzQQ.Inverted()
-	xQQ := quat.Mul(&invYzQQ)
+	xQQ := quat.Mul(invYzQQ)
 
 	// Y成分を抽出する ------------
 	// グローバル軸方向に伸ばす
@@ -516,7 +516,7 @@ func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuat
 	xzQQ := NewMQuaternionRotate(globalYAxis, globalYVec.Normalize())
 	// 元々の回転量 から XZ回転 を除去して、除去されたY成分を求める
 	invXzQQ := xzQQ.Inverted()
-	yQQ := quat.Mul(&invXzQQ)
+	yQQ := quat.Mul(invXzQQ)
 
 	// Z成分を抽出する ------------
 	// グローバル軸方向に伸ばす
@@ -525,7 +525,7 @@ func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuat
 	xyQQ := NewMQuaternionRotate(globalZAxis, globalZVec.Normalize())
 	// 元々の回転量 から XY回転 を除去して、除去されたZ成分を求める
 	invXyQQ := xyQQ.Inverted()
-	zQQ := quat.Mul(&invXyQQ)
+	zQQ := quat.Mul(invXyQQ)
 
 	return xQQ, yQQ, zQQ, yzQQ
 }
@@ -551,7 +551,7 @@ func (v *MQuaternion) ToMat4() *MMat4 {
 func (quat *MQuaternion) ToFixedAxisRotation(fixedAxis *MVec3) *MQuaternion {
 	normalizedFixedAxis := fixedAxis.Normalized()
 	quatVec := quat.Vec3().Normalized()
-	theta := math.Acos(math.Max(-1, math.Min(1, normalizedFixedAxis.Dot(&quatVec))))
+	theta := math.Acos(math.Max(-1, math.Min(1, normalizedFixedAxis.Dot(quatVec))))
 	var flag float64
 	if theta >= math.Pi/2 {
 		flag = -1
@@ -575,7 +575,7 @@ func (quat *MQuaternion) PracticallyEquals(other *MQuaternion, epsilon float64) 
 
 // MulVec3 multiplies v (converted to a vec4 as (v_1, v_2, v_3, 1))
 // with mat and divides the result by w. Returns a new vec3.
-func (quat *MQuaternion) MulVec3(v *MVec3) MVec3 {
+func (quat *MQuaternion) MulVec3(v *MVec3) *MVec3 {
 	return quat.ToMat4().MulVec3(v)
 }
 

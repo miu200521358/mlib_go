@@ -1,7 +1,6 @@
 package mmath
 
 import (
-	"errors"
 	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
@@ -86,14 +85,14 @@ func (mat *MMat3) Scale(f float64) *MMat3 {
 }
 
 // Scaled returns a copy of the matrix with the diagonal scale elements multiplied by f.
-func (mat *MMat3) Scaled(f float64) MMat3 {
+func (mat *MMat3) Scaled(f float64) *MMat3 {
 	r := *mat
-	return *r.Scale(f)
+	return r.Scale(f)
 }
 
 // Scaling returns the scaling diagonal of the matrix.
-func (mat *MMat3) Scaling() MVec3 {
-	return MVec3{mat[0][0], mat[1][1], mat[2][2]}
+func (mat *MMat3) Scaling() *MVec3 {
+	return &MVec3{mat[0][0], mat[1][1], mat[2][2]}
 }
 
 // SetScaling sets the scaling diagonal of the matrix.
@@ -144,9 +143,9 @@ func (mat *MMat3) Trace() float64 {
 
 // AssignMul multiplies a and b and assigns the result to mat.
 func (mat *MMat3) AssignMul(a, b *MMat3) *MMat3 {
-	mat[0] = a.MulVec3(&b[0])
-	mat[1] = a.MulVec3(&b[1])
-	mat[2] = a.MulVec3(&b[2])
+	mat[0] = *a.MulVec3(&b[0])
+	mat[1] = *a.MulVec3(&b[1])
+	mat[2] = *a.MulVec3(&b[2])
 	return mat
 }
 
@@ -168,15 +167,15 @@ func (mat *MMat3) Mul(f float64) *MMat3 {
 }
 
 // Muled returns a copy of the matrix with every element multiplied by f.
-func (mat *MMat3) Muled(f float64) MMat3 {
+func (mat *MMat3) Muled(f float64) *MMat3 {
 	result := *mat
 	result.Mul(f)
-	return result
+	return &result
 }
 
 // MulVec3 multiplies v with mat and returns a new vector v' = M * v.
-func (mat *MMat3) MulVec3(v *MVec3) MVec3 {
-	return MVec3{
+func (mat *MMat3) MulVec3(v *MVec3) *MVec3 {
+	return &MVec3{
 		mat[0][0]*v[0] + mat[1][0]*v[1] + mat[2][0]*v[2],
 		mat[0][1]*v[0] + mat[1][1]*v[1] + mat[2][1]*v[2],
 		mat[0][2]*v[0] + mat[1][2]*v[1] + mat[2][2]*v[2],
@@ -194,7 +193,7 @@ func (mat *MMat3) TransformVec3(v *MVec3) {
 }
 
 // Quaternion extracts a quaternion from the rotation part of the matrix.
-func (mat *MMat3) Quaternion() MQuaternion {
+func (mat *MMat3) Quaternion() *MQuaternion {
 	tr := mat.Trace()
 
 	s := math.Sqrt(tr + 1)
@@ -207,7 +206,7 @@ func (mat *MMat3) Quaternion() MQuaternion {
 		(mat[0][1]-mat[1][0])*s,
 		w,
 	)
-	return q.Normalized()
+	return q.Normalize()
 }
 
 // AssignQuaternion assigns a quaternion to the rotations part of the matrix and sets the other elements to their ident value.
@@ -386,10 +385,10 @@ func (mat *MMat3) Transpose() *MMat3 {
 }
 
 // Transposed returns a transposed copy the matrix.
-func (mat *MMat3) Transposed() MMat3 {
+func (mat *MMat3) Transposed() *MMat3 {
 	result := *mat
 	result.Transpose()
-	return result
+	return &result
 }
 
 // Adjugate computes the adjugate of this matrix and returns mat
@@ -412,29 +411,28 @@ func (matrix *MMat3) Adjugate() *MMat3 {
 }
 
 // Adjugated returns an adjugated copy of the matrix.
-func (mat *MMat3) Adjugated() MMat3 {
+func (mat *MMat3) Adjugated() *MMat3 {
 	result := *mat
 	result.Adjugate()
-	return result
+	return &result
 }
 
 // Invert inverts the given matrix. Destructive operation.
 // Does not check if matrix is singular and may lead to strange results!
-func (mat *MMat3) Invert() (*MMat3, error) {
+func (mat *MMat3) Invert() *MMat3 {
 	initialDet := mat.Determinant()
 	if initialDet == 0 {
-		return &MMat3Zero, errors.New("can not create inverted matrix as determinant is 0")
+		mat = NewMMat3()
 	}
 
 	mat.Adjugate()
 	mat.Mul(1.0 / initialDet)
-	return mat, nil
+	return mat
 }
 
 // Inverted inverts a copy of the given matrix.
 // Does not check if matrix is singular and may lead to strange results!
-func (mat *MMat3) Inverted() (MMat3, error) {
+func (mat *MMat3) Inverted() *MMat3 {
 	result := *mat
-	_, err := result.Invert()
-	return result, err
+	return result.Invert()
 }

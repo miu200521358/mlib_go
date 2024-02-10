@@ -3,6 +3,7 @@ package mmath
 import (
 	"math"
 	"testing"
+
 )
 
 func TestMVec3Interpolate(t *testing.T) {
@@ -13,7 +14,7 @@ func TestMVec3Interpolate(t *testing.T) {
 
 	result := v1.Interpolate(v2, t1) // Use v2 as a pointer
 
-	if result != expected {
+	if !result.PracticallyEquals(&expected, 1e-8) {
 		t.Errorf("Interpolation failed. Expected %v, got %v", expected, result)
 	}
 }

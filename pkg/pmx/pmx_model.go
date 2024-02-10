@@ -211,7 +211,7 @@ func (pm *PmxModel) SetUp() {
 		bone.ChildRelativePosition = pm.Bones.getChildRelativePosition(bone.Index)
 		// 各ボーンのローカル軸
 		localAxis := bone.ChildRelativePosition.Normalized()
-		bone.LocalAxis = &localAxis
+		bone.LocalAxis = localAxis
 		// ローカル軸行列
 		bone.LocalMatrix = localAxis.ToLocalMatrix4x4()
 
@@ -223,8 +223,7 @@ func (pm *PmxModel) SetUp() {
 		}
 
 		// オフセット行列は自身の位置を原点に戻す行列
-		v := bone.Position.Inverted()
-		bone.OffsetMatrix.Translate(&v)
+		bone.OffsetMatrix.Translate(bone.Position.Inverted())
 
 		// 逆オフセット行列は親ボーンからの相対位置分
 		bone.RevertOffsetMatrix.Translate(bone.ParentRelativePosition.Copy())

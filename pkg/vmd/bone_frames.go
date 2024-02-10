@@ -182,7 +182,7 @@ ikLoop:
 			ikLocalPosition := linkInvMatrix.MulVec3(ikGlobalPosition)
 
 			// 位置の差がほとんどない場合、終了
-			if ikLocalPosition.Distance(&effectorLocalPosition) < 1e-8 {
+			if ikLocalPosition.Distance(effectorLocalPosition) < 1e-8 {
 				break ikLoop
 			}
 
@@ -191,10 +191,10 @@ ikLoop:
 
 			// ベクトル (1) を (2) に一致させるための最短回転量（Axis-Angle）
 			// 回転軸
-			axis := normalizedEffectorLocalPosition.Cross(&normalizedIkLocalPosition).Normalize()
+			axis := normalizedEffectorLocalPosition.Cross(normalizedIkLocalPosition).Normalize()
 			// 回転角(ラジアン)
 			angle := math.Acos(mmath.ClampFloat(
-				normalizedIkLocalPosition.Dot(&normalizedEffectorLocalPosition)/
+				normalizedIkLocalPosition.Dot(normalizedEffectorLocalPosition)/
 					(normalizedIkLocalPosition.Length()*normalizedEffectorLocalPosition.Length()), 0, 1))
 
 			// リンクボーンの角度を取得
@@ -256,32 +256,29 @@ ikLoop:
 				// 制限角で最大変位量を制限する
 				limitRotationRad := math.Min(ikBone.Ik.UnitRotation.GetRadians().GetX(), angle)
 				limitQuat := mmath.NewMQuaternionFromAxisAngles(axis, limitRotationRad)
-				correctIkQuat := &limitQuat
+				correctIkQuat := limitQuat
 
 				actualIkQuat := linkQuat.Muled(correctIkQuat)
 				linkAxis := actualIkQuat.GetXYZ().Normalized()
 				linkRad := actualIkQuat.ToRadian()
 				var linkSign float64
-				if linkBone.NormalizedFixedAxis.Dot(&linkAxis) >= 0 {
+				if linkBone.NormalizedFixedAxis.Dot(linkAxis) >= 0 {
 					linkSign = 1
 				} else {
 					linkSign = -1
 				}
 
 				// 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-				quat := mmath.NewMQuaternionFromAxisAngles(linkBone.NormalizedFixedAxis, linkRad*linkSign)
-				totalActualIkQuat = &quat
+				totalActualIkQuat = mmath.NewMQuaternionFromAxisAngles(linkBone.NormalizedFixedAxis, linkRad*linkSign)
 			} else {
 				// 制限が無い場合、制限角の制限だけ入れる
 
 				// 制限角で最大変位量を制限する
 				limitRotationRad := math.Min(ikBone.Ik.UnitRotation.GetRadians().GetX(), angle)
-				limitQuat := mmath.NewMQuaternionFromAxisAngles(axis, limitRotationRad)
-				correctIkQuat := &limitQuat
+				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(axis, limitRotationRad)
 
 				// 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-				quat := linkQuat.Muled(correctIkQuat)
-				totalActualIkQuat = &quat
+				totalActualIkQuat = linkQuat.Muled(correctIkQuat)
 			}
 
 			// IKの結果を更新
@@ -352,7 +349,7 @@ func (bfs *BoneFrames) calculateSingleAxisRadRotation(
 	correctLimitIkQuat := mmath.NewMQuaternionFromAxisAngles(quatAxis, limitAxisRad)
 
 	// 現在IKリンクに入る可能性のあるすべての角度
-	totalIkQuat := linkQuat.Muled(&correctLimitIkQuat)
+	totalIkQuat := linkQuat.Muled(correctLimitIkQuat)
 
 	// 全体の角度を計算する
 	totalAxisIkRad := totalIkQuat.ToRadian()
@@ -387,7 +384,7 @@ func (bfs *BoneFrames) calculateSingleAxisRadRotation(
 	var totalAxisRad float64
 	if unitRadian > quatAngle && QUARTER_RAD > totalAxisIkRad && unitRadian > totalAxisIkRad {
 		// トータルが制限角度以内であれば全軸の角度を使う
-		totalIkQq := linkQuat.Muled(&ikQuat)
+		totalIkQq := linkQuat.Muled(ikQuat)
 		totalAxisRad = totalIkQq.ToRadian() * axisSign
 	} else if GIMBAL_RAD > quatAngle && QUARTER_RAD > totalAxisIkRad && unitRadian > totalAxisIkRad {
 		// トータルが88度以内で、軸分け後が制限角度以内であれば制限角度を使う
@@ -419,7 +416,7 @@ func (bfs *BoneFrames) calculateSingleAxisRadRotation(
 
 	// 指定の軸方向に回す
 	resultLinkQuat := mmath.NewMQuaternionFromAxisAngles(axisVector, resultAxisRad)
-	return &resultLinkQuat
+	return resultLinkQuat
 }
 
 func (bfs *BoneFrames) calcBoneMatrixes(
@@ -467,10 +464,10 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 			boneTrees.SetItem(bone.Name, frame, NewBoneTree(
 				bone.Name,
 				frame,
-				&globalMatrix, // グローバル行列
-				jm,            // ローカル行列はそのまま
-				&p,            // 移動
-				&r,            // 回転
+				globalMatrix, // グローバル行列
+				jm,           // ローカル行列はそのまま
+				p,            // 移動
+				r,            // 回転
 				&mmath.MVec3{s.GetX(), s.GetY(), s.GetZ()}, // 拡大率
 			))
 		}
@@ -619,7 +616,7 @@ func (bfs *BoneFrames) getRotation(
 	if bone.IsEffectorRotation() {
 		// 外部親変形ありの場合、外部親変形行列を掛ける
 		effectQ := rot.Muled(bfs.getRotationWithEffect(frame, bone.Index, model, isCalcIk, 0))
-		rotWithEffect = &effectQ
+		rotWithEffect = effectQ
 	} else {
 		rotWithEffect = rot
 	}
@@ -661,13 +658,13 @@ func (bfs *BoneFrames) getRotationWithEffect(
 		// 正の付与親
 		effectQ := rotWithEffect.MulFactor(bone.EffectFactor)
 		effectQ.Normalize()
-		return &effectQ
+		return effectQ
 	} else {
 		// 負の付与親の場合、逆回転
 		effectQ := rotWithEffect.MulFactor(-bone.EffectFactor)
 		effectQ.Invert()
 		effectQ.Normalize()
-		return &effectQ
+		return effectQ
 	}
 }
 

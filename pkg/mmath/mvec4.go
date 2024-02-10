@@ -122,12 +122,12 @@ func (v *MVec4) AddScalar(s float64) *MVec4 {
 }
 
 // Added ベクトルに他のベクトルを加算した結果を返します
-func (v *MVec4) Added(other *MVec4) MVec4 {
-	return MVec4{v[0] + other[0], v[1] + other[1], v[2] + other[2], v[3] + other[3]}
+func (v *MVec4) Added(other *MVec4) *MVec4 {
+	return &MVec4{v[0] + other[0], v[1] + other[1], v[2] + other[2], v[3] + other[3]}
 }
 
-func (v *MVec4) AddedScalar(s float64) MVec4 {
-	return MVec4{v[0] + s, v[1] + s, v[2] + s, v[3] + s}
+func (v *MVec4) AddedScalar(s float64) *MVec4 {
+	return &MVec4{v[0] + s, v[1] + s, v[2] + s, v[3] + s}
 }
 
 // Sub ベクトルから他のベクトルを減算します
@@ -149,12 +149,12 @@ func (v *MVec4) SubScalar(s float64) *MVec4 {
 }
 
 // Subed ベクトルから他のベクトルを減算した結果を返します
-func (v *MVec4) Subed(other *MVec4) MVec4 {
-	return MVec4{v[0] - other[0], v[1] - other[1], v[2] - other[2], v[3] - other[3]}
+func (v *MVec4) Subed(other *MVec4) *MVec4 {
+	return &MVec4{v[0] - other[0], v[1] - other[1], v[2] - other[2], v[3] - other[3]}
 }
 
-func (v *MVec4) SubedScalar(s float64) MVec4 {
-	return MVec4{v[0] - s, v[1] - s, v[2] - s, v[3] - s}
+func (v *MVec4) SubedScalar(s float64) *MVec4 {
+	return &MVec4{v[0] - s, v[1] - s, v[2] - s, v[3] - s}
 }
 
 // Mul ベクトルの各要素に他のベクトルの各要素を乗算します
@@ -176,12 +176,12 @@ func (v *MVec4) MulScalar(s float64) *MVec4 {
 }
 
 // Muled ベクトルの各要素に他のベクトルの各要素を乗算した結果を返します
-func (v *MVec4) Muled(other *MVec4) MVec4 {
-	return MVec4{v[0] * other[0], v[1] * other[1], v[2] * other[2], v[3] * other[3]}
+func (v *MVec4) Muled(other *MVec4) *MVec4 {
+	return &MVec4{v[0] * other[0], v[1] * other[1], v[2] * other[2], v[3] * other[3]}
 }
 
-func (v *MVec4) MuledScalar(s float64) MVec4 {
-	return MVec4{v[0] * s, v[1] * s, v[2] * s, v[3] * s}
+func (v *MVec4) MuledScalar(s float64) *MVec4 {
+	return &MVec4{v[0] * s, v[1] * s, v[2] * s, v[3] * s}
 }
 
 // Div ベクトルの各要素を他のベクトルの各要素で除算します
@@ -203,13 +203,13 @@ func (v *MVec4) DivScalar(s float64) *MVec4 {
 }
 
 // Dived ベクトルの各要素を他のベクトルの各要素で除算した結果を返します
-func (v *MVec4) Dived(other *MVec4) MVec4 {
-	return MVec4{v[0] / other[0], v[1] / other[1], v[2] / other[2], v[3] / other[3]}
+func (v *MVec4) Dived(other *MVec4) *MVec4 {
+	return &MVec4{v[0] / other[0], v[1] / other[1], v[2] / other[2], v[3] / other[3]}
 }
 
 // DivedScalar ベクトルの各要素をスカラーで除算した結果を返します
-func (v *MVec4) DivedScalar(s float64) MVec4 {
-	return MVec4{v[0] / s, v[1] / s, v[2] / s, v[3] / s}
+func (v *MVec4) DivedScalar(s float64) *MVec4 {
+	return &MVec4{v[0] / s, v[1] / s, v[2] / s, v[3] / s}
 }
 
 // Equal ベクトルが他のベクトルと等しいかどうかをチェックします
@@ -260,8 +260,8 @@ func (v *MVec4) Invert() *MVec4 {
 }
 
 // Inverted ベクトルの各要素の符号を反転した結果を返します (-v)
-func (v *MVec4) Inverted() MVec4 {
-	return MVec4{-v[0], -v[1], -v[2], -v[3]}
+func (v *MVec4) Inverted() *MVec4 {
+	return &MVec4{-v[0], -v[1], -v[2], -v[3]}
 }
 
 // Abs ベクトルの各要素の絶対値を返します
@@ -274,8 +274,8 @@ func (v *MVec4) Abs() *MVec4 {
 }
 
 // Absed ベクトルの各要素の絶対値を返します
-func (v *MVec4) Absed() MVec4 {
-	return MVec4{math.Abs(v[0]), math.Abs(v[1]), math.Abs(v[2]), math.Abs(v[3])}
+func (v *MVec4) Absed() *MVec4 {
+	return &MVec4{math.Abs(v[0]), math.Abs(v[1]), math.Abs(v[2]), math.Abs(v[3])}
 }
 
 // Hash ベクトルのハッシュ値を計算します
@@ -314,10 +314,10 @@ func (v *MVec4) Normalize() *MVec4 {
 }
 
 // Normalized ベクトルを正規化した結果を返します
-func (v *MVec4) Normalized() MVec4 {
+func (v *MVec4) Normalized() *MVec4 {
 	vec := *v
 	vec.Normalize()
-	return vec
+	return &vec
 }
 
 // Angle ベクトルの角度(ラジアン角度)を返します
@@ -343,7 +343,7 @@ func (v *MVec4) Degree(other *MVec4) float64 {
 func (v *MVec4) Dot(other *MVec4) float64 {
 	a3 := v.Vec3DividedByW()
 	b3 := other.Vec3DividedByW()
-	return a3.Dot(&b3)
+	return a3.Dot(b3)
 }
 
 // Dot4 returns the 4 element vdot product of two vectors.
@@ -355,7 +355,7 @@ func Dot4(a, b *MVec4) float64 {
 func (v *MVec4) Cross(other *MVec4) *MVec4 {
 	a3 := v.Vec3DividedByW()
 	b3 := other.Vec3DividedByW()
-	c3 := a3.Cross(&b3)
+	c3 := a3.Cross(b3)
 	return &MVec4{c3[0], c3[1], c3[2], 1}
 }
 
@@ -390,9 +390,9 @@ func (v *MVec4) Max() *MVec4 {
 }
 
 // Interpolate ベクトルの線形補間を行います
-func (v *MVec4) Interpolate(other *MVec4, t float64) MVec4 {
+func (v *MVec4) Interpolate(other *MVec4, t float64) *MVec4 {
 	t1 := 1 - t
-	return MVec4{
+	return &MVec4{
 		v[0]*t1 + other[0]*t,
 		v[1]*t1 + other[1]*t,
 		v[2]*t1 + other[2]*t,
@@ -413,10 +413,10 @@ func (v *MVec4) Clamp(min, max *MVec4) *MVec4 {
 }
 
 // Clamped ベクトルの各要素を指定された範囲内にクランプした結果を返します
-func (v *MVec4) Clamped(min, max *MVec4) MVec4 {
+func (v *MVec4) Clamped(min, max *MVec4) *MVec4 {
 	result := *v
 	result.Clamp(min, max)
-	return result
+	return &result
 }
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
@@ -425,10 +425,10 @@ func (v *MVec4) Clamp01() *MVec4 {
 }
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します
-func (v *MVec4) Clamped01() MVec4 {
+func (v *MVec4) Clamped01() *MVec4 {
 	result := *v
 	result.Clamp01()
-	return result
+	return &result
 }
 
 // Copy
@@ -442,7 +442,7 @@ func (v *MVec4) Vector() []float64 {
 }
 
 // 線形補間
-func LerpVec4(v1, v2 *MVec4, t float64) MVec4 {
+func LerpVec4(v1, v2 *MVec4, t float64) *MVec4 {
 	return (v2.Sub(v1)).MulScalar(t).Added(v1)
 }
 
@@ -456,15 +456,15 @@ func (v *MVec4) Round() *MVec4 {
 }
 
 // Vec3DividedByW returns a vec3.T version of the vector by dividing the first three vector components (XYZ) by the last one (W).
-func (vec *MVec4) Vec3DividedByW() MVec3 {
+func (vec *MVec4) Vec3DividedByW() *MVec3 {
 	oow := 1 / vec[3]
-	return MVec3{vec[0] * oow, vec[1] * oow, vec[2] * oow}
+	return &MVec3{vec[0] * oow, vec[1] * oow, vec[2] * oow}
 }
 
 // DividedByW returns a copy of the vector with the first three components (XYZ) divided by the last one (W).
-func (vec *MVec4) DividedByW() MVec4 {
+func (vec *MVec4) DividedByW() *MVec4 {
 	oow := 1 / vec[3]
-	return MVec4{vec[0] * oow, vec[1] * oow, vec[2] * oow, 1}
+	return &MVec4{vec[0] * oow, vec[1] * oow, vec[2] * oow, 1}
 }
 
 // DivideByW divides the first three components (XYZ) by the last one (W).
@@ -478,7 +478,7 @@ func (vec *MVec4) DivideByW() *MVec4 {
 }
 
 // 標準偏差を加味したmean処理
-func StdMeanVec4(values []MVec4, err float64) MVec4 {
+func StdMeanVec4(values []MVec4, err float64) *MVec4 {
 	npStandardVectors := make([][]float64, len(values))
 	npStandardLengths := make([]float64, len(values))
 
@@ -500,11 +500,11 @@ func StdMeanVec4(values []MVec4, err float64) MVec4 {
 	}
 
 	mean := mutils.Mean2DVertical(filteredStandardValues)
-	return MVec4{mean[0], mean[1], mean[2], mean[3]}
+	return &MVec4{mean[0], mean[1], mean[2], mean[3]}
 }
 
 // One 0を1に変える
-func (v *MVec4) One() MVec4 {
+func (v *MVec4) One() *MVec4 {
 	vec := v.Vector()
 	epsilon := 1e-14
 	for i := 0; i < len(vec); i++ {
@@ -512,7 +512,7 @@ func (v *MVec4) One() MVec4 {
 			vec[i] = 1
 		}
 	}
-	return MVec4{vec[0], vec[1], vec[2], vec[3]}
+	return &MVec4{vec[0], vec[1], vec[2], vec[3]}
 }
 
 func (v *MVec4) Distance(other *MVec4) float64 {

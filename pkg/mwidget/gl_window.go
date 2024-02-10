@@ -454,7 +454,7 @@ func (w *GlWindow) Run() {
 	frame := float32(0)
 	previousTime := glfw.GetTime()
 
-	for !w.ShouldClose() {
+	for w != nil && !w.ShouldClose() {
 		// 深度バッファのクリア
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -496,5 +496,7 @@ func (w *GlWindow) Run() {
 		w.SwapBuffers()
 		glfw.PollEvents()
 	}
-	w.Close(&w.Window)
+	if w != nil {
+		w.Close(&w.Window)
+	}
 }

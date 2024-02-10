@@ -362,7 +362,7 @@ func (b *Bones) getParentRelativePosition(boneIndex int) *mmath.MVec3 {
 	bone := b.GetItem(boneIndex)
 	if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
 		v := bone.Position.Subed(b.GetItem(bone.ParentIndex).Position)
-		return &v
+		return v
 	}
 	return mmath.NewMVec3()
 }
@@ -385,17 +385,17 @@ func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 	}
 
 	v := toPosition.Subed(&fromPosition)
-	return &v
+	return v
 }
 
 func (bone *Bone) normalizeFixedAxis(fixedAxis *mmath.MVec3) {
 	v := fixedAxis.Normalized()
-	bone.NormalizedFixedAxis = &v
+	bone.NormalizedFixedAxis = v
 }
 
 func (bone *Bone) normalizeLocalAxis(localXVector *mmath.MVec3) {
 	v := localXVector.Normalized()
-	bone.NormalizedLocalAxisX = &v
+	bone.NormalizedLocalAxisX = v
 	bone.NormalizedLocalAxisY = v.Cross(&mmath.MVec3{0, 0, -1})
 	bone.NormalizedLocalAxisZ = v.Cross(bone.NormalizedLocalAxisY)
 }

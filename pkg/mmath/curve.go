@@ -2,7 +2,6 @@ package mmath
 
 import (
 	"math"
-
 )
 
 type Curve struct {
@@ -34,7 +33,7 @@ func (v *Curve) Normalize(begin, finish *MVec2) {
 	diff := finish.Subed(begin)
 
 	v.Start = v.Start.Sub(begin)
-	v.Start = v.Start.Div(&diff)
+	v.Start = v.Start.Div(diff)
 	v.Start = v.Start.MulScalar(CURVE_MAX)
 	v.Start = v.Start.Round()
 
@@ -51,7 +50,7 @@ func (v *Curve) Normalize(begin, finish *MVec2) {
 	}
 
 	v.End = v.End.Sub(begin)
-	v.End = v.End.Div(&diff)
+	v.End = v.End.Div(diff)
 	v.End = v.End.MulScalar(CURVE_MAX)
 	v.End = v.End.Round()
 
@@ -141,10 +140,10 @@ func SplitCurve(curve *Curve, start, now, end float32) (*Curve, *Curve) {
 
 	_, _, t := Evaluate(curve, start, now, end)
 
-	iA := MVec2{0.0, 0.0}
+	iA := &MVec2{0.0, 0.0}
 	iB := curve.Start.DivedScalar(CURVE_MAX)
 	iC := curve.End.DivedScalar(CURVE_MAX)
-	iD := MVec2{1.0, 1.0}
+	iD := &MVec2{1.0, 1.0}
 
 	iAt1 := iA.MuledScalar(1 - t)
 	iBt1 := iB.MuledScalar(1 - t)
@@ -153,35 +152,35 @@ func SplitCurve(curve *Curve, start, now, end float32) (*Curve, *Curve) {
 	iCt2 := iC.MuledScalar(t)
 	iDt2 := iD.MuledScalar(t)
 
-	iE := iAt1.Added(&iBt2)
-	iF := iBt1.Added(&iCt2)
-	iG := iCt1.Added(&iDt2)
+	iE := iAt1.Added(iBt2)
+	iF := iBt1.Added(iCt2)
+	iG := iCt1.Added(iDt2)
 
 	iEt1 := iE.MuledScalar(1 - t)
 	iFt1 := iF.MuledScalar(1 - t)
 	iFt2 := iF.MuledScalar(t)
 	iGt2 := iG.MuledScalar(t)
 
-	iH := iEt1.Added(&iFt2)
-	iI := iFt1.Added(&iGt2)
+	iH := iEt1.Added(iFt2)
+	iI := iFt1.Added(iGt2)
 
 	iHt1 := iH.MuledScalar(1 - t)
 	iIt2 := iI.MuledScalar(t)
 
-	iJ := iHt1.Added(&iIt2)
+	iJ := iHt1.Added(iIt2)
 
 	// 新たな4つのベジェ曲線の制御点は、A側がAEHJ、C側がJIGDとなる。
 	startCurve := &Curve{
-		Start: &iE,
-		End:   &iH,
+		Start: iE,
+		End:   iH,
 	}
-	startCurve.Normalize(&iA, &iJ)
+	startCurve.Normalize(iA, iJ)
 
 	endCurve := &Curve{
-		Start: &iI,
-		End:   &iG,
+		Start: iI,
+		End:   iG,
 	}
-	endCurve.Normalize(&iJ, &iD)
+	endCurve.Normalize(iJ, iD)
 
 	if startCurve.Start.GetX() == startCurve.Start.GetY() &&
 		startCurve.End.GetX() == startCurve.End.GetY() &&

@@ -2,7 +2,6 @@ package mmath
 
 import (
 	"testing"
-
 )
 
 func TestMMat4_Translate(t *testing.T) {
@@ -135,7 +134,7 @@ func TestMMat4_Translation(t *testing.T) {
 	result := mat.Translation()
 
 	// Verify the vector values
-	if result != expectedVec {
+	if !result.PracticallyEquals(&expectedVec, 1e-8) {
 		t.Errorf("Expected translation to be %v, got %v", expectedVec, result)
 	}
 }

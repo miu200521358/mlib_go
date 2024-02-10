@@ -69,7 +69,7 @@ func (m *MRotation) SetRadians(v *MVec3) {
 		180.0 * v.GetZ() / math.Pi,
 	}
 	qq := NewMQuaternionFromEulerAngles(v.GetX(), v.GetY(), v.GetZ())
-	m.quaternion = &qq
+	m.quaternion = qq
 }
 
 func (m *MRotation) GetDegrees() *MVec3 {
@@ -84,7 +84,7 @@ func (m *MRotation) SetDegrees(v *MVec3) {
 		math.Pi * v.GetZ() / 180.0,
 	}
 	qq := NewMQuaternionFromEulerAngles(m.radians.GetX(), m.radians.GetY(), m.radians.GetZ())
-	m.quaternion = &qq
+	m.quaternion = qq
 }
 
 // Copy
