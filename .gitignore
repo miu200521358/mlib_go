@@ -29,3 +29,4 @@ cmd/user_config.json
 *.vmd
 *.pmx
 test_resources/sdef.png
+*.pprof

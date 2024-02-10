@@ -73,7 +73,6 @@ func (c *IndexModelCorrection[T]) Append(value T) {
 	if !slices.Contains(c.Indexes, value.GetIndex()) {
 		c.Indexes = append(c.Indexes, value.GetIndex())
 	}
-	c.SortIndexes()
 }
 
 func (c *IndexModelCorrection[T]) SortIndexes() {

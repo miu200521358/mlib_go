@@ -603,20 +603,17 @@ func (mat *MMat4) Transpose3x3() *MMat4 {
 
 // Mul は行列の掛け算を行います
 func (m1 *MMat4) Mul(m2 *MMat4) {
-	var result [4][4]float64
+	var result MMat4
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
+			sum := 0.0
 			for k := 0; k < 4; k++ {
-				result[i][j] += m1[i][k] * m2[k][j]
+				sum += m1[i][k] * m2[k][j]
 			}
+			result[i][j] = sum
 		}
 	}
-	*m1 = *NewMMat4ByValues(
-		result[0][0], result[0][1], result[0][2], result[0][3],
-		result[1][0], result[1][1], result[1][2], result[1][3],
-		result[2][0], result[2][1], result[2][2], result[2][3],
-		result[3][0], result[3][1], result[3][2], result[3][3],
-	)
+	*m1 = result
 }
 
 func (mat *MMat4) Muled(a *MMat4) MMat4 {

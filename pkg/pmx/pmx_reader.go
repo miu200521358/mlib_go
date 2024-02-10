@@ -377,6 +377,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 
 		model.Vertices.Append(v)
 	}
+	model.Vertices.SortIndexes()
 
 	return nil
 }
@@ -410,6 +411,7 @@ func (r *PmxReader) readFaces(model *PmxModel) error {
 
 		model.Faces.Append(f)
 	}
+	model.Faces.SortIndexes()
 
 	return nil
 }
@@ -428,6 +430,7 @@ func (r *PmxReader) readTextures(model *PmxModel) error {
 
 		model.Textures.Append(t)
 	}
+	model.Textures.SortIndexes()
 
 	return nil
 }
@@ -905,6 +908,7 @@ func (r *PmxReader) readDisplaySlots(model *PmxModel) error {
 		}
 		model.DisplaySlots.Append(d)
 	}
+	model.DisplaySlots.SortIndexes()
 
 	return nil
 }

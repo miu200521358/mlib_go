@@ -64,7 +64,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float32(358)
 		if bf.Index != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
+			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
 
 		// 位置
@@ -127,7 +127,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float32(689)
 		if bf.Index != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
+			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
 
 		// 位置
@@ -190,7 +190,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float32(384)
 		if bf.Index != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
+			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
 
 		// 位置
@@ -254,7 +254,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float32(384)
 		if bf.Index != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
+			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
 
 		// 位置
@@ -277,7 +277,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float32(394)
 		if bf.Index != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
+			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
 
 		// 位置
@@ -300,7 +300,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float32(412)
 		if bf.Index != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
+			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
 
 		// 位置
@@ -323,7 +323,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float32(384)
 		if bf.Index != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index)
+			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
 
 		// 位置
