@@ -448,28 +448,24 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 
 	for i, frame := range frames {
 		for j, bone := range model.Bones.GetSortedData() {
-			jm := mmath.NewMMat4()
+			localMatrix := mmath.NewMMat4()
 			for _, k := range bone.ParentBoneIndexes {
 				// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
-				jm.Mul(matrixes[i][k])
+				localMatrix.Mul(matrixes[i][k])
 			}
 			// 最後に対象ボーン自身の行列をかける
-			jm.Mul(matrixes[i][j])
+			localMatrix.Mul(matrixes[i][j])
 			// BOf行列: 自身のボーンのボーンオフセット行列
-			jm.Mul(bone.OffsetMatrix)
+			localMatrix.Mul(bone.OffsetMatrix)
 			// 初期位置行列を掛けてグローバル行列を作成
-			globalMatrix := jm.Muled(bone.Position.ToMat4())
-			p := positions[i][j].Translation()
-			r := rotations[i][j].Quaternion()
-			s := scales[i][j].Scaling()
 			boneTrees.SetItem(bone.Name, frame, NewBoneTree(
 				bone.Name,
 				frame,
-				globalMatrix, // グローバル行列
-				jm,           // ローカル行列はそのまま
-				p,            // 移動
-				r,            // 回転
-				&mmath.MVec3{s.GetX(), s.GetY(), s.GetZ()}, // 拡大率
+				localMatrix.Muled(bone.Position.ToMat4()), // グローバル行列
+				localMatrix,                   // ローカル行列はそのまま
+				positions[i][j].Translation(), // 移動
+				rotations[i][j].Quaternion(),  // 回転
+				scales[i][j].Scaling(),        // 拡大率
 			))
 		}
 	}
