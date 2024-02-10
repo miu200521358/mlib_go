@@ -481,11 +481,14 @@ func (bfs *BoneFrames) getAnimatedBoneNames(
 	if boneNames != nil || len(boneNames) > 0 {
 		targetBoneNames := make([]string, 0)
 		for _, boneName := range boneNames {
+			if !slices.Contains(targetBoneNames, boneName) {
+				targetBoneNames = append(targetBoneNames, boneName)
+			}
 			relativeBoneIndexes := model.Bones.GetItemByName(boneName).RelativeBoneIndexes
 			for _, index := range relativeBoneIndexes {
-				boneName := model.Bones.GetItem(index).Name
-				if !slices.Contains(targetBoneNames, boneName) {
-					targetBoneNames = append(targetBoneNames, boneName)
+				relativeBoneName := model.Bones.GetItem(index).Name
+				if !slices.Contains(targetBoneNames, relativeBoneName) {
+					targetBoneNames = append(targetBoneNames, relativeBoneName)
 				}
 			}
 		}
