@@ -287,6 +287,11 @@ ikLoop:
 				totalActualIkQuat = linkQuat.Muled(correctIkQuat)
 			}
 
+			if linkBone.HasFixedAxis() {
+				// 軸制限回転を求める
+				totalActualIkQuat = totalActualIkQuat.ToFixedAxisRotation(linkBone.NormalizedFixedAxis)
+			}
+
 			// IKの結果を更新
 			quats[0][linkIndex] = totalActualIkQuat
 			rotations[0][linkIndex] = totalActualIkQuat.ToMat4()

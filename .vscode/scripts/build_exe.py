@@ -21,7 +21,6 @@ print(f"app_name: {app_name}")
 print(f"app_version: {app_version}")
 
 # Build command
-# FYNE_THEME=light ライトテーマでビルド
 # -o 出力フォルダ
 # -trimpath ビルドパスを削除
 # -v ビルドログを出力
