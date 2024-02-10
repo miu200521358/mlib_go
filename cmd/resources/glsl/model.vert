@@ -66,66 +66,6 @@ vec4 slerp(vec4 q1, vec4 q2, float t) {
     return q1 * cos(theta) + q3 * sin(theta);
 }
 
-// 行列の逆行列を求める
-mat4 inverseMatrix(mat4 m) {
-    float s0 = m[0][0] * m[1][1] - m[1][0] * m[0][1];
-    float s1 = m[0][0] * m[1][2] - m[1][0] * m[0][2];
-    float s2 = m[0][0] * m[1][3] - m[1][0] * m[0][3];
-    float s3 = m[0][1] * m[1][2] - m[1][1] * m[0][2];
-    float s4 = m[0][1] * m[1][3] - m[1][1] * m[0][3];
-    float s5 = m[0][2] * m[1][3] - m[1][2] * m[0][3];
-
-    float c5 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
-    float c4 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
-    float c3 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
-    float c2 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
-    float c1 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
-    float c0 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
-
-    // Should check for 0 determinant
-    float invdet = 1.0 / (s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0);
-
-    mat4 invM;
-
-    invM[0][0] = (m[1][1] * c5 - m[1][2] * c4 + m[1][3] * c3) * invdet;
-    invM[0][1] = (-m[0][1] * c5 + m[0][2] * c4 - m[0][3] * c3) * invdet;
-    invM[0][2] = (m[3][1] * s5 - m[3][2] * s4 + m[3][3] * s3) * invdet;
-    invM[0][3] = (-m[2][1] * s5 + m[2][2] * s4 - m[2][3] * s3) * invdet;
-
-    invM[1][0] = (-m[1][0] * c5 + m[1][2] * c2 - m[1][3] * c1) * invdet;
-    invM[1][1] = (m[0][0] * c5 - m[0][2] * c2 + m[0][3] * c1) * invdet;
-    invM[1][2] = (-m[3][0] * s5 + m[3][2] * s2 - m[3][3] * s1) * invdet;
-    invM[1][3] = (m[2][0] * s5 - m[2][2] * s2 + m[2][3] * s1) * invdet;
-
-    invM[2][0] = (m[1][0] * c4 - m[1][1] * c2 + m[1][3] * c0) * invdet;
-    invM[2][1] = (-m[0][0] * c4 + m[0][1] * c2 - m[0][3] * c0) * invdet;
-    invM[2][2] = (m[3][0] * s4 - m[3][1] * s2 + m[3][3] * s0) * invdet;
-    invM[2][3] = (-m[2][0] * s4 + m[2][1] * s2 - m[2][3] * s0) * invdet;
-
-    invM[3][0] = (-m[1][0] * c3 + m[1][1] * c1 - m[1][2] * c0) * invdet;
-    invM[3][1] = (m[0][0] * c3 - m[0][1] * c1 + m[0][2] * c0) * invdet;
-    invM[3][2] = (-m[3][0] * s3 + m[3][1] * s1 - m[3][2] * s0) * invdet;
-    invM[3][3] = (m[2][0] * s3 - m[2][1] * s1 + m[2][2] * s0) * invdet;
-
-    return invM;
-}
-
-// クォータニオンvec4の逆回転を求める
-vec4 inverseQuaternion(vec4 q) {
-    return vec4(-q.x, -q.y, -q.z, q.w);
-}
-
-// 行列の転置行列を求める
-mat4 transposeMatrix(mat4 m) {
-    mat4 transposedMatrix;
-    for(int i = 0; i < 4; ++i) {
-        for(int j = 0; j < 4; ++j) {
-            transposedMatrix[i][j] = m[j][i];
-        }
-    }
-    return transposedMatrix;
-}
-
 // mat4からvec4(クォータニオン)への変換
 vec4 mat4ToQuat(mat4 m) {
     float tr = m[0][0] + m[1][1] + m[2][2];
@@ -181,48 +121,20 @@ mat4 getBoneMatrix(int boneIndex) {
     return boneMatrix;
 }
 
-// 移動行列を作成する
-mat4 createTranslationMatrix(vec3 translation) {
-    mat4 translationMatrix = mat4(1.0);
-    translationMatrix[3][0] = translation.x;
-    translationMatrix[3][1] = translation.y;
-    translationMatrix[3][2] = translation.z;
-    return translationMatrix;
-}
-
-// スケール行列を作成する
-mat4 createScaleMatrix(vec3 scale) {
-    mat4 scaleMatrix = mat4(1.0);
-    scaleMatrix[0][0] = scale.x;
-    scaleMatrix[1][1] = scale.y;
-    scaleMatrix[2][2] = scale.z;
-    return scaleMatrix;
-}
-
-// スケールベクトルを計算する
-vec3 calculateScaleVector(mat4 mat) {
-    vec3 scale;
-    scale.x = length(vec3(mat[0][0], mat[0][1], mat[0][2]));
-    scale.y = length(vec3(mat[1][0], mat[1][1], mat[1][2]));
-    scale.z = length(vec3(mat[2][0], mat[2][1], mat[2][2]));
-    return scale;
-}
-
 // SDEF変形中心Cの計算
-vec3 calculateSdefC(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1, vec4 transformedPosition0, vec4 transformedPosition1) {
-
+vec3 calculateSdefC(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1) {
     // ボーンの位置を抽出
-    vec3 c0 = (boneMatrix0 * vec4(sdefC, 1.0)).xyz * boneWeight0;
-    vec3 c1 = (boneMatrix1 * vec4(sdefC, 1.0)).xyz * boneWeight1;
+    vec3 vecC0 = (boneMatrix0 * vec4(sdefC, 1.0)).xyz;
+    vec3 vecC1 = (boneMatrix1 * vec4(sdefC, 1.0)).xyz;
 
     // C点をボーンのウェイトに基づいて補間
-    vec3 interpolatedC = (c0 + c1) / (boneWeight0 + boneWeight1);
+    vec3 interpolatedC = ((vecC0 * boneWeight0) + (vecC1 * boneWeight1));
 
     return interpolatedC;
 }
 
 // C点から見たR0とR1の補間を行い、C点の補正を適用する
-vec3 interpolateCPoint(vec3 interpolatedC, mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1, vec4 transformedPosition0, vec4 transformedPosition1) {
+vec3 interpolateSdefC(vec3 interpolatedC, mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1) {
     vec3 vecR0inB0 = sdefR0 - sdefB0;
     vec3 vecCinB0 = sdefC - sdefB0;
     vec3 vecR1inB1 = sdefR1 - sdefB1;
@@ -252,7 +164,7 @@ vec3 interpolateCPoint(vec3 interpolatedC, mat4 boneMatrix0, mat4 boneMatrix1, f
     vec3 transformedR1 = (boneMatrix1 * vec4(vecR1inC, 0.0)).xyz;
 
     // C点の補正：ウェイトに基づいてR0とR1の変形後の位置の平均を取る
-    vec3 weightedAverage = (transformedR0 * r0Bias + transformedR1 * r1Bias) * 0.5;
+    vec3 weightedAverage = ((transformedR0 * r0Bias) + (transformedR1 * r1Bias)) * 0.5;
 
     // 最終的なC点の位置：補正Cに変形後のウェイト付き平均を加算
     vec3 correctedC = interpolatedC + weightedAverage;
@@ -261,9 +173,7 @@ vec3 interpolateCPoint(vec3 interpolatedC, mat4 boneMatrix0, mat4 boneMatrix1, f
 }
 
 // クォータニオンによるボーンの回転を計算し、頂点Pを変形させる
-vec4 applySdefRotation(vec3 correctedC, mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1) {
-    vec3 vecPinC = position - sdefC;
-
+mat4 calculateSdefMatrix(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1) {
     // ボーンのクォータニオン回転を取得
     vec4 boneQuat0 = mat4ToQuat(boneMatrix0);
     vec4 boneQuat1 = mat4ToQuat(boneMatrix1);
@@ -274,10 +184,7 @@ vec4 applySdefRotation(vec3 correctedC, mat4 boneMatrix0, mat4 boneMatrix1, floa
     // クォータニオンを回転行列に変換
     mat4 rotationMatrix = quatToMat4(slerpedQuat);
 
-    // 回転行列を使用して頂点を変形
-    vec4 rotatedPosition = rotationMatrix * vec4(vecPinC, 1.0) + vec4(correctedC, 0.0);
-
-    return rotatedPosition;
+    return rotationMatrix;
 }
 
 void main() {
@@ -298,19 +205,22 @@ void main() {
         float boneWeight0 = boneWeights[0];
         float boneWeight1 = boneWeights[1];
 
-        vec4 transformedPosition0 = boneMatrix0 * vec4(0.0, 0.0, 0.0, 1.0);
-        vec4 transformedPosition1 = boneMatrix1 * vec4(0.0, 0.0, 0.0, 1.0);
-
-        // 1. 頂点Pに対する変形中心Cを計算
-        vec3 interpolatedC = calculateSdefC(boneMatrix0, boneMatrix1, boneWeight0, boneWeight1, transformedPosition0, transformedPosition1);
+        // 頂点Pに対する変形中心Cを計算
+        vec3 interpolatedC = calculateSdefC(boneMatrix0, boneMatrix1, boneWeight0, boneWeight1);
 
         // 変形中心Cの補正を計算
-        vec3 correctedC = interpolateCPoint(interpolatedC, boneMatrix0, boneMatrix1, boneWeight0, boneWeight1, transformedPosition0, transformedPosition1);
+        vec3 correctedC = interpolateSdefC(interpolatedC, boneMatrix0, boneMatrix1, boneWeight0, boneWeight1);
 
         // ボーンの回転を適用して頂点Pを変形させる
-        vec4 vecPosition = applySdefRotation(correctedC, boneMatrix0, boneMatrix1, boneWeight0, boneWeight1);
+        mat4 rotationMatrix = calculateSdefMatrix(boneMatrix0, boneMatrix1, boneWeight0, boneWeight1);
+
+        // 回転行列を使用して頂点を変形
+        vec4 vecPosition = rotationMatrix * vec4(position - sdefC, 1.0) + vec4(correctedC, 0.0);
 
         gl_Position = modelViewProjectionMatrix * modelViewMatrix * vecPosition;
+
+        // 各頂点で使用される法線変形行列をSDEF変形行列から回転情報のみ抽出して生成する
+        normalTransformMatrix = mat3(rotationMatrix);
     } else {
         for(int i = 0; i < 4; i++) {
             float boneWeight = boneWeights[i];

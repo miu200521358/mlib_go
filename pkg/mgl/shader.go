@@ -10,6 +10,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 const (
@@ -48,7 +49,7 @@ const (
 	INITIAL_CAMERA_POSITION_Z float64 = -40.0
 	INITIAL_LOOK_AT_CENTER_Y  float64 = 11.0
 	LIGHT_AMBIENT             float64 = 154.0 / 255.0
-	FIELD_OF_VIEW_ANGLE       float32 = 40.0
+	FIELD_OF_VIEW_ANGLE       float32 = 50.0
 )
 
 type MShader struct {
