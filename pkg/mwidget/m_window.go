@@ -9,11 +9,7 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-)
 
-const (
-	MAIN_WINDOW_WIDTH  = 512
-	MAIN_WINDOW_HEIGHT = 768
 )
 
 type MWindow struct {
@@ -24,7 +20,7 @@ type MWindow struct {
 	GlWindows []*GlWindow
 }
 
-func NewMWindow(resourceFiles embed.FS, isHorizontal bool) (*MWindow, error) {
+func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int) (*MWindow, error) {
 	appConfig := mutils.LoadAppConfig(resourceFiles)
 
 	var mw *walk.MainWindow
@@ -32,7 +28,7 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool) (*MWindow, error) {
 	if err := (declarative.MainWindow{
 		AssignTo: &mw,
 		Title:    fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion),
-		Size:     declarative.Size{Width: MAIN_WINDOW_WIDTH, Height: MAIN_WINDOW_HEIGHT},
+		Size:     declarative.Size{Width: width, Height: height},
 		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear},
 	}).Create(); err != nil {
 		return nil, err

@@ -246,9 +246,9 @@ func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 			walk.MsgBox(nil, "履歴ダイアログ生成エラー", err.Error(), walk.MsgBoxIconError)
 			return
 		}
-		dlg.SetTitle(picker.title + "ファイルの履歴")
+		dlg.SetTitle(picker.title + "の履歴")
 		dlg.SetLayout(walk.NewVBoxLayout())
-		dlg.SetSize(walk.Size{Width: 500, Height: 400})
+		dlg.SetSize(walk.Size{Width: 800, Height: 400})
 
 		// 履歴リストを表示
 		historyListBox, err := walk.NewListBox(dlg)
@@ -272,8 +272,9 @@ func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 		}
 
 		historyListBox.SetModel(choices)
-		historyListBox.SetMinMaxSize(walk.Size{Width: 500, Height: 400}, walk.Size{Width: 500, Height: 400})
-		historyListBox.SetCurrentIndex(0)
+		historyListBox.SetMinMaxSize(walk.Size{Width: 800, Height: 400}, walk.Size{Width: 800, Height: 400})
+		// 先頭を表示する（選択はできない）
+		historyListBox.SetCurrentIndex(-1)
 
 		// ダブルクリック時の動作を定義
 		historyListBox.ItemActivated().Attach(func() {

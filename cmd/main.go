@@ -39,7 +39,7 @@ func main() {
 	// }
 	// defer pprof.StopCPUProfile()
 
-	mWindow, err := mwidget.NewMWindow(resourceFiles, true)
+	mWindow, err := mwidget.NewMWindow(resourceFiles, true, 512, 768)
 	if err != nil {
 		walk.MsgBox(nil, "メインウィンドウ生成エラー", err.Error(), walk.MsgBoxIconError)
 	}
