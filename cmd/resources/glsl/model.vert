@@ -160,8 +160,8 @@ vec3 interpolateSdefC(vec3 interpolatedC, mat4 boneMatrix0, mat4 boneMatrix1, fl
     float r0Bias = 1.0 - r1Bias;
 
     // C点に基づいて変形されたR0とR1を計算
-    vec3 transformedR0 = (boneMatrix0 * vec4(vecR0inC, 0.0)).xyz;
-    vec3 transformedR1 = (boneMatrix1 * vec4(vecR1inC, 0.0)).xyz;
+    vec3 transformedR0 = (boneMatrix0 * vec4(vecR0inC, 1.0)).xyz;
+    vec3 transformedR1 = (boneMatrix1 * vec4(vecR1inC, 1.0)).xyz;
 
     // C点の補正：ウェイトに基づいてR0とR1の変形後の位置の平均を取る
     vec3 weightedAverage = ((transformedR0 * r0Bias) + (transformedR1 * r1Bias)) * 0.5;
