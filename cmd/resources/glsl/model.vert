@@ -128,7 +128,7 @@ vec3 calculateSdefC(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float
     vec3 vecC1 = (boneMatrix1 * vec4(sdefC, 1.0)).xyz;
 
     // C点をボーンのウェイトに基づいて補間
-    vec3 interpolatedC = ((vecC0 * boneWeight0) + (vecC1 * boneWeight1));
+    vec3 interpolatedC = (vecC0 * boneWeight0) + (vecC1 * boneWeight1);
 
     return interpolatedC;
 }
