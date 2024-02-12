@@ -4,7 +4,6 @@ import (
 	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 // DeformType ウェイト変形方式
@@ -181,6 +180,11 @@ func (b *Bdef1) GetType() DeformType {
 	return BDEF1
 }
 
+// NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
+func (d *Bdef1) NormalizedDeform() [8]float32 {
+	return [8]float32{float32(d.Indexes[0]), 0, 0, 0, 1.0, 0, 0, 0}
+}
+
 // Bdef2 represents the BDEF2 deformation.
 type Bdef2 struct {
 	Deform
@@ -202,6 +206,13 @@ func (b *Bdef2) GetType() DeformType {
 	return BDEF2
 }
 
+// NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
+func (d *Bdef2) NormalizedDeform() [8]float32 {
+	return [8]float32{
+		float32(d.Indexes[0]), float32(d.Indexes[1]), 0, 0,
+		float32(d.Weights[0]), float32(1 - d.Weights[0]), 0, 0}
+}
+
 // Bdef4 represents the BDEF4 deformation.
 type Bdef4 struct {
 	Deform
@@ -221,6 +232,13 @@ func NewBdef4(index0, index1, index2, index3 int, weight0, weight1, weight2, wei
 // GetType returns the deformation type.
 func (b *Bdef4) GetType() DeformType {
 	return BDEF4
+}
+
+// NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
+func (d *Bdef4) NormalizedDeform() [8]float32 {
+	return [8]float32{
+		float32(d.Indexes[0]), float32(d.Indexes[1]), float32(d.Indexes[2]), float32(d.Indexes[3]),
+		float32(d.Weights[0]), float32(d.Weights[1]), float32(d.Weights[2]), float32(d.Weights[3])}
 }
 
 // Sdef represents the SDEF deformation.
@@ -253,4 +271,11 @@ func (s *Sdef) GetType() DeformType {
 // SDEF用パラメーターを返す
 func (s *Sdef) GetSdefParams() ([3]float32, [3]float32, [3]float32) {
 	return s.SdefC.GL(), s.SdefR0.GL(), s.SdefR1.GL()
+}
+
+// NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
+func (d *Sdef) NormalizedDeform() [8]float32 {
+	return [8]float32{
+		float32(d.Indexes[0]), float32(d.Indexes[1]), 0, 0,
+		float32(d.Weights[0]), float32(1 - d.Weights[0]), 0, 0}
 }

@@ -121,55 +121,47 @@ mat4 getBoneMatrix(int boneIndex) {
     return boneMatrix;
 }
 
-// SDEF変形中心Cの計算
-vec3 calculateSdefC(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1) {
-    // ボーンの位置を抽出
-    vec3 vecC0 = (boneMatrix0 * vec4(sdefC, 1.0)).xyz;
-    vec3 vecC1 = (boneMatrix1 * vec4(sdefC, 1.0)).xyz;
+mat4 inverseMatrix(mat4 m) {
+    float s0 = m[0][0] * m[1][1] - m[1][0] * m[0][1];
+    float s1 = m[0][0] * m[1][2] - m[1][0] * m[0][2];
+    float s2 = m[0][0] * m[1][3] - m[1][0] * m[0][3];
+    float s3 = m[0][1] * m[1][2] - m[1][1] * m[0][2];
+    float s4 = m[0][1] * m[1][3] - m[1][1] * m[0][3];
+    float s5 = m[0][2] * m[1][3] - m[1][2] * m[0][3];
 
-    // C点をボーンのウェイトに基づいて補間
-    vec3 interpolatedC = (vecC0 * boneWeight0) + (vecC1 * boneWeight1);
+    float c5 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
+    float c4 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
+    float c3 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
+    float c2 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
+    float c1 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
+    float c0 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
 
-    return interpolatedC;
-}
+    // Should check for 0 determinant
+    float invdet = 1.0 / (s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0);
 
-// C点から見たR0とR1の補間を行い、C点の補正を適用する
-vec3 interpolateSdefC(vec3 interpolatedC, mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1) {
-    vec3 vecR0inB0 = sdefR0 - sdefB0;
-    vec3 vecCinB0 = sdefC - sdefB0;
-    vec3 vecR1inB1 = sdefR1 - sdefB1;
-    vec3 vecCinB1 = sdefC - sdefB1;
-    vec3 vecR0inC = sdefR0 - sdefC;
-    vec3 vecR1inC = sdefR1 - sdefC;
+    mat4 invM;
 
-    // R0/R1影響係数算出
-    float len0 = length(vecR0inB0 - vecCinB0);
-    float len1 = length(vecR1inB1 - vecCinB1);
+    invM[0][0] = (m[1][1] * c5 - m[1][2] * c4 + m[1][3] * c3) * invdet;
+    invM[0][1] = (-m[0][1] * c5 + m[0][2] * c4 - m[0][3] * c3) * invdet;
+    invM[0][2] = (m[3][1] * s5 - m[3][2] * s4 + m[3][3] * s3) * invdet;
+    invM[0][3] = (-m[2][1] * s5 + m[2][2] * s4 - m[2][3] * s3) * invdet;
 
-    float r1Bias = 0.0;
-    if(len0 > 0.0 && len1 == 0.0) {
-        r1Bias = 1.0;
-    } else if(len0 == 0.0 && len1 > 0.0) {
-        r1Bias = 0.0;
-    } else if(len0 + len1 != 0.0) {
-        float bias = len0 / (len0 + len1);
-        if(!isinf(bias) && !isnan(bias)) {
-            r1Bias = clamp(bias, 0.0, 1.0);
-        }
-    }
-    float r0Bias = 1.0 - r1Bias;
+    invM[1][0] = (-m[1][0] * c5 + m[1][2] * c2 - m[1][3] * c1) * invdet;
+    invM[1][1] = (m[0][0] * c5 - m[0][2] * c2 + m[0][3] * c1) * invdet;
+    invM[1][2] = (-m[3][0] * s5 + m[3][2] * s2 - m[3][3] * s1) * invdet;
+    invM[1][3] = (m[2][0] * s5 - m[2][2] * s2 + m[2][3] * s1) * invdet;
 
-    // C点に基づいて変形されたR0とR1を計算
-    vec3 transformedR0 = (boneMatrix0 * vec4(vecR0inC, 1.0)).xyz;
-    vec3 transformedR1 = (boneMatrix1 * vec4(vecR1inC, 1.0)).xyz;
+    invM[2][0] = (m[1][0] * c4 - m[1][1] * c2 + m[1][3] * c0) * invdet;
+    invM[2][1] = (-m[0][0] * c4 + m[0][1] * c2 - m[0][3] * c0) * invdet;
+    invM[2][2] = (m[3][0] * s4 - m[3][1] * s2 + m[3][3] * s0) * invdet;
+    invM[2][3] = (-m[2][0] * s4 + m[2][1] * s2 - m[2][3] * s0) * invdet;
 
-    // C点の補正：ウェイトに基づいてR0とR1の変形後の位置の平均を取る
-    vec3 weightedAverage = ((transformedR0 * r0Bias) + (transformedR1 * r1Bias)) * 0.5;
+    invM[3][0] = (-m[1][0] * c3 + m[1][1] * c1 - m[1][2] * c0) * invdet;
+    invM[3][1] = (m[0][0] * c3 - m[0][1] * c1 + m[0][2] * c0) * invdet;
+    invM[3][2] = (-m[3][0] * s3 + m[3][1] * s1 - m[3][2] * s0) * invdet;
+    invM[3][3] = (m[2][0] * s3 - m[2][1] * s1 + m[2][2] * s0) * invdet;
 
-    // 最終的なC点の位置：補正Cに変形後のウェイト付き平均を加算
-    vec3 correctedC = interpolatedC + weightedAverage;
-
-    return correctedC;
+    return invM;
 }
 
 // クォータニオンによるボーンの回転を計算し、頂点Pを変形させる
@@ -205,19 +197,52 @@ void main() {
         float boneWeight0 = boneWeights[0];
         float boneWeight1 = boneWeights[1];
 
-        // 頂点Pに対する変形中心Cを計算
-        vec3 interpolatedC = calculateSdefC(boneMatrix0, boneMatrix1, boneWeight0, boneWeight1);
+        // ボーンの位置を抽出
+        vec4 transformedC0 = boneMatrix0 * vec4(sdefC, 1.0);
+        vec4 transformedC1 = boneMatrix1 * vec4(sdefC, 1.0);
 
-        // 変形中心Cの補正を計算
-        vec3 correctedC = interpolateSdefC(interpolatedC, boneMatrix0, boneMatrix1, boneWeight0, boneWeight1);
+        // C点をBDEF2で求める
+        vec4 bdefC = (transformedC0 * boneWeight0) + (transformedC1 * boneWeight1);
+
+        // R0/R1影響係数算出
+        float len0 = length(sdefR0 - sdefC);
+        float len1 = length(sdefR1 - sdefC);
+
+        float r1Bias = 0.0;
+        if(len0 > 0.0 && len1 == 0.0) {
+            r1Bias = 1.0;
+        } else if(len0 == 0.0 && len1 > 0.0) {
+            r1Bias = 0.0;
+        } else if(len0 + len1 != 0.0) {
+            float bias = len0 / (len0 + len1);
+            if(!isinf(bias) && !isnan(bias)) {
+                r1Bias = clamp(bias, 0.0, 1.0);
+            }
+        }
+        float r0Bias = 1.0 - r1Bias;
+
+        // C点に基づいて変形されたR0とR1を計算
+        vec4 transformedR0 = boneMatrix0 * vec4(sdefR0, 1.0);
+        vec4 transformedR1 = boneMatrix1 * vec4(sdefR1, 1.0);
+
+        // C点の補正：影響係数に基づいてR0とR1の変形後の位置の平均を取る
+        vec4 biasMeanR = ((transformedR0 - transformedC0) * r0Bias) + ((transformedR1 - transformedC1) * r1Bias);
+
+        // 最終的なC点の位置：補正Cに変形後のウェイト付き平均を加算
+        vec4 correctedC = bdefC + biasMeanR * 0.5;
 
         // ボーンの回転を適用して頂点Pを変形させる
         mat4 rotationMatrix = calculateSdefMatrix(boneMatrix0, boneMatrix1, boneWeight0, boneWeight1);
 
         // 回転行列を使用して頂点を変形
-        vec4 vecPosition = rotationMatrix * vec4(position - sdefC, 1.0) + vec4(correctedC, 0.0);
+        vec4 rotatedPosition = rotationMatrix * vec4(position, 1.0);
+        vec4 rotatedC = rotationMatrix * vec4(sdefC, 1.0);
 
-        gl_Position = modelViewProjectionMatrix * modelViewMatrix * vecPosition;
+        vec4 vecPosition = rotatedPosition - rotatedC + correctedC;
+
+        gl_Position = modelViewProjectionMatrix * modelViewMatrix * vec4(vecPosition.xyz, 1.0);
+        // gl_Position = modelViewProjectionMatrix * modelViewMatrix * vec4((correctedC + vec4(position.x, 0, position.z, 0)).xyz, 1.0);
+        // gl_Position = modelViewProjectionMatrix * modelViewMatrix * vec4(rotatedPosition.xyz, 1.0);
 
         // 各頂点で使用される法線変形行列をSDEF変形行列から回転情報のみ抽出して生成する
         normalTransformMatrix = mat3(rotationMatrix);

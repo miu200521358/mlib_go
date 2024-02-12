@@ -62,7 +62,7 @@ func (bfs *BoneFrames) Animate(
 
 	// ボーン変形行列操作
 	positions, rotations, scales, _ :=
-		bfs.getBoneMatrixes(frames, model, targetBoneNames, isCalcIk, isOutLog, description)
+		bfs.getBoneMatrixes(frames, model, targetBoneNames, isOutLog, description)
 
 	// ボーン行列計算
 	return bfs.calcBoneMatrixes(
@@ -135,7 +135,7 @@ func (bfs *BoneFrames) calcIk(
 	effectorTargetBoneNames := bfs.getAnimatedBoneNames(model, []string{effectorBone.Name})
 	// エフェクタボーンの関連ボーンの初期値を取得
 	positions, rotations, scales, quats :=
-		bfs.getBoneMatrixes([]float32{frame}, model, effectorTargetBoneNames, true, false, "")
+		bfs.getBoneMatrixes([]float32{frame}, model, effectorTargetBoneNames, false, "")
 
 		// IK計算
 ikLoop:
@@ -529,7 +529,6 @@ func (bfs *BoneFrames) getBoneMatrixes(
 	frames []float32,
 	model *pmx.PmxModel,
 	targetBoneNames []string,
-	isCalcIk bool,
 	isOutLog bool,
 	description string,
 ) ([][]*mmath.MMat4, [][]*mmath.MMat4, [][]*mmath.MMat4, [][]*mmath.MQuaternion) {
@@ -576,7 +575,7 @@ func (bfs *BoneFrames) getBoneMatrixes(
 						bone := model.Bones.GetItemByName(targetBoneNames[k])
 						// ボーンが対象の場合、そのボーンの移動位置、回転角度、拡大率を取得
 						positions[i][k] = bfs.getPosition(frame, bone.Name, model)
-						rotWithEffect, rotFk := bfs.getRotation(frame, bone.Name, model, isCalcIk)
+						rotWithEffect, rotFk := bfs.getRotation(frame, bone.Name, model)
 						rotations[i][k] = rotWithEffect.ToMat4()
 						quats[i][k] = rotFk
 						scales[i][k] = bfs.getScale(frame, bone.Name, model)
@@ -641,14 +640,13 @@ func (bfs *BoneFrames) getRotation(
 	frame float32,
 	boneName string,
 	model *pmx.PmxModel,
-	isCalcIk bool,
 ) (*mmath.MQuaternion, *mmath.MQuaternion) {
 	bone := model.Bones.GetItemByName(boneName)
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
 	bf := bfs.Data[boneName].GetItem(frame)
 	rot := bf.Rotation.GetQuaternion().Copy()
-	if isCalcIk && bf.IkRotation != nil && !bf.IkRotation.GetRadians().IsZero() {
+	if bf.IkRotation != nil && !bf.IkRotation.GetRadians().IsZero() {
 		// IK用回転を持っている場合、置き換え
 		rot = bf.IkRotation.GetQuaternion().Copy()
 	} else {
@@ -660,7 +658,7 @@ func (bfs *BoneFrames) getRotation(
 	var rotWithEffect *mmath.MQuaternion
 	if bone.IsEffectorRotation() {
 		// 外部親変形ありの場合、外部親変形行列を掛ける
-		effectQ := rot.Muled(bfs.getRotationWithEffect(frame, bone.Index, model, isCalcIk, 0))
+		effectQ := rot.Muled(bfs.getRotationWithEffect(frame, bone.Index, model, 0))
 		rotWithEffect = effectQ
 	} else {
 		rotWithEffect = rot
@@ -679,7 +677,6 @@ func (bfs *BoneFrames) getRotationWithEffect(
 	frame float32,
 	boneIndex int,
 	model *pmx.PmxModel,
-	isCalcIk bool,
 	loop int,
 ) *mmath.MQuaternion {
 	bone := model.Bones.GetItem(boneIndex)
@@ -697,7 +694,7 @@ func (bfs *BoneFrames) getRotationWithEffect(
 
 	// 付与親が存在する場合、付与親の回転角度を掛ける
 	effectBone := model.Bones.GetItem(bone.EffectIndex)
-	rotWithEffect, _ := bfs.getRotation(frame, effectBone.Name, model, isCalcIk)
+	rotWithEffect, _ := bfs.getRotation(frame, effectBone.Name, model)
 
 	if bone.EffectFactor >= 0 {
 		// 正の付与親
