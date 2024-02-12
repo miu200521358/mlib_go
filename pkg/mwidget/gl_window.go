@@ -454,7 +454,7 @@ func (w *GlWindow) Size() walk.Size {
 
 func (w *GlWindow) Run() {
 	frame := float32(0)
-	// previousTime := glfw.GetTime()
+	previousTime := glfw.GetTime()
 
 	for !w.closed && !w.ShouldClose() {
 		// 深度バッファのクリア
@@ -485,15 +485,15 @@ func (w *GlWindow) Run() {
 			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 		}
 
-		// // Update
-		// time := glfw.GetTime()
-		// elapsed := time - previousTime
-		// previousTime = time
-		// frame += float32(elapsed)
+		// Update
+		time := glfw.GetTime()
+		elapsed := time - previousTime
+		previousTime = time
+		frame += float32(elapsed)
 
 		// 30fps
-		w.Draw(frame)
-		frame += float32(1.0 / 30.0)
+		w.Draw(frame * 30.0)
+		// frame += float32(1.0)
 
 		// Maintenance
 		w.SwapBuffers()
