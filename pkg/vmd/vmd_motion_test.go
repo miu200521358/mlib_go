@@ -1955,3 +1955,581 @@ func TestVmdMotion_AnimateBoneArmIk(t *testing.T) {
 		}
 	}
 }
+
+func TestVmdMotion_AnimateBoneLegIk2(t *testing.T) {
+	vr := &VmdMotionReader{}
+	motionData, err := vr.ReadByFilepath("C:/MMD/mmd_base/tests/resources/唱(ダンスのみ)_0274F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*VmdMotion)
+
+	pr := &pmx.PmxReader{}
+	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4_準標準.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+	model.SetUp()
+
+	matrixes := motion.AnimateBone([]float32{0}, model, nil, true, false, "")
+
+	{
+
+		fno := float32(0)
+		{
+			expectedPosition := &mmath.MVec3{0.04952335, 9.0, 1.72378033}
+			if !matrixes.GetItem(pmx.CENTER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.CENTER.String(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.04952335, 7.97980869, 1.72378033}
+			if !matrixes.GetItem(pmx.GROOVE.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.GROOVE.String(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.04952335, 11.02838314, 2.29172656}
+			if !matrixes.GetItem("腰", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("腰", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.04952335, 11.9671191, 1.06765032}
+			if !matrixes.GetItem("下半身", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("下半身", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.24102019, 9.79926074, 1.08498769}
+			if !matrixes.GetItem("下半身先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("下半身先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.90331914, 10.27362702, 1.009499759}
+			if !matrixes.GetItem("腰キャンセル左", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("腰キャンセル左", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.90331914, 10.27362702, 1.00949975}
+			if !matrixes.GetItem("左足", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左足", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.08276818, 5.59348757, -1.24981795}
+			if !matrixes.GetItem("左ひざ", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左ひざ", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{5.63290634e-01, -2.12439821e-04, -3.87768478e-01}
+			if !matrixes.GetItem("左つま先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左つま先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.90331914, 10.27362702, 1.00949975}
+			if !matrixes.GetItem("左足D", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左足D", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.23453057, 5.6736954, -0.76228439}
+			if !matrixes.GetItem("左ひざ2", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左ひざ2", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.12060311, 4.95396153, -1.23761938}
+			if !matrixes.GetItem("左ひざ2先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左ひざ2先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.90331914, 10.27362702, 1.00949975}
+			if !matrixes.GetItem("左足y+", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左足y+", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.74736036, 9.38409308, 0.58008117}
+			if !matrixes.GetItem("左足yTgt", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左足yTgt", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.74736036, 9.38409308, 0.58008117}
+			if !matrixes.GetItem("左足yIK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左足yIK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.03018836, 10.40081089, 1.26859617}
+			if !matrixes.GetItem("左尻", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左尻", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.08276818, 5.59348757, -1.24981795}
+			if !matrixes.GetItem("左ひざD", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左ひざD", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.08276818, 5.59348757, -1.24981795}
+			if !matrixes.GetItem("左ひざsub", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左ひざsub", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.09359026, 5.54494997, -1.80895985}
+			if !matrixes.GetItem("左ひざsub先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左ひざsub先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{1.23779916, 1.28891465, 1.65257835}
+			if !matrixes.GetItem("左ひざD2", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左ひざD2", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.1106881, 4.98643066, -1.26321915}
+			if !matrixes.GetItem("左ひざD2先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左ひざD2先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.12060311, 4.95396153, -1.23761938}
+			if !matrixes.GetItem("左ひざD2IK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左ひざD2IK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.88590917, 0.38407067, 0.56801614}
+			if !matrixes.GetItem("左足ゆび", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左足ゆび", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{5.63290634e-01, -2.12439821e-04, -3.87768478e-01}
+			if !matrixes.GetItem("左つま先D", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左つま先D", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.90331914, 10.27362702, 1.00949975}
+			if !matrixes.GetItem("左足s", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左足s", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.08276818, 5.59348757, -1.24981795}
+			if !matrixes.GetItem("左ひざs", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左ひざs", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{1.23779916, 1.28891465, 1.65257835}
+			if !matrixes.GetItem("左足首D", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左足首D", fno).Position)
+			}
+		}
+	}
+}
+
+func TestVmdMotion_AnimateBoneArmIk2(t *testing.T) {
+	vr := &VmdMotionReader{}
+	motionData, err := vr.ReadByFilepath("C:/MMD/mmd_base/tests/resources/唱(ダンスのみ)_0274F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*VmdMotion)
+
+	pr := &pmx.PmxReader{}
+	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4_準標準.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+	model.SetUp()
+
+	matrixes := motion.AnimateBone([]float32{0}, model, nil, true, false, "")
+
+	{
+
+		fno := float32(0)
+		{
+			expectedPosition := &mmath.MVec3{0.04952335, 9.0, 1.72378033}
+			if !matrixes.GetItem(pmx.CENTER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.CENTER.String(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.04952335, 7.97980869, 1.72378033}
+			if !matrixes.GetItem(pmx.GROOVE.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.GROOVE.String(), fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.04952335, 11.02838314, 2.29172656}
+			if !matrixes.GetItem("腰", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("腰", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.04952335, 11.9671191, 1.06765032}
+			if !matrixes.GetItem("上半身", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("上半身", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.26284261, 13.14576297, 0.84720008}
+			if !matrixes.GetItem("上半身2", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("上半身2", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{0.33636433, 15.27729547, 0.77435588}
+			if !matrixes.GetItem("右肩", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右肩", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.63104276, 15.44542768, 0.8507726}
+			if !matrixes.GetItem("右肩C", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右肩C", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.63104276, 15.44542768, 0.8507726}
+			if !matrixes.GetItem("右腕", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.90326269, 14.53727204, 0.7925801}
+			if !matrixes.GetItem("右腕捩", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕捩", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.50502977, 12.52976106, 0.66393998}
+			if !matrixes.GetItem("右ひじ", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右ひじ", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.46843236, 12.88476121, 0.12831076}
+			if !matrixes.GetItem("右手捩", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.36287259, 13.90869981, -1.41662258}
+			if !matrixes.GetItem("右手首", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手首", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.81521586, 14.00661535, -1.55616424}
+			if !matrixes.GetItem("右手先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.63104276, 15.44542768, 0.8507726}
+			if !matrixes.GetItem("右腕YZ", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕YZ", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.72589296, 15.12898892, 0.83049645}
+			if !matrixes.GetItem("右腕YZ先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕YZ先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.72589374, 15.12898632, 0.83049628}
+			if !matrixes.GetItem("右腕YZIK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕YZIK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.63104276, 15.44542768, 0.8507726}
+			if !matrixes.GetItem("右腕X", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕X", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.13337279, 15.59959111, 0.79468785}
+			if !matrixes.GetItem("右腕X先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕X先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.1253241, 15.60029489, 0.7461294}
+			if !matrixes.GetItem("右腕XIK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕XIK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.90325538, 14.53727326, 0.79258165}
+			if !matrixes.GetItem("右腕捩YZ", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕捩YZ", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.01247534, 14.17289417, 0.76923367}
+			if !matrixes.GetItem("右腕捩YZTgt", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕捩YZTgt", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.01248754, 14.17289597, 0.76923112}
+			if !matrixes.GetItem("右腕捩YZIK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕捩YZIK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.90325538, 14.53727326, 0.79258165}
+			if !matrixes.GetItem("右腕捩X", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕捩X", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.40656426, 14.68386802, 0.85919594}
+			if !matrixes.GetItem("右腕捩XTgt", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕捩XTgt", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.40657579, 14.68387899, 0.8591982}
+			if !matrixes.GetItem("右腕捩XIK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕捩XIK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.50499623, 12.52974836, 0.66394738}
+			if !matrixes.GetItem("右ひじYZ", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右ひじYZ", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.48334366, 12.74011791, 0.34655051}
+			if !matrixes.GetItem("右ひじYZ先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右ひじYZ先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.48334297, 12.74012453, 0.34654052}
+			if !matrixes.GetItem("右ひじYZIK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右ひじYZIK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.50499623, 12.52974836, 0.66394738}
+			if !matrixes.GetItem("右ひじX", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右ひじX", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-2.01179616, 12.66809052, 0.72106658}
+			if !matrixes.GetItem("右ひじX先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右ひじX先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-2.00760407, 12.67958516, 0.7289003}
+			if !matrixes.GetItem("右ひじXIK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右ひじXIK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.50499623, 12.52974836, 0.66394738}
+			if !matrixes.GetItem("右ひじY", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右ひじY", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.61429839, 12.16509505, 0.6405818}
+			if !matrixes.GetItem("右ひじY先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右ひじY先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.48334297, 12.74012453, 0.34654052}
+			if !matrixes.GetItem("右ひじYIK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右ひじYIK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.46845628, 12.88475892, 0.12832214}
+			if !matrixes.GetItem("右手捩YZ", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩YZ", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.41168478, 13.4363328, -0.7038697}
+			if !matrixes.GetItem("右手捩YZTgt", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩YZTgt", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.41156715, 13.43632015, -0.70389025}
+			if !matrixes.GetItem("右手捩YZIK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩YZIK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.46845628, 12.88475892, 0.12832214}
+			if !matrixes.GetItem("右手捩X", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩X", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.5965686, 12.06213832, -0.42564769}
+			if !matrixes.GetItem("右手捩XTgt", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩XTgt", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.5965684, 12.06214091, -0.42565404}
+			if !matrixes.GetItem("右手捩XIK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩XIK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.7198605, 13.98597326, -1.5267472}
+			if !matrixes.GetItem("右手YZ先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手YZ先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.71969424, 13.98593727, -1.52669587}
+			if !matrixes.GetItem("右手YZIK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手YZIK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.36306295, 13.90872698, -1.41659848}
+			if !matrixes.GetItem("右手X", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手X", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.54727182, 13.56147176, -1.06342964}
+			if !matrixes.GetItem("右手X先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手X先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.54700171, 13.5614545, -1.0633896}
+			if !matrixes.GetItem("右手XIK", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手XIK", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.90581859, 14.5370842, 0.80752276}
+			if !matrixes.GetItem("右腕捩1", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕捩1", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.99954005, 14.2243783, 0.78748743}
+			if !matrixes.GetItem("右腕捩2", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕捩2", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.10880907, 13.85976329, 0.76412793}
+			if !matrixes.GetItem("右腕捩3", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕捩3", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.21298069, 13.51216081, 0.74185819}
+			if !matrixes.GetItem("右腕捩4", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右腕捩4", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.5074743, 12.52953348, 0.67889319}
+			if !matrixes.GetItem("右ひじsub", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右ひじsub", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.48606988, 12.49512375, 1.1040098}
+			if !matrixes.GetItem("右ひじsub先", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右ひじsub先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.47286246, 12.87280799, 0.12010051}
+			if !matrixes.GetItem("右手捩1", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩1", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.45874646, 13.00975416, -0.08652926}
+			if !matrixes.GetItem("右手捩2", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩2", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.44072981, 13.18461598, -0.35036358}
+			if !matrixes.GetItem("右手捩3", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩3", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.42368773, 13.34980879, -0.59962077}
+			if !matrixes.GetItem("右手捩4", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩4", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.40457204, 13.511055, -0.84384039}
+			if !matrixes.GetItem("右手捩5", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩5", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.39275926, 13.62582429, -1.01699954}
+			if !matrixes.GetItem("右手捩6", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手捩6", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.36500465, 13.89623575, -1.42501008}
+			if !matrixes.GetItem("右手首R", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手首R", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.36500465, 13.89623575, -1.42501008}
+			if !matrixes.GetItem("右手首1", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手首1", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.47243053, 13.91720695, -1.52989243}
+			if !matrixes.GetItem("右手首2", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右手首2", fno).Position)
+			}
+		}
+	}
+}

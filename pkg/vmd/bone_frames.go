@@ -7,7 +7,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 type BoneFrames struct {
@@ -86,30 +85,22 @@ func (bfs *BoneFrames) prepareIkSolvers(
 	isOutLog bool,
 	description string,
 ) {
-	// IKリンクに設定されているボーンが対象になっている場合、該当のIKボーンINDEXをリストに追加する
-	ikBoneIndexes := make([]int, 0)
-	for _, boneName := range targetBoneNames {
-		bone := model.Bones.GetItemByName(boneName)
-		for _, linkBoneIndex := range bone.IkLinkBoneIndexes {
-			if !slices.Contains(ikBoneIndexes, linkBoneIndex) {
-				ikBoneIndexes = append(ikBoneIndexes, linkBoneIndex)
-			}
-		}
-	}
-
 	for _, frame := range frames {
-		for _, ikBoneIndex := range ikBoneIndexes {
+		for _, boneName := range targetBoneNames {
 			// 各フレームでIK計算
-			quats, effectorTargetBoneNames := bfs.calcIk(frame, ikBoneIndex, model, isOutLog, description)
+			bone := model.Bones.GetItemByName(boneName)
+			if bone.IsIK() {
+				quats, effectorTargetBoneNames := bfs.calcIk(frame, bone.Index, model, isOutLog, description)
 
-			for _, ikLink := range model.Bones.GetItem(ikBoneIndex).Ik.Links {
-				// IKリンクボーンの回転量を更新
-				linkBf := bfs.GetItem(model.Bones.GetItem(ikLink.BoneIndex).Name).GetItem(frame)
-				linkIndex := slices.Index(effectorTargetBoneNames, model.Bones.GetItem(ikLink.BoneIndex).Name)
-				linkBf.IkRotation.SetQuaternion(quats[linkIndex])
+				for _, ikLink := range bone.Ik.Links {
+					// IKリンクボーンの回転量を更新
+					linkBf := bfs.GetItem(model.Bones.GetItem(ikLink.BoneIndex).Name).GetItem(frame)
+					linkIndex := slices.Index(effectorTargetBoneNames, model.Bones.GetItem(ikLink.BoneIndex).Name)
+					linkBf.IkRotation.SetQuaternion(quats[linkIndex])
 
-				// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
-				bfs.GetItem(model.Bones.GetItem(ikLink.BoneIndex).Name).Append(linkBf)
+					// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
+					bfs.GetItem(model.Bones.GetItem(ikLink.BoneIndex).Name).Append(linkBf)
+				}
 			}
 		}
 	}
@@ -199,7 +190,7 @@ ikLoop:
 			// 回転角(ラジアン)
 			angle := math.Acos(mmath.ClampFloat(
 				normalizedIkLocalPosition.Dot(normalizedEffectorLocalPosition)/
-					(normalizedIkLocalPosition.Length()*normalizedEffectorLocalPosition.Length()), 0, 1))
+					(normalizedIkLocalPosition.Length()*normalizedEffectorLocalPosition.Length()), -1, 1))
 
 			// リンクボーンの角度を取得
 			linkQuat := quats[0][linkIndex]
@@ -520,7 +511,16 @@ func (bfs *BoneFrames) getAnimatedBoneNames(
 		return resultBoneNames
 	}
 
-	return model.Bones.GetNames()
+	// 全ボーンが対象の場合、全部をソートする
+	targetBoneNames := make([]string, 0, len(model.Bones.Data))
+
+	// 変形階層・ボーンINDEXでソート
+	for _, boneIndex := range model.Bones.GetLayerIndexes() {
+		bone := model.Bones.GetItem(boneIndex)
+		targetBoneNames = append(targetBoneNames, bone.Name)
+	}
+
+	return targetBoneNames
 }
 
 // ボーン変形行列を求める

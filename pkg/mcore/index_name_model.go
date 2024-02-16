@@ -74,7 +74,10 @@ func (c *IndexNameModelCorrection[T]) Append(value T) {
 		value.SetIndex(len(c.Data))
 	}
 	c.Data[value.GetIndex()] = value
-	c.NameIndexes[value.GetName()] = value.GetIndex()
+	if _, ok := c.NameIndexes[value.GetName()]; !ok {
+		// 名前は先勝ち
+		c.NameIndexes[value.GetName()] = value.GetIndex()
+	}
 }
 
 func (c *IndexNameModelCorrection[T]) GetIndexes() []int {
