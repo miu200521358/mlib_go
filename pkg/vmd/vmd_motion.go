@@ -76,5 +76,12 @@ func (m *VmdMotion) AnimateBone(
 	description string,
 ) BoneTrees {
 	// ボーン変形行列操作
+	// IKリンクボーンの回転量を初期化
+	for _, bnfs := range m.BoneFrames.Data {
+		for _, bf := range bnfs.Data {
+			bf.IkRotation = nil
+		}
+	}
+
 	return m.BoneFrames.Animate(frames, model, boneNames, isCalcIk, isOutLog, description)
 }

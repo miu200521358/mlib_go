@@ -53,22 +53,23 @@ func (bfs *BoneFrames) Animate(
 	description string,
 ) BoneTrees {
 	// 処理対象ボーン一覧取得
-	targetBoneNames := bfs.getAnimatedBoneNames(model, boneNames)
+	targetBoneNames, targetBoneIndexes := bfs.getAnimatedBoneNames(model, boneNames)
 
 	// IK事前計算
 	if isCalcIk {
-		bfs.prepareIkSolvers(frames, model, targetBoneNames, isOutLog, description)
+		bfs.prepareIkSolvers(frames, model, targetBoneIndexes, isOutLog, description)
 	}
 
 	// ボーン変形行列操作
 	positions, rotations, scales, _ :=
-		bfs.getBoneMatrixes(frames, model, targetBoneNames, isOutLog, description)
+		bfs.getBoneMatrixes(frames, model, targetBoneNames, targetBoneIndexes, isOutLog, description)
 
 	// ボーン行列計算
 	return bfs.calcBoneMatrixes(
 		frames,
 		model,
 		targetBoneNames,
+		targetBoneIndexes,
 		positions,
 		rotations,
 		scales,
@@ -81,22 +82,23 @@ func (bfs *BoneFrames) Animate(
 func (bfs *BoneFrames) prepareIkSolvers(
 	frames []float32,
 	model *pmx.PmxModel,
-	targetBoneNames []string,
+	targetBoneIndexes map[int]string,
 	isOutLog bool,
 	description string,
 ) {
 	for _, frame := range frames {
-		for _, boneName := range targetBoneNames {
+		for i := 0; i < len(targetBoneIndexes); i++ {
+			targetName := targetBoneIndexes[i]
 			// 各フレームでIK計算
-			bone := model.Bones.GetItemByName(boneName)
+			bone := model.Bones.GetItemByName(targetName)
 			if bone.IsIK() {
 				quats, effectorTargetBoneNames := bfs.calcIk(frame, bone.Index, model, isOutLog, description)
 
 				for _, ikLink := range bone.Ik.Links {
 					// IKリンクボーンの回転量を更新
 					linkBf := bfs.GetItem(model.Bones.GetItem(ikLink.BoneIndex).Name).GetItem(frame)
-					linkIndex := slices.Index(effectorTargetBoneNames, model.Bones.GetItem(ikLink.BoneIndex).Name)
-					linkBf.IkRotation.SetQuaternion(quats[linkIndex])
+					linkIndex := effectorTargetBoneNames[model.Bones.GetItem(ikLink.BoneIndex).Name]
+					linkBf.IkRotation = mmath.NewRotationModelByQuaternion(quats[linkIndex])
 
 					// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
 					bfs.GetItem(model.Bones.GetItem(ikLink.BoneIndex).Name).Append(linkBf)
@@ -113,7 +115,7 @@ func (bfs *BoneFrames) calcIk(
 	model *pmx.PmxModel,
 	isOutLog bool,
 	description string,
-) ([]*mmath.MQuaternion, []string) {
+) ([]*mmath.MQuaternion, map[string]int) {
 	// IKボーン
 	ikBone := model.Bones.GetItem(boneIndex)
 	// IKターゲットボーン
@@ -121,10 +123,10 @@ func (bfs *BoneFrames) calcIk(
 	// IK関連の行列を一括計算
 	ikMatrixes := bfs.Animate([]float32{frame}, model, []string{ikBone.Name}, false, false, "")
 	// 処理対象ボーン名取得
-	effectorTargetBoneNames := bfs.getAnimatedBoneNames(model, []string{effectorBone.Name})
+	effectorTargetBoneNames, effectorTargetBoneIndexes := bfs.getAnimatedBoneNames(model, []string{effectorBone.Name})
 	// エフェクタボーンの関連ボーンの初期値を取得
 	positions, rotations, scales, quats :=
-		bfs.getBoneMatrixes([]float32{frame}, model, effectorTargetBoneNames, false, "")
+		bfs.getBoneMatrixes([]float32{frame}, model, effectorTargetBoneNames, effectorTargetBoneIndexes, false, "")
 
 		// IK計算
 ikLoop:
@@ -137,7 +139,7 @@ ikLoop:
 
 			// 処理対象IKリンクボーン
 			linkBone := model.Bones.GetItem(ikLink.BoneIndex)
-			linkIndex := slices.Index(effectorTargetBoneNames, linkBone.Name)
+			linkIndex := effectorTargetBoneNames[linkBone.Name]
 
 			// 角度制限があってまったく動かさない場合、IK計算しないで次に行く
 			if (linkBone.AngleLimit &&
@@ -154,6 +156,7 @@ ikLoop:
 				[]float32{frame},
 				model,
 				effectorTargetBoneNames,
+				effectorTargetBoneIndexes,
 				positions,
 				rotations,
 				scales,
@@ -422,18 +425,23 @@ func (bfs *BoneFrames) calculateSingleAxisRadRotation(
 func (bfs *BoneFrames) calcBoneMatrixes(
 	frames []float32,
 	model *pmx.PmxModel,
-	targetBoneNames []string,
+	targetBoneNames map[string]int,
+	targetBoneIndexes map[int]string,
 	positions, rotations, scales [][]*mmath.MMat4,
 	isOutLog bool,
 	description string,
 ) BoneTrees {
 	// 各ボーンの座標変換行列×逆BOf行列
 	matrixes := make([][]*mmath.MMat4, 0, len(frames))
+
 	for i := range frames {
-		matrixes = append(matrixes, make([]*mmath.MMat4, 0, len(targetBoneNames)))
-		for j, boneName := range targetBoneNames {
-			bone := model.Bones.GetItemByName(boneName)
+		matrixes = append(matrixes, make([]*mmath.MMat4, 0, len(targetBoneIndexes)))
+
+		// 最初にフレーム数*ボーン数分のスライスを確保
+		for j := 0; j < len(targetBoneIndexes); j++ {
 			matrixes[i] = append(matrixes[i], mmath.NewMMat4())
+			boneName := targetBoneIndexes[j]
+			bone := model.Bones.GetItemByName(boneName)
 			// 逆BOf行列(初期姿勢行列)
 			matrixes[i][j].Mul(bone.RevertOffsetMatrix)
 			// 位置
@@ -448,14 +456,15 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 	boneTrees := NewBoneTrees()
 
 	for i, frame := range frames {
-		for j, boneName := range targetBoneNames {
+		for j := 0; j < len(targetBoneIndexes); j++ {
+			boneName := targetBoneIndexes[j]
 			bone := model.Bones.GetItemByName(boneName)
 			localMatrix := mmath.NewMMat4()
 			for _, k := range bone.ParentBoneIndexes {
 				// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
 				parentName := model.Bones.GetItem(k).Name
 				// targetBoneNames の中にある parentName のINDEXを取得
-				parentIndex := slices.Index(targetBoneNames, parentName)
+				parentIndex := targetBoneNames[parentName]
 				localMatrix.Mul(matrixes[i][parentIndex])
 			}
 			// 最後に対象ボーン自身の行列をかける
@@ -482,7 +491,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 func (bfs *BoneFrames) getAnimatedBoneNames(
 	model *pmx.PmxModel,
 	boneNames []string,
-) []string {
+) (map[string]int, map[int]string) {
 	if boneNames != nil || len(boneNames) > 0 {
 		targetBoneNames := make([]string, 0)
 		for _, boneName := range boneNames {
@@ -498,36 +507,45 @@ func (bfs *BoneFrames) getAnimatedBoneNames(
 			}
 		}
 
-		resultBoneNames := make([]string, 0)
+		resultBoneNames := make(map[string]int, 0)
+		resultBoneIndexes := make(map[int]string, 0)
 
 		// 変形階層・ボーンINDEXでソート
+		n := 0
 		for _, boneIndex := range model.Bones.GetLayerIndexes() {
 			bone := model.Bones.GetItem(boneIndex)
 			if slices.Contains(targetBoneNames, bone.Name) {
-				resultBoneNames = append(resultBoneNames, bone.Name)
+				resultBoneNames[bone.Name] = n
+				resultBoneIndexes[n] = bone.Name
+				n++
 			}
 		}
 
-		return resultBoneNames
+		return resultBoneNames, resultBoneIndexes
 	}
 
 	// 全ボーンが対象の場合、全部をソートする
-	targetBoneNames := make([]string, 0, len(model.Bones.Data))
+	targetBoneNames := make(map[string]int, len(model.Bones.Data))
+	targetBoneIndexes := make(map[int]string, len(model.Bones.Data))
 
 	// 変形階層・ボーンINDEXでソート
+	i := 0
 	for _, boneIndex := range model.Bones.GetLayerIndexes() {
 		bone := model.Bones.GetItem(boneIndex)
-		targetBoneNames = append(targetBoneNames, bone.Name)
+		targetBoneNames[bone.Name] = i
+		targetBoneIndexes[i] = bone.Name
+		i++
 	}
 
-	return targetBoneNames
+	return targetBoneNames, targetBoneIndexes
 }
 
 // ボーン変形行列を求める
 func (bfs *BoneFrames) getBoneMatrixes(
 	frames []float32,
 	model *pmx.PmxModel,
-	targetBoneNames []string,
+	targetBoneNames map[string]int,
+	targetBoneIndexes map[int]string,
 	isOutLog bool,
 	description string,
 ) ([][]*mmath.MMat4, [][]*mmath.MMat4, [][]*mmath.MMat4, [][]*mmath.MQuaternion) {
@@ -571,13 +589,13 @@ func (bfs *BoneFrames) getBoneMatrixes(
 						if k >= boneCount {
 							break
 						}
-						bone := model.Bones.GetItemByName(targetBoneNames[k])
-						// ボーンが対象の場合、そのボーンの移動位置、回転角度、拡大率を取得
-						positions[i][k] = bfs.getPosition(frame, bone.Name, model)
-						rotWithEffect, rotFk := bfs.getRotation(frame, bone.Name, model)
+						boneName := targetBoneIndexes[k]
+						// ボーンの移動位置、回転角度、拡大率を取得
+						positions[i][k] = bfs.getPosition(frame, boneName, model)
+						rotWithEffect, rotFk := bfs.getRotation(frame, boneName, model)
 						rotations[i][k] = rotWithEffect.ToMat4()
 						quats[i][k] = rotFk
-						scales[i][k] = bfs.getScale(frame, bone.Name, model)
+						scales[i][k] = bfs.getScale(frame, boneName, model)
 					}
 				}(i, j, frame)
 			}

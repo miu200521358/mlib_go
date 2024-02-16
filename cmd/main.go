@@ -3,8 +3,10 @@ package main
 import (
 	"embed"
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
+	"runtime/pprof"
 
 	"github.com/miu200521358/walk/pkg/walk"
 
@@ -26,18 +28,18 @@ func init() {
 var resourceFiles embed.FS
 
 func main() {
-	// // CPUプロファイル用のファイルを作成
-	// f, err := os.Create("cpu.pprof")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer f.Close()
+	// CPUプロファイル用のファイルを作成
+	f, err := os.Create("cpu.pprof")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
 
-	// // CPUプロファイリングを開始
-	// if err := pprof.StartCPUProfile(f); err != nil {
-	// 	panic(err)
-	// }
-	// defer pprof.StopCPUProfile()
+	// CPUプロファイリングを開始
+	if err := pprof.StartCPUProfile(f); err != nil {
+		panic(err)
+	}
+	defer pprof.StopCPUProfile()
 
 	mWindow, err := mwidget.NewMWindow(resourceFiles, true, 512, 768)
 	if err != nil {

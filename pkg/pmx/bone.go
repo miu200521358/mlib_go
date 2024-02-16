@@ -7,7 +7,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type IkLink struct {
@@ -403,9 +402,10 @@ func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 }
 
 func (b *Bones) GetLayerIndexes() []int {
-	layerIndexes := make(LayerIndexes, len(b.IndexNameModelCorrection.Data))
-	for i, bone := range b.IndexNameModelCorrection.Data {
-		layerIndexes[i] = LayerIndex{Layer: bone.Layer, Index: bone.Index}
+	layerIndexes := make(LayerIndexes, 0)
+	for _, boneIndex := range b.GetIndexes() {
+		bone := b.GetItem(boneIndex)
+		layerIndexes = append(layerIndexes, LayerIndex{Layer: bone.Layer, Index: boneIndex})
 	}
 	sort.Sort(layerIndexes)
 
