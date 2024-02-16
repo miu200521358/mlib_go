@@ -80,6 +80,7 @@ go get -u golang.org/x/image
 
 1. main.go のプロファイルを有効化
 2. main.go を実行
-3. `(mtool) C:\MMD\mlib_go>go tool pprof cmd\main.go cmd\cpu.pprof`
+3. `go tool pprof cmd\main.go cmd\cpu.pprof`
+3. `go tool pprof cmd\main.go cmd\memory.pprof`
 4. `(pprof) top 50`
 

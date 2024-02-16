@@ -2,7 +2,6 @@ package vmd
 
 import (
 	"math"
-	"slices"
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
@@ -492,29 +491,31 @@ func (bfs *BoneFrames) getAnimatedBoneNames(
 	model *pmx.PmxModel,
 	boneNames []string,
 ) (map[string]int, map[int]string) {
-	if boneNames != nil || len(boneNames) > 0 {
-		targetBoneNames := make([]string, 0)
+	// ボーン名の存在チェック用マップ
+	exists := make(map[string]struct{})
+
+	// 条件分岐の最適化
+	if len(boneNames) > 0 {
 		for _, boneName := range boneNames {
-			if !slices.Contains(targetBoneNames, boneName) {
-				targetBoneNames = append(targetBoneNames, boneName)
-			}
+			// ボーン名の追加
+			exists[boneName] = struct{}{}
+
+			// 関連するボーンの追加
 			relativeBoneIndexes := model.Bones.GetItemByName(boneName).RelativeBoneIndexes
 			for _, index := range relativeBoneIndexes {
 				relativeBoneName := model.Bones.GetItem(index).Name
-				if !slices.Contains(targetBoneNames, relativeBoneName) {
-					targetBoneNames = append(targetBoneNames, relativeBoneName)
-				}
+				exists[relativeBoneName] = struct{}{}
 			}
 		}
 
-		resultBoneNames := make(map[string]int, 0)
-		resultBoneIndexes := make(map[int]string, 0)
+		resultBoneNames := make(map[string]int)
+		resultBoneIndexes := make(map[int]string)
 
 		// 変形階層・ボーンINDEXでソート
 		n := 0
 		for _, boneIndex := range model.Bones.GetLayerIndexes() {
 			bone := model.Bones.GetItem(boneIndex)
-			if slices.Contains(targetBoneNames, bone.Name) {
+			if _, ok := exists[bone.Name]; ok {
 				resultBoneNames[bone.Name] = n
 				resultBoneIndexes[n] = bone.Name
 				n++
@@ -524,20 +525,20 @@ func (bfs *BoneFrames) getAnimatedBoneNames(
 		return resultBoneNames, resultBoneIndexes
 	}
 
-	// 全ボーンが対象の場合、全部をソートする
-	targetBoneNames := make(map[string]int, len(model.Bones.Data))
-	targetBoneIndexes := make(map[int]string, len(model.Bones.Data))
+	// 全ボーンが対象の場合
+	resultBoneNames := make(map[string]int, len(model.Bones.Data))
+	resultBoneIndexes := make(map[int]string, len(model.Bones.Data))
 
 	// 変形階層・ボーンINDEXでソート
 	i := 0
 	for _, boneIndex := range model.Bones.GetLayerIndexes() {
 		bone := model.Bones.GetItem(boneIndex)
-		targetBoneNames[bone.Name] = i
-		targetBoneIndexes[i] = bone.Name
+		resultBoneNames[bone.Name] = i
+		resultBoneIndexes[i] = bone.Name
 		i++
 	}
 
-	return targetBoneNames, targetBoneIndexes
+	return resultBoneNames, resultBoneIndexes
 }
 
 // ボーン変形行列を求める
