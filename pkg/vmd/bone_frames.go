@@ -7,6 +7,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+
 )
 
 type BoneFrames struct {
@@ -95,9 +96,6 @@ func (bfs *BoneFrames) prepareIkSolvers(
 			}
 		}
 	}
-
-	// 念のためソート
-	slices.Sort(ikBoneIndexes)
 
 	for _, frame := range frames {
 		for _, ikBoneIndex := range ikBoneIndexes {
@@ -511,8 +509,9 @@ func (bfs *BoneFrames) getAnimatedBoneNames(
 
 		resultBoneNames := make([]string, 0)
 
-		// ボーンINDEXでソート
-		for _, bone := range model.Bones.GetSortedData() {
+		// 変形階層・ボーンINDEXでソート
+		for _, boneIndex := range model.Bones.GetLayerIndexes() {
+			bone := model.Bones.GetItem(boneIndex)
 			if slices.Contains(targetBoneNames, bone.Name) {
 				resultBoneNames = append(resultBoneNames, bone.Name)
 			}
@@ -699,13 +698,11 @@ func (bfs *BoneFrames) getRotationWithEffect(
 	if bone.EffectFactor >= 0 {
 		// 正の付与親
 		effectQ := rotWithEffect.MulFactor(bone.EffectFactor)
-		effectQ.Normalize()
 		return effectQ
 	} else {
 		// 負の付与親の場合、逆回転
 		effectQ := rotWithEffect.MulFactor(-bone.EffectFactor)
 		effectQ.Invert()
-		effectQ.Normalize()
 		return effectQ
 	}
 }

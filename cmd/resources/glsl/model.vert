@@ -182,67 +182,8 @@ mat4 calculateSdefMatrix(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, 
 // 補間点R0/R1をBDEF2移動させて交点Cを補正する
 vec4 calculateCorrectedC(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1) {
     // R0/R1影響係数算出
-
-    // // sdefB0から見た距離の順番にsdefR0, sdefR1, sdefCを並べる
-    // float lenB0R0 = length(sdefR0 - sdefB0);
-    // float lenB0R1 = length(sdefR1 - sdefB0);
-    // float lenB0C = length(sdefC - sdefB0);
-
-    // vec3 first, second, third;
-
-    // if(lenB0R0 <= lenB0R1 && lenB0R0 <= lenB0C) {
-    //     first = sdefR0;
-    //     if(lenB0R1 <= lenB0C) {
-    //         second = sdefR1;
-    //         third = sdefC;
-    //     } else {
-    //         second = sdefC;
-    //         third = sdefR1;
-    //     }
-    // } else if(lenB0R1 <= lenB0R0 && lenB0R1 <= lenB0C) {
-    //     first = sdefR1;
-    //     if(lenB0R0 <= lenB0C) {
-    //         second = sdefR0;
-    //         third = sdefC;
-    //     } else {
-    //         second = sdefC;
-    //         third = sdefR0;
-    //     }
-    // } else {
-    //     first = sdefC;
-    //     if(lenB0R0 <= lenB0R1) {
-    //         second = sdefR0;
-    //         third = sdefR1;
-    //     } else {
-    //         second = sdefR1;
-    //         third = sdefR0;
-    //     }
-    // }
-
-    // // 真ん中の点を中点とした比率を求める
-    // float firstVector = length(first - second);
-    // float thirdVector = length(third - second);
-
-    // float r0Bias, r1Bias;
-    // if(firstVector == 0.0) {
-    //     r0Bias = 0.0;
-    //     r1Bias = 1.0;
-    // } else if(thirdVector == 0.0) {
-    //     r0Bias = 1.0;
-    //     r1Bias = 0.0;
-    // } else {
-    //     // sdefCがsdefR0とsdefR1の間にある場合
-    //     float bias = firstVector / (firstVector + thirdVector);
-    //     if(!isinf(bias) && !isnan(bias)) {
-    //         r1Bias = clamp(bias, 0.0, 1.0);
-    //     }
-    //     r0Bias = 1.0 - r1Bias;
-    // }
-
-    // R0/R1影響係数算出
     float lenR0C = length(sdefR0 - sdefC);
     float lenR1C = length(sdefR1 - sdefC);
-    float lenR0R1 = length(sdefR0 - sdefR1);
 
     float r1Bias = 0.0;
     if(lenR1C == 0.0) {
@@ -250,33 +191,17 @@ vec4 calculateCorrectedC(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, 
     } else if(lenR0C == 0.0) {
         r1Bias = 1.0;
     } else if(lenR0C + lenR1C != 0.0) {
-        if(lenR0R1 >= lenR0C + lenR1C) {
-            // sdefCがsdefR0とsdefR1の間にある場合
-            float bias = lenR0C / (lenR0C + lenR1C);
-            if(!isinf(bias) && !isnan(bias)) {
-                r1Bias = clamp(bias, 0.0, 1.0);
-            }
-        } else {
-            // sdefCがsdefR0とsdefR1の間にない場合
-            r1Bias = 0.0;
+        float bias = lenR0C / (lenR0C + lenR1C);
+        if(!isinf(bias) && !isnan(bias)) {
+            r1Bias = clamp(bias, 0.0, 1.0);
         }
     }
     float r0Bias = 1.0 - r1Bias;
-
-    // // 影響係数に基づいたC
-    // vec4 biasC0 = boneMatrix0 * r0Bias * vec4(sdefC, 1.0);
-    // vec4 biasC1 = boneMatrix1 * r1Bias * vec4(sdefC, 1.0);
-    // vec4 biasC = biasC0 + biasC1;
 
     // ウェイトに基づいたC (BDEF2移動させたC)
     vec4 weightedC0 = boneMatrix0 * boneWeight0 * vec4(sdefC, 1.0);
     vec4 weightedC1 = boneMatrix1 * boneWeight1 * vec4(sdefC, 1.0);
     vec4 weightedC = weightedC0 + weightedC1;
-
-    // // 影響係数に基づいたC
-    // vec4 biasC0 = boneMatrix0 * r0Bias * vec4(sdefC, 1.0);
-    // vec4 biasC1 = boneMatrix1 * r1Bias * vec4(sdefC, 1.0);
-    // vec4 biasC = biasC0 + biasC1;
 
     // 影響係数に基づいたR
     vec4 biasR0 = boneMatrix0 * r0Bias * vec4(sdefR0, 1.0);
@@ -317,7 +242,6 @@ void main() {
 
         vec4 vecPosition = rotatedPosition - rotatedC + correctedC;
 
-        // gl_Position = modelViewProjectionMatrix * modelViewMatrix * vec4((correctedC + vec4(position.x, 0, position.z, 0)).xyz, 1.0);
         gl_Position = modelViewProjectionMatrix * modelViewMatrix * vec4(vecPosition.xyz, 1.0);
 
         // 各頂点で使用される法線変形行列をSDEF変形行列から回転情報のみ抽出して生成する

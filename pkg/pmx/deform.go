@@ -270,7 +270,12 @@ func (s *Sdef) GetType() DeformType {
 
 // SDEF用パラメーターを返す
 func (s *Sdef) GetSdefParams() ([3]float32, [3]float32, [3]float32) {
-	return s.SdefC.GL(), s.SdefR0.GL(), s.SdefR1.GL()
+	// CがR0とR1より先にいかないよう、重みに基づいて補正
+	weight := s.SdefR0.MuledScalar(s.Weights[0]).Added(s.SdefR1.MuledScalar(1 - s.Weights[0]))
+	sdefR0 := s.SdefC.Added(s.SdefR0).Subed(weight)
+	sdefR1 := s.SdefC.Added(s.SdefR1).Subed(weight)
+
+	return s.SdefC.GL(), sdefR0.GL(), sdefR1.GL()
 }
 
 // NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）

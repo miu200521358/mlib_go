@@ -2,10 +2,12 @@ package pmx
 
 import (
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type IkLink struct {
@@ -347,6 +349,18 @@ func (bone *Bone) containsCategory(category BoneCategory) bool {
 	return false
 }
 
+func (bone *Bone) normalizeFixedAxis(fixedAxis *mmath.MVec3) {
+	v := fixedAxis.Normalized()
+	bone.NormalizedFixedAxis = v
+}
+
+func (bone *Bone) normalizeLocalAxis(localXVector *mmath.MVec3) {
+	v := localXVector.Normalized()
+	bone.NormalizedLocalAxisX = v
+	bone.NormalizedLocalAxisY = v.Cross(&mmath.MVec3{0, 0, -1})
+	bone.NormalizedLocalAxisZ = v.Cross(bone.NormalizedLocalAxisY)
+}
+
 // ボーンリスト
 type Bones struct {
 	*mcore.IndexNameModelCorrection[*Bone]
@@ -388,14 +402,31 @@ func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 	return v
 }
 
-func (bone *Bone) normalizeFixedAxis(fixedAxis *mmath.MVec3) {
-	v := fixedAxis.Normalized()
-	bone.NormalizedFixedAxis = v
+func (b *Bones) GetLayerIndexes() []int {
+	layerIndexes := make(LayerIndexes, len(b.IndexNameModelCorrection.Data))
+	for i, bone := range b.IndexNameModelCorrection.Data {
+		layerIndexes[i] = LayerIndex{Layer: bone.Layer, Index: bone.Index}
+	}
+	sort.Sort(layerIndexes)
+
+	indexes := make([]int, len(layerIndexes))
+	for i, layerIndex := range layerIndexes {
+		indexes[i] = layerIndex.Index
+	}
+
+	return indexes
 }
 
-func (bone *Bone) normalizeLocalAxis(localXVector *mmath.MVec3) {
-	v := localXVector.Normalized()
-	bone.NormalizedLocalAxisX = v
-	bone.NormalizedLocalAxisY = v.Cross(&mmath.MVec3{0, 0, -1})
-	bone.NormalizedLocalAxisZ = v.Cross(bone.NormalizedLocalAxisY)
+// 変形階層とINDEXのソート用構造体
+type LayerIndex struct {
+	Layer int
+	Index int
 }
+
+type LayerIndexes []LayerIndex
+
+func (p LayerIndexes) Len() int { return len(p) }
+func (p LayerIndexes) Less(i, j int) bool {
+	return p[i].Layer < p[j].Layer || (p[i].Layer == p[j].Layer && p[i].Index < p[j].Index)
+}
+func (p LayerIndexes) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
