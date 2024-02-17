@@ -85,22 +85,66 @@ func (bfs *BoneFrames) prepareIkSolvers(
 	isOutLog bool,
 	description string,
 ) {
+	// 末端IKボーン（末端ボーンもしくは子ボーンにIKが含まれていないボーン）のリストを生成する
+	tailIkBoneNames := make(map[string][]string, 0)
+	for _, boneName := range targetBoneIndexes {
+		bone := model.Bones.GetItemByName(boneName)
+		if !bone.IsIK() {
+			continue
+		}
+		// 末端ボーンの場合
+		if len(bone.ChildBoneIndexes) == 0 {
+			tailIkBoneNames[bone.Name] = make([]string, 0)
+			for _, parentIndex := range bone.ParentBoneIndexes {
+				parentBone := model.Bones.GetItem(parentIndex)
+				if parentBone.IsIK() {
+					tailIkBoneNames[bone.Name] = append(tailIkBoneNames[bone.Name], parentBone.Name)
+				}
+			}
+			tailIkBoneNames[bone.Name] = append(tailIkBoneNames[bone.Name], bone.Name)
+		} else {
+			// 子ボーンにIKが含まれていない場合
+			isChildIk := false
+			for _, childIndex := range bone.ChildBoneIndexes {
+				childBone := model.Bones.GetItem(childIndex)
+				if childBone.IsIK() {
+					isChildIk = true
+					break
+				}
+			}
+			if !isChildIk {
+				tailIkBoneNames[bone.Name] = make([]string, 0)
+				for _, parentIndex := range bone.ParentBoneIndexes {
+					parentBone := model.Bones.GetItem(parentIndex)
+					if parentBone.IsIK() {
+						tailIkBoneNames[bone.Name] = append(tailIkBoneNames[bone.Name], parentBone.Name)
+					}
+				}
+				tailIkBoneNames[bone.Name] = append(tailIkBoneNames[bone.Name], bone.Name)
+			}
+		}
+	}
+
 	for _, frame := range frames {
 		for i := 0; i < len(targetBoneIndexes); i++ {
 			targetName := targetBoneIndexes[i]
-			// 各フレームでIK計算
-			bone := model.Bones.GetItemByName(targetName)
-			if bone.IsIK() {
-				quats, effectorTargetBoneNames := bfs.calcIk(frame, bone.Index, model, isOutLog, description)
+			if _, ok := tailIkBoneNames[targetName]; ok {
+				for _, boneName := range tailIkBoneNames[targetName] {
+					// 各フレームでIK計算
+					bone := model.Bones.GetItemByName(boneName)
+					if bone.IsIK() {
+						quats, effectorTargetBoneNames := bfs.calcIk(frame, bone.Index, model, isOutLog, description)
 
-				for _, ikLink := range bone.Ik.Links {
-					// IKリンクボーンの回転量を更新
-					linkBf := bfs.GetItem(model.Bones.GetItem(ikLink.BoneIndex).Name).GetItem(frame)
-					linkIndex := effectorTargetBoneNames[model.Bones.GetItem(ikLink.BoneIndex).Name]
-					linkBf.IkRotation = mmath.NewRotationModelByQuaternion(quats[linkIndex])
+						for _, ikLink := range bone.Ik.Links {
+							// IKリンクボーンの回転量を更新
+							linkBf := bfs.GetItem(model.Bones.GetItem(ikLink.BoneIndex).Name).GetItem(frame)
+							linkIndex := effectorTargetBoneNames[model.Bones.GetItem(ikLink.BoneIndex).Name]
+							linkBf.IkRotation = mmath.NewRotationModelByQuaternion(quats[linkIndex])
 
-					// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
-					bfs.GetItem(model.Bones.GetItem(ikLink.BoneIndex).Name).Append(linkBf)
+							// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
+							bfs.GetItem(model.Bones.GetItem(ikLink.BoneIndex).Name).Append(linkBf)
+						}
+					}
 				}
 			}
 		}
