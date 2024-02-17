@@ -6,18 +6,15 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 type BoneFrames struct {
 	Data map[string]*BoneNameFrames
-	lock sync.RWMutex // マップアクセス制御用
 }
 
 func NewBoneFrames() *BoneFrames {
 	return &BoneFrames{
 		Data: make(map[string]*BoneNameFrames, 0),
-		lock: sync.RWMutex{},
 	}
 }
 
@@ -40,9 +37,6 @@ func (bfs *BoneFrames) Append(bnfs *BoneNameFrames) {
 }
 
 func (bfs *BoneFrames) GetItem(boneName string) *BoneNameFrames {
-	bfs.lock.RLock()
-	defer bfs.lock.RUnlock()
-
 	return bfs.Data[boneName]
 }
 
@@ -88,13 +82,16 @@ func (bfs *BoneFrames) prepareIkSolvers(
 	isOutLog bool,
 	description string,
 ) {
-	var boneWg sync.WaitGroup
+	var wg sync.WaitGroup
 	for i := 0; i < len(targetBoneIndexes); i++ {
-		boneWg.Add(1)
-		go func(i int) {
-			defer boneWg.Done()
-			targetName := targetBoneIndexes[i]
-			bone := model.Bones.GetItemByName(targetName)
+		bone := model.Bones.GetItemByName(targetBoneIndexes[i])
+		if len(bone.ChildIkBoneIndexes) == 0 {
+			continue
+		}
+
+		wg.Add(1)
+		go func(i int, bone *pmx.Bone) {
+			defer wg.Done()
 			for _, childIkIndex := range bone.ChildIkBoneIndexes {
 				ikBone := model.Bones.GetItem(childIkIndex)
 				// IK計算
@@ -112,9 +109,9 @@ func (bfs *BoneFrames) prepareIkSolvers(
 					bfs.GetItem(linkBone.Name).Append(linkBf)
 				}
 			}
-		}(i)
+		}(i, bone)
 	}
-	boneWg.Wait()
+	wg.Wait()
 }
 
 // IK計算
@@ -448,39 +445,65 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 		resultMatrixes = append(resultMatrixes, mmath.NewMMat4())
 	}
 
-	// 各ボーンの座標変換行列×逆BOf行列
-	for j := 0; j < boneCount; j++ {
-		boneName := targetBoneIndexes[j]
-		bone := model.Bones.GetItemByName(boneName)
-		// 逆BOf行列(初期姿勢行列)
-		matrixes[j].Mul(bone.RevertOffsetMatrix)
-		// 位置
-		matrixes[j].Mul(positions[j])
-		// 回転
-		matrixes[j].Mul(rotations[j])
-		// スケール
-		matrixes[j].Mul(scales[j])
+	// ボーンを一定件数ごとに並列処理（件数は変数保持）
+	count := 100
+
+	var wg1 sync.WaitGroup
+	for i := 0; i < boneCount; i += count {
+		wg1.Add(1)
+		go func(i int) {
+			defer wg1.Done()
+			for j := i; j < i+count; j++ {
+				if j >= boneCount {
+					break
+				}
+				// 各ボーンの座標変換行列×逆BOf行列
+				boneName := targetBoneIndexes[j]
+				bone := model.Bones.GetItemByName(boneName)
+				// 逆BOf行列(初期姿勢行列)
+				matrixes[j].Mul(bone.RevertOffsetMatrix)
+				// 位置
+				matrixes[j].Mul(positions[j])
+				// 回転
+				matrixes[j].Mul(rotations[j])
+				// スケール
+				matrixes[j].Mul(scales[j])
+			}
+		}(i)
 	}
+	wg1.Wait()
 
 	boneTrees := NewBoneTrees()
 
-	for j := 0; j < boneCount; j++ {
-		boneName := targetBoneIndexes[j]
-		bone := model.Bones.GetItemByName(boneName)
-		localMatrix := mmath.NewMMat4()
-		for _, l := range bone.ParentBoneIndexes {
-			// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
-			parentName := model.Bones.GetItem(l).Name
-			// targetBoneNames の中にある parentName のINDEXを取得
-			parentIndex := targetBoneNames[parentName]
-			localMatrix.Mul(matrixes[parentIndex])
-		}
-		// 最後に対象ボーン自身の行列をかける
-		localMatrix.Mul(matrixes[j])
-		// BOf行列: 自身のボーンのボーンオフセット行列
-		localMatrix.Mul(bone.OffsetMatrix)
-		resultMatrixes[j] = localMatrix
+	var wg2 sync.WaitGroup
+	// ボーンを一定件数ごとに並列処理（件数は変数保持）
+	for i := 0; i < boneCount; i += count {
+		wg2.Add(1)
+		go func(i int) {
+			defer wg2.Done()
+			for j := i; j < i+count; j++ {
+				if j >= boneCount {
+					break
+				}
+				boneName := targetBoneIndexes[j]
+				bone := model.Bones.GetItemByName(boneName)
+				localMatrix := mmath.NewMMat4()
+				for _, l := range bone.ParentBoneIndexes {
+					// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
+					parentName := model.Bones.GetItem(l).Name
+					// targetBoneNames の中にある parentName のINDEXを取得
+					parentIndex := targetBoneNames[parentName]
+					localMatrix.Mul(matrixes[parentIndex])
+				}
+				// 最後に対象ボーン自身の行列をかける
+				localMatrix.Mul(matrixes[j])
+				// BOf行列: 自身のボーンのボーンオフセット行列
+				localMatrix.Mul(bone.OffsetMatrix)
+				resultMatrixes[j] = localMatrix
+			}
+		}(i)
 	}
+	wg2.Wait()
 
 	for i := 0; i < len(targetBoneIndexes); i++ {
 		bone := model.Bones.GetItemByName(targetBoneIndexes[i])
@@ -565,12 +588,10 @@ func (bfs *BoneFrames) getBoneMatrixes(
 		quats = append(quats, mmath.NewMQuaternion())
 	}
 
-	var boneWg sync.WaitGroup
-	// ボーンを一定件数ごとに並列処理（件数は変数保持）
+	// ボーンを一定件数ごとに並列処理
 	count := 100
-	if boneCount < count {
-		count = boneCount
-	}
+
+	var boneWg sync.WaitGroup
 	for i := 0; i < boneCount; i += count {
 		boneWg.Add(1)
 		go func(i int) {
