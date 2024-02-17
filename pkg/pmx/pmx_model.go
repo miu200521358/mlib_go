@@ -8,6 +8,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 type PmxModel struct {
@@ -228,4 +229,17 @@ func (pm *PmxModel) SetUp() {
 		// 逆オフセット行列は親ボーンからの相対位置分
 		bone.RevertOffsetMatrix.Translate(bone.ParentRelativePosition.Copy())
 	}
+
+	// 変形階層・ボーンINDEXでソート
+	pm.Bones.LayerSortedIndexes = make(map[int]string, len(pm.Bones.Data))
+	pm.Bones.LayerSortedNames = make(map[string]int, len(pm.Bones.Data))
+
+	i := 0
+	for _, boneIndex := range pm.Bones.GetLayerIndexes() {
+		bone := pm.Bones.GetItem(boneIndex)
+		pm.Bones.LayerSortedNames[bone.Name] = i
+		pm.Bones.LayerSortedIndexes[i] = bone.Name
+		i++
+	}
+
 }

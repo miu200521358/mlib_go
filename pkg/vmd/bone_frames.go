@@ -588,19 +588,7 @@ func (bfs *BoneFrames) getAnimatedBoneNames(
 	}
 
 	// 全ボーンが対象の場合
-	resultBoneNames := make(map[string]int, len(model.Bones.Data))
-	resultBoneIndexes := make(map[int]string, len(model.Bones.Data))
-
-	// 変形階層・ボーンINDEXでソート
-	i := 0
-	for _, boneIndex := range model.Bones.GetLayerIndexes() {
-		bone := model.Bones.GetItem(boneIndex)
-		resultBoneNames[bone.Name] = i
-		resultBoneIndexes[i] = bone.Name
-		i++
-	}
-
-	return resultBoneNames, resultBoneIndexes
+	return model.Bones.LayerSortedNames, model.Bones.LayerSortedIndexes
 }
 
 // ボーン変形行列を求める

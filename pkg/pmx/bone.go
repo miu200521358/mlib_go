@@ -363,11 +363,15 @@ func (bone *Bone) normalizeLocalAxis(localXVector *mmath.MVec3) {
 // ボーンリスト
 type Bones struct {
 	*mcore.IndexNameModelCorrection[*Bone]
+	LayerSortedIndexes map[int]string
+	LayerSortedNames   map[string]int
 }
 
 func NewBones() *Bones {
 	return &Bones{
 		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Bone](),
+		LayerSortedIndexes:       map[int]string{},
+		LayerSortedNames:         map[string]int{},
 	}
 }
 
