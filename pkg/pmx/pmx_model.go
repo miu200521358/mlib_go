@@ -169,12 +169,12 @@ func (pm *PmxModel) SetUp() {
 		bone.ChildIkBoneIndexes = make([]int, 0)
 	}
 
-	// IK親（子として登録されていない）ボーンINDEXリスト
-	parentIkBoneIndexes := make([]int, 0)
+	// IK末端（親として登録されていない）ボーンINDEXリスト
+	tailIkBoneIndexes := make([]int, 0)
 	// 関連ボーンINDEX情報を設定
 	for _, bone := range pm.Bones.GetSortedData() {
 		if bone.IsIK() && bone.Ik != nil {
-			parentIkBoneIndexes = append(parentIkBoneIndexes, bone.Index)
+			tailIkBoneIndexes = append(tailIkBoneIndexes, bone.Index)
 			// IKのリンクとターゲット
 			for _, link := range bone.Ik.Links {
 				if pm.Bones.Contains(link.BoneIndex) &&
@@ -242,45 +242,73 @@ func (pm *PmxModel) SetUp() {
 		if bone.IsIK() {
 			ikBoneLayerIndexes[bone.Index] =
 				append(ikBoneLayerIndexes[bone.Index], LayerIndex{Index: bone.Index, Layer: bone.Layer})
-			for _, parentIndex := range bone.ParentBoneIndexes {
-				parentBone := pm.Bones.GetItem(parentIndex)
-				if parentBone.IsIK() {
+			ikRelativeIndexes := make([]int, 0)
+			ikRelativeIndexes = append(ikRelativeIndexes, bone.RelativeBoneIndexes...)
+			for _, link := range bone.Ik.Links {
+				ikRelativeIndexes = append(ikRelativeIndexes, link.BoneIndex)
+				linkBone := pm.Bones.GetItem(link.BoneIndex)
+				ikRelativeIndexes = append(ikRelativeIndexes, linkBone.RelativeBoneIndexes...)
+			}
+
+			for _, ikRelativeIndex := range ikRelativeIndexes {
+				ikRelativeBone := pm.Bones.GetItem(ikRelativeIndex)
+				if ikRelativeBone.IsIK() && ikRelativeBone.Index != bone.Index {
 					// IK子ボーンとして追加
-					if _, ok := ikBoneLayerIndexes[parentBone.Index]; !ok {
-						ikBoneLayerIndexes[parentBone.Index] = make(LayerIndexes, 0)
+					if _, ok := ikBoneLayerIndexes[bone.Index]; !ok {
+						ikBoneLayerIndexes[bone.Index] = make(LayerIndexes, 0)
 					}
-					ikBoneLayerIndexes[parentBone.Index] =
-						append(ikBoneLayerIndexes[parentBone.Index], LayerIndex{Index: bone.Index, Layer: bone.Layer})
-					// IK親ボーンINDEXリストからbone.Indexを削除
-					parentIkBoneIndexes = mutils.RemoveFromSlice(parentIkBoneIndexes, bone.Index)
+					ikBoneLayerIndexes[bone.Index] =
+						append(ikBoneLayerIndexes[bone.Index],
+							LayerIndex{Index: ikRelativeBone.Index, Layer: ikRelativeBone.Layer})
+					// IK末端ボーンINDEXリストからbone.Indexを削除
+					tailIkBoneIndexes = mutils.RemoveFromSlice(tailIkBoneIndexes, ikRelativeBone.Index)
 				}
-				if len(parentBone.IkLinkBoneIndexes) > 0 {
-					// IKリンクボーンとして追加
-					for _, linkIkIndex := range parentBone.IkLinkBoneIndexes {
-						linkIkBone := pm.Bones.GetItem(linkIkIndex)
-						if linkIkBone.IsIK() {
-							// IK子ボーンとして追加
-							if _, ok := ikBoneLayerIndexes[linkIkBone.Index]; !ok {
-								ikBoneLayerIndexes[linkIkBone.Index] = make(LayerIndexes, 0)
-							}
-							ikBoneLayerIndexes[linkIkBone.Index] =
-								append(ikBoneLayerIndexes[linkIkBone.Index],
-									LayerIndex{Index: bone.Index, Layer: bone.Layer})
-							// IK親ボーンINDEXリストからbone.Indexを削除
-							parentIkBoneIndexes = mutils.RemoveFromSlice(parentIkBoneIndexes, bone.Index)
-						}
-					}
-				}
+				// if len(ikRelativeBone.IkLinkBoneIndexes) > 0 {
+				// 	// IKリンクボーンとして追加
+				// 	for _, linkIkIndex := range ikRelativeBone.IkLinkBoneIndexes {
+				// 		linkIkBone := pm.Bones.GetItem(linkIkIndex)
+				// 		if linkIkBone.IsIK() {
+				// 			// IK子ボーンとして追加
+				// 			if _, ok := ikBoneLayerIndexes[linkIkBone.Index]; !ok {
+				// 				ikBoneLayerIndexes[linkIkBone.Index] = make(LayerIndexes, 0)
+				// 			}
+				// 			ikBoneLayerIndexes[linkIkBone.Index] =
+				// 				append(ikBoneLayerIndexes[linkIkBone.Index],
+				// 					LayerIndex{Index: bone.Index, Layer: bone.Layer})
+				// 			// IK親ボーンINDEXリストからbone.Indexを削除
+				// 			parentIkBoneIndexes = mutils.RemoveFromSlice(parentIkBoneIndexes, bone.Index)
+				// 		}
+				// 	}
+				// }
+				// if len(ikRelativeBone.RelativeBoneIndexes) > 0 {
+				// 	// 関連ボーンとして追加
+				// 	for _, relativeIndex := range ikRelativeBone.RelativeBoneIndexes {
+				// 		relativeBone := pm.Bones.GetItem(relativeIndex)
+				// 		if relativeBone.IsIK() {
+				// 			// IK子ボーンとして追加
+				// 			if _, ok := ikBoneLayerIndexes[relativeBone.Index]; !ok {
+				// 				ikBoneLayerIndexes[relativeBone.Index] = make(LayerIndexes, 0)
+				// 			}
+				// 			ikBoneLayerIndexes[relativeBone.Index] =
+				// 				append(ikBoneLayerIndexes[relativeBone.Index],
+				// 					LayerIndex{Index: bone.Index, Layer: bone.Layer})
+				// 			// IK親ボーンINDEXリストからbone.Indexを削除
+				// 			parentIkBoneIndexes = mutils.RemoveFromSlice(parentIkBoneIndexes, bone.Index)
+				// 		}
+				// 	}
+				// }
 			}
 		}
 	}
 
 	// 並列計算可能な親IKボーンの子IKボーンを変形階層でソートして設定
 	for boneIndex, childLayerIndexes := range ikBoneLayerIndexes {
-		if slices.Contains(parentIkBoneIndexes, boneIndex) {
+		if !slices.Contains(tailIkBoneIndexes, boneIndex) {
 			sort.Sort(childLayerIndexes)
 			for _, childLayerIndex := range childLayerIndexes {
-				pm.Bones.GetItem(boneIndex).ChildIkBoneIndexes = append(pm.Bones.GetItem(boneIndex).ChildIkBoneIndexes, childLayerIndex.Index)
+				if !slices.Contains(pm.Bones.GetItem(boneIndex).ChildIkBoneIndexes, childLayerIndex.Index) {
+					pm.Bones.GetItem(boneIndex).ChildIkBoneIndexes = append(pm.Bones.GetItem(boneIndex).ChildIkBoneIndexes, childLayerIndex.Index)
+				}
 			}
 		}
 	}
