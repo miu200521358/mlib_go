@@ -27,11 +27,10 @@ func TestVmdMotion_AnimateBone(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{10, 999}, model, []string{pmx.INDEX3.Left()}, false, false, "")
-
 	{
 
 		fno := float32(10.0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.INDEX3.Left()}, false, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.0, 0.0, 0.0}
 			if !matrixes.GetItem(pmx.ROOT.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-5) {
@@ -137,8 +136,8 @@ func TestVmdMotion_AnimateBone(t *testing.T) {
 	}
 
 	{
-
 		fno := float32(999)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.INDEX3.Left()}, false, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.0, 0.0, 0.0}
 			if !matrixes.GetItem(pmx.ROOT.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -265,11 +264,9 @@ func TestVmdMotion_AnimateBoneLegIk1_Matsu(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{29}, model, []string{pmx.TOE.Left()}, true, false, "")
-
 	{
-
 		fno := float32(29)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Left()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{-0.781335, 11.717622, 1.557067}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -323,11 +320,10 @@ func TestVmdMotion_AnimateBoneLegIk2_Matsu(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{3152}, model, []string{pmx.TOE.Left()}, true, false, "")
-
 	{
 
 		fno := float32(3152)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Left()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{7.928583, 11.713336, 1.998830}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -381,11 +377,10 @@ func TestVmdMotion_AnimateBoneLegIk3_Matsu(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{60}, model, nil, true, false, "")
-
 	{
 
 		fno := float32(60)
+		matrixes := motion.AnimateBone(fno, model, nil, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{1.931959, 11.695199, -1.411883}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -451,11 +446,10 @@ func TestVmdMotion_AnimateBoneLegIk4_Snow(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, []string{pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{1.316121, 11.687257, 2.263307}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -509,11 +503,10 @@ func TestVmdMotion_AnimateBoneLegIk5_Snow(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{7409}, model, []string{pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(7409)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{-7.652257, 11.990970, -4.511993}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -569,11 +562,10 @@ func TestVmdMotion_AnimateBoneLegIk6_Snow(t *testing.T) {
 
 	{
 		// IK ON
-		matrixes := motion.AnimateBone([]float32{0}, model, nil, true, false, "")
-
 		{
 
 			fno := float32(0)
+			matrixes := motion.AnimateBone(fno, model, nil, true, false, "")
 			{
 				expectedPosition := &mmath.MVec3{2.143878, 6.558880, 1.121747}
 				if !matrixes.GetItem(pmx.KNEE.Left(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
@@ -591,10 +583,10 @@ func TestVmdMotion_AnimateBoneLegIk6_Snow(t *testing.T) {
 
 	{
 		// IK OFF
-		matrixes := motion.AnimateBone([]float32{0}, model, nil, false, false, "")
 		{
 
 			fno := float32(0)
+			matrixes := motion.AnimateBone(fno, model, nil, false, false, "")
 			{
 				expectedPosition := &mmath.MVec3{1.622245, 6.632885, 0.713205}
 				if !matrixes.GetItem(pmx.KNEE.Left(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
@@ -632,12 +624,11 @@ func TestVmdMotion_AnimateBoneLegIk7_Syou(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, []string{pmx.TOE.Right()}, true, false, "")
-
 	// 残存回転判定用
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.721499, 11.767294, 1.638818}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -691,11 +682,10 @@ func TestVmdMotion_AnimateBoneLegIk8_Syou(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{278}, model, []string{pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(278)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.721499, 11.767294, 1.638818}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -749,11 +739,10 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{100, 107, 272, 273, 274, 275, 278}, model, []string{pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(100)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.365000, 11.411437, 1.963828}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -788,6 +777,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	{
 
 		fno := float32(107)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.365000, 12.042871, 2.034023}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -822,6 +812,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	{
 
 		fno := float32(272)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{-0.330117, 10.811301, 1.914508}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -856,6 +847,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	{
 
 		fno := float32(273)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{-0.154848, 10.862784, 1.868560}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
@@ -890,6 +882,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	{
 
 		fno := float32(274)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.049523, 10.960778, 1.822612}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -924,6 +917,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	{
 
 		fno := float32(278)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.721499, 11.767294, 1.638818}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -958,6 +952,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	{
 
 		fno := float32(275)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.271027, 11.113775, 1.776663}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -1011,11 +1006,10 @@ func TestVmdMotion_AnimateBoneLegIk11_Shining_Miku(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, []string{pmx.LEG_IK.Right(), "足首_R_"}, true, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.LEG_IK.Right(), "足首_R_"}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{-1.869911, 2.074591, -0.911531}
 			if !matrixes.GetItem(pmx.LEG_IK.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
@@ -1075,11 +1069,10 @@ func TestVmdMotion_AnimateBoneLegIk11_Shining_Vroid(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, []string{pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.0, 9.379668, -1.051170}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
@@ -1133,11 +1126,10 @@ func TestVmdMotion_AnimateBoneLegIk12_Down_Miku(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, []string{pmx.LEG_IK.Right(), "足首_R_"}, true, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.LEG_IK.Right(), "足首_R_"}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{-1.012964, 1.623157, 0.680305}
 			if !matrixes.GetItem(pmx.LEG_IK.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
@@ -1197,7 +1189,7 @@ func TestVmdMotion_AnimateBoneLegIk13_Lamb(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model,
+	matrixes := motion.AnimateBone(0, model,
 		[]string{pmx.LEG_IK.Right(), pmx.TOE.Right(), pmx.LEG_IK.Left(), pmx.TOE.Left()}, true, false, "")
 
 	{
@@ -1302,11 +1294,10 @@ func TestVmdMotion_AnimateBoneLegIk14_Ballet(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, []string{pmx.LEG_IK.Right(), pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.LEG_IK.Right(), pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{11.324574, 10.920002, -7.150005}
 			if !matrixes.GetItem(pmx.LEG_IK.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
@@ -1366,11 +1357,10 @@ func TestVmdMotion_AnimateBoneLegIk15_Bottom(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{218}, model, []string{pmx.LEG_IK.Right(), "足首_R_"}, true, false, "")
-
 	{
 
 		fno := float32(218)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.LEG_IK.Right(), "足首_R_"}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{-1.358434, 1.913062, 0.611182}
 			if !matrixes.GetItem(pmx.LEG_IK.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
@@ -1430,11 +1420,10 @@ func TestVmdMotion_AnimateBoneLegIk16_Lamb(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, []string{pmx.LEG_IK.Right(), pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.LEG_IK.Right(), pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{-1.216134, 1.887670, -10.78867}
 			if !matrixes.GetItem(pmx.LEG_IK.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
@@ -1494,11 +1483,10 @@ func TestVmdMotion_AnimateBoneLegIk17_Snow(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, []string{pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{2.049998, 12.957623, 1.477440}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-2) {
@@ -1552,11 +1540,10 @@ func TestVmdMotion_AnimateBoneLegIk18_Syou(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{107}, model, []string{pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(107)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.365000, 12.042871, 2.034023}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -1610,11 +1597,10 @@ func TestVmdMotion_AnimateBoneLegIk19_Wa(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, []string{pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.000000, 9.900000, 0.000000}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -1668,11 +1654,10 @@ func TestVmdMotion_AnimateBoneLegIk20_Syou(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{107}, model, []string{pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(107)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.365000, 12.042871, 2.034023}
 			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -1726,11 +1711,10 @@ func TestVmdMotion_AnimateBoneLegIk21_FK(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, []string{pmx.TOE.Right()}, false, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, false, false, "")
 		{
 			expectedPosition := &mmath.MVec3{-0.133305, 10.693993, 2.314730}
 			if !matrixes.GetItem(pmx.LEG.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -1766,11 +1750,10 @@ func TestVmdMotion_AnimateBoneLegIk22_Bake(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, []string{pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{-0.133306, 10.693994, 2.314731}
 			if !matrixes.GetItem(pmx.LEG.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -1806,11 +1789,10 @@ func TestVmdMotion_AnimateBoneLegIk22_NoLimit(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, []string{pmx.TOE.Right()}, true, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{-0.133305, 10.693993, 2.314730}
 			if !matrixes.GetItem(pmx.LEG.Right(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -1846,11 +1828,10 @@ func TestVmdMotion_AnimateBoneArmIk(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{3182}, model, nil, true, false, "")
-
 	{
 
 		fno := float32(3182)
+		matrixes := motion.AnimateBone(fno, model, nil, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0, 0, 0}
 			if !matrixes.GetItem(pmx.ROOT.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -1976,11 +1957,10 @@ func TestVmdMotion_AnimateBoneLegIk2(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, nil, true, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, nil, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.04952335, 9.0, 1.72378033}
 			if !matrixes.GetItem(pmx.CENTER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
@@ -2166,11 +2146,10 @@ func TestVmdMotion_AnimateBoneArmIk2(t *testing.T) {
 	model := modelData.(*pmx.PmxModel)
 	model.SetUp()
 
-	matrixes := motion.AnimateBone([]float32{0}, model, nil, true, false, "")
-
 	{
 
 		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, nil, true, false, "")
 		{
 			expectedPosition := &mmath.MVec3{0.04952335, 9.0, 1.72378033}
 			if !matrixes.GetItem(pmx.CENTER.String(), fno).Position.PracticallyEquals(expectedPosition, 1e-3) {
