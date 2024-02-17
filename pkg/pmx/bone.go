@@ -98,6 +98,7 @@ type Bone struct {
 	EffectiveBoneIndexes   []int            // 自分を付与親として登録しているボーンINDEX一覧
 	IkLinkBoneIndexes      []int            // IKリンクとして登録されているIKボーンのボーンIndex
 	IkTargetBoneIndexes    []int            // IKターゲットとして登録されているIKボーンのボーンIndex
+	ChildIkBoneIndexes     []int            // 自分を親として登録しているIKボーンのボーンIndex
 	AngleLimit             bool             // 自分がIKリンクボーンの角度制限がある場合、true
 	MinAngleLimit          *mmath.MRotation // 自分がIKリンクボーンの角度制限の下限
 	MaxAngleLimit          *mmath.MRotation // 自分がIKリンクボーンの角度制限の上限
@@ -429,8 +430,21 @@ type LayerIndex struct {
 
 type LayerIndexes []LayerIndex
 
-func (p LayerIndexes) Len() int { return len(p) }
+func (p LayerIndexes) Len() int {
+	return len(p)
+}
 func (p LayerIndexes) Less(i, j int) bool {
 	return p[i].Layer < p[j].Layer || (p[i].Layer == p[j].Layer && p[i].Index < p[j].Index)
 }
-func (p LayerIndexes) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (p LayerIndexes) Swap(i, j int) {
+	p[i], p[j] = p[j], p[i]
+}
+
+func (p LayerIndexes) Contains(index int) bool {
+	for _, layerIndex := range p {
+		if layerIndex.Index == index {
+			return true
+		}
+	}
+	return false
+}

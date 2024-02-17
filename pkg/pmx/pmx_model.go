@@ -3,11 +3,13 @@ package pmx
 import (
 	"embed"
 	"slices"
+	"sort"
 
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 
 )
 
@@ -160,15 +162,19 @@ func (pm *PmxModel) GetRelativeBoneIndexes(boneIndex int, parentBoneIndexes, rel
 func (pm *PmxModel) SetUp() {
 	for _, bone := range pm.Bones.Data {
 		// 関係ボーンリストを一旦クリア
-		bone.IkLinkBoneIndexes = []int{}
-		bone.IkTargetBoneIndexes = []int{}
-		bone.EffectiveBoneIndexes = []int{}
-		bone.ChildBoneIndexes = []int{}
+		bone.IkLinkBoneIndexes = make([]int, 0)
+		bone.IkTargetBoneIndexes = make([]int, 0)
+		bone.EffectiveBoneIndexes = make([]int, 0)
+		bone.ChildBoneIndexes = make([]int, 0)
+		bone.ChildIkBoneIndexes = make([]int, 0)
 	}
 
+	// IK親（子として登録されていない）ボーンINDEXリスト
+	parentIkBoneIndexes := make([]int, 0)
 	// 関連ボーンINDEX情報を設定
 	for _, bone := range pm.Bones.GetSortedData() {
 		if bone.IsIK() && bone.Ik != nil {
+			parentIkBoneIndexes = append(parentIkBoneIndexes, bone.Index)
 			// IKのリンクとターゲット
 			for _, link := range bone.Ik.Links {
 				if pm.Bones.Contains(link.BoneIndex) &&
@@ -228,6 +234,55 @@ func (pm *PmxModel) SetUp() {
 
 		// 逆オフセット行列は親ボーンからの相対位置分
 		bone.RevertOffsetMatrix.Translate(bone.ParentRelativePosition.Copy())
+	}
+
+	// IK子ボーンINDEXリスト
+	ikBoneLayerIndexes := make(map[int]LayerIndexes, 0)
+	for _, bone := range pm.Bones.GetSortedData() {
+		if bone.IsIK() {
+			ikBoneLayerIndexes[bone.Index] =
+				append(ikBoneLayerIndexes[bone.Index], LayerIndex{Index: bone.Index, Layer: bone.Layer})
+			for _, parentIndex := range bone.ParentBoneIndexes {
+				parentBone := pm.Bones.GetItem(parentIndex)
+				if parentBone.IsIK() {
+					// IK子ボーンとして追加
+					if _, ok := ikBoneLayerIndexes[parentBone.Index]; !ok {
+						ikBoneLayerIndexes[parentBone.Index] = make(LayerIndexes, 0)
+					}
+					ikBoneLayerIndexes[parentBone.Index] =
+						append(ikBoneLayerIndexes[parentBone.Index], LayerIndex{Index: bone.Index, Layer: bone.Layer})
+					// IK親ボーンINDEXリストからbone.Indexを削除
+					parentIkBoneIndexes = mutils.RemoveFromSlice(parentIkBoneIndexes, bone.Index)
+				}
+				if len(parentBone.IkLinkBoneIndexes) > 0 {
+					// IKリンクボーンとして追加
+					for _, linkIkIndex := range parentBone.IkLinkBoneIndexes {
+						linkIkBone := pm.Bones.GetItem(linkIkIndex)
+						if linkIkBone.IsIK() {
+							// IK子ボーンとして追加
+							if _, ok := ikBoneLayerIndexes[linkIkBone.Index]; !ok {
+								ikBoneLayerIndexes[linkIkBone.Index] = make(LayerIndexes, 0)
+							}
+							ikBoneLayerIndexes[linkIkBone.Index] =
+								append(ikBoneLayerIndexes[linkIkBone.Index],
+									LayerIndex{Index: bone.Index, Layer: bone.Layer})
+							// IK親ボーンINDEXリストからbone.Indexを削除
+							parentIkBoneIndexes = mutils.RemoveFromSlice(parentIkBoneIndexes, bone.Index)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// 並列計算可能な親IKボーンの子IKボーンを変形階層でソートして設定
+	for boneIndex, childLayerIndexes := range ikBoneLayerIndexes {
+		if slices.Contains(parentIkBoneIndexes, boneIndex) {
+			sort.Sort(childLayerIndexes)
+			for _, childLayerIndex := range childLayerIndexes {
+				pm.Bones.GetItem(boneIndex).ChildIkBoneIndexes = append(pm.Bones.GetItem(boneIndex).ChildIkBoneIndexes, childLayerIndex.Index)
+			}
+		}
 	}
 
 	// 変形階層・ボーンINDEXでソート
