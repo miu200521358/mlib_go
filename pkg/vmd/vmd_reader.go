@@ -6,6 +6,7 @@ import (
 	"golang.org/x/text/encoding/japanese"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+
 )
 
 // https://hariganep.seesaa.net/article/201103article_1.html
@@ -201,6 +202,10 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 			return err
 		}
 		v.Curves = NewBoneCurvesByValues(curves)
+
+		if !motion.BoneFrames.Contains(boneName) {
+			motion.BoneFrames.Append(NewBoneNameFrames(boneName))
+		}
 
 		motion.AppendBoneFrame(boneName, v)
 	}

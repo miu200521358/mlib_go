@@ -2,18 +2,19 @@ package vmd
 
 import (
 	"slices"
+	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type BoneNameFrames struct {
 	*mcore.IndexFloatModelCorrection[*BoneFrame]
-	Name              string    // ボーン名
-	IkIndexes         []float32 // IK計算済みキーフレリスト
-	RegisteredIndexes []float32 // 登録対象キーフレリスト
+	Name              string       // ボーン名
+	IkIndexes         []float32    // IK計算済みキーフレリスト
+	RegisteredIndexes []float32    // 登録対象キーフレリスト
+	lock              sync.RWMutex // マップアクセス制御用
 }
 
 func NewBoneNameFrames(name string) *BoneNameFrames {
@@ -22,6 +23,7 @@ func NewBoneNameFrames(name string) *BoneNameFrames {
 		Name:                      name,
 		IkIndexes:                 []float32{},
 		RegisteredIndexes:         []float32{},
+		lock:                      sync.RWMutex{},
 	}
 }
 
@@ -54,6 +56,10 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	if bnfs == nil {
 		return NewBoneFrame(index)
 	}
+
+	bnfs.lock.RLock()
+	defer bnfs.lock.RUnlock()
+
 	if slices.Contains(bnfs.Indexes, index) {
 		return bnfs.Data[index]
 	}
@@ -131,6 +137,9 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 
 // bf.Registered が true の場合、補間曲線を分割して登録する
 func (bnfs *BoneNameFrames) Append(value *BoneFrame) {
+	bnfs.lock.Lock()
+	defer bnfs.lock.Unlock()
+
 	if !slices.Contains(bnfs.Indexes, value.Index) {
 		bnfs.Indexes = append(bnfs.Indexes, value.Index)
 		mutils.SortFloat32s(bnfs.Indexes)

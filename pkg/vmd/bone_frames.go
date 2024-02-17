@@ -10,11 +10,13 @@ import (
 
 type BoneFrames struct {
 	Data map[string]*BoneNameFrames
+	lock sync.RWMutex // マップアクセス制御用
 }
 
 func NewBoneFrames() *BoneFrames {
 	return &BoneFrames{
 		Data: make(map[string]*BoneNameFrames, 0),
+		lock: sync.RWMutex{},
 	}
 }
 
@@ -37,9 +39,9 @@ func (bfs *BoneFrames) Append(bnfs *BoneNameFrames) {
 }
 
 func (bfs *BoneFrames) GetItem(boneName string) *BoneNameFrames {
-	if !bfs.Contains(boneName) {
-		bfs.Append(NewBoneNameFrames(boneName))
-	}
+	bfs.lock.RLock()
+	defer bfs.lock.RUnlock()
+
 	return bfs.Data[boneName]
 }
 
@@ -705,7 +707,7 @@ func (bfs *BoneFrames) getBoneMatrixes(
 // 該当キーフレにおけるボーンの移動位置
 func (bfs *BoneFrames) getPosition(frame float32, boneName string, model *pmx.PmxModel) *mmath.MMat4 {
 	bone := model.Bones.GetItemByName(boneName)
-	bf := bfs.Data[boneName].GetItem(frame)
+	bf := bfs.GetItem(boneName).GetItem(frame)
 
 	mat := mmath.NewMMat4()
 	mat[0][3] = bf.Position.GetX()
@@ -756,7 +758,7 @@ func (bfs *BoneFrames) getRotation(
 	bone := model.Bones.GetItemByName(boneName)
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
-	bf := bfs.Data[boneName].GetItem(frame)
+	bf := bfs.GetItem(boneName).GetItem(frame)
 	rot := bf.Rotation.GetQuaternion().Copy()
 	if bf.IkRotation != nil && !bf.IkRotation.GetRadians().IsZero() {
 		// IK用回転を持っている場合、置き換え
@@ -822,7 +824,7 @@ func (bfs *BoneFrames) getRotationWithEffect(
 
 // 該当キーフレにおけるボーンの拡大率
 func (bfs *BoneFrames) getScale(frame float32, boneName string, model *pmx.PmxModel) *mmath.MMat4 {
-	bf := bfs.Data[boneName].GetItem(frame)
+	bf := bfs.GetItem(boneName).GetItem(frame)
 	mat := mmath.NewMMat4()
 	mat[0][0] += bf.Scale.GetX()
 	mat[1][1] += bf.Scale.GetY()

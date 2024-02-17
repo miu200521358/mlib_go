@@ -83,5 +83,12 @@ func (m *VmdMotion) AnimateBone(
 		}
 	}
 
+	for _, bone := range model.Bones.Data {
+		// ボーンフレームを生成
+		if !m.BoneFrames.Contains(bone.Name) {
+			m.BoneFrames.Append(NewBoneNameFrames(bone.Name))
+		}
+	}
+
 	return m.BoneFrames.Animate(frames, model, boneNames, isCalcIk, isOutLog, description)
 }
