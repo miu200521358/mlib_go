@@ -432,25 +432,53 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 ) BoneTrees {
 	// 各ボーンの座標変換行列×逆BOf行列
 	matrixes := make([][]*mmath.MMat4, 0, len(frames))
+	boneCount := len(targetBoneNames)
 
+	// 最初にフレーム数*ボーン数分のスライスを確保
 	for i := range frames {
 		matrixes = append(matrixes, make([]*mmath.MMat4, 0, len(targetBoneIndexes)))
-
-		// 最初にフレーム数*ボーン数分のスライスを確保
 		for j := 0; j < len(targetBoneIndexes); j++ {
 			matrixes[i] = append(matrixes[i], mmath.NewMMat4())
-			boneName := targetBoneIndexes[j]
-			bone := model.Bones.GetItemByName(boneName)
-			// 逆BOf行列(初期姿勢行列)
-			matrixes[i][j].Mul(bone.RevertOffsetMatrix)
-			// 位置
-			matrixes[i][j].Mul(positions[i][j])
-			// 回転
-			matrixes[i][j].Mul(rotations[i][j])
-			// スケール
-			matrixes[i][j].Mul(scales[i][j])
 		}
 	}
+
+	var frameWg sync.WaitGroup
+	for i, frame := range frames {
+		frameWg.Add(1)
+		go func(i int, frame float32) {
+			defer frameWg.Done()
+
+			var boneWg sync.WaitGroup
+			// ボーンを一定件数ごとに並列処理（件数は変数保持）
+			count := 100
+			if boneCount < count {
+				count = boneCount
+			}
+			for j := 0; j < boneCount; j += count {
+				boneWg.Add(1)
+				go func(i, j int, frame float32) {
+					defer boneWg.Done()
+					for k := j; k < j+count; k++ {
+						if k >= boneCount {
+							break
+						}
+						boneName := targetBoneIndexes[k]
+						bone := model.Bones.GetItemByName(boneName)
+						// 逆BOf行列(初期姿勢行列)
+						matrixes[i][k].Mul(bone.RevertOffsetMatrix)
+						// 位置
+						matrixes[i][k].Mul(positions[i][k])
+						// 回転
+						matrixes[i][k].Mul(rotations[i][k])
+						// スケール
+						matrixes[i][k].Mul(scales[i][k])
+					}
+				}(i, j, frame)
+			}
+			boneWg.Wait()
+		}(i, frame)
+	}
+	frameWg.Wait()
 
 	boneTrees := NewBoneTrees()
 
@@ -550,7 +578,6 @@ func (bfs *BoneFrames) getBoneMatrixes(
 	isOutLog bool,
 	description string,
 ) ([][]*mmath.MMat4, [][]*mmath.MMat4, [][]*mmath.MMat4, [][]*mmath.MQuaternion) {
-	var frameWg sync.WaitGroup
 	positions := make([][]*mmath.MMat4, 0, len(frames))
 	rotations := make([][]*mmath.MMat4, 0, len(frames))
 	scales := make([][]*mmath.MMat4, 0, len(frames))
@@ -571,6 +598,7 @@ func (bfs *BoneFrames) getBoneMatrixes(
 		}
 	}
 
+	var frameWg sync.WaitGroup
 	for i, frame := range frames {
 		frameWg.Add(1)
 		go func(i int, frame float32) {
