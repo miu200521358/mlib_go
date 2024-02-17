@@ -6,18 +6,33 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type LightFrames struct {
 	*mcore.IndexFloatModelCorrection[*LightFrame]
-	RegisteredIndexes []float32 // 登録対象キーフレリスト
+	RegisteredIndexes map[float32]float32 // 登録対象キーフレリスト
 }
 
 func NewLightFrames() *LightFrames {
 	return &LightFrames{
 		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*LightFrame](),
-		RegisteredIndexes:         []float32{},
+		RegisteredIndexes:         make(map[float32]float32, 0),
 	}
+}
+
+func (c *LightFrames) ContainsRegistered(key float32) bool {
+	_, ok := c.RegisteredIndexes[key]
+	return ok
+}
+
+func (c *LightFrames) GetSortedRegisteredIndexes() []float32 {
+	keys := make([]float32, 0, len(c.RegisteredIndexes))
+	for key := range c.RegisteredIndexes {
+		keys = append(keys, key)
+	}
+	slices.Sort(keys)
+	return keys
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
@@ -26,16 +41,18 @@ func (lfs *LightFrames) GetRangeIndexes(index float32) (float32, float32) {
 	prevIndex := float32(0)
 	nextIndex := index
 
-	if idx := mutils.SearchFloat32s(lfs.Indexes, index); idx == 0 {
+	lightIndexes := lfs.GetSortedIndexes()
+
+	if idx := mutils.SearchFloat32s(lightIndexes, index); idx == 0 {
 		prevIndex = 0
 	} else {
-		prevIndex = lfs.Indexes[idx-1]
+		prevIndex = lightIndexes[idx-1]
 	}
 
-	if idx := mutils.SearchFloat32s(lfs.Indexes, index); idx == len(lfs.Indexes) {
-		nextIndex = slices.Max(lfs.Indexes)
+	if idx := mutils.SearchFloat32s(lightIndexes, index); idx == len(lightIndexes) {
+		nextIndex = slices.Max(lightIndexes)
 	} else {
-		nextIndex = lfs.Indexes[idx]
+		nextIndex = lightIndexes[idx]
 	}
 
 	return prevIndex, nextIndex
@@ -50,7 +67,7 @@ func (lfs *LightFrames) GetItem(index float32) *LightFrame {
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := lfs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && slices.Contains(lfs.Indexes, nextIndex) {
+	if prevIndex == nextIndex && lfs.Contains(nextIndex) {
 		nextLf := lfs.Data[nextIndex]
 		copied := &LightFrame{
 			BaseFrame: NewVmdBaseFrame(index),
@@ -61,12 +78,12 @@ func (lfs *LightFrames) GetItem(index float32) *LightFrame {
 	}
 
 	var prevLf, nextLf *LightFrame
-	if slices.Contains(lfs.Indexes, prevIndex) {
+	if lfs.Contains(prevIndex) {
 		prevLf = lfs.Data[prevIndex]
 	} else {
 		prevLf = NewLightFrame(index)
 	}
-	if slices.Contains(lfs.Indexes, nextIndex) {
+	if lfs.Contains(nextIndex) {
 		nextLf = lfs.Data[nextIndex]
 	} else {
 		nextLf = NewLightFrame(index)
@@ -83,14 +100,12 @@ func (lfs *LightFrames) GetItem(index float32) *LightFrame {
 }
 
 func (lfs *LightFrames) Append(value *LightFrame) {
-	if !slices.Contains(lfs.Indexes, value.Index) {
-		lfs.Indexes = append(lfs.Indexes, value.Index)
-		mutils.SortFloat32s(lfs.Indexes)
+	if !lfs.Contains(value.Index) {
+		lfs.Indexes[value.Index] = value.Index
 	}
 	if value.Registered {
-		if !slices.Contains(lfs.RegisteredIndexes, value.Index) {
-			lfs.RegisteredIndexes = append(lfs.RegisteredIndexes, value.Index)
-			mutils.SortFloat32s(lfs.RegisteredIndexes)
+		if !lfs.ContainsRegistered(value.Index) {
+			lfs.RegisteredIndexes[value.Index] = value.Index
 		}
 	}
 
