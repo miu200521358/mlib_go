@@ -38,13 +38,13 @@ func (v *IndexModel) Copy() IndexModelInterface {
 // Tのリスト基底クラス
 type IndexModelCorrection[T IndexModelInterface] struct {
 	Data    map[int]T
-	Indexes []int
+	Indexes map[int]int
 }
 
 func NewIndexModelCorrection[T IndexModelInterface]() *IndexModelCorrection[T] {
 	return &IndexModelCorrection[T]{
 		Data:    make(map[int]T, 0),
-		Indexes: make([]int, 0),
+		Indexes: make(map[int]int, 0),
 	}
 }
 
@@ -70,13 +70,18 @@ func (c *IndexModelCorrection[T]) Append(value T) {
 		value.SetIndex(len(c.Data))
 	}
 	c.Data[value.GetIndex()] = value
-	if !slices.Contains(c.Indexes, value.GetIndex()) {
-		c.Indexes = append(c.Indexes, value.GetIndex())
+	if _, ok := c.Indexes[value.GetIndex()]; !ok {
+		c.Indexes[value.GetIndex()] = value.GetIndex()
 	}
 }
 
-func (c *IndexModelCorrection[T]) SortIndexes() {
-	slices.Sort(c.Indexes)
+func (c *IndexModelCorrection[T]) GetSortedIndexes() []int {
+	keys := make([]int, 0, len(c.Indexes))
+	for key := range c.Indexes {
+		keys = append(keys, key)
+	}
+	slices.Sort(keys)
+	return keys
 }
 
 func (c *IndexModelCorrection[T]) DeleteItem(index int) {
@@ -112,7 +117,7 @@ func (c *IndexModelCorrection[T]) LastIndex() int {
 
 func (c *IndexModelCorrection[T]) GetSortedData() []T {
 	sortedData := make([]T, len(c.Indexes))
-	for i, index := range c.Indexes {
+	for i, index := range c.GetSortedIndexes() {
 		sortedData[i] = c.Data[index]
 	}
 	return sortedData

@@ -82,5 +82,5 @@ go get -u golang.org/x/image
 2. main.go を実行
 3. `go tool pprof cmd\main.go cmd\cpu.pprof`
 3. `go tool pprof cmd\main.go cmd\memory.pprof`
-4. `(pprof) top 50`
+4. `(pprof) top`
 
