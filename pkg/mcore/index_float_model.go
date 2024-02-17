@@ -38,13 +38,13 @@ func (v *IndexFloatModel) Copy() IndexFloatModelInterface {
 // Tのリスト基底クラス
 type IndexFloatModelCorrection[T IndexFloatModelInterface] struct {
 	Data    map[float32]T
-	Indexes map[float32]float32
+	Indexes []float32
 }
 
 func NewIndexFloatModelCorrection[T IndexFloatModelInterface]() *IndexFloatModelCorrection[T] {
 	return &IndexFloatModelCorrection[T]{
 		Data:    make(map[float32]T, 0),
-		Indexes: make(map[float32]float32, 0),
+		Indexes: make([]float32, 0),
 	}
 }
 
@@ -65,18 +65,14 @@ func (c *IndexFloatModelCorrection[T]) Append(value T) {
 		value.SetIndex(float32(len(c.Data)))
 	}
 	c.Data[value.GetIndex()] = value
-	if _, ok := c.Indexes[value.GetIndex()]; !ok {
-		c.Indexes[value.GetIndex()] = value.GetIndex()
+	if !slices.Contains(c.Indexes, value.GetIndex()) {
+		c.Indexes = append(c.Indexes, value.GetIndex())
 	}
+	c.SortIndexes()
 }
 
-func (c *IndexFloatModelCorrection[T]) GetSortedIndexes() []float32 {
-	keys := make([]float32, 0, len(c.Indexes))
-	for key := range c.Indexes {
-		keys = append(keys, key)
-	}
-	slices.Sort(keys)
-	return keys
+func (c *IndexFloatModelCorrection[T]) SortIndexes() {
+	slices.Sort(c.Indexes)
 }
 
 func (c *IndexFloatModelCorrection[T]) DeleteItem(index float32) {
@@ -112,7 +108,7 @@ func (c *IndexFloatModelCorrection[T]) LastIndex() float32 {
 
 func (c *IndexFloatModelCorrection[T]) GetSortedData() []T {
 	sortedData := make([]T, len(c.Indexes))
-	for i, index := range c.GetSortedIndexes() {
+	for i, index := range c.Indexes {
 		sortedData[i] = c.Data[index]
 	}
 	return sortedData

@@ -11,28 +11,14 @@ import (
 
 type CameraFrames struct {
 	*mcore.IndexFloatModelCorrection[*CameraFrame]
-	RegisteredIndexes map[float32]float32 // 登録対象キーフレリスト
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewCameraFrames() *CameraFrames {
 	return &CameraFrames{
 		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*CameraFrame](),
-		RegisteredIndexes:         make(map[float32]float32, 0),
+		RegisteredIndexes:         []float32{},
 	}
-}
-
-func (c *CameraFrames) ContainsRegistered(key float32) bool {
-	_, ok := c.RegisteredIndexes[key]
-	return ok
-}
-
-func (c *CameraFrames) GetSortedRegisteredIndexes() []float32 {
-	keys := make([]float32, 0, len(c.RegisteredIndexes))
-	for key := range c.RegisteredIndexes {
-		keys = append(keys, key)
-	}
-	slices.Sort(keys)
-	return keys
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
@@ -41,18 +27,16 @@ func (cfs *CameraFrames) GetRangeIndexes(index float32) (float32, float32) {
 	prevIndex := float32(0)
 	nextIndex := index
 
-	sortedIndexes := cfs.GetSortedIndexes()
-
-	if idx := mutils.SearchFloat32s(sortedIndexes, index); idx == 0 {
+	if idx := mutils.SearchFloat32s(cfs.Indexes, index); idx == 0 {
 		prevIndex = 0.0
 	} else {
-		prevIndex = sortedIndexes[idx-1]
+		prevIndex = cfs.Indexes[idx-1]
 	}
 
-	if idx := mutils.SearchFloat32s(sortedIndexes, index); idx == len(sortedIndexes) {
-		nextIndex = slices.Max(sortedIndexes)
+	if idx := mutils.SearchFloat32s(cfs.Indexes, index); idx == len(cfs.Indexes) {
+		nextIndex = slices.Max(cfs.Indexes)
 	} else {
-		nextIndex = sortedIndexes[idx]
+		nextIndex = cfs.Indexes[idx]
 	}
 
 	return prevIndex, nextIndex
@@ -67,7 +51,7 @@ func (cfs *CameraFrames) GetItem(index float32) *CameraFrame {
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := cfs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && cfs.Contains(nextIndex) {
+	if prevIndex == nextIndex && slices.Contains(cfs.Indexes, nextIndex) {
 		nextCf := cfs.Data[nextIndex]
 		copied := &CameraFrame{
 			BaseFrame:        NewVmdBaseFrame(index),
@@ -83,12 +67,12 @@ func (cfs *CameraFrames) GetItem(index float32) *CameraFrame {
 	}
 
 	var prevCf, nextCf *CameraFrame
-	if cfs.Contains(prevIndex) {
+	if slices.Contains(cfs.Indexes, prevIndex) {
 		prevCf = cfs.Data[prevIndex]
 	} else {
 		prevCf = NewCameraFrame(index)
 	}
-	if cfs.Contains(nextIndex) {
+	if slices.Contains(cfs.Indexes, nextIndex) {
 		nextCf = cfs.Data[nextIndex]
 	} else {
 		nextCf = NewCameraFrame(index)
@@ -114,13 +98,15 @@ func (cfs *CameraFrames) GetItem(index float32) *CameraFrame {
 
 // bf.Registered が true の場合、補間曲線を分割して登録する
 func (cfs *CameraFrames) Append(value *CameraFrame) {
-	if !cfs.Contains(value.Index) {
-		cfs.Indexes[value.Index] = value.Index
+	if !slices.Contains(cfs.Indexes, value.Index) {
+		cfs.Indexes = append(cfs.Indexes, value.Index)
+		mutils.SortFloat32s(cfs.Indexes)
 	}
 
 	if value.Registered {
-		if !cfs.ContainsRegistered(value.Index) {
-			cfs.RegisteredIndexes[value.Index] = value.Index
+		if !slices.Contains(cfs.RegisteredIndexes, value.Index) {
+			cfs.RegisteredIndexes = append(cfs.RegisteredIndexes, value.Index)
+			mutils.SortFloat32s(cfs.RegisteredIndexes)
 		}
 		// 補間曲線を分割する
 		prevIndex, nextIndex := cfs.GetRangeIndexes(value.Index)

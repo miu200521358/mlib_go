@@ -6,50 +6,23 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type BoneNameFrames struct {
 	*mcore.IndexFloatModelCorrection[*BoneFrame]
-	Name              string              // ボーン名
-	IkIndexes         map[float32]float32 // IK計算済みキーフレリスト
-	RegisteredIndexes map[float32]float32 // 登録対象キーフレリスト
+	Name              string    // ボーン名
+	IkIndexes         []float32 // IK計算済みキーフレリスト
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewBoneNameFrames(name string) *BoneNameFrames {
 	return &BoneNameFrames{
 		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*BoneFrame](),
 		Name:                      name,
-		IkIndexes:                 make(map[float32]float32, 0),
-		RegisteredIndexes:         make(map[float32]float32, 0),
+		IkIndexes:                 []float32{},
+		RegisteredIndexes:         []float32{},
 	}
-}
-
-func (c *BoneNameFrames) ContainsIk(key float32) bool {
-	_, ok := c.IkIndexes[key]
-	return ok
-}
-
-func (c *BoneNameFrames) ContainsRegistered(key float32) bool {
-	_, ok := c.RegisteredIndexes[key]
-	return ok
-}
-
-func (c *BoneNameFrames) GetSortedIkIndexes() []float32 {
-	keys := make([]float32, 0, len(c.IkIndexes))
-	for key := range c.IkIndexes {
-		keys = append(keys, key)
-	}
-	slices.Sort(keys)
-	return keys
-}
-
-func (c *BoneNameFrames) GetSortedRegisteredIndexes() []float32 {
-	keys := make([]float32, 0, len(c.RegisteredIndexes))
-	for key := range c.RegisteredIndexes {
-		keys = append(keys, key)
-	}
-	slices.Sort(keys)
-	return keys
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
@@ -61,18 +34,16 @@ func (bnfs *BoneNameFrames) GetRangeIndexes(index float32) (float32, float32) {
 	prevIndex := float32(0.0)
 	nextIndex := index
 
-	registeredIndexes := bnfs.GetSortedRegisteredIndexes()
-
-	if idx := mutils.SearchFloat32s(registeredIndexes, index); idx == 0 {
+	if idx := mutils.SearchFloat32s(bnfs.RegisteredIndexes, index); idx == 0 {
 		prevIndex = 0.0
 	} else {
-		prevIndex = registeredIndexes[idx-1]
+		prevIndex = bnfs.RegisteredIndexes[idx-1]
 	}
 
-	if idx := mutils.SearchFloat32s(registeredIndexes, index); idx == len(registeredIndexes) {
-		nextIndex = slices.Max(registeredIndexes)
+	if idx := mutils.SearchFloat32s(bnfs.RegisteredIndexes, index); idx == len(bnfs.RegisteredIndexes) {
+		nextIndex = slices.Max(bnfs.RegisteredIndexes)
 	} else {
-		nextIndex = registeredIndexes[idx]
+		nextIndex = bnfs.RegisteredIndexes[idx]
 	}
 
 	return prevIndex, nextIndex
@@ -83,14 +54,14 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	if bnfs == nil {
 		return NewBoneFrame(index)
 	}
-	if bnfs.Contains(index) {
+	if slices.Contains(bnfs.Indexes, index) {
 		return bnfs.Data[index]
 	}
 
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := bnfs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && bnfs.Contains(nextIndex) {
+	if prevIndex == nextIndex && slices.Contains(bnfs.Indexes, nextIndex) {
 		nextBf := bnfs.Data[nextIndex]
 		copied := &BoneFrame{
 			BaseFrame:     NewVmdBaseFrame(index),
@@ -107,12 +78,12 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	}
 
 	var prevBf, nextBf *BoneFrame
-	if bnfs.Contains(prevIndex) {
+	if slices.Contains(bnfs.Indexes, prevIndex) {
 		prevBf = bnfs.Data[prevIndex]
 	} else {
 		prevBf = NewBoneFrame(index)
 	}
-	if bnfs.Contains(nextIndex) {
+	if slices.Contains(bnfs.Indexes, nextIndex) {
 		nextBf = bnfs.Data[nextIndex]
 	} else {
 		nextBf = NewBoneFrame(index)
@@ -160,16 +131,19 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 
 // bf.Registered が true の場合、補間曲線を分割して登録する
 func (bnfs *BoneNameFrames) Append(value *BoneFrame) {
-	if !bnfs.Contains(value.Index) {
-		bnfs.Indexes[value.Index] = value.Index
+	if !slices.Contains(bnfs.Indexes, value.Index) {
+		bnfs.Indexes = append(bnfs.Indexes, value.Index)
+		mutils.SortFloat32s(bnfs.Indexes)
 	}
-	if value.IkRegistered && !bnfs.ContainsIk(value.Index) {
-		bnfs.IkIndexes[value.Index] = value.Index
+	if value.IkRegistered && !slices.Contains(bnfs.IkIndexes, value.Index) {
+		bnfs.IkIndexes = append(bnfs.IkIndexes, value.Index)
+		mutils.SortFloat32s(bnfs.IkIndexes)
 	}
 
 	if value.Registered {
-		if !bnfs.ContainsRegistered(value.Index) {
-			bnfs.RegisteredIndexes[value.Index] = value.Index
+		if !slices.Contains(bnfs.RegisteredIndexes, value.Index) {
+			bnfs.RegisteredIndexes = append(bnfs.RegisteredIndexes, value.Index)
+			mutils.SortFloat32s(bnfs.RegisteredIndexes)
 		}
 		// 補間曲線を分割する
 		prevIndex, nextIndex := bnfs.GetRangeIndexes(value.Index)

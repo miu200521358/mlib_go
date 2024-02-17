@@ -5,35 +5,20 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type MorphNameFrames struct {
 	*mcore.IndexFloatModelCorrection[*MorphFrame]
-	Name              string              // ボーン名
-	RegisteredIndexes map[float32]float32 // 登録対象キーフレリスト
+	Name              string    // ボーン名
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewMorphNameFrames(name string) *MorphNameFrames {
 	return &MorphNameFrames{
 		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*MorphFrame](),
 		Name:                      name,
-		RegisteredIndexes:         make(map[float32]float32, 0),
+		RegisteredIndexes:         []float32{},
 	}
-}
-
-func (c *MorphNameFrames) ContainsRegistered(key float32) bool {
-	_, ok := c.RegisteredIndexes[key]
-	return ok
-}
-
-func (c *MorphNameFrames) GetSortedRegisteredIndexes() []float32 {
-	keys := make([]float32, 0, len(c.RegisteredIndexes))
-	for key := range c.RegisteredIndexes {
-		keys = append(keys, key)
-	}
-	slices.Sort(keys)
-	return keys
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
@@ -42,18 +27,16 @@ func (mnfs *MorphNameFrames) GetRangeIndexes(index float32) (float32, float32) {
 	prevIndex := float32(0)
 	nextIndex := index
 
-	morphIndexes := mnfs.GetSortedIndexes()
-
-	if idx := mutils.SearchFloat32s(morphIndexes, index); idx == 0 {
+	if idx := mutils.SearchFloat32s(mnfs.Indexes, index); idx == 0 {
 		prevIndex = 0
 	} else {
-		prevIndex = morphIndexes[idx-1]
+		prevIndex = mnfs.Indexes[idx-1]
 	}
 
-	if idx := mutils.SearchFloat32s(morphIndexes, index); idx == len(morphIndexes) {
-		nextIndex = slices.Max(morphIndexes)
+	if idx := mutils.SearchFloat32s(mnfs.Indexes, index); idx == len(mnfs.Indexes) {
+		nextIndex = slices.Max(mnfs.Indexes)
 	} else {
-		nextIndex = morphIndexes[idx]
+		nextIndex = mnfs.Indexes[idx]
 	}
 
 	return prevIndex, nextIndex
@@ -68,7 +51,7 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := mnfs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && mnfs.Contains(nextIndex) {
+	if prevIndex == nextIndex && slices.Contains(mnfs.Indexes, nextIndex) {
 		nextMf := mnfs.Data[nextIndex]
 		copied := &MorphFrame{
 			BaseFrame: NewVmdBaseFrame(index),
@@ -78,12 +61,12 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 	}
 
 	var prevMf, nextMf *MorphFrame
-	if mnfs.Contains(prevIndex) {
+	if slices.Contains(mnfs.Indexes, prevIndex) {
 		prevMf = mnfs.Data[prevIndex]
 	} else {
 		prevMf = NewMorphFrame(index)
 	}
-	if mnfs.Contains(nextIndex) {
+	if slices.Contains(mnfs.Indexes, nextIndex) {
 		nextMf = mnfs.Data[nextIndex]
 	} else {
 		nextMf = NewMorphFrame(index)
@@ -96,13 +79,15 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 }
 
 func (mnfs *MorphNameFrames) Append(value *MorphFrame) {
-	if !mnfs.Contains(value.Index) {
-		mnfs.Indexes[value.Index] = value.Index
+	if !slices.Contains(mnfs.Indexes, value.Index) {
+		mnfs.Indexes = append(mnfs.Indexes, value.Index)
+		mutils.SortFloat32s(mnfs.Indexes)
 	}
 
 	if value.Registered {
-		if !mnfs.ContainsRegistered(value.Index) {
-			mnfs.RegisteredIndexes[value.Index] = value.Index
+		if !slices.Contains(mnfs.RegisteredIndexes, value.Index) {
+			mnfs.RegisteredIndexes = append(mnfs.RegisteredIndexes, value.Index)
+			mutils.SortFloat32s(mnfs.RegisteredIndexes)
 		}
 	}
 
