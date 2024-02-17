@@ -10,7 +10,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type PmxModel struct {
@@ -261,42 +260,8 @@ func (pm *PmxModel) SetUp() {
 						append(ikBoneLayerIndexes[bone.Index],
 							LayerIndex{Index: ikRelativeBone.Index, Layer: ikRelativeBone.Layer})
 					// IK末端ボーンINDEXリストからbone.Indexを削除
-					tailIkBoneIndexes = mutils.RemoveFromSlice(tailIkBoneIndexes, ikRelativeBone.Index)
+					tailIkBoneIndexes = mutils.RemoveFromSlice(tailIkBoneIndexes, bone.Index)
 				}
-				// if len(ikRelativeBone.IkLinkBoneIndexes) > 0 {
-				// 	// IKリンクボーンとして追加
-				// 	for _, linkIkIndex := range ikRelativeBone.IkLinkBoneIndexes {
-				// 		linkIkBone := pm.Bones.GetItem(linkIkIndex)
-				// 		if linkIkBone.IsIK() {
-				// 			// IK子ボーンとして追加
-				// 			if _, ok := ikBoneLayerIndexes[linkIkBone.Index]; !ok {
-				// 				ikBoneLayerIndexes[linkIkBone.Index] = make(LayerIndexes, 0)
-				// 			}
-				// 			ikBoneLayerIndexes[linkIkBone.Index] =
-				// 				append(ikBoneLayerIndexes[linkIkBone.Index],
-				// 					LayerIndex{Index: bone.Index, Layer: bone.Layer})
-				// 			// IK親ボーンINDEXリストからbone.Indexを削除
-				// 			parentIkBoneIndexes = mutils.RemoveFromSlice(parentIkBoneIndexes, bone.Index)
-				// 		}
-				// 	}
-				// }
-				// if len(ikRelativeBone.RelativeBoneIndexes) > 0 {
-				// 	// 関連ボーンとして追加
-				// 	for _, relativeIndex := range ikRelativeBone.RelativeBoneIndexes {
-				// 		relativeBone := pm.Bones.GetItem(relativeIndex)
-				// 		if relativeBone.IsIK() {
-				// 			// IK子ボーンとして追加
-				// 			if _, ok := ikBoneLayerIndexes[relativeBone.Index]; !ok {
-				// 				ikBoneLayerIndexes[relativeBone.Index] = make(LayerIndexes, 0)
-				// 			}
-				// 			ikBoneLayerIndexes[relativeBone.Index] =
-				// 				append(ikBoneLayerIndexes[relativeBone.Index],
-				// 					LayerIndex{Index: bone.Index, Layer: bone.Layer})
-				// 			// IK親ボーンINDEXリストからbone.Indexを削除
-				// 			parentIkBoneIndexes = mutils.RemoveFromSlice(parentIkBoneIndexes, bone.Index)
-				// 		}
-				// 	}
-				// }
 			}
 		}
 	}
