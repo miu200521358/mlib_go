@@ -6,6 +6,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+
 )
 
 type BoneFrames struct {
@@ -448,69 +449,38 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 	}
 
 	// 各ボーンの座標変換行列×逆BOf行列
-	var boneWg1 sync.WaitGroup
-	// ボーンを一定件数ごとに並列処理（件数は変数保持）
-	count := 100
-	if boneCount < count {
-		count = boneCount
+	for j := 0; j < boneCount; j++ {
+		boneName := targetBoneIndexes[j]
+		bone := model.Bones.GetItemByName(boneName)
+		// 逆BOf行列(初期姿勢行列)
+		matrixes[j].Mul(bone.RevertOffsetMatrix)
+		// 位置
+		matrixes[j].Mul(positions[j])
+		// 回転
+		matrixes[j].Mul(rotations[j])
+		// スケール
+		matrixes[j].Mul(scales[j])
 	}
-	for i := 0; i < boneCount; i += count {
-		boneWg1.Add(1)
-		go func(i int) {
-			defer boneWg1.Done()
-			for j := i; j < i+count; j++ {
-				if j >= boneCount {
-					break
-				}
-				boneName := targetBoneIndexes[j]
-				bone := model.Bones.GetItemByName(boneName)
-				// 逆BOf行列(初期姿勢行列)
-				matrixes[j].Mul(bone.RevertOffsetMatrix)
-				// 位置
-				matrixes[j].Mul(positions[j])
-				// 回転
-				matrixes[j].Mul(rotations[j])
-				// スケール
-				matrixes[j].Mul(scales[j])
-			}
-		}(i)
-	}
-	boneWg1.Wait()
 
 	boneTrees := NewBoneTrees()
 
-	var boneWg2 sync.WaitGroup
-	// ボーンを一定件数ごとに並列処理（件数は変数保持）
-	if boneCount < count {
-		count = boneCount
+	for j := 0; j < boneCount; j++ {
+		boneName := targetBoneIndexes[j]
+		bone := model.Bones.GetItemByName(boneName)
+		localMatrix := mmath.NewMMat4()
+		for _, l := range bone.ParentBoneIndexes {
+			// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
+			parentName := model.Bones.GetItem(l).Name
+			// targetBoneNames の中にある parentName のINDEXを取得
+			parentIndex := targetBoneNames[parentName]
+			localMatrix.Mul(matrixes[parentIndex])
+		}
+		// 最後に対象ボーン自身の行列をかける
+		localMatrix.Mul(matrixes[j])
+		// BOf行列: 自身のボーンのボーンオフセット行列
+		localMatrix.Mul(bone.OffsetMatrix)
+		resultMatrixes[j] = localMatrix
 	}
-	for i := 0; i < boneCount; i += count {
-		boneWg2.Add(1)
-		go func(i int) {
-			defer boneWg2.Done()
-			for j := i; j < i+count; j++ {
-				if j >= boneCount {
-					break
-				}
-				boneName := targetBoneIndexes[j]
-				bone := model.Bones.GetItemByName(boneName)
-				localMatrix := mmath.NewMMat4()
-				for _, l := range bone.ParentBoneIndexes {
-					// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
-					parentName := model.Bones.GetItem(l).Name
-					// targetBoneNames の中にある parentName のINDEXを取得
-					parentIndex := targetBoneNames[parentName]
-					localMatrix.Mul(matrixes[parentIndex])
-				}
-				// 最後に対象ボーン自身の行列をかける
-				localMatrix.Mul(matrixes[j])
-				// BOf行列: 自身のボーンのボーンオフセット行列
-				localMatrix.Mul(bone.OffsetMatrix)
-				resultMatrixes[j] = localMatrix
-			}
-		}(i)
-	}
-	boneWg2.Wait()
 
 	for i := 0; i < len(targetBoneIndexes); i++ {
 		bone := model.Bones.GetItemByName(targetBoneIndexes[i])
