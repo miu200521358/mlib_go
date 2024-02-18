@@ -23,10 +23,11 @@
 # Go workspace file
 go.work
 
-build
-distribution
+build/
+bullet/
+distribution/
+
 cmd/user_config.json
 *.vmd
 *.pmx
-test_resources/sdef.png
 *.pprof

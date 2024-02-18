@@ -83,3 +83,6 @@ go get -u golang.org/x/image
 3. `go tool pprof cmd\main.go cmd\cpu.pprof`
 4. `(pprof) top`
 
+## bullet
+
+
