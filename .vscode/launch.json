@@ -14,7 +14,7 @@
     },
     {
       "name": "python: Build exe",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/.vscode/scripts/build_exe.py",
       "env": {
