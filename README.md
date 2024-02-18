@@ -85,4 +85,10 @@ go get -u golang.org/x/image
 
 ## bullet
 
+1. swig インストール
+https://rinatz.github.io/swigdoc/abstract.html
 
+2. 変換コード作成
+```
+(mtool) C:\MMD\mlib_go\pkg\mbt>swig -c++ -go example.i
+```
