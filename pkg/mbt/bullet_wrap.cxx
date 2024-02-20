@@ -246,6 +246,38 @@ static void* Swig_malloc(int c) {
 }
 
 
+
+
+
+
+// src\BulletCollision\CollisionDispatch\btCollisionConfiguration.h --------------
+
+struct btCollisionAlgorithmCreateFunc;
+
+class btPoolAllocator;
+
+///btCollisionConfiguration allows to configure Bullet collision detection
+///stack allocator size, default collision algorithms and persistent manifold pool size
+///@todo: describe the meaning
+class btCollisionConfiguration
+{
+public:
+	virtual ~btCollisionConfiguration()
+	{
+	}
+
+	///memory pools
+	virtual btPoolAllocator* getPersistentManifoldPool() = 0;
+
+	virtual btPoolAllocator* getCollisionAlgorithmPool() = 0;
+
+	virtual btCollisionAlgorithmCreateFunc* getCollisionAlgorithmCreateFunc(int proxyType0, int proxyType1) = 0;
+
+	virtual btCollisionAlgorithmCreateFunc* getClosestPointsAlgorithmCreateFunc(int proxyType0, int proxyType1) = 0;
+};
+
+// src\BulletCollision\CollisionDispatch\btDefaultCollisionConfiguration.h ---------------
+
 class btVoronoiSimplexSolver;
 class btConvexPenetrationDepthSolver;
 
@@ -337,11 +369,16 @@ public:
 	void setPlaneConvexMultipointIterations(int numPerturbationIterations = 3, int minimumPointsPerturbationThreshold = 3);
 };
 
+// src\bullet.h ---------------
+
+btDefaultCollisionConfiguration* NewBtDefaultCollisionConfiguration();
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void _wrap_Swig_free_mbt_2a2cf7305ff63792(void *_swig_go_0) {
+void _wrap_Swig_free_mbt_05a2dd435db1ac5b(void *_swig_go_0) {
   void *arg1 = (void *) 0 ;
   
   arg1 = *(void **)&_swig_go_0; 
@@ -351,7 +388,7 @@ void _wrap_Swig_free_mbt_2a2cf7305ff63792(void *_swig_go_0) {
 }
 
 
-void *_wrap_Swig_malloc_mbt_2a2cf7305ff63792(intgo _swig_go_0) {
+void *_wrap_Swig_malloc_mbt_05a2dd435db1ac5b(intgo _swig_go_0) {
   int arg1 ;
   void *result = 0 ;
   void *_swig_go_result;
@@ -364,7 +401,7 @@ void *_wrap_Swig_malloc_mbt_2a2cf7305ff63792(intgo _swig_go_0) {
 }
 
 
-btDefaultCollisionConfiguration *_wrap_NewBtDefaultCollisionConfiguration_mbt_2a2cf7305ff63792() {
+btDefaultCollisionConfiguration *_wrap_NewBtDefaultCollisionConfiguration_mbt_05a2dd435db1ac5b() {
   btDefaultCollisionConfiguration *result = 0 ;
   btDefaultCollisionConfiguration *_swig_go_result;
   
