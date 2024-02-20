@@ -27,9 +27,40 @@ typedef struct { char *p; intgo n; } _gostring_;
 typedef struct { void* array; intgo len; intgo cap; } _goslice_;
 
 
-extern void _wrap_Swig_free_mbt_13bad93de2ef9069(uintptr_t arg1);
-extern uintptr_t _wrap_Swig_malloc_mbt_13bad93de2ef9069(swig_intgo arg1);
-extern uintptr_t _wrap_NewBtDefaultCollisionConfiguration_mbt_13bad93de2ef9069(void);
+extern void _wrap_Swig_free_mbt_53667cdae90870b5(uintptr_t arg1);
+extern uintptr_t _wrap_Swig_malloc_mbt_53667cdae90870b5(swig_intgo arg1);
+extern void _wrap_delete_btCollisionConfiguration_mbt_53667cdae90870b5(uintptr_t arg1);
+extern uintptr_t _wrap_btCollisionConfiguration_getPersistentManifoldPool_mbt_53667cdae90870b5(uintptr_t arg1);
+extern uintptr_t _wrap_btCollisionConfiguration_getCollisionAlgorithmPool_mbt_53667cdae90870b5(uintptr_t arg1);
+extern uintptr_t _wrap_btCollisionConfiguration_getCollisionAlgorithmCreateFunc_mbt_53667cdae90870b5(uintptr_t arg1, swig_intgo arg2, swig_intgo arg3);
+extern uintptr_t _wrap_btCollisionConfiguration_getClosestPointsAlgorithmCreateFunc_mbt_53667cdae90870b5(uintptr_t arg1, swig_intgo arg2, swig_intgo arg3);
+extern void _wrap_btDefaultCollisionConstructionInfo_m_persistentManifoldPool_set_mbt_53667cdae90870b5(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btDefaultCollisionConstructionInfo_m_persistentManifoldPool_get_mbt_53667cdae90870b5(uintptr_t arg1);
+extern void _wrap_btDefaultCollisionConstructionInfo_m_collisionAlgorithmPool_set_mbt_53667cdae90870b5(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btDefaultCollisionConstructionInfo_m_collisionAlgorithmPool_get_mbt_53667cdae90870b5(uintptr_t arg1);
+extern void _wrap_btDefaultCollisionConstructionInfo_m_defaultMaxPersistentManifoldPoolSize_set_mbt_53667cdae90870b5(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btDefaultCollisionConstructionInfo_m_defaultMaxPersistentManifoldPoolSize_get_mbt_53667cdae90870b5(uintptr_t arg1);
+extern void _wrap_btDefaultCollisionConstructionInfo_m_defaultMaxCollisionAlgorithmPoolSize_set_mbt_53667cdae90870b5(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btDefaultCollisionConstructionInfo_m_defaultMaxCollisionAlgorithmPoolSize_get_mbt_53667cdae90870b5(uintptr_t arg1);
+extern void _wrap_btDefaultCollisionConstructionInfo_m_customCollisionAlgorithmMaxElementSize_set_mbt_53667cdae90870b5(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btDefaultCollisionConstructionInfo_m_customCollisionAlgorithmMaxElementSize_get_mbt_53667cdae90870b5(uintptr_t arg1);
+extern void _wrap_btDefaultCollisionConstructionInfo_m_useEpaPenetrationAlgorithm_set_mbt_53667cdae90870b5(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btDefaultCollisionConstructionInfo_m_useEpaPenetrationAlgorithm_get_mbt_53667cdae90870b5(uintptr_t arg1);
+extern uintptr_t _wrap_new_btDefaultCollisionConstructionInfo_mbt_53667cdae90870b5(void);
+extern void _wrap_delete_btDefaultCollisionConstructionInfo_mbt_53667cdae90870b5(uintptr_t arg1);
+extern uintptr_t _wrap_new_btDefaultCollisionConfiguration__SWIG_0_mbt_53667cdae90870b5(uintptr_t arg1);
+extern uintptr_t _wrap_new_btDefaultCollisionConfiguration__SWIG_1_mbt_53667cdae90870b5(void);
+extern void _wrap_delete_btDefaultCollisionConfiguration_mbt_53667cdae90870b5(uintptr_t arg1);
+extern uintptr_t _wrap_btDefaultCollisionConfiguration_getPersistentManifoldPool_mbt_53667cdae90870b5(uintptr_t arg1);
+extern uintptr_t _wrap_btDefaultCollisionConfiguration_getCollisionAlgorithmPool_mbt_53667cdae90870b5(uintptr_t arg1);
+extern uintptr_t _wrap_btDefaultCollisionConfiguration_getCollisionAlgorithmCreateFunc_mbt_53667cdae90870b5(uintptr_t arg1, swig_intgo arg2, swig_intgo arg3);
+extern uintptr_t _wrap_btDefaultCollisionConfiguration_getClosestPointsAlgorithmCreateFunc_mbt_53667cdae90870b5(uintptr_t arg1, swig_intgo arg2, swig_intgo arg3);
+extern void _wrap_btDefaultCollisionConfiguration_setConvexConvexMultipointIterations__SWIG_0_mbt_53667cdae90870b5(uintptr_t arg1, swig_intgo arg2, swig_intgo arg3);
+extern void _wrap_btDefaultCollisionConfiguration_setConvexConvexMultipointIterations__SWIG_1_mbt_53667cdae90870b5(uintptr_t arg1, swig_intgo arg2);
+extern void _wrap_btDefaultCollisionConfiguration_setConvexConvexMultipointIterations__SWIG_2_mbt_53667cdae90870b5(uintptr_t arg1);
+extern void _wrap_btDefaultCollisionConfiguration_setPlaneConvexMultipointIterations__SWIG_0_mbt_53667cdae90870b5(uintptr_t arg1, swig_intgo arg2, swig_intgo arg3);
+extern void _wrap_btDefaultCollisionConfiguration_setPlaneConvexMultipointIterations__SWIG_1_mbt_53667cdae90870b5(uintptr_t arg1, swig_intgo arg2);
+extern void _wrap_btDefaultCollisionConfiguration_setPlaneConvexMultipointIterations__SWIG_2_mbt_53667cdae90870b5(uintptr_t arg1);
 #undef intgo
 */
 import "C"
@@ -63,28 +94,360 @@ type _ sync.Mutex
 
 func Swig_free(arg1 uintptr) {
 	_swig_i_0 := arg1
-	C._wrap_Swig_free_mbt_13bad93de2ef9069(C.uintptr_t(_swig_i_0))
+	C._wrap_Swig_free_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))
 }
 
 func Swig_malloc(arg1 int) (_swig_ret uintptr) {
 	var swig_r uintptr
 	_swig_i_0 := arg1
-	swig_r = (uintptr)(C._wrap_Swig_malloc_mbt_13bad93de2ef9069(C.swig_intgo(_swig_i_0)))
+	swig_r = (uintptr)(C._wrap_Swig_malloc_mbt_53667cdae90870b5(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
-func NewBtDefaultCollisionConfiguration() (_swig_ret BtDefaultCollisionConfiguration) {
-	var swig_r BtDefaultCollisionConfiguration
-	swig_r = (BtDefaultCollisionConfiguration)(SwigcptrBtDefaultCollisionConfiguration(C._wrap_NewBtDefaultCollisionConfiguration_mbt_13bad93de2ef9069()))
+type SwigcptrBtCollisionConfiguration uintptr
+
+func (p SwigcptrBtCollisionConfiguration) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtCollisionConfiguration) SwigIsBtCollisionConfiguration() {
+}
+
+func DeleteBtCollisionConfiguration(arg1 BtCollisionConfiguration) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btCollisionConfiguration_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))
+}
+
+func (arg1 SwigcptrBtCollisionConfiguration) GetPersistentManifoldPool() (_swig_ret BtPoolAllocator) {
+	var swig_r BtPoolAllocator
+	_swig_i_0 := arg1
+	swig_r = (BtPoolAllocator)(SwigcptrBtPoolAllocator(C._wrap_btCollisionConfiguration_getPersistentManifoldPool_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
+func (arg1 SwigcptrBtCollisionConfiguration) GetCollisionAlgorithmPool() (_swig_ret BtPoolAllocator) {
+	var swig_r BtPoolAllocator
+	_swig_i_0 := arg1
+	swig_r = (BtPoolAllocator)(SwigcptrBtPoolAllocator(C._wrap_btCollisionConfiguration_getCollisionAlgorithmPool_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionConfiguration) GetCollisionAlgorithmCreateFunc(arg2 int, arg3 int) (_swig_ret BtCollisionAlgorithmCreateFunc) {
+	var swig_r BtCollisionAlgorithmCreateFunc
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	_swig_i_2 := arg3
+	swig_r = (BtCollisionAlgorithmCreateFunc)(SwigcptrBtCollisionAlgorithmCreateFunc(C._wrap_btCollisionConfiguration_getCollisionAlgorithmCreateFunc_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1), C.swig_intgo(_swig_i_2))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionConfiguration) GetClosestPointsAlgorithmCreateFunc(arg2 int, arg3 int) (_swig_ret BtCollisionAlgorithmCreateFunc) {
+	var swig_r BtCollisionAlgorithmCreateFunc
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	_swig_i_2 := arg3
+	swig_r = (BtCollisionAlgorithmCreateFunc)(SwigcptrBtCollisionAlgorithmCreateFunc(C._wrap_btCollisionConfiguration_getClosestPointsAlgorithmCreateFunc_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1), C.swig_intgo(_swig_i_2))))
+	return swig_r
+}
+
+type BtCollisionConfiguration interface {
+	Swigcptr() uintptr
+	SwigIsBtCollisionConfiguration()
+	GetPersistentManifoldPool() (_swig_ret BtPoolAllocator)
+	GetCollisionAlgorithmPool() (_swig_ret BtPoolAllocator)
+	GetCollisionAlgorithmCreateFunc(arg2 int, arg3 int) (_swig_ret BtCollisionAlgorithmCreateFunc)
+	GetClosestPointsAlgorithmCreateFunc(arg2 int, arg3 int) (_swig_ret BtCollisionAlgorithmCreateFunc)
+}
+
+type SwigcptrBtDefaultCollisionConstructionInfo uintptr
+
+func (p SwigcptrBtDefaultCollisionConstructionInfo) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtDefaultCollisionConstructionInfo) SwigIsBtDefaultCollisionConstructionInfo() {
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConstructionInfo) SetM_persistentManifoldPool(arg2 BtPoolAllocator) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btDefaultCollisionConstructionInfo_m_persistentManifoldPool_set_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConstructionInfo) GetM_persistentManifoldPool() (_swig_ret BtPoolAllocator) {
+	var swig_r BtPoolAllocator
+	_swig_i_0 := arg1
+	swig_r = (BtPoolAllocator)(SwigcptrBtPoolAllocator(C._wrap_btDefaultCollisionConstructionInfo_m_persistentManifoldPool_get_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConstructionInfo) SetM_collisionAlgorithmPool(arg2 BtPoolAllocator) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btDefaultCollisionConstructionInfo_m_collisionAlgorithmPool_set_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConstructionInfo) GetM_collisionAlgorithmPool() (_swig_ret BtPoolAllocator) {
+	var swig_r BtPoolAllocator
+	_swig_i_0 := arg1
+	swig_r = (BtPoolAllocator)(SwigcptrBtPoolAllocator(C._wrap_btDefaultCollisionConstructionInfo_m_collisionAlgorithmPool_get_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConstructionInfo) SetM_defaultMaxPersistentManifoldPoolSize(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btDefaultCollisionConstructionInfo_m_defaultMaxPersistentManifoldPoolSize_set_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConstructionInfo) GetM_defaultMaxPersistentManifoldPoolSize() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btDefaultCollisionConstructionInfo_m_defaultMaxPersistentManifoldPoolSize_get_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConstructionInfo) SetM_defaultMaxCollisionAlgorithmPoolSize(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btDefaultCollisionConstructionInfo_m_defaultMaxCollisionAlgorithmPoolSize_set_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConstructionInfo) GetM_defaultMaxCollisionAlgorithmPoolSize() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btDefaultCollisionConstructionInfo_m_defaultMaxCollisionAlgorithmPoolSize_get_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConstructionInfo) SetM_customCollisionAlgorithmMaxElementSize(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btDefaultCollisionConstructionInfo_m_customCollisionAlgorithmMaxElementSize_set_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConstructionInfo) GetM_customCollisionAlgorithmMaxElementSize() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btDefaultCollisionConstructionInfo_m_customCollisionAlgorithmMaxElementSize_get_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConstructionInfo) SetM_useEpaPenetrationAlgorithm(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btDefaultCollisionConstructionInfo_m_useEpaPenetrationAlgorithm_set_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConstructionInfo) GetM_useEpaPenetrationAlgorithm() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btDefaultCollisionConstructionInfo_m_useEpaPenetrationAlgorithm_get_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func NewBtDefaultCollisionConstructionInfo() (_swig_ret BtDefaultCollisionConstructionInfo) {
+	var swig_r BtDefaultCollisionConstructionInfo
+	swig_r = (BtDefaultCollisionConstructionInfo)(SwigcptrBtDefaultCollisionConstructionInfo(C._wrap_new_btDefaultCollisionConstructionInfo_mbt_53667cdae90870b5()))
+	return swig_r
+}
+
+func DeleteBtDefaultCollisionConstructionInfo(arg1 BtDefaultCollisionConstructionInfo) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btDefaultCollisionConstructionInfo_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))
+}
+
+type BtDefaultCollisionConstructionInfo interface {
+	Swigcptr() uintptr
+	SwigIsBtDefaultCollisionConstructionInfo()
+	SetM_persistentManifoldPool(arg2 BtPoolAllocator)
+	GetM_persistentManifoldPool() (_swig_ret BtPoolAllocator)
+	SetM_collisionAlgorithmPool(arg2 BtPoolAllocator)
+	GetM_collisionAlgorithmPool() (_swig_ret BtPoolAllocator)
+	SetM_defaultMaxPersistentManifoldPoolSize(arg2 int)
+	GetM_defaultMaxPersistentManifoldPoolSize() (_swig_ret int)
+	SetM_defaultMaxCollisionAlgorithmPoolSize(arg2 int)
+	GetM_defaultMaxCollisionAlgorithmPoolSize() (_swig_ret int)
+	SetM_customCollisionAlgorithmMaxElementSize(arg2 int)
+	GetM_customCollisionAlgorithmMaxElementSize() (_swig_ret int)
+	SetM_useEpaPenetrationAlgorithm(arg2 int)
+	GetM_useEpaPenetrationAlgorithm() (_swig_ret int)
+}
 
 type SwigcptrBtDefaultCollisionConfiguration uintptr
+
+func (p SwigcptrBtDefaultCollisionConfiguration) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtDefaultCollisionConfiguration) SwigIsBtDefaultCollisionConfiguration() {
+}
+
+func NewBtDefaultCollisionConfiguration__SWIG_0(arg1 BtDefaultCollisionConstructionInfo) (_swig_ret BtDefaultCollisionConfiguration) {
+	var swig_r BtDefaultCollisionConfiguration
+	_swig_i_0 := getSwigcptr(arg1)
+	swig_r = (BtDefaultCollisionConfiguration)(SwigcptrBtDefaultCollisionConfiguration(C._wrap_new_btDefaultCollisionConfiguration__SWIG_0_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func NewBtDefaultCollisionConfiguration__SWIG_1() (_swig_ret BtDefaultCollisionConfiguration) {
+	var swig_r BtDefaultCollisionConfiguration
+	swig_r = (BtDefaultCollisionConfiguration)(SwigcptrBtDefaultCollisionConfiguration(C._wrap_new_btDefaultCollisionConfiguration__SWIG_1_mbt_53667cdae90870b5()))
+	return swig_r
+}
+
+func NewBtDefaultCollisionConfiguration(a ...interface{}) BtDefaultCollisionConfiguration {
+	argc := len(a)
+	if argc == 0 {
+		return NewBtDefaultCollisionConfiguration__SWIG_1()
+	}
+	if argc == 1 {
+		return NewBtDefaultCollisionConfiguration__SWIG_0(a[0].(BtDefaultCollisionConstructionInfo))
+	}
+	panic("No match for overloaded function call")
+}
+
+func DeleteBtDefaultCollisionConfiguration(arg1 BtDefaultCollisionConfiguration) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btDefaultCollisionConfiguration_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConfiguration) GetPersistentManifoldPool() (_swig_ret BtPoolAllocator) {
+	var swig_r BtPoolAllocator
+	_swig_i_0 := arg1
+	swig_r = (BtPoolAllocator)(SwigcptrBtPoolAllocator(C._wrap_btDefaultCollisionConfiguration_getPersistentManifoldPool_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConfiguration) GetCollisionAlgorithmPool() (_swig_ret BtPoolAllocator) {
+	var swig_r BtPoolAllocator
+	_swig_i_0 := arg1
+	swig_r = (BtPoolAllocator)(SwigcptrBtPoolAllocator(C._wrap_btDefaultCollisionConfiguration_getCollisionAlgorithmPool_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConfiguration) GetCollisionAlgorithmCreateFunc(arg2 int, arg3 int) (_swig_ret BtCollisionAlgorithmCreateFunc) {
+	var swig_r BtCollisionAlgorithmCreateFunc
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	_swig_i_2 := arg3
+	swig_r = (BtCollisionAlgorithmCreateFunc)(SwigcptrBtCollisionAlgorithmCreateFunc(C._wrap_btDefaultCollisionConfiguration_getCollisionAlgorithmCreateFunc_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1), C.swig_intgo(_swig_i_2))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConfiguration) GetClosestPointsAlgorithmCreateFunc(arg2 int, arg3 int) (_swig_ret BtCollisionAlgorithmCreateFunc) {
+	var swig_r BtCollisionAlgorithmCreateFunc
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	_swig_i_2 := arg3
+	swig_r = (BtCollisionAlgorithmCreateFunc)(SwigcptrBtCollisionAlgorithmCreateFunc(C._wrap_btDefaultCollisionConfiguration_getClosestPointsAlgorithmCreateFunc_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1), C.swig_intgo(_swig_i_2))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConfiguration) SetConvexConvexMultipointIterations__SWIG_0(arg2 int, arg3 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	_swig_i_2 := arg3
+	C._wrap_btDefaultCollisionConfiguration_setConvexConvexMultipointIterations__SWIG_0_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1), C.swig_intgo(_swig_i_2))
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConfiguration) SetConvexConvexMultipointIterations__SWIG_1(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btDefaultCollisionConfiguration_setConvexConvexMultipointIterations__SWIG_1_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConfiguration) SetConvexConvexMultipointIterations__SWIG_2() {
+	_swig_i_0 := arg1
+	C._wrap_btDefaultCollisionConfiguration_setConvexConvexMultipointIterations__SWIG_2_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))
+}
+
+func (p SwigcptrBtDefaultCollisionConfiguration) SetConvexConvexMultipointIterations(a ...interface{}) {
+	argc := len(a)
+	if argc == 0 {
+		p.SetConvexConvexMultipointIterations__SWIG_2()
+		return
+	}
+	if argc == 1 {
+		p.SetConvexConvexMultipointIterations__SWIG_1(a[0].(int))
+		return
+	}
+	if argc == 2 {
+		p.SetConvexConvexMultipointIterations__SWIG_0(a[0].(int), a[1].(int))
+		return
+	}
+	panic("No match for overloaded function call")
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConfiguration) SetPlaneConvexMultipointIterations__SWIG_0(arg2 int, arg3 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	_swig_i_2 := arg3
+	C._wrap_btDefaultCollisionConfiguration_setPlaneConvexMultipointIterations__SWIG_0_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1), C.swig_intgo(_swig_i_2))
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConfiguration) SetPlaneConvexMultipointIterations__SWIG_1(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btDefaultCollisionConfiguration_setPlaneConvexMultipointIterations__SWIG_1_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtDefaultCollisionConfiguration) SetPlaneConvexMultipointIterations__SWIG_2() {
+	_swig_i_0 := arg1
+	C._wrap_btDefaultCollisionConfiguration_setPlaneConvexMultipointIterations__SWIG_2_mbt_53667cdae90870b5(C.uintptr_t(_swig_i_0))
+}
+
+func (p SwigcptrBtDefaultCollisionConfiguration) SetPlaneConvexMultipointIterations(a ...interface{}) {
+	argc := len(a)
+	if argc == 0 {
+		p.SetPlaneConvexMultipointIterations__SWIG_2()
+		return
+	}
+	if argc == 1 {
+		p.SetPlaneConvexMultipointIterations__SWIG_1(a[0].(int))
+		return
+	}
+	if argc == 2 {
+		p.SetPlaneConvexMultipointIterations__SWIG_0(a[0].(int), a[1].(int))
+		return
+	}
+	panic("No match for overloaded function call")
+}
+
+func (p SwigcptrBtDefaultCollisionConfiguration) SwigIsBtCollisionConfiguration() {
+}
+
+func (p SwigcptrBtDefaultCollisionConfiguration) SwigGetBtCollisionConfiguration() BtCollisionConfiguration {
+	return SwigcptrBtCollisionConfiguration(getSwigcptr(p))
+}
+
 type BtDefaultCollisionConfiguration interface {
+	Swigcptr() uintptr
+	SwigIsBtDefaultCollisionConfiguration()
+	GetPersistentManifoldPool() (_swig_ret BtPoolAllocator)
+	GetCollisionAlgorithmPool() (_swig_ret BtPoolAllocator)
+	GetCollisionAlgorithmCreateFunc(arg2 int, arg3 int) (_swig_ret BtCollisionAlgorithmCreateFunc)
+	GetClosestPointsAlgorithmCreateFunc(arg2 int, arg3 int) (_swig_ret BtCollisionAlgorithmCreateFunc)
+	SetConvexConvexMultipointIterations(a ...interface{})
+	SetPlaneConvexMultipointIterations(a ...interface{})
+	SwigIsBtCollisionConfiguration()
+	SwigGetBtCollisionConfiguration() BtCollisionConfiguration
+}
+
+
+type SwigcptrBtPoolAllocator uintptr
+type BtPoolAllocator interface {
 	Swigcptr() uintptr;
 }
-func (p SwigcptrBtDefaultCollisionConfiguration) Swigcptr() uintptr {
+func (p SwigcptrBtPoolAllocator) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtCollisionAlgorithmCreateFunc uintptr
+type BtCollisionAlgorithmCreateFunc interface {
+	Swigcptr() uintptr;
+}
+func (p SwigcptrBtCollisionAlgorithmCreateFunc) Swigcptr() uintptr {
 	return uintptr(p)
 }
 

@@ -255,7 +255,7 @@ static void* Swig_malloc(int c) {
 extern "C" {
 #endif
 
-void _wrap_Swig_free_mbt_13bad93de2ef9069(void *_swig_go_0) {
+void _wrap_Swig_free_mbt_53667cdae90870b5(void *_swig_go_0) {
   void *arg1 = (void *) 0 ;
   
   arg1 = *(void **)&_swig_go_0; 
@@ -265,7 +265,7 @@ void _wrap_Swig_free_mbt_13bad93de2ef9069(void *_swig_go_0) {
 }
 
 
-void *_wrap_Swig_malloc_mbt_13bad93de2ef9069(intgo _swig_go_0) {
+void *_wrap_Swig_malloc_mbt_53667cdae90870b5(intgo _swig_go_0) {
   int arg1 ;
   void *result = 0 ;
   void *_swig_go_result;
@@ -278,14 +278,410 @@ void *_wrap_Swig_malloc_mbt_13bad93de2ef9069(intgo _swig_go_0) {
 }
 
 
-btDefaultCollisionConfiguration *_wrap_NewBtDefaultCollisionConfiguration_mbt_13bad93de2ef9069() {
+void _wrap_delete_btCollisionConfiguration_mbt_53667cdae90870b5(btCollisionConfiguration *_swig_go_0) {
+  btCollisionConfiguration *arg1 = (btCollisionConfiguration *) 0 ;
+  
+  arg1 = *(btCollisionConfiguration **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btPoolAllocator *_wrap_btCollisionConfiguration_getPersistentManifoldPool_mbt_53667cdae90870b5(btCollisionConfiguration *_swig_go_0) {
+  btCollisionConfiguration *arg1 = (btCollisionConfiguration *) 0 ;
+  btPoolAllocator *result = 0 ;
+  btPoolAllocator *_swig_go_result;
+  
+  arg1 = *(btCollisionConfiguration **)&_swig_go_0; 
+  
+  result = (btPoolAllocator *)(arg1)->getPersistentManifoldPool();
+  *(btPoolAllocator **)&_swig_go_result = (btPoolAllocator *)result; 
+  return _swig_go_result;
+}
+
+
+btPoolAllocator *_wrap_btCollisionConfiguration_getCollisionAlgorithmPool_mbt_53667cdae90870b5(btCollisionConfiguration *_swig_go_0) {
+  btCollisionConfiguration *arg1 = (btCollisionConfiguration *) 0 ;
+  btPoolAllocator *result = 0 ;
+  btPoolAllocator *_swig_go_result;
+  
+  arg1 = *(btCollisionConfiguration **)&_swig_go_0; 
+  
+  result = (btPoolAllocator *)(arg1)->getCollisionAlgorithmPool();
+  *(btPoolAllocator **)&_swig_go_result = (btPoolAllocator *)result; 
+  return _swig_go_result;
+}
+
+
+btCollisionAlgorithmCreateFunc *_wrap_btCollisionConfiguration_getCollisionAlgorithmCreateFunc_mbt_53667cdae90870b5(btCollisionConfiguration *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
+  btCollisionConfiguration *arg1 = (btCollisionConfiguration *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  btCollisionAlgorithmCreateFunc *result = 0 ;
+  btCollisionAlgorithmCreateFunc *_swig_go_result;
+  
+  arg1 = *(btCollisionConfiguration **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = (int)_swig_go_2; 
+  
+  result = (btCollisionAlgorithmCreateFunc *)(arg1)->getCollisionAlgorithmCreateFunc(arg2,arg3);
+  *(btCollisionAlgorithmCreateFunc **)&_swig_go_result = (btCollisionAlgorithmCreateFunc *)result; 
+  return _swig_go_result;
+}
+
+
+btCollisionAlgorithmCreateFunc *_wrap_btCollisionConfiguration_getClosestPointsAlgorithmCreateFunc_mbt_53667cdae90870b5(btCollisionConfiguration *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
+  btCollisionConfiguration *arg1 = (btCollisionConfiguration *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  btCollisionAlgorithmCreateFunc *result = 0 ;
+  btCollisionAlgorithmCreateFunc *_swig_go_result;
+  
+  arg1 = *(btCollisionConfiguration **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = (int)_swig_go_2; 
+  
+  result = (btCollisionAlgorithmCreateFunc *)(arg1)->getClosestPointsAlgorithmCreateFunc(arg2,arg3);
+  *(btCollisionAlgorithmCreateFunc **)&_swig_go_result = (btCollisionAlgorithmCreateFunc *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btDefaultCollisionConstructionInfo_m_persistentManifoldPool_set_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0, btPoolAllocator *_swig_go_1) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  btPoolAllocator *arg2 = (btPoolAllocator *) 0 ;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  arg2 = *(btPoolAllocator **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_persistentManifoldPool = arg2;
+  
+}
+
+
+btPoolAllocator *_wrap_btDefaultCollisionConstructionInfo_m_persistentManifoldPool_get_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  btPoolAllocator *result = 0 ;
+  btPoolAllocator *_swig_go_result;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  
+  result = (btPoolAllocator *) ((arg1)->m_persistentManifoldPool);
+  *(btPoolAllocator **)&_swig_go_result = (btPoolAllocator *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btDefaultCollisionConstructionInfo_m_collisionAlgorithmPool_set_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0, btPoolAllocator *_swig_go_1) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  btPoolAllocator *arg2 = (btPoolAllocator *) 0 ;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  arg2 = *(btPoolAllocator **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_collisionAlgorithmPool = arg2;
+  
+}
+
+
+btPoolAllocator *_wrap_btDefaultCollisionConstructionInfo_m_collisionAlgorithmPool_get_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  btPoolAllocator *result = 0 ;
+  btPoolAllocator *_swig_go_result;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  
+  result = (btPoolAllocator *) ((arg1)->m_collisionAlgorithmPool);
+  *(btPoolAllocator **)&_swig_go_result = (btPoolAllocator *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btDefaultCollisionConstructionInfo_m_defaultMaxPersistentManifoldPoolSize_set_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0, intgo _swig_go_1) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_defaultMaxPersistentManifoldPoolSize = arg2;
+  
+}
+
+
+intgo _wrap_btDefaultCollisionConstructionInfo_m_defaultMaxPersistentManifoldPoolSize_get_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  
+  result = (int) ((arg1)->m_defaultMaxPersistentManifoldPoolSize);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btDefaultCollisionConstructionInfo_m_defaultMaxCollisionAlgorithmPoolSize_set_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0, intgo _swig_go_1) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_defaultMaxCollisionAlgorithmPoolSize = arg2;
+  
+}
+
+
+intgo _wrap_btDefaultCollisionConstructionInfo_m_defaultMaxCollisionAlgorithmPoolSize_get_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  
+  result = (int) ((arg1)->m_defaultMaxCollisionAlgorithmPoolSize);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btDefaultCollisionConstructionInfo_m_customCollisionAlgorithmMaxElementSize_set_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0, intgo _swig_go_1) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_customCollisionAlgorithmMaxElementSize = arg2;
+  
+}
+
+
+intgo _wrap_btDefaultCollisionConstructionInfo_m_customCollisionAlgorithmMaxElementSize_get_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  
+  result = (int) ((arg1)->m_customCollisionAlgorithmMaxElementSize);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btDefaultCollisionConstructionInfo_m_useEpaPenetrationAlgorithm_set_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0, intgo _swig_go_1) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_useEpaPenetrationAlgorithm = arg2;
+  
+}
+
+
+intgo _wrap_btDefaultCollisionConstructionInfo_m_useEpaPenetrationAlgorithm_get_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  
+  result = (int) ((arg1)->m_useEpaPenetrationAlgorithm);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btDefaultCollisionConstructionInfo *_wrap_new_btDefaultCollisionConstructionInfo_mbt_53667cdae90870b5() {
+  btDefaultCollisionConstructionInfo *result = 0 ;
+  btDefaultCollisionConstructionInfo *_swig_go_result;
+  
+  
+  result = (btDefaultCollisionConstructionInfo *)new btDefaultCollisionConstructionInfo();
+  *(btDefaultCollisionConstructionInfo **)&_swig_go_result = (btDefaultCollisionConstructionInfo *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btDefaultCollisionConstructionInfo_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
+  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btDefaultCollisionConfiguration *_wrap_new_btDefaultCollisionConfiguration__SWIG_0_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
+  btDefaultCollisionConstructionInfo *arg1 = 0 ;
+  btDefaultCollisionConfiguration *result = 0 ;
+  btDefaultCollisionConfiguration *_swig_go_result;
+  
+  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  
+  result = (btDefaultCollisionConfiguration *)new btDefaultCollisionConfiguration((btDefaultCollisionConstructionInfo const &)*arg1);
+  *(btDefaultCollisionConfiguration **)&_swig_go_result = (btDefaultCollisionConfiguration *)result; 
+  return _swig_go_result;
+}
+
+
+btDefaultCollisionConfiguration *_wrap_new_btDefaultCollisionConfiguration__SWIG_1_mbt_53667cdae90870b5() {
   btDefaultCollisionConfiguration *result = 0 ;
   btDefaultCollisionConfiguration *_swig_go_result;
   
   
-  result = (btDefaultCollisionConfiguration *)NewBtDefaultCollisionConfiguration();
+  result = (btDefaultCollisionConfiguration *)new btDefaultCollisionConfiguration();
   *(btDefaultCollisionConfiguration **)&_swig_go_result = (btDefaultCollisionConfiguration *)result; 
   return _swig_go_result;
+}
+
+
+void _wrap_delete_btDefaultCollisionConfiguration_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0) {
+  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+  
+  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btPoolAllocator *_wrap_btDefaultCollisionConfiguration_getPersistentManifoldPool_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0) {
+  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+  btPoolAllocator *result = 0 ;
+  btPoolAllocator *_swig_go_result;
+  
+  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  
+  result = (btPoolAllocator *)(arg1)->getPersistentManifoldPool();
+  *(btPoolAllocator **)&_swig_go_result = (btPoolAllocator *)result; 
+  return _swig_go_result;
+}
+
+
+btPoolAllocator *_wrap_btDefaultCollisionConfiguration_getCollisionAlgorithmPool_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0) {
+  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+  btPoolAllocator *result = 0 ;
+  btPoolAllocator *_swig_go_result;
+  
+  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  
+  result = (btPoolAllocator *)(arg1)->getCollisionAlgorithmPool();
+  *(btPoolAllocator **)&_swig_go_result = (btPoolAllocator *)result; 
+  return _swig_go_result;
+}
+
+
+btCollisionAlgorithmCreateFunc *_wrap_btDefaultCollisionConfiguration_getCollisionAlgorithmCreateFunc_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
+  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  btCollisionAlgorithmCreateFunc *result = 0 ;
+  btCollisionAlgorithmCreateFunc *_swig_go_result;
+  
+  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = (int)_swig_go_2; 
+  
+  result = (btCollisionAlgorithmCreateFunc *)(arg1)->getCollisionAlgorithmCreateFunc(arg2,arg3);
+  *(btCollisionAlgorithmCreateFunc **)&_swig_go_result = (btCollisionAlgorithmCreateFunc *)result; 
+  return _swig_go_result;
+}
+
+
+btCollisionAlgorithmCreateFunc *_wrap_btDefaultCollisionConfiguration_getClosestPointsAlgorithmCreateFunc_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
+  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  btCollisionAlgorithmCreateFunc *result = 0 ;
+  btCollisionAlgorithmCreateFunc *_swig_go_result;
+  
+  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = (int)_swig_go_2; 
+  
+  result = (btCollisionAlgorithmCreateFunc *)(arg1)->getClosestPointsAlgorithmCreateFunc(arg2,arg3);
+  *(btCollisionAlgorithmCreateFunc **)&_swig_go_result = (btCollisionAlgorithmCreateFunc *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btDefaultCollisionConfiguration_setConvexConvexMultipointIterations__SWIG_0_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
+  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = (int)_swig_go_2; 
+  
+  (arg1)->setConvexConvexMultipointIterations(arg2,arg3);
+  
+}
+
+
+void _wrap_btDefaultCollisionConfiguration_setConvexConvexMultipointIterations__SWIG_1_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0, intgo _swig_go_1) {
+  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  (arg1)->setConvexConvexMultipointIterations(arg2);
+  
+}
+
+
+void _wrap_btDefaultCollisionConfiguration_setConvexConvexMultipointIterations__SWIG_2_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0) {
+  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+  
+  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  
+  (arg1)->setConvexConvexMultipointIterations();
+  
+}
+
+
+void _wrap_btDefaultCollisionConfiguration_setPlaneConvexMultipointIterations__SWIG_0_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
+  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = (int)_swig_go_2; 
+  
+  (arg1)->setPlaneConvexMultipointIterations(arg2,arg3);
+  
+}
+
+
+void _wrap_btDefaultCollisionConfiguration_setPlaneConvexMultipointIterations__SWIG_1_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0, intgo _swig_go_1) {
+  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  (arg1)->setPlaneConvexMultipointIterations(arg2);
+  
+}
+
+
+void _wrap_btDefaultCollisionConfiguration_setPlaneConvexMultipointIterations__SWIG_2_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0) {
+  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+  
+  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  
+  (arg1)->setPlaneConvexMultipointIterations();
+  
 }
 
 
