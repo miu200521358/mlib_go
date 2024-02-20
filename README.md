@@ -90,5 +90,5 @@ https://rinatz.github.io/swigdoc/abstract.html
 
 2. 変換コード作成
 ```
-(mtool) C:\MMD\bullet3\src>swig -c++ -go -outdir "C:\MMD\mlib_go\pkg\mbt" bullet.i
+(mtool) C:\MMD\bullet3\src>swig -c++ -go -cgo -outdir "C:\MMD\mlib_go\pkg\mbt" -o "C:\MMD\mlib_go\pkg\mbt\bullet_wrap.cxx" -I"C:\MMD\bullet3\src" bullet.i
 ```

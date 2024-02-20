@@ -27,9 +27,9 @@ typedef struct { char *p; intgo n; } _gostring_;
 typedef struct { void* array; intgo len; intgo cap; } _goslice_;
 
 
-extern void _wrap_Swig_free_mbt_e2760843bed3e3b0(uintptr_t arg1);
-extern uintptr_t _wrap_Swig_malloc_mbt_e2760843bed3e3b0(swig_intgo arg1);
-extern uintptr_t _wrap_NewBtDefaultCollisionConfiguration_mbt_e2760843bed3e3b0(void);
+extern void _wrap_Swig_free_mbt_2a2cf7305ff63792(uintptr_t arg1);
+extern uintptr_t _wrap_Swig_malloc_mbt_2a2cf7305ff63792(swig_intgo arg1);
+extern uintptr_t _wrap_NewBtDefaultCollisionConfiguration_mbt_2a2cf7305ff63792(void);
 #undef intgo
 */
 import "C"
@@ -63,19 +63,19 @@ type _ sync.Mutex
 
 func Swig_free(arg1 uintptr) {
 	_swig_i_0 := arg1
-	C._wrap_Swig_free_mbt_e2760843bed3e3b0(C.uintptr_t(_swig_i_0))
+	C._wrap_Swig_free_mbt_2a2cf7305ff63792(C.uintptr_t(_swig_i_0))
 }
 
 func Swig_malloc(arg1 int) (_swig_ret uintptr) {
 	var swig_r uintptr
 	_swig_i_0 := arg1
-	swig_r = (uintptr)(C._wrap_Swig_malloc_mbt_e2760843bed3e3b0(C.swig_intgo(_swig_i_0)))
+	swig_r = (uintptr)(C._wrap_Swig_malloc_mbt_2a2cf7305ff63792(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
 func NewBtDefaultCollisionConfiguration() (_swig_ret BtDefaultCollisionConfiguration) {
 	var swig_r BtDefaultCollisionConfiguration
-	swig_r = (BtDefaultCollisionConfiguration)(SwigcptrBtDefaultCollisionConfiguration(C._wrap_NewBtDefaultCollisionConfiguration_mbt_e2760843bed3e3b0()))
+	swig_r = (BtDefaultCollisionConfiguration)(SwigcptrBtDefaultCollisionConfiguration(C._wrap_NewBtDefaultCollisionConfiguration_mbt_2a2cf7305ff63792()))
 	return swig_r
 }
 
