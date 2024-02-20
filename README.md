@@ -90,5 +90,5 @@ https://rinatz.github.io/swigdoc/abstract.html
 
 2. 変換コード作成
 ```
-(mtool) C:\MMD\mlib_go\pkg\mbt>swig -c++ -go example.i
+(mtool) C:\MMD\bullet3\src>swig -c++ -go -outdir "C:\MMD\mlib_go\pkg\mbt" bullet.i
 ```
