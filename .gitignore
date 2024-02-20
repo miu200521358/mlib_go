@@ -24,7 +24,6 @@
 go.work
 
 build/
-bullet/
 distribution/
 
 cmd/user_config.json
