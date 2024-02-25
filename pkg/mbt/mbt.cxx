@@ -6,16 +6,16 @@
  * the SWIG interface file instead.
  * ----------------------------------------------------------------------------- */
 
-// source: C:\MMD\mlib_go\pkg\mbt\bullet\src\bullet.i
+// source: C:\MMD\mlib_go\pkg\mbt\bullet.i
 
 
 extern
 #ifdef __cplusplus
   "C"
 #endif
-  void cgo_panic__mbt_3c32781124460d6b(const char*);
+  void cgo_panic__mbt_220ac3041cacbc73(const char*);
 static void _swig_gopanic(const char *p) {
-  cgo_panic__mbt_3c32781124460d6b(p);
+  cgo_panic__mbt_220ac3041cacbc73(p);
 }
 
 
@@ -1150,7 +1150,7 @@ subject to the following restrictions:
 #ifndef BT_GEN_MINMAX_H
 #define BT_GEN_MINMAX_H
 
-#include "bullet/src/LinearMath/btScalar.h"
+#include "LinearMath/btScalar.h"
 
 template <class T>
 SIMD_FORCE_INLINE const T& btMin(const T& a, const T& b)
@@ -1229,7 +1229,7 @@ subject to the following restrictions:
 ///so we replace _aligned_malloc and _aligned_free with our own
 ///that is better portable and more predictable
 
-#include "bullet/src/LinearMath/btScalar.h"
+#include "LinearMath/btScalar.h"
 
 ///BT_DEBUG_MEMORY_ALLOCATIONS preprocessor can be set in build system
 ///for regression tests to detect memory leaks
@@ -1342,7 +1342,7 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "bullet/src/LinearMath/btAlignedAllocator.h"
+#include "LinearMath/btAlignedAllocator.h"
 
 #ifdef BT_DEBUG_MEMORY_ALLOCATIONS
 int gNumAlignedAllocs = 0;
@@ -1612,9 +1612,9 @@ subject to the following restrictions:
 #ifndef BT_VECTOR3_H
 #define BT_VECTOR3_H
 
-#include "bullet/src/LinearMath/btScalar.h"
-#include "bullet/src/LinearMath/btMinMax.h"
-#include "bullet/src/LinearMath/btAlignedAllocator.h"
+#include "LinearMath/btScalar.h"
+#include "LinearMath/btMinMax.h"
+#include "LinearMath/btAlignedAllocator.h"
 
 #ifdef BT_USE_DOUBLE_PRECISION
 #define btVector3Data btVector3DoubleData
@@ -2952,8 +2952,8 @@ subject to the following restrictions:
 #ifndef BT_SIMD_QUADWORD_H
 #define BT_SIMD_QUADWORD_H
 
-#include "bullet/src/LinearMath/btScalar.h"
-#include "bullet/src/LinearMath/btMinMax.h"
+#include "LinearMath/btScalar.h"
+#include "LinearMath/btMinMax.h"
 
 #if defined(__CELLOS_LV2) && defined(__SPU__)
 #endif
@@ -3194,8 +3194,8 @@ subject to the following restrictions:
 #ifndef BT_SIMD__QUATERNION_H_
 #define BT_SIMD__QUATERNION_H_
 
-#include "bullet/src/LinearMath/btVector3.h"
-#include "bullet/src/LinearMath/btQuadWord.h"
+#include "LinearMath/btVector3.h"
+#include "LinearMath/btQuadWord.h"
 
 #ifdef BT_USE_DOUBLE_PRECISION
 #define btQuaternionData btQuaternionDoubleData
@@ -4220,8 +4220,8 @@ subject to the following restrictions:
 #ifndef BT_MATRIX3x3_H
 #define BT_MATRIX3x3_H
 
-#include "bullet/src/LinearMath/btVector3.h"
-#include "bullet/src/LinearMath/btQuaternion.h"
+#include "LinearMath/btVector3.h"
+#include "LinearMath/btQuaternion.h"
 
 #ifdef BT_USE_SSE
 //const __m128 ATTRIBUTE_ALIGNED16(v2220) = {2.0f, 2.0f, 2.0f, 0.0f};
@@ -5655,7 +5655,7 @@ subject to the following restrictions:
 #ifndef BT_TRANSFORM_H
 #define BT_TRANSFORM_H
 
-#include "bullet/src/LinearMath/btMatrix3x3.h"
+#include "LinearMath/btMatrix3x3.h"
 
 #ifdef BT_USE_DOUBLE_PRECISION
 #define btTransformData btTransformDoubleData
@@ -5948,7 +5948,7 @@ subject to the following restrictions:
 #ifndef BT_MOTIONSTATE_H
 #define BT_MOTIONSTATE_H
 
-#include "bullet/src/LinearMath/btTransform.h"
+#include "LinearMath/btTransform.h"
 
 ///The btMotionState interface class allows the dynamics world to synchronize and interpolate the updated world transforms with graphics
 ///For optimizations, potentially only moving objects get synchronized (using setWorldPosition/setWorldOrientation)
@@ -5974,7 +5974,7 @@ public:
 #ifndef BT_DEFAULT_MOTION_STATE_H
 #define BT_DEFAULT_MOTION_STATE_H
 
-#include "bullet/src/LinearMath/btMotionState.h"
+#include "LinearMath/btMotionState.h"
 
 ///The btDefaultMotionState provides a common implementation to synchronize world transforms with offsets.
 ATTRIBUTE_ALIGNED16(struct)
@@ -6034,8 +6034,8 @@ subject to the following restrictions:
 #ifndef BT_OBJECT_ARRAY__
 #define BT_OBJECT_ARRAY__
 
-#include "bullet/src/LinearMath/btScalar.h"
-#include "bullet/src/LinearMath/btAlignedAllocator.h"
+#include "LinearMath/btScalar.h"
+#include "LinearMath/btAlignedAllocator.h"
 
 ///If the platform doesn't support placement new, you can disable BT_USE_PLACEMENT_NEW
 ///then the btAlignedObjectArray doesn't support objects with virtual methods, and non-trivial constructors/destructors
@@ -6540,7 +6540,7 @@ subject to the following restrictions:
 #ifndef BT_HASH_MAP_H
 #define BT_HASH_MAP_H
 
-#include "bullet/src/LinearMath/btAlignedObjectArray.h"
+#include "LinearMath/btAlignedObjectArray.h"
 
 ///very basic hashable string implementation, compatible with btHashMap
 struct btHashString
@@ -7021,8 +7021,8 @@ subject to the following restrictions:
 #ifndef BT_SERIALIZER_H
 #define BT_SERIALIZER_H
 
-#include "bullet/src/LinearMath/btScalar.h"
-#include "bullet/src/LinearMath/btHashMap.h"
+#include "LinearMath/btScalar.h"
+#include "LinearMath/btHashMap.h"
 
 #if !defined(__CELLOS_LV2__) && !defined(__MWERKS__)
 #endif
@@ -9283,9 +9283,9 @@ subject to the following restrictions:
 #ifndef BT_AABB_UTIL2
 #define BT_AABB_UTIL2
 
-#include "bullet/src/LinearMath/btTransform.h"
-#include "bullet/src/LinearMath/btVector3.h"
-#include "bullet/src/LinearMath/btMinMax.h"
+#include "LinearMath/btTransform.h"
+#include "LinearMath/btVector3.h"
+#include "LinearMath/btMinMax.h"
 
 SIMD_FORCE_INLINE void AabbExpand(btVector3& aabbMin,
 								  btVector3& aabbMax,
@@ -9505,8 +9505,8 @@ subject to the following restrictions:
 #ifndef BT_CONVEX_HULL_COMPUTER_H
 #define BT_CONVEX_HULL_COMPUTER_H
 
-#include "bullet/src/LinearMath/btVector3.h"
-#include "bullet/src/LinearMath/btAlignedObjectArray.h"
+#include "LinearMath/btVector3.h"
+#include "LinearMath/btAlignedObjectArray.h"
 
 /// Convex hull implementation based on Preparata and Hong
 /// See http://code.google.com/p/bullet/issues/detail?id=275
@@ -9610,10 +9610,10 @@ subject to the following restrictions:
 */
 
 
-#include "bullet/src/LinearMath/btConvexHullComputer.h"
-#include "bullet/src/LinearMath/btAlignedObjectArray.h"
-#include "bullet/src/LinearMath/btMinMax.h"
-#include "bullet/src/LinearMath/btVector3.h"
+#include "LinearMath/btConvexHullComputer.h"
+#include "LinearMath/btAlignedObjectArray.h"
+#include "LinearMath/btMinMax.h"
+#include "LinearMath/btVector3.h"
 
 #ifdef __GNUC__
 #elif defined(_MSC_VER)
@@ -12355,11 +12355,2747 @@ btScalar btConvexHullComputer::compute(const void* coords, bool doubleCoords, in
 
 
 
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_BROADPHASE_PROXY_H
+#define BT_BROADPHASE_PROXY_H
+
+#include "LinearMath/btScalar.h"
+#include "LinearMath/btVector3.h"
+#include "LinearMath/btAlignedAllocator.h"
+
+/// btDispatcher uses these types
+/// IMPORTANT NOTE:The types are ordered polyhedral, implicit convex and concave
+/// to facilitate type checking
+/// CUSTOM_POLYHEDRAL_SHAPE_TYPE,CUSTOM_CONVEX_SHAPE_TYPE and CUSTOM_CONCAVE_SHAPE_TYPE can be used to extend Bullet without modifying source code
+enum BroadphaseNativeTypes
+{
+	// polyhedral convex shapes
+	BOX_SHAPE_PROXYTYPE,
+	TRIANGLE_SHAPE_PROXYTYPE,
+	TETRAHEDRAL_SHAPE_PROXYTYPE,
+	CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE,
+	CONVEX_HULL_SHAPE_PROXYTYPE,
+	CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE,
+	CUSTOM_POLYHEDRAL_SHAPE_TYPE,
+	//implicit convex shapes
+	IMPLICIT_CONVEX_SHAPES_START_HERE,
+	SPHERE_SHAPE_PROXYTYPE,
+	MULTI_SPHERE_SHAPE_PROXYTYPE,
+	CAPSULE_SHAPE_PROXYTYPE,
+	CONE_SHAPE_PROXYTYPE,
+	CONVEX_SHAPE_PROXYTYPE,
+	CYLINDER_SHAPE_PROXYTYPE,
+	UNIFORM_SCALING_SHAPE_PROXYTYPE,
+	MINKOWSKI_SUM_SHAPE_PROXYTYPE,
+	MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE,
+	BOX_2D_SHAPE_PROXYTYPE,
+	CONVEX_2D_SHAPE_PROXYTYPE,
+	CUSTOM_CONVEX_SHAPE_TYPE,
+	//concave shapes
+	CONCAVE_SHAPES_START_HERE,
+	//keep all the convex shapetype below here, for the check IsConvexShape in broadphase proxy!
+	TRIANGLE_MESH_SHAPE_PROXYTYPE,
+	SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE,
+	///used for demo integration FAST/Swift collision library and Bullet
+	FAST_CONCAVE_MESH_PROXYTYPE,
+	//terrain
+	TERRAIN_SHAPE_PROXYTYPE,
+	///Used for GIMPACT Trimesh integration
+	GIMPACT_SHAPE_PROXYTYPE,
+	///Multimaterial mesh
+	MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE,
+
+	EMPTY_SHAPE_PROXYTYPE,
+	STATIC_PLANE_PROXYTYPE,
+	CUSTOM_CONCAVE_SHAPE_TYPE,
+	SDF_SHAPE_PROXYTYPE = CUSTOM_CONCAVE_SHAPE_TYPE,
+	CONCAVE_SHAPES_END_HERE,
+
+	COMPOUND_SHAPE_PROXYTYPE,
+
+	SOFTBODY_SHAPE_PROXYTYPE,
+	HFFLUID_SHAPE_PROXYTYPE,
+	HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE,
+	INVALID_SHAPE_PROXYTYPE,
+
+	MAX_BROADPHASE_COLLISION_TYPES
+
+};
+
+///The btBroadphaseProxy is the main class that can be used with the Bullet broadphases.
+///It stores collision shape type information, collision filter information and a client object, typically a btCollisionObject or btRigidBody.
+ATTRIBUTE_ALIGNED16(struct)
+btBroadphaseProxy
+{
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+
+	///optional filtering to cull potential collisions
+	enum CollisionFilterGroups
+	{
+		DefaultFilter = 1,
+		StaticFilter = 2,
+		KinematicFilter = 4,
+		DebrisFilter = 8,
+		SensorTrigger = 16,
+		CharacterFilter = 32,
+		AllFilter = -1  //all bits sets: DefaultFilter | StaticFilter | KinematicFilter | DebrisFilter | SensorTrigger
+	};
+
+	//Usually the client btCollisionObject or Rigidbody class
+	void* m_clientObject;
+	int m_collisionFilterGroup;
+	int m_collisionFilterMask;
+
+	int m_uniqueId;  //m_uniqueId is introduced for paircache. could get rid of this, by calculating the address offset etc.
+
+	btVector3 m_aabbMin;
+	btVector3 m_aabbMax;
+
+	SIMD_FORCE_INLINE int getUid() const
+	{
+		return m_uniqueId;
+	}
+
+	//used for memory pools
+	btBroadphaseProxy() : m_clientObject(0)
+	{
+	}
+
+	btBroadphaseProxy(const btVector3& aabbMin, const btVector3& aabbMax, void* userPtr, int collisionFilterGroup, int collisionFilterMask)
+		: m_clientObject(userPtr),
+		  m_collisionFilterGroup(collisionFilterGroup),
+		  m_collisionFilterMask(collisionFilterMask),
+		  m_aabbMin(aabbMin),
+		  m_aabbMax(aabbMax)
+	{
+	}
+
+	static SIMD_FORCE_INLINE bool isPolyhedral(int proxyType)
+	{
+		return (proxyType < IMPLICIT_CONVEX_SHAPES_START_HERE);
+	}
+
+	static SIMD_FORCE_INLINE bool isConvex(int proxyType)
+	{
+		return (proxyType < CONCAVE_SHAPES_START_HERE);
+	}
+
+	static SIMD_FORCE_INLINE bool isNonMoving(int proxyType)
+	{
+		return (isConcave(proxyType) && !(proxyType == GIMPACT_SHAPE_PROXYTYPE));
+	}
+
+	static SIMD_FORCE_INLINE bool isConcave(int proxyType)
+	{
+		return ((proxyType > CONCAVE_SHAPES_START_HERE) &&
+				(proxyType < CONCAVE_SHAPES_END_HERE));
+	}
+	static SIMD_FORCE_INLINE bool isCompound(int proxyType)
+	{
+		return (proxyType == COMPOUND_SHAPE_PROXYTYPE);
+	}
+
+	static SIMD_FORCE_INLINE bool isSoftBody(int proxyType)
+	{
+		return (proxyType == SOFTBODY_SHAPE_PROXYTYPE);
+	}
+
+	static SIMD_FORCE_INLINE bool isInfinite(int proxyType)
+	{
+		return (proxyType == STATIC_PLANE_PROXYTYPE);
+	}
+
+	static SIMD_FORCE_INLINE bool isConvex2d(int proxyType)
+	{
+		return (proxyType == BOX_2D_SHAPE_PROXYTYPE) || (proxyType == CONVEX_2D_SHAPE_PROXYTYPE);
+	}
+};
+
+class btCollisionAlgorithm;
+
+struct btBroadphaseProxy;
+
+///The btBroadphasePair class contains a pair of aabb-overlapping objects.
+///A btDispatcher can search a btCollisionAlgorithm that performs exact/narrowphase collision detection on the actual collision shapes.
+ATTRIBUTE_ALIGNED16(struct)
+btBroadphasePair
+{
+	btBroadphasePair()
+		: m_pProxy0(0),
+		  m_pProxy1(0),
+		  m_algorithm(0),
+		  m_internalInfo1(0)
+	{
+	}
+
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+
+	btBroadphasePair(btBroadphaseProxy & proxy0, btBroadphaseProxy & proxy1)
+	{
+		//keep them sorted, so the std::set operations work
+		if (proxy0.m_uniqueId < proxy1.m_uniqueId)
+		{
+			m_pProxy0 = &proxy0;
+			m_pProxy1 = &proxy1;
+		}
+		else
+		{
+			m_pProxy0 = &proxy1;
+			m_pProxy1 = &proxy0;
+		}
+
+		m_algorithm = 0;
+		m_internalInfo1 = 0;
+	}
+
+	btBroadphaseProxy* m_pProxy0;
+	btBroadphaseProxy* m_pProxy1;
+
+	mutable btCollisionAlgorithm* m_algorithm;
+	union {
+		void* m_internalInfo1;
+		int m_internalTmpValue;
+	};  //don't use this data, it will be removed in future version.
+};
+
+/*
+//comparison for set operation, see Solid DT_Encounter
+SIMD_FORCE_INLINE bool operator<(const btBroadphasePair& a, const btBroadphasePair& b) 
+{ 
+    return a.m_pProxy0 < b.m_pProxy0 || 
+        (a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 < b.m_pProxy1); 
+}
+*/
+
+class btBroadphasePairSortPredicate
+{
+public:
+	bool operator()(const btBroadphasePair& a, const btBroadphasePair& b) const
+	{
+		const int uidA0 = a.m_pProxy0 ? a.m_pProxy0->m_uniqueId : -1;
+		const int uidB0 = b.m_pProxy0 ? b.m_pProxy0->m_uniqueId : -1;
+		const int uidA1 = a.m_pProxy1 ? a.m_pProxy1->m_uniqueId : -1;
+		const int uidB1 = b.m_pProxy1 ? b.m_pProxy1->m_uniqueId : -1;
+
+		return uidA0 > uidB0 ||
+			   (a.m_pProxy0 == b.m_pProxy0 && uidA1 > uidB1) ||
+			   (a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 == b.m_pProxy1 && a.m_algorithm > b.m_algorithm);
+	}
+};
+
+SIMD_FORCE_INLINE bool operator==(const btBroadphasePair& a, const btBroadphasePair& b)
+{
+	return (a.m_pProxy0 == b.m_pProxy0) && (a.m_pProxy1 == b.m_pProxy1);
+}
+
+#endif  //BT_BROADPHASE_PROXY_H
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_COLLISION_MARGIN_H
+#define BT_COLLISION_MARGIN_H
+
+///The CONVEX_DISTANCE_MARGIN is a default collision margin for convex collision shapes derived from btConvexInternalShape.
+///This collision margin is used by Gjk and some other algorithms
+///Note that when creating small objects, you need to make sure to set a smaller collision margin, using the 'setMargin' API
+#define CONVEX_DISTANCE_MARGIN btScalar(0.04)  // btScalar(0.1)//;//btScalar(0.01)
+
+#endif  //BT_COLLISION_MARGIN_H
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_COLLISION_SHAPE_H
+#define BT_COLLISION_SHAPE_H
+
+#include "LinearMath/btTransform.h"
+#include "LinearMath/btVector3.h"
+#include "LinearMath/btMatrix3x3.h"
+#include "BulletCollision/BroadphaseCollision/btBroadphaseProxy.h"
+class btSerializer;
+
+///The btCollisionShape class provides an interface for collision shapes that can be shared among btCollisionObjects.
+ATTRIBUTE_ALIGNED16(class)
+btCollisionShape
+{
+protected:
+	int m_shapeType;
+	void* m_userPointer;
+	int m_userIndex;
+	int m_userIndex2;
+
+public:
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+
+	btCollisionShape() : m_shapeType(INVALID_SHAPE_PROXYTYPE), m_userPointer(0), m_userIndex(-1), m_userIndex2(-1)
+	{
+	}
+
+	virtual ~btCollisionShape()
+	{
+	}
+
+	///getAabb returns the axis aligned bounding box in the coordinate frame of the given transform t.
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const = 0;
+
+	virtual void getBoundingSphere(btVector3 & center, btScalar & radius) const;
+
+	///getAngularMotionDisc returns the maximum radius needed for Conservative Advancement to handle time-of-impact with rotations.
+	virtual btScalar getAngularMotionDisc() const;
+
+	virtual btScalar getContactBreakingThreshold(btScalar defaultContactThresholdFactor) const;
+
+	///calculateTemporalAabb calculates the enclosing aabb for the moving object over interval [0..timeStep)
+	///result is conservative
+	void calculateTemporalAabb(const btTransform& curTrans, const btVector3& linvel, const btVector3& angvel, btScalar timeStep, btVector3& temporalAabbMin, btVector3& temporalAabbMax) const;
+
+	SIMD_FORCE_INLINE bool isPolyhedral() const
+	{
+		return btBroadphaseProxy::isPolyhedral(getShapeType());
+	}
+
+	SIMD_FORCE_INLINE bool isConvex2d() const
+	{
+		return btBroadphaseProxy::isConvex2d(getShapeType());
+	}
+
+	SIMD_FORCE_INLINE bool isConvex() const
+	{
+		return btBroadphaseProxy::isConvex(getShapeType());
+	}
+	SIMD_FORCE_INLINE bool isNonMoving() const
+	{
+		return btBroadphaseProxy::isNonMoving(getShapeType());
+	}
+	SIMD_FORCE_INLINE bool isConcave() const
+	{
+		return btBroadphaseProxy::isConcave(getShapeType());
+	}
+	SIMD_FORCE_INLINE bool isCompound() const
+	{
+		return btBroadphaseProxy::isCompound(getShapeType());
+	}
+
+	SIMD_FORCE_INLINE bool isSoftBody() const
+	{
+		return btBroadphaseProxy::isSoftBody(getShapeType());
+	}
+
+	///isInfinite is used to catch simulation error (aabb check)
+	SIMD_FORCE_INLINE bool isInfinite() const
+	{
+		return btBroadphaseProxy::isInfinite(getShapeType());
+	}
+
+#ifndef __SPU__
+	virtual void setLocalScaling(const btVector3& scaling) = 0;
+	virtual const btVector3& getLocalScaling() const = 0;
+	virtual void calculateLocalInertia(btScalar mass, btVector3 & inertia) const = 0;
+
+	//debugging support
+	virtual const char* getName() const = 0;
+#endif  //__SPU__
+
+	int getShapeType() const
+	{
+		return m_shapeType;
+	}
+
+	///the getAnisotropicRollingFrictionDirection can be used in combination with setAnisotropicFriction
+	///See Bullet/Demos/RollingFrictionDemo for an example
+	virtual btVector3 getAnisotropicRollingFrictionDirection() const
+	{
+		return btVector3(1, 1, 1);
+	}
+	virtual void setMargin(btScalar margin) = 0;
+	virtual btScalar getMargin() const = 0;
+
+	///optional user data pointer
+	void setUserPointer(void* userPtr)
+	{
+		m_userPointer = userPtr;
+	}
+
+	void* getUserPointer() const
+	{
+		return m_userPointer;
+	}
+	void setUserIndex(int index)
+	{
+		m_userIndex = index;
+	}
+
+	int getUserIndex() const
+	{
+		return m_userIndex;
+	}
+
+	void setUserIndex2(int index)
+	{
+		m_userIndex2 = index;
+	}
+
+	int getUserIndex2() const
+	{
+		return m_userIndex2;
+	}
+
+	virtual int calculateSerializeBufferSize() const;
+
+	///fills the dataBuffer and returns the struct name (and 0 on failure)
+	virtual const char* serialize(void* dataBuffer, btSerializer* serializer) const;
+
+	virtual void serializeSingleShape(btSerializer * serializer) const;
+};
+
+// clang-format off
+// parser needs * with the name
+///do not change those serialization structures, it requires an updated sBulletDNAstr/sBulletDNAstr64
+struct	btCollisionShapeData
+{
+	char	*m_name;
+	int		m_shapeType;
+	char	m_padding[4];
+};
+// clang-format on
+SIMD_FORCE_INLINE int btCollisionShape::calculateSerializeBufferSize() const
+{
+	return sizeof(btCollisionShapeData);
+}
+
+#endif  //BT_COLLISION_SHAPE_H
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+#include "BulletCollision/CollisionShapes/btCollisionShape.h"
+#include "LinearMath/btSerializer.h"
+
+/*
+  Make sure this dummy function never changes so that it
+  can be used by probes that are checking whether the
+  library is actually installed.
+*/
+extern "C"
+{
+	void btBulletCollisionProbe();
+
+	void btBulletCollisionProbe() {}
+}
+
+void btCollisionShape::getBoundingSphere(btVector3& center, btScalar& radius) const
+{
+	btTransform tr;
+	tr.setIdentity();
+	btVector3 aabbMin, aabbMax;
+
+	getAabb(tr, aabbMin, aabbMax);
+
+	radius = (aabbMax - aabbMin).length() * btScalar(0.5);
+	center = (aabbMin + aabbMax) * btScalar(0.5);
+}
+
+btScalar btCollisionShape::getContactBreakingThreshold(btScalar defaultContactThreshold) const
+{
+	return getAngularMotionDisc() * defaultContactThreshold;
+}
+
+btScalar btCollisionShape::getAngularMotionDisc() const
+{
+	///@todo cache this value, to improve performance
+	btVector3 center;
+	btScalar disc;
+	getBoundingSphere(center, disc);
+	disc += (center).length();
+	return disc;
+}
+
+void btCollisionShape::calculateTemporalAabb(const btTransform& curTrans, const btVector3& linvel, const btVector3& angvel, btScalar timeStep, btVector3& temporalAabbMin, btVector3& temporalAabbMax) const
+{
+	//start with static aabb
+	getAabb(curTrans, temporalAabbMin, temporalAabbMax);
+
+	btScalar temporalAabbMaxx = temporalAabbMax.getX();
+	btScalar temporalAabbMaxy = temporalAabbMax.getY();
+	btScalar temporalAabbMaxz = temporalAabbMax.getZ();
+	btScalar temporalAabbMinx = temporalAabbMin.getX();
+	btScalar temporalAabbMiny = temporalAabbMin.getY();
+	btScalar temporalAabbMinz = temporalAabbMin.getZ();
+
+	// add linear motion
+	btVector3 linMotion = linvel * timeStep;
+	///@todo: simd would have a vector max/min operation, instead of per-element access
+	if (linMotion.x() > btScalar(0.))
+		temporalAabbMaxx += linMotion.x();
+	else
+		temporalAabbMinx += linMotion.x();
+	if (linMotion.y() > btScalar(0.))
+		temporalAabbMaxy += linMotion.y();
+	else
+		temporalAabbMiny += linMotion.y();
+	if (linMotion.z() > btScalar(0.))
+		temporalAabbMaxz += linMotion.z();
+	else
+		temporalAabbMinz += linMotion.z();
+
+	//add conservative angular motion
+	btScalar angularMotion = angvel.length() * getAngularMotionDisc() * timeStep;
+	btVector3 angularMotion3d(angularMotion, angularMotion, angularMotion);
+	temporalAabbMin = btVector3(temporalAabbMinx, temporalAabbMiny, temporalAabbMinz);
+	temporalAabbMax = btVector3(temporalAabbMaxx, temporalAabbMaxy, temporalAabbMaxz);
+
+	temporalAabbMin -= angularMotion3d;
+	temporalAabbMax += angularMotion3d;
+}
+
+///fills the dataBuffer and returns the struct name (and 0 on failure)
+const char* btCollisionShape::serialize(void* dataBuffer, btSerializer* serializer) const
+{
+	btCollisionShapeData* shapeData = (btCollisionShapeData*)dataBuffer;
+	char* name = (char*)serializer->findNameForPointer(this);
+	shapeData->m_name = (char*)serializer->getUniquePointer(name);
+	if (shapeData->m_name)
+	{
+		serializer->serializeName(name);
+	}
+	shapeData->m_shapeType = m_shapeType;
+
+	// Fill padding with zeros to appease msan.
+	memset(shapeData->m_padding, 0, sizeof(shapeData->m_padding));
+
+	return "btCollisionShapeData";
+}
+
+void btCollisionShape::serializeSingleShape(btSerializer* serializer) const
+{
+	int len = calculateSerializeBufferSize();
+	btChunk* chunk = serializer->allocate(len, 1);
+	const char* structType = serialize(chunk->m_oldPtr, serializer);
+	serializer->finalizeChunk(chunk, structType, BT_SHAPE_CODE, (void*)this);
+}
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_CONVEX_SHAPE_INTERFACE1
+#define BT_CONVEX_SHAPE_INTERFACE1
+
+#include "BulletCollision/CollisionShapes/btCollisionShape.h"
+
+#include "LinearMath/btVector3.h"
+#include "LinearMath/btTransform.h"
+#include "LinearMath/btMatrix3x3.h"
+#include "BulletCollision/CollisionShapes/btCollisionMargin.h"
+#include "LinearMath/btAlignedAllocator.h"
+
+#define MAX_PREFERRED_PENETRATION_DIRECTIONS 10
+
+/// The btConvexShape is an abstract shape interface, implemented by all convex shapes such as btBoxShape, btConvexHullShape etc.
+/// It describes general convex shapes using the localGetSupportingVertex interface, used by collision detectors such as btGjkPairDetector.
+ATTRIBUTE_ALIGNED16(class)
+btConvexShape : public btCollisionShape
+{
+public:
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+
+	btConvexShape();
+
+	virtual ~btConvexShape();
+
+	virtual btVector3 localGetSupportingVertex(const btVector3& vec) const = 0;
+
+////////
+#ifndef __SPU__
+	virtual btVector3 localGetSupportingVertexWithoutMargin(const btVector3& vec) const = 0;
+#endif  //#ifndef __SPU__
+
+	btVector3 localGetSupportVertexWithoutMarginNonVirtual(const btVector3& vec) const;
+	btVector3 localGetSupportVertexNonVirtual(const btVector3& vec) const;
+	btScalar getMarginNonVirtual() const;
+	void getAabbNonVirtual(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
+
+	virtual void project(const btTransform& trans, const btVector3& dir, btScalar& minProj, btScalar& maxProj, btVector3& witnesPtMin, btVector3& witnesPtMax) const;
+
+	//notice that the vectors should be unit length
+	virtual void batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const = 0;
+
+	///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
+	void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const = 0;
+
+	virtual void getAabbSlow(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const = 0;
+
+	virtual void setLocalScaling(const btVector3& scaling) = 0;
+	virtual const btVector3& getLocalScaling() const = 0;
+
+	virtual void setMargin(btScalar margin) = 0;
+
+	virtual btScalar getMargin() const = 0;
+
+	virtual int getNumPreferredPenetrationDirections() const = 0;
+
+	virtual void getPreferredPenetrationDirection(int index, btVector3& penetrationVector) const = 0;
+};
+
+#endif  //BT_CONVEX_SHAPE_INTERFACE1
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#if defined(_WIN32) || defined(__i386__)
+#define BT_USE_SSE_IN_API
+#endif
+
+#include "BulletCollision/CollisionShapes/btConvexShape.h"
+#include "BulletCollision/CollisionShapes/btTriangleShape.h"
+#include "BulletCollision/CollisionShapes/btSphereShape.h"
+#include "BulletCollision/CollisionShapes/btCylinderShape.h"
+#include "BulletCollision/CollisionShapes/btConeShape.h"
+#include "BulletCollision/CollisionShapes/btCapsuleShape.h"
+#include "BulletCollision/CollisionShapes/btConvexHullShape.h"
+#include "BulletCollision/CollisionShapes/btConvexPointCloudShape.h"
+
+///not supported on IBM SDK, until we fix the alignment of btVector3
+#if defined(__CELLOS_LV2__) && defined(__SPU__)
+static inline vec_float4 vec_dot3(vec_float4 vec0, vec_float4 vec1)
+{
+	vec_float4 result;
+	result = spu_mul(vec0, vec1);
+	result = spu_madd(spu_rlqwbyte(vec0, 4), spu_rlqwbyte(vec1, 4), result);
+	return spu_madd(spu_rlqwbyte(vec0, 8), spu_rlqwbyte(vec1, 8), result);
+}
+#endif  //__SPU__
+
+btConvexShape::btConvexShape()
+{
+}
+
+btConvexShape::~btConvexShape()
+{
+}
+
+void btConvexShape::project(const btTransform& trans, const btVector3& dir, btScalar& min, btScalar& max, btVector3& witnesPtMin, btVector3& witnesPtMax) const
+{
+	btVector3 localAxis = dir * trans.getBasis();
+	btVector3 vtx1 = trans(localGetSupportingVertex(localAxis));
+	btVector3 vtx2 = trans(localGetSupportingVertex(-localAxis));
+
+	min = vtx1.dot(dir);
+	max = vtx2.dot(dir);
+	witnesPtMax = vtx2;
+	witnesPtMin = vtx1;
+
+	if (min > max)
+	{
+		btScalar tmp = min;
+		min = max;
+		max = tmp;
+		witnesPtMax = vtx1;
+		witnesPtMin = vtx2;
+	}
+}
+
+static btVector3 convexHullSupport(const btVector3& localDirOrg, const btVector3* points, int numPoints, const btVector3& localScaling)
+{
+	btVector3 vec = localDirOrg * localScaling;
+
+#if defined(__CELLOS_LV2__) && defined(__SPU__)
+
+	btVector3 localDir = vec;
+
+	vec_float4 v_distMax = {-FLT_MAX, 0, 0, 0};
+	vec_int4 v_idxMax = {-999, 0, 0, 0};
+	int v = 0;
+	int numverts = numPoints;
+
+	for (; v < (int)numverts - 4; v += 4)
+	{
+		vec_float4 p0 = vec_dot3(points[v].get128(), localDir.get128());
+		vec_float4 p1 = vec_dot3(points[v + 1].get128(), localDir.get128());
+		vec_float4 p2 = vec_dot3(points[v + 2].get128(), localDir.get128());
+		vec_float4 p3 = vec_dot3(points[v + 3].get128(), localDir.get128());
+		const vec_int4 i0 = {v, 0, 0, 0};
+		const vec_int4 i1 = {v + 1, 0, 0, 0};
+		const vec_int4 i2 = {v + 2, 0, 0, 0};
+		const vec_int4 i3 = {v + 3, 0, 0, 0};
+		vec_uint4 retGt01 = spu_cmpgt(p0, p1);
+		vec_float4 pmax01 = spu_sel(p1, p0, retGt01);
+		vec_int4 imax01 = spu_sel(i1, i0, retGt01);
+		vec_uint4 retGt23 = spu_cmpgt(p2, p3);
+		vec_float4 pmax23 = spu_sel(p3, p2, retGt23);
+		vec_int4 imax23 = spu_sel(i3, i2, retGt23);
+		vec_uint4 retGt0123 = spu_cmpgt(pmax01, pmax23);
+		vec_float4 pmax0123 = spu_sel(pmax23, pmax01, retGt0123);
+		vec_int4 imax0123 = spu_sel(imax23, imax01, retGt0123);
+		vec_uint4 retGtMax = spu_cmpgt(v_distMax, pmax0123);
+		v_distMax = spu_sel(pmax0123, v_distMax, retGtMax);
+		v_idxMax = spu_sel(imax0123, v_idxMax, retGtMax);
+	}
+	for (; v < (int)numverts; v++)
+	{
+		vec_float4 p = vec_dot3(points[v].get128(), localDir.get128());
+		const vec_int4 i = {v, 0, 0, 0};
+		vec_uint4 retGtMax = spu_cmpgt(v_distMax, p);
+		v_distMax = spu_sel(p, v_distMax, retGtMax);
+		v_idxMax = spu_sel(i, v_idxMax, retGtMax);
+	}
+	int ptIndex = spu_extract(v_idxMax, 0);
+	const btVector3& supVec = points[ptIndex] * localScaling;
+	return supVec;
+#else
+
+	btScalar maxDot;
+	long ptIndex = vec.maxDot(points, numPoints, maxDot);
+	btAssert(ptIndex >= 0);
+	if (ptIndex < 0)
+	{
+		ptIndex = 0;
+	}
+	btVector3 supVec = points[ptIndex] * localScaling;
+	return supVec;
+#endif  //__SPU__
+}
+
+btVector3 btConvexShape::localGetSupportVertexWithoutMarginNonVirtual(const btVector3& localDir) const
+{
+	switch (m_shapeType)
+	{
+		case SPHERE_SHAPE_PROXYTYPE:
+		{
+			return btVector3(0, 0, 0);
+		}
+		case BOX_SHAPE_PROXYTYPE:
+		{
+			btBoxShape* convexShape = (btBoxShape*)this;
+			const btVector3& halfExtents = convexShape->getImplicitShapeDimensions();
+
+#if defined(__APPLE__) && (defined(BT_USE_SSE) || defined(BT_USE_NEON))
+#if defined(BT_USE_SSE)
+			return btVector3(_mm_xor_ps(_mm_and_ps(localDir.mVec128, (__m128){-0.0f, -0.0f, -0.0f, -0.0f}), halfExtents.mVec128));
+#elif defined(BT_USE_NEON)
+			return btVector3((float32x4_t)(((uint32x4_t)localDir.mVec128 & (uint32x4_t){0x80000000, 0x80000000, 0x80000000, 0x80000000}) ^ (uint32x4_t)halfExtents.mVec128));
+#else
+#error unknown vector arch
+#endif
+#else
+			return btVector3(btFsels(localDir.x(), halfExtents.x(), -halfExtents.x()),
+							 btFsels(localDir.y(), halfExtents.y(), -halfExtents.y()),
+							 btFsels(localDir.z(), halfExtents.z(), -halfExtents.z()));
+#endif
+		}
+		case TRIANGLE_SHAPE_PROXYTYPE:
+		{
+			btTriangleShape* triangleShape = (btTriangleShape*)this;
+			btVector3 dir(localDir.getX(), localDir.getY(), localDir.getZ());
+			btVector3* vertices = &triangleShape->m_vertices1[0];
+			btVector3 dots = dir.dot3(vertices[0], vertices[1], vertices[2]);
+			btVector3 sup = vertices[dots.maxAxis()];
+			return btVector3(sup.getX(), sup.getY(), sup.getZ());
+		}
+		case CYLINDER_SHAPE_PROXYTYPE:
+		{
+			btCylinderShape* cylShape = (btCylinderShape*)this;
+			//mapping of halfextents/dimension onto radius/height depends on how cylinder local orientation is (upAxis)
+
+			btVector3 halfExtents = cylShape->getImplicitShapeDimensions();
+			btVector3 v(localDir.getX(), localDir.getY(), localDir.getZ());
+			int cylinderUpAxis = cylShape->getUpAxis();
+			int XX(1), YY(0), ZZ(2);
+
+			switch (cylinderUpAxis)
+			{
+				case 0:
+				{
+					XX = 1;
+					YY = 0;
+					ZZ = 2;
+				}
+				break;
+				case 1:
+				{
+					XX = 0;
+					YY = 1;
+					ZZ = 2;
+				}
+				break;
+				case 2:
+				{
+					XX = 0;
+					YY = 2;
+					ZZ = 1;
+				}
+				break;
+				default:
+					btAssert(0);
+					break;
+			};
+
+			btScalar radius = halfExtents[XX];
+			btScalar halfHeight = halfExtents[cylinderUpAxis];
+
+			btVector3 tmp;
+			btScalar d;
+
+			btScalar s = btSqrt(v[XX] * v[XX] + v[ZZ] * v[ZZ]);
+			if (s != btScalar(0.0))
+			{
+				d = radius / s;
+				tmp[XX] = v[XX] * d;
+				tmp[YY] = v[YY] < 0.0 ? -halfHeight : halfHeight;
+				tmp[ZZ] = v[ZZ] * d;
+				return btVector3(tmp.getX(), tmp.getY(), tmp.getZ());
+			}
+			else
+			{
+				tmp[XX] = radius;
+				tmp[YY] = v[YY] < 0.0 ? -halfHeight : halfHeight;
+				tmp[ZZ] = btScalar(0.0);
+				return btVector3(tmp.getX(), tmp.getY(), tmp.getZ());
+			}
+		}
+		case CAPSULE_SHAPE_PROXYTYPE:
+		{
+			btVector3 vec0(localDir.getX(), localDir.getY(), localDir.getZ());
+
+			btCapsuleShape* capsuleShape = (btCapsuleShape*)this;
+			btScalar halfHeight = capsuleShape->getHalfHeight();
+			int capsuleUpAxis = capsuleShape->getUpAxis();
+
+			btVector3 supVec(0, 0, 0);
+
+			btScalar maxDot(btScalar(-BT_LARGE_FLOAT));
+
+			btVector3 vec = vec0;
+			btScalar lenSqr = vec.length2();
+			if (lenSqr < SIMD_EPSILON * SIMD_EPSILON)
+			{
+				vec.setValue(1, 0, 0);
+			}
+			else
+			{
+				btScalar rlen = btScalar(1.) / btSqrt(lenSqr);
+				vec *= rlen;
+			}
+			btVector3 vtx;
+			btScalar newDot;
+			{
+				btVector3 pos(0, 0, 0);
+				pos[capsuleUpAxis] = halfHeight;
+
+				vtx = pos;
+				newDot = vec.dot(vtx);
+
+				if (newDot > maxDot)
+				{
+					maxDot = newDot;
+					supVec = vtx;
+				}
+			}
+			{
+				btVector3 pos(0, 0, 0);
+				pos[capsuleUpAxis] = -halfHeight;
+
+				vtx = pos;
+				newDot = vec.dot(vtx);
+				if (newDot > maxDot)
+				{
+					maxDot = newDot;
+					supVec = vtx;
+				}
+			}
+			return btVector3(supVec.getX(), supVec.getY(), supVec.getZ());
+		}
+		case CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE:
+		{
+			btConvexPointCloudShape* convexPointCloudShape = (btConvexPointCloudShape*)this;
+			btVector3* points = convexPointCloudShape->getUnscaledPoints();
+			int numPoints = convexPointCloudShape->getNumPoints();
+			return convexHullSupport(localDir, points, numPoints, convexPointCloudShape->getLocalScalingNV());
+		}
+		case CONVEX_HULL_SHAPE_PROXYTYPE:
+		{
+			btConvexHullShape* convexHullShape = (btConvexHullShape*)this;
+			btVector3* points = convexHullShape->getUnscaledPoints();
+			int numPoints = convexHullShape->getNumPoints();
+			return convexHullSupport(localDir, points, numPoints, convexHullShape->getLocalScalingNV());
+		}
+		default:
+#ifndef __SPU__
+			return this->localGetSupportingVertexWithoutMargin(localDir);
+#else
+			btAssert(0);
+#endif
+	}
+
+	// should never reach here
+	btAssert(0);
+	return btVector3(btScalar(0.0f), btScalar(0.0f), btScalar(0.0f));
+}
+
+btVector3 btConvexShape::localGetSupportVertexNonVirtual(const btVector3& localDir) const
+{
+	btVector3 localDirNorm = localDir;
+	if (localDirNorm.length2() < (SIMD_EPSILON * SIMD_EPSILON))
+	{
+		localDirNorm.setValue(btScalar(-1.), btScalar(-1.), btScalar(-1.));
+	}
+	localDirNorm.normalize();
+
+	return localGetSupportVertexWithoutMarginNonVirtual(localDirNorm) + getMarginNonVirtual() * localDirNorm;
+}
+
+/* TODO: This should be bumped up to btCollisionShape () */
+btScalar btConvexShape::getMarginNonVirtual() const
+{
+	switch (m_shapeType)
+	{
+		case SPHERE_SHAPE_PROXYTYPE:
+		{
+			btSphereShape* sphereShape = (btSphereShape*)this;
+			return sphereShape->getRadius();
+		}
+		case BOX_SHAPE_PROXYTYPE:
+		{
+			btBoxShape* convexShape = (btBoxShape*)this;
+			return convexShape->getMarginNV();
+		}
+		case TRIANGLE_SHAPE_PROXYTYPE:
+		{
+			btTriangleShape* triangleShape = (btTriangleShape*)this;
+			return triangleShape->getMarginNV();
+		}
+		case CYLINDER_SHAPE_PROXYTYPE:
+		{
+			btCylinderShape* cylShape = (btCylinderShape*)this;
+			return cylShape->getMarginNV();
+		}
+		case CONE_SHAPE_PROXYTYPE:
+		{
+			btConeShape* conShape = (btConeShape*)this;
+			return conShape->getMarginNV();
+		}
+		case CAPSULE_SHAPE_PROXYTYPE:
+		{
+			btCapsuleShape* capsuleShape = (btCapsuleShape*)this;
+			return capsuleShape->getMarginNV();
+		}
+		case CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE:
+		/* fall through */
+		case CONVEX_HULL_SHAPE_PROXYTYPE:
+		{
+			btPolyhedralConvexShape* convexHullShape = (btPolyhedralConvexShape*)this;
+			return convexHullShape->getMarginNV();
+		}
+		default:
+#ifndef __SPU__
+			return this->getMargin();
+#else
+			btAssert(0);
+#endif
+	}
+
+	// should never reach here
+	btAssert(0);
+	return btScalar(0.0f);
+}
+#ifndef __SPU__
+void btConvexShape::getAabbNonVirtual(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
+{
+	switch (m_shapeType)
+	{
+		case SPHERE_SHAPE_PROXYTYPE:
+		{
+			btSphereShape* sphereShape = (btSphereShape*)this;
+			btScalar radius = sphereShape->getImplicitShapeDimensions().getX();  // * convexShape->getLocalScaling().getX();
+			btScalar margin = radius + sphereShape->getMarginNonVirtual();
+			const btVector3& center = t.getOrigin();
+			btVector3 extent(margin, margin, margin);
+			aabbMin = center - extent;
+			aabbMax = center + extent;
+		}
+		break;
+		case CYLINDER_SHAPE_PROXYTYPE:
+		/* fall through */
+		case BOX_SHAPE_PROXYTYPE:
+		{
+			btBoxShape* convexShape = (btBoxShape*)this;
+			btScalar margin = convexShape->getMarginNonVirtual();
+			btVector3 halfExtents = convexShape->getImplicitShapeDimensions();
+			halfExtents += btVector3(margin, margin, margin);
+			btMatrix3x3 abs_b = t.getBasis().absolute();
+			btVector3 center = t.getOrigin();
+			btVector3 extent = halfExtents.dot3(abs_b[0], abs_b[1], abs_b[2]);
+
+			aabbMin = center - extent;
+			aabbMax = center + extent;
+			break;
+		}
+		case TRIANGLE_SHAPE_PROXYTYPE:
+		{
+			btTriangleShape* triangleShape = (btTriangleShape*)this;
+			btScalar margin = triangleShape->getMarginNonVirtual();
+			for (int i = 0; i < 3; i++)
+			{
+				btVector3 vec(btScalar(0.), btScalar(0.), btScalar(0.));
+				vec[i] = btScalar(1.);
+
+				btVector3 sv = localGetSupportVertexWithoutMarginNonVirtual(vec * t.getBasis());
+
+				btVector3 tmp = t(sv);
+				aabbMax[i] = tmp[i] + margin;
+				vec[i] = btScalar(-1.);
+				tmp = t(localGetSupportVertexWithoutMarginNonVirtual(vec * t.getBasis()));
+				aabbMin[i] = tmp[i] - margin;
+			}
+		}
+		break;
+		case CAPSULE_SHAPE_PROXYTYPE:
+		{
+			btCapsuleShape* capsuleShape = (btCapsuleShape*)this;
+			btVector3 halfExtents(capsuleShape->getRadius(), capsuleShape->getRadius(), capsuleShape->getRadius());
+			int m_upAxis = capsuleShape->getUpAxis();
+			halfExtents[m_upAxis] = capsuleShape->getRadius() + capsuleShape->getHalfHeight();
+			btMatrix3x3 abs_b = t.getBasis().absolute();
+			btVector3 center = t.getOrigin();
+			btVector3 extent = halfExtents.dot3(abs_b[0], abs_b[1], abs_b[2]);
+			aabbMin = center - extent;
+			aabbMax = center + extent;
+		}
+		break;
+		case CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE:
+		case CONVEX_HULL_SHAPE_PROXYTYPE:
+		{
+			btPolyhedralConvexAabbCachingShape* convexHullShape = (btPolyhedralConvexAabbCachingShape*)this;
+			btScalar margin = convexHullShape->getMarginNonVirtual();
+			convexHullShape->getNonvirtualAabb(t, aabbMin, aabbMax, margin);
+		}
+		break;
+		default:
+#ifndef __SPU__
+			this->getAabb(t, aabbMin, aabbMax);
+#else
+			btAssert(0);
+#endif
+			break;
+	}
+
+	// should never reach here
+	btAssert(0);
+}
+
+#endif  //__SPU__
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_CONVEX_INTERNAL_SHAPE_H
+#define BT_CONVEX_INTERNAL_SHAPE_H
+
+#include "BulletCollision/CollisionShapes/btConvexShape.h"
+#include "LinearMath/btAabbUtil2.h"
+
+///The btConvexInternalShape is an internal base class, shared by most convex shape implementations.
+///The btConvexInternalShape uses a default collision margin set to CONVEX_DISTANCE_MARGIN.
+///This collision margin used by Gjk and some other algorithms, see also btCollisionMargin.h
+///Note that when creating small shapes (derived from btConvexInternalShape),
+///you need to make sure to set a smaller collision margin, using the 'setMargin' API
+///There is a automatic mechanism 'setSafeMargin' used by btBoxShape and btCylinderShape
+ATTRIBUTE_ALIGNED16(class)
+btConvexInternalShape : public btConvexShape
+{
+protected:
+	//local scaling. collisionMargin is not scaled !
+	btVector3 m_localScaling;
+
+	btVector3 m_implicitShapeDimensions;
+
+	btScalar m_collisionMargin;
+
+	btScalar m_padding;
+
+	btConvexInternalShape();
+
+public:
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+
+	virtual ~btConvexInternalShape()
+	{
+	}
+
+	virtual btVector3 localGetSupportingVertex(const btVector3& vec) const;
+
+	const btVector3& getImplicitShapeDimensions() const
+	{
+		return m_implicitShapeDimensions;
+	}
+
+	///warning: use setImplicitShapeDimensions with care
+	///changing a collision shape while the body is in the world is not recommended,
+	///it is best to remove the body from the world, then make the change, and re-add it
+	///alternatively flush the contact points, see documentation for 'cleanProxyFromPairs'
+	void setImplicitShapeDimensions(const btVector3& dimensions)
+	{
+		m_implicitShapeDimensions = dimensions;
+	}
+
+	void setSafeMargin(btScalar minDimension, btScalar defaultMarginMultiplier = 0.1f)
+	{
+		btScalar safeMargin = defaultMarginMultiplier * minDimension;
+		if (safeMargin < getMargin())
+		{
+			setMargin(safeMargin);
+		}
+	}
+	void setSafeMargin(const btVector3& halfExtents, btScalar defaultMarginMultiplier = 0.1f)
+	{
+		//see http://code.google.com/p/bullet/issues/detail?id=349
+		//this margin check could could be added to other collision shapes too,
+		//or add some assert/warning somewhere
+		btScalar minDimension = halfExtents[halfExtents.minAxis()];
+		setSafeMargin(minDimension, defaultMarginMultiplier);
+	}
+
+	///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
+	void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
+	{
+		getAabbSlow(t, aabbMin, aabbMax);
+	}
+
+	virtual void getAabbSlow(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
+
+	virtual void setLocalScaling(const btVector3& scaling);
+	virtual const btVector3& getLocalScaling() const
+	{
+		return m_localScaling;
+	}
+
+	const btVector3& getLocalScalingNV() const
+	{
+		return m_localScaling;
+	}
+
+	virtual void setMargin(btScalar margin)
+	{
+		m_collisionMargin = margin;
+	}
+	virtual btScalar getMargin() const
+	{
+		return m_collisionMargin;
+	}
+
+	btScalar getMarginNV() const
+	{
+		return m_collisionMargin;
+	}
+
+	virtual int getNumPreferredPenetrationDirections() const
+	{
+		return 0;
+	}
+
+	virtual void getPreferredPenetrationDirection(int index, btVector3& penetrationVector) const
+	{
+		(void)penetrationVector;
+		(void)index;
+		btAssert(0);
+	}
+
+	virtual int calculateSerializeBufferSize() const;
+
+	///fills the dataBuffer and returns the struct name (and 0 on failure)
+	virtual const char* serialize(void* dataBuffer, btSerializer* serializer) const;
+};
+
+///do not change those serialization structures, it requires an updated sBulletDNAstr/sBulletDNAstr64
+struct btConvexInternalShapeData
+{
+	btCollisionShapeData m_collisionShapeData;
+
+	btVector3FloatData m_localScaling;
+
+	btVector3FloatData m_implicitShapeDimensions;
+
+	float m_collisionMargin;
+
+	int m_padding;
+};
+
+SIMD_FORCE_INLINE int btConvexInternalShape::calculateSerializeBufferSize() const
+{
+	return sizeof(btConvexInternalShapeData);
+}
+
+///fills the dataBuffer and returns the struct name (and 0 on failure)
+SIMD_FORCE_INLINE const char* btConvexInternalShape::serialize(void* dataBuffer, btSerializer* serializer) const
+{
+	btConvexInternalShapeData* shapeData = (btConvexInternalShapeData*)dataBuffer;
+	btCollisionShape::serialize(&shapeData->m_collisionShapeData, serializer);
+
+	m_implicitShapeDimensions.serializeFloat(shapeData->m_implicitShapeDimensions);
+	m_localScaling.serializeFloat(shapeData->m_localScaling);
+	shapeData->m_collisionMargin = float(m_collisionMargin);
+
+	// Fill padding with zeros to appease msan.
+	shapeData->m_padding = 0;
+
+	return "btConvexInternalShapeData";
+}
+
+///btConvexInternalAabbCachingShape adds local aabb caching for convex shapes, to avoid expensive bounding box calculations
+class btConvexInternalAabbCachingShape : public btConvexInternalShape
+{
+	btVector3 m_localAabbMin;
+	btVector3 m_localAabbMax;
+	bool m_isLocalAabbValid;
+
+protected:
+	btConvexInternalAabbCachingShape();
+
+	void setCachedLocalAabb(const btVector3& aabbMin, const btVector3& aabbMax)
+	{
+		m_isLocalAabbValid = true;
+		m_localAabbMin = aabbMin;
+		m_localAabbMax = aabbMax;
+	}
+
+	inline void getCachedLocalAabb(btVector3& aabbMin, btVector3& aabbMax) const
+	{
+		btAssert(m_isLocalAabbValid);
+		aabbMin = m_localAabbMin;
+		aabbMax = m_localAabbMax;
+	}
+
+	inline void getNonvirtualAabb(const btTransform& trans, btVector3& aabbMin, btVector3& aabbMax, btScalar margin) const
+	{
+		//lazy evaluation of local aabb
+		btAssert(m_isLocalAabbValid);
+		btTransformAabb(m_localAabbMin, m_localAabbMax, margin, trans, aabbMin, aabbMax);
+	}
+
+public:
+	virtual void setLocalScaling(const btVector3& scaling);
+
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
+
+	void recalcLocalAabb();
+};
+
+#endif  //BT_CONVEX_INTERNAL_SHAPE_H
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#include "BulletCollision/CollisionShapes/btConvexInternalShape.h"
+
+btConvexInternalShape::btConvexInternalShape()
+	: m_localScaling(btScalar(1.), btScalar(1.), btScalar(1.)),
+	  m_collisionMargin(CONVEX_DISTANCE_MARGIN)
+{
+}
+
+void btConvexInternalShape::setLocalScaling(const btVector3& scaling)
+{
+	m_localScaling = scaling.absolute();
+}
+
+void btConvexInternalShape::getAabbSlow(const btTransform& trans, btVector3& minAabb, btVector3& maxAabb) const
+{
+#ifndef __SPU__
+	//use localGetSupportingVertexWithoutMargin?
+	btScalar margin = getMargin();
+	for (int i = 0; i < 3; i++)
+	{
+		btVector3 vec(btScalar(0.), btScalar(0.), btScalar(0.));
+		vec[i] = btScalar(1.);
+
+		btVector3 sv = localGetSupportingVertex(vec * trans.getBasis());
+
+		btVector3 tmp = trans(sv);
+		maxAabb[i] = tmp[i] + margin;
+		vec[i] = btScalar(-1.);
+		tmp = trans(localGetSupportingVertex(vec * trans.getBasis()));
+		minAabb[i] = tmp[i] - margin;
+	}
+#endif
+}
+
+btVector3 btConvexInternalShape::localGetSupportingVertex(const btVector3& vec) const
+{
+#ifndef __SPU__
+
+	btVector3 supVertex = localGetSupportingVertexWithoutMargin(vec);
+
+	if (getMargin() != btScalar(0.))
+	{
+		btVector3 vecnorm = vec;
+		if (vecnorm.length2() < (SIMD_EPSILON * SIMD_EPSILON))
+		{
+			vecnorm.setValue(btScalar(-1.), btScalar(-1.), btScalar(-1.));
+		}
+		vecnorm.normalize();
+		supVertex += getMargin() * vecnorm;
+	}
+	return supVertex;
+
+#else
+	btAssert(0);
+	return btVector3(0, 0, 0);
+#endif  //__SPU__
+}
+
+btConvexInternalAabbCachingShape::btConvexInternalAabbCachingShape()
+	: btConvexInternalShape(),
+	  m_localAabbMin(1, 1, 1),
+	  m_localAabbMax(-1, -1, -1),
+	  m_isLocalAabbValid(false)
+{
+}
+
+void btConvexInternalAabbCachingShape::getAabb(const btTransform& trans, btVector3& aabbMin, btVector3& aabbMax) const
+{
+	getNonvirtualAabb(trans, aabbMin, aabbMax, getMargin());
+}
+
+void btConvexInternalAabbCachingShape::setLocalScaling(const btVector3& scaling)
+{
+	btConvexInternalShape::setLocalScaling(scaling);
+	recalcLocalAabb();
+}
+
+void btConvexInternalAabbCachingShape::recalcLocalAabb()
+{
+	m_isLocalAabbValid = true;
+
+#if 1
+	static const btVector3 _directions[] =
+		{
+			btVector3(1., 0., 0.),
+			btVector3(0., 1., 0.),
+			btVector3(0., 0., 1.),
+			btVector3(-1., 0., 0.),
+			btVector3(0., -1., 0.),
+			btVector3(0., 0., -1.)};
+
+	btVector3 _supporting[] =
+		{
+			btVector3(0., 0., 0.),
+			btVector3(0., 0., 0.),
+			btVector3(0., 0., 0.),
+			btVector3(0., 0., 0.),
+			btVector3(0., 0., 0.),
+			btVector3(0., 0., 0.)};
+
+	batchedUnitVectorGetSupportingVertexWithoutMargin(_directions, _supporting, 6);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		m_localAabbMax[i] = _supporting[i][i] + m_collisionMargin;
+		m_localAabbMin[i] = _supporting[i + 3][i] - m_collisionMargin;
+	}
+
+#else
+
+	for (int i = 0; i < 3; i++)
+	{
+		btVector3 vec(btScalar(0.), btScalar(0.), btScalar(0.));
+		vec[i] = btScalar(1.);
+		btVector3 tmp = localGetSupportingVertex(vec);
+		m_localAabbMax[i] = tmp[i] + m_collisionMargin;
+		vec[i] = btScalar(-1.);
+		tmp = localGetSupportingVertex(vec);
+		m_localAabbMin[i] = tmp[i] - m_collisionMargin;
+	}
+#endif
+}
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_POLYHEDRAL_CONVEX_SHAPE_H
+#define BT_POLYHEDRAL_CONVEX_SHAPE_H
+
+#include "LinearMath/btMatrix3x3.h"
+#include "BulletCollision/CollisionShapes/btConvexInternalShape.h"
+class btConvexPolyhedron;
+
+///The btPolyhedralConvexShape is an internal interface class for polyhedral convex shapes.
+ATTRIBUTE_ALIGNED16(class)
+btPolyhedralConvexShape : public btConvexInternalShape
+{
+protected:
+	btConvexPolyhedron* m_polyhedron;
+
+public:
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+
+	btPolyhedralConvexShape();
+
+	virtual ~btPolyhedralConvexShape();
+
+	///optional method mainly used to generate multiple contact points by clipping polyhedral features (faces/edges)
+	///experimental/work-in-progress
+	virtual bool initializePolyhedralFeatures(int shiftVerticesByMargin = 0);
+
+	virtual void setPolyhedralFeatures(btConvexPolyhedron & polyhedron);
+
+	const btConvexPolyhedron* getConvexPolyhedron() const
+	{
+		return m_polyhedron;
+	}
+
+	//brute force implementations
+
+	virtual btVector3 localGetSupportingVertexWithoutMargin(const btVector3& vec) const;
+	virtual void batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const;
+
+	virtual void calculateLocalInertia(btScalar mass, btVector3 & inertia) const;
+
+	virtual int getNumVertices() const = 0;
+	virtual int getNumEdges() const = 0;
+	virtual void getEdge(int i, btVector3& pa, btVector3& pb) const = 0;
+	virtual void getVertex(int i, btVector3& vtx) const = 0;
+	virtual int getNumPlanes() const = 0;
+	virtual void getPlane(btVector3 & planeNormal, btVector3 & planeSupport, int i) const = 0;
+	//	virtual int getIndex(int i) const = 0 ;
+
+	virtual bool isInside(const btVector3& pt, btScalar tolerance) const = 0;
+};
+
+///The btPolyhedralConvexAabbCachingShape adds aabb caching to the btPolyhedralConvexShape
+class btPolyhedralConvexAabbCachingShape : public btPolyhedralConvexShape
+{
+	btVector3 m_localAabbMin;
+	btVector3 m_localAabbMax;
+	bool m_isLocalAabbValid;
+
+protected:
+	void setCachedLocalAabb(const btVector3& aabbMin, const btVector3& aabbMax)
+	{
+		m_isLocalAabbValid = true;
+		m_localAabbMin = aabbMin;
+		m_localAabbMax = aabbMax;
+	}
+
+	inline void getCachedLocalAabb(btVector3& aabbMin, btVector3& aabbMax) const
+	{
+		btAssert(m_isLocalAabbValid);
+		aabbMin = m_localAabbMin;
+		aabbMax = m_localAabbMax;
+	}
+
+protected:
+	btPolyhedralConvexAabbCachingShape();
+
+public:
+	inline void getNonvirtualAabb(const btTransform& trans, btVector3& aabbMin, btVector3& aabbMax, btScalar margin) const
+	{
+		//lazy evaluation of local aabb
+		btAssert(m_isLocalAabbValid);
+		btTransformAabb(m_localAabbMin, m_localAabbMax, margin, trans, aabbMin, aabbMax);
+	}
+
+	virtual void setLocalScaling(const btVector3& scaling);
+
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
+
+	void recalcLocalAabb();
+};
+
+#endif  //BT_POLYHEDRAL_CONVEX_SHAPE_H
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2009 Erwin Coumans  http://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+#if defined(_WIN32) || defined(__i386__)
+#define BT_USE_SSE_IN_API
+#endif
+
+#include "BulletCollision/CollisionShapes/btPolyhedralConvexShape.h"
+#include "BulletCollision/CollisionShapes/btConvexPolyhedron.h"
+#include "LinearMath/btConvexHullComputer.h"
+#include "LinearMath/btGeometryUtil.h"
+#include "LinearMath/btGrahamScan2dConvexHull.h"
+
+btPolyhedralConvexShape::btPolyhedralConvexShape() : btConvexInternalShape(),
+													 m_polyhedron(0)
+{
+}
+
+btPolyhedralConvexShape::~btPolyhedralConvexShape()
+{
+	if (m_polyhedron)
+	{
+		m_polyhedron->~btConvexPolyhedron();
+		btAlignedFree(m_polyhedron);
+	}
+}
+
+void btPolyhedralConvexShape::setPolyhedralFeatures(btConvexPolyhedron& polyhedron)
+{
+	if (m_polyhedron)
+	{
+		*m_polyhedron = polyhedron;
+	}
+	else
+	{
+		void* mem = btAlignedAlloc(sizeof(btConvexPolyhedron), 16);
+		m_polyhedron = new (mem) btConvexPolyhedron(polyhedron);
+	}
+}
+
+bool btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMargin)
+{
+	if (m_polyhedron)
+	{
+		m_polyhedron->~btConvexPolyhedron();
+		btAlignedFree(m_polyhedron);
+	}
+
+	void* mem = btAlignedAlloc(sizeof(btConvexPolyhedron), 16);
+	m_polyhedron = new (mem) btConvexPolyhedron;
+
+	btAlignedObjectArray<btVector3> orgVertices;
+
+	for (int i = 0; i < getNumVertices(); i++)
+	{
+		btVector3& newVertex = orgVertices.expand();
+		getVertex(i, newVertex);
+	}
+
+	btConvexHullComputer conv;
+
+	if (shiftVerticesByMargin)
+	{
+		btAlignedObjectArray<btVector3> planeEquations;
+		btGeometryUtil::getPlaneEquationsFromVertices(orgVertices, planeEquations);
+
+		btAlignedObjectArray<btVector3> shiftedPlaneEquations;
+		for (int p = 0; p < planeEquations.size(); p++)
+		{
+			btVector3 plane = planeEquations[p];
+			//	   btScalar margin = getMargin();
+			plane[3] -= getMargin();
+			shiftedPlaneEquations.push_back(plane);
+		}
+
+		btAlignedObjectArray<btVector3> tmpVertices;
+
+		btGeometryUtil::getVerticesFromPlaneEquations(shiftedPlaneEquations, tmpVertices);
+
+		conv.compute(&tmpVertices[0].getX(), sizeof(btVector3), tmpVertices.size(), 0.f, 0.f);
+	}
+	else
+	{
+		conv.compute(&orgVertices[0].getX(), sizeof(btVector3), orgVertices.size(), 0.f, 0.f);
+	}
+
+#ifndef BT_RECONSTRUCT_FACES
+
+	int numVertices = conv.vertices.size();
+	m_polyhedron->m_vertices.resize(numVertices);
+	for (int p = 0; p < numVertices; p++)
+	{
+		m_polyhedron->m_vertices[p] = conv.vertices[p];
+	}
+
+	int v0, v1;
+	for (int j = 0; j < conv.faces.size(); j++)
+	{
+		btVector3 edges[3];
+		int numEdges = 0;
+		btFace combinedFace;
+		const btConvexHullComputer::Edge* edge = &conv.edges[conv.faces[j]];
+		v0 = edge->getSourceVertex();
+		int prevVertex = v0;
+		combinedFace.m_indices.push_back(v0);
+		v1 = edge->getTargetVertex();
+		while (v1 != v0)
+		{
+			btVector3 wa = conv.vertices[prevVertex];
+			btVector3 wb = conv.vertices[v1];
+			btVector3 newEdge = wb - wa;
+			newEdge.normalize();
+			if (numEdges < 2)
+				edges[numEdges++] = newEdge;
+
+			//face->addIndex(v1);
+			combinedFace.m_indices.push_back(v1);
+			edge = edge->getNextEdgeOfFace();
+			prevVertex = v1;
+			int v01 = edge->getSourceVertex();
+			v1 = edge->getTargetVertex();
+		}
+
+		btAssert(combinedFace.m_indices.size() > 2);
+
+		btVector3 faceNormal = edges[0].cross(edges[1]);
+		faceNormal.normalize();
+
+		btScalar planeEq = 1e30f;
+
+		for (int v = 0; v < combinedFace.m_indices.size(); v++)
+		{
+			btScalar eq = m_polyhedron->m_vertices[combinedFace.m_indices[v]].dot(faceNormal);
+			if (planeEq > eq)
+			{
+				planeEq = eq;
+			}
+		}
+		combinedFace.m_plane[0] = faceNormal.getX();
+		combinedFace.m_plane[1] = faceNormal.getY();
+		combinedFace.m_plane[2] = faceNormal.getZ();
+		combinedFace.m_plane[3] = -planeEq;
+
+		m_polyhedron->m_faces.push_back(combinedFace);
+	}
+
+#else  //BT_RECONSTRUCT_FACES
+
+	btAlignedObjectArray<btVector3> faceNormals;
+	int numFaces = conv.faces.size();
+	faceNormals.resize(numFaces);
+	btConvexHullComputer* convexUtil = &conv;
+
+	btAlignedObjectArray<btFace> tmpFaces;
+	tmpFaces.resize(numFaces);
+
+	int numVertices = convexUtil->vertices.size();
+	m_polyhedron->m_vertices.resize(numVertices);
+	for (int p = 0; p < numVertices; p++)
+	{
+		m_polyhedron->m_vertices[p] = convexUtil->vertices[p];
+	}
+
+	for (int i = 0; i < numFaces; i++)
+	{
+		int face = convexUtil->faces[i];
+		//printf("face=%d\n",face);
+		const btConvexHullComputer::Edge* firstEdge = &convexUtil->edges[face];
+		const btConvexHullComputer::Edge* edge = firstEdge;
+
+		btVector3 edges[3];
+		int numEdges = 0;
+		//compute face normals
+
+		do
+		{
+			int src = edge->getSourceVertex();
+			tmpFaces[i].m_indices.push_back(src);
+			int targ = edge->getTargetVertex();
+			btVector3 wa = convexUtil->vertices[src];
+
+			btVector3 wb = convexUtil->vertices[targ];
+			btVector3 newEdge = wb - wa;
+			newEdge.normalize();
+			if (numEdges < 2)
+				edges[numEdges++] = newEdge;
+
+			edge = edge->getNextEdgeOfFace();
+		} while (edge != firstEdge);
+
+		btScalar planeEq = 1e30f;
+
+		if (numEdges == 2)
+		{
+			faceNormals[i] = edges[0].cross(edges[1]);
+			faceNormals[i].normalize();
+			tmpFaces[i].m_plane[0] = faceNormals[i].getX();
+			tmpFaces[i].m_plane[1] = faceNormals[i].getY();
+			tmpFaces[i].m_plane[2] = faceNormals[i].getZ();
+			tmpFaces[i].m_plane[3] = planeEq;
+		}
+		else
+		{
+			btAssert(0);  //degenerate?
+			faceNormals[i].setZero();
+		}
+
+		for (int v = 0; v < tmpFaces[i].m_indices.size(); v++)
+		{
+			btScalar eq = m_polyhedron->m_vertices[tmpFaces[i].m_indices[v]].dot(faceNormals[i]);
+			if (planeEq > eq)
+			{
+				planeEq = eq;
+			}
+		}
+		tmpFaces[i].m_plane[3] = -planeEq;
+	}
+
+	//merge coplanar faces and copy them to m_polyhedron
+
+	btScalar faceWeldThreshold = 0.999f;
+	btAlignedObjectArray<int> todoFaces;
+	for (int i = 0; i < tmpFaces.size(); i++)
+		todoFaces.push_back(i);
+
+	while (todoFaces.size())
+	{
+		btAlignedObjectArray<int> coplanarFaceGroup;
+		int refFace = todoFaces[todoFaces.size() - 1];
+
+		coplanarFaceGroup.push_back(refFace);
+		btFace& faceA = tmpFaces[refFace];
+		todoFaces.pop_back();
+
+		btVector3 faceNormalA(faceA.m_plane[0], faceA.m_plane[1], faceA.m_plane[2]);
+		for (int j = todoFaces.size() - 1; j >= 0; j--)
+		{
+			int i = todoFaces[j];
+			btFace& faceB = tmpFaces[i];
+			btVector3 faceNormalB(faceB.m_plane[0], faceB.m_plane[1], faceB.m_plane[2]);
+			if (faceNormalA.dot(faceNormalB) > faceWeldThreshold)
+			{
+				coplanarFaceGroup.push_back(i);
+				todoFaces.remove(i);
+			}
+		}
+
+		bool did_merge = false;
+		if (coplanarFaceGroup.size() > 1)
+		{
+			//do the merge: use Graham Scan 2d convex hull
+
+			btAlignedObjectArray<GrahamVector3> orgpoints;
+			btVector3 averageFaceNormal(0, 0, 0);
+
+			for (int i = 0; i < coplanarFaceGroup.size(); i++)
+			{
+				//				m_polyhedron->m_faces.push_back(tmpFaces[coplanarFaceGroup[i]]);
+
+				btFace& face = tmpFaces[coplanarFaceGroup[i]];
+				btVector3 faceNormal(face.m_plane[0], face.m_plane[1], face.m_plane[2]);
+				averageFaceNormal += faceNormal;
+				for (int f = 0; f < face.m_indices.size(); f++)
+				{
+					int orgIndex = face.m_indices[f];
+					btVector3 pt = m_polyhedron->m_vertices[orgIndex];
+
+					bool found = false;
+
+					for (int i = 0; i < orgpoints.size(); i++)
+					{
+						//if ((orgpoints[i].m_orgIndex == orgIndex) || ((rotatedPt-orgpoints[i]).length2()<0.0001))
+						if (orgpoints[i].m_orgIndex == orgIndex)
+						{
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+						orgpoints.push_back(GrahamVector3(pt, orgIndex));
+				}
+			}
+
+			btFace combinedFace;
+			for (int i = 0; i < 4; i++)
+				combinedFace.m_plane[i] = tmpFaces[coplanarFaceGroup[0]].m_plane[i];
+
+			btAlignedObjectArray<GrahamVector3> hull;
+
+			averageFaceNormal.normalize();
+			GrahamScanConvexHull2D(orgpoints, hull, averageFaceNormal);
+
+			for (int i = 0; i < hull.size(); i++)
+			{
+				combinedFace.m_indices.push_back(hull[i].m_orgIndex);
+				for (int k = 0; k < orgpoints.size(); k++)
+				{
+					if (orgpoints[k].m_orgIndex == hull[i].m_orgIndex)
+					{
+						orgpoints[k].m_orgIndex = -1;  // invalidate...
+						break;
+					}
+				}
+			}
+
+			// are there rejected vertices?
+			bool reject_merge = false;
+
+			for (int i = 0; i < orgpoints.size(); i++)
+			{
+				if (orgpoints[i].m_orgIndex == -1)
+					continue;  // this is in the hull...
+				// this vertex is rejected -- is anybody else using this vertex?
+				for (int j = 0; j < tmpFaces.size(); j++)
+				{
+					btFace& face = tmpFaces[j];
+					// is this a face of the current coplanar group?
+					bool is_in_current_group = false;
+					for (int k = 0; k < coplanarFaceGroup.size(); k++)
+					{
+						if (coplanarFaceGroup[k] == j)
+						{
+							is_in_current_group = true;
+							break;
+						}
+					}
+					if (is_in_current_group)  // ignore this face...
+						continue;
+					// does this face use this rejected vertex?
+					for (int v = 0; v < face.m_indices.size(); v++)
+					{
+						if (face.m_indices[v] == orgpoints[i].m_orgIndex)
+						{
+							// this rejected vertex is used in another face -- reject merge
+							reject_merge = true;
+							break;
+						}
+					}
+					if (reject_merge)
+						break;
+				}
+				if (reject_merge)
+					break;
+			}
+
+			if (!reject_merge)
+			{
+				// do this merge!
+				did_merge = true;
+				m_polyhedron->m_faces.push_back(combinedFace);
+			}
+		}
+		if (!did_merge)
+		{
+			for (int i = 0; i < coplanarFaceGroup.size(); i++)
+			{
+				btFace face = tmpFaces[coplanarFaceGroup[i]];
+				m_polyhedron->m_faces.push_back(face);
+			}
+		}
+	}
+
+#endif  //BT_RECONSTRUCT_FACES
+
+	m_polyhedron->initialize();
+
+	return true;
+}
+
+#ifndef MIN
+#define MIN(_a, _b) ((_a) < (_b) ? (_a) : (_b))
+#endif
+
+btVector3 btPolyhedralConvexShape::localGetSupportingVertexWithoutMargin(const btVector3& vec0) const
+{
+	btVector3 supVec(0, 0, 0);
+#ifndef __SPU__
+	int i;
+	btScalar maxDot(btScalar(-BT_LARGE_FLOAT));
+
+	btVector3 vec = vec0;
+	btScalar lenSqr = vec.length2();
+	if (lenSqr < btScalar(0.0001))
+	{
+		vec.setValue(1, 0, 0);
+	}
+	else
+	{
+		btScalar rlen = btScalar(1.) / btSqrt(lenSqr);
+		vec *= rlen;
+	}
+
+	btVector3 vtx;
+	btScalar newDot;
+
+	for (int k = 0; k < getNumVertices(); k += 128)
+	{
+		btVector3 temp[128];
+		int inner_count = MIN(getNumVertices() - k, 128);
+		for (i = 0; i < inner_count; i++)
+			getVertex(i, temp[i]);
+		i = (int)vec.maxDot(temp, inner_count, newDot);
+		if (newDot > maxDot)
+		{
+			maxDot = newDot;
+			supVec = temp[i];
+		}
+	}
+
+#endif  //__SPU__
+	return supVec;
+}
+
+void btPolyhedralConvexShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
+{
+#ifndef __SPU__
+	int i;
+
+	btVector3 vtx;
+	btScalar newDot;
+
+	for (i = 0; i < numVectors; i++)
+	{
+		supportVerticesOut[i][3] = btScalar(-BT_LARGE_FLOAT);
+	}
+
+	for (int j = 0; j < numVectors; j++)
+	{
+		const btVector3& vec = vectors[j];
+
+		for (int k = 0; k < getNumVertices(); k += 128)
+		{
+			btVector3 temp[128];
+			int inner_count = MIN(getNumVertices() - k, 128);
+			for (i = 0; i < inner_count; i++)
+				getVertex(i, temp[i]);
+			i = (int)vec.maxDot(temp, inner_count, newDot);
+			if (newDot > supportVerticesOut[j][3])
+			{
+				supportVerticesOut[j] = temp[i];
+				supportVerticesOut[j][3] = newDot;
+			}
+		}
+	}
+
+#endif  //__SPU__
+}
+
+void btPolyhedralConvexShape::calculateLocalInertia(btScalar mass, btVector3& inertia) const
+{
+#ifndef __SPU__
+	//not yet, return box inertia
+
+	btScalar margin = getMargin();
+
+	btTransform ident;
+	ident.setIdentity();
+	btVector3 aabbMin, aabbMax;
+	getAabb(ident, aabbMin, aabbMax);
+	btVector3 halfExtents = (aabbMax - aabbMin) * btScalar(0.5);
+
+	btScalar lx = btScalar(2.) * (halfExtents.x() + margin);
+	btScalar ly = btScalar(2.) * (halfExtents.y() + margin);
+	btScalar lz = btScalar(2.) * (halfExtents.z() + margin);
+	const btScalar x2 = lx * lx;
+	const btScalar y2 = ly * ly;
+	const btScalar z2 = lz * lz;
+	const btScalar scaledmass = mass * btScalar(0.08333333);
+
+	inertia = scaledmass * (btVector3(y2 + z2, x2 + z2, x2 + y2));
+#endif  //__SPU__
+}
+
+void btPolyhedralConvexAabbCachingShape::setLocalScaling(const btVector3& scaling)
+{
+	btConvexInternalShape::setLocalScaling(scaling);
+	recalcLocalAabb();
+}
+
+btPolyhedralConvexAabbCachingShape::btPolyhedralConvexAabbCachingShape()
+	: btPolyhedralConvexShape(),
+	  m_localAabbMin(1, 1, 1),
+	  m_localAabbMax(-1, -1, -1),
+	  m_isLocalAabbValid(false)
+{
+}
+
+void btPolyhedralConvexAabbCachingShape::getAabb(const btTransform& trans, btVector3& aabbMin, btVector3& aabbMax) const
+{
+	getNonvirtualAabb(trans, aabbMin, aabbMax, getMargin());
+}
+
+void btPolyhedralConvexAabbCachingShape::recalcLocalAabb()
+{
+	m_isLocalAabbValid = true;
+
+#if 1
+	static const btVector3 _directions[] =
+		{
+			btVector3(1., 0., 0.),
+			btVector3(0., 1., 0.),
+			btVector3(0., 0., 1.),
+			btVector3(-1., 0., 0.),
+			btVector3(0., -1., 0.),
+			btVector3(0., 0., -1.)};
+
+	btVector3 _supporting[] =
+		{
+			btVector3(0., 0., 0.),
+			btVector3(0., 0., 0.),
+			btVector3(0., 0., 0.),
+			btVector3(0., 0., 0.),
+			btVector3(0., 0., 0.),
+			btVector3(0., 0., 0.)};
+
+	batchedUnitVectorGetSupportingVertexWithoutMargin(_directions, _supporting, 6);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		m_localAabbMax[i] = _supporting[i][i] + m_collisionMargin;
+		m_localAabbMin[i] = _supporting[i + 3][i] - m_collisionMargin;
+	}
+
+#else
+
+	for (int i = 0; i < 3; i++)
+	{
+		btVector3 vec(btScalar(0.), btScalar(0.), btScalar(0.));
+		vec[i] = btScalar(1.);
+		btVector3 tmp = localGetSupportingVertex(vec);
+		m_localAabbMax[i] = tmp[i];
+		vec[i] = btScalar(-1.);
+		tmp = localGetSupportingVertex(vec);
+		m_localAabbMin[i] = tmp[i];
+	}
+#endif
+}
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2011 Advanced Micro Devices, Inc.  http://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+///This file was written by Erwin Coumans
+
+#ifndef _BT_POLYHEDRAL_FEATURES_H
+#define _BT_POLYHEDRAL_FEATURES_H
+
+#include "LinearMath/btTransform.h"
+#include "LinearMath/btAlignedObjectArray.h"
+
+#define TEST_INTERNAL_OBJECTS 1
+
+struct btFace
+{
+	btAlignedObjectArray<int> m_indices;
+	//	btAlignedObjectArray<int>	m_connectedFaces;
+	btScalar m_plane[4];
+};
+
+ATTRIBUTE_ALIGNED16(class)
+btConvexPolyhedron
+{
+public:
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+
+	btConvexPolyhedron();
+	virtual ~btConvexPolyhedron();
+
+	btAlignedObjectArray<btVector3> m_vertices;
+	btAlignedObjectArray<btFace> m_faces;
+	btAlignedObjectArray<btVector3> m_uniqueEdges;
+
+	btVector3 m_localCenter;
+	btVector3 m_extents;
+	btScalar m_radius;
+	btVector3 mC;
+	btVector3 mE;
+
+	void initialize();
+	void initialize2();
+	bool testContainment() const;
+
+	void project(const btTransform& trans, const btVector3& dir, btScalar& minProj, btScalar& maxProj, btVector3& witnesPtMin, btVector3& witnesPtMax) const;
+};
+
+#endif  //_BT_POLYHEDRAL_FEATURES_H
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2011 Advanced Micro Devices, Inc.  http://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+///This file was written by Erwin Coumans
+///Separating axis rest based on work from Pierre Terdiman, see
+///And contact clipping based on work from Simon Hobbs
+
+#include "BulletCollision/CollisionShapes/btConvexPolyhedron.h"
+#include "LinearMath/btHashMap.h"
+
+btConvexPolyhedron::btConvexPolyhedron()
+{
+}
+btConvexPolyhedron::~btConvexPolyhedron()
+{
+}
+
+inline bool IsAlmostZero1(const btVector3& v)
+{
+	if (btFabs(v.x()) > 1e-6 || btFabs(v.y()) > 1e-6 || btFabs(v.z()) > 1e-6) return false;
+	return true;
+}
+
+struct btInternalVertexPair
+{
+	btInternalVertexPair(short int v0, short int v1)
+		: m_v0(v0),
+		  m_v1(v1)
+	{
+		if (m_v1 > m_v0)
+			btSwap(m_v0, m_v1);
+	}
+	short int m_v0;
+	short int m_v1;
+	int getHash() const
+	{
+		return m_v0 + (m_v1 << 16);
+	}
+	bool equals(const btInternalVertexPair& other) const
+	{
+		return m_v0 == other.m_v0 && m_v1 == other.m_v1;
+	}
+};
+
+struct btInternalEdge
+{
+	btInternalEdge()
+		: m_face0(-1),
+		  m_face1(-1)
+	{
+	}
+	short int m_face0;
+	short int m_face1;
+};
+
+//
+
+#ifdef TEST_INTERNAL_OBJECTS
+bool btConvexPolyhedron::testContainment() const
+{
+	for (int p = 0; p < 8; p++)
+	{
+		btVector3 LocalPt;
+		if (p == 0)
+			LocalPt = m_localCenter + btVector3(m_extents[0], m_extents[1], m_extents[2]);
+		else if (p == 1)
+			LocalPt = m_localCenter + btVector3(m_extents[0], m_extents[1], -m_extents[2]);
+		else if (p == 2)
+			LocalPt = m_localCenter + btVector3(m_extents[0], -m_extents[1], m_extents[2]);
+		else if (p == 3)
+			LocalPt = m_localCenter + btVector3(m_extents[0], -m_extents[1], -m_extents[2]);
+		else if (p == 4)
+			LocalPt = m_localCenter + btVector3(-m_extents[0], m_extents[1], m_extents[2]);
+		else if (p == 5)
+			LocalPt = m_localCenter + btVector3(-m_extents[0], m_extents[1], -m_extents[2]);
+		else if (p == 6)
+			LocalPt = m_localCenter + btVector3(-m_extents[0], -m_extents[1], m_extents[2]);
+		else if (p == 7)
+			LocalPt = m_localCenter + btVector3(-m_extents[0], -m_extents[1], -m_extents[2]);
+
+		for (int i = 0; i < m_faces.size(); i++)
+		{
+			const btVector3 Normal(m_faces[i].m_plane[0], m_faces[i].m_plane[1], m_faces[i].m_plane[2]);
+			const btScalar d = LocalPt.dot(Normal) + m_faces[i].m_plane[3];
+			if (d > 0.0f)
+				return false;
+		}
+	}
+	return true;
+}
+#endif
+
+void btConvexPolyhedron::initialize()
+{
+	btHashMap<btInternalVertexPair, btInternalEdge> edges;
+
+	for (int i = 0; i < m_faces.size(); i++)
+	{
+		int numVertices = m_faces[i].m_indices.size();
+		int NbTris = numVertices;
+		for (int j = 0; j < NbTris; j++)
+		{
+			int k = (j + 1) % numVertices;
+			btInternalVertexPair vp(m_faces[i].m_indices[j], m_faces[i].m_indices[k]);
+			btInternalEdge* edptr = edges.find(vp);
+			btVector3 edge = m_vertices[vp.m_v1] - m_vertices[vp.m_v0];
+			edge.normalize();
+
+			bool found = false;
+
+			for (int p = 0; p < m_uniqueEdges.size(); p++)
+			{
+				if (IsAlmostZero1(m_uniqueEdges[p] - edge) ||
+					IsAlmostZero1(m_uniqueEdges[p] + edge))
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				m_uniqueEdges.push_back(edge);
+			}
+
+			if (edptr)
+			{
+				btAssert(edptr->m_face0 >= 0);
+				btAssert(edptr->m_face1 < 0);
+				edptr->m_face1 = i;
+			}
+			else
+			{
+				btInternalEdge ed;
+				ed.m_face0 = i;
+				edges.insert(vp, ed);
+			}
+		}
+	}
+
+#ifdef USE_CONNECTED_FACES
+	for (int i = 0; i < m_faces.size(); i++)
+	{
+		int numVertices = m_faces[i].m_indices.size();
+		m_faces[i].m_connectedFaces.resize(numVertices);
+
+		for (int j = 0; j < numVertices; j++)
+		{
+			int k = (j + 1) % numVertices;
+			btInternalVertexPair vp(m_faces[i].m_indices[j], m_faces[i].m_indices[k]);
+			btInternalEdge* edptr = edges.find(vp);
+			btAssert(edptr);
+			btAssert(edptr->m_face0 >= 0);
+			btAssert(edptr->m_face1 >= 0);
+
+			int connectedFace = (edptr->m_face0 == i) ? edptr->m_face1 : edptr->m_face0;
+			m_faces[i].m_connectedFaces[j] = connectedFace;
+		}
+	}
+#endif  //USE_CONNECTED_FACES
+
+	initialize2();
+}
+
+void btConvexPolyhedron::initialize2()
+{
+	m_localCenter.setValue(0, 0, 0);
+	btScalar TotalArea = 0.0f;
+	for (int i = 0; i < m_faces.size(); i++)
+	{
+		int numVertices = m_faces[i].m_indices.size();
+		int NbTris = numVertices - 2;
+
+		const btVector3& p0 = m_vertices[m_faces[i].m_indices[0]];
+		for (int j = 1; j <= NbTris; j++)
+		{
+			int k = (j + 1) % numVertices;
+			const btVector3& p1 = m_vertices[m_faces[i].m_indices[j]];
+			const btVector3& p2 = m_vertices[m_faces[i].m_indices[k]];
+			btScalar Area = ((p0 - p1).cross(p0 - p2)).length() * 0.5f;
+			btVector3 Center = (p0 + p1 + p2) / 3.0f;
+			m_localCenter += Area * Center;
+			TotalArea += Area;
+		}
+	}
+	m_localCenter /= TotalArea;
+
+#ifdef TEST_INTERNAL_OBJECTS
+	if (1)
+	{
+		m_radius = FLT_MAX;
+		for (int i = 0; i < m_faces.size(); i++)
+		{
+			const btVector3 Normal(m_faces[i].m_plane[0], m_faces[i].m_plane[1], m_faces[i].m_plane[2]);
+			const btScalar dist = btFabs(m_localCenter.dot(Normal) + m_faces[i].m_plane[3]);
+			if (dist < m_radius)
+				m_radius = dist;
+		}
+
+		btScalar MinX = FLT_MAX;
+		btScalar MinY = FLT_MAX;
+		btScalar MinZ = FLT_MAX;
+		btScalar MaxX = -FLT_MAX;
+		btScalar MaxY = -FLT_MAX;
+		btScalar MaxZ = -FLT_MAX;
+		for (int i = 0; i < m_vertices.size(); i++)
+		{
+			const btVector3& pt = m_vertices[i];
+			if (pt.x() < MinX) MinX = pt.x();
+			if (pt.x() > MaxX) MaxX = pt.x();
+			if (pt.y() < MinY) MinY = pt.y();
+			if (pt.y() > MaxY) MaxY = pt.y();
+			if (pt.z() < MinZ) MinZ = pt.z();
+			if (pt.z() > MaxZ) MaxZ = pt.z();
+		}
+		mC.setValue(MaxX + MinX, MaxY + MinY, MaxZ + MinZ);
+		mE.setValue(MaxX - MinX, MaxY - MinY, MaxZ - MinZ);
+
+		//		const btScalar r = m_radius / sqrtf(2.0f);
+		const btScalar r = m_radius / sqrtf(3.0f);
+		const int LargestExtent = mE.maxAxis();
+		const btScalar Step = (mE[LargestExtent] * 0.5f - r) / 1024.0f;
+		m_extents[0] = m_extents[1] = m_extents[2] = r;
+		m_extents[LargestExtent] = mE[LargestExtent] * 0.5f;
+		bool FoundBox = false;
+		for (int j = 0; j < 1024; j++)
+		{
+			if (testContainment())
+			{
+				FoundBox = true;
+				break;
+			}
+
+			m_extents[LargestExtent] -= Step;
+		}
+		if (!FoundBox)
+		{
+			m_extents[0] = m_extents[1] = m_extents[2] = r;
+		}
+		else
+		{
+			// Refine the box
+			const btScalar Step = (m_radius - r) / 1024.0f;
+			const int e0 = (1 << LargestExtent) & 3;
+			const int e1 = (1 << e0) & 3;
+
+			for (int j = 0; j < 1024; j++)
+			{
+				const btScalar Saved0 = m_extents[e0];
+				const btScalar Saved1 = m_extents[e1];
+				m_extents[e0] += Step;
+				m_extents[e1] += Step;
+
+				if (!testContainment())
+				{
+					m_extents[e0] = Saved0;
+					m_extents[e1] = Saved1;
+					break;
+				}
+			}
+		}
+	}
+#endif
+}
+void btConvexPolyhedron::project(const btTransform& trans, const btVector3& dir, btScalar& minProj, btScalar& maxProj, btVector3& witnesPtMin, btVector3& witnesPtMax) const
+{
+	minProj = FLT_MAX;
+	maxProj = -FLT_MAX;
+	int numVerts = m_vertices.size();
+	for (int i = 0; i < numVerts; i++)
+	{
+		btVector3 pt = trans * m_vertices[i];
+		btScalar dp = pt.dot(dir);
+		if (dp < minProj)
+		{
+			minProj = dp;
+			witnesPtMin = pt;
+		}
+		if (dp > maxProj)
+		{
+			maxProj = dp;
+			witnesPtMax = pt;
+		}
+	}
+	if (minProj > maxProj)
+	{
+		btSwap(minProj, maxProj);
+		btSwap(witnesPtMin, witnesPtMax);
+	}
+}
+
+
+
+
+
+/*
+Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_GEOMETRY_UTIL_H
+#define BT_GEOMETRY_UTIL_H
+
+#include "LinearMath/btVector3.h"
+#include "LinearMath/btAlignedObjectArray.h"
+
+///The btGeometryUtil helper class provides a few methods to convert between plane equations and vertices.
+class btGeometryUtil
+{
+public:
+	static void getPlaneEquationsFromVertices(btAlignedObjectArray<btVector3>& vertices, btAlignedObjectArray<btVector3>& planeEquationsOut);
+
+	static void getVerticesFromPlaneEquations(const btAlignedObjectArray<btVector3>& planeEquations, btAlignedObjectArray<btVector3>& verticesOut);
+
+	static bool isInside(const btAlignedObjectArray<btVector3>& vertices, const btVector3& planeNormal, btScalar margin);
+
+	static bool isPointInsidePlanes(const btAlignedObjectArray<btVector3>& planeEquations, const btVector3& point, btScalar margin);
+
+	static bool areVerticesBehindPlane(const btVector3& planeNormal, const btAlignedObjectArray<btVector3>& vertices, btScalar margin);
+};
+
+#endif  //BT_GEOMETRY_UTIL_H
+
+
+
+
+
+/*
+Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#include "LinearMath/btGeometryUtil.h"
+
+/*
+  Make sure this dummy function never changes so that it
+  can be used by probes that are checking whether the
+  library is actually installed.
+*/
+extern "C"
+{
+	void btBulletMathProbe();
+
+	void btBulletMathProbe() {}
+}
+
+bool btGeometryUtil::isPointInsidePlanes(const btAlignedObjectArray<btVector3>& planeEquations, const btVector3& point, btScalar margin)
+{
+	int numbrushes = planeEquations.size();
+	for (int i = 0; i < numbrushes; i++)
+	{
+		const btVector3& N1 = planeEquations[i];
+		btScalar dist = btScalar(N1.dot(point)) + btScalar(N1[3]) - margin;
+		if (dist > btScalar(0.))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool btGeometryUtil::areVerticesBehindPlane(const btVector3& planeNormal, const btAlignedObjectArray<btVector3>& vertices, btScalar margin)
+{
+	int numvertices = vertices.size();
+	for (int i = 0; i < numvertices; i++)
+	{
+		const btVector3& N1 = vertices[i];
+		btScalar dist = btScalar(planeNormal.dot(N1)) + btScalar(planeNormal[3]) - margin;
+		if (dist > btScalar(0.))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool notExist(const btVector3& planeEquation, const btAlignedObjectArray<btVector3>& planeEquations);
+
+bool notExist(const btVector3& planeEquation, const btAlignedObjectArray<btVector3>& planeEquations)
+{
+	int numbrushes = planeEquations.size();
+	for (int i = 0; i < numbrushes; i++)
+	{
+		const btVector3& N1 = planeEquations[i];
+		if (planeEquation.dot(N1) > btScalar(0.999))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+void btGeometryUtil::getPlaneEquationsFromVertices(btAlignedObjectArray<btVector3>& vertices, btAlignedObjectArray<btVector3>& planeEquationsOut)
+{
+	const int numvertices = vertices.size();
+	// brute force:
+	for (int i = 0; i < numvertices; i++)
+	{
+		const btVector3& N1 = vertices[i];
+
+		for (int j = i + 1; j < numvertices; j++)
+		{
+			const btVector3& N2 = vertices[j];
+
+			for (int k = j + 1; k < numvertices; k++)
+			{
+				const btVector3& N3 = vertices[k];
+
+				btVector3 planeEquation, edge0, edge1;
+				edge0 = N2 - N1;
+				edge1 = N3 - N1;
+				btScalar normalSign = btScalar(1.);
+				for (int ww = 0; ww < 2; ww++)
+				{
+					planeEquation = normalSign * edge0.cross(edge1);
+					if (planeEquation.length2() > btScalar(0.0001))
+					{
+						planeEquation.normalize();
+						if (notExist(planeEquation, planeEquationsOut))
+						{
+							planeEquation[3] = -planeEquation.dot(N1);
+
+							//check if inside, and replace supportingVertexOut if needed
+							if (areVerticesBehindPlane(planeEquation, vertices, btScalar(0.01)))
+							{
+								planeEquationsOut.push_back(planeEquation);
+							}
+						}
+					}
+					normalSign = btScalar(-1.);
+				}
+			}
+		}
+	}
+}
+
+void btGeometryUtil::getVerticesFromPlaneEquations(const btAlignedObjectArray<btVector3>& planeEquations, btAlignedObjectArray<btVector3>& verticesOut)
+{
+	const int numbrushes = planeEquations.size();
+	// brute force:
+	for (int i = 0; i < numbrushes; i++)
+	{
+		const btVector3& N1 = planeEquations[i];
+
+		for (int j = i + 1; j < numbrushes; j++)
+		{
+			const btVector3& N2 = planeEquations[j];
+
+			for (int k = j + 1; k < numbrushes; k++)
+			{
+				const btVector3& N3 = planeEquations[k];
+
+				btVector3 n2n3;
+				n2n3 = N2.cross(N3);
+				btVector3 n3n1;
+				n3n1 = N3.cross(N1);
+				btVector3 n1n2;
+				n1n2 = N1.cross(N2);
+
+				if ((n2n3.length2() > btScalar(0.0001)) &&
+					(n3n1.length2() > btScalar(0.0001)) &&
+					(n1n2.length2() > btScalar(0.0001)))
+				{
+					//point P out of 3 plane equations:
+
+					//	d1 ( N2 * N3 ) + d2 ( N3 * N1 ) + d3 ( N1 * N2 )
+					//P =  -------------------------------------------------------------------------
+					//   N1 . ( N2 * N3 )
+
+					btScalar quotient = (N1.dot(n2n3));
+					if (btFabs(quotient) > btScalar(0.000001))
+					{
+						quotient = btScalar(-1.) / quotient;
+						n2n3 *= N1[3];
+						n3n1 *= N2[3];
+						n1n2 *= N3[3];
+						btVector3 potentialVertex = n2n3;
+						potentialVertex += n3n1;
+						potentialVertex += n1n2;
+						potentialVertex *= quotient;
+
+						//check if inside, and replace supportingVertexOut if needed
+						if (isPointInsidePlanes(planeEquations, potentialVertex, btScalar(0.01)))
+						{
+							verticesOut.push_back(potentialVertex);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void _wrap_Swig_free_mbt_3c32781124460d6b(void *_swig_go_0) {
+void _wrap_Swig_free_mbt_220ac3041cacbc73(void *_swig_go_0) {
   void *arg1 = (void *) 0 ;
   
   arg1 = *(void **)&_swig_go_0; 
@@ -12369,7 +15105,7 @@ void _wrap_Swig_free_mbt_3c32781124460d6b(void *_swig_go_0) {
 }
 
 
-void *_wrap_Swig_malloc_mbt_3c32781124460d6b(intgo _swig_go_0) {
+void *_wrap_Swig_malloc_mbt_220ac3041cacbc73(intgo _swig_go_0) {
   int arg1 ;
   void *result = 0 ;
   void *_swig_go_result;
@@ -12382,7 +15118,7 @@ void *_wrap_Swig_malloc_mbt_3c32781124460d6b(intgo _swig_go_0) {
 }
 
 
-intgo _wrap_btGetVersion_mbt_3c32781124460d6b() {
+intgo _wrap_btGetVersion_mbt_220ac3041cacbc73() {
   int result;
   intgo _swig_go_result;
   
@@ -12393,7 +15129,7 @@ intgo _wrap_btGetVersion_mbt_3c32781124460d6b() {
 }
 
 
-intgo _wrap_btIsDoublePrecision_mbt_3c32781124460d6b() {
+intgo _wrap_btIsDoublePrecision_mbt_220ac3041cacbc73() {
   int result;
   intgo _swig_go_result;
   
@@ -12404,7 +15140,7 @@ intgo _wrap_btIsDoublePrecision_mbt_3c32781124460d6b() {
 }
 
 
-btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_0_mbt_3c32781124460d6b(intgo _swig_go_0) {
+btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_0_mbt_220ac3041cacbc73(intgo _swig_go_0) {
   int arg1 ;
   btInfMaskConverter *result = 0 ;
   btInfMaskConverter *_swig_go_result;
@@ -12417,7 +15153,7 @@ btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_0_mbt_3c32781124460d6b(in
 }
 
 
-btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_1_mbt_3c32781124460d6b() {
+btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_1_mbt_220ac3041cacbc73() {
   btInfMaskConverter *result = 0 ;
   btInfMaskConverter *_swig_go_result;
   
@@ -12428,7 +15164,7 @@ btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_1_mbt_3c32781124460d6b() 
 }
 
 
-void _wrap_delete_btInfMaskConverter_mbt_3c32781124460d6b(btInfMaskConverter *_swig_go_0) {
+void _wrap_delete_btInfMaskConverter_mbt_220ac3041cacbc73(btInfMaskConverter *_swig_go_0) {
   btInfMaskConverter *arg1 = (btInfMaskConverter *) 0 ;
   
   arg1 = *(btInfMaskConverter **)&_swig_go_0; 
@@ -12438,7 +15174,7 @@ void _wrap_delete_btInfMaskConverter_mbt_3c32781124460d6b(btInfMaskConverter *_s
 }
 
 
-void _wrap_btInfinityMask_set_mbt_3c32781124460d6b(btInfMaskConverter *_swig_go_0) {
+void _wrap_btInfinityMask_set_mbt_220ac3041cacbc73(btInfMaskConverter *_swig_go_0) {
   btInfMaskConverter *arg1 = (btInfMaskConverter *) 0 ;
   
   arg1 = *(btInfMaskConverter **)&_swig_go_0; 
@@ -12448,7 +15184,7 @@ void _wrap_btInfinityMask_set_mbt_3c32781124460d6b(btInfMaskConverter *_swig_go_
 }
 
 
-btInfMaskConverter *_wrap_btInfinityMask_get_mbt_3c32781124460d6b() {
+btInfMaskConverter *_wrap_btInfinityMask_get_mbt_220ac3041cacbc73() {
   btInfMaskConverter *result = 0 ;
   btInfMaskConverter *_swig_go_result;
   
@@ -12459,7 +15195,7 @@ btInfMaskConverter *_wrap_btInfinityMask_get_mbt_3c32781124460d6b() {
 }
 
 
-intgo _wrap_btGetInfinityMask_mbt_3c32781124460d6b() {
+intgo _wrap_btGetInfinityMask_mbt_220ac3041cacbc73() {
   int result;
   intgo _swig_go_result;
   
@@ -12470,7 +15206,7 @@ intgo _wrap_btGetInfinityMask_mbt_3c32781124460d6b() {
 }
 
 
-float _wrap_btSqrt_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btSqrt_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12483,7 +15219,7 @@ float _wrap_btSqrt_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btFabs_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btFabs_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12496,7 +15232,7 @@ float _wrap_btFabs_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btCos_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btCos_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12509,7 +15245,7 @@ float _wrap_btCos_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btSin_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btSin_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12522,7 +15258,7 @@ float _wrap_btSin_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btTan_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btTan_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12535,7 +15271,7 @@ float _wrap_btTan_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btAcos_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btAcos_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12548,7 +15284,7 @@ float _wrap_btAcos_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btAsin_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btAsin_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12561,7 +15297,7 @@ float _wrap_btAsin_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btAtan_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btAtan_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12574,7 +15310,7 @@ float _wrap_btAtan_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btAtan2_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1) {
+float _wrap_btAtan2_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1) {
   btScalar arg1 ;
   btScalar arg2 ;
   btScalar result;
@@ -12589,7 +15325,7 @@ float _wrap_btAtan2_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1) {
 }
 
 
-float _wrap_btExp_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btExp_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12602,7 +15338,7 @@ float _wrap_btExp_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btLog_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btLog_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12615,7 +15351,7 @@ float _wrap_btLog_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btPow_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1) {
+float _wrap_btPow_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1) {
   btScalar arg1 ;
   btScalar arg2 ;
   btScalar result;
@@ -12630,7 +15366,7 @@ float _wrap_btPow_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1) {
 }
 
 
-float _wrap_btFmod_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1) {
+float _wrap_btFmod_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1) {
   btScalar arg1 ;
   btScalar arg2 ;
   btScalar result;
@@ -12645,7 +15381,7 @@ float _wrap_btFmod_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1) {
 }
 
 
-float _wrap_btAtan2Fast_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1) {
+float _wrap_btAtan2Fast_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1) {
   btScalar arg1 ;
   btScalar arg2 ;
   btScalar result;
@@ -12660,7 +15396,7 @@ float _wrap_btAtan2Fast_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1)
 }
 
 
-bool _wrap_btFuzzyZero_mbt_3c32781124460d6b(float _swig_go_0) {
+bool _wrap_btFuzzyZero_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   bool result;
   bool _swig_go_result;
@@ -12673,7 +15409,7 @@ bool _wrap_btFuzzyZero_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-bool _wrap_btEqual_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1) {
+bool _wrap_btEqual_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1) {
   btScalar arg1 ;
   btScalar arg2 ;
   bool result;
@@ -12688,7 +15424,7 @@ bool _wrap_btEqual_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1) {
 }
 
 
-bool _wrap_btGreaterEqual_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1) {
+bool _wrap_btGreaterEqual_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1) {
   btScalar arg1 ;
   btScalar arg2 ;
   bool result;
@@ -12703,7 +15439,7 @@ bool _wrap_btGreaterEqual_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_
 }
 
 
-intgo _wrap_btIsNegative_mbt_3c32781124460d6b(float _swig_go_0) {
+intgo _wrap_btIsNegative_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   int result;
   intgo _swig_go_result;
@@ -12716,7 +15452,7 @@ intgo _wrap_btIsNegative_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btRadians_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btRadians_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12729,7 +15465,7 @@ float _wrap_btRadians_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btDegrees_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btDegrees_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12742,7 +15478,7 @@ float _wrap_btDegrees_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btFsel_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
+float _wrap_btFsel_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
   btScalar arg1 ;
   btScalar arg2 ;
   btScalar arg3 ;
@@ -12759,7 +15495,7 @@ float _wrap_btFsel_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1, floa
 }
 
 
-bool _wrap_btMachineIsLittleEndian_mbt_3c32781124460d6b() {
+bool _wrap_btMachineIsLittleEndian_mbt_220ac3041cacbc73() {
   bool result;
   bool _swig_go_result;
   
@@ -12770,7 +15506,7 @@ bool _wrap_btMachineIsLittleEndian_mbt_3c32781124460d6b() {
 }
 
 
-intgo _wrap_btSelect__SWIG_0_mbt_3c32781124460d6b(intgo _swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
+intgo _wrap_btSelect__SWIG_0_mbt_220ac3041cacbc73(intgo _swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
   unsigned int arg1 ;
   unsigned int arg2 ;
   unsigned int arg3 ;
@@ -12787,7 +15523,7 @@ intgo _wrap_btSelect__SWIG_0_mbt_3c32781124460d6b(intgo _swig_go_0, intgo _swig_
 }
 
 
-intgo _wrap_btSelect__SWIG_1_mbt_3c32781124460d6b(intgo _swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
+intgo _wrap_btSelect__SWIG_1_mbt_220ac3041cacbc73(intgo _swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
   unsigned int arg1 ;
   int arg2 ;
   int arg3 ;
@@ -12804,7 +15540,7 @@ intgo _wrap_btSelect__SWIG_1_mbt_3c32781124460d6b(intgo _swig_go_0, intgo _swig_
 }
 
 
-float _wrap_btSelect__SWIG_2_mbt_3c32781124460d6b(intgo _swig_go_0, float _swig_go_1, float _swig_go_2) {
+float _wrap_btSelect__SWIG_2_mbt_220ac3041cacbc73(intgo _swig_go_0, float _swig_go_1, float _swig_go_2) {
   unsigned int arg1 ;
   float arg2 ;
   float arg3 ;
@@ -12821,7 +15557,7 @@ float _wrap_btSelect__SWIG_2_mbt_3c32781124460d6b(intgo _swig_go_0, float _swig_
 }
 
 
-intgo _wrap_btSwapEndian__SWIG_0_mbt_3c32781124460d6b(intgo _swig_go_0) {
+intgo _wrap_btSwapEndian__SWIG_0_mbt_220ac3041cacbc73(intgo _swig_go_0) {
   unsigned int arg1 ;
   unsigned int result;
   intgo _swig_go_result;
@@ -12834,7 +15570,7 @@ intgo _wrap_btSwapEndian__SWIG_0_mbt_3c32781124460d6b(intgo _swig_go_0) {
 }
 
 
-short _wrap_btSwapEndian__SWIG_1_mbt_3c32781124460d6b(short _swig_go_0) {
+short _wrap_btSwapEndian__SWIG_1_mbt_220ac3041cacbc73(short _swig_go_0) {
   unsigned short arg1 ;
   unsigned short result;
   short _swig_go_result;
@@ -12847,7 +15583,7 @@ short _wrap_btSwapEndian__SWIG_1_mbt_3c32781124460d6b(short _swig_go_0) {
 }
 
 
-intgo _wrap_btSwapEndian__SWIG_2_mbt_3c32781124460d6b(intgo _swig_go_0) {
+intgo _wrap_btSwapEndian__SWIG_2_mbt_220ac3041cacbc73(intgo _swig_go_0) {
   int arg1 ;
   unsigned int result;
   intgo _swig_go_result;
@@ -12860,7 +15596,7 @@ intgo _wrap_btSwapEndian__SWIG_2_mbt_3c32781124460d6b(intgo _swig_go_0) {
 }
 
 
-short _wrap_btSwapEndian__SWIG_3_mbt_3c32781124460d6b(short _swig_go_0) {
+short _wrap_btSwapEndian__SWIG_3_mbt_220ac3041cacbc73(short _swig_go_0) {
   short arg1 ;
   unsigned short result;
   short _swig_go_result;
@@ -12873,7 +15609,7 @@ short _wrap_btSwapEndian__SWIG_3_mbt_3c32781124460d6b(short _swig_go_0) {
 }
 
 
-intgo _wrap_btSwapEndianFloat_mbt_3c32781124460d6b(float _swig_go_0) {
+intgo _wrap_btSwapEndianFloat_mbt_220ac3041cacbc73(float _swig_go_0) {
   float arg1 ;
   unsigned int result;
   intgo _swig_go_result;
@@ -12886,7 +15622,7 @@ intgo _wrap_btSwapEndianFloat_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-float _wrap_btUnswapEndianFloat_mbt_3c32781124460d6b(intgo _swig_go_0) {
+float _wrap_btUnswapEndianFloat_mbt_220ac3041cacbc73(intgo _swig_go_0) {
   unsigned int arg1 ;
   float result;
   float _swig_go_result;
@@ -12899,7 +15635,7 @@ float _wrap_btUnswapEndianFloat_mbt_3c32781124460d6b(intgo _swig_go_0) {
 }
 
 
-void _wrap_btSwapEndianDouble_mbt_3c32781124460d6b(double _swig_go_0, char *_swig_go_1) {
+void _wrap_btSwapEndianDouble_mbt_220ac3041cacbc73(double _swig_go_0, char *_swig_go_1) {
   double arg1 ;
   unsigned char *arg2 = (unsigned char *) 0 ;
   
@@ -12911,7 +15647,7 @@ void _wrap_btSwapEndianDouble_mbt_3c32781124460d6b(double _swig_go_0, char *_swi
 }
 
 
-double _wrap_btUnswapEndianDouble_mbt_3c32781124460d6b(char *_swig_go_0) {
+double _wrap_btUnswapEndianDouble_mbt_220ac3041cacbc73(char *_swig_go_0) {
   unsigned char *arg1 = (unsigned char *) 0 ;
   double result;
   double _swig_go_result;
@@ -12924,7 +15660,7 @@ double _wrap_btUnswapEndianDouble_mbt_3c32781124460d6b(char *_swig_go_0) {
 }
 
 
-float _wrap_btLargeDot_mbt_3c32781124460d6b(float *_swig_go_0, float *_swig_go_1, intgo _swig_go_2) {
+float _wrap_btLargeDot_mbt_220ac3041cacbc73(float *_swig_go_0, float *_swig_go_1, intgo _swig_go_2) {
   btScalar *arg1 = (btScalar *) 0 ;
   btScalar *arg2 = (btScalar *) 0 ;
   int arg3 ;
@@ -12941,7 +15677,7 @@ float _wrap_btLargeDot_mbt_3c32781124460d6b(float *_swig_go_0, float *_swig_go_1
 }
 
 
-float _wrap_btNormalizeAngle_mbt_3c32781124460d6b(float _swig_go_0) {
+float _wrap_btNormalizeAngle_mbt_220ac3041cacbc73(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -12954,7 +15690,7 @@ float _wrap_btNormalizeAngle_mbt_3c32781124460d6b(float _swig_go_0) {
 }
 
 
-btTypedObject *_wrap_new_btTypedObject_mbt_3c32781124460d6b(intgo _swig_go_0) {
+btTypedObject *_wrap_new_btTypedObject_mbt_220ac3041cacbc73(intgo _swig_go_0) {
   int arg1 ;
   btTypedObject *result = 0 ;
   btTypedObject *_swig_go_result;
@@ -12967,7 +15703,7 @@ btTypedObject *_wrap_new_btTypedObject_mbt_3c32781124460d6b(intgo _swig_go_0) {
 }
 
 
-void _wrap_btTypedObject_m_objectType_set_mbt_3c32781124460d6b(btTypedObject *_swig_go_0, intgo _swig_go_1) {
+void _wrap_btTypedObject_m_objectType_set_mbt_220ac3041cacbc73(btTypedObject *_swig_go_0, intgo _swig_go_1) {
   btTypedObject *arg1 = (btTypedObject *) 0 ;
   int arg2 ;
   
@@ -12979,7 +15715,7 @@ void _wrap_btTypedObject_m_objectType_set_mbt_3c32781124460d6b(btTypedObject *_s
 }
 
 
-intgo _wrap_btTypedObject_m_objectType_get_mbt_3c32781124460d6b(btTypedObject *_swig_go_0) {
+intgo _wrap_btTypedObject_m_objectType_get_mbt_220ac3041cacbc73(btTypedObject *_swig_go_0) {
   btTypedObject *arg1 = (btTypedObject *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -12992,7 +15728,7 @@ intgo _wrap_btTypedObject_m_objectType_get_mbt_3c32781124460d6b(btTypedObject *_
 }
 
 
-intgo _wrap_btTypedObject_getObjectType_mbt_3c32781124460d6b(btTypedObject *_swig_go_0) {
+intgo _wrap_btTypedObject_getObjectType_mbt_220ac3041cacbc73(btTypedObject *_swig_go_0) {
   btTypedObject *arg1 = (btTypedObject *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -13005,7 +15741,7 @@ intgo _wrap_btTypedObject_getObjectType_mbt_3c32781124460d6b(btTypedObject *_swi
 }
 
 
-void _wrap_delete_btTypedObject_mbt_3c32781124460d6b(btTypedObject *_swig_go_0) {
+void _wrap_delete_btTypedObject_mbt_220ac3041cacbc73(btTypedObject *_swig_go_0) {
   btTypedObject *arg1 = (btTypedObject *) 0 ;
   
   arg1 = *(btTypedObject **)&_swig_go_0; 
@@ -13015,7 +15751,7 @@ void _wrap_delete_btTypedObject_mbt_3c32781124460d6b(btTypedObject *_swig_go_0) 
 }
 
 
-void *_wrap_btAlignedAllocInternal_mbt_3c32781124460d6b(long long _swig_go_0, intgo _swig_go_1) {
+void *_wrap_btAlignedAllocInternal_mbt_220ac3041cacbc73(long long _swig_go_0, intgo _swig_go_1) {
   size_t arg1 ;
   int arg2 ;
   void *result = 0 ;
@@ -13030,7 +15766,7 @@ void *_wrap_btAlignedAllocInternal_mbt_3c32781124460d6b(long long _swig_go_0, in
 }
 
 
-void _wrap_btAlignedFreeInternal_mbt_3c32781124460d6b(void *_swig_go_0) {
+void _wrap_btAlignedFreeInternal_mbt_220ac3041cacbc73(void *_swig_go_0) {
   void *arg1 = (void *) 0 ;
   
   arg1 = *(void **)&_swig_go_0; 
@@ -13040,7 +15776,7 @@ void _wrap_btAlignedFreeInternal_mbt_3c32781124460d6b(void *_swig_go_0) {
 }
 
 
-void _wrap_btAlignedAllocSetCustom_mbt_3c32781124460d6b(void* _swig_go_0, void* _swig_go_1) {
+void _wrap_btAlignedAllocSetCustom_mbt_220ac3041cacbc73(void* _swig_go_0, void* _swig_go_1) {
   btAllocFunc *arg1 = (btAllocFunc *) 0 ;
   btFreeFunc *arg2 = (btFreeFunc *) 0 ;
   
@@ -13052,7 +15788,7 @@ void _wrap_btAlignedAllocSetCustom_mbt_3c32781124460d6b(void* _swig_go_0, void* 
 }
 
 
-void _wrap_btAlignedAllocSetCustomAligned_mbt_3c32781124460d6b(void* _swig_go_0, void* _swig_go_1) {
+void _wrap_btAlignedAllocSetCustomAligned_mbt_220ac3041cacbc73(void* _swig_go_0, void* _swig_go_1) {
   btAlignedAllocFunc *arg1 = (btAlignedAllocFunc *) 0 ;
   btAlignedFreeFunc *arg2 = (btAlignedFreeFunc *) 0 ;
   
@@ -13064,7 +15800,7 @@ void _wrap_btAlignedAllocSetCustomAligned_mbt_3c32781124460d6b(void* _swig_go_0,
 }
 
 
-void *_wrap_btAllocDefault_mbt_3c32781124460d6b(long long _swig_go_0) {
+void *_wrap_btAllocDefault_mbt_220ac3041cacbc73(long long _swig_go_0) {
   size_t arg1 ;
   void *result = 0 ;
   void *_swig_go_result;
@@ -13077,7 +15813,7 @@ void *_wrap_btAllocDefault_mbt_3c32781124460d6b(long long _swig_go_0) {
 }
 
 
-void _wrap_btFreeDefault_mbt_3c32781124460d6b(void *_swig_go_0) {
+void _wrap_btFreeDefault_mbt_220ac3041cacbc73(void *_swig_go_0) {
   void *arg1 = (void *) 0 ;
   
   arg1 = *(void **)&_swig_go_0; 
@@ -13087,7 +15823,7 @@ void _wrap_btFreeDefault_mbt_3c32781124460d6b(void *_swig_go_0) {
 }
 
 
-void _wrap_sAllocFunc_set_mbt_3c32781124460d6b(void* _swig_go_0) {
+void _wrap_sAllocFunc_set_mbt_220ac3041cacbc73(void* _swig_go_0) {
   btAllocFunc *arg1 = (btAllocFunc *) 0 ;
   
   arg1 = *(btAllocFunc **)&_swig_go_0; 
@@ -13097,7 +15833,7 @@ void _wrap_sAllocFunc_set_mbt_3c32781124460d6b(void* _swig_go_0) {
 }
 
 
-void* _wrap_sAllocFunc_get_mbt_3c32781124460d6b() {
+void* _wrap_sAllocFunc_get_mbt_220ac3041cacbc73() {
   btAllocFunc *result = 0 ;
   void* _swig_go_result;
   
@@ -13108,7 +15844,7 @@ void* _wrap_sAllocFunc_get_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_sFreeFunc_set_mbt_3c32781124460d6b(void* _swig_go_0) {
+void _wrap_sFreeFunc_set_mbt_220ac3041cacbc73(void* _swig_go_0) {
   btFreeFunc *arg1 = (btFreeFunc *) 0 ;
   
   arg1 = *(btFreeFunc **)&_swig_go_0; 
@@ -13118,7 +15854,7 @@ void _wrap_sFreeFunc_set_mbt_3c32781124460d6b(void* _swig_go_0) {
 }
 
 
-void* _wrap_sFreeFunc_get_mbt_3c32781124460d6b() {
+void* _wrap_sFreeFunc_get_mbt_220ac3041cacbc73() {
   btFreeFunc *result = 0 ;
   void* _swig_go_result;
   
@@ -13129,7 +15865,7 @@ void* _wrap_sFreeFunc_get_mbt_3c32781124460d6b() {
 }
 
 
-void *_wrap_btAlignedAllocDefault_mbt_3c32781124460d6b(long long _swig_go_0, intgo _swig_go_1) {
+void *_wrap_btAlignedAllocDefault_mbt_220ac3041cacbc73(long long _swig_go_0, intgo _swig_go_1) {
   size_t arg1 ;
   int arg2 ;
   void *result = 0 ;
@@ -13144,7 +15880,7 @@ void *_wrap_btAlignedAllocDefault_mbt_3c32781124460d6b(long long _swig_go_0, int
 }
 
 
-void _wrap_btAlignedFreeDefault_mbt_3c32781124460d6b(void *_swig_go_0) {
+void _wrap_btAlignedFreeDefault_mbt_220ac3041cacbc73(void *_swig_go_0) {
   void *arg1 = (void *) 0 ;
   
   arg1 = *(void **)&_swig_go_0; 
@@ -13154,7 +15890,7 @@ void _wrap_btAlignedFreeDefault_mbt_3c32781124460d6b(void *_swig_go_0) {
 }
 
 
-void _wrap_sAlignedAllocFunc_set_mbt_3c32781124460d6b(void* _swig_go_0) {
+void _wrap_sAlignedAllocFunc_set_mbt_220ac3041cacbc73(void* _swig_go_0) {
   btAlignedAllocFunc *arg1 = (btAlignedAllocFunc *) 0 ;
   
   arg1 = *(btAlignedAllocFunc **)&_swig_go_0; 
@@ -13164,7 +15900,7 @@ void _wrap_sAlignedAllocFunc_set_mbt_3c32781124460d6b(void* _swig_go_0) {
 }
 
 
-void* _wrap_sAlignedAllocFunc_get_mbt_3c32781124460d6b() {
+void* _wrap_sAlignedAllocFunc_get_mbt_220ac3041cacbc73() {
   btAlignedAllocFunc *result = 0 ;
   void* _swig_go_result;
   
@@ -13175,7 +15911,7 @@ void* _wrap_sAlignedAllocFunc_get_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_sAlignedFreeFunc_set_mbt_3c32781124460d6b(void* _swig_go_0) {
+void _wrap_sAlignedFreeFunc_set_mbt_220ac3041cacbc73(void* _swig_go_0) {
   btAlignedFreeFunc *arg1 = (btAlignedFreeFunc *) 0 ;
   
   arg1 = *(btAlignedFreeFunc **)&_swig_go_0; 
@@ -13185,7 +15921,7 @@ void _wrap_sAlignedFreeFunc_set_mbt_3c32781124460d6b(void* _swig_go_0) {
 }
 
 
-void* _wrap_sAlignedFreeFunc_get_mbt_3c32781124460d6b() {
+void* _wrap_sAlignedFreeFunc_get_mbt_220ac3041cacbc73() {
   btAlignedFreeFunc *result = 0 ;
   void* _swig_go_result;
   
@@ -13196,7 +15932,7 @@ void* _wrap_sAlignedFreeFunc_get_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_btVector3_m_floats_set_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float *_swig_go_1) {
+void _wrap_btVector3_m_floats_set_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, float *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *arg2 = (btScalar *) (btScalar *)0 ;
   
@@ -13212,7 +15948,7 @@ void _wrap_btVector3_m_floats_set_mbt_3c32781124460d6b(btVector3 *_swig_go_0, fl
 }
 
 
-float *_wrap_btVector3_m_floats_get_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+float *_wrap_btVector3_m_floats_get_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float *_swig_go_result;
@@ -13225,7 +15961,7 @@ float *_wrap_btVector3_m_floats_get_mbt_3c32781124460d6b(btVector3 *_swig_go_0) 
 }
 
 
-btVector3 *_wrap_new_btVector3__SWIG_0_mbt_3c32781124460d6b() {
+btVector3 *_wrap_new_btVector3__SWIG_0_mbt_220ac3041cacbc73() {
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
   
@@ -13236,7 +15972,7 @@ btVector3 *_wrap_new_btVector3__SWIG_0_mbt_3c32781124460d6b() {
 }
 
 
-btVector3 *_wrap_new_btVector3__SWIG_1_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
+btVector3 *_wrap_new_btVector3__SWIG_1_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -13253,7 +15989,7 @@ btVector3 *_wrap_new_btVector3__SWIG_1_mbt_3c32781124460d6b(float _swig_go_0, fl
 }
 
 
-float _wrap_btVector3_dot_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector3_dot_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -13268,7 +16004,7 @@ float _wrap_btVector3_dot_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 
 }
 
 
-float _wrap_btVector3_length2_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+float _wrap_btVector3_length2_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -13281,7 +16017,7 @@ float _wrap_btVector3_length2_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_length_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+float _wrap_btVector3_length_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -13294,7 +16030,7 @@ float _wrap_btVector3_length_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_norm_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+float _wrap_btVector3_norm_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -13307,7 +16043,7 @@ float _wrap_btVector3_norm_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_safeNorm_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+float _wrap_btVector3_safeNorm_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -13320,7 +16056,7 @@ float _wrap_btVector3_safeNorm_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_distance2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector3_distance2_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -13335,7 +16071,7 @@ float _wrap_btVector3_distance2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVe
 }
 
 
-float _wrap_btVector3_distance_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector3_distance_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -13350,7 +16086,7 @@ float _wrap_btVector3_distance_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVec
 }
 
 
-btVector3 *_wrap_btVector3_safeNormalize_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+btVector3 *_wrap_btVector3_safeNormalize_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
@@ -13363,7 +16099,7 @@ btVector3 *_wrap_btVector3_safeNormalize_mbt_3c32781124460d6b(btVector3 *_swig_g
 }
 
 
-btVector3 *_wrap_btVector3_normalize_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+btVector3 *_wrap_btVector3_normalize_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
@@ -13376,7 +16112,7 @@ btVector3 *_wrap_btVector3_normalize_mbt_3c32781124460d6b(btVector3 *_swig_go_0)
 }
 
 
-btVector3 *_wrap_btVector3_normalized_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+btVector3 *_wrap_btVector3_normalized_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 result;
   btVector3 *_swig_go_result;
@@ -13389,7 +16125,7 @@ btVector3 *_wrap_btVector3_normalized_mbt_3c32781124460d6b(btVector3 *_swig_go_0
 }
 
 
-btVector3 *_wrap_btVector3_rotate_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+btVector3 *_wrap_btVector3_rotate_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar arg3 ;
@@ -13406,7 +16142,7 @@ btVector3 *_wrap_btVector3_rotate_mbt_3c32781124460d6b(btVector3 *_swig_go_0, bt
 }
 
 
-float _wrap_btVector3_angle_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector3_angle_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -13421,7 +16157,7 @@ float _wrap_btVector3_angle_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector
 }
 
 
-btVector3 *_wrap_btVector3_absolute_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+btVector3 *_wrap_btVector3_absolute_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 result;
   btVector3 *_swig_go_result;
@@ -13434,7 +16170,7 @@ btVector3 *_wrap_btVector3_absolute_mbt_3c32781124460d6b(btVector3 *_swig_go_0) 
 }
 
 
-btVector3 *_wrap_btVector3_cross_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+btVector3 *_wrap_btVector3_cross_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 result;
@@ -13449,7 +16185,7 @@ btVector3 *_wrap_btVector3_cross_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btV
 }
 
 
-float _wrap_btVector3_triple_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+float _wrap_btVector3_triple_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -13466,7 +16202,7 @@ float _wrap_btVector3_triple_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVecto
 }
 
 
-intgo _wrap_btVector3_minAxis_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+intgo _wrap_btVector3_minAxis_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -13479,7 +16215,7 @@ intgo _wrap_btVector3_minAxis_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector3_maxAxis_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+intgo _wrap_btVector3_maxAxis_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -13492,7 +16228,7 @@ intgo _wrap_btVector3_maxAxis_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector3_furthestAxis_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+intgo _wrap_btVector3_furthestAxis_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -13505,7 +16241,7 @@ intgo _wrap_btVector3_furthestAxis_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector3_closestAxis_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+intgo _wrap_btVector3_closestAxis_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -13518,7 +16254,7 @@ intgo _wrap_btVector3_closestAxis_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-void _wrap_btVector3_setInterpolate3_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, float _swig_go_3) {
+void _wrap_btVector3_setInterpolate3_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, float _swig_go_3) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -13534,7 +16270,7 @@ void _wrap_btVector3_setInterpolate3_mbt_3c32781124460d6b(btVector3 *_swig_go_0,
 }
 
 
-btVector3 *_wrap_btVector3_lerp_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+btVector3 *_wrap_btVector3_lerp_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -13551,7 +16287,7 @@ btVector3 *_wrap_btVector3_lerp_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVe
 }
 
 
-float _wrap_btVector3_getX_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+float _wrap_btVector3_getX_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -13564,7 +16300,7 @@ float _wrap_btVector3_getX_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_getY_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+float _wrap_btVector3_getY_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -13577,7 +16313,7 @@ float _wrap_btVector3_getY_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_getZ_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+float _wrap_btVector3_getZ_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -13590,7 +16326,7 @@ float _wrap_btVector3_getZ_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-void _wrap_btVector3_setX_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector3_setX_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, float _swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar arg2 ;
   
@@ -13602,7 +16338,7 @@ void _wrap_btVector3_setX_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float _swi
 }
 
 
-void _wrap_btVector3_setY_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector3_setY_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, float _swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar arg2 ;
   
@@ -13614,7 +16350,7 @@ void _wrap_btVector3_setY_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float _swi
 }
 
 
-void _wrap_btVector3_setZ_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector3_setZ_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, float _swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar arg2 ;
   
@@ -13626,7 +16362,7 @@ void _wrap_btVector3_setZ_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float _swi
 }
 
 
-void _wrap_btVector3_setW_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector3_setW_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, float _swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar arg2 ;
   
@@ -13638,7 +16374,7 @@ void _wrap_btVector3_setW_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float _swi
 }
 
 
-float _wrap_btVector3_x_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+float _wrap_btVector3_x_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -13651,7 +16387,7 @@ float _wrap_btVector3_x_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_y_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+float _wrap_btVector3_y_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -13664,7 +16400,7 @@ float _wrap_btVector3_y_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_z_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+float _wrap_btVector3_z_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -13677,7 +16413,7 @@ float _wrap_btVector3_z_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_w_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+float _wrap_btVector3_w_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -13690,7 +16426,7 @@ float _wrap_btVector3_w_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-void _wrap_btVector3_setMax_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+void _wrap_btVector3_setMax_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   
@@ -13702,7 +16438,7 @@ void _wrap_btVector3_setMax_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector
 }
 
 
-void _wrap_btVector3_setMin_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+void _wrap_btVector3_setMin_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   
@@ -13714,7 +16450,7 @@ void _wrap_btVector3_setMin_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector
 }
 
 
-void _wrap_btVector3_setValue_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btVector3_setValue_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -13730,7 +16466,7 @@ void _wrap_btVector3_setValue_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float 
 }
 
 
-void _wrap_btVector3_getSkewSymmetricMatrix_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+void _wrap_btVector3_getSkewSymmetricMatrix_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = (btVector3 *) 0 ;
   btVector3 *arg3 = (btVector3 *) 0 ;
@@ -13746,7 +16482,7 @@ void _wrap_btVector3_getSkewSymmetricMatrix_mbt_3c32781124460d6b(btVector3 *_swi
 }
 
 
-void _wrap_btVector3_setZero_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+void _wrap_btVector3_setZero_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   
   arg1 = *(btVector3 **)&_swig_go_0; 
@@ -13756,7 +16492,7 @@ void _wrap_btVector3_setZero_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-bool _wrap_btVector3_isZero_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+bool _wrap_btVector3_isZero_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   bool result;
   bool _swig_go_result;
@@ -13769,7 +16505,7 @@ bool _wrap_btVector3_isZero_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-bool _wrap_btVector3_fuzzyZero_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+bool _wrap_btVector3_fuzzyZero_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   bool result;
   bool _swig_go_result;
@@ -13782,7 +16518,7 @@ bool _wrap_btVector3_fuzzyZero_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-void _wrap_btVector3_serialize_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector3_serialize_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -13794,7 +16530,7 @@ void _wrap_btVector3_serialize_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVec
 }
 
 
-void _wrap_btVector3_deSerialize__SWIG_0_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btVector3_deSerialize__SWIG_0_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3DoubleData *arg2 = 0 ;
   
@@ -13806,7 +16542,7 @@ void _wrap_btVector3_deSerialize__SWIG_0_mbt_3c32781124460d6b(btVector3 *_swig_g
 }
 
 
-void _wrap_btVector3_deSerialize__SWIG_1_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector3_deSerialize__SWIG_1_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -13818,7 +16554,7 @@ void _wrap_btVector3_deSerialize__SWIG_1_mbt_3c32781124460d6b(btVector3 *_swig_g
 }
 
 
-void _wrap_btVector3_serializeFloat_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector3_serializeFloat_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -13830,7 +16566,7 @@ void _wrap_btVector3_serializeFloat_mbt_3c32781124460d6b(btVector3 *_swig_go_0, 
 }
 
 
-void _wrap_btVector3_deSerializeFloat_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector3_deSerializeFloat_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -13842,7 +16578,7 @@ void _wrap_btVector3_deSerializeFloat_mbt_3c32781124460d6b(btVector3 *_swig_go_0
 }
 
 
-void _wrap_btVector3_serializeDouble_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btVector3_serializeDouble_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3DoubleData *arg2 = 0 ;
   
@@ -13854,7 +16590,7 @@ void _wrap_btVector3_serializeDouble_mbt_3c32781124460d6b(btVector3 *_swig_go_0,
 }
 
 
-void _wrap_btVector3_deSerializeDouble_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btVector3_deSerializeDouble_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3DoubleData *arg2 = 0 ;
   
@@ -13866,7 +16602,7 @@ void _wrap_btVector3_deSerializeDouble_mbt_3c32781124460d6b(btVector3 *_swig_go_
 }
 
 
-long long _wrap_btVector3_maxDot_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
+long long _wrap_btVector3_maxDot_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = (btVector3 *) 0 ;
   long arg3 ;
@@ -13885,7 +16621,7 @@ long long _wrap_btVector3_maxDot_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btV
 }
 
 
-long long _wrap_btVector3_minDot_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
+long long _wrap_btVector3_minDot_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = (btVector3 *) 0 ;
   long arg3 ;
@@ -13904,7 +16640,7 @@ long long _wrap_btVector3_minDot_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btV
 }
 
 
-btVector3 *_wrap_btVector3_dot3_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+btVector3 *_wrap_btVector3_dot3_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -13923,7 +16659,7 @@ btVector3 *_wrap_btVector3_dot3_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVe
 }
 
 
-void _wrap_delete_btVector3_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+void _wrap_delete_btVector3_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   
   arg1 = *(btVector3 **)&_swig_go_0; 
@@ -13933,7 +16669,7 @@ void _wrap_delete_btVector3_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btDot_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btDot_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -13948,7 +16684,7 @@ float _wrap_btDot_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_g
 }
 
 
-float _wrap_btDistance2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btDistance2_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -13963,7 +16699,7 @@ float _wrap_btDistance2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_
 }
 
 
-float _wrap_btDistance_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btDistance_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -13978,7 +16714,7 @@ float _wrap_btDistance_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_s
 }
 
 
-float _wrap_btAngle__SWIG_0_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btAngle__SWIG_0_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -13993,7 +16729,7 @@ float _wrap_btAngle__SWIG_0_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector
 }
 
 
-btVector3 *_wrap_btCross_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+btVector3 *_wrap_btCross_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 result;
@@ -14008,7 +16744,7 @@ btVector3 *_wrap_btCross_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *
 }
 
 
-float _wrap_btTriple_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+float _wrap_btTriple_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -14025,7 +16761,7 @@ float _wrap_btTriple_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swi
 }
 
 
-btVector3 *_wrap_lerp_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+btVector3 *_wrap_lerp_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -14042,7 +16778,7 @@ btVector3 *_wrap_lerp_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_sw
 }
 
 
-btVector4 *_wrap_new_btVector4__SWIG_0_mbt_3c32781124460d6b() {
+btVector4 *_wrap_new_btVector4__SWIG_0_mbt_220ac3041cacbc73() {
   btVector4 *result = 0 ;
   btVector4 *_swig_go_result;
   
@@ -14053,7 +16789,7 @@ btVector4 *_wrap_new_btVector4__SWIG_0_mbt_3c32781124460d6b() {
 }
 
 
-btVector4 *_wrap_new_btVector4__SWIG_1_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+btVector4 *_wrap_new_btVector4__SWIG_1_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -14072,7 +16808,7 @@ btVector4 *_wrap_new_btVector4__SWIG_1_mbt_3c32781124460d6b(float _swig_go_0, fl
 }
 
 
-btVector4 *_wrap_btVector4_absolute4_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+btVector4 *_wrap_btVector4_absolute4_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector4 result;
   btVector4 *_swig_go_result;
@@ -14085,7 +16821,7 @@ btVector4 *_wrap_btVector4_absolute4_mbt_3c32781124460d6b(btVector4 *_swig_go_0)
 }
 
 
-float _wrap_btVector4_getW_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float _wrap_btVector4_getW_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -14098,7 +16834,7 @@ float _wrap_btVector4_getW_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector4_maxAxis4_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_maxAxis4_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -14111,7 +16847,7 @@ intgo _wrap_btVector4_maxAxis4_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector4_minAxis4_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_minAxis4_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -14124,7 +16860,7 @@ intgo _wrap_btVector4_minAxis4_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector4_closestAxis4_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_closestAxis4_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -14137,7 +16873,7 @@ intgo _wrap_btVector4_closestAxis4_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-void _wrap_btVector4_setValue_mbt_3c32781124460d6b(btVector4 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
+void _wrap_btVector4_setValue_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -14155,7 +16891,7 @@ void _wrap_btVector4_setValue_mbt_3c32781124460d6b(btVector4 *_swig_go_0, float 
 }
 
 
-void _wrap_delete_btVector4_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+void _wrap_delete_btVector4_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   
   arg1 = *(btVector4 **)&_swig_go_0; 
@@ -14165,7 +16901,7 @@ void _wrap_delete_btVector4_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-void _wrap_SetbtVector4_M_floats_mbt_3c32781124460d6b(btVector4 *_swig_go_0, float *_swig_go_1) {
+void _wrap_SetbtVector4_M_floats_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, float *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *arg2 = (btScalar *) (btScalar *)0 ;
   
@@ -14178,7 +16914,7 @@ void _wrap_SetbtVector4_M_floats_mbt_3c32781124460d6b(btVector4 *_swig_go_0, flo
 }
 
 
-float *_wrap_GetbtVector4_M_floats_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float *_wrap_GetbtVector4_M_floats_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float *_swig_go_result;
@@ -14192,7 +16928,7 @@ float *_wrap_GetbtVector4_M_floats_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_dot_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector4_dot_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -14208,7 +16944,7 @@ float _wrap_btVector4_dot_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 
 }
 
 
-float _wrap_btVector4_length2_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float _wrap_btVector4_length2_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -14222,7 +16958,7 @@ float _wrap_btVector4_length2_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_length_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float _wrap_btVector4_length_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -14236,7 +16972,7 @@ float _wrap_btVector4_length_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_norm_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float _wrap_btVector4_norm_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -14250,7 +16986,7 @@ float _wrap_btVector4_norm_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_safeNorm_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float _wrap_btVector4_safeNorm_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -14264,7 +17000,7 @@ float _wrap_btVector4_safeNorm_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_distance2_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector4_distance2_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -14280,7 +17016,7 @@ float _wrap_btVector4_distance2_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVe
 }
 
 
-float _wrap_btVector4_distance_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector4_distance_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -14296,7 +17032,7 @@ float _wrap_btVector4_distance_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVec
 }
 
 
-btVector3 *_wrap_btVector4_safeNormalize_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+btVector3 *_wrap_btVector4_safeNormalize_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
@@ -14310,7 +17046,7 @@ btVector3 *_wrap_btVector4_safeNormalize_mbt_3c32781124460d6b(btVector4 *_swig_g
 }
 
 
-btVector3 *_wrap_btVector4_normalize_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+btVector3 *_wrap_btVector4_normalize_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
@@ -14324,7 +17060,7 @@ btVector3 *_wrap_btVector4_normalize_mbt_3c32781124460d6b(btVector4 *_swig_go_0)
 }
 
 
-btVector3 *_wrap_btVector4_normalized_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+btVector3 *_wrap_btVector4_normalized_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 result;
   btVector3 *_swig_go_result;
@@ -14338,7 +17074,7 @@ btVector3 *_wrap_btVector4_normalized_mbt_3c32781124460d6b(btVector4 *_swig_go_0
 }
 
 
-btVector3 *_wrap_btVector4_rotate_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+btVector3 *_wrap_btVector4_rotate_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar arg3 ;
@@ -14356,7 +17092,7 @@ btVector3 *_wrap_btVector4_rotate_mbt_3c32781124460d6b(btVector4 *_swig_go_0, bt
 }
 
 
-float _wrap_btVector4_angle_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector4_angle_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -14372,7 +17108,7 @@ float _wrap_btVector4_angle_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector
 }
 
 
-btVector3 *_wrap_btVector4_absolute_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+btVector3 *_wrap_btVector4_absolute_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 result;
   btVector3 *_swig_go_result;
@@ -14386,7 +17122,7 @@ btVector3 *_wrap_btVector4_absolute_mbt_3c32781124460d6b(btVector4 *_swig_go_0) 
 }
 
 
-btVector3 *_wrap_btVector4_cross_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+btVector3 *_wrap_btVector4_cross_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 result;
@@ -14402,7 +17138,7 @@ btVector3 *_wrap_btVector4_cross_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btV
 }
 
 
-float _wrap_btVector4_triple_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+float _wrap_btVector4_triple_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -14420,7 +17156,7 @@ float _wrap_btVector4_triple_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVecto
 }
 
 
-intgo _wrap_btVector4_minAxis_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_minAxis_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -14434,7 +17170,7 @@ intgo _wrap_btVector4_minAxis_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector4_maxAxis_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_maxAxis_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -14448,7 +17184,7 @@ intgo _wrap_btVector4_maxAxis_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector4_furthestAxis_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_furthestAxis_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -14462,7 +17198,7 @@ intgo _wrap_btVector4_furthestAxis_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector4_closestAxis_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_closestAxis_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -14476,7 +17212,7 @@ intgo _wrap_btVector4_closestAxis_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-void _wrap_btVector4_setInterpolate3_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, float _swig_go_3) {
+void _wrap_btVector4_setInterpolate3_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, float _swig_go_3) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -14493,7 +17229,7 @@ void _wrap_btVector4_setInterpolate3_mbt_3c32781124460d6b(btVector4 *_swig_go_0,
 }
 
 
-btVector3 *_wrap_btVector4_lerp_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+btVector3 *_wrap_btVector4_lerp_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -14511,7 +17247,7 @@ btVector3 *_wrap_btVector4_lerp_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVe
 }
 
 
-float _wrap_btVector4_getX_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float _wrap_btVector4_getX_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -14525,7 +17261,7 @@ float _wrap_btVector4_getX_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_getY_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float _wrap_btVector4_getY_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -14539,7 +17275,7 @@ float _wrap_btVector4_getY_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_getZ_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float _wrap_btVector4_getZ_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -14553,7 +17289,7 @@ float _wrap_btVector4_getZ_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-void _wrap_btVector4_setX_mbt_3c32781124460d6b(btVector4 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector4_setX_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, float _swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar arg2 ;
   
@@ -14566,7 +17302,7 @@ void _wrap_btVector4_setX_mbt_3c32781124460d6b(btVector4 *_swig_go_0, float _swi
 }
 
 
-void _wrap_btVector4_setY_mbt_3c32781124460d6b(btVector4 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector4_setY_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, float _swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar arg2 ;
   
@@ -14579,7 +17315,7 @@ void _wrap_btVector4_setY_mbt_3c32781124460d6b(btVector4 *_swig_go_0, float _swi
 }
 
 
-void _wrap_btVector4_setZ_mbt_3c32781124460d6b(btVector4 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector4_setZ_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, float _swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar arg2 ;
   
@@ -14592,7 +17328,7 @@ void _wrap_btVector4_setZ_mbt_3c32781124460d6b(btVector4 *_swig_go_0, float _swi
 }
 
 
-void _wrap_btVector4_setW_mbt_3c32781124460d6b(btVector4 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector4_setW_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, float _swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar arg2 ;
   
@@ -14605,7 +17341,7 @@ void _wrap_btVector4_setW_mbt_3c32781124460d6b(btVector4 *_swig_go_0, float _swi
 }
 
 
-float _wrap_btVector4_x_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float _wrap_btVector4_x_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -14619,7 +17355,7 @@ float _wrap_btVector4_x_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_y_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float _wrap_btVector4_y_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -14633,7 +17369,7 @@ float _wrap_btVector4_y_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_z_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float _wrap_btVector4_z_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -14647,7 +17383,7 @@ float _wrap_btVector4_z_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_w_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+float _wrap_btVector4_w_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -14661,7 +17397,7 @@ float _wrap_btVector4_w_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-void _wrap_btVector4_setMax_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+void _wrap_btVector4_setMax_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   
@@ -14674,7 +17410,7 @@ void _wrap_btVector4_setMax_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector
 }
 
 
-void _wrap_btVector4_setMin_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+void _wrap_btVector4_setMin_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   
@@ -14687,7 +17423,7 @@ void _wrap_btVector4_setMin_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector
 }
 
 
-void _wrap_btVector4_getSkewSymmetricMatrix_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+void _wrap_btVector4_getSkewSymmetricMatrix_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = (btVector3 *) 0 ;
   btVector3 *arg3 = (btVector3 *) 0 ;
@@ -14704,7 +17440,7 @@ void _wrap_btVector4_getSkewSymmetricMatrix_mbt_3c32781124460d6b(btVector4 *_swi
 }
 
 
-void _wrap_btVector4_setZero_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+void _wrap_btVector4_setZero_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   
   arg1 = *(btVector4 **)&_swig_go_0; 
@@ -14715,7 +17451,7 @@ void _wrap_btVector4_setZero_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-bool _wrap_btVector4_isZero_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+bool _wrap_btVector4_isZero_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   bool result;
   bool _swig_go_result;
@@ -14729,7 +17465,7 @@ bool _wrap_btVector4_isZero_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-bool _wrap_btVector4_fuzzyZero_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
+bool _wrap_btVector4_fuzzyZero_mbt_220ac3041cacbc73(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   bool result;
   bool _swig_go_result;
@@ -14743,7 +17479,7 @@ bool _wrap_btVector4_fuzzyZero_mbt_3c32781124460d6b(btVector4 *_swig_go_0) {
 }
 
 
-void _wrap_btVector4_serialize_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector4_serialize_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -14756,7 +17492,7 @@ void _wrap_btVector4_serialize_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVec
 }
 
 
-void _wrap_btVector4_deSerialize__SWIG_0_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btVector4_deSerialize__SWIG_0_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3DoubleData *arg2 = 0 ;
   
@@ -14769,7 +17505,7 @@ void _wrap_btVector4_deSerialize__SWIG_0_mbt_3c32781124460d6b(btVector4 *_swig_g
 }
 
 
-void _wrap_btVector4_deSerialize__SWIG_1_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector4_deSerialize__SWIG_1_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -14782,7 +17518,7 @@ void _wrap_btVector4_deSerialize__SWIG_1_mbt_3c32781124460d6b(btVector4 *_swig_g
 }
 
 
-void _wrap_btVector4_serializeFloat_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector4_serializeFloat_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -14795,7 +17531,7 @@ void _wrap_btVector4_serializeFloat_mbt_3c32781124460d6b(btVector4 *_swig_go_0, 
 }
 
 
-void _wrap_btVector4_deSerializeFloat_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector4_deSerializeFloat_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -14808,7 +17544,7 @@ void _wrap_btVector4_deSerializeFloat_mbt_3c32781124460d6b(btVector4 *_swig_go_0
 }
 
 
-void _wrap_btVector4_serializeDouble_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btVector4_serializeDouble_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3DoubleData *arg2 = 0 ;
   
@@ -14821,7 +17557,7 @@ void _wrap_btVector4_serializeDouble_mbt_3c32781124460d6b(btVector4 *_swig_go_0,
 }
 
 
-void _wrap_btVector4_deSerializeDouble_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btVector4_deSerializeDouble_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3DoubleData *arg2 = 0 ;
   
@@ -14834,7 +17570,7 @@ void _wrap_btVector4_deSerializeDouble_mbt_3c32781124460d6b(btVector4 *_swig_go_
 }
 
 
-long long _wrap_btVector4_maxDot_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
+long long _wrap_btVector4_maxDot_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = (btVector3 *) 0 ;
   long arg3 ;
@@ -14854,7 +17590,7 @@ long long _wrap_btVector4_maxDot_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btV
 }
 
 
-long long _wrap_btVector4_minDot_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
+long long _wrap_btVector4_minDot_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = (btVector3 *) 0 ;
   long arg3 ;
@@ -14874,7 +17610,7 @@ long long _wrap_btVector4_minDot_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btV
 }
 
 
-btVector3 *_wrap_btVector4_dot3_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+btVector3 *_wrap_btVector4_dot3_mbt_220ac3041cacbc73(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -14894,7 +17630,7 @@ btVector3 *_wrap_btVector4_dot3_mbt_3c32781124460d6b(btVector4 *_swig_go_0, btVe
 }
 
 
-void _wrap_btSwapScalarEndian_mbt_3c32781124460d6b(float _swig_go_0, float *_swig_go_1) {
+void _wrap_btSwapScalarEndian_mbt_220ac3041cacbc73(float _swig_go_0, float *_swig_go_1) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   
@@ -14906,7 +17642,7 @@ void _wrap_btSwapScalarEndian_mbt_3c32781124460d6b(float _swig_go_0, float *_swi
 }
 
 
-void _wrap_btSwapVector3Endian_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+void _wrap_btSwapVector3Endian_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   
@@ -14918,7 +17654,7 @@ void _wrap_btSwapVector3Endian_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVec
 }
 
 
-void _wrap_btUnSwapVector3Endian_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
+void _wrap_btUnSwapVector3Endian_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
   btVector3 *arg1 = 0 ;
   
   arg1 = *(btVector3 **)&_swig_go_0; 
@@ -14928,7 +17664,7 @@ void _wrap_btUnSwapVector3Endian_mbt_3c32781124460d6b(btVector3 *_swig_go_0) {
 }
 
 
-void _wrap_btVector3FloatData_m_floats_set_mbt_3c32781124460d6b(btVector3FloatData *_swig_go_0, float *_swig_go_1) {
+void _wrap_btVector3FloatData_m_floats_set_mbt_220ac3041cacbc73(btVector3FloatData *_swig_go_0, float *_swig_go_1) {
   btVector3FloatData *arg1 = (btVector3FloatData *) 0 ;
   float *arg2 = (float *) (float *)0 ;
   
@@ -14944,7 +17680,7 @@ void _wrap_btVector3FloatData_m_floats_set_mbt_3c32781124460d6b(btVector3FloatDa
 }
 
 
-float *_wrap_btVector3FloatData_m_floats_get_mbt_3c32781124460d6b(btVector3FloatData *_swig_go_0) {
+float *_wrap_btVector3FloatData_m_floats_get_mbt_220ac3041cacbc73(btVector3FloatData *_swig_go_0) {
   btVector3FloatData *arg1 = (btVector3FloatData *) 0 ;
   float *result = 0 ;
   float *_swig_go_result;
@@ -14957,7 +17693,7 @@ float *_wrap_btVector3FloatData_m_floats_get_mbt_3c32781124460d6b(btVector3Float
 }
 
 
-btVector3FloatData *_wrap_new_btVector3FloatData_mbt_3c32781124460d6b() {
+btVector3FloatData *_wrap_new_btVector3FloatData_mbt_220ac3041cacbc73() {
   btVector3FloatData *result = 0 ;
   btVector3FloatData *_swig_go_result;
   
@@ -14968,7 +17704,7 @@ btVector3FloatData *_wrap_new_btVector3FloatData_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_btVector3FloatData_mbt_3c32781124460d6b(btVector3FloatData *_swig_go_0) {
+void _wrap_delete_btVector3FloatData_mbt_220ac3041cacbc73(btVector3FloatData *_swig_go_0) {
   btVector3FloatData *arg1 = (btVector3FloatData *) 0 ;
   
   arg1 = *(btVector3FloatData **)&_swig_go_0; 
@@ -14978,7 +17714,7 @@ void _wrap_delete_btVector3FloatData_mbt_3c32781124460d6b(btVector3FloatData *_s
 }
 
 
-void _wrap_btVector3DoubleData_m_floats_set_mbt_3c32781124460d6b(btVector3DoubleData *_swig_go_0, double *_swig_go_1) {
+void _wrap_btVector3DoubleData_m_floats_set_mbt_220ac3041cacbc73(btVector3DoubleData *_swig_go_0, double *_swig_go_1) {
   btVector3DoubleData *arg1 = (btVector3DoubleData *) 0 ;
   double *arg2 = (double *) (double *)0 ;
   
@@ -14994,7 +17730,7 @@ void _wrap_btVector3DoubleData_m_floats_set_mbt_3c32781124460d6b(btVector3Double
 }
 
 
-double *_wrap_btVector3DoubleData_m_floats_get_mbt_3c32781124460d6b(btVector3DoubleData *_swig_go_0) {
+double *_wrap_btVector3DoubleData_m_floats_get_mbt_220ac3041cacbc73(btVector3DoubleData *_swig_go_0) {
   btVector3DoubleData *arg1 = (btVector3DoubleData *) 0 ;
   double *result = 0 ;
   double *_swig_go_result;
@@ -15007,7 +17743,7 @@ double *_wrap_btVector3DoubleData_m_floats_get_mbt_3c32781124460d6b(btVector3Dou
 }
 
 
-btVector3DoubleData *_wrap_new_btVector3DoubleData_mbt_3c32781124460d6b() {
+btVector3DoubleData *_wrap_new_btVector3DoubleData_mbt_220ac3041cacbc73() {
   btVector3DoubleData *result = 0 ;
   btVector3DoubleData *_swig_go_result;
   
@@ -15018,7 +17754,7 @@ btVector3DoubleData *_wrap_new_btVector3DoubleData_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_btVector3DoubleData_mbt_3c32781124460d6b(btVector3DoubleData *_swig_go_0) {
+void _wrap_delete_btVector3DoubleData_mbt_220ac3041cacbc73(btVector3DoubleData *_swig_go_0) {
   btVector3DoubleData *arg1 = (btVector3DoubleData *) 0 ;
   
   arg1 = *(btVector3DoubleData **)&_swig_go_0; 
@@ -15028,7 +17764,7 @@ void _wrap_delete_btVector3DoubleData_mbt_3c32781124460d6b(btVector3DoubleData *
 }
 
 
-float _wrap_btQuadWord_getX_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_getX_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15041,7 +17777,7 @@ float _wrap_btQuadWord_getX_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
 }
 
 
-float _wrap_btQuadWord_getY_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_getY_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15054,7 +17790,7 @@ float _wrap_btQuadWord_getY_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
 }
 
 
-float _wrap_btQuadWord_getZ_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_getZ_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15067,7 +17803,7 @@ float _wrap_btQuadWord_getZ_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
 }
 
 
-void _wrap_btQuadWord_setX_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuadWord_setX_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0, float _swig_go_1) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar arg2 ;
   
@@ -15079,7 +17815,7 @@ void _wrap_btQuadWord_setX_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, float _s
 }
 
 
-void _wrap_btQuadWord_setY_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuadWord_setY_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0, float _swig_go_1) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar arg2 ;
   
@@ -15091,7 +17827,7 @@ void _wrap_btQuadWord_setY_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, float _s
 }
 
 
-void _wrap_btQuadWord_setZ_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuadWord_setZ_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0, float _swig_go_1) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar arg2 ;
   
@@ -15103,7 +17839,7 @@ void _wrap_btQuadWord_setZ_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, float _s
 }
 
 
-void _wrap_btQuadWord_setW_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuadWord_setW_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0, float _swig_go_1) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar arg2 ;
   
@@ -15115,7 +17851,7 @@ void _wrap_btQuadWord_setW_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, float _s
 }
 
 
-float _wrap_btQuadWord_x_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_x_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15128,7 +17864,7 @@ float _wrap_btQuadWord_x_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
 }
 
 
-float _wrap_btQuadWord_y_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_y_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15141,7 +17877,7 @@ float _wrap_btQuadWord_y_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
 }
 
 
-float _wrap_btQuadWord_z_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_z_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15154,7 +17890,7 @@ float _wrap_btQuadWord_z_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
 }
 
 
-float _wrap_btQuadWord_w_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_w_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15167,7 +17903,7 @@ float _wrap_btQuadWord_w_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
 }
 
 
-void _wrap_btQuadWord_setValue__SWIG_0_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btQuadWord_setValue__SWIG_0_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15183,7 +17919,7 @@ void _wrap_btQuadWord_setValue__SWIG_0_mbt_3c32781124460d6b(btQuadWord *_swig_go
 }
 
 
-void _wrap_btQuadWord_setValue__SWIG_1_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
+void _wrap_btQuadWord_setValue__SWIG_1_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15201,7 +17937,7 @@ void _wrap_btQuadWord_setValue__SWIG_1_mbt_3c32781124460d6b(btQuadWord *_swig_go
 }
 
 
-btQuadWord *_wrap_new_btQuadWord__SWIG_0_mbt_3c32781124460d6b() {
+btQuadWord *_wrap_new_btQuadWord__SWIG_0_mbt_220ac3041cacbc73() {
   btQuadWord *result = 0 ;
   btQuadWord *_swig_go_result;
   
@@ -15212,7 +17948,7 @@ btQuadWord *_wrap_new_btQuadWord__SWIG_0_mbt_3c32781124460d6b() {
 }
 
 
-btQuadWord *_wrap_new_btQuadWord__SWIG_1_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
+btQuadWord *_wrap_new_btQuadWord__SWIG_1_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15229,7 +17965,7 @@ btQuadWord *_wrap_new_btQuadWord__SWIG_1_mbt_3c32781124460d6b(float _swig_go_0, 
 }
 
 
-btQuadWord *_wrap_new_btQuadWord__SWIG_2_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+btQuadWord *_wrap_new_btQuadWord__SWIG_2_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15248,7 +17984,7 @@ btQuadWord *_wrap_new_btQuadWord__SWIG_2_mbt_3c32781124460d6b(float _swig_go_0, 
 }
 
 
-void _wrap_btQuadWord_setMax_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, btQuadWord *_swig_go_1) {
+void _wrap_btQuadWord_setMax_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0, btQuadWord *_swig_go_1) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btQuadWord *arg2 = 0 ;
   
@@ -15260,7 +17996,7 @@ void _wrap_btQuadWord_setMax_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, btQuad
 }
 
 
-void _wrap_btQuadWord_setMin_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, btQuadWord *_swig_go_1) {
+void _wrap_btQuadWord_setMin_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0, btQuadWord *_swig_go_1) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btQuadWord *arg2 = 0 ;
   
@@ -15272,7 +18008,7 @@ void _wrap_btQuadWord_setMin_mbt_3c32781124460d6b(btQuadWord *_swig_go_0, btQuad
 }
 
 
-void _wrap_delete_btQuadWord_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
+void _wrap_delete_btQuadWord_mbt_220ac3041cacbc73(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   
   arg1 = *(btQuadWord **)&_swig_go_0; 
@@ -15282,7 +18018,7 @@ void _wrap_delete_btQuadWord_mbt_3c32781124460d6b(btQuadWord *_swig_go_0) {
 }
 
 
-btQuaternion *_wrap_new_btQuaternion__SWIG_0_mbt_3c32781124460d6b() {
+btQuaternion *_wrap_new_btQuaternion__SWIG_0_mbt_220ac3041cacbc73() {
   btQuaternion *result = 0 ;
   btQuaternion *_swig_go_result;
   
@@ -15293,7 +18029,7 @@ btQuaternion *_wrap_new_btQuaternion__SWIG_0_mbt_3c32781124460d6b() {
 }
 
 
-btQuaternion *_wrap_new_btQuaternion__SWIG_1_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+btQuaternion *_wrap_new_btQuaternion__SWIG_1_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15312,7 +18048,7 @@ btQuaternion *_wrap_new_btQuaternion__SWIG_1_mbt_3c32781124460d6b(float _swig_go
 }
 
 
-btQuaternion *_wrap_new_btQuaternion__SWIG_2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float _swig_go_1) {
+btQuaternion *_wrap_new_btQuaternion__SWIG_2_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, float _swig_go_1) {
   btVector3 *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btQuaternion *result = 0 ;
@@ -15327,7 +18063,7 @@ btQuaternion *_wrap_new_btQuaternion__SWIG_2_mbt_3c32781124460d6b(btVector3 *_sw
 }
 
 
-btQuaternion *_wrap_new_btQuaternion__SWIG_3_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
+btQuaternion *_wrap_new_btQuaternion__SWIG_3_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15344,7 +18080,7 @@ btQuaternion *_wrap_new_btQuaternion__SWIG_3_mbt_3c32781124460d6b(float _swig_go
 }
 
 
-void _wrap_btQuaternion_setRotation_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+void _wrap_btQuaternion_setRotation_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15358,7 +18094,7 @@ void _wrap_btQuaternion_setRotation_mbt_3c32781124460d6b(btQuaternion *_swig_go_
 }
 
 
-void _wrap_btQuaternion_setEuler_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btQuaternion_setEuler_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15374,7 +18110,7 @@ void _wrap_btQuaternion_setEuler_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, 
 }
 
 
-void _wrap_btQuaternion_setEulerZYX_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btQuaternion_setEulerZYX_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15390,7 +18126,7 @@ void _wrap_btQuaternion_setEulerZYX_mbt_3c32781124460d6b(btQuaternion *_swig_go_
 }
 
 
-void _wrap_btQuaternion_getEulerZYX_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
+void _wrap_btQuaternion_getEulerZYX_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15406,7 +18142,7 @@ void _wrap_btQuaternion_getEulerZYX_mbt_3c32781124460d6b(btQuaternion *_swig_go_
 }
 
 
-float _wrap_btQuaternion_dot_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+float _wrap_btQuaternion_dot_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar result;
@@ -15421,7 +18157,7 @@ float _wrap_btQuaternion_dot_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQu
 }
 
 
-float _wrap_btQuaternion_length2_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_length2_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -15434,7 +18170,7 @@ float _wrap_btQuaternion_length2_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) 
 }
 
 
-float _wrap_btQuaternion_length_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_length_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -15447,7 +18183,7 @@ float _wrap_btQuaternion_length_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
 }
 
 
-btQuaternion *_wrap_btQuaternion_safeNormalize_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+btQuaternion *_wrap_btQuaternion_safeNormalize_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *result = 0 ;
   btQuaternion *_swig_go_result;
@@ -15460,7 +18196,7 @@ btQuaternion *_wrap_btQuaternion_safeNormalize_mbt_3c32781124460d6b(btQuaternion
 }
 
 
-btQuaternion *_wrap_btQuaternion_normalize_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+btQuaternion *_wrap_btQuaternion_normalize_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *result = 0 ;
   btQuaternion *_swig_go_result;
@@ -15473,7 +18209,7 @@ btQuaternion *_wrap_btQuaternion_normalize_mbt_3c32781124460d6b(btQuaternion *_s
 }
 
 
-btQuaternion *_wrap_btQuaternion_normalized_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+btQuaternion *_wrap_btQuaternion_normalized_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion result;
   btQuaternion *_swig_go_result;
@@ -15486,7 +18222,7 @@ btQuaternion *_wrap_btQuaternion_normalized_mbt_3c32781124460d6b(btQuaternion *_
 }
 
 
-float _wrap_btQuaternion_angle_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+float _wrap_btQuaternion_angle_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar result;
@@ -15501,7 +18237,7 @@ float _wrap_btQuaternion_angle_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, bt
 }
 
 
-float _wrap_btQuaternion_angleShortestPath_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+float _wrap_btQuaternion_angleShortestPath_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar result;
@@ -15516,7 +18252,7 @@ float _wrap_btQuaternion_angleShortestPath_mbt_3c32781124460d6b(btQuaternion *_s
 }
 
 
-float _wrap_btQuaternion_getAngle_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_getAngle_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -15529,7 +18265,7 @@ float _wrap_btQuaternion_getAngle_mbt_3c32781124460d6b(btQuaternion *_swig_go_0)
 }
 
 
-float _wrap_btQuaternion_getAngleShortestPath_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_getAngleShortestPath_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -15542,7 +18278,7 @@ float _wrap_btQuaternion_getAngleShortestPath_mbt_3c32781124460d6b(btQuaternion 
 }
 
 
-btVector3 *_wrap_btQuaternion_getAxis_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+btVector3 *_wrap_btQuaternion_getAxis_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btVector3 result;
   btVector3 *_swig_go_result;
@@ -15555,7 +18291,7 @@ btVector3 *_wrap_btQuaternion_getAxis_mbt_3c32781124460d6b(btQuaternion *_swig_g
 }
 
 
-btQuaternion *_wrap_btQuaternion_inverse_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+btQuaternion *_wrap_btQuaternion_inverse_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion result;
   btQuaternion *_swig_go_result;
@@ -15568,7 +18304,7 @@ btQuaternion *_wrap_btQuaternion_inverse_mbt_3c32781124460d6b(btQuaternion *_swi
 }
 
 
-btQuaternion *_wrap_btQuaternion_farthest_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+btQuaternion *_wrap_btQuaternion_farthest_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *arg2 = 0 ;
   btQuaternion result;
@@ -15583,7 +18319,7 @@ btQuaternion *_wrap_btQuaternion_farthest_mbt_3c32781124460d6b(btQuaternion *_sw
 }
 
 
-btQuaternion *_wrap_btQuaternion_nearest_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+btQuaternion *_wrap_btQuaternion_nearest_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *arg2 = 0 ;
   btQuaternion result;
@@ -15598,7 +18334,7 @@ btQuaternion *_wrap_btQuaternion_nearest_mbt_3c32781124460d6b(btQuaternion *_swi
 }
 
 
-btQuaternion *_wrap_btQuaternion_slerp_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
+btQuaternion *_wrap_btQuaternion_slerp_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15615,7 +18351,7 @@ btQuaternion *_wrap_btQuaternion_slerp_mbt_3c32781124460d6b(btQuaternion *_swig_
 }
 
 
-btQuaternion *_wrap_btQuaternion_getIdentity_mbt_3c32781124460d6b() {
+btQuaternion *_wrap_btQuaternion_getIdentity_mbt_220ac3041cacbc73() {
   btQuaternion *result = 0 ;
   btQuaternion *_swig_go_result;
   
@@ -15626,7 +18362,7 @@ btQuaternion *_wrap_btQuaternion_getIdentity_mbt_3c32781124460d6b() {
 }
 
 
-float _wrap_btQuaternion_getW_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_getW_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15639,7 +18375,7 @@ float _wrap_btQuaternion_getW_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
 }
 
 
-void _wrap_btQuaternion_serialize_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
+void _wrap_btQuaternion_serialize_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionFloatData *arg2 = 0 ;
   
@@ -15651,7 +18387,7 @@ void _wrap_btQuaternion_serialize_mbt_3c32781124460d6b(btQuaternion *_swig_go_0,
 }
 
 
-void _wrap_btQuaternion_deSerialize__SWIG_0_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
+void _wrap_btQuaternion_deSerialize__SWIG_0_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionFloatData *arg2 = 0 ;
   
@@ -15663,7 +18399,7 @@ void _wrap_btQuaternion_deSerialize__SWIG_0_mbt_3c32781124460d6b(btQuaternion *_
 }
 
 
-void _wrap_btQuaternion_deSerialize__SWIG_1_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
+void _wrap_btQuaternion_deSerialize__SWIG_1_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionDoubleData *arg2 = 0 ;
   
@@ -15675,7 +18411,7 @@ void _wrap_btQuaternion_deSerialize__SWIG_1_mbt_3c32781124460d6b(btQuaternion *_
 }
 
 
-void _wrap_btQuaternion_serializeFloat_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
+void _wrap_btQuaternion_serializeFloat_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionFloatData *arg2 = 0 ;
   
@@ -15687,7 +18423,7 @@ void _wrap_btQuaternion_serializeFloat_mbt_3c32781124460d6b(btQuaternion *_swig_
 }
 
 
-void _wrap_btQuaternion_deSerializeFloat_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
+void _wrap_btQuaternion_deSerializeFloat_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionFloatData *arg2 = 0 ;
   
@@ -15699,7 +18435,7 @@ void _wrap_btQuaternion_deSerializeFloat_mbt_3c32781124460d6b(btQuaternion *_swi
 }
 
 
-void _wrap_btQuaternion_serializeDouble_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
+void _wrap_btQuaternion_serializeDouble_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionDoubleData *arg2 = 0 ;
   
@@ -15711,7 +18447,7 @@ void _wrap_btQuaternion_serializeDouble_mbt_3c32781124460d6b(btQuaternion *_swig
 }
 
 
-void _wrap_btQuaternion_deSerializeDouble_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
+void _wrap_btQuaternion_deSerializeDouble_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionDoubleData *arg2 = 0 ;
   
@@ -15723,7 +18459,7 @@ void _wrap_btQuaternion_deSerializeDouble_mbt_3c32781124460d6b(btQuaternion *_sw
 }
 
 
-void _wrap_delete_btQuaternion_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+void _wrap_delete_btQuaternion_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   
   arg1 = *(btQuaternion **)&_swig_go_0; 
@@ -15733,7 +18469,7 @@ void _wrap_delete_btQuaternion_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btQuaternion_getX_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_getX_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15747,7 +18483,7 @@ float _wrap_btQuaternion_getX_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btQuaternion_getY_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_getY_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15761,7 +18497,7 @@ float _wrap_btQuaternion_getY_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btQuaternion_getZ_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_getZ_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15775,7 +18511,7 @@ float _wrap_btQuaternion_getZ_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
 }
 
 
-void _wrap_btQuaternion_setX_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuaternion_setX_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, float _swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar arg2 ;
   
@@ -15788,7 +18524,7 @@ void _wrap_btQuaternion_setX_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, floa
 }
 
 
-void _wrap_btQuaternion_setY_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuaternion_setY_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, float _swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar arg2 ;
   
@@ -15801,7 +18537,7 @@ void _wrap_btQuaternion_setY_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, floa
 }
 
 
-void _wrap_btQuaternion_setZ_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuaternion_setZ_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, float _swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar arg2 ;
   
@@ -15814,7 +18550,7 @@ void _wrap_btQuaternion_setZ_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, floa
 }
 
 
-void _wrap_btQuaternion_setW_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuaternion_setW_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, float _swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar arg2 ;
   
@@ -15827,7 +18563,7 @@ void _wrap_btQuaternion_setW_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, floa
 }
 
 
-float _wrap_btQuaternion_x_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_x_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15841,7 +18577,7 @@ float _wrap_btQuaternion_x_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btQuaternion_y_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_y_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15855,7 +18591,7 @@ float _wrap_btQuaternion_y_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btQuaternion_z_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_z_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15869,7 +18605,7 @@ float _wrap_btQuaternion_z_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btQuaternion_w_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_w_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -15883,7 +18619,7 @@ float _wrap_btQuaternion_w_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
 }
 
 
-void _wrap_btQuaternion_setValue__SWIG_0_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btQuaternion_setValue__SWIG_0_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15900,7 +18636,7 @@ void _wrap_btQuaternion_setValue__SWIG_0_mbt_3c32781124460d6b(btQuaternion *_swi
 }
 
 
-void _wrap_btQuaternion_setValue__SWIG_1_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
+void _wrap_btQuaternion_setValue__SWIG_1_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -15919,7 +18655,7 @@ void _wrap_btQuaternion_setValue__SWIG_1_mbt_3c32781124460d6b(btQuaternion *_swi
 }
 
 
-void _wrap_btQuaternion_setMax_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuadWord *_swig_go_1) {
+void _wrap_btQuaternion_setMax_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuadWord *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuadWord *arg2 = 0 ;
   
@@ -15932,7 +18668,7 @@ void _wrap_btQuaternion_setMax_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, bt
 }
 
 
-void _wrap_btQuaternion_setMin_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuadWord *_swig_go_1) {
+void _wrap_btQuaternion_setMin_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuadWord *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuadWord *arg2 = 0 ;
   
@@ -15945,7 +18681,7 @@ void _wrap_btQuaternion_setMin_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, bt
 }
 
 
-float _wrap_dot_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+float _wrap_dot_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar result;
@@ -15960,7 +18696,7 @@ float _wrap_dot_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternion *_sw
 }
 
 
-float _wrap_length_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+float _wrap_length_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = 0 ;
   btScalar result;
   float _swig_go_result;
@@ -15973,7 +18709,7 @@ float _wrap_length_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btAngle__SWIG_1_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+float _wrap_btAngle__SWIG_1_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar result;
@@ -15988,7 +18724,7 @@ float _wrap_btAngle__SWIG_1_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQua
 }
 
 
-btQuaternion *_wrap_inverse_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+btQuaternion *_wrap_inverse_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = 0 ;
   btQuaternion result;
   btQuaternion *_swig_go_result;
@@ -16001,7 +18737,7 @@ btQuaternion *_wrap_inverse_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
 }
 
 
-btQuaternion *_wrap_slerp_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
+btQuaternion *_wrap_slerp_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
   btQuaternion *arg1 = 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -16018,7 +18754,7 @@ btQuaternion *_wrap_slerp_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btQuate
 }
 
 
-btVector3 *_wrap_quatRotate_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btVector3 *_swig_go_1) {
+btVector3 *_wrap_quatRotate_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btVector3 *_swig_go_1) {
   btQuaternion *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 result;
@@ -16033,7 +18769,7 @@ btVector3 *_wrap_quatRotate_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btVec
 }
 
 
-btQuaternion *_wrap_shortestArcQuat_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+btQuaternion *_wrap_shortestArcQuat_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btQuaternion result;
@@ -16048,7 +18784,7 @@ btQuaternion *_wrap_shortestArcQuat_mbt_3c32781124460d6b(btVector3 *_swig_go_0, 
 }
 
 
-btQuaternion *_wrap_shortestArcQuatNormalize2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+btQuaternion *_wrap_shortestArcQuatNormalize2_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btQuaternion result;
@@ -16063,7 +18799,7 @@ btQuaternion *_wrap_shortestArcQuatNormalize2_mbt_3c32781124460d6b(btVector3 *_s
 }
 
 
-void _wrap_btQuaternionFloatData_m_floats_set_mbt_3c32781124460d6b(btQuaternionFloatData *_swig_go_0, float *_swig_go_1) {
+void _wrap_btQuaternionFloatData_m_floats_set_mbt_220ac3041cacbc73(btQuaternionFloatData *_swig_go_0, float *_swig_go_1) {
   btQuaternionFloatData *arg1 = (btQuaternionFloatData *) 0 ;
   float *arg2 = (float *) (float *)0 ;
   
@@ -16079,7 +18815,7 @@ void _wrap_btQuaternionFloatData_m_floats_set_mbt_3c32781124460d6b(btQuaternionF
 }
 
 
-float *_wrap_btQuaternionFloatData_m_floats_get_mbt_3c32781124460d6b(btQuaternionFloatData *_swig_go_0) {
+float *_wrap_btQuaternionFloatData_m_floats_get_mbt_220ac3041cacbc73(btQuaternionFloatData *_swig_go_0) {
   btQuaternionFloatData *arg1 = (btQuaternionFloatData *) 0 ;
   float *result = 0 ;
   float *_swig_go_result;
@@ -16092,7 +18828,7 @@ float *_wrap_btQuaternionFloatData_m_floats_get_mbt_3c32781124460d6b(btQuaternio
 }
 
 
-btQuaternionFloatData *_wrap_new_btQuaternionFloatData_mbt_3c32781124460d6b() {
+btQuaternionFloatData *_wrap_new_btQuaternionFloatData_mbt_220ac3041cacbc73() {
   btQuaternionFloatData *result = 0 ;
   btQuaternionFloatData *_swig_go_result;
   
@@ -16103,7 +18839,7 @@ btQuaternionFloatData *_wrap_new_btQuaternionFloatData_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_btQuaternionFloatData_mbt_3c32781124460d6b(btQuaternionFloatData *_swig_go_0) {
+void _wrap_delete_btQuaternionFloatData_mbt_220ac3041cacbc73(btQuaternionFloatData *_swig_go_0) {
   btQuaternionFloatData *arg1 = (btQuaternionFloatData *) 0 ;
   
   arg1 = *(btQuaternionFloatData **)&_swig_go_0; 
@@ -16113,7 +18849,7 @@ void _wrap_delete_btQuaternionFloatData_mbt_3c32781124460d6b(btQuaternionFloatDa
 }
 
 
-void _wrap_btQuaternionDoubleData_m_floats_set_mbt_3c32781124460d6b(btQuaternionDoubleData *_swig_go_0, double *_swig_go_1) {
+void _wrap_btQuaternionDoubleData_m_floats_set_mbt_220ac3041cacbc73(btQuaternionDoubleData *_swig_go_0, double *_swig_go_1) {
   btQuaternionDoubleData *arg1 = (btQuaternionDoubleData *) 0 ;
   double *arg2 = (double *) (double *)0 ;
   
@@ -16129,7 +18865,7 @@ void _wrap_btQuaternionDoubleData_m_floats_set_mbt_3c32781124460d6b(btQuaternion
 }
 
 
-double *_wrap_btQuaternionDoubleData_m_floats_get_mbt_3c32781124460d6b(btQuaternionDoubleData *_swig_go_0) {
+double *_wrap_btQuaternionDoubleData_m_floats_get_mbt_220ac3041cacbc73(btQuaternionDoubleData *_swig_go_0) {
   btQuaternionDoubleData *arg1 = (btQuaternionDoubleData *) 0 ;
   double *result = 0 ;
   double *_swig_go_result;
@@ -16142,7 +18878,7 @@ double *_wrap_btQuaternionDoubleData_m_floats_get_mbt_3c32781124460d6b(btQuatern
 }
 
 
-btQuaternionDoubleData *_wrap_new_btQuaternionDoubleData_mbt_3c32781124460d6b() {
+btQuaternionDoubleData *_wrap_new_btQuaternionDoubleData_mbt_220ac3041cacbc73() {
   btQuaternionDoubleData *result = 0 ;
   btQuaternionDoubleData *_swig_go_result;
   
@@ -16153,7 +18889,7 @@ btQuaternionDoubleData *_wrap_new_btQuaternionDoubleData_mbt_3c32781124460d6b() 
 }
 
 
-void _wrap_delete_btQuaternionDoubleData_mbt_3c32781124460d6b(btQuaternionDoubleData *_swig_go_0) {
+void _wrap_delete_btQuaternionDoubleData_mbt_220ac3041cacbc73(btQuaternionDoubleData *_swig_go_0) {
   btQuaternionDoubleData *arg1 = (btQuaternionDoubleData *) 0 ;
   
   arg1 = *(btQuaternionDoubleData **)&_swig_go_0; 
@@ -16163,7 +18899,7 @@ void _wrap_delete_btQuaternionDoubleData_mbt_3c32781124460d6b(btQuaternionDouble
 }
 
 
-btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_0_mbt_3c32781124460d6b() {
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_0_mbt_220ac3041cacbc73() {
   btMatrix3x3 *result = 0 ;
   btMatrix3x3 *_swig_go_result;
   
@@ -16174,7 +18910,7 @@ btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_0_mbt_3c32781124460d6b() {
 }
 
 
-btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_1_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_1_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = 0 ;
   btMatrix3x3 *result = 0 ;
   btMatrix3x3 *_swig_go_result;
@@ -16187,7 +18923,7 @@ btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_1_mbt_3c32781124460d6b(btQuaternion *_s
 }
 
 
-btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_2_mbt_3c32781124460d6b(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4, float _swig_go_5, float _swig_go_6, float _swig_go_7, float _swig_go_8) {
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_2_mbt_220ac3041cacbc73(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4, float _swig_go_5, float _swig_go_6, float _swig_go_7, float _swig_go_8) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -16216,7 +18952,7 @@ btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_2_mbt_3c32781124460d6b(float _swig_go_0
 }
 
 
-btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_3_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0) {
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_3_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = 0 ;
   btMatrix3x3 *result = 0 ;
   btMatrix3x3 *_swig_go_result;
@@ -16229,7 +18965,7 @@ btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_3_mbt_3c32781124460d6b(btMatrix3x3 *_sw
 }
 
 
-btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_4_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_4_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -16246,7 +18982,7 @@ btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_4_mbt_3c32781124460d6b(btVector3 *_swig
 }
 
 
-btVector3 *_wrap_btMatrix3x3_getColumn_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, intgo _swig_go_1) {
+btVector3 *_wrap_btMatrix3x3_getColumn_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, intgo _swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   int arg2 ;
   btVector3 result;
@@ -16261,7 +18997,7 @@ btVector3 *_wrap_btMatrix3x3_getColumn_mbt_3c32781124460d6b(btMatrix3x3 *_swig_g
 }
 
 
-btVector3 *_wrap_btMatrix3x3_getRow_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, intgo _swig_go_1) {
+btVector3 *_wrap_btMatrix3x3_getRow_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, intgo _swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   int arg2 ;
   btVector3 *result = 0 ;
@@ -16276,7 +19012,7 @@ btVector3 *_wrap_btMatrix3x3_getRow_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0
 }
 
 
-void _wrap_btMatrix3x3_setFromOpenGLSubMatrix_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, float *_swig_go_1) {
+void _wrap_btMatrix3x3_setFromOpenGLSubMatrix_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, float *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = (btScalar *) 0 ;
   
@@ -16288,7 +19024,7 @@ void _wrap_btMatrix3x3_setFromOpenGLSubMatrix_mbt_3c32781124460d6b(btMatrix3x3 *
 }
 
 
-void _wrap_btMatrix3x3_setValue_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4, float _swig_go_5, float _swig_go_6, float _swig_go_7, float _swig_go_8, float _swig_go_9) {
+void _wrap_btMatrix3x3_setValue_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4, float _swig_go_5, float _swig_go_6, float _swig_go_7, float _swig_go_8, float _swig_go_9) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -16316,7 +19052,7 @@ void _wrap_btMatrix3x3_setValue_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, fl
 }
 
 
-void _wrap_btMatrix3x3_setRotation_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
+void _wrap_btMatrix3x3_setRotation_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btQuaternion *arg2 = 0 ;
   
@@ -16328,7 +19064,7 @@ void _wrap_btMatrix3x3_setRotation_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0,
 }
 
 
-void _wrap_btMatrix3x3_setEulerYPR_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btMatrix3x3_setEulerYPR_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -16344,7 +19080,7 @@ void _wrap_btMatrix3x3_setEulerYPR_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0,
 }
 
 
-void _wrap_btMatrix3x3_setEulerZYX_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btMatrix3x3_setEulerZYX_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar arg2 ;
   btScalar arg3 ;
@@ -16360,7 +19096,7 @@ void _wrap_btMatrix3x3_setEulerZYX_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0,
 }
 
 
-void _wrap_btMatrix3x3_setIdentity_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0) {
+void _wrap_btMatrix3x3_setIdentity_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   
   arg1 = *(btMatrix3x3 **)&_swig_go_0; 
@@ -16370,7 +19106,7 @@ void _wrap_btMatrix3x3_setIdentity_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0)
 }
 
 
-void _wrap_btMatrix3x3_setZero_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0) {
+void _wrap_btMatrix3x3_setZero_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   
   arg1 = *(btMatrix3x3 **)&_swig_go_0; 
@@ -16380,7 +19116,7 @@ void _wrap_btMatrix3x3_setZero_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0) {
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_getIdentity_mbt_3c32781124460d6b() {
+btMatrix3x3 *_wrap_btMatrix3x3_getIdentity_mbt_220ac3041cacbc73() {
   btMatrix3x3 *result = 0 ;
   btMatrix3x3 *_swig_go_result;
   
@@ -16391,7 +19127,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_getIdentity_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_btMatrix3x3_getOpenGLSubMatrix_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, float *_swig_go_1) {
+void _wrap_btMatrix3x3_getOpenGLSubMatrix_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, float *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = (btScalar *) 0 ;
   
@@ -16403,7 +19139,7 @@ void _wrap_btMatrix3x3_getOpenGLSubMatrix_mbt_3c32781124460d6b(btMatrix3x3 *_swi
 }
 
 
-void _wrap_btMatrix3x3_getRotation_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
+void _wrap_btMatrix3x3_getRotation_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btQuaternion *arg2 = 0 ;
   
@@ -16415,7 +19151,7 @@ void _wrap_btMatrix3x3_getRotation_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0,
 }
 
 
-void _wrap_btMatrix3x3_getEulerYPR_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
+void _wrap_btMatrix3x3_getEulerYPR_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -16431,7 +19167,7 @@ void _wrap_btMatrix3x3_getEulerYPR_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0,
 }
 
 
-void _wrap_btMatrix3x3_getEulerZYX__SWIG_0_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3, intgo _swig_go_4) {
+void _wrap_btMatrix3x3_getEulerZYX__SWIG_0_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3, intgo _swig_go_4) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -16449,7 +19185,7 @@ void _wrap_btMatrix3x3_getEulerZYX__SWIG_0_mbt_3c32781124460d6b(btMatrix3x3 *_sw
 }
 
 
-void _wrap_btMatrix3x3_getEulerZYX__SWIG_1_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
+void _wrap_btMatrix3x3_getEulerZYX__SWIG_1_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -16465,7 +19201,7 @@ void _wrap_btMatrix3x3_getEulerZYX__SWIG_1_mbt_3c32781124460d6b(btMatrix3x3 *_sw
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_scaled_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+btMatrix3x3 *_wrap_btMatrix3x3_scaled_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btMatrix3x3 result;
@@ -16480,7 +19216,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_scaled_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go
 }
 
 
-float _wrap_btMatrix3x3_determinant_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0) {
+float _wrap_btMatrix3x3_determinant_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -16493,7 +19229,7 @@ float _wrap_btMatrix3x3_determinant_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_adjoint_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0) {
+btMatrix3x3 *_wrap_btMatrix3x3_adjoint_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 result;
   btMatrix3x3 *_swig_go_result;
@@ -16506,7 +19242,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_adjoint_mbt_3c32781124460d6b(btMatrix3x3 *_swig_g
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_absolute_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0) {
+btMatrix3x3 *_wrap_btMatrix3x3_absolute_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 result;
   btMatrix3x3 *_swig_go_result;
@@ -16519,7 +19255,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_absolute_mbt_3c32781124460d6b(btMatrix3x3 *_swig_
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_transpose_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0) {
+btMatrix3x3 *_wrap_btMatrix3x3_transpose_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 result;
   btMatrix3x3 *_swig_go_result;
@@ -16532,7 +19268,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_transpose_mbt_3c32781124460d6b(btMatrix3x3 *_swig
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_inverse_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0) {
+btMatrix3x3 *_wrap_btMatrix3x3_inverse_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 result;
   btMatrix3x3 *_swig_go_result;
@@ -16545,7 +19281,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_inverse_mbt_3c32781124460d6b(btMatrix3x3 *_swig_g
 }
 
 
-btVector3 *_wrap_btMatrix3x3_solve33_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+btVector3 *_wrap_btMatrix3x3_solve33_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 result;
@@ -16560,7 +19296,7 @@ btVector3 *_wrap_btMatrix3x3_solve33_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_transposeTimes_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1) {
+btMatrix3x3 *_wrap_btMatrix3x3_transposeTimes_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 *arg2 = 0 ;
   btMatrix3x3 result;
@@ -16575,7 +19311,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_transposeTimes_mbt_3c32781124460d6b(btMatrix3x3 *
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_timesTranspose_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1) {
+btMatrix3x3 *_wrap_btMatrix3x3_timesTranspose_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 *arg2 = 0 ;
   btMatrix3x3 result;
@@ -16590,7 +19326,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_timesTranspose_mbt_3c32781124460d6b(btMatrix3x3 *
 }
 
 
-float _wrap_btMatrix3x3_tdotx_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btMatrix3x3_tdotx_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -16605,7 +19341,7 @@ float _wrap_btMatrix3x3_tdotx_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btVe
 }
 
 
-float _wrap_btMatrix3x3_tdoty_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btMatrix3x3_tdoty_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -16620,7 +19356,7 @@ float _wrap_btMatrix3x3_tdoty_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btVe
 }
 
 
-float _wrap_btMatrix3x3_tdotz_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btMatrix3x3_tdotz_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -16635,7 +19371,7 @@ float _wrap_btMatrix3x3_tdotz_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btVe
 }
 
 
-void _wrap_btMatrix3x3_extractRotation__SWIG_0_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2, intgo _swig_go_3) {
+void _wrap_btMatrix3x3_extractRotation__SWIG_0_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2, intgo _swig_go_3) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar arg3 ;
@@ -16651,7 +19387,7 @@ void _wrap_btMatrix3x3_extractRotation__SWIG_0_mbt_3c32781124460d6b(btMatrix3x3 
 }
 
 
-void _wrap_btMatrix3x3_extractRotation__SWIG_1_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
+void _wrap_btMatrix3x3_extractRotation__SWIG_1_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar arg3 ;
@@ -16665,7 +19401,7 @@ void _wrap_btMatrix3x3_extractRotation__SWIG_1_mbt_3c32781124460d6b(btMatrix3x3 
 }
 
 
-void _wrap_btMatrix3x3_extractRotation__SWIG_2_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
+void _wrap_btMatrix3x3_extractRotation__SWIG_2_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btQuaternion *arg2 = 0 ;
   
@@ -16677,7 +19413,7 @@ void _wrap_btMatrix3x3_extractRotation__SWIG_2_mbt_3c32781124460d6b(btMatrix3x3 
 }
 
 
-void _wrap_btMatrix3x3_diagonalize_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1, float _swig_go_2, intgo _swig_go_3) {
+void _wrap_btMatrix3x3_diagonalize_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1, float _swig_go_2, intgo _swig_go_3) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 *arg2 = 0 ;
   btScalar arg3 ;
@@ -16693,7 +19429,7 @@ void _wrap_btMatrix3x3_diagonalize_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0,
 }
 
 
-float _wrap_btMatrix3x3_cofac_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2, intgo _swig_go_3, intgo _swig_go_4) {
+float _wrap_btMatrix3x3_cofac_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2, intgo _swig_go_3, intgo _swig_go_4) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   int arg2 ;
   int arg3 ;
@@ -16714,7 +19450,7 @@ float _wrap_btMatrix3x3_cofac_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, intg
 }
 
 
-void _wrap_btMatrix3x3_serialize_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+void _wrap_btMatrix3x3_serialize_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3FloatData *arg2 = 0 ;
   
@@ -16726,7 +19462,7 @@ void _wrap_btMatrix3x3_serialize_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, b
 }
 
 
-void _wrap_btMatrix3x3_serializeFloat_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+void _wrap_btMatrix3x3_serializeFloat_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3FloatData *arg2 = 0 ;
   
@@ -16738,7 +19474,7 @@ void _wrap_btMatrix3x3_serializeFloat_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go
 }
 
 
-void _wrap_btMatrix3x3_deSerialize_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+void _wrap_btMatrix3x3_deSerialize_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3FloatData *arg2 = 0 ;
   
@@ -16750,7 +19486,7 @@ void _wrap_btMatrix3x3_deSerialize_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0,
 }
 
 
-void _wrap_btMatrix3x3_deSerializeFloat_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+void _wrap_btMatrix3x3_deSerializeFloat_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3FloatData *arg2 = 0 ;
   
@@ -16762,7 +19498,7 @@ void _wrap_btMatrix3x3_deSerializeFloat_mbt_3c32781124460d6b(btMatrix3x3 *_swig_
 }
 
 
-void _wrap_btMatrix3x3_deSerializeDouble_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btMatrix3x3DoubleData *_swig_go_1) {
+void _wrap_btMatrix3x3_deSerializeDouble_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btMatrix3x3DoubleData *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3DoubleData *arg2 = 0 ;
   
@@ -16774,7 +19510,7 @@ void _wrap_btMatrix3x3_deSerializeDouble_mbt_3c32781124460d6b(btMatrix3x3 *_swig
 }
 
 
-void _wrap_delete_btMatrix3x3_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0) {
+void _wrap_delete_btMatrix3x3_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   
   arg1 = *(btMatrix3x3 **)&_swig_go_0; 
@@ -16784,7 +19520,7 @@ void _wrap_delete_btMatrix3x3_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0) {
 }
 
 
-void _wrap_btMatrix3x3FloatData_m_el_set_mbt_3c32781124460d6b(btMatrix3x3FloatData *_swig_go_0, btVector3FloatData (*_swig_go_1)[3]) {
+void _wrap_btMatrix3x3FloatData_m_el_set_mbt_220ac3041cacbc73(btMatrix3x3FloatData *_swig_go_0, btVector3FloatData (*_swig_go_1)[3]) {
   btMatrix3x3FloatData *arg1 = (btMatrix3x3FloatData *) 0 ;
   btVector3FloatData *arg2 = (btVector3FloatData *) (btVector3FloatData *)0 ;
   
@@ -16800,7 +19536,7 @@ void _wrap_btMatrix3x3FloatData_m_el_set_mbt_3c32781124460d6b(btMatrix3x3FloatDa
 }
 
 
-btVector3FloatData (*_wrap_btMatrix3x3FloatData_m_el_get_mbt_3c32781124460d6b(btMatrix3x3FloatData *_swig_go_0))[3] {
+btVector3FloatData (*_wrap_btMatrix3x3FloatData_m_el_get_mbt_220ac3041cacbc73(btMatrix3x3FloatData *_swig_go_0))[3] {
   btMatrix3x3FloatData *arg1 = (btMatrix3x3FloatData *) 0 ;
   btVector3FloatData *result = 0 ;
   btVector3FloatData (*_swig_go_result)[3];
@@ -16813,7 +19549,7 @@ btVector3FloatData (*_wrap_btMatrix3x3FloatData_m_el_get_mbt_3c32781124460d6b(bt
 }
 
 
-btMatrix3x3FloatData *_wrap_new_btMatrix3x3FloatData_mbt_3c32781124460d6b() {
+btMatrix3x3FloatData *_wrap_new_btMatrix3x3FloatData_mbt_220ac3041cacbc73() {
   btMatrix3x3FloatData *result = 0 ;
   btMatrix3x3FloatData *_swig_go_result;
   
@@ -16824,7 +19560,7 @@ btMatrix3x3FloatData *_wrap_new_btMatrix3x3FloatData_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_btMatrix3x3FloatData_mbt_3c32781124460d6b(btMatrix3x3FloatData *_swig_go_0) {
+void _wrap_delete_btMatrix3x3FloatData_mbt_220ac3041cacbc73(btMatrix3x3FloatData *_swig_go_0) {
   btMatrix3x3FloatData *arg1 = (btMatrix3x3FloatData *) 0 ;
   
   arg1 = *(btMatrix3x3FloatData **)&_swig_go_0; 
@@ -16834,7 +19570,7 @@ void _wrap_delete_btMatrix3x3FloatData_mbt_3c32781124460d6b(btMatrix3x3FloatData
 }
 
 
-void _wrap_btMatrix3x3DoubleData_m_el_set_mbt_3c32781124460d6b(btMatrix3x3DoubleData *_swig_go_0, btVector3DoubleData (*_swig_go_1)[3]) {
+void _wrap_btMatrix3x3DoubleData_m_el_set_mbt_220ac3041cacbc73(btMatrix3x3DoubleData *_swig_go_0, btVector3DoubleData (*_swig_go_1)[3]) {
   btMatrix3x3DoubleData *arg1 = (btMatrix3x3DoubleData *) 0 ;
   btVector3DoubleData *arg2 = (btVector3DoubleData *) (btVector3DoubleData *)0 ;
   
@@ -16850,7 +19586,7 @@ void _wrap_btMatrix3x3DoubleData_m_el_set_mbt_3c32781124460d6b(btMatrix3x3Double
 }
 
 
-btVector3DoubleData (*_wrap_btMatrix3x3DoubleData_m_el_get_mbt_3c32781124460d6b(btMatrix3x3DoubleData *_swig_go_0))[3] {
+btVector3DoubleData (*_wrap_btMatrix3x3DoubleData_m_el_get_mbt_220ac3041cacbc73(btMatrix3x3DoubleData *_swig_go_0))[3] {
   btMatrix3x3DoubleData *arg1 = (btMatrix3x3DoubleData *) 0 ;
   btVector3DoubleData *result = 0 ;
   btVector3DoubleData (*_swig_go_result)[3];
@@ -16863,7 +19599,7 @@ btVector3DoubleData (*_wrap_btMatrix3x3DoubleData_m_el_get_mbt_3c32781124460d6b(
 }
 
 
-btMatrix3x3DoubleData *_wrap_new_btMatrix3x3DoubleData_mbt_3c32781124460d6b() {
+btMatrix3x3DoubleData *_wrap_new_btMatrix3x3DoubleData_mbt_220ac3041cacbc73() {
   btMatrix3x3DoubleData *result = 0 ;
   btMatrix3x3DoubleData *_swig_go_result;
   
@@ -16874,7 +19610,7 @@ btMatrix3x3DoubleData *_wrap_new_btMatrix3x3DoubleData_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_btMatrix3x3DoubleData_mbt_3c32781124460d6b(btMatrix3x3DoubleData *_swig_go_0) {
+void _wrap_delete_btMatrix3x3DoubleData_mbt_220ac3041cacbc73(btMatrix3x3DoubleData *_swig_go_0) {
   btMatrix3x3DoubleData *arg1 = (btMatrix3x3DoubleData *) 0 ;
   
   arg1 = *(btMatrix3x3DoubleData **)&_swig_go_0; 
@@ -16884,7 +19620,7 @@ void _wrap_delete_btMatrix3x3DoubleData_mbt_3c32781124460d6b(btMatrix3x3DoubleDa
 }
 
 
-btTransform *_wrap_new_btTransform__SWIG_0_mbt_3c32781124460d6b() {
+btTransform *_wrap_new_btTransform__SWIG_0_mbt_220ac3041cacbc73() {
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
   
@@ -16895,7 +19631,7 @@ btTransform *_wrap_new_btTransform__SWIG_0_mbt_3c32781124460d6b() {
 }
 
 
-btTransform *_wrap_new_btTransform__SWIG_1_mbt_3c32781124460d6b(btQuaternion *_swig_go_0, btVector3 *_swig_go_1) {
+btTransform *_wrap_new_btTransform__SWIG_1_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0, btVector3 *_swig_go_1) {
   btQuaternion *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btTransform *result = 0 ;
@@ -16910,7 +19646,7 @@ btTransform *_wrap_new_btTransform__SWIG_1_mbt_3c32781124460d6b(btQuaternion *_s
 }
 
 
-btTransform *_wrap_new_btTransform__SWIG_2_mbt_3c32781124460d6b(btQuaternion *_swig_go_0) {
+btTransform *_wrap_new_btTransform__SWIG_2_mbt_220ac3041cacbc73(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = 0 ;
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
@@ -16923,7 +19659,7 @@ btTransform *_wrap_new_btTransform__SWIG_2_mbt_3c32781124460d6b(btQuaternion *_s
 }
 
 
-btTransform *_wrap_new_btTransform__SWIG_3_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+btTransform *_wrap_new_btTransform__SWIG_3_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
   btMatrix3x3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btTransform *result = 0 ;
@@ -16938,7 +19674,7 @@ btTransform *_wrap_new_btTransform__SWIG_3_mbt_3c32781124460d6b(btMatrix3x3 *_sw
 }
 
 
-btTransform *_wrap_new_btTransform__SWIG_4_mbt_3c32781124460d6b(btMatrix3x3 *_swig_go_0) {
+btTransform *_wrap_new_btTransform__SWIG_4_mbt_220ac3041cacbc73(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = 0 ;
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
@@ -16951,7 +19687,7 @@ btTransform *_wrap_new_btTransform__SWIG_4_mbt_3c32781124460d6b(btMatrix3x3 *_sw
 }
 
 
-btTransform *_wrap_new_btTransform__SWIG_5_mbt_3c32781124460d6b(btTransform *_swig_go_0) {
+btTransform *_wrap_new_btTransform__SWIG_5_mbt_220ac3041cacbc73(btTransform *_swig_go_0) {
   btTransform *arg1 = 0 ;
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
@@ -16964,7 +19700,7 @@ btTransform *_wrap_new_btTransform__SWIG_5_mbt_3c32781124460d6b(btTransform *_sw
 }
 
 
-void _wrap_btTransform_mult_mbt_3c32781124460d6b(btTransform *_swig_go_0, btTransform *_swig_go_1, btTransform *_swig_go_2) {
+void _wrap_btTransform_mult_mbt_220ac3041cacbc73(btTransform *_swig_go_0, btTransform *_swig_go_1, btTransform *_swig_go_2) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransform *arg2 = 0 ;
   btTransform *arg3 = 0 ;
@@ -16978,7 +19714,7 @@ void _wrap_btTransform_mult_mbt_3c32781124460d6b(btTransform *_swig_go_0, btTran
 }
 
 
-btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_0_mbt_3c32781124460d6b(btTransform *_swig_go_0) {
+btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_0_mbt_220ac3041cacbc73(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   btMatrix3x3 *result = 0 ;
   btMatrix3x3 *_swig_go_result;
@@ -16991,7 +19727,7 @@ btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_0_mbt_3c32781124460d6b(btTransform
 }
 
 
-btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_1_mbt_3c32781124460d6b(btTransform *_swig_go_0) {
+btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_1_mbt_220ac3041cacbc73(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   btMatrix3x3 *result = 0 ;
   btMatrix3x3 *_swig_go_result;
@@ -17004,7 +19740,7 @@ btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_1_mbt_3c32781124460d6b(btTransform
 }
 
 
-btVector3 *_wrap_btTransform_getOrigin__SWIG_0_mbt_3c32781124460d6b(btTransform *_swig_go_0) {
+btVector3 *_wrap_btTransform_getOrigin__SWIG_0_mbt_220ac3041cacbc73(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
@@ -17017,7 +19753,7 @@ btVector3 *_wrap_btTransform_getOrigin__SWIG_0_mbt_3c32781124460d6b(btTransform 
 }
 
 
-btVector3 *_wrap_btTransform_getOrigin__SWIG_1_mbt_3c32781124460d6b(btTransform *_swig_go_0) {
+btVector3 *_wrap_btTransform_getOrigin__SWIG_1_mbt_220ac3041cacbc73(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
@@ -17030,7 +19766,7 @@ btVector3 *_wrap_btTransform_getOrigin__SWIG_1_mbt_3c32781124460d6b(btTransform 
 }
 
 
-btQuaternion *_wrap_btTransform_getRotation_mbt_3c32781124460d6b(btTransform *_swig_go_0) {
+btQuaternion *_wrap_btTransform_getRotation_mbt_220ac3041cacbc73(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   btQuaternion result;
   btQuaternion *_swig_go_result;
@@ -17043,7 +19779,7 @@ btQuaternion *_wrap_btTransform_getRotation_mbt_3c32781124460d6b(btTransform *_s
 }
 
 
-void _wrap_btTransform_setFromOpenGLMatrix_mbt_3c32781124460d6b(btTransform *_swig_go_0, float *_swig_go_1) {
+void _wrap_btTransform_setFromOpenGLMatrix_mbt_220ac3041cacbc73(btTransform *_swig_go_0, float *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btScalar *arg2 = (btScalar *) 0 ;
   
@@ -17055,7 +19791,7 @@ void _wrap_btTransform_setFromOpenGLMatrix_mbt_3c32781124460d6b(btTransform *_sw
 }
 
 
-void _wrap_btTransform_getOpenGLMatrix_mbt_3c32781124460d6b(btTransform *_swig_go_0, float *_swig_go_1) {
+void _wrap_btTransform_getOpenGLMatrix_mbt_220ac3041cacbc73(btTransform *_swig_go_0, float *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btScalar *arg2 = (btScalar *) 0 ;
   
@@ -17067,7 +19803,7 @@ void _wrap_btTransform_getOpenGLMatrix_mbt_3c32781124460d6b(btTransform *_swig_g
 }
 
 
-void _wrap_btTransform_setOrigin_mbt_3c32781124460d6b(btTransform *_swig_go_0, btVector3 *_swig_go_1) {
+void _wrap_btTransform_setOrigin_mbt_220ac3041cacbc73(btTransform *_swig_go_0, btVector3 *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btVector3 *arg2 = 0 ;
   
@@ -17079,7 +19815,7 @@ void _wrap_btTransform_setOrigin_mbt_3c32781124460d6b(btTransform *_swig_go_0, b
 }
 
 
-btVector3 *_wrap_btTransform_invXform_mbt_3c32781124460d6b(btTransform *_swig_go_0, btVector3 *_swig_go_1) {
+btVector3 *_wrap_btTransform_invXform_mbt_220ac3041cacbc73(btTransform *_swig_go_0, btVector3 *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 result;
@@ -17094,7 +19830,7 @@ btVector3 *_wrap_btTransform_invXform_mbt_3c32781124460d6b(btTransform *_swig_go
 }
 
 
-void _wrap_btTransform_setBasis_mbt_3c32781124460d6b(btTransform *_swig_go_0, btMatrix3x3 *_swig_go_1) {
+void _wrap_btTransform_setBasis_mbt_220ac3041cacbc73(btTransform *_swig_go_0, btMatrix3x3 *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btMatrix3x3 *arg2 = 0 ;
   
@@ -17106,7 +19842,7 @@ void _wrap_btTransform_setBasis_mbt_3c32781124460d6b(btTransform *_swig_go_0, bt
 }
 
 
-void _wrap_btTransform_setRotation_mbt_3c32781124460d6b(btTransform *_swig_go_0, btQuaternion *_swig_go_1) {
+void _wrap_btTransform_setRotation_mbt_220ac3041cacbc73(btTransform *_swig_go_0, btQuaternion *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btQuaternion *arg2 = 0 ;
   
@@ -17118,7 +19854,7 @@ void _wrap_btTransform_setRotation_mbt_3c32781124460d6b(btTransform *_swig_go_0,
 }
 
 
-void _wrap_btTransform_setIdentity_mbt_3c32781124460d6b(btTransform *_swig_go_0) {
+void _wrap_btTransform_setIdentity_mbt_220ac3041cacbc73(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   
   arg1 = *(btTransform **)&_swig_go_0; 
@@ -17128,7 +19864,7 @@ void _wrap_btTransform_setIdentity_mbt_3c32781124460d6b(btTransform *_swig_go_0)
 }
 
 
-btTransform *_wrap_btTransform_inverse_mbt_3c32781124460d6b(btTransform *_swig_go_0) {
+btTransform *_wrap_btTransform_inverse_mbt_220ac3041cacbc73(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransform result;
   btTransform *_swig_go_result;
@@ -17141,7 +19877,7 @@ btTransform *_wrap_btTransform_inverse_mbt_3c32781124460d6b(btTransform *_swig_g
 }
 
 
-btTransform *_wrap_btTransform_inverseTimes_mbt_3c32781124460d6b(btTransform *_swig_go_0, btTransform *_swig_go_1) {
+btTransform *_wrap_btTransform_inverseTimes_mbt_220ac3041cacbc73(btTransform *_swig_go_0, btTransform *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransform *arg2 = 0 ;
   btTransform result;
@@ -17156,7 +19892,7 @@ btTransform *_wrap_btTransform_inverseTimes_mbt_3c32781124460d6b(btTransform *_s
 }
 
 
-btTransform *_wrap_btTransform_getIdentity_mbt_3c32781124460d6b() {
+btTransform *_wrap_btTransform_getIdentity_mbt_220ac3041cacbc73() {
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
   
@@ -17167,7 +19903,7 @@ btTransform *_wrap_btTransform_getIdentity_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_btTransform_serialize_mbt_3c32781124460d6b(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
+void _wrap_btTransform_serialize_mbt_220ac3041cacbc73(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransformFloatData *arg2 = 0 ;
   
@@ -17179,7 +19915,7 @@ void _wrap_btTransform_serialize_mbt_3c32781124460d6b(btTransform *_swig_go_0, b
 }
 
 
-void _wrap_btTransform_serializeFloat_mbt_3c32781124460d6b(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
+void _wrap_btTransform_serializeFloat_mbt_220ac3041cacbc73(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransformFloatData *arg2 = 0 ;
   
@@ -17191,7 +19927,7 @@ void _wrap_btTransform_serializeFloat_mbt_3c32781124460d6b(btTransform *_swig_go
 }
 
 
-void _wrap_btTransform_deSerialize_mbt_3c32781124460d6b(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
+void _wrap_btTransform_deSerialize_mbt_220ac3041cacbc73(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransformFloatData *arg2 = 0 ;
   
@@ -17203,7 +19939,7 @@ void _wrap_btTransform_deSerialize_mbt_3c32781124460d6b(btTransform *_swig_go_0,
 }
 
 
-void _wrap_btTransform_deSerializeDouble_mbt_3c32781124460d6b(btTransform *_swig_go_0, btTransformDoubleData *_swig_go_1) {
+void _wrap_btTransform_deSerializeDouble_mbt_220ac3041cacbc73(btTransform *_swig_go_0, btTransformDoubleData *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransformDoubleData *arg2 = 0 ;
   
@@ -17215,7 +19951,7 @@ void _wrap_btTransform_deSerializeDouble_mbt_3c32781124460d6b(btTransform *_swig
 }
 
 
-void _wrap_btTransform_deSerializeFloat_mbt_3c32781124460d6b(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
+void _wrap_btTransform_deSerializeFloat_mbt_220ac3041cacbc73(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransformFloatData *arg2 = 0 ;
   
@@ -17227,7 +19963,7 @@ void _wrap_btTransform_deSerializeFloat_mbt_3c32781124460d6b(btTransform *_swig_
 }
 
 
-void _wrap_delete_btTransform_mbt_3c32781124460d6b(btTransform *_swig_go_0) {
+void _wrap_delete_btTransform_mbt_220ac3041cacbc73(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   
   arg1 = *(btTransform **)&_swig_go_0; 
@@ -17237,7 +19973,7 @@ void _wrap_delete_btTransform_mbt_3c32781124460d6b(btTransform *_swig_go_0) {
 }
 
 
-void _wrap_btTransformFloatData_m_basis_set_mbt_3c32781124460d6b(btTransformFloatData *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+void _wrap_btTransformFloatData_m_basis_set_mbt_220ac3041cacbc73(btTransformFloatData *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
   btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
   btMatrix3x3FloatData *arg2 = (btMatrix3x3FloatData *) 0 ;
   
@@ -17249,7 +19985,7 @@ void _wrap_btTransformFloatData_m_basis_set_mbt_3c32781124460d6b(btTransformFloa
 }
 
 
-btMatrix3x3FloatData *_wrap_btTransformFloatData_m_basis_get_mbt_3c32781124460d6b(btTransformFloatData *_swig_go_0) {
+btMatrix3x3FloatData *_wrap_btTransformFloatData_m_basis_get_mbt_220ac3041cacbc73(btTransformFloatData *_swig_go_0) {
   btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
   btMatrix3x3FloatData *result = 0 ;
   btMatrix3x3FloatData *_swig_go_result;
@@ -17262,7 +19998,7 @@ btMatrix3x3FloatData *_wrap_btTransformFloatData_m_basis_get_mbt_3c32781124460d6
 }
 
 
-void _wrap_btTransformFloatData_m_origin_set_mbt_3c32781124460d6b(btTransformFloatData *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btTransformFloatData_m_origin_set_mbt_220ac3041cacbc73(btTransformFloatData *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
   btVector3FloatData *arg2 = (btVector3FloatData *) 0 ;
   
@@ -17274,7 +20010,7 @@ void _wrap_btTransformFloatData_m_origin_set_mbt_3c32781124460d6b(btTransformFlo
 }
 
 
-btVector3FloatData *_wrap_btTransformFloatData_m_origin_get_mbt_3c32781124460d6b(btTransformFloatData *_swig_go_0) {
+btVector3FloatData *_wrap_btTransformFloatData_m_origin_get_mbt_220ac3041cacbc73(btTransformFloatData *_swig_go_0) {
   btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
   btVector3FloatData *result = 0 ;
   btVector3FloatData *_swig_go_result;
@@ -17287,7 +20023,7 @@ btVector3FloatData *_wrap_btTransformFloatData_m_origin_get_mbt_3c32781124460d6b
 }
 
 
-btTransformFloatData *_wrap_new_btTransformFloatData_mbt_3c32781124460d6b() {
+btTransformFloatData *_wrap_new_btTransformFloatData_mbt_220ac3041cacbc73() {
   btTransformFloatData *result = 0 ;
   btTransformFloatData *_swig_go_result;
   
@@ -17298,7 +20034,7 @@ btTransformFloatData *_wrap_new_btTransformFloatData_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_btTransformFloatData_mbt_3c32781124460d6b(btTransformFloatData *_swig_go_0) {
+void _wrap_delete_btTransformFloatData_mbt_220ac3041cacbc73(btTransformFloatData *_swig_go_0) {
   btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
   
   arg1 = *(btTransformFloatData **)&_swig_go_0; 
@@ -17308,7 +20044,7 @@ void _wrap_delete_btTransformFloatData_mbt_3c32781124460d6b(btTransformFloatData
 }
 
 
-void _wrap_btTransformDoubleData_m_basis_set_mbt_3c32781124460d6b(btTransformDoubleData *_swig_go_0, btMatrix3x3DoubleData *_swig_go_1) {
+void _wrap_btTransformDoubleData_m_basis_set_mbt_220ac3041cacbc73(btTransformDoubleData *_swig_go_0, btMatrix3x3DoubleData *_swig_go_1) {
   btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
   btMatrix3x3DoubleData *arg2 = (btMatrix3x3DoubleData *) 0 ;
   
@@ -17320,7 +20056,7 @@ void _wrap_btTransformDoubleData_m_basis_set_mbt_3c32781124460d6b(btTransformDou
 }
 
 
-btMatrix3x3DoubleData *_wrap_btTransformDoubleData_m_basis_get_mbt_3c32781124460d6b(btTransformDoubleData *_swig_go_0) {
+btMatrix3x3DoubleData *_wrap_btTransformDoubleData_m_basis_get_mbt_220ac3041cacbc73(btTransformDoubleData *_swig_go_0) {
   btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
   btMatrix3x3DoubleData *result = 0 ;
   btMatrix3x3DoubleData *_swig_go_result;
@@ -17333,7 +20069,7 @@ btMatrix3x3DoubleData *_wrap_btTransformDoubleData_m_basis_get_mbt_3c32781124460
 }
 
 
-void _wrap_btTransformDoubleData_m_origin_set_mbt_3c32781124460d6b(btTransformDoubleData *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btTransformDoubleData_m_origin_set_mbt_220ac3041cacbc73(btTransformDoubleData *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
   btVector3DoubleData *arg2 = (btVector3DoubleData *) 0 ;
   
@@ -17345,7 +20081,7 @@ void _wrap_btTransformDoubleData_m_origin_set_mbt_3c32781124460d6b(btTransformDo
 }
 
 
-btVector3DoubleData *_wrap_btTransformDoubleData_m_origin_get_mbt_3c32781124460d6b(btTransformDoubleData *_swig_go_0) {
+btVector3DoubleData *_wrap_btTransformDoubleData_m_origin_get_mbt_220ac3041cacbc73(btTransformDoubleData *_swig_go_0) {
   btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
   btVector3DoubleData *result = 0 ;
   btVector3DoubleData *_swig_go_result;
@@ -17358,7 +20094,7 @@ btVector3DoubleData *_wrap_btTransformDoubleData_m_origin_get_mbt_3c32781124460d
 }
 
 
-btTransformDoubleData *_wrap_new_btTransformDoubleData_mbt_3c32781124460d6b() {
+btTransformDoubleData *_wrap_new_btTransformDoubleData_mbt_220ac3041cacbc73() {
   btTransformDoubleData *result = 0 ;
   btTransformDoubleData *_swig_go_result;
   
@@ -17369,7 +20105,7 @@ btTransformDoubleData *_wrap_new_btTransformDoubleData_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_btTransformDoubleData_mbt_3c32781124460d6b(btTransformDoubleData *_swig_go_0) {
+void _wrap_delete_btTransformDoubleData_mbt_220ac3041cacbc73(btTransformDoubleData *_swig_go_0) {
   btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
   
   arg1 = *(btTransformDoubleData **)&_swig_go_0; 
@@ -17379,7 +20115,7 @@ void _wrap_delete_btTransformDoubleData_mbt_3c32781124460d6b(btTransformDoubleDa
 }
 
 
-void _wrap_delete_btMotionState_mbt_3c32781124460d6b(btMotionState *_swig_go_0) {
+void _wrap_delete_btMotionState_mbt_220ac3041cacbc73(btMotionState *_swig_go_0) {
   btMotionState *arg1 = (btMotionState *) 0 ;
   
   arg1 = *(btMotionState **)&_swig_go_0; 
@@ -17389,7 +20125,7 @@ void _wrap_delete_btMotionState_mbt_3c32781124460d6b(btMotionState *_swig_go_0) 
 }
 
 
-void _wrap_btMotionState_getWorldTransform_mbt_3c32781124460d6b(btMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btMotionState_getWorldTransform_mbt_220ac3041cacbc73(btMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btMotionState *arg1 = (btMotionState *) 0 ;
   btTransform *arg2 = 0 ;
   
@@ -17401,7 +20137,7 @@ void _wrap_btMotionState_getWorldTransform_mbt_3c32781124460d6b(btMotionState *_
 }
 
 
-void _wrap_btMotionState_setWorldTransform_mbt_3c32781124460d6b(btMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btMotionState_setWorldTransform_mbt_220ac3041cacbc73(btMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btMotionState *arg1 = (btMotionState *) 0 ;
   btTransform *arg2 = 0 ;
   
@@ -17413,7 +20149,7 @@ void _wrap_btMotionState_setWorldTransform_mbt_3c32781124460d6b(btMotionState *_
 }
 
 
-void _wrap_btDefaultMotionState_m_graphicsWorldTrans_set_mbt_3c32781124460d6b(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btDefaultMotionState_m_graphicsWorldTrans_set_mbt_220ac3041cacbc73(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *arg2 = (btTransform *) 0 ;
   
@@ -17425,7 +20161,7 @@ void _wrap_btDefaultMotionState_m_graphicsWorldTrans_set_mbt_3c32781124460d6b(bt
 }
 
 
-btTransform *_wrap_btDefaultMotionState_m_graphicsWorldTrans_get_mbt_3c32781124460d6b(btDefaultMotionState *_swig_go_0) {
+btTransform *_wrap_btDefaultMotionState_m_graphicsWorldTrans_get_mbt_220ac3041cacbc73(btDefaultMotionState *_swig_go_0) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
@@ -17438,7 +20174,7 @@ btTransform *_wrap_btDefaultMotionState_m_graphicsWorldTrans_get_mbt_3c327811244
 }
 
 
-void _wrap_btDefaultMotionState_m_centerOfMassOffset_set_mbt_3c32781124460d6b(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btDefaultMotionState_m_centerOfMassOffset_set_mbt_220ac3041cacbc73(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *arg2 = (btTransform *) 0 ;
   
@@ -17450,7 +20186,7 @@ void _wrap_btDefaultMotionState_m_centerOfMassOffset_set_mbt_3c32781124460d6b(bt
 }
 
 
-btTransform *_wrap_btDefaultMotionState_m_centerOfMassOffset_get_mbt_3c32781124460d6b(btDefaultMotionState *_swig_go_0) {
+btTransform *_wrap_btDefaultMotionState_m_centerOfMassOffset_get_mbt_220ac3041cacbc73(btDefaultMotionState *_swig_go_0) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
@@ -17463,7 +20199,7 @@ btTransform *_wrap_btDefaultMotionState_m_centerOfMassOffset_get_mbt_3c327811244
 }
 
 
-void _wrap_btDefaultMotionState_m_startWorldTrans_set_mbt_3c32781124460d6b(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btDefaultMotionState_m_startWorldTrans_set_mbt_220ac3041cacbc73(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *arg2 = (btTransform *) 0 ;
   
@@ -17475,7 +20211,7 @@ void _wrap_btDefaultMotionState_m_startWorldTrans_set_mbt_3c32781124460d6b(btDef
 }
 
 
-btTransform *_wrap_btDefaultMotionState_m_startWorldTrans_get_mbt_3c32781124460d6b(btDefaultMotionState *_swig_go_0) {
+btTransform *_wrap_btDefaultMotionState_m_startWorldTrans_get_mbt_220ac3041cacbc73(btDefaultMotionState *_swig_go_0) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
@@ -17488,7 +20224,7 @@ btTransform *_wrap_btDefaultMotionState_m_startWorldTrans_get_mbt_3c32781124460d
 }
 
 
-void _wrap_btDefaultMotionState_m_userPointer_set_mbt_3c32781124460d6b(btDefaultMotionState *_swig_go_0, void *_swig_go_1) {
+void _wrap_btDefaultMotionState_m_userPointer_set_mbt_220ac3041cacbc73(btDefaultMotionState *_swig_go_0, void *_swig_go_1) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   void *arg2 = (void *) 0 ;
   
@@ -17500,7 +20236,7 @@ void _wrap_btDefaultMotionState_m_userPointer_set_mbt_3c32781124460d6b(btDefault
 }
 
 
-void *_wrap_btDefaultMotionState_m_userPointer_get_mbt_3c32781124460d6b(btDefaultMotionState *_swig_go_0) {
+void *_wrap_btDefaultMotionState_m_userPointer_get_mbt_220ac3041cacbc73(btDefaultMotionState *_swig_go_0) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   void *result = 0 ;
   void *_swig_go_result;
@@ -17513,7 +20249,7 @@ void *_wrap_btDefaultMotionState_m_userPointer_get_mbt_3c32781124460d6b(btDefaul
 }
 
 
-btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_0_mbt_3c32781124460d6b(btTransform *_swig_go_0, btTransform *_swig_go_1) {
+btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_0_mbt_220ac3041cacbc73(btTransform *_swig_go_0, btTransform *_swig_go_1) {
   btTransform *arg1 = 0 ;
   btTransform *arg2 = 0 ;
   btDefaultMotionState *result = 0 ;
@@ -17528,7 +20264,7 @@ btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_0_mbt_3c32781124460d6
 }
 
 
-btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_1_mbt_3c32781124460d6b(btTransform *_swig_go_0) {
+btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_1_mbt_220ac3041cacbc73(btTransform *_swig_go_0) {
   btTransform *arg1 = 0 ;
   btDefaultMotionState *result = 0 ;
   btDefaultMotionState *_swig_go_result;
@@ -17541,7 +20277,7 @@ btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_1_mbt_3c32781124460d6
 }
 
 
-btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_2_mbt_3c32781124460d6b() {
+btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_2_mbt_220ac3041cacbc73() {
   btDefaultMotionState *result = 0 ;
   btDefaultMotionState *_swig_go_result;
   
@@ -17552,7 +20288,7 @@ btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_2_mbt_3c32781124460d6
 }
 
 
-void _wrap_btDefaultMotionState_getWorldTransform_mbt_3c32781124460d6b(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btDefaultMotionState_getWorldTransform_mbt_220ac3041cacbc73(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *arg2 = 0 ;
   
@@ -17564,7 +20300,7 @@ void _wrap_btDefaultMotionState_getWorldTransform_mbt_3c32781124460d6b(btDefault
 }
 
 
-void _wrap_btDefaultMotionState_setWorldTransform_mbt_3c32781124460d6b(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btDefaultMotionState_setWorldTransform_mbt_220ac3041cacbc73(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *arg2 = 0 ;
   
@@ -17576,7 +20312,7 @@ void _wrap_btDefaultMotionState_setWorldTransform_mbt_3c32781124460d6b(btDefault
 }
 
 
-void _wrap_delete_btDefaultMotionState_mbt_3c32781124460d6b(btDefaultMotionState *_swig_go_0) {
+void _wrap_delete_btDefaultMotionState_mbt_220ac3041cacbc73(btDefaultMotionState *_swig_go_0) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   
   arg1 = *(btDefaultMotionState **)&_swig_go_0; 
@@ -17586,7 +20322,7 @@ void _wrap_delete_btDefaultMotionState_mbt_3c32781124460d6b(btDefaultMotionState
 }
 
 
-void _wrap_btHashString_m_string1_set_mbt_3c32781124460d6b(btHashString *_swig_go_0, std::string *_swig_go_1) {
+void _wrap_btHashString_m_string1_set_mbt_220ac3041cacbc73(btHashString *_swig_go_0, std::string *_swig_go_1) {
   btHashString *arg1 = (btHashString *) 0 ;
   std::string arg2 ;
   std::string *argp2 ;
@@ -17605,7 +20341,7 @@ void _wrap_btHashString_m_string1_set_mbt_3c32781124460d6b(btHashString *_swig_g
 }
 
 
-std::string *_wrap_btHashString_m_string1_get_mbt_3c32781124460d6b(btHashString *_swig_go_0) {
+std::string *_wrap_btHashString_m_string1_get_mbt_220ac3041cacbc73(btHashString *_swig_go_0) {
   btHashString *arg1 = (btHashString *) 0 ;
   std::string result;
   std::string *_swig_go_result;
@@ -17618,7 +20354,7 @@ std::string *_wrap_btHashString_m_string1_get_mbt_3c32781124460d6b(btHashString 
 }
 
 
-void _wrap_btHashString_m_hash_set_mbt_3c32781124460d6b(btHashString *_swig_go_0, intgo _swig_go_1) {
+void _wrap_btHashString_m_hash_set_mbt_220ac3041cacbc73(btHashString *_swig_go_0, intgo _swig_go_1) {
   btHashString *arg1 = (btHashString *) 0 ;
   unsigned int arg2 ;
   
@@ -17630,7 +20366,7 @@ void _wrap_btHashString_m_hash_set_mbt_3c32781124460d6b(btHashString *_swig_go_0
 }
 
 
-intgo _wrap_btHashString_m_hash_get_mbt_3c32781124460d6b(btHashString *_swig_go_0) {
+intgo _wrap_btHashString_m_hash_get_mbt_220ac3041cacbc73(btHashString *_swig_go_0) {
   btHashString *arg1 = (btHashString *) 0 ;
   unsigned int result;
   intgo _swig_go_result;
@@ -17643,7 +20379,7 @@ intgo _wrap_btHashString_m_hash_get_mbt_3c32781124460d6b(btHashString *_swig_go_
 }
 
 
-intgo _wrap_btHashString_getHash_mbt_3c32781124460d6b(btHashString *_swig_go_0) {
+intgo _wrap_btHashString_getHash_mbt_220ac3041cacbc73(btHashString *_swig_go_0) {
   btHashString *arg1 = (btHashString *) 0 ;
   unsigned int result;
   intgo _swig_go_result;
@@ -17656,7 +20392,7 @@ intgo _wrap_btHashString_getHash_mbt_3c32781124460d6b(btHashString *_swig_go_0) 
 }
 
 
-btHashString *_wrap_new_btHashString__SWIG_0_mbt_3c32781124460d6b() {
+btHashString *_wrap_new_btHashString__SWIG_0_mbt_220ac3041cacbc73() {
   btHashString *result = 0 ;
   btHashString *_swig_go_result;
   
@@ -17667,7 +20403,7 @@ btHashString *_wrap_new_btHashString__SWIG_0_mbt_3c32781124460d6b() {
 }
 
 
-btHashString *_wrap_new_btHashString__SWIG_1_mbt_3c32781124460d6b(_gostring_ _swig_go_0) {
+btHashString *_wrap_new_btHashString__SWIG_1_mbt_220ac3041cacbc73(_gostring_ _swig_go_0) {
   char *arg1 = (char *) 0 ;
   btHashString *result = 0 ;
   btHashString *_swig_go_result;
@@ -17685,7 +20421,7 @@ btHashString *_wrap_new_btHashString__SWIG_1_mbt_3c32781124460d6b(_gostring_ _sw
 }
 
 
-bool _wrap_btHashString_equals_mbt_3c32781124460d6b(btHashString *_swig_go_0, btHashString *_swig_go_1) {
+bool _wrap_btHashString_equals_mbt_220ac3041cacbc73(btHashString *_swig_go_0, btHashString *_swig_go_1) {
   btHashString *arg1 = (btHashString *) 0 ;
   btHashString *arg2 = 0 ;
   bool result;
@@ -17700,7 +20436,7 @@ bool _wrap_btHashString_equals_mbt_3c32781124460d6b(btHashString *_swig_go_0, bt
 }
 
 
-void _wrap_delete_btHashString_mbt_3c32781124460d6b(btHashString *_swig_go_0) {
+void _wrap_delete_btHashString_mbt_220ac3041cacbc73(btHashString *_swig_go_0) {
   btHashString *arg1 = (btHashString *) 0 ;
   
   arg1 = *(btHashString **)&_swig_go_0; 
@@ -17710,7 +20446,7 @@ void _wrap_delete_btHashString_mbt_3c32781124460d6b(btHashString *_swig_go_0) {
 }
 
 
-intgo _wrap_BT_HASH_NULL_get_mbt_3c32781124460d6b() {
+intgo _wrap_BT_HASH_NULL_get_mbt_220ac3041cacbc73() {
   int result;
   intgo _swig_go_result;
   
@@ -17721,7 +20457,7 @@ intgo _wrap_BT_HASH_NULL_get_mbt_3c32781124460d6b() {
 }
 
 
-btHashInt *_wrap_new_btHashInt__SWIG_0_mbt_3c32781124460d6b() {
+btHashInt *_wrap_new_btHashInt__SWIG_0_mbt_220ac3041cacbc73() {
   btHashInt *result = 0 ;
   btHashInt *_swig_go_result;
   
@@ -17732,7 +20468,7 @@ btHashInt *_wrap_new_btHashInt__SWIG_0_mbt_3c32781124460d6b() {
 }
 
 
-btHashInt *_wrap_new_btHashInt__SWIG_1_mbt_3c32781124460d6b(intgo _swig_go_0) {
+btHashInt *_wrap_new_btHashInt__SWIG_1_mbt_220ac3041cacbc73(intgo _swig_go_0) {
   int arg1 ;
   btHashInt *result = 0 ;
   btHashInt *_swig_go_result;
@@ -17745,7 +20481,7 @@ btHashInt *_wrap_new_btHashInt__SWIG_1_mbt_3c32781124460d6b(intgo _swig_go_0) {
 }
 
 
-intgo _wrap_btHashInt_getUid1_mbt_3c32781124460d6b(btHashInt *_swig_go_0) {
+intgo _wrap_btHashInt_getUid1_mbt_220ac3041cacbc73(btHashInt *_swig_go_0) {
   btHashInt *arg1 = (btHashInt *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -17758,7 +20494,7 @@ intgo _wrap_btHashInt_getUid1_mbt_3c32781124460d6b(btHashInt *_swig_go_0) {
 }
 
 
-void _wrap_btHashInt_setUid1_mbt_3c32781124460d6b(btHashInt *_swig_go_0, intgo _swig_go_1) {
+void _wrap_btHashInt_setUid1_mbt_220ac3041cacbc73(btHashInt *_swig_go_0, intgo _swig_go_1) {
   btHashInt *arg1 = (btHashInt *) 0 ;
   int arg2 ;
   
@@ -17770,7 +20506,7 @@ void _wrap_btHashInt_setUid1_mbt_3c32781124460d6b(btHashInt *_swig_go_0, intgo _
 }
 
 
-bool _wrap_btHashInt_equals_mbt_3c32781124460d6b(btHashInt *_swig_go_0, btHashInt *_swig_go_1) {
+bool _wrap_btHashInt_equals_mbt_220ac3041cacbc73(btHashInt *_swig_go_0, btHashInt *_swig_go_1) {
   btHashInt *arg1 = (btHashInt *) 0 ;
   btHashInt *arg2 = 0 ;
   bool result;
@@ -17785,7 +20521,7 @@ bool _wrap_btHashInt_equals_mbt_3c32781124460d6b(btHashInt *_swig_go_0, btHashIn
 }
 
 
-intgo _wrap_btHashInt_getHash_mbt_3c32781124460d6b(btHashInt *_swig_go_0) {
+intgo _wrap_btHashInt_getHash_mbt_220ac3041cacbc73(btHashInt *_swig_go_0) {
   btHashInt *arg1 = (btHashInt *) 0 ;
   unsigned int result;
   intgo _swig_go_result;
@@ -17798,7 +20534,7 @@ intgo _wrap_btHashInt_getHash_mbt_3c32781124460d6b(btHashInt *_swig_go_0) {
 }
 
 
-void _wrap_delete_btHashInt_mbt_3c32781124460d6b(btHashInt *_swig_go_0) {
+void _wrap_delete_btHashInt_mbt_220ac3041cacbc73(btHashInt *_swig_go_0) {
   btHashInt *arg1 = (btHashInt *) 0 ;
   
   arg1 = *(btHashInt **)&_swig_go_0; 
@@ -17808,7 +20544,7 @@ void _wrap_delete_btHashInt_mbt_3c32781124460d6b(btHashInt *_swig_go_0) {
 }
 
 
-btHashPtr *_wrap_new_btHashPtr__SWIG_0_mbt_3c32781124460d6b() {
+btHashPtr *_wrap_new_btHashPtr__SWIG_0_mbt_220ac3041cacbc73() {
   btHashPtr *result = 0 ;
   btHashPtr *_swig_go_result;
   
@@ -17819,7 +20555,7 @@ btHashPtr *_wrap_new_btHashPtr__SWIG_0_mbt_3c32781124460d6b() {
 }
 
 
-btHashPtr *_wrap_new_btHashPtr__SWIG_1_mbt_3c32781124460d6b(void *_swig_go_0) {
+btHashPtr *_wrap_new_btHashPtr__SWIG_1_mbt_220ac3041cacbc73(void *_swig_go_0) {
   void *arg1 = (void *) 0 ;
   btHashPtr *result = 0 ;
   btHashPtr *_swig_go_result;
@@ -17832,7 +20568,7 @@ btHashPtr *_wrap_new_btHashPtr__SWIG_1_mbt_3c32781124460d6b(void *_swig_go_0) {
 }
 
 
-void *_wrap_btHashPtr_getPointer_mbt_3c32781124460d6b(btHashPtr *_swig_go_0) {
+void *_wrap_btHashPtr_getPointer_mbt_220ac3041cacbc73(btHashPtr *_swig_go_0) {
   btHashPtr *arg1 = (btHashPtr *) 0 ;
   void *result = 0 ;
   void *_swig_go_result;
@@ -17845,7 +20581,7 @@ void *_wrap_btHashPtr_getPointer_mbt_3c32781124460d6b(btHashPtr *_swig_go_0) {
 }
 
 
-bool _wrap_btHashPtr_equals_mbt_3c32781124460d6b(btHashPtr *_swig_go_0, btHashPtr *_swig_go_1) {
+bool _wrap_btHashPtr_equals_mbt_220ac3041cacbc73(btHashPtr *_swig_go_0, btHashPtr *_swig_go_1) {
   btHashPtr *arg1 = (btHashPtr *) 0 ;
   btHashPtr *arg2 = 0 ;
   bool result;
@@ -17860,7 +20596,7 @@ bool _wrap_btHashPtr_equals_mbt_3c32781124460d6b(btHashPtr *_swig_go_0, btHashPt
 }
 
 
-intgo _wrap_btHashPtr_getHash_mbt_3c32781124460d6b(btHashPtr *_swig_go_0) {
+intgo _wrap_btHashPtr_getHash_mbt_220ac3041cacbc73(btHashPtr *_swig_go_0) {
   btHashPtr *arg1 = (btHashPtr *) 0 ;
   unsigned int result;
   intgo _swig_go_result;
@@ -17873,7 +20609,7 @@ intgo _wrap_btHashPtr_getHash_mbt_3c32781124460d6b(btHashPtr *_swig_go_0) {
 }
 
 
-void _wrap_delete_btHashPtr_mbt_3c32781124460d6b(btHashPtr *_swig_go_0) {
+void _wrap_delete_btHashPtr_mbt_220ac3041cacbc73(btHashPtr *_swig_go_0) {
   btHashPtr *arg1 = (btHashPtr *) 0 ;
   
   arg1 = *(btHashPtr **)&_swig_go_0; 
@@ -17883,7 +20619,7 @@ void _wrap_delete_btHashPtr_mbt_3c32781124460d6b(btHashPtr *_swig_go_0) {
 }
 
 
-void _wrap_sBulletDNAstr_set_mbt_3c32781124460d6b(_gostring_ _swig_go_0) {
+void _wrap_sBulletDNAstr_set_mbt_220ac3041cacbc73(_gostring_ _swig_go_0) {
   char *arg1 = (char *) (char *)0 ;
   
   
@@ -17901,7 +20637,7 @@ void _wrap_sBulletDNAstr_set_mbt_3c32781124460d6b(_gostring_ _swig_go_0) {
 }
 
 
-_gostring_ _wrap_sBulletDNAstr_get_mbt_3c32781124460d6b() {
+_gostring_ _wrap_sBulletDNAstr_get_mbt_220ac3041cacbc73() {
   char *result = 0 ;
   _gostring_ _swig_go_result;
   
@@ -17912,7 +20648,7 @@ _gostring_ _wrap_sBulletDNAstr_get_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_sBulletDNAlen_set_mbt_3c32781124460d6b(intgo _swig_go_0) {
+void _wrap_sBulletDNAlen_set_mbt_220ac3041cacbc73(intgo _swig_go_0) {
   int arg1 ;
   
   arg1 = (int)_swig_go_0; 
@@ -17922,7 +20658,7 @@ void _wrap_sBulletDNAlen_set_mbt_3c32781124460d6b(intgo _swig_go_0) {
 }
 
 
-intgo _wrap_sBulletDNAlen_get_mbt_3c32781124460d6b() {
+intgo _wrap_sBulletDNAlen_get_mbt_220ac3041cacbc73() {
   int result;
   intgo _swig_go_result;
   
@@ -17933,7 +20669,7 @@ intgo _wrap_sBulletDNAlen_get_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_sBulletDNAstr64_set_mbt_3c32781124460d6b(_gostring_ _swig_go_0) {
+void _wrap_sBulletDNAstr64_set_mbt_220ac3041cacbc73(_gostring_ _swig_go_0) {
   char *arg1 = (char *) (char *)0 ;
   
   
@@ -17951,7 +20687,7 @@ void _wrap_sBulletDNAstr64_set_mbt_3c32781124460d6b(_gostring_ _swig_go_0) {
 }
 
 
-_gostring_ _wrap_sBulletDNAstr64_get_mbt_3c32781124460d6b() {
+_gostring_ _wrap_sBulletDNAstr64_get_mbt_220ac3041cacbc73() {
   char *result = 0 ;
   _gostring_ _swig_go_result;
   
@@ -17962,7 +20698,7 @@ _gostring_ _wrap_sBulletDNAstr64_get_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_sBulletDNAlen64_set_mbt_3c32781124460d6b(intgo _swig_go_0) {
+void _wrap_sBulletDNAlen64_set_mbt_220ac3041cacbc73(intgo _swig_go_0) {
   int arg1 ;
   
   arg1 = (int)_swig_go_0; 
@@ -17972,7 +20708,7 @@ void _wrap_sBulletDNAlen64_set_mbt_3c32781124460d6b(intgo _swig_go_0) {
 }
 
 
-intgo _wrap_sBulletDNAlen64_get_mbt_3c32781124460d6b() {
+intgo _wrap_sBulletDNAlen64_get_mbt_220ac3041cacbc73() {
   int result;
   intgo _swig_go_result;
   
@@ -17983,7 +20719,7 @@ intgo _wrap_sBulletDNAlen64_get_mbt_3c32781124460d6b() {
 }
 
 
-intgo _wrap_btStrLen_mbt_3c32781124460d6b(_gostring_ _swig_go_0) {
+intgo _wrap_btStrLen_mbt_220ac3041cacbc73(_gostring_ _swig_go_0) {
   char *arg1 = (char *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -18001,7 +20737,7 @@ intgo _wrap_btStrLen_mbt_3c32781124460d6b(_gostring_ _swig_go_0) {
 }
 
 
-void _wrap_btChunk_m_chunkCode_set_mbt_3c32781124460d6b(btChunk *_swig_go_0, intgo _swig_go_1) {
+void _wrap_btChunk_m_chunkCode_set_mbt_220ac3041cacbc73(btChunk *_swig_go_0, intgo _swig_go_1) {
   btChunk *arg1 = (btChunk *) 0 ;
   int arg2 ;
   
@@ -18013,7 +20749,7 @@ void _wrap_btChunk_m_chunkCode_set_mbt_3c32781124460d6b(btChunk *_swig_go_0, int
 }
 
 
-intgo _wrap_btChunk_m_chunkCode_get_mbt_3c32781124460d6b(btChunk *_swig_go_0) {
+intgo _wrap_btChunk_m_chunkCode_get_mbt_220ac3041cacbc73(btChunk *_swig_go_0) {
   btChunk *arg1 = (btChunk *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -18026,7 +20762,7 @@ intgo _wrap_btChunk_m_chunkCode_get_mbt_3c32781124460d6b(btChunk *_swig_go_0) {
 }
 
 
-void _wrap_btChunk_m_length_set_mbt_3c32781124460d6b(btChunk *_swig_go_0, intgo _swig_go_1) {
+void _wrap_btChunk_m_length_set_mbt_220ac3041cacbc73(btChunk *_swig_go_0, intgo _swig_go_1) {
   btChunk *arg1 = (btChunk *) 0 ;
   int arg2 ;
   
@@ -18038,7 +20774,7 @@ void _wrap_btChunk_m_length_set_mbt_3c32781124460d6b(btChunk *_swig_go_0, intgo 
 }
 
 
-intgo _wrap_btChunk_m_length_get_mbt_3c32781124460d6b(btChunk *_swig_go_0) {
+intgo _wrap_btChunk_m_length_get_mbt_220ac3041cacbc73(btChunk *_swig_go_0) {
   btChunk *arg1 = (btChunk *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -18051,7 +20787,7 @@ intgo _wrap_btChunk_m_length_get_mbt_3c32781124460d6b(btChunk *_swig_go_0) {
 }
 
 
-void _wrap_btChunk_m_oldPtr_set_mbt_3c32781124460d6b(btChunk *_swig_go_0, void *_swig_go_1) {
+void _wrap_btChunk_m_oldPtr_set_mbt_220ac3041cacbc73(btChunk *_swig_go_0, void *_swig_go_1) {
   btChunk *arg1 = (btChunk *) 0 ;
   void *arg2 = (void *) 0 ;
   
@@ -18063,7 +20799,7 @@ void _wrap_btChunk_m_oldPtr_set_mbt_3c32781124460d6b(btChunk *_swig_go_0, void *
 }
 
 
-void *_wrap_btChunk_m_oldPtr_get_mbt_3c32781124460d6b(btChunk *_swig_go_0) {
+void *_wrap_btChunk_m_oldPtr_get_mbt_220ac3041cacbc73(btChunk *_swig_go_0) {
   btChunk *arg1 = (btChunk *) 0 ;
   void *result = 0 ;
   void *_swig_go_result;
@@ -18076,7 +20812,7 @@ void *_wrap_btChunk_m_oldPtr_get_mbt_3c32781124460d6b(btChunk *_swig_go_0) {
 }
 
 
-void _wrap_btChunk_m_dna_nr_set_mbt_3c32781124460d6b(btChunk *_swig_go_0, intgo _swig_go_1) {
+void _wrap_btChunk_m_dna_nr_set_mbt_220ac3041cacbc73(btChunk *_swig_go_0, intgo _swig_go_1) {
   btChunk *arg1 = (btChunk *) 0 ;
   int arg2 ;
   
@@ -18088,7 +20824,7 @@ void _wrap_btChunk_m_dna_nr_set_mbt_3c32781124460d6b(btChunk *_swig_go_0, intgo 
 }
 
 
-intgo _wrap_btChunk_m_dna_nr_get_mbt_3c32781124460d6b(btChunk *_swig_go_0) {
+intgo _wrap_btChunk_m_dna_nr_get_mbt_220ac3041cacbc73(btChunk *_swig_go_0) {
   btChunk *arg1 = (btChunk *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -18101,7 +20837,7 @@ intgo _wrap_btChunk_m_dna_nr_get_mbt_3c32781124460d6b(btChunk *_swig_go_0) {
 }
 
 
-void _wrap_btChunk_m_number_set_mbt_3c32781124460d6b(btChunk *_swig_go_0, intgo _swig_go_1) {
+void _wrap_btChunk_m_number_set_mbt_220ac3041cacbc73(btChunk *_swig_go_0, intgo _swig_go_1) {
   btChunk *arg1 = (btChunk *) 0 ;
   int arg2 ;
   
@@ -18113,7 +20849,7 @@ void _wrap_btChunk_m_number_set_mbt_3c32781124460d6b(btChunk *_swig_go_0, intgo 
 }
 
 
-intgo _wrap_btChunk_m_number_get_mbt_3c32781124460d6b(btChunk *_swig_go_0) {
+intgo _wrap_btChunk_m_number_get_mbt_220ac3041cacbc73(btChunk *_swig_go_0) {
   btChunk *arg1 = (btChunk *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -18126,7 +20862,7 @@ intgo _wrap_btChunk_m_number_get_mbt_3c32781124460d6b(btChunk *_swig_go_0) {
 }
 
 
-btChunk *_wrap_new_btChunk_mbt_3c32781124460d6b() {
+btChunk *_wrap_new_btChunk_mbt_220ac3041cacbc73() {
   btChunk *result = 0 ;
   btChunk *_swig_go_result;
   
@@ -18137,7 +20873,7 @@ btChunk *_wrap_new_btChunk_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_btChunk_mbt_3c32781124460d6b(btChunk *_swig_go_0) {
+void _wrap_delete_btChunk_mbt_220ac3041cacbc73(btChunk *_swig_go_0) {
   btChunk *arg1 = (btChunk *) 0 ;
   
   arg1 = *(btChunk **)&_swig_go_0; 
@@ -18147,7 +20883,7 @@ void _wrap_delete_btChunk_mbt_3c32781124460d6b(btChunk *_swig_go_0) {
 }
 
 
-intgo _wrap_BT_SERIALIZE_NO_BVH_mbt_3c32781124460d6b() {
+intgo _wrap_BT_SERIALIZE_NO_BVH_mbt_220ac3041cacbc73() {
   btSerializationFlags result;
   intgo _swig_go_result;
   
@@ -18159,7 +20895,7 @@ intgo _wrap_BT_SERIALIZE_NO_BVH_mbt_3c32781124460d6b() {
 }
 
 
-intgo _wrap_BT_SERIALIZE_NO_TRIANGLEINFOMAP_mbt_3c32781124460d6b() {
+intgo _wrap_BT_SERIALIZE_NO_TRIANGLEINFOMAP_mbt_220ac3041cacbc73() {
   btSerializationFlags result;
   intgo _swig_go_result;
   
@@ -18171,7 +20907,7 @@ intgo _wrap_BT_SERIALIZE_NO_TRIANGLEINFOMAP_mbt_3c32781124460d6b() {
 }
 
 
-intgo _wrap_BT_SERIALIZE_NO_DUPLICATE_ASSERT_mbt_3c32781124460d6b() {
+intgo _wrap_BT_SERIALIZE_NO_DUPLICATE_ASSERT_mbt_220ac3041cacbc73() {
   btSerializationFlags result;
   intgo _swig_go_result;
   
@@ -18183,7 +20919,7 @@ intgo _wrap_BT_SERIALIZE_NO_DUPLICATE_ASSERT_mbt_3c32781124460d6b() {
 }
 
 
-intgo _wrap_BT_SERIALIZE_CONTACT_MANIFOLDS_mbt_3c32781124460d6b() {
+intgo _wrap_BT_SERIALIZE_CONTACT_MANIFOLDS_mbt_220ac3041cacbc73() {
   btSerializationFlags result;
   intgo _swig_go_result;
   
@@ -18195,7 +20931,7 @@ intgo _wrap_BT_SERIALIZE_CONTACT_MANIFOLDS_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_btSerializer_mbt_3c32781124460d6b(btSerializer *_swig_go_0) {
+void _wrap_delete_btSerializer_mbt_220ac3041cacbc73(btSerializer *_swig_go_0) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   
   arg1 = *(btSerializer **)&_swig_go_0; 
@@ -18205,7 +20941,7 @@ void _wrap_delete_btSerializer_mbt_3c32781124460d6b(btSerializer *_swig_go_0) {
 }
 
 
-char *_wrap_btSerializer_getBufferPointer_mbt_3c32781124460d6b(btSerializer *_swig_go_0) {
+char *_wrap_btSerializer_getBufferPointer_mbt_220ac3041cacbc73(btSerializer *_swig_go_0) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   unsigned char *result = 0 ;
   char *_swig_go_result;
@@ -18218,7 +20954,7 @@ char *_wrap_btSerializer_getBufferPointer_mbt_3c32781124460d6b(btSerializer *_sw
 }
 
 
-intgo _wrap_btSerializer_getCurrentBufferSize_mbt_3c32781124460d6b(btSerializer *_swig_go_0) {
+intgo _wrap_btSerializer_getCurrentBufferSize_mbt_220ac3041cacbc73(btSerializer *_swig_go_0) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -18231,7 +20967,7 @@ intgo _wrap_btSerializer_getCurrentBufferSize_mbt_3c32781124460d6b(btSerializer 
 }
 
 
-btChunk *_wrap_btSerializer_allocate_mbt_3c32781124460d6b(btSerializer *_swig_go_0, long long _swig_go_1, intgo _swig_go_2) {
+btChunk *_wrap_btSerializer_allocate_mbt_220ac3041cacbc73(btSerializer *_swig_go_0, long long _swig_go_1, intgo _swig_go_2) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   size_t arg2 ;
   int arg3 ;
@@ -18248,7 +20984,7 @@ btChunk *_wrap_btSerializer_allocate_mbt_3c32781124460d6b(btSerializer *_swig_go
 }
 
 
-void _wrap_btSerializer_finalizeChunk_mbt_3c32781124460d6b(btSerializer *_swig_go_0, btChunk *_swig_go_1, _gostring_ _swig_go_2, intgo _swig_go_3, void *_swig_go_4) {
+void _wrap_btSerializer_finalizeChunk_mbt_220ac3041cacbc73(btSerializer *_swig_go_0, btChunk *_swig_go_1, _gostring_ _swig_go_2, intgo _swig_go_3, void *_swig_go_4) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   btChunk *arg2 = (btChunk *) 0 ;
   char *arg3 = (char *) 0 ;
@@ -18271,7 +21007,7 @@ void _wrap_btSerializer_finalizeChunk_mbt_3c32781124460d6b(btSerializer *_swig_g
 }
 
 
-void *_wrap_btSerializer_findPointer_mbt_3c32781124460d6b(btSerializer *_swig_go_0, void *_swig_go_1) {
+void *_wrap_btSerializer_findPointer_mbt_220ac3041cacbc73(btSerializer *_swig_go_0, void *_swig_go_1) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   void *arg2 = (void *) 0 ;
   void *result = 0 ;
@@ -18286,7 +21022,7 @@ void *_wrap_btSerializer_findPointer_mbt_3c32781124460d6b(btSerializer *_swig_go
 }
 
 
-void *_wrap_btSerializer_getUniquePointer_mbt_3c32781124460d6b(btSerializer *_swig_go_0, void *_swig_go_1) {
+void *_wrap_btSerializer_getUniquePointer_mbt_220ac3041cacbc73(btSerializer *_swig_go_0, void *_swig_go_1) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   void *arg2 = (void *) 0 ;
   void *result = 0 ;
@@ -18301,7 +21037,7 @@ void *_wrap_btSerializer_getUniquePointer_mbt_3c32781124460d6b(btSerializer *_sw
 }
 
 
-void _wrap_btSerializer_startSerialization_mbt_3c32781124460d6b(btSerializer *_swig_go_0) {
+void _wrap_btSerializer_startSerialization_mbt_220ac3041cacbc73(btSerializer *_swig_go_0) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   
   arg1 = *(btSerializer **)&_swig_go_0; 
@@ -18311,7 +21047,7 @@ void _wrap_btSerializer_startSerialization_mbt_3c32781124460d6b(btSerializer *_s
 }
 
 
-void _wrap_btSerializer_finishSerialization_mbt_3c32781124460d6b(btSerializer *_swig_go_0) {
+void _wrap_btSerializer_finishSerialization_mbt_220ac3041cacbc73(btSerializer *_swig_go_0) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   
   arg1 = *(btSerializer **)&_swig_go_0; 
@@ -18321,7 +21057,7 @@ void _wrap_btSerializer_finishSerialization_mbt_3c32781124460d6b(btSerializer *_
 }
 
 
-_gostring_ _wrap_btSerializer_findNameForPointer_mbt_3c32781124460d6b(btSerializer *_swig_go_0, void *_swig_go_1) {
+_gostring_ _wrap_btSerializer_findNameForPointer_mbt_220ac3041cacbc73(btSerializer *_swig_go_0, void *_swig_go_1) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   void *arg2 = (void *) 0 ;
   char *result = 0 ;
@@ -18336,7 +21072,7 @@ _gostring_ _wrap_btSerializer_findNameForPointer_mbt_3c32781124460d6b(btSerializ
 }
 
 
-void _wrap_btSerializer_registerNameForPointer_mbt_3c32781124460d6b(btSerializer *_swig_go_0, void *_swig_go_1, _gostring_ _swig_go_2) {
+void _wrap_btSerializer_registerNameForPointer_mbt_220ac3041cacbc73(btSerializer *_swig_go_0, void *_swig_go_1, _gostring_ _swig_go_2) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   void *arg2 = (void *) 0 ;
   char *arg3 = (char *) 0 ;
@@ -18355,7 +21091,7 @@ void _wrap_btSerializer_registerNameForPointer_mbt_3c32781124460d6b(btSerializer
 }
 
 
-void _wrap_btSerializer_serializeName_mbt_3c32781124460d6b(btSerializer *_swig_go_0, _gostring_ _swig_go_1) {
+void _wrap_btSerializer_serializeName_mbt_220ac3041cacbc73(btSerializer *_swig_go_0, _gostring_ _swig_go_1) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   char *arg2 = (char *) 0 ;
   
@@ -18372,7 +21108,7 @@ void _wrap_btSerializer_serializeName_mbt_3c32781124460d6b(btSerializer *_swig_g
 }
 
 
-intgo _wrap_btSerializer_getSerializationFlags_mbt_3c32781124460d6b(btSerializer *_swig_go_0) {
+intgo _wrap_btSerializer_getSerializationFlags_mbt_220ac3041cacbc73(btSerializer *_swig_go_0) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -18385,7 +21121,7 @@ intgo _wrap_btSerializer_getSerializationFlags_mbt_3c32781124460d6b(btSerializer
 }
 
 
-void _wrap_btSerializer_setSerializationFlags_mbt_3c32781124460d6b(btSerializer *_swig_go_0, intgo _swig_go_1) {
+void _wrap_btSerializer_setSerializationFlags_mbt_220ac3041cacbc73(btSerializer *_swig_go_0, intgo _swig_go_1) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   int arg2 ;
   
@@ -18397,7 +21133,7 @@ void _wrap_btSerializer_setSerializationFlags_mbt_3c32781124460d6b(btSerializer 
 }
 
 
-intgo _wrap_btSerializer_getNumChunks_mbt_3c32781124460d6b(btSerializer *_swig_go_0) {
+intgo _wrap_btSerializer_getNumChunks_mbt_220ac3041cacbc73(btSerializer *_swig_go_0) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -18410,7 +21146,7 @@ intgo _wrap_btSerializer_getNumChunks_mbt_3c32781124460d6b(btSerializer *_swig_g
 }
 
 
-btChunk *_wrap_btSerializer_getChunk_mbt_3c32781124460d6b(btSerializer *_swig_go_0, intgo _swig_go_1) {
+btChunk *_wrap_btSerializer_getChunk_mbt_220ac3041cacbc73(btSerializer *_swig_go_0, intgo _swig_go_1) {
   btSerializer *arg1 = (btSerializer *) 0 ;
   int arg2 ;
   btChunk *result = 0 ;
@@ -18425,7 +21161,7 @@ btChunk *_wrap_btSerializer_getChunk_mbt_3c32781124460d6b(btSerializer *_swig_go
 }
 
 
-btPointerUid *_wrap_new_btPointerUid_mbt_3c32781124460d6b() {
+btPointerUid *_wrap_new_btPointerUid_mbt_220ac3041cacbc73() {
   btPointerUid *result = 0 ;
   btPointerUid *_swig_go_result;
   
@@ -18436,7 +21172,7 @@ btPointerUid *_wrap_new_btPointerUid_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_btPointerUid_mbt_3c32781124460d6b(btPointerUid *_swig_go_0) {
+void _wrap_delete_btPointerUid_mbt_220ac3041cacbc73(btPointerUid *_swig_go_0) {
   btPointerUid *arg1 = (btPointerUid *) 0 ;
   
   arg1 = *(btPointerUid **)&_swig_go_0; 
@@ -18446,7 +21182,7 @@ void _wrap_delete_btPointerUid_mbt_3c32781124460d6b(btPointerUid *_swig_go_0) {
 }
 
 
-btBulletSerializedArrays *_wrap_new_btBulletSerializedArrays_mbt_3c32781124460d6b() {
+btBulletSerializedArrays *_wrap_new_btBulletSerializedArrays_mbt_220ac3041cacbc73() {
   btBulletSerializedArrays *result = 0 ;
   btBulletSerializedArrays *_swig_go_result;
   
@@ -18457,7 +21193,7 @@ btBulletSerializedArrays *_wrap_new_btBulletSerializedArrays_mbt_3c32781124460d6
 }
 
 
-void _wrap_btBulletSerializedArrays_m_bvhsDouble_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btQuantizedBvhDoubleData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_bvhsDouble_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btQuantizedBvhDoubleData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btQuantizedBvhDoubleData * > *arg2 = (btAlignedObjectArray< btQuantizedBvhDoubleData * > *) 0 ;
   
@@ -18469,7 +21205,7 @@ void _wrap_btBulletSerializedArrays_m_bvhsDouble_set_mbt_3c32781124460d6b(btBull
 }
 
 
-btAlignedObjectArray< btQuantizedBvhDoubleData * > *_wrap_btBulletSerializedArrays_m_bvhsDouble_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btQuantizedBvhDoubleData * > *_wrap_btBulletSerializedArrays_m_bvhsDouble_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btQuantizedBvhDoubleData * > *result = 0 ;
   btAlignedObjectArray< btQuantizedBvhDoubleData * > *_swig_go_result;
@@ -18482,7 +21218,7 @@ btAlignedObjectArray< btQuantizedBvhDoubleData * > *_wrap_btBulletSerializedArra
 }
 
 
-void _wrap_btBulletSerializedArrays_m_bvhsFloat_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btQuantizedBvhFloatData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_bvhsFloat_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btQuantizedBvhFloatData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btQuantizedBvhFloatData * > *arg2 = (btAlignedObjectArray< btQuantizedBvhFloatData * > *) 0 ;
   
@@ -18494,7 +21230,7 @@ void _wrap_btBulletSerializedArrays_m_bvhsFloat_set_mbt_3c32781124460d6b(btBulle
 }
 
 
-btAlignedObjectArray< btQuantizedBvhFloatData * > *_wrap_btBulletSerializedArrays_m_bvhsFloat_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btQuantizedBvhFloatData * > *_wrap_btBulletSerializedArrays_m_bvhsFloat_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btQuantizedBvhFloatData * > *result = 0 ;
   btAlignedObjectArray< btQuantizedBvhFloatData * > *_swig_go_result;
@@ -18507,7 +21243,7 @@ btAlignedObjectArray< btQuantizedBvhFloatData * > *_wrap_btBulletSerializedArray
 }
 
 
-void _wrap_btBulletSerializedArrays_m_colShapeData_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btCollisionShapeData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_colShapeData_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btCollisionShapeData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btCollisionShapeData * > *arg2 = (btAlignedObjectArray< btCollisionShapeData * > *) 0 ;
   
@@ -18519,7 +21255,7 @@ void _wrap_btBulletSerializedArrays_m_colShapeData_set_mbt_3c32781124460d6b(btBu
 }
 
 
-btAlignedObjectArray< btCollisionShapeData * > *_wrap_btBulletSerializedArrays_m_colShapeData_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btCollisionShapeData * > *_wrap_btBulletSerializedArrays_m_colShapeData_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btCollisionShapeData * > *result = 0 ;
   btAlignedObjectArray< btCollisionShapeData * > *_swig_go_result;
@@ -18532,7 +21268,7 @@ btAlignedObjectArray< btCollisionShapeData * > *_wrap_btBulletSerializedArrays_m
 }
 
 
-void _wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataDouble_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btDynamicsWorldDoubleData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataDouble_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btDynamicsWorldDoubleData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btDynamicsWorldDoubleData * > *arg2 = (btAlignedObjectArray< btDynamicsWorldDoubleData * > *) 0 ;
   
@@ -18544,7 +21280,7 @@ void _wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataDouble_set_mbt_3c32781
 }
 
 
-btAlignedObjectArray< btDynamicsWorldDoubleData * > *_wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataDouble_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btDynamicsWorldDoubleData * > *_wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataDouble_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btDynamicsWorldDoubleData * > *result = 0 ;
   btAlignedObjectArray< btDynamicsWorldDoubleData * > *_swig_go_result;
@@ -18557,7 +21293,7 @@ btAlignedObjectArray< btDynamicsWorldDoubleData * > *_wrap_btBulletSerializedArr
 }
 
 
-void _wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataFloat_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btDynamicsWorldFloatData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataFloat_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btDynamicsWorldFloatData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btDynamicsWorldFloatData * > *arg2 = (btAlignedObjectArray< btDynamicsWorldFloatData * > *) 0 ;
   
@@ -18569,7 +21305,7 @@ void _wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataFloat_set_mbt_3c327811
 }
 
 
-btAlignedObjectArray< btDynamicsWorldFloatData * > *_wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataFloat_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btDynamicsWorldFloatData * > *_wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataFloat_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btDynamicsWorldFloatData * > *result = 0 ;
   btAlignedObjectArray< btDynamicsWorldFloatData * > *_swig_go_result;
@@ -18582,7 +21318,7 @@ btAlignedObjectArray< btDynamicsWorldFloatData * > *_wrap_btBulletSerializedArra
 }
 
 
-void _wrap_btBulletSerializedArrays_m_rigidBodyDataDouble_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btRigidBodyDoubleData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_rigidBodyDataDouble_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btRigidBodyDoubleData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btRigidBodyDoubleData * > *arg2 = (btAlignedObjectArray< btRigidBodyDoubleData * > *) 0 ;
   
@@ -18594,7 +21330,7 @@ void _wrap_btBulletSerializedArrays_m_rigidBodyDataDouble_set_mbt_3c32781124460d
 }
 
 
-btAlignedObjectArray< btRigidBodyDoubleData * > *_wrap_btBulletSerializedArrays_m_rigidBodyDataDouble_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btRigidBodyDoubleData * > *_wrap_btBulletSerializedArrays_m_rigidBodyDataDouble_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btRigidBodyDoubleData * > *result = 0 ;
   btAlignedObjectArray< btRigidBodyDoubleData * > *_swig_go_result;
@@ -18607,7 +21343,7 @@ btAlignedObjectArray< btRigidBodyDoubleData * > *_wrap_btBulletSerializedArrays_
 }
 
 
-void _wrap_btBulletSerializedArrays_m_rigidBodyDataFloat_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btRigidBodyFloatData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_rigidBodyDataFloat_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btRigidBodyFloatData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btRigidBodyFloatData * > *arg2 = (btAlignedObjectArray< btRigidBodyFloatData * > *) 0 ;
   
@@ -18619,7 +21355,7 @@ void _wrap_btBulletSerializedArrays_m_rigidBodyDataFloat_set_mbt_3c32781124460d6
 }
 
 
-btAlignedObjectArray< btRigidBodyFloatData * > *_wrap_btBulletSerializedArrays_m_rigidBodyDataFloat_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btRigidBodyFloatData * > *_wrap_btBulletSerializedArrays_m_rigidBodyDataFloat_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btRigidBodyFloatData * > *result = 0 ;
   btAlignedObjectArray< btRigidBodyFloatData * > *_swig_go_result;
@@ -18632,7 +21368,7 @@ btAlignedObjectArray< btRigidBodyFloatData * > *_wrap_btBulletSerializedArrays_m
 }
 
 
-void _wrap_btBulletSerializedArrays_m_collisionObjectDataDouble_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btCollisionObjectDoubleData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_collisionObjectDataDouble_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btCollisionObjectDoubleData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btCollisionObjectDoubleData * > *arg2 = (btAlignedObjectArray< btCollisionObjectDoubleData * > *) 0 ;
   
@@ -18644,7 +21380,7 @@ void _wrap_btBulletSerializedArrays_m_collisionObjectDataDouble_set_mbt_3c327811
 }
 
 
-btAlignedObjectArray< btCollisionObjectDoubleData * > *_wrap_btBulletSerializedArrays_m_collisionObjectDataDouble_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btCollisionObjectDoubleData * > *_wrap_btBulletSerializedArrays_m_collisionObjectDataDouble_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btCollisionObjectDoubleData * > *result = 0 ;
   btAlignedObjectArray< btCollisionObjectDoubleData * > *_swig_go_result;
@@ -18657,7 +21393,7 @@ btAlignedObjectArray< btCollisionObjectDoubleData * > *_wrap_btBulletSerializedA
 }
 
 
-void _wrap_btBulletSerializedArrays_m_collisionObjectDataFloat_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btCollisionObjectFloatData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_collisionObjectDataFloat_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btCollisionObjectFloatData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btCollisionObjectFloatData * > *arg2 = (btAlignedObjectArray< btCollisionObjectFloatData * > *) 0 ;
   
@@ -18669,7 +21405,7 @@ void _wrap_btBulletSerializedArrays_m_collisionObjectDataFloat_set_mbt_3c3278112
 }
 
 
-btAlignedObjectArray< btCollisionObjectFloatData * > *_wrap_btBulletSerializedArrays_m_collisionObjectDataFloat_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btCollisionObjectFloatData * > *_wrap_btBulletSerializedArrays_m_collisionObjectDataFloat_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btCollisionObjectFloatData * > *result = 0 ;
   btAlignedObjectArray< btCollisionObjectFloatData * > *_swig_go_result;
@@ -18682,7 +21418,7 @@ btAlignedObjectArray< btCollisionObjectFloatData * > *_wrap_btBulletSerializedAr
 }
 
 
-void _wrap_btBulletSerializedArrays_m_constraintDataFloat_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btTypedConstraintFloatData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_constraintDataFloat_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btTypedConstraintFloatData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btTypedConstraintFloatData * > *arg2 = (btAlignedObjectArray< btTypedConstraintFloatData * > *) 0 ;
   
@@ -18694,7 +21430,7 @@ void _wrap_btBulletSerializedArrays_m_constraintDataFloat_set_mbt_3c32781124460d
 }
 
 
-btAlignedObjectArray< btTypedConstraintFloatData * > *_wrap_btBulletSerializedArrays_m_constraintDataFloat_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btTypedConstraintFloatData * > *_wrap_btBulletSerializedArrays_m_constraintDataFloat_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btTypedConstraintFloatData * > *result = 0 ;
   btAlignedObjectArray< btTypedConstraintFloatData * > *_swig_go_result;
@@ -18707,7 +21443,7 @@ btAlignedObjectArray< btTypedConstraintFloatData * > *_wrap_btBulletSerializedAr
 }
 
 
-void _wrap_btBulletSerializedArrays_m_constraintDataDouble_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btTypedConstraintDoubleData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_constraintDataDouble_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btTypedConstraintDoubleData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btTypedConstraintDoubleData * > *arg2 = (btAlignedObjectArray< btTypedConstraintDoubleData * > *) 0 ;
   
@@ -18719,7 +21455,7 @@ void _wrap_btBulletSerializedArrays_m_constraintDataDouble_set_mbt_3c32781124460
 }
 
 
-btAlignedObjectArray< btTypedConstraintDoubleData * > *_wrap_btBulletSerializedArrays_m_constraintDataDouble_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btTypedConstraintDoubleData * > *_wrap_btBulletSerializedArrays_m_constraintDataDouble_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btTypedConstraintDoubleData * > *result = 0 ;
   btAlignedObjectArray< btTypedConstraintDoubleData * > *_swig_go_result;
@@ -18732,7 +21468,7 @@ btAlignedObjectArray< btTypedConstraintDoubleData * > *_wrap_btBulletSerializedA
 }
 
 
-void _wrap_btBulletSerializedArrays_m_constraintData_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btTypedConstraintData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_constraintData_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btTypedConstraintData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btTypedConstraintData * > *arg2 = (btAlignedObjectArray< btTypedConstraintData * > *) 0 ;
   
@@ -18744,7 +21480,7 @@ void _wrap_btBulletSerializedArrays_m_constraintData_set_mbt_3c32781124460d6b(bt
 }
 
 
-btAlignedObjectArray< btTypedConstraintData * > *_wrap_btBulletSerializedArrays_m_constraintData_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btTypedConstraintData * > *_wrap_btBulletSerializedArrays_m_constraintData_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btTypedConstraintData * > *result = 0 ;
   btAlignedObjectArray< btTypedConstraintData * > *_swig_go_result;
@@ -18757,7 +21493,7 @@ btAlignedObjectArray< btTypedConstraintData * > *_wrap_btBulletSerializedArrays_
 }
 
 
-void _wrap_btBulletSerializedArrays_m_softBodyFloatData_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btSoftBodyFloatData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_softBodyFloatData_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btSoftBodyFloatData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btSoftBodyFloatData * > *arg2 = (btAlignedObjectArray< btSoftBodyFloatData * > *) 0 ;
   
@@ -18769,7 +21505,7 @@ void _wrap_btBulletSerializedArrays_m_softBodyFloatData_set_mbt_3c32781124460d6b
 }
 
 
-btAlignedObjectArray< btSoftBodyFloatData * > *_wrap_btBulletSerializedArrays_m_softBodyFloatData_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btSoftBodyFloatData * > *_wrap_btBulletSerializedArrays_m_softBodyFloatData_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btSoftBodyFloatData * > *result = 0 ;
   btAlignedObjectArray< btSoftBodyFloatData * > *_swig_go_result;
@@ -18782,7 +21518,7 @@ btAlignedObjectArray< btSoftBodyFloatData * > *_wrap_btBulletSerializedArrays_m_
 }
 
 
-void _wrap_btBulletSerializedArrays_m_softBodyDoubleData_set_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btSoftBodyDoubleData * > *_swig_go_1) {
+void _wrap_btBulletSerializedArrays_m_softBodyDoubleData_set_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0, btAlignedObjectArray< btSoftBodyDoubleData * > *_swig_go_1) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btSoftBodyDoubleData * > *arg2 = (btAlignedObjectArray< btSoftBodyDoubleData * > *) 0 ;
   
@@ -18794,7 +21530,7 @@ void _wrap_btBulletSerializedArrays_m_softBodyDoubleData_set_mbt_3c32781124460d6
 }
 
 
-btAlignedObjectArray< btSoftBodyDoubleData * > *_wrap_btBulletSerializedArrays_m_softBodyDoubleData_get_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+btAlignedObjectArray< btSoftBodyDoubleData * > *_wrap_btBulletSerializedArrays_m_softBodyDoubleData_get_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   btAlignedObjectArray< btSoftBodyDoubleData * > *result = 0 ;
   btAlignedObjectArray< btSoftBodyDoubleData * > *_swig_go_result;
@@ -18807,7 +21543,7 @@ btAlignedObjectArray< btSoftBodyDoubleData * > *_wrap_btBulletSerializedArrays_m
 }
 
 
-void _wrap_delete_btBulletSerializedArrays_mbt_3c32781124460d6b(btBulletSerializedArrays *_swig_go_0) {
+void _wrap_delete_btBulletSerializedArrays_mbt_220ac3041cacbc73(btBulletSerializedArrays *_swig_go_0) {
   btBulletSerializedArrays *arg1 = (btBulletSerializedArrays *) 0 ;
   
   arg1 = *(btBulletSerializedArrays **)&_swig_go_0; 
@@ -18817,7 +21553,7 @@ void _wrap_delete_btBulletSerializedArrays_mbt_3c32781124460d6b(btBulletSerializ
 }
 
 
-void _wrap_btDefaultSerializer_m_skipPointers_set_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0, btHashMap< btHashPtr,void * > *_swig_go_1) {
+void _wrap_btDefaultSerializer_m_skipPointers_set_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0, btHashMap< btHashPtr,void * > *_swig_go_1) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   btHashMap< btHashPtr,void * > *arg2 = (btHashMap< btHashPtr,void * > *) 0 ;
   
@@ -18829,7 +21565,7 @@ void _wrap_btDefaultSerializer_m_skipPointers_set_mbt_3c32781124460d6b(btDefault
 }
 
 
-btHashMap< btHashPtr,void * > *_wrap_btDefaultSerializer_m_skipPointers_get_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0) {
+btHashMap< btHashPtr,void * > *_wrap_btDefaultSerializer_m_skipPointers_get_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   btHashMap< btHashPtr,void * > *result = 0 ;
   btHashMap< btHashPtr,void * > *_swig_go_result;
@@ -18842,7 +21578,7 @@ btHashMap< btHashPtr,void * > *_wrap_btDefaultSerializer_m_skipPointers_get_mbt_
 }
 
 
-btDefaultSerializer *_wrap_new_btDefaultSerializer__SWIG_0_mbt_3c32781124460d6b(intgo _swig_go_0, char *_swig_go_1) {
+btDefaultSerializer *_wrap_new_btDefaultSerializer__SWIG_0_mbt_220ac3041cacbc73(intgo _swig_go_0, char *_swig_go_1) {
   int arg1 ;
   unsigned char *arg2 = (unsigned char *) 0 ;
   btDefaultSerializer *result = 0 ;
@@ -18857,7 +21593,7 @@ btDefaultSerializer *_wrap_new_btDefaultSerializer__SWIG_0_mbt_3c32781124460d6b(
 }
 
 
-btDefaultSerializer *_wrap_new_btDefaultSerializer__SWIG_1_mbt_3c32781124460d6b(intgo _swig_go_0) {
+btDefaultSerializer *_wrap_new_btDefaultSerializer__SWIG_1_mbt_220ac3041cacbc73(intgo _swig_go_0) {
   int arg1 ;
   btDefaultSerializer *result = 0 ;
   btDefaultSerializer *_swig_go_result;
@@ -18870,7 +21606,7 @@ btDefaultSerializer *_wrap_new_btDefaultSerializer__SWIG_1_mbt_3c32781124460d6b(
 }
 
 
-btDefaultSerializer *_wrap_new_btDefaultSerializer__SWIG_2_mbt_3c32781124460d6b() {
+btDefaultSerializer *_wrap_new_btDefaultSerializer__SWIG_2_mbt_220ac3041cacbc73() {
   btDefaultSerializer *result = 0 ;
   btDefaultSerializer *_swig_go_result;
   
@@ -18881,7 +21617,7 @@ btDefaultSerializer *_wrap_new_btDefaultSerializer__SWIG_2_mbt_3c32781124460d6b(
 }
 
 
-void _wrap_delete_btDefaultSerializer_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0) {
+void _wrap_delete_btDefaultSerializer_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   
   arg1 = *(btDefaultSerializer **)&_swig_go_0; 
@@ -18891,7 +21627,7 @@ void _wrap_delete_btDefaultSerializer_mbt_3c32781124460d6b(btDefaultSerializer *
 }
 
 
-intgo _wrap_btDefaultSerializer_getMemoryDnaSizeInBytes_mbt_3c32781124460d6b() {
+intgo _wrap_btDefaultSerializer_getMemoryDnaSizeInBytes_mbt_220ac3041cacbc73() {
   int result;
   intgo _swig_go_result;
   
@@ -18902,7 +21638,7 @@ intgo _wrap_btDefaultSerializer_getMemoryDnaSizeInBytes_mbt_3c32781124460d6b() {
 }
 
 
-_gostring_ _wrap_btDefaultSerializer_getMemoryDna_mbt_3c32781124460d6b() {
+_gostring_ _wrap_btDefaultSerializer_getMemoryDna_mbt_220ac3041cacbc73() {
   char *result = 0 ;
   _gostring_ _swig_go_result;
   
@@ -18913,7 +21649,7 @@ _gostring_ _wrap_btDefaultSerializer_getMemoryDna_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_btDefaultSerializer_insertHeader_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0) {
+void _wrap_btDefaultSerializer_insertHeader_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   
   arg1 = *(btDefaultSerializer **)&_swig_go_0; 
@@ -18923,7 +21659,7 @@ void _wrap_btDefaultSerializer_insertHeader_mbt_3c32781124460d6b(btDefaultSerial
 }
 
 
-void _wrap_btDefaultSerializer_writeHeader_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0, char *_swig_go_1) {
+void _wrap_btDefaultSerializer_writeHeader_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0, char *_swig_go_1) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   unsigned char *arg2 = (unsigned char *) 0 ;
   
@@ -18935,7 +21671,7 @@ void _wrap_btDefaultSerializer_writeHeader_mbt_3c32781124460d6b(btDefaultSeriali
 }
 
 
-void _wrap_btDefaultSerializer_startSerialization_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0) {
+void _wrap_btDefaultSerializer_startSerialization_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   
   arg1 = *(btDefaultSerializer **)&_swig_go_0; 
@@ -18945,7 +21681,7 @@ void _wrap_btDefaultSerializer_startSerialization_mbt_3c32781124460d6b(btDefault
 }
 
 
-void _wrap_btDefaultSerializer_finishSerialization_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0) {
+void _wrap_btDefaultSerializer_finishSerialization_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   
   arg1 = *(btDefaultSerializer **)&_swig_go_0; 
@@ -18955,7 +21691,7 @@ void _wrap_btDefaultSerializer_finishSerialization_mbt_3c32781124460d6b(btDefaul
 }
 
 
-void *_wrap_btDefaultSerializer_getUniquePointer_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0, void *_swig_go_1) {
+void *_wrap_btDefaultSerializer_getUniquePointer_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0, void *_swig_go_1) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   void *arg2 = (void *) 0 ;
   void *result = 0 ;
@@ -18970,7 +21706,7 @@ void *_wrap_btDefaultSerializer_getUniquePointer_mbt_3c32781124460d6b(btDefaultS
 }
 
 
-char *_wrap_btDefaultSerializer_getBufferPointer_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0) {
+char *_wrap_btDefaultSerializer_getBufferPointer_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   unsigned char *result = 0 ;
   char *_swig_go_result;
@@ -18983,7 +21719,7 @@ char *_wrap_btDefaultSerializer_getBufferPointer_mbt_3c32781124460d6b(btDefaultS
 }
 
 
-intgo _wrap_btDefaultSerializer_getCurrentBufferSize_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0) {
+intgo _wrap_btDefaultSerializer_getCurrentBufferSize_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -18996,7 +21732,7 @@ intgo _wrap_btDefaultSerializer_getCurrentBufferSize_mbt_3c32781124460d6b(btDefa
 }
 
 
-void _wrap_btDefaultSerializer_finalizeChunk_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0, btChunk *_swig_go_1, _gostring_ _swig_go_2, intgo _swig_go_3, void *_swig_go_4) {
+void _wrap_btDefaultSerializer_finalizeChunk_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0, btChunk *_swig_go_1, _gostring_ _swig_go_2, intgo _swig_go_3, void *_swig_go_4) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   btChunk *arg2 = (btChunk *) 0 ;
   char *arg3 = (char *) 0 ;
@@ -19019,7 +21755,7 @@ void _wrap_btDefaultSerializer_finalizeChunk_mbt_3c32781124460d6b(btDefaultSeria
 }
 
 
-char *_wrap_btDefaultSerializer_internalAlloc_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0, long long _swig_go_1) {
+char *_wrap_btDefaultSerializer_internalAlloc_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0, long long _swig_go_1) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   size_t arg2 ;
   unsigned char *result = 0 ;
@@ -19034,7 +21770,7 @@ char *_wrap_btDefaultSerializer_internalAlloc_mbt_3c32781124460d6b(btDefaultSeri
 }
 
 
-btChunk *_wrap_btDefaultSerializer_allocate_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0, long long _swig_go_1, intgo _swig_go_2) {
+btChunk *_wrap_btDefaultSerializer_allocate_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0, long long _swig_go_1, intgo _swig_go_2) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   size_t arg2 ;
   int arg3 ;
@@ -19051,7 +21787,7 @@ btChunk *_wrap_btDefaultSerializer_allocate_mbt_3c32781124460d6b(btDefaultSerial
 }
 
 
-_gostring_ _wrap_btDefaultSerializer_findNameForPointer_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0, void *_swig_go_1) {
+_gostring_ _wrap_btDefaultSerializer_findNameForPointer_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0, void *_swig_go_1) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   void *arg2 = (void *) 0 ;
   char *result = 0 ;
@@ -19066,7 +21802,7 @@ _gostring_ _wrap_btDefaultSerializer_findNameForPointer_mbt_3c32781124460d6b(btD
 }
 
 
-void _wrap_btDefaultSerializer_registerNameForPointer_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0, void *_swig_go_1, _gostring_ _swig_go_2) {
+void _wrap_btDefaultSerializer_registerNameForPointer_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0, void *_swig_go_1, _gostring_ _swig_go_2) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   void *arg2 = (void *) 0 ;
   char *arg3 = (char *) 0 ;
@@ -19085,7 +21821,7 @@ void _wrap_btDefaultSerializer_registerNameForPointer_mbt_3c32781124460d6b(btDef
 }
 
 
-void _wrap_btDefaultSerializer_serializeName_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0, _gostring_ _swig_go_1) {
+void _wrap_btDefaultSerializer_serializeName_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0, _gostring_ _swig_go_1) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   char *arg2 = (char *) 0 ;
   
@@ -19102,7 +21838,7 @@ void _wrap_btDefaultSerializer_serializeName_mbt_3c32781124460d6b(btDefaultSeria
 }
 
 
-intgo _wrap_btDefaultSerializer_getSerializationFlags_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0) {
+intgo _wrap_btDefaultSerializer_getSerializationFlags_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -19115,7 +21851,7 @@ intgo _wrap_btDefaultSerializer_getSerializationFlags_mbt_3c32781124460d6b(btDef
 }
 
 
-void _wrap_btDefaultSerializer_setSerializationFlags_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0, intgo _swig_go_1) {
+void _wrap_btDefaultSerializer_setSerializationFlags_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0, intgo _swig_go_1) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   int arg2 ;
   
@@ -19127,7 +21863,7 @@ void _wrap_btDefaultSerializer_setSerializationFlags_mbt_3c32781124460d6b(btDefa
 }
 
 
-intgo _wrap_btDefaultSerializer_getNumChunks_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0) {
+intgo _wrap_btDefaultSerializer_getNumChunks_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -19140,7 +21876,7 @@ intgo _wrap_btDefaultSerializer_getNumChunks_mbt_3c32781124460d6b(btDefaultSeria
 }
 
 
-btChunk *_wrap_btDefaultSerializer_getChunk_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0, intgo _swig_go_1) {
+btChunk *_wrap_btDefaultSerializer_getChunk_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0, intgo _swig_go_1) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   int arg2 ;
   btChunk *result = 0 ;
@@ -19155,7 +21891,7 @@ btChunk *_wrap_btDefaultSerializer_getChunk_mbt_3c32781124460d6b(btDefaultSerial
 }
 
 
-void *_wrap_btDefaultSerializer_findPointer_mbt_3c32781124460d6b(btDefaultSerializer *_swig_go_0, void *_swig_go_1) {
+void *_wrap_btDefaultSerializer_findPointer_mbt_220ac3041cacbc73(btDefaultSerializer *_swig_go_0, void *_swig_go_1) {
   btDefaultSerializer *arg1 = (btDefaultSerializer *) 0 ;
   void *arg2 = (void *) 0 ;
   void *result = 0 ;
@@ -19171,7 +21907,7 @@ void *_wrap_btDefaultSerializer_findPointer_mbt_3c32781124460d6b(btDefaultSerial
 }
 
 
-void _wrap_AabbExpand_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+void _wrap_AabbExpand_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -19187,7 +21923,7 @@ void _wrap_AabbExpand_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_sw
 }
 
 
-bool _wrap_TestPointAgainstAabb2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+bool _wrap_TestPointAgainstAabb2_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -19204,7 +21940,7 @@ bool _wrap_TestPointAgainstAabb2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btV
 }
 
 
-bool _wrap_TestAabbAgainstAabb2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+bool _wrap_TestAabbAgainstAabb2_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -19223,7 +21959,7 @@ bool _wrap_TestAabbAgainstAabb2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVe
 }
 
 
-bool _wrap_TestTriangleAgainstAabb2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+bool _wrap_TestTriangleAgainstAabb2_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -19240,7 +21976,7 @@ bool _wrap_TestTriangleAgainstAabb2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, 
 }
 
 
-intgo _wrap_btOutcode_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+intgo _wrap_btOutcode_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   int result;
@@ -19255,7 +21991,7 @@ intgo _wrap_btOutcode_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_sw
 }
 
 
-bool _wrap_btRayAabb2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, intgo *_swig_go_2, btVector3 (*_swig_go_3)[2], float *_swig_go_4, float _swig_go_5, float _swig_go_6) {
+bool _wrap_btRayAabb2_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, intgo *_swig_go_2, btVector3 (*_swig_go_3)[2], float *_swig_go_4, float _swig_go_5, float _swig_go_6) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   unsigned int *arg3 = (unsigned int *) (unsigned int *)0 ;
@@ -19280,7 +22016,7 @@ bool _wrap_btRayAabb2_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_sw
 }
 
 
-bool _wrap_btRayAabb_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3, float *_swig_go_4, btVector3 *_swig_go_5) {
+bool _wrap_btRayAabb_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3, float *_swig_go_4, btVector3 *_swig_go_5) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -19303,7 +22039,7 @@ bool _wrap_btRayAabb_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swi
 }
 
 
-void _wrap_btTransformAabb__SWIG_0_mbt_3c32781124460d6b(btVector3 *_swig_go_0, float _swig_go_1, btTransform *_swig_go_2, btVector3 *_swig_go_3, btVector3 *_swig_go_4) {
+void _wrap_btTransformAabb__SWIG_0_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, float _swig_go_1, btTransform *_swig_go_2, btVector3 *_swig_go_3, btVector3 *_swig_go_4) {
   btVector3 *arg1 = 0 ;
   btScalar arg2 ;
   btTransform *arg3 = 0 ;
@@ -19321,7 +22057,7 @@ void _wrap_btTransformAabb__SWIG_0_mbt_3c32781124460d6b(btVector3 *_swig_go_0, f
 }
 
 
-void _wrap_btTransformAabb__SWIG_1_mbt_3c32781124460d6b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2, btTransform *_swig_go_3, btVector3 *_swig_go_4, btVector3 *_swig_go_5) {
+void _wrap_btTransformAabb__SWIG_1_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2, btTransform *_swig_go_3, btVector3 *_swig_go_4, btVector3 *_swig_go_5) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btScalar arg3 ;
@@ -19341,7 +22077,7 @@ void _wrap_btTransformAabb__SWIG_1_mbt_3c32781124460d6b(btVector3 *_swig_go_0, b
 }
 
 
-intgo _wrap_testQuantizedAabbAgainstQuantizedAabb_mbt_3c32781124460d6b(short *_swig_go_0, short *_swig_go_1, short *_swig_go_2, short *_swig_go_3) {
+intgo _wrap_testQuantizedAabbAgainstQuantizedAabb_mbt_220ac3041cacbc73(short *_swig_go_0, short *_swig_go_1, short *_swig_go_2, short *_swig_go_3) {
   unsigned short *arg1 = (unsigned short *) 0 ;
   unsigned short *arg2 = (unsigned short *) 0 ;
   unsigned short *arg3 = (unsigned short *) 0 ;
@@ -19360,7 +22096,7 @@ intgo _wrap_testQuantizedAabbAgainstQuantizedAabb_mbt_3c32781124460d6b(short *_s
 }
 
 
-void _wrap_btConvexHullComputer_vertices_set_mbt_3c32781124460d6b(btConvexHullComputer *_swig_go_0, btAlignedObjectArray< btVector3 > *_swig_go_1) {
+void _wrap_btConvexHullComputer_vertices_set_mbt_220ac3041cacbc73(btConvexHullComputer *_swig_go_0, btAlignedObjectArray< btVector3 > *_swig_go_1) {
   btConvexHullComputer *arg1 = (btConvexHullComputer *) 0 ;
   btAlignedObjectArray< btVector3 > *arg2 = (btAlignedObjectArray< btVector3 > *) 0 ;
   
@@ -19372,7 +22108,7 @@ void _wrap_btConvexHullComputer_vertices_set_mbt_3c32781124460d6b(btConvexHullCo
 }
 
 
-btAlignedObjectArray< btVector3 > *_wrap_btConvexHullComputer_vertices_get_mbt_3c32781124460d6b(btConvexHullComputer *_swig_go_0) {
+btAlignedObjectArray< btVector3 > *_wrap_btConvexHullComputer_vertices_get_mbt_220ac3041cacbc73(btConvexHullComputer *_swig_go_0) {
   btConvexHullComputer *arg1 = (btConvexHullComputer *) 0 ;
   btAlignedObjectArray< btVector3 > *result = 0 ;
   btAlignedObjectArray< btVector3 > *_swig_go_result;
@@ -19385,7 +22121,7 @@ btAlignedObjectArray< btVector3 > *_wrap_btConvexHullComputer_vertices_get_mbt_3
 }
 
 
-void _wrap_btConvexHullComputer_original_vertex_index_set_mbt_3c32781124460d6b(btConvexHullComputer *_swig_go_0, btAlignedObjectArray< int > *_swig_go_1) {
+void _wrap_btConvexHullComputer_original_vertex_index_set_mbt_220ac3041cacbc73(btConvexHullComputer *_swig_go_0, btAlignedObjectArray< int > *_swig_go_1) {
   btConvexHullComputer *arg1 = (btConvexHullComputer *) 0 ;
   btAlignedObjectArray< int > *arg2 = (btAlignedObjectArray< int > *) 0 ;
   
@@ -19397,7 +22133,7 @@ void _wrap_btConvexHullComputer_original_vertex_index_set_mbt_3c32781124460d6b(b
 }
 
 
-btAlignedObjectArray< int > *_wrap_btConvexHullComputer_original_vertex_index_get_mbt_3c32781124460d6b(btConvexHullComputer *_swig_go_0) {
+btAlignedObjectArray< int > *_wrap_btConvexHullComputer_original_vertex_index_get_mbt_220ac3041cacbc73(btConvexHullComputer *_swig_go_0) {
   btConvexHullComputer *arg1 = (btConvexHullComputer *) 0 ;
   btAlignedObjectArray< int > *result = 0 ;
   btAlignedObjectArray< int > *_swig_go_result;
@@ -19410,7 +22146,7 @@ btAlignedObjectArray< int > *_wrap_btConvexHullComputer_original_vertex_index_ge
 }
 
 
-void _wrap_btConvexHullComputer_edges_set_mbt_3c32781124460d6b(btConvexHullComputer *_swig_go_0, btAlignedObjectArray< btConvexHullComputer::Edge > *_swig_go_1) {
+void _wrap_btConvexHullComputer_edges_set_mbt_220ac3041cacbc73(btConvexHullComputer *_swig_go_0, btAlignedObjectArray< btConvexHullComputer::Edge > *_swig_go_1) {
   btConvexHullComputer *arg1 = (btConvexHullComputer *) 0 ;
   btAlignedObjectArray< btConvexHullComputer::Edge > *arg2 = (btAlignedObjectArray< btConvexHullComputer::Edge > *) 0 ;
   
@@ -19422,7 +22158,7 @@ void _wrap_btConvexHullComputer_edges_set_mbt_3c32781124460d6b(btConvexHullCompu
 }
 
 
-btAlignedObjectArray< btConvexHullComputer::Edge > *_wrap_btConvexHullComputer_edges_get_mbt_3c32781124460d6b(btConvexHullComputer *_swig_go_0) {
+btAlignedObjectArray< btConvexHullComputer::Edge > *_wrap_btConvexHullComputer_edges_get_mbt_220ac3041cacbc73(btConvexHullComputer *_swig_go_0) {
   btConvexHullComputer *arg1 = (btConvexHullComputer *) 0 ;
   btAlignedObjectArray< btConvexHullComputer::Edge > *result = 0 ;
   btAlignedObjectArray< btConvexHullComputer::Edge > *_swig_go_result;
@@ -19435,7 +22171,7 @@ btAlignedObjectArray< btConvexHullComputer::Edge > *_wrap_btConvexHullComputer_e
 }
 
 
-void _wrap_btConvexHullComputer_faces_set_mbt_3c32781124460d6b(btConvexHullComputer *_swig_go_0, btAlignedObjectArray< int > *_swig_go_1) {
+void _wrap_btConvexHullComputer_faces_set_mbt_220ac3041cacbc73(btConvexHullComputer *_swig_go_0, btAlignedObjectArray< int > *_swig_go_1) {
   btConvexHullComputer *arg1 = (btConvexHullComputer *) 0 ;
   btAlignedObjectArray< int > *arg2 = (btAlignedObjectArray< int > *) 0 ;
   
@@ -19447,7 +22183,7 @@ void _wrap_btConvexHullComputer_faces_set_mbt_3c32781124460d6b(btConvexHullCompu
 }
 
 
-btAlignedObjectArray< int > *_wrap_btConvexHullComputer_faces_get_mbt_3c32781124460d6b(btConvexHullComputer *_swig_go_0) {
+btAlignedObjectArray< int > *_wrap_btConvexHullComputer_faces_get_mbt_220ac3041cacbc73(btConvexHullComputer *_swig_go_0) {
   btConvexHullComputer *arg1 = (btConvexHullComputer *) 0 ;
   btAlignedObjectArray< int > *result = 0 ;
   btAlignedObjectArray< int > *_swig_go_result;
@@ -19460,7 +22196,7 @@ btAlignedObjectArray< int > *_wrap_btConvexHullComputer_faces_get_mbt_3c32781124
 }
 
 
-float _wrap_btConvexHullComputer_compute__SWIG_0_mbt_3c32781124460d6b(btConvexHullComputer *_swig_go_0, float *_swig_go_1, intgo _swig_go_2, intgo _swig_go_3, float _swig_go_4, float _swig_go_5) {
+float _wrap_btConvexHullComputer_compute__SWIG_0_mbt_220ac3041cacbc73(btConvexHullComputer *_swig_go_0, float *_swig_go_1, intgo _swig_go_2, intgo _swig_go_3, float _swig_go_4, float _swig_go_5) {
   btConvexHullComputer *arg1 = (btConvexHullComputer *) 0 ;
   float *arg2 = (float *) 0 ;
   int arg3 ;
@@ -19483,7 +22219,7 @@ float _wrap_btConvexHullComputer_compute__SWIG_0_mbt_3c32781124460d6b(btConvexHu
 }
 
 
-float _wrap_btConvexHullComputer_compute__SWIG_1_mbt_3c32781124460d6b(btConvexHullComputer *_swig_go_0, double *_swig_go_1, intgo _swig_go_2, intgo _swig_go_3, float _swig_go_4, float _swig_go_5) {
+float _wrap_btConvexHullComputer_compute__SWIG_1_mbt_220ac3041cacbc73(btConvexHullComputer *_swig_go_0, double *_swig_go_1, intgo _swig_go_2, intgo _swig_go_3, float _swig_go_4, float _swig_go_5) {
   btConvexHullComputer *arg1 = (btConvexHullComputer *) 0 ;
   double *arg2 = (double *) 0 ;
   int arg3 ;
@@ -19506,7 +22242,7 @@ float _wrap_btConvexHullComputer_compute__SWIG_1_mbt_3c32781124460d6b(btConvexHu
 }
 
 
-btConvexHullComputer *_wrap_new_btConvexHullComputer_mbt_3c32781124460d6b() {
+btConvexHullComputer *_wrap_new_btConvexHullComputer_mbt_220ac3041cacbc73() {
   btConvexHullComputer *result = 0 ;
   btConvexHullComputer *_swig_go_result;
   
@@ -19517,7 +22253,7 @@ btConvexHullComputer *_wrap_new_btConvexHullComputer_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_btConvexHullComputer_mbt_3c32781124460d6b(btConvexHullComputer *_swig_go_0) {
+void _wrap_delete_btConvexHullComputer_mbt_220ac3041cacbc73(btConvexHullComputer *_swig_go_0) {
   btConvexHullComputer *arg1 = (btConvexHullComputer *) 0 ;
   
   arg1 = *(btConvexHullComputer **)&_swig_go_0; 
@@ -19527,7 +22263,7 @@ void _wrap_delete_btConvexHullComputer_mbt_3c32781124460d6b(btConvexHullComputer
 }
 
 
-void _wrap_btConvexHullInternal_vertexList_set_mbt_3c32781124460d6b(btConvexHullInternal *_swig_go_0, btConvexHullInternal::Vertex *_swig_go_1) {
+void _wrap_btConvexHullInternal_vertexList_set_mbt_220ac3041cacbc73(btConvexHullInternal *_swig_go_0, btConvexHullInternal::Vertex *_swig_go_1) {
   btConvexHullInternal *arg1 = (btConvexHullInternal *) 0 ;
   btConvexHullInternal::Vertex *arg2 = (btConvexHullInternal::Vertex *) 0 ;
   
@@ -19539,7 +22275,7 @@ void _wrap_btConvexHullInternal_vertexList_set_mbt_3c32781124460d6b(btConvexHull
 }
 
 
-btConvexHullInternal::Vertex *_wrap_btConvexHullInternal_vertexList_get_mbt_3c32781124460d6b(btConvexHullInternal *_swig_go_0) {
+btConvexHullInternal::Vertex *_wrap_btConvexHullInternal_vertexList_get_mbt_220ac3041cacbc73(btConvexHullInternal *_swig_go_0) {
   btConvexHullInternal *arg1 = (btConvexHullInternal *) 0 ;
   btConvexHullInternal::Vertex *result = 0 ;
   btConvexHullInternal::Vertex *_swig_go_result;
@@ -19552,7 +22288,7 @@ btConvexHullInternal::Vertex *_wrap_btConvexHullInternal_vertexList_get_mbt_3c32
 }
 
 
-void _wrap_btConvexHullInternal_compute_mbt_3c32781124460d6b(btConvexHullInternal *_swig_go_0, void *_swig_go_1, bool _swig_go_2, intgo _swig_go_3, intgo _swig_go_4) {
+void _wrap_btConvexHullInternal_compute_mbt_220ac3041cacbc73(btConvexHullInternal *_swig_go_0, void *_swig_go_1, bool _swig_go_2, intgo _swig_go_3, intgo _swig_go_4) {
   btConvexHullInternal *arg1 = (btConvexHullInternal *) 0 ;
   void *arg2 = (void *) 0 ;
   bool arg3 ;
@@ -19570,7 +22306,7 @@ void _wrap_btConvexHullInternal_compute_mbt_3c32781124460d6b(btConvexHullInterna
 }
 
 
-btVector3 *_wrap_btConvexHullInternal_getCoordinates_mbt_3c32781124460d6b(btConvexHullInternal *_swig_go_0, btConvexHullInternal::Vertex *_swig_go_1) {
+btVector3 *_wrap_btConvexHullInternal_getCoordinates_mbt_220ac3041cacbc73(btConvexHullInternal *_swig_go_0, btConvexHullInternal::Vertex *_swig_go_1) {
   btConvexHullInternal *arg1 = (btConvexHullInternal *) 0 ;
   btConvexHullInternal::Vertex *arg2 = (btConvexHullInternal::Vertex *) 0 ;
   btVector3 result;
@@ -19585,7 +22321,7 @@ btVector3 *_wrap_btConvexHullInternal_getCoordinates_mbt_3c32781124460d6b(btConv
 }
 
 
-float _wrap_btConvexHullInternal_shrink_mbt_3c32781124460d6b(btConvexHullInternal *_swig_go_0, float _swig_go_1, float _swig_go_2) {
+float _wrap_btConvexHullInternal_shrink_mbt_220ac3041cacbc73(btConvexHullInternal *_swig_go_0, float _swig_go_1, float _swig_go_2) {
   btConvexHullInternal *arg1 = (btConvexHullInternal *) 0 ;
   btScalar arg2 ;
   btScalar arg3 ;
@@ -19602,7 +22338,7 @@ float _wrap_btConvexHullInternal_shrink_mbt_3c32781124460d6b(btConvexHullInterna
 }
 
 
-btConvexHullInternal *_wrap_new_btConvexHullInternal_mbt_3c32781124460d6b() {
+btConvexHullInternal *_wrap_new_btConvexHullInternal_mbt_220ac3041cacbc73() {
   btConvexHullInternal *result = 0 ;
   btConvexHullInternal *_swig_go_result;
   
@@ -19613,7 +22349,7 @@ btConvexHullInternal *_wrap_new_btConvexHullInternal_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_btConvexHullInternal_mbt_3c32781124460d6b(btConvexHullInternal *_swig_go_0) {
+void _wrap_delete_btConvexHullInternal_mbt_220ac3041cacbc73(btConvexHullInternal *_swig_go_0) {
   btConvexHullInternal *arg1 = (btConvexHullInternal *) 0 ;
   
   arg1 = *(btConvexHullInternal **)&_swig_go_0; 
@@ -19623,7 +22359,7 @@ void _wrap_delete_btConvexHullInternal_mbt_3c32781124460d6b(btConvexHullInternal
 }
 
 
-pointCmp *_wrap_new_pointCmp_mbt_3c32781124460d6b() {
+pointCmp *_wrap_new_pointCmp_mbt_220ac3041cacbc73() {
   pointCmp *result = 0 ;
   pointCmp *_swig_go_result;
   
@@ -19634,7 +22370,7 @@ pointCmp *_wrap_new_pointCmp_mbt_3c32781124460d6b() {
 }
 
 
-void _wrap_delete_pointCmp_mbt_3c32781124460d6b(pointCmp *_swig_go_0) {
+void _wrap_delete_pointCmp_mbt_220ac3041cacbc73(pointCmp *_swig_go_0) {
   pointCmp *arg1 = (pointCmp *) 0 ;
   
   arg1 = *(pointCmp **)&_swig_go_0; 
@@ -19644,7 +22380,7 @@ void _wrap_delete_pointCmp_mbt_3c32781124460d6b(pointCmp *_swig_go_0) {
 }
 
 
-intgo _wrap_getVertexCopy_mbt_3c32781124460d6b(btConvexHullInternal::Vertex *_swig_go_0, btAlignedObjectArray< btConvexHullInternal::Vertex * > *_swig_go_1) {
+intgo _wrap_getVertexCopy_mbt_220ac3041cacbc73(btConvexHullInternal::Vertex *_swig_go_0, btAlignedObjectArray< btConvexHullInternal::Vertex * > *_swig_go_1) {
   btConvexHullInternal::Vertex *arg1 = (btConvexHullInternal::Vertex *) 0 ;
   btAlignedObjectArray< btConvexHullInternal::Vertex * > *arg2 = 0 ;
   int result;
@@ -19654,6 +22390,6452 @@ intgo _wrap_getVertexCopy_mbt_3c32781124460d6b(btConvexHullInternal::Vertex *_sw
   arg2 = *(btAlignedObjectArray< btConvexHullInternal::Vertex * > **)&_swig_go_1; 
   
   result = (int)getVertexCopy(arg1,*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_BOX_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = BOX_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_TRIANGLE_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = TRIANGLE_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_TETRAHEDRAL_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = TETRAHEDRAL_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONVEX_HULL_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONVEX_HULL_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CUSTOM_POLYHEDRAL_SHAPE_TYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CUSTOM_POLYHEDRAL_SHAPE_TYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_IMPLICIT_CONVEX_SHAPES_START_HERE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = IMPLICIT_CONVEX_SHAPES_START_HERE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_SPHERE_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = SPHERE_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_MULTI_SPHERE_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = MULTI_SPHERE_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CAPSULE_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CAPSULE_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONE_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONE_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONVEX_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONVEX_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CYLINDER_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CYLINDER_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_UNIFORM_SCALING_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = UNIFORM_SCALING_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_MINKOWSKI_SUM_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = MINKOWSKI_SUM_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_BOX_2D_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = BOX_2D_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONVEX_2D_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONVEX_2D_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CUSTOM_CONVEX_SHAPE_TYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CUSTOM_CONVEX_SHAPE_TYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONCAVE_SHAPES_START_HERE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONCAVE_SHAPES_START_HERE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_TRIANGLE_MESH_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = TRIANGLE_MESH_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_FAST_CONCAVE_MESH_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = FAST_CONCAVE_MESH_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_TERRAIN_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = TERRAIN_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_GIMPACT_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = GIMPACT_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_EMPTY_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = EMPTY_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_STATIC_PLANE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = STATIC_PLANE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CUSTOM_CONCAVE_SHAPE_TYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CUSTOM_CONCAVE_SHAPE_TYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_SDF_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = SDF_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONCAVE_SHAPES_END_HERE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONCAVE_SHAPES_END_HERE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_COMPOUND_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = COMPOUND_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_SOFTBODY_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = SOFTBODY_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_HFFLUID_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = HFFLUID_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_INVALID_SHAPE_PROXYTYPE_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = INVALID_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_MAX_BROADPHASE_COLLISION_TYPES_mbt_220ac3041cacbc73() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = MAX_BROADPHASE_COLLISION_TYPES;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_DefaultFilter_btBroadphaseProxy_mbt_220ac3041cacbc73() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::DefaultFilter;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_StaticFilter_btBroadphaseProxy_mbt_220ac3041cacbc73() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::StaticFilter;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_KinematicFilter_btBroadphaseProxy_mbt_220ac3041cacbc73() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::KinematicFilter;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_DebrisFilter_btBroadphaseProxy_mbt_220ac3041cacbc73() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::DebrisFilter;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_SensorTrigger_btBroadphaseProxy_mbt_220ac3041cacbc73() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::SensorTrigger;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CharacterFilter_btBroadphaseProxy_mbt_220ac3041cacbc73() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::CharacterFilter;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_AllFilter_btBroadphaseProxy_mbt_220ac3041cacbc73() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::AllFilter;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphaseProxy_m_clientObject_set_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0, void *_swig_go_1) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  void *arg2 = (void *) 0 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_clientObject = arg2;
+  
+}
+
+
+void *_wrap_btBroadphaseProxy_m_clientObject_get_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  void *result = 0 ;
+  void *_swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (void *) ((arg1)->m_clientObject);
+  *(void **)&_swig_go_result = (void *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphaseProxy_m_collisionFilterGroup_set_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0, intgo _swig_go_1) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_collisionFilterGroup = arg2;
+  
+}
+
+
+intgo _wrap_btBroadphaseProxy_m_collisionFilterGroup_get_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (int) ((arg1)->m_collisionFilterGroup);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphaseProxy_m_collisionFilterMask_set_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0, intgo _swig_go_1) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_collisionFilterMask = arg2;
+  
+}
+
+
+intgo _wrap_btBroadphaseProxy_m_collisionFilterMask_get_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (int) ((arg1)->m_collisionFilterMask);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphaseProxy_m_uniqueId_set_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0, intgo _swig_go_1) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_uniqueId = arg2;
+  
+}
+
+
+intgo _wrap_btBroadphaseProxy_m_uniqueId_get_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (int) ((arg1)->m_uniqueId);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphaseProxy_m_aabbMin_set_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0, btVector3 *_swig_go_1) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_aabbMin = *arg2;
+  
+}
+
+
+btVector3 *_wrap_btBroadphaseProxy_m_aabbMin_get_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (btVector3 *)& ((arg1)->m_aabbMin);
+  *(btVector3 **)&_swig_go_result = (btVector3 *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphaseProxy_m_aabbMax_set_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0, btVector3 *_swig_go_1) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_aabbMax = *arg2;
+  
+}
+
+
+btVector3 *_wrap_btBroadphaseProxy_m_aabbMax_get_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (btVector3 *)& ((arg1)->m_aabbMax);
+  *(btVector3 **)&_swig_go_result = (btVector3 *)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btBroadphaseProxy_getUid_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (int)((btBroadphaseProxy const *)arg1)->getUid();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btBroadphaseProxy *_wrap_new_btBroadphaseProxy__SWIG_0_mbt_220ac3041cacbc73() {
+  btBroadphaseProxy *result = 0 ;
+  btBroadphaseProxy *_swig_go_result;
+  
+  
+  result = (btBroadphaseProxy *)new btBroadphaseProxy();
+  *(btBroadphaseProxy **)&_swig_go_result = (btBroadphaseProxy *)result; 
+  return _swig_go_result;
+}
+
+
+btBroadphaseProxy *_wrap_new_btBroadphaseProxy__SWIG_1_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, void *_swig_go_2, intgo _swig_go_3, intgo _swig_go_4) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  void *arg3 = (void *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  btBroadphaseProxy *result = 0 ;
+  btBroadphaseProxy *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(void **)&_swig_go_2; 
+  arg4 = (int)_swig_go_3; 
+  arg5 = (int)_swig_go_4; 
+  
+  result = (btBroadphaseProxy *)new btBroadphaseProxy((btVector3 const &)*arg1,(btVector3 const &)*arg2,arg3,arg4,arg5);
+  *(btBroadphaseProxy **)&_swig_go_result = (btBroadphaseProxy *)result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isPolyhedral_mbt_220ac3041cacbc73(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isPolyhedral(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isConvex_mbt_220ac3041cacbc73(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isConvex(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isNonMoving_mbt_220ac3041cacbc73(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isNonMoving(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isConcave_mbt_220ac3041cacbc73(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isConcave(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isCompound_mbt_220ac3041cacbc73(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isCompound(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isSoftBody_mbt_220ac3041cacbc73(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isSoftBody(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isInfinite_mbt_220ac3041cacbc73(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isInfinite(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isConvex2d_mbt_220ac3041cacbc73(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isConvex2d(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btBroadphaseProxy_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btBroadphasePair *_wrap_new_btBroadphasePair__SWIG_0_mbt_220ac3041cacbc73() {
+  btBroadphasePair *result = 0 ;
+  btBroadphasePair *_swig_go_result;
+  
+  
+  result = (btBroadphasePair *)new btBroadphasePair();
+  *(btBroadphasePair **)&_swig_go_result = (btBroadphasePair *)result; 
+  return _swig_go_result;
+}
+
+
+btBroadphasePair *_wrap_new_btBroadphasePair__SWIG_1_mbt_220ac3041cacbc73(btBroadphaseProxy *_swig_go_0, btBroadphaseProxy *_swig_go_1) {
+  btBroadphaseProxy *arg1 = 0 ;
+  btBroadphaseProxy *arg2 = 0 ;
+  btBroadphasePair *result = 0 ;
+  btBroadphasePair *_swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = *(btBroadphaseProxy **)&_swig_go_1; 
+  
+  result = (btBroadphasePair *)new btBroadphasePair(*arg1,*arg2);
+  *(btBroadphasePair **)&_swig_go_result = (btBroadphasePair *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphasePair_m_pProxy0_set_mbt_220ac3041cacbc73(btBroadphasePair *_swig_go_0, btBroadphaseProxy *_swig_go_1) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  btBroadphaseProxy *arg2 = (btBroadphaseProxy *) 0 ;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  arg2 = *(btBroadphaseProxy **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_pProxy0 = arg2;
+  
+}
+
+
+btBroadphaseProxy *_wrap_btBroadphasePair_m_pProxy0_get_mbt_220ac3041cacbc73(btBroadphasePair *_swig_go_0) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  btBroadphaseProxy *result = 0 ;
+  btBroadphaseProxy *_swig_go_result;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  
+  result = (btBroadphaseProxy *) ((arg1)->m_pProxy0);
+  *(btBroadphaseProxy **)&_swig_go_result = (btBroadphaseProxy *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphasePair_m_pProxy1_set_mbt_220ac3041cacbc73(btBroadphasePair *_swig_go_0, btBroadphaseProxy *_swig_go_1) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  btBroadphaseProxy *arg2 = (btBroadphaseProxy *) 0 ;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  arg2 = *(btBroadphaseProxy **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_pProxy1 = arg2;
+  
+}
+
+
+btBroadphaseProxy *_wrap_btBroadphasePair_m_pProxy1_get_mbt_220ac3041cacbc73(btBroadphasePair *_swig_go_0) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  btBroadphaseProxy *result = 0 ;
+  btBroadphaseProxy *_swig_go_result;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  
+  result = (btBroadphaseProxy *) ((arg1)->m_pProxy1);
+  *(btBroadphaseProxy **)&_swig_go_result = (btBroadphaseProxy *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphasePair_m_algorithm_set_mbt_220ac3041cacbc73(btBroadphasePair *_swig_go_0, btCollisionAlgorithm *_swig_go_1) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  btCollisionAlgorithm *arg2 = (btCollisionAlgorithm *) 0 ;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  arg2 = *(btCollisionAlgorithm **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_algorithm = arg2;
+  
+}
+
+
+btCollisionAlgorithm *_wrap_btBroadphasePair_m_algorithm_get_mbt_220ac3041cacbc73(btBroadphasePair *_swig_go_0) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  btCollisionAlgorithm *result = 0 ;
+  btCollisionAlgorithm *_swig_go_result;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  
+  result = (btCollisionAlgorithm *) ((arg1)->m_algorithm);
+  *(btCollisionAlgorithm **)&_swig_go_result = (btCollisionAlgorithm *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btBroadphasePair_mbt_220ac3041cacbc73(btBroadphasePair *_swig_go_0) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btBroadphasePairSortPredicate *_wrap_new_btBroadphasePairSortPredicate_mbt_220ac3041cacbc73() {
+  btBroadphasePairSortPredicate *result = 0 ;
+  btBroadphasePairSortPredicate *_swig_go_result;
+  
+  
+  result = (btBroadphasePairSortPredicate *)new btBroadphasePairSortPredicate();
+  *(btBroadphasePairSortPredicate **)&_swig_go_result = (btBroadphasePairSortPredicate *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btBroadphasePairSortPredicate_mbt_220ac3041cacbc73(btBroadphasePairSortPredicate *_swig_go_0) {
+  btBroadphasePairSortPredicate *arg1 = (btBroadphasePairSortPredicate *) 0 ;
+  
+  arg1 = *(btBroadphasePairSortPredicate **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_delete_btCollisionShape_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btCollisionShape_getAabb_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  ((btCollisionShape const *)arg1)->getAabb((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btCollisionShape_getBoundingSphere_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0, btVector3 *_swig_go_1, float *_swig_go_2) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btScalar **)&_swig_go_2; 
+  
+  ((btCollisionShape const *)arg1)->getBoundingSphere(*arg2,*arg3);
+  
+}
+
+
+float _wrap_btCollisionShape_getAngularMotionDisc_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (btScalar)((btCollisionShape const *)arg1)->getAngularMotionDisc();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btCollisionShape_getContactBreakingThreshold_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0, float _swig_go_1) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  btScalar arg2 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  result = (btScalar)((btCollisionShape const *)arg1)->getContactBreakingThreshold(arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btCollisionShape_calculateTemporalAabb_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3, float _swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  btScalar arg5 ;
+  btVector3 *arg6 = 0 ;
+  btVector3 *arg7 = 0 ;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  arg5 = (btScalar)_swig_go_4; 
+  arg6 = *(btVector3 **)&_swig_go_5; 
+  arg7 = *(btVector3 **)&_swig_go_6; 
+  
+  ((btCollisionShape const *)arg1)->calculateTemporalAabb((btTransform const &)*arg2,(btVector3 const &)*arg3,(btVector3 const &)*arg4,arg5,*arg6,*arg7);
+  
+}
+
+
+bool _wrap_btCollisionShape_isPolyhedral_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (bool)((btCollisionShape const *)arg1)->isPolyhedral();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btCollisionShape_isConvex2d_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (bool)((btCollisionShape const *)arg1)->isConvex2d();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btCollisionShape_isConvex_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (bool)((btCollisionShape const *)arg1)->isConvex();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btCollisionShape_isNonMoving_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (bool)((btCollisionShape const *)arg1)->isNonMoving();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btCollisionShape_isConcave_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (bool)((btCollisionShape const *)arg1)->isConcave();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btCollisionShape_isCompound_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (bool)((btCollisionShape const *)arg1)->isCompound();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btCollisionShape_isSoftBody_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (bool)((btCollisionShape const *)arg1)->isSoftBody();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btCollisionShape_isInfinite_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (bool)((btCollisionShape const *)arg1)->isInfinite();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btCollisionShape_setLocalScaling_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  (arg1)->setLocalScaling((btVector3 const &)*arg2);
+  
+}
+
+
+btVector3 *_wrap_btCollisionShape_getLocalScaling_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (btVector3 *) &((btCollisionShape const *)arg1)->getLocalScaling();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btCollisionShape_calculateLocalInertia_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0, float _swig_go_1, btVector3 *_swig_go_2) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  btScalar arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  ((btCollisionShape const *)arg1)->calculateLocalInertia(arg2,*arg3);
+  
+}
+
+
+_gostring_ _wrap_btCollisionShape_getName_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (char *)((btCollisionShape const *)arg1)->getName();
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btCollisionShape_getShapeType_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (int)((btCollisionShape const *)arg1)->getShapeType();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btCollisionShape_getAnisotropicRollingFrictionDirection_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = ((btCollisionShape const *)arg1)->getAnisotropicRollingFrictionDirection();
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btCollisionShape_setMargin_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0, float _swig_go_1) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  (arg1)->setMargin(arg2);
+  
+}
+
+
+float _wrap_btCollisionShape_getMargin_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (btScalar)((btCollisionShape const *)arg1)->getMargin();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btCollisionShape_setUserPointer_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0, void *_swig_go_1) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  void *arg2 = (void *) 0 ;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  
+  (arg1)->setUserPointer(arg2);
+  
+}
+
+
+void *_wrap_btCollisionShape_getUserPointer_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  void *result = 0 ;
+  void *_swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (void *)((btCollisionShape const *)arg1)->getUserPointer();
+  *(void **)&_swig_go_result = (void *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btCollisionShape_setUserIndex_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0, intgo _swig_go_1) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  (arg1)->setUserIndex(arg2);
+  
+}
+
+
+intgo _wrap_btCollisionShape_getUserIndex_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (int)((btCollisionShape const *)arg1)->getUserIndex();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btCollisionShape_setUserIndex2_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0, intgo _swig_go_1) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  (arg1)->setUserIndex2(arg2);
+  
+}
+
+
+intgo _wrap_btCollisionShape_getUserIndex2_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (int)((btCollisionShape const *)arg1)->getUserIndex2();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btCollisionShape_calculateSerializeBufferSize_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  
+  result = (int)((btCollisionShape const *)arg1)->calculateSerializeBufferSize();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+_gostring_ _wrap_btCollisionShape_serialize_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0, void *_swig_go_1, btSerializer *_swig_go_2) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  void *arg2 = (void *) 0 ;
+  btSerializer *arg3 = (btSerializer *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  arg3 = *(btSerializer **)&_swig_go_2; 
+  
+  result = (char *)((btCollisionShape const *)arg1)->serialize(arg2,arg3);
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btCollisionShape_serializeSingleShape_mbt_220ac3041cacbc73(btCollisionShape *_swig_go_0, btSerializer *_swig_go_1) {
+  btCollisionShape *arg1 = (btCollisionShape *) 0 ;
+  btSerializer *arg2 = (btSerializer *) 0 ;
+  
+  arg1 = *(btCollisionShape **)&_swig_go_0; 
+  arg2 = *(btSerializer **)&_swig_go_1; 
+  
+  ((btCollisionShape const *)arg1)->serializeSingleShape(arg2);
+  
+}
+
+
+void _wrap_btCollisionShapeData_m_name_set_mbt_220ac3041cacbc73(btCollisionShapeData *_swig_go_0, _gostring_ _swig_go_1) {
+  btCollisionShapeData *arg1 = (btCollisionShapeData *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = *(btCollisionShapeData **)&_swig_go_0; 
+  
+  arg2 = (char *)malloc(_swig_go_1.n + 1);
+  memcpy(arg2, _swig_go_1.p, _swig_go_1.n);
+  arg2[_swig_go_1.n] = '\0';
+  
+  
+  {
+    delete [] arg1->m_name;
+    if (arg2) {
+      arg1->m_name = (char *) (new char[strlen((const char *)arg2)+1]);
+      strcpy((char *)arg1->m_name, (const char *)arg2);
+    } else {
+      arg1->m_name = 0;
+    }
+  }
+  
+  free(arg2); 
+}
+
+
+_gostring_ _wrap_btCollisionShapeData_m_name_get_mbt_220ac3041cacbc73(btCollisionShapeData *_swig_go_0) {
+  btCollisionShapeData *arg1 = (btCollisionShapeData *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btCollisionShapeData **)&_swig_go_0; 
+  
+  result = (char *) ((arg1)->m_name);
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btCollisionShapeData_m_shapeType_set_mbt_220ac3041cacbc73(btCollisionShapeData *_swig_go_0, intgo _swig_go_1) {
+  btCollisionShapeData *arg1 = (btCollisionShapeData *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btCollisionShapeData **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_shapeType = arg2;
+  
+}
+
+
+intgo _wrap_btCollisionShapeData_m_shapeType_get_mbt_220ac3041cacbc73(btCollisionShapeData *_swig_go_0) {
+  btCollisionShapeData *arg1 = (btCollisionShapeData *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btCollisionShapeData **)&_swig_go_0; 
+  
+  result = (int) ((arg1)->m_shapeType);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btCollisionShapeData_m_padding_set_mbt_220ac3041cacbc73(btCollisionShapeData *_swig_go_0, _gostring_ _swig_go_1) {
+  btCollisionShapeData *arg1 = (btCollisionShapeData *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  
+  arg1 = *(btCollisionShapeData **)&_swig_go_0; 
+  
+  arg2 = (char *)malloc(_swig_go_1.n + 1);
+  memcpy(arg2, _swig_go_1.p, _swig_go_1.n);
+  arg2[_swig_go_1.n] = '\0';
+  
+  
+  {
+    if(arg2) {
+      strncpy((char*)arg1->m_padding, (const char *)arg2, 4-1);
+      arg1->m_padding[4-1] = 0;
+    } else {
+      arg1->m_padding[0] = 0;
+    }
+  }
+  
+  free(arg2); 
+}
+
+
+_gostring_ _wrap_btCollisionShapeData_m_padding_get_mbt_220ac3041cacbc73(btCollisionShapeData *_swig_go_0) {
+  btCollisionShapeData *arg1 = (btCollisionShapeData *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btCollisionShapeData **)&_swig_go_0; 
+  
+  result = (char *)(char *) ((arg1)->m_padding);
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+btCollisionShapeData *_wrap_new_btCollisionShapeData_mbt_220ac3041cacbc73() {
+  btCollisionShapeData *result = 0 ;
+  btCollisionShapeData *_swig_go_result;
+  
+  
+  result = (btCollisionShapeData *)new btCollisionShapeData();
+  *(btCollisionShapeData **)&_swig_go_result = (btCollisionShapeData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btCollisionShapeData_mbt_220ac3041cacbc73(btCollisionShapeData *_swig_go_0) {
+  btCollisionShapeData *arg1 = (btCollisionShapeData *) 0 ;
+  
+  arg1 = *(btCollisionShapeData **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btBulletCollisionProbe_mbt_220ac3041cacbc73() {
+  btBulletCollisionProbe();
+  
+}
+
+
+void _wrap_delete_btConvexShape_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btVector3 *_wrap_btConvexShape_localGetSupportingVertex_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = ((btConvexShape const *)arg1)->localGetSupportingVertex((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexShape_localGetSupportingVertexWithoutMargin_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = ((btConvexShape const *)arg1)->localGetSupportingVertexWithoutMargin((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexShape_localGetSupportVertexWithoutMarginNonVirtual_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = ((btConvexShape const *)arg1)->localGetSupportVertexWithoutMarginNonVirtual((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexShape_localGetSupportVertexNonVirtual_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = ((btConvexShape const *)arg1)->localGetSupportVertexNonVirtual((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btConvexShape_getMarginNonVirtual_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  result = (btScalar)((btConvexShape const *)arg1)->getMarginNonVirtual();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexShape_getAabbNonVirtual_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  ((btConvexShape const *)arg1)->getAabbNonVirtual((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btConvexShape_project_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, float *_swig_go_3, float *_swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btScalar *arg5 = 0 ;
+  btVector3 *arg6 = 0 ;
+  btVector3 *arg7 = 0 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  arg5 = *(btScalar **)&_swig_go_4; 
+  arg6 = *(btVector3 **)&_swig_go_5; 
+  arg7 = *(btVector3 **)&_swig_go_6; 
+  
+  ((btConvexShape const *)arg1)->project((btTransform const &)*arg2,(btVector3 const &)*arg3,*arg4,*arg5,*arg6,*arg7);
+  
+}
+
+
+void _wrap_btConvexShape_batchedUnitVectorGetSupportingVertexWithoutMargin_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, intgo _swig_go_3) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  btVector3 *arg3 = (btVector3 *) 0 ;
+  int arg4 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = (int)_swig_go_3; 
+  
+  ((btConvexShape const *)arg1)->batchedUnitVectorGetSupportingVertexWithoutMargin((btVector3 const *)arg2,arg3,arg4);
+  
+}
+
+
+void _wrap_btConvexShape_getAabb_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  ((btConvexShape const *)arg1)->getAabb((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btConvexShape_getAabbSlow_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  ((btConvexShape const *)arg1)->getAabbSlow((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btConvexShape_setLocalScaling_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  (arg1)->setLocalScaling((btVector3 const &)*arg2);
+  
+}
+
+
+btVector3 *_wrap_btConvexShape_getLocalScaling_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  result = (btVector3 *) &((btConvexShape const *)arg1)->getLocalScaling();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexShape_setMargin_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, float _swig_go_1) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  (arg1)->setMargin(arg2);
+  
+}
+
+
+float _wrap_btConvexShape_getMargin_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  result = (btScalar)((btConvexShape const *)arg1)->getMargin();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btConvexShape_getNumPreferredPenetrationDirections_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  result = (int)((btConvexShape const *)arg1)->getNumPreferredPenetrationDirections();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexShape_getPreferredPenetrationDirection_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, intgo _swig_go_1, btVector3 *_swig_go_2) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  int arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  ((btConvexShape const *)arg1)->getPreferredPenetrationDirection(arg2,*arg3);
+  
+}
+
+
+void _wrap_btConvexShape_getBoundingSphere_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btVector3 *_swig_go_1, float *_swig_go_2) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btScalar **)&_swig_go_2; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  ((btCollisionShape const *)swig_b0)->getBoundingSphere(*arg2,*arg3);
+  
+}
+
+
+float _wrap_btConvexShape_getAngularMotionDisc_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (btScalar)((btCollisionShape const *)swig_b0)->getAngularMotionDisc();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btConvexShape_getContactBreakingThreshold_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, float _swig_go_1) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btScalar arg2 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (btScalar)((btCollisionShape const *)swig_b0)->getContactBreakingThreshold(arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexShape_calculateTemporalAabb_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3, float _swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  btScalar arg5 ;
+  btVector3 *arg6 = 0 ;
+  btVector3 *arg7 = 0 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  arg5 = (btScalar)_swig_go_4; 
+  arg6 = *(btVector3 **)&_swig_go_5; 
+  arg7 = *(btVector3 **)&_swig_go_6; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  ((btCollisionShape const *)swig_b0)->calculateTemporalAabb((btTransform const &)*arg2,(btVector3 const &)*arg3,(btVector3 const &)*arg4,arg5,*arg6,*arg7);
+  
+}
+
+
+bool _wrap_btConvexShape_isPolyhedral_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (bool)((btCollisionShape const *)swig_b0)->isPolyhedral();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexShape_isConvex2d_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (bool)((btCollisionShape const *)swig_b0)->isConvex2d();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexShape_isConvex_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (bool)((btCollisionShape const *)swig_b0)->isConvex();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexShape_isNonMoving_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (bool)((btCollisionShape const *)swig_b0)->isNonMoving();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexShape_isConcave_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (bool)((btCollisionShape const *)swig_b0)->isConcave();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexShape_isCompound_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (bool)((btCollisionShape const *)swig_b0)->isCompound();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexShape_isSoftBody_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (bool)((btCollisionShape const *)swig_b0)->isSoftBody();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexShape_isInfinite_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (bool)((btCollisionShape const *)swig_b0)->isInfinite();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexShape_calculateLocalInertia_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, float _swig_go_1, btVector3 *_swig_go_2) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btScalar arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  ((btCollisionShape const *)swig_b0)->calculateLocalInertia(arg2,*arg3);
+  
+}
+
+
+_gostring_ _wrap_btConvexShape_getName_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (char *)((btCollisionShape const *)swig_b0)->getName();
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btConvexShape_getShapeType_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (int)((btCollisionShape const *)swig_b0)->getShapeType();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexShape_getAnisotropicRollingFrictionDirection_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = ((btCollisionShape const *)swig_b0)->getAnisotropicRollingFrictionDirection();
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexShape_setUserPointer_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, void *_swig_go_1) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  void *arg2 = (void *) 0 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  (swig_b0)->setUserPointer(arg2);
+  
+}
+
+
+void *_wrap_btConvexShape_getUserPointer_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  void *result = 0 ;
+  void *_swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (void *)((btCollisionShape const *)swig_b0)->getUserPointer();
+  *(void **)&_swig_go_result = (void *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexShape_setUserIndex_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, intgo _swig_go_1) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  (swig_b0)->setUserIndex(arg2);
+  
+}
+
+
+intgo _wrap_btConvexShape_getUserIndex_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (int)((btCollisionShape const *)swig_b0)->getUserIndex();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexShape_setUserIndex2_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, intgo _swig_go_1) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  (swig_b0)->setUserIndex2(arg2);
+  
+}
+
+
+intgo _wrap_btConvexShape_getUserIndex2_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (int)((btCollisionShape const *)swig_b0)->getUserIndex2();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btConvexShape_calculateSerializeBufferSize_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (int)((btCollisionShape const *)swig_b0)->calculateSerializeBufferSize();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+_gostring_ _wrap_btConvexShape_serialize_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, void *_swig_go_1, btSerializer *_swig_go_2) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  void *arg2 = (void *) 0 ;
+  btSerializer *arg3 = (btSerializer *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  arg3 = *(btSerializer **)&_swig_go_2; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  result = (char *)((btCollisionShape const *)swig_b0)->serialize(arg2,arg3);
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexShape_serializeSingleShape_mbt_220ac3041cacbc73(btConvexShape *_swig_go_0, btSerializer *_swig_go_1) {
+  btConvexShape *arg1 = (btConvexShape *) 0 ;
+  btSerializer *arg2 = (btSerializer *) 0 ;
+  
+  arg1 = *(btConvexShape **)&_swig_go_0; 
+  arg2 = *(btSerializer **)&_swig_go_1; 
+  
+  btCollisionShape *swig_b0 = (btCollisionShape *)arg1;
+  ((btCollisionShape const *)swig_b0)->serializeSingleShape(arg2);
+  
+}
+
+
+btVector3 *_wrap_convexHullSupport_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btVector3 *_swig_go_1, intgo _swig_go_2, btVector3 *_swig_go_3) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  int arg3 ;
+  btVector3 *arg4 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (int)_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  result = convexHullSupport((btVector3 const &)*arg1,(btVector3 const *)arg2,arg3,(btVector3 const &)*arg4);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btConvexInternalShape_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btVector3 *_wrap_btConvexInternalShape_localGetSupportingVertex_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = ((btConvexInternalShape const *)arg1)->localGetSupportingVertex((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexInternalShape_getImplicitShapeDimensions_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  result = (btVector3 *) &((btConvexInternalShape const *)arg1)->getImplicitShapeDimensions();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShape_setImplicitShapeDimensions_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  (arg1)->setImplicitShapeDimensions((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btConvexInternalShape_setSafeMargin__SWIG_0_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, float _swig_go_1, float _swig_go_2) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btScalar arg2 ;
+  btScalar arg3 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  (arg1)->setSafeMargin(arg2,arg3);
+  
+}
+
+
+void _wrap_btConvexInternalShape_setSafeMargin__SWIG_1_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, float _swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  (arg1)->setSafeMargin(arg2);
+  
+}
+
+
+void _wrap_btConvexInternalShape_setSafeMargin__SWIG_2_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar arg3 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  (arg1)->setSafeMargin((btVector3 const &)*arg2,arg3);
+  
+}
+
+
+void _wrap_btConvexInternalShape_setSafeMargin__SWIG_3_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  (arg1)->setSafeMargin((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btConvexInternalShape_getAabb_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  ((btConvexInternalShape const *)arg1)->getAabb((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btConvexInternalShape_getAabbSlow_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  ((btConvexInternalShape const *)arg1)->getAabbSlow((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btConvexInternalShape_setLocalScaling_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  (arg1)->setLocalScaling((btVector3 const &)*arg2);
+  
+}
+
+
+btVector3 *_wrap_btConvexInternalShape_getLocalScaling_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  result = (btVector3 *) &((btConvexInternalShape const *)arg1)->getLocalScaling();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexInternalShape_getLocalScalingNV_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  result = (btVector3 *) &((btConvexInternalShape const *)arg1)->getLocalScalingNV();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShape_setMargin_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, float _swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  (arg1)->setMargin(arg2);
+  
+}
+
+
+float _wrap_btConvexInternalShape_getMargin_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  result = (btScalar)((btConvexInternalShape const *)arg1)->getMargin();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btConvexInternalShape_getMarginNV_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  result = (btScalar)((btConvexInternalShape const *)arg1)->getMarginNV();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btConvexInternalShape_getNumPreferredPenetrationDirections_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  result = (int)((btConvexInternalShape const *)arg1)->getNumPreferredPenetrationDirections();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShape_getPreferredPenetrationDirection_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, intgo _swig_go_1, btVector3 *_swig_go_2) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  int arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  ((btConvexInternalShape const *)arg1)->getPreferredPenetrationDirection(arg2,*arg3);
+  
+}
+
+
+intgo _wrap_btConvexInternalShape_calculateSerializeBufferSize_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  result = (int)((btConvexInternalShape const *)arg1)->calculateSerializeBufferSize();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+_gostring_ _wrap_btConvexInternalShape_serialize_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, void *_swig_go_1, btSerializer *_swig_go_2) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  void *arg2 = (void *) 0 ;
+  btSerializer *arg3 = (btSerializer *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  arg3 = *(btSerializer **)&_swig_go_2; 
+  
+  result = (char *)((btConvexInternalShape const *)arg1)->serialize(arg2,arg3);
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexInternalShape_localGetSupportingVertexWithoutMargin_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  result = ((btConvexShape const *)swig_b0)->localGetSupportingVertexWithoutMargin((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexInternalShape_localGetSupportVertexWithoutMarginNonVirtual_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  result = ((btConvexShape const *)swig_b0)->localGetSupportVertexWithoutMarginNonVirtual((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexInternalShape_localGetSupportVertexNonVirtual_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  result = ((btConvexShape const *)swig_b0)->localGetSupportVertexNonVirtual((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btConvexInternalShape_getMarginNonVirtual_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  result = (btScalar)((btConvexShape const *)swig_b0)->getMarginNonVirtual();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShape_getAabbNonVirtual_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  ((btConvexShape const *)swig_b0)->getAabbNonVirtual((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btConvexInternalShape_project_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, float *_swig_go_3, float *_swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btScalar *arg5 = 0 ;
+  btVector3 *arg6 = 0 ;
+  btVector3 *arg7 = 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  arg5 = *(btScalar **)&_swig_go_4; 
+  arg6 = *(btVector3 **)&_swig_go_5; 
+  arg7 = *(btVector3 **)&_swig_go_6; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  ((btConvexShape const *)swig_b0)->project((btTransform const &)*arg2,(btVector3 const &)*arg3,*arg4,*arg5,*arg6,*arg7);
+  
+}
+
+
+void _wrap_btConvexInternalShape_batchedUnitVectorGetSupportingVertexWithoutMargin_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, intgo _swig_go_3) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  btVector3 *arg3 = (btVector3 *) 0 ;
+  int arg4 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = (int)_swig_go_3; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  ((btConvexShape const *)swig_b0)->batchedUnitVectorGetSupportingVertexWithoutMargin((btVector3 const *)arg2,arg3,arg4);
+  
+}
+
+
+void _wrap_btConvexInternalShape_getBoundingSphere_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btVector3 *_swig_go_1, float *_swig_go_2) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btScalar **)&_swig_go_2; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  ((btCollisionShape const *)swig_b1)->getBoundingSphere(*arg2,*arg3);
+  
+}
+
+
+float _wrap_btConvexInternalShape_getAngularMotionDisc_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (btScalar)((btCollisionShape const *)swig_b1)->getAngularMotionDisc();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btConvexInternalShape_getContactBreakingThreshold_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, float _swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btScalar arg2 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (btScalar)((btCollisionShape const *)swig_b1)->getContactBreakingThreshold(arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShape_calculateTemporalAabb_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3, float _swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  btScalar arg5 ;
+  btVector3 *arg6 = 0 ;
+  btVector3 *arg7 = 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  arg5 = (btScalar)_swig_go_4; 
+  arg6 = *(btVector3 **)&_swig_go_5; 
+  arg7 = *(btVector3 **)&_swig_go_6; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  ((btCollisionShape const *)swig_b1)->calculateTemporalAabb((btTransform const &)*arg2,(btVector3 const &)*arg3,(btVector3 const &)*arg4,arg5,*arg6,*arg7);
+  
+}
+
+
+bool _wrap_btConvexInternalShape_isPolyhedral_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (bool)((btCollisionShape const *)swig_b1)->isPolyhedral();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalShape_isConvex2d_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (bool)((btCollisionShape const *)swig_b1)->isConvex2d();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalShape_isConvex_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (bool)((btCollisionShape const *)swig_b1)->isConvex();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalShape_isNonMoving_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (bool)((btCollisionShape const *)swig_b1)->isNonMoving();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalShape_isConcave_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (bool)((btCollisionShape const *)swig_b1)->isConcave();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalShape_isCompound_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (bool)((btCollisionShape const *)swig_b1)->isCompound();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalShape_isSoftBody_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (bool)((btCollisionShape const *)swig_b1)->isSoftBody();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalShape_isInfinite_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (bool)((btCollisionShape const *)swig_b1)->isInfinite();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShape_calculateLocalInertia_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, float _swig_go_1, btVector3 *_swig_go_2) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btScalar arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  ((btCollisionShape const *)swig_b1)->calculateLocalInertia(arg2,*arg3);
+  
+}
+
+
+_gostring_ _wrap_btConvexInternalShape_getName_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (char *)((btCollisionShape const *)swig_b1)->getName();
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btConvexInternalShape_getShapeType_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (int)((btCollisionShape const *)swig_b1)->getShapeType();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexInternalShape_getAnisotropicRollingFrictionDirection_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = ((btCollisionShape const *)swig_b1)->getAnisotropicRollingFrictionDirection();
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShape_setUserPointer_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, void *_swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  void *arg2 = (void *) 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  (swig_b1)->setUserPointer(arg2);
+  
+}
+
+
+void *_wrap_btConvexInternalShape_getUserPointer_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  void *result = 0 ;
+  void *_swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (void *)((btCollisionShape const *)swig_b1)->getUserPointer();
+  *(void **)&_swig_go_result = (void *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShape_setUserIndex_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, intgo _swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  (swig_b1)->setUserIndex(arg2);
+  
+}
+
+
+intgo _wrap_btConvexInternalShape_getUserIndex_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (int)((btCollisionShape const *)swig_b1)->getUserIndex();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShape_setUserIndex2_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, intgo _swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  (swig_b1)->setUserIndex2(arg2);
+  
+}
+
+
+intgo _wrap_btConvexInternalShape_getUserIndex2_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  result = (int)((btCollisionShape const *)swig_b1)->getUserIndex2();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShape_serializeSingleShape_mbt_220ac3041cacbc73(btConvexInternalShape *_swig_go_0, btSerializer *_swig_go_1) {
+  btConvexInternalShape *arg1 = (btConvexInternalShape *) 0 ;
+  btSerializer *arg2 = (btSerializer *) 0 ;
+  
+  arg1 = *(btConvexInternalShape **)&_swig_go_0; 
+  arg2 = *(btSerializer **)&_swig_go_1; 
+  
+  btConvexShape *swig_b0 = (btConvexShape *)arg1;
+  btCollisionShape *swig_b1 = (btCollisionShape *)swig_b0;
+  ((btCollisionShape const *)swig_b1)->serializeSingleShape(arg2);
+  
+}
+
+
+void _wrap_btConvexInternalShapeData_m_collisionShapeData_set_mbt_220ac3041cacbc73(btConvexInternalShapeData *_swig_go_0, btCollisionShapeData *_swig_go_1) {
+  btConvexInternalShapeData *arg1 = (btConvexInternalShapeData *) 0 ;
+  btCollisionShapeData *arg2 = (btCollisionShapeData *) 0 ;
+  
+  arg1 = *(btConvexInternalShapeData **)&_swig_go_0; 
+  arg2 = *(btCollisionShapeData **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_collisionShapeData = *arg2;
+  
+}
+
+
+btCollisionShapeData *_wrap_btConvexInternalShapeData_m_collisionShapeData_get_mbt_220ac3041cacbc73(btConvexInternalShapeData *_swig_go_0) {
+  btConvexInternalShapeData *arg1 = (btConvexInternalShapeData *) 0 ;
+  btCollisionShapeData *result = 0 ;
+  btCollisionShapeData *_swig_go_result;
+  
+  arg1 = *(btConvexInternalShapeData **)&_swig_go_0; 
+  
+  result = (btCollisionShapeData *)& ((arg1)->m_collisionShapeData);
+  *(btCollisionShapeData **)&_swig_go_result = (btCollisionShapeData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShapeData_m_localScaling_set_mbt_220ac3041cacbc73(btConvexInternalShapeData *_swig_go_0, btVector3FloatData *_swig_go_1) {
+  btConvexInternalShapeData *arg1 = (btConvexInternalShapeData *) 0 ;
+  btVector3FloatData *arg2 = (btVector3FloatData *) 0 ;
+  
+  arg1 = *(btConvexInternalShapeData **)&_swig_go_0; 
+  arg2 = *(btVector3FloatData **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_localScaling = *arg2;
+  
+}
+
+
+btVector3FloatData *_wrap_btConvexInternalShapeData_m_localScaling_get_mbt_220ac3041cacbc73(btConvexInternalShapeData *_swig_go_0) {
+  btConvexInternalShapeData *arg1 = (btConvexInternalShapeData *) 0 ;
+  btVector3FloatData *result = 0 ;
+  btVector3FloatData *_swig_go_result;
+  
+  arg1 = *(btConvexInternalShapeData **)&_swig_go_0; 
+  
+  result = (btVector3FloatData *)& ((arg1)->m_localScaling);
+  *(btVector3FloatData **)&_swig_go_result = (btVector3FloatData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShapeData_m_implicitShapeDimensions_set_mbt_220ac3041cacbc73(btConvexInternalShapeData *_swig_go_0, btVector3FloatData *_swig_go_1) {
+  btConvexInternalShapeData *arg1 = (btConvexInternalShapeData *) 0 ;
+  btVector3FloatData *arg2 = (btVector3FloatData *) 0 ;
+  
+  arg1 = *(btConvexInternalShapeData **)&_swig_go_0; 
+  arg2 = *(btVector3FloatData **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_implicitShapeDimensions = *arg2;
+  
+}
+
+
+btVector3FloatData *_wrap_btConvexInternalShapeData_m_implicitShapeDimensions_get_mbt_220ac3041cacbc73(btConvexInternalShapeData *_swig_go_0) {
+  btConvexInternalShapeData *arg1 = (btConvexInternalShapeData *) 0 ;
+  btVector3FloatData *result = 0 ;
+  btVector3FloatData *_swig_go_result;
+  
+  arg1 = *(btConvexInternalShapeData **)&_swig_go_0; 
+  
+  result = (btVector3FloatData *)& ((arg1)->m_implicitShapeDimensions);
+  *(btVector3FloatData **)&_swig_go_result = (btVector3FloatData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShapeData_m_collisionMargin_set_mbt_220ac3041cacbc73(btConvexInternalShapeData *_swig_go_0, float _swig_go_1) {
+  btConvexInternalShapeData *arg1 = (btConvexInternalShapeData *) 0 ;
+  float arg2 ;
+  
+  arg1 = *(btConvexInternalShapeData **)&_swig_go_0; 
+  arg2 = (float)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_collisionMargin = arg2;
+  
+}
+
+
+float _wrap_btConvexInternalShapeData_m_collisionMargin_get_mbt_220ac3041cacbc73(btConvexInternalShapeData *_swig_go_0) {
+  btConvexInternalShapeData *arg1 = (btConvexInternalShapeData *) 0 ;
+  float result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexInternalShapeData **)&_swig_go_0; 
+  
+  result = (float) ((arg1)->m_collisionMargin);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalShapeData_m_padding_set_mbt_220ac3041cacbc73(btConvexInternalShapeData *_swig_go_0, intgo _swig_go_1) {
+  btConvexInternalShapeData *arg1 = (btConvexInternalShapeData *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btConvexInternalShapeData **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_padding = arg2;
+  
+}
+
+
+intgo _wrap_btConvexInternalShapeData_m_padding_get_mbt_220ac3041cacbc73(btConvexInternalShapeData *_swig_go_0) {
+  btConvexInternalShapeData *arg1 = (btConvexInternalShapeData *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexInternalShapeData **)&_swig_go_0; 
+  
+  result = (int) ((arg1)->m_padding);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btConvexInternalShapeData *_wrap_new_btConvexInternalShapeData_mbt_220ac3041cacbc73() {
+  btConvexInternalShapeData *result = 0 ;
+  btConvexInternalShapeData *_swig_go_result;
+  
+  
+  result = (btConvexInternalShapeData *)new btConvexInternalShapeData();
+  *(btConvexInternalShapeData **)&_swig_go_result = (btConvexInternalShapeData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btConvexInternalShapeData_mbt_220ac3041cacbc73(btConvexInternalShapeData *_swig_go_0) {
+  btConvexInternalShapeData *arg1 = (btConvexInternalShapeData *) 0 ;
+  
+  arg1 = *(btConvexInternalShapeData **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_setLocalScaling_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  (arg1)->setLocalScaling((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_getAabb_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  ((btConvexInternalAabbCachingShape const *)arg1)->getAabb((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_recalcLocalAabb_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  (arg1)->recalcLocalAabb();
+  
+}
+
+
+void _wrap_delete_btConvexInternalAabbCachingShape_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btVector3 *_wrap_btConvexInternalAabbCachingShape_localGetSupportingVertex_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = ((btConvexInternalShape const *)swig_b0)->localGetSupportingVertex((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexInternalAabbCachingShape_getImplicitShapeDimensions_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (btVector3 *) &((btConvexInternalShape const *)swig_b0)->getImplicitShapeDimensions();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_setImplicitShapeDimensions_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setImplicitShapeDimensions((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_setSafeMargin__SWIG_0_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, float _swig_go_1, float _swig_go_2) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btScalar arg2 ;
+  btScalar arg3 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setSafeMargin(arg2,arg3);
+  
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_setSafeMargin__SWIG_1_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, float _swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setSafeMargin(arg2);
+  
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_setSafeMargin__SWIG_2_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar arg3 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setSafeMargin((btVector3 const &)*arg2,arg3);
+  
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_setSafeMargin__SWIG_3_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setSafeMargin((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_getAabbSlow_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  ((btConvexInternalShape const *)swig_b0)->getAabbSlow((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+btVector3 *_wrap_btConvexInternalAabbCachingShape_getLocalScaling_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (btVector3 *) &((btConvexInternalShape const *)swig_b0)->getLocalScaling();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexInternalAabbCachingShape_getLocalScalingNV_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (btVector3 *) &((btConvexInternalShape const *)swig_b0)->getLocalScalingNV();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_setMargin_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, float _swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setMargin(arg2);
+  
+}
+
+
+float _wrap_btConvexInternalAabbCachingShape_getMargin_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (btScalar)((btConvexInternalShape const *)swig_b0)->getMargin();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btConvexInternalAabbCachingShape_getMarginNV_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (btScalar)((btConvexInternalShape const *)swig_b0)->getMarginNV();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btConvexInternalAabbCachingShape_getNumPreferredPenetrationDirections_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (int)((btConvexInternalShape const *)swig_b0)->getNumPreferredPenetrationDirections();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_getPreferredPenetrationDirection_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, intgo _swig_go_1, btVector3 *_swig_go_2) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  int arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  ((btConvexInternalShape const *)swig_b0)->getPreferredPenetrationDirection(arg2,*arg3);
+  
+}
+
+
+intgo _wrap_btConvexInternalAabbCachingShape_calculateSerializeBufferSize_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (int)((btConvexInternalShape const *)swig_b0)->calculateSerializeBufferSize();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+_gostring_ _wrap_btConvexInternalAabbCachingShape_serialize_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, void *_swig_go_1, btSerializer *_swig_go_2) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  void *arg2 = (void *) 0 ;
+  btSerializer *arg3 = (btSerializer *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  arg3 = *(btSerializer **)&_swig_go_2; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (char *)((btConvexInternalShape const *)swig_b0)->serialize(arg2,arg3);
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexInternalAabbCachingShape_localGetSupportingVertexWithoutMargin_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  result = ((btConvexShape const *)swig_b1)->localGetSupportingVertexWithoutMargin((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexInternalAabbCachingShape_localGetSupportVertexWithoutMarginNonVirtual_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  result = ((btConvexShape const *)swig_b1)->localGetSupportVertexWithoutMarginNonVirtual((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexInternalAabbCachingShape_localGetSupportVertexNonVirtual_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  result = ((btConvexShape const *)swig_b1)->localGetSupportVertexNonVirtual((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btConvexInternalAabbCachingShape_getMarginNonVirtual_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  result = (btScalar)((btConvexShape const *)swig_b1)->getMarginNonVirtual();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_getAabbNonVirtual_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  ((btConvexShape const *)swig_b1)->getAabbNonVirtual((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_project_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, float *_swig_go_3, float *_swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btScalar *arg5 = 0 ;
+  btVector3 *arg6 = 0 ;
+  btVector3 *arg7 = 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  arg5 = *(btScalar **)&_swig_go_4; 
+  arg6 = *(btVector3 **)&_swig_go_5; 
+  arg7 = *(btVector3 **)&_swig_go_6; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  ((btConvexShape const *)swig_b1)->project((btTransform const &)*arg2,(btVector3 const &)*arg3,*arg4,*arg5,*arg6,*arg7);
+  
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_batchedUnitVectorGetSupportingVertexWithoutMargin_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, intgo _swig_go_3) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  btVector3 *arg3 = (btVector3 *) 0 ;
+  int arg4 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = (int)_swig_go_3; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  ((btConvexShape const *)swig_b1)->batchedUnitVectorGetSupportingVertexWithoutMargin((btVector3 const *)arg2,arg3,arg4);
+  
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_getBoundingSphere_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1, float *_swig_go_2) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btScalar **)&_swig_go_2; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  ((btCollisionShape const *)swig_b2)->getBoundingSphere(*arg2,*arg3);
+  
+}
+
+
+float _wrap_btConvexInternalAabbCachingShape_getAngularMotionDisc_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (btScalar)((btCollisionShape const *)swig_b2)->getAngularMotionDisc();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btConvexInternalAabbCachingShape_getContactBreakingThreshold_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, float _swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btScalar arg2 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (btScalar)((btCollisionShape const *)swig_b2)->getContactBreakingThreshold(arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_calculateTemporalAabb_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3, float _swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  btScalar arg5 ;
+  btVector3 *arg6 = 0 ;
+  btVector3 *arg7 = 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  arg5 = (btScalar)_swig_go_4; 
+  arg6 = *(btVector3 **)&_swig_go_5; 
+  arg7 = *(btVector3 **)&_swig_go_6; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  ((btCollisionShape const *)swig_b2)->calculateTemporalAabb((btTransform const &)*arg2,(btVector3 const &)*arg3,(btVector3 const &)*arg4,arg5,*arg6,*arg7);
+  
+}
+
+
+bool _wrap_btConvexInternalAabbCachingShape_isPolyhedral_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isPolyhedral();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalAabbCachingShape_isConvex2d_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isConvex2d();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalAabbCachingShape_isConvex_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isConvex();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalAabbCachingShape_isNonMoving_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isNonMoving();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalAabbCachingShape_isConcave_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isConcave();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalAabbCachingShape_isCompound_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isCompound();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalAabbCachingShape_isSoftBody_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isSoftBody();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btConvexInternalAabbCachingShape_isInfinite_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isInfinite();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_calculateLocalInertia_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, float _swig_go_1, btVector3 *_swig_go_2) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btScalar arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  ((btCollisionShape const *)swig_b2)->calculateLocalInertia(arg2,*arg3);
+  
+}
+
+
+_gostring_ _wrap_btConvexInternalAabbCachingShape_getName_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (char *)((btCollisionShape const *)swig_b2)->getName();
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btConvexInternalAabbCachingShape_getShapeType_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (int)((btCollisionShape const *)swig_b2)->getShapeType();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btConvexInternalAabbCachingShape_getAnisotropicRollingFrictionDirection_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = ((btCollisionShape const *)swig_b2)->getAnisotropicRollingFrictionDirection();
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_setUserPointer_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, void *_swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  void *arg2 = (void *) 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  (swig_b2)->setUserPointer(arg2);
+  
+}
+
+
+void *_wrap_btConvexInternalAabbCachingShape_getUserPointer_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  void *result = 0 ;
+  void *_swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (void *)((btCollisionShape const *)swig_b2)->getUserPointer();
+  *(void **)&_swig_go_result = (void *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_setUserIndex_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, intgo _swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  (swig_b2)->setUserIndex(arg2);
+  
+}
+
+
+intgo _wrap_btConvexInternalAabbCachingShape_getUserIndex_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (int)((btCollisionShape const *)swig_b2)->getUserIndex();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_setUserIndex2_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, intgo _swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  (swig_b2)->setUserIndex2(arg2);
+  
+}
+
+
+intgo _wrap_btConvexInternalAabbCachingShape_getUserIndex2_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (int)((btCollisionShape const *)swig_b2)->getUserIndex2();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexInternalAabbCachingShape_serializeSingleShape_mbt_220ac3041cacbc73(btConvexInternalAabbCachingShape *_swig_go_0, btSerializer *_swig_go_1) {
+  btConvexInternalAabbCachingShape *arg1 = (btConvexInternalAabbCachingShape *) 0 ;
+  btSerializer *arg2 = (btSerializer *) 0 ;
+  
+  arg1 = *(btConvexInternalAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btSerializer **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  ((btCollisionShape const *)swig_b2)->serializeSingleShape(arg2);
+  
+}
+
+
+void _wrap_delete_btPolyhedralConvexShape_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+bool _wrap_btPolyhedralConvexShape_initializePolyhedralFeatures__SWIG_0_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, intgo _swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int arg2 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  result = (bool)(arg1)->initializePolyhedralFeatures(arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexShape_initializePolyhedralFeatures__SWIG_1_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  result = (bool)(arg1)->initializePolyhedralFeatures();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_setPolyhedralFeatures_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btConvexPolyhedron *_swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btConvexPolyhedron *arg2 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btConvexPolyhedron **)&_swig_go_1; 
+  
+  (arg1)->setPolyhedralFeatures(*arg2);
+  
+}
+
+
+btConvexPolyhedron *_wrap_btPolyhedralConvexShape_getConvexPolyhedron_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btConvexPolyhedron *result = 0 ;
+  btConvexPolyhedron *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  result = (btConvexPolyhedron *)((btPolyhedralConvexShape const *)arg1)->getConvexPolyhedron();
+  *(btConvexPolyhedron **)&_swig_go_result = (btConvexPolyhedron *)result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexShape_localGetSupportingVertexWithoutMargin_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = ((btPolyhedralConvexShape const *)arg1)->localGetSupportingVertexWithoutMargin((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_batchedUnitVectorGetSupportingVertexWithoutMargin_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, intgo _swig_go_3) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  btVector3 *arg3 = (btVector3 *) 0 ;
+  int arg4 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = (int)_swig_go_3; 
+  
+  ((btPolyhedralConvexShape const *)arg1)->batchedUnitVectorGetSupportingVertexWithoutMargin((btVector3 const *)arg2,arg3,arg4);
+  
+}
+
+
+void _wrap_btPolyhedralConvexShape_calculateLocalInertia_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, float _swig_go_1, btVector3 *_swig_go_2) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btScalar arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  ((btPolyhedralConvexShape const *)arg1)->calculateLocalInertia(arg2,*arg3);
+  
+}
+
+
+intgo _wrap_btPolyhedralConvexShape_getNumVertices_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  result = (int)((btPolyhedralConvexShape const *)arg1)->getNumVertices();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btPolyhedralConvexShape_getNumEdges_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  result = (int)((btPolyhedralConvexShape const *)arg1)->getNumEdges();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_getEdge_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, intgo _swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int arg2 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  ((btPolyhedralConvexShape const *)arg1)->getEdge(arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btPolyhedralConvexShape_getVertex_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, intgo _swig_go_1, btVector3 *_swig_go_2) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  ((btPolyhedralConvexShape const *)arg1)->getVertex(arg2,*arg3);
+  
+}
+
+
+intgo _wrap_btPolyhedralConvexShape_getNumPlanes_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  result = (int)((btPolyhedralConvexShape const *)arg1)->getNumPlanes();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_getPlane_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, intgo _swig_go_3) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  int arg4 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = (int)_swig_go_3; 
+  
+  ((btPolyhedralConvexShape const *)arg1)->getPlane(*arg2,*arg3,arg4);
+  
+}
+
+
+bool _wrap_btPolyhedralConvexShape_isInside_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar arg3 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  result = (bool)((btPolyhedralConvexShape const *)arg1)->isInside((btVector3 const &)*arg2,arg3);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexShape_localGetSupportingVertex_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = ((btConvexInternalShape const *)swig_b0)->localGetSupportingVertex((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexShape_getImplicitShapeDimensions_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (btVector3 *) &((btConvexInternalShape const *)swig_b0)->getImplicitShapeDimensions();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_setImplicitShapeDimensions_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setImplicitShapeDimensions((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btPolyhedralConvexShape_setSafeMargin__SWIG_0_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, float _swig_go_1, float _swig_go_2) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btScalar arg2 ;
+  btScalar arg3 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setSafeMargin(arg2,arg3);
+  
+}
+
+
+void _wrap_btPolyhedralConvexShape_setSafeMargin__SWIG_1_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, float _swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setSafeMargin(arg2);
+  
+}
+
+
+void _wrap_btPolyhedralConvexShape_setSafeMargin__SWIG_2_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar arg3 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setSafeMargin((btVector3 const &)*arg2,arg3);
+  
+}
+
+
+void _wrap_btPolyhedralConvexShape_setSafeMargin__SWIG_3_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setSafeMargin((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btPolyhedralConvexShape_getAabb_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  ((btConvexInternalShape const *)swig_b0)->getAabb((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btPolyhedralConvexShape_getAabbSlow_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  ((btConvexInternalShape const *)swig_b0)->getAabbSlow((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btPolyhedralConvexShape_setLocalScaling_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setLocalScaling((btVector3 const &)*arg2);
+  
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexShape_getLocalScaling_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (btVector3 *) &((btConvexInternalShape const *)swig_b0)->getLocalScaling();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexShape_getLocalScalingNV_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (btVector3 *) &((btConvexInternalShape const *)swig_b0)->getLocalScalingNV();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_setMargin_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, float _swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  (swig_b0)->setMargin(arg2);
+  
+}
+
+
+float _wrap_btPolyhedralConvexShape_getMargin_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (btScalar)((btConvexInternalShape const *)swig_b0)->getMargin();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btPolyhedralConvexShape_getMarginNV_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (btScalar)((btConvexInternalShape const *)swig_b0)->getMarginNV();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btPolyhedralConvexShape_getNumPreferredPenetrationDirections_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (int)((btConvexInternalShape const *)swig_b0)->getNumPreferredPenetrationDirections();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_getPreferredPenetrationDirection_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, intgo _swig_go_1, btVector3 *_swig_go_2) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  ((btConvexInternalShape const *)swig_b0)->getPreferredPenetrationDirection(arg2,*arg3);
+  
+}
+
+
+intgo _wrap_btPolyhedralConvexShape_calculateSerializeBufferSize_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (int)((btConvexInternalShape const *)swig_b0)->calculateSerializeBufferSize();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+_gostring_ _wrap_btPolyhedralConvexShape_serialize_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, void *_swig_go_1, btSerializer *_swig_go_2) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  void *arg2 = (void *) 0 ;
+  btSerializer *arg3 = (btSerializer *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  arg3 = *(btSerializer **)&_swig_go_2; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  result = (char *)((btConvexInternalShape const *)swig_b0)->serialize(arg2,arg3);
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexShape_localGetSupportVertexWithoutMarginNonVirtual_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  result = ((btConvexShape const *)swig_b1)->localGetSupportVertexWithoutMarginNonVirtual((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexShape_localGetSupportVertexNonVirtual_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  result = ((btConvexShape const *)swig_b1)->localGetSupportVertexNonVirtual((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btPolyhedralConvexShape_getMarginNonVirtual_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  result = (btScalar)((btConvexShape const *)swig_b1)->getMarginNonVirtual();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_getAabbNonVirtual_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  ((btConvexShape const *)swig_b1)->getAabbNonVirtual((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btPolyhedralConvexShape_project_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, float *_swig_go_3, float *_swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btScalar *arg5 = 0 ;
+  btVector3 *arg6 = 0 ;
+  btVector3 *arg7 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  arg5 = *(btScalar **)&_swig_go_4; 
+  arg6 = *(btVector3 **)&_swig_go_5; 
+  arg7 = *(btVector3 **)&_swig_go_6; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  ((btConvexShape const *)swig_b1)->project((btTransform const &)*arg2,(btVector3 const &)*arg3,*arg4,*arg5,*arg6,*arg7);
+  
+}
+
+
+void _wrap_btPolyhedralConvexShape_getBoundingSphere_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btVector3 *_swig_go_1, float *_swig_go_2) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btScalar **)&_swig_go_2; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  ((btCollisionShape const *)swig_b2)->getBoundingSphere(*arg2,*arg3);
+  
+}
+
+
+float _wrap_btPolyhedralConvexShape_getAngularMotionDisc_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (btScalar)((btCollisionShape const *)swig_b2)->getAngularMotionDisc();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btPolyhedralConvexShape_getContactBreakingThreshold_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, float _swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btScalar arg2 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (btScalar)((btCollisionShape const *)swig_b2)->getContactBreakingThreshold(arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_calculateTemporalAabb_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3, float _swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  btScalar arg5 ;
+  btVector3 *arg6 = 0 ;
+  btVector3 *arg7 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  arg5 = (btScalar)_swig_go_4; 
+  arg6 = *(btVector3 **)&_swig_go_5; 
+  arg7 = *(btVector3 **)&_swig_go_6; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  ((btCollisionShape const *)swig_b2)->calculateTemporalAabb((btTransform const &)*arg2,(btVector3 const &)*arg3,(btVector3 const &)*arg4,arg5,*arg6,*arg7);
+  
+}
+
+
+bool _wrap_btPolyhedralConvexShape_isPolyhedral_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isPolyhedral();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexShape_isConvex2d_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isConvex2d();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexShape_isConvex_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isConvex();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexShape_isNonMoving_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isNonMoving();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexShape_isConcave_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isConcave();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexShape_isCompound_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isCompound();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexShape_isSoftBody_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isSoftBody();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexShape_isInfinite_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (bool)((btCollisionShape const *)swig_b2)->isInfinite();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+_gostring_ _wrap_btPolyhedralConvexShape_getName_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (char *)((btCollisionShape const *)swig_b2)->getName();
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btPolyhedralConvexShape_getShapeType_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (int)((btCollisionShape const *)swig_b2)->getShapeType();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexShape_getAnisotropicRollingFrictionDirection_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = ((btCollisionShape const *)swig_b2)->getAnisotropicRollingFrictionDirection();
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_setUserPointer_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, void *_swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  void *arg2 = (void *) 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  (swig_b2)->setUserPointer(arg2);
+  
+}
+
+
+void *_wrap_btPolyhedralConvexShape_getUserPointer_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  void *result = 0 ;
+  void *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (void *)((btCollisionShape const *)swig_b2)->getUserPointer();
+  *(void **)&_swig_go_result = (void *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_setUserIndex_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, intgo _swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  (swig_b2)->setUserIndex(arg2);
+  
+}
+
+
+intgo _wrap_btPolyhedralConvexShape_getUserIndex_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (int)((btCollisionShape const *)swig_b2)->getUserIndex();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_setUserIndex2_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, intgo _swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  (swig_b2)->setUserIndex2(arg2);
+  
+}
+
+
+intgo _wrap_btPolyhedralConvexShape_getUserIndex2_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  result = (int)((btCollisionShape const *)swig_b2)->getUserIndex2();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexShape_serializeSingleShape_mbt_220ac3041cacbc73(btPolyhedralConvexShape *_swig_go_0, btSerializer *_swig_go_1) {
+  btPolyhedralConvexShape *arg1 = (btPolyhedralConvexShape *) 0 ;
+  btSerializer *arg2 = (btSerializer *) 0 ;
+  
+  arg1 = *(btPolyhedralConvexShape **)&_swig_go_0; 
+  arg2 = *(btSerializer **)&_swig_go_1; 
+  
+  btConvexInternalShape *swig_b0 = (btConvexInternalShape *)arg1;
+  btConvexShape *swig_b1 = (btConvexShape *)swig_b0;
+  btCollisionShape *swig_b2 = (btCollisionShape *)swig_b1;
+  ((btCollisionShape const *)swig_b2)->serializeSingleShape(arg2);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_getNonvirtualAabb_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3, float _swig_go_4) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  btScalar arg5 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  arg5 = (btScalar)_swig_go_4; 
+  
+  ((btPolyhedralConvexAabbCachingShape const *)arg1)->getNonvirtualAabb((btTransform const &)*arg2,*arg3,*arg4,arg5);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_setLocalScaling_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  (arg1)->setLocalScaling((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_getAabb_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  ((btPolyhedralConvexAabbCachingShape const *)arg1)->getAabb((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_recalcLocalAabb_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  (arg1)->recalcLocalAabb();
+  
+}
+
+
+void _wrap_delete_btPolyhedralConvexAabbCachingShape_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+bool _wrap_btPolyhedralConvexAabbCachingShape_initializePolyhedralFeatures__SWIG_0_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, intgo _swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int arg2 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  result = (bool)(swig_b0)->initializePolyhedralFeatures(arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexAabbCachingShape_initializePolyhedralFeatures__SWIG_1_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  result = (bool)(swig_b0)->initializePolyhedralFeatures();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_setPolyhedralFeatures_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btConvexPolyhedron *_swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btConvexPolyhedron *arg2 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btConvexPolyhedron **)&_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  (swig_b0)->setPolyhedralFeatures(*arg2);
+  
+}
+
+
+btConvexPolyhedron *_wrap_btPolyhedralConvexAabbCachingShape_getConvexPolyhedron_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btConvexPolyhedron *result = 0 ;
+  btConvexPolyhedron *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  result = (btConvexPolyhedron *)((btPolyhedralConvexShape const *)swig_b0)->getConvexPolyhedron();
+  *(btConvexPolyhedron **)&_swig_go_result = (btConvexPolyhedron *)result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexAabbCachingShape_localGetSupportingVertexWithoutMargin_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  result = ((btPolyhedralConvexShape const *)swig_b0)->localGetSupportingVertexWithoutMargin((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_batchedUnitVectorGetSupportingVertexWithoutMargin_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, intgo _swig_go_3) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  btVector3 *arg3 = (btVector3 *) 0 ;
+  int arg4 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = (int)_swig_go_3; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  ((btPolyhedralConvexShape const *)swig_b0)->batchedUnitVectorGetSupportingVertexWithoutMargin((btVector3 const *)arg2,arg3,arg4);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_calculateLocalInertia_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, float _swig_go_1, btVector3 *_swig_go_2) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btScalar arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  ((btPolyhedralConvexShape const *)swig_b0)->calculateLocalInertia(arg2,*arg3);
+  
+}
+
+
+intgo _wrap_btPolyhedralConvexAabbCachingShape_getNumVertices_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  result = (int)((btPolyhedralConvexShape const *)swig_b0)->getNumVertices();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btPolyhedralConvexAabbCachingShape_getNumEdges_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  result = (int)((btPolyhedralConvexShape const *)swig_b0)->getNumEdges();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_getEdge_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, intgo _swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int arg2 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  ((btPolyhedralConvexShape const *)swig_b0)->getEdge(arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_getVertex_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, intgo _swig_go_1, btVector3 *_swig_go_2) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  ((btPolyhedralConvexShape const *)swig_b0)->getVertex(arg2,*arg3);
+  
+}
+
+
+intgo _wrap_btPolyhedralConvexAabbCachingShape_getNumPlanes_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  result = (int)((btPolyhedralConvexShape const *)swig_b0)->getNumPlanes();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_getPlane_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, intgo _swig_go_3) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  int arg4 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = (int)_swig_go_3; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  ((btPolyhedralConvexShape const *)swig_b0)->getPlane(*arg2,*arg3,arg4);
+  
+}
+
+
+bool _wrap_btPolyhedralConvexAabbCachingShape_isInside_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar arg3 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  result = (bool)((btPolyhedralConvexShape const *)swig_b0)->isInside((btVector3 const &)*arg2,arg3);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexAabbCachingShape_localGetSupportingVertex_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  result = ((btConvexInternalShape const *)swig_b1)->localGetSupportingVertex((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexAabbCachingShape_getImplicitShapeDimensions_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  result = (btVector3 *) &((btConvexInternalShape const *)swig_b1)->getImplicitShapeDimensions();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_setImplicitShapeDimensions_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  (swig_b1)->setImplicitShapeDimensions((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_setSafeMargin__SWIG_0_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, float _swig_go_1, float _swig_go_2) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btScalar arg2 ;
+  btScalar arg3 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  (swig_b1)->setSafeMargin(arg2,arg3);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_setSafeMargin__SWIG_1_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, float _swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  (swig_b1)->setSafeMargin(arg2);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_setSafeMargin__SWIG_2_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar arg3 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  (swig_b1)->setSafeMargin((btVector3 const &)*arg2,arg3);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_setSafeMargin__SWIG_3_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  (swig_b1)->setSafeMargin((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_getAabbSlow_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  ((btConvexInternalShape const *)swig_b1)->getAabbSlow((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexAabbCachingShape_getLocalScaling_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  result = (btVector3 *) &((btConvexInternalShape const *)swig_b1)->getLocalScaling();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexAabbCachingShape_getLocalScalingNV_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  result = (btVector3 *) &((btConvexInternalShape const *)swig_b1)->getLocalScalingNV();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_setMargin_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, float _swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  (swig_b1)->setMargin(arg2);
+  
+}
+
+
+float _wrap_btPolyhedralConvexAabbCachingShape_getMargin_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  result = (btScalar)((btConvexInternalShape const *)swig_b1)->getMargin();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btPolyhedralConvexAabbCachingShape_getMarginNV_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  result = (btScalar)((btConvexInternalShape const *)swig_b1)->getMarginNV();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btPolyhedralConvexAabbCachingShape_getNumPreferredPenetrationDirections_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  result = (int)((btConvexInternalShape const *)swig_b1)->getNumPreferredPenetrationDirections();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_getPreferredPenetrationDirection_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, intgo _swig_go_1, btVector3 *_swig_go_2) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int arg2 ;
+  btVector3 *arg3 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  ((btConvexInternalShape const *)swig_b1)->getPreferredPenetrationDirection(arg2,*arg3);
+  
+}
+
+
+intgo _wrap_btPolyhedralConvexAabbCachingShape_calculateSerializeBufferSize_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  result = (int)((btConvexInternalShape const *)swig_b1)->calculateSerializeBufferSize();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+_gostring_ _wrap_btPolyhedralConvexAabbCachingShape_serialize_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, void *_swig_go_1, btSerializer *_swig_go_2) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  void *arg2 = (void *) 0 ;
+  btSerializer *arg3 = (btSerializer *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  arg3 = *(btSerializer **)&_swig_go_2; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  result = (char *)((btConvexInternalShape const *)swig_b1)->serialize(arg2,arg3);
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexAabbCachingShape_localGetSupportVertexWithoutMarginNonVirtual_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  result = ((btConvexShape const *)swig_b2)->localGetSupportVertexWithoutMarginNonVirtual((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexAabbCachingShape_localGetSupportVertexNonVirtual_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  result = ((btConvexShape const *)swig_b2)->localGetSupportVertexNonVirtual((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btPolyhedralConvexAabbCachingShape_getMarginNonVirtual_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  result = (btScalar)((btConvexShape const *)swig_b2)->getMarginNonVirtual();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_getAabbNonVirtual_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  ((btConvexShape const *)swig_b2)->getAabbNonVirtual((btTransform const &)*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_project_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, float *_swig_go_3, float *_swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btScalar *arg5 = 0 ;
+  btVector3 *arg6 = 0 ;
+  btVector3 *arg7 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  arg5 = *(btScalar **)&_swig_go_4; 
+  arg6 = *(btVector3 **)&_swig_go_5; 
+  arg7 = *(btVector3 **)&_swig_go_6; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  ((btConvexShape const *)swig_b2)->project((btTransform const &)*arg2,(btVector3 const &)*arg3,*arg4,*arg5,*arg6,*arg7);
+  
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_getBoundingSphere_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btVector3 *_swig_go_1, float *_swig_go_2) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btScalar **)&_swig_go_2; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  ((btCollisionShape const *)swig_b3)->getBoundingSphere(*arg2,*arg3);
+  
+}
+
+
+float _wrap_btPolyhedralConvexAabbCachingShape_getAngularMotionDisc_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (btScalar)((btCollisionShape const *)swig_b3)->getAngularMotionDisc();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btPolyhedralConvexAabbCachingShape_getContactBreakingThreshold_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, float _swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btScalar arg2 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (btScalar)((btCollisionShape const *)swig_b3)->getContactBreakingThreshold(arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_calculateTemporalAabb_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3, float _swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  btScalar arg5 ;
+  btVector3 *arg6 = 0 ;
+  btVector3 *arg7 = 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  arg5 = (btScalar)_swig_go_4; 
+  arg6 = *(btVector3 **)&_swig_go_5; 
+  arg7 = *(btVector3 **)&_swig_go_6; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  ((btCollisionShape const *)swig_b3)->calculateTemporalAabb((btTransform const &)*arg2,(btVector3 const &)*arg3,(btVector3 const &)*arg4,arg5,*arg6,*arg7);
+  
+}
+
+
+bool _wrap_btPolyhedralConvexAabbCachingShape_isPolyhedral_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (bool)((btCollisionShape const *)swig_b3)->isPolyhedral();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexAabbCachingShape_isConvex2d_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (bool)((btCollisionShape const *)swig_b3)->isConvex2d();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexAabbCachingShape_isConvex_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (bool)((btCollisionShape const *)swig_b3)->isConvex();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexAabbCachingShape_isNonMoving_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (bool)((btCollisionShape const *)swig_b3)->isNonMoving();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexAabbCachingShape_isConcave_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (bool)((btCollisionShape const *)swig_b3)->isConcave();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexAabbCachingShape_isCompound_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (bool)((btCollisionShape const *)swig_b3)->isCompound();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexAabbCachingShape_isSoftBody_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (bool)((btCollisionShape const *)swig_b3)->isSoftBody();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btPolyhedralConvexAabbCachingShape_isInfinite_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (bool)((btCollisionShape const *)swig_b3)->isInfinite();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+_gostring_ _wrap_btPolyhedralConvexAabbCachingShape_getName_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  char *result = 0 ;
+  _gostring_ _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (char *)((btCollisionShape const *)swig_b3)->getName();
+  _swig_go_result = Swig_AllocateString((char*)result, result ? strlen((char*)result) : 0); 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btPolyhedralConvexAabbCachingShape_getShapeType_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (int)((btCollisionShape const *)swig_b3)->getShapeType();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btPolyhedralConvexAabbCachingShape_getAnisotropicRollingFrictionDirection_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = ((btCollisionShape const *)swig_b3)->getAnisotropicRollingFrictionDirection();
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_setUserPointer_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, void *_swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  void *arg2 = (void *) 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  (swig_b3)->setUserPointer(arg2);
+  
+}
+
+
+void *_wrap_btPolyhedralConvexAabbCachingShape_getUserPointer_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  void *result = 0 ;
+  void *_swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (void *)((btCollisionShape const *)swig_b3)->getUserPointer();
+  *(void **)&_swig_go_result = (void *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_setUserIndex_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, intgo _swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  (swig_b3)->setUserIndex(arg2);
+  
+}
+
+
+intgo _wrap_btPolyhedralConvexAabbCachingShape_getUserIndex_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (int)((btCollisionShape const *)swig_b3)->getUserIndex();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_setUserIndex2_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, intgo _swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  (swig_b3)->setUserIndex2(arg2);
+  
+}
+
+
+intgo _wrap_btPolyhedralConvexAabbCachingShape_getUserIndex2_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  result = (int)((btCollisionShape const *)swig_b3)->getUserIndex2();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btPolyhedralConvexAabbCachingShape_serializeSingleShape_mbt_220ac3041cacbc73(btPolyhedralConvexAabbCachingShape *_swig_go_0, btSerializer *_swig_go_1) {
+  btPolyhedralConvexAabbCachingShape *arg1 = (btPolyhedralConvexAabbCachingShape *) 0 ;
+  btSerializer *arg2 = (btSerializer *) 0 ;
+  
+  arg1 = *(btPolyhedralConvexAabbCachingShape **)&_swig_go_0; 
+  arg2 = *(btSerializer **)&_swig_go_1; 
+  
+  btPolyhedralConvexShape *swig_b0 = (btPolyhedralConvexShape *)arg1;
+  btConvexInternalShape *swig_b1 = (btConvexInternalShape *)swig_b0;
+  btConvexShape *swig_b2 = (btConvexShape *)swig_b1;
+  btCollisionShape *swig_b3 = (btCollisionShape *)swig_b2;
+  ((btCollisionShape const *)swig_b3)->serializeSingleShape(arg2);
+  
+}
+
+
+void _wrap_btFace_m_indices_set_mbt_220ac3041cacbc73(btFace *_swig_go_0, btAlignedObjectArray< int > *_swig_go_1) {
+  btFace *arg1 = (btFace *) 0 ;
+  btAlignedObjectArray< int > *arg2 = (btAlignedObjectArray< int > *) 0 ;
+  
+  arg1 = *(btFace **)&_swig_go_0; 
+  arg2 = *(btAlignedObjectArray< int > **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_indices = *arg2;
+  
+}
+
+
+btAlignedObjectArray< int > *_wrap_btFace_m_indices_get_mbt_220ac3041cacbc73(btFace *_swig_go_0) {
+  btFace *arg1 = (btFace *) 0 ;
+  btAlignedObjectArray< int > *result = 0 ;
+  btAlignedObjectArray< int > *_swig_go_result;
+  
+  arg1 = *(btFace **)&_swig_go_0; 
+  
+  result = (btAlignedObjectArray< int > *)& ((arg1)->m_indices);
+  *(btAlignedObjectArray< int > **)&_swig_go_result = (btAlignedObjectArray< int > *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btFace_m_plane_set_mbt_220ac3041cacbc73(btFace *_swig_go_0, float *_swig_go_1) {
+  btFace *arg1 = (btFace *) 0 ;
+  btScalar *arg2 = (btScalar *) (btScalar *)0 ;
+  
+  arg1 = *(btFace **)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
+  
+  {
+    size_t ii;
+    btScalar *b = (btScalar *) arg1->m_plane;
+    for (ii = 0; ii < (size_t)4; ii++) b[ii] = *((btScalar *) arg2 + ii);
+  }
+  
+}
+
+
+float *_wrap_btFace_m_plane_get_mbt_220ac3041cacbc73(btFace *_swig_go_0) {
+  btFace *arg1 = (btFace *) 0 ;
+  btScalar *result = 0 ;
+  float *_swig_go_result;
+  
+  arg1 = *(btFace **)&_swig_go_0; 
+  
+  result = (btScalar *)(btScalar *) ((arg1)->m_plane);
+  *(btScalar **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btFace *_wrap_new_btFace_mbt_220ac3041cacbc73() {
+  btFace *result = 0 ;
+  btFace *_swig_go_result;
+  
+  
+  result = (btFace *)new btFace();
+  *(btFace **)&_swig_go_result = (btFace *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btFace_mbt_220ac3041cacbc73(btFace *_swig_go_0) {
+  btFace *arg1 = (btFace *) 0 ;
+  
+  arg1 = *(btFace **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btConvexPolyhedron *_wrap_new_btConvexPolyhedron_mbt_220ac3041cacbc73() {
+  btConvexPolyhedron *result = 0 ;
+  btConvexPolyhedron *_swig_go_result;
+  
+  
+  result = (btConvexPolyhedron *)new btConvexPolyhedron();
+  *(btConvexPolyhedron **)&_swig_go_result = (btConvexPolyhedron *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btConvexPolyhedron_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btConvexPolyhedron_m_vertices_set_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0, btAlignedObjectArray< btVector3 > *_swig_go_1) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btAlignedObjectArray< btVector3 > *arg2 = (btAlignedObjectArray< btVector3 > *) 0 ;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  arg2 = *(btAlignedObjectArray< btVector3 > **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_vertices = *arg2;
+  
+}
+
+
+btAlignedObjectArray< btVector3 > *_wrap_btConvexPolyhedron_m_vertices_get_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btAlignedObjectArray< btVector3 > *result = 0 ;
+  btAlignedObjectArray< btVector3 > *_swig_go_result;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  
+  result = (btAlignedObjectArray< btVector3 > *)& ((arg1)->m_vertices);
+  *(btAlignedObjectArray< btVector3 > **)&_swig_go_result = (btAlignedObjectArray< btVector3 > *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexPolyhedron_m_faces_set_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0, btAlignedObjectArray< btFace > *_swig_go_1) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btAlignedObjectArray< btFace > *arg2 = (btAlignedObjectArray< btFace > *) 0 ;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  arg2 = *(btAlignedObjectArray< btFace > **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_faces = *arg2;
+  
+}
+
+
+btAlignedObjectArray< btFace > *_wrap_btConvexPolyhedron_m_faces_get_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btAlignedObjectArray< btFace > *result = 0 ;
+  btAlignedObjectArray< btFace > *_swig_go_result;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  
+  result = (btAlignedObjectArray< btFace > *)& ((arg1)->m_faces);
+  *(btAlignedObjectArray< btFace > **)&_swig_go_result = (btAlignedObjectArray< btFace > *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexPolyhedron_m_uniqueEdges_set_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0, btAlignedObjectArray< btVector3 > *_swig_go_1) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btAlignedObjectArray< btVector3 > *arg2 = (btAlignedObjectArray< btVector3 > *) 0 ;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  arg2 = *(btAlignedObjectArray< btVector3 > **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_uniqueEdges = *arg2;
+  
+}
+
+
+btAlignedObjectArray< btVector3 > *_wrap_btConvexPolyhedron_m_uniqueEdges_get_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btAlignedObjectArray< btVector3 > *result = 0 ;
+  btAlignedObjectArray< btVector3 > *_swig_go_result;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  
+  result = (btAlignedObjectArray< btVector3 > *)& ((arg1)->m_uniqueEdges);
+  *(btAlignedObjectArray< btVector3 > **)&_swig_go_result = (btAlignedObjectArray< btVector3 > *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexPolyhedron_m_localCenter_set_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_localCenter = *arg2;
+  
+}
+
+
+btVector3 *_wrap_btConvexPolyhedron_m_localCenter_get_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  
+  result = (btVector3 *)& ((arg1)->m_localCenter);
+  *(btVector3 **)&_swig_go_result = (btVector3 *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexPolyhedron_m_extents_set_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_extents = *arg2;
+  
+}
+
+
+btVector3 *_wrap_btConvexPolyhedron_m_extents_get_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  
+  result = (btVector3 *)& ((arg1)->m_extents);
+  *(btVector3 **)&_swig_go_result = (btVector3 *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexPolyhedron_m_radius_set_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0, float _swig_go_1) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_radius = arg2;
+  
+}
+
+
+float _wrap_btConvexPolyhedron_m_radius_get_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  
+  result = (btScalar) ((arg1)->m_radius);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexPolyhedron_mC_set_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->mC = *arg2;
+  
+}
+
+
+btVector3 *_wrap_btConvexPolyhedron_mC_get_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  
+  result = (btVector3 *)& ((arg1)->mC);
+  *(btVector3 **)&_swig_go_result = (btVector3 *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexPolyhedron_mE_set_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0, btVector3 *_swig_go_1) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->mE = *arg2;
+  
+}
+
+
+btVector3 *_wrap_btConvexPolyhedron_mE_get_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  
+  result = (btVector3 *)& ((arg1)->mE);
+  *(btVector3 **)&_swig_go_result = (btVector3 *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexPolyhedron_initialize_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  
+  (arg1)->initialize();
+  
+}
+
+
+void _wrap_btConvexPolyhedron_initialize2_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  
+  (arg1)->initialize2();
+  
+}
+
+
+bool _wrap_btConvexPolyhedron_testContainment_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  
+  result = (bool)((btConvexPolyhedron const *)arg1)->testContainment();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btConvexPolyhedron_project_mbt_220ac3041cacbc73(btConvexPolyhedron *_swig_go_0, btTransform *_swig_go_1, btVector3 *_swig_go_2, float *_swig_go_3, float *_swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btConvexPolyhedron *arg1 = (btConvexPolyhedron *) 0 ;
+  btTransform *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btScalar *arg5 = 0 ;
+  btVector3 *arg6 = 0 ;
+  btVector3 *arg7 = 0 ;
+  
+  arg1 = *(btConvexPolyhedron **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  arg5 = *(btScalar **)&_swig_go_4; 
+  arg6 = *(btVector3 **)&_swig_go_5; 
+  arg7 = *(btVector3 **)&_swig_go_6; 
+  
+  ((btConvexPolyhedron const *)arg1)->project((btTransform const &)*arg2,(btVector3 const &)*arg3,*arg4,*arg5,*arg6,*arg7);
+  
+}
+
+
+bool _wrap_IsAlmostZero1_mbt_220ac3041cacbc73(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (bool)IsAlmostZero1((btVector3 const &)*arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btInternalVertexPair *_wrap_new_btInternalVertexPair_mbt_220ac3041cacbc73(short _swig_go_0, short _swig_go_1) {
+  short arg1 ;
+  short arg2 ;
+  btInternalVertexPair *result = 0 ;
+  btInternalVertexPair *_swig_go_result;
+  
+  arg1 = (short)_swig_go_0; 
+  arg2 = (short)_swig_go_1; 
+  
+  result = (btInternalVertexPair *)new btInternalVertexPair(arg1,arg2);
+  *(btInternalVertexPair **)&_swig_go_result = (btInternalVertexPair *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btInternalVertexPair_m_v0_set_mbt_220ac3041cacbc73(btInternalVertexPair *_swig_go_0, short _swig_go_1) {
+  btInternalVertexPair *arg1 = (btInternalVertexPair *) 0 ;
+  short arg2 ;
+  
+  arg1 = *(btInternalVertexPair **)&_swig_go_0; 
+  arg2 = (short)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_v0 = arg2;
+  
+}
+
+
+short _wrap_btInternalVertexPair_m_v0_get_mbt_220ac3041cacbc73(btInternalVertexPair *_swig_go_0) {
+  btInternalVertexPair *arg1 = (btInternalVertexPair *) 0 ;
+  short result;
+  short _swig_go_result;
+  
+  arg1 = *(btInternalVertexPair **)&_swig_go_0; 
+  
+  result = (short) ((arg1)->m_v0);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btInternalVertexPair_m_v1_set_mbt_220ac3041cacbc73(btInternalVertexPair *_swig_go_0, short _swig_go_1) {
+  btInternalVertexPair *arg1 = (btInternalVertexPair *) 0 ;
+  short arg2 ;
+  
+  arg1 = *(btInternalVertexPair **)&_swig_go_0; 
+  arg2 = (short)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_v1 = arg2;
+  
+}
+
+
+short _wrap_btInternalVertexPair_m_v1_get_mbt_220ac3041cacbc73(btInternalVertexPair *_swig_go_0) {
+  btInternalVertexPair *arg1 = (btInternalVertexPair *) 0 ;
+  short result;
+  short _swig_go_result;
+  
+  arg1 = *(btInternalVertexPair **)&_swig_go_0; 
+  
+  result = (short) ((arg1)->m_v1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btInternalVertexPair_getHash_mbt_220ac3041cacbc73(btInternalVertexPair *_swig_go_0) {
+  btInternalVertexPair *arg1 = (btInternalVertexPair *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btInternalVertexPair **)&_swig_go_0; 
+  
+  result = (int)((btInternalVertexPair const *)arg1)->getHash();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btInternalVertexPair_equals_mbt_220ac3041cacbc73(btInternalVertexPair *_swig_go_0, btInternalVertexPair *_swig_go_1) {
+  btInternalVertexPair *arg1 = (btInternalVertexPair *) 0 ;
+  btInternalVertexPair *arg2 = 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btInternalVertexPair **)&_swig_go_0; 
+  arg2 = *(btInternalVertexPair **)&_swig_go_1; 
+  
+  result = (bool)((btInternalVertexPair const *)arg1)->equals((btInternalVertexPair const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btInternalVertexPair_mbt_220ac3041cacbc73(btInternalVertexPair *_swig_go_0) {
+  btInternalVertexPair *arg1 = (btInternalVertexPair *) 0 ;
+  
+  arg1 = *(btInternalVertexPair **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btInternalEdge *_wrap_new_btInternalEdge_mbt_220ac3041cacbc73() {
+  btInternalEdge *result = 0 ;
+  btInternalEdge *_swig_go_result;
+  
+  
+  result = (btInternalEdge *)new btInternalEdge();
+  *(btInternalEdge **)&_swig_go_result = (btInternalEdge *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btInternalEdge_m_face0_set_mbt_220ac3041cacbc73(btInternalEdge *_swig_go_0, short _swig_go_1) {
+  btInternalEdge *arg1 = (btInternalEdge *) 0 ;
+  short arg2 ;
+  
+  arg1 = *(btInternalEdge **)&_swig_go_0; 
+  arg2 = (short)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_face0 = arg2;
+  
+}
+
+
+short _wrap_btInternalEdge_m_face0_get_mbt_220ac3041cacbc73(btInternalEdge *_swig_go_0) {
+  btInternalEdge *arg1 = (btInternalEdge *) 0 ;
+  short result;
+  short _swig_go_result;
+  
+  arg1 = *(btInternalEdge **)&_swig_go_0; 
+  
+  result = (short) ((arg1)->m_face0);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btInternalEdge_m_face1_set_mbt_220ac3041cacbc73(btInternalEdge *_swig_go_0, short _swig_go_1) {
+  btInternalEdge *arg1 = (btInternalEdge *) 0 ;
+  short arg2 ;
+  
+  arg1 = *(btInternalEdge **)&_swig_go_0; 
+  arg2 = (short)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_face1 = arg2;
+  
+}
+
+
+short _wrap_btInternalEdge_m_face1_get_mbt_220ac3041cacbc73(btInternalEdge *_swig_go_0) {
+  btInternalEdge *arg1 = (btInternalEdge *) 0 ;
+  short result;
+  short _swig_go_result;
+  
+  arg1 = *(btInternalEdge **)&_swig_go_0; 
+  
+  result = (short) ((arg1)->m_face1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btInternalEdge_mbt_220ac3041cacbc73(btInternalEdge *_swig_go_0) {
+  btInternalEdge *arg1 = (btInternalEdge *) 0 ;
+  
+  arg1 = *(btInternalEdge **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btGeometryUtil_getPlaneEquationsFromVertices_mbt_220ac3041cacbc73(btAlignedObjectArray< btVector3 > *_swig_go_0, btAlignedObjectArray< btVector3 > *_swig_go_1) {
+  btAlignedObjectArray< btVector3 > *arg1 = 0 ;
+  btAlignedObjectArray< btVector3 > *arg2 = 0 ;
+  
+  arg1 = *(btAlignedObjectArray< btVector3 > **)&_swig_go_0; 
+  arg2 = *(btAlignedObjectArray< btVector3 > **)&_swig_go_1; 
+  
+  btGeometryUtil::getPlaneEquationsFromVertices(*arg1,*arg2);
+  
+}
+
+
+void _wrap_btGeometryUtil_getVerticesFromPlaneEquations_mbt_220ac3041cacbc73(btAlignedObjectArray< btVector3 > *_swig_go_0, btAlignedObjectArray< btVector3 > *_swig_go_1) {
+  btAlignedObjectArray< btVector3 > *arg1 = 0 ;
+  btAlignedObjectArray< btVector3 > *arg2 = 0 ;
+  
+  arg1 = *(btAlignedObjectArray< btVector3 > **)&_swig_go_0; 
+  arg2 = *(btAlignedObjectArray< btVector3 > **)&_swig_go_1; 
+  
+  btGeometryUtil::getVerticesFromPlaneEquations((btAlignedObjectArray< btVector3 > const &)*arg1,*arg2);
+  
+}
+
+
+bool _wrap_btGeometryUtil_isInside_mbt_220ac3041cacbc73(btAlignedObjectArray< btVector3 > *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btAlignedObjectArray< btVector3 > *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar arg3 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btAlignedObjectArray< btVector3 > **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  result = (bool)btGeometryUtil::isInside((btAlignedObjectArray< btVector3 > const &)*arg1,(btVector3 const &)*arg2,arg3);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btGeometryUtil_isPointInsidePlanes_mbt_220ac3041cacbc73(btAlignedObjectArray< btVector3 > *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btAlignedObjectArray< btVector3 > *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar arg3 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btAlignedObjectArray< btVector3 > **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  result = (bool)btGeometryUtil::isPointInsidePlanes((btAlignedObjectArray< btVector3 > const &)*arg1,(btVector3 const &)*arg2,arg3);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btGeometryUtil_areVerticesBehindPlane_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btAlignedObjectArray< btVector3 > *_swig_go_1, float _swig_go_2) {
+  btVector3 *arg1 = 0 ;
+  btAlignedObjectArray< btVector3 > *arg2 = 0 ;
+  btScalar arg3 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btAlignedObjectArray< btVector3 > **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  result = (bool)btGeometryUtil::areVerticesBehindPlane((btVector3 const &)*arg1,(btAlignedObjectArray< btVector3 > const &)*arg2,arg3);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btGeometryUtil *_wrap_new_btGeometryUtil_mbt_220ac3041cacbc73() {
+  btGeometryUtil *result = 0 ;
+  btGeometryUtil *_swig_go_result;
+  
+  
+  result = (btGeometryUtil *)new btGeometryUtil();
+  *(btGeometryUtil **)&_swig_go_result = (btGeometryUtil *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btGeometryUtil_mbt_220ac3041cacbc73(btGeometryUtil *_swig_go_0) {
+  btGeometryUtil *arg1 = (btGeometryUtil *) 0 ;
+  
+  arg1 = *(btGeometryUtil **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btBulletMathProbe_mbt_220ac3041cacbc73() {
+  btBulletMathProbe();
+  
+}
+
+
+bool _wrap_notExist_mbt_220ac3041cacbc73(btVector3 *_swig_go_0, btAlignedObjectArray< btVector3 > *_swig_go_1) {
+  btVector3 *arg1 = 0 ;
+  btAlignedObjectArray< btVector3 > *arg2 = 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btAlignedObjectArray< btVector3 > **)&_swig_go_1; 
+  
+  result = (bool)notExist((btVector3 const &)*arg1,(btAlignedObjectArray< btVector3 > const &)*arg2);
   _swig_go_result = result; 
   return _swig_go_result;
 }
