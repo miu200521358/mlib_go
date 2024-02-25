@@ -5979,11 +5979,261 @@ btDefaultMotionState : public btMotionState
 
 
 
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_BROADPHASE_PROXY_H
+#define BT_BROADPHASE_PROXY_H
+
+
+/// btDispatcher uses these types
+/// IMPORTANT NOTE:The types are ordered polyhedral, implicit convex and concave
+/// to facilitate type checking
+/// CUSTOM_POLYHEDRAL_SHAPE_TYPE,CUSTOM_CONVEX_SHAPE_TYPE and CUSTOM_CONCAVE_SHAPE_TYPE can be used to extend Bullet without modifying source code
+enum BroadphaseNativeTypes
+{
+	// polyhedral convex shapes
+	BOX_SHAPE_PROXYTYPE,
+	TRIANGLE_SHAPE_PROXYTYPE,
+	TETRAHEDRAL_SHAPE_PROXYTYPE,
+	CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE,
+	CONVEX_HULL_SHAPE_PROXYTYPE,
+	CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE,
+	CUSTOM_POLYHEDRAL_SHAPE_TYPE,
+	//implicit convex shapes
+	IMPLICIT_CONVEX_SHAPES_START_HERE,
+	SPHERE_SHAPE_PROXYTYPE,
+	MULTI_SPHERE_SHAPE_PROXYTYPE,
+	CAPSULE_SHAPE_PROXYTYPE,
+	CONE_SHAPE_PROXYTYPE,
+	CONVEX_SHAPE_PROXYTYPE,
+	CYLINDER_SHAPE_PROXYTYPE,
+	UNIFORM_SCALING_SHAPE_PROXYTYPE,
+	MINKOWSKI_SUM_SHAPE_PROXYTYPE,
+	MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE,
+	BOX_2D_SHAPE_PROXYTYPE,
+	CONVEX_2D_SHAPE_PROXYTYPE,
+	CUSTOM_CONVEX_SHAPE_TYPE,
+	//concave shapes
+	CONCAVE_SHAPES_START_HERE,
+	//keep all the convex shapetype below here, for the check IsConvexShape in broadphase proxy!
+	TRIANGLE_MESH_SHAPE_PROXYTYPE,
+	SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE,
+	///used for demo integration FAST/Swift collision library and Bullet
+	FAST_CONCAVE_MESH_PROXYTYPE,
+	//terrain
+	TERRAIN_SHAPE_PROXYTYPE,
+	///Used for GIMPACT Trimesh integration
+	GIMPACT_SHAPE_PROXYTYPE,
+	///Multimaterial mesh
+	MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE,
+
+	EMPTY_SHAPE_PROXYTYPE,
+	STATIC_PLANE_PROXYTYPE,
+	CUSTOM_CONCAVE_SHAPE_TYPE,
+	SDF_SHAPE_PROXYTYPE = CUSTOM_CONCAVE_SHAPE_TYPE,
+	CONCAVE_SHAPES_END_HERE,
+
+	COMPOUND_SHAPE_PROXYTYPE,
+
+	SOFTBODY_SHAPE_PROXYTYPE,
+	HFFLUID_SHAPE_PROXYTYPE,
+	HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE,
+	INVALID_SHAPE_PROXYTYPE,
+
+	MAX_BROADPHASE_COLLISION_TYPES
+
+};
+
+///The btBroadphaseProxy is the main class that can be used with the Bullet broadphases.
+///It stores collision shape type information, collision filter information and a client object, typically a btCollisionObject or btRigidBody.
+ATTRIBUTE_ALIGNED16(struct)
+btBroadphaseProxy
+{
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+
+	///optional filtering to cull potential collisions
+	enum CollisionFilterGroups
+	{
+		DefaultFilter = 1,
+		StaticFilter = 2,
+		KinematicFilter = 4,
+		DebrisFilter = 8,
+		SensorTrigger = 16,
+		CharacterFilter = 32,
+		AllFilter = -1  //all bits sets: DefaultFilter | StaticFilter | KinematicFilter | DebrisFilter | SensorTrigger
+	};
+
+	//Usually the client btCollisionObject or Rigidbody class
+	void* m_clientObject;
+	int m_collisionFilterGroup;
+	int m_collisionFilterMask;
+
+	int m_uniqueId;  //m_uniqueId is introduced for paircache. could get rid of this, by calculating the address offset etc.
+
+	btVector3 m_aabbMin;
+	btVector3 m_aabbMax;
+
+	SIMD_FORCE_INLINE int getUid() const
+	{
+		return m_uniqueId;
+	}
+
+	//used for memory pools
+	btBroadphaseProxy() : m_clientObject(0)
+	{
+	}
+
+	btBroadphaseProxy(const btVector3& aabbMin, const btVector3& aabbMax, void* userPtr, int collisionFilterGroup, int collisionFilterMask)
+		: m_clientObject(userPtr),
+		  m_collisionFilterGroup(collisionFilterGroup),
+		  m_collisionFilterMask(collisionFilterMask),
+		  m_aabbMin(aabbMin),
+		  m_aabbMax(aabbMax)
+	{
+	}
+
+	static SIMD_FORCE_INLINE bool isPolyhedral(int proxyType)
+	{
+		return (proxyType < IMPLICIT_CONVEX_SHAPES_START_HERE);
+	}
+
+	static SIMD_FORCE_INLINE bool isConvex(int proxyType)
+	{
+		return (proxyType < CONCAVE_SHAPES_START_HERE);
+	}
+
+	static SIMD_FORCE_INLINE bool isNonMoving(int proxyType)
+	{
+		return (isConcave(proxyType) && !(proxyType == GIMPACT_SHAPE_PROXYTYPE));
+	}
+
+	static SIMD_FORCE_INLINE bool isConcave(int proxyType)
+	{
+		return ((proxyType > CONCAVE_SHAPES_START_HERE) &&
+				(proxyType < CONCAVE_SHAPES_END_HERE));
+	}
+	static SIMD_FORCE_INLINE bool isCompound(int proxyType)
+	{
+		return (proxyType == COMPOUND_SHAPE_PROXYTYPE);
+	}
+
+	static SIMD_FORCE_INLINE bool isSoftBody(int proxyType)
+	{
+		return (proxyType == SOFTBODY_SHAPE_PROXYTYPE);
+	}
+
+	static SIMD_FORCE_INLINE bool isInfinite(int proxyType)
+	{
+		return (proxyType == STATIC_PLANE_PROXYTYPE);
+	}
+
+	static SIMD_FORCE_INLINE bool isConvex2d(int proxyType)
+	{
+		return (proxyType == BOX_2D_SHAPE_PROXYTYPE) || (proxyType == CONVEX_2D_SHAPE_PROXYTYPE);
+	}
+};
+
+class btCollisionAlgorithm;
+
+struct btBroadphaseProxy;
+
+///The btBroadphasePair class contains a pair of aabb-overlapping objects.
+///A btDispatcher can search a btCollisionAlgorithm that performs exact/narrowphase collision detection on the actual collision shapes.
+ATTRIBUTE_ALIGNED16(struct)
+btBroadphasePair
+{
+	btBroadphasePair()
+		: m_pProxy0(0),
+		  m_pProxy1(0),
+		  m_algorithm(0),
+		  m_internalInfo1(0)
+	{
+	}
+
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+
+	btBroadphasePair(btBroadphaseProxy & proxy0, btBroadphaseProxy & proxy1)
+	{
+		//keep them sorted, so the std::set operations work
+		if (proxy0.m_uniqueId < proxy1.m_uniqueId)
+		{
+			m_pProxy0 = &proxy0;
+			m_pProxy1 = &proxy1;
+		}
+		else
+		{
+			m_pProxy0 = &proxy1;
+			m_pProxy1 = &proxy0;
+		}
+
+		m_algorithm = 0;
+		m_internalInfo1 = 0;
+	}
+
+	btBroadphaseProxy* m_pProxy0;
+	btBroadphaseProxy* m_pProxy1;
+
+	mutable btCollisionAlgorithm* m_algorithm;
+	union {
+		void* m_internalInfo1;
+		int m_internalTmpValue;
+	};  //don't use this data, it will be removed in future version.
+};
+
+/*
+//comparison for set operation, see Solid DT_Encounter
+SIMD_FORCE_INLINE bool operator<(const btBroadphasePair& a, const btBroadphasePair& b) 
+{ 
+    return a.m_pProxy0 < b.m_pProxy0 || 
+        (a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 < b.m_pProxy1); 
+}
+*/
+
+class btBroadphasePairSortPredicate
+{
+public:
+	bool operator()(const btBroadphasePair& a, const btBroadphasePair& b) const
+	{
+		const int uidA0 = a.m_pProxy0 ? a.m_pProxy0->m_uniqueId : -1;
+		const int uidB0 = b.m_pProxy0 ? b.m_pProxy0->m_uniqueId : -1;
+		const int uidA1 = a.m_pProxy1 ? a.m_pProxy1->m_uniqueId : -1;
+		const int uidB1 = b.m_pProxy1 ? b.m_pProxy1->m_uniqueId : -1;
+
+		return uidA0 > uidB0 ||
+			   (a.m_pProxy0 == b.m_pProxy0 && uidA1 > uidB1) ||
+			   (a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 == b.m_pProxy1 && a.m_algorithm > b.m_algorithm);
+	}
+};
+
+SIMD_FORCE_INLINE bool operator==(const btBroadphasePair& a, const btBroadphasePair& b)
+{
+	return (a.m_pProxy0 == b.m_pProxy0) && (a.m_pProxy1 == b.m_pProxy1);
+}
+
+#endif  //BT_BROADPHASE_PROXY_H
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void _wrap_Swig_free_mbt_7f4d06f7d3d79a98(void *_swig_go_0) {
+void _wrap_Swig_free_mbt_6d0baa097fc05319(void *_swig_go_0) {
   void *arg1 = (void *) 0 ;
   
   arg1 = *(void **)&_swig_go_0; 
@@ -5993,7 +6243,7 @@ void _wrap_Swig_free_mbt_7f4d06f7d3d79a98(void *_swig_go_0) {
 }
 
 
-void *_wrap_Swig_malloc_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
+void *_wrap_Swig_malloc_mbt_6d0baa097fc05319(intgo _swig_go_0) {
   int arg1 ;
   void *result = 0 ;
   void *_swig_go_result;
@@ -6006,7 +6256,7 @@ void *_wrap_Swig_malloc_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
 }
 
 
-intgo _wrap_btGetVersion_mbt_7f4d06f7d3d79a98() {
+intgo _wrap_btGetVersion_mbt_6d0baa097fc05319() {
   int result;
   intgo _swig_go_result;
   
@@ -6017,7 +6267,7 @@ intgo _wrap_btGetVersion_mbt_7f4d06f7d3d79a98() {
 }
 
 
-intgo _wrap_btIsDoublePrecision_mbt_7f4d06f7d3d79a98() {
+intgo _wrap_btIsDoublePrecision_mbt_6d0baa097fc05319() {
   int result;
   intgo _swig_go_result;
   
@@ -6028,7 +6278,7 @@ intgo _wrap_btIsDoublePrecision_mbt_7f4d06f7d3d79a98() {
 }
 
 
-btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_0_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
+btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_0_mbt_6d0baa097fc05319(intgo _swig_go_0) {
   int arg1 ;
   btInfMaskConverter *result = 0 ;
   btInfMaskConverter *_swig_go_result;
@@ -6041,7 +6291,7 @@ btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_0_mbt_7f4d06f7d3d79a98(in
 }
 
 
-btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_1_mbt_7f4d06f7d3d79a98() {
+btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_1_mbt_6d0baa097fc05319() {
   btInfMaskConverter *result = 0 ;
   btInfMaskConverter *_swig_go_result;
   
@@ -6052,7 +6302,7 @@ btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_1_mbt_7f4d06f7d3d79a98() 
 }
 
 
-void _wrap_delete_btInfMaskConverter_mbt_7f4d06f7d3d79a98(btInfMaskConverter *_swig_go_0) {
+void _wrap_delete_btInfMaskConverter_mbt_6d0baa097fc05319(btInfMaskConverter *_swig_go_0) {
   btInfMaskConverter *arg1 = (btInfMaskConverter *) 0 ;
   
   arg1 = *(btInfMaskConverter **)&_swig_go_0; 
@@ -6062,7 +6312,7 @@ void _wrap_delete_btInfMaskConverter_mbt_7f4d06f7d3d79a98(btInfMaskConverter *_s
 }
 
 
-void _wrap_btInfinityMask_set_mbt_7f4d06f7d3d79a98(btInfMaskConverter *_swig_go_0) {
+void _wrap_btInfinityMask_set_mbt_6d0baa097fc05319(btInfMaskConverter *_swig_go_0) {
   btInfMaskConverter *arg1 = (btInfMaskConverter *) 0 ;
   
   arg1 = *(btInfMaskConverter **)&_swig_go_0; 
@@ -6072,7 +6322,7 @@ void _wrap_btInfinityMask_set_mbt_7f4d06f7d3d79a98(btInfMaskConverter *_swig_go_
 }
 
 
-btInfMaskConverter *_wrap_btInfinityMask_get_mbt_7f4d06f7d3d79a98() {
+btInfMaskConverter *_wrap_btInfinityMask_get_mbt_6d0baa097fc05319() {
   btInfMaskConverter *result = 0 ;
   btInfMaskConverter *_swig_go_result;
   
@@ -6083,7 +6333,7 @@ btInfMaskConverter *_wrap_btInfinityMask_get_mbt_7f4d06f7d3d79a98() {
 }
 
 
-intgo _wrap_btGetInfinityMask_mbt_7f4d06f7d3d79a98() {
+intgo _wrap_btGetInfinityMask_mbt_6d0baa097fc05319() {
   int result;
   intgo _swig_go_result;
   
@@ -6094,7 +6344,7 @@ intgo _wrap_btGetInfinityMask_mbt_7f4d06f7d3d79a98() {
 }
 
 
-float _wrap_btSqrt_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btSqrt_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6107,7 +6357,7 @@ float _wrap_btSqrt_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btFabs_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btFabs_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6120,7 +6370,7 @@ float _wrap_btFabs_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btCos_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btCos_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6133,7 +6383,7 @@ float _wrap_btCos_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btSin_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btSin_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6146,7 +6396,7 @@ float _wrap_btSin_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btTan_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btTan_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6159,7 +6409,7 @@ float _wrap_btTan_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btAcos_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btAcos_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6172,7 +6422,7 @@ float _wrap_btAcos_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btAsin_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btAsin_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6185,7 +6435,7 @@ float _wrap_btAsin_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btAtan_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btAtan_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6198,7 +6448,7 @@ float _wrap_btAtan_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btAtan2_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
+float _wrap_btAtan2_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1) {
   btScalar arg1 ;
   btScalar arg2 ;
   btScalar result;
@@ -6213,7 +6463,7 @@ float _wrap_btAtan2_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
 }
 
 
-float _wrap_btExp_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btExp_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6226,7 +6476,7 @@ float _wrap_btExp_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btLog_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btLog_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6239,7 +6489,7 @@ float _wrap_btLog_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btPow_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
+float _wrap_btPow_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1) {
   btScalar arg1 ;
   btScalar arg2 ;
   btScalar result;
@@ -6254,7 +6504,7 @@ float _wrap_btPow_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
 }
 
 
-float _wrap_btFmod_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
+float _wrap_btFmod_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1) {
   btScalar arg1 ;
   btScalar arg2 ;
   btScalar result;
@@ -6269,7 +6519,7 @@ float _wrap_btFmod_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
 }
 
 
-float _wrap_btAtan2Fast_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
+float _wrap_btAtan2Fast_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1) {
   btScalar arg1 ;
   btScalar arg2 ;
   btScalar result;
@@ -6284,7 +6534,7 @@ float _wrap_btAtan2Fast_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1)
 }
 
 
-bool _wrap_btFuzzyZero_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+bool _wrap_btFuzzyZero_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   bool result;
   bool _swig_go_result;
@@ -6297,7 +6547,7 @@ bool _wrap_btFuzzyZero_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-bool _wrap_btEqual_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
+bool _wrap_btEqual_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1) {
   btScalar arg1 ;
   btScalar arg2 ;
   bool result;
@@ -6312,7 +6562,7 @@ bool _wrap_btEqual_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
 }
 
 
-bool _wrap_btGreaterEqual_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
+bool _wrap_btGreaterEqual_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1) {
   btScalar arg1 ;
   btScalar arg2 ;
   bool result;
@@ -6327,7 +6577,7 @@ bool _wrap_btGreaterEqual_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_
 }
 
 
-intgo _wrap_btIsNegative_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+intgo _wrap_btIsNegative_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   int result;
   intgo _swig_go_result;
@@ -6340,7 +6590,7 @@ intgo _wrap_btIsNegative_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btRadians_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btRadians_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6353,7 +6603,7 @@ float _wrap_btRadians_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btDegrees_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btDegrees_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6366,7 +6616,7 @@ float _wrap_btDegrees_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btFsel_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
+float _wrap_btFsel_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
   btScalar arg1 ;
   btScalar arg2 ;
   btScalar arg3 ;
@@ -6383,7 +6633,7 @@ float _wrap_btFsel_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, floa
 }
 
 
-bool _wrap_btMachineIsLittleEndian_mbt_7f4d06f7d3d79a98() {
+bool _wrap_btMachineIsLittleEndian_mbt_6d0baa097fc05319() {
   bool result;
   bool _swig_go_result;
   
@@ -6394,7 +6644,7 @@ bool _wrap_btMachineIsLittleEndian_mbt_7f4d06f7d3d79a98() {
 }
 
 
-intgo _wrap_btSelect__SWIG_0_mbt_7f4d06f7d3d79a98(intgo _swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
+intgo _wrap_btSelect__SWIG_0_mbt_6d0baa097fc05319(intgo _swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
   unsigned int arg1 ;
   unsigned int arg2 ;
   unsigned int arg3 ;
@@ -6411,7 +6661,7 @@ intgo _wrap_btSelect__SWIG_0_mbt_7f4d06f7d3d79a98(intgo _swig_go_0, intgo _swig_
 }
 
 
-intgo _wrap_btSelect__SWIG_1_mbt_7f4d06f7d3d79a98(intgo _swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
+intgo _wrap_btSelect__SWIG_1_mbt_6d0baa097fc05319(intgo _swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
   unsigned int arg1 ;
   int arg2 ;
   int arg3 ;
@@ -6428,7 +6678,7 @@ intgo _wrap_btSelect__SWIG_1_mbt_7f4d06f7d3d79a98(intgo _swig_go_0, intgo _swig_
 }
 
 
-float _wrap_btSelect__SWIG_2_mbt_7f4d06f7d3d79a98(intgo _swig_go_0, float _swig_go_1, float _swig_go_2) {
+float _wrap_btSelect__SWIG_2_mbt_6d0baa097fc05319(intgo _swig_go_0, float _swig_go_1, float _swig_go_2) {
   unsigned int arg1 ;
   float arg2 ;
   float arg3 ;
@@ -6445,7 +6695,7 @@ float _wrap_btSelect__SWIG_2_mbt_7f4d06f7d3d79a98(intgo _swig_go_0, float _swig_
 }
 
 
-intgo _wrap_btSwapEndian__SWIG_0_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
+intgo _wrap_btSwapEndian__SWIG_0_mbt_6d0baa097fc05319(intgo _swig_go_0) {
   unsigned int arg1 ;
   unsigned int result;
   intgo _swig_go_result;
@@ -6458,7 +6708,7 @@ intgo _wrap_btSwapEndian__SWIG_0_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
 }
 
 
-short _wrap_btSwapEndian__SWIG_1_mbt_7f4d06f7d3d79a98(short _swig_go_0) {
+short _wrap_btSwapEndian__SWIG_1_mbt_6d0baa097fc05319(short _swig_go_0) {
   unsigned short arg1 ;
   unsigned short result;
   short _swig_go_result;
@@ -6471,7 +6721,7 @@ short _wrap_btSwapEndian__SWIG_1_mbt_7f4d06f7d3d79a98(short _swig_go_0) {
 }
 
 
-intgo _wrap_btSwapEndian__SWIG_2_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
+intgo _wrap_btSwapEndian__SWIG_2_mbt_6d0baa097fc05319(intgo _swig_go_0) {
   int arg1 ;
   unsigned int result;
   intgo _swig_go_result;
@@ -6484,7 +6734,7 @@ intgo _wrap_btSwapEndian__SWIG_2_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
 }
 
 
-short _wrap_btSwapEndian__SWIG_3_mbt_7f4d06f7d3d79a98(short _swig_go_0) {
+short _wrap_btSwapEndian__SWIG_3_mbt_6d0baa097fc05319(short _swig_go_0) {
   short arg1 ;
   unsigned short result;
   short _swig_go_result;
@@ -6497,7 +6747,7 @@ short _wrap_btSwapEndian__SWIG_3_mbt_7f4d06f7d3d79a98(short _swig_go_0) {
 }
 
 
-intgo _wrap_btSwapEndianFloat_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+intgo _wrap_btSwapEndianFloat_mbt_6d0baa097fc05319(float _swig_go_0) {
   float arg1 ;
   unsigned int result;
   intgo _swig_go_result;
@@ -6510,7 +6760,7 @@ intgo _wrap_btSwapEndianFloat_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-float _wrap_btUnswapEndianFloat_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
+float _wrap_btUnswapEndianFloat_mbt_6d0baa097fc05319(intgo _swig_go_0) {
   unsigned int arg1 ;
   float result;
   float _swig_go_result;
@@ -6523,7 +6773,7 @@ float _wrap_btUnswapEndianFloat_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
 }
 
 
-void _wrap_btSwapEndianDouble_mbt_7f4d06f7d3d79a98(double _swig_go_0, char *_swig_go_1) {
+void _wrap_btSwapEndianDouble_mbt_6d0baa097fc05319(double _swig_go_0, char *_swig_go_1) {
   double arg1 ;
   unsigned char *arg2 = (unsigned char *) 0 ;
   
@@ -6535,7 +6785,7 @@ void _wrap_btSwapEndianDouble_mbt_7f4d06f7d3d79a98(double _swig_go_0, char *_swi
 }
 
 
-double _wrap_btUnswapEndianDouble_mbt_7f4d06f7d3d79a98(char *_swig_go_0) {
+double _wrap_btUnswapEndianDouble_mbt_6d0baa097fc05319(char *_swig_go_0) {
   unsigned char *arg1 = (unsigned char *) 0 ;
   double result;
   double _swig_go_result;
@@ -6548,7 +6798,7 @@ double _wrap_btUnswapEndianDouble_mbt_7f4d06f7d3d79a98(char *_swig_go_0) {
 }
 
 
-float _wrap_btLargeDot_mbt_7f4d06f7d3d79a98(float *_swig_go_0, float *_swig_go_1, intgo _swig_go_2) {
+float _wrap_btLargeDot_mbt_6d0baa097fc05319(float *_swig_go_0, float *_swig_go_1, intgo _swig_go_2) {
   btScalar *arg1 = (btScalar *) 0 ;
   btScalar *arg2 = (btScalar *) 0 ;
   int arg3 ;
@@ -6565,7 +6815,7 @@ float _wrap_btLargeDot_mbt_7f4d06f7d3d79a98(float *_swig_go_0, float *_swig_go_1
 }
 
 
-float _wrap_btNormalizeAngle_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+float _wrap_btNormalizeAngle_mbt_6d0baa097fc05319(float _swig_go_0) {
   btScalar arg1 ;
   btScalar result;
   float _swig_go_result;
@@ -6578,7 +6828,7 @@ float _wrap_btNormalizeAngle_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
 }
 
 
-btTypedObject *_wrap_new_btTypedObject_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
+btTypedObject *_wrap_new_btTypedObject_mbt_6d0baa097fc05319(intgo _swig_go_0) {
   int arg1 ;
   btTypedObject *result = 0 ;
   btTypedObject *_swig_go_result;
@@ -6591,7 +6841,7 @@ btTypedObject *_wrap_new_btTypedObject_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
 }
 
 
-void _wrap_btTypedObject_m_objectType_set_mbt_7f4d06f7d3d79a98(btTypedObject *_swig_go_0, intgo _swig_go_1) {
+void _wrap_btTypedObject_m_objectType_set_mbt_6d0baa097fc05319(btTypedObject *_swig_go_0, intgo _swig_go_1) {
   btTypedObject *arg1 = (btTypedObject *) 0 ;
   int arg2 ;
   
@@ -6603,7 +6853,7 @@ void _wrap_btTypedObject_m_objectType_set_mbt_7f4d06f7d3d79a98(btTypedObject *_s
 }
 
 
-intgo _wrap_btTypedObject_m_objectType_get_mbt_7f4d06f7d3d79a98(btTypedObject *_swig_go_0) {
+intgo _wrap_btTypedObject_m_objectType_get_mbt_6d0baa097fc05319(btTypedObject *_swig_go_0) {
   btTypedObject *arg1 = (btTypedObject *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -6616,7 +6866,7 @@ intgo _wrap_btTypedObject_m_objectType_get_mbt_7f4d06f7d3d79a98(btTypedObject *_
 }
 
 
-intgo _wrap_btTypedObject_getObjectType_mbt_7f4d06f7d3d79a98(btTypedObject *_swig_go_0) {
+intgo _wrap_btTypedObject_getObjectType_mbt_6d0baa097fc05319(btTypedObject *_swig_go_0) {
   btTypedObject *arg1 = (btTypedObject *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -6629,7 +6879,7 @@ intgo _wrap_btTypedObject_getObjectType_mbt_7f4d06f7d3d79a98(btTypedObject *_swi
 }
 
 
-void _wrap_delete_btTypedObject_mbt_7f4d06f7d3d79a98(btTypedObject *_swig_go_0) {
+void _wrap_delete_btTypedObject_mbt_6d0baa097fc05319(btTypedObject *_swig_go_0) {
   btTypedObject *arg1 = (btTypedObject *) 0 ;
   
   arg1 = *(btTypedObject **)&_swig_go_0; 
@@ -6639,7 +6889,7 @@ void _wrap_delete_btTypedObject_mbt_7f4d06f7d3d79a98(btTypedObject *_swig_go_0) 
 }
 
 
-void *_wrap_btAlignedAllocInternal_mbt_7f4d06f7d3d79a98(long long _swig_go_0, intgo _swig_go_1) {
+void *_wrap_btAlignedAllocInternal_mbt_6d0baa097fc05319(long long _swig_go_0, intgo _swig_go_1) {
   size_t arg1 ;
   int arg2 ;
   void *result = 0 ;
@@ -6654,7 +6904,7 @@ void *_wrap_btAlignedAllocInternal_mbt_7f4d06f7d3d79a98(long long _swig_go_0, in
 }
 
 
-void _wrap_btAlignedFreeInternal_mbt_7f4d06f7d3d79a98(void *_swig_go_0) {
+void _wrap_btAlignedFreeInternal_mbt_6d0baa097fc05319(void *_swig_go_0) {
   void *arg1 = (void *) 0 ;
   
   arg1 = *(void **)&_swig_go_0; 
@@ -6664,7 +6914,7 @@ void _wrap_btAlignedFreeInternal_mbt_7f4d06f7d3d79a98(void *_swig_go_0) {
 }
 
 
-void _wrap_btAlignedAllocSetCustom_mbt_7f4d06f7d3d79a98(void* _swig_go_0, void* _swig_go_1) {
+void _wrap_btAlignedAllocSetCustom_mbt_6d0baa097fc05319(void* _swig_go_0, void* _swig_go_1) {
   btAllocFunc *arg1 = (btAllocFunc *) 0 ;
   btFreeFunc *arg2 = (btFreeFunc *) 0 ;
   
@@ -6676,7 +6926,7 @@ void _wrap_btAlignedAllocSetCustom_mbt_7f4d06f7d3d79a98(void* _swig_go_0, void* 
 }
 
 
-void _wrap_btAlignedAllocSetCustomAligned_mbt_7f4d06f7d3d79a98(void* _swig_go_0, void* _swig_go_1) {
+void _wrap_btAlignedAllocSetCustomAligned_mbt_6d0baa097fc05319(void* _swig_go_0, void* _swig_go_1) {
   btAlignedAllocFunc *arg1 = (btAlignedAllocFunc *) 0 ;
   btAlignedFreeFunc *arg2 = (btAlignedFreeFunc *) 0 ;
   
@@ -6688,7 +6938,7 @@ void _wrap_btAlignedAllocSetCustomAligned_mbt_7f4d06f7d3d79a98(void* _swig_go_0,
 }
 
 
-void *_wrap_btAllocDefault_mbt_7f4d06f7d3d79a98(long long _swig_go_0) {
+void *_wrap_btAllocDefault_mbt_6d0baa097fc05319(long long _swig_go_0) {
   size_t arg1 ;
   void *result = 0 ;
   void *_swig_go_result;
@@ -6701,7 +6951,7 @@ void *_wrap_btAllocDefault_mbt_7f4d06f7d3d79a98(long long _swig_go_0) {
 }
 
 
-void _wrap_btFreeDefault_mbt_7f4d06f7d3d79a98(void *_swig_go_0) {
+void _wrap_btFreeDefault_mbt_6d0baa097fc05319(void *_swig_go_0) {
   void *arg1 = (void *) 0 ;
   
   arg1 = *(void **)&_swig_go_0; 
@@ -6711,7 +6961,7 @@ void _wrap_btFreeDefault_mbt_7f4d06f7d3d79a98(void *_swig_go_0) {
 }
 
 
-void _wrap_sAllocFunc_set_mbt_7f4d06f7d3d79a98(void* _swig_go_0) {
+void _wrap_sAllocFunc_set_mbt_6d0baa097fc05319(void* _swig_go_0) {
   btAllocFunc *arg1 = (btAllocFunc *) 0 ;
   
   arg1 = *(btAllocFunc **)&_swig_go_0; 
@@ -6721,7 +6971,7 @@ void _wrap_sAllocFunc_set_mbt_7f4d06f7d3d79a98(void* _swig_go_0) {
 }
 
 
-void* _wrap_sAllocFunc_get_mbt_7f4d06f7d3d79a98() {
+void* _wrap_sAllocFunc_get_mbt_6d0baa097fc05319() {
   btAllocFunc *result = 0 ;
   void* _swig_go_result;
   
@@ -6732,7 +6982,7 @@ void* _wrap_sAllocFunc_get_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void _wrap_sFreeFunc_set_mbt_7f4d06f7d3d79a98(void* _swig_go_0) {
+void _wrap_sFreeFunc_set_mbt_6d0baa097fc05319(void* _swig_go_0) {
   btFreeFunc *arg1 = (btFreeFunc *) 0 ;
   
   arg1 = *(btFreeFunc **)&_swig_go_0; 
@@ -6742,7 +6992,7 @@ void _wrap_sFreeFunc_set_mbt_7f4d06f7d3d79a98(void* _swig_go_0) {
 }
 
 
-void* _wrap_sFreeFunc_get_mbt_7f4d06f7d3d79a98() {
+void* _wrap_sFreeFunc_get_mbt_6d0baa097fc05319() {
   btFreeFunc *result = 0 ;
   void* _swig_go_result;
   
@@ -6753,7 +7003,7 @@ void* _wrap_sFreeFunc_get_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void *_wrap_btAlignedAllocDefault_mbt_7f4d06f7d3d79a98(long long _swig_go_0, intgo _swig_go_1) {
+void *_wrap_btAlignedAllocDefault_mbt_6d0baa097fc05319(long long _swig_go_0, intgo _swig_go_1) {
   size_t arg1 ;
   int arg2 ;
   void *result = 0 ;
@@ -6768,7 +7018,7 @@ void *_wrap_btAlignedAllocDefault_mbt_7f4d06f7d3d79a98(long long _swig_go_0, int
 }
 
 
-void _wrap_btAlignedFreeDefault_mbt_7f4d06f7d3d79a98(void *_swig_go_0) {
+void _wrap_btAlignedFreeDefault_mbt_6d0baa097fc05319(void *_swig_go_0) {
   void *arg1 = (void *) 0 ;
   
   arg1 = *(void **)&_swig_go_0; 
@@ -6778,7 +7028,7 @@ void _wrap_btAlignedFreeDefault_mbt_7f4d06f7d3d79a98(void *_swig_go_0) {
 }
 
 
-void _wrap_sAlignedAllocFunc_set_mbt_7f4d06f7d3d79a98(void* _swig_go_0) {
+void _wrap_sAlignedAllocFunc_set_mbt_6d0baa097fc05319(void* _swig_go_0) {
   btAlignedAllocFunc *arg1 = (btAlignedAllocFunc *) 0 ;
   
   arg1 = *(btAlignedAllocFunc **)&_swig_go_0; 
@@ -6788,7 +7038,7 @@ void _wrap_sAlignedAllocFunc_set_mbt_7f4d06f7d3d79a98(void* _swig_go_0) {
 }
 
 
-void* _wrap_sAlignedAllocFunc_get_mbt_7f4d06f7d3d79a98() {
+void* _wrap_sAlignedAllocFunc_get_mbt_6d0baa097fc05319() {
   btAlignedAllocFunc *result = 0 ;
   void* _swig_go_result;
   
@@ -6799,7 +7049,7 @@ void* _wrap_sAlignedAllocFunc_get_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void _wrap_sAlignedFreeFunc_set_mbt_7f4d06f7d3d79a98(void* _swig_go_0) {
+void _wrap_sAlignedFreeFunc_set_mbt_6d0baa097fc05319(void* _swig_go_0) {
   btAlignedFreeFunc *arg1 = (btAlignedFreeFunc *) 0 ;
   
   arg1 = *(btAlignedFreeFunc **)&_swig_go_0; 
@@ -6809,7 +7059,7 @@ void _wrap_sAlignedFreeFunc_set_mbt_7f4d06f7d3d79a98(void* _swig_go_0) {
 }
 
 
-void* _wrap_sAlignedFreeFunc_get_mbt_7f4d06f7d3d79a98() {
+void* _wrap_sAlignedFreeFunc_get_mbt_6d0baa097fc05319() {
   btAlignedFreeFunc *result = 0 ;
   void* _swig_go_result;
   
@@ -6820,7 +7070,7 @@ void* _wrap_sAlignedFreeFunc_get_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void _wrap_btVector3_m_floats_set_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float *_swig_go_1) {
+void _wrap_btVector3_m_floats_set_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, float *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *arg2 = (btScalar *) (btScalar *)0 ;
   
@@ -6836,7 +7086,7 @@ void _wrap_btVector3_m_floats_set_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, fl
 }
 
 
-float *_wrap_btVector3_m_floats_get_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+float *_wrap_btVector3_m_floats_get_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float *_swig_go_result;
@@ -6849,7 +7099,7 @@ float *_wrap_btVector3_m_floats_get_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) 
 }
 
 
-btVector3 *_wrap_new_btVector3__SWIG_0_mbt_7f4d06f7d3d79a98() {
+btVector3 *_wrap_new_btVector3__SWIG_0_mbt_6d0baa097fc05319() {
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
   
@@ -6860,7 +7110,7 @@ btVector3 *_wrap_new_btVector3__SWIG_0_mbt_7f4d06f7d3d79a98() {
 }
 
 
-btVector3 *_wrap_new_btVector3__SWIG_1_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
+btVector3 *_wrap_new_btVector3__SWIG_1_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -6877,7 +7127,7 @@ btVector3 *_wrap_new_btVector3__SWIG_1_mbt_7f4d06f7d3d79a98(float _swig_go_0, fl
 }
 
 
-float _wrap_btVector3_dot_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector3_dot_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -6892,7 +7142,7 @@ float _wrap_btVector3_dot_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 
 }
 
 
-float _wrap_btVector3_length2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+float _wrap_btVector3_length2_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -6905,7 +7155,7 @@ float _wrap_btVector3_length2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_length_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+float _wrap_btVector3_length_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -6918,7 +7168,7 @@ float _wrap_btVector3_length_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_norm_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+float _wrap_btVector3_norm_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -6931,7 +7181,7 @@ float _wrap_btVector3_norm_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_safeNorm_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+float _wrap_btVector3_safeNorm_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -6944,7 +7194,7 @@ float _wrap_btVector3_safeNorm_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_distance2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector3_distance2_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -6959,7 +7209,7 @@ float _wrap_btVector3_distance2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVe
 }
 
 
-float _wrap_btVector3_distance_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector3_distance_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -6974,7 +7224,7 @@ float _wrap_btVector3_distance_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVec
 }
 
 
-btVector3 *_wrap_btVector3_safeNormalize_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+btVector3 *_wrap_btVector3_safeNormalize_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
@@ -6987,7 +7237,7 @@ btVector3 *_wrap_btVector3_safeNormalize_mbt_7f4d06f7d3d79a98(btVector3 *_swig_g
 }
 
 
-btVector3 *_wrap_btVector3_normalize_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+btVector3 *_wrap_btVector3_normalize_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
@@ -7000,7 +7250,7 @@ btVector3 *_wrap_btVector3_normalize_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0)
 }
 
 
-btVector3 *_wrap_btVector3_normalized_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+btVector3 *_wrap_btVector3_normalized_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 result;
   btVector3 *_swig_go_result;
@@ -7013,7 +7263,7 @@ btVector3 *_wrap_btVector3_normalized_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0
 }
 
 
-btVector3 *_wrap_btVector3_rotate_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+btVector3 *_wrap_btVector3_rotate_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar arg3 ;
@@ -7030,7 +7280,7 @@ btVector3 *_wrap_btVector3_rotate_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, bt
 }
 
 
-float _wrap_btVector3_angle_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector3_angle_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -7045,7 +7295,7 @@ float _wrap_btVector3_angle_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector
 }
 
 
-btVector3 *_wrap_btVector3_absolute_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+btVector3 *_wrap_btVector3_absolute_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 result;
   btVector3 *_swig_go_result;
@@ -7058,7 +7308,7 @@ btVector3 *_wrap_btVector3_absolute_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) 
 }
 
 
-btVector3 *_wrap_btVector3_cross_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+btVector3 *_wrap_btVector3_cross_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 result;
@@ -7073,7 +7323,7 @@ btVector3 *_wrap_btVector3_cross_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btV
 }
 
 
-float _wrap_btVector3_triple_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+float _wrap_btVector3_triple_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -7090,7 +7340,7 @@ float _wrap_btVector3_triple_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVecto
 }
 
 
-intgo _wrap_btVector3_minAxis_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+intgo _wrap_btVector3_minAxis_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -7103,7 +7353,7 @@ intgo _wrap_btVector3_minAxis_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector3_maxAxis_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+intgo _wrap_btVector3_maxAxis_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -7116,7 +7366,7 @@ intgo _wrap_btVector3_maxAxis_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector3_furthestAxis_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+intgo _wrap_btVector3_furthestAxis_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -7129,7 +7379,7 @@ intgo _wrap_btVector3_furthestAxis_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector3_closestAxis_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+intgo _wrap_btVector3_closestAxis_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -7142,7 +7392,7 @@ intgo _wrap_btVector3_closestAxis_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-void _wrap_btVector3_setInterpolate3_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, float _swig_go_3) {
+void _wrap_btVector3_setInterpolate3_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, float _swig_go_3) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -7158,7 +7408,7 @@ void _wrap_btVector3_setInterpolate3_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0,
 }
 
 
-btVector3 *_wrap_btVector3_lerp_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+btVector3 *_wrap_btVector3_lerp_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -7175,7 +7425,7 @@ btVector3 *_wrap_btVector3_lerp_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVe
 }
 
 
-float _wrap_btVector3_getX_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+float _wrap_btVector3_getX_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -7188,7 +7438,7 @@ float _wrap_btVector3_getX_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_getY_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+float _wrap_btVector3_getY_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -7201,7 +7451,7 @@ float _wrap_btVector3_getY_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_getZ_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+float _wrap_btVector3_getZ_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -7214,7 +7464,7 @@ float _wrap_btVector3_getZ_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-void _wrap_btVector3_setX_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector3_setX_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, float _swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar arg2 ;
   
@@ -7226,7 +7476,7 @@ void _wrap_btVector3_setX_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swi
 }
 
 
-void _wrap_btVector3_setY_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector3_setY_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, float _swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar arg2 ;
   
@@ -7238,7 +7488,7 @@ void _wrap_btVector3_setY_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swi
 }
 
 
-void _wrap_btVector3_setZ_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector3_setZ_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, float _swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar arg2 ;
   
@@ -7250,7 +7500,7 @@ void _wrap_btVector3_setZ_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swi
 }
 
 
-void _wrap_btVector3_setW_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector3_setW_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, float _swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar arg2 ;
   
@@ -7262,7 +7512,7 @@ void _wrap_btVector3_setW_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swi
 }
 
 
-float _wrap_btVector3_x_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+float _wrap_btVector3_x_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -7275,7 +7525,7 @@ float _wrap_btVector3_x_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_y_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+float _wrap_btVector3_y_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -7288,7 +7538,7 @@ float _wrap_btVector3_y_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_z_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+float _wrap_btVector3_z_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -7301,7 +7551,7 @@ float _wrap_btVector3_z_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btVector3_w_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+float _wrap_btVector3_w_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -7314,7 +7564,7 @@ float _wrap_btVector3_w_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-void _wrap_btVector3_setMax_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+void _wrap_btVector3_setMax_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   
@@ -7326,7 +7576,7 @@ void _wrap_btVector3_setMax_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector
 }
 
 
-void _wrap_btVector3_setMin_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+void _wrap_btVector3_setMin_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   
@@ -7338,7 +7588,7 @@ void _wrap_btVector3_setMin_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector
 }
 
 
-void _wrap_btVector3_setValue_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btVector3_setValue_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -7354,7 +7604,7 @@ void _wrap_btVector3_setValue_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float 
 }
 
 
-void _wrap_btVector3_getSkewSymmetricMatrix_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+void _wrap_btVector3_getSkewSymmetricMatrix_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = (btVector3 *) 0 ;
   btVector3 *arg3 = (btVector3 *) 0 ;
@@ -7370,7 +7620,7 @@ void _wrap_btVector3_getSkewSymmetricMatrix_mbt_7f4d06f7d3d79a98(btVector3 *_swi
 }
 
 
-void _wrap_btVector3_setZero_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+void _wrap_btVector3_setZero_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   
   arg1 = *(btVector3 **)&_swig_go_0; 
@@ -7380,7 +7630,7 @@ void _wrap_btVector3_setZero_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-bool _wrap_btVector3_isZero_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+bool _wrap_btVector3_isZero_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   bool result;
   bool _swig_go_result;
@@ -7393,7 +7643,7 @@ bool _wrap_btVector3_isZero_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-bool _wrap_btVector3_fuzzyZero_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+bool _wrap_btVector3_fuzzyZero_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   bool result;
   bool _swig_go_result;
@@ -7406,7 +7656,7 @@ bool _wrap_btVector3_fuzzyZero_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-void _wrap_btVector3_serialize_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector3_serialize_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -7418,7 +7668,7 @@ void _wrap_btVector3_serialize_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVec
 }
 
 
-void _wrap_btVector3_deSerialize__SWIG_0_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btVector3_deSerialize__SWIG_0_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3DoubleData *arg2 = 0 ;
   
@@ -7430,7 +7680,7 @@ void _wrap_btVector3_deSerialize__SWIG_0_mbt_7f4d06f7d3d79a98(btVector3 *_swig_g
 }
 
 
-void _wrap_btVector3_deSerialize__SWIG_1_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector3_deSerialize__SWIG_1_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -7442,7 +7692,7 @@ void _wrap_btVector3_deSerialize__SWIG_1_mbt_7f4d06f7d3d79a98(btVector3 *_swig_g
 }
 
 
-void _wrap_btVector3_serializeFloat_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector3_serializeFloat_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -7454,7 +7704,7 @@ void _wrap_btVector3_serializeFloat_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, 
 }
 
 
-void _wrap_btVector3_deSerializeFloat_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector3_deSerializeFloat_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -7466,7 +7716,7 @@ void _wrap_btVector3_deSerializeFloat_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0
 }
 
 
-void _wrap_btVector3_serializeDouble_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btVector3_serializeDouble_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3DoubleData *arg2 = 0 ;
   
@@ -7478,7 +7728,7 @@ void _wrap_btVector3_serializeDouble_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0,
 }
 
 
-void _wrap_btVector3_deSerializeDouble_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btVector3_deSerializeDouble_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3DoubleData *arg2 = 0 ;
   
@@ -7490,7 +7740,7 @@ void _wrap_btVector3_deSerializeDouble_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_
 }
 
 
-long long _wrap_btVector3_maxDot_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
+long long _wrap_btVector3_maxDot_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = (btVector3 *) 0 ;
   long arg3 ;
@@ -7509,7 +7759,7 @@ long long _wrap_btVector3_maxDot_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btV
 }
 
 
-long long _wrap_btVector3_minDot_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
+long long _wrap_btVector3_minDot_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = (btVector3 *) 0 ;
   long arg3 ;
@@ -7528,7 +7778,7 @@ long long _wrap_btVector3_minDot_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btV
 }
 
 
-btVector3 *_wrap_btVector3_dot3_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+btVector3 *_wrap_btVector3_dot3_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -7547,7 +7797,7 @@ btVector3 *_wrap_btVector3_dot3_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVe
 }
 
 
-void _wrap_delete_btVector3_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+void _wrap_delete_btVector3_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = (btVector3 *) 0 ;
   
   arg1 = *(btVector3 **)&_swig_go_0; 
@@ -7557,7 +7807,7 @@ void _wrap_delete_btVector3_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-float _wrap_btDot_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btDot_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -7572,7 +7822,7 @@ float _wrap_btDot_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_g
 }
 
 
-float _wrap_btDistance2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btDistance2_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -7587,7 +7837,7 @@ float _wrap_btDistance2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_
 }
 
 
-float _wrap_btDistance_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btDistance_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -7602,7 +7852,7 @@ float _wrap_btDistance_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_s
 }
 
 
-float _wrap_btAngle__SWIG_0_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btAngle__SWIG_0_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -7617,7 +7867,7 @@ float _wrap_btAngle__SWIG_0_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector
 }
 
 
-btVector3 *_wrap_btCross_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+btVector3 *_wrap_btCross_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 result;
@@ -7632,7 +7882,7 @@ btVector3 *_wrap_btCross_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *
 }
 
 
-float _wrap_btTriple_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+float _wrap_btTriple_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -7649,7 +7899,7 @@ float _wrap_btTriple_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swi
 }
 
 
-btVector3 *_wrap_lerp_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+btVector3 *_wrap_lerp_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -7666,7 +7916,7 @@ btVector3 *_wrap_lerp_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_sw
 }
 
 
-btVector4 *_wrap_new_btVector4__SWIG_0_mbt_7f4d06f7d3d79a98() {
+btVector4 *_wrap_new_btVector4__SWIG_0_mbt_6d0baa097fc05319() {
   btVector4 *result = 0 ;
   btVector4 *_swig_go_result;
   
@@ -7677,7 +7927,7 @@ btVector4 *_wrap_new_btVector4__SWIG_0_mbt_7f4d06f7d3d79a98() {
 }
 
 
-btVector4 *_wrap_new_btVector4__SWIG_1_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+btVector4 *_wrap_new_btVector4__SWIG_1_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -7696,7 +7946,7 @@ btVector4 *_wrap_new_btVector4__SWIG_1_mbt_7f4d06f7d3d79a98(float _swig_go_0, fl
 }
 
 
-btVector4 *_wrap_btVector4_absolute4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+btVector4 *_wrap_btVector4_absolute4_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector4 result;
   btVector4 *_swig_go_result;
@@ -7709,7 +7959,7 @@ btVector4 *_wrap_btVector4_absolute4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0)
 }
 
 
-float _wrap_btVector4_getW_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float _wrap_btVector4_getW_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -7722,7 +7972,7 @@ float _wrap_btVector4_getW_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector4_maxAxis4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_maxAxis4_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -7735,7 +7985,7 @@ intgo _wrap_btVector4_maxAxis4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector4_minAxis4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_minAxis4_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -7748,7 +7998,7 @@ intgo _wrap_btVector4_minAxis4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector4_closestAxis4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_closestAxis4_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -7761,7 +8011,7 @@ intgo _wrap_btVector4_closestAxis4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-void _wrap_btVector4_setValue_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
+void _wrap_btVector4_setValue_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -7779,7 +8029,7 @@ void _wrap_btVector4_setValue_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float 
 }
 
 
-void _wrap_delete_btVector4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+void _wrap_delete_btVector4_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   
   arg1 = *(btVector4 **)&_swig_go_0; 
@@ -7789,7 +8039,7 @@ void _wrap_delete_btVector4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-void _wrap_SetbtVector4_M_floats_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float *_swig_go_1) {
+void _wrap_SetbtVector4_M_floats_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, float *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *arg2 = (btScalar *) (btScalar *)0 ;
   
@@ -7802,7 +8052,7 @@ void _wrap_SetbtVector4_M_floats_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, flo
 }
 
 
-float *_wrap_GetbtVector4_M_floats_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float *_wrap_GetbtVector4_M_floats_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float *_swig_go_result;
@@ -7816,7 +8066,7 @@ float *_wrap_GetbtVector4_M_floats_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_dot_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector4_dot_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -7832,7 +8082,7 @@ float _wrap_btVector4_dot_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 
 }
 
 
-float _wrap_btVector4_length2_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float _wrap_btVector4_length2_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -7846,7 +8096,7 @@ float _wrap_btVector4_length2_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_length_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float _wrap_btVector4_length_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -7860,7 +8110,7 @@ float _wrap_btVector4_length_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_norm_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float _wrap_btVector4_norm_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -7874,7 +8124,7 @@ float _wrap_btVector4_norm_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_safeNorm_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float _wrap_btVector4_safeNorm_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -7888,7 +8138,7 @@ float _wrap_btVector4_safeNorm_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_distance2_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector4_distance2_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -7904,7 +8154,7 @@ float _wrap_btVector4_distance2_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVe
 }
 
 
-float _wrap_btVector4_distance_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector4_distance_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -7920,7 +8170,7 @@ float _wrap_btVector4_distance_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVec
 }
 
 
-btVector3 *_wrap_btVector4_safeNormalize_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+btVector3 *_wrap_btVector4_safeNormalize_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
@@ -7934,7 +8184,7 @@ btVector3 *_wrap_btVector4_safeNormalize_mbt_7f4d06f7d3d79a98(btVector4 *_swig_g
 }
 
 
-btVector3 *_wrap_btVector4_normalize_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+btVector3 *_wrap_btVector4_normalize_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
@@ -7948,7 +8198,7 @@ btVector3 *_wrap_btVector4_normalize_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0)
 }
 
 
-btVector3 *_wrap_btVector4_normalized_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+btVector3 *_wrap_btVector4_normalized_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 result;
   btVector3 *_swig_go_result;
@@ -7962,7 +8212,7 @@ btVector3 *_wrap_btVector4_normalized_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0
 }
 
 
-btVector3 *_wrap_btVector4_rotate_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+btVector3 *_wrap_btVector4_rotate_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar arg3 ;
@@ -7980,7 +8230,7 @@ btVector3 *_wrap_btVector4_rotate_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, bt
 }
 
 
-float _wrap_btVector4_angle_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btVector4_angle_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -7996,7 +8246,7 @@ float _wrap_btVector4_angle_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector
 }
 
 
-btVector3 *_wrap_btVector4_absolute_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+btVector3 *_wrap_btVector4_absolute_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 result;
   btVector3 *_swig_go_result;
@@ -8010,7 +8260,7 @@ btVector3 *_wrap_btVector4_absolute_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) 
 }
 
 
-btVector3 *_wrap_btVector4_cross_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+btVector3 *_wrap_btVector4_cross_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 result;
@@ -8026,7 +8276,7 @@ btVector3 *_wrap_btVector4_cross_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btV
 }
 
 
-float _wrap_btVector4_triple_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+float _wrap_btVector4_triple_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -8044,7 +8294,7 @@ float _wrap_btVector4_triple_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVecto
 }
 
 
-intgo _wrap_btVector4_minAxis_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_minAxis_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -8058,7 +8308,7 @@ intgo _wrap_btVector4_minAxis_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector4_maxAxis_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_maxAxis_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -8072,7 +8322,7 @@ intgo _wrap_btVector4_maxAxis_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector4_furthestAxis_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_furthestAxis_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -8086,7 +8336,7 @@ intgo _wrap_btVector4_furthestAxis_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-intgo _wrap_btVector4_closestAxis_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+intgo _wrap_btVector4_closestAxis_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   int result;
   intgo _swig_go_result;
@@ -8100,7 +8350,7 @@ intgo _wrap_btVector4_closestAxis_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-void _wrap_btVector4_setInterpolate3_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, float _swig_go_3) {
+void _wrap_btVector4_setInterpolate3_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, float _swig_go_3) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -8117,7 +8367,7 @@ void _wrap_btVector4_setInterpolate3_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0,
 }
 
 
-btVector3 *_wrap_btVector4_lerp_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+btVector3 *_wrap_btVector4_lerp_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -8135,7 +8385,7 @@ btVector3 *_wrap_btVector4_lerp_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVe
 }
 
 
-float _wrap_btVector4_getX_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float _wrap_btVector4_getX_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8149,7 +8399,7 @@ float _wrap_btVector4_getX_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_getY_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float _wrap_btVector4_getY_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8163,7 +8413,7 @@ float _wrap_btVector4_getY_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_getZ_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float _wrap_btVector4_getZ_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8177,7 +8427,7 @@ float _wrap_btVector4_getZ_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-void _wrap_btVector4_setX_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector4_setX_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, float _swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar arg2 ;
   
@@ -8190,7 +8440,7 @@ void _wrap_btVector4_setX_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swi
 }
 
 
-void _wrap_btVector4_setY_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector4_setY_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, float _swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar arg2 ;
   
@@ -8203,7 +8453,7 @@ void _wrap_btVector4_setY_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swi
 }
 
 
-void _wrap_btVector4_setZ_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector4_setZ_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, float _swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar arg2 ;
   
@@ -8216,7 +8466,7 @@ void _wrap_btVector4_setZ_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swi
 }
 
 
-void _wrap_btVector4_setW_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swig_go_1) {
+void _wrap_btVector4_setW_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, float _swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar arg2 ;
   
@@ -8229,7 +8479,7 @@ void _wrap_btVector4_setW_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swi
 }
 
 
-float _wrap_btVector4_x_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float _wrap_btVector4_x_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8243,7 +8493,7 @@ float _wrap_btVector4_x_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_y_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float _wrap_btVector4_y_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8257,7 +8507,7 @@ float _wrap_btVector4_y_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_z_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float _wrap_btVector4_z_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8271,7 +8521,7 @@ float _wrap_btVector4_z_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-float _wrap_btVector4_w_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+float _wrap_btVector4_w_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8285,7 +8535,7 @@ float _wrap_btVector4_w_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-void _wrap_btVector4_setMax_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+void _wrap_btVector4_setMax_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   
@@ -8298,7 +8548,7 @@ void _wrap_btVector4_setMax_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector
 }
 
 
-void _wrap_btVector4_setMin_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+void _wrap_btVector4_setMin_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   
@@ -8311,7 +8561,7 @@ void _wrap_btVector4_setMin_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector
 }
 
 
-void _wrap_btVector4_getSkewSymmetricMatrix_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+void _wrap_btVector4_getSkewSymmetricMatrix_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = (btVector3 *) 0 ;
   btVector3 *arg3 = (btVector3 *) 0 ;
@@ -8328,7 +8578,7 @@ void _wrap_btVector4_getSkewSymmetricMatrix_mbt_7f4d06f7d3d79a98(btVector4 *_swi
 }
 
 
-void _wrap_btVector4_setZero_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+void _wrap_btVector4_setZero_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   
   arg1 = *(btVector4 **)&_swig_go_0; 
@@ -8339,7 +8589,7 @@ void _wrap_btVector4_setZero_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-bool _wrap_btVector4_isZero_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+bool _wrap_btVector4_isZero_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   bool result;
   bool _swig_go_result;
@@ -8353,7 +8603,7 @@ bool _wrap_btVector4_isZero_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-bool _wrap_btVector4_fuzzyZero_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+bool _wrap_btVector4_fuzzyZero_mbt_6d0baa097fc05319(btVector4 *_swig_go_0) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   bool result;
   bool _swig_go_result;
@@ -8367,7 +8617,7 @@ bool _wrap_btVector4_fuzzyZero_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
 }
 
 
-void _wrap_btVector4_serialize_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector4_serialize_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -8380,7 +8630,7 @@ void _wrap_btVector4_serialize_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVec
 }
 
 
-void _wrap_btVector4_deSerialize__SWIG_0_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btVector4_deSerialize__SWIG_0_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3DoubleData *arg2 = 0 ;
   
@@ -8393,7 +8643,7 @@ void _wrap_btVector4_deSerialize__SWIG_0_mbt_7f4d06f7d3d79a98(btVector4 *_swig_g
 }
 
 
-void _wrap_btVector4_deSerialize__SWIG_1_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector4_deSerialize__SWIG_1_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -8406,7 +8656,7 @@ void _wrap_btVector4_deSerialize__SWIG_1_mbt_7f4d06f7d3d79a98(btVector4 *_swig_g
 }
 
 
-void _wrap_btVector4_serializeFloat_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector4_serializeFloat_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -8419,7 +8669,7 @@ void _wrap_btVector4_serializeFloat_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, 
 }
 
 
-void _wrap_btVector4_deSerializeFloat_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btVector4_deSerializeFloat_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3FloatData *arg2 = 0 ;
   
@@ -8432,7 +8682,7 @@ void _wrap_btVector4_deSerializeFloat_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0
 }
 
 
-void _wrap_btVector4_serializeDouble_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btVector4_serializeDouble_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3DoubleData *arg2 = 0 ;
   
@@ -8445,7 +8695,7 @@ void _wrap_btVector4_serializeDouble_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0,
 }
 
 
-void _wrap_btVector4_deSerializeDouble_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btVector4_deSerializeDouble_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3DoubleData *arg2 = 0 ;
   
@@ -8458,7 +8708,7 @@ void _wrap_btVector4_deSerializeDouble_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_
 }
 
 
-long long _wrap_btVector4_maxDot_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
+long long _wrap_btVector4_maxDot_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = (btVector3 *) 0 ;
   long arg3 ;
@@ -8478,7 +8728,7 @@ long long _wrap_btVector4_maxDot_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btV
 }
 
 
-long long _wrap_btVector4_minDot_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
+long long _wrap_btVector4_minDot_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = (btVector3 *) 0 ;
   long arg3 ;
@@ -8498,7 +8748,7 @@ long long _wrap_btVector4_minDot_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btV
 }
 
 
-btVector3 *_wrap_btVector4_dot3_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+btVector3 *_wrap_btVector4_dot3_mbt_6d0baa097fc05319(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
   btVector4 *arg1 = (btVector4 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -8518,7 +8768,7 @@ btVector3 *_wrap_btVector4_dot3_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVe
 }
 
 
-void _wrap_btSwapScalarEndian_mbt_7f4d06f7d3d79a98(float _swig_go_0, float *_swig_go_1) {
+void _wrap_btSwapScalarEndian_mbt_6d0baa097fc05319(float _swig_go_0, float *_swig_go_1) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   
@@ -8530,7 +8780,7 @@ void _wrap_btSwapScalarEndian_mbt_7f4d06f7d3d79a98(float _swig_go_0, float *_swi
 }
 
 
-void _wrap_btSwapVector3Endian_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+void _wrap_btSwapVector3Endian_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   
@@ -8542,7 +8792,7 @@ void _wrap_btSwapVector3Endian_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVec
 }
 
 
-void _wrap_btUnSwapVector3Endian_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+void _wrap_btUnSwapVector3Endian_mbt_6d0baa097fc05319(btVector3 *_swig_go_0) {
   btVector3 *arg1 = 0 ;
   
   arg1 = *(btVector3 **)&_swig_go_0; 
@@ -8552,7 +8802,7 @@ void _wrap_btUnSwapVector3Endian_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
 }
 
 
-void _wrap_btVector3FloatData_m_floats_set_mbt_7f4d06f7d3d79a98(btVector3FloatData *_swig_go_0, float *_swig_go_1) {
+void _wrap_btVector3FloatData_m_floats_set_mbt_6d0baa097fc05319(btVector3FloatData *_swig_go_0, float *_swig_go_1) {
   btVector3FloatData *arg1 = (btVector3FloatData *) 0 ;
   float *arg2 = (float *) (float *)0 ;
   
@@ -8568,7 +8818,7 @@ void _wrap_btVector3FloatData_m_floats_set_mbt_7f4d06f7d3d79a98(btVector3FloatDa
 }
 
 
-float *_wrap_btVector3FloatData_m_floats_get_mbt_7f4d06f7d3d79a98(btVector3FloatData *_swig_go_0) {
+float *_wrap_btVector3FloatData_m_floats_get_mbt_6d0baa097fc05319(btVector3FloatData *_swig_go_0) {
   btVector3FloatData *arg1 = (btVector3FloatData *) 0 ;
   float *result = 0 ;
   float *_swig_go_result;
@@ -8581,7 +8831,7 @@ float *_wrap_btVector3FloatData_m_floats_get_mbt_7f4d06f7d3d79a98(btVector3Float
 }
 
 
-btVector3FloatData *_wrap_new_btVector3FloatData_mbt_7f4d06f7d3d79a98() {
+btVector3FloatData *_wrap_new_btVector3FloatData_mbt_6d0baa097fc05319() {
   btVector3FloatData *result = 0 ;
   btVector3FloatData *_swig_go_result;
   
@@ -8592,7 +8842,7 @@ btVector3FloatData *_wrap_new_btVector3FloatData_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void _wrap_delete_btVector3FloatData_mbt_7f4d06f7d3d79a98(btVector3FloatData *_swig_go_0) {
+void _wrap_delete_btVector3FloatData_mbt_6d0baa097fc05319(btVector3FloatData *_swig_go_0) {
   btVector3FloatData *arg1 = (btVector3FloatData *) 0 ;
   
   arg1 = *(btVector3FloatData **)&_swig_go_0; 
@@ -8602,7 +8852,7 @@ void _wrap_delete_btVector3FloatData_mbt_7f4d06f7d3d79a98(btVector3FloatData *_s
 }
 
 
-void _wrap_btVector3DoubleData_m_floats_set_mbt_7f4d06f7d3d79a98(btVector3DoubleData *_swig_go_0, double *_swig_go_1) {
+void _wrap_btVector3DoubleData_m_floats_set_mbt_6d0baa097fc05319(btVector3DoubleData *_swig_go_0, double *_swig_go_1) {
   btVector3DoubleData *arg1 = (btVector3DoubleData *) 0 ;
   double *arg2 = (double *) (double *)0 ;
   
@@ -8618,7 +8868,7 @@ void _wrap_btVector3DoubleData_m_floats_set_mbt_7f4d06f7d3d79a98(btVector3Double
 }
 
 
-double *_wrap_btVector3DoubleData_m_floats_get_mbt_7f4d06f7d3d79a98(btVector3DoubleData *_swig_go_0) {
+double *_wrap_btVector3DoubleData_m_floats_get_mbt_6d0baa097fc05319(btVector3DoubleData *_swig_go_0) {
   btVector3DoubleData *arg1 = (btVector3DoubleData *) 0 ;
   double *result = 0 ;
   double *_swig_go_result;
@@ -8631,7 +8881,7 @@ double *_wrap_btVector3DoubleData_m_floats_get_mbt_7f4d06f7d3d79a98(btVector3Dou
 }
 
 
-btVector3DoubleData *_wrap_new_btVector3DoubleData_mbt_7f4d06f7d3d79a98() {
+btVector3DoubleData *_wrap_new_btVector3DoubleData_mbt_6d0baa097fc05319() {
   btVector3DoubleData *result = 0 ;
   btVector3DoubleData *_swig_go_result;
   
@@ -8642,7 +8892,7 @@ btVector3DoubleData *_wrap_new_btVector3DoubleData_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void _wrap_delete_btVector3DoubleData_mbt_7f4d06f7d3d79a98(btVector3DoubleData *_swig_go_0) {
+void _wrap_delete_btVector3DoubleData_mbt_6d0baa097fc05319(btVector3DoubleData *_swig_go_0) {
   btVector3DoubleData *arg1 = (btVector3DoubleData *) 0 ;
   
   arg1 = *(btVector3DoubleData **)&_swig_go_0; 
@@ -8652,7 +8902,7 @@ void _wrap_delete_btVector3DoubleData_mbt_7f4d06f7d3d79a98(btVector3DoubleData *
 }
 
 
-float _wrap_btQuadWord_getX_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_getX_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8665,7 +8915,7 @@ float _wrap_btQuadWord_getX_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
 }
 
 
-float _wrap_btQuadWord_getY_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_getY_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8678,7 +8928,7 @@ float _wrap_btQuadWord_getY_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
 }
 
 
-float _wrap_btQuadWord_getZ_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_getZ_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8691,7 +8941,7 @@ float _wrap_btQuadWord_getZ_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
 }
 
 
-void _wrap_btQuadWord_setX_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuadWord_setX_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0, float _swig_go_1) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar arg2 ;
   
@@ -8703,7 +8953,7 @@ void _wrap_btQuadWord_setX_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _s
 }
 
 
-void _wrap_btQuadWord_setY_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuadWord_setY_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0, float _swig_go_1) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar arg2 ;
   
@@ -8715,7 +8965,7 @@ void _wrap_btQuadWord_setY_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _s
 }
 
 
-void _wrap_btQuadWord_setZ_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuadWord_setZ_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0, float _swig_go_1) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar arg2 ;
   
@@ -8727,7 +8977,7 @@ void _wrap_btQuadWord_setZ_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _s
 }
 
 
-void _wrap_btQuadWord_setW_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuadWord_setW_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0, float _swig_go_1) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar arg2 ;
   
@@ -8739,7 +8989,7 @@ void _wrap_btQuadWord_setW_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _s
 }
 
 
-float _wrap_btQuadWord_x_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_x_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8752,7 +9002,7 @@ float _wrap_btQuadWord_x_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
 }
 
 
-float _wrap_btQuadWord_y_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_y_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8765,7 +9015,7 @@ float _wrap_btQuadWord_y_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
 }
 
 
-float _wrap_btQuadWord_z_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_z_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8778,7 +9028,7 @@ float _wrap_btQuadWord_z_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
 }
 
 
-float _wrap_btQuadWord_w_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+float _wrap_btQuadWord_w_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -8791,7 +9041,7 @@ float _wrap_btQuadWord_w_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
 }
 
 
-void _wrap_btQuadWord_setValue__SWIG_0_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btQuadWord_setValue__SWIG_0_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -8807,7 +9057,7 @@ void _wrap_btQuadWord_setValue__SWIG_0_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go
 }
 
 
-void _wrap_btQuadWord_setValue__SWIG_1_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
+void _wrap_btQuadWord_setValue__SWIG_1_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -8825,7 +9075,7 @@ void _wrap_btQuadWord_setValue__SWIG_1_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go
 }
 
 
-btQuadWord *_wrap_new_btQuadWord__SWIG_0_mbt_7f4d06f7d3d79a98() {
+btQuadWord *_wrap_new_btQuadWord__SWIG_0_mbt_6d0baa097fc05319() {
   btQuadWord *result = 0 ;
   btQuadWord *_swig_go_result;
   
@@ -8836,7 +9086,7 @@ btQuadWord *_wrap_new_btQuadWord__SWIG_0_mbt_7f4d06f7d3d79a98() {
 }
 
 
-btQuadWord *_wrap_new_btQuadWord__SWIG_1_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
+btQuadWord *_wrap_new_btQuadWord__SWIG_1_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -8853,7 +9103,7 @@ btQuadWord *_wrap_new_btQuadWord__SWIG_1_mbt_7f4d06f7d3d79a98(float _swig_go_0, 
 }
 
 
-btQuadWord *_wrap_new_btQuadWord__SWIG_2_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+btQuadWord *_wrap_new_btQuadWord__SWIG_2_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -8872,7 +9122,7 @@ btQuadWord *_wrap_new_btQuadWord__SWIG_2_mbt_7f4d06f7d3d79a98(float _swig_go_0, 
 }
 
 
-void _wrap_btQuadWord_setMax_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, btQuadWord *_swig_go_1) {
+void _wrap_btQuadWord_setMax_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0, btQuadWord *_swig_go_1) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btQuadWord *arg2 = 0 ;
   
@@ -8884,7 +9134,7 @@ void _wrap_btQuadWord_setMax_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, btQuad
 }
 
 
-void _wrap_btQuadWord_setMin_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, btQuadWord *_swig_go_1) {
+void _wrap_btQuadWord_setMin_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0, btQuadWord *_swig_go_1) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   btQuadWord *arg2 = 0 ;
   
@@ -8896,7 +9146,7 @@ void _wrap_btQuadWord_setMin_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, btQuad
 }
 
 
-void _wrap_delete_btQuadWord_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+void _wrap_delete_btQuadWord_mbt_6d0baa097fc05319(btQuadWord *_swig_go_0) {
   btQuadWord *arg1 = (btQuadWord *) 0 ;
   
   arg1 = *(btQuadWord **)&_swig_go_0; 
@@ -8906,7 +9156,7 @@ void _wrap_delete_btQuadWord_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
 }
 
 
-btQuaternion *_wrap_new_btQuaternion__SWIG_0_mbt_7f4d06f7d3d79a98() {
+btQuaternion *_wrap_new_btQuaternion__SWIG_0_mbt_6d0baa097fc05319() {
   btQuaternion *result = 0 ;
   btQuaternion *_swig_go_result;
   
@@ -8917,7 +9167,7 @@ btQuaternion *_wrap_new_btQuaternion__SWIG_0_mbt_7f4d06f7d3d79a98() {
 }
 
 
-btQuaternion *_wrap_new_btQuaternion__SWIG_1_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+btQuaternion *_wrap_new_btQuaternion__SWIG_1_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -8936,7 +9186,7 @@ btQuaternion *_wrap_new_btQuaternion__SWIG_1_mbt_7f4d06f7d3d79a98(float _swig_go
 }
 
 
-btQuaternion *_wrap_new_btQuaternion__SWIG_2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swig_go_1) {
+btQuaternion *_wrap_new_btQuaternion__SWIG_2_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, float _swig_go_1) {
   btVector3 *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btQuaternion *result = 0 ;
@@ -8951,7 +9201,7 @@ btQuaternion *_wrap_new_btQuaternion__SWIG_2_mbt_7f4d06f7d3d79a98(btVector3 *_sw
 }
 
 
-btQuaternion *_wrap_new_btQuaternion__SWIG_3_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
+btQuaternion *_wrap_new_btQuaternion__SWIG_3_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -8968,7 +9218,7 @@ btQuaternion *_wrap_new_btQuaternion__SWIG_3_mbt_7f4d06f7d3d79a98(float _swig_go
 }
 
 
-void _wrap_btQuaternion_setRotation_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+void _wrap_btQuaternion_setRotation_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -8982,7 +9232,7 @@ void _wrap_btQuaternion_setRotation_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_
 }
 
 
-void _wrap_btQuaternion_setEuler_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btQuaternion_setEuler_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -8998,7 +9248,7 @@ void _wrap_btQuaternion_setEuler_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, 
 }
 
 
-void _wrap_btQuaternion_setEulerZYX_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btQuaternion_setEulerZYX_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -9014,7 +9264,7 @@ void _wrap_btQuaternion_setEulerZYX_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_
 }
 
 
-void _wrap_btQuaternion_getEulerZYX_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
+void _wrap_btQuaternion_getEulerZYX_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -9030,7 +9280,7 @@ void _wrap_btQuaternion_getEulerZYX_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_
 }
 
 
-float _wrap_btQuaternion_dot_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+float _wrap_btQuaternion_dot_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar result;
@@ -9045,7 +9295,7 @@ float _wrap_btQuaternion_dot_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQu
 }
 
 
-float _wrap_btQuaternion_length2_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_length2_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -9058,7 +9308,7 @@ float _wrap_btQuaternion_length2_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) 
 }
 
 
-float _wrap_btQuaternion_length_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_length_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -9071,7 +9321,7 @@ float _wrap_btQuaternion_length_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
 }
 
 
-btQuaternion *_wrap_btQuaternion_safeNormalize_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+btQuaternion *_wrap_btQuaternion_safeNormalize_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *result = 0 ;
   btQuaternion *_swig_go_result;
@@ -9084,7 +9334,7 @@ btQuaternion *_wrap_btQuaternion_safeNormalize_mbt_7f4d06f7d3d79a98(btQuaternion
 }
 
 
-btQuaternion *_wrap_btQuaternion_normalize_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+btQuaternion *_wrap_btQuaternion_normalize_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *result = 0 ;
   btQuaternion *_swig_go_result;
@@ -9097,7 +9347,7 @@ btQuaternion *_wrap_btQuaternion_normalize_mbt_7f4d06f7d3d79a98(btQuaternion *_s
 }
 
 
-btQuaternion *_wrap_btQuaternion_normalized_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+btQuaternion *_wrap_btQuaternion_normalized_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion result;
   btQuaternion *_swig_go_result;
@@ -9110,7 +9360,7 @@ btQuaternion *_wrap_btQuaternion_normalized_mbt_7f4d06f7d3d79a98(btQuaternion *_
 }
 
 
-float _wrap_btQuaternion_angle_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+float _wrap_btQuaternion_angle_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar result;
@@ -9125,7 +9375,7 @@ float _wrap_btQuaternion_angle_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, bt
 }
 
 
-float _wrap_btQuaternion_angleShortestPath_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+float _wrap_btQuaternion_angleShortestPath_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar result;
@@ -9140,7 +9390,7 @@ float _wrap_btQuaternion_angleShortestPath_mbt_7f4d06f7d3d79a98(btQuaternion *_s
 }
 
 
-float _wrap_btQuaternion_getAngle_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_getAngle_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -9153,7 +9403,7 @@ float _wrap_btQuaternion_getAngle_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0)
 }
 
 
-float _wrap_btQuaternion_getAngleShortestPath_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_getAngleShortestPath_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -9166,7 +9416,7 @@ float _wrap_btQuaternion_getAngleShortestPath_mbt_7f4d06f7d3d79a98(btQuaternion 
 }
 
 
-btVector3 *_wrap_btQuaternion_getAxis_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+btVector3 *_wrap_btQuaternion_getAxis_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btVector3 result;
   btVector3 *_swig_go_result;
@@ -9179,7 +9429,7 @@ btVector3 *_wrap_btQuaternion_getAxis_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_g
 }
 
 
-btQuaternion *_wrap_btQuaternion_inverse_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+btQuaternion *_wrap_btQuaternion_inverse_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion result;
   btQuaternion *_swig_go_result;
@@ -9192,7 +9442,7 @@ btQuaternion *_wrap_btQuaternion_inverse_mbt_7f4d06f7d3d79a98(btQuaternion *_swi
 }
 
 
-btQuaternion *_wrap_btQuaternion_farthest_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+btQuaternion *_wrap_btQuaternion_farthest_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *arg2 = 0 ;
   btQuaternion result;
@@ -9207,7 +9457,7 @@ btQuaternion *_wrap_btQuaternion_farthest_mbt_7f4d06f7d3d79a98(btQuaternion *_sw
 }
 
 
-btQuaternion *_wrap_btQuaternion_nearest_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+btQuaternion *_wrap_btQuaternion_nearest_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *arg2 = 0 ;
   btQuaternion result;
@@ -9222,7 +9472,7 @@ btQuaternion *_wrap_btQuaternion_nearest_mbt_7f4d06f7d3d79a98(btQuaternion *_swi
 }
 
 
-btQuaternion *_wrap_btQuaternion_slerp_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
+btQuaternion *_wrap_btQuaternion_slerp_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -9239,7 +9489,7 @@ btQuaternion *_wrap_btQuaternion_slerp_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_
 }
 
 
-btQuaternion *_wrap_btQuaternion_getIdentity_mbt_7f4d06f7d3d79a98() {
+btQuaternion *_wrap_btQuaternion_getIdentity_mbt_6d0baa097fc05319() {
   btQuaternion *result = 0 ;
   btQuaternion *_swig_go_result;
   
@@ -9250,7 +9500,7 @@ btQuaternion *_wrap_btQuaternion_getIdentity_mbt_7f4d06f7d3d79a98() {
 }
 
 
-float _wrap_btQuaternion_getW_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_getW_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -9263,7 +9513,7 @@ float _wrap_btQuaternion_getW_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
 }
 
 
-void _wrap_btQuaternion_serialize_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
+void _wrap_btQuaternion_serialize_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionFloatData *arg2 = 0 ;
   
@@ -9275,7 +9525,7 @@ void _wrap_btQuaternion_serialize_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0,
 }
 
 
-void _wrap_btQuaternion_deSerialize__SWIG_0_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
+void _wrap_btQuaternion_deSerialize__SWIG_0_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionFloatData *arg2 = 0 ;
   
@@ -9287,7 +9537,7 @@ void _wrap_btQuaternion_deSerialize__SWIG_0_mbt_7f4d06f7d3d79a98(btQuaternion *_
 }
 
 
-void _wrap_btQuaternion_deSerialize__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
+void _wrap_btQuaternion_deSerialize__SWIG_1_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionDoubleData *arg2 = 0 ;
   
@@ -9299,7 +9549,7 @@ void _wrap_btQuaternion_deSerialize__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_
 }
 
 
-void _wrap_btQuaternion_serializeFloat_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
+void _wrap_btQuaternion_serializeFloat_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionFloatData *arg2 = 0 ;
   
@@ -9311,7 +9561,7 @@ void _wrap_btQuaternion_serializeFloat_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_
 }
 
 
-void _wrap_btQuaternion_deSerializeFloat_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
+void _wrap_btQuaternion_deSerializeFloat_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionFloatData *arg2 = 0 ;
   
@@ -9323,7 +9573,7 @@ void _wrap_btQuaternion_deSerializeFloat_mbt_7f4d06f7d3d79a98(btQuaternion *_swi
 }
 
 
-void _wrap_btQuaternion_serializeDouble_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
+void _wrap_btQuaternion_serializeDouble_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionDoubleData *arg2 = 0 ;
   
@@ -9335,7 +9585,7 @@ void _wrap_btQuaternion_serializeDouble_mbt_7f4d06f7d3d79a98(btQuaternion *_swig
 }
 
 
-void _wrap_btQuaternion_deSerializeDouble_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
+void _wrap_btQuaternion_deSerializeDouble_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuaternionDoubleData *arg2 = 0 ;
   
@@ -9347,7 +9597,7 @@ void _wrap_btQuaternion_deSerializeDouble_mbt_7f4d06f7d3d79a98(btQuaternion *_sw
 }
 
 
-void _wrap_delete_btQuaternion_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+void _wrap_delete_btQuaternion_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   
   arg1 = *(btQuaternion **)&_swig_go_0; 
@@ -9357,7 +9607,7 @@ void _wrap_delete_btQuaternion_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btQuaternion_getX_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_getX_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -9371,7 +9621,7 @@ float _wrap_btQuaternion_getX_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btQuaternion_getY_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_getY_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -9385,7 +9635,7 @@ float _wrap_btQuaternion_getY_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btQuaternion_getZ_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_getZ_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -9399,7 +9649,7 @@ float _wrap_btQuaternion_getZ_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
 }
 
 
-void _wrap_btQuaternion_setX_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuaternion_setX_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, float _swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar arg2 ;
   
@@ -9412,7 +9662,7 @@ void _wrap_btQuaternion_setX_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, floa
 }
 
 
-void _wrap_btQuaternion_setY_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuaternion_setY_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, float _swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar arg2 ;
   
@@ -9425,7 +9675,7 @@ void _wrap_btQuaternion_setY_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, floa
 }
 
 
-void _wrap_btQuaternion_setZ_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuaternion_setZ_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, float _swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar arg2 ;
   
@@ -9438,7 +9688,7 @@ void _wrap_btQuaternion_setZ_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, floa
 }
 
 
-void _wrap_btQuaternion_setW_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1) {
+void _wrap_btQuaternion_setW_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, float _swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar arg2 ;
   
@@ -9451,7 +9701,7 @@ void _wrap_btQuaternion_setW_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, floa
 }
 
 
-float _wrap_btQuaternion_x_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_x_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -9465,7 +9715,7 @@ float _wrap_btQuaternion_x_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btQuaternion_y_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_y_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -9479,7 +9729,7 @@ float _wrap_btQuaternion_y_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btQuaternion_z_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_z_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -9493,7 +9743,7 @@ float _wrap_btQuaternion_z_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btQuaternion_w_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_btQuaternion_w_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *result = 0 ;
   float _swig_go_result;
@@ -9507,7 +9757,7 @@ float _wrap_btQuaternion_w_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
 }
 
 
-void _wrap_btQuaternion_setValue__SWIG_0_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btQuaternion_setValue__SWIG_0_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -9524,7 +9774,7 @@ void _wrap_btQuaternion_setValue__SWIG_0_mbt_7f4d06f7d3d79a98(btQuaternion *_swi
 }
 
 
-void _wrap_btQuaternion_setValue__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
+void _wrap_btQuaternion_setValue__SWIG_1_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -9543,7 +9793,7 @@ void _wrap_btQuaternion_setValue__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_swi
 }
 
 
-void _wrap_btQuaternion_setMax_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuadWord *_swig_go_1) {
+void _wrap_btQuaternion_setMax_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuadWord *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuadWord *arg2 = 0 ;
   
@@ -9556,7 +9806,7 @@ void _wrap_btQuaternion_setMax_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, bt
 }
 
 
-void _wrap_btQuaternion_setMin_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuadWord *_swig_go_1) {
+void _wrap_btQuaternion_setMin_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuadWord *_swig_go_1) {
   btQuaternion *arg1 = (btQuaternion *) 0 ;
   btQuadWord *arg2 = 0 ;
   
@@ -9569,7 +9819,7 @@ void _wrap_btQuaternion_setMin_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, bt
 }
 
 
-float _wrap_dot_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+float _wrap_dot_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar result;
@@ -9584,7 +9834,7 @@ float _wrap_dot_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_sw
 }
 
 
-float _wrap_length_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+float _wrap_length_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = 0 ;
   btScalar result;
   float _swig_go_result;
@@ -9597,7 +9847,7 @@ float _wrap_length_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
 }
 
 
-float _wrap_btAngle__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+float _wrap_btAngle__SWIG_1_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
   btQuaternion *arg1 = 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar result;
@@ -9612,7 +9862,7 @@ float _wrap_btAngle__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQua
 }
 
 
-btQuaternion *_wrap_inverse_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+btQuaternion *_wrap_inverse_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = 0 ;
   btQuaternion result;
   btQuaternion *_swig_go_result;
@@ -9625,7 +9875,7 @@ btQuaternion *_wrap_inverse_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
 }
 
 
-btQuaternion *_wrap_slerp_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
+btQuaternion *_wrap_slerp_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
   btQuaternion *arg1 = 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -9642,7 +9892,7 @@ btQuaternion *_wrap_slerp_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuate
 }
 
 
-btVector3 *_wrap_quatRotate_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btVector3 *_swig_go_1) {
+btVector3 *_wrap_quatRotate_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btVector3 *_swig_go_1) {
   btQuaternion *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 result;
@@ -9657,7 +9907,7 @@ btVector3 *_wrap_quatRotate_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btVec
 }
 
 
-btQuaternion *_wrap_shortestArcQuat_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+btQuaternion *_wrap_shortestArcQuat_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btQuaternion result;
@@ -9672,7 +9922,7 @@ btQuaternion *_wrap_shortestArcQuat_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, 
 }
 
 
-btQuaternion *_wrap_shortestArcQuatNormalize2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+btQuaternion *_wrap_shortestArcQuatNormalize2_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btQuaternion result;
@@ -9687,7 +9937,7 @@ btQuaternion *_wrap_shortestArcQuatNormalize2_mbt_7f4d06f7d3d79a98(btVector3 *_s
 }
 
 
-void _wrap_btQuaternionFloatData_m_floats_set_mbt_7f4d06f7d3d79a98(btQuaternionFloatData *_swig_go_0, float *_swig_go_1) {
+void _wrap_btQuaternionFloatData_m_floats_set_mbt_6d0baa097fc05319(btQuaternionFloatData *_swig_go_0, float *_swig_go_1) {
   btQuaternionFloatData *arg1 = (btQuaternionFloatData *) 0 ;
   float *arg2 = (float *) (float *)0 ;
   
@@ -9703,7 +9953,7 @@ void _wrap_btQuaternionFloatData_m_floats_set_mbt_7f4d06f7d3d79a98(btQuaternionF
 }
 
 
-float *_wrap_btQuaternionFloatData_m_floats_get_mbt_7f4d06f7d3d79a98(btQuaternionFloatData *_swig_go_0) {
+float *_wrap_btQuaternionFloatData_m_floats_get_mbt_6d0baa097fc05319(btQuaternionFloatData *_swig_go_0) {
   btQuaternionFloatData *arg1 = (btQuaternionFloatData *) 0 ;
   float *result = 0 ;
   float *_swig_go_result;
@@ -9716,7 +9966,7 @@ float *_wrap_btQuaternionFloatData_m_floats_get_mbt_7f4d06f7d3d79a98(btQuaternio
 }
 
 
-btQuaternionFloatData *_wrap_new_btQuaternionFloatData_mbt_7f4d06f7d3d79a98() {
+btQuaternionFloatData *_wrap_new_btQuaternionFloatData_mbt_6d0baa097fc05319() {
   btQuaternionFloatData *result = 0 ;
   btQuaternionFloatData *_swig_go_result;
   
@@ -9727,7 +9977,7 @@ btQuaternionFloatData *_wrap_new_btQuaternionFloatData_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void _wrap_delete_btQuaternionFloatData_mbt_7f4d06f7d3d79a98(btQuaternionFloatData *_swig_go_0) {
+void _wrap_delete_btQuaternionFloatData_mbt_6d0baa097fc05319(btQuaternionFloatData *_swig_go_0) {
   btQuaternionFloatData *arg1 = (btQuaternionFloatData *) 0 ;
   
   arg1 = *(btQuaternionFloatData **)&_swig_go_0; 
@@ -9737,7 +9987,7 @@ void _wrap_delete_btQuaternionFloatData_mbt_7f4d06f7d3d79a98(btQuaternionFloatDa
 }
 
 
-void _wrap_btQuaternionDoubleData_m_floats_set_mbt_7f4d06f7d3d79a98(btQuaternionDoubleData *_swig_go_0, double *_swig_go_1) {
+void _wrap_btQuaternionDoubleData_m_floats_set_mbt_6d0baa097fc05319(btQuaternionDoubleData *_swig_go_0, double *_swig_go_1) {
   btQuaternionDoubleData *arg1 = (btQuaternionDoubleData *) 0 ;
   double *arg2 = (double *) (double *)0 ;
   
@@ -9753,7 +10003,7 @@ void _wrap_btQuaternionDoubleData_m_floats_set_mbt_7f4d06f7d3d79a98(btQuaternion
 }
 
 
-double *_wrap_btQuaternionDoubleData_m_floats_get_mbt_7f4d06f7d3d79a98(btQuaternionDoubleData *_swig_go_0) {
+double *_wrap_btQuaternionDoubleData_m_floats_get_mbt_6d0baa097fc05319(btQuaternionDoubleData *_swig_go_0) {
   btQuaternionDoubleData *arg1 = (btQuaternionDoubleData *) 0 ;
   double *result = 0 ;
   double *_swig_go_result;
@@ -9766,7 +10016,7 @@ double *_wrap_btQuaternionDoubleData_m_floats_get_mbt_7f4d06f7d3d79a98(btQuatern
 }
 
 
-btQuaternionDoubleData *_wrap_new_btQuaternionDoubleData_mbt_7f4d06f7d3d79a98() {
+btQuaternionDoubleData *_wrap_new_btQuaternionDoubleData_mbt_6d0baa097fc05319() {
   btQuaternionDoubleData *result = 0 ;
   btQuaternionDoubleData *_swig_go_result;
   
@@ -9777,7 +10027,7 @@ btQuaternionDoubleData *_wrap_new_btQuaternionDoubleData_mbt_7f4d06f7d3d79a98() 
 }
 
 
-void _wrap_delete_btQuaternionDoubleData_mbt_7f4d06f7d3d79a98(btQuaternionDoubleData *_swig_go_0) {
+void _wrap_delete_btQuaternionDoubleData_mbt_6d0baa097fc05319(btQuaternionDoubleData *_swig_go_0) {
   btQuaternionDoubleData *arg1 = (btQuaternionDoubleData *) 0 ;
   
   arg1 = *(btQuaternionDoubleData **)&_swig_go_0; 
@@ -9787,7 +10037,7 @@ void _wrap_delete_btQuaternionDoubleData_mbt_7f4d06f7d3d79a98(btQuaternionDouble
 }
 
 
-btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_0_mbt_7f4d06f7d3d79a98() {
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_0_mbt_6d0baa097fc05319() {
   btMatrix3x3 *result = 0 ;
   btMatrix3x3 *_swig_go_result;
   
@@ -9798,7 +10048,7 @@ btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_0_mbt_7f4d06f7d3d79a98() {
 }
 
 
-btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_1_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = 0 ;
   btMatrix3x3 *result = 0 ;
   btMatrix3x3 *_swig_go_result;
@@ -9811,7 +10061,7 @@ btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_s
 }
 
 
-btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_2_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4, float _swig_go_5, float _swig_go_6, float _swig_go_7, float _swig_go_8) {
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_2_mbt_6d0baa097fc05319(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4, float _swig_go_5, float _swig_go_6, float _swig_go_7, float _swig_go_8) {
   btScalar *arg1 = 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -9840,7 +10090,7 @@ btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_2_mbt_7f4d06f7d3d79a98(float _swig_go_0
 }
 
 
-btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_3_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_3_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = 0 ;
   btMatrix3x3 *result = 0 ;
   btMatrix3x3 *_swig_go_result;
@@ -9853,7 +10103,7 @@ btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_3_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_sw
 }
 
 
-btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_4_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_4_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
   btVector3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 *arg3 = 0 ;
@@ -9870,7 +10120,7 @@ btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_4_mbt_7f4d06f7d3d79a98(btVector3 *_swig
 }
 
 
-btVector3 *_wrap_btMatrix3x3_getColumn_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, intgo _swig_go_1) {
+btVector3 *_wrap_btMatrix3x3_getColumn_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, intgo _swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   int arg2 ;
   btVector3 result;
@@ -9885,7 +10135,7 @@ btVector3 *_wrap_btMatrix3x3_getColumn_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_g
 }
 
 
-btVector3 *_wrap_btMatrix3x3_getRow_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, intgo _swig_go_1) {
+btVector3 *_wrap_btMatrix3x3_getRow_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, intgo _swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   int arg2 ;
   btVector3 *result = 0 ;
@@ -9900,7 +10150,7 @@ btVector3 *_wrap_btMatrix3x3_getRow_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0
 }
 
 
-void _wrap_btMatrix3x3_setFromOpenGLSubMatrix_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float *_swig_go_1) {
+void _wrap_btMatrix3x3_setFromOpenGLSubMatrix_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, float *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = (btScalar *) 0 ;
   
@@ -9912,7 +10162,7 @@ void _wrap_btMatrix3x3_setFromOpenGLSubMatrix_mbt_7f4d06f7d3d79a98(btMatrix3x3 *
 }
 
 
-void _wrap_btMatrix3x3_setValue_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4, float _swig_go_5, float _swig_go_6, float _swig_go_7, float _swig_go_8, float _swig_go_9) {
+void _wrap_btMatrix3x3_setValue_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4, float _swig_go_5, float _swig_go_6, float _swig_go_7, float _swig_go_8, float _swig_go_9) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -9940,7 +10190,7 @@ void _wrap_btMatrix3x3_setValue_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, fl
 }
 
 
-void _wrap_btMatrix3x3_setRotation_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
+void _wrap_btMatrix3x3_setRotation_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btQuaternion *arg2 = 0 ;
   
@@ -9952,7 +10202,7 @@ void _wrap_btMatrix3x3_setRotation_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0,
 }
 
 
-void _wrap_btMatrix3x3_setEulerYPR_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btMatrix3x3_setEulerYPR_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -9968,7 +10218,7 @@ void _wrap_btMatrix3x3_setEulerYPR_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0,
 }
 
 
-void _wrap_btMatrix3x3_setEulerZYX_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+void _wrap_btMatrix3x3_setEulerZYX_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar arg2 ;
   btScalar arg3 ;
@@ -9984,7 +10234,7 @@ void _wrap_btMatrix3x3_setEulerZYX_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0,
 }
 
 
-void _wrap_btMatrix3x3_setIdentity_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+void _wrap_btMatrix3x3_setIdentity_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   
   arg1 = *(btMatrix3x3 **)&_swig_go_0; 
@@ -9994,7 +10244,7 @@ void _wrap_btMatrix3x3_setIdentity_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0)
 }
 
 
-void _wrap_btMatrix3x3_setZero_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+void _wrap_btMatrix3x3_setZero_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   
   arg1 = *(btMatrix3x3 **)&_swig_go_0; 
@@ -10004,7 +10254,7 @@ void _wrap_btMatrix3x3_setZero_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_getIdentity_mbt_7f4d06f7d3d79a98() {
+btMatrix3x3 *_wrap_btMatrix3x3_getIdentity_mbt_6d0baa097fc05319() {
   btMatrix3x3 *result = 0 ;
   btMatrix3x3 *_swig_go_result;
   
@@ -10015,7 +10265,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_getIdentity_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void _wrap_btMatrix3x3_getOpenGLSubMatrix_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float *_swig_go_1) {
+void _wrap_btMatrix3x3_getOpenGLSubMatrix_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, float *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = (btScalar *) 0 ;
   
@@ -10027,7 +10277,7 @@ void _wrap_btMatrix3x3_getOpenGLSubMatrix_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swi
 }
 
 
-void _wrap_btMatrix3x3_getRotation_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
+void _wrap_btMatrix3x3_getRotation_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btQuaternion *arg2 = 0 ;
   
@@ -10039,7 +10289,7 @@ void _wrap_btMatrix3x3_getRotation_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0,
 }
 
 
-void _wrap_btMatrix3x3_getEulerYPR_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
+void _wrap_btMatrix3x3_getEulerYPR_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -10055,7 +10305,7 @@ void _wrap_btMatrix3x3_getEulerYPR_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0,
 }
 
 
-void _wrap_btMatrix3x3_getEulerZYX__SWIG_0_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3, intgo _swig_go_4) {
+void _wrap_btMatrix3x3_getEulerZYX__SWIG_0_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3, intgo _swig_go_4) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -10073,7 +10323,7 @@ void _wrap_btMatrix3x3_getEulerZYX__SWIG_0_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_sw
 }
 
 
-void _wrap_btMatrix3x3_getEulerZYX__SWIG_1_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
+void _wrap_btMatrix3x3_getEulerZYX__SWIG_1_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar *arg2 = 0 ;
   btScalar *arg3 = 0 ;
@@ -10089,7 +10339,7 @@ void _wrap_btMatrix3x3_getEulerZYX__SWIG_1_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_sw
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_scaled_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+btMatrix3x3 *_wrap_btMatrix3x3_scaled_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btMatrix3x3 result;
@@ -10104,7 +10354,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_scaled_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go
 }
 
 
-float _wrap_btMatrix3x3_determinant_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+float _wrap_btMatrix3x3_determinant_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btScalar result;
   float _swig_go_result;
@@ -10117,7 +10367,7 @@ float _wrap_btMatrix3x3_determinant_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_adjoint_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+btMatrix3x3 *_wrap_btMatrix3x3_adjoint_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 result;
   btMatrix3x3 *_swig_go_result;
@@ -10130,7 +10380,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_adjoint_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_g
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_absolute_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+btMatrix3x3 *_wrap_btMatrix3x3_absolute_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 result;
   btMatrix3x3 *_swig_go_result;
@@ -10143,7 +10393,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_absolute_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_transpose_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+btMatrix3x3 *_wrap_btMatrix3x3_transpose_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 result;
   btMatrix3x3 *_swig_go_result;
@@ -10156,7 +10406,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_transpose_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_inverse_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+btMatrix3x3 *_wrap_btMatrix3x3_inverse_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 result;
   btMatrix3x3 *_swig_go_result;
@@ -10169,7 +10419,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_inverse_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_g
 }
 
 
-btVector3 *_wrap_btMatrix3x3_solve33_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+btVector3 *_wrap_btMatrix3x3_solve33_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 result;
@@ -10184,7 +10434,7 @@ btVector3 *_wrap_btMatrix3x3_solve33_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_transposeTimes_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1) {
+btMatrix3x3 *_wrap_btMatrix3x3_transposeTimes_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 *arg2 = 0 ;
   btMatrix3x3 result;
@@ -10199,7 +10449,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_transposeTimes_mbt_7f4d06f7d3d79a98(btMatrix3x3 *
 }
 
 
-btMatrix3x3 *_wrap_btMatrix3x3_timesTranspose_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1) {
+btMatrix3x3 *_wrap_btMatrix3x3_timesTranspose_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 *arg2 = 0 ;
   btMatrix3x3 result;
@@ -10214,7 +10464,7 @@ btMatrix3x3 *_wrap_btMatrix3x3_timesTranspose_mbt_7f4d06f7d3d79a98(btMatrix3x3 *
 }
 
 
-float _wrap_btMatrix3x3_tdotx_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btMatrix3x3_tdotx_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -10229,7 +10479,7 @@ float _wrap_btMatrix3x3_tdotx_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVe
 }
 
 
-float _wrap_btMatrix3x3_tdoty_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btMatrix3x3_tdoty_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -10244,7 +10494,7 @@ float _wrap_btMatrix3x3_tdoty_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVe
 }
 
 
-float _wrap_btMatrix3x3_tdotz_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+float _wrap_btMatrix3x3_tdotz_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btVector3 *arg2 = 0 ;
   btScalar result;
@@ -10259,7 +10509,7 @@ float _wrap_btMatrix3x3_tdotz_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVe
 }
 
 
-void _wrap_btMatrix3x3_extractRotation__SWIG_0_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2, intgo _swig_go_3) {
+void _wrap_btMatrix3x3_extractRotation__SWIG_0_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2, intgo _swig_go_3) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar arg3 ;
@@ -10275,7 +10525,7 @@ void _wrap_btMatrix3x3_extractRotation__SWIG_0_mbt_7f4d06f7d3d79a98(btMatrix3x3 
 }
 
 
-void _wrap_btMatrix3x3_extractRotation__SWIG_1_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
+void _wrap_btMatrix3x3_extractRotation__SWIG_1_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btQuaternion *arg2 = 0 ;
   btScalar arg3 ;
@@ -10289,7 +10539,7 @@ void _wrap_btMatrix3x3_extractRotation__SWIG_1_mbt_7f4d06f7d3d79a98(btMatrix3x3 
 }
 
 
-void _wrap_btMatrix3x3_extractRotation__SWIG_2_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
+void _wrap_btMatrix3x3_extractRotation__SWIG_2_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btQuaternion *arg2 = 0 ;
   
@@ -10301,7 +10551,7 @@ void _wrap_btMatrix3x3_extractRotation__SWIG_2_mbt_7f4d06f7d3d79a98(btMatrix3x3 
 }
 
 
-void _wrap_btMatrix3x3_diagonalize_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1, float _swig_go_2, intgo _swig_go_3) {
+void _wrap_btMatrix3x3_diagonalize_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1, float _swig_go_2, intgo _swig_go_3) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3 *arg2 = 0 ;
   btScalar arg3 ;
@@ -10317,7 +10567,7 @@ void _wrap_btMatrix3x3_diagonalize_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0,
 }
 
 
-float _wrap_btMatrix3x3_cofac_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2, intgo _swig_go_3, intgo _swig_go_4) {
+float _wrap_btMatrix3x3_cofac_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2, intgo _swig_go_3, intgo _swig_go_4) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   int arg2 ;
   int arg3 ;
@@ -10338,7 +10588,7 @@ float _wrap_btMatrix3x3_cofac_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, intg
 }
 
 
-void _wrap_btMatrix3x3_serialize_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+void _wrap_btMatrix3x3_serialize_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3FloatData *arg2 = 0 ;
   
@@ -10350,7 +10600,7 @@ void _wrap_btMatrix3x3_serialize_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, b
 }
 
 
-void _wrap_btMatrix3x3_serializeFloat_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+void _wrap_btMatrix3x3_serializeFloat_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3FloatData *arg2 = 0 ;
   
@@ -10362,7 +10612,7 @@ void _wrap_btMatrix3x3_serializeFloat_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go
 }
 
 
-void _wrap_btMatrix3x3_deSerialize_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+void _wrap_btMatrix3x3_deSerialize_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3FloatData *arg2 = 0 ;
   
@@ -10374,7 +10624,7 @@ void _wrap_btMatrix3x3_deSerialize_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0,
 }
 
 
-void _wrap_btMatrix3x3_deSerializeFloat_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+void _wrap_btMatrix3x3_deSerializeFloat_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3FloatData *arg2 = 0 ;
   
@@ -10386,7 +10636,7 @@ void _wrap_btMatrix3x3_deSerializeFloat_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_
 }
 
 
-void _wrap_btMatrix3x3_deSerializeDouble_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3DoubleData *_swig_go_1) {
+void _wrap_btMatrix3x3_deSerializeDouble_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btMatrix3x3DoubleData *_swig_go_1) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   btMatrix3x3DoubleData *arg2 = 0 ;
   
@@ -10398,7 +10648,7 @@ void _wrap_btMatrix3x3_deSerializeDouble_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig
 }
 
 
-void _wrap_delete_btMatrix3x3_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+void _wrap_delete_btMatrix3x3_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   
   arg1 = *(btMatrix3x3 **)&_swig_go_0; 
@@ -10408,7 +10658,7 @@ void _wrap_delete_btMatrix3x3_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
 }
 
 
-void _wrap_btMatrix3x3FloatData_m_el_set_mbt_7f4d06f7d3d79a98(btMatrix3x3FloatData *_swig_go_0, btVector3FloatData (*_swig_go_1)[3]) {
+void _wrap_btMatrix3x3FloatData_m_el_set_mbt_6d0baa097fc05319(btMatrix3x3FloatData *_swig_go_0, btVector3FloatData (*_swig_go_1)[3]) {
   btMatrix3x3FloatData *arg1 = (btMatrix3x3FloatData *) 0 ;
   btVector3FloatData *arg2 = (btVector3FloatData *) (btVector3FloatData *)0 ;
   
@@ -10424,7 +10674,7 @@ void _wrap_btMatrix3x3FloatData_m_el_set_mbt_7f4d06f7d3d79a98(btMatrix3x3FloatDa
 }
 
 
-btVector3FloatData (*_wrap_btMatrix3x3FloatData_m_el_get_mbt_7f4d06f7d3d79a98(btMatrix3x3FloatData *_swig_go_0))[3] {
+btVector3FloatData (*_wrap_btMatrix3x3FloatData_m_el_get_mbt_6d0baa097fc05319(btMatrix3x3FloatData *_swig_go_0))[3] {
   btMatrix3x3FloatData *arg1 = (btMatrix3x3FloatData *) 0 ;
   btVector3FloatData *result = 0 ;
   btVector3FloatData (*_swig_go_result)[3];
@@ -10437,7 +10687,7 @@ btVector3FloatData (*_wrap_btMatrix3x3FloatData_m_el_get_mbt_7f4d06f7d3d79a98(bt
 }
 
 
-btMatrix3x3FloatData *_wrap_new_btMatrix3x3FloatData_mbt_7f4d06f7d3d79a98() {
+btMatrix3x3FloatData *_wrap_new_btMatrix3x3FloatData_mbt_6d0baa097fc05319() {
   btMatrix3x3FloatData *result = 0 ;
   btMatrix3x3FloatData *_swig_go_result;
   
@@ -10448,7 +10698,7 @@ btMatrix3x3FloatData *_wrap_new_btMatrix3x3FloatData_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void _wrap_delete_btMatrix3x3FloatData_mbt_7f4d06f7d3d79a98(btMatrix3x3FloatData *_swig_go_0) {
+void _wrap_delete_btMatrix3x3FloatData_mbt_6d0baa097fc05319(btMatrix3x3FloatData *_swig_go_0) {
   btMatrix3x3FloatData *arg1 = (btMatrix3x3FloatData *) 0 ;
   
   arg1 = *(btMatrix3x3FloatData **)&_swig_go_0; 
@@ -10458,7 +10708,7 @@ void _wrap_delete_btMatrix3x3FloatData_mbt_7f4d06f7d3d79a98(btMatrix3x3FloatData
 }
 
 
-void _wrap_btMatrix3x3DoubleData_m_el_set_mbt_7f4d06f7d3d79a98(btMatrix3x3DoubleData *_swig_go_0, btVector3DoubleData (*_swig_go_1)[3]) {
+void _wrap_btMatrix3x3DoubleData_m_el_set_mbt_6d0baa097fc05319(btMatrix3x3DoubleData *_swig_go_0, btVector3DoubleData (*_swig_go_1)[3]) {
   btMatrix3x3DoubleData *arg1 = (btMatrix3x3DoubleData *) 0 ;
   btVector3DoubleData *arg2 = (btVector3DoubleData *) (btVector3DoubleData *)0 ;
   
@@ -10474,7 +10724,7 @@ void _wrap_btMatrix3x3DoubleData_m_el_set_mbt_7f4d06f7d3d79a98(btMatrix3x3Double
 }
 
 
-btVector3DoubleData (*_wrap_btMatrix3x3DoubleData_m_el_get_mbt_7f4d06f7d3d79a98(btMatrix3x3DoubleData *_swig_go_0))[3] {
+btVector3DoubleData (*_wrap_btMatrix3x3DoubleData_m_el_get_mbt_6d0baa097fc05319(btMatrix3x3DoubleData *_swig_go_0))[3] {
   btMatrix3x3DoubleData *arg1 = (btMatrix3x3DoubleData *) 0 ;
   btVector3DoubleData *result = 0 ;
   btVector3DoubleData (*_swig_go_result)[3];
@@ -10487,7 +10737,7 @@ btVector3DoubleData (*_wrap_btMatrix3x3DoubleData_m_el_get_mbt_7f4d06f7d3d79a98(
 }
 
 
-btMatrix3x3DoubleData *_wrap_new_btMatrix3x3DoubleData_mbt_7f4d06f7d3d79a98() {
+btMatrix3x3DoubleData *_wrap_new_btMatrix3x3DoubleData_mbt_6d0baa097fc05319() {
   btMatrix3x3DoubleData *result = 0 ;
   btMatrix3x3DoubleData *_swig_go_result;
   
@@ -10498,7 +10748,7 @@ btMatrix3x3DoubleData *_wrap_new_btMatrix3x3DoubleData_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void _wrap_delete_btMatrix3x3DoubleData_mbt_7f4d06f7d3d79a98(btMatrix3x3DoubleData *_swig_go_0) {
+void _wrap_delete_btMatrix3x3DoubleData_mbt_6d0baa097fc05319(btMatrix3x3DoubleData *_swig_go_0) {
   btMatrix3x3DoubleData *arg1 = (btMatrix3x3DoubleData *) 0 ;
   
   arg1 = *(btMatrix3x3DoubleData **)&_swig_go_0; 
@@ -10508,7 +10758,7 @@ void _wrap_delete_btMatrix3x3DoubleData_mbt_7f4d06f7d3d79a98(btMatrix3x3DoubleDa
 }
 
 
-btTransform *_wrap_new_btTransform__SWIG_0_mbt_7f4d06f7d3d79a98() {
+btTransform *_wrap_new_btTransform__SWIG_0_mbt_6d0baa097fc05319() {
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
   
@@ -10519,7 +10769,7 @@ btTransform *_wrap_new_btTransform__SWIG_0_mbt_7f4d06f7d3d79a98() {
 }
 
 
-btTransform *_wrap_new_btTransform__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btVector3 *_swig_go_1) {
+btTransform *_wrap_new_btTransform__SWIG_1_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0, btVector3 *_swig_go_1) {
   btQuaternion *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btTransform *result = 0 ;
@@ -10534,7 +10784,7 @@ btTransform *_wrap_new_btTransform__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_s
 }
 
 
-btTransform *_wrap_new_btTransform__SWIG_2_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+btTransform *_wrap_new_btTransform__SWIG_2_mbt_6d0baa097fc05319(btQuaternion *_swig_go_0) {
   btQuaternion *arg1 = 0 ;
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
@@ -10547,7 +10797,7 @@ btTransform *_wrap_new_btTransform__SWIG_2_mbt_7f4d06f7d3d79a98(btQuaternion *_s
 }
 
 
-btTransform *_wrap_new_btTransform__SWIG_3_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+btTransform *_wrap_new_btTransform__SWIG_3_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
   btMatrix3x3 *arg1 = 0 ;
   btVector3 *arg2 = 0 ;
   btTransform *result = 0 ;
@@ -10562,7 +10812,7 @@ btTransform *_wrap_new_btTransform__SWIG_3_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_sw
 }
 
 
-btTransform *_wrap_new_btTransform__SWIG_4_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+btTransform *_wrap_new_btTransform__SWIG_4_mbt_6d0baa097fc05319(btMatrix3x3 *_swig_go_0) {
   btMatrix3x3 *arg1 = 0 ;
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
@@ -10575,7 +10825,7 @@ btTransform *_wrap_new_btTransform__SWIG_4_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_sw
 }
 
 
-btTransform *_wrap_new_btTransform__SWIG_5_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+btTransform *_wrap_new_btTransform__SWIG_5_mbt_6d0baa097fc05319(btTransform *_swig_go_0) {
   btTransform *arg1 = 0 ;
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
@@ -10588,7 +10838,7 @@ btTransform *_wrap_new_btTransform__SWIG_5_mbt_7f4d06f7d3d79a98(btTransform *_sw
 }
 
 
-void _wrap_btTransform_mult_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransform *_swig_go_1, btTransform *_swig_go_2) {
+void _wrap_btTransform_mult_mbt_6d0baa097fc05319(btTransform *_swig_go_0, btTransform *_swig_go_1, btTransform *_swig_go_2) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransform *arg2 = 0 ;
   btTransform *arg3 = 0 ;
@@ -10602,7 +10852,7 @@ void _wrap_btTransform_mult_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTran
 }
 
 
-btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_0_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_0_mbt_6d0baa097fc05319(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   btMatrix3x3 *result = 0 ;
   btMatrix3x3 *_swig_go_result;
@@ -10615,7 +10865,7 @@ btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_0_mbt_7f4d06f7d3d79a98(btTransform
 }
 
 
-btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_1_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_1_mbt_6d0baa097fc05319(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   btMatrix3x3 *result = 0 ;
   btMatrix3x3 *_swig_go_result;
@@ -10628,7 +10878,7 @@ btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_1_mbt_7f4d06f7d3d79a98(btTransform
 }
 
 
-btVector3 *_wrap_btTransform_getOrigin__SWIG_0_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+btVector3 *_wrap_btTransform_getOrigin__SWIG_0_mbt_6d0baa097fc05319(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
@@ -10641,7 +10891,7 @@ btVector3 *_wrap_btTransform_getOrigin__SWIG_0_mbt_7f4d06f7d3d79a98(btTransform 
 }
 
 
-btVector3 *_wrap_btTransform_getOrigin__SWIG_1_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+btVector3 *_wrap_btTransform_getOrigin__SWIG_1_mbt_6d0baa097fc05319(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   btVector3 *result = 0 ;
   btVector3 *_swig_go_result;
@@ -10654,7 +10904,7 @@ btVector3 *_wrap_btTransform_getOrigin__SWIG_1_mbt_7f4d06f7d3d79a98(btTransform 
 }
 
 
-btQuaternion *_wrap_btTransform_getRotation_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+btQuaternion *_wrap_btTransform_getRotation_mbt_6d0baa097fc05319(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   btQuaternion result;
   btQuaternion *_swig_go_result;
@@ -10667,7 +10917,7 @@ btQuaternion *_wrap_btTransform_getRotation_mbt_7f4d06f7d3d79a98(btTransform *_s
 }
 
 
-void _wrap_btTransform_setFromOpenGLMatrix_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, float *_swig_go_1) {
+void _wrap_btTransform_setFromOpenGLMatrix_mbt_6d0baa097fc05319(btTransform *_swig_go_0, float *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btScalar *arg2 = (btScalar *) 0 ;
   
@@ -10679,7 +10929,7 @@ void _wrap_btTransform_setFromOpenGLMatrix_mbt_7f4d06f7d3d79a98(btTransform *_sw
 }
 
 
-void _wrap_btTransform_getOpenGLMatrix_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, float *_swig_go_1) {
+void _wrap_btTransform_getOpenGLMatrix_mbt_6d0baa097fc05319(btTransform *_swig_go_0, float *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btScalar *arg2 = (btScalar *) 0 ;
   
@@ -10691,7 +10941,7 @@ void _wrap_btTransform_getOpenGLMatrix_mbt_7f4d06f7d3d79a98(btTransform *_swig_g
 }
 
 
-void _wrap_btTransform_setOrigin_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btVector3 *_swig_go_1) {
+void _wrap_btTransform_setOrigin_mbt_6d0baa097fc05319(btTransform *_swig_go_0, btVector3 *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btVector3 *arg2 = 0 ;
   
@@ -10703,7 +10953,7 @@ void _wrap_btTransform_setOrigin_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, b
 }
 
 
-btVector3 *_wrap_btTransform_invXform_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btVector3 *_swig_go_1) {
+btVector3 *_wrap_btTransform_invXform_mbt_6d0baa097fc05319(btTransform *_swig_go_0, btVector3 *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btVector3 *arg2 = 0 ;
   btVector3 result;
@@ -10718,7 +10968,7 @@ btVector3 *_wrap_btTransform_invXform_mbt_7f4d06f7d3d79a98(btTransform *_swig_go
 }
 
 
-void _wrap_btTransform_setBasis_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btMatrix3x3 *_swig_go_1) {
+void _wrap_btTransform_setBasis_mbt_6d0baa097fc05319(btTransform *_swig_go_0, btMatrix3x3 *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btMatrix3x3 *arg2 = 0 ;
   
@@ -10730,7 +10980,7 @@ void _wrap_btTransform_setBasis_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, bt
 }
 
 
-void _wrap_btTransform_setRotation_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btQuaternion *_swig_go_1) {
+void _wrap_btTransform_setRotation_mbt_6d0baa097fc05319(btTransform *_swig_go_0, btQuaternion *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btQuaternion *arg2 = 0 ;
   
@@ -10742,7 +10992,7 @@ void _wrap_btTransform_setRotation_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0,
 }
 
 
-void _wrap_btTransform_setIdentity_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+void _wrap_btTransform_setIdentity_mbt_6d0baa097fc05319(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   
   arg1 = *(btTransform **)&_swig_go_0; 
@@ -10752,7 +11002,7 @@ void _wrap_btTransform_setIdentity_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0)
 }
 
 
-btTransform *_wrap_btTransform_inverse_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+btTransform *_wrap_btTransform_inverse_mbt_6d0baa097fc05319(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransform result;
   btTransform *_swig_go_result;
@@ -10765,7 +11015,7 @@ btTransform *_wrap_btTransform_inverse_mbt_7f4d06f7d3d79a98(btTransform *_swig_g
 }
 
 
-btTransform *_wrap_btTransform_inverseTimes_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransform *_swig_go_1) {
+btTransform *_wrap_btTransform_inverseTimes_mbt_6d0baa097fc05319(btTransform *_swig_go_0, btTransform *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransform *arg2 = 0 ;
   btTransform result;
@@ -10780,7 +11030,7 @@ btTransform *_wrap_btTransform_inverseTimes_mbt_7f4d06f7d3d79a98(btTransform *_s
 }
 
 
-btTransform *_wrap_btTransform_getIdentity_mbt_7f4d06f7d3d79a98() {
+btTransform *_wrap_btTransform_getIdentity_mbt_6d0baa097fc05319() {
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
   
@@ -10791,7 +11041,7 @@ btTransform *_wrap_btTransform_getIdentity_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void _wrap_btTransform_serialize_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
+void _wrap_btTransform_serialize_mbt_6d0baa097fc05319(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransformFloatData *arg2 = 0 ;
   
@@ -10803,7 +11053,7 @@ void _wrap_btTransform_serialize_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, b
 }
 
 
-void _wrap_btTransform_serializeFloat_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
+void _wrap_btTransform_serializeFloat_mbt_6d0baa097fc05319(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransformFloatData *arg2 = 0 ;
   
@@ -10815,7 +11065,7 @@ void _wrap_btTransform_serializeFloat_mbt_7f4d06f7d3d79a98(btTransform *_swig_go
 }
 
 
-void _wrap_btTransform_deSerialize_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
+void _wrap_btTransform_deSerialize_mbt_6d0baa097fc05319(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransformFloatData *arg2 = 0 ;
   
@@ -10827,7 +11077,7 @@ void _wrap_btTransform_deSerialize_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0,
 }
 
 
-void _wrap_btTransform_deSerializeDouble_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransformDoubleData *_swig_go_1) {
+void _wrap_btTransform_deSerializeDouble_mbt_6d0baa097fc05319(btTransform *_swig_go_0, btTransformDoubleData *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransformDoubleData *arg2 = 0 ;
   
@@ -10839,7 +11089,7 @@ void _wrap_btTransform_deSerializeDouble_mbt_7f4d06f7d3d79a98(btTransform *_swig
 }
 
 
-void _wrap_btTransform_deSerializeFloat_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
+void _wrap_btTransform_deSerializeFloat_mbt_6d0baa097fc05319(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
   btTransform *arg1 = (btTransform *) 0 ;
   btTransformFloatData *arg2 = 0 ;
   
@@ -10851,7 +11101,7 @@ void _wrap_btTransform_deSerializeFloat_mbt_7f4d06f7d3d79a98(btTransform *_swig_
 }
 
 
-void _wrap_delete_btTransform_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+void _wrap_delete_btTransform_mbt_6d0baa097fc05319(btTransform *_swig_go_0) {
   btTransform *arg1 = (btTransform *) 0 ;
   
   arg1 = *(btTransform **)&_swig_go_0; 
@@ -10861,7 +11111,7 @@ void _wrap_delete_btTransform_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
 }
 
 
-void _wrap_btTransformFloatData_m_basis_set_mbt_7f4d06f7d3d79a98(btTransformFloatData *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+void _wrap_btTransformFloatData_m_basis_set_mbt_6d0baa097fc05319(btTransformFloatData *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
   btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
   btMatrix3x3FloatData *arg2 = (btMatrix3x3FloatData *) 0 ;
   
@@ -10873,7 +11123,7 @@ void _wrap_btTransformFloatData_m_basis_set_mbt_7f4d06f7d3d79a98(btTransformFloa
 }
 
 
-btMatrix3x3FloatData *_wrap_btTransformFloatData_m_basis_get_mbt_7f4d06f7d3d79a98(btTransformFloatData *_swig_go_0) {
+btMatrix3x3FloatData *_wrap_btTransformFloatData_m_basis_get_mbt_6d0baa097fc05319(btTransformFloatData *_swig_go_0) {
   btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
   btMatrix3x3FloatData *result = 0 ;
   btMatrix3x3FloatData *_swig_go_result;
@@ -10886,7 +11136,7 @@ btMatrix3x3FloatData *_wrap_btTransformFloatData_m_basis_get_mbt_7f4d06f7d3d79a9
 }
 
 
-void _wrap_btTransformFloatData_m_origin_set_mbt_7f4d06f7d3d79a98(btTransformFloatData *_swig_go_0, btVector3FloatData *_swig_go_1) {
+void _wrap_btTransformFloatData_m_origin_set_mbt_6d0baa097fc05319(btTransformFloatData *_swig_go_0, btVector3FloatData *_swig_go_1) {
   btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
   btVector3FloatData *arg2 = (btVector3FloatData *) 0 ;
   
@@ -10898,7 +11148,7 @@ void _wrap_btTransformFloatData_m_origin_set_mbt_7f4d06f7d3d79a98(btTransformFlo
 }
 
 
-btVector3FloatData *_wrap_btTransformFloatData_m_origin_get_mbt_7f4d06f7d3d79a98(btTransformFloatData *_swig_go_0) {
+btVector3FloatData *_wrap_btTransformFloatData_m_origin_get_mbt_6d0baa097fc05319(btTransformFloatData *_swig_go_0) {
   btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
   btVector3FloatData *result = 0 ;
   btVector3FloatData *_swig_go_result;
@@ -10911,7 +11161,7 @@ btVector3FloatData *_wrap_btTransformFloatData_m_origin_get_mbt_7f4d06f7d3d79a98
 }
 
 
-btTransformFloatData *_wrap_new_btTransformFloatData_mbt_7f4d06f7d3d79a98() {
+btTransformFloatData *_wrap_new_btTransformFloatData_mbt_6d0baa097fc05319() {
   btTransformFloatData *result = 0 ;
   btTransformFloatData *_swig_go_result;
   
@@ -10922,7 +11172,7 @@ btTransformFloatData *_wrap_new_btTransformFloatData_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void _wrap_delete_btTransformFloatData_mbt_7f4d06f7d3d79a98(btTransformFloatData *_swig_go_0) {
+void _wrap_delete_btTransformFloatData_mbt_6d0baa097fc05319(btTransformFloatData *_swig_go_0) {
   btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
   
   arg1 = *(btTransformFloatData **)&_swig_go_0; 
@@ -10932,7 +11182,7 @@ void _wrap_delete_btTransformFloatData_mbt_7f4d06f7d3d79a98(btTransformFloatData
 }
 
 
-void _wrap_btTransformDoubleData_m_basis_set_mbt_7f4d06f7d3d79a98(btTransformDoubleData *_swig_go_0, btMatrix3x3DoubleData *_swig_go_1) {
+void _wrap_btTransformDoubleData_m_basis_set_mbt_6d0baa097fc05319(btTransformDoubleData *_swig_go_0, btMatrix3x3DoubleData *_swig_go_1) {
   btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
   btMatrix3x3DoubleData *arg2 = (btMatrix3x3DoubleData *) 0 ;
   
@@ -10944,7 +11194,7 @@ void _wrap_btTransformDoubleData_m_basis_set_mbt_7f4d06f7d3d79a98(btTransformDou
 }
 
 
-btMatrix3x3DoubleData *_wrap_btTransformDoubleData_m_basis_get_mbt_7f4d06f7d3d79a98(btTransformDoubleData *_swig_go_0) {
+btMatrix3x3DoubleData *_wrap_btTransformDoubleData_m_basis_get_mbt_6d0baa097fc05319(btTransformDoubleData *_swig_go_0) {
   btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
   btMatrix3x3DoubleData *result = 0 ;
   btMatrix3x3DoubleData *_swig_go_result;
@@ -10957,7 +11207,7 @@ btMatrix3x3DoubleData *_wrap_btTransformDoubleData_m_basis_get_mbt_7f4d06f7d3d79
 }
 
 
-void _wrap_btTransformDoubleData_m_origin_set_mbt_7f4d06f7d3d79a98(btTransformDoubleData *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+void _wrap_btTransformDoubleData_m_origin_set_mbt_6d0baa097fc05319(btTransformDoubleData *_swig_go_0, btVector3DoubleData *_swig_go_1) {
   btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
   btVector3DoubleData *arg2 = (btVector3DoubleData *) 0 ;
   
@@ -10969,7 +11219,7 @@ void _wrap_btTransformDoubleData_m_origin_set_mbt_7f4d06f7d3d79a98(btTransformDo
 }
 
 
-btVector3DoubleData *_wrap_btTransformDoubleData_m_origin_get_mbt_7f4d06f7d3d79a98(btTransformDoubleData *_swig_go_0) {
+btVector3DoubleData *_wrap_btTransformDoubleData_m_origin_get_mbt_6d0baa097fc05319(btTransformDoubleData *_swig_go_0) {
   btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
   btVector3DoubleData *result = 0 ;
   btVector3DoubleData *_swig_go_result;
@@ -10982,7 +11232,7 @@ btVector3DoubleData *_wrap_btTransformDoubleData_m_origin_get_mbt_7f4d06f7d3d79a
 }
 
 
-btTransformDoubleData *_wrap_new_btTransformDoubleData_mbt_7f4d06f7d3d79a98() {
+btTransformDoubleData *_wrap_new_btTransformDoubleData_mbt_6d0baa097fc05319() {
   btTransformDoubleData *result = 0 ;
   btTransformDoubleData *_swig_go_result;
   
@@ -10993,7 +11243,7 @@ btTransformDoubleData *_wrap_new_btTransformDoubleData_mbt_7f4d06f7d3d79a98() {
 }
 
 
-void _wrap_delete_btTransformDoubleData_mbt_7f4d06f7d3d79a98(btTransformDoubleData *_swig_go_0) {
+void _wrap_delete_btTransformDoubleData_mbt_6d0baa097fc05319(btTransformDoubleData *_swig_go_0) {
   btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
   
   arg1 = *(btTransformDoubleData **)&_swig_go_0; 
@@ -11003,7 +11253,7 @@ void _wrap_delete_btTransformDoubleData_mbt_7f4d06f7d3d79a98(btTransformDoubleDa
 }
 
 
-void _wrap_delete_btMotionState_mbt_7f4d06f7d3d79a98(btMotionState *_swig_go_0) {
+void _wrap_delete_btMotionState_mbt_6d0baa097fc05319(btMotionState *_swig_go_0) {
   btMotionState *arg1 = (btMotionState *) 0 ;
   
   arg1 = *(btMotionState **)&_swig_go_0; 
@@ -11013,7 +11263,7 @@ void _wrap_delete_btMotionState_mbt_7f4d06f7d3d79a98(btMotionState *_swig_go_0) 
 }
 
 
-void _wrap_btMotionState_getWorldTransform_mbt_7f4d06f7d3d79a98(btMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btMotionState_getWorldTransform_mbt_6d0baa097fc05319(btMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btMotionState *arg1 = (btMotionState *) 0 ;
   btTransform *arg2 = 0 ;
   
@@ -11025,7 +11275,7 @@ void _wrap_btMotionState_getWorldTransform_mbt_7f4d06f7d3d79a98(btMotionState *_
 }
 
 
-void _wrap_btMotionState_setWorldTransform_mbt_7f4d06f7d3d79a98(btMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btMotionState_setWorldTransform_mbt_6d0baa097fc05319(btMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btMotionState *arg1 = (btMotionState *) 0 ;
   btTransform *arg2 = 0 ;
   
@@ -11037,7 +11287,7 @@ void _wrap_btMotionState_setWorldTransform_mbt_7f4d06f7d3d79a98(btMotionState *_
 }
 
 
-void _wrap_btDefaultMotionState_m_graphicsWorldTrans_set_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btDefaultMotionState_m_graphicsWorldTrans_set_mbt_6d0baa097fc05319(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *arg2 = (btTransform *) 0 ;
   
@@ -11049,7 +11299,7 @@ void _wrap_btDefaultMotionState_m_graphicsWorldTrans_set_mbt_7f4d06f7d3d79a98(bt
 }
 
 
-btTransform *_wrap_btDefaultMotionState_m_graphicsWorldTrans_get_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0) {
+btTransform *_wrap_btDefaultMotionState_m_graphicsWorldTrans_get_mbt_6d0baa097fc05319(btDefaultMotionState *_swig_go_0) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
@@ -11062,7 +11312,7 @@ btTransform *_wrap_btDefaultMotionState_m_graphicsWorldTrans_get_mbt_7f4d06f7d3d
 }
 
 
-void _wrap_btDefaultMotionState_m_centerOfMassOffset_set_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btDefaultMotionState_m_centerOfMassOffset_set_mbt_6d0baa097fc05319(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *arg2 = (btTransform *) 0 ;
   
@@ -11074,7 +11324,7 @@ void _wrap_btDefaultMotionState_m_centerOfMassOffset_set_mbt_7f4d06f7d3d79a98(bt
 }
 
 
-btTransform *_wrap_btDefaultMotionState_m_centerOfMassOffset_get_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0) {
+btTransform *_wrap_btDefaultMotionState_m_centerOfMassOffset_get_mbt_6d0baa097fc05319(btDefaultMotionState *_swig_go_0) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
@@ -11087,7 +11337,7 @@ btTransform *_wrap_btDefaultMotionState_m_centerOfMassOffset_get_mbt_7f4d06f7d3d
 }
 
 
-void _wrap_btDefaultMotionState_m_startWorldTrans_set_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btDefaultMotionState_m_startWorldTrans_set_mbt_6d0baa097fc05319(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *arg2 = (btTransform *) 0 ;
   
@@ -11099,7 +11349,7 @@ void _wrap_btDefaultMotionState_m_startWorldTrans_set_mbt_7f4d06f7d3d79a98(btDef
 }
 
 
-btTransform *_wrap_btDefaultMotionState_m_startWorldTrans_get_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0) {
+btTransform *_wrap_btDefaultMotionState_m_startWorldTrans_get_mbt_6d0baa097fc05319(btDefaultMotionState *_swig_go_0) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *result = 0 ;
   btTransform *_swig_go_result;
@@ -11112,7 +11362,7 @@ btTransform *_wrap_btDefaultMotionState_m_startWorldTrans_get_mbt_7f4d06f7d3d79a
 }
 
 
-void _wrap_btDefaultMotionState_m_userPointer_set_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0, void *_swig_go_1) {
+void _wrap_btDefaultMotionState_m_userPointer_set_mbt_6d0baa097fc05319(btDefaultMotionState *_swig_go_0, void *_swig_go_1) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   void *arg2 = (void *) 0 ;
   
@@ -11124,7 +11374,7 @@ void _wrap_btDefaultMotionState_m_userPointer_set_mbt_7f4d06f7d3d79a98(btDefault
 }
 
 
-void *_wrap_btDefaultMotionState_m_userPointer_get_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0) {
+void *_wrap_btDefaultMotionState_m_userPointer_get_mbt_6d0baa097fc05319(btDefaultMotionState *_swig_go_0) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   void *result = 0 ;
   void *_swig_go_result;
@@ -11137,7 +11387,7 @@ void *_wrap_btDefaultMotionState_m_userPointer_get_mbt_7f4d06f7d3d79a98(btDefaul
 }
 
 
-btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_0_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransform *_swig_go_1) {
+btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_0_mbt_6d0baa097fc05319(btTransform *_swig_go_0, btTransform *_swig_go_1) {
   btTransform *arg1 = 0 ;
   btTransform *arg2 = 0 ;
   btDefaultMotionState *result = 0 ;
@@ -11152,7 +11402,7 @@ btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_0_mbt_7f4d06f7d3d79a9
 }
 
 
-btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_1_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_1_mbt_6d0baa097fc05319(btTransform *_swig_go_0) {
   btTransform *arg1 = 0 ;
   btDefaultMotionState *result = 0 ;
   btDefaultMotionState *_swig_go_result;
@@ -11165,7 +11415,7 @@ btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_1_mbt_7f4d06f7d3d79a9
 }
 
 
-btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_2_mbt_7f4d06f7d3d79a98() {
+btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_2_mbt_6d0baa097fc05319() {
   btDefaultMotionState *result = 0 ;
   btDefaultMotionState *_swig_go_result;
   
@@ -11176,7 +11426,7 @@ btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_2_mbt_7f4d06f7d3d79a9
 }
 
 
-void _wrap_btDefaultMotionState_getWorldTransform_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btDefaultMotionState_getWorldTransform_mbt_6d0baa097fc05319(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *arg2 = 0 ;
   
@@ -11188,7 +11438,7 @@ void _wrap_btDefaultMotionState_getWorldTransform_mbt_7f4d06f7d3d79a98(btDefault
 }
 
 
-void _wrap_btDefaultMotionState_setWorldTransform_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+void _wrap_btDefaultMotionState_setWorldTransform_mbt_6d0baa097fc05319(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   btTransform *arg2 = 0 ;
   
@@ -11200,10 +11450,991 @@ void _wrap_btDefaultMotionState_setWorldTransform_mbt_7f4d06f7d3d79a98(btDefault
 }
 
 
-void _wrap_delete_btDefaultMotionState_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0) {
+void _wrap_delete_btDefaultMotionState_mbt_6d0baa097fc05319(btDefaultMotionState *_swig_go_0) {
   btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
   
   arg1 = *(btDefaultMotionState **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+intgo _wrap_BOX_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = BOX_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_TRIANGLE_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = TRIANGLE_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_TETRAHEDRAL_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = TETRAHEDRAL_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONVEX_HULL_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONVEX_HULL_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CUSTOM_POLYHEDRAL_SHAPE_TYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CUSTOM_POLYHEDRAL_SHAPE_TYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_IMPLICIT_CONVEX_SHAPES_START_HERE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = IMPLICIT_CONVEX_SHAPES_START_HERE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_SPHERE_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = SPHERE_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_MULTI_SPHERE_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = MULTI_SPHERE_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CAPSULE_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CAPSULE_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONE_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONE_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONVEX_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONVEX_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CYLINDER_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CYLINDER_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_UNIFORM_SCALING_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = UNIFORM_SCALING_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_MINKOWSKI_SUM_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = MINKOWSKI_SUM_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_BOX_2D_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = BOX_2D_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONVEX_2D_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONVEX_2D_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CUSTOM_CONVEX_SHAPE_TYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CUSTOM_CONVEX_SHAPE_TYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONCAVE_SHAPES_START_HERE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONCAVE_SHAPES_START_HERE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_TRIANGLE_MESH_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = TRIANGLE_MESH_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_FAST_CONCAVE_MESH_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = FAST_CONCAVE_MESH_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_TERRAIN_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = TERRAIN_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_GIMPACT_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = GIMPACT_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_EMPTY_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = EMPTY_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_STATIC_PLANE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = STATIC_PLANE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CUSTOM_CONCAVE_SHAPE_TYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CUSTOM_CONCAVE_SHAPE_TYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_SDF_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = SDF_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CONCAVE_SHAPES_END_HERE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = CONCAVE_SHAPES_END_HERE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_COMPOUND_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = COMPOUND_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_SOFTBODY_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = SOFTBODY_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_HFFLUID_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = HFFLUID_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_INVALID_SHAPE_PROXYTYPE_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = INVALID_SHAPE_PROXYTYPE;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_MAX_BROADPHASE_COLLISION_TYPES_mbt_6d0baa097fc05319() {
+  BroadphaseNativeTypes result;
+  intgo _swig_go_result;
+  
+  
+  result = MAX_BROADPHASE_COLLISION_TYPES;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_DefaultFilter_btBroadphaseProxy_mbt_6d0baa097fc05319() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::DefaultFilter;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_StaticFilter_btBroadphaseProxy_mbt_6d0baa097fc05319() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::StaticFilter;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_KinematicFilter_btBroadphaseProxy_mbt_6d0baa097fc05319() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::KinematicFilter;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_DebrisFilter_btBroadphaseProxy_mbt_6d0baa097fc05319() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::DebrisFilter;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_SensorTrigger_btBroadphaseProxy_mbt_6d0baa097fc05319() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::SensorTrigger;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_CharacterFilter_btBroadphaseProxy_mbt_6d0baa097fc05319() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::CharacterFilter;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_AllFilter_btBroadphaseProxy_mbt_6d0baa097fc05319() {
+  btBroadphaseProxy::CollisionFilterGroups result;
+  intgo _swig_go_result;
+  
+  
+  result = btBroadphaseProxy::AllFilter;
+  
+  _swig_go_result = (intgo)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphaseProxy_m_clientObject_set_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0, void *_swig_go_1) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  void *arg2 = (void *) 0 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_clientObject = arg2;
+  
+}
+
+
+void *_wrap_btBroadphaseProxy_m_clientObject_get_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  void *result = 0 ;
+  void *_swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (void *) ((arg1)->m_clientObject);
+  *(void **)&_swig_go_result = (void *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphaseProxy_m_collisionFilterGroup_set_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0, intgo _swig_go_1) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_collisionFilterGroup = arg2;
+  
+}
+
+
+intgo _wrap_btBroadphaseProxy_m_collisionFilterGroup_get_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (int) ((arg1)->m_collisionFilterGroup);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphaseProxy_m_collisionFilterMask_set_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0, intgo _swig_go_1) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_collisionFilterMask = arg2;
+  
+}
+
+
+intgo _wrap_btBroadphaseProxy_m_collisionFilterMask_get_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (int) ((arg1)->m_collisionFilterMask);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphaseProxy_m_uniqueId_set_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0, intgo _swig_go_1) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  if (arg1) (arg1)->m_uniqueId = arg2;
+  
+}
+
+
+intgo _wrap_btBroadphaseProxy_m_uniqueId_get_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (int) ((arg1)->m_uniqueId);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphaseProxy_m_aabbMin_set_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0, btVector3 *_swig_go_1) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_aabbMin = *arg2;
+  
+}
+
+
+btVector3 *_wrap_btBroadphaseProxy_m_aabbMin_get_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (btVector3 *)& ((arg1)->m_aabbMin);
+  *(btVector3 **)&_swig_go_result = (btVector3 *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphaseProxy_m_aabbMax_set_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0, btVector3 *_swig_go_1) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_aabbMax = *arg2;
+  
+}
+
+
+btVector3 *_wrap_btBroadphaseProxy_m_aabbMax_get_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (btVector3 *)& ((arg1)->m_aabbMax);
+  *(btVector3 **)&_swig_go_result = (btVector3 *)result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btBroadphaseProxy_getUid_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  result = (int)((btBroadphaseProxy const *)arg1)->getUid();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btBroadphaseProxy *_wrap_new_btBroadphaseProxy__SWIG_0_mbt_6d0baa097fc05319() {
+  btBroadphaseProxy *result = 0 ;
+  btBroadphaseProxy *_swig_go_result;
+  
+  
+  result = (btBroadphaseProxy *)new btBroadphaseProxy();
+  *(btBroadphaseProxy **)&_swig_go_result = (btBroadphaseProxy *)result; 
+  return _swig_go_result;
+}
+
+
+btBroadphaseProxy *_wrap_new_btBroadphaseProxy__SWIG_1_mbt_6d0baa097fc05319(btVector3 *_swig_go_0, btVector3 *_swig_go_1, void *_swig_go_2, intgo _swig_go_3, intgo _swig_go_4) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  void *arg3 = (void *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  btBroadphaseProxy *result = 0 ;
+  btBroadphaseProxy *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(void **)&_swig_go_2; 
+  arg4 = (int)_swig_go_3; 
+  arg5 = (int)_swig_go_4; 
+  
+  result = (btBroadphaseProxy *)new btBroadphaseProxy((btVector3 const &)*arg1,(btVector3 const &)*arg2,arg3,arg4,arg5);
+  *(btBroadphaseProxy **)&_swig_go_result = (btBroadphaseProxy *)result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isPolyhedral_mbt_6d0baa097fc05319(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isPolyhedral(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isConvex_mbt_6d0baa097fc05319(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isConvex(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isNonMoving_mbt_6d0baa097fc05319(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isNonMoving(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isConcave_mbt_6d0baa097fc05319(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isConcave(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isCompound_mbt_6d0baa097fc05319(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isCompound(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isSoftBody_mbt_6d0baa097fc05319(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isSoftBody(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isInfinite_mbt_6d0baa097fc05319(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isInfinite(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btBroadphaseProxy_isConvex2d_mbt_6d0baa097fc05319(intgo _swig_go_0) {
+  int arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (bool)btBroadphaseProxy::isConvex2d(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btBroadphaseProxy_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0) {
+  btBroadphaseProxy *arg1 = (btBroadphaseProxy *) 0 ;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btBroadphasePair *_wrap_new_btBroadphasePair__SWIG_0_mbt_6d0baa097fc05319() {
+  btBroadphasePair *result = 0 ;
+  btBroadphasePair *_swig_go_result;
+  
+  
+  result = (btBroadphasePair *)new btBroadphasePair();
+  *(btBroadphasePair **)&_swig_go_result = (btBroadphasePair *)result; 
+  return _swig_go_result;
+}
+
+
+btBroadphasePair *_wrap_new_btBroadphasePair__SWIG_1_mbt_6d0baa097fc05319(btBroadphaseProxy *_swig_go_0, btBroadphaseProxy *_swig_go_1) {
+  btBroadphaseProxy *arg1 = 0 ;
+  btBroadphaseProxy *arg2 = 0 ;
+  btBroadphasePair *result = 0 ;
+  btBroadphasePair *_swig_go_result;
+  
+  arg1 = *(btBroadphaseProxy **)&_swig_go_0; 
+  arg2 = *(btBroadphaseProxy **)&_swig_go_1; 
+  
+  result = (btBroadphasePair *)new btBroadphasePair(*arg1,*arg2);
+  *(btBroadphasePair **)&_swig_go_result = (btBroadphasePair *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphasePair_m_pProxy0_set_mbt_6d0baa097fc05319(btBroadphasePair *_swig_go_0, btBroadphaseProxy *_swig_go_1) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  btBroadphaseProxy *arg2 = (btBroadphaseProxy *) 0 ;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  arg2 = *(btBroadphaseProxy **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_pProxy0 = arg2;
+  
+}
+
+
+btBroadphaseProxy *_wrap_btBroadphasePair_m_pProxy0_get_mbt_6d0baa097fc05319(btBroadphasePair *_swig_go_0) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  btBroadphaseProxy *result = 0 ;
+  btBroadphaseProxy *_swig_go_result;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  
+  result = (btBroadphaseProxy *) ((arg1)->m_pProxy0);
+  *(btBroadphaseProxy **)&_swig_go_result = (btBroadphaseProxy *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphasePair_m_pProxy1_set_mbt_6d0baa097fc05319(btBroadphasePair *_swig_go_0, btBroadphaseProxy *_swig_go_1) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  btBroadphaseProxy *arg2 = (btBroadphaseProxy *) 0 ;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  arg2 = *(btBroadphaseProxy **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_pProxy1 = arg2;
+  
+}
+
+
+btBroadphaseProxy *_wrap_btBroadphasePair_m_pProxy1_get_mbt_6d0baa097fc05319(btBroadphasePair *_swig_go_0) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  btBroadphaseProxy *result = 0 ;
+  btBroadphaseProxy *_swig_go_result;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  
+  result = (btBroadphaseProxy *) ((arg1)->m_pProxy1);
+  *(btBroadphaseProxy **)&_swig_go_result = (btBroadphaseProxy *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btBroadphasePair_m_algorithm_set_mbt_6d0baa097fc05319(btBroadphasePair *_swig_go_0, btCollisionAlgorithm *_swig_go_1) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  btCollisionAlgorithm *arg2 = (btCollisionAlgorithm *) 0 ;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  arg2 = *(btCollisionAlgorithm **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_algorithm = arg2;
+  
+}
+
+
+btCollisionAlgorithm *_wrap_btBroadphasePair_m_algorithm_get_mbt_6d0baa097fc05319(btBroadphasePair *_swig_go_0) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  btCollisionAlgorithm *result = 0 ;
+  btCollisionAlgorithm *_swig_go_result;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  
+  result = (btCollisionAlgorithm *) ((arg1)->m_algorithm);
+  *(btCollisionAlgorithm **)&_swig_go_result = (btCollisionAlgorithm *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btBroadphasePair_mbt_6d0baa097fc05319(btBroadphasePair *_swig_go_0) {
+  btBroadphasePair *arg1 = (btBroadphasePair *) 0 ;
+  
+  arg1 = *(btBroadphasePair **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btBroadphasePairSortPredicate *_wrap_new_btBroadphasePairSortPredicate_mbt_6d0baa097fc05319() {
+  btBroadphasePairSortPredicate *result = 0 ;
+  btBroadphasePairSortPredicate *_swig_go_result;
+  
+  
+  result = (btBroadphasePairSortPredicate *)new btBroadphasePairSortPredicate();
+  *(btBroadphasePairSortPredicate **)&_swig_go_result = (btBroadphasePairSortPredicate *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btBroadphasePairSortPredicate_mbt_6d0baa097fc05319(btBroadphasePairSortPredicate *_swig_go_0) {
+  btBroadphasePairSortPredicate *arg1 = (btBroadphasePairSortPredicate *) 0 ;
+  
+  arg1 = *(btBroadphasePairSortPredicate **)&_swig_go_0; 
   
   delete arg1;
   
