@@ -32,7 +32,7 @@ public:
 
 	static void getVerticesFromPlaneEquations(const btAlignedObjectArray<btVector3>& planeEquations, btAlignedObjectArray<btVector3>& verticesOut);
 
-	static bool isInside(const btAlignedObjectArray<btVector3>& vertices, const btVector3& planeNormal, btScalar margin);
+	// static bool isInside(const btAlignedObjectArray<btVector3>& vertices, const btVector3& planeNormal, btScalar margin);
 
 	static bool isPointInsidePlanes(const btAlignedObjectArray<btVector3>& planeEquations, const btVector3& point, btScalar margin);
 

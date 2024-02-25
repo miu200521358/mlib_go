@@ -81,6 +81,8 @@
 %include "LinearMath/btAabbUtil2.h.i"
 %include "LinearMath/btConvexHullComputer.h.i"
 %include "LinearMath/btConvexHullComputer.cpp.i"
+%include "LinearMath/btGeometryUtil.h.i"
+%include "LinearMath/btGeometryUtil.cpp.i"
 
 %include "BulletCollision/BroadphaseCollision/btBroadphaseProxy.h.i"
 %include "BulletCollision/CollisionShapes/btCollisionMargin.h.i"
@@ -90,20 +92,22 @@
 %include "BulletCollision/CollisionShapes/btConvexShape.cpp.i"
 %include "BulletCollision/CollisionShapes/btConvexInternalShape.h.i"
 %include "BulletCollision/CollisionShapes/btConvexInternalShape.cpp.i"
+
 %include "BulletCollision/CollisionShapes/btPolyhedralConvexShape.h.i"
 %include "BulletCollision/CollisionShapes/btPolyhedralConvexShape.cpp.i"
 %include "BulletCollision/CollisionShapes/btConvexPolyhedron.h.i"
 %include "BulletCollision/CollisionShapes/btConvexPolyhedron.cpp.i"
 
+%include "BulletCollision/CollisionShapes/btBoxShape.h.i"
+%include "BulletCollision/CollisionShapes/btBoxShape.cpp.i"
+%include "BulletCollision/CollisionShapes/btCapsuleShape.h.i"
+%include "BulletCollision/CollisionShapes/btCapsuleShape.cpp.i"
+%include "BulletCollision/CollisionShapes/btSphereShape.h.i"
+%include "BulletCollision/CollisionShapes/btSphereShape.cpp.i"
+
+
+
 // %include "BulletCollision/CollisionShapes/btTriangleShape.h.i"
-// %include "BulletCollision/CollisionShapes/btBoxShape.h.i"
-
-%include "LinearMath/btGeometryUtil.h.i"
-%include "LinearMath/btGeometryUtil.cpp.i"
-
-// %include "BulletCollision/CollisionShapes/btBoxShape.cpp.i"
-
-// %include "BulletCollision/CollisionShapes/btSphereShape.h.i"
 // %include "BulletCollision/CollisionShapes/btConvexPolyhedron.h.i"
 // %include "BulletCollision/CollisionShapes/btConvexHullShape.h.i"
 
@@ -113,7 +117,6 @@
 // %include "BulletCollision/CollisionShapes/btConeShape.h.i"
 // %include "BulletCollision/CollisionShapes/btConeShapeX.h.i"
 // %include "BulletCollision/CollisionShapes/btConeShapeZ.h.i"
-// %include "BulletCollision/CollisionShapes/btCapsuleShape.h.i"
 // %include "BulletCollision/CollisionShapes/btCapsuleShapeX.h.i"
 // %include "BulletCollision/CollisionShapes/btCapsuleShapeZ.h.i"
 // %include "BulletCollision/CollisionShapes/btConvexPointCloudShape.h.i"
