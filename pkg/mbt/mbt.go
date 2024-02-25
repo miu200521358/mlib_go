@@ -50,474 +50,660 @@ typedef long long swig_type_20;
 typedef long long swig_type_21;
 typedef long long swig_type_22;
 typedef long long swig_type_23;
-extern void _wrap_Swig_free_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_Swig_malloc_mbt_745dded929ebaf09(swig_intgo arg1);
-extern swig_intgo _wrap_btGetVersion_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_btIsDoublePrecision_mbt_745dded929ebaf09(void);
-extern uintptr_t _wrap_new_btInfMaskConverter__SWIG_0_mbt_745dded929ebaf09(swig_intgo arg1);
-extern uintptr_t _wrap_new_btInfMaskConverter__SWIG_1_mbt_745dded929ebaf09(void);
-extern void _wrap_delete_btInfMaskConverter_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btInfinityMask_set_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btInfinityMask_get_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_btGetInfinityMask_mbt_745dded929ebaf09(void);
-extern float _wrap_btSqrt_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btFabs_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btCos_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btSin_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btTan_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btAcos_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btAsin_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btAtan_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btAtan2_mbt_745dded929ebaf09(float arg1, float arg2);
-extern float _wrap_btExp_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btLog_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btPow_mbt_745dded929ebaf09(float arg1, float arg2);
-extern float _wrap_btFmod_mbt_745dded929ebaf09(float arg1, float arg2);
-extern float _wrap_btAtan2Fast_mbt_745dded929ebaf09(float arg1, float arg2);
-extern _Bool _wrap_btFuzzyZero_mbt_745dded929ebaf09(float arg1);
-extern _Bool _wrap_btEqual_mbt_745dded929ebaf09(float arg1, float arg2);
-extern _Bool _wrap_btGreaterEqual_mbt_745dded929ebaf09(float arg1, float arg2);
-extern swig_intgo _wrap_btIsNegative_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btRadians_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btDegrees_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btFsel_mbt_745dded929ebaf09(float arg1, float arg2, float arg3);
-extern _Bool _wrap_btMachineIsLittleEndian_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_btSelect__SWIG_0_mbt_745dded929ebaf09(swig_intgo arg1, swig_intgo arg2, swig_intgo arg3);
-extern swig_intgo _wrap_btSelect__SWIG_1_mbt_745dded929ebaf09(swig_intgo arg1, swig_intgo arg2, swig_intgo arg3);
-extern float _wrap_btSelect__SWIG_2_mbt_745dded929ebaf09(swig_intgo arg1, float arg2, float arg3);
-extern swig_intgo _wrap_btSwapEndian__SWIG_0_mbt_745dded929ebaf09(swig_intgo arg1);
-extern short _wrap_btSwapEndian__SWIG_1_mbt_745dded929ebaf09(short arg1);
-extern swig_intgo _wrap_btSwapEndian__SWIG_2_mbt_745dded929ebaf09(swig_intgo arg1);
-extern short _wrap_btSwapEndian__SWIG_3_mbt_745dded929ebaf09(short arg1);
-extern swig_intgo _wrap_btSwapEndianFloat_mbt_745dded929ebaf09(float arg1);
-extern float _wrap_btUnswapEndianFloat_mbt_745dded929ebaf09(swig_intgo arg1);
-extern void _wrap_btSwapEndianDouble_mbt_745dded929ebaf09(double arg1, swig_voidp arg2);
-extern double _wrap_btUnswapEndianDouble_mbt_745dded929ebaf09(swig_voidp arg1);
-extern float _wrap_btLargeDot_mbt_745dded929ebaf09(swig_voidp arg1, swig_voidp arg2, swig_intgo arg3);
-extern float _wrap_btNormalizeAngle_mbt_745dded929ebaf09(float arg1);
-extern uintptr_t _wrap_new_btTypedObject_mbt_745dded929ebaf09(swig_intgo arg1);
-extern void _wrap_btTypedObject_m_objectType_set_mbt_745dded929ebaf09(uintptr_t arg1, swig_intgo arg2);
-extern swig_intgo _wrap_btTypedObject_m_objectType_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern swig_intgo _wrap_btTypedObject_getObjectType_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_delete_btTypedObject_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btAlignedAllocInternal_mbt_745dded929ebaf09(swig_type_1 arg1, swig_intgo arg2);
-extern void _wrap_btAlignedFreeInternal_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btAlignedAllocSetCustom_mbt_745dded929ebaf09(swig_type_2 arg1, swig_type_3 arg2);
-extern void _wrap_btAlignedAllocSetCustomAligned_mbt_745dded929ebaf09(swig_type_4 arg1, swig_type_5 arg2);
-extern uintptr_t _wrap_btAllocDefault_mbt_745dded929ebaf09(swig_type_6 arg1);
-extern void _wrap_btFreeDefault_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_sAllocFunc_set_mbt_745dded929ebaf09(swig_type_7 arg1);
-extern swig_type_8 _wrap_sAllocFunc_get_mbt_745dded929ebaf09(void);
-extern void _wrap_sFreeFunc_set_mbt_745dded929ebaf09(swig_type_9 arg1);
-extern swig_type_10 _wrap_sFreeFunc_get_mbt_745dded929ebaf09(void);
-extern uintptr_t _wrap_btAlignedAllocDefault_mbt_745dded929ebaf09(swig_type_11 arg1, swig_intgo arg2);
-extern void _wrap_btAlignedFreeDefault_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_sAlignedAllocFunc_set_mbt_745dded929ebaf09(swig_type_12 arg1);
-extern swig_type_13 _wrap_sAlignedAllocFunc_get_mbt_745dded929ebaf09(void);
-extern void _wrap_sAlignedFreeFunc_set_mbt_745dded929ebaf09(swig_type_14 arg1);
-extern swig_type_15 _wrap_sAlignedFreeFunc_get_mbt_745dded929ebaf09(void);
-extern void _wrap_btVector3_m_floats_set_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2);
-extern swig_voidp _wrap_btVector3_m_floats_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btVector3__SWIG_0_mbt_745dded929ebaf09(void);
-extern uintptr_t _wrap_new_btVector3__SWIG_1_mbt_745dded929ebaf09(float arg1, float arg2, float arg3);
-extern float _wrap_btVector3_dot_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btVector3_length2_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btVector3_length_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btVector3_norm_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btVector3_safeNorm_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btVector3_distance2_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btVector3_distance_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btVector3_safeNormalize_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btVector3_normalize_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btVector3_normalized_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btVector3_rotate_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, float arg3);
-extern float _wrap_btVector3_angle_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btVector3_absolute_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btVector3_cross_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btVector3_triple_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
-extern swig_intgo _wrap_btVector3_minAxis_mbt_745dded929ebaf09(uintptr_t arg1);
-extern swig_intgo _wrap_btVector3_maxAxis_mbt_745dded929ebaf09(uintptr_t arg1);
-extern swig_intgo _wrap_btVector3_furthestAxis_mbt_745dded929ebaf09(uintptr_t arg1);
-extern swig_intgo _wrap_btVector3_closestAxis_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btVector3_setInterpolate3_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, float arg4);
-extern uintptr_t _wrap_btVector3_lerp_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, float arg3);
-extern float _wrap_btVector3_getX_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btVector3_getY_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btVector3_getZ_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btVector3_setX_mbt_745dded929ebaf09(uintptr_t arg1, float arg2);
-extern void _wrap_btVector3_setY_mbt_745dded929ebaf09(uintptr_t arg1, float arg2);
-extern void _wrap_btVector3_setZ_mbt_745dded929ebaf09(uintptr_t arg1, float arg2);
-extern void _wrap_btVector3_setW_mbt_745dded929ebaf09(uintptr_t arg1, float arg2);
-extern float _wrap_btVector3_x_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btVector3_y_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btVector3_z_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btVector3_w_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btVector3_setMax_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btVector3_setMin_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btVector3_setValue_mbt_745dded929ebaf09(uintptr_t arg1, float arg2, float arg3, float arg4);
-extern void _wrap_btVector3_getSkewSymmetricMatrix_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, uintptr_t arg4);
-extern void _wrap_btVector3_setZero_mbt_745dded929ebaf09(uintptr_t arg1);
-extern _Bool _wrap_btVector3_isZero_mbt_745dded929ebaf09(uintptr_t arg1);
-extern _Bool _wrap_btVector3_fuzzyZero_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btVector3_serialize_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btVector3_deSerialize__SWIG_0_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btVector3_deSerialize__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btVector3_serializeFloat_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btVector3_deSerializeFloat_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btVector3_serializeDouble_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btVector3_deSerializeDouble_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern swig_type_16 _wrap_btVector3_maxDot_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, swig_type_17 arg3, swig_voidp arg4);
-extern swig_type_18 _wrap_btVector3_minDot_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, swig_type_19 arg3, swig_voidp arg4);
-extern uintptr_t _wrap_btVector3_dot3_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, uintptr_t arg4);
-extern void _wrap_delete_btVector3_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btDot_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btDistance2_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btDistance_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btAngle__SWIG_0_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btCross_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btTriple_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
-extern uintptr_t _wrap_lerp_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, float arg3);
-extern uintptr_t _wrap_new_btVector4__SWIG_0_mbt_745dded929ebaf09(void);
-extern uintptr_t _wrap_new_btVector4__SWIG_1_mbt_745dded929ebaf09(float arg1, float arg2, float arg3, float arg4);
-extern uintptr_t _wrap_btVector4_absolute4_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btVector4_getW_mbt_745dded929ebaf09(uintptr_t arg1);
-extern swig_intgo _wrap_btVector4_maxAxis4_mbt_745dded929ebaf09(uintptr_t arg1);
-extern swig_intgo _wrap_btVector4_minAxis4_mbt_745dded929ebaf09(uintptr_t arg1);
-extern swig_intgo _wrap_btVector4_closestAxis4_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btVector4_setValue_mbt_745dded929ebaf09(uintptr_t arg1, float arg2, float arg3, float arg4, float arg5);
-extern void _wrap_delete_btVector4_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_SetbtVector4_M_floats_mbt_745dded929ebaf09(uintptr_t _swig_base, swig_voidp arg1);
-extern swig_voidp _wrap_GetbtVector4_M_floats_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btVector4_dot_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern float _wrap_btVector4_length2_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btVector4_length_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btVector4_norm_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btVector4_safeNorm_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btVector4_distance2_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern float _wrap_btVector4_distance_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern uintptr_t _wrap_btVector4_safeNormalize_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern uintptr_t _wrap_btVector4_normalize_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern uintptr_t _wrap_btVector4_normalized_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern uintptr_t _wrap_btVector4_rotate_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1, float arg2);
-extern float _wrap_btVector4_angle_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern uintptr_t _wrap_btVector4_absolute_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern uintptr_t _wrap_btVector4_cross_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern float _wrap_btVector4_triple_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1, uintptr_t arg2);
-extern swig_intgo _wrap_btVector4_minAxis_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern swig_intgo _wrap_btVector4_maxAxis_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern swig_intgo _wrap_btVector4_furthestAxis_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern swig_intgo _wrap_btVector4_closestAxis_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern void _wrap_btVector4_setInterpolate3_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1, uintptr_t arg2, float arg3);
-extern uintptr_t _wrap_btVector4_lerp_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1, float arg2);
-extern float _wrap_btVector4_getX_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btVector4_getY_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btVector4_getZ_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern void _wrap_btVector4_setX_mbt_745dded929ebaf09(uintptr_t _swig_base, float arg1);
-extern void _wrap_btVector4_setY_mbt_745dded929ebaf09(uintptr_t _swig_base, float arg1);
-extern void _wrap_btVector4_setZ_mbt_745dded929ebaf09(uintptr_t _swig_base, float arg1);
-extern void _wrap_btVector4_setW_mbt_745dded929ebaf09(uintptr_t _swig_base, float arg1);
-extern float _wrap_btVector4_x_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btVector4_y_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btVector4_z_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btVector4_w_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern void _wrap_btVector4_setMax_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern void _wrap_btVector4_setMin_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern void _wrap_btVector4_getSkewSymmetricMatrix_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
-extern void _wrap_btVector4_setZero_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern _Bool _wrap_btVector4_isZero_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern _Bool _wrap_btVector4_fuzzyZero_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern void _wrap_btVector4_serialize_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern void _wrap_btVector4_deSerialize__SWIG_0_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern void _wrap_btVector4_deSerialize__SWIG_1_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern void _wrap_btVector4_serializeFloat_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern void _wrap_btVector4_deSerializeFloat_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern void _wrap_btVector4_serializeDouble_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern void _wrap_btVector4_deSerializeDouble_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern swig_type_20 _wrap_btVector4_maxDot_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1, swig_type_21 arg2, swig_voidp arg3);
-extern swig_type_22 _wrap_btVector4_minDot_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1, swig_type_23 arg2, swig_voidp arg3);
-extern uintptr_t _wrap_btVector4_dot3_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
-extern void _wrap_btSwapScalarEndian_mbt_745dded929ebaf09(float arg1, swig_voidp arg2);
-extern void _wrap_btSwapVector3Endian_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btUnSwapVector3Endian_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btVector3FloatData_m_floats_set_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2);
-extern swig_voidp _wrap_btVector3FloatData_m_floats_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btVector3FloatData_mbt_745dded929ebaf09(void);
-extern void _wrap_delete_btVector3FloatData_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btVector3DoubleData_m_floats_set_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2);
-extern swig_voidp _wrap_btVector3DoubleData_m_floats_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btVector3DoubleData_mbt_745dded929ebaf09(void);
-extern void _wrap_delete_btVector3DoubleData_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btQuadWord_getX_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btQuadWord_getY_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btQuadWord_getZ_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btQuadWord_setX_mbt_745dded929ebaf09(uintptr_t arg1, float arg2);
-extern void _wrap_btQuadWord_setY_mbt_745dded929ebaf09(uintptr_t arg1, float arg2);
-extern void _wrap_btQuadWord_setZ_mbt_745dded929ebaf09(uintptr_t arg1, float arg2);
-extern void _wrap_btQuadWord_setW_mbt_745dded929ebaf09(uintptr_t arg1, float arg2);
-extern float _wrap_btQuadWord_x_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btQuadWord_y_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btQuadWord_z_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btQuadWord_w_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btQuadWord_setValue__SWIG_0_mbt_745dded929ebaf09(uintptr_t arg1, float arg2, float arg3, float arg4);
-extern void _wrap_btQuadWord_setValue__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1, float arg2, float arg3, float arg4, float arg5);
-extern uintptr_t _wrap_new_btQuadWord__SWIG_0_mbt_745dded929ebaf09(void);
-extern uintptr_t _wrap_new_btQuadWord__SWIG_1_mbt_745dded929ebaf09(float arg1, float arg2, float arg3);
-extern uintptr_t _wrap_new_btQuadWord__SWIG_2_mbt_745dded929ebaf09(float arg1, float arg2, float arg3, float arg4);
-extern void _wrap_btQuadWord_setMax_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btQuadWord_setMin_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_delete_btQuadWord_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btQuaternion__SWIG_0_mbt_745dded929ebaf09(void);
-extern uintptr_t _wrap_new_btQuaternion__SWIG_1_mbt_745dded929ebaf09(float arg1, float arg2, float arg3, float arg4);
-extern uintptr_t _wrap_new_btQuaternion__SWIG_2_mbt_745dded929ebaf09(uintptr_t arg1, float arg2);
-extern uintptr_t _wrap_new_btQuaternion__SWIG_3_mbt_745dded929ebaf09(float arg1, float arg2, float arg3);
-extern void _wrap_btQuaternion_setRotation_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, float arg3);
-extern void _wrap_btQuaternion_setEuler_mbt_745dded929ebaf09(uintptr_t arg1, float arg2, float arg3, float arg4);
-extern void _wrap_btQuaternion_setEulerZYX_mbt_745dded929ebaf09(uintptr_t arg1, float arg2, float arg3, float arg4);
-extern void _wrap_btQuaternion_getEulerZYX_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2, swig_voidp arg3, swig_voidp arg4);
-extern float _wrap_btQuaternion_dot_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btQuaternion_length2_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btQuaternion_length_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btQuaternion_safeNormalize_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btQuaternion_normalize_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btQuaternion_normalized_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btQuaternion_angle_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btQuaternion_angleShortestPath_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btQuaternion_getAngle_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btQuaternion_getAngleShortestPath_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btQuaternion_getAxis_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btQuaternion_inverse_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btQuaternion_farthest_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btQuaternion_nearest_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btQuaternion_slerp_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, float arg3);
-extern uintptr_t _wrap_btQuaternion_getIdentity_mbt_745dded929ebaf09(void);
-extern float _wrap_btQuaternion_getW_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btQuaternion_serialize_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btQuaternion_deSerialize__SWIG_0_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btQuaternion_deSerialize__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btQuaternion_serializeFloat_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btQuaternion_deSerializeFloat_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btQuaternion_serializeDouble_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btQuaternion_deSerializeDouble_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_delete_btQuaternion_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btQuaternion_getX_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btQuaternion_getY_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btQuaternion_getZ_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern void _wrap_btQuaternion_setX_mbt_745dded929ebaf09(uintptr_t _swig_base, float arg1);
-extern void _wrap_btQuaternion_setY_mbt_745dded929ebaf09(uintptr_t _swig_base, float arg1);
-extern void _wrap_btQuaternion_setZ_mbt_745dded929ebaf09(uintptr_t _swig_base, float arg1);
-extern void _wrap_btQuaternion_setW_mbt_745dded929ebaf09(uintptr_t _swig_base, float arg1);
-extern float _wrap_btQuaternion_x_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btQuaternion_y_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btQuaternion_z_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern float _wrap_btQuaternion_w_mbt_745dded929ebaf09(uintptr_t _swig_base);
-extern void _wrap_btQuaternion_setValue__SWIG_0_mbt_745dded929ebaf09(uintptr_t _swig_base, float arg1, float arg2, float arg3);
-extern void _wrap_btQuaternion_setValue__SWIG_1_mbt_745dded929ebaf09(uintptr_t _swig_base, float arg1, float arg2, float arg3, float arg4);
-extern void _wrap_btQuaternion_setMax_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern void _wrap_btQuaternion_setMin_mbt_745dded929ebaf09(uintptr_t _swig_base, uintptr_t arg1);
-extern float _wrap_dot_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_length_mbt_745dded929ebaf09(uintptr_t arg1);
-extern float _wrap_btAngle__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_inverse_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_slerp_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, float arg3);
-extern uintptr_t _wrap_quatRotate_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_shortestArcQuat_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_shortestArcQuatNormalize2_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btQuaternionFloatData_m_floats_set_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2);
-extern swig_voidp _wrap_btQuaternionFloatData_m_floats_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btQuaternionFloatData_mbt_745dded929ebaf09(void);
-extern void _wrap_delete_btQuaternionFloatData_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btQuaternionDoubleData_m_floats_set_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2);
-extern swig_voidp _wrap_btQuaternionDoubleData_m_floats_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btQuaternionDoubleData_mbt_745dded929ebaf09(void);
-extern void _wrap_delete_btQuaternionDoubleData_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btMatrix3x3__SWIG_0_mbt_745dded929ebaf09(void);
-extern uintptr_t _wrap_new_btMatrix3x3__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btMatrix3x3__SWIG_2_mbt_745dded929ebaf09(float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7, float arg8, float arg9);
-extern uintptr_t _wrap_new_btMatrix3x3__SWIG_3_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btMatrix3x3__SWIG_4_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
-extern uintptr_t _wrap_btMatrix3x3_getColumn_mbt_745dded929ebaf09(uintptr_t arg1, swig_intgo arg2);
-extern uintptr_t _wrap_btMatrix3x3_getRow_mbt_745dded929ebaf09(uintptr_t arg1, swig_intgo arg2);
-extern void _wrap_btMatrix3x3_setFromOpenGLSubMatrix_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2);
-extern void _wrap_btMatrix3x3_setValue_mbt_745dded929ebaf09(uintptr_t arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7, float arg8, float arg9, float arg10);
-extern void _wrap_btMatrix3x3_setRotation_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btMatrix3x3_setEulerYPR_mbt_745dded929ebaf09(uintptr_t arg1, float arg2, float arg3, float arg4);
-extern void _wrap_btMatrix3x3_setEulerZYX_mbt_745dded929ebaf09(uintptr_t arg1, float arg2, float arg3, float arg4);
-extern void _wrap_btMatrix3x3_setIdentity_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btMatrix3x3_setZero_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btMatrix3x3_getIdentity_mbt_745dded929ebaf09(void);
-extern void _wrap_btMatrix3x3_getOpenGLSubMatrix_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2);
-extern void _wrap_btMatrix3x3_getRotation_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btMatrix3x3_getEulerYPR_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2, swig_voidp arg3, swig_voidp arg4);
-extern void _wrap_btMatrix3x3_getEulerZYX__SWIG_0_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2, swig_voidp arg3, swig_voidp arg4, swig_intgo arg5);
-extern void _wrap_btMatrix3x3_getEulerZYX__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2, swig_voidp arg3, swig_voidp arg4);
-extern uintptr_t _wrap_btMatrix3x3_scaled_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btMatrix3x3_determinant_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btMatrix3x3_adjoint_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btMatrix3x3_absolute_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btMatrix3x3_transpose_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btMatrix3x3_inverse_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btMatrix3x3_solve33_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btMatrix3x3_transposeTimes_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btMatrix3x3_timesTranspose_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btMatrix3x3_tdotx_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btMatrix3x3_tdoty_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern float _wrap_btMatrix3x3_tdotz_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btMatrix3x3_extractRotation__SWIG_0_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, float arg3, swig_intgo arg4);
-extern void _wrap_btMatrix3x3_extractRotation__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, float arg3);
-extern void _wrap_btMatrix3x3_extractRotation__SWIG_2_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btMatrix3x3_diagonalize_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, float arg3, swig_intgo arg4);
-extern float _wrap_btMatrix3x3_cofac_mbt_745dded929ebaf09(uintptr_t arg1, swig_intgo arg2, swig_intgo arg3, swig_intgo arg4, swig_intgo arg5);
-extern void _wrap_btMatrix3x3_serialize_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btMatrix3x3_serializeFloat_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btMatrix3x3_deSerialize_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btMatrix3x3_deSerializeFloat_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btMatrix3x3_deSerializeDouble_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_delete_btMatrix3x3_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btMatrix3x3FloatData_m_el_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btMatrix3x3FloatData_m_el_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btMatrix3x3FloatData_mbt_745dded929ebaf09(void);
-extern void _wrap_delete_btMatrix3x3FloatData_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btMatrix3x3DoubleData_m_el_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btMatrix3x3DoubleData_m_el_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btMatrix3x3DoubleData_mbt_745dded929ebaf09(void);
-extern void _wrap_delete_btMatrix3x3DoubleData_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btTransform__SWIG_0_mbt_745dded929ebaf09(void);
-extern uintptr_t _wrap_new_btTransform__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_new_btTransform__SWIG_2_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btTransform__SWIG_3_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_new_btTransform__SWIG_4_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btTransform__SWIG_5_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btTransform_mult_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
-extern uintptr_t _wrap_btTransform_getBasis__SWIG_0_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btTransform_getBasis__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btTransform_getOrigin__SWIG_0_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btTransform_getOrigin__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btTransform_getRotation_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btTransform_setFromOpenGLMatrix_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2);
-extern void _wrap_btTransform_getOpenGLMatrix_mbt_745dded929ebaf09(uintptr_t arg1, swig_voidp arg2);
-extern void _wrap_btTransform_setOrigin_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btTransform_invXform_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btTransform_setBasis_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btTransform_setRotation_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btTransform_setIdentity_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btTransform_inverse_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_btTransform_inverseTimes_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btTransform_getIdentity_mbt_745dded929ebaf09(void);
-extern void _wrap_btTransform_serialize_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btTransform_serializeFloat_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btTransform_deSerialize_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btTransform_deSerializeDouble_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btTransform_deSerializeFloat_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_delete_btTransform_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btTransformFloatData_m_basis_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btTransformFloatData_m_basis_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btTransformFloatData_m_origin_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btTransformFloatData_m_origin_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btTransformFloatData_mbt_745dded929ebaf09(void);
-extern void _wrap_delete_btTransformFloatData_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btTransformDoubleData_m_basis_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btTransformDoubleData_m_basis_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btTransformDoubleData_m_origin_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btTransformDoubleData_m_origin_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btTransformDoubleData_mbt_745dded929ebaf09(void);
-extern void _wrap_delete_btTransformDoubleData_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_delete_btMotionState_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btMotionState_getWorldTransform_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btMotionState_setWorldTransform_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btDefaultMotionState_m_graphicsWorldTrans_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btDefaultMotionState_m_graphicsWorldTrans_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btDefaultMotionState_m_centerOfMassOffset_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btDefaultMotionState_m_centerOfMassOffset_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btDefaultMotionState_m_startWorldTrans_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btDefaultMotionState_m_startWorldTrans_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btDefaultMotionState_m_userPointer_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btDefaultMotionState_m_userPointer_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btDefaultMotionState__SWIG_0_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_new_btDefaultMotionState__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btDefaultMotionState__SWIG_2_mbt_745dded929ebaf09(void);
-extern void _wrap_btDefaultMotionState_getWorldTransform_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btDefaultMotionState_setWorldTransform_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_delete_btDefaultMotionState_mbt_745dded929ebaf09(uintptr_t arg1);
-extern swig_intgo _wrap_BOX_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_TRIANGLE_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_TETRAHEDRAL_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CONVEX_HULL_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CUSTOM_POLYHEDRAL_SHAPE_TYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_IMPLICIT_CONVEX_SHAPES_START_HERE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_SPHERE_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_MULTI_SPHERE_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CAPSULE_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CONE_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CONVEX_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CYLINDER_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_UNIFORM_SCALING_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_MINKOWSKI_SUM_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_BOX_2D_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CONVEX_2D_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CUSTOM_CONVEX_SHAPE_TYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CONCAVE_SHAPES_START_HERE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_TRIANGLE_MESH_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_FAST_CONCAVE_MESH_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_TERRAIN_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_GIMPACT_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_EMPTY_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_STATIC_PLANE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CUSTOM_CONCAVE_SHAPE_TYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_SDF_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CONCAVE_SHAPES_END_HERE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_COMPOUND_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_SOFTBODY_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_HFFLUID_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_INVALID_SHAPE_PROXYTYPE_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_MAX_BROADPHASE_COLLISION_TYPES_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_DefaultFilter_btBroadphaseProxy_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_StaticFilter_btBroadphaseProxy_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_KinematicFilter_btBroadphaseProxy_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_DebrisFilter_btBroadphaseProxy_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_SensorTrigger_btBroadphaseProxy_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_CharacterFilter_btBroadphaseProxy_mbt_745dded929ebaf09(void);
-extern swig_intgo _wrap_AllFilter_btBroadphaseProxy_mbt_745dded929ebaf09(void);
-extern void _wrap_btBroadphaseProxy_m_clientObject_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btBroadphaseProxy_m_clientObject_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btBroadphaseProxy_m_collisionFilterGroup_set_mbt_745dded929ebaf09(uintptr_t arg1, swig_intgo arg2);
-extern swig_intgo _wrap_btBroadphaseProxy_m_collisionFilterGroup_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btBroadphaseProxy_m_collisionFilterMask_set_mbt_745dded929ebaf09(uintptr_t arg1, swig_intgo arg2);
-extern swig_intgo _wrap_btBroadphaseProxy_m_collisionFilterMask_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btBroadphaseProxy_m_uniqueId_set_mbt_745dded929ebaf09(uintptr_t arg1, swig_intgo arg2);
-extern swig_intgo _wrap_btBroadphaseProxy_m_uniqueId_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btBroadphaseProxy_m_aabbMin_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btBroadphaseProxy_m_aabbMin_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btBroadphaseProxy_m_aabbMax_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btBroadphaseProxy_m_aabbMax_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern swig_intgo _wrap_btBroadphaseProxy_getUid_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btBroadphaseProxy__SWIG_0_mbt_745dded929ebaf09(void);
-extern uintptr_t _wrap_new_btBroadphaseProxy__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, swig_intgo arg4, swig_intgo arg5);
-extern _Bool _wrap_btBroadphaseProxy_isPolyhedral_mbt_745dded929ebaf09(swig_intgo arg1);
-extern _Bool _wrap_btBroadphaseProxy_isConvex_mbt_745dded929ebaf09(swig_intgo arg1);
-extern _Bool _wrap_btBroadphaseProxy_isNonMoving_mbt_745dded929ebaf09(swig_intgo arg1);
-extern _Bool _wrap_btBroadphaseProxy_isConcave_mbt_745dded929ebaf09(swig_intgo arg1);
-extern _Bool _wrap_btBroadphaseProxy_isCompound_mbt_745dded929ebaf09(swig_intgo arg1);
-extern _Bool _wrap_btBroadphaseProxy_isSoftBody_mbt_745dded929ebaf09(swig_intgo arg1);
-extern _Bool _wrap_btBroadphaseProxy_isInfinite_mbt_745dded929ebaf09(swig_intgo arg1);
-extern _Bool _wrap_btBroadphaseProxy_isConvex2d_mbt_745dded929ebaf09(swig_intgo arg1);
-extern void _wrap_delete_btBroadphaseProxy_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btBroadphasePair__SWIG_0_mbt_745dded929ebaf09(void);
-extern uintptr_t _wrap_new_btBroadphasePair__SWIG_1_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern void _wrap_btBroadphasePair_m_pProxy0_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btBroadphasePair_m_pProxy0_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btBroadphasePair_m_pProxy1_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btBroadphasePair_m_pProxy1_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_btBroadphasePair_m_algorithm_set_mbt_745dded929ebaf09(uintptr_t arg1, uintptr_t arg2);
-extern uintptr_t _wrap_btBroadphasePair_m_algorithm_get_mbt_745dded929ebaf09(uintptr_t arg1);
-extern void _wrap_delete_btBroadphasePair_mbt_745dded929ebaf09(uintptr_t arg1);
-extern uintptr_t _wrap_new_btBroadphasePairSortPredicate_mbt_745dded929ebaf09(void);
-extern void _wrap_delete_btBroadphasePairSortPredicate_mbt_745dded929ebaf09(uintptr_t arg1);
+typedef _gostring_ swig_type_24;
+typedef _gostring_ swig_type_25;
+typedef _gostring_ swig_type_26;
+typedef _gostring_ swig_type_27;
+typedef _gostring_ swig_type_28;
+typedef _gostring_ swig_type_29;
+typedef long long swig_type_30;
+typedef _gostring_ swig_type_31;
+typedef _gostring_ swig_type_32;
+typedef _gostring_ swig_type_33;
+typedef _gostring_ swig_type_34;
+typedef _gostring_ swig_type_35;
+typedef _gostring_ swig_type_36;
+typedef long long swig_type_37;
+typedef long long swig_type_38;
+typedef _gostring_ swig_type_39;
+typedef _gostring_ swig_type_40;
+typedef _gostring_ swig_type_41;
+typedef _gostring_ swig_type_42;
+typedef _gostring_ swig_type_43;
+typedef _gostring_ swig_type_44;
+typedef _gostring_ swig_type_45;
+typedef _gostring_ swig_type_46;
+typedef _gostring_ swig_type_47;
+extern void _wrap_Swig_free_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_Swig_malloc_mbt_702ac83b51919141(swig_intgo arg1);
+extern swig_intgo _wrap_btGetVersion_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_btIsDoublePrecision_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btInfMaskConverter__SWIG_0_mbt_702ac83b51919141(swig_intgo arg1);
+extern uintptr_t _wrap_new_btInfMaskConverter__SWIG_1_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btInfMaskConverter_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btInfinityMask_set_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btInfinityMask_get_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_btGetInfinityMask_mbt_702ac83b51919141(void);
+extern float _wrap_btSqrt_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btFabs_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btCos_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btSin_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btTan_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btAcos_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btAsin_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btAtan_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btAtan2_mbt_702ac83b51919141(float arg1, float arg2);
+extern float _wrap_btExp_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btLog_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btPow_mbt_702ac83b51919141(float arg1, float arg2);
+extern float _wrap_btFmod_mbt_702ac83b51919141(float arg1, float arg2);
+extern float _wrap_btAtan2Fast_mbt_702ac83b51919141(float arg1, float arg2);
+extern _Bool _wrap_btFuzzyZero_mbt_702ac83b51919141(float arg1);
+extern _Bool _wrap_btEqual_mbt_702ac83b51919141(float arg1, float arg2);
+extern _Bool _wrap_btGreaterEqual_mbt_702ac83b51919141(float arg1, float arg2);
+extern swig_intgo _wrap_btIsNegative_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btRadians_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btDegrees_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btFsel_mbt_702ac83b51919141(float arg1, float arg2, float arg3);
+extern _Bool _wrap_btMachineIsLittleEndian_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_btSelect__SWIG_0_mbt_702ac83b51919141(swig_intgo arg1, swig_intgo arg2, swig_intgo arg3);
+extern swig_intgo _wrap_btSelect__SWIG_1_mbt_702ac83b51919141(swig_intgo arg1, swig_intgo arg2, swig_intgo arg3);
+extern float _wrap_btSelect__SWIG_2_mbt_702ac83b51919141(swig_intgo arg1, float arg2, float arg3);
+extern swig_intgo _wrap_btSwapEndian__SWIG_0_mbt_702ac83b51919141(swig_intgo arg1);
+extern short _wrap_btSwapEndian__SWIG_1_mbt_702ac83b51919141(short arg1);
+extern swig_intgo _wrap_btSwapEndian__SWIG_2_mbt_702ac83b51919141(swig_intgo arg1);
+extern short _wrap_btSwapEndian__SWIG_3_mbt_702ac83b51919141(short arg1);
+extern swig_intgo _wrap_btSwapEndianFloat_mbt_702ac83b51919141(float arg1);
+extern float _wrap_btUnswapEndianFloat_mbt_702ac83b51919141(swig_intgo arg1);
+extern void _wrap_btSwapEndianDouble_mbt_702ac83b51919141(double arg1, swig_voidp arg2);
+extern double _wrap_btUnswapEndianDouble_mbt_702ac83b51919141(swig_voidp arg1);
+extern float _wrap_btLargeDot_mbt_702ac83b51919141(swig_voidp arg1, swig_voidp arg2, swig_intgo arg3);
+extern float _wrap_btNormalizeAngle_mbt_702ac83b51919141(float arg1);
+extern uintptr_t _wrap_new_btTypedObject_mbt_702ac83b51919141(swig_intgo arg1);
+extern void _wrap_btTypedObject_m_objectType_set_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btTypedObject_m_objectType_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btTypedObject_getObjectType_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_delete_btTypedObject_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btAlignedAllocInternal_mbt_702ac83b51919141(swig_type_1 arg1, swig_intgo arg2);
+extern void _wrap_btAlignedFreeInternal_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btAlignedAllocSetCustom_mbt_702ac83b51919141(swig_type_2 arg1, swig_type_3 arg2);
+extern void _wrap_btAlignedAllocSetCustomAligned_mbt_702ac83b51919141(swig_type_4 arg1, swig_type_5 arg2);
+extern uintptr_t _wrap_btAllocDefault_mbt_702ac83b51919141(swig_type_6 arg1);
+extern void _wrap_btFreeDefault_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_sAllocFunc_set_mbt_702ac83b51919141(swig_type_7 arg1);
+extern swig_type_8 _wrap_sAllocFunc_get_mbt_702ac83b51919141(void);
+extern void _wrap_sFreeFunc_set_mbt_702ac83b51919141(swig_type_9 arg1);
+extern swig_type_10 _wrap_sFreeFunc_get_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_btAlignedAllocDefault_mbt_702ac83b51919141(swig_type_11 arg1, swig_intgo arg2);
+extern void _wrap_btAlignedFreeDefault_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_sAlignedAllocFunc_set_mbt_702ac83b51919141(swig_type_12 arg1);
+extern swig_type_13 _wrap_sAlignedAllocFunc_get_mbt_702ac83b51919141(void);
+extern void _wrap_sAlignedFreeFunc_set_mbt_702ac83b51919141(swig_type_14 arg1);
+extern swig_type_15 _wrap_sAlignedFreeFunc_get_mbt_702ac83b51919141(void);
+extern void _wrap_btVector3_m_floats_set_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2);
+extern swig_voidp _wrap_btVector3_m_floats_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btVector3__SWIG_0_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btVector3__SWIG_1_mbt_702ac83b51919141(float arg1, float arg2, float arg3);
+extern float _wrap_btVector3_dot_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btVector3_length2_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btVector3_length_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btVector3_norm_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btVector3_safeNorm_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btVector3_distance2_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btVector3_distance_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btVector3_safeNormalize_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btVector3_normalize_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btVector3_normalized_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btVector3_rotate_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, float arg3);
+extern float _wrap_btVector3_angle_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btVector3_absolute_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btVector3_cross_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btVector3_triple_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
+extern swig_intgo _wrap_btVector3_minAxis_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btVector3_maxAxis_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btVector3_furthestAxis_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btVector3_closestAxis_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btVector3_setInterpolate3_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, float arg4);
+extern uintptr_t _wrap_btVector3_lerp_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, float arg3);
+extern float _wrap_btVector3_getX_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btVector3_getY_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btVector3_getZ_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btVector3_setX_mbt_702ac83b51919141(uintptr_t arg1, float arg2);
+extern void _wrap_btVector3_setY_mbt_702ac83b51919141(uintptr_t arg1, float arg2);
+extern void _wrap_btVector3_setZ_mbt_702ac83b51919141(uintptr_t arg1, float arg2);
+extern void _wrap_btVector3_setW_mbt_702ac83b51919141(uintptr_t arg1, float arg2);
+extern float _wrap_btVector3_x_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btVector3_y_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btVector3_z_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btVector3_w_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btVector3_setMax_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btVector3_setMin_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btVector3_setValue_mbt_702ac83b51919141(uintptr_t arg1, float arg2, float arg3, float arg4);
+extern void _wrap_btVector3_getSkewSymmetricMatrix_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, uintptr_t arg4);
+extern void _wrap_btVector3_setZero_mbt_702ac83b51919141(uintptr_t arg1);
+extern _Bool _wrap_btVector3_isZero_mbt_702ac83b51919141(uintptr_t arg1);
+extern _Bool _wrap_btVector3_fuzzyZero_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btVector3_serialize_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btVector3_deSerialize__SWIG_0_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btVector3_deSerialize__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btVector3_serializeFloat_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btVector3_deSerializeFloat_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btVector3_serializeDouble_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btVector3_deSerializeDouble_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern swig_type_16 _wrap_btVector3_maxDot_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, swig_type_17 arg3, swig_voidp arg4);
+extern swig_type_18 _wrap_btVector3_minDot_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, swig_type_19 arg3, swig_voidp arg4);
+extern uintptr_t _wrap_btVector3_dot3_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, uintptr_t arg4);
+extern void _wrap_delete_btVector3_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btDot_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btDistance2_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btDistance_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btAngle__SWIG_0_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btCross_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btTriple_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
+extern uintptr_t _wrap_lerp_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, float arg3);
+extern uintptr_t _wrap_new_btVector4__SWIG_0_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btVector4__SWIG_1_mbt_702ac83b51919141(float arg1, float arg2, float arg3, float arg4);
+extern uintptr_t _wrap_btVector4_absolute4_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btVector4_getW_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btVector4_maxAxis4_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btVector4_minAxis4_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btVector4_closestAxis4_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btVector4_setValue_mbt_702ac83b51919141(uintptr_t arg1, float arg2, float arg3, float arg4, float arg5);
+extern void _wrap_delete_btVector4_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_SetbtVector4_M_floats_mbt_702ac83b51919141(uintptr_t _swig_base, swig_voidp arg1);
+extern swig_voidp _wrap_GetbtVector4_M_floats_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btVector4_dot_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern float _wrap_btVector4_length2_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btVector4_length_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btVector4_norm_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btVector4_safeNorm_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btVector4_distance2_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern float _wrap_btVector4_distance_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern uintptr_t _wrap_btVector4_safeNormalize_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern uintptr_t _wrap_btVector4_normalize_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern uintptr_t _wrap_btVector4_normalized_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern uintptr_t _wrap_btVector4_rotate_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1, float arg2);
+extern float _wrap_btVector4_angle_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern uintptr_t _wrap_btVector4_absolute_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern uintptr_t _wrap_btVector4_cross_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern float _wrap_btVector4_triple_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1, uintptr_t arg2);
+extern swig_intgo _wrap_btVector4_minAxis_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern swig_intgo _wrap_btVector4_maxAxis_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern swig_intgo _wrap_btVector4_furthestAxis_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern swig_intgo _wrap_btVector4_closestAxis_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern void _wrap_btVector4_setInterpolate3_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1, uintptr_t arg2, float arg3);
+extern uintptr_t _wrap_btVector4_lerp_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1, float arg2);
+extern float _wrap_btVector4_getX_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btVector4_getY_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btVector4_getZ_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern void _wrap_btVector4_setX_mbt_702ac83b51919141(uintptr_t _swig_base, float arg1);
+extern void _wrap_btVector4_setY_mbt_702ac83b51919141(uintptr_t _swig_base, float arg1);
+extern void _wrap_btVector4_setZ_mbt_702ac83b51919141(uintptr_t _swig_base, float arg1);
+extern void _wrap_btVector4_setW_mbt_702ac83b51919141(uintptr_t _swig_base, float arg1);
+extern float _wrap_btVector4_x_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btVector4_y_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btVector4_z_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btVector4_w_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern void _wrap_btVector4_setMax_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern void _wrap_btVector4_setMin_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern void _wrap_btVector4_getSkewSymmetricMatrix_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
+extern void _wrap_btVector4_setZero_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern _Bool _wrap_btVector4_isZero_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern _Bool _wrap_btVector4_fuzzyZero_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern void _wrap_btVector4_serialize_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern void _wrap_btVector4_deSerialize__SWIG_0_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern void _wrap_btVector4_deSerialize__SWIG_1_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern void _wrap_btVector4_serializeFloat_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern void _wrap_btVector4_deSerializeFloat_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern void _wrap_btVector4_serializeDouble_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern void _wrap_btVector4_deSerializeDouble_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern swig_type_20 _wrap_btVector4_maxDot_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1, swig_type_21 arg2, swig_voidp arg3);
+extern swig_type_22 _wrap_btVector4_minDot_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1, swig_type_23 arg2, swig_voidp arg3);
+extern uintptr_t _wrap_btVector4_dot3_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
+extern void _wrap_btSwapScalarEndian_mbt_702ac83b51919141(float arg1, swig_voidp arg2);
+extern void _wrap_btSwapVector3Endian_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btUnSwapVector3Endian_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btVector3FloatData_m_floats_set_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2);
+extern swig_voidp _wrap_btVector3FloatData_m_floats_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btVector3FloatData_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btVector3FloatData_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btVector3DoubleData_m_floats_set_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2);
+extern swig_voidp _wrap_btVector3DoubleData_m_floats_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btVector3DoubleData_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btVector3DoubleData_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btQuadWord_getX_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btQuadWord_getY_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btQuadWord_getZ_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btQuadWord_setX_mbt_702ac83b51919141(uintptr_t arg1, float arg2);
+extern void _wrap_btQuadWord_setY_mbt_702ac83b51919141(uintptr_t arg1, float arg2);
+extern void _wrap_btQuadWord_setZ_mbt_702ac83b51919141(uintptr_t arg1, float arg2);
+extern void _wrap_btQuadWord_setW_mbt_702ac83b51919141(uintptr_t arg1, float arg2);
+extern float _wrap_btQuadWord_x_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btQuadWord_y_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btQuadWord_z_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btQuadWord_w_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btQuadWord_setValue__SWIG_0_mbt_702ac83b51919141(uintptr_t arg1, float arg2, float arg3, float arg4);
+extern void _wrap_btQuadWord_setValue__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1, float arg2, float arg3, float arg4, float arg5);
+extern uintptr_t _wrap_new_btQuadWord__SWIG_0_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btQuadWord__SWIG_1_mbt_702ac83b51919141(float arg1, float arg2, float arg3);
+extern uintptr_t _wrap_new_btQuadWord__SWIG_2_mbt_702ac83b51919141(float arg1, float arg2, float arg3, float arg4);
+extern void _wrap_btQuadWord_setMax_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btQuadWord_setMin_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_delete_btQuadWord_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btQuaternion__SWIG_0_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btQuaternion__SWIG_1_mbt_702ac83b51919141(float arg1, float arg2, float arg3, float arg4);
+extern uintptr_t _wrap_new_btQuaternion__SWIG_2_mbt_702ac83b51919141(uintptr_t arg1, float arg2);
+extern uintptr_t _wrap_new_btQuaternion__SWIG_3_mbt_702ac83b51919141(float arg1, float arg2, float arg3);
+extern void _wrap_btQuaternion_setRotation_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, float arg3);
+extern void _wrap_btQuaternion_setEuler_mbt_702ac83b51919141(uintptr_t arg1, float arg2, float arg3, float arg4);
+extern void _wrap_btQuaternion_setEulerZYX_mbt_702ac83b51919141(uintptr_t arg1, float arg2, float arg3, float arg4);
+extern void _wrap_btQuaternion_getEulerZYX_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2, swig_voidp arg3, swig_voidp arg4);
+extern float _wrap_btQuaternion_dot_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btQuaternion_length2_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btQuaternion_length_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btQuaternion_safeNormalize_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btQuaternion_normalize_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btQuaternion_normalized_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btQuaternion_angle_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btQuaternion_angleShortestPath_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btQuaternion_getAngle_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btQuaternion_getAngleShortestPath_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btQuaternion_getAxis_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btQuaternion_inverse_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btQuaternion_farthest_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btQuaternion_nearest_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btQuaternion_slerp_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, float arg3);
+extern uintptr_t _wrap_btQuaternion_getIdentity_mbt_702ac83b51919141(void);
+extern float _wrap_btQuaternion_getW_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btQuaternion_serialize_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btQuaternion_deSerialize__SWIG_0_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btQuaternion_deSerialize__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btQuaternion_serializeFloat_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btQuaternion_deSerializeFloat_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btQuaternion_serializeDouble_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btQuaternion_deSerializeDouble_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_delete_btQuaternion_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btQuaternion_getX_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btQuaternion_getY_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btQuaternion_getZ_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern void _wrap_btQuaternion_setX_mbt_702ac83b51919141(uintptr_t _swig_base, float arg1);
+extern void _wrap_btQuaternion_setY_mbt_702ac83b51919141(uintptr_t _swig_base, float arg1);
+extern void _wrap_btQuaternion_setZ_mbt_702ac83b51919141(uintptr_t _swig_base, float arg1);
+extern void _wrap_btQuaternion_setW_mbt_702ac83b51919141(uintptr_t _swig_base, float arg1);
+extern float _wrap_btQuaternion_x_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btQuaternion_y_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btQuaternion_z_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern float _wrap_btQuaternion_w_mbt_702ac83b51919141(uintptr_t _swig_base);
+extern void _wrap_btQuaternion_setValue__SWIG_0_mbt_702ac83b51919141(uintptr_t _swig_base, float arg1, float arg2, float arg3);
+extern void _wrap_btQuaternion_setValue__SWIG_1_mbt_702ac83b51919141(uintptr_t _swig_base, float arg1, float arg2, float arg3, float arg4);
+extern void _wrap_btQuaternion_setMax_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern void _wrap_btQuaternion_setMin_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern float _wrap_dot_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_length_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btAngle__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_inverse_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_slerp_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, float arg3);
+extern uintptr_t _wrap_quatRotate_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_shortestArcQuat_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_shortestArcQuatNormalize2_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btQuaternionFloatData_m_floats_set_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2);
+extern swig_voidp _wrap_btQuaternionFloatData_m_floats_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btQuaternionFloatData_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btQuaternionFloatData_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btQuaternionDoubleData_m_floats_set_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2);
+extern swig_voidp _wrap_btQuaternionDoubleData_m_floats_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btQuaternionDoubleData_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btQuaternionDoubleData_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btMatrix3x3__SWIG_0_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btMatrix3x3__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btMatrix3x3__SWIG_2_mbt_702ac83b51919141(float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7, float arg8, float arg9);
+extern uintptr_t _wrap_new_btMatrix3x3__SWIG_3_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btMatrix3x3__SWIG_4_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
+extern uintptr_t _wrap_btMatrix3x3_getColumn_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern uintptr_t _wrap_btMatrix3x3_getRow_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern void _wrap_btMatrix3x3_setFromOpenGLSubMatrix_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2);
+extern void _wrap_btMatrix3x3_setValue_mbt_702ac83b51919141(uintptr_t arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7, float arg8, float arg9, float arg10);
+extern void _wrap_btMatrix3x3_setRotation_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btMatrix3x3_setEulerYPR_mbt_702ac83b51919141(uintptr_t arg1, float arg2, float arg3, float arg4);
+extern void _wrap_btMatrix3x3_setEulerZYX_mbt_702ac83b51919141(uintptr_t arg1, float arg2, float arg3, float arg4);
+extern void _wrap_btMatrix3x3_setIdentity_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btMatrix3x3_setZero_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btMatrix3x3_getIdentity_mbt_702ac83b51919141(void);
+extern void _wrap_btMatrix3x3_getOpenGLSubMatrix_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2);
+extern void _wrap_btMatrix3x3_getRotation_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btMatrix3x3_getEulerYPR_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2, swig_voidp arg3, swig_voidp arg4);
+extern void _wrap_btMatrix3x3_getEulerZYX__SWIG_0_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2, swig_voidp arg3, swig_voidp arg4, swig_intgo arg5);
+extern void _wrap_btMatrix3x3_getEulerZYX__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2, swig_voidp arg3, swig_voidp arg4);
+extern uintptr_t _wrap_btMatrix3x3_scaled_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btMatrix3x3_determinant_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btMatrix3x3_adjoint_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btMatrix3x3_absolute_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btMatrix3x3_transpose_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btMatrix3x3_inverse_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btMatrix3x3_solve33_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btMatrix3x3_transposeTimes_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btMatrix3x3_timesTranspose_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btMatrix3x3_tdotx_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btMatrix3x3_tdoty_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern float _wrap_btMatrix3x3_tdotz_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btMatrix3x3_extractRotation__SWIG_0_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, float arg3, swig_intgo arg4);
+extern void _wrap_btMatrix3x3_extractRotation__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, float arg3);
+extern void _wrap_btMatrix3x3_extractRotation__SWIG_2_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btMatrix3x3_diagonalize_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, float arg3, swig_intgo arg4);
+extern float _wrap_btMatrix3x3_cofac_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2, swig_intgo arg3, swig_intgo arg4, swig_intgo arg5);
+extern void _wrap_btMatrix3x3_serialize_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btMatrix3x3_serializeFloat_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btMatrix3x3_deSerialize_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btMatrix3x3_deSerializeFloat_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btMatrix3x3_deSerializeDouble_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_delete_btMatrix3x3_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btMatrix3x3FloatData_m_el_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btMatrix3x3FloatData_m_el_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btMatrix3x3FloatData_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btMatrix3x3FloatData_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btMatrix3x3DoubleData_m_el_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btMatrix3x3DoubleData_m_el_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btMatrix3x3DoubleData_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btMatrix3x3DoubleData_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btTransform__SWIG_0_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btTransform__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_new_btTransform__SWIG_2_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btTransform__SWIG_3_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_new_btTransform__SWIG_4_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btTransform__SWIG_5_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btTransform_mult_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
+extern uintptr_t _wrap_btTransform_getBasis__SWIG_0_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btTransform_getBasis__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btTransform_getOrigin__SWIG_0_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btTransform_getOrigin__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btTransform_getRotation_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btTransform_setFromOpenGLMatrix_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2);
+extern void _wrap_btTransform_getOpenGLMatrix_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2);
+extern void _wrap_btTransform_setOrigin_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btTransform_invXform_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btTransform_setBasis_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btTransform_setRotation_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btTransform_setIdentity_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btTransform_inverse_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btTransform_inverseTimes_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btTransform_getIdentity_mbt_702ac83b51919141(void);
+extern void _wrap_btTransform_serialize_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btTransform_serializeFloat_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btTransform_deSerialize_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btTransform_deSerializeDouble_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btTransform_deSerializeFloat_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_delete_btTransform_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btTransformFloatData_m_basis_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btTransformFloatData_m_basis_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btTransformFloatData_m_origin_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btTransformFloatData_m_origin_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btTransformFloatData_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btTransformFloatData_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btTransformDoubleData_m_basis_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btTransformDoubleData_m_basis_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btTransformDoubleData_m_origin_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btTransformDoubleData_m_origin_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btTransformDoubleData_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btTransformDoubleData_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_delete_btMotionState_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btMotionState_getWorldTransform_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btMotionState_setWorldTransform_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btDefaultMotionState_m_graphicsWorldTrans_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btDefaultMotionState_m_graphicsWorldTrans_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btDefaultMotionState_m_centerOfMassOffset_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btDefaultMotionState_m_centerOfMassOffset_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btDefaultMotionState_m_startWorldTrans_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btDefaultMotionState_m_startWorldTrans_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btDefaultMotionState_m_userPointer_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btDefaultMotionState_m_userPointer_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btDefaultMotionState__SWIG_0_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_new_btDefaultMotionState__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btDefaultMotionState__SWIG_2_mbt_702ac83b51919141(void);
+extern void _wrap_btDefaultMotionState_getWorldTransform_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btDefaultMotionState_setWorldTransform_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_delete_btDefaultMotionState_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btHashString_m_string1_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btHashString_m_string1_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btHashString_m_hash_set_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btHashString_m_hash_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btHashString_getHash_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btHashString__SWIG_0_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btHashString__SWIG_1_mbt_702ac83b51919141(swig_type_24 arg1);
+extern _Bool _wrap_btHashString_equals_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_delete_btHashString_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_BT_HASH_NULL_get_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btHashInt__SWIG_0_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btHashInt__SWIG_1_mbt_702ac83b51919141(swig_intgo arg1);
+extern swig_intgo _wrap_btHashInt_getUid1_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btHashInt_setUid1_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern _Bool _wrap_btHashInt_equals_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern swig_intgo _wrap_btHashInt_getHash_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_delete_btHashInt_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btHashPtr__SWIG_0_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btHashPtr__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btHashPtr_getPointer_mbt_702ac83b51919141(uintptr_t arg1);
+extern _Bool _wrap_btHashPtr_equals_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern swig_intgo _wrap_btHashPtr_getHash_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_delete_btHashPtr_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_sBulletDNAstr_set_mbt_702ac83b51919141(swig_type_25 arg1);
+extern swig_type_26 _wrap_sBulletDNAstr_get_mbt_702ac83b51919141(void);
+extern void _wrap_sBulletDNAlen_set_mbt_702ac83b51919141(swig_intgo arg1);
+extern swig_intgo _wrap_sBulletDNAlen_get_mbt_702ac83b51919141(void);
+extern void _wrap_sBulletDNAstr64_set_mbt_702ac83b51919141(swig_type_27 arg1);
+extern swig_type_28 _wrap_sBulletDNAstr64_get_mbt_702ac83b51919141(void);
+extern void _wrap_sBulletDNAlen64_set_mbt_702ac83b51919141(swig_intgo arg1);
+extern swig_intgo _wrap_sBulletDNAlen64_get_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_btStrLen_mbt_702ac83b51919141(swig_type_29 arg1);
+extern void _wrap_btChunk_m_chunkCode_set_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btChunk_m_chunkCode_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btChunk_m_length_set_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btChunk_m_length_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btChunk_m_oldPtr_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btChunk_m_oldPtr_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btChunk_m_dna_nr_set_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btChunk_m_dna_nr_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btChunk_m_number_set_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btChunk_m_number_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btChunk_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btChunk_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_BT_SERIALIZE_NO_BVH_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_BT_SERIALIZE_NO_TRIANGLEINFOMAP_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_BT_SERIALIZE_NO_DUPLICATE_ASSERT_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_BT_SERIALIZE_CONTACT_MANIFOLDS_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btSerializer_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_voidp _wrap_btSerializer_getBufferPointer_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btSerializer_getCurrentBufferSize_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btSerializer_allocate_mbt_702ac83b51919141(uintptr_t arg1, swig_type_30 arg2, swig_intgo arg3);
+extern void _wrap_btSerializer_finalizeChunk_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, swig_type_31 arg3, swig_intgo arg4, uintptr_t arg5);
+extern uintptr_t _wrap_btSerializer_findPointer_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btSerializer_getUniquePointer_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btSerializer_startSerialization_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btSerializer_finishSerialization_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_type_32 _wrap_btSerializer_findNameForPointer_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btSerializer_registerNameForPointer_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, swig_type_33 arg3);
+extern void _wrap_btSerializer_serializeName_mbt_702ac83b51919141(uintptr_t arg1, swig_type_34 arg2);
+extern swig_intgo _wrap_btSerializer_getSerializationFlags_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btSerializer_setSerializationFlags_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btSerializer_getNumChunks_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btSerializer_getChunk_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern uintptr_t _wrap_new_btPointerUid_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btPointerUid_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btBulletSerializedArrays_mbt_702ac83b51919141(void);
+extern void _wrap_btBulletSerializedArrays_m_bvhsDouble_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_bvhsDouble_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_bvhsFloat_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_bvhsFloat_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_colShapeData_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_colShapeData_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataDouble_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataDouble_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataFloat_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataFloat_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_rigidBodyDataDouble_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_rigidBodyDataDouble_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_rigidBodyDataFloat_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_rigidBodyDataFloat_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_collisionObjectDataDouble_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_collisionObjectDataDouble_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_collisionObjectDataFloat_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_collisionObjectDataFloat_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_constraintDataFloat_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_constraintDataFloat_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_constraintDataDouble_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_constraintDataDouble_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_constraintData_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_constraintData_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_softBodyFloatData_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_softBodyFloatData_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletSerializedArrays_m_softBodyDoubleData_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBulletSerializedArrays_m_softBodyDoubleData_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_delete_btBulletSerializedArrays_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btDefaultSerializer_m_skipPointers_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btDefaultSerializer_m_skipPointers_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btDefaultSerializer__SWIG_0_mbt_702ac83b51919141(swig_intgo arg1, swig_voidp arg2);
+extern uintptr_t _wrap_new_btDefaultSerializer__SWIG_1_mbt_702ac83b51919141(swig_intgo arg1);
+extern uintptr_t _wrap_new_btDefaultSerializer__SWIG_2_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btDefaultSerializer_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btDefaultSerializer_getMemoryDnaSizeInBytes_mbt_702ac83b51919141(void);
+extern swig_type_35 _wrap_btDefaultSerializer_getMemoryDna_mbt_702ac83b51919141(void);
+extern void _wrap_btDefaultSerializer_insertHeader_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btDefaultSerializer_writeHeader_mbt_702ac83b51919141(uintptr_t arg1, swig_voidp arg2);
+extern void _wrap_btDefaultSerializer_startSerialization_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btDefaultSerializer_finishSerialization_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btDefaultSerializer_getUniquePointer_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern swig_voidp _wrap_btDefaultSerializer_getBufferPointer_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btDefaultSerializer_getCurrentBufferSize_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btDefaultSerializer_finalizeChunk_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, swig_type_36 arg3, swig_intgo arg4, uintptr_t arg5);
+extern swig_voidp _wrap_btDefaultSerializer_internalAlloc_mbt_702ac83b51919141(uintptr_t arg1, swig_type_37 arg2);
+extern uintptr_t _wrap_btDefaultSerializer_allocate_mbt_702ac83b51919141(uintptr_t arg1, swig_type_38 arg2, swig_intgo arg3);
+extern swig_type_39 _wrap_btDefaultSerializer_findNameForPointer_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btDefaultSerializer_registerNameForPointer_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, swig_type_40 arg3);
+extern void _wrap_btDefaultSerializer_serializeName_mbt_702ac83b51919141(uintptr_t arg1, swig_type_41 arg2);
+extern swig_intgo _wrap_btDefaultSerializer_getSerializationFlags_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btDefaultSerializer_setSerializationFlags_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btDefaultSerializer_getNumChunks_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btDefaultSerializer_getChunk_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern uintptr_t _wrap_btDefaultSerializer_findPointer_mbt_702ac83b51919141(uintptr_t _swig_base, uintptr_t arg1);
+extern swig_intgo _wrap_BOX_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_TRIANGLE_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_TETRAHEDRAL_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CONVEX_HULL_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CUSTOM_POLYHEDRAL_SHAPE_TYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_IMPLICIT_CONVEX_SHAPES_START_HERE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_SPHERE_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_MULTI_SPHERE_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CAPSULE_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CONE_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CONVEX_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CYLINDER_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_UNIFORM_SCALING_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_MINKOWSKI_SUM_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_BOX_2D_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CONVEX_2D_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CUSTOM_CONVEX_SHAPE_TYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CONCAVE_SHAPES_START_HERE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_TRIANGLE_MESH_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_FAST_CONCAVE_MESH_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_TERRAIN_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_GIMPACT_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_EMPTY_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_STATIC_PLANE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CUSTOM_CONCAVE_SHAPE_TYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_SDF_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CONCAVE_SHAPES_END_HERE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_COMPOUND_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_SOFTBODY_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_HFFLUID_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_INVALID_SHAPE_PROXYTYPE_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_MAX_BROADPHASE_COLLISION_TYPES_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_DefaultFilter_btBroadphaseProxy_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_StaticFilter_btBroadphaseProxy_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_KinematicFilter_btBroadphaseProxy_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_DebrisFilter_btBroadphaseProxy_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_SensorTrigger_btBroadphaseProxy_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_CharacterFilter_btBroadphaseProxy_mbt_702ac83b51919141(void);
+extern swig_intgo _wrap_AllFilter_btBroadphaseProxy_mbt_702ac83b51919141(void);
+extern void _wrap_btBroadphaseProxy_m_clientObject_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBroadphaseProxy_m_clientObject_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBroadphaseProxy_m_collisionFilterGroup_set_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btBroadphaseProxy_m_collisionFilterGroup_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBroadphaseProxy_m_collisionFilterMask_set_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btBroadphaseProxy_m_collisionFilterMask_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBroadphaseProxy_m_uniqueId_set_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btBroadphaseProxy_m_uniqueId_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBroadphaseProxy_m_aabbMin_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBroadphaseProxy_m_aabbMin_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBroadphaseProxy_m_aabbMax_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBroadphaseProxy_m_aabbMax_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btBroadphaseProxy_getUid_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btBroadphaseProxy__SWIG_0_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btBroadphaseProxy__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, swig_intgo arg4, swig_intgo arg5);
+extern _Bool _wrap_btBroadphaseProxy_isPolyhedral_mbt_702ac83b51919141(swig_intgo arg1);
+extern _Bool _wrap_btBroadphaseProxy_isConvex_mbt_702ac83b51919141(swig_intgo arg1);
+extern _Bool _wrap_btBroadphaseProxy_isNonMoving_mbt_702ac83b51919141(swig_intgo arg1);
+extern _Bool _wrap_btBroadphaseProxy_isConcave_mbt_702ac83b51919141(swig_intgo arg1);
+extern _Bool _wrap_btBroadphaseProxy_isCompound_mbt_702ac83b51919141(swig_intgo arg1);
+extern _Bool _wrap_btBroadphaseProxy_isSoftBody_mbt_702ac83b51919141(swig_intgo arg1);
+extern _Bool _wrap_btBroadphaseProxy_isInfinite_mbt_702ac83b51919141(swig_intgo arg1);
+extern _Bool _wrap_btBroadphaseProxy_isConvex2d_mbt_702ac83b51919141(swig_intgo arg1);
+extern void _wrap_delete_btBroadphaseProxy_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btBroadphasePair__SWIG_0_mbt_702ac83b51919141(void);
+extern uintptr_t _wrap_new_btBroadphasePair__SWIG_1_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btBroadphasePair_m_pProxy0_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBroadphasePair_m_pProxy0_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBroadphasePair_m_pProxy1_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBroadphasePair_m_pProxy1_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBroadphasePair_m_algorithm_set_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btBroadphasePair_m_algorithm_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_delete_btBroadphasePair_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btBroadphasePairSortPredicate_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btBroadphasePairSortPredicate_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_delete_btCollisionShape_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btCollisionShape_getAabb_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, uintptr_t arg4);
+extern void _wrap_btCollisionShape_getBoundingSphere_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, swig_voidp arg3);
+extern float _wrap_btCollisionShape_getAngularMotionDisc_mbt_702ac83b51919141(uintptr_t arg1);
+extern float _wrap_btCollisionShape_getContactBreakingThreshold_mbt_702ac83b51919141(uintptr_t arg1, float arg2);
+extern void _wrap_btCollisionShape_calculateTemporalAabb_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, uintptr_t arg4, float arg5, uintptr_t arg6, uintptr_t arg7);
+extern _Bool _wrap_btCollisionShape_isPolyhedral_mbt_702ac83b51919141(uintptr_t arg1);
+extern _Bool _wrap_btCollisionShape_isConvex2d_mbt_702ac83b51919141(uintptr_t arg1);
+extern _Bool _wrap_btCollisionShape_isConvex_mbt_702ac83b51919141(uintptr_t arg1);
+extern _Bool _wrap_btCollisionShape_isNonMoving_mbt_702ac83b51919141(uintptr_t arg1);
+extern _Bool _wrap_btCollisionShape_isConcave_mbt_702ac83b51919141(uintptr_t arg1);
+extern _Bool _wrap_btCollisionShape_isCompound_mbt_702ac83b51919141(uintptr_t arg1);
+extern _Bool _wrap_btCollisionShape_isSoftBody_mbt_702ac83b51919141(uintptr_t arg1);
+extern _Bool _wrap_btCollisionShape_isInfinite_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btCollisionShape_setLocalScaling_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btCollisionShape_getLocalScaling_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btCollisionShape_calculateLocalInertia_mbt_702ac83b51919141(uintptr_t arg1, float arg2, uintptr_t arg3);
+extern swig_type_42 _wrap_btCollisionShape_getName_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btCollisionShape_getShapeType_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_btCollisionShape_getAnisotropicRollingFrictionDirection_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btCollisionShape_setMargin_mbt_702ac83b51919141(uintptr_t arg1, float arg2);
+extern float _wrap_btCollisionShape_getMargin_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btCollisionShape_setUserPointer_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_btCollisionShape_getUserPointer_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btCollisionShape_setUserIndex_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btCollisionShape_getUserIndex_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btCollisionShape_setUserIndex2_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btCollisionShape_getUserIndex2_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_intgo _wrap_btCollisionShape_calculateSerializeBufferSize_mbt_702ac83b51919141(uintptr_t arg1);
+extern swig_type_43 _wrap_btCollisionShape_serialize_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
+extern void _wrap_btCollisionShape_serializeSingleShape_mbt_702ac83b51919141(uintptr_t arg1, uintptr_t arg2);
+extern void _wrap_btCollisionShapeData_m_name_set_mbt_702ac83b51919141(uintptr_t arg1, swig_type_44 arg2);
+extern swig_type_45 _wrap_btCollisionShapeData_m_name_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btCollisionShapeData_m_shapeType_set_mbt_702ac83b51919141(uintptr_t arg1, swig_intgo arg2);
+extern swig_intgo _wrap_btCollisionShapeData_m_shapeType_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btCollisionShapeData_m_padding_set_mbt_702ac83b51919141(uintptr_t arg1, swig_type_46 arg2);
+extern swig_type_47 _wrap_btCollisionShapeData_m_padding_get_mbt_702ac83b51919141(uintptr_t arg1);
+extern uintptr_t _wrap_new_btCollisionShapeData_mbt_702ac83b51919141(void);
+extern void _wrap_delete_btCollisionShapeData_mbt_702ac83b51919141(uintptr_t arg1);
+extern void _wrap_btBulletCollisionProbe_mbt_702ac83b51919141(void);
 #undef intgo
 */
 import "C"
@@ -545,15 +731,38 @@ func getSwigcptr(v interface{ Swigcptr() uintptr }) uintptr {
 
 type _ sync.Mutex
 
+//export cgo_panic__mbt_702ac83b51919141
+func cgo_panic__mbt_702ac83b51919141(p *byte) {
+	s := (*[1024]byte)(unsafe.Pointer(p))[:]
+	for i, b := range s {
+		if b == 0 {
+			panic(string(s[:i]))
+		}
+	}
+	panic(string(s))
+}
+
+type swig_gostring struct {
+	p uintptr
+	n int
+}
+
+func swigCopyString(s string) string {
+	p := *(*swig_gostring)(unsafe.Pointer(&s))
+	r := string((*[0x7fffffff]byte)(unsafe.Pointer(p.p))[:p.n])
+	Swig_free(p.p)
+	return r
+}
+
 func Swig_free(arg1 uintptr) {
 	_swig_i_0 := arg1
-	C._wrap_Swig_free_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_Swig_free_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func Swig_malloc(arg1 int) (_swig_ret uintptr) {
 	var swig_r uintptr
 	_swig_i_0 := arg1
-	swig_r = (uintptr)(C._wrap_Swig_malloc_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0)))
+	swig_r = (uintptr)(C._wrap_Swig_malloc_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
@@ -561,13 +770,13 @@ const BT_BULLET_VERSION int = 326
 
 func BtGetVersion() (_swig_ret int) {
 	var swig_r int
-	swig_r = (int)(C._wrap_btGetVersion_mbt_745dded929ebaf09())
+	swig_r = (int)(C._wrap_btGetVersion_mbt_702ac83b51919141())
 	return swig_r
 }
 
 func BtIsDoublePrecision() (_swig_ret int) {
 	var swig_r int
-	swig_r = (int)(C._wrap_btIsDoublePrecision_mbt_745dded929ebaf09())
+	swig_r = (int)(C._wrap_btIsDoublePrecision_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -585,13 +794,13 @@ func (p SwigcptrBtInfMaskConverter) SwigIsBtInfMaskConverter() {
 func NewBtInfMaskConverter__SWIG_0(arg1 int) (_swig_ret BtInfMaskConverter) {
 	var swig_r BtInfMaskConverter
 	_swig_i_0 := arg1
-	swig_r = (BtInfMaskConverter)(SwigcptrBtInfMaskConverter(C._wrap_new_btInfMaskConverter__SWIG_0_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0))))
+	swig_r = (BtInfMaskConverter)(SwigcptrBtInfMaskConverter(C._wrap_new_btInfMaskConverter__SWIG_0_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0))))
 	return swig_r
 }
 
 func NewBtInfMaskConverter__SWIG_1() (_swig_ret BtInfMaskConverter) {
 	var swig_r BtInfMaskConverter
-	swig_r = (BtInfMaskConverter)(SwigcptrBtInfMaskConverter(C._wrap_new_btInfMaskConverter__SWIG_1_mbt_745dded929ebaf09()))
+	swig_r = (BtInfMaskConverter)(SwigcptrBtInfMaskConverter(C._wrap_new_btInfMaskConverter__SWIG_1_mbt_702ac83b51919141()))
 	return swig_r
 }
 
@@ -608,7 +817,7 @@ func NewBtInfMaskConverter(a ...interface{}) BtInfMaskConverter {
 
 func DeleteBtInfMaskConverter(arg1 BtInfMaskConverter) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btInfMaskConverter_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btInfMaskConverter_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtInfMaskConverter interface {
@@ -618,74 +827,74 @@ type BtInfMaskConverter interface {
 
 func SetBtInfinityMask(arg1 BtInfMaskConverter) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btInfinityMask_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_btInfinityMask_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func GetBtInfinityMask() (_swig_ret BtInfMaskConverter) {
 	var swig_r BtInfMaskConverter
-	swig_r = (BtInfMaskConverter)(SwigcptrBtInfMaskConverter(C._wrap_btInfinityMask_get_mbt_745dded929ebaf09()))
+	swig_r = (BtInfMaskConverter)(SwigcptrBtInfMaskConverter(C._wrap_btInfinityMask_get_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func BtGetInfinityMask() (_swig_ret int) {
 	var swig_r int
-	swig_r = (int)(C._wrap_btGetInfinityMask_mbt_745dded929ebaf09())
+	swig_r = (int)(C._wrap_btGetInfinityMask_mbt_702ac83b51919141())
 	return swig_r
 }
 
 func BtSqrt(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btSqrt_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btSqrt_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
 func BtFabs(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btFabs_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btFabs_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
 func BtCos(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btCos_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btCos_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
 func BtSin(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btSin_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btSin_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
 func BtTan(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btTan_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btTan_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
 func BtAcos(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btAcos_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btAcos_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
 func BtAsin(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btAsin_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btAsin_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
 func BtAtan(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btAtan_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btAtan_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
@@ -693,21 +902,21 @@ func BtAtan2(arg1 float32, arg2 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	swig_r = (float32)(C._wrap_btAtan2_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btAtan2_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1)))
 	return swig_r
 }
 
 func BtExp(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btExp_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btExp_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
 func BtLog(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btLog_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btLog_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
@@ -715,7 +924,7 @@ func BtPow(arg1 float32, arg2 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	swig_r = (float32)(C._wrap_btPow_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btPow_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1)))
 	return swig_r
 }
 
@@ -723,7 +932,7 @@ func BtFmod(arg1 float32, arg2 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	swig_r = (float32)(C._wrap_btFmod_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btFmod_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1)))
 	return swig_r
 }
 
@@ -736,14 +945,14 @@ func BtAtan2Fast(arg1 float32, arg2 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	swig_r = (float32)(C._wrap_btAtan2Fast_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btAtan2Fast_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1)))
 	return swig_r
 }
 
 func BtFuzzyZero(arg1 float32) (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
-	swig_r = (bool)(C._wrap_btFuzzyZero_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (bool)(C._wrap_btFuzzyZero_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
@@ -751,7 +960,7 @@ func BtEqual(arg1 float32, arg2 float32) (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	swig_r = (bool)(C._wrap_btEqual_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1)))
+	swig_r = (bool)(C._wrap_btEqual_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1)))
 	return swig_r
 }
 
@@ -759,28 +968,28 @@ func BtGreaterEqual(arg1 float32, arg2 float32) (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	swig_r = (bool)(C._wrap_btGreaterEqual_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1)))
+	swig_r = (bool)(C._wrap_btGreaterEqual_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1)))
 	return swig_r
 }
 
 func BtIsNegative(arg1 float32) (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btIsNegative_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (int)(C._wrap_btIsNegative_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
 func BtRadians(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btRadians_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btRadians_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
 func BtDegrees(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btDegrees_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btDegrees_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
@@ -789,13 +998,13 @@ func BtFsel(arg1 float32, arg2 float32, arg3 float32) (_swig_ret float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
-	swig_r = (float32)(C._wrap_btFsel_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2)))
+	swig_r = (float32)(C._wrap_btFsel_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2)))
 	return swig_r
 }
 
 func BtMachineIsLittleEndian() (_swig_ret bool) {
 	var swig_r bool
-	swig_r = (bool)(C._wrap_btMachineIsLittleEndian_mbt_745dded929ebaf09())
+	swig_r = (bool)(C._wrap_btMachineIsLittleEndian_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -804,7 +1013,7 @@ func BtSelect__SWIG_0(arg1 uint, arg2 uint, arg3 uint) (_swig_ret uint) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
-	swig_r = (uint)(C._wrap_btSelect__SWIG_0_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0), C.swig_intgo(_swig_i_1), C.swig_intgo(_swig_i_2)))
+	swig_r = (uint)(C._wrap_btSelect__SWIG_0_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0), C.swig_intgo(_swig_i_1), C.swig_intgo(_swig_i_2)))
 	return swig_r
 }
 
@@ -813,7 +1022,7 @@ func BtSelect__SWIG_1(arg1 uint, arg2 int, arg3 int) (_swig_ret int) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
-	swig_r = (int)(C._wrap_btSelect__SWIG_1_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0), C.swig_intgo(_swig_i_1), C.swig_intgo(_swig_i_2)))
+	swig_r = (int)(C._wrap_btSelect__SWIG_1_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0), C.swig_intgo(_swig_i_1), C.swig_intgo(_swig_i_2)))
 	return swig_r
 }
 
@@ -822,7 +1031,7 @@ func BtSelect__SWIG_2(arg1 uint, arg2 float32, arg3 float32) (_swig_ret float32)
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
-	swig_r = (float32)(C._wrap_btSelect__SWIG_2_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2)))
+	swig_r = (float32)(C._wrap_btSelect__SWIG_2_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2)))
 	return swig_r
 }
 
@@ -857,28 +1066,28 @@ check_2:
 func BtSwapEndian__SWIG_0(arg1 uint) (_swig_ret uint) {
 	var swig_r uint
 	_swig_i_0 := arg1
-	swig_r = (uint)(C._wrap_btSwapEndian__SWIG_0_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0)))
+	swig_r = (uint)(C._wrap_btSwapEndian__SWIG_0_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
 func BtSwapEndian__SWIG_1(arg1 uint16) (_swig_ret uint16) {
 	var swig_r uint16
 	_swig_i_0 := arg1
-	swig_r = (uint16)(C._wrap_btSwapEndian__SWIG_1_mbt_745dded929ebaf09(C.short(_swig_i_0)))
+	swig_r = (uint16)(C._wrap_btSwapEndian__SWIG_1_mbt_702ac83b51919141(C.short(_swig_i_0)))
 	return swig_r
 }
 
 func BtSwapEndian__SWIG_2(arg1 int) (_swig_ret uint) {
 	var swig_r uint
 	_swig_i_0 := arg1
-	swig_r = (uint)(C._wrap_btSwapEndian__SWIG_2_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0)))
+	swig_r = (uint)(C._wrap_btSwapEndian__SWIG_2_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
 func BtSwapEndian__SWIG_3(arg1 int16) (_swig_ret uint16) {
 	var swig_r uint16
 	_swig_i_0 := arg1
-	swig_r = (uint16)(C._wrap_btSwapEndian__SWIG_3_mbt_745dded929ebaf09(C.short(_swig_i_0)))
+	swig_r = (uint16)(C._wrap_btSwapEndian__SWIG_3_mbt_702ac83b51919141(C.short(_swig_i_0)))
 	return swig_r
 }
 
@@ -914,27 +1123,27 @@ check_3:
 func BtSwapEndianFloat(arg1 float32) (_swig_ret uint) {
 	var swig_r uint
 	_swig_i_0 := arg1
-	swig_r = (uint)(C._wrap_btSwapEndianFloat_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (uint)(C._wrap_btSwapEndianFloat_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
 func BtUnswapEndianFloat(arg1 uint) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btUnswapEndianFloat_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btUnswapEndianFloat_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
 func BtSwapEndianDouble(arg1 float64, arg2 *byte) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btSwapEndianDouble_mbt_745dded929ebaf09(C.double(_swig_i_0), C.swig_voidp(_swig_i_1))
+	C._wrap_btSwapEndianDouble_mbt_702ac83b51919141(C.double(_swig_i_0), C.swig_voidp(_swig_i_1))
 }
 
 func BtUnswapEndianDouble(arg1 *byte) (_swig_ret float64) {
 	var swig_r float64
 	_swig_i_0 := arg1
-	swig_r = (float64)(C._wrap_btUnswapEndianDouble_mbt_745dded929ebaf09(C.swig_voidp(_swig_i_0)))
+	swig_r = (float64)(C._wrap_btUnswapEndianDouble_mbt_702ac83b51919141(C.swig_voidp(_swig_i_0)))
 	return swig_r
 }
 
@@ -943,14 +1152,14 @@ func BtLargeDot(arg1 *float32, arg2 *float32, arg3 int) (_swig_ret float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
-	swig_r = (float32)(C._wrap_btLargeDot_mbt_745dded929ebaf09(C.swig_voidp(_swig_i_0), C.swig_voidp(_swig_i_1), C.swig_intgo(_swig_i_2)))
+	swig_r = (float32)(C._wrap_btLargeDot_mbt_702ac83b51919141(C.swig_voidp(_swig_i_0), C.swig_voidp(_swig_i_1), C.swig_intgo(_swig_i_2)))
 	return swig_r
 }
 
 func BtNormalizeAngle(arg1 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btNormalizeAngle_mbt_745dded929ebaf09(C.float(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btNormalizeAngle_mbt_702ac83b51919141(C.float(_swig_i_0)))
 	return swig_r
 }
 
@@ -966,33 +1175,33 @@ func (p SwigcptrBtTypedObject) SwigIsBtTypedObject() {
 func NewBtTypedObject(arg1 int) (_swig_ret BtTypedObject) {
 	var swig_r BtTypedObject
 	_swig_i_0 := arg1
-	swig_r = (BtTypedObject)(SwigcptrBtTypedObject(C._wrap_new_btTypedObject_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0))))
+	swig_r = (BtTypedObject)(SwigcptrBtTypedObject(C._wrap_new_btTypedObject_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtTypedObject) SetM_objectType(arg2 int) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btTypedObject_m_objectType_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+	C._wrap_btTypedObject_m_objectType_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTypedObject) GetM_objectType() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btTypedObject_m_objectType_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btTypedObject_m_objectType_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtTypedObject) GetObjectType() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btTypedObject_getObjectType_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btTypedObject_getObjectType_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func DeleteBtTypedObject(arg1 BtTypedObject) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btTypedObject_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btTypedObject_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtTypedObject interface {
@@ -1007,58 +1216,58 @@ func BtAlignedAllocInternal(arg1 int64, arg2 int) (_swig_ret uintptr) {
 	var swig_r uintptr
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	swig_r = (uintptr)(C._wrap_btAlignedAllocInternal_mbt_745dded929ebaf09(C.swig_type_1(_swig_i_0), C.swig_intgo(_swig_i_1)))
+	swig_r = (uintptr)(C._wrap_btAlignedAllocInternal_mbt_702ac83b51919141(C.swig_type_1(_swig_i_0), C.swig_intgo(_swig_i_1)))
 	return swig_r
 }
 
 func BtAlignedFreeInternal(arg1 uintptr) {
 	_swig_i_0 := arg1
-	C._wrap_btAlignedFreeInternal_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_btAlignedFreeInternal_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func BtAlignedAllocSetCustom(arg1 _swig_fnptr, arg2 _swig_fnptr) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btAlignedAllocSetCustom_mbt_745dded929ebaf09(C.swig_type_2(_swig_i_0), C.swig_type_3(_swig_i_1))
+	C._wrap_btAlignedAllocSetCustom_mbt_702ac83b51919141(C.swig_type_2(_swig_i_0), C.swig_type_3(_swig_i_1))
 }
 
 func BtAlignedAllocSetCustomAligned(arg1 _swig_fnptr, arg2 _swig_fnptr) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btAlignedAllocSetCustomAligned_mbt_745dded929ebaf09(C.swig_type_4(_swig_i_0), C.swig_type_5(_swig_i_1))
+	C._wrap_btAlignedAllocSetCustomAligned_mbt_702ac83b51919141(C.swig_type_4(_swig_i_0), C.swig_type_5(_swig_i_1))
 }
 
 func BtAllocDefault(arg1 int64) (_swig_ret uintptr) {
 	var swig_r uintptr
 	_swig_i_0 := arg1
-	swig_r = (uintptr)(C._wrap_btAllocDefault_mbt_745dded929ebaf09(C.swig_type_6(_swig_i_0)))
+	swig_r = (uintptr)(C._wrap_btAllocDefault_mbt_702ac83b51919141(C.swig_type_6(_swig_i_0)))
 	return swig_r
 }
 
 func BtFreeDefault(arg1 uintptr) {
 	_swig_i_0 := arg1
-	C._wrap_btFreeDefault_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_btFreeDefault_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func SetSAllocFunc(arg1 _swig_fnptr) {
 	_swig_i_0 := arg1
-	C._wrap_sAllocFunc_set_mbt_745dded929ebaf09(C.swig_type_7(_swig_i_0))
+	C._wrap_sAllocFunc_set_mbt_702ac83b51919141(C.swig_type_7(_swig_i_0))
 }
 
 func GetSAllocFunc() (_swig_ret _swig_fnptr) {
 	var swig_r _swig_fnptr
-	swig_r = (_swig_fnptr)(C._wrap_sAllocFunc_get_mbt_745dded929ebaf09())
+	swig_r = (_swig_fnptr)(C._wrap_sAllocFunc_get_mbt_702ac83b51919141())
 	return swig_r
 }
 
 func SetSFreeFunc(arg1 _swig_fnptr) {
 	_swig_i_0 := arg1
-	C._wrap_sFreeFunc_set_mbt_745dded929ebaf09(C.swig_type_9(_swig_i_0))
+	C._wrap_sFreeFunc_set_mbt_702ac83b51919141(C.swig_type_9(_swig_i_0))
 }
 
 func GetSFreeFunc() (_swig_ret _swig_fnptr) {
 	var swig_r _swig_fnptr
-	swig_r = (_swig_fnptr)(C._wrap_sFreeFunc_get_mbt_745dded929ebaf09())
+	swig_r = (_swig_fnptr)(C._wrap_sFreeFunc_get_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -1066,34 +1275,34 @@ func BtAlignedAllocDefault(arg1 int64, arg2 int) (_swig_ret uintptr) {
 	var swig_r uintptr
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	swig_r = (uintptr)(C._wrap_btAlignedAllocDefault_mbt_745dded929ebaf09(C.swig_type_11(_swig_i_0), C.swig_intgo(_swig_i_1)))
+	swig_r = (uintptr)(C._wrap_btAlignedAllocDefault_mbt_702ac83b51919141(C.swig_type_11(_swig_i_0), C.swig_intgo(_swig_i_1)))
 	return swig_r
 }
 
 func BtAlignedFreeDefault(arg1 uintptr) {
 	_swig_i_0 := arg1
-	C._wrap_btAlignedFreeDefault_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_btAlignedFreeDefault_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func SetSAlignedAllocFunc(arg1 _swig_fnptr) {
 	_swig_i_0 := arg1
-	C._wrap_sAlignedAllocFunc_set_mbt_745dded929ebaf09(C.swig_type_12(_swig_i_0))
+	C._wrap_sAlignedAllocFunc_set_mbt_702ac83b51919141(C.swig_type_12(_swig_i_0))
 }
 
 func GetSAlignedAllocFunc() (_swig_ret _swig_fnptr) {
 	var swig_r _swig_fnptr
-	swig_r = (_swig_fnptr)(C._wrap_sAlignedAllocFunc_get_mbt_745dded929ebaf09())
+	swig_r = (_swig_fnptr)(C._wrap_sAlignedAllocFunc_get_mbt_702ac83b51919141())
 	return swig_r
 }
 
 func SetSAlignedFreeFunc(arg1 _swig_fnptr) {
 	_swig_i_0 := arg1
-	C._wrap_sAlignedFreeFunc_set_mbt_745dded929ebaf09(C.swig_type_14(_swig_i_0))
+	C._wrap_sAlignedFreeFunc_set_mbt_702ac83b51919141(C.swig_type_14(_swig_i_0))
 }
 
 func GetSAlignedFreeFunc() (_swig_ret _swig_fnptr) {
 	var swig_r _swig_fnptr
-	swig_r = (_swig_fnptr)(C._wrap_sAlignedFreeFunc_get_mbt_745dded929ebaf09())
+	swig_r = (_swig_fnptr)(C._wrap_sAlignedFreeFunc_get_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -1111,19 +1320,19 @@ func (p SwigcptrBtVector3) SwigIsBtVector3() {
 func (arg1 SwigcptrBtVector3) SetM_floats(arg2 *float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btVector3_m_floats_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
+	C._wrap_btVector3_m_floats_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) GetM_floats() (_swig_ret *float32) {
 	var swig_r *float32
 	_swig_i_0 := arg1
-	swig_r = (*float32)(C._wrap_btVector3_m_floats_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (*float32)(C._wrap_btVector3_m_floats_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func NewBtVector3__SWIG_0() (_swig_ret BtVector3) {
 	var swig_r BtVector3
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_new_btVector3__SWIG_0_mbt_745dded929ebaf09()))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_new_btVector3__SWIG_0_mbt_702ac83b51919141()))
 	return swig_r
 }
 
@@ -1132,7 +1341,7 @@ func NewBtVector3__SWIG_1(arg1 float32, arg2 float32, arg3 float32) (_swig_ret B
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_new_btVector3__SWIG_1_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_new_btVector3__SWIG_1_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2))))
 	return swig_r
 }
 
@@ -1151,35 +1360,35 @@ func (arg1 SwigcptrBtVector3) Dot(arg2 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btVector3_dot_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btVector3_dot_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) Length2() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btVector3_length2_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector3_length2_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) Length() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btVector3_length_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector3_length_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) Norm() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btVector3_norm_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector3_norm_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) SafeNorm() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btVector3_safeNorm_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector3_safeNorm_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
@@ -1187,7 +1396,7 @@ func (arg1 SwigcptrBtVector3) Distance2(arg2 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btVector3_distance2_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btVector3_distance2_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
@@ -1195,28 +1404,28 @@ func (arg1 SwigcptrBtVector3) Distance(arg2 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btVector3_distance_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btVector3_distance_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) SafeNormalize() (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_safeNormalize_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_safeNormalize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) Normalize() (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_normalize_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_normalize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) Normalized() (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_normalized_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_normalized_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -1225,7 +1434,7 @@ func (arg1 SwigcptrBtVector3) Rotate(arg2 BtVector3, arg3 float32) (_swig_ret Bt
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := arg3
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_rotate_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_rotate_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))))
 	return swig_r
 }
 
@@ -1233,14 +1442,14 @@ func (arg1 SwigcptrBtVector3) Angle(arg2 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btVector3_angle_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btVector3_angle_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) Absolute() (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_absolute_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_absolute_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -1248,7 +1457,7 @@ func (arg1 SwigcptrBtVector3) Cross(arg2 BtVector3) (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_cross_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_cross_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
@@ -1257,35 +1466,35 @@ func (arg1 SwigcptrBtVector3) Triple(arg2 BtVector3, arg3 BtVector3) (_swig_ret 
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := getSwigcptr(arg3)
-	swig_r = (float32)(C._wrap_btVector3_triple_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2)))
+	swig_r = (float32)(C._wrap_btVector3_triple_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) MinAxis() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btVector3_minAxis_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btVector3_minAxis_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) MaxAxis() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btVector3_maxAxis_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btVector3_maxAxis_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) FurthestAxis() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btVector3_furthestAxis_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btVector3_furthestAxis_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) ClosestAxis() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btVector3_closestAxis_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btVector3_closestAxis_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
@@ -1294,7 +1503,7 @@ func (arg1 SwigcptrBtVector3) SetInterpolate3(arg2 BtVector3, arg3 BtVector3, ar
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := getSwigcptr(arg3)
 	_swig_i_3 := arg4
-	C._wrap_btVector3_setInterpolate3_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.float(_swig_i_3))
+	C._wrap_btVector3_setInterpolate3_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.float(_swig_i_3))
 }
 
 func (arg1 SwigcptrBtVector3) Lerp(arg2 BtVector3, arg3 float32) (_swig_ret BtVector3) {
@@ -1302,93 +1511,93 @@ func (arg1 SwigcptrBtVector3) Lerp(arg2 BtVector3, arg3 float32) (_swig_ret BtVe
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := arg3
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_lerp_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_lerp_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) GetX() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btVector3_getX_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector3_getX_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) GetY() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btVector3_getY_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector3_getY_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) GetZ() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btVector3_getZ_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector3_getZ_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) SetX(arg2 float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btVector3_setX_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
+	C._wrap_btVector3_setX_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) SetY(arg2 float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btVector3_setY_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
+	C._wrap_btVector3_setY_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) SetZ(arg2 float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btVector3_setZ_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
+	C._wrap_btVector3_setZ_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) SetW(arg2 float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btVector3_setW_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
+	C._wrap_btVector3_setW_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) X() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btVector3_x_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector3_x_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) Y() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btVector3_y_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector3_y_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) Z() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btVector3_z_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector3_z_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) W() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btVector3_w_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector3_w_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) SetMax(arg2 BtVector3) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btVector3_setMax_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btVector3_setMax_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) SetMin(arg2 BtVector3) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btVector3_setMin_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btVector3_setMin_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) SetValue(arg2 float32, arg3 float32, arg4 float32) {
@@ -1396,7 +1605,7 @@ func (arg1 SwigcptrBtVector3) SetValue(arg2 float32, arg3 float32, arg4 float32)
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	C._wrap_btVector3_setValue_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
+	C._wrap_btVector3_setValue_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
 }
 
 func (arg1 SwigcptrBtVector3) GetSkewSymmetricMatrix(arg2 BtVector3, arg3 BtVector3, arg4 BtVector3) {
@@ -1404,44 +1613,44 @@ func (arg1 SwigcptrBtVector3) GetSkewSymmetricMatrix(arg2 BtVector3, arg3 BtVect
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := getSwigcptr(arg3)
 	_swig_i_3 := getSwigcptr(arg4)
-	C._wrap_btVector3_getSkewSymmetricMatrix_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.uintptr_t(_swig_i_3))
+	C._wrap_btVector3_getSkewSymmetricMatrix_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.uintptr_t(_swig_i_3))
 }
 
 func (arg1 SwigcptrBtVector3) SetZero() {
 	_swig_i_0 := arg1
-	C._wrap_btVector3_setZero_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_btVector3_setZero_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func (arg1 SwigcptrBtVector3) IsZero() (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
-	swig_r = (bool)(C._wrap_btVector3_isZero_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (bool)(C._wrap_btVector3_isZero_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) FuzzyZero() (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
-	swig_r = (bool)(C._wrap_btVector3_fuzzyZero_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (bool)(C._wrap_btVector3_fuzzyZero_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector3) Serialize(arg2 BtVector3FloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btVector3_serialize_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btVector3_serialize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) DeSerialize__SWIG_0(arg2 BtVector3DoubleData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btVector3_deSerialize__SWIG_0_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btVector3_deSerialize__SWIG_0_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) DeSerialize__SWIG_1(arg2 BtVector3FloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btVector3_deSerialize__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btVector3_deSerialize__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (p SwigcptrBtVector3) DeSerialize(a ...interface{}) {
@@ -1464,25 +1673,25 @@ check_1:
 func (arg1 SwigcptrBtVector3) SerializeFloat(arg2 BtVector3FloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btVector3_serializeFloat_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btVector3_serializeFloat_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) DeSerializeFloat(arg2 BtVector3FloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btVector3_deSerializeFloat_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btVector3_deSerializeFloat_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) SerializeDouble(arg2 BtVector3DoubleData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btVector3_serializeDouble_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btVector3_serializeDouble_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) DeSerializeDouble(arg2 BtVector3DoubleData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btVector3_deSerializeDouble_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btVector3_deSerializeDouble_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3) MaxDot(arg2 BtVector3, arg3 int64, arg4 *float32) (_swig_ret int64) {
@@ -1491,7 +1700,7 @@ func (arg1 SwigcptrBtVector3) MaxDot(arg2 BtVector3, arg3 int64, arg4 *float32) 
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	swig_r = (int64)(C._wrap_btVector3_maxDot_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.swig_type_17(_swig_i_2), C.swig_voidp(_swig_i_3)))
+	swig_r = (int64)(C._wrap_btVector3_maxDot_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.swig_type_17(_swig_i_2), C.swig_voidp(_swig_i_3)))
 	return swig_r
 }
 
@@ -1501,7 +1710,7 @@ func (arg1 SwigcptrBtVector3) MinDot(arg2 BtVector3, arg3 int64, arg4 *float32) 
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	swig_r = (int64)(C._wrap_btVector3_minDot_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.swig_type_19(_swig_i_2), C.swig_voidp(_swig_i_3)))
+	swig_r = (int64)(C._wrap_btVector3_minDot_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.swig_type_19(_swig_i_2), C.swig_voidp(_swig_i_3)))
 	return swig_r
 }
 
@@ -1511,13 +1720,13 @@ func (arg1 SwigcptrBtVector3) Dot3(arg2 BtVector3, arg3 BtVector3, arg4 BtVector
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := getSwigcptr(arg3)
 	_swig_i_3 := getSwigcptr(arg4)
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_dot3_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.uintptr_t(_swig_i_3))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector3_dot3_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.uintptr_t(_swig_i_3))))
 	return swig_r
 }
 
 func DeleteBtVector3(arg1 BtVector3) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btVector3_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btVector3_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtVector3 interface {
@@ -1579,7 +1788,7 @@ func BtDot(arg1 BtVector3, arg2 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btDot_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btDot_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
@@ -1587,7 +1796,7 @@ func BtDistance2(arg1 BtVector3, arg2 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btDistance2_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btDistance2_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
@@ -1595,7 +1804,7 @@ func BtDistance(arg1 BtVector3, arg2 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btDistance_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btDistance_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
@@ -1603,7 +1812,7 @@ func BtAngle__SWIG_0(arg1 BtVector3, arg2 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btAngle__SWIG_0_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btAngle__SWIG_0_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
@@ -1611,7 +1820,7 @@ func BtCross(arg1 BtVector3, arg2 BtVector3) (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btCross_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btCross_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
@@ -1620,7 +1829,7 @@ func BtTriple(arg1 BtVector3, arg2 BtVector3, arg3 BtVector3) (_swig_ret float32
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := getSwigcptr(arg3)
-	swig_r = (float32)(C._wrap_btTriple_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2)))
+	swig_r = (float32)(C._wrap_btTriple_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2)))
 	return swig_r
 }
 
@@ -1629,7 +1838,7 @@ func Lerp(arg1 BtVector3, arg2 BtVector3, arg3 float32) (_swig_ret BtVector3) {
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := arg3
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_lerp_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_lerp_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))))
 	return swig_r
 }
 
@@ -1644,7 +1853,7 @@ func (p SwigcptrBtVector4) SwigIsBtVector4() {
 
 func NewBtVector4__SWIG_0() (_swig_ret BtVector4) {
 	var swig_r BtVector4
-	swig_r = (BtVector4)(SwigcptrBtVector4(C._wrap_new_btVector4__SWIG_0_mbt_745dded929ebaf09()))
+	swig_r = (BtVector4)(SwigcptrBtVector4(C._wrap_new_btVector4__SWIG_0_mbt_702ac83b51919141()))
 	return swig_r
 }
 
@@ -1654,7 +1863,7 @@ func NewBtVector4__SWIG_1(arg1 float32, arg2 float32, arg3 float32, arg4 float32
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	swig_r = (BtVector4)(SwigcptrBtVector4(C._wrap_new_btVector4__SWIG_1_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))))
+	swig_r = (BtVector4)(SwigcptrBtVector4(C._wrap_new_btVector4__SWIG_1_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))))
 	return swig_r
 }
 
@@ -1672,35 +1881,35 @@ func NewBtVector4(a ...interface{}) BtVector4 {
 func (arg1 SwigcptrBtVector4) Absolute4() (_swig_ret BtVector4) {
 	var swig_r BtVector4
 	_swig_i_0 := arg1
-	swig_r = (BtVector4)(SwigcptrBtVector4(C._wrap_btVector4_absolute4_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector4)(SwigcptrBtVector4(C._wrap_btVector4_absolute4_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector4) GetW() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btVector4_getW_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector4_getW_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector4) MaxAxis4() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btVector4_maxAxis4_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btVector4_maxAxis4_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector4) MinAxis4() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btVector4_minAxis4_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btVector4_minAxis4_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtVector4) ClosestAxis4() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btVector4_closestAxis4_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btVector4_closestAxis4_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
@@ -1710,22 +1919,22 @@ func (arg1 SwigcptrBtVector4) SetValue(arg2 float32, arg3 float32, arg4 float32,
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
 	_swig_i_4 := arg5
-	C._wrap_btVector4_setValue_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3), C.float(_swig_i_4))
+	C._wrap_btVector4_setValue_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3), C.float(_swig_i_4))
 }
 
 func DeleteBtVector4(arg1 BtVector4) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btVector4_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btVector4_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) SetM_floats(arg1 *float32) {
 	_swig_i_0 := arg1
-	C._wrap_SetbtVector4_M_floats_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.swig_voidp(_swig_i_0))
+	C._wrap_SetbtVector4_M_floats_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.swig_voidp(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) GetM_floats() (_swig_ret *float32) {
 	var swig_r *float32
-	swig_r = (*float32)(C._wrap_GetbtVector4_M_floats_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (*float32)(C._wrap_GetbtVector4_M_floats_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
@@ -1736,63 +1945,63 @@ func (p SwigcptrBtVector4) Operator_Sm__Se_(a ...interface{}) {
 func (_swig_base SwigcptrBtVector4) Dot(arg1 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (float32)(C._wrap_btVector4_dot_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector4_dot_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Length2() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btVector4_length2_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btVector4_length2_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Length() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btVector4_length_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btVector4_length_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Norm() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btVector4_norm_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btVector4_norm_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) SafeNorm() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btVector4_safeNorm_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btVector4_safeNorm_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Distance2(arg1 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (float32)(C._wrap_btVector4_distance2_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector4_distance2_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Distance(arg1 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (float32)(C._wrap_btVector4_distance_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector4_distance_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) SafeNormalize() (_swig_ret BtVector3) {
 	var swig_r BtVector3
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_safeNormalize_mbt_745dded929ebaf09(C.uintptr_t(_swig_base))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_safeNormalize_mbt_702ac83b51919141(C.uintptr_t(_swig_base))))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Normalize() (_swig_ret BtVector3) {
 	var swig_r BtVector3
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_normalize_mbt_745dded929ebaf09(C.uintptr_t(_swig_base))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_normalize_mbt_702ac83b51919141(C.uintptr_t(_swig_base))))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Normalized() (_swig_ret BtVector3) {
 	var swig_r BtVector3
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_normalized_mbt_745dded929ebaf09(C.uintptr_t(_swig_base))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_normalized_mbt_702ac83b51919141(C.uintptr_t(_swig_base))))
 	return swig_r
 }
 
@@ -1800,27 +2009,27 @@ func (_swig_base SwigcptrBtVector4) Rotate(arg1 BtVector3, arg2 float32) (_swig_
 	var swig_r BtVector3
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := arg2
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_rotate_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.float(_swig_i_1))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_rotate_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.float(_swig_i_1))))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Angle(arg1 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (float32)(C._wrap_btVector4_angle_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btVector4_angle_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Absolute() (_swig_ret BtVector3) {
 	var swig_r BtVector3
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_absolute_mbt_745dded929ebaf09(C.uintptr_t(_swig_base))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_absolute_mbt_702ac83b51919141(C.uintptr_t(_swig_base))))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Cross(arg1 BtVector3) (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_cross_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_cross_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -1828,31 +2037,31 @@ func (_swig_base SwigcptrBtVector4) Triple(arg1 BtVector3, arg2 BtVector3) (_swi
 	var swig_r float32
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btVector4_triple_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btVector4_triple_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) MinAxis() (_swig_ret int) {
 	var swig_r int
-	swig_r = (int)(C._wrap_btVector4_minAxis_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (int)(C._wrap_btVector4_minAxis_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) MaxAxis() (_swig_ret int) {
 	var swig_r int
-	swig_r = (int)(C._wrap_btVector4_maxAxis_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (int)(C._wrap_btVector4_maxAxis_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) FurthestAxis() (_swig_ret int) {
 	var swig_r int
-	swig_r = (int)(C._wrap_btVector4_furthestAxis_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (int)(C._wrap_btVector4_furthestAxis_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) ClosestAxis() (_swig_ret int) {
 	var swig_r int
-	swig_r = (int)(C._wrap_btVector4_closestAxis_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (int)(C._wrap_btVector4_closestAxis_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
@@ -1860,125 +2069,125 @@ func (_swig_base SwigcptrBtVector4) SetInterpolate3(arg1 BtVector3, arg2 BtVecto
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := arg3
-	C._wrap_btVector4_setInterpolate3_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))
+	C._wrap_btVector4_setInterpolate3_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))
 }
 
 func (_swig_base SwigcptrBtVector4) Lerp(arg1 BtVector3, arg2 float32) (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := arg2
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_lerp_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.float(_swig_i_1))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_lerp_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.float(_swig_i_1))))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) GetX() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btVector4_getX_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btVector4_getX_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) GetY() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btVector4_getY_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btVector4_getY_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) GetZ() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btVector4_getZ_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btVector4_getZ_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) SetX(arg1 float32) {
 	_swig_i_0 := arg1
-	C._wrap_btVector4_setX_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.float(_swig_i_0))
+	C._wrap_btVector4_setX_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.float(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) SetY(arg1 float32) {
 	_swig_i_0 := arg1
-	C._wrap_btVector4_setY_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.float(_swig_i_0))
+	C._wrap_btVector4_setY_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.float(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) SetZ(arg1 float32) {
 	_swig_i_0 := arg1
-	C._wrap_btVector4_setZ_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.float(_swig_i_0))
+	C._wrap_btVector4_setZ_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.float(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) SetW(arg1 float32) {
 	_swig_i_0 := arg1
-	C._wrap_btVector4_setW_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.float(_swig_i_0))
+	C._wrap_btVector4_setW_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.float(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) X() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btVector4_x_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btVector4_x_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Y() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btVector4_y_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btVector4_y_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Z() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btVector4_z_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btVector4_z_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) W() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btVector4_w_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btVector4_w_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) SetMax(arg1 BtVector3) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btVector4_setMax_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
+	C._wrap_btVector4_setMax_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) SetMin(arg1 BtVector3) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btVector4_setMin_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
+	C._wrap_btVector4_setMin_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) GetSkewSymmetricMatrix(arg1 BtVector3, arg2 BtVector3, arg3 BtVector3) {
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := getSwigcptr(arg3)
-	C._wrap_btVector4_getSkewSymmetricMatrix_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
+	C._wrap_btVector4_getSkewSymmetricMatrix_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 }
 
 func (_swig_base SwigcptrBtVector4) SetZero() {
-	C._wrap_btVector4_setZero_mbt_745dded929ebaf09(C.uintptr_t(_swig_base))
+	C._wrap_btVector4_setZero_mbt_702ac83b51919141(C.uintptr_t(_swig_base))
 }
 
 func (_swig_base SwigcptrBtVector4) IsZero() (_swig_ret bool) {
 	var swig_r bool
-	swig_r = (bool)(C._wrap_btVector4_isZero_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (bool)(C._wrap_btVector4_isZero_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) FuzzyZero() (_swig_ret bool) {
 	var swig_r bool
-	swig_r = (bool)(C._wrap_btVector4_fuzzyZero_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (bool)(C._wrap_btVector4_fuzzyZero_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtVector4) Serialize(arg1 BtVector3FloatData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btVector4_serialize_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
+	C._wrap_btVector4_serialize_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) DeSerialize__SWIG_0(arg1 BtVector3DoubleData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btVector4_deSerialize__SWIG_0_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
+	C._wrap_btVector4_deSerialize__SWIG_0_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) DeSerialize__SWIG_1(arg1 BtVector3FloatData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btVector4_deSerialize__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
+	C._wrap_btVector4_deSerialize__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
 }
 
 func (p SwigcptrBtVector4) DeSerialize(a ...interface{}) {
@@ -2000,22 +2209,22 @@ check_1:
 
 func (_swig_base SwigcptrBtVector4) SerializeFloat(arg1 BtVector3FloatData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btVector4_serializeFloat_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
+	C._wrap_btVector4_serializeFloat_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) DeSerializeFloat(arg1 BtVector3FloatData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btVector4_deSerializeFloat_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
+	C._wrap_btVector4_deSerializeFloat_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) SerializeDouble(arg1 BtVector3DoubleData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btVector4_serializeDouble_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
+	C._wrap_btVector4_serializeDouble_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) DeSerializeDouble(arg1 BtVector3DoubleData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btVector4_deSerializeDouble_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
+	C._wrap_btVector4_deSerializeDouble_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtVector4) MaxDot(arg1 BtVector3, arg2 int64, arg3 *float32) (_swig_ret int64) {
@@ -2023,7 +2232,7 @@ func (_swig_base SwigcptrBtVector4) MaxDot(arg1 BtVector3, arg2 int64, arg3 *flo
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
-	swig_r = (int64)(C._wrap_btVector4_maxDot_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.swig_type_21(_swig_i_1), C.swig_voidp(_swig_i_2)))
+	swig_r = (int64)(C._wrap_btVector4_maxDot_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.swig_type_21(_swig_i_1), C.swig_voidp(_swig_i_2)))
 	return swig_r
 }
 
@@ -2032,7 +2241,7 @@ func (_swig_base SwigcptrBtVector4) MinDot(arg1 BtVector3, arg2 int64, arg3 *flo
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
-	swig_r = (int64)(C._wrap_btVector4_minDot_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.swig_type_23(_swig_i_1), C.swig_voidp(_swig_i_2)))
+	swig_r = (int64)(C._wrap_btVector4_minDot_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.swig_type_23(_swig_i_1), C.swig_voidp(_swig_i_2)))
 	return swig_r
 }
 
@@ -2041,7 +2250,7 @@ func (_swig_base SwigcptrBtVector4) Dot3(arg1 BtVector3, arg2 BtVector3, arg3 Bt
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := getSwigcptr(arg3)
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_dot3_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btVector4_dot3_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))))
 	return swig_r
 }
 
@@ -2118,18 +2327,18 @@ type BtVector4 interface {
 func BtSwapScalarEndian(arg1 float32, arg2 *float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btSwapScalarEndian_mbt_745dded929ebaf09(C.float(_swig_i_0), C.swig_voidp(_swig_i_1))
+	C._wrap_btSwapScalarEndian_mbt_702ac83b51919141(C.float(_swig_i_0), C.swig_voidp(_swig_i_1))
 }
 
 func BtSwapVector3Endian(arg1 BtVector3, arg2 BtVector3) {
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btSwapVector3Endian_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btSwapVector3Endian_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func BtUnSwapVector3Endian(arg1 BtVector3) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btUnSwapVector3Endian_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_btUnSwapVector3Endian_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type SwigcptrBtVector3FloatData uintptr
@@ -2144,25 +2353,25 @@ func (p SwigcptrBtVector3FloatData) SwigIsBtVector3FloatData() {
 func (arg1 SwigcptrBtVector3FloatData) SetM_floats(arg2 *float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btVector3FloatData_m_floats_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
+	C._wrap_btVector3FloatData_m_floats_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3FloatData) GetM_floats() (_swig_ret *float32) {
 	var swig_r *float32
 	_swig_i_0 := arg1
-	swig_r = (*float32)(C._wrap_btVector3FloatData_m_floats_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (*float32)(C._wrap_btVector3FloatData_m_floats_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func NewBtVector3FloatData() (_swig_ret BtVector3FloatData) {
 	var swig_r BtVector3FloatData
-	swig_r = (BtVector3FloatData)(SwigcptrBtVector3FloatData(C._wrap_new_btVector3FloatData_mbt_745dded929ebaf09()))
+	swig_r = (BtVector3FloatData)(SwigcptrBtVector3FloatData(C._wrap_new_btVector3FloatData_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func DeleteBtVector3FloatData(arg1 BtVector3FloatData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btVector3FloatData_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btVector3FloatData_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtVector3FloatData interface {
@@ -2184,25 +2393,25 @@ func (p SwigcptrBtVector3DoubleData) SwigIsBtVector3DoubleData() {
 func (arg1 SwigcptrBtVector3DoubleData) SetM_floats(arg2 *float64) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btVector3DoubleData_m_floats_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
+	C._wrap_btVector3DoubleData_m_floats_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtVector3DoubleData) GetM_floats() (_swig_ret *float64) {
 	var swig_r *float64
 	_swig_i_0 := arg1
-	swig_r = (*float64)(C._wrap_btVector3DoubleData_m_floats_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (*float64)(C._wrap_btVector3DoubleData_m_floats_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func NewBtVector3DoubleData() (_swig_ret BtVector3DoubleData) {
 	var swig_r BtVector3DoubleData
-	swig_r = (BtVector3DoubleData)(SwigcptrBtVector3DoubleData(C._wrap_new_btVector3DoubleData_mbt_745dded929ebaf09()))
+	swig_r = (BtVector3DoubleData)(SwigcptrBtVector3DoubleData(C._wrap_new_btVector3DoubleData_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func DeleteBtVector3DoubleData(arg1 BtVector3DoubleData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btVector3DoubleData_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btVector3DoubleData_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtVector3DoubleData interface {
@@ -2224,73 +2433,73 @@ func (p SwigcptrBtQuadWord) SwigIsBtQuadWord() {
 func (arg1 SwigcptrBtQuadWord) GetX() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btQuadWord_getX_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btQuadWord_getX_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuadWord) GetY() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btQuadWord_getY_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btQuadWord_getY_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuadWord) GetZ() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btQuadWord_getZ_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btQuadWord_getZ_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuadWord) SetX(arg2 float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btQuadWord_setX_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
+	C._wrap_btQuadWord_setX_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtQuadWord) SetY(arg2 float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btQuadWord_setY_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
+	C._wrap_btQuadWord_setY_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtQuadWord) SetZ(arg2 float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btQuadWord_setZ_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
+	C._wrap_btQuadWord_setZ_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtQuadWord) SetW(arg2 float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btQuadWord_setW_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
+	C._wrap_btQuadWord_setW_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtQuadWord) X() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btQuadWord_x_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btQuadWord_x_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuadWord) Y() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btQuadWord_y_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btQuadWord_y_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuadWord) Z() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btQuadWord_z_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btQuadWord_z_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuadWord) W() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btQuadWord_w_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btQuadWord_w_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
@@ -2299,7 +2508,7 @@ func (arg1 SwigcptrBtQuadWord) SetValue__SWIG_0(arg2 float32, arg3 float32, arg4
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	C._wrap_btQuadWord_setValue__SWIG_0_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
+	C._wrap_btQuadWord_setValue__SWIG_0_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
 }
 
 func (arg1 SwigcptrBtQuadWord) SetValue__SWIG_1(arg2 float32, arg3 float32, arg4 float32, arg5 float32) {
@@ -2308,7 +2517,7 @@ func (arg1 SwigcptrBtQuadWord) SetValue__SWIG_1(arg2 float32, arg3 float32, arg4
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
 	_swig_i_4 := arg5
-	C._wrap_btQuadWord_setValue__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3), C.float(_swig_i_4))
+	C._wrap_btQuadWord_setValue__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3), C.float(_swig_i_4))
 }
 
 func (p SwigcptrBtQuadWord) SetValue(a ...interface{}) {
@@ -2326,7 +2535,7 @@ func (p SwigcptrBtQuadWord) SetValue(a ...interface{}) {
 
 func NewBtQuadWord__SWIG_0() (_swig_ret BtQuadWord) {
 	var swig_r BtQuadWord
-	swig_r = (BtQuadWord)(SwigcptrBtQuadWord(C._wrap_new_btQuadWord__SWIG_0_mbt_745dded929ebaf09()))
+	swig_r = (BtQuadWord)(SwigcptrBtQuadWord(C._wrap_new_btQuadWord__SWIG_0_mbt_702ac83b51919141()))
 	return swig_r
 }
 
@@ -2335,7 +2544,7 @@ func NewBtQuadWord__SWIG_1(arg1 float32, arg2 float32, arg3 float32) (_swig_ret 
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
-	swig_r = (BtQuadWord)(SwigcptrBtQuadWord(C._wrap_new_btQuadWord__SWIG_1_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2))))
+	swig_r = (BtQuadWord)(SwigcptrBtQuadWord(C._wrap_new_btQuadWord__SWIG_1_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2))))
 	return swig_r
 }
 
@@ -2345,7 +2554,7 @@ func NewBtQuadWord__SWIG_2(arg1 float32, arg2 float32, arg3 float32, arg4 float3
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	swig_r = (BtQuadWord)(SwigcptrBtQuadWord(C._wrap_new_btQuadWord__SWIG_2_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))))
+	swig_r = (BtQuadWord)(SwigcptrBtQuadWord(C._wrap_new_btQuadWord__SWIG_2_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))))
 	return swig_r
 }
 
@@ -2366,18 +2575,18 @@ func NewBtQuadWord(a ...interface{}) BtQuadWord {
 func (arg1 SwigcptrBtQuadWord) SetMax(arg2 BtQuadWord) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btQuadWord_setMax_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btQuadWord_setMax_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtQuadWord) SetMin(arg2 BtQuadWord) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btQuadWord_setMin_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btQuadWord_setMin_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func DeleteBtQuadWord(arg1 BtQuadWord) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btQuadWord_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btQuadWord_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtQuadWord interface {
@@ -2412,7 +2621,7 @@ func (p SwigcptrBtQuaternion) SwigIsBtQuaternion() {
 
 func NewBtQuaternion__SWIG_0() (_swig_ret BtQuaternion) {
 	var swig_r BtQuaternion
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_new_btQuaternion__SWIG_0_mbt_745dded929ebaf09()))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_new_btQuaternion__SWIG_0_mbt_702ac83b51919141()))
 	return swig_r
 }
 
@@ -2422,7 +2631,7 @@ func NewBtQuaternion__SWIG_1(arg1 float32, arg2 float32, arg3 float32, arg4 floa
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_new_btQuaternion__SWIG_1_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_new_btQuaternion__SWIG_1_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))))
 	return swig_r
 }
 
@@ -2430,7 +2639,7 @@ func NewBtQuaternion__SWIG_2(arg1 BtVector3, arg2 float32) (_swig_ret BtQuaterni
 	var swig_r BtQuaternion
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := arg2
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_new_btQuaternion__SWIG_2_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_new_btQuaternion__SWIG_2_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))))
 	return swig_r
 }
 
@@ -2439,7 +2648,7 @@ func NewBtQuaternion__SWIG_3(arg1 float32, arg2 float32, arg3 float32) (_swig_re
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_new_btQuaternion__SWIG_3_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_new_btQuaternion__SWIG_3_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2))))
 	return swig_r
 }
 
@@ -2464,7 +2673,7 @@ func (arg1 SwigcptrBtQuaternion) SetRotation(arg2 BtVector3, arg3 float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := arg3
-	C._wrap_btQuaternion_setRotation_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))
+	C._wrap_btQuaternion_setRotation_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))
 }
 
 func (arg1 SwigcptrBtQuaternion) SetEuler(arg2 float32, arg3 float32, arg4 float32) {
@@ -2472,7 +2681,7 @@ func (arg1 SwigcptrBtQuaternion) SetEuler(arg2 float32, arg3 float32, arg4 float
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	C._wrap_btQuaternion_setEuler_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
+	C._wrap_btQuaternion_setEuler_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
 }
 
 func (arg1 SwigcptrBtQuaternion) SetEulerZYX(arg2 float32, arg3 float32, arg4 float32) {
@@ -2480,7 +2689,7 @@ func (arg1 SwigcptrBtQuaternion) SetEulerZYX(arg2 float32, arg3 float32, arg4 fl
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	C._wrap_btQuaternion_setEulerZYX_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
+	C._wrap_btQuaternion_setEulerZYX_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
 }
 
 func (arg1 SwigcptrBtQuaternion) GetEulerZYX(arg2 *float32, arg3 *float32, arg4 *float32) {
@@ -2488,49 +2697,49 @@ func (arg1 SwigcptrBtQuaternion) GetEulerZYX(arg2 *float32, arg3 *float32, arg4 
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	C._wrap_btQuaternion_getEulerZYX_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1), C.swig_voidp(_swig_i_2), C.swig_voidp(_swig_i_3))
+	C._wrap_btQuaternion_getEulerZYX_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1), C.swig_voidp(_swig_i_2), C.swig_voidp(_swig_i_3))
 }
 
 func (arg1 SwigcptrBtQuaternion) Dot(arg2 BtQuaternion) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btQuaternion_dot_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btQuaternion_dot_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuaternion) Length2() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btQuaternion_length2_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btQuaternion_length2_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuaternion) Length() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btQuaternion_length_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btQuaternion_length_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuaternion) SafeNormalize() (_swig_ret BtQuaternion) {
 	var swig_r BtQuaternion
 	_swig_i_0 := arg1
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_safeNormalize_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_safeNormalize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuaternion) Normalize() (_swig_ret BtQuaternion) {
 	var swig_r BtQuaternion
 	_swig_i_0 := arg1
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_normalize_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_normalize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuaternion) Normalized() (_swig_ret BtQuaternion) {
 	var swig_r BtQuaternion
 	_swig_i_0 := arg1
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_normalized_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_normalized_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -2538,7 +2747,7 @@ func (arg1 SwigcptrBtQuaternion) Angle(arg2 BtQuaternion) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btQuaternion_angle_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btQuaternion_angle_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
@@ -2546,35 +2755,35 @@ func (arg1 SwigcptrBtQuaternion) AngleShortestPath(arg2 BtQuaternion) (_swig_ret
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btQuaternion_angleShortestPath_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btQuaternion_angleShortestPath_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuaternion) GetAngle() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btQuaternion_getAngle_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btQuaternion_getAngle_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuaternion) GetAngleShortestPath() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btQuaternion_getAngleShortestPath_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btQuaternion_getAngleShortestPath_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuaternion) GetAxis() (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btQuaternion_getAxis_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btQuaternion_getAxis_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuaternion) Inverse() (_swig_ret BtQuaternion) {
 	var swig_r BtQuaternion
 	_swig_i_0 := arg1
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_inverse_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_inverse_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -2582,7 +2791,7 @@ func (arg1 SwigcptrBtQuaternion) Farthest(arg2 BtQuaternion) (_swig_ret BtQuater
 	var swig_r BtQuaternion
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_farthest_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_farthest_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
@@ -2590,7 +2799,7 @@ func (arg1 SwigcptrBtQuaternion) Nearest(arg2 BtQuaternion) (_swig_ret BtQuatern
 	var swig_r BtQuaternion
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_nearest_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_nearest_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
@@ -2599,39 +2808,39 @@ func (arg1 SwigcptrBtQuaternion) Slerp(arg2 BtQuaternion, arg3 float32) (_swig_r
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := arg3
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_slerp_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_slerp_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))))
 	return swig_r
 }
 
 func BtQuaternionGetIdentity() (_swig_ret BtQuaternion) {
 	var swig_r BtQuaternion
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_getIdentity_mbt_745dded929ebaf09()))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btQuaternion_getIdentity_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuaternion) GetW() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btQuaternion_getW_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btQuaternion_getW_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtQuaternion) Serialize(arg2 BtQuaternionFloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btQuaternion_serialize_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btQuaternion_serialize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtQuaternion) DeSerialize__SWIG_0(arg2 BtQuaternionFloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btQuaternion_deSerialize__SWIG_0_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btQuaternion_deSerialize__SWIG_0_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtQuaternion) DeSerialize__SWIG_1(arg2 BtQuaternionDoubleData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btQuaternion_deSerialize__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btQuaternion_deSerialize__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (p SwigcptrBtQuaternion) DeSerialize(a ...interface{}) {
@@ -2654,91 +2863,91 @@ check_1:
 func (arg1 SwigcptrBtQuaternion) SerializeFloat(arg2 BtQuaternionFloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btQuaternion_serializeFloat_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btQuaternion_serializeFloat_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtQuaternion) DeSerializeFloat(arg2 BtQuaternionFloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btQuaternion_deSerializeFloat_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btQuaternion_deSerializeFloat_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtQuaternion) SerializeDouble(arg2 BtQuaternionDoubleData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btQuaternion_serializeDouble_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btQuaternion_serializeDouble_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtQuaternion) DeSerializeDouble(arg2 BtQuaternionDoubleData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btQuaternion_deSerializeDouble_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btQuaternion_deSerializeDouble_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func DeleteBtQuaternion(arg1 BtQuaternion) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btQuaternion_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btQuaternion_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtQuaternion) GetX() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btQuaternion_getX_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btQuaternion_getX_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtQuaternion) GetY() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btQuaternion_getY_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btQuaternion_getY_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtQuaternion) GetZ() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btQuaternion_getZ_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btQuaternion_getZ_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtQuaternion) SetX(arg1 float32) {
 	_swig_i_0 := arg1
-	C._wrap_btQuaternion_setX_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.float(_swig_i_0))
+	C._wrap_btQuaternion_setX_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.float(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtQuaternion) SetY(arg1 float32) {
 	_swig_i_0 := arg1
-	C._wrap_btQuaternion_setY_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.float(_swig_i_0))
+	C._wrap_btQuaternion_setY_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.float(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtQuaternion) SetZ(arg1 float32) {
 	_swig_i_0 := arg1
-	C._wrap_btQuaternion_setZ_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.float(_swig_i_0))
+	C._wrap_btQuaternion_setZ_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.float(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtQuaternion) SetW(arg1 float32) {
 	_swig_i_0 := arg1
-	C._wrap_btQuaternion_setW_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.float(_swig_i_0))
+	C._wrap_btQuaternion_setW_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.float(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtQuaternion) X() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btQuaternion_x_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btQuaternion_x_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtQuaternion) Y() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btQuaternion_y_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btQuaternion_y_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtQuaternion) Z() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btQuaternion_z_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btQuaternion_z_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
 func (_swig_base SwigcptrBtQuaternion) W() (_swig_ret float32) {
 	var swig_r float32
-	swig_r = (float32)(C._wrap_btQuaternion_w_mbt_745dded929ebaf09(C.uintptr_t(_swig_base)))
+	swig_r = (float32)(C._wrap_btQuaternion_w_mbt_702ac83b51919141(C.uintptr_t(_swig_base)))
 	return swig_r
 }
 
@@ -2746,7 +2955,7 @@ func (_swig_base SwigcptrBtQuaternion) SetValue__SWIG_0(arg1 float32, arg2 float
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
-	C._wrap_btQuaternion_setValue__SWIG_0_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2))
+	C._wrap_btQuaternion_setValue__SWIG_0_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2))
 }
 
 func (_swig_base SwigcptrBtQuaternion) SetValue__SWIG_1(arg1 float32, arg2 float32, arg3 float32, arg4 float32) {
@@ -2754,7 +2963,7 @@ func (_swig_base SwigcptrBtQuaternion) SetValue__SWIG_1(arg1 float32, arg2 float
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	C._wrap_btQuaternion_setValue__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
+	C._wrap_btQuaternion_setValue__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
 }
 
 func (p SwigcptrBtQuaternion) SetValue(a ...interface{}) {
@@ -2772,12 +2981,12 @@ func (p SwigcptrBtQuaternion) SetValue(a ...interface{}) {
 
 func (_swig_base SwigcptrBtQuaternion) SetMax(arg1 BtQuadWord) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btQuaternion_setMax_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
+	C._wrap_btQuaternion_setMax_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
 }
 
 func (_swig_base SwigcptrBtQuaternion) SetMin(arg1 BtQuadWord) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_btQuaternion_setMin_mbt_745dded929ebaf09(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
+	C._wrap_btQuaternion_setMin_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
 }
 
 func (p SwigcptrBtQuaternion) SwigIsBtQuadWord() {
@@ -2838,14 +3047,14 @@ func Dot(arg1 BtQuaternion, arg2 BtQuaternion) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_dot_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_dot_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
 func Length(arg1 BtQuaternion) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (float32)(C._wrap_length_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_length_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
@@ -2853,7 +3062,7 @@ func BtAngle__SWIG_1(arg1 BtQuaternion, arg2 BtQuaternion) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btAngle__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btAngle__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
@@ -2878,7 +3087,7 @@ check_1:
 func Inverse(arg1 BtQuaternion) (_swig_ret BtQuaternion) {
 	var swig_r BtQuaternion
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_inverse_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_inverse_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -2887,7 +3096,7 @@ func Slerp(arg1 BtQuaternion, arg2 BtQuaternion, arg3 float32) (_swig_ret BtQuat
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := arg3
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_slerp_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_slerp_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))))
 	return swig_r
 }
 
@@ -2895,7 +3104,7 @@ func QuatRotate(arg1 BtQuaternion, arg2 BtVector3) (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_quatRotate_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_quatRotate_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
@@ -2903,7 +3112,7 @@ func ShortestArcQuat(arg1 BtVector3, arg2 BtVector3) (_swig_ret BtQuaternion) {
 	var swig_r BtQuaternion
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_shortestArcQuat_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_shortestArcQuat_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
@@ -2911,7 +3120,7 @@ func ShortestArcQuatNormalize2(arg1 BtVector3, arg2 BtVector3) (_swig_ret BtQuat
 	var swig_r BtQuaternion
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_shortestArcQuatNormalize2_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_shortestArcQuatNormalize2_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
@@ -2927,25 +3136,25 @@ func (p SwigcptrBtQuaternionFloatData) SwigIsBtQuaternionFloatData() {
 func (arg1 SwigcptrBtQuaternionFloatData) SetM_floats(arg2 *float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btQuaternionFloatData_m_floats_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
+	C._wrap_btQuaternionFloatData_m_floats_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtQuaternionFloatData) GetM_floats() (_swig_ret *float32) {
 	var swig_r *float32
 	_swig_i_0 := arg1
-	swig_r = (*float32)(C._wrap_btQuaternionFloatData_m_floats_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (*float32)(C._wrap_btQuaternionFloatData_m_floats_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func NewBtQuaternionFloatData() (_swig_ret BtQuaternionFloatData) {
 	var swig_r BtQuaternionFloatData
-	swig_r = (BtQuaternionFloatData)(SwigcptrBtQuaternionFloatData(C._wrap_new_btQuaternionFloatData_mbt_745dded929ebaf09()))
+	swig_r = (BtQuaternionFloatData)(SwigcptrBtQuaternionFloatData(C._wrap_new_btQuaternionFloatData_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func DeleteBtQuaternionFloatData(arg1 BtQuaternionFloatData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btQuaternionFloatData_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btQuaternionFloatData_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtQuaternionFloatData interface {
@@ -2967,25 +3176,25 @@ func (p SwigcptrBtQuaternionDoubleData) SwigIsBtQuaternionDoubleData() {
 func (arg1 SwigcptrBtQuaternionDoubleData) SetM_floats(arg2 *float64) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btQuaternionDoubleData_m_floats_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
+	C._wrap_btQuaternionDoubleData_m_floats_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtQuaternionDoubleData) GetM_floats() (_swig_ret *float64) {
 	var swig_r *float64
 	_swig_i_0 := arg1
-	swig_r = (*float64)(C._wrap_btQuaternionDoubleData_m_floats_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (*float64)(C._wrap_btQuaternionDoubleData_m_floats_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func NewBtQuaternionDoubleData() (_swig_ret BtQuaternionDoubleData) {
 	var swig_r BtQuaternionDoubleData
-	swig_r = (BtQuaternionDoubleData)(SwigcptrBtQuaternionDoubleData(C._wrap_new_btQuaternionDoubleData_mbt_745dded929ebaf09()))
+	swig_r = (BtQuaternionDoubleData)(SwigcptrBtQuaternionDoubleData(C._wrap_new_btQuaternionDoubleData_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func DeleteBtQuaternionDoubleData(arg1 BtQuaternionDoubleData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btQuaternionDoubleData_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btQuaternionDoubleData_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtQuaternionDoubleData interface {
@@ -3006,14 +3215,14 @@ func (p SwigcptrBtMatrix3x3) SwigIsBtMatrix3x3() {
 
 func NewBtMatrix3x3__SWIG_0() (_swig_ret BtMatrix3x3) {
 	var swig_r BtMatrix3x3
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_new_btMatrix3x3__SWIG_0_mbt_745dded929ebaf09()))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_new_btMatrix3x3__SWIG_0_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func NewBtMatrix3x3__SWIG_1(arg1 BtQuaternion) (_swig_ret BtMatrix3x3) {
 	var swig_r BtMatrix3x3
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_new_btMatrix3x3__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_new_btMatrix3x3__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -3028,14 +3237,14 @@ func NewBtMatrix3x3__SWIG_2(arg1 float32, arg2 float32, arg3 float32, arg4 float
 	_swig_i_6 := arg7
 	_swig_i_7 := arg8
 	_swig_i_8 := arg9
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_new_btMatrix3x3__SWIG_2_mbt_745dded929ebaf09(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3), C.float(_swig_i_4), C.float(_swig_i_5), C.float(_swig_i_6), C.float(_swig_i_7), C.float(_swig_i_8))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_new_btMatrix3x3__SWIG_2_mbt_702ac83b51919141(C.float(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3), C.float(_swig_i_4), C.float(_swig_i_5), C.float(_swig_i_6), C.float(_swig_i_7), C.float(_swig_i_8))))
 	return swig_r
 }
 
 func NewBtMatrix3x3__SWIG_3(arg1 BtMatrix3x3) (_swig_ret BtMatrix3x3) {
 	var swig_r BtMatrix3x3
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_new_btMatrix3x3__SWIG_3_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_new_btMatrix3x3__SWIG_3_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -3044,7 +3253,7 @@ func NewBtMatrix3x3__SWIG_4(arg1 BtVector3, arg2 BtVector3, arg3 BtVector3) (_sw
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := getSwigcptr(arg3)
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_new_btMatrix3x3__SWIG_4_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_new_btMatrix3x3__SWIG_4_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))))
 	return swig_r
 }
 
@@ -3076,7 +3285,7 @@ func (arg1 SwigcptrBtMatrix3x3) GetColumn(arg2 int) (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btMatrix3x3_getColumn_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btMatrix3x3_getColumn_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))))
 	return swig_r
 }
 
@@ -3084,14 +3293,14 @@ func (arg1 SwigcptrBtMatrix3x3) GetRow(arg2 int) (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btMatrix3x3_getRow_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btMatrix3x3_getRow_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtMatrix3x3) SetFromOpenGLSubMatrix(arg2 *float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btMatrix3x3_setFromOpenGLSubMatrix_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
+	C._wrap_btMatrix3x3_setFromOpenGLSubMatrix_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) SetValue(arg2 float32, arg3 float32, arg4 float32, arg5 float32, arg6 float32, arg7 float32, arg8 float32, arg9 float32, arg10 float32) {
@@ -3105,13 +3314,13 @@ func (arg1 SwigcptrBtMatrix3x3) SetValue(arg2 float32, arg3 float32, arg4 float3
 	_swig_i_7 := arg8
 	_swig_i_8 := arg9
 	_swig_i_9 := arg10
-	C._wrap_btMatrix3x3_setValue_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3), C.float(_swig_i_4), C.float(_swig_i_5), C.float(_swig_i_6), C.float(_swig_i_7), C.float(_swig_i_8), C.float(_swig_i_9))
+	C._wrap_btMatrix3x3_setValue_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3), C.float(_swig_i_4), C.float(_swig_i_5), C.float(_swig_i_6), C.float(_swig_i_7), C.float(_swig_i_8), C.float(_swig_i_9))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) SetRotation(arg2 BtQuaternion) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMatrix3x3_setRotation_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btMatrix3x3_setRotation_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) SetEulerYPR(arg2 float32, arg3 float32, arg4 float32) {
@@ -3119,7 +3328,7 @@ func (arg1 SwigcptrBtMatrix3x3) SetEulerYPR(arg2 float32, arg3 float32, arg4 flo
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	C._wrap_btMatrix3x3_setEulerYPR_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
+	C._wrap_btMatrix3x3_setEulerYPR_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) SetEulerZYX(arg2 float32, arg3 float32, arg4 float32) {
@@ -3127,35 +3336,35 @@ func (arg1 SwigcptrBtMatrix3x3) SetEulerZYX(arg2 float32, arg3 float32, arg4 flo
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	C._wrap_btMatrix3x3_setEulerZYX_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
+	C._wrap_btMatrix3x3_setEulerZYX_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.float(_swig_i_2), C.float(_swig_i_3))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) SetIdentity() {
 	_swig_i_0 := arg1
-	C._wrap_btMatrix3x3_setIdentity_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_btMatrix3x3_setIdentity_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) SetZero() {
 	_swig_i_0 := arg1
-	C._wrap_btMatrix3x3_setZero_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_btMatrix3x3_setZero_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func BtMatrix3x3GetIdentity() (_swig_ret BtMatrix3x3) {
 	var swig_r BtMatrix3x3
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_getIdentity_mbt_745dded929ebaf09()))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_getIdentity_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtMatrix3x3) GetOpenGLSubMatrix(arg2 *float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btMatrix3x3_getOpenGLSubMatrix_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
+	C._wrap_btMatrix3x3_getOpenGLSubMatrix_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) GetRotation(arg2 BtQuaternion) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMatrix3x3_getRotation_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btMatrix3x3_getRotation_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) GetEulerYPR(arg2 *float32, arg3 *float32, arg4 *float32) {
@@ -3163,7 +3372,7 @@ func (arg1 SwigcptrBtMatrix3x3) GetEulerYPR(arg2 *float32, arg3 *float32, arg4 *
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	C._wrap_btMatrix3x3_getEulerYPR_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1), C.swig_voidp(_swig_i_2), C.swig_voidp(_swig_i_3))
+	C._wrap_btMatrix3x3_getEulerYPR_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1), C.swig_voidp(_swig_i_2), C.swig_voidp(_swig_i_3))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) GetEulerZYX__SWIG_0(arg2 *float32, arg3 *float32, arg4 *float32, arg5 uint) {
@@ -3172,7 +3381,7 @@ func (arg1 SwigcptrBtMatrix3x3) GetEulerZYX__SWIG_0(arg2 *float32, arg3 *float32
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
 	_swig_i_4 := arg5
-	C._wrap_btMatrix3x3_getEulerZYX__SWIG_0_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1), C.swig_voidp(_swig_i_2), C.swig_voidp(_swig_i_3), C.swig_intgo(_swig_i_4))
+	C._wrap_btMatrix3x3_getEulerZYX__SWIG_0_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1), C.swig_voidp(_swig_i_2), C.swig_voidp(_swig_i_3), C.swig_intgo(_swig_i_4))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) GetEulerZYX__SWIG_1(arg2 *float32, arg3 *float32, arg4 *float32) {
@@ -3180,7 +3389,7 @@ func (arg1 SwigcptrBtMatrix3x3) GetEulerZYX__SWIG_1(arg2 *float32, arg3 *float32
 	_swig_i_1 := arg2
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	C._wrap_btMatrix3x3_getEulerZYX__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1), C.swig_voidp(_swig_i_2), C.swig_voidp(_swig_i_3))
+	C._wrap_btMatrix3x3_getEulerZYX__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1), C.swig_voidp(_swig_i_2), C.swig_voidp(_swig_i_3))
 }
 
 func (p SwigcptrBtMatrix3x3) GetEulerZYX(a ...interface{}) {
@@ -3200,42 +3409,42 @@ func (arg1 SwigcptrBtMatrix3x3) Scaled(arg2 BtVector3) (_swig_ret BtMatrix3x3) {
 	var swig_r BtMatrix3x3
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_scaled_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_scaled_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtMatrix3x3) Determinant() (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
-	swig_r = (float32)(C._wrap_btMatrix3x3_determinant_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (float32)(C._wrap_btMatrix3x3_determinant_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtMatrix3x3) Adjoint() (_swig_ret BtMatrix3x3) {
 	var swig_r BtMatrix3x3
 	_swig_i_0 := arg1
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_adjoint_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_adjoint_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtMatrix3x3) Absolute() (_swig_ret BtMatrix3x3) {
 	var swig_r BtMatrix3x3
 	_swig_i_0 := arg1
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_absolute_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_absolute_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtMatrix3x3) Transpose() (_swig_ret BtMatrix3x3) {
 	var swig_r BtMatrix3x3
 	_swig_i_0 := arg1
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_transpose_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_transpose_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtMatrix3x3) Inverse() (_swig_ret BtMatrix3x3) {
 	var swig_r BtMatrix3x3
 	_swig_i_0 := arg1
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_inverse_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_inverse_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -3243,7 +3452,7 @@ func (arg1 SwigcptrBtMatrix3x3) Solve33(arg2 BtVector3) (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btMatrix3x3_solve33_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btMatrix3x3_solve33_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
@@ -3251,7 +3460,7 @@ func (arg1 SwigcptrBtMatrix3x3) TransposeTimes(arg2 BtMatrix3x3) (_swig_ret BtMa
 	var swig_r BtMatrix3x3
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_transposeTimes_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_transposeTimes_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
@@ -3259,7 +3468,7 @@ func (arg1 SwigcptrBtMatrix3x3) TimesTranspose(arg2 BtMatrix3x3) (_swig_ret BtMa
 	var swig_r BtMatrix3x3
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_timesTranspose_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btMatrix3x3_timesTranspose_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
@@ -3267,7 +3476,7 @@ func (arg1 SwigcptrBtMatrix3x3) Tdotx(arg2 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btMatrix3x3_tdotx_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btMatrix3x3_tdotx_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
@@ -3275,7 +3484,7 @@ func (arg1 SwigcptrBtMatrix3x3) Tdoty(arg2 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btMatrix3x3_tdoty_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btMatrix3x3_tdoty_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
@@ -3283,7 +3492,7 @@ func (arg1 SwigcptrBtMatrix3x3) Tdotz(arg2 BtVector3) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (float32)(C._wrap_btMatrix3x3_tdotz_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	swig_r = (float32)(C._wrap_btMatrix3x3_tdotz_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
 	return swig_r
 }
 
@@ -3292,20 +3501,20 @@ func (arg1 SwigcptrBtMatrix3x3) ExtractRotation__SWIG_0(arg2 BtQuaternion, arg3 
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	C._wrap_btMatrix3x3_extractRotation__SWIG_0_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2), C.swig_intgo(_swig_i_3))
+	C._wrap_btMatrix3x3_extractRotation__SWIG_0_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2), C.swig_intgo(_swig_i_3))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) ExtractRotation__SWIG_1(arg2 BtQuaternion, arg3 float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := arg3
-	C._wrap_btMatrix3x3_extractRotation__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))
+	C._wrap_btMatrix3x3_extractRotation__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) ExtractRotation__SWIG_2(arg2 BtQuaternion) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMatrix3x3_extractRotation__SWIG_2_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btMatrix3x3_extractRotation__SWIG_2_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (p SwigcptrBtMatrix3x3) ExtractRotation(a ...interface{}) {
@@ -3330,7 +3539,7 @@ func (arg1 SwigcptrBtMatrix3x3) Diagonalize(arg2 BtMatrix3x3, arg3 float32, arg4
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
-	C._wrap_btMatrix3x3_diagonalize_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2), C.swig_intgo(_swig_i_3))
+	C._wrap_btMatrix3x3_diagonalize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.float(_swig_i_2), C.swig_intgo(_swig_i_3))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) Cofac(arg2 int, arg3 int, arg4 int, arg5 int) (_swig_ret float32) {
@@ -3340,43 +3549,43 @@ func (arg1 SwigcptrBtMatrix3x3) Cofac(arg2 int, arg3 int, arg4 int, arg5 int) (_
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
 	_swig_i_4 := arg5
-	swig_r = (float32)(C._wrap_btMatrix3x3_cofac_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1), C.swig_intgo(_swig_i_2), C.swig_intgo(_swig_i_3), C.swig_intgo(_swig_i_4)))
+	swig_r = (float32)(C._wrap_btMatrix3x3_cofac_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1), C.swig_intgo(_swig_i_2), C.swig_intgo(_swig_i_3), C.swig_intgo(_swig_i_4)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtMatrix3x3) Serialize(arg2 BtMatrix3x3FloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMatrix3x3_serialize_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btMatrix3x3_serialize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) SerializeFloat(arg2 BtMatrix3x3FloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMatrix3x3_serializeFloat_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btMatrix3x3_serializeFloat_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) DeSerialize(arg2 BtMatrix3x3FloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMatrix3x3_deSerialize_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btMatrix3x3_deSerialize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) DeSerializeFloat(arg2 BtMatrix3x3FloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMatrix3x3_deSerializeFloat_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btMatrix3x3_deSerializeFloat_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtMatrix3x3) DeSerializeDouble(arg2 BtMatrix3x3DoubleData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMatrix3x3_deSerializeDouble_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btMatrix3x3_deSerializeDouble_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func DeleteBtMatrix3x3(arg1 BtMatrix3x3) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btMatrix3x3_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btMatrix3x3_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtMatrix3x3 interface {
@@ -3429,25 +3638,25 @@ func (p SwigcptrBtMatrix3x3FloatData) SwigIsBtMatrix3x3FloatData() {
 func (arg1 SwigcptrBtMatrix3x3FloatData) SetM_el(arg2 BtVector3FloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMatrix3x3FloatData_m_el_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btMatrix3x3FloatData_m_el_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtMatrix3x3FloatData) GetM_el() (_swig_ret BtVector3FloatData) {
 	var swig_r BtVector3FloatData
 	_swig_i_0 := arg1
-	swig_r = (BtVector3FloatData)(SwigcptrBtVector3FloatData(C._wrap_btMatrix3x3FloatData_m_el_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3FloatData)(SwigcptrBtVector3FloatData(C._wrap_btMatrix3x3FloatData_m_el_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func NewBtMatrix3x3FloatData() (_swig_ret BtMatrix3x3FloatData) {
 	var swig_r BtMatrix3x3FloatData
-	swig_r = (BtMatrix3x3FloatData)(SwigcptrBtMatrix3x3FloatData(C._wrap_new_btMatrix3x3FloatData_mbt_745dded929ebaf09()))
+	swig_r = (BtMatrix3x3FloatData)(SwigcptrBtMatrix3x3FloatData(C._wrap_new_btMatrix3x3FloatData_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func DeleteBtMatrix3x3FloatData(arg1 BtMatrix3x3FloatData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btMatrix3x3FloatData_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btMatrix3x3FloatData_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtMatrix3x3FloatData interface {
@@ -3469,25 +3678,25 @@ func (p SwigcptrBtMatrix3x3DoubleData) SwigIsBtMatrix3x3DoubleData() {
 func (arg1 SwigcptrBtMatrix3x3DoubleData) SetM_el(arg2 BtVector3DoubleData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMatrix3x3DoubleData_m_el_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btMatrix3x3DoubleData_m_el_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtMatrix3x3DoubleData) GetM_el() (_swig_ret BtVector3DoubleData) {
 	var swig_r BtVector3DoubleData
 	_swig_i_0 := arg1
-	swig_r = (BtVector3DoubleData)(SwigcptrBtVector3DoubleData(C._wrap_btMatrix3x3DoubleData_m_el_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3DoubleData)(SwigcptrBtVector3DoubleData(C._wrap_btMatrix3x3DoubleData_m_el_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func NewBtMatrix3x3DoubleData() (_swig_ret BtMatrix3x3DoubleData) {
 	var swig_r BtMatrix3x3DoubleData
-	swig_r = (BtMatrix3x3DoubleData)(SwigcptrBtMatrix3x3DoubleData(C._wrap_new_btMatrix3x3DoubleData_mbt_745dded929ebaf09()))
+	swig_r = (BtMatrix3x3DoubleData)(SwigcptrBtMatrix3x3DoubleData(C._wrap_new_btMatrix3x3DoubleData_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func DeleteBtMatrix3x3DoubleData(arg1 BtMatrix3x3DoubleData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btMatrix3x3DoubleData_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btMatrix3x3DoubleData_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtMatrix3x3DoubleData interface {
@@ -3508,7 +3717,7 @@ func (p SwigcptrBtTransform) SwigIsBtTransform() {
 
 func NewBtTransform__SWIG_0() (_swig_ret BtTransform) {
 	var swig_r BtTransform
-	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_new_btTransform__SWIG_0_mbt_745dded929ebaf09()))
+	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_new_btTransform__SWIG_0_mbt_702ac83b51919141()))
 	return swig_r
 }
 
@@ -3516,14 +3725,14 @@ func NewBtTransform__SWIG_1(arg1 BtQuaternion, arg2 BtVector3) (_swig_ret BtTran
 	var swig_r BtTransform
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_new_btTransform__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_new_btTransform__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
 func NewBtTransform__SWIG_2(arg1 BtQuaternion) (_swig_ret BtTransform) {
 	var swig_r BtTransform
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_new_btTransform__SWIG_2_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_new_btTransform__SWIG_2_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -3531,21 +3740,21 @@ func NewBtTransform__SWIG_3(arg1 BtMatrix3x3, arg2 BtVector3) (_swig_ret BtTrans
 	var swig_r BtTransform
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_new_btTransform__SWIG_3_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_new_btTransform__SWIG_3_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
 func NewBtTransform__SWIG_4(arg1 BtMatrix3x3) (_swig_ret BtTransform) {
 	var swig_r BtTransform
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_new_btTransform__SWIG_4_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_new_btTransform__SWIG_4_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func NewBtTransform__SWIG_5(arg1 BtTransform) (_swig_ret BtTransform) {
 	var swig_r BtTransform
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_new_btTransform__SWIG_5_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_new_btTransform__SWIG_5_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -3588,20 +3797,20 @@ func (arg1 SwigcptrBtTransform) Mult(arg2 BtTransform, arg3 BtTransform) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
 	_swig_i_2 := getSwigcptr(arg3)
-	C._wrap_btTransform_mult_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
+	C._wrap_btTransform_mult_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 }
 
 func (arg1 SwigcptrBtTransform) GetBasis__SWIG_0() (_swig_ret BtMatrix3x3) {
 	var swig_r BtMatrix3x3
 	_swig_i_0 := arg1
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btTransform_getBasis__SWIG_0_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btTransform_getBasis__SWIG_0_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtTransform) GetBasis__SWIG_1() (_swig_ret BtMatrix3x3) {
 	var swig_r BtMatrix3x3
 	_swig_i_0 := arg1
-	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btTransform_getBasis__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtMatrix3x3)(SwigcptrBtMatrix3x3(C._wrap_btTransform_getBasis__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -3619,14 +3828,14 @@ func (p SwigcptrBtTransform) GetBasis(a ...interface{}) interface{} {
 func (arg1 SwigcptrBtTransform) GetOrigin__SWIG_0() (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btTransform_getOrigin__SWIG_0_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btTransform_getOrigin__SWIG_0_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtTransform) GetOrigin__SWIG_1() (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btTransform_getOrigin__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btTransform_getOrigin__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -3644,57 +3853,57 @@ func (p SwigcptrBtTransform) GetOrigin(a ...interface{}) interface{} {
 func (arg1 SwigcptrBtTransform) GetRotation() (_swig_ret BtQuaternion) {
 	var swig_r BtQuaternion
 	_swig_i_0 := arg1
-	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btTransform_getRotation_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtQuaternion)(SwigcptrBtQuaternion(C._wrap_btTransform_getRotation_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtTransform) SetFromOpenGLMatrix(arg2 *float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btTransform_setFromOpenGLMatrix_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
+	C._wrap_btTransform_setFromOpenGLMatrix_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransform) GetOpenGLMatrix(arg2 *float32) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btTransform_getOpenGLMatrix_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
+	C._wrap_btTransform_getOpenGLMatrix_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransform) SetOrigin(arg2 BtVector3) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btTransform_setOrigin_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btTransform_setOrigin_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransform) InvXform(arg2 BtVector3) (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btTransform_invXform_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btTransform_invXform_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtTransform) SetBasis(arg2 BtMatrix3x3) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btTransform_setBasis_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btTransform_setBasis_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransform) SetRotation(arg2 BtQuaternion) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btTransform_setRotation_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btTransform_setRotation_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransform) SetIdentity() {
 	_swig_i_0 := arg1
-	C._wrap_btTransform_setIdentity_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_btTransform_setIdentity_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func (arg1 SwigcptrBtTransform) Inverse() (_swig_ret BtTransform) {
 	var swig_r BtTransform
 	_swig_i_0 := arg1
-	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_btTransform_inverse_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_btTransform_inverse_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
@@ -3702,49 +3911,49 @@ func (arg1 SwigcptrBtTransform) InverseTimes(arg2 BtTransform) (_swig_ret BtTran
 	var swig_r BtTransform
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_btTransform_inverseTimes_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_btTransform_inverseTimes_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
 func BtTransformGetIdentity() (_swig_ret BtTransform) {
 	var swig_r BtTransform
-	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_btTransform_getIdentity_mbt_745dded929ebaf09()))
+	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_btTransform_getIdentity_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtTransform) Serialize(arg2 BtTransformFloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btTransform_serialize_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btTransform_serialize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransform) SerializeFloat(arg2 BtTransformFloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btTransform_serializeFloat_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btTransform_serializeFloat_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransform) DeSerialize(arg2 BtTransformFloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btTransform_deSerialize_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btTransform_deSerialize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransform) DeSerializeDouble(arg2 BtTransformDoubleData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btTransform_deSerializeDouble_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btTransform_deSerializeDouble_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransform) DeSerializeFloat(arg2 BtTransformFloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btTransform_deSerializeFloat_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btTransform_deSerializeFloat_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func DeleteBtTransform(arg1 BtTransform) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btTransform_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btTransform_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtTransform interface {
@@ -3782,38 +3991,38 @@ func (p SwigcptrBtTransformFloatData) SwigIsBtTransformFloatData() {
 func (arg1 SwigcptrBtTransformFloatData) SetM_basis(arg2 BtMatrix3x3FloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btTransformFloatData_m_basis_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btTransformFloatData_m_basis_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransformFloatData) GetM_basis() (_swig_ret BtMatrix3x3FloatData) {
 	var swig_r BtMatrix3x3FloatData
 	_swig_i_0 := arg1
-	swig_r = (BtMatrix3x3FloatData)(SwigcptrBtMatrix3x3FloatData(C._wrap_btTransformFloatData_m_basis_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtMatrix3x3FloatData)(SwigcptrBtMatrix3x3FloatData(C._wrap_btTransformFloatData_m_basis_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtTransformFloatData) SetM_origin(arg2 BtVector3FloatData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btTransformFloatData_m_origin_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btTransformFloatData_m_origin_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransformFloatData) GetM_origin() (_swig_ret BtVector3FloatData) {
 	var swig_r BtVector3FloatData
 	_swig_i_0 := arg1
-	swig_r = (BtVector3FloatData)(SwigcptrBtVector3FloatData(C._wrap_btTransformFloatData_m_origin_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3FloatData)(SwigcptrBtVector3FloatData(C._wrap_btTransformFloatData_m_origin_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func NewBtTransformFloatData() (_swig_ret BtTransformFloatData) {
 	var swig_r BtTransformFloatData
-	swig_r = (BtTransformFloatData)(SwigcptrBtTransformFloatData(C._wrap_new_btTransformFloatData_mbt_745dded929ebaf09()))
+	swig_r = (BtTransformFloatData)(SwigcptrBtTransformFloatData(C._wrap_new_btTransformFloatData_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func DeleteBtTransformFloatData(arg1 BtTransformFloatData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btTransformFloatData_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btTransformFloatData_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtTransformFloatData interface {
@@ -3837,38 +4046,38 @@ func (p SwigcptrBtTransformDoubleData) SwigIsBtTransformDoubleData() {
 func (arg1 SwigcptrBtTransformDoubleData) SetM_basis(arg2 BtMatrix3x3DoubleData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btTransformDoubleData_m_basis_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btTransformDoubleData_m_basis_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransformDoubleData) GetM_basis() (_swig_ret BtMatrix3x3DoubleData) {
 	var swig_r BtMatrix3x3DoubleData
 	_swig_i_0 := arg1
-	swig_r = (BtMatrix3x3DoubleData)(SwigcptrBtMatrix3x3DoubleData(C._wrap_btTransformDoubleData_m_basis_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtMatrix3x3DoubleData)(SwigcptrBtMatrix3x3DoubleData(C._wrap_btTransformDoubleData_m_basis_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtTransformDoubleData) SetM_origin(arg2 BtVector3DoubleData) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btTransformDoubleData_m_origin_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btTransformDoubleData_m_origin_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtTransformDoubleData) GetM_origin() (_swig_ret BtVector3DoubleData) {
 	var swig_r BtVector3DoubleData
 	_swig_i_0 := arg1
-	swig_r = (BtVector3DoubleData)(SwigcptrBtVector3DoubleData(C._wrap_btTransformDoubleData_m_origin_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3DoubleData)(SwigcptrBtVector3DoubleData(C._wrap_btTransformDoubleData_m_origin_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func NewBtTransformDoubleData() (_swig_ret BtTransformDoubleData) {
 	var swig_r BtTransformDoubleData
-	swig_r = (BtTransformDoubleData)(SwigcptrBtTransformDoubleData(C._wrap_new_btTransformDoubleData_mbt_745dded929ebaf09()))
+	swig_r = (BtTransformDoubleData)(SwigcptrBtTransformDoubleData(C._wrap_new_btTransformDoubleData_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func DeleteBtTransformDoubleData(arg1 BtTransformDoubleData) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btTransformDoubleData_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btTransformDoubleData_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtTransformDoubleData interface {
@@ -3891,19 +4100,19 @@ func (p SwigcptrBtMotionState) SwigIsBtMotionState() {
 
 func DeleteBtMotionState(arg1 BtMotionState) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btMotionState_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btMotionState_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func (arg1 SwigcptrBtMotionState) GetWorldTransform(arg2 BtTransform) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMotionState_getWorldTransform_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btMotionState_getWorldTransform_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtMotionState) SetWorldTransform(arg2 BtTransform) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMotionState_setWorldTransform_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btMotionState_setWorldTransform_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 type BtMotionState interface {
@@ -3925,52 +4134,52 @@ func (p SwigcptrBtDefaultMotionState) SwigIsBtDefaultMotionState() {
 func (arg1 SwigcptrBtDefaultMotionState) SetM_graphicsWorldTrans(arg2 BtTransform) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btDefaultMotionState_m_graphicsWorldTrans_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btDefaultMotionState_m_graphicsWorldTrans_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtDefaultMotionState) GetM_graphicsWorldTrans() (_swig_ret BtTransform) {
 	var swig_r BtTransform
 	_swig_i_0 := arg1
-	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_btDefaultMotionState_m_graphicsWorldTrans_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_btDefaultMotionState_m_graphicsWorldTrans_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtDefaultMotionState) SetM_centerOfMassOffset(arg2 BtTransform) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btDefaultMotionState_m_centerOfMassOffset_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btDefaultMotionState_m_centerOfMassOffset_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtDefaultMotionState) GetM_centerOfMassOffset() (_swig_ret BtTransform) {
 	var swig_r BtTransform
 	_swig_i_0 := arg1
-	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_btDefaultMotionState_m_centerOfMassOffset_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_btDefaultMotionState_m_centerOfMassOffset_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtDefaultMotionState) SetM_startWorldTrans(arg2 BtTransform) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btDefaultMotionState_m_startWorldTrans_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btDefaultMotionState_m_startWorldTrans_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtDefaultMotionState) GetM_startWorldTrans() (_swig_ret BtTransform) {
 	var swig_r BtTransform
 	_swig_i_0 := arg1
-	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_btDefaultMotionState_m_startWorldTrans_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtTransform)(SwigcptrBtTransform(C._wrap_btDefaultMotionState_m_startWorldTrans_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtDefaultMotionState) SetM_userPointer(arg2 uintptr) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btDefaultMotionState_m_userPointer_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btDefaultMotionState_m_userPointer_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtDefaultMotionState) GetM_userPointer() (_swig_ret uintptr) {
 	var swig_r uintptr
 	_swig_i_0 := arg1
-	swig_r = (uintptr)(C._wrap_btDefaultMotionState_m_userPointer_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (uintptr)(C._wrap_btDefaultMotionState_m_userPointer_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
@@ -3978,20 +4187,20 @@ func NewBtDefaultMotionState__SWIG_0(arg1 BtTransform, arg2 BtTransform) (_swig_
 	var swig_r BtDefaultMotionState
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtDefaultMotionState)(SwigcptrBtDefaultMotionState(C._wrap_new_btDefaultMotionState__SWIG_0_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtDefaultMotionState)(SwigcptrBtDefaultMotionState(C._wrap_new_btDefaultMotionState__SWIG_0_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
 func NewBtDefaultMotionState__SWIG_1(arg1 BtTransform) (_swig_ret BtDefaultMotionState) {
 	var swig_r BtDefaultMotionState
 	_swig_i_0 := getSwigcptr(arg1)
-	swig_r = (BtDefaultMotionState)(SwigcptrBtDefaultMotionState(C._wrap_new_btDefaultMotionState__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtDefaultMotionState)(SwigcptrBtDefaultMotionState(C._wrap_new_btDefaultMotionState__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func NewBtDefaultMotionState__SWIG_2() (_swig_ret BtDefaultMotionState) {
 	var swig_r BtDefaultMotionState
-	swig_r = (BtDefaultMotionState)(SwigcptrBtDefaultMotionState(C._wrap_new_btDefaultMotionState__SWIG_2_mbt_745dded929ebaf09()))
+	swig_r = (BtDefaultMotionState)(SwigcptrBtDefaultMotionState(C._wrap_new_btDefaultMotionState__SWIG_2_mbt_702ac83b51919141()))
 	return swig_r
 }
 
@@ -4012,18 +4221,18 @@ func NewBtDefaultMotionState(a ...interface{}) BtDefaultMotionState {
 func (arg1 SwigcptrBtDefaultMotionState) GetWorldTransform(arg2 BtTransform) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btDefaultMotionState_getWorldTransform_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btDefaultMotionState_getWorldTransform_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtDefaultMotionState) SetWorldTransform(arg2 BtTransform) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btDefaultMotionState_setWorldTransform_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btDefaultMotionState_setWorldTransform_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func DeleteBtDefaultMotionState(arg1 BtDefaultMotionState) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btDefaultMotionState_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btDefaultMotionState_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 func (p SwigcptrBtDefaultMotionState) SwigIsBtMotionState() {
@@ -4050,11 +4259,1116 @@ type BtDefaultMotionState interface {
 	SwigGetBtMotionState() BtMotionState
 }
 
+type SwigcptrBtHashString uintptr
+
+func (p SwigcptrBtHashString) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtHashString) SwigIsBtHashString() {
+}
+
+func (arg1 SwigcptrBtHashString) SetM_string1(arg2 Std_string) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btHashString_m_string1_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtHashString) GetM_string1() (_swig_ret Std_string) {
+	var swig_r Std_string
+	_swig_i_0 := arg1
+	swig_r = (Std_string)(SwigcptrStd_string(C._wrap_btHashString_m_string1_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtHashString) SetM_hash(arg2 uint) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btHashString_m_hash_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtHashString) GetM_hash() (_swig_ret uint) {
+	var swig_r uint
+	_swig_i_0 := arg1
+	swig_r = (uint)(C._wrap_btHashString_m_hash_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtHashString) GetHash() (_swig_ret uint) {
+	var swig_r uint
+	_swig_i_0 := arg1
+	swig_r = (uint)(C._wrap_btHashString_getHash_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func NewBtHashString__SWIG_0() (_swig_ret BtHashString) {
+	var swig_r BtHashString
+	swig_r = (BtHashString)(SwigcptrBtHashString(C._wrap_new_btHashString__SWIG_0_mbt_702ac83b51919141()))
+	return swig_r
+}
+
+func NewBtHashString__SWIG_1(arg1 string) (_swig_ret BtHashString) {
+	var swig_r BtHashString
+	_swig_i_0 := arg1
+	swig_r = (BtHashString)(SwigcptrBtHashString(C._wrap_new_btHashString__SWIG_1_mbt_702ac83b51919141(*(*C.swig_type_24)(unsafe.Pointer(&_swig_i_0)))))
+	if Swig_escape_always_false {
+		Swig_escape_val = arg1
+	}
+	return swig_r
+}
+
+func NewBtHashString(a ...interface{}) BtHashString {
+	argc := len(a)
+	if argc == 0 {
+		return NewBtHashString__SWIG_0()
+	}
+	if argc == 1 {
+		return NewBtHashString__SWIG_1(a[0].(string))
+	}
+	panic("No match for overloaded function call")
+}
+
+func (arg1 SwigcptrBtHashString) Equals(arg2 BtHashString) (_swig_ret bool) {
+	var swig_r bool
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	swig_r = (bool)(C._wrap_btHashString_equals_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	return swig_r
+}
+
+func DeleteBtHashString(arg1 BtHashString) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btHashString_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+type BtHashString interface {
+	Swigcptr() uintptr
+	SwigIsBtHashString()
+	SetM_string1(arg2 Std_string)
+	GetM_string1() (_swig_ret Std_string)
+	SetM_hash(arg2 uint)
+	GetM_hash() (_swig_ret uint)
+	GetHash() (_swig_ret uint)
+	Equals(arg2 BtHashString) (_swig_ret bool)
+}
+
+func GetBT_HASH_NULL() (_swig_ret int) {
+	var swig_r int
+	swig_r = (int)(C._wrap_BT_HASH_NULL_get_mbt_702ac83b51919141())
+	return swig_r
+}
+
+type SwigcptrBtHashInt uintptr
+
+func (p SwigcptrBtHashInt) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtHashInt) SwigIsBtHashInt() {
+}
+
+func NewBtHashInt__SWIG_0() (_swig_ret BtHashInt) {
+	var swig_r BtHashInt
+	swig_r = (BtHashInt)(SwigcptrBtHashInt(C._wrap_new_btHashInt__SWIG_0_mbt_702ac83b51919141()))
+	return swig_r
+}
+
+func NewBtHashInt__SWIG_1(arg1 int) (_swig_ret BtHashInt) {
+	var swig_r BtHashInt
+	_swig_i_0 := arg1
+	swig_r = (BtHashInt)(SwigcptrBtHashInt(C._wrap_new_btHashInt__SWIG_1_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0))))
+	return swig_r
+}
+
+func NewBtHashInt(a ...interface{}) BtHashInt {
+	argc := len(a)
+	if argc == 0 {
+		return NewBtHashInt__SWIG_0()
+	}
+	if argc == 1 {
+		return NewBtHashInt__SWIG_1(a[0].(int))
+	}
+	panic("No match for overloaded function call")
+}
+
+func (arg1 SwigcptrBtHashInt) GetUid1() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btHashInt_getUid1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtHashInt) SetUid1(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btHashInt_setUid1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtHashInt) Equals(arg2 BtHashInt) (_swig_ret bool) {
+	var swig_r bool
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	swig_r = (bool)(C._wrap_btHashInt_equals_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtHashInt) GetHash() (_swig_ret uint) {
+	var swig_r uint
+	_swig_i_0 := arg1
+	swig_r = (uint)(C._wrap_btHashInt_getHash_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func DeleteBtHashInt(arg1 BtHashInt) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btHashInt_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+type BtHashInt interface {
+	Swigcptr() uintptr
+	SwigIsBtHashInt()
+	GetUid1() (_swig_ret int)
+	SetUid1(arg2 int)
+	Equals(arg2 BtHashInt) (_swig_ret bool)
+	GetHash() (_swig_ret uint)
+}
+
+type SwigcptrBtHashPtr uintptr
+
+func (p SwigcptrBtHashPtr) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtHashPtr) SwigIsBtHashPtr() {
+}
+
+func NewBtHashPtr__SWIG_0() (_swig_ret BtHashPtr) {
+	var swig_r BtHashPtr
+	swig_r = (BtHashPtr)(SwigcptrBtHashPtr(C._wrap_new_btHashPtr__SWIG_0_mbt_702ac83b51919141()))
+	return swig_r
+}
+
+func NewBtHashPtr__SWIG_1(arg1 uintptr) (_swig_ret BtHashPtr) {
+	var swig_r BtHashPtr
+	_swig_i_0 := arg1
+	swig_r = (BtHashPtr)(SwigcptrBtHashPtr(C._wrap_new_btHashPtr__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func NewBtHashPtr(a ...interface{}) BtHashPtr {
+	argc := len(a)
+	if argc == 0 {
+		return NewBtHashPtr__SWIG_0()
+	}
+	if argc == 1 {
+		return NewBtHashPtr__SWIG_1(a[0].(uintptr))
+	}
+	panic("No match for overloaded function call")
+}
+
+func (arg1 SwigcptrBtHashPtr) GetPointer() (_swig_ret uintptr) {
+	var swig_r uintptr
+	_swig_i_0 := arg1
+	swig_r = (uintptr)(C._wrap_btHashPtr_getPointer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtHashPtr) Equals(arg2 BtHashPtr) (_swig_ret bool) {
+	var swig_r bool
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	swig_r = (bool)(C._wrap_btHashPtr_equals_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtHashPtr) GetHash() (_swig_ret uint) {
+	var swig_r uint
+	_swig_i_0 := arg1
+	swig_r = (uint)(C._wrap_btHashPtr_getHash_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func DeleteBtHashPtr(arg1 BtHashPtr) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btHashPtr_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+type BtHashPtr interface {
+	Swigcptr() uintptr
+	SwigIsBtHashPtr()
+	GetPointer() (_swig_ret uintptr)
+	Equals(arg2 BtHashPtr) (_swig_ret bool)
+	GetHash() (_swig_ret uint)
+}
+
+func SetSBulletDNAstr(arg1 string) {
+	_swig_i_0 := arg1
+	C._wrap_sBulletDNAstr_set_mbt_702ac83b51919141(*(*C.swig_type_25)(unsafe.Pointer(&_swig_i_0)))
+	if Swig_escape_always_false {
+		Swig_escape_val = arg1
+	}
+}
+
+func GetSBulletDNAstr() (_swig_ret string) {
+	var swig_r string
+	swig_r_p := C._wrap_sBulletDNAstr_get_mbt_702ac83b51919141()
+	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
+	var swig_r_1 string
+	swig_r_1 = swigCopyString(swig_r)
+	return swig_r_1
+}
+
+func SetSBulletDNAlen(arg1 int) {
+	_swig_i_0 := arg1
+	C._wrap_sBulletDNAlen_set_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0))
+}
+
+func GetSBulletDNAlen() (_swig_ret int) {
+	var swig_r int
+	swig_r = (int)(C._wrap_sBulletDNAlen_get_mbt_702ac83b51919141())
+	return swig_r
+}
+
+func SetSBulletDNAstr64(arg1 string) {
+	_swig_i_0 := arg1
+	C._wrap_sBulletDNAstr64_set_mbt_702ac83b51919141(*(*C.swig_type_27)(unsafe.Pointer(&_swig_i_0)))
+	if Swig_escape_always_false {
+		Swig_escape_val = arg1
+	}
+}
+
+func GetSBulletDNAstr64() (_swig_ret string) {
+	var swig_r string
+	swig_r_p := C._wrap_sBulletDNAstr64_get_mbt_702ac83b51919141()
+	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
+	var swig_r_1 string
+	swig_r_1 = swigCopyString(swig_r)
+	return swig_r_1
+}
+
+func SetSBulletDNAlen64(arg1 int) {
+	_swig_i_0 := arg1
+	C._wrap_sBulletDNAlen64_set_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0))
+}
+
+func GetSBulletDNAlen64() (_swig_ret int) {
+	var swig_r int
+	swig_r = (int)(C._wrap_sBulletDNAlen64_get_mbt_702ac83b51919141())
+	return swig_r
+}
+
+func BtStrLen(arg1 string) (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btStrLen_mbt_702ac83b51919141(*(*C.swig_type_29)(unsafe.Pointer(&_swig_i_0))))
+	if Swig_escape_always_false {
+		Swig_escape_val = arg1
+	}
+	return swig_r
+}
+
+type SwigcptrBtChunk uintptr
+
+func (p SwigcptrBtChunk) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtChunk) SwigIsBtChunk() {
+}
+
+func (arg1 SwigcptrBtChunk) SetM_chunkCode(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btChunk_m_chunkCode_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtChunk) GetM_chunkCode() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btChunk_m_chunkCode_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtChunk) SetM_length(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btChunk_m_length_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtChunk) GetM_length() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btChunk_m_length_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtChunk) SetM_oldPtr(arg2 uintptr) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btChunk_m_oldPtr_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtChunk) GetM_oldPtr() (_swig_ret uintptr) {
+	var swig_r uintptr
+	_swig_i_0 := arg1
+	swig_r = (uintptr)(C._wrap_btChunk_m_oldPtr_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtChunk) SetM_dna_nr(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btChunk_m_dna_nr_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtChunk) GetM_dna_nr() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btChunk_m_dna_nr_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtChunk) SetM_number(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btChunk_m_number_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtChunk) GetM_number() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btChunk_m_number_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func NewBtChunk() (_swig_ret BtChunk) {
+	var swig_r BtChunk
+	swig_r = (BtChunk)(SwigcptrBtChunk(C._wrap_new_btChunk_mbt_702ac83b51919141()))
+	return swig_r
+}
+
+func DeleteBtChunk(arg1 BtChunk) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btChunk_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+type BtChunk interface {
+	Swigcptr() uintptr
+	SwigIsBtChunk()
+	SetM_chunkCode(arg2 int)
+	GetM_chunkCode() (_swig_ret int)
+	SetM_length(arg2 int)
+	GetM_length() (_swig_ret int)
+	SetM_oldPtr(arg2 uintptr)
+	GetM_oldPtr() (_swig_ret uintptr)
+	SetM_dna_nr(arg2 int)
+	GetM_dna_nr() (_swig_ret int)
+	SetM_number(arg2 int)
+	GetM_number() (_swig_ret int)
+}
+
+type BtSerializationFlags int
+
+func _swig_getBT_SERIALIZE_NO_BVH() (_swig_ret BtSerializationFlags) {
+	var swig_r BtSerializationFlags
+	swig_r = (BtSerializationFlags)(C._wrap_BT_SERIALIZE_NO_BVH_mbt_702ac83b51919141())
+	return swig_r
+}
+
+var BT_SERIALIZE_NO_BVH BtSerializationFlags = _swig_getBT_SERIALIZE_NO_BVH()
+
+func _swig_getBT_SERIALIZE_NO_TRIANGLEINFOMAP() (_swig_ret BtSerializationFlags) {
+	var swig_r BtSerializationFlags
+	swig_r = (BtSerializationFlags)(C._wrap_BT_SERIALIZE_NO_TRIANGLEINFOMAP_mbt_702ac83b51919141())
+	return swig_r
+}
+
+var BT_SERIALIZE_NO_TRIANGLEINFOMAP BtSerializationFlags = _swig_getBT_SERIALIZE_NO_TRIANGLEINFOMAP()
+
+func _swig_getBT_SERIALIZE_NO_DUPLICATE_ASSERT() (_swig_ret BtSerializationFlags) {
+	var swig_r BtSerializationFlags
+	swig_r = (BtSerializationFlags)(C._wrap_BT_SERIALIZE_NO_DUPLICATE_ASSERT_mbt_702ac83b51919141())
+	return swig_r
+}
+
+var BT_SERIALIZE_NO_DUPLICATE_ASSERT BtSerializationFlags = _swig_getBT_SERIALIZE_NO_DUPLICATE_ASSERT()
+
+func _swig_getBT_SERIALIZE_CONTACT_MANIFOLDS() (_swig_ret BtSerializationFlags) {
+	var swig_r BtSerializationFlags
+	swig_r = (BtSerializationFlags)(C._wrap_BT_SERIALIZE_CONTACT_MANIFOLDS_mbt_702ac83b51919141())
+	return swig_r
+}
+
+var BT_SERIALIZE_CONTACT_MANIFOLDS BtSerializationFlags = _swig_getBT_SERIALIZE_CONTACT_MANIFOLDS()
+
+type SwigcptrBtSerializer uintptr
+
+func (p SwigcptrBtSerializer) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtSerializer) SwigIsBtSerializer() {
+}
+
+func DeleteBtSerializer(arg1 BtSerializer) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btSerializer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+func (arg1 SwigcptrBtSerializer) GetBufferPointer() (_swig_ret *byte) {
+	var swig_r *byte
+	_swig_i_0 := arg1
+	swig_r = (*byte)(C._wrap_btSerializer_getBufferPointer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtSerializer) GetCurrentBufferSize() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btSerializer_getCurrentBufferSize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtSerializer) Allocate(arg2 int64, arg3 int) (_swig_ret BtChunk) {
+	var swig_r BtChunk
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	_swig_i_2 := arg3
+	swig_r = (BtChunk)(SwigcptrBtChunk(C._wrap_btSerializer_allocate_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_type_30(_swig_i_1), C.swig_intgo(_swig_i_2))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtSerializer) FinalizeChunk(arg2 BtChunk, arg3 string, arg4 int, arg5 uintptr) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	_swig_i_2 := arg3
+	_swig_i_3 := arg4
+	_swig_i_4 := arg5
+	C._wrap_btSerializer_finalizeChunk_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), *(*C.swig_type_31)(unsafe.Pointer(&_swig_i_2)), C.swig_intgo(_swig_i_3), C.uintptr_t(_swig_i_4))
+	if Swig_escape_always_false {
+		Swig_escape_val = arg3
+	}
+}
+
+func (arg1 SwigcptrBtSerializer) FindPointer(arg2 uintptr) (_swig_ret uintptr) {
+	var swig_r uintptr
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	swig_r = (uintptr)(C._wrap_btSerializer_findPointer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtSerializer) GetUniquePointer(arg2 uintptr) (_swig_ret uintptr) {
+	var swig_r uintptr
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	swig_r = (uintptr)(C._wrap_btSerializer_getUniquePointer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtSerializer) StartSerialization() {
+	_swig_i_0 := arg1
+	C._wrap_btSerializer_startSerialization_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+func (arg1 SwigcptrBtSerializer) FinishSerialization() {
+	_swig_i_0 := arg1
+	C._wrap_btSerializer_finishSerialization_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+func (arg1 SwigcptrBtSerializer) FindNameForPointer(arg2 uintptr) (_swig_ret string) {
+	var swig_r string
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	swig_r_p := C._wrap_btSerializer_findNameForPointer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
+	var swig_r_1 string
+	swig_r_1 = swigCopyString(swig_r)
+	return swig_r_1
+}
+
+func (arg1 SwigcptrBtSerializer) RegisterNameForPointer(arg2 uintptr, arg3 string) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	_swig_i_2 := arg3
+	C._wrap_btSerializer_registerNameForPointer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), *(*C.swig_type_33)(unsafe.Pointer(&_swig_i_2)))
+	if Swig_escape_always_false {
+		Swig_escape_val = arg3
+	}
+}
+
+func (arg1 SwigcptrBtSerializer) SerializeName(arg2 string) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btSerializer_serializeName_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), *(*C.swig_type_34)(unsafe.Pointer(&_swig_i_1)))
+	if Swig_escape_always_false {
+		Swig_escape_val = arg2
+	}
+}
+
+func (arg1 SwigcptrBtSerializer) GetSerializationFlags() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btSerializer_getSerializationFlags_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtSerializer) SetSerializationFlags(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btSerializer_setSerializationFlags_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtSerializer) GetNumChunks() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btSerializer_getNumChunks_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtSerializer) GetChunk(arg2 int) (_swig_ret BtChunk) {
+	var swig_r BtChunk
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	swig_r = (BtChunk)(SwigcptrBtChunk(C._wrap_btSerializer_getChunk_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))))
+	return swig_r
+}
+
+type BtSerializer interface {
+	Swigcptr() uintptr
+	SwigIsBtSerializer()
+	GetBufferPointer() (_swig_ret *byte)
+	GetCurrentBufferSize() (_swig_ret int)
+	Allocate(arg2 int64, arg3 int) (_swig_ret BtChunk)
+	FinalizeChunk(arg2 BtChunk, arg3 string, arg4 int, arg5 uintptr)
+	FindPointer(arg2 uintptr) (_swig_ret uintptr)
+	GetUniquePointer(arg2 uintptr) (_swig_ret uintptr)
+	StartSerialization()
+	FinishSerialization()
+	FindNameForPointer(arg2 uintptr) (_swig_ret string)
+	RegisterNameForPointer(arg2 uintptr, arg3 string)
+	SerializeName(arg2 string)
+	GetSerializationFlags() (_swig_ret int)
+	SetSerializationFlags(arg2 int)
+	GetNumChunks() (_swig_ret int)
+	GetChunk(arg2 int) (_swig_ret BtChunk)
+}
+
+const BT_HEADER_LENGTH int = 12
+
+type SwigcptrBtPointerUid uintptr
+
+func (p SwigcptrBtPointerUid) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtPointerUid) SwigIsBtPointerUid() {
+}
+
+func NewBtPointerUid() (_swig_ret BtPointerUid) {
+	var swig_r BtPointerUid
+	swig_r = (BtPointerUid)(SwigcptrBtPointerUid(C._wrap_new_btPointerUid_mbt_702ac83b51919141()))
+	return swig_r
+}
+
+func DeleteBtPointerUid(arg1 BtPointerUid) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btPointerUid_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+type BtPointerUid interface {
+	Swigcptr() uintptr
+	SwigIsBtPointerUid()
+}
+
+type SwigcptrBtBulletSerializedArrays uintptr
+
+func (p SwigcptrBtBulletSerializedArrays) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtBulletSerializedArrays) SwigIsBtBulletSerializedArrays() {
+}
+
+func NewBtBulletSerializedArrays() (_swig_ret BtBulletSerializedArrays) {
+	var swig_r BtBulletSerializedArrays
+	swig_r = (BtBulletSerializedArrays)(SwigcptrBtBulletSerializedArrays(C._wrap_new_btBulletSerializedArrays_mbt_702ac83b51919141()))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_bvhsDouble(arg2 BtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_bvhsDouble_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_bvhsDouble() (_swig_ret BtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_bvhsDouble_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_bvhsFloat(arg2 BtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_bvhsFloat_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_bvhsFloat() (_swig_ret BtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_bvhsFloat_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_colShapeData(arg2 BtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_colShapeData_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_colShapeData() (_swig_ret BtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_colShapeData_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_dynamicWorldInfoDataDouble(arg2 BtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataDouble_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_dynamicWorldInfoDataDouble() (_swig_ret BtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataDouble_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_dynamicWorldInfoDataFloat(arg2 BtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataFloat_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_dynamicWorldInfoDataFloat() (_swig_ret BtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_dynamicWorldInfoDataFloat_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_rigidBodyDataDouble(arg2 BtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_rigidBodyDataDouble_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_rigidBodyDataDouble() (_swig_ret BtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_rigidBodyDataDouble_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_rigidBodyDataFloat(arg2 BtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_rigidBodyDataFloat_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_rigidBodyDataFloat() (_swig_ret BtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_rigidBodyDataFloat_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_collisionObjectDataDouble(arg2 BtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_collisionObjectDataDouble_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_collisionObjectDataDouble() (_swig_ret BtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_collisionObjectDataDouble_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_collisionObjectDataFloat(arg2 BtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_collisionObjectDataFloat_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_collisionObjectDataFloat() (_swig_ret BtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_collisionObjectDataFloat_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_constraintDataFloat(arg2 BtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_constraintDataFloat_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_constraintDataFloat() (_swig_ret BtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_constraintDataFloat_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_constraintDataDouble(arg2 BtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_constraintDataDouble_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_constraintDataDouble() (_swig_ret BtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_constraintDataDouble_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_constraintData(arg2 BtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_constraintData_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_constraintData() (_swig_ret BtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_constraintData_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_softBodyFloatData(arg2 BtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_softBodyFloatData_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_softBodyFloatData() (_swig_ret BtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_softBodyFloatData_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) SetM_softBodyDoubleData(arg2 BtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btBulletSerializedArrays_m_softBodyDoubleData_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtBulletSerializedArrays) GetM_softBodyDoubleData() (_swig_ret BtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_) {
+	var swig_r BtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_)(SwigcptrBtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_(C._wrap_btBulletSerializedArrays_m_softBodyDoubleData_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func DeleteBtBulletSerializedArrays(arg1 BtBulletSerializedArrays) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btBulletSerializedArrays_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+type BtBulletSerializedArrays interface {
+	Swigcptr() uintptr
+	SwigIsBtBulletSerializedArrays()
+	SetM_bvhsDouble(arg2 BtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_)
+	GetM_bvhsDouble() (_swig_ret BtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_)
+	SetM_bvhsFloat(arg2 BtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_)
+	GetM_bvhsFloat() (_swig_ret BtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_)
+	SetM_colShapeData(arg2 BtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_)
+	GetM_colShapeData() (_swig_ret BtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_)
+	SetM_dynamicWorldInfoDataDouble(arg2 BtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_)
+	GetM_dynamicWorldInfoDataDouble() (_swig_ret BtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_)
+	SetM_dynamicWorldInfoDataFloat(arg2 BtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_)
+	GetM_dynamicWorldInfoDataFloat() (_swig_ret BtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_)
+	SetM_rigidBodyDataDouble(arg2 BtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_)
+	GetM_rigidBodyDataDouble() (_swig_ret BtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_)
+	SetM_rigidBodyDataFloat(arg2 BtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_)
+	GetM_rigidBodyDataFloat() (_swig_ret BtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_)
+	SetM_collisionObjectDataDouble(arg2 BtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_)
+	GetM_collisionObjectDataDouble() (_swig_ret BtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_)
+	SetM_collisionObjectDataFloat(arg2 BtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_)
+	GetM_collisionObjectDataFloat() (_swig_ret BtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_)
+	SetM_constraintDataFloat(arg2 BtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_)
+	GetM_constraintDataFloat() (_swig_ret BtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_)
+	SetM_constraintDataDouble(arg2 BtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_)
+	GetM_constraintDataDouble() (_swig_ret BtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_)
+	SetM_constraintData(arg2 BtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_)
+	GetM_constraintData() (_swig_ret BtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_)
+	SetM_softBodyFloatData(arg2 BtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_)
+	GetM_softBodyFloatData() (_swig_ret BtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_)
+	SetM_softBodyDoubleData(arg2 BtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_)
+	GetM_softBodyDoubleData() (_swig_ret BtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_)
+}
+
+type SwigcptrBtDefaultSerializer uintptr
+
+func (p SwigcptrBtDefaultSerializer) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtDefaultSerializer) SwigIsBtDefaultSerializer() {
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) SetM_skipPointers(arg2 BtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btDefaultSerializer_m_skipPointers_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) GetM_skipPointers() (_swig_ret BtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_) {
+	var swig_r BtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_
+	_swig_i_0 := arg1
+	swig_r = (BtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_)(SwigcptrBtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_(C._wrap_btDefaultSerializer_m_skipPointers_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func NewBtDefaultSerializer__SWIG_0(arg1 int, arg2 *byte) (_swig_ret BtDefaultSerializer) {
+	var swig_r BtDefaultSerializer
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	swig_r = (BtDefaultSerializer)(SwigcptrBtDefaultSerializer(C._wrap_new_btDefaultSerializer__SWIG_0_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0), C.swig_voidp(_swig_i_1))))
+	return swig_r
+}
+
+func NewBtDefaultSerializer__SWIG_1(arg1 int) (_swig_ret BtDefaultSerializer) {
+	var swig_r BtDefaultSerializer
+	_swig_i_0 := arg1
+	swig_r = (BtDefaultSerializer)(SwigcptrBtDefaultSerializer(C._wrap_new_btDefaultSerializer__SWIG_1_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0))))
+	return swig_r
+}
+
+func NewBtDefaultSerializer__SWIG_2() (_swig_ret BtDefaultSerializer) {
+	var swig_r BtDefaultSerializer
+	swig_r = (BtDefaultSerializer)(SwigcptrBtDefaultSerializer(C._wrap_new_btDefaultSerializer__SWIG_2_mbt_702ac83b51919141()))
+	return swig_r
+}
+
+func NewBtDefaultSerializer(a ...interface{}) BtDefaultSerializer {
+	argc := len(a)
+	if argc == 0 {
+		return NewBtDefaultSerializer__SWIG_2()
+	}
+	if argc == 1 {
+		return NewBtDefaultSerializer__SWIG_1(a[0].(int))
+	}
+	if argc == 2 {
+		return NewBtDefaultSerializer__SWIG_0(a[0].(int), a[1].(*byte))
+	}
+	panic("No match for overloaded function call")
+}
+
+func DeleteBtDefaultSerializer(arg1 BtDefaultSerializer) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btDefaultSerializer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+func BtDefaultSerializerGetMemoryDnaSizeInBytes() (_swig_ret int) {
+	var swig_r int
+	swig_r = (int)(C._wrap_btDefaultSerializer_getMemoryDnaSizeInBytes_mbt_702ac83b51919141())
+	return swig_r
+}
+
+func BtDefaultSerializerGetMemoryDna() (_swig_ret string) {
+	var swig_r string
+	swig_r_p := C._wrap_btDefaultSerializer_getMemoryDna_mbt_702ac83b51919141()
+	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
+	var swig_r_1 string
+	swig_r_1 = swigCopyString(swig_r)
+	return swig_r_1
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) InsertHeader() {
+	_swig_i_0 := arg1
+	C._wrap_btDefaultSerializer_insertHeader_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) WriteHeader(arg2 *byte) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btDefaultSerializer_writeHeader_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_voidp(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) StartSerialization() {
+	_swig_i_0 := arg1
+	C._wrap_btDefaultSerializer_startSerialization_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) FinishSerialization() {
+	_swig_i_0 := arg1
+	C._wrap_btDefaultSerializer_finishSerialization_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) GetUniquePointer(arg2 uintptr) (_swig_ret uintptr) {
+	var swig_r uintptr
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	swig_r = (uintptr)(C._wrap_btDefaultSerializer_getUniquePointer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) GetBufferPointer() (_swig_ret *byte) {
+	var swig_r *byte
+	_swig_i_0 := arg1
+	swig_r = (*byte)(C._wrap_btDefaultSerializer_getBufferPointer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) GetCurrentBufferSize() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btDefaultSerializer_getCurrentBufferSize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) FinalizeChunk(arg2 BtChunk, arg3 string, arg4 int, arg5 uintptr) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	_swig_i_2 := arg3
+	_swig_i_3 := arg4
+	_swig_i_4 := arg5
+	C._wrap_btDefaultSerializer_finalizeChunk_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), *(*C.swig_type_36)(unsafe.Pointer(&_swig_i_2)), C.swig_intgo(_swig_i_3), C.uintptr_t(_swig_i_4))
+	if Swig_escape_always_false {
+		Swig_escape_val = arg3
+	}
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) InternalAlloc(arg2 int64) (_swig_ret *byte) {
+	var swig_r *byte
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	swig_r = (*byte)(C._wrap_btDefaultSerializer_internalAlloc_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_type_37(_swig_i_1)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) Allocate(arg2 int64, arg3 int) (_swig_ret BtChunk) {
+	var swig_r BtChunk
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	_swig_i_2 := arg3
+	swig_r = (BtChunk)(SwigcptrBtChunk(C._wrap_btDefaultSerializer_allocate_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_type_38(_swig_i_1), C.swig_intgo(_swig_i_2))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) FindNameForPointer(arg2 uintptr) (_swig_ret string) {
+	var swig_r string
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	swig_r_p := C._wrap_btDefaultSerializer_findNameForPointer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
+	var swig_r_1 string
+	swig_r_1 = swigCopyString(swig_r)
+	return swig_r_1
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) RegisterNameForPointer(arg2 uintptr, arg3 string) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	_swig_i_2 := arg3
+	C._wrap_btDefaultSerializer_registerNameForPointer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), *(*C.swig_type_40)(unsafe.Pointer(&_swig_i_2)))
+	if Swig_escape_always_false {
+		Swig_escape_val = arg3
+	}
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) SerializeName(arg2 string) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btDefaultSerializer_serializeName_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), *(*C.swig_type_41)(unsafe.Pointer(&_swig_i_1)))
+	if Swig_escape_always_false {
+		Swig_escape_val = arg2
+	}
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) GetSerializationFlags() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btDefaultSerializer_getSerializationFlags_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) SetSerializationFlags(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btDefaultSerializer_setSerializationFlags_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) GetNumChunks() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btDefaultSerializer_getNumChunks_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtDefaultSerializer) GetChunk(arg2 int) (_swig_ret BtChunk) {
+	var swig_r BtChunk
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	swig_r = (BtChunk)(SwigcptrBtChunk(C._wrap_btDefaultSerializer_getChunk_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))))
+	return swig_r
+}
+
+func (_swig_base SwigcptrBtDefaultSerializer) FindPointer(arg1 uintptr) (_swig_ret uintptr) {
+	var swig_r uintptr
+	_swig_i_0 := arg1
+	swig_r = (uintptr)(C._wrap_btDefaultSerializer_findPointer_mbt_702ac83b51919141(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (p SwigcptrBtDefaultSerializer) SwigIsBtSerializer() {
+}
+
+func (p SwigcptrBtDefaultSerializer) SwigGetBtSerializer() BtSerializer {
+	return SwigcptrBtSerializer(getSwigcptr(p))
+}
+
+type BtDefaultSerializer interface {
+	Swigcptr() uintptr
+	SwigIsBtDefaultSerializer()
+	SetM_skipPointers(arg2 BtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_)
+	GetM_skipPointers() (_swig_ret BtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_)
+	InsertHeader()
+	WriteHeader(arg2 *byte)
+	StartSerialization()
+	FinishSerialization()
+	GetUniquePointer(arg2 uintptr) (_swig_ret uintptr)
+	GetBufferPointer() (_swig_ret *byte)
+	GetCurrentBufferSize() (_swig_ret int)
+	FinalizeChunk(arg2 BtChunk, arg3 string, arg4 int, arg5 uintptr)
+	InternalAlloc(arg2 int64) (_swig_ret *byte)
+	Allocate(arg2 int64, arg3 int) (_swig_ret BtChunk)
+	FindNameForPointer(arg2 uintptr) (_swig_ret string)
+	RegisterNameForPointer(arg2 uintptr, arg3 string)
+	SerializeName(arg2 string)
+	GetSerializationFlags() (_swig_ret int)
+	SetSerializationFlags(arg2 int)
+	GetNumChunks() (_swig_ret int)
+	GetChunk(arg2 int) (_swig_ret BtChunk)
+	FindPointer(arg1 uintptr) (_swig_ret uintptr)
+	SwigIsBtSerializer()
+	SwigGetBtSerializer() BtSerializer
+}
+
 type BroadphaseNativeTypes int
 
 func _swig_getBOX_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_BOX_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_BOX_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4062,7 +5376,7 @@ var BOX_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getBOX_SHAPE_PROXYTYPE()
 
 func _swig_getTRIANGLE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_TRIANGLE_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_TRIANGLE_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4070,7 +5384,7 @@ var TRIANGLE_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getTRIANGLE_SHAPE_PRO
 
 func _swig_getTETRAHEDRAL_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_TETRAHEDRAL_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_TETRAHEDRAL_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4078,7 +5392,7 @@ var TETRAHEDRAL_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getTETRAHEDRAL_SHA
 
 func _swig_getCONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4086,7 +5400,7 @@ var CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCONVEX_
 
 func _swig_getCONVEX_HULL_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_HULL_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_HULL_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4094,7 +5408,7 @@ var CONVEX_HULL_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCONVEX_HULL_SHA
 
 func _swig_getCONVEX_POINT_CLOUD_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4102,7 +5416,7 @@ var CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCONVEX_P
 
 func _swig_getCUSTOM_POLYHEDRAL_SHAPE_TYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CUSTOM_POLYHEDRAL_SHAPE_TYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CUSTOM_POLYHEDRAL_SHAPE_TYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4110,7 +5424,7 @@ var CUSTOM_POLYHEDRAL_SHAPE_TYPE BroadphaseNativeTypes = _swig_getCUSTOM_POLYHED
 
 func _swig_getIMPLICIT_CONVEX_SHAPES_START_HERE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_IMPLICIT_CONVEX_SHAPES_START_HERE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_IMPLICIT_CONVEX_SHAPES_START_HERE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4118,7 +5432,7 @@ var IMPLICIT_CONVEX_SHAPES_START_HERE BroadphaseNativeTypes = _swig_getIMPLICIT_
 
 func _swig_getSPHERE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_SPHERE_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_SPHERE_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4126,7 +5440,7 @@ var SPHERE_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getSPHERE_SHAPE_PROXYTY
 
 func _swig_getMULTI_SPHERE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_MULTI_SPHERE_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_MULTI_SPHERE_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4134,7 +5448,7 @@ var MULTI_SPHERE_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getMULTI_SPHERE_S
 
 func _swig_getCAPSULE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CAPSULE_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CAPSULE_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4142,7 +5456,7 @@ var CAPSULE_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCAPSULE_SHAPE_PROXY
 
 func _swig_getCONE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CONE_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CONE_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4150,7 +5464,7 @@ var CONE_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCONE_SHAPE_PROXYTYPE()
 
 func _swig_getCONVEX_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4158,7 +5472,7 @@ var CONVEX_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCONVEX_SHAPE_PROXYTY
 
 func _swig_getCYLINDER_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CYLINDER_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CYLINDER_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4166,7 +5480,7 @@ var CYLINDER_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCYLINDER_SHAPE_PRO
 
 func _swig_getUNIFORM_SCALING_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_UNIFORM_SCALING_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_UNIFORM_SCALING_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4174,7 +5488,7 @@ var UNIFORM_SCALING_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getUNIFORM_SCA
 
 func _swig_getMINKOWSKI_SUM_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_MINKOWSKI_SUM_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_MINKOWSKI_SUM_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4182,7 +5496,7 @@ var MINKOWSKI_SUM_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getMINKOWSKI_SUM
 
 func _swig_getMINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4190,7 +5504,7 @@ var MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getMINKOW
 
 func _swig_getBOX_2D_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_BOX_2D_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_BOX_2D_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4198,7 +5512,7 @@ var BOX_2D_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getBOX_2D_SHAPE_PROXYTY
 
 func _swig_getCONVEX_2D_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_2D_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_2D_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4206,7 +5520,7 @@ var CONVEX_2D_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCONVEX_2D_SHAPE_P
 
 func _swig_getCUSTOM_CONVEX_SHAPE_TYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CUSTOM_CONVEX_SHAPE_TYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CUSTOM_CONVEX_SHAPE_TYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4214,7 +5528,7 @@ var CUSTOM_CONVEX_SHAPE_TYPE BroadphaseNativeTypes = _swig_getCUSTOM_CONVEX_SHAP
 
 func _swig_getCONCAVE_SHAPES_START_HERE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CONCAVE_SHAPES_START_HERE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CONCAVE_SHAPES_START_HERE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4222,7 +5536,7 @@ var CONCAVE_SHAPES_START_HERE BroadphaseNativeTypes = _swig_getCONCAVE_SHAPES_ST
 
 func _swig_getTRIANGLE_MESH_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_TRIANGLE_MESH_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_TRIANGLE_MESH_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4230,7 +5544,7 @@ var TRIANGLE_MESH_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getTRIANGLE_MESH
 
 func _swig_getSCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4238,7 +5552,7 @@ var SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getSCALED
 
 func _swig_getFAST_CONCAVE_MESH_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_FAST_CONCAVE_MESH_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_FAST_CONCAVE_MESH_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4246,7 +5560,7 @@ var FAST_CONCAVE_MESH_PROXYTYPE BroadphaseNativeTypes = _swig_getFAST_CONCAVE_ME
 
 func _swig_getTERRAIN_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_TERRAIN_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_TERRAIN_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4254,7 +5568,7 @@ var TERRAIN_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getTERRAIN_SHAPE_PROXY
 
 func _swig_getGIMPACT_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_GIMPACT_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_GIMPACT_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4262,7 +5576,7 @@ var GIMPACT_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getGIMPACT_SHAPE_PROXY
 
 func _swig_getMULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4270,7 +5584,7 @@ var MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE BroadphaseNativeTypes = _swig_getMULTI
 
 func _swig_getEMPTY_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_EMPTY_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_EMPTY_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4278,7 +5592,7 @@ var EMPTY_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getEMPTY_SHAPE_PROXYTYPE
 
 func _swig_getSTATIC_PLANE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_STATIC_PLANE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_STATIC_PLANE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4286,7 +5600,7 @@ var STATIC_PLANE_PROXYTYPE BroadphaseNativeTypes = _swig_getSTATIC_PLANE_PROXYTY
 
 func _swig_getCUSTOM_CONCAVE_SHAPE_TYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CUSTOM_CONCAVE_SHAPE_TYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CUSTOM_CONCAVE_SHAPE_TYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4294,7 +5608,7 @@ var CUSTOM_CONCAVE_SHAPE_TYPE BroadphaseNativeTypes = _swig_getCUSTOM_CONCAVE_SH
 
 func _swig_getSDF_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_SDF_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_SDF_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4302,7 +5616,7 @@ var SDF_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getSDF_SHAPE_PROXYTYPE()
 
 func _swig_getCONCAVE_SHAPES_END_HERE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_CONCAVE_SHAPES_END_HERE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_CONCAVE_SHAPES_END_HERE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4310,7 +5624,7 @@ var CONCAVE_SHAPES_END_HERE BroadphaseNativeTypes = _swig_getCONCAVE_SHAPES_END_
 
 func _swig_getCOMPOUND_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_COMPOUND_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_COMPOUND_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4318,7 +5632,7 @@ var COMPOUND_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCOMPOUND_SHAPE_PRO
 
 func _swig_getSOFTBODY_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_SOFTBODY_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_SOFTBODY_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4326,7 +5640,7 @@ var SOFTBODY_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getSOFTBODY_SHAPE_PRO
 
 func _swig_getHFFLUID_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_HFFLUID_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_HFFLUID_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4334,7 +5648,7 @@ var HFFLUID_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getHFFLUID_SHAPE_PROXY
 
 func _swig_getHFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4342,7 +5656,7 @@ var HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getHFFL
 
 func _swig_getINVALID_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_INVALID_SHAPE_PROXYTYPE_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_INVALID_SHAPE_PROXYTYPE_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4350,7 +5664,7 @@ var INVALID_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getINVALID_SHAPE_PROXY
 
 func _swig_getMAX_BROADPHASE_COLLISION_TYPES() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
-	swig_r = (BroadphaseNativeTypes)(C._wrap_MAX_BROADPHASE_COLLISION_TYPES_mbt_745dded929ebaf09())
+	swig_r = (BroadphaseNativeTypes)(C._wrap_MAX_BROADPHASE_COLLISION_TYPES_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4369,7 +5683,7 @@ type BtBroadphaseProxyCollisionFilterGroups int
 
 func _swig_getbtBroadphaseProxy_DefaultFilter_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
-	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_DefaultFilter_btBroadphaseProxy_mbt_745dded929ebaf09())
+	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_DefaultFilter_btBroadphaseProxy_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4377,7 +5691,7 @@ var BtBroadphaseProxyDefaultFilter BtBroadphaseProxyCollisionFilterGroups = _swi
 
 func _swig_getbtBroadphaseProxy_StaticFilter_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
-	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_StaticFilter_btBroadphaseProxy_mbt_745dded929ebaf09())
+	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_StaticFilter_btBroadphaseProxy_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4385,7 +5699,7 @@ var BtBroadphaseProxyStaticFilter BtBroadphaseProxyCollisionFilterGroups = _swig
 
 func _swig_getbtBroadphaseProxy_KinematicFilter_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
-	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_KinematicFilter_btBroadphaseProxy_mbt_745dded929ebaf09())
+	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_KinematicFilter_btBroadphaseProxy_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4393,7 +5707,7 @@ var BtBroadphaseProxyKinematicFilter BtBroadphaseProxyCollisionFilterGroups = _s
 
 func _swig_getbtBroadphaseProxy_DebrisFilter_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
-	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_DebrisFilter_btBroadphaseProxy_mbt_745dded929ebaf09())
+	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_DebrisFilter_btBroadphaseProxy_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4401,7 +5715,7 @@ var BtBroadphaseProxyDebrisFilter BtBroadphaseProxyCollisionFilterGroups = _swig
 
 func _swig_getbtBroadphaseProxy_SensorTrigger_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
-	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_SensorTrigger_btBroadphaseProxy_mbt_745dded929ebaf09())
+	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_SensorTrigger_btBroadphaseProxy_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4409,7 +5723,7 @@ var BtBroadphaseProxySensorTrigger BtBroadphaseProxyCollisionFilterGroups = _swi
 
 func _swig_getbtBroadphaseProxy_CharacterFilter_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
-	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_CharacterFilter_btBroadphaseProxy_mbt_745dded929ebaf09())
+	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_CharacterFilter_btBroadphaseProxy_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4417,7 +5731,7 @@ var BtBroadphaseProxyCharacterFilter BtBroadphaseProxyCollisionFilterGroups = _s
 
 func _swig_getbtBroadphaseProxy_AllFilter_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
-	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_AllFilter_btBroadphaseProxy_mbt_745dded929ebaf09())
+	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_AllFilter_btBroadphaseProxy_mbt_702ac83b51919141())
 	return swig_r
 }
 
@@ -4426,91 +5740,91 @@ var BtBroadphaseProxyAllFilter BtBroadphaseProxyCollisionFilterGroups = _swig_ge
 func (arg1 SwigcptrBtBroadphaseProxy) SetM_clientObject(arg2 uintptr) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btBroadphaseProxy_m_clientObject_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btBroadphaseProxy_m_clientObject_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtBroadphaseProxy) GetM_clientObject() (_swig_ret uintptr) {
 	var swig_r uintptr
 	_swig_i_0 := arg1
-	swig_r = (uintptr)(C._wrap_btBroadphaseProxy_m_clientObject_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (uintptr)(C._wrap_btBroadphaseProxy_m_clientObject_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtBroadphaseProxy) SetM_collisionFilterGroup(arg2 int) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btBroadphaseProxy_m_collisionFilterGroup_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+	C._wrap_btBroadphaseProxy_m_collisionFilterGroup_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtBroadphaseProxy) GetM_collisionFilterGroup() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btBroadphaseProxy_m_collisionFilterGroup_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btBroadphaseProxy_m_collisionFilterGroup_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtBroadphaseProxy) SetM_collisionFilterMask(arg2 int) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btBroadphaseProxy_m_collisionFilterMask_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+	C._wrap_btBroadphaseProxy_m_collisionFilterMask_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtBroadphaseProxy) GetM_collisionFilterMask() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btBroadphaseProxy_m_collisionFilterMask_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btBroadphaseProxy_m_collisionFilterMask_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtBroadphaseProxy) SetM_uniqueId(arg2 int) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	C._wrap_btBroadphaseProxy_m_uniqueId_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+	C._wrap_btBroadphaseProxy_m_uniqueId_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtBroadphaseProxy) GetM_uniqueId() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btBroadphaseProxy_m_uniqueId_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btBroadphaseProxy_m_uniqueId_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtBroadphaseProxy) SetM_aabbMin(arg2 BtVector3) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btBroadphaseProxy_m_aabbMin_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btBroadphaseProxy_m_aabbMin_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtBroadphaseProxy) GetM_aabbMin() (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btBroadphaseProxy_m_aabbMin_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btBroadphaseProxy_m_aabbMin_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtBroadphaseProxy) SetM_aabbMax(arg2 BtVector3) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btBroadphaseProxy_m_aabbMax_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btBroadphaseProxy_m_aabbMax_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtBroadphaseProxy) GetM_aabbMax() (_swig_ret BtVector3) {
 	var swig_r BtVector3
 	_swig_i_0 := arg1
-	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btBroadphaseProxy_m_aabbMax_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btBroadphaseProxy_m_aabbMax_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtBroadphaseProxy) GetUid() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btBroadphaseProxy_getUid_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0)))
+	swig_r = (int)(C._wrap_btBroadphaseProxy_getUid_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
 	return swig_r
 }
 
 func NewBtBroadphaseProxy__SWIG_0() (_swig_ret BtBroadphaseProxy) {
 	var swig_r BtBroadphaseProxy
-	swig_r = (BtBroadphaseProxy)(SwigcptrBtBroadphaseProxy(C._wrap_new_btBroadphaseProxy__SWIG_0_mbt_745dded929ebaf09()))
+	swig_r = (BtBroadphaseProxy)(SwigcptrBtBroadphaseProxy(C._wrap_new_btBroadphaseProxy__SWIG_0_mbt_702ac83b51919141()))
 	return swig_r
 }
 
@@ -4521,7 +5835,7 @@ func NewBtBroadphaseProxy__SWIG_1(arg1 BtVector3, arg2 BtVector3, arg3 uintptr, 
 	_swig_i_2 := arg3
 	_swig_i_3 := arg4
 	_swig_i_4 := arg5
-	swig_r = (BtBroadphaseProxy)(SwigcptrBtBroadphaseProxy(C._wrap_new_btBroadphaseProxy__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.swig_intgo(_swig_i_3), C.swig_intgo(_swig_i_4))))
+	swig_r = (BtBroadphaseProxy)(SwigcptrBtBroadphaseProxy(C._wrap_new_btBroadphaseProxy__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.swig_intgo(_swig_i_3), C.swig_intgo(_swig_i_4))))
 	return swig_r
 }
 
@@ -4539,62 +5853,62 @@ func NewBtBroadphaseProxy(a ...interface{}) BtBroadphaseProxy {
 func BtBroadphaseProxyIsPolyhedral(arg1 int) (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
-	swig_r = (bool)(C._wrap_btBroadphaseProxy_isPolyhedral_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0)))
+	swig_r = (bool)(C._wrap_btBroadphaseProxy_isPolyhedral_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
 func BtBroadphaseProxyIsConvex(arg1 int) (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
-	swig_r = (bool)(C._wrap_btBroadphaseProxy_isConvex_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0)))
+	swig_r = (bool)(C._wrap_btBroadphaseProxy_isConvex_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
 func BtBroadphaseProxyIsNonMoving(arg1 int) (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
-	swig_r = (bool)(C._wrap_btBroadphaseProxy_isNonMoving_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0)))
+	swig_r = (bool)(C._wrap_btBroadphaseProxy_isNonMoving_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
 func BtBroadphaseProxyIsConcave(arg1 int) (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
-	swig_r = (bool)(C._wrap_btBroadphaseProxy_isConcave_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0)))
+	swig_r = (bool)(C._wrap_btBroadphaseProxy_isConcave_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
 func BtBroadphaseProxyIsCompound(arg1 int) (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
-	swig_r = (bool)(C._wrap_btBroadphaseProxy_isCompound_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0)))
+	swig_r = (bool)(C._wrap_btBroadphaseProxy_isCompound_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
 func BtBroadphaseProxyIsSoftBody(arg1 int) (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
-	swig_r = (bool)(C._wrap_btBroadphaseProxy_isSoftBody_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0)))
+	swig_r = (bool)(C._wrap_btBroadphaseProxy_isSoftBody_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
 func BtBroadphaseProxyIsInfinite(arg1 int) (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
-	swig_r = (bool)(C._wrap_btBroadphaseProxy_isInfinite_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0)))
+	swig_r = (bool)(C._wrap_btBroadphaseProxy_isInfinite_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
 func BtBroadphaseProxyIsConvex2d(arg1 int) (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
-	swig_r = (bool)(C._wrap_btBroadphaseProxy_isConvex2d_mbt_745dded929ebaf09(C.swig_intgo(_swig_i_0)))
+	swig_r = (bool)(C._wrap_btBroadphaseProxy_isConvex2d_mbt_702ac83b51919141(C.swig_intgo(_swig_i_0)))
 	return swig_r
 }
 
 func DeleteBtBroadphaseProxy(arg1 BtBroadphaseProxy) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btBroadphaseProxy_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btBroadphaseProxy_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtBroadphaseProxy interface {
@@ -4626,7 +5940,7 @@ func (p SwigcptrBtBroadphasePair) SwigIsBtBroadphasePair() {
 
 func NewBtBroadphasePair__SWIG_0() (_swig_ret BtBroadphasePair) {
 	var swig_r BtBroadphasePair
-	swig_r = (BtBroadphasePair)(SwigcptrBtBroadphasePair(C._wrap_new_btBroadphasePair__SWIG_0_mbt_745dded929ebaf09()))
+	swig_r = (BtBroadphasePair)(SwigcptrBtBroadphasePair(C._wrap_new_btBroadphasePair__SWIG_0_mbt_702ac83b51919141()))
 	return swig_r
 }
 
@@ -4634,7 +5948,7 @@ func NewBtBroadphasePair__SWIG_1(arg1 BtBroadphaseProxy, arg2 BtBroadphaseProxy)
 	var swig_r BtBroadphasePair
 	_swig_i_0 := getSwigcptr(arg1)
 	_swig_i_1 := getSwigcptr(arg2)
-	swig_r = (BtBroadphasePair)(SwigcptrBtBroadphasePair(C._wrap_new_btBroadphasePair__SWIG_1_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	swig_r = (BtBroadphasePair)(SwigcptrBtBroadphasePair(C._wrap_new_btBroadphasePair__SWIG_1_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
 	return swig_r
 }
 
@@ -4652,45 +5966,45 @@ func NewBtBroadphasePair(a ...interface{}) BtBroadphasePair {
 func (arg1 SwigcptrBtBroadphasePair) SetM_pProxy0(arg2 BtBroadphaseProxy) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btBroadphasePair_m_pProxy0_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btBroadphasePair_m_pProxy0_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtBroadphasePair) GetM_pProxy0() (_swig_ret BtBroadphaseProxy) {
 	var swig_r BtBroadphaseProxy
 	_swig_i_0 := arg1
-	swig_r = (BtBroadphaseProxy)(SwigcptrBtBroadphaseProxy(C._wrap_btBroadphasePair_m_pProxy0_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtBroadphaseProxy)(SwigcptrBtBroadphaseProxy(C._wrap_btBroadphasePair_m_pProxy0_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtBroadphasePair) SetM_pProxy1(arg2 BtBroadphaseProxy) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btBroadphasePair_m_pProxy1_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btBroadphasePair_m_pProxy1_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtBroadphasePair) GetM_pProxy1() (_swig_ret BtBroadphaseProxy) {
 	var swig_r BtBroadphaseProxy
 	_swig_i_0 := arg1
-	swig_r = (BtBroadphaseProxy)(SwigcptrBtBroadphaseProxy(C._wrap_btBroadphasePair_m_pProxy1_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtBroadphaseProxy)(SwigcptrBtBroadphaseProxy(C._wrap_btBroadphasePair_m_pProxy1_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func (arg1 SwigcptrBtBroadphasePair) SetM_algorithm(arg2 BtCollisionAlgorithm) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btBroadphasePair_m_algorithm_set_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+	C._wrap_btBroadphasePair_m_algorithm_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtBroadphasePair) GetM_algorithm() (_swig_ret BtCollisionAlgorithm) {
 	var swig_r BtCollisionAlgorithm
 	_swig_i_0 := arg1
-	swig_r = (BtCollisionAlgorithm)(SwigcptrBtCollisionAlgorithm(C._wrap_btBroadphasePair_m_algorithm_get_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtCollisionAlgorithm)(SwigcptrBtCollisionAlgorithm(C._wrap_btBroadphasePair_m_algorithm_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
 func DeleteBtBroadphasePair(arg1 BtBroadphasePair) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btBroadphasePair_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btBroadphasePair_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtBroadphasePair interface {
@@ -4715,18 +6029,506 @@ func (p SwigcptrBtBroadphasePairSortPredicate) SwigIsBtBroadphasePairSortPredica
 
 func NewBtBroadphasePairSortPredicate() (_swig_ret BtBroadphasePairSortPredicate) {
 	var swig_r BtBroadphasePairSortPredicate
-	swig_r = (BtBroadphasePairSortPredicate)(SwigcptrBtBroadphasePairSortPredicate(C._wrap_new_btBroadphasePairSortPredicate_mbt_745dded929ebaf09()))
+	swig_r = (BtBroadphasePairSortPredicate)(SwigcptrBtBroadphasePairSortPredicate(C._wrap_new_btBroadphasePairSortPredicate_mbt_702ac83b51919141()))
 	return swig_r
 }
 
 func DeleteBtBroadphasePairSortPredicate(arg1 BtBroadphasePairSortPredicate) {
 	_swig_i_0 := getSwigcptr(arg1)
-	C._wrap_delete_btBroadphasePairSortPredicate_mbt_745dded929ebaf09(C.uintptr_t(_swig_i_0))
+	C._wrap_delete_btBroadphasePairSortPredicate_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
 }
 
 type BtBroadphasePairSortPredicate interface {
 	Swigcptr() uintptr
 	SwigIsBtBroadphasePairSortPredicate()
+}
+
+type SwigcptrBtCollisionShape uintptr
+
+func (p SwigcptrBtCollisionShape) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtCollisionShape) SwigIsBtCollisionShape() {
+}
+
+func DeleteBtCollisionShape(arg1 BtCollisionShape) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btCollisionShape_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+func (arg1 SwigcptrBtCollisionShape) GetAabb(arg2 BtTransform, arg3 BtVector3, arg4 BtVector3) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	_swig_i_2 := getSwigcptr(arg3)
+	_swig_i_3 := getSwigcptr(arg4)
+	C._wrap_btCollisionShape_getAabb_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.uintptr_t(_swig_i_3))
+}
+
+func (arg1 SwigcptrBtCollisionShape) GetBoundingSphere(arg2 BtVector3, arg3 *float32) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	_swig_i_2 := arg3
+	C._wrap_btCollisionShape_getBoundingSphere_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.swig_voidp(_swig_i_2))
+}
+
+func (arg1 SwigcptrBtCollisionShape) GetAngularMotionDisc() (_swig_ret float32) {
+	var swig_r float32
+	_swig_i_0 := arg1
+	swig_r = (float32)(C._wrap_btCollisionShape_getAngularMotionDisc_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) GetContactBreakingThreshold(arg2 float32) (_swig_ret float32) {
+	var swig_r float32
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	swig_r = (float32)(C._wrap_btCollisionShape_getContactBreakingThreshold_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) CalculateTemporalAabb(arg2 BtTransform, arg3 BtVector3, arg4 BtVector3, arg5 float32, arg6 BtVector3, arg7 BtVector3) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	_swig_i_2 := getSwigcptr(arg3)
+	_swig_i_3 := getSwigcptr(arg4)
+	_swig_i_4 := arg5
+	_swig_i_5 := getSwigcptr(arg6)
+	_swig_i_6 := getSwigcptr(arg7)
+	C._wrap_btCollisionShape_calculateTemporalAabb_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.uintptr_t(_swig_i_3), C.float(_swig_i_4), C.uintptr_t(_swig_i_5), C.uintptr_t(_swig_i_6))
+}
+
+func (arg1 SwigcptrBtCollisionShape) IsPolyhedral() (_swig_ret bool) {
+	var swig_r bool
+	_swig_i_0 := arg1
+	swig_r = (bool)(C._wrap_btCollisionShape_isPolyhedral_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) IsConvex2d() (_swig_ret bool) {
+	var swig_r bool
+	_swig_i_0 := arg1
+	swig_r = (bool)(C._wrap_btCollisionShape_isConvex2d_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) IsConvex() (_swig_ret bool) {
+	var swig_r bool
+	_swig_i_0 := arg1
+	swig_r = (bool)(C._wrap_btCollisionShape_isConvex_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) IsNonMoving() (_swig_ret bool) {
+	var swig_r bool
+	_swig_i_0 := arg1
+	swig_r = (bool)(C._wrap_btCollisionShape_isNonMoving_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) IsConcave() (_swig_ret bool) {
+	var swig_r bool
+	_swig_i_0 := arg1
+	swig_r = (bool)(C._wrap_btCollisionShape_isConcave_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) IsCompound() (_swig_ret bool) {
+	var swig_r bool
+	_swig_i_0 := arg1
+	swig_r = (bool)(C._wrap_btCollisionShape_isCompound_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) IsSoftBody() (_swig_ret bool) {
+	var swig_r bool
+	_swig_i_0 := arg1
+	swig_r = (bool)(C._wrap_btCollisionShape_isSoftBody_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) IsInfinite() (_swig_ret bool) {
+	var swig_r bool
+	_swig_i_0 := arg1
+	swig_r = (bool)(C._wrap_btCollisionShape_isInfinite_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) SetLocalScaling(arg2 BtVector3) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btCollisionShape_setLocalScaling_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtCollisionShape) GetLocalScaling() (_swig_ret BtVector3) {
+	var swig_r BtVector3
+	_swig_i_0 := arg1
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btCollisionShape_getLocalScaling_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) CalculateLocalInertia(arg2 float32, arg3 BtVector3) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	_swig_i_2 := getSwigcptr(arg3)
+	C._wrap_btCollisionShape_calculateLocalInertia_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1), C.uintptr_t(_swig_i_2))
+}
+
+func (arg1 SwigcptrBtCollisionShape) GetName() (_swig_ret string) {
+	var swig_r string
+	_swig_i_0 := arg1
+	swig_r_p := C._wrap_btCollisionShape_getName_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
+	var swig_r_1 string
+	swig_r_1 = swigCopyString(swig_r)
+	return swig_r_1
+}
+
+func (arg1 SwigcptrBtCollisionShape) GetShapeType() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btCollisionShape_getShapeType_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) GetAnisotropicRollingFrictionDirection() (_swig_ret BtVector3) {
+	var swig_r BtVector3
+	_swig_i_0 := arg1
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_btCollisionShape_getAnisotropicRollingFrictionDirection_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) SetMargin(arg2 float32) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btCollisionShape_setMargin_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.float(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtCollisionShape) GetMargin() (_swig_ret float32) {
+	var swig_r float32
+	_swig_i_0 := arg1
+	swig_r = (float32)(C._wrap_btCollisionShape_getMargin_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) SetUserPointer(arg2 uintptr) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btCollisionShape_setUserPointer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtCollisionShape) GetUserPointer() (_swig_ret uintptr) {
+	var swig_r uintptr
+	_swig_i_0 := arg1
+	swig_r = (uintptr)(C._wrap_btCollisionShape_getUserPointer_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) SetUserIndex(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btCollisionShape_setUserIndex_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtCollisionShape) GetUserIndex() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btCollisionShape_getUserIndex_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) SetUserIndex2(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btCollisionShape_setUserIndex2_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtCollisionShape) GetUserIndex2() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btCollisionShape_getUserIndex2_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) CalculateSerializeBufferSize() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btCollisionShape_calculateSerializeBufferSize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShape) Serialize(arg2 uintptr, arg3 BtSerializer) (_swig_ret string) {
+	var swig_r string
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	_swig_i_2 := getSwigcptr(arg3)
+	swig_r_p := C._wrap_btCollisionShape_serialize_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
+	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
+	var swig_r_1 string
+	swig_r_1 = swigCopyString(swig_r)
+	return swig_r_1
+}
+
+func (arg1 SwigcptrBtCollisionShape) SerializeSingleShape(arg2 BtSerializer) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btCollisionShape_serializeSingleShape_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+type BtCollisionShape interface {
+	Swigcptr() uintptr
+	SwigIsBtCollisionShape()
+	GetAabb(arg2 BtTransform, arg3 BtVector3, arg4 BtVector3)
+	GetBoundingSphere(arg2 BtVector3, arg3 *float32)
+	GetAngularMotionDisc() (_swig_ret float32)
+	GetContactBreakingThreshold(arg2 float32) (_swig_ret float32)
+	CalculateTemporalAabb(arg2 BtTransform, arg3 BtVector3, arg4 BtVector3, arg5 float32, arg6 BtVector3, arg7 BtVector3)
+	IsPolyhedral() (_swig_ret bool)
+	IsConvex2d() (_swig_ret bool)
+	IsConvex() (_swig_ret bool)
+	IsNonMoving() (_swig_ret bool)
+	IsConcave() (_swig_ret bool)
+	IsCompound() (_swig_ret bool)
+	IsSoftBody() (_swig_ret bool)
+	IsInfinite() (_swig_ret bool)
+	SetLocalScaling(arg2 BtVector3)
+	GetLocalScaling() (_swig_ret BtVector3)
+	CalculateLocalInertia(arg2 float32, arg3 BtVector3)
+	GetName() (_swig_ret string)
+	GetShapeType() (_swig_ret int)
+	GetAnisotropicRollingFrictionDirection() (_swig_ret BtVector3)
+	SetMargin(arg2 float32)
+	GetMargin() (_swig_ret float32)
+	SetUserPointer(arg2 uintptr)
+	GetUserPointer() (_swig_ret uintptr)
+	SetUserIndex(arg2 int)
+	GetUserIndex() (_swig_ret int)
+	SetUserIndex2(arg2 int)
+	GetUserIndex2() (_swig_ret int)
+	CalculateSerializeBufferSize() (_swig_ret int)
+	Serialize(arg2 uintptr, arg3 BtSerializer) (_swig_ret string)
+	SerializeSingleShape(arg2 BtSerializer)
+}
+
+type SwigcptrBtCollisionShapeData uintptr
+
+func (p SwigcptrBtCollisionShapeData) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtCollisionShapeData) SwigIsBtCollisionShapeData() {
+}
+
+func (arg1 SwigcptrBtCollisionShapeData) SetM_name(arg2 string) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btCollisionShapeData_m_name_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), *(*C.swig_type_44)(unsafe.Pointer(&_swig_i_1)))
+	if Swig_escape_always_false {
+		Swig_escape_val = arg2
+	}
+}
+
+func (arg1 SwigcptrBtCollisionShapeData) GetM_name() (_swig_ret string) {
+	var swig_r string
+	_swig_i_0 := arg1
+	swig_r_p := C._wrap_btCollisionShapeData_m_name_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
+	var swig_r_1 string
+	swig_r_1 = swigCopyString(swig_r)
+	return swig_r_1
+}
+
+func (arg1 SwigcptrBtCollisionShapeData) SetM_shapeType(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btCollisionShapeData_m_shapeType_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtCollisionShapeData) GetM_shapeType() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btCollisionShapeData_m_shapeType_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtCollisionShapeData) SetM_padding(arg2 string) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btCollisionShapeData_m_padding_set_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0), *(*C.swig_type_46)(unsafe.Pointer(&_swig_i_1)))
+	if Swig_escape_always_false {
+		Swig_escape_val = arg2
+	}
+}
+
+func (arg1 SwigcptrBtCollisionShapeData) GetM_padding() (_swig_ret string) {
+	var swig_r string
+	_swig_i_0 := arg1
+	swig_r_p := C._wrap_btCollisionShapeData_m_padding_get_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
+	var swig_r_1 string
+	swig_r_1 = swigCopyString(swig_r)
+	return swig_r_1
+}
+
+func NewBtCollisionShapeData() (_swig_ret BtCollisionShapeData) {
+	var swig_r BtCollisionShapeData
+	swig_r = (BtCollisionShapeData)(SwigcptrBtCollisionShapeData(C._wrap_new_btCollisionShapeData_mbt_702ac83b51919141()))
+	return swig_r
+}
+
+func DeleteBtCollisionShapeData(arg1 BtCollisionShapeData) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btCollisionShapeData_mbt_702ac83b51919141(C.uintptr_t(_swig_i_0))
+}
+
+type BtCollisionShapeData interface {
+	Swigcptr() uintptr
+	SwigIsBtCollisionShapeData()
+	SetM_name(arg2 string)
+	GetM_name() (_swig_ret string)
+	SetM_shapeType(arg2 int)
+	GetM_shapeType() (_swig_ret int)
+	SetM_padding(arg2 string)
+	GetM_padding() (_swig_ret string)
+}
+
+func BtBulletCollisionProbe() {
+	C._wrap_btBulletCollisionProbe_mbt_702ac83b51919141()
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_ uintptr
+type BtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrStd_string uintptr
+type Std_string interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrStd_string) Swigcptr() uintptr {
+	return uintptr(p)
 }
 
 type SwigcptrBtCollisionAlgorithm uintptr
@@ -4735,5 +6537,14 @@ type BtCollisionAlgorithm interface {
 }
 
 func (p SwigcptrBtCollisionAlgorithm) Swigcptr() uintptr {
+	return uintptr(p)
+}
+
+type SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_ uintptr
+type BtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_ interface {
+	Swigcptr() uintptr
+}
+
+func (p SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
