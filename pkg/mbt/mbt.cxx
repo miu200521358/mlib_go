@@ -6,7 +6,7 @@
  * the SWIG interface file instead.
  * ----------------------------------------------------------------------------- */
 
-// source: bullet.i
+// source: C:\MMD\mlib_go\pkg\mbt\bullet\src\bullet.i
 
 
 
@@ -246,16 +246,5744 @@ static void* Swig_malloc(int c) {
 }
 
 
-    btDefaultCollisionConfiguration* NewBtDefaultCollisionConfiguration() {
-        return new btDefaultCollisionConfiguration();
+    #include <cmath>
+
+
+#define FLT_EPSILON      1.192092896e-07F        // smallest such that 1.0+FLT_EPSILON != 1.0
+#define FLT_MAX          3.402823466e+38F        // max value
+
+
+
+/* 7.12.4 Trigonometric functions: Double in C89 */
+  extern float __cdecl sinf(float _X);
+  extern long double __cdecl sinl(long double);
+
+  extern float __cdecl cosf(float _X);
+  extern long double __cdecl cosl(long double);
+
+  extern float __cdecl tanf(float _X);
+  extern long double __cdecl tanl(long double);
+  extern float __cdecl asinf(float _X);
+  extern long double __cdecl asinl(long double);
+
+  extern float __cdecl acosf (float);
+  extern long double __cdecl acosl (long double);
+
+  extern float __cdecl atanf (float);
+  extern long double __cdecl atanl (long double);
+
+  extern float __cdecl atan2f (float, float);
+  extern long double __cdecl atan2l (long double, long double);
+
+/* 7.12.6.1 Double in C89 */
+  extern float __cdecl expf(float _X);
+
+/* 7.12.6.7 Double in C89 */
+  extern float __cdecl logf (float);
+
+/* 7.12.7.4 The pow functions. Double in C89 */
+  extern float __cdecl powf(float _X,float _Y);
+
+/* 7.12.7.5 The sqrt functions. Double in C89. */
+  extern float __cdecl sqrtf (float);
+
+/* 7.12.7.2 The fabs functions: Double in C89 */
+  extern  float __cdecl fabsf (float x);
+
+/* 7.12.10.1 Double in C89 */
+  extern float __cdecl fmodf (float, float);
+
+
+
+
+/*
+Copyright (c) 2003-2009 Erwin Coumans  http://bullet.googlecode.com
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_SCALAR_H
+#define BT_SCALAR_H
+
+#ifdef BT_MANAGED_CODE
+//Aligned data types not supported in managed code
+#pragma unmanaged
+#endif
+
+
+/* SVN $Revision$ on $Date$ from http://bullet.googlecode.com*/
+#define BT_BULLET_VERSION 326
+
+inline int btGetVersion()
+{
+	return BT_BULLET_VERSION;
+}
+
+inline int btIsDoublePrecision()
+{
+  #ifdef BT_USE_DOUBLE_PRECISION
+  return true;
+  #else
+  return false;
+  #endif
+}
+
+
+// The following macro "BT_NOT_EMPTY_FILE" can be put into a file
+// in order suppress the MS Visual C++ Linker warning 4221
+//
+// warning LNK4221: no public symbols found; archive member will be inaccessible
+//
+// This warning occurs on PC and XBOX when a file compiles out completely
+// has no externally visible symbols which may be dependant on configuration
+// #defines and options.
+//
+// see more https://stackoverflow.com/questions/1822887/what-is-the-best-way-to-eliminate-ms-visual-c-linker-warning-warning-lnk422
+
+#if defined(_MSC_VER)
+#define BT_NOT_EMPTY_FILE_CAT_II(p, res) res
+#define BT_NOT_EMPTY_FILE_CAT_I(a, b) BT_NOT_EMPTY_FILE_CAT_II(~, a##b)
+#define BT_NOT_EMPTY_FILE_CAT(a, b) BT_NOT_EMPTY_FILE_CAT_I(a, b)
+#define BT_NOT_EMPTY_FILE                                      \
+	namespace                                                  \
+	{                                                          \
+	char BT_NOT_EMPTY_FILE_CAT(NoEmptyFileDummy, __COUNTER__); \
+	}
+#else
+#define BT_NOT_EMPTY_FILE
+#endif
+
+// clang and most formatting tools don't support indentation of preprocessor guards, so turn it off
+// clang-format off
+#if defined(DEBUG) || defined (_DEBUG)
+	#define BT_DEBUG
+#endif
+
+#ifdef _WIN32
+	#if  defined(__GNUC__)	// it should handle both MINGW and CYGWIN
+        	#define SIMD_FORCE_INLINE        __inline__ __attribute__((always_inline))
+        	#define ATTRIBUTE_ALIGNED16(a)   a __attribute__((aligned(16)))
+        	#define ATTRIBUTE_ALIGNED64(a)   a __attribute__((aligned(64)))
+        	#define ATTRIBUTE_ALIGNED128(a)  a __attribute__((aligned(128)))
+    	#elif ( defined(_MSC_VER) && _MSC_VER < 1300 )
+		#define SIMD_FORCE_INLINE inline
+		#define ATTRIBUTE_ALIGNED16(a) a
+		#define ATTRIBUTE_ALIGNED64(a) a
+		#define ATTRIBUTE_ALIGNED128(a) a
+	#elif defined(_M_ARM)
+		#define SIMD_FORCE_INLINE __forceinline
+		#define ATTRIBUTE_ALIGNED16(a) __declspec() a
+		#define ATTRIBUTE_ALIGNED64(a) __declspec() a
+		#define ATTRIBUTE_ALIGNED128(a) __declspec () a
+	#else//__MINGW32__
+		//#define BT_HAS_ALIGNED_ALLOCATOR
+		#pragma warning(disable : 4324) // disable padding warning
+//			#pragma warning(disable:4530) // Disable the exception disable but used in MSCV Stl warning.
+		#pragma warning(disable:4996) //Turn off warnings about deprecated C routines
+//			#pragma warning(disable:4786) // Disable the "debug name too long" warning
+
+		#define SIMD_FORCE_INLINE __forceinline
+		#define ATTRIBUTE_ALIGNED16(a) __declspec(align(16)) a
+		#define ATTRIBUTE_ALIGNED64(a) __declspec(align(64)) a
+		#define ATTRIBUTE_ALIGNED128(a) __declspec (align(128)) a
+		#ifdef _XBOX
+			#define BT_USE_VMX128
+
+ 			#define BT_HAVE_NATIVE_FSEL
+ 			#define btFsel(a,b,c) __fsel((a),(b),(c))
+		#else
+
+#if defined (_M_ARM) || defined (_M_ARM64)
+            //Do not turn SSE on for ARM (may want to turn on BT_USE_NEON however)
+#elif (defined (_WIN32) && (_MSC_VER) && _MSC_VER >= 1400) && (!defined (BT_USE_DOUBLE_PRECISION))
+
+#ifdef __clang__
+#define __BT_DISABLE_SSE__
+#endif
+#ifndef __BT_DISABLE_SSE__
+			#if _MSC_VER>1400
+				#define BT_USE_SIMD_VECTOR3
+			#endif
+			#define BT_USE_SSE
+#endif//__BT_DISABLE_SSE__
+			#ifdef BT_USE_SSE
+
+#if (_MSC_FULL_VER >= 170050727)//Visual Studio 2012 can compile SSE4/FMA3 (but SSE4/FMA3 is not enabled by default)
+			#define BT_ALLOW_SSE4
+#endif //(_MSC_FULL_VER >= 160040219)
+
+			//BT_USE_SSE_IN_API is disabled under Windows by default, because 
+			//it makes it harder to integrate Bullet into your application under Windows 
+			//(structured embedding Bullet structs/classes need to be 16-byte aligned)
+			//with relatively little performance gain
+			//If you are not embedded Bullet data in your classes, or make sure that you align those classes on 16-byte boundaries
+			//you can manually enable this line or set it in the build system for a bit of performance gain (a few percent, dependent on usage)
+			//#define BT_USE_SSE_IN_API
+			#endif //BT_USE_SSE
+#endif
+
+		#endif//_XBOX
+
+	#endif //__MINGW32__
+
+	#ifdef BT_DEBUG
+		#ifdef _MSC_VER
+			#define btAssert(x) { if(!(x)){printf("Assert " __FILE__ ":%u (%s)\n", __LINE__, #x);__debugbreak();	}}
+		#else//_MSC_VER
+			#define btAssert assert
+		#endif//_MSC_VER
+	#else
+		#define btAssert(x)
+	#endif
+		//btFullAssert is optional, slows down a lot
+		#define btFullAssert(x)
+
+		#define btLikely(_c)  _c
+		#define btUnlikely(_c) _c
+
+#else//_WIN32
+	
+	#if defined	(__CELLOS_LV2__)
+		#define SIMD_FORCE_INLINE inline __attribute__((always_inline))
+		#define ATTRIBUTE_ALIGNED16(a) a __attribute__ ((aligned (16)))
+		#define ATTRIBUTE_ALIGNED64(a) a __attribute__ ((aligned (64)))
+		#define ATTRIBUTE_ALIGNED128(a) a __attribute__ ((aligned (128)))
+		#ifndef assert
+		#endif
+		#ifdef BT_DEBUG
+			#ifdef __SPU__
+				#define printf spu_printf
+				#define btAssert(x) {if(!(x)){printf("Assert " __FILE__ ":%u ("#x")\n", __LINE__);spu_hcmpeq(0,0);}}
+			#else
+				#define btAssert assert
+			#endif
+	
+		#else//BT_DEBUG
+				#define btAssert(x)
+		#endif//BT_DEBUG
+		//btFullAssert is optional, slows down a lot
+		#define btFullAssert(x)
+
+		#define btLikely(_c)  _c
+		#define btUnlikely(_c) _c
+
+	#else//defined	(__CELLOS_LV2__)
+
+		#ifdef USE_LIBSPE2
+
+			#define SIMD_FORCE_INLINE __inline
+			#define ATTRIBUTE_ALIGNED16(a) a __attribute__ ((aligned (16)))
+			#define ATTRIBUTE_ALIGNED64(a) a __attribute__ ((aligned (64)))
+			#define ATTRIBUTE_ALIGNED128(a) a __attribute__ ((aligned (128)))
+			#ifndef assert
+			#endif
+	#ifdef BT_DEBUG
+			#define btAssert assert
+	#else
+			#define btAssert(x)
+	#endif
+			//btFullAssert is optional, slows down a lot
+			#define btFullAssert(x)
+
+
+			#define btLikely(_c)   __builtin_expect((_c), 1)
+			#define btUnlikely(_c) __builtin_expect((_c), 0)
+		
+
+		#else//USE_LIBSPE2
+	//non-windows systems
+
+			#if (defined (__APPLE__) && (!defined (BT_USE_DOUBLE_PRECISION)))
+				#if defined (__i386__) || defined (__x86_64__)
+					#define BT_USE_SIMD_VECTOR3
+					#define BT_USE_SSE
+					//BT_USE_SSE_IN_API is enabled on Mac OSX by default, because memory is automatically aligned on 16-byte boundaries
+					//if apps run into issues, we will disable the next line
+					#define BT_USE_SSE_IN_API
+					#ifdef BT_USE_SSE
+						// include appropriate SSE level
+						#if defined (__SSE4_1__)
+						#elif defined (__SSSE3__)
+						#elif defined (__SSE3__)
+						#else
+						#endif
+					#endif //BT_USE_SSE
+				#elif defined( __ARM_NEON__ )
+					#ifdef __clang__
+						#define BT_USE_NEON 1
+						#define BT_USE_SIMD_VECTOR3
+		
+						#if defined BT_USE_NEON && defined (__clang__)
+						#endif//BT_USE_NEON
+				   #endif //__clang__
+				#endif//__arm__
+
+				#define SIMD_FORCE_INLINE inline __attribute__ ((always_inline))
+			///@todo: check out alignment methods for other platforms/compilers
+				#define ATTRIBUTE_ALIGNED16(a) a __attribute__ ((aligned (16)))
+				#define ATTRIBUTE_ALIGNED64(a) a __attribute__ ((aligned (64)))
+				#define ATTRIBUTE_ALIGNED128(a) a __attribute__ ((aligned (128)))
+				#ifndef assert
+				#endif
+
+				#if defined(DEBUG) || defined (_DEBUG)
+				 #if defined (__i386__) || defined (__x86_64__)
+				 #define btAssert(x)\
+				{\
+				if(!(x))\
+				{\
+					printf("Assert %s in line %d, file %s\n",#x, __LINE__, __FILE__);\
+					asm volatile ("int3");\
+				}\
+				}
+				#else//defined (__i386__) || defined (__x86_64__)
+					#define btAssert assert
+				#endif//defined (__i386__) || defined (__x86_64__)
+				#else//defined(DEBUG) || defined (_DEBUG)
+					#define btAssert(x)
+				#endif//defined(DEBUG) || defined (_DEBUG)
+
+				//btFullAssert is optional, slows down a lot
+				#define btFullAssert(x)
+				#define btLikely(_c)  _c
+				#define btUnlikely(_c) _c
+
+			#else//__APPLE__
+
+				#define SIMD_FORCE_INLINE inline
+				///@todo: check out alignment methods for other platforms/compilers
+				///#define ATTRIBUTE_ALIGNED16(a) a __attribute__ ((aligned (16)))
+				///#define ATTRIBUTE_ALIGNED64(a) a __attribute__ ((aligned (64)))
+				///#define ATTRIBUTE_ALIGNED128(a) a __attribute__ ((aligned (128)))
+				#define ATTRIBUTE_ALIGNED16(a) a
+				#define ATTRIBUTE_ALIGNED64(a) a
+				#define ATTRIBUTE_ALIGNED128(a) a
+				#ifndef assert
+				#endif
+
+				#if defined(DEBUG) || defined (_DEBUG)
+					#define btAssert assert
+				#else
+					#define btAssert(x)
+				#endif
+
+				//btFullAssert is optional, slows down a lot
+				#define btFullAssert(x)
+				#define btLikely(_c)  _c
+				#define btUnlikely(_c) _c
+			#endif //__APPLE__ 
+		#endif // LIBSPE2
+	#endif	//__CELLOS_LV2__
+#endif//_WIN32
+
+
+///The btScalar type abstracts floating point numbers, to easily switch between double and single floating point precision.
+#if defined(BT_USE_DOUBLE_PRECISION)
+	typedef double btScalar;
+	//this number could be bigger in double precision
+	#define BT_LARGE_FLOAT 1e30
+#else
+	typedef float btScalar;
+	//keep BT_LARGE_FLOAT*BT_LARGE_FLOAT < FLT_MAX
+	#define BT_LARGE_FLOAT 1e18f
+#endif
+
+#ifdef BT_USE_SSE
+	typedef __m128 btSimdFloat4;
+#endif  //BT_USE_SSE
+
+#if defined(BT_USE_SSE)
+	//#if defined BT_USE_SSE_IN_API && defined (BT_USE_SSE)
+	#ifdef _WIN32
+
+		#ifndef BT_NAN
+			static int btNanMask = 0x7F800001;
+			#define BT_NAN (*(float *)&btNanMask)
+		#endif
+
+		#ifndef BT_INFINITY
+			static int btInfinityMask = 0x7F800000;
+			#define BT_INFINITY (*(float *)&btInfinityMask)
+			inline int btGetInfinityMask()  //suppress stupid compiler warning
+			{
+				return btInfinityMask;
+			}
+		#endif
+
+
+
+	//use this, in case there are clashes (such as xnamath.h)
+	#ifndef BT_NO_SIMD_OPERATOR_OVERLOADS
+	inline __m128 operator+(const __m128 A, const __m128 B)
+	{
+		return _mm_add_ps(A, B);
+	}
+
+	inline __m128 operator-(const __m128 A, const __m128 B)
+	{
+		return _mm_sub_ps(A, B);
+	}
+
+	inline __m128 operator*(const __m128 A, const __m128 B)
+	{
+		return _mm_mul_ps(A, B);
+	}
+	#endif  //BT_NO_SIMD_OPERATOR_OVERLOADS
+
+	#define btCastfTo128i(a) (_mm_castps_si128(a))
+	#define btCastfTo128d(a) (_mm_castps_pd(a))
+	#define btCastiTo128f(a) (_mm_castsi128_ps(a))
+	#define btCastdTo128f(a) (_mm_castpd_ps(a))
+	#define btCastdTo128i(a) (_mm_castpd_si128(a))
+	#define btAssign128(r0, r1, r2, r3) _mm_setr_ps(r0, r1, r2, r3)
+
+	#else  //_WIN32
+
+		#define btCastfTo128i(a) ((__m128i)(a))
+		#define btCastfTo128d(a) ((__m128d)(a))
+		#define btCastiTo128f(a) ((__m128)(a))
+		#define btCastdTo128f(a) ((__m128)(a))
+		#define btCastdTo128i(a) ((__m128i)(a))
+		#define btAssign128(r0, r1, r2, r3) \
+			(__m128) { r0, r1, r2, r3 }
+		#define BT_INFINITY INFINITY
+		#define BT_NAN NAN
+	#endif  //_WIN32
+#else//BT_USE_SSE
+
+	#ifdef BT_USE_NEON
+
+	typedef float32x4_t btSimdFloat4;
+	#define BT_INFINITY INFINITY
+	#define BT_NAN NAN
+	#define btAssign128(r0, r1, r2, r3) \
+		(float32x4_t) { r0, r1, r2, r3 }
+	#else  //BT_USE_NEON
+
+	#ifndef BT_INFINITY
+	struct btInfMaskConverter
+	{
+		union {
+			float mask;
+			int intmask;
+		};
+		btInfMaskConverter(int _mask = 0x7F800000)
+			: intmask(_mask)
+		{
+		}
+	};
+	static btInfMaskConverter btInfinityMask = 0x7F800000;
+	#define BT_INFINITY (btInfinityMask.mask)
+	inline int btGetInfinityMask()  //suppress stupid compiler warning
+	{
+		return btInfinityMask.intmask;
+	}
+	#endif
+	#endif  //BT_USE_NEON
+
+#endif  //BT_USE_SSE
+
+#ifdef BT_USE_NEON
+
+	typedef float32x4_t btSimdFloat4;
+	#define BT_INFINITY INFINITY
+	#define BT_NAN NAN
+	#define btAssign128(r0, r1, r2, r3) \
+		(float32x4_t) { r0, r1, r2, r3 }
+#endif//BT_USE_NEON
+
+#define BT_DECLARE_ALIGNED_ALLOCATOR()                                                                     \
+	SIMD_FORCE_INLINE void *operator new(size_t sizeInBytes) { return btAlignedAlloc(sizeInBytes, 16); }   \
+	SIMD_FORCE_INLINE void operator delete(void *ptr) { btAlignedFree(ptr); }                              \
+	SIMD_FORCE_INLINE void *operator new(size_t, void *ptr) { return ptr; }                                \
+	SIMD_FORCE_INLINE void operator delete(void *, void *) {}                                              \
+	SIMD_FORCE_INLINE void *operator new[](size_t sizeInBytes) { return btAlignedAlloc(sizeInBytes, 16); } \
+	SIMD_FORCE_INLINE void operator delete[](void *ptr) { btAlignedFree(ptr); }                            \
+	SIMD_FORCE_INLINE void *operator new[](size_t, void *ptr) { return ptr; }                              \
+	SIMD_FORCE_INLINE void operator delete[](void *, void *) {}
+
+#if defined(BT_USE_DOUBLE_PRECISION) || defined(BT_FORCE_DOUBLE_FUNCTIONS)
+
+	SIMD_FORCE_INLINE btScalar btSqrt(btScalar x)
+	{
+		return sqrt(x);
+	}
+	SIMD_FORCE_INLINE btScalar btFabs(btScalar x) { return fabs(x); }
+	SIMD_FORCE_INLINE btScalar btCos(btScalar x) { return cos(x); }
+	SIMD_FORCE_INLINE btScalar btSin(btScalar x) { return sin(x); }
+	SIMD_FORCE_INLINE btScalar btTan(btScalar x) { return tan(x); }
+	SIMD_FORCE_INLINE btScalar btAcos(btScalar x)
+	{
+		if (x < btScalar(-1)) x = btScalar(-1);
+		if (x > btScalar(1)) x = btScalar(1);
+		return acos(x);
+	}
+	SIMD_FORCE_INLINE btScalar btAsin(btScalar x)
+	{
+		if (x < btScalar(-1)) x = btScalar(-1);
+		if (x > btScalar(1)) x = btScalar(1);
+		return asin(x);
+	}
+	SIMD_FORCE_INLINE btScalar btAtan(btScalar x) { return atan(x); }
+	SIMD_FORCE_INLINE btScalar btAtan2(btScalar x, btScalar y) { return atan2(x, y); }
+	SIMD_FORCE_INLINE btScalar btExp(btScalar x) { return exp(x); }
+	SIMD_FORCE_INLINE btScalar btLog(btScalar x) { return log(x); }
+	SIMD_FORCE_INLINE btScalar btPow(btScalar x, btScalar y) { return pow(x, y); }
+	SIMD_FORCE_INLINE btScalar btFmod(btScalar x, btScalar y) { return fmod(x, y); }
+
+#else//BT_USE_DOUBLE_PRECISION
+
+	SIMD_FORCE_INLINE btScalar btSqrt(btScalar y)
+	{
+	#ifdef USE_APPROXIMATION
+	#ifdef __LP64__
+		float xhalf = 0.5f * y;
+		int i = *(int *)&y;
+		i = 0x5f375a86 - (i >> 1);
+		y = *(float *)&i;
+		y = y * (1.5f - xhalf * y * y);
+		y = y * (1.5f - xhalf * y * y);
+		y = y * (1.5f - xhalf * y * y);
+		y = 1 / y;
+		return y;
+	#else
+		double x, z, tempf;
+		unsigned long *tfptr = ((unsigned long *)&tempf) + 1;
+		tempf = y;
+		*tfptr = (0xbfcdd90a - *tfptr) >> 1; /* estimate of 1/sqrt(y) */
+		x = tempf;
+		z = y * btScalar(0.5);
+		x = (btScalar(1.5) * x) - (x * x) * (x * z); /* iteration formula     */
+		x = (btScalar(1.5) * x) - (x * x) * (x * z);
+		x = (btScalar(1.5) * x) - (x * x) * (x * z);
+		x = (btScalar(1.5) * x) - (x * x) * (x * z);
+		x = (btScalar(1.5) * x) - (x * x) * (x * z);
+		return x * y;
+	#endif
+	#else
+		return sqrtf(y);
+	#endif
+	}
+	SIMD_FORCE_INLINE btScalar btFabs(btScalar x) { return fabsf(x); }
+	SIMD_FORCE_INLINE btScalar btCos(btScalar x) { return cosf(x); }
+	SIMD_FORCE_INLINE btScalar btSin(btScalar x) { return sinf(x); }
+	SIMD_FORCE_INLINE btScalar btTan(btScalar x) { return tanf(x); }
+	SIMD_FORCE_INLINE btScalar btAcos(btScalar x)
+	{
+		if (x < btScalar(-1))
+			x = btScalar(-1);
+		if (x > btScalar(1))
+			x = btScalar(1);
+		return acosf(x);
+	}
+	SIMD_FORCE_INLINE btScalar btAsin(btScalar x)
+	{
+		if (x < btScalar(-1))
+			x = btScalar(-1);
+		if (x > btScalar(1))
+			x = btScalar(1);
+		return asinf(x);
+	}
+	SIMD_FORCE_INLINE btScalar btAtan(btScalar x) { return atanf(x); }
+	SIMD_FORCE_INLINE btScalar btAtan2(btScalar x, btScalar y) { return atan2f(x, y); }
+	SIMD_FORCE_INLINE btScalar btExp(btScalar x) { return expf(x); }
+	SIMD_FORCE_INLINE btScalar btLog(btScalar x) { return logf(x); }
+	SIMD_FORCE_INLINE btScalar btPow(btScalar x, btScalar y) { return powf(x, y); }
+	SIMD_FORCE_INLINE btScalar btFmod(btScalar x, btScalar y) { return fmodf(x, y); }
+
+#endif//BT_USE_DOUBLE_PRECISION
+
+#define SIMD_PI btScalar(3.1415926535897932384626433832795029)
+#define SIMD_2_PI (btScalar(2.0) * SIMD_PI)
+#define SIMD_HALF_PI (SIMD_PI * btScalar(0.5))
+#define SIMD_RADS_PER_DEG (SIMD_2_PI / btScalar(360.0))
+#define SIMD_DEGS_PER_RAD (btScalar(360.0) / SIMD_2_PI)
+#define SIMDSQRT12 btScalar(0.7071067811865475244008443621048490)
+#define btRecipSqrt(x) ((btScalar)(btScalar(1.0) / btSqrt(btScalar(x)))) /* reciprocal square root */
+#define btRecip(x) (btScalar(1.0) / btScalar(x))
+
+#ifdef BT_USE_DOUBLE_PRECISION
+	#define SIMD_EPSILON DBL_EPSILON
+	#define SIMD_INFINITY DBL_MAX
+	#define BT_ONE 1.0
+	#define BT_ZERO 0.0
+	#define BT_TWO 2.0
+	#define BT_HALF 0.5
+#else
+	#define SIMD_EPSILON FLT_EPSILON
+	#define SIMD_INFINITY FLT_MAX
+	#define BT_ONE 1.0f
+	#define BT_ZERO 0.0f
+	#define BT_TWO 2.0f
+	#define BT_HALF 0.5f
+#endif
+
+// clang-format on
+
+SIMD_FORCE_INLINE btScalar btAtan2Fast(btScalar y, btScalar x)
+{
+	btScalar coeff_1 = SIMD_PI / 4.0f;
+	btScalar coeff_2 = 3.0f * coeff_1;
+	btScalar abs_y = btFabs(y);
+	btScalar angle;
+	if (x >= 0.0f)
+	{
+		btScalar r = (x - abs_y) / (x + abs_y);
+		angle = coeff_1 - coeff_1 * r;
+	}
+	else
+	{
+		btScalar r = (x + abs_y) / (abs_y - x);
+		angle = coeff_2 - coeff_1 * r;
+	}
+	return (y < 0.0f) ? -angle : angle;
+}
+
+SIMD_FORCE_INLINE bool btFuzzyZero(btScalar x) { return btFabs(x) < SIMD_EPSILON; }
+
+SIMD_FORCE_INLINE bool btEqual(btScalar a, btScalar eps)
+{
+	return (((a) <= eps) && !((a) < -eps));
+}
+SIMD_FORCE_INLINE bool btGreaterEqual(btScalar a, btScalar eps)
+{
+	return (!((a) <= eps));
+}
+
+SIMD_FORCE_INLINE int btIsNegative(btScalar x)
+{
+	return x < btScalar(0.0) ? 1 : 0;
+}
+
+SIMD_FORCE_INLINE btScalar btRadians(btScalar x) { return x * SIMD_RADS_PER_DEG; }
+SIMD_FORCE_INLINE btScalar btDegrees(btScalar x) { return x * SIMD_DEGS_PER_RAD; }
+
+#define BT_DECLARE_HANDLE(name) \
+	typedef struct name##__     \
+	{                           \
+		int unused;             \
+	} * name
+
+#ifndef btFsel
+SIMD_FORCE_INLINE btScalar btFsel(btScalar a, btScalar b, btScalar c)
+{
+	return a >= 0 ? b : c;
+}
+#endif
+#define btFsels(a, b, c) (btScalar) btFsel(a, b, c)
+
+SIMD_FORCE_INLINE bool btMachineIsLittleEndian()
+{
+	long int i = 1;
+	const char *p = (const char *)&i;
+	if (p[0] == 1)  // Lowest address contains the least significant byte
+		return true;
+	else
+		return false;
+}
+
+///btSelect avoids branches, which makes performance much better for consoles like Playstation 3 and XBox 360
+///Thanks Phil Knight. See also http://www.cellperformance.com/articles/2006/04/more_techniques_for_eliminatin_1.html
+SIMD_FORCE_INLINE unsigned btSelect(unsigned condition, unsigned valueIfConditionNonZero, unsigned valueIfConditionZero)
+{
+	// Set testNz to 0xFFFFFFFF if condition is nonzero, 0x00000000 if condition is zero
+	// Rely on positive value or'ed with its negative having sign bit on
+	// and zero value or'ed with its negative (which is still zero) having sign bit off
+	// Use arithmetic shift right, shifting the sign bit through all 32 bits
+	unsigned testNz = (unsigned)(((int)condition | -(int)condition) >> 31);
+	unsigned testEqz = ~testNz;
+	return ((valueIfConditionNonZero & testNz) | (valueIfConditionZero & testEqz));
+}
+SIMD_FORCE_INLINE int btSelect(unsigned condition, int valueIfConditionNonZero, int valueIfConditionZero)
+{
+	unsigned testNz = (unsigned)(((int)condition | -(int)condition) >> 31);
+	unsigned testEqz = ~testNz;
+	return static_cast<int>((valueIfConditionNonZero & testNz) | (valueIfConditionZero & testEqz));
+}
+SIMD_FORCE_INLINE float btSelect(unsigned condition, float valueIfConditionNonZero, float valueIfConditionZero)
+{
+#ifdef BT_HAVE_NATIVE_FSEL
+	return (float)btFsel((btScalar)condition - btScalar(1.0f), valueIfConditionNonZero, valueIfConditionZero);
+#else
+	return (condition != 0) ? valueIfConditionNonZero : valueIfConditionZero;
+#endif
+}
+
+template <typename T>
+SIMD_FORCE_INLINE void btSwap(T &a, T &b)
+{
+	T tmp = a;
+	a = b;
+	b = tmp;
+}
+
+//PCK: endian swapping functions
+SIMD_FORCE_INLINE unsigned btSwapEndian(unsigned val)
+{
+	return (((val & 0xff000000) >> 24) | ((val & 0x00ff0000) >> 8) | ((val & 0x0000ff00) << 8) | ((val & 0x000000ff) << 24));
+}
+
+SIMD_FORCE_INLINE unsigned short btSwapEndian(unsigned short val)
+{
+	return static_cast<unsigned short>(((val & 0xff00) >> 8) | ((val & 0x00ff) << 8));
+}
+
+SIMD_FORCE_INLINE unsigned btSwapEndian(int val)
+{
+	return btSwapEndian((unsigned)val);
+}
+
+SIMD_FORCE_INLINE unsigned short btSwapEndian(short val)
+{
+	return btSwapEndian((unsigned short)val);
+}
+
+///btSwapFloat uses using char pointers to swap the endianness
+////btSwapFloat/btSwapDouble will NOT return a float, because the machine might 'correct' invalid floating point values
+///Not all values of sign/exponent/mantissa are valid floating point numbers according to IEEE 754.
+///When a floating point unit is faced with an invalid value, it may actually change the value, or worse, throw an exception.
+///In most systems, running user mode code, you wouldn't get an exception, but instead the hardware/os/runtime will 'fix' the number for you.
+///so instead of returning a float/double, we return integer/long long integer
+SIMD_FORCE_INLINE unsigned int btSwapEndianFloat(float d)
+{
+	unsigned int a = 0;
+	unsigned char *dst = (unsigned char *)&a;
+	unsigned char *src = (unsigned char *)&d;
+
+	dst[0] = src[3];
+	dst[1] = src[2];
+	dst[2] = src[1];
+	dst[3] = src[0];
+	return a;
+}
+
+// unswap using char pointers
+SIMD_FORCE_INLINE float btUnswapEndianFloat(unsigned int a)
+{
+	float d = 0.0f;
+	unsigned char *src = (unsigned char *)&a;
+	unsigned char *dst = (unsigned char *)&d;
+
+	dst[0] = src[3];
+	dst[1] = src[2];
+	dst[2] = src[1];
+	dst[3] = src[0];
+
+	return d;
+}
+
+// swap using char pointers
+SIMD_FORCE_INLINE void btSwapEndianDouble(double d, unsigned char *dst)
+{
+	unsigned char *src = (unsigned char *)&d;
+
+	dst[0] = src[7];
+	dst[1] = src[6];
+	dst[2] = src[5];
+	dst[3] = src[4];
+	dst[4] = src[3];
+	dst[5] = src[2];
+	dst[6] = src[1];
+	dst[7] = src[0];
+}
+
+// unswap using char pointers
+SIMD_FORCE_INLINE double btUnswapEndianDouble(const unsigned char *src)
+{
+	double d = 0.0;
+	unsigned char *dst = (unsigned char *)&d;
+
+	dst[0] = src[7];
+	dst[1] = src[6];
+	dst[2] = src[5];
+	dst[3] = src[4];
+	dst[4] = src[3];
+	dst[5] = src[2];
+	dst[6] = src[1];
+	dst[7] = src[0];
+
+	return d;
+}
+
+template <typename T>
+SIMD_FORCE_INLINE void btSetZero(T *a, int n)
+{
+	T *acurr = a;
+	size_t ncurr = n;
+	while (ncurr > 0)
+	{
+		*(acurr++) = 0;
+		--ncurr;
+	}
+}
+
+SIMD_FORCE_INLINE btScalar btLargeDot(const btScalar *a, const btScalar *b, int n)
+{
+	btScalar p0, q0, m0, p1, q1, m1, sum;
+	sum = 0;
+	n -= 2;
+	while (n >= 0)
+	{
+		p0 = a[0];
+		q0 = b[0];
+		m0 = p0 * q0;
+		p1 = a[1];
+		q1 = b[1];
+		m1 = p1 * q1;
+		sum += m0;
+		sum += m1;
+		a += 2;
+		b += 2;
+		n -= 2;
+	}
+	n += 2;
+	while (n > 0)
+	{
+		sum += (*a) * (*b);
+		a++;
+		b++;
+		n--;
+	}
+	return sum;
+}
+
+// returns normalized value in range [-SIMD_PI, SIMD_PI]
+SIMD_FORCE_INLINE btScalar btNormalizeAngle(btScalar angleInRadians)
+{
+	angleInRadians = btFmod(angleInRadians, SIMD_2_PI);
+	if (angleInRadians < -SIMD_PI)
+	{
+		return angleInRadians + SIMD_2_PI;
+	}
+	else if (angleInRadians > SIMD_PI)
+	{
+		return angleInRadians - SIMD_2_PI;
+	}
+	else
+	{
+		return angleInRadians;
+	}
+}
+
+///rudimentary class to provide type info
+struct btTypedObject
+{
+	btTypedObject(int objectType)
+		: m_objectType(objectType)
+	{
+	}
+	int m_objectType;
+	inline int getObjectType() const
+	{
+		return m_objectType;
+	}
+};
+
+///align a pointer to the provided alignment, upwards
+template <typename T>
+T *btAlignPointer(T *unalignedPtr, size_t alignment)
+{
+	struct btConvertPointerSizeT
+	{
+		union {
+			T *ptr;
+			size_t integer;
+		};
+	};
+	btConvertPointerSizeT converter;
+
+	const size_t bit_mask = ~(alignment - 1);
+	converter.ptr = unalignedPtr;
+	converter.integer += alignment - 1;
+	converter.integer &= bit_mask;
+	return converter.ptr;
+}
+
+#endif  //BT_SCALAR_H
+
+
+
+
+
+/*
+Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_GEN_MINMAX_H
+#define BT_GEN_MINMAX_H
+
+
+template <class T>
+SIMD_FORCE_INLINE const T& btMin(const T& a, const T& b)
+{
+	return a < b ? a : b;
+}
+
+template <class T>
+SIMD_FORCE_INLINE const T& btMax(const T& a, const T& b)
+{
+	return a > b ? a : b;
+}
+
+template <class T>
+SIMD_FORCE_INLINE const T& btClamped(const T& a, const T& lb, const T& ub)
+{
+	return a < lb ? lb : (ub < a ? ub : a);
+}
+
+template <class T>
+SIMD_FORCE_INLINE void btSetMin(T& a, const T& b)
+{
+	if (b < a)
+	{
+		a = b;
+	}
+}
+
+template <class T>
+SIMD_FORCE_INLINE void btSetMax(T& a, const T& b)
+{
+	if (a < b)
+	{
+		a = b;
+	}
+}
+
+template <class T>
+SIMD_FORCE_INLINE void btClamp(T& a, const T& lb, const T& ub)
+{
+	if (a < lb)
+	{
+		a = lb;
+	}
+	else if (ub < a)
+	{
+		a = ub;
+	}
+}
+
+#endif  //BT_GEN_MINMAX_H
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_ALIGNED_ALLOCATOR
+#define BT_ALIGNED_ALLOCATOR
+
+///we probably replace this with our own aligned memory allocator
+///so we replace _aligned_malloc and _aligned_free with our own
+///that is better portable and more predictable
+
+
+///BT_DEBUG_MEMORY_ALLOCATIONS preprocessor can be set in build system
+///for regression tests to detect memory leaks
+///#define BT_DEBUG_MEMORY_ALLOCATIONS 1
+#ifdef BT_DEBUG_MEMORY_ALLOCATIONS
+
+int btDumpMemoryLeaks();
+
+#define btAlignedAlloc(a, b) \
+	btAlignedAllocInternal(a, b, __LINE__, __FILE__)
+
+#define btAlignedFree(ptr) \
+	btAlignedFreeInternal(ptr, __LINE__, __FILE__)
+
+void* btAlignedAllocInternal(size_t size, int alignment, int line, const char* filename);
+
+void btAlignedFreeInternal(void* ptr, int line, const char* filename);
+
+#else
+void* btAlignedAllocInternal(size_t size, int alignment);
+void btAlignedFreeInternal(void* ptr);
+
+#define btAlignedAlloc(size, alignment) btAlignedAllocInternal(size, alignment)
+#define btAlignedFree(ptr) btAlignedFreeInternal(ptr)
+
+#endif
+typedef int size_type;
+
+typedef void*(btAlignedAllocFunc)(size_t size, int alignment);
+typedef void(btAlignedFreeFunc)(void* memblock);
+typedef void*(btAllocFunc)(size_t size);
+typedef void(btFreeFunc)(void* memblock);
+
+///The developer can let all Bullet memory allocations go through a custom memory allocator, using btAlignedAllocSetCustom
+void btAlignedAllocSetCustom(btAllocFunc* allocFunc, btFreeFunc* freeFunc);
+///If the developer has already an custom aligned allocator, then btAlignedAllocSetCustomAligned can be used. The default aligned allocator pre-allocates extra memory using the non-aligned allocator, and instruments it.
+void btAlignedAllocSetCustomAligned(btAlignedAllocFunc* allocFunc, btAlignedFreeFunc* freeFunc);
+
+///The btAlignedAllocator is a portable class for aligned memory allocations.
+///Default implementations for unaligned and aligned allocations can be overridden by a custom allocator using btAlignedAllocSetCustom and btAlignedAllocSetCustomAligned.
+template <typename T, unsigned Alignment>
+class btAlignedAllocator
+{
+	typedef btAlignedAllocator<T, Alignment> self_type;
+
+public:
+	//just going down a list:
+	btAlignedAllocator() {}
+	/*
+	btAlignedAllocator( const self_type & ) {}
+	*/
+
+	template <typename Other>
+	btAlignedAllocator(const btAlignedAllocator<Other, Alignment>&)
+	{
+	}
+
+	typedef const T* const_pointer;
+	typedef const T& const_reference;
+	typedef T* pointer;
+	typedef T& reference;
+	typedef T value_type;
+
+	pointer address(reference ref) const { return &ref; }
+	const_pointer address(const_reference ref) const { return &ref; }
+	pointer allocate(size_type n, const_pointer* hint = 0)
+	{
+		(void)hint;
+		return reinterpret_cast<pointer>(btAlignedAlloc(sizeof(value_type) * n, Alignment));
+	}
+	void construct(pointer ptr, const value_type& value) { new (ptr) value_type(value); }
+	void deallocate(pointer ptr)
+	{
+		btAlignedFree(reinterpret_cast<void*>(ptr));
+	}
+	void destroy(pointer ptr) { ptr->~value_type(); }
+
+	template <typename O>
+	struct rebind
+	{
+		typedef btAlignedAllocator<O, Alignment> other;
+	};
+	template <typename O>
+	self_type& operator=(const btAlignedAllocator<O, Alignment>&)
+	{
+		return *this;
+	}
+
+	friend bool operator==(const self_type&, const self_type&) { return true; }
+};
+
+#endif  //BT_ALIGNED_ALLOCATOR
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+
+#ifdef BT_DEBUG_MEMORY_ALLOCATIONS
+int gNumAlignedAllocs = 0;
+int gNumAlignedFree = 0;
+int gTotalBytesAlignedAllocs = 0;  //detect memory leaks
+#endif                             //BT_DEBUG_MEMORY_ALLOCATIONST_DEBUG_ALLOCATIONS
+
+static void *btAllocDefault(size_t size)
+{
+  char* data = (char*) malloc(size);
+  memset(data,0,size);//keep msan happy
+  return data;
+}
+
+static void btFreeDefault(void *ptr)
+{
+	free(ptr);
+}
+
+static btAllocFunc *sAllocFunc = btAllocDefault;
+static btFreeFunc *sFreeFunc = btFreeDefault;
+
+#if defined(BT_HAS_ALIGNED_ALLOCATOR)
+static void *btAlignedAllocDefault(size_t size, int alignment)
+{
+	return _aligned_malloc(size, (size_t)alignment);
+}
+
+static void btAlignedFreeDefault(void *ptr)
+{
+	_aligned_free(ptr);
+}
+#elif defined(__CELLOS_LV2__)
+
+static inline void *btAlignedAllocDefault(size_t size, int alignment)
+{
+	return memalign(alignment, size);
+}
+
+static inline void btAlignedFreeDefault(void *ptr)
+{
+	free(ptr);
+}
+#else
+
+static inline void *btAlignedAllocDefault(size_t size, int alignment)
+{
+	void *ret;
+	char *real;
+	real = (char *)sAllocFunc(size + sizeof(void *) + (alignment - 1));
+	if (real)
+	{
+		ret = btAlignPointer(real + sizeof(void *), alignment);
+		*((void **)(ret)-1) = (void *)(real);
+	}
+	else
+	{
+		ret = (void *)(real);
+	}
+  //keep msan happy
+  memset((char*) ret, 0, size);
+	return (ret);
+}
+
+static inline void btAlignedFreeDefault(void *ptr)
+{
+	void *real;
+
+	if (ptr)
+	{
+		real = *((void **)(ptr)-1);
+		sFreeFunc(real);
+	}
+}
+#endif
+
+static btAlignedAllocFunc *sAlignedAllocFunc = btAlignedAllocDefault;
+static btAlignedFreeFunc *sAlignedFreeFunc = btAlignedFreeDefault;
+
+void btAlignedAllocSetCustomAligned(btAlignedAllocFunc *allocFunc, btAlignedFreeFunc *freeFunc)
+{
+	sAlignedAllocFunc = allocFunc ? allocFunc : btAlignedAllocDefault;
+	sAlignedFreeFunc = freeFunc ? freeFunc : btAlignedFreeDefault;
+}
+
+void btAlignedAllocSetCustom(btAllocFunc *allocFunc, btFreeFunc *freeFunc)
+{
+	sAllocFunc = allocFunc ? allocFunc : btAllocDefault;
+	sFreeFunc = freeFunc ? freeFunc : btFreeDefault;
+}
+
+#ifdef BT_DEBUG_MEMORY_ALLOCATIONS
+
+static int allocations_id[10241024];
+static int allocations_bytes[10241024];
+static int mynumallocs = 0;
+
+int btDumpMemoryLeaks()
+{
+	int totalLeak = 0;
+
+	for (int i = 0; i < mynumallocs; i++)
+	{
+		printf("Error: leaked memory of allocation #%d (%d bytes)\n", allocations_id[i], allocations_bytes[i]);
+		totalLeak += allocations_bytes[i];
+	}
+	if (totalLeak)
+	{
+		printf("Error: memory leaks: %d allocations were not freed and leaked together %d bytes\n", mynumallocs, totalLeak);
+	}
+	return totalLeak;
+}
+//this generic allocator provides the total allocated number of bytes
+
+struct btDebugPtrMagic
+{
+	union {
+		void **vptrptr;
+		void *vptr;
+		int *iptr;
+		char *cptr;
+	};
+};
+
+void *btAlignedAllocInternal(size_t size, int alignment, int line, const char *filename)
+{
+	if (size == 0)
+	{
+		printf("Whaat? size==0");
+		return 0;
+	}
+	static int allocId = 0;
+
+	void *ret;
+	char *real;
+
+	// to find some particular memory leak, you could do something like this:
+	//	if (allocId==172)
+	//	{
+	//		printf("catch me!\n");
+	//	}
+	//	if (size>1024*1024)
+	//	{
+	//		printf("big alloc!%d\n", size);
+	//	}
+
+	gTotalBytesAlignedAllocs += size;
+	gNumAlignedAllocs++;
+
+	int sz4prt = 4 * sizeof(void *);
+
+	real = (char *)sAllocFunc(size + sz4prt + (alignment - 1));
+	if (real)
+	{
+		ret = (void *)btAlignPointer(real + sz4prt, alignment);
+		btDebugPtrMagic p;
+		p.vptr = ret;
+		p.cptr -= sizeof(void *);
+		*p.vptrptr = (void *)real;
+		p.cptr -= sizeof(void *);
+		*p.iptr = size;
+		p.cptr -= sizeof(void *);
+		*p.iptr = allocId;
+
+		allocations_id[mynumallocs] = allocId;
+		allocations_bytes[mynumallocs] = size;
+		mynumallocs++;
+	}
+	else
+	{
+		ret = (void *)(real);  //??
+	}
+
+	printf("allocation %d at address %x, from %s,line %d, size %d (total allocated = %d)\n", allocId, real, filename, line, size, gTotalBytesAlignedAllocs);
+	allocId++;
+
+	int *ptr = (int *)ret;
+	*ptr = 12;
+	return (ret);
+}
+
+void btAlignedFreeInternal(void *ptr, int line, const char *filename)
+{
+	void *real;
+
+	if (ptr)
+	{
+		gNumAlignedFree++;
+
+		btDebugPtrMagic p;
+		p.vptr = ptr;
+		p.cptr -= sizeof(void *);
+		real = *p.vptrptr;
+		p.cptr -= sizeof(void *);
+		int size = *p.iptr;
+		p.cptr -= sizeof(void *);
+		int allocId = *p.iptr;
+
+		bool found = false;
+
+		for (int i = 0; i < mynumallocs; i++)
+		{
+			if (allocations_id[i] == allocId)
+			{
+				allocations_id[i] = allocations_id[mynumallocs - 1];
+				allocations_bytes[i] = allocations_bytes[mynumallocs - 1];
+				mynumallocs--;
+				found = true;
+				break;
+			}
+		}
+
+		gTotalBytesAlignedAllocs -= size;
+
+		int diff = gNumAlignedAllocs - gNumAlignedFree;
+		printf("free %d at address %x, from %s,line %d, size %d (total remain = %d in %d non-freed allocations)\n", allocId, real, filename, line, size, gTotalBytesAlignedAllocs, diff);
+
+		sFreeFunc(real);
+	}
+	else
+	{
+		//printf("deleting a NULL ptr, no effect\n");
+	}
+}
+
+#else  //BT_DEBUG_MEMORY_ALLOCATIONS
+
+void *btAlignedAllocInternal(size_t size, int alignment)
+{
+	void *ptr;
+	ptr = sAlignedAllocFunc(size, alignment);
+	//	printf("btAlignedAllocInternal %d, %x\n",size,ptr);
+	return ptr;
+}
+
+void btAlignedFreeInternal(void *ptr)
+{
+	if (!ptr)
+	{
+		return;
+	}
+
+	//	printf("btAlignedFreeInternal %x\n",ptr);
+	sAlignedFreeFunc(ptr);
+}
+
+#endif  //BT_DEBUG_MEMORY_ALLOCATIONS
+
+
+
+
+
+/*
+Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_VECTOR3_H
+#define BT_VECTOR3_H
+
+
+#ifdef BT_USE_DOUBLE_PRECISION
+#define btVector3Data btVector3DoubleData
+#define btVector3DataName "btVector3DoubleData"
+#else
+#define btVector3Data btVector3FloatData
+#define btVector3DataName "btVector3FloatData"
+#endif  //BT_USE_DOUBLE_PRECISION
+
+#if defined BT_USE_SSE
+
+//typedef  uint32_t __m128i __attribute__ ((vector_size(16)));
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4556)  // value of intrinsic immediate argument '4294967239' is out of range '0 - 255'
+#endif
+
+#define BT_SHUFFLE(x, y, z, w) (((w) << 6 | (z) << 4 | (y) << 2 | (x)) & 0xff)
+//#define bt_pshufd_ps( _a, _mask ) (__m128) _mm_shuffle_epi32((__m128i)(_a), (_mask) )
+#define bt_pshufd_ps(_a, _mask) _mm_shuffle_ps((_a), (_a), (_mask))
+#define bt_splat3_ps(_a, _i) bt_pshufd_ps((_a), BT_SHUFFLE(_i, _i, _i, 3))
+#define bt_splat_ps(_a, _i) bt_pshufd_ps((_a), BT_SHUFFLE(_i, _i, _i, _i))
+
+#define btv3AbsiMask (_mm_set_epi32(0x00000000, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF))
+#define btvAbsMask (_mm_set_epi32(0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF))
+#define btvFFF0Mask (_mm_set_epi32(0x00000000, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF))
+#define btv3AbsfMask btCastiTo128f(btv3AbsiMask)
+#define btvFFF0fMask btCastiTo128f(btvFFF0Mask)
+#define btvxyzMaskf btvFFF0fMask
+#define btvAbsfMask btCastiTo128f(btvAbsMask)
+
+//there is an issue with XCode 3.2 (LCx errors)
+#define btvMzeroMask (_mm_set_ps(-0.0f, -0.0f, -0.0f, -0.0f))
+#define v1110 (_mm_set_ps(0.0f, 1.0f, 1.0f, 1.0f))
+#define vHalf (_mm_set_ps(0.5f, 0.5f, 0.5f, 0.5f))
+#define v1_5 (_mm_set_ps(1.5f, 1.5f, 1.5f, 1.5f))
+
+//const __m128 ATTRIBUTE_ALIGNED16(btvMzeroMask) = {-0.0f, -0.0f, -0.0f, -0.0f};
+//const __m128 ATTRIBUTE_ALIGNED16(v1110) = {1.0f, 1.0f, 1.0f, 0.0f};
+//const __m128 ATTRIBUTE_ALIGNED16(vHalf) = {0.5f, 0.5f, 0.5f, 0.5f};
+//const __m128 ATTRIBUTE_ALIGNED16(v1_5)  = {1.5f, 1.5f, 1.5f, 1.5f};
+
+#endif
+
+#ifdef BT_USE_NEON
+
+const float32x4_t ATTRIBUTE_ALIGNED16(btvMzeroMask) = (float32x4_t){-0.0f, -0.0f, -0.0f, -0.0f};
+const int32x4_t ATTRIBUTE_ALIGNED16(btvFFF0Mask) = (int32x4_t){static_cast<int32_t>(0xFFFFFFFF),
+															   static_cast<int32_t>(0xFFFFFFFF), static_cast<int32_t>(0xFFFFFFFF), 0x0};
+const int32x4_t ATTRIBUTE_ALIGNED16(btvAbsMask) = (int32x4_t){0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF};
+const int32x4_t ATTRIBUTE_ALIGNED16(btv3AbsMask) = (int32x4_t){0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x0};
+
+#endif
+
+/**@brief btVector3 can be used to represent 3D points and vectors.
+ * It has an un-used w component to suit 16-byte alignment when btVector3 is stored in containers. This extra component can be used by derived classes (Quaternion?) or by user
+ * Ideally, this class should be replaced by a platform optimized SIMD version that keeps the data in registers
+ */
+ATTRIBUTE_ALIGNED16(class)
+btVector3
+{
+public:
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+
+#if defined(__SPU__) && defined(__CELLOS_LV2__)
+	btScalar m_floats[4];
+
+public:
+	SIMD_FORCE_INLINE const vec_float4& get128() const
+	{
+		return *((const vec_float4*)&m_floats[0]);
+	}
+
+public:
+#else                                            //__CELLOS_LV2__ __SPU__
+#if defined(BT_USE_SSE) || defined(BT_USE_NEON)  // _WIN32 || ARM
+	union {
+		btSimdFloat4 mVec128;
+		btScalar m_floats[4];
+	};
+	SIMD_FORCE_INLINE btSimdFloat4 get128() const
+	{
+		return mVec128;
+	}
+	SIMD_FORCE_INLINE void set128(btSimdFloat4 v128)
+	{
+		mVec128 = v128;
+	}
+#else
+	btScalar m_floats[4];
+#endif
+#endif  //__CELLOS_LV2__ __SPU__
+
+public:
+	/**@brief No initialization constructor */
+	SIMD_FORCE_INLINE btVector3()
+	{
+	}
+
+	/**@brief Constructor from scalars 
+   * @param x X value
+   * @param y Y value 
+   * @param z Z value 
+   */
+	SIMD_FORCE_INLINE btVector3(const btScalar& _x, const btScalar& _y, const btScalar& _z)
+	{
+		m_floats[0] = _x;
+		m_floats[1] = _y;
+		m_floats[2] = _z;
+		m_floats[3] = btScalar(0.f);
+	}
+
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+	// Set Vector
+	SIMD_FORCE_INLINE btVector3(btSimdFloat4 v)
+	{
+		mVec128 = v;
+	}
+
+	// Copy constructor
+	SIMD_FORCE_INLINE btVector3(const btVector3& rhs)
+	{
+		mVec128 = rhs.mVec128;
+	}
+
+	// Assignment Operator
+	SIMD_FORCE_INLINE btVector3&
+	operator=(const btVector3& v)
+	{
+		mVec128 = v.mVec128;
+
+		return *this;
+	}
+#endif  // #if defined (BT_USE_SSE_IN_API) || defined (BT_USE_NEON)
+
+	/**@brief Add a vector to this one 
+ * @param The vector to add to this one */
+	SIMD_FORCE_INLINE btVector3& operator+=(const btVector3& v)
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		mVec128 = _mm_add_ps(mVec128, v.mVec128);
+#elif defined(BT_USE_NEON)
+		mVec128 = vaddq_f32(mVec128, v.mVec128);
+#else
+		m_floats[0] += v.m_floats[0];
+		m_floats[1] += v.m_floats[1];
+		m_floats[2] += v.m_floats[2];
+#endif
+		return *this;
+	}
+
+	/**@brief Subtract a vector from this one
+   * @param The vector to subtract */
+	SIMD_FORCE_INLINE btVector3& operator-=(const btVector3& v)
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		mVec128 = _mm_sub_ps(mVec128, v.mVec128);
+#elif defined(BT_USE_NEON)
+		mVec128 = vsubq_f32(mVec128, v.mVec128);
+#else
+		m_floats[0] -= v.m_floats[0];
+		m_floats[1] -= v.m_floats[1];
+		m_floats[2] -= v.m_floats[2];
+#endif
+		return *this;
+	}
+
+	/**@brief Scale the vector
+   * @param s Scale factor */
+	SIMD_FORCE_INLINE btVector3& operator*=(const btScalar& s)
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		__m128 vs = _mm_load_ss(&s);  //	(S 0 0 0)
+		vs = bt_pshufd_ps(vs, 0x80);  //	(S S S 0.0)
+		mVec128 = _mm_mul_ps(mVec128, vs);
+#elif defined(BT_USE_NEON)
+		mVec128 = vmulq_n_f32(mVec128, s);
+#else
+		m_floats[0] *= s;
+		m_floats[1] *= s;
+		m_floats[2] *= s;
+#endif
+		return *this;
+	}
+
+	/**@brief Inversely scale the vector 
+   * @param s Scale factor to divide by */
+	SIMD_FORCE_INLINE btVector3& operator/=(const btScalar& s)
+	{
+		btFullAssert(s != btScalar(0.0));
+
+#if 0  //defined(BT_USE_SSE_IN_API)
+// this code is not faster !
+		__m128 vs = _mm_load_ss(&s);
+		vs = _mm_div_ss(v1110, vs);
+		vs = bt_pshufd_ps(vs, 0x00);	//	(S S S S)
+
+		mVec128 = _mm_mul_ps(mVec128, vs);
+		
+		return *this;
+#else
+		return *this *= btScalar(1.0) / s;
+#endif
+	}
+
+	/**@brief Return the dot product
+   * @param v The other vector in the dot product */
+	SIMD_FORCE_INLINE btScalar dot(const btVector3& v) const
+	{
+#if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		__m128 vd = _mm_mul_ps(mVec128, v.mVec128);
+		__m128 z = _mm_movehl_ps(vd, vd);
+		__m128 y = _mm_shuffle_ps(vd, vd, 0x55);
+		vd = _mm_add_ss(vd, y);
+		vd = _mm_add_ss(vd, z);
+		return _mm_cvtss_f32(vd);
+#elif defined(BT_USE_NEON)
+		float32x4_t vd = vmulq_f32(mVec128, v.mVec128);
+		float32x2_t x = vpadd_f32(vget_low_f32(vd), vget_low_f32(vd));
+		x = vadd_f32(x, vget_high_f32(vd));
+		return vget_lane_f32(x, 0);
+#else
+		return m_floats[0] * v.m_floats[0] +
+			   m_floats[1] * v.m_floats[1] +
+			   m_floats[2] * v.m_floats[2];
+#endif
+	}
+
+	/**@brief Return the length of the vector squared */
+	SIMD_FORCE_INLINE btScalar length2() const
+	{
+		return dot(*this);
+	}
+
+	/**@brief Return the length of the vector */
+	SIMD_FORCE_INLINE btScalar length() const
+	{
+		return btSqrt(length2());
+	}
+
+	/**@brief Return the norm (length) of the vector */
+	SIMD_FORCE_INLINE btScalar norm() const
+	{
+		return length();
+	}
+
+	/**@brief Return the norm (length) of the vector */
+	SIMD_FORCE_INLINE btScalar safeNorm() const
+	{
+		btScalar d = length2();
+		//workaround for some clang/gcc issue of sqrtf(tiny number) = -INF
+		if (d > SIMD_EPSILON)
+			return btSqrt(d);
+		return btScalar(0);
+	}
+
+	/**@brief Return the distance squared between the ends of this and another vector
+   * This is symantically treating the vector like a point */
+	SIMD_FORCE_INLINE btScalar distance2(const btVector3& v) const;
+
+	/**@brief Return the distance between the ends of this and another vector
+   * This is symantically treating the vector like a point */
+	SIMD_FORCE_INLINE btScalar distance(const btVector3& v) const;
+
+	SIMD_FORCE_INLINE btVector3& safeNormalize()
+	{
+		btScalar l2 = length2();
+		//triNormal.normalize();
+		if (l2 >= SIMD_EPSILON * SIMD_EPSILON)
+		{
+			(*this) /= btSqrt(l2);
+		}
+		else
+		{
+			setValue(1, 0, 0);
+		}
+		return *this;
+	}
+
+	/**@brief Normalize this vector 
+   * x^2 + y^2 + z^2 = 1 */
+	SIMD_FORCE_INLINE btVector3& normalize()
+	{
+		btAssert(!fuzzyZero());
+
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		// dot product first
+		__m128 vd = _mm_mul_ps(mVec128, mVec128);
+		__m128 z = _mm_movehl_ps(vd, vd);
+		__m128 y = _mm_shuffle_ps(vd, vd, 0x55);
+		vd = _mm_add_ss(vd, y);
+		vd = _mm_add_ss(vd, z);
+
+#if 0
+        vd = _mm_sqrt_ss(vd);
+		vd = _mm_div_ss(v1110, vd);
+		vd = bt_splat_ps(vd, 0x80);
+		mVec128 = _mm_mul_ps(mVec128, vd);
+#else
+
+		// NR step 1/sqrt(x) - vd is x, y is output
+		y = _mm_rsqrt_ss(vd);  // estimate
+
+		//  one step NR
+		z = v1_5;
+		vd = _mm_mul_ss(vd, vHalf);  // vd * 0.5
+		//x2 = vd;
+		vd = _mm_mul_ss(vd, y);  // vd * 0.5 * y0
+		vd = _mm_mul_ss(vd, y);  // vd * 0.5 * y0 * y0
+		z = _mm_sub_ss(z, vd);   // 1.5 - vd * 0.5 * y0 * y0
+
+		y = _mm_mul_ss(y, z);  // y0 * (1.5 - vd * 0.5 * y0 * y0)
+
+		y = bt_splat_ps(y, 0x80);
+		mVec128 = _mm_mul_ps(mVec128, y);
+
+#endif
+
+		return *this;
+#else
+		return *this /= length();
+#endif
+	}
+
+	/**@brief Return a normalized version of this vector */
+	SIMD_FORCE_INLINE btVector3 normalized() const;
+
+	/**@brief Return a rotated version of this vector
+   * @param wAxis The axis to rotate about 
+   * @param angle The angle to rotate by */
+	SIMD_FORCE_INLINE btVector3 rotate(const btVector3& wAxis, const btScalar angle) const;
+
+	/**@brief Return the angle between this and another vector
+   * @param v The other vector */
+	SIMD_FORCE_INLINE btScalar angle(const btVector3& v) const
+	{
+		btScalar s = btSqrt(length2() * v.length2());
+		btFullAssert(s != btScalar(0.0));
+		return btAcos(dot(v) / s);
+	}
+
+	/**@brief Return a vector with the absolute values of each element */
+	SIMD_FORCE_INLINE btVector3 absolute() const
+	{
+#if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		return btVector3(_mm_and_ps(mVec128, btv3AbsfMask));
+#elif defined(BT_USE_NEON)
+		return btVector3(vabsq_f32(mVec128));
+#else
+		return btVector3(
+			btFabs(m_floats[0]),
+			btFabs(m_floats[1]),
+			btFabs(m_floats[2]));
+#endif
+	}
+
+	/**@brief Return the cross product between this and another vector 
+   * @param v The other vector */
+	SIMD_FORCE_INLINE btVector3 cross(const btVector3& v) const
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		__m128 T, V;
+
+		T = bt_pshufd_ps(mVec128, BT_SHUFFLE(1, 2, 0, 3));    //	(Y Z X 0)
+		V = bt_pshufd_ps(v.mVec128, BT_SHUFFLE(1, 2, 0, 3));  //	(Y Z X 0)
+
+		V = _mm_mul_ps(V, mVec128);
+		T = _mm_mul_ps(T, v.mVec128);
+		V = _mm_sub_ps(V, T);
+
+		V = bt_pshufd_ps(V, BT_SHUFFLE(1, 2, 0, 3));
+		return btVector3(V);
+#elif defined(BT_USE_NEON)
+		float32x4_t T, V;
+		// form (Y, Z, X, _) of mVec128 and v.mVec128
+		float32x2_t Tlow = vget_low_f32(mVec128);
+		float32x2_t Vlow = vget_low_f32(v.mVec128);
+		T = vcombine_f32(vext_f32(Tlow, vget_high_f32(mVec128), 1), Tlow);
+		V = vcombine_f32(vext_f32(Vlow, vget_high_f32(v.mVec128), 1), Vlow);
+
+		V = vmulq_f32(V, mVec128);
+		T = vmulq_f32(T, v.mVec128);
+		V = vsubq_f32(V, T);
+		Vlow = vget_low_f32(V);
+		// form (Y, Z, X, _);
+		V = vcombine_f32(vext_f32(Vlow, vget_high_f32(V), 1), Vlow);
+		V = (float32x4_t)vandq_s32((int32x4_t)V, btvFFF0Mask);
+
+		return btVector3(V);
+#else
+		return btVector3(
+			m_floats[1] * v.m_floats[2] - m_floats[2] * v.m_floats[1],
+			m_floats[2] * v.m_floats[0] - m_floats[0] * v.m_floats[2],
+			m_floats[0] * v.m_floats[1] - m_floats[1] * v.m_floats[0]);
+#endif
+	}
+
+	SIMD_FORCE_INLINE btScalar triple(const btVector3& v1, const btVector3& v2) const
+	{
+#if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		// cross:
+		__m128 T = _mm_shuffle_ps(v1.mVec128, v1.mVec128, BT_SHUFFLE(1, 2, 0, 3));  //	(Y Z X 0)
+		__m128 V = _mm_shuffle_ps(v2.mVec128, v2.mVec128, BT_SHUFFLE(1, 2, 0, 3));  //	(Y Z X 0)
+
+		V = _mm_mul_ps(V, v1.mVec128);
+		T = _mm_mul_ps(T, v2.mVec128);
+		V = _mm_sub_ps(V, T);
+
+		V = _mm_shuffle_ps(V, V, BT_SHUFFLE(1, 2, 0, 3));
+
+		// dot:
+		V = _mm_mul_ps(V, mVec128);
+		__m128 z = _mm_movehl_ps(V, V);
+		__m128 y = _mm_shuffle_ps(V, V, 0x55);
+		V = _mm_add_ss(V, y);
+		V = _mm_add_ss(V, z);
+		return _mm_cvtss_f32(V);
+
+#elif defined(BT_USE_NEON)
+		// cross:
+		float32x4_t T, V;
+		// form (Y, Z, X, _) of mVec128 and v.mVec128
+		float32x2_t Tlow = vget_low_f32(v1.mVec128);
+		float32x2_t Vlow = vget_low_f32(v2.mVec128);
+		T = vcombine_f32(vext_f32(Tlow, vget_high_f32(v1.mVec128), 1), Tlow);
+		V = vcombine_f32(vext_f32(Vlow, vget_high_f32(v2.mVec128), 1), Vlow);
+
+		V = vmulq_f32(V, v1.mVec128);
+		T = vmulq_f32(T, v2.mVec128);
+		V = vsubq_f32(V, T);
+		Vlow = vget_low_f32(V);
+		// form (Y, Z, X, _);
+		V = vcombine_f32(vext_f32(Vlow, vget_high_f32(V), 1), Vlow);
+
+		// dot:
+		V = vmulq_f32(mVec128, V);
+		float32x2_t x = vpadd_f32(vget_low_f32(V), vget_low_f32(V));
+		x = vadd_f32(x, vget_high_f32(V));
+		return vget_lane_f32(x, 0);
+#else
+		return m_floats[0] * (v1.m_floats[1] * v2.m_floats[2] - v1.m_floats[2] * v2.m_floats[1]) +
+			   m_floats[1] * (v1.m_floats[2] * v2.m_floats[0] - v1.m_floats[0] * v2.m_floats[2]) +
+			   m_floats[2] * (v1.m_floats[0] * v2.m_floats[1] - v1.m_floats[1] * v2.m_floats[0]);
+#endif
+	}
+
+	/**@brief Return the axis with the smallest value 
+   * Note return values are 0,1,2 for x, y, or z */
+	SIMD_FORCE_INLINE int minAxis() const
+	{
+		return m_floats[0] < m_floats[1] ? (m_floats[0] < m_floats[2] ? 0 : 2) : (m_floats[1] < m_floats[2] ? 1 : 2);
+	}
+
+	/**@brief Return the axis with the largest value 
+   * Note return values are 0,1,2 for x, y, or z */
+	SIMD_FORCE_INLINE int maxAxis() const
+	{
+		return m_floats[0] < m_floats[1] ? (m_floats[1] < m_floats[2] ? 2 : 1) : (m_floats[0] < m_floats[2] ? 2 : 0);
+	}
+
+	SIMD_FORCE_INLINE int furthestAxis() const
+	{
+		return absolute().minAxis();
+	}
+
+	SIMD_FORCE_INLINE int closestAxis() const
+	{
+		return absolute().maxAxis();
+	}
+
+	SIMD_FORCE_INLINE void setInterpolate3(const btVector3& v0, const btVector3& v1, btScalar rt)
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		__m128 vrt = _mm_load_ss(&rt);  //	(rt 0 0 0)
+		btScalar s = btScalar(1.0) - rt;
+		__m128 vs = _mm_load_ss(&s);  //	(S 0 0 0)
+		vs = bt_pshufd_ps(vs, 0x80);  //	(S S S 0.0)
+		__m128 r0 = _mm_mul_ps(v0.mVec128, vs);
+		vrt = bt_pshufd_ps(vrt, 0x80);  //	(rt rt rt 0.0)
+		__m128 r1 = _mm_mul_ps(v1.mVec128, vrt);
+		__m128 tmp3 = _mm_add_ps(r0, r1);
+		mVec128 = tmp3;
+#elif defined(BT_USE_NEON)
+		float32x4_t vl = vsubq_f32(v1.mVec128, v0.mVec128);
+		vl = vmulq_n_f32(vl, rt);
+		mVec128 = vaddq_f32(vl, v0.mVec128);
+#else
+		btScalar s = btScalar(1.0) - rt;
+		m_floats[0] = s * v0.m_floats[0] + rt * v1.m_floats[0];
+		m_floats[1] = s * v0.m_floats[1] + rt * v1.m_floats[1];
+		m_floats[2] = s * v0.m_floats[2] + rt * v1.m_floats[2];
+		//don't do the unused w component
+		//		m_co[3] = s * v0[3] + rt * v1[3];
+#endif
+	}
+
+	/**@brief Return the linear interpolation between this and another vector 
+   * @param v The other vector 
+   * @param t The ration of this to v (t = 0 => return this, t=1 => return other) */
+	SIMD_FORCE_INLINE btVector3 lerp(const btVector3& v, const btScalar& t) const
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		__m128 vt = _mm_load_ss(&t);  //	(t 0 0 0)
+		vt = bt_pshufd_ps(vt, 0x80);  //	(rt rt rt 0.0)
+		__m128 vl = _mm_sub_ps(v.mVec128, mVec128);
+		vl = _mm_mul_ps(vl, vt);
+		vl = _mm_add_ps(vl, mVec128);
+
+		return btVector3(vl);
+#elif defined(BT_USE_NEON)
+		float32x4_t vl = vsubq_f32(v.mVec128, mVec128);
+		vl = vmulq_n_f32(vl, t);
+		vl = vaddq_f32(vl, mVec128);
+
+		return btVector3(vl);
+#else
+		return btVector3(m_floats[0] + (v.m_floats[0] - m_floats[0]) * t,
+						 m_floats[1] + (v.m_floats[1] - m_floats[1]) * t,
+						 m_floats[2] + (v.m_floats[2] - m_floats[2]) * t);
+#endif
+	}
+
+	/**@brief Elementwise multiply this vector by the other 
+   * @param v The other vector */
+	SIMD_FORCE_INLINE btVector3& operator*=(const btVector3& v)
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		mVec128 = _mm_mul_ps(mVec128, v.mVec128);
+#elif defined(BT_USE_NEON)
+		mVec128 = vmulq_f32(mVec128, v.mVec128);
+#else
+		m_floats[0] *= v.m_floats[0];
+		m_floats[1] *= v.m_floats[1];
+		m_floats[2] *= v.m_floats[2];
+#endif
+		return *this;
+	}
+
+	/**@brief Return the x value */
+	SIMD_FORCE_INLINE const btScalar& getX() const { return m_floats[0]; }
+	/**@brief Return the y value */
+	SIMD_FORCE_INLINE const btScalar& getY() const { return m_floats[1]; }
+	/**@brief Return the z value */
+	SIMD_FORCE_INLINE const btScalar& getZ() const { return m_floats[2]; }
+	/**@brief Set the x value */
+	SIMD_FORCE_INLINE void setX(btScalar _x) { m_floats[0] = _x; };
+	/**@brief Set the y value */
+	SIMD_FORCE_INLINE void setY(btScalar _y) { m_floats[1] = _y; };
+	/**@brief Set the z value */
+	SIMD_FORCE_INLINE void setZ(btScalar _z) { m_floats[2] = _z; };
+	/**@brief Set the w value */
+	SIMD_FORCE_INLINE void setW(btScalar _w) { m_floats[3] = _w; };
+	/**@brief Return the x value */
+	SIMD_FORCE_INLINE const btScalar& x() const { return m_floats[0]; }
+	/**@brief Return the y value */
+	SIMD_FORCE_INLINE const btScalar& y() const { return m_floats[1]; }
+	/**@brief Return the z value */
+	SIMD_FORCE_INLINE const btScalar& z() const { return m_floats[2]; }
+	/**@brief Return the w value */
+	SIMD_FORCE_INLINE const btScalar& w() const { return m_floats[3]; }
+
+	//SIMD_FORCE_INLINE btScalar&       operator[](int i)       { return (&m_floats[0])[i];	}
+	//SIMD_FORCE_INLINE const btScalar& operator[](int i) const { return (&m_floats[0])[i]; }
+	///operator btScalar*() replaces operator[], using implicit conversion. We added operator != and operator == to avoid pointer comparisons.
+	SIMD_FORCE_INLINE operator btScalar*() { return &m_floats[0]; }
+	SIMD_FORCE_INLINE operator const btScalar*() const { return &m_floats[0]; }
+
+	SIMD_FORCE_INLINE bool operator==(const btVector3& other) const
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		return (0xf == _mm_movemask_ps((__m128)_mm_cmpeq_ps(mVec128, other.mVec128)));
+#else
+		return ((m_floats[3] == other.m_floats[3]) &&
+				(m_floats[2] == other.m_floats[2]) &&
+				(m_floats[1] == other.m_floats[1]) &&
+				(m_floats[0] == other.m_floats[0]));
+#endif
+	}
+
+	SIMD_FORCE_INLINE bool operator!=(const btVector3& other) const
+	{
+		return !(*this == other);
+	}
+
+	/**@brief Set each element to the max of the current values and the values of another btVector3
+   * @param other The other btVector3 to compare with 
+   */
+	SIMD_FORCE_INLINE void setMax(const btVector3& other)
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		mVec128 = _mm_max_ps(mVec128, other.mVec128);
+#elif defined(BT_USE_NEON)
+		mVec128 = vmaxq_f32(mVec128, other.mVec128);
+#else
+		btSetMax(m_floats[0], other.m_floats[0]);
+		btSetMax(m_floats[1], other.m_floats[1]);
+		btSetMax(m_floats[2], other.m_floats[2]);
+		btSetMax(m_floats[3], other.w());
+#endif
+	}
+
+	/**@brief Set each element to the min of the current values and the values of another btVector3
+   * @param other The other btVector3 to compare with 
+   */
+	SIMD_FORCE_INLINE void setMin(const btVector3& other)
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		mVec128 = _mm_min_ps(mVec128, other.mVec128);
+#elif defined(BT_USE_NEON)
+		mVec128 = vminq_f32(mVec128, other.mVec128);
+#else
+		btSetMin(m_floats[0], other.m_floats[0]);
+		btSetMin(m_floats[1], other.m_floats[1]);
+		btSetMin(m_floats[2], other.m_floats[2]);
+		btSetMin(m_floats[3], other.w());
+#endif
+	}
+
+	SIMD_FORCE_INLINE void setValue(const btScalar& _x, const btScalar& _y, const btScalar& _z)
+	{
+		m_floats[0] = _x;
+		m_floats[1] = _y;
+		m_floats[2] = _z;
+		m_floats[3] = btScalar(0.f);
+	}
+
+	void getSkewSymmetricMatrix(btVector3 * v0, btVector3 * v1, btVector3 * v2) const
+	{
+#if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+
+		__m128 V = _mm_and_ps(mVec128, btvFFF0fMask);
+		__m128 V0 = _mm_xor_ps(btvMzeroMask, V);
+		__m128 V2 = _mm_movelh_ps(V0, V);
+
+		__m128 V1 = _mm_shuffle_ps(V, V0, 0xCE);
+
+		V0 = _mm_shuffle_ps(V0, V, 0xDB);
+		V2 = _mm_shuffle_ps(V2, V, 0xF9);
+
+		v0->mVec128 = V0;
+		v1->mVec128 = V1;
+		v2->mVec128 = V2;
+#else
+		v0->setValue(0., -z(), y());
+		v1->setValue(z(), 0., -x());
+		v2->setValue(-y(), x(), 0.);
+#endif
+	}
+
+	void setZero()
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		mVec128 = (__m128)_mm_xor_ps(mVec128, mVec128);
+#elif defined(BT_USE_NEON)
+		int32x4_t vi = vdupq_n_s32(0);
+		mVec128 = vreinterpretq_f32_s32(vi);
+#else
+		setValue(btScalar(0.), btScalar(0.), btScalar(0.));
+#endif
+	}
+
+	SIMD_FORCE_INLINE bool isZero() const
+	{
+		return m_floats[0] == btScalar(0) && m_floats[1] == btScalar(0) && m_floats[2] == btScalar(0);
+	}
+
+	SIMD_FORCE_INLINE bool fuzzyZero() const
+	{
+		return length2() < SIMD_EPSILON * SIMD_EPSILON;
+	}
+
+	SIMD_FORCE_INLINE void serialize(struct btVector3Data & dataOut) const;
+
+	SIMD_FORCE_INLINE void deSerialize(const struct btVector3DoubleData& dataIn);
+
+	SIMD_FORCE_INLINE void deSerialize(const struct btVector3FloatData& dataIn);
+
+	SIMD_FORCE_INLINE void serializeFloat(struct btVector3FloatData & dataOut) const;
+
+	SIMD_FORCE_INLINE void deSerializeFloat(const struct btVector3FloatData& dataIn);
+
+	SIMD_FORCE_INLINE void serializeDouble(struct btVector3DoubleData & dataOut) const;
+
+	SIMD_FORCE_INLINE void deSerializeDouble(const struct btVector3DoubleData& dataIn);
+
+	/**@brief returns index of maximum dot product between this and vectors in array[]
+         * @param array The other vectors 
+         * @param array_count The number of other vectors 
+         * @param dotOut The maximum dot product */
+	SIMD_FORCE_INLINE long maxDot(const btVector3* array, long array_count, btScalar& dotOut) const;
+
+	/**@brief returns index of minimum dot product between this and vectors in array[]
+         * @param array The other vectors 
+         * @param array_count The number of other vectors 
+         * @param dotOut The minimum dot product */
+	SIMD_FORCE_INLINE long minDot(const btVector3* array, long array_count, btScalar& dotOut) const;
+
+	/* create a vector as  btVector3( this->dot( btVector3 v0 ), this->dot( btVector3 v1), this->dot( btVector3 v2 ))  */
+	SIMD_FORCE_INLINE btVector3 dot3(const btVector3& v0, const btVector3& v1, const btVector3& v2) const
+	{
+#if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+
+		__m128 a0 = _mm_mul_ps(v0.mVec128, this->mVec128);
+		__m128 a1 = _mm_mul_ps(v1.mVec128, this->mVec128);
+		__m128 a2 = _mm_mul_ps(v2.mVec128, this->mVec128);
+		__m128 b0 = _mm_unpacklo_ps(a0, a1);
+		__m128 b1 = _mm_unpackhi_ps(a0, a1);
+		__m128 b2 = _mm_unpacklo_ps(a2, _mm_setzero_ps());
+		__m128 r = _mm_movelh_ps(b0, b2);
+		r = _mm_add_ps(r, _mm_movehl_ps(b2, b0));
+		a2 = _mm_and_ps(a2, btvxyzMaskf);
+		r = _mm_add_ps(r, btCastdTo128f(_mm_move_sd(btCastfTo128d(a2), btCastfTo128d(b1))));
+		return btVector3(r);
+
+#elif defined(BT_USE_NEON)
+		static const uint32x4_t xyzMask = (const uint32x4_t){static_cast<uint32_t>(-1), static_cast<uint32_t>(-1), static_cast<uint32_t>(-1), 0};
+		float32x4_t a0 = vmulq_f32(v0.mVec128, this->mVec128);
+		float32x4_t a1 = vmulq_f32(v1.mVec128, this->mVec128);
+		float32x4_t a2 = vmulq_f32(v2.mVec128, this->mVec128);
+		float32x2x2_t zLo = vtrn_f32(vget_high_f32(a0), vget_high_f32(a1));
+		a2 = (float32x4_t)vandq_u32((uint32x4_t)a2, xyzMask);
+		float32x2_t b0 = vadd_f32(vpadd_f32(vget_low_f32(a0), vget_low_f32(a1)), zLo.val[0]);
+		float32x2_t b1 = vpadd_f32(vpadd_f32(vget_low_f32(a2), vget_high_f32(a2)), vdup_n_f32(0.0f));
+		return btVector3(vcombine_f32(b0, b1));
+#else
+		return btVector3(dot(v0), dot(v1), dot(v2));
+#endif
+	}
+};
+
+/**@brief Return the sum of two vectors (Point symantics)*/
+SIMD_FORCE_INLINE btVector3
+operator+(const btVector3& v1, const btVector3& v2)
+{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+	return btVector3(_mm_add_ps(v1.mVec128, v2.mVec128));
+#elif defined(BT_USE_NEON)
+	return btVector3(vaddq_f32(v1.mVec128, v2.mVec128));
+#else
+	return btVector3(
+		v1.m_floats[0] + v2.m_floats[0],
+		v1.m_floats[1] + v2.m_floats[1],
+		v1.m_floats[2] + v2.m_floats[2]);
+#endif
+}
+
+/**@brief Return the elementwise product of two vectors */
+SIMD_FORCE_INLINE btVector3
+operator*(const btVector3& v1, const btVector3& v2)
+{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+	return btVector3(_mm_mul_ps(v1.mVec128, v2.mVec128));
+#elif defined(BT_USE_NEON)
+	return btVector3(vmulq_f32(v1.mVec128, v2.mVec128));
+#else
+	return btVector3(
+		v1.m_floats[0] * v2.m_floats[0],
+		v1.m_floats[1] * v2.m_floats[1],
+		v1.m_floats[2] * v2.m_floats[2]);
+#endif
+}
+
+/**@brief Return the difference between two vectors */
+SIMD_FORCE_INLINE btVector3
+operator-(const btVector3& v1, const btVector3& v2)
+{
+#if defined BT_USE_SIMD_VECTOR3 && (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
+
+	//	without _mm_and_ps this code causes slowdown in Concave moving
+	__m128 r = _mm_sub_ps(v1.mVec128, v2.mVec128);
+	return btVector3(_mm_and_ps(r, btvFFF0fMask));
+#elif defined(BT_USE_NEON)
+	float32x4_t r = vsubq_f32(v1.mVec128, v2.mVec128);
+	return btVector3((float32x4_t)vandq_s32((int32x4_t)r, btvFFF0Mask));
+#else
+	return btVector3(
+		v1.m_floats[0] - v2.m_floats[0],
+		v1.m_floats[1] - v2.m_floats[1],
+		v1.m_floats[2] - v2.m_floats[2]);
+#endif
+}
+
+/**@brief Return the negative of the vector */
+SIMD_FORCE_INLINE btVector3
+operator-(const btVector3& v)
+{
+#if defined BT_USE_SIMD_VECTOR3 && (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
+	__m128 r = _mm_xor_ps(v.mVec128, btvMzeroMask);
+	return btVector3(_mm_and_ps(r, btvFFF0fMask));
+#elif defined(BT_USE_NEON)
+	return btVector3((btSimdFloat4)veorq_s32((int32x4_t)v.mVec128, (int32x4_t)btvMzeroMask));
+#else
+	return btVector3(-v.m_floats[0], -v.m_floats[1], -v.m_floats[2]);
+#endif
+}
+
+/**@brief Return the vector scaled by s */
+SIMD_FORCE_INLINE btVector3
+operator*(const btVector3& v, const btScalar& s)
+{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+	__m128 vs = _mm_load_ss(&s);  //	(S 0 0 0)
+	vs = bt_pshufd_ps(vs, 0x80);  //	(S S S 0.0)
+	return btVector3(_mm_mul_ps(v.mVec128, vs));
+#elif defined(BT_USE_NEON)
+	float32x4_t r = vmulq_n_f32(v.mVec128, s);
+	return btVector3((float32x4_t)vandq_s32((int32x4_t)r, btvFFF0Mask));
+#else
+	return btVector3(v.m_floats[0] * s, v.m_floats[1] * s, v.m_floats[2] * s);
+#endif
+}
+
+/**@brief Return the vector scaled by s */
+SIMD_FORCE_INLINE btVector3
+operator*(const btScalar& s, const btVector3& v)
+{
+	return v * s;
+}
+
+/**@brief Return the vector inversely scaled by s */
+SIMD_FORCE_INLINE btVector3
+operator/(const btVector3& v, const btScalar& s)
+{
+	btFullAssert(s != btScalar(0.0));
+#if 0  //defined(BT_USE_SSE_IN_API)
+// this code is not faster !
+	__m128 vs = _mm_load_ss(&s);
+    vs = _mm_div_ss(v1110, vs);
+	vs = bt_pshufd_ps(vs, 0x00);	//	(S S S S)
+
+	return btVector3(_mm_mul_ps(v.mVec128, vs));
+#else
+	return v * (btScalar(1.0) / s);
+#endif
+}
+
+/**@brief Return the vector inversely scaled by s */
+SIMD_FORCE_INLINE btVector3
+operator/(const btVector3& v1, const btVector3& v2)
+{
+#if defined BT_USE_SIMD_VECTOR3 && (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
+	__m128 vec = _mm_div_ps(v1.mVec128, v2.mVec128);
+	vec = _mm_and_ps(vec, btvFFF0fMask);
+	return btVector3(vec);
+#elif defined(BT_USE_NEON)
+	float32x4_t x, y, v, m;
+
+	x = v1.mVec128;
+	y = v2.mVec128;
+
+	v = vrecpeq_f32(y);     // v ~ 1/y
+	m = vrecpsq_f32(y, v);  // m = (2-v*y)
+	v = vmulq_f32(v, m);    // vv = v*m ~~ 1/y
+	m = vrecpsq_f32(y, v);  // mm = (2-vv*y)
+	v = vmulq_f32(v, x);    // x*vv
+	v = vmulq_f32(v, m);    // (x*vv)*(2-vv*y) = x*(vv(2-vv*y)) ~~~ x/y
+
+	return btVector3(v);
+#else
+	return btVector3(
+		v1.m_floats[0] / v2.m_floats[0],
+		v1.m_floats[1] / v2.m_floats[1],
+		v1.m_floats[2] / v2.m_floats[2]);
+#endif
+}
+
+/**@brief Return the dot product between two vectors */
+SIMD_FORCE_INLINE btScalar
+btDot(const btVector3& v1, const btVector3& v2)
+{
+	return v1.dot(v2);
+}
+
+/**@brief Return the distance squared between two vectors */
+SIMD_FORCE_INLINE btScalar
+btDistance2(const btVector3& v1, const btVector3& v2)
+{
+	return v1.distance2(v2);
+}
+
+/**@brief Return the distance between two vectors */
+SIMD_FORCE_INLINE btScalar
+btDistance(const btVector3& v1, const btVector3& v2)
+{
+	return v1.distance(v2);
+}
+
+/**@brief Return the angle between two vectors */
+SIMD_FORCE_INLINE btScalar
+btAngle(const btVector3& v1, const btVector3& v2)
+{
+	return v1.angle(v2);
+}
+
+/**@brief Return the cross product of two vectors */
+SIMD_FORCE_INLINE btVector3
+btCross(const btVector3& v1, const btVector3& v2)
+{
+	return v1.cross(v2);
+}
+
+SIMD_FORCE_INLINE btScalar
+btTriple(const btVector3& v1, const btVector3& v2, const btVector3& v3)
+{
+	return v1.triple(v2, v3);
+}
+
+/**@brief Return the linear interpolation between two vectors
+ * @param v1 One vector 
+ * @param v2 The other vector 
+ * @param t The ration of this to v (t = 0 => return v1, t=1 => return v2) */
+SIMD_FORCE_INLINE btVector3
+lerp(const btVector3& v1, const btVector3& v2, const btScalar& t)
+{
+	return v1.lerp(v2, t);
+}
+
+SIMD_FORCE_INLINE btScalar btVector3::distance2(const btVector3& v) const
+{
+	return (v - *this).length2();
+}
+
+SIMD_FORCE_INLINE btScalar btVector3::distance(const btVector3& v) const
+{
+	return (v - *this).length();
+}
+
+SIMD_FORCE_INLINE btVector3 btVector3::normalized() const
+{
+	btVector3 nrm = *this;
+
+	return nrm.normalize();
+}
+
+SIMD_FORCE_INLINE btVector3 btVector3::rotate(const btVector3& wAxis, const btScalar _angle) const
+{
+	// wAxis must be a unit lenght vector
+
+#if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+
+	__m128 O = _mm_mul_ps(wAxis.mVec128, mVec128);
+	btScalar ssin = btSin(_angle);
+	__m128 C = wAxis.cross(mVec128).mVec128;
+	O = _mm_and_ps(O, btvFFF0fMask);
+	btScalar scos = btCos(_angle);
+
+	__m128 vsin = _mm_load_ss(&ssin);  //	(S 0 0 0)
+	__m128 vcos = _mm_load_ss(&scos);  //	(S 0 0 0)
+
+	__m128 Y = bt_pshufd_ps(O, 0xC9);  //	(Y Z X 0)
+	__m128 Z = bt_pshufd_ps(O, 0xD2);  //	(Z X Y 0)
+	O = _mm_add_ps(O, Y);
+	vsin = bt_pshufd_ps(vsin, 0x80);  //	(S S S 0)
+	O = _mm_add_ps(O, Z);
+	vcos = bt_pshufd_ps(vcos, 0x80);  //	(S S S 0)
+
+	vsin = vsin * C;
+	O = O * wAxis.mVec128;
+	__m128 X = mVec128 - O;
+
+	O = O + vsin;
+	vcos = vcos * X;
+	O = O + vcos;
+
+	return btVector3(O);
+#else
+	btVector3 o = wAxis * wAxis.dot(*this);
+	btVector3 _x = *this - o;
+	btVector3 _y;
+
+	_y = wAxis.cross(*this);
+
+	return (o + _x * btCos(_angle) + _y * btSin(_angle));
+#endif
+}
+
+SIMD_FORCE_INLINE long btVector3::maxDot(const btVector3* array, long array_count, btScalar& dotOut) const
+{
+#if (defined BT_USE_SSE && defined BT_USE_SIMD_VECTOR3 && defined BT_USE_SSE_IN_API) || defined(BT_USE_NEON)
+#if defined _WIN32 || defined(BT_USE_SSE)
+	const long scalar_cutoff = 10;
+	long _maxdot_large(const float* array, const float* vec, unsigned long array_count, float* dotOut);
+#elif defined BT_USE_NEON
+	const long scalar_cutoff = 4;
+	extern long (*_maxdot_large)(const float* array, const float* vec, unsigned long array_count, float* dotOut);
+#endif
+	if (array_count < scalar_cutoff)
+#endif
+	{
+		btScalar maxDot1 = -SIMD_INFINITY;
+		int i = 0;
+		int ptIndex = -1;
+		for (i = 0; i < array_count; i++)
+		{
+			btScalar dot = array[i].dot(*this);
+
+			if (dot > maxDot1)
+			{
+				maxDot1 = dot;
+				ptIndex = i;
+			}
+		}
+
+		dotOut = maxDot1;
+		return ptIndex;
+	}
+#if (defined BT_USE_SSE && defined BT_USE_SIMD_VECTOR3 && defined BT_USE_SSE_IN_API) || defined(BT_USE_NEON)
+	return _maxdot_large((float*)array, (float*)&m_floats[0], array_count, &dotOut);
+#endif
+}
+
+SIMD_FORCE_INLINE long btVector3::minDot(const btVector3* array, long array_count, btScalar& dotOut) const
+{
+#if (defined BT_USE_SSE && defined BT_USE_SIMD_VECTOR3 && defined BT_USE_SSE_IN_API) || defined(BT_USE_NEON)
+#if defined BT_USE_SSE
+	const long scalar_cutoff = 10;
+	long _mindot_large(const float* array, const float* vec, unsigned long array_count, float* dotOut);
+#elif defined BT_USE_NEON
+	const long scalar_cutoff = 4;
+	extern long (*_mindot_large)(const float* array, const float* vec, unsigned long array_count, float* dotOut);
+#else
+#error unhandled arch!
+#endif
+
+	if (array_count < scalar_cutoff)
+#endif
+	{
+		btScalar minDot = SIMD_INFINITY;
+		int i = 0;
+		int ptIndex = -1;
+
+		for (i = 0; i < array_count; i++)
+		{
+			btScalar dot = array[i].dot(*this);
+
+			if (dot < minDot)
+			{
+				minDot = dot;
+				ptIndex = i;
+			}
+		}
+
+		dotOut = minDot;
+
+		return ptIndex;
+	}
+#if (defined BT_USE_SSE && defined BT_USE_SIMD_VECTOR3 && defined BT_USE_SSE_IN_API) || defined(BT_USE_NEON)
+	return _mindot_large((float*)array, (float*)&m_floats[0], array_count, &dotOut);
+#endif  //BT_USE_SIMD_VECTOR3
+}
+
+class btVector4 : public btVector3
+{
+public:
+	SIMD_FORCE_INLINE btVector4() {}
+
+	SIMD_FORCE_INLINE btVector4(const btScalar& _x, const btScalar& _y, const btScalar& _z, const btScalar& _w)
+		: btVector3(_x, _y, _z)
+	{
+		m_floats[3] = _w;
+	}
+
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+	SIMD_FORCE_INLINE btVector4(const btSimdFloat4 vec)
+	{
+		mVec128 = vec;
+	}
+
+	SIMD_FORCE_INLINE btVector4(const btVector3& rhs)
+	{
+		mVec128 = rhs.mVec128;
+	}
+
+	SIMD_FORCE_INLINE btVector4&
+	operator=(const btVector4& v)
+	{
+		mVec128 = v.mVec128;
+		return *this;
+	}
+#endif  // #if defined (BT_USE_SSE_IN_API) || defined (BT_USE_NEON)
+
+	SIMD_FORCE_INLINE btVector4 absolute4() const
+	{
+#if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		return btVector4(_mm_and_ps(mVec128, btvAbsfMask));
+#elif defined(BT_USE_NEON)
+		return btVector4(vabsq_f32(mVec128));
+#else
+		return btVector4(
+			btFabs(m_floats[0]),
+			btFabs(m_floats[1]),
+			btFabs(m_floats[2]),
+			btFabs(m_floats[3]));
+#endif
+	}
+
+	btScalar getW() const { return m_floats[3]; }
+
+	SIMD_FORCE_INLINE int maxAxis4() const
+	{
+		int maxIndex = -1;
+		btScalar maxVal = btScalar(-BT_LARGE_FLOAT);
+		if (m_floats[0] > maxVal)
+		{
+			maxIndex = 0;
+			maxVal = m_floats[0];
+		}
+		if (m_floats[1] > maxVal)
+		{
+			maxIndex = 1;
+			maxVal = m_floats[1];
+		}
+		if (m_floats[2] > maxVal)
+		{
+			maxIndex = 2;
+			maxVal = m_floats[2];
+		}
+		if (m_floats[3] > maxVal)
+		{
+			maxIndex = 3;
+		}
+
+		return maxIndex;
+	}
+
+	SIMD_FORCE_INLINE int minAxis4() const
+	{
+		int minIndex = -1;
+		btScalar minVal = btScalar(BT_LARGE_FLOAT);
+		if (m_floats[0] < minVal)
+		{
+			minIndex = 0;
+			minVal = m_floats[0];
+		}
+		if (m_floats[1] < minVal)
+		{
+			minIndex = 1;
+			minVal = m_floats[1];
+		}
+		if (m_floats[2] < minVal)
+		{
+			minIndex = 2;
+			minVal = m_floats[2];
+		}
+		if (m_floats[3] < minVal)
+		{
+			minIndex = 3;
+		}
+
+		return minIndex;
+	}
+
+	SIMD_FORCE_INLINE int closestAxis4() const
+	{
+		return absolute4().maxAxis4();
+	}
+
+	/**@brief Set x,y,z and zero w 
+   * @param x Value of x
+   * @param y Value of y
+   * @param z Value of z
+   */
+
+	/*		void getValue(btScalar *m) const 
+		{
+			m[0] = m_floats[0];
+			m[1] = m_floats[1];
+			m[2] =m_floats[2];
+		}
+*/
+	/**@brief Set the values 
+   * @param x Value of x
+   * @param y Value of y
+   * @param z Value of z
+   * @param w Value of w
+   */
+	SIMD_FORCE_INLINE void setValue(const btScalar& _x, const btScalar& _y, const btScalar& _z, const btScalar& _w)
+	{
+		m_floats[0] = _x;
+		m_floats[1] = _y;
+		m_floats[2] = _z;
+		m_floats[3] = _w;
+	}
+};
+
+///btSwapVector3Endian swaps vector endianness, useful for network and cross-platform serialization
+SIMD_FORCE_INLINE void btSwapScalarEndian(const btScalar& sourceVal, btScalar& destVal)
+{
+#ifdef BT_USE_DOUBLE_PRECISION
+	unsigned char* dest = (unsigned char*)&destVal;
+	const unsigned char* src = (const unsigned char*)&sourceVal;
+	dest[0] = src[7];
+	dest[1] = src[6];
+	dest[2] = src[5];
+	dest[3] = src[4];
+	dest[4] = src[3];
+	dest[5] = src[2];
+	dest[6] = src[1];
+	dest[7] = src[0];
+#else
+	unsigned char* dest = (unsigned char*)&destVal;
+	const unsigned char* src = (const unsigned char*)&sourceVal;
+	dest[0] = src[3];
+	dest[1] = src[2];
+	dest[2] = src[1];
+	dest[3] = src[0];
+#endif  //BT_USE_DOUBLE_PRECISION
+}
+///btSwapVector3Endian swaps vector endianness, useful for network and cross-platform serialization
+SIMD_FORCE_INLINE void btSwapVector3Endian(const btVector3& sourceVec, btVector3& destVec)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		btSwapScalarEndian(sourceVec[i], destVec[i]);
+	}
+}
+
+///btUnSwapVector3Endian swaps vector endianness, useful for network and cross-platform serialization
+SIMD_FORCE_INLINE void btUnSwapVector3Endian(btVector3& vector)
+{
+	btVector3 swappedVec;
+	for (int i = 0; i < 4; i++)
+	{
+		btSwapScalarEndian(vector[i], swappedVec[i]);
+	}
+	vector = swappedVec;
+}
+
+template <class T>
+SIMD_FORCE_INLINE void btPlaneSpace1(const T& n, T& p, T& q)
+{
+	if (btFabs(n[2]) > SIMDSQRT12)
+	{
+		// choose p in y-z plane
+		btScalar a = n[1] * n[1] + n[2] * n[2];
+		btScalar k = btRecipSqrt(a);
+		p[0] = 0;
+		p[1] = -n[2] * k;
+		p[2] = n[1] * k;
+		// set q = n x p
+		q[0] = a * k;
+		q[1] = -n[0] * p[2];
+		q[2] = n[0] * p[1];
+	}
+	else
+	{
+		// choose p in x-y plane
+		btScalar a = n[0] * n[0] + n[1] * n[1];
+		btScalar k = btRecipSqrt(a);
+		p[0] = -n[1] * k;
+		p[1] = n[0] * k;
+		p[2] = 0;
+		// set q = n x p
+		q[0] = -n[2] * p[1];
+		q[1] = n[2] * p[0];
+		q[2] = a * k;
+	}
+}
+
+struct btVector3FloatData
+{
+	float m_floats[4];
+};
+
+struct btVector3DoubleData
+{
+	double m_floats[4];
+};
+
+SIMD_FORCE_INLINE void btVector3::serializeFloat(struct btVector3FloatData& dataOut) const
+{
+	///could also do a memcpy, check if it is worth it
+	for (int i = 0; i < 4; i++)
+		dataOut.m_floats[i] = float(m_floats[i]);
+}
+
+SIMD_FORCE_INLINE void btVector3::deSerializeFloat(const struct btVector3FloatData& dataIn)
+{
+	for (int i = 0; i < 4; i++)
+		m_floats[i] = btScalar(dataIn.m_floats[i]);
+}
+
+SIMD_FORCE_INLINE void btVector3::serializeDouble(struct btVector3DoubleData& dataOut) const
+{
+	///could also do a memcpy, check if it is worth it
+	for (int i = 0; i < 4; i++)
+		dataOut.m_floats[i] = double(m_floats[i]);
+}
+
+SIMD_FORCE_INLINE void btVector3::deSerializeDouble(const struct btVector3DoubleData& dataIn)
+{
+	for (int i = 0; i < 4; i++)
+		m_floats[i] = btScalar(dataIn.m_floats[i]);
+}
+
+SIMD_FORCE_INLINE void btVector3::serialize(struct btVector3Data& dataOut) const
+{
+	///could also do a memcpy, check if it is worth it
+	for (int i = 0; i < 4; i++)
+		dataOut.m_floats[i] = m_floats[i];
+}
+
+SIMD_FORCE_INLINE void btVector3::deSerialize(const struct btVector3FloatData& dataIn)
+{
+	for (int i = 0; i < 4; i++)
+		m_floats[i] = (btScalar)dataIn.m_floats[i];
+}
+
+SIMD_FORCE_INLINE void btVector3::deSerialize(const struct btVector3DoubleData& dataIn)
+{
+	for (int i = 0; i < 4; i++)
+		m_floats[i] = (btScalar)dataIn.m_floats[i];
+}
+
+#endif  //BT_VECTOR3_H
+
+
+
+
+
+/*
+Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_SIMD_QUADWORD_H
+#define BT_SIMD_QUADWORD_H
+
+
+#if defined(__CELLOS_LV2) && defined(__SPU__)
+#endif
+
+/**@brief The btQuadWord class is base class for btVector3 and btQuaternion. 
+ * Some issues under PS3 Linux with IBM 2.1 SDK, gcc compiler prevent from using aligned quadword.
+ */
+#ifndef USE_LIBSPE2
+ATTRIBUTE_ALIGNED16(class)
+btQuadWord
+#else
+class btQuadWord
+#endif
+{
+protected:
+#if defined(__SPU__) && defined(__CELLOS_LV2__)
+	union {
+		vec_float4 mVec128;
+		btScalar m_floats[4];
+	};
+
+public:
+	vec_float4 get128() const
+	{
+		return mVec128;
+	}
+
+protected:
+#else  //__CELLOS_LV2__ __SPU__
+
+#if defined(BT_USE_SSE) || defined(BT_USE_NEON)
+	union {
+		btSimdFloat4 mVec128;
+		btScalar m_floats[4];
+	};
+
+public:
+	SIMD_FORCE_INLINE btSimdFloat4 get128() const
+	{
+		return mVec128;
+	}
+	SIMD_FORCE_INLINE void set128(btSimdFloat4 v128)
+	{
+		mVec128 = v128;
+	}
+#else
+	btScalar m_floats[4];
+#endif  // BT_USE_SSE
+
+#endif  //__CELLOS_LV2__ __SPU__
+
+public:
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+
+	// Set Vector
+	SIMD_FORCE_INLINE btQuadWord(const btSimdFloat4 vec)
+	{
+		mVec128 = vec;
+	}
+
+	// Copy constructor
+	SIMD_FORCE_INLINE btQuadWord(const btQuadWord& rhs)
+	{
+		mVec128 = rhs.mVec128;
+	}
+
+	// Assignment Operator
+	SIMD_FORCE_INLINE btQuadWord&
+	operator=(const btQuadWord& v)
+	{
+		mVec128 = v.mVec128;
+
+		return *this;
+	}
+
+#endif
+
+	/**@brief Return the x value */
+	SIMD_FORCE_INLINE const btScalar& getX() const { return m_floats[0]; }
+	/**@brief Return the y value */
+	SIMD_FORCE_INLINE const btScalar& getY() const { return m_floats[1]; }
+	/**@brief Return the z value */
+	SIMD_FORCE_INLINE const btScalar& getZ() const { return m_floats[2]; }
+	/**@brief Set the x value */
+	SIMD_FORCE_INLINE void setX(btScalar _x) { m_floats[0] = _x; };
+	/**@brief Set the y value */
+	SIMD_FORCE_INLINE void setY(btScalar _y) { m_floats[1] = _y; };
+	/**@brief Set the z value */
+	SIMD_FORCE_INLINE void setZ(btScalar _z) { m_floats[2] = _z; };
+	/**@brief Set the w value */
+	SIMD_FORCE_INLINE void setW(btScalar _w) { m_floats[3] = _w; };
+	/**@brief Return the x value */
+	SIMD_FORCE_INLINE const btScalar& x() const { return m_floats[0]; }
+	/**@brief Return the y value */
+	SIMD_FORCE_INLINE const btScalar& y() const { return m_floats[1]; }
+	/**@brief Return the z value */
+	SIMD_FORCE_INLINE const btScalar& z() const { return m_floats[2]; }
+	/**@brief Return the w value */
+	SIMD_FORCE_INLINE const btScalar& w() const { return m_floats[3]; }
+
+	//SIMD_FORCE_INLINE btScalar&       operator[](int i)       { return (&m_floats[0])[i];	}
+	//SIMD_FORCE_INLINE const btScalar& operator[](int i) const { return (&m_floats[0])[i]; }
+	///operator btScalar*() replaces operator[], using implicit conversion. We added operator != and operator == to avoid pointer comparisons.
+	SIMD_FORCE_INLINE operator btScalar*() { return &m_floats[0]; }
+	SIMD_FORCE_INLINE operator const btScalar*() const { return &m_floats[0]; }
+
+	SIMD_FORCE_INLINE bool operator==(const btQuadWord& other) const
+	{
+#ifdef BT_USE_SSE
+		return (0xf == _mm_movemask_ps((__m128)_mm_cmpeq_ps(mVec128, other.mVec128)));
+#else
+		return ((m_floats[3] == other.m_floats[3]) &&
+				(m_floats[2] == other.m_floats[2]) &&
+				(m_floats[1] == other.m_floats[1]) &&
+				(m_floats[0] == other.m_floats[0]));
+#endif
+	}
+
+	SIMD_FORCE_INLINE bool operator!=(const btQuadWord& other) const
+	{
+		return !(*this == other);
+	}
+
+	/**@brief Set x,y,z and zero w 
+   * @param x Value of x
+   * @param y Value of y
+   * @param z Value of z
+   */
+	SIMD_FORCE_INLINE void setValue(const btScalar& _x, const btScalar& _y, const btScalar& _z)
+	{
+		m_floats[0] = _x;
+		m_floats[1] = _y;
+		m_floats[2] = _z;
+		m_floats[3] = 0.f;
+	}
+
+	/*		void getValue(btScalar *m) const 
+		{
+			m[0] = m_floats[0];
+			m[1] = m_floats[1];
+			m[2] = m_floats[2];
+		}
+*/
+	/**@brief Set the values 
+   * @param x Value of x
+   * @param y Value of y
+   * @param z Value of z
+   * @param w Value of w
+   */
+	SIMD_FORCE_INLINE void setValue(const btScalar& _x, const btScalar& _y, const btScalar& _z, const btScalar& _w)
+	{
+		m_floats[0] = _x;
+		m_floats[1] = _y;
+		m_floats[2] = _z;
+		m_floats[3] = _w;
+	}
+	/**@brief No initialization constructor */
+	SIMD_FORCE_INLINE btQuadWord()
+	//	:m_floats[0](btScalar(0.)),m_floats[1](btScalar(0.)),m_floats[2](btScalar(0.)),m_floats[3](btScalar(0.))
+	{
+	}
+
+	/**@brief Three argument constructor (zeros w)
+   * @param x Value of x
+   * @param y Value of y
+   * @param z Value of z
+   */
+	SIMD_FORCE_INLINE btQuadWord(const btScalar& _x, const btScalar& _y, const btScalar& _z)
+	{
+		m_floats[0] = _x, m_floats[1] = _y, m_floats[2] = _z, m_floats[3] = 0.0f;
+	}
+
+	/**@brief Initializing constructor
+   * @param x Value of x
+   * @param y Value of y
+   * @param z Value of z
+   * @param w Value of w
+   */
+	SIMD_FORCE_INLINE btQuadWord(const btScalar& _x, const btScalar& _y, const btScalar& _z, const btScalar& _w)
+	{
+		m_floats[0] = _x, m_floats[1] = _y, m_floats[2] = _z, m_floats[3] = _w;
+	}
+
+	/**@brief Set each element to the max of the current values and the values of another btQuadWord
+   * @param other The other btQuadWord to compare with 
+   */
+	SIMD_FORCE_INLINE void setMax(const btQuadWord& other)
+	{
+#ifdef BT_USE_SSE
+		mVec128 = _mm_max_ps(mVec128, other.mVec128);
+#elif defined(BT_USE_NEON)
+		mVec128 = vmaxq_f32(mVec128, other.mVec128);
+#else
+		btSetMax(m_floats[0], other.m_floats[0]);
+		btSetMax(m_floats[1], other.m_floats[1]);
+		btSetMax(m_floats[2], other.m_floats[2]);
+		btSetMax(m_floats[3], other.m_floats[3]);
+#endif
+	}
+	/**@brief Set each element to the min of the current values and the values of another btQuadWord
+   * @param other The other btQuadWord to compare with 
+   */
+	SIMD_FORCE_INLINE void setMin(const btQuadWord& other)
+	{
+#ifdef BT_USE_SSE
+		mVec128 = _mm_min_ps(mVec128, other.mVec128);
+#elif defined(BT_USE_NEON)
+		mVec128 = vminq_f32(mVec128, other.mVec128);
+#else
+		btSetMin(m_floats[0], other.m_floats[0]);
+		btSetMin(m_floats[1], other.m_floats[1]);
+		btSetMin(m_floats[2], other.m_floats[2]);
+		btSetMin(m_floats[3], other.m_floats[3]);
+#endif
+	}
+};
+
+#endif  //BT_SIMD_QUADWORD_H
+
+
+
+
+
+/*
+Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_SIMD__QUATERNION_H_
+#define BT_SIMD__QUATERNION_H_
+
+
+#ifdef BT_USE_DOUBLE_PRECISION
+#define btQuaternionData btQuaternionDoubleData
+#define btQuaternionDataName "btQuaternionDoubleData"
+#else
+#define btQuaternionData btQuaternionFloatData
+#define btQuaternionDataName "btQuaternionFloatData"
+#endif  //BT_USE_DOUBLE_PRECISION
+
+#ifdef BT_USE_SSE
+
+//const __m128 ATTRIBUTE_ALIGNED16(vOnes) = {1.0f, 1.0f, 1.0f, 1.0f};
+#define vOnes (_mm_set_ps(1.0f, 1.0f, 1.0f, 1.0f))
+
+#endif
+
+#if defined(BT_USE_SSE)
+
+#define vQInv (_mm_set_ps(+0.0f, -0.0f, -0.0f, -0.0f))
+#define vPPPM (_mm_set_ps(-0.0f, +0.0f, +0.0f, +0.0f))
+
+#elif defined(BT_USE_NEON)
+
+const btSimdFloat4 ATTRIBUTE_ALIGNED16(vQInv) = {-0.0f, -0.0f, -0.0f, +0.0f};
+const btSimdFloat4 ATTRIBUTE_ALIGNED16(vPPPM) = {+0.0f, +0.0f, +0.0f, -0.0f};
+
+#endif
+
+/**@brief The btQuaternion implements quaternion to perform linear algebra rotations in combination with btMatrix3x3, btVector3 and btTransform. */
+class btQuaternion : public btQuadWord
+{
+public:
+	/**@brief No initialization constructor */
+	btQuaternion() {}
+
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+	// Set Vector
+	SIMD_FORCE_INLINE btQuaternion(const btSimdFloat4 vec)
+	{
+		mVec128 = vec;
+	}
+
+	// Copy constructor
+	SIMD_FORCE_INLINE btQuaternion(const btQuaternion& rhs)
+	{
+		mVec128 = rhs.mVec128;
+	}
+
+	// Assignment Operator
+	SIMD_FORCE_INLINE btQuaternion&
+	operator=(const btQuaternion& v)
+	{
+		mVec128 = v.mVec128;
+
+		return *this;
+	}
+
+#endif
+
+	//		template <typename btScalar>
+	//		explicit Quaternion(const btScalar *v) : Tuple4<btScalar>(v) {}
+	/**@brief Constructor from scalars */
+	btQuaternion(const btScalar& _x, const btScalar& _y, const btScalar& _z, const btScalar& _w)
+		: btQuadWord(_x, _y, _z, _w)
+	{
+	}
+	/**@brief Axis angle Constructor
+   * @param axis The axis which the rotation is around
+   * @param angle The magnitude of the rotation around the angle (Radians) */
+	btQuaternion(const btVector3& _axis, const btScalar& _angle)
+	{
+		setRotation(_axis, _angle);
+	}
+	/**@brief Constructor from Euler angles
+   * @param yaw Angle around Y unless BT_EULER_DEFAULT_ZYX defined then Z
+   * @param pitch Angle around X unless BT_EULER_DEFAULT_ZYX defined then Y
+   * @param roll Angle around Z unless BT_EULER_DEFAULT_ZYX defined then X */
+	btQuaternion(const btScalar& yaw, const btScalar& pitch, const btScalar& roll)
+	{
+#ifndef BT_EULER_DEFAULT_ZYX
+		setEuler(yaw, pitch, roll);
+#else
+		setEulerZYX(yaw, pitch, roll);
+#endif
+	}
+	/**@brief Set the rotation using axis angle notation 
+   * @param axis The axis around which to rotate
+   * @param angle The magnitude of the rotation in Radians */
+	void setRotation(const btVector3& axis, const btScalar& _angle)
+	{
+		btScalar d = axis.length();
+		btAssert(d != btScalar(0.0));
+		btScalar s = btSin(_angle * btScalar(0.5)) / d;
+		setValue(axis.x() * s, axis.y() * s, axis.z() * s,
+				 btCos(_angle * btScalar(0.5)));
+	}
+	/**@brief Set the quaternion using Euler angles
+   * @param yaw Angle around Y
+   * @param pitch Angle around X
+   * @param roll Angle around Z */
+	void setEuler(const btScalar& yaw, const btScalar& pitch, const btScalar& roll)
+	{
+		btScalar halfYaw = btScalar(yaw) * btScalar(0.5);
+		btScalar halfPitch = btScalar(pitch) * btScalar(0.5);
+		btScalar halfRoll = btScalar(roll) * btScalar(0.5);
+		btScalar cosYaw = btCos(halfYaw);
+		btScalar sinYaw = btSin(halfYaw);
+		btScalar cosPitch = btCos(halfPitch);
+		btScalar sinPitch = btSin(halfPitch);
+		btScalar cosRoll = btCos(halfRoll);
+		btScalar sinRoll = btSin(halfRoll);
+		setValue(cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw,
+				 cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw,
+				 sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw,
+				 cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw);
+	}
+	/**@brief Set the quaternion using euler angles 
+   * @param yaw Angle around Z
+   * @param pitch Angle around Y
+   * @param roll Angle around X */
+	void setEulerZYX(const btScalar& yawZ, const btScalar& pitchY, const btScalar& rollX)
+	{
+		btScalar halfYaw = btScalar(yawZ) * btScalar(0.5);
+		btScalar halfPitch = btScalar(pitchY) * btScalar(0.5);
+		btScalar halfRoll = btScalar(rollX) * btScalar(0.5);
+		btScalar cosYaw = btCos(halfYaw);
+		btScalar sinYaw = btSin(halfYaw);
+		btScalar cosPitch = btCos(halfPitch);
+		btScalar sinPitch = btSin(halfPitch);
+		btScalar cosRoll = btCos(halfRoll);
+		btScalar sinRoll = btSin(halfRoll);
+		setValue(sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw,   //x
+				 cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw,   //y
+				 cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw,   //z
+				 cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw);  //formerly yzx
+	}
+
+	/**@brief Get the euler angles from this quaternion
+	   * @param yaw Angle around Z
+	   * @param pitch Angle around Y
+	   * @param roll Angle around X */
+	void getEulerZYX(btScalar& yawZ, btScalar& pitchY, btScalar& rollX) const
+	{
+		btScalar squ;
+		btScalar sqx;
+		btScalar sqy;
+		btScalar sqz;
+		btScalar sarg;
+		sqx = m_floats[0] * m_floats[0];
+		sqy = m_floats[1] * m_floats[1];
+		sqz = m_floats[2] * m_floats[2];
+		squ = m_floats[3] * m_floats[3];
+		sarg = btScalar(-2.) * (m_floats[0] * m_floats[2] - m_floats[3] * m_floats[1]);
+
+		// If the pitch angle is PI/2 or -PI/2, we can only compute
+		// the sum roll + yaw.  However, any combination that gives
+		// the right sum will produce the correct orientation, so we
+		// set rollX = 0 and compute yawZ.
+		if (sarg <= -btScalar(0.99999))
+		{
+			pitchY = btScalar(-0.5) * SIMD_PI;
+			rollX = 0;
+			yawZ = btScalar(2) * btAtan2(m_floats[0], -m_floats[1]);
+		}
+		else if (sarg >= btScalar(0.99999))
+		{
+			pitchY = btScalar(0.5) * SIMD_PI;
+			rollX = 0;
+			yawZ = btScalar(2) * btAtan2(-m_floats[0], m_floats[1]);
+		}
+		else
+		{
+			pitchY = btAsin(sarg);
+			rollX = btAtan2(2 * (m_floats[1] * m_floats[2] + m_floats[3] * m_floats[0]), squ - sqx - sqy + sqz);
+			yawZ = btAtan2(2 * (m_floats[0] * m_floats[1] + m_floats[3] * m_floats[2]), squ + sqx - sqy - sqz);
+		}
+	}
+
+	/**@brief Add two quaternions
+   * @param q The quaternion to add to this one */
+	SIMD_FORCE_INLINE btQuaternion& operator+=(const btQuaternion& q)
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		mVec128 = _mm_add_ps(mVec128, q.mVec128);
+#elif defined(BT_USE_NEON)
+		mVec128 = vaddq_f32(mVec128, q.mVec128);
+#else
+		m_floats[0] += q.x();
+		m_floats[1] += q.y();
+		m_floats[2] += q.z();
+		m_floats[3] += q.m_floats[3];
+#endif
+		return *this;
+	}
+
+	/**@brief Subtract out a quaternion
+   * @param q The quaternion to subtract from this one */
+	btQuaternion& operator-=(const btQuaternion& q)
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		mVec128 = _mm_sub_ps(mVec128, q.mVec128);
+#elif defined(BT_USE_NEON)
+		mVec128 = vsubq_f32(mVec128, q.mVec128);
+#else
+		m_floats[0] -= q.x();
+		m_floats[1] -= q.y();
+		m_floats[2] -= q.z();
+		m_floats[3] -= q.m_floats[3];
+#endif
+		return *this;
+	}
+
+	/**@brief Scale this quaternion
+   * @param s The scalar to scale by */
+	btQuaternion& operator*=(const btScalar& s)
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		__m128 vs = _mm_load_ss(&s);  //	(S 0 0 0)
+		vs = bt_pshufd_ps(vs, 0);     //	(S S S S)
+		mVec128 = _mm_mul_ps(mVec128, vs);
+#elif defined(BT_USE_NEON)
+		mVec128 = vmulq_n_f32(mVec128, s);
+#else
+		m_floats[0] *= s;
+		m_floats[1] *= s;
+		m_floats[2] *= s;
+		m_floats[3] *= s;
+#endif
+		return *this;
+	}
+
+	/**@brief Multiply this quaternion by q on the right
+   * @param q The other quaternion 
+   * Equivilant to this = this * q */
+	btQuaternion& operator*=(const btQuaternion& q)
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		__m128 vQ2 = q.get128();
+
+		__m128 A1 = bt_pshufd_ps(mVec128, BT_SHUFFLE(0, 1, 2, 0));
+		__m128 B1 = bt_pshufd_ps(vQ2, BT_SHUFFLE(3, 3, 3, 0));
+
+		A1 = A1 * B1;
+
+		__m128 A2 = bt_pshufd_ps(mVec128, BT_SHUFFLE(1, 2, 0, 1));
+		__m128 B2 = bt_pshufd_ps(vQ2, BT_SHUFFLE(2, 0, 1, 1));
+
+		A2 = A2 * B2;
+
+		B1 = bt_pshufd_ps(mVec128, BT_SHUFFLE(2, 0, 1, 2));
+		B2 = bt_pshufd_ps(vQ2, BT_SHUFFLE(1, 2, 0, 2));
+
+		B1 = B1 * B2;  //	A3 *= B3
+
+		mVec128 = bt_splat_ps(mVec128, 3);  //	A0
+		mVec128 = mVec128 * vQ2;            //	A0 * B0
+
+		A1 = A1 + A2;                //	AB12
+		mVec128 = mVec128 - B1;      //	AB03 = AB0 - AB3
+		A1 = _mm_xor_ps(A1, vPPPM);  //	change sign of the last element
+		mVec128 = mVec128 + A1;      //	AB03 + AB12
+
+#elif defined(BT_USE_NEON)
+
+		float32x4_t vQ1 = mVec128;
+		float32x4_t vQ2 = q.get128();
+		float32x4_t A0, A1, B1, A2, B2, A3, B3;
+		float32x2_t vQ1zx, vQ2wx, vQ1yz, vQ2zx, vQ2yz, vQ2xz;
+
+		{
+			float32x2x2_t tmp;
+			tmp = vtrn_f32(vget_high_f32(vQ1), vget_low_f32(vQ1));  // {z x}, {w y}
+			vQ1zx = tmp.val[0];
+
+			tmp = vtrn_f32(vget_high_f32(vQ2), vget_low_f32(vQ2));  // {z x}, {w y}
+			vQ2zx = tmp.val[0];
+		}
+		vQ2wx = vext_f32(vget_high_f32(vQ2), vget_low_f32(vQ2), 1);
+
+		vQ1yz = vext_f32(vget_low_f32(vQ1), vget_high_f32(vQ1), 1);
+
+		vQ2yz = vext_f32(vget_low_f32(vQ2), vget_high_f32(vQ2), 1);
+		vQ2xz = vext_f32(vQ2zx, vQ2zx, 1);
+
+		A1 = vcombine_f32(vget_low_f32(vQ1), vQ1zx);                     // X Y  z x
+		B1 = vcombine_f32(vdup_lane_f32(vget_high_f32(vQ2), 1), vQ2wx);  // W W  W X
+
+		A2 = vcombine_f32(vQ1yz, vget_low_f32(vQ1));
+		B2 = vcombine_f32(vQ2zx, vdup_lane_f32(vget_low_f32(vQ2), 1));
+
+		A3 = vcombine_f32(vQ1zx, vQ1yz);  // Z X Y Z
+		B3 = vcombine_f32(vQ2yz, vQ2xz);  // Y Z x z
+
+		A1 = vmulq_f32(A1, B1);
+		A2 = vmulq_f32(A2, B2);
+		A3 = vmulq_f32(A3, B3);                           //	A3 *= B3
+		A0 = vmulq_lane_f32(vQ2, vget_high_f32(vQ1), 1);  //	A0 * B0
+
+		A1 = vaddq_f32(A1, A2);  //	AB12 = AB1 + AB2
+		A0 = vsubq_f32(A0, A3);  //	AB03 = AB0 - AB3
+
+		//	change the sign of the last element
+		A1 = (btSimdFloat4)veorq_s32((int32x4_t)A1, (int32x4_t)vPPPM);
+		A0 = vaddq_f32(A0, A1);  //	AB03 + AB12
+
+		mVec128 = A0;
+#else
+		setValue(
+			m_floats[3] * q.x() + m_floats[0] * q.m_floats[3] + m_floats[1] * q.z() - m_floats[2] * q.y(),
+			m_floats[3] * q.y() + m_floats[1] * q.m_floats[3] + m_floats[2] * q.x() - m_floats[0] * q.z(),
+			m_floats[3] * q.z() + m_floats[2] * q.m_floats[3] + m_floats[0] * q.y() - m_floats[1] * q.x(),
+			m_floats[3] * q.m_floats[3] - m_floats[0] * q.x() - m_floats[1] * q.y() - m_floats[2] * q.z());
+#endif
+		return *this;
+	}
+	/**@brief Return the dot product between this quaternion and another
+   * @param q The other quaternion */
+	btScalar dot(const btQuaternion& q) const
+	{
+#if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		__m128 vd;
+
+		vd = _mm_mul_ps(mVec128, q.mVec128);
+
+		__m128 t = _mm_movehl_ps(vd, vd);
+		vd = _mm_add_ps(vd, t);
+		t = _mm_shuffle_ps(vd, vd, 0x55);
+		vd = _mm_add_ss(vd, t);
+
+		return _mm_cvtss_f32(vd);
+#elif defined(BT_USE_NEON)
+		float32x4_t vd = vmulq_f32(mVec128, q.mVec128);
+		float32x2_t x = vpadd_f32(vget_low_f32(vd), vget_high_f32(vd));
+		x = vpadd_f32(x, x);
+		return vget_lane_f32(x, 0);
+#else
+		return m_floats[0] * q.x() +
+			   m_floats[1] * q.y() +
+			   m_floats[2] * q.z() +
+			   m_floats[3] * q.m_floats[3];
+#endif
+	}
+
+	/**@brief Return the length squared of the quaternion */
+	btScalar length2() const
+	{
+		return dot(*this);
+	}
+
+	/**@brief Return the length of the quaternion */
+	btScalar length() const
+	{
+		return btSqrt(length2());
+	}
+	btQuaternion& safeNormalize()
+	{
+		btScalar l2 = length2();
+		if (l2 > SIMD_EPSILON)
+		{
+			normalize();
+		}
+		return *this;
+	}
+	/**@brief Normalize the quaternion 
+   * Such that x^2 + y^2 + z^2 +w^2 = 1 */
+	btQuaternion& normalize()
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		__m128 vd;
+
+		vd = _mm_mul_ps(mVec128, mVec128);
+
+		__m128 t = _mm_movehl_ps(vd, vd);
+		vd = _mm_add_ps(vd, t);
+		t = _mm_shuffle_ps(vd, vd, 0x55);
+		vd = _mm_add_ss(vd, t);
+
+		vd = _mm_sqrt_ss(vd);
+		vd = _mm_div_ss(vOnes, vd);
+		vd = bt_pshufd_ps(vd, 0);  // splat
+		mVec128 = _mm_mul_ps(mVec128, vd);
+
+		return *this;
+#else
+		return *this /= length();
+#endif
+	}
+
+	/**@brief Return a scaled version of this quaternion
+   * @param s The scale factor */
+	SIMD_FORCE_INLINE btQuaternion
+	operator*(const btScalar& s) const
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		__m128 vs = _mm_load_ss(&s);  //	(S 0 0 0)
+		vs = bt_pshufd_ps(vs, 0x00);  //	(S S S S)
+
+		return btQuaternion(_mm_mul_ps(mVec128, vs));
+#elif defined(BT_USE_NEON)
+		return btQuaternion(vmulq_n_f32(mVec128, s));
+#else
+		return btQuaternion(x() * s, y() * s, z() * s, m_floats[3] * s);
+#endif
+	}
+
+	/**@brief Return an inversely scaled versionof this quaternion
+   * @param s The inverse scale factor */
+	btQuaternion operator/(const btScalar& s) const
+	{
+		btAssert(s != btScalar(0.0));
+		return *this * (btScalar(1.0) / s);
+	}
+
+	/**@brief Inversely scale this quaternion
+   * @param s The scale factor */
+	btQuaternion& operator/=(const btScalar& s)
+	{
+		btAssert(s != btScalar(0.0));
+		return *this *= btScalar(1.0) / s;
+	}
+
+	/**@brief Return a normalized version of this quaternion */
+	btQuaternion normalized() const
+	{
+		return *this / length();
+	}
+	/**@brief Return the ***half*** angle between this quaternion and the other
+   * @param q The other quaternion */
+	btScalar angle(const btQuaternion& q) const
+	{
+		btScalar s = btSqrt(length2() * q.length2());
+		btAssert(s != btScalar(0.0));
+		return btAcos(dot(q) / s);
+	}
+
+	/**@brief Return the angle between this quaternion and the other along the shortest path
+	* @param q The other quaternion */
+	btScalar angleShortestPath(const btQuaternion& q) const
+	{
+		btScalar s = btSqrt(length2() * q.length2());
+		btAssert(s != btScalar(0.0));
+		if (dot(q) < 0)  // Take care of long angle case see http://en.wikipedia.org/wiki/Slerp
+			return btAcos(dot(-q) / s) * btScalar(2.0);
+		else
+			return btAcos(dot(q) / s) * btScalar(2.0);
+	}
+
+	/**@brief Return the angle [0, 2Pi] of rotation represented by this quaternion */
+	btScalar getAngle() const
+	{
+		btScalar s = btScalar(2.) * btAcos(m_floats[3]);
+		return s;
+	}
+
+	/**@brief Return the angle [0, Pi] of rotation represented by this quaternion along the shortest path */
+	btScalar getAngleShortestPath() const
+	{
+		btScalar s;
+		if (m_floats[3] >= 0)
+			s = btScalar(2.) * btAcos(m_floats[3]);
+		else
+			s = btScalar(2.) * btAcos(-m_floats[3]);
+		return s;
+	}
+
+	/**@brief Return the axis of the rotation represented by this quaternion */
+	btVector3 getAxis() const
+	{
+		btScalar s_squared = 1.f - m_floats[3] * m_floats[3];
+
+		if (s_squared < btScalar(10.) * SIMD_EPSILON)  //Check for divide by zero
+			return btVector3(1.0, 0.0, 0.0);           // Arbitrary
+		btScalar s = 1.f / btSqrt(s_squared);
+		return btVector3(m_floats[0] * s, m_floats[1] * s, m_floats[2] * s);
+	}
+
+	/**@brief Return the inverse of this quaternion */
+	btQuaternion inverse() const
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		return btQuaternion(_mm_xor_ps(mVec128, vQInv));
+#elif defined(BT_USE_NEON)
+		return btQuaternion((btSimdFloat4)veorq_s32((int32x4_t)mVec128, (int32x4_t)vQInv));
+#else
+		return btQuaternion(-m_floats[0], -m_floats[1], -m_floats[2], m_floats[3]);
+#endif
+	}
+
+	/**@brief Return the sum of this quaternion and the other 
+   * @param q2 The other quaternion */
+	SIMD_FORCE_INLINE btQuaternion
+	operator+(const btQuaternion& q2) const
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		return btQuaternion(_mm_add_ps(mVec128, q2.mVec128));
+#elif defined(BT_USE_NEON)
+		return btQuaternion(vaddq_f32(mVec128, q2.mVec128));
+#else
+		const btQuaternion& q1 = *this;
+		return btQuaternion(q1.x() + q2.x(), q1.y() + q2.y(), q1.z() + q2.z(), q1.m_floats[3] + q2.m_floats[3]);
+#endif
+	}
+
+	/**@brief Return the difference between this quaternion and the other 
+   * @param q2 The other quaternion */
+	SIMD_FORCE_INLINE btQuaternion
+	operator-(const btQuaternion& q2) const
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		return btQuaternion(_mm_sub_ps(mVec128, q2.mVec128));
+#elif defined(BT_USE_NEON)
+		return btQuaternion(vsubq_f32(mVec128, q2.mVec128));
+#else
+		const btQuaternion& q1 = *this;
+		return btQuaternion(q1.x() - q2.x(), q1.y() - q2.y(), q1.z() - q2.z(), q1.m_floats[3] - q2.m_floats[3]);
+#endif
+	}
+
+	/**@brief Return the negative of this quaternion 
+   * This simply negates each element */
+	SIMD_FORCE_INLINE btQuaternion operator-() const
+	{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		return btQuaternion(_mm_xor_ps(mVec128, btvMzeroMask));
+#elif defined(BT_USE_NEON)
+		return btQuaternion((btSimdFloat4)veorq_s32((int32x4_t)mVec128, (int32x4_t)btvMzeroMask));
+#else
+		const btQuaternion& q2 = *this;
+		return btQuaternion(-q2.x(), -q2.y(), -q2.z(), -q2.m_floats[3]);
+#endif
+	}
+	/**@todo document this and it's use */
+	SIMD_FORCE_INLINE btQuaternion farthest(const btQuaternion& qd) const
+	{
+		btQuaternion diff, sum;
+		diff = *this - qd;
+		sum = *this + qd;
+		if (diff.dot(diff) > sum.dot(sum))
+			return qd;
+		return (-qd);
+	}
+
+	/**@todo document this and it's use */
+	SIMD_FORCE_INLINE btQuaternion nearest(const btQuaternion& qd) const
+	{
+		btQuaternion diff, sum;
+		diff = *this - qd;
+		sum = *this + qd;
+		if (diff.dot(diff) < sum.dot(sum))
+			return qd;
+		return (-qd);
+	}
+
+	/**@brief Return the quaternion which is the result of Spherical Linear Interpolation between this and the other quaternion
+   * @param q The other quaternion to interpolate with 
+   * @param t The ratio between this and q to interpolate.  If t = 0 the result is this, if t=1 the result is q.
+   * Slerp interpolates assuming constant velocity.  */
+	btQuaternion slerp(const btQuaternion& q, const btScalar& t) const
+	{
+		const btScalar magnitude = btSqrt(length2() * q.length2());
+		btAssert(magnitude > btScalar(0));
+
+		const btScalar product = dot(q) / magnitude;
+		const btScalar absproduct = btFabs(product);
+
+		if (absproduct < btScalar(1.0 - SIMD_EPSILON))
+		{
+			// Take care of long angle case see http://en.wikipedia.org/wiki/Slerp
+			const btScalar theta = btAcos(absproduct);
+			const btScalar d = btSin(theta);
+			btAssert(d > btScalar(0));
+
+			const btScalar sign = (product < 0) ? btScalar(-1) : btScalar(1);
+			const btScalar s0 = btSin((btScalar(1.0) - t) * theta) / d;
+			const btScalar s1 = btSin(sign * t * theta) / d;
+
+			return btQuaternion(
+				(m_floats[0] * s0 + q.x() * s1),
+				(m_floats[1] * s0 + q.y() * s1),
+				(m_floats[2] * s0 + q.z() * s1),
+				(m_floats[3] * s0 + q.w() * s1));
+		}
+		else
+		{
+			return *this;
+		}
+	}
+
+	static const btQuaternion& getIdentity()
+	{
+		static const btQuaternion identityQuat(btScalar(0.), btScalar(0.), btScalar(0.), btScalar(1.));
+		return identityQuat;
+	}
+
+	SIMD_FORCE_INLINE const btScalar& getW() const { return m_floats[3]; }
+
+	SIMD_FORCE_INLINE void serialize(struct btQuaternionData& dataOut) const;
+
+	SIMD_FORCE_INLINE void deSerialize(const struct btQuaternionFloatData& dataIn);
+
+	SIMD_FORCE_INLINE void deSerialize(const struct btQuaternionDoubleData& dataIn);
+
+	SIMD_FORCE_INLINE void serializeFloat(struct btQuaternionFloatData& dataOut) const;
+
+	SIMD_FORCE_INLINE void deSerializeFloat(const struct btQuaternionFloatData& dataIn);
+
+	SIMD_FORCE_INLINE void serializeDouble(struct btQuaternionDoubleData& dataOut) const;
+
+	SIMD_FORCE_INLINE void deSerializeDouble(const struct btQuaternionDoubleData& dataIn);
+};
+
+/**@brief Return the product of two quaternions */
+SIMD_FORCE_INLINE btQuaternion
+operator*(const btQuaternion& q1, const btQuaternion& q2)
+{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+	__m128 vQ1 = q1.get128();
+	__m128 vQ2 = q2.get128();
+	__m128 A0, A1, B1, A2, B2;
+
+	A1 = bt_pshufd_ps(vQ1, BT_SHUFFLE(0, 1, 2, 0));  // X Y  z x     //      vtrn
+	B1 = bt_pshufd_ps(vQ2, BT_SHUFFLE(3, 3, 3, 0));  // W W  W X     // vdup vext
+
+	A1 = A1 * B1;
+
+	A2 = bt_pshufd_ps(vQ1, BT_SHUFFLE(1, 2, 0, 1));  // Y Z  X Y     // vext
+	B2 = bt_pshufd_ps(vQ2, BT_SHUFFLE(2, 0, 1, 1));  // z x  Y Y     // vtrn vdup
+
+	A2 = A2 * B2;
+
+	B1 = bt_pshufd_ps(vQ1, BT_SHUFFLE(2, 0, 1, 2));  // z x Y Z      // vtrn vext
+	B2 = bt_pshufd_ps(vQ2, BT_SHUFFLE(1, 2, 0, 2));  // Y Z x z      // vext vtrn
+
+	B1 = B1 * B2;  //	A3 *= B3
+
+	A0 = bt_splat_ps(vQ1, 3);  //	A0
+	A0 = A0 * vQ2;             //	A0 * B0
+
+	A1 = A1 + A2;  //	AB12
+	A0 = A0 - B1;  //	AB03 = AB0 - AB3
+
+	A1 = _mm_xor_ps(A1, vPPPM);  //	change sign of the last element
+	A0 = A0 + A1;                //	AB03 + AB12
+
+	return btQuaternion(A0);
+
+#elif defined(BT_USE_NEON)
+
+	float32x4_t vQ1 = q1.get128();
+	float32x4_t vQ2 = q2.get128();
+	float32x4_t A0, A1, B1, A2, B2, A3, B3;
+	float32x2_t vQ1zx, vQ2wx, vQ1yz, vQ2zx, vQ2yz, vQ2xz;
+
+	{
+		float32x2x2_t tmp;
+		tmp = vtrn_f32(vget_high_f32(vQ1), vget_low_f32(vQ1));  // {z x}, {w y}
+		vQ1zx = tmp.val[0];
+
+		tmp = vtrn_f32(vget_high_f32(vQ2), vget_low_f32(vQ2));  // {z x}, {w y}
+		vQ2zx = tmp.val[0];
+	}
+	vQ2wx = vext_f32(vget_high_f32(vQ2), vget_low_f32(vQ2), 1);
+
+	vQ1yz = vext_f32(vget_low_f32(vQ1), vget_high_f32(vQ1), 1);
+
+	vQ2yz = vext_f32(vget_low_f32(vQ2), vget_high_f32(vQ2), 1);
+	vQ2xz = vext_f32(vQ2zx, vQ2zx, 1);
+
+	A1 = vcombine_f32(vget_low_f32(vQ1), vQ1zx);                     // X Y  z x
+	B1 = vcombine_f32(vdup_lane_f32(vget_high_f32(vQ2), 1), vQ2wx);  // W W  W X
+
+	A2 = vcombine_f32(vQ1yz, vget_low_f32(vQ1));
+	B2 = vcombine_f32(vQ2zx, vdup_lane_f32(vget_low_f32(vQ2), 1));
+
+	A3 = vcombine_f32(vQ1zx, vQ1yz);  // Z X Y Z
+	B3 = vcombine_f32(vQ2yz, vQ2xz);  // Y Z x z
+
+	A1 = vmulq_f32(A1, B1);
+	A2 = vmulq_f32(A2, B2);
+	A3 = vmulq_f32(A3, B3);                           //	A3 *= B3
+	A0 = vmulq_lane_f32(vQ2, vget_high_f32(vQ1), 1);  //	A0 * B0
+
+	A1 = vaddq_f32(A1, A2);  //	AB12 = AB1 + AB2
+	A0 = vsubq_f32(A0, A3);  //	AB03 = AB0 - AB3
+
+	//	change the sign of the last element
+	A1 = (btSimdFloat4)veorq_s32((int32x4_t)A1, (int32x4_t)vPPPM);
+	A0 = vaddq_f32(A0, A1);  //	AB03 + AB12
+
+	return btQuaternion(A0);
+
+#else
+	return btQuaternion(
+		q1.w() * q2.x() + q1.x() * q2.w() + q1.y() * q2.z() - q1.z() * q2.y(),
+		q1.w() * q2.y() + q1.y() * q2.w() + q1.z() * q2.x() - q1.x() * q2.z(),
+		q1.w() * q2.z() + q1.z() * q2.w() + q1.x() * q2.y() - q1.y() * q2.x(),
+		q1.w() * q2.w() - q1.x() * q2.x() - q1.y() * q2.y() - q1.z() * q2.z());
+#endif
+}
+
+SIMD_FORCE_INLINE btQuaternion
+operator*(const btQuaternion& q, const btVector3& w)
+{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+	__m128 vQ1 = q.get128();
+	__m128 vQ2 = w.get128();
+	__m128 A1, B1, A2, B2, A3, B3;
+
+	A1 = bt_pshufd_ps(vQ1, BT_SHUFFLE(3, 3, 3, 0));
+	B1 = bt_pshufd_ps(vQ2, BT_SHUFFLE(0, 1, 2, 0));
+
+	A1 = A1 * B1;
+
+	A2 = bt_pshufd_ps(vQ1, BT_SHUFFLE(1, 2, 0, 1));
+	B2 = bt_pshufd_ps(vQ2, BT_SHUFFLE(2, 0, 1, 1));
+
+	A2 = A2 * B2;
+
+	A3 = bt_pshufd_ps(vQ1, BT_SHUFFLE(2, 0, 1, 2));
+	B3 = bt_pshufd_ps(vQ2, BT_SHUFFLE(1, 2, 0, 2));
+
+	A3 = A3 * B3;  //	A3 *= B3
+
+	A1 = A1 + A2;                //	AB12
+	A1 = _mm_xor_ps(A1, vPPPM);  //	change sign of the last element
+	A1 = A1 - A3;                //	AB123 = AB12 - AB3
+
+	return btQuaternion(A1);
+
+#elif defined(BT_USE_NEON)
+
+	float32x4_t vQ1 = q.get128();
+	float32x4_t vQ2 = w.get128();
+	float32x4_t A1, B1, A2, B2, A3, B3;
+	float32x2_t vQ1wx, vQ2zx, vQ1yz, vQ2yz, vQ1zx, vQ2xz;
+
+	vQ1wx = vext_f32(vget_high_f32(vQ1), vget_low_f32(vQ1), 1);
+	{
+		float32x2x2_t tmp;
+
+		tmp = vtrn_f32(vget_high_f32(vQ2), vget_low_f32(vQ2));  // {z x}, {w y}
+		vQ2zx = tmp.val[0];
+
+		tmp = vtrn_f32(vget_high_f32(vQ1), vget_low_f32(vQ1));  // {z x}, {w y}
+		vQ1zx = tmp.val[0];
+	}
+
+	vQ1yz = vext_f32(vget_low_f32(vQ1), vget_high_f32(vQ1), 1);
+
+	vQ2yz = vext_f32(vget_low_f32(vQ2), vget_high_f32(vQ2), 1);
+	vQ2xz = vext_f32(vQ2zx, vQ2zx, 1);
+
+	A1 = vcombine_f32(vdup_lane_f32(vget_high_f32(vQ1), 1), vQ1wx);  // W W  W X
+	B1 = vcombine_f32(vget_low_f32(vQ2), vQ2zx);                     // X Y  z x
+
+	A2 = vcombine_f32(vQ1yz, vget_low_f32(vQ1));
+	B2 = vcombine_f32(vQ2zx, vdup_lane_f32(vget_low_f32(vQ2), 1));
+
+	A3 = vcombine_f32(vQ1zx, vQ1yz);  // Z X Y Z
+	B3 = vcombine_f32(vQ2yz, vQ2xz);  // Y Z x z
+
+	A1 = vmulq_f32(A1, B1);
+	A2 = vmulq_f32(A2, B2);
+	A3 = vmulq_f32(A3, B3);  //	A3 *= B3
+
+	A1 = vaddq_f32(A1, A2);  //	AB12 = AB1 + AB2
+
+	//	change the sign of the last element
+	A1 = (btSimdFloat4)veorq_s32((int32x4_t)A1, (int32x4_t)vPPPM);
+
+	A1 = vsubq_f32(A1, A3);  //	AB123 = AB12 - AB3
+
+	return btQuaternion(A1);
+
+#else
+	return btQuaternion(
+		q.w() * w.x() + q.y() * w.z() - q.z() * w.y(),
+		q.w() * w.y() + q.z() * w.x() - q.x() * w.z(),
+		q.w() * w.z() + q.x() * w.y() - q.y() * w.x(),
+		-q.x() * w.x() - q.y() * w.y() - q.z() * w.z());
+#endif
+}
+
+SIMD_FORCE_INLINE btQuaternion
+operator*(const btVector3& w, const btQuaternion& q)
+{
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+	__m128 vQ1 = w.get128();
+	__m128 vQ2 = q.get128();
+	__m128 A1, B1, A2, B2, A3, B3;
+
+	A1 = bt_pshufd_ps(vQ1, BT_SHUFFLE(0, 1, 2, 0));  // X Y  z x
+	B1 = bt_pshufd_ps(vQ2, BT_SHUFFLE(3, 3, 3, 0));  // W W  W X
+
+	A1 = A1 * B1;
+
+	A2 = bt_pshufd_ps(vQ1, BT_SHUFFLE(1, 2, 0, 1));
+	B2 = bt_pshufd_ps(vQ2, BT_SHUFFLE(2, 0, 1, 1));
+
+	A2 = A2 * B2;
+
+	A3 = bt_pshufd_ps(vQ1, BT_SHUFFLE(2, 0, 1, 2));
+	B3 = bt_pshufd_ps(vQ2, BT_SHUFFLE(1, 2, 0, 2));
+
+	A3 = A3 * B3;  //	A3 *= B3
+
+	A1 = A1 + A2;                //	AB12
+	A1 = _mm_xor_ps(A1, vPPPM);  //	change sign of the last element
+	A1 = A1 - A3;                //	AB123 = AB12 - AB3
+
+	return btQuaternion(A1);
+
+#elif defined(BT_USE_NEON)
+
+	float32x4_t vQ1 = w.get128();
+	float32x4_t vQ2 = q.get128();
+	float32x4_t A1, B1, A2, B2, A3, B3;
+	float32x2_t vQ1zx, vQ2wx, vQ1yz, vQ2zx, vQ2yz, vQ2xz;
+
+	{
+		float32x2x2_t tmp;
+
+		tmp = vtrn_f32(vget_high_f32(vQ1), vget_low_f32(vQ1));  // {z x}, {w y}
+		vQ1zx = tmp.val[0];
+
+		tmp = vtrn_f32(vget_high_f32(vQ2), vget_low_f32(vQ2));  // {z x}, {w y}
+		vQ2zx = tmp.val[0];
+	}
+	vQ2wx = vext_f32(vget_high_f32(vQ2), vget_low_f32(vQ2), 1);
+
+	vQ1yz = vext_f32(vget_low_f32(vQ1), vget_high_f32(vQ1), 1);
+
+	vQ2yz = vext_f32(vget_low_f32(vQ2), vget_high_f32(vQ2), 1);
+	vQ2xz = vext_f32(vQ2zx, vQ2zx, 1);
+
+	A1 = vcombine_f32(vget_low_f32(vQ1), vQ1zx);                     // X Y  z x
+	B1 = vcombine_f32(vdup_lane_f32(vget_high_f32(vQ2), 1), vQ2wx);  // W W  W X
+
+	A2 = vcombine_f32(vQ1yz, vget_low_f32(vQ1));
+	B2 = vcombine_f32(vQ2zx, vdup_lane_f32(vget_low_f32(vQ2), 1));
+
+	A3 = vcombine_f32(vQ1zx, vQ1yz);  // Z X Y Z
+	B3 = vcombine_f32(vQ2yz, vQ2xz);  // Y Z x z
+
+	A1 = vmulq_f32(A1, B1);
+	A2 = vmulq_f32(A2, B2);
+	A3 = vmulq_f32(A3, B3);  //	A3 *= B3
+
+	A1 = vaddq_f32(A1, A2);  //	AB12 = AB1 + AB2
+
+	//	change the sign of the last element
+	A1 = (btSimdFloat4)veorq_s32((int32x4_t)A1, (int32x4_t)vPPPM);
+
+	A1 = vsubq_f32(A1, A3);  //	AB123 = AB12 - AB3
+
+	return btQuaternion(A1);
+
+#else
+	return btQuaternion(
+		+w.x() * q.w() + w.y() * q.z() - w.z() * q.y(),
+		+w.y() * q.w() + w.z() * q.x() - w.x() * q.z(),
+		+w.z() * q.w() + w.x() * q.y() - w.y() * q.x(),
+		-w.x() * q.x() - w.y() * q.y() - w.z() * q.z());
+#endif
+}
+
+/**@brief Calculate the dot product between two quaternions */
+SIMD_FORCE_INLINE btScalar
+dot(const btQuaternion& q1, const btQuaternion& q2)
+{
+	return q1.dot(q2);
+}
+
+/**@brief Return the length of a quaternion */
+SIMD_FORCE_INLINE btScalar
+length(const btQuaternion& q)
+{
+	return q.length();
+}
+
+/**@brief Return the angle between two quaternions*/
+SIMD_FORCE_INLINE btScalar
+btAngle(const btQuaternion& q1, const btQuaternion& q2)
+{
+	return q1.angle(q2);
+}
+
+/**@brief Return the inverse of a quaternion*/
+SIMD_FORCE_INLINE btQuaternion
+inverse(const btQuaternion& q)
+{
+	return q.inverse();
+}
+
+/**@brief Return the result of spherical linear interpolation betwen two quaternions 
+ * @param q1 The first quaternion
+ * @param q2 The second quaternion 
+ * @param t The ration between q1 and q2.  t = 0 return q1, t=1 returns q2 
+ * Slerp assumes constant velocity between positions. */
+SIMD_FORCE_INLINE btQuaternion
+slerp(const btQuaternion& q1, const btQuaternion& q2, const btScalar& t)
+{
+	return q1.slerp(q2, t);
+}
+
+SIMD_FORCE_INLINE btVector3
+quatRotate(const btQuaternion& rotation, const btVector3& v)
+{
+	btQuaternion q = rotation * v;
+	q *= rotation.inverse();
+#if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+	return btVector3(_mm_and_ps(q.get128(), btvFFF0fMask));
+#elif defined(BT_USE_NEON)
+	return btVector3((float32x4_t)vandq_s32((int32x4_t)q.get128(), btvFFF0Mask));
+#else
+	return btVector3(q.getX(), q.getY(), q.getZ());
+#endif
+}
+
+SIMD_FORCE_INLINE btQuaternion
+shortestArcQuat(const btVector3& v0, const btVector3& v1)  // Game Programming Gems 2.10. make sure v0,v1 are normalized
+{
+	btVector3 c = v0.cross(v1);
+	btScalar d = v0.dot(v1);
+
+	if (d < -1.0 + SIMD_EPSILON)
+	{
+		btVector3 n, unused;
+		btPlaneSpace1(v0, n, unused);
+		return btQuaternion(n.x(), n.y(), n.z(), 0.0f);  // just pick any vector that is orthogonal to v0
+	}
+
+	btScalar s = btSqrt((1.0f + d) * 2.0f);
+	btScalar rs = 1.0f / s;
+
+	return btQuaternion(c.getX() * rs, c.getY() * rs, c.getZ() * rs, s * 0.5f);
+}
+
+SIMD_FORCE_INLINE btQuaternion
+shortestArcQuatNormalize2(btVector3& v0, btVector3& v1)
+{
+	v0.normalize();
+	v1.normalize();
+	return shortestArcQuat(v0, v1);
+}
+
+struct btQuaternionFloatData
+{
+	float m_floats[4];
+};
+
+struct btQuaternionDoubleData
+{
+	double m_floats[4];
+};
+
+SIMD_FORCE_INLINE void btQuaternion::serializeFloat(struct btQuaternionFloatData& dataOut) const
+{
+	///could also do a memcpy, check if it is worth it
+	for (int i = 0; i < 4; i++)
+		dataOut.m_floats[i] = float(m_floats[i]);
+}
+
+SIMD_FORCE_INLINE void btQuaternion::deSerializeFloat(const struct btQuaternionFloatData& dataIn)
+{
+	for (int i = 0; i < 4; i++)
+		m_floats[i] = btScalar(dataIn.m_floats[i]);
+}
+
+SIMD_FORCE_INLINE void btQuaternion::serializeDouble(struct btQuaternionDoubleData& dataOut) const
+{
+	///could also do a memcpy, check if it is worth it
+	for (int i = 0; i < 4; i++)
+		dataOut.m_floats[i] = double(m_floats[i]);
+}
+
+SIMD_FORCE_INLINE void btQuaternion::deSerializeDouble(const struct btQuaternionDoubleData& dataIn)
+{
+	for (int i = 0; i < 4; i++)
+		m_floats[i] = btScalar(dataIn.m_floats[i]);
+}
+
+SIMD_FORCE_INLINE void btQuaternion::serialize(struct btQuaternionData& dataOut) const
+{
+	///could also do a memcpy, check if it is worth it
+	for (int i = 0; i < 4; i++)
+		dataOut.m_floats[i] = m_floats[i];
+}
+
+SIMD_FORCE_INLINE void btQuaternion::deSerialize(const struct btQuaternionFloatData& dataIn)
+{
+	for (int i = 0; i < 4; i++)
+		m_floats[i] = (btScalar)dataIn.m_floats[i];
+}
+
+SIMD_FORCE_INLINE void btQuaternion::deSerialize(const struct btQuaternionDoubleData& dataIn)
+{
+	for (int i = 0; i < 4; i++)
+		m_floats[i] = (btScalar)dataIn.m_floats[i];
+}
+
+#endif  //BT_SIMD__QUATERNION_H_
+
+
+
+
+
+/*
+Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_MATRIX3x3_H
+#define BT_MATRIX3x3_H
+
+
+#ifdef BT_USE_SSE
+//const __m128 ATTRIBUTE_ALIGNED16(v2220) = {2.0f, 2.0f, 2.0f, 0.0f};
+//const __m128 ATTRIBUTE_ALIGNED16(vMPPP) = {-0.0f, +0.0f, +0.0f, +0.0f};
+#define vMPPP (_mm_set_ps(+0.0f, +0.0f, +0.0f, -0.0f))
+#endif
+
+#if defined(BT_USE_SSE)
+#define v0000 (_mm_set_ps(0.0f, 0.0f, 0.0f, 0.0f))
+#define v1000 (_mm_set_ps(0.0f, 0.0f, 0.0f, 1.0f))
+#define v0100 (_mm_set_ps(0.0f, 0.0f, 1.0f, 0.0f))
+#define v0010 (_mm_set_ps(0.0f, 1.0f, 0.0f, 0.0f))
+#elif defined(BT_USE_NEON)
+const btSimdFloat4 ATTRIBUTE_ALIGNED16(v0000) = {0.0f, 0.0f, 0.0f, 0.0f};
+const btSimdFloat4 ATTRIBUTE_ALIGNED16(v1000) = {1.0f, 0.0f, 0.0f, 0.0f};
+const btSimdFloat4 ATTRIBUTE_ALIGNED16(v0100) = {0.0f, 1.0f, 0.0f, 0.0f};
+const btSimdFloat4 ATTRIBUTE_ALIGNED16(v0010) = {0.0f, 0.0f, 1.0f, 0.0f};
+#endif
+
+#ifdef BT_USE_DOUBLE_PRECISION
+#define btMatrix3x3Data btMatrix3x3DoubleData
+#else
+#define btMatrix3x3Data btMatrix3x3FloatData
+#endif  //BT_USE_DOUBLE_PRECISION
+
+/**@brief The btMatrix3x3 class implements a 3x3 rotation matrix, to perform linear algebra in combination with btQuaternion, btTransform and btVector3.
+* Make sure to only include a pure orthogonal matrix without scaling. */
+ATTRIBUTE_ALIGNED16(class)
+btMatrix3x3
+{
+	///Data storage for the matrix, each vector is a row of the matrix
+	btVector3 m_el[3];
+
+public:
+	/** @brief No initializaion constructor */
+	btMatrix3x3() {}
+
+	//		explicit btMatrix3x3(const btScalar *m) { setFromOpenGLSubMatrix(m); }
+
+	/**@brief Constructor from Quaternion */
+	explicit btMatrix3x3(const btQuaternion& q) { setRotation(q); }
+	/*
+	template <typename btScalar>
+	Matrix3x3(const btScalar& yaw, const btScalar& pitch, const btScalar& roll)
+	{ 
+	setEulerYPR(yaw, pitch, roll);
+	}
+	*/
+	/** @brief Constructor with row major formatting */
+	btMatrix3x3(const btScalar& xx, const btScalar& xy, const btScalar& xz,
+				const btScalar& yx, const btScalar& yy, const btScalar& yz,
+				const btScalar& zx, const btScalar& zy, const btScalar& zz)
+	{
+		setValue(xx, xy, xz,
+				 yx, yy, yz,
+				 zx, zy, zz);
+	}
+
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+	SIMD_FORCE_INLINE btMatrix3x3(const btSimdFloat4 v0, const btSimdFloat4 v1, const btSimdFloat4 v2)
+	{
+		m_el[0].mVec128 = v0;
+		m_el[1].mVec128 = v1;
+		m_el[2].mVec128 = v2;
+	}
+
+	SIMD_FORCE_INLINE btMatrix3x3(const btVector3& v0, const btVector3& v1, const btVector3& v2)
+	{
+		m_el[0] = v0;
+		m_el[1] = v1;
+		m_el[2] = v2;
+	}
+
+	// Copy constructor
+	SIMD_FORCE_INLINE btMatrix3x3(const btMatrix3x3& rhs)
+	{
+		m_el[0].mVec128 = rhs.m_el[0].mVec128;
+		m_el[1].mVec128 = rhs.m_el[1].mVec128;
+		m_el[2].mVec128 = rhs.m_el[2].mVec128;
+	}
+
+	// Assignment Operator
+	SIMD_FORCE_INLINE btMatrix3x3& operator=(const btMatrix3x3& m)
+	{
+		m_el[0].mVec128 = m.m_el[0].mVec128;
+		m_el[1].mVec128 = m.m_el[1].mVec128;
+		m_el[2].mVec128 = m.m_el[2].mVec128;
+
+		return *this;
+	}
+
+#else
+
+	/** @brief Copy constructor */
+	SIMD_FORCE_INLINE btMatrix3x3(const btMatrix3x3& other)
+	{
+		m_el[0] = other.m_el[0];
+		m_el[1] = other.m_el[1];
+		m_el[2] = other.m_el[2];
+	}
+
+	/** @brief Assignment Operator */
+	SIMD_FORCE_INLINE btMatrix3x3& operator=(const btMatrix3x3& other)
+	{
+		m_el[0] = other.m_el[0];
+		m_el[1] = other.m_el[1];
+		m_el[2] = other.m_el[2];
+		return *this;
+	}
+    
+    SIMD_FORCE_INLINE btMatrix3x3(const btVector3& v0, const btVector3& v1, const btVector3& v2)
+    {
+        m_el[0] = v0;
+        m_el[1] = v1;
+        m_el[2] = v2;
     }
+
+#endif
+
+	/** @brief Get a column of the matrix as a vector 
+	*  @param i Column number 0 indexed */
+	SIMD_FORCE_INLINE btVector3 getColumn(int i) const
+	{
+		return btVector3(m_el[0][i], m_el[1][i], m_el[2][i]);
+	}
+
+	/** @brief Get a row of the matrix as a vector 
+	*  @param i Row number 0 indexed */
+	SIMD_FORCE_INLINE const btVector3& getRow(int i) const
+	{
+		btFullAssert(0 <= i && i < 3);
+		return m_el[i];
+	}
+
+	/** @brief Get a mutable reference to a row of the matrix as a vector 
+	*  @param i Row number 0 indexed */
+	SIMD_FORCE_INLINE btVector3& operator[](int i)
+	{
+		btFullAssert(0 <= i && i < 3);
+		return m_el[i];
+	}
+
+	/** @brief Get a const reference to a row of the matrix as a vector 
+	*  @param i Row number 0 indexed */
+	SIMD_FORCE_INLINE const btVector3& operator[](int i) const
+	{
+		btFullAssert(0 <= i && i < 3);
+		return m_el[i];
+	}
+
+	/** @brief Multiply by the target matrix on the right
+	*  @param m Rotation matrix to be applied 
+	* Equivilant to this = this * m */
+	btMatrix3x3& operator*=(const btMatrix3x3& m);
+
+	/** @brief Adds by the target matrix on the right
+	*  @param m matrix to be applied 
+	* Equivilant to this = this + m */
+	btMatrix3x3& operator+=(const btMatrix3x3& m);
+
+	/** @brief Substractss by the target matrix on the right
+	*  @param m matrix to be applied 
+	* Equivilant to this = this - m */
+	btMatrix3x3& operator-=(const btMatrix3x3& m);
+
+	/** @brief Set from the rotational part of a 4x4 OpenGL matrix
+	*  @param m A pointer to the beginning of the array of scalars*/
+	void setFromOpenGLSubMatrix(const btScalar* m)
+	{
+		m_el[0].setValue(m[0], m[4], m[8]);
+		m_el[1].setValue(m[1], m[5], m[9]);
+		m_el[2].setValue(m[2], m[6], m[10]);
+	}
+	/** @brief Set the values of the matrix explicitly (row major)
+	*  @param xx Top left
+	*  @param xy Top Middle
+	*  @param xz Top Right
+	*  @param yx Middle Left
+	*  @param yy Middle Middle
+	*  @param yz Middle Right
+	*  @param zx Bottom Left
+	*  @param zy Bottom Middle
+	*  @param zz Bottom Right*/
+	void setValue(const btScalar& xx, const btScalar& xy, const btScalar& xz,
+				  const btScalar& yx, const btScalar& yy, const btScalar& yz,
+				  const btScalar& zx, const btScalar& zy, const btScalar& zz)
+	{
+		m_el[0].setValue(xx, xy, xz);
+		m_el[1].setValue(yx, yy, yz);
+		m_el[2].setValue(zx, zy, zz);
+	}
+
+	/** @brief Set the matrix from a quaternion
+	*  @param q The Quaternion to match */
+	void setRotation(const btQuaternion& q)
+	{
+		btScalar d = q.length2();
+		btFullAssert(d != btScalar(0.0));
+		btScalar s = btScalar(2.0) / d;
+
+#if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		__m128 vs, Q = q.get128();
+		__m128i Qi = btCastfTo128i(Q);
+		__m128 Y, Z;
+		__m128 V1, V2, V3;
+		__m128 V11, V21, V31;
+		__m128 NQ = _mm_xor_ps(Q, btvMzeroMask);
+		__m128i NQi = btCastfTo128i(NQ);
+
+		V1 = btCastiTo128f(_mm_shuffle_epi32(Qi, BT_SHUFFLE(1, 0, 2, 3)));  // Y X Z W
+		V2 = _mm_shuffle_ps(NQ, Q, BT_SHUFFLE(0, 0, 1, 3));                 // -X -X  Y  W
+		V3 = btCastiTo128f(_mm_shuffle_epi32(Qi, BT_SHUFFLE(2, 1, 0, 3)));  // Z Y X W
+		V1 = _mm_xor_ps(V1, vMPPP);                                         //	change the sign of the first element
+
+		V11 = btCastiTo128f(_mm_shuffle_epi32(Qi, BT_SHUFFLE(1, 1, 0, 3)));  // Y Y X W
+		V21 = _mm_unpackhi_ps(Q, Q);                                         //  Z  Z  W  W
+		V31 = _mm_shuffle_ps(Q, NQ, BT_SHUFFLE(0, 2, 0, 3));                 //  X  Z -X -W
+
+		V2 = V2 * V1;   //
+		V1 = V1 * V11;  //
+		V3 = V3 * V31;  //
+
+		V11 = _mm_shuffle_ps(NQ, Q, BT_SHUFFLE(2, 3, 1, 3));                //	-Z -W  Y  W
+		V11 = V11 * V21;                                                    //
+		V21 = _mm_xor_ps(V21, vMPPP);                                       //	change the sign of the first element
+		V31 = _mm_shuffle_ps(Q, NQ, BT_SHUFFLE(3, 3, 1, 3));                //	 W  W -Y -W
+		V31 = _mm_xor_ps(V31, vMPPP);                                       //	change the sign of the first element
+		Y = btCastiTo128f(_mm_shuffle_epi32(NQi, BT_SHUFFLE(3, 2, 0, 3)));  // -W -Z -X -W
+		Z = btCastiTo128f(_mm_shuffle_epi32(Qi, BT_SHUFFLE(1, 0, 1, 3)));   //  Y  X  Y  W
+
+		vs = _mm_load_ss(&s);
+		V21 = V21 * Y;
+		V31 = V31 * Z;
+
+		V1 = V1 + V11;
+		V2 = V2 + V21;
+		V3 = V3 + V31;
+
+		vs = bt_splat3_ps(vs, 0);
+		//	s ready
+		V1 = V1 * vs;
+		V2 = V2 * vs;
+		V3 = V3 * vs;
+
+		V1 = V1 + v1000;
+		V2 = V2 + v0100;
+		V3 = V3 + v0010;
+
+		m_el[0] = V1;
+		m_el[1] = V2;
+		m_el[2] = V3;
+#else
+		btScalar xs = q.x() * s, ys = q.y() * s, zs = q.z() * s;
+		btScalar wx = q.w() * xs, wy = q.w() * ys, wz = q.w() * zs;
+		btScalar xx = q.x() * xs, xy = q.x() * ys, xz = q.x() * zs;
+		btScalar yy = q.y() * ys, yz = q.y() * zs, zz = q.z() * zs;
+		setValue(
+			btScalar(1.0) - (yy + zz), xy - wz, xz + wy,
+			xy + wz, btScalar(1.0) - (xx + zz), yz - wx,
+			xz - wy, yz + wx, btScalar(1.0) - (xx + yy));
+#endif
+	}
+
+	/** @brief Set the matrix from euler angles using YPR around YXZ respectively
+	*  @param yaw Yaw about Y axis
+	*  @param pitch Pitch about X axis
+	*  @param roll Roll about Z axis 
+	*/
+	void setEulerYPR(const btScalar& yaw, const btScalar& pitch, const btScalar& roll)
+	{
+		setEulerZYX(roll, pitch, yaw);
+	}
+
+	/** @brief Set the matrix from euler angles YPR around ZYX axes
+	* @param eulerX Roll about X axis
+	* @param eulerY Pitch around Y axis
+	* @param eulerZ Yaw about Z axis
+	* 
+	* These angles are used to produce a rotation matrix. The euler
+	* angles are applied in ZYX order. I.e a vector is first rotated 
+	* about X then Y and then Z
+	**/
+	void setEulerZYX(btScalar eulerX, btScalar eulerY, btScalar eulerZ)
+	{
+		///@todo proposed to reverse this since it's labeled zyx but takes arguments xyz and it will match all other parts of the code
+		btScalar ci(btCos(eulerX));
+		btScalar cj(btCos(eulerY));
+		btScalar ch(btCos(eulerZ));
+		btScalar si(btSin(eulerX));
+		btScalar sj(btSin(eulerY));
+		btScalar sh(btSin(eulerZ));
+		btScalar cc = ci * ch;
+		btScalar cs = ci * sh;
+		btScalar sc = si * ch;
+		btScalar ss = si * sh;
+
+		setValue(cj * ch, sj * sc - cs, sj * cc + ss,
+				 cj * sh, sj * ss + cc, sj * cs - sc,
+				 -sj, cj * si, cj * ci);
+	}
+
+	/**@brief Set the matrix to the identity */
+	void setIdentity()
+	{
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+		m_el[0] = v1000;
+		m_el[1] = v0100;
+		m_el[2] = v0010;
+#else
+		setValue(btScalar(1.0), btScalar(0.0), btScalar(0.0),
+				 btScalar(0.0), btScalar(1.0), btScalar(0.0),
+				 btScalar(0.0), btScalar(0.0), btScalar(1.0));
+#endif
+	}
+    
+    /**@brief Set the matrix to the identity */
+    void setZero()
+    {
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+        m_el[0] = v0000;
+        m_el[1] = v0000;
+        m_el[2] = v0000;
+#else
+        setValue(btScalar(0.0), btScalar(0.0), btScalar(0.0),
+                 btScalar(0.0), btScalar(0.0), btScalar(0.0),
+                 btScalar(0.0), btScalar(0.0), btScalar(0.0));
+#endif
+    }
+
+	static const btMatrix3x3& getIdentity()
+	{
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+		static const btMatrix3x3
+			identityMatrix(v1000, v0100, v0010);
+#else
+		static const btMatrix3x3
+			identityMatrix(
+				btScalar(1.0), btScalar(0.0), btScalar(0.0),
+				btScalar(0.0), btScalar(1.0), btScalar(0.0),
+				btScalar(0.0), btScalar(0.0), btScalar(1.0));
+#endif
+		return identityMatrix;
+	}
+
+	/**@brief Fill the rotational part of an OpenGL matrix and clear the shear/perspective
+	* @param m The array to be filled */
+	void getOpenGLSubMatrix(btScalar * m) const
+	{
+#if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+		__m128 v0 = m_el[0].mVec128;
+		__m128 v1 = m_el[1].mVec128;
+		__m128 v2 = m_el[2].mVec128;  //  x2 y2 z2 w2
+		__m128* vm = (__m128*)m;
+		__m128 vT;
+
+		v2 = _mm_and_ps(v2, btvFFF0fMask);  //  x2 y2 z2 0
+
+		vT = _mm_unpackhi_ps(v0, v1);  //	z0 z1 * *
+		v0 = _mm_unpacklo_ps(v0, v1);  //	x0 x1 y0 y1
+
+		v1 = _mm_shuffle_ps(v0, v2, BT_SHUFFLE(2, 3, 1, 3));                    // y0 y1 y2 0
+		v0 = _mm_shuffle_ps(v0, v2, BT_SHUFFLE(0, 1, 0, 3));                    // x0 x1 x2 0
+		v2 = btCastdTo128f(_mm_move_sd(btCastfTo128d(v2), btCastfTo128d(vT)));  // z0 z1 z2 0
+
+		vm[0] = v0;
+		vm[1] = v1;
+		vm[2] = v2;
+#elif defined(BT_USE_NEON)
+		// note: zeros the w channel. We can preserve it at the cost of two more vtrn instructions.
+		static const uint32x2_t zMask = (const uint32x2_t){static_cast<uint32_t>(-1), 0};
+		float32x4_t* vm = (float32x4_t*)m;
+		float32x4x2_t top = vtrnq_f32(m_el[0].mVec128, m_el[1].mVec128);               // {x0 x1 z0 z1}, {y0 y1 w0 w1}
+		float32x2x2_t bl = vtrn_f32(vget_low_f32(m_el[2].mVec128), vdup_n_f32(0.0f));  // {x2  0 }, {y2 0}
+		float32x4_t v0 = vcombine_f32(vget_low_f32(top.val[0]), bl.val[0]);
+		float32x4_t v1 = vcombine_f32(vget_low_f32(top.val[1]), bl.val[1]);
+		float32x2_t q = (float32x2_t)vand_u32((uint32x2_t)vget_high_f32(m_el[2].mVec128), zMask);
+		float32x4_t v2 = vcombine_f32(vget_high_f32(top.val[0]), q);  // z0 z1 z2  0
+
+		vm[0] = v0;
+		vm[1] = v1;
+		vm[2] = v2;
+#else
+		m[0] = btScalar(m_el[0].x());
+		m[1] = btScalar(m_el[1].x());
+		m[2] = btScalar(m_el[2].x());
+		m[3] = btScalar(0.0);
+		m[4] = btScalar(m_el[0].y());
+		m[5] = btScalar(m_el[1].y());
+		m[6] = btScalar(m_el[2].y());
+		m[7] = btScalar(0.0);
+		m[8] = btScalar(m_el[0].z());
+		m[9] = btScalar(m_el[1].z());
+		m[10] = btScalar(m_el[2].z());
+		m[11] = btScalar(0.0);
+#endif
+	}
+
+	/**@brief Get the matrix represented as a quaternion 
+	* @param q The quaternion which will be set */
+	void getRotation(btQuaternion & q) const
+	{
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+		btScalar trace = m_el[0].x() + m_el[1].y() + m_el[2].z();
+		btScalar s, x;
+
+		union {
+			btSimdFloat4 vec;
+			btScalar f[4];
+		} temp;
+
+		if (trace > btScalar(0.0))
+		{
+			x = trace + btScalar(1.0);
+
+			temp.f[0] = m_el[2].y() - m_el[1].z();
+			temp.f[1] = m_el[0].z() - m_el[2].x();
+			temp.f[2] = m_el[1].x() - m_el[0].y();
+			temp.f[3] = x;
+			//temp.f[3]= s * btScalar(0.5);
+		}
+		else
+		{
+			int i, j, k;
+			if (m_el[0].x() < m_el[1].y())
+			{
+				if (m_el[1].y() < m_el[2].z())
+				{
+					i = 2;
+					j = 0;
+					k = 1;
+				}
+				else
+				{
+					i = 1;
+					j = 2;
+					k = 0;
+				}
+			}
+			else
+			{
+				if (m_el[0].x() < m_el[2].z())
+				{
+					i = 2;
+					j = 0;
+					k = 1;
+				}
+				else
+				{
+					i = 0;
+					j = 1;
+					k = 2;
+				}
+			}
+
+			x = m_el[i][i] - m_el[j][j] - m_el[k][k] + btScalar(1.0);
+
+			temp.f[3] = (m_el[k][j] - m_el[j][k]);
+			temp.f[j] = (m_el[j][i] + m_el[i][j]);
+			temp.f[k] = (m_el[k][i] + m_el[i][k]);
+			temp.f[i] = x;
+			//temp.f[i] = s * btScalar(0.5);
+		}
+
+		s = btSqrt(x);
+		q.set128(temp.vec);
+		s = btScalar(0.5) / s;
+
+		q *= s;
+#else
+		btScalar trace = m_el[0].x() + m_el[1].y() + m_el[2].z();
+
+		btScalar temp[4];
+
+		if (trace > btScalar(0.0))
+		{
+			btScalar s = btSqrt(trace + btScalar(1.0));
+			temp[3] = (s * btScalar(0.5));
+			s = btScalar(0.5) / s;
+
+			temp[0] = ((m_el[2].y() - m_el[1].z()) * s);
+			temp[1] = ((m_el[0].z() - m_el[2].x()) * s);
+			temp[2] = ((m_el[1].x() - m_el[0].y()) * s);
+		}
+		else
+		{
+			int i = m_el[0].x() < m_el[1].y() ? (m_el[1].y() < m_el[2].z() ? 2 : 1) : (m_el[0].x() < m_el[2].z() ? 2 : 0);
+			int j = (i + 1) % 3;
+			int k = (i + 2) % 3;
+
+			btScalar s = btSqrt(m_el[i][i] - m_el[j][j] - m_el[k][k] + btScalar(1.0));
+			temp[i] = s * btScalar(0.5);
+			s = btScalar(0.5) / s;
+
+			temp[3] = (m_el[k][j] - m_el[j][k]) * s;
+			temp[j] = (m_el[j][i] + m_el[i][j]) * s;
+			temp[k] = (m_el[k][i] + m_el[i][k]) * s;
+		}
+		q.setValue(temp[0], temp[1], temp[2], temp[3]);
+#endif
+	}
+
+	/**@brief Get the matrix represented as euler angles around YXZ, roundtrip with setEulerYPR
+	* @param yaw Yaw around Y axis
+	* @param pitch Pitch around X axis
+	* @param roll around Z axis */
+	void getEulerYPR(btScalar & yaw, btScalar & pitch, btScalar & roll) const
+	{
+		// first use the normal calculus
+		yaw = btScalar(btAtan2(m_el[1].x(), m_el[0].x()));
+		pitch = btScalar(btAsin(-m_el[2].x()));
+		roll = btScalar(btAtan2(m_el[2].y(), m_el[2].z()));
+
+		// on pitch = +/-HalfPI
+		if (btFabs(pitch) == SIMD_HALF_PI)
+		{
+			if (yaw > 0)
+				yaw -= SIMD_PI;
+			else
+				yaw += SIMD_PI;
+
+			if (roll > 0)
+				roll -= SIMD_PI;
+			else
+				roll += SIMD_PI;
+		}
+	};
+
+	/**@brief Get the matrix represented as euler angles around ZYX
+	* @param yaw Yaw around Z axis
+	* @param pitch Pitch around Y axis
+	* @param roll around X axis 
+	* @param solution_number Which solution of two possible solutions ( 1 or 2) are possible values*/
+	void getEulerZYX(btScalar & yaw, btScalar & pitch, btScalar & roll, unsigned int solution_number = 1) const
+	{
+		struct Euler
+		{
+			btScalar yaw;
+			btScalar pitch;
+			btScalar roll;
+		};
+
+		Euler euler_out;
+		Euler euler_out2;  //second solution
+		//get the pointer to the raw data
+
+		// Check that pitch is not at a singularity
+		if (btFabs(m_el[2].x()) >= 1)
+		{
+			euler_out.yaw = 0;
+			euler_out2.yaw = 0;
+
+			// From difference of angles formula
+			btScalar delta = btAtan2(m_el[0].x(), m_el[0].z());
+			if (m_el[2].x() > 0)  //gimbal locked up
+			{
+				euler_out.pitch = SIMD_PI / btScalar(2.0);
+				euler_out2.pitch = SIMD_PI / btScalar(2.0);
+				euler_out.roll = euler_out.pitch + delta;
+				euler_out2.roll = euler_out.pitch + delta;
+			}
+			else  // gimbal locked down
+			{
+				euler_out.pitch = -SIMD_PI / btScalar(2.0);
+				euler_out2.pitch = -SIMD_PI / btScalar(2.0);
+				euler_out.roll = -euler_out.pitch + delta;
+				euler_out2.roll = -euler_out.pitch + delta;
+			}
+		}
+		else
+		{
+			euler_out.pitch = -btAsin(m_el[2].x());
+			euler_out2.pitch = SIMD_PI - euler_out.pitch;
+
+			euler_out.roll = btAtan2(m_el[2].y() / btCos(euler_out.pitch),
+									 m_el[2].z() / btCos(euler_out.pitch));
+			euler_out2.roll = btAtan2(m_el[2].y() / btCos(euler_out2.pitch),
+									  m_el[2].z() / btCos(euler_out2.pitch));
+
+			euler_out.yaw = btAtan2(m_el[1].x() / btCos(euler_out.pitch),
+									m_el[0].x() / btCos(euler_out.pitch));
+			euler_out2.yaw = btAtan2(m_el[1].x() / btCos(euler_out2.pitch),
+									 m_el[0].x() / btCos(euler_out2.pitch));
+		}
+
+		if (solution_number == 1)
+		{
+			yaw = euler_out.yaw;
+			pitch = euler_out.pitch;
+			roll = euler_out.roll;
+		}
+		else
+		{
+			yaw = euler_out2.yaw;
+			pitch = euler_out2.pitch;
+			roll = euler_out2.roll;
+		}
+	}
+
+	/**@brief Create a scaled copy of the matrix 
+	* @param s Scaling vector The elements of the vector will scale each column */
+
+	btMatrix3x3 scaled(const btVector3& s) const
+	{
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+		return btMatrix3x3(m_el[0] * s, m_el[1] * s, m_el[2] * s);
+#else
+		return btMatrix3x3(
+			m_el[0].x() * s.x(), m_el[0].y() * s.y(), m_el[0].z() * s.z(),
+			m_el[1].x() * s.x(), m_el[1].y() * s.y(), m_el[1].z() * s.z(),
+			m_el[2].x() * s.x(), m_el[2].y() * s.y(), m_el[2].z() * s.z());
+#endif
+	}
+
+	/**@brief Return the determinant of the matrix */
+	btScalar determinant() const;
+	/**@brief Return the adjoint of the matrix */
+	btMatrix3x3 adjoint() const;
+	/**@brief Return the matrix with all values non negative */
+	btMatrix3x3 absolute() const;
+	/**@brief Return the transpose of the matrix */
+	btMatrix3x3 transpose() const;
+	/**@brief Return the inverse of the matrix */
+	btMatrix3x3 inverse() const;
+
+	/// Solve A * x = b, where b is a column vector. This is more efficient
+	/// than computing the inverse in one-shot cases.
+	///Solve33 is from Box2d, thanks to Erin Catto,
+	btVector3 solve33(const btVector3& b) const
+	{
+		btVector3 col1 = getColumn(0);
+		btVector3 col2 = getColumn(1);
+		btVector3 col3 = getColumn(2);
+
+		btScalar det = btDot(col1, btCross(col2, col3));
+		if (btFabs(det) > SIMD_EPSILON)
+		{
+			det = 1.0f / det;
+		}
+		btVector3 x;
+		x[0] = det * btDot(b, btCross(col2, col3));
+		x[1] = det * btDot(col1, btCross(b, col3));
+		x[2] = det * btDot(col1, btCross(col2, b));
+		return x;
+	}
+
+	btMatrix3x3 transposeTimes(const btMatrix3x3& m) const;
+	btMatrix3x3 timesTranspose(const btMatrix3x3& m) const;
+
+	SIMD_FORCE_INLINE btScalar tdotx(const btVector3& v) const
+	{
+		return m_el[0].x() * v.x() + m_el[1].x() * v.y() + m_el[2].x() * v.z();
+	}
+	SIMD_FORCE_INLINE btScalar tdoty(const btVector3& v) const
+	{
+		return m_el[0].y() * v.x() + m_el[1].y() * v.y() + m_el[2].y() * v.z();
+	}
+	SIMD_FORCE_INLINE btScalar tdotz(const btVector3& v) const
+	{
+		return m_el[0].z() * v.x() + m_el[1].z() * v.y() + m_el[2].z() * v.z();
+	}
+
+	///extractRotation is from "A robust method to extract the rotational part of deformations"
+	///See http://dl.acm.org/citation.cfm?doid=2994258.2994269
+	///decomposes a matrix A in a orthogonal matrix R and a
+	///symmetric matrix S:
+	///A = R*S.
+	///note that R can include both rotation and scaling.
+	SIMD_FORCE_INLINE void extractRotation(btQuaternion & q, btScalar tolerance = 1.0e-9, int maxIter = 100)
+	{
+		int iter = 0;
+		btScalar w;
+		const btMatrix3x3& A = *this;
+		for (iter = 0; iter < maxIter; iter++)
+		{
+			btMatrix3x3 R(q);
+			btVector3 omega = (R.getColumn(0).cross(A.getColumn(0)) + R.getColumn(1).cross(A.getColumn(1)) + R.getColumn(2).cross(A.getColumn(2))) * (btScalar(1.0) / btFabs(R.getColumn(0).dot(A.getColumn(0)) + R.getColumn(1).dot(A.getColumn(1)) + R.getColumn(2).dot(A.getColumn(2))) +
+																																					  tolerance);
+			w = omega.norm();
+			if (w < tolerance)
+				break;
+			q = btQuaternion(btVector3((btScalar(1.0) / w) * omega), w) *
+				q;
+			q.normalize();
+		}
+	}
+
+	/**@brief diagonalizes this matrix by the Jacobi method.
+	* @param rot stores the rotation from the coordinate system in which the matrix is diagonal to the original
+	* coordinate system, i.e., old_this = rot * new_this * rot^T.
+	* @param threshold See iteration
+	* @param iteration The iteration stops when all off-diagonal elements are less than the threshold multiplied
+	* by the sum of the absolute values of the diagonal, or when maxSteps have been executed.
+	*
+	* Note that this matrix is assumed to be symmetric.
+	*/
+	void diagonalize(btMatrix3x3 & rot, btScalar threshold, int maxSteps)
+	{
+		rot.setIdentity();
+		for (int step = maxSteps; step > 0; step--)
+		{
+			// find off-diagonal element [p][q] with largest magnitude
+			int p = 0;
+			int q = 1;
+			int r = 2;
+			btScalar max = btFabs(m_el[0][1]);
+			btScalar v = btFabs(m_el[0][2]);
+			if (v > max)
+			{
+				q = 2;
+				r = 1;
+				max = v;
+			}
+			v = btFabs(m_el[1][2]);
+			if (v > max)
+			{
+				p = 1;
+				q = 2;
+				r = 0;
+				max = v;
+			}
+
+			btScalar t = threshold * (btFabs(m_el[0][0]) + btFabs(m_el[1][1]) + btFabs(m_el[2][2]));
+			if (max <= t)
+			{
+				if (max <= SIMD_EPSILON * t)
+				{
+					return;
+				}
+				step = 1;
+			}
+
+			// compute Jacobi rotation J which leads to a zero for element [p][q]
+			btScalar mpq = m_el[p][q];
+			btScalar theta = (m_el[q][q] - m_el[p][p]) / (2 * mpq);
+			btScalar theta2 = theta * theta;
+			btScalar cos;
+			btScalar sin;
+			if (theta2 * theta2 < btScalar(10 / SIMD_EPSILON))
+			{
+				t = (theta >= 0) ? 1 / (theta + btSqrt(1 + theta2))
+								 : 1 / (theta - btSqrt(1 + theta2));
+				cos = 1 / btSqrt(1 + t * t);
+				sin = cos * t;
+			}
+			else
+			{
+				// approximation for large theta-value, i.e., a nearly diagonal matrix
+				t = 1 / (theta * (2 + btScalar(0.5) / theta2));
+				cos = 1 - btScalar(0.5) * t * t;
+				sin = cos * t;
+			}
+
+			// apply rotation to matrix (this = J^T * this * J)
+			m_el[p][q] = m_el[q][p] = 0;
+			m_el[p][p] -= t * mpq;
+			m_el[q][q] += t * mpq;
+			btScalar mrp = m_el[r][p];
+			btScalar mrq = m_el[r][q];
+			m_el[r][p] = m_el[p][r] = cos * mrp - sin * mrq;
+			m_el[r][q] = m_el[q][r] = cos * mrq + sin * mrp;
+
+			// apply rotation to rot (rot = rot * J)
+			for (int i = 0; i < 3; i++)
+			{
+				btVector3& row = rot[i];
+				mrp = row[p];
+				mrq = row[q];
+				row[p] = cos * mrp - sin * mrq;
+				row[q] = cos * mrq + sin * mrp;
+			}
+		}
+	}
+
+	/**@brief Calculate the matrix cofactor 
+	* @param r1 The first row to use for calculating the cofactor
+	* @param c1 The first column to use for calculating the cofactor
+	* @param r1 The second row to use for calculating the cofactor
+	* @param c1 The second column to use for calculating the cofactor
+	* See http://en.wikipedia.org/wiki/Cofactor_(linear_algebra) for more details
+	*/
+	btScalar cofac(int r1, int c1, int r2, int c2) const
+	{
+		return m_el[r1][c1] * m_el[r2][c2] - m_el[r1][c2] * m_el[r2][c1];
+	}
+
+	void serialize(struct btMatrix3x3Data & dataOut) const;
+
+	void serializeFloat(struct btMatrix3x3FloatData & dataOut) const;
+
+	void deSerialize(const struct btMatrix3x3Data& dataIn);
+
+	void deSerializeFloat(const struct btMatrix3x3FloatData& dataIn);
+
+	void deSerializeDouble(const struct btMatrix3x3DoubleData& dataIn);
+};
+
+SIMD_FORCE_INLINE btMatrix3x3&
+btMatrix3x3::operator*=(const btMatrix3x3& m)
+{
+#if defined BT_USE_SIMD_VECTOR3 && defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+	__m128 rv00, rv01, rv02;
+	__m128 rv10, rv11, rv12;
+	__m128 rv20, rv21, rv22;
+	__m128 mv0, mv1, mv2;
+
+	rv02 = m_el[0].mVec128;
+	rv12 = m_el[1].mVec128;
+	rv22 = m_el[2].mVec128;
+
+	mv0 = _mm_and_ps(m[0].mVec128, btvFFF0fMask);
+	mv1 = _mm_and_ps(m[1].mVec128, btvFFF0fMask);
+	mv2 = _mm_and_ps(m[2].mVec128, btvFFF0fMask);
+
+	// rv0
+	rv00 = bt_splat_ps(rv02, 0);
+	rv01 = bt_splat_ps(rv02, 1);
+	rv02 = bt_splat_ps(rv02, 2);
+
+	rv00 = _mm_mul_ps(rv00, mv0);
+	rv01 = _mm_mul_ps(rv01, mv1);
+	rv02 = _mm_mul_ps(rv02, mv2);
+
+	// rv1
+	rv10 = bt_splat_ps(rv12, 0);
+	rv11 = bt_splat_ps(rv12, 1);
+	rv12 = bt_splat_ps(rv12, 2);
+
+	rv10 = _mm_mul_ps(rv10, mv0);
+	rv11 = _mm_mul_ps(rv11, mv1);
+	rv12 = _mm_mul_ps(rv12, mv2);
+
+	// rv2
+	rv20 = bt_splat_ps(rv22, 0);
+	rv21 = bt_splat_ps(rv22, 1);
+	rv22 = bt_splat_ps(rv22, 2);
+
+	rv20 = _mm_mul_ps(rv20, mv0);
+	rv21 = _mm_mul_ps(rv21, mv1);
+	rv22 = _mm_mul_ps(rv22, mv2);
+
+	rv00 = _mm_add_ps(rv00, rv01);
+	rv10 = _mm_add_ps(rv10, rv11);
+	rv20 = _mm_add_ps(rv20, rv21);
+
+	m_el[0].mVec128 = _mm_add_ps(rv00, rv02);
+	m_el[1].mVec128 = _mm_add_ps(rv10, rv12);
+	m_el[2].mVec128 = _mm_add_ps(rv20, rv22);
+
+#elif defined(BT_USE_NEON)
+
+	float32x4_t rv0, rv1, rv2;
+	float32x4_t v0, v1, v2;
+	float32x4_t mv0, mv1, mv2;
+
+	v0 = m_el[0].mVec128;
+	v1 = m_el[1].mVec128;
+	v2 = m_el[2].mVec128;
+
+	mv0 = (float32x4_t)vandq_s32((int32x4_t)m[0].mVec128, btvFFF0Mask);
+	mv1 = (float32x4_t)vandq_s32((int32x4_t)m[1].mVec128, btvFFF0Mask);
+	mv2 = (float32x4_t)vandq_s32((int32x4_t)m[2].mVec128, btvFFF0Mask);
+
+	rv0 = vmulq_lane_f32(mv0, vget_low_f32(v0), 0);
+	rv1 = vmulq_lane_f32(mv0, vget_low_f32(v1), 0);
+	rv2 = vmulq_lane_f32(mv0, vget_low_f32(v2), 0);
+
+	rv0 = vmlaq_lane_f32(rv0, mv1, vget_low_f32(v0), 1);
+	rv1 = vmlaq_lane_f32(rv1, mv1, vget_low_f32(v1), 1);
+	rv2 = vmlaq_lane_f32(rv2, mv1, vget_low_f32(v2), 1);
+
+	rv0 = vmlaq_lane_f32(rv0, mv2, vget_high_f32(v0), 0);
+	rv1 = vmlaq_lane_f32(rv1, mv2, vget_high_f32(v1), 0);
+	rv2 = vmlaq_lane_f32(rv2, mv2, vget_high_f32(v2), 0);
+
+	m_el[0].mVec128 = rv0;
+	m_el[1].mVec128 = rv1;
+	m_el[2].mVec128 = rv2;
+#else
+	setValue(
+		m.tdotx(m_el[0]), m.tdoty(m_el[0]), m.tdotz(m_el[0]),
+		m.tdotx(m_el[1]), m.tdoty(m_el[1]), m.tdotz(m_el[1]),
+		m.tdotx(m_el[2]), m.tdoty(m_el[2]), m.tdotz(m_el[2]));
+#endif
+	return *this;
+}
+
+SIMD_FORCE_INLINE btMatrix3x3&
+btMatrix3x3::operator+=(const btMatrix3x3& m)
+{
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+	m_el[0].mVec128 = m_el[0].mVec128 + m.m_el[0].mVec128;
+	m_el[1].mVec128 = m_el[1].mVec128 + m.m_el[1].mVec128;
+	m_el[2].mVec128 = m_el[2].mVec128 + m.m_el[2].mVec128;
+#else
+	setValue(
+		m_el[0][0] + m.m_el[0][0],
+		m_el[0][1] + m.m_el[0][1],
+		m_el[0][2] + m.m_el[0][2],
+		m_el[1][0] + m.m_el[1][0],
+		m_el[1][1] + m.m_el[1][1],
+		m_el[1][2] + m.m_el[1][2],
+		m_el[2][0] + m.m_el[2][0],
+		m_el[2][1] + m.m_el[2][1],
+		m_el[2][2] + m.m_el[2][2]);
+#endif
+	return *this;
+}
+
+SIMD_FORCE_INLINE btMatrix3x3
+operator*(const btMatrix3x3& m, const btScalar& k)
+{
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
+	__m128 vk = bt_splat_ps(_mm_load_ss((float*)&k), 0x80);
+	return btMatrix3x3(
+		_mm_mul_ps(m[0].mVec128, vk),
+		_mm_mul_ps(m[1].mVec128, vk),
+		_mm_mul_ps(m[2].mVec128, vk));
+#elif defined(BT_USE_NEON)
+	return btMatrix3x3(
+		vmulq_n_f32(m[0].mVec128, k),
+		vmulq_n_f32(m[1].mVec128, k),
+		vmulq_n_f32(m[2].mVec128, k));
+#else
+	return btMatrix3x3(
+		m[0].x() * k, m[0].y() * k, m[0].z() * k,
+		m[1].x() * k, m[1].y() * k, m[1].z() * k,
+		m[2].x() * k, m[2].y() * k, m[2].z() * k);
+#endif
+}
+
+SIMD_FORCE_INLINE btMatrix3x3
+operator+(const btMatrix3x3& m1, const btMatrix3x3& m2)
+{
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+	return btMatrix3x3(
+		m1[0].mVec128 + m2[0].mVec128,
+		m1[1].mVec128 + m2[1].mVec128,
+		m1[2].mVec128 + m2[2].mVec128);
+#else
+	return btMatrix3x3(
+		m1[0][0] + m2[0][0],
+		m1[0][1] + m2[0][1],
+		m1[0][2] + m2[0][2],
+
+		m1[1][0] + m2[1][0],
+		m1[1][1] + m2[1][1],
+		m1[1][2] + m2[1][2],
+
+		m1[2][0] + m2[2][0],
+		m1[2][1] + m2[2][1],
+		m1[2][2] + m2[2][2]);
+#endif
+}
+
+SIMD_FORCE_INLINE btMatrix3x3
+operator-(const btMatrix3x3& m1, const btMatrix3x3& m2)
+{
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+	return btMatrix3x3(
+		m1[0].mVec128 - m2[0].mVec128,
+		m1[1].mVec128 - m2[1].mVec128,
+		m1[2].mVec128 - m2[2].mVec128);
+#else
+	return btMatrix3x3(
+		m1[0][0] - m2[0][0],
+		m1[0][1] - m2[0][1],
+		m1[0][2] - m2[0][2],
+
+		m1[1][0] - m2[1][0],
+		m1[1][1] - m2[1][1],
+		m1[1][2] - m2[1][2],
+
+		m1[2][0] - m2[2][0],
+		m1[2][1] - m2[2][1],
+		m1[2][2] - m2[2][2]);
+#endif
+}
+
+SIMD_FORCE_INLINE btMatrix3x3&
+btMatrix3x3::operator-=(const btMatrix3x3& m)
+{
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+	m_el[0].mVec128 = m_el[0].mVec128 - m.m_el[0].mVec128;
+	m_el[1].mVec128 = m_el[1].mVec128 - m.m_el[1].mVec128;
+	m_el[2].mVec128 = m_el[2].mVec128 - m.m_el[2].mVec128;
+#else
+	setValue(
+		m_el[0][0] - m.m_el[0][0],
+		m_el[0][1] - m.m_el[0][1],
+		m_el[0][2] - m.m_el[0][2],
+		m_el[1][0] - m.m_el[1][0],
+		m_el[1][1] - m.m_el[1][1],
+		m_el[1][2] - m.m_el[1][2],
+		m_el[2][0] - m.m_el[2][0],
+		m_el[2][1] - m.m_el[2][1],
+		m_el[2][2] - m.m_el[2][2]);
+#endif
+	return *this;
+}
+
+SIMD_FORCE_INLINE btScalar
+btMatrix3x3::determinant() const
+{
+	return btTriple((*this)[0], (*this)[1], (*this)[2]);
+}
+
+SIMD_FORCE_INLINE btMatrix3x3
+btMatrix3x3::absolute() const
+{
+#if defined BT_USE_SIMD_VECTOR3 && (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
+	return btMatrix3x3(
+		_mm_and_ps(m_el[0].mVec128, btvAbsfMask),
+		_mm_and_ps(m_el[1].mVec128, btvAbsfMask),
+		_mm_and_ps(m_el[2].mVec128, btvAbsfMask));
+#elif defined(BT_USE_NEON)
+	return btMatrix3x3(
+		(float32x4_t)vandq_s32((int32x4_t)m_el[0].mVec128, btv3AbsMask),
+		(float32x4_t)vandq_s32((int32x4_t)m_el[1].mVec128, btv3AbsMask),
+		(float32x4_t)vandq_s32((int32x4_t)m_el[2].mVec128, btv3AbsMask));
+#else
+	return btMatrix3x3(
+		btFabs(m_el[0].x()), btFabs(m_el[0].y()), btFabs(m_el[0].z()),
+		btFabs(m_el[1].x()), btFabs(m_el[1].y()), btFabs(m_el[1].z()),
+		btFabs(m_el[2].x()), btFabs(m_el[2].y()), btFabs(m_el[2].z()));
+#endif
+}
+
+SIMD_FORCE_INLINE btMatrix3x3
+btMatrix3x3::transpose() const
+{
+#if defined BT_USE_SIMD_VECTOR3 && (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
+	__m128 v0 = m_el[0].mVec128;
+	__m128 v1 = m_el[1].mVec128;
+	__m128 v2 = m_el[2].mVec128;  //  x2 y2 z2 w2
+	__m128 vT;
+
+	v2 = _mm_and_ps(v2, btvFFF0fMask);  //  x2 y2 z2 0
+
+	vT = _mm_unpackhi_ps(v0, v1);  //	z0 z1 * *
+	v0 = _mm_unpacklo_ps(v0, v1);  //	x0 x1 y0 y1
+
+	v1 = _mm_shuffle_ps(v0, v2, BT_SHUFFLE(2, 3, 1, 3));                    // y0 y1 y2 0
+	v0 = _mm_shuffle_ps(v0, v2, BT_SHUFFLE(0, 1, 0, 3));                    // x0 x1 x2 0
+	v2 = btCastdTo128f(_mm_move_sd(btCastfTo128d(v2), btCastfTo128d(vT)));  // z0 z1 z2 0
+
+	return btMatrix3x3(v0, v1, v2);
+#elif defined(BT_USE_NEON)
+	// note: zeros the w channel. We can preserve it at the cost of two more vtrn instructions.
+	static const uint32x2_t zMask = (const uint32x2_t){static_cast<uint32_t>(-1), 0};
+	float32x4x2_t top = vtrnq_f32(m_el[0].mVec128, m_el[1].mVec128);               // {x0 x1 z0 z1}, {y0 y1 w0 w1}
+	float32x2x2_t bl = vtrn_f32(vget_low_f32(m_el[2].mVec128), vdup_n_f32(0.0f));  // {x2  0 }, {y2 0}
+	float32x4_t v0 = vcombine_f32(vget_low_f32(top.val[0]), bl.val[0]);
+	float32x4_t v1 = vcombine_f32(vget_low_f32(top.val[1]), bl.val[1]);
+	float32x2_t q = (float32x2_t)vand_u32((uint32x2_t)vget_high_f32(m_el[2].mVec128), zMask);
+	float32x4_t v2 = vcombine_f32(vget_high_f32(top.val[0]), q);  // z0 z1 z2  0
+	return btMatrix3x3(v0, v1, v2);
+#else
+	return btMatrix3x3(m_el[0].x(), m_el[1].x(), m_el[2].x(),
+					   m_el[0].y(), m_el[1].y(), m_el[2].y(),
+					   m_el[0].z(), m_el[1].z(), m_el[2].z());
+#endif
+}
+
+SIMD_FORCE_INLINE btMatrix3x3
+btMatrix3x3::adjoint() const
+{
+	return btMatrix3x3(cofac(1, 1, 2, 2), cofac(0, 2, 2, 1), cofac(0, 1, 1, 2),
+					   cofac(1, 2, 2, 0), cofac(0, 0, 2, 2), cofac(0, 2, 1, 0),
+					   cofac(1, 0, 2, 1), cofac(0, 1, 2, 0), cofac(0, 0, 1, 1));
+}
+
+SIMD_FORCE_INLINE btMatrix3x3
+btMatrix3x3::inverse() const
+{
+	btVector3 co(cofac(1, 1, 2, 2), cofac(1, 2, 2, 0), cofac(1, 0, 2, 1));
+	btScalar det = (*this)[0].dot(co);
+	//btFullAssert(det != btScalar(0.0));
+	btAssert(det != btScalar(0.0));
+	btScalar s = btScalar(1.0) / det;
+	return btMatrix3x3(co.x() * s, cofac(0, 2, 2, 1) * s, cofac(0, 1, 1, 2) * s,
+					   co.y() * s, cofac(0, 0, 2, 2) * s, cofac(0, 2, 1, 0) * s,
+					   co.z() * s, cofac(0, 1, 2, 0) * s, cofac(0, 0, 1, 1) * s);
+}
+
+SIMD_FORCE_INLINE btMatrix3x3
+btMatrix3x3::transposeTimes(const btMatrix3x3& m) const
+{
+#if defined BT_USE_SIMD_VECTOR3 && (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
+	// zeros w
+	//    static const __m128i xyzMask = (const __m128i){ -1ULL, 0xffffffffULL };
+	__m128 row = m_el[0].mVec128;
+	__m128 m0 = _mm_and_ps(m.getRow(0).mVec128, btvFFF0fMask);
+	__m128 m1 = _mm_and_ps(m.getRow(1).mVec128, btvFFF0fMask);
+	__m128 m2 = _mm_and_ps(m.getRow(2).mVec128, btvFFF0fMask);
+	__m128 r0 = _mm_mul_ps(m0, _mm_shuffle_ps(row, row, 0));
+	__m128 r1 = _mm_mul_ps(m0, _mm_shuffle_ps(row, row, 0x55));
+	__m128 r2 = _mm_mul_ps(m0, _mm_shuffle_ps(row, row, 0xaa));
+	row = m_el[1].mVec128;
+	r0 = _mm_add_ps(r0, _mm_mul_ps(m1, _mm_shuffle_ps(row, row, 0)));
+	r1 = _mm_add_ps(r1, _mm_mul_ps(m1, _mm_shuffle_ps(row, row, 0x55)));
+	r2 = _mm_add_ps(r2, _mm_mul_ps(m1, _mm_shuffle_ps(row, row, 0xaa)));
+	row = m_el[2].mVec128;
+	r0 = _mm_add_ps(r0, _mm_mul_ps(m2, _mm_shuffle_ps(row, row, 0)));
+	r1 = _mm_add_ps(r1, _mm_mul_ps(m2, _mm_shuffle_ps(row, row, 0x55)));
+	r2 = _mm_add_ps(r2, _mm_mul_ps(m2, _mm_shuffle_ps(row, row, 0xaa)));
+	return btMatrix3x3(r0, r1, r2);
+
+#elif defined BT_USE_NEON
+	// zeros w
+	static const uint32x4_t xyzMask = (const uint32x4_t){static_cast<uint32_t>(-1), static_cast<uint32_t>(-1), static_cast<uint32_t>(-1), 0};
+	float32x4_t m0 = (float32x4_t)vandq_u32((uint32x4_t)m.getRow(0).mVec128, xyzMask);
+	float32x4_t m1 = (float32x4_t)vandq_u32((uint32x4_t)m.getRow(1).mVec128, xyzMask);
+	float32x4_t m2 = (float32x4_t)vandq_u32((uint32x4_t)m.getRow(2).mVec128, xyzMask);
+	float32x4_t row = m_el[0].mVec128;
+	float32x4_t r0 = vmulq_lane_f32(m0, vget_low_f32(row), 0);
+	float32x4_t r1 = vmulq_lane_f32(m0, vget_low_f32(row), 1);
+	float32x4_t r2 = vmulq_lane_f32(m0, vget_high_f32(row), 0);
+	row = m_el[1].mVec128;
+	r0 = vmlaq_lane_f32(r0, m1, vget_low_f32(row), 0);
+	r1 = vmlaq_lane_f32(r1, m1, vget_low_f32(row), 1);
+	r2 = vmlaq_lane_f32(r2, m1, vget_high_f32(row), 0);
+	row = m_el[2].mVec128;
+	r0 = vmlaq_lane_f32(r0, m2, vget_low_f32(row), 0);
+	r1 = vmlaq_lane_f32(r1, m2, vget_low_f32(row), 1);
+	r2 = vmlaq_lane_f32(r2, m2, vget_high_f32(row), 0);
+	return btMatrix3x3(r0, r1, r2);
+#else
+	return btMatrix3x3(
+		m_el[0].x() * m[0].x() + m_el[1].x() * m[1].x() + m_el[2].x() * m[2].x(),
+		m_el[0].x() * m[0].y() + m_el[1].x() * m[1].y() + m_el[2].x() * m[2].y(),
+		m_el[0].x() * m[0].z() + m_el[1].x() * m[1].z() + m_el[2].x() * m[2].z(),
+		m_el[0].y() * m[0].x() + m_el[1].y() * m[1].x() + m_el[2].y() * m[2].x(),
+		m_el[0].y() * m[0].y() + m_el[1].y() * m[1].y() + m_el[2].y() * m[2].y(),
+		m_el[0].y() * m[0].z() + m_el[1].y() * m[1].z() + m_el[2].y() * m[2].z(),
+		m_el[0].z() * m[0].x() + m_el[1].z() * m[1].x() + m_el[2].z() * m[2].x(),
+		m_el[0].z() * m[0].y() + m_el[1].z() * m[1].y() + m_el[2].z() * m[2].y(),
+		m_el[0].z() * m[0].z() + m_el[1].z() * m[1].z() + m_el[2].z() * m[2].z());
+#endif
+}
+
+SIMD_FORCE_INLINE btMatrix3x3
+btMatrix3x3::timesTranspose(const btMatrix3x3& m) const
+{
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
+	__m128 a0 = m_el[0].mVec128;
+	__m128 a1 = m_el[1].mVec128;
+	__m128 a2 = m_el[2].mVec128;
+
+	btMatrix3x3 mT = m.transpose();  // we rely on transpose() zeroing w channel so that we don't have to do it here
+	__m128 mx = mT[0].mVec128;
+	__m128 my = mT[1].mVec128;
+	__m128 mz = mT[2].mVec128;
+
+	__m128 r0 = _mm_mul_ps(mx, _mm_shuffle_ps(a0, a0, 0x00));
+	__m128 r1 = _mm_mul_ps(mx, _mm_shuffle_ps(a1, a1, 0x00));
+	__m128 r2 = _mm_mul_ps(mx, _mm_shuffle_ps(a2, a2, 0x00));
+	r0 = _mm_add_ps(r0, _mm_mul_ps(my, _mm_shuffle_ps(a0, a0, 0x55)));
+	r1 = _mm_add_ps(r1, _mm_mul_ps(my, _mm_shuffle_ps(a1, a1, 0x55)));
+	r2 = _mm_add_ps(r2, _mm_mul_ps(my, _mm_shuffle_ps(a2, a2, 0x55)));
+	r0 = _mm_add_ps(r0, _mm_mul_ps(mz, _mm_shuffle_ps(a0, a0, 0xaa)));
+	r1 = _mm_add_ps(r1, _mm_mul_ps(mz, _mm_shuffle_ps(a1, a1, 0xaa)));
+	r2 = _mm_add_ps(r2, _mm_mul_ps(mz, _mm_shuffle_ps(a2, a2, 0xaa)));
+	return btMatrix3x3(r0, r1, r2);
+
+#elif defined BT_USE_NEON
+	float32x4_t a0 = m_el[0].mVec128;
+	float32x4_t a1 = m_el[1].mVec128;
+	float32x4_t a2 = m_el[2].mVec128;
+
+	btMatrix3x3 mT = m.transpose();  // we rely on transpose() zeroing w channel so that we don't have to do it here
+	float32x4_t mx = mT[0].mVec128;
+	float32x4_t my = mT[1].mVec128;
+	float32x4_t mz = mT[2].mVec128;
+
+	float32x4_t r0 = vmulq_lane_f32(mx, vget_low_f32(a0), 0);
+	float32x4_t r1 = vmulq_lane_f32(mx, vget_low_f32(a1), 0);
+	float32x4_t r2 = vmulq_lane_f32(mx, vget_low_f32(a2), 0);
+	r0 = vmlaq_lane_f32(r0, my, vget_low_f32(a0), 1);
+	r1 = vmlaq_lane_f32(r1, my, vget_low_f32(a1), 1);
+	r2 = vmlaq_lane_f32(r2, my, vget_low_f32(a2), 1);
+	r0 = vmlaq_lane_f32(r0, mz, vget_high_f32(a0), 0);
+	r1 = vmlaq_lane_f32(r1, mz, vget_high_f32(a1), 0);
+	r2 = vmlaq_lane_f32(r2, mz, vget_high_f32(a2), 0);
+	return btMatrix3x3(r0, r1, r2);
+
+#else
+	return btMatrix3x3(
+		m_el[0].dot(m[0]), m_el[0].dot(m[1]), m_el[0].dot(m[2]),
+		m_el[1].dot(m[0]), m_el[1].dot(m[1]), m_el[1].dot(m[2]),
+		m_el[2].dot(m[0]), m_el[2].dot(m[1]), m_el[2].dot(m[2]));
+#endif
+}
+
+SIMD_FORCE_INLINE btVector3
+operator*(const btMatrix3x3& m, const btVector3& v)
+{
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
+	return v.dot3(m[0], m[1], m[2]);
+#else
+	return btVector3(m[0].dot(v), m[1].dot(v), m[2].dot(v));
+#endif
+}
+
+SIMD_FORCE_INLINE btVector3
+operator*(const btVector3& v, const btMatrix3x3& m)
+{
+#if defined BT_USE_SIMD_VECTOR3 && (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
+
+	const __m128 vv = v.mVec128;
+
+	__m128 c0 = bt_splat_ps(vv, 0);
+	__m128 c1 = bt_splat_ps(vv, 1);
+	__m128 c2 = bt_splat_ps(vv, 2);
+
+	c0 = _mm_mul_ps(c0, _mm_and_ps(m[0].mVec128, btvFFF0fMask));
+	c1 = _mm_mul_ps(c1, _mm_and_ps(m[1].mVec128, btvFFF0fMask));
+	c0 = _mm_add_ps(c0, c1);
+	c2 = _mm_mul_ps(c2, _mm_and_ps(m[2].mVec128, btvFFF0fMask));
+
+	return btVector3(_mm_add_ps(c0, c2));
+#elif defined(BT_USE_NEON)
+	const float32x4_t vv = v.mVec128;
+	const float32x2_t vlo = vget_low_f32(vv);
+	const float32x2_t vhi = vget_high_f32(vv);
+
+	float32x4_t c0, c1, c2;
+
+	c0 = (float32x4_t)vandq_s32((int32x4_t)m[0].mVec128, btvFFF0Mask);
+	c1 = (float32x4_t)vandq_s32((int32x4_t)m[1].mVec128, btvFFF0Mask);
+	c2 = (float32x4_t)vandq_s32((int32x4_t)m[2].mVec128, btvFFF0Mask);
+
+	c0 = vmulq_lane_f32(c0, vlo, 0);
+	c1 = vmulq_lane_f32(c1, vlo, 1);
+	c2 = vmulq_lane_f32(c2, vhi, 0);
+	c0 = vaddq_f32(c0, c1);
+	c0 = vaddq_f32(c0, c2);
+
+	return btVector3(c0);
+#else
+	return btVector3(m.tdotx(v), m.tdoty(v), m.tdotz(v));
+#endif
+}
+
+SIMD_FORCE_INLINE btMatrix3x3
+operator*(const btMatrix3x3& m1, const btMatrix3x3& m2)
+{
+#if defined BT_USE_SIMD_VECTOR3 && (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
+
+	__m128 m10 = m1[0].mVec128;
+	__m128 m11 = m1[1].mVec128;
+	__m128 m12 = m1[2].mVec128;
+
+	__m128 m2v = _mm_and_ps(m2[0].mVec128, btvFFF0fMask);
+
+	__m128 c0 = bt_splat_ps(m10, 0);
+	__m128 c1 = bt_splat_ps(m11, 0);
+	__m128 c2 = bt_splat_ps(m12, 0);
+
+	c0 = _mm_mul_ps(c0, m2v);
+	c1 = _mm_mul_ps(c1, m2v);
+	c2 = _mm_mul_ps(c2, m2v);
+
+	m2v = _mm_and_ps(m2[1].mVec128, btvFFF0fMask);
+
+	__m128 c0_1 = bt_splat_ps(m10, 1);
+	__m128 c1_1 = bt_splat_ps(m11, 1);
+	__m128 c2_1 = bt_splat_ps(m12, 1);
+
+	c0_1 = _mm_mul_ps(c0_1, m2v);
+	c1_1 = _mm_mul_ps(c1_1, m2v);
+	c2_1 = _mm_mul_ps(c2_1, m2v);
+
+	m2v = _mm_and_ps(m2[2].mVec128, btvFFF0fMask);
+
+	c0 = _mm_add_ps(c0, c0_1);
+	c1 = _mm_add_ps(c1, c1_1);
+	c2 = _mm_add_ps(c2, c2_1);
+
+	m10 = bt_splat_ps(m10, 2);
+	m11 = bt_splat_ps(m11, 2);
+	m12 = bt_splat_ps(m12, 2);
+
+	m10 = _mm_mul_ps(m10, m2v);
+	m11 = _mm_mul_ps(m11, m2v);
+	m12 = _mm_mul_ps(m12, m2v);
+
+	c0 = _mm_add_ps(c0, m10);
+	c1 = _mm_add_ps(c1, m11);
+	c2 = _mm_add_ps(c2, m12);
+
+	return btMatrix3x3(c0, c1, c2);
+
+#elif defined(BT_USE_NEON)
+
+	float32x4_t rv0, rv1, rv2;
+	float32x4_t v0, v1, v2;
+	float32x4_t mv0, mv1, mv2;
+
+	v0 = m1[0].mVec128;
+	v1 = m1[1].mVec128;
+	v2 = m1[2].mVec128;
+
+	mv0 = (float32x4_t)vandq_s32((int32x4_t)m2[0].mVec128, btvFFF0Mask);
+	mv1 = (float32x4_t)vandq_s32((int32x4_t)m2[1].mVec128, btvFFF0Mask);
+	mv2 = (float32x4_t)vandq_s32((int32x4_t)m2[2].mVec128, btvFFF0Mask);
+
+	rv0 = vmulq_lane_f32(mv0, vget_low_f32(v0), 0);
+	rv1 = vmulq_lane_f32(mv0, vget_low_f32(v1), 0);
+	rv2 = vmulq_lane_f32(mv0, vget_low_f32(v2), 0);
+
+	rv0 = vmlaq_lane_f32(rv0, mv1, vget_low_f32(v0), 1);
+	rv1 = vmlaq_lane_f32(rv1, mv1, vget_low_f32(v1), 1);
+	rv2 = vmlaq_lane_f32(rv2, mv1, vget_low_f32(v2), 1);
+
+	rv0 = vmlaq_lane_f32(rv0, mv2, vget_high_f32(v0), 0);
+	rv1 = vmlaq_lane_f32(rv1, mv2, vget_high_f32(v1), 0);
+	rv2 = vmlaq_lane_f32(rv2, mv2, vget_high_f32(v2), 0);
+
+	return btMatrix3x3(rv0, rv1, rv2);
+
+#else
+	return btMatrix3x3(
+		m2.tdotx(m1[0]), m2.tdoty(m1[0]), m2.tdotz(m1[0]),
+		m2.tdotx(m1[1]), m2.tdoty(m1[1]), m2.tdotz(m1[1]),
+		m2.tdotx(m1[2]), m2.tdoty(m1[2]), m2.tdotz(m1[2]));
+#endif
+}
+
+/*
+SIMD_FORCE_INLINE btMatrix3x3 btMultTransposeLeft(const btMatrix3x3& m1, const btMatrix3x3& m2) {
+return btMatrix3x3(
+m1[0][0] * m2[0][0] + m1[1][0] * m2[1][0] + m1[2][0] * m2[2][0],
+m1[0][0] * m2[0][1] + m1[1][0] * m2[1][1] + m1[2][0] * m2[2][1],
+m1[0][0] * m2[0][2] + m1[1][0] * m2[1][2] + m1[2][0] * m2[2][2],
+m1[0][1] * m2[0][0] + m1[1][1] * m2[1][0] + m1[2][1] * m2[2][0],
+m1[0][1] * m2[0][1] + m1[1][1] * m2[1][1] + m1[2][1] * m2[2][1],
+m1[0][1] * m2[0][2] + m1[1][1] * m2[1][2] + m1[2][1] * m2[2][2],
+m1[0][2] * m2[0][0] + m1[1][2] * m2[1][0] + m1[2][2] * m2[2][0],
+m1[0][2] * m2[0][1] + m1[1][2] * m2[1][1] + m1[2][2] * m2[2][1],
+m1[0][2] * m2[0][2] + m1[1][2] * m2[1][2] + m1[2][2] * m2[2][2]);
+}
+*/
+
+/**@brief Equality operator between two matrices
+* It will test all elements are equal.  */
+SIMD_FORCE_INLINE bool operator==(const btMatrix3x3& m1, const btMatrix3x3& m2)
+{
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE))
+
+	__m128 c0, c1, c2;
+
+	c0 = _mm_cmpeq_ps(m1[0].mVec128, m2[0].mVec128);
+	c1 = _mm_cmpeq_ps(m1[1].mVec128, m2[1].mVec128);
+	c2 = _mm_cmpeq_ps(m1[2].mVec128, m2[2].mVec128);
+
+	c0 = _mm_and_ps(c0, c1);
+	c0 = _mm_and_ps(c0, c2);
+
+	int m = _mm_movemask_ps((__m128)c0);
+	return (0x7 == (m & 0x7));
+
+#else
+	return (m1[0][0] == m2[0][0] && m1[1][0] == m2[1][0] && m1[2][0] == m2[2][0] &&
+			m1[0][1] == m2[0][1] && m1[1][1] == m2[1][1] && m1[2][1] == m2[2][1] &&
+			m1[0][2] == m2[0][2] && m1[1][2] == m2[1][2] && m1[2][2] == m2[2][2]);
+#endif
+}
+
+///for serialization
+struct btMatrix3x3FloatData
+{
+	btVector3FloatData m_el[3];
+};
+
+///for serialization
+struct btMatrix3x3DoubleData
+{
+	btVector3DoubleData m_el[3];
+};
+
+SIMD_FORCE_INLINE void btMatrix3x3::serialize(struct btMatrix3x3Data& dataOut) const
+{
+	for (int i = 0; i < 3; i++)
+		m_el[i].serialize(dataOut.m_el[i]);
+}
+
+SIMD_FORCE_INLINE void btMatrix3x3::serializeFloat(struct btMatrix3x3FloatData& dataOut) const
+{
+	for (int i = 0; i < 3; i++)
+		m_el[i].serializeFloat(dataOut.m_el[i]);
+}
+
+SIMD_FORCE_INLINE void btMatrix3x3::deSerialize(const struct btMatrix3x3Data& dataIn)
+{
+	for (int i = 0; i < 3; i++)
+		m_el[i].deSerialize(dataIn.m_el[i]);
+}
+
+SIMD_FORCE_INLINE void btMatrix3x3::deSerializeFloat(const struct btMatrix3x3FloatData& dataIn)
+{
+	for (int i = 0; i < 3; i++)
+		m_el[i].deSerializeFloat(dataIn.m_el[i]);
+}
+
+SIMD_FORCE_INLINE void btMatrix3x3::deSerializeDouble(const struct btMatrix3x3DoubleData& dataIn)
+{
+	for (int i = 0; i < 3; i++)
+		m_el[i].deSerializeDouble(dataIn.m_el[i]);
+}
+
+#endif  //BT_MATRIX3x3_H
+
+
+
+
+
+/*
+Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_TRANSFORM_H
+#define BT_TRANSFORM_H
+
+
+#ifdef BT_USE_DOUBLE_PRECISION
+#define btTransformData btTransformDoubleData
+#else
+#define btTransformData btTransformFloatData
+#endif
+
+/**@brief The btTransform class supports rigid transforms with only translation and rotation and no scaling/shear.
+ *It can be used in combination with btVector3, btQuaternion and btMatrix3x3 linear algebra classes. */
+ATTRIBUTE_ALIGNED16(class)
+btTransform
+{
+	///Storage for the rotation
+	btMatrix3x3 m_basis;
+	///Storage for the translation
+	btVector3 m_origin;
+
+public:
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+	/**@brief No initialization constructor */
+	btTransform() {}
+	/**@brief Constructor from btQuaternion (optional btVector3 )
+   * @param q Rotation from quaternion 
+   * @param c Translation from Vector (default 0,0,0) */
+	explicit SIMD_FORCE_INLINE btTransform(const btQuaternion& q,
+										   const btVector3& c = btVector3(btScalar(0), btScalar(0), btScalar(0)))
+		: m_basis(q),
+		  m_origin(c)
+	{
+	}
+
+	/**@brief Constructor from btMatrix3x3 (optional btVector3)
+   * @param b Rotation from Matrix 
+   * @param c Translation from Vector default (0,0,0)*/
+	explicit SIMD_FORCE_INLINE btTransform(const btMatrix3x3& b,
+										   const btVector3& c = btVector3(btScalar(0), btScalar(0), btScalar(0)))
+		: m_basis(b),
+		  m_origin(c)
+	{
+	}
+	/**@brief Copy constructor */
+	SIMD_FORCE_INLINE btTransform(const btTransform& other)
+		: m_basis(other.m_basis),
+		  m_origin(other.m_origin)
+	{
+	}
+	/**@brief Assignment Operator */
+	SIMD_FORCE_INLINE btTransform& operator=(const btTransform& other)
+	{
+		m_basis = other.m_basis;
+		m_origin = other.m_origin;
+		return *this;
+	}
+
+	/**@brief Set the current transform as the value of the product of two transforms
+   * @param t1 Transform 1
+   * @param t2 Transform 2
+   * This = Transform1 * Transform2 */
+	SIMD_FORCE_INLINE void mult(const btTransform& t1, const btTransform& t2)
+	{
+		m_basis = t1.m_basis * t2.m_basis;
+		m_origin = t1(t2.m_origin);
+	}
+
+	/*		void multInverseLeft(const btTransform& t1, const btTransform& t2) {
+			btVector3 v = t2.m_origin - t1.m_origin;
+			m_basis = btMultTransposeLeft(t1.m_basis, t2.m_basis);
+			m_origin = v * t1.m_basis;
+		}
+		*/
+
+	/**@brief Return the transform of the vector */
+	SIMD_FORCE_INLINE btVector3 operator()(const btVector3& x) const
+	{
+		return x.dot3(m_basis[0], m_basis[1], m_basis[2]) + m_origin;
+	}
+
+	/**@brief Return the transform of the vector */
+	SIMD_FORCE_INLINE btVector3 operator*(const btVector3& x) const
+	{
+		return (*this)(x);
+	}
+
+	/**@brief Return the transform of the btQuaternion */
+	SIMD_FORCE_INLINE btQuaternion operator*(const btQuaternion& q) const
+	{
+		return getRotation() * q;
+	}
+
+	/**@brief Return the basis matrix for the rotation */
+	SIMD_FORCE_INLINE btMatrix3x3& getBasis() { return m_basis; }
+	/**@brief Return the basis matrix for the rotation */
+	SIMD_FORCE_INLINE const btMatrix3x3& getBasis() const { return m_basis; }
+
+	/**@brief Return the origin vector translation */
+	SIMD_FORCE_INLINE btVector3& getOrigin() { return m_origin; }
+	/**@brief Return the origin vector translation */
+	SIMD_FORCE_INLINE const btVector3& getOrigin() const { return m_origin; }
+
+	/**@brief Return a quaternion representing the rotation */
+	btQuaternion getRotation() const
+	{
+		btQuaternion q;
+		m_basis.getRotation(q);
+		return q;
+	}
+
+	/**@brief Set from an array 
+   * @param m A pointer to a 16 element array (12 rotation(row major padded on the right by 1), and 3 translation */
+	void setFromOpenGLMatrix(const btScalar* m)
+	{
+		m_basis.setFromOpenGLSubMatrix(m);
+		m_origin.setValue(m[12], m[13], m[14]);
+	}
+
+	/**@brief Fill an array representation
+   * @param m A pointer to a 16 element array (12 rotation(row major padded on the right by 1), and 3 translation */
+	void getOpenGLMatrix(btScalar * m) const
+	{
+		m_basis.getOpenGLSubMatrix(m);
+		m[12] = m_origin.x();
+		m[13] = m_origin.y();
+		m[14] = m_origin.z();
+		m[15] = btScalar(1.0);
+	}
+
+	/**@brief Set the translational element
+   * @param origin The vector to set the translation to */
+	SIMD_FORCE_INLINE void setOrigin(const btVector3& origin)
+	{
+		m_origin = origin;
+	}
+
+	SIMD_FORCE_INLINE btVector3 invXform(const btVector3& inVec) const;
+
+	/**@brief Set the rotational element by btMatrix3x3 */
+	SIMD_FORCE_INLINE void setBasis(const btMatrix3x3& basis)
+	{
+		m_basis = basis;
+	}
+
+	/**@brief Set the rotational element by btQuaternion */
+	SIMD_FORCE_INLINE void setRotation(const btQuaternion& q)
+	{
+		m_basis.setRotation(q);
+	}
+
+	/**@brief Set this transformation to the identity */
+	void setIdentity()
+	{
+		m_basis.setIdentity();
+		m_origin.setValue(btScalar(0.0), btScalar(0.0), btScalar(0.0));
+	}
+
+	/**@brief Multiply this Transform by another(this = this * another) 
+   * @param t The other transform */
+	btTransform& operator*=(const btTransform& t)
+	{
+		m_origin += m_basis * t.m_origin;
+		m_basis *= t.m_basis;
+		return *this;
+	}
+
+	/**@brief Return the inverse of this transform */
+	btTransform inverse() const
+	{
+		btMatrix3x3 inv = m_basis.transpose();
+		return btTransform(inv, inv * -m_origin);
+	}
+
+	/**@brief Return the inverse of this transform times the other transform
+   * @param t The other transform 
+   * return this.inverse() * the other */
+	btTransform inverseTimes(const btTransform& t) const;
+
+	/**@brief Return the product of this transform and the other */
+	btTransform operator*(const btTransform& t) const;
+
+	/**@brief Return an identity transform */
+	static const btTransform& getIdentity()
+	{
+		static const btTransform identityTransform(btMatrix3x3::getIdentity());
+		return identityTransform;
+	}
+
+	void serialize(struct btTransformData & dataOut) const;
+
+	void serializeFloat(struct btTransformFloatData & dataOut) const;
+
+	void deSerialize(const struct btTransformData& dataIn);
+
+	void deSerializeDouble(const struct btTransformDoubleData& dataIn);
+
+	void deSerializeFloat(const struct btTransformFloatData& dataIn);
+};
+
+SIMD_FORCE_INLINE btVector3
+btTransform::invXform(const btVector3& inVec) const
+{
+	btVector3 v = inVec - m_origin;
+	return (m_basis.transpose() * v);
+}
+
+SIMD_FORCE_INLINE btTransform
+btTransform::inverseTimes(const btTransform& t) const
+{
+	btVector3 v = t.getOrigin() - m_origin;
+	return btTransform(m_basis.transposeTimes(t.m_basis),
+					   v * m_basis);
+}
+
+SIMD_FORCE_INLINE btTransform
+	btTransform::operator*(const btTransform& t) const
+{
+	return btTransform(m_basis * t.m_basis,
+					   (*this)(t.m_origin));
+}
+
+/**@brief Test if two transforms have all elements equal */
+SIMD_FORCE_INLINE bool operator==(const btTransform& t1, const btTransform& t2)
+{
+	return (t1.getBasis() == t2.getBasis() &&
+			t1.getOrigin() == t2.getOrigin());
+}
+
+///for serialization
+struct btTransformFloatData
+{
+	btMatrix3x3FloatData m_basis;
+	btVector3FloatData m_origin;
+};
+
+struct btTransformDoubleData
+{
+	btMatrix3x3DoubleData m_basis;
+	btVector3DoubleData m_origin;
+};
+
+SIMD_FORCE_INLINE void btTransform::serialize(btTransformData& dataOut) const
+{
+	m_basis.serialize(dataOut.m_basis);
+	m_origin.serialize(dataOut.m_origin);
+}
+
+SIMD_FORCE_INLINE void btTransform::serializeFloat(btTransformFloatData& dataOut) const
+{
+	m_basis.serializeFloat(dataOut.m_basis);
+	m_origin.serializeFloat(dataOut.m_origin);
+}
+
+SIMD_FORCE_INLINE void btTransform::deSerialize(const btTransformData& dataIn)
+{
+	m_basis.deSerialize(dataIn.m_basis);
+	m_origin.deSerialize(dataIn.m_origin);
+}
+
+SIMD_FORCE_INLINE void btTransform::deSerializeFloat(const btTransformFloatData& dataIn)
+{
+	m_basis.deSerializeFloat(dataIn.m_basis);
+	m_origin.deSerializeFloat(dataIn.m_origin);
+}
+
+SIMD_FORCE_INLINE void btTransform::deSerializeDouble(const btTransformDoubleData& dataIn)
+{
+	m_basis.deSerializeDouble(dataIn.m_basis);
+	m_origin.deSerializeDouble(dataIn.m_origin);
+}
+
+#endif  //BT_TRANSFORM_H
+
+
+
+
+
+/*
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from the use of this software.
+Permission is granted to anyone to use this software for any purpose, 
+including commercial applications, and to alter it and redistribute it freely, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef BT_MOTIONSTATE_H
+#define BT_MOTIONSTATE_H
+
+
+///The btMotionState interface class allows the dynamics world to synchronize and interpolate the updated world transforms with graphics
+///For optimizations, potentially only moving objects get synchronized (using setWorldPosition/setWorldOrientation)
+class btMotionState
+{
+public:
+	virtual ~btMotionState()
+	{
+	}
+
+	virtual void getWorldTransform(btTransform& worldTrans) const = 0;
+
+	//Bullet only calls the update of worldtransform for active objects
+	virtual void setWorldTransform(const btTransform& worldTrans) = 0;
+};
+
+#endif  //BT_MOTIONSTATE_H
+
+
+
+
+
+#ifndef BT_DEFAULT_MOTION_STATE_H
+#define BT_DEFAULT_MOTION_STATE_H
+
+
+///The btDefaultMotionState provides a common implementation to synchronize world transforms with offsets.
+ATTRIBUTE_ALIGNED16(struct)
+btDefaultMotionState : public btMotionState
+{
+	btTransform m_graphicsWorldTrans;
+	btTransform m_centerOfMassOffset;
+	btTransform m_startWorldTrans;
+	void* m_userPointer;
+
+	BT_DECLARE_ALIGNED_ALLOCATOR();
+
+	btDefaultMotionState(const btTransform& startTrans = btTransform::getIdentity(), const btTransform& centerOfMassOffset = btTransform::getIdentity())
+		: m_graphicsWorldTrans(startTrans),
+		  m_centerOfMassOffset(centerOfMassOffset),
+		  m_startWorldTrans(startTrans),
+		  m_userPointer(0)
+
+	{
+	}
+
+	///synchronizes world transform from user to physics
+	virtual void getWorldTransform(btTransform & centerOfMassWorldTrans) const
+	{
+		centerOfMassWorldTrans = m_graphicsWorldTrans * m_centerOfMassOffset.inverse();
+	}
+
+	///synchronizes world transform from physics to user
+	///Bullet only calls the update of worldtransform for active objects
+	virtual void setWorldTransform(const btTransform& centerOfMassWorldTrans)
+	{
+		m_graphicsWorldTrans = centerOfMassWorldTrans * m_centerOfMassOffset;
+	}
+};
+
+#endif  //BT_DEFAULT_MOTION_STATE_H
+
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void _wrap_Swig_free_mbt_53667cdae90870b5(void *_swig_go_0) {
+void _wrap_Swig_free_mbt_7f4d06f7d3d79a98(void *_swig_go_0) {
   void *arg1 = (void *) 0 ;
   
   arg1 = *(void **)&_swig_go_0; 
@@ -265,7 +5993,7 @@ void _wrap_Swig_free_mbt_53667cdae90870b5(void *_swig_go_0) {
 }
 
 
-void *_wrap_Swig_malloc_mbt_53667cdae90870b5(intgo _swig_go_0) {
+void *_wrap_Swig_malloc_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
   int arg1 ;
   void *result = 0 ;
   void *_swig_go_result;
@@ -278,409 +6006,5206 @@ void *_wrap_Swig_malloc_mbt_53667cdae90870b5(intgo _swig_go_0) {
 }
 
 
-void _wrap_delete_btCollisionConfiguration_mbt_53667cdae90870b5(btCollisionConfiguration *_swig_go_0) {
-  btCollisionConfiguration *arg1 = (btCollisionConfiguration *) 0 ;
+intgo _wrap_btGetVersion_mbt_7f4d06f7d3d79a98() {
+  int result;
+  intgo _swig_go_result;
   
-  arg1 = *(btCollisionConfiguration **)&_swig_go_0; 
+  
+  result = (int)btGetVersion();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btIsDoublePrecision_mbt_7f4d06f7d3d79a98() {
+  int result;
+  intgo _swig_go_result;
+  
+  
+  result = (int)btIsDoublePrecision();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_0_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
+  int arg1 ;
+  btInfMaskConverter *result = 0 ;
+  btInfMaskConverter *_swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (btInfMaskConverter *)new btInfMaskConverter(arg1);
+  *(btInfMaskConverter **)&_swig_go_result = (btInfMaskConverter *)result; 
+  return _swig_go_result;
+}
+
+
+btInfMaskConverter *_wrap_new_btInfMaskConverter__SWIG_1_mbt_7f4d06f7d3d79a98() {
+  btInfMaskConverter *result = 0 ;
+  btInfMaskConverter *_swig_go_result;
+  
+  
+  result = (btInfMaskConverter *)new btInfMaskConverter();
+  *(btInfMaskConverter **)&_swig_go_result = (btInfMaskConverter *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btInfMaskConverter_mbt_7f4d06f7d3d79a98(btInfMaskConverter *_swig_go_0) {
+  btInfMaskConverter *arg1 = (btInfMaskConverter *) 0 ;
+  
+  arg1 = *(btInfMaskConverter **)&_swig_go_0; 
   
   delete arg1;
   
 }
 
 
-btPoolAllocator *_wrap_btCollisionConfiguration_getPersistentManifoldPool_mbt_53667cdae90870b5(btCollisionConfiguration *_swig_go_0) {
-  btCollisionConfiguration *arg1 = (btCollisionConfiguration *) 0 ;
-  btPoolAllocator *result = 0 ;
-  btPoolAllocator *_swig_go_result;
+void _wrap_btInfinityMask_set_mbt_7f4d06f7d3d79a98(btInfMaskConverter *_swig_go_0) {
+  btInfMaskConverter *arg1 = (btInfMaskConverter *) 0 ;
   
-  arg1 = *(btCollisionConfiguration **)&_swig_go_0; 
+  arg1 = *(btInfMaskConverter **)&_swig_go_0; 
   
-  result = (btPoolAllocator *)(arg1)->getPersistentManifoldPool();
-  *(btPoolAllocator **)&_swig_go_result = (btPoolAllocator *)result; 
+  btInfinityMask = *arg1;
+  
+}
+
+
+btInfMaskConverter *_wrap_btInfinityMask_get_mbt_7f4d06f7d3d79a98() {
+  btInfMaskConverter *result = 0 ;
+  btInfMaskConverter *_swig_go_result;
+  
+  
+  result = (btInfMaskConverter *)&btInfinityMask;
+  *(btInfMaskConverter **)&_swig_go_result = (btInfMaskConverter *)result; 
   return _swig_go_result;
 }
 
 
-btPoolAllocator *_wrap_btCollisionConfiguration_getCollisionAlgorithmPool_mbt_53667cdae90870b5(btCollisionConfiguration *_swig_go_0) {
-  btCollisionConfiguration *arg1 = (btCollisionConfiguration *) 0 ;
-  btPoolAllocator *result = 0 ;
-  btPoolAllocator *_swig_go_result;
+intgo _wrap_btGetInfinityMask_mbt_7f4d06f7d3d79a98() {
+  int result;
+  intgo _swig_go_result;
   
-  arg1 = *(btCollisionConfiguration **)&_swig_go_0; 
   
-  result = (btPoolAllocator *)(arg1)->getCollisionAlgorithmPool();
-  *(btPoolAllocator **)&_swig_go_result = (btPoolAllocator *)result; 
+  result = (int)btGetInfinityMask();
+  _swig_go_result = result; 
   return _swig_go_result;
 }
 
 
-btCollisionAlgorithmCreateFunc *_wrap_btCollisionConfiguration_getCollisionAlgorithmCreateFunc_mbt_53667cdae90870b5(btCollisionConfiguration *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
-  btCollisionConfiguration *arg1 = (btCollisionConfiguration *) 0 ;
+float _wrap_btSqrt_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (btScalar)btSqrt(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btFabs_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (btScalar)btFabs(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btCos_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (btScalar)btCos(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btSin_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (btScalar)btSin(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btTan_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (btScalar)btTan(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btAcos_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (btScalar)btAcos(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btAsin_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (btScalar)btAsin(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btAtan_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (btScalar)btAtan(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btAtan2_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
+  btScalar arg1 ;
+  btScalar arg2 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  result = (btScalar)btAtan2(arg1,arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btExp_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (btScalar)btExp(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btLog_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (btScalar)btLog(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btPow_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
+  btScalar arg1 ;
+  btScalar arg2 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  result = (btScalar)btPow(arg1,arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btFmod_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
+  btScalar arg1 ;
+  btScalar arg2 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  result = (btScalar)btFmod(arg1,arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btAtan2Fast_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
+  btScalar arg1 ;
+  btScalar arg2 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  result = (btScalar)btAtan2Fast(arg1,arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btFuzzyZero_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (bool)btFuzzyZero(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btEqual_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
+  btScalar arg1 ;
+  btScalar arg2 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  result = (bool)btEqual(arg1,arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btGreaterEqual_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1) {
+  btScalar arg1 ;
+  btScalar arg2 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  result = (bool)btGreaterEqual(arg1,arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btIsNegative_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (int)btIsNegative(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btRadians_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (btScalar)btRadians(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btDegrees_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  
+  result = (btScalar)btDegrees(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btFsel_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
+  btScalar arg1 ;
+  btScalar arg2 ;
+  btScalar arg3 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = (btScalar)_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  result = (btScalar)btFsel(arg1,arg2,arg3);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btMachineIsLittleEndian_mbt_7f4d06f7d3d79a98() {
+  bool result;
+  bool _swig_go_result;
+  
+  
+  result = (bool)btMachineIsLittleEndian();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btSelect__SWIG_0_mbt_7f4d06f7d3d79a98(intgo _swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
+  unsigned int arg1 ;
+  unsigned int arg2 ;
+  unsigned int arg3 ;
+  unsigned int result;
+  intgo _swig_go_result;
+  
+  arg1 = (unsigned int)_swig_go_0; 
+  arg2 = (unsigned int)_swig_go_1; 
+  arg3 = (unsigned int)_swig_go_2; 
+  
+  result = (unsigned int)btSelect(arg1,arg2,arg3);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btSelect__SWIG_1_mbt_7f4d06f7d3d79a98(intgo _swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
+  unsigned int arg1 ;
   int arg2 ;
   int arg3 ;
-  btCollisionAlgorithmCreateFunc *result = 0 ;
-  btCollisionAlgorithmCreateFunc *_swig_go_result;
+  int result;
+  intgo _swig_go_result;
   
-  arg1 = *(btCollisionConfiguration **)&_swig_go_0; 
+  arg1 = (unsigned int)_swig_go_0; 
   arg2 = (int)_swig_go_1; 
   arg3 = (int)_swig_go_2; 
   
-  result = (btCollisionAlgorithmCreateFunc *)(arg1)->getCollisionAlgorithmCreateFunc(arg2,arg3);
-  *(btCollisionAlgorithmCreateFunc **)&_swig_go_result = (btCollisionAlgorithmCreateFunc *)result; 
+  result = (int)btSelect(arg1,arg2,arg3);
+  _swig_go_result = result; 
   return _swig_go_result;
 }
 
 
-btCollisionAlgorithmCreateFunc *_wrap_btCollisionConfiguration_getClosestPointsAlgorithmCreateFunc_mbt_53667cdae90870b5(btCollisionConfiguration *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
-  btCollisionConfiguration *arg1 = (btCollisionConfiguration *) 0 ;
-  int arg2 ;
-  int arg3 ;
-  btCollisionAlgorithmCreateFunc *result = 0 ;
-  btCollisionAlgorithmCreateFunc *_swig_go_result;
+float _wrap_btSelect__SWIG_2_mbt_7f4d06f7d3d79a98(intgo _swig_go_0, float _swig_go_1, float _swig_go_2) {
+  unsigned int arg1 ;
+  float arg2 ;
+  float arg3 ;
+  float result;
+  float _swig_go_result;
   
-  arg1 = *(btCollisionConfiguration **)&_swig_go_0; 
-  arg2 = (int)_swig_go_1; 
+  arg1 = (unsigned int)_swig_go_0; 
+  arg2 = (float)_swig_go_1; 
+  arg3 = (float)_swig_go_2; 
+  
+  result = (float)btSelect(arg1,arg2,arg3);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btSwapEndian__SWIG_0_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
+  unsigned int arg1 ;
+  unsigned int result;
+  intgo _swig_go_result;
+  
+  arg1 = (unsigned int)_swig_go_0; 
+  
+  result = (unsigned int)btSwapEndian(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+short _wrap_btSwapEndian__SWIG_1_mbt_7f4d06f7d3d79a98(short _swig_go_0) {
+  unsigned short arg1 ;
+  unsigned short result;
+  short _swig_go_result;
+  
+  arg1 = (unsigned short)_swig_go_0; 
+  
+  result = (unsigned short)btSwapEndian(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btSwapEndian__SWIG_2_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
+  int arg1 ;
+  unsigned int result;
+  intgo _swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (unsigned int)btSwapEndian(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+short _wrap_btSwapEndian__SWIG_3_mbt_7f4d06f7d3d79a98(short _swig_go_0) {
+  short arg1 ;
+  unsigned short result;
+  short _swig_go_result;
+  
+  arg1 = (short)_swig_go_0; 
+  
+  result = (unsigned short)btSwapEndian(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btSwapEndianFloat_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  float arg1 ;
+  unsigned int result;
+  intgo _swig_go_result;
+  
+  arg1 = (float)_swig_go_0; 
+  
+  result = (unsigned int)btSwapEndianFloat(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btUnswapEndianFloat_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
+  unsigned int arg1 ;
+  float result;
+  float _swig_go_result;
+  
+  arg1 = (unsigned int)_swig_go_0; 
+  
+  result = (float)btUnswapEndianFloat(arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btSwapEndianDouble_mbt_7f4d06f7d3d79a98(double _swig_go_0, char *_swig_go_1) {
+  double arg1 ;
+  unsigned char *arg2 = (unsigned char *) 0 ;
+  
+  arg1 = (double)_swig_go_0; 
+  arg2 = *(unsigned char **)&_swig_go_1; 
+  
+  btSwapEndianDouble(arg1,arg2);
+  
+}
+
+
+double _wrap_btUnswapEndianDouble_mbt_7f4d06f7d3d79a98(char *_swig_go_0) {
+  unsigned char *arg1 = (unsigned char *) 0 ;
+  double result;
+  double _swig_go_result;
+  
+  arg1 = *(unsigned char **)&_swig_go_0; 
+  
+  result = (double)btUnswapEndianDouble((unsigned char const *)arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btLargeDot_mbt_7f4d06f7d3d79a98(float *_swig_go_0, float *_swig_go_1, intgo _swig_go_2) {
+  btScalar *arg1 = (btScalar *) 0 ;
+  btScalar *arg2 = (btScalar *) 0 ;
+  int arg3 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btScalar **)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
   arg3 = (int)_swig_go_2; 
   
-  result = (btCollisionAlgorithmCreateFunc *)(arg1)->getClosestPointsAlgorithmCreateFunc(arg2,arg3);
-  *(btCollisionAlgorithmCreateFunc **)&_swig_go_result = (btCollisionAlgorithmCreateFunc *)result; 
-  return _swig_go_result;
-}
-
-
-void _wrap_btDefaultCollisionConstructionInfo_m_persistentManifoldPool_set_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0, btPoolAllocator *_swig_go_1) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
-  btPoolAllocator *arg2 = (btPoolAllocator *) 0 ;
-  
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
-  arg2 = *(btPoolAllocator **)&_swig_go_1; 
-  
-  if (arg1) (arg1)->m_persistentManifoldPool = arg2;
-  
-}
-
-
-btPoolAllocator *_wrap_btDefaultCollisionConstructionInfo_m_persistentManifoldPool_get_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
-  btPoolAllocator *result = 0 ;
-  btPoolAllocator *_swig_go_result;
-  
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
-  
-  result = (btPoolAllocator *) ((arg1)->m_persistentManifoldPool);
-  *(btPoolAllocator **)&_swig_go_result = (btPoolAllocator *)result; 
-  return _swig_go_result;
-}
-
-
-void _wrap_btDefaultCollisionConstructionInfo_m_collisionAlgorithmPool_set_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0, btPoolAllocator *_swig_go_1) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
-  btPoolAllocator *arg2 = (btPoolAllocator *) 0 ;
-  
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
-  arg2 = *(btPoolAllocator **)&_swig_go_1; 
-  
-  if (arg1) (arg1)->m_collisionAlgorithmPool = arg2;
-  
-}
-
-
-btPoolAllocator *_wrap_btDefaultCollisionConstructionInfo_m_collisionAlgorithmPool_get_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
-  btPoolAllocator *result = 0 ;
-  btPoolAllocator *_swig_go_result;
-  
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
-  
-  result = (btPoolAllocator *) ((arg1)->m_collisionAlgorithmPool);
-  *(btPoolAllocator **)&_swig_go_result = (btPoolAllocator *)result; 
-  return _swig_go_result;
-}
-
-
-void _wrap_btDefaultCollisionConstructionInfo_m_defaultMaxPersistentManifoldPoolSize_set_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0, intgo _swig_go_1) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
-  int arg2 ;
-  
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
-  arg2 = (int)_swig_go_1; 
-  
-  if (arg1) (arg1)->m_defaultMaxPersistentManifoldPoolSize = arg2;
-  
-}
-
-
-intgo _wrap_btDefaultCollisionConstructionInfo_m_defaultMaxPersistentManifoldPoolSize_get_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
-  int result;
-  intgo _swig_go_result;
-  
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
-  
-  result = (int) ((arg1)->m_defaultMaxPersistentManifoldPoolSize);
+  result = (btScalar)btLargeDot((float const *)arg1,(float const *)arg2,arg3);
   _swig_go_result = result; 
   return _swig_go_result;
 }
 
 
-void _wrap_btDefaultCollisionConstructionInfo_m_defaultMaxCollisionAlgorithmPoolSize_set_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0, intgo _swig_go_1) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
-  int arg2 ;
+float _wrap_btNormalizeAngle_mbt_7f4d06f7d3d79a98(float _swig_go_0) {
+  btScalar arg1 ;
+  btScalar result;
+  float _swig_go_result;
   
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
-  arg2 = (int)_swig_go_1; 
+  arg1 = (btScalar)_swig_go_0; 
   
-  if (arg1) (arg1)->m_defaultMaxCollisionAlgorithmPoolSize = arg2;
-  
-}
-
-
-intgo _wrap_btDefaultCollisionConstructionInfo_m_defaultMaxCollisionAlgorithmPoolSize_get_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
-  int result;
-  intgo _swig_go_result;
-  
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
-  
-  result = (int) ((arg1)->m_defaultMaxCollisionAlgorithmPoolSize);
+  result = (btScalar)btNormalizeAngle(arg1);
   _swig_go_result = result; 
   return _swig_go_result;
 }
 
 
-void _wrap_btDefaultCollisionConstructionInfo_m_customCollisionAlgorithmMaxElementSize_set_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0, intgo _swig_go_1) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+btTypedObject *_wrap_new_btTypedObject_mbt_7f4d06f7d3d79a98(intgo _swig_go_0) {
+  int arg1 ;
+  btTypedObject *result = 0 ;
+  btTypedObject *_swig_go_result;
+  
+  arg1 = (int)_swig_go_0; 
+  
+  result = (btTypedObject *)new btTypedObject(arg1);
+  *(btTypedObject **)&_swig_go_result = (btTypedObject *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btTypedObject_m_objectType_set_mbt_7f4d06f7d3d79a98(btTypedObject *_swig_go_0, intgo _swig_go_1) {
+  btTypedObject *arg1 = (btTypedObject *) 0 ;
   int arg2 ;
   
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  arg1 = *(btTypedObject **)&_swig_go_0; 
   arg2 = (int)_swig_go_1; 
   
-  if (arg1) (arg1)->m_customCollisionAlgorithmMaxElementSize = arg2;
+  if (arg1) (arg1)->m_objectType = arg2;
   
 }
 
 
-intgo _wrap_btDefaultCollisionConstructionInfo_m_customCollisionAlgorithmMaxElementSize_get_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+intgo _wrap_btTypedObject_m_objectType_get_mbt_7f4d06f7d3d79a98(btTypedObject *_swig_go_0) {
+  btTypedObject *arg1 = (btTypedObject *) 0 ;
   int result;
   intgo _swig_go_result;
   
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  arg1 = *(btTypedObject **)&_swig_go_0; 
   
-  result = (int) ((arg1)->m_customCollisionAlgorithmMaxElementSize);
+  result = (int) ((arg1)->m_objectType);
   _swig_go_result = result; 
   return _swig_go_result;
 }
 
 
-void _wrap_btDefaultCollisionConstructionInfo_m_useEpaPenetrationAlgorithm_set_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0, intgo _swig_go_1) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
-  int arg2 ;
-  
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
-  arg2 = (int)_swig_go_1; 
-  
-  if (arg1) (arg1)->m_useEpaPenetrationAlgorithm = arg2;
-  
-}
-
-
-intgo _wrap_btDefaultCollisionConstructionInfo_m_useEpaPenetrationAlgorithm_get_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
+intgo _wrap_btTypedObject_getObjectType_mbt_7f4d06f7d3d79a98(btTypedObject *_swig_go_0) {
+  btTypedObject *arg1 = (btTypedObject *) 0 ;
   int result;
   intgo _swig_go_result;
   
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  arg1 = *(btTypedObject **)&_swig_go_0; 
   
-  result = (int) ((arg1)->m_useEpaPenetrationAlgorithm);
+  result = (int)((btTypedObject const *)arg1)->getObjectType();
   _swig_go_result = result; 
   return _swig_go_result;
 }
 
 
-btDefaultCollisionConstructionInfo *_wrap_new_btDefaultCollisionConstructionInfo_mbt_53667cdae90870b5() {
-  btDefaultCollisionConstructionInfo *result = 0 ;
-  btDefaultCollisionConstructionInfo *_swig_go_result;
+void _wrap_delete_btTypedObject_mbt_7f4d06f7d3d79a98(btTypedObject *_swig_go_0) {
+  btTypedObject *arg1 = (btTypedObject *) 0 ;
   
-  
-  result = (btDefaultCollisionConstructionInfo *)new btDefaultCollisionConstructionInfo();
-  *(btDefaultCollisionConstructionInfo **)&_swig_go_result = (btDefaultCollisionConstructionInfo *)result; 
-  return _swig_go_result;
-}
-
-
-void _wrap_delete_btDefaultCollisionConstructionInfo_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
-  btDefaultCollisionConstructionInfo *arg1 = (btDefaultCollisionConstructionInfo *) 0 ;
-  
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  arg1 = *(btTypedObject **)&_swig_go_0; 
   
   delete arg1;
   
 }
 
 
-btDefaultCollisionConfiguration *_wrap_new_btDefaultCollisionConfiguration__SWIG_0_mbt_53667cdae90870b5(btDefaultCollisionConstructionInfo *_swig_go_0) {
-  btDefaultCollisionConstructionInfo *arg1 = 0 ;
-  btDefaultCollisionConfiguration *result = 0 ;
-  btDefaultCollisionConfiguration *_swig_go_result;
+void *_wrap_btAlignedAllocInternal_mbt_7f4d06f7d3d79a98(long long _swig_go_0, intgo _swig_go_1) {
+  size_t arg1 ;
+  int arg2 ;
+  void *result = 0 ;
+  void *_swig_go_result;
   
-  arg1 = *(btDefaultCollisionConstructionInfo **)&_swig_go_0; 
+  arg1 = (size_t)_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
   
-  result = (btDefaultCollisionConfiguration *)new btDefaultCollisionConfiguration((btDefaultCollisionConstructionInfo const &)*arg1);
-  *(btDefaultCollisionConfiguration **)&_swig_go_result = (btDefaultCollisionConfiguration *)result; 
+  result = (void *)btAlignedAllocInternal(SWIG_STD_MOVE(arg1),arg2);
+  *(void **)&_swig_go_result = (void *)result; 
   return _swig_go_result;
 }
 
 
-btDefaultCollisionConfiguration *_wrap_new_btDefaultCollisionConfiguration__SWIG_1_mbt_53667cdae90870b5() {
-  btDefaultCollisionConfiguration *result = 0 ;
-  btDefaultCollisionConfiguration *_swig_go_result;
+void _wrap_btAlignedFreeInternal_mbt_7f4d06f7d3d79a98(void *_swig_go_0) {
+  void *arg1 = (void *) 0 ;
   
+  arg1 = *(void **)&_swig_go_0; 
   
-  result = (btDefaultCollisionConfiguration *)new btDefaultCollisionConfiguration();
-  *(btDefaultCollisionConfiguration **)&_swig_go_result = (btDefaultCollisionConfiguration *)result; 
+  btAlignedFreeInternal(arg1);
+  
+}
+
+
+void _wrap_btAlignedAllocSetCustom_mbt_7f4d06f7d3d79a98(void* _swig_go_0, void* _swig_go_1) {
+  btAllocFunc *arg1 = (btAllocFunc *) 0 ;
+  btFreeFunc *arg2 = (btFreeFunc *) 0 ;
+  
+  arg1 = *(btAllocFunc **)&_swig_go_0; 
+  arg2 = *(btFreeFunc **)&_swig_go_1; 
+  
+  btAlignedAllocSetCustom(arg1,arg2);
+  
+}
+
+
+void _wrap_btAlignedAllocSetCustomAligned_mbt_7f4d06f7d3d79a98(void* _swig_go_0, void* _swig_go_1) {
+  btAlignedAllocFunc *arg1 = (btAlignedAllocFunc *) 0 ;
+  btAlignedFreeFunc *arg2 = (btAlignedFreeFunc *) 0 ;
+  
+  arg1 = *(btAlignedAllocFunc **)&_swig_go_0; 
+  arg2 = *(btAlignedFreeFunc **)&_swig_go_1; 
+  
+  btAlignedAllocSetCustomAligned(arg1,arg2);
+  
+}
+
+
+void *_wrap_btAllocDefault_mbt_7f4d06f7d3d79a98(long long _swig_go_0) {
+  size_t arg1 ;
+  void *result = 0 ;
+  void *_swig_go_result;
+  
+  arg1 = (size_t)_swig_go_0; 
+  
+  result = (void *)btAllocDefault(SWIG_STD_MOVE(arg1));
+  *(void **)&_swig_go_result = (void *)result; 
   return _swig_go_result;
 }
 
 
-void _wrap_delete_btDefaultCollisionConfiguration_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0) {
-  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+void _wrap_btFreeDefault_mbt_7f4d06f7d3d79a98(void *_swig_go_0) {
+  void *arg1 = (void *) 0 ;
   
-  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  arg1 = *(void **)&_swig_go_0; 
+  
+  btFreeDefault(arg1);
+  
+}
+
+
+void _wrap_sAllocFunc_set_mbt_7f4d06f7d3d79a98(void* _swig_go_0) {
+  btAllocFunc *arg1 = (btAllocFunc *) 0 ;
+  
+  arg1 = *(btAllocFunc **)&_swig_go_0; 
+  
+  sAllocFunc = arg1;
+  
+}
+
+
+void* _wrap_sAllocFunc_get_mbt_7f4d06f7d3d79a98() {
+  btAllocFunc *result = 0 ;
+  void* _swig_go_result;
+  
+  
+  result = (btAllocFunc *)sAllocFunc;
+  *(btAllocFunc **)&_swig_go_result = (btAllocFunc *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_sFreeFunc_set_mbt_7f4d06f7d3d79a98(void* _swig_go_0) {
+  btFreeFunc *arg1 = (btFreeFunc *) 0 ;
+  
+  arg1 = *(btFreeFunc **)&_swig_go_0; 
+  
+  sFreeFunc = arg1;
+  
+}
+
+
+void* _wrap_sFreeFunc_get_mbt_7f4d06f7d3d79a98() {
+  btFreeFunc *result = 0 ;
+  void* _swig_go_result;
+  
+  
+  result = (btFreeFunc *)sFreeFunc;
+  *(btFreeFunc **)&_swig_go_result = (btFreeFunc *)result; 
+  return _swig_go_result;
+}
+
+
+void *_wrap_btAlignedAllocDefault_mbt_7f4d06f7d3d79a98(long long _swig_go_0, intgo _swig_go_1) {
+  size_t arg1 ;
+  int arg2 ;
+  void *result = 0 ;
+  void *_swig_go_result;
+  
+  arg1 = (size_t)_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  result = (void *)btAlignedAllocDefault(SWIG_STD_MOVE(arg1),arg2);
+  *(void **)&_swig_go_result = (void *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btAlignedFreeDefault_mbt_7f4d06f7d3d79a98(void *_swig_go_0) {
+  void *arg1 = (void *) 0 ;
+  
+  arg1 = *(void **)&_swig_go_0; 
+  
+  btAlignedFreeDefault(arg1);
+  
+}
+
+
+void _wrap_sAlignedAllocFunc_set_mbt_7f4d06f7d3d79a98(void* _swig_go_0) {
+  btAlignedAllocFunc *arg1 = (btAlignedAllocFunc *) 0 ;
+  
+  arg1 = *(btAlignedAllocFunc **)&_swig_go_0; 
+  
+  sAlignedAllocFunc = arg1;
+  
+}
+
+
+void* _wrap_sAlignedAllocFunc_get_mbt_7f4d06f7d3d79a98() {
+  btAlignedAllocFunc *result = 0 ;
+  void* _swig_go_result;
+  
+  
+  result = (btAlignedAllocFunc *)sAlignedAllocFunc;
+  *(btAlignedAllocFunc **)&_swig_go_result = (btAlignedAllocFunc *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_sAlignedFreeFunc_set_mbt_7f4d06f7d3d79a98(void* _swig_go_0) {
+  btAlignedFreeFunc *arg1 = (btAlignedFreeFunc *) 0 ;
+  
+  arg1 = *(btAlignedFreeFunc **)&_swig_go_0; 
+  
+  sAlignedFreeFunc = arg1;
+  
+}
+
+
+void* _wrap_sAlignedFreeFunc_get_mbt_7f4d06f7d3d79a98() {
+  btAlignedFreeFunc *result = 0 ;
+  void* _swig_go_result;
+  
+  
+  result = (btAlignedFreeFunc *)sAlignedFreeFunc;
+  *(btAlignedFreeFunc **)&_swig_go_result = (btAlignedFreeFunc *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btVector3_m_floats_set_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar *arg2 = (btScalar *) (btScalar *)0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
+  
+  {
+    size_t ii;
+    btScalar *b = (btScalar *) arg1->m_floats;
+    for (ii = 0; ii < (size_t)4; ii++) b[ii] = *((btScalar *) arg2 + ii);
+  }
+  
+}
+
+
+float *_wrap_btVector3_m_floats_get_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar *result = 0 ;
+  float *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btScalar *)(btScalar *) ((arg1)->m_floats);
+  *(btScalar **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_new_btVector3__SWIG_0_mbt_7f4d06f7d3d79a98() {
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  
+  result = (btVector3 *)new btVector3();
+  *(btVector3 **)&_swig_go_result = (btVector3 *)result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_new_btVector3__SWIG_1_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
+  btScalar *arg1 = 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = (btScalar *)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  
+  result = (btVector3 *)new btVector3((btScalar const &)*arg1,(btScalar const &)*arg2,(btScalar const &)*arg3);
+  *(btVector3 **)&_swig_go_result = (btVector3 *)result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_dot_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = (btScalar)((btVector3 const *)arg1)->dot((btVector3 const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_length2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btScalar)((btVector3 const *)arg1)->length2();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_length_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btScalar)((btVector3 const *)arg1)->length();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_norm_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btScalar)((btVector3 const *)arg1)->norm();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_safeNorm_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btScalar)((btVector3 const *)arg1)->safeNorm();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_distance2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = (btScalar)((btVector3 const *)arg1)->distance2((btVector3 const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_distance_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = (btScalar)((btVector3 const *)arg1)->distance((btVector3 const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector3_safeNormalize_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btVector3 *) &(arg1)->safeNormalize();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector3_normalize_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btVector3 *) &(arg1)->normalize();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector3_normalized_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = ((btVector3 const *)arg1)->normalized();
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector3_rotate_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar arg3 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  result = ((btVector3 const *)arg1)->rotate((btVector3 const &)*arg2,arg3);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_angle_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = (btScalar)((btVector3 const *)arg1)->angle((btVector3 const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector3_absolute_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = ((btVector3 const *)arg1)->absolute();
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector3_cross_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = ((btVector3 const *)arg1)->cross((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_triple_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  result = (btScalar)((btVector3 const *)arg1)->triple((btVector3 const &)*arg2,(btVector3 const &)*arg3);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btVector3_minAxis_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (int)((btVector3 const *)arg1)->minAxis();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btVector3_maxAxis_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (int)((btVector3 const *)arg1)->maxAxis();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btVector3_furthestAxis_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (int)((btVector3 const *)arg1)->furthestAxis();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btVector3_closestAxis_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (int)((btVector3 const *)arg1)->closestAxis();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btVector3_setInterpolate3_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, float _swig_go_3) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btScalar arg4 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = (btScalar)_swig_go_3; 
+  
+  (arg1)->setInterpolate3((btVector3 const &)*arg2,(btVector3 const &)*arg3,arg4);
+  
+}
+
+
+btVector3 *_wrap_btVector3_lerp_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  
+  result = ((btVector3 const *)arg1)->lerp((btVector3 const &)*arg2,(btScalar const &)*arg3);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_getX_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btVector3 const *)arg1)->getX();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_getY_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btVector3 const *)arg1)->getY();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_getZ_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btVector3 const *)arg1)->getZ();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btVector3_setX_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  (arg1)->setX(arg2);
+  
+}
+
+
+void _wrap_btVector3_setY_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  (arg1)->setY(arg2);
+  
+}
+
+
+void _wrap_btVector3_setZ_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  (arg1)->setZ(arg2);
+  
+}
+
+
+void _wrap_btVector3_setW_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  (arg1)->setW(arg2);
+  
+}
+
+
+float _wrap_btVector3_x_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btVector3 const *)arg1)->x();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_y_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btVector3 const *)arg1)->y();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_z_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btVector3 const *)arg1)->z();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector3_w_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btVector3 const *)arg1)->w();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btVector3_setMax_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  (arg1)->setMax((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btVector3_setMin_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  (arg1)->setMin((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btVector3_setValue_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  
+  (arg1)->setValue((btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4);
+  
+}
+
+
+void _wrap_btVector3_getSkewSymmetricMatrix_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  btVector3 *arg3 = (btVector3 *) 0 ;
+  btVector3 *arg4 = (btVector3 *) 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  ((btVector3 const *)arg1)->getSkewSymmetricMatrix(arg2,arg3,arg4);
+  
+}
+
+
+void _wrap_btVector3_setZero_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  (arg1)->setZero();
+  
+}
+
+
+bool _wrap_btVector3_isZero_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (bool)((btVector3 const *)arg1)->isZero();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btVector3_fuzzyZero_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  result = (bool)((btVector3 const *)arg1)->fuzzyZero();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btVector3_serialize_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3FloatData *arg2 = 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3FloatData **)&_swig_go_1; 
+  
+  ((btVector3 const *)arg1)->serialize(*arg2);
+  
+}
+
+
+void _wrap_btVector3_deSerialize__SWIG_0_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3DoubleData *arg2 = 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3DoubleData **)&_swig_go_1; 
+  
+  (arg1)->deSerialize((btVector3DoubleData const &)*arg2);
+  
+}
+
+
+void _wrap_btVector3_deSerialize__SWIG_1_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3FloatData *arg2 = 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3FloatData **)&_swig_go_1; 
+  
+  (arg1)->deSerialize((btVector3FloatData const &)*arg2);
+  
+}
+
+
+void _wrap_btVector3_serializeFloat_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3FloatData *arg2 = 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3FloatData **)&_swig_go_1; 
+  
+  ((btVector3 const *)arg1)->serializeFloat(*arg2);
+  
+}
+
+
+void _wrap_btVector3_deSerializeFloat_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3FloatData *arg2 = 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3FloatData **)&_swig_go_1; 
+  
+  (arg1)->deSerializeFloat((btVector3FloatData const &)*arg2);
+  
+}
+
+
+void _wrap_btVector3_serializeDouble_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3DoubleData *arg2 = 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3DoubleData **)&_swig_go_1; 
+  
+  ((btVector3 const *)arg1)->serializeDouble(*arg2);
+  
+}
+
+
+void _wrap_btVector3_deSerializeDouble_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3DoubleData *arg2 = 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3DoubleData **)&_swig_go_1; 
+  
+  (arg1)->deSerializeDouble((btVector3DoubleData const &)*arg2);
+  
+}
+
+
+long long _wrap_btVector3_maxDot_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  long arg3 ;
+  btScalar *arg4 = 0 ;
+  long result;
+  long long _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (long)_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  
+  result = (long)((btVector3 const *)arg1)->maxDot((btVector3 const *)arg2,arg3,*arg4);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+long long _wrap_btVector3_minDot_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  long arg3 ;
+  btScalar *arg4 = 0 ;
+  long result;
+  long long _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (long)_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  
+  result = (long)((btVector3 const *)arg1)->minDot((btVector3 const *)arg2,arg3,*arg4);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector3_dot3_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  result = ((btVector3 const *)arg1)->dot3((btVector3 const &)*arg2,(btVector3 const &)*arg3,(btVector3 const &)*arg4);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btVector3_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = (btVector3 *) 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
   
   delete arg1;
   
 }
 
 
-btPoolAllocator *_wrap_btDefaultCollisionConfiguration_getPersistentManifoldPool_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0) {
-  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
-  btPoolAllocator *result = 0 ;
-  btPoolAllocator *_swig_go_result;
+float _wrap_btDot_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
   
-  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
   
-  result = (btPoolAllocator *)(arg1)->getPersistentManifoldPool();
-  *(btPoolAllocator **)&_swig_go_result = (btPoolAllocator *)result; 
+  result = (btScalar)btDot((btVector3 const &)*arg1,(btVector3 const &)*arg2);
+  _swig_go_result = result; 
   return _swig_go_result;
 }
 
 
-btPoolAllocator *_wrap_btDefaultCollisionConfiguration_getCollisionAlgorithmPool_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0) {
-  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
-  btPoolAllocator *result = 0 ;
-  btPoolAllocator *_swig_go_result;
+float _wrap_btDistance2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
   
-  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
   
-  result = (btPoolAllocator *)(arg1)->getCollisionAlgorithmPool();
-  *(btPoolAllocator **)&_swig_go_result = (btPoolAllocator *)result; 
+  result = (btScalar)btDistance2((btVector3 const &)*arg1,(btVector3 const &)*arg2);
+  _swig_go_result = result; 
   return _swig_go_result;
 }
 
 
-btCollisionAlgorithmCreateFunc *_wrap_btDefaultCollisionConfiguration_getCollisionAlgorithmCreateFunc_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
-  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
-  int arg2 ;
-  int arg3 ;
-  btCollisionAlgorithmCreateFunc *result = 0 ;
-  btCollisionAlgorithmCreateFunc *_swig_go_result;
+float _wrap_btDistance_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
   
-  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
-  arg2 = (int)_swig_go_1; 
-  arg3 = (int)_swig_go_2; 
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
   
-  result = (btCollisionAlgorithmCreateFunc *)(arg1)->getCollisionAlgorithmCreateFunc(arg2,arg3);
-  *(btCollisionAlgorithmCreateFunc **)&_swig_go_result = (btCollisionAlgorithmCreateFunc *)result; 
+  result = (btScalar)btDistance((btVector3 const &)*arg1,(btVector3 const &)*arg2);
+  _swig_go_result = result; 
   return _swig_go_result;
 }
 
 
-btCollisionAlgorithmCreateFunc *_wrap_btDefaultCollisionConfiguration_getClosestPointsAlgorithmCreateFunc_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
-  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
-  int arg2 ;
-  int arg3 ;
-  btCollisionAlgorithmCreateFunc *result = 0 ;
-  btCollisionAlgorithmCreateFunc *_swig_go_result;
+float _wrap_btAngle__SWIG_0_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
   
-  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
-  arg2 = (int)_swig_go_1; 
-  arg3 = (int)_swig_go_2; 
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
   
-  result = (btCollisionAlgorithmCreateFunc *)(arg1)->getClosestPointsAlgorithmCreateFunc(arg2,arg3);
-  *(btCollisionAlgorithmCreateFunc **)&_swig_go_result = (btCollisionAlgorithmCreateFunc *)result; 
+  result = (btScalar)btAngle((btVector3 const &)*arg1,(btVector3 const &)*arg2);
+  _swig_go_result = result; 
   return _swig_go_result;
 }
 
 
-void _wrap_btDefaultCollisionConfiguration_setConvexConvexMultipointIterations__SWIG_0_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
-  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+btVector3 *_wrap_btCross_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = btCross((btVector3 const &)*arg1,(btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btTriple_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  result = (btScalar)btTriple((btVector3 const &)*arg1,(btVector3 const &)*arg2,(btVector3 const &)*arg3);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_lerp_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  
+  result = lerp((btVector3 const &)*arg1,(btVector3 const &)*arg2,(float const &)*arg3);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector4 *_wrap_new_btVector4__SWIG_0_mbt_7f4d06f7d3d79a98() {
+  btVector4 *result = 0 ;
+  btVector4 *_swig_go_result;
+  
+  
+  result = (btVector4 *)new btVector4();
+  *(btVector4 **)&_swig_go_result = (btVector4 *)result; 
+  return _swig_go_result;
+}
+
+
+btVector4 *_wrap_new_btVector4__SWIG_1_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+  btScalar *arg1 = 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btVector4 *result = 0 ;
+  btVector4 *_swig_go_result;
+  
+  arg1 = (btScalar *)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  
+  result = (btVector4 *)new btVector4((btScalar const &)*arg1,(btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4);
+  *(btVector4 **)&_swig_go_result = (btVector4 *)result; 
+  return _swig_go_result;
+}
+
+
+btVector4 *_wrap_btVector4_absolute4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector4 result;
+  btVector4 *_swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  result = ((btVector4 const *)arg1)->absolute4();
+  *(btVector4 **)&_swig_go_result = new btVector4(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_getW_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  result = (btScalar)((btVector4 const *)arg1)->getW();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btVector4_maxAxis4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  result = (int)((btVector4 const *)arg1)->maxAxis4();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btVector4_minAxis4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  result = (int)((btVector4 const *)arg1)->minAxis4();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btVector4_closestAxis4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  result = (int)((btVector4 const *)arg1)->closestAxis4();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btVector4_setValue_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btScalar *arg5 = 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  arg5 = (btScalar *)&_swig_go_4; 
+  
+  (arg1)->setValue((btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4,(btScalar const &)*arg5);
+  
+}
+
+
+void _wrap_delete_btVector4_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_SetbtVector4_M_floats_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar *arg2 = (btScalar *) (btScalar *)0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  ;
+  
+}
+
+
+float *_wrap_GetbtVector4_M_floats_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar *result = 0 ;
+  float *_swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar *)(btScalar *) ((swig_b0)->m_floats);
+  *(btScalar **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_dot_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar)((btVector3 const *)swig_b0)->dot((btVector3 const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_length2_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar)((btVector3 const *)swig_b0)->length2();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_length_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar)((btVector3 const *)swig_b0)->length();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_norm_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar)((btVector3 const *)swig_b0)->norm();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_safeNorm_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar)((btVector3 const *)swig_b0)->safeNorm();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_distance2_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar)((btVector3 const *)swig_b0)->distance2((btVector3 const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_distance_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar)((btVector3 const *)swig_b0)->distance((btVector3 const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector4_safeNormalize_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btVector3 *) &(swig_b0)->safeNormalize();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector4_normalize_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btVector3 *) &(swig_b0)->normalize();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector4_normalized_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = ((btVector3 const *)swig_b0)->normalized();
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector4_rotate_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar arg3 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = ((btVector3 const *)swig_b0)->rotate((btVector3 const &)*arg2,arg3);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_angle_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar)((btVector3 const *)swig_b0)->angle((btVector3 const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector4_absolute_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = ((btVector3 const *)swig_b0)->absolute();
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector4_cross_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = ((btVector3 const *)swig_b0)->cross((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_triple_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar)((btVector3 const *)swig_b0)->triple((btVector3 const &)*arg2,(btVector3 const &)*arg3);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btVector4_minAxis_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (int)((btVector3 const *)swig_b0)->minAxis();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btVector4_maxAxis_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (int)((btVector3 const *)swig_b0)->maxAxis();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btVector4_furthestAxis_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (int)((btVector3 const *)swig_b0)->furthestAxis();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_btVector4_closestAxis_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (int)((btVector3 const *)swig_b0)->closestAxis();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btVector4_setInterpolate3_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, float _swig_go_3) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btScalar arg4 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = (btScalar)_swig_go_3; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  (swig_b0)->setInterpolate3((btVector3 const &)*arg2,(btVector3 const &)*arg3,arg4);
+  
+}
+
+
+btVector3 *_wrap_btVector4_lerp_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = ((btVector3 const *)swig_b0)->lerp((btVector3 const &)*arg2,(btScalar const &)*arg3);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_getX_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar *) &((btVector3 const *)swig_b0)->getX();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_getY_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar *) &((btVector3 const *)swig_b0)->getY();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_getZ_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar *) &((btVector3 const *)swig_b0)->getZ();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btVector4_setX_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  (swig_b0)->setX(arg2);
+  
+}
+
+
+void _wrap_btVector4_setY_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  (swig_b0)->setY(arg2);
+  
+}
+
+
+void _wrap_btVector4_setZ_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  (swig_b0)->setZ(arg2);
+  
+}
+
+
+void _wrap_btVector4_setW_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, float _swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  (swig_b0)->setW(arg2);
+  
+}
+
+
+float _wrap_btVector4_x_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar *) &((btVector3 const *)swig_b0)->x();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_y_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar *) &((btVector3 const *)swig_b0)->y();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_z_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar *) &((btVector3 const *)swig_b0)->z();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btVector4_w_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (btScalar *) &((btVector3 const *)swig_b0)->w();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btVector4_setMax_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  (swig_b0)->setMax((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btVector4_setMin_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  (swig_b0)->setMin((btVector3 const &)*arg2);
+  
+}
+
+
+void _wrap_btVector4_getSkewSymmetricMatrix_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  btVector3 *arg3 = (btVector3 *) 0 ;
+  btVector3 *arg4 = (btVector3 *) 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  ((btVector3 const *)swig_b0)->getSkewSymmetricMatrix(arg2,arg3,arg4);
+  
+}
+
+
+void _wrap_btVector4_setZero_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  (swig_b0)->setZero();
+  
+}
+
+
+bool _wrap_btVector4_isZero_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (bool)((btVector3 const *)swig_b0)->isZero();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_btVector4_fuzzyZero_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (bool)((btVector3 const *)swig_b0)->fuzzyZero();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btVector4_serialize_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3FloatData *arg2 = 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3FloatData **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  ((btVector3 const *)swig_b0)->serialize(*arg2);
+  
+}
+
+
+void _wrap_btVector4_deSerialize__SWIG_0_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3DoubleData *arg2 = 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3DoubleData **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  (swig_b0)->deSerialize((btVector3DoubleData const &)*arg2);
+  
+}
+
+
+void _wrap_btVector4_deSerialize__SWIG_1_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3FloatData *arg2 = 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3FloatData **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  (swig_b0)->deSerialize((btVector3FloatData const &)*arg2);
+  
+}
+
+
+void _wrap_btVector4_serializeFloat_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3FloatData *arg2 = 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3FloatData **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  ((btVector3 const *)swig_b0)->serializeFloat(*arg2);
+  
+}
+
+
+void _wrap_btVector4_deSerializeFloat_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3FloatData *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3FloatData *arg2 = 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3FloatData **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  (swig_b0)->deSerializeFloat((btVector3FloatData const &)*arg2);
+  
+}
+
+
+void _wrap_btVector4_serializeDouble_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3DoubleData *arg2 = 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3DoubleData **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  ((btVector3 const *)swig_b0)->serializeDouble(*arg2);
+  
+}
+
+
+void _wrap_btVector4_deSerializeDouble_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3DoubleData *arg2 = 0 ;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3DoubleData **)&_swig_go_1; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  (swig_b0)->deSerializeDouble((btVector3DoubleData const &)*arg2);
+  
+}
+
+
+long long _wrap_btVector4_maxDot_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  long arg3 ;
+  btScalar *arg4 = 0 ;
+  long result;
+  long long _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (long)_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (long)((btVector3 const *)swig_b0)->maxDot((btVector3 const *)arg2,arg3,*arg4);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+long long _wrap_btVector4_minDot_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, long long _swig_go_2, float *_swig_go_3) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = (btVector3 *) 0 ;
+  long arg3 ;
+  btScalar *arg4 = 0 ;
+  long result;
+  long long _swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (long)_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = (long)((btVector3 const *)swig_b0)->minDot((btVector3 const *)arg2,arg3,*arg4);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btVector4_dot3_mbt_7f4d06f7d3d79a98(btVector4 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
+  btVector4 *arg1 = (btVector4 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btVector3 *arg4 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btVector4 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  arg4 = *(btVector3 **)&_swig_go_3; 
+  
+  btVector3 *swig_b0 = (btVector3 *)arg1;
+  result = ((btVector3 const *)swig_b0)->dot3((btVector3 const &)*arg2,(btVector3 const &)*arg3,(btVector3 const &)*arg4);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btSwapScalarEndian_mbt_7f4d06f7d3d79a98(float _swig_go_0, float *_swig_go_1) {
+  btScalar *arg1 = 0 ;
+  btScalar *arg2 = 0 ;
+  
+  arg1 = (btScalar *)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
+  
+  btSwapScalarEndian((float const &)*arg1,*arg2);
+  
+}
+
+
+void _wrap_btSwapVector3Endian_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  btSwapVector3Endian((btVector3 const &)*arg1,*arg2);
+  
+}
+
+
+void _wrap_btUnSwapVector3Endian_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0) {
+  btVector3 *arg1 = 0 ;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  
+  btUnSwapVector3Endian(*arg1);
+  
+}
+
+
+void _wrap_btVector3FloatData_m_floats_set_mbt_7f4d06f7d3d79a98(btVector3FloatData *_swig_go_0, float *_swig_go_1) {
+  btVector3FloatData *arg1 = (btVector3FloatData *) 0 ;
+  float *arg2 = (float *) (float *)0 ;
+  
+  arg1 = *(btVector3FloatData **)&_swig_go_0; 
+  arg2 = *(float **)&_swig_go_1; 
+  
+  {
+    size_t ii;
+    float *b = (float *) arg1->m_floats;
+    for (ii = 0; ii < (size_t)4; ii++) b[ii] = *((float *) arg2 + ii);
+  }
+  
+}
+
+
+float *_wrap_btVector3FloatData_m_floats_get_mbt_7f4d06f7d3d79a98(btVector3FloatData *_swig_go_0) {
+  btVector3FloatData *arg1 = (btVector3FloatData *) 0 ;
+  float *result = 0 ;
+  float *_swig_go_result;
+  
+  arg1 = *(btVector3FloatData **)&_swig_go_0; 
+  
+  result = (float *)(float *) ((arg1)->m_floats);
+  *(float **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3FloatData *_wrap_new_btVector3FloatData_mbt_7f4d06f7d3d79a98() {
+  btVector3FloatData *result = 0 ;
+  btVector3FloatData *_swig_go_result;
+  
+  
+  result = (btVector3FloatData *)new btVector3FloatData();
+  *(btVector3FloatData **)&_swig_go_result = (btVector3FloatData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btVector3FloatData_mbt_7f4d06f7d3d79a98(btVector3FloatData *_swig_go_0) {
+  btVector3FloatData *arg1 = (btVector3FloatData *) 0 ;
+  
+  arg1 = *(btVector3FloatData **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btVector3DoubleData_m_floats_set_mbt_7f4d06f7d3d79a98(btVector3DoubleData *_swig_go_0, double *_swig_go_1) {
+  btVector3DoubleData *arg1 = (btVector3DoubleData *) 0 ;
+  double *arg2 = (double *) (double *)0 ;
+  
+  arg1 = *(btVector3DoubleData **)&_swig_go_0; 
+  arg2 = *(double **)&_swig_go_1; 
+  
+  {
+    size_t ii;
+    double *b = (double *) arg1->m_floats;
+    for (ii = 0; ii < (size_t)4; ii++) b[ii] = *((double *) arg2 + ii);
+  }
+  
+}
+
+
+double *_wrap_btVector3DoubleData_m_floats_get_mbt_7f4d06f7d3d79a98(btVector3DoubleData *_swig_go_0) {
+  btVector3DoubleData *arg1 = (btVector3DoubleData *) 0 ;
+  double *result = 0 ;
+  double *_swig_go_result;
+  
+  arg1 = *(btVector3DoubleData **)&_swig_go_0; 
+  
+  result = (double *)(double *) ((arg1)->m_floats);
+  *(double **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3DoubleData *_wrap_new_btVector3DoubleData_mbt_7f4d06f7d3d79a98() {
+  btVector3DoubleData *result = 0 ;
+  btVector3DoubleData *_swig_go_result;
+  
+  
+  result = (btVector3DoubleData *)new btVector3DoubleData();
+  *(btVector3DoubleData **)&_swig_go_result = (btVector3DoubleData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btVector3DoubleData_mbt_7f4d06f7d3d79a98(btVector3DoubleData *_swig_go_0) {
+  btVector3DoubleData *arg1 = (btVector3DoubleData *) 0 ;
+  
+  arg1 = *(btVector3DoubleData **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+float _wrap_btQuadWord_getX_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btQuadWord const *)arg1)->getX();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuadWord_getY_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btQuadWord const *)arg1)->getY();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuadWord_getZ_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btQuadWord const *)arg1)->getZ();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btQuadWord_setX_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _swig_go_1) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  (arg1)->setX(arg2);
+  
+}
+
+
+void _wrap_btQuadWord_setY_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _swig_go_1) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  (arg1)->setY(arg2);
+  
+}
+
+
+void _wrap_btQuadWord_setZ_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _swig_go_1) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  (arg1)->setZ(arg2);
+  
+}
+
+
+void _wrap_btQuadWord_setW_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _swig_go_1) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  (arg1)->setW(arg2);
+  
+}
+
+
+float _wrap_btQuadWord_x_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btQuadWord const *)arg1)->x();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuadWord_y_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btQuadWord const *)arg1)->y();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuadWord_z_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btQuadWord const *)arg1)->z();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuadWord_w_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btQuadWord const *)arg1)->w();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btQuadWord_setValue__SWIG_0_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  
+  (arg1)->setValue((btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4);
+  
+}
+
+
+void _wrap_btQuadWord_setValue__SWIG_1_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btScalar *arg5 = 0 ;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  arg5 = (btScalar *)&_swig_go_4; 
+  
+  (arg1)->setValue((btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4,(btScalar const &)*arg5);
+  
+}
+
+
+btQuadWord *_wrap_new_btQuadWord__SWIG_0_mbt_7f4d06f7d3d79a98() {
+  btQuadWord *result = 0 ;
+  btQuadWord *_swig_go_result;
+  
+  
+  result = (btQuadWord *)new btQuadWord();
+  *(btQuadWord **)&_swig_go_result = (btQuadWord *)result; 
+  return _swig_go_result;
+}
+
+
+btQuadWord *_wrap_new_btQuadWord__SWIG_1_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
+  btScalar *arg1 = 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btQuadWord *result = 0 ;
+  btQuadWord *_swig_go_result;
+  
+  arg1 = (btScalar *)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  
+  result = (btQuadWord *)new btQuadWord((btScalar const &)*arg1,(btScalar const &)*arg2,(btScalar const &)*arg3);
+  *(btQuadWord **)&_swig_go_result = (btQuadWord *)result; 
+  return _swig_go_result;
+}
+
+
+btQuadWord *_wrap_new_btQuadWord__SWIG_2_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+  btScalar *arg1 = 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btQuadWord *result = 0 ;
+  btQuadWord *_swig_go_result;
+  
+  arg1 = (btScalar *)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  
+  result = (btQuadWord *)new btQuadWord((btScalar const &)*arg1,(btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4);
+  *(btQuadWord **)&_swig_go_result = (btQuadWord *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btQuadWord_setMax_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, btQuadWord *_swig_go_1) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btQuadWord *arg2 = 0 ;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  arg2 = *(btQuadWord **)&_swig_go_1; 
+  
+  (arg1)->setMax((btQuadWord const &)*arg2);
+  
+}
+
+
+void _wrap_btQuadWord_setMin_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0, btQuadWord *_swig_go_1) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  btQuadWord *arg2 = 0 ;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  arg2 = *(btQuadWord **)&_swig_go_1; 
+  
+  (arg1)->setMin((btQuadWord const &)*arg2);
+  
+}
+
+
+void _wrap_delete_btQuadWord_mbt_7f4d06f7d3d79a98(btQuadWord *_swig_go_0) {
+  btQuadWord *arg1 = (btQuadWord *) 0 ;
+  
+  arg1 = *(btQuadWord **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btQuaternion *_wrap_new_btQuaternion__SWIG_0_mbt_7f4d06f7d3d79a98() {
+  btQuaternion *result = 0 ;
+  btQuaternion *_swig_go_result;
+  
+  
+  result = (btQuaternion *)new btQuaternion();
+  *(btQuaternion **)&_swig_go_result = (btQuaternion *)result; 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_new_btQuaternion__SWIG_1_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+  btScalar *arg1 = 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btQuaternion *result = 0 ;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = (btScalar *)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  
+  result = (btQuaternion *)new btQuaternion((btScalar const &)*arg1,(btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4);
+  *(btQuaternion **)&_swig_go_result = (btQuaternion *)result; 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_new_btQuaternion__SWIG_2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, float _swig_go_1) {
+  btVector3 *arg1 = 0 ;
+  btScalar *arg2 = 0 ;
+  btQuaternion *result = 0 ;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  
+  result = (btQuaternion *)new btQuaternion((btVector3 const &)*arg1,(btScalar const &)*arg2);
+  *(btQuaternion **)&_swig_go_result = (btQuaternion *)result; 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_new_btQuaternion__SWIG_3_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2) {
+  btScalar *arg1 = 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btQuaternion *result = 0 ;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = (btScalar *)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  
+  result = (btQuaternion *)new btQuaternion((btScalar const &)*arg1,(btScalar const &)*arg2,(btScalar const &)*arg3);
+  *(btQuaternion **)&_swig_go_result = (btQuaternion *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btQuaternion_setRotation_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btVector3 *_swig_go_1, float _swig_go_2) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  
+  (arg1)->setRotation((btVector3 const &)*arg2,(btScalar const &)*arg3);
+  
+}
+
+
+void _wrap_btQuaternion_setEuler_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  
+  (arg1)->setEuler((btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4);
+  
+}
+
+
+void _wrap_btQuaternion_setEulerZYX_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  
+  (arg1)->setEulerZYX((btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4);
+  
+}
+
+
+void _wrap_btQuaternion_getEulerZYX_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
+  arg3 = *(btScalar **)&_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  
+  ((btQuaternion const *)arg1)->getEulerZYX(*arg2,*arg3,*arg4);
+  
+}
+
+
+float _wrap_btQuaternion_dot_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternion *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  
+  result = (btScalar)((btQuaternion const *)arg1)->dot((btQuaternion const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuaternion_length2_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = (btScalar)((btQuaternion const *)arg1)->length2();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuaternion_length_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = (btScalar)((btQuaternion const *)arg1)->length();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_btQuaternion_safeNormalize_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternion *result = 0 ;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = (btQuaternion *) &(arg1)->safeNormalize();
+  *(btQuaternion **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_btQuaternion_normalize_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternion *result = 0 ;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = (btQuaternion *) &(arg1)->normalize();
+  *(btQuaternion **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_btQuaternion_normalized_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternion result;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = ((btQuaternion const *)arg1)->normalized();
+  *(btQuaternion **)&_swig_go_result = new btQuaternion(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuaternion_angle_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternion *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  
+  result = (btScalar)((btQuaternion const *)arg1)->angle((btQuaternion const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuaternion_angleShortestPath_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternion *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  
+  result = (btScalar)((btQuaternion const *)arg1)->angleShortestPath((btQuaternion const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuaternion_getAngle_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = (btScalar)((btQuaternion const *)arg1)->getAngle();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuaternion_getAngleShortestPath_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = (btScalar)((btQuaternion const *)arg1)->getAngleShortestPath();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btQuaternion_getAxis_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = ((btQuaternion const *)arg1)->getAxis();
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_btQuaternion_inverse_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternion result;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = ((btQuaternion const *)arg1)->inverse();
+  *(btQuaternion **)&_swig_go_result = new btQuaternion(result); 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_btQuaternion_farthest_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternion *arg2 = 0 ;
+  btQuaternion result;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  
+  result = ((btQuaternion const *)arg1)->farthest((btQuaternion const &)*arg2);
+  *(btQuaternion **)&_swig_go_result = new btQuaternion(result); 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_btQuaternion_nearest_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternion *arg2 = 0 ;
+  btQuaternion result;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  
+  result = ((btQuaternion const *)arg1)->nearest((btQuaternion const &)*arg2);
+  *(btQuaternion **)&_swig_go_result = new btQuaternion(result); 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_btQuaternion_slerp_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternion *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btQuaternion result;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  
+  result = ((btQuaternion const *)arg1)->slerp((btQuaternion const &)*arg2,(btScalar const &)*arg3);
+  *(btQuaternion **)&_swig_go_result = new btQuaternion(result); 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_btQuaternion_getIdentity_mbt_7f4d06f7d3d79a98() {
+  btQuaternion *result = 0 ;
+  btQuaternion *_swig_go_result;
+  
+  
+  result = (btQuaternion *) &btQuaternion::getIdentity();
+  *(btQuaternion **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuaternion_getW_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = (btScalar *) &((btQuaternion const *)arg1)->getW();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btQuaternion_serialize_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternionFloatData *arg2 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternionFloatData **)&_swig_go_1; 
+  
+  ((btQuaternion const *)arg1)->serialize(*arg2);
+  
+}
+
+
+void _wrap_btQuaternion_deSerialize__SWIG_0_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternionFloatData *arg2 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternionFloatData **)&_swig_go_1; 
+  
+  (arg1)->deSerialize((btQuaternionFloatData const &)*arg2);
+  
+}
+
+
+void _wrap_btQuaternion_deSerialize__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternionDoubleData *arg2 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternionDoubleData **)&_swig_go_1; 
+  
+  (arg1)->deSerialize((btQuaternionDoubleData const &)*arg2);
+  
+}
+
+
+void _wrap_btQuaternion_serializeFloat_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternionFloatData *arg2 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternionFloatData **)&_swig_go_1; 
+  
+  ((btQuaternion const *)arg1)->serializeFloat(*arg2);
+  
+}
+
+
+void _wrap_btQuaternion_deSerializeFloat_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionFloatData *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternionFloatData *arg2 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternionFloatData **)&_swig_go_1; 
+  
+  (arg1)->deSerializeFloat((btQuaternionFloatData const &)*arg2);
+  
+}
+
+
+void _wrap_btQuaternion_serializeDouble_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternionDoubleData *arg2 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternionDoubleData **)&_swig_go_1; 
+  
+  ((btQuaternion const *)arg1)->serializeDouble(*arg2);
+  
+}
+
+
+void _wrap_btQuaternion_deSerializeDouble_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternionDoubleData *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuaternionDoubleData *arg2 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternionDoubleData **)&_swig_go_1; 
+  
+  (arg1)->deSerializeDouble((btQuaternionDoubleData const &)*arg2);
+  
+}
+
+
+void _wrap_delete_btQuaternion_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+float _wrap_btQuaternion_getX_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  result = (btScalar *) &((btQuadWord const *)swig_b0)->getX();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuaternion_getY_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  result = (btScalar *) &((btQuadWord const *)swig_b0)->getY();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuaternion_getZ_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  result = (btScalar *) &((btQuadWord const *)swig_b0)->getZ();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btQuaternion_setX_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  (swig_b0)->setX(arg2);
+  
+}
+
+
+void _wrap_btQuaternion_setY_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  (swig_b0)->setY(arg2);
+  
+}
+
+
+void _wrap_btQuaternion_setZ_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  (swig_b0)->setZ(arg2);
+  
+}
+
+
+void _wrap_btQuaternion_setW_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar arg2 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  (swig_b0)->setW(arg2);
+  
+}
+
+
+float _wrap_btQuaternion_x_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  result = (btScalar *) &((btQuadWord const *)swig_b0)->x();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuaternion_y_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  result = (btScalar *) &((btQuadWord const *)swig_b0)->y();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuaternion_z_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  result = (btScalar *) &((btQuadWord const *)swig_b0)->z();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btQuaternion_w_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *result = 0 ;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  result = (btScalar *) &((btQuadWord const *)swig_b0)->w();
+  _swig_go_result = (btScalar)*result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btQuaternion_setValue__SWIG_0_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  (swig_b0)->setValue((btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4);
+  
+}
+
+
+void _wrap_btQuaternion_setValue__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btScalar *arg5 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  arg5 = (btScalar *)&_swig_go_4; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  (swig_b0)->setValue((btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4,(btScalar const &)*arg5);
+  
+}
+
+
+void _wrap_btQuaternion_setMax_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuadWord *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuadWord *arg2 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuadWord **)&_swig_go_1; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  (swig_b0)->setMax((btQuadWord const &)*arg2);
+  
+}
+
+
+void _wrap_btQuaternion_setMin_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuadWord *_swig_go_1) {
+  btQuaternion *arg1 = (btQuaternion *) 0 ;
+  btQuadWord *arg2 = 0 ;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuadWord **)&_swig_go_1; 
+  
+  btQuadWord *swig_b0 = (btQuadWord *)arg1;
+  (swig_b0)->setMin((btQuadWord const &)*arg2);
+  
+}
+
+
+float _wrap_dot_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+  btQuaternion *arg1 = 0 ;
+  btQuaternion *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  
+  result = (btScalar)dot((btQuaternion const &)*arg1,(btQuaternion const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_length_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = (btScalar)length((btQuaternion const &)*arg1);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btAngle__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1) {
+  btQuaternion *arg1 = 0 ;
+  btQuaternion *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  
+  result = (btScalar)btAngle((btQuaternion const &)*arg1,(btQuaternion const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_inverse_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = 0 ;
+  btQuaternion result;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = inverse((btQuaternion const &)*arg1);
+  *(btQuaternion **)&_swig_go_result = new btQuaternion(result); 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_slerp_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
+  btQuaternion *arg1 = 0 ;
+  btQuaternion *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btQuaternion result;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  
+  result = slerp((btQuaternion const &)*arg1,(btQuaternion const &)*arg2,(float const &)*arg3);
+  *(btQuaternion **)&_swig_go_result = new btQuaternion(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_quatRotate_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btVector3 *_swig_go_1) {
+  btQuaternion *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = quatRotate((btQuaternion const &)*arg1,(btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_shortestArcQuat_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btQuaternion result;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = shortestArcQuat((btVector3 const &)*arg1,(btVector3 const &)*arg2);
+  *(btQuaternion **)&_swig_go_result = new btQuaternion(result); 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_shortestArcQuatNormalize2_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btQuaternion result;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = shortestArcQuatNormalize2(*arg1,*arg2);
+  *(btQuaternion **)&_swig_go_result = new btQuaternion(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btQuaternionFloatData_m_floats_set_mbt_7f4d06f7d3d79a98(btQuaternionFloatData *_swig_go_0, float *_swig_go_1) {
+  btQuaternionFloatData *arg1 = (btQuaternionFloatData *) 0 ;
+  float *arg2 = (float *) (float *)0 ;
+  
+  arg1 = *(btQuaternionFloatData **)&_swig_go_0; 
+  arg2 = *(float **)&_swig_go_1; 
+  
+  {
+    size_t ii;
+    float *b = (float *) arg1->m_floats;
+    for (ii = 0; ii < (size_t)4; ii++) b[ii] = *((float *) arg2 + ii);
+  }
+  
+}
+
+
+float *_wrap_btQuaternionFloatData_m_floats_get_mbt_7f4d06f7d3d79a98(btQuaternionFloatData *_swig_go_0) {
+  btQuaternionFloatData *arg1 = (btQuaternionFloatData *) 0 ;
+  float *result = 0 ;
+  float *_swig_go_result;
+  
+  arg1 = *(btQuaternionFloatData **)&_swig_go_0; 
+  
+  result = (float *)(float *) ((arg1)->m_floats);
+  *(float **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btQuaternionFloatData *_wrap_new_btQuaternionFloatData_mbt_7f4d06f7d3d79a98() {
+  btQuaternionFloatData *result = 0 ;
+  btQuaternionFloatData *_swig_go_result;
+  
+  
+  result = (btQuaternionFloatData *)new btQuaternionFloatData();
+  *(btQuaternionFloatData **)&_swig_go_result = (btQuaternionFloatData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btQuaternionFloatData_mbt_7f4d06f7d3d79a98(btQuaternionFloatData *_swig_go_0) {
+  btQuaternionFloatData *arg1 = (btQuaternionFloatData *) 0 ;
+  
+  arg1 = *(btQuaternionFloatData **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btQuaternionDoubleData_m_floats_set_mbt_7f4d06f7d3d79a98(btQuaternionDoubleData *_swig_go_0, double *_swig_go_1) {
+  btQuaternionDoubleData *arg1 = (btQuaternionDoubleData *) 0 ;
+  double *arg2 = (double *) (double *)0 ;
+  
+  arg1 = *(btQuaternionDoubleData **)&_swig_go_0; 
+  arg2 = *(double **)&_swig_go_1; 
+  
+  {
+    size_t ii;
+    double *b = (double *) arg1->m_floats;
+    for (ii = 0; ii < (size_t)4; ii++) b[ii] = *((double *) arg2 + ii);
+  }
+  
+}
+
+
+double *_wrap_btQuaternionDoubleData_m_floats_get_mbt_7f4d06f7d3d79a98(btQuaternionDoubleData *_swig_go_0) {
+  btQuaternionDoubleData *arg1 = (btQuaternionDoubleData *) 0 ;
+  double *result = 0 ;
+  double *_swig_go_result;
+  
+  arg1 = *(btQuaternionDoubleData **)&_swig_go_0; 
+  
+  result = (double *)(double *) ((arg1)->m_floats);
+  *(double **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btQuaternionDoubleData *_wrap_new_btQuaternionDoubleData_mbt_7f4d06f7d3d79a98() {
+  btQuaternionDoubleData *result = 0 ;
+  btQuaternionDoubleData *_swig_go_result;
+  
+  
+  result = (btQuaternionDoubleData *)new btQuaternionDoubleData();
+  *(btQuaternionDoubleData **)&_swig_go_result = (btQuaternionDoubleData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btQuaternionDoubleData_mbt_7f4d06f7d3d79a98(btQuaternionDoubleData *_swig_go_0) {
+  btQuaternionDoubleData *arg1 = (btQuaternionDoubleData *) 0 ;
+  
+  arg1 = *(btQuaternionDoubleData **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_0_mbt_7f4d06f7d3d79a98() {
+  btMatrix3x3 *result = 0 ;
+  btMatrix3x3 *_swig_go_result;
+  
+  
+  result = (btMatrix3x3 *)new btMatrix3x3();
+  *(btMatrix3x3 **)&_swig_go_result = (btMatrix3x3 *)result; 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = 0 ;
+  btMatrix3x3 *result = 0 ;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = (btMatrix3x3 *)new btMatrix3x3((btQuaternion const &)*arg1);
+  *(btMatrix3x3 **)&_swig_go_result = (btMatrix3x3 *)result; 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_2_mbt_7f4d06f7d3d79a98(float _swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4, float _swig_go_5, float _swig_go_6, float _swig_go_7, float _swig_go_8) {
+  btScalar *arg1 = 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btScalar *arg5 = 0 ;
+  btScalar *arg6 = 0 ;
+  btScalar *arg7 = 0 ;
+  btScalar *arg8 = 0 ;
+  btScalar *arg9 = 0 ;
+  btMatrix3x3 *result = 0 ;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = (btScalar *)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  arg5 = (btScalar *)&_swig_go_4; 
+  arg6 = (btScalar *)&_swig_go_5; 
+  arg7 = (btScalar *)&_swig_go_6; 
+  arg8 = (btScalar *)&_swig_go_7; 
+  arg9 = (btScalar *)&_swig_go_8; 
+  
+  result = (btMatrix3x3 *)new btMatrix3x3((btScalar const &)*arg1,(btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4,(btScalar const &)*arg5,(btScalar const &)*arg6,(btScalar const &)*arg7,(btScalar const &)*arg8,(btScalar const &)*arg9);
+  *(btMatrix3x3 **)&_swig_go_result = (btMatrix3x3 *)result; 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_3_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+  btMatrix3x3 *arg1 = 0 ;
+  btMatrix3x3 *result = 0 ;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  
+  result = (btMatrix3x3 *)new btMatrix3x3((btMatrix3x3 const &)*arg1);
+  *(btMatrix3x3 **)&_swig_go_result = (btMatrix3x3 *)result; 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3 *_wrap_new_btMatrix3x3__SWIG_4_mbt_7f4d06f7d3d79a98(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 *arg3 = 0 ;
+  btMatrix3x3 *result = 0 ;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  arg3 = *(btVector3 **)&_swig_go_2; 
+  
+  result = (btMatrix3x3 *)new btMatrix3x3((btVector3 const &)*arg1,(btVector3 const &)*arg2,(btVector3 const &)*arg3);
+  *(btMatrix3x3 **)&_swig_go_result = (btMatrix3x3 *)result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btMatrix3x3_getColumn_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, intgo _swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  int arg2 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  result = ((btMatrix3x3 const *)arg1)->getColumn(arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btMatrix3x3_getRow_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, intgo _swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  int arg2 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  result = (btVector3 *) &((btMatrix3x3 const *)arg1)->getRow(arg2);
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btMatrix3x3_setFromOpenGLSubMatrix_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btScalar *arg2 = (btScalar *) 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
+  
+  (arg1)->setFromOpenGLSubMatrix((btScalar const *)arg2);
+  
+}
+
+
+void _wrap_btMatrix3x3_setValue_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3, float _swig_go_4, float _swig_go_5, float _swig_go_6, float _swig_go_7, float _swig_go_8, float _swig_go_9) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  btScalar *arg5 = 0 ;
+  btScalar *arg6 = 0 ;
+  btScalar *arg7 = 0 ;
+  btScalar *arg8 = 0 ;
+  btScalar *arg9 = 0 ;
+  btScalar *arg10 = 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  arg5 = (btScalar *)&_swig_go_4; 
+  arg6 = (btScalar *)&_swig_go_5; 
+  arg7 = (btScalar *)&_swig_go_6; 
+  arg8 = (btScalar *)&_swig_go_7; 
+  arg9 = (btScalar *)&_swig_go_8; 
+  arg10 = (btScalar *)&_swig_go_9; 
+  
+  (arg1)->setValue((btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4,(btScalar const &)*arg5,(btScalar const &)*arg6,(btScalar const &)*arg7,(btScalar const &)*arg8,(btScalar const &)*arg9,(btScalar const &)*arg10);
+  
+}
+
+
+void _wrap_btMatrix3x3_setRotation_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btQuaternion *arg2 = 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  
+  (arg1)->setRotation((btQuaternion const &)*arg2);
+  
+}
+
+
+void _wrap_btMatrix3x3_setEulerYPR_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = (btScalar *)&_swig_go_1; 
+  arg3 = (btScalar *)&_swig_go_2; 
+  arg4 = (btScalar *)&_swig_go_3; 
+  
+  (arg1)->setEulerYPR((btScalar const &)*arg2,(btScalar const &)*arg3,(btScalar const &)*arg4);
+  
+}
+
+
+void _wrap_btMatrix3x3_setEulerZYX_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float _swig_go_1, float _swig_go_2, float _swig_go_3) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btScalar arg2 ;
+  btScalar arg3 ;
+  btScalar arg4 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = (btScalar)_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  arg4 = (btScalar)_swig_go_3; 
+  
+  (arg1)->setEulerZYX(arg2,arg3,arg4);
+  
+}
+
+
+void _wrap_btMatrix3x3_setIdentity_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  
+  (arg1)->setIdentity();
+  
+}
+
+
+void _wrap_btMatrix3x3_setZero_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  
+  (arg1)->setZero();
+  
+}
+
+
+btMatrix3x3 *_wrap_btMatrix3x3_getIdentity_mbt_7f4d06f7d3d79a98() {
+  btMatrix3x3 *result = 0 ;
+  btMatrix3x3 *_swig_go_result;
+  
+  
+  result = (btMatrix3x3 *) &btMatrix3x3::getIdentity();
+  *(btMatrix3x3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btMatrix3x3_getOpenGLSubMatrix_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btScalar *arg2 = (btScalar *) 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
+  
+  ((btMatrix3x3 const *)arg1)->getOpenGLSubMatrix(arg2);
+  
+}
+
+
+void _wrap_btMatrix3x3_getRotation_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btQuaternion *arg2 = 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  
+  ((btMatrix3x3 const *)arg1)->getRotation(*arg2);
+  
+}
+
+
+void _wrap_btMatrix3x3_getEulerYPR_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
+  arg3 = *(btScalar **)&_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  
+  ((btMatrix3x3 const *)arg1)->getEulerYPR(*arg2,*arg3,*arg4);
+  
+}
+
+
+void _wrap_btMatrix3x3_getEulerZYX__SWIG_0_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3, intgo _swig_go_4) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  unsigned int arg5 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
+  arg3 = *(btScalar **)&_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  arg5 = (unsigned int)_swig_go_4; 
+  
+  ((btMatrix3x3 const *)arg1)->getEulerZYX(*arg2,*arg3,*arg4,arg5);
+  
+}
+
+
+void _wrap_btMatrix3x3_getEulerZYX__SWIG_1_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, float *_swig_go_1, float *_swig_go_2, float *_swig_go_3) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btScalar *arg2 = 0 ;
+  btScalar *arg3 = 0 ;
+  btScalar *arg4 = 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
+  arg3 = *(btScalar **)&_swig_go_2; 
+  arg4 = *(btScalar **)&_swig_go_3; 
+  
+  ((btMatrix3x3 const *)arg1)->getEulerZYX(*arg2,*arg3,*arg4);
+  
+}
+
+
+btMatrix3x3 *_wrap_btMatrix3x3_scaled_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btMatrix3x3 result;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = ((btMatrix3x3 const *)arg1)->scaled((btVector3 const &)*arg2);
+  *(btMatrix3x3 **)&_swig_go_result = new btMatrix3x3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btMatrix3x3_determinant_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  
+  result = (btScalar)((btMatrix3x3 const *)arg1)->determinant();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3 *_wrap_btMatrix3x3_adjoint_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btMatrix3x3 result;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  
+  result = ((btMatrix3x3 const *)arg1)->adjoint();
+  *(btMatrix3x3 **)&_swig_go_result = new btMatrix3x3(result); 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3 *_wrap_btMatrix3x3_absolute_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btMatrix3x3 result;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  
+  result = ((btMatrix3x3 const *)arg1)->absolute();
+  *(btMatrix3x3 **)&_swig_go_result = new btMatrix3x3(result); 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3 *_wrap_btMatrix3x3_transpose_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btMatrix3x3 result;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  
+  result = ((btMatrix3x3 const *)arg1)->transpose();
+  *(btMatrix3x3 **)&_swig_go_result = new btMatrix3x3(result); 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3 *_wrap_btMatrix3x3_inverse_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btMatrix3x3 result;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  
+  result = ((btMatrix3x3 const *)arg1)->inverse();
+  *(btMatrix3x3 **)&_swig_go_result = new btMatrix3x3(result); 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btMatrix3x3_solve33_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = ((btMatrix3x3 const *)arg1)->solve33((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3 *_wrap_btMatrix3x3_transposeTimes_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btMatrix3x3 *arg2 = 0 ;
+  btMatrix3x3 result;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btMatrix3x3 **)&_swig_go_1; 
+  
+  result = ((btMatrix3x3 const *)arg1)->transposeTimes((btMatrix3x3 const &)*arg2);
+  *(btMatrix3x3 **)&_swig_go_result = new btMatrix3x3(result); 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3 *_wrap_btMatrix3x3_timesTranspose_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btMatrix3x3 *arg2 = 0 ;
+  btMatrix3x3 result;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btMatrix3x3 **)&_swig_go_1; 
+  
+  result = ((btMatrix3x3 const *)arg1)->timesTranspose((btMatrix3x3 const &)*arg2);
+  *(btMatrix3x3 **)&_swig_go_result = new btMatrix3x3(result); 
+  return _swig_go_result;
+}
+
+
+float _wrap_btMatrix3x3_tdotx_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = (btScalar)((btMatrix3x3 const *)arg1)->tdotx((btVector3 const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btMatrix3x3_tdoty_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = (btScalar)((btMatrix3x3 const *)arg1)->tdoty((btVector3 const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_btMatrix3x3_tdotz_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = (btScalar)((btMatrix3x3 const *)arg1)->tdotz((btVector3 const &)*arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btMatrix3x3_extractRotation__SWIG_0_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2, intgo _swig_go_3) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btQuaternion *arg2 = 0 ;
+  btScalar arg3 ;
+  int arg4 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  arg4 = (int)_swig_go_3; 
+  
+  (arg1)->extractRotation(*arg2,arg3,arg4);
+  
+}
+
+
+void _wrap_btMatrix3x3_extractRotation__SWIG_1_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1, float _swig_go_2) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btQuaternion *arg2 = 0 ;
+  btScalar arg3 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  
+  (arg1)->extractRotation(*arg2,arg3);
+  
+}
+
+
+void _wrap_btMatrix3x3_extractRotation__SWIG_2_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btQuaternion *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btQuaternion *arg2 = 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  
+  (arg1)->extractRotation(*arg2);
+  
+}
+
+
+void _wrap_btMatrix3x3_diagonalize_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3 *_swig_go_1, float _swig_go_2, intgo _swig_go_3) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btMatrix3x3 *arg2 = 0 ;
+  btScalar arg3 ;
+  int arg4 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btMatrix3x3 **)&_swig_go_1; 
+  arg3 = (btScalar)_swig_go_2; 
+  arg4 = (int)_swig_go_3; 
+  
+  (arg1)->diagonalize(*arg2,arg3,arg4);
+  
+}
+
+
+float _wrap_btMatrix3x3_cofac_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2, intgo _swig_go_3, intgo _swig_go_4) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
   int arg2 ;
   int arg3 ;
+  int arg4 ;
+  int arg5 ;
+  btScalar result;
+  float _swig_go_result;
   
-  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
   arg2 = (int)_swig_go_1; 
   arg3 = (int)_swig_go_2; 
+  arg4 = (int)_swig_go_3; 
+  arg5 = (int)_swig_go_4; 
   
-  (arg1)->setConvexConvexMultipointIterations(arg2,arg3);
+  result = (btScalar)((btMatrix3x3 const *)arg1)->cofac(arg2,arg3,arg4,arg5);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btMatrix3x3_serialize_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btMatrix3x3FloatData *arg2 = 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btMatrix3x3FloatData **)&_swig_go_1; 
+  
+  ((btMatrix3x3 const *)arg1)->serialize(*arg2);
   
 }
 
 
-void _wrap_btDefaultCollisionConfiguration_setConvexConvexMultipointIterations__SWIG_1_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0, intgo _swig_go_1) {
-  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
-  int arg2 ;
+void _wrap_btMatrix3x3_serializeFloat_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btMatrix3x3FloatData *arg2 = 0 ;
   
-  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
-  arg2 = (int)_swig_go_1; 
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btMatrix3x3FloatData **)&_swig_go_1; 
   
-  (arg1)->setConvexConvexMultipointIterations(arg2);
-  
-}
-
-
-void _wrap_btDefaultCollisionConfiguration_setConvexConvexMultipointIterations__SWIG_2_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0) {
-  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
-  
-  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
-  
-  (arg1)->setConvexConvexMultipointIterations();
+  ((btMatrix3x3 const *)arg1)->serializeFloat(*arg2);
   
 }
 
 
-void _wrap_btDefaultCollisionConfiguration_setPlaneConvexMultipointIterations__SWIG_0_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0, intgo _swig_go_1, intgo _swig_go_2) {
-  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
-  int arg2 ;
-  int arg3 ;
+void _wrap_btMatrix3x3_deSerialize_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btMatrix3x3FloatData *arg2 = 0 ;
   
-  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
-  arg2 = (int)_swig_go_1; 
-  arg3 = (int)_swig_go_2; 
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btMatrix3x3FloatData **)&_swig_go_1; 
   
-  (arg1)->setPlaneConvexMultipointIterations(arg2,arg3);
+  (arg1)->deSerialize((btMatrix3x3FloatData const &)*arg2);
   
 }
 
 
-void _wrap_btDefaultCollisionConfiguration_setPlaneConvexMultipointIterations__SWIG_1_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0, intgo _swig_go_1) {
-  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
-  int arg2 ;
+void _wrap_btMatrix3x3_deSerializeFloat_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btMatrix3x3FloatData *arg2 = 0 ;
   
-  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
-  arg2 = (int)_swig_go_1; 
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btMatrix3x3FloatData **)&_swig_go_1; 
   
-  (arg1)->setPlaneConvexMultipointIterations(arg2);
+  (arg1)->deSerializeFloat((btMatrix3x3FloatData const &)*arg2);
   
 }
 
 
-void _wrap_btDefaultCollisionConfiguration_setPlaneConvexMultipointIterations__SWIG_2_mbt_53667cdae90870b5(btDefaultCollisionConfiguration *_swig_go_0) {
-  btDefaultCollisionConfiguration *arg1 = (btDefaultCollisionConfiguration *) 0 ;
+void _wrap_btMatrix3x3_deSerializeDouble_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btMatrix3x3DoubleData *_swig_go_1) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  btMatrix3x3DoubleData *arg2 = 0 ;
   
-  arg1 = *(btDefaultCollisionConfiguration **)&_swig_go_0; 
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btMatrix3x3DoubleData **)&_swig_go_1; 
   
-  (arg1)->setPlaneConvexMultipointIterations();
+  (arg1)->deSerializeDouble((btMatrix3x3DoubleData const &)*arg2);
+  
+}
+
+
+void _wrap_delete_btMatrix3x3_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+  btMatrix3x3 *arg1 = (btMatrix3x3 *) 0 ;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btMatrix3x3FloatData_m_el_set_mbt_7f4d06f7d3d79a98(btMatrix3x3FloatData *_swig_go_0, btVector3FloatData (*_swig_go_1)[3]) {
+  btMatrix3x3FloatData *arg1 = (btMatrix3x3FloatData *) 0 ;
+  btVector3FloatData *arg2 = (btVector3FloatData *) (btVector3FloatData *)0 ;
+  
+  arg1 = *(btMatrix3x3FloatData **)&_swig_go_0; 
+  arg2 = *(btVector3FloatData **)&_swig_go_1; 
+  
+  {
+    size_t ii;
+    btVector3FloatData *b = (btVector3FloatData *) arg1->m_el;
+    for (ii = 0; ii < (size_t)3; ii++) b[ii] = *((btVector3FloatData *) arg2 + ii);
+  }
+  
+}
+
+
+btVector3FloatData (*_wrap_btMatrix3x3FloatData_m_el_get_mbt_7f4d06f7d3d79a98(btMatrix3x3FloatData *_swig_go_0))[3] {
+  btMatrix3x3FloatData *arg1 = (btMatrix3x3FloatData *) 0 ;
+  btVector3FloatData *result = 0 ;
+  btVector3FloatData (*_swig_go_result)[3];
+  
+  arg1 = *(btMatrix3x3FloatData **)&_swig_go_0; 
+  
+  result = (btVector3FloatData *)(btVector3FloatData *) ((arg1)->m_el);
+  *(btVector3FloatData **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3FloatData *_wrap_new_btMatrix3x3FloatData_mbt_7f4d06f7d3d79a98() {
+  btMatrix3x3FloatData *result = 0 ;
+  btMatrix3x3FloatData *_swig_go_result;
+  
+  
+  result = (btMatrix3x3FloatData *)new btMatrix3x3FloatData();
+  *(btMatrix3x3FloatData **)&_swig_go_result = (btMatrix3x3FloatData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btMatrix3x3FloatData_mbt_7f4d06f7d3d79a98(btMatrix3x3FloatData *_swig_go_0) {
+  btMatrix3x3FloatData *arg1 = (btMatrix3x3FloatData *) 0 ;
+  
+  arg1 = *(btMatrix3x3FloatData **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btMatrix3x3DoubleData_m_el_set_mbt_7f4d06f7d3d79a98(btMatrix3x3DoubleData *_swig_go_0, btVector3DoubleData (*_swig_go_1)[3]) {
+  btMatrix3x3DoubleData *arg1 = (btMatrix3x3DoubleData *) 0 ;
+  btVector3DoubleData *arg2 = (btVector3DoubleData *) (btVector3DoubleData *)0 ;
+  
+  arg1 = *(btMatrix3x3DoubleData **)&_swig_go_0; 
+  arg2 = *(btVector3DoubleData **)&_swig_go_1; 
+  
+  {
+    size_t ii;
+    btVector3DoubleData *b = (btVector3DoubleData *) arg1->m_el;
+    for (ii = 0; ii < (size_t)3; ii++) b[ii] = *((btVector3DoubleData *) arg2 + ii);
+  }
+  
+}
+
+
+btVector3DoubleData (*_wrap_btMatrix3x3DoubleData_m_el_get_mbt_7f4d06f7d3d79a98(btMatrix3x3DoubleData *_swig_go_0))[3] {
+  btMatrix3x3DoubleData *arg1 = (btMatrix3x3DoubleData *) 0 ;
+  btVector3DoubleData *result = 0 ;
+  btVector3DoubleData (*_swig_go_result)[3];
+  
+  arg1 = *(btMatrix3x3DoubleData **)&_swig_go_0; 
+  
+  result = (btVector3DoubleData *)(btVector3DoubleData *) ((arg1)->m_el);
+  *(btVector3DoubleData **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3DoubleData *_wrap_new_btMatrix3x3DoubleData_mbt_7f4d06f7d3d79a98() {
+  btMatrix3x3DoubleData *result = 0 ;
+  btMatrix3x3DoubleData *_swig_go_result;
+  
+  
+  result = (btMatrix3x3DoubleData *)new btMatrix3x3DoubleData();
+  *(btMatrix3x3DoubleData **)&_swig_go_result = (btMatrix3x3DoubleData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btMatrix3x3DoubleData_mbt_7f4d06f7d3d79a98(btMatrix3x3DoubleData *_swig_go_0) {
+  btMatrix3x3DoubleData *arg1 = (btMatrix3x3DoubleData *) 0 ;
+  
+  arg1 = *(btMatrix3x3DoubleData **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+btTransform *_wrap_new_btTransform__SWIG_0_mbt_7f4d06f7d3d79a98() {
+  btTransform *result = 0 ;
+  btTransform *_swig_go_result;
+  
+  
+  result = (btTransform *)new btTransform();
+  *(btTransform **)&_swig_go_result = (btTransform *)result; 
+  return _swig_go_result;
+}
+
+
+btTransform *_wrap_new_btTransform__SWIG_1_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0, btVector3 *_swig_go_1) {
+  btQuaternion *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btTransform *result = 0 ;
+  btTransform *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = (btTransform *)new btTransform((btQuaternion const &)*arg1,(btVector3 const &)*arg2);
+  *(btTransform **)&_swig_go_result = (btTransform *)result; 
+  return _swig_go_result;
+}
+
+
+btTransform *_wrap_new_btTransform__SWIG_2_mbt_7f4d06f7d3d79a98(btQuaternion *_swig_go_0) {
+  btQuaternion *arg1 = 0 ;
+  btTransform *result = 0 ;
+  btTransform *_swig_go_result;
+  
+  arg1 = *(btQuaternion **)&_swig_go_0; 
+  
+  result = (btTransform *)new btTransform((btQuaternion const &)*arg1);
+  *(btTransform **)&_swig_go_result = (btTransform *)result; 
+  return _swig_go_result;
+}
+
+
+btTransform *_wrap_new_btTransform__SWIG_3_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btMatrix3x3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  btTransform *result = 0 ;
+  btTransform *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = (btTransform *)new btTransform((btMatrix3x3 const &)*arg1,(btVector3 const &)*arg2);
+  *(btTransform **)&_swig_go_result = (btTransform *)result; 
+  return _swig_go_result;
+}
+
+
+btTransform *_wrap_new_btTransform__SWIG_4_mbt_7f4d06f7d3d79a98(btMatrix3x3 *_swig_go_0) {
+  btMatrix3x3 *arg1 = 0 ;
+  btTransform *result = 0 ;
+  btTransform *_swig_go_result;
+  
+  arg1 = *(btMatrix3x3 **)&_swig_go_0; 
+  
+  result = (btTransform *)new btTransform((btMatrix3x3 const &)*arg1);
+  *(btTransform **)&_swig_go_result = (btTransform *)result; 
+  return _swig_go_result;
+}
+
+
+btTransform *_wrap_new_btTransform__SWIG_5_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+  btTransform *arg1 = 0 ;
+  btTransform *result = 0 ;
+  btTransform *_swig_go_result;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  
+  result = (btTransform *)new btTransform((btTransform const &)*arg1);
+  *(btTransform **)&_swig_go_result = (btTransform *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btTransform_mult_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransform *_swig_go_1, btTransform *_swig_go_2) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btTransform *arg2 = 0 ;
+  btTransform *arg3 = 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  arg3 = *(btTransform **)&_swig_go_2; 
+  
+  (arg1)->mult((btTransform const &)*arg2,(btTransform const &)*arg3);
+  
+}
+
+
+btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_0_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btMatrix3x3 *result = 0 ;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  
+  result = (btMatrix3x3 *) &(arg1)->getBasis();
+  *(btMatrix3x3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btMatrix3x3 *_wrap_btTransform_getBasis__SWIG_1_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btMatrix3x3 *result = 0 ;
+  btMatrix3x3 *_swig_go_result;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  
+  result = (btMatrix3x3 *) &((btTransform const *)arg1)->getBasis();
+  *(btMatrix3x3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btTransform_getOrigin__SWIG_0_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  
+  result = (btVector3 *) &(arg1)->getOrigin();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_btTransform_getOrigin__SWIG_1_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  
+  result = (btVector3 *) &((btTransform const *)arg1)->getOrigin();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btQuaternion *_wrap_btTransform_getRotation_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btQuaternion result;
+  btQuaternion *_swig_go_result;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  
+  result = ((btTransform const *)arg1)->getRotation();
+  *(btQuaternion **)&_swig_go_result = new btQuaternion(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btTransform_setFromOpenGLMatrix_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, float *_swig_go_1) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btScalar *arg2 = (btScalar *) 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
+  
+  (arg1)->setFromOpenGLMatrix((btScalar const *)arg2);
+  
+}
+
+
+void _wrap_btTransform_getOpenGLMatrix_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, float *_swig_go_1) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btScalar *arg2 = (btScalar *) 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btScalar **)&_swig_go_1; 
+  
+  ((btTransform const *)arg1)->getOpenGLMatrix(arg2);
+  
+}
+
+
+void _wrap_btTransform_setOrigin_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btVector3 *_swig_go_1) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btVector3 *arg2 = 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  (arg1)->setOrigin((btVector3 const &)*arg2);
+  
+}
+
+
+btVector3 *_wrap_btTransform_invXform_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btVector3 *_swig_go_1) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btVector3 *arg2 = 0 ;
+  btVector3 result;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = ((btTransform const *)arg1)->invXform((btVector3 const &)*arg2);
+  *(btVector3 **)&_swig_go_result = new btVector3(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btTransform_setBasis_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btMatrix3x3 *_swig_go_1) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btMatrix3x3 *arg2 = 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btMatrix3x3 **)&_swig_go_1; 
+  
+  (arg1)->setBasis((btMatrix3x3 const &)*arg2);
+  
+}
+
+
+void _wrap_btTransform_setRotation_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btQuaternion *_swig_go_1) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btQuaternion *arg2 = 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btQuaternion **)&_swig_go_1; 
+  
+  (arg1)->setRotation((btQuaternion const &)*arg2);
+  
+}
+
+
+void _wrap_btTransform_setIdentity_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  
+  (arg1)->setIdentity();
+  
+}
+
+
+btTransform *_wrap_btTransform_inverse_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btTransform result;
+  btTransform *_swig_go_result;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  
+  result = ((btTransform const *)arg1)->inverse();
+  *(btTransform **)&_swig_go_result = new btTransform(result); 
+  return _swig_go_result;
+}
+
+
+btTransform *_wrap_btTransform_inverseTimes_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransform *_swig_go_1) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btTransform *arg2 = 0 ;
+  btTransform result;
+  btTransform *_swig_go_result;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  
+  result = ((btTransform const *)arg1)->inverseTimes((btTransform const &)*arg2);
+  *(btTransform **)&_swig_go_result = new btTransform(result); 
+  return _swig_go_result;
+}
+
+
+btTransform *_wrap_btTransform_getIdentity_mbt_7f4d06f7d3d79a98() {
+  btTransform *result = 0 ;
+  btTransform *_swig_go_result;
+  
+  
+  result = (btTransform *) &btTransform::getIdentity();
+  *(btTransform **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btTransform_serialize_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btTransformFloatData *arg2 = 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btTransformFloatData **)&_swig_go_1; 
+  
+  ((btTransform const *)arg1)->serialize(*arg2);
+  
+}
+
+
+void _wrap_btTransform_serializeFloat_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btTransformFloatData *arg2 = 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btTransformFloatData **)&_swig_go_1; 
+  
+  ((btTransform const *)arg1)->serializeFloat(*arg2);
+  
+}
+
+
+void _wrap_btTransform_deSerialize_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btTransformFloatData *arg2 = 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btTransformFloatData **)&_swig_go_1; 
+  
+  (arg1)->deSerialize((btTransformFloatData const &)*arg2);
+  
+}
+
+
+void _wrap_btTransform_deSerializeDouble_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransformDoubleData *_swig_go_1) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btTransformDoubleData *arg2 = 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btTransformDoubleData **)&_swig_go_1; 
+  
+  (arg1)->deSerializeDouble((btTransformDoubleData const &)*arg2);
+  
+}
+
+
+void _wrap_btTransform_deSerializeFloat_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransformFloatData *_swig_go_1) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  btTransformFloatData *arg2 = 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btTransformFloatData **)&_swig_go_1; 
+  
+  (arg1)->deSerializeFloat((btTransformFloatData const &)*arg2);
+  
+}
+
+
+void _wrap_delete_btTransform_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+  btTransform *arg1 = (btTransform *) 0 ;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btTransformFloatData_m_basis_set_mbt_7f4d06f7d3d79a98(btTransformFloatData *_swig_go_0, btMatrix3x3FloatData *_swig_go_1) {
+  btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
+  btMatrix3x3FloatData *arg2 = (btMatrix3x3FloatData *) 0 ;
+  
+  arg1 = *(btTransformFloatData **)&_swig_go_0; 
+  arg2 = *(btMatrix3x3FloatData **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_basis = *arg2;
+  
+}
+
+
+btMatrix3x3FloatData *_wrap_btTransformFloatData_m_basis_get_mbt_7f4d06f7d3d79a98(btTransformFloatData *_swig_go_0) {
+  btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
+  btMatrix3x3FloatData *result = 0 ;
+  btMatrix3x3FloatData *_swig_go_result;
+  
+  arg1 = *(btTransformFloatData **)&_swig_go_0; 
+  
+  result = (btMatrix3x3FloatData *)& ((arg1)->m_basis);
+  *(btMatrix3x3FloatData **)&_swig_go_result = (btMatrix3x3FloatData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btTransformFloatData_m_origin_set_mbt_7f4d06f7d3d79a98(btTransformFloatData *_swig_go_0, btVector3FloatData *_swig_go_1) {
+  btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
+  btVector3FloatData *arg2 = (btVector3FloatData *) 0 ;
+  
+  arg1 = *(btTransformFloatData **)&_swig_go_0; 
+  arg2 = *(btVector3FloatData **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_origin = *arg2;
+  
+}
+
+
+btVector3FloatData *_wrap_btTransformFloatData_m_origin_get_mbt_7f4d06f7d3d79a98(btTransformFloatData *_swig_go_0) {
+  btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
+  btVector3FloatData *result = 0 ;
+  btVector3FloatData *_swig_go_result;
+  
+  arg1 = *(btTransformFloatData **)&_swig_go_0; 
+  
+  result = (btVector3FloatData *)& ((arg1)->m_origin);
+  *(btVector3FloatData **)&_swig_go_result = (btVector3FloatData *)result; 
+  return _swig_go_result;
+}
+
+
+btTransformFloatData *_wrap_new_btTransformFloatData_mbt_7f4d06f7d3d79a98() {
+  btTransformFloatData *result = 0 ;
+  btTransformFloatData *_swig_go_result;
+  
+  
+  result = (btTransformFloatData *)new btTransformFloatData();
+  *(btTransformFloatData **)&_swig_go_result = (btTransformFloatData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btTransformFloatData_mbt_7f4d06f7d3d79a98(btTransformFloatData *_swig_go_0) {
+  btTransformFloatData *arg1 = (btTransformFloatData *) 0 ;
+  
+  arg1 = *(btTransformFloatData **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btTransformDoubleData_m_basis_set_mbt_7f4d06f7d3d79a98(btTransformDoubleData *_swig_go_0, btMatrix3x3DoubleData *_swig_go_1) {
+  btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
+  btMatrix3x3DoubleData *arg2 = (btMatrix3x3DoubleData *) 0 ;
+  
+  arg1 = *(btTransformDoubleData **)&_swig_go_0; 
+  arg2 = *(btMatrix3x3DoubleData **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_basis = *arg2;
+  
+}
+
+
+btMatrix3x3DoubleData *_wrap_btTransformDoubleData_m_basis_get_mbt_7f4d06f7d3d79a98(btTransformDoubleData *_swig_go_0) {
+  btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
+  btMatrix3x3DoubleData *result = 0 ;
+  btMatrix3x3DoubleData *_swig_go_result;
+  
+  arg1 = *(btTransformDoubleData **)&_swig_go_0; 
+  
+  result = (btMatrix3x3DoubleData *)& ((arg1)->m_basis);
+  *(btMatrix3x3DoubleData **)&_swig_go_result = (btMatrix3x3DoubleData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btTransformDoubleData_m_origin_set_mbt_7f4d06f7d3d79a98(btTransformDoubleData *_swig_go_0, btVector3DoubleData *_swig_go_1) {
+  btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
+  btVector3DoubleData *arg2 = (btVector3DoubleData *) 0 ;
+  
+  arg1 = *(btTransformDoubleData **)&_swig_go_0; 
+  arg2 = *(btVector3DoubleData **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_origin = *arg2;
+  
+}
+
+
+btVector3DoubleData *_wrap_btTransformDoubleData_m_origin_get_mbt_7f4d06f7d3d79a98(btTransformDoubleData *_swig_go_0) {
+  btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
+  btVector3DoubleData *result = 0 ;
+  btVector3DoubleData *_swig_go_result;
+  
+  arg1 = *(btTransformDoubleData **)&_swig_go_0; 
+  
+  result = (btVector3DoubleData *)& ((arg1)->m_origin);
+  *(btVector3DoubleData **)&_swig_go_result = (btVector3DoubleData *)result; 
+  return _swig_go_result;
+}
+
+
+btTransformDoubleData *_wrap_new_btTransformDoubleData_mbt_7f4d06f7d3d79a98() {
+  btTransformDoubleData *result = 0 ;
+  btTransformDoubleData *_swig_go_result;
+  
+  
+  result = (btTransformDoubleData *)new btTransformDoubleData();
+  *(btTransformDoubleData **)&_swig_go_result = (btTransformDoubleData *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btTransformDoubleData_mbt_7f4d06f7d3d79a98(btTransformDoubleData *_swig_go_0) {
+  btTransformDoubleData *arg1 = (btTransformDoubleData *) 0 ;
+  
+  arg1 = *(btTransformDoubleData **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_delete_btMotionState_mbt_7f4d06f7d3d79a98(btMotionState *_swig_go_0) {
+  btMotionState *arg1 = (btMotionState *) 0 ;
+  
+  arg1 = *(btMotionState **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+void _wrap_btMotionState_getWorldTransform_mbt_7f4d06f7d3d79a98(btMotionState *_swig_go_0, btTransform *_swig_go_1) {
+  btMotionState *arg1 = (btMotionState *) 0 ;
+  btTransform *arg2 = 0 ;
+  
+  arg1 = *(btMotionState **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  
+  ((btMotionState const *)arg1)->getWorldTransform(*arg2);
+  
+}
+
+
+void _wrap_btMotionState_setWorldTransform_mbt_7f4d06f7d3d79a98(btMotionState *_swig_go_0, btTransform *_swig_go_1) {
+  btMotionState *arg1 = (btMotionState *) 0 ;
+  btTransform *arg2 = 0 ;
+  
+  arg1 = *(btMotionState **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  
+  (arg1)->setWorldTransform((btTransform const &)*arg2);
+  
+}
+
+
+void _wrap_btDefaultMotionState_m_graphicsWorldTrans_set_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+  btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
+  btTransform *arg2 = (btTransform *) 0 ;
+  
+  arg1 = *(btDefaultMotionState **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_graphicsWorldTrans = *arg2;
+  
+}
+
+
+btTransform *_wrap_btDefaultMotionState_m_graphicsWorldTrans_get_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0) {
+  btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
+  btTransform *result = 0 ;
+  btTransform *_swig_go_result;
+  
+  arg1 = *(btDefaultMotionState **)&_swig_go_0; 
+  
+  result = (btTransform *)& ((arg1)->m_graphicsWorldTrans);
+  *(btTransform **)&_swig_go_result = (btTransform *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btDefaultMotionState_m_centerOfMassOffset_set_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+  btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
+  btTransform *arg2 = (btTransform *) 0 ;
+  
+  arg1 = *(btDefaultMotionState **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_centerOfMassOffset = *arg2;
+  
+}
+
+
+btTransform *_wrap_btDefaultMotionState_m_centerOfMassOffset_get_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0) {
+  btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
+  btTransform *result = 0 ;
+  btTransform *_swig_go_result;
+  
+  arg1 = *(btDefaultMotionState **)&_swig_go_0; 
+  
+  result = (btTransform *)& ((arg1)->m_centerOfMassOffset);
+  *(btTransform **)&_swig_go_result = (btTransform *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btDefaultMotionState_m_startWorldTrans_set_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+  btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
+  btTransform *arg2 = (btTransform *) 0 ;
+  
+  arg1 = *(btDefaultMotionState **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_startWorldTrans = *arg2;
+  
+}
+
+
+btTransform *_wrap_btDefaultMotionState_m_startWorldTrans_get_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0) {
+  btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
+  btTransform *result = 0 ;
+  btTransform *_swig_go_result;
+  
+  arg1 = *(btDefaultMotionState **)&_swig_go_0; 
+  
+  result = (btTransform *)& ((arg1)->m_startWorldTrans);
+  *(btTransform **)&_swig_go_result = (btTransform *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btDefaultMotionState_m_userPointer_set_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0, void *_swig_go_1) {
+  btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
+  void *arg2 = (void *) 0 ;
+  
+  arg1 = *(btDefaultMotionState **)&_swig_go_0; 
+  arg2 = *(void **)&_swig_go_1; 
+  
+  if (arg1) (arg1)->m_userPointer = arg2;
+  
+}
+
+
+void *_wrap_btDefaultMotionState_m_userPointer_get_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0) {
+  btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
+  void *result = 0 ;
+  void *_swig_go_result;
+  
+  arg1 = *(btDefaultMotionState **)&_swig_go_0; 
+  
+  result = (void *) ((arg1)->m_userPointer);
+  *(void **)&_swig_go_result = (void *)result; 
+  return _swig_go_result;
+}
+
+
+btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_0_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0, btTransform *_swig_go_1) {
+  btTransform *arg1 = 0 ;
+  btTransform *arg2 = 0 ;
+  btDefaultMotionState *result = 0 ;
+  btDefaultMotionState *_swig_go_result;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  
+  result = (btDefaultMotionState *)new btDefaultMotionState((btTransform const &)*arg1,(btTransform const &)*arg2);
+  *(btDefaultMotionState **)&_swig_go_result = (btDefaultMotionState *)result; 
+  return _swig_go_result;
+}
+
+
+btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_1_mbt_7f4d06f7d3d79a98(btTransform *_swig_go_0) {
+  btTransform *arg1 = 0 ;
+  btDefaultMotionState *result = 0 ;
+  btDefaultMotionState *_swig_go_result;
+  
+  arg1 = *(btTransform **)&_swig_go_0; 
+  
+  result = (btDefaultMotionState *)new btDefaultMotionState((btTransform const &)*arg1);
+  *(btDefaultMotionState **)&_swig_go_result = (btDefaultMotionState *)result; 
+  return _swig_go_result;
+}
+
+
+btDefaultMotionState *_wrap_new_btDefaultMotionState__SWIG_2_mbt_7f4d06f7d3d79a98() {
+  btDefaultMotionState *result = 0 ;
+  btDefaultMotionState *_swig_go_result;
+  
+  
+  result = (btDefaultMotionState *)new btDefaultMotionState();
+  *(btDefaultMotionState **)&_swig_go_result = (btDefaultMotionState *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btDefaultMotionState_getWorldTransform_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+  btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
+  btTransform *arg2 = 0 ;
+  
+  arg1 = *(btDefaultMotionState **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  
+  ((btDefaultMotionState const *)arg1)->getWorldTransform(*arg2);
+  
+}
+
+
+void _wrap_btDefaultMotionState_setWorldTransform_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0, btTransform *_swig_go_1) {
+  btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
+  btTransform *arg2 = 0 ;
+  
+  arg1 = *(btDefaultMotionState **)&_swig_go_0; 
+  arg2 = *(btTransform **)&_swig_go_1; 
+  
+  (arg1)->setWorldTransform((btTransform const &)*arg2);
+  
+}
+
+
+void _wrap_delete_btDefaultMotionState_mbt_7f4d06f7d3d79a98(btDefaultMotionState *_swig_go_0) {
+  btDefaultMotionState *arg1 = (btDefaultMotionState *) 0 ;
+  
+  arg1 = *(btDefaultMotionState **)&_swig_go_0; 
+  
+  delete arg1;
   
 }
 

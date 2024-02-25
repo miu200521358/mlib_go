@@ -75,8 +75,8 @@ func NewGlWindow(
 		}
 	}
 
-	collisionConfiguration := mbt.NewBtDefaultCollisionConfiguration()
-	fmt.Printf("collisionConfiguration: %v\n", collisionConfiguration)
+	btDefaultMotionState := mbt.NewBtDefaultMotionState()
+	fmt.Printf("btDefaultMotionState: %v\n", btDefaultMotionState)
 
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
