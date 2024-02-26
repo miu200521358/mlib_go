@@ -59,7 +59,90 @@
 
 %}
 
-%ignore Operator_Sm__Se_;
+// // C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\minwindef.h ------
+
+// %{
+
+// typedef unsigned long       DWORD;
+// typedef int                 BOOL;
+// typedef unsigned char       BYTE;
+// typedef unsigned short      WORD;
+// typedef float               FLOAT;
+
+// typedef int                INT;
+// typedef unsigned int        UINT;
+
+// typedef long LONG;
+// typedef unsigned long ULONG;
+// typedef ULONG *PULONG;
+
+// typedef __int64 LONGLONG;
+// typedef unsigned __int64 ULONGLONG;
+
+// %}
+
+// // C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\WTypesbase.h ------
+
+// %{
+// typedef DWORD ULONG;
+// %}
+
+// // %include <ntdef.h> ----------------------------------------------
+
+// %{
+// #define DUMMYSTRUCTNAME
+
+// typedef union _LARGE_INTEGER {
+//     struct {
+//         ULONG LowPart;
+//         LONG HighPart;
+//     } DUMMYSTRUCTNAME;
+//     struct {
+//         ULONG LowPart;
+//         LONG HighPart;
+//     } u;
+//     LONGLONG QuadPart;
+// } LARGE_INTEGER;
+// typedef LARGE_INTEGER *PLARGE_INTEGER;
+
+// %}
+
+// // C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\apisetcconv.h ------
+
+// %{
+// #define DECLSPEC_IMPORT __declspec(dllimport)
+// #define WINBASEAPI DECLSPEC_IMPORT
+
+// #define WINAPI      __stdcall
+// %}
+
+// // C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um\profileapi.h ------
+
+// %{
+
+// //
+// // Performance counter API's
+// //
+
+// WINBASEAPI
+// BOOL
+// WINAPI
+// QueryPerformanceCounter(
+//     _Out_ LARGE_INTEGER* lpPerformanceCount
+//     );
+
+// WINBASEAPI
+// BOOL
+// WINAPI
+// QueryPerformanceFrequency(
+//     _Out_ LARGE_INTEGER* lpFrequency
+//     );
+
+// %}
+
+
+
+/////// ---------------------------------------------------------------
 
 %include "LinearMath/btScalar.h.i"
 %include "LinearMath/btMinMax.h.i"
@@ -73,6 +156,9 @@
 %include "LinearMath/btMotionState.h.i"
 %include "LinearMath/btDefaultMotionState.h.i"
 
+%include "BulletCollision/CollisionDispatch/btUnionFind.h.i"
+%include "BulletCollision/CollisionDispatch/btUnionFind.cpp.i"
+
 %include "LinearMath/btAlignedObjectArray.h.i"
 %include "LinearMath/btHashMap.h.i"
 %include "LinearMath/btSerializer.h.i"
@@ -83,8 +169,11 @@
 %include "LinearMath/btConvexHullComputer.cpp.i"
 %include "LinearMath/btGeometryUtil.h.i"
 %include "LinearMath/btGeometryUtil.cpp.i"
+%include "LinearMath/btQuickprof.h.i"
+// %include "LinearMath/btQuickprof.cpp.i"
 
 %include "BulletCollision/BroadphaseCollision/btBroadphaseProxy.h.i"
+
 %include "BulletCollision/CollisionShapes/btCollisionMargin.h.i"
 %include "BulletCollision/CollisionShapes/btCollisionShape.h.i"
 %include "BulletCollision/CollisionShapes/btCollisionShape.cpp.i"
@@ -105,6 +194,33 @@
 %include "BulletCollision/CollisionShapes/btSphereShape.h.i"
 %include "BulletCollision/CollisionShapes/btSphereShape.cpp.i"
 
+%include "BulletCollision/CollisionDispatch/btManifoldResult.h.i"
+%include "BulletCollision/CollisionDispatch/btCollisionObject.h.i"
+%include "BulletCollision/CollisionDispatch/btCollisionObject.cpp.i"
+%include "BulletCollision/CollisionDispatch/btCollisionObjectWrapper.h.i"
+%include "BulletCollision/CollisionDispatch/btSimulationIslandManager.h.i"
+%include "BulletCollision/CollisionDispatch/btSimulationIslandManager.cpp.i"
+%include "BulletCollision/CollisionDispatch/btCollisionWorld.h.i"
+%include "BulletCollision/CollisionDispatch/btCollisionWorld.cpp.i"
+
+%include "BulletCollision/CollisionShapes/btTriangleCallback.h.i"
+%include "BulletCollision/CollisionShapes/btTriangleCallback.cpp.i"
+%include "BulletDynamics/ConstraintSolver/btTypedConstraint.h.i"
+%include "BulletDynamics/ConstraintSolver/btTypedConstraint.cpp.i"
+%include "BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.h.i"
+%include "BulletDynamics/ConstraintSolver/btGeneric6DofConstraint.cpp.i"
+
+%include "BulletCollision/NarrowPhaseCollision/btPersistentManifold.h.i"
+%include "BulletCollision/NarrowPhaseCollision/btPersistentManifold.cpp.i"
+
+%include "BulletDynamics/Dynamics/btRigidBody.h.i"
+%include "BulletDynamics/Dynamics/btRigidBody.cpp.i"
+
+%include "BulletDynamics/ConstraintSolver/btConeTwistConstraint.h.i"
+%include "BulletDynamics/ConstraintSolver/btConeTwistConstraint.cpp.i"
+
+%include "BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h.i"
+%include "BulletDynamics/Dynamics/btDiscreteDynamicsWorld.cpp.i"
 
 
 // %include "BulletCollision/CollisionShapes/btTriangleShape.h.i"
@@ -121,5 +237,4 @@
 // %include "BulletCollision/CollisionShapes/btCapsuleShapeZ.h.i"
 // %include "BulletCollision/CollisionShapes/btConvexPointCloudShape.h.i"
 // %include "BulletCollision/CollisionShapes/btConvexShape.cpp.i"
-// %include "BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h"
 
