@@ -105,6 +105,21 @@
 %include "BulletCollision/CollisionShapes/btCapsuleShape.cpp.i"
 
 
+////// included headers [BulletDynamics/Dynamics/btRigidBody.h] ----------------------------------
+%include "BulletCollision/CollisionDispatch/btCollisionObject.h.i"
+%include "BulletCollision/CollisionDispatch/btCollisionObject.cpp.i"
+%include "BulletDynamics/Dynamics/btRigidBody.h.i"
+%include "BulletDynamics/Dynamics/btRigidBody.cpp.i"
+
+
+////// included headers [BulletDynamics/ConstraintSolver/btTypedConstraint.h] ----------------------------------
+%include "BulletDynamics/ConstraintSolver/btJacobianEntry.h.i"
+%include "LinearMath/btTransformUtil.h.i"
+%include "BulletDynamics/ConstraintSolver/btSolverBody.h.i"
+%include "BulletDynamics/ConstraintSolver/btSolverConstraint.h.i"
+%include "BulletDynamics/ConstraintSolver/btTypedConstraint.h.i"
+%include "BulletDynamics/ConstraintSolver/btTypedConstraint.cpp.i"
+
 
 
 
