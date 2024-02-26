@@ -100,6 +100,11 @@
 %include "BulletCollision/CollisionShapes/btBoxShape.cpp.i"
 
 
+////// included headers [BulletCollision/CollisionShapes/btCapsuleShape.h] ----------------------------------
+%include "BulletCollision/CollisionShapes/btCapsuleShape.h.i"
+%include "BulletCollision/CollisionShapes/btCapsuleShape.cpp.i"
+
+
 
 
 
