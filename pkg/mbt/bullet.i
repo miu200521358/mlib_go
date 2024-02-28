@@ -63,8 +63,8 @@
 ////// included headers [LinearMath/btDefaultMotionState.h] ----------------------------------
 %include "LinearMath/btScalar.h.i"
 %include "LinearMath/btMinMax.h.i"
-%include "LinearMath/btAlignedAllocator.h.i"
 %include "LinearMath/btAlignedAllocator.cpp.i"
+%include "LinearMath/btAlignedAllocator.h.i"
 %include "LinearMath/btVector3.h.i"
 %include "LinearMath/btVector3.h.i"
 %include "LinearMath/btQuadWord.h.i"
@@ -77,19 +77,29 @@
 
 ////// included headers [BulletCollision/CollisionShapes/btSphereShape.h] ----------------------------------
 %include "BulletCollision/BroadphaseCollision/btBroadphaseProxy.h.i"
-%include "BulletCollision/CollisionShapes/btCollisionShape.h.i"
 %include "BulletCollision/CollisionShapes/btCollisionShape.cpp.i"
+%include "BulletCollision/CollisionShapes/btCollisionShape.h.i"
 %include "BulletCollision/CollisionShapes/btCollisionMargin.h.i"
-%include "BulletCollision/CollisionShapes/btConvexShape.h.i"
 %include "BulletCollision/CollisionShapes/btConvexShape.cpp.i"
+%include "BulletCollision/CollisionShapes/btConvexShape.h.i"
 %include "LinearMath/btAabbUtil2.h.i"
-%include "BulletCollision/CollisionShapes/btConvexInternalShape.h.i"
 %include "BulletCollision/CollisionShapes/btConvexInternalShape.cpp.i"
-%include "BulletCollision/CollisionShapes/btSphereShape.h.i"
+%include "BulletCollision/CollisionShapes/btConvexInternalShape.h.i"
 %include "BulletCollision/CollisionShapes/btSphereShape.cpp.i"
-
+%include "BulletCollision/CollisionShapes/btSphereShape.h.i"
 
 // ////// included headers [BulletCollision/CollisionShapes/btBoxShape.h] ----------------------------------
+// %include "BulletCollision/BroadphaseCollision/btBroadphaseProxy.h.i"
+// %include "BulletCollision/CollisionShapes/btCollisionShape.h.i"
+// %include "BulletCollision/CollisionShapes/btCollisionMargin.h.i"
+// %include "BulletCollision/CollisionShapes/btConvexShape.h.i"
+// %include "LinearMath/btAabbUtil2.h.i"
+// %include "BulletCollision/CollisionShapes/btConvexInternalShape.h.i"
+// %include "BulletCollision/CollisionShapes/btPolyhedralConvexShape.h.i"
+// %include "BulletCollision/CollisionShapes/btPolyhedralConvexShape.cpp"
+// %include "BulletCollision/CollisionShapes/btBoxShape.h.i"
+// %include "BulletCollision/CollisionShapes/btBoxShape.cpp"
+
 // %include "LinearMath/btConvexHullComputer.h.i"
 // %include "LinearMath/btConvexHullComputer.cpp.i"
 // %include "LinearMath/btAlignedObjectArray.h.i"
