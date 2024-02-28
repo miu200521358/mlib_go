@@ -1,6 +1,6 @@
 ////// BulletCollision/CollisionDispatch/btCollisionObjectWrapper.h ----------------
 
-%include "BulletCollision/CollisionDispatch/btCollisionObjectWrapper.h"
+// %include "BulletCollision/CollisionDispatch/btCollisionObjectWrapper.h"
 
 %{
 
@@ -15,9 +15,10 @@ class btTransform;
 #include "LinearMath/btScalar.h"
 
 #define BT_DECLARE_STACK_ONLY_OBJECT \
+public:                            \
+	void operator delete(void*);	\
 private:                             \
 	void* operator new(size_t size); \
-	void operator delete(void*);
 
 struct btCollisionObjectWrapper;
 struct btCollisionObjectWrapper

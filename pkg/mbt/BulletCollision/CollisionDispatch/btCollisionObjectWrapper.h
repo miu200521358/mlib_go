@@ -9,9 +9,10 @@ class btTransform;
 #include "LinearMath/btScalar.h"  // for SIMD_FORCE_INLINE definition
 
 #define BT_DECLARE_STACK_ONLY_OBJECT \
+public:                            \
+	void operator delete(void*);	\
 private:                             \
 	void* operator new(size_t size); \
-	void operator delete(void*);
 
 struct btCollisionObjectWrapper;
 struct btCollisionObjectWrapper
