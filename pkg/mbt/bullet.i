@@ -88,30 +88,20 @@
 %include "BulletCollision/CollisionShapes/btSphereShape.cpp.i"
 %include "BulletCollision/CollisionShapes/btSphereShape.h.i"
 
-// ////// included headers [BulletCollision/CollisionShapes/btBoxShape.h] ----------------------------------
-// %include "BulletCollision/BroadphaseCollision/btBroadphaseProxy.h.i"
-// %include "BulletCollision/CollisionShapes/btCollisionShape.h.i"
-// %include "BulletCollision/CollisionShapes/btCollisionMargin.h.i"
-// %include "BulletCollision/CollisionShapes/btConvexShape.h.i"
-// %include "LinearMath/btAabbUtil2.h.i"
-// %include "BulletCollision/CollisionShapes/btConvexInternalShape.h.i"
-// %include "BulletCollision/CollisionShapes/btPolyhedralConvexShape.h.i"
-// %include "BulletCollision/CollisionShapes/btPolyhedralConvexShape.cpp"
-// %include "BulletCollision/CollisionShapes/btBoxShape.h.i"
-// %include "BulletCollision/CollisionShapes/btBoxShape.cpp"
 
-// %include "LinearMath/btConvexHullComputer.h.i"
-// %include "LinearMath/btConvexHullComputer.cpp.i"
-// %include "LinearMath/btAlignedObjectArray.h.i"
-// %include "LinearMath/btGeometryUtil.h.i"
-// %include "LinearMath/btGeometryUtil.cpp.i"
-// %include "BulletCollision/CollisionShapes/btConvexPolyhedron.h.i"
-// %include "LinearMath/btHashMap.h.i"
-// %include "BulletCollision/CollisionShapes/btConvexPolyhedron.cpp.i"
-// %include "BulletCollision/CollisionShapes/btPolyhedralConvexShape.h.i"
-// %include "BulletCollision/CollisionShapes/btPolyhedralConvexShape.cpp.i"
-// %include "BulletCollision/CollisionShapes/btBoxShape.h.i"
-// %include "BulletCollision/CollisionShapes/btBoxShape.cpp.i"
+// ////// included headers [BulletCollision/CollisionShapes/btBoxShape.h] ----------------------------------
+%include "BulletCollision/CollisionShapes/btPolyhedralConvexShape.cpp.i"
+%include "BulletCollision/CollisionShapes/btPolyhedralConvexShape.h.i"
+%include "BulletCollision/CollisionShapes/btBoxShape.cpp.i"
+%include "BulletCollision/CollisionShapes/btBoxShape.h.i"
+%include "LinearMath/btAlignedObjectArray.h.i"
+%include "BulletCollision/CollisionShapes/btConvexPolyhedron.cpp.i"
+%include "BulletCollision/CollisionShapes/btConvexPolyhedron.h.i"
+%include "LinearMath/btGeometryUtil.cpp.i"
+%include "LinearMath/btGeometryUtil.h.i"
+%include "LinearMath/btConvexHullComputer.cpp.i"
+%include "LinearMath/btConvexHullComputer.h.i"
+%include "LinearMath/btHashMap.h.i"
 
 
 // ////// included headers [BulletCollision/CollisionShapes/btCapsuleShape.h] ----------------------------------
