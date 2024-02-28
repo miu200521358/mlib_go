@@ -104,25 +104,22 @@
 %include "LinearMath/btHashMap.h.i"
 
 
-// ////// included headers [BulletCollision/CollisionShapes/btCapsuleShape.h] ----------------------------------
-// %include "BulletCollision/CollisionShapes/btCapsuleShape.h.i"
-// %include "BulletCollision/CollisionShapes/btCapsuleShape.cpp.i"
+////// included headers [BulletCollision/CollisionShapes/btCapsuleShape.h] ----------------------------------
+%include "BulletCollision/CollisionShapes/btCapsuleShape.cpp.i"
+%include "BulletCollision/CollisionShapes/btCapsuleShape.h.i"
 
 
-// ////// included headers [BulletDynamics/Dynamics/btRigidBody.h] ----------------------------------
-// %include "BulletCollision/CollisionDispatch/btCollisionObject.h.i"
-// %include "BulletCollision/CollisionDispatch/btCollisionObject.cpp.i"
-// %include "BulletDynamics/Dynamics/btRigidBody.h.i"
-// %include "BulletDynamics/Dynamics/btRigidBody.cpp.i"
-
-
-// ////// included headers [BulletDynamics/ConstraintSolver/btTypedConstraint.h] ----------------------------------
-// %include "BulletDynamics/ConstraintSolver/btJacobianEntry.h.i"
-// %include "LinearMath/btTransformUtil.h.i"
-// %include "BulletDynamics/ConstraintSolver/btSolverBody.h.i"
-// %include "BulletDynamics/ConstraintSolver/btSolverConstraint.h.i"
-// %include "BulletDynamics/ConstraintSolver/btTypedConstraint.h.i"
-// %include "BulletDynamics/ConstraintSolver/btTypedConstraint.cpp.i"
+////// included headers [BulletDynamics/Dynamics/btRigidBody.h] ----------------------------------
+%include "BulletCollision/CollisionDispatch/btCollisionObject.cpp.i"
+%include "BulletCollision/CollisionDispatch/btCollisionObject.h.i"
+%include "BulletDynamics/Dynamics/btRigidBody.cpp.i"
+%include "BulletDynamics/Dynamics/btRigidBody.h.i"
+%include "BulletDynamics/ConstraintSolver/btJacobianEntry.h.i"
+%include "LinearMath/btTransformUtil.h.i"
+%include "BulletDynamics/ConstraintSolver/btSolverBody.h.i"
+%include "BulletDynamics/ConstraintSolver/btSolverConstraint.h.i"
+%include "BulletDynamics/ConstraintSolver/btTypedConstraint.cpp.i"
+%include "BulletDynamics/ConstraintSolver/btTypedConstraint.h.i"
 
 
 // ////// included headers [BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h] ----------------------------------
