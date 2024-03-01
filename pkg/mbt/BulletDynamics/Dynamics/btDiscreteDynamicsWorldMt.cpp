@@ -172,7 +172,7 @@ btDiscreteDynamicsWorldMt::~btDiscreteDynamicsWorldMt()
 
 void btDiscreteDynamicsWorldMt::solveConstraints(btContactSolverInfo& solverInfo)
 {
-	BT_PROFILE("solveConstraints");
+//\1("solveConstraints");
 
 	m_constraintSolver->prepareSolve(getCollisionWorld()->getNumCollisionObjects(), getCollisionWorld()->getDispatcher()->getNumManifolds());
 
@@ -211,7 +211,7 @@ struct UpdaterUnconstrainedMotion : public btIParallelForBody
 
 void btDiscreteDynamicsWorldMt::predictUnconstraintMotion(btScalar timeStep)
 {
-	BT_PROFILE("predictUnconstraintMotion");
+//\1("predictUnconstraintMotion");
 	if (m_nonStaticRigidBodies.size() > 0)
 	{
 		UpdaterUnconstrainedMotion update;
@@ -224,7 +224,7 @@ void btDiscreteDynamicsWorldMt::predictUnconstraintMotion(btScalar timeStep)
 
 void btDiscreteDynamicsWorldMt::createPredictiveContacts(btScalar timeStep)
 {
-	BT_PROFILE("createPredictiveContacts");
+//\1("createPredictiveContacts");
 	releasePredictiveContacts();
 	if (m_nonStaticRigidBodies.size() > 0)
 	{
@@ -239,7 +239,7 @@ void btDiscreteDynamicsWorldMt::createPredictiveContacts(btScalar timeStep)
 
 void btDiscreteDynamicsWorldMt::integrateTransforms(btScalar timeStep)
 {
-	BT_PROFILE("integrateTransforms");
+//\1("integrateTransforms");
 	if (m_nonStaticRigidBodies.size() > 0)
 	{
 		UpdaterIntegrateTransforms update;

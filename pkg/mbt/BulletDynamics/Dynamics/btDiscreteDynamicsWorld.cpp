@@ -268,7 +268,7 @@ void btDiscreteDynamicsWorld::saveKinematicState(btScalar timeStep)
 
 void btDiscreteDynamicsWorld::debugDrawWorld()
 {
-	BT_PROFILE("debugDrawWorld");
+//\1("debugDrawWorld");
 
 	btCollisionWorld::debugDrawWorld();
 
@@ -451,7 +451,7 @@ int btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, 
 
 void btDiscreteDynamicsWorld::internalSingleStepSimulation(btScalar timeStep)
 {
-	BT_PROFILE("internalSingleStepSimulation");
+//\1("internalSingleStepSimulation");
 
 	if (0 != m_internalPreTickCallback)
 	{
@@ -583,7 +583,7 @@ void btDiscreteDynamicsWorld::addRigidBody(btRigidBody* body, int group, int mas
 
 void btDiscreteDynamicsWorld::updateActions(btScalar timeStep)
 {
-	BT_PROFILE("updateActions");
+//\1("updateActions");
 
 	for (int i = 0; i < m_actions.size(); i++)
 	{
@@ -593,7 +593,7 @@ void btDiscreteDynamicsWorld::updateActions(btScalar timeStep)
 
 void btDiscreteDynamicsWorld::updateActivationState(btScalar timeStep)
 {
-	BT_PROFILE("updateActivationState");
+//\1("updateActivationState");
 
 	for (int i = 0; i < m_nonStaticRigidBodies.size(); i++)
 	{
@@ -680,7 +680,7 @@ void btDiscreteDynamicsWorld::removeCharacter(btActionInterface* character)
 
 void btDiscreteDynamicsWorld::solveConstraints(btContactSolverInfo& solverInfo)
 {
-	BT_PROFILE("solveConstraints");
+//\1("solveConstraints");
 
 	m_sortedConstraints.resize(m_constraints.size());
 	int i;
@@ -708,7 +708,7 @@ void btDiscreteDynamicsWorld::solveConstraints(btContactSolverInfo& solverInfo)
 
 void btDiscreteDynamicsWorld::calculateSimulationIslands()
 {
-	BT_PROFILE("calculateSimulationIslands");
+//\1("calculateSimulationIslands");
 
 	getSimulationIslandManager()->updateActivationState(getCollisionWorld(), getCollisionWorld()->getDispatcher());
 
@@ -862,7 +862,7 @@ void btDiscreteDynamicsWorld::createPredictiveContactsInternal(btRigidBody** bod
 
 			if (getDispatchInfo().m_useContinuous && body->getCcdSquareMotionThreshold() && body->getCcdSquareMotionThreshold() < squareMotion)
 			{
-				BT_PROFILE("predictive convexSweepTest");
+//\1("predictive convexSweepTest");
 				if (body->getCollisionShape()->isConvex())
 				{
 					gNumClampedCcdMotions++;
@@ -928,7 +928,7 @@ void btDiscreteDynamicsWorld::createPredictiveContactsInternal(btRigidBody** bod
 
 void btDiscreteDynamicsWorld::releasePredictiveContacts()
 {
-	BT_PROFILE("release predictive contact manifolds");
+//\1("release predictive contact manifolds");
 
 	for (int i = 0; i < m_predictiveManifolds.size(); i++)
 	{
@@ -940,7 +940,7 @@ void btDiscreteDynamicsWorld::releasePredictiveContacts()
 
 void btDiscreteDynamicsWorld::createPredictiveContacts(btScalar timeStep)
 {
-	BT_PROFILE("createPredictiveContacts");
+//\1("createPredictiveContacts");
 	releasePredictiveContacts();
 	if (m_nonStaticRigidBodies.size() > 0)
 	{
@@ -964,7 +964,7 @@ void btDiscreteDynamicsWorld::integrateTransformsInternal(btRigidBody** bodies, 
 
 			if (getDispatchInfo().m_useContinuous && body->getCcdSquareMotionThreshold() && body->getCcdSquareMotionThreshold() < squareMotion)
 			{
-				BT_PROFILE("CCD motion clamping");
+//\1("CCD motion clamping");
 				if (body->getCollisionShape()->isConvex())
 				{
 					gNumClampedCcdMotions++;
@@ -1046,7 +1046,7 @@ void btDiscreteDynamicsWorld::integrateTransformsInternal(btRigidBody** bodies, 
 
 void btDiscreteDynamicsWorld::integrateTransforms(btScalar timeStep)
 {
-	BT_PROFILE("integrateTransforms");
+//\1("integrateTransforms");
 	if (m_nonStaticRigidBodies.size() > 0)
 	{
 		integrateTransformsInternal(&m_nonStaticRigidBodies[0], m_nonStaticRigidBodies.size(), timeStep);
@@ -1055,7 +1055,7 @@ void btDiscreteDynamicsWorld::integrateTransforms(btScalar timeStep)
 	///this should probably be switched on by default, but it is not well tested yet
 	if (m_applySpeculativeContactRestitution)
 	{
-		BT_PROFILE("apply speculative contact restitution");
+//\1("apply speculative contact restitution");
 		for (int i = 0; i < m_predictiveManifolds.size(); i++)
 		{
 			btPersistentManifold* manifold = m_predictiveManifolds[i];
@@ -1090,7 +1090,7 @@ void btDiscreteDynamicsWorld::integrateTransforms(btScalar timeStep)
 
 void btDiscreteDynamicsWorld::predictUnconstraintMotion(btScalar timeStep)
 {
-	BT_PROFILE("predictUnconstraintMotion");
+//\1("predictUnconstraintMotion");
 	for (int i = 0; i < m_nonStaticRigidBodies.size(); i++)
 	{
 		btRigidBody* body = m_nonStaticRigidBodies[i];

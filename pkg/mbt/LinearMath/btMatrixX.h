@@ -192,7 +192,7 @@ struct btMatrixX
 		m_rows = rows;
 		m_cols = cols;
 		{
-			BT_PROFILE("m_storage.resize");
+//\1("m_storage.resize");
 			m_storage.resize(rows * cols);
 		}
 	}
@@ -262,7 +262,7 @@ struct btMatrixX
 	void setZero()
 	{
 		{
-			BT_PROFILE("storage=0");
+//\1("storage=0");
 			if (m_storage.size())
 			{
 				btSetZero(&m_storage[0], m_storage.size());

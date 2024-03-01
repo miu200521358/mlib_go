@@ -1293,7 +1293,7 @@ void btSequentialImpulseConstraintSolver::convertJoint(btSolverConstraint* curre
 
 void btSequentialImpulseConstraintSolver::convertJoints(btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("convertJoints");
+//\1("convertJoints");
 	for (int j = 0; j < numConstraints; j++)
 	{
 		btTypedConstraint* constraint = constraints[j];
@@ -1357,7 +1357,7 @@ void btSequentialImpulseConstraintSolver::convertJoints(btTypedConstraint** cons
 
 void btSequentialImpulseConstraintSolver::convertBodies(btCollisionObject** bodies, int numBodies, const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("convertBodies");
+//\1("convertBodies");
 	for (int i = 0; i < numBodies; i++)
 	{
 		bodies[i]->setCompanionId(-1);
@@ -1403,7 +1403,7 @@ void btSequentialImpulseConstraintSolver::convertBodies(btCollisionObject** bodi
 btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCollisionObject** bodies, int numBodies, btPersistentManifold** manifoldPtr, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& infoGlobal, btIDebugDraw* debugDrawer)
 {
 	m_fixedBodyId = -1;
-	BT_PROFILE("solveGroupCacheFriendlySetup");
+//\1("solveGroupCacheFriendlySetup");
 	(void)debugDrawer;
 
 	// if solver mode has changed,
@@ -1525,7 +1525,7 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCol
 
 btScalar btSequentialImpulseConstraintSolver::solveSingleIteration(int iteration, btCollisionObject** /*bodies */, int /*numBodies*/, btPersistentManifold** /*manifoldPtr*/, int /*numManifolds*/, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& infoGlobal, btIDebugDraw* /*debugDrawer*/)
 {
-	BT_PROFILE("solveSingleIteration");
+//\1("solveSingleIteration");
 	btScalar leastSquaresResidual = 0.f;
 
 	int numNonContactPool = m_tmpSolverNonContactConstraintPool.size();
@@ -1696,7 +1696,7 @@ btScalar btSequentialImpulseConstraintSolver::solveSingleIteration(int iteration
 
 void btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySplitImpulseIterations(btCollisionObject** bodies, int numBodies, btPersistentManifold** manifoldPtr, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& infoGlobal, btIDebugDraw* debugDrawer)
 {
-	BT_PROFILE("solveGroupCacheFriendlySplitImpulseIterations");
+//\1("solveGroupCacheFriendlySplitImpulseIterations");
 	int iteration;
 	if (infoGlobal.m_splitImpulse)
 	{
@@ -1729,7 +1729,7 @@ void btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySplitImpulseIte
 
 btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlyIterations(btCollisionObject** bodies, int numBodies, btPersistentManifold** manifoldPtr, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& infoGlobal, btIDebugDraw* debugDrawer)
 {
-	BT_PROFILE("solveGroupCacheFriendlyIterations");
+//\1("solveGroupCacheFriendlyIterations");
 
 	{
 		///this is a special step to resolve penetrations (just for contacts)
@@ -1835,7 +1835,7 @@ void btSequentialImpulseConstraintSolver::writeBackBodies(int iBegin, int iEnd, 
 
 btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlyFinish(btCollisionObject** bodies, int numBodies, const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("solveGroupCacheFriendlyFinish");
+//\1("solveGroupCacheFriendlyFinish");
 
 	if (infoGlobal.m_solverMode & SOLVER_USE_WARMSTARTING)
 	{
@@ -1857,7 +1857,7 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlyFinish(btCo
 /// btSequentialImpulseConstraintSolver Sequentially applies impulses
 btScalar btSequentialImpulseConstraintSolver::solveGroup(btCollisionObject** bodies, int numBodies, btPersistentManifold** manifoldPtr, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& infoGlobal, btIDebugDraw* debugDrawer, btDispatcher* /*dispatcher*/)
 {
-	BT_PROFILE("solveGroup");
+//\1("solveGroup");
 	//you need to provide at least some bodies
 
 	solveGroupCacheFriendlySetup(bodies, numBodies, manifoldPtr, numManifolds, constraints, numConstraints, infoGlobal, debugDrawer);

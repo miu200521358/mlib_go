@@ -331,7 +331,7 @@ void* btHashedOverlappingPairCache::removeOverlappingPair(btBroadphaseProxy* pro
 #include "LinearMath/btQuickprof.h"
 void btHashedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback* callback, btDispatcher* dispatcher)
 {
-	BT_PROFILE("btHashedOverlappingPairCache::processAllOverlappingPairs");
+//\1("btHashedOverlappingPairCache::processAllOverlappingPairs");
 	int i;
 
 	//	printf("m_overlappingPairArray.size()=%d\n",m_overlappingPairArray.size());
@@ -376,7 +376,7 @@ void btHashedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback*
 		btBroadphasePairArray& pa = getOverlappingPairArray();
 		btAlignedObjectArray<MyPairIndex> indices;
 		{
-			BT_PROFILE("sortOverlappingPairs");
+//\1("sortOverlappingPairs");
 			indices.resize(pa.size());
 			for (int i = 0; i < indices.size(); i++)
 			{
@@ -391,7 +391,7 @@ void btHashedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback*
 			indices.quickSort(MyPairIndeSortPredicate());
 		}
 		{
-			BT_PROFILE("btHashedOverlappingPairCache::processAllOverlappingPairs");
+//\1("btHashedOverlappingPairCache::processAllOverlappingPairs");
 			int i;
 			for (i = 0; i < indices.size();)
 			{

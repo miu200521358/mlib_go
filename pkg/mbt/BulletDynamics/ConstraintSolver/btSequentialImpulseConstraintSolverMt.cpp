@@ -42,7 +42,7 @@ btSequentialImpulseConstraintSolverMt::~btSequentialImpulseConstraintSolverMt()
 
 void btSequentialImpulseConstraintSolverMt::setupBatchedContactConstraints()
 {
-	BT_PROFILE("setupBatchedContactConstraints");
+//\1("setupBatchedContactConstraints");
 	m_batchedContactConstraints.setup(&m_tmpSolverContactConstraintPool,
 									  m_tmpSolverBodyPool,
 									  s_contactBatchingMethod,
@@ -53,7 +53,7 @@ void btSequentialImpulseConstraintSolverMt::setupBatchedContactConstraints()
 
 void btSequentialImpulseConstraintSolverMt::setupBatchedJointConstraints()
 {
-	BT_PROFILE("setupBatchedJointConstraints");
+//\1("setupBatchedJointConstraints");
 	m_batchedJointConstraints.setup(&m_tmpSolverNonContactConstraintPool,
 									m_tmpSolverBodyPool,
 									s_jointBatchingMethod,
@@ -257,7 +257,7 @@ struct SetupContactConstraintsLoop : public btIParallelForBody
 	}
 	void forLoop(int iBegin, int iEnd) const BT_OVERRIDE
 	{
-		BT_PROFILE("SetupContactConstraintsLoop");
+//\1("SetupContactConstraintsLoop");
 		for (int iBatch = iBegin; iBatch < iEnd; ++iBatch)
 		{
 			const btBatchedConstraints::Range& batch = m_bc->m_batches[iBatch];
@@ -272,7 +272,7 @@ struct SetupContactConstraintsLoop : public btIParallelForBody
 
 void btSequentialImpulseConstraintSolverMt::setupAllContactConstraints(const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("setupAllContactConstraints");
+//\1("setupAllContactConstraints");
 	if (m_useBatching)
 	{
 		const btBatchedConstraints& batchedCons = m_batchedContactConstraints;
@@ -388,7 +388,7 @@ int btSequentialImpulseConstraintSolverMt::getOrInitSolverBodyThreadsafe(btColli
 
 void btSequentialImpulseConstraintSolverMt::internalCollectContactManifoldCachedInfo(btContactManifoldCachedInfo* cachedInfoArray, btPersistentManifold** manifoldPtr, int numManifolds, const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("internalCollectContactManifoldCachedInfo");
+//\1("internalCollectContactManifoldCachedInfo");
 	for (int i = 0; i < numManifolds; ++i)
 	{
 		btContactManifoldCachedInfo* cachedInfo = &cachedInfoArray[i];
@@ -449,7 +449,7 @@ struct CollectContactManifoldCachedInfoLoop : public btIParallelForBody
 
 void btSequentialImpulseConstraintSolverMt::internalAllocContactConstraints(const btContactManifoldCachedInfo* cachedInfoArray, int numManifolds)
 {
-	BT_PROFILE("internalAllocContactConstraints");
+//\1("internalAllocContactConstraints");
 	// possibly parallel part
 	for (int iManifold = 0; iManifold < numManifolds; ++iManifold)
 	{
@@ -512,7 +512,7 @@ struct AllocContactConstraintsLoop : public btIParallelForBody
 
 void btSequentialImpulseConstraintSolverMt::allocAllContactConstraints(btPersistentManifold** manifoldPtr, int numManifolds, const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("allocAllContactConstraints");
+//\1("allocAllContactConstraints");
 	btAlignedObjectArray<btContactManifoldCachedInfo> cachedInfoArray;  // = m_manifoldCachedInfoArray;
 	cachedInfoArray.resizeNoInitialize(numManifolds);
 	if (/* DISABLES CODE */ (false))
@@ -547,7 +547,7 @@ void btSequentialImpulseConstraintSolverMt::allocAllContactConstraints(btPersist
 			}
 		}
 		{
-			BT_PROFILE("allocPools");
+//\1("allocPools");
 			if (m_tmpSolverContactConstraintPool.capacity() < numContacts)
 			{
 				// if we need to reallocate, reserve some extra so we don't have to reallocate again next frame
@@ -577,7 +577,7 @@ void btSequentialImpulseConstraintSolverMt::convertContacts(btPersistentManifold
 		btSequentialImpulseConstraintSolver::convertContacts(manifoldPtr, numManifolds, infoGlobal);
 		return;
 	}
-	BT_PROFILE("convertContacts");
+//\1("convertContacts");
 	if (numManifolds > 0)
 	{
 		if (m_fixedBodyId < 0)
@@ -597,7 +597,7 @@ void btSequentialImpulseConstraintSolverMt::convertContacts(btPersistentManifold
 
 void btSequentialImpulseConstraintSolverMt::internalInitMultipleJoints(btTypedConstraint** constraints, int iBegin, int iEnd)
 {
-	BT_PROFILE("internalInitMultipleJoints");
+//\1("internalInitMultipleJoints");
 	for (int i = iBegin; i < iEnd; i++)
 	{
 		btTypedConstraint* constraint = constraints[i];
@@ -642,7 +642,7 @@ struct InitJointsLoop : public btIParallelForBody
 
 void btSequentialImpulseConstraintSolverMt::internalConvertMultipleJoints(const btAlignedObjectArray<JointParams>& jointParamsArray, btTypedConstraint** constraints, int iBegin, int iEnd, const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("internalConvertMultipleJoints");
+//\1("internalConvertMultipleJoints");
 	for (int i = iBegin; i < iEnd; ++i)
 	{
 		const JointParams& jointParams = jointParamsArray[i];
@@ -690,7 +690,7 @@ void btSequentialImpulseConstraintSolverMt::convertJoints(btTypedConstraint** co
 		btSequentialImpulseConstraintSolver::convertJoints(constraints, numConstraints, infoGlobal);
 		return;
 	}
-	BT_PROFILE("convertJoints");
+//\1("convertJoints");
 	bool parallelJointSetup = true;
 	m_tmpConstraintSizesPool.resizeNoInitialize(numConstraints);
 	if (parallelJointSetup)
@@ -746,7 +746,7 @@ void btSequentialImpulseConstraintSolverMt::convertJoints(btTypedConstraint** co
 
 void btSequentialImpulseConstraintSolverMt::internalConvertBodies(btCollisionObject** bodies, int iBegin, int iEnd, const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("internalConvertBodies");
+//\1("internalConvertBodies");
 	for (int i = iBegin; i < iEnd; i++)
 	{
 		btCollisionObject* obj = bodies[i];
@@ -801,7 +801,7 @@ struct ConvertBodiesLoop : public btIParallelForBody
 
 void btSequentialImpulseConstraintSolverMt::convertBodies(btCollisionObject** bodies, int numBodies, const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("convertBodies");
+//\1("convertBodies");
 	m_kinematicBodyUniqueIdToSolverBodyTable.resize(0);
 
 	m_tmpSolverBodyPool.resizeNoInitialize(numBodies + 1);
@@ -882,7 +882,7 @@ struct ContactSplitPenetrationImpulseSolverLoop : public btIParallelSumBody
 	}
 	btScalar sumLoop(int iBegin, int iEnd) const BT_OVERRIDE
 	{
-		BT_PROFILE("ContactSplitPenetrationImpulseSolverLoop");
+//\1("ContactSplitPenetrationImpulseSolverLoop");
 		btScalar sum = 0;
 		for (int iBatch = iBegin; iBatch < iEnd; ++iBatch)
 		{
@@ -895,7 +895,7 @@ struct ContactSplitPenetrationImpulseSolverLoop : public btIParallelSumBody
 
 void btSequentialImpulseConstraintSolverMt::solveGroupCacheFriendlySplitImpulseIterations(btCollisionObject** bodies, int numBodies, btPersistentManifold** manifoldPtr, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& infoGlobal, btIDebugDraw* debugDrawer)
 {
-	BT_PROFILE("solveGroupCacheFriendlySplitImpulseIterations");
+//\1("solveGroupCacheFriendlySplitImpulseIterations");
 	if (infoGlobal.m_splitImpulse)
 	{
 		for (int iteration = 0; iteration < infoGlobal.m_numIterations; iteration++)
@@ -936,7 +936,7 @@ btScalar btSequentialImpulseConstraintSolverMt::solveSingleIteration(int iterati
 	{
 		return btSequentialImpulseConstraintSolver::solveSingleIteration(iteration, bodies, numBodies, manifoldPtr, numManifolds, constraints, numConstraints, infoGlobal, debugDrawer);
 	}
-	BT_PROFILE("solveSingleIterationMt");
+//\1("solveSingleIterationMt");
 	btScalar leastSquaresResidual = 0.f;
 
 	if (infoGlobal.m_solverMode & SOLVER_RANDMIZE_ORDER)
@@ -1215,7 +1215,7 @@ struct JointSolverLoop : public btIParallelSumBody
 	}
 	btScalar sumLoop(int iBegin, int iEnd) const BT_OVERRIDE
 	{
-		BT_PROFILE("JointSolverLoop");
+//\1("JointSolverLoop");
 		btScalar sum = 0;
 		for (int iBatch = iBegin; iBatch < iEnd; ++iBatch)
 		{
@@ -1228,7 +1228,7 @@ struct JointSolverLoop : public btIParallelSumBody
 
 btScalar btSequentialImpulseConstraintSolverMt::resolveAllJointConstraints(int iteration)
 {
-	BT_PROFILE("resolveAllJointConstraints");
+//\1("resolveAllJointConstraints");
 	const btBatchedConstraints& batchedCons = m_batchedJointConstraints;
 	JointSolverLoop loop(this, &batchedCons, iteration);
 	btScalar leastSquaresResidual = 0.f;
@@ -1254,7 +1254,7 @@ struct ContactSolverLoop : public btIParallelSumBody
 	}
 	btScalar sumLoop(int iBegin, int iEnd) const BT_OVERRIDE
 	{
-		BT_PROFILE("ContactSolverLoop");
+//\1("ContactSolverLoop");
 		btScalar sum = 0;
 		for (int iBatch = iBegin; iBatch < iEnd; ++iBatch)
 		{
@@ -1267,7 +1267,7 @@ struct ContactSolverLoop : public btIParallelSumBody
 
 btScalar btSequentialImpulseConstraintSolverMt::resolveAllContactConstraints()
 {
-	BT_PROFILE("resolveAllContactConstraints");
+//\1("resolveAllContactConstraints");
 	const btBatchedConstraints& batchedCons = m_batchedContactConstraints;
 	ContactSolverLoop loop(this, &batchedCons);
 	btScalar leastSquaresResidual = 0.f;
@@ -1293,7 +1293,7 @@ struct ContactFrictionSolverLoop : public btIParallelSumBody
 	}
 	btScalar sumLoop(int iBegin, int iEnd) const BT_OVERRIDE
 	{
-		BT_PROFILE("ContactFrictionSolverLoop");
+//\1("ContactFrictionSolverLoop");
 		btScalar sum = 0;
 		for (int iBatch = iBegin; iBatch < iEnd; ++iBatch)
 		{
@@ -1306,7 +1306,7 @@ struct ContactFrictionSolverLoop : public btIParallelSumBody
 
 btScalar btSequentialImpulseConstraintSolverMt::resolveAllContactFrictionConstraints()
 {
-	BT_PROFILE("resolveAllContactFrictionConstraints");
+//\1("resolveAllContactFrictionConstraints");
 	const btBatchedConstraints& batchedCons = m_batchedContactConstraints;
 	ContactFrictionSolverLoop loop(this, &batchedCons);
 	btScalar leastSquaresResidual = 0.f;
@@ -1332,7 +1332,7 @@ struct InterleavedContactSolverLoop : public btIParallelSumBody
 	}
 	btScalar sumLoop(int iBegin, int iEnd) const BT_OVERRIDE
 	{
-		BT_PROFILE("InterleavedContactSolverLoop");
+//\1("InterleavedContactSolverLoop");
 		btScalar sum = 0;
 		for (int iBatch = iBegin; iBatch < iEnd; ++iBatch)
 		{
@@ -1345,7 +1345,7 @@ struct InterleavedContactSolverLoop : public btIParallelSumBody
 
 btScalar btSequentialImpulseConstraintSolverMt::resolveAllContactConstraintsInterleaved()
 {
-	BT_PROFILE("resolveAllContactConstraintsInterleaved");
+//\1("resolveAllContactConstraintsInterleaved");
 	const btBatchedConstraints& batchedCons = m_batchedContactConstraints;
 	InterleavedContactSolverLoop loop(this, &batchedCons);
 	btScalar leastSquaresResidual = 0.f;
@@ -1371,7 +1371,7 @@ struct ContactRollingFrictionSolverLoop : public btIParallelSumBody
 	}
 	btScalar sumLoop(int iBegin, int iEnd) const BT_OVERRIDE
 	{
-		BT_PROFILE("ContactFrictionSolverLoop");
+//\1("ContactFrictionSolverLoop");
 		btScalar sum = 0;
 		for (int iBatch = iBegin; iBatch < iEnd; ++iBatch)
 		{
@@ -1384,7 +1384,7 @@ struct ContactRollingFrictionSolverLoop : public btIParallelSumBody
 
 btScalar btSequentialImpulseConstraintSolverMt::resolveAllRollingFrictionConstraints()
 {
-	BT_PROFILE("resolveAllRollingFrictionConstraints");
+//\1("resolveAllRollingFrictionConstraints");
 	btScalar leastSquaresResidual = 0.f;
 	//
 	// We do not generate batches for rolling friction constraints. We assume that
@@ -1446,7 +1446,7 @@ btScalar btSequentialImpulseConstraintSolverMt::resolveAllRollingFrictionConstra
 
 void btSequentialImpulseConstraintSolverMt::internalWriteBackContacts(int iBegin, int iEnd, const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("internalWriteBackContacts");
+//\1("internalWriteBackContacts");
 	writeBackContacts(iBegin, iEnd, infoGlobal);
 	//for ( int iContact = iBegin; iContact < iEnd; ++iContact)
 	//{
@@ -1464,13 +1464,13 @@ void btSequentialImpulseConstraintSolverMt::internalWriteBackContacts(int iBegin
 
 void btSequentialImpulseConstraintSolverMt::internalWriteBackJoints(int iBegin, int iEnd, const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("internalWriteBackJoints");
+//\1("internalWriteBackJoints");
 	writeBackJoints(iBegin, iEnd, infoGlobal);
 }
 
 void btSequentialImpulseConstraintSolverMt::internalWriteBackBodies(int iBegin, int iEnd, const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("internalWriteBackBodies");
+//\1("internalWriteBackBodies");
 	writeBackBodies(iBegin, iEnd, infoGlobal);
 }
 
@@ -1524,7 +1524,7 @@ struct WriteBodiesLoop : public btIParallelForBody
 
 btScalar btSequentialImpulseConstraintSolverMt::solveGroupCacheFriendlyFinish(btCollisionObject** bodies, int numBodies, const btContactSolverInfo& infoGlobal)
 {
-	BT_PROFILE("solveGroupCacheFriendlyFinish");
+//\1("solveGroupCacheFriendlyFinish");
 
 	if (infoGlobal.m_solverMode & SOLVER_USE_WARMSTARTING)
 	{

@@ -220,7 +220,7 @@ void btCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPairCache* pa
 	btCollisionPairCallback collisionCallback(dispatchInfo, this);
 
 	{
-		BT_PROFILE("processAllOverlappingPairs");
+//\1("processAllOverlappingPairs");
 		pairCache->processAllOverlappingPairs(&collisionCallback, dispatcher, dispatchInfo);
 	}
 

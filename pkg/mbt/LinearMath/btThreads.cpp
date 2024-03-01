@@ -476,12 +476,12 @@ public:
 	virtual void setNumThreads(int numThreads) BT_OVERRIDE {}
 	virtual void parallelFor(int iBegin, int iEnd, int grainSize, const btIParallelForBody& body) BT_OVERRIDE
 	{
-		BT_PROFILE("parallelFor_sequential");
+//\1("parallelFor_sequential");
 		body.forLoop(iBegin, iEnd);
 	}
 	virtual btScalar parallelSum(int iBegin, int iEnd, int grainSize, const btIParallelSumBody& body) BT_OVERRIDE
 	{
-		BT_PROFILE("parallelSum_sequential");
+//\1("parallelSum_sequential");
 		return body.sumLoop(iBegin, iEnd);
 	}
 };
@@ -523,26 +523,26 @@ public:
 	}
 	virtual void parallelFor(int iBegin, int iEnd, int grainSize, const btIParallelForBody& body) BT_OVERRIDE
 	{
-		BT_PROFILE("parallelFor_OpenMP");
+//\1("parallelFor_OpenMP");
 		btPushThreadsAreRunning();
 #pragma omp parallel for schedule(static, 1)
 		for (int i = iBegin; i < iEnd; i += grainSize)
 		{
-			BT_PROFILE("OpenMP_forJob");
+//\1("OpenMP_forJob");
 			body.forLoop(i, (std::min)(i + grainSize, iEnd));
 		}
 		btPopThreadsAreRunning();
 	}
 	virtual btScalar parallelSum(int iBegin, int iEnd, int grainSize, const btIParallelSumBody& body) BT_OVERRIDE
 	{
-		BT_PROFILE("parallelFor_OpenMP");
+//\1("parallelFor_OpenMP");
 		btPushThreadsAreRunning();
 		btScalar sum = btScalar(0);
 #pragma omp parallel for schedule(static, 1) reduction(+ \
 													   : sum)
 		for (int i = iBegin; i < iEnd; i += grainSize)
 		{
-			BT_PROFILE("OpenMP_sumJob");
+//\1("OpenMP_sumJob");
 			sum += body.sumLoop(i, (std::min)(i + grainSize, iEnd));
 		}
 		btPopThreadsAreRunning();
@@ -606,13 +606,13 @@ public:
 		ForBodyAdapter(const btIParallelForBody* body) : mBody(body) {}
 		void operator()(const tbb::blocked_range<int>& range) const
 		{
-			BT_PROFILE("TBB_forJob");
+//\1("TBB_forJob");
 			mBody->forLoop(range.begin(), range.end());
 		}
 	};
 	virtual void parallelFor(int iBegin, int iEnd, int grainSize, const btIParallelForBody& body) BT_OVERRIDE
 	{
-		BT_PROFILE("parallelFor_TBB");
+//\1("parallelFor_TBB");
 		ForBodyAdapter tbbBody(&body);
 		btPushThreadsAreRunning();
 		tbb::parallel_for(tbb::blocked_range<int>(iBegin, iEnd, grainSize),
@@ -630,13 +630,13 @@ public:
 		void join(const SumBodyAdapter& src) { mSum += src.mSum; }
 		void operator()(const tbb::blocked_range<int>& range)
 		{
-			BT_PROFILE("TBB_sumJob");
+//\1("TBB_sumJob");
 			mSum += mBody->sumLoop(range.begin(), range.end());
 		}
 	};
 	virtual btScalar parallelSum(int iBegin, int iEnd, int grainSize, const btIParallelSumBody& body) BT_OVERRIDE
 	{
-		BT_PROFILE("parallelSum_TBB");
+//\1("parallelSum_TBB");
 		SumBodyAdapter tbbBody(&body);
 		btPushThreadsAreRunning();
 		tbb::parallel_deterministic_reduce(tbb::blocked_range<int>(iBegin, iEnd, grainSize), tbbBody);
@@ -702,13 +702,13 @@ public:
 		ForBodyAdapter(const btIParallelForBody* body, int grainSize, int end) : mBody(body), mGrainSize(grainSize), mIndexEnd(end) {}
 		void operator()(int i) const
 		{
-			BT_PROFILE("PPL_forJob");
+//\1("PPL_forJob");
 			mBody->forLoop(i, (std::min)(i + mGrainSize, mIndexEnd));
 		}
 	};
 	virtual void parallelFor(int iBegin, int iEnd, int grainSize, const btIParallelForBody& body) BT_OVERRIDE
 	{
-		BT_PROFILE("parallelFor_PPL");
+//\1("parallelFor_PPL");
 		// PPL dispatch
 		ForBodyAdapter pplBody(&body, grainSize, iEnd);
 		btPushThreadsAreRunning();
@@ -729,14 +729,14 @@ public:
 		SumBodyAdapter(const btIParallelSumBody* body, concurrency::combinable<btScalar>* sum, int grainSize, int end) : mBody(body), mSum(sum), mGrainSize(grainSize), mIndexEnd(end) {}
 		void operator()(int i) const
 		{
-			BT_PROFILE("PPL_sumJob");
+//\1("PPL_sumJob");
 			mSum->local() += mBody->sumLoop(i, (std::min)(i + mGrainSize, mIndexEnd));
 		}
 	};
 	static btScalar sumFunc(btScalar a, btScalar b) { return a + b; }
 	virtual btScalar parallelSum(int iBegin, int iEnd, int grainSize, const btIParallelSumBody& body) BT_OVERRIDE
 	{
-		BT_PROFILE("parallelSum_PPL");
+//\1("parallelSum_PPL");
 		m_sum.clear();
 		SumBodyAdapter pplBody(&body, &m_sum, grainSize, iEnd);
 		btPushThreadsAreRunning();

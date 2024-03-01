@@ -1,3 +1,0 @@
-[submodule "pkg/mbt/bullet"]
-	path = pkg/mbt/bullet
-	url = https://github.com/miu200521358/bullet3.git

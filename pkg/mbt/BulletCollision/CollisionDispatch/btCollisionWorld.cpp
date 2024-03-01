@@ -196,7 +196,7 @@ void btCollisionWorld::updateSingleAabb(btCollisionObject* colObj)
 
 void btCollisionWorld::updateAabbs()
 {
-	BT_PROFILE("updateAabbs");
+//\1("updateAabbs");
 
 	for (int i = 0; i < m_collisionObjects.size(); i++)
 	{
@@ -213,13 +213,13 @@ void btCollisionWorld::updateAabbs()
 
 void btCollisionWorld::computeOverlappingPairs()
 {
-	BT_PROFILE("calculateOverlappingPairs");
+//\1("calculateOverlappingPairs");
 	m_broadphasePairCache->calculateOverlappingPairs(m_dispatcher1);
 }
 
 void btCollisionWorld::performDiscreteCollisionDetection()
 {
-	BT_PROFILE("performDiscreteCollisionDetection");
+//\1("performDiscreteCollisionDetection");
 
 	btDispatcherInfo& dispatchInfo = getDispatchInfo();
 
@@ -229,7 +229,7 @@ void btCollisionWorld::performDiscreteCollisionDetection()
 
 	btDispatcher* dispatcher = getDispatcher();
 	{
-		BT_PROFILE("dispatchAllCollisionPairs");
+//\1("dispatchAllCollisionPairs");
 		if (dispatcher)
 			dispatcher->dispatchAllCollisionPairs(m_broadphasePairCache->getOverlappingPairCache(), dispatchInfo, m_dispatcher1);
 	}
@@ -890,7 +890,7 @@ void btCollisionWorld::objectQuerySingleInternal(const btConvexShape* castShape,
 					}
 				};
 
-				BT_PROFILE("convexSweepCompound");
+//\1("convexSweepCompound");
 				const btCompoundShape* compoundShape = static_cast<const btCompoundShape*>(collisionShape);
 
 				btVector3 fromLocalAabbMin, fromLocalAabbMax;
@@ -1074,7 +1074,7 @@ struct btSingleSweepCallback : public btBroadphaseRayCallback
 
 void btCollisionWorld::convexSweepTest(const btConvexShape* castShape, const btTransform& convexFromWorld, const btTransform& convexToWorld, ConvexResultCallback& resultCallback, btScalar allowedCcdPenetration) const
 {
-	BT_PROFILE("convexSweepTest");
+//\1("convexSweepTest");
 	/// use the broadphase to accelerate the search for objects, based on their aabb
 	/// and for each object with ray-aabb overlap, perform an exact ray test
 	/// unfortunately the implementation for rayTest and convexSweepTest duplicated, albeit practically identical

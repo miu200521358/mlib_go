@@ -74,7 +74,7 @@ void btConvexTriangleCallback::clearCache()
 
 void btConvexTriangleCallback::processTriangle(btVector3* triangle, int partId, int triangleIndex)
 {
-	BT_PROFILE("btConvexTriangleCallback::processTriangle");
+//\1("btConvexTriangleCallback::processTriangle");
 
 	if (!TestTriangleAgainstAabb2(triangle, m_aabbMin, m_aabbMax))
 	{
@@ -172,7 +172,7 @@ void btConvexTriangleCallback::processTriangle(btVector3* triangle, int partId, 
 		}
 
 		{
-			BT_PROFILE("processCollision (GJK?)");
+//\1("processCollision (GJK?)");
 			colAlgo->processCollision(m_convexBodyWrap, &triObWrap, *m_dispatchInfoPtr, m_resultOut);
 		}
 
@@ -220,7 +220,7 @@ void btConvexConcaveCollisionAlgorithm::clearCache()
 
 void btConvexConcaveCollisionAlgorithm::processCollision(const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
-	BT_PROFILE("btConvexConcaveCollisionAlgorithm::processCollision");
+//\1("btConvexConcaveCollisionAlgorithm::processCollision");
 
 	const btCollisionObjectWrapper* convexBodyWrap = m_isSwapped ? body1Wrap : body0Wrap;
 	const btCollisionObjectWrapper* triBodyWrap = m_isSwapped ? body0Wrap : body1Wrap;
@@ -355,7 +355,7 @@ btScalar btConvexConcaveCollisionAlgorithm::calculateTimeOfImpact(btCollisionObj
 
 		virtual void processTriangle(btVector3* triangle, int partId, int triangleIndex)
 		{
-			BT_PROFILE("processTriangle");
+//\1("processTriangle");
 			(void)partId;
 			(void)triangleIndex;
 			//do a swept sphere for now

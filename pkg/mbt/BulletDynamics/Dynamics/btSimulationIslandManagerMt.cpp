@@ -263,7 +263,7 @@ btSimulationIslandManagerMt::Island* btSimulationIslandManagerMt::allocateIsland
 
 void btSimulationIslandManagerMt::buildIslands(btDispatcher* dispatcher, btCollisionWorld* collisionWorld)
 {
-	BT_PROFILE("buildIslands");
+//\1("buildIslands");
 
 	btCollisionObjectArray& collisionObjects = collisionWorld->getCollisionObjectArray();
 
@@ -542,7 +542,7 @@ void btSimulationIslandManagerMt::solveIsland(btConstraintSolver* solver, Island
 
 void btSimulationIslandManagerMt::serialIslandDispatch(btAlignedObjectArray<Island*>* islandsPtr, const SolverParams& solverParams)
 {
-	BT_PROFILE("serialIslandDispatch");
+//\1("serialIslandDispatch");
 	// serial dispatch
 	btAlignedObjectArray<Island*>& islands = *islandsPtr;
 	btConstraintSolver* solver = solverParams.m_solverMt ? solverParams.m_solverMt : solverParams.m_solverPool;
@@ -575,7 +575,7 @@ struct UpdateIslandDispatcher : public btIParallelForBody
 
 void btSimulationIslandManagerMt::parallelIslandDispatch(btAlignedObjectArray<Island*>* islandsPtr, const SolverParams& solverParams)
 {
-	BT_PROFILE("parallelIslandDispatch");
+//\1("parallelIslandDispatch");
 	//
 	// if there are islands with many contacts, it may be faster to submit these
 	// large islands *serially* to a single parallel constraint solver, and then later
@@ -627,7 +627,7 @@ void btSimulationIslandManagerMt::buildAndProcessIslands(btDispatcher* dispatche
 														 btAlignedObjectArray<btTypedConstraint*>& constraints,
 														 const SolverParams& solverParams)
 {
-	BT_PROFILE("buildAndProcessIslands");
+//\1("buildAndProcessIslands");
 	btCollisionObjectArray& collisionObjects = collisionWorld->getCollisionObjectArray();
 
 	buildIslands(dispatcher, collisionWorld);

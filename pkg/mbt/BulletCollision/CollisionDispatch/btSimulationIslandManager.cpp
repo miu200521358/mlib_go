@@ -195,7 +195,7 @@ public:
 
 void btSimulationIslandManager::buildIslands(btDispatcher* dispatcher, btCollisionWorld* collisionWorld)
 {
-	BT_PROFILE("islandUnionFindAndQuickSort");
+//\1("islandUnionFindAndQuickSort");
 
 	btCollisionObjectArray& collisionObjects = collisionWorld->getCollisionObjectArray();
 
@@ -353,7 +353,7 @@ void btSimulationIslandManager::processIslands(btDispatcher* dispatcher, btColli
 	int startIslandIndex;
 	int numElem = getUnionFind().getNumElements();
 
-	BT_PROFILE("processIslands");
+//\1("processIslands");
 
 	if (!m_splitIslands)
 	{

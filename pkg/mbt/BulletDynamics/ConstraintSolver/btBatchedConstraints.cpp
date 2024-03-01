@@ -129,7 +129,7 @@ static void debugDrawPhase(const btBatchedConstraints* bc,
 						   const btVector3& color1,
 						   const btVector3& offset)
 {
-	BT_PROFILE("debugDrawPhase");
+//\1("debugDrawPhase");
 	if (bc && bc->m_debugDrawer && iPhase < bc->m_phases.size())
 	{
 		const btBatchedConstraints::Range& phase = bc->m_phases[iPhase];
@@ -146,7 +146,7 @@ static void debugDrawAllBatches(const btBatchedConstraints* bc,
 								btConstraintArray* constraints,
 								const btAlignedObjectArray<btSolverBody>& bodies)
 {
-	BT_PROFILE("debugDrawAllBatches");
+//\1("debugDrawAllBatches");
 	if (bc && bc->m_debugDrawer && bc->m_phases.size() > 0)
 	{
 		btVector3 bboxMin(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
@@ -174,7 +174,7 @@ static void debugDrawAllBatches(const btBatchedConstraints* bc,
 
 static void initBatchedBodyDynamicFlags(btAlignedObjectArray<bool>* outBodyDynamicFlags, const btAlignedObjectArray<btSolverBody>& bodies)
 {
-	BT_PROFILE("initBatchedBodyDynamicFlags");
+//\1("initBatchedBodyDynamicFlags");
 	btAlignedObjectArray<bool>& bodyDynamicFlags = *outBodyDynamicFlags;
 	bodyDynamicFlags.resizeNoInitialize(bodies.size());
 	for (int i = 0; i < bodies.size(); ++i)
@@ -186,7 +186,7 @@ static void initBatchedBodyDynamicFlags(btAlignedObjectArray<bool>* outBodyDynam
 
 static int runLengthEncodeConstraintInfo(btBatchedConstraintInfo* outConInfos, int numConstraints)
 {
-	BT_PROFILE("runLengthEncodeConstraintInfo");
+//\1("runLengthEncodeConstraintInfo");
 	// detect and run-length encode constraint rows that repeat the same bodies
 	int iDest = 0;
 	int iSrc = 0;
@@ -233,7 +233,7 @@ struct ReadSolverConstraintsLoop : public btIParallelForBody
 
 static int initBatchedConstraintInfo(btBatchedConstraintInfo* outConInfos, btConstraintArray* constraints)
 {
-	BT_PROFILE("initBatchedConstraintInfo");
+//\1("initBatchedConstraintInfo");
 	int numConstraints = constraints->size();
 	bool inParallel = true;
 	if (inParallel)
@@ -264,7 +264,7 @@ static int initBatchedConstraintInfo(btBatchedConstraintInfo* outConInfos, btCon
 
 static void expandConstraintRowsInPlace(int* constraintBatchIds, const btBatchedConstraintInfo* conInfos, int numConstraints, int numConstraintRows)
 {
-	BT_PROFILE("expandConstraintRowsInPlace");
+//\1("expandConstraintRowsInPlace");
 	if (numConstraintRows > numConstraints)
 	{
 		// we walk the array in reverse to avoid overwriteing
@@ -285,7 +285,7 @@ static void expandConstraintRowsInPlace(int* constraintBatchIds, const btBatched
 
 static void expandConstraintRows(int* destConstraintBatchIds, const int* srcConstraintBatchIds, const btBatchedConstraintInfo* conInfos, int numConstraints, int numConstraintRows)
 {
-	BT_PROFILE("expandConstraintRows");
+//\1("expandConstraintRows");
 	for (int iCon = 0; iCon < numConstraints; ++iCon)
 	{
 		const btBatchedConstraintInfo& conInfo = conInfos[iCon];
@@ -322,7 +322,7 @@ struct ExpandConstraintRowsLoop : public btIParallelForBody
 
 static void expandConstraintRowsMt(int* destConstraintBatchIds, const int* srcConstraintBatchIds, const btBatchedConstraintInfo* conInfos, int numConstraints, int numConstraintRows)
 {
-	BT_PROFILE("expandConstraintRowsMt");
+//\1("expandConstraintRowsMt");
 	ExpandConstraintRowsLoop loop(destConstraintBatchIds, srcConstraintBatchIds, conInfos, numConstraintRows);
 	int grainSize = 600;
 	btParallelFor(0, numConstraints, grainSize, loop);
@@ -330,7 +330,7 @@ static void expandConstraintRowsMt(int* destConstraintBatchIds, const int* srcCo
 
 static void initBatchedConstraintInfoArray(btAlignedObjectArray<btBatchedConstraintInfo>* outConInfos, btConstraintArray* constraints)
 {
-	BT_PROFILE("initBatchedConstraintInfoArray");
+//\1("initBatchedConstraintInfoArray");
 	btAlignedObjectArray<btBatchedConstraintInfo>& conInfos = *outConInfos;
 	int numConstraints = constraints->size();
 	conInfos.resizeNoInitialize(numConstraints);
@@ -341,7 +341,7 @@ static void initBatchedConstraintInfoArray(btAlignedObjectArray<btBatchedConstra
 
 static void mergeSmallBatches(btBatchInfo* batches, int iBeginBatch, int iEndBatch, int minBatchSize, int maxBatchSize)
 {
-	BT_PROFILE("mergeSmallBatches");
+//\1("mergeSmallBatches");
 	for (int iBatch = iEndBatch - 1; iBatch >= iBeginBatch; --iBatch)
 	{
 		btBatchInfo& batch = batches[iBatch];
@@ -387,7 +387,7 @@ static void mergeSmallBatches(btBatchInfo* batches, int iBeginBatch, int iEndBat
 
 static void updateConstraintBatchIdsForMerges(int* constraintBatchIds, int numConstraints, const btBatchInfo* batches, int numBatches)
 {
-	BT_PROFILE("updateConstraintBatchIdsForMerges");
+//\1("updateConstraintBatchIdsForMerges");
 	// update batchIds to account for merges
 	for (int i = 0; i < numConstraints; ++i)
 	{
@@ -416,14 +416,14 @@ struct UpdateConstraintBatchIdsForMergesLoop : public btIParallelForBody
 	}
 	void forLoop(int iBegin, int iEnd) const BT_OVERRIDE
 	{
-		BT_PROFILE("UpdateConstraintBatchIdsForMergesLoop");
+//\1("UpdateConstraintBatchIdsForMergesLoop");
 		updateConstraintBatchIdsForMerges(m_constraintBatchIds + iBegin, iEnd - iBegin, m_batches, m_numBatches);
 	}
 };
 
 static void updateConstraintBatchIdsForMergesMt(int* constraintBatchIds, int numConstraints, const btBatchInfo* batches, int numBatches)
 {
-	BT_PROFILE("updateConstraintBatchIdsForMergesMt");
+//\1("updateConstraintBatchIdsForMergesMt");
 	UpdateConstraintBatchIdsForMergesLoop loop(constraintBatchIds, batches, numBatches);
 	int grainSize = 800;
 	btParallelFor(0, numConstraints, grainSize, loop);
@@ -443,7 +443,7 @@ static void writeOutConstraintIndicesForRangeOfBatches(btBatchedConstraints* bc,
 													   int batchBegin,
 													   int batchEnd)
 {
-	BT_PROFILE("writeOutConstraintIndicesForRangeOfBatches");
+//\1("writeOutConstraintIndicesForRangeOfBatches");
 	for (int iCon = 0; iCon < numConstraints; ++iCon)
 	{
 		int iBatch = constraintBatchIds[iCon];
@@ -474,7 +474,7 @@ struct WriteOutConstraintIndicesLoop : public btIParallelForBody
 	}
 	void forLoop(int iBegin, int iEnd) const BT_OVERRIDE
 	{
-		BT_PROFILE("WriteOutConstraintIndicesLoop");
+//\1("WriteOutConstraintIndicesLoop");
 		int batchBegin = iBegin * m_maxNumBatchesPerPhase;
 		int batchEnd = iEnd * m_maxNumBatchesPerPhase;
 		writeOutConstraintIndicesForRangeOfBatches(m_batchedConstraints,
@@ -493,7 +493,7 @@ static void writeOutConstraintIndicesMt(btBatchedConstraints* bc,
 										int maxNumBatchesPerPhase,
 										int numPhases)
 {
-	BT_PROFILE("writeOutConstraintIndicesMt");
+//\1("writeOutConstraintIndicesMt");
 	bool inParallel = true;
 	if (inParallel)
 	{
@@ -535,7 +535,7 @@ static void writeOutBatches(btBatchedConstraints* bc,
 							int maxNumBatchesPerPhase,
 							int numPhases)
 {
-	BT_PROFILE("writeOutBatches");
+//\1("writeOutBatches");
 	typedef btBatchedConstraints::Range Range;
 	bc->m_constraintIndices.reserve(numConstraints);
 	bc->m_batches.resizeNoInitialize(0);
@@ -657,7 +657,7 @@ static btVector3 findMaxDynamicConstraintExtent(
 	int numConstraints,
 	int numBodies)
 {
-	BT_PROFILE("findMaxDynamicConstraintExtent");
+//\1("findMaxDynamicConstraintExtent");
 	btVector3 consExtent = btVector3(1, 1, 1) * 0.001;
 	for (int iCon = 0; iCon < numConstraints; ++iCon)
 	{
@@ -704,7 +704,7 @@ struct AssignConstraintsToGridBatchesParams
 
 static void assignConstraintsToGridBatches(const AssignConstraintsToGridBatchesParams& params, int iConBegin, int iConEnd)
 {
-	BT_PROFILE("assignConstraintsToGridBatches");
+//\1("assignConstraintsToGridBatches");
 	// (can be done in parallel)
 	for (int iCon = iConBegin; iCon < iConEnd; ++iCon)
 	{
@@ -822,7 +822,7 @@ static void setupSpatialGridBatchesMt(
 	int maxBatchSize,
 	bool use2DGrid)
 {
-	BT_PROFILE("setupSpatialGridBatchesMt");
+//\1("setupSpatialGridBatchesMt");
 	const int numPhases = 8;
 	int numConstraints = constraints->size();
 	int numConstraintRows = constraints->size();
@@ -1037,7 +1037,7 @@ static void setupSingleBatch(
 	btBatchedConstraints* bc,
 	int numConstraints)
 {
-	BT_PROFILE("setupSingleBatch");
+//\1("setupSingleBatch");
 	typedef btBatchedConstraints::Range Range;
 
 	bc->m_constraintIndices.resize(numConstraints);

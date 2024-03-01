@@ -113,7 +113,7 @@ struct btCompoundCompoundLeafCallback : btDbvt::ICollide
 
 	void Process(const btDbvtNode* leaf0, const btDbvtNode* leaf1)
 	{
-		BT_PROFILE("btCompoundCompoundLeafCallback::Process");
+//\1("btCompoundCompoundLeafCallback::Process");
 		m_numOverlapPairs++;
 
 		int childIndex0 = leaf0->dataAsInt;
