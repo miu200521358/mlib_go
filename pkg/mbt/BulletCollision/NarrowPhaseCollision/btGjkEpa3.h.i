@@ -53,7 +53,9 @@ struct btGjkEpaSolver3
 };
 
 #if defined(DEBUG) || defined(_DEBUG)
+#include <stdio.h>  //for debug printf
 #ifdef __SPU__
+#include <spu_printf.h>
 #define printf spu_printf
 #endif  //__SPU__
 #endif

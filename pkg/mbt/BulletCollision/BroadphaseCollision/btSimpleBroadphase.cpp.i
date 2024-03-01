@@ -28,6 +28,7 @@ subject to the following restrictions:
 #include "LinearMath/btMatrix3x3.h"
 #include "LinearMath/btAabbUtil2.h"
 
+#include <new>
 
 void btSimpleBroadphase::validate()
 {

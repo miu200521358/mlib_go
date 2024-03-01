@@ -21,6 +21,7 @@ subject to the following restrictions:
 
 #include "BulletCollision/CollisionDispatch/btHashedSimplePairCache.h"
 
+#include <stdio.h>
 
 #ifdef BT_DEBUG_COLLISION_PAIRS
 int gOverlappingSimplePairs = 0;
@@ -83,6 +84,7 @@ btSimplePair* btHashedSimplePairCache::findPair(int indexA, int indexB)
 	return &m_overlappingPairArray[index];
 }
 
+//#include <stdio.h>
 
 void btHashedSimplePairCache::growTables()
 {
@@ -245,6 +247,7 @@ void* btHashedSimplePairCache::removeOverlappingPair(int indexA, int indexB)
 
 	return userData;
 }
+//#include <stdio.h>
 
 
 %}

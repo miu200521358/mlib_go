@@ -23,11 +23,17 @@
 #include "LinearMath/btThreads.h"
 
 #ifdef __CELLOS_LV2__
+#include <sys/sys_time.h>
+#include <sys/time_util.h>
+#include <stdio.h>
 #endif
 
 #if defined(SUNOS) || defined(__SUNOS__)
+#include <stdio.h>
 #endif
 #ifdef __APPLE__
+#include <mach/mach_time.h>
+#include <TargetConditionals.h>
 #endif
 
 #if defined(WIN32) || defined(_WIN32)
@@ -39,7 +45,9 @@
 #define NOIME
 
 #ifdef _XBOX
+#include <Xtl.h>
 #else  //_XBOX
+#include <windows.h>
 
 #if WINVER < 0x0602
 #define GetTickCount64 GetTickCount
@@ -47,11 +55,14 @@
 
 #endif  //_XBOX
 
+#include <time.h>
 
 #else  //_WIN32
+#include <sys/time.h>
 
 #ifdef BT_LINUX_REALTIME
 //required linking against rt (librt)
+#include <time.h>
 #endif  //BT_LINUX_REALTIME
 
 #endif  //_WIN32
@@ -630,6 +641,7 @@ float CProfileManager::Get_Time_Since_Reset(void)
 	return (float)time / Profile_Get_Tick_Rate();
 }
 
+#include <stdio.h>
 
 void CProfileManager::dumpRecursive(CProfileIterator* profileIterator, int spacing)
 {
@@ -723,6 +735,7 @@ void btLeaveProfileZoneDefault()
 // https://github.com/android-ndk/ndk/issues/8
 #if defined(__ANDROID__) && defined(__clang__)
   #if __has_include(<android/ndk-version.h>)
+    #include <android/ndk-version.h>
   #endif  // __has_include(<android/ndk-version.h>)
   #if defined(__NDK_MAJOR__) && \
     ((__NDK_MAJOR__ < 12) || ((__NDK_MAJOR__ == 12) && (__NDK_MINOR__ < 1)))

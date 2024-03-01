@@ -195,6 +195,7 @@ public:
 ////////////////////////////////////////////////////////////////////
 
 #ifdef DEBUG_BROADPHASE
+#include <stdio.h>
 
 template <typename BP_FP_INT_TYPE>
 void btAxisSweep3<BP_FP_INT_TYPE>::debugPrintAxis(int axis, bool checkCardinality)
@@ -594,6 +595,7 @@ void btAxisSweep3Internal<BP_FP_INT_TYPE>::resetPool(btDispatcher* /*dispatcher*
 	}
 }
 
+//#include <stdio.h>
 
 template <typename BP_FP_INT_TYPE>
 void btAxisSweep3Internal<BP_FP_INT_TYPE>::calculateOverlappingPairs(btDispatcher* dispatcher)

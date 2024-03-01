@@ -74,6 +74,7 @@ subject to the following restrictions:
 #if (DBVT_SELECT_IMPL == DBVT_IMPL_SSE) || \
 	(DBVT_MERGE_IMPL == DBVT_IMPL_SSE) ||  \
 	(DBVT_INT0_IMPL == DBVT_IMPL_SSE)
+#include <emmintrin.h>
 #endif
 
 //
@@ -99,7 +100,9 @@ subject to the following restrictions:
 
 #if DBVT_USE_MEMMOVE
 #if !defined(__CELLOS_LV2__) && !defined(__MWERKS__)
+#include <memory.h>
 #endif
+#include <string.h>
 #endif
 
 #ifndef DBVT_USE_TEMPLATE

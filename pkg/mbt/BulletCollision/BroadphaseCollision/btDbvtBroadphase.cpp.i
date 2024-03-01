@@ -29,6 +29,7 @@ btScalar gDbvtMargin = btScalar(0.05);
 //
 
 #if DBVT_BP_PROFILE || DBVT_BP_ENABLE_BENCHMARK
+#include <stdio.h>
 #endif
 
 #if DBVT_BP_PROFILE

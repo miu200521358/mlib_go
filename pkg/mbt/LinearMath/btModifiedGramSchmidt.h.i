@@ -16,6 +16,8 @@
 
 #include "LinearMath/btReducedVector.h"
 #include "LinearMath/btAlignedObjectArray.h"
+#include <iostream>
+#include <cmath>
 template<class TV>
 class btModifiedGramSchmidt
 {

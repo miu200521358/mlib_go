@@ -1,6 +1,6 @@
 ////// BulletCollision/NarrowPhaseCollision/btGjkPairDetector.cpp ----------------
 
-// %include "BulletCollision/NarrowPhaseCollision/btGjkPairDetector.cpp"
+%include "BulletCollision/NarrowPhaseCollision/btGjkPairDetector.cpp"
 
 %{
 
@@ -26,7 +26,9 @@ subject to the following restrictions:
 
 #if defined(DEBUG) || defined(_DEBUG)
 //#define TEST_NON_VIRTUAL 1
+#include <stdio.h>  //for debug printf
 #ifdef __SPU__
+#include <spu_printf.h>
 #define printf spu_printf
 #endif  //__SPU__
 #endif

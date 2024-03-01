@@ -1,6 +1,6 @@
 ////// LinearMath/btAlignedAllocator.cpp ----------------
 
-// %include "LinearMath/btAlignedAllocator.cpp"
+%include "LinearMath/btAlignedAllocator.cpp"
 
 %{
 
@@ -20,6 +20,7 @@ subject to the following restrictions:
 */
 
 #include "LinearMath/btAlignedAllocator.h"
+#include <string.h>
 
 #ifdef BT_DEBUG_MEMORY_ALLOCATIONS
 int gNumAlignedAllocs = 0;
@@ -43,6 +44,7 @@ static btAllocFunc *sAllocFunc = btAllocDefault;
 static btFreeFunc *sFreeFunc = btFreeDefault;
 
 #if defined(BT_HAS_ALIGNED_ALLOCATOR)
+#include <malloc.h>
 static void *btAlignedAllocDefault(size_t size, int alignment)
 {
 	return _aligned_malloc(size, (size_t)alignment);
@@ -53,6 +55,7 @@ static void btAlignedFreeDefault(void *ptr)
 	_aligned_free(ptr);
 }
 #elif defined(__CELLOS_LV2__)
+#include <stdlib.h>
 
 static inline void *btAlignedAllocDefault(size_t size, int alignment)
 {
@@ -116,6 +119,7 @@ void btAlignedAllocSetCustom(btAllocFunc *allocFunc, btFreeFunc *freeFunc)
 static int allocations_id[10241024];
 static int allocations_bytes[10241024];
 static int mynumallocs = 0;
+#include <stdio.h>
 
 int btDumpMemoryLeaks()
 {
@@ -133,6 +137,7 @@ int btDumpMemoryLeaks()
 	return totalLeak;
 }
 //this generic allocator provides the total allocated number of bytes
+#include <stdio.h>
 
 struct btDebugPtrMagic
 {

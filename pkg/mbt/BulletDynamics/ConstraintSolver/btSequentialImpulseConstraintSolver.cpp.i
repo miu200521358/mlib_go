@@ -1,6 +1,6 @@
 ////// BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.cpp ----------------
 
-// %include "BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.cpp"
+%include "BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.cpp"
 
 %{
 
@@ -35,11 +35,13 @@ subject to the following restrictions:
 #include "BulletDynamics/ConstraintSolver/btJacobianEntry.h"
 #include "LinearMath/btMinMax.h"
 #include "BulletDynamics/ConstraintSolver/btTypedConstraint.h"
+#include <new>
 #include "LinearMath/btStackAlloc.h"
 #include "LinearMath/btQuickprof.h"
 #include "BulletDynamics/ConstraintSolver/btSolverBody.h"
 #include "BulletDynamics/ConstraintSolver/btSolverConstraint.h"
 #include "LinearMath/btAlignedObjectArray.h"
+#include <string.h>  //for memset
 
 int gNumSplitImpulseRecoveries = 0;
 
@@ -105,6 +107,7 @@ static btScalar gResolveSingleConstraintRowLowerLimit_scalar_reference(btSolverB
 }
 
 #ifdef USE_SIMD
+#include <emmintrin.h>
 
 #define btVecSplat(x, e) _mm_shuffle_ps(x, x, _MM_SHUFFLE(e, e, e, e))
 static inline __m128 btSimdDot3(__m128 vec0, __m128 vec1)
@@ -114,6 +117,7 @@ static inline __m128 btSimdDot3(__m128 vec0, __m128 vec1)
 }
 
 #if defined(BT_ALLOW_SSE4)
+#include <intrin.h>
 
 #define USE_FMA 1
 #define USE_FMA3_INSTEAD_FMA4 1
@@ -793,6 +797,7 @@ int btSequentialImpulseConstraintSolver::getOrInitSolverBody(btCollisionObject& 
 	return solverBodyIdA;
 #endif  // BT_THREADSAFE
 }
+#include <stdio.h>
 
 void btSequentialImpulseConstraintSolver::setupContactConstraint(btSolverConstraint& solverConstraint,
 	int solverBodyIdA, int solverBodyIdB,

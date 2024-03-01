@@ -21,6 +21,7 @@ subject to the following restrictions:
 #ifndef BT_VECTOR3_H
 #define BT_VECTOR3_H
 
+//#include <stdint.h>
 #include "LinearMath/btScalar.h"
 #include "LinearMath/btMinMax.h"
 #include "LinearMath/btAlignedAllocator.h"

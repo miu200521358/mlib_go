@@ -25,6 +25,7 @@ subject to the following restrictions:
 #include "BulletCollision/CollisionShapes/btPolyhedralConvexShape.h"
 #include "BulletCollision/CollisionShapes/btConvexPolyhedron.h"
 #include "LinearMath/btConvexHullComputer.h"
+#include <new>
 #include "LinearMath/btGeometryUtil.h"
 #include "LinearMath/btGrahamScan2dConvexHull.h"
 

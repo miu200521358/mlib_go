@@ -15,6 +15,9 @@
 #include "LinearMath/btVector3.h"
 #include "LinearMath/btMatrix3x3.h"
 #include "LinearMath/btAlignedObjectArray.h"
+#include <stdio.h>
+#include <vector>
+#include <algorithm>
 struct TwoInts
 {
     int a,b;

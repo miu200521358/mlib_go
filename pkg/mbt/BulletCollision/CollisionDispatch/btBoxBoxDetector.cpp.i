@@ -27,6 +27,8 @@ subject to the following restrictions:
 #include "BulletCollision/CollisionDispatch/btBoxBoxDetector.h"
 #include "BulletCollision/CollisionShapes/btBoxShape.h"
 
+#include <float.h>
+#include <string.h>
 
 btBoxBoxDetector::btBoxBoxDetector(const btBoxShape* box1, const btBoxShape* box2)
 	: m_box1(box1),

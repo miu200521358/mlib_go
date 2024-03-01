@@ -18,6 +18,7 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
+#include <string.h>
 
 #include "LinearMath/btConvexHullComputer.h"
 #include "LinearMath/btAlignedObjectArray.h"
@@ -25,6 +26,7 @@ subject to the following restrictions:
 #include "LinearMath/btVector3.h"
 
 #ifdef __GNUC__
+#include <stdint.h>
 #elif defined(_MSC_VER)
 typedef __int32 int32_t;
 typedef __int64 int64_t;
@@ -46,6 +48,7 @@ typedef unsigned long long int uint64_t;
 //#define SHOW_ITERATIONS
 
 #if defined(DEBUG_CONVEX_HULL) || defined(SHOW_ITERATIONS)
+#include <stdio.h>
 #endif
 
 // Convex hull implementation based on Preparata and Hong

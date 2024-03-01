@@ -199,3 +199,13 @@
 %include "BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver.h.i"
 %include "BulletCollision/NarrowPhaseCollision/btGjkEpa2.cpp.i"
 %include "BulletCollision/NarrowPhaseCollision/btGjkEpa2.h.i"
+
+
+////// included headers [BulletCollision/BroadphaseCollision/btDbvtBroadphase.h] ----------------------------------
+%include "BulletCollision/BroadphaseCollision/btDbvt.cpp.i"
+%include "BulletCollision/BroadphaseCollision/btDbvt.h.i"
+%include "LinearMath/btQuickprof.cpp.i"
+%include "LinearMath/btQuickprof.h.i"
+%include "BulletCollision/BroadphaseCollision/btDbvtBroadphase.h.i"
+
+

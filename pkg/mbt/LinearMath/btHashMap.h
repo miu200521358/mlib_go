@@ -112,10 +112,6 @@ class btHashPtr
 	};
 
 public:
-	btHashPtr()
-	{
-	}
-
 	btHashPtr(const void* ptr)
 		: m_pointer(ptr)
 	{

@@ -1,6 +1,6 @@
 ////// BulletCollision/BroadphaseCollision/btQuantizedBvh.cpp ----------------
 
-// %include "BulletCollision/BroadphaseCollision/btQuantizedBvh.cpp"
+%include "BulletCollision/BroadphaseCollision/btQuantizedBvh.cpp"
 
 %{
 
@@ -800,6 +800,7 @@ void btQuantizedBvh::assignInternalNodeFromLeafNode(int internalNode, int leafNo
 }
 
 //PCK: include
+#include <new>
 
 #if 0
 //PCK: consts

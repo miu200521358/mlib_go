@@ -30,9 +30,11 @@
 #if defined BT_USE_SIMD_VECTOR3
 
 #if DEBUG
+#include <string.h>  //for memset
 #endif
 
 #ifdef __APPLE__
+#include <stdint.h>
 typedef float float4 __attribute__((vector_size(16)));
 #else
 #define float4 __m128
@@ -44,6 +46,7 @@ typedef float float4 __attribute__((vector_size(16)));
 #define LOG2_ARRAY_SIZE 6
 #define STACK_ARRAY_COUNT (1UL << LOG2_ARRAY_SIZE)
 
+#include <emmintrin.h>
 
 long _maxdot_large(const float *vv, const float *vec, unsigned long count, float *dotResult);
 long _maxdot_large(const float *vv, const float *vec, unsigned long count, float *dotResult)
@@ -834,6 +837,9 @@ long _mindot_large(const float *vv, const float *vec, unsigned long count, float
 #elif defined BT_USE_NEON
 
 #define ARM_NEON_GCC_COMPATIBILITY 1
+#include <arm_neon.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>  //for sysctlbyname
 
 static long _maxdot_large_v0(const float *vv, const float *vec, unsigned long count, float *dotResult);
 static long _maxdot_large_v1(const float *vv, const float *vec, unsigned long count, float *dotResult);

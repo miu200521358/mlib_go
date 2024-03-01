@@ -36,9 +36,12 @@ subject to the following restrictions:
 #define BT_ALLOW_ARRAY_COPY_OPERATOR  // enabling this can accidently perform deep copies of data if you are not careful
 
 #ifdef BT_USE_MEMCPY
+#include <memory.h>
+#include <string.h>
 #endif  //BT_USE_MEMCPY
 
 #ifdef BT_USE_PLACEMENT_NEW
+#include <new>  //for placement new
 #endif          //BT_USE_PLACEMENT_NEW
 
 ///The btAlignedObjectArray template class uses a subset of the stl::vector interface for its methods

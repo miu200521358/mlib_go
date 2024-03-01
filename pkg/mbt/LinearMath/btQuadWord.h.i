@@ -25,6 +25,7 @@ subject to the following restrictions:
 #include "LinearMath/btMinMax.h"
 
 #if defined(__CELLOS_LV2) && defined(__SPU__)
+#include <altivec.h>
 #endif
 
 /**@brief The btQuadWord class is base class for btVector3 and btQuaternion. 

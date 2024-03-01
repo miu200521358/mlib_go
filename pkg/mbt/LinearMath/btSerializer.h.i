@@ -26,7 +26,9 @@ subject to the following restrictions:
 #include "LinearMath/btHashMap.h"
 
 #if !defined(__CELLOS_LV2__) && !defined(__MWERKS__)
+#include <memory.h>
 #endif
+#include <string.h>
 
 extern char sBulletDNAstr[];
 extern int sBulletDNAlen;

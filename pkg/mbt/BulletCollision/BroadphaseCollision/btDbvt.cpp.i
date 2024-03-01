@@ -712,6 +712,8 @@ void btDbvt::extractLeaves(const btDbvtNode* node, btAlignedObjectArray<const bt
 //
 #if DBVT_ENABLE_BENCHMARK
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "LinearMath/btQuickProf.h"
 
 /*

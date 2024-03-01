@@ -22,6 +22,7 @@ subject to the following restrictions:
 #ifndef BT_HASH_MAP_H
 #define BT_HASH_MAP_H
 
+#include <string>
 #include "LinearMath/btAlignedObjectArray.h"
 
 ///very basic hashable string implementation, compatible with btHashMap
@@ -117,10 +118,6 @@ class btHashPtr
 	};
 
 public:
-	btHashPtr()
-	{
-	}
-
 	btHashPtr(const void* ptr)
 		: m_pointer(ptr)
 	{

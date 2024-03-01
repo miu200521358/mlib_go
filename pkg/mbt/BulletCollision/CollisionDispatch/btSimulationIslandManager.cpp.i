@@ -1,6 +1,6 @@
 ////// BulletCollision/CollisionDispatch/btSimulationIslandManager.cpp ----------------
 
-// %include "BulletCollision/CollisionDispatch/btSimulationIslandManager.cpp"
+%include "BulletCollision/CollisionDispatch/btSimulationIslandManager.cpp"
 
 %{
 
@@ -27,6 +27,7 @@ subject to the following restrictions:
 #include "BulletCollision/CollisionDispatch/btCollisionObject.h"
 #include "BulletCollision/CollisionDispatch/btCollisionWorld.h"
 
+//#include <stdio.h>
 #include "LinearMath/btQuickprof.h"
 
 btSimulationIslandManager::btSimulationIslandManager() : m_splitIslands(true)

@@ -34,6 +34,7 @@ subject to the following restrictions:
 
 ///not supported on IBM SDK, until we fix the alignment of btVector3
 #if defined(__CELLOS_LV2__) && defined(__SPU__)
+#include <spu_intrinsics.h>
 static inline vec_float4 vec_dot3(vec_float4 vec0, vec_float4 vec1)
 {
 	vec_float4 result;

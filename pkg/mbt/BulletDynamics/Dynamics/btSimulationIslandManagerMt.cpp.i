@@ -29,6 +29,7 @@ subject to the following restrictions:
 #include "BulletDynamics/ConstraintSolver/btTypedConstraint.h"
 #include "BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h"
 
+//#include <stdio.h>
 #include "LinearMath/btQuickprof.h"
 
 SIMD_FORCE_INLINE int calcBatchCost(int bodies, int manifolds, int constraints)

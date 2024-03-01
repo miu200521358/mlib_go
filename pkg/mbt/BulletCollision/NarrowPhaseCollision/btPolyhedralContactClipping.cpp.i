@@ -26,6 +26,7 @@ subject to the following restrictions:
 #include "BulletCollision/NarrowPhaseCollision/btPolyhedralContactClipping.h"
 #include "BulletCollision/CollisionShapes/btConvexPolyhedron.h"
 
+#include <float.h>  //for FLT_MAX
 
 int gExpectedNbTests = 0;
 int gActualNbTests = 0;

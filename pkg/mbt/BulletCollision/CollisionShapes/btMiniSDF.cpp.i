@@ -15,6 +15,8 @@
 //Copyright (c) 2017 Dan Koschier
 //
 
+#include <limits.h>
+#include <string.h>  //memcpy
 
 struct btSdfDataStream
 {

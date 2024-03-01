@@ -30,6 +30,8 @@ class btSerializer;
 #define printf spu_printf
 #endif  //__SPU__
 
+#include <stdio.h>
+#include <stdlib.h>
 #endif  //DEBUG_CHECK_DEQUANTIZATION
 
 #include "LinearMath/btVector3.h"

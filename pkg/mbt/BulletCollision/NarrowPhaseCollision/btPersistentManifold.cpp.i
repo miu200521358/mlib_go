@@ -50,6 +50,7 @@ btPersistentManifold::btPersistentManifold()
 }
 
 #ifdef DEBUG_PERSISTENCY
+#include <stdio.h>
 void btPersistentManifold::DebugPersistency()
 {
 	int i;

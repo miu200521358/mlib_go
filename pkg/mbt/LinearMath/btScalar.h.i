@@ -26,6 +26,9 @@ subject to the following restrictions:
 #pragma unmanaged
 #endif
 
+#include <math.h>
+#include <stdlib.h>  //size_t for MSVC 6.0
+#include <float.h>
 
 /* SVN $Revision$ on $Date$ from http://bullet.googlecode.com*/
 #define BT_BULLET_VERSION 326
@@ -105,6 +108,7 @@ inline int btIsDoublePrecision()
 		#ifdef _XBOX
 			#define BT_USE_VMX128
 
+			#include <ppcintrinsics.h>
  			#define BT_HAVE_NATIVE_FSEL
  			#define btFsel(a,b,c) __fsel((a),(b),(c))
 		#else
@@ -136,6 +140,7 @@ inline int btIsDoublePrecision()
 			//you can manually enable this line or set it in the build system for a bit of performance gain (a few percent, dependent on usage)
 			//#define BT_USE_SSE_IN_API
 			#endif //BT_USE_SSE
+			#include <emmintrin.h>
 #endif
 
 		#endif//_XBOX
@@ -144,8 +149,10 @@ inline int btIsDoublePrecision()
 
 	#ifdef BT_DEBUG
 		#ifdef _MSC_VER
+			#include <stdio.h>
 			#define btAssert(x) { if(!(x)){printf("Assert " __FILE__ ":%u (%s)\n", __LINE__, #x);__debugbreak();	}}
 		#else//_MSC_VER
+			#include <assert.h>
 			#define btAssert assert
 		#endif//_MSC_VER
 	#else
@@ -165,9 +172,11 @@ inline int btIsDoublePrecision()
 		#define ATTRIBUTE_ALIGNED64(a) a __attribute__ ((aligned (64)))
 		#define ATTRIBUTE_ALIGNED128(a) a __attribute__ ((aligned (128)))
 		#ifndef assert
+		#include <assert.h>
 		#endif
 		#ifdef BT_DEBUG
 			#ifdef __SPU__
+				#include <spu_printf.h>
 				#define printf spu_printf
 				#define btAssert(x) {if(!(x)){printf("Assert " __FILE__ ":%u ("#x")\n", __LINE__);spu_hcmpeq(0,0);}}
 			#else
@@ -192,6 +201,7 @@ inline int btIsDoublePrecision()
 			#define ATTRIBUTE_ALIGNED64(a) a __attribute__ ((aligned (64)))
 			#define ATTRIBUTE_ALIGNED128(a) a __attribute__ ((aligned (128)))
 			#ifndef assert
+			#include <assert.h>
 			#endif
 	#ifdef BT_DEBUG
 			#define btAssert assert
@@ -219,9 +229,13 @@ inline int btIsDoublePrecision()
 					#ifdef BT_USE_SSE
 						// include appropriate SSE level
 						#if defined (__SSE4_1__)
+							#include <smmintrin.h>
 						#elif defined (__SSSE3__)
+							#include <tmmintrin.h>
 						#elif defined (__SSE3__)
+							#include <pmmintrin.h>
 						#else
+							#include <emmintrin.h>
 						#endif
 					#endif //BT_USE_SSE
 				#elif defined( __ARM_NEON__ )
@@ -230,6 +244,7 @@ inline int btIsDoublePrecision()
 						#define BT_USE_SIMD_VECTOR3
 		
 						#if defined BT_USE_NEON && defined (__clang__)
+							#include <arm_neon.h>
 						#endif//BT_USE_NEON
 				   #endif //__clang__
 				#endif//__arm__
@@ -240,10 +255,12 @@ inline int btIsDoublePrecision()
 				#define ATTRIBUTE_ALIGNED64(a) a __attribute__ ((aligned (64)))
 				#define ATTRIBUTE_ALIGNED128(a) a __attribute__ ((aligned (128)))
 				#ifndef assert
+				#include <assert.h>
 				#endif
 
 				#if defined(DEBUG) || defined (_DEBUG)
 				 #if defined (__i386__) || defined (__x86_64__)
+				#include <stdio.h>
 				 #define btAssert(x)\
 				{\
 				if(!(x))\
@@ -275,6 +292,7 @@ inline int btIsDoublePrecision()
 				#define ATTRIBUTE_ALIGNED64(a) a
 				#define ATTRIBUTE_ALIGNED128(a) a
 				#ifndef assert
+				#include <assert.h>
 				#endif
 
 				#if defined(DEBUG) || defined (_DEBUG)
@@ -368,6 +386,7 @@ inline int btIsDoublePrecision()
 #else//BT_USE_SSE
 
 	#ifdef BT_USE_NEON
+	#include <arm_neon.h>
 
 	typedef float32x4_t btSimdFloat4;
 	#define BT_INFINITY INFINITY
@@ -400,6 +419,7 @@ inline int btIsDoublePrecision()
 #endif  //BT_USE_SSE
 
 #ifdef BT_USE_NEON
+	#include <arm_neon.h>
 
 	typedef float32x4_t btSimdFloat4;
 	#define BT_INFINITY INFINITY

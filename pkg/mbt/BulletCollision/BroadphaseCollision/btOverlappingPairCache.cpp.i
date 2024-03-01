@@ -25,6 +25,7 @@ subject to the following restrictions:
 #include "BulletCollision/BroadphaseCollision/btCollisionAlgorithm.h"
 #include "LinearMath/btAabbUtil2.h"
 
+#include <stdio.h>
 
 btHashedOverlappingPairCache::btHashedOverlappingPairCache() : m_overlapFilterCallback(0),
 															   m_ghostPairCallback(0)
@@ -137,6 +138,7 @@ btBroadphasePair* btHashedOverlappingPairCache::findPair(btBroadphaseProxy* prox
 	return &m_overlappingPairArray[index];
 }
 
+//#include <stdio.h>
 
 void btHashedOverlappingPairCache::growTables()
 {
@@ -331,6 +333,7 @@ void* btHashedOverlappingPairCache::removeOverlappingPair(btBroadphaseProxy* pro
 
 	return userData;
 }
+//#include <stdio.h>
 #include "LinearMath/btQuickprof.h"
 void btHashedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback* callback, btDispatcher* dispatcher)
 {
@@ -505,6 +508,7 @@ btBroadphasePair* btSortedOverlappingPairCache::findPair(btBroadphaseProxy* prox
 	return 0;
 }
 
+//#include <stdio.h>
 
 void btSortedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback* callback, btDispatcher* dispatcher)
 {

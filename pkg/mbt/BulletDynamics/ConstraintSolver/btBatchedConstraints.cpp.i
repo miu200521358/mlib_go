@@ -26,7 +26,9 @@ subject to the following restrictions:
 #include "LinearMath/btStackAlloc.h"
 #include "LinearMath/btQuickprof.h"
 
+#include <string.h>  //for memset
 
+#include <cmath>
 
 const int kNoMerge = -1;
 

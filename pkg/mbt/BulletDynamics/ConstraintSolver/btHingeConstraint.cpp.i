@@ -1,6 +1,6 @@
 ////// BulletDynamics/ConstraintSolver/btHingeConstraint.cpp ----------------
 
-// %include "BulletDynamics/ConstraintSolver/btHingeConstraint.cpp"
+%include "BulletDynamics/ConstraintSolver/btHingeConstraint.cpp"
 
 %{
 
@@ -23,6 +23,7 @@ subject to the following restrictions:
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 #include "LinearMath/btTransformUtil.h"
 #include "LinearMath/btMinMax.h"
+#include <new>
 #include "BulletDynamics/ConstraintSolver/btSolverBody.h"
 
 //#define HINGE_USE_OBSOLETE_SOLVER false

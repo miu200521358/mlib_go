@@ -80,8 +80,10 @@ unsigned int btQuickprofGetCurrentThreadIndex2();
 #ifndef BT_NO_PROFILE
 
 
+#include <stdio.h>  //@todo remove this, backwards compatibility
 
 #include "LinearMath/btAlignedAllocator.h"
+#include <new>
 
 ///A node in the Profile Hierarchy Tree
 class CProfileNode
@@ -189,17 +191,17 @@ private:
 
 #endif  //#ifndef BT_NO_PROFILE
 
-// ///ProfileSampleClass is a simple way to profile a function's scope
-// ///Use the BT_PROFILE macro at the start of scope to time
-// class CProfileSample
-// {
-// public:
-// 	CProfileSample(const char* name);
+///ProfileSampleClass is a simple way to profile a function's scope
+///Use the BT_PROFILE macro at the start of scope to time
+class CProfileSample
+{
+public:
+	CProfileSample(const char* name);
 
-// 	~CProfileSample(void);
-// };
+	~CProfileSample(void);
+};
 
-#define BT_PROFILE(name) printf(name)
+#define BT_PROFILE(name) CProfileSample __profile(name)
 
 #endif  //BT_QUICK_PROF_H
 

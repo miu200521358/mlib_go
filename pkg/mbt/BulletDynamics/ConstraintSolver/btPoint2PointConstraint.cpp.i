@@ -21,6 +21,7 @@ subject to the following restrictions:
 
 #include "BulletDynamics/ConstraintSolver/btPoint2PointConstraint.h"
 #include "BulletDynamics/Dynamics/btRigidBody.h"
+#include <new>
 
 btPoint2PointConstraint::btPoint2PointConstraint(btRigidBody& rbA, btRigidBody& rbB, const btVector3& pivotInA, const btVector3& pivotInB)
 	: btTypedConstraint(POINT2POINT_CONSTRAINT_TYPE, rbA, rbB), m_pivotInA(pivotInA), m_pivotInB(pivotInB), m_flags(0), m_useSolveConstraintObsolete(false)

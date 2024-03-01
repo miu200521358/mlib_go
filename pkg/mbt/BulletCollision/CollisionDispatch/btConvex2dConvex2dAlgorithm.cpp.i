@@ -21,6 +21,7 @@ subject to the following restrictions:
 
 #include "BulletCollision/CollisionDispatch/btConvex2dConvex2dAlgorithm.h"
 
+//#include <stdio.h>
 #include "BulletCollision/NarrowPhaseCollision/btDiscreteCollisionDetectorInterface.h"
 #include "BulletCollision/BroadphaseCollision/btBroadphaseInterface.h"
 #include "BulletCollision/CollisionDispatch/btCollisionObject.h"

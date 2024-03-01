@@ -1,6 +1,6 @@
 ////// LinearMath/btConvexHull.cpp ----------------
 
-// %include "LinearMath/btConvexHull.cpp"
+%include "LinearMath/btConvexHull.cpp"
 
 %{
 
@@ -19,6 +19,7 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
+#include <string.h>
 
 #include "LinearMath/btConvexHull.h"
 #include "LinearMath/btAlignedObjectArray.h"

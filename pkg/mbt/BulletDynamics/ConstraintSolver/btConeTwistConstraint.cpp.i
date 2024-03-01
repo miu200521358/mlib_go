@@ -1,6 +1,6 @@
 ////// BulletDynamics/ConstraintSolver/btConeTwistConstraint.cpp ----------------
 
-// %include "BulletDynamics/ConstraintSolver/btConeTwistConstraint.cpp"
+%include "BulletDynamics/ConstraintSolver/btConeTwistConstraint.cpp"
 
 %{
 
@@ -25,6 +25,8 @@ Written by: Marcus Hennix
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 #include "LinearMath/btTransformUtil.h"
 #include "LinearMath/btMinMax.h"
+#include <cmath>
+#include <new>
 
 //#define CONETWIST_USE_OBSOLETE_SOLVER true
 #define CONETWIST_USE_OBSOLETE_SOLVER false

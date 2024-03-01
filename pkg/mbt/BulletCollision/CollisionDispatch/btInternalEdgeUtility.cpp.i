@@ -19,6 +19,7 @@
 //#define DEBUG_INTERNAL_EDGE
 
 #ifdef DEBUG_INTERNAL_EDGE
+#include <stdio.h>
 #endif  //DEBUG_INTERNAL_EDGE
 
 #ifdef BT_INTERNAL_EDGE_DEBUG_DRAW

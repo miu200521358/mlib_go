@@ -1,6 +1,6 @@
 ////// BulletCollision/NarrowPhaseCollision/btGjkEpa2.cpp ----------------
 
-// %include "BulletCollision/NarrowPhaseCollision/btGjkEpa2.cpp"
+%include "BulletCollision/NarrowPhaseCollision/btGjkEpa2.cpp"
 
 %{
 
@@ -33,7 +33,9 @@ GJK-EPA collision solver by Nathanael Presson, 2008
 #include "BulletCollision/NarrowPhaseCollision/btGjkEpa2.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
+#include <stdio.h>  //for debug printf
 #ifdef __SPU__
+#include <spu_printf.h>
 #define printf spu_printf
 #endif  //__SPU__
 #endif

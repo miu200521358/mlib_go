@@ -1,6 +1,6 @@
 ////// LinearMath/btThreads.cpp ----------------
 
-// %include "LinearMath/btThreads.cpp"
+%include "LinearMath/btThreads.cpp"
 
 %{
 
@@ -20,16 +20,20 @@ subject to the following restrictions:
 
 #include "LinearMath/btThreads.h"
 #include "LinearMath/btQuickprof.h"
+#include <algorithm>  // for min and max
 
 #if BT_USE_OPENMP && BT_THREADSAFE
 
+#include <omp.h>
 
 #endif  // #if BT_USE_OPENMP && BT_THREADSAFE
 
 #if BT_USE_PPL && BT_THREADSAFE
 
 // use Microsoft Parallel Patterns Library (installed with Visual Studio 2010 and later)
+#include <ppl.h>  // if you get a compile error here, check whether your version of Visual Studio includes PPL
 // Visual Studio 2010 and later should come with it
+#include <concrtrm.h>  // for GetProcessorCount()
 
 #endif  // #if BT_USE_PPL && BT_THREADSAFE
 
@@ -37,6 +41,10 @@ subject to the following restrictions:
 
 // use Intel Threading Building Blocks for thread management
 #define __TBB_NO_IMPLICIT_LINKAGE 1
+#include <tbb/tbb.h>
+#include <tbb/task_scheduler_init.h>
+#include <tbb/parallel_for.h>
+#include <tbb/blocked_range.h>
 
 #endif  // #if BT_USE_TBB && BT_THREADSAFE
 
@@ -74,6 +82,8 @@ subject to the following restrictions:
 
 #if USE_CPP11_ATOMICS
 
+#include <atomic>
+#include <thread>
 
 #define THREAD_LOCAL_STATIC thread_local static
 
@@ -103,6 +113,8 @@ void btSpinMutex::unlock()
 
 #define WIN32_LEAN_AND_MEAN
 
+#include <windows.h>
+#include <intrin.h>
 
 #define THREAD_LOCAL_STATIC __declspec(thread) static
 
