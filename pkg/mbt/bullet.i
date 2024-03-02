@@ -192,3 +192,7 @@
 %include "BulletCollision/CollisionShapes/btSdfCollisionShape.cpp.i"
 %include "BulletCollision/CollisionDispatch/SphereTriangleDetector.h.i"
 %include "BulletCollision/CollisionDispatch/SphereTriangleDetector.cpp.i"
+
+////// included headers [BulletCollision/CollisionShapes/btStaticPlaneShape.h] ----------------------------------
+%include "BulletCollision/CollisionShapes/btStaticPlaneShape.h.i"
+%include "BulletCollision/CollisionShapes/btStaticPlaneShape.cpp.i"
