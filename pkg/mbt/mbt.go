@@ -3162,8 +3162,7 @@ extern void _wrap_btCollisionDispatcher_registerCollisionCreateFunc_mbt_c42c1874
 extern void _wrap_btCollisionDispatcher_registerClosestPointsCreateFunc_mbt_c42c187411a48b0f(uintptr_t arg1, swig_intgo arg2, swig_intgo arg3, uintptr_t arg4);
 extern swig_intgo _wrap_btCollisionDispatcher_getNumManifolds_mbt_c42c187411a48b0f(uintptr_t arg1);
 extern uintptr_t _wrap_btCollisionDispatcher_getInternalManifoldPointer_mbt_c42c187411a48b0f(uintptr_t arg1);
-extern uintptr_t _wrap_btCollisionDispatcher_getManifoldByIndexInternal__SWIG_0_mbt_c42c187411a48b0f(uintptr_t arg1, swig_intgo arg2);
-extern uintptr_t _wrap_btCollisionDispatcher_getManifoldByIndexInternal__SWIG_1_mbt_c42c187411a48b0f(uintptr_t arg1, swig_intgo arg2);
+extern uintptr_t _wrap_btCollisionDispatcher_getManifoldByIndexInternal_mbt_c42c187411a48b0f(uintptr_t arg1, swig_intgo arg2);
 extern uintptr_t _wrap_new_btCollisionDispatcher_mbt_c42c187411a48b0f(uintptr_t arg1);
 extern void _wrap_delete_btCollisionDispatcher_mbt_c42c187411a48b0f(uintptr_t arg1);
 extern uintptr_t _wrap_btCollisionDispatcher_getNewManifold_mbt_c42c187411a48b0f(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3);
@@ -31029,31 +31028,12 @@ func (arg1 SwigcptrBtCollisionDispatcher) GetInternalManifoldPointer() (_swig_re
 	return swig_r
 }
 
-func (arg1 SwigcptrBtCollisionDispatcher) GetManifoldByIndexInternal__SWIG_0(arg2 int) (_swig_ret BtPersistentManifold) {
+func (arg1 SwigcptrBtCollisionDispatcher) GetManifoldByIndexInternal(arg2 int) (_swig_ret BtPersistentManifold) {
 	var swig_r BtPersistentManifold
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
-	swig_r = (BtPersistentManifold)(SwigcptrBtPersistentManifold(C._wrap_btCollisionDispatcher_getManifoldByIndexInternal__SWIG_0_mbt_c42c187411a48b0f(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))))
+	swig_r = (BtPersistentManifold)(SwigcptrBtPersistentManifold(C._wrap_btCollisionDispatcher_getManifoldByIndexInternal_mbt_c42c187411a48b0f(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))))
 	return swig_r
-}
-
-func (arg1 SwigcptrBtCollisionDispatcher) GetManifoldByIndexInternal__SWIG_1(arg2 int) (_swig_ret BtPersistentManifold) {
-	var swig_r BtPersistentManifold
-	_swig_i_0 := arg1
-	_swig_i_1 := arg2
-	swig_r = (BtPersistentManifold)(SwigcptrBtPersistentManifold(C._wrap_btCollisionDispatcher_getManifoldByIndexInternal__SWIG_1_mbt_c42c187411a48b0f(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))))
-	return swig_r
-}
-
-func (p SwigcptrBtCollisionDispatcher) GetManifoldByIndexInternal(a ...interface{}) interface{} {
-	argc := len(a)
-	if argc == 1 {
-		return p.GetManifoldByIndexInternal__SWIG_0(a[0].(int))
-	}
-	if argc == 1 {
-		return p.GetManifoldByIndexInternal__SWIG_1(a[0].(int))
-	}
-	panic("No match for overloaded function call")
 }
 
 func NewBtCollisionDispatcher(arg1 BtCollisionConfiguration) (_swig_ret BtCollisionDispatcher) {
@@ -31232,7 +31212,7 @@ type BtCollisionDispatcher interface {
 	RegisterClosestPointsCreateFunc(arg2 int, arg3 int, arg4 BtCollisionAlgorithmCreateFunc)
 	GetNumManifolds() (_swig_ret int)
 	GetInternalManifoldPointer() (_swig_ret BtPersistentManifold)
-	GetManifoldByIndexInternal(a ...interface{}) interface{}
+	GetManifoldByIndexInternal(arg2 int) (_swig_ret BtPersistentManifold)
 	GetNewManifold(arg2 BtCollisionObject, arg3 BtCollisionObject) (_swig_ret BtPersistentManifold)
 	ReleaseManifold(arg2 BtPersistentManifold)
 	ClearManifold(arg2 BtPersistentManifold)

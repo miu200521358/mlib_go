@@ -41202,7 +41202,7 @@ btPersistentManifold **_wrap_btCollisionDispatcher_getInternalManifoldPointer_mb
 }
 
 
-btPersistentManifold *_wrap_btCollisionDispatcher_getManifoldByIndexInternal__SWIG_0_mbt_c42c187411a48b0f(btCollisionDispatcher *_swig_go_0, intgo _swig_go_1) {
+btPersistentManifold *_wrap_btCollisionDispatcher_getManifoldByIndexInternal_mbt_c42c187411a48b0f(btCollisionDispatcher *_swig_go_0, intgo _swig_go_1) {
   btCollisionDispatcher *arg1 = (btCollisionDispatcher *) 0 ;
   int arg2 ;
   btPersistentManifold *result = 0 ;
@@ -41212,21 +41212,6 @@ btPersistentManifold *_wrap_btCollisionDispatcher_getManifoldByIndexInternal__SW
   arg2 = (int)_swig_go_1; 
   
   result = (btPersistentManifold *)(arg1)->getManifoldByIndexInternal(arg2);
-  *(btPersistentManifold **)&_swig_go_result = (btPersistentManifold *)result; 
-  return _swig_go_result;
-}
-
-
-btPersistentManifold *_wrap_btCollisionDispatcher_getManifoldByIndexInternal__SWIG_1_mbt_c42c187411a48b0f(btCollisionDispatcher *_swig_go_0, intgo _swig_go_1) {
-  btCollisionDispatcher *arg1 = (btCollisionDispatcher *) 0 ;
-  int arg2 ;
-  btPersistentManifold *result = 0 ;
-  btPersistentManifold *_swig_go_result;
-  
-  arg1 = *(btCollisionDispatcher **)&_swig_go_0; 
-  arg2 = (int)_swig_go_1; 
-  
-  result = (btPersistentManifold *)((btCollisionDispatcher const *)arg1)->getManifoldByIndexInternal(arg2);
   *(btPersistentManifold **)&_swig_go_result = (btPersistentManifold *)result; 
   return _swig_go_result;
 }

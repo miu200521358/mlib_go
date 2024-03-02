@@ -98,12 +98,12 @@ public:
 		return m_manifoldsPtr[index];
 	}
 
-	const btPersistentManifold* getManifoldByIndexInternal(int index) const
-	{
-		btAssert(index>=0);
-		btAssert(index<m_manifoldsPtr.size());
-		return m_manifoldsPtr[index];
-	}
+	// const btPersistentManifold* getManifoldByIndexInternal(int index) const
+	// {
+	// 	btAssert(index>=0);
+	// 	btAssert(index<m_manifoldsPtr.size());
+	// 	return m_manifoldsPtr[index];
+	// }
 
 	btCollisionDispatcher(btCollisionConfiguration* collisionConfiguration);
 
