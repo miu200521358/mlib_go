@@ -13,7 +13,6 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/walk/pkg/walk"
 
-	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
@@ -74,9 +73,6 @@ func NewGlWindow(
 			return nil, err
 		}
 	}
-
-	btDefaultMotionState := mbt.NewBtDefaultMotionState()
-	fmt.Printf("btDefaultMotionState: %v\n", btDefaultMotionState)
 
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)

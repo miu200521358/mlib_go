@@ -7,9 +7,11 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 
+	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type PmxModel struct {
@@ -42,6 +44,7 @@ type PmxModel struct {
 	VerticesByMaterials map[int][]int
 	FacesByMaterials    map[int][]int
 	Meshes              *Meshes
+	Physics             *mbt.MPhysics
 }
 
 func NewPmxModel(path string) *PmxModel {
@@ -82,6 +85,7 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 func (pm *PmxModel) InitializeDraw(windowIndex int, resourceFiles embed.FS) {
 	pm.ToonTextures.InitGl(windowIndex, resourceFiles)
 	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
+	pm.Physics = mbt.NewMPhysics()
 }
 
 func (pm *PmxModel) Draw(

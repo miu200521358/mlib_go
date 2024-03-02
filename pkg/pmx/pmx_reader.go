@@ -8,6 +8,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type PmxReader struct {
@@ -1105,30 +1106,30 @@ func (r *PmxReader) unpackVertexIndex(model *PmxModel) (int, error) {
 
 // テクスチャIndexを読み取る
 func (r *PmxReader) unpackTextureIndex(model *PmxModel) (int, error) {
-	return r.unpackIndex(model, model.TextureCountType)
+	return r.unpackIndex(model.TextureCountType)
 }
 
 // 材質Indexを読み取る
 func (r *PmxReader) unpackMaterialIndex(model *PmxModel) (int, error) {
-	return r.unpackIndex(model, model.MaterialCountType)
+	return r.unpackIndex(model.MaterialCountType)
 }
 
 // ボーンIndexを読み取る
 func (r *PmxReader) unpackBoneIndex(model *PmxModel) (int, error) {
-	return r.unpackIndex(model, model.BoneCountType)
+	return r.unpackIndex(model.BoneCountType)
 }
 
 // 表情Indexを読み取る
 func (r *PmxReader) unpackMorphIndex(model *PmxModel) (int, error) {
-	return r.unpackIndex(model, model.MorphCountType)
+	return r.unpackIndex(model.MorphCountType)
 }
 
 // 剛体Indexを読み取る
 func (r *PmxReader) unpackRigidBodyIndex(model *PmxModel) (int, error) {
-	return r.unpackIndex(model, model.RigidBodyCountType)
+	return r.unpackIndex(model.RigidBodyCountType)
 }
 
-func (r *PmxReader) unpackIndex(model *PmxModel, index int) (int, error) {
+func (r *PmxReader) unpackIndex(index int) (int, error) {
 	switch index {
 	case 1:
 		v, err := r.UnpackSByte()
