@@ -2,16 +2,16 @@ package mbt
 
 type MPhysics struct {
 	broadphase             *BtDbvtBroadphase
-	collisionConfiguration *BtCollisionConfiguration
+	collisionConfiguration *BtDefaultCollisionConfiguration
 }
 
 func NewMPhysics() *MPhysics {
 	broadphase := NewBtDbvtBroadphase()
-	// collisionConfiguration := NewBtCollisionConfiguration()
+	collisionConfiguration := NewBtDefaultCollisionConfiguration()
 
 	p := &MPhysics{
-		broadphase: &broadphase,
-		// collisionConfiguration: &collisionConfiguration,
+		broadphase:             &broadphase,
+		collisionConfiguration: &collisionConfiguration,
 	}
 
 	return p
