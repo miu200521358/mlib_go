@@ -1,11 +1,8 @@
 package mbt
 
 type MPhysics struct {
-	broadphase             *BtDbvtBroadphase
-	collisionConfiguration *BtDefaultCollisionConfiguration
-	dispatcher             *BtCollisionDispatcher
-	solver                 *BtSequentialImpulseConstraintSolver
-	world                  *BtDiscreteDynamicsWorld
+	world    *BtDiscreteDynamicsWorld
+	filterCB *MFilterCallback
 }
 
 func NewMPhysics() *MPhysics {
@@ -14,7 +11,7 @@ func NewMPhysics() *MPhysics {
 	dispatcher := NewBtCollisionDispatcher(collisionConfiguration)
 	solver := NewBtSequentialImpulseConstraintSolver()
 	world := NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
-	world.SetGravity(NewBtVector3(float32(0), float32(-9.8 * 10.0), float32(0)))
+	world.SetGravity(NewBtVector3(float32(0), float32(-9.8*10.0), float32(0)))
 
 	groundShape := NewBtStaticPlaneShape(NewBtVector3(float32(0), float32(1), float32(0)), float32(0))
 	groundTransform := NewBtTransform()
@@ -23,12 +20,13 @@ func NewMPhysics() *MPhysics {
 
 	world.AddRigidBody(groundRigidBody)
 
+	filterCB := NewMFilterCallback(world.GetPairCache().GetOverlapFilterCallback())
+	filterCB.m_nonFilterProxy = append(filterCB.m_nonFilterProxy, groundRigidBody.GetBroadphaseProxy())
+	world.GetPairCache().SetOverlapFilterCallback(filterCB)
+
 	p := &MPhysics{
-		broadphase:             &broadphase,
-		collisionConfiguration: &collisionConfiguration,
-		dispatcher:             &dispatcher,
-		solver:                 &solver,
-		world:                  &world,
+		world:    &world,
+		filterCB: filterCB,
 	}
 
 	return p

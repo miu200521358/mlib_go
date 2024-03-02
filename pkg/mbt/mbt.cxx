@@ -22190,20 +22190,20 @@ bool _wrap_btRigidBody_wantsSleeping_mbt_6498085272db21a9(btRigidBody *_swig_go_
 }
 
 
-btBroadphaseProxy *_wrap_btRigidBody_getBroadphaseProxy__SWIG_0_mbt_6498085272db21a9(btRigidBody *_swig_go_0) {
+btBroadphaseProxy *_wrap_btRigidBody_getConstBroadphaseProxy_mbt_6498085272db21a9(btRigidBody *_swig_go_0) {
   btRigidBody *arg1 = (btRigidBody *) 0 ;
   btBroadphaseProxy *result = 0 ;
   btBroadphaseProxy *_swig_go_result;
   
   arg1 = *(btRigidBody **)&_swig_go_0; 
   
-  result = (btBroadphaseProxy *)((btRigidBody const *)arg1)->getBroadphaseProxy();
+  result = (btBroadphaseProxy *)((btRigidBody const *)arg1)->getConstBroadphaseProxy();
   *(btBroadphaseProxy **)&_swig_go_result = (btBroadphaseProxy *)result; 
   return _swig_go_result;
 }
 
 
-btBroadphaseProxy *_wrap_btRigidBody_getBroadphaseProxy__SWIG_1_mbt_6498085272db21a9(btRigidBody *_swig_go_0) {
+btBroadphaseProxy *_wrap_btRigidBody_getBroadphaseProxy_mbt_6498085272db21a9(btRigidBody *_swig_go_0) {
   btRigidBody *arg1 = (btRigidBody *) 0 ;
   btBroadphaseProxy *result = 0 ;
   btBroadphaseProxy *_swig_go_result;

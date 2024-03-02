@@ -532,10 +532,11 @@ public:
 		return false;
 	}
 
-	const btBroadphaseProxy* getBroadphaseProxy() const
+	const btBroadphaseProxy* getConstBroadphaseProxy() const
 	{
 		return m_broadphaseHandle;
 	}
+
 	btBroadphaseProxy* getBroadphaseProxy()
 	{
 		return m_broadphaseHandle;
@@ -584,7 +585,7 @@ public:
 	//is this rigidbody added to a btCollisionWorld/btDynamicsWorld/btBroadphase?
 	bool isInWorld() const
 	{
-		return (getBroadphaseProxy() != 0);
+		return (getConstBroadphaseProxy() != 0);
 	}
 
 	void addConstraintRef(btTypedConstraint* c);

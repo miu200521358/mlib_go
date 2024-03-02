@@ -1725,8 +1725,8 @@ extern float _wrap_btRigidBody_computeImpulseDenominator_mbt_6498085272db21a9(ui
 extern float _wrap_btRigidBody_computeAngularImpulseDenominator_mbt_6498085272db21a9(uintptr_t arg1, uintptr_t arg2);
 extern void _wrap_btRigidBody_updateDeactivation_mbt_6498085272db21a9(uintptr_t arg1, float arg2);
 extern _Bool _wrap_btRigidBody_wantsSleeping_mbt_6498085272db21a9(uintptr_t arg1);
-extern uintptr_t _wrap_btRigidBody_getBroadphaseProxy__SWIG_0_mbt_6498085272db21a9(uintptr_t arg1);
-extern uintptr_t _wrap_btRigidBody_getBroadphaseProxy__SWIG_1_mbt_6498085272db21a9(uintptr_t arg1);
+extern uintptr_t _wrap_btRigidBody_getConstBroadphaseProxy_mbt_6498085272db21a9(uintptr_t arg1);
+extern uintptr_t _wrap_btRigidBody_getBroadphaseProxy_mbt_6498085272db21a9(uintptr_t arg1);
 extern void _wrap_btRigidBody_setNewBroadphaseProxy_mbt_6498085272db21a9(uintptr_t arg1, uintptr_t arg2);
 extern uintptr_t _wrap_btRigidBody_getMotionState__SWIG_0_mbt_6498085272db21a9(uintptr_t arg1);
 extern uintptr_t _wrap_btRigidBody_getMotionState__SWIG_1_mbt_6498085272db21a9(uintptr_t arg1);
@@ -18579,29 +18579,18 @@ func (arg1 SwigcptrBtRigidBody) WantsSleeping() (_swig_ret bool) {
 	return swig_r
 }
 
-func (arg1 SwigcptrBtRigidBody) GetBroadphaseProxy__SWIG_0() (_swig_ret BtBroadphaseProxy) {
+func (arg1 SwigcptrBtRigidBody) GetConstBroadphaseProxy() (_swig_ret BtBroadphaseProxy) {
 	var swig_r BtBroadphaseProxy
 	_swig_i_0 := arg1
-	swig_r = (BtBroadphaseProxy)(SwigcptrBtBroadphaseProxy(C._wrap_btRigidBody_getBroadphaseProxy__SWIG_0_mbt_6498085272db21a9(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtBroadphaseProxy)(SwigcptrBtBroadphaseProxy(C._wrap_btRigidBody_getConstBroadphaseProxy_mbt_6498085272db21a9(C.uintptr_t(_swig_i_0))))
 	return swig_r
 }
 
-func (arg1 SwigcptrBtRigidBody) GetBroadphaseProxy__SWIG_1() (_swig_ret BtBroadphaseProxy) {
+func (arg1 SwigcptrBtRigidBody) GetBroadphaseProxy() (_swig_ret BtBroadphaseProxy) {
 	var swig_r BtBroadphaseProxy
 	_swig_i_0 := arg1
-	swig_r = (BtBroadphaseProxy)(SwigcptrBtBroadphaseProxy(C._wrap_btRigidBody_getBroadphaseProxy__SWIG_1_mbt_6498085272db21a9(C.uintptr_t(_swig_i_0))))
+	swig_r = (BtBroadphaseProxy)(SwigcptrBtBroadphaseProxy(C._wrap_btRigidBody_getBroadphaseProxy_mbt_6498085272db21a9(C.uintptr_t(_swig_i_0))))
 	return swig_r
-}
-
-func (p SwigcptrBtRigidBody) GetBroadphaseProxy(a ...interface{}) interface{} {
-	argc := len(a)
-	if argc == 0 {
-		return p.GetBroadphaseProxy__SWIG_0()
-	}
-	if argc == 0 {
-		return p.GetBroadphaseProxy__SWIG_1()
-	}
-	panic("No match for overloaded function call")
 }
 
 func (arg1 SwigcptrBtRigidBody) SetNewBroadphaseProxy(arg2 BtBroadphaseProxy) {
@@ -19395,7 +19384,8 @@ type BtRigidBody interface {
 	ComputeAngularImpulseDenominator(arg2 BtVector3) (_swig_ret float32)
 	UpdateDeactivation(arg2 float32)
 	WantsSleeping() (_swig_ret bool)
-	GetBroadphaseProxy(a ...interface{}) interface{}
+	GetConstBroadphaseProxy() (_swig_ret BtBroadphaseProxy)
+	GetBroadphaseProxy() (_swig_ret BtBroadphaseProxy)
 	SetNewBroadphaseProxy(arg2 BtBroadphaseProxy)
 	GetMotionState(a ...interface{}) interface{}
 	SetMotionState(arg2 BtMotionState)
