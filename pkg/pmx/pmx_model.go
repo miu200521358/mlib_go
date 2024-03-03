@@ -115,25 +115,24 @@ func (pm *PmxModel) ResetPhysics() {
 		rigidBody.ResetPhysics()
 	}
 
-	pm.Physics.StepSimulation(float32(0.0))
+	pm.Physics.Update()
 
-	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-		rigidBody.ReflectGlobalTransform()
-	}
-	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-		rigidBody.CalcLocalTransform()
-	}
+	// for _, rigidBody := range pm.RigidBodies.GetSortedData() {
+	// 	rigidBody.CalcTransform(nil)
+	// }
 }
 
 func (pm *PmxModel) Draw(
 	shader *mgl.MShader,
 	boneMatrixes []*mgl32.Mat4,
 	windowIndex int,
+	frame float32,
 ) {
+	pm.UpdatePhysics(boneMatrixes, frame)
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
 }
 
-func (pm *PmxModel) DrawPhysics(frame float32) {
+func (pm *PmxModel) UpdatePhysics(boneMatrixes []*mgl32.Mat4, frame float32) {
 	if pm.Physics == nil {
 		return
 	}
@@ -142,7 +141,11 @@ func (pm *PmxModel) DrawPhysics(frame float32) {
 		rigidBody.SetActivation(true)
 	}
 
-	pm.Physics.Update(frame)
+	pm.Physics.Update()
+
+	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
+		rigidBody.UpdateMatrix(boneMatrixes)
+	}
 
 }
 

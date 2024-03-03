@@ -39,7 +39,7 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32) {
 			matrixes[i] = mat
 		}
 	}
-	ms.Model.Draw(shader, matrixes, windowIndex)
+	ms.Model.Draw(shader, matrixes, windowIndex, frame)
 }
 
 type GlWindow struct {

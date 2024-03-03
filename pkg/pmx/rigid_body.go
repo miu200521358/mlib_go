@@ -3,6 +3,8 @@ package pmx
 import (
 	"math"
 
+	"github.com/go-gl/mathgl/mgl32"
+
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
@@ -109,7 +111,6 @@ type RigidBody struct {
 	ZDirection         *mmath.MVec3                   // Z軸方向
 	IsSystem           bool                           // システムで追加した剛体か
 	Matrix             *mmath.MMat4                   // 剛体の行列
-	BtTransform        mbt.BtTransform                // Bulletの変換行列
 	BtCollisionShape   mbt.BtCollisionShape           // 物理形状
 	BtRigidBody        mbt.BtRigidBody                // 物理剛体
 	ActiveMotionState  mphysics.MMotionStateInterface // 物理ON時のステート
@@ -179,20 +180,20 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 	}
 
 	// OpenGL行列を設定
-	r.BtTransform = mbt.NewBtTransform()
-	r.BtTransform.SetFromOpenGLMatrix(&rigidBodyOffsetMat.GL()[0])
+	btTransform := mbt.NewBtTransform()
+	btTransform.SetFromOpenGLMatrix(&rigidBodyOffsetMat.GL()[0])
 
 	if r.PhysicsType == PHYSICS_TYPE_STATIC {
-		r.ActiveMotionState = mphysics.NewStaticMotionState(r.BtTransform, rigidBodyOffsetMat)
-		r.StaticMotionState = mphysics.NewStaticMotionState(r.BtTransform, rigidBodyOffsetMat)
+		r.ActiveMotionState = mphysics.NewStaticMotionState(btTransform, rigidBodyOffsetMat)
+		r.StaticMotionState = mphysics.NewStaticMotionState(btTransform, rigidBodyOffsetMat)
 	} else if r.PhysicsType == PHYSICS_TYPE_DYNAMIC {
-		r.ActiveMotionState = mphysics.NewDynamicMotionState(r.BtTransform, rigidBodyOffsetMat)
-		r.StaticMotionState = mphysics.NewStaticMotionState(r.BtTransform, rigidBodyOffsetMat)
+		r.ActiveMotionState = mphysics.NewDynamicMotionState(btTransform, rigidBodyOffsetMat)
+		r.StaticMotionState = mphysics.NewStaticMotionState(btTransform, rigidBodyOffsetMat)
 	} else if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
-		r.ActiveMotionState = mphysics.NewDynamicBoneMotionState(r.BtTransform, rigidBodyOffsetMat)
-		r.StaticMotionState = mphysics.NewStaticMotionState(r.BtTransform, rigidBodyOffsetMat)
+		r.ActiveMotionState = mphysics.NewDynamicBoneMotionState(btTransform, rigidBodyOffsetMat)
+		r.StaticMotionState = mphysics.NewStaticMotionState(btTransform, rigidBodyOffsetMat)
 	}
-	r.ActiveMotionState.SetWorldTransform(r.BtTransform)
+	r.ActiveMotionState.SetWorldTransform(btTransform)
 
 	r.BtRigidBody = mbt.NewBtRigidBody(mass, r.ActiveMotionState, r.BtCollisionShape, localInertia)
 	r.BtRigidBody.SetDamping(float32(r.RigidBodyParam.LinearDamping), float32(r.RigidBodyParam.AngularDamping))
@@ -239,12 +240,16 @@ func (r *RigidBody) ResetPhysics() {
 	r.ActiveMotionState.Reset()
 }
 
-func (r *RigidBody) ReflectGlobalTransform() {
+func (r *RigidBody) UpdateMatrix(boneMatrixes []*mgl32.Mat4) {
+	if r.BtRigidBody == nil || r.BoneIndex < 0 || r.BoneIndex >= len(boneMatrixes) ||
+		r.PhysicsType == PHYSICS_TYPE_STATIC {
+		return
+	}
 
-}
-
-func (r *RigidBody) CalcLocalTransform() {
-
+	transform := r.BtRigidBody.GetWorldTransform().(mbt.BtTransform)
+	glMat4 := mgl32.Mat4{}
+	transform.GetOpenGLMatrix(&glMat4[0])
+	boneMatrixes[r.BoneIndex] = &glMat4
 }
 
 // 剛体リスト

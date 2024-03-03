@@ -60,10 +60,6 @@ func (p *MPhysics) RemoveJoint(joint mbt.BtTypedConstraint) {
 	p.World.RemoveConstraint(joint)
 }
 
-func (p *MPhysics) StepSimulation(frame float32) {
-	p.World.StepSimulation(frame, p.MaxSubSteps, float32(1.0/p.Fps))
-}
-
-func (p *MPhysics) Update(frame float32) {
-	p.StepSimulation(frame)
+func (p *MPhysics) Update() {
+	p.World.StepSimulation(float32(1.0/60.0), p.MaxSubSteps, float32(1.0/p.Fps))
 }
