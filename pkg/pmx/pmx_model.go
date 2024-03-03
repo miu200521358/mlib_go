@@ -90,6 +90,8 @@ func (pm *PmxModel) InitializeDraw(windowIndex int, resourceFiles embed.FS) {
 	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
 		if rigidBody.BoneIndex >= 0 && pm.Bones.Contains(rigidBody.BoneIndex) {
 			rigidBody.InitPhysics(pm.Physics, pm.Bones.GetItem(rigidBody.BoneIndex))
+		} else {
+			rigidBody.InitPhysics(pm.Physics, nil)
 		}
 	}
 

@@ -196,3 +196,8 @@
 ////// included headers [BulletCollision/CollisionShapes/btStaticPlaneShape.h] ----------------------------------
 %include "BulletCollision/CollisionShapes/btStaticPlaneShape.h.i"
 %include "BulletCollision/CollisionShapes/btStaticPlaneShape.cpp.i"
+
+
+////// included headers [BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h] ----------------------------------
+%include "BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h.i"
+%include "BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.cpp.i"

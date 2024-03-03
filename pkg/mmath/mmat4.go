@@ -76,6 +76,14 @@ func (m *MMat4) GL() *mgl32.Mat4 {
 
 // Bullet+OpenGL座標系に変換された行列ベクトルを返します
 func (v *MMat4) Bullet() mbt.BtMatrix3x3 {
+	return mbt.NewBtMatrix3x3(
+		float32(v[0][0]), float32(v[0][1]), float32(v[0][2]),
+		float32(v[1][0]), float32(v[1][1]), float32(v[1][2]),
+		float32(v[2][0]), float32(v[2][1]), float32(v[2][2]))
+}
+
+// Bullet+OpenGL座標系に変換 + Z軸の逆行列を加味した行列ベクトルを返します
+func (v *MMat4) BulletInvZ() mbt.BtMatrix3x3 {
 	invZ := NewMMat4()
 	invZ.ScaleVec3(&MVec3{1, 1, -1})
 

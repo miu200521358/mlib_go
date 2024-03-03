@@ -5,6 +5,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
+
 )
 
 type JointParam struct {
@@ -36,6 +37,7 @@ type Joint struct {
 	Rotation        *mmath.MRotation // 回転
 	JointParam      *JointParam      // ジョイントパラメーター
 	IsSystem        bool
+	Constraint      mbt.BtGeneric6DofSpringConstraint // Bulletのジョイント
 }
 
 func NewJoint() *Joint {
@@ -59,16 +61,54 @@ func NewJointByName(name string) *Joint {
 }
 
 func (j *Joint) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody) {
-	// // ジョイントの回転
-	// rotationMat := j.Rotation.GetQuaternion().ToMat4()
+	// 回転行列
+	rotationMat := j.Rotation.GetQuaternion().ToMat4()
 
-	// // ジョイントの位置
-	// translationMat := mmath.NewMMat4()
-	// translationMat.SetTranslation(j.Position)
+	jointMat := mmath.NewMMat4()
+	jointMat.Translate(j.Position)
+	jointMat.Mul(rotationMat)
 
-	jointTF := mbt.NewBtTransform()
-	jointTF.SetIdentity()
+	// 剛体Aから見たジョイントの行列
+	jointAMat := rigidBodyA.Matrix.Inverted().Muled(jointMat).GL()
+	jointATransform := mbt.NewBtTransform()
+	jointATransform.SetFromOpenGLMatrix(&jointAMat[0])
 
+	// 剛体Bから見たジョイントの行列
+	jointBMat := rigidBodyB.Matrix.Inverted().Muled(jointMat).GL()
+	jointBTransform := mbt.NewBtTransform()
+	jointBTransform.SetFromOpenGLMatrix(&jointBMat[0])
+
+	// ジョイント係数
+	j.Constraint = mbt.NewBtGeneric6DofSpringConstraint(
+		rigidBodyA.BtRigidBody, rigidBodyB.BtRigidBody, jointATransform, jointBTransform, true)
+	j.Constraint.SetLinearLowerLimit(j.JointParam.TranslationLimitMin.Bullet())
+	j.Constraint.SetLinearUpperLimit(j.JointParam.TranslationLimitMax.Bullet())
+	j.Constraint.SetAngularLowerLimit(j.JointParam.RotationLimitMin.GetRadians().Bullet())
+	j.Constraint.SetAngularUpperLimit(j.JointParam.RotationLimitMax.GetRadians().Bullet())
+	if j.JointParam.SpringConstantTranslation.GetX() != 0 {
+		j.Constraint.EnableSpring(0, true)
+		j.Constraint.SetStiffness(0, float32(j.JointParam.SpringConstantTranslation.GetX()))
+	}
+	if j.JointParam.SpringConstantTranslation.GetY() != 0 {
+		j.Constraint.EnableSpring(1, true)
+		j.Constraint.SetStiffness(1, float32(j.JointParam.SpringConstantTranslation.GetY()))
+	}
+	if j.JointParam.SpringConstantTranslation.GetZ() != 0 {
+		j.Constraint.EnableSpring(2, true)
+		j.Constraint.SetStiffness(2, float32(j.JointParam.SpringConstantTranslation.GetZ()))
+	}
+	if j.JointParam.SpringConstantRotation.GetRadians().GetX() != 0 {
+		j.Constraint.EnableSpring(3, true)
+		j.Constraint.SetStiffness(3, float32(j.JointParam.SpringConstantRotation.GetRadians().GetX()))
+	}
+	if j.JointParam.SpringConstantRotation.GetRadians().GetY() != 0 {
+		j.Constraint.EnableSpring(4, true)
+		j.Constraint.SetStiffness(4, float32(j.JointParam.SpringConstantRotation.GetRadians().GetY()))
+	}
+	if j.JointParam.SpringConstantRotation.GetRadians().GetZ() != 0 {
+		j.Constraint.EnableSpring(5, true)
+		j.Constraint.SetStiffness(5, float32(j.JointParam.SpringConstantRotation.GetRadians().GetZ()))
+	}
 }
 
 // ジョイントリスト

@@ -3,6 +3,8 @@ package pmx
 import (
 	"math"
 
+	"github.com/go-gl/mathgl/mgl32"
+
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
@@ -108,7 +110,10 @@ type RigidBody struct {
 	YDirection         *mmath.MVec3         // Y軸方向
 	ZDirection         *mmath.MVec3         // Z軸方向
 	IsSystem           bool                 // システムで追加した剛体か
+	Matrix             *mmath.MMat4         // 剛体の行列
+	BtTransform        mbt.BtTransform      // Bulletの変換行列
 	BtCollisionShape   mbt.BtCollisionShape // 物理形状
+	BtRigidBody        mbt.BtRigidBody      // 物理剛体
 }
 
 // NewRigidBody creates a new rigid body.
@@ -161,16 +166,21 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 	translationMat := mmath.NewMMat4()
 	translationMat.Translate(r.Position)
 
-	rigidBodyMat := mmath.NewMMat4()
-	rigidBodyMat.Mul(translationMat)
-	rigidBodyMat.Mul(rotationMat)
+	r.Matrix = mmath.NewMMat4()
+	r.Matrix.Mul(translationMat)
+	r.Matrix.Mul(rotationMat)
 
-	// ボーンから見た剛体のローカル行列
-	rigidBodyOffsetGLMat := bone.OffsetMatrix.Muled(rigidBodyMat).GL()
+	// ボーンから見た剛体のローカル行列(ボーンがなければ初期行列)
+	var rigidBodyOffsetGLMat *mgl32.Mat4
+	if bone != nil {
+		rigidBodyOffsetGLMat = bone.OffsetMatrix.Muled(r.Matrix).GL()
+	} else {
+		rigidBodyOffsetGLMat = mmath.NewMMat4().GL()
+	}
 
 	// OpenGL行列を設定
-	rigidBodyTransform := mbt.NewBtTransform()
-	rigidBodyTransform.SetFromOpenGLMatrix(&rigidBodyOffsetGLMat[0])
+	r.BtTransform = mbt.NewBtTransform()
+	r.BtTransform.SetFromOpenGLMatrix(&rigidBodyOffsetGLMat[0])
 
 	var motionState mbt.BtDefaultMotionState
 	if r.PhysicsType == PHYSICS_TYPE_STATIC {
@@ -180,15 +190,15 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 	} else if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
 		motionState = mphysics.NewDynamicBoneMotionState()
 	}
-	motionState.SetWorldTransform(rigidBodyTransform)
+	motionState.SetWorldTransform(r.BtTransform)
 
-	btRigidBody := mbt.NewBtRigidBody(mass, motionState, r.BtCollisionShape, localInertia)
-	btRigidBody.SetDamping(float32(r.RigidBodyParam.LinearDamping), float32(r.RigidBodyParam.AngularDamping))
-	btRigidBody.SetRestitution(float32(r.RigidBodyParam.Restitution))
-	btRigidBody.SetFriction(float32(r.RigidBodyParam.Friction))
+	r.BtRigidBody = mbt.NewBtRigidBody(mass, motionState, r.BtCollisionShape, localInertia)
+	r.BtRigidBody.SetDamping(float32(r.RigidBodyParam.LinearDamping), float32(r.RigidBodyParam.AngularDamping))
+	r.BtRigidBody.SetRestitution(float32(r.RigidBodyParam.Restitution))
+	r.BtRigidBody.SetFriction(float32(r.RigidBodyParam.Friction))
 	// btRigidBody.SetUserIndex(mbt.)
-	btRigidBody.SetSleepingThresholds(0.01, (180.0 * 0.1 / math.Pi))
-	btRigidBody.SetActivationState(mbt.DISABLE_DEACTIVATION)
+	r.BtRigidBody.SetSleepingThresholds(0.01, (180.0 * 0.1 / math.Pi))
+	r.BtRigidBody.SetActivationState(mbt.DISABLE_DEACTIVATION)
 }
 
 // 剛体リスト
