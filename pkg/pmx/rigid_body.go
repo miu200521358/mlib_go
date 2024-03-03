@@ -6,7 +6,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
+	"github.com/miu200521358/mlib_go/pkg/mphysics"
 )
 
 type RigidBodyParam struct {
@@ -131,7 +131,7 @@ func NewRigidBody() *RigidBody {
 	}
 }
 
-func (r *RigidBody) InitPhysics(modelPhysics *mbt.MPhysics, bone *Bone) {
+func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 	switch r.ShapeType {
 	case SHAPE_SPHERE:
 		r.BtCollisionShape = mbt.NewBtSphereShape(float32(r.Size.GetX()))
@@ -155,29 +155,32 @@ func (r *RigidBody) InitPhysics(modelPhysics *mbt.MPhysics, bone *Bone) {
 	}
 
 	// 剛体の回転
-	rotationX := mmath.NewMMat4()
-	rotationX.AssignXRotation(r.Rotation.GetRadians().GetX())
-
-	rotationY := mmath.NewMMat4()
-	rotationY.AssignYRotation(r.Rotation.GetRadians().GetY())
-
-	rotationZ := mmath.NewMMat4()
-	rotationZ.AssignZRotation(r.Rotation.GetRadians().GetZ())
-
-	rotationMat := mmath.NewMMat4()
-	rotationMat.Mul(rotationY)
-	rotationMat.Mul(rotationX)
-	rotationMat.Mul(rotationZ)
+	rotationMat := r.Rotation.GetQuaternion().ToMat4()
 
 	// 剛体の位置
-	translationMatrix := mmath.NewMMat4()
-	translationMatrix.Translate(r.Position)
+	translationMat := mmath.NewMMat4()
+	translationMat.Translate(r.Position)
 
 	rigidBodyMat := mmath.NewMMat4()
-	rigidBodyMat.Mul(translationMatrix)
+	rigidBodyMat.Mul(translationMat)
 	rigidBodyMat.Mul(rotationMat)
 
-	motionState := mbt.NewBtDefaultMotionState(bone.InitTransform)
+	// ボーンから見た剛体のローカル行列
+	rigidBodyOffsetGLMat := bone.OffsetMatrix.Muled(rigidBodyMat).GL()
+
+	// OpenGL行列を設定
+	rigidBodyTransform := mbt.NewBtTransform()
+	rigidBodyTransform.SetFromOpenGLMatrix(&rigidBodyOffsetGLMat[0])
+
+	var motionState mbt.BtDefaultMotionState
+	if r.PhysicsType == PHYSICS_TYPE_STATIC {
+		motionState = mphysics.NewStaticMotionState()
+	} else if r.PhysicsType == PHYSICS_TYPE_DYNAMIC {
+		motionState = mphysics.NewDynamicMotionState()
+	} else if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
+		motionState = mphysics.NewDynamicBoneMotionState()
+	}
+	motionState.SetWorldTransform(rigidBodyTransform)
 
 	btRigidBody := mbt.NewBtRigidBody(mass, motionState, r.BtCollisionShape, localInertia)
 	btRigidBody.SetDamping(float32(r.RigidBodyParam.LinearDamping), float32(r.RigidBodyParam.AngularDamping))

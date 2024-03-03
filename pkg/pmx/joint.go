@@ -1,9 +1,10 @@
 package pmx
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
+	"github.com/miu200521358/mlib_go/pkg/mphysics"
 )
 
 type JointParam struct {
@@ -55,6 +56,19 @@ func NewJointByName(name string) *Joint {
 	j := NewJoint()
 	j.Name = name
 	return j
+}
+
+func (j *Joint) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody) {
+	// // ジョイントの回転
+	// rotationMat := j.Rotation.GetQuaternion().ToMat4()
+
+	// // ジョイントの位置
+	// translationMat := mmath.NewMMat4()
+	// translationMat.SetTranslation(j.Position)
+
+	jointTF := mbt.NewBtTransform()
+	jointTF.SetIdentity()
+
 }
 
 // ジョイントリスト

@@ -1,18 +1,20 @@
-package mbt
+package mphysics
+
+import "github.com/miu200521358/mlib_go/pkg/mbt"
 
 type MFilterCallback struct {
-	BtOverlapFilterCallback
-	m_nonFilterProxy []BtBroadphaseProxy
+	mbt.BtOverlapFilterCallback
+	m_nonFilterProxy []mbt.BtBroadphaseProxy
 }
 
-func NewMFilterCallback(cb BtOverlapFilterCallback) MFilterCallback {
+func NewMFilterCallback(cb mbt.BtOverlapFilterCallback) MFilterCallback {
 	return MFilterCallback{
 		BtOverlapFilterCallback: cb,
 	}
 }
 
-func (m *MFilterCallback) NeedBroadphaseCollision(proxy0, proxy1 BtBroadphaseProxy) bool {
-	findIt := func() BtBroadphaseProxy {
+func (m *MFilterCallback) NeedBroadphaseCollision(proxy0, proxy1 mbt.BtBroadphaseProxy) bool {
+	findIt := func() mbt.BtBroadphaseProxy {
 		for _, x := range m.m_nonFilterProxy {
 			if x == proxy0 || x == proxy1 {
 				return x
