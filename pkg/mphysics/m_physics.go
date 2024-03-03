@@ -39,3 +39,23 @@ func NewMPhysics() *MPhysics {
 
 	return p
 }
+
+func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody) {
+	p.World.AddRigidBody(rigidBody)
+}
+
+func (p *MPhysics) RemoveRigidBody(rigidBody mbt.BtRigidBody) {
+	p.World.RemoveRigidBody(rigidBody)
+}
+
+func (p *MPhysics) AddJoint(joint mbt.BtTypedConstraint) {
+	p.World.AddConstraint(joint, true)
+}
+
+func (p *MPhysics) RemoveJoint(joint mbt.BtTypedConstraint) {
+	p.World.RemoveConstraint(joint)
+}
+
+func (p *MPhysics) StepSimulation(timeStep float64, maxSubSteps int, fixedTimeStep float64) {
+	p.World.StepSimulation(float32(timeStep), maxSubSteps, float32(fixedTimeStep))
+}

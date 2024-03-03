@@ -199,6 +199,8 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 	// btRigidBody.SetUserIndex(mbt.)
 	r.BtRigidBody.SetSleepingThresholds(0.01, (180.0 * 0.1 / math.Pi))
 	r.BtRigidBody.SetActivationState(mbt.DISABLE_DEACTIVATION)
+
+	modelPhysics.AddRigidBody(r.BtRigidBody)
 }
 
 // 剛体リスト

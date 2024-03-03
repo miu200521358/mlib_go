@@ -5,7 +5,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-
 )
 
 type JointParam struct {
@@ -109,6 +108,8 @@ func (j *Joint) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBo
 		j.Constraint.EnableSpring(5, true)
 		j.Constraint.SetStiffness(5, float32(j.JointParam.SpringConstantRotation.GetRadians().GetZ()))
 	}
+
+	modelPhysics.AddJoint(j.Constraint)
 }
 
 // ジョイントリスト
