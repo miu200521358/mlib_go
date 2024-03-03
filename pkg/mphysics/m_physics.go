@@ -7,6 +7,8 @@ type MPhysics struct {
 	GroundTransform mbt.BtTransform
 	FilterCallBack  MFilterCallback
 	MotionState     mbt.BtDefaultMotionState
+	MaxSubSteps     int
+	Fps             float64
 }
 
 func NewMPhysics() *MPhysics {
@@ -35,6 +37,8 @@ func NewMPhysics() *MPhysics {
 		GroundTransform: groundTransform,
 		FilterCallBack:  filterCB,
 		MotionState:     motionState,
+		MaxSubSteps:     10,
+		Fps:             60.0,
 	}
 
 	return p
@@ -56,6 +60,10 @@ func (p *MPhysics) RemoveJoint(joint mbt.BtTypedConstraint) {
 	p.World.RemoveConstraint(joint)
 }
 
-func (p *MPhysics) StepSimulation(timeStep float64, maxSubSteps int, fixedTimeStep float64) {
-	p.World.StepSimulation(float32(timeStep), maxSubSteps, float32(fixedTimeStep))
+func (p *MPhysics) StepSimulation(frame float32) {
+	p.World.StepSimulation(frame, p.MaxSubSteps, float32(1.0/p.Fps))
+}
+
+func (p *MPhysics) Update(frame float32) {
+	p.StepSimulation(frame)
 }

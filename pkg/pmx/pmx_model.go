@@ -106,12 +106,44 @@ func (pm *PmxModel) InitializeDraw(windowIndex int, resourceFiles embed.FS) {
 	}
 }
 
+func (pm *PmxModel) ResetPhysics() {
+	if pm.Physics == nil {
+		return
+	}
+
+	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
+		rigidBody.ResetPhysics()
+	}
+
+	pm.Physics.StepSimulation(float32(0.0))
+
+	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
+		rigidBody.ReflectGlobalTransform()
+	}
+	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
+		rigidBody.CalcLocalTransform()
+	}
+}
+
 func (pm *PmxModel) Draw(
 	shader *mgl.MShader,
 	boneMatrixes []*mgl32.Mat4,
 	windowIndex int,
 ) {
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
+}
+
+func (pm *PmxModel) DrawPhysics(frame float32) {
+	if pm.Physics == nil {
+		return
+	}
+
+	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
+		rigidBody.SetActivation(true)
+	}
+
+	pm.Physics.Update(frame)
+
 }
 
 // 関連ボーンリストの取得
