@@ -11,7 +11,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type PmxModel struct {
@@ -86,6 +85,13 @@ func (pm *PmxModel) InitializeDraw(windowIndex int, resourceFiles embed.FS) {
 	pm.ToonTextures.InitGl(windowIndex, resourceFiles)
 	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
 	pm.Physics = mbt.NewMPhysics()
+
+	// 剛体を順番にボーンと紐付けていく
+	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
+		if rigidBody.BoneIndex >= 0 && pm.Bones.Contains(rigidBody.BoneIndex) {
+			rigidBody.InitPhysics(pm.Physics, pm.Bones.GetItem(rigidBody.BoneIndex))
+		}
+	}
 }
 
 func (pm *PmxModel) Draw(
@@ -219,24 +225,8 @@ func (pm *PmxModel) SetUp() {
 		bone.ParentRelativePosition = pm.Bones.getParentRelativePosition(bone.Index)
 		// 子への相対位置
 		bone.ChildRelativePosition = pm.Bones.getChildRelativePosition(bone.Index)
-		// 各ボーンのローカル軸
-		localAxis := bone.ChildRelativePosition.Normalized()
-		bone.LocalAxis = localAxis
-		// ローカル軸行列
-		bone.LocalMatrix = localAxis.ToLocalMatrix4x4()
-
-		if bone.HasFixedAxis() {
-			bone.normalizeFixedAxis(bone.FixedAxis)
-			bone.normalizeLocalAxis(bone.FixedAxis)
-		} else {
-			bone.normalizeLocalAxis(bone.LocalAxis)
-		}
-
-		// オフセット行列は自身の位置を原点に戻す行列
-		bone.OffsetMatrix.Translate(bone.Position.Inverted())
-
-		// 逆オフセット行列は親ボーンからの相対位置分
-		bone.RevertOffsetMatrix.Translate(bone.ParentRelativePosition.Copy())
+		// ボーン単体のセットアップ
+		bone.setup()
 	}
 
 	// IK子ボーンINDEXリスト
@@ -293,5 +283,4 @@ func (pm *PmxModel) SetUp() {
 		pm.Bones.LayerSortedIndexes[i] = bone.Name
 		i++
 	}
-
 }

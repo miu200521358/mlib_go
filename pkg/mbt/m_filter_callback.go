@@ -5,8 +5,8 @@ type MFilterCallback struct {
 	m_nonFilterProxy []BtBroadphaseProxy
 }
 
-func NewMFilterCallback(cb BtOverlapFilterCallback) *MFilterCallback {
-	return &MFilterCallback{
+func NewMFilterCallback(cb BtOverlapFilterCallback) MFilterCallback {
+	return MFilterCallback{
 		BtOverlapFilterCallback: cb,
 	}
 }

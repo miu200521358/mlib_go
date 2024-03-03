@@ -1,8 +1,10 @@
 package mbt
 
 type MPhysics struct {
-	world    *BtDiscreteDynamicsWorld
-	filterCB *MFilterCallback
+	World           BtDiscreteDynamicsWorld
+	GroundTransform BtTransform
+	FilterCallBack  MFilterCallback
+	MotionState     BtDefaultMotionState
 }
 
 func NewMPhysics() *MPhysics {
@@ -22,11 +24,15 @@ func NewMPhysics() *MPhysics {
 
 	filterCB := NewMFilterCallback(world.GetPairCache().GetOverlapFilterCallback())
 	filterCB.m_nonFilterProxy = append(filterCB.m_nonFilterProxy, groundRigidBody.GetBroadphaseProxy())
-	world.GetPairCache().SetOverlapFilterCallback(filterCB)
+	world.GetPairCache().SetOverlapFilterCallback(&filterCB)
+
+	motionState := NewBtDefaultMotionState(groundTransform)
 
 	p := &MPhysics{
-		world:    &world,
-		filterCB: filterCB,
+		World:           world,
+		GroundTransform: groundTransform,
+		FilterCallBack:  filterCB,
+		MotionState:     motionState,
 	}
 
 	return p

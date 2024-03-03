@@ -86,6 +86,11 @@ func (v *MVec3) GL() mgl32.Vec3 {
 	return mgl32.Vec3{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ())}
 }
 
+// Bullet+OpenGL座標系に変換された2次元ベクトルを返します
+func (v *MVec3) Bullet() *MVec3 {
+	return &MVec3{v.GetX(), v.GetY(), -v.GetZ()}
+}
+
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します
 func (v *MVec3) MMD() *MVec3 {
 	return &MVec3{v.GetX(), -v.GetY(), -v.GetZ()}

@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
@@ -105,6 +106,8 @@ type Bone struct {
 	LocalAngleLimit        bool             // 自分がIKリンクボーンのローカル軸角度制限がある場合、true
 	LocalMinAngleLimit     *mmath.MRotation // 自分がIKリンクボーンのローカル軸角度制限の下限
 	LocalMaxAngleLimit     *mmath.MRotation // 自分がIKリンクボーンのローカル軸角度制限の上限
+	InitTransform          mbt.BtTransform  // 物理用初期姿勢
+	InverseInitTransform   mbt.BtTransform  // 物理用初期姿勢の逆行列
 }
 
 func NewBone() *Bone {
@@ -359,6 +362,32 @@ func (bone *Bone) normalizeLocalAxis(localXVector *mmath.MVec3) {
 	bone.NormalizedLocalAxisX = v
 	bone.NormalizedLocalAxisY = v.Cross(&mmath.MVec3{0, 0, -1})
 	bone.NormalizedLocalAxisZ = v.Cross(bone.NormalizedLocalAxisY)
+}
+
+func (bone *Bone) setup() {
+	// 各ボーンのローカル軸
+	localAxis := bone.ChildRelativePosition.Normalized()
+	bone.LocalAxis = localAxis
+	// ローカル軸行列
+	bone.LocalMatrix = localAxis.ToLocalMatrix4x4()
+
+	if bone.HasFixedAxis() {
+		bone.normalizeFixedAxis(bone.FixedAxis)
+		bone.normalizeLocalAxis(bone.FixedAxis)
+	} else {
+		bone.normalizeLocalAxis(bone.LocalAxis)
+	}
+
+	// オフセット行列は自身の位置を原点に戻す行列
+	bone.OffsetMatrix.Translate(bone.Position.Inverted())
+
+	// 逆オフセット行列は親ボーンからの相対位置分
+	bone.RevertOffsetMatrix.Translate(bone.ParentRelativePosition.Copy())
+
+	// 物理用初期姿勢
+	initMat := bone.Position.ToMat4()
+	bone.InitTransform = mbt.NewBtTransform(initMat.Bullet())
+	bone.InverseInitTransform = mbt.NewBtTransform(initMat.Inverted().Bullet())
 }
 
 // ボーンリスト

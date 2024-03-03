@@ -5,6 +5,8 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
+
+	"github.com/miu200521358/mlib_go/pkg/mbt"
 )
 
 type MMat4 [4]MVec4
@@ -70,6 +72,22 @@ func (m *MMat4) GL() *mgl32.Mat4 {
 		float32(-tm[3][0]), float32(tm[3][1]), float32(tm[3][2]), float32(tm[3][3]),
 	}
 	return &mat
+}
+
+// Bullet+OpenGL座標系に変換された行列ベクトルを返します
+func (v *MMat4) Bullet() mbt.BtMatrix3x3 {
+	invZ := NewMMat4()
+	invZ.ScaleVec3(&MVec3{1, 1, -1})
+
+	mat := NewMMat4()
+	mat.Mul(invZ)
+	mat.Mul(v)
+	mat.Mul(invZ)
+
+	return mbt.NewBtMatrix3x3(
+		float32(mat[0][0]), float32(mat[0][1]), float32(mat[0][2]),
+		float32(mat[1][0]), float32(mat[1][1]), float32(mat[1][2]),
+		float32(mat[2][0]), float32(mat[2][1]), float32(mat[2][2]))
 }
 
 // IsZero
@@ -317,6 +335,14 @@ func (mat *MMat4) Quaternion() *MQuaternion {
 	}
 
 	return q.Normalize()
+}
+
+func (mat *MMat4) Mat3() *MMat3 {
+	return &MMat3{
+		MVec3{mat[0][0], mat[0][1], mat[0][2]},
+		MVec3{mat[1][0], mat[1][1], mat[1][2]},
+		MVec3{mat[2][0], mat[2][1], mat[2][2]},
+	}
 }
 
 // AssignQuaternion assigns a quaternion to the rotations part of the matrix and sets the other elements to their ident value.
@@ -684,4 +710,9 @@ func (m *MMat4) Inverse() *MMat4 {
 	}
 
 	return &retMat
+}
+
+func (m *MMat4) Inverted() *MMat4 {
+	copied := m.Copy()
+	return copied.Inverse()
 }

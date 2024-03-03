@@ -1,6 +1,9 @@
 package pmx
 
 import (
+	"math"
+
+	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 
@@ -92,19 +95,20 @@ func NewCollisionGroup(collisionGroupMask uint16) []uint16 {
 
 type RigidBody struct {
 	*mcore.IndexNameModel
-	BoneIndex          int              // 関連ボーンIndex
-	CollisionGroup     byte             // グループ
-	CollisionGroupMask CollisionGroup   // 非衝突グループフラグ
-	ShapeType          Shape            // 形状
-	Size               *mmath.MVec3     // サイズ(x,y,z)
-	Position           *mmath.MVec3     // 位置(x,y,z)
-	Rotation           *mmath.MRotation // 回転(x,y,z) -> ラジアン角
-	RigidBodyParam     *RigidBodyParam  // 剛体パラ
-	PhysicsType        PhysicsType      // 剛体の物理演算
-	XDirection         *mmath.MVec3     // X軸方向
-	YDirection         *mmath.MVec3     // Y軸方向
-	ZDirection         *mmath.MVec3     // Z軸方向
-	IsSystem           bool             // システムで追加した剛体か
+	BoneIndex          int                  // 関連ボーンIndex
+	CollisionGroup     byte                 // グループ
+	CollisionGroupMask CollisionGroup       // 非衝突グループフラグ
+	ShapeType          Shape                // 形状
+	Size               *mmath.MVec3         // サイズ(x,y,z)
+	Position           *mmath.MVec3         // 位置(x,y,z)
+	Rotation           *mmath.MRotation     // 回転(x,y,z) -> ラジアン角
+	RigidBodyParam     *RigidBodyParam      // 剛体パラ
+	PhysicsType        PhysicsType          // 剛体の物理演算
+	XDirection         *mmath.MVec3         // X軸方向
+	YDirection         *mmath.MVec3         // Y軸方向
+	ZDirection         *mmath.MVec3         // Z軸方向
+	IsSystem           bool                 // システムで追加した剛体か
+	BtCollisionShape   mbt.BtCollisionShape // 物理形状
 }
 
 // NewRigidBody creates a new rigid body.
@@ -125,6 +129,63 @@ func NewRigidBody() *RigidBody {
 		ZDirection:         mmath.NewMVec3(),
 		IsSystem:           false,
 	}
+}
+
+func (r *RigidBody) InitPhysics(modelPhysics *mbt.MPhysics, bone *Bone) {
+	switch r.ShapeType {
+	case SHAPE_SPHERE:
+		r.BtCollisionShape = mbt.NewBtSphereShape(float32(r.Size.GetX()))
+	case SHAPE_BOX:
+		r.BtCollisionShape = mbt.NewBtBoxShape(
+			mbt.NewBtVector3(float32(r.Size.GetX()), float32(r.Size.GetY()), float32(r.Size.GetZ())))
+	case SHAPE_CAPSULE:
+		r.BtCollisionShape = mbt.NewBtCapsuleShape(float32(r.Size.GetX()), float32(r.Size.GetY()))
+	}
+
+	// 質量
+	mass := float32(0.0)
+	localInertia := mbt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
+	if r.PhysicsType == PHYSICS_TYPE_STATIC {
+		// ボーン追従の場合そのまま設定
+		mass = float32(r.RigidBodyParam.Mass)
+	}
+	if mass != 0 {
+		// 質量が設定されている場合、慣性を計算
+		r.BtCollisionShape.CalculateLocalInertia(mass, localInertia)
+	}
+
+	// 剛体の回転
+	rotationX := mmath.NewMMat4()
+	rotationX.AssignXRotation(r.Rotation.GetRadians().GetX())
+
+	rotationY := mmath.NewMMat4()
+	rotationY.AssignYRotation(r.Rotation.GetRadians().GetY())
+
+	rotationZ := mmath.NewMMat4()
+	rotationZ.AssignZRotation(r.Rotation.GetRadians().GetZ())
+
+	rotationMat := mmath.NewMMat4()
+	rotationMat.Mul(rotationY)
+	rotationMat.Mul(rotationX)
+	rotationMat.Mul(rotationZ)
+
+	// 剛体の位置
+	translationMatrix := mmath.NewMMat4()
+	translationMatrix.Translate(r.Position)
+
+	rigidBodyMat := mmath.NewMMat4()
+	rigidBodyMat.Mul(translationMatrix)
+	rigidBodyMat.Mul(rotationMat)
+
+	motionState := mbt.NewBtDefaultMotionState(bone.InitTransform)
+
+	btRigidBody := mbt.NewBtRigidBody(mass, motionState, r.BtCollisionShape, localInertia)
+	btRigidBody.SetDamping(float32(r.RigidBodyParam.LinearDamping), float32(r.RigidBodyParam.AngularDamping))
+	btRigidBody.SetRestitution(float32(r.RigidBodyParam.Restitution))
+	btRigidBody.SetFriction(float32(r.RigidBodyParam.Friction))
+	// btRigidBody.SetUserIndex(mbt.)
+	btRigidBody.SetSleepingThresholds(0.01, (180.0 * 0.1 / math.Pi))
+	btRigidBody.SetActivationState(mbt.DISABLE_DEACTIVATION)
 }
 
 // 剛体リスト

@@ -95,6 +95,19 @@ func (v *MQuaternion) GL() [4]float32 {
 	return [4]float32{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW())}
 }
 
+// Bullet+OpenGL座標系に変換されたクォータニオンベクトルを返します
+func (v *MQuaternion) Bullet() *MQuaternion {
+	invZ := NewMMat4()
+	invZ.ScaleVec3(&MVec3{1, 1, -1})
+
+	btMat := NewMMat4()
+	btMat.Mul(invZ)
+	btMat.Mul(v.ToMat4())
+	btMat.Mul(invZ)
+
+	return btMat.Quaternion()
+}
+
 // MMD MMD(MikuMikuDance)座標系に変換されたクォータニオンベクトルを返します
 func (v *MQuaternion) MMD() *MQuaternion {
 	return &MQuaternion{v.GetW(), mgl64.Vec3{-v.GetX(), -v.GetY(), v.GetZ()}}
