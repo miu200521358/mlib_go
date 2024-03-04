@@ -60,26 +60,28 @@ func NewJointByName(name string) *Joint {
 }
 
 func (j *Joint) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody) {
-	// 回転行列
-	rotationMat := j.Rotation.GetQuaternion().ToMat4()
+	// ジョイントの位置と向き
+	jointTransform := mbt.NewBtTransform(j.Rotation.GetQuaternion().Bullet(), j.Position.Bullet())
 
-	jointMat := mmath.NewMMat4()
-	jointMat.Translate(j.Position)
-	jointMat.Mul(rotationMat)
+	// 剛体Aの現在の位置と向きを取得
+	worldTransformA := rigidBodyA.BtRigidBody.GetWorldTransform().(mbt.BtTransform)
 
-	// 剛体Aから見たジョイントの行列
-	jointAMat := rigidBodyA.Matrix.Inverted().Muled(jointMat).GL()
-	jointATransform := mbt.NewBtTransform()
-	jointATransform.SetFromOpenGLMatrix(&jointAMat[0])
+	// 剛体Aのローカル座標系におけるジョイント
+	jointLocalTransformA := mbt.NewBtTransform()
+	jointLocalTransformA.SetIdentity()
+	jointLocalTransformA.Mult(worldTransformA.Inverse(), jointTransform)
 
-	// 剛体Bから見たジョイントの行列
-	jointBMat := rigidBodyB.Matrix.Inverted().Muled(jointMat).GL()
-	jointBTransform := mbt.NewBtTransform()
-	jointBTransform.SetFromOpenGLMatrix(&jointBMat[0])
+	// 剛体Bの現在の位置と向きを取得
+	worldTransformB := rigidBodyB.BtRigidBody.GetWorldTransform().(mbt.BtTransform)
+
+	// 剛体Bのローカル座標系におけるジョイント
+	jointLocalTransformB := mbt.NewBtTransform()
+	jointLocalTransformB.SetIdentity()
+	jointLocalTransformB.Mult(worldTransformB.Inverse(), jointTransform)
 
 	// ジョイント係数
 	j.Constraint = mbt.NewBtGeneric6DofSpringConstraint(
-		rigidBodyA.BtRigidBody, rigidBodyB.BtRigidBody, jointATransform, jointBTransform, true)
+		rigidBodyA.BtRigidBody, rigidBodyB.BtRigidBody, jointLocalTransformA, jointLocalTransformB, true)
 	j.Constraint.SetLinearLowerLimit(j.JointParam.TranslationLimitMin.Bullet())
 	j.Constraint.SetLinearUpperLimit(j.JointParam.TranslationLimitMax.Bullet())
 	j.Constraint.SetAngularLowerLimit(j.JointParam.RotationLimitMin.GetRadians().Bullet())

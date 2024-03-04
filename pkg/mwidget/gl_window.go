@@ -13,6 +13,7 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/walk/pkg/walk"
 
+	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
@@ -27,19 +28,25 @@ type ModelSet struct {
 
 func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32) {
 	matrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
+	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
 	if ms.Motion == nil {
 		for i := range ms.Model.Bones.GetIndexes() {
 			mat := mgl32.Ident4()
 			matrixes[i] = &mat
+			t := mbt.NewBtTransform()
+			transforms[i] = &t
 		}
 	} else {
 		trees := ms.Motion.Animate(frame, ms.Model)
 		for i, bone := range ms.Model.Bones.GetSortedData() {
 			mat := trees.GetItem(bone.Name, frame).LocalMatrix.GL()
 			matrixes[i] = mat
+			t := mbt.NewBtTransform()
+			t.SetFromOpenGLMatrix(&mat[0])
+			transforms[i] = &t
 		}
 	}
-	ms.Model.Draw(shader, matrixes, windowIndex, frame)
+	ms.Model.Draw(shader, matrixes, transforms, windowIndex, frame)
 }
 
 type GlWindow struct {

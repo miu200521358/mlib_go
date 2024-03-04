@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 
+	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
@@ -111,9 +112,9 @@ func (pm *PmxModel) ResetPhysics() {
 		return
 	}
 
-	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-		rigidBody.ResetPhysics()
-	}
+	// for _, rigidBody := range pm.RigidBodies.GetSortedData() {
+	// 	rigidBody.ResetPhysics()
+	// }
 
 	pm.Physics.Update()
 
@@ -125,26 +126,31 @@ func (pm *PmxModel) ResetPhysics() {
 func (pm *PmxModel) Draw(
 	shader *mgl.MShader,
 	boneMatrixes []*mgl32.Mat4,
+	boneTransforms []*mbt.BtTransform,
 	windowIndex int,
 	frame float32,
 ) {
-	pm.UpdatePhysics(boneMatrixes, frame)
+	pm.UpdatePhysics(boneMatrixes, boneTransforms, frame)
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
 }
 
-func (pm *PmxModel) UpdatePhysics(boneMatrixes []*mgl32.Mat4, frame float32) {
+func (pm *PmxModel) UpdatePhysics(
+	boneMatrixes []*mgl32.Mat4,
+	boneTransforms []*mbt.BtTransform,
+	frame float32,
+) {
 	if pm.Physics == nil {
 		return
 	}
 
-	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-		rigidBody.SetActivation(true)
-	}
+	// for _, rigidBody := range pm.RigidBodies.GetSortedData() {
+	// 	rigidBody.UpdateTransform(boneTransforms)
+	// }
 
 	pm.Physics.Update()
 
 	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-		rigidBody.UpdateMatrix(boneMatrixes)
+		rigidBody.UpdateMatrix(boneMatrixes, boneTransforms)
 	}
 
 }

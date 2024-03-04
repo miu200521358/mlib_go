@@ -427,6 +427,26 @@ func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 	return v
 }
 
+func (b *Bones) GetInitializeLocalPosition(boneIndex int) *mmath.MVec3 {
+	if boneIndex < 0 || !b.Contains(boneIndex) {
+		return mmath.NewMVec3()
+	}
+
+	bone := b.GetItem(boneIndex)
+	matrix := mmath.NewMMat4()
+	for _, parentIndex := range bone.ParentBoneIndexes {
+		if parentIndex >= 0 && b.Contains(parentIndex) {
+			// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
+			matrix.Mul(b.GetItem(parentIndex).RevertOffsetMatrix)
+		}
+	}
+	// 最後に対象ボーン自身の行列をかける
+	matrix.Mul(bone.RevertOffsetMatrix)
+	// BOf行列: 自身のボーンのボーンオフセット行列
+	matrix.Mul(bone.OffsetMatrix)
+	return matrix.Translation()
+}
+
 func (b *Bones) GetLayerIndexes() []int {
 	layerIndexes := make(LayerIndexes, 0)
 	for _, boneIndex := range b.GetIndexes() {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 var (
@@ -89,7 +90,7 @@ func (v *MVec3) GL() mgl32.Vec3 {
 
 // Bullet+OpenGL座標系に変換された3次元ベクトルを返します
 func (v *MVec3) Bullet() mbt.BtVector3 {
-	return mbt.NewBtVector3(float32(v.GetX()), float32(v.GetY()), float32(v.GetZ()))
+	return mbt.NewBtVector3(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()))
 }
 
 // Bullet+OpenGL座標系に変換＋Z値を反転させた3次元ベクトルを返します

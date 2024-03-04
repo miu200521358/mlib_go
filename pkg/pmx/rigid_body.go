@@ -1,6 +1,7 @@
 package pmx
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -97,24 +98,22 @@ func NewCollisionGroup(collisionGroupMask uint16) []uint16 {
 
 type RigidBody struct {
 	*mcore.IndexNameModel
-	BoneIndex          int                            // 関連ボーンIndex
-	CollisionGroup     byte                           // グループ
-	CollisionGroupMask CollisionGroup                 // 非衝突グループフラグ
-	ShapeType          Shape                          // 形状
-	Size               *mmath.MVec3                   // サイズ(x,y,z)
-	Position           *mmath.MVec3                   // 位置(x,y,z)
-	Rotation           *mmath.MRotation               // 回転(x,y,z) -> ラジアン角
-	RigidBodyParam     *RigidBodyParam                // 剛体パラ
-	PhysicsType        PhysicsType                    // 剛体の物理演算
-	XDirection         *mmath.MVec3                   // X軸方向
-	YDirection         *mmath.MVec3                   // Y軸方向
-	ZDirection         *mmath.MVec3                   // Z軸方向
-	IsSystem           bool                           // システムで追加した剛体か
-	Matrix             *mmath.MMat4                   // 剛体の行列
-	BtCollisionShape   mbt.BtCollisionShape           // 物理形状
-	BtRigidBody        mbt.BtRigidBody                // 物理剛体
-	ActiveMotionState  mphysics.MMotionStateInterface // 物理ON時のステート
-	StaticMotionState  mphysics.MMotionStateInterface // 物理OFF時のステート
+	BoneIndex          int              // 関連ボーンIndex
+	CollisionGroup     byte             // グループ
+	CollisionGroupMask CollisionGroup   // 非衝突グループフラグ
+	ShapeType          Shape            // 形状
+	Size               *mmath.MVec3     // サイズ(x,y,z)
+	Position           *mmath.MVec3     // 位置(x,y,z)
+	Rotation           *mmath.MRotation // 回転(x,y,z) -> ラジアン角
+	RigidBodyParam     *RigidBodyParam  // 剛体パラ
+	PhysicsType        PhysicsType      // 剛体の物理演算
+	XDirection         *mmath.MVec3     // X軸方向
+	YDirection         *mmath.MVec3     // Y軸方向
+	ZDirection         *mmath.MVec3     // Z軸方向
+	IsSystem           bool             // システムで追加した剛体か
+	Matrix             *mmath.MMat4     // 剛体の行列
+	BtRigidBody        mbt.BtRigidBody  // 物理剛体
+	BtLocalTransform   mbt.BtTransform  // 剛体のローカル変換情報
 }
 
 // NewRigidBody creates a new rigid body.
@@ -138,64 +137,50 @@ func NewRigidBody() *RigidBody {
 }
 
 func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
+	var btCollisionShape mbt.BtCollisionShape
 	switch r.ShapeType {
 	case SHAPE_SPHERE:
-		r.BtCollisionShape = mbt.NewBtSphereShape(float32(r.Size.GetX()))
+		btCollisionShape = mbt.NewBtSphereShape(float32(r.Size.GetX()))
 	case SHAPE_BOX:
-		r.BtCollisionShape = mbt.NewBtBoxShape(
+		btCollisionShape = mbt.NewBtBoxShape(
 			mbt.NewBtVector3(float32(r.Size.GetX()), float32(r.Size.GetY()), float32(r.Size.GetZ())))
 	case SHAPE_CAPSULE:
-		r.BtCollisionShape = mbt.NewBtCapsuleShape(float32(r.Size.GetX()), float32(r.Size.GetY()))
+		btCollisionShape = mbt.NewBtCapsuleShape(float32(r.Size.GetX()), float32(r.Size.GetY()))
 	}
 
 	// 質量
 	mass := float32(0.0)
 	localInertia := mbt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
-	if r.PhysicsType == PHYSICS_TYPE_STATIC {
-		// ボーン追従の場合そのまま設定
+	if r.PhysicsType != PHYSICS_TYPE_STATIC {
+		// ボーン追従ではない場合そのまま設定
 		mass = float32(r.RigidBodyParam.Mass)
 	}
 	if mass != 0 {
 		// 質量が設定されている場合、慣性を計算
-		r.BtCollisionShape.CalculateLocalInertia(mass, localInertia)
+		btCollisionShape.CalculateLocalInertia(mass, localInertia)
 	}
 
-	// 剛体の回転
-	rotationMat := r.Rotation.GetQuaternion().ToMat4()
+	// // ボーンのローカル位置
+	// boneTransform := mbt.NewBtTransform()
+	// boneTransform.SetIdentity()
+	// boneTransform.SetOrigin(boneLocalPosition.Bullet())
 
-	// 剛体の位置
-	translationMat := mmath.NewMMat4()
-	translationMat.Translate(r.Position)
-
-	r.Matrix = mmath.NewMMat4()
-	r.Matrix.Mul(translationMat)
-	r.Matrix.Mul(rotationMat)
-
-	// ボーンから見た剛体のローカル行列(ボーンがなければ初期行列)
-	var rigidBodyOffsetMat *mmath.MMat4
-	if bone != nil {
-		rigidBodyOffsetMat = bone.OffsetMatrix.Muled(r.Matrix)
+	// 剛体のローカル位置
+	if bone == nil {
+		r.BtLocalTransform = mbt.NewBtTransform(
+			r.Rotation.GetQuaternion().Bullet(), mbt.NewBtVector3())
 	} else {
-		rigidBodyOffsetMat = mmath.NewMMat4()
+		r.BtLocalTransform = mbt.NewBtTransform(
+			r.Rotation.GetQuaternion().Bullet(), r.Position.Subed(bone.Position).Bullet())
 	}
 
-	// OpenGL行列を設定
-	btTransform := mbt.NewBtTransform()
-	btTransform.SetFromOpenGLMatrix(&rigidBodyOffsetMat.GL()[0])
+	// 剛体のグローバル位置と向き
+	rigidbodyGlobalTransform := mbt.NewBtTransform(r.Rotation.GetQuaternion().Bullet(), r.Position.Bullet())
+	// rigidBodyTransform := mbt.NewBtTransform()
+	// rigidBodyTransform.Mult(boneTransform, r.BtLocalTransform)
+	motionState := mbt.NewBtDefaultMotionState(rigidbodyGlobalTransform)
 
-	if r.PhysicsType == PHYSICS_TYPE_STATIC {
-		r.ActiveMotionState = mphysics.NewStaticMotionState(btTransform, rigidBodyOffsetMat)
-		r.StaticMotionState = mphysics.NewStaticMotionState(btTransform, rigidBodyOffsetMat)
-	} else if r.PhysicsType == PHYSICS_TYPE_DYNAMIC {
-		r.ActiveMotionState = mphysics.NewDynamicMotionState(btTransform, rigidBodyOffsetMat)
-		r.StaticMotionState = mphysics.NewStaticMotionState(btTransform, rigidBodyOffsetMat)
-	} else if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
-		r.ActiveMotionState = mphysics.NewDynamicBoneMotionState(btTransform, rigidBodyOffsetMat)
-		r.StaticMotionState = mphysics.NewStaticMotionState(btTransform, rigidBodyOffsetMat)
-	}
-	r.ActiveMotionState.SetWorldTransform(btTransform)
-
-	r.BtRigidBody = mbt.NewBtRigidBody(mass, r.ActiveMotionState, r.BtCollisionShape, localInertia)
+	r.BtRigidBody = mbt.NewBtRigidBody(mass, motionState, btCollisionShape, localInertia)
 	r.BtRigidBody.SetDamping(float32(r.RigidBodyParam.LinearDamping), float32(r.RigidBodyParam.AngularDamping))
 	r.BtRigidBody.SetRestitution(float32(r.RigidBodyParam.Restitution))
 	r.BtRigidBody.SetFriction(float32(r.RigidBodyParam.Friction))
@@ -210,46 +195,98 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 	modelPhysics.AddRigidBody(r.BtRigidBody)
 }
 
-func (r *RigidBody) SetActivation(activation bool) {
-	if r.BtRigidBody == nil {
+// func (r *RigidBody) SetActivation(activation bool) {
+// 	if r.BtRigidBody == nil {
+// 		return
+// 	}
+
+// 	if r.PhysicsType != PHYSICS_TYPE_STATIC {
+// 		// 物理の場合
+// 		if activation {
+// 			r.BtRigidBody.SetCollisionFlags(
+// 				r.BtRigidBody.GetCollisionFlags() & int(^mbt.BtCollisionObjectCF_KINEMATIC_OBJECT))
+// 			r.BtRigidBody.SetMotionState(r.ActiveMotionState)
+// 		} else {
+// 			r.BtRigidBody.SetCollisionFlags(
+// 				r.BtRigidBody.GetCollisionFlags() | int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT))
+// 			r.BtRigidBody.SetMotionState(r.StaticMotionState)
+// 		}
+// 	} else {
+// 		// ボーン追従の場合
+// 		r.BtRigidBody.SetMotionState(r.StaticMotionState)
+// 	}
+// }
+
+// func (r *RigidBody) ResetPhysics() {
+// 	if r.BtRigidBody == nil {
+// 		return
+// 	}
+// 	r.BtRigidBody.SetActivationState(mbt.DISABLE_SIMULATION)
+// 	r.ActiveMotionState.Reset()
+// }
+
+func (r *RigidBody) UpdateTransform(
+	boneTransforms []*mbt.BtTransform,
+) {
+	if r.BtRigidBody == nil || r.BtRigidBody.GetMotionState() == nil ||
+		r.BoneIndex < 0 || r.BoneIndex >= len(boneTransforms) || r.PhysicsType == PHYSICS_TYPE_DYNAMIC {
 		return
 	}
 
-	if r.PhysicsType != PHYSICS_TYPE_STATIC {
-		// 物理の場合
-		if activation {
-			r.BtRigidBody.SetCollisionFlags(
-				r.BtRigidBody.GetCollisionFlags() & int(^mbt.BtCollisionObjectCF_KINEMATIC_OBJECT))
-			r.BtRigidBody.SetMotionState(r.ActiveMotionState)
-		} else {
-			r.BtRigidBody.SetCollisionFlags(
-				r.BtRigidBody.GetCollisionFlags() | int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT))
-			r.BtRigidBody.SetMotionState(r.StaticMotionState)
-		}
-	} else {
-		// ボーン追従の場合
-		r.BtRigidBody.SetMotionState(r.StaticMotionState)
+	// 剛体のグローバル位置と向き
+	rigidBodyTransform := mbt.NewBtTransform()
+	rigidBodyTransform.Mult(*boneTransforms[r.BoneIndex], r.BtLocalTransform)
+
+	{
+		mat := mgl32.Mat4{}
+		(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
+		fmt.Printf("[%d] boneTransform: %v\n", r.BoneIndex, mat)
 	}
+	{
+		mat := mgl32.Mat4{}
+		rigidBodyTransform.GetOpenGLMatrix(&mat[0])
+		fmt.Printf("[%s] rigidBodyTransform: %v\n", r.Name, mat)
+	}
+
+	motionState := r.BtRigidBody.GetMotionState().(mbt.BtMotionState)
+	motionState.SetWorldTransform(rigidBodyTransform)
 }
 
-func (r *RigidBody) ResetPhysics() {
-	if r.BtRigidBody == nil {
-		return
-	}
-	r.BtRigidBody.SetActivationState(mbt.DISABLE_SIMULATION)
-	r.ActiveMotionState.Reset()
-}
-
-func (r *RigidBody) UpdateMatrix(boneMatrixes []*mgl32.Mat4) {
-	if r.BtRigidBody == nil || r.BoneIndex < 0 || r.BoneIndex >= len(boneMatrixes) ||
-		r.PhysicsType == PHYSICS_TYPE_STATIC {
+func (r *RigidBody) UpdateMatrix(boneMatrixes []*mgl32.Mat4, boneTransforms []*mbt.BtTransform) {
+	if r.BtRigidBody == nil || r.BtRigidBody.GetMotionState() == nil ||
+		r.BoneIndex < 0 || r.BoneIndex >= len(boneMatrixes) || r.PhysicsType == PHYSICS_TYPE_STATIC {
 		return
 	}
 
-	transform := r.BtRigidBody.GetWorldTransform().(mbt.BtTransform)
-	glMat4 := mgl32.Mat4{}
-	transform.GetOpenGLMatrix(&glMat4[0])
-	boneMatrixes[r.BoneIndex] = &glMat4
+	motionState := r.BtRigidBody.GetMotionState().(mbt.BtMotionState)
+
+	rigidBodyGlobalTransform := mbt.NewBtTransform()
+	motionState.GetWorldTransform(rigidBodyGlobalTransform)
+
+	// 剛体のグローバル位置と向き
+	physicsBoneTransform := mbt.NewBtTransform()
+	physicsBoneTransform.Mult((*boneTransforms[r.BoneIndex]).Inverse(), rigidBodyGlobalTransform)
+
+	physicsBoneMatrix := mgl32.Mat4{}
+	physicsBoneTransform.GetOpenGLMatrix(&physicsBoneMatrix[0])
+
+	if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
+		// 物理+ボーン追従はボーン移動成分を0にする
+		physicsBoneMatrix[12] = float32(0)
+		physicsBoneMatrix[13] = float32(0)
+		physicsBoneMatrix[14] = float32(0)
+	}
+
+	{
+		mat := mgl32.Mat4{}
+		(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
+		fmt.Printf("[%d] boneTransform: \n%v\n", r.BoneIndex, mat)
+	}
+	{
+		fmt.Printf("[%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
+	}
+
+	boneMatrixes[r.BoneIndex] = &physicsBoneMatrix
 }
 
 // 剛体リスト

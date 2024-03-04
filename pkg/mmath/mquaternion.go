@@ -5,6 +5,8 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
+
+	"github.com/miu200521358/mlib_go/pkg/mbt"
 )
 
 type MQuaternion mgl64.Quat
@@ -95,18 +97,10 @@ func (v *MQuaternion) GL() [4]float32 {
 	return [4]float32{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW())}
 }
 
-// // Bullet+OpenGL座標系に変換されたクォータニオンベクトルを返します
-// func (v *MQuaternion) Bullet() *MQuaternion {
-// 	invZ := NewMMat4()
-// 	invZ.ScaleVec3(&MVec3{1, 1, -1})
-
-// 	btMat := NewMMat4()
-// 	btMat.Mul(invZ)
-// 	btMat.Mul(v.ToMat4())
-// 	btMat.Mul(invZ)
-
-// 	return btMat.Quaternion()
-// }
+// Bullet+OpenGL座標系に変換されたクォータニオンベクトルを返します
+func (v *MQuaternion) Bullet() mbt.BtQuaternion {
+	return mbt.NewBtQuaternion(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW()))
+}
 
 // MMD MMD(MikuMikuDance)座標系に変換されたクォータニオンベクトルを返します
 func (v *MQuaternion) MMD() *MQuaternion {
@@ -206,7 +200,7 @@ func (quat *MQuaternion) Vec3() *MVec3 {
 }
 
 // AxisAngleは、正規化されたクォータニオンから、軸と回転角度の形で回転を取り出す。
-func (quat *MQuaternion) AxisAngle() (axis *MVec3, angle float64) {
+func (quat *MQuaternion) AxisAngle() (axis MVec3, angle float64) {
 	cos := quat.W
 	sin := math.Sqrt(1 - cos*cos)
 	angle = math.Acos(cos) * 2
