@@ -116,7 +116,7 @@ func (pm *PmxModel) ResetPhysics() {
 	// 	rigidBody.ResetPhysics()
 	// }
 
-	pm.Physics.Update()
+	pm.Physics.Update(float32(0.0))
 
 	// for _, rigidBody := range pm.RigidBodies.GetSortedData() {
 	// 	rigidBody.CalcTransform(nil)
@@ -128,16 +128,16 @@ func (pm *PmxModel) Draw(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
 	windowIndex int,
-	frame float32,
+	elapsed float32,
 ) {
-	pm.UpdatePhysics(boneMatrixes, boneTransforms, frame)
+	pm.UpdatePhysics(boneMatrixes, boneTransforms, elapsed)
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
 }
 
 func (pm *PmxModel) UpdatePhysics(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
-	frame float32,
+	elapsed float32,
 ) {
 	if pm.Physics == nil {
 		return
@@ -147,7 +147,7 @@ func (pm *PmxModel) UpdatePhysics(
 		rigidBody.UpdateTransform(boneMatrixes, boneTransforms)
 	}
 
-	pm.Physics.Update()
+	pm.Physics.Update(elapsed)
 
 	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
 		rigidBody.UpdateMatrix(boneMatrixes, boneTransforms)

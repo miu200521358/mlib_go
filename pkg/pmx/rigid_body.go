@@ -285,13 +285,6 @@ func (r *RigidBody) UpdateMatrix(
 	physicsBoneMatrix := mgl32.Mat4{}
 	boneLocalTransform.GetOpenGLMatrix(&physicsBoneMatrix[0])
 
-	// if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
-	// 	// 物理+ボーン追従はボーン移動成分を初期値にする
-	// 	physicsBoneMatrix[12] = float32(0)
-	// 	physicsBoneMatrix[13] = float32(0)
-	// 	physicsBoneMatrix[14] = float32(0)
-	// }
-
 	{
 		mat := mgl32.Mat4{}
 		(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
@@ -310,6 +303,13 @@ func (r *RigidBody) UpdateMatrix(
 	{
 		fmt.Printf("3. [%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
 	}
+
+	// if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
+	// 	// 物理+ボーン追従はボーン移動成分を初期値にする
+	// 	physicsBoneMatrix[12] = float32(0)
+	// 	physicsBoneMatrix[13] = float32(0)
+	// 	physicsBoneMatrix[14] = float32(0)
+	// }
 
 	boneMatrixes[r.BoneIndex] = &physicsBoneMatrix
 }
