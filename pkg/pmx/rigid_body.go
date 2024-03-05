@@ -98,41 +98,46 @@ func NewCollisionGroup(collisionGroupMask uint16) []uint16 {
 
 type RigidBody struct {
 	*mcore.IndexNameModel
-	BoneIndex          int              // 関連ボーンIndex
-	CollisionGroup     byte             // グループ
-	CollisionGroupMask CollisionGroup   // 非衝突グループフラグ
-	ShapeType          Shape            // 形状
-	Size               *mmath.MVec3     // サイズ(x,y,z)
-	Position           *mmath.MVec3     // 位置(x,y,z)
-	Rotation           *mmath.MRotation // 回転(x,y,z) -> ラジアン角
-	RigidBodyParam     *RigidBodyParam  // 剛体パラ
-	PhysicsType        PhysicsType      // 剛体の物理演算
-	XDirection         *mmath.MVec3     // X軸方向
-	YDirection         *mmath.MVec3     // Y軸方向
-	ZDirection         *mmath.MVec3     // Z軸方向
-	IsSystem           bool             // システムで追加した剛体か
-	Matrix             *mmath.MMat4     // 剛体の行列
-	BtRigidBody        mbt.BtRigidBody  // 物理剛体
-	BtInitialTransform mbt.BtTransform  // 剛体のローカル変換情報
+	BoneIndex                   int              // 関連ボーンIndex
+	CollisionGroup              byte             // グループ
+	CollisionGroupMask          CollisionGroup   // 非衝突グループフラグ
+	ShapeType                   Shape            // 形状
+	Size                        *mmath.MVec3     // サイズ(x,y,z)
+	Position                    *mmath.MVec3     // 位置(x,y,z)
+	Rotation                    *mmath.MRotation // 回転(x,y,z) -> ラジアン角
+	RigidBodyParam              *RigidBodyParam  // 剛体パラ
+	PhysicsType                 PhysicsType      // 剛体の物理演算
+	XDirection                  *mmath.MVec3     // X軸方向
+	YDirection                  *mmath.MVec3     // Y軸方向
+	ZDirection                  *mmath.MVec3     // Z軸方向
+	IsSystem                    bool             // システムで追加した剛体か
+	Matrix                      *mmath.MMat4     // 剛体の行列
+	BtRigidBody                 mbt.BtRigidBody  // 物理剛体
+	BtInitialTransform          mbt.BtTransform  // 剛体のローカル変換情報
+	BoneRevertOffsetBtTransform mbt.BtTransform  // ボーンの初期逆行列
 }
 
 // NewRigidBody creates a new rigid body.
 func NewRigidBody() *RigidBody {
 	return &RigidBody{
-		IndexNameModel:     &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
-		BoneIndex:          -1,
-		CollisionGroup:     0,
-		CollisionGroupMask: NewCollisionGroupFromSlice([]uint16{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
-		ShapeType:          SHAPE_BOX,
-		Size:               mmath.NewMVec3(),
-		Position:           mmath.NewMVec3(),
-		Rotation:           mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
-		RigidBodyParam:     NewRigidBodyParam(),
-		PhysicsType:        PHYSICS_TYPE_STATIC,
-		XDirection:         mmath.NewMVec3(),
-		YDirection:         mmath.NewMVec3(),
-		ZDirection:         mmath.NewMVec3(),
-		IsSystem:           false,
+		IndexNameModel:              &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		BoneIndex:                   -1,
+		CollisionGroup:              0,
+		CollisionGroupMask:          NewCollisionGroupFromSlice([]uint16{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
+		ShapeType:                   SHAPE_BOX,
+		Size:                        mmath.NewMVec3(),
+		Position:                    mmath.NewMVec3(),
+		Rotation:                    mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		RigidBodyParam:              NewRigidBodyParam(),
+		PhysicsType:                 PHYSICS_TYPE_STATIC,
+		XDirection:                  mmath.NewMVec3(),
+		YDirection:                  mmath.NewMVec3(),
+		ZDirection:                  mmath.NewMVec3(),
+		IsSystem:                    false,
+		Matrix:                      mmath.NewMMat4(),
+		BtRigidBody:                 nil,
+		BtInitialTransform:          nil,
+		BoneRevertOffsetBtTransform: nil,
 	}
 }
 
@@ -169,15 +174,19 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 	if bone == nil {
 		r.BtInitialTransform = mbt.NewBtTransform(
 			r.Rotation.GetQuaternion().Bullet(), mbt.NewBtVector3())
+		r.BoneRevertOffsetBtTransform = mbt.NewBtTransform()
 	} else {
 		r.BtInitialTransform = mbt.NewBtTransform(
 			r.Rotation.GetQuaternion().Bullet(), r.Position.Bullet())
+		r.BoneRevertOffsetBtTransform = mbt.NewBtTransform()
+		r.BoneRevertOffsetBtTransform.SetIdentity()
+		r.BoneRevertOffsetBtTransform.SetOrigin(bone.Position.Inverted().Bullet())
 	}
 
 	{
 		mat := mgl32.Mat4{}
 		r.BtInitialTransform.GetOpenGLMatrix(&mat[0])
-		fmt.Printf("[%s] BtInitialTransform: \n%v\n", r.Name, mat)
+		fmt.Printf("1. [%s] BtInitialTransform: \n%v\n", r.Name, mat)
 	}
 
 	motionState := mbt.NewBtDefaultMotionState(r.BtInitialTransform)
@@ -244,12 +253,12 @@ func (r *RigidBody) UpdateTransform(
 	{
 		mat := mgl32.Mat4{}
 		(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
-		fmt.Printf("[%d] boneTransform: \n%v\n", r.BoneIndex, mat)
+		fmt.Printf("2. [%d] boneTransform: \n%v\n", r.BoneIndex, mat)
 	}
 	{
 		mat := mgl32.Mat4{}
 		rigidBodyTransform.GetOpenGLMatrix(&mat[0])
-		fmt.Printf("[%s] rigidBodyTransform: \n%v\n", r.Name, mat)
+		fmt.Printf("2. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
 	}
 
 	motionState := r.BtRigidBody.GetMotionState().(mbt.BtMotionState)
@@ -270,12 +279,11 @@ func (r *RigidBody) UpdateMatrix(
 	rigidBodyTransform := mbt.NewBtTransform()
 	motionState.GetWorldTransform(rigidBodyTransform)
 
-	// // 剛体のグローバル位置と向き
-	// physicsBoneTransform := mbt.NewBtTransform()
-	// physicsBoneTransform.Mult((*boneTransforms[r.BoneIndex]).Inverse(), rigidBodyTransform)
+	boneLocalTransform := mbt.NewBtTransform()
+	boneLocalTransform.Mult(rigidBodyTransform, r.BoneRevertOffsetBtTransform)
 
 	physicsBoneMatrix := mgl32.Mat4{}
-	rigidBodyTransform.GetOpenGLMatrix(&physicsBoneMatrix[0])
+	boneLocalTransform.GetOpenGLMatrix(&physicsBoneMatrix[0])
 
 	// if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
 	// 	// 物理+ボーン追従はボーン移動成分を初期値にする
@@ -287,10 +295,20 @@ func (r *RigidBody) UpdateMatrix(
 	{
 		mat := mgl32.Mat4{}
 		(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
-		fmt.Printf("[%d] boneTransform: \n%v\n", r.BoneIndex, mat)
+		fmt.Printf("3. [%d] boneTransform: \n%v\n", r.BoneIndex, mat)
 	}
 	{
-		fmt.Printf("[%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
+		mat := mgl32.Mat4{}
+		rigidBodyTransform.GetOpenGLMatrix(&mat[0])
+		fmt.Printf("3. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
+	}
+	{
+		mat := mgl32.Mat4{}
+		boneLocalTransform.GetOpenGLMatrix(&mat[0])
+		fmt.Printf("3. [%s] boneLocalTransform: \n%v\n", r.Name, mat)
+	}
+	{
+		fmt.Printf("3. [%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
 	}
 
 	boneMatrixes[r.BoneIndex] = &physicsBoneMatrix
