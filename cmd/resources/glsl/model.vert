@@ -36,7 +36,7 @@ uniform int sphereMode;
 out vec4 vertexColor;
 out vec3 vertexSpecular;
 out vec2 vertexUv;
-out vec3 vetexNormal;
+out vec3 vertexNormal;
 out vec2 sphereUv;
 out vec3 eye;
 out float totalBoneWeight;
@@ -265,14 +265,14 @@ void main() {
     }
 
     // 頂点法線
-    vetexNormal = normalize(normalTransformMatrix * normalize(normal)).xyz;
+    vertexNormal = normalize(normalTransformMatrix * normalize(normal)).xyz;
 
     // 頂点色設定(透過込み)
     vertexColor = clamp(diffuse, 0.0, 1.0);
 
     if(0 == useToon) {
         // ディフューズ色＋アンビエント色 計算
-        float lightNormal = clamp(dot(vetexNormal, -lightDirection), 0.0, 1.0);
+        float lightNormal = clamp(dot(vertexNormal, -lightDirection), 0.0, 1.0);
         vertexColor.rgb += diffuse.rgb * lightNormal;
         vertexColor = clamp(vertexColor, 0.0, 1.0);
     }
@@ -287,7 +287,7 @@ void main() {
             sphereUv = extendUv;
         } else {
 	        // スフィアマップテクスチャ座標
-            vec3 normalWv = mat3(modelViewMatrix) * vetexNormal;
+            vec3 normalWv = mat3(modelViewMatrix) * vertexNormal;
             sphereUv.x = normalWv.x * 0.5 + 0.5;
             sphereUv.y = normalWv.y * -0.5 + 0.5;
         }
@@ -299,5 +299,5 @@ void main() {
 
     // スペキュラ色計算
     vec3 HalfVector = normalize(normalize(eye) + -lightDirection);
-    vertexSpecular = pow(max(0, dot(HalfVector, vetexNormal)), max(0.000001, specular.w)) * specular.rgb;
+    vertexSpecular = pow(max(0, dot(HalfVector, vertexNormal)), max(0.000001, specular.w)) * specular.rgb;
 }

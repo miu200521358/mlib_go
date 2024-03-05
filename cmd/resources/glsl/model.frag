@@ -18,7 +18,7 @@ uniform vec3 lightDirection;
 in vec4 vertexColor;
 in vec3 vertexSpecular;
 in vec2 vertexUv;
-in vec3 vetexNormal;
+in vec3 vertexNormal;
 in vec2 sphereUv;
 in vec3 eye;
 in float totalBoneWeight;
@@ -49,7 +49,7 @@ void main() {
 
     if (1 == useToon) {
         // Toon適用
-        float lightNormal = dot( vetexNormal, -lightDirection );
+        float lightNormal = dot( vertexNormal, -lightDirection );
         outColor *= texture(toonSampler, vec2(0, lightNormal));
     }
 

@@ -44,8 +44,8 @@ func NewMPhysics() *MPhysics {
 	return p
 }
 
-func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody) {
-	p.World.AddRigidBody(rigidBody)
+func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody, group int, mask int) {
+	p.World.AddRigidBody(rigidBody, group, mask)
 }
 
 func (p *MPhysics) RemoveRigidBody(rigidBody mbt.BtRigidBody) {

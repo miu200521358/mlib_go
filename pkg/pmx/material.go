@@ -8,6 +8,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 // スフィアモード
@@ -78,7 +79,7 @@ const (
 
 type MaterialGL struct {
 	name              string       // 材質名
-	diffuse           *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
+	diffuse           *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色 + 非透過度)
 	specular          *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
 	ambient           *mmath.MVec3 // Ambient (R,G,B)(環境色)
 	edge              *mmath.MVec4 // エッジ色 (R,G,B,A)
