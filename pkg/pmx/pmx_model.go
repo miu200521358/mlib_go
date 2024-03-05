@@ -143,9 +143,9 @@ func (pm *PmxModel) UpdatePhysics(
 		return
 	}
 
-	// for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-	// 	rigidBody.UpdateTransform(boneTransforms)
-	// }
+	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
+		rigidBody.UpdateTransform(boneMatrixes, boneTransforms)
+	}
 
 	pm.Physics.Update()
 

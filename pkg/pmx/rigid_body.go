@@ -113,7 +113,7 @@ type RigidBody struct {
 	IsSystem           bool             // システムで追加した剛体か
 	Matrix             *mmath.MMat4     // 剛体の行列
 	BtRigidBody        mbt.BtRigidBody  // 物理剛体
-	BtLocalTransform   mbt.BtTransform  // 剛体のローカル変換情報
+	BtInitialTransform mbt.BtTransform  // 剛体のローカル変換情報
 }
 
 // NewRigidBody creates a new rigid body.
@@ -165,20 +165,22 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 	// boneTransform.SetIdentity()
 	// boneTransform.SetOrigin(boneLocalPosition.Bullet())
 
-	// 剛体のローカル位置
+	// 剛体の初期位置
 	if bone == nil {
-		r.BtLocalTransform = mbt.NewBtTransform(
+		r.BtInitialTransform = mbt.NewBtTransform(
 			r.Rotation.GetQuaternion().Bullet(), mbt.NewBtVector3())
 	} else {
-		r.BtLocalTransform = mbt.NewBtTransform(
-			r.Rotation.GetQuaternion().Bullet(), r.Position.Subed(bone.Position).Bullet())
+		r.BtInitialTransform = mbt.NewBtTransform(
+			r.Rotation.GetQuaternion().Bullet(), r.Position.Bullet())
 	}
 
-	// 剛体のグローバル位置と向き
-	rigidbodyGlobalTransform := mbt.NewBtTransform(r.Rotation.GetQuaternion().Bullet(), r.Position.Bullet())
-	// rigidBodyTransform := mbt.NewBtTransform()
-	// rigidBodyTransform.Mult(boneTransform, r.BtLocalTransform)
-	motionState := mbt.NewBtDefaultMotionState(rigidbodyGlobalTransform)
+	{
+		mat := mgl32.Mat4{}
+		r.BtInitialTransform.GetOpenGLMatrix(&mat[0])
+		fmt.Printf("[%s] BtInitialTransform: \n%v\n", r.Name, mat)
+	}
+
+	motionState := mbt.NewBtDefaultMotionState(r.BtInitialTransform)
 
 	r.BtRigidBody = mbt.NewBtRigidBody(mass, motionState, btCollisionShape, localInertia)
 	r.BtRigidBody.SetDamping(float32(r.RigidBodyParam.LinearDamping), float32(r.RigidBodyParam.AngularDamping))
@@ -226,6 +228,7 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 // }
 
 func (r *RigidBody) UpdateTransform(
+	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
 ) {
 	if r.BtRigidBody == nil || r.BtRigidBody.GetMotionState() == nil ||
@@ -235,24 +238,28 @@ func (r *RigidBody) UpdateTransform(
 
 	// 剛体のグローバル位置と向き
 	rigidBodyTransform := mbt.NewBtTransform()
-	rigidBodyTransform.Mult(*boneTransforms[r.BoneIndex], r.BtLocalTransform)
+	rigidBodyTransform.Mult(*boneTransforms[r.BoneIndex], r.BtInitialTransform)
+	// rigidBodyTransform.SetFromOpenGLMatrix(&boneMatrixes[r.BoneIndex][0])
 
 	{
 		mat := mgl32.Mat4{}
 		(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
-		fmt.Printf("[%d] boneTransform: %v\n", r.BoneIndex, mat)
+		fmt.Printf("[%d] boneTransform: \n%v\n", r.BoneIndex, mat)
 	}
 	{
 		mat := mgl32.Mat4{}
 		rigidBodyTransform.GetOpenGLMatrix(&mat[0])
-		fmt.Printf("[%s] rigidBodyTransform: %v\n", r.Name, mat)
+		fmt.Printf("[%s] rigidBodyTransform: \n%v\n", r.Name, mat)
 	}
 
 	motionState := r.BtRigidBody.GetMotionState().(mbt.BtMotionState)
 	motionState.SetWorldTransform(rigidBodyTransform)
 }
 
-func (r *RigidBody) UpdateMatrix(boneMatrixes []*mgl32.Mat4, boneTransforms []*mbt.BtTransform) {
+func (r *RigidBody) UpdateMatrix(
+	boneMatrixes []*mgl32.Mat4,
+	boneTransforms []*mbt.BtTransform,
+) {
 	if r.BtRigidBody == nil || r.BtRigidBody.GetMotionState() == nil ||
 		r.BoneIndex < 0 || r.BoneIndex >= len(boneMatrixes) || r.PhysicsType == PHYSICS_TYPE_STATIC {
 		return
@@ -260,22 +267,22 @@ func (r *RigidBody) UpdateMatrix(boneMatrixes []*mgl32.Mat4, boneTransforms []*m
 
 	motionState := r.BtRigidBody.GetMotionState().(mbt.BtMotionState)
 
-	rigidBodyGlobalTransform := mbt.NewBtTransform()
-	motionState.GetWorldTransform(rigidBodyGlobalTransform)
+	rigidBodyTransform := mbt.NewBtTransform()
+	motionState.GetWorldTransform(rigidBodyTransform)
 
-	// 剛体のグローバル位置と向き
-	physicsBoneTransform := mbt.NewBtTransform()
-	physicsBoneTransform.Mult((*boneTransforms[r.BoneIndex]).Inverse(), rigidBodyGlobalTransform)
+	// // 剛体のグローバル位置と向き
+	// physicsBoneTransform := mbt.NewBtTransform()
+	// physicsBoneTransform.Mult((*boneTransforms[r.BoneIndex]).Inverse(), rigidBodyTransform)
 
 	physicsBoneMatrix := mgl32.Mat4{}
-	physicsBoneTransform.GetOpenGLMatrix(&physicsBoneMatrix[0])
+	rigidBodyTransform.GetOpenGLMatrix(&physicsBoneMatrix[0])
 
-	if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
-		// 物理+ボーン追従はボーン移動成分を0にする
-		physicsBoneMatrix[12] = float32(0)
-		physicsBoneMatrix[13] = float32(0)
-		physicsBoneMatrix[14] = float32(0)
-	}
+	// if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
+	// 	// 物理+ボーン追従はボーン移動成分を初期値にする
+	// 	physicsBoneMatrix[12] = float32(0)
+	// 	physicsBoneMatrix[13] = float32(0)
+	// 	physicsBoneMatrix[14] = float32(0)
+	// }
 
 	{
 		mat := mgl32.Mat4{}
