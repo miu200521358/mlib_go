@@ -17,8 +17,18 @@ type VBO struct {
 	stride      int32          // stride
 }
 
+// Delete this VBO.
+func (v *VBO) Delete() {
+	gl.DeleteBuffers(1, &v.id)
+}
+
+// Unbinds.
+func (v *VBO) Unbind() {
+	gl.BindBuffer(v.target, 0)
+}
+
 // Creates a new VBO with given faceDtype.
-func NewVBO(verticesPtr unsafe.Pointer, count int) *VBO {
+func NewVBOForModel(verticesPtr unsafe.Pointer, count int) *VBO {
 	var vboId uint32
 	gl.GenBuffers(1, &vboId)
 
@@ -36,13 +46,8 @@ func NewVBO(verticesPtr unsafe.Pointer, count int) *VBO {
 	return vbo
 }
 
-// Delete this VBO.
-func (v *VBO) Delete() {
-	gl.DeleteBuffers(1, &v.id)
-}
-
 // Binds VBO for rendering.
-func (v *VBO) Bind() {
+func (v *VBO) BindModel() {
 	gl.BindBuffer(v.target, v.id)
 	gl.BufferData(v.target, v.size, v.verticesPtr, gl.STATIC_DRAW)
 	mutils.CheckGLError()
@@ -192,7 +197,93 @@ func (v *VBO) Bind() {
 
 }
 
-// Unbinds.
-func (v *VBO) Unbind() {
-	gl.BindBuffer(v.target, 0)
+// Creates a new VBO with given faceDtype.
+func NewVBOForRigidBody(rigidBodyPtr unsafe.Pointer, count int) *VBO {
+	var vboId uint32
+	gl.GenBuffers(1, &vboId)
+
+	vbo := &VBO{
+		id:          vboId,
+		target:      gl.ARRAY_BUFFER,
+		verticesPtr: rigidBodyPtr,
+	}
+	// 剛体構造体のサイズ(全部floatとする)
+	// boneIndex(1), shapeType(1), size(3), position(3), rotation(4), typeColor(4)
+	vbo.stride = int32(4 * (1 + 1 + 3 + 3 + 4 + 4))
+	vbo.size = count * 4
+
+	return vbo
+}
+
+// Binds VBO for rendering.
+func (v *VBO) BindRigidBody() {
+	gl.BindBuffer(v.target, v.id)
+	gl.BufferData(v.target, v.size, v.verticesPtr, gl.STATIC_DRAW)
+	mutils.CheckGLError()
+
+	// 0: boneIndex
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(
+		0,        // 属性のインデックス
+		1,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		0,        // オフセット
+	)
+
+	// 1: shapeType
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointerWithOffset(
+		1,        // 属性のインデックス
+		1,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		1*4,      // オフセット
+	)
+
+	// 2: size
+	gl.EnableVertexAttribArray(2)
+	gl.VertexAttribPointerWithOffset(
+		2,        // 属性のインデックス
+		3,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		2*4,      // オフセット
+	)
+
+	// 3: position
+	gl.EnableVertexAttribArray(3)
+	gl.VertexAttribPointerWithOffset(
+		3,        // 属性のインデックス
+		3,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		5*4,      // オフセット
+	)
+
+	// 4: rotation
+	gl.EnableVertexAttribArray(4)
+	gl.VertexAttribPointerWithOffset(
+		4,        // 属性のインデックス
+		4,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		8*4,      // オフセット
+	)
+
+	// 5: typeColor
+	gl.EnableVertexAttribArray(5)
+	gl.VertexAttribPointerWithOffset(
+		5,        // 属性のインデックス
+		4,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		13*4,     // オフセット（構造体内のオフセット）
+	)
 }

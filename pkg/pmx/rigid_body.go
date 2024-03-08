@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 )
@@ -314,13 +316,88 @@ func (r *RigidBody) UpdateMatrix(
 	boneMatrixes[r.BoneIndex] = &physicsBoneMatrix
 }
 
+func (r *RigidBody) Bullet() []float32 {
+	rb := make([]float32, 0)
+
+	// ボーンINDEX
+	rb = append(rb, float32(r.BoneIndex))
+
+	// 剛体の形
+	rb = append(rb, float32(r.ShapeType))
+
+	// 剛体のサイズ
+	rb = append(rb, float32(r.Size.GetX()))
+	rb = append(rb, float32(r.Size.GetY()))
+	rb = append(rb, float32(r.Size.GetZ()))
+
+	// 剛体の位置
+	pos := r.Position.GL()
+	rb = append(rb, float32(pos[0]))
+	rb = append(rb, float32(pos[1]))
+	rb = append(rb, float32(pos[2]))
+
+	// 剛体の回転
+	rot := r.Rotation.GetQuaternion().GL()
+	rb = append(rb, float32(rot[0]))
+	rb = append(rb, float32(rot[1]))
+	rb = append(rb, float32(rot[2]))
+	rb = append(rb, float32(rot[3]))
+
+	// 剛体の色
+	if r.PhysicsType == PHYSICS_TYPE_STATIC {
+		// ボーン追従剛体：黄緑色
+		rb = append(rb, float32(0.0))
+		rb = append(rb, float32(1.0))
+		rb = append(rb, float32(0.0))
+	} else if r.PhysicsType == PHYSICS_TYPE_DYNAMIC {
+		// 物理剛体: 赤色
+		rb = append(rb, float32(1.0))
+		rb = append(rb, float32(0.0))
+		rb = append(rb, float32(0.0))
+	} else {
+		// ボーン追従 + 物理剛体: 黄色
+		rb = append(rb, float32(1.0))
+		rb = append(rb, float32(1.0))
+		rb = append(rb, float32(0.0))
+	}
+	rb = append(rb, float32(0.6))
+
+	return rb
+}
+
 // 剛体リスト
 type RigidBodies struct {
 	*mcore.IndexNameModelCorrection[*RigidBody]
+	vao *mgl.VAO
+	vbo *mgl.VBO
 }
 
 func NewRigidBodies() *RigidBodies {
 	return &RigidBodies{
 		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*RigidBody](),
+		vao:                      nil,
+		vbo:                      nil,
 	}
+}
+
+func (r *RigidBodies) InitPhysics(physics *mphysics.MPhysics, bones *Bones) {
+	rigidBodyVbo := make([]float32, 0, len(r.Data))
+
+	// 剛体を順番にボーンと紐付けていく
+	for _, rigidBody := range r.GetSortedData() {
+		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
+
+		if rigidBody.BoneIndex >= 0 && bones.Contains(rigidBody.BoneIndex) {
+			rigidBody.InitPhysics(physics, bones.GetItem(rigidBody.BoneIndex))
+		} else {
+			rigidBody.InitPhysics(physics, nil)
+		}
+	}
+
+	r.vao = mgl.NewVAO()
+	r.vao.Bind()
+	r.vbo = mgl.NewVBOForRigidBody(gl.Ptr(rigidBodyVbo), len(rigidBodyVbo))
+	r.vbo.BindRigidBody()
+	r.vbo.Unbind()
+	r.vao.Unbind()
 }

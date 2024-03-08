@@ -19,12 +19,14 @@ func NewMPhysics() *MPhysics {
 	world := mbt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
 	world.SetGravity(mbt.NewBtVector3(float32(0), float32(-9.8*10.0), float32(0)))
 
-	groundShape := mbt.NewBtStaticPlaneShape(mbt.NewBtVector3(float32(0), float32(1), float32(0)), float32(0))
+	groundShape := mbt.NewBtStaticPlaneShape(mbt.NewBtVector3(float32(0), float32(1), float32(0)), float32(100))
 	groundTransform := mbt.NewBtTransform()
+	groundTransform.SetIdentity()
+	groundTransform.SetOrigin(mbt.NewBtVector3(float32(0), float32(10), float32(0)))
 	groundMotionState := mbt.NewBtDefaultMotionState(groundTransform)
-	groundRigidBody := mbt.NewBtRigidBody(float32(0), groundMotionState, groundShape, mbt.NewBtVector3(float32(0), float32(0), float32(0)))
+	groundRigidBody := mbt.NewBtRigidBody(float32(0), groundMotionState, groundShape)
 
-	world.AddRigidBody(groundRigidBody)
+	world.AddRigidBody(groundRigidBody, 15, 0xffff)
 
 	filterCB := NewMFilterCallback(world.GetPairCache().GetOverlapFilterCallback())
 	filterCB.m_nonFilterProxy = append(filterCB.m_nonFilterProxy, groundRigidBody.GetBroadphaseProxy())

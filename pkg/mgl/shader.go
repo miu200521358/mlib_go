@@ -42,6 +42,7 @@ const (
 	PROGRAM_TYPE_MODEL ProgramType = iota
 	PROGRAM_TYPE_EDGE
 	PROGRAM_TYPE_BONE
+	PROGRAM_TYPE_RIGIDBODY ProgramType = iota
 )
 
 const (
@@ -70,6 +71,7 @@ type MShader struct {
 	EdgeProgram          uint32
 	BoneProgram          uint32
 	BoneTextureId        uint32
+	RigidBodyProgram     uint32
 }
 
 func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
@@ -86,16 +88,25 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		msaa:                 NewMsaa(int32(width), int32(height)),
 	}
 	shader.lightDirection = shader.lightPosition.Muled(&mmath.MVec3{-1, -1, -1}).Normalize()
+
 	modelProgram, err := shader.newProgram(
-		resourceFiles,
-		"resources/glsl/model.vert", "resources/glsl/model.frag",
-		PROGRAM_TYPE_MODEL)
+		resourceFiles, "resources/glsl/model.vert", "resources/glsl/model.frag")
 	if err != nil {
 		return nil, err
 	}
 	shader.ModelProgram = modelProgram
 	shader.UseModelProgram()
-	shader.initialize(shader.ModelProgram, PROGRAM_TYPE_MODEL)
+	shader.initialize(shader.ModelProgram)
+	shader.Unuse()
+
+	rigidBodyProgram, err := shader.newProgram(
+		resourceFiles, "resources/glsl/rigidbody.vert", "resources/glsl/rigidbody.frag")
+	if err != nil {
+		return nil, err
+	}
+	shader.RigidBodyProgram = rigidBodyProgram
+	shader.UseRigidBodyProgram()
+	shader.initialize(shader.RigidBodyProgram)
 	shader.Unuse()
 
 	return shader, nil
@@ -141,7 +152,6 @@ func (s *MShader) compileShader(shaderName, source string, shaderType uint32) (u
 func (s *MShader) newProgram(
 	resourceFiles embed.FS,
 	vertexShaderName, fragmentShaderName string,
-	programType ProgramType,
 ) (uint32, error) {
 	vertexShaderFile, err := fs.ReadFile(resourceFiles, vertexShaderName)
 	if err != nil {
@@ -149,9 +159,6 @@ func (s *MShader) newProgram(
 	}
 
 	vertexShaderSource := string(vertexShaderFile)
-	if err != nil {
-		return 0, err
-	}
 
 	fragmentShaderFile, err := fs.ReadFile(resourceFiles, fragmentShaderName)
 	if err != nil {
@@ -159,9 +166,6 @@ func (s *MShader) newProgram(
 	}
 
 	fragmentShaderSource := string(fragmentShaderFile)
-	if err != nil {
-		return 0, err
-	}
 
 	vertexShader, err := s.compileShader(vertexShaderName, vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
@@ -197,7 +201,7 @@ func (s *MShader) newProgram(
 	return program, nil
 }
 
-func (s *MShader) initialize(program uint32, programType ProgramType) {
+func (s *MShader) initialize(program uint32) {
 	// light color
 	// MMD Light Diffuse は必ず0
 	s.lightDiffuse = &mmath.MVec3Zero
@@ -272,6 +276,10 @@ func (s *MShader) UseBoneProgram() {
 	s.Use(PROGRAM_TYPE_BONE)
 }
 
+func (s *MShader) UseRigidBodyProgram() {
+	s.Use(PROGRAM_TYPE_RIGIDBODY)
+}
+
 func (s *MShader) Use(programType ProgramType) {
 	switch programType {
 	case PROGRAM_TYPE_MODEL:
@@ -280,11 +288,13 @@ func (s *MShader) Use(programType ProgramType) {
 		gl.UseProgram(s.EdgeProgram)
 	case PROGRAM_TYPE_BONE:
 		gl.UseProgram(s.BoneProgram)
+	case PROGRAM_TYPE_RIGIDBODY:
+		gl.UseProgram(s.RigidBodyProgram)
 	}
 }
 
 func (s *MShader) GetPrograms() []uint32 {
-	return []uint32{s.ModelProgram}
+	return []uint32{s.ModelProgram, s.RigidBodyProgram}
 }
 
 func (s *MShader) Unuse() {
@@ -295,4 +305,5 @@ func (s *MShader) Delete() {
 	s.DeleteProgram(s.ModelProgram)
 	s.DeleteProgram(s.EdgeProgram)
 	s.DeleteProgram(s.BoneProgram)
+	s.DeleteProgram(s.RigidBodyProgram)
 }
