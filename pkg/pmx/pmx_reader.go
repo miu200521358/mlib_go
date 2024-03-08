@@ -8,7 +8,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type PmxReader struct {
@@ -939,6 +938,7 @@ func (r *PmxReader) readRigidBodies(model *PmxModel) error {
 		if err != nil {
 			return err
 		}
+		b.CollisionGroupMaskValue = int(collisionGroupMask)
 		b.CollisionGroupMask.IsCollisions = NewCollisionGroup(collisionGroupMask)
 		// 1  : byte	| 形状 - 0:球 1:箱 2:カプセル
 		shapeType, err := r.UnpackByte()
