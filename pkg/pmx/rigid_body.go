@@ -355,10 +355,14 @@ func (r *RigidBody) Bullet() []float32 {
 // 剛体リスト
 type RigidBodies struct {
 	*mcore.IndexNameModelCorrection[*RigidBody]
-	vao      *mgl.VAO
-	vbo      *mgl.VBO
-	ibo      *mgl.IBO
-	iboCount int32
+	vao         *mgl.VAO
+	vbo         *mgl.VBO
+	ibo         *mgl.IBO
+	count       int32
+	sphereVao   *mgl.VAO
+	sphereVbo   *mgl.VBO
+	shapeCount  int32
+	sphereSizes []float32
 }
 
 func NewRigidBodies() *RigidBodies {
@@ -367,142 +371,201 @@ func NewRigidBodies() *RigidBodies {
 		vao:                      nil,
 		vbo:                      nil,
 		ibo:                      nil,
-		iboCount:                 0,
+		count:                    0,
+		sphereVao:                nil,
+		sphereVbo:                nil,
+		shapeCount:               0,
+		sphereSizes:              make([]float32, 0),
 	}
 }
 
-func (r *RigidBodies) InitPhysics(physics *mphysics.MPhysics, bones *Bones) {
+func (r *RigidBodies) addCornerBox(
+	rigidBody *RigidBody,
+	rigidBodyVbo []float32,
+	rigidBodyIbo []uint32,
+	i int,
+	pos mgl32.Vec3,
+	halfSize *mmath.MVec3,
+) ([]float32, []uint32) {
+	{
+		// 手前左上
+		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
+		rigidBodyVbo = append(rigidBodyVbo, pos[0]-float32(halfSize.GetX()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[1]-float32(halfSize.GetY()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[2]-float32(halfSize.GetZ()))
+	}
+	{
+		// 手前右上
+		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
+		rigidBodyVbo = append(rigidBodyVbo, pos[0]+float32(halfSize.GetX()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[1]-float32(halfSize.GetY()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[2]-float32(halfSize.GetZ()))
+	}
+	{
+		// 手前右下
+		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
+		rigidBodyVbo = append(rigidBodyVbo, pos[0]+float32(halfSize.GetX()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[1]+float32(halfSize.GetY()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[2]-float32(halfSize.GetZ()))
+	}
+	{
+		// 手前左下
+		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
+		rigidBodyVbo = append(rigidBodyVbo, pos[0]-float32(halfSize.GetX()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[1]+float32(halfSize.GetY()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[2]-float32(halfSize.GetZ()))
+	}
+	{
+		// 奥左上
+		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
+		rigidBodyVbo = append(rigidBodyVbo, pos[0]-float32(halfSize.GetX()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[1]-float32(halfSize.GetY()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[2]+float32(halfSize.GetZ()))
+	}
+	{
+		// 奥右上
+		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
+		rigidBodyVbo = append(rigidBodyVbo, pos[0]+float32(halfSize.GetX()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[1]-float32(halfSize.GetY()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[2]+float32(halfSize.GetZ()))
+	}
+	{
+		// 奥右下
+		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
+		rigidBodyVbo = append(rigidBodyVbo, pos[0]+float32(halfSize.GetX()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[1]+float32(halfSize.GetY()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[2]+float32(halfSize.GetZ()))
+	}
+	{
+		// 奥左下
+		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
+		rigidBodyVbo = append(rigidBodyVbo, pos[0]-float32(halfSize.GetX()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[1]+float32(halfSize.GetY()))
+		rigidBodyVbo = append(rigidBodyVbo, pos[2]+float32(halfSize.GetZ()))
+	}
+	{
+		// 手前左上-手前右上
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+0))
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+1))
+	}
+	{
+		// 手前右上-手前右下
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+1))
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+2))
+	}
+	{
+		// 手前右下-手前左下
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+2))
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+3))
+	}
+	{
+		// 手前左下-手前左上
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+3))
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+0))
+	}
+	{
+		// 奥左上-奥右上
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+4))
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+5))
+	}
+	{
+		// 奥右上-奥右下
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+5))
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+6))
+	}
+	{
+		// 奥右下-奥左下
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+6))
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+7))
+	}
+	{
+		// 奥左下-奥左上
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+7))
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+4))
+	}
+	{
+		// 手前左上-奥左上
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+0))
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+4))
+	}
+	{
+		// 手前右上-奥右上
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+1))
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+5))
+	}
+	{
+		// 手前右下-奥右下
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+2))
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+6))
+	}
+	{
+		// 手前左下-奥左下
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+3))
+		rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+7))
+	}
+
+	return rigidBodyVbo, rigidBodyIbo
+}
+
+func (r *RigidBodies) addCornerSphere(
+	rigidBody *RigidBody,
+	rigidBodyVbo []float32,
+	rigidBodyIbo []uint32,
+	i int,
+	pos mgl32.Vec3,
+	halfSize *mmath.MVec3,
+) ([]float32, []uint32) {
+	// 球体を6x6に分割して線で描くため、球体の頂点を追加
+	const segments = 6.0
+
+	for y := 0; y <= segments; y++ {
+		for x := 0; x <= segments; x++ {
+			// Calculate the latitude and longitude
+			lat := (float64(y) / segments) * math.Pi
+			lon := (float64(x) / segments) * 2.0 * math.Pi
+
+			// Calculate the x, y, z coordinates
+			x := halfSize[0] * math.Sin(lat) * math.Cos(lon)
+			y := halfSize[0] * math.Sin(lat) * math.Sin(lon)
+			z := halfSize[0] * math.Cos(lat)
+
+			// Append the coordinates to the VBO
+			rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
+			rigidBodyVbo = append(rigidBodyVbo, pos[0]+float32(x), pos[1]+float32(y), pos[2]+float32(z))
+		}
+	}
+
+	// IBOとして球体の線を追加
+	for y := 0; y < segments; y++ {
+		for x := 0; x < segments; x++ {
+			// Append the indices for the first triangle
+			rigidBodyIbo = append(rigidBodyIbo, uint32(i*int(segments+1)+y*int(segments+1)+x))
+			rigidBodyIbo = append(rigidBodyIbo, uint32(i*int(segments+1)+y*int(segments+1)+x+1))
+
+			// Append the indices for the second triangle
+			rigidBodyIbo = append(rigidBodyIbo, uint32(i*int(segments+1)+y*int(segments+1)+x))
+			rigidBodyIbo = append(rigidBodyIbo, uint32(i*int(segments+1)+(y+1)*int(segments+1)+x))
+		}
+	}
+
+	return rigidBodyVbo, rigidBodyIbo
+}
+
+func (r *RigidBodies) prepareDraw() {
 	rigidBodyVbo := make([]float32, 0, len(r.Data))
 	rigidBodyIbo := make([]uint32, 0, len(r.Data))
 
-	// 剛体を順番にボーンと紐付けていく
 	for i, rigidBody := range r.GetSortedData() {
 		// 剛体の位置
-		// 直方体の角を設定していく
-		pos := rigidBody.Position.GL()
-		halfSize := rigidBody.Size.MuledScalar(0.5)
-		{
-			// 手前左上
-			rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-			rigidBodyVbo = append(rigidBodyVbo, pos[0]-float32(halfSize.GetX()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[1]-float32(halfSize.GetY()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[2]-float32(halfSize.GetZ()))
-		}
-		{
-			// 手前右上
-			rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-			rigidBodyVbo = append(rigidBodyVbo, pos[0]+float32(halfSize.GetX()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[1]-float32(halfSize.GetY()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[2]-float32(halfSize.GetZ()))
-		}
-		{
-			// 手前右下
-			rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-			rigidBodyVbo = append(rigidBodyVbo, pos[0]+float32(halfSize.GetX()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[1]+float32(halfSize.GetY()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[2]-float32(halfSize.GetZ()))
-		}
-		{
-			// 手前左下
-			rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-			rigidBodyVbo = append(rigidBodyVbo, pos[0]-float32(halfSize.GetX()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[1]+float32(halfSize.GetY()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[2]-float32(halfSize.GetZ()))
-		}
-		{
-			// 奥左上
-			rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-			rigidBodyVbo = append(rigidBodyVbo, pos[0]-float32(halfSize.GetX()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[1]-float32(halfSize.GetY()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[2]+float32(halfSize.GetZ()))
-		}
-		{
-			// 奥右上
-			rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-			rigidBodyVbo = append(rigidBodyVbo, pos[0]+float32(halfSize.GetX()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[1]-float32(halfSize.GetY()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[2]+float32(halfSize.GetZ()))
-		}
-		{
-			// 奥右下
-			rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-			rigidBodyVbo = append(rigidBodyVbo, pos[0]+float32(halfSize.GetX()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[1]+float32(halfSize.GetY()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[2]+float32(halfSize.GetZ()))
-		}
-		{
-			// 奥左下
-			rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-			rigidBodyVbo = append(rigidBodyVbo, pos[0]-float32(halfSize.GetX()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[1]+float32(halfSize.GetY()))
-			rigidBodyVbo = append(rigidBodyVbo, pos[2]+float32(halfSize.GetZ()))
-		}
-		{
-			// 手前左上-手前右上
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+0))
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+1))
-		}
-		{
-			// 手前右上-手前右下
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+1))
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+2))
-		}
-		{
-			// 手前右下-手前左下
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+2))
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+3))
-		}
-		{
-			// 手前左下-手前左上
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+3))
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+0))
-		}
-		{
-			// 奥左上-奥右上
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+4))
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+5))
-		}
-		{
-			// 奥右上-奥右下
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+5))
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+6))
-		}
-		{
-			// 奥右下-奥左下
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+6))
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+7))
-		}
-		{
-			// 奥左下-奥左上
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+7))
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+4))
-		}
-		{
-			// 手前左上-奥左上
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+0))
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+4))
-		}
-		{
-			// 手前右上-奥右上
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+1))
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+5))
-		}
-		{
-			// 手前右下-奥右下
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+2))
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+6))
-		}
-		{
-			// 手前左下-奥左下
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+3))
-			rigidBodyIbo = append(rigidBodyIbo, uint32(i*8+7))
-		}
-
-		// 物理設定の初期化
-		if rigidBody.BoneIndex >= 0 && bones.Contains(rigidBody.BoneIndex) {
-			rigidBody.InitPhysics(physics, bones.GetItem(rigidBody.BoneIndex))
-		} else {
-			rigidBody.InitPhysics(physics, nil)
+		if rigidBody.ShapeType == SHAPE_BOX {
+			// 直方体の角を設定していく
+			pos := rigidBody.Position.GL()
+			halfSize := rigidBody.Size
+			rigidBodyVbo, rigidBodyIbo = r.addCornerBox(rigidBody, rigidBodyVbo, rigidBodyIbo, i, pos, halfSize)
+		} else if rigidBody.ShapeType == SHAPE_SPHERE {
+			pos := rigidBody.Position.GL()
+			halfSize := rigidBody.Size
+			rigidBodyVbo, rigidBodyIbo = r.addCornerSphere(rigidBody, rigidBodyVbo, rigidBodyIbo, i, pos, halfSize)
 		}
 	}
 
@@ -514,7 +577,22 @@ func (r *RigidBodies) InitPhysics(physics *mphysics.MPhysics, bones *Bones) {
 	r.vao.Unbind()
 
 	r.ibo = mgl.NewIBO(gl.Ptr(rigidBodyIbo), len(rigidBodyIbo))
-	r.iboCount = int32(len(rigidBodyIbo))
+	r.count = int32(len(rigidBodyIbo))
+}
+
+func (r *RigidBodies) InitPhysics(physics *mphysics.MPhysics, bones *Bones) {
+	// 剛体を順番にボーンと紐付けていく
+	for _, rigidBody := range r.GetSortedData() {
+		// 物理設定の初期化
+		if rigidBody.BoneIndex >= 0 && bones.Contains(rigidBody.BoneIndex) {
+			rigidBody.InitPhysics(physics, bones.GetItem(rigidBody.BoneIndex))
+		} else {
+			rigidBody.InitPhysics(physics, nil)
+		}
+	}
+
+	// 剛体の描画準備
+	r.prepareDraw()
 }
 
 func (r *RigidBodies) Draw(
@@ -530,10 +608,6 @@ func (r *RigidBodies) Draw(
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	r.vao.Bind()
-	r.vbo.BindRigidBody()
-	r.ibo.Bind()
-
 	// ブレンディングを有効にする
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -543,16 +617,21 @@ func (r *RigidBodies) Draw(
 	// ボーンデフォームテクスチャ設定
 	BindBoneMatrixes(boneMatrixes, shader, shader.RigidBodyProgram, windowIndex)
 
-	gl.DrawElements(gl.LINES, r.iboCount, gl.UNSIGNED_INT, nil)
+	// 箱剛体の描画
 
-	UnbindBoneMatrixes()
+	r.vao.Bind()
+	r.vbo.BindRigidBody()
+	r.ibo.Bind()
 
-	shader.Unuse()
+	gl.DrawElements(gl.LINES, r.count, gl.UNSIGNED_INT, nil)
 
 	r.ibo.Unbind()
 	r.vbo.Unbind()
 	r.vao.Unbind()
 
-	gl.Disable(gl.BLEND)
+	UnbindBoneMatrixes()
 
+	shader.Unuse()
+
+	gl.Disable(gl.BLEND)
 }
