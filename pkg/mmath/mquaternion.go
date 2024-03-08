@@ -94,12 +94,12 @@ func (v *MQuaternion) String() string {
 
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します
 func (v *MQuaternion) GL() [4]float32 {
-	return [4]float32{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW())}
+	return [4]float32{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(v.GetW())}
 }
 
 // Bullet+OpenGL座標系に変換されたクォータニオンベクトルを返します
 func (v *MQuaternion) Bullet() mbt.BtQuaternion {
-	return mbt.NewBtQuaternion(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW()))
+	return mbt.NewBtQuaternion(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(v.GetW()))
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換されたクォータニオンベクトルを返します
