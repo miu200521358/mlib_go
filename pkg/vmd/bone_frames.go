@@ -602,8 +602,8 @@ func (bfs *BoneFrames) getBoneMatrixes(
 				}
 				boneName := targetBoneIndexes[j]
 				// ボーンの移動位置、回転角度、拡大率を取得
-				positions[j] = bfs.getPosition(frame, boneName, model)
-				rotWithEffect, rotFk := bfs.getRotation(frame, boneName, model)
+				positions[j] = bfs.getPosition(frame, boneName, model, 0)
+				rotWithEffect, rotFk := bfs.getRotation(frame, boneName, model, 0)
 				rotations[j] = rotWithEffect.ToMat4()
 				quats[j] = rotFk
 				scales[j] = bfs.getScale(frame, boneName, model)
@@ -616,7 +616,17 @@ func (bfs *BoneFrames) getBoneMatrixes(
 }
 
 // 該当キーフレにおけるボーンの移動位置
-func (bfs *BoneFrames) getPosition(frame float32, boneName string, model *pmx.PmxModel) *mmath.MMat4 {
+func (bfs *BoneFrames) getPosition(
+	frame float32,
+	boneName string,
+	model *pmx.PmxModel,
+	loop int,
+) *mmath.MMat4 {
+	if loop > 20 {
+		// 無限ループを避ける
+		return mmath.NewMMat4()
+	}
+
 	bone := model.Bones.GetItemByName(boneName)
 	bf := bfs.GetItem(boneName).GetItem(frame)
 
@@ -627,7 +637,7 @@ func (bfs *BoneFrames) getPosition(frame float32, boneName string, model *pmx.Pm
 
 	if bone.IsEffectorTranslation() {
 		// 外部親変形ありの場合、外部親変形行列を掛ける
-		effectPosMat := bfs.getPositionWithEffect(frame, bone.Index, model, 0)
+		effectPosMat := bfs.getPositionWithEffect(frame, bone.Index, model, loop+1)
 		mat.Mul(effectPosMat)
 	}
 
@@ -638,7 +648,7 @@ func (bfs *BoneFrames) getPosition(frame float32, boneName string, model *pmx.Pm
 func (bfs *BoneFrames) getPositionWithEffect(frame float32, boneIndex int, model *pmx.PmxModel, loop int) *mmath.MMat4 {
 	bone := model.Bones.GetItem(boneIndex)
 
-	if bone.EffectFactor == 0 && loop > 20 {
+	if bone.EffectFactor == 0 || loop > 20 {
 		// 付与率が0の場合、常に0になる
 		// MMDエンジン対策で無限ループを避ける
 		return mmath.NewMMat4()
@@ -651,7 +661,7 @@ func (bfs *BoneFrames) getPositionWithEffect(frame float32, boneIndex int, model
 
 	// 付与親が存在する場合、付与親の回転角度を掛ける
 	effectBone := model.Bones.GetItem(bone.EffectIndex)
-	posMat := bfs.getPosition(frame, effectBone.Name, model)
+	posMat := bfs.getPosition(frame, effectBone.Name, model, loop+1)
 
 	posMat[0][3] *= bone.EffectFactor
 	posMat[1][3] *= bone.EffectFactor
@@ -665,7 +675,13 @@ func (bfs *BoneFrames) getRotation(
 	frame float32,
 	boneName string,
 	model *pmx.PmxModel,
+	loop int,
 ) (*mmath.MQuaternion, *mmath.MQuaternion) {
+	if loop > 20 {
+		// 無限ループを避ける
+		return mmath.NewMQuaternion(), mmath.NewMQuaternion()
+	}
+
 	bone := model.Bones.GetItemByName(boneName)
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
@@ -683,7 +699,7 @@ func (bfs *BoneFrames) getRotation(
 	var rotWithEffect *mmath.MQuaternion
 	if bone.IsEffectorRotation() {
 		// 外部親変形ありの場合、外部親変形行列を掛ける
-		effectQ := rot.Muled(bfs.getRotationWithEffect(frame, bone.Index, model, 0))
+		effectQ := rot.Muled(bfs.getRotationWithEffect(frame, bone.Index, model, loop+1))
 		rotWithEffect = effectQ
 	} else {
 		rotWithEffect = rot
@@ -706,7 +722,7 @@ func (bfs *BoneFrames) getRotationWithEffect(
 ) *mmath.MQuaternion {
 	bone := model.Bones.GetItem(boneIndex)
 
-	if bone.EffectFactor == 0 && loop > 20 {
+	if bone.EffectFactor == 0 || loop > 20 {
 		// 付与率が0の場合、常に0になる
 		// MMDエンジン対策で無限ループを避ける
 		return mmath.NewMQuaternion()
@@ -719,7 +735,7 @@ func (bfs *BoneFrames) getRotationWithEffect(
 
 	// 付与親が存在する場合、付与親の回転角度を掛ける
 	effectBone := model.Bones.GetItem(bone.EffectIndex)
-	rotWithEffect, _ := bfs.getRotation(frame, effectBone.Name, model)
+	rotWithEffect, _ := bfs.getRotation(frame, effectBone.Name, model, loop+1)
 
 	if bone.EffectFactor >= 0 {
 		// 正の付与親
