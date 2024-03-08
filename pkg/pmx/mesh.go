@@ -59,7 +59,7 @@ func (m *Mesh) DrawModel(
 	}
 
 	// ボーンデフォームテクスチャ設定
-	m.BindBoneMatrixes(boneMatrixes, shader, shader.ModelProgram, windowIndex)
+	BindBoneMatrixes(boneMatrixes, shader, shader.ModelProgram, windowIndex)
 
 	// ------------------
 	// 材質色設定
@@ -151,7 +151,7 @@ func (m *Mesh) DrawModel(
 		m.material.SphereTexture.Unbind()
 	}
 
-	// m.UnbindBoneMatrixes()
+	UnbindBoneMatrixes()
 	m.ibo.Unbind()
 }
 
@@ -162,7 +162,7 @@ func (m *Mesh) Delete() {
 	}
 }
 
-func (m *Mesh) BindBoneMatrixes(
+func BindBoneMatrixes(
 	matrixes []*mgl32.Mat4,
 	shader *mgl.MShader,
 	program uint32,
@@ -216,6 +216,6 @@ func (m *Mesh) BindBoneMatrixes(
 	gl.Uniform1i(modelHeightUniform, int32(height))
 }
 
-func (m *Mesh) UnbindBoneMatrixes() {
+func UnbindBoneMatrixes() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }

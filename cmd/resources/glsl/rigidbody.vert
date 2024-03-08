@@ -9,11 +9,9 @@ uniform int boneMatrixWidth;
 uniform int boneMatrixHeight;
 
 in layout(location = 0) float boneIndex;
-in layout(location = 1) float shapeType;
-in layout(location = 2) vec3 size;
+in layout(location = 1) vec4 typeColor;
+in layout(location = 2) vec4 rotation;
 in layout(location = 3) vec3 position;
-in layout(location = 4) vec4 rotation;
-in layout(location = 5) vec4 typeColor;
 
 out vec4 rigidbodyColor;
 

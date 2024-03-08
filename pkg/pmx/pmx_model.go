@@ -124,6 +124,7 @@ func (pm *PmxModel) Draw(
 ) {
 	pm.UpdatePhysics(boneMatrixes, boneTransforms, elapsed)
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
+	pm.RigidBodies.Draw(shader, boneMatrixes, windowIndex)
 }
 
 func (pm *PmxModel) UpdatePhysics(

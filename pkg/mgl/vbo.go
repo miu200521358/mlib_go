@@ -208,8 +208,8 @@ func NewVBOForRigidBody(rigidBodyPtr unsafe.Pointer, count int) *VBO {
 		verticesPtr: rigidBodyPtr,
 	}
 	// 剛体構造体のサイズ(全部floatとする)
-	// boneIndex(1), shapeType(1), size(3), position(3), rotation(4), typeColor(4)
-	vbo.stride = int32(4 * (1 + 1 + 3 + 3 + 4 + 4))
+	// boneIndex(1), typeColor(4), rotation(4), position(3)
+	vbo.stride = int32(4 * (1 + 4 + 4 + 3))
 	vbo.size = count * 4
 
 	return vbo
@@ -232,26 +232,26 @@ func (v *VBO) BindRigidBody() {
 		0,        // オフセット
 	)
 
-	// 1: shapeType
+	// 1: typeColor
 	gl.EnableVertexAttribArray(1)
 	gl.VertexAttribPointerWithOffset(
 		1,        // 属性のインデックス
-		1,        // 属性のサイズ
+		4,        // 属性のサイズ
 		gl.FLOAT, // データの型
 		false,    // 正規化するかどうか
 		v.stride, // ストライド
-		1*4,      // オフセット
+		1*4,      // オフセット（構造体内のオフセット）
 	)
 
-	// 2: size
+	// 2: rotation
 	gl.EnableVertexAttribArray(2)
 	gl.VertexAttribPointerWithOffset(
 		2,        // 属性のインデックス
-		3,        // 属性のサイズ
+		4,        // 属性のサイズ
 		gl.FLOAT, // データの型
 		false,    // 正規化するかどうか
 		v.stride, // ストライド
-		2*4,      // オフセット
+		5*4,      // オフセット
 	)
 
 	// 3: position
@@ -262,28 +262,7 @@ func (v *VBO) BindRigidBody() {
 		gl.FLOAT, // データの型
 		false,    // 正規化するかどうか
 		v.stride, // ストライド
-		5*4,      // オフセット
+		9*4,      // オフセット
 	)
 
-	// 4: rotation
-	gl.EnableVertexAttribArray(4)
-	gl.VertexAttribPointerWithOffset(
-		4,        // 属性のインデックス
-		4,        // 属性のサイズ
-		gl.FLOAT, // データの型
-		false,    // 正規化するかどうか
-		v.stride, // ストライド
-		8*4,      // オフセット
-	)
-
-	// 5: typeColor
-	gl.EnableVertexAttribArray(5)
-	gl.VertexAttribPointerWithOffset(
-		5,        // 属性のインデックス
-		4,        // 属性のサイズ
-		gl.FLOAT, // データの型
-		false,    // 正規化するかどうか
-		v.stride, // ストライド
-		13*4,     // オフセット（構造体内のオフセット）
-	)
 }
