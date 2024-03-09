@@ -30,6 +30,9 @@ func NewMPhysics() *MPhysics {
 	callback := NewMFilterCallback()
 	world.GetPairCache().SetOverlapFilterCallback(&callback)
 
+	// world.GetDebugDrawer().SetDebugMode(
+	// 	int(mbt.BtIDebugDrawDBG_DrawConstraints | mbt.BtIDebugDrawDBG_DrawConstraintLimits))
+
 	p := &MPhysics{
 		world:          world,
 		filterCallBack: callback,

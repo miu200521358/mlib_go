@@ -10,6 +10,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
+
 )
 
 type JointParam struct {
@@ -120,7 +121,7 @@ func (j *Joint) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBo
 	modelPhysics.AddJoint(j.Constraint)
 }
 
-func (j *Joint) updateVbo(jointVbo []float32, segments int) []float32 {
+func (j *Joint) updateVbo(jointVbo []float32, jointIbo []uint32, startIdx int, segments int) ([]float32, []uint32) {
 	// ジョイントの位置と向き
 	// Get the rigid bodies from the constraint
 	bodyA := j.Constraint.GetRigidBodyA().(mbt.BtRigidBody)
@@ -162,19 +163,6 @@ func (j *Joint) updateVbo(jointVbo []float32, segments int) []float32 {
 	)
 
 	// Add the global positions and rotations to the VBO
-	jointVbo = j.addJointVbo(&position, rotation, jointVbo, segments)
-
-	return jointVbo
-}
-
-// 球の頂点を追加
-func (j *Joint) addJointVbo(
-	position *mmath.MVec3,
-	rotation *mmath.MQuaternion,
-	jointVbo []float32,
-	segments int,
-) []float32 {
-	// 球体を6x6に分割して線で描くため、球体の頂点を追加
 
 	for m := 0; m <= segments; m++ {
 		for n := 0; n <= segments; n++ {
@@ -191,7 +179,7 @@ func (j *Joint) addJointVbo(
 			spherePos := &mmath.MVec3{x, y, z}
 
 			// Apply the rigid body's rotation to the vector
-			rotatedPos := rotation.RotatedVec3(spherePos).Added(position)
+			rotatedPos := rotation.RotatedVec3(spherePos).Added(&position)
 
 			// Append the coordinates to the VBO
 			jointVbo = append(
@@ -209,7 +197,27 @@ func (j *Joint) addJointVbo(
 		}
 	}
 
-	return jointVbo
+	for m := 0; m <= segments; m++ {
+		for n := 0; n <= segments; n++ {
+			// Calculate the indices of the current point and the points to the right and below it
+			idx := startIdx + m*(segments+1) + n
+			idxRight := idx + 1
+			idxBelow := idx + segments + 1
+
+			// Add a line from the current point to the point to the right
+			if n < segments {
+				jointIbo = append(jointIbo, uint32(idx), uint32(idxRight))
+			}
+
+			// Add a line from the current point to the point below
+			if m < segments {
+				jointIbo = append(jointIbo, uint32(idx), uint32(idxBelow))
+			}
+		}
+	}
+	startIdx += (segments + 1) * (segments + 1)
+
+	return jointVbo, jointIbo
 }
 
 // ジョイントリスト
@@ -225,7 +233,7 @@ type Joints struct {
 func NewJoints() *Joints {
 	return &Joints{
 		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Joint](),
-		vao:                      nil,
+		vao:                      mgl.NewVAO(),
 		vbo:                      nil,
 		ibo:                      nil,
 		count:                    0,
@@ -243,53 +251,17 @@ func (j *Joints) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodies *Rigid
 				rigidBodies.GetItem(joint.RigidbodyIndexB))
 		}
 	}
-
-	// 描画準備
-	j.prepareDraw()
-}
-
-func (j *Joints) prepareDraw() {
-	jointIbo := make([]uint32, 0)
-
-	startIdx := 0
-	segments := j.segments
-
-	for range j.Data {
-		for m := 0; m <= segments; m++ {
-			for n := 0; n <= segments; n++ {
-				// Calculate the indices of the current point and the points to the right and below it
-				idx := startIdx + m*(segments+1) + n
-				idxRight := idx + 1
-				idxBelow := idx + segments + 1
-
-				// Add a line from the current point to the point to the right
-				if n < segments {
-					jointIbo = append(jointIbo, uint32(idx), uint32(idxRight))
-				}
-
-				// Add a line from the current point to the point below
-				if m < segments {
-					jointIbo = append(jointIbo, uint32(idx), uint32(idxBelow))
-				}
-			}
-		}
-		startIdx += (segments + 1) * (segments + 1)
-	}
-
-	j.vao = mgl.NewVAO()
-	j.vao.Bind()
-	j.vao.Unbind()
-
-	j.ibo = mgl.NewIBO(gl.Ptr(jointIbo), len(jointIbo))
-	j.count = int32(len(jointIbo))
 }
 
 func (j *Joints) updateVbo() {
 	// ジョイント位置を更新
 	jointVbo := make([]float32, 0)
+	jointIbo := make([]uint32, 0)
+	startIdx := 0
 
 	for _, joint := range j.GetSortedData() {
-		jointVbo = joint.updateVbo(jointVbo, j.segments)
+		jointVbo, jointIbo = joint.updateVbo(jointVbo, jointIbo, startIdx, j.segments)
+		startIdx += (j.segments + 1) * (j.segments + 1)
 	}
 
 	j.vao.Bind()
@@ -297,6 +269,9 @@ func (j *Joints) updateVbo() {
 	j.vbo.BindJoint()
 	j.vbo.Unbind()
 	j.vao.Unbind()
+
+	j.ibo = mgl.NewIBO(gl.Ptr(jointIbo), len(jointIbo))
+	j.count = int32(len(jointIbo))
 }
 
 func (j *Joints) Draw(

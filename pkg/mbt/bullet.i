@@ -201,3 +201,6 @@
 ////// included headers [BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h] ----------------------------------
 %include "BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.h.i"
 %include "BulletDynamics/ConstraintSolver/btGeneric6DofSpringConstraint.cpp.i"
+
+////// included headers [LinearMath/btIDebugDraw.h] ----------------------------------
+%include "LinearMath/btIDebugDraw.h.i"
