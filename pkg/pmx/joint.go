@@ -215,10 +215,11 @@ func (j *Joint) addJointVbo(
 // ジョイントリスト
 type Joints struct {
 	*mcore.IndexNameModelCorrection[*Joint]
-	vao   *mgl.VAO
-	vbo   *mgl.VBO
-	ibo   *mgl.IBO
-	count int32
+	vao      *mgl.VAO
+	vbo      *mgl.VBO
+	ibo      *mgl.IBO
+	count    int32
+	segments int
 }
 
 func NewJoints() *Joints {
@@ -228,6 +229,7 @@ func NewJoints() *Joints {
 		vbo:                      nil,
 		ibo:                      nil,
 		count:                    0,
+		segments:                 6,
 	}
 }
 
@@ -250,7 +252,7 @@ func (j *Joints) prepareDraw() {
 	jointIbo := make([]uint32, 0)
 
 	startIdx := 0
-	segments := 6
+	segments := j.segments
 
 	for range j.Data {
 		for m := 0; m <= segments; m++ {
@@ -271,7 +273,7 @@ func (j *Joints) prepareDraw() {
 				}
 			}
 		}
-		startIdx += (segments+1)*(segments+1) + (segments + 1)
+		startIdx += (segments + 1) * (segments + 1)
 	}
 
 	j.vao = mgl.NewVAO()
@@ -284,13 +286,10 @@ func (j *Joints) prepareDraw() {
 
 func (j *Joints) updateVbo() {
 	// ジョイント位置を更新
-	startIdx := 0
-	segments := 6
 	jointVbo := make([]float32, 0)
 
 	for _, joint := range j.GetSortedData() {
-		jointVbo = joint.updateVbo(jointVbo, segments)
-		startIdx += (segments + 1) * (segments + 1)
+		jointVbo = joint.updateVbo(jointVbo, j.segments)
 	}
 
 	j.vao.Bind()
