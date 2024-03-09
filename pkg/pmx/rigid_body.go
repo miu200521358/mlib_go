@@ -338,7 +338,7 @@ func (r *RigidBody) Bullet() []float32 {
 		rb = append(rb, float32(1.0))
 		rb = append(rb, float32(0.0))
 	}
-	rb = append(rb, float32(0.6))
+	rb = append(rb, float32(0.4))
 
 	return rb
 }
