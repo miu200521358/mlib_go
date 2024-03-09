@@ -10,11 +10,11 @@ import (
 
 // Vertex Buffer Object.
 type VBO struct {
-	id          uint32         // ID
-	target      uint32         // gl.ARRAY_BUFFER
-	size        int            // size in bytes
-	verticesPtr unsafe.Pointer // verticesPtr
-	stride      int32          // stride
+	id     uint32         // ID
+	target uint32         // gl.ARRAY_BUFFER
+	size   int            // size in bytes
+	ptr    unsafe.Pointer // verticesPtr
+	stride int32          // stride
 }
 
 // Delete this VBO.
@@ -33,9 +33,9 @@ func NewVBOForModel(verticesPtr unsafe.Pointer, count int) *VBO {
 	gl.GenBuffers(1, &vboId)
 
 	vbo := &VBO{
-		id:          vboId,
-		target:      gl.ARRAY_BUFFER,
-		verticesPtr: verticesPtr,
+		id:     vboId,
+		target: gl.ARRAY_BUFFER,
+		ptr:    verticesPtr,
 	}
 	// 頂点構造体のサイズ(全部floatとする)
 	// position(3), normal(3), uv(2), extendedUV(2), edgeFactor(1), deformBoneIndex(4), deformBoneWeight(4),
@@ -49,7 +49,7 @@ func NewVBOForModel(verticesPtr unsafe.Pointer, count int) *VBO {
 // Binds VBO for rendering.
 func (v *VBO) BindModel() {
 	gl.BindBuffer(v.target, v.id)
-	gl.BufferData(v.target, v.size, v.verticesPtr, gl.STATIC_DRAW)
+	gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
 	mutils.CheckGLError()
 
 	// 0: position
@@ -203,9 +203,9 @@ func NewVBOForRigidBody(rigidBodyPtr unsafe.Pointer, count int) *VBO {
 	gl.GenBuffers(1, &vboId)
 
 	vbo := &VBO{
-		id:          vboId,
-		target:      gl.ARRAY_BUFFER,
-		verticesPtr: rigidBodyPtr,
+		id:     vboId,
+		target: gl.ARRAY_BUFFER,
+		ptr:    rigidBodyPtr,
 	}
 	// 剛体構造体のサイズ(全部floatとする)
 	// boneIndex(1), typeColor(4), position(3)
@@ -218,7 +218,7 @@ func NewVBOForRigidBody(rigidBodyPtr unsafe.Pointer, count int) *VBO {
 // Binds VBO for rendering.
 func (v *VBO) BindRigidBody() {
 	gl.BindBuffer(v.target, v.id)
-	gl.BufferData(v.target, v.size, v.verticesPtr, gl.STATIC_DRAW)
+	gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
 	mutils.CheckGLError()
 
 	// 0: boneIndex
@@ -252,6 +252,54 @@ func (v *VBO) BindRigidBody() {
 		false,    // 正規化するかどうか
 		v.stride, // ストライド
 		5*4,      // オフセット
+	)
+
+}
+
+// Creates a nth given faceDtype.
+func NewVBOForJoint(ptr unsafe.Pointer, count int) *VBO {
+	var vboId uint32
+	gl.GenBuffers(1, &vboId)
+
+	vbo := &VBO{
+		id:     vboId,
+		target: gl.ARRAY_BUFFER,
+		ptr:    ptr,
+	}
+	// 剛体構造体のサイズ(全部floatとする)
+	// typeColor(4), position(3)
+	vbo.stride = int32(4 * (4 + 3))
+	vbo.size = count * 4
+
+	return vbo
+}
+
+// Binds VBO for rendering.
+func (v *VBO) BindJoint() {
+	gl.BindBuffer(v.target, v.id)
+	gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
+	mutils.CheckGLError()
+
+	// 0: typeColor
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(
+		0,        // 属性のインデックス
+		4,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		0*4,      // オフセット（構造体内のオフセット）
+	)
+
+	// 1: position
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointerWithOffset(
+		1,        // 属性のインデックス
+		3,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		4*4,      // オフセット
 	)
 
 }

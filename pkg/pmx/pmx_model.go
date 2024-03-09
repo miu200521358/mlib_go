@@ -115,6 +115,7 @@ func (pm *PmxModel) Draw(
 	pm.UpdatePhysics(boneMatrixes, boneTransforms)
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
 	pm.RigidBodies.Draw(shader, boneMatrixes, windowIndex)
+	pm.Joints.Draw(shader, windowIndex)
 }
 
 func (pm *PmxModel) UpdatePhysics(
@@ -131,10 +132,10 @@ func (pm *PmxModel) UpdatePhysics(
 
 	pm.Physics.Update()
 
+	// 剛体位置を更新
 	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
 		rigidBody.UpdateMatrix(boneMatrixes, boneTransforms)
 	}
-
 }
 
 // 関連ボーンリストの取得

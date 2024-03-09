@@ -374,10 +374,10 @@ func (r *RigidBody) Bullet() []float32 {
 		rb = append(rb, float32(0.0))
 		rb = append(rb, float32(0.0))
 	} else {
-		// ボーン追従 + 物理剛体: 青色
-		rb = append(rb, float32(0.0))
-		rb = append(rb, float32(0.0))
+		// ボーン追従 + 物理剛体:黄色
 		rb = append(rb, float32(1.0))
+		rb = append(rb, float32(1.0))
+		rb = append(rb, float32(0.0))
 	}
 	rb = append(rb, float32(0.4))
 
@@ -387,14 +387,10 @@ func (r *RigidBody) Bullet() []float32 {
 // 剛体リスト
 type RigidBodies struct {
 	*mcore.IndexNameModelCorrection[*RigidBody]
-	vao         *mgl.VAO
-	vbo         *mgl.VBO
-	ibo         *mgl.IBO
-	count       int32
-	sphereVao   *mgl.VAO
-	sphereVbo   *mgl.VBO
-	shapeCount  int32
-	sphereSizes []float32
+	vao   *mgl.VAO
+	vbo   *mgl.VBO
+	ibo   *mgl.IBO
+	count int32
 }
 
 func NewRigidBodies() *RigidBodies {
@@ -404,10 +400,6 @@ func NewRigidBodies() *RigidBodies {
 		vbo:                      nil,
 		ibo:                      nil,
 		count:                    0,
-		sphereVao:                nil,
-		sphereVbo:                nil,
-		shapeCount:               0,
-		sphereSizes:              make([]float32, 0),
 	}
 }
 

@@ -10,7 +10,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 const (
@@ -43,6 +42,7 @@ const (
 	PROGRAM_TYPE_EDGE
 	PROGRAM_TYPE_BONE
 	PROGRAM_TYPE_RIGIDBODY ProgramType = iota
+	PROGRAM_TYPE_JOINT     ProgramType = iota
 )
 
 const (
@@ -72,6 +72,7 @@ type MShader struct {
 	BoneProgram          uint32
 	BoneTextureId        uint32
 	RigidBodyProgram     uint32
+	JointProgram         uint32
 }
 
 func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
@@ -89,25 +90,41 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 	}
 	shader.lightDirection = shader.lightPosition.Muled(&mmath.MVec3{-1, -1, -1}).Normalize()
 
-	modelProgram, err := shader.newProgram(
-		resourceFiles, "resources/glsl/model.vert", "resources/glsl/model.frag")
-	if err != nil {
-		return nil, err
+	{
+		modelProgram, err := shader.newProgram(
+			resourceFiles, "resources/glsl/model.vert", "resources/glsl/model.frag")
+		if err != nil {
+			return nil, err
+		}
+		shader.ModelProgram = modelProgram
+		shader.UseModelProgram()
+		shader.initialize(shader.ModelProgram)
+		shader.Unuse()
 	}
-	shader.ModelProgram = modelProgram
-	shader.UseModelProgram()
-	shader.initialize(shader.ModelProgram)
-	shader.Unuse()
 
-	rigidBodyProgram, err := shader.newProgram(
-		resourceFiles, "resources/glsl/rigidbody.vert", "resources/glsl/rigidbody.frag")
-	if err != nil {
-		return nil, err
+	{
+		rigidBodyProgram, err := shader.newProgram(
+			resourceFiles, "resources/glsl/rigidbody.vert", "resources/glsl/rigidbody.frag")
+		if err != nil {
+			return nil, err
+		}
+		shader.RigidBodyProgram = rigidBodyProgram
+		shader.UseRigidBodyProgram()
+		shader.initialize(shader.RigidBodyProgram)
+		shader.Unuse()
 	}
-	shader.RigidBodyProgram = rigidBodyProgram
-	shader.UseRigidBodyProgram()
-	shader.initialize(shader.RigidBodyProgram)
-	shader.Unuse()
+
+	{
+		jointProgram, err := shader.newProgram(
+			resourceFiles, "resources/glsl/joint.vert", "resources/glsl/joint.frag")
+		if err != nil {
+			return nil, err
+		}
+		shader.JointProgram = jointProgram
+		shader.UseJointProgram()
+		shader.initialize(shader.JointProgram)
+		shader.Unuse()
+	}
 
 	return shader, nil
 }
@@ -280,6 +297,10 @@ func (s *MShader) UseRigidBodyProgram() {
 	s.Use(PROGRAM_TYPE_RIGIDBODY)
 }
 
+func (s *MShader) UseJointProgram() {
+	s.Use(PROGRAM_TYPE_JOINT)
+}
+
 func (s *MShader) Use(programType ProgramType) {
 	switch programType {
 	case PROGRAM_TYPE_MODEL:
@@ -290,11 +311,13 @@ func (s *MShader) Use(programType ProgramType) {
 		gl.UseProgram(s.BoneProgram)
 	case PROGRAM_TYPE_RIGIDBODY:
 		gl.UseProgram(s.RigidBodyProgram)
+	case PROGRAM_TYPE_JOINT:
+		gl.UseProgram(s.JointProgram)
 	}
 }
 
 func (s *MShader) GetPrograms() []uint32 {
-	return []uint32{s.ModelProgram, s.RigidBodyProgram}
+	return []uint32{s.ModelProgram, s.RigidBodyProgram, s.JointProgram}
 }
 
 func (s *MShader) Unuse() {
@@ -306,4 +329,5 @@ func (s *MShader) Delete() {
 	s.DeleteProgram(s.EdgeProgram)
 	s.DeleteProgram(s.BoneProgram)
 	s.DeleteProgram(s.RigidBodyProgram)
+	s.DeleteProgram(s.JointProgram)
 }
