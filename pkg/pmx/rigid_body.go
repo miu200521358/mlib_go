@@ -389,62 +389,63 @@ func (r *RigidBodies) addCornerBox(
 	// 傾き加味
 	rotation := rigidBody.Rotation.GetQuaternion()
 	rotatedVec := rotation.RotatedVec3(halfSize)
+	rotateVecGL := rotatedVec.GL()
 
 	{
 		// 手前左上
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGL[0]-float32(rotatedVec.GetX()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[1]-float32(rotatedVec.GetY()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[2]-float32(rotatedVec.GetZ()))
+		rigidBodyVbo = append(rigidBodyVbo, posGL[0]-rotateVecGL[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[1]-rotateVecGL[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[2]-rotateVecGL[2])
 	}
 	{
 		// 手前右上
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGL[0]+float32(rotatedVec.GetX()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[1]-float32(rotatedVec.GetY()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[2]-float32(rotatedVec.GetZ()))
+		rigidBodyVbo = append(rigidBodyVbo, posGL[0]+rotateVecGL[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[1]-rotateVecGL[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[2]-rotateVecGL[2])
 	}
 	{
 		// 手前右下
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGL[0]+float32(rotatedVec.GetX()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[1]+float32(rotatedVec.GetY()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[2]-float32(rotatedVec.GetZ()))
+		rigidBodyVbo = append(rigidBodyVbo, posGL[0]+rotateVecGL[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[1]+rotateVecGL[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[2]-rotateVecGL[2])
 	}
 	{
 		// 手前左下
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGL[0]-float32(rotatedVec.GetX()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[1]+float32(rotatedVec.GetY()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[2]-float32(rotatedVec.GetZ()))
+		rigidBodyVbo = append(rigidBodyVbo, posGL[0]-rotateVecGL[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[1]+rotateVecGL[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[2]-rotateVecGL[2])
 	}
 	{
 		// 奥左上
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGL[0]-float32(rotatedVec.GetX()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[1]-float32(rotatedVec.GetY()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[2]+float32(rotatedVec.GetZ()))
+		rigidBodyVbo = append(rigidBodyVbo, posGL[0]-rotateVecGL[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[1]-rotateVecGL[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[2]+rotateVecGL[2])
 	}
 	{
 		// 奥右上
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGL[0]+float32(rotatedVec.GetX()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[1]-float32(rotatedVec.GetY()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[2]+float32(rotatedVec.GetZ()))
+		rigidBodyVbo = append(rigidBodyVbo, posGL[0]+rotateVecGL[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[1]-rotateVecGL[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[2]+rotateVecGL[2])
 	}
 	{
 		// 奥右下
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGL[0]+float32(rotatedVec.GetX()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[1]+float32(rotatedVec.GetY()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[2]+float32(rotatedVec.GetZ()))
+		rigidBodyVbo = append(rigidBodyVbo, posGL[0]+rotateVecGL[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[1]+rotateVecGL[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[2]+rotateVecGL[2])
 	}
 	{
 		// 奥左下
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGL[0]-float32(rotatedVec.GetX()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[1]+float32(rotatedVec.GetY()))
-		rigidBodyVbo = append(rigidBodyVbo, posGL[2]+float32(rotatedVec.GetZ()))
+		rigidBodyVbo = append(rigidBodyVbo, posGL[0]-rotateVecGL[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[1]+rotateVecGL[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGL[2]+rotateVecGL[2])
 	}
 	{
 		// 手前左上-手前右上
@@ -510,7 +511,8 @@ func (r *RigidBodies) addCornerBox(
 	return rigidBodyVbo, rigidBodyIbo
 }
 
-func (r *RigidBodies) addCornerSphere(
+// 半球の頂点を追加
+func (r *RigidBodies) addCornerSphereHalf(
 	rigidBody *RigidBody,
 	rigidBodyVbo []float32,
 	rigidBodyIbo []uint32,
@@ -576,6 +578,23 @@ func (r *RigidBodies) addCornerSphere(
 	return rigidBodyVbo, rigidBodyIbo
 }
 
+func (r *RigidBodies) addCornerSphere(
+	rigidBody *RigidBody,
+	rigidBodyVbo []float32,
+	rigidBodyIbo []uint32,
+	startIdx int,
+	segments int,
+) ([]float32, []uint32) {
+	// 上半球
+	rigidBodyVbo, rigidBodyIbo = r.addCornerSphereHalf(
+		rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, rigidBody.Position, segments, true)
+	// 下半球
+	rigidBodyVbo, rigidBodyIbo = r.addCornerSphereHalf(
+		rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, rigidBody.Position, segments, false)
+
+	return rigidBodyVbo, rigidBodyIbo
+}
+
 func (r *RigidBodies) addCornerCapsule(
 	rigidBody *RigidBody,
 	rigidBodyVbo []float32,
@@ -588,11 +607,11 @@ func (r *RigidBodies) addCornerCapsule(
 
 	// 上半球
 	upperPos := rigidBody.Position.Added(halfSize)
-	rigidBodyVbo, rigidBodyIbo = r.addCornerSphere(
+	rigidBodyVbo, rigidBodyIbo = r.addCornerSphereHalf(
 		rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, upperPos, segments, true)
 	// 下半球
 	lowerPos := rigidBody.Position.Subed(halfSize)
-	rigidBodyVbo, rigidBodyIbo = r.addCornerSphere(
+	rigidBodyVbo, rigidBodyIbo = r.addCornerSphereHalf(
 		rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, lowerPos, segments, false)
 
 	return rigidBodyVbo, rigidBodyIbo
@@ -606,21 +625,18 @@ func (r *RigidBodies) prepareDraw() {
 	segments := 6
 
 	for _, rigidBody := range r.GetSortedData() {
-		// 剛体の位置
 		if rigidBody.ShapeType == SHAPE_BOX {
-			// 直方体の角を設定していく
+			// 箱剛体
 			rigidBodyVbo, rigidBodyIbo = r.addCornerBox(
 				rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx)
 			startIdx += 8
 		} else if rigidBody.ShapeType == SHAPE_SPHERE {
-			// 上半球
+			// 球剛体
 			rigidBodyVbo, rigidBodyIbo = r.addCornerSphere(
-				rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, rigidBody.Position, segments, true)
-			// 下半球
-			rigidBodyVbo, rigidBodyIbo = r.addCornerSphere(
-				rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, rigidBody.Position, segments, false)
+				rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, segments)
 			startIdx += (segments+1)*(segments+1) + (segments + 1)
 		} else if rigidBody.ShapeType == SHAPE_CAPSULE {
+			// カプセル剛体
 			rigidBodyVbo, rigidBodyIbo = r.addCornerCapsule(
 				rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, segments)
 			startIdx += (segments+1)*(segments+1) + (segments + 1)
