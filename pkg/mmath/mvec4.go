@@ -95,7 +95,7 @@ func (v *MVec4) String() string {
 
 // GL OpenGL座標系に変換された4次元ベクトルを返します
 func (v *MVec4) GL() mgl32.Vec4 {
-	return mgl32.Vec4{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW())}
+	return mgl32.Vec4{float32(v.GetX()), float32(v.GetY()), float32(-v.GetZ()), float32(-v.GetW())}
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します
