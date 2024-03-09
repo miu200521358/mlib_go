@@ -329,4 +329,16 @@ func (pm *PmxModel) SetUp() {
 		pm.Bones.LayerSortedIndexes[i] = bone.Name
 		i++
 	}
+
+	// ジョイント
+	for _, joint := range pm.Joints.GetSortedData() {
+		if joint.RigidbodyIndexA >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexA) &&
+			joint.RigidbodyIndexB >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexB) {
+			// 剛体AもBも存在する場合、剛体Aと剛体Bを関連付ける
+			pm.RigidBodies.GetItem(joint.RigidbodyIndexA).JointedBoneIndex =
+				pm.RigidBodies.GetItem(joint.RigidbodyIndexB).BoneIndex
+			pm.RigidBodies.GetItem(joint.RigidbodyIndexB).JointedBoneIndex =
+				pm.RigidBodies.GetItem(joint.RigidbodyIndexA).BoneIndex
+		}
+	}
 }
