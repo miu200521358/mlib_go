@@ -214,7 +214,7 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 		r.BtRigidBody.SetActivationState(mbt.ACTIVE_TAG)
 	}
 
-	modelPhysics.AddRigidBody(r.BtRigidBody, int(1<<r.CollisionGroup), r.CollisionGroupMaskValue)
+	modelPhysics.AddRigidBody(r.BtRigidBody, 1<<r.CollisionGroup, r.CollisionGroupMaskValue)
 }
 
 func (r *RigidBody) UpdateTransform(
@@ -340,7 +340,7 @@ func (r *RigidBody) Bullet() []float32 {
 
 	// 剛体の色
 	if r.PhysicsType == PHYSICS_TYPE_STATIC {
-		// ボーン追従剛体：黄緑色
+		// ボーン追従剛体：緑色
 		rb = append(rb, float32(0.0))
 		rb = append(rb, float32(1.0))
 		rb = append(rb, float32(0.0))
@@ -350,10 +350,10 @@ func (r *RigidBody) Bullet() []float32 {
 		rb = append(rb, float32(0.0))
 		rb = append(rb, float32(0.0))
 	} else {
-		// ボーン追従 + 物理剛体: 黄色
-		rb = append(rb, float32(1.0))
-		rb = append(rb, float32(1.0))
+		// ボーン追従 + 物理剛体: 青色
 		rb = append(rb, float32(0.0))
+		rb = append(rb, float32(0.0))
+		rb = append(rb, float32(1.0))
 	}
 	rb = append(rb, float32(0.4))
 

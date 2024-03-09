@@ -39,7 +39,7 @@ func NewMPhysics() *MPhysics {
 		GroundTransform: groundTransform,
 		FilterCallBack:  filterCB,
 		MotionState:     motionState,
-		MaxSubSteps:     10,
+		MaxSubSteps:     5,
 		Fps:             60.0,
 	}
 
