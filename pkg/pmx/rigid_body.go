@@ -319,7 +319,7 @@ func (r *RigidBody) Bullet() []float32 {
 	rb := make([]float32, 0)
 
 	// ボーンINDEX
-	rb = append(rb, float32(-1))
+	rb = append(rb, float32(r.BoneIndex))
 
 	// 剛体の色
 	if r.PhysicsType == PHYSICS_TYPE_STATIC {
@@ -339,13 +339,6 @@ func (r *RigidBody) Bullet() []float32 {
 		rb = append(rb, float32(0.0))
 	}
 	rb = append(rb, float32(0.6))
-
-	// 剛体の回転
-	rot := r.Rotation.GetQuaternion().GL()
-	rb = append(rb, float32(rot[0]))
-	rb = append(rb, float32(rot[1]))
-	rb = append(rb, float32(rot[2]))
-	rb = append(rb, float32(rot[3]))
 
 	return rb
 }
@@ -383,69 +376,93 @@ func (r *RigidBodies) addCornerBox(
 	rigidBodyIbo []uint32,
 	startIdx int,
 ) ([]float32, []uint32) {
-	posGl := rigidBody.Position.GL()
 	// 直方体の角を設定していく
-	halfSize := rigidBody.Size.MuledScalar(0.5)
+	size := rigidBody.Size
+
 	// 傾き加味
-	rotation := rigidBody.Rotation.GetQuaternion()
-	rotatedVec := rotation.RotatedVec3(halfSize)
-	rotateVecGl := rotatedVec.GL()
+	rotation := rigidBody.Rotation.GetQuaternion().Copy()
+	rotation.SetX(-rotation.GetX())
+	rotation.SetY(-rotation.GetY())
+	rotation.Normalize()
+
+	pos := rigidBody.Position.Copy()
+	// pos.SetZ(-pos.GetZ())
+
+	mat := mmath.NewMMat4()
+	mat.Translate(pos)
+	mat.Mul(rotation.ToMat4())
 
 	{
 		// 手前左上
+		posGl := mat.MulVec3(&mmath.MVec3{-size.GetX(), -size.GetY(), -size.GetZ()}).GL()
+
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0]-rotateVecGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1]-rotateVecGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2]-rotateVecGl[2])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
 	}
 	{
 		// 手前右上
+		posGl := mat.MulVec3(&mmath.MVec3{size.GetX(), -size.GetY(), -size.GetZ()}).GL()
+
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0]+rotateVecGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1]-rotateVecGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2]-rotateVecGl[2])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
 	}
 	{
 		// 手前右下
+		posGl := mat.MulVec3(&mmath.MVec3{size.GetX(), size.GetY(), -size.GetZ()}).GL()
+
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0]+rotateVecGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1]+rotateVecGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2]-rotateVecGl[2])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
 	}
 	{
 		// 手前左下
+		posGl := mat.MulVec3(&mmath.MVec3{-size.GetX(), size.GetY(), -size.GetZ()}).GL()
+
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0]-rotateVecGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1]+rotateVecGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2]-rotateVecGl[2])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
 	}
 	{
 		// 奥左上
+		posGl := mat.MulVec3(&mmath.MVec3{-size.GetX(), -size.GetY(), size.GetZ()}).GL()
+
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0]-rotateVecGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1]-rotateVecGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2]+rotateVecGl[2])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
 	}
 	{
 		// 奥右上
+		posGl := mat.MulVec3(&mmath.MVec3{size.GetX(), -size.GetY(), size.GetZ()}).GL()
+
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0]+rotateVecGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1]-rotateVecGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2]+rotateVecGl[2])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
 	}
 	{
 		// 奥右下
+		posGl := mat.MulVec3(&mmath.MVec3{size.GetX(), size.GetY(), size.GetZ()}).GL()
+
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0]+rotateVecGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1]+rotateVecGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2]+rotateVecGl[2])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
 	}
 	{
 		// 奥左下
+		posGl := mat.MulVec3(&mmath.MVec3{-size.GetX(), size.GetY(), size.GetZ()}).GL()
+
 		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0]-rotateVecGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1]+rotateVecGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2]+rotateVecGl[2])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
+		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
 	}
 	{
 		// 手前左上-手前右上

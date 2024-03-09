@@ -10,19 +10,9 @@ uniform int boneMatrixHeight;
 
 in layout(location = 0) float boneIndex;
 in layout(location = 1) vec4 typeColor;
-in layout(location = 2) vec4 rotation;
-in layout(location = 3) vec3 position;
+in layout(location = 2) vec3 position;
 
 out vec4 rigidbodyColor;
-
-// vec4(クォータニオン)からmat4への変換
-mat4 quatToMat4(vec4 q) {
-    float x = q.x;
-    float y = q.y;
-    float z = q.z;
-    float w = q.w;
-    return mat4(1.0 - 2.0 * y * y - 2.0 * z * z, 2.0 * x * y - 2.0 * z * w, 2.0 * x * z + 2.0 * y * w, 0.0, 2.0 * x * y + 2.0 * z * w, 1.0 - 2.0 * x * x - 2.0 * z * z, 2.0 * y * z - 2.0 * x * w, 0.0, 2.0 * x * z - 2.0 * y * w, 2.0 * y * z + 2.0 * x * w, 1.0 - 2.0 * x * x - 2.0 * y * y, 0.0, 0.0, 0.0, 0.0, 1.0);
-}
 
 // テクスチャからボーン変形行列を取得する
 mat4 getBoneMatrix(int boneIndex) {
@@ -48,10 +38,10 @@ void main() {
         boneTransformMatrix += boneMatrix;
 
         // ボーン変形行列を適用して描画
-        gl_Position = modelViewProjectionMatrix * modelViewMatrix * boneTransformMatrix * quatToMat4(rotation) * vec4(position, 1.0);
+        gl_Position = modelViewProjectionMatrix * modelViewMatrix * boneTransformMatrix * vec4(position, 1.0);
     } else {
         // ボーンに紐付いていない場合、そのまま描画
-        gl_Position = modelViewProjectionMatrix * modelViewMatrix * quatToMat4(rotation) * vec4(position, 1.0);
+        gl_Position = modelViewProjectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
 
     rigidbodyColor = typeColor;
