@@ -82,34 +82,35 @@ func (j *Joint) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBo
 	// ジョイント係数
 	j.Constraint = mbt.NewBtGeneric6DofSpringConstraint(
 		rigidBodyA.BtRigidBody, rigidBodyB.BtRigidBody, jointLocalTransformA, jointLocalTransformB, true)
-	j.Constraint.SetLinearLowerLimit(j.JointParam.TranslationLimitMin.Bullet())
-	j.Constraint.SetLinearUpperLimit(j.JointParam.TranslationLimitMax.Bullet())
-	j.Constraint.SetAngularLowerLimit(j.JointParam.RotationLimitMin.GetRadians().Bullet())
-	j.Constraint.SetAngularUpperLimit(j.JointParam.RotationLimitMax.GetRadians().Bullet())
-	if j.JointParam.SpringConstantTranslation.GetX() != 0 {
-		j.Constraint.EnableSpring(0, true)
-		j.Constraint.SetStiffness(0, float32(j.JointParam.SpringConstantTranslation.GetX()))
-	}
-	if j.JointParam.SpringConstantTranslation.GetY() != 0 {
-		j.Constraint.EnableSpring(1, true)
-		j.Constraint.SetStiffness(1, float32(j.JointParam.SpringConstantTranslation.GetY()))
-	}
-	if j.JointParam.SpringConstantTranslation.GetZ() != 0 {
-		j.Constraint.EnableSpring(2, true)
-		j.Constraint.SetStiffness(2, float32(j.JointParam.SpringConstantTranslation.GetZ()))
-	}
-	if j.JointParam.SpringConstantRotation.GetRadians().GetX() != 0 {
-		j.Constraint.EnableSpring(3, true)
-		j.Constraint.SetStiffness(3, float32(j.JointParam.SpringConstantRotation.GetRadians().GetX()))
-	}
-	if j.JointParam.SpringConstantRotation.GetRadians().GetY() != 0 {
-		j.Constraint.EnableSpring(4, true)
-		j.Constraint.SetStiffness(4, float32(j.JointParam.SpringConstantRotation.GetRadians().GetY()))
-	}
-	if j.JointParam.SpringConstantRotation.GetRadians().GetZ() != 0 {
-		j.Constraint.EnableSpring(5, true)
-		j.Constraint.SetStiffness(5, float32(j.JointParam.SpringConstantRotation.GetRadians().GetZ()))
-	}
+	// 係数は符号を調整する必要がないため、そのまま設定
+	j.Constraint.SetLinearLowerLimit(mbt.NewBtVector3(
+		float32(j.JointParam.TranslationLimitMin.GetX()),
+		float32(j.JointParam.TranslationLimitMin.GetY()),
+		float32(j.JointParam.TranslationLimitMin.GetZ())))
+	j.Constraint.SetLinearUpperLimit(mbt.NewBtVector3(
+		float32(j.JointParam.TranslationLimitMax.GetX()),
+		float32(j.JointParam.TranslationLimitMax.GetY()),
+		float32(j.JointParam.TranslationLimitMax.GetZ())))
+	j.Constraint.SetAngularLowerLimit(mbt.NewBtVector3(
+		float32(j.JointParam.RotationLimitMin.GetRadians().GetX()),
+		float32(j.JointParam.RotationLimitMin.GetRadians().GetY()),
+		float32(j.JointParam.RotationLimitMin.GetRadians().GetZ())))
+	j.Constraint.SetAngularUpperLimit(mbt.NewBtVector3(
+		float32(j.JointParam.RotationLimitMax.GetRadians().GetX()),
+		float32(j.JointParam.RotationLimitMax.GetRadians().GetY()),
+		float32(j.JointParam.RotationLimitMax.GetRadians().GetZ())))
+	j.Constraint.EnableSpring(0, true)
+	j.Constraint.SetStiffness(0, float32(j.JointParam.SpringConstantTranslation.GetX()))
+	j.Constraint.EnableSpring(1, true)
+	j.Constraint.SetStiffness(1, float32(j.JointParam.SpringConstantTranslation.GetY()))
+	j.Constraint.EnableSpring(2, true)
+	j.Constraint.SetStiffness(2, float32(j.JointParam.SpringConstantTranslation.GetZ()))
+	j.Constraint.EnableSpring(3, true)
+	j.Constraint.SetStiffness(3, float32(j.JointParam.SpringConstantRotation.GetRadians().GetX()))
+	j.Constraint.EnableSpring(4, true)
+	j.Constraint.SetStiffness(4, float32(j.JointParam.SpringConstantRotation.GetRadians().GetY()))
+	j.Constraint.EnableSpring(5, true)
+	j.Constraint.SetStiffness(5, float32(j.JointParam.SpringConstantRotation.GetRadians().GetZ()))
 
 	modelPhysics.AddJoint(j.Constraint)
 }

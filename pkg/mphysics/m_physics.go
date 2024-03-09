@@ -3,13 +3,11 @@ package mphysics
 import "github.com/miu200521358/mlib_go/pkg/mbt"
 
 type MPhysics struct {
-	world           mbt.BtDiscreteDynamicsWorld
-	GroundTransform mbt.BtTransform
-	FilterCallBack  MFilterCallback
-	MotionState     mbt.BtDefaultMotionState
-	MaxSubSteps     int
-	Fps             float32
-	Spf             float32
+	world          mbt.BtDiscreteDynamicsWorld
+	filterCallBack MFilterCallback
+	MaxSubSteps    int
+	Fps            float32
+	Spf            float32
 }
 
 func NewMPhysics() *MPhysics {
@@ -18,7 +16,7 @@ func NewMPhysics() *MPhysics {
 	dispatcher := mbt.NewBtCollisionDispatcher(collisionConfiguration)
 	solver := mbt.NewBtSequentialImpulseConstraintSolver()
 	world := mbt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
-	world.SetGravity(mbt.NewBtVector3(float32(0), float32(-9.8*10.0), float32(0)))
+	world.SetGravity(mbt.NewBtVector3(float32(0), float32(-9.8*10), float32(0)))
 
 	groundShape := mbt.NewBtStaticPlaneShape(mbt.NewBtVector3(float32(0), float32(1), float32(0)), float32(0))
 	groundTransform := mbt.NewBtTransform()
@@ -32,22 +30,19 @@ func NewMPhysics() *MPhysics {
 	callback := NewMFilterCallback()
 	world.GetPairCache().SetOverlapFilterCallback(&callback)
 
-	motionState := mbt.NewBtDefaultMotionState(groundTransform)
-
 	p := &MPhysics{
-		world:           world,
-		GroundTransform: groundTransform,
-		MotionState:     motionState,
-		MaxSubSteps:     5,
-		Fps:             60.0,
-		Spf:             1.0 / 60.0,
+		world:          world,
+		filterCallBack: callback,
+		MaxSubSteps:    5,
+		Fps:            60.0,
+		Spf:            1.0 / 60.0,
 	}
 
 	return p
 }
 
 func (p *MPhysics) AddNonFilterProxy(proxy mbt.BtBroadphaseProxy) {
-	p.FilterCallBack.nonFilterProxy = append(p.FilterCallBack.nonFilterProxy, proxy)
+	p.filterCallBack.nonFilterProxy = append(p.filterCallBack.nonFilterProxy, proxy)
 }
 
 func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody, group int, mask int) {

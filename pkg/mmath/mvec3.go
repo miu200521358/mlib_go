@@ -89,7 +89,7 @@ func (v *MVec3) GL() mgl32.Vec3 {
 
 // Bullet+OpenGL座標系に変換された3次元ベクトルを返します
 func (v *MVec3) Bullet() mbt.BtVector3 {
-	return mbt.NewBtVector3(-float32(v.GetX()), float32(v.GetY()), float32(v.GetZ()))
+	return mbt.NewBtVector3(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()))
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します
