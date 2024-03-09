@@ -87,16 +87,7 @@ func (pm *PmxModel) InitializeDraw(physics *mphysics.MPhysics, windowIndex int, 
 	pm.ToonTextures.InitGl(windowIndex, resourceFiles)
 	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
 	pm.RigidBodies.InitPhysics(pm.Physics, pm.Bones)
-
-	// ジョイントを順番に剛体と紐付けていく
-	for _, joint := range pm.Joints.GetSortedData() {
-		if joint.RigidbodyIndexA >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexA) &&
-			joint.RigidbodyIndexB >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexB) {
-			joint.InitPhysics(
-				pm.Physics, pm.RigidBodies.GetItem(joint.RigidbodyIndexA),
-				pm.RigidBodies.GetItem(joint.RigidbodyIndexB))
-		}
-	}
+	pm.Joints.InitPhysics(pm.Physics, pm.RigidBodies)
 }
 
 func (pm *PmxModel) ResetPhysics() {

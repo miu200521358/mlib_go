@@ -125,3 +125,15 @@ func NewJoints() *Joints {
 		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Joint](),
 	}
 }
+
+func (j *Joints) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodies *RigidBodies) {
+	// ジョイントを順番に剛体と紐付けていく
+	for _, joint := range j.GetSortedData() {
+		if joint.RigidbodyIndexA >= 0 && rigidBodies.Contains(joint.RigidbodyIndexA) &&
+			joint.RigidbodyIndexB >= 0 && rigidBodies.Contains(joint.RigidbodyIndexB) {
+			joint.InitPhysics(
+				modelPhysics, rigidBodies.GetItem(joint.RigidbodyIndexA),
+				rigidBodies.GetItem(joint.RigidbodyIndexB))
+		}
+	}
+}
