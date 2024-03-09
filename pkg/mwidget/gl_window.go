@@ -16,6 +16,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
@@ -26,7 +27,7 @@ type ModelSet struct {
 	Motion *vmd.VmdMotion
 }
 
-func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, elapsed float32) {
+func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32) {
 	matrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
 	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
 	if ms.Motion == nil {
@@ -46,7 +47,7 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, el
 			transforms[i] = &t
 		}
 	}
-	ms.Model.Draw(shader, matrixes, transforms, windowIndex, elapsed)
+	ms.Model.Draw(shader, matrixes, transforms, windowIndex)
 }
 
 type GlWindow struct {
@@ -58,6 +59,7 @@ type GlWindow struct {
 	prevCursorPos       *mmath.MVec2
 	yaw                 float64
 	pitch               float64
+	Physics             *mphysics.MPhysics
 	middleButtonPressed bool
 	rightButtonPressed  bool
 	updatedPrev         bool
@@ -151,6 +153,7 @@ func NewGlWindow(
 		prevCursorPos:       &mmath.MVec2{0, 0},
 		yaw:                 89.0,
 		pitch:               0.0,
+		Physics:             mphysics.NewMPhysics(),
 		middleButtonPressed: false,
 		rightButtonPressed:  false,
 		updatedPrev:         false,
@@ -429,7 +432,7 @@ func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
 	w.MakeContextCurrent()
 	w.Reset()
 
-	pmxModel.InitializeDraw(w.WindowIndex, w.resourceFiles)
+	pmxModel.InitializeDraw(w.Physics, w.WindowIndex, w.resourceFiles)
 	w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel, Motion: vmdMotion})
 }
 
@@ -440,7 +443,7 @@ func (w *GlWindow) ClearData() {
 	w.ModelSets = make([]ModelSet, 0)
 }
 
-func (w *GlWindow) Draw(frame float32, elapsed float32) {
+func (w *GlWindow) Draw(frame float32) {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 
@@ -450,7 +453,7 @@ func (w *GlWindow) Draw(frame float32, elapsed float32) {
 
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
-		modelSet.Draw(w.Shader, w.WindowIndex, frame, elapsed)
+		modelSet.Draw(w.Shader, w.WindowIndex, frame)
 	}
 }
 
@@ -498,15 +501,69 @@ func (w *GlWindow) Run() {
 		previousTime = time
 		frame += float32(elapsed)
 
-		// 30fps
-		w.Draw(frame*30.0, float32(elapsed))
-		// frame += float32(1.0)
+		// 描画は30fps固定
+		w.Draw(frame * 30.0)
 
 		// Maintenance
 		w.SwapBuffers()
 		glfw.PollEvents()
+
+		// Wait to maintain fps
+		glfw.WaitEventsTimeout(float64(w.Physics.Spf))
 	}
 	if w != nil && !w.closed {
 		w.Close(&w.Window)
 	}
 }
+
+// func (w *GlWindow) Run() {
+// 	frame := float32(0)
+// 	previousTime := glfw.GetTime()
+
+// 	for !w.closed && !w.ShouldClose() {
+// 		// 深度バッファのクリア
+// 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+// 		for _, program := range w.Shader.GetPrograms() {
+// 			// プログラムの切り替え
+// 			gl.UseProgram(program)
+// 			// カメラの再計算
+// 			projection := mgl32.Perspective(
+// 				mgl32.DegToRad(w.Shader.FieldOfViewAngle),
+// 				float32(w.Shader.Width)/float32(w.Shader.Height),
+// 				w.Shader.NearPlane,
+// 				w.Shader.FarPlane,
+// 			)
+// 			projectionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_PROJECTION_MATRIX))
+// 			gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
+
+// 			// カメラの位置
+// 			cameraPosition := w.Shader.CameraPosition.GL()
+// 			cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_CAMERA_POSITION))
+// 			gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
+
+// 			// カメラの中心
+// 			lookAtCenter := w.Shader.LookAtCenterPosition.GL()
+// 			camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
+// 			cameraUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_MATRIX))
+// 			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
+// 		}
+
+// 		// Update
+// 		time := glfw.GetTime()
+// 		elapsed := time - previousTime
+// 		previousTime = time
+// 		frame += float32(elapsed)
+
+// 		// 30fps
+// 		w.Draw(frame*30.0, float32(elapsed))
+// 		// frame += float32(1.0)
+
+// 		// Maintenance
+// 		w.SwapBuffers()
+// 		glfw.PollEvents()
+// 	}
+// 	if w != nil && !w.closed {
+// 		w.Close(&w.Window)
+// 	}
+// }

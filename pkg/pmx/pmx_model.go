@@ -82,10 +82,10 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 	pm.DisplaySlots.Append(d02)
 }
 
-func (pm *PmxModel) InitializeDraw(windowIndex int, resourceFiles embed.FS) {
+func (pm *PmxModel) InitializeDraw(physics *mphysics.MPhysics, windowIndex int, resourceFiles embed.FS) {
+	pm.Physics = physics
 	pm.ToonTextures.InitGl(windowIndex, resourceFiles)
 	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
-	pm.Physics = mphysics.NewMPhysics()
 	pm.RigidBodies.InitPhysics(pm.Physics, pm.Bones)
 
 	// ジョイントを順番に剛体と紐付けていく
@@ -108,7 +108,7 @@ func (pm *PmxModel) ResetPhysics() {
 	// 	rigidBody.ResetPhysics()
 	// }
 
-	pm.Physics.Update(float32(0.0))
+	pm.Physics.Update()
 
 	// for _, rigidBody := range pm.RigidBodies.GetSortedData() {
 	// 	rigidBody.CalcTransform(nil)
@@ -120,9 +120,8 @@ func (pm *PmxModel) Draw(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
 	windowIndex int,
-	elapsed float32,
 ) {
-	pm.UpdatePhysics(boneMatrixes, boneTransforms, elapsed)
+	pm.UpdatePhysics(boneMatrixes, boneTransforms)
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
 	pm.RigidBodies.Draw(shader, boneMatrixes, windowIndex)
 }
@@ -130,7 +129,6 @@ func (pm *PmxModel) Draw(
 func (pm *PmxModel) UpdatePhysics(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
-	elapsed float32,
 ) {
 	if pm.Physics == nil {
 		return
@@ -140,7 +138,7 @@ func (pm *PmxModel) UpdatePhysics(
 		rigidBody.UpdateTransform(boneMatrixes, boneTransforms)
 	}
 
-	pm.Physics.Update(elapsed)
+	pm.Physics.Update()
 
 	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
 		rigidBody.UpdateMatrix(boneMatrixes, boneTransforms)
