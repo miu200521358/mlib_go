@@ -1,6 +1,7 @@
 package pmx
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -214,6 +215,9 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 		r.BtRigidBody.SetActivationState(mbt.ACTIVE_TAG)
 	}
 
+	fmt.Printf("name: %s, group: %d, mask: %d\n", r.Name, r.CollisionGroup, r.CollisionGroupMaskValue)
+
+	modelPhysics.AddNonFilterProxy(r.BtRigidBody.GetBroadphaseProxy())
 	modelPhysics.AddRigidBody(r.BtRigidBody, 1<<r.CollisionGroup, r.CollisionGroupMaskValue)
 }
 
@@ -398,9 +402,9 @@ func (r *RigidBodies) addCornerBox(
 
 	// 傾き加味
 	rotation := rigidBody.Rotation.GetQuaternion().Copy()
-	rotation.SetX(-rotation.GetX())
-	rotation.SetY(-rotation.GetY())
-	rotation.Normalize()
+	// rotation.SetX(-rotation.GetX())
+	// rotation.SetY(-rotation.GetY())
+	// rotation.Normalize()
 
 	pos := rigidBody.Position.Copy()
 	// pos.SetZ(-pos.GetZ())
@@ -582,9 +586,9 @@ func (r *RigidBodies) addCornerSphereHalf(
 
 			// Apply the rigid body's rotation to the vector
 			rotation := rigidBody.Rotation.GetQuaternion().Copy()
-			rotation.SetX(-rotation.GetX())
-			rotation.SetY(-rotation.GetY())
-			rotation.Normalize()
+			// rotation.SetX(-rotation.GetX())
+			// rotation.SetY(-rotation.GetY())
+			// rotation.Normalize()
 			rotatedPosGl := rotation.RotatedVec3(spherePos).Added(pos).GL()
 
 			// Append the coordinates to the VBO
@@ -643,9 +647,9 @@ func (r *RigidBodies) addCornerCapsule(
 ) ([]float32, []uint32) {
 	// カプセルを6x6に分割して線で描くため、カプセルの頂点を追加
 	rotation := rigidBody.Rotation.GetQuaternion().Copy()
-	rotation.SetX(-rotation.GetX())
-	rotation.SetY(-rotation.GetY())
-	rotation.Normalize()
+	// rotation.SetX(-rotation.GetX())
+	// rotation.SetY(-rotation.GetY())
+	// rotation.Normalize()
 
 	// 上半球
 	upperMat := mmath.NewMMat4()

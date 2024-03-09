@@ -3,7 +3,7 @@ package mphysics
 import "github.com/miu200521358/mlib_go/pkg/mbt"
 
 type MPhysics struct {
-	World           mbt.BtDiscreteDynamicsWorld
+	world           mbt.BtDiscreteDynamicsWorld
 	GroundTransform mbt.BtTransform
 	FilterCallBack  MFilterCallback
 	MotionState     mbt.BtDefaultMotionState
@@ -26,18 +26,16 @@ func NewMPhysics() *MPhysics {
 	groundMotionState := mbt.NewBtDefaultMotionState(groundTransform)
 	groundRigidBody := mbt.NewBtRigidBody(float32(0), groundMotionState, groundShape)
 
-	world.AddRigidBody(groundRigidBody)
+	world.AddRigidBody(groundRigidBody, 1<<15, 0xFFFF)
 
-	filterCB := NewMFilterCallback(world.GetPairCache().GetOverlapFilterCallback())
-	filterCB.m_nonFilterProxy = append(filterCB.m_nonFilterProxy, groundRigidBody.GetBroadphaseProxy())
-	world.GetPairCache().SetOverlapFilterCallback(&filterCB)
+	callback := NewMFilterCallback()
+	world.GetPairCache().SetOverlapFilterCallback(&callback)
 
 	motionState := mbt.NewBtDefaultMotionState(groundTransform)
 
 	p := &MPhysics{
-		World:           world,
+		world:           world,
 		GroundTransform: groundTransform,
-		FilterCallBack:  filterCB,
 		MotionState:     motionState,
 		MaxSubSteps:     5,
 		Fps:             60.0,
@@ -46,22 +44,26 @@ func NewMPhysics() *MPhysics {
 	return p
 }
 
+func (p *MPhysics) AddNonFilterProxy(proxy mbt.BtBroadphaseProxy) {
+	p.FilterCallBack.nonFilterProxy = append(p.FilterCallBack.nonFilterProxy, proxy)
+}
+
 func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody, group int, mask int) {
-	p.World.AddRigidBody(rigidBody, group, mask)
+	p.world.AddRigidBody(rigidBody, group, mask)
 }
 
 func (p *MPhysics) RemoveRigidBody(rigidBody mbt.BtRigidBody) {
-	p.World.RemoveRigidBody(rigidBody)
+	p.world.RemoveRigidBody(rigidBody)
 }
 
 func (p *MPhysics) AddJoint(joint mbt.BtTypedConstraint) {
-	p.World.AddConstraint(joint, true)
+	p.world.AddConstraint(joint, true)
 }
 
 func (p *MPhysics) RemoveJoint(joint mbt.BtTypedConstraint) {
-	p.World.RemoveConstraint(joint)
+	p.world.RemoveConstraint(joint)
 }
 
 func (p *MPhysics) Update(elapsed float32) {
-	p.World.StepSimulation(elapsed, p.MaxSubSteps, float32(1.0/p.Fps))
+	p.world.StepSimulation(elapsed, p.MaxSubSteps, float32(1.0/p.Fps))
 }
