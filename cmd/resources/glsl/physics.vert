@@ -3,13 +3,15 @@
 uniform mat4 modelViewProjectionMatrix;
 uniform mat4 modelViewMatrix;
 
-in layout(location = 0) vec4 typeColor;
-in layout(location = 1) vec3 position;
+in layout(location = 0) vec3 position;
 
-out vec4 rigidbodyColor;
+in vec3 color;
+in float alpha;
+
+out vec4 physicsColor;
 
 void main() {
     gl_Position = modelViewProjectionMatrix * modelViewMatrix * vec4(position, 1.0);
 
-    rigidbodyColor = typeColor;
+    physicsColor = vec4(color, alpha);
 }

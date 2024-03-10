@@ -153,7 +153,7 @@ func NewGlWindow(
 		prevCursorPos:       &mmath.MVec2{0, 0},
 		yaw:                 89.0,
 		pitch:               0.0,
-		Physics:             mphysics.NewMPhysics(),
+		Physics:             mphysics.NewMPhysics(shader),
 		middleButtonPressed: false,
 		rightButtonPressed:  false,
 		updatedPrev:         false,

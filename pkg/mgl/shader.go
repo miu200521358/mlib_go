@@ -10,6 +10,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 const (
@@ -33,6 +34,8 @@ const (
 	SHADER_MORPH_TEXTURE_FACTOR         = "textureFactor\x00"
 	SHADER_MORPH_TOON_FACTOR            = "toonFactor\x00"
 	SHADER_MORPH_SPHERE_FACTOR          = "sphereFactor\x00"
+	SHADER_PHYSICS_COLOR                = "color\x00"
+	SHADER_PHYSICS_ALPHA                = "alpha\x00"
 )
 
 type ProgramType int
@@ -41,8 +44,7 @@ const (
 	PROGRAM_TYPE_MODEL ProgramType = iota
 	PROGRAM_TYPE_EDGE
 	PROGRAM_TYPE_BONE
-	PROGRAM_TYPE_RIGIDBODY ProgramType = iota
-	PROGRAM_TYPE_JOINT     ProgramType = iota
+	PROGRAM_TYPE_PHYSICS ProgramType = iota
 )
 
 const (
@@ -72,7 +74,7 @@ type MShader struct {
 	BoneProgram          uint32
 	BoneTextureId        uint32
 	RigidBodyProgram     uint32
-	JointProgram         uint32
+	PhysicsProgram       uint32
 }
 
 func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
@@ -103,26 +105,14 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 	}
 
 	{
-		rigidBodyProgram, err := shader.newProgram(
-			resourceFiles, "resources/glsl/rigidbody.vert", "resources/glsl/rigidbody.frag")
+		physicsProgram, err := shader.newProgram(
+			resourceFiles, "resources/glsl/physics.vert", "resources/glsl/physics.frag")
 		if err != nil {
 			return nil, err
 		}
-		shader.RigidBodyProgram = rigidBodyProgram
-		shader.UseRigidBodyProgram()
-		shader.initialize(shader.RigidBodyProgram)
-		shader.Unuse()
-	}
-
-	{
-		jointProgram, err := shader.newProgram(
-			resourceFiles, "resources/glsl/joint.vert", "resources/glsl/joint.frag")
-		if err != nil {
-			return nil, err
-		}
-		shader.JointProgram = jointProgram
-		shader.UseJointProgram()
-		shader.initialize(shader.JointProgram)
+		shader.PhysicsProgram = physicsProgram
+		shader.UsePhysicsProgram()
+		shader.initialize(shader.PhysicsProgram)
 		shader.Unuse()
 	}
 
@@ -293,12 +283,8 @@ func (s *MShader) UseBoneProgram() {
 	s.Use(PROGRAM_TYPE_BONE)
 }
 
-func (s *MShader) UseRigidBodyProgram() {
-	s.Use(PROGRAM_TYPE_RIGIDBODY)
-}
-
-func (s *MShader) UseJointProgram() {
-	s.Use(PROGRAM_TYPE_JOINT)
+func (s *MShader) UsePhysicsProgram() {
+	s.Use(PROGRAM_TYPE_PHYSICS)
 }
 
 func (s *MShader) Use(programType ProgramType) {
@@ -309,15 +295,13 @@ func (s *MShader) Use(programType ProgramType) {
 		gl.UseProgram(s.EdgeProgram)
 	case PROGRAM_TYPE_BONE:
 		gl.UseProgram(s.BoneProgram)
-	case PROGRAM_TYPE_RIGIDBODY:
-		gl.UseProgram(s.RigidBodyProgram)
-	case PROGRAM_TYPE_JOINT:
-		gl.UseProgram(s.JointProgram)
+	case PROGRAM_TYPE_PHYSICS:
+		gl.UseProgram(s.PhysicsProgram)
 	}
 }
 
 func (s *MShader) GetPrograms() []uint32 {
-	return []uint32{s.ModelProgram, s.RigidBodyProgram, s.JointProgram}
+	return []uint32{s.ModelProgram, s.PhysicsProgram}
 }
 
 func (s *MShader) Unuse() {
@@ -328,6 +312,5 @@ func (s *MShader) Delete() {
 	s.DeleteProgram(s.ModelProgram)
 	s.DeleteProgram(s.EdgeProgram)
 	s.DeleteProgram(s.BoneProgram)
-	s.DeleteProgram(s.RigidBodyProgram)
-	s.DeleteProgram(s.JointProgram)
+	s.DeleteProgram(s.PhysicsProgram)
 }

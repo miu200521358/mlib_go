@@ -1,18 +1,14 @@
 package pmx
 
 import (
-	"fmt"
 	"math"
 
-	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
-	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-
 )
 
 type RigidBodyParam struct {
@@ -236,7 +232,7 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 
 	// fmt.Printf("name: %s, group: %d, mask: %d\n", r.Name, r.CollisionGroup, r.CollisionGroupMaskValue)
 
-	modelPhysics.AddNonFilterProxy(r.BtRigidBody.GetBroadphaseProxy())
+	// modelPhysics.AddNonFilterProxy(r.BtRigidBody.GetBroadphaseProxy())
 	// 剛体・剛体グループ・非衝突グループを追加
 	modelPhysics.AddRigidBody(r.BtRigidBody, 1<<r.CollisionGroup, r.CollisionGroupMaskValue)
 }
@@ -249,9 +245,9 @@ func (r *RigidBody) UpdateTransform(
 		return
 	}
 
-	{
-		fmt.Println("----------")
-	}
+	// {
+	// 	fmt.Println("----------")
+	// }
 
 	// 剛体のグローバル位置を確定
 	rigidBodyTransform := mbt.NewBtTransform()
@@ -261,16 +257,16 @@ func (r *RigidBody) UpdateTransform(
 		rigidBodyTransform.Mult(*boneTransforms[r.JointedBoneIndex], r.BtRigidBodyTransform)
 	}
 
-	if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
-		mat := mgl32.Mat4{}
-		(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
-		fmt.Printf("2. [%d] boneTransform: \n%v\n", r.BoneIndex, mat)
-	}
-	{
-		mat := mgl32.Mat4{}
-		rigidBodyTransform.GetOpenGLMatrix(&mat[0])
-		fmt.Printf("2. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
-	}
+	// if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
+	// 	mat := mgl32.Mat4{}
+	// 	(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
+	// 	fmt.Printf("2. [%d] boneTransform: \n%v\n", r.BoneIndex, mat)
+	// }
+	// {
+	// 	mat := mgl32.Mat4{}
+	// 	rigidBodyTransform.GetOpenGLMatrix(&mat[0])
+	// 	fmt.Printf("2. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
+	// }
 
 	motionState := r.BtRigidBody.GetMotionState().(mbt.BtMotionState)
 	motionState.SetWorldTransform(rigidBodyTransform)
@@ -284,9 +280,9 @@ func (r *RigidBody) UpdateMatrix(
 		return
 	}
 
-	{
-		fmt.Println("----------")
-	}
+	// {
+	// 	fmt.Println("----------")
+	// }
 
 	motionState := r.BtRigidBody.GetMotionState().(mbt.BtMotionState)
 
@@ -327,19 +323,19 @@ func (r *RigidBody) UpdateMatrix(
 	physicsBoneMatrix := mgl32.Mat4{}
 	boneLocalTransform.GetOpenGLMatrix(&physicsBoneMatrix[0])
 
-	if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
-		mat := mgl32.Mat4{}
-		(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
-		fmt.Printf("3. [%d] boneTransform: \n%v\n", r.BoneIndex, mat)
-	}
-	{
-		mat := mgl32.Mat4{}
-		rigidBodyTransform.GetOpenGLMatrix(&mat[0])
-		fmt.Printf("3. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
-	}
-	{
-		fmt.Printf("3. [%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
-	}
+	// if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
+	// 	mat := mgl32.Mat4{}
+	// 	(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
+	// 	fmt.Printf("3. [%d] boneTransform: \n%v\n", r.BoneIndex, mat)
+	// }
+	// {
+	// 	mat := mgl32.Mat4{}
+	// 	rigidBodyTransform.GetOpenGLMatrix(&mat[0])
+	// 	fmt.Printf("3. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
+	// }
+	// {
+	// 	fmt.Printf("3. [%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
+	// }
 
 	if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
 		boneMatrixes[r.BoneIndex] = &physicsBoneMatrix
@@ -348,374 +344,15 @@ func (r *RigidBody) UpdateMatrix(
 	}
 }
 
-func (r *RigidBody) Bullet() []float32 {
-	rb := make([]float32, 0)
-
-	// ボーンINDEX
-	if r.BoneIndex >= 0 {
-		rb = append(rb, float32(r.BoneIndex))
-	} else {
-		if r.JointedBoneIndex >= 0 {
-			rb = append(rb, float32(r.JointedBoneIndex))
-		} else {
-			rb = append(rb, float32(-1))
-		}
-	}
-
-	// 剛体の色
-	if r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
-		// ボーン追従剛体：緑色
-		rb = append(rb, float32(0.0))
-		rb = append(rb, float32(1.0))
-		rb = append(rb, float32(0.0))
-	} else if r.CorrectPhysicsType == PHYSICS_TYPE_DYNAMIC {
-		// 物理剛体: 赤色
-		rb = append(rb, float32(1.0))
-		rb = append(rb, float32(0.0))
-		rb = append(rb, float32(0.0))
-	} else {
-		// ボーン追従 + 物理剛体:黄色
-		rb = append(rb, float32(1.0))
-		rb = append(rb, float32(1.0))
-		rb = append(rb, float32(0.0))
-	}
-	rb = append(rb, float32(0.6))
-
-	return rb
-}
-
 // 剛体リスト
 type RigidBodies struct {
 	*mcore.IndexNameModelCorrection[*RigidBody]
-	vao   *mgl.VAO
-	vbo   *mgl.VBO
-	ibo   *mgl.IBO
-	count int32
 }
 
 func NewRigidBodies() *RigidBodies {
 	return &RigidBodies{
 		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*RigidBody](),
-		vao:                      nil,
-		vbo:                      nil,
-		ibo:                      nil,
-		count:                    0,
 	}
-}
-
-func (r *RigidBodies) addCornerBox(
-	rigidBody *RigidBody,
-	rigidBodyVbo []float32,
-	rigidBodyIbo []uint32,
-	startIdx int,
-) ([]float32, []uint32) {
-	// 直方体の角を設定していく
-	size := rigidBody.Size
-
-	// 傾き加味
-	rotation := rigidBody.Rotation.GetQuaternion().Copy()
-	// rotation.SetX(-rotation.GetX())
-	// rotation.SetY(-rotation.GetY())
-	// rotation.Normalize()
-
-	pos := rigidBody.Position.Copy()
-	// pos.SetZ(-pos.GetZ())
-
-	mat := mmath.NewMMat4()
-	mat.Translate(pos)
-	mat.Mul(rotation.ToMat4())
-
-	{
-		// 手前左上
-		posGl := mat.MulVec3(&mmath.MVec3{-size.GetX(), -size.GetY(), -size.GetZ()}).GL()
-
-		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
-	}
-	{
-		// 手前右上
-		posGl := mat.MulVec3(&mmath.MVec3{size.GetX(), -size.GetY(), -size.GetZ()}).GL()
-
-		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
-	}
-	{
-		// 手前右下
-		posGl := mat.MulVec3(&mmath.MVec3{size.GetX(), size.GetY(), -size.GetZ()}).GL()
-
-		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
-	}
-	{
-		// 手前左下
-		posGl := mat.MulVec3(&mmath.MVec3{-size.GetX(), size.GetY(), -size.GetZ()}).GL()
-
-		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
-	}
-	{
-		// 奥左上
-		posGl := mat.MulVec3(&mmath.MVec3{-size.GetX(), -size.GetY(), size.GetZ()}).GL()
-
-		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
-	}
-	{
-		// 奥右上
-		posGl := mat.MulVec3(&mmath.MVec3{size.GetX(), -size.GetY(), size.GetZ()}).GL()
-
-		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
-	}
-	{
-		// 奥右下
-		posGl := mat.MulVec3(&mmath.MVec3{size.GetX(), size.GetY(), size.GetZ()}).GL()
-
-		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
-	}
-	{
-		// 奥左下
-		posGl := mat.MulVec3(&mmath.MVec3{-size.GetX(), size.GetY(), size.GetZ()}).GL()
-
-		rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-		rigidBodyVbo = append(rigidBodyVbo, posGl[0])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[1])
-		rigidBodyVbo = append(rigidBodyVbo, posGl[2])
-	}
-	{
-		// 手前左上-手前右上
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+0))
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+1))
-	}
-	{
-		// 手前右上-手前右下
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+1))
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+2))
-	}
-	{
-		// 手前右下-手前左下
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+2))
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+3))
-	}
-	{
-		// 手前左下-手前左上
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+3))
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+0))
-	}
-	{
-		// 奥左上-奥右上
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+4))
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+5))
-	}
-	{
-		// 奥右上-奥右下
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+5))
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+6))
-	}
-	{
-		// 奥右下-奥左下
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+6))
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+7))
-	}
-	{
-		// 奥左下-奥左上
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+7))
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+4))
-	}
-	{
-		// 手前左上-奥左上
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+0))
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+4))
-	}
-	{
-		// 手前右上-奥右上
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+1))
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+5))
-	}
-	{
-		// 手前右下-奥右下
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+2))
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+6))
-	}
-	{
-		// 手前左下-奥左下
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+3))
-		rigidBodyIbo = append(rigidBodyIbo, uint32(startIdx+7))
-	}
-
-	return rigidBodyVbo, rigidBodyIbo
-}
-
-// 半球の頂点を追加
-func (r *RigidBodies) addCornerSphereHalf(
-	rigidBody *RigidBody,
-	rigidBodyVbo []float32,
-	rigidBodyIbo []uint32,
-	startIdx int,
-	pos *mmath.MVec3,
-	segments int,
-	isUpper bool,
-) ([]float32, []uint32) {
-	// 球体を6x6に分割して線で描くため、球体の頂点を追加
-
-	// isUpperがtrueの場合は上半球、falseの場合は下半球
-	var mStart int
-	var mEnd int
-	if isUpper {
-		mStart = 0
-		mEnd = int(segments / 2)
-	} else {
-		mStart = int(segments / 2)
-		mEnd = segments
-	}
-
-	for m := mStart; m <= mEnd; m++ {
-		for n := 0; n <= segments; n++ {
-			// Calculate the latitude and longitude
-			lat := (float64(m) / float64(segments)) * math.Pi
-			lon := (float64(n) / float64(segments)) * 2.0 * math.Pi
-
-			// Calculate the x, y, z coordinates
-			x := rigidBody.Size.GetX() * math.Sin(lat) * math.Cos(lon)
-			y := rigidBody.Size.GetX() * math.Cos(lat)
-			z := rigidBody.Size.GetX() * math.Sin(lat) * math.Sin(lon)
-			spherePos := &mmath.MVec3{x, y, z}
-
-			// Apply the rigid body's rotation to the vector
-			rotation := rigidBody.Rotation.GetQuaternion().Copy()
-			// rotation.SetX(-rotation.GetX())
-			// rotation.SetY(-rotation.GetY())
-			// rotation.Normalize()
-			rotatedPosGl := rotation.RotatedVec3(spherePos).Added(pos).GL()
-
-			// Append the coordinates to the VBO
-			rigidBodyVbo = append(rigidBodyVbo, rigidBody.Bullet()...)
-			rigidBodyVbo = append(rigidBodyVbo, rotatedPosGl[0], rotatedPosGl[1], rotatedPosGl[2])
-		}
-	}
-
-	for m := mStart; m <= mEnd; m++ {
-		for n := 0; n <= segments; n++ {
-			// Calculate the indices of the current point and the points to the right and below it
-			idx := startIdx + m*(segments+1) + n
-			idxRight := idx + 1
-			idxBelow := idx + segments + 1
-
-			// Add a line from the current point to the point to the right
-			if n < segments {
-				rigidBodyIbo = append(rigidBodyIbo, uint32(idx), uint32(idxRight))
-			}
-
-			// Add a line from the current point to the point below
-			if m < segments {
-				rigidBodyIbo = append(rigidBodyIbo, uint32(idx), uint32(idxBelow))
-			}
-		}
-	}
-
-	return rigidBodyVbo, rigidBodyIbo
-}
-
-func (r *RigidBodies) addCornerSphere(
-	rigidBody *RigidBody,
-	rigidBodyVbo []float32,
-	rigidBodyIbo []uint32,
-	startIdx int,
-	segments int,
-) ([]float32, []uint32) {
-	// 上半球
-	upperPos := rigidBody.Position.Copy()
-	rigidBodyVbo, rigidBodyIbo = r.addCornerSphereHalf(
-		rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, upperPos, segments, true)
-	// 下半球
-	lowerPos := rigidBody.Position.Copy()
-	rigidBodyVbo, rigidBodyIbo = r.addCornerSphereHalf(
-		rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, lowerPos, segments, false)
-
-	return rigidBodyVbo, rigidBodyIbo
-}
-
-func (r *RigidBodies) addCornerCapsule(
-	rigidBody *RigidBody,
-	rigidBodyVbo []float32,
-	rigidBodyIbo []uint32,
-	startIdx int,
-	segments int,
-) ([]float32, []uint32) {
-	// カプセルを6x6に分割して線で描くため、カプセルの頂点を追加
-	rotation := rigidBody.Rotation.GetQuaternion().Copy()
-	// rotation.SetX(-rotation.GetX())
-	// rotation.SetY(-rotation.GetY())
-	// rotation.Normalize()
-
-	// 上半球
-	upperMat := mmath.NewMMat4()
-	upperMat.Translate(rigidBody.Position)
-	upperMat.Mul(rotation.ToMat4())
-	upperPos := upperMat.MulVec3(&mmath.MVec3{0, rigidBody.Size.GetY() / 2, 0})
-	rigidBodyVbo, rigidBodyIbo = r.addCornerSphereHalf(
-		rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, upperPos, segments, true)
-	// 下半球
-	lowerMat := mmath.NewMMat4()
-	lowerMat.Translate(rigidBody.Position)
-	lowerMat.Mul(rotation.ToMat4())
-	lowerPos := lowerMat.MulVec3(&mmath.MVec3{0, -rigidBody.Size.GetY() / 2, 0})
-	rigidBodyVbo, rigidBodyIbo = r.addCornerSphereHalf(
-		rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, lowerPos, segments, false)
-
-	return rigidBodyVbo, rigidBodyIbo
-}
-
-func (r *RigidBodies) prepareDraw() {
-	rigidBodyVbo := make([]float32, 0, len(r.Data))
-	rigidBodyIbo := make([]uint32, 0, len(r.Data))
-
-	startIdx := 0
-	segments := 6
-
-	for _, rigidBody := range r.GetSortedData() {
-		if rigidBody.ShapeType == SHAPE_BOX {
-			// 箱剛体
-			rigidBodyVbo, rigidBodyIbo = r.addCornerBox(
-				rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx)
-			startIdx += 8
-		} else if rigidBody.ShapeType == SHAPE_SPHERE {
-			// 球剛体
-			rigidBodyVbo, rigidBodyIbo = r.addCornerSphere(
-				rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, segments)
-			startIdx += (segments+1)*(segments+1) + (segments + 1)
-		} else if rigidBody.ShapeType == SHAPE_CAPSULE {
-			// カプセル剛体
-			rigidBodyVbo, rigidBodyIbo = r.addCornerCapsule(
-				rigidBody, rigidBodyVbo, rigidBodyIbo, startIdx, segments)
-			startIdx += (segments+1)*(segments+1) + (segments + 1)
-		}
-	}
-
-	r.vao = mgl.NewVAO()
-	r.vao.Bind()
-	r.vbo = mgl.NewVBOForRigidBody(gl.Ptr(rigidBodyVbo), len(rigidBodyVbo))
-	r.vbo.BindRigidBody()
-	r.vbo.Unbind()
-	r.vao.Unbind()
-
-	r.ibo = mgl.NewIBO(gl.Ptr(rigidBodyIbo), len(rigidBodyIbo))
-	r.count = int32(len(rigidBodyIbo))
 }
 
 func (r *RigidBodies) InitPhysics(physics *mphysics.MPhysics, bones *Bones) {
@@ -728,48 +365,4 @@ func (r *RigidBodies) InitPhysics(physics *mphysics.MPhysics, bones *Bones) {
 			rigidBody.InitPhysics(physics, nil)
 		}
 	}
-
-	// 剛体の描画準備
-	r.prepareDraw()
-}
-
-func (r *RigidBodies) Draw(
-	shader *mgl.MShader,
-	boneMatrixes []*mgl32.Mat4,
-	windowIndex int,
-) {
-	// ボーンをモデルメッシュの前面に描画するために深度テストを無効化
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.ALWAYS)
-
-	// ブレンディングを有効にする
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-	// ブレンディングを有効にする
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-	shader.UseRigidBodyProgram()
-
-	// ボーンデフォームテクスチャ設定
-	BindBoneMatrixes(boneMatrixes, shader, shader.RigidBodyProgram, windowIndex)
-
-	// 箱剛体の描画
-
-	r.vao.Bind()
-	r.vbo.BindRigidBody()
-	r.ibo.Bind()
-
-	gl.DrawElements(gl.LINES, r.count, gl.UNSIGNED_INT, nil)
-
-	r.ibo.Unbind()
-	r.vbo.Unbind()
-	r.vao.Unbind()
-
-	UnbindBoneMatrixes()
-
-	shader.Unuse()
-
-	gl.Disable(gl.BLEND)
 }

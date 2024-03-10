@@ -3,13 +3,13 @@ package mphysics
 import "github.com/miu200521358/mlib_go/pkg/mbt"
 
 type MFilterCallback struct {
-	mbt.BtHashedOverlappingPairCache
+	mbt.BtOverlapFilterCallback
 	nonFilterProxy []mbt.BtBroadphaseProxy
 }
 
-func NewMFilterCallback() MFilterCallback {
-	return MFilterCallback{
-		BtHashedOverlappingPairCache: mbt.NewBtHashedOverlappingPairCache(),
+func NewMFilterCallback() *MFilterCallback {
+	return &MFilterCallback{
+		BtOverlapFilterCallback: mbt.NewBtHashedOverlappingPairCache().GetOverlapFilterCallback(),
 	}
 }
 
@@ -19,6 +19,10 @@ func (m *MFilterCallback) NeedBroadphaseCollision(proxy0, proxy1 mbt.BtBroadphas
 	collides = collides && ((proxy1.GetM_collisionFilterGroup() & proxy0.GetM_collisionFilterMask()) != 0)
 	// Add additional logic here to modify 'collides'
 	return collides
+}
+
+func (m *MFilterCallback) Swigcptr() uintptr {
+	return m.BtOverlapFilterCallback.Swigcptr()
 }
 
 func (m *MFilterCallback) SwigIsBtOverlapFilterCallback() {

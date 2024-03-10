@@ -1,16 +1,19 @@
 package mphysics
 
-import "github.com/miu200521358/mlib_go/pkg/mbt"
+import (
+	"github.com/miu200521358/mlib_go/pkg/mbt"
+	"github.com/miu200521358/mlib_go/pkg/mgl"
+)
 
 type MPhysics struct {
-	world          mbt.BtDiscreteDynamicsWorld
-	filterCallBack MFilterCallback
-	MaxSubSteps    int
-	Fps            float32
-	Spf            float32
+	world       mbt.BtDiscreteDynamicsWorld
+	MaxSubSteps int
+	Fps         float32
+	Spf         float32
+	isDebug     bool
 }
 
-func NewMPhysics() *MPhysics {
+func NewMPhysics(shader *mgl.MShader) *MPhysics {
 	broadphase := mbt.NewBtDbvtBroadphase()
 	collisionConfiguration := mbt.NewBtDefaultCollisionConfiguration()
 	dispatcher := mbt.NewBtCollisionDispatcher(collisionConfiguration)
@@ -27,26 +30,42 @@ func NewMPhysics() *MPhysics {
 
 	world.AddRigidBody(groundRigidBody, 1<<15, 0xFFFF)
 
-	callback := NewMFilterCallback()
-	world.GetPairCache().SetOverlapFilterCallback(&callback)
+	// // 剛体衝突判定用のコールバック
+	// world.GetPairCache().SetOverlapFilterCallback(NewMFilterCallback())
 
-	// world.GetDebugDrawer().SetDebugMode(
-	// 	int(mbt.BtIDebugDrawDBG_DrawConstraints | mbt.BtIDebugDrawDBG_DrawConstraintLimits))
+	// デバッグビューワー
+	// world.SetDebugDrawer(NewMDebugView(shader))
 
 	p := &MPhysics{
-		world:          world,
-		filterCallBack: callback,
-		MaxSubSteps:    5,
-		Fps:            60.0,
-		Spf:            1.0 / 60.0,
+		world:       world,
+		MaxSubSteps: 5,
+		Fps:         60.0,
+		Spf:         1.0 / 60.0,
+		isDebug:     false,
 	}
 
 	return p
 }
 
-func (p *MPhysics) AddNonFilterProxy(proxy mbt.BtBroadphaseProxy) {
-	p.filterCallBack.nonFilterProxy = append(p.filterCallBack.nonFilterProxy, proxy)
+func (p *MPhysics) EnableDebug(enable bool) {
+	p.isDebug = enable
+	if enable {
+		p.world.GetDebugDrawer().SetDebugMode(int(mbt.BtIDebugDrawDBG_DrawConstraints | mbt.BtIDebugDrawDBG_DrawConstraintLimits | mbt.BtIDebugDrawDBG_DrawWireframe | mbt.BtIDebugDrawDBG_DrawAabb))
+	} else {
+		p.world.GetDebugDrawer().SetDebugMode(0)
+	}
 }
+
+func (p *MPhysics) DrawWorld() {
+	if p.isDebug {
+		p.world.DebugDrawWorld()
+	}
+}
+
+// func (p *MPhysics) AddNonFilterProxy(proxy mbt.BtBroadphaseProxy) {
+// 	pairCache := p.world.GetPairCache()
+
+// }
 
 func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody, group int, mask int) {
 	p.world.AddRigidBody(rigidBody, group, mask)

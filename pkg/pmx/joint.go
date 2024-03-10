@@ -1,16 +1,10 @@
 package pmx
 
 import (
-	"math"
-
-	"github.com/go-gl/gl/v4.4-core/gl"
-
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
-	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-
 )
 
 type JointParam struct {
@@ -121,123 +115,14 @@ func (j *Joint) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBo
 	modelPhysics.AddJoint(j.Constraint)
 }
 
-func (j *Joint) updateVbo(jointVbo []float32, jointIbo []uint32, startIdx int, segments int) ([]float32, []uint32) {
-	// ジョイントの位置と向き
-	// Get the rigid bodies from the constraint
-	bodyA := j.Constraint.GetRigidBodyA().(mbt.BtRigidBody)
-	bodyB := j.Constraint.GetRigidBodyB().(mbt.BtRigidBody)
-
-	// Get the world transforms of the rigid bodies
-	transformA := bodyA.GetWorldTransform().(mbt.BtTransform)
-	transformB := bodyB.GetWorldTransform().(mbt.BtTransform)
-
-	// Get the local transforms of the constraint
-	localTransformA := j.Constraint.GetFrameOffsetA().(mbt.BtTransform)
-	localTransformB := j.Constraint.GetFrameOffsetB().(mbt.BtTransform)
-
-	// Calculate the global transforms by combining the world and local transforms
-	globalTransformA := mbt.NewBtTransform()
-	globalTransformA.Mult(transformA, localTransformA)
-	globalTransformB := mbt.NewBtTransform()
-	globalTransformB.Mult(transformB, localTransformB)
-
-	// Get the global positions and rotations from the global transforms
-	globalPositionA := globalTransformA.GetOrigin().(mbt.BtVector3)
-	globalPositionB := globalTransformB.GetOrigin().(mbt.BtVector3)
-
-	globalRotationA := globalTransformA.GetRotation()
-	globalRotationB := globalTransformB.GetRotation()
-	globalRotation := globalRotationA.Slerp(globalRotationB, 0.5)
-
-	position := mmath.MVec3{
-		float64((globalPositionA.GetX() + globalPositionB.GetX()) / 2),
-		float64((globalPositionA.GetY() + globalPositionB.GetY()) / 2),
-		float64((globalPositionA.GetZ() + globalPositionB.GetZ()) / 2),
-	}
-
-	rotation := mmath.NewMQuaternionByValues(
-		float64(globalRotation.GetX()),
-		float64(globalRotation.GetY()),
-		float64(globalRotation.GetZ()),
-		float64(globalRotation.GetW()),
-	)
-
-	// Add the global positions and rotations to the VBO
-
-	for m := 0; m <= segments; m++ {
-		for n := 0; n <= segments; n++ {
-			// Calculate the latitude and longitude
-			lat := (float64(m) / float64(segments)) * math.Pi
-			lon := (float64(n) / float64(segments)) * 2.0 * math.Pi
-
-			size := 0.2
-
-			// Calculate the x, y, z coordinates
-			x := size * math.Sin(lat) * math.Cos(lon)
-			y := size * math.Cos(lat)
-			z := size * math.Sin(lat) * math.Sin(lon)
-			spherePos := &mmath.MVec3{x, y, z}
-
-			// Apply the rigid body's rotation to the vector
-			rotatedPos := rotation.RotatedVec3(spherePos).Added(&position)
-
-			// Append the coordinates to the VBO
-			jointVbo = append(
-				jointVbo,
-				// 0: typeColor
-				float32(0.0),
-				float32(0.0),
-				float32(1.0),
-				float32(0.6),
-				// 1: position
-				float32(rotatedPos.GetX()),
-				float32(rotatedPos.GetY()),
-				float32(rotatedPos.GetZ()),
-			)
-		}
-	}
-
-	for m := 0; m <= segments; m++ {
-		for n := 0; n <= segments; n++ {
-			// Calculate the indices of the current point and the points to the right and below it
-			idx := startIdx + m*(segments+1) + n
-			idxRight := idx + 1
-			idxBelow := idx + segments + 1
-
-			// Add a line from the current point to the point to the right
-			if n < segments {
-				jointIbo = append(jointIbo, uint32(idx), uint32(idxRight))
-			}
-
-			// Add a line from the current point to the point below
-			if m < segments {
-				jointIbo = append(jointIbo, uint32(idx), uint32(idxBelow))
-			}
-		}
-	}
-	startIdx += (segments + 1) * (segments + 1)
-
-	return jointVbo, jointIbo
-}
-
 // ジョイントリスト
 type Joints struct {
 	*mcore.IndexNameModelCorrection[*Joint]
-	vao      *mgl.VAO
-	vbo      *mgl.VBO
-	ibo      *mgl.IBO
-	count    int32
-	segments int
 }
 
 func NewJoints() *Joints {
 	return &Joints{
 		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Joint](),
-		vao:                      mgl.NewVAO(),
-		vbo:                      nil,
-		ibo:                      nil,
-		count:                    0,
-		segments:                 6,
 	}
 }
 
@@ -251,60 +136,4 @@ func (j *Joints) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodies *Rigid
 				rigidBodies.GetItem(joint.RigidbodyIndexB))
 		}
 	}
-}
-
-func (j *Joints) updateVbo() {
-	// ジョイント位置を更新
-	jointVbo := make([]float32, 0)
-	jointIbo := make([]uint32, 0)
-	startIdx := 0
-
-	for _, joint := range j.GetSortedData() {
-		jointVbo, jointIbo = joint.updateVbo(jointVbo, jointIbo, startIdx, j.segments)
-		startIdx += (j.segments + 1) * (j.segments + 1)
-	}
-
-	j.vao.Bind()
-	j.vbo = mgl.NewVBOForJoint(gl.Ptr(jointVbo), len(jointVbo))
-	j.vbo.BindJoint()
-	j.vbo.Unbind()
-	j.vao.Unbind()
-
-	j.ibo = mgl.NewIBO(gl.Ptr(jointIbo), len(jointIbo))
-	j.count = int32(len(jointIbo))
-}
-
-func (j *Joints) Draw(
-	shader *mgl.MShader,
-	windowIndex int,
-) {
-	j.updateVbo()
-
-	// ボーンをモデルメッシュの前面に描画するために深度テストを無効化
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.ALWAYS)
-
-	// ブレンディングを有効にする
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-	// ブレンディングを有効にする
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-	shader.UseJointProgram()
-
-	j.vao.Bind()
-	j.vbo.BindJoint()
-	j.ibo.Bind()
-
-	gl.DrawElements(gl.LINES, j.count, gl.UNSIGNED_INT, nil)
-
-	j.ibo.Unbind()
-	j.vbo.Unbind()
-	j.vao.Unbind()
-
-	shader.Unuse()
-
-	gl.Disable(gl.BLEND)
 }
