@@ -8,10 +8,10 @@ in layout(location = 0) vec3 position;
 in vec3 color;
 in float alpha;
 
-out vec4 physicsColor;
+out vec4 color4;
 
 void main() {
     gl_Position = modelViewProjectionMatrix * modelViewMatrix * vec4(position, 1.0);
 
-    physicsColor = vec4(color, alpha);
+    color4 = vec4(color, alpha);
 }

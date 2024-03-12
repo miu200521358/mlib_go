@@ -1,8 +1,8 @@
 #version 440 core
 
-in vec4 physicsColor;
+in vec4 color4;
 out vec4  outColor;
 
 void main() {
-    outColor = physicsColor;
+    outColor = color4;
 }

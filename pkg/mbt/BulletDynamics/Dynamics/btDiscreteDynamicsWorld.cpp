@@ -12,6 +12,7 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
+#include <stdio.h>
 
 #include "btDiscreteDynamicsWorld.h"
 
@@ -269,6 +270,7 @@ void btDiscreteDynamicsWorld::saveKinematicState(btScalar timeStep)
 void btDiscreteDynamicsWorld::debugDrawWorld()
 {
 //\1("debugDrawWorld");
+	printf("btDiscreteDynamicsWorld::debugDrawWorld ---------\n");
 
 	btCollisionWorld::debugDrawWorld();
 
@@ -276,15 +278,18 @@ void btDiscreteDynamicsWorld::debugDrawWorld()
 	if (getDebugDrawer())
 	{
 		int mode = getDebugDrawer()->getDebugMode();
+		printf("mode = %d\n", mode);
 		if (mode & (btIDebugDraw::DBG_DrawConstraints | btIDebugDraw::DBG_DrawConstraintLimits))
 		{
 			drawConstraints = true;
 		}
+		printf("drawConstraints = %d\n", drawConstraints);
 	}
 	if (drawConstraints)
 	{
 		for (int i = getNumConstraints() - 1; i >= 0; i--)
 		{
+			printf("debugDrawConstraint[%d]\n", i);
 			btTypedConstraint* constraint = getConstraint(i);
 			debugDrawConstraint(constraint);
 		}
@@ -293,11 +298,13 @@ void btDiscreteDynamicsWorld::debugDrawWorld()
 	if (getDebugDrawer() && (getDebugDrawer()->getDebugMode() & (btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawAabb | btIDebugDraw::DBG_DrawNormals)))
 	{
 		int i;
-
+		printf("m_nonStaticRigidBodies.size() = %d\n", m_nonStaticRigidBodies.size());
 		if (getDebugDrawer() && getDebugDrawer()->getDebugMode())
 		{
+			printf("getDebugDrawer()->getDebugMode() = %d\n", getDebugDrawer()->getDebugMode());
 			for (i = 0; i < m_actions.size(); i++)
 			{
+				printf("m_actions[%d]->debugDraw(getDebugDrawer())\n", i);
 				m_actions[i]->debugDraw(m_debugDrawer);
 			}
 		}
@@ -414,10 +421,14 @@ int btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, 
 		}
 	}
 
+	printf("btDiscreteDynamicsWorld::stepSimulation ----------\n");
+
 	//process some debugging flags
 	if (getDebugDrawer())
 	{
 		btIDebugDraw* debugDrawer = getDebugDrawer();
+		printf("debugDrawer pointer: %p\n", (void*)debugDrawer);
+		printf("debugDrawer->getDebugMode() = %d\n", debugDrawer->getDebugMode());
 		gDisableDeactivation = (debugDrawer->getDebugMode() & btIDebugDraw::DBG_NoDeactivation) != 0;
 	}
 	if (numSimulationSubSteps)

@@ -1,6 +1,8 @@
 package mphysics
 
 import (
+	"fmt"
+
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 )
@@ -34,7 +36,10 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 	// world.GetPairCache().SetOverlapFilterCallback(NewMFilterCallback())
 
 	// デバッグビューワー
-	// world.SetDebugDrawer(NewMDebugView(shader))
+	drawer := mbt.NewBtMDebugDraw()
+	drawer.SetLiner(NewMDebugDrawLiner(shader))
+	world.SetDebugDrawer(drawer)
+	fmt.Printf("world.GetDebugDrawer()=%+v\n", world.GetDebugDrawer())
 
 	p := &MPhysics{
 		world:       world,
@@ -43,6 +48,8 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 		Spf:         1.0 / 60.0,
 		isDebug:     false,
 	}
+
+	p.EnableDebug(true)
 
 	return p
 }
@@ -58,7 +65,22 @@ func (p *MPhysics) EnableDebug(enable bool) {
 
 func (p *MPhysics) DrawWorld() {
 	if p.isDebug {
+		// fmt.Printf("DrawWorld p.world=%+v\n", p.world)
+
+		// // 標準出力を一時的にリダイレクトする
+		// old := os.Stdout // keep backup of the real stdout
+		// r, w, _ := os.Pipe()
+		// os.Stdout = w
+
 		p.world.DebugDrawWorld()
+
+		// // 標準出力を元に戻す
+		// w.Close()
+		// os.Stdout = old // restoring the real stdout
+
+		// var buf bytes.Buffer
+		// buf.ReadFrom(r)
+		// fmt.Print(buf.String())
 	}
 }
 
@@ -84,5 +106,18 @@ func (p *MPhysics) RemoveJoint(joint mbt.BtTypedConstraint) {
 }
 
 func (p *MPhysics) Update() {
+	// // 標準出力を一時的にリダイレクトする
+	// old := os.Stdout // keep backup of the real stdout
+	// r, w, _ := os.Pipe()
+	// os.Stdout = w
+
 	p.world.StepSimulation(p.Spf, p.MaxSubSteps, p.Spf)
+
+	// // 標準出力を元に戻す
+	// w.Close()
+	// os.Stdout = old // restoring the real stdout
+
+	// var buf bytes.Buffer
+	// buf.ReadFrom(r)
+	// fmt.Print(buf.String())
 }

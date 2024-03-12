@@ -204,3 +204,5 @@
 
 ////// included headers [LinearMath/btIDebugDraw.h] ----------------------------------
 %include "LinearMath/btIDebugDraw.h.i"
+%include "LinearMath/btMDebugDraw.h.i"
+%include "LinearMath/btMDebugDraw.cpp.i"

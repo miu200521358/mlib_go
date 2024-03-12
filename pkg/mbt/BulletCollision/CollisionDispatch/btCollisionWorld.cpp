@@ -1466,11 +1466,21 @@ void btCollisionWorld::debugDrawObject(const btTransform& worldTransform, const 
 
 void btCollisionWorld::debugDrawWorld()
 {
+	printf("btCollisionWorld::debugDrawWorld\n");
+	printf("m_debugDrawer = %p\n", m_debugDrawer);
+	printf("getDebugDrawer() = %p\n", getDebugDrawer());
+
 	if (getDebugDrawer())
 	{
+		printf("m_debugDrawer->getDebugMode() = %d\n", m_debugDrawer->getDebugMode());
+
 		getDebugDrawer()->clearLines();
 
+		printf("m_debugDrawer->clearLines();\n");
+
 		btIDebugDraw::DefaultColors defaultColors = getDebugDrawer()->getDefaultColors();
+
+		printf("defaultColors\n");
 
 		if (getDebugDrawer()->getDebugMode() & btIDebugDraw::DBG_DrawContactPoints)
 		{
