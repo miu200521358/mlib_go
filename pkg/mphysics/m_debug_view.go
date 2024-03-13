@@ -5,7 +5,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 // type MDefaultColors struct {
@@ -28,11 +27,11 @@ import (
 
 func NewConstBtMDefaultColors() mbt.BtMDefaultColors {
 	return mbt.NewBtMDefaultColors(
-		mbt.NewBtVector3(float32(1.0), float32(0.0), float32(0.0)), // activeObject
+		mbt.NewBtVector3(float32(1.0), float32(0.0), float32(0.0)), // activeObject	(物理剛体)
 		mbt.NewBtVector3(float32(0.5), float32(0.5), float32(0.0)), // deactivatedObject
 		mbt.NewBtVector3(float32(0.5), float32(0.0), float32(0.5)), // wantsDeactivationObject
 		mbt.NewBtVector3(float32(0.0), float32(0.5), float32(0.5)), // disabledDeactivationObject
-		mbt.NewBtVector3(float32(0.0), float32(1.0), float32(0.0)), // disabledSimulationObject
+		mbt.NewBtVector3(float32(0.0), float32(1.0), float32(0.0)), // disabledSimulationObject	(ボーン追従剛体)
 		mbt.NewBtVector3(float32(1.0), float32(1.0), float32(0.0)), // aabb
 		mbt.NewBtVector3(float32(0.0), float32(0.0), float32(1.0)), // contactPoint
 	)

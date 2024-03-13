@@ -1497,6 +1497,7 @@ void btCollisionWorld::debugDrawWorld()
 					int numContacts = contactManifold->getNumContacts();
 					for (int j = 0; j < numContacts; j++)
 					{
+						// printf("drawContactPoint[%d]\n", j);
 						btManifoldPoint& cp = contactManifold->getContactPoint(j);
 						getDebugDrawer()->drawContactPoint(cp.m_positionWorldOnB, cp.m_normalWorldOnB, cp.getDistance(), cp.getLifeTime(), defaultColors.m_contactPoint);
 					}

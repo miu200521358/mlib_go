@@ -43,9 +43,9 @@ void btMDebugDraw::drawContactPoint(const btVector3& PointOnB, const btVector3& 
     // Implement drawContactPoint method here
     // printf("drawContactPoint: PointOnB(%f, %f, %f), normalOnB(%f, %f, %f), distance(%f), lifeTime(%d), color(%f, %f, %f)\n", PointOnB.x(), PointOnB.y(), PointOnB.z(), normalOnB.x(), normalOnB.y(), normalOnB.z(), distance, lifeTime, color.x(), color.y(), color.z());
 
-    drawLine( PointOnB, PointOnB + normalOnB * distance, color );
-    btVector3 ncolor( 0, 0, 0 );
-    drawLine( PointOnB, PointOnB + normalOnB * 0.01f, ncolor );
+    getLiner()->drawLine( PointOnB, PointOnB + normalOnB * distance, color );
+    btVector3 ncolor( 0, 0.5, 0.5 );
+    getLiner()->drawLine( PointOnB, PointOnB + normalOnB * 0.01f, ncolor );
 }
 
 void btMDebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {
@@ -97,7 +97,8 @@ btIDebugDraw::DefaultColors btMDebugDraw::getDefaultColors() const {
 
 void btMDebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor) {
     // printf("drawLine: from(%f, %f, %f), to(%f, %f, %f), fromColor(%f, %f, %f), toColor(%f, %f, %f)\n", from.x(), from.y(), from.z(), to.x(), to.y(), to.z(), fromColor.x(), fromColor.y(), fromColor.z(), toColor.x(), toColor.y(), toColor.z());
-    btIDebugDraw::drawLine(from, to, fromColor, toColor);
+    (void)toColor;
+    drawLine(from, to, fromColor);
 }
 
 void btMDebugDraw::drawSphere(btScalar radius, const btTransform& transform, const btVector3& color) {
