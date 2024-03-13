@@ -14,6 +14,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mwidget"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
+
 )
 
 func init() {
@@ -83,6 +84,17 @@ func main() {
 		walk.MsgBox(&mWindow.MainWindow, "出力Pmxファイル選択エラー", err.Error(), walk.MsgBoxIconError)
 	}
 
+	debugCheckBox, err := walk.NewCheckBox(&mWindow.MainWindow)
+	if err != nil {
+		walk.MsgBox(&mWindow.MainWindow, "デバッグチェックボックス生成エラー", err.Error(), walk.MsgBoxIconError)
+	}
+	debugCheckBox.SetText("デバッグ表示")
+	debugCheckBox.SetChecked(false)
+
+	debugCheckBox.Clicked().Attach(func() {
+		glWindow.Physics.EnableDebug(debugCheckBox.Checked())
+	})
+
 	execButton, err := walk.NewPushButton(&mWindow.MainWindow)
 	if err != nil {
 		walk.MsgBox(&mWindow.MainWindow, "モデル描画ボタン生成エラー", err.Error(), walk.MsgBoxIconError)
@@ -149,6 +161,7 @@ func main() {
 		isExist, err := mutils.ExistsFile(path)
 		if !isExist || err != nil {
 			pmxSavePicker.PathLineEdit.SetText("")
+			debugCheckBox.SetEnabled(false)
 			execButton.SetEnabled(false)
 			subExecButton.SetEnabled(false)
 			return
@@ -158,6 +171,7 @@ func main() {
 		ext := filepath.Ext(file)
 		outputPath := filepath.Join(dir, file[:len(file)-len(ext)]+"_out"+ext)
 		pmxSavePicker.PathLineEdit.SetText(outputPath)
+		debugCheckBox.SetEnabled(true)
 		execButton.SetEnabled(true)
 		subExecButton.SetEnabled(true)
 	}

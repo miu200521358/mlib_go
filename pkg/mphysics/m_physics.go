@@ -49,7 +49,7 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 		isDebug:     false,
 	}
 
-	p.EnableDebug(true)
+	p.EnableDebug(false)
 
 	return p
 }

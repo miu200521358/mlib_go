@@ -12,7 +12,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type PmxModel struct {
@@ -115,8 +114,6 @@ func (pm *PmxModel) Draw(
 ) {
 	pm.UpdatePhysics(boneMatrixes, boneTransforms)
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
-	// pm.RigidBodies.Draw(shader, boneMatrixes, windowIndex)
-	// pm.Joints.Draw(shader, windowIndex)
 
 	// 物理デバッグ表示
 	pm.Physics.DrawWorld()
