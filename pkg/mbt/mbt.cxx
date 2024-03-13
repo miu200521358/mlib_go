@@ -73776,6 +73776,90 @@ void _wrap_delete_btGeneric6DofSpringConstraintDoubleData2_mbt_e879218550ba2e2b(
 }
 
 
+btMDefaultColors *_wrap_new_btMDefaultColors_mbt_e879218550ba2e2b(btVector3 *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3, btVector3 *_swig_go_4, btVector3 *_swig_go_5, btVector3 *_swig_go_6) {
+  btVector3 arg1 ;
+  btVector3 arg2 ;
+  btVector3 arg3 ;
+  btVector3 arg4 ;
+  btVector3 arg5 ;
+  btVector3 arg6 ;
+  btVector3 arg7 ;
+  btVector3 *argp1 ;
+  btVector3 *argp2 ;
+  btVector3 *argp3 ;
+  btVector3 *argp4 ;
+  btVector3 *argp5 ;
+  btVector3 *argp6 ;
+  btVector3 *argp7 ;
+  btMDefaultColors *result = 0 ;
+  btMDefaultColors *_swig_go_result;
+  
+  
+  argp1 = (btVector3 *)_swig_go_0;
+  if (argp1 == NULL) {
+    _swig_gopanic("Attempt to dereference null btVector3");
+  }
+  arg1 = (btVector3)*argp1;
+  
+  
+  argp2 = (btVector3 *)_swig_go_1;
+  if (argp2 == NULL) {
+    _swig_gopanic("Attempt to dereference null btVector3");
+  }
+  arg2 = (btVector3)*argp2;
+  
+  
+  argp3 = (btVector3 *)_swig_go_2;
+  if (argp3 == NULL) {
+    _swig_gopanic("Attempt to dereference null btVector3");
+  }
+  arg3 = (btVector3)*argp3;
+  
+  
+  argp4 = (btVector3 *)_swig_go_3;
+  if (argp4 == NULL) {
+    _swig_gopanic("Attempt to dereference null btVector3");
+  }
+  arg4 = (btVector3)*argp4;
+  
+  
+  argp5 = (btVector3 *)_swig_go_4;
+  if (argp5 == NULL) {
+    _swig_gopanic("Attempt to dereference null btVector3");
+  }
+  arg5 = (btVector3)*argp5;
+  
+  
+  argp6 = (btVector3 *)_swig_go_5;
+  if (argp6 == NULL) {
+    _swig_gopanic("Attempt to dereference null btVector3");
+  }
+  arg6 = (btVector3)*argp6;
+  
+  
+  argp7 = (btVector3 *)_swig_go_6;
+  if (argp7 == NULL) {
+    _swig_gopanic("Attempt to dereference null btVector3");
+  }
+  arg7 = (btVector3)*argp7;
+  
+  
+  result = (btMDefaultColors *)new btMDefaultColors(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+  *(btMDefaultColors **)&_swig_go_result = (btMDefaultColors *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_btMDefaultColors_mbt_e879218550ba2e2b(btMDefaultColors *_swig_go_0) {
+  btMDefaultColors *arg1 = (btMDefaultColors *) 0 ;
+  
+  arg1 = *(btMDefaultColors **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
 btMDebugDrawLiner *_wrap__swig_NewDirectorBtMDebugDrawLinerBtMDebugDrawLiner_mbt_e879218550ba2e2b(intgo _swig_go_0) {
   int arg1 ;
   btMDebugDrawLiner *result = 0 ;
@@ -73853,18 +73937,6 @@ void _wrap_delete_btMDebugDraw_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0) {
   arg1 = *(btMDebugDraw **)&_swig_go_0; 
   
   delete arg1;
-  
-}
-
-
-void _wrap_btMDebugDraw_setDefaultColors_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0, btIDebugDraw::DefaultColors *_swig_go_1) {
-  btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
-  btIDebugDraw::DefaultColors *arg2 = 0 ;
-  
-  arg1 = *(btMDebugDraw **)&_swig_go_0; 
-  arg2 = *(btIDebugDraw::DefaultColors **)&_swig_go_1; 
-  
-  (arg1)->setDefaultColors((btIDebugDraw::DefaultColors const &)*arg2);
   
 }
 
@@ -74275,6 +74347,81 @@ void _wrap_btMDebugDraw_flushLines_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0
 }
 
 
+btIDebugDraw::DefaultColors *_wrap_btMDebugDraw_getDefaultColors_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0) {
+  btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
+  btIDebugDraw::DefaultColors result;
+  btIDebugDraw::DefaultColors *_swig_go_result;
+  
+  arg1 = *(btMDebugDraw **)&_swig_go_0; 
+  
+  result = ((btMDebugDraw const *)arg1)->getDefaultColors();
+  *(btIDebugDraw::DefaultColors **)&_swig_go_result = new btIDebugDraw::DefaultColors(result); 
+  return _swig_go_result;
+}
+
+
+void _wrap_btMDebugDraw_setMDefaultColors_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0, btMDefaultColors *_swig_go_1) {
+  btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
+  btMDefaultColors *arg2 = 0 ;
+  
+  arg1 = *(btMDebugDraw **)&_swig_go_0; 
+  arg2 = *(btMDefaultColors **)&_swig_go_1; 
+  
+  (arg1)->setMDefaultColors((btMDefaultColors const &)*arg2);
+  
+}
+
+
+void _wrap_btMDebugDraw_setLiner_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0, btMDebugDrawLiner *_swig_go_1) {
+  btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
+  btMDebugDrawLiner *arg2 = (btMDebugDrawLiner *) 0 ;
+  
+  arg1 = *(btMDebugDraw **)&_swig_go_0; 
+  arg2 = *(btMDebugDrawLiner **)&_swig_go_1; 
+  
+  (arg1)->setLiner(arg2);
+  
+}
+
+
+btMDebugDrawLiner *_wrap_btMDebugDraw_getLiner_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0) {
+  btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
+  btMDebugDrawLiner *result = 0 ;
+  btMDebugDrawLiner *_swig_go_result;
+  
+  arg1 = *(btMDebugDraw **)&_swig_go_0; 
+  
+  result = (btMDebugDrawLiner *)(arg1)->getLiner();
+  *(btMDebugDrawLiner **)&_swig_go_result = (btMDebugDrawLiner *)result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_btMDebugDraw_setDebugMode_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0, intgo _swig_go_1) {
+  btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(btMDebugDraw **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  (arg1)->setDebugMode(arg2);
+  
+}
+
+
+intgo _wrap_btMDebugDraw_getDebugMode_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0) {
+  btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(btMDebugDraw **)&_swig_go_0; 
+  
+  result = (int)((btMDebugDraw const *)arg1)->getDebugMode();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
 void _wrap_btMDebugDraw_drawLine__SWIG_1_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0, btVector3 *_swig_go_1, btVector3 *_swig_go_2, btVector3 *_swig_go_3) {
   btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
   btVector3 *arg2 = 0 ;
@@ -74347,67 +74494,16 @@ void _wrap_btMDebugDraw_draw3dText_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0
 }
 
 
-void _wrap_btMDebugDraw_setLiner_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0, btMDebugDrawLiner *_swig_go_1) {
+void _wrap_btMDebugDraw_setDefaultColors_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0, btIDebugDraw::DefaultColors *_swig_go_1) {
   btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
-  btMDebugDrawLiner *arg2 = (btMDebugDrawLiner *) 0 ;
+  btIDebugDraw::DefaultColors *arg2 = 0 ;
   
   arg1 = *(btMDebugDraw **)&_swig_go_0; 
-  arg2 = *(btMDebugDrawLiner **)&_swig_go_1; 
-  
-  (arg1)->setLiner(arg2);
-  
-}
-
-
-btMDebugDrawLiner *_wrap_btMDebugDraw_getLiner_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0) {
-  btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
-  btMDebugDrawLiner *result = 0 ;
-  btMDebugDrawLiner *_swig_go_result;
-  
-  arg1 = *(btMDebugDraw **)&_swig_go_0; 
-  
-  result = (btMDebugDrawLiner *)(arg1)->getLiner();
-  *(btMDebugDrawLiner **)&_swig_go_result = (btMDebugDrawLiner *)result; 
-  return _swig_go_result;
-}
-
-
-void _wrap_btMDebugDraw_setDebugMode_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0, intgo _swig_go_1) {
-  btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
-  int arg2 ;
-  
-  arg1 = *(btMDebugDraw **)&_swig_go_0; 
-  arg2 = (int)_swig_go_1; 
-  
-  (arg1)->setDebugMode(arg2);
-  
-}
-
-
-intgo _wrap_btMDebugDraw_getDebugMode_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0) {
-  btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
-  int result;
-  intgo _swig_go_result;
-  
-  arg1 = *(btMDebugDraw **)&_swig_go_0; 
-  
-  result = (int)((btMDebugDraw const *)arg1)->getDebugMode();
-  _swig_go_result = result; 
-  return _swig_go_result;
-}
-
-
-btIDebugDraw::DefaultColors *_wrap_btMDebugDraw_getDefaultColors_mbt_e879218550ba2e2b(btMDebugDraw *_swig_go_0) {
-  btMDebugDraw *arg1 = (btMDebugDraw *) 0 ;
-  btIDebugDraw::DefaultColors result;
-  btIDebugDraw::DefaultColors *_swig_go_result;
-  
-  arg1 = *(btMDebugDraw **)&_swig_go_0; 
+  arg2 = *(btIDebugDraw::DefaultColors **)&_swig_go_1; 
   
   btIDebugDraw *swig_b0 = (btIDebugDraw *)arg1;
-  result = ((btIDebugDraw const *)swig_b0)->getDefaultColors();
-  *(btIDebugDraw::DefaultColors **)&_swig_go_result = new btIDebugDraw::DefaultColors(result); 
-  return _swig_go_result;
+  (swig_b0)->setDefaultColors((btIDebugDraw::DefaultColors const &)*arg2);
+  
 }
 
 

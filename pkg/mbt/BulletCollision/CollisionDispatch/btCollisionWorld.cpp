@@ -1517,30 +1517,40 @@ void btCollisionWorld::debugDrawWorld()
 					{
 						btVector3 color(btScalar(0.4), btScalar(0.4), btScalar(0.4));
 
+						// printf("color_start: %f, %f, %f\n", color.getX(), color.getY(), color.getZ());
+
 						switch (colObj->getActivationState())
 						{
 							case ACTIVE_TAG:
 								color = defaultColors.m_activeObject;
+								printf("color_ACTIVE: %f, %f, %f\n", color.getX(), color.getY(), color.getZ());
 								break;
 							case ISLAND_SLEEPING:
 								color = defaultColors.m_deactivatedObject;
+								// printf("color_SLEEPING: %f, %f, %f\n", color.getX(), color.getY(), color.getZ());
 								break;
 							case WANTS_DEACTIVATION:
 								color = defaultColors.m_wantsDeactivationObject;
+								// printf("color_WANTS_DEACTIVATION: %f, %f, %f\n", color.getX(), color.getY(), color.getZ());
 								break;
 							case DISABLE_DEACTIVATION:
 								color = defaultColors.m_disabledDeactivationObject;
+								// printf("color_DISABLE_DEACTIVATION: %f, %f, %f\n", color.getX(), color.getY(), color.getZ());
 								break;
 							case DISABLE_SIMULATION:
 								color = defaultColors.m_disabledSimulationObject;
+								// printf("color_DISABLE_SIMULATION: %f, %f, %f\n", color.getX(), color.getY(), color.getZ());
 								break;
 							default:
 							{
 								color = btVector3(btScalar(.3), btScalar(0.3), btScalar(0.3));
+								// printf("color_Default: %f, %f, %f\n", color.getX(), color.getY(), color.getZ());
 							}
 						};
 
 						colObj->getCustomDebugColor(color);
+
+						// printf("color_final: %f, %f, %f\n", color.getX(), color.getY(), color.getZ());
 
 						debugDrawObject(colObj->getWorldTransform(), colObj->getCollisionShape(), color);
 					}

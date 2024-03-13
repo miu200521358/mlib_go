@@ -1,5 +1,19 @@
 #include "btMDebugDraw.h"
 
+btMDefaultColors::btMDefaultColors(btVector3 activeObject, btVector3 deactivatedObject, btVector3 wantsDeactivationObject, btVector3 disabledDeactivationObject, btVector3 disabledSimulationObject, btVector3 aabb, btVector3 contactPoint)
+        : btIDebugDraw::DefaultColors()
+{
+    m_activeObject = activeObject;
+    m_deactivatedObject = deactivatedObject;
+    m_wantsDeactivationObject = wantsDeactivationObject;
+    m_disabledDeactivationObject = disabledDeactivationObject;
+    m_disabledSimulationObject = disabledSimulationObject;
+    m_aabb = aabb;
+    m_contactPoint = contactPoint;
+}
+
+// ---------------------------------------------------------
+
 btMDebugDrawLiner::btMDebugDrawLiner() {}
 btMDebugDrawLiner::~btMDebugDrawLiner() {}
 
@@ -11,6 +25,15 @@ btMDebugDrawLiner::~btMDebugDrawLiner() {}
 // コンストラクタ
 btMDebugDraw::btMDebugDraw() :
     m_debugMode(0)
+    , m_defaultColors(
+        btVector3(1.0f, 0.0f, 0.0f), // activeObject
+        btVector3(0.0f, 1.0f, 0.0f), // deactivatedObject
+        btVector3(0.0f, 1.0f, 1.0f), // wantsDeactivationObject
+        btVector3(1.0f, 0.0f, 1.0f), // disabledDeactivationObject
+        btVector3(1.0f, 1.0f, 1.0f), // disabledSimulationObject
+        btVector3(1.0f, 1.0f, 1.0f), // aabb
+        btVector3(0.0f, 0.0f, 1.0f)  // contactPoint
+    )
     , m_liner(0)
     {}
 btMDebugDraw::~btMDebugDraw() {}
@@ -64,8 +87,12 @@ int btMDebugDraw::getDebugMode() const {
 }
 
 // btIDebugDrawで定義済みのメソッド
-void btMDebugDraw::setDefaultColors(const DefaultColors& colors) {
-    btIDebugDraw::setDefaultColors(colors);
+void btMDebugDraw::setMDefaultColors(const btMDefaultColors& colors) {
+    m_defaultColors = colors;
+}
+
+btIDebugDraw::DefaultColors btMDebugDraw::getDefaultColors() const {
+    return m_defaultColors;
 }
 
 void btMDebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor) {

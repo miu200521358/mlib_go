@@ -5525,6 +5525,8 @@ extern void _wrap_btGeneric6DofSpringConstraintDoubleData2_m_springDamping_set_m
 extern swig_voidp _wrap_btGeneric6DofSpringConstraintDoubleData2_m_springDamping_get_mbt_e879218550ba2e2b(uintptr_t arg1);
 extern uintptr_t _wrap_new_btGeneric6DofSpringConstraintDoubleData2_mbt_e879218550ba2e2b(void);
 extern void _wrap_delete_btGeneric6DofSpringConstraintDoubleData2_mbt_e879218550ba2e2b(uintptr_t arg1);
+extern uintptr_t _wrap_new_btMDefaultColors_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, uintptr_t arg4, uintptr_t arg5, uintptr_t arg6, uintptr_t arg7);
+extern void _wrap_delete_btMDefaultColors_mbt_e879218550ba2e2b(uintptr_t arg1);
 extern uintptr_t _wrap__swig_NewDirectorBtMDebugDrawLinerBtMDebugDrawLiner_mbt_e879218550ba2e2b(int);
 extern void _wrap_DeleteDirectorBtMDebugDrawLiner_mbt_e879218550ba2e2b(uintptr_t arg1);
 extern uintptr_t _wrap_new_btMDebugDrawLiner_mbt_e879218550ba2e2b(void);
@@ -5532,7 +5534,6 @@ extern void _wrap_delete_btMDebugDrawLiner_mbt_e879218550ba2e2b(uintptr_t arg1);
 extern void _wrap_btMDebugDrawLiner_drawLine_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, uintptr_t arg4);
 extern uintptr_t _wrap_new_btMDebugDraw_mbt_e879218550ba2e2b(void);
 extern void _wrap_delete_btMDebugDraw_mbt_e879218550ba2e2b(uintptr_t arg1);
-extern void _wrap_btMDebugDraw_setDefaultColors_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2);
 extern void _wrap_btMDebugDraw_drawLine__SWIG_0_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, uintptr_t arg4, uintptr_t arg5);
 extern void _wrap_btMDebugDraw_drawSphere__SWIG_0_mbt_e879218550ba2e2b(uintptr_t arg1, float arg2, uintptr_t arg3, uintptr_t arg4);
 extern void _wrap_btMDebugDraw_drawSphere__SWIG_1_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2, float arg3, uintptr_t arg4);
@@ -5553,15 +5554,17 @@ extern void _wrap_btMDebugDraw_drawCone_mbt_e879218550ba2e2b(uintptr_t arg1, flo
 extern void _wrap_btMDebugDraw_drawPlane_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2, float arg3, uintptr_t arg4, uintptr_t arg5);
 extern void _wrap_btMDebugDraw_clearLines_mbt_e879218550ba2e2b(uintptr_t arg1);
 extern void _wrap_btMDebugDraw_flushLines_mbt_e879218550ba2e2b(uintptr_t arg1);
-extern void _wrap_btMDebugDraw_drawLine__SWIG_1_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, uintptr_t arg4);
-extern void _wrap_btMDebugDraw_drawContactPoint_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, float arg4, swig_intgo arg5, uintptr_t arg6);
-extern void _wrap_btMDebugDraw_reportErrorWarning_mbt_e879218550ba2e2b(uintptr_t arg1, swig_type_174 arg2);
-extern void _wrap_btMDebugDraw_draw3dText_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2, swig_type_175 arg3);
+extern uintptr_t _wrap_btMDebugDraw_getDefaultColors_mbt_e879218550ba2e2b(uintptr_t arg1);
+extern void _wrap_btMDebugDraw_setMDefaultColors_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2);
 extern void _wrap_btMDebugDraw_setLiner_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2);
 extern uintptr_t _wrap_btMDebugDraw_getLiner_mbt_e879218550ba2e2b(uintptr_t arg1);
 extern void _wrap_btMDebugDraw_setDebugMode_mbt_e879218550ba2e2b(uintptr_t arg1, swig_intgo arg2);
 extern swig_intgo _wrap_btMDebugDraw_getDebugMode_mbt_e879218550ba2e2b(uintptr_t arg1);
-extern uintptr_t _wrap_btMDebugDraw_getDefaultColors_mbt_e879218550ba2e2b(uintptr_t _swig_base);
+extern void _wrap_btMDebugDraw_drawLine__SWIG_1_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, uintptr_t arg4);
+extern void _wrap_btMDebugDraw_drawContactPoint_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3, float arg4, swig_intgo arg5, uintptr_t arg6);
+extern void _wrap_btMDebugDraw_reportErrorWarning_mbt_e879218550ba2e2b(uintptr_t arg1, swig_type_174 arg2);
+extern void _wrap_btMDebugDraw_draw3dText_mbt_e879218550ba2e2b(uintptr_t arg1, uintptr_t arg2, swig_type_175 arg3);
+extern void _wrap_btMDebugDraw_setDefaultColors_mbt_e879218550ba2e2b(uintptr_t _swig_base, uintptr_t arg1);
 #undef intgo
 */
 import "C"
@@ -52849,6 +52852,38 @@ type BtGeneric6DofSpringConstraintDoubleData2 interface {
 	GetM_springDamping() (_swig_ret *float64)
 }
 
+type SwigcptrBtMDefaultColors uintptr
+
+func (p SwigcptrBtMDefaultColors) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtMDefaultColors) SwigIsBtMDefaultColors() {
+}
+
+func NewBtMDefaultColors(arg1 BtVector3, arg2 BtVector3, arg3 BtVector3, arg4 BtVector3, arg5 BtVector3, arg6 BtVector3, arg7 BtVector3) (_swig_ret BtMDefaultColors) {
+	var swig_r BtMDefaultColors
+	_swig_i_0 := getSwigcptr(arg1)
+	_swig_i_1 := getSwigcptr(arg2)
+	_swig_i_2 := getSwigcptr(arg3)
+	_swig_i_3 := getSwigcptr(arg4)
+	_swig_i_4 := getSwigcptr(arg5)
+	_swig_i_5 := getSwigcptr(arg6)
+	_swig_i_6 := getSwigcptr(arg7)
+	swig_r = (BtMDefaultColors)(SwigcptrBtMDefaultColors(C._wrap_new_btMDefaultColors_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.uintptr_t(_swig_i_3), C.uintptr_t(_swig_i_4), C.uintptr_t(_swig_i_5), C.uintptr_t(_swig_i_6))))
+	return swig_r
+}
+
+func DeleteBtMDefaultColors(arg1 BtMDefaultColors) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_btMDefaultColors_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
+}
+
+type BtMDefaultColors interface {
+	Swigcptr() uintptr
+	SwigIsBtMDefaultColors()
+}
+
 type _swig_DirectorBtMDebugDrawLiner struct {
 	SwigcptrBtMDebugDrawLiner
 	v interface{}
@@ -52957,12 +52992,6 @@ func NewBtMDebugDraw() (_swig_ret BtMDebugDraw) {
 func DeleteBtMDebugDraw(arg1 BtMDebugDraw) {
 	_swig_i_0 := getSwigcptr(arg1)
 	C._wrap_delete_btMDebugDraw_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
-}
-
-func (arg1 SwigcptrBtMDebugDraw) SetDefaultColors(arg2 BtIDebugDraw_DefaultColors) {
-	_swig_i_0 := arg1
-	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMDebugDraw_setDefaultColors_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 }
 
 func (arg1 SwigcptrBtMDebugDraw) DrawLine__SWIG_0(arg2 BtVector3, arg3 BtVector3, arg4 BtVector3, arg5 BtVector3) {
@@ -53244,6 +53273,45 @@ func (arg1 SwigcptrBtMDebugDraw) FlushLines() {
 	C._wrap_btMDebugDraw_flushLines_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 }
 
+func (arg1 SwigcptrBtMDebugDraw) GetDefaultColors() (_swig_ret BtIDebugDraw_DefaultColors) {
+	var swig_r BtIDebugDraw_DefaultColors
+	_swig_i_0 := arg1
+	swig_r = (BtIDebugDraw_DefaultColors)(SwigcptrBtIDebugDraw_DefaultColors(C._wrap_btMDebugDraw_getDefaultColors_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtMDebugDraw) SetMDefaultColors(arg2 BtMDefaultColors) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btMDebugDraw_setMDefaultColors_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtMDebugDraw) SetLiner(arg2 BtMDebugDrawLiner) {
+	_swig_i_0 := arg1
+	_swig_i_1 := getSwigcptr(arg2)
+	C._wrap_btMDebugDraw_setLiner_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtMDebugDraw) GetLiner() (_swig_ret BtMDebugDrawLiner) {
+	var swig_r BtMDebugDrawLiner
+	_swig_i_0 := arg1
+	swig_r = (BtMDebugDrawLiner)(SwigcptrBtMDebugDrawLiner(C._wrap_btMDebugDraw_getLiner_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtMDebugDraw) SetDebugMode(arg2 int) {
+	_swig_i_0 := arg1
+	_swig_i_1 := arg2
+	C._wrap_btMDebugDraw_setDebugMode_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
+}
+
+func (arg1 SwigcptrBtMDebugDraw) GetDebugMode() (_swig_ret int) {
+	var swig_r int
+	_swig_i_0 := arg1
+	swig_r = (int)(C._wrap_btMDebugDraw_getDebugMode_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
 func (arg1 SwigcptrBtMDebugDraw) DrawLine__SWIG_1(arg2 BtVector3, arg3 BtVector3, arg4 BtVector3) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
@@ -53294,36 +53362,9 @@ func (arg1 SwigcptrBtMDebugDraw) Draw3dText(arg2 BtVector3, arg3 string) {
 	}
 }
 
-func (arg1 SwigcptrBtMDebugDraw) SetLiner(arg2 BtMDebugDrawLiner) {
-	_swig_i_0 := arg1
-	_swig_i_1 := getSwigcptr(arg2)
-	C._wrap_btMDebugDraw_setLiner_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
-}
-
-func (arg1 SwigcptrBtMDebugDraw) GetLiner() (_swig_ret BtMDebugDrawLiner) {
-	var swig_r BtMDebugDrawLiner
-	_swig_i_0 := arg1
-	swig_r = (BtMDebugDrawLiner)(SwigcptrBtMDebugDrawLiner(C._wrap_btMDebugDraw_getLiner_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))))
-	return swig_r
-}
-
-func (arg1 SwigcptrBtMDebugDraw) SetDebugMode(arg2 int) {
-	_swig_i_0 := arg1
-	_swig_i_1 := arg2
-	C._wrap_btMDebugDraw_setDebugMode_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.swig_intgo(_swig_i_1))
-}
-
-func (arg1 SwigcptrBtMDebugDraw) GetDebugMode() (_swig_ret int) {
-	var swig_r int
-	_swig_i_0 := arg1
-	swig_r = (int)(C._wrap_btMDebugDraw_getDebugMode_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0)))
-	return swig_r
-}
-
-func (_swig_base SwigcptrBtMDebugDraw) GetDefaultColors() (_swig_ret BtIDebugDraw_DefaultColors) {
-	var swig_r BtIDebugDraw_DefaultColors
-	swig_r = (BtIDebugDraw_DefaultColors)(SwigcptrBtIDebugDraw_DefaultColors(C._wrap_btMDebugDraw_getDefaultColors_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base))))
-	return swig_r
+func (_swig_base SwigcptrBtMDebugDraw) SetDefaultColors(arg1 BtIDebugDraw_DefaultColors) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_btMDebugDraw_setDefaultColors_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0))
 }
 
 func (p SwigcptrBtMDebugDraw) SwigIsBtIDebugDraw() {
@@ -53336,7 +53377,6 @@ func (p SwigcptrBtMDebugDraw) SwigGetBtIDebugDraw() BtIDebugDraw {
 type BtMDebugDraw interface {
 	Swigcptr() uintptr
 	SwigIsBtMDebugDraw()
-	SetDefaultColors(arg2 BtIDebugDraw_DefaultColors)
 	DrawSphere(a ...interface{})
 	DrawTriangle(a ...interface{})
 	DrawAabb(arg2 BtVector3, arg3 BtVector3, arg4 BtVector3)
@@ -53350,15 +53390,17 @@ type BtMDebugDraw interface {
 	DrawPlane(arg2 BtVector3, arg3 float32, arg4 BtTransform, arg5 BtVector3)
 	ClearLines()
 	FlushLines()
-	DrawLine(a ...interface{})
-	DrawContactPoint(arg2 BtVector3, arg3 BtVector3, arg4 float32, arg5 int, arg6 BtVector3)
-	ReportErrorWarning(arg2 string)
-	Draw3dText(arg2 BtVector3, arg3 string)
+	GetDefaultColors() (_swig_ret BtIDebugDraw_DefaultColors)
+	SetMDefaultColors(arg2 BtMDefaultColors)
 	SetLiner(arg2 BtMDebugDrawLiner)
 	GetLiner() (_swig_ret BtMDebugDrawLiner)
 	SetDebugMode(arg2 int)
 	GetDebugMode() (_swig_ret int)
-	GetDefaultColors() (_swig_ret BtIDebugDraw_DefaultColors)
+	DrawLine(a ...interface{})
+	DrawContactPoint(arg2 BtVector3, arg3 BtVector3, arg4 float32, arg5 int, arg6 BtVector3)
+	ReportErrorWarning(arg2 string)
+	Draw3dText(arg2 BtVector3, arg3 string)
+	SetDefaultColors(arg1 BtIDebugDraw_DefaultColors)
 	SwigIsBtIDebugDraw()
 	SwigGetBtIDebugDraw() BtIDebugDraw
 }

@@ -1,10 +1,9 @@
 package mphysics
 
 import (
-	"fmt"
-
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 type MPhysics struct {
@@ -38,8 +37,9 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 	// デバッグビューワー
 	drawer := mbt.NewBtMDebugDraw()
 	drawer.SetLiner(NewMDebugDrawLiner(shader))
+	drawer.SetMDefaultColors(NewConstBtMDefaultColors())
 	world.SetDebugDrawer(drawer)
-	fmt.Printf("world.GetDebugDrawer()=%+v\n", world.GetDebugDrawer())
+	// fmt.Printf("world.GetDebugDrawer()=%+v\n", world.GetDebugDrawer())
 
 	p := &MPhysics{
 		world:       world,
@@ -57,7 +57,13 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 func (p *MPhysics) EnableDebug(enable bool) {
 	p.isDebug = enable
 	if enable {
-		p.world.GetDebugDrawer().SetDebugMode(int(mbt.BtIDebugDrawDBG_DrawConstraints | mbt.BtIDebugDrawDBG_DrawConstraintLimits | mbt.BtIDebugDrawDBG_DrawWireframe | mbt.BtIDebugDrawDBG_DrawAabb))
+		p.world.GetDebugDrawer().SetDebugMode(int(
+			mbt.BtIDebugDrawDBG_DrawConstraints |
+				mbt.BtIDebugDrawDBG_DrawConstraintLimits |
+				mbt.BtIDebugDrawDBG_DrawWireframe |
+				mbt.BtIDebugDrawDBG_DrawContactPoints |
+				mbt.BtIDebugDrawDBG_DrawFrames,
+		))
 	} else {
 		p.world.GetDebugDrawer().SetDebugMode(0)
 	}

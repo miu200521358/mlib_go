@@ -1,15 +1,21 @@
 package mphysics
 
 import (
-	"fmt"
-
 	"github.com/go-gl/gl/v4.4-core/gl"
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 // type MDefaultColors struct {
+// 	mbt.BtMDefaultColors
+// }
+
+// func NewMDefaultColors() *MDefaultColors {
+// 	return &MDefaultColors{
+// 		BtMDefaultColors: ,
+// 	}
 // }
 
 // func NewMDefaultColors() *MDefaultColors {
@@ -19,6 +25,18 @@ import (
 // func (mdc *MDefaultColors) Swigcptr() uintptr {
 // 	return uintptr(unsafe.Pointer(mdc))
 // }
+
+func NewConstBtMDefaultColors() mbt.BtMDefaultColors {
+	return mbt.NewBtMDefaultColors(
+		mbt.NewBtVector3(float32(1.0), float32(0.0), float32(0.0)), // activeObject
+		mbt.NewBtVector3(float32(0.5), float32(0.5), float32(0.0)), // deactivatedObject
+		mbt.NewBtVector3(float32(0.5), float32(0.0), float32(0.5)), // wantsDeactivationObject
+		mbt.NewBtVector3(float32(0.0), float32(0.5), float32(0.5)), // disabledDeactivationObject
+		mbt.NewBtVector3(float32(0.0), float32(1.0), float32(0.0)), // disabledSimulationObject
+		mbt.NewBtVector3(float32(1.0), float32(1.0), float32(0.0)), // aabb
+		mbt.NewBtVector3(float32(0.0), float32(0.0), float32(1.0)), // contactPoint
+	)
+}
 
 type MDebugDrawLiner struct {
 	mbt.BtMDebugDrawLiner
@@ -42,7 +60,7 @@ func NewMDebugDrawLiner(shader *mgl.MShader) *MDebugDrawLiner {
 // }
 
 func (ddl MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color mbt.BtVector3) {
-	fmt.Println("MDebugDrawLiner.DrawLine")
+	// fmt.Println("MDebugDrawLiner.DrawLine")
 	ddl.shader.UsePhysicsProgram()
 
 	// 頂点データを準備
@@ -72,6 +90,8 @@ func (ddl MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color 
 	gl.EnableVertexAttribArray(0)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
+
+	// fmt.Printf("ddl.color: %.5f, %.5f, %.5f\n", color.GetX(), color.GetY(), color.GetZ())
 
 	// 色を設定
 	colorUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mgl.SHADER_PHYSICS_COLOR))

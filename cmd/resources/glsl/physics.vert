@@ -5,8 +5,8 @@ uniform mat4 modelViewMatrix;
 
 in layout(location = 0) vec3 position;
 
-in vec3 color;
-in float alpha;
+uniform vec3 color;
+uniform float alpha;
 
 out vec4 color4;
 
