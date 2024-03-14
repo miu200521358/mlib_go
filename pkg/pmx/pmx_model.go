@@ -99,7 +99,7 @@ func (pm *PmxModel) ResetPhysics() {
 	// 	rigidBody.ResetPhysics()
 	// }
 
-	pm.Physics.Update()
+	pm.Physics.Update(1)
 
 	// for _, rigidBody := range pm.RigidBodies.GetSortedData() {
 	// 	rigidBody.CalcTransform(nil)
@@ -111,8 +111,9 @@ func (pm *PmxModel) Draw(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
 	windowIndex int,
+	elapsedCnt int,
 ) {
-	pm.UpdatePhysics(boneMatrixes, boneTransforms)
+	pm.UpdatePhysics(boneMatrixes, boneTransforms, elapsedCnt)
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
 
 	// 物理デバッグ表示
@@ -122,6 +123,7 @@ func (pm *PmxModel) Draw(
 func (pm *PmxModel) UpdatePhysics(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
+	elapsedCnt int,
 ) {
 	if pm.Physics == nil {
 		return
@@ -131,7 +133,7 @@ func (pm *PmxModel) UpdatePhysics(
 		rigidBody.UpdateTransform(boneMatrixes, boneTransforms)
 	}
 
-	pm.Physics.Update()
+	pm.Physics.Update(elapsedCnt)
 
 	// 剛体位置を更新
 	for _, rigidBody := range pm.RigidBodies.GetSortedData() {

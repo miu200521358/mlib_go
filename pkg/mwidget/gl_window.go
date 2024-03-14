@@ -27,7 +27,7 @@ type ModelSet struct {
 	Motion *vmd.VmdMotion
 }
 
-func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32) {
+func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, elapsedCnt int) {
 	matrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
 	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
 	if ms.Motion == nil {
@@ -47,7 +47,7 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32) {
 			transforms[i] = &t
 		}
 	}
-	ms.Model.Draw(shader, matrixes, transforms, windowIndex)
+	ms.Model.Draw(shader, matrixes, transforms, windowIndex, elapsedCnt)
 }
 
 type GlWindow struct {
@@ -443,7 +443,7 @@ func (w *GlWindow) ClearData() {
 	w.ModelSets = make([]ModelSet, 0)
 }
 
-func (w *GlWindow) Draw(frame float32) {
+func (w *GlWindow) Draw(frame float32, elapsedCnt int) {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 
@@ -453,7 +453,7 @@ func (w *GlWindow) Draw(frame float32) {
 
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
-		modelSet.Draw(w.Shader, w.WindowIndex, frame)
+		modelSet.Draw(w.Shader, w.WindowIndex, frame, elapsedCnt)
 	}
 }
 
@@ -499,17 +499,21 @@ func (w *GlWindow) Run() {
 		time := glfw.GetTime()
 		elapsed := time - previousTime
 		previousTime = time
-		frame += float32(elapsed)
+		// elapsedCnt := float32(math.Ceil(elapsed * float64(w.Physics.Fps)))
+		elapsedCnt := float32(1.0)
+		frame += elapsedCnt
+
+		fmt.Printf("frame: %.8f, elapsed: %.8f, elapsedCnt: %.1f\n", frame, elapsed, elapsedCnt)
 
 		// 描画は30fps固定
-		w.Draw(frame * w.Physics.Fps)
+		w.Draw(frame*30/w.Physics.Fps, int(elapsedCnt))
 
 		// Maintenance
 		w.SwapBuffers()
 		glfw.PollEvents()
 
 		// Wait to maintain fps
-		glfw.WaitEventsTimeout(float64(w.Physics.Spf))
+		glfw.WaitEventsTimeout(float64(w.Physics.Spf * elapsedCnt))
 	}
 	if w != nil && !w.closed {
 		w.Close(&w.Window)

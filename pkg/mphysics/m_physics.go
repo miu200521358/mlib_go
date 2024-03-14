@@ -3,6 +3,7 @@ package mphysics
 import (
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 type MPhysics struct {
@@ -43,7 +44,7 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 	p := &MPhysics{
 		world:       world,
 		MaxSubSteps: 5,
-		Fps:         60.0,
+		Fps:         30.0,
 		isDebug:     false,
 	}
 	p.Spf = 1.0 / p.Fps
@@ -109,13 +110,13 @@ func (p *MPhysics) RemoveJoint(joint mbt.BtTypedConstraint) {
 	p.world.RemoveConstraint(joint)
 }
 
-func (p *MPhysics) Update() {
+func (p *MPhysics) Update(elapsedCnt int) {
 	// // 標準出力を一時的にリダイレクトする
 	// old := os.Stdout // keep backup of the real stdout
 	// r, w, _ := os.Pipe()
 	// os.Stdout = w
 
-	p.world.StepSimulation(p.Spf, p.MaxSubSteps, p.Spf)
+	p.world.StepSimulation(p.Spf*float32(elapsedCnt), p.MaxSubSteps, p.Spf)
 
 	// // 標準出力を元に戻す
 	// w.Close()
