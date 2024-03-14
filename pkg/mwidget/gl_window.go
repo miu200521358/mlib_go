@@ -434,6 +434,7 @@ func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
 
 	pmxModel.InitializeDraw(w.Physics, w.WindowIndex, w.resourceFiles)
 	w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel, Motion: vmdMotion})
+	w.Draw(0, 0)
 }
 
 func (w *GlWindow) ClearData() {
