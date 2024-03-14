@@ -1,6 +1,8 @@
 package mphysics
 
 import (
+	"fmt"
+
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 
@@ -11,6 +13,7 @@ type MPhysics struct {
 	MaxSubSteps int
 	Fps         float32
 	Spf         float32
+	FpsMmd      float32
 	isDebug     bool
 }
 
@@ -48,6 +51,7 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 		isDebug:     false,
 	}
 	p.Spf = 1.0 / p.Fps
+	p.FpsMmd = 30.0 * (30.0 / p.Fps)
 
 	p.EnableDebug(false)
 
@@ -110,17 +114,16 @@ func (p *MPhysics) RemoveJoint(joint mbt.BtTypedConstraint) {
 	p.world.RemoveConstraint(joint)
 }
 
-func (p *MPhysics) Update(elapsedCnt int) {
+func (p *MPhysics) Update(timeStep float32) {
 	// // 標準出力を一時的にリダイレクトする
 	// old := os.Stdout // keep backup of the real stdout
 	// r, w, _ := os.Pipe()
 	// os.Stdout = w
 
-	timeStep := p.Spf * float32(elapsedCnt)
 	p.world.StepSimulation(timeStep, p.MaxSubSteps, timeStep/float32(p.MaxSubSteps))
 
-	// p.frame += float32(elapsedCnt)
-	// fmt.Printf("frame: %.8f [p.world.StepSimulation]\n", p.frame)
+	// p.frame += float32(elapsed)
+	fmt.Printf("timeStep: %.8f [p.world.StepSimulation]\n", timeStep)
 
 	// // 標準出力を元に戻す
 	// w.Close()

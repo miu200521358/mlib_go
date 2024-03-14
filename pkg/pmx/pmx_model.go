@@ -95,9 +95,10 @@ func (pm *PmxModel) Draw(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
 	windowIndex int,
-	elapsedCnt int,
+	frame float32,
+	elapsed float32,
 ) {
-	pm.UpdatePhysics(boneMatrixes, boneTransforms, elapsedCnt)
+	pm.UpdatePhysics(boneMatrixes, boneTransforms, frame, elapsed)
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
 
 	// 物理デバッグ表示
@@ -107,21 +108,24 @@ func (pm *PmxModel) Draw(
 func (pm *PmxModel) UpdatePhysics(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
-	elapsedCnt int,
+	frame float32,
+	elapsed float32,
 ) {
 	if pm.Physics == nil {
 		return
 	}
 
 	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-		rigidBody.UpdateTransform(boneMatrixes, boneTransforms)
+		rigidBody.UpdateTransform(boneMatrixes, boneTransforms, elapsed == 0.0)
 	}
 
-	pm.Physics.Update(elapsedCnt)
+	if frame > pm.Physics.Spf {
+		pm.Physics.Update(elapsed)
 
-	// 剛体位置を更新
-	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-		rigidBody.UpdateMatrix(boneMatrixes, boneTransforms)
+		// 剛体位置を更新
+		for _, rigidBody := range pm.RigidBodies.GetSortedData() {
+			rigidBody.UpdateMatrix(boneMatrixes, boneTransforms)
+		}
 	}
 }
 

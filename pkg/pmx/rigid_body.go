@@ -239,8 +239,10 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 func (r *RigidBody) UpdateTransform(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
+	isForce bool,
 ) {
-	if r.BtRigidBody == nil || r.BtRigidBody.GetMotionState() == nil || r.CorrectPhysicsType == PHYSICS_TYPE_DYNAMIC {
+	if r.BtRigidBody == nil || r.BtRigidBody.GetMotionState() == nil ||
+		(r.CorrectPhysicsType == PHYSICS_TYPE_DYNAMIC && !isForce) {
 		return
 	}
 

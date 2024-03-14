@@ -27,7 +27,7 @@ type ModelSet struct {
 	Motion *vmd.VmdMotion
 }
 
-func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, elapsedCnt int) {
+func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, elapsed float32) {
 	matrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
 	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
 	if ms.Motion == nil {
@@ -47,7 +47,7 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, el
 			transforms[i] = &t
 		}
 	}
-	ms.Model.Draw(shader, matrixes, transforms, windowIndex, elapsedCnt)
+	ms.Model.Draw(shader, matrixes, transforms, windowIndex, frame, elapsed)
 }
 
 type GlWindow struct {
@@ -443,7 +443,7 @@ func (w *GlWindow) ClearData() {
 	w.ModelSets = make([]ModelSet, 0)
 }
 
-func (w *GlWindow) Draw(frame float32, elapsedCnt int) {
+func (w *GlWindow) Draw(frame float32, elapsed float32) {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 
@@ -453,7 +453,7 @@ func (w *GlWindow) Draw(frame float32, elapsedCnt int) {
 
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
-		modelSet.Draw(w.Shader, w.WindowIndex, frame, elapsedCnt)
+		modelSet.Draw(w.Shader, w.WindowIndex, frame, elapsed)
 	}
 }
 
@@ -497,23 +497,20 @@ func (w *GlWindow) Run() {
 
 		// Update
 		time := glfw.GetTime()
-		elapsed := time - previousTime
+		elapsed := float32(time - previousTime)
 		previousTime = time
-		// elapsedCnt := float32(math.Ceil(elapsed * float64(w.Physics.Fps)))
-		elapsedCnt := float32(1.0)
-		frame += elapsedCnt
+		// elapsed := float32(math.Ceil(elapsed * float64(w.Physics.Fps)))
+		// elapsed := float32(1.0)
+		frame += elapsed
 
-		fmt.Printf("frame: %.8f, elapsed: %.8f, elapsedCnt: %.1f\n", frame, elapsed, elapsedCnt)
+		fmt.Printf("elapsed: %.8f, frame: %.8f\n", elapsed, frame)
 
-		// 描画は30fps固定
-		w.Draw(frame*30/w.Physics.Fps, int(elapsedCnt))
+		// 描画
+		w.Draw(frame*w.Physics.FpsMmd, elapsed)
 
 		// Maintenance
 		w.SwapBuffers()
 		glfw.PollEvents()
-
-		// Wait to maintain fps
-		glfw.WaitEventsTimeout(float64(w.Physics.Spf * elapsedCnt))
 	}
 	if w != nil && !w.closed {
 		w.Close(&w.Window)
