@@ -10,6 +10,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
@@ -88,21 +89,29 @@ func (pm *PmxModel) InitializeDraw(physics *mphysics.MPhysics, windowIndex int, 
 	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
 	pm.RigidBodies.InitPhysics(pm.Physics, pm.Bones)
 	pm.Joints.InitPhysics(pm.Physics, pm.RigidBodies)
+	pm.Bones.PrepareDraw()
 }
 
 func (pm *PmxModel) Draw(
 	shader *mgl.MShader,
 	boneMatrixes []*mgl32.Mat4,
+	boneGlobalMatrixes []*mmath.MMat4,
 	boneTransforms []*mbt.BtTransform,
 	windowIndex int,
 	frame float32,
 	elapsed float32,
+	isBoneDebug bool,
 ) {
 	pm.UpdatePhysics(boneMatrixes, boneTransforms, frame, elapsed)
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
 
 	// 物理デバッグ表示
 	pm.Physics.DrawWorld()
+
+	// ボーンデバッグ表示
+	if isBoneDebug {
+		pm.Bones.Draw(shader, boneGlobalMatrixes, windowIndex)
+	}
 }
 
 func (pm *PmxModel) UpdatePhysics(

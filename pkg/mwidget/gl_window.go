@@ -27,13 +27,19 @@ type ModelSet struct {
 	Motion *vmd.VmdMotion
 }
 
-func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, elapsed float32) {
+func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, elapsed float32, isBoneDebug bool) {
 	matrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
+	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.NameIndexes))
 	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
 	if ms.Motion == nil {
 		for i := range ms.Model.Bones.GetIndexes() {
 			mat := mgl32.Ident4()
 			matrixes[i] = &mat
+
+			globalMat := mmath.NewMMat4()
+			globalMat.Translate(ms.Model.Bones.GetItem(i).Position)
+			globalMatrixes[i] = globalMat
+
 			t := mbt.NewBtTransform()
 			transforms[i] = &t
 		}
@@ -42,12 +48,13 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, el
 		for i, bone := range ms.Model.Bones.GetSortedData() {
 			mat := trees.GetItem(bone.Name, frame).LocalMatrix.GL()
 			matrixes[i] = mat
+			globalMatrixes[i] = trees.GetItem(bone.Name, frame).GlobalMatrix
 			t := mbt.NewBtTransform()
 			t.SetFromOpenGLMatrix(&mat[0])
 			transforms[i] = &t
 		}
 	}
-	ms.Model.Draw(shader, matrixes, transforms, windowIndex, frame, elapsed)
+	ms.Model.Draw(shader, matrixes, globalMatrixes, transforms, windowIndex, frame, elapsed, isBoneDebug)
 }
 
 // 直角の定数値
@@ -459,7 +466,7 @@ func (w *GlWindow) Draw(frame float32, elapsed float32) {
 
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
-		modelSet.Draw(w.Shader, w.WindowIndex, frame, elapsed)
+		modelSet.Draw(w.Shader, w.WindowIndex, frame, elapsed, w.EnableBoneDebug)
 	}
 }
 

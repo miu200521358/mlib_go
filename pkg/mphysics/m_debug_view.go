@@ -5,6 +5,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 // type MDefaultColors struct {
@@ -93,10 +94,10 @@ func (ddl MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color 
 	// fmt.Printf("ddl.color: %.5f, %.5f, %.5f\n", color.GetX(), color.GetY(), color.GetZ())
 
 	// 色を設定
-	colorUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mgl.SHADER_PHYSICS_COLOR))
+	colorUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mgl.SHADER_COLOR))
 	gl.Uniform3f(colorUniform, color.GetX(), color.GetY(), color.GetZ())
 
-	alphaUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mgl.SHADER_PHYSICS_ALPHA))
+	alphaUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mgl.SHADER_ALPHA))
 	gl.Uniform1f(alphaUniform, 0.6)
 
 	// 描画

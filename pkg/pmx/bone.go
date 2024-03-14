@@ -5,7 +5,10 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/go-gl/gl/v4.4-core/gl"
+
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
@@ -387,6 +390,9 @@ type Bones struct {
 	*mcore.IndexNameModelCorrection[*Bone]
 	LayerSortedIndexes map[int]string
 	LayerSortedNames   map[string]int
+	vao                *mgl.VAO
+	ibo                *mgl.IBO
+	iboCount           int32
 }
 
 func NewBones() *Bones {
@@ -394,6 +400,9 @@ func NewBones() *Bones {
 		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Bone](),
 		LayerSortedIndexes:       map[int]string{},
 		LayerSortedNames:         map[string]int{},
+		vao:                      nil,
+		ibo:                      nil,
+		iboCount:                 0,
 	}
 }
 
@@ -461,6 +470,72 @@ func (b *Bones) GetLayerIndexes() []int {
 	}
 
 	return indexes
+}
+
+func (b *Bones) PrepareDraw() {
+	ibo := make([]uint32, 0, len(b.Data))
+
+	for _, bone := range b.GetSortedData() {
+		if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
+			ibo = append(ibo, uint32(bone.Index))
+			ibo = append(ibo, uint32(bone.ParentIndex))
+		}
+	}
+
+	b.vao = mgl.NewVAO()
+	b.ibo = mgl.NewIBO(gl.Ptr(ibo), len(ibo))
+	b.iboCount = int32(len(ibo))
+}
+
+func (b *Bones) Draw(
+	shader *mgl.MShader,
+	boneGlobalMatrixes []*mmath.MMat4,
+	windowIndex int,
+) {
+	// ボーンをモデルメッシュの前面に描画するために深度テストを無効化
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.ALWAYS)
+
+	// ブレンディングを有効にする
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	// ブレンディングを有効にする
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	shader.UseBoneProgram()
+
+	// ボーン位置を設定
+	boneVbo := make([]float32, 0)
+
+	for _, matrix := range boneGlobalMatrixes {
+		posGl := matrix.Translation().GL()
+		boneVbo = append(boneVbo, posGl[0], posGl[1], posGl[2])
+	}
+
+	vbo := mgl.NewVBOForBone(gl.Ptr(boneVbo), len(boneVbo))
+
+	// 色を設定
+	colorUniform := gl.GetUniformLocation(shader.BoneProgram, gl.Str(mgl.SHADER_COLOR))
+	gl.Uniform3f(colorUniform, 0, 0, 1.0)
+
+	alphaUniform := gl.GetUniformLocation(shader.BoneProgram, gl.Str(mgl.SHADER_ALPHA))
+	gl.Uniform1f(alphaUniform, 0.8)
+
+	b.vao.Bind()
+	vbo.BindBone()
+	b.ibo.Bind()
+
+	gl.DrawElements(gl.LINES, b.iboCount, gl.UNSIGNED_INT, nil)
+
+	b.ibo.Unbind()
+	vbo.Unbind()
+	b.vao.Unbind()
+
+	shader.Unuse()
+
+	gl.Disable(gl.BLEND)
 }
 
 // 変形階層とINDEXのソート用構造体

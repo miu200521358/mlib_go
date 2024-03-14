@@ -10,7 +10,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 const (
@@ -34,16 +33,16 @@ const (
 	SHADER_MORPH_TEXTURE_FACTOR         = "textureFactor\x00"
 	SHADER_MORPH_TOON_FACTOR            = "toonFactor\x00"
 	SHADER_MORPH_SPHERE_FACTOR          = "sphereFactor\x00"
-	SHADER_PHYSICS_COLOR                = "color\x00"
-	SHADER_PHYSICS_ALPHA                = "alpha\x00"
+	SHADER_COLOR                        = "color\x00"
+	SHADER_ALPHA                        = "alpha\x00"
 )
 
 type ProgramType int
 
 const (
-	PROGRAM_TYPE_MODEL ProgramType = iota
-	PROGRAM_TYPE_EDGE
-	PROGRAM_TYPE_BONE
+	PROGRAM_TYPE_MODEL   ProgramType = iota
+	PROGRAM_TYPE_EDGE    ProgramType = iota
+	PROGRAM_TYPE_BONE    ProgramType = iota
 	PROGRAM_TYPE_PHYSICS ProgramType = iota
 )
 
@@ -70,9 +69,8 @@ type MShader struct {
 	ModelProgram         uint32
 	EdgeProgram          uint32
 	BoneProgram          uint32
-	BoneTextureId        uint32
-	RigidBodyProgram     uint32
 	PhysicsProgram       uint32
+	BoneTextureId        uint32
 }
 
 func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
@@ -99,6 +97,18 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		shader.ModelProgram = modelProgram
 		shader.UseModelProgram()
 		shader.initialize(shader.ModelProgram)
+		shader.Unuse()
+	}
+
+	{
+		boneProgram, err := shader.newProgram(
+			resourceFiles, "resources/glsl/bone.vert", "resources/glsl/bone.frag")
+		if err != nil {
+			return nil, err
+		}
+		shader.BoneProgram = boneProgram
+		shader.UseBoneProgram()
+		shader.initialize(shader.BoneProgram)
 		shader.Unuse()
 	}
 
@@ -296,7 +306,7 @@ func (s *MShader) Use(programType ProgramType) {
 }
 
 func (s *MShader) GetPrograms() []uint32 {
-	return []uint32{s.ModelProgram, s.PhysicsProgram}
+	return []uint32{s.ModelProgram, s.BoneProgram, s.PhysicsProgram}
 }
 
 func (s *MShader) Unuse() {

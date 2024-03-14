@@ -7,7 +7,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 type Meshes struct {
@@ -103,8 +102,8 @@ func NewMeshes(
 
 	vao := mgl.NewVAO()
 	vao.Bind()
-	vbo := mgl.NewVBOForModel(gl.Ptr(vertices), len(vertices))
-	vbo.BindModel()
+	vbo := mgl.NewVBOForVertex(gl.Ptr(vertices), len(vertices))
+	vbo.BindVertex()
 	vbo.Unbind()
 	vao.Unbind()
 
@@ -135,7 +134,7 @@ func (m *Meshes) Draw(
 
 	for _, mesh := range m.meshes {
 		m.vao.Bind()
-		m.vbo.BindModel()
+		m.vbo.BindVertex()
 
 		// ブレンディングを有効にする
 		gl.Enable(gl.BLEND)
