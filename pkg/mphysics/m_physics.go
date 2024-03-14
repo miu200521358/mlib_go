@@ -43,10 +43,10 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 	p := &MPhysics{
 		world:       world,
 		MaxSubSteps: 5,
-		Fps:         30.0,
-		Spf:         1.0 / 30.0,
+		Fps:         60.0,
 		isDebug:     false,
 	}
+	p.Spf = 1.0 / p.Fps
 
 	p.EnableDebug(false)
 
