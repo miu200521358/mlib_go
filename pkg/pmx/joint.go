@@ -5,7 +5,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-
 )
 
 type JointParam struct {
@@ -117,6 +116,8 @@ func (j *Joint) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBo
 	// j.Constraint.SetParam(int(mbt.BT_CONSTRAINT_STOP_ERP), float32(0.8), 0)
 	// j.Constraint.SetParam(int(mbt.BT_CONSTRAINT_CFM), float32(0.2), 0)
 	// j.Constraint.SetParam(int(mbt.BT_CONSTRAINT_STOP_CFM), float32(0.2), 0)
+
+	// 円の表示サイズ
 	j.Constraint.SetDbgDrawSize(float32(1.5))
 
 	modelPhysics.AddJoint(j.Constraint)

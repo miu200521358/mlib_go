@@ -184,8 +184,7 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 	// boneTransform.SetOrigin(boneLocalPosition.Bullet())
 
 	// 剛体の初期位置と回転
-	r.BtRigidBodyTransform = mbt.NewBtTransform(
-		r.Rotation.GetQuaternion().Bullet(), r.Position.Bullet())
+	r.BtRigidBodyTransform = mbt.NewBtTransform(r.Rotation.GetQuaternion().Bullet(), r.Position.Bullet())
 
 	// 剛体の初期位置
 	r.BtRigidBodyPositionTransform = mbt.NewBtTransform()
