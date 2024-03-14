@@ -56,8 +56,6 @@ const (
 
 type MShader struct {
 	lightAmbient         *mmath.MVec4
-	lightDiffuse         *mmath.MVec3
-	lightSpecular        *mmath.MVec3
 	CameraPosition       *mmath.MVec3
 	LookAtCenterPosition *mmath.MVec3
 	FieldOfViewAngle     float32
@@ -86,7 +84,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		Height:               int32(height),
 		NearPlane:            0.1,
 		FarPlane:             1000.0,
-		lightPosition:        &mmath.MVec3{-20, INITIAL_CAMERA_POSITION_Y * 2, INITIAL_CAMERA_POSITION_Z * 2},
+		lightPosition:        &mmath.MVec3{-40, INITIAL_CAMERA_POSITION_Y * 2, -INITIAL_CAMERA_POSITION_Z * 3},
 		msaa:                 NewMsaa(int32(width), int32(height)),
 	}
 	shader.lightDirection = shader.lightPosition.Muled(&mmath.MVec3{-1, -1, -1}).Normalize()
@@ -210,10 +208,7 @@ func (s *MShader) newProgram(
 func (s *MShader) initialize(program uint32) {
 	// light color
 	// MMD Light Diffuse は必ず0
-	s.lightDiffuse = &mmath.MVec3Zero
-	// MMDの照明色そのまま
-	s.lightSpecular = &mmath.MVec3{LIGHT_AMBIENT, LIGHT_AMBIENT, LIGHT_AMBIENT}
-	// light_diffuse == MMDのambient
+	// MMDの照明色そのまま: light_diffuse == MMDのambient
 	s.lightAmbient = &mmath.MVec4{LIGHT_AMBIENT, LIGHT_AMBIENT, LIGHT_AMBIENT, 1}
 
 	gl.UseProgram(program)

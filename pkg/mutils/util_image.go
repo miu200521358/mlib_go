@@ -16,7 +16,6 @@ import (
 	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/riff"
 	_ "golang.org/x/image/tiff"
-
 )
 
 // 指定されたパスから画像を読み込む
@@ -83,10 +82,35 @@ func LoadImageFromResources(resourceFiles embed.FS, fileName string) (image.Imag
 	if err != nil {
 		return nil, fmt.Errorf("image not found: %v", err)
 	}
+	file := bytes.NewReader(fileData)
 
-	img, err := png.Decode(bytes.NewReader(fileData))
+	if strings.ToLower(fileName[len(fileName)-4:]) == ".png" {
+		img, err := png.Decode(file)
+		if err != nil {
+			return nil, err
+		}
+
+		return img, nil
+	} else if strings.ToLower(fileName[len(fileName)-4:]) == ".tga" {
+		img, err := tga.Decode(file)
+		if err != nil {
+			return nil, err
+		}
+
+		return img, nil
+	} else if strings.ToLower(fileName[len(fileName)-4:]) == ".spa" ||
+		strings.ToLower(fileName[len(fileName)-4:]) == ".bmp" {
+		// スフィアファイルはbmpとして読み込む
+		img, err := bmp.Decode(file)
+		if err != nil {
+			return nil, err
+		}
+
+		return img, nil
+	}
+	img, _, err := image.Decode(file)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode image: %v", err)
+		return nil, err
 	}
 
 	return img, nil
