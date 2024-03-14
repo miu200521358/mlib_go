@@ -1,11 +1,8 @@
 package mphysics
 
 import (
-	"fmt"
-
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 type MPhysics struct {
@@ -122,8 +119,8 @@ func (p *MPhysics) Update(timeStep float32) {
 
 	p.world.StepSimulation(timeStep, p.MaxSubSteps, timeStep/float32(p.MaxSubSteps))
 
-	// p.frame += float32(elapsed)
-	fmt.Printf("timeStep: %.8f [p.world.StepSimulation]\n", timeStep)
+	// // p.frame += float32(elapsed)
+	// fmt.Printf("timeStep: %.8f [p.world.StepSimulation]\n", timeStep)
 
 	// // 標準出力を元に戻す
 	// w.Close()

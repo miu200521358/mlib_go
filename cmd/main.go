@@ -14,7 +14,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mwidget"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 func init() {
@@ -84,15 +83,26 @@ func main() {
 		walk.MsgBox(&mWindow.MainWindow, "出力Pmxファイル選択エラー", err.Error(), walk.MsgBoxIconError)
 	}
 
-	debugCheckBox, err := walk.NewCheckBox(&mWindow.MainWindow)
+	boneDebugCheckBox, err := walk.NewCheckBox(&mWindow.MainWindow)
 	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "デバッグチェックボックス生成エラー", err.Error(), walk.MsgBoxIconError)
+		walk.MsgBox(&mWindow.MainWindow, "ボーンデバッグチェックボックス生成エラー", err.Error(), walk.MsgBoxIconError)
 	}
-	debugCheckBox.SetText("デバッグ表示")
-	debugCheckBox.SetChecked(false)
+	boneDebugCheckBox.SetText("ボーンデバッグ表示")
+	boneDebugCheckBox.SetChecked(false)
 
-	debugCheckBox.Clicked().Attach(func() {
-		glWindow.Physics.EnableDebug(debugCheckBox.Checked())
+	boneDebugCheckBox.Clicked().Attach(func() {
+		glWindow.EnableBoneDebug = boneDebugCheckBox.Checked()
+	})
+
+	physicsDebugCheckBox, err := walk.NewCheckBox(&mWindow.MainWindow)
+	if err != nil {
+		walk.MsgBox(&mWindow.MainWindow, "物理デバッグチェックボックス生成エラー", err.Error(), walk.MsgBoxIconError)
+	}
+	physicsDebugCheckBox.SetText("物理デバッグ表示")
+	physicsDebugCheckBox.SetChecked(false)
+
+	physicsDebugCheckBox.Clicked().Attach(func() {
+		glWindow.Physics.EnableDebug(physicsDebugCheckBox.Checked())
 	})
 
 	execButton, err := walk.NewPushButton(&mWindow.MainWindow)
@@ -161,7 +171,7 @@ func main() {
 		isExist, err := mutils.ExistsFile(path)
 		if !isExist || err != nil {
 			pmxSavePicker.PathLineEdit.SetText("")
-			debugCheckBox.SetEnabled(false)
+			physicsDebugCheckBox.SetEnabled(false)
 			execButton.SetEnabled(false)
 			subExecButton.SetEnabled(false)
 			return
@@ -171,7 +181,7 @@ func main() {
 		ext := filepath.Ext(file)
 		outputPath := filepath.Join(dir, file[:len(file)-len(ext)]+"_out"+ext)
 		pmxSavePicker.PathLineEdit.SetText(outputPath)
-		debugCheckBox.SetEnabled(true)
+		physicsDebugCheckBox.SetEnabled(true)
 		execButton.SetEnabled(true)
 		subExecButton.SetEnabled(true)
 	}

@@ -50,6 +50,9 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, el
 	ms.Model.Draw(shader, matrixes, transforms, windowIndex, frame, elapsed)
 }
 
+// 直角の定数値
+const RIGHT_ANGLE = 89.9
+
 type GlWindow struct {
 	glfw.Window
 	ModelSets           []ModelSet
@@ -66,6 +69,7 @@ type GlWindow struct {
 	shiftPressed        bool
 	ctrlPressed         bool
 	closed              bool
+	EnableBoneDebug     bool
 }
 
 func NewGlWindow(
@@ -151,7 +155,7 @@ func NewGlWindow(
 		WindowIndex:         windowIndex,
 		resourceFiles:       resourceFiles,
 		prevCursorPos:       &mmath.MVec2{0, 0},
-		yaw:                 89.0,
+		yaw:                 RIGHT_ANGLE,
 		pitch:               0.0,
 		Physics:             mphysics.NewMPhysics(shader),
 		middleButtonPressed: false,
@@ -160,6 +164,7 @@ func NewGlWindow(
 		shiftPressed:        false,
 		ctrlPressed:         false,
 		closed:              false,
+		EnableBoneDebug:     false,
 	}
 
 	w.SetScrollCallback(glWindow.handleScrollEvent)
@@ -223,22 +228,22 @@ func (w *GlWindow) handleKeyEvent(
 
 	switch key {
 	case glfw.KeyKP0: // 下面から
-		w.yaw = 90
-		w.pitch = 90
+		w.yaw = RIGHT_ANGLE
+		w.pitch = RIGHT_ANGLE
 	case glfw.KeyKP2: // 正面から
-		w.yaw = 90
+		w.yaw = RIGHT_ANGLE
 		w.pitch = 0
 	case glfw.KeyKP4: // 左面から
 		w.yaw = 180
 		w.pitch = 0
 	case glfw.KeyKP5: // 上面から
-		w.yaw = 90
-		w.pitch = -90
+		w.yaw = RIGHT_ANGLE
+		w.pitch = -RIGHT_ANGLE
 	case glfw.KeyKP6: // 右面から
 		w.yaw = 0
 		w.pitch = 0
 	case glfw.KeyKP8: // 背面から
-		w.yaw = -90
+		w.yaw = -RIGHT_ANGLE
 		w.pitch = 0
 	default:
 		return
@@ -327,10 +332,10 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 		w.pitch += yOffset
 
 		// 仰角の制限（水平面より上下に行き過ぎないようにする）
-		if w.pitch > 89.9 {
-			w.pitch = 89.9
-		} else if w.pitch < -89.9 {
-			w.pitch = -89.9
+		if w.pitch > RIGHT_ANGLE {
+			w.pitch = RIGHT_ANGLE
+		} else if w.pitch < -RIGHT_ANGLE {
+			w.pitch = -RIGHT_ANGLE
 		}
 
 		// 方位角の制限（360度を超えないようにする）
@@ -368,19 +373,19 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 			math.Sin(mgl64.DegToRad(w.pitch)),
 			math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw)),
 		}.Normalize()
-		upVector := mgl64.Vec3{0, 1, 0}
+		upVector := cameraDirection.Cross(mgl64.Vec3{1, 0, 0}).Normalize()
 
 		// カメラの横方向と縦方向のベクトルを計算
 		rightVector := cameraDirection.Cross(upVector).Normalize()
 		upCameraVector := rightVector.Cross(cameraDirection).Normalize()
 
 		// カメラがモデルの側面を向いているかを確認
-		var horizontalSign float64 = -1
-		if (w.yaw > 160 && w.yaw < 200) || (w.yaw > 340 && w.yaw < 380) {
-			horizontalSign = 1
-		}
+		// var horizontalSign float64 = -1
+		// if (w.yaw > 160 && w.yaw < 200) || (w.yaw > 340 && w.yaw < 380) {
+		// 	horizontalSign = 1
+		// }
 
-		xOffset := (w.prevCursorPos.GetX() - xpos) * ratio * horizontalSign
+		xOffset := (w.prevCursorPos.GetX() - xpos) * ratio * -1
 		yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
 
 		// カメラの位置を更新（カメラの方向を考慮）
@@ -420,7 +425,7 @@ func (w *GlWindow) Reset() {
 	// カメラとかリセット
 	w.Shader.Reset()
 	w.prevCursorPos = &mmath.MVec2{0, 0}
-	w.yaw = 89.0
+	w.yaw = RIGHT_ANGLE
 	w.pitch = 0.0
 	w.middleButtonPressed = false
 	w.rightButtonPressed = false
@@ -504,7 +509,7 @@ func (w *GlWindow) Run() {
 		// elapsed := float32(1.0)
 		frame += elapsed
 
-		fmt.Printf("elapsed: %.8f, frame: %.8f\n", elapsed, frame)
+		// fmt.Printf("elapsed: %.8f, frame: %.8f\n", elapsed, frame)
 
 		// 描画
 		w.Draw(frame*w.Physics.FpsMmd, elapsed)
