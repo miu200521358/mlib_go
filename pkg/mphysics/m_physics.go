@@ -116,7 +116,11 @@ func (p *MPhysics) Update(elapsedCnt int) {
 	// r, w, _ := os.Pipe()
 	// os.Stdout = w
 
-	p.world.StepSimulation(p.Spf*float32(elapsedCnt), p.MaxSubSteps, p.Spf)
+	timeStep := p.Spf * float32(elapsedCnt)
+	p.world.StepSimulation(timeStep, p.MaxSubSteps, timeStep/float32(p.MaxSubSteps))
+
+	// p.frame += float32(elapsedCnt)
+	// fmt.Printf("frame: %.8f [p.world.StepSimulation]\n", p.frame)
 
 	// // 標準出力を元に戻す
 	// w.Close()
