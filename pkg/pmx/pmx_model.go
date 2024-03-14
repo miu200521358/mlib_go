@@ -90,22 +90,6 @@ func (pm *PmxModel) InitializeDraw(physics *mphysics.MPhysics, windowIndex int, 
 	pm.Joints.InitPhysics(pm.Physics, pm.RigidBodies)
 }
 
-func (pm *PmxModel) ResetPhysics() {
-	if pm.Physics == nil {
-		return
-	}
-
-	// for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-	// 	rigidBody.ResetPhysics()
-	// }
-
-	pm.Physics.Update(1)
-
-	// for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-	// 	rigidBody.CalcTransform(nil)
-	// }
-}
-
 func (pm *PmxModel) Draw(
 	shader *mgl.MShader,
 	boneMatrixes []*mgl32.Mat4,
