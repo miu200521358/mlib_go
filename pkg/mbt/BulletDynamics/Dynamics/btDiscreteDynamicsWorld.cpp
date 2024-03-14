@@ -421,6 +421,8 @@ int btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, 
 		}
 	}
 
+	// printf("numSimulationSubSteps = %d, maxSubSteps = %d\n", numSimulationSubSteps, maxSubSteps);
+
 	// printf("btDiscreteDynamicsWorld::stepSimulation ----------\n");
 
 	//process some debugging flags
@@ -435,6 +437,7 @@ int btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, 
 	{
 		//clamp the number of substeps, to prevent simulation grinding spiralling down to a halt
 		int clampedSimulationSteps = (numSimulationSubSteps > maxSubSteps) ? maxSubSteps : numSimulationSubSteps;
+		// printf("clampedSimulationSteps = %d\n", clampedSimulationSteps);
 
 		saveKinematicState(fixedTimeStep * clampedSimulationSteps);
 
@@ -448,6 +451,7 @@ int btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, 
 	}
 	else
 	{
+		// printf("synchronizeMotionStates\n");
 		synchronizeMotionStates();
 	}
 

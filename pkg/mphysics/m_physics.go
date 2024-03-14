@@ -3,7 +3,6 @@ package mphysics
 import (
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 type MPhysics struct {
@@ -44,8 +43,8 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 	p := &MPhysics{
 		world:       world,
 		MaxSubSteps: 5,
-		Fps:         60.0,
-		Spf:         1.0 / 60.0,
+		Fps:         30.0,
+		Spf:         1.0 / 30.0,
 		isDebug:     false,
 	}
 
@@ -61,8 +60,7 @@ func (p *MPhysics) EnableDebug(enable bool) {
 			mbt.BtIDebugDrawDBG_DrawConstraints |
 				mbt.BtIDebugDrawDBG_DrawConstraintLimits |
 				mbt.BtIDebugDrawDBG_DrawWireframe |
-				mbt.BtIDebugDrawDBG_DrawContactPoints |
-				mbt.BtIDebugDrawDBG_DrawFrames,
+				mbt.BtIDebugDrawDBG_DrawContactPoints,
 		))
 	} else {
 		p.world.GetDebugDrawer().SetDebugMode(0)

@@ -20,7 +20,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 type ModelSet struct {
@@ -503,7 +502,7 @@ func (w *GlWindow) Run() {
 		frame += float32(elapsed)
 
 		// 描画は30fps固定
-		w.Draw(frame * 30.0)
+		w.Draw(frame * w.Physics.Fps)
 
 		// Maintenance
 		w.SwapBuffers()
