@@ -527,28 +527,68 @@ func (b *Bones) Draw(
 	normalVbo := make([]float32, 0)
 
 	for i, matrix := range boneGlobalMatrixes {
+		bone := b.GetItem(i)
+
 		posGl := matrix.Translation().GL()
 		positionVbo = append(positionVbo, posGl[0], posGl[1], posGl[2])
 
-		bone := b.GetItem(i)
 		normalMatrix := matrix.Muled(bone.LocalMatrix)
-		unitY := mmath.MVec3UnitY.Copy()
-		if bone.Position.GetX() > 0 {
-			unitY = unitY.MuledScalar(-1)
-		}
-		normalGl := normalMatrix.MulVec3(unitY).GL()
 		normalVbo = append(normalVbo, posGl[0], posGl[1], posGl[2])
-		normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
+		normalGl := normalMatrix.MulVec3(mmath.MVec3UnitY).GL()
+
+		// ボーンの種類で色を変える
+		if bone.IsIK() {
+			// IKボーン
+			positionVbo = append(positionVbo, 1.0, 0.38, 0, 1.0)
+			normalVbo = append(normalVbo, 1.0, 0.58, 0.2, 0.7)
+			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
+			normalVbo = append(normalVbo, 1.0, 0.58, 0.2, 0.7)
+		} else if len(bone.IkTargetBoneIndexes) > 0 {
+			// IK先
+			positionVbo = append(positionVbo, 1.0, 0.57, 0.61, 1.0)
+			normalVbo = append(normalVbo, 1.0, 0.77, 0.81, 0.7)
+			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
+			normalVbo = append(normalVbo, 1.0, 0.77, 0.81, 0.7)
+		} else if len(bone.IkLinkBoneIndexes) > 0 {
+			// IKリンク
+			positionVbo = append(positionVbo, 1.0, 0.83, 0.49, 1.0)
+			normalVbo = append(normalVbo, 1.0, 1.0, 0.69, 0.7)
+			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
+			normalVbo = append(normalVbo, 1.0, 1.0, 0.69, 0.7)
+		} else if bone.HasFixedAxis() {
+			// 軸制限
+			positionVbo = append(positionVbo, 0.72, 0.32, 1.0, 1.0)
+			normalVbo = append(normalVbo, 0.92, 0.52, 1.0, 0.7)
+			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
+			normalVbo = append(normalVbo, 0.92, 0.52, 1.0, 0.7)
+		} else if bone.IsEffectorRotation() || bone.IsEffectorTranslation() {
+			// 付与親
+			positionVbo = append(positionVbo, 0.68, 0.64, 1.0, 1.0)
+			normalVbo = append(normalVbo, 0.88, 0.84, 1.0, 0.7)
+			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
+			normalVbo = append(normalVbo, 0.88, 0.84, 1.0, 0.7)
+		} else if bone.CanTranslate() {
+			// 移動可能
+			positionVbo = append(positionVbo, 0.70, 1.0, 0.54, 1.0)
+			normalVbo = append(normalVbo, 0.90, 1.0, 0.74, 0.7)
+			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
+			normalVbo = append(normalVbo, 0.90, 1.0, 0.74, 0.7)
+		} else if !bone.IsVisible() {
+			// 非表示
+			positionVbo = append(positionVbo, 0.82, 0.82, 0.82, 1.0)
+			normalVbo = append(normalVbo, 0.92, 0.92, 0.92, 0.7)
+			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
+			normalVbo = append(normalVbo, 0.92, 0.92, 0.92, 0.7)
+		} else {
+			// それ以外（回転）
+			positionVbo = append(positionVbo, 0.56, 0.78, 1.0, 1.0)
+			normalVbo = append(normalVbo, 0.76, 0.98, 1.00, 0.7)
+			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
+			normalVbo = append(normalVbo, 0.76, 0.98, 1.00, 0.7)
+		}
 	}
 
 	positionVboGl := mgl.NewVBOForBone(gl.Ptr(positionVbo), len(positionVbo))
-
-	// 色を設定
-	positionColorUniform := gl.GetUniformLocation(shader.BoneProgram, gl.Str(mgl.SHADER_COLOR))
-	gl.Uniform3f(positionColorUniform, 0, 0, 1.0)
-
-	alphaUniform := gl.GetUniformLocation(shader.BoneProgram, gl.Str(mgl.SHADER_ALPHA))
-	gl.Uniform1f(alphaUniform, 0.8)
 
 	b.positionVao.Bind()
 	positionVboGl.BindBone()
@@ -563,10 +603,6 @@ func (b *Bones) Draw(
 	// ------------------------------
 
 	normalVboGl := mgl.NewVBOForBone(gl.Ptr(normalVbo), len(normalVbo))
-
-	// 色を設定
-	normalColorUniform := gl.GetUniformLocation(shader.BoneProgram, gl.Str(mgl.SHADER_COLOR))
-	gl.Uniform3f(normalColorUniform, 0.7, 0.7, 1.0)
 
 	b.normalVao.Bind()
 	normalVboGl.BindBone()

@@ -137,7 +137,7 @@ func (v *VBO) BindVertex() {
 		gl.FLOAT,
 		false,
 		v.stride,
-		19*4, // オフセット
+		19*4,
 	)
 
 	// 8: SDEF-C
@@ -148,7 +148,7 @@ func (v *VBO) BindVertex() {
 		gl.FLOAT,
 		false,
 		v.stride,
-		20*4, // オフセット
+		20*4,
 	)
 
 	// 9: SDEF-R0
@@ -159,7 +159,7 @@ func (v *VBO) BindVertex() {
 		gl.FLOAT,
 		false,
 		v.stride,
-		23*4, // オフセット
+		23*4,
 	)
 
 	// 10: SDEF-R1
@@ -170,7 +170,7 @@ func (v *VBO) BindVertex() {
 		gl.FLOAT,
 		false,
 		v.stride,
-		26*4, // オフセット
+		26*4,
 	)
 
 	// 11: SDEF-Bone0
@@ -181,7 +181,7 @@ func (v *VBO) BindVertex() {
 		gl.FLOAT,
 		false,
 		v.stride,
-		29*4, // オフセット
+		29*4,
 	)
 
 	// 12: SDEF-Bone1
@@ -192,7 +192,7 @@ func (v *VBO) BindVertex() {
 		gl.FLOAT,
 		false,
 		v.stride,
-		32*4, // オフセット
+		32*4,
 	)
 
 }
@@ -208,8 +208,8 @@ func NewVBOForBone(ptr unsafe.Pointer, count int) *VBO {
 		ptr:    ptr,
 	}
 	// 剛体構造体のサイズ(全部floatとする)
-	// position(3)
-	vbo.stride = int32(4 * (3))
+	// position(3), color(4)
+	vbo.stride = int32(4 * (3 + 4))
 	vbo.size = count * 4
 
 	return vbo
@@ -230,6 +230,17 @@ func (v *VBO) BindBone() {
 		false,
 		v.stride,
 		0*4,
+	)
+
+	// 1: color
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointerWithOffset(
+		1,
+		4,
+		gl.FLOAT,
+		false,
+		v.stride,
+		3*4,
 	)
 
 }
