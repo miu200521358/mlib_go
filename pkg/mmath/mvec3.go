@@ -13,32 +13,32 @@ import (
 )
 
 var (
-	MVec3Zero = MVec3{}
+	MVec3Zero = &MVec3{}
 
 	// UnitX holds a vector with X set to one.
-	MVec3UnitX = MVec3{1, 0, 0}
+	MVec3UnitX = &MVec3{1, 0, 0}
 	// UnitY holds a vector with Y set to one.
-	MVec3UnitY = MVec3{0, 1, 0}
+	MVec3UnitY = &MVec3{0, 1, 0}
 	// UnitZ holds a vector with Z set to one.
-	MVec3UnitZ = MVec3{0, 0, 1}
+	MVec3UnitZ = &MVec3{0, 0, 1}
 	// UnitXYZ holds a vector with X, Y, Z set to one.
-	MVec3UnitXYZ = MVec3{1, 1, 1}
+	MVec3UnitXYZ = &MVec3{1, 1, 1}
 
 	// Red holds the color red.
-	MVec3Red = MVec3{1, 0, 0}
+	MVec3Red = &MVec3{1, 0, 0}
 	// Green holds the color green.
-	MVec3Green = MVec3{0, 1, 0}
+	MVec3Green = &MVec3{0, 1, 0}
 	// Blue holds the color black.
-	MVec3Blue = MVec3{0, 0, 1}
+	MVec3Blue = &MVec3{0, 0, 1}
 	// Black holds the color black.
-	MVec3Black = MVec3{0, 0, 0}
+	MVec3Black = &MVec3{0, 0, 0}
 	// White holds the color white.
-	MVec3White = MVec3{1, 1, 1}
+	MVec3White = &MVec3{1, 1, 1}
 
 	// MinVal holds a vector with the smallest possible component values.
-	MVec3MinVal = MVec3{-math.MaxFloat64, -math.MaxFloat64, -math.MaxFloat64}
+	MVec3MinVal = &MVec3{-math.MaxFloat64, -math.MaxFloat64, -math.MaxFloat64}
 	// MaxVal holds a vector with the highest possible component values.
-	MVec3MaxVal = MVec3{+math.MaxFloat64, +math.MaxFloat64, +math.MaxFloat64}
+	MVec3MaxVal = &MVec3{+math.MaxFloat64, +math.MaxFloat64, +math.MaxFloat64}
 )
 
 type MVec3 mgl64.Vec3
@@ -383,7 +383,7 @@ func (v *MVec3) Clamped(min, max *MVec3) *MVec3 {
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
 func (v *MVec3) Clamp01() *MVec3 {
-	return v.Clamp(&MVec3Zero, &MVec3UnitXYZ)
+	return v.Clamp(MVec3Zero, MVec3UnitXYZ)
 }
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します

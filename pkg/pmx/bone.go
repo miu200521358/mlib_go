@@ -390,9 +390,12 @@ type Bones struct {
 	*mcore.IndexNameModelCorrection[*Bone]
 	LayerSortedIndexes map[int]string
 	LayerSortedNames   map[string]int
-	vao                *mgl.VAO
-	ibo                *mgl.IBO
-	iboCount           int32
+	positionVao        *mgl.VAO
+	positionIbo        *mgl.IBO
+	positionIboCount   int32
+	normalVao          *mgl.VAO
+	normalIbo          *mgl.IBO
+	normalIboCount     int32
 }
 
 func NewBones() *Bones {
@@ -400,9 +403,12 @@ func NewBones() *Bones {
 		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Bone](),
 		LayerSortedIndexes:       map[int]string{},
 		LayerSortedNames:         map[string]int{},
-		vao:                      nil,
-		ibo:                      nil,
-		iboCount:                 0,
+		positionVao:              nil,
+		positionIbo:              nil,
+		positionIboCount:         0,
+		normalVao:                nil,
+		normalIbo:                nil,
+		normalIboCount:           0,
 	}
 }
 
@@ -473,18 +479,26 @@ func (b *Bones) GetLayerIndexes() []int {
 }
 
 func (b *Bones) PrepareDraw() {
-	ibo := make([]uint32, 0, len(b.Data))
+	positionIbo := make([]uint32, 0, len(b.Data))
+	normalIbo := make([]uint32, 0, len(b.Data))
 
-	for _, bone := range b.GetSortedData() {
+	for i, bone := range b.GetSortedData() {
 		if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
-			ibo = append(ibo, uint32(bone.Index))
-			ibo = append(ibo, uint32(bone.ParentIndex))
+			positionIbo = append(positionIbo, uint32(bone.Index))
+			positionIbo = append(positionIbo, uint32(bone.ParentIndex))
 		}
+
+		normalIbo = append(normalIbo, uint32(i*2))
+		normalIbo = append(normalIbo, uint32(i*2+1))
 	}
 
-	b.vao = mgl.NewVAO()
-	b.ibo = mgl.NewIBO(gl.Ptr(ibo), len(ibo))
-	b.iboCount = int32(len(ibo))
+	b.positionVao = mgl.NewVAO()
+	b.positionIbo = mgl.NewIBO(gl.Ptr(positionIbo), len(positionIbo))
+	b.positionIboCount = int32(len(positionIbo))
+
+	b.normalVao = mgl.NewVAO()
+	b.normalIbo = mgl.NewIBO(gl.Ptr(normalIbo), len(normalIbo))
+	b.normalIboCount = int32(len(normalIbo))
 }
 
 func (b *Bones) Draw(
@@ -506,32 +520,63 @@ func (b *Bones) Draw(
 
 	shader.UseBoneProgram()
 
-	// ボーン位置を設定
-	boneVbo := make([]float32, 0)
+	// ------------------------------
 
-	for _, matrix := range boneGlobalMatrixes {
+	// ボーン位置を設定
+	positionVbo := make([]float32, 0)
+	normalVbo := make([]float32, 0)
+
+	for i, matrix := range boneGlobalMatrixes {
 		posGl := matrix.Translation().GL()
-		boneVbo = append(boneVbo, posGl[0], posGl[1], posGl[2])
+		positionVbo = append(positionVbo, posGl[0], posGl[1], posGl[2])
+
+		bone := b.GetItem(i)
+		normalMatrix := matrix.Muled(bone.LocalMatrix)
+		unitY := mmath.MVec3UnitY.Copy()
+		if bone.Position.GetX() > 0 {
+			unitY = unitY.MuledScalar(-1)
+		}
+		normalGl := normalMatrix.MulVec3(unitY).GL()
+		normalVbo = append(normalVbo, posGl[0], posGl[1], posGl[2])
+		normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
 	}
 
-	vbo := mgl.NewVBOForBone(gl.Ptr(boneVbo), len(boneVbo))
+	positionVboGl := mgl.NewVBOForBone(gl.Ptr(positionVbo), len(positionVbo))
 
 	// 色を設定
-	colorUniform := gl.GetUniformLocation(shader.BoneProgram, gl.Str(mgl.SHADER_COLOR))
-	gl.Uniform3f(colorUniform, 0, 0, 1.0)
+	positionColorUniform := gl.GetUniformLocation(shader.BoneProgram, gl.Str(mgl.SHADER_COLOR))
+	gl.Uniform3f(positionColorUniform, 0, 0, 1.0)
 
 	alphaUniform := gl.GetUniformLocation(shader.BoneProgram, gl.Str(mgl.SHADER_ALPHA))
 	gl.Uniform1f(alphaUniform, 0.8)
 
-	b.vao.Bind()
-	vbo.BindBone()
-	b.ibo.Bind()
+	b.positionVao.Bind()
+	positionVboGl.BindBone()
+	b.positionIbo.Bind()
 
-	gl.DrawElements(gl.LINES, b.iboCount, gl.UNSIGNED_INT, nil)
+	gl.DrawElements(gl.LINES, b.positionIboCount, gl.UNSIGNED_INT, nil)
 
-	b.ibo.Unbind()
-	vbo.Unbind()
-	b.vao.Unbind()
+	b.positionIbo.Unbind()
+	positionVboGl.Unbind()
+	b.positionVao.Unbind()
+
+	// ------------------------------
+
+	normalVboGl := mgl.NewVBOForBone(gl.Ptr(normalVbo), len(normalVbo))
+
+	// 色を設定
+	normalColorUniform := gl.GetUniformLocation(shader.BoneProgram, gl.Str(mgl.SHADER_COLOR))
+	gl.Uniform3f(normalColorUniform, 0.7, 0.7, 1.0)
+
+	b.normalVao.Bind()
+	normalVboGl.BindBone()
+	b.normalIbo.Bind()
+
+	gl.DrawElements(gl.LINES, b.normalIboCount, gl.UNSIGNED_INT, nil)
+
+	b.normalIbo.Unbind()
+	normalVboGl.Unbind()
+	b.normalVao.Unbind()
 
 	shader.Unuse()
 

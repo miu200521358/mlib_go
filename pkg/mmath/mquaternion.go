@@ -495,13 +495,13 @@ func NewMQuaternionFromAxes(xAxis, yAxis, zAxis *MVec3) *MQuaternion {
 
 // SeparateByAxis separates the quaternion into four quaternions based on the global axis.
 func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuaternion, *MQuaternion, *MQuaternion) {
-	localZAxis := &MVec3UnitZ
+	localZAxis := MVec3UnitZ
 	globalXAxis := globalAxis.Normalize()
 	globalYAxis := localZAxis.Cross(globalXAxis)
 	globalZAxis := globalXAxis.Cross(globalYAxis)
 
 	if globalYAxis.Length() == 0 {
-		localYAxis := &MVec3UnitY
+		localYAxis := MVec3UnitY
 		globalZAxis := localYAxis.Cross(globalXAxis)
 		globalYAxis = globalXAxis.Cross(globalZAxis)
 	}
