@@ -3,6 +3,7 @@ package mphysics
 import (
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 type MPhysics struct {
@@ -30,9 +31,6 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 
 	world.AddRigidBody(groundRigidBody, 1<<15, 0xFFFF)
 
-	// // 剛体衝突判定用のコールバック
-	// world.GetPairCache().SetOverlapFilterCallback(NewMFilterCallback())
-
 	// デバッグビューワー
 	drawer := mbt.NewBtMDebugDraw()
 	drawer.SetLiner(NewMDebugDrawLiner(shader))
@@ -42,7 +40,7 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 
 	p := &MPhysics{
 		world:       world,
-		MaxSubSteps: 10,
+		MaxSubSteps: 5,
 		Fps:         30.0,
 		isDebug:     false,
 	}
@@ -87,11 +85,6 @@ func (p *MPhysics) DrawWorld() {
 		// fmt.Print(buf.String())
 	}
 }
-
-// func (p *MPhysics) AddNonFilterProxy(proxy mbt.BtBroadphaseProxy) {
-// 	pairCache := p.world.GetPairCache()
-
-// }
 
 func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody, group int, mask int) {
 	p.world.AddRigidBody(rigidBody, group, mask)
