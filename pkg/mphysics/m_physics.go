@@ -3,7 +3,6 @@ package mphysics
 import (
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 type MPhysics struct {
@@ -65,25 +64,23 @@ func (p *MPhysics) EnableDebug(enable bool) {
 	}
 }
 
-func (p *MPhysics) DrawWorld() {
-	if p.isDebug {
-		// fmt.Printf("DrawWorld p.world=%+v\n", p.world)
+func (p *MPhysics) DebugDrawWorld() {
+	// fmt.Printf("DrawWorld p.world=%+v\n", p.world)
 
-		// // 標準出力を一時的にリダイレクトする
-		// old := os.Stdout // keep backup of the real stdout
-		// r, w, _ := os.Pipe()
-		// os.Stdout = w
+	// // 標準出力を一時的にリダイレクトする
+	// old := os.Stdout // keep backup of the real stdout
+	// r, w, _ := os.Pipe()
+	// os.Stdout = w
 
-		p.world.DebugDrawWorld()
+	p.world.DebugDrawWorld()
 
-		// // 標準出力を元に戻す
-		// w.Close()
-		// os.Stdout = old // restoring the real stdout
+	// // 標準出力を元に戻す
+	// w.Close()
+	// os.Stdout = old // restoring the real stdout
 
-		// var buf bytes.Buffer
-		// buf.ReadFrom(r)
-		// fmt.Print(buf.String())
-	}
+	// var buf bytes.Buffer
+	// buf.ReadFrom(r)
+	// fmt.Print(buf.String())
 }
 
 func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody, group int, mask int) {

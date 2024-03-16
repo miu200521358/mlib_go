@@ -98,7 +98,7 @@ func (pm *PmxModel) Draw(
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
 
 	// 物理デバッグ表示
-	pm.Physics.DrawWorld()
+	pm.Physics.DebugDrawWorld()
 
 	// ボーンデバッグ表示
 	if isBoneDebug {
@@ -134,7 +134,7 @@ func (pm *PmxModel) SetUp() {
 	// ボーン情報のセットアップ
 	pm.Bones.setup()
 
-	// ジョイント
+	// 剛体・ジョイント
 	for _, joint := range pm.Joints.GetSortedData() {
 		if joint.RigidbodyIndexA >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexA) &&
 			joint.RigidbodyIndexB >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexB) {
