@@ -519,7 +519,7 @@ func (w *GlWindow) Run() {
 		// fmt.Printf("elapsed: %.8f, frame: %.8f\n", elapsed, frame)
 
 		// 描画
-		w.Draw(frame*w.Physics.FpsMmd, elapsed)
+		w.Draw(frame*w.Physics.Fps, elapsed)
 
 		// Maintenance
 		w.SwapBuffers()

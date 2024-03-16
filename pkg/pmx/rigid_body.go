@@ -1,15 +1,12 @@
 package pmx
 
 import (
-	"math"
-
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-
 )
 
 type RigidBodyParam struct {
@@ -208,8 +205,7 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 	r.BtRigidBody.SetDamping(float32(r.RigidBodyParam.LinearDamping), float32(r.RigidBodyParam.AngularDamping))
 	r.BtRigidBody.SetRestitution(float32(r.RigidBodyParam.Restitution))
 	r.BtRigidBody.SetFriction(float32(r.RigidBodyParam.Friction))
-	// btRigidBody.SetUserIndex(mbt.)
-	r.BtRigidBody.SetSleepingThresholds(0.01, (180.0 * 0.1 / math.Pi))
+	// r.BtRigidBody.SetSleepingThresholds(0.1, (180.0 * 0.1 / math.Pi))
 
 	if r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
 		// 剛体の位置更新に物理演算を使わない。

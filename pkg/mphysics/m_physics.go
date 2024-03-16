@@ -10,7 +10,6 @@ type MPhysics struct {
 	MaxSubSteps int
 	Fps         float32
 	Spf         float32
-	FpsMmd      float32
 	isDebug     bool
 }
 
@@ -20,7 +19,7 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 	dispatcher := mbt.NewBtCollisionDispatcher(collisionConfiguration)
 	solver := mbt.NewBtSequentialImpulseConstraintSolver()
 	world := mbt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
-	world.SetGravity(mbt.NewBtVector3(float32(0), float32(-9.8*10), float32(0)))
+	world.SetGravity(mbt.NewBtVector3(float32(0), float32(-9.8), float32(0)))
 
 	groundShape := mbt.NewBtStaticPlaneShape(mbt.NewBtVector3(float32(0), float32(1), float32(0)), float32(0))
 	groundTransform := mbt.NewBtTransform()
@@ -43,12 +42,11 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 
 	p := &MPhysics{
 		world:       world,
-		MaxSubSteps: 5,
+		MaxSubSteps: 10,
 		Fps:         30.0,
 		isDebug:     false,
 	}
 	p.Spf = 1.0 / p.Fps
-	p.FpsMmd = 30.0 * (30.0 / p.Fps)
 
 	p.EnableDebug(false)
 
