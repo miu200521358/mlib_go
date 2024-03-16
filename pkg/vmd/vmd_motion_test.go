@@ -2512,3 +2512,66 @@ func TestVmdMotion_AnimateBoneArmIk2(t *testing.T) {
 		}
 	}
 }
+
+func TestVmdMotion_AnimateBoneArmIk3(t *testing.T) {
+	vr := &VmdMotionReader{}
+	motionData, err := vr.ReadByFilepath("C:/MMD/mlib_go/test_resources/Addiction_0F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*VmdMotion)
+
+	pr := &pmx.PmxReader{}
+	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Sour式初音ミクVer.1.02/Black_全表示.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+	model.SetUp()
+
+	{
+
+		fno := float32(0)
+		matrixes := motion.AnimateBone(fno, model, nil, true, false, "")
+		{
+			expectedPosition := &mmath.MVec3{1.018832, 15.840092, 0.532239}
+			if !matrixes.GetItem("左腕", fno).Position.PracticallyEquals(expectedPosition, 0.2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左腕", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{1.186002, 14.510550, 0.099023}
+			if !matrixes.GetItem("左腕捩", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左腕捩", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{1.353175, 13.181011, -0.334196}
+			if !matrixes.GetItem("左ひじ", fno).Position.PracticallyEquals(expectedPosition, 1e-1) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左ひじ", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{1.018832, 15.840092, 0.532239}
+			if !matrixes.GetItem("左腕W", fno).Position.PracticallyEquals(expectedPosition, 0.2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左腕W", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{1.353175, 13.181011, -0.334196}
+			if !matrixes.GetItem("左腕W先", fno).Position.PracticallyEquals(expectedPosition, 0.2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左腕W先", fno).Position)
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{1.353175, 13.181011, -0.334196}
+			if !matrixes.GetItem("左腕WIK", fno).Position.PracticallyEquals(expectedPosition, 0.2) {
+				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("左腕WIK", fno).Position)
+			}
+		}
+	}
+}

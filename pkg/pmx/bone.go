@@ -101,7 +101,6 @@ type Bone struct {
 	EffectiveBoneIndexes   []int            // 自分を付与親として登録しているボーンINDEX一覧
 	IkLinkBoneIndexes      []int            // IKリンクとして登録されているIKボーンのボーンIndex
 	IkTargetBoneIndexes    []int            // IKターゲットとして登録されているIKボーンのボーンIndex
-	ChildIkBoneIndexes     []int            // 自分を親として登録しているIKボーンのボーンIndex
 	AngleLimit             bool             // 自分がIKリンクボーンの角度制限がある場合、true
 	MinAngleLimit          *mmath.MRotation // 自分がIKリンクボーンの角度制限の下限
 	MaxAngleLimit          *mmath.MRotation // 自分がIKリンクボーンの角度制限の上限
@@ -388,6 +387,8 @@ func (bone *Bone) setup() {
 // ボーンリスト
 type Bones struct {
 	*mcore.IndexNameModelCorrection[*Bone]
+	Vertices           map[int][]int
+	IkTreeIndexes      map[int][]int
 	LayerSortedIndexes map[int]string
 	LayerSortedNames   map[string]int
 	positionVao        *mgl.VAO
@@ -401,8 +402,10 @@ type Bones struct {
 func NewBones() *Bones {
 	return &Bones{
 		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Bone](),
-		LayerSortedIndexes:       map[int]string{},
-		LayerSortedNames:         map[string]int{},
+		Vertices:                 make(map[int][]int),
+		IkTreeIndexes:            make(map[int][]int),
+		LayerSortedIndexes:       make(map[int]string),
+		LayerSortedNames:         make(map[string]int),
 		positionVao:              nil,
 		positionIbo:              nil,
 		positionIboCount:         0,
@@ -476,6 +479,213 @@ func (b *Bones) GetLayerIndexes() []int {
 	}
 
 	return indexes
+}
+
+// 関連ボーンリストの取得
+func (b *Bones) getRelativeBoneIndexes(boneIndex int, parentBoneIndexes, relativeBoneIndexes []int) ([]int, []int) {
+
+	if boneIndex <= 0 || !b.Contains(boneIndex) {
+		return parentBoneIndexes, relativeBoneIndexes
+	}
+
+	bone := b.GetItem(boneIndex)
+	if b.Contains(bone.ParentIndex) && !slices.Contains(relativeBoneIndexes, bone.ParentIndex) {
+		// 親ボーンを辿る(親から子の順番)
+		parentBoneIndexes = append([]int{bone.ParentIndex}, parentBoneIndexes...)
+		relativeBoneIndexes = append(relativeBoneIndexes, bone.ParentIndex)
+		parentBoneIndexes, relativeBoneIndexes =
+			b.getRelativeBoneIndexes(bone.ParentIndex, parentBoneIndexes, relativeBoneIndexes)
+	}
+	if (bone.IsEffectorRotation() || bone.IsEffectorTranslation()) &&
+		b.Contains(bone.EffectIndex) && !slices.Contains(relativeBoneIndexes, bone.EffectIndex) {
+		// 付与親ボーンを辿る
+		relativeBoneIndexes = append(relativeBoneIndexes, bone.EffectIndex)
+		_, relativeBoneIndexes =
+			b.getRelativeBoneIndexes(bone.EffectIndex, parentBoneIndexes, relativeBoneIndexes)
+	}
+	if bone.IsIK() {
+		if b.Contains(bone.Ik.BoneIndex) && !slices.Contains(relativeBoneIndexes, bone.Ik.BoneIndex) {
+			// IKターゲットボーンを辿る
+			relativeBoneIndexes = append(relativeBoneIndexes, bone.Ik.BoneIndex)
+			_, relativeBoneIndexes =
+				b.getRelativeBoneIndexes(bone.Ik.BoneIndex, parentBoneIndexes, relativeBoneIndexes)
+		}
+		for _, link := range bone.Ik.Links {
+			if b.Contains(link.BoneIndex) && !slices.Contains(relativeBoneIndexes, link.BoneIndex) {
+				// IKリンクボーンを辿る
+				relativeBoneIndexes = append(relativeBoneIndexes, link.BoneIndex)
+				_, relativeBoneIndexes =
+					b.getRelativeBoneIndexes(link.BoneIndex, parentBoneIndexes, relativeBoneIndexes)
+			}
+		}
+	}
+	for _, boneIndex := range bone.EffectiveBoneIndexes {
+		if b.Contains(boneIndex) && !slices.Contains(relativeBoneIndexes, boneIndex) {
+			// 外部子ボーンを辿る
+			relativeBoneIndexes = append(relativeBoneIndexes, boneIndex)
+			_, relativeBoneIndexes =
+				b.getRelativeBoneIndexes(boneIndex, parentBoneIndexes, relativeBoneIndexes)
+		}
+	}
+	for _, boneIndex := range bone.IkTargetBoneIndexes {
+		if b.Contains(boneIndex) && !slices.Contains(relativeBoneIndexes, boneIndex) {
+			// IKターゲットボーンを辿る
+			relativeBoneIndexes = append(relativeBoneIndexes, boneIndex)
+			_, relativeBoneIndexes =
+				b.getRelativeBoneIndexes(boneIndex, parentBoneIndexes, relativeBoneIndexes)
+		}
+	}
+	for _, boneIndex := range bone.IkLinkBoneIndexes {
+		if b.Contains(boneIndex) && !slices.Contains(relativeBoneIndexes, boneIndex) {
+			// IKリンクボーンを辿る
+			relativeBoneIndexes = append(relativeBoneIndexes, boneIndex)
+			_, relativeBoneIndexes =
+				b.getRelativeBoneIndexes(boneIndex, parentBoneIndexes, relativeBoneIndexes)
+		}
+	}
+
+	return parentBoneIndexes, relativeBoneIndexes
+}
+
+// IKツリーの親INDEXを取得
+func (b *Bones) getIkTreeIndex(bone *Bone) *Bone {
+	if bone == nil || bone.ParentIndex < 0 || !b.Contains(bone.ParentIndex) {
+		return nil
+	}
+
+	parentBone := b.GetItem(bone.ParentIndex)
+	if parentBone.Index < 0 {
+		return nil
+	}
+
+	if _, ok := b.IkTreeIndexes[parentBone.Index]; ok {
+		return parentBone
+	} else {
+		parentLayerBone := b.getIkTreeIndex(parentBone)
+		if parentLayerBone != nil {
+			return parentLayerBone
+		}
+	}
+
+	if bone.IsEffectorRotation() || bone.IsEffectorTranslation() {
+		effectBone := b.GetItem(bone.EffectIndex)
+		if _, ok := b.IkTreeIndexes[effectBone.Index]; ok {
+			return effectBone
+		} else {
+			effectorLayerBone := b.getIkTreeIndex(effectBone)
+			if effectorLayerBone != nil {
+				return effectorLayerBone
+			}
+		}
+	}
+
+	return nil
+}
+
+func (b *Bones) setup() {
+	for _, bone := range b.Data {
+		// 関係ボーンリストを一旦クリア
+		bone.IkLinkBoneIndexes = make([]int, 0)
+		bone.IkTargetBoneIndexes = make([]int, 0)
+		bone.EffectiveBoneIndexes = make([]int, 0)
+		bone.ChildBoneIndexes = make([]int, 0)
+	}
+
+	// 関連ボーンINDEX情報を設定
+	for _, bone := range b.GetSortedData() {
+		if bone.IsIK() && bone.Ik != nil {
+			// IKのリンクとターゲット
+			for _, link := range bone.Ik.Links {
+				if b.Contains(link.BoneIndex) &&
+					!slices.Contains(b.GetItem(link.BoneIndex).IkLinkBoneIndexes, bone.Index) {
+					// リンクボーンにフラグを立てる
+					linkBone := b.GetItem(link.BoneIndex)
+					linkBone.IkLinkBoneIndexes = append(linkBone.IkLinkBoneIndexes, bone.Index)
+					// リンクの制限をコピーしておく
+					linkBone.AngleLimit = link.AngleLimit
+					linkBone.MinAngleLimit = link.MinAngleLimit
+					linkBone.MaxAngleLimit = link.MaxAngleLimit
+					linkBone.LocalAngleLimit = link.LocalAngleLimit
+					linkBone.LocalMinAngleLimit = link.LocalMinAngleLimit
+					linkBone.LocalMaxAngleLimit = link.LocalMaxAngleLimit
+				}
+			}
+			if b.Contains(bone.Ik.BoneIndex) &&
+				!slices.Contains(b.GetItem(bone.Ik.BoneIndex).IkTargetBoneIndexes, bone.Index) {
+				// ターゲットボーンにもフラグを立てる
+				b.GetItem(bone.Ik.BoneIndex).IkTargetBoneIndexes = append(b.GetItem(bone.Ik.BoneIndex).IkTargetBoneIndexes, bone.Index)
+			}
+		}
+		if bone.EffectIndex >= 0 && b.Contains(bone.EffectIndex) &&
+			!slices.Contains(b.GetItem(bone.EffectIndex).EffectiveBoneIndexes, bone.Index) {
+			// 付与親の方に付与子情報を保持
+			b.GetItem(bone.EffectIndex).EffectiveBoneIndexes = append(b.GetItem(bone.EffectIndex).EffectiveBoneIndexes, bone.Index)
+		}
+	}
+
+	for _, bone := range b.GetSortedData() {
+		// 影響があるボーンINDEXリスト
+		bone.ParentBoneIndexes, bone.RelativeBoneIndexes = b.getRelativeBoneIndexes(bone.Index, []int{}, []int{})
+
+		// 親ボーンに子ボーンとして登録する
+		if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
+			b.GetItem(bone.ParentIndex).ChildBoneIndexes = append(b.GetItem(bone.ParentIndex).ChildBoneIndexes, bone.Index)
+		}
+		// 親からの相対位置
+		bone.ParentRelativePosition = b.getParentRelativePosition(bone.Index)
+		// 子への相対位置
+		bone.ChildRelativePosition = b.getChildRelativePosition(bone.Index)
+		// ボーン単体のセットアップ
+		bone.setup()
+	}
+
+	// 変形階層・ボーンINDEXでソート
+	b.LayerSortedIndexes = make(map[int]string, len(b.Data))
+	b.LayerSortedNames = make(map[string]int, len(b.Data))
+	layerIndexes := b.GetLayerIndexes()
+
+	i := 0
+	for _, boneIndex := range layerIndexes {
+		bone := b.GetItem(boneIndex)
+		b.LayerSortedNames[bone.Name] = i
+		b.LayerSortedIndexes[i] = bone.Name
+		i++
+	}
+
+	// 変形階層順に親子を繋げていく
+ikLoop:
+	for _, boneIndex := range layerIndexes {
+		bone := b.GetItem(boneIndex)
+		if bone.IsIK() {
+			ikLayerBone := b.getIkTreeIndex(bone)
+			if ikLayerBone != nil {
+				// 合致するIKツリーがある場合、そのレイヤーに登録
+				b.IkTreeIndexes[ikLayerBone.Index] =
+					append(b.IkTreeIndexes[ikLayerBone.Index], bone.Index)
+				continue ikLoop
+			}
+			for _, link := range bone.Ik.Links {
+				linkBone := b.GetItem(link.BoneIndex)
+				linkLayerBone := b.getIkTreeIndex(linkBone)
+				if linkLayerBone != nil {
+					// 合致するIKツリーがある場合、そのレイヤーに登録
+					b.IkTreeIndexes[linkLayerBone.Index] =
+						append(b.IkTreeIndexes[linkLayerBone.Index], bone.Index)
+					continue ikLoop
+				}
+			}
+
+			// 関連親がIKツリーに登録されていない場合、新規にIKツリーを作成
+			linkBone := b.GetItem(bone.Ik.Links[len(bone.Ik.Links)-1].BoneIndex)
+			// b.IkTreeIndexes[linkBone.Index] = []int{bone.Index}
+			if linkBone.ParentIndex >= 0 && b.Contains(linkBone.ParentIndex) {
+				parentBone := b.GetItem(linkBone.ParentIndex)
+				b.IkTreeIndexes[parentBone.Index] = []int{bone.Index}
+			} else {
+				b.IkTreeIndexes[bone.Index] = []int{bone.Index}
+			}
+		}
+	}
 }
 
 func (b *Bones) PrepareDraw() {

@@ -53,7 +53,7 @@ func (bfs *BoneFrames) Animate(
 
 	// IK事前計算
 	if isCalcIk {
-		bfs.prepareIkSolvers(frame, model, targetBoneIndexes, isOutLog, description)
+		bfs.prepareIkSolvers(frame, model, targetBoneNames, isOutLog, description)
 	}
 
 	// ボーン変形行列操作
@@ -78,22 +78,23 @@ func (bfs *BoneFrames) Animate(
 func (bfs *BoneFrames) prepareIkSolvers(
 	frame float32,
 	model *pmx.PmxModel,
-	targetBoneIndexes map[int]string,
+	targetBoneNames map[string]int,
 	isOutLog bool,
 	description string,
 ) {
 	var wg sync.WaitGroup
-	for i := 0; i < len(targetBoneIndexes); i++ {
-		bone := model.Bones.GetItemByName(targetBoneIndexes[i])
-		if len(bone.ChildIkBoneIndexes) == 0 {
+	for boneName := range targetBoneNames {
+		bone := model.Bones.GetItemByName(boneName)
+		// ボーンIndexがIkTreeIndexesに含まれていない場合、スルー
+		if _, ok := model.Bones.IkTreeIndexes[bone.Index]; !ok {
 			continue
 		}
 
 		wg.Add(1)
-		go func(i int, bone *pmx.Bone) {
+		go func(bone *pmx.Bone) {
 			defer wg.Done()
-			for _, childIkIndex := range bone.ChildIkBoneIndexes {
-				ikBone := model.Bones.GetItem(childIkIndex)
+			for i := 0; i < len(model.Bones.IkTreeIndexes[bone.Index]); i++ {
+				ikBone := model.Bones.GetItem(model.Bones.IkTreeIndexes[bone.Index][i])
 				// IK計算
 				quats, effectorTargetBoneNames :=
 					bfs.calcIk(frame, ikBone, model, isOutLog, description)
@@ -109,7 +110,7 @@ func (bfs *BoneFrames) prepareIkSolvers(
 					bfs.GetItem(linkBone.Name).Append(linkBf)
 				}
 			}
-		}(i, bone)
+		}(bone)
 	}
 	wg.Wait()
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 // スフィアモード
@@ -226,11 +225,15 @@ func (m *Material) Copy() mcore.IndexNameModelInterface {
 // 材質リスト
 type Materials struct {
 	*mcore.IndexNameModelCorrection[*Material]
+	Vertices map[int][]int
+	Faces    map[int][]int
 }
 
 func NewMaterials() *Materials {
 	return &Materials{
 		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Material](),
+		Vertices:                 make(map[int][]int),
+		Faces:                    make(map[int][]int),
 	}
 }
 
