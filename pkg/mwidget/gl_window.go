@@ -62,7 +62,9 @@ type GlWindow struct {
 	shiftPressed        bool
 	ctrlPressed         bool
 	closed              bool
+	paused              bool
 	EnableBoneDebug     bool
+	frame               float32
 }
 
 func NewGlWindow(
@@ -158,6 +160,7 @@ func NewGlWindow(
 		ctrlPressed:         false,
 		closed:              false,
 		EnableBoneDebug:     false,
+		frame:               float32(0),
 	}
 
 	w.SetScrollCallback(glWindow.handleScrollEvent)
@@ -167,6 +170,18 @@ func NewGlWindow(
 	w.SetCloseCallback(glWindow.Close)
 
 	return &glWindow, nil
+}
+
+func (w *GlWindow) Pause(p bool) {
+	w.paused = p
+}
+
+func (w *GlWindow) GetValue() float32 {
+	return w.frame
+}
+
+func (w *GlWindow) SetValue(f float32) {
+	w.frame = f
 }
 
 func (w *GlWindow) Close(window *glfw.Window) {
@@ -465,8 +480,7 @@ func (w *GlWindow) Size() walk.Size {
 	return walk.Size{Width: x, Height: y}
 }
 
-func (w *GlWindow) Run() {
-	frame := float32(0)
+func (w *GlWindow) Run(frameEdit *walk.NumberEdit, frameSlider *walk.Slider) {
 	previousTime := glfw.GetTime()
 
 	for !w.closed && !w.ShouldClose() {
@@ -498,18 +512,27 @@ func (w *GlWindow) Run() {
 			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 		}
 
-		// Update
 		time := glfw.GetTime()
 		elapsed := float32(time - previousTime)
+		// Update
 		previousTime = time
-		// elapsed := float32(math.Ceil(elapsed * float64(w.Physics.Fps)))
-		// elapsed := float32(1.0)
-		frame += elapsed
+
+		if !w.paused {
+			// elapsed := float32(math.Ceil(elapsed * float64(w.Physics.Fps)))
+			// elapsed := float32(1.0)
+			w.frame += elapsed
+			if frameEdit != nil {
+				frameEdit.SetValue(float64(w.frame * w.Physics.Fps))
+			}
+			if frameSlider != nil {
+				frameSlider.SetValue(int(w.frame * w.Physics.Fps))
+			}
+		}
 
 		// fmt.Printf("elapsed: %.8f, frame: %.8f\n", elapsed, frame)
 
 		// 描画
-		w.Draw(frame*w.Physics.Fps, elapsed)
+		w.Draw(w.frame*w.Physics.Fps, elapsed)
 
 		// Maintenance
 		w.SwapBuffers()

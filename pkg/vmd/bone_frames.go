@@ -40,6 +40,17 @@ func (bfs *BoneFrames) GetItem(boneName string) *BoneNameFrames {
 	return bfs.Data[boneName]
 }
 
+func (bfs *BoneFrames) GetMaxFrame() float32 {
+	maxFno := float32(0)
+	for _, bnfs := range bfs.Data {
+		fno := bnfs.GetMaxFrame()
+		if fno > maxFno {
+			maxFno = fno
+		}
+	}
+	return maxFno
+}
+
 func (bfs *BoneFrames) Animate(
 	frame float32,
 	model *pmx.PmxModel,

@@ -3,7 +3,6 @@ package vmd
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 type VmdMotion struct {
@@ -37,6 +36,11 @@ func (m *VmdMotion) GetName() string {
 
 func (m *VmdMotion) SetName(name string) {
 	m.ModelName = name
+}
+
+func (m *VmdMotion) GetMaxFrame() float32 {
+	// TODO: モーフが入ったらモーフも考慮する
+	return m.BoneFrames.GetMaxFrame()
 }
 
 func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {

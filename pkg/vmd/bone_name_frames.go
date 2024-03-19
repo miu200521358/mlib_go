@@ -7,7 +7,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type BoneNameFrames struct {
@@ -172,4 +171,12 @@ func (bnfs *BoneNameFrames) Append(value *BoneFrame) {
 	}
 
 	bnfs.Data[value.Index] = value
+}
+
+func (bnfs *BoneNameFrames) GetMaxFrame() float32 {
+	if len(bnfs.RegisteredIndexes) == 0 {
+		return 0
+	}
+
+	return slices.Max(bnfs.RegisteredIndexes)
 }

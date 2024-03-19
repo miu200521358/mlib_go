@@ -83,6 +83,23 @@ func main() {
 		walk.MsgBox(&mWindow.MainWindow, "出力Pmxファイル選択エラー", err.Error(), walk.MsgBoxIconError)
 	}
 
+	motionFrameEdit, err := walk.NewNumberEdit(&mWindow.MainWindow)
+	if err != nil {
+		walk.MsgBox(&mWindow.MainWindow, "モーションフレーム生成エラー", err.Error(), walk.MsgBoxIconError)
+	}
+	motionFrameEdit.SetDecimals(0)
+	motionFrameEdit.SetRange(0, 1)
+	motionFrameEdit.SetValue(0)
+	motionFrameEdit.SetEnabled(false)
+
+	motionSlider, err := walk.NewSlider(&mWindow.MainWindow)
+	if err != nil {
+		walk.MsgBox(&mWindow.MainWindow, "モーションスライダー生成エラー", err.Error(), walk.MsgBoxIconError)
+	}
+	motionSlider.SetRange(0, 1)
+	motionSlider.SetValue(0)
+	motionSlider.SetEnabled(false)
+
 	boneDebugCheckBox, err := walk.NewCheckBox(&mWindow.MainWindow)
 	if err != nil {
 		walk.MsgBox(&mWindow.MainWindow, "ボーンデバッグチェックボックス生成エラー", err.Error(), walk.MsgBoxIconError)
@@ -111,6 +128,23 @@ func main() {
 	}
 	execButton.SetText("モデル描画")
 	execButton.SetEnabled(false)
+
+	paused := false
+	pauseButton, err := walk.NewPushButton(&mWindow.MainWindow)
+	if err != nil {
+		walk.MsgBox(&mWindow.MainWindow, "一時停止ボタン生成エラー", err.Error(), walk.MsgBoxIconError)
+	}
+	pauseButton.SetText("一時停止")
+	pauseButton.SetEnabled(false)
+	pauseButton.Clicked().Attach(func() {
+		paused = !paused
+		glWindow.Pause(paused)
+		if paused {
+			pauseButton.SetText("再開")
+		} else {
+			pauseButton.SetText("一時停止")
+		}
+	})
 
 	subExecButton, err := walk.NewPushButton(&mWindow.MainWindow)
 	if err != nil {
@@ -153,9 +187,30 @@ func main() {
 			motion = motionData.(*vmd.VmdMotion)
 		}
 
+		motionFrameEdit.SetRange(0, float64(motion.GetMaxFrame()+1))
+		motionFrameEdit.SetValue(0)
+
+		motionFrameEdit.ValueChanged().Attach(func() {
+			if paused {
+				mWindow.GetMainGlWindow().SetValue(
+					float32(motionFrameEdit.Value()) / mWindow.GetMainGlWindow().Physics.Fps)
+				motionSlider.SetValue(int(motionFrameEdit.Value()))
+			}
+		})
+
+		motionSlider.SetRange(0, int(motion.GetMaxFrame()+1))
+		motionSlider.SetValue(0)
+		motionSlider.ValueChanged().Attach(func() {
+			if paused {
+				mWindow.GetMainGlWindow().SetValue(
+					float32(motionSlider.Value()) / mWindow.GetMainGlWindow().Physics.Fps)
+				motionFrameEdit.SetValue(float64(motionSlider.Value()))
+			}
+		})
+
 		mWindow.GetMainGlWindow().ClearData()
 		mWindow.GetMainGlWindow().AddData(model, motion)
-		mWindow.GetMainGlWindow().Run()
+		mWindow.GetMainGlWindow().Run(motionFrameEdit, motionSlider)
 	})
 
 	subExecButton.Clicked().Attach(func() {
@@ -184,6 +239,9 @@ func main() {
 		physicsDebugCheckBox.SetEnabled(true)
 		execButton.SetEnabled(true)
 		subExecButton.SetEnabled(true)
+		motionFrameEdit.SetEnabled(true)
+		motionSlider.SetEnabled(true)
+		pauseButton.SetEnabled(true)
 	}
 
 	mWindow.Center()
