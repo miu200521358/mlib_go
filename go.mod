@@ -1,6 +1,6 @@
 module github.com/miu200521358/mlib_go
 
-go 1.22.0
+go 1.22.1
 
 require (
 	github.com/ftrvxmtrx/tga v0.0.0-20150524081124-bd8e8d5be13a
@@ -14,7 +14,7 @@ require (
 )
 
 require (
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
 	gopkg.in/Knetic/govaluate.v3 v3.0.0 // indirect
 )
 

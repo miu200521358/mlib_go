@@ -31,28 +31,14 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, el
 	matrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
 	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.NameIndexes))
 	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
-	if ms.Motion == nil {
-		for i := range ms.Model.Bones.GetIndexes() {
-			mat := mgl32.Ident4()
-			matrixes[i] = &mat
-
-			globalMat := mmath.NewMMat4()
-			globalMat.Translate(ms.Model.Bones.GetItem(i).Position)
-			globalMatrixes[i] = globalMat
-
-			t := mbt.NewBtTransform()
-			transforms[i] = &t
-		}
-	} else {
-		trees := ms.Motion.Animate(frame, ms.Model)
-		for i, bone := range ms.Model.Bones.GetSortedData() {
-			mat := trees.GetItem(bone.Name, frame).LocalMatrix.GL()
-			matrixes[i] = mat
-			globalMatrixes[i] = trees.GetItem(bone.Name, frame).GlobalMatrix
-			t := mbt.NewBtTransform()
-			t.SetFromOpenGLMatrix(&mat[0])
-			transforms[i] = &t
-		}
+	trees := ms.Motion.Animate(frame, ms.Model)
+	for i, bone := range ms.Model.Bones.GetSortedData() {
+		mat := trees.GetItem(bone.Name, frame).LocalMatrix.GL()
+		matrixes[i] = mat
+		globalMatrixes[i] = trees.GetItem(bone.Name, frame).GlobalMatrix
+		t := mbt.NewBtTransform()
+		t.SetFromOpenGLMatrix(&mat[0])
+		transforms[i] = &t
 	}
 	ms.Model.Draw(shader, matrixes, globalMatrixes, transforms, windowIndex, frame, elapsed, isBoneDebug)
 }
@@ -440,6 +426,10 @@ func (w *GlWindow) Reset() {
 }
 
 func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
+	if vmdMotion == nil {
+		vmdMotion = vmd.NewVmdMotion("")
+	}
+
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 	w.Reset()

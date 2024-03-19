@@ -53,6 +53,10 @@ go clean -testcache
 ```
 
 ```
+go fmt ./...
+```
+
+```
 go get github.com/akavel/rsrc
 cd %GOPATH%\pkg\mod\github.com\akavel\rsrc@v0.10.2
 go build
