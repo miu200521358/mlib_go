@@ -145,6 +145,16 @@ func main() {
 		glWindow.EnablePhysics = physicsCheckBox.Checked()
 	})
 
+	dropCheckBox, err := walk.NewCheckBox(&mWindow.MainWindow)
+	if err != nil {
+		walk.MsgBox(&mWindow.MainWindow, "フレームドロップONチェックボックス生成エラー", err.Error(), walk.MsgBoxIconError)
+	}
+	dropCheckBox.SetText("フレームドロップON (スキップ許容)")
+	dropCheckBox.SetChecked(true)
+	dropCheckBox.Clicked().Attach(func() {
+		glWindow.EnableDrop = dropCheckBox.Checked()
+	})
+
 	execButton, err := walk.NewPushButton(&mWindow.MainWindow)
 	if err != nil {
 		walk.MsgBox(&mWindow.MainWindow, "モデル描画ボタン生成エラー", err.Error(), walk.MsgBoxIconError)

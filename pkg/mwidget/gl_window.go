@@ -71,6 +71,7 @@ type GlWindow struct {
 	paused              bool
 	EnableBoneDebug     bool
 	EnablePhysics       bool
+	EnableDrop          bool
 	frame               float32
 }
 
@@ -167,6 +168,7 @@ func NewGlWindow(
 		ctrlPressed:         false,
 		EnableBoneDebug:     false,
 		EnablePhysics:       true, // 最初は物理ON
+		EnableDrop:          true, // 最初はドロップON
 		frame:               float32(0),
 	}
 
@@ -505,6 +507,11 @@ func (w *GlWindow) Run(frameEdit *walk.NumberEdit, frameSlider *walk.Slider) {
 		elapsed := float32(time - previousTime)
 		// Update
 		previousTime = time
+
+		if !w.EnableDrop {
+			// フレームドロップOFFの場合、1Fずつ
+			elapsed = 1.0 / float32(w.Physics.Fps)
+		}
 
 		if !w.paused {
 			// elapsed := float32(math.Ceil(elapsed * float64(w.Physics.Fps)))
