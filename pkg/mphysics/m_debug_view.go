@@ -5,7 +5,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 func NewConstBtMDefaultColors() mbt.BtMDefaultColors {
@@ -23,25 +22,29 @@ func NewConstBtMDefaultColors() mbt.BtMDefaultColors {
 type MDebugDrawLiner struct {
 	mbt.BtMDebugDrawLiner
 	shader *mgl.MShader
+	vao    *mgl.VAO
+	vbo    *mgl.VBO
 }
 
 func NewMDebugDrawLiner(shader *mgl.MShader) *MDebugDrawLiner {
-	liner := &MDebugDrawLiner{
+	ddl := &MDebugDrawLiner{
 		shader: shader,
 	}
-	liner.BtMDebugDrawLiner = mbt.NewDirectorBtMDebugDrawLiner(liner)
-	return liner
+	ddl.BtMDebugDrawLiner = mbt.NewDirectorBtMDebugDrawLiner(ddl)
+
+	ddl.vao = mgl.NewVAO()
+	ddl.vao.Bind()
+	ddl.vbo = mgl.NewVBOForDebug()
+	ddl.vbo.BindDebug(mbt.NewBtVector3(), mbt.NewBtVector3())
+	ddl.vbo.Unbind()
+	ddl.vao.Unbind()
+
+	return ddl
 }
 
 func (ddl MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color mbt.BtVector3) {
 	// fmt.Println("MDebugDrawLiner.DrawLine")
 	ddl.shader.UsePhysicsProgram()
-
-	// 頂点データを準備
-	vertices := []float32{
-		from.GetX(), from.GetY(), from.GetZ(),
-		to.GetX(), to.GetY(), to.GetZ(),
-	}
 
 	// 色を設定
 	colorUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mgl.SHADER_COLOR))
@@ -50,24 +53,14 @@ func (ddl MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color 
 	alphaUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mgl.SHADER_ALPHA))
 	gl.Uniform1f(alphaUniform, 0.6)
 
-	// VAO
-	var vao uint32
-	gl.GenVertexArrays(1, &vao)
-	gl.BindVertexArray(vao)
-	gl.EnableVertexAttribArray(0)
+	// 線を引く
+	ddl.vao.Bind()
+	ddl.vbo.BindDebug(from, to)
 
-	// VBO
-	var vbo uint32
-	gl.GenBuffers(1, &vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Ptr(vertices), gl.STATIC_DRAW)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
+	gl.DrawArrays(gl.LINES, 0, int32(2))
 
-	gl.DrawArrays(gl.LINES, 0, int32(len(vertices)/3))
-
-	// バッファとVAOをアンバインド
-	gl.BindBuffer(gl.ARRAY_BUFFER, 0)
-	gl.BindVertexArray(0)
+	ddl.vbo.Unbind()
+	ddl.vao.Unbind()
 
 	ddl.shader.Unuse()
 }

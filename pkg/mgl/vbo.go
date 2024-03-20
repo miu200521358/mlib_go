@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 
+	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
@@ -241,6 +242,48 @@ func (v *VBO) BindBone() {
 		false,
 		v.stride,
 		3*4,
+	)
+
+}
+
+// Creates a new VBO with given faceDtype.
+func NewVBOForDebug() *VBO {
+	var vboId uint32
+	gl.GenBuffers(1, &vboId)
+
+	vbo := &VBO{
+		id:     vboId,
+		target: gl.ARRAY_BUFFER,
+		ptr:    nil,
+	}
+	// 剛体構造体のサイズ(全部floatとする)
+	// position(3)
+	vbo.stride = int32(4 * (3))
+	vbo.size = 6 * 4
+
+	return vbo
+}
+
+// Binds VBO for rendering.
+func (v *VBO) BindDebug(from mbt.BtVector3, to mbt.BtVector3) {
+	vertices := []float32{
+		from.GetX(), from.GetY(), from.GetZ(),
+		to.GetX(), to.GetY(), to.GetZ(),
+	}
+
+	gl.BindBuffer(v.target, v.id)
+	gl.BufferData(v.target, v.size, gl.Ptr(&vertices[0]), gl.STATIC_DRAW)
+	mutils.CheckGLError()
+
+	// 0: position
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(
+		0,
+		3,
+		gl.FLOAT,
+		false,
+		v.stride,
+		0*4,
 	)
 
 }
