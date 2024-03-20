@@ -5,6 +5,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 func NewConstBtMDefaultColors() mbt.BtMDefaultColors {
@@ -42,30 +43,6 @@ func (ddl MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color 
 		to.GetX(), to.GetY(), to.GetZ(),
 	}
 
-	// VBOを生成
-	var vbo uint32
-	gl.GenBuffers(1, &vbo)
-
-	// VBOをバインド
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-
-	// 頂点データをVBOに送信
-	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Ptr(vertices), gl.STATIC_DRAW)
-
-	// VAOを生成
-	var vao uint32
-	gl.GenVertexArrays(1, &vao)
-
-	// VAOをバインド
-	gl.BindVertexArray(vao)
-
-	// 頂点属性を有効化
-	gl.EnableVertexAttribArray(0)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
-
-	// fmt.Printf("ddl.color: %.5f, %.5f, %.5f\n", color.GetX(), color.GetY(), color.GetZ())
-
 	// 色を設定
 	colorUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mgl.SHADER_COLOR))
 	gl.Uniform3f(colorUniform, color.GetX(), color.GetY(), color.GetZ())
@@ -73,8 +50,19 @@ func (ddl MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color 
 	alphaUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mgl.SHADER_ALPHA))
 	gl.Uniform1f(alphaUniform, 0.6)
 
-	// 描画
+	// VAO
+	var vao uint32
+	gl.GenVertexArrays(1, &vao)
 	gl.BindVertexArray(vao)
+	gl.EnableVertexAttribArray(0)
+
+	// VBO
+	var vbo uint32
+	gl.GenBuffers(1, &vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, len(vertices)*4, gl.Ptr(vertices), gl.STATIC_DRAW)
+	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
+
 	gl.DrawArrays(gl.LINES, 0, int32(len(vertices)/3))
 
 	// バッファとVAOをアンバインド

@@ -1,6 +1,8 @@
 package pmx
 
 import (
+	"fmt"
+
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
@@ -276,6 +278,11 @@ func (r *RigidBody) UpdateMatrix(
 ) {
 	if r.BtRigidBody == nil || r.BtRigidBody.GetMotionState() == nil || r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
 		return
+	}
+
+	if r.Name == "前髪" {
+		state := r.BtRigidBody.GetActivationState()
+		fmt.Printf("name: %s, state: %v\n", r.Name, state)
 	}
 
 	// {

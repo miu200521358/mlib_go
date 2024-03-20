@@ -417,10 +417,6 @@ func (w *GlWindow) Reset() {
 }
 
 func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
-	if vmdMotion == nil {
-		vmdMotion = vmd.NewVmdMotion("")
-	}
-
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 	w.Reset()

@@ -11,6 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mwidget"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
+
 )
 
 func init() {
@@ -38,6 +39,22 @@ func main() {
 	// 		panic(err)
 	// 	}
 	// 	defer pprof.StopCPUProfile()
+	// }
+
+	// {
+	// 	// go tool pprof cmd\main.go cmd\memory.pprof
+	// 	// メモリプロファイル用のファイルを作成
+	// 	f, err := os.Create("memory.pprof")
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	defer f.Close()
+	// 	runtime.GC()
+
+	// 	// ヒーププロファイリングを開始
+	// 	if err := pprof.WriteHeapProfile(f); err != nil {
+	// 		panic(err)
+	// 	}
 	// }
 
 	mWindow, err := mwidget.NewMWindow(resourceFiles, true, 512, 768)
@@ -182,6 +199,10 @@ func main() {
 				return
 			}
 			motion = motionData.(*vmd.VmdMotion)
+		}
+
+		if motion == nil {
+			motion = vmd.NewVmdMotion("")
 		}
 
 		motionFrameEdit.SetRange(0, float64(motion.GetMaxFrame()+1))
