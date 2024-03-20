@@ -195,7 +195,7 @@ func (w *GlWindow) Close(window *glfw.Window) {
 	window.SetShouldClose(true)
 	w.Shader.Delete()
 	for _, modelSet := range w.ModelSets {
-		modelSet.Model.Meshes.Delete()
+		modelSet.Model.Delete()
 	}
 	if w.WindowIndex == 0 {
 		defer glfw.Terminate()
@@ -414,6 +414,13 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 	w.prevCursorPos.SetY(ypos)
 }
 
+func (w *GlWindow) ResetPhysics() {
+	for _, modelSet := range w.ModelSets {
+		modelSet.Model.DeletePhysics()
+		modelSet.Model.InitPhysics(w.Physics)
+	}
+}
+
 func (w *GlWindow) Reset() {
 	// カメラとかリセット
 	w.Shader.Reset()
@@ -430,14 +437,15 @@ func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
 	w.MakeContextCurrent()
 	w.Reset()
 
-	pmxModel.InitializeDraw(w.Physics, w.WindowIndex, w.resourceFiles)
+	pmxModel.InitDraw(w.WindowIndex, w.resourceFiles)
+	pmxModel.InitPhysics(w.Physics)
 	w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel, Motion: vmdMotion})
 	w.Draw(0, 0)
 }
 
 func (w *GlWindow) ClearData() {
 	for _, modelSet := range w.ModelSets {
-		modelSet.Model.Meshes.Delete()
+		modelSet.Model.DeletePhysics()
 	}
 	w.ModelSets = make([]ModelSet, 0)
 }

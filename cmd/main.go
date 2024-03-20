@@ -169,6 +169,15 @@ func main() {
 		}
 	})
 
+	physicsResetButton, err := walk.NewPushButton(&mWindow.MainWindow)
+	if err != nil {
+		walk.MsgBox(&mWindow.MainWindow, "物理リセットボタン生成エラー", err.Error(), walk.MsgBoxIconError)
+	}
+	physicsResetButton.SetText("物理クリア")
+	physicsResetButton.Clicked().Attach(func() {
+		glWindow.ResetPhysics()
+	})
+
 	subExecButton, err := walk.NewPushButton(&mWindow.MainWindow)
 	if err != nil {
 		walk.MsgBox(&mWindow.MainWindow, "サブウィンドウ描画ボタン生成エラー", err.Error(), walk.MsgBoxIconError)

@@ -146,7 +146,7 @@ func (bfs *BoneFrames) calcIk(
 
 		// IK計算
 ikLoop:
-	for loop := 0; loop < ikBone.Ik.LoopCount; loop++ {
+	for loop := 0; loop < max(ikBone.Ik.LoopCount, 1); loop++ {
 		for _, ikLink := range ikBone.Ik.Links {
 			// ikLink は末端から並んでる
 			if !model.Bones.Contains(ikLink.BoneIndex) {

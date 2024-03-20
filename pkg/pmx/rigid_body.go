@@ -400,6 +400,15 @@ func (r *RigidBody) updateMatrix(
 	}
 }
 
+func (r *RigidBody) deletePhysics() {
+	if r.BtRigidBody != nil {
+		r.BtRigidBody.SetUserIndex(-1)
+		r.BtRigidBody.SetMotionState(nil)
+		r.BtRigidBody.SetCollisionShape(nil)
+		r.BtRigidBody = nil
+	}
+}
+
 // 剛体リスト
 type RigidBodies struct {
 	*mcore.IndexNameModelCorrection[*RigidBody]
@@ -416,5 +425,12 @@ func (r *RigidBodies) initPhysics(physics *mphysics.MPhysics) {
 	for _, rigidBody := range r.GetSortedData() {
 		// 物理設定の初期化
 		rigidBody.initPhysics(physics)
+	}
+}
+
+func (r *RigidBodies) deletePhysics(modelPhysics *mphysics.MPhysics) {
+	for _, rigidBody := range r.Data {
+		modelPhysics.DeleteRigidBody(rigidBody.BtRigidBody)
+		rigidBody.deletePhysics()
 	}
 }

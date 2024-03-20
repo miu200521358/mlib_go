@@ -123,6 +123,10 @@ func (j *Joint) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBo
 	modelPhysics.AddJoint(j.Constraint)
 }
 
+func (j *Joint) deletePhysics() {
+	j.Constraint = nil
+}
+
 // ジョイントリスト
 type Joints struct {
 	*mcore.IndexNameModelCorrection[*Joint]
@@ -143,5 +147,12 @@ func (j *Joints) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodies *Rigid
 				modelPhysics, rigidBodies.GetItem(joint.RigidbodyIndexA),
 				rigidBodies.GetItem(joint.RigidbodyIndexB))
 		}
+	}
+}
+
+func (j *Joints) deletePhysics(modelPhysics *mphysics.MPhysics) {
+	for _, joint := range j.Data {
+		modelPhysics.DeleteJoint(joint.Constraint)
+		joint.deletePhysics()
 	}
 }

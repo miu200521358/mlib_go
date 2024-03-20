@@ -9,7 +9,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type Mesh struct {
@@ -156,10 +155,10 @@ func (m *Mesh) DrawModel(
 	m.ibo.Unbind()
 }
 
-func (m *Mesh) Delete() {
+func (m *Mesh) delete() {
 	m.ibo.Delete()
 	if m.material.Texture != nil {
-		m.material.Texture.Delete()
+		m.material.Texture.delete()
 	}
 }
 

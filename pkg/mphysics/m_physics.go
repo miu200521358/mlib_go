@@ -3,6 +3,7 @@ package mphysics
 import (
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 type MPhysics struct {
@@ -87,7 +88,7 @@ func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody, group int, mask int) 
 	p.world.AddRigidBody(rigidBody, group, mask)
 }
 
-func (p *MPhysics) RemoveRigidBody(rigidBody mbt.BtRigidBody) {
+func (p *MPhysics) DeleteRigidBody(rigidBody mbt.BtRigidBody) {
 	p.world.RemoveRigidBody(rigidBody)
 }
 
@@ -95,7 +96,7 @@ func (p *MPhysics) AddJoint(joint mbt.BtTypedConstraint) {
 	p.world.AddConstraint(joint, true)
 }
 
-func (p *MPhysics) RemoveJoint(joint mbt.BtTypedConstraint) {
+func (p *MPhysics) DeleteJoint(joint mbt.BtTypedConstraint) {
 	p.world.RemoveConstraint(joint)
 }
 

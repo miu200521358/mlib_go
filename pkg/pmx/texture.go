@@ -56,7 +56,7 @@ func (t *TextureGL) Unbind() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 
-func (t *TextureGL) Delete() {
+func (t *TextureGL) delete() {
 	if t.Valid {
 		gl.DeleteTextures(1, &t.Id)
 	}

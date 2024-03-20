@@ -115,9 +115,9 @@ func NewMeshes(
 	}
 }
 
-func (m *Meshes) Delete() {
+func (m *Meshes) delete() {
 	for _, mesh := range m.meshes {
-		mesh.Delete()
+		mesh.delete()
 	}
 	m.vao.Delete()
 	m.vbo.Delete()

@@ -10,6 +10,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
+
 )
 
 type PmxModel struct {
@@ -74,13 +75,16 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 	pm.DisplaySlots.Append(d02)
 }
 
-func (pm *PmxModel) InitializeDraw(physics *mphysics.MPhysics, windowIndex int, resourceFiles embed.FS) {
-	pm.Physics = physics
+func (pm *PmxModel) InitDraw(windowIndex int, resourceFiles embed.FS) {
 	pm.ToonTextures.initGl(windowIndex, resourceFiles)
 	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
-	pm.RigidBodies.initPhysics(pm.Physics)
-	pm.Joints.initPhysics(pm.Physics, pm.RigidBodies)
 	pm.Bones.prepareDraw()
+}
+
+func (pm *PmxModel) InitPhysics(physics *mphysics.MPhysics) {
+	pm.Physics = physics
+	pm.RigidBodies.initPhysics(physics)
+	pm.Joints.initPhysics(physics, pm.RigidBodies)
 }
 
 func (pm *PmxModel) Draw(
@@ -148,4 +152,14 @@ func (pm *PmxModel) SetUp() {
 				pm.RigidBodies.GetItem(joint.RigidbodyIndexA).BoneIndex
 		}
 	}
+}
+
+func (pm *PmxModel) Delete() {
+	pm.Meshes.delete()
+	pm.DeletePhysics()
+}
+
+func (pm *PmxModel) DeletePhysics() {
+	pm.RigidBodies.deletePhysics(pm.Physics)
+	pm.Joints.deletePhysics(pm.Physics)
 }
