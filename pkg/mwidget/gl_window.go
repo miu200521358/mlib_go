@@ -61,7 +61,6 @@ type GlWindow struct {
 	updatedPrev         bool
 	shiftPressed        bool
 	ctrlPressed         bool
-	closed              bool
 	paused              bool
 	EnableBoneDebug     bool
 	frame               float32
@@ -158,7 +157,6 @@ func NewGlWindow(
 		updatedPrev:         false,
 		shiftPressed:        false,
 		ctrlPressed:         false,
-		closed:              false,
 		EnableBoneDebug:     false,
 		frame:               float32(0),
 	}
@@ -185,7 +183,7 @@ func (w *GlWindow) SetValue(f float32) {
 }
 
 func (w *GlWindow) Close(window *glfw.Window) {
-	w.closed = true
+	window.SetShouldClose(true)
 	w.Shader.Delete()
 	for _, modelSet := range w.ModelSets {
 		modelSet.Model.Meshes.Delete()
@@ -193,6 +191,7 @@ func (w *GlWindow) Close(window *glfw.Window) {
 	if w.WindowIndex == 0 {
 		defer glfw.Terminate()
 	}
+	window.Destroy()
 }
 
 func (w *GlWindow) handleKeyEvent(
@@ -460,7 +459,7 @@ func (w *GlWindow) Size() walk.Size {
 func (w *GlWindow) Run(frameEdit *walk.NumberEdit, frameSlider *walk.Slider) {
 	previousTime := glfw.GetTime()
 
-	for !w.closed && !w.ShouldClose() {
+	for !w.ShouldClose() {
 		// 深度バッファのクリア
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -515,7 +514,5 @@ func (w *GlWindow) Run(frameEdit *walk.NumberEdit, frameSlider *walk.Slider) {
 		w.SwapBuffers()
 		glfw.PollEvents()
 	}
-	if w != nil && !w.closed {
-		w.Close(&w.Window)
-	}
+	w.Close(&w.Window)
 }

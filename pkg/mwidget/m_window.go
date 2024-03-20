@@ -38,9 +38,10 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int
 	mw.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
 		if len(mainWindow.GlWindows) > 0 {
 			for _, glWindow := range mainWindow.GlWindows {
-				glWindow.Close(&glWindow.Window)
+				glWindow.SetShouldClose(true)
 			}
 		}
+		// mw.Dispose()
 		walk.App().Exit(0)
 	})
 	iconImg, err := mutils.LoadIconFile(resourceFiles)

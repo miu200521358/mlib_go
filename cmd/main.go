@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"runtime/pprof"
 
 	"github.com/miu200521358/walk/pkg/walk"
@@ -17,7 +16,7 @@ import (
 )
 
 func init() {
-	runtime.LockOSThread()
+	// runtime.LockOSThread()
 
 	walk.AppendToWalkInit(func() {
 		walk.MustRegisterWindowClass(mwidget.FilePickerClass)
