@@ -43,6 +43,10 @@ func (v *MVec2) SetX(x float64) {
 	v[0] = x
 }
 
+func (v *MVec2) AddX(x float64) {
+	v[0] += x
+}
+
 // GetY returns the value of the Y coordinate
 func (v *MVec2) GetY() float64 {
 	return v[1]
@@ -51,6 +55,10 @@ func (v *MVec2) GetY() float64 {
 // SetY sets the value of the Y coordinate
 func (v *MVec2) SetY(y float64) {
 	v[1] = y
+}
+
+func (v *MVec2) AddY(y float64) {
+	v[1] += y
 }
 
 // String 文字列表現を返します。

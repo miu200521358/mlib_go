@@ -58,6 +58,10 @@ func (v *MVec4) SetX(x float64) {
 	v[0] = x
 }
 
+func (v *MVec4) AddX(x float64) {
+	v[0] += x
+}
+
 // GetY returns the value of the Y coordinate
 func (v *MVec4) GetY() float64 {
 	return v[1]
@@ -66,6 +70,10 @@ func (v *MVec4) GetY() float64 {
 // SetY sets the value of the Y coordinate
 func (v *MVec4) SetY(y float64) {
 	v[1] = y
+}
+
+func (v *MVec4) AddY(y float64) {
+	v[1] += y
 }
 
 // GetZ returns the value of the Z coordinate
@@ -78,6 +86,10 @@ func (v *MVec4) SetZ(z float64) {
 	v[2] = z
 }
 
+func (v *MVec4) AddZ(z float64) {
+	v[2] += z
+}
+
 // GetW returns the value of the W coordinate
 func (v *MVec4) GetW() float64 {
 	return v[3]
@@ -86,6 +98,10 @@ func (v *MVec4) GetW() float64 {
 // SetW sets the value of the W coordinate
 func (v *MVec4) SetW(w float64) {
 	v[3] = w
+}
+
+func (v *MVec4) AddW(w float64) {
+	v[3] += w
 }
 
 // String T の文字列表現を返します。

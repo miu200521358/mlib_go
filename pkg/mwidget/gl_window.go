@@ -373,56 +373,33 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 		} else if w.ctrlPressed {
 			ratio *= 0.1
 		}
+		// 中ボタンが押された場合の処理
+		if w.middleButtonPressed {
+			ratio := 0.07
+			if w.shiftPressed {
+				ratio *= 10
+			} else if w.ctrlPressed {
+				ratio *= 0.1
+			}
 
-		// 中クリックはカメラ中心とカメラ位置を一緒に動かす
-		// カメラの方向ベクトルと上方ベクトルを計算
-		cameraDirection := mgl64.Vec3{
-			math.Cos(mgl64.DegToRad(w.pitch)) * math.Cos(mgl64.DegToRad(w.yaw)),
-			math.Sin(mgl64.DegToRad(w.pitch)),
-			math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw)),
-		}.Normalize()
-		upVector := cameraDirection.Cross(mgl64.Vec3{1, 0, 0}).Normalize()
+			xOffset := (w.prevCursorPos.GetX() - xpos) * ratio
+			yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
 
-		// カメラの横方向と縦方向のベクトルを計算
-		rightVector := cameraDirection.Cross(upVector).Normalize()
-		upCameraVector := rightVector.Cross(cameraDirection).Normalize()
+			// カメラの向きに基づいて移動方向を計算
+			forward := w.Shader.LookAtCenterPosition.Subed(w.Shader.CameraPosition).Normalize()
+			right := forward.Cross(mmath.MVec3UnitY).Normalize()
+			up := right.Cross(forward).Normalize()
 
-		// カメラがモデルの側面を向いているかを確認
-		// var horizontalSign float64 = -1
-		// if (w.yaw > 160 && w.yaw < 200) || (w.yaw > 340 && w.yaw < 380) {
-		// 	horizontalSign = 1
-		// }
+			// 上下移動のベクトルを計算
+			upMovement := up.MulScalar(-yOffset) // Y軸が上向きなので、マウスのY軸移動は逆にする
+			// 左右移動のベクトルを計算
+			rightMovement := right.MulScalar(-xOffset) // X軸が右向きなので、マウスのX軸移動は逆にする
 
-		xOffset := (w.prevCursorPos.GetX() - xpos) * ratio * -1
-		yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
-
-		// カメラの位置を更新（カメラの方向を考慮）
-		w.Shader.CameraPosition.SetX(
-			w.Shader.CameraPosition.GetX() +
-				float64(rightVector.X())*xOffset - float64(upCameraVector.X())*yOffset)
-		w.Shader.CameraPosition.SetY(
-			w.Shader.CameraPosition.GetY() +
-				float64(rightVector.Y())*xOffset - float64(upCameraVector.Y())*yOffset)
-		w.Shader.CameraPosition.SetZ(
-			w.Shader.CameraPosition.GetZ() +
-				float64(rightVector.Z())*xOffset - float64(upCameraVector.Z())*yOffset)
-
-		// カメラの中心位置も同様に更新
-		w.Shader.LookAtCenterPosition.SetX(
-			w.Shader.LookAtCenterPosition.GetX() +
-				float64(rightVector.X())*xOffset -
-				float64(upCameraVector.X())*yOffset)
-		w.Shader.LookAtCenterPosition.SetY(
-			w.Shader.LookAtCenterPosition.GetY() +
-				float64(rightVector.Y())*xOffset -
-				float64(upCameraVector.Y())*yOffset)
-		w.Shader.LookAtCenterPosition.SetZ(
-			w.Shader.LookAtCenterPosition.GetZ() +
-				float64(rightVector.Z())*xOffset -
-				float64(upCameraVector.Z())*yOffset)
-
-		// fmt.Printf("xOffset %.8f, yOffset %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
-		// 	xOffset, yOffset, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
+			// 移動ベクトルを合成してカメラ位置と中心を更新
+			movement := upMovement.Add(rightMovement)
+			w.Shader.CameraPosition.Add(movement)
+			w.Shader.LookAtCenterPosition.Add(movement)
+		}
 	}
 
 	w.prevCursorPos.SetX(xpos)
