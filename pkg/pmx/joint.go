@@ -59,7 +59,7 @@ func NewJointByName(name string) *Joint {
 	return j
 }
 
-func (j *Joint) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody) {
+func (j *Joint) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody) {
 	// ジョイントの位置と向き
 	jointTransform := mbt.NewBtTransform(j.Rotation.GetQuaternion().Bullet(), j.Position.Bullet())
 
@@ -134,12 +134,12 @@ func NewJoints() *Joints {
 	}
 }
 
-func (j *Joints) InitPhysics(modelPhysics *mphysics.MPhysics, rigidBodies *RigidBodies) {
+func (j *Joints) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodies *RigidBodies) {
 	// ジョイントを順番に剛体と紐付けていく
 	for _, joint := range j.GetSortedData() {
 		if joint.RigidbodyIndexA >= 0 && rigidBodies.Contains(joint.RigidbodyIndexA) &&
 			joint.RigidbodyIndexB >= 0 && rigidBodies.Contains(joint.RigidbodyIndexB) {
-			joint.InitPhysics(
+			joint.initPhysics(
 				modelPhysics, rigidBodies.GetItem(joint.RigidbodyIndexA),
 				rigidBodies.GetItem(joint.RigidbodyIndexB))
 		}

@@ -15,5 +15,16 @@ https://fire.st/EPU7lAw
 MlibSample 1.0.0_beta_10
 ・物理デバッグ時のVAOとVBOの生成をデバッガー初期化時に限定（後は使い回す）
 
+https://fire.st/oTXaOYY
+MlibSample 1.0.0_beta_11
+・物理ON/OFF機能追加
+　・フォローなし … フラグONOFFのみ
+　・行列更新　　 … 物理OFF→ONにした時に剛体の位置再計算を行う
+　・State初期化　… 物理OFF→ONにした時にMotionState再生成（時々物理がピクつく）
+　・行列更新・State初期化　…　両方対応
 
+https://fire.st/aZwahtw
+MlibSample 1.0.0_beta_12
+・物理ON/OFF機能
+　・フラグONOFF＋フラグを切り替えた直後に剛体の位置再計算を行う
 

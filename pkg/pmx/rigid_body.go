@@ -1,8 +1,6 @@
 package pmx
 
 import (
-	"fmt"
-
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
@@ -145,7 +143,75 @@ func NewRigidBody() *RigidBody {
 	}
 }
 
-func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
+// func (r *RigidBody) resetPhysics(enablePhysics bool) bool {
+// 	// 物理ON＆自身が物理剛体＆現在のステートがActiveではない場合、True
+// 	return enablePhysics &&
+// 		r.CorrectPhysicsType != PHYSICS_TYPE_STATIC &&
+// 		r.BtRigidBody.GetActivationState() == mbt.ISLAND_SLEEPING
+// }
+
+func (r *RigidBody) updateFlags(enablePhysics bool) bool {
+	if r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
+		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時
+		// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
+		r.BtRigidBody.SetCollisionFlags(
+			r.BtRigidBody.GetCollisionFlags() | int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT))
+		// 毎ステップの剛体位置通知を無効にする
+		// MotionState::setWorldTransformの毎ステップ呼び出しが無効になる(剛体位置は判っているので不要)
+		r.BtRigidBody.SetActivationState(mbt.DISABLE_SIMULATION)
+		// if prevActivationState != mbt.DISABLE_SIMULATION {
+		// 	return true
+		// }
+	} else {
+		prevActivationState := r.BtRigidBody.GetActivationState()
+
+		if enablePhysics {
+			// 物理演算・物理+ボーン位置合わせの場合
+			if prevActivationState != mbt.ACTIVE_TAG {
+				r.BtRigidBody.SetCollisionFlags(0 & ^int(mbt.BtCollisionObjectCF_NO_CONTACT_RESPONSE))
+				r.BtRigidBody.ForceActivationState(mbt.ACTIVE_TAG)
+
+				// localInertia := mbt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
+				// r.BtRigidBody.GetCollisionShape().(mbt.BtCollisionShape).CalculateLocalInertia(
+				// 	float32(r.RigidBodyParam.Mass), localInertia)
+
+				// r.BtRigidBody.GetMotionState().(mbt.BtMotionState).SetWorldTransform(r.BtRigidBodyTransform)
+
+				return true
+			} else {
+				// 剛体の位置更新に物理演算を使う。
+				// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
+				r.BtRigidBody.SetCollisionFlags(
+					r.BtRigidBody.GetCollisionFlags() & ^int(mbt.BtCollisionObjectCF_NO_CONTACT_RESPONSE))
+				// 毎ステップの剛体位置通知を有効にする
+				// MotionState::setWorldTransformの毎ステップ呼び出しが有効になる(剛体位置が変わるので必要)
+				r.BtRigidBody.SetActivationState(mbt.ACTIVE_TAG)
+			}
+		} else {
+			// 物理OFF時
+			r.BtRigidBody.SetCollisionFlags(
+				r.BtRigidBody.GetCollisionFlags() | int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT))
+			r.BtRigidBody.SetActivationState(mbt.ISLAND_SLEEPING)
+
+			if prevActivationState != mbt.ISLAND_SLEEPING {
+				return true
+			}
+		}
+		// if prevActivationState != mbt.ACTIVE_TAG {
+		// 	// r.BtRigidBody.ForceActivationState(mbt.ACTIVE_TAG)
+		// 	// r.BtRigidBody.Activate(true)
+		// 	modelPhysics.RemoveRigidBody(r.BtRigidBody)
+		// 	r.InitPhysics(modelPhysics)
+		// 	return true
+		// } else {
+		// 	r.BtRigidBody.SetActivationState(mbt.ACTIVE_TAG)
+		// }
+	}
+
+	return false
+}
+
+func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 	var btCollisionShape mbt.BtCollisionShape
 	switch r.ShapeType {
 	case SHAPE_SPHERE:
@@ -207,26 +273,10 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 	r.BtRigidBody.SetDamping(float32(r.RigidBodyParam.LinearDamping), float32(r.RigidBodyParam.AngularDamping))
 	r.BtRigidBody.SetRestitution(float32(r.RigidBodyParam.Restitution))
 	r.BtRigidBody.SetFriction(float32(r.RigidBodyParam.Friction))
+	r.BtRigidBody.SetUserIndex(r.Index)
 	// r.BtRigidBody.SetSleepingThresholds(0.1, (180.0 * 0.1 / math.Pi))
 
-	if r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
-		// 剛体の位置更新に物理演算を使わない。
-		// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
-		r.BtRigidBody.SetCollisionFlags(
-			r.BtRigidBody.GetCollisionFlags() | int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT))
-		// 毎ステップの剛体位置通知を無効にする
-		// MotionState::setWorldTransformの毎ステップ呼び出しが無効になる(剛体位置は判っているので不要)
-		r.BtRigidBody.SetActivationState(mbt.DISABLE_SIMULATION)
-	} else {
-		// 物理演算・物理+ボーン位置合わせの場合
-		// 剛体の位置更新に物理演算を使う。
-		// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
-		r.BtRigidBody.SetCollisionFlags(
-			r.BtRigidBody.GetCollisionFlags() & ^int(mbt.BtCollisionObjectCF_NO_CONTACT_RESPONSE))
-		// 毎ステップの剛体位置通知を有効にする
-		// MotionState::setWorldTransformの毎ステップ呼び出しが有効になる(剛体位置が変わるので必要)
-		r.BtRigidBody.SetActivationState(mbt.ACTIVE_TAG)
-	}
+	r.updateFlags(true)
 
 	// fmt.Printf("name: %s, group: %d, mask: %d\n", r.Name, r.CollisionGroup, r.CollisionGroupMaskValue)
 
@@ -235,8 +285,7 @@ func (r *RigidBody) InitPhysics(modelPhysics *mphysics.MPhysics, bone *Bone) {
 	modelPhysics.AddRigidBody(r.BtRigidBody, 1<<r.CollisionGroup, r.CollisionGroupMaskValue)
 }
 
-func (r *RigidBody) UpdateTransform(
-	boneMatrixes []*mgl32.Mat4,
+func (r *RigidBody) updateTransform(
 	boneTransforms []*mbt.BtTransform,
 	isForce bool,
 ) {
@@ -272,7 +321,7 @@ func (r *RigidBody) UpdateTransform(
 	motionState.SetWorldTransform(rigidBodyTransform)
 }
 
-func (r *RigidBody) UpdateMatrix(
+func (r *RigidBody) updateMatrix(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
 ) {
@@ -280,10 +329,12 @@ func (r *RigidBody) UpdateMatrix(
 		return
 	}
 
-	if r.Name == "前髪" {
-		state := r.BtRigidBody.GetActivationState()
-		fmt.Printf("name: %s, state: %v\n", r.Name, state)
-	}
+	// if r.Name == "前髪" {
+	// 	state := r.BtRigidBody.GetActivationState()
+	// 	isStatic := r.BtRigidBody.IsStaticOrKinematicObject()
+	// 	flags := r.BtRigidBody.GetCollisionFlags()
+	// 	fmt.Printf("name: %s, state: %v, static: %v, flags: %v, isKinematic: %v, isStatic: %v\n", r.Name, state, isStatic, flags, flags&int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT) != 0, flags&int(mbt.BtCollisionObjectCF_STATIC_OBJECT) != 0)
+	// }
 
 	// {
 	// 	fmt.Println("----------")
@@ -360,14 +411,10 @@ func NewRigidBodies() *RigidBodies {
 	}
 }
 
-func (r *RigidBodies) InitPhysics(physics *mphysics.MPhysics, bones *Bones) {
+func (r *RigidBodies) initPhysics(physics *mphysics.MPhysics) {
 	// 剛体を順番にボーンと紐付けていく
 	for _, rigidBody := range r.GetSortedData() {
 		// 物理設定の初期化
-		if rigidBody.BoneIndex >= 0 && bones.Contains(rigidBody.BoneIndex) {
-			rigidBody.InitPhysics(physics, bones.GetItem(rigidBody.BoneIndex))
-		} else {
-			rigidBody.InitPhysics(physics, nil)
-		}
+		rigidBody.initPhysics(physics)
 	}
 }

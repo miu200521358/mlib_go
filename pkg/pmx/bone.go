@@ -688,7 +688,7 @@ ikLoop:
 	}
 }
 
-func (b *Bones) PrepareDraw() {
+func (b *Bones) prepareDraw() {
 	positionIbo := make([]uint32, 0, len(b.Data))
 	normalIbo := make([]uint32, 0, len(b.Data))
 

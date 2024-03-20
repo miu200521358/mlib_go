@@ -11,7 +11,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mwidget"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 func init() {
@@ -134,6 +133,16 @@ func main() {
 
 	physicsDebugCheckBox.Clicked().Attach(func() {
 		glWindow.Physics.EnableDebug(physicsDebugCheckBox.Checked())
+	})
+
+	physicsCheckBox, err := walk.NewCheckBox(&mWindow.MainWindow)
+	if err != nil {
+		walk.MsgBox(&mWindow.MainWindow, "静的物理チェックボックス生成エラー", err.Error(), walk.MsgBoxIconError)
+	}
+	physicsCheckBox.SetText("物理ON/OFF")
+	physicsCheckBox.SetChecked(true)
+	physicsCheckBox.Clicked().Attach(func() {
+		glWindow.EnablePhysics = physicsCheckBox.Checked()
 	})
 
 	execButton, err := walk.NewPushButton(&mWindow.MainWindow)

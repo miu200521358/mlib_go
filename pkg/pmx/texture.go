@@ -11,7 +11,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 // テクスチャ種別
@@ -227,7 +226,7 @@ func NewToonTextures() *ToonTextures {
 	}
 }
 
-func (t *ToonTextures) InitGl(
+func (t *ToonTextures) initGl(
 	windowIndex int,
 	resourceFiles embed.FS,
 ) error {

@@ -10,7 +10,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-
 )
 
 type PmxModel struct {
@@ -77,11 +76,11 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 
 func (pm *PmxModel) InitializeDraw(physics *mphysics.MPhysics, windowIndex int, resourceFiles embed.FS) {
 	pm.Physics = physics
-	pm.ToonTextures.InitGl(windowIndex, resourceFiles)
+	pm.ToonTextures.initGl(windowIndex, resourceFiles)
 	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
-	pm.RigidBodies.InitPhysics(pm.Physics, pm.Bones)
-	pm.Joints.InitPhysics(pm.Physics, pm.RigidBodies)
-	pm.Bones.PrepareDraw()
+	pm.RigidBodies.initPhysics(pm.Physics)
+	pm.Joints.initPhysics(pm.Physics, pm.RigidBodies)
+	pm.Bones.prepareDraw()
 }
 
 func (pm *PmxModel) Draw(
@@ -93,8 +92,9 @@ func (pm *PmxModel) Draw(
 	frame float32,
 	elapsed float32,
 	isBoneDebug bool,
+	enablePhysics bool,
 ) {
-	pm.UpdatePhysics(boneMatrixes, boneTransforms, frame, elapsed)
+	pm.updatePhysics(boneMatrixes, boneTransforms, frame, elapsed, enablePhysics)
 	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
 
 	// 物理デバッグ表示
@@ -106,18 +106,21 @@ func (pm *PmxModel) Draw(
 	}
 }
 
-func (pm *PmxModel) UpdatePhysics(
+func (pm *PmxModel) updatePhysics(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
 	frame float32,
 	elapsed float32,
+	enablePhysics bool,
 ) {
 	if pm.Physics == nil {
 		return
 	}
 
-	for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-		rigidBody.UpdateTransform(boneMatrixes, boneTransforms, elapsed == 0.0)
+	for _, r := range pm.RigidBodies.GetSortedData() {
+		// 物理フラグが落ちている場合があるので、強制的に起こす
+		forceUpdate := r.updateFlags(enablePhysics)
+		r.updateTransform(boneTransforms, elapsed == 0.0 || !enablePhysics || forceUpdate)
 	}
 
 	if frame > pm.Physics.Spf {
@@ -125,7 +128,7 @@ func (pm *PmxModel) UpdatePhysics(
 
 		// 剛体位置を更新
 		for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-			rigidBody.UpdateMatrix(boneMatrixes, boneTransforms)
+			rigidBody.updateMatrix(boneMatrixes, boneTransforms)
 		}
 	}
 }

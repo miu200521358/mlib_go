@@ -8,7 +8,7 @@ workspace_folder = os.environ.get('WORKSPACE_FOLDER')
 print(f"workspace_folder: {workspace_folder}")
 
 # Read app_config.json file
-with open(f'{workspace_folder}/cmd/resources/app_config.json', 'r') as file:
+with open(f'{workspace_folder}/cmd/resources/app_config.json', 'r', encoding='utf-8') as file:
     config_data = json.load(file)
 
 # Convert JSON data to dictionary

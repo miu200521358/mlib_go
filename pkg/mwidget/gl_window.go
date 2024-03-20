@@ -27,7 +27,14 @@ type ModelSet struct {
 	Motion *vmd.VmdMotion
 }
 
-func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, elapsed float32, isBoneDebug bool) {
+func (ms *ModelSet) Draw(
+	shader *mgl.MShader,
+	windowIndex int,
+	frame float32,
+	elapsed float32,
+	isBoneDebug bool,
+	enablePhysics bool,
+) {
 	matrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
 	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.NameIndexes))
 	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
@@ -40,7 +47,7 @@ func (ms *ModelSet) Draw(shader *mgl.MShader, windowIndex int, frame float32, el
 		t.SetFromOpenGLMatrix(&mat[0])
 		transforms[i] = &t
 	}
-	ms.Model.Draw(shader, matrixes, globalMatrixes, transforms, windowIndex, frame, elapsed, isBoneDebug)
+	ms.Model.Draw(shader, matrixes, globalMatrixes, transforms, windowIndex, frame, elapsed, isBoneDebug, enablePhysics)
 }
 
 // 直角の定数値
@@ -63,6 +70,7 @@ type GlWindow struct {
 	ctrlPressed         bool
 	paused              bool
 	EnableBoneDebug     bool
+	EnablePhysics       bool
 	frame               float32
 }
 
@@ -158,6 +166,7 @@ func NewGlWindow(
 		shiftPressed:        false,
 		ctrlPressed:         false,
 		EnableBoneDebug:     false,
+		EnablePhysics:       true, // 最初は物理ON
 		frame:               float32(0),
 	}
 
@@ -443,7 +452,7 @@ func (w *GlWindow) Draw(frame float32, elapsed float32) {
 
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
-		modelSet.Draw(w.Shader, w.WindowIndex, frame, elapsed, w.EnableBoneDebug)
+		modelSet.Draw(w.Shader, w.WindowIndex, frame, elapsed, w.EnableBoneDebug, w.EnablePhysics)
 	}
 }
 
