@@ -2,7 +2,9 @@ package mcore
 
 import (
 	"bufio"
+	"crypto/sha1"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"math"
@@ -19,6 +21,7 @@ import (
 type ReaderInterface interface {
 	ReadNameByFilepath(path string) (string, error)
 	ReadByFilepath(path string) (HashModelInterface, error)
+	ReadHashByFilePath(path string) (string, error)
 }
 
 type BaseReader[T HashModelInterface] struct {
@@ -50,6 +53,25 @@ func (r *BaseReader[T]) ReadNameByFilepath(path string) (string, error) {
 
 func (r *BaseReader[T]) ReadByFilepath(path string) (T, error) {
 	panic("not implemented")
+}
+
+func (r *BaseReader[T]) ReadHashByFilePath(path string) (string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	sha1Hash := sha1.New()
+	if _, err := io.Copy(sha1Hash, file); err != nil {
+		return "", err
+	}
+
+	// ファイルパスをハッシュに含める
+	sha1Hash.Write([]byte(path))
+
+	return hex.EncodeToString(sha1Hash.Sum(nil)), nil
+
 }
 
 func (r *BaseReader[T]) DefineEncoding(encoding encoding.Encoding) {

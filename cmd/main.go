@@ -18,6 +18,8 @@ func init() {
 
 	walk.AppendToWalkInit(func() {
 		walk.MustRegisterWindowClass(mwidget.FilePickerClass)
+		walk.MustRegisterWindowClass(mwidget.MotionPlayerClass)
+		walk.MustRegisterWindowClass(mwidget.ConsoleViewClass)
 	})
 }
 
@@ -98,123 +100,32 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 		func(path string) {}))
 	mwidget.CheckError(err, mWindow, "出力Pmxファイルピッカー生成エラー")
 
-	motionFrameEdit, err := walk.NewNumberEdit(page)
-	mwidget.CheckError(err, mWindow, "モーションフレームエディット生成エラー")
-	motionFrameEdit.SetDecimals(0)
-	motionFrameEdit.SetRange(0, 1)
-	motionFrameEdit.SetValue(0)
-	motionFrameEdit.SetEnabled(false)
+	_, err = walk.NewVSeparator(page)
+	mwidget.CheckError(err, mWindow, "セパレータ生成エラー")
 
-	motionSlider, err := walk.NewSlider(page)
-	mwidget.CheckError(err, mWindow, "モーションスライダー生成エラー")
-	motionSlider.SetRange(0, 1)
-	motionSlider.SetValue(0)
-	motionSlider.SetEnabled(false)
+	motionPlayer, err := mwidget.NewMotionPlayer(page, mWindow, resourceFiles)
+	mwidget.CheckError(err, mWindow, "モーションプレイヤー生成エラー")
+	motionPlayer.SetEnabled(false)
+	motionPlayer.PlayButton.SetEnabled(false)
 
-	execButton, err := walk.NewPushButton(page)
-	mwidget.CheckError(err, mWindow, "モデル描画ボタン生成エラー")
-	execButton.SetText("モデル描画")
-	execButton.SetEnabled(false)
-
-	paused := false
-	pauseButton, err := walk.NewPushButton(page)
-	mwidget.CheckError(err, mWindow, "一時停止ボタン生成エラー")
-	pauseButton.SetText("一時停止")
-	pauseButton.SetEnabled(false)
-	pauseButton.Clicked().Attach(func() {
-		paused = !paused
-		for _, glWindow := range mWindow.GlWindows {
-			glWindow.Pause(paused)
-		}
-		if paused {
-			pauseButton.SetText("再開")
-		} else {
-			pauseButton.SetText("一時停止")
-		}
-	})
-
-	subExecButton, err := walk.NewPushButton(page)
-	mwidget.CheckError(err, mWindow, "サブウィンドウ描画ボタン生成エラー")
-	subExecButton.SetText("サブウィンドウ描画")
-	subExecButton.SetEnabled(false)
-
-	console, err := (mwidget.NewConsoleView(mWindow))
+	// コンソールはタブ外に表示
+	console, err := mwidget.NewConsoleView(mWindow)
 	mwidget.CheckError(err, mWindow, "コンソール生成エラー")
 
-	execButton.Clicked().Attach(func() {
-		data, err := pmxReadPicker.GetData()
-		if err != nil {
-			walk.MsgBox(mWindow.MainWindow, "Pmxファイル読み込みエラー", err.Error(), walk.MsgBoxIconError)
-			return
+	var onFilePathChanged = func() {
+		mWindow.GetMainGlWindow().Play(false)
+		motionPlayer.Play(false)
+		if pmxReadPicker.Exists() && vmdReadPicker.ExistsOrEmpty() {
+			motionPlayer.PlayButton.SetEnabled(true)
+		} else {
+			motionPlayer.PlayButton.SetEnabled(false)
 		}
-		model := data.(*pmx.PmxModel)
-		model.SetUp()
-
-		println(fmt.Sprintf("頂点数: %d", len(model.Vertices.Indexes)))
-		println(fmt.Sprintf("面数: %d", len(model.Faces.Indexes)))
-
-		console.AppendText(fmt.Sprintf("モデル名: %s", model.Name))
-		console.AppendText(fmt.Sprintf("頂点数: %d", len(model.Vertices.Indexes)))
-		console.AppendText(fmt.Sprintf("面数: %d", len(model.Faces.Indexes)))
-		console.AppendText(fmt.Sprintf("材質数: %d", len(model.Materials.GetIndexes())))
-		console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.GetIndexes())))
-		console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.GetIndexes())))
-
-		var motion *vmd.VmdMotion
-		if vmdReadPicker.Exists() {
-			motionData, err := vmdReadPicker.GetData()
-			if err != nil {
-				walk.MsgBox(mWindow.MainWindow, "Vmdファイル読み込みエラー", err.Error(), walk.MsgBoxIconError)
-				return
-			}
-			motion = motionData.(*vmd.VmdMotion)
-		}
-
-		if motion == nil {
-			motion = vmd.NewVmdMotion("")
-		}
-
-		motionFrameEdit.SetRange(0, float64(motion.GetMaxFrame()+1))
-		motionFrameEdit.SetValue(0)
-
-		motionFrameEdit.ValueChanged().Attach(func() {
-			if paused {
-				mWindow.GetMainGlWindow().SetValue(
-					float32(motionFrameEdit.Value()) / mWindow.GetMainGlWindow().Physics.Fps)
-				motionSlider.SetValue(int(motionFrameEdit.Value()))
-			}
-		})
-
-		motionSlider.SetRange(0, int(motion.GetMaxFrame()+1))
-		motionSlider.SetValue(0)
-		motionSlider.ValueChanged().Attach(func() {
-			if paused {
-				mWindow.GetMainGlWindow().SetValue(
-					float32(motionSlider.Value()) / mWindow.GetMainGlWindow().Physics.Fps)
-				motionFrameEdit.SetValue(float64(motionSlider.Value()))
-			}
-		})
-
-		mWindow.GetMainGlWindow().ClearData()
-		mWindow.GetMainGlWindow().AddData(model, motion)
-		mWindow.GetMainGlWindow().Run(motionFrameEdit, motionSlider)
-	})
-
-	subExecButton.Clicked().Attach(func() {
-		subGlWindow, err := mwidget.NewGlWindow("サブウィンドウ", 300, 300, 1, resourceFiles, mWindow.GetMainGlWindow())
-		if err != nil {
-			walk.MsgBox(mWindow.MainWindow, "サブウィンドウ生成エラー", err.Error(), walk.MsgBoxIconError)
-			return
-		}
-		mWindow.AddGlWindow(subGlWindow)
-	})
+	}
 
 	pmxReadPicker.OnPathChanged = func(path string) {
 		isExist, err := mutils.ExistsFile(path)
 		if !isExist || err != nil {
 			pmxSavePicker.PathLineEdit.SetText("")
-			execButton.SetEnabled(false)
-			subExecButton.SetEnabled(false)
 			return
 		}
 
@@ -222,11 +133,80 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 		ext := filepath.Ext(file)
 		outputPath := filepath.Join(dir, file[:len(file)-len(ext)]+"_out"+ext)
 		pmxSavePicker.PathLineEdit.SetText(outputPath)
-		execButton.SetEnabled(true)
-		subExecButton.SetEnabled(true)
-		motionFrameEdit.SetEnabled(true)
-		motionSlider.SetEnabled(true)
-		pauseButton.SetEnabled(true)
+
+		if pmxReadPicker.Exists() {
+			motionPlayer.PlayButton.SetEnabled(true)
+		}
+	}
+
+	vmdReadPicker.OnPathChanged = func(path string) {
+		if pmxReadPicker.Exists() {
+			motionPlayer.PlayButton.SetEnabled(true)
+		}
+
+		onFilePathChanged()
+	}
+
+	motionPlayer.OnPlay = func(isPlaying bool) {
+		if !pmxReadPicker.Exists() {
+			return
+		}
+
+		if isPlaying {
+			var model *pmx.PmxModel
+			modelCached := pmxReadPicker.IsCached()
+			motionCached := vmdReadPicker.IsCached()
+
+			if !modelCached {
+				data, err := pmxReadPicker.GetData()
+				mwidget.CheckError(err, mWindow, "Pmxファイル読み込みエラー")
+				model = data.(*pmx.PmxModel)
+				model.SetUp()
+
+				console.AppendText(fmt.Sprintf("モデル名: %s", model.Name))
+				console.AppendText(fmt.Sprintf("頂点数: %d", len(model.Vertices.Indexes)))
+				console.AppendText(fmt.Sprintf("面数: %d", len(model.Faces.Indexes)))
+				console.AppendText(fmt.Sprintf("材質数: %d", len(model.Materials.GetIndexes())))
+				console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.GetIndexes())))
+				console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.GetIndexes())))
+			} else {
+				model = pmxReadPicker.GetCache().(*pmx.PmxModel)
+			}
+
+			var motion *vmd.VmdMotion
+			if !motionCached {
+				if vmdReadPicker.Exists() {
+					motionData, err := vmdReadPicker.GetData()
+					if err != nil {
+						walk.MsgBox(mWindow.MainWindow, "Vmdファイル読み込みエラー", err.Error(), walk.MsgBoxIconError)
+						return
+					}
+					motion = motionData.(*vmd.VmdMotion)
+				}
+
+				if motion == nil {
+					motion = vmd.NewVmdMotion("")
+				}
+			} else {
+				motion = vmdReadPicker.GetCache().(*vmd.VmdMotion)
+			}
+
+			if modelCached && motionCached {
+				mWindow.GetMainGlWindow().Play(true)
+			} else {
+				motionPlayer.SetEnabled(false)
+				motionPlayer.SetRange(0, float64(motion.GetMaxFrame()+1))
+				motionPlayer.SetValue(0)
+
+				mWindow.GetMainGlWindow().SetFrame(0)
+				mWindow.GetMainGlWindow().Play(true)
+				mWindow.GetMainGlWindow().ClearData()
+				mWindow.GetMainGlWindow().AddData(model, motion)
+				mWindow.GetMainGlWindow().Run(motionPlayer)
+			}
+		} else {
+			mWindow.GetMainGlWindow().Play(false)
+		}
 	}
 
 	return page

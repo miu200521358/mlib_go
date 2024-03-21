@@ -16,7 +16,8 @@ type ConsoleView struct {
 }
 
 const (
-	TEM_APPENDTEXT = win.WM_USER + 6
+	TEM_APPENDTEXT   = win.WM_USER + 6
+	ConsoleViewClass = "ConsoleView Class"
 )
 
 func NewConsoleView(parent walk.Container) (*ConsoleView, error) {
@@ -26,7 +27,7 @@ func NewConsoleView(parent walk.Container) (*ConsoleView, error) {
 	if err := walk.InitWidget(
 		lv,
 		parent,
-		"EDIT",
+		ConsoleViewClass,
 		win.WS_TABSTOP|win.WS_VISIBLE|win.WS_VSCROLL|win.ES_MULTILINE|win.ES_WANTRETURN,
 		win.WS_EX_CLIENTEDGE); err != nil {
 		return nil, err

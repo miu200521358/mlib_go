@@ -1,33 +1,24 @@
 package mcore
 
-import (
-	"crypto/sha1"
-	"encoding/hex"
-	"io"
-	"os"
-
-)
-
 type HashModelInterface interface {
 	GetName() string
 	SetName(name string)
 	IsNotEmpty() bool
 	IsEmpty() bool
-	GetDigest() string
-	UpdateDigest() error
+	GetHash() string
 	GetPath() string
 	SetPath(path string)
 }
 
 type HashModel struct {
-	Path   string
-	Digest string
+	Path string
+	Hash string
 }
 
 func NewHashModel(path string) *HashModel {
 	return &HashModel{
-		Path:   path,
-		Digest: "",
+		Path: path,
+		Hash: "",
 	}
 }
 
@@ -49,28 +40,8 @@ func (m *HashModel) SetName(name string) {
 	panic("not implemented")
 }
 
-func (m *HashModel) GetDigest() string {
-	return m.Digest
-}
-
-func (m *HashModel) UpdateDigest() error {
-	file, err := os.Open(m.Path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	sha1Hash := sha1.New()
-	if _, err := io.Copy(sha1Hash, file); err != nil {
-		return err
-	}
-
-	// ファイルパスをハッシュに含める
-	sha1Hash.Write([]byte(m.Path))
-
-	m.Digest = hex.EncodeToString(sha1Hash.Sum(nil))
-
-	return nil
+func (m *HashModel) GetHash() string {
+	return m.Hash
 }
 
 func (m *HashModel) IsNotEmpty() bool {

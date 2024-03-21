@@ -24,8 +24,14 @@ func (r *PmxReader) ReadByFilepath(path string) (mcore.HashModelInterface, error
 	// モデルを新規作成
 	model := r.createModel(path)
 
+	hash, err := r.ReadHashByFilePath(path)
+	if err != nil {
+		return nil, err
+	}
+	model.Hash = hash
+
 	// ファイルを開く
-	err := r.Open(path)
+	err = r.Open(path)
 	if err != nil {
 		return model, err
 	}
@@ -41,7 +47,6 @@ func (r *PmxReader) ReadByFilepath(path string) (mcore.HashModelInterface, error
 	}
 
 	r.Close()
-	model.UpdateDigest()
 
 	return model, nil
 }
@@ -62,7 +67,6 @@ func (r *PmxReader) ReadNameByFilepath(path string) (string, error) {
 	}
 
 	r.Close()
-	model.UpdateDigest()
 
 	return model.Name, nil
 }

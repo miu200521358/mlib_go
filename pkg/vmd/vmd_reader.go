@@ -28,8 +28,14 @@ func (r *VmdMotionReader) ReadByFilepath(path string) (mcore.HashModelInterface,
 	// モデルを新規作成
 	motion := r.createModel(path)
 
+	hash, err := r.ReadHashByFilePath(path)
+	if err != nil {
+		return motion, err
+	}
+	motion.Hash = hash
+
 	// ファイルを開く
-	err := r.Open(path)
+	err = r.Open(path)
 	if err != nil {
 		return motion, err
 	}
@@ -45,11 +51,6 @@ func (r *VmdMotionReader) ReadByFilepath(path string) (mcore.HashModelInterface,
 	}
 
 	r.Close()
-
-	err = motion.UpdateDigest()
-	if err != nil {
-		return motion, err
-	}
 
 	return motion, nil
 }
@@ -70,11 +71,6 @@ func (r *VmdMotionReader) ReadNameByFilepath(path string) (string, error) {
 	}
 
 	r.Close()
-
-	err = motion.UpdateDigest()
-	if err != nil {
-		return "", err
-	}
 
 	return motion.ModelName, nil
 }

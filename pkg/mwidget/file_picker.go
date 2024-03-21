@@ -11,7 +11,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 const FilePickerClass = "FilePicker Class"
@@ -38,6 +37,8 @@ type FilePicker struct {
 	modelReader mcore.ReaderInterface
 	// 初期ディレクトリ
 	initialDirPath string
+	// キャッシュデータ
+	cacheData mcore.HashModelInterface
 }
 
 func NewPmxReadFilePicker(
@@ -127,6 +128,7 @@ func NewFilePicker(
 		return nil, err
 	}
 	titleLayout := walk.NewHBoxLayout()
+	titleLayout.SetMargins(MarginSmall)
 	titleComposite.SetLayout(titleLayout)
 
 	titleLabel, err := walk.NewTextLabel(titleComposite)
@@ -166,6 +168,7 @@ func NewFilePicker(
 		return nil, err
 	}
 	inputLayout := walk.NewHBoxLayout()
+	inputLayout.SetMargins(MarginSmall)
 	inputComposite.SetLayout(inputLayout)
 
 	pathTextEdit, err := walk.NewLineEdit(inputComposite)
@@ -173,6 +176,15 @@ func NewFilePicker(
 		return nil, err
 	}
 	pathTextEdit.SetToolTipText(tooltip)
+	pathTextEdit.DropFiles().Attach(func(files []string) {
+		if len(files) > 0 {
+			path := files[0]
+			// パスを入力欄に設定
+			picker.PathLineEdit.SetText(path)
+			// コールバックを呼び出し
+			picker.OnChanged(path)
+		}
+	})
 	picker.PathLineEdit = pathTextEdit
 
 	openPushButton, err := walk.NewPushButton(inputComposite)
@@ -200,10 +212,47 @@ func (picker *FilePicker) GetData() (mcore.HashModelInterface, error) {
 	if picker.PathLineEdit.Text() == "" || picker.modelReader == nil {
 		return nil, nil
 	}
+
 	if isExist, err := mutils.ExistsFile(picker.PathLineEdit.Text()); err != nil || !isExist {
 		return nil, fmt.Errorf("ファイルが存在しません")
 	}
-	return picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
+
+	hash, err := picker.modelReader.ReadHashByFilePath(picker.PathLineEdit.Text())
+	if err != nil {
+		return nil, err
+	}
+
+	if picker.cacheData != nil && picker.cacheData.GetHash() == hash {
+		return picker.cacheData, nil
+	}
+
+	data, err := picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
+	if err != nil {
+		return nil, err
+	}
+	picker.cacheData = data
+	return data, nil
+}
+
+func (picker *FilePicker) IsCached() bool {
+	if isExist, err := mutils.ExistsFile(picker.PathLineEdit.Text()); err != nil || !isExist {
+		return false
+	}
+
+	hash, err := picker.modelReader.ReadHashByFilePath(picker.PathLineEdit.Text())
+	if err != nil {
+		return false
+	}
+
+	return picker.cacheData != nil && picker.cacheData.GetHash() == hash
+}
+
+func (picker *FilePicker) ClearCache() {
+	picker.cacheData = nil
+}
+
+func (picker *FilePicker) GetCache() mcore.HashModelInterface {
+	return picker.cacheData
 }
 
 func (picker *FilePicker) OnChanged(path string) {
@@ -366,6 +415,17 @@ func (*FilePicker) CreateLayoutItem(ctx *walk.LayoutContext) walk.LayoutItem {
 func (f *FilePicker) Exists() bool {
 	if f.PathLineEdit.Text() == "" {
 		return false
+	}
+	isExist, err := mutils.ExistsFile(f.PathLineEdit.Text())
+	if err != nil {
+		return false
+	}
+	return isExist
+}
+
+func (f *FilePicker) ExistsOrEmpty() bool {
+	if f.PathLineEdit.Text() == "" {
+		return true
 	}
 	isExist, err := mutils.ExistsFile(f.PathLineEdit.Text())
 	if err != nil {

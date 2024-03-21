@@ -68,7 +68,7 @@ type GlWindow struct {
 	updatedPrev         bool
 	shiftPressed        bool
 	ctrlPressed         bool
-	paused              bool
+	playing             bool
 	VisibleBone         bool
 	EnablePhysics       bool
 	EnableFrameDrop     bool
@@ -167,6 +167,7 @@ func NewGlWindow(
 		shiftPressed:        false,
 		ctrlPressed:         false,
 		VisibleBone:         false,
+		playing:             true, // 最初は再生
 		EnablePhysics:       true, // 最初は物理ON
 		EnableFrameDrop:     true, // 最初はドロップON
 		frame:               float32(0),
@@ -181,15 +182,15 @@ func NewGlWindow(
 	return &glWindow, nil
 }
 
-func (w *GlWindow) Pause(p bool) {
-	w.paused = p
+func (w *GlWindow) Play(p bool) {
+	w.playing = p
 }
 
-func (w *GlWindow) GetValue() float32 {
+func (w *GlWindow) GetFrame() float32 {
 	return w.frame
 }
 
-func (w *GlWindow) SetValue(f float32) {
+func (w *GlWindow) SetFrame(f float32) {
 	w.frame = f
 }
 
@@ -450,6 +451,7 @@ func (w *GlWindow) ClearData() {
 		modelSet.Model.DeletePhysics()
 	}
 	w.ModelSets = make([]ModelSet, 0)
+	w.frame = 0
 }
 
 func (w *GlWindow) Draw(frame float32, elapsed float32) {
@@ -471,7 +473,7 @@ func (w *GlWindow) Size() walk.Size {
 	return walk.Size{Width: x, Height: y}
 }
 
-func (w *GlWindow) Run(frameEdit *walk.NumberEdit, frameSlider *walk.Slider) {
+func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 	previousTime := glfw.GetTime()
 
 	for !w.ShouldClose() {
@@ -513,15 +515,13 @@ func (w *GlWindow) Run(frameEdit *walk.NumberEdit, frameSlider *walk.Slider) {
 			elapsed = 1.0 / float32(w.Physics.Fps)
 		}
 
-		if !w.paused {
+		if w.playing {
 			// elapsed := float32(math.Ceil(elapsed * float64(w.Physics.Fps)))
 			// elapsed := float32(1.0)
 			w.frame += elapsed
-			if frameEdit != nil {
-				frameEdit.SetValue(float64(w.frame * w.Physics.Fps))
-			}
-			if frameSlider != nil {
-				frameSlider.SetValue(int(w.frame * w.Physics.Fps))
+			if motionPlayer != nil {
+				motionPlayer.FrameEdit.SetValue(float64(w.frame * w.Physics.Fps))
+				motionPlayer.FrameSlider.SetValue(int(w.frame * w.Physics.Fps))
 			}
 		}
 
@@ -534,5 +534,7 @@ func (w *GlWindow) Run(frameEdit *walk.NumberEdit, frameSlider *walk.Slider) {
 		w.SwapBuffers()
 		glfw.PollEvents()
 	}
-	w.Close(&w.Window)
+	if w.ShouldClose() {
+		w.Close(&w.Window)
+	}
 }
