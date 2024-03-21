@@ -9,41 +9,94 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type MWindow struct {
-	walk.MainWindow
-	// 横並びであるか否か
-	isHorizontal bool
-	// 描画ウィンドウ
-	GlWindows []*GlWindow
+	*walk.MainWindow
+	TabWidget            *MTabWidget  // タブウィジェット
+	isHorizontal         bool         // 横並びであるか否か
+	GlWindows            []*GlWindow  // 描画ウィンドウ
+	frameDropAction      *walk.Action // フレームドロップON/OFF
+	physicsAction        *walk.Action // 物理ON/OFF
+	physicsResetAction   *walk.Action // 物理リセット
+	boneDebugAction      *walk.Action // ボーンデバッグ表示
+	rigidBodyDebugAction *walk.Action // 剛体デバッグ表示
+	jointDebugAction     *walk.Action // ジョイントデバッグ表示
 }
 
 func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int) (*MWindow, error) {
 	appConfig := mutils.LoadAppConfig(resourceFiles)
 
-	var mw *walk.MainWindow
+	mainWindow := &MWindow{isHorizontal: isHorizontal, GlWindows: []*GlWindow{}}
 
 	if err := (declarative.MainWindow{
-		AssignTo: &mw,
+		AssignTo: &mainWindow.MainWindow,
 		Title:    fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion),
-		Size:     declarative.Size{Width: width, Height: height},
-		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear},
+		Size:     getWindowSize(width, height),
+		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear, MarginsZero: true, SpacingZero: true},
+		MenuItems: []declarative.MenuItem{
+			declarative.Menu{
+				Text: "&モデル描画",
+				Items: []declarative.MenuItem{
+					declarative.Action{
+						Text:        "&フレームドロップON/OFF",
+						Checkable:   true,
+						OnTriggered: mainWindow.frameDropTriggered,
+						AssignTo:    &mainWindow.frameDropAction,
+					},
+					declarative.Separator{},
+					declarative.Action{
+						Text:        "&物理ON/OFF",
+						Checkable:   true,
+						OnTriggered: mainWindow.physicsTriggered,
+						AssignTo:    &mainWindow.physicsAction,
+					},
+					declarative.Action{
+						Text:        "&物理リセット",
+						OnTriggered: mainWindow.physicsResetTriggered,
+						AssignTo:    &mainWindow.physicsResetAction,
+					},
+					declarative.Separator{},
+					declarative.Action{
+						Text:        "&ボーンデバッグ表示",
+						Checkable:   true,
+						OnTriggered: mainWindow.boneDebugViewTriggered,
+						AssignTo:    &mainWindow.boneDebugAction,
+					},
+					declarative.Separator{},
+					declarative.Action{
+						Text:        "&剛体デバッグ表示",
+						Checkable:   true,
+						OnTriggered: mainWindow.rigidBodyDebugViewTriggered,
+						AssignTo:    &mainWindow.rigidBodyDebugAction,
+					},
+					declarative.Action{
+						Text:        "&ジョイントデバッグ表示",
+						Checkable:   true,
+						OnTriggered: mainWindow.jointDebugViewTriggered,
+						AssignTo:    &mainWindow.jointDebugAction,
+					},
+				},
+			},
+		},
 	}).Create(); err != nil {
 		return nil, err
 	}
 
-	mainWindow := &MWindow{MainWindow: *mw, isHorizontal: isHorizontal, GlWindows: []*GlWindow{}}
-	mw.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
+	// 最初は物理ON
+	mainWindow.physicsAction.SetChecked(true)
+	// 最初はフレームドロップON
+	mainWindow.frameDropAction.SetChecked(true)
+
+	mainWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
 		if len(mainWindow.GlWindows) > 0 {
 			for _, glWindow := range mainWindow.GlWindows {
 				glWindow.SetShouldClose(true)
 			}
 		}
-		// mw.Dispose()
 		walk.App().Exit(0)
 	})
+
 	iconImg, err := mutils.LoadIconFile(resourceFiles)
 	if err != nil {
 		return nil, err
@@ -54,7 +107,65 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int
 	}
 	mainWindow.SetIcon(icon)
 
+	// タブウィジェット追加
+	mainWindow.TabWidget = NewMTabWidget(mainWindow)
+	mainWindow.Children().Add(mainWindow.TabWidget)
+
+	bg, err := walk.NewSystemColorBrush(walk.SysColor3DShadow)
+	CheckError(err, mainWindow, "背景色生成エラー")
+	mainWindow.SetBackground(bg)
+
 	return mainWindow, nil
+}
+
+func (w *MWindow) boneDebugViewTriggered() {
+	for _, glWindow := range w.GlWindows {
+		glWindow.VisibleBone = w.boneDebugAction.Checked()
+	}
+}
+
+func (w *MWindow) rigidBodyDebugViewTriggered() {
+	for _, glWindow := range w.GlWindows {
+		glWindow.Physics.VisibleRigidBody(w.rigidBodyDebugAction.Checked())
+	}
+}
+
+func (w *MWindow) jointDebugViewTriggered() {
+	for _, glWindow := range w.GlWindows {
+		glWindow.Physics.VisibleJoint(w.jointDebugAction.Checked())
+	}
+}
+
+func (w *MWindow) physicsTriggered() {
+	for _, glWindow := range w.GlWindows {
+		glWindow.EnablePhysics = w.physicsAction.Checked()
+	}
+}
+
+func (w *MWindow) physicsResetTriggered() {
+	for _, glWindow := range w.GlWindows {
+		glWindow.ResetPhysics()
+	}
+}
+
+func (w *MWindow) frameDropTriggered() {
+	for _, glWindow := range w.GlWindows {
+		glWindow.EnableFrameDrop = w.frameDropAction.Checked()
+	}
+}
+
+func getWindowSize(width int, height int) declarative.Size {
+	screenWidth := GetSystemMetrics(SM_CXSCREEN)
+	screenHeight := GetSystemMetrics(SM_CYSCREEN)
+
+	if width > screenWidth-50 {
+		width = screenWidth - 50
+	}
+	if height > screenHeight-50 {
+		height = screenHeight - 50
+	}
+
+	return declarative.Size{Width: width, Height: height}
 }
 
 func (w *MWindow) AddGlWindow(glWindow *GlWindow) {

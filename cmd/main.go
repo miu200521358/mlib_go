@@ -57,121 +57,75 @@ func main() {
 	// }
 
 	mWindow, err := mwidget.NewMWindow(resourceFiles, true, 512, 768)
-	if err != nil {
-		walk.MsgBox(nil, "メインウィンドウ生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
+	mwidget.CheckError(err, nil, "メインウィンドウ生成エラー")
 
 	glWindow, err := mwidget.NewGlWindow("モデル描画", 512, 768, 0, resourceFiles, nil)
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "モデル描画ウィンドウ生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
+	mwidget.CheckError(err, mWindow, "モデル描画ウィンドウ生成エラー")
 	mWindow.AddGlWindow(glWindow)
 
+	NewFileTabPage(mWindow)
+
+	mWindow.Center()
+	mWindow.Run()
+}
+
+func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
+	page := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, "ファイル")
+
+	mainLayout := walk.NewVBoxLayout()
+	page.SetLayout(mainLayout)
+
 	pmxReadPicker, err := (mwidget.NewPmxReadFilePicker(
-		mWindow,
+		page,
 		"PmxPath",
 		"Pmxファイル",
 		"Pmxファイルを選択してください",
 		func(path string) {}))
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "Pmxファイル選択エラー", err.Error(), walk.MsgBoxIconError)
-	}
+	mwidget.CheckError(err, mWindow, "Pmxファイルピッカー生成エラー")
 
 	vmdReadPicker, err := (mwidget.NewVmdReadFilePicker(
-		mWindow,
+		page,
 		"VmdPath",
 		"Vmdファイル",
 		"Vmdファイルを選択してください",
 		func(path string) {}))
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "Vmdファイル選択エラー", err.Error(), walk.MsgBoxIconError)
-	}
+	mwidget.CheckError(err, mWindow, "Vmdファイルピッカー生成エラー")
 
 	pmxSavePicker, err := (mwidget.NewPmxSaveFilePicker(
-		mWindow,
+		page,
 		"出力Pmxファイル",
 		"出力Pmxファイルパスを入力もしくは選択してください",
 		func(path string) {}))
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "出力Pmxファイル選択エラー", err.Error(), walk.MsgBoxIconError)
-	}
+	mwidget.CheckError(err, mWindow, "出力Pmxファイルピッカー生成エラー")
 
-	motionFrameEdit, err := walk.NewNumberEdit(&mWindow.MainWindow)
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "モーションフレーム生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
+	motionFrameEdit, err := walk.NewNumberEdit(page)
+	mwidget.CheckError(err, mWindow, "モーションフレームエディット生成エラー")
 	motionFrameEdit.SetDecimals(0)
 	motionFrameEdit.SetRange(0, 1)
 	motionFrameEdit.SetValue(0)
 	motionFrameEdit.SetEnabled(false)
 
-	motionSlider, err := walk.NewSlider(&mWindow.MainWindow)
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "モーションスライダー生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
+	motionSlider, err := walk.NewSlider(page)
+	mwidget.CheckError(err, mWindow, "モーションスライダー生成エラー")
 	motionSlider.SetRange(0, 1)
 	motionSlider.SetValue(0)
 	motionSlider.SetEnabled(false)
 
-	boneDebugCheckBox, err := walk.NewCheckBox(&mWindow.MainWindow)
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "ボーンデバッグチェックボックス生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
-	boneDebugCheckBox.SetText("ボーンデバッグ表示")
-	boneDebugCheckBox.SetChecked(false)
-
-	boneDebugCheckBox.Clicked().Attach(func() {
-		glWindow.EnableBoneDebug = boneDebugCheckBox.Checked()
-	})
-
-	physicsDebugCheckBox, err := walk.NewCheckBox(&mWindow.MainWindow)
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "物理デバッグチェックボックス生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
-	physicsDebugCheckBox.SetText("物理デバッグ表示")
-	physicsDebugCheckBox.SetChecked(false)
-
-	physicsDebugCheckBox.Clicked().Attach(func() {
-		glWindow.Physics.EnableDebug(physicsDebugCheckBox.Checked())
-	})
-
-	physicsCheckBox, err := walk.NewCheckBox(&mWindow.MainWindow)
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "静的物理チェックボックス生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
-	physicsCheckBox.SetText("物理ON/OFF")
-	physicsCheckBox.SetChecked(true)
-	physicsCheckBox.Clicked().Attach(func() {
-		glWindow.EnablePhysics = physicsCheckBox.Checked()
-	})
-
-	dropCheckBox, err := walk.NewCheckBox(&mWindow.MainWindow)
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "フレームドロップONチェックボックス生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
-	dropCheckBox.SetText("フレームドロップON (スキップ許容)")
-	dropCheckBox.SetChecked(true)
-	dropCheckBox.Clicked().Attach(func() {
-		glWindow.EnableDrop = dropCheckBox.Checked()
-	})
-
-	execButton, err := walk.NewPushButton(&mWindow.MainWindow)
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "モデル描画ボタン生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
+	execButton, err := walk.NewPushButton(page)
+	mwidget.CheckError(err, mWindow, "モデル描画ボタン生成エラー")
 	execButton.SetText("モデル描画")
 	execButton.SetEnabled(false)
 
 	paused := false
-	pauseButton, err := walk.NewPushButton(&mWindow.MainWindow)
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "一時停止ボタン生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
+	pauseButton, err := walk.NewPushButton(page)
+	mwidget.CheckError(err, mWindow, "一時停止ボタン生成エラー")
 	pauseButton.SetText("一時停止")
 	pauseButton.SetEnabled(false)
 	pauseButton.Clicked().Attach(func() {
 		paused = !paused
-		glWindow.Pause(paused)
+		for _, glWindow := range mWindow.GlWindows {
+			glWindow.Pause(paused)
+		}
 		if paused {
 			pauseButton.SetText("再開")
 		} else {
@@ -179,31 +133,18 @@ func main() {
 		}
 	})
 
-	physicsResetButton, err := walk.NewPushButton(&mWindow.MainWindow)
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "物理リセットボタン生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
-	physicsResetButton.SetText("物理クリア")
-	physicsResetButton.Clicked().Attach(func() {
-		glWindow.ResetPhysics()
-	})
-
-	subExecButton, err := walk.NewPushButton(&mWindow.MainWindow)
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "サブウィンドウ描画ボタン生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
+	subExecButton, err := walk.NewPushButton(page)
+	mwidget.CheckError(err, mWindow, "サブウィンドウ描画ボタン生成エラー")
 	subExecButton.SetText("サブウィンドウ描画")
 	subExecButton.SetEnabled(false)
 
 	console, err := (mwidget.NewConsoleView(mWindow))
-	if err != nil {
-		walk.MsgBox(&mWindow.MainWindow, "コンソール生成エラー", err.Error(), walk.MsgBoxIconError)
-	}
+	mwidget.CheckError(err, mWindow, "コンソール生成エラー")
 
 	execButton.Clicked().Attach(func() {
 		data, err := pmxReadPicker.GetData()
 		if err != nil {
-			walk.MsgBox(&mWindow.MainWindow, "Pmxファイル読み込みエラー", err.Error(), walk.MsgBoxIconError)
+			walk.MsgBox(mWindow.MainWindow, "Pmxファイル読み込みエラー", err.Error(), walk.MsgBoxIconError)
 			return
 		}
 		model := data.(*pmx.PmxModel)
@@ -223,7 +164,7 @@ func main() {
 		if vmdReadPicker.Exists() {
 			motionData, err := vmdReadPicker.GetData()
 			if err != nil {
-				walk.MsgBox(&mWindow.MainWindow, "Vmdファイル読み込みエラー", err.Error(), walk.MsgBoxIconError)
+				walk.MsgBox(mWindow.MainWindow, "Vmdファイル読み込みエラー", err.Error(), walk.MsgBoxIconError)
 				return
 			}
 			motion = motionData.(*vmd.VmdMotion)
@@ -260,9 +201,9 @@ func main() {
 	})
 
 	subExecButton.Clicked().Attach(func() {
-		subGlWindow, err := mwidget.NewGlWindow("サブウィンドウ", 300, 300, 1, resourceFiles, glWindow)
+		subGlWindow, err := mwidget.NewGlWindow("サブウィンドウ", 300, 300, 1, resourceFiles, mWindow.GetMainGlWindow())
 		if err != nil {
-			walk.MsgBox(&mWindow.MainWindow, "サブウィンドウ生成エラー", err.Error(), walk.MsgBoxIconError)
+			walk.MsgBox(mWindow.MainWindow, "サブウィンドウ生成エラー", err.Error(), walk.MsgBoxIconError)
 			return
 		}
 		mWindow.AddGlWindow(subGlWindow)
@@ -272,7 +213,6 @@ func main() {
 		isExist, err := mutils.ExistsFile(path)
 		if !isExist || err != nil {
 			pmxSavePicker.PathLineEdit.SetText("")
-			physicsDebugCheckBox.SetEnabled(false)
 			execButton.SetEnabled(false)
 			subExecButton.SetEnabled(false)
 			return
@@ -282,7 +222,6 @@ func main() {
 		ext := filepath.Ext(file)
 		outputPath := filepath.Join(dir, file[:len(file)-len(ext)]+"_out"+ext)
 		pmxSavePicker.PathLineEdit.SetText(outputPath)
-		physicsDebugCheckBox.SetEnabled(true)
 		execButton.SetEnabled(true)
 		subExecButton.SetEnabled(true)
 		motionFrameEdit.SetEnabled(true)
@@ -290,6 +229,5 @@ func main() {
 		pauseButton.SetEnabled(true)
 	}
 
-	mWindow.Center()
-	mWindow.Run()
+	return page
 }

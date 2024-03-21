@@ -69,9 +69,9 @@ type GlWindow struct {
 	shiftPressed        bool
 	ctrlPressed         bool
 	paused              bool
-	EnableBoneDebug     bool
+	VisibleBone         bool
 	EnablePhysics       bool
-	EnableDrop          bool
+	EnableFrameDrop     bool
 	frame               float32
 }
 
@@ -166,9 +166,9 @@ func NewGlWindow(
 		updatedPrev:         false,
 		shiftPressed:        false,
 		ctrlPressed:         false,
-		EnableBoneDebug:     false,
+		VisibleBone:         false,
 		EnablePhysics:       true, // 最初は物理ON
-		EnableDrop:          true, // 最初はドロップON
+		EnableFrameDrop:     true, // 最初はドロップON
 		frame:               float32(0),
 	}
 
@@ -462,7 +462,7 @@ func (w *GlWindow) Draw(frame float32, elapsed float32) {
 
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
-		modelSet.Draw(w.Shader, w.WindowIndex, frame, elapsed, w.EnableBoneDebug, w.EnablePhysics)
+		modelSet.Draw(w.Shader, w.WindowIndex, frame, elapsed, w.VisibleBone, w.EnablePhysics)
 	}
 }
 
@@ -508,7 +508,7 @@ func (w *GlWindow) Run(frameEdit *walk.NumberEdit, frameSlider *walk.Slider) {
 		// Update
 		previousTime = time
 
-		if !w.EnableDrop {
+		if !w.EnableFrameDrop {
 			// フレームドロップOFFの場合、1Fずつ
 			elapsed = 1.0 / float32(w.Physics.Fps)
 		}

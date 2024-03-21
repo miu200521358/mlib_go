@@ -11,6 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
+
 )
 
 const FilePickerClass = "FilePicker Class"
@@ -40,7 +41,7 @@ type FilePicker struct {
 }
 
 func NewPmxReadFilePicker(
-	parent *MWindow,
+	parent walk.Container,
 	historyKey string,
 	title string,
 	tooltip string,
@@ -58,7 +59,7 @@ func NewPmxReadFilePicker(
 }
 
 func NewVmdReadFilePicker(
-	parent *MWindow,
+	parent walk.Container,
 	historyKey string,
 	title string,
 	tooltip string,
@@ -76,7 +77,7 @@ func NewVmdReadFilePicker(
 }
 
 func NewPmxSaveFilePicker(
-	parent *MWindow,
+	parent walk.Container,
 	title string,
 	tooltip string,
 	onPathChanged func(string),
@@ -93,7 +94,7 @@ func NewPmxSaveFilePicker(
 }
 
 func NewFilePicker(
-	parent *MWindow,
+	parent walk.Container,
 	historyKey string,
 	title string,
 	tooltip string,
@@ -114,22 +115,14 @@ func NewFilePicker(
 		picker,
 		parent,
 		FilePickerClass,
-		win.WS_VISIBLE,
+		win.WS_DISABLED,
 		0); err != nil {
 
 		return nil, err
 	}
 
-	// ピッカー全体
-	pickerComposite, err := walk.NewComposite(parent)
-	if err != nil {
-		return nil, err
-	}
-	pickerLayout := walk.NewVBoxLayout()
-	pickerComposite.SetLayout(pickerLayout)
-
 	// タイトル
-	titleComposite, err := walk.NewComposite(pickerComposite)
+	titleComposite, err := walk.NewComposite(parent)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +161,7 @@ func NewFilePicker(
 	}
 
 	// パス入力欄
-	inputComposite, err := walk.NewComposite(pickerComposite)
+	inputComposite, err := walk.NewComposite(parent)
 	if err != nil {
 		return nil, err
 	}

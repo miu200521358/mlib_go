@@ -7,11 +7,10 @@ import (
 )
 
 type MPhysics struct {
-	world       mbt.BtDiscreteDynamicsWorld
-	MaxSubSteps int
-	Fps         float32
-	Spf         float32
-	isDebug     bool
+	world            mbt.BtDiscreteDynamicsWorld
+	MaxSubSteps      int
+	Fps              float32
+	Spf              float32
 }
 
 func NewMPhysics(shader *mgl.MShader) *MPhysics {
@@ -42,26 +41,44 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 		world:       world,
 		MaxSubSteps: 5,
 		Fps:         30.0,
-		isDebug:     false,
 	}
 	p.Spf = 1.0 / p.Fps
 
-	p.EnableDebug(false)
+	p.VisibleRigidBody(false)
+	p.VisibleJoint(false)
 
 	return p
 }
 
-func (p *MPhysics) EnableDebug(enable bool) {
-	p.isDebug = enable
+func (p *MPhysics) VisibleRigidBody(enable bool) {
 	if enable {
-		p.world.GetDebugDrawer().SetDebugMode(int(
-			mbt.BtIDebugDrawDBG_DrawConstraints |
-				mbt.BtIDebugDrawDBG_DrawConstraintLimits |
-				mbt.BtIDebugDrawDBG_DrawWireframe |
-				mbt.BtIDebugDrawDBG_DrawContactPoints,
-		))
+		p.world.GetDebugDrawer().SetDebugMode(
+			p.world.GetDebugDrawer().GetDebugMode() | int(
+				mbt.BtIDebugDrawDBG_DrawWireframe|
+					mbt.BtIDebugDrawDBG_DrawContactPoints,
+			))
 	} else {
-		p.world.GetDebugDrawer().SetDebugMode(0)
+		p.world.GetDebugDrawer().SetDebugMode(
+			p.world.GetDebugDrawer().GetDebugMode() & ^int(
+				mbt.BtIDebugDrawDBG_DrawWireframe|
+					mbt.BtIDebugDrawDBG_DrawContactPoints,
+			))
+	}
+}
+
+func (p *MPhysics) VisibleJoint(enable bool) {
+	if enable {
+		p.world.GetDebugDrawer().SetDebugMode(
+			p.world.GetDebugDrawer().GetDebugMode() | int(
+				mbt.BtIDebugDrawDBG_DrawConstraints|
+					mbt.BtIDebugDrawDBG_DrawConstraintLimits,
+			))
+	} else {
+		p.world.GetDebugDrawer().SetDebugMode(
+			p.world.GetDebugDrawer().GetDebugMode() & ^int(
+				mbt.BtIDebugDrawDBG_DrawConstraints|
+					mbt.BtIDebugDrawDBG_DrawConstraintLimits,
+			))
 	}
 }
 
