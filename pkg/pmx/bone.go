@@ -741,10 +741,6 @@ func (b *Bones) Draw(
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	// ブレンディングを有効にする
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
 	shader.UseBoneProgram()
 
 	// ------------------------------
