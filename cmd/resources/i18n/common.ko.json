@@ -1,0 +1,166 @@
+[
+    {
+        "id": "&ビューワー",
+        "translation": "&뷰어"
+    },
+    {
+        "id": "&フレームドロップON/OFF",
+        "translation": "&프레임 드롭 ON/OFF"
+    },
+    {
+        "id": "&物理ON/OFF",
+        "translation": "&물리 ON/OFF"
+    },
+    {
+        "id": "&物理リセット",
+        "translation": "&물리 리셋"
+    },
+    {
+        "id": "&ボーンデバッグ表示",
+        "translation": "&본 디버그 표시"
+    },
+    {
+        "id": "&剛体デバッグ表示",
+        "translation": "&강체 디버그 표시"
+    },
+    {
+        "id": "&ジョイントデバッグ表示",
+        "translation": "&조인트 디버그 표시"
+    },
+    {
+        "id": "背景色生成エラー",
+        "translation": "배경색 생성 오류"
+    },
+    {
+        "id": "&言語",
+        "translation": "&언어"
+    },
+    {
+        "id": "LanguageChanged.Title",
+        "translation": "언어 변경"
+    },
+    {
+        "id": "LanguageChanged.Message",
+        "translation": "화면의 언어 변경은 재시작 후 적용됩니다\n앱을 종료합니다"
+    },
+    {
+        "id": "未設定",
+        "translation": "미설정"
+    },
+    {
+        "id": "開く",
+        "translation": "열기"
+    },
+    {
+        "id": "履歴",
+        "translation": "기록"
+    },
+    {
+        "id": "ファイルが存在しません",
+        "translation": "파일이 존재하지 않습니다"
+    },
+    {
+        "id": "読み込み失敗",
+        "translation": "로드 실패"
+    },
+    {
+        "id": "履歴ダイアログ生成エラー",
+        "translation": "기록 대화상자 생성 오류"
+    },
+    {
+        "id": "履歴ダイアログタイトル",
+        "translation": "{{.Title}}의 기록"
+    },
+    {
+        "id": "履歴リスト生成エラー",
+        "translation": "기록 리스트 생성 오류"
+    },
+    {
+        "id": "ボタンBox生成エラー",
+        "translation": "버튼 박스 생성 오류"
+    },
+    {
+        "id": "OKボタン生成エラー",
+        "translation": "확인 버튼 생성 오류"
+    },
+    {
+        "id": "Cancelボタン生成エラー",
+        "translation": "취소 버튼 생성 오류"
+    },
+    {
+        "id": "ファイル選択ダイアログタイトル",
+        "translation": "{{.Title}}을(를) 선택해주세요"
+    },
+    {
+        "id": "ファイル選択ダイアログ選択エラー",
+        "translation": "파일 선택 대화상자 선택 오류"
+    },
+    {
+        "id": "タブウィジェット生成エラー",
+        "translation": "탭 위젯 생성 오류"
+    },
+    {
+        "id": "タブページ生成エラー",
+        "translation": "탭 페이지 생성 오류"
+    },
+    {
+        "id": "再生",
+        "translation": "재생"
+    },
+    {
+        "id": "一時停止",
+        "translation": "일시 정지"
+    },
+    {
+        "id": "メインウィンドウ生成エラー",
+        "translation": "메인 윈도우 생성 오류"
+    },
+    {
+        "id": "ビューワーウィンドウ生成エラー",
+        "translation": "뷰어 윈도우 생성 오류"
+    },
+    {
+        "id": "コンソール生成エラー",
+        "translation": "콘솔 생성 오류"
+    },
+    {
+        "id": "ファイル",
+        "translation": "파일"
+    },
+    {
+        "id": "Pmxファイル",
+        "translation": "PMX 파일"
+    },
+    {
+        "id": "Pmxファイルピッカー生成エラー",
+        "translation": "PMX 파일 선택기 생성 오류"
+    },
+    {
+        "id": "Vmdファイル",
+        "translation": "VMD 파일"
+    },
+    {
+        "id": "Vmdファイルピッカー生成エラー",
+        "translation": "VMD 파일 선택기 생성 오류"
+    },
+    {
+        "id": "セパレータ生成エラー",
+        "translation": "구분자 생성 오류"
+    },
+    {
+        "id": "モーションプレイヤー生成エラー",
+        "translation": "모션 플레이어 생성 오류"
+    },
+    {
+        "id": "Pmxファイル読み込みエラー",
+        "translation": "PMX 파일 로드 오류"
+    },
+    {
+        "id": "Vmdファイル読み込みエラー",
+        "translation": "VMD 파일 로드 오류"
+    },
+    {
+        "id": "ビューワー",
+        "translation": "뷰어"
+    }
+]

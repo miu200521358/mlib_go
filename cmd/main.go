@@ -60,17 +60,17 @@ func main() {
 	// }
 
 	mWindow, err := mwidget.NewMWindow(resourceFiles, true, 512, 768)
-	mwidget.CheckError(err, nil, "メインウィンドウ生成エラー")
+	mwidget.CheckError(err, nil, mWindow.I18n.T("メインウィンドウ生成エラー"))
 
-	glWindow, err := mwidget.NewGlWindow("モデル描画", 512, 768, 0, resourceFiles, nil)
-	mwidget.CheckError(err, mWindow, "モデル描画ウィンドウ生成エラー")
+	glWindow, err := mwidget.NewGlWindow(mWindow.I18n.T("ビューワー"), 512, 768, 0, resourceFiles, nil)
+	mwidget.CheckError(err, mWindow, mWindow.I18n.T("ビューワーウィンドウ生成エラー"))
 	mWindow.AddGlWindow(glWindow)
 
 	NewFileTabPage(mWindow)
 
 	// コンソールはタブ外に表示
 	mWindow.ConsoleView, err = mwidget.NewConsoleView(mWindow)
-	mwidget.CheckError(err, mWindow, "コンソール生成エラー")
+	mwidget.CheckError(err, mWindow, mWindow.I18n.T("コンソール生成エラー"))
 	log.SetOutput(mWindow.ConsoleView)
 
 	mWindow.Center()
@@ -78,39 +78,42 @@ func main() {
 }
 
 func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
-	page := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, "ファイル")
+	page := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, mWindow.I18n.T("ファイル"))
 
 	mainLayout := walk.NewVBoxLayout()
 	page.SetLayout(mainLayout)
 
 	pmxReadPicker, err := (mwidget.NewPmxReadFilePicker(
+		mWindow,
 		page,
 		"PmxPath",
-		"Pmxファイル",
-		"Pmxファイルを選択してください",
+		mWindow.I18n.T("Pmxファイル"),
+		mWindow.I18n.T("Pmxファイルを選択してください"),
 		func(path string) {}))
-	mwidget.CheckError(err, mWindow, "Pmxファイルピッカー生成エラー")
+	mwidget.CheckError(err, mWindow, mWindow.I18n.T("Pmxファイルピッカー生成エラー"))
 
 	vmdReadPicker, err := (mwidget.NewVmdReadFilePicker(
+		mWindow,
 		page,
 		"VmdPath",
-		"Vmdファイル",
-		"Vmdファイルを選択してください",
+		mWindow.I18n.T("Vmdファイル"),
+		mWindow.I18n.T("Vmdファイルを選択してください"),
 		func(path string) {}))
-	mwidget.CheckError(err, mWindow, "Vmdファイルピッカー生成エラー")
+	mwidget.CheckError(err, mWindow, mWindow.I18n.T("Vmdファイルピッカー生成エラー"))
 
 	pmxSavePicker, err := (mwidget.NewPmxSaveFilePicker(
+		mWindow,
 		page,
-		"出力Pmxファイル",
-		"出力Pmxファイルパスを入力もしくは選択してください",
+		mWindow.I18n.T("出力Pmxファイル"),
+		mWindow.I18n.T("出力Pmxファイルパスを入力もしくは選択してください"),
 		func(path string) {}))
-	mwidget.CheckError(err, mWindow, "出力Pmxファイルピッカー生成エラー")
+	mwidget.CheckError(err, mWindow, mWindow.I18n.T("出力Pmxファイルピッカー生成エラー"))
 
 	_, err = walk.NewVSeparator(page)
-	mwidget.CheckError(err, mWindow, "セパレータ生成エラー")
+	mwidget.CheckError(err, mWindow, mWindow.I18n.T("セパレータ生成エラー"))
 
 	motionPlayer, err := mwidget.NewMotionPlayer(page, mWindow, resourceFiles)
-	mwidget.CheckError(err, mWindow, "モーションプレイヤー生成エラー")
+	mwidget.CheckError(err, mWindow, mWindow.I18n.T("モーションプレイヤー生成エラー"))
 	motionPlayer.SetEnabled(false)
 	motionPlayer.PlayButton.SetEnabled(false)
 
@@ -163,7 +166,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 
 			if !modelCached {
 				data, err := pmxReadPicker.GetData()
-				mwidget.CheckError(err, mWindow, "Pmxファイル読み込みエラー")
+				mwidget.CheckError(err, mWindow, mWindow.I18n.T("Pmxファイル読み込みエラー"))
 				model = data.(*pmx.PmxModel)
 				model.SetUp()
 
@@ -177,7 +180,8 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 				if vmdReadPicker.Exists() {
 					motionData, err := vmdReadPicker.GetData()
 					if err != nil {
-						walk.MsgBox(mWindow.MainWindow, "Vmdファイル読み込みエラー", err.Error(), walk.MsgBoxIconError)
+						walk.MsgBox(mWindow.MainWindow, mWindow.I18n.T("Vmdファイル読み込みエラー"),
+							err.Error(), walk.MsgBoxIconError)
 						return
 					}
 					motion = motionData.(*vmd.VmdMotion)

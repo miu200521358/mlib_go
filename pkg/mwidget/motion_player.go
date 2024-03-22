@@ -5,6 +5,7 @@ import (
 
 	"github.com/miu200521358/walk/pkg/walk"
 	"github.com/miu200521358/win"
+
 )
 
 type MotionPlayer struct {
@@ -46,7 +47,7 @@ func NewMotionPlayer(parent walk.Container, mWindow *MWindow, resourceFiles embe
 	if err != nil {
 		return nil, err
 	}
-	titleLabel.SetText("再生")
+	titleLabel.SetText(mWindow.I18n.T("再生"))
 
 	// キーフレ番号
 	mp.FrameEdit, err = walk.NewNumberEdit(playerComposite)
@@ -69,7 +70,7 @@ func NewMotionPlayer(parent walk.Container, mWindow *MWindow, resourceFiles embe
 	if err != nil {
 		return nil, err
 	}
-	mp.PlayButton.SetText("再生")
+	mp.PlayButton.SetText(mWindow.I18n.T("再生"))
 	mp.PlayButton.Clicked().Attach(func() {
 		mp.playing = !mp.playing
 		mp.Play(mp.playing)
@@ -103,10 +104,10 @@ func (mp *MotionPlayer) Play(playing bool) {
 		glWindow.Play(mp.playing)
 	}
 	if mp.playing {
-		mp.PlayButton.SetText("一時停止")
+		mp.PlayButton.SetText(mp.mWindow.I18n.T("一時停止"))
 		mp.SetEnabled(false)
 	} else {
-		mp.PlayButton.SetText("再生")
+		mp.PlayButton.SetText(mp.mWindow.I18n.T("再生"))
 		mp.SetEnabled(true)
 	}
 

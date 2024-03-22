@@ -23,12 +23,20 @@ type MWindow struct {
 	boneDebugAction      *walk.Action // ボーンデバッグ表示
 	rigidBodyDebugAction *walk.Action // 剛体デバッグ表示
 	jointDebugAction     *walk.Action // ジョイントデバッグ表示
+	I18n                 *mutils.I18n // 多言語対応
+	resourceFiles        embed.FS     // リソースファイル
 }
 
 func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int) (*MWindow, error) {
 	appConfig := mutils.LoadAppConfig(resourceFiles)
+	i18n := mutils.NewI18n(resourceFiles)
 
-	mainWindow := &MWindow{isHorizontal: isHorizontal, GlWindows: []*GlWindow{}}
+	mainWindow := &MWindow{
+		isHorizontal:  isHorizontal,
+		GlWindows:     []*GlWindow{},
+		I18n:          i18n,
+		resourceFiles: resourceFiles,
+	}
 
 	if err := (declarative.MainWindow{
 		AssignTo: &mainWindow.MainWindow,
@@ -37,45 +45,66 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int
 		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear, MarginsZero: true, SpacingZero: true},
 		MenuItems: []declarative.MenuItem{
 			declarative.Menu{
-				Text: "&モデル描画",
+				Text: i18n.T("&ビューワー"),
 				Items: []declarative.MenuItem{
 					declarative.Action{
-						Text:        "&フレームドロップON/OFF",
+						Text:        i18n.T("&フレームドロップON/OFF"),
 						Checkable:   true,
 						OnTriggered: mainWindow.frameDropTriggered,
 						AssignTo:    &mainWindow.frameDropAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
-						Text:        "&物理ON/OFF",
+						Text:        i18n.T("&物理ON/OFF"),
 						Checkable:   true,
 						OnTriggered: mainWindow.physicsTriggered,
 						AssignTo:    &mainWindow.physicsAction,
 					},
 					declarative.Action{
-						Text:        "&物理リセット",
+						Text:        i18n.T("&物理リセット"),
 						OnTriggered: mainWindow.physicsResetTriggered,
 						AssignTo:    &mainWindow.physicsResetAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
-						Text:        "&ボーンデバッグ表示",
+						Text:        i18n.T("&ボーンデバッグ表示"),
 						Checkable:   true,
 						OnTriggered: mainWindow.boneDebugViewTriggered,
 						AssignTo:    &mainWindow.boneDebugAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
-						Text:        "&剛体デバッグ表示",
+						Text:        i18n.T("&剛体デバッグ表示"),
 						Checkable:   true,
 						OnTriggered: mainWindow.rigidBodyDebugViewTriggered,
 						AssignTo:    &mainWindow.rigidBodyDebugAction,
 					},
 					declarative.Action{
-						Text:        "&ジョイントデバッグ表示",
+						Text:        i18n.T("&ジョイントデバッグ表示"),
 						Checkable:   true,
 						OnTriggered: mainWindow.jointDebugViewTriggered,
 						AssignTo:    &mainWindow.jointDebugAction,
+					},
+				},
+			},
+			declarative.Menu{
+				Text: i18n.T("&言語"),
+				Items: []declarative.MenuItem{
+					declarative.Action{
+						Text:        "日本語",
+						OnTriggered: mainWindow.langJapaneseTriggered,
+					},
+					declarative.Action{
+						Text:        "English",
+						OnTriggered: mainWindow.langEnglishTriggered,
+					},
+					declarative.Action{
+						Text:        "中文",
+						OnTriggered: mainWindow.langChineseTriggered,
+					},
+					declarative.Action{
+						Text:        "한국어",
+						OnTriggered: mainWindow.langKoreanTriggered,
 					},
 				},
 			},
@@ -113,10 +142,38 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int
 	mainWindow.Children().Add(mainWindow.TabWidget)
 
 	bg, err := walk.NewSystemColorBrush(walk.SysColor3DShadow)
-	CheckError(err, mainWindow, "背景色生成エラー")
+	CheckError(err, mainWindow, i18n.T("背景色生成エラー"))
 	mainWindow.SetBackground(bg)
 
 	return mainWindow, nil
+}
+
+func (w *MWindow) langJapaneseTriggered() {
+	w.langTriggered("ja")
+}
+
+func (w *MWindow) langEnglishTriggered() {
+	w.langTriggered("en")
+}
+
+func (w *MWindow) langChineseTriggered() {
+	w.langTriggered("zh")
+}
+
+func (w *MWindow) langKoreanTriggered() {
+	w.langTriggered("ko")
+}
+
+func (w *MWindow) langTriggered(lang string) {
+	w.I18n.SetLang(lang)
+	w.I18n = mutils.NewI18n(w.resourceFiles)
+	walk.MsgBox(
+		w.MainWindow,
+		w.I18n.T("LanguageChanged.Title"),
+		w.I18n.T("LanguageChanged.Message"),
+		walk.MsgBoxOK|walk.MsgBoxIconInformation,
+	)
+	w.Close()
 }
 
 func (w *MWindow) boneDebugViewTriggered() {

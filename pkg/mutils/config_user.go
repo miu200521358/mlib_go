@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
 )
 
 const USER_CONFIG_FILE_NAME = "user_config.json"
@@ -15,7 +16,7 @@ func SaveUserConfig(key string, value string, limit int) error {
 	}
 
 	// UserConfigファイルをロードする
-	existingValues, config := LoadUserConfig(key)
+	existingValues, config := LoadUserConfigAll(key)
 	values := []string{value}
 
 	// Determine the upper limit based on the smaller value between len(existingValues) and limit
@@ -57,8 +58,13 @@ func SaveUserConfig(key string, value string, limit int) error {
 	return nil
 }
 
+func LoadUserConfig(key string) []string {
+	existingValues, _ := LoadUserConfigAll(key)
+	return existingValues
+}
+
 // 設定の読み込み
-func LoadUserConfig(key string) ([]string, map[string]interface{}) {
+func LoadUserConfigAll(key string) ([]string, map[string]interface{}) {
 	// Configファイルのフルパスを取得
 	configFilePath := filepath.Join(GetAppRootDir(), USER_CONFIG_FILE_NAME)
 	println("LoadConfig: ", key, configFilePath)

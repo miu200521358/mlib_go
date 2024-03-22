@@ -17,31 +17,21 @@ const FilePickerClass = "FilePicker Class"
 
 type FilePicker struct {
 	walk.WidgetBase
-	// ファイルタイトル
-	title string
-	// 履歴用キー(空欄の場合、保存用ファイルと見なす
-
-	// 履歴用キー(空欄の場合、保存用ファイルと見なす)
-	historyKey string
-	// フィルタ拡張子
-	filterExtension map[string]string
-	// ファイルパス入力欄
-	PathLineEdit *walk.LineEdit
-	// ファイル名入力欄
-	NameLineEdit *walk.LineEdit
-	// パス変更時のコールバック
-	OnPathChanged func(string)
-	// 履歴リスト
-	limitHistory int
-	// mcore
-	modelReader mcore.ReaderInterface
-	// 初期ディレクトリ
-	initialDirPath string
-	// キャッシュデータ
-	cacheData mcore.HashModelInterface
+	title           string                   // ファイルタイトル
+	historyKey      string                   // 履歴用キー(空欄の場合、保存用ファイルと見なす)
+	filterExtension map[string]string        // フィルタ拡張子
+	PathLineEdit    *walk.LineEdit           // ファイルパス入力欄
+	NameLineEdit    *walk.LineEdit           // ファイル名入力欄
+	OnPathChanged   func(string)             // パス変更時のコールバック
+	limitHistory    int                      // 履歴リスト
+	modelReader     mcore.ReaderInterface    // mcore
+	initialDirPath  string                   // 初期ディレクトリ
+	cacheData       mcore.HashModelInterface // キャッシュデータ
+	window          *MWindow                 // MWindow
 }
 
 func NewPmxReadFilePicker(
+	window *MWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,
@@ -49,6 +39,7 @@ func NewPmxReadFilePicker(
 	OnPathChanged func(string),
 ) (*FilePicker, error) {
 	return NewFilePicker(
+		window,
 		parent,
 		historyKey,
 		title,
@@ -60,6 +51,7 @@ func NewPmxReadFilePicker(
 }
 
 func NewVmdReadFilePicker(
+	window *MWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,
@@ -67,6 +59,7 @@ func NewVmdReadFilePicker(
 	OnPathChanged func(string),
 ) (*FilePicker, error) {
 	return NewFilePicker(
+		window,
 		parent,
 		historyKey,
 		title,
@@ -78,12 +71,14 @@ func NewVmdReadFilePicker(
 }
 
 func NewPmxSaveFilePicker(
+	window *MWindow,
 	parent walk.Container,
 	title string,
 	tooltip string,
 	onPathChanged func(string),
 ) (*FilePicker, error) {
 	return NewFilePicker(
+		window,
 		parent,
 		"",
 		title,
@@ -95,6 +90,7 @@ func NewPmxSaveFilePicker(
 }
 
 func NewFilePicker(
+	window *MWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,
@@ -111,6 +107,7 @@ func NewFilePicker(
 	picker.OnPathChanged = onPathChanged
 	picker.limitHistory = limitHistory
 	picker.modelReader = modelReader
+	picker.window = window
 
 	if err := walk.InitWidget(
 		picker,
@@ -150,7 +147,7 @@ func NewFilePicker(
 		if err != nil {
 			return nil, err
 		}
-		nameLineEdit.SetText("未設定")
+		nameLineEdit.SetText(window.I18n.T("未設定"))
 		nameLineEdit.SetToolTipText(tooltip)
 		nameLineEdit.SetReadOnly(true)
 		picker.NameLineEdit = nameLineEdit
@@ -192,7 +189,7 @@ func NewFilePicker(
 		return nil, err
 	}
 	openPushButton.SetToolTipText(tooltip)
-	openPushButton.SetText("開く")
+	openPushButton.SetText(window.I18n.T("開く"))
 	openPushButton.Clicked().Attach(picker.onClickOpenButton())
 
 	if historyKey != "" {
@@ -201,7 +198,7 @@ func NewFilePicker(
 			return nil, err
 		}
 		historyPushButton.SetToolTipText(tooltip)
-		historyPushButton.SetText("履歴")
+		historyPushButton.SetText(window.I18n.T("履歴"))
 		historyPushButton.Clicked().Attach(picker.onClickHistoryButton())
 	}
 
@@ -214,7 +211,7 @@ func (picker *FilePicker) GetData() (mcore.HashModelInterface, error) {
 	}
 
 	if isExist, err := mutils.ExistsFile(picker.PathLineEdit.Text()); err != nil || !isExist {
-		return nil, fmt.Errorf("ファイルが存在しません")
+		return nil, fmt.Errorf(picker.window.I18n.T("ファイルが存在しません"))
 	}
 
 	hash, err := picker.modelReader.ReadHashByFilePath(picker.PathLineEdit.Text())
@@ -261,7 +258,7 @@ func (picker *FilePicker) OnChanged(path string) {
 	if picker.modelReader != nil && picker.historyKey != "" {
 		modelName, err := picker.modelReader.ReadNameByFilepath(path)
 		if err != nil {
-			picker.NameLineEdit.SetText("読み込み失敗")
+			picker.NameLineEdit.SetText(picker.window.I18n.T("読み込み失敗"))
 		} else {
 			picker.NameLineEdit.SetText(modelName)
 		}
@@ -280,22 +277,22 @@ func (picker *FilePicker) OnChanged(path string) {
 func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 	return func() {
 		// 履歴リストを取得
-		choices, _ := mutils.LoadUserConfig(picker.historyKey)
+		choices := mutils.LoadUserConfig(picker.historyKey)
 
 		// 履歴ダイアログを開く
 		dlg, err := walk.NewDialog(picker.Form())
 		if err != nil {
-			walk.MsgBox(nil, "履歴ダイアログ生成エラー", err.Error(), walk.MsgBoxIconError)
+			walk.MsgBox(nil, picker.window.I18n.T("履歴ダイアログ生成エラー"), err.Error(), walk.MsgBoxIconError)
 			return
 		}
-		dlg.SetTitle(picker.title + "の履歴")
+		dlg.SetTitle(picker.window.I18n.TP("履歴ダイアログタイトル", map[string]interface{}{"Title": picker.title}))
 		dlg.SetLayout(walk.NewVBoxLayout())
 		dlg.SetSize(walk.Size{Width: 800, Height: 400})
 
 		// 履歴リストを表示
 		historyListBox, err := walk.NewListBox(dlg)
 		if err != nil {
-			walk.MsgBox(nil, "履歴リスト生成エラー", err.Error(), walk.MsgBoxIconError)
+			walk.MsgBox(nil, picker.window.I18n.T("履歴リスト生成エラー"), err.Error(), walk.MsgBoxIconError)
 			return
 		}
 
@@ -327,7 +324,7 @@ func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 		// ボタンBox
 		buttonComposite, err := walk.NewComposite(dlg)
 		if err != nil {
-			walk.MsgBox(nil, "ボタンBox生成エラー", err.Error(), walk.MsgBoxIconError)
+			walk.MsgBox(nil, picker.window.I18n.T("ボタンBox生成エラー"), err.Error(), walk.MsgBoxIconError)
 			return
 		}
 		buttonComposite.SetLayout(walk.NewHBoxLayout())
@@ -335,7 +332,7 @@ func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 		// OKボタン
 		okButton, err := walk.NewPushButton(buttonComposite)
 		if err != nil {
-			walk.MsgBox(nil, "OKボタン生成エラー", err.Error(), walk.MsgBoxIconError)
+			walk.MsgBox(nil, picker.window.I18n.T("OKボタン生成エラー"), err.Error(), walk.MsgBoxIconError)
 			return
 		}
 		okButton.SetText("OK")
@@ -347,7 +344,7 @@ func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 		// Cancel ボタン
 		cancelButton, err := walk.NewPushButton(buttonComposite)
 		if err != nil {
-			walk.MsgBox(nil, "Cancelボタン生成エラー", err.Error(), walk.MsgBoxIconError)
+			walk.MsgBox(nil, picker.window.I18n.T("Cancelボタン生成エラー"), err.Error(), walk.MsgBoxIconError)
 			return
 		}
 		cancelButton.SetText("Cancel")
@@ -370,7 +367,7 @@ func (picker *FilePicker) onClickOpenButton() walk.EventHandler {
 			picker.initialDirPath = dirPath
 		} else if picker.historyKey != "" {
 			// 履歴用キーを指定して履歴リストを取得
-			choices, _ := mutils.LoadUserConfig(picker.historyKey)
+			choices := mutils.LoadUserConfig(picker.historyKey)
 			if len(choices) > 0 {
 				// ファイルパスからディレクトリパスを取得
 				dirPath := filepath.Dir(choices[0])
@@ -381,13 +378,15 @@ func (picker *FilePicker) onClickOpenButton() walk.EventHandler {
 
 		// ファイル選択ダイアログを開く
 		dlg := walk.FileDialog{
-			Title:          picker.title + "ファイルを選択してください",
+			Title: picker.window.I18n.TP(
+				"ファイル選択ダイアログタイトル",
+				map[string]interface{}{"Title": picker.title}),
 			Filter:         picker.convertFilterExtension(picker.filterExtension),
 			FilterIndex:    1,
 			InitialDirPath: picker.initialDirPath,
 		}
 		if ok, err := dlg.ShowOpen(nil); err != nil {
-			walk.MsgBox(nil, "エラー", err.Error(), walk.MsgBoxIconError)
+			walk.MsgBox(nil, picker.window.I18n.T("ファイル選択ダイアログ選択エラー"), err.Error(), walk.MsgBoxIconError)
 		} else if ok {
 			// パスを入力欄に設定
 			picker.PathLineEdit.SetText(dlg.FilePath)

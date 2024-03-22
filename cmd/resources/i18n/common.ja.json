@@ -1,0 +1,166 @@
+[
+    {
+        "id": "&ビューワー",
+        "translation": "&ビューワー"
+    },
+    {
+        "id": "&フレームドロップON/OFF",
+        "translation": "&フレームドロップON/OFF"
+    },
+    {
+        "id": "&物理ON/OFF",
+        "translation": "&物理ON/OFF"
+    },
+    {
+        "id": "&物理リセット",
+        "translation": "&物理リセット"
+    },
+    {
+        "id": "&ボーンデバッグ表示",
+        "translation": "&ボーンデバッグ表示"
+    },
+    {
+        "id": "&剛体デバッグ表示",
+        "translation": "&剛体デバッグ表示"
+    },
+    {
+        "id": "&ジョイントデバッグ表示",
+        "translation": "&ジョイントデバッグ表示"
+    },
+    {
+        "id": "背景色生成エラー",
+        "translation": "背景色生成エラー"
+    },
+    {
+        "id": "&言語",
+        "translation": "&言語"
+    },
+    {
+        "id": "LanguageChanged.Title",
+        "translation": "言語変更"
+    },
+    {
+        "id": "LanguageChanged.Message",
+        "translation": "画面上の言語の変更は再起動後に有効になります\nアプリを終了します"
+    },
+    {
+        "id": "未設定",
+        "translation": "未設定"
+    },
+    {
+        "id": "開く",
+        "translation": "開く"
+    },
+    {
+        "id": "履歴",
+        "translation": "履歴"
+    },
+    {
+        "id": "ファイルが存在しません",
+        "translation": "ファイルが存在しません"
+    },
+    {
+        "id": "読み込み失敗",
+        "translation": "読み込み失敗"
+    },
+    {
+        "id": "履歴ダイアログ生成エラー",
+        "translation": "履歴ダイアログ生成エラー"
+    },
+    {
+        "id": "履歴ダイアログタイトル",
+        "translation": "{{.Title}}の履歴"
+    },
+    {
+        "id": "履歴リスト生成エラー",
+        "translation": "履歴リスト生成エラー"
+    },
+    {
+        "id": "ボタンBox生成エラー",
+        "translation": "ボタンBox生成エラー"
+    },
+    {
+        "id": "OKボタン生成エラー",
+        "translation": "OKボタン生成エラー"
+    },
+    {
+        "id": "Cancelボタン生成エラー",
+        "translation": "Cancelボタン生成エラー"
+    },
+    {
+        "id": "ファイル選択ダイアログタイトル",
+        "translation": "{{.Title}}を選択してください"
+    },
+    {
+        "id": "ファイル選択ダイアログ選択エラー",
+        "translation": "ファイル選択ダイアログ選択エラー"
+    },
+    {
+        "id": "タブウィジェット生成エラー",
+        "translation": "タブウィジェット生成エラー"
+    },
+    {
+        "id": "タブページ生成エラー",
+        "translation": "タブページ生成エラー"
+    },
+    {
+        "id": "再生",
+        "translation": "再生"
+    },
+    {
+        "id": "一時停止",
+        "translation": "一時停止"
+    },
+    {
+        "id": "メインウィンドウ生成エラー",
+        "translation": "メインウィンドウ生成エラー"
+    },
+    {
+        "id": "ビューワーウィンドウ生成エラー",
+        "translation": "ビューワーウィンドウ生成エラー"
+    },
+    {
+        "id": "コンソール生成エラー",
+        "translation": "コンソール生成エラー"
+    },
+    {
+        "id": "ファイル",
+        "translation": "ファイル"
+    },
+    {
+        "id": "Pmxファイル",
+        "translation": "Pmxファイル"
+    },
+    {
+        "id": "Pmxファイルピッカー生成エラー",
+        "translation": "Pmxファイルピッカー生成エラー"
+    },
+    {
+        "id": "Vmdファイル",
+        "translation": "Vmdファイル"
+    },
+    {
+        "id": "Vmdファイルピッカー生成エラー",
+        "translation": "Vmdファイルピッカー生成エラー"
+    },
+    {
+        "id": "セパレータ生成エラー",
+        "translation": "セパレータ生成エラー"
+    },
+    {
+        "id":  "モーションプレイヤー生成エラー",
+        "translation": "モーションプレイヤー生成エラー"
+    },
+    {
+        "id": "Pmxファイル読み込みエラー",
+        "translation": "Pmxファイル読み込みエラー"
+    },
+    {
+        "id": "Vmdファイル読み込みエラー",
+        "translation": "Vmdファイル読み込みエラー"
+    },
+    {
+        "id": "ビューワー",
+        "translation": "ビューワー"
+    }
+]

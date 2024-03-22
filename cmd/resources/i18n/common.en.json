@@ -1,0 +1,167 @@
+[
+    {
+        "id": "&ビューワー",
+        "translation": "&Viewer"
+    },
+    {
+        "id": "&フレームドロップON/OFF",
+        "translation": "&Frame Drop ON/OFF"
+    },
+    {
+        "id": "&物理ON/OFF",
+        "translation": "&Physics ON/OFF"
+    },
+    {
+        "id": "&物理リセット",
+        "translation": "&Physics Reset"
+    },
+   {
+        "id": "&ボーンデバッグ表示",
+        "translation": "&Bone Debug Display"
+    },
+    {
+        "id": "&剛体デバッグ表示",
+        "translation": "&Rigid Body Debug Display"
+    },
+    {
+        "id": "&ジョイントデバッグ表示",
+        "translation": "&Joint Debug Display"
+    },
+    {
+        "id": "背景色生成エラー",
+        "translation": "Background Color Generation Error"
+    },
+    {
+        "id": "&言語",
+        "translation": "&Language"
+    },
+    {
+        "id": "LanguageChanged.Title",
+        "translation": "Language Change"
+    },
+    {
+        "id": "LanguageChanged.Message",
+        "translation": "The language change will take effect after restarting\nThe app will now close"
+    },
+    {
+        "id": "未設定",
+        "translation": "Not Set"
+    },
+    {
+        "id": "開く",
+        "translation": "Open"
+    },
+    {
+        "id": "履歴",
+        "translation": "History"
+    },
+    {
+        "id": "ファイルが存在しません",
+        "translation": "File Does Not Exist"
+    },
+    {
+        "id": "読み込み失敗",
+        "translation": "Load Failed"
+    },
+    {
+        "id": "履歴ダイアログ生成エラー",
+        "translation": "History Dialog Generation Error"
+    },
+    {
+        "id": "履歴ダイアログタイトル",
+        "translation": "History of {{.Title}}"
+    },
+    {
+        "id": "履歴リスト生成エラー",
+        "translation": "History List Generation Error"
+    },
+    {
+        "id": "ボタンBox生成エラー",
+        "translation": "Button Box Generation Error"
+    },
+    {
+        "id": "OKボタン生成エラー",
+        "translation": "OK Button Generation Error"
+    },
+    {
+        "id": "Cancelボタン生成エラー",
+        "translation": "Cancel Button Generation Error"
+    },
+    {
+        "id": "ファイル選択ダイアログタイトル",
+        "translation": "Please Select {{.Title}}"
+    },
+    {
+        "id": "ファイル選択ダイアログ選択エラー",
+        "translation": "File Selection Dialog Error"
+    },
+    {
+        "id": "タブウィジェット生成エラー",
+        "translation": "Tab Widget Generation Error"
+    },
+    {
+        "id": "タブページ生成エラー",
+        "translation": "Tab Page Generation Error"
+    },
+    {
+        "id": "再生",
+        "translation": "Play"
+    },
+    {
+        "id": "一時停止",
+        "translation": "Pause"
+    },
+    {
+        "id": "メインウィンドウ生成エラー",
+        "translation": "Main Window Generation Error"
+    },
+    {
+        "id": "ビューワーウィンドウ生成エラー",
+        "translation": "Viewer Window Generation Error"
+    },
+    {
+        "id": "コンソール生成エラー",
+        "translation": "Console Generation Error"
+    },
+    {
+        "id": "ファイル",
+        "translation": "File"
+    },
+    {
+        "id": "Pmxファイル",
+        "translation": "PMX File"
+    },
+    {
+        "id": "Pmxファイルピッカー生成エラー",
+        "translation": "PMX File Picker Generation Error"
+    },
+    {
+        "id": "Vmdファイル",
+        "translation": "VMD File"
+    },
+    {
+        "id": "Vmdファイルピッカー生成エラー",
+        "translation": "VMD File Picker Generation Error"
+    },
+    {
+        "id": "セパレータ生成エラー",
+        "translation": "Separator Generation Error"
+    },
+    {
+        "id":  "モーションプレイヤー生成エラー",
+        "translation": "Motion Player Generation Error"
+    },
+    {
+        "id": "Pmxファイル読み込みエラー",
+        "translation": "PMX File Loading Error"
+    },
+    {
+        "id": "Vmdファイル読み込みエラー",
+        "translation": "VMD File Loading Error"
+    },
+    {
+        "id": "ビューワー",
+        "translation": "Viewer"
+    }
+]
+

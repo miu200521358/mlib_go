@@ -1,0 +1,166 @@
+[
+    {
+        "id": "&ビューワー",
+        "translation": "&查看器"
+    },
+    {
+        "id": "&フレームドロップON/OFF",
+        "translation": "&帧丢失开/关"
+    },
+    {
+        "id": "&物理ON/OFF",
+        "translation": "&物理开/关"
+    },
+    {
+        "id": "&物理リセット",
+        "translation": "&物理重置"
+    },
+    {
+        "id": "&ボーンデバッグ表示",
+        "translation": "&骨骼调试显示"
+    },
+    {
+        "id": "&剛体デバッグ表示",
+        "translation": "&刚体调试显示"
+    },
+    {
+        "id": "&ジョイントデバッグ表示",
+        "translation": "&关节调试显示"
+    },
+    {
+        "id": "背景色生成エラー",
+        "translation": "背景色生成错误"
+    },
+    {
+        "id": "&言語",
+        "translation": "&语言"
+    },
+    {
+        "id": "LanguageChanged.Title",
+        "translation": "语言更改"
+    },
+    {
+        "id": "LanguageChanged.Message",
+        "translation": "屏幕上的语言更改将在重新启动后生效\n现在将关闭应用程序"
+    },
+    {
+        "id": "未設定",
+        "translation": "未设置"
+    },
+    {
+        "id": "開く",
+        "translation": "打开"
+    },
+    {
+        "id": "履歴",
+        "translation": "历史"
+    },
+    {
+        "id": "ファイルが存在しません",
+        "translation": "文件不存在"
+    },
+    {
+        "id": "読み込み失敗",
+        "translation": "加载失败"
+    },
+    {
+        "id": "履歴ダイアログ生成エラー",
+        "translation": "历史对话框生成错误"
+    },
+    {
+        "id": "履歴ダイアログタイトル",
+        "translation": "{{.Title}}的历史"
+    },
+    {
+        "id": "履歴リスト生成エラー",
+        "translation": "历史列表生成错误"
+    },
+    {
+        "id": "ボタンBox生成エラー",
+        "translation": "按钮盒生成错误"
+    },
+    {
+        "id": "OKボタン生成エラー",
+        "translation": "OK按钮生成错误"
+    },
+    {
+        "id": "Cancelボタン生成エラー",
+        "translation": "取消按钮生成错误"
+    },
+    {
+        "id": "ファイル選択ダイアログタイトル",
+        "translation": "请选择{{.Title}}"
+    },
+    {
+        "id": "ファイル選択ダイアログ選択エラー",
+        "translation": "文件选择对话框选择错误"
+    },
+    {
+        "id": "タブウィジェット生成エラー",
+        "translation": "标签小部件生成错误"
+    },
+    {
+        "id": "タブページ生成エラー",
+        "translation": "标签页生成错误"
+    },
+    {
+        "id": "再生",
+        "translation": "播放"
+    },
+    {
+        "id": "一時停止",
+        "translation": "暂停"
+    },
+    {
+        "id": "メインウィンドウ生成エラー",
+        "translation": "主窗口生成错误"
+    },
+    {
+        "id": "ビューワーウィンドウ生成エラー",
+        "translation": "查看器窗口生成错误"
+    },
+    {
+        "id": "コンソール生成エラー",
+        "translation": "控制台生成错误"
+    },
+    {
+        "id": "ファイル",
+        "translation": "文件"
+    },
+    {
+        "id": "Pmxファイル",
+        "translation": "PMX文件"
+    },
+    {
+        "id": "Pmxファイルピッカー生成エラー",
+        "translation": "PMX文件选择器生成错误"
+    },
+    {
+        "id": "Vmdファイル",
+        "translation": "VMD文件"
+    },
+    {
+        "id": "Vmdファイルピッカー生成エラー",
+        "translation": "VMD文件选择器生成错误"
+    },
+    {
+        "id": "セパレータ生成エラー",
+        "translation": "分隔符生成错误"
+    },
+    {
+        "id": "モーションプレイヤー生成エラー",
+        "translation": "动作播放器生成错误"
+    },
+    {
+        "id": "Pmxファイル読み込みエラー",
+        "translation": "PMX文件加载错误"
+    },
+    {
+        "id": "Vmdファイル読み込みエラー",
+        "translation": "VMD文件加载错误"
+    },
+    {
+        "id": "ビューワー",
+        "translation": "查看器"
+    }
+]

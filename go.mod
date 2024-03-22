@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/nicksnyder/go-i18n/v2 v2.4.0
 	golang.org/x/sys v0.12.0 // indirect
 	gopkg.in/Knetic/govaluate.v3 v3.0.0 // indirect
 )
