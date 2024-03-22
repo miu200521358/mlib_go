@@ -11,6 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mwidget"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
+
 )
 
 func init() {
@@ -137,6 +138,8 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 		if pmxReadPicker.Exists() {
 			motionPlayer.PlayButton.SetEnabled(true)
 		}
+
+		onFilePathChanged()
 	}
 
 	vmdReadPicker.OnPathChanged = func(path string) {
