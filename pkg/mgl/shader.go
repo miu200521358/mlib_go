@@ -131,6 +131,12 @@ func (s *MShader) Reset() {
 	s.CameraPosition = &mmath.MVec3{0.0, INITIAL_CAMERA_POSITION_Y, INITIAL_CAMERA_POSITION_Z}
 	s.LookAtCenterPosition = &mmath.MVec3{0.0, INITIAL_LOOK_AT_CENTER_Y, 0.0}
 	s.FieldOfViewAngle = FIELD_OF_VIEW_ANGLE
+	s.Resize(int(s.Width), int(s.Height))
+}
+
+func (s *MShader) Resize(width, height int) {
+	s.Width = int32(width)
+	s.Height = int32(height)
 	s.msaa = NewMsaa(s.Width, s.Height)
 	s.updateCamera()
 }

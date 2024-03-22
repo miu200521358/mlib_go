@@ -90,7 +90,7 @@ func NewGlWindow(
 		}
 	}
 
-	glfw.WindowHint(glfw.Resizable, glfw.False)
+	glfw.WindowHint(glfw.Resizable, glfw.True)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
 	glfw.WindowHint(glfw.ContextVersionMinor, 4)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
@@ -178,8 +178,14 @@ func NewGlWindow(
 	w.SetCursorPosCallback(glWindow.handleCursorPosEvent)
 	w.SetKeyCallback(glWindow.handleKeyEvent)
 	w.SetCloseCallback(glWindow.Close)
+	w.SetSizeCallback(glWindow.Resize)
 
 	return &glWindow, nil
+}
+
+func (w *GlWindow) Resize(window *glfw.Window, width int, height int) {
+	gl.Viewport(0, 0, int32(width), int32(height))
+	w.Shader.Resize(width, height)
 }
 
 func (w *GlWindow) Play(p bool) {
