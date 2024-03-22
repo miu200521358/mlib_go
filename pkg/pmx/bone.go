@@ -711,6 +711,23 @@ func (b *Bones) prepareDraw() {
 	b.normalIboCount = int32(len(normalIbo))
 }
 
+var BONE_COLORS_IK = []float32{1.0, 0.38, 0, 1.0}
+var BONE_COLORS_IK_NORMAL = []float32{1.0, 0.58, 0.2, 0.7}
+var BONE_COLORS_IK_TARGET = []float32{1.0, 0.57, 0.61, 1.0}
+var BONE_COLORS_IK_TARGET_NORMAL = []float32{1.0, 0.77, 0.81, 0.7}
+var BONE_COLORS_IK_LINK = []float32{1.0, 0.83, 0.49, 1.0}
+var BONE_COLORS_IK_LINK_NORMAL = []float32{1.0, 1.0, 0.69, 0.7}
+var BONE_COLORS_FIXED = []float32{0.72, 0.32, 1.0, 1.0}
+var BONE_COLORS_FIXED_NORMAL = []float32{0.92, 0.52, 1.0, 0.7}
+var BONE_COLORS_EFFECT = []float32{0.68, 0.64, 1.0, 1.0}
+var BONE_COLORS_EFFECT_NORMAL = []float32{0.88, 0.84, 1.0, 0.7}
+var BONE_COLORS_TRANSLATE = []float32{0.70, 1.0, 0.54, 1.0}
+var BONE_COLORS_TRANSLATE_NORMAL = []float32{0.90, 1.0, 0.74, 0.7}
+var BONE_COLORS_INVISIBLE = []float32{0.82, 0.82, 0.82, 1.0}
+var BONE_COLORS_INVISIBLE_NORMAL = []float32{0.92, 0.92, 0.92, 0.7}
+var BONE_COLORS_ROTATE = []float32{0.56, 0.78, 1.0, 1.0}
+var BONE_COLORS_ROTATE_NORMAL = []float32{0.76, 0.98, 1.00, 0.7}
+
 func (b *Bones) Draw(
 	shader *mgl.MShader,
 	boneGlobalMatrixes []*mmath.MMat4,
@@ -744,57 +761,57 @@ func (b *Bones) Draw(
 
 		normalMatrix := matrix.Muled(bone.LocalMatrix)
 		normalVbo = append(normalVbo, posGl[0], posGl[1], posGl[2])
-		normalGl := normalMatrix.MulVec3(mmath.MVec3UnitY).GL()
+		normalGl := normalMatrix.MulVec3(&mmath.MVec3{0, 0.6, 0}).GL()
 
 		// ボーンの種類で色を変える
 		if bone.IsIK() {
 			// IKボーン
-			positionVbo = append(positionVbo, 1.0, 0.38, 0, 1.0)
-			normalVbo = append(normalVbo, 1.0, 0.58, 0.2, 0.7)
+			positionVbo = append(positionVbo, BONE_COLORS_IK...)
+			normalVbo = append(normalVbo, BONE_COLORS_IK_NORMAL...)
 			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
-			normalVbo = append(normalVbo, 1.0, 0.58, 0.2, 0.7)
+			normalVbo = append(normalVbo, BONE_COLORS_IK_NORMAL...)
 		} else if len(bone.IkTargetBoneIndexes) > 0 {
 			// IK先
-			positionVbo = append(positionVbo, 1.0, 0.57, 0.61, 1.0)
-			normalVbo = append(normalVbo, 1.0, 0.77, 0.81, 0.7)
+			positionVbo = append(positionVbo, BONE_COLORS_IK_TARGET...)
+			normalVbo = append(normalVbo, BONE_COLORS_IK_TARGET_NORMAL...)
 			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
-			normalVbo = append(normalVbo, 1.0, 0.77, 0.81, 0.7)
+			normalVbo = append(normalVbo, BONE_COLORS_IK_TARGET_NORMAL...)
 		} else if len(bone.IkLinkBoneIndexes) > 0 {
 			// IKリンク
-			positionVbo = append(positionVbo, 1.0, 0.83, 0.49, 1.0)
-			normalVbo = append(normalVbo, 1.0, 1.0, 0.69, 0.7)
+			positionVbo = append(positionVbo, BONE_COLORS_IK_LINK...)
+			normalVbo = append(normalVbo, BONE_COLORS_IK_LINK_NORMAL...)
 			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
-			normalVbo = append(normalVbo, 1.0, 1.0, 0.69, 0.7)
+			normalVbo = append(normalVbo, BONE_COLORS_IK_LINK_NORMAL...)
 		} else if bone.HasFixedAxis() {
 			// 軸制限
-			positionVbo = append(positionVbo, 0.72, 0.32, 1.0, 1.0)
-			normalVbo = append(normalVbo, 0.92, 0.52, 1.0, 0.7)
+			positionVbo = append(positionVbo, BONE_COLORS_FIXED...)
+			normalVbo = append(normalVbo, BONE_COLORS_FIXED_NORMAL...)
 			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
-			normalVbo = append(normalVbo, 0.92, 0.52, 1.0, 0.7)
+			normalVbo = append(normalVbo, BONE_COLORS_FIXED_NORMAL...)
 		} else if bone.IsEffectorRotation() || bone.IsEffectorTranslation() {
 			// 付与親
-			positionVbo = append(positionVbo, 0.68, 0.64, 1.0, 1.0)
-			normalVbo = append(normalVbo, 0.88, 0.84, 1.0, 0.7)
+			positionVbo = append(positionVbo, BONE_COLORS_EFFECT...)
+			normalVbo = append(normalVbo, BONE_COLORS_EFFECT_NORMAL...)
 			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
-			normalVbo = append(normalVbo, 0.88, 0.84, 1.0, 0.7)
+			normalVbo = append(normalVbo, BONE_COLORS_EFFECT_NORMAL...)
 		} else if bone.CanTranslate() {
 			// 移動可能
-			positionVbo = append(positionVbo, 0.70, 1.0, 0.54, 1.0)
-			normalVbo = append(normalVbo, 0.90, 1.0, 0.74, 0.7)
+			positionVbo = append(positionVbo, BONE_COLORS_TRANSLATE...)
+			normalVbo = append(normalVbo, BONE_COLORS_TRANSLATE_NORMAL...)
 			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
-			normalVbo = append(normalVbo, 0.90, 1.0, 0.74, 0.7)
+			normalVbo = append(normalVbo, BONE_COLORS_TRANSLATE_NORMAL...)
 		} else if !bone.IsVisible() {
 			// 非表示
-			positionVbo = append(positionVbo, 0.82, 0.82, 0.82, 1.0)
-			normalVbo = append(normalVbo, 0.92, 0.92, 0.92, 0.7)
+			positionVbo = append(positionVbo, BONE_COLORS_INVISIBLE...)
+			normalVbo = append(normalVbo, BONE_COLORS_INVISIBLE_NORMAL...)
 			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
-			normalVbo = append(normalVbo, 0.92, 0.92, 0.92, 0.7)
+			normalVbo = append(normalVbo, BONE_COLORS_INVISIBLE_NORMAL...)
 		} else {
 			// それ以外（回転）
-			positionVbo = append(positionVbo, 0.56, 0.78, 1.0, 1.0)
-			normalVbo = append(normalVbo, 0.76, 0.98, 1.00, 0.7)
+			positionVbo = append(positionVbo, BONE_COLORS_ROTATE...)
+			normalVbo = append(normalVbo, BONE_COLORS_ROTATE_NORMAL...)
 			normalVbo = append(normalVbo, normalGl[0], normalGl[1], normalGl[2])
-			normalVbo = append(normalVbo, 0.76, 0.98, 1.00, 0.7)
+			normalVbo = append(normalVbo, BONE_COLORS_ROTATE_NORMAL...)
 		}
 	}
 
