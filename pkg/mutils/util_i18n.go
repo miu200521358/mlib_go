@@ -7,11 +7,10 @@ import (
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
-
 )
 
 type I18n struct {
-	bundle    i18n.Bundle
+	bundle    *i18n.Bundle
 	localizer *i18n.Localizer
 }
 
@@ -46,7 +45,7 @@ func NewI18n(resourceFiles embed.FS) *I18n {
 
 	localizer := i18n.NewLocalizer(bundle, lang)
 
-	return &I18n{bundle: *bundle, localizer: localizer}
+	return &I18n{bundle: bundle, localizer: localizer}
 }
 
 func (i *I18n) SetLang(lang string) {
@@ -58,6 +57,5 @@ func (i *I18n) T(key string) string {
 }
 
 func (i *I18n) TP(key string, param map[string]interface{}) string {
-	config := &i18n.LocalizeConfig{MessageID: key, TemplateData: param}
-	return i.localizer.MustLocalize(config)
+	return i.localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: key, TemplateData: param})
 }

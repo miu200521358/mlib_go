@@ -4,7 +4,6 @@ import (
 	"embed"
 	"fmt"
 	"image"
-	"log"
 	"math"
 	"unsafe"
 
@@ -531,7 +530,7 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 			}
 		}
 
-		log.Printf("elapsed: %.8f, frame: %.8f\n", elapsed, w.frame)
+		// log.Printf("elapsed: %.8f, frame: %.8f\n", elapsed, w.frame)
 
 		// 描画
 		w.Draw(w.frame*w.Physics.Fps, elapsed)
