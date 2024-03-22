@@ -1,39 +1,43 @@
 package mwidget
 
 import (
-	"errors"
-	"syscall"
-	"unsafe"
+	"bytes"
+	"sync"
 
 	"github.com/miu200521358/walk/pkg/walk"
 	"github.com/miu200521358/win"
-
 )
 
+// ConsoleView は、walk.WidgetBaseを埋め込んでカスタムウィジェットを作成します。
 type ConsoleView struct {
 	walk.WidgetBase
-	logChan chan string
+	Console   *walk.TextEdit
+	logBuffer *bytes.Buffer
+	mutex     sync.Mutex
 }
 
-const (
-	TEM_APPENDTEXT   = win.WM_USER + 6
-	ConsoleViewClass = "ConsoleView Class"
-)
+const ConsoleViewClass = "ConsoleView Class"
 
 func NewConsoleView(parent walk.Container) (*ConsoleView, error) {
-	lc := make(chan string, 1024)
-	lv := &ConsoleView{logChan: lc}
+	lv := &ConsoleView{logBuffer: new(bytes.Buffer)}
 
 	if err := walk.InitWidget(
 		lv,
 		parent,
 		ConsoleViewClass,
-		win.WS_TABSTOP|win.WS_VISIBLE|win.WS_VSCROLL|win.ES_MULTILINE|win.ES_WANTRETURN,
+		win.WS_DISABLED,
 		win.WS_EX_CLIENTEDGE); err != nil {
 		return nil, err
 	}
-	lv.setReadOnly(true)
-	lv.SendMessage(win.EM_SETLIMITTEXT, 4294967295, 0)
+
+	// テキストエディットを作成
+	te, err := walk.NewTextEditWithStyle(parent, win.WS_VISIBLE|win.WS_VSCROLL|win.ES_MULTILINE)
+	if err != nil {
+		return nil, err
+	}
+	lv.Console = te
+	lv.Console.SetReadOnly(true)
+
 	return lv, nil
 }
 
@@ -41,58 +45,18 @@ func (*ConsoleView) CreateLayoutItem(ctx *walk.LayoutContext) walk.LayoutItem {
 	return walk.NewGreedyLayoutItem()
 }
 
-func (lv *ConsoleView) setTextSelection(start, end int) {
-	lv.SendMessage(win.EM_SETSEL, uintptr(start), uintptr(end))
-}
+// Write はio.Writerインターフェースを実装し、logの出力をConsoleViewにリダイレクトします。
+func (cv *ConsoleView) Write(p []byte) (n int, err error) {
+	cv.mutex.Lock()
+	defer cv.mutex.Unlock()
 
-func (lv *ConsoleView) textLength() int {
-	return int(lv.SendMessage(0x000E, uintptr(0), uintptr(0)))
-}
-
-func (lv *ConsoleView) AppendText(value string) {
-	textLength := lv.textLength()
-	lv.setTextSelection(textLength, textLength)
-	s, err := syscall.UTF16PtrFromString(value)
+	// ログメッセージをバッファに書き込む
+	n, err = cv.logBuffer.Write(p)
 	if err != nil {
-		return
-	}
-	lv.SendMessage(win.EM_REPLACESEL, 0, uintptr(unsafe.Pointer(s)))
-}
-
-func (lv *ConsoleView) setReadOnly(readOnly bool) error {
-	if lv.SendMessage(win.EM_SETREADONLY, uintptr(win.BoolToBOOL(readOnly)), 0) == 0 {
-		return errors.New("fail to call EM_SETREADONLY")
+		return 0, err
 	}
 
-	return nil
-}
+	cv.Console.AppendText(string(p))
 
-func (lv *ConsoleView) PostAppendText(value string) {
-	lv.logChan <- value
-	win.PostMessage(lv.Handle(), TEM_APPENDTEXT, 0, 0)
-}
-
-func (lv *ConsoleView) Write(p []byte) (int, error) {
-	lv.PostAppendText(string(p) + "\r\n")
-	return len(p), nil
-}
-
-func (lv *ConsoleView) WndProc(hwnd win.HWND, msg uint32, wParam, lParam uintptr) uintptr {
-	switch msg {
-	case win.WM_GETDLGCODE:
-		if wParam == win.VK_RETURN {
-			return win.DLGC_WANTALLKEYS
-		}
-
-		return win.DLGC_HASSETSEL | win.DLGC_WANTARROWS | win.DLGC_WANTCHARS
-	case TEM_APPENDTEXT:
-		select {
-		case value := <-lv.logChan:
-			lv.AppendText(value)
-		default:
-			return 0
-		}
-	}
-
-	return lv.WidgetBase.WndProc(hwnd, msg, wParam, lParam)
+	return n, nil
 }

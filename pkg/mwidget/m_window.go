@@ -16,6 +16,7 @@ type MWindow struct {
 	TabWidget            *MTabWidget  // タブウィジェット
 	isHorizontal         bool         // 横並びであるか否か
 	GlWindows            []*GlWindow  // 描画ウィンドウ
+	ConsoleView          *ConsoleView // コンソールビュー
 	frameDropAction      *walk.Action // フレームドロップON/OFF
 	physicsAction        *walk.Action // 物理ON/OFF
 	physicsResetAction   *walk.Action // 物理リセット

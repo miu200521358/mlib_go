@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"image"
+	"log"
 	"math"
 	"unsafe"
 
@@ -526,12 +527,11 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 			// elapsed := float32(1.0)
 			w.frame += elapsed
 			if motionPlayer != nil {
-				motionPlayer.FrameEdit.SetValue(float64(w.frame * w.Physics.Fps))
-				motionPlayer.FrameSlider.SetValue(int(w.frame * w.Physics.Fps))
+				motionPlayer.SetValue(float64(w.frame * w.Physics.Fps))
 			}
 		}
 
-		// fmt.Printf("elapsed: %.8f, frame: %.8f\n", elapsed, frame)
+		log.Printf("elapsed: %.8f, frame: %.8f\n", elapsed, w.frame)
 
 		// 描画
 		w.Draw(w.frame*w.Physics.Fps, elapsed)

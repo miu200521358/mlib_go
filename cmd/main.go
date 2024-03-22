@@ -2,7 +2,7 @@ package main
 
 import (
 	"embed"
-	"fmt"
+	"log"
 	"path/filepath"
 
 	"github.com/miu200521358/walk/pkg/walk"
@@ -68,6 +68,11 @@ func main() {
 
 	NewFileTabPage(mWindow)
 
+	// コンソールはタブ外に表示
+	mWindow.ConsoleView, err = mwidget.NewConsoleView(mWindow)
+	mwidget.CheckError(err, mWindow, "コンソール生成エラー")
+	log.SetOutput(mWindow.ConsoleView)
+
 	mWindow.Center()
 	mWindow.Run()
 }
@@ -108,10 +113,6 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 	mwidget.CheckError(err, mWindow, "モーションプレイヤー生成エラー")
 	motionPlayer.SetEnabled(false)
 	motionPlayer.PlayButton.SetEnabled(false)
-
-	// コンソールはタブ外に表示
-	console, err := mwidget.NewConsoleView(mWindow)
-	mwidget.CheckError(err, mWindow, "コンソール生成エラー")
 
 	var onFilePathChanged = func() {
 		mWindow.GetMainGlWindow().Play(false)
@@ -166,12 +167,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 				model = data.(*pmx.PmxModel)
 				model.SetUp()
 
-				console.AppendText(fmt.Sprintf("モデル名: %s", model.Name))
-				console.AppendText(fmt.Sprintf("頂点数: %d", len(model.Vertices.Indexes)))
-				console.AppendText(fmt.Sprintf("面数: %d", len(model.Faces.Indexes)))
-				console.AppendText(fmt.Sprintf("材質数: %d", len(model.Materials.GetIndexes())))
-				console.AppendText(fmt.Sprintf("ボーン数: %d", len(model.Bones.GetIndexes())))
-				console.AppendText(fmt.Sprintf("表情数: %d", len(model.Morphs.GetIndexes())))
+				log.Printf("モデル名: %s", model.Name)
 			} else {
 				model = pmxReadPicker.GetCache().(*pmx.PmxModel)
 			}
