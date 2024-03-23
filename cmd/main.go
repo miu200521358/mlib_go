@@ -12,7 +12,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mwidget"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 func init() {
@@ -60,7 +59,20 @@ func main() {
 	// 	}
 	// }
 
-	mWindow, err := mwidget.NewMWindow(resourceFiles, true, 512, 768)
+	var mWindow *mwidget.MWindow
+	var err error
+
+	defer func() {
+		if r := recover(); r != nil {
+			rMessage := r.(string)
+			walk.MsgBox(nil, mi18n.T("予期せぬエラーが発生しました"), rMessage, walk.MsgBoxIconError)
+			if mWindow != nil {
+				mWindow.Close()
+			}
+		}
+	}()
+
+	mWindow, err = mwidget.NewMWindow(resourceFiles, true, 512, 768)
 	mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
 
 	glWindow, err := mwidget.NewGlWindow(mi18n.T("ビューワー"), 512, 768, 0, resourceFiles, nil)

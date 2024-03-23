@@ -12,7 +12,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 const FilePickerClass = "FilePicker Class"
@@ -127,7 +126,7 @@ func NewFilePicker(
 		return nil, err
 	}
 	titleLayout := walk.NewHBoxLayout()
-	titleLayout.SetMargins(MarginSmall)
+	titleLayout.SetMargins(MARGIN_SMALL)
 	titleComposite.SetLayout(titleLayout)
 
 	titleLabel, err := walk.NewTextLabel(titleComposite)
@@ -167,7 +166,7 @@ func NewFilePicker(
 		return nil, err
 	}
 	inputLayout := walk.NewHBoxLayout()
-	inputLayout.SetMargins(MarginSmall)
+	inputLayout.SetMargins(MARGIN_SMALL)
 	inputComposite.SetLayout(inputLayout)
 
 	pathTextEdit, err := walk.NewLineEdit(inputComposite)

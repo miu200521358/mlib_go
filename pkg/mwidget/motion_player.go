@@ -7,7 +7,6 @@ import (
 	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
-
 )
 
 type MotionPlayer struct {
@@ -41,7 +40,7 @@ func NewMotionPlayer(parent walk.Container, mWindow *MWindow, resourceFiles embe
 		return nil, err
 	}
 	layout := walk.NewHBoxLayout()
-	layout.SetMargins(MarginSmall)
+	layout.SetMargins(MARGIN_SMALL)
 	playerComposite.SetLayout(layout)
 
 	// 再生エリア
