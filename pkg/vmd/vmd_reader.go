@@ -6,7 +6,6 @@ import (
 	"golang.org/x/text/encoding/japanese"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
-
 )
 
 // https://hariganep.seesaa.net/article/201103article_1.html

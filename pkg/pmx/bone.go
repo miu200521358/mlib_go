@@ -693,10 +693,8 @@ func (b *Bones) prepareDraw() {
 	normalIbo := make([]uint32, 0, len(b.Data))
 
 	for i, bone := range b.GetSortedData() {
-		if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
-			positionIbo = append(positionIbo, uint32(bone.Index))
-			positionIbo = append(positionIbo, uint32(bone.ParentIndex))
-		}
+		positionIbo = append(positionIbo, uint32(bone.Index))
+		positionIbo = append(positionIbo, uint32(bone.ParentIndex))
 
 		normalIbo = append(normalIbo, uint32(i*2))
 		normalIbo = append(normalIbo, uint32(i*2+1))

@@ -42,7 +42,7 @@ func (bnfs *BoneNameFrames) GetRangeIndexes(index float32) (float32, float32) {
 		prevIndex = bnfs.RegisteredIndexes[idx-1]
 	}
 
-	if idx := mutils.SearchFloat32s(bnfs.RegisteredIndexes, index); idx == len(bnfs.RegisteredIndexes) {
+	if idx := mutils.SearchFloat32s(bnfs.RegisteredIndexes, index); idx >= len(bnfs.RegisteredIndexes) {
 		nextIndex = slices.Max(bnfs.RegisteredIndexes)
 	} else {
 		nextIndex = bnfs.RegisteredIndexes[idx]

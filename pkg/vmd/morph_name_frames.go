@@ -8,7 +8,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 type MorphNameFrames struct {
@@ -41,7 +40,7 @@ func (mnfs *MorphNameFrames) GetRangeIndexes(index float32) (float32, float32) {
 		prevIndex = mnfs.RegisteredIndexes[idx-1]
 	}
 
-	if idx := mutils.SearchFloat32s(mnfs.RegisteredIndexes, index); idx == len(mnfs.RegisteredIndexes) {
+	if idx := mutils.SearchFloat32s(mnfs.RegisteredIndexes, index); idx >= len(mnfs.RegisteredIndexes) {
 		nextIndex = slices.Max(mnfs.RegisteredIndexes)
 	} else {
 		nextIndex = mnfs.RegisteredIndexes[idx]
@@ -182,7 +181,7 @@ func (mnfs *MorphNameFrames) AnimateUv(
 			delta := deltas.Data[offset.VertexIndex]
 			uv := offset.Uv.MuledScalar(mf.Ratio).GetXY()
 			// UVは左上原点なので、Yを反転させる
-			delta.Uv.Add(&mmath.MVec2{uv[0], 1 - uv[1]})
+			delta.Uv.Add(&mmath.MVec2{uv.GetX(), 1 - uv.GetY()})
 		}
 	}
 }
@@ -202,9 +201,9 @@ func (mnfs *MorphNameFrames) AnimateUv1(
 		offset := o.(*pmx.UvMorphOffset)
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
-			uv := offset.Uv.MuledScalar(mf.Ratio).GetXY()
+			uv := offset.Uv.MuledScalar(mf.Ratio)
 			// UVは左上原点なので、Yを反転させる
-			delta.Uv1.Add(&mmath.MVec2{uv[0], 1 - uv[1]})
+			delta.Uv1.Add(&mmath.MVec2{uv.GetX(), 1 - uv.GetY()})
 		}
 	}
 }

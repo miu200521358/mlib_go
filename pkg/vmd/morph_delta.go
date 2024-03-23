@@ -4,7 +4,6 @@ import (
 	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type VertexMorphDelta struct {
@@ -29,13 +28,12 @@ func NewVertexMorphDelta() *VertexMorphDelta {
 
 func (md *VertexMorphDelta) GL() []float32 {
 	p := md.Position.GL()
-	uv := md.Uv.GL()
-	uv1 := md.Uv1.GL()
 	ap := md.AfterPosition.GL()
+	// UVは符号関係ないのでそのまま取得する
 	return []float32{
 		p[0], p[1], p[2],
-		uv[0], uv[1],
-		uv1[0], uv1[1],
+		float32(md.Uv.GetX()), float32(md.Uv.GetY()),
+		float32(md.Uv1.GetX()), float32(md.Uv1.GetY()),
 		ap[0], ap[1], ap[2],
 	}
 }

@@ -55,3 +55,14 @@ func (mfs *MorphFrames) Animate(
 
 	return mds
 }
+
+func (mfs *MorphFrames) GetMaxFrame() float32 {
+	maxFno := float32(0)
+	for _, mnfs := range mfs.Data {
+		fno := mnfs.GetMaxFrame()
+		if fno > maxFno {
+			maxFno = fno
+		}
+	}
+	return maxFno
+}
