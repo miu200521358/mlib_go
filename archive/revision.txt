@@ -46,7 +46,7 @@ MlibSample 1.0.0_beta_15
 　・プレイヤーをコンポーネント化
 ・ファイルピッカーのD&D有効化
 
-
+https://fire.st/vuhu3Ag
 MlibSample 1.0.0_beta_16
 ・再生中にPMXを変えた時に落ちるのを修正
 ・ボーンデバッグ色定義定数化
