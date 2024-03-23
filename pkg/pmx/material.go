@@ -4,10 +4,12 @@ import (
 	"embed"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 // スフィアモード
@@ -76,96 +78,45 @@ const (
 	TOON_SHARING_SHARING ToonSharing = 1
 )
 
-type MaterialGL struct {
-	name              string       // 材質名
-	diffuse           *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色 + 非透過度)
-	specular          *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
-	ambient           *mmath.MVec3 // Ambient (R,G,B)(環境色)
-	edge              *mmath.MVec4 // エッジ色 (R,G,B,A)
-	EdgeSize          float32      // エッジサイズ
-	DrawFlag          DrawFlag     // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
-	Texture           *TextureGL   // 通常テクスチャ
-	TextureFactor     *mmath.MVec4 // テクスチャ係数
-	SphereTexture     *TextureGL   // スフィアテクスチャ
-	ToonTexture       *TextureGL   // トゥーンテクスチャ
-	SphereMode        SphereMode   // スフィアモード
-	VerticesCount     int          // 頂点数
-	PrevVerticesCount int          // 前の材質までの頂点数
-	lightAmbient      *mmath.MVec4
-}
-
-func (m *MaterialGL) Diffuse() mgl32.Vec4 {
-	diffuse := mgl32.Vec4{
-		float32(m.diffuse.GetX())*float32(m.lightAmbient.GetX()) + float32(m.ambient.GetX()),
-		float32(m.diffuse.GetY())*float32(m.lightAmbient.GetY()) + float32(m.ambient.GetY()),
-		float32(m.diffuse.GetZ())*float32(m.lightAmbient.GetZ()) + float32(m.ambient.GetZ()),
-		float32(m.diffuse.GetW()),
-	}
-	return diffuse
-}
-
-func (m *MaterialGL) Ambient() mgl32.Vec3 {
-	ambient := mgl32.Vec3{
-		float32(m.diffuse.GetX()) * float32(m.lightAmbient.GetX()),
-		float32(m.diffuse.GetY()) * float32(m.lightAmbient.GetY()),
-		float32(m.diffuse.GetZ()) * float32(m.lightAmbient.GetZ()),
-	}
-	return ambient
-}
-
-func (m *MaterialGL) Specular() mgl32.Vec4 {
-	specular := mgl32.Vec4{
-		float32(m.specular.GetX()) * float32(m.lightAmbient.GetX()),
-		float32(m.specular.GetY()) * float32(m.lightAmbient.GetY()),
-		float32(m.specular.GetZ()) * float32(m.lightAmbient.GetZ()),
-		float32(m.specular.GetW()),
-	}
-	return specular
-}
-
-func (m *MaterialGL) Edge() [4]float32 {
-	edge := [4]float32{
-		float32(m.edge.GetX()),
-		float32(m.edge.GetY()),
-		float32(m.edge.GetZ()),
-		float32(m.edge.GetW()) * float32(m.diffuse.GetW()),
-	}
-	return edge
-}
-
 type Material struct {
 	*mcore.IndexNameModel
-	Diffuse            *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
-	Specular           *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
-	Ambient            *mmath.MVec3 // Ambient (R,G,B)(環境色)
-	DrawFlag           DrawFlag     // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
-	Edge               *mmath.MVec4 // エッジ色 (R,G,B,A)
-	EdgeSize           float64      // エッジサイズ
-	TextureIndex       int          // 通常テクスチャINDEX
-	SphereTextureIndex int          // スフィアテクスチャINDEX
-	SphereMode         SphereMode   // スフィアモード
-	ToonSharingFlag    ToonSharing  // 共有Toonフラグ
-	ToonTextureIndex   int          // ToonテクスチャINDEX
-	Memo               string       // メモ
-	VerticesCount      int          // 材質に対応する面(頂点)数 (必ず3の倍数になる)
+	Diffuse             *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
+	Specular            *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
+	Ambient             *mmath.MVec3 // Ambient (R,G,B)(環境色)
+	DrawFlag            DrawFlag     // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
+	Edge                *mmath.MVec4 // エッジ色 (R,G,B,A)
+	EdgeSize            float64      // エッジサイズ
+	TextureIndex        int          // 通常テクスチャINDEX
+	SphereTextureIndex  int          // スフィアテクスチャINDEX
+	SphereMode          SphereMode   // スフィアモード
+	ToonSharingFlag     ToonSharing  // 共有Toonフラグ
+	ToonTextureIndex    int          // ToonテクスチャINDEX
+	Memo                string       // メモ
+	VerticesCount       int          // 材質に対応する面(頂点)数 (必ず3の倍数になる)
+	TextureFactor       *mmath.MVec4 // テクスチャ係数
+	SphereTextureFactor *mmath.MVec4 // スフィアテクスチャ係数
+	ToonTextureFactor   *mmath.MVec4 // トゥーンテクスチャ係数
 }
 
 func NewMaterial() *Material {
 	return &Material{
-		IndexNameModel:     &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
-		Diffuse:            &mmath.MVec4{},
-		Specular:           &mmath.MVec4{},
-		Ambient:            mmath.NewMVec3(),
-		DrawFlag:           DRAW_FLAG_NONE,
-		Edge:               &mmath.MVec4{},
-		EdgeSize:           0.0,
-		TextureIndex:       -1,
-		SphereTextureIndex: -1,
-		SphereMode:         SPHERE_MODE_INVALID,
-		ToonSharingFlag:    TOON_SHARING_INDIVIDUAL,
-		ToonTextureIndex:   -1,
-		Memo:               "",
-		VerticesCount:      0,
+		IndexNameModel:      &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		Diffuse:             &mmath.MVec4{},
+		Specular:            &mmath.MVec4{},
+		Ambient:             mmath.NewMVec3(),
+		DrawFlag:            DRAW_FLAG_NONE,
+		Edge:                &mmath.MVec4{},
+		EdgeSize:            0.0,
+		TextureIndex:        -1,
+		SphereTextureIndex:  -1,
+		SphereMode:          SPHERE_MODE_INVALID,
+		ToonSharingFlag:     TOON_SHARING_INDIVIDUAL,
+		ToonTextureIndex:    -1,
+		Memo:                "",
+		VerticesCount:       0,
+		TextureFactor:       mmath.NewMVec4(),
+		SphereTextureFactor: mmath.NewMVec4(),
+		ToonTextureFactor:   mmath.NewMVec4(),
 	}
 }
 
@@ -173,6 +124,39 @@ func NewMaterialByName(name string) *Material {
 	m := NewMaterial()
 	m.Name = name
 	return m
+}
+
+func (m *Material) DiffuseGL() mgl32.Vec4 {
+	d := m.Diffuse.GetXYZ().MuledScalar(float64(mgl.LIGHT_AMBIENT)).Add(m.Ambient)
+	diffuse := mgl32.Vec4{float32(d.GetX()), float32(d.GetY()), float32(d.GetZ()), float32(m.Diffuse.GetW())}
+	return diffuse
+}
+
+func (m *Material) AmbientGL() mgl32.Vec3 {
+	a := m.Diffuse.GetXYZ().MuledScalar(float64(mgl.LIGHT_AMBIENT))
+	ambient := mgl32.Vec3{float32(a.GetX()), float32(a.GetY()), float32(a.GetZ())}
+	return ambient
+}
+
+func (m *Material) SpecularGL() mgl32.Vec4 {
+	s := m.Specular.GetXYZ().MuledScalar(float64(mgl.LIGHT_AMBIENT))
+	specular := mgl32.Vec4{float32(s.GetX()), float32(s.GetY()), float32(s.GetZ()), float32(m.Specular.GetW())}
+	return specular
+}
+
+func (m *Material) EdgeGL() [4]float32 {
+	e := m.Edge.GetXYZ().MuledScalar(float64(m.Diffuse.GetW()))
+	edge := [4]float32{float32(e.GetX()), float32(e.GetY()), float32(e.GetZ()),
+		float32(m.Edge.GetW()) * float32(m.Diffuse.GetW())}
+	return edge
+}
+
+type MaterialGL struct {
+	*Material
+	Texture           *TextureGL // 通常テクスチャ
+	SphereTexture     *TextureGL // スフィアテクスチャ
+	ToonTexture       *TextureGL // トゥーンテクスチャ
+	PrevVerticesCount int        // 前の材質までの頂点数
 }
 
 func (m *Material) GL(
@@ -200,26 +184,12 @@ func (m *Material) GL(
 	}
 
 	return &MaterialGL{
-		name:              m.Name,
-		diffuse:           m.Diffuse,
-		ambient:           m.Ambient,
-		specular:          m.Specular,
-		edge:              m.Edge,
-		EdgeSize:          float32(m.EdgeSize),
+		Material:          m,
 		Texture:           textureGL,
 		SphereTexture:     sphereTextureGL,
 		ToonTexture:       tooTextureGL,
-		DrawFlag:          m.DrawFlag,
-		SphereMode:        m.SphereMode,
-		VerticesCount:     m.VerticesCount,
 		PrevVerticesCount: prevVerticesCount * 4,
-		lightAmbient:      &mmath.MVec4{mgl.LIGHT_AMBIENT, mgl.LIGHT_AMBIENT, mgl.LIGHT_AMBIENT, 1},
 	}
-}
-
-func (m *Material) Copy() mcore.IndexNameModelInterface {
-	copied := *m
-	return &copied
 }
 
 // 材質リスト
@@ -235,6 +205,12 @@ func NewMaterials() *Materials {
 		Vertices:                 make(map[int][]int),
 		Faces:                    make(map[int][]int),
 	}
+}
+
+func (m *Material) Copy() mcore.IndexNameModelInterface {
+	copied := NewMaterial()
+	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
+	return copied
 }
 
 // // シェーダー用材質

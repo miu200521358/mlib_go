@@ -1,6 +1,10 @@
 package mcore
 
-import "slices"
+import (
+	"slices"
+
+	"github.com/jinzhu/copier"
+)
 
 type IndexNameModelInterface interface {
 	IsValid() bool
@@ -38,9 +42,9 @@ func (v *IndexNameModel) IsValid() bool {
 	return v.GetIndex() >= 0
 }
 
-// Copy
 func (v *IndexNameModel) Copy() IndexNameModelInterface {
-	copied := *v
+	copied := IndexNameModel{Index: v.Index, Name: v.Name, EnglishName: v.EnglishName}
+	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return &copied
 }
 

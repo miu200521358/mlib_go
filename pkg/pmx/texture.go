@@ -8,9 +8,11 @@ import (
 	"path/filepath"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
+	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 // テクスチャ種別
@@ -83,6 +85,12 @@ func NewTexture() *Texture {
 		Path:        "",
 		Valid:       false,
 	}
+}
+
+func (t *Texture) Copy() mcore.IndexModelInterface {
+	copied := NewTexture()
+	copier.CopyWithOption(copied, t, copier.Option{DeepCopy: true})
+	return copied
 }
 
 func (t *Texture) GL(

@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
+	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 )
@@ -118,12 +119,9 @@ func (m *MMat4) String() string {
 }
 
 func (m *MMat4) Copy() *MMat4 {
-	return &MMat4{
-		*m[0].Copy(),
-		*m[1].Copy(),
-		*m[2].Copy(),
-		*m[3].Copy(),
-	}
+	copied := NewMMat4()
+	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
+	return copied
 }
 
 // PracticallyEquals

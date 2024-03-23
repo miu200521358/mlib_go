@@ -1,9 +1,10 @@
 package pmx
 
 import (
+	"github.com/jinzhu/copier"
+
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 // MorphPanel 操作パネル
@@ -40,7 +41,7 @@ const (
 	MORPH_TYPE_GROUP        MorphType = 0 // グループ
 	MORPH_TYPE_VERTEX       MorphType = 1 // 頂点
 	MORPH_TYPE_BONE         MorphType = 2 // ボーン
-	MORPH_TYPE_UV           MorphType = 3 // MORPH_TYPE_UV
+	MORPH_TYPE_UV           MorphType = 3 // UV
 	MORPH_TYPE_EXTENDED_UV1 MorphType = 4 // 追加UV1
 	MORPH_TYPE_EXTENDED_UV2 MorphType = 5 // 追加UV2
 	MORPH_TYPE_EXTENDED_UV3 MorphType = 6 // 追加UV3
@@ -57,14 +58,6 @@ type Morph struct {
 	Offsets     []TMorphOffset // モーフオフセット
 	DisplaySlot int            // 表示枠
 	IsSystem    bool           // ツール側で追加したモーフ
-}
-
-// Copy
-func (t *Morph) Copy() mcore.IndexNameModelInterface {
-	copied := *t
-	copied.Offsets = make([]TMorphOffset, len(t.Offsets))
-	copy(copied.Offsets, t.Offsets)
-	return &copied
 }
 
 // TMorphOffset represents a morph offset.
@@ -212,6 +205,12 @@ func NewMorph() *Morph {
 		DisplaySlot:    -1,
 		IsSystem:       false,
 	}
+}
+
+func (m *Morph) Copy() mcore.IndexNameModelInterface {
+	copied := NewMorph()
+	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
+	return copied
 }
 
 // モーフリスト

@@ -1,6 +1,8 @@
 package pmx
 
 import (
+	"github.com/jinzhu/copier"
+
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
@@ -51,6 +53,12 @@ func NewJoint() *Joint {
 		JointParam:      NewJointParam(),
 		IsSystem:        false,
 	}
+}
+
+func (j *Joint) Copy() mcore.IndexNameModelInterface {
+	copied := NewJoint()
+	copier.CopyWithOption(copied, j, copier.Option{DeepCopy: true})
+	return copied
 }
 
 func NewJointByName(name string) *Joint {

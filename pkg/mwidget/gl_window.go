@@ -39,6 +39,7 @@ func (ms *ModelSet) Draw(
 	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.NameIndexes))
 	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
 	vertexDeltas := make([][]float32, len(ms.Model.Vertices.Data))
+	materialDeltas := make([]*pmx.Material, len(ms.Model.Materials.Data))
 	deltas := ms.Motion.Animate(frame, ms.Model)
 	for i, bone := range ms.Model.Bones.GetSortedData() {
 		mat := deltas.Bones.GetItem(bone.Name, frame).LocalMatrix.GL()
@@ -51,7 +52,10 @@ func (ms *ModelSet) Draw(
 	for i, vd := range deltas.Morphs.Vertices.Data {
 		vertexDeltas[i] = vd.GL()
 	}
-	ms.Model.Draw(shader, boneMatrixes, globalMatrixes, transforms, vertexDeltas,
+	for i, md := range deltas.Morphs.Materials.Data {
+		materialDeltas[i] = md.Material
+	}
+	ms.Model.Draw(shader, boneMatrixes, globalMatrixes, transforms, vertexDeltas, materialDeltas,
 		windowIndex, frame, elapsed, isBoneDebug, enablePhysics)
 }
 
@@ -59,7 +63,7 @@ func (ms *ModelSet) Draw(
 const RIGHT_ANGLE = 89.9
 
 type GlWindow struct {
-	glfw.Window
+	*glfw.Window
 	ModelSets           []ModelSet
 	Shader              *mgl.MShader
 	WindowIndex         int
@@ -103,7 +107,7 @@ func NewGlWindow(
 
 	var mw *glfw.Window = nil
 	if mainWindow != nil {
-		mw = &mainWindow.Window
+		mw = mainWindow.Window
 	}
 
 	// ウィンドウの作成
@@ -157,7 +161,7 @@ func NewGlWindow(
 	}
 
 	glWindow := GlWindow{
-		Window:              *w,
+		Window:              w,
 		ModelSets:           make([]ModelSet, 0),
 		Shader:              shader,
 		WindowIndex:         windowIndex,
@@ -546,6 +550,6 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 		glfw.PollEvents()
 	}
 	if w.ShouldClose() {
-		w.Close(&w.Window)
+		w.Close(w.Window)
 	}
 }

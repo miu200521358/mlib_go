@@ -9,6 +9,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type Mesh struct {
@@ -45,6 +46,7 @@ func (m *Mesh) DrawModel(
 	shader *mgl.MShader,
 	windowIndex int,
 	boneMatrixes []*mgl32.Mat4,
+	materialDelta *Material,
 ) {
 	m.ibo.Bind()
 
@@ -64,15 +66,15 @@ func (m *Mesh) DrawModel(
 	// ------------------
 	// 材質色設定
 	// full.fx の AmbientColor相当
-	diffuse := m.material.Diffuse()
+	diffuse := materialDelta.DiffuseGL()
 	diffuseUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_DIFFUSE))
 	gl.Uniform4fv(diffuseUniform, 1, &diffuse[0])
 
-	ambient := m.material.Ambient()
+	ambient := materialDelta.AmbientGL()
 	ambientUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_AMBIENT))
 	gl.Uniform3fv(ambientUniform, 1, &ambient[0])
 
-	specular := m.material.Specular()
+	specular := materialDelta.SpecularGL()
 	specularUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPECULAR))
 	gl.Uniform4fv(specularUniform, 1, &specular[0])
 

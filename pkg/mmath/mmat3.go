@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
+	"github.com/jinzhu/copier"
 )
 
 type MMat3 [3]MVec3
@@ -60,11 +61,9 @@ func (m *MMat3) String() string {
 }
 
 func (m *MMat3) Copy() *MMat3 {
-	return &MMat3{
-		*m[0].Copy(),
-		*m[1].Copy(),
-		*m[2].Copy(),
-	}
+	copied := NewMMat3()
+	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
+	return copied
 }
 
 // Slice returns the elements of the matrix as slice.

@@ -2,6 +2,8 @@ package mmath
 
 import (
 	"math"
+
+	"github.com/jinzhu/copier"
 )
 
 type Curve struct {
@@ -23,10 +25,9 @@ func NewCurve() *Curve {
 
 // Copy
 func (v *Curve) Copy() *Curve {
-	return &Curve{
-		Start: v.Start.Copy(),
-		End:   v.End.Copy(),
-	}
+	copied := NewCurve()
+	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+	return copied
 }
 
 func (v *Curve) Normalize(begin, finish *MVec2) {

@@ -3,6 +3,8 @@ package mmath
 import (
 	"math"
 
+	"github.com/jinzhu/copier"
+
 )
 
 type MRotation struct {
@@ -90,7 +92,9 @@ func (m *MRotation) SetDegrees(v *MVec3) {
 
 // Copy
 func (rot *MRotation) Copy() *MRotation {
-	return &MRotation{rot.radians.Copy(), rot.degrees.Copy(), rot.quaternion.Copy()}
+	copied := NewRotationModelByDegrees(NewMVec3())
+	copier.CopyWithOption(copied, rot, copier.Option{DeepCopy: true})
+	return copied
 }
 
 // Add

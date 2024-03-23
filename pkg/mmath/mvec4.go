@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
+	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
@@ -457,7 +458,9 @@ func (v *MVec4) Clamped01() *MVec4 {
 
 // Copy
 func (v *MVec4) Copy() *MVec4 {
-	return &MVec4{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
+	copied := NewMVec4()
+	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+	return copied
 }
 
 // Vector

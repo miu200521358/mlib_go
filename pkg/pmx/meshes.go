@@ -7,6 +7,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
+
 )
 
 type Meshes struct {
@@ -112,6 +113,7 @@ func (m *Meshes) Draw(
 	shader *mgl.MShader,
 	boneMatrixes []*mgl32.Mat4,
 	vertexDeltas [][]float32,
+	materialDeltas []*Material,
 	windowIndex int,
 ) {
 	// 隠面消去
@@ -119,7 +121,7 @@ func (m *Meshes) Draw(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
 
-	for _, mesh := range m.meshes {
+	for i, mesh := range m.meshes {
 		m.vao.Bind()
 		m.vbo.BindVertex(m.vertices, vertexDeltas)
 
@@ -128,7 +130,7 @@ func (m *Meshes) Draw(
 		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 		shader.UseModelProgram()
-		mesh.DrawModel(shader, windowIndex, boneMatrixes)
+		mesh.DrawModel(shader, windowIndex, boneMatrixes, materialDeltas[i])
 		shader.Unuse()
 
 		m.vbo.Unbind()

@@ -33,7 +33,7 @@ func (mfs *MorphFrames) Animate(
 	model *pmx.PmxModel,
 	morphNames []string,
 ) *MorphDeltas {
-	mds := NewMorphDeltas(len(model.Vertices.Data), len(model.Bones.Data))
+	mds := NewMorphDeltas(len(model.Vertices.Data), len(model.Bones.Data), model.Materials)
 	for _, morphName := range morphNames {
 		if !mfs.Contains(morphName) || !model.Morphs.ContainsByName(morphName) {
 			continue
@@ -50,6 +50,8 @@ func (mfs *MorphFrames) Animate(
 			mfs.GetItem(morphName).AnimateUv1(frame, model, mds.Vertices)
 		} else if morph.MorphType == pmx.MORPH_TYPE_BONE {
 			mfs.GetItem(morphName).AnimateBone(frame, model, mds.Bones)
+		} else if morph.MorphType == pmx.MORPH_TYPE_MATERIAL {
+			mfs.GetItem(morphName).AnimateMaterial(frame, model, mds.Materials)
 		}
 	}
 

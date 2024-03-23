@@ -3,6 +3,7 @@ package mcore
 import (
 	"slices"
 
+	"github.com/jinzhu/copier"
 )
 
 type IndexModelInterface interface {
@@ -29,9 +30,9 @@ func (v *IndexModel) IsValid() bool {
 	return v.GetIndex() >= 0
 }
 
-// Copy
 func (v *IndexModel) Copy() IndexModelInterface {
-	copied := *v
+	copied := IndexModel{Index: v.Index}
+	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return &copied
 }
 

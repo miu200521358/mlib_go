@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
+	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
@@ -163,43 +164,10 @@ func NewBoneByName(name string) *Bone {
 	return bone
 }
 
-// Copy
-func (t *Bone) Copy() mcore.IndexNameModelInterface {
-	copied := *t
-	copied.Ik = t.Ik.Copy()
-	copied.Position = t.Position.Copy()
-	copied.TailPosition = t.TailPosition.Copy()
-	copied.FixedAxis = t.FixedAxis.Copy()
-	copied.LocalAxisX = t.LocalAxisX.Copy()
-	copied.LocalAxisZ = t.LocalAxisZ.Copy()
-	copied.NormalizedLocalAxisZ = t.NormalizedLocalAxisZ.Copy()
-	copied.NormalizedLocalAxisX = t.NormalizedLocalAxisX.Copy()
-	copied.NormalizedLocalAxisY = t.NormalizedLocalAxisY.Copy()
-	copied.LocalAxis = t.LocalAxis.Copy()
-	copied.ParentRelativePosition = t.ParentRelativePosition.Copy()
-	copied.ChildRelativePosition = t.ChildRelativePosition.Copy()
-	copied.NormalizedFixedAxis = t.NormalizedFixedAxis.Copy()
-	copied.IkLinkBoneIndexes = make([]int, len(t.IkLinkBoneIndexes))
-	copy(copied.IkLinkBoneIndexes, t.IkLinkBoneIndexes)
-	copied.IkTargetBoneIndexes = make([]int, len(t.IkTargetBoneIndexes))
-	copy(copied.IkTargetBoneIndexes, t.IkTargetBoneIndexes)
-	copied.TreeBoneIndexes = make([]int, len(t.TreeBoneIndexes))
-	copy(copied.TreeBoneIndexes, t.TreeBoneIndexes)
-	copied.RevertOffsetMatrix = t.RevertOffsetMatrix.Copy()
-	copied.OffsetMatrix = t.OffsetMatrix.Copy()
-	copied.ParentBoneIndexes = make([]int, len(t.ParentBoneIndexes))
-	copy(copied.ParentBoneIndexes, t.ParentBoneIndexes)
-	copied.RelativeBoneIndexes = make([]int, len(t.RelativeBoneIndexes))
-	copy(copied.RelativeBoneIndexes, t.RelativeBoneIndexes)
-	copied.ChildBoneIndexes = make([]int, len(t.ChildBoneIndexes))
-	copy(copied.ChildBoneIndexes, t.ChildBoneIndexes)
-	copied.EffectiveBoneIndexes = make([]int, len(t.EffectiveBoneIndexes))
-	copy(copied.EffectiveBoneIndexes, t.EffectiveBoneIndexes)
-	copied.MinAngleLimit = t.MinAngleLimit.Copy()
-	copied.MaxAngleLimit = t.MaxAngleLimit.Copy()
-	copied.LocalMinAngleLimit = t.LocalMinAngleLimit.Copy()
-	copied.LocalMaxAngleLimit = t.LocalMaxAngleLimit.Copy()
-	return &copied
+func (v *Bone) Copy() mcore.IndexNameModelInterface {
+	copied := NewBone()
+	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+	return copied
 }
 
 func (bone *Bone) NormalizeFixedAxis(fixedAxis *mmath.MVec3) {

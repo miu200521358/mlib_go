@@ -1,6 +1,8 @@
 package vmd
 
 import (
+	"github.com/jinzhu/copier"
+
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
@@ -29,6 +31,12 @@ func NewVmdMotion(path string) *VmdMotion {
 		ShadowFrames: NewShadowFrames(),
 		IkFrames:     NewIkFrames(),
 	}
+}
+
+func (m *VmdMotion) Copy() mcore.HashModelInterface {
+	copied := NewVmdMotion("")
+	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
+	return copied
 }
 
 func (m *VmdMotion) GetName() string {
@@ -89,7 +97,7 @@ func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
 		bf.MorphLocalScale = mmath.NewMVec3()
 
 		// 該当ボーンキーフレにモーフの値を加算
-		bf.Add(&bd.BoneFrame)
+		bf.Add(bd.BoneFrame)
 		m.AppendBoneFrame(bone.Name, bf)
 	}
 

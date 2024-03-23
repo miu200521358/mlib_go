@@ -1,6 +1,8 @@
 package pmx
 
 import (
+	"github.com/jinzhu/copier"
+
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 
 )
@@ -56,10 +58,9 @@ func NewDisplaySlot() *DisplaySlot {
 
 // Copy
 func (v *DisplaySlot) Copy() mcore.IndexModelInterface {
-	copied := *v
-	copied.References = make([]Reference, len(v.References))
-	copy(copied.References, v.References)
-	return &copied
+	copied := NewDisplaySlot()
+	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+	return copied
 }
 
 // 表示枠リスト

@@ -1,10 +1,11 @@
 package pmx
 
 import (
+	"github.com/jinzhu/copier"
+
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type Vertex struct {
@@ -30,6 +31,12 @@ func NewVertex() *Vertex {
 		EdgeFactor:  0.0,
 	}
 	return v
+}
+
+func (v *Vertex) Copy() mcore.IndexModelInterface {
+	copied := NewTexture()
+	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+	return copied
 }
 
 func (v *Vertex) GL() []float32 {

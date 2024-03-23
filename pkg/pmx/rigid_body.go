@@ -2,12 +2,12 @@ package pmx
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-
 )
 
 type RigidBodyParam struct {
@@ -142,6 +142,12 @@ func NewRigidBody() *RigidBody {
 		BtRigidBodyPositionTransform: nil,
 		JointedBoneIndex:             -1,
 	}
+}
+
+func (r *RigidBody) Copy() mcore.IndexNameModelInterface {
+	copied := NewMorph()
+	copier.CopyWithOption(copied, r, copier.Option{DeepCopy: true})
+	return copied
 }
 
 // func (r *RigidBody) resetPhysics(enablePhysics bool) bool {

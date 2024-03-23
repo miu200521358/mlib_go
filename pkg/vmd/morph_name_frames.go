@@ -236,3 +236,43 @@ func (mnfs *MorphNameFrames) AnimateBone(
 		}
 	}
 }
+
+// AnimateMaterial 材質モーフの適用
+func (mnfs *MorphNameFrames) AnimateMaterial(
+	frame float32,
+	model *pmx.PmxModel,
+	deltas *MaterialMorphDeltas,
+) {
+	mf := mnfs.GetItem(frame)
+	if mf.Ratio == 0.0 {
+		return
+	}
+
+	morph := model.Morphs.GetItemByName(mnfs.Name)
+	// 乗算→加算の順で処理
+	for _, calcMode := range []pmx.MaterialMorphCalcMode{pmx.CALC_MODE_MULTIPLICATION, pmx.CALC_MODE_ADDITION} {
+		for _, o := range morph.Offsets {
+			offset := o.(*pmx.MaterialMorphOffset)
+			if offset.CalcMode != calcMode {
+				continue
+			}
+			if offset.MaterialIndex < 0 {
+				// 全材質対象の場合
+				for _, delta := range deltas.Data {
+					if calcMode == pmx.CALC_MODE_MULTIPLICATION {
+						delta.Mul(offset, mf.Ratio)
+					} else {
+						delta.Add(offset, mf.Ratio)
+					}
+				}
+			} else if 0 < offset.MaterialIndex && offset.MaterialIndex <= len(deltas.Data) {
+				// 特定材質のみの場合
+				if calcMode == pmx.CALC_MODE_MULTIPLICATION {
+					deltas.Data[offset.MaterialIndex].Mul(offset, mf.Ratio)
+				} else {
+					deltas.Data[offset.MaterialIndex].Add(offset, mf.Ratio)
+				}
+			}
+		}
+	}
+}

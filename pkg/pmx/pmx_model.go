@@ -4,12 +4,14 @@ import (
 	"embed"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
+
 )
 
 type PmxModel struct {
@@ -92,6 +94,7 @@ func (pm *PmxModel) Draw(
 	boneGlobalMatrixes []*mmath.MMat4,
 	boneTransforms []*mbt.BtTransform,
 	vertexDeltas [][]float32,
+	materialDeltas []*Material,
 	windowIndex int,
 	frame float32,
 	elapsed float32,
@@ -99,7 +102,7 @@ func (pm *PmxModel) Draw(
 	enablePhysics bool,
 ) {
 	pm.updatePhysics(boneMatrixes, boneTransforms, frame, elapsed, enablePhysics)
-	pm.Meshes.Draw(shader, boneMatrixes, vertexDeltas, windowIndex)
+	pm.Meshes.Draw(shader, boneMatrixes, vertexDeltas, materialDeltas, windowIndex)
 
 	// 物理デバッグ表示
 	pm.Physics.DebugDrawWorld()
@@ -162,4 +165,10 @@ func (pm *PmxModel) Delete() {
 func (pm *PmxModel) DeletePhysics() {
 	pm.RigidBodies.deletePhysics(pm.Physics)
 	pm.Joints.deletePhysics(pm.Physics)
+}
+
+func (m *PmxModel) Copy() mcore.HashModelInterface {
+	copied := NewPmxModel("")
+	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
+	return copied
 }

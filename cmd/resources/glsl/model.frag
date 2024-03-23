@@ -1,8 +1,5 @@
 #version 440 core
 
-uniform vec4 diffuse;
-uniform vec3 ambient;
-
 uniform int useTexture;
 uniform sampler2D textureSampler;
 

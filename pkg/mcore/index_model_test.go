@@ -2,7 +2,6 @@ package mcore
 
 import (
 	"testing"
-
 )
 
 func TestIndexModel_GetIndex(t *testing.T) {
@@ -50,28 +49,27 @@ func TestIndexModel_Copy(t *testing.T) {
 }
 
 type Face struct {
-	IndexModel
-	Index         int
+	*IndexModel
 	VertexIndexes [3]int
 }
 
 func NewFace(index, vertexIndex0, vertexIndex1, vertexIndex2 int) *Face {
 	return &Face{
-		Index:         index,
+		IndexModel:    &IndexModel{Index: index},
 		VertexIndexes: [3]int{vertexIndex0, vertexIndex1, vertexIndex2},
 	}
 }
 
 // 面リスト
 type Faces struct {
-	IndexModelCorrection[*Face]
+	*IndexModelCorrection[*Face]
 	Data    map[int]*Face
 	Indexes []int
 }
 
 func NewFaces() *Faces {
 	return &Faces{
-		IndexModelCorrection: *NewIndexModelCorrection[*Face](),
+		IndexModelCorrection: NewIndexModelCorrection[*Face](),
 	}
 }
 
@@ -119,10 +117,10 @@ func TestIndexModelCorrection_Append(t *testing.T) {
 	// Test sorting
 	model.Append(item2)
 	result = model.GetItem(0)
-	if result == item {
+	if result != item {
 		t.Errorf("Expected Append to sort the items, but got %v", result)
 	}
-	if result != item2 {
+	if result == item2 {
 		t.Errorf("Expected Append to sort the items, but got %v", result)
 	}
 }
