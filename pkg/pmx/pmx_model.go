@@ -10,7 +10,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-
 )
 
 type PmxModel struct {
@@ -92,6 +91,7 @@ func (pm *PmxModel) Draw(
 	boneMatrixes []*mgl32.Mat4,
 	boneGlobalMatrixes []*mmath.MMat4,
 	boneTransforms []*mbt.BtTransform,
+	vertexDeltas [][]float32,
 	windowIndex int,
 	frame float32,
 	elapsed float32,
@@ -99,7 +99,7 @@ func (pm *PmxModel) Draw(
 	enablePhysics bool,
 ) {
 	pm.updatePhysics(boneMatrixes, boneTransforms, frame, elapsed, enablePhysics)
-	pm.Meshes.Draw(shader, boneMatrixes, windowIndex)
+	pm.Meshes.Draw(shader, boneMatrixes, vertexDeltas, windowIndex)
 
 	// 物理デバッグ表示
 	pm.Physics.DebugDrawWorld()

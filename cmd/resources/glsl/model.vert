@@ -19,8 +19,10 @@ in layout(location = 7) float isSdef;
 in layout(location = 8) vec3 sdefC;
 in layout(location = 9) vec3 sdefR0;
 in layout(location = 10) vec3 sdefR1;
-in layout(location = 11) vec3 sdefB0; // SDEF用ボーン0の位置
-in layout(location = 12) vec3 sdefB1; // SDEF用ボーン1の位置
+in layout(location = 11) vec3 vertexDelta;  // 頂点モーフ
+in layout(location = 12) vec4 uvDelta; // UVモーフ
+in layout(location = 13) vec4 uv1Delta; // 拡張UV1モーフ
+in layout(location = 14) vec3 afterVertexDelta; // ボーン変形後頂点モーフ
 
 uniform vec4 diffuse;
 uniform vec3 ambient;
@@ -213,12 +215,16 @@ vec4 calculateCorrectedC(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, 
 }
 
 void main() {
-    vec4 position4 = vec4(position, 1.0);
+    vec4 position4 = vec4(position + vertexDelta, 1.0);
 
     // 各頂点で使用されるボーン変形行列を計算する
     totalBoneWeight = 0;
     mat4 boneTransformMatrix = mat4(0.0);
     mat3 normalTransformMatrix = mat3(1.0);
+
+    // ボーン変形後頂点モーフ変形量
+    mat4 afterVertexTransformMatrix = mat4(1.0);
+    afterVertexTransformMatrix[3] = vec4(afterVertexDelta, 1.0); // 4列目に移動量を設定
 
     if(isSdef == 1.0) {
         // SDEFの場合は、SDEF用の頂点位置を計算する
@@ -242,7 +248,7 @@ void main() {
 
         vec4 vecPosition = rotatedPosition - rotatedC + correctedC;
 
-        gl_Position = modelViewProjectionMatrix * modelViewMatrix * vec4(vecPosition.xyz, 1.0);
+        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * vec4(vecPosition.xyz, 1.0);
 
         // 各頂点で使用される法線変形行列をSDEF変形行列から回転情報のみ抽出して生成する
         normalTransformMatrix = mat3(rotationMatrix);
@@ -258,7 +264,7 @@ void main() {
             boneTransformMatrix += boneMatrix * boneWeight;
         }
 
-        gl_Position = modelViewProjectionMatrix * modelViewMatrix * boneTransformMatrix * position4;
+        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * position4;
 
         // 各頂点で使用される法線変形行列をボーン変形行列から回転情報のみ抽出して生成する
         normalTransformMatrix = mat3(boneTransformMatrix);
@@ -278,7 +284,7 @@ void main() {
     }
 
     // テクスチャ描画位置
-    vertexUv = uv;
+    vertexUv = uv + uvDelta.xy;
 
     if(1 == useSphere) {
         // Sphereマップ計算
@@ -291,7 +297,7 @@ void main() {
             sphereUv.x = normalWv.x * 0.5 + 0.5;
             sphereUv.y = normalWv.y * -0.5 + 0.5;
         }
-        // sphereUv += morphUv1.xy;
+        sphereUv += uv1Delta.xy;
     }
 
     // カメラとの相対位置

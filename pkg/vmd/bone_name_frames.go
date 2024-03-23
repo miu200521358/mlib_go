@@ -67,20 +67,24 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := bnfs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && slices.Contains(bnfs.Indexes, nextIndex) {
-		nextBf := bnfs.Data[nextIndex]
-		copied := &BoneFrame{
-			BaseFrame:     NewVmdBaseFrame(index),
-			Position:      nextBf.Position.Copy(),
-			LocalPosition: nextBf.LocalPosition.Copy(),
-			Rotation:      nextBf.Rotation.Copy(),
-			LocalRotation: nextBf.LocalRotation.Copy(),
-			Scale:         nextBf.Scale.Copy(),
-			LocalScale:    nextBf.LocalScale.Copy(),
-			// IKとかの計算値はコピーしないで初期値
-			IkRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+	if prevIndex == nextIndex {
+		if slices.Contains(bnfs.Indexes, nextIndex) {
+			nextBf := bnfs.Data[nextIndex]
+			copied := &BoneFrame{
+				BaseFrame:     NewVmdBaseFrame(index),
+				Position:      nextBf.Position.Copy(),
+				LocalPosition: nextBf.LocalPosition.Copy(),
+				Rotation:      nextBf.Rotation.Copy(),
+				LocalRotation: nextBf.LocalRotation.Copy(),
+				Scale:         nextBf.Scale.Copy(),
+				LocalScale:    nextBf.LocalScale.Copy(),
+				// IKとかの計算値はコピーしないで初期値
+				IkRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+			}
+			return copied
+		} else {
+			return NewBoneFrame(index)
 		}
-		return copied
 	}
 
 	var prevBf, nextBf *BoneFrame

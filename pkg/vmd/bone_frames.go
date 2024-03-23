@@ -58,7 +58,7 @@ func (bfs *BoneFrames) Animate(
 	isCalcIk bool,
 	isOutLog bool,
 	description string,
-) BoneTrees {
+) *BoneDeltas {
 	// 処理対象ボーン一覧取得
 	targetBoneNames, targetBoneIndexes := bfs.getAnimatedBoneNames(model, boneNames)
 
@@ -446,7 +446,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 	positions, rotations, scales []*mmath.MMat4,
 	isOutLog bool,
 	description string,
-) BoneTrees {
+) *BoneDeltas {
 	matrixes := make([]*mmath.MMat4, 0, len(targetBoneIndexes))
 	resultMatrixes := make([]*mmath.MMat4, 0, len(targetBoneIndexes))
 	boneCount := len(targetBoneNames)
@@ -485,7 +485,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 	}
 	wg1.Wait()
 
-	boneTrees := NewBoneTrees()
+	boneDeltas := NewBoneDeltas()
 
 	var wg2 sync.WaitGroup
 	// ボーンを一定件数ごとに並列処理（件数は変数保持）
@@ -521,7 +521,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 		bone := model.Bones.GetItemByName(targetBoneIndexes[i])
 		localMatrix := resultMatrixes[i]
 		// 初期位置行列を掛けてグローバル行列を作成
-		boneTrees.SetItem(bone.Name, frame, NewBoneTree(
+		boneDeltas.SetItem(bone.Name, frame, NewBoneDelta(
 			bone.Name,
 			frame,
 			localMatrix.Muled(bone.Position.ToMat4()), // グローバル行列
@@ -532,7 +532,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 		))
 	}
 
-	return *boneTrees
+	return boneDeltas
 }
 
 // アニメーション対象ボーン一覧取得

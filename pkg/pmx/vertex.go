@@ -4,6 +4,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type Vertex struct {
@@ -55,6 +56,10 @@ func (v *Vertex) GL() []float32 {
 		sdefC[0], sdefC[1], sdefC[2], // SDEF-C
 		sdefR0[0], sdefR0[1], sdefR0[2], // SDEF-R0
 		sdefR1[0], sdefR1[1], sdefR1[2], // SDEF-R1
+		0.0, 0.0, 0.0, // 頂点モーフ
+		0.0, 0.0, 0.0, 0.0, // UVモーフ
+		0.0, 0.0, 0.0, 0.0, // 追加UV1モーフ
+		0.0, 0.0, 0.0, // 変形後頂点モーフ
 	}
 }
 

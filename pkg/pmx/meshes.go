@@ -7,13 +7,13 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 type Meshes struct {
-	meshes []*Mesh
-	vao    *mgl.VAO
-	vbo    *mgl.VBO
+	meshes   []*Mesh
+	vertices []float32
+	vao      *mgl.VAO
+	vbo      *mgl.VBO
 }
 
 func NewMeshes(
@@ -25,22 +25,6 @@ func NewMeshes(
 	vertices := make([]float32, 0, len(model.Vertices.Indexes))
 	for _, v := range model.Vertices.GetSortedData() {
 		vertices = append(vertices, (*v).GL()...)
-
-		// SDEF用にボーンの位置を設定
-		if v.DeformType == SDEF {
-			bone0Position := model.Bones.GetItem(v.Deform.GetAllIndexes()[0]).Position
-			vertices = append(vertices, float32(bone0Position.GetX()))
-			vertices = append(vertices, float32(bone0Position.GetY()))
-			vertices = append(vertices, float32(bone0Position.GetZ()))
-
-			bone1Position := model.Bones.GetItem(v.Deform.GetAllIndexes()[1]).Position
-			vertices = append(vertices, float32(bone1Position.GetX()))
-			vertices = append(vertices, float32(bone1Position.GetY()))
-			vertices = append(vertices, float32(bone1Position.GetZ()))
-		} else {
-			// SDEFでない場合は0で埋める
-			vertices = append(vertices, []float32{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}...)
-		}
 	}
 	// println("vertices", mutils.JoinSlice(mutils.ConvertFloat32ToInterfaceSlice(vertices)))
 
@@ -104,14 +88,15 @@ func NewMeshes(
 	vao := mgl.NewVAO()
 	vao.Bind()
 	vbo := mgl.NewVBOForVertex(gl.Ptr(vertices), len(vertices))
-	vbo.BindVertex()
+	vbo.BindVertex(nil, nil)
 	vbo.Unbind()
 	vao.Unbind()
 
 	return &Meshes{
-		meshes: meshes,
-		vao:    vao,
-		vbo:    vbo,
+		meshes:   meshes,
+		vertices: vertices,
+		vao:      vao,
+		vbo:      vbo,
 	}
 }
 
@@ -126,6 +111,7 @@ func (m *Meshes) delete() {
 func (m *Meshes) Draw(
 	shader *mgl.MShader,
 	boneMatrixes []*mgl32.Mat4,
+	vertexDeltas [][]float32,
 	windowIndex int,
 ) {
 	// 隠面消去
@@ -135,7 +121,7 @@ func (m *Meshes) Draw(
 
 	for _, mesh := range m.meshes {
 		m.vao.Bind()
-		m.vbo.BindVertex()
+		m.vbo.BindVertex(m.vertices, vertexDeltas)
 
 		// ブレンディングを有効にする
 		gl.Enable(gl.BLEND)

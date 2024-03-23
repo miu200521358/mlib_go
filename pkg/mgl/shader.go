@@ -247,7 +247,7 @@ func (s *MShader) initialize(program uint32) {
 
 	// カメラ中心
 	lookAtCenter := s.LookAtCenterPosition.GL()
-	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
+	camera := mgl32.LookAtV(*cameraPosition, *lookAtCenter, mgl32.Vec3{0, 1, 0})
 	cameraUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_MATRIX))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 

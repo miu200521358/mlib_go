@@ -35,19 +35,24 @@ func (ms *ModelSet) Draw(
 	isBoneDebug bool,
 	enablePhysics bool,
 ) {
-	matrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
+	boneMatrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
 	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.NameIndexes))
 	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
-	trees := ms.Motion.Animate(frame, ms.Model)
+	vertexDeltas := make([][]float32, len(ms.Model.Vertices.Data))
+	deltas := ms.Motion.Animate(frame, ms.Model)
 	for i, bone := range ms.Model.Bones.GetSortedData() {
-		mat := trees.GetItem(bone.Name, frame).LocalMatrix.GL()
-		matrixes[i] = mat
-		globalMatrixes[i] = trees.GetItem(bone.Name, frame).GlobalMatrix
+		mat := deltas.Bones.GetItem(bone.Name, frame).LocalMatrix.GL()
+		boneMatrixes[i] = mat
+		globalMatrixes[i] = deltas.Bones.GetItem(bone.Name, frame).GlobalMatrix
 		t := mbt.NewBtTransform()
 		t.SetFromOpenGLMatrix(&mat[0])
 		transforms[i] = &t
 	}
-	ms.Model.Draw(shader, matrixes, globalMatrixes, transforms, windowIndex, frame, elapsed, isBoneDebug, enablePhysics)
+	for i, vd := range deltas.Morphs.Vertices.Data {
+		vertexDeltas[i] = vd.GL()
+	}
+	ms.Model.Draw(shader, boneMatrixes, globalMatrixes, transforms, vertexDeltas,
+		windowIndex, frame, elapsed, isBoneDebug, enablePhysics)
 }
 
 // 直角の定数値
@@ -506,7 +511,7 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 
 			// カメラの中心
 			lookAtCenter := w.Shader.LookAtCenterPosition.GL()
-			camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
+			camera := mgl32.LookAtV(*cameraPosition, *lookAtCenter, mgl32.Vec3{0, 1, 0})
 			cameraUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_MATRIX))
 			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 		}

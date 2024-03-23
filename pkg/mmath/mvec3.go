@@ -95,8 +95,8 @@ func (v *MVec3) String() string {
 }
 
 // Gl OpenGL座標系に変換された3次元ベクトルを返します
-func (v *MVec3) GL() mgl32.Vec3 {
-	return mgl32.Vec3{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ())}
+func (v *MVec3) GL() *mgl32.Vec3 {
+	return &mgl32.Vec3{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ())}
 }
 
 // Bullet+OpenGL座標系に変換された3次元ベクトルを返します

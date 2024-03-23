@@ -11,11 +11,12 @@ import (
 
 // Vertex Buffer Object.
 type VBO struct {
-	id     uint32         // ID
-	target uint32         // gl.ARRAY_BUFFER
-	size   int            // size in bytes
-	ptr    unsafe.Pointer // verticesPtr
-	stride int32          // stride
+	id         uint32         // ID
+	target     uint32         // gl.ARRAY_BUFFER
+	size       int            // size in bytes
+	ptr        unsafe.Pointer // verticesPtr
+	stride     int32          // stride
+	strideSize int            // strideSize
 }
 
 // Delete this VBO.
@@ -40,17 +41,32 @@ func NewVBOForVertex(ptr unsafe.Pointer, count int) *VBO {
 	}
 	// 頂点構造体のサイズ(全部floatとする)
 	// position(3), normal(3), uv(2), extendedUV(2), edgeFactor(1), deformBoneIndex(4), deformBoneWeight(4),
-	// isSdef(1), sdefC(3), sdefR0(3), sdefR1(3), sdefB0(3), sdefB1(3)
-	vbo.stride = int32(4 * (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3 + 3 + 3))
+	// isSdef(1), sdefC(3), sdefR0(3), sdefR1(3), vertexDelta(3), uvDelta(4), uv1Delta(4), afterVertexDelta(3)
+	vbo.strideSize = 3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3 + 3 + 4 + 4 + 3
+	vbo.stride = int32(4 * vbo.strideSize)
 	vbo.size = count * 4
 
 	return vbo
 }
 
 // Binds VBO for rendering.
-func (v *VBO) BindVertex() {
+func (v *VBO) BindVertex(vertices []float32, vertexDeltas [][]float32) {
 	gl.BindBuffer(v.target, v.id)
-	gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
+
+	if vertices != nil && vertexDeltas != nil {
+		// モーフ分の変動量を設定
+		for i, vd := range vertexDeltas {
+			offset := i*v.strideSize + (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3)
+			for j, d := range vd {
+				vertices[offset+j] = d
+			}
+		}
+
+		gl.BufferData(v.target, v.size, gl.Ptr(vertices), gl.STATIC_DRAW)
+	} else {
+		gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
+	}
+
 	mutils.CheckGLError()
 
 	// 0: position
@@ -174,7 +190,7 @@ func (v *VBO) BindVertex() {
 		26*4,
 	)
 
-	// 11: SDEF-Bone0
+	// 11: vertexDelta
 	gl.EnableVertexAttribArray(11)
 	gl.VertexAttribPointerWithOffset(
 		11,
@@ -185,15 +201,37 @@ func (v *VBO) BindVertex() {
 		29*4,
 	)
 
-	// 12: SDEF-Bone1
+	// 12: uvDelta
 	gl.EnableVertexAttribArray(12)
 	gl.VertexAttribPointerWithOffset(
 		12,
-		3,
+		4,
 		gl.FLOAT,
 		false,
 		v.stride,
 		32*4,
+	)
+
+	// 13: uv1Delta
+	gl.EnableVertexAttribArray(13)
+	gl.VertexAttribPointerWithOffset(
+		13,
+		4,
+		gl.FLOAT,
+		false,
+		v.stride,
+		36*4,
+	)
+
+	// 14: vertexDelta
+	gl.EnableVertexAttribArray(14)
+	gl.VertexAttribPointerWithOffset(
+		14,
+		3,
+		gl.FLOAT,
+		false,
+		v.stride,
+		40*4,
 	)
 
 }

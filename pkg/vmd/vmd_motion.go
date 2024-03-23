@@ -3,6 +3,7 @@ package vmd
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+
 )
 
 type VmdMotion struct {
@@ -67,8 +68,35 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 	m.IkFrames.Append(ikf)
 }
 
-func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) BoneTrees {
-	return m.AnimateBone(fno, model, nil, true, false, "")
+func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
+	vds := &VmdDeltas{}
+	vds.Bones = m.AnimateBone(fno, model, nil, true, false, "")
+	vds.Morphs = m.AnimateMorph(fno, model, nil, false, false, "")
+
+	return vds
+}
+
+func (m *VmdMotion) AnimateMorph(
+	frame float32,
+	model *pmx.PmxModel,
+	morphNames []string,
+	isCalcIk bool,
+	isOutLog bool,
+	description string,
+) *MorphDeltas {
+	if morphNames == nil {
+		morphNames = make([]string, 0)
+	}
+
+	for _, morph := range model.Morphs.Data {
+		// モーフフレームを生成
+		if !m.MorphFrames.Contains(morph.Name) {
+			m.MorphFrames.Append(NewMorphNameFrames(morph.Name))
+		}
+		morphNames = append(morphNames, morph.Name)
+	}
+
+	return m.MorphFrames.Animate(frame, model, morphNames, isOutLog, description)
 }
 
 func (m *VmdMotion) AnimateBone(
@@ -78,7 +106,7 @@ func (m *VmdMotion) AnimateBone(
 	isCalcIk bool,
 	isOutLog bool,
 	description string,
-) BoneTrees {
+) *BoneDeltas {
 	// ボーン変形行列操作
 	// IKリンクボーンの回転量を初期化
 	for _, bnfs := range m.BoneFrames.Data {

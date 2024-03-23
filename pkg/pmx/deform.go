@@ -3,6 +3,8 @@ package pmx
 import (
 	"sort"
 
+	"github.com/go-gl/mathgl/mgl32"
+
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
@@ -23,7 +25,7 @@ type DeformInterface interface {
 	GetIndexes(weightThreshold float64) []int
 	GetWeights(weightThreshold float64) []float64
 	NormalizedDeform() [8]float32
-	GetSdefParams() ([3]float32, [3]float32, [3]float32)
+	GetSdefParams() (*mgl32.Vec3, *mgl32.Vec3, *mgl32.Vec3)
 }
 
 // Deform デフォーム既定構造体
@@ -133,8 +135,8 @@ func (d *Deform) NormalizedDeform() [8]float32 {
 }
 
 // SDEF用パラメーターを返す
-func (d *Deform) GetSdefParams() ([3]float32, [3]float32, [3]float32) {
-	return [3]float32{0, 0, 0}, [3]float32{0, 0, 0}, [3]float32{0, 0, 0}
+func (d *Deform) GetSdefParams() (*mgl32.Vec3, *mgl32.Vec3, *mgl32.Vec3) {
+	return &mgl32.Vec3{0, 0, 0}, &mgl32.Vec3{0, 0, 0}, &mgl32.Vec3{0, 0, 0}
 }
 
 // sortIndexesByWeight ウェイトの大きい順に指定個数までを対象とする
@@ -269,7 +271,7 @@ func (s *Sdef) GetType() DeformType {
 }
 
 // SDEF用パラメーターを返す
-func (s *Sdef) GetSdefParams() ([3]float32, [3]float32, [3]float32) {
+func (s *Sdef) GetSdefParams() (*mgl32.Vec3, *mgl32.Vec3, *mgl32.Vec3) {
 	// CがR0とR1より先にいかないよう、重みに基づいて補正
 	weight := s.SdefR0.MuledScalar(s.Weights[0]).Added(s.SdefR1.MuledScalar(1 - s.Weights[0]))
 	sdefR0 := s.SdefC.Added(s.SdefR0).Subed(weight)
