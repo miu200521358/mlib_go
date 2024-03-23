@@ -66,15 +66,7 @@ func main() {
 	var mWindow *mwidget.MWindow
 	var err error
 
-	defer func() {
-		if r := recover(); r != nil {
-			rMessage := r.(string)
-			walk.MsgBox(nil, mi18n.T("予期せぬエラーが発生しました"), rMessage, walk.MsgBoxIconError)
-			if mWindow != nil {
-				mWindow.Close()
-			}
-		}
-	}()
+	defer mwidget.RecoverFromPanic(mWindow)
 
 	mWindow, err = mwidget.NewMWindow(resourceFiles, true, 512, 768, getMenuItems)
 	mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))

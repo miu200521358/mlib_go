@@ -214,5 +214,25 @@
     {
         "id": "メイン画面の使い方メッセージ",
         "translation": "・Clicking above the name of each form part outputs how to use that part in the message field"
+    },
+    {
+        "id": "予期せぬエラーヘッダー",
+        "translation": "The app will close due to an unexpected error.\nPlease contact the community if this happens again."
+    },
+    {
+        "id": "コミュニティ報告",
+        "translation": "Copy the error and report it in the community"
+    },
+    {
+        "id": "アプリを終了",
+        "translation": "Close the app"
+    },
+    {
+        "id": "エラーダイアログ起動失敗",
+        "translation": "Failed to launch error dialog"
+    },
+    {
+        "id": "クリップボードコピー失敗",
+        "translation": "Failed to copy to clipboard"
     }
 ]
