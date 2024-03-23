@@ -7,6 +7,7 @@ import (
 	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 type MotionPlayer struct {
@@ -16,7 +17,7 @@ type MotionPlayer struct {
 	FrameSlider *walk.Slider     // フレームスライダー
 	PlayButton  *walk.PushButton // 一時停止ボタン
 	playing     bool             // 再生中かどうか
-	OnPlay      func(bool)       // 再生/一時停止時のコールバック
+	OnPlay      func(bool) error // 再生/一時停止時のコールバック
 }
 
 const MotionPlayerClass = "MotionPlayer Class"
@@ -49,6 +50,9 @@ func NewMotionPlayer(parent walk.Container, mWindow *MWindow, resourceFiles embe
 		return nil, err
 	}
 	titleLabel.SetText(mi18n.T("再生"))
+	titleLabel.MouseDown().Attach(func(x, y int, button walk.MouseButton) {
+		mlog.IL(mi18n.T("再生ウィジェットの使い方メッセージ"))
+	})
 
 	// キーフレ番号
 	mp.FrameEdit, err = walk.NewNumberEdit(playerComposite)
@@ -100,11 +104,22 @@ func NewMotionPlayer(parent walk.Container, mWindow *MWindow, resourceFiles embe
 	return mp, nil
 }
 
+func (mp *MotionPlayer) Playing() bool {
+	return mp.playing
+}
+
+func (mp *MotionPlayer) Dispose() {
+	mp.WidgetBase.Dispose()
+	mp.FrameEdit.Dispose()
+	mp.FrameSlider.Dispose()
+	mp.PlayButton.Dispose()
+}
+
 func (mp *MotionPlayer) Play(playing bool) {
 	for _, glWindow := range mp.mWindow.GlWindows {
-		glWindow.Play(mp.playing)
+		glWindow.Play(playing)
 	}
-	if mp.playing {
+	if playing {
 		mp.PlayButton.SetText(mi18n.T("一時停止"))
 		mp.SetEnabled(false)
 	} else {
@@ -113,7 +128,11 @@ func (mp *MotionPlayer) Play(playing bool) {
 	}
 
 	if mp.OnPlay != nil {
-		mp.OnPlay(mp.playing)
+		err := mp.OnPlay(playing)
+		if err != nil {
+			mlog.ET("再生失敗", err.Error())
+			mp.Play(false)
+		}
 	}
 }
 

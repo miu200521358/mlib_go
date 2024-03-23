@@ -29,7 +29,13 @@ type MWindow struct {
 	logLevelVerboseAction *walk.Action // 冗長メッセージ表示
 }
 
-func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int) (*MWindow, error) {
+func NewMWindow(
+	resourceFiles embed.FS,
+	isHorizontal bool,
+	width int,
+	height int,
+	funcHelpMenuItems func() []declarative.MenuItem,
+) (*MWindow, error) {
 	appConfig := mutils.LoadAppConfig(resourceFiles)
 	mi18n.Initialize(resourceFiles)
 
@@ -85,43 +91,61 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int
 						OnTriggered: mainWindow.jointDebugViewTriggered,
 						AssignTo:    &mainWindow.jointDebugAction,
 					},
+					declarative.Separator{},
+					declarative.Action{
+						Text: mi18n.T("&使い方"),
+						OnTriggered: func() {
+							mlog.ILT(mi18n.T("ビューワーの使い方"), mi18n.T("ビューワーの使い方メッセージ"))
+						},
+					},
 				},
+			},
+			declarative.Menu{
+				Text: mi18n.T("&メイン画面"),
+				Items: []declarative.MenuItem{
+					declarative.Action{
+						Text:        mi18n.T("&デバッグログ表示"),
+						Checkable:   true,
+						OnTriggered: mainWindow.logLevelTriggered,
+						AssignTo:    &mainWindow.logLevelDebugAction,
+					},
+					declarative.Action{
+						Text:        mi18n.T("&冗長ログ表示"),
+						Checkable:   true,
+						OnTriggered: mainWindow.logLevelTriggered,
+						AssignTo:    &mainWindow.logLevelVerboseAction,
+					},
+					declarative.Separator{},
+					declarative.Action{
+						Text: mi18n.T("&使い方"),
+						OnTriggered: func() {
+							mlog.ILT(mi18n.T("メイン画面の使い方"), mi18n.T("メイン画面の使い方メッセージ"))
+						},
+					},
+				},
+			},
+			declarative.Menu{
+				Text:  mi18n.T("&使い方"),
+				Items: funcHelpMenuItems(),
 			},
 			declarative.Menu{
 				Text: mi18n.T("&言語"),
 				Items: []declarative.MenuItem{
 					declarative.Action{
 						Text:        "日本語",
-						OnTriggered: mainWindow.langJapaneseTriggered,
+						OnTriggered: func() { mainWindow.langTriggered("ja") },
 					},
 					declarative.Action{
 						Text:        "English",
-						OnTriggered: mainWindow.langEnglishTriggered,
+						OnTriggered: func() { mainWindow.langTriggered("en") },
 					},
 					declarative.Action{
 						Text:        "中文",
-						OnTriggered: mainWindow.langChineseTriggered,
+						OnTriggered: func() { mainWindow.langTriggered("zh") },
 					},
 					declarative.Action{
 						Text:        "한국어",
-						OnTriggered: mainWindow.langKoreanTriggered,
-					},
-				},
-			},
-			declarative.Menu{
-				Text: mi18n.T("&メッセージ"),
-				Items: []declarative.MenuItem{
-					declarative.Action{
-						Text:        mi18n.T("&デバッグメッセージ表示"),
-						Checkable:   true,
-						OnTriggered: mainWindow.logLevelTriggered,
-						AssignTo:    &mainWindow.logLevelDebugAction,
-					},
-					declarative.Action{
-						Text:        mi18n.T("&冗長メッセージ表示"),
-						Checkable:   true,
-						OnTriggered: mainWindow.logLevelTriggered,
-						AssignTo:    &mainWindow.logLevelVerboseAction,
+						OnTriggered: func() { mainWindow.langTriggered("ko") },
 					},
 				},
 			},
@@ -173,22 +197,6 @@ func (w *MWindow) logLevelTriggered() {
 	if w.logLevelVerboseAction.Checked() {
 		mlog.SetLevel(0)
 	}
-}
-
-func (w *MWindow) langJapaneseTriggered() {
-	w.langTriggered("ja")
-}
-
-func (w *MWindow) langEnglishTriggered() {
-	w.langTriggered("en")
-}
-
-func (w *MWindow) langChineseTriggered() {
-	w.langTriggered("zh")
-}
-
-func (w *MWindow) langKoreanTriggered() {
-	w.langTriggered("ko")
 }
 
 func (w *MWindow) langTriggered(lang string) {

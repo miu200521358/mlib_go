@@ -14,5 +14,5 @@ func CheckError(err error, w *MWindow, message string) {
 }
 
 var MARGIN_ZERO = walk.Margins{HNear: 0, VNear: 0, HFar: 0, VFar: 0}
-
-var MARGIN_SMALL = walk.Margins{HNear: 6, VNear: 6, HFar: 6, VFar: 6}
+var MARGIN_SMALL = walk.Margins{HNear: 3, VNear: 3, HFar: 3, VFar: 3}
+var MARGIN_MEDIUM = walk.Margins{HNear: 6, VNear: 6, HFar: 6, VFar: 6}

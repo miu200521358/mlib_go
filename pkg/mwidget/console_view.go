@@ -26,7 +26,7 @@ func NewConsoleView(parent walk.Container) (*ConsoleView, error) {
 		parent,
 		ConsoleViewClass,
 		win.WS_DISABLED,
-		win.WS_EX_CLIENTEDGE); err != nil {
+		0); err != nil {
 		return nil, err
 	}
 
@@ -37,6 +37,7 @@ func NewConsoleView(parent walk.Container) (*ConsoleView, error) {
 	}
 	lv.Console = te
 	lv.Console.SetReadOnly(true)
+	lv.Console.SendMessage(win.EM_SETLIMITTEXT, 4294967295, 0)
 
 	return lv, nil
 }
@@ -56,6 +57,8 @@ func (cv *ConsoleView) Write(p []byte) (n int, err error) {
 		return 0, err
 	}
 
+	// 改行が文字列内にある場合、コンソール内で改行が行われるよう置換する
+	p = bytes.ReplaceAll(p, []byte("\n"), []byte("\r\n"))
 	cv.Console.AppendText(string(p))
 
 	return n, nil

@@ -2,20 +2,24 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"log"
 	"path/filepath"
+	"runtime"
 
+	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/mwidget"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
 func init() {
-	// runtime.LockOSThread()
+	runtime.LockOSThread()
 
 	walk.AppendToWalkInit(func() {
 		walk.MustRegisterWindowClass(mwidget.FilePickerClass)
@@ -72,7 +76,7 @@ func main() {
 		}
 	}()
 
-	mWindow, err = mwidget.NewMWindow(resourceFiles, true, 512, 768)
+	mWindow, err = mwidget.NewMWindow(resourceFiles, true, 512, 768, getMenuItems)
 	mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
 
 	glWindow, err := mwidget.NewGlWindow(mi18n.T("ビューワー"), 512, 768, 0, resourceFiles, nil)
@@ -90,6 +94,15 @@ func main() {
 	mWindow.Run()
 }
 
+func getMenuItems() []declarative.MenuItem {
+	return []declarative.MenuItem{
+		declarative.Action{
+			Text:        mi18n.T("&サンプルメニュー"),
+			OnTriggered: func() { mlog.IL(mi18n.T("サンプルヘルプ")) },
+		},
+	}
+}
+
 func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 	page := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, mi18n.T("ファイル"))
 
@@ -102,6 +115,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 		"PmxPath",
 		mi18n.T("Pmxファイル"),
 		mi18n.T("Pmxファイルを選択してください"),
+		mi18n.T("Pmxファイルの使い方"),
 		func(path string) {}))
 	mwidget.CheckError(err, mWindow, mi18n.T("Pmxファイルピッカー生成エラー"))
 
@@ -111,6 +125,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 		"VmdPath",
 		mi18n.T("Vmdファイル"),
 		mi18n.T("Vmdファイルを選択してください"),
+		mi18n.T("Vmdファイルの使い方"),
 		func(path string) {}))
 	mwidget.CheckError(err, mWindow, mi18n.T("Vmdファイルピッカー生成エラー"))
 
@@ -119,6 +134,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 		page,
 		mi18n.T("出力Pmxファイル"),
 		mi18n.T("出力Pmxファイルパスを入力もしくは選択してください"),
+		mi18n.T("出力Pmxファイルの使い方"),
 		func(path string) {}))
 	mwidget.CheckError(err, mWindow, mi18n.T("出力Pmxファイルピッカー生成エラー"))
 
@@ -131,8 +147,10 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 	motionPlayer.PlayButton.SetEnabled(false)
 
 	var onFilePathChanged = func() {
-		mWindow.GetMainGlWindow().Play(false)
-		motionPlayer.Play(false)
+		if motionPlayer.Playing() {
+			mWindow.GetMainGlWindow().Play(false)
+			motionPlayer.Play(false)
+		}
 		if pmxReadPicker.Exists() && vmdReadPicker.ExistsOrEmpty() {
 			motionPlayer.PlayButton.SetEnabled(true)
 		} else {
@@ -167,61 +185,77 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 		onFilePathChanged()
 	}
 
-	motionPlayer.OnPlay = func(isPlaying bool) {
-		if !pmxReadPicker.Exists() {
-			return
+	motionPlayer.OnPlay = func(isPlaying bool) error {
+		if !isPlaying {
+			pmxReadPicker.SetEnabled(true)
+			vmdReadPicker.SetEnabled(true)
+			pmxSavePicker.SetEnabled(true)
+			return nil
+		} else {
+			pmxReadPicker.SetEnabled(false)
+			vmdReadPicker.SetEnabled(false)
+			pmxSavePicker.SetEnabled(false)
 		}
 
-		if isPlaying {
-			var model *pmx.PmxModel
-			modelCached := pmxReadPicker.IsCached()
-			motionCached := vmdReadPicker.IsCached()
+		if !pmxReadPicker.Exists() {
+			err := fmt.Errorf("%s\n%s",
+				mi18n.T("Pmxファイル読み込みエラー"),
+				mi18n.T("有効なPmxファイルが入力されていません"))
+			return err
+		}
 
-			if !modelCached {
-				data, err := pmxReadPicker.GetData()
-				mwidget.CheckError(err, mWindow, mi18n.T("Pmxファイル読み込みエラー"))
-				model = data.(*pmx.PmxModel)
-				model.SetUp()
-			} else {
-				model = pmxReadPicker.GetCache().(*pmx.PmxModel)
+		var model *pmx.PmxModel
+		modelCached := pmxReadPicker.IsCached()
+		motionCached := vmdReadPicker.IsCached()
+
+		if !modelCached {
+			data, err := pmxReadPicker.GetData()
+			if err != nil {
+				err := fmt.Errorf("%s\n%s", mi18n.T("Pmxファイル読み込みエラー"), err.Error())
+				return err
+			}
+			model = data.(*pmx.PmxModel)
+			model.SetUp()
+		} else {
+			model = pmxReadPicker.GetCache().(*pmx.PmxModel)
+		}
+
+		var motion *vmd.VmdMotion
+		if !motionCached {
+			if vmdReadPicker.Exists() {
+				motionData, err := vmdReadPicker.GetData()
+				if err != nil {
+					err := fmt.Errorf("%s\n%s", mi18n.T("Vmdファイル読み込みエラー"), err.Error())
+					return err
+				}
+				motion = motionData.(*vmd.VmdMotion)
 			}
 
-			var motion *vmd.VmdMotion
-			if !motionCached {
-				if vmdReadPicker.Exists() {
-					motionData, err := vmdReadPicker.GetData()
-					if err != nil {
-						walk.MsgBox(mWindow.MainWindow, mi18n.T("Vmdファイル読み込みエラー"),
-							err.Error(), walk.MsgBoxIconError)
-						return
-					}
-					motion = motionData.(*vmd.VmdMotion)
-				}
-
-				if motion == nil {
-					motion = vmd.NewVmdMotion("")
-				}
-			} else {
-				motion = vmdReadPicker.GetCache().(*vmd.VmdMotion)
-			}
-
-			if modelCached && motionCached {
-				mWindow.GetMainGlWindow().Play(true)
-			} else {
-				motionPlayer.SetEnabled(false)
-				motionPlayer.SetRange(0, float64(motion.GetMaxFrame()+1))
-				motionPlayer.SetValue(0)
-
-				mWindow.GetMainGlWindow().SetFrame(0)
-				mWindow.GetMainGlWindow().Play(true)
-				mWindow.GetMainGlWindow().ClearData()
-				mWindow.GetMainGlWindow().AddData(model, motion)
-				mWindow.GetMainGlWindow().Run(motionPlayer)
+			if motion == nil {
+				motion = vmd.NewVmdMotion("")
 			}
 		} else {
-			mWindow.GetMainGlWindow().Play(false)
+			motion = vmdReadPicker.GetCache().(*vmd.VmdMotion)
 		}
+
+		if modelCached && motionCached {
+			mWindow.GetMainGlWindow().Play(true)
+		} else {
+			motionPlayer.SetEnabled(false)
+			motionPlayer.SetRange(0, float64(motion.GetMaxFrame()+1))
+			motionPlayer.SetValue(0)
+
+			mWindow.GetMainGlWindow().SetFrame(0)
+			mWindow.GetMainGlWindow().Play(true)
+			mWindow.GetMainGlWindow().ClearData()
+			mWindow.GetMainGlWindow().AddData(model, motion)
+			mWindow.GetMainGlWindow().Run(motionPlayer)
+		}
+
+		return nil
 	}
+
+	pmxReadPicker.PathLineEdit.SetFocus()
 
 	return page
 }

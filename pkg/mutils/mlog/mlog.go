@@ -4,6 +4,10 @@ import "log"
 
 var level = 20
 
+func init() {
+	log.SetFlags(0)
+}
+
 // SetLevel ログレベルの設定
 func SetLevel(l int) {
 	level = l
@@ -23,30 +27,63 @@ func D(message string, param ...interface{}) {
 	}
 }
 
+// L ログの区切り線
+func L() {
+	log.Println("---------------------------------")
+}
+
 // Info 情報ログ
 func I(message string, param ...interface{}) {
-	if level <= 20 {
-		log.Printf(message, param...)
-	}
+	log.Printf(message, param...)
+}
+
+// IL 情報ログ（区切り線付き）
+func IL(message string, param ...interface{}) {
+	L()
+	I(message, param...)
+}
+
+// IT 情報ログ（タイトル付き）
+func IT(title string, message string, param ...interface{}) {
+	log.Printf("■■■■■ %s ■■■■■", title)
+	I(message, param...)
+}
+
+// ILT 情報ログ（区切り線・タイトル付き）
+func ILT(title string, message string, param ...interface{}) {
+	L()
+	IT(title, message, param...)
 }
 
 // Warn 警告ログ
 func W(message string, param ...interface{}) {
-	if level <= 30 {
-		log.Printf(message, param...)
-	}
+	WT("WARN", message, param...)
+}
+
+// Warn 警告ログ
+func WT(title string, message string, param ...interface{}) {
+	log.Printf("~~~~~~~~~~ %s ~~~~~~~~~~", title)
+	log.Printf(message, param...)
 }
 
 // Error エラーログ
 func E(message string, param ...interface{}) {
-	if level <= 40 {
-		log.Printf(message, param...)
-	}
+	ET("ERROR", message, param...)
+}
+
+// Error エラーログ
+func ET(title string, message string, param ...interface{}) {
+	log.Printf("********** %s **********", title)
+	log.Printf(message, param...)
 }
 
 // Fatal 致命的エラーログ
 func F(message string, param ...interface{}) {
-	if level <= 50 {
-		log.Fatalf(message, param...)
-	}
+	FT("FATAL ERROR", message, param...)
+}
+
+// Error エラーログ
+func FT(title string, message string, param ...interface{}) {
+	log.Printf("!!!!!!!!!! %s !!!!!!!!!!", title)
+	log.Printf(message, param...)
 }
