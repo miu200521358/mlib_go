@@ -9,6 +9,7 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 var bundle *i18n.Bundle
@@ -50,16 +51,24 @@ func SetLang(lang string) {
 	mutils.SaveUserConfig("lang", lang, 1)
 }
 
-func T(key string, param ...interface{}) string {
+// T メッセージIDを元にメッセージを取得する
+func T(key string, params ...map[string]interface{}) string {
 	if localizer == nil {
 		return key
 	}
-	return localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: key, TemplateData: param})
+	if len(params) == 0 {
+		return localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: key})
+	}
+	return localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: key, TemplateData: params[0]})
 }
 
-func TWithLocale(lang string, key string, param ...interface{}) string {
+// TWithLocale メッセージIDを元に指定ロケールでメッセージを取得する
+func TWithLocale(lang string, key string, params ...map[string]interface{}) string {
 	if bundle == nil {
 		return key
 	}
-	return i18n.NewLocalizer(bundle, lang).MustLocalize(&i18n.LocalizeConfig{MessageID: key, TemplateData: param})
+	if len(params) == 0 {
+		return i18n.NewLocalizer(bundle, lang).MustLocalize(&i18n.LocalizeConfig{MessageID: key})
+	}
+	return i18n.NewLocalizer(bundle, lang).MustLocalize(&i18n.LocalizeConfig{MessageID: key, TemplateData: params})
 }

@@ -530,7 +530,8 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 			}
 		}
 
-		mlog.V("elapsed: %.8f, frame: %.8f\n", elapsed, w.frame)
+		mlog.D("[debug] keyframe: %.8f\n", w.frame*w.Physics.Fps)
+		mlog.V("[verbose] elapsed: %.8f, frame: %.8f\n", elapsed, w.frame)
 
 		// 描画
 		w.Draw(w.frame*w.Physics.Fps, elapsed)

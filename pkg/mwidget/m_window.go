@@ -11,21 +11,22 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
-
 )
 
 type MWindow struct {
 	*walk.MainWindow
-	TabWidget            *MTabWidget  // タブウィジェット
-	isHorizontal         bool         // 横並びであるか否か
-	GlWindows            []*GlWindow  // 描画ウィンドウ
-	ConsoleView          *ConsoleView // コンソールビュー
-	frameDropAction      *walk.Action // フレームドロップON/OFF
-	physicsAction        *walk.Action // 物理ON/OFF
-	physicsResetAction   *walk.Action // 物理リセット
-	boneDebugAction      *walk.Action // ボーンデバッグ表示
-	rigidBodyDebugAction *walk.Action // 剛体デバッグ表示
-	jointDebugAction     *walk.Action // ジョイントデバッグ表示
+	TabWidget             *MTabWidget  // タブウィジェット
+	isHorizontal          bool         // 横並びであるか否か
+	GlWindows             []*GlWindow  // 描画ウィンドウ
+	ConsoleView           *ConsoleView // コンソールビュー
+	frameDropAction       *walk.Action // フレームドロップON/OFF
+	physicsAction         *walk.Action // 物理ON/OFF
+	physicsResetAction    *walk.Action // 物理リセット
+	boneDebugAction       *walk.Action // ボーンデバッグ表示
+	rigidBodyDebugAction  *walk.Action // 剛体デバッグ表示
+	jointDebugAction      *walk.Action // ジョイントデバッグ表示
+	logLevelDebugAction   *walk.Action // デバッグメッセージ表示
+	logLevelVerboseAction *walk.Action // 冗長メッセージ表示
 }
 
 func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int) (*MWindow, error) {
@@ -33,8 +34,8 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int
 	mi18n.Initialize(resourceFiles)
 
 	mainWindow := &MWindow{
-		isHorizontal:  isHorizontal,
-		GlWindows:     []*GlWindow{},
+		isHorizontal: isHorizontal,
+		GlWindows:    []*GlWindow{},
 	}
 
 	if err := (declarative.MainWindow{
@@ -113,12 +114,14 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int
 					declarative.Action{
 						Text:        mi18n.T("&デバッグメッセージ表示"),
 						Checkable:   true,
-						OnTriggered: mainWindow.logLevelDebugTriggered,
+						OnTriggered: mainWindow.logLevelTriggered,
+						AssignTo:    &mainWindow.logLevelDebugAction,
 					},
 					declarative.Action{
 						Text:        mi18n.T("&冗長メッセージ表示"),
 						Checkable:   true,
-						OnTriggered: mainWindow.logLevelVerboseTriggered,
+						OnTriggered: mainWindow.logLevelTriggered,
+						AssignTo:    &mainWindow.logLevelVerboseAction,
 					},
 				},
 			},
@@ -162,12 +165,14 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int
 	return mainWindow, nil
 }
 
-func (w *MWindow) logLevelDebugTriggered() {
-	mlog.SetLevel(10)
-}
-
-func (w *MWindow) logLevelVerboseTriggered() {
-	mlog.SetLevel(0)
+func (w *MWindow) logLevelTriggered() {
+	mlog.SetLevel(20)
+	if w.logLevelDebugAction.Checked() {
+		mlog.SetLevel(10)
+	}
+	if w.logLevelVerboseAction.Checked() {
+		mlog.SetLevel(0)
+	}
 }
 
 func (w *MWindow) langJapaneseTriggered() {

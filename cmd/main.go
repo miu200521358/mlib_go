@@ -182,8 +182,6 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 				mwidget.CheckError(err, mWindow, mi18n.T("Pmxファイル読み込みエラー"))
 				model = data.(*pmx.PmxModel)
 				model.SetUp()
-
-				log.Printf("モデル名: %s", model.Name)
 			} else {
 				model = pmxReadPicker.GetCache().(*pmx.PmxModel)
 			}
