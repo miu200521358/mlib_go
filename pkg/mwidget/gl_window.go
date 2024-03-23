@@ -2,7 +2,6 @@ package mwidget
 
 import (
 	"embed"
-	"fmt"
 	"image"
 	"math"
 	"unsafe"
@@ -18,6 +17,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
@@ -129,17 +129,17 @@ func NewGlWindow(
 	) {
 		switch severity {
 		case gl.DEBUG_SEVERITY_HIGH:
-			fmt.Printf("[HIGH] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
+			mlog.E("[HIGH] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
 				source, glType, severity, message)
 			panic("critical OpenGL error")
 		case gl.DEBUG_SEVERITY_MEDIUM:
-			fmt.Printf("[MEDIUM] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
+			mlog.D("[MEDIUM] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
 				source, glType, severity, message)
 		case gl.DEBUG_SEVERITY_LOW:
-			fmt.Printf("[LOW] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
+			mlog.D("[LOW] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
 				source, glType, severity, message)
 			// case gl.DEBUG_SEVERITY_NOTIFICATION:
-			// 	fmt.Printf("[NOTIFICATION] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
+			// 	mlog.D("[NOTIFICATION] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
 			// 		source, glType, severity, message)
 		}
 	}, gl.Ptr(nil))
@@ -330,7 +330,7 @@ func (w *GlWindow) handleMouseButtonEvent(
 }
 
 func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos float64) {
-	// fmt.Printf("[start] yaw %.8f, pitch %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
+	// mlog.D("[start] yaw %.8f, pitch %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
 	// 	w.yaw, w.pitch, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
 
 	if !w.updatedPrev {
@@ -381,7 +381,7 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 		w.Shader.CameraPosition.SetX(cameraX)
 		w.Shader.CameraPosition.SetY(mgl.INITIAL_CAMERA_POSITION_Y + cameraY)
 		w.Shader.CameraPosition.SetZ(cameraZ)
-		// fmt.Printf("xOffset %.8f, yOffset %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
+		// mlog.D("xOffset %.8f, yOffset %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
 		// 	xOffset, yOffset, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
 	} else if w.middleButtonPressed {
 		ratio := 0.07
@@ -530,7 +530,7 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 			}
 		}
 
-		// log.Printf("elapsed: %.8f, frame: %.8f\n", elapsed, w.frame)
+		mlog.V("elapsed: %.8f, frame: %.8f\n", elapsed, w.frame)
 
 		// 描画
 		w.Draw(w.frame*w.Physics.Fps, elapsed)

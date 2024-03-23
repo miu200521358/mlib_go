@@ -3,14 +3,13 @@ package mphysics
 import (
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 type MPhysics struct {
-	world            mbt.BtDiscreteDynamicsWorld
-	MaxSubSteps      int
-	Fps              float32
-	Spf              float32
+	world       mbt.BtDiscreteDynamicsWorld
+	MaxSubSteps int
+	Fps         float32
+	Spf         float32
 }
 
 func NewMPhysics(shader *mgl.MShader) *MPhysics {
@@ -35,7 +34,7 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 	drawer.SetLiner(NewMDebugDrawLiner(shader))
 	drawer.SetMDefaultColors(NewConstBtMDefaultColors())
 	world.SetDebugDrawer(drawer)
-	// fmt.Printf("world.GetDebugDrawer()=%+v\n", world.GetDebugDrawer())
+	// mlog.D("world.GetDebugDrawer()=%+v\n", world.GetDebugDrawer())
 
 	p := &MPhysics{
 		world:       world,
@@ -83,7 +82,7 @@ func (p *MPhysics) VisibleJoint(enable bool) {
 }
 
 func (p *MPhysics) DebugDrawWorld() {
-	// fmt.Printf("DrawWorld p.world=%+v\n", p.world)
+	// mlog.D("DrawWorld p.world=%+v\n", p.world)
 
 	// // 標準出力を一時的にリダイレクトする
 	// old := os.Stdout // keep backup of the real stdout
@@ -126,7 +125,7 @@ func (p *MPhysics) Update(timeStep float32) {
 	p.world.StepSimulation(timeStep, p.MaxSubSteps, timeStep/float32(p.MaxSubSteps))
 
 	// // p.frame += float32(elapsed)
-	// fmt.Printf("timeStep: %.8f [p.world.StepSimulation]\n", timeStep)
+	// mlog.D("timeStep: %.8f [p.world.StepSimulation]\n", timeStep)
 
 	// // 標準出力を元に戻す
 	// w.Close()

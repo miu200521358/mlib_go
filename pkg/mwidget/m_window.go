@@ -9,6 +9,9 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
+
 )
 
 type MWindow struct {
@@ -23,19 +26,15 @@ type MWindow struct {
 	boneDebugAction      *walk.Action // ボーンデバッグ表示
 	rigidBodyDebugAction *walk.Action // 剛体デバッグ表示
 	jointDebugAction     *walk.Action // ジョイントデバッグ表示
-	I18n                 *mutils.I18n // 多言語対応
-	resourceFiles        embed.FS     // リソースファイル
 }
 
 func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int) (*MWindow, error) {
 	appConfig := mutils.LoadAppConfig(resourceFiles)
-	i18n := mutils.NewI18n(resourceFiles)
+	mi18n.Initialize(resourceFiles)
 
 	mainWindow := &MWindow{
 		isHorizontal:  isHorizontal,
 		GlWindows:     []*GlWindow{},
-		I18n:          i18n,
-		resourceFiles: resourceFiles,
 	}
 
 	if err := (declarative.MainWindow{
@@ -45,42 +44,42 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int
 		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear, MarginsZero: true, SpacingZero: true},
 		MenuItems: []declarative.MenuItem{
 			declarative.Menu{
-				Text: i18n.T("&ビューワー"),
+				Text: mi18n.T("&ビューワー"),
 				Items: []declarative.MenuItem{
 					declarative.Action{
-						Text:        i18n.T("&フレームドロップON/OFF"),
+						Text:        mi18n.T("&フレームドロップON/OFF"),
 						Checkable:   true,
 						OnTriggered: mainWindow.frameDropTriggered,
 						AssignTo:    &mainWindow.frameDropAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
-						Text:        i18n.T("&物理ON/OFF"),
+						Text:        mi18n.T("&物理ON/OFF"),
 						Checkable:   true,
 						OnTriggered: mainWindow.physicsTriggered,
 						AssignTo:    &mainWindow.physicsAction,
 					},
 					declarative.Action{
-						Text:        i18n.T("&物理リセット"),
+						Text:        mi18n.T("&物理リセット"),
 						OnTriggered: mainWindow.physicsResetTriggered,
 						AssignTo:    &mainWindow.physicsResetAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
-						Text:        i18n.T("&ボーンデバッグ表示"),
+						Text:        mi18n.T("&ボーンデバッグ表示"),
 						Checkable:   true,
 						OnTriggered: mainWindow.boneDebugViewTriggered,
 						AssignTo:    &mainWindow.boneDebugAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
-						Text:        i18n.T("&剛体デバッグ表示"),
+						Text:        mi18n.T("&剛体デバッグ表示"),
 						Checkable:   true,
 						OnTriggered: mainWindow.rigidBodyDebugViewTriggered,
 						AssignTo:    &mainWindow.rigidBodyDebugAction,
 					},
 					declarative.Action{
-						Text:        i18n.T("&ジョイントデバッグ表示"),
+						Text:        mi18n.T("&ジョイントデバッグ表示"),
 						Checkable:   true,
 						OnTriggered: mainWindow.jointDebugViewTriggered,
 						AssignTo:    &mainWindow.jointDebugAction,
@@ -88,7 +87,7 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int
 				},
 			},
 			declarative.Menu{
-				Text: i18n.T("&言語"),
+				Text: mi18n.T("&言語"),
 				Items: []declarative.MenuItem{
 					declarative.Action{
 						Text:        "日本語",
@@ -105,6 +104,21 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int
 					declarative.Action{
 						Text:        "한국어",
 						OnTriggered: mainWindow.langKoreanTriggered,
+					},
+				},
+			},
+			declarative.Menu{
+				Text: mi18n.T("&メッセージ"),
+				Items: []declarative.MenuItem{
+					declarative.Action{
+						Text:        mi18n.T("&デバッグメッセージ表示"),
+						Checkable:   true,
+						OnTriggered: mainWindow.logLevelDebugTriggered,
+					},
+					declarative.Action{
+						Text:        mi18n.T("&冗長メッセージ表示"),
+						Checkable:   true,
+						OnTriggered: mainWindow.logLevelVerboseTriggered,
 					},
 				},
 			},
@@ -142,10 +156,18 @@ func NewMWindow(resourceFiles embed.FS, isHorizontal bool, width int, height int
 	mainWindow.Children().Add(mainWindow.TabWidget)
 
 	bg, err := walk.NewSystemColorBrush(walk.SysColor3DShadow)
-	CheckError(err, mainWindow, i18n.T("背景色生成エラー"))
+	CheckError(err, mainWindow, mi18n.T("背景色生成エラー"))
 	mainWindow.SetBackground(bg)
 
 	return mainWindow, nil
+}
+
+func (w *MWindow) logLevelDebugTriggered() {
+	mlog.SetLevel(10)
+}
+
+func (w *MWindow) logLevelVerboseTriggered() {
+	mlog.SetLevel(0)
 }
 
 func (w *MWindow) langJapaneseTriggered() {
@@ -165,12 +187,11 @@ func (w *MWindow) langKoreanTriggered() {
 }
 
 func (w *MWindow) langTriggered(lang string) {
-	w.I18n.SetLang(lang)
-	w.I18n = mutils.NewI18n(w.resourceFiles)
+	mi18n.SetLang(lang)
 	walk.MsgBox(
 		w.MainWindow,
-		w.I18n.T("LanguageChanged.Title"),
-		w.I18n.T("LanguageChanged.Message"),
+		mi18n.TWithLocale(lang, "LanguageChanged.Title"),
+		mi18n.TWithLocale(lang, "LanguageChanged.Message"),
 		walk.MsgBoxOK|walk.MsgBoxIconInformation,
 	)
 	w.Close()

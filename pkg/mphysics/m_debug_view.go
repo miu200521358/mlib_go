@@ -43,7 +43,7 @@ func NewMDebugDrawLiner(shader *mgl.MShader) *MDebugDrawLiner {
 }
 
 func (ddl MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color mbt.BtVector3) {
-	// fmt.Println("MDebugDrawLiner.DrawLine")
+	// mlog.D("MDebugDrawLiner.DrawLine")
 	ddl.shader.UsePhysicsProgram()
 
 	// 色を設定

@@ -162,6 +162,18 @@
     {
         "id": "ビューワー",
         "translation": "Viewer"
+    },
+    {
+        "id": "&メッセージ",
+        "translation": "&Message"
+    },
+    {
+        "id": "&デバッグメッセージ表示",
+        "translation": "&Display Debug Messages"
+    },
+    {
+        "id": "&冗長メッセージ表示",
+        "translation": "&Display Verbose Messages"
     }
 ]
 

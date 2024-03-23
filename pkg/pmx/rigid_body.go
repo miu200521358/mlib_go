@@ -7,6 +7,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
+
 )
 
 type RigidBodyParam struct {
@@ -258,12 +259,12 @@ func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 	r.BtRigidBodyPositionTransform.SetOrigin(r.Position.Bullet())
 
 	// {
-	// 	fmt.Println("---------------------------------")
+	// 	mlog.V("---------------------------------")
 	// }
 	// {
 	// 	mat := mgl32.Mat4{}
 	// 	r.BtRigidBodyTransform.GetOpenGLMatrix(&mat[0])
-	// 	fmt.Printf("1. [%s] BtRigidBodyTransform: \n%v\n", r.Name, mat)
+	// 	mlog.V("1. [%s] BtRigidBodyTransform: \n%v\n", r.Name, mat)
 	// }
 
 	// 剛体のグローバル位置と回転
@@ -278,7 +279,7 @@ func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 
 	r.updateFlags(true)
 
-	// fmt.Printf("name: %s, group: %d, mask: %d\n", r.Name, r.CollisionGroup, r.CollisionGroupMaskValue)
+	// mlog.V("name: %s, group: %d, mask: %d\n", r.Name, r.CollisionGroup, r.CollisionGroupMaskValue)
 
 	// modelPhysics.AddNonFilterProxy(r.BtRigidBody.GetBroadphaseProxy())
 	// 剛体・剛体グループ・非衝突グループを追加
@@ -295,7 +296,7 @@ func (r *RigidBody) updateTransform(
 	}
 
 	// {
-	// 	fmt.Println("----------")
+	// 	mlog.V("----------")
 	// }
 
 	// 剛体のグローバル位置を確定
@@ -309,12 +310,12 @@ func (r *RigidBody) updateTransform(
 	// if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
 	// 	mat := mgl32.Mat4{}
 	// 	(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
-	// 	fmt.Printf("2. [%d] boneTransform: \n%v\n", r.BoneIndex, mat)
+	// 	mlog.V("2. [%d] boneTransform: \n%v\n", r.BoneIndex, mat)
 	// }
 	// {
 	// 	mat := mgl32.Mat4{}
 	// 	rigidBodyTransform.GetOpenGLMatrix(&mat[0])
-	// 	fmt.Printf("2. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
+	// 	mlog.V("2. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
 	// }
 
 	motionState := r.BtRigidBody.GetMotionState().(mbt.BtMotionState)
@@ -333,11 +334,11 @@ func (r *RigidBody) updateMatrix(
 	// 	state := r.BtRigidBody.GetActivationState()
 	// 	isStatic := r.BtRigidBody.IsStaticOrKinematicObject()
 	// 	flags := r.BtRigidBody.GetCollisionFlags()
-	// 	fmt.Printf("name: %s, state: %v, static: %v, flags: %v, isKinematic: %v, isStatic: %v\n", r.Name, state, isStatic, flags, flags&int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT) != 0, flags&int(mbt.BtCollisionObjectCF_STATIC_OBJECT) != 0)
+	// 	mlog.V("name: %s, state: %v, static: %v, flags: %v, isKinematic: %v, isStatic: %v\n", r.Name, state, isStatic, flags, flags&int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT) != 0, flags&int(mbt.BtCollisionObjectCF_STATIC_OBJECT) != 0)
 	// }
 
 	// {
-	// 	fmt.Println("----------")
+	// 	mlog.V("----------")
 	// }
 
 	motionState := r.BtRigidBody.GetMotionState().(mbt.BtMotionState)
@@ -349,7 +350,7 @@ func (r *RigidBody) updateMatrix(
 	// 	{
 	// 		mat := mgl32.Mat4{}
 	// 		rigidBodyTransform.GetOpenGLMatrix(&mat[0])
-	// 		fmt.Printf("3. [%s] rigidBodyTransform Before: \n%v\n", r.Name, mat)
+	// 		mlog.V("3. [%s] rigidBodyTransform Before: \n%v\n", r.Name, mat)
 	// 	}
 
 	// 	if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
@@ -369,7 +370,7 @@ func (r *RigidBody) updateMatrix(
 	// 	{
 	// 		mat := mgl32.Mat4{}
 	// 		rigidBodyTransform.GetOpenGLMatrix(&mat[0])
-	// 		fmt.Printf("3. [%s] rigidBodyTransform After: \n%v\n", r.Name, mat)
+	// 		mlog.V("3. [%s] rigidBodyTransform After: \n%v\n", r.Name, mat)
 	// 	}
 	// }
 
@@ -382,15 +383,15 @@ func (r *RigidBody) updateMatrix(
 	// if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
 	// 	mat := mgl32.Mat4{}
 	// 	(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
-	// 	fmt.Printf("3. [%d] boneTransform: \n%v\n", r.BoneIndex, mat)
+	// 	mlog.V("3. [%d] boneTransform: \n%v\n", r.BoneIndex, mat)
 	// }
 	// {
 	// 	mat := mgl32.Mat4{}
 	// 	rigidBodyTransform.GetOpenGLMatrix(&mat[0])
-	// 	fmt.Printf("3. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
+	// 	mlog.V("3. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
 	// }
 	// {
-	// 	fmt.Printf("3. [%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
+	// 	mlog.V("3. [%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
 	// }
 
 	if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
