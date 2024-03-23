@@ -2,8 +2,8 @@ package vmd
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 type VmdMotion struct {
@@ -70,8 +70,31 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 
 func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
 	vds := &VmdDeltas{}
-	vds.Bones = m.AnimateBone(fno, model, nil, true, false, "")
-	vds.Morphs = m.AnimateMorph(fno, model, nil, false, false, "")
+
+	vds.Morphs = m.AnimateMorph(fno, model, nil)
+
+	for i, bd := range vds.Morphs.Bones.Data {
+		bone := model.Bones.GetItem(i)
+		if !m.BoneFrames.Contains(bone.Name) {
+			m.BoneFrames.Append(NewBoneNameFrames(bone.Name))
+		}
+		bf := m.BoneFrames.GetItem(bone.Name).GetItem(fno)
+
+		// 一旦モーフの値をクリア
+		bf.MorphPosition = mmath.NewMVec3()
+		bf.MorphLocalPosition = mmath.NewMVec3()
+		bf.MorphRotation.SetQuaternion(mmath.NewMQuaternion())
+		bf.MorphLocalRotation.SetQuaternion(mmath.NewMQuaternion())
+		bf.MorphScale = mmath.NewMVec3()
+		bf.MorphLocalScale = mmath.NewMVec3()
+
+		// 該当ボーンキーフレにモーフの値を加算
+		bf.Add(&bd.BoneFrame)
+		m.AppendBoneFrame(bone.Name, bf)
+	}
+
+	// モーフ付きで変形を計算
+	vds.Bones = m.AnimateBoneWithMorphs(fno, model, nil, true, true)
 
 	return vds
 }
@@ -80,9 +103,6 @@ func (m *VmdMotion) AnimateMorph(
 	frame float32,
 	model *pmx.PmxModel,
 	morphNames []string,
-	isCalcIk bool,
-	isOutLog bool,
-	description string,
 ) *MorphDeltas {
 	if morphNames == nil {
 		morphNames = make([]string, 0)
@@ -96,7 +116,7 @@ func (m *VmdMotion) AnimateMorph(
 		morphNames = append(morphNames, morph.Name)
 	}
 
-	return m.MorphFrames.Animate(frame, model, morphNames, isOutLog, description)
+	return m.MorphFrames.Animate(frame, model, morphNames)
 }
 
 func (m *VmdMotion) AnimateBone(
@@ -104,14 +124,22 @@ func (m *VmdMotion) AnimateBone(
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk bool,
-	isOutLog bool,
-	description string,
+) *BoneDeltas {
+	return m.AnimateBoneWithMorphs(frame, model, boneNames, isCalcIk, false)
+}
+
+func (m *VmdMotion) AnimateBoneWithMorphs(
+	frame float32,
+	model *pmx.PmxModel,
+	boneNames []string,
+	isCalcIk bool,
+	isCalcMorph bool,
 ) *BoneDeltas {
 	// ボーン変形行列操作
 	// IKリンクボーンの回転量を初期化
 	for _, bnfs := range m.BoneFrames.Data {
 		for _, bf := range bnfs.Data {
-			bf.IkRotation = nil
+			bf.IkRotation = mmath.NewRotationModelByDegrees(mmath.NewMVec3())
 		}
 	}
 
@@ -122,5 +150,5 @@ func (m *VmdMotion) AnimateBone(
 		}
 	}
 
-	return m.BoneFrames.Animate(frame, model, boneNames, isCalcIk, isOutLog, description)
+	return m.BoneFrames.Animate(frame, model, boneNames, isCalcIk, isCalcMorph)
 }

@@ -104,6 +104,14 @@ func (v *MVec4) AddW(w float64) {
 	v[3] += w
 }
 
+func (v *MVec4) GetXY() *MVec2 {
+	return &MVec2{v[0], v[1]}
+}
+
+func (v *MVec4) GetXYZ() *MVec3 {
+	return &MVec3{v[0], v[1], v[2]}
+}
+
 // String T の文字列表現を返します。
 func (v *MVec4) String() string {
 	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f, w=%.5f]", v.GetX(), v.GetY(), v.GetZ(), v.GetW())

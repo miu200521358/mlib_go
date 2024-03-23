@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 
@@ -140,6 +141,99 @@ func (mnfs *MorphNameFrames) AnimateVertex(
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
 			delta.Position.Add(offset.Position.MuledScalar(mf.Ratio))
+		}
+	}
+}
+
+func (mnfs *MorphNameFrames) AnimateAfterVertex(
+	frame float32,
+	model *pmx.PmxModel,
+	deltas *VertexMorphDeltas,
+) {
+	mf := mnfs.GetItem(frame)
+	if mf.Ratio == 0.0 {
+		return
+	}
+
+	morph := model.Morphs.GetItemByName(mnfs.Name)
+	for _, o := range morph.Offsets {
+		offset := o.(*pmx.VertexMorphOffset)
+		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
+			delta := deltas.Data[offset.VertexIndex]
+			delta.AfterPosition.Add(offset.Position.MuledScalar(mf.Ratio))
+		}
+	}
+}
+
+func (mnfs *MorphNameFrames) AnimateUv(
+	frame float32,
+	model *pmx.PmxModel,
+	deltas *VertexMorphDeltas,
+) {
+	mf := mnfs.GetItem(frame)
+	if mf.Ratio == 0.0 {
+		return
+	}
+
+	morph := model.Morphs.GetItemByName(mnfs.Name)
+	for _, o := range morph.Offsets {
+		offset := o.(*pmx.UvMorphOffset)
+		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
+			delta := deltas.Data[offset.VertexIndex]
+			uv := offset.Uv.MuledScalar(mf.Ratio).GetXY()
+			// UVは左上原点なので、Yを反転させる
+			delta.Uv.Add(&mmath.MVec2{uv[0], 1 - uv[1]})
+		}
+	}
+}
+
+func (mnfs *MorphNameFrames) AnimateUv1(
+	frame float32,
+	model *pmx.PmxModel,
+	deltas *VertexMorphDeltas,
+) {
+	mf := mnfs.GetItem(frame)
+	if mf.Ratio == 0.0 {
+		return
+	}
+
+	morph := model.Morphs.GetItemByName(mnfs.Name)
+	for _, o := range morph.Offsets {
+		offset := o.(*pmx.UvMorphOffset)
+		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
+			delta := deltas.Data[offset.VertexIndex]
+			uv := offset.Uv.MuledScalar(mf.Ratio).GetXY()
+			// UVは左上原点なので、Yを反転させる
+			delta.Uv1.Add(&mmath.MVec2{uv[0], 1 - uv[1]})
+		}
+	}
+}
+
+func (mnfs *MorphNameFrames) AnimateBone(
+	frame float32,
+	model *pmx.PmxModel,
+	deltas *BoneMorphDeltas,
+) {
+	mf := mnfs.GetItem(frame)
+	if mf.Ratio == 0.0 {
+		return
+	}
+
+	morph := model.Morphs.GetItemByName(mnfs.Name)
+	for _, o := range morph.Offsets {
+		offset := o.(*pmx.BoneMorphOffset)
+		if 0 < offset.BoneIndex && offset.BoneIndex <= len(deltas.Data) {
+			delta := deltas.Data[offset.BoneIndex]
+			delta.MorphPosition.Add(offset.Position.MuledScalar(mf.Ratio))
+			delta.MorphLocalPosition.Add(offset.LocalPosition.MuledScalar(mf.Ratio))
+			deltaRad := offset.Rotation.GetRadians().MuledScalar(mf.Ratio)
+			delta.MorphRotation.SetQuaternion(delta.MorphRotation.GetQuaternion().Muled(
+				mmath.NewMQuaternionFromEulerAngles(deltaRad.GetX(), deltaRad.GetY(), deltaRad.GetZ())))
+			deltaLocalRad := offset.LocalRotation.GetRadians().MuledScalar(mf.Ratio)
+			delta.MorphLocalRotation.SetQuaternion(delta.MorphLocalRotation.GetQuaternion().Muled(
+				mmath.NewMQuaternionFromEulerAngles(deltaLocalRad.GetX(), deltaLocalRad.GetY(), deltaLocalRad.GetZ())))
+			delta.MorphScale.Add(offset.Scale.MuledScalar(mf.Ratio))
+			delta.MorphLocalScale.Add(offset.LocalScale.MuledScalar(mf.Ratio))
 		}
 	}
 }

@@ -8,14 +8,14 @@ import (
 )
 
 type BoneDelta struct {
-	BoneName      string
-	Frame         float32
-	GlobalMatrix  *mmath.MMat4
-	LocalMatrix   *mmath.MMat4
-	Position      *mmath.MVec3
-	FramePosition *mmath.MVec3
-	FrameRotation *mmath.MQuaternion
-	FrameScale    *mmath.MVec3
+	BoneName      string             // ボーン名
+	Frame         float32            // キーフレーム
+	GlobalMatrix  *mmath.MMat4       // グローバル行列
+	LocalMatrix   *mmath.MMat4       // ローカル行列
+	Position      *mmath.MVec3       // グローバル位置
+	FramePosition *mmath.MVec3       // キーフレ位置の変動量
+	FrameRotation *mmath.MQuaternion // キーフレ回転の変動量
+	FrameScale    *mmath.MVec3       // キーフレスケールの変動量
 }
 
 func NewBoneDelta(

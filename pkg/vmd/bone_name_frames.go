@@ -71,13 +71,19 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 		if slices.Contains(bnfs.Indexes, nextIndex) {
 			nextBf := bnfs.Data[nextIndex]
 			copied := &BoneFrame{
-				BaseFrame:     NewVmdBaseFrame(index),
-				Position:      nextBf.Position.Copy(),
-				LocalPosition: nextBf.LocalPosition.Copy(),
-				Rotation:      nextBf.Rotation.Copy(),
-				LocalRotation: nextBf.LocalRotation.Copy(),
-				Scale:         nextBf.Scale.Copy(),
-				LocalScale:    nextBf.LocalScale.Copy(),
+				BaseFrame:          NewVmdBaseFrame(index),
+				Position:           nextBf.Position.Copy(),
+				MorphPosition:      nextBf.MorphPosition.Copy(),
+				LocalPosition:      nextBf.LocalPosition.Copy(),
+				MorphLocalPosition: nextBf.MorphLocalPosition.Copy(),
+				Rotation:           nextBf.Rotation.Copy(),
+				MorphRotation:      nextBf.MorphRotation.Copy(),
+				LocalRotation:      nextBf.LocalRotation.Copy(),
+				MorphLocalRotation: nextBf.MorphLocalRotation.Copy(),
+				Scale:              nextBf.Scale.Copy(),
+				MorphScale:         nextBf.MorphScale.Copy(),
+				LocalScale:         nextBf.LocalScale.Copy(),
+				MorphLocalScale:    nextBf.MorphLocalScale.Copy(),
 				// IKとかの計算値はコピーしないで初期値
 				IkRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 			}
@@ -135,6 +141,9 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	bf.LocalPosition.SetZ(nowZ[1])
 	bf.Scale.SetZ(nowZ[2])
 	bf.LocalScale.SetZ(nowZ[3])
+
+	// IKとかの計算値はコピーしないで初期値
+	bf.IkRotation = mmath.NewRotationModelByDegrees(mmath.NewMVec3())
 
 	return bf
 }

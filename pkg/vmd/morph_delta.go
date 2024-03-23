@@ -4,6 +4,7 @@ import (
 	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type VertexMorphDelta struct {
@@ -47,6 +48,7 @@ func NewVertexMorphDeltas(vertexCount int) *VertexMorphDeltas {
 	deltas := make([]*VertexMorphDelta, vertexCount)
 	for i := 0; i < vertexCount; i++ {
 		deltas[i] = NewVertexMorphDelta()
+		deltas[i].Index = i
 	}
 
 	return &VertexMorphDeltas{
@@ -54,13 +56,45 @@ func NewVertexMorphDeltas(vertexCount int) *VertexMorphDeltas {
 	}
 }
 
-type MorphDeltas struct {
-	Vertices *VertexMorphDeltas
+type BoneMorphDelta struct {
+	BoneFrame
+	Frame float32
+	Index int
 }
 
-func NewMorphDeltas(vertexCount int) *MorphDeltas {
+func NewBoneMorphDelta() *BoneMorphDelta {
+	return &BoneMorphDelta{
+		BoneFrame: *NewBoneFrame(0.0),
+		Frame:     0.0,
+		Index:     0,
+	}
+}
+
+type BoneMorphDeltas struct {
+	Data []*BoneMorphDelta
+}
+
+func NewBoneMorphDeltas(boneCount int) *BoneMorphDeltas {
+	deltas := make([]*BoneMorphDelta, boneCount)
+	for i := 0; i < boneCount; i++ {
+		deltas[i] = NewBoneMorphDelta()
+		deltas[i].Index = i
+	}
+
+	return &BoneMorphDeltas{
+		Data: deltas,
+	}
+}
+
+type MorphDeltas struct {
+	Vertices *VertexMorphDeltas
+	Bones    *BoneMorphDeltas
+}
+
+func NewMorphDeltas(vertexCount int, boneCount int) *MorphDeltas {
 	return &MorphDeltas{
 		Vertices: NewVertexMorphDeltas(vertexCount),
+		Bones:    NewBoneMorphDeltas(boneCount),
 	}
 }
 
@@ -69,6 +103,11 @@ func (mds *MorphDeltas) GetFrameNos() []float32 {
 	for _, v := range mds.Vertices.Data {
 		if !slices.Contains(frames, v.Frame) {
 			frames = append(frames, v.Frame)
+		}
+	}
+	for _, b := range mds.Bones.Data {
+		if !slices.Contains(frames, b.Frame) {
+			frames = append(frames, b.Frame)
 		}
 	}
 	return frames
