@@ -274,16 +274,14 @@ void main() {
     vertexNormal = normalize(normalTransformMatrix * normalize(normal)).xyz;
 
     // 頂点色設定
-    vertexColor.rgb = diffuse.rgb;
+    vertexColor =  clamp(diffuse, 0.0, 1.0);
 
     if(0 == useToon) {
         // ディフューズ色＋アンビエント色 計算
         float lightNormal = clamp(dot(vertexNormal, -lightDirection), 0.0, 1.0);
         vertexColor.rgb += ambient * lightNormal;
+        vertexColor = clamp(vertexColor, 0.0, 1.0);
     }
-
-    vertexColor.a = diffuse.a;
-    vertexColor = clamp(vertexColor, 0.0, 1.0);
 
     // テクスチャ描画位置
     vertexUv = uv + uvDelta.xy;

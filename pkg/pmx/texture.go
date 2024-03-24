@@ -4,7 +4,6 @@ import (
 	"embed"
 	"fmt"
 	"image"
-	"image/draw"
 	"path/filepath"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -128,12 +127,7 @@ func (t *Texture) GL(
 	if err != nil {
 		t.Valid = false
 	} else {
-		rgba := image.NewRGBA(img.Bounds())
-		if rgba.Stride != rgba.Rect.Size().X*4 {
-			return nil
-		}
-		draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
-		t.Image = rgba
+		t.Image = mutils.ConvertToRGBA(img)
 	}
 
 	if !t.Valid {
@@ -251,12 +245,7 @@ func (t *ToonTextures) initGl(
 		if err != nil {
 			return err
 		}
-		rgba := image.NewRGBA(img.Bounds())
-		if rgba.Stride != rgba.Rect.Size().X*4 {
-			return err
-		}
-		draw.Draw(rgba, rgba.Bounds(), img, image.Point{0, 0}, draw.Src)
-		toon.Image = rgba
+		toon.Image = mutils.ConvertToRGBA(img)
 		toon.Valid = true
 
 		tGl := &TextureGL{}
@@ -287,12 +276,12 @@ func (t *ToonTextures) initGl(
 			gl.TEXTURE_2D,
 			0,
 			gl.RGBA,
-			int32(rgba.Rect.Size().X),
-			int32(rgba.Rect.Size().Y),
+			int32(toon.Image.Rect.Size().X),
+			int32(toon.Image.Rect.Size().Y),
 			0,
 			gl.RGBA,
 			gl.UNSIGNED_BYTE,
-			gl.Ptr(rgba.Pix),
+			gl.Ptr(toon.Image.Pix),
 		)
 
 		tGl.Unbind()

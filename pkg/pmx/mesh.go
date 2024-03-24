@@ -9,7 +9,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type Mesh struct {
@@ -54,7 +53,8 @@ func (m *Mesh) DrawModel(
 		// 両面描画
 		// カリングOFF
 		gl.Disable(gl.CULL_FACE)
-	} else { // 片面描画
+	} else {
+		// 片面描画
 		// カリングON
 		gl.Enable(gl.CULL_FACE)
 		gl.CullFace(gl.BACK)

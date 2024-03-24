@@ -16,6 +16,7 @@ import (
 	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/riff"
 	_ "golang.org/x/image/tiff"
+
 )
 
 // 指定されたパスから画像を読み込む
@@ -114,4 +115,22 @@ func LoadImageFromResources(resourceFiles embed.FS, fileName string) (image.Imag
 	}
 
 	return img, nil
+}
+
+func ConvertToRGBA(img image.Image) *image.RGBA {
+	// 画像がすでに*image.RGBA型の場合はそのまま返す
+	if rgba, ok := img.(*image.RGBA); ok {
+		return rgba
+	}
+
+	// それ以外の場合は、新しい*image.RGBAイメージに描画して変換する
+	bounds := img.Bounds()
+	rgba := image.NewRGBA(bounds)
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			rgba.Set(x, y, img.At(x, y))
+		}
+	}
+
+	return rgba
 }

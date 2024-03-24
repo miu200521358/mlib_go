@@ -7,7 +7,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 type Meshes struct {
@@ -121,13 +120,13 @@ func (m *Meshes) Draw(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
 
+	// ブレンディングを有効にする
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
 	for i, mesh := range m.meshes {
 		m.vao.Bind()
 		m.vbo.BindVertex(m.vertices, vertexDeltas)
-
-		// ブレンディングを有効にする
-		gl.Enable(gl.BLEND)
-		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 		shader.UseModelProgram()
 		mesh.DrawModel(shader, windowIndex, boneMatrixes, materialDeltas[i])
@@ -135,9 +134,8 @@ func (m *Meshes) Draw(
 
 		m.vbo.Unbind()
 		m.vao.Unbind()
-
-		gl.Disable(gl.BLEND)
 	}
 
+	gl.Disable(gl.BLEND)
 	gl.Disable(gl.DEPTH_TEST)
 }
