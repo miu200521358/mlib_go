@@ -20,6 +20,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
+
 )
 
 type ModelSet struct {
@@ -538,9 +539,6 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 				motionPlayer.SetValue(float64(w.frame * w.Physics.Fps))
 			}
 		}
-
-		mlog.D("[debug] keyframe: %.8f\n", w.frame*w.Physics.Fps)
-		mlog.V("[verbose] elapsed: %.8f, frame: %.8f\n", elapsed, w.frame)
 
 		// 描画
 		w.Draw(w.frame*w.Physics.Fps, elapsed)
