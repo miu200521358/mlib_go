@@ -6,7 +6,6 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
-	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 // Vertex Buffer Object.
@@ -67,7 +66,7 @@ func (v *VBO) BindVertex(vertices []float32, vertexDeltas [][]float32) {
 		gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
 	}
 
-	mutils.CheckGLError()
+	CheckGLError()
 
 	// 0: position
 	gl.EnableVertexAttribArray(0)
@@ -258,7 +257,7 @@ func NewVBOForBone(ptr unsafe.Pointer, count int) *VBO {
 func (v *VBO) BindBone() {
 	gl.BindBuffer(v.target, v.id)
 	gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
-	mutils.CheckGLError()
+	CheckGLError()
 
 	// 0: position
 	gl.EnableVertexAttribArray(0)
@@ -311,7 +310,7 @@ func (v *VBO) BindDebug(from mbt.BtVector3, to mbt.BtVector3) {
 
 	gl.BindBuffer(v.target, v.id)
 	gl.BufferData(v.target, v.size, gl.Ptr(&vertices[0]), gl.STATIC_DRAW)
-	mutils.CheckGLError()
+	CheckGLError()
 
 	// 0: position
 	gl.EnableVertexAttribArray(0)

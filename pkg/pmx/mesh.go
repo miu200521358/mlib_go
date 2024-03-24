@@ -122,7 +122,7 @@ func (m *Mesh) DrawModel(
 
 	// prevVerticesSize := m.prevVerticesCount * int(ibo.Dtype)
 
-	// if err := mutils.CheckGLError(); err != nil {
+	// if err := CheckGLError(); err != nil {
 	// 	panic(fmt.Errorf("Mesh DrawElements failed: %v", err))
 	// }
 

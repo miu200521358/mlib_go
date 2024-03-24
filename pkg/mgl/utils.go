@@ -1,10 +1,9 @@
-package mutils
+package mgl
 
 import (
 	"fmt"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
-
 )
 
 func glErrorString(errCode uint32) string {

@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 
-	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type IBO struct {
@@ -33,7 +32,7 @@ func NewIBO(facePtr unsafe.Pointer, count int) *IBO {
 func (ibo *IBO) Bind() {
 	gl.BindBuffer(ibo.target, ibo.id)
 	gl.BufferData(ibo.target, ibo.size, ibo.facePtr, gl.STATIC_DRAW)
-	mutils.CheckGLError()
+	CheckGLError()
 }
 
 func (ibo *IBO) Unbind() {

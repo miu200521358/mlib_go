@@ -20,7 +20,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 type ModelSet struct {
@@ -492,7 +491,7 @@ func (w *GlWindow) Size() walk.Size {
 func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 	previousTime := glfw.GetTime()
 
-	for !w.ShouldClose() {
+	for w != nil && gl.GetError() == gl.NO_ERROR && !w.ShouldClose() {
 		// 深度バッファのクリア
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -547,7 +546,10 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 		w.SwapBuffers()
 		glfw.PollEvents()
 	}
-	if w.ShouldClose() {
+	if w != nil && gl.GetError() == gl.NO_ERROR && w.ShouldClose() {
 		w.Close(w.Window)
+	}
+	if w == nil || (w.WindowIndex == 0 && gl.GetError() != gl.NO_ERROR) {
+		walk.App().Exit(0)
 	}
 }
