@@ -5,9 +5,11 @@ import (
 	"embed"
 	"fmt"
 	"image"
-	_ "image/gif"
-	_ "image/jpeg"
+	"image/draw"
+	"image/gif"
+	"image/jpeg"
 	"image/png"
+	"io"
 	"io/fs"
 	"os"
 	"strings"
@@ -16,7 +18,6 @@ import (
 	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/riff"
 	_ "golang.org/x/image/tiff"
-
 )
 
 // 指定されたパスから画像を読み込む
@@ -27,35 +28,7 @@ func LoadImage(path string) (image.Image, error) {
 	}
 	defer file.Close()
 
-	if strings.ToLower(path[len(path)-4:]) == ".png" {
-		img, err := png.Decode(file)
-		if err != nil {
-			return nil, err
-		}
-
-		return img, nil
-	} else if strings.ToLower(path[len(path)-4:]) == ".tga" {
-		img, err := tga.Decode(file)
-		if err != nil {
-			return nil, err
-		}
-
-		return img, nil
-	} else if strings.ToLower(path[len(path)-4:]) == ".spa" || strings.ToLower(path[len(path)-4:]) == ".bmp" {
-		// スフィアファイルはbmpとして読み込む
-		img, err := bmp.Decode(file)
-		if err != nil {
-			return nil, err
-		}
-
-		return img, nil
-	}
-	img, _, err := image.Decode(file)
-	if err != nil {
-		return nil, err
-	}
-
-	return img, nil
+	return loadImage(path, file)
 }
 
 // 指定された画像を反転させる
@@ -85,22 +58,54 @@ func LoadImageFromResources(resourceFiles embed.FS, fileName string) (image.Imag
 	}
 	file := bytes.NewReader(fileData)
 
-	if strings.ToLower(fileName[len(fileName)-4:]) == ".png" {
+	return loadImage(fileName, file)
+}
+
+func ConvertToNRGBA(img image.Image) *image.NRGBA {
+	// 画像がすでに*image.NRGBA型の場合はそのまま返す
+	if rgba, ok := img.(*image.NRGBA); ok {
+		return rgba
+	}
+
+	// それ以外の場合は、新しい*image.NRGBAイメージに描画して変換する
+	bounds := img.Bounds()
+	rgba := image.NewNRGBA(bounds)
+	draw.Draw(rgba, rgba.Bounds(), img, bounds.Min, draw.Src)
+
+	return rgba
+}
+
+func loadImage(path string, file io.Reader) (image.Image, error) {
+
+	if strings.ToLower(path[len(path)-4:]) == ".png" {
 		img, err := png.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
 		return img, nil
-	} else if strings.ToLower(fileName[len(fileName)-4:]) == ".tga" {
+	} else if strings.ToLower(path[len(path)-4:]) == ".tga" {
 		img, err := tga.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
 		return img, nil
-	} else if strings.ToLower(fileName[len(fileName)-4:]) == ".spa" ||
-		strings.ToLower(fileName[len(fileName)-4:]) == ".bmp" {
+	} else if strings.ToLower(path[len(path)-4:]) == ".gif" {
+		img, err := gif.Decode(file)
+		if err != nil {
+			return nil, err
+		}
+
+		return img, nil
+	} else if strings.ToLower(path[len(path)-4:]) == ".jpg" || strings.ToLower(path[len(path)-5:]) == ".jpeg" {
+		img, err := jpeg.Decode(file)
+		if err != nil {
+			return nil, err
+		}
+
+		return img, nil
+	} else if strings.ToLower(path[len(path)-4:]) == ".spa" || strings.ToLower(path[len(path)-4:]) == ".bmp" {
 		// スフィアファイルはbmpとして読み込む
 		img, err := bmp.Decode(file)
 		if err != nil {
@@ -109,28 +114,11 @@ func LoadImageFromResources(resourceFiles embed.FS, fileName string) (image.Imag
 
 		return img, nil
 	}
+
 	img, _, err := image.Decode(file)
 	if err != nil {
 		return nil, err
 	}
 
 	return img, nil
-}
-
-func ConvertToRGBA(img image.Image) *image.RGBA {
-	// 画像がすでに*image.RGBA型の場合はそのまま返す
-	if rgba, ok := img.(*image.RGBA); ok {
-		return rgba
-	}
-
-	// それ以外の場合は、新しい*image.RGBAイメージに描画して変換する
-	bounds := img.Bounds()
-	rgba := image.NewRGBA(bounds)
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			rgba.Set(x, y, img.At(x, y))
-		}
-	}
-
-	return rgba
 }

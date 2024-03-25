@@ -11,7 +11,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 // テクスチャ種別
@@ -65,15 +64,15 @@ func (t *TextureGL) delete() {
 
 type Texture struct {
 	*mcore.IndexModel
-	Name          string      // テクスチャ名
-	TextureType   TextureType // テクスチャ種別
-	Path          string      // テクスチャフルパス
-	Valid         bool        // テクスチャフルパスが有効であるか否か
-	glId          uint32      // OpenGLテクスチャID
-	Initialized   bool        // 描画初期化済みフラグ
-	Image         *image.RGBA // テクスチャイメージ
-	textureUnitId uint32      // テクスチャ種類別描画先ユニットID
-	textureUnitNo uint32      // テクスチャ種類別描画先ユニット番号
+	Name          string       // テクスチャ名
+	TextureType   TextureType  // テクスチャ種別
+	Path          string       // テクスチャフルパス
+	Valid         bool         // テクスチャフルパスが有効であるか否か
+	glId          uint32       // OpenGLテクスチャID
+	Initialized   bool         // 描画初期化済みフラグ
+	Image         *image.NRGBA // テクスチャイメージ
+	textureUnitId uint32       // テクスチャ種類別描画先ユニットID
+	textureUnitNo uint32       // テクスチャ種類別描画先ユニット番号
 }
 
 func NewTexture() *Texture {
@@ -127,7 +126,7 @@ func (t *Texture) GL(
 	if err != nil {
 		t.Valid = false
 	} else {
-		t.Image = mutils.ConvertToRGBA(img)
+		t.Image = mutils.ConvertToNRGBA(img)
 	}
 
 	if !t.Valid {
@@ -245,7 +244,7 @@ func (t *ToonTextures) initGl(
 		if err != nil {
 			return err
 		}
-		toon.Image = mutils.ConvertToRGBA(img)
+		toon.Image = mutils.ConvertToNRGBA(img)
 		toon.Valid = true
 
 		tGl := &TextureGL{}
