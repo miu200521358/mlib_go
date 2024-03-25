@@ -50,6 +50,10 @@ void main() {
         outColor *= texture(toonSampler, vec2(0, lightNormal));
     }
 
+    if (outColor.a < 1e-6) {
+        discard;
+    }
+
     // スペキュラ適用
     outColor.rgb += vertexSpecular;
 }
