@@ -81,3 +81,5 @@ MlibSample 1.0.0_beta_21
 ・冗長ログで描画ループ時にOpenのエラーコードを出力追加
 ・予期せぬエラーダイアログにOpenGLのエラーコードを出力追加
 
+MlibSample 1.0.0_beta_22
+・UVモーフのY向き修正
