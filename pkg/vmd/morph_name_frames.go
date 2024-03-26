@@ -180,8 +180,7 @@ func (mnfs *MorphNameFrames) AnimateUv(
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
 			uv := offset.Uv.MuledScalar(mf.Ratio).GetXY()
-			// UVは左上原点なので、Yを反転させる
-			delta.Uv.Add(&mmath.MVec2{uv.GetX(), 1 - uv.GetY()})
+			delta.Uv.Add(uv)
 		}
 	}
 }
@@ -202,8 +201,7 @@ func (mnfs *MorphNameFrames) AnimateUv1(
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
 			uv := offset.Uv.MuledScalar(mf.Ratio)
-			// UVは左上原点なので、Yを反転させる
-			delta.Uv1.Add(&mmath.MVec2{uv.GetX(), 1 - uv.GetY()})
+			delta.Uv1.Add(uv.GetXY())
 		}
 	}
 }
