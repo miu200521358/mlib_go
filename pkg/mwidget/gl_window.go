@@ -49,6 +49,7 @@ func (ms *ModelSet) Draw(
 		t.SetFromOpenGLMatrix(&mat[0])
 		transforms[i] = &t
 	}
+	// TODO: 並列化
 	for i, vd := range deltas.Morphs.Vertices.Data {
 		vertexDeltas[i] = vd.GL()
 	}
@@ -217,6 +218,7 @@ func (w *GlWindow) Close(window *glfw.Window) {
 	}
 	if w.WindowIndex == 0 {
 		defer glfw.Terminate()
+		defer walk.App().Exit(0)
 	}
 	window.Destroy()
 }
@@ -491,7 +493,7 @@ func (w *GlWindow) Size() walk.Size {
 func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 	previousTime := glfw.GetTime()
 
-	for w != nil && gl.GetError() == gl.NO_ERROR && !w.ShouldClose() {
+	for w != nil && !CheckOpenGLError() && !w.ShouldClose() {
 		// 深度バッファのクリア
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -546,10 +548,10 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 		w.SwapBuffers()
 		glfw.PollEvents()
 	}
-	if w != nil && gl.GetError() == gl.NO_ERROR && w.ShouldClose() {
+	if w != nil && !CheckOpenGLError() && w.ShouldClose() {
 		w.Close(w.Window)
 	}
-	if w == nil || (w.WindowIndex == 0 && gl.GetError() != gl.NO_ERROR) {
+	if w == nil || w.WindowIndex == 0 {
 		walk.App().Exit(0)
 	}
 }

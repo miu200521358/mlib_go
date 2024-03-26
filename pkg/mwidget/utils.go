@@ -2,15 +2,17 @@ package mwidget
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"runtime/debug"
 
+	"github.com/go-gl/gl/v4.4-core/gl"
+	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
-
 )
 
 func CheckError(err error, w *MWindow, message string) {
@@ -45,7 +47,9 @@ func RecoverFromPanic(mWindow *MWindow) {
 					Text: mi18n.T("予期せぬエラーヘッダー"),
 				},
 				declarative.TextEdit{
-					Text:     string(bytes.ReplaceAll(stackTrace, []byte("\n"), []byte("\r\n"))),
+					Text: fmt.Sprintf("GLError: %d", gl.GetError()) +
+						string("\r\n------------\r\n") +
+						string(bytes.ReplaceAll(stackTrace, []byte("\n"), []byte("\r\n"))),
 					ReadOnly: true,
 					AssignTo: &errT,
 					VScroll:  true,
@@ -80,4 +84,10 @@ func RecoverFromPanic(mWindow *MWindow) {
 			mWindow.Close()
 		}
 	}
+}
+
+func CheckOpenGLError() bool {
+	err := gl.GetError()
+	glfwErrorMessage := glfw.ErrorCode(err).String()
+	return err != gl.NO_ERROR || glfwErrorMessage != "ErrorCode(0)"
 }

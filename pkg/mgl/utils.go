@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
+
 )
 
-func glErrorString(errCode uint32) string {
+func GetOpenGLErrorString(errCode uint32) string {
 	switch errCode {
 	case gl.NO_ERROR:
 		return "No error"
@@ -31,7 +32,7 @@ func glErrorString(errCode uint32) string {
 
 func CheckGLError() error {
 	if errCode := gl.GetError(); errCode != gl.NO_ERROR {
-		return fmt.Errorf("OpenGL error: %v - %s", errCode, glErrorString(errCode))
+		return fmt.Errorf("OpenGL error: %v - %s", errCode, GetOpenGLErrorString(errCode))
 	}
 	return nil
 }

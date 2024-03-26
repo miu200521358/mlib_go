@@ -160,7 +160,7 @@ func NewMWindow(
 	mainWindow.frameDropAction.SetChecked(true)
 
 	mainWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
-		if len(mainWindow.GlWindows) > 0 {
+		if len(mainWindow.GlWindows) > 0 && !CheckOpenGLError() {
 			for _, glWindow := range mainWindow.GlWindows {
 				glWindow.SetShouldClose(true)
 			}
