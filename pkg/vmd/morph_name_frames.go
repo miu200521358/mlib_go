@@ -98,19 +98,31 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 	return mf
 }
 
+func (mnfs *MorphNameFrames) Sort() {
+	mnfs.lock.Lock()
+	defer mnfs.lock.Unlock()
+
+	mutils.SortFloat32s(mnfs.Indexes)
+	mutils.SortFloat32s(mnfs.RegisteredIndexes)
+}
+
 // bf.Registered が true の場合、補間曲線を分割して登録する
-func (mnfs *MorphNameFrames) Append(value *MorphFrame) {
+func (mnfs *MorphNameFrames) Append(value *MorphFrame, isSort bool) {
 	mnfs.lock.Lock()
 	defer mnfs.lock.Unlock()
 
 	if !slices.Contains(mnfs.Indexes, value.Index) {
 		mnfs.Indexes = append(mnfs.Indexes, value.Index)
-		mutils.SortFloat32s(mnfs.Indexes)
+		if isSort {
+			mutils.SortFloat32s(mnfs.Indexes)
+		}
 	}
 
 	if value.Registered && !slices.Contains(mnfs.RegisteredIndexes, value.Index) {
 		mnfs.RegisteredIndexes = append(mnfs.RegisteredIndexes, value.Index)
-		mutils.SortFloat32s(mnfs.RegisteredIndexes)
+		if isSort {
+			mutils.SortFloat32s(mnfs.RegisteredIndexes)
+		}
 	}
 
 	mnfs.Data[value.Index] = value

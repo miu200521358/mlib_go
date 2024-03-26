@@ -6,6 +6,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+
 )
 
 type VmdMotion struct {
@@ -52,12 +53,24 @@ func (m *VmdMotion) GetMaxFrame() float32 {
 	return max(m.BoneFrames.GetMaxFrame(), m.MorphFrames.GetMaxFrame())
 }
 
-func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {
-	m.BoneFrames.GetItem(boneName).Append(bf)
+func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame, isSort bool) {
+	m.BoneFrames.GetItem(boneName).Append(bf, isSort)
 }
 
-func (m *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame) {
-	m.MorphFrames.GetItem(morphName).Append(mf)
+func (m *VmdMotion) SortBoneFrames() {
+	for _, bnfs := range m.BoneFrames.Data {
+		bnfs.Sort()
+	}
+}
+
+func (m *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame, isSort bool) {
+	m.MorphFrames.GetItem(morphName).Append(mf, isSort)
+}
+
+func (m *VmdMotion) SortMorphFrames() {
+	for _, mnfs := range m.MorphFrames.Data {
+		mnfs.Sort()
+	}
 }
 
 func (m *VmdMotion) AppendCameraFrame(cf *CameraFrame) {
@@ -98,7 +111,7 @@ func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
 
 		// 該当ボーンキーフレにモーフの値を加算
 		bf.Add(bd.BoneFrame)
-		m.AppendBoneFrame(bone.Name, bf)
+		m.AppendBoneFrame(bone.Name, bf, false)
 	}
 
 	// モーフ付きで変形を計算

@@ -7,6 +7,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type BoneNameFrames struct {
@@ -148,24 +149,39 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	return bf
 }
 
+func (bnfs *BoneNameFrames) Sort() {
+	bnfs.lock.Lock()
+	defer bnfs.lock.Unlock()
+
+	mutils.SortFloat32s(bnfs.Indexes)
+	mutils.SortFloat32s(bnfs.IkIndexes)
+	mutils.SortFloat32s(bnfs.RegisteredIndexes)
+}
+
 // bf.Registered が true の場合、補間曲線を分割して登録する
-func (bnfs *BoneNameFrames) Append(value *BoneFrame) {
+func (bnfs *BoneNameFrames) Append(value *BoneFrame, isSort bool) {
 	bnfs.lock.Lock()
 	defer bnfs.lock.Unlock()
 
 	if !slices.Contains(bnfs.Indexes, value.Index) {
 		bnfs.Indexes = append(bnfs.Indexes, value.Index)
-		mutils.SortFloat32s(bnfs.Indexes)
+		if isSort {
+			mutils.SortFloat32s(bnfs.Indexes)
+		}
 	}
 	if value.IkRegistered && !slices.Contains(bnfs.IkIndexes, value.Index) {
 		bnfs.IkIndexes = append(bnfs.IkIndexes, value.Index)
-		mutils.SortFloat32s(bnfs.IkIndexes)
+		if isSort {
+			mutils.SortFloat32s(bnfs.IkIndexes)
+		}
 	}
 
 	if value.Registered {
 		if !slices.Contains(bnfs.RegisteredIndexes, value.Index) {
 			bnfs.RegisteredIndexes = append(bnfs.RegisteredIndexes, value.Index)
-			mutils.SortFloat32s(bnfs.RegisteredIndexes)
+			if isSort {
+				mutils.SortFloat32s(bnfs.RegisteredIndexes)
+			}
 		}
 		// 補間曲線を分割する
 		prevIndex, nextIndex := bnfs.GetRangeIndexes(value.Index)

@@ -225,8 +225,10 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 			motion.BoneFrames.Append(NewBoneNameFrames(boneName))
 		}
 
-		motion.AppendBoneFrame(boneName, v)
+		motion.AppendBoneFrame(boneName, v, false)
 	}
+
+	motion.SortBoneFrames()
 
 	return nil
 }
@@ -265,8 +267,10 @@ func (r *VmdMotionReader) readMorphs(motion *VmdMotion) error {
 			return err
 		}
 
-		motion.AppendMorphFrame(morphName, v)
+		motion.AppendMorphFrame(morphName, v, false)
 	}
+
+	motion.SortMorphFrames()
 
 	return nil
 }

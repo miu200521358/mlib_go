@@ -114,7 +114,7 @@ func (bfs *BoneFrames) prepareIkSolvers(
 					linkBf.IkRotation = mmath.NewRotationModelByQuaternion(quats[linkIndex])
 
 					// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
-					bfs.GetItem(linkBone.Name).Append(linkBf)
+					bfs.GetItem(linkBone.Name).Append(linkBf, true)
 				}
 			}
 		}(bone)
