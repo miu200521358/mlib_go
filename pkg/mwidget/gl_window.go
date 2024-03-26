@@ -75,22 +75,60 @@ func (ms ModelSet) fetchBoneMatrixes(
 	boneMatrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
 	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.NameIndexes))
 	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
-	for i, bone := range ms.Model.Bones.GetSortedData() {
-		mat := deltas.Bones.GetItem(bone.Name, frame).LocalMatrix.GL()
-		boneMatrixes[i] = mat
-		globalMatrixes[i] = deltas.Bones.GetItem(bone.Name, frame).GlobalMatrix
-		t := mbt.NewBtTransform()
-		t.SetFromOpenGLMatrix(&mat[0])
-		transforms[i] = &t
+
+	const chunkSize = 100
+	for chunkStart := 0; chunkStart < len(ms.Model.Bones.GetSortedData()); chunkStart += chunkSize {
+		chunkEnd := chunkStart + chunkSize
+		if chunkEnd > len(ms.Model.Bones.GetSortedData()) {
+			chunkEnd = len(ms.Model.Bones.GetSortedData())
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(chunkEnd - chunkStart)
+
+		for i := chunkStart; i < chunkEnd; i++ {
+			go func(i int) {
+				defer wg.Done()
+				bone := ms.Model.Bones.GetItem(i)
+				mat := deltas.Bones.GetItem(bone.Name, frame).LocalMatrix.GL()
+				boneMatrixes[i] = mat
+				globalMatrixes[i] = deltas.Bones.GetItem(bone.Name, frame).GlobalMatrix
+				t := mbt.NewBtTransform()
+				t.SetFromOpenGLMatrix(&mat[0])
+				transforms[i] = &t
+			}(i)
+		}
+
+		wg.Wait()
 	}
+
 	return boneMatrixes, globalMatrixes, transforms
 }
 
 func (ms ModelSet) fetchVertexDeltas(deltas *vmd.VmdDeltas) [][]float32 {
 	vertexDeltas := make([][]float32, len(ms.Model.Vertices.Data))
-	for i, vd := range deltas.Morphs.Vertices.Data {
-		vertexDeltas[i] = vd.GL()
+
+	const chunkSize = 10000
+	for chunkStart := 0; chunkStart < len(ms.Model.Vertices.Data); chunkStart += chunkSize {
+		chunkEnd := chunkStart + chunkSize
+		if chunkEnd > len(ms.Model.Vertices.Data) {
+			chunkEnd = len(ms.Model.Vertices.Data)
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(chunkEnd - chunkStart)
+
+		for i := chunkStart; i < chunkEnd; i++ {
+			go func(i int) {
+				defer wg.Done()
+				vd := deltas.Morphs.Vertices.Data[i]
+				vertexDeltas[i] = vd.GL()
+			}(i)
+		}
+
+		wg.Wait()
 	}
+
 	return vertexDeltas
 }
 
