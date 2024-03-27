@@ -4,11 +4,12 @@ import (
 	"slices"
 
 	"github.com/jinzhu/copier"
+
 )
 
-type IndexNameModelInterface interface {
+type IIndexNameModel interface {
 	IsValid() bool
-	Copy() IndexNameModelInterface
+	Copy() IIndexNameModel
 	GetIndex() int
 	SetIndex(index int)
 	GetName() string
@@ -42,19 +43,19 @@ func (v *IndexNameModel) IsValid() bool {
 	return v.GetIndex() >= 0
 }
 
-func (v *IndexNameModel) Copy() IndexNameModelInterface {
+func (v *IndexNameModel) Copy() IIndexNameModel {
 	copied := IndexNameModel{Index: v.Index, Name: v.Name, EnglishName: v.EnglishName}
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return &copied
 }
 
 // Tのリスト基底クラス
-type IndexNameModelCorrection[T IndexNameModelInterface] struct {
+type IndexNameModelCorrection[T IIndexNameModel] struct {
 	Data        map[int]T
 	NameIndexes map[string]int
 }
 
-func NewIndexNameModelCorrection[T IndexNameModelInterface]() *IndexNameModelCorrection[T] {
+func NewIndexNameModelCorrection[T IIndexNameModel]() *IndexNameModelCorrection[T] {
 	return &IndexNameModelCorrection[T]{
 		Data:        make(map[int]T, 0),
 		NameIndexes: make(map[string]int, 0),

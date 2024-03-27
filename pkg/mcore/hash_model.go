@@ -1,6 +1,6 @@
 package mcore
 
-type HashModelInterface interface {
+type IHashModel interface {
 	GetName() string
 	SetName(name string)
 	IsNotEmpty() bool

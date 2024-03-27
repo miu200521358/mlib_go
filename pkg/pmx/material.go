@@ -9,7 +9,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 // スフィアモード
@@ -207,7 +206,7 @@ func NewMaterials() *Materials {
 	}
 }
 
-func (m *Material) Copy() mcore.IndexNameModelInterface {
+func (m *Material) Copy() mcore.IIndexNameModel {
 	copied := NewMaterial()
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied

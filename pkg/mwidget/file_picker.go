@@ -13,26 +13,25 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 const FilePickerClass = "FilePicker Class"
 
 type FilePicker struct {
 	walk.WidgetBase
-	title             string                   // ファイルタイトル
-	historyKey        string                   // 履歴用キー(空欄の場合、保存用ファイルと見なす)
-	filterExtension   map[string]string        // フィルタ拡張子
-	PathLineEdit      *walk.LineEdit           // ファイルパス入力欄
-	nameLineEdit      *walk.LineEdit           // ファイル名入力欄
-	openPushButton    *walk.PushButton         // 開くボタン
-	historyPushButton *walk.PushButton         // 履歴ボタン
-	OnPathChanged     func(string)             // パス変更時のコールバック
-	limitHistory      int                      // 履歴リスト
-	modelReader       mcore.ReaderInterface    // mcore
-	initialDirPath    string                   // 初期ディレクトリ
-	cacheData         mcore.HashModelInterface // キャッシュデータ
-	window            *MWindow                 // MWindow
+	title             string                // ファイルタイトル
+	historyKey        string                // 履歴用キー(空欄の場合、保存用ファイルと見なす)
+	filterExtension   map[string]string     // フィルタ拡張子
+	PathLineEdit      *walk.LineEdit        // ファイルパス入力欄
+	nameLineEdit      *walk.LineEdit        // ファイル名入力欄
+	openPushButton    *walk.PushButton      // 開くボタン
+	historyPushButton *walk.PushButton      // 履歴ボタン
+	OnPathChanged     func(string)          // パス変更時のコールバック
+	limitHistory      int                   // 履歴リスト
+	modelReader       mcore.ReaderInterface // mcore
+	initialDirPath    string                // 初期ディレクトリ
+	cacheData         mcore.IHashModel      // キャッシュデータ
+	window            *MWindow              // MWindow
 }
 
 func NewPmxReadFilePicker(
@@ -219,7 +218,7 @@ func NewFilePicker(
 	return picker, nil
 }
 
-func (picker *FilePicker) GetData() (mcore.HashModelInterface, error) {
+func (picker *FilePicker) GetData() (mcore.IHashModel, error) {
 	if picker.PathLineEdit.Text() == "" || picker.modelReader == nil {
 		return nil, nil
 	}
@@ -262,7 +261,7 @@ func (picker *FilePicker) ClearCache() {
 	picker.cacheData = nil
 }
 
-func (picker *FilePicker) GetCache() mcore.HashModelInterface {
+func (picker *FilePicker) GetCache() mcore.IHashModel {
 	return picker.cacheData
 }
 

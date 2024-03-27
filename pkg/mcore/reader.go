@@ -20,11 +20,11 @@ import (
 
 type ReaderInterface interface {
 	ReadNameByFilepath(path string) (string, error)
-	ReadByFilepath(path string) (HashModelInterface, error)
+	ReadByFilepath(path string) (IHashModel, error)
 	ReadHashByFilePath(path string) (string, error)
 }
 
-type BaseReader[T HashModelInterface] struct {
+type BaseReader[T IHashModel] struct {
 	file     *os.File
 	reader   *bufio.Reader
 	encoding encoding.Encoding

@@ -24,7 +24,7 @@ func (r *VmdMotionReader) createModel(path string) *VmdMotion {
 }
 
 // 指定されたパスのファイルからデータを読み込む
-func (r *VmdMotionReader) ReadByFilepath(path string) (mcore.HashModelInterface, error) {
+func (r *VmdMotionReader) ReadByFilepath(path string) (mcore.IHashModel, error) {
 	// モデルを新規作成
 	motion := r.createModel(path)
 

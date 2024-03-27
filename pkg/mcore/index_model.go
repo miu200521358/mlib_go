@@ -6,9 +6,9 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-type IndexModelInterface interface {
+type IIndexModel interface {
 	IsValid() bool
-	Copy() IndexModelInterface
+	Copy() IIndexModel
 	GetIndex() int
 	SetIndex(index int)
 }
@@ -30,19 +30,19 @@ func (v *IndexModel) IsValid() bool {
 	return v.GetIndex() >= 0
 }
 
-func (v *IndexModel) Copy() IndexModelInterface {
+func (v *IndexModel) Copy() IIndexModel {
 	copied := IndexModel{Index: v.Index}
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return &copied
 }
 
 // Tのリスト基底クラス
-type IndexModelCorrection[T IndexModelInterface] struct {
+type IndexModelCorrection[T IIndexModel] struct {
 	Data    map[int]T
 	Indexes map[int]int
 }
 
-func NewIndexModelCorrection[T IndexModelInterface]() *IndexModelCorrection[T] {
+func NewIndexModelCorrection[T IIndexModel]() *IndexModelCorrection[T] {
 	return &IndexModelCorrection[T]{
 		Data:    make(map[int]T, 0),
 		Indexes: make(map[int]int, 0),

@@ -33,7 +33,7 @@ func NewVmdMotion(path string) *VmdMotion {
 	}
 }
 
-func (m *VmdMotion) Copy() mcore.HashModelInterface {
+func (m *VmdMotion) Copy() mcore.IHashModel {
 	copied := NewVmdMotion("")
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied

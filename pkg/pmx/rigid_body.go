@@ -144,7 +144,7 @@ func NewRigidBody() *RigidBody {
 	}
 }
 
-func (r *RigidBody) Copy() mcore.IndexNameModelInterface {
+func (r *RigidBody) Copy() mcore.IIndexNameModel {
 	copied := NewMorph()
 	copier.CopyWithOption(copied, r, copier.Option{DeepCopy: true})
 	return copied

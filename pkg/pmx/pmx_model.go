@@ -174,7 +174,7 @@ func (pm *PmxModel) DeletePhysics() {
 	pm.Joints.deletePhysics(pm.Physics)
 }
 
-func (m *PmxModel) Copy() mcore.HashModelInterface {
+func (m *PmxModel) Copy() mcore.IHashModel {
 	copied := NewPmxModel("")
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied
