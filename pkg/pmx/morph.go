@@ -121,7 +121,7 @@ func NewBoneMorph(boneIndex int, position *mmath.MVec3, rotation *mmath.MRotatio
 		Rotation:      rotation,
 		Scale:         mmath.NewMVec3(),
 		LocalPosition: mmath.NewMVec3(),
-		LocalRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		LocalRotation: mmath.NewRotationModel(),
 		LocalScale:    mmath.NewMVec3(),
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"math"
 
 	"github.com/jinzhu/copier"
-
 )
 
 type MRotation struct {
@@ -13,36 +12,51 @@ type MRotation struct {
 	quaternion *MQuaternion
 }
 
+func NewRotationModel() *MRotation {
+	model := &MRotation{
+		radians:    NewMVec3(),
+		degrees:    NewMVec3(),
+		quaternion: NewMQuaternion(),
+	}
+	return model
+}
+
 // NewRotationModelByRadians はラジアン角度からで回転を表すモデルを生成します。
 func NewRotationModelByRadians(vRadians *MVec3) *MRotation {
 	model := &MRotation{
-		radians:    &MVec3{},
-		degrees:    &MVec3{},
-		quaternion: &MQuaternion{},
+		radians:    NewMVec3(),
+		degrees:    NewMVec3(),
+		quaternion: NewMQuaternion(),
 	}
-	model.SetRadians(vRadians)
+	if vRadians.Length() > 0 {
+		model.SetRadians(vRadians)
+	}
 	return model
 }
 
 // NewRotationModelByDegrees は度数角度からで回転を表すモデルを生成します。
 func NewRotationModelByDegrees(vDegrees *MVec3) *MRotation {
 	model := &MRotation{
-		radians:    &MVec3{},
-		degrees:    &MVec3{},
-		quaternion: &MQuaternion{},
+		radians:    NewMVec3(),
+		degrees:    NewMVec3(),
+		quaternion: NewMQuaternion(),
 	}
-	model.SetDegrees(vDegrees)
+	if vDegrees.Length() > 0 {
+		model.SetDegrees(vDegrees)
+	}
 	return model
 }
 
 // NewRotationModelByQuaternion はクォータニオンからで回転を表すモデルを生成します。
 func NewRotationModelByQuaternion(vQuaternion *MQuaternion) *MRotation {
 	model := &MRotation{
-		radians:    &MVec3{},
-		degrees:    &MVec3{},
-		quaternion: &MQuaternion{},
+		radians:    NewMVec3(),
+		degrees:    NewMVec3(),
+		quaternion: NewMQuaternion(),
 	}
-	model.SetQuaternion(vQuaternion)
+	if vQuaternion.GetXYZ().Length() > 0 {
+		model.SetQuaternion(vQuaternion)
+	}
 	return model
 }
 
@@ -92,7 +106,7 @@ func (m *MRotation) SetDegrees(v *MVec3) {
 
 // Copy
 func (rot *MRotation) Copy() *MRotation {
-	copied := NewRotationModelByDegrees(NewMVec3())
+	copied := NewRotationModel()
 	copier.CopyWithOption(copied, rot, copier.Option{DeepCopy: true})
 	return copied
 }

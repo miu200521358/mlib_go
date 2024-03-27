@@ -11,11 +11,11 @@ func TestIkLink_Copy(t *testing.T) {
 	ikLink := &IkLink{
 		BoneIndex:          0,
 		AngleLimit:         true,
-		MinAngleLimit:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
-		MaxAngleLimit:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		MinAngleLimit:      mmath.NewRotationModel(),
+		MaxAngleLimit:      mmath.NewRotationModel(),
 		LocalAngleLimit:    true,
-		LocalMinAngleLimit: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
-		LocalMaxAngleLimit: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		LocalMinAngleLimit: mmath.NewRotationModel(),
+		LocalMaxAngleLimit: mmath.NewRotationModel(),
 	}
 
 	copied := ikLink.Copy()

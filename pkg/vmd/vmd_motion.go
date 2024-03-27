@@ -6,7 +6,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 type VmdMotion struct {
@@ -160,7 +159,7 @@ func (m *VmdMotion) AnimateBoneWithMorphs(
 	// IKリンクボーンの回転量を初期化
 	for _, bnfs := range m.BoneFrames.Data {
 		for _, bf := range bnfs.Data {
-			bf.IkRotation = mmath.NewRotationModelByDegrees(mmath.NewMVec3())
+			bf.IkRotation = mmath.NewRotationModel()
 		}
 	}
 

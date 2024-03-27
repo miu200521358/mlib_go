@@ -7,7 +7,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type BoneNameFrames struct {
@@ -86,7 +85,7 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 				LocalScale:         nextBf.LocalScale.Copy(),
 				MorphLocalScale:    nextBf.MorphLocalScale.Copy(),
 				// IKとかの計算値はコピーしないで初期値
-				IkRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+				IkRotation: mmath.NewRotationModel(),
 			}
 			return copied
 		} else {
@@ -144,7 +143,7 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	bf.LocalScale.SetZ(nowZ[3])
 
 	// IKとかの計算値はコピーしないで初期値
-	bf.IkRotation = mmath.NewRotationModelByDegrees(mmath.NewMVec3())
+	bf.IkRotation = mmath.NewRotationModel()
 
 	return bf
 }

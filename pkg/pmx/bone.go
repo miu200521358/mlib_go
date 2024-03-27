@@ -27,11 +27,11 @@ func NewIkLink() *IkLink {
 	return &IkLink{
 		BoneIndex:          -1,
 		AngleLimit:         false,
-		MinAngleLimit:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
-		MaxAngleLimit:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		MinAngleLimit:      mmath.NewRotationModel(),
+		MaxAngleLimit:      mmath.NewRotationModel(),
 		LocalAngleLimit:    false,
-		LocalMinAngleLimit: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
-		LocalMaxAngleLimit: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		LocalMinAngleLimit: mmath.NewRotationModel(),
+		LocalMaxAngleLimit: mmath.NewRotationModel(),
 	}
 }
 
@@ -51,7 +51,7 @@ func NewIk() *Ik {
 	return &Ik{
 		BoneIndex:    -1,
 		LoopCount:    0,
-		UnitRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		UnitRotation: mmath.NewRotationModel(),
 		Links:        []*IkLink{},
 	}
 }
