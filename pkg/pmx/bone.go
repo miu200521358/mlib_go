@@ -365,6 +365,7 @@ type Bones struct {
 	normalVao          *mgl.VAO
 	normalIbo          *mgl.IBO
 	normalIboCount     int32
+	ChunkSize          int
 }
 
 func NewBones() *Bones {
@@ -380,6 +381,7 @@ func NewBones() *Bones {
 		normalVao:                nil,
 		normalIbo:                nil,
 		normalIboCount:           0,
+		ChunkSize:                100,
 	}
 }
 

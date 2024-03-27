@@ -6,6 +6,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type Vertex struct {
@@ -73,10 +74,12 @@ func (v *Vertex) GL() []float32 {
 // 頂点リスト
 type Vertices struct {
 	*mcore.IndexModelCorrection[*Vertex]
+	ChunkSize int
 }
 
 func NewVertices() *Vertices {
 	return &Vertices{
 		IndexModelCorrection: mcore.NewIndexModelCorrection[*Vertex](),
+		ChunkSize:            10000,
 	}
 }

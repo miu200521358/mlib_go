@@ -76,7 +76,7 @@ func (ms ModelSet) fetchBoneMatrixes(
 	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.NameIndexes))
 	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
 
-	const chunkSize = 100
+	chunkSize := ms.Model.Bones.ChunkSize
 	for chunkStart := 0; chunkStart < len(ms.Model.Bones.GetSortedData()); chunkStart += chunkSize {
 		chunkEnd := chunkStart + chunkSize
 		if chunkEnd > len(ms.Model.Bones.GetSortedData()) {
@@ -108,7 +108,7 @@ func (ms ModelSet) fetchBoneMatrixes(
 func (ms ModelSet) fetchVertexDeltas(deltas *vmd.VmdDeltas) [][]float32 {
 	vertexDeltas := make([][]float32, len(ms.Model.Vertices.Data))
 
-	const chunkSize = 10000
+	chunkSize := ms.Model.Vertices.ChunkSize
 	for chunkStart := 0; chunkStart < len(ms.Model.Vertices.Data); chunkStart += chunkSize {
 		chunkEnd := chunkStart + chunkSize
 		if chunkEnd > len(ms.Model.Vertices.Data) {
