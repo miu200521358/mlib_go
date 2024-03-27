@@ -3,13 +3,13 @@ package vmd
 import (
 	"slices"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type BoneDelta struct {
 	BoneName      string             // ボーン名
-	Frame         mcore.Float32      // キーフレーム
+	Frame         float32            // キーフレーム
 	GlobalMatrix  *mmath.MMat4       // グローバル行列
 	LocalMatrix   *mmath.MMat4       // ローカル行列
 	Position      *mmath.MVec3       // グローバル位置
@@ -20,7 +20,7 @@ type BoneDelta struct {
 
 func NewBoneDelta(
 	boneName string,
-	frame mcore.Float32,
+	frame float32,
 	globalMatrix, localMatrix *mmath.MMat4,
 	framePosition *mmath.MVec3,
 	frameRotation *mmath.MQuaternion,
@@ -41,7 +41,7 @@ func NewBoneDelta(
 
 type BoneNameFrameNo struct {
 	BoneName string
-	Frame    mcore.Float32
+	Frame    float32
 }
 
 type BoneDeltas struct {
@@ -54,11 +54,11 @@ func NewBoneDeltas() *BoneDeltas {
 	}
 }
 
-func (bts *BoneDeltas) GetItem(boneName string, frame mcore.Float32) *BoneDelta {
+func (bts *BoneDeltas) GetItem(boneName string, frame float32) *BoneDelta {
 	return bts.Data[BoneNameFrameNo{boneName, frame}]
 }
 
-func (bts *BoneDeltas) SetItem(boneName string, frame mcore.Float32, boneDelta *BoneDelta) {
+func (bts *BoneDeltas) SetItem(boneName string, frame float32, boneDelta *BoneDelta) {
 	bts.Data[BoneNameFrameNo{boneName, frame}] = boneDelta
 }
 
@@ -72,8 +72,8 @@ func (bts *BoneDeltas) GetBoneNames() []string {
 	return boneNames
 }
 
-func (bts *BoneDeltas) GetFrameNos() []mcore.Float32 {
-	frames := make([]mcore.Float32, 0)
+func (bts *BoneDeltas) GetFrameNos() []float32 {
+	frames := make([]float32, 0)
 	for key := range bts.Data {
 		if slices.Contains(frames, key.Frame) {
 			frames = append(frames, key.Frame)
@@ -82,7 +82,7 @@ func (bts *BoneDeltas) GetFrameNos() []mcore.Float32 {
 	return frames
 }
 
-func (bts *BoneDeltas) Contains(boneName string, frame mcore.Float32) bool {
+func (bts *BoneDeltas) Contains(boneName string, frame float32) bool {
 	_, ok := bts.Data[BoneNameFrameNo{boneName, frame}]
 	return ok
 }

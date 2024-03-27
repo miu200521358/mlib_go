@@ -4,7 +4,6 @@ import (
 	"math"
 	"sync"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
@@ -41,8 +40,8 @@ func (bfs *BoneFrames) GetItem(boneName string) *BoneNameFrames {
 	return bfs.Data[boneName]
 }
 
-func (bfs *BoneFrames) GetMaxFrame() mcore.Float32 {
-	maxFno := mcore.NewFloat32(0)
+func (bfs *BoneFrames) GetMaxFrame() float32 {
+	maxFno := float32(0)
 	for _, bnfs := range bfs.Data {
 		fno := bnfs.GetMaxFrame()
 		if fno > maxFno {
@@ -53,7 +52,7 @@ func (bfs *BoneFrames) GetMaxFrame() mcore.Float32 {
 }
 
 func (bfs *BoneFrames) Animate(
-	frame mcore.Float32,
+	frame float32,
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk bool,
@@ -85,9 +84,9 @@ func (bfs *BoneFrames) Animate(
 
 // IK事前計算処理
 func (bfs *BoneFrames) prepareIkSolvers(
-	frame mcore.Float32,
+	frame float32,
 	model *pmx.PmxModel,
-	targetBoneNames map[string]mcore.Int,
+	targetBoneNames map[string]int,
 	isCalcMorph bool,
 ) {
 	var wg sync.WaitGroup
@@ -125,11 +124,11 @@ func (bfs *BoneFrames) prepareIkSolvers(
 
 // IK計算
 func (bfs *BoneFrames) calcIk(
-	frame mcore.Float32,
+	frame float32,
 	ikBone *pmx.Bone,
 	model *pmx.PmxModel,
 	isisCalcMorph bool,
-) ([]*mmath.MQuaternion, map[string]mcore.Int) {
+) ([]*mmath.MQuaternion, map[string]int) {
 	// IKターゲットボーン
 	effectorBone := model.Bones.GetItem(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
@@ -318,7 +317,7 @@ func (bfs *BoneFrames) calculateSingleAxisRadRotation(
 	linkQuat *mmath.MQuaternion,
 	quatAxis *mmath.MVec3,
 	quatAngle float64,
-	axisIndex mcore.Int,
+	axisIndex int,
 	axisVector *mmath.MVec3,
 	unitRadian float64,
 	isLocal bool,
@@ -434,10 +433,10 @@ func (bfs *BoneFrames) calculateSingleAxisRadRotation(
 }
 
 func (bfs *BoneFrames) calcBoneMatrixes(
-	frame mcore.Float32,
+	frame float32,
 	model *pmx.PmxModel,
-	targetBoneNames map[string]mcore.Int,
-	targetBoneIndexes map[mcore.Int]string,
+	targetBoneNames map[string]int,
+	targetBoneIndexes map[int]string,
 	positions, rotations, scales []*mmath.MMat4,
 ) *BoneDeltas {
 	matrixes := make([]*mmath.MMat4, 0, len(targetBoneIndexes))
@@ -463,7 +462,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 					break
 				}
 				// 各ボーンの座標変換行列×逆BOf行列
-				boneName := targetBoneIndexes[mcore.NewInt(j)]
+				boneName := targetBoneIndexes[j]
 				bone := model.Bones.GetItemByName(boneName)
 				// 逆BOf行列(初期姿勢行列)
 				matrixes[j].Mul(bone.RevertOffsetMatrix)
@@ -490,7 +489,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 				if j >= boneCount {
 					break
 				}
-				boneName := targetBoneIndexes[mcore.NewInt(j)]
+				boneName := targetBoneIndexes[j]
 				bone := model.Bones.GetItemByName(boneName)
 				localMatrix := mmath.NewMMat4()
 				for _, l := range bone.ParentBoneIndexes {
@@ -511,7 +510,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 	wg2.Wait()
 
 	for i := 0; i < len(targetBoneIndexes); i++ {
-		bone := model.Bones.GetItemByName(targetBoneIndexes[mcore.NewInt(i)])
+		bone := model.Bones.GetItemByName(targetBoneIndexes[i])
 		localMatrix := resultMatrixes[i]
 		// 初期位置行列を掛けてグローバル行列を作成
 		boneDeltas.SetItem(bone.Name, frame, NewBoneDelta(
@@ -532,7 +531,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 func (bfs *BoneFrames) getAnimatedBoneNames(
 	model *pmx.PmxModel,
 	boneNames []string,
-) (map[string]mcore.Int, map[mcore.Int]string) {
+) (map[string]int, map[int]string) {
 	// ボーン名の存在チェック用マップ
 	exists := make(map[string]struct{})
 
@@ -550,17 +549,16 @@ func (bfs *BoneFrames) getAnimatedBoneNames(
 			}
 		}
 
-		resultBoneNames := make(map[string]mcore.Int)
-		resultBoneIndexes := make(map[mcore.Int]string)
+		resultBoneNames := make(map[string]int)
+		resultBoneIndexes := make(map[int]string)
 
 		// 変形階層・ボーンINDEXでソート
 		n := 0
 		for _, boneIndex := range model.Bones.GetLayerIndexes() {
 			bone := model.Bones.GetItem(boneIndex)
 			if _, ok := exists[bone.Name]; ok {
-				nn := mcore.NewInt(n)
-				resultBoneNames[bone.Name] = nn
-				resultBoneIndexes[nn] = bone.Name
+				resultBoneNames[bone.Name] = n
+				resultBoneIndexes[n] = bone.Name
 				n++
 			}
 		}
@@ -574,10 +572,10 @@ func (bfs *BoneFrames) getAnimatedBoneNames(
 
 // ボーン変形行列を求める
 func (bfs *BoneFrames) getBoneMatrixes(
-	frame mcore.Float32,
+	frame float32,
 	model *pmx.PmxModel,
-	targetBoneNames map[string]mcore.Int,
-	targetBoneIndexes map[mcore.Int]string,
+	targetBoneNames map[string]int,
+	targetBoneIndexes map[int]string,
 	isCalcMorph bool,
 ) ([]*mmath.MMat4, []*mmath.MMat4, []*mmath.MMat4, []*mmath.MQuaternion) {
 	boneCount := len(targetBoneNames)
@@ -605,7 +603,7 @@ func (bfs *BoneFrames) getBoneMatrixes(
 				if j >= boneCount {
 					break
 				}
-				boneName := targetBoneIndexes[mcore.NewInt(j)]
+				boneName := targetBoneIndexes[j]
 				// ボーンの移動位置、回転角度、拡大率を取得
 				positions[j] = bfs.getPosition(frame, boneName, model, isCalcMorph, 0)
 				rotWithEffect, rotFk := bfs.getRotation(frame, boneName, model, isCalcMorph, 0)
@@ -622,7 +620,7 @@ func (bfs *BoneFrames) getBoneMatrixes(
 
 // 該当キーフレにおけるボーンの移動位置
 func (bfs *BoneFrames) getPosition(
-	frame mcore.Float32,
+	frame float32,
 	boneName string,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
@@ -653,8 +651,8 @@ func (bfs *BoneFrames) getPosition(
 
 // 付与親を加味した移動位置
 func (bfs *BoneFrames) getPositionWithEffect(
-	frame mcore.Float32,
-	boneIndex mcore.Int,
+	frame float32,
+	boneIndex int,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
 	loop int,
@@ -685,7 +683,7 @@ func (bfs *BoneFrames) getPositionWithEffect(
 
 // 該当キーフレにおけるボーンの回転角度
 func (bfs *BoneFrames) getRotation(
-	frame mcore.Float32,
+	frame float32,
 	boneName string,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
@@ -741,8 +739,8 @@ func (bfs *BoneFrames) getRotation(
 
 // 付与親を加味した回転角度
 func (bfs *BoneFrames) getRotationWithEffect(
-	frame mcore.Float32,
-	boneIndex mcore.Int,
+	frame float32,
+	boneIndex int,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
 	loop int,
@@ -778,7 +776,7 @@ func (bfs *BoneFrames) getRotationWithEffect(
 
 // 該当キーフレにおけるボーンの拡大率
 func (bfs *BoneFrames) getScale(
-	frame mcore.Float32,
+	frame float32,
 	boneName string,
 	model *pmx.PmxModel,
 	isCalcMorph bool,

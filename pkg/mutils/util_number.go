@@ -2,8 +2,8 @@ package mutils
 
 import (
 	"math"
+	"slices"
 	"sort"
-
 )
 
 func BoolToInt(b bool) int32 {
@@ -11,6 +11,21 @@ func BoolToInt(b bool) int32 {
 		return 1
 	}
 	return 0
+}
+
+// slices.Contains の高速版
+func Contains[S ~[]E, E comparable](s S, v E) bool {
+	if len(s) <= 20 {
+		return slices.Contains(s, v)
+	}
+
+	set := make(map[E]bool, len(s))
+	for _, s := range s {
+		set[s] = true
+	}
+
+	_, exists := set[v]
+	return exists
 }
 
 // 中央値計算

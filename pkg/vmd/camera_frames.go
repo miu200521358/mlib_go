@@ -1,56 +1,49 @@
 package vmd
 
 import (
+	"slices"
+
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 
 )
 
 type CameraFrames struct {
 	*mcore.IndexFloatModelCorrection[*CameraFrame]
-	RegisteredIndexes *mcore.TreeIndexes[mcore.Float32] // 登録対象キーフレリスト
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewCameraFrames() *CameraFrames {
 	return &CameraFrames{
 		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*CameraFrame](),
-		RegisteredIndexes:         mcore.NewTreeIndexes[mcore.Float32](),
+		RegisteredIndexes:         []float32{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (cfs *CameraFrames) GetRangeIndexes(index mcore.Float32) (mcore.Float32, mcore.Float32) {
-	if cfs.RegisteredIndexes.IsEmpty() {
-		return 0.0, 0.0
-	}
+func (cfs *CameraFrames) GetRangeIndexes(index float32) (float32, float32) {
 
-	nowIndexes := cfs.RegisteredIndexes.Search(index)
-	if nowIndexes != nil {
-		return index, index
-	}
+	prevIndex := float32(0)
+	nextIndex := index
 
-	var prevIndex, nextIndex mcore.Float32
-
-	prevIndexes := cfs.RegisteredIndexes.SearchLeft(index)
-	nextIndexes := cfs.RegisteredIndexes.SearchRight(index)
-
-	if prevIndexes == nil {
-		prevIndex = mcore.NewFloat32(0)
+	if idx := mutils.SearchFloat32s(cfs.Indexes, index); idx == 0 {
+		prevIndex = 0.0
 	} else {
-		prevIndex = prevIndexes.Value
+		prevIndex = cfs.Indexes[idx-1]
 	}
 
-	if nextIndexes == nil {
-		nextIndex = index
+	if idx := mutils.SearchFloat32s(cfs.Indexes, index); idx == len(cfs.Indexes) {
+		nextIndex = slices.Max(cfs.Indexes)
 	} else {
-		nextIndex = nextIndexes.Value
+		nextIndex = cfs.Indexes[idx]
 	}
 
 	return prevIndex, nextIndex
 }
 
 // キーフレ計算結果を返す
-func (cfs *CameraFrames) GetItem(index mcore.Float32) *CameraFrame {
+func (cfs *CameraFrames) GetItem(index float32) *CameraFrame {
 	if val, ok := cfs.Data[index]; ok {
 		return val
 	}
@@ -58,7 +51,7 @@ func (cfs *CameraFrames) GetItem(index mcore.Float32) *CameraFrame {
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := cfs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && cfs.Indexes.Contains(nextIndex) {
+	if prevIndex == nextIndex && slices.Contains(cfs.Indexes, nextIndex) {
 		nextCf := cfs.Data[nextIndex]
 		copied := &CameraFrame{
 			BaseFrame:        NewVmdBaseFrame(index),
@@ -74,12 +67,12 @@ func (cfs *CameraFrames) GetItem(index mcore.Float32) *CameraFrame {
 	}
 
 	var prevCf, nextCf *CameraFrame
-	if cfs.Indexes.Contains(prevIndex) {
+	if slices.Contains(cfs.Indexes, prevIndex) {
 		prevCf = cfs.Data[prevIndex]
 	} else {
 		prevCf = NewCameraFrame(index)
 	}
-	if cfs.Indexes.Contains(nextIndex) {
+	if slices.Contains(cfs.Indexes, nextIndex) {
 		nextCf = cfs.Data[nextIndex]
 	} else {
 		nextCf = NewCameraFrame(index)
@@ -87,7 +80,7 @@ func (cfs *CameraFrames) GetItem(index mcore.Float32) *CameraFrame {
 
 	cf := NewCameraFrame(index)
 
-	xy, yy, zy, ry, dy, vy := nextCf.Curves.Evaluate(float32(prevIndex), float32(index), float32(nextIndex))
+	xy, yy, zy, ry, dy, vy := nextCf.Curves.Evaluate(prevIndex, index, nextIndex)
 
 	qq := prevCf.Rotation.GetQuaternion().Slerp(nextCf.Rotation.GetQuaternion(), ry)
 	cf.Rotation.SetQuaternion(qq)
@@ -105,34 +98,33 @@ func (cfs *CameraFrames) GetItem(index mcore.Float32) *CameraFrame {
 
 // bf.Registered が true の場合、補間曲線を分割して登録する
 func (cfs *CameraFrames) Append(value *CameraFrame) {
-	if !cfs.Indexes.Contains(value.Index) {
-		cfs.Indexes.Insert(value.Index)
+	if !slices.Contains(cfs.Indexes, value.Index) {
+		cfs.Indexes = append(cfs.Indexes, value.Index)
+		mutils.SortFloat32s(cfs.Indexes)
 	}
 
 	if value.Registered {
-		if !cfs.RegisteredIndexes.Contains(value.Index) {
-			cfs.RegisteredIndexes.Insert(value.Index)
+		if !slices.Contains(cfs.RegisteredIndexes, value.Index) {
+			cfs.RegisteredIndexes = append(cfs.RegisteredIndexes, value.Index)
+			mutils.SortFloat32s(cfs.RegisteredIndexes)
 		}
 		// 補間曲線を分割する
 		prevIndex, nextIndex := cfs.GetRangeIndexes(value.Index)
 		if nextIndex > value.Index && prevIndex < value.Index {
 			nextCf := cfs.Data[nextIndex]
-			pi := float32(prevIndex)
-			vi := float32(value.Index)
-			ni := float32(nextIndex)
 			// 自分の前後にフレームがある場合、分割する
 			value.Curves.TranslateX, nextCf.Curves.TranslateX =
-				mmath.SplitCurve(nextCf.Curves.TranslateX, pi, vi, ni)
+				mmath.SplitCurve(nextCf.Curves.TranslateX, prevIndex, value.Index, nextIndex)
 			value.Curves.TranslateY, nextCf.Curves.TranslateY =
-				mmath.SplitCurve(nextCf.Curves.TranslateY, pi, vi, ni)
+				mmath.SplitCurve(nextCf.Curves.TranslateY, prevIndex, value.Index, nextIndex)
 			value.Curves.TranslateZ, nextCf.Curves.TranslateZ =
-				mmath.SplitCurve(nextCf.Curves.TranslateZ, pi, vi, ni)
+				mmath.SplitCurve(nextCf.Curves.TranslateZ, prevIndex, value.Index, nextIndex)
 			value.Curves.Rotate, nextCf.Curves.Rotate =
-				mmath.SplitCurve(nextCf.Curves.Rotate, pi, vi, ni)
+				mmath.SplitCurve(nextCf.Curves.Rotate, prevIndex, value.Index, nextIndex)
 			value.Curves.Distance, nextCf.Curves.Distance =
-				mmath.SplitCurve(nextCf.Curves.Distance, pi, vi, ni)
+				mmath.SplitCurve(nextCf.Curves.Distance, prevIndex, value.Index, nextIndex)
 			value.Curves.ViewOfAngle, nextCf.Curves.ViewOfAngle =
-				mmath.SplitCurve(nextCf.Curves.ViewOfAngle, pi, vi, ni)
+				mmath.SplitCurve(nextCf.Curves.ViewOfAngle, prevIndex, value.Index, nextIndex)
 		}
 	}
 

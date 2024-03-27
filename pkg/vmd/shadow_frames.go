@@ -1,55 +1,49 @@
 package vmd
 
 import (
+	"slices"
+
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type ShadowFrames struct {
 	*mcore.IndexFloatModelCorrection[*ShadowFrame]
-	RegisteredIndexes *mcore.TreeIndexes[mcore.Float32] // 登録対象キーフレリスト
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewShadowFrames() *ShadowFrames {
 	return &ShadowFrames{
 		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*ShadowFrame](),
-		RegisteredIndexes:         mcore.NewTreeIndexes[mcore.Float32](),
+		RegisteredIndexes:         []float32{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (sfs *ShadowFrames) GetRangeIndexes(index mcore.Float32) (mcore.Float32, mcore.Float32) {
-	if sfs.RegisteredIndexes.IsEmpty() {
-		return 0.0, 0.0
-	}
+func (sfs *ShadowFrames) GetRangeIndexes(index float32) (float32, float32) {
 
-	nowIndexes := sfs.RegisteredIndexes.Search(index)
-	if nowIndexes != nil {
-		return index, index
-	}
+	prevIndex := float32(0)
+	nextIndex := index
 
-	var prevIndex, nextIndex mcore.Float32
-
-	prevIndexes := sfs.RegisteredIndexes.SearchLeft(index)
-	nextIndexes := sfs.RegisteredIndexes.SearchRight(index)
-
-	if prevIndexes == nil {
-		prevIndex = mcore.NewFloat32(0)
+	if idx := mutils.SearchFloat32s(sfs.Indexes, index); idx == 0 {
+		prevIndex = 0
 	} else {
-		prevIndex = prevIndexes.Value
+		prevIndex = sfs.Indexes[idx-1]
 	}
 
-	if nextIndexes == nil {
-		nextIndex = index
+	if idx := mutils.SearchFloat32s(sfs.Indexes, index); idx == len(sfs.Indexes) {
+		nextIndex = slices.Max(sfs.Indexes)
 	} else {
-		nextIndex = nextIndexes.Value
+		nextIndex = sfs.Indexes[idx]
 	}
 
 	return prevIndex, nextIndex
 }
 
 // キーフレ計算結果を返す
-func (sfs *ShadowFrames) GetItem(index mcore.Float32) *ShadowFrame {
+func (sfs *ShadowFrames) GetItem(index float32) *ShadowFrame {
 	if val, ok := sfs.Data[index]; ok {
 		return val
 	}
@@ -57,7 +51,7 @@ func (sfs *ShadowFrames) GetItem(index mcore.Float32) *ShadowFrame {
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := sfs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && sfs.Indexes.Contains(nextIndex) {
+	if prevIndex == nextIndex && slices.Contains(sfs.Indexes, nextIndex) {
 		nextSf := sfs.Data[nextIndex]
 		copied := &ShadowFrame{
 			BaseFrame: NewVmdBaseFrame(index),
@@ -67,12 +61,12 @@ func (sfs *ShadowFrames) GetItem(index mcore.Float32) *ShadowFrame {
 	}
 
 	var prevSf, nextSf *ShadowFrame
-	if sfs.Indexes.Contains(prevIndex) {
+	if slices.Contains(sfs.Indexes, prevIndex) {
 		prevSf = sfs.Data[prevIndex]
 	} else {
 		prevSf = NewShadowFrame(index)
 	}
-	if sfs.Indexes.Contains(nextIndex) {
+	if slices.Contains(sfs.Indexes, nextIndex) {
 		nextSf = sfs.Data[nextIndex]
 	} else {
 		nextSf = NewShadowFrame(index)
@@ -87,12 +81,14 @@ func (sfs *ShadowFrames) GetItem(index mcore.Float32) *ShadowFrame {
 }
 
 func (sfs *ShadowFrames) Append(value *ShadowFrame) {
-	if !sfs.Indexes.Contains(value.Index) {
-		sfs.Indexes.Insert(value.Index)
+	if !slices.Contains(sfs.Indexes, value.Index) {
+		sfs.Indexes = append(sfs.Indexes, value.Index)
+		mutils.SortFloat32s(sfs.Indexes)
 	}
 	if value.Registered {
-		if !sfs.RegisteredIndexes.Contains(value.Index) {
-			sfs.RegisteredIndexes.Insert(value.Index)
+		if !slices.Contains(sfs.RegisteredIndexes, value.Index) {
+			sfs.RegisteredIndexes = append(sfs.RegisteredIndexes, value.Index)
+			mutils.SortFloat32s(sfs.RegisteredIndexes)
 		}
 	}
 

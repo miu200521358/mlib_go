@@ -8,7 +8,7 @@ type ShadowFrame struct {
 	Distance   float64 // 影範囲距離
 }
 
-func NewShadowFrame(index mcore.Float32) *ShadowFrame {
+func NewShadowFrame(index float32) *ShadowFrame {
 	return &ShadowFrame{
 		BaseFrame:  NewVmdBaseFrame(index),
 		ShadowMode: 0,
@@ -16,7 +16,7 @@ func NewShadowFrame(index mcore.Float32) *ShadowFrame {
 	}
 }
 
-func (sf *ShadowFrame) Copy() mcore.IIndexFloatModel {
+func (sf *ShadowFrame) Copy() mcore.IndexFloatModelInterface {
 	vv := &ShadowFrame{
 		ShadowMode: sf.ShadowMode,
 		Distance:   sf.Distance,

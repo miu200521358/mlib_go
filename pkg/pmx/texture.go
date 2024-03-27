@@ -11,7 +11,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 // テクスチャ種別
@@ -86,7 +85,7 @@ func NewTexture() *Texture {
 	}
 }
 
-func (t *Texture) Copy() mcore.IIndexIntModel {
+func (t *Texture) Copy() mcore.IndexModelInterface {
 	copied := NewTexture()
 	copier.CopyWithOption(copied, t, copier.Option{DeepCopy: true})
 	return copied
@@ -236,7 +235,7 @@ func (t *ToonTextures) initGl(
 		filePath := fmt.Sprintf("resources/toon/toon%02d.bmp", i+1)
 
 		toon := NewTexture()
-		toon.Index = mcore.NewInt(i)
+		toon.Index = i
 		toon.Name = filePath
 		toon.TextureType = TEXTURE_TYPE_TOON
 		toon.Path = filePath

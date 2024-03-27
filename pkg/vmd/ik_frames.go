@@ -1,55 +1,47 @@
 package vmd
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"slices"
 
+	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type IkFrames struct {
 	*mcore.IndexFloatModelCorrection[*IkFrame]
-	RegisteredIndexes *mcore.TreeIndexes[mcore.Float32] // 登録対象キーフレリスト
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewIkFrames() *IkFrames {
 	return &IkFrames{
 		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*IkFrame](),
-		RegisteredIndexes:         mcore.NewTreeIndexes[mcore.Float32](),
+		RegisteredIndexes:         []float32{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (ifs *IkFrames) GetRangeIndexes(index mcore.Float32) (mcore.Float32, mcore.Float32) {
-	if ifs.RegisteredIndexes.IsEmpty() {
-		return 0.0, 0.0
-	}
+func (ifs *IkFrames) GetRangeIndexes(index float32) (float32, float32) {
 
-	nowIndexes := ifs.RegisteredIndexes.Search(index)
-	if nowIndexes != nil {
-		return index, index
-	}
+	prevIndex := float32(0)
+	nextIndex := index
 
-	var prevIndex, nextIndex mcore.Float32
-
-	prevIndexes := ifs.RegisteredIndexes.SearchLeft(index)
-	nextIndexes := ifs.RegisteredIndexes.SearchRight(index)
-
-	if prevIndexes == nil {
-		prevIndex = mcore.NewFloat32(0)
+	if idx := mutils.SearchFloat32s(ifs.Indexes, index); idx == 0 {
+		prevIndex = 0
 	} else {
-		prevIndex = prevIndexes.Value
+		prevIndex = ifs.Indexes[idx-1]
 	}
 
-	if nextIndexes == nil {
-		nextIndex = index
+	if idx := mutils.SearchFloat32s(ifs.Indexes, index); idx == len(ifs.Indexes) {
+		nextIndex = slices.Max(ifs.Indexes)
 	} else {
-		nextIndex = nextIndexes.Value
+		nextIndex = ifs.Indexes[idx]
 	}
 
 	return prevIndex, nextIndex
 }
 
 // キーフレ計算結果を返す
-func (ifs *IkFrames) GetItem(index mcore.Float32) *IkFrame {
+func (ifs *IkFrames) GetItem(index float32) *IkFrame {
 	if val, ok := ifs.Data[index]; ok {
 		return val
 	}
@@ -57,14 +49,14 @@ func (ifs *IkFrames) GetItem(index mcore.Float32) *IkFrame {
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := ifs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && ifs.Indexes.Contains(nextIndex) {
+	if prevIndex == nextIndex && slices.Contains(ifs.Indexes, nextIndex) {
 		nextIf := ifs.Data[nextIndex]
 		copied := nextIf.Copy()
 		return copied.(*IkFrame)
 	}
 
 	var prevIf *IkFrame
-	if ifs.Indexes.Contains(prevIndex) {
+	if slices.Contains(ifs.Indexes, prevIndex) {
 		prevIf = ifs.Data[prevIndex]
 	} else {
 		prevIf = NewIkFrame(index)
@@ -75,12 +67,14 @@ func (ifs *IkFrames) GetItem(index mcore.Float32) *IkFrame {
 }
 
 func (ifs *IkFrames) Append(value *IkFrame) {
-	if !ifs.Indexes.Contains(value.Index) {
-		ifs.Indexes.Insert(value.Index)
+	if !slices.Contains(ifs.Indexes, value.Index) {
+		ifs.Indexes = append(ifs.Indexes, value.Index)
+		mutils.SortFloat32s(ifs.Indexes)
 	}
 	if value.Registered {
-		if !ifs.RegisteredIndexes.Contains(value.Index) {
-			ifs.RegisteredIndexes.Insert(value.Index)
+		if !slices.Contains(ifs.RegisteredIndexes, value.Index) {
+			ifs.RegisteredIndexes = append(ifs.RegisteredIndexes, value.Index)
+			mutils.SortFloat32s(ifs.RegisteredIndexes)
 		}
 	}
 

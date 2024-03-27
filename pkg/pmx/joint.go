@@ -7,7 +7,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-
 )
 
 type JointParam struct {
@@ -33,8 +32,8 @@ func NewJointParam() *JointParam {
 type Joint struct {
 	*mcore.IndexNameModel
 	JointType       byte             // Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
-	RigidbodyIndexA mcore.Int        // 関連剛体AのIndex
-	RigidbodyIndexB mcore.Int        // 関連剛体BのIndex
+	RigidbodyIndexA int              // 関連剛体AのIndex
+	RigidbodyIndexB int              // 関連剛体BのIndex
 	Position        *mmath.MVec3     // 位置(x,y,z)
 	Rotation        *mmath.MRotation // 回転
 	JointParam      *JointParam      // ジョイントパラメーター
@@ -56,7 +55,7 @@ func NewJoint() *Joint {
 	}
 }
 
-func (j *Joint) Copy() mcore.IIndexNameModel {
+func (j *Joint) Copy() mcore.IndexNameModelInterface {
 	copied := NewJoint()
 	copier.CopyWithOption(copied, j, copier.Option{DeepCopy: true})
 	return copied

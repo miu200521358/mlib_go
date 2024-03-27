@@ -8,7 +8,7 @@ type BaseFrame struct {
 	Read       bool // VMDファイルから読み込んだキーフレであるか
 }
 
-func NewVmdBaseFrame(index mcore.Float32) *BaseFrame {
+func NewVmdBaseFrame(index float32) *BaseFrame {
 	return &BaseFrame{
 		IndexFloatModel: &mcore.IndexFloatModel{Index: index},
 		Registered:      false,

@@ -166,13 +166,13 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	{
 		f := model.Faces.GetItem(19117)
 		expectedFaceVertexIndexes := []int{8857, 8893, 8871}
-		if int(f.VertexIndexes[0]) != expectedFaceVertexIndexes[0] {
+		if f.VertexIndexes[0] != expectedFaceVertexIndexes[0] {
 			t.Errorf("Expected Deform to be %v, got %v", expectedFaceVertexIndexes[0], f.VertexIndexes[0])
 		}
-		if int(f.VertexIndexes[1]) != expectedFaceVertexIndexes[1] {
+		if f.VertexIndexes[1] != expectedFaceVertexIndexes[1] {
 			t.Errorf("Expected Deform to be %v, got %v", expectedFaceVertexIndexes[1], f.VertexIndexes[1])
 		}
-		if int(f.VertexIndexes[2]) != expectedFaceVertexIndexes[2] {
+		if f.VertexIndexes[2] != expectedFaceVertexIndexes[2] {
 			t.Errorf("Expected Deform to be %v, got %v", expectedFaceVertexIndexes[2], f.VertexIndexes[2])
 		}
 	}
@@ -220,11 +220,11 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected EdgeSize to be %v, got %v", expectedEdgeSize, m.EdgeSize)
 		}
 		expectedTextureIndex := 22
-		if int(m.TextureIndex) != expectedTextureIndex {
+		if m.TextureIndex != expectedTextureIndex {
 			t.Errorf("Expected TextureIndex to be %v, got %v", expectedTextureIndex, m.TextureIndex)
 		}
 		expectedSphereTextureIndex := 4
-		if int(m.SphereTextureIndex) != expectedSphereTextureIndex {
+		if m.SphereTextureIndex != expectedSphereTextureIndex {
 			t.Errorf("Expected SphereTextureIndex to be %v, got %v", expectedSphereTextureIndex, m.SphereTextureIndex)
 		}
 		expectedSphereMode := SPHERE_MODE_ADDITION
@@ -236,7 +236,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected ToonSharingFlag to be %v, got %v", expectedToonSharingFlag, m.ToonSharingFlag)
 		}
 		expectedToonTextureIndex := 21
-		if int(m.ToonTextureIndex) != expectedToonTextureIndex {
+		if m.ToonTextureIndex != expectedToonTextureIndex {
 			t.Errorf("Expected ToonTextureIndex to be %v, got %v", expectedToonTextureIndex, m.ToonTextureIndex)
 		}
 		expectedMemo := ""
@@ -264,7 +264,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
 		expectedParentBoneIndex := 3
-		if int(b.ParentIndex) != expectedParentBoneIndex {
+		if b.ParentIndex != expectedParentBoneIndex {
 			t.Errorf("Expected ParentBoneIndex to be %v, got %v", expectedParentBoneIndex, b.ParentIndex)
 		}
 		expectedLayer := 0
@@ -280,7 +280,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected TailPosition to be %v, got %v", expectedTailPosition, b.TailPosition)
 		}
 		expectedTailIndex := 6
-		if int(b.TailIndex) != expectedTailIndex {
+		if b.TailIndex != expectedTailIndex {
 			t.Errorf("Expected TailIndex to be %v, got %v", expectedTailIndex, b.TailIndex)
 		}
 	}
@@ -300,7 +300,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
 		expectedParentBoneIndex := 9
-		if int(b.ParentIndex) != expectedParentBoneIndex {
+		if b.ParentIndex != expectedParentBoneIndex {
 			t.Errorf("Expected ParentBoneIndex to be %v, got %v", expectedParentBoneIndex, b.ParentIndex)
 		}
 		expectedLayer := 0
@@ -316,11 +316,11 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected TailPosition to be %v, got %v", expectedTailPosition, b.TailPosition)
 		}
 		expectedTailIndex := -1
-		if int(b.TailIndex) != expectedTailIndex {
+		if b.TailIndex != expectedTailIndex {
 			t.Errorf("Expected TailIndex to be %v, got %v", expectedTailIndex, b.TailIndex)
 		}
 		expectedEffectBoneIndex := 10
-		if int(b.EffectIndex) != expectedEffectBoneIndex {
+		if b.EffectIndex != expectedEffectBoneIndex {
 			t.Errorf("Expected EffectorBoneIndex to be %v, got %v", expectedEffectBoneIndex, b.EffectIndex)
 		}
 		expectedEffectFactor := 0.3
@@ -344,7 +344,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
 		expectedParentBoneIndex := 27
-		if int(b.ParentIndex) != expectedParentBoneIndex {
+		if b.ParentIndex != expectedParentBoneIndex {
 			t.Errorf("Expected ParentBoneIndex to be %v, got %v", expectedParentBoneIndex, b.ParentIndex)
 		}
 		expectedLayer := 0
@@ -360,7 +360,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected TailPosition to be %v, got %v", expectedTailPosition, b.TailPosition)
 		}
 		expectedTailIndex := -1
-		if int(b.TailIndex) != expectedTailIndex {
+		if b.TailIndex != expectedTailIndex {
 			t.Errorf("Expected TailIndex to be %v, got %v", expectedTailIndex, b.TailIndex)
 		}
 		expectedFixedAxis := &mmath.MVec3{0.819152, -0.5735764, -4.355049e-15}
@@ -392,7 +392,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
 		expectedParentBoneIndex := 97
-		if int(b.ParentIndex) != expectedParentBoneIndex {
+		if b.ParentIndex != expectedParentBoneIndex {
 			t.Errorf("Expected ParentBoneIndex to be %v, got %v", expectedParentBoneIndex, b.ParentIndex)
 		}
 		expectedLayer := 0
@@ -408,11 +408,11 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected TailPosition to be %v, got %v", expectedTailPosition, b.TailPosition)
 		}
 		expectedTailIndex := -1
-		if int(b.TailIndex) != expectedTailIndex {
+		if b.TailIndex != expectedTailIndex {
 			t.Errorf("Expected TailIndex to be %v, got %v", expectedTailIndex, b.TailIndex)
 		}
 		expectedIkTargetBoneIndex := 95
-		if int(b.Ik.BoneIndex) != expectedIkTargetBoneIndex {
+		if b.Ik.BoneIndex != expectedIkTargetBoneIndex {
 			t.Errorf("Expected IkTargetBoneIndex to be %v, got %v", expectedIkTargetBoneIndex, b.Ik.BoneIndex)
 		}
 		expectedIkLoopCount := 40
@@ -426,7 +426,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 		{
 			il := b.Ik.Links[0]
 			expectedLinkBoneIndex := 94
-			if int(il.BoneIndex) != expectedLinkBoneIndex {
+			if il.BoneIndex != expectedLinkBoneIndex {
 				t.Errorf("Expected LinkBoneIndex to be %v, got %v", expectedLinkBoneIndex, il.BoneIndex)
 			}
 			expectedAngleLimit := true
@@ -445,7 +445,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 		{
 			il := b.Ik.Links[1]
 			expectedLinkBoneIndex := 93
-			if int(il.BoneIndex) != expectedLinkBoneIndex {
+			if il.BoneIndex != expectedLinkBoneIndex {
 				t.Errorf("Expected LinkBoneIndex to be %v, got %v", expectedLinkBoneIndex, il.BoneIndex)
 			}
 			expectedAngleLimit := false
@@ -476,7 +476,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 		{
 			o := m.Offsets[30].(*VertexMorphOffset)
 			expectedVertexIndex := 19329
-			if int(o.VertexIndex) != expectedVertexIndex {
+			if o.VertexIndex != expectedVertexIndex {
 				t.Errorf("Expected VertexIndex to be %v, got %v", expectedVertexIndex, o.VertexIndex)
 			}
 			expectedPosition := &mmath.MVec3{-0.01209146, 0.1320038, -0.0121327}
@@ -507,7 +507,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 		{
 			o := m.Offsets[1].(*BoneMorphOffset)
 			expectedBoneIndex := 17
-			if int(o.BoneIndex) != expectedBoneIndex {
+			if o.BoneIndex != expectedBoneIndex {
 				t.Errorf("Expected BoneIndex to be %v, got %v", expectedBoneIndex, o.BoneIndex)
 			}
 			expectedPosition := &mmath.MVec3{0.0, 0.0, 0.0}
@@ -542,7 +542,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 		{
 			o := m.Offsets[3].(*MaterialMorphOffset)
 			expectedMaterialIndex := 12
-			if int(o.MaterialIndex) != expectedMaterialIndex {
+			if o.MaterialIndex != expectedMaterialIndex {
 				t.Errorf("Expected MaterialIndex to be %v, got %v", expectedMaterialIndex, o.MaterialIndex)
 			}
 			expectedCalcMode := CALC_MODE_ADDITION
@@ -605,7 +605,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 		{
 			o := m.Offsets[2].(*GroupMorphOffset)
 			expectedMorphIndex := 21
-			if int(o.MorphIndex) != expectedMorphIndex {
+			if o.MorphIndex != expectedMorphIndex {
 				t.Errorf("Expected MorphIndex to be %v, got %v", expectedMorphIndex, o.MorphIndex)
 			}
 			expectedFactor := 0.3
@@ -640,7 +640,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 				t.Errorf("Expected DisplayType to be %v, got %v", expectedDisplayType, r.DisplayType)
 			}
 			expectedIndex := 0
-			if int(r.DisplayIndex) != expectedIndex {
+			if r.DisplayIndex != expectedIndex {
 				t.Errorf("Expected DisplayIndex to be %v, got %v", expectedIndex, r.DisplayIndex)
 			}
 		}
@@ -671,7 +671,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 				t.Errorf("Expected DisplayType to be %v, got %v", expectedDisplayType, r.DisplayType)
 			}
 			expectedIndex := 142
-			if int(r.DisplayIndex) != expectedIndex {
+			if r.DisplayIndex != expectedIndex {
 				t.Errorf("Expected DisplayIndex to be %v, got %v", expectedIndex, r.DisplayIndex)
 			}
 		}
@@ -702,7 +702,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 				t.Errorf("Expected DisplayType to be %v, got %v", expectedDisplayType, r.DisplayType)
 			}
 			expectedIndex := 81
-			if int(r.DisplayIndex) != expectedIndex {
+			if r.DisplayIndex != expectedIndex {
 				t.Errorf("Expected DisplayIndex to be %v, got %v", expectedIndex, r.DisplayIndex)
 			}
 		}
@@ -719,7 +719,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
 		}
 		expectedBoneIndex := 61
-		if int(b.BoneIndex) != expectedBoneIndex {
+		if b.BoneIndex != expectedBoneIndex {
 			t.Errorf("Expected BoneIndex to be %v, got %v", expectedBoneIndex, b.BoneIndex)
 		}
 		expectedGroupIndex := byte(2)
@@ -785,11 +785,11 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, j.EnglishName)
 		}
 		expectedRigidBodyIndexA := 5
-		if int(j.RigidbodyIndexA) != expectedRigidBodyIndexA {
+		if j.RigidbodyIndexA != expectedRigidBodyIndexA {
 			t.Errorf("Expected RigidBodyIndexA to be %v, got %v", expectedRigidBodyIndexA, j.RigidbodyIndexA)
 		}
 		expectedRigidBodyIndexB := 45
-		if int(j.RigidbodyIndexB) != expectedRigidBodyIndexB {
+		if j.RigidbodyIndexB != expectedRigidBodyIndexB {
 			t.Errorf("Expected RigidBodyIndexB to be %v, got %v", expectedRigidBodyIndexB, j.RigidbodyIndexB)
 		}
 		expectedPosition := &mmath.MVec3{-1.189768, 18.56266, 0.07277258}

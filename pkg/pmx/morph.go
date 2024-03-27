@@ -5,7 +5,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 // MorphPanel 操作パネル
@@ -68,7 +67,7 @@ type TMorphOffset interface {
 
 // VertexMorphOffset represents a vertex morph.
 type VertexMorphOffset struct {
-	VertexIndex mcore.Int          // 頂点INDEX
+	VertexIndex int          // 頂点INDEX
 	Position    *mmath.MVec3 // 座標オフセット量(x,y,z)
 }
 
@@ -76,7 +75,7 @@ func (v *VertexMorphOffset) GetType() int {
 	return int(MORPH_TYPE_VERTEX)
 }
 
-func NewVertexMorph(vertexIndex mcore.Int, position *mmath.MVec3) *VertexMorphOffset {
+func NewVertexMorph(vertexIndex int, position *mmath.MVec3) *VertexMorphOffset {
 	return &VertexMorphOffset{
 		VertexIndex: vertexIndex,
 		Position:    position,
@@ -85,7 +84,7 @@ func NewVertexMorph(vertexIndex mcore.Int, position *mmath.MVec3) *VertexMorphOf
 
 // UvMorphOffset represents a UV morph.
 type UvMorphOffset struct {
-	VertexIndex mcore.Int          // 頂点INDEX
+	VertexIndex int          // 頂点INDEX
 	Uv          *mmath.MVec4 // UVオフセット量(x,y,z,w)
 }
 
@@ -93,7 +92,7 @@ func (v *UvMorphOffset) GetType() int {
 	return int(MORPH_TYPE_UV)
 }
 
-func NewUvMorph(vertexIndex mcore.Int, uv *mmath.MVec4) *UvMorphOffset {
+func NewUvMorph(vertexIndex int, uv *mmath.MVec4) *UvMorphOffset {
 	return &UvMorphOffset{
 		VertexIndex: vertexIndex,
 		Uv:          uv,
@@ -102,7 +101,7 @@ func NewUvMorph(vertexIndex mcore.Int, uv *mmath.MVec4) *UvMorphOffset {
 
 // BoneMorphOffset represents a bone morph.
 type BoneMorphOffset struct {
-	BoneIndex     mcore.Int              // ボーンIndex
+	BoneIndex     int              // ボーンIndex
 	Position      *mmath.MVec3     // グローバル移動量(x,y,z)
 	Rotation      *mmath.MRotation // グローバル回転量-クォータニオン(x,y,z,w)
 	Scale         *mmath.MVec3     // グローバル縮尺量(x,y,z) ※システム独自
@@ -115,7 +114,7 @@ func (v *BoneMorphOffset) GetType() int {
 	return int(MORPH_TYPE_BONE)
 }
 
-func NewBoneMorph(boneIndex mcore.Int, position *mmath.MVec3, rotation *mmath.MRotation) *BoneMorphOffset {
+func NewBoneMorph(boneIndex int, position *mmath.MVec3, rotation *mmath.MRotation) *BoneMorphOffset {
 	return &BoneMorphOffset{
 		BoneIndex:     boneIndex,
 		Position:      position,
@@ -129,11 +128,11 @@ func NewBoneMorph(boneIndex mcore.Int, position *mmath.MVec3, rotation *mmath.MR
 
 // GroupMorphOffset represents a group morph.
 type GroupMorphOffset struct {
-	MorphIndex  mcore.Int     // モーフINDEX
+	MorphIndex  int     // モーフINDEX
 	MorphFactor float64 // モーフ変動量
 }
 
-func NewGroupMorph(morphIndex mcore.Int, morphFactor float64) *GroupMorphOffset {
+func NewGroupMorph(morphIndex int, morphFactor float64) *GroupMorphOffset {
 	return &GroupMorphOffset{
 		MorphIndex:  morphIndex,
 		MorphFactor: morphFactor,
@@ -154,7 +153,7 @@ const (
 
 // MaterialMorphOffset represents a material morph.
 type MaterialMorphOffset struct {
-	MaterialIndex       mcore.Int                   // 材質Index -> -1:全材質対象
+	MaterialIndex       int                   // 材質Index -> -1:全材質対象
 	CalcMode            MaterialMorphCalcMode // 0:乗算, 1:加算
 	Diffuse             *mmath.MVec4          // Diffuse (R,G,B,A)
 	Specular            *mmath.MVec4          // SpecularColor (R,G,B, 係数)
@@ -171,7 +170,7 @@ func (v *MaterialMorphOffset) GetType() int {
 }
 
 func NewMaterialMorph(
-	materialIndex mcore.Int,
+	materialIndex int,
 	calcMode MaterialMorphCalcMode,
 	diffuse *mmath.MVec4,
 	specular *mmath.MVec4,
@@ -208,7 +207,7 @@ func NewMorph() *Morph {
 	}
 }
 
-func (m *Morph) Copy() mcore.IIndexNameModel {
+func (m *Morph) Copy() mcore.IndexNameModelInterface {
 	copied := NewMorph()
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied

@@ -17,7 +17,7 @@ const (
 
 type Reference struct {
 	DisplayType  DisplayType // 要素対象 0:ボーン 1:モーフ
-	DisplayIndex mcore.Int         // ボーンIndex or モーフIndex
+	DisplayIndex int         // ボーンIndex or モーフIndex
 }
 
 func NewDisplaySlotReference() *Reference {
@@ -57,7 +57,7 @@ func NewDisplaySlot() *DisplaySlot {
 }
 
 // Copy
-func (v *DisplaySlot) Copy() mcore.IIndexIntModel {
+func (v *DisplaySlot) Copy() mcore.IndexModelInterface {
 	copied := NewDisplaySlot()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied

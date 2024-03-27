@@ -3,7 +3,6 @@ package vmd
 import (
 	"testing"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
@@ -63,7 +62,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.CENTER.String()).GetItem(358)
 
 		// フレーム番号
-		expectedFrameNo := mcore.NewFloat32(358)
+		expectedFrameNo := float32(358)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
@@ -126,7 +125,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.UPPER.String()).GetItem(689)
 
 		// フレーム番号
-		expectedFrameNo := mcore.NewFloat32(689)
+		expectedFrameNo := float32(689)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
@@ -189,7 +188,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Right()).GetItem(384)
 
 		// フレーム番号
-		expectedFrameNo := mcore.NewFloat32(384)
+		expectedFrameNo := float32(384)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
@@ -253,7 +252,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Left()).GetItem(384)
 
 		// フレーム番号
-		expectedFrameNo := mcore.NewFloat32(384)
+		expectedFrameNo := float32(384)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
@@ -276,7 +275,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Left()).GetItem(394)
 
 		// フレーム番号
-		expectedFrameNo := mcore.NewFloat32(394)
+		expectedFrameNo := float32(394)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
@@ -299,7 +298,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Left()).GetItem(412)
 
 		// フレーム番号
-		expectedFrameNo := mcore.NewFloat32(412)
+		expectedFrameNo := float32(412)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}
@@ -322,7 +321,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		bf := motion.BoneFrames.GetItem(pmx.ARM.Right()).GetItem(384)
 
 		// フレーム番号
-		expectedFrameNo := mcore.NewFloat32(384)
+		expectedFrameNo := float32(384)
 		if bf.Index != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.5f, got %.5f", expectedFrameNo, bf.Index)
 		}

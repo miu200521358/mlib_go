@@ -6,6 +6,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type Vertex struct {
@@ -33,7 +34,7 @@ func NewVertex() *Vertex {
 	return v
 }
 
-func (v *Vertex) Copy() mcore.IIndexIntModel {
+func (v *Vertex) Copy() mcore.IndexModelInterface {
 	copied := NewTexture()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied

@@ -14,7 +14,6 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
-	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
@@ -37,8 +36,7 @@ func (ms *ModelSet) Draw(
 	isBoneDebug bool,
 	enablePhysics bool,
 ) {
-	f := mcore.NewFloat32(frame)
-	deltas := ms.Motion.Animate(f, ms.Model)
+	deltas := ms.Motion.Animate(frame, ms.Model)
 
 	var wg sync.WaitGroup
 	wg.Add(3)
@@ -51,7 +49,7 @@ func (ms *ModelSet) Draw(
 
 	go func() {
 		defer wg.Done()
-		boneMatrixes, globalMatrixes, transforms = ms.fetchBoneMatrixes(deltas, f)
+		boneMatrixes, globalMatrixes, transforms = ms.fetchBoneMatrixes(deltas, frame)
 	}()
 
 	go func() {
@@ -72,7 +70,7 @@ func (ms *ModelSet) Draw(
 
 func (ms ModelSet) fetchBoneMatrixes(
 	deltas *vmd.VmdDeltas,
-	frame mcore.Float32,
+	frame float32,
 ) ([]*mgl32.Mat4, []*mmath.MMat4, []*mbt.BtTransform) {
 	boneMatrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
 	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.NameIndexes))
@@ -91,7 +89,7 @@ func (ms ModelSet) fetchBoneMatrixes(
 		for i := chunkStart; i < chunkEnd; i++ {
 			go func(i int) {
 				defer wg.Done()
-				bone := ms.Model.Bones.GetItem(mcore.NewInt(i))
+				bone := ms.Model.Bones.GetItem(i)
 				mat := deltas.Bones.GetItem(bone.Name, frame).LocalMatrix.GL()
 				boneMatrixes[i] = mat
 				globalMatrixes[i] = deltas.Bones.GetItem(bone.Name, frame).GlobalMatrix
@@ -629,10 +627,6 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 		// Maintenance
 		w.SwapBuffers()
 		glfw.PollEvents()
-
-		// if w.frame*w.Physics.Fps >= 100 {
-		// 	break
-		// }
 	}
 	if w != nil && !CheckOpenGLError() && w.ShouldClose() {
 		w.Close(w.Window)

@@ -1,13 +1,11 @@
 package vmd
 
-import "github.com/miu200521358/mlib_go/pkg/mcore"
-
 type MorphFrame struct {
 	*BaseFrame         // キーフレ
 	Ratio      float64 // モーフの割合
 }
 
-func NewMorphFrame(index mcore.Float32) *MorphFrame {
+func NewMorphFrame(index float32) *MorphFrame {
 	return &MorphFrame{
 		BaseFrame: NewVmdBaseFrame(index),
 		Ratio:     0.0,

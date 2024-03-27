@@ -1,9 +1,6 @@
 package vmd
 
-import (
-	"github.com/miu200521358/mlib_go/pkg/mcore"
-	"github.com/miu200521358/mlib_go/pkg/pmx"
-)
+import "github.com/miu200521358/mlib_go/pkg/pmx"
 
 type MorphFrames struct {
 	Data map[string]*MorphNameFrames
@@ -32,7 +29,7 @@ func (mfs *MorphFrames) GetItem(morphName string) *MorphNameFrames {
 }
 
 func (mfs *MorphFrames) Animate(
-	frame mcore.Float32,
+	frame float32,
 	model *pmx.PmxModel,
 	morphNames []string,
 ) *MorphDeltas {
@@ -61,8 +58,8 @@ func (mfs *MorphFrames) Animate(
 	return mds
 }
 
-func (mfs *MorphFrames) GetMaxFrame() mcore.Float32 {
-	maxFno := mcore.Float32(0)
+func (mfs *MorphFrames) GetMaxFrame() float32 {
+	maxFno := float32(0)
 	for _, mnfs := range mfs.Data {
 		fno := mnfs.GetMaxFrame()
 		if fno > maxFno {

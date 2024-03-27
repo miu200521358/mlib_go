@@ -1,9 +1,7 @@
 package vmd
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type BoneFrame struct {
@@ -25,7 +23,7 @@ type BoneFrame struct {
 	IkRegistered       bool             // IK計算済み
 }
 
-func NewBoneFrame(index mcore.Float32) *BoneFrame {
+func NewBoneFrame(index float32) *BoneFrame {
 	return &BoneFrame{
 		BaseFrame:          NewVmdBaseFrame(index),
 		Position:           mmath.NewMVec3(),
