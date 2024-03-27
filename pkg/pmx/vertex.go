@@ -72,13 +72,13 @@ func (v *Vertex) GL() []float32 {
 
 // 頂点リスト
 type Vertices struct {
-	*mcore.IndexModelCorrection[*Vertex]
+	*mcore.IndexModels[*Vertex]
 	ChunkSize int
 }
 
 func NewVertices() *Vertices {
 	return &Vertices{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*Vertex](),
-		ChunkSize:            10000,
+		IndexModels: mcore.NewIndexModelCorrection[*Vertex](),
+		ChunkSize:   10000,
 	}
 }

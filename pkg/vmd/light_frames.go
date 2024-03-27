@@ -9,14 +9,14 @@ import (
 )
 
 type LightFrames struct {
-	*mcore.IndexFloatModelCorrection[*LightFrame]
+	*mcore.IndexFloatModels[*LightFrame]
 	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewLightFrames() *LightFrames {
 	return &LightFrames{
-		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*LightFrame](),
-		RegisteredIndexes:         []float32{},
+		IndexFloatModels:  mcore.NewIndexFloatModelCorrection[*LightFrame](),
+		RegisteredIndexes: []float32{},
 	}
 }
 

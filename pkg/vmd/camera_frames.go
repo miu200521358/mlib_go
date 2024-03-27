@@ -6,18 +6,17 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type CameraFrames struct {
-	*mcore.IndexFloatModelCorrection[*CameraFrame]
+	*mcore.IndexFloatModels[*CameraFrame]
 	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewCameraFrames() *CameraFrames {
 	return &CameraFrames{
-		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*CameraFrame](),
-		RegisteredIndexes:         []float32{},
+		IndexFloatModels:  mcore.NewIndexFloatModelCorrection[*CameraFrame](),
+		RegisteredIndexes: []float32{},
 	}
 }
 

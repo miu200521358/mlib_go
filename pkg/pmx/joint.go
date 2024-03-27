@@ -137,12 +137,12 @@ func (j *Joint) deletePhysics() {
 
 // ジョイントリスト
 type Joints struct {
-	*mcore.IndexNameModelCorrection[*Joint]
+	*mcore.IndexNameModels[*Joint]
 }
 
 func NewJoints() *Joints {
 	return &Joints{
-		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Joint](),
+		IndexNameModels: mcore.NewIndexNameModelCorrection[*Joint](),
 	}
 }
 

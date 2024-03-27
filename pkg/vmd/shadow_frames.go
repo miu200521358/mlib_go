@@ -6,18 +6,17 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type ShadowFrames struct {
-	*mcore.IndexFloatModelCorrection[*ShadowFrame]
+	*mcore.IndexFloatModels[*ShadowFrame]
 	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewShadowFrames() *ShadowFrames {
 	return &ShadowFrames{
-		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*ShadowFrame](),
-		RegisteredIndexes:         []float32{},
+		IndexFloatModels:  mcore.NewIndexFloatModelCorrection[*ShadowFrame](),
+		RegisteredIndexes: []float32{},
 	}
 }
 

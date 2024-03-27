@@ -11,7 +11,7 @@ import (
 )
 
 type MorphNameFrames struct {
-	*mcore.IndexFloatModelCorrection[*MorphFrame]
+	*mcore.IndexFloatModels[*MorphFrame]
 	Name              string       // ボーン名
 	RegisteredIndexes []float32    // 登録対象キーフレリスト
 	lock              sync.RWMutex // マップアクセス制御用
@@ -19,9 +19,9 @@ type MorphNameFrames struct {
 
 func NewMorphNameFrames(name string) *MorphNameFrames {
 	return &MorphNameFrames{
-		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*MorphFrame](),
-		Name:                      name,
-		RegisteredIndexes:         []float32{},
+		IndexFloatModels:  mcore.NewIndexFloatModelCorrection[*MorphFrame](),
+		Name:              name,
+		RegisteredIndexes: []float32{},
 	}
 }
 

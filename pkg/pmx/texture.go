@@ -207,23 +207,23 @@ func (t *Texture) GL(
 
 // テクスチャリスト
 type Textures struct {
-	*mcore.IndexModelCorrection[*Texture]
+	*mcore.IndexModels[*Texture]
 }
 
 func NewTextures() *Textures {
 	return &Textures{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*Texture](),
+		IndexModels: mcore.NewIndexModelCorrection[*Texture](),
 	}
 }
 
 // 共有テクスチャ辞書
 type ToonTextures struct {
-	*mcore.IndexModelCorrection[*Texture]
+	*mcore.IndexModels[*Texture]
 }
 
 func NewToonTextures() *ToonTextures {
 	return &ToonTextures{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*Texture](),
+		IndexModels: mcore.NewIndexModelCorrection[*Texture](),
 	}
 }
 

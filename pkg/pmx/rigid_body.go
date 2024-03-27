@@ -418,12 +418,12 @@ func (r *RigidBody) deletePhysics() {
 
 // 剛体リスト
 type RigidBodies struct {
-	*mcore.IndexNameModelCorrection[*RigidBody]
+	*mcore.IndexNameModels[*RigidBody]
 }
 
 func NewRigidBodies() *RigidBodies {
 	return &RigidBodies{
-		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*RigidBody](),
+		IndexNameModels: mcore.NewIndexNameModelCorrection[*RigidBody](),
 	}
 }
 

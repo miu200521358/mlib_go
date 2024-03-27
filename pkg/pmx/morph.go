@@ -215,11 +215,11 @@ func (m *Morph) Copy() mcore.IIndexNameModel {
 
 // モーフリスト
 type Morphs struct {
-	*mcore.IndexNameModelCorrection[*Morph]
+	*mcore.IndexNameModels[*Morph]
 }
 
 func NewMorphs() *Morphs {
 	return &Morphs{
-		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Morph](),
+		IndexNameModels: mcore.NewIndexNameModelCorrection[*Morph](),
 	}
 }

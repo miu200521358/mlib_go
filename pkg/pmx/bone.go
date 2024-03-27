@@ -354,7 +354,7 @@ func (bone *Bone) setup() {
 
 // ボーンリスト
 type Bones struct {
-	*mcore.IndexNameModelCorrection[*Bone]
+	*mcore.IndexNameModels[*Bone]
 	Vertices           map[int][]int
 	IkTreeIndexes      map[int][]int
 	LayerSortedIndexes map[int]string
@@ -370,18 +370,18 @@ type Bones struct {
 
 func NewBones() *Bones {
 	return &Bones{
-		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Bone](),
-		Vertices:                 make(map[int][]int),
-		IkTreeIndexes:            make(map[int][]int),
-		LayerSortedIndexes:       make(map[int]string),
-		LayerSortedNames:         make(map[string]int),
-		positionVao:              nil,
-		positionIbo:              nil,
-		positionIboCount:         0,
-		normalVao:                nil,
-		normalIbo:                nil,
-		normalIboCount:           0,
-		ChunkSize:                100,
+		IndexNameModels:    mcore.NewIndexNameModelCorrection[*Bone](),
+		Vertices:           make(map[int][]int),
+		IkTreeIndexes:      make(map[int][]int),
+		LayerSortedIndexes: make(map[int]string),
+		LayerSortedNames:   make(map[string]int),
+		positionVao:        nil,
+		positionIbo:        nil,
+		positionIboCount:   0,
+		normalVao:          nil,
+		normalIbo:          nil,
+		normalIboCount:     0,
+		ChunkSize:          100,
 	}
 }
 
