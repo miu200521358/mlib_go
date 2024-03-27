@@ -183,6 +183,9 @@ func (bnfs *BoneNameFrames) Append(value *BoneFrame, isSort bool) {
 				mutils.SortFloat32s(bnfs.RegisteredIndexes)
 			}
 		}
+	}
+
+	if value.Registered && isSort {
 		// 補間曲線を分割する
 		prevIndex, nextIndex := bnfs.GetRangeIndexes(value.Index)
 		if nextIndex > value.Index && prevIndex < value.Index {
