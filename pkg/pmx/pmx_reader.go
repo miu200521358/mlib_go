@@ -2,7 +2,6 @@ package pmx
 
 import (
 	"fmt"
-	"slices"
 
 	"golang.org/x/text/encoding/unicode"
 
@@ -93,7 +92,7 @@ func (r *PmxReader) readHeader(model *PmxModel) error {
 	}
 
 	if model.Signature[:3] != "PMX" ||
-		!slices.Contains([]string{"2.0", "2.1"}, fmt.Sprintf("%.1f", model.Version)) {
+		(fmt.Sprintf("%.1f", model.Version) != "2.0" && fmt.Sprintf("%.1f", model.Version) != "2.1") {
 		// 整合性チェック
 		return fmt.Errorf("PMX2.0/2.1形式外のデータです。signature: %s, version: %.1f ", model.Signature, model.Version)
 	}
@@ -592,7 +591,7 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 				mlog.E("[%d] readMaterials UnpackByte ToonTextureIndex error: %v", i, err)
 				return err
 			}
-			m.ToonTextureIndex = int(toonTextureIndex)
+			m.ToonTextureIndex = mcore.NewInt(int(toonTextureIndex))
 		}
 
 		// 4 + n : TextBuf	| メモ
@@ -1234,7 +1233,7 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 }
 
 // テキストデータを読み取る
-func (r *PmxReader) unpackVertexIndex(model *PmxModel) (int, error) {
+func (r *PmxReader) unpackVertexIndex(model *PmxModel) (mcore.Int, error) {
 	switch model.VertexCountType {
 	case 1:
 		v, err := r.UnpackByte()
@@ -1242,51 +1241,51 @@ func (r *PmxReader) unpackVertexIndex(model *PmxModel) (int, error) {
 			mlog.E("unpackVertexIndex.UnpackByte error: %v", err)
 			return 0, err
 		}
-		return int(v), nil
+		return mcore.NewInt(int(v)), nil
 	case 2:
 		v, err := r.UnpackUShort()
 		if err != nil {
 			mlog.E("unpackVertexIndex.UnpackUShort error: %v", err)
 			return 0, err
 		}
-		return int(v), nil
+		return mcore.NewInt(int(v)), nil
 	case 4:
 		v, err := r.UnpackInt()
 		if err != nil {
 			mlog.E("unpackVertexIndex.UnpackInt error: %v", err)
 			return 0, err
 		}
-		return v, nil
+		return mcore.NewInt(int(v)), nil
 	}
 	return 0, fmt.Errorf("未知のVertexIndexサイズです。vertexCount: %d", model.VertexCountType)
 }
 
 // テクスチャIndexを読み取る
-func (r *PmxReader) unpackTextureIndex(model *PmxModel) (int, error) {
+func (r *PmxReader) unpackTextureIndex(model *PmxModel) (mcore.Int, error) {
 	return r.unpackIndex(model.TextureCountType)
 }
 
 // 材質Indexを読み取る
-func (r *PmxReader) unpackMaterialIndex(model *PmxModel) (int, error) {
+func (r *PmxReader) unpackMaterialIndex(model *PmxModel) (mcore.Int, error) {
 	return r.unpackIndex(model.MaterialCountType)
 }
 
 // ボーンIndexを読み取る
-func (r *PmxReader) unpackBoneIndex(model *PmxModel) (int, error) {
+func (r *PmxReader) unpackBoneIndex(model *PmxModel) (mcore.Int, error) {
 	return r.unpackIndex(model.BoneCountType)
 }
 
 // 表情Indexを読み取る
-func (r *PmxReader) unpackMorphIndex(model *PmxModel) (int, error) {
+func (r *PmxReader) unpackMorphIndex(model *PmxModel) (mcore.Int, error) {
 	return r.unpackIndex(model.MorphCountType)
 }
 
 // 剛体Indexを読み取る
-func (r *PmxReader) unpackRigidBodyIndex(model *PmxModel) (int, error) {
+func (r *PmxReader) unpackRigidBodyIndex(model *PmxModel) (mcore.Int, error) {
 	return r.unpackIndex(model.RigidBodyCountType)
 }
 
-func (r *PmxReader) unpackIndex(index int) (int, error) {
+func (r *PmxReader) unpackIndex(index int) (mcore.Int, error) {
 	switch index {
 	case 1:
 		v, err := r.UnpackSByte()
@@ -1294,21 +1293,21 @@ func (r *PmxReader) unpackIndex(index int) (int, error) {
 			mlog.E("unpackIndex.UnpackSByte error: %v", err)
 			return 0, err
 		}
-		return int(v), nil
+		return mcore.NewInt(int(v)), nil
 	case 2:
 		v, err := r.UnpackShort()
 		if err != nil {
 			mlog.E("unpackIndex.UnpackShort error: %v", err)
 			return 0, err
 		}
-		return int(v), nil
+		return mcore.NewInt(int(v)), nil
 	case 4:
 		v, err := r.UnpackInt()
 		if err != nil {
 			mlog.E("unpackIndex.UnpackInt error: %v", err)
 			return 0, err
 		}
-		return v, nil
+		return mcore.NewInt(int(v)), nil
 	}
 	return 0, fmt.Errorf("未知のIndexサイズです。index: %d", index)
 }

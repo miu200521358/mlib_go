@@ -1,6 +1,9 @@
 package vmd
 
-import "github.com/miu200521358/mlib_go/pkg/mmath"
+import (
+	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
+)
 
 type LightFrame struct {
 	*BaseFrame              // キーフレ
@@ -8,7 +11,7 @@ type LightFrame struct {
 	Color      *mmath.MVec3 // 色
 }
 
-func NewLightFrame(index float32) *LightFrame {
+func NewLightFrame(index mcore.Float32) *LightFrame {
 	return &LightFrame{
 		BaseFrame: NewVmdBaseFrame(index),
 		Position:  mmath.NewMVec3(),

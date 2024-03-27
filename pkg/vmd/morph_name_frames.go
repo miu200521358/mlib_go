@@ -1,56 +1,61 @@
 package vmd
 
 import (
-	"slices"
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
 
 type MorphNameFrames struct {
 	*mcore.IndexFloatModelCorrection[*MorphFrame]
-	Name              string       // ボーン名
-	RegisteredIndexes []float32    // 登録対象キーフレリスト
-	lock              sync.RWMutex // マップアクセス制御用
+	Name              string                            // ボーン名
+	RegisteredIndexes *mcore.TreeIndexes[mcore.Float32] // 登録対象キーフレリスト
+	lock              sync.RWMutex                      // マップアクセス制御用
 }
 
 func NewMorphNameFrames(name string) *MorphNameFrames {
 	return &MorphNameFrames{
 		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*MorphFrame](),
 		Name:                      name,
-		RegisteredIndexes:         []float32{},
+		RegisteredIndexes:         mcore.NewTreeIndexes[mcore.Float32](),
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (mnfs *MorphNameFrames) GetRangeIndexes(index float32) (float32, float32) {
-	if len(mnfs.RegisteredIndexes) == 0 {
+func (mnfs *MorphNameFrames) GetRangeIndexes(index mcore.Float32) (mcore.Float32, mcore.Float32) {
+	if mnfs.RegisteredIndexes.IsEmpty() {
 		return 0.0, 0.0
 	}
 
-	prevIndex := float32(0.0)
-	nextIndex := index
-
-	if idx := mutils.SearchFloat32s(mnfs.RegisteredIndexes, index); idx == 0 {
-		prevIndex = 0.0
-	} else {
-		prevIndex = mnfs.RegisteredIndexes[idx-1]
+	nowIndexes := mnfs.RegisteredIndexes.Search(index)
+	if nowIndexes != nil {
+		return index, index
 	}
 
-	if idx := mutils.SearchFloat32s(mnfs.RegisteredIndexes, index); idx >= len(mnfs.RegisteredIndexes) {
-		nextIndex = slices.Max(mnfs.RegisteredIndexes)
+	var prevIndex, nextIndex mcore.Float32
+
+	prevIndexes := mnfs.RegisteredIndexes.SearchLeft(index)
+	nextIndexes := mnfs.RegisteredIndexes.SearchRight(index)
+
+	if prevIndexes == nil {
+		prevIndex = mcore.NewFloat32(0)
 	} else {
-		nextIndex = mnfs.RegisteredIndexes[idx]
+		prevIndex = prevIndexes.Value
+	}
+
+	if nextIndexes == nil {
+		nextIndex = index
+	} else {
+		nextIndex = nextIndexes.Value
 	}
 
 	return prevIndex, nextIndex
 }
 
 // キーフレ計算結果を返す
-func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
+func (mnfs *MorphNameFrames) GetItem(index mcore.Float32) *MorphFrame {
 	if mnfs == nil {
 		return NewMorphFrame(index)
 	}
@@ -58,7 +63,7 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 	mnfs.lock.RLock()
 	defer mnfs.lock.RUnlock()
 
-	if slices.Contains(mnfs.Indexes, index) {
+	if mnfs.Indexes.Contains(index) {
 		return mnfs.Data[index]
 	}
 
@@ -66,7 +71,7 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 	prevIndex, nextIndex := mnfs.GetRangeIndexes(index)
 
 	if prevIndex == nextIndex {
-		if slices.Contains(mnfs.Indexes, nextIndex) {
+		if mnfs.Indexes.Contains(nextIndex) {
 			nextMf := mnfs.Data[nextIndex]
 			copied := &MorphFrame{
 				BaseFrame: NewVmdBaseFrame(index),
@@ -79,12 +84,12 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 	}
 
 	var prevMf, nextMf *MorphFrame
-	if slices.Contains(mnfs.Indexes, prevIndex) {
+	if mnfs.Indexes.Contains(prevIndex) {
 		prevMf = mnfs.Data[prevIndex]
 	} else {
 		prevMf = NewMorphFrame(index)
 	}
-	if slices.Contains(mnfs.Indexes, nextIndex) {
+	if mnfs.Indexes.Contains(nextIndex) {
 		nextMf = mnfs.Data[nextIndex]
 	} else {
 		nextMf = NewMorphFrame(index)
@@ -98,46 +103,32 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 	return mf
 }
 
-func (mnfs *MorphNameFrames) Sort() {
-	mnfs.lock.Lock()
-	defer mnfs.lock.Unlock()
-
-	mutils.SortFloat32s(mnfs.Indexes)
-	mutils.SortFloat32s(mnfs.RegisteredIndexes)
-}
-
 // bf.Registered が true の場合、補間曲線を分割して登録する
 func (mnfs *MorphNameFrames) Append(value *MorphFrame, isSort bool) {
 	mnfs.lock.Lock()
 	defer mnfs.lock.Unlock()
 
-	if !slices.Contains(mnfs.Indexes, value.Index) {
-		mnfs.Indexes = append(mnfs.Indexes, value.Index)
-		if isSort {
-			mutils.SortFloat32s(mnfs.Indexes)
-		}
+	if !mnfs.Indexes.Contains(value.Index) {
+		mnfs.Indexes.Insert(value.Index)
 	}
 
-	if value.Registered && !slices.Contains(mnfs.RegisteredIndexes, value.Index) {
-		mnfs.RegisteredIndexes = append(mnfs.RegisteredIndexes, value.Index)
-		if isSort {
-			mutils.SortFloat32s(mnfs.RegisteredIndexes)
-		}
+	if value.Registered && !mnfs.RegisteredIndexes.Contains(value.Index) {
+		mnfs.RegisteredIndexes.Insert(value.Index)
 	}
 
 	mnfs.Data[value.Index] = value
 }
 
-func (mnfs *MorphNameFrames) GetMaxFrame() float32 {
-	if len(mnfs.RegisteredIndexes) == 0 {
+func (mnfs *MorphNameFrames) GetMaxFrame() mcore.Float32 {
+	if mnfs.RegisteredIndexes.IsEmpty() {
 		return 0
 	}
 
-	return slices.Max(mnfs.RegisteredIndexes)
+	return mnfs.RegisteredIndexes.GetMax()
 }
 
 func (mnfs *MorphNameFrames) AnimateVertex(
-	frame float32,
+	frame mcore.Float32,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
 ) {
@@ -149,7 +140,7 @@ func (mnfs *MorphNameFrames) AnimateVertex(
 	morph := model.Morphs.GetItemByName(mnfs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.VertexMorphOffset)
-		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
+		if 0 < offset.VertexIndex && int(offset.VertexIndex) <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
 			delta.Position.Add(offset.Position.MuledScalar(mf.Ratio))
 		}
@@ -157,7 +148,7 @@ func (mnfs *MorphNameFrames) AnimateVertex(
 }
 
 func (mnfs *MorphNameFrames) AnimateAfterVertex(
-	frame float32,
+	frame mcore.Float32,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
 ) {
@@ -169,7 +160,7 @@ func (mnfs *MorphNameFrames) AnimateAfterVertex(
 	morph := model.Morphs.GetItemByName(mnfs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.VertexMorphOffset)
-		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
+		if 0 < offset.VertexIndex && int(offset.VertexIndex) <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
 			delta.AfterPosition.Add(offset.Position.MuledScalar(mf.Ratio))
 		}
@@ -177,7 +168,7 @@ func (mnfs *MorphNameFrames) AnimateAfterVertex(
 }
 
 func (mnfs *MorphNameFrames) AnimateUv(
-	frame float32,
+	frame mcore.Float32,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
 ) {
@@ -189,7 +180,7 @@ func (mnfs *MorphNameFrames) AnimateUv(
 	morph := model.Morphs.GetItemByName(mnfs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.UvMorphOffset)
-		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
+		if 0 < offset.VertexIndex && int(offset.VertexIndex) <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
 			uv := offset.Uv.MuledScalar(mf.Ratio).GetXY()
 			delta.Uv.Add(uv)
@@ -198,7 +189,7 @@ func (mnfs *MorphNameFrames) AnimateUv(
 }
 
 func (mnfs *MorphNameFrames) AnimateUv1(
-	frame float32,
+	frame mcore.Float32,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
 ) {
@@ -210,7 +201,7 @@ func (mnfs *MorphNameFrames) AnimateUv1(
 	morph := model.Morphs.GetItemByName(mnfs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.UvMorphOffset)
-		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
+		if 0 < offset.VertexIndex && int(offset.VertexIndex) <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
 			uv := offset.Uv.MuledScalar(mf.Ratio)
 			delta.Uv1.Add(uv.GetXY())
@@ -219,7 +210,7 @@ func (mnfs *MorphNameFrames) AnimateUv1(
 }
 
 func (mnfs *MorphNameFrames) AnimateBone(
-	frame float32,
+	frame mcore.Float32,
 	model *pmx.PmxModel,
 	deltas *BoneMorphDeltas,
 ) {
@@ -231,7 +222,7 @@ func (mnfs *MorphNameFrames) AnimateBone(
 	morph := model.Morphs.GetItemByName(mnfs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.BoneMorphOffset)
-		if 0 < offset.BoneIndex && offset.BoneIndex <= len(deltas.Data) {
+		if 0 < offset.BoneIndex && int(offset.BoneIndex) <= len(deltas.Data) {
 			delta := deltas.Data[offset.BoneIndex]
 			delta.MorphPosition.Add(offset.Position.MuledScalar(mf.Ratio))
 			delta.MorphLocalPosition.Add(offset.LocalPosition.MuledScalar(mf.Ratio))
@@ -249,7 +240,7 @@ func (mnfs *MorphNameFrames) AnimateBone(
 
 // AnimateMaterial 材質モーフの適用
 func (mnfs *MorphNameFrames) AnimateMaterial(
-	frame float32,
+	frame mcore.Float32,
 	model *pmx.PmxModel,
 	deltas *MaterialMorphDeltas,
 ) {
@@ -275,7 +266,7 @@ func (mnfs *MorphNameFrames) AnimateMaterial(
 						delta.Add(offset, mf.Ratio)
 					}
 				}
-			} else if 0 < offset.MaterialIndex && offset.MaterialIndex <= len(deltas.Data) {
+			} else if 0 < offset.MaterialIndex && int(offset.MaterialIndex) <= len(deltas.Data) {
 				// 特定材質のみの場合
 				if calcMode == pmx.CALC_MODE_MULTIPLICATION {
 					deltas.Data[offset.MaterialIndex].Mul(offset, mf.Ratio)

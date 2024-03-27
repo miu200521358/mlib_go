@@ -7,7 +7,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 type Meshes struct {
@@ -23,14 +22,14 @@ func NewMeshes(
 	resourceFiles embed.FS,
 ) *Meshes {
 	// 頂点情報
-	vertices := make([]float32, 0, len(model.Vertices.Indexes))
+	vertices := make([]float32, 0, len(model.Vertices.Indexes.GetValues()))
 	for _, v := range model.Vertices.GetSortedData() {
 		vertices = append(vertices, (*v).GL()...)
 	}
 	// println("vertices", mutils.JoinSlice(mutils.ConvertFloat32ToInterfaceSlice(vertices)))
 
 	// 面情報
-	faces := make([]uint32, 0, len(model.Faces.Indexes))
+	faces := make([]uint32, 0, len(model.Faces.Indexes.GetValues()))
 	for _, f := range model.Faces.GetSortedData() {
 		vertices := f.VertexIndexes
 		faces = append(faces, uint32(vertices[2]))
@@ -38,7 +37,7 @@ func NewMeshes(
 		faces = append(faces, uint32(vertices[0]))
 	}
 
-	meshes := make([]*Mesh, 0, len(model.Materials.GetIndexes()))
+	meshes := make([]*Mesh, 0, len(model.Materials.Indexes.GetValues()))
 	prevVerticesCount := 0
 	for _, m := range model.Materials.GetSortedData() {
 		var texture *Texture

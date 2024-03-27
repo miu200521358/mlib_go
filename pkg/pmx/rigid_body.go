@@ -8,6 +8,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
+
 )
 
 type RigidBodyParam struct {
@@ -96,7 +97,7 @@ func NewCollisionGroup(collisionGroupMask uint16) []uint16 {
 
 type RigidBody struct {
 	*mcore.IndexNameModel
-	BoneIndex                    int              // 関連ボーンIndex
+	BoneIndex                    mcore.Int        // 関連ボーンIndex
 	CollisionGroup               byte             // グループ
 	CollisionGroupMask           CollisionGroup   // 非衝突グループフラグ
 	CollisionGroupMaskValue      int              // 非衝突グループフラグ値
@@ -115,7 +116,7 @@ type RigidBody struct {
 	BtRigidBody                  mbt.BtRigidBody  // 物理剛体
 	BtRigidBodyTransform         mbt.BtTransform  // 剛体の初期位置・回転情報
 	BtRigidBodyPositionTransform mbt.BtTransform  // 剛体の初期位置情報
-	JointedBoneIndex             int              // ジョイントで繋がってるボーンIndex
+	JointedBoneIndex             mcore.Int        // ジョイントで繋がってるボーンIndex
 }
 
 // NewRigidBody creates a new rigid body.
@@ -144,7 +145,7 @@ func NewRigidBody() *RigidBody {
 	}
 }
 
-func (r *RigidBody) Copy() mcore.IndexNameModelInterface {
+func (r *RigidBody) Copy() mcore.IIndexNameModel {
 	copied := NewMorph()
 	copier.CopyWithOption(copied, r, copier.Option{DeepCopy: true})
 	return copied
@@ -280,7 +281,7 @@ func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 	r.BtRigidBody.SetDamping(float32(r.RigidBodyParam.LinearDamping), float32(r.RigidBodyParam.AngularDamping))
 	r.BtRigidBody.SetRestitution(float32(r.RigidBodyParam.Restitution))
 	r.BtRigidBody.SetFriction(float32(r.RigidBodyParam.Friction))
-	r.BtRigidBody.SetUserIndex(r.Index)
+	r.BtRigidBody.SetUserIndex(int(r.Index))
 	// r.BtRigidBody.SetSleepingThresholds(0.1, (180.0 * 0.1 / math.Pi))
 
 	r.updateFlags(true)
@@ -307,9 +308,9 @@ func (r *RigidBody) updateTransform(
 
 	// 剛体のグローバル位置を確定
 	rigidBodyTransform := mbt.NewBtTransform()
-	if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
+	if r.BoneIndex >= 0 && int(r.BoneIndex) < len(boneTransforms) {
 		rigidBodyTransform.Mult(*boneTransforms[r.BoneIndex], r.BtRigidBodyTransform)
-	} else if r.JointedBoneIndex >= 0 && r.JointedBoneIndex < len(boneTransforms) {
+	} else if r.JointedBoneIndex >= 0 && int(r.JointedBoneIndex) < len(boneTransforms) {
 		rigidBodyTransform.Mult(*boneTransforms[r.JointedBoneIndex], r.BtRigidBodyTransform)
 	}
 
@@ -400,9 +401,9 @@ func (r *RigidBody) updateMatrix(
 	// 	mlog.V("3. [%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
 	// }
 
-	if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
+	if r.BoneIndex >= 0 && int(r.BoneIndex) < len(boneTransforms) {
 		boneMatrixes[r.BoneIndex] = &physicsBoneMatrix
-	} else if r.JointedBoneIndex >= 0 && r.JointedBoneIndex < len(boneTransforms) {
+	} else if r.JointedBoneIndex >= 0 && int(r.JointedBoneIndex) < len(boneTransforms) {
 		boneMatrixes[r.JointedBoneIndex] = &physicsBoneMatrix
 	}
 }

@@ -86,11 +86,11 @@ type Material struct {
 	DrawFlag            DrawFlag     // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
 	Edge                *mmath.MVec4 // エッジ色 (R,G,B,A)
 	EdgeSize            float64      // エッジサイズ
-	TextureIndex        int          // 通常テクスチャINDEX
-	SphereTextureIndex  int          // スフィアテクスチャINDEX
+	TextureIndex        mcore.Int          // 通常テクスチャINDEX
+	SphereTextureIndex  mcore.Int          // スフィアテクスチャINDEX
 	SphereMode          SphereMode   // スフィアモード
 	ToonSharingFlag     ToonSharing  // 共有Toonフラグ
-	ToonTextureIndex    int          // ToonテクスチャINDEX
+	ToonTextureIndex    mcore.Int          // ToonテクスチャINDEX
 	Memo                string       // メモ
 	VerticesCount       int          // 材質に対応する面(頂点)数 (必ず3の倍数になる)
 	TextureFactor       *mmath.MVec4 // テクスチャ係数
@@ -207,7 +207,7 @@ func NewMaterials() *Materials {
 	}
 }
 
-func (m *Material) Copy() mcore.IndexNameModelInterface {
+func (m *Material) Copy() mcore.IIndexNameModel {
 	copied := NewMaterial()
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied

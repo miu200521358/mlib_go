@@ -14,7 +14,7 @@ import (
 )
 
 type IkLink struct {
-	BoneIndex          int              // リンクボーンのボーンIndex
+	BoneIndex          mcore.Int        // リンクボーンのボーンIndex
 	AngleLimit         bool             // 角度制限有無
 	MinAngleLimit      *mmath.MRotation // 下限
 	MaxAngleLimit      *mmath.MRotation // 上限
@@ -41,7 +41,7 @@ func (t *IkLink) Copy() *IkLink {
 }
 
 type Ik struct {
-	BoneIndex    int              // IKターゲットボーンのボーンIndex
+	BoneIndex    mcore.Int        // IKターゲットボーンのボーンIndex
 	LoopCount    int              // IKループ回数 (最大255)
 	UnitRotation *mmath.MRotation // IKループ計算時の1回あたりの制限角度
 	Links        []*IkLink        // IKリンクリスト
@@ -71,12 +71,12 @@ func (t *Ik) Copy() *Ik {
 type Bone struct {
 	*mcore.IndexNameModel
 	Position               *mmath.MVec3     // ボーン位置
-	ParentIndex            int              // 親ボーンのボーンIndex
+	ParentIndex            mcore.Int        // 親ボーンのボーンIndex
 	Layer                  int              // 変形階層
 	BoneFlag               BoneFlag         // ボーンフラグ(16bit) 各bit 0:OFF 1:ON
 	TailPosition           *mmath.MVec3     // 接続先:0 の場合 座標オフセット, ボーン位置からの相対分
-	TailIndex              int              // 接続先:1 の場合 接続先ボーンのボーンIndex
-	EffectIndex            int              // 回転付与:1 または 移動付与:1 の場合 付与親ボーンのボーンIndex
+	TailIndex              mcore.Int        // 接続先:1 の場合 接続先ボーンのボーンIndex
+	EffectIndex            mcore.Int        // 回転付与:1 または 移動付与:1 の場合 付与親ボーンのボーンIndex
 	EffectFactor           float64          // 付与率
 	FixedAxis              *mmath.MVec3     // 軸固定:1 の場合 軸の方向ベクトル
 	LocalAxisX             *mmath.MVec3     // ローカル軸:1 の場合 X軸の方向ベクトル
@@ -95,13 +95,13 @@ type Bone struct {
 	LocalMatrix            *mmath.MMat4     // ローカル軸行列
 	RevertOffsetMatrix     *mmath.MMat4     // 逆オフセット行列(親ボーンからの相対位置分を戻す)
 	OffsetMatrix           *mmath.MMat4     // オフセット行列 (自身の位置を原点に戻す行列)
-	TreeBoneIndexes        []int            // 自分のボーンまでのボーンIndexのリスト
-	ParentBoneIndexes      []int            // 自分の親ボーンからルートまでのボーンIndexのリスト
-	RelativeBoneIndexes    []int            // 関連ボーンINDEX一覧（付与親とかIKとか）
-	ChildBoneIndexes       []int            // 自分を親として登録しているボーンINDEX一覧
-	EffectiveBoneIndexes   []int            // 自分を付与親として登録しているボーンINDEX一覧
-	IkLinkBoneIndexes      []int            // IKリンクとして登録されているIKボーンのボーンIndex
-	IkTargetBoneIndexes    []int            // IKターゲットとして登録されているIKボーンのボーンIndex
+	TreeBoneIndexes        []mcore.Int      // 自分のボーンまでのボーンIndexのリスト
+	ParentBoneIndexes      []mcore.Int      // 自分の親ボーンからルートまでのボーンIndexのリスト
+	RelativeBoneIndexes    []mcore.Int      // 関連ボーンINDEX一覧（付与親とかIKとか）
+	ChildBoneIndexes       []mcore.Int      // 自分を親として登録しているボーンINDEX一覧
+	EffectiveBoneIndexes   []mcore.Int      // 自分を付与親として登録しているボーンINDEX一覧
+	IkLinkBoneIndexes      []mcore.Int      // IKリンクとして登録されているIKボーンのボーンIndex
+	IkTargetBoneIndexes    []mcore.Int      // IKターゲットとして登録されているIKボーンのボーンIndex
 	AngleLimit             bool             // 自分がIKリンクボーンの角度制限がある場合、true
 	MinAngleLimit          *mmath.MRotation // 自分がIKリンクボーンの角度制限の下限
 	MaxAngleLimit          *mmath.MRotation // 自分がIKリンクボーンの角度制限の上限
@@ -132,18 +132,18 @@ func NewBone() *Bone {
 		NormalizedLocalAxisY:   mmath.NewMVec3(),
 		NormalizedLocalAxisZ:   mmath.NewMVec3(),
 		LocalAxis:              &mmath.MVec3{1, 0, 0},
-		IkLinkBoneIndexes:      []int{},
-		IkTargetBoneIndexes:    []int{},
+		IkLinkBoneIndexes:      []mcore.Int{},
+		IkTargetBoneIndexes:    []mcore.Int{},
 		ParentRelativePosition: mmath.NewMVec3(),
 		ChildRelativePosition:  mmath.NewMVec3(),
 		NormalizedFixedAxis:    mmath.NewMVec3(),
-		TreeBoneIndexes:        []int{},
+		TreeBoneIndexes:        []mcore.Int{},
 		RevertOffsetMatrix:     mmath.NewMMat4(),
 		OffsetMatrix:           mmath.NewMMat4(),
-		ParentBoneIndexes:      []int{},
-		RelativeBoneIndexes:    []int{},
-		ChildBoneIndexes:       []int{},
-		EffectiveBoneIndexes:   []int{},
+		ParentBoneIndexes:      []mcore.Int{},
+		RelativeBoneIndexes:    []mcore.Int{},
+		ChildBoneIndexes:       []mcore.Int{},
+		EffectiveBoneIndexes:   []mcore.Int{},
 		AngleLimit:             false,
 		MinAngleLimit:          mmath.NewRotationModelByRadians(mmath.NewMVec3()),
 		MaxAngleLimit:          mmath.NewRotationModelByRadians(mmath.NewMVec3()),
@@ -164,7 +164,7 @@ func NewBoneByName(name string) *Bone {
 	return bone
 }
 
-func (v *Bone) Copy() mcore.IndexNameModelInterface {
+func (v *Bone) Copy() mcore.IIndexNameModel {
 	copied := NewBone()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied
@@ -355,10 +355,10 @@ func (bone *Bone) setup() {
 // ボーンリスト
 type Bones struct {
 	*mcore.IndexNameModelCorrection[*Bone]
-	Vertices           map[int][]int
-	IkTreeIndexes      map[int][]int
-	LayerSortedIndexes map[int]string
-	LayerSortedNames   map[string]int
+	Vertices           map[mcore.Int][]mcore.Int
+	IkTreeIndexes      map[mcore.Int][]mcore.Int
+	LayerSortedIndexes map[mcore.Int]string
+	LayerSortedNames   map[string]mcore.Int
 	positionVao        *mgl.VAO
 	positionIbo        *mgl.IBO
 	positionIboCount   int32
@@ -371,10 +371,10 @@ type Bones struct {
 func NewBones() *Bones {
 	return &Bones{
 		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Bone](),
-		Vertices:                 make(map[int][]int),
-		IkTreeIndexes:            make(map[int][]int),
-		LayerSortedIndexes:       make(map[int]string),
-		LayerSortedNames:         make(map[string]int),
+		Vertices:                 make(map[mcore.Int][]mcore.Int),
+		IkTreeIndexes:            make(map[mcore.Int][]mcore.Int),
+		LayerSortedIndexes:       make(map[mcore.Int]string),
+		LayerSortedNames:         make(map[string]mcore.Int),
 		positionVao:              nil,
 		positionIbo:              nil,
 		positionIboCount:         0,
@@ -385,7 +385,7 @@ func NewBones() *Bones {
 	}
 }
 
-func (b *Bones) getParentRelativePosition(boneIndex int) *mmath.MVec3 {
+func (b *Bones) getParentRelativePosition(boneIndex mcore.Int) *mmath.MVec3 {
 	bone := b.GetItem(boneIndex)
 	if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
 		v := bone.Position.Subed(b.GetItem(bone.ParentIndex).Position)
@@ -394,13 +394,13 @@ func (b *Bones) getParentRelativePosition(boneIndex int) *mmath.MVec3 {
 	return mmath.NewMVec3()
 }
 
-func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
+func (b *Bones) getChildRelativePosition(boneIndex mcore.Int) *mmath.MVec3 {
 	bone := b.GetItem(boneIndex)
 
 	fromPosition := *bone.Position
 	var toPosition *mmath.MVec3
 
-	if bone.IsTailBone() && bone.TailIndex >= 0 && slices.Contains(b.GetIndexes(), bone.TailIndex) {
+	if bone.IsTailBone() && bone.TailIndex >= 0 && b.Indexes.Contains(bone.TailIndex) {
 		toPosition = b.GetItem(bone.TailIndex).Position
 	} else if !bone.IsTailBone() && bone.TailPosition.Length() > 0 {
 		toPosition = bone.TailPosition.Add(bone.Position)
@@ -415,7 +415,7 @@ func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 	return v
 }
 
-func (b *Bones) GetInitializeLocalPosition(boneIndex int) *mmath.MVec3 {
+func (b *Bones) GetInitializeLocalPosition(boneIndex mcore.Int) *mmath.MVec3 {
 	if boneIndex < 0 || !b.Contains(boneIndex) {
 		return mmath.NewMVec3()
 	}
@@ -435,15 +435,15 @@ func (b *Bones) GetInitializeLocalPosition(boneIndex int) *mmath.MVec3 {
 	return matrix.Translation()
 }
 
-func (b *Bones) GetLayerIndexes() []int {
+func (b *Bones) GetLayerIndexes() []mcore.Int {
 	layerIndexes := make(LayerIndexes, 0)
-	for _, boneIndex := range b.GetIndexes() {
+	for _, boneIndex := range b.Indexes.GetValues() {
 		bone := b.GetItem(boneIndex)
 		layerIndexes = append(layerIndexes, LayerIndex{Layer: bone.Layer, Index: boneIndex})
 	}
 	sort.Sort(layerIndexes)
 
-	indexes := make([]int, len(layerIndexes))
+	indexes := make([]mcore.Int, len(layerIndexes))
 	for i, layerIndex := range layerIndexes {
 		indexes[i] = layerIndex.Index
 	}
@@ -452,7 +452,7 @@ func (b *Bones) GetLayerIndexes() []int {
 }
 
 // 関連ボーンリストの取得
-func (b *Bones) getRelativeBoneIndexes(boneIndex int, parentBoneIndexes, relativeBoneIndexes []int) ([]int, []int) {
+func (b *Bones) getRelativeBoneIndexes(boneIndex mcore.Int, parentBoneIndexes, relativeBoneIndexes []mcore.Int) ([]mcore.Int, []mcore.Int) {
 
 	if boneIndex <= 0 || !b.Contains(boneIndex) {
 		return parentBoneIndexes, relativeBoneIndexes
@@ -461,7 +461,7 @@ func (b *Bones) getRelativeBoneIndexes(boneIndex int, parentBoneIndexes, relativ
 	bone := b.GetItem(boneIndex)
 	if b.Contains(bone.ParentIndex) && !slices.Contains(relativeBoneIndexes, bone.ParentIndex) {
 		// 親ボーンを辿る(親から子の順番)
-		parentBoneIndexes = append([]int{bone.ParentIndex}, parentBoneIndexes...)
+		parentBoneIndexes = append([]mcore.Int{bone.ParentIndex}, parentBoneIndexes...)
 		relativeBoneIndexes = append(relativeBoneIndexes, bone.ParentIndex)
 		parentBoneIndexes, relativeBoneIndexes =
 			b.getRelativeBoneIndexes(bone.ParentIndex, parentBoneIndexes, relativeBoneIndexes)
@@ -555,10 +555,10 @@ func (b *Bones) getIkTreeIndex(bone *Bone) *Bone {
 func (b *Bones) setup() {
 	for _, bone := range b.Data {
 		// 関係ボーンリストを一旦クリア
-		bone.IkLinkBoneIndexes = make([]int, 0)
-		bone.IkTargetBoneIndexes = make([]int, 0)
-		bone.EffectiveBoneIndexes = make([]int, 0)
-		bone.ChildBoneIndexes = make([]int, 0)
+		bone.IkLinkBoneIndexes = make([]mcore.Int, 0)
+		bone.IkTargetBoneIndexes = make([]mcore.Int, 0)
+		bone.EffectiveBoneIndexes = make([]mcore.Int, 0)
+		bone.ChildBoneIndexes = make([]mcore.Int, 0)
 	}
 
 	// 関連ボーンINDEX情報を設定
@@ -595,7 +595,7 @@ func (b *Bones) setup() {
 
 	for _, bone := range b.GetSortedData() {
 		// 影響があるボーンINDEXリスト
-		bone.ParentBoneIndexes, bone.RelativeBoneIndexes = b.getRelativeBoneIndexes(bone.Index, []int{}, []int{})
+		bone.ParentBoneIndexes, bone.RelativeBoneIndexes = b.getRelativeBoneIndexes(bone.Index, []mcore.Int{}, []mcore.Int{})
 
 		// 親ボーンに子ボーンとして登録する
 		if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
@@ -610,15 +610,16 @@ func (b *Bones) setup() {
 	}
 
 	// 変形階層・ボーンINDEXでソート
-	b.LayerSortedIndexes = make(map[int]string, len(b.Data))
-	b.LayerSortedNames = make(map[string]int, len(b.Data))
+	b.LayerSortedIndexes = make(map[mcore.Int]string, len(b.Data))
+	b.LayerSortedNames = make(map[string]mcore.Int, len(b.Data))
 	layerIndexes := b.GetLayerIndexes()
 
 	i := 0
 	for _, boneIndex := range layerIndexes {
 		bone := b.GetItem(boneIndex)
-		b.LayerSortedNames[bone.Name] = i
-		b.LayerSortedIndexes[i] = bone.Name
+		ii := mcore.NewInt(i)
+		b.LayerSortedNames[bone.Name] = ii
+		b.LayerSortedIndexes[ii] = bone.Name
 		i++
 	}
 
@@ -647,12 +648,12 @@ ikLoop:
 
 			// 関連親がIKツリーに登録されていない場合、新規にIKツリーを作成
 			linkBone := b.GetItem(bone.Ik.Links[len(bone.Ik.Links)-1].BoneIndex)
-			// b.IkTreeIndexes[linkBone.Index] = []int{bone.Index}
+			// b.IkTreeIndexes[linkBone.Index] = []mcore.Int{bone.Index}
 			if linkBone.ParentIndex >= 0 && b.Contains(linkBone.ParentIndex) {
 				parentBone := b.GetItem(linkBone.ParentIndex)
-				b.IkTreeIndexes[parentBone.Index] = []int{bone.Index}
+				b.IkTreeIndexes[parentBone.Index] = []mcore.Int{bone.Index}
 			} else {
-				b.IkTreeIndexes[bone.Index] = []int{bone.Index}
+				b.IkTreeIndexes[bone.Index] = []mcore.Int{bone.Index}
 			}
 		}
 	}
@@ -718,7 +719,7 @@ func (b *Bones) Draw(
 	normalVbo := make([]float32, 0)
 
 	for i, matrix := range boneGlobalMatrixes {
-		bone := b.GetItem(i)
+		bone := b.GetItem(mcore.NewInt(i))
 
 		posGl := matrix.Translation().GL()
 		positionVbo = append(positionVbo, posGl[0], posGl[1], posGl[2])
@@ -813,7 +814,7 @@ func (b *Bones) Draw(
 // 変形階層とINDEXのソート用構造体
 type LayerIndex struct {
 	Layer int
-	Index int
+	Index mcore.Int
 }
 
 type LayerIndexes []LayerIndex
@@ -828,7 +829,7 @@ func (p LayerIndexes) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
-func (p LayerIndexes) Contains(index int) bool {
+func (p LayerIndexes) Contains(index mcore.Int) bool {
 	for _, layerIndex := range p {
 		if layerIndex.Index == index {
 			return true

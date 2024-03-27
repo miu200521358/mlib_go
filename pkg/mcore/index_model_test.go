@@ -2,6 +2,7 @@ package mcore
 
 import (
 	"testing"
+
 )
 
 func TestIndexModel_GetIndex(t *testing.T) {
@@ -50,21 +51,21 @@ func TestIndexModel_Copy(t *testing.T) {
 
 type Face struct {
 	*IndexModel
-	VertexIndexes [3]int
+	VertexIndexes [3]Int
 }
 
-func NewFace(index, vertexIndex0, vertexIndex1, vertexIndex2 int) *Face {
+func NewFace(index, vertexIndex0, vertexIndex1, vertexIndex2 Int) *Face {
 	return &Face{
 		IndexModel:    &IndexModel{Index: index},
-		VertexIndexes: [3]int{vertexIndex0, vertexIndex1, vertexIndex2},
+		VertexIndexes: [3]Int{vertexIndex0, vertexIndex1, vertexIndex2},
 	}
 }
 
 // 面リスト
 type Faces struct {
 	*IndexModelCorrection[*Face]
-	Data    map[int]*Face
-	Indexes []int
+	Data    map[Int]*Face
+	Indexes []Int
 }
 
 func NewFaces() *Faces {
@@ -76,7 +77,7 @@ func NewFaces() *Faces {
 func TestIndexModelCorrection_GetItem(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, item)
+	model.Append(item)
 
 	result := model.GetItem(0)
 	if result != item {
@@ -95,7 +96,7 @@ func TestIndexModelCorrection_GetItem(t *testing.T) {
 func TestIndexModelCorrection_SetItem(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, item)
+	model.Append(item)
 
 	result := model.GetItem(0)
 	if result != item {
@@ -128,7 +129,7 @@ func TestIndexModelCorrection_Append(t *testing.T) {
 func TestIndexModelCorrection_DeleteItem(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, item)
+	model.Append(item)
 
 	model.DeleteItem(0)
 
@@ -144,7 +145,7 @@ func TestIndexModelCorrection_DeleteItem(t *testing.T) {
 func TestIndexModelCorrection_Len(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, item)
+	model.Append(item)
 
 	result := model.Len()
 	if result != 1 {
@@ -155,7 +156,7 @@ func TestIndexModelCorrection_Len(t *testing.T) {
 func TestIndexModelCorrection_Contains(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, item)
+	model.Append(item)
 
 	result := model.Contains(0)
 	if !result {
@@ -177,7 +178,7 @@ func TestIndexModelCorrection_IsEmpty(t *testing.T) {
 	}
 
 	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, item)
+	model.Append(item)
 
 	result = model.IsEmpty()
 	if result {
@@ -188,7 +189,7 @@ func TestIndexModelCorrection_IsEmpty(t *testing.T) {
 func TestIndexModelCorrection_LastIndex(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(5, 0, 0, 0)
-	model.SetItem(5, item)
+	model.Append(item)
 
 	result := model.LastIndex()
 	if result != 5 {

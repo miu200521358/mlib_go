@@ -6,6 +6,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+
 )
 
 type VmdMotion struct {
@@ -47,7 +48,7 @@ func (m *VmdMotion) SetName(name string) {
 	m.ModelName = name
 }
 
-func (m *VmdMotion) GetMaxFrame() float32 {
+func (m *VmdMotion) GetMaxFrame() mcore.Float32 {
 	// TODO: モーフが入ったらモーフも考慮する
 	return max(m.BoneFrames.GetMaxFrame(), m.MorphFrames.GetMaxFrame())
 }
@@ -56,20 +57,8 @@ func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame, isSort bool)
 	m.BoneFrames.GetItem(boneName).Append(bf, isSort)
 }
 
-func (m *VmdMotion) SortBoneFrames() {
-	for _, bnfs := range m.BoneFrames.Data {
-		bnfs.Sort()
-	}
-}
-
 func (m *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame, isSort bool) {
 	m.MorphFrames.GetItem(morphName).Append(mf, isSort)
-}
-
-func (m *VmdMotion) SortMorphFrames() {
-	for _, mnfs := range m.MorphFrames.Data {
-		mnfs.Sort()
-	}
 }
 
 func (m *VmdMotion) AppendCameraFrame(cf *CameraFrame) {
@@ -88,13 +77,13 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 	m.IkFrames.Append(ikf)
 }
 
-func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
+func (m *VmdMotion) Animate(fno mcore.Float32, model *pmx.PmxModel) *VmdDeltas {
 	vds := &VmdDeltas{}
 
 	vds.Morphs = m.AnimateMorph(fno, model, nil)
 
 	for i, bd := range vds.Morphs.Bones.Data {
-		bone := model.Bones.GetItem(i)
+		bone := model.Bones.GetItem(mcore.NewInt(i))
 		if !m.BoneFrames.Contains(bone.Name) {
 			m.BoneFrames.Append(NewBoneNameFrames(bone.Name))
 		}
@@ -120,7 +109,7 @@ func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
 }
 
 func (m *VmdMotion) AnimateMorph(
-	frame float32,
+	frame mcore.Float32,
 	model *pmx.PmxModel,
 	morphNames []string,
 ) *MorphDeltas {
@@ -140,7 +129,7 @@ func (m *VmdMotion) AnimateMorph(
 }
 
 func (m *VmdMotion) AnimateBone(
-	frame float32,
+	frame mcore.Float32,
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk bool,
@@ -149,7 +138,7 @@ func (m *VmdMotion) AnimateBone(
 }
 
 func (m *VmdMotion) AnimateBoneWithMorphs(
-	frame float32,
+	frame mcore.Float32,
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk bool,

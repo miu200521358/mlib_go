@@ -8,7 +8,7 @@ import (
 // 面データ
 type Face struct {
 	*mcore.IndexModel
-	VertexIndexes [3]int // 頂点INDEXリスト
+	VertexIndexes [3]mcore.Int // 頂点INDEXリスト
 }
 
 type FaceGL struct {
@@ -18,7 +18,7 @@ type FaceGL struct {
 func NewFace() *Face {
 	return &Face{
 		IndexModel:    &mcore.IndexModel{Index: -1},
-		VertexIndexes: [3]int{0, 0, 0},
+		VertexIndexes: [3]mcore.Int{0, 0, 0},
 	}
 }
 

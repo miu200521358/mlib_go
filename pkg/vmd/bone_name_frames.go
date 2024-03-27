@@ -1,58 +1,64 @@
 package vmd
 
 import (
-	"slices"
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type BoneNameFrames struct {
 	*mcore.IndexFloatModelCorrection[*BoneFrame]
-	Name              string       // ボーン名
-	IkIndexes         []float32    // IK計算済みキーフレリスト
-	RegisteredIndexes []float32    // 登録対象キーフレリスト
-	lock              sync.RWMutex // マップアクセス制御用
+	Name              string                            // ボーン名
+	IkIndexes         *mcore.TreeIndexes[mcore.Float32] // IK計算済みキーフレリスト
+	RegisteredIndexes *mcore.TreeIndexes[mcore.Float32] // 登録対象キーフレリスト
+	lock              sync.RWMutex                      // マップアクセス制御用
 }
 
 func NewBoneNameFrames(name string) *BoneNameFrames {
 	return &BoneNameFrames{
 		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*BoneFrame](),
 		Name:                      name,
-		IkIndexes:                 []float32{},
-		RegisteredIndexes:         []float32{},
+		IkIndexes:                 mcore.NewTreeIndexes[mcore.Float32](),
+		RegisteredIndexes:         mcore.NewTreeIndexes[mcore.Float32](),
 		lock:                      sync.RWMutex{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (bnfs *BoneNameFrames) GetRangeIndexes(index float32) (float32, float32) {
-	if len(bnfs.RegisteredIndexes) == 0 {
+func (bnfs *BoneNameFrames) GetRangeIndexes(index mcore.Float32) (mcore.Float32, mcore.Float32) {
+	if bnfs.RegisteredIndexes.IsEmpty() {
 		return 0.0, 0.0
 	}
 
-	prevIndex := float32(0.0)
-	nextIndex := index
-
-	if idx := mutils.SearchFloat32s(bnfs.RegisteredIndexes, index); idx == 0 {
-		prevIndex = 0.0
-	} else {
-		prevIndex = bnfs.RegisteredIndexes[idx-1]
+	nowIndexes := bnfs.RegisteredIndexes.Search(index)
+	if nowIndexes != nil {
+		return index, index
 	}
 
-	if idx := mutils.SearchFloat32s(bnfs.RegisteredIndexes, index); idx >= len(bnfs.RegisteredIndexes) {
-		nextIndex = slices.Max(bnfs.RegisteredIndexes)
+	var prevIndex, nextIndex mcore.Float32
+
+	prevIndexes := bnfs.RegisteredIndexes.SearchLeft(index)
+	nextIndexes := bnfs.RegisteredIndexes.SearchRight(index)
+
+	if prevIndexes == nil {
+		prevIndex = mcore.NewFloat32(0)
 	} else {
-		nextIndex = bnfs.RegisteredIndexes[idx]
+		prevIndex = prevIndexes.Value
+	}
+
+	if nextIndexes == nil {
+		nextIndex = index
+	} else {
+		nextIndex = nextIndexes.Value
 	}
 
 	return prevIndex, nextIndex
 }
 
 // キーフレ計算結果を返す
-func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
+func (bnfs *BoneNameFrames) GetItem(index mcore.Float32) *BoneFrame {
 	if bnfs == nil {
 		return NewBoneFrame(index)
 	}
@@ -60,7 +66,7 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	bnfs.lock.RLock()
 	defer bnfs.lock.RUnlock()
 
-	if slices.Contains(bnfs.Indexes, index) {
+	if bnfs.Indexes.Contains(index) {
 		return bnfs.Data[index]
 	}
 
@@ -68,7 +74,7 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	prevIndex, nextIndex := bnfs.GetRangeIndexes(index)
 
 	if prevIndex == nextIndex {
-		if slices.Contains(bnfs.Indexes, nextIndex) {
+		if bnfs.Indexes.Contains(nextIndex) {
 			nextBf := bnfs.Data[nextIndex]
 			copied := &BoneFrame{
 				BaseFrame:          NewVmdBaseFrame(index),
@@ -94,12 +100,12 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	}
 
 	var prevBf, nextBf *BoneFrame
-	if slices.Contains(bnfs.Indexes, prevIndex) {
+	if bnfs.Indexes.Contains(prevIndex) {
 		prevBf = bnfs.Data[prevIndex]
 	} else {
 		prevBf = NewBoneFrame(index)
 	}
-	if slices.Contains(bnfs.Indexes, nextIndex) {
+	if bnfs.Indexes.Contains(nextIndex) {
 		nextBf = bnfs.Data[nextIndex]
 	} else {
 		nextBf = NewBoneFrame(index)
@@ -107,7 +113,7 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 
 	bf := NewBoneFrame(index)
 
-	xy, yy, zy, ry := nextBf.Curves.Evaluate(prevIndex, index, nextIndex)
+	xy, yy, zy, ry := nextBf.Curves.Evaluate(float32(prevIndex), float32(index), float32(nextIndex))
 
 	qq := prevBf.Rotation.GetQuaternion().Slerp(nextBf.Rotation.GetQuaternion(), ry)
 	bf.Rotation.SetQuaternion(qq)
@@ -148,39 +154,21 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	return bf
 }
 
-func (bnfs *BoneNameFrames) Sort() {
-	bnfs.lock.Lock()
-	defer bnfs.lock.Unlock()
-
-	mutils.SortFloat32s(bnfs.Indexes)
-	mutils.SortFloat32s(bnfs.IkIndexes)
-	mutils.SortFloat32s(bnfs.RegisteredIndexes)
-}
-
 // bf.Registered が true の場合、補間曲線を分割して登録する
 func (bnfs *BoneNameFrames) Append(value *BoneFrame, isSort bool) {
 	bnfs.lock.Lock()
 	defer bnfs.lock.Unlock()
 
-	if !slices.Contains(bnfs.Indexes, value.Index) {
-		bnfs.Indexes = append(bnfs.Indexes, value.Index)
-		if isSort {
-			mutils.SortFloat32s(bnfs.Indexes)
-		}
+	if !bnfs.Indexes.Contains(value.Index) {
+		bnfs.Indexes.Insert(value.Index)
 	}
-	if value.IkRegistered && !slices.Contains(bnfs.IkIndexes, value.Index) {
-		bnfs.IkIndexes = append(bnfs.IkIndexes, value.Index)
-		if isSort {
-			mutils.SortFloat32s(bnfs.IkIndexes)
-		}
+	if value.IkRegistered && !bnfs.IkIndexes.Contains(value.Index) {
+		bnfs.IkIndexes.Insert(value.Index)
 	}
 
 	if value.Registered {
-		if !slices.Contains(bnfs.RegisteredIndexes, value.Index) {
-			bnfs.RegisteredIndexes = append(bnfs.RegisteredIndexes, value.Index)
-			if isSort {
-				mutils.SortFloat32s(bnfs.RegisteredIndexes)
-			}
+		if !bnfs.RegisteredIndexes.Contains(value.Index) {
+			bnfs.RegisteredIndexes.Insert(value.Index)
 		}
 	}
 
@@ -189,25 +177,28 @@ func (bnfs *BoneNameFrames) Append(value *BoneFrame, isSort bool) {
 		prevIndex, nextIndex := bnfs.GetRangeIndexes(value.Index)
 		if nextIndex > value.Index && prevIndex < value.Index {
 			nextBf := bnfs.Data[nextIndex]
+			pi := float32(prevIndex)
+			vi := float32(value.Index)
+			ni := float32(nextIndex)
 			// 自分の前後にフレームがある場合、分割する
 			value.Curves.TranslateX, nextBf.Curves.TranslateX =
-				mmath.SplitCurve(nextBf.Curves.TranslateX, prevIndex, value.Index, nextIndex)
+				mmath.SplitCurve(nextBf.Curves.TranslateX, pi, vi, ni)
 			value.Curves.TranslateY, nextBf.Curves.TranslateY =
-				mmath.SplitCurve(nextBf.Curves.TranslateY, prevIndex, value.Index, nextIndex)
+				mmath.SplitCurve(nextBf.Curves.TranslateY, pi, vi, ni)
 			value.Curves.TranslateZ, nextBf.Curves.TranslateZ =
-				mmath.SplitCurve(nextBf.Curves.TranslateZ, prevIndex, value.Index, nextIndex)
+				mmath.SplitCurve(nextBf.Curves.TranslateZ, pi, vi, ni)
 			value.Curves.Rotate, nextBf.Curves.Rotate =
-				mmath.SplitCurve(nextBf.Curves.Rotate, prevIndex, value.Index, nextIndex)
+				mmath.SplitCurve(nextBf.Curves.Rotate, pi, vi, ni)
 		}
 	}
 
 	bnfs.Data[value.Index] = value
 }
 
-func (bnfs *BoneNameFrames) GetMaxFrame() float32 {
-	if len(bnfs.RegisteredIndexes) == 0 {
+func (bnfs *BoneNameFrames) GetMaxFrame() mcore.Float32 {
+	if bnfs.RegisteredIndexes.IsEmpty() {
 		return 0
 	}
 
-	return slices.Max(bnfs.RegisteredIndexes)
+	return bnfs.RegisteredIndexes.GetMax()
 }

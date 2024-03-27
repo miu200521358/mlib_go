@@ -1,28 +1,26 @@
 package mcore
 
 import (
-	"slices"
-
 	"github.com/jinzhu/copier"
 )
 
-type IndexModelInterface interface {
+type IIndexIntModel interface {
 	IsValid() bool
-	Copy() IndexModelInterface
-	GetIndex() int
-	SetIndex(index int)
+	Copy() IIndexIntModel
+	GetIndex() Int
+	SetIndex(index Int)
 }
 
 // INDEXを持つ基底クラス
 type IndexModel struct {
-	Index int
+	Index Int
 }
 
-func (v *IndexModel) GetIndex() int {
+func (v *IndexModel) GetIndex() Int {
 	return v.Index
 }
 
-func (v *IndexModel) SetIndex(index int) {
+func (v *IndexModel) SetIndex(index Int) {
 	v.Index = index
 }
 
@@ -30,62 +28,42 @@ func (v *IndexModel) IsValid() bool {
 	return v.GetIndex() >= 0
 }
 
-func (v *IndexModel) Copy() IndexModelInterface {
+func (v *IndexModel) Copy() IIndexIntModel {
 	copied := IndexModel{Index: v.Index}
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return &copied
 }
 
 // Tのリスト基底クラス
-type IndexModelCorrection[T IndexModelInterface] struct {
-	Data    map[int]T
-	Indexes map[int]int
+type IndexModelCorrection[T IIndexIntModel] struct {
+	Data    map[Int]T
+	Indexes *TreeIndexes[Int]
 }
 
-func NewIndexModelCorrection[T IndexModelInterface]() *IndexModelCorrection[T] {
+func NewIndexModelCorrection[T IIndexIntModel]() *IndexModelCorrection[T] {
 	return &IndexModelCorrection[T]{
-		Data:    make(map[int]T, 0),
-		Indexes: make(map[int]int, 0),
+		Data:    make(map[Int]T, 0),
+		Indexes: NewTreeIndexes[Int](),
 	}
 }
 
-func (c *IndexModelCorrection[T]) GetItem(index int) T {
-	if index < 0 {
-		// マイナス指定の場合、後ろからの順番に置き換える
-		index = len(c.Data) + index
-		return c.Data[c.Indexes[index]]
-	}
+func (c *IndexModelCorrection[T]) GetItem(index Int) T {
 	if val, ok := c.Data[index]; ok {
 		return val
 	}
 	// なかったらエラー
-	panic("[BaseIndexDictModel] index out of range: index: " + string(rune(index)))
-}
-
-func (c *IndexModelCorrection[T]) SetItem(index int, v T) {
-	c.Data[index] = v
+	panic("[IndexModelCorrection] index out of range: index: " + string(rune(index)))
 }
 
 func (c *IndexModelCorrection[T]) Append(value T) {
 	if value.GetIndex() < 0 {
-		value.SetIndex(len(c.Data))
+		value.SetIndex(Int(len(c.Data)))
 	}
 	c.Data[value.GetIndex()] = value
-	if _, ok := c.Indexes[value.GetIndex()]; !ok {
-		c.Indexes[value.GetIndex()] = value.GetIndex()
-	}
+	c.Indexes.Insert(value.GetIndex())
 }
 
-func (c *IndexModelCorrection[T]) GetSortedIndexes() []int {
-	keys := make([]int, 0, len(c.Indexes))
-	for key := range c.Indexes {
-		keys = append(keys, key)
-	}
-	slices.Sort(keys)
-	return keys
-}
-
-func (c *IndexModelCorrection[T]) DeleteItem(index int) {
+func (c *IndexModelCorrection[T]) DeleteItem(index Int) {
 	delete(c.Data, index)
 }
 
@@ -93,7 +71,7 @@ func (c *IndexModelCorrection[T]) Len() int {
 	return len(c.Data)
 }
 
-func (c *IndexModelCorrection[T]) Contains(key int) bool {
+func (c *IndexModelCorrection[T]) Contains(key Int) bool {
 	_, ok := c.Data[key]
 	return ok
 }
@@ -106,19 +84,16 @@ func (c *IndexModelCorrection[T]) IsNotEmpty() bool {
 	return len(c.Data) > 0
 }
 
-func (c *IndexModelCorrection[T]) LastIndex() int {
-	maxIndex := 0
-	for index := range c.Data {
-		if index > maxIndex {
-			maxIndex = index
-		}
+func (c *IndexModelCorrection[T]) LastIndex() Int {
+	if c.IsEmpty() {
+		return -1
 	}
-	return maxIndex
+	return c.Indexes.GetMax()
 }
 
 func (c *IndexModelCorrection[T]) GetSortedData() []T {
-	sortedData := make([]T, len(c.Indexes))
-	for i, index := range c.GetSortedIndexes() {
+	sortedData := make([]T, len(c.Indexes.GetValues()))
+	for i, index := range c.Indexes.GetValues() {
 		sortedData[i] = c.Data[index]
 	}
 	return sortedData

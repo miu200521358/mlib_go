@@ -1,6 +1,9 @@
 package vmd
 
-import "github.com/miu200521358/mlib_go/pkg/mmath"
+import (
+	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
+)
 
 type CameraFrame struct {
 	*BaseFrame                        // キーフレ
@@ -12,7 +15,7 @@ type CameraFrame struct {
 	Curves           *CameraCurves    // 補間曲線
 }
 
-func NewCameraFrame(index float32) *CameraFrame {
+func NewCameraFrame(index mcore.Float32) *CameraFrame {
 	return &CameraFrame{
 		BaseFrame:        NewVmdBaseFrame(index),
 		Position:         mmath.NewMVec3(),
