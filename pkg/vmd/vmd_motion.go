@@ -149,9 +149,8 @@ func (m *VmdMotion) animateBoneWithMorphs(
 	// ボーン変形行列操作
 	// IKリンクボーンの回転量を初期化
 	for _, bnfs := range m.BoneFrames.Data {
-		for _, bf := range bnfs.Data {
-			bf.IkRotation = mmath.NewRotationModel()
-		}
+		bf := bnfs.GetItem(frame)
+		bf.IkRotation = mmath.NewRotationModel()
 	}
 
 	for _, bone := range model.Bones.Data {

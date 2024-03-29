@@ -19,7 +19,7 @@ type BoneNameFrames struct {
 
 func NewBoneNameFrames(name string) *BoneNameFrames {
 	return &BoneNameFrames{
-		IndexFloatModels:  mcore.NewIndexFloatModelCorrection[*BoneFrame](),
+		IndexFloatModels:  mcore.NewIndexFloatModels[*BoneFrame](),
 		Name:              name,
 		IkIndexes:         mcore.NewFloatIndexes(),
 		RegisteredIndexes: mcore.NewFloatIndexes(),
@@ -62,16 +62,16 @@ func (fs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	fs.lock.RLock()
 	defer fs.lock.RUnlock()
 
-	if fs.Indexes.Has(index) {
-		return fs.Data[index]
+	if fs.Has(index) {
+		return fs.Get(index)
 	}
 
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := fs.GetRangeIndexes(index)
 
 	if prevIndex == nextIndex {
-		if fs.Indexes.Has(nextIndex) {
-			nextBf := fs.Data[nextIndex]
+		if fs.Has(nextIndex) {
+			nextBf := fs.Get(nextIndex)
 			copied := &BoneFrame{
 				BaseFrame:          NewVmdBaseFrame(index),
 				Position:           nextBf.Position.Copy(),
@@ -96,13 +96,13 @@ func (fs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	}
 
 	var prevBf, nextBf *BoneFrame
-	if fs.Indexes.Has(prevIndex) {
-		prevBf = fs.Data[prevIndex]
+	if fs.Has(prevIndex) {
+		prevBf = fs.Get(prevIndex)
 	} else {
 		prevBf = NewBoneFrame(index)
 	}
-	if fs.Indexes.Has(nextIndex) {
-		nextBf = fs.Data[nextIndex]
+	if fs.Has(nextIndex) {
+		nextBf = fs.Get(nextIndex)
 	} else {
 		nextBf = NewBoneFrame(index)
 	}
@@ -155,17 +155,15 @@ func (fs *BoneNameFrames) Append(value *BoneFrame) {
 	fs.lock.Lock()
 	defer fs.lock.Unlock()
 
-	fs.Indexes.InsertNoReplace(mcore.Float32(value.Index))
-
 	if value.IkRegistered {
-		fs.IkIndexes.InsertNoReplace(mcore.Float32(value.Index))
+		fs.IkIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
 	}
 
 	if value.Registered {
-		fs.RegisteredIndexes.InsertNoReplace(mcore.Float32(value.Index))
+		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
 	}
 
-	fs.Data[value.Index] = value
+	fs.ReplaceOrInsert(value)
 }
 
 // bf.Registered が true の場合、補間曲線を分割して登録する
@@ -173,17 +171,15 @@ func (fs *BoneNameFrames) Insert(value *BoneFrame) {
 	fs.lock.Lock()
 	defer fs.lock.Unlock()
 
-	fs.Indexes.InsertNoReplace(mcore.Float32(value.Index))
-
 	if value.IkRegistered {
-		fs.IkIndexes.InsertNoReplace(mcore.Float32(value.Index))
+		fs.IkIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
 	}
 
 	if value.Registered && !fs.RegisteredIndexes.Has(value.Index) {
 		// 補間曲線を分割する
 		prevIndex, nextIndex := fs.GetRangeIndexes(value.Index)
 		if nextIndex > value.Index && prevIndex < value.Index {
-			nextBf := fs.Data[nextIndex]
+			nextBf := fs.Get(nextIndex)
 			// 自分の前後にフレームがある場合、分割する
 			value.Curves.TranslateX, nextBf.Curves.TranslateX =
 				mmath.SplitCurve(nextBf.Curves.TranslateX, float32(prevIndex), float32(value.Index), float32(nextIndex))
@@ -197,8 +193,8 @@ func (fs *BoneNameFrames) Insert(value *BoneFrame) {
 	}
 
 	if value.Registered {
-		fs.RegisteredIndexes.InsertNoReplace(mcore.Float32(value.Index))
+		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
 	}
 
-	fs.Data[value.Index] = value
+	fs.ReplaceOrInsert(value)
 }

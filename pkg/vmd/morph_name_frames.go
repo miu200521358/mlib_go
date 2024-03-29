@@ -20,7 +20,7 @@ type MorphNameFrames struct {
 
 func NewMorphNameFrames(name string) *MorphNameFrames {
 	return &MorphNameFrames{
-		IndexFloatModels:  mcore.NewIndexFloatModelCorrection[*MorphFrame](),
+		IndexFloatModels:  mcore.NewIndexFloatModels[*MorphFrame](),
 		Name:              name,
 		RegisteredIndexes: mcore.NewFloatIndexes(),
 		lock:              sync.RWMutex{},
@@ -62,16 +62,16 @@ func (fs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 	fs.lock.RLock()
 	defer fs.lock.RUnlock()
 
-	if fs.Indexes.Has(index) {
-		return fs.Data[index]
+	if fs.Has(index) {
+		return fs.Get(index)
 	}
 
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := fs.GetRangeIndexes(index)
 
 	if prevIndex == nextIndex {
-		if fs.Indexes.Has(nextIndex) {
-			nextMf := fs.Data[nextIndex]
+		if fs.Has(nextIndex) {
+			nextMf := fs.Get(nextIndex)
 			copied := &MorphFrame{
 				BaseFrame: NewVmdBaseFrame(index),
 				Ratio:     nextMf.Ratio,
@@ -83,13 +83,13 @@ func (fs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 	}
 
 	var prevMf, nextMf *MorphFrame
-	if fs.Indexes.Has(prevIndex) {
-		prevMf = fs.Data[prevIndex]
+	if fs.Has(prevIndex) {
+		prevMf = fs.Get(prevIndex)
 	} else {
 		prevMf = NewMorphFrame(index)
 	}
-	if fs.Indexes.Has(nextIndex) {
-		nextMf = fs.Data[nextIndex]
+	if fs.Has(nextIndex) {
+		nextMf = fs.Get(nextIndex)
 	} else {
 		nextMf = NewMorphFrame(index)
 	}
@@ -107,13 +107,11 @@ func (fs *MorphNameFrames) Append(value *MorphFrame) {
 	fs.lock.Lock()
 	defer fs.lock.Unlock()
 
-	fs.Indexes.InsertNoReplace(mcore.Float32(value.Index))
-
 	if value.Registered {
-		fs.RegisteredIndexes.InsertNoReplace(mcore.Float32(value.Index))
+		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
 	}
 
-	fs.Data[value.Index] = value
+	fs.ReplaceOrInsert(value)
 }
 
 func (fs *MorphNameFrames) AnimateVertex(

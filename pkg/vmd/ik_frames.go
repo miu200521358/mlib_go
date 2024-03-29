@@ -6,6 +6,7 @@ import (
 	"github.com/petar/GoLLRB/llrb"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+
 )
 
 type IkFrames struct {
@@ -16,7 +17,7 @@ type IkFrames struct {
 
 func NewIkFrames() *IkFrames {
 	return &IkFrames{
-		IndexFloatModels:  mcore.NewIndexFloatModelCorrection[*IkFrame](),
+		IndexFloatModels:  mcore.NewIndexFloatModels[*IkFrame](),
 		RegisteredIndexes: mcore.NewFloatIndexes(),
 		lock:              sync.RWMutex{},
 	}
@@ -47,22 +48,29 @@ func (fs *IkFrames) GetRangeIndexes(index float32) (float32, float32) {
 
 // キーフレ計算結果を返す
 func (fs *IkFrames) GetItem(index float32) *IkFrame {
-	if val, ok := fs.Data[index]; ok {
-		return val
+	if fs == nil {
+		return NewIkFrame(index)
+	}
+
+	fs.lock.RLock()
+	defer fs.lock.RUnlock()
+
+	if fs.Has(index) {
+		return fs.Get(index)
 	}
 
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := fs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && fs.Indexes.Has(nextIndex) {
-		nextIf := fs.Data[nextIndex]
+	if prevIndex == nextIndex && fs.Has(nextIndex) {
+		nextIf := fs.Get(nextIndex)
 		copied := nextIf.Copy()
 		return copied.(*IkFrame)
 	}
 
 	var prevIf *IkFrame
-	if fs.Indexes.Has(prevIndex) {
-		prevIf = fs.Data[prevIndex]
+	if fs.Has(prevIndex) {
+		prevIf = fs.Get(prevIndex)
 	} else {
 		prevIf = NewIkFrame(index)
 	}
@@ -75,11 +83,9 @@ func (fs *IkFrames) Append(value *IkFrame) {
 	fs.lock.Lock()
 	defer fs.lock.Unlock()
 
-	fs.Indexes.InsertNoReplace(mcore.Float32(value.Index))
-
 	if value.Registered {
 		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
 	}
 
-	fs.Data[value.Index] = value
+	fs.ReplaceOrInsert(value)
 }

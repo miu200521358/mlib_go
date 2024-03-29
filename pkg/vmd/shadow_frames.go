@@ -6,7 +6,6 @@ import (
 	"github.com/petar/GoLLRB/llrb"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
-
 )
 
 type ShadowFrames struct {
@@ -17,7 +16,7 @@ type ShadowFrames struct {
 
 func NewShadowFrames() *ShadowFrames {
 	return &ShadowFrames{
-		IndexFloatModels:  mcore.NewIndexFloatModelCorrection[*ShadowFrame](),
+		IndexFloatModels:  mcore.NewIndexFloatModels[*ShadowFrame](),
 		RegisteredIndexes: mcore.NewFloatIndexes(),
 		lock:              sync.RWMutex{},
 	}
@@ -48,22 +47,29 @@ func (fs *ShadowFrames) GetRangeIndexes(index float32) (float32, float32) {
 
 // キーフレ計算結果を返す
 func (fs *ShadowFrames) GetItem(index float32) *ShadowFrame {
-	if val, ok := fs.Data[index]; ok {
-		return val
+	if fs == nil {
+		return NewShadowFrame(index)
+	}
+
+	fs.lock.RLock()
+	defer fs.lock.RUnlock()
+
+	if fs.Has(index) {
+		return fs.Get(index)
 	}
 
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := fs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && fs.Indexes.Has(nextIndex) {
-		nextSf := fs.Data[nextIndex]
+	if prevIndex == nextIndex && fs.Has(nextIndex) {
+		nextSf := fs.Get(nextIndex)
 		copied := nextSf.Copy()
 		return copied.(*ShadowFrame)
 	}
 
 	var prevSf *ShadowFrame
-	if fs.Indexes.Has(prevIndex) {
-		prevSf = fs.Data[prevIndex]
+	if fs.Has(prevIndex) {
+		prevSf = fs.Get(prevIndex)
 	} else {
 		prevSf = NewShadowFrame(index)
 	}
@@ -76,11 +82,9 @@ func (fs *ShadowFrames) Append(value *ShadowFrame) {
 	fs.lock.Lock()
 	defer fs.lock.Unlock()
 
-	fs.Indexes.InsertNoReplace(mcore.Float32(value.Index))
-
 	if value.Registered {
 		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
 	}
 
-	fs.Data[value.Index] = value
+	fs.ReplaceOrInsert(value)
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/petar/GoLLRB/llrb"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
-
 )
 
 type LightFrames struct {
@@ -17,7 +16,7 @@ type LightFrames struct {
 
 func NewLightFrames() *LightFrames {
 	return &LightFrames{
-		IndexFloatModels:  mcore.NewIndexFloatModelCorrection[*LightFrame](),
+		IndexFloatModels:  mcore.NewIndexFloatModels[*LightFrame](),
 		RegisteredIndexes: mcore.NewFloatIndexes(),
 		lock:              sync.RWMutex{},
 	}
@@ -48,22 +47,29 @@ func (fs *LightFrames) GetRangeIndexes(index float32) (float32, float32) {
 
 // キーフレ計算結果を返す
 func (fs *LightFrames) GetItem(index float32) *LightFrame {
-	if val, ok := fs.Data[index]; ok {
-		return val
+	if fs == nil {
+		return NewLightFrame(index)
+	}
+
+	fs.lock.RLock()
+	defer fs.lock.RUnlock()
+
+	if fs.Has(index) {
+		return fs.Get(index)
 	}
 
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := fs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && fs.Indexes.Has(nextIndex) {
-		nextIf := fs.Data[nextIndex]
+	if prevIndex == nextIndex && fs.Has(nextIndex) {
+		nextIf := fs.Get(nextIndex)
 		copied := nextIf.Copy()
 		return copied.(*LightFrame)
 	}
 
 	var prevIf *LightFrame
-	if fs.Indexes.Has(prevIndex) {
-		prevIf = fs.Data[prevIndex]
+	if fs.Has(prevIndex) {
+		prevIf = fs.Get(prevIndex)
 	} else {
 		prevIf = NewLightFrame(index)
 	}
@@ -76,11 +82,9 @@ func (fs *LightFrames) Append(value *LightFrame) {
 	fs.lock.Lock()
 	defer fs.lock.Unlock()
 
-	fs.Indexes.InsertNoReplace(mcore.Float32(value.Index))
-
 	if value.Registered {
 		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
 	}
 
-	fs.Data[value.Index] = value
+	fs.ReplaceOrInsert(value)
 }

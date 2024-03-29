@@ -7,6 +7,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type CameraFrames struct {
@@ -17,7 +18,7 @@ type CameraFrames struct {
 
 func NewCameraFrames() *CameraFrames {
 	return &CameraFrames{
-		IndexFloatModels:  mcore.NewIndexFloatModelCorrection[*CameraFrame](),
+		IndexFloatModels:  mcore.NewIndexFloatModels[*CameraFrame](),
 		RegisteredIndexes: mcore.NewFloatIndexes(),
 		lock:              sync.RWMutex{},
 	}
@@ -48,15 +49,22 @@ func (fs *CameraFrames) GetRangeIndexes(index float32) (float32, float32) {
 
 // キーフレ計算結果を返す
 func (fs *CameraFrames) GetItem(index float32) *CameraFrame {
-	if val, ok := fs.Data[index]; ok {
-		return val
+	if fs == nil {
+		return NewCameraFrame(index)
+	}
+
+	fs.lock.RLock()
+	defer fs.lock.RUnlock()
+
+	if fs.Has(index) {
+		return fs.Get(index)
 	}
 
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := fs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && fs.Indexes.Has(nextIndex) {
-		nextCf := fs.Data[nextIndex]
+	if prevIndex == nextIndex && fs.Has(nextIndex) {
+		nextCf := fs.Get(nextIndex)
 		copied := &CameraFrame{
 			BaseFrame:        NewVmdBaseFrame(index),
 			Position:         nextCf.Position.Copy(),
@@ -71,13 +79,13 @@ func (fs *CameraFrames) GetItem(index float32) *CameraFrame {
 	}
 
 	var prevCf, nextCf *CameraFrame
-	if fs.Indexes.Has(prevIndex) {
-		prevCf = fs.Data[prevIndex]
+	if fs.Has(prevIndex) {
+		prevCf = fs.Get(prevIndex)
 	} else {
 		prevCf = NewCameraFrame(index)
 	}
-	if fs.Indexes.Has(nextIndex) {
-		nextCf = fs.Data[nextIndex]
+	if fs.Has(nextIndex) {
+		nextCf = fs.Get(nextIndex)
 	} else {
 		nextCf = NewCameraFrame(index)
 	}
@@ -105,13 +113,11 @@ func (fs *CameraFrames) Append(value *CameraFrame) {
 	fs.lock.Lock()
 	defer fs.lock.Unlock()
 
-	fs.Indexes.InsertNoReplace(mcore.Float32(value.Index))
-
 	if value.Registered {
-		fs.RegisteredIndexes.InsertNoReplace(mcore.Float32(value.Index))
+		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
 	}
 
-	fs.Data[value.Index] = value
+	fs.ReplaceOrInsert(value)
 }
 
 // bf.Registered が true の場合、補間曲線を分割して登録する
@@ -119,13 +125,11 @@ func (fs *CameraFrames) Insert(value *CameraFrame) {
 	fs.lock.Lock()
 	defer fs.lock.Unlock()
 
-	fs.Indexes.InsertNoReplace(mcore.Float32(value.Index))
-
 	if value.Registered && !fs.RegisteredIndexes.Has(value.Index) {
 		// 補間曲線を分割する
 		prevIndex, nextIndex := fs.GetRangeIndexes(value.Index)
 		if nextIndex > value.Index && prevIndex < value.Index {
-			nextCf := fs.Data[nextIndex]
+			nextCf := fs.Get(nextIndex)
 			// 自分の前後にフレームがある場合、分割する
 			value.Curves.TranslateX, nextCf.Curves.TranslateX =
 				mmath.SplitCurve(nextCf.Curves.TranslateX, prevIndex, value.Index, nextIndex)
@@ -143,8 +147,8 @@ func (fs *CameraFrames) Insert(value *CameraFrame) {
 	}
 
 	if value.Registered {
-		fs.RegisteredIndexes.InsertNoReplace(mcore.Float32(value.Index))
+		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
 	}
 
-	fs.Data[value.Index] = value
+	fs.ReplaceOrInsert(value)
 }
