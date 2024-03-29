@@ -2,7 +2,6 @@ package pmx
 
 import (
 	"fmt"
-	"slices"
 
 	"golang.org/x/text/encoding/unicode"
 
@@ -93,7 +92,7 @@ func (r *PmxReader) readHeader(model *PmxModel) error {
 	}
 
 	if model.Signature[:3] != "PMX" ||
-		!slices.Contains([]string{"2.0", "2.1"}, fmt.Sprintf("%.1f", model.Version)) {
+		(fmt.Sprintf("%.1f", model.Version) != "2.0" && fmt.Sprintf("%.1f", model.Version) != "2.1") {
 		// 整合性チェック
 		return fmt.Errorf("PMX2.0/2.1形式外のデータです。signature: %s, version: %.1f ", model.Signature, model.Version)
 	}

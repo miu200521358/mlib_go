@@ -86,6 +86,7 @@ go get -u golang.org/x/image
 2. main.go を実行
 3. `go tool pprof cmd\main.go cmd\cpu.pprof`
     - `go tool pprof -flat cmd\main.go cmd\cpu.pprof`
+    - `go tool pprof -cum cmd\main.go cmd\cpu.pprof`
 4. `(pprof) top`
 
 ## bullet
