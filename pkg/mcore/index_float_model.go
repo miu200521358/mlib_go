@@ -1,10 +1,8 @@
 package mcore
 
 import (
-	"slices"
-
 	"github.com/jinzhu/copier"
-
+	"github.com/petar/GoLLRB/llrb"
 )
 
 type IIndexFloatModel interface {
@@ -37,16 +35,37 @@ func (v *IndexFloatModel) Copy() IIndexFloatModel {
 	return &copied
 }
 
+type FloatIndexes struct {
+	*llrb.LLRB
+}
+
+func NewFloatIndexes() *FloatIndexes {
+	return &FloatIndexes{
+		LLRB: llrb.New(),
+	}
+}
+
+func (i FloatIndexes) Has(index float32) bool {
+	return i.LLRB.Has(Float32(index))
+}
+
+func (i FloatIndexes) Max() float32 {
+	if i.LLRB.Len() == 0 {
+		return 0
+	}
+	return float32(i.LLRB.Max().(Float32))
+}
+
 // Tのリスト基底クラス
 type IndexFloatModels[T IIndexFloatModel] struct {
 	Data    map[float32]T
-	Indexes []float32
+	Indexes *FloatIndexes
 }
 
 func NewIndexFloatModelCorrection[T IIndexFloatModel]() *IndexFloatModels[T] {
 	return &IndexFloatModels[T]{
 		Data:    make(map[float32]T, 0),
-		Indexes: make([]float32, 0),
+		Indexes: NewFloatIndexes(),
 	}
 }
 
@@ -67,18 +86,12 @@ func (c *IndexFloatModels[T]) Append(value T) {
 		value.SetIndex(float32(len(c.Data)))
 	}
 	c.Data[value.GetIndex()] = value
-	if !slices.Contains(c.Indexes, value.GetIndex()) {
-		c.Indexes = append(c.Indexes, value.GetIndex())
-	}
-	c.SortIndexes()
+	c.Indexes.ReplaceOrInsert(Float32(value.GetIndex()))
 }
 
-func (c *IndexFloatModels[T]) SortIndexes() {
-	slices.Sort(c.Indexes)
-}
-
-func (c *IndexFloatModels[T]) DeleteItem(index float32) {
+func (c *IndexFloatModels[T]) Delete(index float32) {
 	delete(c.Data, index)
+	c.Indexes.Delete(Float32(index))
 }
 
 func (c *IndexFloatModels[T]) Len() int {
@@ -106,12 +119,4 @@ func (c *IndexFloatModels[T]) LastIndex() float32 {
 		}
 	}
 	return maxIndex
-}
-
-func (c *IndexFloatModels[T]) GetSortedData() []T {
-	sortedData := make([]T, len(c.Indexes))
-	for i, index := range c.Indexes {
-		sortedData[i] = c.Data[index]
-	}
-	return sortedData
 }

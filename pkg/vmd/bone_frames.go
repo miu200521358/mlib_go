@@ -32,8 +32,8 @@ func (bfs *BoneFrames) Contains(boneName string) bool {
 	return ok
 }
 
-func (bfs *BoneFrames) Append(bnfs *BoneNameFrames) {
-	bfs.Data[bnfs.Name] = bnfs
+func (bfs *BoneFrames) Append(fs *BoneNameFrames) {
+	bfs.Data[fs.Name] = fs
 }
 
 func (bfs *BoneFrames) GetItem(boneName string) *BoneNameFrames {
@@ -42,8 +42,8 @@ func (bfs *BoneFrames) GetItem(boneName string) *BoneNameFrames {
 
 func (bfs *BoneFrames) GetMaxFrame() float32 {
 	maxFno := float32(0)
-	for _, bnfs := range bfs.Data {
-		fno := bnfs.GetMaxFrame()
+	for _, fs := range bfs.Data {
+		fno := fs.RegisteredIndexes.Max()
 		if fno > maxFno {
 			maxFno = fno
 		}
@@ -114,7 +114,7 @@ func (bfs *BoneFrames) prepareIkSolvers(
 					linkBf.IkRotation = mmath.NewRotationModelByQuaternion(quats[linkIndex])
 
 					// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
-					bfs.GetItem(linkBone.Name).Append(linkBf, true)
+					bfs.GetItem(linkBone.Name).Append(linkBf)
 				}
 			}
 		}(bone)

@@ -48,28 +48,19 @@ func (m *VmdMotion) SetName(name string) {
 }
 
 func (m *VmdMotion) GetMaxFrame() float32 {
-	// TODO: モーフが入ったらモーフも考慮する
-	return max(m.BoneFrames.GetMaxFrame(), m.MorphFrames.GetMaxFrame())
+	return max(float32(m.BoneFrames.GetMaxFrame()), float32(m.MorphFrames.GetMaxFrame()))
 }
 
-func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame, isSort bool) {
-	m.BoneFrames.GetItem(boneName).Append(bf, isSort)
+func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {
+	m.BoneFrames.GetItem(boneName).Append(bf)
 }
 
-func (m *VmdMotion) SortBoneFrames() {
-	for _, bnfs := range m.BoneFrames.Data {
-		bnfs.Sort()
-	}
+func (m *VmdMotion) InsertBoneFrame(boneName string, bf *BoneFrame) {
+	m.BoneFrames.GetItem(boneName).Insert(bf)
 }
 
-func (m *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame, isSort bool) {
-	m.MorphFrames.GetItem(morphName).Append(mf, isSort)
-}
-
-func (m *VmdMotion) SortMorphFrames() {
-	for _, mnfs := range m.MorphFrames.Data {
-		mnfs.Sort()
-	}
+func (m *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame) {
+	m.MorphFrames.GetItem(morphName).Append(mf)
 }
 
 func (m *VmdMotion) AppendCameraFrame(cf *CameraFrame) {
@@ -88,17 +79,17 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 	m.IkFrames.Append(ikf)
 }
 
-func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
+func (m *VmdMotion) Animate(frame float32, model *pmx.PmxModel) *VmdDeltas {
 	vds := &VmdDeltas{}
 
-	vds.Morphs = m.AnimateMorph(fno, model, nil)
+	vds.Morphs = m.AnimateMorph(frame, model, nil)
 
 	for i, bd := range vds.Morphs.Bones.Data {
 		bone := model.Bones.GetItem(i)
 		if !m.BoneFrames.Contains(bone.Name) {
 			m.BoneFrames.Append(NewBoneNameFrames(bone.Name))
 		}
-		bf := m.BoneFrames.GetItem(bone.Name).GetItem(fno)
+		bf := m.BoneFrames.GetItem(bone.Name).GetItem(frame)
 
 		// 一旦モーフの値をクリア
 		bf.MorphPosition = mmath.NewMVec3()
@@ -110,11 +101,11 @@ func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
 
 		// 該当ボーンキーフレにモーフの値を加算
 		bf.Add(bd.BoneFrame)
-		m.AppendBoneFrame(bone.Name, bf, false)
+		m.AppendBoneFrame(bone.Name, bf)
 	}
 
 	// モーフ付きで変形を計算
-	vds.Bones = m.AnimateBoneWithMorphs(fno, model, nil, true, true)
+	vds.Bones = m.animateBoneWithMorphs(frame, model, nil, true, true)
 
 	return vds
 }
@@ -145,10 +136,10 @@ func (m *VmdMotion) AnimateBone(
 	boneNames []string,
 	isCalcIk bool,
 ) *BoneDeltas {
-	return m.AnimateBoneWithMorphs(frame, model, boneNames, isCalcIk, false)
+	return m.animateBoneWithMorphs(float32(frame), model, boneNames, isCalcIk, false)
 }
 
-func (m *VmdMotion) AnimateBoneWithMorphs(
+func (m *VmdMotion) animateBoneWithMorphs(
 	frame float32,
 	model *pmx.PmxModel,
 	boneNames []string,
