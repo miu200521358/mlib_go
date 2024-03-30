@@ -2,6 +2,7 @@ package vmd
 
 import (
 	"slices"
+	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
@@ -45,11 +46,13 @@ type BoneNameFrameNo struct {
 
 type BoneDeltas struct {
 	Data map[BoneNameFrameNo]*BoneDelta
+	lock sync.RWMutex // マップアクセス制御用
 }
 
 func NewBoneDeltas() *BoneDeltas {
 	return &BoneDeltas{
 		Data: make(map[BoneNameFrameNo]*BoneDelta, 0),
+		lock: sync.RWMutex{},
 	}
 }
 
@@ -58,6 +61,9 @@ func (bts *BoneDeltas) GetItem(boneName string, frame float32) *BoneDelta {
 }
 
 func (bts *BoneDeltas) SetItem(boneName string, frame float32, boneDelta *BoneDelta) {
+	bts.lock.Lock()
+	defer bts.lock.Unlock()
+
 	bts.Data[BoneNameFrameNo{boneName, frame}] = boneDelta
 }
 
