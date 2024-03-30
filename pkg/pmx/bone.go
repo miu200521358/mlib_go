@@ -355,33 +355,31 @@ func (bone *Bone) setup() {
 // ボーンリスト
 type Bones struct {
 	*mcore.IndexNameModels[*Bone]
-	Vertices           map[int][]int
-	IkTreeIndexes      map[int][]int
-	LayerSortedIndexes map[int]string
-	LayerSortedNames   map[string]int
-	positionVao        *mgl.VAO
-	positionIbo        *mgl.IBO
-	positionIboCount   int32
-	normalVao          *mgl.VAO
-	normalIbo          *mgl.IBO
-	normalIboCount     int32
-	ChunkSize          int
+	Vertices         map[int][]int
+	IkTreeIndexes    map[int][]int
+	LayerSortedNames []string
+	positionVao      *mgl.VAO
+	positionIbo      *mgl.IBO
+	positionIboCount int32
+	normalVao        *mgl.VAO
+	normalIbo        *mgl.IBO
+	normalIboCount   int32
+	ChunkSize        int
 }
 
 func NewBones() *Bones {
 	return &Bones{
-		IndexNameModels:    mcore.NewIndexNameModels[*Bone](),
-		Vertices:           make(map[int][]int),
-		IkTreeIndexes:      make(map[int][]int),
-		LayerSortedIndexes: make(map[int]string),
-		LayerSortedNames:   make(map[string]int),
-		positionVao:        nil,
-		positionIbo:        nil,
-		positionIboCount:   0,
-		normalVao:          nil,
-		normalIbo:          nil,
-		normalIboCount:     0,
-		ChunkSize:          100,
+		IndexNameModels:  mcore.NewIndexNameModels[*Bone](),
+		Vertices:         make(map[int][]int),
+		IkTreeIndexes:    make(map[int][]int),
+		LayerSortedNames: make([]string, 0),
+		positionVao:      nil,
+		positionIbo:      nil,
+		positionIboCount: 0,
+		normalVao:        nil,
+		normalIbo:        nil,
+		normalIboCount:   0,
+		ChunkSize:        100,
 	}
 }
 
@@ -610,16 +608,11 @@ func (b *Bones) setup() {
 	}
 
 	// 変形階層・ボーンINDEXでソート
-	b.LayerSortedIndexes = make(map[int]string, len(b.Data))
-	b.LayerSortedNames = make(map[string]int, len(b.Data))
+	b.LayerSortedNames = make([]string, 0)
 	layerIndexes := b.GetLayerIndexes()
 
-	i := 0
 	for _, boneIndex := range layerIndexes {
-		bone := b.GetItem(boneIndex)
-		b.LayerSortedNames[bone.Name] = i
-		b.LayerSortedIndexes[i] = bone.Name
-		i++
+		b.LayerSortedNames = append(b.LayerSortedNames, b.GetItem(boneIndex).Name)
 	}
 
 	// 変形階層順に親子を繋げていく
@@ -826,13 +819,4 @@ func (p LayerIndexes) Less(i, j int) bool {
 }
 func (p LayerIndexes) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
-}
-
-func (p LayerIndexes) Contains(index int) bool {
-	for _, layerIndex := range p {
-		if layerIndex.Index == index {
-			return true
-		}
-	}
-	return false
 }
