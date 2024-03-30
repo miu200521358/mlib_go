@@ -7,6 +7,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type BoneNameFrames struct {
@@ -55,6 +56,15 @@ func (fs *BoneNameFrames) GetRangeIndexes(index float32) (float32, float32) {
 
 // キーフレ計算結果を返す
 func (fs *BoneNameFrames) GetItem(index float32) *BoneFrame {
+	return fs.getItemWithCopyFlg(index, true)
+}
+
+func (fs *BoneNameFrames) GetItemNoCopy(index float32) *BoneFrame {
+	return fs.getItemWithCopyFlg(index, false)
+}
+
+// キーフレ計算結果を返す
+func (fs *BoneNameFrames) getItemWithCopyFlg(index float32, isCopy bool) *BoneFrame {
 	if fs == nil {
 		return NewBoneFrame(index)
 	}
@@ -71,7 +81,11 @@ func (fs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 
 	if prevIndex == nextIndex {
 		if fs.Has(nextIndex) {
-			return fs.Get(nextIndex).Copy().(*BoneFrame)
+			if isCopy {
+				return fs.Get(nextIndex).Copy().(*BoneFrame)
+			} else {
+				return fs.Get(nextIndex)
+			}
 		} else {
 			return NewBoneFrame(index)
 		}

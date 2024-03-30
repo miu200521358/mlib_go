@@ -93,7 +93,7 @@ go get -u golang.org/x/image
 
 1. `set GOGC=1000`
 2. `set GODEBUG=gctrace=1`
-3. `(mtool) C:\MMD\mlib_go\test>go run profile.go`
+3. `(mtool) C:\MMD\mlib_go\crumb>go run profile.go`
 4. `go tool pprof profile.go cpu.pprof`
 5. `go tool pprof -http=:8080 cpu.pprof`
 

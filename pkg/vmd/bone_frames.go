@@ -632,7 +632,7 @@ func (bfs *BoneFrames) getPosition(
 	}
 
 	bone := model.Bones.GetItemByName(boneName)
-	bf := bfs.GetItem(boneName).GetItem(frame)
+	bf := bfs.GetItem(boneName).GetItemNoCopy(frame)
 
 	mat := mmath.NewMMat4()
 	if isCalcMorph {
@@ -697,7 +697,7 @@ func (bfs *BoneFrames) getRotation(
 	bone := model.Bones.GetItemByName(boneName)
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
-	bf := bfs.GetItem(boneName).GetItem(frame)
+	bf := bfs.GetItem(boneName).GetItemNoCopy(frame)
 	var rot *mmath.MQuaternion
 	if bf.IkRotation != nil && !bf.IkRotation.GetRadians().IsZero() {
 		// IK用回転を持っている場合、置き換え
@@ -781,7 +781,7 @@ func (bfs *BoneFrames) getScale(
 	model *pmx.PmxModel,
 	isCalcMorph bool,
 ) *mmath.MMat4 {
-	bf := bfs.GetItem(boneName).GetItem(frame)
+	bf := bfs.GetItem(boneName).GetItemNoCopy(frame)
 	mat := mmath.NewMMat4()
 
 	if isCalcMorph {
