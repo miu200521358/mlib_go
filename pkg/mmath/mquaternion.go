@@ -548,9 +548,23 @@ func (v *MQuaternion) Vector() *[]float64 {
 }
 
 func (v *MQuaternion) ToMat4() *MMat4 {
-	mat := NewMMat4()
-	mat.AssignQuaternion(v)
-	return mat
+
+	xx := v.GetX() * v.GetX() * 2
+	yy := v.GetY() * v.GetY() * 2
+	zz := v.GetZ() * v.GetZ() * 2
+	xy := v.GetX() * v.GetY() * 2
+	xz := v.GetX() * v.GetZ() * 2
+	yz := v.GetY() * v.GetZ() * 2
+	wx := v.GetW() * v.GetX() * 2
+	wy := v.GetW() * v.GetY() * 2
+	wz := v.GetW() * v.GetZ() * 2
+
+	return &MMat4{
+		{1 - (yy + zz), xy - wz, xz + wy, 0},
+		{xy + wz, 1 - (xx + zz), yz - wx, 0},
+		{xz - wy, yz + wx, 1 - (xx + yy), 0},
+		{0, 0, 0, 1},
+	}
 }
 
 // ToFixedAxisRotation 軸制限されたクォータニオンの回転

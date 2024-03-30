@@ -410,11 +410,9 @@ func LerpVec2(v1, v2 *MVec2, t float64) *MVec2 {
 	return (v2.Sub(v1)).MulScalar(t).Added(v1)
 }
 
-func (v *MVec2) Round() *MVec2 {
-	return &MVec2{
-		math.Round(v.GetX()),
-		math.Round(v.GetY()),
-	}
+func (v *MVec2) Round() {
+	v.SetX(math.Round(v.GetX()))
+	v.SetY(math.Round(v.GetY()))
 }
 
 // 標準偏差を加味したmean処理

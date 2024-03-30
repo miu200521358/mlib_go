@@ -12,12 +12,6 @@ import (
 
 type MMat4 [4]MVec4
 
-func NewMMat4FromQuaternion(rot *MQuaternion) *MMat4 {
-	mat := NewMMat4()
-	mat.AssignQuaternion(rot)
-	return mat
-}
-
 var (
 	// Zero holds a zero matrix.
 	MMat4Zero = MMat4{
@@ -84,22 +78,6 @@ func (v *MMat4) Bullet() mbt.BtMatrix3x3 {
 		float32(glMat[8]), float32(glMat[9]), float32(glMat[10]))
 }
 
-// Bullet+OpenGL座標系に変換 + Z軸の逆行列を加味した行列ベクトルを返します
-func (v *MMat4) BulletInvZ() mbt.BtMatrix3x3 {
-	invZ := NewMMat4()
-	invZ.ScaleVec3(&MVec3{1, 1, -1})
-
-	mat := NewMMat4()
-	mat.Mul(invZ)
-	mat.Mul(v)
-	mat.Mul(invZ)
-
-	return mbt.NewBtMatrix3x3(
-		float32(mat[0][0]), float32(mat[0][1]), float32(mat[0][2]),
-		float32(mat[1][0]), float32(mat[1][1]), float32(mat[1][2]),
-		float32(mat[2][0]), float32(mat[2][1]), float32(mat[2][2]))
-}
-
 // IsZero
 func (m *MMat4) IsZero() bool {
 	return *m == MMat4Zero
@@ -142,8 +120,7 @@ func (mat *MMat4) Scale(f float64) *MMat4 {
 
 // Scaled returns a copy of the matrix with the diagonal scale elements multiplied by f.
 func (mat *MMat4) Scaled(f float64) *MMat4 {
-	r := *mat
-	return r.Scale(f)
+	return mat.Copy().Scale(f)
 }
 
 // Trace returns the trace value for the matrix.
@@ -228,28 +205,6 @@ func (mat *MMat4) TransformVec3(v *MVec3) {
 	v[0] = x * oow
 	v[1] = y * oow
 	v[2] = z * oow
-}
-
-// MulVec3W multiplies v with mat with w as fourth component of the vector.
-// Useful to differentiate between vectors (w = 0) and points (w = 1)
-// without transforming them to vec4.
-func (mat *MMat4) MulVec3W(v *MVec3, w float64) *MVec3 {
-	result := *v
-	mat.TransformVec3W(&result, w)
-	return &result
-}
-
-// TransformVec3W multiplies v with mat with w as fourth component of the vector and
-// saves the result in v.
-// Useful to differentiate between vectors (w = 0) and points (w = 1)
-// without transforming them to vec4.
-func (mat *MMat4) TransformVec3W(v *MVec3, w float64) {
-	// use intermediate variables to not alter further computations
-	x := mat[0][0]*v[0] + mat[1][0]*v[1] + mat[2][0]*v[2] + mat[3][0]*w
-	y := mat[0][1]*v[0] + mat[1][1]*v[1] + mat[2][1]*v[2] + mat[3][1]*w
-	v[2] = mat[0][2]*v[0] + mat[1][2]*v[1] + mat[2][2]*v[2] + mat[3][2]*w
-	v[0] = x
-	v[1] = y
 }
 
 // SetTranslation sets the translation elements of the matrix.
@@ -350,41 +305,6 @@ func (mat *MMat4) Mat3() *MMat3 {
 		MVec3{mat[1][0], mat[1][1], mat[1][2]},
 		MVec3{mat[2][0], mat[2][1], mat[2][2]},
 	}
-}
-
-// AssignQuaternion assigns a quaternion to the rotations part of the matrix and sets the other elements to their ident value.
-func (mat *MMat4) AssignQuaternion(q *MQuaternion) *MMat4 {
-	xx := q.GetX() * q.GetX() * 2
-	yy := q.GetY() * q.GetY() * 2
-	zz := q.GetZ() * q.GetZ() * 2
-	xy := q.GetX() * q.GetY() * 2
-	xz := q.GetX() * q.GetZ() * 2
-	yz := q.GetY() * q.GetZ() * 2
-	wx := q.GetW() * q.GetX() * 2
-	wy := q.GetW() * q.GetY() * 2
-	wz := q.GetW() * q.GetZ() * 2
-
-	mat[0][0] = 1 - (yy + zz)
-	mat[0][1] = xy - wz
-	mat[0][2] = xz + wy
-	mat[0][3] = 0
-
-	mat[1][0] = xy + wz
-	mat[1][1] = 1 - (xx + zz)
-	mat[1][2] = yz - wx
-	mat[1][3] = 0
-
-	mat[2][0] = xz - wy
-	mat[2][1] = yz + wx
-	mat[2][2] = 1 - (xx + yy)
-	mat[2][3] = 0
-
-	mat[3][0] = 0
-	mat[3][1] = 0
-	mat[3][2] = 0
-	mat[3][3] = 1
-
-	return mat
 }
 
 // AssignXRotation assigns a rotation around the x axis to the rotation part of the matrix and sets the remaining elements to their ident value.

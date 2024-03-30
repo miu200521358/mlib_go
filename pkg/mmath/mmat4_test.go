@@ -50,23 +50,6 @@ func TestMMat4_Quaternion(t *testing.T) {
 	}
 }
 
-func TestMMat4_AssignQuaternion(t *testing.T) {
-	mat := &MMat4{}
-	q := NewMQuaternionByValues(1, 2, 3, 4)
-	expectedMat := &MMat4{
-		{-25, -20, 22, 0},
-		{28, -19, 4, 0},
-		{-10, 20, -9, 0},
-		{0, 0, 0, 1},
-	}
-
-	mat.AssignQuaternion(q)
-
-	if !mat.PracticallyEquals(expectedMat, 1e-10) {
-		t.Errorf("Expected mat to be %v, got %v", expectedMat, mat)
-	}
-}
-
 func TestMMat4_AssignEulerRotation(t *testing.T) {
 	mat := &MMat4{}
 	xPitch := 0.5
