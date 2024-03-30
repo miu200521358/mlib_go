@@ -307,9 +307,7 @@ func (v *MVec3) Normalize() *MVec3 {
 
 // Normalized ベクトルを正規化した結果を返します
 func (v *MVec3) Normalized() *MVec3 {
-	vec := *v
-	vec.Normalize()
-	return &vec
+	return v.Copy().Normalize()
 }
 
 // Angle ベクトルの角度(ラジアン角度)を返します
@@ -326,9 +324,7 @@ func (v *MVec3) Angle(other *MVec3) float64 {
 
 // Degree ベクトルの角度(度数)を返します
 func (v *MVec3) Degree(other *MVec3) float64 {
-	radian := v.Angle(other)
-	degree := radian * (180 / math.Pi)
-	return degree
+	return v.Angle(other) * (180 / math.Pi)
 }
 
 // Dot ベクトルの内積を返します
@@ -389,9 +385,7 @@ func (v *MVec3) Clamp(min, max *MVec3) *MVec3 {
 
 // Clamped ベクトルの各要素を指定された範囲内にクランプした結果を返します
 func (v *MVec3) Clamped(min, max *MVec3) *MVec3 {
-	result := *v
-	result.Clamp(min, max)
-	return &result
+	return v.Copy().Clamp(min, max)
 }
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
@@ -401,9 +395,7 @@ func (v *MVec3) Clamp01() *MVec3 {
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します
 func (v *MVec3) Clamped01() *MVec3 {
-	result := *v
-	result.Clamp01()
-	return &result
+	return v.Copy().Clamp01()
 }
 
 // Copy
@@ -557,8 +549,7 @@ func (v *MVec3) One() *MVec3 {
 }
 
 func (v *MVec3) Distance(other *MVec3) float64 {
-	s := v.Subed(other)
-	return s.Length()
+	return v.Subed(other).Length()
 }
 
 func (v *MVec3) Project(other *MVec3) *MVec3 {

@@ -111,29 +111,25 @@ func (v *MQuaternion) MMD() *MQuaternion {
 func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
 	angle *= 0.5
 	sin := math.Sin(angle)
-	q := NewMQuaternionByValues(axis[0]*sin, axis[1]*sin, axis[2]*sin, math.Cos(angle))
-	return q.Normalize()
+	return NewMQuaternionByValues(axis[0]*sin, axis[1]*sin, axis[2]*sin, math.Cos(angle)).Normalize()
 }
 
 // NewMQuaternionFromXAxisAngleは、X軸周りの回転を表す四元数を返します。
 func NewMQuaternionFromXAxisAngle(angle float64) *MQuaternion {
 	angle *= 0.5
-	q := NewMQuaternionByValues(math.Sin(angle), 0, 0, math.Cos(angle))
-	return q.Normalize()
+	return NewMQuaternionByValues(math.Sin(angle), 0, 0, math.Cos(angle)).Normalize()
 }
 
 // NewMQuaternionFromYAxisAngleは、Y軸周りの回転を表す四元数を返します。
 func NewMQuaternionFromYAxisAngle(angle float64) *MQuaternion {
 	angle *= 0.5
-	q := NewMQuaternionByValues(0, math.Sin(angle), 0, math.Cos(angle))
-	return q.Normalize()
+	return NewMQuaternionByValues(0, math.Sin(angle), 0, math.Cos(angle)).Normalize()
 }
 
 // NewMQuaternionFromZAxisAngleは、Z軸周りの回転を表す四元数を返します。
 func NewMQuaternionFromZAxisAngle(angle float64) *MQuaternion {
 	angle *= 0.5
-	q := NewMQuaternionByValues(0, 0, math.Sin(angle), math.Cos(angle))
-	return q.Normalize()
+	return NewMQuaternionByValues(0, 0, math.Sin(angle), math.Cos(angle)).Normalize()
 }
 
 // NewMQuaternionFromEulerAnglesは、オイラー角（ラジアン）回転を表す四元数を返します。
@@ -195,8 +191,7 @@ func (quat *MQuaternion) Vec4() *MVec4 {
 
 // Vec3は、クォータニオンのベクトル部分を返します。
 func (quat *MQuaternion) Vec3() *MVec3 {
-	vec3 := MVec3{quat.GetX(), quat.GetY(), quat.GetZ()}
-	return &vec3
+	return &MVec3{quat.GetX(), quat.GetY(), quat.GetZ()}
 }
 
 // AxisAngleは、正規化されたクォータニオンから、軸と回転角度の形で回転を取り出す。
@@ -223,19 +218,13 @@ func (q1 *MQuaternion) Mul(q2 *MQuaternion) *MQuaternion {
 	mat1 := q1.ToMat4()
 	mat2 := q2.ToMat4()
 	mat1.Mul(mat2)
-	qq := mat1.Quaternion()
-
-	q1.SetX(qq.GetX())
-	q1.SetY(qq.GetY())
-	q1.SetZ(qq.GetZ())
-	q1.SetW(qq.GetW())
+	q1 = mat1.Quaternion()
 	return q1
 }
 
 func (q1 *MQuaternion) Muled(q2 *MQuaternion) *MQuaternion {
 	copied := q1.Copy()
-	copied.Mul(q2)
-	return copied
+	return copied.Mul(q2)
 }
 
 // Norm はクォータニオンのノルム値を返します。
@@ -380,8 +369,7 @@ func (a *MVec3) Vec3Diff(b *MVec3) *MQuaternion {
 	sr := math.Sqrt(2 * (1 + a.Dot(b)))
 	oosr := 1 / sr
 
-	q := NewMQuaternionByValues(cr[0]*oosr, cr[1]*oosr, cr[2]*oosr, sr*0.5)
-	return q.Normalize()
+	return NewMQuaternionByValues(cr[0]*oosr, cr[1]*oosr, cr[2]*oosr, sr*0.5).Normalize()
 }
 
 // ToDegree は、クォータニオンを度に変換します。

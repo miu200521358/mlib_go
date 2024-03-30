@@ -263,9 +263,7 @@ func (v *MVec2) Normalize() *MVec2 {
 
 // Normalized ベクトルを正規化した結果を返します
 func (v *MVec2) Normalized() *MVec2 {
-	vec := *v
-	vec.Normalize()
-	return &vec
+	return v.Copy().Normalize()
 }
 
 // Angle ベクトルの角度(ラジアン角度)を返します
@@ -341,9 +339,7 @@ func (v *MVec2) Clamp(min, max *MVec2) *MVec2 {
 
 // Clamped ベクトルの各要素を指定された範囲内にクランプした結果を返します
 func (v *MVec2) Clamped(min, max *MVec2) *MVec2 {
-	result := *v
-	result.Clamp(min, max)
-	return &result
+	return v.Copy().Clamp(min, max)
 }
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
@@ -353,9 +349,7 @@ func (v *MVec2) Clamp01() *MVec2 {
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します
 func (v *MVec2) Clamped01() *MVec2 {
-	result := *v
-	result.Clamp01()
-	return &result
+	return v.Copy().Clamp01()
 }
 
 func (v *MVec2) Rotate(angle float64) *MVec2 {
@@ -368,8 +362,7 @@ func (v *MVec2) Rotate(angle float64) *MVec2 {
 
 // Rotated ベクトルを回転します
 func (v *MVec2) Rotated(angle float64) *MVec2 {
-	copied := v.Copy()
-	return copied.Rotate(angle)
+	return v.Copy().Rotate(angle)
 }
 
 // RotateAroundPoint ベクトルを指定された点を中心に回転します
@@ -454,6 +447,5 @@ func (v *MVec2) One() *MVec2 {
 }
 
 func (v *MVec2) Distance(other *MVec2) float64 {
-	s := v.Subed(other)
-	return s.Length()
+	return v.Subed(other).Length()
 }
