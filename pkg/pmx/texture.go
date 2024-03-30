@@ -212,7 +212,7 @@ type Textures struct {
 
 func NewTextures() *Textures {
 	return &Textures{
-		IndexModels: mcore.NewIndexModelCorrection[*Texture](),
+		IndexModels: mcore.NewIndexModels[*Texture](),
 	}
 }
 
@@ -223,7 +223,7 @@ type ToonTextures struct {
 
 func NewToonTextures() *ToonTextures {
 	return &ToonTextures{
-		IndexModels: mcore.NewIndexModelCorrection[*Texture](),
+		IndexModels: mcore.NewIndexModels[*Texture](),
 	}
 }
 

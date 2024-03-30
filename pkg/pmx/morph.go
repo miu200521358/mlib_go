@@ -220,6 +220,6 @@ type Morphs struct {
 
 func NewMorphs() *Morphs {
 	return &Morphs{
-		IndexNameModels: mcore.NewIndexNameModelCorrection[*Morph](),
+		IndexNameModels: mcore.NewIndexNameModels[*Morph](),
 	}
 }

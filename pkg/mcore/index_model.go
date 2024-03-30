@@ -42,7 +42,7 @@ type IndexModels[T IIndexModel] struct {
 	Indexes map[int]int
 }
 
-func NewIndexModelCorrection[T IIndexModel]() *IndexModels[T] {
+func NewIndexModels[T IIndexModel]() *IndexModels[T] {
 	return &IndexModels[T]{
 		Data:    make(map[int]T, 0),
 		Indexes: make(map[int]int, 0),

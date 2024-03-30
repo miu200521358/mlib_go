@@ -200,7 +200,7 @@ type Materials struct {
 
 func NewMaterials() *Materials {
 	return &Materials{
-		IndexNameModels: mcore.NewIndexNameModelCorrection[*Material](),
+		IndexNameModels: mcore.NewIndexNameModels[*Material](),
 		Vertices:        make(map[int][]int),
 		Faces:           make(map[int][]int),
 	}

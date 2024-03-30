@@ -142,7 +142,7 @@ type Joints struct {
 
 func NewJoints() *Joints {
 	return &Joints{
-		IndexNameModels: mcore.NewIndexNameModelCorrection[*Joint](),
+		IndexNameModels: mcore.NewIndexNameModels[*Joint](),
 	}
 }
 

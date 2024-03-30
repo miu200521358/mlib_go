@@ -69,7 +69,7 @@ type Faces struct {
 
 func NewFaces() *Faces {
 	return &Faces{
-		IndexModels: NewIndexModelCorrection[*Face](),
+		IndexModels: NewIndexModels[*Face](),
 	}
 }
 

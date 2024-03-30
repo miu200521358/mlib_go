@@ -145,11 +145,11 @@ func NewBone() *Bone {
 		ChildBoneIndexes:       []int{},
 		EffectiveBoneIndexes:   []int{},
 		AngleLimit:             false,
-		MinAngleLimit:          mmath.NewRotationModelByRadians(mmath.NewMVec3()),
-		MaxAngleLimit:          mmath.NewRotationModelByRadians(mmath.NewMVec3()),
+		MinAngleLimit:          mmath.NewRotationModel(),
+		MaxAngleLimit:          mmath.NewRotationModel(),
 		LocalAngleLimit:        false,
-		LocalMinAngleLimit:     mmath.NewRotationModelByRadians(mmath.NewMVec3()),
-		LocalMaxAngleLimit:     mmath.NewRotationModelByRadians(mmath.NewMVec3()),
+		LocalMinAngleLimit:     mmath.NewRotationModel(),
+		LocalMaxAngleLimit:     mmath.NewRotationModel(),
 	}
 	bone.NormalizedLocalAxisX = bone.LocalAxisX.Copy()
 	bone.NormalizedLocalAxisZ = bone.LocalAxisZ.Copy()
@@ -370,7 +370,7 @@ type Bones struct {
 
 func NewBones() *Bones {
 	return &Bones{
-		IndexNameModels:    mcore.NewIndexNameModelCorrection[*Bone](),
+		IndexNameModels:    mcore.NewIndexNameModels[*Bone](),
 		Vertices:           make(map[int][]int),
 		IkTreeIndexes:      make(map[int][]int),
 		LayerSortedIndexes: make(map[int]string),

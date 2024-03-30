@@ -423,7 +423,7 @@ type RigidBodies struct {
 
 func NewRigidBodies() *RigidBodies {
 	return &RigidBodies{
-		IndexNameModels: mcore.NewIndexNameModelCorrection[*RigidBody](),
+		IndexNameModels: mcore.NewIndexNameModels[*RigidBody](),
 	}
 }
 

@@ -55,7 +55,7 @@ type IndexNameModels[T IIndexNameModel] struct {
 	NameIndexes map[string]int
 }
 
-func NewIndexNameModelCorrection[T IIndexNameModel]() *IndexNameModels[T] {
+func NewIndexNameModels[T IIndexNameModel]() *IndexNameModels[T] {
 	return &IndexNameModels[T]{
 		Data:        make(map[int]T, 0),
 		NameIndexes: make(map[string]int, 0),

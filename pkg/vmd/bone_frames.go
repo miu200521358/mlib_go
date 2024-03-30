@@ -516,7 +516,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 		boneDeltas.SetItem(bone.Name, frame, NewBoneDelta(
 			bone.Name,
 			frame,
-			localMatrix.Muled(bone.Position.ToMat4()), // グローバル行列
+			localMatrix.Muled(bone.Position.ToMoveMat4()), // グローバル行列
 			localMatrix,                // ローカル行列はそのまま
 			positions[i].Translation(), // 移動
 			rotations[i].Quaternion(),  // 回転
@@ -634,11 +634,13 @@ func (bfs *BoneFrames) getPosition(
 	bone := model.Bones.GetItemByName(boneName)
 	bf := bfs.GetItem(boneName).GetItemNoCopy(frame)
 
-	mat := mmath.NewMMat4()
+	var mat *mmath.MMat4
 	if isCalcMorph {
-		mat.Mul(bf.MorphPosition.ToMat4())
+		mat = bf.MorphPosition.ToMoveMat4()
+		mat.Mul(bf.Position.ToMoveMat4())
+	} else {
+		mat = bf.Position.ToMoveMat4()
 	}
-	mat.Mul(bf.Position.ToMat4())
 
 	if bone.IsEffectorTranslation() {
 		// 外部親変形ありの場合、外部親変形行列を掛ける
@@ -782,12 +784,15 @@ func (bfs *BoneFrames) getScale(
 	isCalcMorph bool,
 ) *mmath.MMat4 {
 	bf := bfs.GetItem(boneName).GetItemNoCopy(frame)
-	mat := mmath.NewMMat4()
 
+	var mat *mmath.MMat4
 	if isCalcMorph {
+		mat = bf.MorphScale.ToScaleMat4()
 		mat.ScaleVec3(bf.MorphScale.AddedScalar(1))
+		mat.ScaleVec3(bf.Scale.AddedScalar(1))
+	} else {
+		mat = bf.Scale.ToScaleMat4()
 	}
-	mat.ScaleVec3(bf.Scale.AddedScalar(1))
 
 	return mat
 }

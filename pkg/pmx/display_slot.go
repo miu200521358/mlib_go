@@ -4,6 +4,7 @@ import (
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+
 )
 
 // 表示枠要素タイプ
@@ -69,6 +70,6 @@ type DisplaySlots struct {
 
 func NewDisplaySlots() *DisplaySlots {
 	return &DisplaySlots{
-		IndexModels: mcore.NewIndexModelCorrection[*DisplaySlot](),
+		IndexModels: mcore.NewIndexModels[*DisplaySlot](),
 	}
 }

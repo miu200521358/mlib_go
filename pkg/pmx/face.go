@@ -28,6 +28,6 @@ type Faces struct {
 
 func NewFaces() *Faces {
 	return &Faces{
-		IndexModels: mcore.NewIndexModelCorrection[*Face](),
+		IndexModels: mcore.NewIndexModels[*Face](),
 	}
 }

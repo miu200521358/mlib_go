@@ -78,7 +78,7 @@ type Vertices struct {
 
 func NewVertices() *Vertices {
 	return &Vertices{
-		IndexModels: mcore.NewIndexModelCorrection[*Vertex](),
+		IndexModels: mcore.NewIndexModels[*Vertex](),
 		ChunkSize:   10000,
 	}
 }
