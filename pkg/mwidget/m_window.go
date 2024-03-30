@@ -175,6 +175,11 @@ func NewMWindow(
 
 	// 最初はフレームドロップON
 	mainWindow.frameDropAction.SetChecked(true)
+	frameDrop := mconfig.LoadUserConfig(mconfig.FRAME_DROP)
+	if len(frameDrop) > 0 && frameDrop[0] != "1" {
+		// frameDrop=1では無い場合、フレームドロップOFF
+		mainWindow.frameDropAction.SetChecked(false)
+	}
 
 	highSpecMode := mconfig.LoadUserConfig(mconfig.HIGH_SPEC_MODE)
 	if len(highSpecMode) > 0 && highSpecMode[0] != "1" {
@@ -282,6 +287,7 @@ func (w *MWindow) frameDropTriggered() {
 	for _, glWindow := range w.GlWindows {
 		glWindow.EnableFrameDrop = w.frameDropAction.Checked()
 	}
+	mconfig.SaveUserConfig(mconfig.FRAME_DROP, string(rune(mutils.BoolToInt(w.frameDropAction.Checked()))), 1)
 }
 
 func getWindowSize(width int, height int) declarative.Size {

@@ -10,7 +10,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 const (
@@ -84,10 +83,10 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		Height:               int32(height),
 		NearPlane:            0.1,
 		FarPlane:             1000.0,
-		lightPosition:        &mmath.MVec3{0.5, -1.0, -0.5},
+		lightPosition:        &mmath.MVec3{-0.5, -1.0, 0.5},
 		msaa:                 NewMsaa(int32(width), int32(height)),
 	}
-	shader.lightDirection = shader.lightPosition.Muled(&mmath.MVec3{-1, -1, -1}).Normalize()
+	shader.lightDirection = shader.lightPosition.Normalized()
 
 	{
 		modelProgram, err := shader.newProgram(
