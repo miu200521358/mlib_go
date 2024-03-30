@@ -218,7 +218,12 @@ func (q1 *MQuaternion) Mul(q2 *MQuaternion) *MQuaternion {
 	mat1 := q1.ToMat4()
 	mat2 := q2.ToMat4()
 	mat1.Mul(mat2)
-	q1 = mat1.Quaternion()
+	qq := mat1.Quaternion()
+
+	q1.SetX(qq.GetX())
+	q1.SetY(qq.GetY())
+	q1.SetZ(qq.GetZ())
+	q1.SetW(qq.GetW())
 	return q1
 }
 

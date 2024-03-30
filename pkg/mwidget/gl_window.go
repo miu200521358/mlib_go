@@ -18,6 +18,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
+	"github.com/miu200521358/mlib_go/pkg/mutils/miter"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
@@ -72,35 +73,19 @@ func (ms ModelSet) fetchBoneMatrixes(
 	deltas *vmd.VmdDeltas,
 	frame float32,
 ) ([]*mgl32.Mat4, []*mmath.MMat4, []*mbt.BtTransform) {
-	boneMatrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
-	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.NameIndexes))
-	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
+	boneMatrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.Data))
+	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.Data))
+	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.Data))
 
-	chunkSize := ms.Model.Bones.ChunkSize
-	for chunkStart := 0; chunkStart < len(ms.Model.Bones.GetSortedData()); chunkStart += chunkSize {
-		chunkEnd := chunkStart + chunkSize
-		if chunkEnd > len(ms.Model.Bones.GetSortedData()) {
-			chunkEnd = len(ms.Model.Bones.GetSortedData())
-		}
-
-		var wg sync.WaitGroup
-		wg.Add(chunkEnd - chunkStart)
-
-		for i := chunkStart; i < chunkEnd; i++ {
-			go func(i int) {
-				defer wg.Done()
-				bone := ms.Model.Bones.GetItem(i)
-				mat := deltas.Bones.GetItem(bone.Name, frame).LocalMatrix.GL()
-				boneMatrixes[i] = mat
-				globalMatrixes[i] = deltas.Bones.GetItem(bone.Name, frame).GlobalMatrix
-				t := mbt.NewBtTransform()
-				t.SetFromOpenGLMatrix(&mat[0])
-				transforms[i] = &t
-			}(i)
-		}
-
-		wg.Wait()
-	}
+	miter.IterParallel(len(ms.Model.Bones.Data), func(i int) {
+		bone := ms.Model.Bones.GetItem(i)
+		mat := deltas.Bones.GetItem(bone.Name, frame).LocalMatrix.GL()
+		boneMatrixes[i] = mat
+		globalMatrixes[i] = deltas.Bones.GetItem(bone.Name, frame).GlobalMatrix
+		t := mbt.NewBtTransform()
+		t.SetFromOpenGLMatrix(&mat[0])
+		transforms[i] = &t
+	})
 
 	return boneMatrixes, globalMatrixes, transforms
 }
@@ -108,26 +93,9 @@ func (ms ModelSet) fetchBoneMatrixes(
 func (ms ModelSet) fetchVertexDeltas(deltas *vmd.VmdDeltas) [][]float32 {
 	vertexDeltas := make([][]float32, len(ms.Model.Vertices.Data))
 
-	chunkSize := ms.Model.Vertices.ChunkSize
-	for chunkStart := 0; chunkStart < len(ms.Model.Vertices.Data); chunkStart += chunkSize {
-		chunkEnd := chunkStart + chunkSize
-		if chunkEnd > len(ms.Model.Vertices.Data) {
-			chunkEnd = len(ms.Model.Vertices.Data)
-		}
-
-		var wg sync.WaitGroup
-		wg.Add(chunkEnd - chunkStart)
-
-		for i := chunkStart; i < chunkEnd; i++ {
-			go func(i int) {
-				defer wg.Done()
-				vd := deltas.Morphs.Vertices.Data[i]
-				vertexDeltas[i] = vd.GL()
-			}(i)
-		}
-
-		wg.Wait()
-	}
+	miter.IterParallel(len(ms.Model.Vertices.Data), func(i int) {
+		vertexDeltas[i] = deltas.Morphs.Vertices.Data[i].GL()
+	})
 
 	return vertexDeltas
 }

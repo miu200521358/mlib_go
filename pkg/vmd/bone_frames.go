@@ -480,16 +480,11 @@ func (bfs *BoneFrames) calcBoneDeltas(
 	matrixes := make([]*mmath.MMat4, len(targetBoneNames))
 	boneCount := len(targetBoneNames)
 
-	// 最初にフレーム数*ボーン数分のスライスを確保
-	for i := range targetBoneNames {
-		matrixes[i] = mmath.NewMMat4()
-	}
-
 	miter.IterParallel(boneCount, func(i int) {
 		// 各ボーンの座標変換行列×逆BOf行列
 		bone := model.Bones.GetItemByName(targetBoneNames[i])
 		// 逆BOf行列(初期姿勢行列)
-		matrixes[i].Mul(bone.RevertOffsetMatrix)
+		matrixes[i] = bone.RevertOffsetMatrix.Copy()
 		// 位置
 		matrixes[i].Mul(positions[i])
 		// 回転
@@ -503,10 +498,10 @@ func (bfs *BoneFrames) calcBoneDeltas(
 	miter.IterParallel(boneCount, func(i int) {
 		bone := model.Bones.GetItemByName(targetBoneNames[i])
 		localMatrix := mmath.NewMMat4()
-		for _, l := range bone.ParentBoneIndexes {
+		for _, j := range bone.ParentBoneIndexes {
 			// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
 			// targetBoneNames の中にある parentName のINDEXを取得
-			localMatrix.Mul(matrixes[slices.Index(targetBoneNames, model.Bones.GetItem(l).Name)])
+			localMatrix.Mul(matrixes[slices.Index(targetBoneNames, model.Bones.GetItem(j).Name)])
 		}
 		// 最後に対象ボーン自身の行列をかける
 		localMatrix.Mul(matrixes[i])
