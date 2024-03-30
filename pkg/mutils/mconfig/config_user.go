@@ -6,10 +6,14 @@ import (
 	"path/filepath"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 const USER_CONFIG_FILE_NAME = "user_config.json"
+
+const (
+	HIGH_SPEC_MODE = "HighSpecMode"
+	PHYSICS        = "Physics"
+)
 
 // 設定の保存
 func SaveUserConfig(key string, value string, limit int) error {

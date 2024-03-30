@@ -241,7 +241,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 			mWindow.GetMainGlWindow().SetFrame(0)
 			mWindow.GetMainGlWindow().Play(true)
 			mWindow.GetMainGlWindow().ClearData()
-			mWindow.GetMainGlWindow().AddData(model, motion)
+			mWindow.GetMainGlWindow().AddData(model, motion, mWindow.IsPhysics())
 			mWindow.GetMainGlWindow().Run(motionPlayer)
 		}
 

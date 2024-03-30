@@ -47,7 +47,7 @@ void main() {
     if (1 == useToon) {
         // Toon適用
         float lightNormal = dot( vertexNormal, -lightDirection );
-        outColor *= texture(toonSampler, vec2(0, lightNormal));
+        outColor *= texture(toonSampler, vec2(0, 0.5 - lightNormal * 0.5));
     }
 
     if (outColor.a < 1e-6) {

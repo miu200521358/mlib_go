@@ -22,7 +22,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 type ModelSet struct {
@@ -501,10 +500,11 @@ func (w *GlWindow) Reset() {
 
 }
 
-func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
+func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion, enablePhysics bool) {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 	w.Reset()
+	w.EnablePhysics = enablePhysics
 
 	pmxModel.InitDraw(w.WindowIndex, w.resourceFiles)
 	pmxModel.InitPhysics(w.Physics)
