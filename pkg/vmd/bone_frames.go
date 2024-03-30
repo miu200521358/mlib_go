@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mutils/miter"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
 
@@ -162,6 +163,24 @@ func (bfs *BoneFrames) calcIk(
 	var actualIkQuat *mmath.MQuaternion
 	var linkAxis *mmath.MVec3
 	var linkRad float64
+
+	defer func() {
+		linkBone = nil
+		linkMatrixes = nil
+		ikGlobalPosition = nil
+		effectorGlobalPosition = nil
+		linkInvMatrix = nil
+		effectorLocalPosition = nil
+		ikLocalPosition = nil
+		normalizedEffectorLocalPosition = nil
+		normalizedIkLocalPosition = nil
+		axis = nil
+		linkQuat = nil
+		totalActualIkQuat = nil
+		correctIkQuat = nil
+		actualIkQuat = nil
+		linkAxis = nil
+	}()
 
 	// IK計算
 ikLoop:
@@ -466,78 +485,45 @@ func (bfs *BoneFrames) calcBoneDeltas(
 		matrixes[i] = mmath.NewMMat4()
 	}
 
-	// ボーンを一定件数ごとに並列処理（件数は変数保持）
-	count := 100
-
-	var wg1 sync.WaitGroup
-	for i := 0; i < boneCount; i += count {
-		wg1.Add(1)
-		go func(i int) {
-			defer wg1.Done()
-
-			var bone *pmx.Bone
-
-			for j := i; j < i+count; j++ {
-				if j >= boneCount {
-					break
-				}
-				// 各ボーンの座標変換行列×逆BOf行列
-				bone = model.Bones.GetItemByName(targetBoneNames[j])
-				// 逆BOf行列(初期姿勢行列)
-				matrixes[j].Mul(bone.RevertOffsetMatrix)
-				// 位置
-				matrixes[j].Mul(positions[j])
-				// 回転
-				matrixes[j].Mul(rotations[j])
-				// スケール
-				matrixes[j].Mul(scales[j])
-			}
-		}(i)
-	}
-	wg1.Wait()
+	miter.IterParallel(boneCount, func(i int) {
+		// 各ボーンの座標変換行列×逆BOf行列
+		bone := model.Bones.GetItemByName(targetBoneNames[i])
+		// 逆BOf行列(初期姿勢行列)
+		matrixes[i].Mul(bone.RevertOffsetMatrix)
+		// 位置
+		matrixes[i].Mul(positions[i])
+		// 回転
+		matrixes[i].Mul(rotations[i])
+		// スケール
+		matrixes[i].Mul(scales[i])
+	})
 
 	boneDeltas := NewBoneDeltas()
 
-	var wg2 sync.WaitGroup
-	// ボーンを一定件数ごとに並列処理（件数は変数保持）
-	for i := 0; i < boneCount; i += count {
-		wg2.Add(1)
-		go func(i int) {
-			defer wg2.Done()
+	miter.IterParallel(boneCount, func(i int) {
+		bone := model.Bones.GetItemByName(targetBoneNames[i])
+		localMatrix := mmath.NewMMat4()
+		for _, l := range bone.ParentBoneIndexes {
+			// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
+			// targetBoneNames の中にある parentName のINDEXを取得
+			localMatrix.Mul(matrixes[slices.Index(targetBoneNames, model.Bones.GetItem(l).Name)])
+		}
+		// 最後に対象ボーン自身の行列をかける
+		localMatrix.Mul(matrixes[i])
+		// BOf行列: 自身のボーンのボーンオフセット行列
+		localMatrix.Mul(bone.OffsetMatrix)
 
-			var bone *pmx.Bone
-			var localMatrix *mmath.MMat4
-
-			for j := i; j < i+count; j++ {
-				if j >= boneCount {
-					break
-				}
-				bone = model.Bones.GetItemByName(targetBoneNames[j])
-				localMatrix = mmath.NewMMat4()
-				for _, l := range bone.ParentBoneIndexes {
-					// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
-					// targetBoneNames の中にある parentName のINDEXを取得
-					localMatrix.Mul(matrixes[slices.Index(targetBoneNames, model.Bones.GetItem(l).Name)])
-				}
-				// 最後に対象ボーン自身の行列をかける
-				localMatrix.Mul(matrixes[j])
-				// BOf行列: 自身のボーンのボーンオフセット行列
-				localMatrix.Mul(bone.OffsetMatrix)
-
-				// 初期位置行列を掛けてグローバル行列を作成
-				boneDeltas.SetItem(bone.Name, frame, NewBoneDelta(
-					bone.Name,
-					frame,
-					localMatrix.Muled(bone.Position.ToMoveMat4()), // グローバル行列
-					localMatrix,                // ローカル行列はそのまま
-					positions[i].Translation(), // 移動
-					rotations[i].Quaternion(),  // 回転
-					scales[i].Scaling(),        // 拡大率
-				))
-			}
-		}(i)
-	}
-	wg2.Wait()
+		// 初期位置行列を掛けてグローバル行列を作成
+		boneDeltas.SetItem(bone.Name, frame, NewBoneDelta(
+			bone.Name,
+			frame,
+			localMatrix.Muled(bone.Position.ToMoveMat4()), // グローバル行列
+			localMatrix,                // ローカル行列はそのまま
+			positions[i].Translation(), // 移動
+			rotations[i].Quaternion(),  // 回転
+			scales[i].Scaling(),        // 拡大率
+		))
+	})
 
 	return boneDeltas
 }
@@ -596,29 +582,15 @@ func (bfs *BoneFrames) getBoneMatrixes(
 		quats = append(quats, mmath.NewMQuaternion())
 	}
 
-	// ボーンを一定件数ごとに並列処理
-	count := 100
-
-	var boneWg sync.WaitGroup
-	for i := 0; i < boneCount; i += count {
-		boneWg.Add(1)
-		go func(i int) {
-			defer boneWg.Done()
-			for j := i; j < i+count; j++ {
-				if j >= boneCount {
-					break
-				}
-				boneName := targetBoneNames[j]
-				// ボーンの移動位置、回転角度、拡大率を取得
-				positions[j] = bfs.getPosition(frame, boneName, model, isCalcMorph, 0)
-				rotWithEffect, rotFk := bfs.getRotation(frame, boneName, model, isCalcMorph, 0)
-				rotations[j] = rotWithEffect.ToMat4()
-				quats[j] = rotFk
-				scales[j] = bfs.getScale(frame, boneName, model, isCalcMorph)
-			}
-		}(i)
-	}
-	boneWg.Wait()
+	miter.IterParallel(boneCount, func(i int) {
+		boneName := targetBoneNames[i]
+		// ボーンの移動位置、回転角度、拡大率を取得
+		positions[i] = bfs.getPosition(frame, boneName, model, isCalcMorph, 0)
+		rotWithEffect, rotFk := bfs.getRotation(frame, boneName, model, isCalcMorph, 0)
+		rotations[i] = rotWithEffect.ToMat4()
+		quats[i] = rotFk
+		scales[i] = bfs.getScale(frame, boneName, model, isCalcMorph)
+	})
 
 	return positions, rotations, scales, quats
 }
