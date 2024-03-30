@@ -7,7 +7,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type BoneNameFrames struct {
@@ -178,13 +177,13 @@ func (fs *BoneNameFrames) Insert(value *BoneFrame) {
 			nextBf := fs.Get(nextIndex)
 			// 自分の前後にフレームがある場合、分割する
 			value.Curves.TranslateX, nextBf.Curves.TranslateX =
-				mmath.SplitCurve(nextBf.Curves.TranslateX, float32(prevIndex), float32(value.Index), float32(nextIndex))
+				mmath.SplitCurve(nextBf.Curves.TranslateX, prevIndex, value.Index, nextIndex)
 			value.Curves.TranslateY, nextBf.Curves.TranslateY =
-				mmath.SplitCurve(nextBf.Curves.TranslateY, float32(prevIndex), float32(value.Index), float32(nextIndex))
+				mmath.SplitCurve(nextBf.Curves.TranslateY, prevIndex, value.Index, nextIndex)
 			value.Curves.TranslateZ, nextBf.Curves.TranslateZ =
-				mmath.SplitCurve(nextBf.Curves.TranslateZ, float32(prevIndex), float32(value.Index), float32(nextIndex))
+				mmath.SplitCurve(nextBf.Curves.TranslateZ, prevIndex, value.Index, nextIndex)
 			value.Curves.Rotate, nextBf.Curves.Rotate =
-				mmath.SplitCurve(nextBf.Curves.Rotate, float32(prevIndex), float32(value.Index), float32(nextIndex))
+				mmath.SplitCurve(nextBf.Curves.Rotate, prevIndex, value.Index, nextIndex)
 		}
 	}
 

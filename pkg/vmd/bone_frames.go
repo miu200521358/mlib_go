@@ -144,45 +144,7 @@ func (bfs *BoneFrames) calcIk(
 	positions, rotations, scales, quats :=
 		bfs.getBoneMatrixes(frame, model, effectorTargetBoneNames, isisCalcMorph)
 
-	var linkBone *pmx.Bone
-	var linkIndex int
-	var linkMatrixes *BoneDeltas
-	var ikGlobalPosition *mmath.MVec3
-	var effectorGlobalPosition *mmath.MVec3
-	var linkInvMatrix *mmath.MMat4
-	var effectorLocalPosition *mmath.MVec3
-	var ikLocalPosition *mmath.MVec3
-	var normalizedEffectorLocalPosition *mmath.MVec3
-	var normalizedIkLocalPosition *mmath.MVec3
-	var axis *mmath.MVec3
-	var angle float64
-	var linkQuat *mmath.MQuaternion
-	var totalActualIkQuat *mmath.MQuaternion
-	var limitRotationRad float64
-	var correctIkQuat *mmath.MQuaternion
-	var actualIkQuat *mmath.MQuaternion
-	var linkAxis *mmath.MVec3
-	var linkRad float64
-
-	defer func() {
-		linkBone = nil
-		linkMatrixes = nil
-		ikGlobalPosition = nil
-		effectorGlobalPosition = nil
-		linkInvMatrix = nil
-		effectorLocalPosition = nil
-		ikLocalPosition = nil
-		normalizedEffectorLocalPosition = nil
-		normalizedIkLocalPosition = nil
-		axis = nil
-		linkQuat = nil
-		totalActualIkQuat = nil
-		correctIkQuat = nil
-		actualIkQuat = nil
-		linkAxis = nil
-	}()
-
-	// IK計算
+		// IK計算
 ikLoop:
 	for loop := 0; loop < max(ikBone.Ik.LoopCount, 1); loop++ {
 		for _, ikLink := range ikBone.Ik.Links {
@@ -192,8 +154,8 @@ ikLoop:
 			}
 
 			// 処理対象IKリンクボーン
-			linkBone = model.Bones.GetItem(ikLink.BoneIndex)
-			linkIndex = slices.Index(effectorTargetBoneNames, linkBone.Name)
+			linkBone := model.Bones.GetItem(ikLink.BoneIndex)
+			linkIndex := slices.Index(effectorTargetBoneNames, linkBone.Name)
 
 			// 角度制限があってまったく動かさない場合、IK計算しないで次に行く
 			if (linkBone.AngleLimit &&
@@ -206,7 +168,7 @@ ikLoop:
 			}
 
 			// IK関連の行列を取得
-			linkMatrixes = bfs.calcBoneDeltas(
+			linkMatrixes := bfs.calcBoneDeltas(
 				frame,
 				model,
 				effectorTargetBoneNames,
@@ -216,38 +178,42 @@ ikLoop:
 			)
 
 			// IKボーンのグローバル位置
-			ikGlobalPosition = ikMatrixes.GetItem(ikBone.Name, frame).Position
+			ikGlobalPosition := ikMatrixes.GetItem(ikBone.Name, frame).Position
 
 			// 現在のIKターゲットボーンのグローバル位置を取得
-			effectorGlobalPosition = linkMatrixes.GetItem(effectorBone.Name, frame).Position
+			effectorGlobalPosition := linkMatrixes.GetItem(effectorBone.Name, frame).Position
 
 			// 注目ノード（実際に動かすボーン=リンクボーン）
 			// ワールド座標系から注目ノードの局所座標系への変換
-			linkInvMatrix = linkMatrixes.GetItem(linkBone.Name, frame).GlobalMatrix.Inverse()
+			linkInvMatrix := linkMatrixes.GetItem(linkBone.Name, frame).GlobalMatrix.Inverted()
 
 			// 注目ノードを起点とした、エフェクタのローカル位置
-			effectorLocalPosition = linkInvMatrix.MulVec3(effectorGlobalPosition)
+			effectorLocalPosition := linkInvMatrix.MulVec3(effectorGlobalPosition)
+			effectorLocalPosition.ClampIfVerySmall()
 			// 注目ノードを起点とした、IK目標のローカル位置
-			ikLocalPosition = linkInvMatrix.MulVec3(ikGlobalPosition)
+			ikLocalPosition := linkInvMatrix.MulVec3(ikGlobalPosition)
+			ikLocalPosition.ClampIfVerySmall()
 
 			// 位置の差がほとんどない場合、終了
 			if ikLocalPosition.Distance(effectorLocalPosition) < 1e-8 {
 				break ikLoop
 			}
 
-			normalizedEffectorLocalPosition = effectorLocalPosition.Normalized()
-			normalizedIkLocalPosition = ikLocalPosition.Normalized()
+			normalizedEffectorLocalPosition := effectorLocalPosition.Normalized()
+			normalizedIkLocalPosition := ikLocalPosition.Normalized()
 
 			// ベクトル (1) を (2) に一致させるための最短回転量（Axis-Angle）
 			// 回転軸
-			axis = normalizedEffectorLocalPosition.Cross(normalizedIkLocalPosition).Normalize()
+			axis := normalizedEffectorLocalPosition.Cross(normalizedIkLocalPosition)
+			axis.Normalize()
 			// 回転角(ラジアン)
-			angle = math.Acos(mmath.ClampFloat(
+			angle := math.Acos(mmath.ClampFloat(
 				normalizedIkLocalPosition.Dot(normalizedEffectorLocalPosition)/
 					(normalizedIkLocalPosition.Length()*normalizedEffectorLocalPosition.Length()), -1, 1))
 
 			// リンクボーンの角度を取得
-			linkQuat = quats[linkIndex]
+			linkQuat := quats[linkIndex]
+			var totalActualIkQuat *mmath.MQuaternion
 
 			if ikLink.AngleLimit {
 				// 角度制限が入ってる場合
@@ -302,12 +268,12 @@ ikLoop:
 				// 軸制限ありの場合、軸にそった理想回転量とする
 
 				// 制限角で最大変位量を制限する
-				limitRotationRad = math.Min(ikBone.Ik.UnitRotation.GetRadians().GetX(), angle)
-				correctIkQuat = mmath.NewMQuaternionFromAxisAngles(axis, limitRotationRad)
+				limitRotationRad := math.Min(ikBone.Ik.UnitRotation.GetRadians().GetX(), angle)
+				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(axis, limitRotationRad)
 
-				actualIkQuat = linkQuat.Muled(correctIkQuat)
-				linkAxis = actualIkQuat.GetXYZ().Normalized()
-				linkRad = actualIkQuat.ToRadian()
+				actualIkQuat := linkQuat.Muled(correctIkQuat)
+				linkAxis := actualIkQuat.GetXYZ().Normalized()
+				linkRad := actualIkQuat.ToRadian()
 				var linkSign float64
 				if linkBone.NormalizedFixedAxis.Dot(linkAxis) >= 0 {
 					linkSign = 1
@@ -321,8 +287,8 @@ ikLoop:
 				// 制限が無い場合、制限角の制限だけ入れる
 
 				// 制限角で最大変位量を制限する
-				limitRotationRad = math.Min(ikBone.Ik.UnitRotation.GetRadians().GetX(), angle)
-				correctIkQuat = mmath.NewMQuaternionFromAxisAngles(axis, limitRotationRad)
+				limitRotationRad := math.Min(ikBone.Ik.UnitRotation.GetRadians().GetX(), angle)
+				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(axis, limitRotationRad)
 
 				// 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
 				totalActualIkQuat = linkQuat.Muled(correctIkQuat)
@@ -569,13 +535,6 @@ func (bfs *BoneFrames) getBoneMatrixes(
 	rotations := make([]*mmath.MMat4, boneCount)
 	scales := make([]*mmath.MMat4, boneCount)
 	quats := make([]*mmath.MQuaternion, boneCount)
-
-	for i := 0; i < boneCount; i++ {
-		positions = append(positions, mmath.NewMMat4())
-		rotations = append(rotations, mmath.NewMMat4())
-		scales = append(scales, mmath.NewMMat4())
-		quats = append(quats, mmath.NewMQuaternion())
-	}
 
 	miter.IterParallel(boneCount, func(i int) {
 		boneName := targetBoneNames[i]

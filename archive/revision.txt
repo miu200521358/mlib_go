@@ -92,6 +92,6 @@ MlibSample 1.0.0_beta_23
 ・メニューの下記値を次回起動時に引き継ぐよう機能追加
 　物理ON/OFF、ハイスペックモード
 
-
+MlibSample 1.0.0_beta_24
 
 

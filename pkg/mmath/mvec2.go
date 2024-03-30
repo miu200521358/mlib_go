@@ -10,6 +10,7 @@ import (
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 var (
@@ -448,4 +449,16 @@ func (v *MVec2) One() *MVec2 {
 
 func (v *MVec2) Distance(other *MVec2) float64 {
 	return v.Subed(other).Length()
+}
+
+// ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
+func (v *MVec2) ClampIfVerySmall() *MVec2 {
+	epsilon := 1e-6
+	if math.Abs(v.GetX()) < epsilon {
+		v.SetX(0)
+	}
+	if math.Abs(v.GetY()) < epsilon {
+		v.SetY(0)
+	}
+	return v
 }

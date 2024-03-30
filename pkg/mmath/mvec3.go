@@ -371,6 +371,21 @@ func (v *MVec3) Interpolate(other *MVec3, t float64) *MVec3 {
 	}
 }
 
+// ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
+func (v *MVec3) ClampIfVerySmall() *MVec3 {
+	epsilon := 1e-6
+	if math.Abs(v.GetX()) < epsilon {
+		v.SetX(0)
+	}
+	if math.Abs(v.GetY()) < epsilon {
+		v.SetY(0)
+	}
+	if math.Abs(v.GetZ()) < epsilon {
+		v.SetZ(0)
+	}
+	return v
+}
+
 // Clamp ベクトルの各要素を指定された範囲内にクランプします
 func (v *MVec3) Clamp(min, max *MVec3) *MVec3 {
 	for i := range v {

@@ -234,7 +234,7 @@ func (w *MWindow) hightSpecModeTriggered() {
 	} else {
 		miter.SetBlockSize(1)
 	}
-	mconfig.SaveUserConfig(mconfig.HIGH_SPEC_MODE, string(rune(miter.GetBlockSize())), 1)
+	mconfig.SaveUserConfig(mconfig.HIGH_SPEC_MODE, fmt.Sprintf("%d", miter.GetBlockSize()), 1)
 }
 
 func (w *MWindow) langTriggered(lang string) {
@@ -274,7 +274,7 @@ func (w *MWindow) physicsTriggered() {
 	for _, glWindow := range w.GlWindows {
 		glWindow.EnablePhysics = w.physicsAction.Checked()
 	}
-	mconfig.SaveUserConfig(mconfig.PHYSICS, string(rune(mutils.BoolToInt(w.physicsAction.Checked()))), 1)
+	mconfig.SaveUserConfig(mconfig.PHYSICS, fmt.Sprintf("%d", mutils.BoolToInt(w.physicsAction.Checked())), 1)
 }
 
 func (w *MWindow) physicsResetTriggered() {

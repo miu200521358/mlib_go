@@ -137,7 +137,7 @@ func TestMMat4_Inverse(t *testing.T) {
 		{0.0, 0.0, 0.0, 1.0},
 	}
 
-	result1 := mat1.Inverse()
+	result1 := mat1.Invert()
 
 	// Verify the matrix values
 	if !result1.PracticallyEquals(&expected1, 1e-8) {
@@ -158,7 +158,7 @@ func TestMMat4_Inverse(t *testing.T) {
 		{0.0, 0.0, 0.0, 1.0},
 	}
 
-	result2 := mat2.Inverse()
+	result2 := mat2.Invert()
 
 	// Verify the matrix values
 	if !result2.PracticallyEquals(&expected2, 1e-8) {

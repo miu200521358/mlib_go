@@ -620,3 +620,21 @@ func VectorToRadian(a *MVec3, b *MVec3) float64 {
 
 	return rad
 }
+
+// ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
+func (v *MQuaternion) ClampIfVerySmall() *MQuaternion {
+	epsilon := 1e-6
+	if math.Abs(v.GetX()) < epsilon {
+		v.SetX(0)
+	}
+	if math.Abs(v.GetY()) < epsilon {
+		v.SetY(0)
+	}
+	if math.Abs(v.GetZ()) < epsilon {
+		v.SetZ(0)
+	}
+	if math.Abs(v.GetW()) < epsilon {
+		v.SetW(0)
+	}
+	return v
+}
