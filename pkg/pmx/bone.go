@@ -136,6 +136,7 @@ func NewBone() *Bone {
 		IkTargetBoneIndexes:    []int{},
 		ParentRelativePosition: mmath.NewMVec3(),
 		ChildRelativePosition:  mmath.NewMVec3(),
+		LocalMatrix:            mmath.NewMMat4(),
 		NormalizedFixedAxis:    mmath.NewMVec3(),
 		TreeBoneIndexes:        []int{},
 		RevertOffsetMatrix:     mmath.NewMMat4(),
