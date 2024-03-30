@@ -317,17 +317,20 @@ func (v *MVec4) IsZero() bool {
 
 // Length ベクトルの長さを返します
 func (v *MVec4) Length() float64 {
-	return v.Vec3DividedByW().Length()
+	v3 := v.Vec3DividedByW()
+	return v3.Length()
 }
 
 // LengthSqr ベクトルの長さの2乗を返します
 func (v *MVec4) LengthSqr() float64 {
-	return v.Vec3DividedByW().LengthSqr()
+	v3 := v.Vec3DividedByW()
+	return v3.LengthSqr()
 }
 
 // Normalize ベクトルを正規化します
 func (v *MVec4) Normalize() *MVec4 {
-	v3 := v.Vec3DividedByW().Normalize()
+	v3 := v.Vec3DividedByW()
+	v3.Normalize()
 	v[0] = v3[0]
 	v[1] = v3[1]
 	v[2] = v3[2]
@@ -337,7 +340,9 @@ func (v *MVec4) Normalize() *MVec4 {
 
 // Normalized ベクトルを正規化した結果を返します
 func (v *MVec4) Normalized() *MVec4 {
-	return v.Copy().Normalize()
+	vec := *v
+	vec.Normalize()
+	return &vec
 }
 
 // Angle ベクトルの角度(ラジアン角度)を返します
@@ -354,12 +359,16 @@ func (v *MVec4) Angle(other *MVec4) float64 {
 
 // Degree ベクトルの角度(度数)を返します
 func (v *MVec4) Degree(other *MVec4) float64 {
-	return v.Angle(other) * (180 / math.Pi)
+	radian := v.Angle(other)
+	degree := radian * (180 / math.Pi)
+	return degree
 }
 
 // Dot ベクトルの内積を返します
 func (v *MVec4) Dot(other *MVec4) float64 {
-	return v.Vec3DividedByW().Dot(other.Vec3DividedByW())
+	a3 := v.Vec3DividedByW()
+	b3 := other.Vec3DividedByW()
+	return a3.Dot(b3)
 }
 
 // Dot4 returns the 4 element vdot product of two vectors.
@@ -369,8 +378,10 @@ func Dot4(a, b *MVec4) float64 {
 
 // Cross ベクトルの外積を返します
 func (v *MVec4) Cross(other *MVec4) *MVec4 {
-	c := v.Vec3DividedByW().Cross(other.Vec3DividedByW())
-	return &MVec4{c[0], c[1], c[2], 1}
+	a3 := v.Vec3DividedByW()
+	b3 := other.Vec3DividedByW()
+	c3 := a3.Cross(b3)
+	return &MVec4{c3[0], c3[1], c3[2], 1}
 }
 
 // Min ベクトルの各要素の最小値をTの各要素に設定して返します
@@ -428,7 +439,9 @@ func (v *MVec4) Clamp(min, max *MVec4) *MVec4 {
 
 // Clamped ベクトルの各要素を指定された範囲内にクランプした結果を返します
 func (v *MVec4) Clamped(min, max *MVec4) *MVec4 {
-	return v.Copy().Clamp(min, max)
+	result := *v
+	result.Clamp(min, max)
+	return &result
 }
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
@@ -438,7 +451,9 @@ func (v *MVec4) Clamp01() *MVec4 {
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します
 func (v *MVec4) Clamped01() *MVec4 {
-	return v.Copy().Clamp01()
+	result := *v
+	result.Clamp01()
+	return &result
 }
 
 // Copy
@@ -528,23 +543,6 @@ func (v *MVec4) One() *MVec4 {
 }
 
 func (v *MVec4) Distance(other *MVec4) float64 {
-	return v.Subed(other).Length()
-}
-
-// ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
-func (v *MVec4) ClampIfVerySmall() *MVec4 {
-	epsilon := 1e-6
-	if math.Abs(v.GetX()) < epsilon {
-		v.SetX(0)
-	}
-	if math.Abs(v.GetY()) < epsilon {
-		v.SetY(0)
-	}
-	if math.Abs(v.GetZ()) < epsilon {
-		v.SetZ(0)
-	}
-	if math.Abs(v.GetW()) < epsilon {
-		v.SetW(0)
-	}
-	return v
+	s := v.Subed(other)
+	return s.Length()
 }

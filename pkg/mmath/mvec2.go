@@ -10,7 +10,6 @@ import (
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 var (
@@ -264,7 +263,9 @@ func (v *MVec2) Normalize() *MVec2 {
 
 // Normalized ベクトルを正規化した結果を返します
 func (v *MVec2) Normalized() *MVec2 {
-	return v.Copy().Normalize()
+	vec := *v
+	vec.Normalize()
+	return &vec
 }
 
 // Angle ベクトルの角度(ラジアン角度)を返します
@@ -340,7 +341,9 @@ func (v *MVec2) Clamp(min, max *MVec2) *MVec2 {
 
 // Clamped ベクトルの各要素を指定された範囲内にクランプした結果を返します
 func (v *MVec2) Clamped(min, max *MVec2) *MVec2 {
-	return v.Copy().Clamp(min, max)
+	result := *v
+	result.Clamp(min, max)
+	return &result
 }
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
@@ -350,7 +353,9 @@ func (v *MVec2) Clamp01() *MVec2 {
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します
 func (v *MVec2) Clamped01() *MVec2 {
-	return v.Copy().Clamp01()
+	result := *v
+	result.Clamp01()
+	return &result
 }
 
 func (v *MVec2) Rotate(angle float64) *MVec2 {
@@ -363,7 +368,8 @@ func (v *MVec2) Rotate(angle float64) *MVec2 {
 
 // Rotated ベクトルを回転します
 func (v *MVec2) Rotated(angle float64) *MVec2 {
-	return v.Copy().Rotate(angle)
+	copied := v.Copy()
+	return copied.Rotate(angle)
 }
 
 // RotateAroundPoint ベクトルを指定された点を中心に回転します
@@ -404,9 +410,11 @@ func LerpVec2(v1, v2 *MVec2, t float64) *MVec2 {
 	return (v2.Sub(v1)).MulScalar(t).Added(v1)
 }
 
-func (v *MVec2) Round() {
-	v.SetX(math.Round(v.GetX()))
-	v.SetY(math.Round(v.GetY()))
+func (v *MVec2) Round() *MVec2 {
+	return &MVec2{
+		math.Round(v.GetX()),
+		math.Round(v.GetY()),
+	}
 }
 
 // 標準偏差を加味したmean処理
@@ -448,17 +456,6 @@ func (v *MVec2) One() *MVec2 {
 }
 
 func (v *MVec2) Distance(other *MVec2) float64 {
-	return v.Subed(other).Length()
-}
-
-// ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
-func (v *MVec2) ClampIfVerySmall() *MVec2 {
-	epsilon := 1e-6
-	if math.Abs(v.GetX()) < epsilon {
-		v.SetX(0)
-	}
-	if math.Abs(v.GetY()) < epsilon {
-		v.SetY(0)
-	}
-	return v
+	s := v.Subed(other)
+	return s.Length()
 }

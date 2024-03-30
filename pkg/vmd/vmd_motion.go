@@ -33,7 +33,7 @@ func NewVmdMotion(path string) *VmdMotion {
 	}
 }
 
-func (m *VmdMotion) Copy() mcore.IHashModel {
+func (m *VmdMotion) Copy() mcore.HashModelInterface {
 	copied := NewVmdMotion("")
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied
@@ -48,15 +48,12 @@ func (m *VmdMotion) SetName(name string) {
 }
 
 func (m *VmdMotion) GetMaxFrame() float32 {
-	return max(float32(m.BoneFrames.GetMaxFrame()), float32(m.MorphFrames.GetMaxFrame()))
+	// TODO: モーフが入ったらモーフも考慮する
+	return max(m.BoneFrames.GetMaxFrame(), m.MorphFrames.GetMaxFrame())
 }
 
 func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {
 	m.BoneFrames.GetItem(boneName).Append(bf)
-}
-
-func (m *VmdMotion) InsertBoneFrame(boneName string, bf *BoneFrame) {
-	m.BoneFrames.GetItem(boneName).Insert(bf)
 }
 
 func (m *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame) {
@@ -79,17 +76,17 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 	m.IkFrames.Append(ikf)
 }
 
-func (m *VmdMotion) Animate(frame float32, model *pmx.PmxModel) *VmdDeltas {
+func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
 	vds := &VmdDeltas{}
 
-	vds.Morphs = m.AnimateMorph(frame, model, nil)
+	vds.Morphs = m.AnimateMorph(fno, model, nil)
 
 	for i, bd := range vds.Morphs.Bones.Data {
 		bone := model.Bones.GetItem(i)
 		if !m.BoneFrames.Contains(bone.Name) {
 			m.BoneFrames.Append(NewBoneNameFrames(bone.Name))
 		}
-		bf := m.BoneFrames.GetItem(bone.Name).GetItem(frame)
+		bf := m.BoneFrames.GetItem(bone.Name).GetItem(fno)
 
 		// 一旦モーフの値をクリア
 		bf.MorphPosition = mmath.NewMVec3()
@@ -105,7 +102,7 @@ func (m *VmdMotion) Animate(frame float32, model *pmx.PmxModel) *VmdDeltas {
 	}
 
 	// モーフ付きで変形を計算
-	vds.Bones = m.animateBoneWithMorphs(frame, model, nil, true, true)
+	vds.Bones = m.AnimateBoneWithMorphs(fno, model, nil, true, true)
 
 	return vds
 }
@@ -116,17 +113,15 @@ func (m *VmdMotion) AnimateMorph(
 	morphNames []string,
 ) *MorphDeltas {
 	if morphNames == nil {
-		morphNames = make([]string, len(model.Morphs.Data))
-		for _, morph := range model.Morphs.Data {
-			morphNames = append(morphNames, morph.Name)
-		}
+		morphNames = make([]string, 0)
 	}
 
-	for _, morphName := range morphNames {
+	for _, morph := range model.Morphs.Data {
 		// モーフフレームを生成
-		if !m.MorphFrames.Contains(morphName) {
-			m.MorphFrames.Append(NewMorphNameFrames(morphName))
+		if !m.MorphFrames.Contains(morph.Name) {
+			m.MorphFrames.Append(NewMorphNameFrames(morph.Name))
 		}
+		morphNames = append(morphNames, morph.Name)
 	}
 
 	return m.MorphFrames.Animate(frame, model, morphNames)
@@ -138,10 +133,10 @@ func (m *VmdMotion) AnimateBone(
 	boneNames []string,
 	isCalcIk bool,
 ) *BoneDeltas {
-	return m.animateBoneWithMorphs(float32(frame), model, boneNames, isCalcIk, false)
+	return m.AnimateBoneWithMorphs(frame, model, boneNames, isCalcIk, false)
 }
 
-func (m *VmdMotion) animateBoneWithMorphs(
+func (m *VmdMotion) AnimateBoneWithMorphs(
 	frame float32,
 	model *pmx.PmxModel,
 	boneNames []string,
@@ -151,8 +146,9 @@ func (m *VmdMotion) animateBoneWithMorphs(
 	// ボーン変形行列操作
 	// IKリンクボーンの回転量を初期化
 	for _, bnfs := range m.BoneFrames.Data {
-		bf := bnfs.GetItem(frame)
-		bf.IkRotation = mmath.NewRotationModel()
+		for _, bf := range bnfs.Data {
+			bf.IkRotation = mmath.NewRotationModelByDegrees(mmath.NewMVec3())
+		}
 	}
 
 	for _, bone := range model.Bones.Data {

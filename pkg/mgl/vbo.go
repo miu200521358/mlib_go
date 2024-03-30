@@ -1,7 +1,6 @@
 package mgl
 
 import (
-	"sync"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -50,43 +49,18 @@ func NewVBOForVertex(ptr unsafe.Pointer, count int) *VBO {
 }
 
 // Binds VBO for rendering.
-func (v *VBO) BindVertex(vertices []float32, vertexDeltas [][]float32, vertexChunkSize int) {
+func (v *VBO) BindVertex(vertices []float32, vertexDeltas [][]float32) {
 	gl.BindBuffer(v.target, v.id)
 
 	if vertices != nil && vertexDeltas != nil {
 		// モーフ分の変動量を設定
-		numChunks := len(vertexDeltas)/vertexChunkSize + 1
-
-		var wg sync.WaitGroup
-		wg.Add(numChunks)
-
-		for i := 0; i < numChunks; i++ {
-			go func(chunkIndex int) {
-				defer wg.Done()
-
-				// Calculate the start and end indices for the current chunk
-				startIndex := chunkIndex * vertexChunkSize
-				endIndex := (chunkIndex + 1) * vertexChunkSize
-
-				// Process the vertex deltas for the current chunk
-				for i := startIndex; i < endIndex; i++ {
-					if i >= len(vertexDeltas) {
-						break
-					}
-					vd := vertexDeltas[i]
-
-					// Calculate the offset for the current vertex delta
-					offset := i*v.strideSize + (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3)
-					nextOffset := (i + 1) * v.strideSize
-
-					// Copy the vertex delta to the vertices slice
-					copy(vertices[offset:nextOffset], vd)
-				}
-			}(i)
+		for i, vd := range vertexDeltas {
+			offset := i*v.strideSize + (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3)
+			for j, d := range vd {
+				vertices[offset+j] = d
+			}
 		}
 
-		// Wait for all goroutines to finish
-		wg.Wait()
 		gl.BufferData(v.target, v.size, gl.Ptr(vertices), gl.STATIC_DRAW)
 	} else {
 		gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)

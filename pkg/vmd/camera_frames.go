@@ -1,70 +1,58 @@
 package vmd
 
 import (
-	"sync"
-
-	"github.com/petar/GoLLRB/llrb"
+	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 
 )
 
 type CameraFrames struct {
-	*mcore.IndexFloatModels[*CameraFrame]
-	RegisteredIndexes *mcore.FloatIndexes // 登録対象キーフレリスト
-	lock              sync.RWMutex        // マップアクセス制御用
+	*mcore.IndexFloatModelCorrection[*CameraFrame]
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewCameraFrames() *CameraFrames {
 	return &CameraFrames{
-		IndexFloatModels:  mcore.NewIndexFloatModels[*CameraFrame](),
-		RegisteredIndexes: mcore.NewFloatIndexes(),
-		lock:              sync.RWMutex{},
+		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*CameraFrame](),
+		RegisteredIndexes:         []float32{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (fs *CameraFrames) GetRangeIndexes(index float32) (float32, float32) {
+func (cfs *CameraFrames) GetRangeIndexes(index float32) (float32, float32) {
 
-	prevIndex := mcore.Float32(0)
-	nextIndex := mcore.Float32(index)
+	prevIndex := float32(0)
+	nextIndex := index
 
-	if fs.RegisteredIndexes.Max() < index {
-		return float32(fs.RegisteredIndexes.Max()), float32(fs.RegisteredIndexes.Max())
+	if idx := mutils.SearchFloat32s(cfs.Indexes, index); idx == 0 {
+		prevIndex = 0.0
+	} else {
+		prevIndex = cfs.Indexes[idx-1]
 	}
 
-	fs.RegisteredIndexes.DescendLessOrEqual(mcore.Float32(index), func(i llrb.Item) bool {
-		prevIndex = i.(mcore.Float32)
-		return false
-	})
+	if idx := mutils.SearchFloat32s(cfs.Indexes, index); idx == len(cfs.Indexes) {
+		nextIndex = slices.Max(cfs.Indexes)
+	} else {
+		nextIndex = cfs.Indexes[idx]
+	}
 
-	fs.RegisteredIndexes.AscendGreaterOrEqual(mcore.Float32(index), func(i llrb.Item) bool {
-		nextIndex = i.(mcore.Float32)
-		return false
-	})
-
-	return float32(prevIndex), float32(nextIndex)
+	return prevIndex, nextIndex
 }
 
 // キーフレ計算結果を返す
-func (fs *CameraFrames) GetItem(index float32) *CameraFrame {
-	if fs == nil {
-		return NewCameraFrame(index)
-	}
-
-	fs.lock.RLock()
-	defer fs.lock.RUnlock()
-
-	if fs.Has(index) {
-		return fs.Get(index)
+func (cfs *CameraFrames) GetItem(index float32) *CameraFrame {
+	if val, ok := cfs.Data[index]; ok {
+		return val
 	}
 
 	// なかったら補間計算して返す
-	prevIndex, nextIndex := fs.GetRangeIndexes(index)
+	prevIndex, nextIndex := cfs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && fs.Has(nextIndex) {
-		nextCf := fs.Get(nextIndex)
+	if prevIndex == nextIndex && slices.Contains(cfs.Indexes, nextIndex) {
+		nextCf := cfs.Data[nextIndex]
 		copied := &CameraFrame{
 			BaseFrame:        NewVmdBaseFrame(index),
 			Position:         nextCf.Position.Copy(),
@@ -79,20 +67,20 @@ func (fs *CameraFrames) GetItem(index float32) *CameraFrame {
 	}
 
 	var prevCf, nextCf *CameraFrame
-	if fs.Has(prevIndex) {
-		prevCf = fs.Get(prevIndex)
+	if slices.Contains(cfs.Indexes, prevIndex) {
+		prevCf = cfs.Data[prevIndex]
 	} else {
 		prevCf = NewCameraFrame(index)
 	}
-	if fs.Has(nextIndex) {
-		nextCf = fs.Get(nextIndex)
+	if slices.Contains(cfs.Indexes, nextIndex) {
+		nextCf = cfs.Data[nextIndex]
 	} else {
 		nextCf = NewCameraFrame(index)
 	}
 
 	cf := NewCameraFrame(index)
 
-	xy, yy, zy, ry, dy, vy := nextCf.Curves.Evaluate(float32(prevIndex), float32(index), float32(nextIndex))
+	xy, yy, zy, ry, dy, vy := nextCf.Curves.Evaluate(prevIndex, index, nextIndex)
 
 	qq := prevCf.Rotation.GetQuaternion().Slerp(nextCf.Rotation.GetQuaternion(), ry)
 	cf.Rotation.SetQuaternion(qq)
@@ -109,27 +97,21 @@ func (fs *CameraFrames) GetItem(index float32) *CameraFrame {
 }
 
 // bf.Registered が true の場合、補間曲線を分割して登録する
-func (fs *CameraFrames) Append(value *CameraFrame) {
-	fs.lock.Lock()
-	defer fs.lock.Unlock()
-
-	if value.Registered {
-		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
+func (cfs *CameraFrames) Append(value *CameraFrame) {
+	if !slices.Contains(cfs.Indexes, value.Index) {
+		cfs.Indexes = append(cfs.Indexes, value.Index)
+		mutils.SortFloat32s(cfs.Indexes)
 	}
 
-	fs.ReplaceOrInsert(value)
-}
-
-// bf.Registered が true の場合、補間曲線を分割して登録する
-func (fs *CameraFrames) Insert(value *CameraFrame) {
-	fs.lock.Lock()
-	defer fs.lock.Unlock()
-
-	if value.Registered && !fs.RegisteredIndexes.Has(value.Index) {
+	if value.Registered {
+		if !slices.Contains(cfs.RegisteredIndexes, value.Index) {
+			cfs.RegisteredIndexes = append(cfs.RegisteredIndexes, value.Index)
+			mutils.SortFloat32s(cfs.RegisteredIndexes)
+		}
 		// 補間曲線を分割する
-		prevIndex, nextIndex := fs.GetRangeIndexes(value.Index)
+		prevIndex, nextIndex := cfs.GetRangeIndexes(value.Index)
 		if nextIndex > value.Index && prevIndex < value.Index {
-			nextCf := fs.Get(nextIndex)
+			nextCf := cfs.Data[nextIndex]
 			// 自分の前後にフレームがある場合、分割する
 			value.Curves.TranslateX, nextCf.Curves.TranslateX =
 				mmath.SplitCurve(nextCf.Curves.TranslateX, prevIndex, value.Index, nextIndex)
@@ -146,9 +128,5 @@ func (fs *CameraFrames) Insert(value *CameraFrame) {
 		}
 	}
 
-	if value.Registered {
-		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
-	}
-
-	fs.ReplaceOrInsert(value)
+	cfs.Data[value.Index] = value
 }

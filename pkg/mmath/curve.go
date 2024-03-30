@@ -2,6 +2,8 @@ package mmath
 
 import (
 	"math"
+
+	"github.com/jinzhu/copier"
 )
 
 type Curve struct {
@@ -23,16 +25,18 @@ func NewCurve() *Curve {
 
 // Copy
 func (v *Curve) Copy() *Curve {
-	return &Curve{
-		Start: v.Start.Copy(),
-		End:   v.End.Copy(),
-	}
+	copied := NewCurve()
+	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+	return copied
 }
 
 func (v *Curve) Normalize(begin, finish *MVec2) {
 	diff := finish.Subed(begin)
 
-	v.Start.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
+	v.Start = v.Start.Sub(begin)
+	v.Start = v.Start.Div(diff)
+	v.Start = v.Start.MulScalar(CURVE_MAX)
+	v.Start = v.Start.Round()
 
 	if v.Start.GetX() < 0 {
 		v.Start.SetX(0)
@@ -46,7 +50,10 @@ func (v *Curve) Normalize(begin, finish *MVec2) {
 		v.Start.SetY(CURVE_MAX)
 	}
 
-	v.End.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
+	v.End = v.End.Sub(begin)
+	v.End = v.End.Div(diff)
+	v.End = v.End.MulScalar(CURVE_MAX)
+	v.End = v.End.Round()
 
 	if v.End.GetX() < 0 {
 		v.End.SetX(0)
@@ -97,8 +104,9 @@ func Evaluate(curve *Curve, start, now, end float32) (float64, float64, float64)
 }
 
 // 解を求める関数
-func newtonF(x1, x2, x, t float64) float64 {
-	return 3.0*(math.Pow((1.0-t), 2.0))*t*x1 + 3.0*(1.0-t)*(math.Pow(t, 2.0))*x2 + math.Pow(t, 3.0) - x
+func newtonFuncF(x1, x2, x, t float64) float64 {
+	t1 := 1.0 - t
+	return 3.0*(math.Pow(t1, 2.0))*t*x1 + 3.0*t1*(math.Pow(t, 2.0))*x2 + math.Pow(t, 3.0) - x
 }
 
 // Newton法（方程式の関数項、探索の開始点、微小量、誤差範囲、最大反復回数）
@@ -106,9 +114,9 @@ func newton(x1, x2, x, t0, eps, err float64) float64 {
 	derivative := 2.0 * eps
 
 	for i := 0; i < 20; i++ {
-		funcFValue := newtonF(x1, x2, x, t0)
+		funcFValue := newtonFuncF(x1, x2, x, t0)
 		// 中心差分による微分値
-		funcDF := (newtonF(x1, x2, x, t0+eps) - newtonF(x1, x2, x, t0-eps)) / derivative
+		funcDF := (newtonFuncF(x1, x2, x, t0+eps) - newtonFuncF(x1, x2, x, t0-eps)) / derivative
 
 		// 次の解を計算
 		t1 := t0 - funcFValue/funcDF

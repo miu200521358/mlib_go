@@ -2,6 +2,7 @@ package pmx
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+
 )
 
 // 面データ
@@ -23,11 +24,11 @@ func NewFace() *Face {
 
 // 面リスト
 type Faces struct {
-	*mcore.IndexModels[*Face]
+	*mcore.IndexModelCorrection[*Face]
 }
 
 func NewFaces() *Faces {
 	return &Faces{
-		IndexModels: mcore.NewIndexModels[*Face](),
+		IndexModelCorrection: mcore.NewIndexModelCorrection[*Face](),
 	}
 }

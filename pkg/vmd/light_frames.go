@@ -1,90 +1,98 @@
 package vmd
 
 import (
-	"sync"
-
-	"github.com/petar/GoLLRB/llrb"
+	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type LightFrames struct {
-	*mcore.IndexFloatModels[*LightFrame]
-	RegisteredIndexes *mcore.FloatIndexes // 登録対象キーフレリスト
-	lock              sync.RWMutex        // マップアクセス制御用
+	*mcore.IndexFloatModelCorrection[*LightFrame]
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewLightFrames() *LightFrames {
 	return &LightFrames{
-		IndexFloatModels:  mcore.NewIndexFloatModels[*LightFrame](),
-		RegisteredIndexes: mcore.NewFloatIndexes(),
-		lock:              sync.RWMutex{},
+		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*LightFrame](),
+		RegisteredIndexes:         []float32{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (fs *LightFrames) GetRangeIndexes(index float32) (float32, float32) {
+func (lfs *LightFrames) GetRangeIndexes(index float32) (float32, float32) {
 
-	prevIndex := mcore.Float32(0)
-	nextIndex := mcore.Float32(index)
+	prevIndex := float32(0)
+	nextIndex := index
 
-	if fs.RegisteredIndexes.Max() < index {
-		return float32(fs.RegisteredIndexes.Max()), float32(fs.RegisteredIndexes.Max())
+	if idx := mutils.SearchFloat32s(lfs.Indexes, index); idx == 0 {
+		prevIndex = 0
+	} else {
+		prevIndex = lfs.Indexes[idx-1]
 	}
 
-	fs.RegisteredIndexes.DescendLessOrEqual(mcore.Float32(index), func(i llrb.Item) bool {
-		prevIndex = i.(mcore.Float32)
-		return false
-	})
+	if idx := mutils.SearchFloat32s(lfs.Indexes, index); idx == len(lfs.Indexes) {
+		nextIndex = slices.Max(lfs.Indexes)
+	} else {
+		nextIndex = lfs.Indexes[idx]
+	}
 
-	fs.RegisteredIndexes.AscendGreaterOrEqual(mcore.Float32(index), func(i llrb.Item) bool {
-		nextIndex = i.(mcore.Float32)
-		return false
-	})
-
-	return float32(prevIndex), float32(nextIndex)
+	return prevIndex, nextIndex
 }
 
 // キーフレ計算結果を返す
-func (fs *LightFrames) GetItem(index float32) *LightFrame {
-	if fs == nil {
-		return NewLightFrame(index)
-	}
-
-	fs.lock.RLock()
-	defer fs.lock.RUnlock()
-
-	if fs.Has(index) {
-		return fs.Get(index)
+func (lfs *LightFrames) GetItem(index float32) *LightFrame {
+	if val, ok := lfs.Data[index]; ok {
+		return val
 	}
 
 	// なかったら補間計算して返す
-	prevIndex, nextIndex := fs.GetRangeIndexes(index)
+	prevIndex, nextIndex := lfs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && fs.Has(nextIndex) {
-		nextIf := fs.Get(nextIndex)
-		copied := nextIf.Copy()
-		return copied.(*LightFrame)
+	if prevIndex == nextIndex && slices.Contains(lfs.Indexes, nextIndex) {
+		nextLf := lfs.Data[nextIndex]
+		copied := &LightFrame{
+			BaseFrame: NewVmdBaseFrame(index),
+			Position:  nextLf.Position.Copy(),
+			Color:     nextLf.Color.Copy(),
+		}
+		return copied
 	}
 
-	var prevIf *LightFrame
-	if fs.Has(prevIndex) {
-		prevIf = fs.Get(prevIndex)
+	var prevLf, nextLf *LightFrame
+	if slices.Contains(lfs.Indexes, prevIndex) {
+		prevLf = lfs.Data[prevIndex]
 	} else {
-		prevIf = NewLightFrame(index)
+		prevLf = NewLightFrame(index)
+	}
+	if slices.Contains(lfs.Indexes, nextIndex) {
+		nextLf = lfs.Data[nextIndex]
+	} else {
+		nextLf = NewLightFrame(index)
 	}
 
-	nif := prevIf.Copy()
-	return nif.(*LightFrame)
+	lf := NewLightFrame(index)
+
+	t := (float64(index) - float64(prevIndex)) / (float64(nextIndex) - float64(prevIndex))
+
+	lf.Position = mmath.LerpVec3(prevLf.Position, nextLf.Position, t)
+	lf.Color = mmath.LerpVec3(prevLf.Color, nextLf.Color, t)
+
+	return lf
 }
 
-func (fs *LightFrames) Append(value *LightFrame) {
-	fs.lock.Lock()
-	defer fs.lock.Unlock()
-
+func (lfs *LightFrames) Append(value *LightFrame) {
+	if !slices.Contains(lfs.Indexes, value.Index) {
+		lfs.Indexes = append(lfs.Indexes, value.Index)
+		mutils.SortFloat32s(lfs.Indexes)
+	}
 	if value.Registered {
-		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
+		if !slices.Contains(lfs.RegisteredIndexes, value.Index) {
+			lfs.RegisteredIndexes = append(lfs.RegisteredIndexes, value.Index)
+			mutils.SortFloat32s(lfs.RegisteredIndexes)
+		}
 	}
 
-	fs.ReplaceOrInsert(value)
+	lfs.Data[value.Index] = value
 }

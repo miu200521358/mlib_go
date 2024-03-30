@@ -1,8 +1,6 @@
 package vmd
 
-import (
-	"github.com/miu200521358/mlib_go/pkg/pmx"
-)
+import "github.com/miu200521358/mlib_go/pkg/pmx"
 
 type MorphFrames struct {
 	Data map[string]*MorphNameFrames
@@ -63,7 +61,7 @@ func (mfs *MorphFrames) Animate(
 func (mfs *MorphFrames) GetMaxFrame() float32 {
 	maxFno := float32(0)
 	for _, mnfs := range mfs.Data {
-		fno := mnfs.RegisteredIndexes.Max()
+		fno := mnfs.GetMaxFrame()
 		if fno > maxFno {
 			maxFno = fno
 		}

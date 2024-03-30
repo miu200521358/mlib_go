@@ -675,7 +675,7 @@ func (m *MMat4) Det() float64 {
 }
 
 // 逆行列
-func (m *MMat4) Invert() *MMat4 {
+func (m *MMat4) Inverse() *MMat4 {
 	det := m.Det()
 	if mgl64.FloatEqual(det, float64(0.0)) {
 		return NewMMat4()
@@ -721,18 +721,5 @@ func (m *MMat4) Invert() *MMat4 {
 
 func (m *MMat4) Inverted() *MMat4 {
 	copied := m.Copy()
-	return copied.Invert()
-}
-
-// ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
-func (v *MMat4) ClampIfVerySmall() *MMat4 {
-	epsilon := 1e-6
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
-			if math.Abs(v[i][j]) < epsilon {
-				v[i][j] = 0
-			}
-		}
-	}
-	return v
+	return copied.Inverse()
 }

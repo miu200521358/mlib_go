@@ -3,16 +3,13 @@ package mwidget
 import (
 	"embed"
 	"fmt"
-	"runtime"
 	"syscall"
 
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
-	"github.com/miu200521358/mlib_go/pkg/mutils/miter"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
@@ -30,7 +27,6 @@ type MWindow struct {
 	jointDebugAction      *walk.Action // ジョイントデバッグ表示
 	logLevelDebugAction   *walk.Action // デバッグメッセージ表示
 	logLevelVerboseAction *walk.Action // 冗長メッセージ表示
-	hightSpecMode         *walk.Action // ハイスペックモード
 }
 
 func NewMWindow(
@@ -40,7 +36,7 @@ func NewMWindow(
 	height int,
 	funcHelpMenuItems func() []declarative.MenuItem,
 ) (*MWindow, error) {
-	appConfig := mconfig.LoadAppConfig(resourceFiles)
+	appConfig := mutils.LoadAppConfig(resourceFiles)
 	mi18n.Initialize(resourceFiles)
 
 	mainWindow := &MWindow{
@@ -126,13 +122,6 @@ func NewMWindow(
 							mlog.ILT(mi18n.T("メイン画面の使い方"), mi18n.T("メイン画面の使い方メッセージ"))
 						},
 					},
-					declarative.Separator{},
-					declarative.Action{
-						Text:        mi18n.T("&ハイスペックモード"),
-						Checkable:   true,
-						OnTriggered: mainWindow.hightSpecModeTriggered,
-						AssignTo:    &mainWindow.hightSpecMode,
-					},
 				},
 			},
 			declarative.Menu{
@@ -167,25 +156,8 @@ func NewMWindow(
 
 	// 最初は物理ON
 	mainWindow.physicsAction.SetChecked(true)
-	physics := mconfig.LoadUserConfig(mconfig.PHYSICS)
-	if len(physics) > 0 && physics[0] != "1" {
-		// physics=1では無い場合、物理OFF
-		mainWindow.physicsAction.SetChecked(false)
-	}
-
 	// 最初はフレームドロップON
 	mainWindow.frameDropAction.SetChecked(true)
-	frameDrop := mconfig.LoadUserConfig(mconfig.FRAME_DROP)
-	if len(frameDrop) > 0 && frameDrop[0] != "1" {
-		// frameDrop=1では無い場合、フレームドロップOFF
-		mainWindow.frameDropAction.SetChecked(false)
-	}
-
-	highSpecMode := mconfig.LoadUserConfig(mconfig.HIGH_SPEC_MODE)
-	if len(highSpecMode) > 0 && highSpecMode[0] != "1" {
-		// CPU=1では無い場合、ハイスペックモードON
-		mainWindow.hightSpecMode.SetChecked(true)
-	}
 
 	mainWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
 		if len(mainWindow.GlWindows) > 0 && !CheckOpenGLError() {
@@ -196,7 +168,7 @@ func NewMWindow(
 		walk.App().Exit(0)
 	})
 
-	iconImg, err := mconfig.LoadIconFile(resourceFiles)
+	iconImg, err := mutils.LoadIconFile(resourceFiles)
 	if err != nil {
 		return nil, err
 	}
@@ -225,16 +197,6 @@ func (w *MWindow) logLevelTriggered() {
 	if w.logLevelVerboseAction.Checked() {
 		mlog.SetLevel(0)
 	}
-}
-
-func (w *MWindow) hightSpecModeTriggered() {
-	if w.hightSpecMode.Checked() {
-		// ハイスペックモードの場合、CPUを半分動かすくらいでブロックサイズを設定
-		miter.SetBlockSize(runtime.NumCPU() / 2)
-	} else {
-		miter.SetBlockSize(1)
-	}
-	mconfig.SaveUserConfig(mconfig.HIGH_SPEC_MODE, fmt.Sprintf("%d", miter.GetBlockSize()), 1)
 }
 
 func (w *MWindow) langTriggered(lang string) {
@@ -266,15 +228,10 @@ func (w *MWindow) jointDebugViewTriggered() {
 	}
 }
 
-func (w *MWindow) IsPhysics() bool {
-	return w.physicsAction.Checked()
-}
-
 func (w *MWindow) physicsTriggered() {
 	for _, glWindow := range w.GlWindows {
 		glWindow.EnablePhysics = w.physicsAction.Checked()
 	}
-	mconfig.SaveUserConfig(mconfig.PHYSICS, fmt.Sprintf("%d", mutils.BoolToInt(w.physicsAction.Checked())), 1)
 }
 
 func (w *MWindow) physicsResetTriggered() {
@@ -287,7 +244,6 @@ func (w *MWindow) frameDropTriggered() {
 	for _, glWindow := range w.GlWindows {
 		glWindow.EnableFrameDrop = w.frameDropAction.Checked()
 	}
-	mconfig.SaveUserConfig(mconfig.FRAME_DROP, string(rune(mutils.BoolToInt(w.frameDropAction.Checked()))), 1)
 }
 
 func getWindowSize(width int, height int) declarative.Size {

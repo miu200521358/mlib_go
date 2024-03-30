@@ -307,7 +307,9 @@ func (v *MVec3) Normalize() *MVec3 {
 
 // Normalized ベクトルを正規化した結果を返します
 func (v *MVec3) Normalized() *MVec3 {
-	return v.Copy().Normalize()
+	vec := *v
+	vec.Normalize()
+	return &vec
 }
 
 // Angle ベクトルの角度(ラジアン角度)を返します
@@ -324,7 +326,9 @@ func (v *MVec3) Angle(other *MVec3) float64 {
 
 // Degree ベクトルの角度(度数)を返します
 func (v *MVec3) Degree(other *MVec3) float64 {
-	return v.Angle(other) * (180 / math.Pi)
+	radian := v.Angle(other)
+	degree := radian * (180 / math.Pi)
+	return degree
 }
 
 // Dot ベクトルの内積を返します
@@ -371,21 +375,6 @@ func (v *MVec3) Interpolate(other *MVec3, t float64) *MVec3 {
 	}
 }
 
-// ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
-func (v *MVec3) ClampIfVerySmall() *MVec3 {
-	epsilon := 1e-6
-	if math.Abs(v.GetX()) < epsilon {
-		v.SetX(0)
-	}
-	if math.Abs(v.GetY()) < epsilon {
-		v.SetY(0)
-	}
-	if math.Abs(v.GetZ()) < epsilon {
-		v.SetZ(0)
-	}
-	return v
-}
-
 // Clamp ベクトルの各要素を指定された範囲内にクランプします
 func (v *MVec3) Clamp(min, max *MVec3) *MVec3 {
 	for i := range v {
@@ -400,7 +389,9 @@ func (v *MVec3) Clamp(min, max *MVec3) *MVec3 {
 
 // Clamped ベクトルの各要素を指定された範囲内にクランプした結果を返します
 func (v *MVec3) Clamped(min, max *MVec3) *MVec3 {
-	return v.Copy().Clamp(min, max)
+	result := *v
+	result.Clamp(min, max)
+	return &result
 }
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
@@ -410,7 +401,9 @@ func (v *MVec3) Clamp01() *MVec3 {
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します
 func (v *MVec3) Clamped01() *MVec3 {
-	return v.Copy().Clamp01()
+	result := *v
+	result.Clamp01()
+	return &result
 }
 
 // Copy
@@ -425,19 +418,11 @@ func (v *MVec3) Vector() []float64 {
 	return []float64{v.GetX(), v.GetY(), v.GetZ()}
 }
 
-func (v *MVec3) ToMoveMat4() *MMat4 {
+func (v *MVec3) ToMat4() *MMat4 {
 	mat := NewMMat4()
 	mat[0][3] = v.GetX()
 	mat[1][3] = v.GetY()
 	mat[2][3] = v.GetZ()
-	return mat
-}
-
-func (v *MVec3) ToScaleMat4() *MMat4 {
-	mat := NewMMat4()
-	mat[0][0] += v.GetX()
-	mat[1][1] += v.GetY()
-	mat[2][2] += v.GetZ()
 	return mat
 }
 
@@ -564,7 +549,8 @@ func (v *MVec3) One() *MVec3 {
 }
 
 func (v *MVec3) Distance(other *MVec3) float64 {
-	return v.Subed(other).Length()
+	s := v.Subed(other)
+	return s.Length()
 }
 
 func (v *MVec3) Project(other *MVec3) *MVec3 {

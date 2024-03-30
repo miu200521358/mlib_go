@@ -1,9 +1,7 @@
 package vmd
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type BoneFrame struct {
@@ -32,15 +30,15 @@ func NewBoneFrame(index float32) *BoneFrame {
 		MorphPosition:      mmath.NewMVec3(),
 		LocalPosition:      mmath.NewMVec3(),
 		MorphLocalPosition: mmath.NewMVec3(),
-		Rotation:           mmath.NewRotationModel(),
-		MorphRotation:      mmath.NewRotationModel(),
-		LocalRotation:      mmath.NewRotationModel(),
-		MorphLocalRotation: mmath.NewRotationModel(),
+		Rotation:           mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		MorphRotation:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		LocalRotation:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		MorphLocalRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 		Scale:              mmath.NewMVec3(),
 		MorphScale:         mmath.NewMVec3(),
 		LocalScale:         mmath.NewMVec3(),
 		MorphLocalScale:    mmath.NewMVec3(),
-		IkRotation:         mmath.NewRotationModel(),
+		IkRotation:         mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 		Curves:             NewBoneCurves(),
 	}
 }
@@ -79,24 +77,4 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 	copied.IkRotation.Mul(v.IkRotation)
 
 	return copied
-}
-
-func (bf *BoneFrame) Copy() mcore.IIndexFloatModel {
-	return &BoneFrame{
-		BaseFrame:          NewVmdBaseFrame(bf.Index),
-		Position:           bf.Position.Copy(),
-		MorphPosition:      bf.MorphPosition.Copy(),
-		LocalPosition:      bf.LocalPosition.Copy(),
-		MorphLocalPosition: bf.MorphLocalPosition.Copy(),
-		Rotation:           bf.Rotation.Copy(),
-		MorphRotation:      bf.MorphRotation.Copy(),
-		LocalRotation:      bf.LocalRotation.Copy(),
-		MorphLocalRotation: bf.MorphLocalRotation.Copy(),
-		Scale:              bf.Scale.Copy(),
-		MorphScale:         bf.MorphScale.Copy(),
-		LocalScale:         bf.LocalScale.Copy(),
-		MorphLocalScale:    bf.MorphLocalScale.Copy(),
-		Curves:             bf.Curves.Copy(),
-		IkRotation:         bf.IkRotation.Copy(),
-	}
 }

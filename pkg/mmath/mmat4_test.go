@@ -50,6 +50,23 @@ func TestMMat4_Quaternion(t *testing.T) {
 	}
 }
 
+func TestMMat4_AssignQuaternion(t *testing.T) {
+	mat := &MMat4{}
+	q := NewMQuaternionByValues(1, 2, 3, 4)
+	expectedMat := &MMat4{
+		{-25, -20, 22, 0},
+		{28, -19, 4, 0},
+		{-10, 20, -9, 0},
+		{0, 0, 0, 1},
+	}
+
+	mat.AssignQuaternion(q)
+
+	if !mat.PracticallyEquals(expectedMat, 1e-10) {
+		t.Errorf("Expected mat to be %v, got %v", expectedMat, mat)
+	}
+}
+
 func TestMMat4_AssignEulerRotation(t *testing.T) {
 	mat := &MMat4{}
 	xPitch := 0.5
@@ -137,7 +154,7 @@ func TestMMat4_Inverse(t *testing.T) {
 		{0.0, 0.0, 0.0, 1.0},
 	}
 
-	result1 := mat1.Invert()
+	result1 := mat1.Inverse()
 
 	// Verify the matrix values
 	if !result1.PracticallyEquals(&expected1, 1e-8) {
@@ -158,7 +175,7 @@ func TestMMat4_Inverse(t *testing.T) {
 		{0.0, 0.0, 0.0, 1.0},
 	}
 
-	result2 := mat2.Invert()
+	result2 := mat2.Inverse()
 
 	// Verify the matrix values
 	if !result2.PracticallyEquals(&expected2, 1e-8) {

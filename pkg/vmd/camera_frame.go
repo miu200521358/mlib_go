@@ -1,8 +1,6 @@
 package vmd
 
-import (
-	"github.com/miu200521358/mlib_go/pkg/mmath"
-)
+import "github.com/miu200521358/mlib_go/pkg/mmath"
 
 type CameraFrame struct {
 	*BaseFrame                        // キーフレ

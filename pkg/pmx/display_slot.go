@@ -57,7 +57,7 @@ func NewDisplaySlot() *DisplaySlot {
 }
 
 // Copy
-func (v *DisplaySlot) Copy() mcore.IIndexModel {
+func (v *DisplaySlot) Copy() mcore.IndexModelInterface {
 	copied := NewDisplaySlot()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied
@@ -65,11 +65,11 @@ func (v *DisplaySlot) Copy() mcore.IIndexModel {
 
 // 表示枠リスト
 type DisplaySlots struct {
-	*mcore.IndexModels[*DisplaySlot]
+	*mcore.IndexModelCorrection[*DisplaySlot]
 }
 
 func NewDisplaySlots() *DisplaySlots {
 	return &DisplaySlots{
-		IndexModels: mcore.NewIndexModels[*DisplaySlot](),
+		IndexModelCorrection: mcore.NewIndexModelCorrection[*DisplaySlot](),
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"embed"
 	"image"
 	"math"
-	"sync"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -17,8 +16,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
-	"github.com/miu200521358/mlib_go/pkg/mutils/miter"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
@@ -37,75 +35,29 @@ func (ms *ModelSet) Draw(
 	isBoneDebug bool,
 	enablePhysics bool,
 ) {
+	boneMatrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
+	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.NameIndexes))
+	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
+	vertexDeltas := make([][]float32, len(ms.Model.Vertices.Data))
+	materialDeltas := make([]*pmx.Material, len(ms.Model.Materials.Data))
 	deltas := ms.Motion.Animate(frame, ms.Model)
-
-	var wg sync.WaitGroup
-	wg.Add(3)
-
-	var boneMatrixes []*mgl32.Mat4
-	var globalMatrixes []*mmath.MMat4
-	var transforms []*mbt.BtTransform
-	var vertexDeltas [][]float32
-	var materialDeltas []*pmx.Material
-
-	go func() {
-		defer wg.Done()
-		boneMatrixes, globalMatrixes, transforms = ms.fetchBoneMatrixes(deltas, frame)
-	}()
-
-	go func() {
-		defer wg.Done()
-		vertexDeltas = ms.fetchVertexDeltas(deltas)
-	}()
-
-	go func() {
-		defer wg.Done()
-		materialDeltas = ms.fetchMaterialDeltas(deltas)
-	}()
-
-	wg.Wait()
-
-	ms.Model.Draw(shader, boneMatrixes, globalMatrixes, transforms, vertexDeltas, materialDeltas,
-		windowIndex, frame, elapsed, isBoneDebug, enablePhysics)
-}
-
-func (ms ModelSet) fetchBoneMatrixes(
-	deltas *vmd.VmdDeltas,
-	frame float32,
-) ([]*mgl32.Mat4, []*mmath.MMat4, []*mbt.BtTransform) {
-	boneMatrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.Data))
-	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.Data))
-	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.Data))
-
-	miter.IterParallel(len(ms.Model.Bones.Data), func(i int) {
-		bone := ms.Model.Bones.GetItem(i)
+	for i, bone := range ms.Model.Bones.GetSortedData() {
 		mat := deltas.Bones.GetItem(bone.Name, frame).LocalMatrix.GL()
 		boneMatrixes[i] = mat
 		globalMatrixes[i] = deltas.Bones.GetItem(bone.Name, frame).GlobalMatrix
 		t := mbt.NewBtTransform()
 		t.SetFromOpenGLMatrix(&mat[0])
 		transforms[i] = &t
-	})
-
-	return boneMatrixes, globalMatrixes, transforms
-}
-
-func (ms ModelSet) fetchVertexDeltas(deltas *vmd.VmdDeltas) [][]float32 {
-	vertexDeltas := make([][]float32, len(ms.Model.Vertices.Data))
-
-	miter.IterParallel(len(ms.Model.Vertices.Data), func(i int) {
-		vertexDeltas[i] = deltas.Morphs.Vertices.Data[i].GL()
-	})
-
-	return vertexDeltas
-}
-
-func (ms ModelSet) fetchMaterialDeltas(deltas *vmd.VmdDeltas) []*pmx.Material {
-	materialDeltas := make([]*pmx.Material, len(ms.Model.Materials.Data))
+	}
+	// TODO: 並列化
+	for i, vd := range deltas.Morphs.Vertices.Data {
+		vertexDeltas[i] = vd.GL()
+	}
 	for i, md := range deltas.Morphs.Materials.Data {
 		materialDeltas[i] = md.Material
 	}
-	return materialDeltas
+	ms.Model.Draw(shader, boneMatrixes, globalMatrixes, transforms, vertexDeltas, materialDeltas,
+		windowIndex, frame, elapsed, isBoneDebug, enablePhysics)
 }
 
 // 直角の定数値
@@ -165,7 +117,7 @@ func NewGlWindow(
 		return nil, err
 	}
 	w.MakeContextCurrent()
-	iconImg, err := mconfig.LoadIconFile(resourceFiles)
+	iconImg, err := mutils.LoadIconFile(resourceFiles)
 	if err == nil {
 		w.SetIcon([]image.Image{iconImg})
 	}
@@ -500,11 +452,10 @@ func (w *GlWindow) Reset() {
 
 }
 
-func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion, enablePhysics bool) {
+func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 	w.Reset()
-	w.EnablePhysics = enablePhysics
 
 	pmxModel.InitDraw(w.WindowIndex, w.resourceFiles)
 	pmxModel.InitPhysics(w.Physics)

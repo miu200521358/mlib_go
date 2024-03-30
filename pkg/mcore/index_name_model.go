@@ -4,12 +4,11 @@ import (
 	"slices"
 
 	"github.com/jinzhu/copier"
-
 )
 
-type IIndexNameModel interface {
+type IndexNameModelInterface interface {
 	IsValid() bool
-	Copy() IIndexNameModel
+	Copy() IndexNameModelInterface
 	GetIndex() int
 	SetIndex(index int)
 	GetName() string
@@ -43,26 +42,26 @@ func (v *IndexNameModel) IsValid() bool {
 	return v.GetIndex() >= 0
 }
 
-func (v *IndexNameModel) Copy() IIndexNameModel {
+func (v *IndexNameModel) Copy() IndexNameModelInterface {
 	copied := IndexNameModel{Index: v.Index, Name: v.Name, EnglishName: v.EnglishName}
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return &copied
 }
 
 // Tのリスト基底クラス
-type IndexNameModels[T IIndexNameModel] struct {
+type IndexNameModelCorrection[T IndexNameModelInterface] struct {
 	Data        map[int]T
 	NameIndexes map[string]int
 }
 
-func NewIndexNameModels[T IIndexNameModel]() *IndexNameModels[T] {
-	return &IndexNameModels[T]{
+func NewIndexNameModelCorrection[T IndexNameModelInterface]() *IndexNameModelCorrection[T] {
+	return &IndexNameModelCorrection[T]{
 		Data:        make(map[int]T, 0),
 		NameIndexes: make(map[string]int, 0),
 	}
 }
 
-func (c *IndexNameModels[T]) GetItem(index int) T {
+func (c *IndexNameModelCorrection[T]) GetItem(index int) T {
 	if val, ok := c.Data[index]; ok {
 		return val
 	}
@@ -70,11 +69,11 @@ func (c *IndexNameModels[T]) GetItem(index int) T {
 	panic("[BaseIndexDictModel] index out of range: index: " + string(rune(index)))
 }
 
-func (c *IndexNameModels[T]) SetItem(index int, v T) {
+func (c *IndexNameModelCorrection[T]) SetItem(index int, v T) {
 	c.Data[index] = v
 }
 
-func (c *IndexNameModels[T]) Append(value T) {
+func (c *IndexNameModelCorrection[T]) Append(value T) {
 	if value.GetIndex() < 0 {
 		value.SetIndex(len(c.Data))
 	}
@@ -85,7 +84,7 @@ func (c *IndexNameModels[T]) Append(value T) {
 	}
 }
 
-func (c *IndexNameModels[T]) GetIndexes() []int {
+func (c *IndexNameModelCorrection[T]) GetIndexes() []int {
 	indexes := make([]int, 0, len(c.NameIndexes))
 	for _, value := range c.NameIndexes {
 		indexes = append(indexes, value)
@@ -94,7 +93,7 @@ func (c *IndexNameModels[T]) GetIndexes() []int {
 	return indexes
 }
 
-func (c *IndexNameModels[T]) GetNames() []string {
+func (c *IndexNameModelCorrection[T]) GetNames() []string {
 	names := make([]string, 0, len(c.NameIndexes))
 	for index := range c.GetIndexes() {
 		names = append(names, c.Data[index].GetName())
@@ -102,33 +101,33 @@ func (c *IndexNameModels[T]) GetNames() []string {
 	return names
 }
 
-func (c *IndexNameModels[T]) DeleteItem(index int) {
+func (c *IndexNameModelCorrection[T]) DeleteItem(index int) {
 	delete(c.Data, index)
 }
 
-func (c *IndexNameModels[T]) Len() int {
+func (c *IndexNameModelCorrection[T]) Len() int {
 	return len(c.Data)
 }
 
-func (c *IndexNameModels[T]) ContainsIndex(key int) bool {
+func (c *IndexNameModelCorrection[T]) ContainsIndex(key int) bool {
 	_, ok := c.Data[key]
 	return ok
 }
 
-func (c *IndexNameModels[T]) ContainsName(key string) bool {
+func (c *IndexNameModelCorrection[T]) ContainsName(key string) bool {
 	_, ok := c.NameIndexes[key]
 	return ok
 }
 
-func (c *IndexNameModels[T]) IsEmpty() bool {
+func (c *IndexNameModelCorrection[T]) IsEmpty() bool {
 	return len(c.Data) == 0
 }
 
-func (c *IndexNameModels[T]) IsNotEmpty() bool {
+func (c *IndexNameModelCorrection[T]) IsNotEmpty() bool {
 	return len(c.Data) > 0
 }
 
-func (c *IndexNameModels[T]) LastIndex() int {
+func (c *IndexNameModelCorrection[T]) LastIndex() int {
 	maxIndex := 0
 	for index := range c.Data {
 		if index > maxIndex {
@@ -138,7 +137,7 @@ func (c *IndexNameModels[T]) LastIndex() int {
 	return maxIndex
 }
 
-func (c *IndexNameModels[T]) GetSortedData() []T {
+func (c *IndexNameModelCorrection[T]) GetSortedData() []T {
 	sortedData := make([]T, 0, len(c.NameIndexes))
 	for index := range c.GetIndexes() {
 		sortedData = append(sortedData, c.Data[index])
@@ -146,19 +145,19 @@ func (c *IndexNameModels[T]) GetSortedData() []T {
 	return sortedData
 }
 
-func (c *IndexNameModels[T]) GetItemByName(name string) T {
+func (c *IndexNameModelCorrection[T]) GetItemByName(name string) T {
 	if index, ok := c.NameIndexes[name]; ok {
 		return c.Data[index]
 	}
 	panic("[BaseIndexDictModel] name not found: name: " + name)
 }
 
-func (v *IndexNameModels[T]) Contains(index int) bool {
+func (v *IndexNameModelCorrection[T]) Contains(index int) bool {
 	_, ok := v.Data[index]
 	return ok
 }
 
-func (v *IndexNameModels[T]) ContainsByName(name string) bool {
+func (v *IndexNameModelCorrection[T]) ContainsByName(name string) bool {
 	_, ok := v.NameIndexes[name]
 	return ok
 }

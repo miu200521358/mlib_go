@@ -89,7 +89,7 @@ func NewMeshes(
 	vao := mgl.NewVAO()
 	vao.Bind()
 	vbo := mgl.NewVBOForVertex(gl.Ptr(vertices), len(vertices))
-	vbo.BindVertex(nil, nil, 0)
+	vbo.BindVertex(nil, nil)
 	vbo.Unbind()
 	vao.Unbind()
 
@@ -113,7 +113,6 @@ func (m *Meshes) Draw(
 	shader *mgl.MShader,
 	boneMatrixes []*mgl32.Mat4,
 	vertexDeltas [][]float32,
-	vertexChunkSize int,
 	materialDeltas []*Material,
 	windowIndex int,
 ) {
@@ -128,7 +127,7 @@ func (m *Meshes) Draw(
 
 	for i, mesh := range m.meshes {
 		m.vao.Bind()
-		m.vbo.BindVertex(m.vertices, vertexDeltas, vertexChunkSize)
+		m.vbo.BindVertex(m.vertices, vertexDeltas)
 
 		shader.UseModelProgram()
 		mesh.DrawModel(shader, windowIndex, boneMatrixes, materialDeltas[i])

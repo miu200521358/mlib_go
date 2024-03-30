@@ -85,7 +85,7 @@ func NewTexture() *Texture {
 	}
 }
 
-func (t *Texture) Copy() mcore.IIndexModel {
+func (t *Texture) Copy() mcore.IndexModelInterface {
 	copied := NewTexture()
 	copier.CopyWithOption(copied, t, copier.Option{DeepCopy: true})
 	return copied
@@ -207,23 +207,23 @@ func (t *Texture) GL(
 
 // テクスチャリスト
 type Textures struct {
-	*mcore.IndexModels[*Texture]
+	*mcore.IndexModelCorrection[*Texture]
 }
 
 func NewTextures() *Textures {
 	return &Textures{
-		IndexModels: mcore.NewIndexModels[*Texture](),
+		IndexModelCorrection: mcore.NewIndexModelCorrection[*Texture](),
 	}
 }
 
 // 共有テクスチャ辞書
 type ToonTextures struct {
-	*mcore.IndexModels[*Texture]
+	*mcore.IndexModelCorrection[*Texture]
 }
 
 func NewToonTextures() *ToonTextures {
 	return &ToonTextures{
-		IndexModels: mcore.NewIndexModels[*Texture](),
+		IndexModelCorrection: mcore.NewIndexModelCorrection[*Texture](),
 	}
 }
 

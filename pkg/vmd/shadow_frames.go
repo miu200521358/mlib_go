@@ -1,90 +1,96 @@
 package vmd
 
 import (
-	"sync"
-
-	"github.com/petar/GoLLRB/llrb"
+	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
+
 )
 
 type ShadowFrames struct {
-	*mcore.IndexFloatModels[*ShadowFrame]
-	RegisteredIndexes *mcore.FloatIndexes // 登録対象キーフレリスト
-	lock              sync.RWMutex        // マップアクセス制御用
+	*mcore.IndexFloatModelCorrection[*ShadowFrame]
+	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewShadowFrames() *ShadowFrames {
 	return &ShadowFrames{
-		IndexFloatModels:  mcore.NewIndexFloatModels[*ShadowFrame](),
-		RegisteredIndexes: mcore.NewFloatIndexes(),
-		lock:              sync.RWMutex{},
+		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*ShadowFrame](),
+		RegisteredIndexes:         []float32{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (fs *ShadowFrames) GetRangeIndexes(index float32) (float32, float32) {
+func (sfs *ShadowFrames) GetRangeIndexes(index float32) (float32, float32) {
 
-	prevIndex := mcore.Float32(0)
-	nextIndex := mcore.Float32(index)
+	prevIndex := float32(0)
+	nextIndex := index
 
-	if fs.RegisteredIndexes.Max() < index {
-		return float32(fs.RegisteredIndexes.Max()), float32(fs.RegisteredIndexes.Max())
+	if idx := mutils.SearchFloat32s(sfs.Indexes, index); idx == 0 {
+		prevIndex = 0
+	} else {
+		prevIndex = sfs.Indexes[idx-1]
 	}
 
-	fs.RegisteredIndexes.DescendLessOrEqual(mcore.Float32(index), func(i llrb.Item) bool {
-		prevIndex = i.(mcore.Float32)
-		return false
-	})
+	if idx := mutils.SearchFloat32s(sfs.Indexes, index); idx == len(sfs.Indexes) {
+		nextIndex = slices.Max(sfs.Indexes)
+	} else {
+		nextIndex = sfs.Indexes[idx]
+	}
 
-	fs.RegisteredIndexes.AscendGreaterOrEqual(mcore.Float32(index), func(i llrb.Item) bool {
-		nextIndex = i.(mcore.Float32)
-		return false
-	})
-
-	return float32(prevIndex), float32(nextIndex)
+	return prevIndex, nextIndex
 }
 
 // キーフレ計算結果を返す
-func (fs *ShadowFrames) GetItem(index float32) *ShadowFrame {
-	if fs == nil {
-		return NewShadowFrame(index)
-	}
-
-	fs.lock.RLock()
-	defer fs.lock.RUnlock()
-
-	if fs.Has(index) {
-		return fs.Get(index)
+func (sfs *ShadowFrames) GetItem(index float32) *ShadowFrame {
+	if val, ok := sfs.Data[index]; ok {
+		return val
 	}
 
 	// なかったら補間計算して返す
-	prevIndex, nextIndex := fs.GetRangeIndexes(index)
+	prevIndex, nextIndex := sfs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && fs.Has(nextIndex) {
-		nextSf := fs.Get(nextIndex)
-		copied := nextSf.Copy()
-		return copied.(*ShadowFrame)
+	if prevIndex == nextIndex && slices.Contains(sfs.Indexes, nextIndex) {
+		nextSf := sfs.Data[nextIndex]
+		copied := &ShadowFrame{
+			BaseFrame: NewVmdBaseFrame(index),
+			Distance:  nextSf.Distance,
+		}
+		return copied
 	}
 
-	var prevSf *ShadowFrame
-	if fs.Has(prevIndex) {
-		prevSf = fs.Get(prevIndex)
+	var prevSf, nextSf *ShadowFrame
+	if slices.Contains(sfs.Indexes, prevIndex) {
+		prevSf = sfs.Data[prevIndex]
 	} else {
 		prevSf = NewShadowFrame(index)
 	}
-
-	nif := prevSf.Copy()
-	return nif.(*ShadowFrame)
-}
-
-func (fs *ShadowFrames) Append(value *ShadowFrame) {
-	fs.lock.Lock()
-	defer fs.lock.Unlock()
-
-	if value.Registered {
-		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Float32(value.Index))
+	if slices.Contains(sfs.Indexes, nextIndex) {
+		nextSf = sfs.Data[nextIndex]
+	} else {
+		nextSf = NewShadowFrame(index)
 	}
 
-	fs.ReplaceOrInsert(value)
+	sf := NewShadowFrame(index)
+
+	t := (float64(index) - float64(prevIndex)) / (float64(nextIndex) - float64(prevIndex))
+	sf.Distance = mmath.LerpFloat(prevSf.Distance, nextSf.Distance, t)
+
+	return sf
+}
+
+func (sfs *ShadowFrames) Append(value *ShadowFrame) {
+	if !slices.Contains(sfs.Indexes, value.Index) {
+		sfs.Indexes = append(sfs.Indexes, value.Index)
+		mutils.SortFloat32s(sfs.Indexes)
+	}
+	if value.Registered {
+		if !slices.Contains(sfs.RegisteredIndexes, value.Index) {
+			sfs.RegisteredIndexes = append(sfs.RegisteredIndexes, value.Index)
+			mutils.SortFloat32s(sfs.RegisteredIndexes)
+		}
+	}
+
+	sfs.Data[value.Index] = value
 }

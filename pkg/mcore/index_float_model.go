@@ -1,28 +1,22 @@
 package mcore
 
 import (
+	"slices"
+
 	"github.com/jinzhu/copier"
-	"github.com/petar/GoLLRB/llrb"
 
 )
 
-type IIndexFloatModel interface {
+type IndexFloatModelInterface interface {
 	IsValid() bool
-	Copy() IIndexFloatModel
+	Copy() IndexFloatModelInterface
 	GetIndex() float32
 	SetIndex(index float32)
-	Less(than llrb.Item) bool
 }
 
 // INDEXを持つ基底クラス
 type IndexFloatModel struct {
 	Index float32
-}
-
-func NewIndexFloatModel(index float32) *IndexFloatModel {
-	return &IndexFloatModel{
-		Index: index,
-	}
 }
 
 func (v *IndexFloatModel) GetIndex() float32 {
@@ -37,66 +31,87 @@ func (v *IndexFloatModel) IsValid() bool {
 	return v.GetIndex() >= 0
 }
 
-func (v *IndexFloatModel) Copy() IIndexFloatModel {
+func (v *IndexFloatModel) Copy() IndexFloatModelInterface {
 	copied := IndexFloatModel{Index: v.Index}
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return &copied
 }
 
-func (v *IndexFloatModel) Less(than llrb.Item) bool {
-	if than == nil {
-		return false
-	}
-	return v.Index < than.(IIndexFloatModel).GetIndex()
-}
-
-type IIndexFloatModels[T IIndexFloatModel] interface {
-	Has(index float32) bool
-	Get(index float32) T
-	Append(value T)
-	Insert(value T)
-	Delete(index float32)
-	Len() int
-	IsEmpty() bool
-	IsNotEmpty() bool
-	LastIndex() float32
-}
-
 // Tのリスト基底クラス
-type IndexFloatModels[T IIndexFloatModel] struct {
-	*llrb.LLRB
+type IndexFloatModelCorrection[T IndexFloatModelInterface] struct {
+	Data    map[float32]T
+	Indexes []float32
 }
 
-func NewIndexFloatModels[T IIndexFloatModel]() *IndexFloatModels[T] {
-	return &IndexFloatModels[T]{
-		LLRB: llrb.New(),
+func NewIndexFloatModelCorrection[T IndexFloatModelInterface]() *IndexFloatModelCorrection[T] {
+	return &IndexFloatModelCorrection[T]{
+		Data:    make(map[float32]T, 0),
+		Indexes: make([]float32, 0),
 	}
 }
 
-func (c *IndexFloatModels[T]) Get(index float32) T {
-	return c.LLRB.Get(NewIndexFloatModel(index)).(T)
+func (c *IndexFloatModelCorrection[T]) GetItem(index float32) T {
+	if val, ok := c.Data[index]; ok {
+		return val
+	}
+	// なかったらエラー
+	panic("[BaseIndexDictModel] index out of range: index: " + string(rune(index)))
 }
 
-func (c *IndexFloatModels[T]) Append(value T) {
-	c.LLRB.ReplaceOrInsert(value)
+func (c *IndexFloatModelCorrection[T]) SetItem(index float32, v T) {
+	c.Data[index] = v
 }
 
-func (c *IndexFloatModels[T]) Insert(value T) {
-	c.LLRB.ReplaceOrInsert(value)
+func (c *IndexFloatModelCorrection[T]) Append(value T) {
+	if value.GetIndex() < 0 {
+		value.SetIndex(float32(len(c.Data)))
+	}
+	c.Data[value.GetIndex()] = value
+	if !slices.Contains(c.Indexes, value.GetIndex()) {
+		c.Indexes = append(c.Indexes, value.GetIndex())
+	}
+	c.SortIndexes()
 }
 
-func (c *IndexFloatModels[T]) Has(index float32) bool {
-	return c.LLRB.Has(NewIndexFloatModel(index))
+func (c *IndexFloatModelCorrection[T]) SortIndexes() {
+	slices.Sort(c.Indexes)
 }
 
-func (c *IndexFloatModels[T]) IsEmpty() bool {
-	return c.Len() == 0
+func (c *IndexFloatModelCorrection[T]) DeleteItem(index float32) {
+	delete(c.Data, index)
 }
 
-func (c *IndexFloatModels[T]) IsNotEmpty() bool {
-	return !c.IsEmpty()
+func (c *IndexFloatModelCorrection[T]) Len() int {
+	return len(c.Data)
 }
 
-func (c *IndexFloatModels[T]) LastIndex() float32 {
-	return c.Max().(T).GetIndex()
+func (c *IndexFloatModelCorrection[T]) Contains(key float32) bool {
+	_, ok := c.Data[key]
+	return ok
+}
+
+func (c *IndexFloatModelCorrection[T]) IsEmpty() bool {
+	return len(c.Data) == 0
+}
+
+func (c *IndexFloatModelCorrection[T]) IsNotEmpty() bool {
+	return len(c.Data) > 0
+}
+
+func (c *IndexFloatModelCorrection[T]) LastIndex() float32 {
+	maxIndex := float32(0.0)
+	for index := range c.Data {
+		if index > maxIndex {
+			maxIndex = index
+		}
+	}
+	return maxIndex
+}
+
+func (c *IndexFloatModelCorrection[T]) GetSortedData() []T {
+	sortedData := make([]T, len(c.Indexes))
+	for i, index := range c.Indexes {
+		sortedData[i] = c.Data[index]
+	}
+	return sortedData
 }

@@ -2,7 +2,6 @@ package pmx
 
 import (
 	"embed"
-	"runtime"
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/jinzhu/copier"
@@ -12,6 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
+
 )
 
 type PmxModel struct {
@@ -80,13 +80,6 @@ func (pm *PmxModel) InitDraw(windowIndex int, resourceFiles embed.FS) {
 	pm.ToonTextures.initGl(windowIndex, resourceFiles)
 	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
 	pm.Bones.prepareDraw()
-
-	// CPUの数を基準にチャンクサイズを決定
-
-	// 利用可能なCPUの数
-	cpuCount := runtime.NumCPU()
-	pm.Vertices.ChunkSize = len(pm.Vertices.Data)/cpuCount + 1
-	pm.Bones.ChunkSize = len(pm.Bones.Data)/cpuCount + 1
 }
 
 func (pm *PmxModel) InitPhysics(physics *mphysics.MPhysics) {
@@ -109,7 +102,7 @@ func (pm *PmxModel) Draw(
 	enablePhysics bool,
 ) {
 	pm.updatePhysics(boneMatrixes, boneTransforms, frame, elapsed, enablePhysics)
-	pm.Meshes.Draw(shader, boneMatrixes, vertexDeltas, pm.Vertices.ChunkSize, materialDeltas, windowIndex)
+	pm.Meshes.Draw(shader, boneMatrixes, vertexDeltas, materialDeltas, windowIndex)
 
 	// 物理デバッグ表示
 	pm.Physics.DebugDrawWorld()
@@ -174,7 +167,7 @@ func (pm *PmxModel) DeletePhysics() {
 	pm.Joints.deletePhysics(pm.Physics)
 }
 
-func (m *PmxModel) Copy() mcore.IHashModel {
+func (m *PmxModel) Copy() mcore.HashModelInterface {
 	copied := NewPmxModel("")
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied

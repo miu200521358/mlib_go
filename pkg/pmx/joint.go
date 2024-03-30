@@ -22,10 +22,10 @@ func NewJointParam() *JointParam {
 	return &JointParam{
 		TranslationLimitMin:       mmath.NewMVec3(),
 		TranslationLimitMax:       mmath.NewMVec3(),
-		RotationLimitMin:          mmath.NewRotationModel(),
-		RotationLimitMax:          mmath.NewRotationModel(),
+		RotationLimitMin:          mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		RotationLimitMax:          mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 		SpringConstantTranslation: mmath.NewMVec3(),
-		SpringConstantRotation:    mmath.NewRotationModel(),
+		SpringConstantRotation:    mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 	}
 }
 
@@ -49,13 +49,13 @@ func NewJoint() *Joint {
 		RigidbodyIndexA: -1,
 		RigidbodyIndexB: -1,
 		Position:        mmath.NewMVec3(),
-		Rotation:        mmath.NewRotationModel(),
+		Rotation:        mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 		JointParam:      NewJointParam(),
 		IsSystem:        false,
 	}
 }
 
-func (j *Joint) Copy() mcore.IIndexNameModel {
+func (j *Joint) Copy() mcore.IndexNameModelInterface {
 	copied := NewJoint()
 	copier.CopyWithOption(copied, j, copier.Option{DeepCopy: true})
 	return copied
@@ -137,12 +137,12 @@ func (j *Joint) deletePhysics() {
 
 // ジョイントリスト
 type Joints struct {
-	*mcore.IndexNameModels[*Joint]
+	*mcore.IndexNameModelCorrection[*Joint]
 }
 
 func NewJoints() *Joints {
 	return &Joints{
-		IndexNameModels: mcore.NewIndexNameModels[*Joint](),
+		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Joint](),
 	}
 }
 

@@ -129,7 +129,7 @@ func NewRigidBody() *RigidBody {
 		ShapeType:                    SHAPE_BOX,
 		Size:                         mmath.NewMVec3(),
 		Position:                     mmath.NewMVec3(),
-		Rotation:                     mmath.NewRotationModel(),
+		Rotation:                     mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 		RigidBodyParam:               NewRigidBodyParam(),
 		PhysicsType:                  PHYSICS_TYPE_STATIC,
 		XDirection:                   mmath.NewMVec3(),
@@ -144,7 +144,7 @@ func NewRigidBody() *RigidBody {
 	}
 }
 
-func (r *RigidBody) Copy() mcore.IIndexNameModel {
+func (r *RigidBody) Copy() mcore.IndexNameModelInterface {
 	copied := NewMorph()
 	copier.CopyWithOption(copied, r, copier.Option{DeepCopy: true})
 	return copied
@@ -418,12 +418,12 @@ func (r *RigidBody) deletePhysics() {
 
 // 剛体リスト
 type RigidBodies struct {
-	*mcore.IndexNameModels[*RigidBody]
+	*mcore.IndexNameModelCorrection[*RigidBody]
 }
 
 func NewRigidBodies() *RigidBodies {
 	return &RigidBodies{
-		IndexNameModels: mcore.NewIndexNameModels[*RigidBody](),
+		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*RigidBody](),
 	}
 }
 

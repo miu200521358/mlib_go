@@ -62,14 +62,14 @@ func NewFace(index, vertexIndex0, vertexIndex1, vertexIndex2 int) *Face {
 
 // 面リスト
 type Faces struct {
-	*IndexModels[*Face]
+	*IndexModelCorrection[*Face]
 	Data    map[int]*Face
 	Indexes []int
 }
 
 func NewFaces() *Faces {
 	return &Faces{
-		IndexModels: NewIndexModels[*Face](),
+		IndexModelCorrection: NewIndexModelCorrection[*Face](),
 	}
 }
 

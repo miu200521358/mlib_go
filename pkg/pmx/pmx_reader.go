@@ -2,6 +2,7 @@ package pmx
 
 import (
 	"fmt"
+	"slices"
 
 	"golang.org/x/text/encoding/unicode"
 
@@ -20,7 +21,7 @@ func (r *PmxReader) createModel(path string) *PmxModel {
 }
 
 // 指定されたパスのファイルからデータを読み込む
-func (r *PmxReader) ReadByFilepath(path string) (mcore.IHashModel, error) {
+func (r *PmxReader) ReadByFilepath(path string) (mcore.HashModelInterface, error) {
 	// モデルを新規作成
 	model := r.createModel(path)
 
@@ -92,7 +93,7 @@ func (r *PmxReader) readHeader(model *PmxModel) error {
 	}
 
 	if model.Signature[:3] != "PMX" ||
-		(fmt.Sprintf("%.1f", model.Version) != "2.0" && fmt.Sprintf("%.1f", model.Version) != "2.1") {
+		!slices.Contains([]string{"2.0", "2.1"}, fmt.Sprintf("%.1f", model.Version)) {
 		// 整合性チェック
 		return fmt.Errorf("PMX2.0/2.1形式外のデータです。signature: %s, version: %.1f ", model.Signature, model.Version)
 	}
@@ -871,7 +872,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					mlog.E("[%d][%d] readMorphs UnpackQuaternion Quaternion error: %v", i, j, err)
 					return err
 				}
-				rotation := mmath.NewRotationModel()
+				rotation := mmath.NewRotationModelByDegrees(mmath.NewMVec3())
 				rotation.SetQuaternion(qq)
 				m.Offsets = append(m.Offsets, NewBoneMorph(boneIndex, offset, rotation))
 			case MORPH_TYPE_UV, MORPH_TYPE_EXTENDED_UV1, MORPH_TYPE_EXTENDED_UV2, MORPH_TYPE_EXTENDED_UV3, MORPH_TYPE_EXTENDED_UV4:

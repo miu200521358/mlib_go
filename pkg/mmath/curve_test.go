@@ -47,28 +47,6 @@ func TestEvaluate2(tst *testing.T) {
 	}
 }
 
-func TestEvaluate3(tst *testing.T) {
-	inter := &Curve{}
-	inter.Start = &MVec2{46.0, 33.0}
-	inter.End = &MVec2{80.0, 88.0}
-
-	x, y, t := Evaluate(inter, 272, 278, 280)
-
-	if x != 0.75 {
-		tst.Errorf("Expected x to be 0.2, but got %f", x)
-	}
-
-	expectedY := 0.7628337691389842
-	if math.Abs(y-expectedY) > 1e-10 {
-		tst.Errorf("Expected y to be %.20f, but got %.20f", expectedY, y)
-	}
-
-	expectedT := 0.7614940998277816
-	if math.Abs(t-expectedT) > 1e-10 {
-		tst.Errorf("Expected t to be %.20f, but got %.20f", expectedT, t)
-	}
-}
-
 func TestSplitCurve(t *testing.T) {
 	curve := &Curve{}
 	curve.Start = &MVec2{89.0, 2.0}

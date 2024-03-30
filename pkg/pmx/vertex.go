@@ -33,7 +33,7 @@ func NewVertex() *Vertex {
 	return v
 }
 
-func (v *Vertex) Copy() mcore.IIndexModel {
+func (v *Vertex) Copy() mcore.IndexModelInterface {
 	copied := NewTexture()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied
@@ -72,13 +72,11 @@ func (v *Vertex) GL() []float32 {
 
 // 頂点リスト
 type Vertices struct {
-	*mcore.IndexModels[*Vertex]
-	ChunkSize int
+	*mcore.IndexModelCorrection[*Vertex]
 }
 
 func NewVertices() *Vertices {
 	return &Vertices{
-		IndexModels: mcore.NewIndexModels[*Vertex](),
-		ChunkSize:   10000,
+		IndexModelCorrection: mcore.NewIndexModelCorrection[*Vertex](),
 	}
 }

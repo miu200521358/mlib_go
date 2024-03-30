@@ -16,7 +16,7 @@ func NewShadowFrame(index float32) *ShadowFrame {
 	}
 }
 
-func (sf *ShadowFrame) Copy() mcore.IIndexFloatModel {
+func (sf *ShadowFrame) Copy() mcore.IndexFloatModelInterface {
 	vv := &ShadowFrame{
 		ShadowMode: sf.ShadowMode,
 		Distance:   sf.Distance,
