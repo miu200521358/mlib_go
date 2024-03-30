@@ -1,7 +1,9 @@
 package vmd
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type BoneFrame struct {
@@ -77,4 +79,24 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 	copied.IkRotation.Mul(v.IkRotation)
 
 	return copied
+}
+
+func (bf *BoneFrame) Copy() mcore.IIndexFloatModel {
+	return &BoneFrame{
+		BaseFrame:          NewVmdBaseFrame(bf.Index),
+		Position:           bf.Position.Copy(),
+		MorphPosition:      bf.MorphPosition.Copy(),
+		LocalPosition:      bf.LocalPosition.Copy(),
+		MorphLocalPosition: bf.MorphLocalPosition.Copy(),
+		Rotation:           bf.Rotation.Copy(),
+		MorphRotation:      bf.MorphRotation.Copy(),
+		LocalRotation:      bf.LocalRotation.Copy(),
+		MorphLocalRotation: bf.MorphLocalRotation.Copy(),
+		Scale:              bf.Scale.Copy(),
+		MorphScale:         bf.MorphScale.Copy(),
+		LocalScale:         bf.LocalScale.Copy(),
+		MorphLocalScale:    bf.MorphLocalScale.Copy(),
+		Curves:             bf.Curves.Copy(),
+		IkRotation:         bf.IkRotation.Copy(),
+	}
 }

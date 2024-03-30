@@ -71,25 +71,7 @@ func (fs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 
 	if prevIndex == nextIndex {
 		if fs.Has(nextIndex) {
-			nextBf := fs.Get(nextIndex)
-			copied := &BoneFrame{
-				BaseFrame:          NewVmdBaseFrame(index),
-				Position:           nextBf.Position.Copy(),
-				MorphPosition:      nextBf.MorphPosition.Copy(),
-				LocalPosition:      nextBf.LocalPosition.Copy(),
-				MorphLocalPosition: nextBf.MorphLocalPosition.Copy(),
-				Rotation:           nextBf.Rotation.Copy(),
-				MorphRotation:      nextBf.MorphRotation.Copy(),
-				LocalRotation:      nextBf.LocalRotation.Copy(),
-				MorphLocalRotation: nextBf.MorphLocalRotation.Copy(),
-				Scale:              nextBf.Scale.Copy(),
-				MorphScale:         nextBf.MorphScale.Copy(),
-				LocalScale:         nextBf.LocalScale.Copy(),
-				MorphLocalScale:    nextBf.MorphLocalScale.Copy(),
-				// IKとかの計算値はコピーしないで初期値
-				IkRotation: mmath.NewRotationModel(),
-			}
-			return copied
+			return fs.Get(nextIndex).Copy().(*BoneFrame)
 		} else {
 			return NewBoneFrame(index)
 		}
