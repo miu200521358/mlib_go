@@ -234,5 +234,9 @@
     {
         "id": "クリップボードコピー失敗",
         "translation": "Failed to copy to clipboard"
+    },
+    {
+        "id": "&ハイスペックモード",
+        "translation": "&High Spec Mode"
     }
 ]

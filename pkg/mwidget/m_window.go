@@ -3,13 +3,15 @@ package mwidget
 import (
 	"embed"
 	"fmt"
+	"runtime"
 	"syscall"
 
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
-	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
+	"github.com/miu200521358/mlib_go/pkg/mutils/miter"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
@@ -27,6 +29,7 @@ type MWindow struct {
 	jointDebugAction      *walk.Action // ジョイントデバッグ表示
 	logLevelDebugAction   *walk.Action // デバッグメッセージ表示
 	logLevelVerboseAction *walk.Action // 冗長メッセージ表示
+	hightSpecMode         *walk.Action // ハイスペックモード
 }
 
 func NewMWindow(
@@ -36,7 +39,7 @@ func NewMWindow(
 	height int,
 	funcHelpMenuItems func() []declarative.MenuItem,
 ) (*MWindow, error) {
-	appConfig := mutils.LoadAppConfig(resourceFiles)
+	appConfig := mconfig.LoadAppConfig(resourceFiles)
 	mi18n.Initialize(resourceFiles)
 
 	mainWindow := &MWindow{
@@ -122,6 +125,13 @@ func NewMWindow(
 							mlog.ILT(mi18n.T("メイン画面の使い方"), mi18n.T("メイン画面の使い方メッセージ"))
 						},
 					},
+					declarative.Separator{},
+					declarative.Action{
+						Text:        mi18n.T("&ハイスペックモード"),
+						Checkable:   true,
+						OnTriggered: mainWindow.hightSpecModeTriggered,
+						AssignTo:    &mainWindow.hightSpecMode,
+					},
 				},
 			},
 			declarative.Menu{
@@ -159,6 +169,12 @@ func NewMWindow(
 	// 最初はフレームドロップON
 	mainWindow.frameDropAction.SetChecked(true)
 
+	highSpecMode := mconfig.LoadUserConfig("highSpecMode")
+	if len(highSpecMode) > 0 && highSpecMode[0] != "1" {
+		// CPU=1では無い場合、ハイスペックモードON
+		mainWindow.hightSpecMode.SetChecked(true)
+	}
+
 	mainWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
 		if len(mainWindow.GlWindows) > 0 && !CheckOpenGLError() {
 			for _, glWindow := range mainWindow.GlWindows {
@@ -168,7 +184,7 @@ func NewMWindow(
 		walk.App().Exit(0)
 	})
 
-	iconImg, err := mutils.LoadIconFile(resourceFiles)
+	iconImg, err := mconfig.LoadIconFile(resourceFiles)
 	if err != nil {
 		return nil, err
 	}
@@ -197,6 +213,16 @@ func (w *MWindow) logLevelTriggered() {
 	if w.logLevelVerboseAction.Checked() {
 		mlog.SetLevel(0)
 	}
+}
+
+func (w *MWindow) hightSpecModeTriggered() {
+	if w.hightSpecMode.Checked() {
+		// ハイスペックモードの場合、CPUを半分動かすくらいでブロックサイズを設定
+		miter.SetBlockSize(runtime.NumCPU() / 2)
+	} else {
+		miter.SetBlockSize(1)
+	}
+	mconfig.SaveUserConfig("highSpecMode", string(rune(miter.GetBlockSize())), 1)
 }
 
 func (w *MWindow) langTriggered(lang string) {

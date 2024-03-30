@@ -9,6 +9,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
@@ -279,7 +280,7 @@ func (picker *FilePicker) OnChanged(path string) {
 
 	if picker.historyKey != "" {
 		// 履歴用キーを指定して履歴リストを保存
-		mutils.SaveUserConfig(picker.historyKey, path, picker.limitHistory)
+		mconfig.SaveUserConfig(picker.historyKey, path, picker.limitHistory)
 	}
 
 	if picker.OnPathChanged != nil {
@@ -290,7 +291,7 @@ func (picker *FilePicker) OnChanged(path string) {
 func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 	return func() {
 		// 履歴リストを取得
-		choices := mutils.LoadUserConfig(picker.historyKey)
+		choices := mconfig.LoadUserConfig(picker.historyKey)
 
 		// 履歴ダイアログを開く
 		dlg, err := walk.NewDialog(picker.Form())
@@ -380,7 +381,7 @@ func (picker *FilePicker) onClickOpenButton() walk.EventHandler {
 			picker.initialDirPath = dirPath
 		} else if picker.historyKey != "" {
 			// 履歴用キーを指定して履歴リストを取得
-			choices := mutils.LoadUserConfig(picker.historyKey)
+			choices := mconfig.LoadUserConfig(picker.historyKey)
 			if len(choices) > 0 {
 				// ファイルパスからディレクトリパスを取得
 				dirPath := filepath.Dir(choices[0])

@@ -7,15 +7,14 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
 
-	"github.com/miu200521358/mlib_go/pkg/mutils"
-
+	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 )
 
 var bundle *i18n.Bundle
 var localizer *i18n.Localizer
 
 func Initialize(resourceFiles embed.FS) {
-	langs := mutils.LoadUserConfig("lang")
+	langs := mconfig.LoadUserConfig("lang")
 
 	var lang string
 	var langTag language.Tag
@@ -53,7 +52,7 @@ func Initialize(resourceFiles embed.FS) {
 }
 
 func SetLang(lang string) {
-	mutils.SaveUserConfig("lang", lang, 1)
+	mconfig.SaveUserConfig("lang", lang, 1)
 }
 
 // T メッセージIDを元にメッセージを取得する

@@ -1,9 +1,11 @@
-package mutils
+package mconfig
 
 import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 
 )
 
@@ -47,7 +49,7 @@ func SaveUserConfig(key string, value string, limit int) error {
 	}
 
 	// ファイルのフルパスを取得
-	configFilePath := filepath.Join(GetAppRootDir(), USER_CONFIG_FILE_NAME)
+	configFilePath := filepath.Join(mutils.GetAppRootDir(), USER_CONFIG_FILE_NAME)
 
 	// Overwrite the config.json file with the updated JSON data
 	err = os.WriteFile(configFilePath, updatedData, 0644)
@@ -66,7 +68,7 @@ func LoadUserConfig(key string) []string {
 // 設定の読み込み
 func LoadUserConfigAll(key string) ([]string, map[string]interface{}) {
 	// Configファイルのフルパスを取得
-	configFilePath := filepath.Join(GetAppRootDir(), USER_CONFIG_FILE_NAME)
+	configFilePath := filepath.Join(mutils.GetAppRootDir(), USER_CONFIG_FILE_NAME)
 	println("LoadConfig: ", key, configFilePath)
 
 	// Read the config.json file
