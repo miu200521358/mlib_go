@@ -71,7 +71,8 @@ func main() {
 	mWindow, err = mwidget.NewMWindow(resourceFiles, true, 512, 768, getMenuItems)
 	mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
 
-	glWindow, err := mwidget.NewGlWindow(mi18n.T("ビューワー"), 512, 768, 0, resourceFiles, nil)
+	glWindow, err := mwidget.NewGlWindow(fmt.Sprintf("%s %s", mWindow.Title(), mi18n.T("ビューワー")),
+		512, 768, 0, resourceFiles, nil)
 	mwidget.CheckError(err, mWindow, mi18n.T("ビューワーウィンドウ生成エラー"))
 	mWindow.AddGlWindow(glWindow)
 
