@@ -73,7 +73,7 @@ func (bfs *BoneFrames) Animate(
 		bfs.getBoneMatrixes(frame, model, targetBoneNames, isCalcMorph)
 
 	// ボーン行列計算
-	return bfs.calcBoneMatrixes(
+	return bfs.calcBoneDeltas(
 		frame,
 		model,
 		targetBoneNames,
@@ -187,7 +187,7 @@ ikLoop:
 			}
 
 			// IK関連の行列を取得
-			linkMatrixes = bfs.calcBoneMatrixes(
+			linkMatrixes = bfs.calcBoneDeltas(
 				frame,
 				model,
 				effectorTargetBoneNames,
@@ -452,18 +452,18 @@ func (bfs *BoneFrames) calculateSingleAxisRadRotation(
 	return resultLinkQuat
 }
 
-func (bfs *BoneFrames) calcBoneMatrixes(
+func (bfs *BoneFrames) calcBoneDeltas(
 	frame float32,
 	model *pmx.PmxModel,
 	targetBoneNames []string,
 	positions, rotations, scales []*mmath.MMat4,
 ) *BoneDeltas {
-	matrixes := make([]*mmath.MMat4, 0, len(targetBoneNames))
+	matrixes := make([]*mmath.MMat4, len(targetBoneNames))
 	boneCount := len(targetBoneNames)
 
 	// 最初にフレーム数*ボーン数分のスライスを確保
-	for range targetBoneNames {
-		matrixes = append(matrixes, mmath.NewMMat4())
+	for i := range targetBoneNames {
+		matrixes[i] = mmath.NewMMat4()
 	}
 
 	// ボーンを一定件数ごとに並列処理（件数は変数保持）

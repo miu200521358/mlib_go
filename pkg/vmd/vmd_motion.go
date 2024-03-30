@@ -6,6 +6,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+
 )
 
 type VmdMotion struct {
@@ -116,15 +117,17 @@ func (m *VmdMotion) AnimateMorph(
 	morphNames []string,
 ) *MorphDeltas {
 	if morphNames == nil {
-		morphNames = make([]string, 0)
+		morphNames = make([]string, len(model.Morphs.Data))
+		for _, morph := range model.Morphs.Data {
+			morphNames = append(morphNames, morph.Name)
+		}
 	}
 
-	for _, morph := range model.Morphs.Data {
+	for _, morphName := range morphNames {
 		// モーフフレームを生成
-		if !m.MorphFrames.Contains(morph.Name) {
-			m.MorphFrames.Append(NewMorphNameFrames(morph.Name))
+		if !m.MorphFrames.Contains(morphName) {
+			m.MorphFrames.Append(NewMorphNameFrames(morphName))
 		}
-		morphNames = append(morphNames, morph.Name)
 	}
 
 	return m.MorphFrames.Animate(frame, model, morphNames)
