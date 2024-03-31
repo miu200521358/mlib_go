@@ -162,7 +162,48 @@ func (v *MQuaternion) ToEulerAngles() *MVec3 {
 		yHead = math.Atan2(-(2*v.GetX()*v.GetZ() - 2*v.GetY()*v.GetW()), 2*v.GetW()*v.GetW()+2*v.GetX()*v.GetX()-1)
 		zRoll = 0
 	}
+
 	return &MVec3{xPitch, yHead, zRoll}
+}
+
+const (
+	gimbal2_rad = math.Pi * 89.99 * 2 / 180
+	one_rad     = math.Pi / 2
+)
+
+// ToEulerRadiansEscapeGimbalは、クォータニオンを三軸のオイラー角（ラジアン）回転を返します。
+// ジンバルロックを回避するために、指定された軸の角度を調整します。
+func (v *MQuaternion) ToEulerRadiansEscapeGimbal(axisIndex int) *MVec3 {
+	r := v.ToEulerAngles()
+
+	axisRad := r.Vector()[axisIndex]
+
+	var other1Rad, other2Rad float64
+	if axisIndex == 0 {
+		other1Rad = r.Vector()[1]
+		other2Rad = r.Vector()[2]
+	} else if axisIndex == 1 {
+		other1Rad = r.Vector()[0]
+		other2Rad = r.Vector()[2]
+	} else {
+		other1Rad = r.Vector()[0]
+		other2Rad = r.Vector()[1]
+	}
+
+	// 単位角とジンバルロックの整合性を取る
+	if other1Rad >= gimbal2_rad && other2Rad >= gimbal2_rad {
+		axisRad += one_rad
+		other1Rad = 0
+		other2Rad = 0
+	}
+
+	if axisIndex == 0 {
+		return &MVec3{axisRad, other1Rad, other2Rad}
+	} else if axisIndex == 1 {
+		return &MVec3{other1Rad, axisRad, other2Rad}
+	} else {
+		return &MVec3{other1Rad, other2Rad, axisRad}
+	}
 }
 
 // NewMQuaternionFromEulerAnglesDegreesは、オイラー角（度）回転を表す四元数を返します。
@@ -419,16 +460,15 @@ func (quat *MQuaternion) ToSignedDegree() float64 {
 }
 
 // ToSignedRadian 符号付きラジアンに変換
-func (quat *MQuaternion) ToSignedRadian() float64 {
+func (quat *MQuaternion) ToSignedRadian(axisIndex int) float64 {
 	// スカラー部分から基本的な角度を計算
 	basicAngle := quat.ToRadian()
 
 	// ベクトルの長さを使って、角度の正負を決定
 	if quat.Vec3().Length() > 0 {
-		// ベクトルの向きに基づいて角度を調整
-		if quat.GetW() >= 0 {
-			return basicAngle
-		} else {
+		if (axisIndex == 0 && quat.GetX() < 0) ||
+			(axisIndex == 1 && quat.GetY() < 0) ||
+			(axisIndex == 2 && quat.GetZ() < 0) {
 			return -basicAngle
 		}
 	}
@@ -543,8 +583,8 @@ func (qq *MQuaternion) Copy() *MQuaternion {
 }
 
 // Vector
-func (v *MQuaternion) Vector() *[]float64 {
-	return &[]float64{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
+func (v *MQuaternion) Vector() []float64 {
+	return []float64{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
 }
 
 func (v *MQuaternion) ToMat4() *MMat4 {

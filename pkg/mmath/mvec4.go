@@ -546,3 +546,21 @@ func (v *MVec4) Distance(other *MVec4) float64 {
 	s := v.Subed(other)
 	return s.Length()
 }
+
+// ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
+func (v *MVec4) ClampIfVerySmall() *MVec4 {
+	epsilon := 1e-6
+	if math.Abs(v.GetX()) < epsilon {
+		v.SetX(0)
+	}
+	if math.Abs(v.GetY()) < epsilon {
+		v.SetY(0)
+	}
+	if math.Abs(v.GetZ()) < epsilon {
+		v.SetZ(0)
+	}
+	if math.Abs(v.GetW()) < epsilon {
+		v.SetW(0)
+	}
+	return v
+}

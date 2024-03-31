@@ -68,3 +68,11 @@ func (mfs *MorphFrames) GetMaxFrame() float32 {
 	}
 	return maxFno
 }
+
+func (fs *MorphFrames) GetCount() int {
+	count := 0
+	for _, bnfs := range fs.Data {
+		count += len(bnfs.RegisteredIndexes)
+	}
+	return count
+}

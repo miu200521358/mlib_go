@@ -441,6 +441,21 @@ func ClampFloat(v float64, min float64, max float64) float64 {
 	return v
 }
 
+// ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
+func (v *MVec3) ClampIfVerySmall() *MVec3 {
+	epsilon := 1e-6
+	if math.Abs(v.GetX()) < epsilon {
+		v.SetX(0)
+	}
+	if math.Abs(v.GetY()) < epsilon {
+		v.SetY(0)
+	}
+	if math.Abs(v.GetZ()) < epsilon {
+		v.SetZ(0)
+	}
+	return v
+}
+
 // 線形補間
 func LerpVec3(v1, v2 *MVec3, t float64) *MVec3 {
 	return (v2.Sub(v1)).MulScalar(t).Added(v1)

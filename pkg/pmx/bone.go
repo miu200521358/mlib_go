@@ -108,6 +108,7 @@ type Bone struct {
 	LocalAngleLimit        bool             // 自分がIKリンクボーンのローカル軸角度制限がある場合、true
 	LocalMinAngleLimit     *mmath.MRotation // 自分がIKリンクボーンのローカル軸角度制限の下限
 	LocalMaxAngleLimit     *mmath.MRotation // 自分がIKリンクボーンのローカル軸角度制限の上限
+	AxisSign               int              // ボーンの軸ベクトル(左は-1, 右は1)
 }
 
 func NewBone() *Bone {
@@ -150,6 +151,7 @@ func NewBone() *Bone {
 		LocalAngleLimit:        false,
 		LocalMinAngleLimit:     mmath.NewRotationModelByRadians(mmath.NewMVec3()),
 		LocalMaxAngleLimit:     mmath.NewRotationModelByRadians(mmath.NewMVec3()),
+		AxisSign:               1,
 	}
 	bone.NormalizedLocalAxisX = bone.LocalAxisX.Copy()
 	bone.NormalizedLocalAxisZ = bone.LocalAxisZ.Copy()
@@ -561,6 +563,9 @@ func (b *Bones) setup() {
 
 	// 関連ボーンINDEX情報を設定
 	for _, bone := range b.GetSortedData() {
+		if strings.HasPrefix(bone.Name, "左") {
+			bone.AxisSign = -1
+		}
 		if bone.IsIK() && bone.Ik != nil {
 			// IKのリンクとターゲット
 			for _, link := range bone.Ik.Links {

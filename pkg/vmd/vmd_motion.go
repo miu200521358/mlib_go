@@ -56,6 +56,11 @@ func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {
 	m.BoneFrames.GetItem(boneName).Append(bf)
 }
 
+func (m *VmdMotion) AppendRegisteredBoneFrame(boneName string, bf *BoneFrame) {
+	bf.Registered = true
+	m.BoneFrames.GetItem(boneName).Append(bf)
+}
+
 func (m *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame) {
 	m.MorphFrames.GetItem(morphName).Append(mf)
 }

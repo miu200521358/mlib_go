@@ -435,3 +435,16 @@ func (mat *MMat3) Inverted() *MMat3 {
 	result := *mat
 	return result.Invert()
 }
+
+// ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
+func (v *MMat3) ClampIfVerySmall() *MMat3 {
+	epsilon := 1e-6
+	for i := 0; i < 3; i++ {
+		for j := 0; j < 3; j++ {
+			if math.Abs(v[i][j]) < epsilon {
+				v[i][j] = 0
+			}
+		}
+	}
+	return v
+}
