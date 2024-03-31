@@ -276,7 +276,7 @@ ikLoop:
 
 			// ベクトル (1) を (2) に一致させるための最短回転量（Axis-Angle）
 			// 回転軸
-			linkAxis := effectorLocalPosition.Cross(ikLocalPosition)
+			linkAxis := effectorLocalPosition.Cross(ikLocalPosition).Normalize()
 			// 回転角(ラジアン)
 			linkAngle := math.Acos(mmath.ClampFloat(effectorLocalPosition.Dot(ikLocalPosition), -1, 1))
 
