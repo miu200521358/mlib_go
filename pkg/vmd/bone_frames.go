@@ -305,48 +305,54 @@ ikLoop:
 				if ikLink.MinAngleLimit.GetRadians().GetX() != 0 ||
 					ikLink.MaxAngleLimit.GetRadians().GetX() != 0 {
 					// グローバルX: 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-					linkAxis, linkAngle, count = bfs.calcSingleAxisRad(
+					linkAngle, count = bfs.calcSingleAxisRad(
 						ikLink.MinAngleLimit.GetRadians().GetX(),
 						ikLink.MaxAngleLimit.GetRadians().GetX(),
-						linkQuat, linkAxis, linkAngle, 0, &mmath.MVec3{1, 0, 0}, ikMotion, linkBone, count)
+						linkQuat, linkAxis, linkAngle, 0, ikMotion, linkBone, count)
+					linkAxis = &mmath.MVec3{1, 0, 0}
 				} else if ikLink.MinAngleLimit.GetRadians().GetY() != 0 ||
 					ikLink.MaxAngleLimit.GetRadians().GetY() != 0 {
 					// グローバルY: 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-					linkAxis, linkAngle, count = bfs.calcSingleAxisRad(
+					linkAngle, count = bfs.calcSingleAxisRad(
 						ikLink.MinAngleLimit.GetRadians().GetY(),
 						ikLink.MaxAngleLimit.GetRadians().GetY(),
-						linkQuat, linkAxis, linkAngle, 1, &mmath.MVec3{0, 1, 0}, ikMotion, linkBone, count)
+						linkQuat, linkAxis, linkAngle, 1, ikMotion, linkBone, count)
+					linkAxis = &mmath.MVec3{0, 1, 0}
 				} else if ikLink.MinAngleLimit.GetRadians().GetZ() != 0 ||
 					ikLink.MaxAngleLimit.GetRadians().GetZ() != 0 {
 					// グローバルZ: 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-					linkAxis, linkAngle, count = bfs.calcSingleAxisRad(
+					linkAngle, count = bfs.calcSingleAxisRad(
 						ikLink.MinAngleLimit.GetRadians().GetZ(),
 						ikLink.MaxAngleLimit.GetRadians().GetZ(),
-						linkQuat, linkAxis, linkAngle, 2, &mmath.MVec3{0, 0, 1}, ikMotion, linkBone, count)
+						linkQuat, linkAxis, linkAngle, 2, ikMotion, linkBone, count)
+					linkAxis = &mmath.MVec3{0, 0, 1}
 				}
 			} else if ikLink.LocalAngleLimit {
 				// ローカル軸角度制限が入っている場合、ローカル軸に合わせて理想回転を求める
 				if ikLink.LocalMinAngleLimit.GetRadians().GetX() != 0 ||
 					ikLink.LocalMaxAngleLimit.GetRadians().GetX() != 0 {
 					// ローカルX: 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-					linkAxis, linkAngle, count = bfs.calcSingleAxisRad(
+					linkAngle, count = bfs.calcSingleAxisRad(
 						ikLink.LocalMinAngleLimit.GetRadians().GetX(),
 						ikLink.LocalMaxAngleLimit.GetRadians().GetX(),
-						linkQuat, linkAxis, linkAngle, 0, &mmath.MVec3{1, 0, 0}, ikMotion, linkBone, count)
+						linkQuat, linkAxis, linkAngle, 0, ikMotion, linkBone, count)
+					linkAxis = &mmath.MVec3{1, 0, 0}
 				} else if ikLink.LocalMinAngleLimit.GetRadians().GetY() != 0 ||
 					ikLink.LocalMaxAngleLimit.GetRadians().GetY() != 0 {
 					// ローカルY: 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-					linkAxis, linkAngle, count = bfs.calcSingleAxisRad(
+					linkAngle, count = bfs.calcSingleAxisRad(
 						ikLink.LocalMinAngleLimit.GetRadians().GetY(),
 						ikLink.LocalMaxAngleLimit.GetRadians().GetY(),
-						linkQuat, linkAxis, linkAngle, 1, &mmath.MVec3{0, 1, 0}, ikMotion, linkBone, count)
+						linkQuat, linkAxis, linkAngle, 1, ikMotion, linkBone, count)
+					linkAxis = &mmath.MVec3{0, 1, 0}
 				} else if ikLink.LocalMinAngleLimit.GetRadians().GetZ() != 0 ||
 					ikLink.LocalMaxAngleLimit.GetRadians().GetZ() != 0 {
 					// ローカルZ: 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-					linkAxis, linkAngle, count = bfs.calcSingleAxisRad(
+					linkAngle, count = bfs.calcSingleAxisRad(
 						ikLink.LocalMinAngleLimit.GetRadians().GetZ(),
 						ikLink.LocalMaxAngleLimit.GetRadians().GetZ(),
-						linkQuat, linkAxis, linkAngle, 2, &mmath.MVec3{0, 0, 1}, ikMotion, linkBone, count)
+						linkQuat, linkAxis, linkAngle, 2, ikMotion, linkBone, count)
+					linkAxis = &mmath.MVec3{0, 0, 1}
 				}
 			} else if linkBone.HasFixedAxis() {
 				// 軸制限ありの場合、軸にそった理想回転量とする
@@ -436,11 +442,10 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	quatAxis *mmath.MVec3,
 	quatAngle float64,
 	axisIndex int,
-	axisVector *mmath.MVec3,
 	ikMotion *VmdMotion,
 	linkBone *pmx.Bone,
 	count float32,
-) (*mmath.MVec3, float64, float32) {
+) (float64, float32) {
 	// 現在調整予定角度の全ての軸の角度
 	ikQuat := mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle).Normalize()
 
@@ -511,14 +516,13 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 			mlog.I("[%s][制限逆] axisRad: %.5f(%s), totalAxisRad: %.5f(%s)\n",
 				linkBone.Name, 180.0*axisRad/math.Pi, invertedIkQuat.ToEulerAnglesDegrees().String(),
 				180.0*totalAxisRad/math.Pi, totalIkQuat.ToEulerAnglesDegrees().String())
-			mlog.I("[%s][制限逆] invertDot: %.5f, vectorDot: %.5f, quatDot: %.5f\n",
+			mlog.I("[%s][制限逆] invertDot: %.5f, quatDot: %.5f\n",
 				linkBone.Name, axisRads.Normalized().Dot(invertedAxisRads.Normalized()),
-				axisRads.Normalized().Dot(axisVector.Normalized()),
 				ikQuat.Dot(invertedIkQuat))
 		}
 	}
 
-	return axisVector, axisRad, count
+	return axisRad, count
 
 	// // 角度制限がある場合、全体の角度をその角度内に収める
 	// totalLimitAxisRad := mmath.ClampFloat(
