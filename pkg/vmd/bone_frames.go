@@ -271,8 +271,18 @@ ikLoop:
 				count++
 			}
 
+			{
+				mlog.I("[%d][%s][Local] effectorLocalPosition: %s, ikLocalPosition: %s\n", loop, linkBone.Name,
+					effectorLocalPosition.String(), ikLocalPosition.String())
+			}
+
 			effectorLocalPosition.Normalize()
 			ikLocalPosition.Normalize()
+
+			{
+				mlog.I("[%d][%s][Normal] effectorLocalPosition: %s, ikLocalPosition: %s\n", loop, linkBone.Name,
+					effectorLocalPosition.String(), ikLocalPosition.String())
+			}
 
 			// ベクトル (1) を (2) に一致させるための最短回転量（Axis-Angle）
 			// 回転軸
@@ -503,12 +513,14 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 		}
 
 		totalAxisRad = totalIkQuat.ToEulerAngles().Vector()[axisIndex]
-
 		invertedAxisRads := invertedIkQuat.ToEulerAngles()
-		axisRad = invertedAxisRads.Vector()[axisIndex]
-		// if invertedAxisRads.Vector()[axisIndex] < 0 {
-		// 	axisRad *= -1
-		// }
+
+		// axisRad = invertedAxisRads.Vector()[axisIndex]
+
+		axisRad = invertedIkQuat.ToRadian()
+		if invertedIkQuat.ToEulerAngles().Vector()[axisIndex] < 0 {
+			axisRad *= -1
+		}
 
 		{
 			mlog.I("[%s][制限逆] invertedIkQuat: %s, totalIkQuat: %s\n",
