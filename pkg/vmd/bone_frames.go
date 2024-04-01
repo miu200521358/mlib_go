@@ -319,17 +319,6 @@ ikLoop:
 				mlog.I("[%d][%s][半分] linkAngle: %.5f\n", loop, linkBone.Name, 180.0*linkAngle/math.Pi)
 			}
 
-			// 単位角を超えないようにする
-			linkAngle = mmath.ClampFloat(
-				linkAngle,
-				-ikBone.Ik.UnitRotation.GetRadians().GetX(),
-				ikBone.Ik.UnitRotation.GetRadians().GetX(),
-			)
-
-			{
-				mlog.I("[%d][%s][単位角] linkAngle: %.5f\n", loop, linkBone.Name, 180.0*linkAngle/math.Pi)
-			}
-
 			if ikLink.AngleLimit {
 				// 角度制限が入ってる場合
 				if ikLink.MinAngleLimit.GetRadians().GetX() != 0 ||
@@ -390,6 +379,17 @@ ikLoop:
 				if linkBone.NormalizedFixedAxis.Dot(linkAxis) < 0 {
 					linkAngle *= -1
 				}
+			}
+
+			// 単位角を超えないようにする
+			linkAngle = mmath.ClampFloat(
+				linkAngle,
+				-ikBone.Ik.UnitRotation.GetRadians().GetX(),
+				ikBone.Ik.UnitRotation.GetRadians().GetX(),
+			)
+
+			{
+				mlog.I("[%d][%s][単位角] linkAngle: %.5f\n", loop, linkBone.Name, 180.0*linkAngle/math.Pi)
 			}
 
 			{
@@ -518,12 +518,12 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 		totalAxisRad = totalIkQuat.ToEulerAngles().Vector()[axisIndex]
 		invertedAxisRads := invertedIkQuat.ToEulerAngles()
 
-		axisRad = invertedAxisRads.Vector()[axisIndex]
+		// axisRad = invertedAxisRads.Vector()[axisIndex]
 
-		// axisRad = invertedIkQuat.ToRadian()
-		// if invertedIkQuat.ToEulerAngles().Vector()[axisIndex] < 0 {
-		// 	axisRad *= -1
-		// }
+		axisRad = invertedIkQuat.ToRadian()
+		if invertedIkQuat.ToEulerAngles().Vector()[axisIndex] < 0 {
+			axisRad *= -1
+		}
 
 		{
 			mlog.I("[%s][制限逆] invertedIkQuat: %s, totalIkQuat: %s\n",
