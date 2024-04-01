@@ -379,18 +379,17 @@ ikLoop:
 				count++
 			}
 
-			// if loop > 0 {
-			linkSign := 1.0
-			if linkAngle < 0 {
-				linkSign = -1.0
-			}
 			if l > 0 {
 				// 根元に行くほど回転角度を半分にする
 				linkAngle /= float64(l * 2)
 			}
+
 			// 単位角を超えないようにする
-			linkAngle = math.Min(ikBone.Ik.UnitRotation.GetRadians().GetX(), math.Abs(linkAngle)) * linkSign
-			// }
+			linkAngle = mmath.ClampFloat(
+				linkAngle,
+				-ikBone.Ik.UnitRotation.GetRadians().GetX(),
+				ikBone.Ik.UnitRotation.GetRadians().GetX(),
+			)
 
 			{
 				mlog.I("[%d][%s][単位角] linkAngle: %.5f\n", loop, linkBone.Name, 180.0*linkAngle/math.Pi)
