@@ -444,6 +444,13 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	// 現在調整予定角度の全ての軸の角度
 	ikQuat := mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle).Normalize()
 
+	{
+		bf := NewBoneFrame(count)
+		bf.Rotation.SetQuaternion(ikQuat)
+		ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+		count++
+	}
+
 	// 現在IKリンクに入る可能性のあるすべての角度
 	totalIkQuat := linkQuat.Muled(ikQuat)
 
@@ -467,7 +474,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 			180.0*totalAxisRad/math.Pi, totalIkQuat.ToEulerAnglesDegrees().String())
 	}
 
-	if axisRad < minAngleLimit || maxAngleLimit < axisRad {
+	if totalAxisRad < minAngleLimit || maxAngleLimit < totalAxisRad {
 		// 角度制限をオーバーしている場合、反対側に曲げる
 		// invertedIkQuat := mmath.NewMQuaternionByValues(
 		// 	-ikQuat.GetX(), -ikQuat.GetY(), -ikQuat.GetZ(), ikQuat.GetW()).Normalize()
@@ -493,17 +500,8 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 		totalAxisRad = totalIkQuat.ToEulerAngles().Vector()[axisIndex]
 
 		invertedAxisRads := invertedIkQuat.ToEulerAngles()
-		axisRad = invertedIkQuat.ToRadian()
-		if invertedAxisRads.Vector()[axisIndex] < 0 {
-			axisRad *= -1
-		}
-		// if axisRads.Dot(invertedAxisRads) > 0 {
-		// 	axisRad *= -1
-		// }
-		// if (axisIndex == 0 && (math.Abs(axisRads[1]) >= GIMBAL2_RAD || math.Abs(axisRads[2]) >= GIMBAL2_RAD)) ||
-		// 	(axisIndex == 1 && (math.Abs(axisRads[0]) >= GIMBAL2_RAD || math.Abs(axisRads[2]) >= GIMBAL2_RAD)) ||
-		// 	(axisIndex == 2 && (math.Abs(axisRads[0]) >= GIMBAL2_RAD || math.Abs(axisRads[1]) >= GIMBAL2_RAD)) {
-		// 	// ジンバルロックが起きている場合、符号を反転する
+		axisRad = invertedAxisRads.Vector()[axisIndex]
+		// if invertedAxisRads.Vector()[axisIndex] < 0 {
 		// 	axisRad *= -1
 		// }
 
