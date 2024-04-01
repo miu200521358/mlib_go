@@ -518,12 +518,12 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 		totalAxisRad = totalIkQuat.ToEulerAngles().Vector()[axisIndex]
 		invertedAxisRads := invertedIkQuat.ToEulerAngles()
 
-		// axisRad = invertedAxisRads.Vector()[axisIndex]
+		axisRad = invertedAxisRads.Vector()[axisIndex]
 
-		axisRad = invertedIkQuat.ToRadian()
-		if invertedIkQuat.ToEulerAngles().Vector()[axisIndex] < 0 {
-			axisRad *= -1
-		}
+		// axisRad = invertedIkQuat.ToRadian()
+		// if invertedIkQuat.ToEulerAngles().Vector()[axisIndex] < 0 {
+		// 	axisRad *= -1
+		// }
 
 		{
 			mlog.I("[%s][制限逆] invertedIkQuat: %s, totalIkQuat: %s\n",
