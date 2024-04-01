@@ -310,6 +310,26 @@ ikLoop:
 					180.0*linkAngle/math.Pi, linkAxis.String())
 			}
 
+			if l > 0 {
+				// 根元に行くほど回転角度を半分にする
+				linkAngle /= float64(l * 2)
+			}
+
+			{
+				mlog.I("[%d][%s][半分] linkAngle: %.5f\n", loop, linkBone.Name, 180.0*linkAngle/math.Pi)
+			}
+
+			// 単位角を超えないようにする
+			linkAngle = mmath.ClampFloat(
+				linkAngle,
+				-ikBone.Ik.UnitRotation.GetRadians().GetX(),
+				ikBone.Ik.UnitRotation.GetRadians().GetX(),
+			)
+
+			{
+				mlog.I("[%d][%s][単位角] linkAngle: %.5f\n", loop, linkBone.Name, 180.0*linkAngle/math.Pi)
+			}
+
 			if ikLink.AngleLimit {
 				// 角度制限が入ってる場合
 				if ikLink.MinAngleLimit.GetRadians().GetX() != 0 ||
@@ -377,22 +397,6 @@ ikLoop:
 				bf.Rotation.SetQuaternion(mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle))
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 				count++
-			}
-
-			if l > 0 {
-				// 根元に行くほど回転角度を半分にする
-				linkAngle /= float64(l * 2)
-			}
-
-			// 単位角を超えないようにする
-			linkAngle = mmath.ClampFloat(
-				linkAngle,
-				-ikBone.Ik.UnitRotation.GetRadians().GetX(),
-				ikBone.Ik.UnitRotation.GetRadians().GetX(),
-			)
-
-			{
-				mlog.I("[%d][%s][単位角] linkAngle: %.5f\n", loop, linkBone.Name, 180.0*linkAngle/math.Pi)
 			}
 
 			correctIkQuat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
