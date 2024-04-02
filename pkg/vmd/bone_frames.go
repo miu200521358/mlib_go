@@ -212,8 +212,6 @@ ikLoop:
 
 			// 単位角
 			unitRad := ikBone.Ik.UnitRotation.GetRadians().GetX() * float64(lidx+1)
-			// ループ閾値
-			loopThreshold := ikBone.Ik.LoopCount / 2
 
 			// IK関連の行列を取得
 			linkMatrixes := bfs.calcBoneMatrixes(
@@ -317,56 +315,35 @@ ikLoop:
 			if ikLink.AngleLimit || ikLink.LocalAngleLimit {
 				// 角度制限が入ってる場合
 				if ikLink.MinAngleLimit.GetRadians().GetX() != 0 ||
-					ikLink.MaxAngleLimit.GetRadians().GetX() != 0 {
-					// グローバルX: 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
+					ikLink.MaxAngleLimit.GetRadians().GetX() != 0 ||
+					ikLink.LocalMinAngleLimit.GetRadians().GetX() != 0 ||
+					ikLink.LocalMaxAngleLimit.GetRadians().GetX() != 0 {
+					// グローバルX or ローカルX
 					totalActualIkQuat, count = bfs.calcSingleAxisRad(
 						ikLink.MinAngleLimit.GetRadians().GetX(),
 						ikLink.MaxAngleLimit.GetRadians().GetX(),
-						unitRad, loop < loopThreshold, linkQuat, linkAxis, linkAngle, 0,
-						&mmath.MVec3{1, 0, 0}, lidx, ikMotion, linkBone, count)
-					// 	} else if ikLink.MinAngleLimit.GetRadians().GetY() != 0 ||
-					// 		ikLink.MaxAngleLimit.GetRadians().GetY() != 0 {
-					// 		// グローバルY: 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-					// 		linkAngle, count = bfs.calcSingleAxisRad(
-					// 			ikLink.MinAngleLimit.GetRadians().GetY(),
-					// 			ikLink.MaxAngleLimit.GetRadians().GetY(),
-					// 			linkQuat, linkAxis, linkAngle, 1, lidx, ikMotion, linkBone, count)
-					// 		linkAxis = &mmath.MVec3{0, 1, 0}
-					// 	} else if ikLink.MinAngleLimit.GetRadians().GetZ() != 0 ||
-					// 		ikLink.MaxAngleLimit.GetRadians().GetZ() != 0 {
-					// 		// グローバルZ: 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-					// 		linkAngle, count = bfs.calcSingleAxisRad(
-					// 			ikLink.MinAngleLimit.GetRadians().GetZ(),
-					// 			ikLink.MaxAngleLimit.GetRadians().GetZ(),
-					// 			linkQuat, linkAxis, linkAngle, 2, lidx, ikMotion, linkBone, count)
-					// 		linkAxis = &mmath.MVec3{0, 0, 1}
-					// 	}
-					// } else if ikLink.LocalAngleLimit {
-					// 	// ローカル軸角度制限が入っている場合、ローカル軸に合わせて理想回転を求める
-					// 	if ikLink.LocalMinAngleLimit.GetRadians().GetX() != 0 ||
-					// 		ikLink.LocalMaxAngleLimit.GetRadians().GetX() != 0 {
-					// 		// ローカルX: 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-					// 		linkAngle, count = bfs.calcSingleAxisRad(
-					// 			ikLink.LocalMinAngleLimit.GetRadians().GetX(),
-					// 			ikLink.LocalMaxAngleLimit.GetRadians().GetX(),
-					// 			linkQuat, linkAxis, linkAngle, 0, lidx, ikMotion, linkBone, count)
-					// 		linkAxis = &mmath.MVec3{1, 0, 0}
-					// 	} else if ikLink.LocalMinAngleLimit.GetRadians().GetY() != 0 ||
-					// 		ikLink.LocalMaxAngleLimit.GetRadians().GetY() != 0 {
-					// 		// ローカルY: 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-					// 		linkAngle, count = bfs.calcSingleAxisRad(
-					// 			ikLink.LocalMinAngleLimit.GetRadians().GetY(),
-					// 			ikLink.LocalMaxAngleLimit.GetRadians().GetY(),
-					// 			linkQuat, linkAxis, linkAngle, 1, lidx, ikMotion, linkBone, count)
-					// 		linkAxis = &mmath.MVec3{0, 1, 0}
-					// 	} else if ikLink.LocalMinAngleLimit.GetRadians().GetZ() != 0 ||
-					// 		ikLink.LocalMaxAngleLimit.GetRadians().GetZ() != 0 {
-					// 		// ローカルZ: 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-					// 		linkAngle, count = bfs.calcSingleAxisRad(
-					// 			ikLink.LocalMinAngleLimit.GetRadians().GetZ(),
-					// 			ikLink.LocalMaxAngleLimit.GetRadians().GetZ(),
-					// 			linkQuat, linkAxis, linkAngle, 2, lidx, ikMotion, linkBone, count)
-					// 		linkAxis = &mmath.MVec3{0, 0, 1}
+						linkQuat, linkAxis, linkAngle, 0,
+						&mmath.MVec3{1, 0, 0}, ikMotion, linkBone, count)
+				} else if ikLink.MinAngleLimit.GetRadians().GetY() != 0 ||
+					ikLink.MaxAngleLimit.GetRadians().GetY() != 0 ||
+					ikLink.LocalMinAngleLimit.GetRadians().GetY() != 0 ||
+					ikLink.LocalMaxAngleLimit.GetRadians().GetY() != 0 {
+					// グローバルY or ローカルY
+					totalActualIkQuat, count = bfs.calcSingleAxisRad(
+						ikLink.MinAngleLimit.GetRadians().GetY(),
+						ikLink.MaxAngleLimit.GetRadians().GetY(),
+						linkQuat, linkAxis, linkAngle, 0,
+						&mmath.MVec3{0, 1, 0}, ikMotion, linkBone, count)
+				} else if ikLink.MinAngleLimit.GetRadians().GetZ() != 0 ||
+					ikLink.MaxAngleLimit.GetRadians().GetZ() != 0 ||
+					ikLink.LocalMinAngleLimit.GetRadians().GetZ() != 0 ||
+					ikLink.LocalMaxAngleLimit.GetRadians().GetZ() != 0 {
+					// グローバルZ or ローカルZ
+					totalActualIkQuat, count = bfs.calcSingleAxisRad(
+						ikLink.MinAngleLimit.GetRadians().GetZ(),
+						ikLink.MaxAngleLimit.GetRadians().GetZ(),
+						linkQuat, linkAxis, linkAngle, 0,
+						&mmath.MVec3{0, 0, 1}, ikMotion, linkBone, count)
 				}
 			} else {
 				if linkBone.HasFixedAxis() {
@@ -459,14 +436,13 @@ ikLoop:
 // quatAngle: 現在のIK回転の回転角度（ラジアン）
 // axisIndex: 制限軸INDEX
 func (bfs *BoneFrames) calcSingleAxisRad(
-	minAngleLimit, maxAngleLimit, unitRad float64,
-	overLoopThreshold bool,
+	minAngleLimit float64,
+	maxAngleLimit float64,
 	linkQuat *mmath.MQuaternion,
 	quatAxis *mmath.MVec3,
 	quatAngle float64,
 	axisIndex int,
 	axisVector *mmath.MVec3,
-	lidx int,
 	ikMotion *VmdMotion,
 	linkBone *pmx.Bone,
 	count float32,
