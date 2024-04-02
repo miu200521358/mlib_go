@@ -506,20 +506,11 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 				180.0*fSX/math.Pi, 180.0*fX/math.Pi, 180.0*tf/math.Pi)
 		}
 
-		if tf <= maxAngleLimit {
-			fX = tf
+		fX = mmath.ClampFloat(tf, minAngleLimit, maxAngleLimit)
 
-			{
-				mlog.I("[%s][制限:min:IN] fSX: %.5f, fX: %.5f, tf: %.5f\n", linkBone.Name,
-					180.0*fSX/math.Pi, 180.0*fX/math.Pi, 180.0*tf/math.Pi)
-			}
-		} else {
-			fX = maxAngleLimit
-
-			{
-				mlog.I("[%s][制限:min:Out] fSX: %.5f, fX: %.5f, tf: %.5f\n", linkBone.Name,
-					180.0*fSX/math.Pi, 180.0*fX/math.Pi, 180.0*tf/math.Pi)
-			}
+		{
+			mlog.I("[%s][制限:min:After] fSX: %.5f, fX: %.5f, tf: %.5f\n", linkBone.Name,
+				180.0*fSX/math.Pi, 180.0*fX/math.Pi, 180.0*tf/math.Pi)
 		}
 	}
 	if fX > maxAngleLimit {
@@ -530,20 +521,11 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 				180.0*fSX/math.Pi, 180.0*fX/math.Pi, 180.0*tf/math.Pi)
 		}
 
-		if tf >= minAngleLimit {
-			fX = tf
+		fX = mmath.ClampFloat(tf, minAngleLimit, maxAngleLimit)
 
-			{
-				mlog.I("[%s][制限:max:IN] fSX: %.5f, fX: %.5f, tf: %.5f\n", linkBone.Name,
-					180.0*fSX/math.Pi, 180.0*fX/math.Pi, 180.0*tf/math.Pi)
-			}
-		} else {
-			fX = minAngleLimit
-
-			{
-				mlog.I("[%s][制限:max:Out] fSX: %.5f, fX: %.5f, tf: %.5f\n", linkBone.Name,
-					180.0*fSX/math.Pi, 180.0*fX/math.Pi, 180.0*tf/math.Pi)
-			}
+		{
+			mlog.I("[%s][制限:max:After] fSX: %.5f, fX: %.5f, tf: %.5f\n", linkBone.Name,
+				180.0*fSX/math.Pi, 180.0*fX/math.Pi, 180.0*tf/math.Pi)
 		}
 	}
 
