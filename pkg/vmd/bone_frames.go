@@ -484,12 +484,12 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 
 	// ジンバルロック回避
 	totalIkRads, isGimbal := totalIkQuat.ToRadiansWithGimbal(axisIndex)
-	if isGimbal || math.Abs(totalIkRad) > mmath.GIMBAL2_RAD {
+	if isGimbal || math.Abs(totalIkRad) > math.Pi {
 		fX = totalIkRads.Vector()[axisIndex]
 		if fX < 0 {
-			fX = -(mmath.GIMBAL2_RAD - fX)
+			fX = -(math.Pi - fX)
 		} else {
-			fX = mmath.GIMBAL2_RAD - fX
+			fX = math.Pi - fX
 		}
 
 		{
