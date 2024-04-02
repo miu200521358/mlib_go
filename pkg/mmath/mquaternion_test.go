@@ -42,7 +42,7 @@ func TestMQuaternionFromEulerAngles(t *testing.T) {
 	angles := MVec3{math.Pi / 2, math.Pi / 2, math.Pi / 2}
 	expected := NewMQuaternionByValues(0.7071067811865476, 0.0, 0.0, 0.7071067811865476)
 
-	result := NewMQuaternionFromEulerAngles(angles.GetX(), angles.GetY(), angles.GetZ())
+	result := NewMQuaternionFromRadians(angles.GetX(), angles.GetY(), angles.GetZ())
 
 	if math.Abs(result.GetX()-expected.GetX()) > 1e-10 || math.Abs(result.GetY()-expected.GetY()) > 1e-10 || math.Abs(result.GetZ()-expected.GetZ()) > 1e-10 || math.Abs(result.GetW()-expected.GetW()) > 1e-10 {
 		t.Errorf("FromEulerAngles failed. Expected %v, got %v", expected, result)
@@ -53,7 +53,7 @@ func TestMQuaternionToEulerAngles(t *testing.T) {
 	quat := NewMQuaternionByValues(0.7071067811865476, 0.0, 0.0, 0.7071067811865476)
 	expected := MVec3{1.5707963267948966, 0, 0}
 
-	result := quat.ToEulerAngles()
+	result := quat.ToRadians()
 
 	if math.Abs(result.GetX()-expected.GetX()) > 1e-10 || math.Abs(result.GetY()-expected.GetY()) > 1e-10 || math.Abs(result.GetZ()-expected.GetZ()) > 1e-10 {
 		t.Errorf("ToEulerAngles failed. Expected %v, got %v", expected, result)
@@ -225,7 +225,7 @@ func TestMQuaternionNormalized(t *testing.T) {
 func TestFromEulerAnglesDegrees(t *testing.T) {
 	expected1 := NewMQuaternionByValues(0, 0, 0, 1)
 
-	result1 := NewMQuaternionFromEulerAnglesDegrees(0, 0, 0)
+	result1 := NewMQuaternionFromDegrees(0, 0, 0)
 
 	if !result1.PracticallyEquals(expected1, 1e-8) {
 		t.Errorf("FromEulerAnglesDegrees failed. Expected %v, got %v", expected1, result1)
@@ -233,7 +233,7 @@ func TestFromEulerAnglesDegrees(t *testing.T) {
 
 	expected2 := NewMQuaternionByValues(0.08715574, 0.0, 0.0, 0.9961947)
 
-	result2 := NewMQuaternionFromEulerAnglesDegrees(10, 0, 0)
+	result2 := NewMQuaternionFromDegrees(10, 0, 0)
 
 	if !result2.PracticallyEquals(expected2, 1e-8) {
 		t.Errorf("FromEulerAnglesDegrees failed. Expected %v, got %v", expected2, result2)
@@ -241,7 +241,7 @@ func TestFromEulerAnglesDegrees(t *testing.T) {
 
 	expected3 := NewMQuaternionByValues(0.12767944, 0.14487813, 0.23929834, 0.95154852)
 
-	result3 := NewMQuaternionFromEulerAnglesDegrees(10, 20, 30)
+	result3 := NewMQuaternionFromDegrees(10, 20, 30)
 
 	if !result3.PracticallyEquals(expected3, 1e-8) {
 		t.Errorf("FromEulerAnglesDegrees failed. Expected %v, got %v", expected3, result3)
@@ -249,7 +249,7 @@ func TestFromEulerAnglesDegrees(t *testing.T) {
 
 	expected4 := NewMQuaternionByValues(0.47386805, 0.20131049, -0.48170221, 0.70914465)
 
-	result4 := NewMQuaternionFromEulerAnglesDegrees(60, -20, -80)
+	result4 := NewMQuaternionFromDegrees(60, -20, -80)
 
 	if !result4.PracticallyEquals(expected4, 1e-8) {
 		t.Errorf("FromEulerAnglesDegrees failed. Expected %v, got %v", expected4, result4)
@@ -259,7 +259,7 @@ func TestFromEulerAnglesDegrees(t *testing.T) {
 func TestMQuaternionToEulerAnglesDegrees(t *testing.T) {
 	expected1 := MVec3{0, 0, 0}
 
-	result1 := NewMQuaternionByValues(0, 0, 0, 1).ToEulerAnglesDegrees()
+	result1 := NewMQuaternionByValues(0, 0, 0, 1).ToDegrees()
 
 	if !result1.PracticallyEquals(&expected1, 1e-8) {
 		t.Errorf("ToEulerAnglesDegrees failed. Expected %v, got %v", expected1, result1)
@@ -267,7 +267,7 @@ func TestMQuaternionToEulerAnglesDegrees(t *testing.T) {
 
 	expected2 := MVec3{10, 0, 0}
 
-	result2 := NewMQuaternionByValues(0.08715574274765817, 0.0, 0.0, 0.9961946980917455).ToEulerAnglesDegrees()
+	result2 := NewMQuaternionByValues(0.08715574274765817, 0.0, 0.0, 0.9961946980917455).ToDegrees()
 
 	if !result2.PracticallyEquals(&expected2, 1e-5) {
 		t.Errorf("ToEulerAnglesDegrees failed. Expected %v, got %v", expected2, result2)
@@ -275,7 +275,7 @@ func TestMQuaternionToEulerAnglesDegrees(t *testing.T) {
 
 	expected3 := MVec3{10, 20, 30}
 
-	result3 := NewMQuaternionByValues(0.12767944, 0.14487813, 0.23929834, 0.95154852).ToEulerAnglesDegrees()
+	result3 := NewMQuaternionByValues(0.12767944, 0.14487813, 0.23929834, 0.95154852).ToDegrees()
 
 	if !result3.PracticallyEquals(&expected3, 1e-5) {
 		t.Errorf("ToEulerAnglesDegrees failed. Expected %v, got %v", expected3, result3)
@@ -283,7 +283,7 @@ func TestMQuaternionToEulerAnglesDegrees(t *testing.T) {
 
 	expected4 := MVec3{60, -20, -80}
 
-	result4 := NewMQuaternionByValues(0.47386805, 0.20131049, -0.48170221, 0.70914465).ToEulerAnglesDegrees()
+	result4 := NewMQuaternionByValues(0.47386805, 0.20131049, -0.48170221, 0.70914465).ToDegrees()
 
 	if !result4.PracticallyEquals(&expected4, 1e-5) {
 		t.Errorf("ToEulerAnglesDegrees failed. Expected %v, got %v", expected4, result4)

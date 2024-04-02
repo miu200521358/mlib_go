@@ -472,18 +472,18 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	}
 
 	mlog.I("[%s][制限] totalIkRad: %.5f(%s), quat: %.5f(%s)\n", linkBone.Name,
-		180.0*totalIkRad/math.Pi, totalIkQuat.ToEulerAnglesDegrees().String(),
-		180.0*quatAngle/math.Pi, quat.ToEulerAnglesDegrees().String())
+		180.0*totalIkRad/math.Pi, totalIkQuat.ToDegrees().String(),
+		180.0*quatAngle/math.Pi, quat.ToDegrees().String())
 
-	fSX := math.Sin(totalIkRad) // sin(θx)
-	fX := math.Asin(fSX)        // X軸回り決定
+	fSX := math.Sin(totalIkRad) // sin(θ)
+	fX := math.Asin(fSX)        // 一軸回り決定
 
 	{
 		mlog.I("[%s][制限] quatAngle: %.5f, fSX: %.5f, fX: %.5f\n", linkBone.Name, 180.0*quatAngle/math.Pi, 180.0*fSX/math.Pi, 180.0*fX/math.Pi)
 	}
 
 	// ジンバルロック回避
-	totalIkRads, isGimbal := totalIkQuat.ToEulerRadiansWithGimbal(axisIndex)
+	totalIkRads, isGimbal := totalIkQuat.ToRadiansWithGimbal(axisIndex)
 	if isGimbal || math.Abs(totalIkRad) > mmath.GIMBAL2_RAD {
 		fX = totalIkRads.Vector()[axisIndex]
 		if fX < 0 {

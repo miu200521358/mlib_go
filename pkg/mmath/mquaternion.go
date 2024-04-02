@@ -136,8 +136,8 @@ func NewMQuaternionFromZAxisAngle(angle float64) *MQuaternion {
 	return q.Normalize()
 }
 
-// NewMQuaternionFromEulerAnglesは、オイラー角（ラジアン）回転を表す四元数を返します。
-func NewMQuaternionFromEulerAngles(xPitch, yHead, zRoll float64) *MQuaternion {
+// NewMQuaternionFromRadiansは、オイラー角（ラジアン）回転を表す四元数を返します。
+func NewMQuaternionFromRadians(xPitch, yHead, zRoll float64) *MQuaternion {
 	qy := NewMQuaternionFromYAxisAngle(yHead)
 	qx := NewMQuaternionFromXAxisAngle(xPitch)
 	qz := NewMQuaternionFromZAxisAngle(zRoll)
@@ -149,8 +149,8 @@ func NewMQuaternionFromEulerAngles(xPitch, yHead, zRoll float64) *MQuaternion {
 // https://qiita.com/aa_debdeb/items/abe90a9bd0b4809813da
 // https://site.nicovideo.jp/ch/userblomaga_thanks/archive/ar805999
 
-// ToEulerAnglesは、クォータニオンを三軸のオイラー角（ラジアン）回転を返します。
-func (v *MQuaternion) ToEulerAngles() *MVec3 {
+// ToRadiansは、クォータニオンを三軸のオイラー角（ラジアン）回転を返します。
+func (v *MQuaternion) ToRadians() *MVec3 {
 	sx := -(2*v.GetY()*v.GetZ() - 2*v.GetX()*v.GetW())
 	unlocked := math.Abs(sx) < 0.99999
 	xPitch := math.Asin(math.Max(-1, math.Min(1, sx)))
@@ -173,10 +173,10 @@ const (
 	ONE_RAD       = math.Pi
 )
 
-// ToEulerRadiansWithGimbalは、クォータニオンを三軸のオイラー角（ラジアン）回転を返します。
+// ToRadiansWithGimbalは、クォータニオンを三軸のオイラー角（ラジアン）回転を返します。
 // ジンバルロックが発生しているか否かのフラグも返します
-func (v *MQuaternion) ToEulerRadiansWithGimbal(axisIndex int) (*MVec3, bool) {
-	r := v.ToEulerAngles()
+func (v *MQuaternion) ToRadiansWithGimbal(axisIndex int) (*MVec3, bool) {
+	r := v.ToRadians()
 
 	var other1Rad, other2Rad float64
 	if axisIndex == 0 {
@@ -198,17 +198,17 @@ func (v *MQuaternion) ToEulerRadiansWithGimbal(axisIndex int) (*MVec3, bool) {
 	return r, false
 }
 
-// NewMQuaternionFromEulerAnglesDegreesは、オイラー角（度）回転を表す四元数を返します。
-func NewMQuaternionFromEulerAnglesDegrees(xPitch, yHead, zRoll float64) *MQuaternion {
+// NewMQuaternionFromDegreesは、オイラー角（度）回転を表す四元数を返します。
+func NewMQuaternionFromDegrees(xPitch, yHead, zRoll float64) *MQuaternion {
 	xPitchRadian := math.Pi * xPitch / 180.0
 	yHeadRadian := math.Pi * yHead / 180.0
 	zRollRadian := math.Pi * zRoll / 180.0
-	return NewMQuaternionFromEulerAngles(xPitchRadian, yHeadRadian, zRollRadian)
+	return NewMQuaternionFromRadians(xPitchRadian, yHeadRadian, zRollRadian)
 }
 
-// ToEulerAnglesDegreesは、クォータニオンのオイラー角（度）回転を返します。
-func (quat *MQuaternion) ToEulerAnglesDegrees() *MVec3 {
-	vec := quat.ToEulerAngles()
+// ToDegreesは、クォータニオンのオイラー角（度）回転を返します。
+func (quat *MQuaternion) ToDegrees() *MVec3 {
+	vec := quat.ToRadians()
 	return &MVec3{
 		180.0 * vec.GetX() / math.Pi,
 		180.0 * vec.GetY() / math.Pi,

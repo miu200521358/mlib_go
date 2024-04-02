@@ -4,7 +4,6 @@ import (
 	"math"
 
 	"github.com/jinzhu/copier"
-
 )
 
 type MRotation struct {
@@ -52,7 +51,7 @@ func (m *MRotation) GetQuaternion() *MQuaternion {
 
 func (m *MRotation) SetQuaternion(v *MQuaternion) {
 	m.quaternion = v
-	m.radians = v.ToEulerAngles()
+	m.radians = v.ToRadians()
 	m.degrees = &MVec3{
 		180.0 * m.radians.GetX() / math.Pi,
 		180.0 * m.radians.GetY() / math.Pi,
@@ -71,7 +70,7 @@ func (m *MRotation) SetRadians(v *MVec3) {
 		180.0 * v.GetY() / math.Pi,
 		180.0 * v.GetZ() / math.Pi,
 	}
-	qq := NewMQuaternionFromEulerAngles(v.GetX(), v.GetY(), v.GetZ())
+	qq := NewMQuaternionFromRadians(v.GetX(), v.GetY(), v.GetZ())
 	m.quaternion = qq
 }
 
@@ -86,7 +85,7 @@ func (m *MRotation) SetDegrees(v *MVec3) {
 		math.Pi * v.GetY() / 180.0,
 		math.Pi * v.GetZ() / 180.0,
 	}
-	qq := NewMQuaternionFromEulerAngles(m.radians.GetX(), m.radians.GetY(), m.radians.GetZ())
+	qq := NewMQuaternionFromRadians(m.radians.GetX(), m.radians.GetY(), m.radians.GetZ())
 	m.quaternion = qq
 }
 

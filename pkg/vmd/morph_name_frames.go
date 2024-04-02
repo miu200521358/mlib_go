@@ -225,10 +225,10 @@ func (mnfs *MorphNameFrames) AnimateBone(
 			delta.MorphLocalPosition.Add(offset.LocalPosition.MuledScalar(mf.Ratio))
 			deltaRad := offset.Rotation.GetRadians().MuledScalar(mf.Ratio)
 			delta.MorphRotation.SetQuaternion(delta.MorphRotation.GetQuaternion().Muled(
-				mmath.NewMQuaternionFromEulerAngles(deltaRad.GetX(), deltaRad.GetY(), deltaRad.GetZ())))
+				mmath.NewMQuaternionFromRadians(deltaRad.GetX(), deltaRad.GetY(), deltaRad.GetZ())))
 			deltaLocalRad := offset.LocalRotation.GetRadians().MuledScalar(mf.Ratio)
 			delta.MorphLocalRotation.SetQuaternion(delta.MorphLocalRotation.GetQuaternion().Muled(
-				mmath.NewMQuaternionFromEulerAngles(deltaLocalRad.GetX(), deltaLocalRad.GetY(), deltaLocalRad.GetZ())))
+				mmath.NewMQuaternionFromRadians(deltaLocalRad.GetX(), deltaLocalRad.GetY(), deltaLocalRad.GetZ())))
 			delta.MorphScale.Add(offset.Scale.MuledScalar(mf.Ratio))
 			delta.MorphLocalScale.Add(offset.LocalScale.MuledScalar(mf.Ratio))
 		}
