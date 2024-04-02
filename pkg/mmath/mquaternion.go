@@ -168,15 +168,13 @@ func (v *MQuaternion) ToEulerAngles() *MVec3 {
 
 const (
 	gimbal2_rad = math.Pi * 89.99 * 2 / 180
-	one_rad     = math.Pi / 2
+	one_rad     = math.Pi
 )
 
-// ToEulerRadiansEscapeGimbalは、クォータニオンを三軸のオイラー角（ラジアン）回転を返します。
-// ジンバルロックを回避するために、指定された軸の角度を調整します。
-func (v *MQuaternion) ToEulerRadiansEscapeGimbal(axisIndex int) *MVec3 {
+// ToEulerRadiansWithGimbalは、クォータニオンを三軸のオイラー角（ラジアン）回転を返します。
+// ジンバルロックが発生しているか否かのフラグも返します
+func (v *MQuaternion) ToEulerRadiansWithGimbal(axisIndex int) (*MVec3, bool) {
 	r := v.ToEulerAngles()
-
-	axisRad := r.Vector()[axisIndex]
 
 	var other1Rad, other2Rad float64
 	if axisIndex == 0 {
@@ -190,20 +188,12 @@ func (v *MQuaternion) ToEulerRadiansEscapeGimbal(axisIndex int) *MVec3 {
 		other2Rad = r.Vector()[1]
 	}
 
-	// 単位角とジンバルロックの整合性を取る
+	// ジンバルロックを判定する
 	if other1Rad >= gimbal2_rad && other2Rad >= gimbal2_rad {
-		axisRad += one_rad
-		other1Rad = 0
-		other2Rad = 0
+		return r, true
 	}
 
-	if axisIndex == 0 {
-		return &MVec3{axisRad, other1Rad, other2Rad}
-	} else if axisIndex == 1 {
-		return &MVec3{other1Rad, axisRad, other2Rad}
-	} else {
-		return &MVec3{other1Rad, other2Rad, axisRad}
-	}
+	return r, false
 }
 
 // NewMQuaternionFromEulerAnglesDegreesは、オイラー角（度）回転を表す四元数を返します。
