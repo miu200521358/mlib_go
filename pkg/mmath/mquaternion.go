@@ -167,9 +167,10 @@ func (v *MQuaternion) ToEulerAngles() *MVec3 {
 }
 
 const (
-	GIMBAL_RAD  = math.Pi * 89.99 / 180
-	GIMBAL2_RAD = math.Pi * 89.99 * 2 / 180
-	ONE_RAD     = math.Pi
+	GIMBAL_RAD    = math.Pi * 89.99 / 180
+	GIMBAL1_5_RAD = math.Pi * 89.99 * 1.5 / 180
+	GIMBAL2_RAD   = math.Pi * 89.99 * 2 / 180
+	ONE_RAD       = math.Pi
 )
 
 // ToEulerRadiansWithGimbalは、クォータニオンを三軸のオイラー角（ラジアン）回転を返します。
@@ -179,14 +180,14 @@ func (v *MQuaternion) ToEulerRadiansWithGimbal(axisIndex int) (*MVec3, bool) {
 
 	var other1Rad, other2Rad float64
 	if axisIndex == 0 {
-		other1Rad = r.Vector()[1]
-		other2Rad = r.Vector()[2]
+		other1Rad = math.Abs(r.Vector()[1])
+		other2Rad = math.Abs(r.Vector()[2])
 	} else if axisIndex == 1 {
-		other1Rad = r.Vector()[0]
-		other2Rad = r.Vector()[2]
+		other1Rad = math.Abs(r.Vector()[0])
+		other2Rad = math.Abs(r.Vector()[2])
 	} else {
-		other1Rad = r.Vector()[0]
-		other2Rad = r.Vector()[1]
+		other1Rad = math.Abs(r.Vector()[0])
+		other2Rad = math.Abs(r.Vector()[1])
 	}
 
 	// ジンバルロックを判定する
