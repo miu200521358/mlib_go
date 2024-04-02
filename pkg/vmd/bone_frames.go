@@ -486,38 +486,49 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 		count++
 	}
 
-	// if lidx > 0 {
-	// 	// 根元に行くほど回転角を半分にする
-	// 	quatAngle /= float64(lidx * 2)
-	// }
-
-	// {
-	// 	mlog.I("[%s][軸制限半分] quatAngle: %.5f\n", linkBone.Name, 180.0*quatAngle/math.Pi)
-	// }
-
-	// 単位角を超えないようにする
-	quatAngle = mmath.ClampFloat(quatAngle, -unitRad, unitRad)
-
-	{
-		mlog.I("[%s][軸制限単位角] quatAngle: %.5f\n", linkBone.Name, 180.0*quatAngle/math.Pi)
-	}
-
-	// 現在調整予定角度の全ての軸の角度
-	ikQuat = mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle).Normalize()
-
-	{
-		bf := NewBoneFrame(count)
-		bf.Rotation.SetQuaternion(ikQuat)
-		ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
-		count++
-	}
-
 	// 軸別の角度を取得
 	axisRads := ikQuat.ToEulerAngles()
 	axisRad := axisRads.Vector()[axisIndex]
 
+	{
+		bf := NewBoneFrame(count)
+		bf.Rotation.SetQuaternion(linkQuat.Muled(mmath.NewMQuaternionFromAxisAngles(axisVector, axisRad)))
+		ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+		count++
+	}
+
+	if lidx > 0 {
+		// 根元に行くほど回転角を半分にする
+		axisRad /= float64(lidx * 2)
+	}
+
+	{
+		bf := NewBoneFrame(count)
+		bf.Rotation.SetQuaternion(linkQuat.Muled(mmath.NewMQuaternionFromAxisAngles(axisVector, axisRad)))
+		ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+		count++
+	}
+
+	{
+		mlog.I("[%s][軸制限半分] axisRad: %.5f\n", linkBone.Name, 180.0*axisRad/math.Pi)
+	}
+
+	// 単位角を超えないようにする
+	axisRad = mmath.ClampFloat(axisRad, -unitRad, unitRad)
+
+	{
+		mlog.I("[%s][軸制限単位角] axisRad: %.5f\n", linkBone.Name, 180.0*axisRad/math.Pi)
+	}
+
+	{
+		bf := NewBoneFrame(count)
+		bf.Rotation.SetQuaternion(linkQuat.Muled(mmath.NewMQuaternionFromAxisAngles(axisVector, axisRad)))
+		ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+		count++
+	}
+
 	// 調整した軸角度からクォータニオンを生成
-	axisIkQuat := mmath.NewMQuaternionFromAxisAngles(axisVector, quatAngle)
+	axisIkQuat := mmath.NewMQuaternionFromAxisAngles(axisVector, axisRad)
 
 	{
 		bf := NewBoneFrame(count)
@@ -536,7 +547,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 		count++
 	}
 
-	// 全体の角度を取得
+	// 全体の軸角度を取得
 	totalAxisRad := totalIkQuat.ToEulerAngles().Vector()[axisIndex]
 
 	{
@@ -611,6 +622,9 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 			ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 			count++
 		}
+
+		// 全体の軸角度を取得
+		totalAxisRad = totalIkQuat.ToEulerAngles().Vector()[axisIndex]
 
 		// totalAxisRad = totalIkQuat.ToEulerAngles().Vector()[axisIndex]
 		// invertedAxisRads := invertedIkQuat.ToEulerAngles()
