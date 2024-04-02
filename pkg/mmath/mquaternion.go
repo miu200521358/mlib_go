@@ -167,9 +167,9 @@ func (v *MQuaternion) ToRadians() *MVec3 {
 }
 
 const (
-	GIMBAL_RAD    = math.Pi * 89.99 / 180
-	GIMBAL1_5_RAD = math.Pi * 89.99 * 1.5 / 180
-	GIMBAL2_RAD   = math.Pi * 89.99 * 2 / 180
+	GIMBAL_RAD    = math.Pi * 89.99999 / 180
+	GIMBAL1_5_RAD = math.Pi * 89.99999 * 1.5 / 180
+	GIMBAL2_RAD   = math.Pi * 89.99999 * 2 / 180
 	ONE_RAD       = math.Pi
 )
 
