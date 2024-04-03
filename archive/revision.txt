@@ -94,5 +94,7 @@ MlibSample 1.0.0_beta_23
 
 MlibSample 1.0.0_beta_24
 ・リファクタリングを撤回
+・UVモーフのY向き修正
+・光源の修正
 ・IK計算見直し
 
