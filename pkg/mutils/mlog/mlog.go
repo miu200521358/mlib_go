@@ -8,6 +8,14 @@ func init() {
 	log.SetFlags(0)
 }
 
+func IsVerbose() bool {
+	return level <= 0
+}
+
+func IsDebug() bool {
+	return level <= 10
+}
+
 // SetLevel ログレベルの設定
 func SetLevel(l int) {
 	level = l

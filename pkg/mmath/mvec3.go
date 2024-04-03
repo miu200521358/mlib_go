@@ -431,6 +431,14 @@ func LerpFloat(v1, v2 float64, t float64) float64 {
 	return v1 + ((v2 - v1) * t)
 }
 
+func ToRadian(degree float64) float64 {
+	return degree * math.Pi / 180
+}
+
+func ToDegree(radian float64) float64 {
+	return radian * 180 / math.Pi
+}
+
 // Clamp01 ベクトルの各要素をmin～maxの範囲内にクランプします
 func ClampFloat(v float64, min float64, max float64) float64 {
 	if v < min {
