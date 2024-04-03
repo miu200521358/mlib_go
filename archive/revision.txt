@@ -93,5 +93,6 @@ MlibSample 1.0.0_beta_23
 　物理ON/OFF、ハイスペックモード
 
 MlibSample 1.0.0_beta_24
-
+・リファクタリングを撤回
+・IK計算見直し
 
