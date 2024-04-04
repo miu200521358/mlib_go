@@ -391,7 +391,8 @@ func (b *Bones) getParentRelativePosition(boneIndex int) *mmath.MVec3 {
 		v := bone.Position.Subed(b.GetItem(bone.ParentIndex).Position)
 		return v
 	}
-	return mmath.NewMVec3()
+	// 親が見つからない場合、自分の位置を原点からの相対位置として返す
+	return bone.Position
 }
 
 func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {

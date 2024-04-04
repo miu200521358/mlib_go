@@ -7,6 +7,7 @@ require (
 	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240118000515-a250818d05e3
 	github.com/go-gl/mathgl v1.1.0
+	github.com/miu200521358/dds v0.0.0
 	github.com/miu200521358/walk v0.0.2
 	github.com/miu200521358/win v0.0.1
 	golang.org/x/image v0.15.0
@@ -24,3 +25,5 @@ require (
 replace github.com/miu200521358/walk => C:\MMD\walk
 
 replace github.com/miu200521358/win => C:\MMD\win
+
+replace github.com/miu200521358/dds => C:\MMD\dds

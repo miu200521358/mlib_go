@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/ftrvxmtrx/tga"
+	"github.com/miu200521358/dds/pkg/dds"
 	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/riff"
 	_ "golang.org/x/image/tiff"
@@ -93,6 +94,13 @@ func loadImage(path string, file io.Reader) (image.Image, error) {
 		return img, nil
 	} else if strings.ToLower(path[len(path)-4:]) == ".gif" {
 		img, err := gif.Decode(file)
+		if err != nil {
+			return nil, err
+		}
+
+		return img, nil
+	} else if strings.ToLower(path[len(path)-4:]) == ".dds" {
+		img, err := dds.Decode(file)
 		if err != nil {
 			return nil, err
 		}

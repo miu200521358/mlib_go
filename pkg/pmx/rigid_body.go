@@ -232,6 +232,7 @@ func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 		// カプセル剛体
 		btCollisionShape = mbt.NewBtCapsuleShape(float32(r.Size.GetX()), float32(r.Size.GetY()))
 	}
+	// btCollisionShape.SetMargin(0.0001)
 
 	r.CorrectPhysicsType = r.PhysicsType
 	// if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE && r.BoneIndex < 0 {
