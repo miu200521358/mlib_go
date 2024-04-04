@@ -264,11 +264,20 @@ ikLoop:
 			ikLocalPosition := linkInvMatrix.MulVec3(ikGlobalPosition)
 
 			if mlog.IsVerbose() && ikMotion != nil {
-				bf := NewBoneFrame(count)
-				bf.Position = ikMatrixes.GetItem(ikBone.Name, frame).FramePosition
-				bf.Rotation.SetQuaternion(ikMatrixes.GetItem(ikBone.Name, frame).FrameRotation)
-				ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
-				count++
+				{
+					bf := NewBoneFrame(count)
+					bf.Position = ikMatrixes.GetItem(ikBone.Name, frame).FramePosition
+					bf.Rotation.SetQuaternion(ikMatrixes.GetItem(ikBone.Name, frame).FrameRotation)
+					ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
+					count++
+				}
+				{
+					bf := NewBoneFrame(count)
+					bf.Position = linkMatrixes.GetItem(linkBone.Name, frame).FramePosition
+					bf.Rotation.SetQuaternion(linkMatrixes.GetItem(linkBone.Name, frame).FrameRotation)
+					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+					count++
+				}
 			}
 			if mlog.IsVerbose() && ikMotion != nil {
 				mlog.V("[%.2f][%03d][%s][%05.0f][00][Local] effectorLocalPosition: %s, ikLocalPosition: %s",
@@ -374,6 +383,10 @@ ikLoop:
 					if linkBone.NormalizedFixedAxis.Dot(linkAxis) < 0 {
 						linkAngle *= -1
 					}
+
+					if mlog.IsVerbose() && ikMotion != nil {
+						mlog.V("[%.2f][%03d][%s][%05.0f][12][軸制限] linkAxis: %s, linkAngle: %.5f", frame, loop, linkBone.Name, count-1, linkAxis.String(), mmath.ToDegree(linkAngle))
+					}
 				}
 
 				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
@@ -386,7 +399,7 @@ ikLoop:
 				}
 
 				if mlog.IsVerbose() && ikMotion != nil {
-					mlog.V("[%.2f][%03d][%s][%05.0f][12][軸制限] correctIkQuat: %s(%s)", frame, loop, linkBone.Name, count-1, correctIkQuat.String(), correctIkQuat.ToDegrees().String())
+					mlog.V("[%.2f][%03d][%s][%05.0f][13][角度制限なし] correctIkQuat: %s(%s)", frame, loop, linkBone.Name, count-1, correctIkQuat.String(), correctIkQuat.ToDegrees().String())
 				}
 
 				// 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
@@ -400,7 +413,7 @@ ikLoop:
 				}
 
 				if mlog.IsVerbose() && ikMotion != nil {
-					mlog.V("[%.2f][%03d][%s][%05.0f][13][軸制限] totalActualIkQuat: %s(%s)", frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String())
+					mlog.V("[%.2f][%03d][%s][%05.0f][14][角度制限なし] totalActualIkQuat: %s(%s)", frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String())
 				}
 			}
 
@@ -416,7 +429,7 @@ ikLoop:
 				}
 
 				if mlog.IsVerbose() && ikMotion != nil {
-					mlog.V("[%.2f][%03d][%s][%05.0f][14][軸制限] totalActualIkQuat: %s(%s)", frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String())
+					mlog.V("[%.2f][%03d][%s][%05.0f][15][角度制限なし] totalActualIkQuat: %s(%s)", frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String())
 				}
 
 			}
@@ -434,7 +447,7 @@ ikLoop:
 			}
 
 			if mlog.IsVerbose() && ikMotion != nil {
-				mlog.V("[%.2f][%03d][%s][%05.0f][15][結果] totalActualIkQuat: %s(%s)", frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String())
+				mlog.V("[%.2f][%03d][%s][%05.0f][16][結果] totalActualIkQuat: %s(%s)", frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String())
 			}
 
 			// IKの結果を更新
@@ -505,7 +518,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	}
 
 	if mlog.IsVerbose() && ikMotion != nil {
-		mlog.V("[%.2f][%03d][%s][%05.0f][06][角度制限] totalIkRad: %.5f", frame, loop, linkBoneName, count-1, totalIkRad)
+		mlog.V("[%.2f][%03d][%s][%05.0f][06][角度制限] totalIkRad: %.5f(%.5f)", frame, loop, linkBoneName, count-1, totalIkRad, mmath.ToDegree(totalIkRad))
 	}
 
 	fSX := math.Sin(totalIkRad) // sin(θ)

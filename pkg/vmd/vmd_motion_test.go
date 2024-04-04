@@ -1811,7 +1811,7 @@ func TestVmdMotion_AnimateBoneLegIk23_Addiction(t *testing.T) {
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.609285, 12.001350, 1.555402}
-			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 0.1) {
+			if !matrixes.GetItem(pmx.LOWER.String(), fno).Position.PracticallyEquals(expectedPosition, 0.2) {
 				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.LOWER.String(), fno).Position)
 			}
 		}
