@@ -7,10 +7,12 @@ import (
 	"math"
 	"os"
 
-	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
-	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
+
+	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
+
 )
 
 type VmdWriter struct {

@@ -187,7 +187,7 @@ func (bfs *BoneFrames) calcIk(
 	var ikMotion *VmdMotion
 	count := float32(1.0)
 	if mlog.IsVerbose() {
-		// IK計算でバッグ用モーション
+		// IK計算デバッグ用モーション
 		dirPath := fmt.Sprintf("%s/IK_step", filepath.Dir(model.Path))
 		err := os.MkdirAll(dirPath, 0755)
 		if err != nil {
@@ -379,13 +379,41 @@ ikLoop:
 			} else {
 				if linkBone.HasFixedAxis() {
 					// 軸制限ありの場合、軸にそった理想回転量とする
-					linkAxis = linkBone.NormalizedFixedAxis
-					if linkBone.NormalizedFixedAxis.Dot(linkAxis) < 0 {
-						linkAngle *= -1
+					quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
+
+					if mlog.IsVerbose() && ikMotion != nil {
+						bf := NewBoneFrame(count)
+						bf.Rotation.SetQuaternion(quat)
+						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+						count++
 					}
 
 					if mlog.IsVerbose() && ikMotion != nil {
-						mlog.V("[%.2f][%03d][%s][%05.0f][12][軸制限] linkAxis: %s, linkAngle: %.5f", frame, loop, linkBone.Name, count-1, linkAxis.String(), mmath.ToDegree(linkAngle))
+						mlog.V("[%.2f][%03d][%s][%05.0f][04][軸制限] quat: %s(%s)", frame, loop, linkBone.Name, count-1, quat.String(), quat.ToDegrees().String())
+					}
+
+					// 現在IKリンクに入る可能性のあるすべての角度
+					totalIkQuat := linkQuat.Muled(quat)
+
+					if mlog.IsVerbose() && ikMotion != nil {
+						bf := NewBoneFrame(count)
+						bf.Rotation.SetQuaternion(totalIkQuat)
+						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+						count++
+					}
+
+					if mlog.IsVerbose() && ikMotion != nil {
+						mlog.V("[%.2f][%03d][%s][%05.0f][05][軸制限] totalIkQuat: %s(%s)", frame, loop, linkBone.Name, count-1, totalIkQuat.String(), totalIkQuat.ToDegrees().String())
+					}
+
+					linkAngle = totalIkQuat.ToRadian()
+					if linkBone.NormalizedFixedAxis.Dot(totalIkQuat.GetXYZ().Normalized()) < 0 {
+						linkAngle *= -1
+					}
+					linkAxis = linkBone.NormalizedFixedAxis
+
+					if mlog.IsVerbose() && ikMotion != nil {
+						mlog.V("[%.2f][%03d][%s][%05.0f][06][軸制限] linkAxis: %s, linkAngle: %.5f", frame, loop, linkBone.Name, count-1, linkAxis.String(), mmath.ToDegree(linkAngle))
 					}
 				}
 

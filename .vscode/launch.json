@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "go: Launch main",
+      "name": "Launch",
       "type": "go",
       "request": "launch",
       "mode": "debug",
@@ -13,10 +13,14 @@
       "preLaunchTask": "go: mod tidy",
     },
     {
-      "name": "python: Build exe",
+      "name": "[dev] Build",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/.vscode/scripts/build_exe.py",
+      "args": [
+        "--env",
+        "dev",
+      ],
       "env": {
         "WORKSPACE_FOLDER": "${workspaceFolder}",
       },

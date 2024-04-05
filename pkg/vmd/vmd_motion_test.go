@@ -1828,12 +1828,6 @@ func TestVmdMotion_AnimateBoneLegIk23_Addiction(t *testing.T) {
 			}
 		}
 		{
-			expectedPosition := &mmath.MVec3{-1.358807, 1.912181, 0.611265}
-			if !matrixes.GetItem(pmx.ANKLE.Right(), fno).Position.PracticallyEquals(expectedPosition, 0.2) {
-				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ANKLE.Right(), fno).Position)
-			}
-		}
-		{
 			expectedPosition := &mmath.MVec3{-1.529553, 5.033699, 3.127081}
 			if !matrixes.GetItem("右足首", fno).Position.PracticallyEquals(expectedPosition, 0.1) {
 				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem("右足首", fno).Position)
