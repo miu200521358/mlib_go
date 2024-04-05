@@ -118,3 +118,8 @@ MlibSample 1.0.0_beta_28
 ・IK計算ログ出力方法修正
   <pmxモデルディレクトリパス>/IK_step/xxxxx.vmd, xxxxx.log
 
+MlibSample 1.0.0_beta_29
+・IK計算ログ改行追加
+・初期角度を求めた際に 1e-6 まで一致していたら抜けるよう修正
+
+
