@@ -4,6 +4,7 @@ import (
 	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+
 )
 
 type BoneDelta struct {
@@ -15,6 +16,7 @@ type BoneDelta struct {
 	FramePosition *mmath.MVec3       // キーフレ位置の変動量
 	FrameRotation *mmath.MQuaternion // キーフレ回転の変動量
 	FrameScale    *mmath.MVec3       // キーフレスケールの変動量
+	Matrix        *mmath.MMat4       // ボーンの変動行列
 }
 
 func NewBoneDelta(
@@ -24,6 +26,7 @@ func NewBoneDelta(
 	framePosition *mmath.MVec3,
 	frameRotation *mmath.MQuaternion,
 	frameScale *mmath.MVec3,
+	matrix *mmath.MMat4,
 ) *BoneDelta {
 	p := globalMatrix.Translation()
 	return &BoneDelta{
@@ -35,6 +38,7 @@ func NewBoneDelta(
 		FramePosition: framePosition,
 		FrameRotation: frameRotation,
 		FrameScale:    frameScale,
+		Matrix:        matrix,
 	}
 }
 

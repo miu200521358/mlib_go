@@ -771,6 +771,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 			positions[i].Translation(), // 移動
 			rotations[i].Quaternion(),  // 回転
 			scales[i].Scaling(),        // 拡大率
+			matrixes[i],                // ボーン変形行列
 		))
 	}
 
