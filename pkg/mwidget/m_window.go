@@ -8,7 +8,7 @@ import (
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
-	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
@@ -37,7 +37,7 @@ func NewMWindow(
 	height int,
 	funcHelpMenuItems func() []declarative.MenuItem,
 ) (*MWindow, error) {
-	appConfig := mutils.LoadAppConfig(resourceFiles)
+	appConfig := mconfig.LoadAppConfig(resourceFiles)
 	mi18n.Initialize(resourceFiles)
 
 	mainWindow := &MWindow{
@@ -185,7 +185,7 @@ func NewMWindow(
 		walk.App().Exit(0)
 	})
 
-	iconImg, err := mutils.LoadIconFile(resourceFiles)
+	iconImg, err := mconfig.LoadIconFile(resourceFiles)
 	if err != nil {
 		return nil, err
 	}

@@ -12,8 +12,9 @@ import (
 )
 
 type AppConfig struct {
-	AppName    string `json:"AppName"`
-	AppVersion string `json:"AppVersion"`
+	Name    string `json:"Name"`
+	Version string `json:"Version"`
+	Env     string `json:"Env"`
 }
 
 // LoadAppConfig アプリ設定ファイルの読み込み

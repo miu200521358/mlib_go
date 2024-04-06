@@ -16,7 +16,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
@@ -117,7 +117,7 @@ func NewGlWindow(
 		return nil, err
 	}
 	w.MakeContextCurrent()
-	iconImg, err := mutils.LoadIconFile(resourceFiles)
+	iconImg, err := mconfig.LoadIconFile(resourceFiles)
 	if err == nil {
 		w.SetIcon([]image.Image{iconImg})
 	}
