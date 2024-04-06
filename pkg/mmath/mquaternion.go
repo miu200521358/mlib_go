@@ -16,9 +16,21 @@ func NewMQuaternion() *MQuaternion {
 }
 
 func NewMQuaternionByVec3(vec3 *MVec3) *MQuaternion {
-	return &MQuaternion{1., mgl64.Vec3{vec3.GetX(), vec3.GetY(), vec3.GetZ()}}
+	return NewMQuaternionByValues(vec3.GetX(), vec3.GetY(), vec3.GetZ(), 0)
 }
 
+// 指定された値でクォータニオンを作成します。
+// ただし必ず最短距離クォータニオンにします
+func NewMQuaternionByValuesShort(x, y, z, w float64) *MQuaternion {
+	qq := &MQuaternion{w, mgl64.Vec3{x, y, z}}
+	if !MQuaternionIdent.IsShortestRotation(qq) {
+		qq.Negate()
+	}
+	return qq
+}
+
+// NewMQuaternionByValuesOriginal は、指定された値でクォータニオンを作成します。
+// ただし、強制的に最短距離クォータニオンにはしません
 func NewMQuaternionByValues(x, y, z, w float64) *MQuaternion {
 	return &MQuaternion{w, mgl64.Vec3{x, y, z}}
 }
@@ -142,7 +154,7 @@ func NewMQuaternionFromRadians(xPitch, yHead, zRoll float64) *MQuaternion {
 	qx := NewMQuaternionFromXAxisAngle(xPitch)
 	qz := NewMQuaternionFromZAxisAngle(zRoll)
 	q := qy.Mul(qx)
-	return q.Mul(qz)
+	return q.Mul(qz).Normalize()
 }
 
 // 参考URL:
@@ -247,6 +259,22 @@ func (quat *MQuaternion) AxisAngle() (axis MVec3, angle float64) {
 	axis[2] = quat.V[2] * ooSin
 
 	return axis, angle
+}
+
+// Mul は、クォータニオンの積を返します。
+func (q1 *MQuaternion) MulShort(q2 *MQuaternion) *MQuaternion {
+	mat1 := q1.ToMat4()
+	mat2 := q2.ToMat4()
+	mat1.Mul(mat2)
+	qq := mat1.Quaternion()
+
+	return NewMQuaternionByValues(qq.V[0], qq.V[1], qq.V[2], qq.W)
+}
+
+func (q1 *MQuaternion) MuledShort(q2 *MQuaternion) *MQuaternion {
+	copied := q1.Copy()
+	copied.Mul(q2)
+	return copied
 }
 
 // Mul は、クォータニオンの積を返します。
@@ -358,6 +386,14 @@ func (quat *MQuaternion) IsUnitQuat(tolerance float64) bool {
 	return norm >= (1.0-tolerance) && norm <= (1.0+tolerance)
 }
 
+// 最短回転に変換します
+func (quat *MQuaternion) Shorten() *MQuaternion {
+	if quat.W < 0 {
+		quat.Negate()
+	}
+	return quat
+}
+
 // RotateVec3 は、四元数によって表される回転によって v を回転させます。
 // https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
 func (quat *MQuaternion) RotateVec3(v *MVec3) {
@@ -389,13 +425,46 @@ func (quat *MQuaternion) Dot(other *MQuaternion) float64 {
 	return quat.V[0]*other.V[0] + quat.V[1]*other.V[1] + quat.V[2]*other.V[2] + quat.W*other.W
 }
 
-// MulFactor
-func (quat *MQuaternion) MulFactor(factor float64) *MQuaternion {
+// MulScalar
+func (quat *MQuaternion) MulScalar(factor float64) *MQuaternion {
 	if factor == 0.0 {
 		return NewMQuaternion()
 	}
-	qq := NewMQuaternionByValues(quat.GetX(), quat.GetY(), quat.GetZ(), quat.GetW()/factor)
-	return qq.Normalize()
+
+	// qq := NewMQuaternion().Lerp(quat, math.Abs(factor))
+	// if factor < 0 {
+	// 	qq.Invert()
+	// }
+
+	// return qq.Normalize()
+
+	axis, angle := quat.ToAxisAngle()
+
+	// factor をかけて角度を制限
+	angle = math.Mod(angle*factor, math.Pi*2)
+
+	return NewMQuaternionFromAxisAngles(axis, angle)
+}
+
+// ToAxisAngle converts the quaternion to an axis and an angle.
+func (quat *MQuaternion) ToAxisAngle() (*MVec3, float64) {
+	// Normalize the quaternion
+	quat.Normalize()
+
+	// Calculate the angle
+	angle := 2 * math.Acos(quat.W)
+
+	// Calculate the components of the axis
+	s := math.Sqrt(1 - quat.W*quat.W)
+	if s < 1e-9 {
+		s = 1
+	}
+	axis := NewMVec3()
+	axis.SetX(quat.V[0] / s)
+	axis.SetY(quat.V[1] / s)
+	axis.SetZ(quat.V[2] / s)
+
+	return axis, angle
 }
 
 // Slerp は t (0,1) における a と b の間の球面線形補間クォータニオンを返す。
@@ -403,6 +472,11 @@ func (quat *MQuaternion) MulFactor(factor float64) *MQuaternion {
 func (a *MQuaternion) Slerp(b *MQuaternion, t float64) *MQuaternion {
 	q := mgl64.QuatSlerp(mgl64.Quat(*a), mgl64.Quat(*b), t)
 	return (*MQuaternion)(&q)
+}
+
+func (q *MQuaternion) Lerp(other *MQuaternion, t float64) *MQuaternion {
+	qq := mgl64.QuatLerp(mgl64.Quat(*q), mgl64.Quat(*other), t)
+	return (*MQuaternion)(&qq)
 }
 
 // Vec3Diff関数は、2つのベクトル間の回転四元数を返します。
@@ -587,19 +661,12 @@ func (v *MQuaternion) ToMat4() *MMat4 {
 // fixedAxis: 軸制限を表す3次元ベクトル
 func (quat *MQuaternion) ToFixedAxisRotation(fixedAxis *MVec3) *MQuaternion {
 	normalizedFixedAxis := fixedAxis.Normalized()
-	quatVec := quat.Vec3().Normalized()
-	theta := math.Acos(math.Max(-1, math.Min(1, normalizedFixedAxis.Dot(quatVec))))
-	var flag float64
-	if theta >= math.Pi/2 {
-		flag = -1
-	} else {
-		flag = 1
+	quatAxis := quat.GetXYZ().Normalized()
+	rad := quat.ToRadian()
+	if normalizedFixedAxis.Dot(quatAxis) < 0 {
+		rad *= -1
 	}
-	fixedQuatAxis := normalizedFixedAxis.MulScalar(flag).MulScalar((quat.Vec3()).Length())
-	fixedQuat := NewMQuaternionByValues(fixedQuatAxis.GetX(), fixedQuatAxis.GetY(), fixedQuatAxis.GetZ(), quat.GetW())
-	fixedQuat.Normalize()
-
-	return fixedQuat
+	return NewMQuaternionFromAxisAngles(normalizedFixedAxis, rad)
 }
 
 // PracticallyEquals

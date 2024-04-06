@@ -111,7 +111,7 @@ func (bfs *BoneFrames) Animate(
 	}
 
 	// ボーン変形行列操作
-	positions, rotations, scales, _ :=
+	positions, rotations, scales, quatsWithoutEffect :=
 		bfs.getBoneMatrixes(frame, model, targetBoneNames, targetBoneIndexes, isCalcMorph)
 
 	// ボーン行列計算
@@ -123,6 +123,7 @@ func (bfs *BoneFrames) Animate(
 		positions,
 		rotations,
 		scales,
+		quatsWithoutEffect,
 	)
 }
 
@@ -182,7 +183,7 @@ func (bfs *BoneFrames) calcIk(
 	// 処理対象ボーン名取得
 	effectorTargetBoneNames, effectorTargetBoneIndexes := bfs.getAnimatedBoneNames(model, []string{effectorBone.Name})
 	// エフェクタボーンの関連ボーンの初期値を取得
-	positions, rotations, scales, quats :=
+	positions, rotations, scales, quatsWithoutEffect :=
 		bfs.getBoneMatrixes(frame, model, effectorTargetBoneNames, effectorTargetBoneIndexes, isisCalcMorph)
 	// 中断FLGが入ったか否か
 	aborts := make([]bool, len(ikBone.Ik.Links))
@@ -258,6 +259,7 @@ ikLoop:
 				positions,
 				rotations,
 				scales,
+				quatsWithoutEffect,
 			)
 
 			// IKボーンのグローバル位置
@@ -273,11 +275,11 @@ ikLoop:
 					ikGlobalPosition.String(), effectorGlobalPosition.String())
 			}
 
-			fmt.Fprintf(ikFile,
-				"[%.2f][%03d][%s][%05.0f][01][グローバル位置終了判定] %sと%sの距離: %v(%0.6f)\n",
-				frame, loop, linkBone.Name, count-1, ikBone.Name, effectorBone.Name,
-				ikGlobalPosition.Distance(effectorGlobalPosition) < 1e-6,
-				ikGlobalPosition.Distance(effectorGlobalPosition))
+			// fmt.Fprintf(ikFile,
+			// 	"[%.2f][%03d][%s][%05.0f][01][グローバル位置終了判定] %sと%sの距離: %v(%0.6f)\n",
+			// 	frame, loop, linkBone.Name, count-1, ikBone.Name, effectorBone.Name,
+			// 	ikGlobalPosition.Distance(effectorGlobalPosition) < 1e-6,
+			// 	ikGlobalPosition.Distance(effectorGlobalPosition))
 
 			// // 位置の差がほとんどない場合、終了
 			// if ikGlobalPosition.Distance(effectorGlobalPosition) < 1e-6 {
@@ -353,7 +355,7 @@ ikLoop:
 			}
 
 			// リンクボーンの角度を取得
-			linkQuat := quats[linkIndex]
+			linkQuat := quatsWithoutEffect[linkIndex]
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := deform.NewBoneFrame(count)
@@ -432,7 +434,7 @@ ikLoop:
 			} else {
 				if linkBone.HasFixedAxis() {
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
+						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
 						bf := deform.NewBoneFrame(count)
 						bf.Rotation.SetQuaternion(quat)
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
@@ -450,7 +452,7 @@ ikLoop:
 					linkAxis = linkBone.NormalizedFixedAxis
 
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
+						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
 						bf := deform.NewBoneFrame(count)
 						bf.Rotation.SetQuaternion(quat)
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
@@ -465,7 +467,7 @@ ikLoop:
 					}
 				}
 
-				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
+				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := deform.NewBoneFrame(count)
@@ -518,11 +520,11 @@ ikLoop:
 			fmt.Fprintf(ikFile,
 				"[%.2f][%03d][%s][%05.0f][15] 前回差分中断判定: %v(%0.6f) 前回: %s 今回: %s\n",
 				frame, loop, linkBone.Name, count-1,
-				1-quats[linkIndex].Dot(totalActualIkQuat) < 1e-6, 1-quats[linkIndex].Dot(totalActualIkQuat),
-				quats[linkIndex].ToDegrees().String(), totalActualIkQuat.ToDegrees().String())
+				1-quatsWithoutEffect[linkIndex].Dot(totalActualIkQuat) < 1e-6, 1-quatsWithoutEffect[linkIndex].Dot(totalActualIkQuat),
+				quatsWithoutEffect[linkIndex].ToDegrees().String(), totalActualIkQuat.ToDegrees().String())
 
 			// 前回（既存）とほぼ同じ回転量の場合、中断FLGを立てる
-			if 1-quats[linkIndex].Dot(totalActualIkQuat) < 1e-8 {
+			if 1-quatsWithoutEffect[linkIndex].Dot(totalActualIkQuat) < 1e-8 {
 				aborts[lidx] = true
 			}
 
@@ -540,7 +542,7 @@ ikLoop:
 			}
 
 			// IKの結果を更新
-			quats[linkIndex] = totalActualIkQuat
+			quatsWithoutEffect[linkIndex] = totalActualIkQuat
 			rotations[linkIndex] = totalActualIkQuat.ToMat4()
 		}
 
@@ -550,7 +552,7 @@ ikLoop:
 		}
 	}
 
-	return quats, effectorTargetBoneNames
+	return quatsWithoutEffect, effectorTargetBoneNames
 }
 
 // 全ての角度をラジアン角度に分割して、そのうちのひとつの軸だけを動かす回転を取得する
@@ -575,7 +577,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	ikMotion *VmdMotion,
 	ikFile *os.File,
 ) *mmath.MQuaternion {
-	quat := mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle)
+	quat := mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle).Shorten()
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		bf := deform.NewBoneFrame(count)
@@ -660,7 +662,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 		}
 	}
 
-	return mmath.NewMQuaternionFromAxisAngles(axisVector, fX)
+	return mmath.NewMQuaternionFromAxisAngles(axisVector, fX).Shorten()
 }
 
 func (bfs *BoneFrames) calcBoneMatrixes(
@@ -669,6 +671,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 	targetBoneNames map[string]int,
 	targetBoneIndexes map[int]string,
 	positions, rotations, scales []*mmath.MMat4,
+	quatsWithoutEffect []*mmath.MQuaternion,
 ) *deform.BoneDeltas {
 	matrixes := make([]*mmath.MMat4, 0, len(targetBoneIndexes))
 	resultMatrixes := make([]*mmath.MMat4, 0, len(targetBoneIndexes))
@@ -751,6 +754,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 			localMatrix,                // ローカル行列はそのまま
 			positions[i].Translation(), // 移動
 			rotations[i].Quaternion(),  // 回転
+			quatsWithoutEffect[i],      // 回転(付与親なし)
 			scales[i].Scaling(),        // 拡大率
 			matrixes[i],                // ボーン変形行列
 		))
@@ -966,7 +970,7 @@ func (bfs *BoneFrames) getRotation(
 		rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
 	}
 
-	return rotWithEffect, rot
+	return rotWithEffect.Shorten(), rot.Shorten()
 }
 
 // 付与親を加味した回転角度
@@ -994,16 +998,7 @@ func (bfs *BoneFrames) getRotationWithEffect(
 	effectBone := model.Bones.GetItem(bone.EffectIndex)
 	rotWithEffect, _ := bfs.getRotation(frame, effectBone.Name, model, isCalcMorph, loop+1)
 
-	if bone.EffectFactor >= 0 {
-		// 正の付与親
-		effectQ := rotWithEffect.MulFactor(bone.EffectFactor)
-		return effectQ
-	} else {
-		// 負の付与親の場合、逆回転
-		effectQ := rotWithEffect.MulFactor(-bone.EffectFactor)
-		effectQ.Invert()
-		return effectQ
-	}
+	return rotWithEffect.MulScalar(bone.EffectFactor).Shorten()
 }
 
 // 該当キーフレにおけるボーンの拡大率
