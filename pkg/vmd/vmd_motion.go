@@ -82,8 +82,8 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 	m.IkFrames.Append(ikf)
 }
 
-func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
-	vds := &VmdDeltas{}
+func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *delta.VmdDeltas {
+	vds := &delta.VmdDeltas{}
 
 	vds.Morphs = m.AnimateMorph(fno, model, nil)
 
