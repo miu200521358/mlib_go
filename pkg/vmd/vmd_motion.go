@@ -6,6 +6,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+	"github.com/miu200521358/mlib_go/pkg/vmd/delta"
 )
 
 type VmdMotion struct {
@@ -52,16 +53,16 @@ func (m *VmdMotion) GetMaxFrame() float32 {
 	return max(m.BoneFrames.GetMaxFrame(), m.MorphFrames.GetMaxFrame())
 }
 
-func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {
+func (m *VmdMotion) AppendBoneFrame(boneName string, bf *delta.BoneFrame) {
 	m.BoneFrames.GetItem(boneName).Append(bf)
 }
 
-func (m *VmdMotion) AppendRegisteredBoneFrame(boneName string, bf *BoneFrame) {
+func (m *VmdMotion) AppendRegisteredBoneFrame(boneName string, bf *delta.BoneFrame) {
 	bf.Registered = true
 	m.BoneFrames.GetItem(boneName).Append(bf)
 }
 
-func (m *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame) {
+func (m *VmdMotion) AppendMorphFrame(morphName string, mf *delta.MorphFrame) {
 	m.MorphFrames.GetItem(morphName).Append(mf)
 }
 
@@ -116,7 +117,7 @@ func (m *VmdMotion) AnimateMorph(
 	frame float32,
 	model *pmx.PmxModel,
 	morphNames []string,
-) *MorphDeltas {
+) *delta.MorphDeltas {
 	if morphNames == nil {
 		morphNames = make([]string, 0)
 	}
@@ -137,7 +138,7 @@ func (m *VmdMotion) AnimateBone(
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk bool,
-) *BoneDeltas {
+) *delta.BoneDeltas {
 	return m.AnimateBoneWithMorphs(frame, model, boneNames, isCalcIk, false)
 }
 
@@ -147,7 +148,7 @@ func (m *VmdMotion) AnimateBoneWithMorphs(
 	boneNames []string,
 	isCalcIk bool,
 	isCalcMorph bool,
-) *BoneDeltas {
+) *delta.BoneDeltas {
 	// ボーン変形行列操作
 	// IKリンクボーンの回転量を初期化
 	for _, bnfs := range m.BoneFrames.Data {

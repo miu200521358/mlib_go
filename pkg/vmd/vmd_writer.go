@@ -12,7 +12,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
-
 )
 
 type VmdWriter struct {
@@ -102,7 +101,7 @@ func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
 				binary.Write(fout, binary.LittleEndian, float32(v.GetZ()))
 				binary.Write(fout, binary.LittleEndian, float32(v.GetW()))
 
-				curves := make([]byte, len(bf.Curves.values))
+				curves := make([]byte, len(bf.Curves.Values))
 				for i, x := range bf.Curves.Merge() {
 					curves[i] = byte(math.Min(255, math.Max(0, float64(x))))
 				}

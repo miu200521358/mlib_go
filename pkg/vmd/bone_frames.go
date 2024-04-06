@@ -13,6 +13,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+	"github.com/miu200521358/mlib_go/pkg/vmd/delta"
 )
 
 type BoneFrames struct {
@@ -100,7 +101,7 @@ func (bfs *BoneFrames) Animate(
 	boneNames []string,
 	isCalcIk bool,
 	isCalcMorph bool,
-) *BoneDeltas {
+) *delta.BoneDeltas {
 	// 処理対象ボーン一覧取得
 	targetBoneNames, targetBoneIndexes := bfs.getAnimatedBoneNames(model, boneNames)
 
@@ -273,7 +274,7 @@ ikLoop:
 			}
 
 			// 位置の差がほとんどない場合、終了
-			if ikGlobalPosition.Distance(effectorGlobalPosition) < 1e-5 {
+			if ikGlobalPosition.Distance(effectorGlobalPosition) < 1e-6 {
 				fmt.Fprintf(ikFile,
 					"[%.2f][%03d][%s][%05.0f][01] ○グローバル差微少: %0.6f\n",
 					frame, loop, linkBone.Name, count-1, ikGlobalPosition.Distance(effectorGlobalPosition))
@@ -296,14 +297,14 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				{
-					bf := NewBoneFrame(count)
+					bf := delta.NewBoneFrame(count)
 					bf.Position = ikMatrixes.GetItem(ikBone.Name, frame).FramePosition
 					bf.Rotation.SetQuaternion(ikMatrixes.GetItem(ikBone.Name, frame).FrameRotation)
 					ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
 					count++
 				}
 				{
-					bf := NewBoneFrame(count)
+					bf := delta.NewBoneFrame(count)
 					bf.Position = linkMatrixes.GetItem(linkBone.Name, frame).FramePosition
 					bf.Rotation.SetQuaternion(linkMatrixes.GetItem(linkBone.Name, frame).FrameRotation)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
@@ -334,7 +335,7 @@ ikLoop:
 			}
 
 			// 角度がほとんどない場合、終了
-			if linkAngle < 1e-4 {
+			if linkAngle < 1e-6 {
 				fmt.Fprintf(ikFile,
 					"[%.2f][%03d][%s][%05.0f][01] ○回転角度差微少: %0.6f\n",
 					frame, loop, linkBone.Name, count-1, linkAngle)
@@ -359,7 +360,7 @@ ikLoop:
 			linkQuat := quats[linkIndex]
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				bf := NewBoneFrame(count)
+				bf := delta.NewBoneFrame(count)
 				bf.Rotation.SetQuaternion(linkQuat)
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 				count++
@@ -420,7 +421,7 @@ ikLoop:
 				}
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					bf := NewBoneFrame(count)
+					bf := delta.NewBoneFrame(count)
 					bf.Rotation.SetQuaternion(totalActualIkQuat)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
@@ -438,7 +439,7 @@ ikLoop:
 					quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
 
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-						bf := NewBoneFrame(count)
+						bf := delta.NewBoneFrame(count)
 						bf.Rotation.SetQuaternion(quat)
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 						count++
@@ -455,7 +456,7 @@ ikLoop:
 					totalIkQuat := linkQuat.Muled(quat)
 
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-						bf := NewBoneFrame(count)
+						bf := delta.NewBoneFrame(count)
 						bf.Rotation.SetQuaternion(totalIkQuat)
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 						count++
@@ -483,7 +484,7 @@ ikLoop:
 				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					bf := NewBoneFrame(count)
+					bf := delta.NewBoneFrame(count)
 					bf.Rotation.SetQuaternion(correctIkQuat)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
@@ -499,7 +500,7 @@ ikLoop:
 				totalActualIkQuat = linkQuat.Muled(correctIkQuat)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					bf := NewBoneFrame(count)
+					bf := delta.NewBoneFrame(count)
 					bf.Rotation.SetQuaternion(totalActualIkQuat)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
@@ -517,7 +518,7 @@ ikLoop:
 				totalActualIkQuat = totalActualIkQuat.ToFixedAxisRotation(linkBone.NormalizedFixedAxis)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					bf := NewBoneFrame(count)
+					bf := delta.NewBoneFrame(count)
 					bf.Rotation.SetQuaternion(totalActualIkQuat)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
@@ -531,7 +532,7 @@ ikLoop:
 			}
 
 			// 前回（既存）とほぼ同じ回転量の場合、中断FLGを立てる
-			if 1-quats[linkIndex].Dot(totalActualIkQuat) < 1e-4 {
+			if 1-quats[linkIndex].Dot(totalActualIkQuat) < 1e-6 {
 				fmt.Fprintf(ikFile,
 					"[%.2f][%03d][%s][%05.0f][15] ○前回差分微少: %0.6f 前回: %s 今回: %s\n",
 					frame, loop, linkBone.Name, count-1, 1-quats[linkIndex].Dot(totalActualIkQuat),
@@ -545,7 +546,7 @@ ikLoop:
 			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				bf := NewBoneFrame(count)
+				bf := delta.NewBoneFrame(count)
 				bf.Rotation.SetQuaternion(totalActualIkQuat)
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 				count++
@@ -596,7 +597,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	quat := mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle)
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-		bf := NewBoneFrame(count)
+		bf := delta.NewBoneFrame(count)
 		bf.Rotation.SetQuaternion(quat)
 		ikMotion.AppendRegisteredBoneFrame(linkBoneName, bf)
 		count++
@@ -611,7 +612,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	totalIkQuat := linkQuat.Muled(quat)
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-		bf := NewBoneFrame(count)
+		bf := delta.NewBoneFrame(count)
 		bf.Rotation.SetQuaternion(totalIkQuat)
 		ikMotion.AppendRegisteredBoneFrame(linkBoneName, bf)
 		count++
@@ -687,7 +688,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 	targetBoneNames map[string]int,
 	targetBoneIndexes map[int]string,
 	positions, rotations, scales []*mmath.MMat4,
-) *BoneDeltas {
+) *delta.BoneDeltas {
 	matrixes := make([]*mmath.MMat4, 0, len(targetBoneIndexes))
 	resultMatrixes := make([]*mmath.MMat4, 0, len(targetBoneIndexes))
 	boneCount := len(targetBoneNames)
@@ -726,7 +727,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 	}
 	wg1.Wait()
 
-	boneDeltas := NewBoneDeltas()
+	boneDeltas := delta.NewBoneDeltas()
 
 	var wg2 sync.WaitGroup
 	// ボーンを一定件数ごとに並列処理（件数は変数保持）
@@ -762,7 +763,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 		bone := model.Bones.GetItemByName(targetBoneIndexes[i])
 		localMatrix := resultMatrixes[i]
 		// 初期位置行列を掛けてグローバル行列を作成
-		boneDeltas.SetItem(bone.Name, frame, NewBoneDelta(
+		boneDeltas.SetItem(bone.Name, frame, delta.NewBoneDelta(
 			bone.Name,
 			frame,
 			localMatrix.Muled(bone.Position.ToMat4()), // グローバル行列

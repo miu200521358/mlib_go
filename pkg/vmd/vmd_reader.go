@@ -7,6 +7,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
+	"github.com/miu200521358/mlib_go/pkg/vmd/delta"
 )
 
 // https://hariganep.seesaa.net/article/201103article_1.html
@@ -179,7 +180,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		v := NewBoneFrame(0)
+		v := delta.NewBoneFrame(0)
 		v.Registered = true
 		v.Read = true
 
@@ -219,7 +220,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 			mlog.E("[%d] readBones.Curves error: %v", i, err)
 			return err
 		}
-		v.Curves = NewBoneCurvesByValues(curves)
+		v.Curves = delta.NewBoneCurvesByValues(curves)
 
 		if !motion.BoneFrames.Contains(boneName) {
 			motion.BoneFrames.Append(NewBoneNameFrames(boneName))
@@ -239,7 +240,7 @@ func (r *VmdMotionReader) readMorphs(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		v := NewMorphFrame(0)
+		v := delta.NewMorphFrame(0)
 		v.Registered = true
 		v.Read = true
 

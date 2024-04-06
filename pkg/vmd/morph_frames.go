@@ -1,6 +1,9 @@
 package vmd
 
-import "github.com/miu200521358/mlib_go/pkg/pmx"
+import (
+	"github.com/miu200521358/mlib_go/pkg/pmx"
+	"github.com/miu200521358/mlib_go/pkg/vmd/delta"
+)
 
 type MorphFrames struct {
 	Data map[string]*MorphNameFrames
@@ -32,8 +35,8 @@ func (mfs *MorphFrames) Animate(
 	frame float32,
 	model *pmx.PmxModel,
 	morphNames []string,
-) *MorphDeltas {
-	mds := NewMorphDeltas(len(model.Vertices.Data), len(model.Bones.Data), model.Materials)
+) *delta.MorphDeltas {
+	mds := delta.NewMorphDeltas(len(model.Vertices.Data), len(model.Bones.Data), model.Materials)
 	for _, morphName := range morphNames {
 		if !mfs.Contains(morphName) || !model.Morphs.ContainsByName(morphName) {
 			continue

@@ -1,16 +1,19 @@
 package vmd
 
-import "github.com/miu200521358/mlib_go/pkg/mmath"
+import (
+	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/vmd/delta"
+)
 
 type LightFrame struct {
-	*BaseFrame              // キーフレ
-	Position   *mmath.MVec3 // 位置
-	Color      *mmath.MVec3 // 色
+	*delta.BaseFrame              // キーフレ
+	Position         *mmath.MVec3 // 位置
+	Color            *mmath.MVec3 // 色
 }
 
 func NewLightFrame(index float32) *LightFrame {
 	return &LightFrame{
-		BaseFrame: NewVmdBaseFrame(index),
+		BaseFrame: delta.NewVmdBaseFrame(index),
 		Position:  mmath.NewMVec3(),
 		Color:     mmath.NewMVec3(),
 	}

@@ -1,16 +1,19 @@
 package vmd
 
-import "github.com/miu200521358/mlib_go/pkg/mcore"
+import (
+	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/vmd/delta"
+)
 
 type IkEnabledFrame struct {
-	*BaseFrame        // キーフレ
-	BoneName   string // IKボーン名
-	Enabled    bool   // IKON/OFF
+	*delta.BaseFrame        // キーフレ
+	BoneName         string // IKボーン名
+	Enabled          bool   // IKON/OFF
 }
 
 func NewIkEnableFrame(index float32) *IkEnabledFrame {
 	return &IkEnabledFrame{
-		BaseFrame: NewVmdBaseFrame(index),
+		BaseFrame: delta.NewVmdBaseFrame(index),
 		BoneName:  "",
 		Enabled:   true,
 	}
@@ -25,14 +28,14 @@ func (kf *IkEnabledFrame) Copy() *IkEnabledFrame {
 }
 
 type IkFrame struct {
-	*BaseFrame                   // キーフレ
-	Visible    bool              // 表示ON/OFF
-	IkList     []*IkEnabledFrame // IKリスト
+	*delta.BaseFrame                   // キーフレ
+	Visible          bool              // 表示ON/OFF
+	IkList           []*IkEnabledFrame // IKリスト
 }
 
 func NewIkFrame(index float32) *IkFrame {
 	return &IkFrame{
-		BaseFrame: NewVmdBaseFrame(index),
+		BaseFrame: delta.NewVmdBaseFrame(index),
 		Visible:   true,
 		IkList:    []*IkEnabledFrame{},
 	}

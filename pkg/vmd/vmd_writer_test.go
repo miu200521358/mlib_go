@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/vmd/delta"
 )
 
 func TestVmdWriter_Write1(t *testing.T) {
@@ -13,7 +14,7 @@ func TestVmdWriter_Write1(t *testing.T) {
 	motion := NewVmdMotion(path)
 	motion.SetName("Null_00")
 
-	bf := NewBoneFrame(0)
+	bf := delta.NewBoneFrame(0)
 	bf.Position = &mmath.MVec3{1, 2, 3}
 	bf.Rotation.SetDegrees(&mmath.MVec3{10, 20, 30})
 	bf.Registered = true

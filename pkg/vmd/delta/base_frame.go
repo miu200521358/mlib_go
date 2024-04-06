@@ -1,4 +1,4 @@
-package vmd
+package delta
 
 import "github.com/miu200521358/mlib_go/pkg/mcore"
 

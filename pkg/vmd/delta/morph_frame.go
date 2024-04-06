@@ -1,4 +1,4 @@
-package vmd
+package delta
 
 type MorphFrame struct {
 	*BaseFrame         // キーフレ

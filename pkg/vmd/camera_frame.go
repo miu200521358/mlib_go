@@ -1,9 +1,12 @@
 package vmd
 
-import "github.com/miu200521358/mlib_go/pkg/mmath"
+import (
+	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/vmd/delta"
+)
 
 type CameraFrame struct {
-	*BaseFrame                        // キーフレ
+	*delta.BaseFrame                  // キーフレ
 	Position         *mmath.MVec3     // 位置
 	Rotation         *mmath.MRotation // 回転
 	Distance         float64          // 距離
@@ -14,7 +17,7 @@ type CameraFrame struct {
 
 func NewCameraFrame(index float32) *CameraFrame {
 	return &CameraFrame{
-		BaseFrame:        NewVmdBaseFrame(index),
+		BaseFrame:        delta.NewVmdBaseFrame(index),
 		Position:         mmath.NewMVec3(),
 		Rotation:         mmath.NewRotationModelByDegrees(&mmath.MVec3{0, 0, 0}),
 		Distance:         0.0,

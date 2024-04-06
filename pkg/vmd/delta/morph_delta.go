@@ -1,9 +1,8 @@
-package vmd
+package delta
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 type VertexMorphDelta struct {

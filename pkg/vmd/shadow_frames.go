@@ -6,7 +6,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
+	"github.com/miu200521358/mlib_go/pkg/vmd/delta"
 )
 
 type ShadowFrames struct {
@@ -54,7 +54,7 @@ func (sfs *ShadowFrames) GetItem(index float32) *ShadowFrame {
 	if prevIndex == nextIndex && slices.Contains(sfs.Indexes, nextIndex) {
 		nextSf := sfs.Data[nextIndex]
 		copied := &ShadowFrame{
-			BaseFrame: NewVmdBaseFrame(index),
+			BaseFrame: delta.NewVmdBaseFrame(index),
 			Distance:  nextSf.Distance,
 		}
 		return copied
