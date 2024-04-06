@@ -14,8 +14,8 @@ with open(f'{workspace_folder}/cmd/resources/app_config.json', 'r', encoding='ut
 # Convert JSON data to dictionary
 config_dict = dict(config_data)
 
-app_name = config_dict.get('AppName')
-app_version = config_dict.get('AppVersion')
+app_name = config_dict.get('Name')
+app_version = config_dict.get('Version')
 
 print(f"app_name: {app_name}")
 print(f"app_version: {app_version}")
