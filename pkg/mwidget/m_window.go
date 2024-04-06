@@ -15,18 +15,19 @@ import (
 
 type MWindow struct {
 	*walk.MainWindow
-	TabWidget             *MTabWidget  // タブウィジェット
-	isHorizontal          bool         // 横並びであるか否か
-	GlWindows             []*GlWindow  // 描画ウィンドウ
-	ConsoleView           *ConsoleView // コンソールビュー
-	frameDropAction       *walk.Action // フレームドロップON/OFF
-	physicsAction         *walk.Action // 物理ON/OFF
-	physicsResetAction    *walk.Action // 物理リセット
-	boneDebugAction       *walk.Action // ボーンデバッグ表示
-	rigidBodyDebugAction  *walk.Action // 剛体デバッグ表示
-	jointDebugAction      *walk.Action // ジョイントデバッグ表示
-	logLevelDebugAction   *walk.Action // デバッグメッセージ表示
-	logLevelVerboseAction *walk.Action // 冗長メッセージ表示
+	TabWidget               *MTabWidget  // タブウィジェット
+	isHorizontal            bool         // 横並びであるか否か
+	GlWindows               []*GlWindow  // 描画ウィンドウ
+	ConsoleView             *ConsoleView // コンソールビュー
+	frameDropAction         *walk.Action // フレームドロップON/OFF
+	physicsAction           *walk.Action // 物理ON/OFF
+	physicsResetAction      *walk.Action // 物理リセット
+	boneDebugAction         *walk.Action // ボーンデバッグ表示
+	rigidBodyDebugAction    *walk.Action // 剛体デバッグ表示
+	jointDebugAction        *walk.Action // ジョイントデバッグ表示
+	logLevelDebugAction     *walk.Action // デバッグメッセージ表示
+	logLevelVerboseAction   *walk.Action // 冗長メッセージ表示
+	logLevelIkVerboseAction *walk.Action // IK冗長メッセージ表示
 }
 
 func NewMWindow(
@@ -44,9 +45,45 @@ func NewMWindow(
 		GlWindows:    []*GlWindow{},
 	}
 
+	logMenuItems := []declarative.MenuItem{
+		declarative.Action{
+			Text: mi18n.T("&使い方"),
+			OnTriggered: func() {
+				mlog.ILT(mi18n.T("メイン画面の使い方"), mi18n.T("メイン画面の使い方メッセージ"))
+			},
+		},
+		declarative.Separator{},
+		declarative.Action{
+			Text:        mi18n.T("&デバッグログ表示"),
+			Checkable:   true,
+			OnTriggered: mainWindow.logLevelTriggered,
+			AssignTo:    &mainWindow.logLevelDebugAction,
+		},
+	}
+
+	if appConfig.Env == "dev" {
+		// 開発時のみ冗長ログ表示を追加
+		logMenuItems = append(logMenuItems,
+			declarative.Separator{})
+		logMenuItems = append(logMenuItems,
+			declarative.Action{
+				Text:        mi18n.T("&冗長ログ表示"),
+				Checkable:   true,
+				OnTriggered: mainWindow.logLevelTriggered,
+				AssignTo:    &mainWindow.logLevelVerboseAction,
+			})
+		logMenuItems = append(logMenuItems,
+			declarative.Action{
+				Text:        mi18n.T("&IK冗長ログ表示"),
+				Checkable:   true,
+				OnTriggered: mainWindow.logLevelTriggered,
+				AssignTo:    &mainWindow.logLevelIkVerboseAction,
+			})
+	}
+
 	if err := (declarative.MainWindow{
 		AssignTo: &mainWindow.MainWindow,
-		Title:    fmt.Sprintf("%s %s", appConfig.AppName, appConfig.AppVersion),
+		Title:    fmt.Sprintf("%s %s", appConfig.Name, appConfig.Version),
 		Size:     getWindowSize(width, height),
 		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear, MarginsZero: true, SpacingZero: true},
 		MenuItems: []declarative.MenuItem{
@@ -101,28 +138,8 @@ func NewMWindow(
 				},
 			},
 			declarative.Menu{
-				Text: mi18n.T("&メイン画面"),
-				Items: []declarative.MenuItem{
-					declarative.Action{
-						Text:        mi18n.T("&デバッグログ表示"),
-						Checkable:   true,
-						OnTriggered: mainWindow.logLevelTriggered,
-						AssignTo:    &mainWindow.logLevelDebugAction,
-					},
-					declarative.Action{
-						Text:        mi18n.T("&冗長ログ表示"),
-						Checkable:   true,
-						OnTriggered: mainWindow.logLevelTriggered,
-						AssignTo:    &mainWindow.logLevelVerboseAction,
-					},
-					declarative.Separator{},
-					declarative.Action{
-						Text: mi18n.T("&使い方"),
-						OnTriggered: func() {
-							mlog.ILT(mi18n.T("メイン画面の使い方"), mi18n.T("メイン画面の使い方メッセージ"))
-						},
-					},
-				},
+				Text:  mi18n.T("&メイン画面"),
+				Items: logMenuItems,
 			},
 			declarative.Menu{
 				Text:  mi18n.T("&使い方"),
@@ -190,12 +207,15 @@ func NewMWindow(
 }
 
 func (w *MWindow) logLevelTriggered() {
-	mlog.SetLevel(20)
+	mlog.SetLevel(mlog.INFO)
 	if w.logLevelDebugAction.Checked() {
-		mlog.SetLevel(10)
+		mlog.SetLevel(mlog.DEBUG)
+	}
+	if w.logLevelIkVerboseAction.Checked() {
+		mlog.SetLevel(mlog.IK_VERBOSE)
 	}
 	if w.logLevelVerboseAction.Checked() {
-		mlog.SetLevel(0)
+		mlog.SetLevel(mlog.VERBOSE)
 	}
 }
 

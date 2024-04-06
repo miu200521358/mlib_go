@@ -1,4 +1,5 @@
 {
-    "AppName": "MlibSample",
-    "AppVersion": "1.0.0_beta_29"
+    "Name": "MlibSample",
+    "Version": "1.0.0_beta_30",
+    "Env": "dev"
 }

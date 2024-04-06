@@ -4,16 +4,30 @@ import "log"
 
 var level = 20
 
+const (
+	VERBOSE    = 0
+	IK_VERBOSE = 1
+	DEBUG      = 10
+	INFO       = 20
+	WARN       = 30
+	ERROR      = 40
+	FATAL      = 50
+)
+
 func init() {
 	log.SetFlags(0)
 }
 
 func IsVerbose() bool {
-	return level <= 0
+	return level < DEBUG
+}
+
+func IsIkVerbose() bool {
+	return level == IK_VERBOSE
 }
 
 func IsDebug() bool {
-	return level <= 10
+	return level < INFO
 }
 
 // SetLevel ログレベルの設定
@@ -23,14 +37,14 @@ func SetLevel(l int) {
 
 // Verbose 冗長ログ
 func V(message string, param ...interface{}) {
-	if level <= 0 {
+	if level < DEBUG {
 		log.Printf(message, param...)
 	}
 }
 
 // Debug デバッグログ
 func D(message string, param ...interface{}) {
-	if level <= 10 {
+	if level < INFO {
 		log.Printf(message, param...)
 	}
 }

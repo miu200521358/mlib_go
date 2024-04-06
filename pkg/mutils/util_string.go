@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"slices"
 	"strings"
-
 )
 
 func JoinSlice(slice []interface{}) string {
