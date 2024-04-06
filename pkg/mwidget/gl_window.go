@@ -13,7 +13,6 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/deform"
-	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
@@ -21,7 +20,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 type ModelSet struct {
@@ -37,29 +35,8 @@ func (ms *ModelSet) Draw(
 	isBoneDebug bool,
 	enablePhysics bool,
 ) {
-	boneMatrixes := make([]*mgl32.Mat4, len(ms.Model.Bones.NameIndexes))
-	globalMatrixes := make([]*mmath.MMat4, len(ms.Model.Bones.NameIndexes))
-	transforms := make([]*mbt.BtTransform, len(ms.Model.Bones.NameIndexes))
-	vertexDeltas := make([][]float32, len(ms.Model.Vertices.Data))
-	materialDeltas := make([]*pmx.Material, len(ms.Model.Materials.Data))
 	deltas := ms.Motion.Animate(frame, ms.Model)
-	for i, bone := range ms.Model.Bones.GetSortedData() {
-		mat := deltas.Bones.GetItem(bone.Name, frame).LocalMatrix.GL()
-		boneMatrixes[i] = mat
-		globalMatrixes[i] = deltas.Bones.GetItem(bone.Name, frame).GlobalMatrix
-		t := mbt.NewBtTransform()
-		t.SetFromOpenGLMatrix(&mat[0])
-		transforms[i] = &t
-	}
-	// TODO: 並列化
-	for i, vd := range deltas.Morphs.Vertices.Data {
-		vertexDeltas[i] = vd.GL()
-	}
-	for i, md := range deltas.Morphs.Materials.Data {
-		materialDeltas[i] = md.Material
-	}
-	deform.Draw(ms.Model, shader, boneMatrixes, globalMatrixes, transforms, vertexDeltas, materialDeltas,
-		windowIndex, frame, elapsed, isBoneDebug, enablePhysics)
+	deform.Draw(ms.Model, shader, deltas, windowIndex, frame, elapsed, isBoneDebug, enablePhysics)
 }
 
 // 直角の定数値

@@ -7,23 +7,39 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 func Draw(
 	model *pmx.PmxModel,
 	shader *mgl.MShader,
-	boneMatrixes []*mgl32.Mat4,
-	boneGlobalMatrixes []*mmath.MMat4,
-	boneTransforms []*mbt.BtTransform,
-	vertexDeltas [][]float32,
-	materialDeltas []*pmx.Material,
+	deltas *VmdDeltas,
 	windowIndex int,
 	frame float32,
 	elapsed float32,
 	isBoneDebug bool,
 	enablePhysics bool,
 ) {
+	boneMatrixes := make([]*mgl32.Mat4, len(model.Bones.NameIndexes))
+	globalMatrixes := make([]*mmath.MMat4, len(model.Bones.NameIndexes))
+	boneTransforms := make([]*mbt.BtTransform, len(model.Bones.NameIndexes))
+	vertexDeltas := make([][]float32, len(model.Vertices.Data))
+	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))
+	for i, bone := range model.Bones.GetSortedData() {
+		mat := deltas.Bones.GetItem(bone.Name, frame).LocalMatrix.GL()
+		boneMatrixes[i] = mat
+		globalMatrixes[i] = deltas.Bones.GetItem(bone.Name, frame).GlobalMatrix
+		t := mbt.NewBtTransform()
+		t.SetFromOpenGLMatrix(&mat[0])
+		boneTransforms[i] = &t
+	}
+	// TODO: 並列化
+	for i, vd := range deltas.Morphs.Vertices.Data {
+		vertexDeltas[i] = vd.GL()
+	}
+	for i, md := range deltas.Morphs.Materials.Data {
+		materialDeltas[i] = md.Material
+	}
+
 	updatePhysics(model, boneMatrixes, boneTransforms, frame, elapsed, enablePhysics)
 	model.Meshes.Draw(shader, boneMatrixes, vertexDeltas, materialDeltas, windowIndex)
 
@@ -32,7 +48,7 @@ func Draw(
 
 	// ボーンデバッグ表示
 	if isBoneDebug {
-		model.Bones.Draw(shader, boneGlobalMatrixes, windowIndex)
+		model.Bones.Draw(shader, globalMatrixes, windowIndex)
 	}
 }
 
