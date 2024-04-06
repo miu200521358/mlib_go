@@ -275,12 +275,12 @@ ikLoop:
 			// 位置の差がほとんどない場合、終了
 			if ikGlobalPosition.Distance(effectorGlobalPosition) < 1e-5 {
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][01] ○グローバル差微少: %0.6f",
+					"[%.2f][%03d][%s][%05.0f][01] ○グローバル差微少: %0.6f\n",
 					frame, loop, linkBone.Name, count-1, ikGlobalPosition.Distance(effectorGlobalPosition))
 				break ikLoop
 			} else {
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][01] ×グローバル差あり: %0.6f",
+					"[%.2f][%03d][%s][%05.0f][01] ×グローバル差あり: %0.6f\n",
 					frame, loop, linkBone.Name, count-1, ikGlobalPosition.Distance(effectorGlobalPosition))
 			}
 
@@ -334,14 +334,14 @@ ikLoop:
 			}
 
 			// 角度がほとんどない場合、終了
-			if linkAngle < 1e-5 {
+			if linkAngle < 1e-4 {
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][01] ○回転角度差微少: %0.6f",
+					"[%.2f][%03d][%s][%05.0f][01] ○回転角度差微少: %0.6f\n",
 					frame, loop, linkBone.Name, count-1, linkAngle)
 				break ikLoop
 			} else {
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][01] ×回転角度差あり: %0.6f",
+					"[%.2f][%03d][%s][%05.0f][01] ×回転角度差あり: %0.6f\n",
 					frame, loop, linkBone.Name, count-1, linkAngle)
 			}
 
@@ -531,15 +531,17 @@ ikLoop:
 			}
 
 			// 前回（既存）とほぼ同じ回転量の場合、中断FLGを立てる
-			if 1-quats[linkIndex].Dot(totalActualIkQuat) < 1e-5 {
+			if 1-quats[linkIndex].Dot(totalActualIkQuat) < 1e-4 {
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][15] ○前回差分微少: %0.6f",
-					frame, loop, linkBone.Name, count-1, 1-quats[linkIndex].Dot(totalActualIkQuat))
+					"[%.2f][%03d][%s][%05.0f][15] ○前回差分微少: %0.6f 前回: %s 今回: %s\n",
+					frame, loop, linkBone.Name, count-1, 1-quats[linkIndex].Dot(totalActualIkQuat),
+					quats[linkIndex].ToDegrees().String(), totalActualIkQuat.ToDegrees().String())
 				aborts[lidx] = true
 			} else {
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][15] ×前回差分あり: %0.6f",
-					frame, loop, linkBone.Name, count-1, 1-quats[linkIndex].Dot(totalActualIkQuat))
+					"[%.2f][%03d][%s][%05.0f][15] ×前回差分あり: %0.6f 前回: %s 今回: %s\n",
+					frame, loop, linkBone.Name, count-1, 1-quats[linkIndex].Dot(totalActualIkQuat),
+					quats[linkIndex].ToDegrees().String(), totalActualIkQuat.ToDegrees().String())
 			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
