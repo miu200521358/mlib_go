@@ -12,6 +12,7 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/walk/pkg/walk"
 
+	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
@@ -20,6 +21,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
+
 )
 
 type ModelSet struct {
@@ -56,7 +58,7 @@ func (ms *ModelSet) Draw(
 	for i, md := range deltas.Morphs.Materials.Data {
 		materialDeltas[i] = md.Material
 	}
-	ms.Model.Draw(shader, boneMatrixes, globalMatrixes, transforms, vertexDeltas, materialDeltas,
+	deform.Draw(ms.Model, shader, boneMatrixes, globalMatrixes, transforms, vertexDeltas, materialDeltas,
 		windowIndex, frame, elapsed, isBoneDebug, enablePhysics)
 }
 

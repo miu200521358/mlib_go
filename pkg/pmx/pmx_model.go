@@ -3,15 +3,10 @@ package pmx
 import (
 	"embed"
 
-	"github.com/go-gl/mathgl/mgl32"
 	"github.com/jinzhu/copier"
 
-	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
-	"github.com/miu200521358/mlib_go/pkg/mgl"
-	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-
 )
 
 type PmxModel struct {
@@ -86,58 +81,6 @@ func (pm *PmxModel) InitPhysics(physics *mphysics.MPhysics) {
 	pm.Physics = physics
 	pm.RigidBodies.initPhysics(physics)
 	pm.Joints.initPhysics(physics, pm.RigidBodies)
-}
-
-func (pm *PmxModel) Draw(
-	shader *mgl.MShader,
-	boneMatrixes []*mgl32.Mat4,
-	boneGlobalMatrixes []*mmath.MMat4,
-	boneTransforms []*mbt.BtTransform,
-	vertexDeltas [][]float32,
-	materialDeltas []*Material,
-	windowIndex int,
-	frame float32,
-	elapsed float32,
-	isBoneDebug bool,
-	enablePhysics bool,
-) {
-	pm.updatePhysics(boneMatrixes, boneTransforms, frame, elapsed, enablePhysics)
-	pm.Meshes.Draw(shader, boneMatrixes, vertexDeltas, materialDeltas, windowIndex)
-
-	// 物理デバッグ表示
-	pm.Physics.DebugDrawWorld()
-
-	// ボーンデバッグ表示
-	if isBoneDebug {
-		pm.Bones.Draw(shader, boneGlobalMatrixes, windowIndex)
-	}
-}
-
-func (pm *PmxModel) updatePhysics(
-	boneMatrixes []*mgl32.Mat4,
-	boneTransforms []*mbt.BtTransform,
-	frame float32,
-	elapsed float32,
-	enablePhysics bool,
-) {
-	if pm.Physics == nil {
-		return
-	}
-
-	for _, r := range pm.RigidBodies.GetSortedData() {
-		// 物理フラグが落ちている場合があるので、強制的に起こす
-		forceUpdate := r.updateFlags(enablePhysics)
-		r.updateTransform(boneTransforms, elapsed == 0.0 || !enablePhysics || forceUpdate)
-	}
-
-	if frame > pm.Physics.Spf {
-		pm.Physics.Update(elapsed)
-
-		// 剛体位置を更新
-		for _, rigidBody := range pm.RigidBodies.GetSortedData() {
-			rigidBody.updateMatrix(boneMatrixes, boneTransforms)
-		}
-	}
 }
 
 func (pm *PmxModel) SetUp() {

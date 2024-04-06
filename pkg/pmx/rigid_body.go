@@ -157,7 +157,7 @@ func (r *RigidBody) Copy() mcore.IndexNameModelInterface {
 // 		r.BtRigidBody.GetActivationState() == mbt.ISLAND_SLEEPING
 // }
 
-func (r *RigidBody) updateFlags(enablePhysics bool) bool {
+func (r *RigidBody) UpdateFlags(enablePhysics bool) bool {
 	if r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
 		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時
 		// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
@@ -284,7 +284,7 @@ func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 	r.BtRigidBody.SetUserIndex(r.Index)
 	// r.BtRigidBody.SetSleepingThresholds(0.1, (180.0 * 0.1 / math.Pi))
 
-	r.updateFlags(true)
+	r.UpdateFlags(true)
 
 	// mlog.V("name: %s, group: %d, mask: %d\n", r.Name, r.CollisionGroup, r.CollisionGroupMaskValue)
 
@@ -293,7 +293,7 @@ func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 	modelPhysics.AddRigidBody(r.BtRigidBody, 1<<r.CollisionGroup, r.CollisionGroupMaskValue)
 }
 
-func (r *RigidBody) updateTransform(
+func (r *RigidBody) UpdateTransform(
 	boneTransforms []*mbt.BtTransform,
 	isForce bool,
 ) {
@@ -329,7 +329,7 @@ func (r *RigidBody) updateTransform(
 	motionState.SetWorldTransform(rigidBodyTransform)
 }
 
-func (r *RigidBody) updateMatrix(
+func (r *RigidBody) UpdateMatrix(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
 ) {
