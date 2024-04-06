@@ -4,15 +4,15 @@ import (
 	"slices"
 	"sync"
 
+	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-	"github.com/miu200521358/mlib_go/pkg/vmd/delta"
 )
 
 type MorphNameFrames struct {
-	*mcore.IndexFloatModelCorrection[*delta.MorphFrame]
+	*mcore.IndexFloatModelCorrection[*deform.MorphFrame]
 	Name              string       // ボーン名
 	RegisteredIndexes []float32    // 登録対象キーフレリスト
 	lock              sync.RWMutex // マップアクセス制御用
@@ -20,7 +20,7 @@ type MorphNameFrames struct {
 
 func NewMorphNameFrames(name string) *MorphNameFrames {
 	return &MorphNameFrames{
-		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*delta.MorphFrame](),
+		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*deform.MorphFrame](),
 		Name:                      name,
 		RegisteredIndexes:         []float32{},
 	}
@@ -51,9 +51,9 @@ func (mnfs *MorphNameFrames) GetRangeIndexes(index float32) (float32, float32) {
 }
 
 // キーフレ計算結果を返す
-func (mnfs *MorphNameFrames) GetItem(index float32) *delta.MorphFrame {
+func (mnfs *MorphNameFrames) GetItem(index float32) *deform.MorphFrame {
 	if mnfs == nil {
-		return delta.NewMorphFrame(index)
+		return deform.NewMorphFrame(index)
 	}
 
 	mnfs.lock.RLock()
@@ -69,29 +69,29 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *delta.MorphFrame {
 	if prevIndex == nextIndex {
 		if slices.Contains(mnfs.Indexes, nextIndex) {
 			nextMf := mnfs.Data[nextIndex]
-			copied := &delta.MorphFrame{
-				BaseFrame: delta.NewVmdBaseFrame(index),
+			copied := &deform.MorphFrame{
+				BaseFrame: deform.NewVmdBaseFrame(index),
 				Ratio:     nextMf.Ratio,
 			}
 			return copied
 		} else {
-			return delta.NewMorphFrame(index)
+			return deform.NewMorphFrame(index)
 		}
 	}
 
-	var prevMf, nextMf *delta.MorphFrame
+	var prevMf, nextMf *deform.MorphFrame
 	if slices.Contains(mnfs.Indexes, prevIndex) {
 		prevMf = mnfs.Data[prevIndex]
 	} else {
-		prevMf = delta.NewMorphFrame(index)
+		prevMf = deform.NewMorphFrame(index)
 	}
 	if slices.Contains(mnfs.Indexes, nextIndex) {
 		nextMf = mnfs.Data[nextIndex]
 	} else {
-		nextMf = delta.NewMorphFrame(index)
+		nextMf = deform.NewMorphFrame(index)
 	}
 
-	mf := delta.NewMorphFrame(index)
+	mf := deform.NewMorphFrame(index)
 
 	ry := (index - prevIndex) / (nextIndex - prevIndex)
 	mf.Ratio = prevMf.Ratio + (nextMf.Ratio-prevMf.Ratio)*float64(ry)
@@ -100,7 +100,7 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *delta.MorphFrame {
 }
 
 // bf.Registered が true の場合、補間曲線を分割して登録する
-func (mnfs *MorphNameFrames) Append(value *delta.MorphFrame) {
+func (mnfs *MorphNameFrames) Append(value *deform.MorphFrame) {
 	mnfs.lock.Lock()
 	defer mnfs.lock.Unlock()
 
@@ -128,7 +128,7 @@ func (mnfs *MorphNameFrames) GetMaxFrame() float32 {
 func (mnfs *MorphNameFrames) AnimateVertex(
 	frame float32,
 	model *pmx.PmxModel,
-	deltas *delta.VertexMorphDeltas,
+	deltas *deform.VertexMorphDeltas,
 ) {
 	mf := mnfs.GetItem(frame)
 	if mf.Ratio == 0.0 {
@@ -148,7 +148,7 @@ func (mnfs *MorphNameFrames) AnimateVertex(
 func (mnfs *MorphNameFrames) AnimateAfterVertex(
 	frame float32,
 	model *pmx.PmxModel,
-	deltas *delta.VertexMorphDeltas,
+	deltas *deform.VertexMorphDeltas,
 ) {
 	mf := mnfs.GetItem(frame)
 	if mf.Ratio == 0.0 {
@@ -168,7 +168,7 @@ func (mnfs *MorphNameFrames) AnimateAfterVertex(
 func (mnfs *MorphNameFrames) AnimateUv(
 	frame float32,
 	model *pmx.PmxModel,
-	deltas *delta.VertexMorphDeltas,
+	deltas *deform.VertexMorphDeltas,
 ) {
 	mf := mnfs.GetItem(frame)
 	if mf.Ratio == 0.0 {
@@ -189,7 +189,7 @@ func (mnfs *MorphNameFrames) AnimateUv(
 func (mnfs *MorphNameFrames) AnimateUv1(
 	frame float32,
 	model *pmx.PmxModel,
-	deltas *delta.VertexMorphDeltas,
+	deltas *deform.VertexMorphDeltas,
 ) {
 	mf := mnfs.GetItem(frame)
 	if mf.Ratio == 0.0 {
@@ -210,7 +210,7 @@ func (mnfs *MorphNameFrames) AnimateUv1(
 func (mnfs *MorphNameFrames) AnimateBone(
 	frame float32,
 	model *pmx.PmxModel,
-	deltas *delta.BoneMorphDeltas,
+	deltas *deform.BoneMorphDeltas,
 ) {
 	mf := mnfs.GetItem(frame)
 	if mf.Ratio == 0.0 {
@@ -240,7 +240,7 @@ func (mnfs *MorphNameFrames) AnimateBone(
 func (mnfs *MorphNameFrames) AnimateMaterial(
 	frame float32,
 	model *pmx.PmxModel,
-	deltas *delta.MaterialMorphDeltas,
+	deltas *deform.MaterialMorphDeltas,
 ) {
 	mf := mnfs.GetItem(frame)
 	if mf.Ratio == 0.0 {

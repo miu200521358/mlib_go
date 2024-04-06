@@ -3,10 +3,10 @@ package vmd
 import (
 	"slices"
 
+	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-	"github.com/miu200521358/mlib_go/pkg/vmd/delta"
 )
 
 type CameraFrames struct {
@@ -54,7 +54,7 @@ func (cfs *CameraFrames) GetItem(index float32) *CameraFrame {
 	if prevIndex == nextIndex && slices.Contains(cfs.Indexes, nextIndex) {
 		nextCf := cfs.Data[nextIndex]
 		copied := &CameraFrame{
-			BaseFrame:        delta.NewVmdBaseFrame(index),
+			BaseFrame:        deform.NewVmdBaseFrame(index),
 			Position:         nextCf.Position.Copy(),
 			Rotation:         nextCf.Rotation.Copy(),
 			Distance:         nextCf.Distance,

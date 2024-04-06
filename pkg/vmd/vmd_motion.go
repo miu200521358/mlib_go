@@ -3,10 +3,10 @@ package vmd
 import (
 	"github.com/jinzhu/copier"
 
+	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-	"github.com/miu200521358/mlib_go/pkg/vmd/delta"
 )
 
 type VmdMotion struct {
@@ -53,16 +53,16 @@ func (m *VmdMotion) GetMaxFrame() float32 {
 	return max(m.BoneFrames.GetMaxFrame(), m.MorphFrames.GetMaxFrame())
 }
 
-func (m *VmdMotion) AppendBoneFrame(boneName string, bf *delta.BoneFrame) {
+func (m *VmdMotion) AppendBoneFrame(boneName string, bf *deform.BoneFrame) {
 	m.BoneFrames.GetItem(boneName).Append(bf)
 }
 
-func (m *VmdMotion) AppendRegisteredBoneFrame(boneName string, bf *delta.BoneFrame) {
+func (m *VmdMotion) AppendRegisteredBoneFrame(boneName string, bf *deform.BoneFrame) {
 	bf.Registered = true
 	m.BoneFrames.GetItem(boneName).Append(bf)
 }
 
-func (m *VmdMotion) AppendMorphFrame(morphName string, mf *delta.MorphFrame) {
+func (m *VmdMotion) AppendMorphFrame(morphName string, mf *deform.MorphFrame) {
 	m.MorphFrames.GetItem(morphName).Append(mf)
 }
 
@@ -82,8 +82,8 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 	m.IkFrames.Append(ikf)
 }
 
-func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *delta.VmdDeltas {
-	vds := &delta.VmdDeltas{}
+func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *deform.VmdDeltas {
+	vds := &deform.VmdDeltas{}
 
 	vds.Morphs = m.AnimateMorph(fno, model, nil)
 
@@ -117,7 +117,7 @@ func (m *VmdMotion) AnimateMorph(
 	frame float32,
 	model *pmx.PmxModel,
 	morphNames []string,
-) *delta.MorphDeltas {
+) *deform.MorphDeltas {
 	if morphNames == nil {
 		morphNames = make([]string, 0)
 	}
@@ -138,7 +138,7 @@ func (m *VmdMotion) AnimateBone(
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk bool,
-) *delta.BoneDeltas {
+) *deform.BoneDeltas {
 	return m.AnimateBoneWithMorphs(frame, model, boneNames, isCalcIk, false)
 }
 
@@ -148,7 +148,7 @@ func (m *VmdMotion) AnimateBoneWithMorphs(
 	boneNames []string,
 	isCalcIk bool,
 	isCalcMorph bool,
-) *delta.BoneDeltas {
+) *deform.BoneDeltas {
 	// ボーン変形行列操作
 	// IKリンクボーンの回転量を初期化
 	for _, bnfs := range m.BoneFrames.Data {

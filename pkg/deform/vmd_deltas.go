@@ -1,4 +1,4 @@
-package delta
+package deform
 
 type VmdDeltas struct {
 	Bones  *BoneDeltas

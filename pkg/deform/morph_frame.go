@@ -1,4 +1,4 @@
-package delta
+package deform
 
 type MorphFrame struct {
 	*BaseFrame         // キーフレ
