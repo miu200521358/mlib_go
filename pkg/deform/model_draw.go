@@ -40,7 +40,7 @@ func Draw(
 		materialDeltas[i] = md.Material
 	}
 
-	updatePhysics(model, boneMatrixes, boneTransforms, frame, elapsed, enablePhysics)
+	updatePhysics(model, boneMatrixes, boneTransforms, deltas, frame, elapsed, enablePhysics)
 	model.Meshes.Draw(shader, boneMatrixes, vertexDeltas, materialDeltas, windowIndex)
 
 	// 物理デバッグ表示
@@ -56,6 +56,7 @@ func updatePhysics(
 	model *pmx.PmxModel,
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
+	deltas *VmdDeltas,
 	frame float32,
 	elapsed float32,
 	enablePhysics bool,
@@ -77,5 +78,23 @@ func updatePhysics(
 		for _, rigidBody := range model.RigidBodies.GetSortedData() {
 			rigidBody.UpdateMatrix(boneMatrixes, boneTransforms)
 		}
+
+		// // 物理後ボーン位置を更新
+		// for boneIndex := range model.Bones.LayerSortedIndexes {
+		// 	bone := model.Bones.GetItem(boneIndex)
+		// 	if bone.IsAfterPhysicsDeform() && bone.ParentIndex == -1 && model.Bones.Contains(bone.ParentIndex) {
+		// 		// 物理後ボーンで親が存在している場合、親の行列を取得する
+		// 		parentMat := boneMatrixes[bone.ParentIndex]
+		// 		pos := deltas.Bones.GetItem(bone.Name, frame).FramePosition.GL()
+		// 		rot := deltas.Bones.GetItem(bone.Name, frame).FrameRotation.GL()
+		// 		scl := deltas.Bones.GetItem(bone.Name, frame).FrameScale
+
+		// 		// 自身の行列を作成
+		// 		mat := parentMat.Mul4(mgl32.Translate3D(pos[0], pos[1], pos[2]))
+		// 		mat = mat.Mul4(mgl32.HomogRotate3D(rot[3], mgl32.Vec3{rot[0], rot[1], rot[2]}))
+		// 		mat = mat.Mul4(mgl32.Scale3D(float32(scl[0]), float32(scl[1]), float32(scl[2])))
+		// 		boneMatrixes[boneIndex] = &mat
+		// 	}
+		// }
 	}
 }
