@@ -7,6 +7,7 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
+
 )
 
 type MQuaternion mgl64.Quat

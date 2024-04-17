@@ -2,6 +2,7 @@ package mmath
 
 import (
 	"math"
+	"sort"
 
 	"github.com/jinzhu/copier"
 )
@@ -74,7 +75,7 @@ func (v *Curve) Normalize(begin, finish *MVec2) {
 // https://edvakf.hatenadiary.org/entry/20111016/1318716097
 // Evaluate 補間曲線を求めます。
 // return x（計算キーフレ時点のX値）, y（計算キーフレ時点のY値）, t（計算キーフレまでの変化量）
-func Evaluate(curve *Curve, start, now, end float32) (float64, float64, float64) {
+func Evaluate(curve *Curve, start, now, end float64) (float64, float64, float64) {
 	if (now-start) == 0.0 || (end-start) == 0.0 {
 		return 0.0, 0.0, 0.0
 	}
@@ -134,7 +135,7 @@ func newton(x1, x2, x, t0, eps, err float64) float64 {
 }
 
 // SplitCurve 補間曲線を指定キーフレで前後に分割する
-func SplitCurve(curve *Curve, start, now, end float32) (*Curve, *Curve) {
+func SplitCurve(curve *Curve, start, now, end float64) (*Curve, *Curve) {
 	if (now-start) == 0 || (end-start) == 0 {
 		return NewCurve(), NewCurve()
 	}
@@ -193,4 +194,73 @@ func SplitCurve(curve *Curve, start, now, end float32) (*Curve, *Curve) {
 	}
 
 	return startCurve, endCurve
+}
+
+// GetInfections 補間曲線を分割するキーフレを求めます
+func GetInfections(values []float64, threshold float64, tolerance float64) []int {
+	// Calculate the first derivative
+	ysPrime := make([]float64, len(values))
+	for i := 0; i < len(values); i++ {
+		if i == 0 {
+			ysPrime[i] = values[i+1] - values[i]
+		} else if i == len(values)-1 {
+			ysPrime[i] = values[i] - values[i-1]
+		} else {
+			ysPrime[i] = (values[i+1] - values[i-1]) / 2
+		}
+	}
+
+	// Calculate the second derivative
+	ysDoublePrime := make([]float64, len(ysPrime))
+	for i := 0; i < len(ysPrime); i++ {
+		if i == 0 {
+			ysDoublePrime[i] = ysPrime[i+1] - ysPrime[i]
+		} else if i == len(ysPrime)-1 {
+			ysDoublePrime[i] = ysPrime[i] - ysPrime[i-1]
+		} else {
+			ysDoublePrime[i] = (ysPrime[i+1] - ysPrime[i-1]) / 2
+		}
+	}
+
+	// Find the inflection points
+	inflectionPoints := make([]int, 0)
+	for i := 0; i < len(ysDoublePrime); i++ {
+		if math.Abs(ysDoublePrime[i]) >= threshold {
+			inflectionPoints = append(inflectionPoints, i)
+		}
+	}
+
+	// Sign the second derivative with tolerance
+	ysDoublePrimeSign := make([]float64, len(ysDoublePrime))
+	for i := 0; i < len(ysDoublePrime); i++ {
+		if ysDoublePrime[i] >= tolerance {
+			ysDoublePrimeSign[i] = 1
+		} else if ysDoublePrime[i] <= -tolerance {
+			ysDoublePrimeSign[i] = -1
+		} else {
+			ysDoublePrimeSign[i] = 0
+		}
+	}
+
+	// Calculate the difference between each element
+	ysDoublePrimeDiff := make([]float64, len(ysDoublePrimeSign)-1)
+	for i := 0; i < len(ysDoublePrimeSign)-1; i++ {
+		ysDoublePrimeDiff[i] = ysDoublePrimeSign[i+1] - ysDoublePrimeSign[i]
+	}
+
+	// Find the indices where the difference is not 0 (i.e., the sign has changed)
+	signChangeIndices := make([]int, 0)
+	for i := 0; i < len(ysDoublePrimeDiff); i++ {
+		if ysDoublePrimeDiff[i] != 0 {
+			signChangeIndices = append(signChangeIndices, i)
+		}
+	}
+
+	inflections := make([]int, 0)
+	inflections = append(inflections, inflectionPoints...)
+	inflections = append(inflections, signChangeIndices...)
+	inflections = append(inflections, 0, len(values)-1)
+	sort.Ints(inflections)
+
+	return inflections
 }

@@ -340,7 +340,7 @@ ikLoop:
 				frame, loop, linkBone.Name, count-1, linkAngle < 1e-6, linkAngle)
 
 			// 角度がほとんどない場合、終了
-			if linkAngle < 1e-7 {
+			if linkAngle < 1e-7 || (linkBone.HasFixedAxis() && linkAngle < 1e-2) {
 				break ikLoop
 			}
 
@@ -607,6 +607,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	}
 
 	totalIkRad := totalIkQuat.ToRadian()
+	// TODO ローカル軸ベースの分割の場合、ローカル軸に合わせる
 	if quatAxis.Dot(axisVector) < 0 {
 		totalIkRad *= -1
 	}
