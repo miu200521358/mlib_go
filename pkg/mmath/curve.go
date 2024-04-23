@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/jinzhu/copier"
-
+	"gonum.org/v1/gonum/optimize"
 )
 
 type Curve struct {
@@ -194,4 +194,94 @@ func SplitCurve(curve *Curve, start, now, end float32) (*Curve, *Curve) {
 	}
 
 	return startCurve, endCurve
+}
+
+func Bezier(t float64, p0, p1, p2, p3 *MVec2) *MVec2 {
+	t2 := t * t
+	t3 := t2 * t
+	mt := 1 - t
+	mt2 := mt * mt
+	mt3 := mt2 * mt
+
+	bx := mt3*p0.GetX() + 3*mt2*t*p1.GetX() + 3*mt*t2*p2.GetX() + t3*p3.GetX()
+	by := mt3*p0.GetY() + 3*mt2*t*p1.GetY() + 3*mt*t2*p2.GetY() + t3*p3.GetY()
+
+	return &MVec2{bx, by}
+}
+
+// NewCurveFromValues calculates the control points of a cubic Bezier curve
+// that best fits a given set of y-values.
+func NewCurveFromValues(values []float64) *Curve {
+	n := len(values)
+	if n <= 2 {
+		return NewCurve()
+	}
+
+	// Set start and end points
+	p0 := &MVec2{0, values[0]}
+	p3 := &MVec2{float64(n - 1), values[n-1]}
+
+	// Initial guesses for control points
+	p1 := &MVec2{1, values[1]}
+	p2 := &MVec2{float64(n - 2), values[n-2]}
+
+	funcEval := func(x []float64) float64 {
+		p1 = &MVec2{x[0], x[1]}
+		p2 = &MVec2{x[2], x[3]}
+		sumSq := 0.0
+		for i, y := range values {
+			t := float64(i) / float64(n-1)
+			bp := Bezier(t, p0, p1, p2, p3)
+			diff := bp.GetY() - y
+			sumSq += diff * diff
+		}
+		return sumSq
+	}
+
+	// Define the optimization problem
+	problem := optimize.Problem{
+		Func: funcEval,
+		Grad: func(grad, x []float64) {
+			h := 1e-6
+			fx := funcEval(x)
+			for i := range x {
+				orig := x[i]
+				x[i] += h
+				fxh := funcEval(x)
+				x[i] = orig
+				grad[i] = (fxh - fx) / h
+			}
+		},
+	}
+
+	// Optimization settings
+	settings := &optimize.Settings{
+		MajorIterations:   1000,  // 最大イテレーション数を増やす
+		FuncEvaluations:   10000, // 関数評価の最大数を増やす
+		GradientThreshold: 1e-6,  // 勾配の閾値を変更する
+	}
+	method := &optimize.LBFGS{}
+
+	// Initial control points vector
+	initial := []float64{p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY()}
+
+	// Perform optimization
+	result, err := optimize.Minimize(problem, initial, settings, method)
+	if err != nil {
+		return NewCurve()
+	}
+
+	// Update p1 and p2 with optimized values
+	c := &Curve{
+		Start: &MVec2{result.X[0], result.X[1]},
+		End:   &MVec2{result.X[2], result.X[3]},
+	}
+	c.Normalize(p0, p3)
+
+	if c.Start.GetX()/c.Start.GetY() == 1.0 && c.End.GetX()/c.End.GetY() == 1.0 {
+		// 線形の場合初期化
+		c = NewCurve()
+	}
+
+	return c
 }
