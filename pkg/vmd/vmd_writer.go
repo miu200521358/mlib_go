@@ -14,13 +14,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
-type VmdWriter struct {
-}
-
-func NewVmdWriter() *VmdWriter {
-	return &VmdWriter{}
-}
-
 func Write(motion *VmdMotion) error {
 	// Open the output file
 	fout, err := os.Create(motion.GetPath())
