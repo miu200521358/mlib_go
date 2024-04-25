@@ -49,7 +49,6 @@ func (m *VmdMotion) SetName(name string) {
 }
 
 func (m *VmdMotion) GetMaxFrame() float32 {
-	// TODO: モーフが入ったらモーフも考慮する
 	return max(m.BoneFrames.GetMaxFrame(), m.MorphFrames.GetMaxFrame())
 }
 

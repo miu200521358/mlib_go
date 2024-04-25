@@ -1,8 +1,9 @@
 package deform
 
 import (
+	"github.com/jinzhu/copier"
+	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type BoneFrame struct {
@@ -77,5 +78,11 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 	copied.MorphLocalScale.Add(v.MorphLocalScale)
 	copied.IkRotation.Mul(v.IkRotation)
 
+	return copied
+}
+
+func (v *BoneFrame) Copy() mcore.IndexFloatModelInterface {
+	copied := NewBoneFrame(v.Index)
+	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied
 }
