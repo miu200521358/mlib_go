@@ -1,10 +1,12 @@
+//go:build !for_linux
+// +build !for_linux
+
 package mgl
 
 import (
 	"fmt"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
-
 )
 
 func GetOpenGLErrorString(errCode uint32) string {

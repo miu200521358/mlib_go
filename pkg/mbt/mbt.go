@@ -8,6 +8,9 @@
 
 // source: C:\MMD\mlib_go\pkg\mbt\bullet.i
 
+//go:build !for_linux
+// +build !for_linux
+
 package mbt
 
 /*
@@ -9885,7 +9888,7 @@ func (arg1 SwigcptrBtCollisionShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btCollisionShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -9970,7 +9973,7 @@ func (arg1 SwigcptrBtCollisionShape) Serialize(arg2 uintptr, arg3 BtSerializer) 
 	swig_r_p := C._wrap_btCollisionShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -10039,7 +10042,7 @@ func (arg1 SwigcptrBtCollisionShapeData) GetM_name() (_swig_ret string) {
 	swig_r_p := C._wrap_btCollisionShapeData_m_name_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -10071,7 +10074,7 @@ func (arg1 SwigcptrBtCollisionShapeData) GetM_padding() (_swig_ret string) {
 	swig_r_p := C._wrap_btCollisionShapeData_m_padding_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -10326,7 +10329,7 @@ func (_swig_base SwigcptrBtConvexShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btConvexShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -10388,7 +10391,7 @@ func (_swig_base SwigcptrBtConvexShape) Serialize(arg1 uintptr, arg2 BtSerialize
 	swig_r_p := C._wrap_btConvexShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -10749,7 +10752,7 @@ func (arg1 SwigcptrBtConvexInternalShape) Serialize(arg2 uintptr, arg3 BtSeriali
 	swig_r_p := C._wrap_btConvexInternalShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -10892,7 +10895,7 @@ func (_swig_base SwigcptrBtConvexInternalShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btConvexInternalShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -11278,7 +11281,7 @@ func (_swig_base SwigcptrBtConvexInternalAabbCachingShape) Serialize(arg1 uintpt
 	swig_r_p := C._wrap_btConvexInternalAabbCachingShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -11421,7 +11424,7 @@ func (_swig_base SwigcptrBtConvexInternalAabbCachingShape) GetName() (_swig_ret 
 	swig_r_p := C._wrap_btConvexInternalAabbCachingShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -11628,7 +11631,7 @@ func (arg1 SwigcptrBtSphereShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btSphereShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -11767,7 +11770,7 @@ func (_swig_base SwigcptrBtSphereShape) Serialize(arg1 uintptr, arg2 BtSerialize
 	swig_r_p := C._wrap_btSphereShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -12286,7 +12289,7 @@ func (_swig_base SwigcptrBtPolyhedralConvexShape) Serialize(arg1 uintptr, arg2 B
 	swig_r_p := C._wrap_btPolyhedralConvexShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -12409,7 +12412,7 @@ func (_swig_base SwigcptrBtPolyhedralConvexShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btPolyhedralConvexShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -12824,7 +12827,7 @@ func (_swig_base SwigcptrBtPolyhedralConvexAabbCachingShape) Serialize(arg1 uint
 	swig_r_p := C._wrap_btPolyhedralConvexAabbCachingShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -12947,7 +12950,7 @@ func (_swig_base SwigcptrBtPolyhedralConvexAabbCachingShape) GetName() (_swig_re
 	swig_r_p := C._wrap_btPolyhedralConvexAabbCachingShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -14410,7 +14413,7 @@ func (arg1 SwigcptrBtBoxShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btBoxShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -14574,7 +14577,7 @@ func (_swig_base SwigcptrBtBoxShape) Serialize(arg1 uintptr, arg2 BtSerializer) 
 	swig_r_p := C._wrap_btBoxShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -14910,7 +14913,7 @@ func (arg1 SwigcptrBtCapsuleShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btCapsuleShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -14963,7 +14966,7 @@ func (arg1 SwigcptrBtCapsuleShape) Serialize(arg2 uintptr, arg3 BtSerializer) (_
 	swig_r_p := C._wrap_btCapsuleShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -15353,7 +15356,7 @@ func (arg1 SwigcptrBtCapsuleShapeX) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btCapsuleShapeX_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -15436,7 +15439,7 @@ func (_swig_base SwigcptrBtCapsuleShapeX) Serialize(arg1 uintptr, arg2 BtSeriali
 	swig_r_p := C._wrap_btCapsuleShapeX_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -15829,7 +15832,7 @@ func (arg1 SwigcptrBtCapsuleShapeZ) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btCapsuleShapeZ_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -15912,7 +15915,7 @@ func (_swig_base SwigcptrBtCapsuleShapeZ) Serialize(arg1 uintptr, arg2 BtSeriali
 	swig_r_p := C._wrap_btCapsuleShapeZ_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -16332,7 +16335,7 @@ func (arg1 SwigcptrBtCapsuleShapeData) GetM_padding() (_swig_ret string) {
 	swig_r_p := C._wrap_btCapsuleShapeData_m_padding_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -17184,7 +17187,7 @@ func (arg1 SwigcptrBtCollisionObject) Serialize(arg2 uintptr, arg3 BtSerializer)
 	swig_r_p := C._wrap_btCollisionObject_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -17340,7 +17343,7 @@ func (arg1 SwigcptrBtCollisionObjectDoubleData) GetM_name() (_swig_ret string) {
 	swig_r_p := C._wrap_btCollisionObjectDoubleData_m_name_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -17806,7 +17809,7 @@ func (arg1 SwigcptrBtCollisionObjectFloatData) GetM_name() (_swig_ret string) {
 	swig_r_p := C._wrap_btCollisionObjectFloatData_m_name_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -18947,7 +18950,7 @@ func (arg1 SwigcptrBtRigidBody) Serialize(arg2 uintptr, arg3 BtSerializer) (_swi
 	swig_r_p := C._wrap_btRigidBody_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -20286,7 +20289,7 @@ func (arg1 SwigcptrBtRigidBodyDoubleData) GetM_padding() (_swig_ret string) {
 	swig_r_p := C._wrap_btRigidBodyDoubleData_m_padding_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -21978,7 +21981,7 @@ func (arg1 SwigcptrBtTypedConstraint) Serialize(arg2 uintptr, arg3 BtSerializer)
 	swig_r_p := C._wrap_btTypedConstraint_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -22109,7 +22112,7 @@ func (arg1 SwigcptrBtTypedConstraintFloatData) GetM_name() (_swig_ret string) {
 	swig_r_p := C._wrap_btTypedConstraintFloatData_m_name_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -22335,7 +22338,7 @@ func (arg1 SwigcptrBtTypedConstraintData) GetM_name() (_swig_ret string) {
 	swig_r_p := C._wrap_btTypedConstraintData_m_name_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -22561,7 +22564,7 @@ func (arg1 SwigcptrBtTypedConstraintDoubleData) GetM_name() (_swig_ret string) {
 	swig_r_p := C._wrap_btTypedConstraintDoubleData_m_name_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -22710,7 +22713,7 @@ func (arg1 SwigcptrBtTypedConstraintDoubleData) GetPadding() (_swig_ret string) 
 	swig_r_p := C._wrap_btTypedConstraintDoubleData_padding_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -23188,7 +23191,7 @@ func GetSBulletDNAstr() (_swig_ret string) {
 	swig_r_p := C._wrap_sBulletDNAstr_get_mbt_e879218550ba2e2b()
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -23216,7 +23219,7 @@ func GetSBulletDNAstr64() (_swig_ret string) {
 	swig_r_p := C._wrap_sBulletDNAstr64_get_mbt_e879218550ba2e2b()
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -23452,7 +23455,7 @@ func (arg1 SwigcptrBtSerializer) FindNameForPointer(arg2 uintptr) (_swig_ret str
 	swig_r_p := C._wrap_btSerializer_findNameForPointer_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -23857,7 +23860,7 @@ func BtDefaultSerializerGetMemoryDna() (_swig_ret string) {
 	swig_r_p := C._wrap_btDefaultSerializer_getMemoryDna_mbt_e879218550ba2e2b()
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -23940,7 +23943,7 @@ func (arg1 SwigcptrBtDefaultSerializer) FindNameForPointer(arg2 uintptr) (_swig_
 	swig_r_p := C._wrap_btDefaultSerializer_findNameForPointer_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -27527,7 +27530,7 @@ func (arg1 SwigcptrBtITaskScheduler) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btITaskScheduler_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -27834,7 +27837,7 @@ func (_swig_base SwigcptrBtTaskSchedulerSequential) GetName() (_swig_ret string)
 	swig_r_p := C._wrap_btTaskSchedulerSequential_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -29368,7 +29371,7 @@ func (arg1 SwigcptrBtPersistentManifold) Serialize(arg2 BtPersistentManifold, ar
 	swig_r_p := C._wrap_btPersistentManifold_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.uintptr_t(_swig_i_3))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -32832,7 +32835,7 @@ func (_swig_base SwigcptrBtConcaveShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btConcaveShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -32894,7 +32897,7 @@ func (_swig_base SwigcptrBtConcaveShape) Serialize(arg1 uintptr, arg2 BtSerializ
 	swig_r_p := C._wrap_btConcaveShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -33137,7 +33140,7 @@ func (arg1 SwigcptrBtStridingMeshInterface) Serialize(arg2 uintptr, arg3 BtSeria
 	swig_r_p := C._wrap_btStridingMeshInterface_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -33239,7 +33242,7 @@ func (arg1 SwigcptrBtShortIntIndexData) GetM_pad() (_swig_ret string) {
 	swig_r_p := C._wrap_btShortIntIndexData_m_pad_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -33300,7 +33303,7 @@ func (arg1 SwigcptrBtShortIntIndexTripletData) GetM_pad() (_swig_ret string) {
 	swig_r_p := C._wrap_btShortIntIndexTripletData_m_pad_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -33587,7 +33590,7 @@ func (arg1 SwigcptrBtStridingMeshInterfaceData) GetM_padding() (_swig_ret string
 	swig_r_p := C._wrap_btStridingMeshInterfaceData_m_padding_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -33731,7 +33734,7 @@ func (arg1 SwigcptrBtTriangleMeshShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btTriangleMeshShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -33881,7 +33884,7 @@ func (_swig_base SwigcptrBtTriangleMeshShape) Serialize(arg1 uintptr, arg2 BtSer
 	swig_r_p := C._wrap_btTriangleMeshShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -34144,7 +34147,7 @@ func (arg1 SwigcptrBtOptimizedBvhNode) GetM_padding() (_swig_ret string) {
 	swig_r_p := C._wrap_btOptimizedBvhNode_m_padding_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -34509,7 +34512,7 @@ func (arg1 SwigcptrBtQuantizedBvh) Serialize__SWIG_1(arg2 uintptr, arg3 BtSerial
 	swig_r_p := C._wrap_btQuantizedBvh_serialize__SWIG_1_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -34740,7 +34743,7 @@ func (arg1 SwigcptrBtOptimizedBvhNodeFloatData) GetM_pad() (_swig_ret string) {
 	swig_r_p := C._wrap_btOptimizedBvhNodeFloatData_m_pad_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -34861,7 +34864,7 @@ func (arg1 SwigcptrBtOptimizedBvhNodeDoubleData) GetM_pad() (_swig_ret string) {
 	swig_r_p := C._wrap_btOptimizedBvhNodeDoubleData_m_pad_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -35565,7 +35568,7 @@ func (_swig_base SwigcptrBtOptimizedBvh) Serialize__SWIG_1(arg1 uintptr, arg2 Bt
 	swig_r_p := C._wrap_btOptimizedBvh_serialize__SWIG_1_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -35849,7 +35852,7 @@ func (arg1 SwigcptrBtTriangleInfoMap) Serialize(arg2 uintptr, arg3 BtSerializer)
 	swig_r_p := C._wrap_btTriangleInfoMap_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -36157,7 +36160,7 @@ func (arg1 SwigcptrBtTriangleInfoMapData) GetM_padding() (_swig_ret string) {
 	swig_r_p := C._wrap_btTriangleInfoMapData_m_padding_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -36327,7 +36330,7 @@ func (arg1 SwigcptrBtBvhTriangleMeshShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btBvhTriangleMeshShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -36428,7 +36431,7 @@ func (arg1 SwigcptrBtBvhTriangleMeshShape) Serialize(arg2 uintptr, arg3 BtSerial
 	swig_r_p := C._wrap_btBvhTriangleMeshShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -36838,7 +36841,7 @@ func (arg1 SwigcptrBtTriangleMeshShapeData) GetM_pad3() (_swig_ret string) {
 	swig_r_p := C._wrap_btTriangleMeshShapeData_m_pad3_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -37163,7 +37166,7 @@ func (arg1 SwigcptrBtHeightfieldTerrainShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btHeightfieldTerrainShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -37364,7 +37367,7 @@ func (_swig_base SwigcptrBtHeightfieldTerrainShape) Serialize(arg1 uintptr, arg2
 	swig_r_p := C._wrap_btHeightfieldTerrainShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -40624,7 +40627,7 @@ func (arg1 SwigcptrBtContactSolverInfoDoubleData) GetM_padding() (_swig_ret stri
 	swig_r_p := C._wrap_btContactSolverInfoDoubleData_m_padding_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -43905,7 +43908,7 @@ func (arg1 SwigcptrBtConeTwistConstraint) Serialize(arg2 uintptr, arg3 BtSeriali
 	swig_r_p := C._wrap_btConeTwistConstraint_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -44519,7 +44522,7 @@ func (arg1 SwigcptrBtConeTwistConstraintData) GetM_pad() (_swig_ret string) {
 	swig_r_p := C._wrap_btConeTwistConstraintData_m_pad_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -45684,7 +45687,7 @@ func (arg1 SwigcptrBtGeneric6DofConstraint) Serialize(arg2 uintptr, arg3 BtSeria
 	swig_r_p := C._wrap_btGeneric6DofConstraint_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -50994,7 +50997,7 @@ func (arg1 SwigcptrBtSdfCollisionShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btSdfCollisionShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -51164,7 +51167,7 @@ func (_swig_base SwigcptrBtSdfCollisionShape) Serialize(arg1 uintptr, arg2 BtSer
 	swig_r_p := C._wrap_btSdfCollisionShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -51469,7 +51472,7 @@ func (arg1 SwigcptrBtStaticPlaneShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btStaticPlaneShape_getName_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -51488,7 +51491,7 @@ func (arg1 SwigcptrBtStaticPlaneShape) Serialize(arg2 uintptr, arg3 BtSerializer
 	swig_r_p := C._wrap_btStaticPlaneShape_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -51762,7 +51765,7 @@ func (arg1 SwigcptrBtStaticPlaneShapeData) GetM_pad() (_swig_ret string) {
 	swig_r_p := C._wrap_btStaticPlaneShapeData_m_pad_get_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -51949,7 +51952,7 @@ func (arg1 SwigcptrBtGeneric6DofSpringConstraint) Serialize(arg2 uintptr, arg3 B
 	swig_r_p := C._wrap_btGeneric6DofSpringConstraint_serialize_mbt_e879218550ba2e2b(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+ swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 

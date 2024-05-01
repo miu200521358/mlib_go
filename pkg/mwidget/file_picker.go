@@ -1,3 +1,6 @@
+//go:build !for_linux
+// +build !for_linux
+
 package mwidget
 
 import (
@@ -14,7 +17,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 const FilePickerClass = "FilePicker Class"

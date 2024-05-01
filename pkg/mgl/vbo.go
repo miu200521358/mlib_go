@@ -1,3 +1,6 @@
+//go:build !for_linux
+// +build !for_linux
+
 package mgl
 
 import (

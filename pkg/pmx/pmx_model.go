@@ -6,7 +6,6 @@ import (
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
-	"github.com/miu200521358/mlib_go/pkg/mphysics"
 )
 
 type PmxModel struct {
@@ -36,7 +35,6 @@ type PmxModel struct {
 	RigidBodies         *RigidBodies
 	Joints              *Joints
 	Meshes              *Meshes
-	Physics             *mphysics.MPhysics
 }
 
 func NewPmxModel(path string) *PmxModel {
@@ -77,12 +75,6 @@ func (pm *PmxModel) InitDraw(windowIndex int, resourceFiles embed.FS) {
 	pm.Bones.prepareDraw()
 }
 
-func (pm *PmxModel) InitPhysics(physics *mphysics.MPhysics) {
-	pm.Physics = physics
-	pm.RigidBodies.initPhysics(physics)
-	pm.Joints.initPhysics(physics, pm.RigidBodies)
-}
-
 func (pm *PmxModel) SetUp() {
 	// ボーン情報のセットアップ
 	pm.Bones.setup()
@@ -99,17 +91,6 @@ func (pm *PmxModel) SetUp() {
 		}
 	}
 }
-
-func (pm *PmxModel) Delete() {
-	pm.Meshes.delete()
-	pm.DeletePhysics()
-}
-
-func (pm *PmxModel) DeletePhysics() {
-	pm.RigidBodies.deletePhysics(pm.Physics)
-	pm.Joints.deletePhysics(pm.Physics)
-}
-
 func (m *PmxModel) Copy() mcore.HashModelInterface {
 	copied := NewPmxModel("")
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})

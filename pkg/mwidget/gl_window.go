@@ -1,3 +1,6 @@
+//go:build !for_linux
+// +build !for_linux
+
 package mwidget
 
 import (
@@ -12,7 +15,6 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/walk/pkg/walk"
 
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
@@ -20,7 +22,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 type ModelSet struct {
@@ -29,6 +30,7 @@ type ModelSet struct {
 }
 
 func (ms *ModelSet) Draw(
+	modelPhysics *mphysics.MPhysics,
 	shader *mgl.MShader,
 	windowIndex int,
 	frame float32,
@@ -37,7 +39,7 @@ func (ms *ModelSet) Draw(
 	enablePhysics bool,
 ) {
 	deltas := ms.Motion.Animate(frame, ms.Model)
-	deform.Draw(ms.Model, shader, deltas, windowIndex, frame, elapsed, isBoneDebug, enablePhysics)
+	Draw(modelPhysics, ms.Model, shader, deltas, windowIndex, frame, elapsed, isBoneDebug, enablePhysics)
 }
 
 // 直角の定数値
@@ -194,7 +196,7 @@ func (w *GlWindow) Close(window *glfw.Window) {
 	window.SetShouldClose(true)
 	w.Shader.Delete()
 	for _, modelSet := range w.ModelSets {
-		modelSet.Model.Delete()
+		modelSet.Model.Delete(w.Physics)
 	}
 	if w.WindowIndex == 0 {
 		defer glfw.Terminate()
@@ -416,7 +418,7 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 
 func (w *GlWindow) ResetPhysics() {
 	for _, modelSet := range w.ModelSets {
-		modelSet.Model.DeletePhysics()
+		modelSet.Model.DeletePhysics(w.Physics)
 		modelSet.Model.InitPhysics(w.Physics)
 	}
 }
@@ -445,7 +447,7 @@ func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
 
 func (w *GlWindow) ClearData() {
 	for _, modelSet := range w.ModelSets {
-		modelSet.Model.DeletePhysics()
+		modelSet.Model.DeletePhysics(w.Physics)
 	}
 	w.ModelSets = make([]ModelSet, 0)
 	w.frame = 0
@@ -461,7 +463,7 @@ func (w *GlWindow) Draw(frame float32, elapsed float32) {
 
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
-		modelSet.Draw(w.Shader, w.WindowIndex, frame, elapsed, w.VisibleBone, w.EnablePhysics)
+		modelSet.Draw(w.Physics, w.Shader, w.WindowIndex, frame, elapsed, w.VisibleBone, w.EnablePhysics)
 	}
 }
 

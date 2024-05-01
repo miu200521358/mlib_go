@@ -1,3 +1,6 @@
+//go:build !for_linux
+// +build !for_linux
+
 package mphysics
 
 import (
@@ -5,7 +8,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 func NewConstBtMDefaultColors() mbt.BtMDefaultColors {

@@ -1,3 +1,6 @@
+//go:build !for_linux
+// +build !for_linux
+
 package mwidget
 
 import (
@@ -6,7 +9,6 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
-
 )
 
 type MTabWidget struct {

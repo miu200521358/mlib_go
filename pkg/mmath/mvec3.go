@@ -5,11 +5,9 @@ import (
 	"hash/fnv"
 	"math"
 
-	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/jinzhu/copier"
 
-	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
@@ -93,16 +91,6 @@ func (v *MVec3) AddZ(z float64) {
 // String T の文字列表現を返します。
 func (v *MVec3) String() string {
 	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f]", v.GetX(), v.GetY(), v.GetZ())
-}
-
-// Gl OpenGL座標系に変換された3次元ベクトルを返します
-func (v *MVec3) GL() *mgl32.Vec3 {
-	return &mgl32.Vec3{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ())}
-}
-
-// Bullet+OpenGL座標系に変換された3次元ベクトルを返します
-func (v *MVec3) Bullet() mbt.BtVector3 {
-	return mbt.NewBtVector3(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()))
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します
