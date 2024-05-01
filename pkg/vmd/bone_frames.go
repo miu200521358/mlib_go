@@ -95,6 +95,17 @@ func (bfs *BoneFrames) GetMaxFrame() float32 {
 	return maxFno
 }
 
+func (bfs *BoneFrames) GetMinFrame() float32 {
+	minFno := float32(math.MaxFloat32)
+	for _, bnfs := range bfs.Data {
+		fno := bnfs.GetMaxFrame()
+		if fno < minFno {
+			minFno = fno
+		}
+	}
+	return minFno
+}
+
 func (bfs *BoneFrames) Animate(
 	frame float32,
 	model *pmx.PmxModel,

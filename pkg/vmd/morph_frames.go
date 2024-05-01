@@ -1,9 +1,10 @@
 package vmd
 
 import (
+	"math"
+
 	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-
 )
 
 type MorphFrames struct {
@@ -71,6 +72,17 @@ func (mfs *MorphFrames) GetMaxFrame() float32 {
 		}
 	}
 	return maxFno
+}
+
+func (mfs *MorphFrames) GetMinFrame() float32 {
+	minFno := float32(math.MaxFloat32)
+	for _, bnfs := range mfs.Data {
+		fno := bnfs.GetMaxFrame()
+		if fno < minFno {
+			minFno = fno
+		}
+	}
+	return minFno
 }
 
 func (fs *MorphFrames) GetCount() int {
