@@ -28,6 +28,9 @@ func NewBoneFrames() *BoneFrames {
 }
 
 func (bfs *BoneFrames) Contains(boneName string) bool {
+	bfs.lock.RLock()
+	defer bfs.lock.RUnlock()
+
 	_, ok := bfs.Data[boneName]
 	return ok
 }
@@ -40,6 +43,9 @@ func (bfs *BoneFrames) Append(bnfs *BoneNameFrames) {
 }
 
 func (bfs *BoneFrames) GetItem(boneName string) *BoneNameFrames {
+	bfs.lock.RLock()
+	defer bfs.lock.RUnlock()
+
 	if !bfs.Contains(boneName) {
 		bfs.Append(NewBoneNameFrames(boneName))
 	}
