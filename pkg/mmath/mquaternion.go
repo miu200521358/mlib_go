@@ -5,9 +5,6 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
-
-	"github.com/miu200521358/mlib_go/pkg/mbt"
-
 )
 
 type MQuaternion mgl64.Quat
@@ -103,16 +100,6 @@ func (v *MQuaternion) AssignVec3(vec3 *MVec3) {
 // String T の文字列表現を返します。
 func (v *MQuaternion) String() string {
 	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f, w=%.5f]", v.GetX(), v.GetY(), v.GetZ(), v.GetW())
-}
-
-// GL OpenGL座標系に変換されたクォータニオンベクトルを返します
-func (v *MQuaternion) GL() [4]float32 {
-	return [4]float32{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW())}
-}
-
-// Bullet+OpenGL座標系に変換されたクォータニオンベクトルを返します
-func (v *MQuaternion) Bullet() mbt.BtQuaternion {
-	return mbt.NewBtQuaternion(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW()))
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換されたクォータニオンベクトルを返します

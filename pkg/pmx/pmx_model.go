@@ -1,8 +1,6 @@
 package pmx
 
 import (
-	"embed"
-
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
@@ -67,12 +65,6 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 	d02.EnglishName = "Exp"
 	d02.SpecialFlag = SPECIAL_FLAG_ON
 	pm.DisplaySlots.Append(d02)
-}
-
-func (pm *PmxModel) InitDraw(windowIndex int, resourceFiles embed.FS) {
-	pm.ToonTextures.initGl(windowIndex, resourceFiles)
-	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
-	pm.Bones.prepareDraw()
 }
 
 func (pm *PmxModel) SetUp() {

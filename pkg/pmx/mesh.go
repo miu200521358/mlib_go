@@ -1,5 +1,5 @@
-//go:build !for_linux
-// +build !for_linux
+//go:build windows
+// +build windows
 
 package pmx
 
@@ -12,7 +12,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type Mesh struct {

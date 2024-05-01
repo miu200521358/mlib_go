@@ -1,13 +1,21 @@
-//go:build !for_linux
-// +build !for_linux
+//go:build windows
+// +build windows
 
 package pmx
 
 import (
+	"embed"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 )
+
+func (pm *PmxModel) InitDraw(windowIndex int, resourceFiles embed.FS) {
+	pm.ToonTextures.initGl(windowIndex, resourceFiles)
+	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
+	pm.Bones.prepareDraw()
+}
 
 func (pm *PmxModel) InitPhysics(physics *mphysics.MPhysics) {
 	pm.RigidBodies.initPhysics(physics)

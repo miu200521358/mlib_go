@@ -1,5 +1,5 @@
-//go:build !for_linux
-// +build !for_linux
+//go:build windows
+// +build windows
 
 package pmx
 
@@ -10,7 +10,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mgl"
-
 )
 
 type Meshes struct {

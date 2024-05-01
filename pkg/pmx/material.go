@@ -1,15 +1,12 @@
 package pmx
 
 import (
-	"embed"
-
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 // スフィアモード
@@ -149,47 +146,6 @@ func (m *Material) EdgeGL() [4]float32 {
 	edge := [4]float32{float32(e.GetX()), float32(e.GetY()), float32(e.GetZ()),
 		float32(m.Edge.GetW()) * float32(m.Diffuse.GetW())}
 	return edge
-}
-
-type MaterialGL struct {
-	*Material
-	Texture           *TextureGL // 通常テクスチャ
-	SphereTexture     *TextureGL // スフィアテクスチャ
-	ToonTexture       *TextureGL // トゥーンテクスチャ
-	PrevVerticesCount int        // 前の材質までの頂点数
-}
-
-func (m *Material) GL(
-	modelPath string,
-	texture *Texture,
-	toonTexture *Texture,
-	sphereTexture *Texture,
-	windowIndex int,
-	prevVerticesCount int,
-	resourceFiles embed.FS,
-) *MaterialGL {
-	var textureGL *TextureGL
-	if texture != nil {
-		textureGL = texture.GL(modelPath, TEXTURE_TYPE_TEXTURE, windowIndex, resourceFiles)
-	}
-
-	var sphereTextureGL *TextureGL
-	if sphereTexture != nil {
-		sphereTextureGL = sphereTexture.GL(modelPath, TEXTURE_TYPE_SPHERE, windowIndex, resourceFiles)
-	}
-
-	var tooTextureGL *TextureGL
-	if toonTexture != nil {
-		tooTextureGL = toonTexture.GL(modelPath, TEXTURE_TYPE_TOON, windowIndex, resourceFiles)
-	}
-
-	return &MaterialGL{
-		Material:          m,
-		Texture:           textureGL,
-		SphereTexture:     sphereTextureGL,
-		ToonTexture:       tooTextureGL,
-		PrevVerticesCount: prevVerticesCount * 4,
-	}
 }
 
 // 材質リスト

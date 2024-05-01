@@ -1,5 +1,5 @@
-//go:build !for_linux
-// +build !for_linux
+//go:build windows
+// +build windows
 
 package mphysics
 

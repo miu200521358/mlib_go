@@ -1,5 +1,5 @@
-//go:build !for_linux
-// +build !for_linux
+//go:build windows
+// +build windows
 
 package mmath
 
@@ -8,6 +8,16 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 )
+
+// GL OpenGL座標系に変換されたクォータニオンベクトルを返します
+func (v *MQuaternion) GL() [4]float32 {
+	return [4]float32{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW())}
+}
+
+// Bullet+OpenGL座標系に変換されたクォータニオンベクトルを返します
+func (v *MQuaternion) Bullet() mbt.BtQuaternion {
+	return mbt.NewBtQuaternion(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW()))
+}
 
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します
 func (m *MMat4) GL() *mgl32.Mat4 {
