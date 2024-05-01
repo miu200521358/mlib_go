@@ -1,6 +1,8 @@
 package vmd
 
 import (
+	"sync"
+
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/deform"
@@ -19,6 +21,7 @@ type VmdMotion struct {
 	LightFrames  *LightFrames
 	ShadowFrames *ShadowFrames
 	IkFrames     *IkFrames
+	lock         sync.RWMutex // マップアクセス制御用
 }
 
 func NewVmdMotion(path string) *VmdMotion {
@@ -57,31 +60,52 @@ func (m *VmdMotion) GetMinFrame() float32 {
 }
 
 func (m *VmdMotion) AppendBoneFrame(boneName string, bf *deform.BoneFrame) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
 	m.BoneFrames.GetItem(boneName).Append(bf)
 }
 
 func (m *VmdMotion) AppendRegisteredBoneFrame(boneName string, bf *deform.BoneFrame) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
 	bf.Registered = true
 	m.BoneFrames.GetItem(boneName).Append(bf)
 }
 
 func (m *VmdMotion) AppendMorphFrame(morphName string, mf *deform.MorphFrame) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
 	m.MorphFrames.GetItem(morphName).Append(mf)
 }
 
 func (m *VmdMotion) AppendCameraFrame(cf *CameraFrame) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
 	m.CameraFrames.Append(cf)
 }
 
 func (m *VmdMotion) AppendLightFrame(lf *LightFrame) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
 	m.LightFrames.Append(lf)
 }
 
 func (m *VmdMotion) AppendShadowFrame(sf *ShadowFrame) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
 	m.ShadowFrames.Append(sf)
 }
 
 func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
 	m.IkFrames.Append(ikf)
 }
 
