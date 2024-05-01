@@ -43,12 +43,13 @@ func (bfs *BoneFrames) Append(bnfs *BoneNameFrames) {
 }
 
 func (bfs *BoneFrames) GetItem(boneName string) *BoneNameFrames {
-	bfs.lock.RLock()
-	defer bfs.lock.RUnlock()
-
 	if !bfs.Contains(boneName) {
 		bfs.Append(NewBoneNameFrames(boneName))
 	}
+
+	bfs.lock.RLock()
+	defer bfs.lock.RUnlock()
+
 	return bfs.Data[boneName]
 }
 
