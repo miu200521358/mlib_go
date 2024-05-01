@@ -52,6 +52,10 @@ func (m *VmdMotion) GetMaxFrame() float32 {
 	return max(m.BoneFrames.GetMaxFrame(), m.MorphFrames.GetMaxFrame())
 }
 
+func (m *VmdMotion) GetMinFrame() float32 {
+	return min(m.BoneFrames.GetMinFrame(), m.MorphFrames.GetMinFrame())
+}
+
 func (m *VmdMotion) AppendBoneFrame(boneName string, bf *deform.BoneFrame) {
 	m.BoneFrames.GetItem(boneName).Append(bf)
 }
