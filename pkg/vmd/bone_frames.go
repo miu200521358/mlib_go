@@ -18,6 +18,7 @@ import (
 
 type BoneFrames struct {
 	Data map[string]*BoneNameFrames
+	lock sync.RWMutex // マップアクセス制御用
 }
 
 func NewBoneFrames() *BoneFrames {
@@ -32,6 +33,9 @@ func (bfs *BoneFrames) Contains(boneName string) bool {
 }
 
 func (bfs *BoneFrames) Append(bnfs *BoneNameFrames) {
+	bfs.lock.Lock()
+	defer bfs.lock.Unlock()
+
 	bfs.Data[bnfs.Name] = bnfs
 }
 
