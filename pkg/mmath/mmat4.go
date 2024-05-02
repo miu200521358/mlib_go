@@ -268,6 +268,11 @@ func (mat *MMat4) ScaleVec3(s *MVec3) *MMat4 {
 	return mat
 }
 
+func (mat *MMat4) Rotate(quat *MQuaternion) *MMat4 {
+	mat.Mul(NewMMat4FromQuaternion(quat))
+	return mat
+}
+
 // Quaternion extracts a quaternion from the rotation part of the matrix.
 func (mat *MMat4) Quaternion() *MQuaternion {
 	trace := mat[0][0] + mat[1][1] + mat[2][2]

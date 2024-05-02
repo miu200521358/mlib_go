@@ -8,7 +8,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type BoneNameFrames struct {
@@ -194,4 +193,12 @@ func (bnfs *BoneNameFrames) GetMaxFrame() float32 {
 	}
 
 	return slices.Max(bnfs.RegisteredIndexes)
+}
+
+func (bnfs *BoneNameFrames) GetMinFrame() float32 {
+	if len(bnfs.RegisteredIndexes) == 0 {
+		return 0
+	}
+
+	return slices.Min(bnfs.RegisteredIndexes)
 }

@@ -23,6 +23,7 @@ func NewMorphNameFrames(name string) *MorphNameFrames {
 		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*deform.MorphFrame](),
 		Name:                      name,
 		RegisteredIndexes:         []float32{},
+		lock:                      sync.RWMutex{},
 	}
 }
 
@@ -123,6 +124,14 @@ func (mnfs *MorphNameFrames) GetMaxFrame() float32 {
 	}
 
 	return slices.Max(mnfs.RegisteredIndexes)
+}
+
+func (mnfs *MorphNameFrames) GetMinFrame() float32 {
+	if len(mnfs.RegisteredIndexes) == 0 {
+		return 0
+	}
+
+	return slices.Min(mnfs.RegisteredIndexes)
 }
 
 func (mnfs *MorphNameFrames) AnimateVertex(

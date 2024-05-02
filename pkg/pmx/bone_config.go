@@ -168,6 +168,10 @@ func (s StandardBoneNames) String() string {
 	return string(s)
 }
 
+func (s StandardBoneNames) StringFromDirection(direction string) string {
+	return strings.ReplaceAll(string(s), "{d}", direction)
+}
+
 func (s StandardBoneNames) Right() string {
 	return strings.ReplaceAll(string(s), "{d}", "右")
 }

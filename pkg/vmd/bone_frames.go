@@ -24,6 +24,7 @@ type BoneFrames struct {
 func NewBoneFrames() *BoneFrames {
 	return &BoneFrames{
 		Data: make(map[string]*BoneNameFrames, 0),
+		lock: sync.RWMutex{},
 	}
 }
 
@@ -40,6 +41,13 @@ func (bfs *BoneFrames) Append(bnfs *BoneNameFrames) {
 	defer bfs.lock.Unlock()
 
 	bfs.Data[bnfs.Name] = bnfs
+}
+
+func (bfs *BoneFrames) Delete(boneName string) {
+	bfs.lock.Lock()
+	defer bfs.lock.Unlock()
+
+	delete(bfs.Data, boneName)
 }
 
 func (bfs *BoneFrames) GetItem(boneName string) *BoneNameFrames {
@@ -109,7 +117,7 @@ func (bfs *BoneFrames) GetMaxFrame() float32 {
 func (bfs *BoneFrames) GetMinFrame() float32 {
 	minFno := float32(math.MaxFloat32)
 	for _, bnfs := range bfs.Data {
-		fno := bnfs.GetMaxFrame()
+		fno := bnfs.GetMinFrame()
 		if fno < minFno {
 			minFno = fno
 		}
@@ -129,6 +137,7 @@ func (bfs *BoneFrames) Animate(
 
 	// IK事前計算
 	if isCalcIk {
+		// ボーン変形行列操作
 		bfs.prepareIkSolvers(frame, model, targetBoneNames, isCalcMorph)
 	}
 
@@ -355,11 +364,11 @@ ikLoop:
 					"[%.2f][%03d][%s][%05.0f][01][回転軸・角度] linkAxis: %s, linkAngle: %.5f\n",
 					frame, loop, linkBone.Name, count-1, linkAxis.String(), mmath.ToDegree(linkAngle),
 				)
-			}
 
-			fmt.Fprintf(ikFile,
-				"[%.2f][%03d][%s][%05.0f][01][回転角度終了判定] linkAngle: %v(%0.6f)\n",
-				frame, loop, linkBone.Name, count-1, linkAngle < 1e-6, linkAngle)
+				fmt.Fprintf(ikFile,
+					"[%.2f][%03d][%s][%05.0f][01][回転角度終了判定] linkAngle: %v(%0.6f)\n",
+					frame, loop, linkBone.Name, count-1, linkAngle < 1e-6, linkAngle)
+			}
 
 			// 角度がほとんどない場合、終了
 			if linkAngle < 1e-7 || (linkBone.HasFixedAxis() && linkAngle < 1e-2) {

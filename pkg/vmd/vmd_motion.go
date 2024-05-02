@@ -1,8 +1,6 @@
 package vmd
 
 import (
-	"sync"
-
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/deform"
@@ -21,8 +19,6 @@ type VmdMotion struct {
 	LightFrames  *LightFrames
 	ShadowFrames *ShadowFrames
 	IkFrames     *IkFrames
-	lock         sync.RWMutex // マップアクセス制御用
-
 }
 
 func NewVmdMotion(path string) *VmdMotion {
@@ -156,23 +152,5 @@ func (m *VmdMotion) AnimateBoneWithMorphs(
 	isCalcIk bool,
 	isCalcMorph bool,
 ) *deform.BoneDeltas {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-
-	// ボーン変形行列操作
-	// IKリンクボーンの回転量を初期化
-	for _, bnfs := range m.BoneFrames.Data {
-		for _, bf := range bnfs.Data {
-			bf.IkRotation = mmath.NewRotationModelByDegrees(mmath.NewMVec3())
-		}
-	}
-
-	for _, bone := range model.Bones.Data {
-		// ボーンフレームを生成
-		if !m.BoneFrames.Contains(bone.Name) {
-			m.BoneFrames.Append(NewBoneNameFrames(bone.Name))
-		}
-	}
-
 	return m.BoneFrames.Animate(frame, model, boneNames, isCalcIk, isCalcMorph)
 }

@@ -76,8 +76,8 @@ func (mfs *MorphFrames) GetMaxFrame() float32 {
 
 func (mfs *MorphFrames) GetMinFrame() float32 {
 	minFno := float32(math.MaxFloat32)
-	for _, bnfs := range mfs.Data {
-		fno := bnfs.GetMaxFrame()
+	for _, mnfs := range mfs.Data {
+		fno := mnfs.GetMinFrame()
 		if fno < minFno {
 			minFno = fno
 		}
