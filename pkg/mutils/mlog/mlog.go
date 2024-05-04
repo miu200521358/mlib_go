@@ -7,6 +7,7 @@ var level = 20
 const (
 	VERBOSE    = 0
 	IK_VERBOSE = 1
+	VERBOSE2   = 2
 	DEBUG      = 10
 	INFO       = 20
 	WARN       = 30
@@ -20,6 +21,10 @@ func init() {
 
 func IsVerbose() bool {
 	return level < DEBUG
+}
+
+func IsVerbose2() bool {
+	return level == VERBOSE2
 }
 
 func IsIkVerbose() bool {
@@ -38,6 +43,13 @@ func SetLevel(l int) {
 // Verbose 冗長ログ
 func V(message string, param ...interface{}) {
 	if level < DEBUG {
+		log.Printf(message, param...)
+	}
+}
+
+// Verbose2 冗長ログ
+func V2(message string, param ...interface{}) {
+	if VERBOSE2 <= level && level < DEBUG {
 		log.Printf(message, param...)
 	}
 }
