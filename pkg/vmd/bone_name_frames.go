@@ -87,6 +87,8 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *deform.BoneFrame {
 				MorphLocalScale:    nextBf.MorphLocalScale.Copy(),
 				// IKとかの計算値はコピーしないで初期値
 				IkRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+				// 補間曲線はとりあえず初期値
+				Curves: deform.NewBoneCurves(),
 			}
 			return copied
 		} else {

@@ -2,7 +2,8 @@ package mmath
 
 import (
 	"math"
-	"sort"
+
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 func gradient(values []float64) []float64 {
@@ -15,57 +16,120 @@ func gradient(values []float64) []float64 {
 	return result
 }
 
-func clip(values []float64, min, max float64) []float64 {
-	result := make([]float64, len(values))
-	for i, v := range values {
-		if v < min {
-			result[i] = min
-		} else if v > max {
-			result[i] = max
-		} else {
-			result[i] = v
-		}
-	}
-	return result
-}
-
-func diff(values []float64) []float64 {
-	result := make([]float64, len(values)-1)
-	for i := range result {
-		result[i] = values[i+1] - values[i]
-	}
-	return result
-}
-
-func CreateInfections(values []float64, threshold, tolerance float64) []int {
+func FindInflectionPoints(values []float64, tolerance float64) map[int]int {
 	ysPrime := gradient(values)
-	ysDoublePrime := gradient(ysPrime)
 
-	var inflectionPoints []int
-	for i, v := range ysDoublePrime {
-		if math.Abs(v) >= threshold {
-			inflectionPoints = append(inflectionPoints, i)
+	primePoints := make(map[int]int)
+	prevInflectionPoint := 0
+	for i, v := range ysPrime {
+		if i > 0 && math.Abs(v) > tolerance && ysPrime[i-1]*v < 0 {
+			// ゼロに近しい許容値範囲外で前回と符号が変わっている場合、変曲点と見なす
+			primePoints[prevInflectionPoint] = i
+			prevInflectionPoint = i
 		}
 	}
 
-	ysDoublePrimeSign := make([]float64, len(ysDoublePrime))
-	for i, v := range clip(ysDoublePrime, -tolerance, tolerance) {
-		ysDoublePrimeSign[i] = math.Copysign(1, v)
-	}
-
-	ysDoublePrimeDiff := diff(ysDoublePrimeSign)
-
-	var signChangeIndices []int
-	for i, v := range ysDoublePrimeDiff {
-		if v != 0 {
-			signChangeIndices = append(signChangeIndices, i)
+	nonMovingPoints := make(map[int]int)
+	startIdx := -1
+	for i, v := range ysPrime {
+		if math.Abs(v) <= tolerance {
+			// ゼロに近しい許容範囲内
+			if startIdx < 0 {
+				// 開始INDEXが未設定の場合、設定
+				startIdx = i
+			} else {
+				continue
+			}
+		} else {
+			// 許容範囲外になった場合
+			if startIdx >= 0 && i-startIdx > 2 {
+				// 開始地点と終了地点を記録
+				nonMovingPoints[startIdx] = i
+				startIdx = -1
+			}
 		}
 	}
 
-	inflections := append(inflectionPoints, signChangeIndices...)
-	inflections = append(inflections, 0, len(values)-1)
+	if startIdx >= 0 && startIdx < len(ysPrime)-2 {
+		// 最後に停止があった場合、最後のキーフレを保持
+		nonMovingPoints[startIdx] = len(ysPrime) - 1
+	}
 
-	sort.Ints(inflections)
+	return MergeInflectionPoints(values, []map[int]int{primePoints, nonMovingPoints})
+}
 
-	return inflections
+func MergeInflectionPoints(values []float64, inflectionPointsList []map[int]int) map[int]int {
+	inflectionIndexes := make([]int, 0)
+	inflectionPoints := make(map[int]int)
+	inflectionEndPoints := make(map[int]int)
+	for i := range values {
+		for _, iPoints := range inflectionPointsList {
+			if _, ok := iPoints[i]; ok {
+				maxInflectionIndex := mutils.MaxInt(inflectionIndexes)
+				if maxInflectionIndex <= i {
+					// 今回の開始INDEXが最大INDEXより大きい場合、そのまま追加
+					inflectionPoints[i] = iPoints[i]
+					inflectionEndPoints[iPoints[i]] = i
+
+					inflectionIndexes = append(inflectionIndexes, i)
+					inflectionIndexes = append(inflectionIndexes, iPoints[i])
+				} else {
+					// 最大INDEXより小さい場合、分割する
+					inflectionMaxStart := inflectionPoints[maxInflectionIndex]
+					inflectionMaxEnd := maxInflectionIndex
+
+					vs := []int{inflectionMaxStart, inflectionMaxEnd, i, iPoints[i]}
+					mutils.SortInts(vs)
+
+					if (vs[1]-vs[0] < 2 && vs[2]-vs[1] < 2 && vs[3]-vs[2] < 2) ||
+						(vs[1]-vs[0] < 2 && vs[2]-vs[1] >= 2 && vs[3]-vs[2] < 2) {
+						// 全部連続している場合、0-3を繋ぐ
+						// 0,1...2,3 の場合、1,2を削除して0-3を繋ぐ
+						delete(inflectionPoints, vs[1])
+						delete(inflectionPoints, vs[2])
+						delete(inflectionEndPoints, vs[1])
+						delete(inflectionEndPoints, vs[2])
+
+						inflectionPoints[vs[0]] = vs[3]
+						inflectionEndPoints[vs[3]] = vs[0]
+					} else if vs[1]-vs[0] < 2 && vs[2]-vs[1] < 2 && vs[3]-vs[2] >= 2 {
+						// 0,1,2...3 の場合、1を削除して0-1,1-3を繋ぐ
+						delete(inflectionPoints, vs[1])
+						delete(inflectionEndPoints, vs[1])
+
+						inflectionPoints[vs[0]] = vs[2]
+						inflectionEndPoints[vs[2]] = vs[0]
+
+						inflectionPoints[vs[2]] = vs[3]
+						inflectionEndPoints[vs[3]] = vs[2]
+					} else if vs[1]-vs[0] >= 2 && vs[2]-vs[1] < 2 && vs[3]-vs[2] < 2 {
+						// 0...1,2,3 の場合、2を削除して0-2,2-3を繋ぐ
+						delete(inflectionPoints, vs[2])
+						delete(inflectionEndPoints, vs[2])
+
+						inflectionPoints[vs[0]] = vs[1]
+						inflectionEndPoints[vs[1]] = vs[0]
+
+						inflectionPoints[vs[1]] = vs[3]
+						inflectionEndPoints[vs[3]] = vs[1]
+					} else {
+						// 全部離れている場合、全部登録
+						inflectionPoints[vs[0]] = vs[1]
+						inflectionEndPoints[vs[1]] = vs[0]
+
+						inflectionPoints[vs[1]] = vs[2]
+						inflectionEndPoints[vs[2]] = vs[1]
+
+						inflectionPoints[vs[2]] = vs[3]
+						inflectionEndPoints[vs[3]] = vs[2]
+					}
+
+					inflectionIndexes = append(inflectionIndexes, i)
+					inflectionIndexes = append(inflectionIndexes, iPoints[i])
+				}
+			}
+		}
+	}
+
+	return inflectionPoints
 }

@@ -28,6 +28,26 @@ func Contains[S ~[]E, E comparable](s S, v E) bool {
 	return exists
 }
 
+func MaxInt(arr []int) int {
+	max := math.MinInt64
+	for _, v := range arr {
+		if v > max {
+			max = v
+		}
+	}
+	return max
+}
+
+func MaxFloat(arr []float64) float64 {
+	max := math.SmallestNonzeroFloat64
+	for _, v := range arr {
+		if v > max {
+			max = v
+		}
+	}
+	return max
+}
+
 // 中央値計算
 func Median(nums []float64) float64 {
 	sortedNums := make([]float64, len(nums))
@@ -83,6 +103,8 @@ func Mean2DHorizontal(nums [][]float64) []float64 {
 	return horizontal
 }
 
+// ------------------
+
 func SearchFloat32s(a []float32, x float32) int {
 	return sort.Search(len(a), func(i int) bool { return a[i] >= x })
 }
@@ -106,11 +128,13 @@ func (x Float32Slice) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
 
 // isNaN32 is a copy of math.IsNaN to avoid a dependency on the math package.
 func isNaN32(f float32) bool {
-	return f != f
+	return math.IsNaN(float64(f))
 }
 
 // Sort is a convenience method: x.Sort() calls Sort(x).
 func (x Float32Slice) Sort() { sort.Sort(x) }
+
+// ------------------
 
 func SearchFloat64s(a []float64, x float64) int {
 	return sort.Search(len(a), func(i int) bool { return a[i] >= x })
@@ -135,8 +159,34 @@ func (x Float64Slice) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
 
 // isNaN64 is a copy of math.IsNaN to avoid a dependency on the math package.
 func isNaN64(f float64) bool {
-	return f != f
+	return math.IsNaN(f)
 }
 
 // Sort is a convenience method: x.Sort() calls Sort(x).
 func (x Float64Slice) Sort() { sort.Sort(x) }
+
+// ------------------
+
+func SearchInts(a []int, x int) int {
+	return sort.Search(len(a), func(i int) bool { return a[i] >= x })
+}
+
+func SortInts(x []int) { sort.Sort(IntSlice(x)) }
+
+// IntSlice implements Interface for a []int, sorting in increasing order,
+// with not-a-number (NaN) values ordered before other values.
+type IntSlice []int
+
+func (x IntSlice) Len() int { return len(x) }
+
+// Less reports whether x[i] should be ordered before x[j], as required by the sort Interface.
+// Note that floating-point comparison by itself is not a transitive relation: it does not
+// report a consistent ordering for not-a-number (NaN) values.
+// This implementation of Less places NaN values before any others, by using:
+//
+//	x[i] < x[j] || (math.IsNaN(x[i]) && !math.IsNaN(x[j]))
+func (x IntSlice) Less(i, j int) bool { return x[i] < x[j] }
+func (x IntSlice) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
+
+// Sort is a convenience method: x.Sort() calls Sort(x).
+func (x IntSlice) Sort() { sort.Sort(x) }
