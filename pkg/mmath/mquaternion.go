@@ -701,56 +701,136 @@ func VectorToRadian(a *MVec3, b *MVec3) float64 {
 
 // FindSlerpT 始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q1, Q2, t) ≈ Qtとなるtを見つけます。
 func FindSlerpT(Q1, Q2, Qt *MQuaternion) float64 {
-	t0 := 0.5
-	eps := 1e-15
-	err := 1e-20
-	maxStep := 0.3
-
-	return findSlerpT(Q1, Q2, Qt, t0, eps, err, maxStep)
+	tol := 1e-15
+	return findSlerpTGoldenSection(Q1, Q2, Qt, tol)
 }
 
-// findSlerpT uses Newton's method to approximate the t value for which Slerp(Q1, Q2, t) approximates Qt.
-func findSlerpT(Q1, Q2, Qt *MQuaternion, t0, eps, err, maxStep float64) float64 {
-	maxIterations := 20
-	for i := 0; i < maxIterations; i++ {
-		f := quatError(Q1, Q2, Qt, t0)
-		df := quatErrorDerivative(Q1, Q2, Qt, t0, eps)
+// findSlerpTGoldenSection ensures consistent quaternion signs before finding t.
+func findSlerpTGoldenSection(Q1, Q2, Qt *MQuaternion, tol float64) float64 {
+	phi := (1 + math.Sqrt(5)) / 2
+	maxIterations := 100
 
-		// 微分値がしきい値以下ならば調整
-		if df == 0 {
-			df = eps
-		} else if math.Abs(df) < eps {
-			df = eps * (df / math.Abs(df)) // df の符号を保持しつつ小さい値で置換
-		}
+	// 初期範囲の設定
+	a := 0.0
+	b := 1.0
+	c := b - (b-a)/phi
+	d := a + (b-a)/phi
 
-		// Update t0 using Newton's method with step limit
-		step := -f / df
-		if math.Abs(step) > maxStep {
-			step = maxStep * (step / math.Abs(step))
-		}
-
-		// Update t0 using Newton's method
-		t1 := t0 + step
-
-		if math.Abs(t1-t0) < err {
-			return t1
-		}
-
-		t0 = t1
+	q2 := Q2
+	if Q1.Dot(Q2) < 0 {
+		q2 = Q2.Negated()
 	}
-	return math.Min(math.Max(math.Abs(t0), 0), 1)
+	Q2 = q2
+
+	// 誤差の計算関数
+	errorFunc := func(t float64) float64 {
+		tQuat := Q1.Slerp(Q2, t)
+		dot := math.Abs(tQuat.Dot(Qt))
+		return 1 - dot
+	}
+
+	// 初期の誤差計算
+	fc := errorFunc(c)
+	fd := errorFunc(d)
+
+	for i := 0; i < maxIterations; i++ {
+		if math.Abs(b-a) < tol {
+			return (a + b) / 2
+		}
+		if fc < fd {
+			b = d
+			d = c
+			fd = fc
+			c = b - (b-a)/phi
+			fc = errorFunc(c)
+		} else {
+			a = c
+			c = d
+			fc = fd
+			d = a + (b-a)/phi
+			fd = errorFunc(d)
+		}
+	}
+
+	// 終了条件に達したら範囲の中間点を返す
+	return (a + b) / 2
 }
 
-// quatError calculates the error between Slerp(Q1, Q2, t) and the target quaternion Qt.
-func quatError(Q1, Q2, Qt *MQuaternion, t float64) float64 {
-	t2 := Q1.Slerp(Q2, t)
-	dot := math.Abs(t2.Dot(Qt))
-	return 1 - dot
+// FindSlerpTBisection 始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q1, Q2, t) ≈ Qtとなるtを二分法で見つけます。
+func FindSlerpTBisection(Q1, Q2, Qt *MQuaternion, tol float64) float64 {
+	low := 0.00001
+	high := 0.99999
+	mid := (low + high) / 2
+
+	maxIterations := 50
+
+	for i := 0; i < maxIterations; i++ {
+		// Slerpで中間のクオータニオンを計算し、誤差を測定
+		midQuat := Q1.Slerp(Q2, mid)
+		dot := math.Abs(midQuat.Dot(Qt))
+		err := 1 - dot
+
+		// 誤差が許容範囲内であれば終了
+		if err < tol {
+			return mid
+		}
+
+		// 中間点の誤差に基づいて範囲を狭める
+		lowQuat := Q1.Slerp(Q2, low)
+		if lowQuat.Dot(Qt) < midQuat.Dot(Qt) {
+			low = mid
+		} else {
+			high = mid
+		}
+
+		mid = (low + high) / 2
+	}
+
+	return mid
 }
 
-// quatErrorDerivative calculates the derivative of the error function with respect to t using central difference.
-func quatErrorDerivative(Q1, Q2, Qt *MQuaternion, t, eps float64) float64 {
-	fPlus := quatError(Q1, Q2, Qt, t+eps)
-	fMinus := quatError(Q1, Q2, Qt, t-eps)
-	return (fPlus - fMinus) / (2 * eps)
-}
+// // findSlerpT uses Newton's method to approximate the t value for which Slerp(Q1, Q2, t) approximates Qt.
+// func findSlerpT(Q1, Q2, Qt *MQuaternion, t0, eps, err, maxStep float64) float64 {
+// 	maxIterations := 20
+// 	for i := 0; i < maxIterations; i++ {
+// 		f := quatError(Q1, Q2, Qt, t0)
+// 		df := quatErrorDerivative(Q1, Q2, Qt, t0, eps)
+
+// 		// 微分値がしきい値以下ならば調整
+// 		if df == 0 {
+// 			df = eps
+// 		} else if math.Abs(df) < eps {
+// 			df = eps * (df / math.Abs(df)) // df の符号を保持しつつ小さい値で置換
+// 		}
+
+// 		// Update t0 using Newton's method with step limit
+// 		step := -f / df
+// 		if math.Abs(step) > maxStep {
+// 			step = maxStep * (step / math.Abs(step))
+// 		}
+
+// 		// Update t0 using Newton's method
+// 		t1 := t0 + step
+
+// 		if math.Abs(t1-t0) < err {
+// 			return t1
+// 		}
+
+// 		t0 = t1
+// 	}
+// 	return math.Min(math.Max(math.Abs(t0), 0), 1)
+// }
+
+// // quatError calculates the error between Slerp(Q1, Q2, t) and the target quaternion Qt.
+// func quatError(Q1, Q2, Qt *MQuaternion, t float64) float64 {
+// 	t2 := Q1.Slerp(Q2, t)
+// 	dot := math.Abs(t2.Dot(Qt))
+// 	return 1 - dot
+// }
+
+// // quatErrorDerivative calculates the derivative of the error function with respect to t using central difference.
+// func quatErrorDerivative(Q1, Q2, Qt *MQuaternion, t, eps float64) float64 {
+// 	fPlus := quatError(Q1, Q2, Qt, t+eps)
+// 	fMinus := quatError(Q1, Q2, Qt, t-eps)
+// 	return (fPlus - fMinus) / (2 * eps)
+// }
