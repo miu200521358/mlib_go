@@ -50,7 +50,7 @@ func FindInflectionPoints(values []float64, tolerance float64) map[int]int {
 		}
 	}
 
-	if startIdx >= 0 && startIdx < len(ysPrime)-2 {
+	if startIdx > 0 && startIdx < len(ysPrime)-2 {
 		// 最後に停止があった場合、最後のキーフレを保持
 		nonMovingPoints[startIdx] = len(ysPrime) - 1
 	}
@@ -78,7 +78,12 @@ func MergeInflectionPoints(values []float64, inflectionPointsList []map[int]int)
 					inflectionMaxStart := inflectionPoints[maxInflectionIndex]
 					inflectionMaxEnd := maxInflectionIndex
 
-					vs := []int{inflectionMaxStart, inflectionMaxEnd, i, iPoints[i]}
+					vs := []int{inflectionMaxEnd, i, iPoints[i]}
+					if i > 0 && inflectionMaxStart > 0 {
+						vs = append(vs, inflectionMaxStart)
+					} else {
+						vs = append(vs, i)
+					}
 					mutils.SortInts(vs)
 
 					if (vs[1]-vs[0] < 2 && vs[2]-vs[1] < 2 && vs[3]-vs[2] < 2) ||
