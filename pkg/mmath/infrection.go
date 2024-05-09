@@ -16,13 +16,13 @@ func gradient(values []float64) []float64 {
 	return result
 }
 
-func FindInflectionPoints(values []float64, tolerance float64) map[int]int {
+func FindInflectionPoints(values []float64, tolerance float64, space int) map[int]int {
 	ysPrime := gradient(values)
 
 	primePoints := make(map[int]int)
 	prevInflectionPoint := 0
 	for i, v := range ysPrime {
-		if i > 0 && math.Abs(v) > tolerance && ysPrime[i-1]*v < 0 && i-prevInflectionPoint > 2 {
+		if i > 0 && math.Abs(v) > tolerance && ysPrime[i-1]*v < 0 && i-prevInflectionPoint > space {
 			// ゼロに近しい許容値範囲外で前回と符号が変わっている場合、変曲点と見なす
 			primePoints[prevInflectionPoint] = i
 			prevInflectionPoint = i
@@ -42,7 +42,7 @@ func FindInflectionPoints(values []float64, tolerance float64) map[int]int {
 			}
 		} else {
 			// 許容範囲外になった場合
-			if startIdx >= 0 && i-startIdx > 2 {
+			if startIdx >= 0 && i-startIdx > space {
 				// 開始地点と終了地点を記録
 				nonMovingPoints[startIdx] = i
 				startIdx = -1
@@ -50,15 +50,15 @@ func FindInflectionPoints(values []float64, tolerance float64) map[int]int {
 		}
 	}
 
-	if startIdx > 0 && startIdx < len(ysPrime)-2 {
+	if startIdx > 0 && (len(ysPrime)-1)-startIdx > space {
 		// 最後に停止があった場合、最後のキーフレを保持
 		nonMovingPoints[startIdx] = len(ysPrime) - 1
 	}
 
-	return MergeInflectionPoints(values, []map[int]int{primePoints, nonMovingPoints})
+	return MergeInflectionPoints(values, []map[int]int{primePoints, nonMovingPoints}, space)
 }
 
-func MergeInflectionPoints(values []float64, inflectionPointsList []map[int]int) map[int]int {
+func MergeInflectionPoints(values []float64, inflectionPointsList []map[int]int, space int) map[int]int {
 	inflectionAllIndexes := make([]int, 0)
 	for _, iPoints := range inflectionPointsList {
 		for i, j := range iPoints {
@@ -76,7 +76,7 @@ func MergeInflectionPoints(values []float64, inflectionPointsList []map[int]int)
 			prevIdx = iIdx
 			continue
 		}
-		if iIdx-prevIdx > 1 {
+		if iIdx-prevIdx > space {
 			inflectionPoints[prevIdx] = iIdx
 			prevIdx = iIdx
 		}
