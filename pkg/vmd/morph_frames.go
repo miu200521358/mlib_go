@@ -87,7 +87,7 @@ func (mfs *MorphFrames) GetMinFrame() int {
 func (fs *MorphFrames) GetCount() int {
 	count := 0
 	for _, fs := range fs.Data {
-		count += len(fs.RegisteredIndexes)
+		count += fs.RegisteredIndexes.Len()
 	}
 	return count
 }

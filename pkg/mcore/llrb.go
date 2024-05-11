@@ -43,6 +43,10 @@ func (i IntIndexes) Min() int {
 	return int(i.LLRB.Min().(Int))
 }
 
+func (i IntIndexes) Len() int {
+	return i.LLRB.Len()
+}
+
 func (i IntIndexes) List() []int {
 	list := make([]int, i.LLRB.Len())
 	i.LLRB.AscendGreaterOrEqual(i.LLRB.Min(), func(item llrb.Item) bool {

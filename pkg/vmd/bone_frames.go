@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
@@ -69,29 +70,23 @@ func (fs *BoneFrames) GetNames() []string {
 }
 
 func (fs *BoneFrames) GetIndexes() []int {
-	indexes := make([]int, 0)
+	indexes := mcore.NewIntIndexes()
 	for _, fs := range fs.Data {
 		for _, index := range fs.Indexes {
-			if !slices.Contains(indexes, index) {
-				indexes = append(indexes, index)
-			}
+			indexes.ReplaceOrInsert(mcore.NewInt(index))
 		}
 	}
-	slices.Sort(indexes)
-	return indexes
+	return indexes.List()
 }
 
 func (fs *BoneFrames) GetRegisteredIndexes() []int {
-	indexes := make([]int, 0)
+	indexes := mcore.NewIntIndexes()
 	for _, fs := range fs.Data {
 		for _, index := range fs.RegisteredIndexes.List() {
-			if !slices.Contains(indexes, index) {
-				indexes = append(indexes, index)
-			}
+			indexes.ReplaceOrInsert(mcore.NewInt(index))
 		}
 	}
-	slices.Sort(indexes)
-	return indexes
+	return indexes.List()
 }
 
 func (fs *BoneFrames) GetCount() int {
