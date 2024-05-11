@@ -49,19 +49,19 @@ func (v *IndexNameModel) Copy() IIndexNameModel {
 }
 
 // Tのリスト基底クラス
-type IndexNameModelCorrection[T IIndexNameModel] struct {
+type IIndexNameModels[T IIndexNameModel] struct {
 	Data        map[int]T
 	NameIndexes map[string]int
 }
 
-func NewIndexNameModelCorrection[T IIndexNameModel]() *IndexNameModelCorrection[T] {
-	return &IndexNameModelCorrection[T]{
+func NewIndexNameModelCorrection[T IIndexNameModel]() *IIndexNameModels[T] {
+	return &IIndexNameModels[T]{
 		Data:        make(map[int]T, 0),
 		NameIndexes: make(map[string]int, 0),
 	}
 }
 
-func (c *IndexNameModelCorrection[T]) GetItem(index int) T {
+func (c *IIndexNameModels[T]) GetItem(index int) T {
 	if val, ok := c.Data[index]; ok {
 		return val
 	}
@@ -69,11 +69,11 @@ func (c *IndexNameModelCorrection[T]) GetItem(index int) T {
 	panic("[BaseIndexDictModel] index out of range: index: " + string(rune(index)))
 }
 
-func (c *IndexNameModelCorrection[T]) SetItem(index int, v T) {
+func (c *IIndexNameModels[T]) SetItem(index int, v T) {
 	c.Data[index] = v
 }
 
-func (c *IndexNameModelCorrection[T]) Append(value T) {
+func (c *IIndexNameModels[T]) Append(value T) {
 	if value.GetIndex() < 0 {
 		value.SetIndex(len(c.Data))
 	}
@@ -84,7 +84,7 @@ func (c *IndexNameModelCorrection[T]) Append(value T) {
 	}
 }
 
-func (c *IndexNameModelCorrection[T]) GetIndexes() []int {
+func (c *IIndexNameModels[T]) GetIndexes() []int {
 	indexes := make([]int, 0, len(c.NameIndexes))
 	for _, value := range c.NameIndexes {
 		indexes = append(indexes, value)
@@ -93,7 +93,7 @@ func (c *IndexNameModelCorrection[T]) GetIndexes() []int {
 	return indexes
 }
 
-func (c *IndexNameModelCorrection[T]) GetNames() []string {
+func (c *IIndexNameModels[T]) GetNames() []string {
 	names := make([]string, 0, len(c.NameIndexes))
 	for index := range c.GetIndexes() {
 		names = append(names, c.Data[index].GetName())
@@ -101,33 +101,33 @@ func (c *IndexNameModelCorrection[T]) GetNames() []string {
 	return names
 }
 
-func (c *IndexNameModelCorrection[T]) DeleteItem(index int) {
+func (c *IIndexNameModels[T]) DeleteItem(index int) {
 	delete(c.Data, index)
 }
 
-func (c *IndexNameModelCorrection[T]) Len() int {
+func (c *IIndexNameModels[T]) Len() int {
 	return len(c.Data)
 }
 
-func (c *IndexNameModelCorrection[T]) ContainsIndex(key int) bool {
+func (c *IIndexNameModels[T]) ContainsIndex(key int) bool {
 	_, ok := c.Data[key]
 	return ok
 }
 
-func (c *IndexNameModelCorrection[T]) ContainsName(key string) bool {
+func (c *IIndexNameModels[T]) ContainsName(key string) bool {
 	_, ok := c.NameIndexes[key]
 	return ok
 }
 
-func (c *IndexNameModelCorrection[T]) IsEmpty() bool {
+func (c *IIndexNameModels[T]) IsEmpty() bool {
 	return len(c.Data) == 0
 }
 
-func (c *IndexNameModelCorrection[T]) IsNotEmpty() bool {
+func (c *IIndexNameModels[T]) IsNotEmpty() bool {
 	return len(c.Data) > 0
 }
 
-func (c *IndexNameModelCorrection[T]) LastIndex() int {
+func (c *IIndexNameModels[T]) LastIndex() int {
 	maxIndex := 0
 	for index := range c.Data {
 		if index > maxIndex {
@@ -137,7 +137,7 @@ func (c *IndexNameModelCorrection[T]) LastIndex() int {
 	return maxIndex
 }
 
-func (c *IndexNameModelCorrection[T]) GetSortedData() []T {
+func (c *IIndexNameModels[T]) GetSortedData() []T {
 	sortedData := make([]T, 0, len(c.NameIndexes))
 	for index := range c.GetIndexes() {
 		sortedData = append(sortedData, c.Data[index])
@@ -145,19 +145,19 @@ func (c *IndexNameModelCorrection[T]) GetSortedData() []T {
 	return sortedData
 }
 
-func (c *IndexNameModelCorrection[T]) GetItemByName(name string) T {
+func (c *IIndexNameModels[T]) GetItemByName(name string) T {
 	if index, ok := c.NameIndexes[name]; ok {
 		return c.Data[index]
 	}
 	panic("[BaseIndexDictModel] name not found: name: " + name)
 }
 
-func (v *IndexNameModelCorrection[T]) Contains(index int) bool {
+func (v *IIndexNameModels[T]) Contains(index int) bool {
 	_, ok := v.Data[index]
 	return ok
 }
 
-func (v *IndexNameModelCorrection[T]) ContainsByName(name string) bool {
+func (v *IIndexNameModels[T]) ContainsByName(name string) bool {
 	_, ok := v.NameIndexes[name]
 	return ok
 }

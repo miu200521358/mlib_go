@@ -66,11 +66,11 @@ func NewJointByName(name string) *Joint {
 
 // ジョイントリスト
 type Joints struct {
-	*mcore.IndexNameModelCorrection[*Joint]
+	*mcore.IIndexNameModels[*Joint]
 }
 
 func NewJoints() *Joints {
 	return &Joints{
-		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Joint](),
+		IIndexNameModels: mcore.NewIndexNameModelCorrection[*Joint](),
 	}
 }

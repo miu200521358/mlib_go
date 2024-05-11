@@ -10,14 +10,14 @@ import (
 )
 
 type CameraFrames struct {
-	*mcore.IndexFloatModelCorrection[*CameraFrame]
+	*mcore.IIndexFloatModels[*CameraFrame]
 	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewCameraFrames() *CameraFrames {
 	return &CameraFrames{
-		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*CameraFrame](),
-		RegisteredIndexes:         []float32{},
+		IIndexFloatModels: mcore.NewIndexFloatModelCorrection[*CameraFrame](),
+		RegisteredIndexes: []float32{},
 	}
 }
 

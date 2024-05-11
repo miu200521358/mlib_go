@@ -10,14 +10,14 @@ import (
 )
 
 type ShadowFrames struct {
-	*mcore.IndexFloatModelCorrection[*ShadowFrame]
+	*mcore.IIndexFloatModels[*ShadowFrame]
 	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewShadowFrames() *ShadowFrames {
 	return &ShadowFrames{
-		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*ShadowFrame](),
-		RegisteredIndexes:         []float32{},
+		IIndexFloatModels: mcore.NewIndexFloatModelCorrection[*ShadowFrame](),
+		RegisteredIndexes: []float32{},
 	}
 }
 

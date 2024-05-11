@@ -8,14 +8,14 @@ import (
 )
 
 type IkFrames struct {
-	*mcore.IndexFloatModelCorrection[*IkFrame]
+	*mcore.IIndexFloatModels[*IkFrame]
 	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewIkFrames() *IkFrames {
 	return &IkFrames{
-		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*IkFrame](),
-		RegisteredIndexes:         []float32{},
+		IIndexFloatModels: mcore.NewIndexFloatModelCorrection[*IkFrame](),
+		RegisteredIndexes: []float32{},
 	}
 }
 

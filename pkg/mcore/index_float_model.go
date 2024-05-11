@@ -37,19 +37,19 @@ func (v *IndexFloatModel) Copy() IIndexFloatModel {
 }
 
 // Tのリスト基底クラス
-type IndexFloatModelCorrection[T IIndexFloatModel] struct {
+type IIndexFloatModels[T IIndexFloatModel] struct {
 	Data    map[float32]T
 	Indexes []float32
 }
 
-func NewIndexFloatModelCorrection[T IIndexFloatModel]() *IndexFloatModelCorrection[T] {
-	return &IndexFloatModelCorrection[T]{
+func NewIndexFloatModelCorrection[T IIndexFloatModel]() *IIndexFloatModels[T] {
+	return &IIndexFloatModels[T]{
 		Data:    make(map[float32]T, 0),
 		Indexes: make([]float32, 0),
 	}
 }
 
-func (c *IndexFloatModelCorrection[T]) GetItem(index float32) T {
+func (c *IIndexFloatModels[T]) GetItem(index float32) T {
 	if val, ok := c.Data[index]; ok {
 		return val
 	}
@@ -57,11 +57,11 @@ func (c *IndexFloatModelCorrection[T]) GetItem(index float32) T {
 	panic("[BaseIndexDictModel] index out of range: index: " + string(rune(index)))
 }
 
-func (c *IndexFloatModelCorrection[T]) SetItem(index float32, v T) {
+func (c *IIndexFloatModels[T]) SetItem(index float32, v T) {
 	c.Data[index] = v
 }
 
-func (c *IndexFloatModelCorrection[T]) Append(value T) {
+func (c *IIndexFloatModels[T]) Append(value T) {
 	if value.GetIndex() < 0 {
 		value.SetIndex(float32(len(c.Data)))
 	}
@@ -72,32 +72,32 @@ func (c *IndexFloatModelCorrection[T]) Append(value T) {
 	c.SortIndexes()
 }
 
-func (c *IndexFloatModelCorrection[T]) SortIndexes() {
+func (c *IIndexFloatModels[T]) SortIndexes() {
 	slices.Sort(c.Indexes)
 }
 
-func (c *IndexFloatModelCorrection[T]) DeleteItem(index float32) {
+func (c *IIndexFloatModels[T]) DeleteItem(index float32) {
 	delete(c.Data, index)
 }
 
-func (c *IndexFloatModelCorrection[T]) Len() int {
+func (c *IIndexFloatModels[T]) Len() int {
 	return len(c.Data)
 }
 
-func (c *IndexFloatModelCorrection[T]) Contains(key float32) bool {
+func (c *IIndexFloatModels[T]) Contains(key float32) bool {
 	_, ok := c.Data[key]
 	return ok
 }
 
-func (c *IndexFloatModelCorrection[T]) IsEmpty() bool {
+func (c *IIndexFloatModels[T]) IsEmpty() bool {
 	return len(c.Data) == 0
 }
 
-func (c *IndexFloatModelCorrection[T]) IsNotEmpty() bool {
+func (c *IIndexFloatModels[T]) IsNotEmpty() bool {
 	return len(c.Data) > 0
 }
 
-func (c *IndexFloatModelCorrection[T]) LastIndex() float32 {
+func (c *IIndexFloatModels[T]) LastIndex() float32 {
 	maxIndex := float32(0.0)
 	for index := range c.Data {
 		if index > maxIndex {
@@ -107,7 +107,7 @@ func (c *IndexFloatModelCorrection[T]) LastIndex() float32 {
 	return maxIndex
 }
 
-func (c *IndexFloatModelCorrection[T]) GetSortedData() []T {
+func (c *IIndexFloatModels[T]) GetSortedData() []T {
 	sortedData := make([]T, len(c.Indexes))
 	for i, index := range c.Indexes {
 		sortedData[i] = c.Data[index]

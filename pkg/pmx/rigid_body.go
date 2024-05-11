@@ -143,11 +143,11 @@ func (r *RigidBody) Copy() mcore.IIndexNameModel {
 
 // 剛体リスト
 type RigidBodies struct {
-	*mcore.IndexNameModelCorrection[*RigidBody]
+	*mcore.IIndexNameModels[*RigidBody]
 }
 
 func NewRigidBodies() *RigidBodies {
 	return &RigidBodies{
-		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*RigidBody](),
+		IIndexNameModels: mcore.NewIndexNameModelCorrection[*RigidBody](),
 	}
 }

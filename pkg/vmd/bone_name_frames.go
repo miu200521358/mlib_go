@@ -11,7 +11,7 @@ import (
 )
 
 type BoneNameFrames struct {
-	*mcore.IndexFloatModelCorrection[*deform.BoneFrame]
+	*mcore.IIndexFloatModels[*deform.BoneFrame]
 	Name              string       // ボーン名
 	IkIndexes         []float32    // IK計算済みキーフレリスト
 	RegisteredIndexes []float32    // 登録対象キーフレリスト
@@ -20,11 +20,11 @@ type BoneNameFrames struct {
 
 func NewBoneNameFrames(name string) *BoneNameFrames {
 	return &BoneNameFrames{
-		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*deform.BoneFrame](),
-		Name:                      name,
-		IkIndexes:                 []float32{},
-		RegisteredIndexes:         []float32{},
-		lock:                      sync.RWMutex{},
+		IIndexFloatModels: mcore.NewIndexFloatModelCorrection[*deform.BoneFrame](),
+		Name:              name,
+		IkIndexes:         []float32{},
+		RegisteredIndexes: []float32{},
+		lock:              sync.RWMutex{},
 	}
 }
 

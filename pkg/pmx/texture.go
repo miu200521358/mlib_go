@@ -47,22 +47,22 @@ func (t *Texture) Copy() mcore.IIndexModel {
 
 // テクスチャリスト
 type Textures struct {
-	*mcore.IndexModelCorrection[*Texture]
+	*mcore.IIndexModels[*Texture]
 }
 
 func NewTextures() *Textures {
 	return &Textures{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*Texture](),
+		IIndexModels: mcore.NewIndexModelCorrection[*Texture](),
 	}
 }
 
 // 共有テクスチャ辞書
 type ToonTextures struct {
-	*mcore.IndexModelCorrection[*Texture]
+	*mcore.IIndexModels[*Texture]
 }
 
 func NewToonTextures() *ToonTextures {
 	return &ToonTextures{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*Texture](),
+		IIndexModels: mcore.NewIndexModelCorrection[*Texture](),
 	}
 }

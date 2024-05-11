@@ -37,19 +37,19 @@ func (v *IndexModel) Copy() IIndexModel {
 }
 
 // Tのリスト基底クラス
-type IndexModelCorrection[T IIndexModel] struct {
+type IIndexModels[T IIndexModel] struct {
 	Data    map[int]T
 	Indexes map[int]int
 }
 
-func NewIndexModelCorrection[T IIndexModel]() *IndexModelCorrection[T] {
-	return &IndexModelCorrection[T]{
+func NewIndexModelCorrection[T IIndexModel]() *IIndexModels[T] {
+	return &IIndexModels[T]{
 		Data:    make(map[int]T, 0),
 		Indexes: make(map[int]int, 0),
 	}
 }
 
-func (c *IndexModelCorrection[T]) GetItem(index int) T {
+func (c *IIndexModels[T]) GetItem(index int) T {
 	if index < 0 {
 		// マイナス指定の場合、後ろからの順番に置き換える
 		index = len(c.Data) + index
@@ -62,11 +62,11 @@ func (c *IndexModelCorrection[T]) GetItem(index int) T {
 	panic("[BaseIndexDictModel] index out of range: index: " + string(rune(index)))
 }
 
-func (c *IndexModelCorrection[T]) SetItem(index int, v T) {
+func (c *IIndexModels[T]) SetItem(index int, v T) {
 	c.Data[index] = v
 }
 
-func (c *IndexModelCorrection[T]) Append(value T) {
+func (c *IIndexModels[T]) Append(value T) {
 	if value.GetIndex() < 0 {
 		value.SetIndex(len(c.Data))
 	}
@@ -76,7 +76,7 @@ func (c *IndexModelCorrection[T]) Append(value T) {
 	}
 }
 
-func (c *IndexModelCorrection[T]) GetSortedIndexes() []int {
+func (c *IIndexModels[T]) GetSortedIndexes() []int {
 	keys := make([]int, 0, len(c.Indexes))
 	for key := range c.Indexes {
 		keys = append(keys, key)
@@ -85,28 +85,28 @@ func (c *IndexModelCorrection[T]) GetSortedIndexes() []int {
 	return keys
 }
 
-func (c *IndexModelCorrection[T]) DeleteItem(index int) {
+func (c *IIndexModels[T]) DeleteItem(index int) {
 	delete(c.Data, index)
 }
 
-func (c *IndexModelCorrection[T]) Len() int {
+func (c *IIndexModels[T]) Len() int {
 	return len(c.Data)
 }
 
-func (c *IndexModelCorrection[T]) Contains(key int) bool {
+func (c *IIndexModels[T]) Contains(key int) bool {
 	_, ok := c.Data[key]
 	return ok
 }
 
-func (c *IndexModelCorrection[T]) IsEmpty() bool {
+func (c *IIndexModels[T]) IsEmpty() bool {
 	return len(c.Data) == 0
 }
 
-func (c *IndexModelCorrection[T]) IsNotEmpty() bool {
+func (c *IIndexModels[T]) IsNotEmpty() bool {
 	return len(c.Data) > 0
 }
 
-func (c *IndexModelCorrection[T]) LastIndex() int {
+func (c *IIndexModels[T]) LastIndex() int {
 	maxIndex := 0
 	for index := range c.Data {
 		if index > maxIndex {
@@ -116,7 +116,7 @@ func (c *IndexModelCorrection[T]) LastIndex() int {
 	return maxIndex
 }
 
-func (c *IndexModelCorrection[T]) GetSortedData() []T {
+func (c *IIndexModels[T]) GetSortedData() []T {
 	sortedData := make([]T, len(c.Indexes))
 	for i, index := range c.GetSortedIndexes() {
 		sortedData[i] = c.Data[index]

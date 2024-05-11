@@ -7,18 +7,17 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
-
 )
 
 type LightFrames struct {
-	*mcore.IndexFloatModelCorrection[*LightFrame]
+	*mcore.IIndexFloatModels[*LightFrame]
 	RegisteredIndexes []float32 // 登録対象キーフレリスト
 }
 
 func NewLightFrames() *LightFrames {
 	return &LightFrames{
-		IndexFloatModelCorrection: mcore.NewIndexFloatModelCorrection[*LightFrame](),
-		RegisteredIndexes:         []float32{},
+		IIndexFloatModels: mcore.NewIndexFloatModelCorrection[*LightFrame](),
+		RegisteredIndexes: []float32{},
 	}
 }
 

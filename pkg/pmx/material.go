@@ -123,16 +123,16 @@ func NewMaterialByName(name string) *Material {
 
 // 材質リスト
 type Materials struct {
-	*mcore.IndexNameModelCorrection[*Material]
+	*mcore.IIndexNameModels[*Material]
 	Vertices map[int][]int
 	Faces    map[int][]int
 }
 
 func NewMaterials() *Materials {
 	return &Materials{
-		IndexNameModelCorrection: mcore.NewIndexNameModelCorrection[*Material](),
-		Vertices:                 make(map[int][]int),
-		Faces:                    make(map[int][]int),
+		IIndexNameModels: mcore.NewIndexNameModelCorrection[*Material](),
+		Vertices:         make(map[int][]int),
+		Faces:            make(map[int][]int),
 	}
 }
 

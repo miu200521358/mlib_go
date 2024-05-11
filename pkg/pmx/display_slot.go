@@ -64,11 +64,11 @@ func (v *DisplaySlot) Copy() mcore.IIndexModel {
 
 // 表示枠リスト
 type DisplaySlots struct {
-	*mcore.IndexModelCorrection[*DisplaySlot]
+	*mcore.IIndexModels[*DisplaySlot]
 }
 
 func NewDisplaySlots() *DisplaySlots {
 	return &DisplaySlots{
-		IndexModelCorrection: mcore.NewIndexModelCorrection[*DisplaySlot](),
+		IIndexModels: mcore.NewIndexModelCorrection[*DisplaySlot](),
 	}
 }
