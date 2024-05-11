@@ -602,15 +602,27 @@ func (mat *MMat4) Transpose3x3() *MMat4 {
 // Mul は行列の掛け算を行います
 func (m1 *MMat4) Mul(m2 *MMat4) {
 	var result MMat4
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
-			sum := 0.0
-			for k := 0; k < 4; k++ {
-				sum += m1[i][k] * m2[k][j]
-			}
-			result[i][j] = sum
-		}
-	}
+	// ループを展開して直接各成分を計算します
+	result[0][0] = m1[0][0]*m2[0][0] + m1[0][1]*m2[1][0] + m1[0][2]*m2[2][0] + m1[0][3]*m2[3][0]
+	result[0][1] = m1[0][0]*m2[0][1] + m1[0][1]*m2[1][1] + m1[0][2]*m2[2][1] + m1[0][3]*m2[3][1]
+	result[0][2] = m1[0][0]*m2[0][2] + m1[0][1]*m2[1][2] + m1[0][2]*m2[2][2] + m1[0][3]*m2[3][2]
+	result[0][3] = m1[0][0]*m2[0][3] + m1[0][1]*m2[1][3] + m1[0][2]*m2[2][3] + m1[0][3]*m2[3][3]
+
+	result[1][0] = m1[1][0]*m2[0][0] + m1[1][1]*m2[1][0] + m1[1][2]*m2[2][0] + m1[1][3]*m2[3][0]
+	result[1][1] = m1[1][0]*m2[0][1] + m1[1][1]*m2[1][1] + m1[1][2]*m2[2][1] + m1[1][3]*m2[3][1]
+	result[1][2] = m1[1][0]*m2[0][2] + m1[1][1]*m2[1][2] + m1[1][2]*m2[2][2] + m1[1][3]*m2[3][2]
+	result[1][3] = m1[1][0]*m2[0][3] + m1[1][1]*m2[1][3] + m1[1][2]*m2[2][3] + m1[1][3]*m2[3][3]
+
+	result[2][0] = m1[2][0]*m2[0][0] + m1[2][1]*m2[1][0] + m1[2][2]*m2[2][0] + m1[2][3]*m2[3][0]
+	result[2][1] = m1[2][0]*m2[0][1] + m1[2][1]*m2[1][1] + m1[2][2]*m2[2][1] + m1[2][3]*m2[3][1]
+	result[2][2] = m1[2][0]*m2[0][2] + m1[2][1]*m2[1][2] + m1[2][2]*m2[2][2] + m1[2][3]*m2[3][2]
+	result[2][3] = m1[2][0]*m2[0][3] + m1[2][1]*m2[1][3] + m1[2][2]*m2[2][3] + m1[2][3]*m2[3][3]
+
+	result[3][0] = m1[3][0]*m2[0][0] + m1[3][1]*m2[1][0] + m1[3][2]*m2[2][0] + m1[3][3]*m2[3][0]
+	result[3][1] = m1[3][0]*m2[0][1] + m1[3][1]*m2[1][1] + m1[3][2]*m2[2][1] + m1[3][3]*m2[3][1]
+	result[3][2] = m1[3][0]*m2[0][2] + m1[3][1]*m2[1][2] + m1[3][2]*m2[2][2] + m1[3][3]*m2[3][2]
+	result[3][3] = m1[3][0]*m2[0][3] + m1[3][1]*m2[1][3] + m1[3][2]*m2[2][3] + m1[3][3]*m2[3][3]
+
 	*m1 = result
 }
 
@@ -622,11 +634,27 @@ func (mat *MMat4) Muled(a *MMat4) *MMat4 {
 
 func (mat *MMat4) MuledFactor(v float64) *MMat4 {
 	copied := mat.Copy()
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
-			copied[i][j] *= v
-		}
-	}
+
+	copied[0][0] *= v
+	copied[0][1] *= v
+	copied[0][2] *= v
+	copied[0][3] *= v
+
+	copied[1][0] *= v
+	copied[1][1] *= v
+	copied[1][2] *= v
+	copied[1][3] *= v
+
+	copied[2][0] *= v
+	copied[2][1] *= v
+	copied[2][2] *= v
+	copied[2][3] *= v
+
+	copied[3][0] *= v
+	copied[3][1] *= v
+	copied[3][2] *= v
+	copied[3][3] *= v
+
 	return copied
 }
 
@@ -675,11 +703,25 @@ func (m *MMat4) Inverse() *MMat4 {
 
 	invDet := 1 / det
 
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
-			retMat[i][j] *= invDet
-		}
-	}
+	retMat[0][0] *= invDet
+	retMat[0][1] *= invDet
+	retMat[0][2] *= invDet
+	retMat[0][3] *= invDet
+
+	retMat[1][0] *= invDet
+	retMat[1][1] *= invDet
+	retMat[1][2] *= invDet
+	retMat[1][3] *= invDet
+
+	retMat[2][0] *= invDet
+	retMat[2][1] *= invDet
+	retMat[2][2] *= invDet
+	retMat[2][3] *= invDet
+
+	retMat[3][0] *= invDet
+	retMat[3][1] *= invDet
+	retMat[3][2] *= invDet
+	retMat[3][3] *= invDet
 
 	return &retMat
 }
