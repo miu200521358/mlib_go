@@ -6,7 +6,7 @@ package mmath
 import (
 	"github.com/go-gl/mathgl/mgl32"
 
-	"github.com/miu200521358/mlib_go/pkg/mbt"
+	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 )
 
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します

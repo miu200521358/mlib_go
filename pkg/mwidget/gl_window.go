@@ -15,11 +15,11 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/walk/pkg/walk"
 
-	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
+	"github.com/miu200521358/mlib_go/pkg/mview"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
@@ -31,7 +31,7 @@ type ModelSet struct {
 
 func (ms *ModelSet) Draw(
 	modelPhysics *mphysics.MPhysics,
-	shader *mgl.MShader,
+	shader *mview.MShader,
 	windowIndex int,
 	frame float32,
 	elapsed float32,
@@ -48,7 +48,7 @@ const RIGHT_ANGLE = 89.9
 type GlWindow struct {
 	*glfw.Window
 	ModelSets           []ModelSet
-	Shader              *mgl.MShader
+	Shader              *mview.MShader
 	WindowIndex         int
 	resourceFiles       embed.FS
 	prevCursorPos       *mmath.MVec2
@@ -138,7 +138,7 @@ func NewGlWindow(
 	gl.Enable(gl.DEBUG_OUTPUT)
 	gl.Enable(gl.DEBUG_OUTPUT_SYNCHRONOUS) // 同期的なデバッグ出力を有効にします。
 
-	shader, err := mgl.NewMShader(width, height, resourceFiles)
+	shader, err := mview.NewMShader(width, height, resourceFiles)
 	if err != nil {
 		return nil, err
 	}
@@ -268,7 +268,7 @@ func (w *GlWindow) handleKeyEvent(
 	}
 
 	// カメラの新しい位置を計算
-	radius := mgl.INITIAL_CAMERA_POSITION_Z
+	radius := mview.INITIAL_CAMERA_POSITION_Z
 
 	// 球面座標系をデカルト座標系に変換
 	cameraX := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Cos(mgl64.DegToRad(w.yaw))
@@ -277,7 +277,7 @@ func (w *GlWindow) handleKeyEvent(
 
 	// カメラ位置を更新
 	w.Shader.CameraPosition.SetX(cameraX)
-	w.Shader.CameraPosition.SetY(mgl.INITIAL_CAMERA_POSITION_Y + cameraY)
+	w.Shader.CameraPosition.SetY(mview.INITIAL_CAMERA_POSITION_Y + cameraY)
 	w.Shader.CameraPosition.SetZ(cameraZ)
 }
 
@@ -365,14 +365,14 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 
 		// 球面座標系をデカルト座標系に変換
 		// radius := float64(-w.Shader.CameraPosition.Sub(w.Shader.LookAtCenterPosition).Length())
-		radius := float64(mgl.INITIAL_CAMERA_POSITION_Z)
+		radius := float64(mview.INITIAL_CAMERA_POSITION_Z)
 		cameraX := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Cos(mgl64.DegToRad(w.yaw))
 		cameraY := radius * math.Sin(mgl64.DegToRad(w.pitch))
 		cameraZ := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw))
 
 		// カメラ位置を更新
 		w.Shader.CameraPosition.SetX(cameraX)
-		w.Shader.CameraPosition.SetY(mgl.INITIAL_CAMERA_POSITION_Y + cameraY)
+		w.Shader.CameraPosition.SetY(mview.INITIAL_CAMERA_POSITION_Y + cameraY)
 		w.Shader.CameraPosition.SetZ(cameraZ)
 		// mlog.D("xOffset %.8f, yOffset %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
 		// 	xOffset, yOffset, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
@@ -489,18 +489,18 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 				w.Shader.NearPlane,
 				w.Shader.FarPlane,
 			)
-			projectionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_PROJECTION_MATRIX))
+			projectionUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_MODEL_VIEW_PROJECTION_MATRIX))
 			gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
 			// カメラの位置
 			cameraPosition := w.Shader.CameraPosition.GL()
-			cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_CAMERA_POSITION))
+			cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_CAMERA_POSITION))
 			gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
 			// カメラの中心
 			lookAtCenter := w.Shader.LookAtCenterPosition.GL()
 			camera := mgl32.LookAtV(*cameraPosition, *lookAtCenter, mgl32.Vec3{0, 1, 0})
-			cameraUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_MATRIX))
+			cameraUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_MODEL_VIEW_MATRIX))
 			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 		}
 

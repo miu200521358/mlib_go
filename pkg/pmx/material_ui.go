@@ -7,7 +7,7 @@ import (
 	"embed"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/miu200521358/mlib_go/pkg/mgl"
+	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
 type MaterialGL struct {
@@ -52,19 +52,19 @@ func (m *Material) GL(
 }
 
 func (m *Material) DiffuseGL() mgl32.Vec4 {
-	d := m.Diffuse.GetXYZ().MuledScalar(float64(mgl.LIGHT_AMBIENT)).Add(m.Ambient)
+	d := m.Diffuse.GetXYZ().MuledScalar(float64(mview.LIGHT_AMBIENT)).Add(m.Ambient)
 	diffuse := mgl32.Vec4{float32(d.GetX()), float32(d.GetY()), float32(d.GetZ()), float32(m.Diffuse.GetW())}
 	return diffuse
 }
 
 func (m *Material) AmbientGL() mgl32.Vec3 {
-	a := m.Diffuse.GetXYZ().MuledScalar(float64(mgl.LIGHT_AMBIENT))
+	a := m.Diffuse.GetXYZ().MuledScalar(float64(mview.LIGHT_AMBIENT))
 	ambient := mgl32.Vec3{float32(a.GetX()), float32(a.GetY()), float32(a.GetZ())}
 	return ambient
 }
 
 func (m *Material) SpecularGL() mgl32.Vec4 {
-	s := m.Specular.GetXYZ().MuledScalar(float64(mgl.LIGHT_AMBIENT))
+	s := m.Specular.GetXYZ().MuledScalar(float64(mview.LIGHT_AMBIENT))
 	specular := mgl32.Vec4{float32(s.GetX()), float32(s.GetY()), float32(s.GetZ()), float32(m.Specular.GetW())}
 	return specular
 }

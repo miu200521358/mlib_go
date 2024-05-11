@@ -1,14 +1,14 @@
 //go:build windows
 // +build windows
 
-package mgl
+package mview
 
 import (
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 
-	"github.com/miu200521358/mlib_go/pkg/mbt"
+	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 )
 
 // Vertex Buffer Object.

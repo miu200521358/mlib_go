@@ -6,10 +6,10 @@ package mwidget
 import (
 	"github.com/go-gl/mathgl/mgl32"
 
-	"github.com/miu200521358/mlib_go/pkg/mbt"
-	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
+	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
+	"github.com/miu200521358/mlib_go/pkg/mview"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
@@ -17,7 +17,7 @@ import (
 func Draw(
 	modelPhysics *mphysics.MPhysics,
 	model *pmx.PmxModel,
-	shader *mgl.MShader,
+	shader *mview.MShader,
 	deltas *vmd.VmdDeltas,
 	windowIndex int,
 	frame float32,

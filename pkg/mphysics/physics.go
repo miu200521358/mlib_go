@@ -4,8 +4,8 @@
 package mphysics
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/mbt"
-	"github.com/miu200521358/mlib_go/pkg/mgl"
+	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
+	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
 type MPhysics struct {
@@ -19,7 +19,7 @@ type MPhysics struct {
 	rigidBodyPositionTransforms map[int]mbt.BtTransform // 剛体の初期位置情報
 }
 
-func NewMPhysics(shader *mgl.MShader) *MPhysics {
+func NewMPhysics(shader *mview.MShader) *MPhysics {
 	broadphase := mbt.NewBtDbvtBroadphase()
 	collisionConfiguration := mbt.NewBtDefaultCollisionConfiguration()
 	dispatcher := mbt.NewBtCollisionDispatcher(collisionConfiguration)

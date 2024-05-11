@@ -5,8 +5,8 @@ package pmx
 
 import (
 	"github.com/go-gl/gl/v4.4-core/gl"
-	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
 var BONE_COLORS_IK = []float32{1.0, 0.38, 0, 1.0}
@@ -27,7 +27,7 @@ var BONE_COLORS_ROTATE = []float32{0.56, 0.78, 1.0, 1.0}
 var BONE_COLORS_ROTATE_NORMAL = []float32{0.76, 0.98, 1.00, 0.7}
 
 func (b *Bones) Draw(
-	shader *mgl.MShader,
+	shader *mview.MShader,
 	boneGlobalMatrixes []*mmath.MMat4,
 	windowIndex int,
 ) {
@@ -109,7 +109,7 @@ func (b *Bones) Draw(
 		}
 	}
 
-	positionVboGl := mgl.NewVBOForBone(gl.Ptr(positionVbo), len(positionVbo))
+	positionVboGl := mview.NewVBOForBone(gl.Ptr(positionVbo), len(positionVbo))
 
 	b.positionVao.Bind()
 	positionVboGl.BindBone()
@@ -123,7 +123,7 @@ func (b *Bones) Draw(
 
 	// ------------------------------
 
-	normalVboGl := mgl.NewVBOForBone(gl.Ptr(normalVbo), len(normalVbo))
+	normalVboGl := mview.NewVBOForBone(gl.Ptr(normalVbo), len(normalVbo))
 
 	b.normalVao.Bind()
 	normalVboGl.BindBone()
@@ -152,11 +152,11 @@ func (b *Bones) prepareDraw() {
 		normalIbo = append(normalIbo, uint32(i*2+1))
 	}
 
-	b.positionVao = mgl.NewVAO()
-	b.positionIbo = mgl.NewIBO(gl.Ptr(positionIbo), len(positionIbo))
+	b.positionVao = mview.NewVAO()
+	b.positionIbo = mview.NewIBO(gl.Ptr(positionIbo), len(positionIbo))
 	b.positionIboCount = int32(len(positionIbo))
 
-	b.normalVao = mgl.NewVAO()
-	b.normalIbo = mgl.NewIBO(gl.Ptr(normalIbo), len(normalIbo))
+	b.normalVao = mview.NewVAO()
+	b.normalIbo = mview.NewIBO(gl.Ptr(normalIbo), len(normalIbo))
 	b.normalIboCount = int32(len(normalIbo))
 }

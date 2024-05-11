@@ -5,7 +5,7 @@ package pmx
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
-	"github.com/miu200521358/mlib_go/pkg/mgl"
+	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
 // ボーンリスト
@@ -15,11 +15,11 @@ type Bones struct {
 	IkTreeIndexes      map[int][]int
 	LayerSortedIndexes map[int]string
 	LayerSortedNames   map[string]int
-	positionVao        *mgl.VAO
-	positionIbo        *mgl.IBO
+	positionVao        *mview.VAO
+	positionIbo        *mview.IBO
 	positionIboCount   int32
-	normalVao          *mgl.VAO
-	normalIbo          *mgl.IBO
+	normalVao          *mview.VAO
+	normalIbo          *mview.IBO
 	normalIboCount     int32
 }
 

@@ -7,8 +7,8 @@ import (
 	"embed"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
+	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 )
 
 func (pm *PmxModel) InitDraw(windowIndex int, resourceFiles embed.FS) {

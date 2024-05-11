@@ -9,14 +9,14 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
-	"github.com/miu200521358/mlib_go/pkg/mgl"
+	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
 type Meshes struct {
 	meshes   []*Mesh
 	vertices []float32
-	vao      *mgl.VAO
-	vbo      *mgl.VBO
+	vao      *mview.VAO
+	vbo      *mview.VBO
 }
 
 func NewMeshes(
@@ -88,9 +88,9 @@ func NewMeshes(
 		prevVerticesCount += m.VerticesCount
 	}
 
-	vao := mgl.NewVAO()
+	vao := mview.NewVAO()
 	vao.Bind()
-	vbo := mgl.NewVBOForVertex(gl.Ptr(vertices), len(vertices))
+	vbo := mview.NewVBOForVertex(gl.Ptr(vertices), len(vertices))
 	vbo.BindVertex(nil, nil)
 	vbo.Unbind()
 	vao.Unbind()
@@ -112,7 +112,7 @@ func (m *Meshes) delete() {
 }
 
 func (m *Meshes) Draw(
-	shader *mgl.MShader,
+	shader *mview.MShader,
 	boneMatrixes []*mgl32.Mat4,
 	vertexDeltas [][]float32,
 	materialDeltas []*Material,

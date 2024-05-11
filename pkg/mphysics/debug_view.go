@@ -6,8 +6,8 @@ package mphysics
 import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 
-	"github.com/miu200521358/mlib_go/pkg/mbt"
-	"github.com/miu200521358/mlib_go/pkg/mgl"
+	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
+	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
 func NewConstBtMDefaultColors() mbt.BtMDefaultColors {
@@ -24,20 +24,20 @@ func NewConstBtMDefaultColors() mbt.BtMDefaultColors {
 
 type MDebugDrawLiner struct {
 	mbt.BtMDebugDrawLiner
-	shader *mgl.MShader
-	vao    *mgl.VAO
-	vbo    *mgl.VBO
+	shader *mview.MShader
+	vao    *mview.VAO
+	vbo    *mview.VBO
 }
 
-func NewMDebugDrawLiner(shader *mgl.MShader) *MDebugDrawLiner {
+func NewMDebugDrawLiner(shader *mview.MShader) *MDebugDrawLiner {
 	ddl := &MDebugDrawLiner{
 		shader: shader,
 	}
 	ddl.BtMDebugDrawLiner = mbt.NewDirectorBtMDebugDrawLiner(ddl)
 
-	ddl.vao = mgl.NewVAO()
+	ddl.vao = mview.NewVAO()
 	ddl.vao.Bind()
-	ddl.vbo = mgl.NewVBOForDebug()
+	ddl.vbo = mview.NewVBOForDebug()
 	ddl.vbo.BindDebug(mbt.NewBtVector3(), mbt.NewBtVector3())
 	ddl.vbo.Unbind()
 	ddl.vao.Unbind()
@@ -50,10 +50,10 @@ func (ddl MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color 
 	ddl.shader.UsePhysicsProgram()
 
 	// 色を設定
-	colorUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mgl.SHADER_COLOR))
+	colorUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mview.SHADER_COLOR))
 	gl.Uniform3f(colorUniform, color.GetX(), color.GetY(), color.GetZ())
 
-	alphaUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mgl.SHADER_ALPHA))
+	alphaUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mview.SHADER_ALPHA))
 	gl.Uniform1f(alphaUniform, 0.6)
 
 	// 線を引く
