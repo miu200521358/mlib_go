@@ -32,7 +32,7 @@ func NewVertex() *Vertex {
 	return v
 }
 
-func (v *Vertex) Copy() mcore.IndexModelInterface {
+func (v *Vertex) Copy() mcore.IIndexModel {
 	copied := NewTexture()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied

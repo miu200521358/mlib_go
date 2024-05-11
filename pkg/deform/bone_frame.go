@@ -81,7 +81,7 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 	return copied
 }
 
-func (v *BoneFrame) Copy() mcore.IndexFloatModelInterface {
+func (v *BoneFrame) Copy() mcore.IIndexFloatModel {
 	copied := NewBoneFrame(v.Index)
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied

@@ -52,7 +52,7 @@ func NewJoint() *Joint {
 	}
 }
 
-func (j *Joint) Copy() mcore.IndexNameModelInterface {
+func (j *Joint) Copy() mcore.IIndexNameModel {
 	copied := NewJoint()
 	copier.CopyWithOption(copied, j, copier.Option{DeepCopy: true})
 	return copied

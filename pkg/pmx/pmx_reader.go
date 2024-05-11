@@ -21,7 +21,7 @@ func (r *PmxReader) createModel(path string) *PmxModel {
 }
 
 // 指定されたパスのファイルからデータを読み込む
-func (r *PmxReader) ReadByFilepath(path string) (mcore.HashModelInterface, error) {
+func (r *PmxReader) ReadByFilepath(path string) (mcore.IHashModel, error) {
 	// モデルを新規作成
 	model := r.createModel(path)
 

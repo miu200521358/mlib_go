@@ -164,7 +164,7 @@ func NewBoneByName(name string) *Bone {
 	return bone
 }
 
-func (v *Bone) Copy() mcore.IndexNameModelInterface {
+func (v *Bone) Copy() mcore.IIndexNameModel {
 	copied := NewBone()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied

@@ -4,12 +4,11 @@ import (
 	"slices"
 
 	"github.com/jinzhu/copier"
-
 )
 
-type IndexFloatModelInterface interface {
+type IIndexFloatModel interface {
 	IsValid() bool
-	Copy() IndexFloatModelInterface
+	Copy() IIndexFloatModel
 	GetIndex() float32
 	SetIndex(index float32)
 }
@@ -31,19 +30,19 @@ func (v *IndexFloatModel) IsValid() bool {
 	return v.GetIndex() >= 0
 }
 
-func (v *IndexFloatModel) Copy() IndexFloatModelInterface {
+func (v *IndexFloatModel) Copy() IIndexFloatModel {
 	copied := IndexFloatModel{Index: v.Index}
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return &copied
 }
 
 // Tのリスト基底クラス
-type IndexFloatModelCorrection[T IndexFloatModelInterface] struct {
+type IndexFloatModelCorrection[T IIndexFloatModel] struct {
 	Data    map[float32]T
 	Indexes []float32
 }
 
-func NewIndexFloatModelCorrection[T IndexFloatModelInterface]() *IndexFloatModelCorrection[T] {
+func NewIndexFloatModelCorrection[T IIndexFloatModel]() *IndexFloatModelCorrection[T] {
 	return &IndexFloatModelCorrection[T]{
 		Data:    make(map[float32]T, 0),
 		Indexes: make([]float32, 0),

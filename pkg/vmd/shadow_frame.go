@@ -3,7 +3,6 @@ package vmd
 import (
 	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
-
 )
 
 type ShadowFrame struct {
@@ -20,7 +19,7 @@ func NewShadowFrame(index float32) *ShadowFrame {
 	}
 }
 
-func (sf *ShadowFrame) Copy() mcore.IndexFloatModelInterface {
+func (sf *ShadowFrame) Copy() mcore.IIndexFloatModel {
 	vv := &ShadowFrame{
 		ShadowMode: sf.ShadowMode,
 		Distance:   sf.Distance,

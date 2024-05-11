@@ -39,7 +39,7 @@ func NewTexture() *Texture {
 	}
 }
 
-func (t *Texture) Copy() mcore.IndexModelInterface {
+func (t *Texture) Copy() mcore.IIndexModel {
 	copied := NewTexture()
 	copier.CopyWithOption(copied, t, copier.Option{DeepCopy: true})
 	return copied

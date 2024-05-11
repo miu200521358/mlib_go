@@ -41,7 +41,7 @@ func NewIkFrame(index float32) *IkFrame {
 	}
 }
 
-func (ikf *IkFrame) Copy() mcore.IndexFloatModelInterface {
+func (ikf *IkFrame) Copy() mcore.IIndexFloatModel {
 	vv := &IkFrame{
 		Visible: ikf.Visible,
 		IkList:  []*IkEnabledFrame{},

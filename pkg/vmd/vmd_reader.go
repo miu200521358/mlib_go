@@ -8,7 +8,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
-
 )
 
 // https://hariganep.seesaa.net/article/201103article_1.html
@@ -26,7 +25,7 @@ func (r *VmdMotionReader) createModel(path string) *VmdMotion {
 }
 
 // 指定されたパスのファイルからデータを読み込む
-func (r *VmdMotionReader) ReadByFilepath(path string) (mcore.HashModelInterface, error) {
+func (r *VmdMotionReader) ReadByFilepath(path string) (mcore.IHashModel, error) {
 	// モデルを新規作成
 	motion := r.createModel(path)
 

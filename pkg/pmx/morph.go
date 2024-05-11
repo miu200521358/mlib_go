@@ -207,7 +207,7 @@ func NewMorph() *Morph {
 	}
 }
 
-func (m *Morph) Copy() mcore.IndexNameModelInterface {
+func (m *Morph) Copy() mcore.IIndexNameModel {
 	copied := NewMorph()
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied

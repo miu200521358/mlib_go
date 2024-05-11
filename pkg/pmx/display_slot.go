@@ -4,7 +4,6 @@ import (
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
-
 )
 
 // 表示枠要素タイプ
@@ -57,7 +56,7 @@ func NewDisplaySlot() *DisplaySlot {
 }
 
 // Copy
-func (v *DisplaySlot) Copy() mcore.IndexModelInterface {
+func (v *DisplaySlot) Copy() mcore.IIndexModel {
 	copied := NewDisplaySlot()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied
