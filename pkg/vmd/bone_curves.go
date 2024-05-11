@@ -3,11 +3,11 @@ package vmd
 import "github.com/miu200521358/mlib_go/pkg/mmath"
 
 type BoneCurves struct {
-	TranslateX *mmath.Curve // 移動X
-	TranslateY *mmath.Curve // 移動Y
-	TranslateZ *mmath.Curve // 移動Z
-	Rotate     *mmath.Curve // 回転
-	Values     []byte       // 補間曲線の値
+	TranslateX mmath.Curve // 移動X
+	TranslateY mmath.Curve // 移動Y
+	TranslateZ mmath.Curve // 移動Z
+	Rotate     mmath.Curve // 回転
+	Values     []byte      // 補間曲線の値
 }
 
 func NewBoneCurves() *BoneCurves {
