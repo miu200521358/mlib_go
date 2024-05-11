@@ -20,7 +20,7 @@ type MorphNameFrames struct {
 
 func NewMorphNameFrames(name string) *MorphNameFrames {
 	return &MorphNameFrames{
-		IIndexFloatModels: mcore.NewIndexFloatModelCorrection[*deform.MorphFrame](),
+		IIndexFloatModels: mcore.NewIndexFloatModels[*deform.MorphFrame](),
 		Name:              name,
 		RegisteredIndexes: []float32{},
 		lock:              sync.RWMutex{},

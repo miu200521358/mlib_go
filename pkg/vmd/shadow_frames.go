@@ -16,7 +16,7 @@ type ShadowFrames struct {
 
 func NewShadowFrames() *ShadowFrames {
 	return &ShadowFrames{
-		IIndexFloatModels: mcore.NewIndexFloatModelCorrection[*ShadowFrame](),
+		IIndexFloatModels: mcore.NewIndexFloatModels[*ShadowFrame](),
 		RegisteredIndexes: []float32{},
 	}
 }

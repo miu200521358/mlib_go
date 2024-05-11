@@ -16,7 +16,7 @@ type CameraFrames struct {
 
 func NewCameraFrames() *CameraFrames {
 	return &CameraFrames{
-		IIndexFloatModels: mcore.NewIndexFloatModelCorrection[*CameraFrame](),
+		IIndexFloatModels: mcore.NewIndexFloatModels[*CameraFrame](),
 		RegisteredIndexes: []float32{},
 	}
 }

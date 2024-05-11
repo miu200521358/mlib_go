@@ -42,7 +42,7 @@ type IIndexFloatModels[T IIndexFloatModel] struct {
 	Indexes []float32
 }
 
-func NewIndexFloatModelCorrection[T IIndexFloatModel]() *IIndexFloatModels[T] {
+func NewIndexFloatModels[T IIndexFloatModel]() *IIndexFloatModels[T] {
 	return &IIndexFloatModels[T]{
 		Data:    make(map[float32]T, 0),
 		Indexes: make([]float32, 0),

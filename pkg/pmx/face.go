@@ -23,11 +23,11 @@ func NewFace() *Face {
 
 // 面リスト
 type Faces struct {
-	*mcore.IIndexModels[*Face]
+	*mcore.IndexModels[*Face]
 }
 
 func NewFaces() *Faces {
 	return &Faces{
-		IIndexModels: mcore.NewIndexModelCorrection[*Face](),
+		IndexModels: mcore.NewIndexModels[*Face](),
 	}
 }

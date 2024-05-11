@@ -20,7 +20,7 @@ type BoneNameFrames struct {
 
 func NewBoneNameFrames(name string) *BoneNameFrames {
 	return &BoneNameFrames{
-		IIndexFloatModels: mcore.NewIndexFloatModelCorrection[*deform.BoneFrame](),
+		IIndexFloatModels: mcore.NewIndexFloatModels[*deform.BoneFrame](),
 		Name:              name,
 		IkIndexes:         []float32{},
 		RegisteredIndexes: []float32{},

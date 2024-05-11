@@ -40,11 +40,11 @@ func (v *Vertex) Copy() mcore.IIndexModel {
 
 // 頂点リスト
 type Vertices struct {
-	*mcore.IIndexModels[*Vertex]
+	*mcore.IndexModels[*Vertex]
 }
 
 func NewVertices() *Vertices {
 	return &Vertices{
-		IIndexModels: mcore.NewIndexModelCorrection[*Vertex](),
+		IndexModels: mcore.NewIndexModels[*Vertex](),
 	}
 }

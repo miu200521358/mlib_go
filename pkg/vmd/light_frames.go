@@ -16,7 +16,7 @@ type LightFrames struct {
 
 func NewLightFrames() *LightFrames {
 	return &LightFrames{
-		IIndexFloatModels: mcore.NewIndexFloatModelCorrection[*LightFrame](),
+		IIndexFloatModels: mcore.NewIndexFloatModels[*LightFrame](),
 		RegisteredIndexes: []float32{},
 	}
 }

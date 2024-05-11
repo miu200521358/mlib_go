@@ -14,7 +14,7 @@ type IkFrames struct {
 
 func NewIkFrames() *IkFrames {
 	return &IkFrames{
-		IIndexFloatModels: mcore.NewIndexFloatModelCorrection[*IkFrame](),
+		IIndexFloatModels: mcore.NewIndexFloatModels[*IkFrame](),
 		RegisteredIndexes: []float32{},
 	}
 }
