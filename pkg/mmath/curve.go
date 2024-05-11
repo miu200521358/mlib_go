@@ -8,8 +8,8 @@ import (
 )
 
 type Curve struct {
-	Start *MVec2
-	End   *MVec2
+	Start MVec2
+	End   MVec2
 }
 
 const (
@@ -19,8 +19,8 @@ const (
 
 func NewCurve() *Curve {
 	return &Curve{
-		Start: &MVec2{20.0, 20.0},
-		End:   &MVec2{107.0, 107.0},
+		Start: MVec2{20.0, 20.0},
+		End:   MVec2{107.0, 107.0},
 	}
 }
 
@@ -34,10 +34,7 @@ func (v *Curve) Copy() *Curve {
 func (v *Curve) Normalize(begin, finish *MVec2) {
 	diff := finish.Subed(begin)
 
-	v.Start = v.Start.Sub(begin)
-	v.Start = v.Start.Div(diff)
-	v.Start = v.Start.MulScalar(CURVE_MAX)
-	v.Start = v.Start.Round()
+	v.Start = *v.Start.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
 
 	if v.Start.GetX() < 0 {
 		v.Start.SetX(0)
@@ -51,10 +48,7 @@ func (v *Curve) Normalize(begin, finish *MVec2) {
 		v.Start.SetY(CURVE_MAX)
 	}
 
-	v.End = v.End.Sub(begin)
-	v.End = v.End.Div(diff)
-	v.End = v.End.MulScalar(CURVE_MAX)
-	v.End = v.End.Round()
+	v.End = *v.End.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
 
 	if v.End.GetX() < 0 {
 		v.End.SetX(0)
@@ -173,14 +167,14 @@ func SplitCurve(curve *Curve, start, now, end int) (*Curve, *Curve) {
 
 	// 新たな4つのベジェ曲線の制御点は、A側がAEHJ、C側がJIGDとなる。
 	startCurve := &Curve{
-		Start: iE,
-		End:   iH,
+		Start: *iE,
+		End:   *iH,
 	}
 	startCurve.Normalize(iA, iJ)
 
 	endCurve := &Curve{
-		Start: iI,
-		End:   iG,
+		Start: *iI,
+		End:   *iG,
 	}
 	endCurve.Normalize(iJ, iD)
 
@@ -273,8 +267,8 @@ func NewCurveFromValues(values []float64) *Curve {
 
 	// Update p1 and p2 with optimized values
 	c := &Curve{
-		Start: &MVec2{result.X[0], result.X[1]},
-		End:   &MVec2{result.X[2], result.X[3]},
+		Start: MVec2{result.X[0], result.X[1]},
+		End:   MVec2{result.X[2], result.X[3]},
 	}
 	c.Normalize(p0, p3)
 
