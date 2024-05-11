@@ -96,11 +96,11 @@ type Material struct {
 func NewMaterial() *Material {
 	return &Material{
 		IndexNameModel:      &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
-		Diffuse:             &mmath.MVec4{},
-		Specular:            &mmath.MVec4{},
+		Diffuse:             mmath.NewMVec4(),
+		Specular:            mmath.NewMVec4(),
 		Ambient:             mmath.NewMVec3(),
 		DrawFlag:            DRAW_FLAG_NONE,
-		Edge:                &mmath.MVec4{},
+		Edge:                mmath.NewMVec4(),
 		EdgeSize:            0.0,
 		TextureIndex:        -1,
 		SphereTextureIndex:  -1,

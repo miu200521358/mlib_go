@@ -131,24 +131,24 @@ func NewBone() *Bone {
 		NormalizedLocalAxisY:   mmath.NewMVec3(),
 		NormalizedLocalAxisZ:   mmath.NewMVec3(),
 		LocalAxis:              &mmath.MVec3{1, 0, 0},
-		IkLinkBoneIndexes:      []int{},
-		IkTargetBoneIndexes:    []int{},
+		IkLinkBoneIndexes:      make([]int, 0),
+		IkTargetBoneIndexes:    make([]int, 0),
 		ParentRelativePosition: mmath.NewMVec3(),
 		ChildRelativePosition:  mmath.NewMVec3(),
 		NormalizedFixedAxis:    mmath.NewMVec3(),
-		TreeBoneIndexes:        []int{},
+		TreeBoneIndexes:        make([]int, 0),
 		RevertOffsetMatrix:     mmath.NewMMat4(),
 		OffsetMatrix:           mmath.NewMMat4(),
-		ParentBoneIndexes:      []int{},
-		RelativeBoneIndexes:    []int{},
-		ChildBoneIndexes:       []int{},
-		EffectiveBoneIndexes:   []int{},
+		ParentBoneIndexes:      make([]int, 0),
+		RelativeBoneIndexes:    make([]int, 0),
+		ChildBoneIndexes:       make([]int, 0),
+		EffectiveBoneIndexes:   make([]int, 0),
 		AngleLimit:             false,
-		MinAngleLimit:          mmath.NewRotationByRadians(mmath.NewMVec3()),
-		MaxAngleLimit:          mmath.NewRotationByRadians(mmath.NewMVec3()),
+		MinAngleLimit:          mmath.NewRotation(),
+		MaxAngleLimit:          mmath.NewRotation(),
 		LocalAngleLimit:        false,
-		LocalMinAngleLimit:     mmath.NewRotationByRadians(mmath.NewMVec3()),
-		LocalMaxAngleLimit:     mmath.NewRotationByRadians(mmath.NewMVec3()),
+		LocalMinAngleLimit:     mmath.NewRotation(),
+		LocalMaxAngleLimit:     mmath.NewRotation(),
 		AxisSign:               1,
 	}
 	bone.NormalizedLocalAxisX = bone.LocalAxisX.Copy()
@@ -346,9 +346,11 @@ func (bone *Bone) setup() {
 	}
 
 	// オフセット行列は自身の位置を原点に戻す行列
+	bone.OffsetMatrix = mmath.NewMMat4()
 	bone.OffsetMatrix.Translate(bone.Position.Inverted())
 
 	// 逆オフセット行列は親ボーンからの相対位置分
+	bone.RevertOffsetMatrix = mmath.NewMMat4()
 	bone.RevertOffsetMatrix.Translate(bone.ParentRelativePosition.Copy())
 }
 
@@ -566,7 +568,7 @@ func (b *Bones) setup() {
 
 	for _, bone := range b.GetSortedData() {
 		// 影響があるボーンINDEXリスト
-		bone.ParentBoneIndexes, bone.RelativeBoneIndexes = b.getRelativeBoneIndexes(bone.Index, []int{}, []int{})
+		bone.ParentBoneIndexes, bone.RelativeBoneIndexes = b.getRelativeBoneIndexes(bone.Index, make([]int, 0), make([]int, 0))
 
 		// 親ボーンに子ボーンとして登録する
 		if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {

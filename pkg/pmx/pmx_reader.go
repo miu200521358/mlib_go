@@ -245,49 +245,35 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalVertexCount; i++ {
-		v := NewVertex()
+		v := &Vertex{
+			IndexModel:  &mcore.IndexModel{Index: -1},
+			Position:    nil,
+			Normal:      nil,
+			UV:          nil,
+			ExtendedUVs: make([]*mmath.MVec4, 0),
+			DeformType:  BDEF1,
+			Deform:      nil,
+			EdgeFactor:  0.0,
+		}
 
 		// 12 : float3  | 位置(x,y,z)
-		v.Position[0], err = r.UnpackFloat()
+		v.Position, err = r.UnpackVec3()
 		if err != nil {
-			mlog.E("[%d] readVertices UnpackFloat Position[0] error: %v", i, err)
+			mlog.E("[%d] readVertices UnpackFloat Position error: %v", i, err)
 			return err
 		}
-		v.Position[1], err = r.UnpackFloat()
-		if err != nil {
-			mlog.E("[%d] readVertices UnpackFloat Position[1] error: %v", i, err)
-			return err
-		}
-		v.Position[2], err = r.UnpackFloat()
-		if err != nil {
-			mlog.E("[%d] readVertices UnpackFloat Position[2] error: %v", i, err)
-			return err
-		}
+
 		// 12 : float3  | 法線(x,y,z)
-		v.Normal[0], err = r.UnpackFloat()
+		v.Normal, err = r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readVertices UnpackFloat Normal[0] error: %v", i, err)
 			return err
 		}
-		v.Normal[1], err = r.UnpackFloat()
-		if err != nil {
-			mlog.E("[%d] readVertices UnpackFloat Normal[1] error: %v", i, err)
-			return err
-		}
-		v.Normal[2], err = r.UnpackFloat()
-		if err != nil {
-			mlog.E("[%d] readVertices UnpackFloat Normal[2] error: %v", i, err)
-			return err
-		}
+
 		// 8  : float2  | UV(u,v)
-		v.UV[0], err = r.UnpackFloat()
+		v.UV, err = r.UnpackVec2()
 		if err != nil {
 			mlog.E("[%d] readVertices UnpackFloat UV[0] error: %v", i, err)
-			return err
-		}
-		v.UV[1], err = r.UnpackFloat()
-		if err != nil {
-			mlog.E("[%d] readVertices UnpackFloat UV[1] error: %v", i, err)
 			return err
 		}
 
@@ -505,7 +491,25 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalMaterialCount; i++ {
-		m := NewMaterial()
+		m := &Material{
+			IndexNameModel:      &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+			Diffuse:             nil,
+			Specular:            nil,
+			Ambient:             nil,
+			DrawFlag:            DRAW_FLAG_NONE,
+			Edge:                nil,
+			EdgeSize:            0.0,
+			TextureIndex:        -1,
+			SphereTextureIndex:  -1,
+			SphereMode:          SPHERE_MODE_INVALID,
+			ToonSharingFlag:     TOON_SHARING_INDIVIDUAL,
+			ToonTextureIndex:    -1,
+			Memo:                "",
+			VerticesCount:       0,
+			TextureFactor:       mmath.NewMVec4(),
+			SphereTextureFactor: mmath.NewMVec4(),
+			ToonTextureFactor:   mmath.NewMVec4(),
+		}
 
 		// 4 + n : TextBuf	| 材質名
 		m.Name = r.ReadText()
@@ -619,7 +623,47 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalBoneCount; i++ {
-		b := NewBone()
+		b := &Bone{
+			IndexNameModel:         &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+			Position:               nil,
+			ParentIndex:            -1,
+			Layer:                  -1,
+			BoneFlag:               BONE_FLAG_NONE,
+			TailPosition:           nil,
+			TailIndex:              -1,
+			EffectIndex:            -1,
+			EffectFactor:           0.0,
+			FixedAxis:              nil,
+			LocalAxisX:             nil,
+			LocalAxisZ:             nil,
+			EffectorKey:            -1,
+			Ik:                     NewIk(),
+			DisplaySlot:            -1,
+			IsSystem:               true,
+			NormalizedLocalAxisX:   nil,
+			NormalizedLocalAxisY:   nil,
+			NormalizedLocalAxisZ:   nil,
+			LocalAxis:              &mmath.MVec3{1, 0, 0},
+			IkLinkBoneIndexes:      make([]int, 0),
+			IkTargetBoneIndexes:    make([]int, 0),
+			ParentRelativePosition: nil,
+			ChildRelativePosition:  nil,
+			NormalizedFixedAxis:    nil,
+			TreeBoneIndexes:        make([]int, 0),
+			RevertOffsetMatrix:     mmath.NewMMat4(),
+			OffsetMatrix:           mmath.NewMMat4(),
+			ParentBoneIndexes:      make([]int, 0),
+			RelativeBoneIndexes:    make([]int, 0),
+			ChildBoneIndexes:       make([]int, 0),
+			EffectiveBoneIndexes:   make([]int, 0),
+			AngleLimit:             false,
+			MinAngleLimit:          mmath.NewRotation(),
+			MaxAngleLimit:          mmath.NewRotation(),
+			LocalAngleLimit:        false,
+			LocalMinAngleLimit:     mmath.NewRotation(),
+			LocalMaxAngleLimit:     mmath.NewRotation(),
+			AxisSign:               1,
+		}
 
 		// 4 + n : TextBuf	| ボーン名
 		b.Name = r.ReadText()
@@ -659,6 +703,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 				mlog.E("[%d] readBones unpackBoneIndex TailIndex error: %v", i, err)
 				return err
 			}
+			b.TailPosition = mmath.NewMVec3()
 		} else {
 			//  12 : float3	| 座標オフセット, ボーン位置からの相対分
 			b.TailPosition, err = r.UnpackVec3()
@@ -693,6 +738,8 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 				return err
 			}
 			b.NormalizeFixedAxis(b.FixedAxis.Normalize())
+		} else {
+			b.FixedAxis = mmath.NewMVec3()
 		}
 
 		// ローカル軸:1 の場合
@@ -710,6 +757,9 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 				return err
 			}
 			b.NormalizeLocalAxis(b.LocalAxisX.Normalize())
+		} else {
+			b.LocalAxisX = mmath.NewMVec3()
+			b.LocalAxisZ = mmath.NewMVec3()
 		}
 
 		// 外部親変形:1 の場合
