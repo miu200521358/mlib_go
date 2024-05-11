@@ -174,8 +174,7 @@ func (r *BaseReader[T]) UnpackShort() (int16, error) {
 		return 0, err
 	}
 
-	value := int16(binary.LittleEndian.Uint16(chunk))
-	return value, nil
+	return int16(binary.LittleEndian.Uint16(chunk)), nil
 }
 
 // バイナリデータから uint16 を読み出す
@@ -185,8 +184,7 @@ func (r *BaseReader[T]) UnpackUShort() (uint16, error) {
 		return 0, err
 	}
 
-	value := binary.LittleEndian.Uint16(chunk)
-	return value, nil
+	return binary.LittleEndian.Uint16(chunk), nil
 }
 
 // バイナリデータから uint を読み出す
@@ -196,8 +194,7 @@ func (r *BaseReader[T]) UnpackUInt() (uint, error) {
 		return 0, err
 	}
 
-	value := binary.LittleEndian.Uint32(chunk)
-	return uint(value), nil
+	return uint(binary.LittleEndian.Uint32(chunk)), nil
 }
 
 // バイナリデータから int を読み出す
@@ -207,8 +204,7 @@ func (r *BaseReader[T]) UnpackInt() (int, error) {
 		return 0, err
 	}
 
-	value := int(binary.LittleEndian.Uint32(chunk))
-	return value, nil
+	return int(binary.LittleEndian.Uint32(chunk)), nil
 }
 
 // バイナリデータから float64 を読み出す
@@ -219,8 +215,7 @@ func (r *BaseReader[T]) UnpackFloat() (float64, error) {
 		return 0, err
 	}
 
-	value := float64(math.Float32frombits(binary.LittleEndian.Uint32(chunk)))
-	return value, nil
+	return float64(math.Float32frombits(binary.LittleEndian.Uint32(chunk))), nil
 }
 
 func (r *BaseReader[T]) UnpackVec2() (*mmath.MVec2, error) {
