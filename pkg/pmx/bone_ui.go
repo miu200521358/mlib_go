@@ -10,7 +10,7 @@ import (
 
 // ボーンリスト
 type Bones struct {
-	*mcore.IIndexNameModels[*Bone]
+	*mcore.IndexNameModels[*Bone]
 	Vertices           map[int][]int
 	IkTreeIndexes      map[int][]int
 	LayerSortedIndexes map[int]string
@@ -25,7 +25,7 @@ type Bones struct {
 
 func NewBones() *Bones {
 	return &Bones{
-		IIndexNameModels:   mcore.NewIndexNameModelCorrection[*Bone](),
+		IndexNameModels:    mcore.NewIndexNameModels[*Bone](),
 		Vertices:           make(map[int][]int),
 		IkTreeIndexes:      make(map[int][]int),
 		LayerSortedIndexes: make(map[int]string),
