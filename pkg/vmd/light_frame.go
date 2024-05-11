@@ -1,20 +1,18 @@
 package vmd
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type LightFrame struct {
-	*deform.BaseFrame              // キーフレ
-	Position          *mmath.MVec3 // 位置
-	Color             *mmath.MVec3 // 色
+	*BaseFrame              // キーフレ
+	Position   *mmath.MVec3 // 位置
+	Color      *mmath.MVec3 // 色
 }
 
 func NewLightFrame(index float32) *LightFrame {
 	return &LightFrame{
-		BaseFrame: deform.NewVmdBaseFrame(index),
+		BaseFrame: NewVmdBaseFrame(index),
 		Position:  mmath.NewMVec3(),
 		Color:     mmath.NewMVec3(),
 	}

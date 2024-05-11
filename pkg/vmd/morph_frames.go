@@ -3,7 +3,6 @@ package vmd
 import (
 	"math"
 
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
 
@@ -37,8 +36,8 @@ func (mfs *MorphFrames) Animate(
 	frame float32,
 	model *pmx.PmxModel,
 	morphNames []string,
-) *deform.MorphDeltas {
-	mds := deform.NewMorphDeltas(len(model.Vertices.Data), len(model.Bones.Data), model.Materials)
+) *MorphDeltas {
+	mds := NewMorphDeltas(len(model.Vertices.Data), len(model.Bones.Data), model.Materials)
 	for _, morphName := range morphNames {
 		if !mfs.Contains(morphName) || !model.Morphs.ContainsByName(morphName) {
 			continue

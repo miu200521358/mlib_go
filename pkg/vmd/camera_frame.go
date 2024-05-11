@@ -1,24 +1,22 @@
 package vmd
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-
 )
 
 type CameraFrame struct {
-	*deform.BaseFrame                  // キーフレ
-	Position          *mmath.MVec3     // 位置
-	Rotation          *mmath.MRotation // 回転
-	Distance          float64          // 距離
-	ViewOfAngle       int              // 視野角
-	IsPerspectiveOff  bool             // パースOFF
-	Curves            *CameraCurves    // 補間曲線
+	*BaseFrame                        // キーフレ
+	Position         *mmath.MVec3     // 位置
+	Rotation         *mmath.MRotation // 回転
+	Distance         float64          // 距離
+	ViewOfAngle      int              // 視野角
+	IsPerspectiveOff bool             // パースOFF
+	Curves           *CameraCurves    // 補間曲線
 }
 
 func NewCameraFrame(index float32) *CameraFrame {
 	return &CameraFrame{
-		BaseFrame:        deform.NewVmdBaseFrame(index),
+		BaseFrame:        NewVmdBaseFrame(index),
 		Position:         mmath.NewMVec3(),
 		Rotation:         mmath.NewRotationModelByDegrees(&mmath.MVec3{0, 0, 0}),
 		Distance:         0.0,

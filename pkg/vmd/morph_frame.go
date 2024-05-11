@@ -1,4 +1,4 @@
-package deform
+package vmd
 
 type MorphFrame struct {
 	*BaseFrame         // キーフレ

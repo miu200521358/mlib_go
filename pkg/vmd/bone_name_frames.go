@@ -4,14 +4,13 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type BoneNameFrames struct {
-	*mcore.IIndexFloatModels[*deform.BoneFrame]
+	*mcore.IIndexFloatModels[*BoneFrame]
 	Name              string       // ボーン名
 	IkIndexes         []float32    // IK計算済みキーフレリスト
 	RegisteredIndexes []float32    // 登録対象キーフレリスト
@@ -20,7 +19,7 @@ type BoneNameFrames struct {
 
 func NewBoneNameFrames(name string) *BoneNameFrames {
 	return &BoneNameFrames{
-		IIndexFloatModels: mcore.NewIndexFloatModels[*deform.BoneFrame](),
+		IIndexFloatModels: mcore.NewIndexFloatModels[*BoneFrame](),
 		Name:              name,
 		IkIndexes:         []float32{},
 		RegisteredIndexes: []float32{},
@@ -53,9 +52,9 @@ func (bnfs *BoneNameFrames) GetRangeIndexes(index float32) (float32, float32) {
 }
 
 // キーフレ計算結果を返す
-func (bnfs *BoneNameFrames) GetItem(index float32) *deform.BoneFrame {
+func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	if bnfs == nil {
-		return deform.NewBoneFrame(index)
+		return NewBoneFrame(index)
 	}
 
 	bnfs.lock.RLock()
@@ -71,8 +70,8 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *deform.BoneFrame {
 	if prevIndex == nextIndex {
 		if slices.Contains(bnfs.Indexes, nextIndex) {
 			nextBf := bnfs.Data[nextIndex]
-			copied := &deform.BoneFrame{
-				BaseFrame:          deform.NewVmdBaseFrame(index),
+			copied := &BoneFrame{
+				BaseFrame:          NewVmdBaseFrame(index),
 				Position:           nextBf.Position.Copy(),
 				MorphPosition:      nextBf.MorphPosition.Copy(),
 				LocalPosition:      nextBf.LocalPosition.Copy(),
@@ -88,27 +87,27 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *deform.BoneFrame {
 				// IKとかの計算値はコピーしないで初期値
 				IkRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
 				// 補間曲線はとりあえず初期値
-				Curves: deform.NewBoneCurves(),
+				Curves: NewBoneCurves(),
 			}
 			return copied
 		} else {
-			return deform.NewBoneFrame(index)
+			return NewBoneFrame(index)
 		}
 	}
 
-	var prevBf, nextBf *deform.BoneFrame
+	var prevBf, nextBf *BoneFrame
 	if slices.Contains(bnfs.Indexes, prevIndex) {
 		prevBf = bnfs.Data[prevIndex]
 	} else {
-		prevBf = deform.NewBoneFrame(index)
+		prevBf = NewBoneFrame(index)
 	}
 	if slices.Contains(bnfs.Indexes, nextIndex) {
 		nextBf = bnfs.Data[nextIndex]
 	} else {
-		nextBf = deform.NewBoneFrame(index)
+		nextBf = NewBoneFrame(index)
 	}
 
-	bf := deform.NewBoneFrame(index)
+	bf := NewBoneFrame(index)
 
 	xy, yy, zy, ry := nextBf.Curves.Evaluate(prevIndex, index, nextIndex)
 
@@ -152,7 +151,7 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *deform.BoneFrame {
 }
 
 // bf.Registered が true の場合、補間曲線を分割して登録する
-func (bnfs *BoneNameFrames) Append(value *deform.BoneFrame) {
+func (bnfs *BoneNameFrames) Append(value *BoneFrame) {
 	bnfs.lock.Lock()
 	defer bnfs.lock.Unlock()
 

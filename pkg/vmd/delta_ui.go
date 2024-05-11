@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package deform
+package vmd
 
 func (md *VertexMorphDelta) GL() []float32 {
 	p := md.Position.GL()

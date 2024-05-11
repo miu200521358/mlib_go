@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
@@ -131,7 +130,7 @@ func (bfs *BoneFrames) Animate(
 	boneNames []string,
 	isCalcIk bool,
 	isCalcMorph bool,
-) *deform.BoneDeltas {
+) *BoneDeltas {
 	// 処理対象ボーン一覧取得
 	targetBoneNames, targetBoneIndexes := bfs.getAnimatedBoneNames(model, boneNames)
 
@@ -329,14 +328,14 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				{
-					bf := deform.NewBoneFrame(count)
+					bf := NewBoneFrame(count)
 					bf.Position = ikMatrixes.GetItem(ikBone.Name, frame).FramePosition
 					bf.Rotation.SetQuaternion(ikMatrixes.GetItem(ikBone.Name, frame).FrameRotation)
 					ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
 					count++
 				}
 				{
-					bf := deform.NewBoneFrame(count)
+					bf := NewBoneFrame(count)
 					bf.Position = linkMatrixes.GetItem(linkBone.Name, frame).FramePosition
 					bf.Rotation.SetQuaternion(linkMatrixes.GetItem(linkBone.Name, frame).FrameRotation)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
@@ -389,7 +388,7 @@ ikLoop:
 			linkQuat := quatsWithoutEffect[linkIndex]
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				bf := deform.NewBoneFrame(count)
+				bf := NewBoneFrame(count)
 				bf.Rotation.SetQuaternion(linkQuat)
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 				count++
@@ -450,7 +449,7 @@ ikLoop:
 				}
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					bf := deform.NewBoneFrame(count)
+					bf := NewBoneFrame(count)
 					bf.Rotation.SetQuaternion(totalActualIkQuat)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
@@ -466,7 +465,7 @@ ikLoop:
 				if linkBone.HasFixedAxis() {
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
-						bf := deform.NewBoneFrame(count)
+						bf := NewBoneFrame(count)
 						bf.Rotation.SetQuaternion(quat)
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 						count++
@@ -484,7 +483,7 @@ ikLoop:
 
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
-						bf := deform.NewBoneFrame(count)
+						bf := NewBoneFrame(count)
 						bf.Rotation.SetQuaternion(quat)
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 						count++
@@ -501,7 +500,7 @@ ikLoop:
 				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					bf := deform.NewBoneFrame(count)
+					bf := NewBoneFrame(count)
 					bf.Rotation.SetQuaternion(correctIkQuat)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
@@ -517,7 +516,7 @@ ikLoop:
 				totalActualIkQuat = linkQuat.Muled(correctIkQuat)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					bf := deform.NewBoneFrame(count)
+					bf := NewBoneFrame(count)
 					bf.Rotation.SetQuaternion(totalActualIkQuat)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
@@ -535,7 +534,7 @@ ikLoop:
 				totalActualIkQuat = totalActualIkQuat.ToFixedAxisRotation(linkBone.NormalizedFixedAxis)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					bf := deform.NewBoneFrame(count)
+					bf := NewBoneFrame(count)
 					bf.Rotation.SetQuaternion(totalActualIkQuat)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
@@ -560,7 +559,7 @@ ikLoop:
 			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				bf := deform.NewBoneFrame(count)
+				bf := NewBoneFrame(count)
 				bf.Rotation.SetQuaternion(totalActualIkQuat)
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 				count++
@@ -611,7 +610,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	quat := mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle).Shorten()
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-		bf := deform.NewBoneFrame(count)
+		bf := NewBoneFrame(count)
 		bf.Rotation.SetQuaternion(quat)
 		ikMotion.AppendRegisteredBoneFrame(linkBoneName, bf)
 		count++
@@ -626,7 +625,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	totalIkQuat := linkQuat.Muled(quat)
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-		bf := deform.NewBoneFrame(count)
+		bf := NewBoneFrame(count)
 		bf.Rotation.SetQuaternion(totalIkQuat)
 		ikMotion.AppendRegisteredBoneFrame(linkBoneName, bf)
 		count++
@@ -704,7 +703,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 	targetBoneIndexes map[int]string,
 	positions, rotations, scales []*mmath.MMat4,
 	quatsWithoutEffect []*mmath.MQuaternion,
-) *deform.BoneDeltas {
+) *BoneDeltas {
 	matrixes := make([]*mmath.MMat4, 0, len(targetBoneIndexes))
 	resultMatrixes := make([]*mmath.MMat4, 0, len(targetBoneIndexes))
 	boneCount := len(targetBoneNames)
@@ -743,7 +742,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 	}
 	wg1.Wait()
 
-	boneDeltas := deform.NewBoneDeltas()
+	boneDeltas := NewBoneDeltas()
 
 	var wg2 sync.WaitGroup
 	// ボーンを一定件数ごとに並列処理（件数は変数保持）
@@ -779,7 +778,7 @@ func (bfs *BoneFrames) calcBoneMatrixes(
 		bone := model.Bones.GetItemByName(targetBoneIndexes[i])
 		localMatrix := resultMatrixes[i]
 		// 初期位置行列を掛けてグローバル行列を作成
-		boneDeltas.SetItem(bone.Name, frame, deform.NewBoneDelta(
+		boneDeltas.SetItem(bone.Name, frame, NewBoneDelta(
 			bone.Name,
 			frame,
 			localMatrix.Muled(bone.Position.ToMat4()), // グローバル行列

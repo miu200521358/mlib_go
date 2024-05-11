@@ -3,7 +3,6 @@ package vmd
 import (
 	"github.com/jinzhu/copier"
 
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
@@ -56,16 +55,16 @@ func (m *VmdMotion) GetMinFrame() float32 {
 	return min(m.BoneFrames.GetMinFrame(), m.MorphFrames.GetMinFrame())
 }
 
-func (m *VmdMotion) AppendBoneFrame(boneName string, bf *deform.BoneFrame) {
+func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {
 	m.BoneFrames.GetItem(boneName).Append(bf)
 }
 
-func (m *VmdMotion) AppendRegisteredBoneFrame(boneName string, bf *deform.BoneFrame) {
+func (m *VmdMotion) AppendRegisteredBoneFrame(boneName string, bf *BoneFrame) {
 	bf.Registered = true
 	m.BoneFrames.GetItem(boneName).Append(bf)
 }
 
-func (m *VmdMotion) AppendMorphFrame(morphName string, mf *deform.MorphFrame) {
+func (m *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame) {
 	m.MorphFrames.GetItem(morphName).Append(mf)
 }
 
@@ -85,8 +84,8 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 	m.IkFrames.Append(ikf)
 }
 
-func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *deform.VmdDeltas {
-	vds := &deform.VmdDeltas{}
+func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
+	vds := &VmdDeltas{}
 
 	vds.Morphs = m.AnimateMorph(fno, model, nil)
 
@@ -120,7 +119,7 @@ func (m *VmdMotion) AnimateMorph(
 	frame float32,
 	model *pmx.PmxModel,
 	morphNames []string,
-) *deform.MorphDeltas {
+) *MorphDeltas {
 	if morphNames == nil {
 		morphNames = make([]string, 0)
 	}
@@ -141,7 +140,7 @@ func (m *VmdMotion) AnimateBone(
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk bool,
-) *deform.BoneDeltas {
+) *BoneDeltas {
 	return m.AnimateBoneWithMorphs(frame, model, boneNames, isCalcIk, false)
 }
 
@@ -151,6 +150,6 @@ func (m *VmdMotion) AnimateBoneWithMorphs(
 	boneNames []string,
 	isCalcIk bool,
 	isCalcMorph bool,
-) *deform.BoneDeltas {
+) *BoneDeltas {
 	return m.BoneFrames.Animate(frame, model, boneNames, isCalcIk, isCalcMorph)
 }

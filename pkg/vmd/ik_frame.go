@@ -1,19 +1,18 @@
 package vmd
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 )
 
 type IkEnabledFrame struct {
-	*deform.BaseFrame        // キーフレ
-	BoneName          string // IKボーン名
-	Enabled           bool   // IKON/OFF
+	*BaseFrame        // キーフレ
+	BoneName   string // IKボーン名
+	Enabled    bool   // IKON/OFF
 }
 
 func NewIkEnableFrame(index float32) *IkEnabledFrame {
 	return &IkEnabledFrame{
-		BaseFrame: deform.NewVmdBaseFrame(index),
+		BaseFrame: NewVmdBaseFrame(index),
 		BoneName:  "",
 		Enabled:   true,
 	}
@@ -28,14 +27,14 @@ func (kf *IkEnabledFrame) Copy() *IkEnabledFrame {
 }
 
 type IkFrame struct {
-	*deform.BaseFrame                   // キーフレ
-	Visible           bool              // 表示ON/OFF
-	IkList            []*IkEnabledFrame // IKリスト
+	*BaseFrame                   // キーフレ
+	Visible    bool              // 表示ON/OFF
+	IkList     []*IkEnabledFrame // IKリスト
 }
 
 func NewIkFrame(index float32) *IkFrame {
 	return &IkFrame{
-		BaseFrame: deform.NewVmdBaseFrame(index),
+		BaseFrame: NewVmdBaseFrame(index),
 		Visible:   true,
 		IkList:    []*IkEnabledFrame{},
 	}

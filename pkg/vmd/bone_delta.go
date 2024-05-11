@@ -1,4 +1,4 @@
-package deform
+package vmd
 
 import (
 	"slices"

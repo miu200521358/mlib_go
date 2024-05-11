@@ -1,4 +1,4 @@
-package deform
+package vmd
 
 import (
 	"github.com/jinzhu/copier"

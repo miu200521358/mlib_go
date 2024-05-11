@@ -1,4 +1,4 @@
-package deform
+package vmd
 
 import "github.com/miu200521358/mlib_go/pkg/mmath"
 

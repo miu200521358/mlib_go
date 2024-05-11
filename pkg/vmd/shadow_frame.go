@@ -1,19 +1,18 @@
 package vmd
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 )
 
 type ShadowFrame struct {
-	*deform.BaseFrame         // キーフレ
-	ShadowMode        int     // セルフ影モード
-	Distance          float64 // 影範囲距離
+	*BaseFrame         // キーフレ
+	ShadowMode int     // セルフ影モード
+	Distance   float64 // 影範囲距離
 }
 
 func NewShadowFrame(index float32) *ShadowFrame {
 	return &ShadowFrame{
-		BaseFrame:  deform.NewVmdBaseFrame(index),
+		BaseFrame:  NewVmdBaseFrame(index),
 		ShadowMode: 0,
 		Distance:   0.0,
 	}

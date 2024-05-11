@@ -6,19 +6,19 @@ package mwidget
 import (
 	"github.com/go-gl/mathgl/mgl32"
 
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
+	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
 func Draw(
 	modelPhysics *mphysics.MPhysics,
 	model *pmx.PmxModel,
 	shader *mgl.MShader,
-	deltas *deform.VmdDeltas,
+	deltas *vmd.VmdDeltas,
 	windowIndex int,
 	frame float32,
 	elapsed float32,
@@ -63,7 +63,7 @@ func updatePhysics(
 	model *pmx.PmxModel,
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
-	deltas *deform.VmdDeltas,
+	deltas *vmd.VmdDeltas,
 	frame float32,
 	elapsed float32,
 	enablePhysics bool,
@@ -89,7 +89,7 @@ func updatePhysics(
 		// // 物理後ボーン位置を更新
 		// for boneIndex := range model.Bones.LayerSortedIndexes {
 		// 	bone := model.Bones.GetItem(boneIndex)
-		// 	if bone.IsAfterPhysicsDeform() && bone.ParentIndex == -1 && model.Bones.Contains(bone.ParentIndex) {
+		// 	if bone.IsAfterPhysicsvmd.) && bone.ParentIndex == -1 && model.Bones.Contains(bone.ParentIndex) {
 		// 		// 物理後ボーンで親が存在している場合、親の行列を取得する
 		// 		parentMat := boneMatrixes[bone.ParentIndex]
 		// 		pos := deltas.Bones.GetItem(bone.Name, frame).FramePosition.GL()

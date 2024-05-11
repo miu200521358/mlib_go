@@ -3,7 +3,6 @@ package vmd
 import (
 	"slices"
 
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
@@ -54,7 +53,7 @@ func (lfs *LightFrames) GetItem(index float32) *LightFrame {
 	if prevIndex == nextIndex && slices.Contains(lfs.Indexes, nextIndex) {
 		nextLf := lfs.Data[nextIndex]
 		copied := &LightFrame{
-			BaseFrame: deform.NewVmdBaseFrame(index),
+			BaseFrame: NewVmdBaseFrame(index),
 			Position:  nextLf.Position.Copy(),
 			Color:     nextLf.Color.Copy(),
 		}

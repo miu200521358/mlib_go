@@ -5,7 +5,6 @@ import (
 
 	"golang.org/x/text/encoding/japanese"
 
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
@@ -180,7 +179,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		v := deform.NewBoneFrame(0)
+		v := NewBoneFrame(0)
 		v.Registered = true
 		v.Read = true
 
@@ -220,7 +219,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 			mlog.E("[%d] readBones.Curves error: %v", i, err)
 			return err
 		}
-		v.Curves = deform.NewBoneCurvesByValues(curves)
+		v.Curves = NewBoneCurvesByValues(curves)
 
 		if !motion.BoneFrames.Contains(boneName) {
 			motion.BoneFrames.Append(NewBoneNameFrames(boneName))
@@ -240,7 +239,7 @@ func (r *VmdMotionReader) readMorphs(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		v := deform.NewMorphFrame(0)
+		v := NewMorphFrame(0)
 		v.Registered = true
 		v.Read = true
 

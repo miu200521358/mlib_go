@@ -3,7 +3,6 @@ package vmd
 import (
 	"slices"
 
-	"github.com/miu200521358/mlib_go/pkg/deform"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
@@ -54,7 +53,7 @@ func (sfs *ShadowFrames) GetItem(index float32) *ShadowFrame {
 	if prevIndex == nextIndex && slices.Contains(sfs.Indexes, nextIndex) {
 		nextSf := sfs.Data[nextIndex]
 		copied := &ShadowFrame{
-			BaseFrame: deform.NewVmdBaseFrame(index),
+			BaseFrame: NewVmdBaseFrame(index),
 			Distance:  nextSf.Distance,
 		}
 		return copied
