@@ -97,13 +97,19 @@ func (m *MRotation) SetDegrees(v *MVec3) {
 
 // Copy
 func (rot *MRotation) Copy() *MRotation {
-	copied := NewRotationByDegrees(NewMVec3())
+	copied := NewRotation()
 	copier.CopyWithOption(copied, rot, copier.Option{DeepCopy: true})
 	return copied
 }
 
-// Add
+// Mul
 func (rot *MRotation) Mul(v *MRotation) {
+	if rot.quaternion == nil {
+		rot.quaternion = NewMQuaternion()
+	}
+	if v.quaternion == nil {
+		v.quaternion = NewMQuaternion()
+	}
 	qq := rot.quaternion.Mul(v.quaternion)
 	rot.SetQuaternion(qq)
 }

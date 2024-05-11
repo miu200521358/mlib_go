@@ -1,7 +1,6 @@
 package vmd
 
 import (
-	"github.com/jinzhu/copier"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
@@ -82,7 +81,22 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 }
 
 func (v *BoneFrame) Copy() mcore.IIndexModel {
-	copied := NewBoneFrame(v.Index)
-	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+	copied := &BoneFrame{
+		BaseFrame:          NewVmdBaseFrame(v.Index),
+		Position:           v.Position.Copy(),
+		MorphPosition:      v.MorphPosition.Copy(),
+		LocalPosition:      v.LocalPosition.Copy(),
+		MorphLocalPosition: v.MorphLocalPosition.Copy(),
+		Rotation:           v.Rotation.Copy(),
+		MorphRotation:      v.MorphRotation.Copy(),
+		LocalRotation:      v.LocalRotation.Copy(),
+		MorphLocalRotation: v.MorphLocalRotation.Copy(),
+		Scale:              v.Scale.Copy(),
+		MorphScale:         v.MorphScale.Copy(),
+		LocalScale:         v.LocalScale.Copy(),
+		MorphLocalScale:    v.MorphLocalScale.Copy(),
+		IkRotation:         v.IkRotation.Copy(),
+		Curves:             v.Curves.Copy(),
+	}
 	return copied
 }
