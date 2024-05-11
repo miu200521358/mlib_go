@@ -43,7 +43,7 @@ var (
 type MVec3 mgl64.Vec3
 
 func NewMVec3() *MVec3 {
-	return &MVec3{0, 0, 0}
+	return &MVec3{}
 }
 
 // GetX returns the value of the X coordinate

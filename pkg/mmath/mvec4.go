@@ -46,7 +46,7 @@ var (
 type MVec4 mgl64.Vec4
 
 func NewMVec4() *MVec4 {
-	return &MVec4{0, 0, 0, 0}
+	return &MVec4{}
 }
 
 // GetX returns the value of the X coordinate
