@@ -563,27 +563,6 @@ func TestVmdMotion_AnimateBoneLegIk6_Snow(t *testing.T) {
 	model.SetUp()
 
 	{
-		// IK ON
-		{
-
-			fno := float32(0)
-			matrixes := motion.AnimateBone(fno, model, nil, true)
-			{
-				expectedPosition := &mmath.MVec3{2.143878, 6.558880, 1.121747}
-				if !matrixes.GetItem(pmx.KNEE.Left(), fno).Position.PracticallyEquals(expectedPosition, 0.6) {
-					t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.KNEE.Left(), fno).Position)
-				}
-			}
-			{
-				expectedPosition := &mmath.MVec3{2.214143, 1.689811, 2.947619}
-				if !matrixes.GetItem(pmx.ANKLE.Left(), fno).Position.PracticallyEquals(expectedPosition, 0.3) {
-					t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ANKLE.Left(), fno).Position)
-				}
-			}
-		}
-	}
-
-	{
 		// IK OFF
 		{
 
@@ -598,6 +577,27 @@ func TestVmdMotion_AnimateBoneLegIk6_Snow(t *testing.T) {
 			{
 				expectedPosition := &mmath.MVec3{1.003185, 1.474691, 0.475763}
 				if !matrixes.GetItem(pmx.ANKLE.Left(), fno).Position.PracticallyEquals(expectedPosition, 0.1) {
+					t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ANKLE.Left(), fno).Position)
+				}
+			}
+		}
+	}
+
+	{
+		// IK ON
+		{
+
+			fno := float32(0)
+			matrixes := motion.AnimateBone(fno, model, nil, true)
+			{
+				expectedPosition := &mmath.MVec3{2.143878, 6.558880, 1.121747}
+				if !matrixes.GetItem(pmx.KNEE.Left(), fno).Position.PracticallyEquals(expectedPosition, 0.6) {
+					t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.KNEE.Left(), fno).Position)
+				}
+			}
+			{
+				expectedPosition := &mmath.MVec3{2.214143, 1.689811, 2.947619}
+				if !matrixes.GetItem(pmx.ANKLE.Left(), fno).Position.PracticallyEquals(expectedPosition, 0.3) {
 					t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.ANKLE.Left(), fno).Position)
 				}
 			}
