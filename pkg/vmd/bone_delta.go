@@ -8,7 +8,7 @@ import (
 
 type BoneDelta struct {
 	BoneName                   string             // ボーン名
-	Frame                      float32            // キーフレーム
+	Frame                      int                // キーフレーム
 	GlobalMatrix               *mmath.MMat4       // グローバル行列
 	LocalMatrix                *mmath.MMat4       // ローカル行列
 	Position                   *mmath.MVec3       // グローバル位置
@@ -21,7 +21,7 @@ type BoneDelta struct {
 
 func NewBoneDelta(
 	boneName string,
-	frame float32,
+	frame int,
 	globalMatrix, localMatrix *mmath.MMat4,
 	framePosition *mmath.MVec3,
 	frameRotation *mmath.MQuaternion,
@@ -46,7 +46,7 @@ func NewBoneDelta(
 
 type BoneNameFrameNo struct {
 	BoneName string
-	Frame    float32
+	Frame    int
 }
 
 type BoneDeltas struct {
@@ -59,11 +59,11 @@ func NewBoneDeltas() *BoneDeltas {
 	}
 }
 
-func (bts *BoneDeltas) GetItem(boneName string, frame float32) *BoneDelta {
+func (bts *BoneDeltas) GetItem(boneName string, frame int) *BoneDelta {
 	return bts.Data[BoneNameFrameNo{boneName, frame}]
 }
 
-func (bts *BoneDeltas) SetItem(boneName string, frame float32, boneDelta *BoneDelta) {
+func (bts *BoneDeltas) SetItem(boneName string, frame int, boneDelta *BoneDelta) {
 	bts.Data[BoneNameFrameNo{boneName, frame}] = boneDelta
 }
 
@@ -77,8 +77,8 @@ func (bts *BoneDeltas) GetBoneNames() []string {
 	return boneNames
 }
 
-func (bts *BoneDeltas) GetFrameNos() []float32 {
-	frames := make([]float32, 0)
+func (bts *BoneDeltas) GetFrameNos() []int {
+	frames := make([]int, 0)
 	for key := range bts.Data {
 		if slices.Contains(frames, key.Frame) {
 			frames = append(frames, key.Frame)
@@ -87,7 +87,7 @@ func (bts *BoneDeltas) GetFrameNos() []float32 {
 	return frames
 }
 
-func (bts *BoneDeltas) Contains(boneName string, frame float32) bool {
+func (bts *BoneDeltas) Contains(boneName string, frame int) bool {
 	_, ok := bts.Data[BoneNameFrameNo{boneName, frame}]
 	return ok
 }

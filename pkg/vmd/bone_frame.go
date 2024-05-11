@@ -25,7 +25,7 @@ type BoneFrame struct {
 	IkRegistered       bool             // IK計算済み
 }
 
-func NewBoneFrame(index float32) *BoneFrame {
+func NewBoneFrame(index int) *BoneFrame {
 	return &BoneFrame{
 		BaseFrame:          NewVmdBaseFrame(index),
 		Position:           mmath.NewMVec3(),
@@ -81,7 +81,7 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 	return copied
 }
 
-func (v *BoneFrame) Copy() mcore.IIndexFloatModel {
+func (v *BoneFrame) Copy() mcore.IIndexModel {
 	copied := NewBoneFrame(v.Index)
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied

@@ -9,7 +9,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/miter"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-
 )
 
 func main() {
@@ -71,6 +70,6 @@ func main() {
 		if i%100 == 0 {
 			log.Printf("i: %d", i)
 		}
-		motion.AnimateBone(float32(i), model, nil, true)
+		motion.AnimateBone(i, model, nil, true)
 	}
 }

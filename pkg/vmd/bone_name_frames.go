@@ -10,39 +10,39 @@ import (
 )
 
 type BoneNameFrames struct {
-	*mcore.IIndexFloatModels[*BoneFrame]
+	*mcore.IndexModels[*BoneFrame]
 	Name              string       // ボーン名
-	IkIndexes         []float32    // IK計算済みキーフレリスト
-	RegisteredIndexes []float32    // 登録対象キーフレリスト
+	IkIndexes         []int        // IK計算済みキーフレリスト
+	RegisteredIndexes []int        // 登録対象キーフレリスト
 	lock              sync.RWMutex // マップアクセス制御用
 }
 
 func NewBoneNameFrames(name string) *BoneNameFrames {
 	return &BoneNameFrames{
-		IIndexFloatModels: mcore.NewIndexFloatModels[*BoneFrame](),
+		IndexModels:       mcore.NewIndexModels[*BoneFrame](),
 		Name:              name,
-		IkIndexes:         []float32{},
-		RegisteredIndexes: []float32{},
+		IkIndexes:         make([]int, 0),
+		RegisteredIndexes: make([]int, 0),
 		lock:              sync.RWMutex{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (bnfs *BoneNameFrames) GetRangeIndexes(index float32) (float32, float32) {
+func (bnfs *BoneNameFrames) GetRangeIndexes(index int) (int, int) {
 	if len(bnfs.RegisteredIndexes) == 0 {
-		return 0.0, 0.0
+		return 0, 0
 	}
 
-	prevIndex := float32(0.0)
+	prevIndex := 0
 	nextIndex := index
 
-	if idx := mutils.SearchFloat32s(bnfs.RegisteredIndexes, index); idx == 0 {
+	if idx := mutils.SearchInts(bnfs.RegisteredIndexes, index); idx == 0 {
 		prevIndex = 0.0
 	} else {
 		prevIndex = bnfs.RegisteredIndexes[idx-1]
 	}
 
-	if idx := mutils.SearchFloat32s(bnfs.RegisteredIndexes, index); idx >= len(bnfs.RegisteredIndexes) {
+	if idx := mutils.SearchInts(bnfs.RegisteredIndexes, index); idx >= len(bnfs.RegisteredIndexes) {
 		nextIndex = slices.Max(bnfs.RegisteredIndexes)
 	} else {
 		nextIndex = bnfs.RegisteredIndexes[idx]
@@ -52,7 +52,7 @@ func (bnfs *BoneNameFrames) GetRangeIndexes(index float32) (float32, float32) {
 }
 
 // キーフレ計算結果を返す
-func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
+func (bnfs *BoneNameFrames) GetItem(index int) *BoneFrame {
 	if bnfs == nil {
 		return NewBoneFrame(index)
 	}
@@ -60,7 +60,7 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	bnfs.lock.RLock()
 	defer bnfs.lock.RUnlock()
 
-	if slices.Contains(bnfs.Indexes, index) {
+	if _, ok := bnfs.Data[index]; ok {
 		return bnfs.Data[index]
 	}
 
@@ -68,7 +68,7 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	prevIndex, nextIndex := bnfs.GetRangeIndexes(index)
 
 	if prevIndex == nextIndex {
-		if slices.Contains(bnfs.Indexes, nextIndex) {
+		if _, ok := bnfs.Data[nextIndex]; ok {
 			nextBf := bnfs.Data[nextIndex]
 			copied := &BoneFrame{
 				BaseFrame:          NewVmdBaseFrame(index),
@@ -96,12 +96,12 @@ func (bnfs *BoneNameFrames) GetItem(index float32) *BoneFrame {
 	}
 
 	var prevBf, nextBf *BoneFrame
-	if slices.Contains(bnfs.Indexes, prevIndex) {
+	if _, ok := bnfs.Data[prevIndex]; ok {
 		prevBf = bnfs.Data[prevIndex]
 	} else {
 		prevBf = NewBoneFrame(index)
 	}
-	if slices.Contains(bnfs.Indexes, nextIndex) {
+	if _, ok := bnfs.Data[nextIndex]; ok {
 		nextBf = bnfs.Data[nextIndex]
 	} else {
 		nextBf = NewBoneFrame(index)
@@ -155,19 +155,18 @@ func (bnfs *BoneNameFrames) Append(value *BoneFrame) {
 	bnfs.lock.Lock()
 	defer bnfs.lock.Unlock()
 
-	if !slices.Contains(bnfs.Indexes, value.Index) {
-		bnfs.Indexes = append(bnfs.Indexes, value.Index)
-		mutils.SortFloat32s(bnfs.Indexes)
+	if _, ok := bnfs.Data[value.Index]; !ok {
+		bnfs.Indexes[value.Index] = value.Index
 	}
 	if value.IkRegistered && !slices.Contains(bnfs.IkIndexes, value.Index) {
 		bnfs.IkIndexes = append(bnfs.IkIndexes, value.Index)
-		mutils.SortFloat32s(bnfs.IkIndexes)
+		mutils.SortInts(bnfs.IkIndexes)
 	}
 
 	if value.Registered {
 		if !slices.Contains(bnfs.RegisteredIndexes, value.Index) {
 			bnfs.RegisteredIndexes = append(bnfs.RegisteredIndexes, value.Index)
-			mutils.SortFloat32s(bnfs.RegisteredIndexes)
+			mutils.SortInts(bnfs.RegisteredIndexes)
 		}
 		// 補間曲線を分割する
 		prevIndex, nextIndex := bnfs.GetRangeIndexes(value.Index)
@@ -188,7 +187,7 @@ func (bnfs *BoneNameFrames) Append(value *BoneFrame) {
 	bnfs.Data[value.Index] = value
 }
 
-func (bnfs *BoneNameFrames) GetMaxFrame() float32 {
+func (bnfs *BoneNameFrames) GetMaxFrame() int {
 	if len(bnfs.RegisteredIndexes) == 0 {
 		return 0
 	}
@@ -196,7 +195,7 @@ func (bnfs *BoneNameFrames) GetMaxFrame() float32 {
 	return slices.Max(bnfs.RegisteredIndexes)
 }
 
-func (bnfs *BoneNameFrames) GetMinFrame() float32 {
+func (bnfs *BoneNameFrames) GetMinFrame() int {
 	if len(bnfs.RegisteredIndexes) == 0 {
 		return 0
 	}

@@ -68,8 +68,8 @@ func (bfs *BoneFrames) GetNames() []string {
 	return names
 }
 
-func (bfs *BoneFrames) GetIndexes() []float32 {
-	indexes := make([]float32, 0)
+func (bfs *BoneFrames) GetIndexes() []int {
+	indexes := make([]int, 0)
 	for _, bnfs := range bfs.Data {
 		for _, index := range bnfs.Indexes {
 			if !slices.Contains(indexes, index) {
@@ -81,8 +81,8 @@ func (bfs *BoneFrames) GetIndexes() []float32 {
 	return indexes
 }
 
-func (bfs *BoneFrames) GetRegisteredIndexes() []float32 {
-	indexes := make([]float32, 0)
+func (bfs *BoneFrames) GetRegisteredIndexes() []int {
+	indexes := make([]int, 0)
 	for _, bnfs := range bfs.Data {
 		for _, index := range bnfs.RegisteredIndexes {
 			if !slices.Contains(indexes, index) {
@@ -102,8 +102,8 @@ func (bfs *BoneFrames) GetCount() int {
 	return count
 }
 
-func (bfs *BoneFrames) GetMaxFrame() float32 {
-	maxFno := float32(0)
+func (bfs *BoneFrames) GetMaxFrame() int {
+	maxFno := int(0)
 	for _, bnfs := range bfs.Data {
 		fno := bnfs.GetMaxFrame()
 		if fno > maxFno {
@@ -113,8 +113,8 @@ func (bfs *BoneFrames) GetMaxFrame() float32 {
 	return maxFno
 }
 
-func (bfs *BoneFrames) GetMinFrame() float32 {
-	minFno := float32(math.MaxFloat32)
+func (bfs *BoneFrames) GetMinFrame() int {
+	minFno := math.MaxInt
 	for _, bnfs := range bfs.Data {
 		fno := bnfs.GetMinFrame()
 		if fno < minFno {
@@ -125,7 +125,7 @@ func (bfs *BoneFrames) GetMinFrame() float32 {
 }
 
 func (bfs *BoneFrames) Animate(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk bool,
@@ -159,7 +159,7 @@ func (bfs *BoneFrames) Animate(
 
 // IK事前計算処理
 func (bfs *BoneFrames) prepareIkSolvers(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	targetBoneNames map[string]int,
 	isCalcMorph bool,
@@ -196,12 +196,12 @@ func (bfs *BoneFrames) prepareIkSolvers(
 	}
 	wg.Wait()
 
-	mlog.V("[IK計算終了][%.2f] -----------------------------------------------", frame)
+	mlog.V("[IK計算終了][%04d] -----------------------------------------------", frame)
 }
 
 // IK計算
 func (bfs *BoneFrames) calcIk(
-	frame float32,
+	frame int,
 	ikBone *pmx.Bone,
 	model *pmx.PmxModel,
 	isisCalcMorph bool,
@@ -220,7 +220,7 @@ func (bfs *BoneFrames) calcIk(
 
 	var ikFile *os.File
 	var ikMotion *VmdMotion
-	count := float32(1.0)
+	count := int(1.0)
 	if mlog.IsIkVerbose() {
 		// IK計算デバッグ用モーション
 		dirPath := fmt.Sprintf("%s/IK_step", filepath.Dir(model.Path))
@@ -230,10 +230,10 @@ func (bfs *BoneFrames) calcIk(
 		}
 
 		date := time.Now().Format("20060102_150405")
-		ikMotionPath := fmt.Sprintf("%s/%.2f_%s_%s.vmd", dirPath, frame, date, ikBone.Name)
+		ikMotionPath := fmt.Sprintf("%s/%04d_%s_%s.vmd", dirPath, frame, date, ikBone.Name)
 		ikMotion = NewVmdMotion(ikMotionPath)
 
-		ikLogPath := fmt.Sprintf("%s/%.2f_%s_%s.log", dirPath, frame, date, ikBone.Name)
+		ikLogPath := fmt.Sprintf("%s/%04d_%s_%s.log", dirPath, frame, date, ikBone.Name)
 		ikFile, err = os.OpenFile(ikLogPath, os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
 			fmt.Println(err)
@@ -241,10 +241,10 @@ func (bfs *BoneFrames) calcIk(
 		}
 
 		fmt.Println(ikFile, "----------------------------------------")
-		fmt.Println(ikFile, "[IK計算出力先][%.2f][%s] %s", frame, ikMotionPath)
+		fmt.Println(ikFile, "[IK計算出力先][%04d][%s] %s", frame, ikMotionPath)
 	}
 	defer func() {
-		mlog.V("[IK計算終了][%.2f][%s]", frame, ikBone.Name)
+		mlog.V("[IK計算終了][%04d][%s]", frame, ikBone.Name)
 
 		if ikMotion != nil {
 			Write(ikMotion)
@@ -300,13 +300,13 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][00][Global] ikGlobalPosition: %s, effectorGlobalPosition: %s\n",
+					"[%04d][%03d][%s][%05d][00][Global] ikGlobalPosition: %s, effectorGlobalPosition: %s\n",
 					frame, loop, linkBone.Name, count-1,
 					ikGlobalPosition.String(), effectorGlobalPosition.String())
 			}
 
 			// fmt.Fprintf(ikFile,
-			// 	"[%.2f][%03d][%s][%05.0f][01][グローバル位置終了判定] %sと%sの距離: %v(%0.6f)\n",
+			// 	"[%04d][%03d][%s][%05d][01][グローバル位置終了判定] %sと%sの距離: %v(%0.6f)\n",
 			// 	frame, loop, linkBone.Name, count-1, ikBone.Name, effectorBone.Name,
 			// 	ikGlobalPosition.Distance(effectorGlobalPosition) < 1e-6,
 			// 	ikGlobalPosition.Distance(effectorGlobalPosition))
@@ -344,7 +344,7 @@ ikLoop:
 			}
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][00][Local] effectorLocalPosition: %s, ikLocalPosition: %s\n",
+					"[%04d][%03d][%s][%05d][00][Local] effectorLocalPosition: %s, ikLocalPosition: %s\n",
 					frame, loop, linkBone.Name, count-1,
 					effectorLocalPosition.String(), ikLocalPosition.String())
 			}
@@ -360,12 +360,12 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][01][回転軸・角度] linkAxis: %s, linkAngle: %.5f\n",
+					"[%04d][%03d][%s][%05d][01][回転軸・角度] linkAxis: %s, linkAngle: %.5f\n",
 					frame, loop, linkBone.Name, count-1, linkAxis.String(), mmath.ToDegree(linkAngle),
 				)
 
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][01][回転角度終了判定] linkAngle: %v(%0.6f)\n",
+					"[%04d][%03d][%s][%05d][01][回転角度終了判定] linkAngle: %v(%0.6f)\n",
 					frame, loop, linkBone.Name, count-1, linkAngle < 1e-6, linkAngle)
 			}
 
@@ -379,7 +379,7 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][02][単位角制限] linkAngle: %.5f\n",
+					"[%04d][%03d][%s][%05d][02][単位角制限] linkAngle: %.5f\n",
 					frame, loop, linkBone.Name, count-1, mmath.ToDegree(linkAngle),
 				)
 			}
@@ -396,7 +396,7 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][03][linkQuat] linkQuat: %s(%s)\n",
+					"[%04d][%03d][%s][%05d][03][linkQuat] linkQuat: %s(%s)\n",
 					frame, loop, linkBone.Name, count-1, linkQuat.String(), linkQuat.ToDegrees().String(),
 				)
 			}
@@ -457,7 +457,7 @@ ikLoop:
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					fmt.Fprintf(ikFile,
-						"[%.2f][%03d][%s][%05.0f][11][角度制限結果] totalActualIkQuat: %s(%s)\n",
+						"[%04d][%03d][%s][%05d][11][角度制限結果] totalActualIkQuat: %s(%s)\n",
 						frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String(),
 					)
 				}
@@ -472,7 +472,7 @@ ikLoop:
 
 						if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 							fmt.Fprintf(ikFile,
-								"[%.2f][%03d][%s][%05.0f][04][軸制限][理想回転] quat: %s(%s)\n",
+								"[%04d][%03d][%s][%05d][04][軸制限][理想回転] quat: %s(%s)\n",
 								frame, loop, linkBone.Name, count-1, quat.String(), quat.ToDegrees().String(),
 							)
 						}
@@ -490,7 +490,7 @@ ikLoop:
 
 						if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 							fmt.Fprintf(ikFile,
-								"[%.2f][%03d][%s][%05.0f][04][軸制限][理想軸制限回転] quat: %s(%s)\n",
+								"[%04d][%03d][%s][%05d][04][軸制限][理想軸制限回転] quat: %s(%s)\n",
 								frame, loop, linkBone.Name, count-1, quat.String(), quat.ToDegrees().String(),
 							)
 						}
@@ -508,7 +508,7 @@ ikLoop:
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					fmt.Fprintf(ikFile,
-						"[%.2f][%03d][%s][%05.0f][13][角度制限なし] correctIkQuat: %s(%s)\n",
+						"[%04d][%03d][%s][%05d][13][角度制限なし] correctIkQuat: %s(%s)\n",
 						frame, loop, linkBone.Name, count-1, correctIkQuat.String(), correctIkQuat.ToDegrees().String())
 				}
 
@@ -524,7 +524,7 @@ ikLoop:
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					fmt.Fprintf(ikFile,
-						"[%.2f][%03d][%s][%05.0f][14][角度制限なし] totalActualIkQuat: %s(%s)\n",
+						"[%04d][%03d][%s][%05d][14][角度制限なし] totalActualIkQuat: %s(%s)\n",
 						frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String())
 				}
 			}
@@ -542,13 +542,13 @@ ikLoop:
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					fmt.Fprintf(ikFile,
-						"[%.2f][%03d][%s][%05.0f][15][軸制限後処理] totalActualIkQuat: %s(%s)\n",
+						"[%04d][%03d][%s][%05d][15][軸制限後処理] totalActualIkQuat: %s(%s)\n",
 						frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String())
 				}
 			}
 
 			fmt.Fprintf(ikFile,
-				"[%.2f][%03d][%s][%05.0f][15] 前回差分中断判定: %v(%0.6f) 前回: %s 今回: %s\n",
+				"[%04d][%03d][%s][%05d][15] 前回差分中断判定: %v(%0.6f) 前回: %s 今回: %s\n",
 				frame, loop, linkBone.Name, count-1,
 				1-quatsWithoutEffect[linkIndex].Dot(totalActualIkQuat) < 1e-6, 1-quatsWithoutEffect[linkIndex].Dot(totalActualIkQuat),
 				quatsWithoutEffect[linkIndex].ToDegrees().String(), totalActualIkQuat.ToDegrees().String())
@@ -567,7 +567,7 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%.2f][%03d][%s][%05.0f][16][結果] totalActualIkQuat: %s(%s)\n",
+					"[%04d][%03d][%s][%05d][16][結果] totalActualIkQuat: %s(%s)\n",
 					frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String())
 			}
 
@@ -600,8 +600,8 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	quatAngle float64,
 	axisIndex int,
 	axisVector *mmath.MVec3,
-	frame float32,
-	count float32,
+	frame int,
+	count int,
 	loop int,
 	linkBoneName string,
 	ikMotion *VmdMotion,
@@ -617,7 +617,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	}
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-		fmt.Fprintf(ikFile, "[%.2f][%03d][%s][%05.0f][04][角度制限] quat: %s(%s)\n",
+		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][04][角度制限] quat: %s(%s)\n",
 			frame, loop, linkBoneName, count-1, quat.String(), quat.ToDegrees().String())
 	}
 
@@ -632,7 +632,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	}
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-		fmt.Fprintf(ikFile, "[%.2f][%03d][%s][%05.0f][05][角度制限] totalIkQuat: %s(%s)\n",
+		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][05][角度制限] totalIkQuat: %s(%s)\n",
 			frame, loop, linkBoneName, count-1, totalIkQuat.String(), totalIkQuat.ToDegrees().String())
 	}
 
@@ -643,7 +643,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	}
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-		fmt.Fprintf(ikFile, "[%.2f][%03d][%s][%05.0f][06][角度制限] totalIkRad: %.5f(%.5f)\n",
+		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][06][角度制限] totalIkRad: %.5f(%.5f)\n",
 			frame, loop, linkBoneName, count-1, totalIkRad, mmath.ToDegree(totalIkRad))
 	}
 
@@ -651,7 +651,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 	fX := math.Asin(fSX)        // 一軸回り決定
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-		fmt.Fprintf(ikFile, "[%.2f][%03d][%s][%05.0f][07][角度制限] fSX: %.5f, fX: %.5f(%.5f)\n",
+		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][07][角度制限] fSX: %.5f, fX: %.5f(%.5f)\n",
 			frame, loop, linkBoneName, count-1, fSX, fX, mmath.ToDegree(fX))
 	}
 
@@ -666,7 +666,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 		}
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-			fmt.Fprintf(ikFile, "[%.2f][%03d][%s][%05.0f][08][角度制限][ジンバルロック回避] fSX: %.5f, fX: %.5f(%.5f)\n",
+			fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][08][角度制限][ジンバルロック回避] fSX: %.5f, fX: %.5f(%.5f)\n",
 				frame, loop, linkBoneName, count-1, fSX, fX, mmath.ToDegree(fX))
 		}
 	}
@@ -678,7 +678,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 		fX = mmath.ClampFloat(tf, minAngleLimit, maxAngleLimit)
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-			fmt.Fprintf(ikFile, "[%.2f][%03d][%s][%05.0f][09][角度制限][負角度制限] fSX: %.5f, fX: %.5f(%.5f)\n",
+			fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][09][角度制限][負角度制限] fSX: %.5f, fX: %.5f(%.5f)\n",
 				frame, loop, linkBoneName, count-1, fSX, fX, mmath.ToDegree(fX))
 		}
 	}
@@ -688,7 +688,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 		fX = mmath.ClampFloat(tf, minAngleLimit, maxAngleLimit)
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-			fmt.Fprintf(ikFile, "[%.2f][%03d][%s][%05.0f][10][角度制限][正角度制限] fSX: %.5f, fX: %.5f(%.5f)\n",
+			fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][10][角度制限][正角度制限] fSX: %.5f, fX: %.5f(%.5f)\n",
 				frame, loop, linkBoneName, count-1, fSX, fX, mmath.ToDegree(fX))
 		}
 	}
@@ -697,7 +697,7 @@ func (bfs *BoneFrames) calcSingleAxisRad(
 }
 
 func (bfs *BoneFrames) calcBoneMatrixes(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	targetBoneNames map[string]int,
 	targetBoneIndexes map[int]string,
@@ -839,7 +839,7 @@ func (bfs *BoneFrames) getAnimatedBoneNames(
 
 // ボーン変形行列を求める
 func (bfs *BoneFrames) getBoneMatrixes(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	targetBoneNames map[string]int,
 	targetBoneIndexes map[int]string,
@@ -887,7 +887,7 @@ func (bfs *BoneFrames) getBoneMatrixes(
 
 // 該当キーフレにおけるボーンの移動位置
 func (bfs *BoneFrames) getPosition(
-	frame float32,
+	frame int,
 	boneName string,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
@@ -918,7 +918,7 @@ func (bfs *BoneFrames) getPosition(
 
 // 付与親を加味した移動位置
 func (bfs *BoneFrames) getPositionWithEffect(
-	frame float32,
+	frame int,
 	boneIndex int,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
@@ -950,7 +950,7 @@ func (bfs *BoneFrames) getPositionWithEffect(
 
 // 該当キーフレにおけるボーンの回転角度
 func (bfs *BoneFrames) getRotation(
-	frame float32,
+	frame int,
 	boneName string,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
@@ -1006,7 +1006,7 @@ func (bfs *BoneFrames) getRotation(
 
 // 付与親を加味した回転角度
 func (bfs *BoneFrames) getRotationWithEffect(
-	frame float32,
+	frame int,
 	boneIndex int,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
@@ -1034,7 +1034,7 @@ func (bfs *BoneFrames) getRotationWithEffect(
 
 // 該当キーフレにおけるボーンの拡大率
 func (bfs *BoneFrames) getScale(
-	frame float32,
+	frame int,
 	boneName string,
 	model *pmx.PmxModel,
 	isCalcMorph bool,

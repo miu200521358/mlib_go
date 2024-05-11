@@ -25,7 +25,7 @@ func NewFloatIndexes() *FloatIndexes {
 	}
 }
 
-func (i FloatIndexes) Has(index float32) bool {
+func (i FloatIndexes) Has(index int) bool {
 	return i.LLRB.Has(Float32(index))
 }
 

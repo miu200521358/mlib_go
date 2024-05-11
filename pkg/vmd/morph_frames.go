@@ -33,7 +33,7 @@ func (mfs *MorphFrames) GetItem(morphName string) *MorphNameFrames {
 }
 
 func (mfs *MorphFrames) Animate(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	morphNames []string,
 ) *MorphDeltas {
@@ -62,8 +62,8 @@ func (mfs *MorphFrames) Animate(
 	return mds
 }
 
-func (mfs *MorphFrames) GetMaxFrame() float32 {
-	maxFno := float32(0)
+func (mfs *MorphFrames) GetMaxFrame() int {
+	maxFno := int(0)
 	for _, mnfs := range mfs.Data {
 		fno := mnfs.GetMaxFrame()
 		if fno > maxFno {
@@ -73,8 +73,8 @@ func (mfs *MorphFrames) GetMaxFrame() float32 {
 	return maxFno
 }
 
-func (mfs *MorphFrames) GetMinFrame() float32 {
-	minFno := float32(math.MaxFloat32)
+func (mfs *MorphFrames) GetMinFrame() int {
+	minFno := math.MaxInt
 	for _, mnfs := range mfs.Data {
 		fno := mnfs.GetMinFrame()
 		if fno < minFno {

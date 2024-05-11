@@ -11,37 +11,37 @@ import (
 )
 
 type MorphNameFrames struct {
-	*mcore.IIndexFloatModels[*MorphFrame]
+	*mcore.IndexModels[*MorphFrame]
 	Name              string       // ボーン名
-	RegisteredIndexes []float32    // 登録対象キーフレリスト
+	RegisteredIndexes []int        // 登録対象キーフレリスト
 	lock              sync.RWMutex // マップアクセス制御用
 }
 
 func NewMorphNameFrames(name string) *MorphNameFrames {
 	return &MorphNameFrames{
-		IIndexFloatModels: mcore.NewIndexFloatModels[*MorphFrame](),
+		IndexModels:       mcore.NewIndexModels[*MorphFrame](),
 		Name:              name,
-		RegisteredIndexes: []float32{},
+		RegisteredIndexes: []int{},
 		lock:              sync.RWMutex{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (mnfs *MorphNameFrames) GetRangeIndexes(index float32) (float32, float32) {
+func (mnfs *MorphNameFrames) GetRangeIndexes(index int) (int, int) {
 	if len(mnfs.RegisteredIndexes) == 0 {
 		return 0.0, 0.0
 	}
 
-	prevIndex := float32(0.0)
+	prevIndex := 0
 	nextIndex := index
 
-	if idx := mutils.SearchFloat32s(mnfs.RegisteredIndexes, index); idx == 0 {
+	if idx := mutils.SearchInts(mnfs.RegisteredIndexes, index); idx == 0 {
 		prevIndex = 0.0
 	} else {
 		prevIndex = mnfs.RegisteredIndexes[idx-1]
 	}
 
-	if idx := mutils.SearchFloat32s(mnfs.RegisteredIndexes, index); idx >= len(mnfs.RegisteredIndexes) {
+	if idx := mutils.SearchInts(mnfs.RegisteredIndexes, index); idx >= len(mnfs.RegisteredIndexes) {
 		nextIndex = slices.Max(mnfs.RegisteredIndexes)
 	} else {
 		nextIndex = mnfs.RegisteredIndexes[idx]
@@ -51,7 +51,7 @@ func (mnfs *MorphNameFrames) GetRangeIndexes(index float32) (float32, float32) {
 }
 
 // キーフレ計算結果を返す
-func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
+func (mnfs *MorphNameFrames) GetItem(index int) *MorphFrame {
 	if mnfs == nil {
 		return NewMorphFrame(index)
 	}
@@ -59,7 +59,7 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 	mnfs.lock.RLock()
 	defer mnfs.lock.RUnlock()
 
-	if slices.Contains(mnfs.Indexes, index) {
+	if slices.Contains(mnfs.RegisteredIndexes, index) {
 		return mnfs.Data[index]
 	}
 
@@ -67,7 +67,7 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 	prevIndex, nextIndex := mnfs.GetRangeIndexes(index)
 
 	if prevIndex == nextIndex {
-		if slices.Contains(mnfs.Indexes, nextIndex) {
+		if slices.Contains(mnfs.RegisteredIndexes, nextIndex) {
 			nextMf := mnfs.Data[nextIndex]
 			copied := &MorphFrame{
 				BaseFrame: NewVmdBaseFrame(index),
@@ -80,12 +80,12 @@ func (mnfs *MorphNameFrames) GetItem(index float32) *MorphFrame {
 	}
 
 	var prevMf, nextMf *MorphFrame
-	if slices.Contains(mnfs.Indexes, prevIndex) {
+	if slices.Contains(mnfs.RegisteredIndexes, prevIndex) {
 		prevMf = mnfs.Data[prevIndex]
 	} else {
 		prevMf = NewMorphFrame(index)
 	}
-	if slices.Contains(mnfs.Indexes, nextIndex) {
+	if slices.Contains(mnfs.RegisteredIndexes, nextIndex) {
 		nextMf = mnfs.Data[nextIndex]
 	} else {
 		nextMf = NewMorphFrame(index)
@@ -104,20 +104,20 @@ func (mnfs *MorphNameFrames) Append(value *MorphFrame) {
 	mnfs.lock.Lock()
 	defer mnfs.lock.Unlock()
 
-	if !slices.Contains(mnfs.Indexes, value.Index) {
-		mnfs.Indexes = append(mnfs.Indexes, value.Index)
-		mutils.SortFloat32s(mnfs.Indexes)
+	if !slices.Contains(mnfs.RegisteredIndexes, value.Index) {
+		mnfs.RegisteredIndexes = append(mnfs.RegisteredIndexes, value.Index)
+		mutils.SortInts(mnfs.RegisteredIndexes)
 	}
 
 	if value.Registered && !slices.Contains(mnfs.RegisteredIndexes, value.Index) {
 		mnfs.RegisteredIndexes = append(mnfs.RegisteredIndexes, value.Index)
-		mutils.SortFloat32s(mnfs.RegisteredIndexes)
+		mutils.SortInts(mnfs.RegisteredIndexes)
 	}
 
 	mnfs.Data[value.Index] = value
 }
 
-func (mnfs *MorphNameFrames) GetMaxFrame() float32 {
+func (mnfs *MorphNameFrames) GetMaxFrame() int {
 	if len(mnfs.RegisteredIndexes) == 0 {
 		return 0
 	}
@@ -125,7 +125,7 @@ func (mnfs *MorphNameFrames) GetMaxFrame() float32 {
 	return slices.Max(mnfs.RegisteredIndexes)
 }
 
-func (mnfs *MorphNameFrames) GetMinFrame() float32 {
+func (mnfs *MorphNameFrames) GetMinFrame() int {
 	if len(mnfs.RegisteredIndexes) == 0 {
 		return 0
 	}
@@ -134,7 +134,7 @@ func (mnfs *MorphNameFrames) GetMinFrame() float32 {
 }
 
 func (mnfs *MorphNameFrames) AnimateVertex(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
 ) {
@@ -154,7 +154,7 @@ func (mnfs *MorphNameFrames) AnimateVertex(
 }
 
 func (mnfs *MorphNameFrames) AnimateAfterVertex(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
 ) {
@@ -174,7 +174,7 @@ func (mnfs *MorphNameFrames) AnimateAfterVertex(
 }
 
 func (mnfs *MorphNameFrames) AnimateUv(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
 ) {
@@ -195,7 +195,7 @@ func (mnfs *MorphNameFrames) AnimateUv(
 }
 
 func (mnfs *MorphNameFrames) AnimateUv1(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
 ) {
@@ -216,7 +216,7 @@ func (mnfs *MorphNameFrames) AnimateUv1(
 }
 
 func (mnfs *MorphNameFrames) AnimateBone(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	deltas *BoneMorphDeltas,
 ) {
@@ -246,7 +246,7 @@ func (mnfs *MorphNameFrames) AnimateBone(
 
 // AnimateMaterial 材質モーフの適用
 func (mnfs *MorphNameFrames) AnimateMaterial(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	deltas *MaterialMorphDeltas,
 ) {

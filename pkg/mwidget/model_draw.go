@@ -20,7 +20,7 @@ func Draw(
 	shader *mview.MShader,
 	deltas *vmd.VmdDeltas,
 	windowIndex int,
-	frame float32,
+	fno int,
 	elapsed float32,
 	isBoneDebug bool,
 	enablePhysics bool,
@@ -31,9 +31,9 @@ func Draw(
 	vertexDeltas := make([][]float32, len(model.Vertices.Data))
 	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))
 	for i, bone := range model.Bones.GetSortedData() {
-		mat := deltas.Bones.GetItem(bone.Name, frame).LocalMatrix.GL()
+		mat := deltas.Bones.GetItem(bone.Name, fno).LocalMatrix.GL()
 		boneMatrixes[i] = mat
-		globalMatrixes[i] = deltas.Bones.GetItem(bone.Name, frame).GlobalMatrix
+		globalMatrixes[i] = deltas.Bones.GetItem(bone.Name, fno).GlobalMatrix
 		t := mbt.NewBtTransform()
 		t.SetFromOpenGLMatrix(&mat[0])
 		boneTransforms[i] = &t
@@ -46,7 +46,7 @@ func Draw(
 		materialDeltas[i] = md.Material
 	}
 
-	updatePhysics(modelPhysics, model, boneMatrixes, boneTransforms, deltas, frame, elapsed, enablePhysics)
+	updatePhysics(modelPhysics, model, boneMatrixes, boneTransforms, deltas, fno, elapsed, enablePhysics)
 	model.Meshes.Draw(shader, boneMatrixes, vertexDeltas, materialDeltas, windowIndex)
 
 	// 物理デバッグ表示
@@ -64,7 +64,7 @@ func updatePhysics(
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
 	deltas *vmd.VmdDeltas,
-	frame float32,
+	fno int,
 	elapsed float32,
 	enablePhysics bool,
 ) {
@@ -78,7 +78,7 @@ func updatePhysics(
 		r.UpdateTransform(modelPhysics, boneTransforms, elapsed == 0.0 || !enablePhysics || forceUpdate)
 	}
 
-	if frame > modelPhysics.Spf {
+	if float32(fno) > modelPhysics.Spf {
 		modelPhysics.Update(elapsed)
 
 		// 剛体位置を更新
@@ -92,9 +92,9 @@ func updatePhysics(
 		// 	if bone.IsAfterPhysicsvmd.) && bone.ParentIndex == -1 && model.Bones.Contains(bone.ParentIndex) {
 		// 		// 物理後ボーンで親が存在している場合、親の行列を取得する
 		// 		parentMat := boneMatrixes[bone.ParentIndex]
-		// 		pos := deltas.Bones.GetItem(bone.Name, frame).FramePosition.GL()
-		// 		rot := deltas.Bones.GetItem(bone.Name, frame).FrameRotation.GL()
-		// 		scl := deltas.Bones.GetItem(bone.Name, frame).FrameScale
+		// 		pos := deltas.Bones.GetItem(bone.Name, fno).FramePosition.GL()
+		// 		rot := deltas.Bones.GetItem(bone.Name, fno).FrameRotation.GL()
+		// 		scl := deltas.Bones.GetItem(bone.Name, fno).FrameScale
 
 		// 		// 自身の行列を作成
 		// 		mat := parentMat.Mul4(mgl32.Translate3D(pos[0], pos[1], pos[2]))

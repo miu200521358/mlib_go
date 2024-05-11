@@ -9,31 +9,31 @@ import (
 )
 
 type ShadowFrames struct {
-	*mcore.IIndexFloatModels[*ShadowFrame]
-	RegisteredIndexes []float32 // 登録対象キーフレリスト
+	*mcore.IndexModels[*ShadowFrame]
+	RegisteredIndexes []int // 登録対象キーフレリスト
 }
 
 func NewShadowFrames() *ShadowFrames {
 	return &ShadowFrames{
-		IIndexFloatModels: mcore.NewIndexFloatModels[*ShadowFrame](),
-		RegisteredIndexes: []float32{},
+		IndexModels:       mcore.NewIndexModels[*ShadowFrame](),
+		RegisteredIndexes: []int{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (sfs *ShadowFrames) GetRangeIndexes(index float32) (float32, float32) {
+func (sfs *ShadowFrames) GetRangeIndexes(index int) (int, int) {
 
-	prevIndex := float32(0)
+	prevIndex := int(0)
 	nextIndex := index
 
-	if idx := mutils.SearchFloat32s(sfs.Indexes, index); idx == 0 {
+	if idx := mutils.SearchInts(sfs.RegisteredIndexes, index); idx == 0 {
 		prevIndex = 0
 	} else {
 		prevIndex = sfs.Indexes[idx-1]
 	}
 
-	if idx := mutils.SearchFloat32s(sfs.Indexes, index); idx == len(sfs.Indexes) {
-		nextIndex = slices.Max(sfs.Indexes)
+	if idx := mutils.SearchInts(sfs.RegisteredIndexes, index); idx == len(sfs.Indexes) {
+		nextIndex = slices.Max(sfs.RegisteredIndexes)
 	} else {
 		nextIndex = sfs.Indexes[idx]
 	}
@@ -42,7 +42,7 @@ func (sfs *ShadowFrames) GetRangeIndexes(index float32) (float32, float32) {
 }
 
 // キーフレ計算結果を返す
-func (sfs *ShadowFrames) GetItem(index float32) *ShadowFrame {
+func (sfs *ShadowFrames) GetItem(index int) *ShadowFrame {
 	if val, ok := sfs.Data[index]; ok {
 		return val
 	}
@@ -50,7 +50,7 @@ func (sfs *ShadowFrames) GetItem(index float32) *ShadowFrame {
 	// なかったら補間計算して返す
 	prevIndex, nextIndex := sfs.GetRangeIndexes(index)
 
-	if prevIndex == nextIndex && slices.Contains(sfs.Indexes, nextIndex) {
+	if prevIndex == nextIndex && slices.Contains(sfs.RegisteredIndexes, nextIndex) {
 		nextSf := sfs.Data[nextIndex]
 		copied := &ShadowFrame{
 			BaseFrame: NewVmdBaseFrame(index),
@@ -60,12 +60,12 @@ func (sfs *ShadowFrames) GetItem(index float32) *ShadowFrame {
 	}
 
 	var prevSf, nextSf *ShadowFrame
-	if slices.Contains(sfs.Indexes, prevIndex) {
+	if slices.Contains(sfs.RegisteredIndexes, prevIndex) {
 		prevSf = sfs.Data[prevIndex]
 	} else {
 		prevSf = NewShadowFrame(index)
 	}
-	if slices.Contains(sfs.Indexes, nextIndex) {
+	if slices.Contains(sfs.RegisteredIndexes, nextIndex) {
 		nextSf = sfs.Data[nextIndex]
 	} else {
 		nextSf = NewShadowFrame(index)
@@ -80,14 +80,14 @@ func (sfs *ShadowFrames) GetItem(index float32) *ShadowFrame {
 }
 
 func (sfs *ShadowFrames) Append(value *ShadowFrame) {
-	if !slices.Contains(sfs.Indexes, value.Index) {
-		sfs.Indexes = append(sfs.Indexes, value.Index)
-		mutils.SortFloat32s(sfs.Indexes)
+	if !slices.Contains(sfs.RegisteredIndexes, value.Index) {
+		sfs.RegisteredIndexes = append(sfs.RegisteredIndexes, value.Index)
+		mutils.SortInts(sfs.RegisteredIndexes)
 	}
 	if value.Registered {
 		if !slices.Contains(sfs.RegisteredIndexes, value.Index) {
 			sfs.RegisteredIndexes = append(sfs.RegisteredIndexes, value.Index)
-			mutils.SortFloat32s(sfs.RegisteredIndexes)
+			mutils.SortInts(sfs.RegisteredIndexes)
 		}
 	}
 

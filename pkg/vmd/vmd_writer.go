@@ -73,7 +73,7 @@ func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
 	binary.Write(fout, binary.LittleEndian, uint32(motion.BoneFrames.GetCount()))
 	for _, name := range names {
 		bfs := motion.BoneFrames.Data[name]
-		mutils.SortFloat32s(bfs.RegisteredIndexes)
+		mutils.SortInts(bfs.RegisteredIndexes)
 
 		for i := len(bfs.RegisteredIndexes) - 1; i >= 0; i-- {
 			fno := bfs.RegisteredIndexes[i]

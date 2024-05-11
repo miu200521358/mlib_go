@@ -47,11 +47,11 @@ func (m *VmdMotion) SetName(name string) {
 	m.ModelName = name
 }
 
-func (m *VmdMotion) GetMaxFrame() float32 {
+func (m *VmdMotion) GetMaxFrame() int {
 	return max(m.BoneFrames.GetMaxFrame(), m.MorphFrames.GetMaxFrame())
 }
 
-func (m *VmdMotion) GetMinFrame() float32 {
+func (m *VmdMotion) GetMinFrame() int {
 	return min(m.BoneFrames.GetMinFrame(), m.MorphFrames.GetMinFrame())
 }
 
@@ -84,7 +84,7 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 	m.IkFrames.Append(ikf)
 }
 
-func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
+func (m *VmdMotion) Animate(fno int, model *pmx.PmxModel) *VmdDeltas {
 	vds := &VmdDeltas{}
 
 	vds.Morphs = m.AnimateMorph(fno, model, nil)
@@ -116,7 +116,7 @@ func (m *VmdMotion) Animate(fno float32, model *pmx.PmxModel) *VmdDeltas {
 }
 
 func (m *VmdMotion) AnimateMorph(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	morphNames []string,
 ) *MorphDeltas {
@@ -136,7 +136,7 @@ func (m *VmdMotion) AnimateMorph(
 }
 
 func (m *VmdMotion) AnimateBone(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk bool,
@@ -145,7 +145,7 @@ func (m *VmdMotion) AnimateBone(
 }
 
 func (m *VmdMotion) AnimateBoneWithMorphs(
-	frame float32,
+	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk bool,

@@ -196,7 +196,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 			mlog.E("[%d] readBones.index error: %v", i, err)
 			return err
 		}
-		v.Index = float32(index)
+		v.Index = int(index)
 
 		// 位置X,Y,Z
 		v.Position, err = r.UnpackVec3()
@@ -256,7 +256,7 @@ func (r *VmdMotionReader) readMorphs(motion *VmdMotion) error {
 			mlog.E("[%d] readMorphs.index error: %v", i, err)
 			return err
 		}
-		v.Index = float32(index)
+		v.Index = int(index)
 
 		// ratio
 		v.Ratio, err = r.UnpackFloat()
@@ -289,7 +289,7 @@ func (r *VmdMotionReader) readCameras(motion *VmdMotion) error {
 			mlog.E("[%d] readCameras.index error: %v", i, err)
 			return err
 		}
-		v.Index = float32(index)
+		v.Index = int(index)
 
 		// 距離
 		v.Distance, err = r.UnpackFloat()
@@ -361,7 +361,7 @@ func (r *VmdMotionReader) readLights(motion *VmdMotion) error {
 			mlog.E("[%d] readLights.index error: %v", i, err)
 			return err
 		}
-		v.Index = float32(index)
+		v.Index = int(index)
 
 		// 照明色
 		v.Color, err = r.UnpackVec3()
@@ -401,7 +401,7 @@ func (r *VmdMotionReader) readShadows(motion *VmdMotion) error {
 			mlog.E("[%d] readShadows.index error: %v", i, err)
 			return err
 		}
-		v.Index = float32(index)
+		v.Index = int(index)
 
 		// セルフ影タイプ
 		shadowMode, err := r.UnpackByte()
@@ -442,7 +442,7 @@ func (r *VmdMotionReader) readIks(motion *VmdMotion) error {
 			mlog.E("[%d] readIks.index error: %v", i, err)
 			return err
 		}
-		v.Index = float32(index)
+		v.Index = int(index)
 
 		// モデル表示
 		visible, err := r.UnpackByte()

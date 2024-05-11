@@ -5,7 +5,7 @@ type MorphFrame struct {
 	Ratio      float64 // モーフの割合
 }
 
-func NewMorphFrame(index float32) *MorphFrame {
+func NewMorphFrame(index int) *MorphFrame {
 	return &MorphFrame{
 		BaseFrame: NewVmdBaseFrame(index),
 		Ratio:     0.0,

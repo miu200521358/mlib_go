@@ -10,7 +10,7 @@ type IkEnabledFrame struct {
 	Enabled    bool   // IKON/OFF
 }
 
-func NewIkEnableFrame(index float32) *IkEnabledFrame {
+func NewIkEnableFrame(index int) *IkEnabledFrame {
 	return &IkEnabledFrame{
 		BaseFrame: NewVmdBaseFrame(index),
 		BoneName:  "",
@@ -32,7 +32,7 @@ type IkFrame struct {
 	IkList     []*IkEnabledFrame // IKリスト
 }
 
-func NewIkFrame(index float32) *IkFrame {
+func NewIkFrame(index int) *IkFrame {
 	return &IkFrame{
 		BaseFrame: NewVmdBaseFrame(index),
 		Visible:   true,
@@ -40,7 +40,7 @@ func NewIkFrame(index float32) *IkFrame {
 	}
 }
 
-func (ikf *IkFrame) Copy() mcore.IIndexFloatModel {
+func (ikf *IkFrame) Copy() mcore.IIndexModel {
 	vv := &IkFrame{
 		Visible: ikf.Visible,
 		IkList:  []*IkEnabledFrame{},

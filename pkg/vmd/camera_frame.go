@@ -14,7 +14,7 @@ type CameraFrame struct {
 	Curves           *CameraCurves    // 補間曲線
 }
 
-func NewCameraFrame(index float32) *CameraFrame {
+func NewCameraFrame(index int) *CameraFrame {
 	return &CameraFrame{
 		BaseFrame:        NewVmdBaseFrame(index),
 		Position:         mmath.NewMVec3(),

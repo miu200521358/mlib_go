@@ -38,8 +38,9 @@ func (ms *ModelSet) Draw(
 	isBoneDebug bool,
 	enablePhysics bool,
 ) {
-	deltas := ms.Motion.Animate(frame, ms.Model)
-	Draw(modelPhysics, ms.Model, shader, deltas, windowIndex, frame, elapsed, isBoneDebug, enablePhysics)
+	fno := int(math.Round(float64(frame)))
+	deltas := ms.Motion.Animate(fno, ms.Model)
+	Draw(modelPhysics, ms.Model, shader, deltas, windowIndex, fno, elapsed, isBoneDebug, enablePhysics)
 }
 
 // 直角の定数値

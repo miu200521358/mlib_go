@@ -31,7 +31,7 @@ func TestVmdMotion_AnimateBone(t *testing.T) {
 
 	{
 
-		fno := float32(10.0)
+		fno := int(10.0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.INDEX3.Left()}, false)
 		{
 			expectedPosition := &mmath.MVec3{0.0, 0.0, 0.0}
@@ -138,7 +138,7 @@ func TestVmdMotion_AnimateBone(t *testing.T) {
 	}
 
 	{
-		fno := float32(999)
+		fno := int(999)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.INDEX3.Left()}, false)
 		{
 			expectedPosition := &mmath.MVec3{0.0, 0.0, 0.0}
@@ -267,7 +267,7 @@ func TestVmdMotion_AnimateBoneLegIk1_Matsu(t *testing.T) {
 	model.SetUp()
 
 	{
-		fno := float32(29)
+		fno := int(29)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Left()}, true)
 		{
 			expectedPosition := &mmath.MVec3{-0.781335, 11.717622, 1.557067}
@@ -324,7 +324,7 @@ func TestVmdMotion_AnimateBoneLegIk2_Matsu(t *testing.T) {
 
 	{
 
-		fno := float32(3152)
+		fno := int(3152)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Left()}, true)
 		{
 			expectedPosition := &mmath.MVec3{7.928583, 11.713336, 1.998830}
@@ -381,7 +381,7 @@ func TestVmdMotion_AnimateBoneLegIk3_Matsu(t *testing.T) {
 
 	{
 
-		fno := float32(60)
+		fno := int(60)
 		matrixes := motion.AnimateBone(fno, model, nil, true)
 		{
 			expectedPosition := &mmath.MVec3{1.931959, 11.695199, -1.411883}
@@ -450,7 +450,7 @@ func TestVmdMotion_AnimateBoneLegIk4_Snow(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{1.316121, 11.687257, 2.263307}
@@ -507,7 +507,7 @@ func TestVmdMotion_AnimateBoneLegIk5_Snow(t *testing.T) {
 
 	{
 
-		fno := float32(7409)
+		fno := int(7409)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{-7.652257, 11.990970, -4.511993}
@@ -566,7 +566,7 @@ func TestVmdMotion_AnimateBoneLegIk6_Snow(t *testing.T) {
 		// IK OFF
 		{
 
-			fno := float32(0)
+			fno := int(0)
 			matrixes := motion.AnimateBone(fno, model, nil, false)
 			{
 				expectedPosition := &mmath.MVec3{1.622245, 6.632885, 0.713205}
@@ -587,7 +587,7 @@ func TestVmdMotion_AnimateBoneLegIk6_Snow(t *testing.T) {
 		// IK ON
 		{
 
-			fno := float32(0)
+			fno := int(0)
 			matrixes := motion.AnimateBone(fno, model, nil, true)
 			{
 				expectedPosition := &mmath.MVec3{2.143878, 6.558880, 1.121747}
@@ -629,7 +629,7 @@ func TestVmdMotion_AnimateBoneLegIk7_Syou(t *testing.T) {
 	// 残存回転判定用
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{0.721499, 11.767294, 1.638818}
@@ -686,7 +686,7 @@ func TestVmdMotion_AnimateBoneLegIk8_Syou(t *testing.T) {
 
 	{
 
-		fno := float32(278)
+		fno := int(278)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{0.721499, 11.767294, 1.638818}
@@ -743,7 +743,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 
 	{
 
-		fno := float32(100)
+		fno := int(100)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{0.365000, 11.411437, 1.963828}
@@ -778,7 +778,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	}
 	{
 
-		fno := float32(107)
+		fno := int(107)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{0.365000, 12.042871, 2.034023}
@@ -813,7 +813,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	}
 	{
 
-		fno := float32(272)
+		fno := int(272)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{-0.330117, 10.811301, 1.914508}
@@ -848,7 +848,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	}
 	{
 
-		fno := float32(273)
+		fno := int(273)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{-0.154848, 10.862784, 1.868560}
@@ -883,7 +883,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	}
 	{
 
-		fno := float32(274)
+		fno := int(274)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{0.049523, 10.960778, 1.822612}
@@ -918,7 +918,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	}
 	{
 
-		fno := float32(278)
+		fno := int(278)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{0.721499, 11.767294, 1.638818}
@@ -975,7 +975,7 @@ func TestVmdMotion_AnimateBoneLegIk11_Shining_Miku(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.LEG_IK.Right(), "足首_R_"}, true)
 		{
 			expectedPosition := &mmath.MVec3{-1.869911, 2.074591, -0.911531}
@@ -1038,7 +1038,7 @@ func TestVmdMotion_AnimateBoneLegIk11_Shining_Vroid(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{0.0, 9.379668, -1.051170}
@@ -1095,7 +1095,7 @@ func TestVmdMotion_AnimateBoneLegIk12_Down_Miku(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.LEG_IK.Right(), "足首_R_"}, true)
 		{
 			expectedPosition := &mmath.MVec3{-1.012964, 1.623157, 0.680305}
@@ -1161,7 +1161,7 @@ func TestVmdMotion_AnimateBoneLegIk13_Lamb(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		{
 			expectedPosition := &mmath.MVec3{-1.216134, 1.887670, -10.78867}
 			if !matrixes.GetItem(pmx.LEG_IK.Right(), fno).Position.PracticallyEquals(expectedPosition, 0.1) {
@@ -1201,7 +1201,7 @@ func TestVmdMotion_AnimateBoneLegIk13_Lamb(t *testing.T) {
 	}
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		{
 			expectedPosition := &mmath.MVec3{2.322227, 1.150214, -9.644499}
 			if !matrixes.GetItem(pmx.LEG_IK.Left(), fno).Position.PracticallyEquals(expectedPosition, 0.1) {
@@ -1263,7 +1263,7 @@ func TestVmdMotion_AnimateBoneLegIk14_Ballet(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.LEG_IK.Right(), pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{11.324574, 10.920002, -7.150005}
@@ -1326,7 +1326,7 @@ func TestVmdMotion_AnimateBoneLegIk15_Bottom(t *testing.T) {
 
 	{
 
-		fno := float32(218)
+		fno := int(218)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.LEG_IK.Right(), "足首_R_"}, true)
 		{
 			expectedPosition := &mmath.MVec3{-1.358434, 1.913062, 0.611182}
@@ -1389,7 +1389,7 @@ func TestVmdMotion_AnimateBoneLegIk16_Lamb(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.LEG_IK.Right(), pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{-1.216134, 1.887670, -10.78867}
@@ -1452,7 +1452,7 @@ func TestVmdMotion_AnimateBoneLegIk17_Snow(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{2.049998, 12.957623, 1.477440}
@@ -1509,7 +1509,7 @@ func TestVmdMotion_AnimateBoneLegIk18_Syou(t *testing.T) {
 
 	{
 
-		fno := float32(107)
+		fno := int(107)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{0.365000, 12.042871, 2.034023}
@@ -1566,7 +1566,7 @@ func TestVmdMotion_AnimateBoneLegIk19_Wa(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{0.000000, 9.900000, 0.000000}
@@ -1623,7 +1623,7 @@ func TestVmdMotion_AnimateBoneLegIk20_Syou(t *testing.T) {
 
 	{
 
-		fno := float32(107)
+		fno := int(107)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{0.365000, 12.042871, 2.034023}
@@ -1680,7 +1680,7 @@ func TestVmdMotion_AnimateBoneLegIk21_FK(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, false)
 		{
 			expectedPosition := &mmath.MVec3{-0.133305, 10.693993, 2.314730}
@@ -1719,7 +1719,7 @@ func TestVmdMotion_AnimateBoneLegIk22_Bake(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{-0.133306, 10.693994, 2.314731}
@@ -1758,7 +1758,7 @@ func TestVmdMotion_AnimateBoneLegIk22_NoLimit(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE.Right()}, true)
 		{
 			expectedPosition := &mmath.MVec3{-0.133305, 10.693993, 2.314730}
@@ -1797,7 +1797,7 @@ func TestVmdMotion_AnimateBoneLegIk23_Addiction(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, []string{pmx.TOE_IK.Right(), "右つま先"}, true)
 		{
 			expectedPosition := &mmath.MVec3{0, 0.2593031, 0}
@@ -1866,7 +1866,7 @@ func TestVmdMotion_AnimateBoneLegIk24_Positive(t *testing.T) {
 	model.SetUp()
 
 	{
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, nil, true)
 		{
 			expectedPosition := &mmath.MVec3{0, 0, 0}
@@ -2014,7 +2014,7 @@ func TestVmdMotion_AnimateBoneArmIk(t *testing.T) {
 
 	{
 
-		fno := float32(3182)
+		fno := int(3182)
 		matrixes := motion.AnimateBone(fno, model, nil, true)
 		{
 			expectedPosition := &mmath.MVec3{0, 0, 0}
@@ -2143,7 +2143,7 @@ func TestVmdMotion_AnimateBoneLegIk2(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, nil, true)
 		{
 			expectedPosition := &mmath.MVec3{0.04952335, 9.0, 1.72378033}
@@ -2332,7 +2332,7 @@ func TestVmdMotion_AnimateBoneArmIk2(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, nil, true)
 		{
 			expectedPosition := &mmath.MVec3{0.04952335, 9.0, 1.72378033}
@@ -2719,7 +2719,7 @@ func TestVmdMotion_AnimateBoneArmIk3(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, nil, true)
 		{
 			expectedPosition := &mmath.MVec3{1.018832, 15.840092, 0.532239}
@@ -2782,7 +2782,7 @@ func TestVmdMotion_AnimateBoneArmIk4_DMF(t *testing.T) {
 
 	{
 
-		fno := float32(0)
+		fno := int(0)
 		matrixes := motion.AnimateBone(fno, model, nil, true)
 		{
 			expectedPosition := &mmath.MVec3{6.210230, 8.439670, 0.496305}
