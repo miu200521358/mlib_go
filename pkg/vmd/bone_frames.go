@@ -181,7 +181,7 @@ func (fs *BoneFrames) prepareIkSolvers(
 					linkBone := model.Bones.GetItem(linkIndex.BoneIndex)
 					linkBf := fs.GetItem(linkBone.Name).GetItem(frame)
 					linkIndex := effectorTargetBoneNames[linkBone.Name]
-					linkBf.IkRotation = mmath.NewRotationModelByQuaternion(quats[linkIndex])
+					linkBf.IkRotation = mmath.NewRotationByQuaternion(quats[linkIndex])
 
 					// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
 					fs.GetItem(linkBone.Name).Append(linkBf)

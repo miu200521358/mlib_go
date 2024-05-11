@@ -2,9 +2,8 @@ package main
 
 import (
 	"log"
-	"os"
-	"runtime"
-	"runtime/pprof"
+
+	"github.com/pkg/profile"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils/miter"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
@@ -12,35 +11,37 @@ import (
 )
 
 func main() {
-	// CPUプロファイル用のファイルを作成
-	{
-		f, err := os.Create("cpu.pprof")
-		if err != nil {
-			panic(err)
-		}
-		defer f.Close()
+	// // CPUプロファイル用のファイルを作成
+	// {
+	// 	f, err := os.Create("cpu.pprof")
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	defer f.Close()
 
-		// CPUプロファイリングを開始
-		if err := pprof.StartCPUProfile(f); err != nil {
-			panic(err)
-		}
-		defer pprof.StopCPUProfile()
-	}
+	// 	// CPUプロファイリングを開始
+	// 	if err := pprof.StartCPUProfile(f); err != nil {
+	// 		panic(err)
+	// 	}
+	// 	defer pprof.StopCPUProfile()
+	// }
 
-	{
-		// メモリプロファイル用のファイルを作成
-		f, err := os.Create("memory.pprof")
-		if err != nil {
-			panic(err)
-		}
-		defer f.Close()
-		runtime.GC()
+	// {
+	// 	// メモリプロファイル用のファイルを作成
+	// 	f, err := os.Create("memory.pprof")
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	defer f.Close()
+	// 	runtime.GC()
 
-		// ヒーププロファイリングを開始
-		if err := pprof.WriteHeapProfile(f); err != nil {
-			panic(err)
-		}
-	}
+	// 	// ヒーププロファイリングを開始
+	// 	if err := pprof.WriteHeapProfile(f); err != nil {
+	// 		panic(err)
+	// 	}
+	// }
+
+	defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
 
 	// --------------------------------------------
 

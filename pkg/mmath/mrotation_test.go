@@ -2,30 +2,29 @@ package mmath
 
 import (
 	"testing"
-
 )
 
-func TestNewRotationModelByRadians(t *testing.T) {
+func TestNewRotationByRadians(t *testing.T) {
 	radians := MVec3{1, 2, 3}
-	rotation := NewRotationModelByRadians(&radians)
+	rotation := NewRotationByRadians(&radians)
 
 	if *rotation.GetRadians() != radians {
 		t.Errorf("Expected GetRadians() to return %v, but got %v", radians, rotation.radians.String())
 	}
 }
 
-func TestNewRotationModelByDegrees(t *testing.T) {
+func TestNewRotationByDegrees(t *testing.T) {
 	degrees := MVec3{90, 180, 270}
-	rotation := NewRotationModelByDegrees(&degrees)
+	rotation := NewRotationByDegrees(&degrees)
 
 	if *rotation.GetDegrees() != degrees {
 		t.Errorf("Expected GetDegrees() to return %v, but got %v", degrees, rotation.degrees.String())
 	}
 }
 
-func TestNewRotationModelByQuaternion(t *testing.T) {
+func TestNewRotationByQuaternion(t *testing.T) {
 	quaternion := NewMQuaternionByValues(1, 0, 0, 0)
-	rotation := NewRotationModelByQuaternion(quaternion)
+	rotation := NewRotationByQuaternion(quaternion)
 
 	if *rotation.GetQuaternion() != *quaternion {
 		t.Errorf("Expected GetQuaternion() to return %v, but got %v", quaternion, rotation.quaternion.String())

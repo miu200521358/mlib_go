@@ -86,7 +86,7 @@ func (fs *BoneNameFrames) GetItem(index int) *BoneFrame {
 				LocalScale:         nextBf.LocalScale.Copy(),
 				MorphLocalScale:    nextBf.MorphLocalScale.Copy(),
 				// IKとかの計算値はコピーしないで初期値
-				IkRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+				IkRotation: mmath.NewRotation(),
 				// 補間曲線はとりあえず初期値
 				Curves: NewBoneCurves(),
 			}
@@ -146,7 +146,7 @@ func (fs *BoneNameFrames) GetItem(index int) *BoneFrame {
 	bf.LocalScale.SetZ(nowZ[3])
 
 	// IKとかの計算値はコピーしないで初期値
-	bf.IkRotation = mmath.NewRotationModelByDegrees(mmath.NewMVec3())
+	bf.IkRotation = mmath.NewRotation()
 
 	return bf
 }

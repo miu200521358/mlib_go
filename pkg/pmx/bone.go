@@ -25,11 +25,11 @@ func NewIkLink() *IkLink {
 	return &IkLink{
 		BoneIndex:          -1,
 		AngleLimit:         false,
-		MinAngleLimit:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
-		MaxAngleLimit:      mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		MinAngleLimit:      mmath.NewRotation(),
+		MaxAngleLimit:      mmath.NewRotation(),
 		LocalAngleLimit:    false,
-		LocalMinAngleLimit: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
-		LocalMaxAngleLimit: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		LocalMinAngleLimit: mmath.NewRotation(),
+		LocalMaxAngleLimit: mmath.NewRotation(),
 	}
 }
 
@@ -49,7 +49,7 @@ func NewIk() *Ik {
 	return &Ik{
 		BoneIndex:    -1,
 		LoopCount:    0,
-		UnitRotation: mmath.NewRotationModelByDegrees(mmath.NewMVec3()),
+		UnitRotation: mmath.NewRotation(),
 		Links:        []*IkLink{},
 	}
 }
@@ -144,11 +144,11 @@ func NewBone() *Bone {
 		ChildBoneIndexes:       []int{},
 		EffectiveBoneIndexes:   []int{},
 		AngleLimit:             false,
-		MinAngleLimit:          mmath.NewRotationModelByRadians(mmath.NewMVec3()),
-		MaxAngleLimit:          mmath.NewRotationModelByRadians(mmath.NewMVec3()),
+		MinAngleLimit:          mmath.NewRotationByRadians(mmath.NewMVec3()),
+		MaxAngleLimit:          mmath.NewRotationByRadians(mmath.NewMVec3()),
 		LocalAngleLimit:        false,
-		LocalMinAngleLimit:     mmath.NewRotationModelByRadians(mmath.NewMVec3()),
-		LocalMaxAngleLimit:     mmath.NewRotationModelByRadians(mmath.NewMVec3()),
+		LocalMinAngleLimit:     mmath.NewRotationByRadians(mmath.NewMVec3()),
+		LocalMaxAngleLimit:     mmath.NewRotationByRadians(mmath.NewMVec3()),
 		AxisSign:               1,
 	}
 	bone.NormalizedLocalAxisX = bone.LocalAxisX.Copy()
