@@ -10,7 +10,6 @@ import (
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
 
-	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
@@ -72,11 +71,12 @@ func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
 
 	binary.Write(fout, binary.LittleEndian, uint32(motion.BoneFrames.GetCount()))
 	for _, name := range names {
-		bfs := motion.BoneFrames.Data[name]
-		mutils.SortInts(bfs.RegisteredIndexes)
+		fs := motion.BoneFrames.Data[name]
 
-		for i := len(bfs.RegisteredIndexes) - 1; i >= 0; i-- {
-			fno := bfs.RegisteredIndexes[i]
+		for fno := fs.RegisteredIndexes.Max(); fno >= 0; fno-- {
+			if !fs.RegisteredIndexes.Has(fno) {
+				continue
+			}
 			bf := motion.BoneFrames.Data[name].Data[fno]
 			encodedName, err := encodeName(name, 15)
 			if err != nil {

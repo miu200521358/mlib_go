@@ -1,75 +1,76 @@
 package vmd
 
 import (
-	"slices"
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/petar/GoLLRB/llrb"
 )
 
 type BoneNameFrames struct {
 	*mcore.IndexModels[*BoneFrame]
-	Name              string       // ボーン名
-	IkIndexes         []int        // IK計算済みキーフレリスト
-	RegisteredIndexes []int        // 登録対象キーフレリスト
-	lock              sync.RWMutex // マップアクセス制御用
+	Name              string            // ボーン名
+	IkIndexes         *mcore.IntIndexes // IK計算済みキーフレリスト
+	RegisteredIndexes *mcore.IntIndexes // 登録対象キーフレリスト
+	lock              sync.RWMutex      // マップアクセス制御用
 }
 
 func NewBoneNameFrames(name string) *BoneNameFrames {
 	return &BoneNameFrames{
 		IndexModels:       mcore.NewIndexModels[*BoneFrame](),
 		Name:              name,
-		IkIndexes:         make([]int, 0),
-		RegisteredIndexes: make([]int, 0),
+		IkIndexes:         mcore.NewIntIndexes(),
+		RegisteredIndexes: mcore.NewIntIndexes(),
 		lock:              sync.RWMutex{},
 	}
 }
 
 // 指定したキーフレの前後のキーフレ番号を返す
-func (bnfs *BoneNameFrames) GetRangeIndexes(index int) (int, int) {
-	if len(bnfs.RegisteredIndexes) == 0 {
+func (fs *BoneNameFrames) GetRangeIndexes(index int) (int, int) {
+	if fs.RegisteredIndexes.Len() == 0 {
 		return 0, 0
 	}
 
-	prevIndex := 0
-	nextIndex := index
-
-	if idx := mutils.SearchInts(bnfs.RegisteredIndexes, index); idx == 0 {
-		prevIndex = 0.0
-	} else {
-		prevIndex = bnfs.RegisteredIndexes[idx-1]
+	if fs.RegisteredIndexes.Max() < index {
+		return fs.RegisteredIndexes.Max(), fs.RegisteredIndexes.Max()
 	}
 
-	if idx := mutils.SearchInts(bnfs.RegisteredIndexes, index); idx >= len(bnfs.RegisteredIndexes) {
-		nextIndex = slices.Max(bnfs.RegisteredIndexes)
-	} else {
-		nextIndex = bnfs.RegisteredIndexes[idx]
-	}
+	prevIndex := mcore.Int(0)
+	nextIndex := mcore.Int(index)
 
-	return prevIndex, nextIndex
+	fs.RegisteredIndexes.DescendLessOrEqual(mcore.Int(index), func(i llrb.Item) bool {
+		prevIndex = i.(mcore.Int)
+		return false
+	})
+
+	fs.RegisteredIndexes.AscendGreaterOrEqual(mcore.Int(index), func(i llrb.Item) bool {
+		nextIndex = i.(mcore.Int)
+		return false
+	})
+
+	return int(prevIndex), int(nextIndex)
 }
 
 // キーフレ計算結果を返す
-func (bnfs *BoneNameFrames) GetItem(index int) *BoneFrame {
-	if bnfs == nil {
+func (fs *BoneNameFrames) GetItem(index int) *BoneFrame {
+	if fs == nil {
 		return NewBoneFrame(index)
 	}
 
-	bnfs.lock.RLock()
-	defer bnfs.lock.RUnlock()
+	fs.lock.RLock()
+	defer fs.lock.RUnlock()
 
-	if _, ok := bnfs.Data[index]; ok {
-		return bnfs.Data[index]
+	if _, ok := fs.Data[index]; ok {
+		return fs.Data[index]
 	}
 
 	// なかったら補間計算して返す
-	prevIndex, nextIndex := bnfs.GetRangeIndexes(index)
+	prevIndex, nextIndex := fs.GetRangeIndexes(index)
 
 	if prevIndex == nextIndex {
-		if _, ok := bnfs.Data[nextIndex]; ok {
-			nextBf := bnfs.Data[nextIndex]
+		if _, ok := fs.Data[nextIndex]; ok {
+			nextBf := fs.Data[nextIndex]
 			copied := &BoneFrame{
 				BaseFrame:          NewVmdBaseFrame(index),
 				Position:           nextBf.Position.Copy(),
@@ -96,13 +97,13 @@ func (bnfs *BoneNameFrames) GetItem(index int) *BoneFrame {
 	}
 
 	var prevBf, nextBf *BoneFrame
-	if _, ok := bnfs.Data[prevIndex]; ok {
-		prevBf = bnfs.Data[prevIndex]
+	if _, ok := fs.Data[prevIndex]; ok {
+		prevBf = fs.Data[prevIndex]
 	} else {
 		prevBf = NewBoneFrame(index)
 	}
-	if _, ok := bnfs.Data[nextIndex]; ok {
-		nextBf = bnfs.Data[nextIndex]
+	if _, ok := fs.Data[nextIndex]; ok {
+		nextBf = fs.Data[nextIndex]
 	} else {
 		nextBf = NewBoneFrame(index)
 	}
@@ -151,27 +152,24 @@ func (bnfs *BoneNameFrames) GetItem(index int) *BoneFrame {
 }
 
 // bf.Registered が true の場合、補間曲線を分割して登録する
-func (bnfs *BoneNameFrames) Append(value *BoneFrame) {
-	bnfs.lock.Lock()
-	defer bnfs.lock.Unlock()
+func (fs *BoneNameFrames) Append(value *BoneFrame) {
+	fs.lock.Lock()
+	defer fs.lock.Unlock()
 
-	if _, ok := bnfs.Data[value.Index]; !ok {
-		bnfs.Indexes[value.Index] = value.Index
+	if _, ok := fs.Data[value.Index]; !ok {
+		fs.Indexes[value.Index] = value.Index
 	}
-	if value.IkRegistered && !slices.Contains(bnfs.IkIndexes, value.Index) {
-		bnfs.IkIndexes = append(bnfs.IkIndexes, value.Index)
-		mutils.SortInts(bnfs.IkIndexes)
+	if value.IkRegistered {
+		fs.IkIndexes.ReplaceOrInsert(mcore.Int(value.Index))
 	}
 
 	if value.Registered {
-		if !slices.Contains(bnfs.RegisteredIndexes, value.Index) {
-			bnfs.RegisteredIndexes = append(bnfs.RegisteredIndexes, value.Index)
-			mutils.SortInts(bnfs.RegisteredIndexes)
-		}
+		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Int(value.Index))
+
 		// 補間曲線を分割する
-		prevIndex, nextIndex := bnfs.GetRangeIndexes(value.Index)
+		prevIndex, nextIndex := fs.GetRangeIndexes(value.Index)
 		if nextIndex > value.Index && prevIndex < value.Index {
-			nextBf := bnfs.Data[nextIndex]
+			nextBf := fs.Data[nextIndex]
 			// 自分の前後にフレームがある場合、分割する
 			value.Curves.TranslateX, nextBf.Curves.TranslateX =
 				mmath.SplitCurve(nextBf.Curves.TranslateX, prevIndex, value.Index, nextIndex)
@@ -184,21 +182,13 @@ func (bnfs *BoneNameFrames) Append(value *BoneFrame) {
 		}
 	}
 
-	bnfs.Data[value.Index] = value
+	fs.Data[value.Index] = value
 }
 
-func (bnfs *BoneNameFrames) GetMaxFrame() int {
-	if len(bnfs.RegisteredIndexes) == 0 {
-		return 0
-	}
-
-	return slices.Max(bnfs.RegisteredIndexes)
+func (fs *BoneNameFrames) GetMaxFrame() int {
+	return fs.RegisteredIndexes.Max()
 }
 
-func (bnfs *BoneNameFrames) GetMinFrame() int {
-	if len(bnfs.RegisteredIndexes) == 0 {
-		return 0
-	}
-
-	return slices.Min(bnfs.RegisteredIndexes)
+func (fs *BoneNameFrames) GetMinFrame() int {
+	return fs.RegisteredIndexes.Min()
 }

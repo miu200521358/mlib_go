@@ -21,8 +21,8 @@ func (mfs *MorphFrames) Contains(morphName string) bool {
 	return ok
 }
 
-func (mfs *MorphFrames) Append(bnfs *MorphNameFrames) {
-	mfs.Data[bnfs.Name] = bnfs
+func (mfs *MorphFrames) Append(fs *MorphNameFrames) {
+	mfs.Data[fs.Name] = fs
 }
 
 func (mfs *MorphFrames) GetItem(morphName string) *MorphNameFrames {
@@ -86,8 +86,8 @@ func (mfs *MorphFrames) GetMinFrame() int {
 
 func (fs *MorphFrames) GetCount() int {
 	count := 0
-	for _, bnfs := range fs.Data {
-		count += len(bnfs.RegisteredIndexes)
+	for _, fs := range fs.Data {
+		count += len(fs.RegisteredIndexes)
 	}
 	return count
 }

@@ -2,36 +2,52 @@ package mcore
 
 import "github.com/petar/GoLLRB/llrb"
 
-type Float32 float32
+type Int int
 
-func NewFloat32(v float32) Float32 {
-	return Float32(v)
+func NewInt(v int) Int {
+	return Int(v)
 }
 
-func (v Float32) Less(than llrb.Item) bool {
+func (v Int) Less(than llrb.Item) bool {
 	if than == nil {
 		return false
 	}
-	return v < than.(Float32)
+	return v < than.(Int)
 }
 
-type FloatIndexes struct {
+type IntIndexes struct {
 	*llrb.LLRB
 }
 
-func NewFloatIndexes() *FloatIndexes {
-	return &FloatIndexes{
+func NewIntIndexes() *IntIndexes {
+	return &IntIndexes{
 		LLRB: llrb.New(),
 	}
 }
 
-func (i FloatIndexes) Has(index int) bool {
-	return i.LLRB.Has(Float32(index))
+func (i IntIndexes) Has(index int) bool {
+	return i.LLRB.Has(Int(index))
 }
 
-func (i FloatIndexes) Max() float32 {
+func (i IntIndexes) Max() int {
 	if i.LLRB.Len() == 0 {
 		return 0
 	}
-	return float32(i.LLRB.Max().(Float32))
+	return int(i.LLRB.Max().(Int))
+}
+
+func (i IntIndexes) Min() int {
+	if i.LLRB.Len() == 0 {
+		return 0
+	}
+	return int(i.LLRB.Min().(Int))
+}
+
+func (i IntIndexes) List() []int {
+	list := make([]int, i.LLRB.Len())
+	i.LLRB.AscendGreaterOrEqual(i.LLRB.Min(), func(item llrb.Item) bool {
+		list = append(list, int(item.(Int)))
+		return true
+	})
+	return list
 }
