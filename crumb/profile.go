@@ -28,7 +28,6 @@ func main() {
 	}
 
 	{
-		// go tool pprof cmd\main.go cmd\memory.pprof
 		// メモリプロファイル用のファイルを作成
 		f, err := os.Create("memory.pprof")
 		if err != nil {

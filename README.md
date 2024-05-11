@@ -82,12 +82,11 @@ go get -u golang.org/x/image
 
 ## プロファイル
 
-1. main.go のプロファイルを有効化
-2. main.go を実行
-3. `go tool pprof cmd\main.go cmd\cpu.pprof`
-    - `go tool pprof -flat cmd\main.go cmd\cpu.pprof`
-    - `go tool pprof -cum cmd\main.go cmd\cpu.pprof`
-4. `(pprof) top`
+1. crumb/profile.go を実行
+2. `go tool pprof crumb\profile.go crumb\cpu.pprof`
+    - `go tool pprof -flat crumb\profile.go crumb\cpu.pprof`
+    - `go tool pprof -cum crumb\profile.go crumb\cpu.pprof`
+3. `(pprof) top`
 
 ### GCプロファイル
 
@@ -102,6 +101,7 @@ go get -u golang.org/x/image
 1. `go get github.com/goccy/go-graphviz/cmd/dot`
 2. `go install github.com/goccy/go-graphviz`
 3. `go tool pprof -http=:8080 cpu.pprof`
+4. `go tool pprof -http=:8081 memory.pprof`
 
 ## bullet
 

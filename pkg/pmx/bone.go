@@ -307,7 +307,7 @@ func (bone *Bone) IsNoLocalCancel() bool {
 
 // 指定したカテゴリーに属するか
 func (bone *Bone) containsCategory(category BoneCategory) bool {
-	for _, boneConfig := range StandardBoneConfigs {
+	for _, boneConfig := range GetStandardBoneConfigs() {
 		for _, c := range boneConfig.Categories {
 			if c == category && (boneConfig.Name.String() == bone.Name ||
 				boneConfig.Name.Right() == bone.Name ||
