@@ -245,16 +245,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalVertexCount; i++ {
-		v := &Vertex{
-			IndexModel:  &mcore.IndexModel{Index: -1},
-			Position:    nil,
-			Normal:      nil,
-			UV:          nil,
-			ExtendedUVs: make([]*mmath.MVec4, 0),
-			DeformType:  BDEF1,
-			Deform:      nil,
-			EdgeFactor:  0.0,
-		}
+		v := NewVertex()
 
 		// 12 : float3  | 位置(x,y,z)
 		v.Position, err = r.UnpackVec3()
@@ -412,7 +403,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 				mlog.E("[%d] readVertices SDEF UnpackVec3 sdefR1 error: %v", i, err)
 				return err
 			}
-			v.Deform = NewSdef(boneIndex1, boneIndex2, boneWeight, sdefC, sdefR0, sdefR1)
+			v.Deform = NewSdef(boneIndex1, boneIndex2, boneWeight, &sdefC, &sdefR0, &sdefR1)
 		}
 
 		v.EdgeFactor, err = r.UnpackFloat()
@@ -495,7 +486,7 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 			IndexNameModel:      &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 			Diffuse:             nil,
 			Specular:            nil,
-			Ambient:             nil,
+			Ambient:             mmath.NewMVec3(),
 			DrawFlag:            DRAW_FLAG_NONE,
 			Edge:                nil,
 			EdgeSize:            0.0,
@@ -623,47 +614,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalBoneCount; i++ {
-		b := &Bone{
-			IndexNameModel:         &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
-			Position:               nil,
-			ParentIndex:            -1,
-			Layer:                  -1,
-			BoneFlag:               BONE_FLAG_NONE,
-			TailPosition:           nil,
-			TailIndex:              -1,
-			EffectIndex:            -1,
-			EffectFactor:           0.0,
-			FixedAxis:              nil,
-			LocalAxisX:             nil,
-			LocalAxisZ:             nil,
-			EffectorKey:            -1,
-			Ik:                     NewIk(),
-			DisplaySlot:            -1,
-			IsSystem:               true,
-			NormalizedLocalAxisX:   nil,
-			NormalizedLocalAxisY:   nil,
-			NormalizedLocalAxisZ:   nil,
-			LocalAxis:              &mmath.MVec3{1, 0, 0},
-			IkLinkBoneIndexes:      make([]int, 0),
-			IkTargetBoneIndexes:    make([]int, 0),
-			ParentRelativePosition: nil,
-			ChildRelativePosition:  nil,
-			NormalizedFixedAxis:    nil,
-			TreeBoneIndexes:        make([]int, 0),
-			RevertOffsetMatrix:     mmath.NewMMat4(),
-			OffsetMatrix:           mmath.NewMMat4(),
-			ParentBoneIndexes:      make([]int, 0),
-			RelativeBoneIndexes:    make([]int, 0),
-			ChildBoneIndexes:       make([]int, 0),
-			EffectiveBoneIndexes:   make([]int, 0),
-			AngleLimit:             false,
-			MinAngleLimit:          mmath.NewRotation(),
-			MaxAngleLimit:          mmath.NewRotation(),
-			LocalAngleLimit:        false,
-			LocalMinAngleLimit:     mmath.NewRotation(),
-			LocalMaxAngleLimit:     mmath.NewRotation(),
-			AxisSign:               1,
-		}
+		b := NewBone()
 
 		// 4 + n : TextBuf	| ボーン名
 		b.Name = r.ReadText()
@@ -821,14 +772,14 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 						mlog.E("[%d][%d] readBones UnpackVec3 IkLink.MinAngleLimit error: %v", i, j, err)
 						return err
 					}
-					il.MinAngleLimit.SetRadians(minAngleLimit)
+					il.MinAngleLimit.SetRadians(&minAngleLimit)
 					// 12 : float3	| 上限 (x,y,z) -> ラジアン角
 					maxAngleLimit, err := r.UnpackVec3()
 					if err != nil {
 						mlog.E("[%d][%d] readBones UnpackVec3 IkLink.MaxAngleLimit error: %v", i, j, err)
 						return err
 					}
-					il.MaxAngleLimit.SetRadians(maxAngleLimit)
+					il.MaxAngleLimit.SetRadians(&maxAngleLimit)
 				}
 				b.Ik.Links = append(b.Ik.Links, il)
 			}
@@ -902,7 +853,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					mlog.E("[%d][%d] readMorphs UnpackVec3 Offset error: %v", i, j, err)
 					return err
 				}
-				m.Offsets = append(m.Offsets, NewVertexMorph(vertexIndex, offset))
+				m.Offsets = append(m.Offsets, NewVertexMorph(vertexIndex, &offset))
 			case MORPH_TYPE_BONE:
 				// n  : ボーンIndexサイズ  | ボーンIndex
 				boneIndex, err := r.unpackBoneIndex(model)
@@ -924,7 +875,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 				}
 				rotation := mmath.NewRotation()
 				rotation.SetQuaternion(qq)
-				m.Offsets = append(m.Offsets, NewBoneMorph(boneIndex, offset, rotation))
+				m.Offsets = append(m.Offsets, NewBoneMorph(boneIndex, &offset, rotation))
 			case MORPH_TYPE_UV, MORPH_TYPE_EXTENDED_UV1, MORPH_TYPE_EXTENDED_UV2, MORPH_TYPE_EXTENDED_UV3, MORPH_TYPE_EXTENDED_UV4:
 				// n  : 頂点Indexサイズ  | 頂点Index
 				vertexIndex, err := r.unpackVertexIndex(model)
@@ -1005,7 +956,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					MaterialMorphCalcMode(calcMode),
 					diffuse,
 					specular,
-					ambient,
+					&ambient,
 					edge,
 					edgeSize,
 					textureFactor,
@@ -1147,7 +1098,7 @@ func (r *PmxReader) readRigidBodies(model *PmxModel) error {
 			mlog.E("[%d] readRigidBodies UnpackVec3 Rotation error: %v", i, err)
 			return err
 		}
-		b.Rotation.SetRadians(rads)
+		b.Rotation.SetRadians(&rads)
 		// 4  : float	| 質量
 		b.RigidBodyParam.Mass, err = r.UnpackFloat()
 		if err != nil {
@@ -1236,7 +1187,7 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 			mlog.E("[%d] readJoints UnpackVec3 Rotation error: %v", i, err)
 			return err
 		}
-		j.Rotation.SetRadians(rads)
+		j.Rotation.SetRadians(&rads)
 		// 12 : float3	| 移動制限-下限(x,y,z)
 		j.JointParam.TranslationLimitMin, err = r.UnpackVec3()
 		if err != nil {
@@ -1255,14 +1206,14 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 			mlog.E("[%d] readJoints UnpackVec3 RotationLimitMin error: %v", i, err)
 			return err
 		}
-		j.JointParam.RotationLimitMin.SetRadians(rotationLimitMin)
+		j.JointParam.RotationLimitMin.SetRadians(&rotationLimitMin)
 		// 12 : float3	| 回転制限-上限(x,y,z) -> ラジアン角
 		rotationLimitMax, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readJoints UnpackVec3 RotationLimitMax error: %v", i, err)
 			return err
 		}
-		j.JointParam.RotationLimitMax.SetRadians(rotationLimitMax)
+		j.JointParam.RotationLimitMax.SetRadians(&rotationLimitMax)
 		// 12 : float3	| バネ定数-移動(x,y,z)
 		j.JointParam.SpringConstantTranslation, err = r.UnpackVec3()
 		if err != nil {
@@ -1275,7 +1226,7 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 			mlog.E("[%d] readJoints UnpackVec3 SpringConstantRotation error: %v", i, err)
 			return err
 		}
-		j.JointParam.SpringConstantRotation.SetDegrees(springConstantRotation)
+		j.JointParam.SpringConstantRotation.SetDegrees(&springConstantRotation)
 
 		model.Joints.Append(j)
 	}

@@ -452,7 +452,7 @@ func (quat *MQuaternion) ToAxisAngle() (*MVec3, float64) {
 	axis.SetY(quat.V[1] / s)
 	axis.SetZ(quat.V[2] / s)
 
-	return axis, angle
+	return &axis, angle
 }
 
 // Slerp は t (0,1) における a と b の間の球面線形補間クォータニオンを返す。

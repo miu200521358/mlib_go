@@ -6,7 +6,6 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
-	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
@@ -42,8 +41,8 @@ var (
 
 type MVec3 mgl64.Vec3
 
-func NewMVec3() *MVec3 {
-	return &MVec3{}
+func NewMVec3() MVec3 {
+	return MVec3{}
 }
 
 // GetX returns the value of the X coordinate
@@ -395,10 +394,8 @@ func (v *MVec3) Clamped01() *MVec3 {
 }
 
 // Copy
-func (v *MVec3) Copy() *MVec3 {
-	copied := NewMVec3()
-	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
-	return copied
+func (v *MVec3) Copy() MVec3 {
+	return MVec3{v.GetX(), v.GetY(), v.GetZ()}
 }
 
 // Vector
@@ -491,7 +488,7 @@ func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
 	}
 
 	// ローカルY軸の方向ベクトル
-	yAxis := zAxis.Cross(xAxis)
+	yAxis := zAxis.Cross(&xAxis)
 	normYAxis := yAxis.Length()
 	if normYAxis == 0 {
 		return NewMMat4()

@@ -14,7 +14,7 @@ func TestVmdWriter_Write1(t *testing.T) {
 	motion.SetName("Null_00")
 
 	bf := NewBoneFrame(0)
-	bf.Position = &mmath.MVec3{1, 2, 3}
+	bf.Position = mmath.MVec3{1, 2, 3}
 	bf.Rotation.SetDegrees(&mmath.MVec3{10, 20, 30})
 	bf.Registered = true
 	motion.AppendBoneFrame("センター", bf)
@@ -45,7 +45,7 @@ func TestVmdWriter_Write1(t *testing.T) {
 	}
 
 	reloadBf := reloadMotion.BoneFrames.Data["センター"].Data[0]
-	if reloadBf.Position.PracticallyEquals(bf.Position, 1e-8) == false {
+	if reloadBf.Position.PracticallyEquals(&bf.Position, 1e-8) == false {
 		t.Errorf("Expected position to be %v, got %v", bf.Position, reloadBf.Position)
 	}
 	if reloadBf.Rotation.GetDegrees().PracticallyEquals(bf.Rotation.GetDegrees(), 1e-5) == false {

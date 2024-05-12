@@ -52,7 +52,7 @@ func (m *Material) GL(
 }
 
 func (m *Material) DiffuseGL() mgl32.Vec4 {
-	d := m.Diffuse.GetXYZ().MuledScalar(float64(mview.LIGHT_AMBIENT)).Add(m.Ambient)
+	d := m.Diffuse.GetXYZ().MuledScalar(float64(mview.LIGHT_AMBIENT)).Add(&m.Ambient)
 	diffuse := mgl32.Vec4{float32(d.GetX()), float32(d.GetY()), float32(d.GetZ()), float32(m.Diffuse.GetW())}
 	return diffuse
 }

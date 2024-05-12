@@ -324,14 +324,14 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				{
 					bf := NewBoneFrame(count)
-					bf.Position = ikMatrixes.GetItem(ikBone.Name, frame).FramePosition
+					bf.Position = *ikMatrixes.GetItem(ikBone.Name, frame).FramePosition
 					bf.Rotation.SetQuaternion(ikMatrixes.GetItem(ikBone.Name, frame).FrameRotation)
 					ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
 					count++
 				}
 				{
 					bf := NewBoneFrame(count)
-					bf.Position = linkMatrixes.GetItem(linkBone.Name, frame).FramePosition
+					bf.Position = *linkMatrixes.GetItem(linkBone.Name, frame).FramePosition
 					bf.Rotation.SetQuaternion(linkMatrixes.GetItem(linkBone.Name, frame).FrameRotation)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
@@ -403,7 +403,7 @@ ikLoop:
 					ikLink.MaxAngleLimit.GetRadians().GetX() != 0 ||
 					ikLink.LocalMinAngleLimit.GetRadians().GetX() != 0 ||
 					ikLink.LocalMaxAngleLimit.GetRadians().GetX() != 0 {
-					axisVector := &mmath.MVec3{1, 0, 0}
+					axisVector := mmath.MVec3{1, 0, 0}
 					if ikLink.LocalAngleLimit {
 						axisVector = ikBone.NormalizedLocalAxisX
 					}
@@ -417,7 +417,7 @@ ikLoop:
 					ikLink.MaxAngleLimit.GetRadians().GetY() != 0 ||
 					ikLink.LocalMinAngleLimit.GetRadians().GetY() != 0 ||
 					ikLink.LocalMaxAngleLimit.GetRadians().GetY() != 0 {
-					axisVector := &mmath.MVec3{0, 1, 0}
+					axisVector := mmath.MVec3{0, 1, 0}
 					if ikLink.LocalAngleLimit {
 						axisVector = ikBone.NormalizedLocalAxisY
 					}
@@ -431,7 +431,7 @@ ikLoop:
 					ikLink.MaxAngleLimit.GetRadians().GetZ() != 0 ||
 					ikLink.LocalMinAngleLimit.GetRadians().GetZ() != 0 ||
 					ikLink.LocalMaxAngleLimit.GetRadians().GetZ() != 0 {
-					axisVector := &mmath.MVec3{0, 0, 1}
+					axisVector := mmath.MVec3{0, 0, 1}
 					if ikLink.LocalAngleLimit {
 						axisVector = ikBone.NormalizedLocalAxisZ
 					}
@@ -474,7 +474,7 @@ ikLoop:
 					}
 
 					// 軸制限ありの場合、軸にそった理想回転量とする
-					linkAxis = linkBone.NormalizedFixedAxis
+					linkAxis = &linkBone.NormalizedFixedAxis
 
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
@@ -526,7 +526,7 @@ ikLoop:
 
 			if linkBone.HasFixedAxis() {
 				// 軸制限回転を求める
-				totalActualIkQuat = totalActualIkQuat.ToFixedAxisRotation(linkBone.NormalizedFixedAxis)
+				totalActualIkQuat = totalActualIkQuat.ToFixedAxisRotation(&linkBone.NormalizedFixedAxis)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
@@ -594,7 +594,7 @@ func (fs *BoneFrames) calcSingleAxisRad(
 	quatAxis *mmath.MVec3,
 	quatAngle float64,
 	axisIndex int,
-	axisVector *mmath.MVec3,
+	axisVector mmath.MVec3,
 	frame int,
 	count int,
 	loop int,
@@ -633,7 +633,7 @@ func (fs *BoneFrames) calcSingleAxisRad(
 
 	totalIkRad := totalIkQuat.ToRadian()
 	// TODO ローカル軸ベースの分割の場合、ローカル軸に合わせる
-	if quatAxis.Dot(axisVector) < 0 {
+	if quatAxis.Dot(&axisVector) < 0 {
 		totalIkRad *= -1
 	}
 
@@ -688,7 +688,7 @@ func (fs *BoneFrames) calcSingleAxisRad(
 		}
 	}
 
-	return mmath.NewMQuaternionFromAxisAngles(axisVector, fX).Shorten()
+	return mmath.NewMQuaternionFromAxisAngles(&axisVector, fX).Shorten()
 }
 
 func (fs *BoneFrames) calcBoneMatrixes(
@@ -978,7 +978,7 @@ func (fs *BoneFrames) getRotation(
 		}
 
 		if bone.HasFixedAxis() {
-			rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
+			rot = rot.ToFixedAxisRotation(&bone.NormalizedFixedAxis)
 		}
 	}
 
@@ -993,7 +993,7 @@ func (fs *BoneFrames) getRotation(
 
 	if bone.HasFixedAxis() {
 		// 軸制限回転を求める
-		rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
+		rot = rot.ToFixedAxisRotation(&bone.NormalizedFixedAxis)
 	}
 
 	return rotWithEffect.Shorten(), rot.Shorten()
