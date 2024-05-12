@@ -50,6 +50,7 @@ func main() {
 
 	vr := &vmd.VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Motion/ダンス_1人/[A]ddiction_モーション hino/[A]ddiction_Lat式.vmd")
+	// motionData, err := vr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Motion/ダンス_1人/CH4NGE mobiusP/CH4NGE.vmd")
 
 	if err != nil {
 		log.Fatalf("Expected error to be nil, got %q", err)
