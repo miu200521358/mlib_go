@@ -74,8 +74,7 @@ func NewMaterialMorphDelta(m *pmx.Material) *MaterialMorphDelta {
 func (md *MaterialMorphDelta) Add(m *pmx.MaterialMorphOffset, ratio float64) {
 	md.Diffuse.Add(m.Diffuse.MuledScalar(ratio))
 	md.Specular.Add(m.Specular.MuledScalar(ratio))
-	ma := m.Ambient.MuledScalar(ratio)
-	md.Ambient.Add(&ma)
+	md.Ambient.Add(m.Ambient.MuledScalar(ratio))
 	md.Edge.Add(m.Edge.MuledScalar(ratio))
 	md.EdgeSize += m.EdgeSize * ratio
 	md.TextureFactor.Add(m.TextureFactor.MuledScalar(ratio))
@@ -86,8 +85,7 @@ func (md *MaterialMorphDelta) Add(m *pmx.MaterialMorphOffset, ratio float64) {
 func (md *MaterialMorphDelta) Mul(m *pmx.MaterialMorphOffset, ratio float64) {
 	md.Diffuse.Mul(m.Diffuse.MuledScalar(ratio))
 	md.Specular.Mul(m.Specular.MuledScalar(ratio))
-	ma := m.Ambient.MuledScalar(ratio)
-	md.Ambient.Mul(&ma)
+	md.Ambient.Mul(m.Ambient.MuledScalar(ratio))
 	md.Edge.Mul(m.Edge.MuledScalar(ratio))
 	md.EdgeSize += m.EdgeSize * ratio
 	md.TextureFactor.Mul(m.TextureFactor.MuledScalar(ratio))
