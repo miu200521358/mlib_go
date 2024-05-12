@@ -99,8 +99,10 @@ func (m *VmdMotion) Animate(fno int, model *pmx.PmxModel) *VmdDeltas {
 		// 一旦モーフの値をクリア
 		bf.MorphPosition = mmath.NewMVec3()
 		bf.MorphLocalPosition = mmath.NewMVec3()
-		bf.MorphRotation.SetQuaternion(mmath.NewMQuaternion())
-		bf.MorphLocalRotation.SetQuaternion(mmath.NewMQuaternion())
+		mr := mmath.NewMQuaternion()
+		bf.MorphRotation.SetQuaternion(&mr)
+		mlr := mmath.NewMQuaternion()
+		bf.MorphLocalRotation.SetQuaternion(&mlr)
 		bf.MorphScale = mmath.NewMVec3()
 		bf.MorphLocalScale = mmath.NewMVec3()
 
