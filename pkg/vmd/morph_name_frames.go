@@ -139,7 +139,8 @@ func (fs *MorphNameFrames) AnimateVertex(
 		offset := o.(*pmx.VertexMorphOffset)
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
-			delta.Position.Add(offset.Position.MuledScalar(mf.Ratio))
+			p := offset.Position.MuledScalar(mf.Ratio)
+			delta.Position.Add(&p)
 		}
 	}
 }
@@ -159,7 +160,8 @@ func (fs *MorphNameFrames) AnimateAfterVertex(
 		offset := o.(*pmx.VertexMorphOffset)
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
-			delta.AfterPosition.Add(offset.Position.MuledScalar(mf.Ratio))
+			ap := offset.Position.MuledScalar(mf.Ratio)
+			delta.AfterPosition.Add(&ap)
 		}
 	}
 }
@@ -221,16 +223,20 @@ func (fs *MorphNameFrames) AnimateBone(
 		offset := o.(*pmx.BoneMorphOffset)
 		if 0 < offset.BoneIndex && offset.BoneIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.BoneIndex]
-			delta.MorphPosition.Add(offset.Position.MuledScalar(mf.Ratio))
-			delta.MorphLocalPosition.Add(offset.LocalPosition.MuledScalar(mf.Ratio))
+			mp := offset.Position.MuledScalar(mf.Ratio)
+			delta.MorphPosition.Add(&mp)
+			mlp := offset.LocalPosition.MuledScalar(mf.Ratio)
+			delta.MorphLocalPosition.Add(&mlp)
 			deltaRad := offset.Rotation.GetRadians().MuledScalar(mf.Ratio)
 			delta.MorphRotation.SetQuaternion(delta.MorphRotation.GetQuaternion().Muled(
 				mmath.NewMQuaternionFromRadians(deltaRad.GetX(), deltaRad.GetY(), deltaRad.GetZ())))
 			deltaLocalRad := offset.LocalRotation.GetRadians().MuledScalar(mf.Ratio)
 			delta.MorphLocalRotation.SetQuaternion(delta.MorphLocalRotation.GetQuaternion().Muled(
 				mmath.NewMQuaternionFromRadians(deltaLocalRad.GetX(), deltaLocalRad.GetY(), deltaLocalRad.GetZ())))
-			delta.MorphScale.Add(offset.Scale.MuledScalar(mf.Ratio))
-			delta.MorphLocalScale.Add(offset.LocalScale.MuledScalar(mf.Ratio))
+			ms := offset.Scale.MuledScalar(mf.Ratio)
+			delta.MorphScale.Add(&ms)
+			mls := offset.LocalScale.MuledScalar(mf.Ratio)
+			delta.MorphLocalScale.Add(&mls)
 		}
 	}
 }
