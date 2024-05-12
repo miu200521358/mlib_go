@@ -12,7 +12,7 @@ type Vertex struct {
 	Position    mmath.MVec3     // 頂点位置
 	Normal      mmath.MVec3     // 頂点法線
 	UV          mmath.MVec2     // UV
-	ExtendedUVs []*mmath.MVec4  // 追加UV
+	ExtendedUVs []mmath.MVec4   // 追加UV
 	DeformType  DeformType      // ウェイト変形方式
 	Deform      DeformInterface // デフォーム
 	EdgeFactor  float64         // エッジ倍率
@@ -24,7 +24,7 @@ func NewVertex() *Vertex {
 		Position:    mmath.NewMVec3(),
 		Normal:      mmath.NewMVec3(),
 		UV:          mmath.NewMVec2(),
-		ExtendedUVs: make([]*mmath.MVec4, 0),
+		ExtendedUVs: make([]mmath.MVec4, 0),
 		DeformType:  BDEF1,
 		Deform:      NewBdef1(0),
 		EdgeFactor:  0.0,

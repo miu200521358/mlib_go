@@ -269,7 +269,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 		}
 
 		// 16 * n : float4[n] | 追加UV(x,y,z,w)  PMXヘッダの追加UV数による
-		v.ExtendedUVs = make([]*mmath.MVec4, 0)
+		v.ExtendedUVs = make([]mmath.MVec4, 0)
 		for j := 0; j < model.ExtendedUVCountType; j++ {
 			extendedUV, err := r.UnpackVec4()
 			if err != nil {
@@ -482,25 +482,7 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalMaterialCount; i++ {
-		m := &Material{
-			IndexNameModel:      &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
-			Diffuse:             nil,
-			Specular:            nil,
-			Ambient:             nil,
-			DrawFlag:            DRAW_FLAG_NONE,
-			Edge:                nil,
-			EdgeSize:            0.0,
-			TextureIndex:        -1,
-			SphereTextureIndex:  -1,
-			SphereMode:          SPHERE_MODE_INVALID,
-			ToonSharingFlag:     TOON_SHARING_INDIVIDUAL,
-			ToonTextureIndex:    -1,
-			Memo:                "",
-			VerticesCount:       0,
-			TextureFactor:       mmath.NewMVec4(),
-			SphereTextureFactor: mmath.NewMVec4(),
-			ToonTextureFactor:   mmath.NewMVec4(),
-		}
+		m := NewMaterial()
 
 		// 4 + n : TextBuf	| 材質名
 		m.Name = r.ReadText()
@@ -520,12 +502,11 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 			return err
 		}
 		// 12 : float3	| Ambient (R,G,B)
-		ambient, err := r.UnpackVec3()
+		m.Ambient, err = r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readMaterials UnpackVec3 Ambient error: %v", i, err)
 			return err
 		}
-		m.Ambient = &ambient
 		// 1  : bitFlag  	| 描画フラグ(8bit) - 各bit 0:OFF 1:ON
 		drawFlag, err := r.UnpackByte()
 		if err != nil {
@@ -854,7 +835,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					mlog.E("[%d][%d] readMorphs UnpackVec3 Offset error: %v", i, j, err)
 					return err
 				}
-				m.Offsets = append(m.Offsets, NewVertexMorph(vertexIndex, &offset))
+				m.Offsets = append(m.Offsets, NewVertexMorph(vertexIndex, offset))
 			case MORPH_TYPE_BONE:
 				// n  : ボーンIndexサイズ  | ボーンIndex
 				boneIndex, err := r.unpackBoneIndex(model)
@@ -876,7 +857,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 				}
 				rotation := mmath.NewRotation()
 				rotation.SetQuaternion(qq)
-				m.Offsets = append(m.Offsets, NewBoneMorph(boneIndex, &offset, rotation))
+				m.Offsets = append(m.Offsets, NewBoneMorph(boneIndex, offset, *rotation))
 			case MORPH_TYPE_UV, MORPH_TYPE_EXTENDED_UV1, MORPH_TYPE_EXTENDED_UV2, MORPH_TYPE_EXTENDED_UV3, MORPH_TYPE_EXTENDED_UV4:
 				// n  : 頂点Indexサイズ  | 頂点Index
 				vertexIndex, err := r.unpackVertexIndex(model)
@@ -957,7 +938,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					MaterialMorphCalcMode(calcMode),
 					diffuse,
 					specular,
-					&ambient,
+					ambient,
 					edge,
 					edgeSize,
 					textureFactor,
