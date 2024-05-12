@@ -65,3 +65,8 @@ func (v *MVec3) GL() *mgl32.Vec3 {
 func (v *MVec3) Bullet() mbt.BtVector3 {
 	return mbt.NewBtVector3(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()))
 }
+
+// GL OpenGL座標系に変換された2次元ベクトルを返します
+func (v *MVec2) GL() mgl32.Vec2 {
+	return mgl32.Vec2{float32(-v.GetX()), float32(v.GetY())}
+}

@@ -5,7 +5,6 @@ import (
 	"hash/fnv"
 	"math"
 
-	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
@@ -64,11 +63,6 @@ func (v *MVec2) AddY(y float64) {
 // String 文字列表現を返します。
 func (v *MVec2) String() string {
 	return fmt.Sprintf("[x=%.5f, y=%.5f]", v.GetX(), v.GetY())
-}
-
-// GL OpenGL座標系に変換された2次元ベクトルを返します
-func (v *MVec2) GL() mgl32.Vec2 {
-	return mgl32.Vec2{float32(-v.GetX()), float32(v.GetY())}
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します
@@ -315,15 +309,6 @@ func (v *MVec2) Max() *MVec2 {
 		max = v.GetY()
 	}
 	return &MVec2{max, max}
-}
-
-// Interpolate ベクトルの線形補間を行います
-func (v *MVec2) Interpolate(other *MVec2, t float64) *MVec2 {
-	t1 := 1 - t
-	return &MVec2{
-		v[0]*t1 + other[0]*t,
-		v[1]*t1 + other[1]*t,
-	}
 }
 
 // Clamp ベクトルの各要素を指定された範囲内にクランプします

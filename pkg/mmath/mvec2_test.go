@@ -5,16 +5,16 @@ import (
 	"testing"
 )
 
-func TestMVec2Interpolate(t *testing.T) {
-	v1 := MVec2{1, 2}
+func TestMVec2LerpVec2(t *testing.T) {
+	v1 := &MVec2{1, 2}
 	v2 := &MVec2{3, 4} // Pass the address of v2
 	t1 := 0.5
 	expected := MVec2{2, 3}
 
-	result := v1.Interpolate(v2, t1) // Use v2 as a pointer
+	result := LerpVec2(v1, v2, t1) // Use v2 as a pointer
 
 	if !result.PracticallyEquals(&expected, 1e-8) {
-		t.Errorf("Interpolation failed. Expected %v, got %v", expected, result)
+		t.Errorf("TestMVec2LerpVec2 failed. Expected %v, got %v", expected, result)
 	}
 }
 
