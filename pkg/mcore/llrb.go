@@ -25,6 +25,28 @@ func NewIntIndexes() *IntIndexes {
 	}
 }
 
+func (i IntIndexes) Prev(index int) int {
+	prevIndex := Int(0)
+
+	i.DescendLessOrEqual(Int(index), func(i llrb.Item) bool {
+		prevIndex = i.(Int)
+		return false
+	})
+
+	return int(prevIndex)
+}
+
+func (i IntIndexes) Next(index int) int {
+	nextIndex := Int(index)
+
+	i.AscendGreaterOrEqual(Int(index), func(i llrb.Item) bool {
+		nextIndex = i.(Int)
+		return false
+	})
+
+	return int(nextIndex)
+}
+
 func (i IntIndexes) Has(index int) bool {
 	return i.LLRB.Has(Int(index))
 }
