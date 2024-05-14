@@ -266,22 +266,22 @@ func (r *BaseReader[T]) UnpackVec4() (mmath.MVec4, error) {
 	return mmath.MVec4{x, y, z, w}, nil
 }
 
-func (r *BaseReader[T]) UnpackQuaternion() (mmath.MQuaternion, error) {
+func (r *BaseReader[T]) UnpackQuaternion() (*mmath.MQuaternion, error) {
 	x, err := r.UnpackFloat()
 	if err != nil {
-		return mmath.NewMQuaternion(), err
+		return &mmath.MQuaternion{}, err
 	}
 	y, err := r.UnpackFloat()
 	if err != nil {
-		return mmath.NewMQuaternion(), err
+		return &mmath.MQuaternion{}, err
 	}
 	z, err := r.UnpackFloat()
 	if err != nil {
-		return mmath.NewMQuaternion(), err
+		return &mmath.MQuaternion{}, err
 	}
 	w, err := r.UnpackFloat()
 	if err != nil {
-		return mmath.NewMQuaternion(), err
+		return &mmath.MQuaternion{}, err
 	}
 	return mmath.NewMQuaternionByValues(x, y, z, w), nil
 }

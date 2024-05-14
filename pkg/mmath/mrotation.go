@@ -44,8 +44,7 @@ func NewRotationByQuaternion(vQuaternion *MQuaternion) *MRotation {
 
 func (m *MRotation) GetQuaternion() *MQuaternion {
 	if m.quaternion == nil {
-		qq := NewMQuaternion()
-		m.quaternion = &qq
+		m.quaternion = NewMQuaternion()
 	}
 	return m.quaternion
 }
@@ -76,7 +75,7 @@ func (m *MRotation) SetRadians(v *MVec3) {
 		180.0 * v.GetZ() / math.Pi,
 	}
 	qq := NewMQuaternionFromRadians(v.GetX(), v.GetY(), v.GetZ())
-	m.quaternion = &qq
+	m.quaternion = qq
 }
 
 func (m *MRotation) GetDegrees() *MVec3 {
@@ -95,7 +94,7 @@ func (m *MRotation) SetDegrees(v *MVec3) {
 		math.Pi * v.GetZ() / 180.0,
 	}
 	qq := NewMQuaternionFromRadians(m.radians.GetX(), m.radians.GetY(), m.radians.GetZ())
-	m.quaternion = &qq
+	m.quaternion = qq
 }
 
 // Copy
@@ -108,12 +107,10 @@ func (rot *MRotation) Copy() *MRotation {
 // Mul
 func (rot *MRotation) Mul(v *MRotation) {
 	if rot.quaternion == nil {
-		qq := NewMQuaternion()
-		rot.quaternion = &qq
+		rot.quaternion = NewMQuaternion()
 	}
 	if v.quaternion == nil {
-		qq := NewMQuaternion()
-		v.quaternion = &qq
+		v.quaternion = NewMQuaternion()
 	}
 	qq := rot.quaternion.Mul(v.quaternion)
 	rot.SetQuaternion(qq)
