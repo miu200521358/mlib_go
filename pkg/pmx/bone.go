@@ -356,10 +356,11 @@ func (bone *Bone) setup() {
 func (b *Bones) getParentRelativePosition(boneIndex int) *mmath.MVec3 {
 	bone := b.GetItem(boneIndex)
 	if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
-		return bone.Position.Subed(&b.GetItem(bone.ParentIndex).Position)
+		v := bone.Position.Subed(&b.GetItem(bone.ParentIndex).Position)
+		return &v
 	}
 	// 親が見つからない場合、自分の位置を原点からの相対位置として返す
-	p := bone.Position.Copy()
+	p := mmath.MVec3{bone.Position.GetX(), bone.Position.GetY(), bone.Position.GetZ()}
 	return &p
 }
 
@@ -382,7 +383,7 @@ func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 	}
 
 	v := toPosition.Subed(&fromPosition)
-	return v
+	return &v
 }
 
 func (b *Bones) GetInitializeLocalPosition(boneIndex int) *mmath.MVec3 {

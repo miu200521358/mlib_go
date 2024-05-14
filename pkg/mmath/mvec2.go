@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
+	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
@@ -379,7 +380,9 @@ func (v *MVec2) Rotate90DegRight() *MVec2 {
 
 // Copy
 func (v *MVec2) Copy() MVec2 {
-	return MVec2{v.GetX(), v.GetY()}
+	copied := NewMVec2()
+	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+	return copied
 }
 
 // Vector
