@@ -61,8 +61,7 @@ func (m *MRotation) SetQuaternion(v *MQuaternion) {
 
 func (m *MRotation) GetRadians() *MVec3 {
 	if m.radians == nil {
-		v := NewMVec3()
-		m.radians = &v
+		m.radians = NewMVec3()
 	}
 	return m.radians
 }
@@ -80,8 +79,7 @@ func (m *MRotation) SetRadians(v *MVec3) {
 
 func (m *MRotation) GetDegrees() *MVec3 {
 	if m.degrees == nil {
-		v := NewMVec3()
-		m.degrees = &v
+		m.degrees = NewMVec3()
 	}
 	return m.degrees
 }

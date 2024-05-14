@@ -6,7 +6,7 @@ import (
 
 type CameraFrame struct {
 	*BaseFrame                        // キーフレ
-	Position         mmath.MVec3      // 位置
+	Position         *mmath.MVec3     // 位置
 	Rotation         *mmath.MRotation // 回転
 	Distance         float64          // 距離
 	ViewOfAngle      int              // 視野角
@@ -27,7 +27,7 @@ func NewCameraFrame(index int) *CameraFrame {
 }
 
 func (cf *CameraFrame) Add(v *CameraFrame) {
-	cf.Position.Add(&v.Position)
+	cf.Position.Add(v.Position)
 	cf.Rotation.Mul(v.Rotation)
 	cf.Distance += v.Distance
 	cf.ViewOfAngle += v.ViewOfAngle
@@ -36,7 +36,7 @@ func (cf *CameraFrame) Add(v *CameraFrame) {
 func (cf *CameraFrame) Added(v *CameraFrame) *CameraFrame {
 	copied := cf.Copy().(*CameraFrame)
 
-	copied.Position.Add(&v.Position)
+	copied.Position.Add(v.Position)
 	copied.Rotation.Mul(v.Rotation)
 	copied.Distance += v.Distance
 	copied.ViewOfAngle += v.ViewOfAngle

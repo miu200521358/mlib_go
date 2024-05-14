@@ -171,8 +171,7 @@ func (mat *MMat4) MulVec3(other *MVec3) *MVec3 {
 	if s[3] == 1.0 {
 		return &MVec3{s[0], s[1], s[2]}
 	} else if s[3] == 0.0 {
-		v := NewMVec3()
-		return &v
+		return NewMVec3()
 	} else {
 		return &MVec3{s[0] / s[3], s[1] / s[3], s[2] / s[3]}
 	}

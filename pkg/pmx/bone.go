@@ -68,28 +68,28 @@ func (t *Ik) Copy() *Ik {
 
 type Bone struct {
 	*mcore.IndexNameModel
-	Position               mmath.MVec3      // ボーン位置
+	Position               *mmath.MVec3     // ボーン位置
 	ParentIndex            int              // 親ボーンのボーンIndex
 	Layer                  int              // 変形階層
 	BoneFlag               BoneFlag         // ボーンフラグ(16bit) 各bit 0:OFF 1:ON
-	TailPosition           mmath.MVec3      // 接続先:0 の場合 座標オフセット, ボーン位置からの相対分
+	TailPosition           *mmath.MVec3     // 接続先:0 の場合 座標オフセット, ボーン位置からの相対分
 	TailIndex              int              // 接続先:1 の場合 接続先ボーンのボーンIndex
 	EffectIndex            int              // 回転付与:1 または 移動付与:1 の場合 付与親ボーンのボーンIndex
 	EffectFactor           float64          // 付与率
-	FixedAxis              mmath.MVec3      // 軸固定:1 の場合 軸の方向ベクトル
-	LocalAxisX             mmath.MVec3      // ローカル軸:1 の場合 X軸の方向ベクトル
-	LocalAxisZ             mmath.MVec3      // ローカル軸:1 の場合 Z軸の方向ベクトル
+	FixedAxis              *mmath.MVec3     // 軸固定:1 の場合 軸の方向ベクトル
+	LocalAxisX             *mmath.MVec3     // ローカル軸:1 の場合 X軸の方向ベクトル
+	LocalAxisZ             *mmath.MVec3     // ローカル軸:1 の場合 Z軸の方向ベクトル
 	EffectorKey            int              // 外部親変形:1 の場合 Key値
 	Ik                     *Ik              // IK:1 の場合 IKデータを格納
 	DisplaySlot            int              // 該当表示枠
 	IsSystem               bool             // システム計算用追加ボーン の場合 true
-	NormalizedLocalAxisX   mmath.MVec3      // 計算済みのX軸の方向ベクトル
-	NormalizedLocalAxisY   mmath.MVec3      // 計算済みのY軸の方向ベクトル
-	NormalizedLocalAxisZ   mmath.MVec3      // 計算済みのZ軸の方向ベクトル
-	NormalizedFixedAxis    mmath.MVec3      // 計算済みの軸制限ベクトル
-	LocalAxis              mmath.MVec3      // ローカル軸の方向ベクトル(CorrectedLocalXVectorの正規化ベクトル)
-	ParentRelativePosition mmath.MVec3      // 親ボーンからの相対位置
-	ChildRelativePosition  mmath.MVec3      // Tailボーンへの相対位置
+	NormalizedLocalAxisX   *mmath.MVec3     // 計算済みのX軸の方向ベクトル
+	NormalizedLocalAxisY   *mmath.MVec3     // 計算済みのY軸の方向ベクトル
+	NormalizedLocalAxisZ   *mmath.MVec3     // 計算済みのZ軸の方向ベクトル
+	NormalizedFixedAxis    *mmath.MVec3     // 計算済みの軸制限ベクトル
+	LocalAxis              *mmath.MVec3     // ローカル軸の方向ベクトル(CorrectedLocalXVectorの正規化ベクトル)
+	ParentRelativePosition *mmath.MVec3     // 親ボーンからの相対位置
+	ChildRelativePosition  *mmath.MVec3     // Tailボーンへの相対位置
 	LocalMatrix            *mmath.MMat4     // ローカル軸行列
 	RevertOffsetMatrix     *mmath.MMat4     // 逆オフセット行列(親ボーンからの相対位置分を戻す)
 	OffsetMatrix           *mmath.MMat4     // オフセット行列 (自身の位置を原点に戻す行列)
@@ -130,7 +130,7 @@ func NewBone() *Bone {
 		NormalizedLocalAxisX:   mmath.NewMVec3(),
 		NormalizedLocalAxisY:   mmath.NewMVec3(),
 		NormalizedLocalAxisZ:   mmath.NewMVec3(),
-		LocalAxis:              mmath.MVec3{1, 0, 0},
+		LocalAxis:              &mmath.MVec3{1, 0, 0},
 		IkLinkBoneIndexes:      make([]int, 0),
 		IkTargetBoneIndexes:    make([]int, 0),
 		ParentRelativePosition: mmath.NewMVec3(),
@@ -153,7 +153,7 @@ func NewBone() *Bone {
 	}
 	bone.NormalizedLocalAxisX = bone.LocalAxisX.Copy()
 	bone.NormalizedLocalAxisZ = bone.LocalAxisZ.Copy()
-	bone.NormalizedLocalAxisY = *bone.NormalizedLocalAxisZ.Cross(&bone.NormalizedLocalAxisX)
+	bone.NormalizedLocalAxisY = bone.NormalizedLocalAxisZ.Cross(bone.NormalizedLocalAxisX)
 	bone.NormalizedFixedAxis = bone.FixedAxis.Copy()
 	return bone
 }
@@ -171,13 +171,13 @@ func (v *Bone) Copy() mcore.IIndexNameModel {
 }
 
 func (bone *Bone) NormalizeFixedAxis(fixedAxis *mmath.MVec3) {
-	bone.NormalizedFixedAxis = *fixedAxis.Normalize()
+	bone.NormalizedFixedAxis = fixedAxis.Normalize()
 }
 
 func (bone *Bone) NormalizeLocalAxis(localAxisX *mmath.MVec3) {
-	bone.NormalizedLocalAxisX = *localAxisX.Normalize()
-	bone.NormalizedLocalAxisY = *bone.NormalizedLocalAxisX.Cross(mmath.MVec3UnitZ.Invert())
-	bone.NormalizedLocalAxisZ = *bone.NormalizedLocalAxisX.Cross(&bone.NormalizedLocalAxisY)
+	bone.NormalizedLocalAxisX = localAxisX.Normalize()
+	bone.NormalizedLocalAxisY = bone.NormalizedLocalAxisX.Cross(mmath.MVec3UnitZ.Invert())
+	bone.NormalizedLocalAxisZ = bone.NormalizedLocalAxisX.Cross(bone.NormalizedLocalAxisY)
 }
 
 // 表示先がボーンであるか
@@ -319,22 +319,24 @@ func (bone *Bone) containsCategory(category BoneCategory) bool {
 	return false
 }
 
-func (bone *Bone) normalizeFixedAxis(fixedAxis mmath.MVec3) {
-	bone.NormalizedFixedAxis = *fixedAxis.Normalized()
+func (bone *Bone) normalizeFixedAxis(fixedAxis *mmath.MVec3) {
+	v := fixedAxis.Normalized()
+	bone.NormalizedFixedAxis = v
 }
 
-func (bone *Bone) normalizeLocalAxis(localXVector mmath.MVec3) {
+func (bone *Bone) normalizeLocalAxis(localXVector *mmath.MVec3) {
 	v := localXVector.Normalized()
-	bone.NormalizedLocalAxisX = *v
-	bone.NormalizedLocalAxisY = *v.Cross(&mmath.MVec3{0, 0, -1})
-	bone.NormalizedLocalAxisZ = *v.Cross(&bone.NormalizedLocalAxisY)
+	bone.NormalizedLocalAxisX = v
+	bone.NormalizedLocalAxisY = v.Cross(&mmath.MVec3{0, 0, -1})
+	bone.NormalizedLocalAxisZ = v.Cross(bone.NormalizedLocalAxisY)
 }
 
 func (bone *Bone) setup() {
 	// 各ボーンのローカル軸
-	bone.LocalAxis = *bone.ChildRelativePosition.Normalized()
+	localAxis := bone.ChildRelativePosition.Normalized()
+	bone.LocalAxis = localAxis
 	// ローカル軸行列
-	bone.LocalMatrix = bone.LocalAxis.ToLocalMatrix4x4()
+	bone.LocalMatrix = localAxis.ToLocalMatrix4x4()
 
 	if bone.HasFixedAxis() {
 		bone.normalizeFixedAxis(bone.FixedAxis)
@@ -349,35 +351,33 @@ func (bone *Bone) setup() {
 
 	// 逆オフセット行列は親ボーンからの相対位置分
 	bone.RevertOffsetMatrix = mmath.NewMMat4()
-	bone.RevertOffsetMatrix.Translate(&bone.ParentRelativePosition)
+	bone.RevertOffsetMatrix.Translate(bone.ParentRelativePosition.Copy())
 }
 
 func (b *Bones) getParentRelativePosition(boneIndex int) *mmath.MVec3 {
 	bone := b.GetItem(boneIndex)
 	if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
-		v := bone.Position.Subed(&b.GetItem(bone.ParentIndex).Position)
+		v := bone.Position.Subed(b.GetItem(bone.ParentIndex).Position)
 		return v
 	}
 	// 親が見つからない場合、自分の位置を原点からの相対位置として返す
-	p := mmath.MVec3{bone.Position.GetX(), bone.Position.GetY(), bone.Position.GetZ()}
-	return &p
+	return bone.Position
 }
 
 func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 	bone := b.GetItem(boneIndex)
 
-	fromPosition := bone.Position
-	var toPosition mmath.MVec3
+	fromPosition := *bone.Position
+	var toPosition *mmath.MVec3
 
 	if bone.IsTailBone() && bone.TailIndex >= 0 && slices.Contains(b.GetIndexes(), bone.TailIndex) {
 		toPosition = b.GetItem(bone.TailIndex).Position
 	} else if !bone.IsTailBone() && bone.TailPosition.Length() > 0 {
-		toPosition = *bone.TailPosition.Add(&bone.Position)
+		toPosition = bone.TailPosition.Add(bone.Position)
 	} else if bone.ParentIndex < 0 || !b.Contains(bone.ParentIndex) {
-		v := mmath.NewMVec3()
-		return &v
+		return mmath.NewMVec3()
 	} else {
-		fromPosition = b.GetItem(bone.ParentIndex).Position
+		fromPosition = *b.GetItem(bone.ParentIndex).Position
 		toPosition = bone.Position
 	}
 
@@ -387,8 +387,7 @@ func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 
 func (b *Bones) GetInitializeLocalPosition(boneIndex int) *mmath.MVec3 {
 	if boneIndex < 0 || !b.Contains(boneIndex) {
-		v := mmath.NewMVec3()
-		return &v
+		return mmath.NewMVec3()
 	}
 
 	bone := b.GetItem(boneIndex)
@@ -576,9 +575,9 @@ func (b *Bones) setup() {
 			b.GetItem(bone.ParentIndex).ChildBoneIndexes = append(b.GetItem(bone.ParentIndex).ChildBoneIndexes, bone.Index)
 		}
 		// 親からの相対位置
-		bone.ParentRelativePosition = *b.getParentRelativePosition(bone.Index)
+		bone.ParentRelativePosition = b.getParentRelativePosition(bone.Index)
 		// 子への相対位置
-		bone.ChildRelativePosition = *b.getChildRelativePosition(bone.Index)
+		bone.ChildRelativePosition = b.getChildRelativePosition(bone.Index)
 		// ボーン単体のセットアップ
 		bone.setup()
 	}

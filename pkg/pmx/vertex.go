@@ -9,9 +9,9 @@ import (
 
 type Vertex struct {
 	*mcore.IndexModel
-	Position    mmath.MVec3     // 頂点位置
-	Normal      mmath.MVec3     // 頂点法線
-	UV          mmath.MVec2     // UV
+	Position    *mmath.MVec3    // 頂点位置
+	Normal      *mmath.MVec3    // 頂点法線
+	UV          *mmath.MVec2    // UV
 	ExtendedUVs []*mmath.MVec4  // 追加UV
 	DeformType  DeformType      // ウェイト変形方式
 	Deform      DeformInterface // デフォーム
