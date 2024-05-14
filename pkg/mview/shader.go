@@ -89,8 +89,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		lightPosition:        &mmath.MVec3{-0.5, -1.0, 0.5},
 		msaa:                 NewMsaa(int32(width), int32(height)),
 	}
-	lightDirection := shader.lightPosition.Normalized()
-	shader.lightDirection = &lightDirection
+	shader.lightDirection = shader.lightPosition.Normalized()
 
 	{
 		modelProgram, err := shader.newProgram(

@@ -651,10 +651,10 @@ func (quat *MQuaternion) ToFixedAxisRotation(fixedAxis *MVec3) *MQuaternion {
 	normalizedFixedAxis := fixedAxis.Normalized()
 	quatAxis := quat.GetXYZ().Normalized()
 	rad := quat.ToRadian()
-	if normalizedFixedAxis.Dot(&quatAxis) < 0 {
+	if normalizedFixedAxis.Dot(quatAxis) < 0 {
 		rad *= -1
 	}
-	return NewMQuaternionFromAxisAngles(&normalizedFixedAxis, rad)
+	return NewMQuaternionFromAxisAngles(normalizedFixedAxis, rad)
 }
 
 // PracticallyEquals

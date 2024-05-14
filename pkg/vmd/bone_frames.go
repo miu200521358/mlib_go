@@ -1042,11 +1042,9 @@ func (fs *BoneFrames) getScale(
 	mat := mmath.NewMMat4()
 
 	if isCalcMorph {
-		ms := bf.MorphScale.AddedScalar(1)
-		mat.ScaleVec3(&ms)
+		mat.ScaleVec3(bf.MorphScale.AddedScalar(1))
 	}
-	s := bf.Scale.AddedScalar(1)
-	mat.ScaleVec3(&s)
+	mat.ScaleVec3(bf.Scale.AddedScalar(1))
 
 	return mat
 }

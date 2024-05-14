@@ -486,7 +486,7 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 			IndexNameModel:      &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 			Diffuse:             nil,
 			Specular:            nil,
-			Ambient:             nil,
+			Ambient:             mmath.NewMVec3(),
 			DrawFlag:            DRAW_FLAG_NONE,
 			Edge:                nil,
 			EdgeSize:            0.0,
@@ -520,12 +520,11 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 			return err
 		}
 		// 12 : float3	| Ambient (R,G,B)
-		ambient, err := r.UnpackVec3()
+		m.Ambient, err = r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readMaterials UnpackVec3 Ambient error: %v", i, err)
 			return err
 		}
-		m.Ambient = &ambient
 		// 1  : bitFlag  	| 描画フラグ(8bit) - 各bit 0:OFF 1:ON
 		drawFlag, err := r.UnpackByte()
 		if err != nil {
