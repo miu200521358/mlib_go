@@ -1,9 +1,5 @@
 package vmd
 
-import (
-	"github.com/miu200521358/mlib_go/pkg/mcore"
-)
-
 type IkEnabledFrame struct {
 	*BaseFrame        // キーフレ
 	BoneName   string // IKボーン名
@@ -12,7 +8,7 @@ type IkEnabledFrame struct {
 
 func NewIkEnableFrame(index int) *IkEnabledFrame {
 	return &IkEnabledFrame{
-		BaseFrame: NewVmdBaseFrame(index),
+		BaseFrame: NewFrame(index).(*BaseFrame),
 		BoneName:  "",
 		Enabled:   true,
 	}
@@ -26,6 +22,11 @@ func (kf *IkEnabledFrame) Copy() *IkEnabledFrame {
 	return vv
 }
 
+func (nextKf *IkEnabledFrame) LerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
+	// 補間なしで前のキーフレを引き継ぐ
+	return prevFrame
+}
+
 type IkFrame struct {
 	*BaseFrame                   // キーフレ
 	Visible    bool              // 表示ON/OFF
@@ -34,19 +35,35 @@ type IkFrame struct {
 
 func NewIkFrame(index int) *IkFrame {
 	return &IkFrame{
-		BaseFrame: NewVmdBaseFrame(index),
+		BaseFrame: NewFrame(index).(*BaseFrame),
 		Visible:   true,
-		IkList:    []*IkEnabledFrame{},
+		IkList:    make([]*IkEnabledFrame, 0),
 	}
 }
 
-func (ikf *IkFrame) Copy() mcore.IIndexModel {
+func (ikf *IkFrame) Copy() IBaseFrame {
 	vv := &IkFrame{
 		Visible: ikf.Visible,
-		IkList:  []*IkEnabledFrame{},
+		IkList:  make([]*IkEnabledFrame, 0, len(ikf.IkList)),
 	}
 	for _, v := range ikf.IkList {
 		vv.IkList = append(vv.IkList, v.Copy())
 	}
 	return vv
+}
+
+func (nextIkf *IkFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
+	prevIkf := prevFrame.(*IkFrame)
+	// 補間なしで前のキーフレを引き継ぐ
+	vv := &IkFrame{
+		Visible: prevIkf.Visible,
+		IkList:  make([]*IkEnabledFrame, 0, len(prevIkf.IkList)),
+	}
+	for _, v := range prevIkf.IkList {
+		vv.IkList = append(vv.IkList, v.Copy())
+	}
+	return vv
+}
+
+func (kf *IkFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
 }

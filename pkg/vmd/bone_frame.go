@@ -1,7 +1,6 @@
 package vmd
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
@@ -26,7 +25,7 @@ type BoneFrame struct {
 
 func NewBoneFrame(index int) *BoneFrame {
 	return &BoneFrame{
-		BaseFrame:          NewVmdBaseFrame(index),
+		BaseFrame:          NewFrame(index).(*BaseFrame),
 		Position:           mmath.NewMVec3(),
 		MorphPosition:      mmath.NewMVec3(),
 		LocalPosition:      mmath.NewMVec3(),
@@ -80,9 +79,9 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 	return copied
 }
 
-func (v *BoneFrame) Copy() mcore.IIndexModel {
-	copied := &BoneFrame{
-		BaseFrame:          NewVmdBaseFrame(v.Index),
+func (v *BoneFrame) Copy() IBaseFrame {
+	copied := BoneFrame{
+		BaseFrame:          NewFrame(v.GetIndex()).(*BaseFrame),
 		Position:           v.Position.Copy(),
 		MorphPosition:      v.MorphPosition.Copy(),
 		LocalPosition:      v.LocalPosition.Copy(),
@@ -98,5 +97,70 @@ func (v *BoneFrame) Copy() mcore.IIndexModel {
 		IkRotation:         v.IkRotation.Copy(),
 		Curves:             v.Curves.Copy(),
 	}
-	return copied
+	return &copied
+}
+
+func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
+	prevBf := prevFrame.(*BoneFrame)
+
+	if prevBf == nil || nextBf.GetIndex() <= index {
+		// 前がないか、最後より後の場合、次のキーフレをコピーして返す
+		frame := nextBf.Copy().(*BoneFrame)
+		// 計算情報はクリア
+		frame.IkRotation = mmath.NewRotation()
+		return frame
+	}
+
+	bf := NewBoneFrame(index)
+
+	xy, yy, zy, ry := nextBf.Curves.Evaluate(prevBf.GetIndex(), index, nextBf.GetIndex())
+
+	qq := prevBf.Rotation.GetQuaternion().Slerp(nextBf.Rotation.GetQuaternion(), ry)
+	bf.Rotation.SetQuaternion(qq)
+
+	prevX := mmath.MVec4{
+		prevBf.Position.GetX(), prevBf.LocalPosition.GetX(), prevBf.Scale.GetX(), prevBf.LocalScale.GetX()}
+	nextX := mmath.MVec4{
+		nextBf.Position.GetX(), nextBf.LocalPosition.GetX(), nextBf.Scale.GetX(), nextBf.LocalScale.GetX()}
+	nowX := mmath.LerpVec4(&prevX, &nextX, xy)
+	bf.Position.SetX(nowX[0])
+	bf.LocalPosition.SetX(nowX[1])
+	bf.Scale.SetX(nowX[2])
+	bf.LocalScale.SetX(nowX[3])
+
+	prevY := mmath.MVec4{
+		prevBf.Position.GetY(), prevBf.LocalPosition.GetY(), prevBf.Scale.GetY(), prevBf.LocalScale.GetY()}
+	nextY := mmath.MVec4{
+		nextBf.Position.GetY(), nextBf.LocalPosition.GetY(), nextBf.Scale.GetY(), nextBf.LocalScale.GetY()}
+	nowY := mmath.LerpVec4(&prevY, &nextY, yy)
+	bf.Position.SetY(nowY[0])
+	bf.LocalPosition.SetY(nowY[1])
+	bf.Scale.SetY(nowY[2])
+	bf.LocalScale.SetY(nowY[3])
+
+	prevZ := mmath.MVec4{
+		prevBf.Position.GetZ(), prevBf.LocalPosition.GetZ(), prevBf.Scale.GetZ(), prevBf.LocalScale.GetZ()}
+	nextZ := mmath.MVec4{
+		nextBf.Position.GetZ(), nextBf.LocalPosition.GetZ(), nextBf.Scale.GetZ(), nextBf.LocalScale.GetZ()}
+	nowZ := mmath.LerpVec4(&prevZ, &nextZ, zy)
+	bf.Position.SetZ(nowZ[0])
+	bf.LocalPosition.SetZ(nowZ[1])
+	bf.Scale.SetZ(nowZ[2])
+	bf.LocalScale.SetZ(nowZ[3])
+
+	return bf
+}
+
+func (bf *BoneFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
+	nextBf := nextFrame.(*BoneFrame)
+	prevBf := prevFrame.(*BoneFrame)
+
+	bf.Curves.TranslateX, nextBf.Curves.TranslateX =
+		mmath.SplitCurve(nextBf.Curves.TranslateX, prevBf.GetIndex(), bf.GetIndex(), nextBf.GetIndex())
+	bf.Curves.TranslateY, nextBf.Curves.TranslateY =
+		mmath.SplitCurve(nextBf.Curves.TranslateY, prevBf.GetIndex(), bf.GetIndex(), nextBf.GetIndex())
+	bf.Curves.TranslateZ, nextBf.Curves.TranslateZ =
+		mmath.SplitCurve(nextBf.Curves.TranslateZ, prevBf.GetIndex(), bf.GetIndex(), nextBf.GetIndex())
+	bf.Curves.Rotate, nextBf.Curves.Rotate =
+		mmath.SplitCurve(nextBf.Curves.Rotate, prevBf.GetIndex(), bf.GetIndex(), nextBf.GetIndex())
 }

@@ -1,127 +1,24 @@
 package vmd
 
 import (
-	"sync"
-
-	"github.com/miu200521358/mlib_go/pkg/mcore"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
-	"github.com/petar/GoLLRB/llrb"
 )
 
 type MorphNameFrames struct {
-	*mcore.IndexModels[*MorphFrame]
-	Name              string            // ボーン名
-	RegisteredIndexes *mcore.IntIndexes // 登録対象キーフレリスト
-	lock              sync.RWMutex      // マップアクセス制御用
+	*BaseFrames[*MorphFrame]
+	Name string // ボーン名
 }
 
 func NewMorphNameFrames(name string) *MorphNameFrames {
 	return &MorphNameFrames{
-		IndexModels:       mcore.NewIndexModels[*MorphFrame](),
-		Name:              name,
-		RegisteredIndexes: mcore.NewIntIndexes(),
-		lock:              sync.RWMutex{},
+		BaseFrames: NewBaseFrames[*MorphFrame](NewMorphFrame),
+		Name:       name,
 	}
 }
 
-// 指定したキーフレの前後のキーフレ番号を返す
-func (fs *MorphNameFrames) GetRangeIndexes(index int) (int, int) {
-	if fs.RegisteredIndexes.Len() == 0 {
-		return 0, 0
-	}
-
-	if fs.RegisteredIndexes.Max() < index {
-		return fs.RegisteredIndexes.Max(), fs.RegisteredIndexes.Max()
-	}
-
-	prevIndex := mcore.Int(0)
-	nextIndex := mcore.Int(index)
-
-	fs.RegisteredIndexes.DescendLessOrEqual(mcore.Int(index), func(i llrb.Item) bool {
-		prevIndex = i.(mcore.Int)
-		return false
-	})
-
-	fs.RegisteredIndexes.AscendGreaterOrEqual(mcore.Int(index), func(i llrb.Item) bool {
-		nextIndex = i.(mcore.Int)
-		return false
-	})
-
-	return int(prevIndex), int(nextIndex)
-}
-
-// キーフレ計算結果を返す
-func (fs *MorphNameFrames) GetItem(index int) *MorphFrame {
-	if fs == nil {
-		return NewMorphFrame(index)
-	}
-
-	fs.lock.RLock()
-	defer fs.lock.RUnlock()
-
-	if _, ok := fs.Data[index]; ok {
-		return fs.Data[index]
-	}
-
-	// なかったら補間計算して返す
-	prevIndex, nextIndex := fs.GetRangeIndexes(index)
-
-	if prevIndex == nextIndex {
-		if _, ok := fs.Data[nextIndex]; ok {
-			nextMf := fs.Data[nextIndex]
-			copied := &MorphFrame{
-				BaseFrame: NewVmdBaseFrame(index),
-				Ratio:     nextMf.Ratio,
-			}
-			return copied
-		} else {
-			return NewMorphFrame(index)
-		}
-	}
-
-	var prevMf, nextMf *MorphFrame
-	if _, ok := fs.Data[prevIndex]; ok {
-		prevMf = fs.Data[prevIndex]
-	} else {
-		prevMf = NewMorphFrame(index)
-	}
-	if _, ok := fs.Data[nextIndex]; ok {
-		nextMf = fs.Data[nextIndex]
-	} else {
-		nextMf = NewMorphFrame(index)
-	}
-
-	mf := NewMorphFrame(index)
-
-	ry := (index - prevIndex) / (nextIndex - prevIndex)
-	mf.Ratio = prevMf.Ratio + (nextMf.Ratio-prevMf.Ratio)*float64(ry)
-
-	return mf
-}
-
-// bf.Registered が true の場合、補間曲線を分割して登録する
-func (fs *MorphNameFrames) Append(value *MorphFrame) {
-	fs.lock.Lock()
-	defer fs.lock.Unlock()
-
-	if _, ok := fs.Data[value.Index]; !ok {
-		fs.Indexes[value.Index] = value.Index
-	}
-
-	if value.Registered {
-		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Int(value.Index))
-	}
-
-	fs.Data[value.Index] = value
-}
-
-func (fs *MorphNameFrames) GetMaxFrame() int {
-	return fs.RegisteredIndexes.Max()
-}
-
-func (fs *MorphNameFrames) GetMinFrame() int {
-	return fs.RegisteredIndexes.Min()
+func (i *MorphNameFrames) NewFrame(index int) *MorphFrame {
+	return NewMorphFrame(index)
 }
 
 func (fs *MorphNameFrames) AnimateVertex(
@@ -129,7 +26,7 @@ func (fs *MorphNameFrames) AnimateVertex(
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
 ) {
-	mf := fs.GetItem(frame)
+	mf := fs.Get(frame)
 	if mf.Ratio == 0.0 {
 		return
 	}
@@ -149,7 +46,7 @@ func (fs *MorphNameFrames) AnimateAfterVertex(
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
 ) {
-	mf := fs.GetItem(frame)
+	mf := fs.Get(frame)
 	if mf.Ratio == 0.0 {
 		return
 	}
@@ -169,7 +66,7 @@ func (fs *MorphNameFrames) AnimateUv(
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
 ) {
-	mf := fs.GetItem(frame)
+	mf := fs.Get(frame)
 	if mf.Ratio == 0.0 {
 		return
 	}
@@ -190,7 +87,7 @@ func (fs *MorphNameFrames) AnimateUv1(
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
 ) {
-	mf := fs.GetItem(frame)
+	mf := fs.Get(frame)
 	if mf.Ratio == 0.0 {
 		return
 	}
@@ -211,7 +108,7 @@ func (fs *MorphNameFrames) AnimateBone(
 	model *pmx.PmxModel,
 	deltas *BoneMorphDeltas,
 ) {
-	mf := fs.GetItem(frame)
+	mf := fs.Get(frame)
 	if mf.Ratio == 0.0 {
 		return
 	}
@@ -241,7 +138,7 @@ func (fs *MorphNameFrames) AnimateMaterial(
 	model *pmx.PmxModel,
 	deltas *MaterialMorphDeltas,
 ) {
-	mf := fs.GetItem(frame)
+	mf := fs.Get(frame)
 	if mf.Ratio == 0.0 {
 		return
 	}

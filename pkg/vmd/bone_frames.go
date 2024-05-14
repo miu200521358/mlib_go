@@ -72,8 +72,8 @@ func (fs *BoneFrames) GetNames() []string {
 func (fs *BoneFrames) GetIndexes() []int {
 	indexes := mcore.NewIntIndexes()
 	for _, fs := range fs.Data {
-		for _, index := range fs.Indexes {
-			indexes.ReplaceOrInsert(mcore.NewInt(index))
+		for _, f := range fs.List() {
+			indexes.ReplaceOrInsert(f.Index)
 		}
 	}
 	return indexes.List()
@@ -179,7 +179,7 @@ func (fs *BoneFrames) prepareIkSolvers(
 				for _, linkIndex := range ikBone.Ik.Links {
 					// IKリンクボーンの回転量を更新
 					linkBone := model.Bones.GetItem(linkIndex.BoneIndex)
-					linkBf := fs.GetItem(linkBone.Name).GetItem(frame)
+					linkBf := fs.GetItem(linkBone.Name).Get(frame)
 					linkIndex := effectorTargetBoneNames[linkBone.Name]
 					linkBf.IkRotation = mmath.NewRotationByQuaternion(quats[linkIndex])
 
@@ -459,9 +459,10 @@ ikLoop:
 			} else {
 				if linkBone.HasFixedAxis() {
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
+						qq := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
+						quat := qq.Shorten()
 						bf := NewBoneFrame(count)
-						bf.Rotation.SetQuaternion(quat.Shorten())
+						bf.Rotation.SetQuaternion(quat)
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 						count++
 
@@ -477,9 +478,10 @@ ikLoop:
 					linkAxis = &linkBone.NormalizedFixedAxis
 
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
+						qq := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
+						quat := qq.Shorten()
 						bf := NewBoneFrame(count)
-						bf.Rotation.SetQuaternion(quat.Shorten())
+						bf.Rotation.SetQuaternion(quat)
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 						count++
 
@@ -492,11 +494,12 @@ ikLoop:
 					}
 				}
 
-				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
+				correctIkQq := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
+				correctIkQuat := correctIkQq.Shorten()
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
-					bf.Rotation.SetQuaternion(correctIkQuat.Shorten())
+					bf.Rotation.SetQuaternion(correctIkQuat)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
 				}
@@ -508,7 +511,7 @@ ikLoop:
 				}
 
 				// 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-				totalActualIkQuat = linkQuat.Muled(&correctIkQuat)
+				totalActualIkQuat = linkQuat.Muled(correctIkQuat)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
@@ -602,11 +605,12 @@ func (fs *BoneFrames) calcSingleAxisRad(
 	ikMotion *VmdMotion,
 	ikFile *os.File,
 ) *mmath.MQuaternion {
-	quat := mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle)
+	qq := mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle)
+	quat := qq.Shorten()
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		bf := NewBoneFrame(count)
-		bf.Rotation.SetQuaternion(quat.Shorten())
+		bf.Rotation.SetQuaternion(quat)
 		ikMotion.AppendRegisteredBoneFrame(linkBoneName, bf)
 		count++
 	}
@@ -617,7 +621,7 @@ func (fs *BoneFrames) calcSingleAxisRad(
 	}
 
 	// 現在IKリンクに入る可能性のあるすべての角度
-	totalIkQuat := linkQuat.Muled(quat.Shorten())
+	totalIkQuat := linkQuat.Muled(quat)
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		bf := NewBoneFrame(count)
@@ -688,8 +692,8 @@ func (fs *BoneFrames) calcSingleAxisRad(
 		}
 	}
 
-	result := mmath.NewMQuaternionFromAxisAngles(&axisVector, fX)
-	return result.Shorten()
+	resultQq := mmath.NewMQuaternionFromAxisAngles(&axisVector, fX)
+	return resultQq.Shorten()
 }
 
 func (fs *BoneFrames) calcBoneMatrixes(
@@ -896,7 +900,7 @@ func (fs *BoneFrames) getPosition(
 	}
 
 	bone := model.Bones.GetItemByName(boneName)
-	bf := fs.GetItem(boneName).GetItem(frame)
+	bf := fs.GetItem(boneName).Get(frame)
 
 	mat := mmath.NewMMat4()
 	if isCalcMorph {
@@ -963,41 +967,44 @@ func (fs *BoneFrames) getRotation(
 	bone := model.Bones.GetItemByName(boneName)
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
-	bf := fs.GetItem(boneName).GetItem(frame)
-	var rot mmath.MQuaternion
+	bf := fs.GetItem(boneName).Get(frame)
+	var rot *mmath.MQuaternion
 	if bf.IkRotation != nil && !bf.IkRotation.GetRadians().IsZero() {
 		// IK用回転を持っている場合、置き換え
 		if isCalcMorph {
-			rot = bf.MorphRotation.GetQuaternion().Copy()
+			qq := bf.MorphRotation.GetQuaternion().Copy()
+			rot = &qq
 			rot.Mul(bf.IkRotation.GetQuaternion())
 		} else {
-			rot = bf.IkRotation.GetQuaternion().Copy()
+			qq := bf.IkRotation.GetQuaternion().Copy()
+			rot = &qq
 		}
 	} else {
 		if isCalcMorph {
-			rot = bf.MorphRotation.GetQuaternion().Copy()
+			qq := bf.MorphRotation.GetQuaternion().Copy()
+			rot = &qq
 			rot.Mul(bf.Rotation.GetQuaternion())
 		} else {
-			rot = bf.Rotation.GetQuaternion().Copy()
+			qq := bf.Rotation.GetQuaternion().Copy()
+			rot = &qq
 		}
 
 		if bone.HasFixedAxis() {
-			rot = *rot.ToFixedAxisRotation(&bone.NormalizedFixedAxis)
+			rot = rot.ToFixedAxisRotation(&bone.NormalizedFixedAxis)
 		}
 	}
 
-	var rotWithEffect mmath.MQuaternion
+	var rotWithEffect *mmath.MQuaternion
 	if bone.IsEffectorRotation() {
 		// 外部親変形ありの場合、外部親変形行列を掛ける
-		effectQ := rot.Muled(fs.getRotationWithEffect(frame, bone.Index, model, isCalcMorph, loop+1))
-		rotWithEffect = *effectQ
+		rotWithEffect = rot.Muled(fs.getRotationWithEffect(frame, bone.Index, model, isCalcMorph, loop+1))
 	} else {
 		rotWithEffect = rot
 	}
 
 	if bone.HasFixedAxis() {
 		// 軸制限回転を求める
-		rot = *rot.ToFixedAxisRotation(&bone.NormalizedFixedAxis)
+		rot = rot.ToFixedAxisRotation(&bone.NormalizedFixedAxis)
 	}
 
 	return rotWithEffect.Shorten(), rot.Shorten()
@@ -1040,7 +1047,7 @@ func (fs *BoneFrames) getScale(
 	model *pmx.PmxModel,
 	isCalcMorph bool,
 ) *mmath.MMat4 {
-	bf := fs.GetItem(boneName).GetItem(frame)
+	bf := fs.GetItem(boneName).Get(frame)
 	mat := mmath.NewMMat4()
 
 	if isCalcMorph {

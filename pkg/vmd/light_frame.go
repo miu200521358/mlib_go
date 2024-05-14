@@ -12,7 +12,7 @@ type LightFrame struct {
 
 func NewLightFrame(index int) *LightFrame {
 	return &LightFrame{
-		BaseFrame: NewVmdBaseFrame(index),
+		BaseFrame: NewFrame(index).(*BaseFrame),
 		Position:  mmath.NewMVec3(),
 		Color:     mmath.NewMVec3(),
 	}
@@ -30,4 +30,26 @@ func (lf *LightFrame) Added(v *LightFrame) *LightFrame {
 	copied.Color.Add(&v.Color)
 
 	return copied
+}
+
+func (lf *LightFrame) Copy() IBaseFrame {
+	copied := NewLightFrame(lf.GetIndex())
+	copied.Position = lf.Position
+	copied.Color = lf.Color
+
+	return copied
+}
+
+func (nextLf *LightFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
+	prevLf := prevFrame.(*LightFrame)
+	// 線形補間
+	t := float64(nextLf.GetIndex()-index) / float64(nextLf.GetIndex()-prevLf.GetIndex())
+	vv := &LightFrame{
+		Position: *mmath.LerpVec3(&prevLf.Position, &nextLf.Position, t),
+		Color:    *mmath.LerpVec3(&prevLf.Color, &nextLf.Color, t),
+	}
+	return vv
+}
+
+func (lf *LightFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
 }

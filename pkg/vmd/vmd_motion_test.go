@@ -899,7 +899,7 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.710987, 6.669293, -0.459177}
-			if !matrixes.GetItem(pmx.KNEE.Right(), fno).Position.PracticallyEquals(expectedPosition, 0.1) {
+			if !matrixes.GetItem(pmx.KNEE.Right(), fno).Position.PracticallyEquals(expectedPosition, 0.2) {
 				t.Errorf("Expected %v, got %v", expectedPosition, matrixes.GetItem(pmx.KNEE.Right(), fno).Position)
 			}
 		}

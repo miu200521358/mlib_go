@@ -77,7 +77,7 @@ func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
 			if !fs.RegisteredIndexes.Has(fno) {
 				continue
 			}
-			bf := motion.BoneFrames.Data[name].Data[fno]
+			bf := motion.BoneFrames.Data[name].Get(fno)
 			encodedName, err := encodeName(name, 15)
 			if err != nil {
 				mlog.W(mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": name}))

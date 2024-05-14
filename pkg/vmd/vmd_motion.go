@@ -84,6 +84,35 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 	m.IkFrames.Append(ikf)
 }
 
+func (m *VmdMotion) InsertBoneFrame(boneName string, bf *BoneFrame) {
+	m.BoneFrames.GetItem(boneName).Insert(bf)
+}
+
+func (m *VmdMotion) InsertRegisteredBoneFrame(boneName string, bf *BoneFrame) {
+	bf.Registered = true
+	m.BoneFrames.GetItem(boneName).Insert(bf)
+}
+
+func (m *VmdMotion) InsertMorphFrame(morphName string, mf *MorphFrame) {
+	m.MorphFrames.GetItem(morphName).Insert(mf)
+}
+
+func (m *VmdMotion) InsertCameraFrame(cf *CameraFrame) {
+	m.CameraFrames.Insert(cf)
+}
+
+func (m *VmdMotion) InsertLightFrame(lf *LightFrame) {
+	m.LightFrames.Insert(lf)
+}
+
+func (m *VmdMotion) InsertShadowFrame(sf *ShadowFrame) {
+	m.ShadowFrames.Insert(sf)
+}
+
+func (m *VmdMotion) InsertIkFrame(ikf *IkFrame) {
+	m.IkFrames.Insert(ikf)
+}
+
 func (m *VmdMotion) Animate(fno int, model *pmx.PmxModel) *VmdDeltas {
 	vds := &VmdDeltas{}
 
@@ -94,7 +123,7 @@ func (m *VmdMotion) Animate(fno int, model *pmx.PmxModel) *VmdDeltas {
 		if !m.BoneFrames.Contains(bone.Name) {
 			m.BoneFrames.Append(NewBoneNameFrames(bone.Name))
 		}
-		bf := m.BoneFrames.GetItem(bone.Name).GetItem(fno)
+		bf := m.BoneFrames.GetItem(bone.Name).Get(fno)
 
 		// 一旦モーフの値をクリア
 		bf.MorphPosition = mmath.NewMVec3()
