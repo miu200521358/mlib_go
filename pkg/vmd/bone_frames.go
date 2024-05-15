@@ -172,6 +172,16 @@ func (fs *BoneFrames) prepareIkSolvers(
 			defer wg.Done()
 			for i := 0; i < len(model.Bones.IkTreeIndexes[bone.Index]); i++ {
 				ikBone := model.Bones.GetItem(model.Bones.IkTreeIndexes[bone.Index][i])
+				for _, linkIndex := range ikBone.Ik.Links {
+					// IKリンクボーンの回転量を初期化
+					linkBone := model.Bones.GetItem(linkIndex.BoneIndex)
+					linkBf := fs.GetItem(linkBone.Name).Get(frame)
+					linkBf.IkRotation = mmath.NewRotation()
+
+					// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
+					fs.GetItem(linkBone.Name).Append(linkBf)
+				}
+
 				// IK計算
 				quats, effectorTargetBoneNames :=
 					fs.calcIk(frame, ikBone, model, isCalcMorph)
