@@ -27,9 +27,6 @@ type VertexMorphDeltas struct {
 
 func NewVertexMorphDeltas(vertexCount int) *VertexMorphDeltas {
 	deltas := make([]*VertexMorphDelta, vertexCount)
-	for i := 0; i < vertexCount; i++ {
-		deltas[i] = NewVertexMorphDelta()
-	}
 
 	return &VertexMorphDeltas{
 		Data: deltas,
@@ -52,9 +49,6 @@ type BoneMorphDeltas struct {
 
 func NewBoneMorphDeltas(boneCount int) *BoneMorphDeltas {
 	deltas := make([]*BoneMorphDelta, boneCount)
-	for i := 0; i < boneCount; i++ {
-		deltas[i] = NewBoneMorphDelta()
-	}
 
 	return &BoneMorphDeltas{
 		Data: deltas,

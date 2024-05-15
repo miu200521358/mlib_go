@@ -119,6 +119,9 @@ func (m *VmdMotion) Animate(fno int, model *pmx.PmxModel) *VmdDeltas {
 	vds.Morphs = m.AnimateMorph(fno, model, nil)
 
 	for i, bd := range vds.Morphs.Bones.Data {
+		if bd == nil {
+			continue
+		}
 		bone := model.Bones.GetItem(i)
 		if !m.BoneFrames.Contains(bone.Name) {
 			m.BoneFrames.Append(NewBoneNameFrames(bone.Name))

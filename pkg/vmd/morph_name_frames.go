@@ -36,6 +36,9 @@ func (fs *MorphNameFrames) AnimateVertex(
 		offset := o.(*pmx.VertexMorphOffset)
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
+			if delta == nil {
+				delta = NewVertexMorphDelta()
+			}
 			delta.Position.Add(offset.Position.MuledScalar(mf.Ratio))
 		}
 	}
@@ -56,6 +59,9 @@ func (fs *MorphNameFrames) AnimateAfterVertex(
 		offset := o.(*pmx.VertexMorphOffset)
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
+			if delta == nil {
+				delta = NewVertexMorphDelta()
+			}
 			delta.AfterPosition.Add(offset.Position.MuledScalar(mf.Ratio))
 		}
 	}
@@ -76,6 +82,9 @@ func (fs *MorphNameFrames) AnimateUv(
 		offset := o.(*pmx.UvMorphOffset)
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
+			if delta == nil {
+				delta = NewVertexMorphDelta()
+			}
 			uv := offset.Uv.MuledScalar(mf.Ratio).GetXY()
 			delta.Uv.Add(uv)
 		}
@@ -97,6 +106,9 @@ func (fs *MorphNameFrames) AnimateUv1(
 		offset := o.(*pmx.UvMorphOffset)
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
+			if delta == nil {
+				delta = NewVertexMorphDelta()
+			}
 			uv := offset.Uv.MuledScalar(mf.Ratio)
 			delta.Uv1.Add(uv.GetXY())
 		}
@@ -118,6 +130,9 @@ func (fs *MorphNameFrames) AnimateBone(
 		offset := o.(*pmx.BoneMorphOffset)
 		if 0 < offset.BoneIndex && offset.BoneIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.BoneIndex]
+			if delta == nil {
+				delta = NewBoneMorphDelta()
+			}
 			delta.MorphPosition.Add(offset.Position.MuledScalar(mf.Ratio))
 			delta.MorphLocalPosition.Add(offset.LocalPosition.MuledScalar(mf.Ratio))
 			deltaRad := offset.Rotation.GetRadians().MuledScalar(mf.Ratio)

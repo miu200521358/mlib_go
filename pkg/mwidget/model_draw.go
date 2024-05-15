@@ -76,10 +76,11 @@ func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
 		go func(chunkStart, chunkEnd int) {
 			defer wg.Done()
 			for i := chunkStart; i < chunkEnd; i++ {
-				if !deltas.Morphs.Vertices.Data[i].Position.IsZero() ||
-					!deltas.Morphs.Vertices.Data[i].Uv.IsZero() ||
-					!deltas.Morphs.Vertices.Data[i].Uv1.IsZero() ||
-					!deltas.Morphs.Vertices.Data[i].AfterPosition.IsZero() {
+				if deltas.Morphs.Vertices.Data[i] != nil &&
+					(!deltas.Morphs.Vertices.Data[i].Position.IsZero() ||
+						!deltas.Morphs.Vertices.Data[i].Uv.IsZero() ||
+						!deltas.Morphs.Vertices.Data[i].Uv1.IsZero() ||
+						!deltas.Morphs.Vertices.Data[i].AfterPosition.IsZero()) {
 					// 必要な場合にのみ部分更新するよう設定
 					vertexDeltas[i] = deltas.Morphs.Vertices.Data[i].GL()
 				}
