@@ -959,26 +959,22 @@ func (fs *BoneFrames) getRotation(
 	bone := model.Bones.GetItemByName(boneName)
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
-	bf := fs.GetItem(boneName).GetItem(frame)
+	bf := fs.GetItem(boneName).Get(frame)
 	var rot *mmath.MQuaternion
 	if bf.IkRotation != nil && !bf.IkRotation.GetRadians().IsZero() {
 		// IK用回転を持っている場合、置き換え
 		if isCalcMorph {
-			qq := bf.MorphRotation.GetQuaternion().Copy()
-			rot = &qq
+			rot = bf.MorphRotation.GetQuaternion().Copy()
 			rot.Mul(bf.IkRotation.GetQuaternion())
 		} else {
-			qq := bf.IkRotation.GetQuaternion().Copy()
-			rot = &qq
+			rot = bf.IkRotation.GetQuaternion().Copy()
 		}
 	} else {
 		if isCalcMorph {
-			qq := bf.MorphRotation.GetQuaternion().Copy()
-			rot = &qq
+			rot = bf.MorphRotation.GetQuaternion().Copy()
 			rot.Mul(bf.Rotation.GetQuaternion())
 		} else {
-			qq := bf.Rotation.GetQuaternion().Copy()
-			rot = &qq
+			rot = bf.Rotation.GetQuaternion().Copy()
 		}
 
 		if bone.HasFixedAxis() {
