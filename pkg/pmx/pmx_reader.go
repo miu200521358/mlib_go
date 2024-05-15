@@ -245,7 +245,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalVertexCount; i++ {
-		v := NewVertex()
+		v := &Vertex{IndexModel: &mcore.IndexModel{Index: i}}
 
 		// 12 : float3  | 位置(x,y,z)
 		v.Position, err = r.UnpackVec3()
@@ -426,7 +426,10 @@ func (r *PmxReader) readFaces(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalFaceCount; i += 3 {
-		f := NewFace()
+		f := &Face{
+			IndexModel:    &mcore.IndexModel{Index: int(i / 3)},
+			VertexIndexes: [3]int{},
+		}
 
 		// n : 頂点Indexサイズ     | 頂点の参照Index
 		f.VertexIndexes[0], err = r.unpackVertexIndex(model)
@@ -482,12 +485,14 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalMaterialCount; i++ {
-		m := NewMaterial()
-
 		// 4 + n : TextBuf	| 材質名
-		m.Name = r.ReadText()
+		name := r.ReadText()
 		// 4 + n : TextBuf	| 材質名英
-		m.EnglishName = r.ReadText()
+		englishName := r.ReadText()
+
+		m := &Material{
+			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+		}
 
 		// 16 : float4	| Diffuse (R,G,B,A)
 		m.Diffuse, err = r.UnpackVec4()
@@ -596,12 +601,35 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalBoneCount; i++ {
-		b := NewBone()
 
 		// 4 + n : TextBuf	| ボーン名
-		b.Name = r.ReadText()
+		name := r.ReadText()
 		// 4 + n : TextBuf	| ボーン名英
-		b.EnglishName = r.ReadText()
+		englishName := r.ReadText()
+
+		b := &Bone{
+			IndexNameModel:         &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IkLinkBoneIndexes:      make([]int, 0),
+			IkTargetBoneIndexes:    make([]int, 0),
+			ParentRelativePosition: mmath.NewMVec3(),
+			ChildRelativePosition:  mmath.NewMVec3(),
+			NormalizedFixedAxis:    mmath.NewMVec3(),
+			TreeBoneIndexes:        make([]int, 0),
+			RevertOffsetMatrix:     mmath.NewMMat4(),
+			OffsetMatrix:           mmath.NewMMat4(),
+			ParentBoneIndexes:      make([]int, 0),
+			RelativeBoneIndexes:    make([]int, 0),
+			ChildBoneIndexes:       make([]int, 0),
+			EffectiveBoneIndexes:   make([]int, 0),
+			AngleLimit:             false,
+			MinAngleLimit:          mmath.NewRotation(),
+			MaxAngleLimit:          mmath.NewRotation(),
+			LocalAngleLimit:        false,
+			LocalMinAngleLimit:     mmath.NewRotation(),
+			LocalMaxAngleLimit:     mmath.NewRotation(),
+			AxisSign:               1,
+		}
+
 		// 12 : float3	| 位置
 		b.Position, err = r.UnpackVec3()
 		if err != nil {
@@ -639,6 +667,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 			b.TailPosition = mmath.NewMVec3()
 		} else {
 			//  12 : float3	| 座標オフセット, ボーン位置からの相対分
+			b.TailIndex = -1
 			b.TailPosition, err = r.UnpackVec3()
 			if err != nil {
 				mlog.E("[%d] readBones UnpackVec3 TailPosition error: %v", i, err)
@@ -660,6 +689,9 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 				mlog.E("[%d] readBones UnpackFloat EffectFactor error: %v", i, err)
 				return err
 			}
+		} else {
+			b.EffectIndex = -1
+			b.EffectFactor = 0
 		}
 
 		// 軸固定:1 の場合
@@ -707,6 +739,8 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 
 		// IK:1 の場合 IKデータを格納
 		if b.IsIK() {
+			b.Ik = NewIk()
+
 			// n  : ボーンIndexサイズ  | IKターゲットボーンのボーンIndex
 			b.Ik.BoneIndex, err = r.unpackBoneIndex(model)
 			if err != nil {
@@ -781,12 +815,15 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalMorphCount; i++ {
-		m := NewMorph()
-
 		// 4 + n : TextBuf	| モーフ名
-		m.Name = r.ReadText()
+		name := r.ReadText()
 		// 4 + n : TextBuf	| モーフ名英
-		m.EnglishName = r.ReadText()
+		englishName := r.ReadText()
+
+		m := &Morph{
+			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+		}
+
 		// 1  : byte	| 操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約
 		panel, err := r.UnpackByte()
 		if err != nil {
@@ -962,12 +999,15 @@ func (r *PmxReader) readDisplaySlots(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalDisplaySlotCount; i++ {
-		d := NewDisplaySlot()
-
 		// 4 + n : TextBuf	| 枠名
-		d.Name = r.ReadText()
+		name := r.ReadText()
 		// 4 + n : TextBuf	| 枠名英
-		d.EnglishName = r.ReadText()
+		englishName := r.ReadText()
+
+		d := &DisplaySlot{
+			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			References:     make([]Reference, 0),
+		}
 
 		// 1  : byte	| 特殊枠フラグ - 0:通常枠 1:特殊枠
 		specialFlag, err := r.UnpackByte()
@@ -1028,12 +1068,17 @@ func (r *PmxReader) readRigidBodies(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalRigidBodyCount; i++ {
-		b := NewRigidBody()
-
 		// 4 + n : TextBuf	| 剛体名
-		b.Name = r.ReadText()
+		name := r.ReadText()
 		// 4 + n : TextBuf	| 剛体名英
-		b.EnglishName = r.ReadText()
+		englishName := r.ReadText()
+
+		b := &RigidBody{
+			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			Rotation:       mmath.NewRotation(),
+			RigidBodyParam: NewRigidBodyParam(),
+		}
+
 		// n  : ボーンIndexサイズ  | 関連ボーンIndex - 関連なしの場合は-1
 		b.BoneIndex, err = r.unpackBoneIndex(model)
 		if err != nil {
@@ -1133,12 +1178,17 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalJointCount; i++ {
-		j := NewJoint()
-
 		// 4 + n : TextBuf	| Joint名
-		j.Name = r.ReadText()
+		name := r.ReadText()
 		// 4 + n : TextBuf	| Joint名英
-		j.EnglishName = r.ReadText()
+		englishName := r.ReadText()
+
+		j := &Joint{
+			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			Rotation:       mmath.NewRotation(),
+			JointParam:     NewJointParam(),
+		}
+
 		// 1  : byte	| Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
 		j.JointType, err = r.UnpackByte()
 		if err != nil {

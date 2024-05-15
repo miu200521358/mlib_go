@@ -549,11 +549,13 @@ ikLoop:
 				}
 			}
 
-			fmt.Fprintf(ikFile,
-				"[%04d][%03d][%s][%05d][15] 前回差分中断判定: %v(%0.6f) 前回: %s 今回: %s\n",
-				frame, loop, linkBone.Name, count-1,
-				1-quatsWithoutEffect[linkIndex].Dot(totalActualIkQuat) < 1e-6, 1-quatsWithoutEffect[linkIndex].Dot(totalActualIkQuat),
-				quatsWithoutEffect[linkIndex].ToDegrees().String(), totalActualIkQuat.ToDegrees().String())
+			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+				fmt.Fprintf(ikFile,
+					"[%04d][%03d][%s][%05d][15] 前回差分中断判定: %v(%0.6f) 前回: %s 今回: %s\n",
+					frame, loop, linkBone.Name, count-1,
+					1-quatsWithoutEffect[linkIndex].Dot(totalActualIkQuat) < 1e-6, 1-quatsWithoutEffect[linkIndex].Dot(totalActualIkQuat),
+					quatsWithoutEffect[linkIndex].ToDegrees().String(), totalActualIkQuat.ToDegrees().String())
+			}
 
 			// 前回（既存）とほぼ同じ回転量の場合、中断FLGを立てる
 			if 1-quatsWithoutEffect[linkIndex].Dot(totalActualIkQuat) < 1e-8 {
