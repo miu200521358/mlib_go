@@ -527,9 +527,9 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 		// 描画
 		w.Draw(w.frame*w.Physics.Fps, elapsed)
 
-		if w.frame*w.Physics.Fps >= float32(100) {
-			break
-		}
+		// if w.frame*w.Physics.Fps >= float32(100) {
+		// 	break
+		// }
 
 		// Maintenance
 		w.SwapBuffers()
