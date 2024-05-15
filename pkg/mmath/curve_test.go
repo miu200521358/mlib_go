@@ -7,7 +7,7 @@ import (
 )
 
 func TestEvaluate(tst *testing.T) {
-	inter := Curve{}
+	inter := &Curve{}
 	inter.Start = MVec2{20.0, 20.0}
 	inter.End = MVec2{107.0, 107.0}
 
@@ -27,7 +27,7 @@ func TestEvaluate(tst *testing.T) {
 }
 
 func TestEvaluate2(tst *testing.T) {
-	inter := Curve{}
+	inter := &Curve{}
 	inter.Start = MVec2{10.0, 30.0}
 	inter.End = MVec2{100.0, 80.0}
 
@@ -49,7 +49,7 @@ func TestEvaluate2(tst *testing.T) {
 }
 
 func TestSplitCurve(t *testing.T) {
-	curve := Curve{}
+	curve := &Curve{}
 	curve.Start = MVec2{89.0, 2.0}
 	curve.End = MVec2{52.0, 106.0}
 
@@ -77,7 +77,7 @@ func TestSplitCurve(t *testing.T) {
 }
 
 func TestSplitCurve2(t *testing.T) {
-	curve := Curve{}
+	curve := &Curve{}
 	curve.Start = MVec2{89.0, 2.0}
 	curve.End = MVec2{52.0, 106.0}
 
@@ -105,7 +105,7 @@ func TestSplitCurve2(t *testing.T) {
 }
 
 func TestSplitCurveLinear(t *testing.T) {
-	curve := Curve{}
+	curve := &Curve{}
 	curve.Start = MVec2{20.0, 20.0}
 	curve.End = MVec2{107.0, 107.0}
 
@@ -133,7 +133,7 @@ func TestSplitCurveLinear(t *testing.T) {
 }
 
 func TestSplitCurveSamePoints(t *testing.T) {
-	curve := Curve{}
+	curve := &Curve{}
 	curve.Start = MVec2{10.0, 10.0}
 	curve.End = MVec2{10.0, 10.0}
 
@@ -161,7 +161,7 @@ func TestSplitCurveSamePoints(t *testing.T) {
 }
 
 func TestSplitCurveOutOfRange(t *testing.T) {
-	curve := Curve{}
+	curve := &Curve{}
 	curve.Start = MVec2{25.0, 101.0}
 	curve.End = MVec2{127.0, 12.0}
 
@@ -276,7 +276,7 @@ func TestNewCurveFromValues(t *testing.T) {
 		-1.1037554740905762,
 		-1.1115431785583496,
 	}
-	expected = Curve{
+	expected = &Curve{
 		Start: MVec2{2, 37},
 		End:   MVec2{125, 94},
 	}
