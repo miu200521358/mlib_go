@@ -33,7 +33,7 @@ func Draw(
 	for i, bone := range model.Bones.GetSortedData() {
 		mat := deltas.Bones.GetItem(bone.Name, fno).LocalMatrix.GL()
 		boneMatrixes[i] = mat
-		globalMatrixes[i] = deltas.Bones.GetItem(bone.Name, fno).GlobalMatrix
+		globalMatrixes[i] = &deltas.Bones.GetItem(bone.Name, fno).GlobalMatrix
 		t := mbt.NewBtTransform()
 		t.SetFromOpenGLMatrix(&mat[0])
 		boneTransforms[i] = &t

@@ -321,22 +321,22 @@ ikLoop:
 			linkInvMatrix := linkMatrix.Inverse()
 
 			// 注目ノードを起点とした、エフェクタのローカル位置
-			effectorLocalPosition := linkInvMatrix.MulVec3(effectorGlobalPosition)
+			effectorLocalPosition := linkInvMatrix.MulVec3(&effectorGlobalPosition)
 			// 注目ノードを起点とした、IK目標のローカル位置
-			ikLocalPosition := linkInvMatrix.MulVec3(ikGlobalPosition)
+			ikLocalPosition := linkInvMatrix.MulVec3(&ikGlobalPosition)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				{
 					bf := NewBoneFrame(count)
-					bf.Position = *ikMatrixes.GetItem(ikBone.Name, frame).FramePosition
-					bf.Rotation.SetQuaternion(ikMatrixes.GetItem(ikBone.Name, frame).FrameRotation)
+					bf.Position = ikMatrixes.GetItem(ikBone.Name, frame).FramePosition
+					bf.Rotation.SetQuaternion(&ikMatrixes.GetItem(ikBone.Name, frame).FrameRotation)
 					ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
 					count++
 				}
 				{
 					bf := NewBoneFrame(count)
-					bf.Position = *linkMatrixes.GetItem(linkBone.Name, frame).FramePosition
-					bf.Rotation.SetQuaternion(linkMatrixes.GetItem(linkBone.Name, frame).FrameRotation)
+					bf.Position = linkMatrixes.GetItem(linkBone.Name, frame).FramePosition
+					bf.Rotation.SetQuaternion(&linkMatrixes.GetItem(linkBone.Name, frame).FrameRotation)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
 				}
@@ -759,13 +759,13 @@ func (fs *BoneFrames) calcBoneMatrixes(
 		boneDeltas.SetItem(bone.Name, frame, NewBoneDelta(
 			bone.Name,
 			frame,
-			localMatrix.Muled(bone.Position.ToMat4()), // グローバル行列
-			localMatrix,                // ローカル行列はそのまま
-			positions[i].Translation(), // 移動
-			rotations[i].Quaternion(),  // 回転
-			quatsWithoutEffect[i],      // 回転(付与親なし)
-			scales[i].Scaling(),        // 拡大率
-			matrixes[i],                // ボーン変形行列
+			*localMatrix.Muled(bone.Position.ToMat4()), // グローバル行列
+			*localMatrix,                // ローカル行列はそのまま
+			*positions[i].Translation(), // 移動
+			*rotations[i].Quaternion(),  // 回転
+			*quatsWithoutEffect[i],      // 回転(付与親なし)
+			*scales[i].Scaling(),        // 拡大率
+			*matrixes[i],                // ボーン変形行列
 		))
 	}
 
