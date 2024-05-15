@@ -6,94 +6,112 @@ import (
 
 type BoneFrame struct {
 	*BaseFrame                          // キーフレ
-	Position           mmath.MVec3      // 位置
-	MorphPosition      mmath.MVec3      // モーフ位置
-	LocalPosition      mmath.MVec3      // ローカル位置
-	MorphLocalPosition mmath.MVec3      // モーフローカル位置
+	Position           *mmath.MVec3     // 位置
+	MorphPosition      *mmath.MVec3     // モーフ位置
+	LocalPosition      *mmath.MVec3     // ローカル位置
+	MorphLocalPosition *mmath.MVec3     // モーフローカル位置
 	Rotation           *mmath.MRotation // 回転
 	MorphRotation      *mmath.MRotation // モーフ回転
 	LocalRotation      *mmath.MRotation // ローカル回転
 	MorphLocalRotation *mmath.MRotation // モーフローカル回転
-	Scale              mmath.MVec3      // スケール
-	MorphScale         mmath.MVec3      // モーフスケール
-	LocalScale         mmath.MVec3      // ローカルスケール
-	MorphLocalScale    mmath.MVec3      // モーフローカルスケール
+	Scale              *mmath.MVec3     // スケール
+	MorphScale         *mmath.MVec3     // モーフスケール
+	LocalScale         *mmath.MVec3     // ローカルスケール
+	MorphLocalScale    *mmath.MVec3     // モーフローカルスケール
 	IkRotation         *mmath.MRotation // IK回転
 	Curves             *BoneCurves      // 補間曲線
 	IkRegistered       bool             // IK計算済み
 }
 
 func NewBoneFrame(index int) *BoneFrame {
+	position := mmath.NewMVec3()
+	morphPosition := mmath.NewMVec3()
+	localPosition := mmath.NewMVec3()
+	morphLocalPosition := mmath.NewMVec3()
+	scale := mmath.NewMVec3()
+	morphScale := mmath.NewMVec3()
+	localScale := mmath.NewMVec3()
+	morphLocalScale := mmath.NewMVec3()
+
 	return &BoneFrame{
 		BaseFrame:          NewFrame(index).(*BaseFrame),
-		Position:           mmath.NewMVec3(),
-		MorphPosition:      mmath.NewMVec3(),
-		LocalPosition:      mmath.NewMVec3(),
-		MorphLocalPosition: mmath.NewMVec3(),
+		Position:           &position,
+		MorphPosition:      &morphPosition,
+		LocalPosition:      &localPosition,
+		MorphLocalPosition: &morphLocalPosition,
 		Rotation:           mmath.NewRotation(),
 		MorphRotation:      mmath.NewRotation(),
 		LocalRotation:      mmath.NewRotation(),
 		MorphLocalRotation: mmath.NewRotation(),
-		Scale:              mmath.NewMVec3(),
-		MorphScale:         mmath.NewMVec3(),
-		LocalScale:         mmath.NewMVec3(),
-		MorphLocalScale:    mmath.NewMVec3(),
+		Scale:              &scale,
+		MorphScale:         &morphScale,
+		LocalScale:         &localScale,
+		MorphLocalScale:    &morphLocalScale,
 		IkRotation:         mmath.NewRotation(),
 		Curves:             NewBoneCurves(),
 	}
 }
 
 func (bf *BoneFrame) Add(v *BoneFrame) {
-	bf.Position.Add(&v.Position)
-	bf.MorphPosition.Add(&v.MorphPosition)
-	bf.LocalPosition.Add(&v.LocalPosition)
-	bf.MorphLocalPosition.Add(&v.MorphLocalPosition)
+	bf.Position.Add(v.Position)
+	bf.MorphPosition.Add(v.MorphPosition)
+	bf.LocalPosition.Add(v.LocalPosition)
+	bf.MorphLocalPosition.Add(v.MorphLocalPosition)
 	bf.Rotation.Mul(v.Rotation)
 	bf.MorphRotation.Mul(v.MorphRotation)
 	bf.LocalRotation.Mul(v.LocalRotation)
 	bf.MorphLocalRotation.Mul(v.MorphLocalRotation)
-	bf.Scale.Add(&v.Scale)
-	bf.MorphScale.Add(&v.MorphScale)
-	bf.LocalScale.Add(&v.LocalScale)
-	bf.MorphLocalScale.Add(&v.MorphLocalScale)
+	bf.Scale.Add(v.Scale)
+	bf.MorphScale.Add(v.MorphScale)
+	bf.LocalScale.Add(v.LocalScale)
+	bf.MorphLocalScale.Add(v.MorphLocalScale)
 	bf.IkRotation.Mul(v.IkRotation)
 }
 
 func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 	copied := bf.Copy().(*BoneFrame)
 
-	copied.Position.Add(&v.Position)
-	copied.MorphPosition.Add(&v.MorphPosition)
-	copied.LocalPosition.Add(&v.LocalPosition)
-	copied.MorphLocalPosition.Add(&v.MorphLocalPosition)
+	copied.Position.Add(v.Position)
+	copied.MorphPosition.Add(v.MorphPosition)
+	copied.LocalPosition.Add(v.LocalPosition)
+	copied.MorphLocalPosition.Add(v.MorphLocalPosition)
 	copied.Rotation.Mul(v.Rotation)
 	copied.MorphRotation.Mul(v.MorphRotation)
 	copied.LocalRotation.Mul(v.LocalRotation)
 	copied.MorphLocalRotation.Mul(v.MorphLocalRotation)
-	copied.Scale.Add(&v.Scale)
-	copied.MorphScale.Add(&v.MorphScale)
-	copied.LocalScale.Add(&v.LocalScale)
-	copied.MorphLocalScale.Add(&v.MorphLocalScale)
+	copied.Scale.Add(v.Scale)
+	copied.MorphScale.Add(v.MorphScale)
+	copied.LocalScale.Add(v.LocalScale)
+	copied.MorphLocalScale.Add(v.MorphLocalScale)
 	copied.IkRotation.Mul(v.IkRotation)
 
 	return copied
 }
 
 func (v *BoneFrame) Copy() IBaseFrame {
+	position := v.Position.Copy()
+	morphPosition := v.MorphPosition.Copy()
+	localPosition := v.LocalPosition.Copy()
+	morphLocalPosition := v.MorphLocalPosition.Copy()
+	scale := v.Scale.Copy()
+	morphScale := v.MorphScale.Copy()
+	localScale := v.LocalScale.Copy()
+	morphLocalScale := v.MorphLocalScale.Copy()
+
 	copied := BoneFrame{
 		BaseFrame:          NewFrame(v.GetIndex()).(*BaseFrame),
-		Position:           v.Position.Copy(),
-		MorphPosition:      v.MorphPosition.Copy(),
-		LocalPosition:      v.LocalPosition.Copy(),
-		MorphLocalPosition: v.MorphLocalPosition.Copy(),
+		Position:           &position,
+		MorphPosition:      &morphPosition,
+		LocalPosition:      &localPosition,
+		MorphLocalPosition: &morphLocalPosition,
 		Rotation:           v.Rotation.Copy(),
 		MorphRotation:      v.MorphRotation.Copy(),
 		LocalRotation:      v.LocalRotation.Copy(),
 		MorphLocalRotation: v.MorphLocalRotation.Copy(),
-		Scale:              v.Scale.Copy(),
-		MorphScale:         v.MorphScale.Copy(),
-		LocalScale:         v.LocalScale.Copy(),
-		MorphLocalScale:    v.MorphLocalScale.Copy(),
+		Scale:              &scale,
+		MorphScale:         &morphScale,
+		LocalScale:         &localScale,
+		MorphLocalScale:    &morphLocalScale,
 		IkRotation:         v.IkRotation.Copy(),
 		Curves:             v.Curves.Copy(),
 	}

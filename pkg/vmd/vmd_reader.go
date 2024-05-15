@@ -180,19 +180,27 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
+		morphPosition := mmath.NewMVec3()
+		localPosition := mmath.NewMVec3()
+		morphLocalPosition := mmath.NewMVec3()
+		scale := mmath.NewMVec3()
+		morphScale := mmath.NewMVec3()
+		localScale := mmath.NewMVec3()
+		morphLocalScale := mmath.NewMVec3()
+
 		v := &BoneFrame{
 			BaseFrame:          NewFrame(i).(*BaseFrame),
-			MorphPosition:      mmath.NewMVec3(),
-			LocalPosition:      mmath.NewMVec3(),
-			MorphLocalPosition: mmath.NewMVec3(),
+			MorphPosition:      &morphPosition,
+			LocalPosition:      &localPosition,
+			MorphLocalPosition: &morphLocalPosition,
 			Rotation:           mmath.NewRotation(),
 			MorphRotation:      mmath.NewRotation(),
 			LocalRotation:      mmath.NewRotation(),
 			MorphLocalRotation: mmath.NewRotation(),
-			Scale:              mmath.NewMVec3(),
-			MorphScale:         mmath.NewMVec3(),
-			LocalScale:         mmath.NewMVec3(),
-			MorphLocalScale:    mmath.NewMVec3(),
+			Scale:              &scale,
+			MorphScale:         &morphScale,
+			LocalScale:         &localScale,
+			MorphLocalScale:    &morphLocalScale,
 			IkRotation:         mmath.NewRotation(),
 		}
 		v.Read = true
@@ -213,11 +221,12 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 		v.SetIndex(int(index))
 
 		// 位置X,Y,Z
-		v.Position, err = r.UnpackVec3()
+		position, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readBones.Position error: %v", i, err)
 			return err
 		}
+		v.Position = &position
 
 		// 回転X,Y,Z,W
 		qq, err := r.UnpackQuaternion()

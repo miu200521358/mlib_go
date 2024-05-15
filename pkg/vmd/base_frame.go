@@ -95,28 +95,31 @@ func NewBaseFrames[T IBaseFrame](newFunc func(index int) T) *BaseFrames[T] {
 	}
 }
 
-func (i *BaseFrames[T]) NewFrame(index int) T {
+func (fs *BaseFrames[T]) NewFrame(index int) T {
 	return NewFrame(index).(T)
 }
 
-func (i *BaseFrames[T]) Get(index int) T {
-	if _, ok := i.data[index]; ok {
-		return i.data[index]
+func (fs *BaseFrames[T]) Get(index int) T {
+	fs.lock.Lock()
+	defer fs.lock.Unlock()
+
+	if _, ok := fs.data[index]; ok {
+		return fs.data[index]
 	}
 
-	if len(i.data) == 0 {
-		return i.newFunc(index)
+	if len(fs.data) == 0 {
+		return fs.newFunc(index)
 	}
 
-	prevFrame := i.prevFrame(index)
-	nextFrame := i.nextFrame(index)
+	prevFrame := fs.prevFrame(index)
+	nextFrame := fs.nextFrame(index)
 	if nextFrame == prevFrame {
 		// 次のキーフレが無い場合、最大キーフレのコピーを返す
-		return i.Get(int(nextFrame)).Copy().(T)
+		return fs.Get(int(nextFrame)).Copy().(T)
 	}
 
-	prevF := i.Get(int(prevFrame))
-	nextF := i.Get(int(nextFrame))
+	prevF := fs.Get(int(prevFrame))
+	nextF := fs.Get(int(nextFrame))
 
 	// 該当キーフレが無い場合、補間結果を返す
 	return nextF.lerpFrame(prevF, index).(T)
@@ -144,10 +147,10 @@ func (fs *BaseFrames[T]) nextFrame(index int) int {
 	return nextFrame
 }
 
-func (i *BaseFrames[T]) List() []T {
-	list := make([]T, 0, i.RegisteredIndexes.Len())
+func (fs *BaseFrames[T]) List() []T {
+	list := make([]T, 0, fs.RegisteredIndexes.Len())
 
-	i.RegisteredIndexes.AscendRange(mcore.Int(0), mcore.Int(i.RegisteredIndexes.Max()), func(i llrb.Item) bool {
+	fs.RegisteredIndexes.AscendRange(mcore.Int(0), mcore.Int(fs.RegisteredIndexes.Max()), func(i llrb.Item) bool {
 		list = append(list, i.(T))
 		return true
 	})
@@ -155,9 +158,12 @@ func (i *BaseFrames[T]) List() []T {
 	return list
 }
 
-func (i *BaseFrames[T]) appendFrame(v T) {
-	i.RegisteredIndexes.ReplaceOrInsert(mcore.Int(v.GetIndex()))
-	i.data[v.GetIndex()] = v
+func (fs *BaseFrames[T]) appendFrame(v T) {
+	fs.lock.Lock()
+	defer fs.lock.Unlock()
+
+	fs.RegisteredIndexes.ReplaceOrInsert(mcore.Int(v.GetIndex()))
+	fs.data[v.GetIndex()] = v
 }
 
 func (fs *BaseFrames[T]) GetMaxFrame() int {
@@ -196,9 +202,6 @@ func (fs *BaseFrames[T]) Insert(f T) {
 }
 
 func (fs *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {
-	fs.lock.Lock()
-	defer fs.lock.Unlock()
-
 	if f.IsRegistered() {
 		if fs.RegisteredIndexes.Len() == 0 {
 			// フレームがない場合、何もしない

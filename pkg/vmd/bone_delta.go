@@ -7,34 +7,34 @@ import (
 )
 
 type BoneDelta struct {
-	BoneName                   string            // ボーン名
-	Frame                      int               // キーフレーム
-	GlobalMatrix               mmath.MMat4       // グローバル行列
-	LocalMatrix                mmath.MMat4       // ローカル行列
-	Position                   mmath.MVec3       // グローバル位置
-	FramePosition              mmath.MVec3       // キーフレ位置の変動量
-	FrameRotation              mmath.MQuaternion // キーフレ回転の変動量
-	FrameRotationWithoutEffect mmath.MQuaternion // キーフレ回転の変動量(付与親無視)
-	FrameScale                 mmath.MVec3       // キーフレスケールの変動量
-	Matrix                     mmath.MMat4       // ボーンの変動行列
+	BoneName                   string             // ボーン名
+	Frame                      int                // キーフレーム
+	GlobalMatrix               *mmath.MMat4       // グローバル行列
+	LocalMatrix                *mmath.MMat4       // ローカル行列
+	Position                   *mmath.MVec3       // グローバル位置
+	FramePosition              *mmath.MVec3       // キーフレ位置の変動量
+	FrameRotation              *mmath.MQuaternion // キーフレ回転の変動量
+	FrameRotationWithoutEffect *mmath.MQuaternion // キーフレ回転の変動量(付与親無視)
+	FrameScale                 *mmath.MVec3       // キーフレスケールの変動量
+	Matrix                     *mmath.MMat4       // ボーンの変動行列
 }
 
 func NewBoneDelta(
 	boneName string,
 	frame int,
-	globalMatrix, localMatrix mmath.MMat4,
-	framePosition mmath.MVec3,
-	frameRotation mmath.MQuaternion,
-	frameRotationWithoutEffect mmath.MQuaternion,
-	frameScale mmath.MVec3,
-	matrix mmath.MMat4,
+	globalMatrix, localMatrix *mmath.MMat4,
+	framePosition *mmath.MVec3,
+	frameRotation *mmath.MQuaternion,
+	frameRotationWithoutEffect *mmath.MQuaternion,
+	frameScale *mmath.MVec3,
+	matrix *mmath.MMat4,
 ) *BoneDelta {
 	return &BoneDelta{
 		BoneName:                   boneName,
 		Frame:                      frame,
 		GlobalMatrix:               globalMatrix,
 		LocalMatrix:                localMatrix,
-		Position:                   *globalMatrix.Translation(),
+		Position:                   globalMatrix.Translation(),
 		FramePosition:              framePosition,
 		FrameRotation:              frameRotation,
 		FrameRotationWithoutEffect: frameRotationWithoutEffect,
