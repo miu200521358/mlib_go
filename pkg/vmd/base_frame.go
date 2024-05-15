@@ -100,8 +100,8 @@ func (fs *BaseFrames[T]) NewFrame(index int) T {
 }
 
 func (fs *BaseFrames[T]) Get(index int) T {
-	fs.lock.Lock()
-	defer fs.lock.Unlock()
+	fs.lock.RLock()
+	defer fs.lock.RUnlock()
 
 	if _, ok := fs.data[index]; ok {
 		return fs.data[index]
