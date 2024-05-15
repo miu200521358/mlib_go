@@ -810,19 +810,19 @@ func (fs *BoneFrames) getAnimatedBoneNames(
 	boneNames []string,
 ) (map[string]int, map[int]string) {
 	// ボーン名の存在チェック用マップ
-	exists := make(map[int]int)
+	exists := make(map[string]string)
 
 	// 条件分岐の最適化
 	if len(boneNames) > 0 {
 		for _, boneName := range boneNames {
 			// ボーン名の追加
-			boneIndex := model.Bones.GetItemByName(boneName).Index
-			exists[boneIndex] = boneIndex
+			exists[boneName] = boneName
 
 			// 関連するボーンの追加
 			relativeBoneIndexes := model.Bones.GetItemByName(boneName).RelativeBoneIndexes
 			for _, index := range relativeBoneIndexes {
-				exists[index] = index
+				relativeBoneName := model.Bones.GetItem(index).Name
+				exists[relativeBoneName] = relativeBoneName
 			}
 		}
 
@@ -833,8 +833,7 @@ func (fs *BoneFrames) getAnimatedBoneNames(
 		n := 0
 		for k := range len(model.Bones.LayerSortedIndexes) {
 			boneName := model.Bones.LayerSortedIndexes[k]
-			boneIndex := model.Bones.GetItemByName(boneName).Index
-			if _, ok := exists[boneIndex]; ok {
+			if _, ok := exists[boneName]; ok {
 				resultBoneNames[boneName] = n
 				resultBoneIndexes[n] = boneName
 				n++
