@@ -423,6 +423,22 @@ func (b *Bones) GetLayerIndexes() []int {
 	return indexes
 }
 
+func (b *Bones) GetLayerIndexesByValues(boneIndexes []int) []int {
+	layerIndexes := make(LayerIndexes, 0)
+	for _, boneIndex := range b.GetIndexes() {
+		bone := b.GetItem(boneIndex)
+		layerIndexes = append(layerIndexes, LayerIndex{Layer: bone.Layer, Index: boneIndex})
+	}
+	sort.Sort(layerIndexes)
+
+	indexes := make([]int, len(layerIndexes))
+	for i, layerIndex := range layerIndexes {
+		indexes[i] = layerIndex.Index
+	}
+
+	return indexes
+}
+
 // 関連ボーンリストの取得
 func (b *Bones) getRelativeBoneIndexes(boneIndex int, parentBoneIndexes, relativeBoneIndexes []int) ([]int, []int) {
 

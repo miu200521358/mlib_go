@@ -810,19 +810,19 @@ func (fs *BoneFrames) getAnimatedBoneNames(
 	boneNames []string,
 ) (map[string]int, map[int]string) {
 	// ボーン名の存在チェック用マップ
-	exists := make(map[string]struct{})
+	exists := make(map[int]int)
 
 	// 条件分岐の最適化
 	if len(boneNames) > 0 {
 		for _, boneName := range boneNames {
 			// ボーン名の追加
-			exists[boneName] = struct{}{}
+			boneIndex := model.Bones.GetItemByName(boneName).Index
+			exists[boneIndex] = boneIndex
 
 			// 関連するボーンの追加
 			relativeBoneIndexes := model.Bones.GetItemByName(boneName).RelativeBoneIndexes
 			for _, index := range relativeBoneIndexes {
-				relativeBoneName := model.Bones.GetItem(index).Name
-				exists[relativeBoneName] = struct{}{}
+				exists[index] = index
 			}
 		}
 
@@ -831,11 +831,12 @@ func (fs *BoneFrames) getAnimatedBoneNames(
 
 		// 変形階層・ボーンINDEXでソート
 		n := 0
-		for _, boneIndex := range model.Bones.GetLayerIndexes() {
-			bone := model.Bones.GetItem(boneIndex)
-			if _, ok := exists[bone.Name]; ok {
-				resultBoneNames[bone.Name] = n
-				resultBoneIndexes[n] = bone.Name
+		for k := range len(model.Bones.LayerSortedIndexes) {
+			boneName := model.Bones.LayerSortedIndexes[k]
+			boneIndex := model.Bones.GetItemByName(boneName).Index
+			if _, ok := exists[boneIndex]; ok {
+				resultBoneNames[boneName] = n
+				resultBoneIndexes[n] = boneName
 				n++
 			}
 		}
