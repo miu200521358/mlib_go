@@ -4,6 +4,9 @@
 package mview
 
 import (
+	"math"
+	"runtime"
+	"sync"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -56,13 +59,35 @@ func (v *VBO) BindVertex(vertices []float32, vertexDeltas [][]float32) {
 	gl.BindBuffer(v.target, v.id)
 
 	if vertices != nil && vertexDeltas != nil {
+		chunkNum := runtime.NumCPU()
+
+		var wg sync.WaitGroup
+		wg.Add(chunkNum)
+
+		chunkSize := int(math.Ceil(float64(len(vertices)) / float64(chunkNum)))
+
 		// モーフ分の変動量を設定
-		for i, vd := range vertexDeltas {
-			offset := i*v.strideSize + (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3)
-			for j, d := range vd {
-				vertices[offset+j] = d
-			}
+		for chunkIndex := 0; chunkIndex < chunkNum; chunkIndex++ {
+			startIndex := chunkIndex * chunkSize
+			endIndex := (chunkIndex + 1) * chunkSize
+
+			go func(chunkIndex, startIndex, endIndex int) {
+				defer wg.Done()
+
+				for i := startIndex; i < endIndex; i++ {
+					if i >= len(vertexDeltas) {
+						break
+					}
+
+					offset := i*v.strideSize + (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3)
+					nextOffset := (i + 1) * v.strideSize
+
+					copy(vertices[offset:nextOffset], vertexDeltas[i])
+				}
+			}(chunkIndex, startIndex, endIndex)
 		}
+
+		wg.Wait()
 
 		gl.BufferData(v.target, v.size, gl.Ptr(vertices), gl.STATIC_DRAW)
 	} else {

@@ -4,6 +4,10 @@
 package mwidget
 
 import (
+	"math"
+	"runtime"
+	"sync"
+
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
@@ -38,13 +42,18 @@ func Draw(
 		t.SetFromOpenGLMatrix(&mat[0])
 		boneTransforms[i] = &t
 	}
-	// TODO: 並列化
-	for i, vd := range deltas.Morphs.Vertices.Data {
-		vertexDeltas[i] = vd.GL()
-	}
+
 	for i, md := range deltas.Morphs.Materials.Data {
 		materialDeltas[i] = md.Material
 	}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+		vertexDeltas = fetchVertexDeltas(model, deltas)
+	}()
 
 	updatePhysics(modelPhysics, model, boneMatrixes, boneTransforms, deltas, fno, elapsed, enablePhysics)
 	model.Meshes.Draw(shader, boneMatrixes, vertexDeltas, materialDeltas, windowIndex)
@@ -56,6 +65,31 @@ func Draw(
 	if isBoneDebug {
 		model.Bones.Draw(shader, globalMatrixes, windowIndex)
 	}
+}
+
+func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
+	vertexDeltas := make([][]float32, len(model.Vertices.Data))
+
+	var wg sync.WaitGroup
+	wg.Add(runtime.NumCPU())
+
+	chunkSize := int(math.Ceil(float64(len(model.Vertices.Data)) / float64(runtime.NumCPU())))
+	for chunkStart := 0; chunkStart < len(model.Vertices.Data); chunkStart += chunkSize {
+		chunkEnd := chunkStart + chunkSize
+		if chunkEnd > len(model.Vertices.Data) {
+			chunkEnd = len(model.Vertices.Data)
+		}
+
+		go func(chunkStart, chunkEnd int) {
+			defer wg.Done()
+			for i := chunkStart; i < chunkEnd; i++ {
+				vertexDeltas[i] = deltas.Morphs.Vertices.Data[i].GL()
+			}
+		}(chunkStart, chunkEnd)
+	}
+	wg.Wait()
+
+	return vertexDeltas
 }
 
 func updatePhysics(

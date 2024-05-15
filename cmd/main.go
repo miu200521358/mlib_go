@@ -12,6 +12,7 @@ import (
 
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
+	"github.com/pkg/profile"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
@@ -35,41 +36,10 @@ func init() {
 var resourceFiles embed.FS
 
 func main() {
-	// {
-	// 	// CPUプロファイル用のファイルを作成
-	// 	f, err := os.Create("cpu.pprof")
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	defer f.Close()
-
-	// 	// CPUプロファイリングを開始
-	// 	if err := pprof.StartCPUProfile(f); err != nil {
-	// 		panic(err)
-	// 	}
-	// 	defer pprof.StopCPUProfile()
-	// }
-
-	// {
-	// 	// go tool pprof cmd\main.go cmd\memory.pprof
-	// 	// メモリプロファイル用のファイルを作成
-	// 	f, err := os.Create("memory.pprof")
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	defer f.Close()
-	// 	runtime.GC()
-
-	// 	// ヒーププロファイリングを開始
-	// 	if err := pprof.WriteHeapProfile(f); err != nil {
-	// 		panic(err)
-	// 	}
-	// }
-
 	var mWindow *mwidget.MWindow
 	var err error
 
-	// defer mwidget.RecoverFromPanic(mWindow)
+	defer mwidget.RecoverFromPanic(mWindow)
 
 	mWindow, err = mwidget.NewMWindow(resourceFiles, true, 512, 768, getMenuItems)
 	mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
@@ -240,6 +210,9 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 			motionPlayer.SetEnabled(false)
 			motionPlayer.SetRange(0, float64(motion.GetMaxFrame()+1))
 			motionPlayer.SetValue(0)
+
+			defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+			// defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
 
 			mWindow.GetMainGlWindow().SetFrame(0)
 			mWindow.GetMainGlWindow().Play(true)
