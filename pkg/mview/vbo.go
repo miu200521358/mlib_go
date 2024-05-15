@@ -60,16 +60,7 @@ func (v *VBO) BindVertex(vertices []float32, vertexDeltas [][]float32) {
 
 		// モーフ分の変動量を設定
 		for i, vd := range vertexDeltas {
-			// vertexDeltas[i]が全て0でないかチェック
-			updateNeeded := false
-			for _, delta := range vd {
-				if delta != 0 {
-					updateNeeded = true
-					break
-				}
-			}
-
-			if updateNeeded {
+			if vd != nil {
 				// 必要な場合にのみ部分更新
 				offsetStride := (i*v.strideSize + vboVertexSize) * 4
 				gl.BufferSubData(v.target, offsetStride, len(vertexDeltas[i])*4, gl.Ptr(vertexDeltas[i]))

@@ -32,7 +32,6 @@ func Draw(
 	boneMatrixes := make([]*mgl32.Mat4, len(model.Bones.NameIndexes))
 	globalMatrixes := make([]*mmath.MMat4, len(model.Bones.NameIndexes))
 	boneTransforms := make([]*mbt.BtTransform, len(model.Bones.NameIndexes))
-	vertexDeltas := make([][]float32, len(model.Vertices.Data))
 	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))
 	for i, bone := range model.Bones.GetSortedData() {
 		mat := deltas.Bones.GetItem(bone.Name, fno).LocalMatrix.GL()
@@ -47,13 +46,7 @@ func Draw(
 		materialDeltas[i] = md.Material
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-
-	go func() {
-		defer wg.Done()
-		vertexDeltas = fetchVertexDeltas(model, deltas)
-	}()
+	vertexDeltas := fetchVertexDeltas(model, deltas)
 
 	updatePhysics(modelPhysics, model, boneMatrixes, boneTransforms, deltas, fno, elapsed, enablePhysics)
 	model.Meshes.Draw(shader, boneMatrixes, vertexDeltas, materialDeltas, windowIndex)
@@ -83,7 +76,13 @@ func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
 		go func(chunkStart, chunkEnd int) {
 			defer wg.Done()
 			for i := chunkStart; i < chunkEnd; i++ {
-				vertexDeltas[i] = deltas.Morphs.Vertices.Data[i].GL()
+				if !deltas.Morphs.Vertices.Data[i].Position.IsZero() ||
+					!deltas.Morphs.Vertices.Data[i].Uv.IsZero() ||
+					!deltas.Morphs.Vertices.Data[i].Uv1.IsZero() ||
+					!deltas.Morphs.Vertices.Data[i].AfterPosition.IsZero() {
+					// 必要な場合にのみ部分更新するよう設定
+					vertexDeltas[i] = deltas.Morphs.Vertices.Data[i].GL()
+				}
 			}
 		}(chunkStart, chunkEnd)
 	}
