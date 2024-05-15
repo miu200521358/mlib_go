@@ -882,12 +882,13 @@ func (fs *BoneFrames) getBoneMatrixes(
 					break
 				}
 				boneName := targetBoneIndexes[j]
+				bf := fs.GetItem(boneName).Get(frame)
 				// ボーンの移動位置、回転角度、拡大率を取得
-				positions[j] = fs.getPosition(frame, boneName, model, isCalcMorph, 0)
-				rotWithEffect, rotFk := fs.getRotation(frame, boneName, model, isCalcMorph, 0)
+				positions[j] = fs.getPosition(bf, frame, boneName, model, isCalcMorph, 0)
+				rotWithEffect, rotFk := fs.getRotation(bf, frame, boneName, model, isCalcMorph, 0)
 				rotations[j] = rotWithEffect.ToMat4()
 				quats[j] = rotFk
-				scales[j] = fs.getScale(frame, boneName, model, isCalcMorph)
+				scales[j] = fs.getScale(bf, frame, boneName, model, isCalcMorph)
 			}
 		}(i)
 	}
@@ -898,6 +899,7 @@ func (fs *BoneFrames) getBoneMatrixes(
 
 // 該当キーフレにおけるボーンの移動位置
 func (fs *BoneFrames) getPosition(
+	bf *BoneFrame,
 	frame int,
 	boneName string,
 	model *pmx.PmxModel,
@@ -910,7 +912,6 @@ func (fs *BoneFrames) getPosition(
 	}
 
 	bone := model.Bones.GetItemByName(boneName)
-	bf := fs.GetItem(boneName).Get(frame)
 
 	mat := mmath.NewMMat4()
 	if isCalcMorph {
@@ -950,7 +951,8 @@ func (fs *BoneFrames) getPositionWithEffect(
 
 	// 付与親が存在する場合、付与親の回転角度を掛ける
 	effectBone := model.Bones.GetItem(bone.EffectIndex)
-	posMat := fs.getPosition(frame, effectBone.Name, model, isCalcMorph, loop+1)
+	bf := fs.GetItem(effectBone.Name).Get(frame)
+	posMat := fs.getPosition(bf, frame, effectBone.Name, model, isCalcMorph, loop+1)
 
 	posMat[0][3] *= bone.EffectFactor
 	posMat[1][3] *= bone.EffectFactor
@@ -961,6 +963,7 @@ func (fs *BoneFrames) getPositionWithEffect(
 
 // 該当キーフレにおけるボーンの回転角度
 func (fs *BoneFrames) getRotation(
+	bf *BoneFrame,
 	frame int,
 	boneName string,
 	model *pmx.PmxModel,
@@ -977,7 +980,6 @@ func (fs *BoneFrames) getRotation(
 	bone := model.Bones.GetItemByName(boneName)
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
-	bf := fs.GetItem(boneName).Get(frame)
 	var rot *mmath.MQuaternion
 	if bf.IkRotation != nil && !bf.IkRotation.GetRadians().IsZero() {
 		// IK用回転を持っている場合、置き換え
@@ -1045,19 +1047,20 @@ func (fs *BoneFrames) getRotationWithEffect(
 
 	// 付与親が存在する場合、付与親の回転角度を掛ける
 	effectBone := model.Bones.GetItem(bone.EffectIndex)
-	rotWithEffect, _ := fs.getRotation(frame, effectBone.Name, model, isCalcMorph, loop+1)
+	bf := fs.GetItem(effectBone.Name).Get(frame)
+	rotWithEffect, _ := fs.getRotation(bf, frame, effectBone.Name, model, isCalcMorph, loop+1)
 
 	return rotWithEffect.MulScalar(bone.EffectFactor).Shorten()
 }
 
 // 該当キーフレにおけるボーンの拡大率
 func (fs *BoneFrames) getScale(
+	bf *BoneFrame,
 	frame int,
 	boneName string,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
 ) *mmath.MMat4 {
-	bf := fs.GetItem(boneName).Get(frame)
 	mat := mmath.NewMMat4()
 
 	if isCalcMorph {
