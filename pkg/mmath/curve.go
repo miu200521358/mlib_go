@@ -8,8 +8,8 @@ import (
 )
 
 type Curve struct {
-	Start *MVec2
-	End   *MVec2
+	Start MVec2
+	End   MVec2
 }
 
 const (
@@ -17,15 +17,15 @@ const (
 	CURVE_MAX = 127.0
 )
 
-func NewCurve() *Curve {
-	return &Curve{
-		Start: &MVec2{20.0, 20.0},
-		End:   &MVec2{107.0, 107.0},
+func NewCurve() Curve {
+	return Curve{
+		Start: MVec2{20.0, 20.0},
+		End:   MVec2{107.0, 107.0},
 	}
 }
 
 // Copy
-func (v *Curve) Copy() *Curve {
+func (v *Curve) Copy() Curve {
 	copied := NewCurve()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied
@@ -34,10 +34,7 @@ func (v *Curve) Copy() *Curve {
 func (v *Curve) Normalize(begin, finish *MVec2) {
 	diff := finish.Subed(begin)
 
-	v.Start = v.Start.Sub(begin)
-	v.Start = v.Start.Div(diff)
-	v.Start = v.Start.MulScalar(CURVE_MAX)
-	v.Start = v.Start.Round()
+	v.Start = *v.Start.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
 
 	if v.Start.GetX() < 0 {
 		v.Start.SetX(0)
@@ -51,10 +48,7 @@ func (v *Curve) Normalize(begin, finish *MVec2) {
 		v.Start.SetY(CURVE_MAX)
 	}
 
-	v.End = v.End.Sub(begin)
-	v.End = v.End.Div(diff)
-	v.End = v.End.MulScalar(CURVE_MAX)
-	v.End = v.End.Round()
+	v.End = *v.End.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
 
 	if v.End.GetX() < 0 {
 		v.End.SetX(0)
@@ -75,7 +69,7 @@ func (v *Curve) Normalize(begin, finish *MVec2) {
 // https://edvakf.hatenadiary.org/entry/20111016/1318716097
 // Evaluate 補間曲線を求めます。
 // return x（計算キーフレ時点のX値）, y（計算キーフレ時点のY値）, t（計算キーフレまでの変化量）
-func Evaluate(curve *Curve, start, now, end int) (float64, float64, float64) {
+func Evaluate(curve Curve, start, now, end int) (float64, float64, float64) {
 	if (now-start) == 0.0 || (end-start) == 0.0 {
 		return 0.0, 0.0, 0.0
 	}
@@ -135,7 +129,7 @@ func newton(x1, x2, x, t0, eps, err float64) float64 {
 }
 
 // SplitCurve 補間曲線を指定キーフレで前後に分割する
-func SplitCurve(curve *Curve, start, now, end int) (*Curve, *Curve) {
+func SplitCurve(curve Curve, start, now, end int) (Curve, Curve) {
 	if (now-start) == 0 || (end-start) == 0 {
 		return NewCurve(), NewCurve()
 	}
@@ -172,15 +166,15 @@ func SplitCurve(curve *Curve, start, now, end int) (*Curve, *Curve) {
 	iJ := iHt1.Added(iIt2)
 
 	// 新たな4つのベジェ曲線の制御点は、A側がAEHJ、C側がJIGDとなる。
-	startCurve := &Curve{
-		Start: iE,
-		End:   iH,
+	startCurve := Curve{
+		Start: *iE,
+		End:   *iH,
 	}
 	startCurve.Normalize(iA, iJ)
 
-	endCurve := &Curve{
-		Start: iI,
-		End:   iG,
+	endCurve := Curve{
+		Start: *iI,
+		End:   *iG,
 	}
 	endCurve.Normalize(iJ, iD)
 
@@ -211,7 +205,7 @@ func Bezier(t float64, p0, p1, p2, p3 *MVec2) *MVec2 {
 
 // NewCurveFromValues calculates the control points of a cubic Bezier curve
 // that best fits a given set of y-values.
-func NewCurveFromValues(values []float64) *Curve {
+func NewCurveFromValues(values []float64) Curve {
 	n := len(values)
 	if n <= 2 {
 		return NewCurve()
@@ -272,9 +266,9 @@ func NewCurveFromValues(values []float64) *Curve {
 	}
 
 	// Update p1 and p2 with optimized values
-	c := &Curve{
-		Start: &MVec2{result.X[0], result.X[1]},
-		End:   &MVec2{result.X[2], result.X[3]},
+	c := Curve{
+		Start: MVec2{result.X[0], result.X[1]},
+		End:   MVec2{result.X[2], result.X[3]},
 	}
 	c.Normalize(p0, p3)
 

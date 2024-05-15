@@ -179,7 +179,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		v := NewBoneFrame(0)
+		v := NewBoneFrame(i)
 		v.Read = true
 
 		// ボーン名
@@ -210,7 +210,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 			mlog.E("[%d] readBones.Quaternion error: %v", i, err)
 			return err
 		}
-		v.Rotation.SetQuaternion(qq)
+		v.Rotation.SetQuaternion(&qq)
 
 		// 補間曲線
 		curves, err := r.UnpackBytes(64)
@@ -306,7 +306,7 @@ func (r *VmdMotionReader) readCameras(motion *VmdMotion) error {
 			mlog.E("[%d] readCameras.Degrees error: %v", i, err)
 			return err
 		}
-		v.Rotation.SetDegrees(degrees)
+		v.Rotation.SetDegrees(&degrees)
 
 		// 補間曲線
 		curves, err := r.UnpackBytes(24)

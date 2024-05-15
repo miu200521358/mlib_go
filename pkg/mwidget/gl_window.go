@@ -397,9 +397,9 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 			yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
 
 			// カメラの向きに基づいて移動方向を計算
-			forward := w.Shader.LookAtCenterPosition.Subed(w.Shader.CameraPosition).Normalize()
+			forward := w.Shader.LookAtCenterPosition.Subed(w.Shader.CameraPosition)
 			right := forward.Cross(mmath.MVec3UnitY).Normalize()
-			up := right.Cross(forward).Normalize()
+			up := right.Cross(forward.Normalize()).Normalize()
 
 			// 上下移動のベクトルを計算
 			upMovement := up.MulScalar(-yOffset) // Y軸が上向きなので、マウスのY軸移動は逆にする

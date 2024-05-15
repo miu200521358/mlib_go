@@ -6,10 +6,10 @@ import (
 )
 
 type VertexMorphDelta struct {
-	Position      *mmath.MVec3
-	Uv            *mmath.MVec2
-	Uv1           *mmath.MVec2
-	AfterPosition *mmath.MVec3
+	Position      mmath.MVec3
+	Uv            mmath.MVec2
+	Uv1           mmath.MVec2
+	AfterPosition mmath.MVec3
 }
 
 func NewVertexMorphDelta() *VertexMorphDelta {

@@ -121,11 +121,11 @@ func (fs *MorphNameFrames) AnimateBone(
 			delta.MorphPosition.Add(offset.Position.MuledScalar(mf.Ratio))
 			delta.MorphLocalPosition.Add(offset.LocalPosition.MuledScalar(mf.Ratio))
 			deltaRad := offset.Rotation.GetRadians().MuledScalar(mf.Ratio)
-			delta.MorphRotation.SetQuaternion(delta.MorphRotation.GetQuaternion().Muled(
-				mmath.NewMQuaternionFromRadians(deltaRad.GetX(), deltaRad.GetY(), deltaRad.GetZ())))
+			mr := mmath.NewMQuaternionFromRadians(deltaRad.GetX(), deltaRad.GetY(), deltaRad.GetZ())
+			delta.MorphRotation.SetQuaternion(delta.MorphRotation.GetQuaternion().Muled(&mr))
 			deltaLocalRad := offset.LocalRotation.GetRadians().MuledScalar(mf.Ratio)
-			delta.MorphLocalRotation.SetQuaternion(delta.MorphLocalRotation.GetQuaternion().Muled(
-				mmath.NewMQuaternionFromRadians(deltaLocalRad.GetX(), deltaLocalRad.GetY(), deltaLocalRad.GetZ())))
+			mlr := mmath.NewMQuaternionFromRadians(deltaLocalRad.GetX(), deltaLocalRad.GetY(), deltaLocalRad.GetZ())
+			delta.MorphLocalRotation.SetQuaternion(delta.MorphLocalRotation.GetQuaternion().Muled(&mlr))
 			delta.MorphScale.Add(offset.Scale.MuledScalar(mf.Ratio))
 			delta.MorphLocalScale.Add(offset.LocalScale.MuledScalar(mf.Ratio))
 		}

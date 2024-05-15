@@ -6,7 +6,6 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
-	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
@@ -29,8 +28,8 @@ var (
 
 type MVec2 mgl64.Vec2
 
-func NewMVec2() *MVec2 {
-	return &MVec2{}
+func NewMVec2() MVec2 {
+	return MVec2{}
 }
 
 // GetX returns the value of the X coordinate
@@ -379,10 +378,8 @@ func (v *MVec2) Rotate90DegRight() *MVec2 {
 }
 
 // Copy
-func (v *MVec2) Copy() *MVec2 {
-	copied := NewMVec2()
-	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
-	return copied
+func (v *MVec2) Copy() MVec2 {
+	return MVec2{v.GetX(), v.GetY()}
 }
 
 // Vector

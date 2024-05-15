@@ -3,13 +3,13 @@ package vmd
 import "github.com/miu200521358/mlib_go/pkg/mmath"
 
 type CameraCurves struct {
-	TranslateX  *mmath.Curve // 移動X
-	TranslateY  *mmath.Curve // 移動Y
-	TranslateZ  *mmath.Curve // 移動Z
-	Rotate      *mmath.Curve // 回転
-	Distance    *mmath.Curve // 距離
-	ViewOfAngle *mmath.Curve // 視野角
-	values      []byte       // 補間曲線の値
+	TranslateX  mmath.Curve // 移動X
+	TranslateY  mmath.Curve // 移動Y
+	TranslateZ  mmath.Curve // 移動Z
+	Rotate      mmath.Curve // 回転
+	Distance    mmath.Curve // 距離
+	ViewOfAngle mmath.Curve // 視野角
+	values      []byte      // 補間曲線の値
 }
 
 func NewCameraCurves() *CameraCurves {

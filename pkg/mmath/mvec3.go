@@ -6,7 +6,6 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
-	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
@@ -42,8 +41,8 @@ var (
 
 type MVec3 mgl64.Vec3
 
-func NewMVec3() *MVec3 {
-	return &MVec3{}
+func NewMVec3() MVec3 {
+	return MVec3{}
 }
 
 // GetX returns the value of the X coordinate
@@ -245,8 +244,8 @@ func (v *MVec3) Invert() *MVec3 {
 }
 
 // Inverted ベクトルの各要素の符号を反転した結果を返します (-v)
-func (v *MVec3) Inverted() *MVec3 {
-	return &MVec3{-v[0], -v[1], -v[2]}
+func (v *MVec3) Inverted() MVec3 {
+	return MVec3{-v[0], -v[1], -v[2]}
 }
 
 // Abs ベクトルの各要素の絶対値を返します
@@ -258,8 +257,8 @@ func (v *MVec3) Abs() *MVec3 {
 }
 
 // Absed ベクトルの各要素の絶対値を返します
-func (v *MVec3) Absed() *MVec3 {
-	return &MVec3{math.Abs(v[0]), math.Abs(v[1]), math.Abs(v[2])}
+func (v *MVec3) Absed() MVec3 {
+	return MVec3{math.Abs(v[0]), math.Abs(v[1]), math.Abs(v[2])}
 }
 
 // Hash ベクトルのハッシュ値を計算します
@@ -294,10 +293,10 @@ func (v *MVec3) Normalize() *MVec3 {
 }
 
 // Normalized ベクトルを正規化した結果を返します
-func (v *MVec3) Normalized() *MVec3 {
-	vec := *v
+func (v *MVec3) Normalized() MVec3 {
+	vec := MVec3{v[0], v[1], v[2]}
 	vec.Normalize()
-	return &vec
+	return vec
 }
 
 // Angle ベクトルの角度(ラジアン角度)を返します
@@ -376,10 +375,10 @@ func (v *MVec3) Clamp(min, max *MVec3) *MVec3 {
 }
 
 // Clamped ベクトルの各要素を指定された範囲内にクランプした結果を返します
-func (v *MVec3) Clamped(min, max *MVec3) *MVec3 {
-	result := *v
+func (v *MVec3) Clamped(min, max *MVec3) MVec3 {
+	result := MVec3{v.GetX(), v.GetY(), v.GetZ()}
 	result.Clamp(min, max)
-	return &result
+	return result
 }
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
@@ -388,17 +387,15 @@ func (v *MVec3) Clamp01() *MVec3 {
 }
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します
-func (v *MVec3) Clamped01() *MVec3 {
-	result := *v
+func (v *MVec3) Clamped01() MVec3 {
+	result := MVec3{v.GetX(), v.GetY(), v.GetZ()}
 	result.Clamp01()
-	return &result
+	return result
 }
 
 // Copy
-func (v *MVec3) Copy() *MVec3 {
-	copied := NewMVec3()
-	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
-	return copied
+func (v *MVec3) Copy() MVec3 {
+	return MVec3{v.GetX(), v.GetY(), v.GetZ()}
 }
 
 // Vector
@@ -491,7 +488,7 @@ func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
 	}
 
 	// ローカルY軸の方向ベクトル
-	yAxis := zAxis.Cross(xAxis)
+	yAxis := zAxis.Cross(&xAxis)
 	normYAxis := yAxis.Length()
 	if normYAxis == 0 {
 		return NewMMat4()
@@ -581,7 +578,7 @@ func GetVertexLocalPositions(vertexPositions []*MVec3, startBonePosition *MVec3,
 	for i := 0; i < vertexSize; i++ {
 		vertexPosition := vertexPositions[i]
 		subedVertexPosition := vertexPosition.Subed(startBonePosition)
-		projection := subedVertexPosition.Project(boneDirection)
+		projection := subedVertexPosition.Project(&boneDirection)
 		localPosition := endBonePosition.Added(projection)
 		localPositions[i] = localPosition
 	}
