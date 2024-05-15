@@ -714,14 +714,14 @@ func (fs *BoneFrames) calcBoneMatrixes(
 	positions, rotations, scales []*mmath.MMat4,
 	quatsWithoutEffect []*mmath.MQuaternion,
 ) *BoneDeltas {
-	matrixes := make([]*mmath.MMat4, 0, len(targetBoneIndexes))
-	resultMatrixes := make([]*mmath.MMat4, 0, len(targetBoneIndexes))
+	matrixes := make([]*mmath.MMat4, len(targetBoneIndexes))
+	resultMatrixes := make([]*mmath.MMat4, len(targetBoneIndexes))
 	boneCount := len(targetBoneNames)
 
 	// 最初にフレーム数*ボーン数分のスライスを確保
 	for i := 0; i < len(targetBoneIndexes); i++ {
-		matrixes = append(matrixes, mmath.NewMMat4())
-		resultMatrixes = append(resultMatrixes, mmath.NewMMat4())
+		matrixes[i] = mmath.NewMMat4()
+		resultMatrixes[i] = mmath.NewMMat4()
 	}
 
 	// ボーンを一定件数ごとに並列処理（件数は変数保持）
@@ -862,11 +862,11 @@ func (fs *BoneFrames) getBoneMatrixes(
 	quats := make([]*mmath.MQuaternion, boneCount)
 
 	for i := 0; i < boneCount; i++ {
-		positions = append(positions, mmath.NewMMat4())
-		rotations = append(rotations, mmath.NewMMat4())
-		scales = append(scales, mmath.NewMMat4())
+		positions[i] = mmath.NewMMat4()
+		rotations[i] = mmath.NewMMat4()
+		scales[i] = mmath.NewMMat4()
 		qq := mmath.NewMQuaternion()
-		quats = append(quats, &qq)
+		quats[i] = &qq
 	}
 
 	// ボーンを一定件数ごとに並列処理

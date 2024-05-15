@@ -408,10 +408,10 @@ func (b *Bones) GetInitializeLocalPosition(boneIndex int) *mmath.MVec3 {
 }
 
 func (b *Bones) GetLayerIndexes() []int {
-	layerIndexes := make(LayerIndexes, 0)
-	for _, boneIndex := range b.GetIndexes() {
+	layerIndexes := make(LayerIndexes, len(b.NameIndexes))
+	for i, boneIndex := range b.GetIndexes() {
 		bone := b.GetItem(boneIndex)
-		layerIndexes = append(layerIndexes, LayerIndex{Layer: bone.Layer, Index: boneIndex})
+		layerIndexes[i] = LayerIndex{Layer: bone.Layer, Index: boneIndex}
 	}
 	sort.Sort(layerIndexes)
 

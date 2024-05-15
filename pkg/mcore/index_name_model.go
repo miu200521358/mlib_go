@@ -1,7 +1,7 @@
 package mcore
 
 import (
-	"slices"
+	"sort"
 
 	"github.com/jinzhu/copier"
 )
@@ -85,11 +85,13 @@ func (c *IndexNameModels[T]) Append(value T) {
 }
 
 func (c *IndexNameModels[T]) GetIndexes() []int {
-	indexes := make([]int, 0, len(c.NameIndexes))
-	for _, value := range c.NameIndexes {
-		indexes = append(indexes, value)
+	indexes := make([]int, len(c.NameIndexes))
+	i := 0
+	for _, index := range c.NameIndexes {
+		indexes[i] = index
+		i++
 	}
-	slices.Sort(indexes)
+	sort.Ints(indexes)
 	return indexes
 }
 
