@@ -3,10 +3,11 @@ package main
 import (
 	"log"
 
+	"github.com/pkg/profile"
+
 	"github.com/miu200521358/mlib_go/pkg/mutils/miter"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
-	"github.com/pkg/profile"
 )
 
 func main() {
@@ -40,10 +41,6 @@ func main() {
 	// 	}
 	// }
 
-	// // CPUプロファイル
-	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
-
-	// メモリプロファイル
 	defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
 
 	// --------------------------------------------
