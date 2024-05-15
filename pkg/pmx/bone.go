@@ -601,7 +601,7 @@ func (b *Bones) setup() {
 	}
 
 	// 変形階層・ボーンINDEXでソート
-	b.LayerSortedIndexes = make(map[int]string, len(b.Data))
+	b.LayerSortedBones = make(map[int]*Bone, len(b.Data))
 	b.LayerSortedNames = make(map[string]int, len(b.Data))
 	layerIndexes := b.GetLayerIndexes()
 
@@ -609,7 +609,7 @@ func (b *Bones) setup() {
 	for _, boneIndex := range layerIndexes {
 		bone := b.GetItem(boneIndex)
 		b.LayerSortedNames[bone.Name] = i
-		b.LayerSortedIndexes[i] = bone.Name
+		b.LayerSortedBones[i] = bone
 		i++
 	}
 

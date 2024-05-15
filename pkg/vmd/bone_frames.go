@@ -210,10 +210,10 @@ func (fs *BoneFrames) calcIk(
 	// IK関連の行列を一括計算
 	ikMatrixes := fs.Animate(frame, model, []string{ikBone.Name}, false, isisCalcMorph)
 	// 処理対象ボーン名取得
-	effectorTargetBoneNames, effectorTargetBoneIndexes := fs.getAnimatedBoneNames(model, []string{effectorBone.Name})
+	effectorTargetBoneNames, effectorTargetBones := fs.getAnimatedBoneNames(model, []string{effectorBone.Name})
 	// エフェクタボーンの関連ボーンの初期値を取得
 	positions, rotations, scales, quatsWithoutEffect :=
-		fs.getBoneMatrixes(frame, model, effectorTargetBoneNames, effectorTargetBoneIndexes, isisCalcMorph)
+		fs.getBoneMatrixes(frame, model, effectorTargetBoneNames, effectorTargetBones, isisCalcMorph)
 	// 中断FLGが入ったか否か
 	aborts := make([]bool, len(ikBone.Ik.Links))
 
@@ -284,7 +284,7 @@ ikLoop:
 				frame,
 				model,
 				effectorTargetBoneNames,
-				effectorTargetBoneIndexes,
+				effectorTargetBones,
 				positions,
 				rotations,
 				scales,
@@ -704,16 +704,16 @@ func (fs *BoneFrames) calcBoneMatrixes(
 	frame int,
 	model *pmx.PmxModel,
 	targetBoneNames map[string]int,
-	targetBoneIndexes map[int]string,
+	targetBones map[int]*pmx.Bone,
 	positions, rotations, scales []*mmath.MMat4,
 	quatsWithoutEffect []*mmath.MQuaternion,
 ) *BoneDeltas {
-	matrixes := make([]*mmath.MMat4, len(targetBoneIndexes))
-	resultMatrixes := make([]*mmath.MMat4, len(targetBoneIndexes))
+	matrixes := make([]*mmath.MMat4, len(targetBones))
+	resultMatrixes := make([]*mmath.MMat4, len(targetBones))
 	boneCount := len(targetBoneNames)
 
 	// 最初にフレーム数*ボーン数分のスライスを確保
-	for i := 0; i < len(targetBoneIndexes); i++ {
+	for i := 0; i < len(targetBones); i++ {
 		matrixes[i] = mmath.NewMMat4()
 		resultMatrixes[i] = mmath.NewMMat4()
 	}
@@ -721,8 +721,7 @@ func (fs *BoneFrames) calcBoneMatrixes(
 	// ボーンを一定件数ごとに並列処理（件数は変数保持）
 	for i := 0; i < boneCount; i++ {
 		// 各ボーンの座標変換行列×逆BOf行列
-		boneName := targetBoneIndexes[i]
-		bone := model.Bones.GetItemByName(boneName)
+		bone := targetBones[i]
 		// 逆BOf行列(初期姿勢行列)
 		matrixes[i].Mul(bone.RevertOffsetMatrix)
 		// 位置
@@ -737,8 +736,7 @@ func (fs *BoneFrames) calcBoneMatrixes(
 
 	// ボーンを一定件数ごとに並列処理（件数は変数保持）
 	for i := 0; i < boneCount; i++ {
-		boneName := targetBoneIndexes[i]
-		bone := model.Bones.GetItemByName(boneName)
+		bone := targetBones[i]
 		localMatrix := mmath.NewMMat4()
 		for _, l := range bone.ParentBoneIndexes {
 			// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
@@ -754,8 +752,8 @@ func (fs *BoneFrames) calcBoneMatrixes(
 		resultMatrixes[i] = localMatrix
 	}
 
-	for i := 0; i < len(targetBoneIndexes); i++ {
-		bone := model.Bones.GetItemByName(targetBoneIndexes[i])
+	for i := 0; i < len(targetBones); i++ {
+		bone := targetBones[i]
 		localMatrix := resultMatrixes[i]
 		// 初期位置行列を掛けてグローバル行列を作成
 		boneDeltas.SetItem(bone.Name, frame, NewBoneDelta(
@@ -778,7 +776,7 @@ func (fs *BoneFrames) calcBoneMatrixes(
 func (fs *BoneFrames) getAnimatedBoneNames(
 	model *pmx.PmxModel,
 	boneNames []string,
-) (map[string]int, map[int]string) {
+) (map[string]int, map[int]*pmx.Bone) {
 	// ボーン名の存在チェック用マップ
 	exists := make(map[string]string)
 
@@ -797,24 +795,24 @@ func (fs *BoneFrames) getAnimatedBoneNames(
 		}
 
 		resultBoneNames := make(map[string]int)
-		resultBoneIndexes := make(map[int]string)
+		resultBones := make(map[int]*pmx.Bone)
 
 		// 変形階層・ボーンINDEXでソート
 		n := 0
-		for k := range len(model.Bones.LayerSortedIndexes) {
-			boneName := model.Bones.LayerSortedIndexes[k]
-			if _, ok := exists[boneName]; ok {
-				resultBoneNames[boneName] = n
-				resultBoneIndexes[n] = boneName
+		for k := range len(model.Bones.LayerSortedBones) {
+			bone := model.Bones.LayerSortedBones[k]
+			if _, ok := exists[bone.Name]; ok {
+				resultBoneNames[bone.Name] = n
+				resultBones[n] = bone
 				n++
 			}
 		}
 
-		return resultBoneNames, resultBoneIndexes
+		return resultBoneNames, resultBones
 	}
 
 	// 全ボーンが対象の場合
-	return model.Bones.LayerSortedNames, model.Bones.LayerSortedIndexes
+	return model.Bones.LayerSortedNames, model.Bones.LayerSortedBones
 }
 
 // ボーン変形行列を求める
@@ -822,7 +820,7 @@ func (fs *BoneFrames) getBoneMatrixes(
 	frame int,
 	model *pmx.PmxModel,
 	targetBoneNames map[string]int,
-	targetBoneIndexes map[int]string,
+	targetBones map[int]*pmx.Bone,
 	isCalcMorph bool,
 ) ([]*mmath.MMat4, []*mmath.MMat4, []*mmath.MMat4, []*mmath.MQuaternion) {
 	boneCount := len(targetBoneNames)
@@ -841,14 +839,14 @@ func (fs *BoneFrames) getBoneMatrixes(
 
 	// ボーンを一定件数ごとに並列処理
 	for i := 0; i < boneCount; i++ {
-		boneName := targetBoneIndexes[i]
-		bf := fs.GetItem(boneName).Get(frame)
+		bone := targetBones[i]
+		bf := fs.GetItem(bone.Name).Get(frame)
 		// ボーンの移動位置、回転角度、拡大率を取得
-		positions[i] = fs.getPosition(bf, frame, boneName, model, isCalcMorph, 0)
-		rotWithEffect, rotFk := fs.getRotation(bf, frame, boneName, model, isCalcMorph, 0)
+		positions[i] = fs.getPosition(bf, frame, bone, model, isCalcMorph, 0)
+		rotWithEffect, rotFk := fs.getRotation(bf, frame, bone, model, isCalcMorph, 0)
 		rotations[i] = rotWithEffect.ToMat4()
 		quats[i] = rotFk
-		scales[i] = fs.getScale(bf, frame, boneName, model, isCalcMorph)
+		scales[i] = fs.getScale(bf, frame, bone, model, isCalcMorph)
 	}
 
 	return positions, rotations, scales, quats
@@ -858,7 +856,7 @@ func (fs *BoneFrames) getBoneMatrixes(
 func (fs *BoneFrames) getPosition(
 	bf *BoneFrame,
 	frame int,
-	boneName string,
+	bone *pmx.Bone,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
 	loop int,
@@ -868,8 +866,6 @@ func (fs *BoneFrames) getPosition(
 		return mmath.NewMMat4()
 	}
 
-	bone := model.Bones.GetItemByName(boneName)
-
 	mat := mmath.NewMMat4()
 	if isCalcMorph {
 		mat.Mul(bf.MorphPosition.ToMat4())
@@ -878,7 +874,7 @@ func (fs *BoneFrames) getPosition(
 
 	if bone.IsEffectorTranslation() {
 		// 外部親変形ありの場合、外部親変形行列を掛ける
-		effectPosMat := fs.getPositionWithEffect(frame, bone.Index, model, isCalcMorph, loop+1)
+		effectPosMat := fs.getPositionWithEffect(frame, bone, model, isCalcMorph, loop+1)
 		mat.Mul(effectPosMat)
 	}
 
@@ -888,13 +884,11 @@ func (fs *BoneFrames) getPosition(
 // 付与親を加味した移動位置
 func (fs *BoneFrames) getPositionWithEffect(
 	frame int,
-	boneIndex int,
+	bone *pmx.Bone,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
 	loop int,
 ) *mmath.MMat4 {
-	bone := model.Bones.GetItem(boneIndex)
-
 	if bone.EffectFactor == 0 || loop > 20 {
 		// 付与率が0の場合、常に0になる
 		// MMDエンジン対策で無限ループを避ける
@@ -909,7 +903,7 @@ func (fs *BoneFrames) getPositionWithEffect(
 	// 付与親が存在する場合、付与親の回転角度を掛ける
 	effectBone := model.Bones.GetItem(bone.EffectIndex)
 	bf := fs.GetItem(effectBone.Name).Get(frame)
-	posMat := fs.getPosition(bf, frame, effectBone.Name, model, isCalcMorph, loop+1)
+	posMat := fs.getPosition(bf, frame, effectBone, model, isCalcMorph, loop+1)
 
 	posMat[0][3] *= bone.EffectFactor
 	posMat[1][3] *= bone.EffectFactor
@@ -922,7 +916,7 @@ func (fs *BoneFrames) getPositionWithEffect(
 func (fs *BoneFrames) getRotation(
 	bf *BoneFrame,
 	frame int,
-	boneName string,
+	bone *pmx.Bone,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
 	loop int,
@@ -933,8 +927,6 @@ func (fs *BoneFrames) getRotation(
 		q2 := mmath.NewMQuaternion()
 		return &q1, &q2
 	}
-
-	bone := model.Bones.GetItemByName(boneName)
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
 	var rot *mmath.MQuaternion
@@ -966,7 +958,7 @@ func (fs *BoneFrames) getRotation(
 	var rotWithEffect *mmath.MQuaternion
 	if bone.IsEffectorRotation() {
 		// 外部親変形ありの場合、外部親変形行列を掛ける
-		rotWithEffect = rot.Muled(fs.getRotationWithEffect(frame, bone.Index, model, isCalcMorph, loop+1))
+		rotWithEffect = rot.Muled(fs.getRotationWithEffect(frame, bone, model, isCalcMorph, loop+1))
 	} else {
 		rotWithEffect = rot
 	}
@@ -982,13 +974,11 @@ func (fs *BoneFrames) getRotation(
 // 付与親を加味した回転角度
 func (fs *BoneFrames) getRotationWithEffect(
 	frame int,
-	boneIndex int,
+	bone *pmx.Bone,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
 	loop int,
 ) *mmath.MQuaternion {
-	bone := model.Bones.GetItem(boneIndex)
-
 	if bone.EffectFactor == 0 || loop > 20 {
 		// 付与率が0の場合、常に0になる
 		// MMDエンジン対策で無限ループを避ける
@@ -1005,7 +995,7 @@ func (fs *BoneFrames) getRotationWithEffect(
 	// 付与親が存在する場合、付与親の回転角度を掛ける
 	effectBone := model.Bones.GetItem(bone.EffectIndex)
 	bf := fs.GetItem(effectBone.Name).Get(frame)
-	rotWithEffect, _ := fs.getRotation(bf, frame, effectBone.Name, model, isCalcMorph, loop+1)
+	rotWithEffect, _ := fs.getRotation(bf, frame, effectBone, model, isCalcMorph, loop+1)
 
 	return rotWithEffect.MulScalar(bone.EffectFactor).Shorten()
 }
@@ -1014,7 +1004,7 @@ func (fs *BoneFrames) getRotationWithEffect(
 func (fs *BoneFrames) getScale(
 	bf *BoneFrame,
 	frame int,
-	boneName string,
+	bone *pmx.Bone,
 	model *pmx.PmxModel,
 	isCalcMorph bool,
 ) *mmath.MMat4 {
