@@ -40,9 +40,9 @@ func NewMeshes(
 		faces = append(faces, uint32(vertices[0]))
 	}
 
-	meshes := make([]*Mesh, 0, len(model.Materials.GetIndexes()))
+	meshes := make([]*Mesh, len(model.Materials.GetIndexes()))
 	prevVerticesCount := 0
-	for _, m := range model.Materials.GetSortedData() {
+	for i, m := range model.Materials.GetSortedData() {
 		var texture *Texture
 		if m.TextureIndex != -1 && model.Textures.Contains(m.TextureIndex) {
 			texture = model.Textures.GetItem(m.TextureIndex)
@@ -83,7 +83,7 @@ func NewMeshes(
 			materialGl,
 			prevVerticesCount,
 		)
-		meshes = append(meshes, mesh)
+		meshes[i] = mesh
 
 		prevVerticesCount += m.VerticesCount
 	}
@@ -127,17 +127,17 @@ func (m *Meshes) Draw(
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	for i, mesh := range m.meshes {
-		m.vao.Bind()
-		m.vbo.BindVertex(m.vertices, vertexDeltas)
+	m.vao.Bind()
+	m.vbo.BindVertex(m.vertices, vertexDeltas)
 
+	for i, mesh := range m.meshes {
 		shader.UseModelProgram()
 		mesh.DrawModel(shader, windowIndex, boneMatrixes, materialDeltas[i])
 		shader.Unuse()
-
-		m.vbo.Unbind()
-		m.vao.Unbind()
 	}
+
+	m.vbo.Unbind()
+	m.vao.Unbind()
 
 	gl.Disable(gl.BLEND)
 	gl.Disable(gl.DEPTH_TEST)
