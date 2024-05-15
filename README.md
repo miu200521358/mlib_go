@@ -101,7 +101,7 @@ go get -u golang.org/x/image
 1. `go get github.com/goccy/go-graphviz/cmd/dot`
 2. `go install github.com/goccy/go-graphviz`
 3. `go tool pprof -http=:8080 cpu.pprof`
-4. `go tool pprof -http=:8081 memory.pprof`
+4. `go tool pprof -http=:8081 mem.pprof`
 
 ## bullet
 
