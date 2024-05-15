@@ -6,6 +6,7 @@ import (
 	"golang.org/x/text/encoding/japanese"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
@@ -179,7 +180,21 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		v := NewBoneFrame(i)
+		v := &BoneFrame{
+			BaseFrame:          NewFrame(i).(*BaseFrame),
+			MorphPosition:      mmath.NewMVec3(),
+			LocalPosition:      mmath.NewMVec3(),
+			MorphLocalPosition: mmath.NewMVec3(),
+			Rotation:           mmath.NewRotation(),
+			MorphRotation:      mmath.NewRotation(),
+			LocalRotation:      mmath.NewRotation(),
+			MorphLocalRotation: mmath.NewRotation(),
+			Scale:              mmath.NewMVec3(),
+			MorphScale:         mmath.NewMVec3(),
+			LocalScale:         mmath.NewMVec3(),
+			MorphLocalScale:    mmath.NewMVec3(),
+			IkRotation:         mmath.NewRotation(),
+		}
 		v.Read = true
 
 		// ボーン名
