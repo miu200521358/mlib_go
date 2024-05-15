@@ -33,9 +33,10 @@ func NewIkLink() *IkLink {
 	}
 }
 
-func (t *IkLink) Copy() *IkLink {
-	copied := *t
-	return &copied
+func (v *IkLink) Copy() *IkLink {
+	copied := NewIkLink()
+	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+	return copied
 }
 
 type Ik struct {

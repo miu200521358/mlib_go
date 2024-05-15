@@ -3,7 +3,6 @@ package mmath
 import (
 	"math"
 
-	"github.com/jinzhu/copier"
 	"gonum.org/v1/gonum/optimize"
 )
 
@@ -27,7 +26,10 @@ func NewCurve() Curve {
 // Copy
 func (v *Curve) Copy() Curve {
 	copied := NewCurve()
-	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+	copied.Start.SetX(v.Start.GetX())
+	copied.Start.SetY(v.Start.GetY())
+	copied.End.SetX(v.End.GetX())
+	copied.End.SetY(v.End.GetY())
 	return copied
 }
 

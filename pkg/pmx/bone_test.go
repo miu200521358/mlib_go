@@ -24,14 +24,26 @@ func TestIkLink_Copy(t *testing.T) {
 		t.Error("Expected Copy() to return a different instance")
 	}
 
-	if copied.BoneIndex != ikLink.BoneIndex ||
-		copied.AngleLimit != ikLink.AngleLimit ||
-		copied.MinAngleLimit != ikLink.MinAngleLimit ||
-		copied.MaxAngleLimit != ikLink.MaxAngleLimit ||
-		copied.LocalAngleLimit != ikLink.LocalAngleLimit ||
-		copied.LocalMinAngleLimit != ikLink.LocalMinAngleLimit ||
-		copied.LocalMaxAngleLimit != ikLink.LocalMaxAngleLimit {
-		t.Error("Copied instance does not match the original")
+	if copied.BoneIndex != ikLink.BoneIndex {
+		t.Error("Expected BoneIndex to match the original")
+	}
+	if copied.AngleLimit != ikLink.AngleLimit {
+		t.Error("Expected AngleLimit to match the original")
+	}
+	if copied.MinAngleLimit.String() != ikLink.MinAngleLimit.String() {
+		t.Error("Expected MinAngleLimit to match the original")
+	}
+	if copied.MaxAngleLimit.String() != ikLink.MaxAngleLimit.String() {
+		t.Error("Expected MaxAngleLimit to match the original")
+	}
+	if copied.LocalAngleLimit != ikLink.LocalAngleLimit {
+		t.Error("Expected LocalAngleLimit to match the original")
+	}
+	if copied.LocalMinAngleLimit.String() != ikLink.LocalMinAngleLimit.String() {
+		t.Error("Expected LocalMinAngleLimit to match the original")
+	}
+	if copied.LocalMaxAngleLimit.String() != ikLink.LocalMaxAngleLimit.String() {
+		t.Error("Expected LocalMaxAngleLimit to match the original")
 	}
 }
 

@@ -34,9 +34,9 @@ func TestNewRotationByQuaternion(t *testing.T) {
 func TestT_Copy(t *testing.T) {
 	qq := NewMQuaternionByValues(1, 0, 0, 0)
 	rot := &MRotation{
-		radians:    &MVec3{1, 2, 3},
-		degrees:    &MVec3{90, 180, 270},
-		quaternion: &qq,
+		radians:    MVec3{1, 2, 3},
+		degrees:    MVec3{90, 180, 270},
+		quaternion: qq,
 	}
 
 	copied := rot.Copy()
