@@ -75,7 +75,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 回転
 		expectedRotation := mmath.NewMQuaternionByValues(0, 0, 0, 1)
-		if 1-bf.Rotation.GetQuaternion().Dot(&expectedRotation) > 1e-8 {
+		if 1-bf.Rotation.GetQuaternion().Dot(expectedRotation) > 1e-8 {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, bf.Rotation)
 		}
 
