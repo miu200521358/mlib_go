@@ -45,7 +45,7 @@ func TestMMat4_Quaternion(t *testing.T) {
 	q := mat.Quaternion()
 
 	// Verify the quaternion values
-	if !q.PracticallyEquals(expectedQ, 1e-10) {
+	if !q.PracticallyEquals(&expectedQ, 1e-10) {
 		t.Errorf("Expected q to be %v, got %v", expectedQ, q)
 	}
 }
@@ -60,7 +60,7 @@ func TestMMat4_AssignQuaternion(t *testing.T) {
 		{0, 0, 0, 1},
 	}
 
-	mat.AssignQuaternion(q)
+	mat.AssignQuaternion(&q)
 
 	if !mat.PracticallyEquals(expectedMat, 1e-10) {
 		t.Errorf("Expected mat to be %v, got %v", expectedMat, mat)

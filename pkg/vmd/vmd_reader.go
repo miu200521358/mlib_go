@@ -210,7 +210,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 			mlog.E("[%d] readBones.Quaternion error: %v", i, err)
 			return err
 		}
-		v.Rotation.SetQuaternion(qq)
+		v.Rotation.SetQuaternion(&qq)
 
 		// 補間曲線
 		curves, err := r.UnpackBytes(64)
