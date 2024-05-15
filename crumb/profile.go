@@ -11,37 +11,8 @@ import (
 )
 
 func main() {
-	// // CPUプロファイル用のファイルを作成
-	// {
-	// 	f, err := os.Create("cpu.pprof")
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	defer f.Close()
-
-	// 	// CPUプロファイリングを開始
-	// 	if err := pprof.StartCPUProfile(f); err != nil {
-	// 		panic(err)
-	// 	}
-	// 	defer pprof.StopCPUProfile()
-	// }
-
-	// {
-	// 	// メモリプロファイル用のファイルを作成
-	// 	f, err := os.Create("memory.pprof")
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	defer f.Close()
-	// 	runtime.GC()
-
-	// 	// ヒーププロファイリングを開始
-	// 	if err := pprof.WriteHeapProfile(f); err != nil {
-	// 		panic(err)
-	// 	}
-	// }
-
-	defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
+	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+	// defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
 
 	// --------------------------------------------
 
