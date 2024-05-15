@@ -365,7 +365,7 @@ ikLoop:
 			}
 
 			// 角度がほとんどない場合、終了
-			if linkAngle < 1e-7 || (linkBone.HasFixedAxis() && linkAngle < 1e-2) {
+			if linkAngle < 1e-7 {
 				break ikLoop
 			}
 
