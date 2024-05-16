@@ -182,17 +182,17 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 	for i := 0; i < int(totalCount); i++ {
 		v := &BoneFrame{
 			BaseFrame:          NewFrame(i).(*BaseFrame),
-			MorphPosition:      mmath.NewMVec3(),
-			LocalPosition:      mmath.NewMVec3(),
-			MorphLocalPosition: mmath.NewMVec3(),
+			MorphPosition:      nil,
+			LocalPosition:      nil,
+			MorphLocalPosition: nil,
 			Rotation:           mmath.NewRotation(),
 			MorphRotation:      mmath.NewRotation(),
 			LocalRotation:      mmath.NewRotation(),
 			MorphLocalRotation: mmath.NewRotation(),
-			Scale:              mmath.NewMVec3(),
-			MorphScale:         mmath.NewMVec3(),
-			LocalScale:         mmath.NewMVec3(),
-			MorphLocalScale:    mmath.NewMVec3(),
+			Scale:              nil,
+			MorphScale:         nil,
+			LocalScale:         nil,
+			MorphLocalScale:    nil,
 			IkRotation:         mmath.NewRotation(),
 		}
 		v.Read = true

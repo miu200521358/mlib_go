@@ -863,7 +863,7 @@ func (fs *BoneFrames) getPosition(
 	}
 
 	mat := mmath.NewMMat4()
-	if isCalcMorph {
+	if isCalcMorph && bf.MorphPosition != nil {
 		mat.Mul(bf.MorphPosition.ToMat4())
 	}
 	mat.Mul(bf.Position.ToMat4())
@@ -998,10 +998,12 @@ func (fs *BoneFrames) getScale(
 ) *mmath.MMat4 {
 	mat := mmath.NewMMat4()
 
-	if isCalcMorph {
+	if isCalcMorph && bf.MorphScale != nil {
 		mat.ScaleVec3(bf.MorphScale.AddedScalar(1))
 	}
-	mat.ScaleVec3(bf.Scale.AddedScalar(1))
+	if bf.Scale != nil {
+		mat.ScaleVec3(bf.Scale.AddedScalar(1))
+	}
 
 	return mat
 }

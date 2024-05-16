@@ -44,25 +44,43 @@ func NewBoneFrame(index int) *BoneFrame {
 }
 
 func (bf *BoneFrame) Add(v *BoneFrame) {
-	bf.Position.Add(v.Position)
-	bf.MorphPosition.Add(v.MorphPosition)
-	bf.LocalPosition.Add(v.LocalPosition)
-	bf.MorphLocalPosition.Add(v.MorphLocalPosition)
+	if bf.Position != nil && v.Position != nil {
+		bf.Position.Add(v.Position)
+	}
+	if bf.MorphPosition != nil && v.MorphPosition != nil {
+		bf.MorphPosition.Add(v.MorphPosition)
+	}
+	if bf.LocalPosition != nil && v.LocalPosition != nil {
+		bf.LocalPosition.Add(v.LocalPosition)
+	}
+	if bf.MorphLocalPosition != nil && v.MorphLocalPosition != nil {
+		bf.MorphLocalPosition.Add(v.MorphLocalPosition)
+	}
 	bf.Rotation.Mul(v.Rotation)
 	bf.MorphRotation.Mul(v.MorphRotation)
 	bf.LocalRotation.Mul(v.LocalRotation)
 	bf.MorphLocalRotation.Mul(v.MorphLocalRotation)
-	bf.Scale.Add(v.Scale)
-	bf.MorphScale.Add(v.MorphScale)
-	bf.LocalScale.Add(v.LocalScale)
-	bf.MorphLocalScale.Add(v.MorphLocalScale)
+	if bf.Scale != nil && v.Scale != nil {
+		bf.Scale.Add(v.Scale)
+	}
+	if bf.MorphScale != nil && v.MorphScale != nil {
+		bf.MorphScale.Add(v.MorphScale)
+	}
+	if bf.LocalScale != nil && v.LocalScale != nil {
+		bf.LocalScale.Add(v.LocalScale)
+	}
+	if bf.MorphLocalScale != nil && v.MorphLocalScale != nil {
+		bf.MorphLocalScale.Add(v.MorphLocalScale)
+	}
 	bf.IkRotation.Mul(v.IkRotation)
 }
 
 func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 	copied := bf.Copy().(*BoneFrame)
 
-	copied.Position.Add(v.Position)
+	if bf.Position != nil && v.Position != nil {
+		copied.Position.Add(v.Position)
+	}
 	copied.MorphPosition.Add(v.MorphPosition)
 	copied.LocalPosition.Add(v.LocalPosition)
 	copied.MorphLocalPosition.Add(v.MorphLocalPosition)
@@ -82,20 +100,44 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 func (v *BoneFrame) Copy() IBaseFrame {
 	copied := &BoneFrame{
 		BaseFrame:          NewFrame(v.GetIndex()).(*BaseFrame),
-		Position:           v.Position.Copy(),
-		MorphPosition:      v.MorphPosition.Copy(),
-		LocalPosition:      v.LocalPosition.Copy(),
-		MorphLocalPosition: v.MorphLocalPosition.Copy(),
+		Position:           mmath.NewMVec3(),
+		MorphPosition:      nil,
+		LocalPosition:      nil,
+		MorphLocalPosition: nil,
 		Rotation:           v.Rotation.Copy(),
 		MorphRotation:      v.MorphRotation.Copy(),
 		LocalRotation:      v.LocalRotation.Copy(),
 		MorphLocalRotation: v.MorphLocalRotation.Copy(),
-		Scale:              v.Scale.Copy(),
-		MorphScale:         v.MorphScale.Copy(),
-		LocalScale:         v.LocalScale.Copy(),
-		MorphLocalScale:    v.MorphLocalScale.Copy(),
+		Scale:              nil,
+		MorphScale:         nil,
+		LocalScale:         nil,
+		MorphLocalScale:    nil,
 		IkRotation:         v.IkRotation.Copy(),
 		Curves:             v.Curves.Copy(),
+	}
+	if v.Position != nil {
+		copied.Position = v.Position.Copy()
+	}
+	if v.MorphPosition != nil {
+		copied.MorphPosition = v.MorphPosition.Copy()
+	}
+	if v.LocalPosition != nil {
+		copied.LocalPosition = v.LocalPosition.Copy()
+	}
+	if v.MorphLocalPosition != nil {
+		copied.MorphLocalPosition = v.MorphLocalPosition.Copy()
+	}
+	if v.Scale != nil {
+		copied.Scale = v.Scale.Copy()
+	}
+	if v.MorphScale != nil {
+		copied.MorphScale = v.MorphScale.Copy()
+	}
+	if v.LocalScale != nil {
+		copied.LocalScale = v.LocalScale.Copy()
+	}
+	if v.MorphLocalScale != nil {
+		copied.MorphLocalScale = v.MorphLocalScale.Copy()
 	}
 	return copied
 }
@@ -118,35 +160,79 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	qq := prevBf.Rotation.GetQuaternion().Slerp(nextBf.Rotation.GetQuaternion(), ry)
 	bf.Rotation.SetQuaternion(qq)
 
+	plpx := 0.0
+	plpy := 0.0
+	plpz := 0.0
+	if prevBf.LocalPosition != nil {
+		plpx = prevBf.LocalPosition.GetX()
+		plpy = prevBf.LocalPosition.GetY()
+		plpz = prevBf.LocalPosition.GetZ()
+	}
+	psx := 0.0
+	psy := 0.0
+	psz := 0.0
+	if prevBf.Scale != nil {
+		psx = prevBf.Scale.GetX()
+		psy = prevBf.Scale.GetY()
+		psz = prevBf.Scale.GetZ()
+	}
+	plsx := 0.0
+	plsy := 0.0
+	plsz := 0.0
+	if prevBf.LocalScale != nil {
+		plsx = prevBf.LocalScale.GetX()
+		plsy = prevBf.LocalScale.GetY()
+		plsz = prevBf.LocalScale.GetZ()
+	}
+	nlpx := 0.0
+	nlpy := 0.0
+	nlpz := 0.0
+	if nextBf.LocalPosition != nil {
+		nlpx = nextBf.LocalPosition.GetX()
+		nlpy = nextBf.LocalPosition.GetY()
+		nlpz = nextBf.LocalPosition.GetZ()
+	}
+	nsx := 0.0
+	nsy := 0.0
+	nsz := 0.0
+	if nextBf.Scale != nil {
+		nsx = nextBf.Scale.GetX()
+		nsy = nextBf.Scale.GetY()
+		nsz = nextBf.Scale.GetZ()
+	}
+	nlsx := 0.0
+	nlsy := 0.0
+	nlsz := 0.0
+	if nextBf.LocalScale != nil {
+		nlsx = nextBf.LocalScale.GetX()
+		nlsy = nextBf.LocalScale.GetY()
+		nlsz = nextBf.LocalScale.GetZ()
+	}
+
 	prevX := &mmath.MVec4{
-		prevBf.Position.GetX(), prevBf.LocalPosition.GetX(), prevBf.Scale.GetX(), prevBf.LocalScale.GetX()}
+		prevBf.Position.GetX(), plpx, psx, plsx}
 	nextX := &mmath.MVec4{
-		nextBf.Position.GetX(), nextBf.LocalPosition.GetX(), nextBf.Scale.GetX(), nextBf.LocalScale.GetX()}
+		nextBf.Position.GetX(), nlpx, nsx, nlsx}
 	nowX := mmath.LerpVec4(prevX, nextX, xy)
 	bf.Position.SetX(nowX[0])
-	bf.LocalPosition.SetX(nowX[1])
-	bf.Scale.SetX(nowX[2])
-	bf.LocalScale.SetX(nowX[3])
 
 	prevY := &mmath.MVec4{
-		prevBf.Position.GetY(), prevBf.LocalPosition.GetY(), prevBf.Scale.GetY(), prevBf.LocalScale.GetY()}
+		prevBf.Position.GetY(), plpy, psy, plsy}
 	nextY := &mmath.MVec4{
-		nextBf.Position.GetY(), nextBf.LocalPosition.GetY(), nextBf.Scale.GetY(), nextBf.LocalScale.GetY()}
+		nextBf.Position.GetY(), nlpy, nsy, nlsy}
 	nowY := mmath.LerpVec4(prevY, nextY, yy)
 	bf.Position.SetY(nowY[0])
-	bf.LocalPosition.SetY(nowY[1])
-	bf.Scale.SetY(nowY[2])
-	bf.LocalScale.SetY(nowY[3])
 
 	prevZ := &mmath.MVec4{
-		prevBf.Position.GetZ(), prevBf.LocalPosition.GetZ(), prevBf.Scale.GetZ(), prevBf.LocalScale.GetZ()}
+		prevBf.Position.GetZ(), plpz, psz, plsz}
 	nextZ := &mmath.MVec4{
-		nextBf.Position.GetZ(), nextBf.LocalPosition.GetZ(), nextBf.Scale.GetZ(), nextBf.LocalScale.GetZ()}
+		nextBf.Position.GetZ(), nlpz, nsz, nlsz}
 	nowZ := mmath.LerpVec4(prevZ, nextZ, zy)
 	bf.Position.SetZ(nowZ[0])
-	bf.LocalPosition.SetZ(nowZ[1])
-	bf.Scale.SetZ(nowZ[2])
-	bf.LocalScale.SetZ(nowZ[3])
+
+	bf.LocalPosition = &mmath.MVec3{nowX[1], nowY[1], nowZ[1]}
+	bf.Scale = &mmath.MVec3{nowX[2], nowY[2], nowZ[2]}
+	bf.LocalScale = &mmath.MVec3{nowX[3], nowY[3], nowZ[3]}
 
 	return bf
 }

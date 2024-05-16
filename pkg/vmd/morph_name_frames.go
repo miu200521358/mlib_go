@@ -133,7 +133,13 @@ func (fs *MorphNameFrames) AnimateBone(
 			if delta == nil {
 				delta = NewBoneMorphDelta()
 			}
+			if delta.MorphPosition == nil {
+				delta.MorphPosition = mmath.NewMVec3()
+			}
 			delta.MorphPosition.Add(offset.Position.MuledScalar(mf.Ratio))
+			if delta.MorphLocalPosition == nil {
+				delta.MorphLocalPosition = mmath.NewMVec3()
+			}
 			delta.MorphLocalPosition.Add(offset.LocalPosition.MuledScalar(mf.Ratio))
 			deltaRad := offset.Rotation.GetRadians().MuledScalar(mf.Ratio)
 			delta.MorphRotation.SetQuaternion(delta.MorphRotation.GetQuaternion().Muled(
@@ -141,7 +147,13 @@ func (fs *MorphNameFrames) AnimateBone(
 			deltaLocalRad := offset.LocalRotation.GetRadians().MuledScalar(mf.Ratio)
 			delta.MorphLocalRotation.SetQuaternion(delta.MorphLocalRotation.GetQuaternion().Muled(
 				mmath.NewMQuaternionFromRadians(deltaLocalRad.GetX(), deltaLocalRad.GetY(), deltaLocalRad.GetZ())))
+			if delta.MorphScale == nil {
+				delta.MorphScale = mmath.NewMVec3()
+			}
 			delta.MorphScale.Add(offset.Scale.MuledScalar(mf.Ratio))
+			if delta.MorphLocalScale == nil {
+				delta.MorphLocalScale = mmath.NewMVec3()
+			}
 			delta.MorphLocalScale.Add(offset.LocalScale.MuledScalar(mf.Ratio))
 		}
 	}

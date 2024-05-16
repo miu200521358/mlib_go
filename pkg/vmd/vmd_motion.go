@@ -129,12 +129,12 @@ func (m *VmdMotion) Animate(fno int, model *pmx.PmxModel) *VmdDeltas {
 		bf := m.BoneFrames.GetItem(bone.Name).Get(fno)
 
 		// 一旦モーフの値をクリア
-		bf.MorphPosition = mmath.NewMVec3()
-		bf.MorphLocalPosition = mmath.NewMVec3()
-		bf.MorphRotation.SetQuaternion(mmath.NewMQuaternion())
-		bf.MorphLocalRotation.SetQuaternion(mmath.NewMQuaternion())
-		bf.MorphScale = mmath.NewMVec3()
-		bf.MorphLocalScale = mmath.NewMVec3()
+		bf.MorphPosition = nil
+		bf.MorphLocalPosition = nil
+		bf.MorphRotation = mmath.NewRotation()
+		bf.MorphLocalRotation = mmath.NewRotation()
+		bf.MorphScale = nil
+		bf.MorphLocalScale = nil
 
 		// 該当ボーンキーフレにモーフの値を加算
 		bf.Add(bd.BoneFrame)
