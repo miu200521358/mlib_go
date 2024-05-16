@@ -298,7 +298,8 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 				mlog.E("[%d] readVertices BDEF1 unpackBoneIndex error: %v", i, err)
 				return err
 			}
-			v.Deform = NewBdef1(boneIndex)
+			deform := NewBdef1(boneIndex)
+			v.Deform = &deform
 		case BDEF2:
 			// n : ボーンIndexサイズ  | ボーン1の参照Index
 			boneIndex1, err := r.unpackBoneIndex(model)
@@ -318,7 +319,8 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 				mlog.E("[%d] readVertices BDEF2 UnpackFloat boneWeight error: %v", i, err)
 				return err
 			}
-			v.Deform = NewBdef2(boneIndex1, boneIndex2, boneWeight)
+			deform := NewBdef2(boneIndex1, boneIndex2, boneWeight)
+			v.Deform = &deform
 		case BDEF4:
 			// n : ボーンIndexサイズ  | ボーン1の参照Index
 			boneIndex1, err := r.unpackBoneIndex(model)
@@ -368,7 +370,9 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 				mlog.E("[%d] readVertices BDEF4 UnpackFloat boneWeight4 error: %v", i, err)
 				return err
 			}
-			v.Deform = NewBdef4(boneIndex1, boneIndex2, boneIndex3, boneIndex4, boneWeight1, boneWeight2, boneWeight3, boneWeight4)
+			deform := NewBdef4(boneIndex1, boneIndex2, boneIndex3, boneIndex4,
+				boneWeight1, boneWeight2, boneWeight3, boneWeight4)
+			v.Deform = &deform
 		case SDEF:
 			// n : ボーンIndexサイズ  | ボーン1の参照Index
 			boneIndex1, err := r.unpackBoneIndex(model)
@@ -406,7 +410,8 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 				mlog.E("[%d] readVertices SDEF UnpackVec3 sdefR1 error: %v", i, err)
 				return err
 			}
-			v.Deform = NewSdef(boneIndex1, boneIndex2, boneWeight, &sdefC, &sdefR0, &sdefR1)
+			deform := NewSdef(boneIndex1, boneIndex2, boneWeight, &sdefC, &sdefR0, &sdefR1)
+			v.Deform = &deform
 		}
 
 		v.EdgeFactor, err = r.UnpackFloat()
