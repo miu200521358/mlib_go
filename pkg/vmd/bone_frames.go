@@ -123,11 +123,15 @@ func (fs *BoneFrames) Animate(
 	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
-	isCalcIk bool,
-	isCalcMorph bool,
+	isCalcIk, isClearIk, isCalcMorph bool,
 ) *BoneDeltas {
 	// 処理対象ボーン一覧取得
-	targetBoneNames, targetBoneIndexes := fs.getAnimatedBoneNames(model, boneNames)
+	targetBoneNames, targetBones := fs.getAnimatedBoneNames(model, boneNames)
+
+	if isClearIk {
+		// IKクリア
+		fs.clearIk(frame, model, targetBoneNames)
+	}
 
 	// IK事前計算
 	if isCalcIk {
@@ -137,19 +141,52 @@ func (fs *BoneFrames) Animate(
 
 	// ボーン変形行列操作
 	positions, rotations, scales, quatsWithoutEffect :=
-		fs.getBoneMatrixes(frame, model, targetBoneNames, targetBoneIndexes, isCalcMorph)
+		fs.getBoneMatrixes(frame, model, targetBoneNames, targetBones, isCalcMorph)
 
 	// ボーン行列計算
 	return fs.calcBoneMatrixes(
 		frame,
 		model,
 		targetBoneNames,
-		targetBoneIndexes,
+		targetBones,
 		positions,
 		rotations,
 		scales,
 		quatsWithoutEffect,
 	)
+}
+
+// IK事前計算処理
+func (fs *BoneFrames) clearIk(
+	frame int,
+	model *pmx.PmxModel,
+	targetBoneNames map[string]int,
+) {
+	for boneName := range targetBoneNames {
+		bone := model.Bones.GetByName(boneName)
+
+		// ボーンIndexがIkTreeIndexesに含まれていない場合、スルー
+		if _, ok := model.Bones.IkTreeIndexes[bone.Index]; !ok {
+			continue
+		}
+
+		for i := 0; i < len(model.Bones.IkTreeIndexes[bone.Index]); i++ {
+			ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[bone.Index][i])
+			if _, ok := targetBoneNames[ikBone.Name]; !ok {
+				continue
+			}
+
+			for _, linkIndex := range ikBone.Ik.Links {
+				// IKリンクボーンの回転量を初期化
+				linkBone := model.Bones.Get(linkIndex.BoneIndex)
+				linkBf := fs.Get(linkBone.Name).Get(frame)
+				linkBf.IkRotation = mmath.NewRotation()
+
+				// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
+				fs.Get(linkBone.Name).Append(linkBf)
+			}
+		}
+	}
 }
 
 // IK事前計算処理
@@ -161,6 +198,7 @@ func (fs *BoneFrames) prepareIkSolvers(
 ) {
 	for boneName := range targetBoneNames {
 		bone := model.Bones.GetByName(boneName)
+
 		// ボーンIndexがIkTreeIndexesに含まれていない場合、スルー
 		if _, ok := model.Bones.IkTreeIndexes[bone.Index]; !ok {
 			continue
@@ -168,14 +206,8 @@ func (fs *BoneFrames) prepareIkSolvers(
 
 		for i := 0; i < len(model.Bones.IkTreeIndexes[bone.Index]); i++ {
 			ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[bone.Index][i])
-			for _, linkIndex := range ikBone.Ik.Links {
-				// IKリンクボーンの回転量を初期化
-				linkBone := model.Bones.Get(linkIndex.BoneIndex)
-				linkBf := fs.Get(linkBone.Name).Get(frame)
-				linkBf.IkRotation = mmath.NewRotation()
-
-				// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
-				fs.Get(linkBone.Name).Append(linkBf)
+			if _, ok := targetBoneNames[ikBone.Name]; !ok {
+				continue
 			}
 
 			// IK計算
@@ -208,7 +240,7 @@ func (fs *BoneFrames) calcIk(
 	// IKターゲットボーン
 	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
-	ikMatrixes := fs.Animate(frame, model, []string{ikBone.Name}, false, isisCalcMorph)
+	ikMatrixes := fs.Animate(frame, model, []string{ikBone.Name}, false, false, isisCalcMorph)
 	// 処理対象ボーン名取得
 	effectorTargetBoneNames, effectorTargetBones := fs.getAnimatedBoneNames(model, []string{effectorBone.Name})
 	// エフェクタボーンの関連ボーンの初期値を取得
@@ -710,13 +742,13 @@ func (fs *BoneFrames) calcBoneMatrixes(
 	boneCount := len(targetBoneNames)
 
 	// 最初にフレーム数*ボーン数分のスライスを確保
-	for i := 0; i < len(targetBones); i++ {
+	for i := range boneCount {
 		matrixes[i] = mmath.NewMMat4()
 		resultMatrixes[i] = mmath.NewMMat4()
 	}
 
 	// ボーンを一定件数ごとに並列処理（件数は変数保持）
-	for i := 0; i < boneCount; i++ {
+	for i := range boneCount {
 		// 各ボーンの座標変換行列×逆BOf行列
 		bone := targetBones[i]
 		// 逆BOf行列(初期姿勢行列)
@@ -738,25 +770,27 @@ func (fs *BoneFrames) calcBoneMatrixes(
 	boneDeltas := NewBoneDeltas()
 
 	// ボーンを一定件数ごとに並列処理（件数は変数保持）
-	for i := 0; i < boneCount; i++ {
+	for i := range boneCount {
 		bone := targetBones[i]
-		localMatrix := mmath.NewMMat4()
-		for _, parentName := range bone.ParentBoneNames {
-			// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
+		var localMatrix *mmath.MMat4
+		// 直近の親ボーンの変形行列を元にする
+		if bone.ParentIndex >= 0 && model.Bones.Contains(bone.ParentIndex) {
 			// targetBoneNames の中にある parentName のINDEXを取得
-			parentIndex := targetBoneNames[parentName]
-			localMatrix.Mul(matrixes[parentIndex])
+			parentIndex := targetBoneNames[model.Bones.Get(bone.ParentIndex).Name]
+			localMatrix = resultMatrixes[parentIndex].Copy()
+		} else {
+			localMatrix = mmath.NewMMat4()
 		}
 		// 最後に対象ボーン自身の行列をかける
 		localMatrix.Mul(matrixes[i])
-		// BOf行列: 自身のボーンのボーンオフセット行列
-		localMatrix.Mul(bone.OffsetMatrix)
 		resultMatrixes[i] = localMatrix
 	}
 
-	for i := 0; i < len(targetBones); i++ {
+	for i := range boneCount {
 		bone := targetBones[i]
 		localMatrix := resultMatrixes[i]
+		// BOf行列: 自身のボーンのボーンオフセット行列
+		localMatrix.Mul(bone.OffsetMatrix)
 		// 初期位置行列を掛けてグローバル行列を作成
 		boneDeltas.SetItem(bone.Name, frame, NewBoneDelta(
 			bone.Name,

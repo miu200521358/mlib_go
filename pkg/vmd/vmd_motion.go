@@ -142,7 +142,7 @@ func (m *VmdMotion) Animate(fno int, model *pmx.PmxModel) *VmdDeltas {
 	}
 
 	// モーフ付きで変形を計算
-	vds.Bones = m.AnimateBoneWithMorphs(fno, model, nil, true, true)
+	vds.Bones = m.AnimateBoneWithMorphs(fno, model, nil, true, true, true)
 
 	return vds
 }
@@ -167,21 +167,31 @@ func (m *VmdMotion) AnimateMorph(
 	return m.MorphFrames.Animate(frame, model, morphNames)
 }
 
+// AnimateBone IK結果をクリアして計算する
 func (m *VmdMotion) AnimateBone(
 	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk bool,
 ) *BoneDeltas {
-	return m.AnimateBoneWithMorphs(frame, model, boneNames, isCalcIk, false)
+	return m.AnimateBoneWithMorphs(frame, model, boneNames, isCalcIk, true, false)
+}
+
+// AnimateBoneContinueIk IK結果をクリアせずに計算する
+func (m *VmdMotion) AnimateBoneContinueIk(
+	frame int,
+	model *pmx.PmxModel,
+	boneNames []string,
+	isCalcIk bool,
+) *BoneDeltas {
+	return m.AnimateBoneWithMorphs(frame, model, boneNames, isCalcIk, false, false)
 }
 
 func (m *VmdMotion) AnimateBoneWithMorphs(
 	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
-	isCalcIk bool,
-	isCalcMorph bool,
+	isCalcIk, isClearIk, isCalcMorph bool,
 ) *BoneDeltas {
-	return m.BoneFrames.Animate(frame, model, boneNames, isCalcIk, isCalcMorph)
+	return m.BoneFrames.Animate(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph)
 }

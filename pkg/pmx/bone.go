@@ -347,13 +347,10 @@ func (bone *Bone) setup() {
 	}
 
 	// オフセット行列は自身の位置を原点に戻す行列
-	bone.OffsetMatrix = mmath.NewMMat4()
-	invertPos := bone.Position.Inverted()
-	bone.OffsetMatrix.Translate(invertPos)
+	bone.OffsetMatrix = bone.Position.Inverted().ToMat4()
 
 	// 逆オフセット行列は親ボーンからの相対位置分
-	bone.RevertOffsetMatrix = mmath.NewMMat4()
-	bone.RevertOffsetMatrix.Translate(bone.ParentRelativePosition)
+	bone.RevertOffsetMatrix = bone.ParentRelativePosition.ToMat4()
 }
 
 func (b *Bones) getParentRelativePosition(boneIndex int) *mmath.MVec3 {
