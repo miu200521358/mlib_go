@@ -96,9 +96,11 @@ func (c *IndexNameModels[T]) GetIndexes() []int {
 }
 
 func (c *IndexNameModels[T]) GetNames() []string {
-	names := make([]string, 0, len(c.NameIndexes))
+	names := make([]string, len(c.NameIndexes))
+	i := 0
 	for index := range c.GetIndexes() {
-		names = append(names, c.Data[index].GetName())
+		names[i] = c.Data[index].GetName()
+		i++
 	}
 	return names
 }
@@ -140,9 +142,11 @@ func (c *IndexNameModels[T]) LastIndex() int {
 }
 
 func (c *IndexNameModels[T]) GetSortedData() []T {
-	sortedData := make([]T, 0, len(c.NameIndexes))
+	sortedData := make([]T, len(c.NameIndexes))
+	i := 0
 	for index := range c.GetIndexes() {
-		sortedData = append(sortedData, c.Data[index])
+		sortedData[i] = c.Data[index]
+		i++
 	}
 	return sortedData
 }

@@ -67,10 +67,8 @@ func Write(motion *VmdMotion) error {
 
 func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
 
-	names := motion.BoneFrames.GetNames()
-
 	binary.Write(fout, binary.LittleEndian, uint32(motion.BoneFrames.GetCount()))
-	for _, name := range names {
+	for _, name := range motion.BoneFrames.GetNames() {
 		fs := motion.BoneFrames.Data[name]
 
 		for fno := fs.RegisteredIndexes.Max(); fno >= 0; fno-- {

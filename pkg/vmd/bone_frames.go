@@ -745,18 +745,12 @@ func (fs *BoneFrames) calcBoneMatrixes(
 			// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
 			// targetBoneNames の中にある parentName のINDEXを取得
 			parentIndex := targetBoneNames[parentName]
-			if !matrixes[parentIndex].IsIdent() {
-				localMatrix.Mul(matrixes[parentIndex])
-			}
+			localMatrix.Mul(matrixes[parentIndex])
 		}
 		// 最後に対象ボーン自身の行列をかける
-		if !matrixes[i].IsIdent() {
-			localMatrix.Mul(matrixes[i])
-		}
+		localMatrix.Mul(matrixes[i])
 		// BOf行列: 自身のボーンのボーンオフセット行列
-		if !bone.OffsetMatrix.IsIdent() {
-			localMatrix.Mul(bone.OffsetMatrix)
-		}
+		localMatrix.Mul(bone.OffsetMatrix)
 		resultMatrixes[i] = localMatrix
 	}
 

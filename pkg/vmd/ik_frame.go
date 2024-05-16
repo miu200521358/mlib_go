@@ -44,10 +44,10 @@ func NewIkFrame(index int) *IkFrame {
 func (ikf *IkFrame) Copy() IBaseFrame {
 	vv := &IkFrame{
 		Visible: ikf.Visible,
-		IkList:  make([]*IkEnabledFrame, 0, len(ikf.IkList)),
+		IkList:  make([]*IkEnabledFrame, len(ikf.IkList)),
 	}
-	for _, v := range ikf.IkList {
-		vv.IkList = append(vv.IkList, v.Copy())
+	for i, v := range ikf.IkList {
+		vv.IkList[i] = v.Copy()
 	}
 	return vv
 }

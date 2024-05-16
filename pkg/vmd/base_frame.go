@@ -148,10 +148,12 @@ func (fs *BaseFrames[T]) nextFrame(index int) int {
 }
 
 func (fs *BaseFrames[T]) List() []T {
-	list := make([]T, 0, fs.RegisteredIndexes.Len())
+	list := make([]T, fs.RegisteredIndexes.Len())
 
+	n := 0
 	fs.RegisteredIndexes.AscendRange(mcore.Int(0), mcore.Int(fs.RegisteredIndexes.Max()), func(i llrb.Item) bool {
-		list = append(list, i.(T))
+		list[n] = i.(T)
+		n++
 		return true
 	})
 

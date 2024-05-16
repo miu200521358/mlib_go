@@ -19,7 +19,7 @@ type BoneFrame struct {
 	LocalScale         *mmath.MVec3     // ローカルスケール
 	MorphLocalScale    *mmath.MVec3     // モーフローカルスケール
 	IkRotation         *mmath.MRotation // IK回転
-	Curves             *BoneCurves      // 補間曲線
+	Curves             BoneCurves       // 補間曲線
 	IkRegistered       bool             // IK計算済み
 }
 
@@ -113,7 +113,7 @@ func (v *BoneFrame) Copy() IBaseFrame {
 		LocalScale:         nil,
 		MorphLocalScale:    nil,
 		IkRotation:         nil,
-		Curves:             nil,
+		Curves:             NewBoneCurves(),
 	}
 	if v.MorphPosition != nil {
 		copied.MorphPosition = v.MorphPosition.Copy()
@@ -148,9 +148,8 @@ func (v *BoneFrame) Copy() IBaseFrame {
 	if v.IkRotation != nil {
 		copied.IkRotation = v.IkRotation.Copy()
 	}
-	if v.Curves != nil {
-		copied.Curves = v.Curves.Copy()
-	}
+	copied.Curves = v.Curves.Copy()
+
 	return copied
 }
 

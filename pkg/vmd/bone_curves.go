@@ -10,8 +10,8 @@ type BoneCurves struct {
 	Values     []byte      // 補間曲線の値
 }
 
-func NewBoneCurves() *BoneCurves {
-	return &BoneCurves{
+func NewBoneCurves() BoneCurves {
+	return BoneCurves{
 		TranslateX: mmath.NewCurve(),
 		TranslateY: mmath.NewCurve(),
 		TranslateZ: mmath.NewCurve(),
@@ -85,8 +85,8 @@ func NewBoneCurves() *BoneCurves {
 	}
 }
 
-func NewBoneCurvesByValues(values []byte) *BoneCurves {
-	curves := &BoneCurves{
+func NewBoneCurvesByValues(values []byte) BoneCurves {
+	curves := BoneCurves{
 		TranslateX: mmath.NewCurve(),
 		TranslateY: mmath.NewCurve(),
 		TranslateZ: mmath.NewCurve(),
@@ -193,8 +193,8 @@ func (c *BoneCurves) Merge() []byte {
 	}
 }
 
-func (c *BoneCurves) Copy() *BoneCurves {
-	return &BoneCurves{
+func (c *BoneCurves) Copy() BoneCurves {
+	return BoneCurves{
 		TranslateX: c.TranslateX.Copy(),
 		TranslateY: c.TranslateY.Copy(),
 		TranslateZ: c.TranslateZ.Copy(),
