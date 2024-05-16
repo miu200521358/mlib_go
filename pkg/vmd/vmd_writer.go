@@ -93,6 +93,10 @@ func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
 }
 
 func writeBoneFrame(fout *os.File, name string, bf *BoneFrame) error {
+	if bf == nil {
+		return nil
+	}
+
 	encodedName, err := encodeName(name, 15)
 	if err != nil {
 		mlog.W(mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": name}))
