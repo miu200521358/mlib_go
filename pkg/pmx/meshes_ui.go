@@ -25,16 +25,16 @@ func NewMeshes(
 	resourceFiles embed.FS,
 ) *Meshes {
 	// 頂点情報
-	vertices := make([]float32, 0, len(model.Vertices.Indexes))
-	for _, v := range model.Vertices.GetSortedData() {
-		vertices = append(vertices, (*v).GL()...)
+	vertices := make([]float32, 0, len(model.Vertices.Data))
+	for i := range len(model.Vertices.Data) {
+		vertices = append(vertices, model.Vertices.GetItem(i).GL()...)
 	}
 	// println("vertices", mutils.JoinSlice(mutils.ConvertFloat32ToInterfaceSlice(vertices)))
 
 	// 面情報
-	faces := make([]uint32, 0, len(model.Faces.Indexes))
-	for _, f := range model.Faces.GetSortedData() {
-		vertices := f.VertexIndexes
+	faces := make([]uint32, 0, len(model.Faces.Data)*3)
+	for i := range len(model.Faces.Data) {
+		vertices := model.Faces.GetItem(i).VertexIndexes
 		faces = append(faces, uint32(vertices[2]))
 		faces = append(faces, uint32(vertices[1]))
 		faces = append(faces, uint32(vertices[0]))

@@ -937,14 +937,14 @@ func (fs *BoneFrames) getRotation(
 	var rot *mmath.MQuaternion
 	if bf.IkRotation != nil && !bf.IkRotation.GetRadians().IsZero() {
 		// IK用回転を持っている場合、置き換え
-		if isCalcMorph {
+		if isCalcMorph && bf.MorphRotation != nil {
 			rot = bf.MorphRotation.GetQuaternion().Copy()
 			rot.Mul(bf.IkRotation.GetQuaternion())
 		} else {
 			rot = bf.IkRotation.GetQuaternion().Copy()
 		}
 	} else {
-		if isCalcMorph {
+		if isCalcMorph && bf.MorphRotation != nil {
 			rot = bf.MorphRotation.GetQuaternion().Copy()
 			rot.Mul(bf.Rotation.GetQuaternion())
 		} else {

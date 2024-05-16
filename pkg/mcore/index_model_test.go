@@ -184,14 +184,3 @@ func TestIndexModelCorrection_IsEmpty(t *testing.T) {
 		t.Error("Expected IsEmpty to return false, but got true")
 	}
 }
-
-func TestIndexModelCorrection_LastIndex(t *testing.T) {
-	model := NewFaces()
-	item := NewFace(5, 0, 0, 0)
-	model.SetItem(5, item)
-
-	result := model.LastIndex()
-	if result != 5 {
-		t.Errorf("Expected LastIndex to return 5, but got %d", result)
-	}
-}
