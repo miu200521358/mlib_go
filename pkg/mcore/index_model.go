@@ -45,7 +45,7 @@ func NewIndexModels[T IIndexModel]() *IndexModels[T] {
 	}
 }
 
-func (c *IndexModels[T]) GetItem(index int) T {
+func (c *IndexModels[T]) Get(index int) T {
 	if val, ok := c.Data[index]; ok {
 		return val
 	}

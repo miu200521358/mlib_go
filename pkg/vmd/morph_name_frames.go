@@ -31,7 +31,7 @@ func (fs *MorphNameFrames) AnimateVertex(
 		return
 	}
 
-	morph := model.Morphs.GetItemByName(fs.Name)
+	morph := model.Morphs.GetByName(fs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.VertexMorphOffset)
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
@@ -54,7 +54,7 @@ func (fs *MorphNameFrames) AnimateAfterVertex(
 		return
 	}
 
-	morph := model.Morphs.GetItemByName(fs.Name)
+	morph := model.Morphs.GetByName(fs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.VertexMorphOffset)
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
@@ -77,7 +77,7 @@ func (fs *MorphNameFrames) AnimateUv(
 		return
 	}
 
-	morph := model.Morphs.GetItemByName(fs.Name)
+	morph := model.Morphs.GetByName(fs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.UvMorphOffset)
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
@@ -101,7 +101,7 @@ func (fs *MorphNameFrames) AnimateUv1(
 		return
 	}
 
-	morph := model.Morphs.GetItemByName(fs.Name)
+	morph := model.Morphs.GetByName(fs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.UvMorphOffset)
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
@@ -125,7 +125,7 @@ func (fs *MorphNameFrames) AnimateBone(
 		return
 	}
 
-	morph := model.Morphs.GetItemByName(fs.Name)
+	morph := model.Morphs.GetByName(fs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.BoneMorphOffset)
 		if 0 < offset.BoneIndex && offset.BoneIndex <= len(deltas.Data) {
@@ -170,7 +170,7 @@ func (fs *MorphNameFrames) AnimateMaterial(
 		return
 	}
 
-	morph := model.Morphs.GetItemByName(fs.Name)
+	morph := model.Morphs.GetByName(fs.Name)
 	// 乗算→加算の順で処理
 	for _, calcMode := range []pmx.MaterialMorphCalcMode{pmx.CALC_MODE_MULTIPLICATION, pmx.CALC_MODE_ADDITION} {
 		for _, o := range morph.Offsets {

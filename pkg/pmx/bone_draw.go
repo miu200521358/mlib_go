@@ -48,7 +48,7 @@ func (b *Bones) Draw(
 	normalVbo := make([]float32, 0)
 
 	for i, matrix := range boneGlobalMatrixes {
-		bone := b.GetItem(i)
+		bone := b.Get(i)
 
 		posGl := matrix.Translation().GL()
 		positionVbo = append(positionVbo, posGl[0], posGl[1], posGl[2])

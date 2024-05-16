@@ -78,7 +78,7 @@ func TestIndexModelCorrection_GetItem(t *testing.T) {
 	item := NewFace(0, 0, 0, 0)
 	model.SetItem(0, item)
 
-	result := model.GetItem(0)
+	result := model.Get(0)
 	if result != item {
 		t.Errorf("Expected GetItem to return the item, but got %v", result)
 	}
@@ -89,7 +89,7 @@ func TestIndexModelCorrection_GetItem(t *testing.T) {
 			t.Error("Expected GetItem to panic with out of range index")
 		}
 	}()
-	model.GetItem(1)
+	model.Get(1)
 }
 
 func TestIndexModelCorrection_SetItem(t *testing.T) {
@@ -97,7 +97,7 @@ func TestIndexModelCorrection_SetItem(t *testing.T) {
 	item := NewFace(0, 0, 0, 0)
 	model.SetItem(0, item)
 
-	result := model.GetItem(0)
+	result := model.Get(0)
 	if result != item {
 		t.Errorf("Expected SetItem to set the item, but got %v", result)
 	}
@@ -108,7 +108,7 @@ func TestIndexModelCorrection_Append(t *testing.T) {
 	item := NewFace(0, 0, 0, 0)
 	model.Append(item)
 
-	result := model.GetItem(0)
+	result := model.Get(0)
 	if result != item {
 		t.Errorf("Expected Append to add the item, but got %v", result)
 	}
@@ -116,7 +116,7 @@ func TestIndexModelCorrection_Append(t *testing.T) {
 	item2 := NewFace(1, 0, 0, 0)
 	// Test sorting
 	model.Append(item2)
-	result = model.GetItem(0)
+	result = model.Get(0)
 	if result != item {
 		t.Errorf("Expected Append to sort the items, but got %v", result)
 	}
@@ -138,7 +138,7 @@ func TestIndexModelCorrection_DeleteItem(t *testing.T) {
 			t.Error("Expected GetItem to panic with deleted item")
 		}
 	}()
-	model.GetItem(0)
+	model.Get(0)
 }
 
 func TestIndexModelCorrection_Len(t *testing.T) {

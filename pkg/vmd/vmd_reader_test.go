@@ -59,7 +59,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 	// キーフレがある
 	{
-		bf := motion.BoneFrames.GetItem(pmx.CENTER.String()).Get(358)
+		bf := motion.BoneFrames.Get(pmx.CENTER.String()).Get(358)
 
 		// フレーム番号
 		expectedFrameNo := int(358)
@@ -122,7 +122,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		bf := motion.BoneFrames.GetItem(pmx.UPPER.String()).Get(689)
+		bf := motion.BoneFrames.Get(pmx.UPPER.String()).Get(689)
 
 		// フレーム番号
 		expectedFrameNo := int(689)
@@ -185,7 +185,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Right()).Get(384)
+		bf := motion.BoneFrames.Get(pmx.LEG_IK.Right()).Get(384)
 
 		// フレーム番号
 		expectedFrameNo := int(384)
@@ -249,7 +249,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 	{
 		// キーがないフレーム
-		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Left()).Get(384)
+		bf := motion.BoneFrames.Get(pmx.LEG_IK.Left()).Get(384)
 
 		// フレーム番号
 		expectedFrameNo := int(384)
@@ -272,7 +272,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 	{
 		// キーがないフレーム
-		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Left()).Get(394)
+		bf := motion.BoneFrames.Get(pmx.LEG_IK.Left()).Get(394)
 
 		// フレーム番号
 		expectedFrameNo := int(394)
@@ -295,7 +295,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 	{
 		// キーがないフレーム
-		bf := motion.BoneFrames.GetItem(pmx.LEG_IK.Left()).Get(412)
+		bf := motion.BoneFrames.Get(pmx.LEG_IK.Left()).Get(412)
 
 		// フレーム番号
 		expectedFrameNo := int(412)
@@ -318,7 +318,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 	{
 		// キーがないフレーム
-		bf := motion.BoneFrames.GetItem(pmx.ARM.Right()).Get(384)
+		bf := motion.BoneFrames.Get(pmx.ARM.Right()).Get(384)
 
 		// フレーム番号
 		expectedFrameNo := int(384)

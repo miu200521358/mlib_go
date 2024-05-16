@@ -61,7 +61,7 @@ func NewIndexNameModels[T IIndexNameModel]() *IndexNameModels[T] {
 	}
 }
 
-func (c *IndexNameModels[T]) GetItem(index int) T {
+func (c *IndexNameModels[T]) Get(index int) T {
 	if val, ok := c.Data[index]; ok {
 		return val
 	}
@@ -151,7 +151,7 @@ func (c *IndexNameModels[T]) GetSortedData() []T {
 	return sortedData
 }
 
-func (c *IndexNameModels[T]) GetItemByName(name string) T {
+func (c *IndexNameModels[T]) GetByName(name string) T {
 	if index, ok := c.NameIndexes[name]; ok {
 		return c.Data[index]
 	}

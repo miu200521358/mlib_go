@@ -56,16 +56,16 @@ func (m *VmdMotion) GetMinFrame() int {
 }
 
 func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {
-	m.BoneFrames.GetItem(boneName).Append(bf)
+	m.BoneFrames.Get(boneName).Append(bf)
 }
 
 func (m *VmdMotion) AppendRegisteredBoneFrame(boneName string, bf *BoneFrame) {
 	bf.Registered = true
-	m.BoneFrames.GetItem(boneName).Append(bf)
+	m.BoneFrames.Get(boneName).Append(bf)
 }
 
 func (m *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame) {
-	m.MorphFrames.GetItem(morphName).Append(mf)
+	m.MorphFrames.Get(morphName).Append(mf)
 }
 
 func (m *VmdMotion) AppendCameraFrame(cf *CameraFrame) {
@@ -85,16 +85,16 @@ func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 }
 
 func (m *VmdMotion) InsertBoneFrame(boneName string, bf *BoneFrame) {
-	m.BoneFrames.GetItem(boneName).Insert(bf)
+	m.BoneFrames.Get(boneName).Insert(bf)
 }
 
 func (m *VmdMotion) InsertRegisteredBoneFrame(boneName string, bf *BoneFrame) {
 	bf.Registered = true
-	m.BoneFrames.GetItem(boneName).Insert(bf)
+	m.BoneFrames.Get(boneName).Insert(bf)
 }
 
 func (m *VmdMotion) InsertMorphFrame(morphName string, mf *MorphFrame) {
-	m.MorphFrames.GetItem(morphName).Insert(mf)
+	m.MorphFrames.Get(morphName).Insert(mf)
 }
 
 func (m *VmdMotion) InsertCameraFrame(cf *CameraFrame) {
@@ -122,11 +122,11 @@ func (m *VmdMotion) Animate(fno int, model *pmx.PmxModel) *VmdDeltas {
 		if bd == nil {
 			continue
 		}
-		bone := model.Bones.GetItem(i)
+		bone := model.Bones.Get(i)
 		if !m.BoneFrames.Contains(bone.Name) {
 			m.BoneFrames.Append(NewBoneNameFrames(bone.Name))
 		}
-		bf := m.BoneFrames.GetItem(bone.Name).Get(fno)
+		bf := m.BoneFrames.Get(bone.Name).Get(fno)
 
 		// 一旦モーフの値をクリア
 		bf.MorphPosition = nil

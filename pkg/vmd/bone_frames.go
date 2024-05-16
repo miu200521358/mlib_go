@@ -50,7 +50,7 @@ func (fs *BoneFrames) Delete(boneName string) {
 	delete(fs.Data, boneName)
 }
 
-func (fs *BoneFrames) GetItem(boneName string) *BoneNameFrames {
+func (fs *BoneFrames) Get(boneName string) *BoneNameFrames {
 	if !fs.Contains(boneName) {
 		fs.Append(NewBoneNameFrames(boneName))
 	}
@@ -160,22 +160,22 @@ func (fs *BoneFrames) prepareIkSolvers(
 	isCalcMorph bool,
 ) {
 	for boneName := range targetBoneNames {
-		bone := model.Bones.GetItemByName(boneName)
+		bone := model.Bones.GetByName(boneName)
 		// ボーンIndexがIkTreeIndexesに含まれていない場合、スルー
 		if _, ok := model.Bones.IkTreeIndexes[bone.Index]; !ok {
 			continue
 		}
 
 		for i := 0; i < len(model.Bones.IkTreeIndexes[bone.Index]); i++ {
-			ikBone := model.Bones.GetItem(model.Bones.IkTreeIndexes[bone.Index][i])
+			ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[bone.Index][i])
 			for _, linkIndex := range ikBone.Ik.Links {
 				// IKリンクボーンの回転量を初期化
-				linkBone := model.Bones.GetItem(linkIndex.BoneIndex)
-				linkBf := fs.GetItem(linkBone.Name).Get(frame)
+				linkBone := model.Bones.Get(linkIndex.BoneIndex)
+				linkBf := fs.Get(linkBone.Name).Get(frame)
 				linkBf.IkRotation = mmath.NewRotation()
 
 				// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
-				fs.GetItem(linkBone.Name).Append(linkBf)
+				fs.Get(linkBone.Name).Append(linkBf)
 			}
 
 			// IK計算
@@ -184,13 +184,13 @@ func (fs *BoneFrames) prepareIkSolvers(
 
 			for _, linkIndex := range ikBone.Ik.Links {
 				// IKリンクボーンの回転量を更新
-				linkBone := model.Bones.GetItem(linkIndex.BoneIndex)
-				linkBf := fs.GetItem(linkBone.Name).Get(frame)
+				linkBone := model.Bones.Get(linkIndex.BoneIndex)
+				linkBf := fs.Get(linkBone.Name).Get(frame)
 				linkIndex := effectorTargetBoneNames[linkBone.Name]
 				linkBf.IkRotation = mmath.NewRotationByQuaternion(quats[linkIndex])
 
 				// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
-				fs.GetItem(linkBone.Name).Append(linkBf)
+				fs.Get(linkBone.Name).Append(linkBf)
 			}
 		}
 	}
@@ -206,7 +206,7 @@ func (fs *BoneFrames) calcIk(
 	isisCalcMorph bool,
 ) ([]*mmath.MQuaternion, map[string]int) {
 	// IKターゲットボーン
-	effectorBone := model.Bones.GetItem(ikBone.Ik.BoneIndex)
+	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
 	ikMatrixes := fs.Animate(frame, model, []string{ikBone.Name}, false, isisCalcMorph)
 	// 処理対象ボーン名取得
@@ -263,7 +263,7 @@ ikLoop:
 			}
 
 			// 処理対象IKリンクボーン
-			linkBone := model.Bones.GetItem(ikLink.BoneIndex)
+			linkBone := model.Bones.Get(ikLink.BoneIndex)
 			linkIndex := effectorTargetBoneNames[linkBone.Name]
 
 			// 角度制限があってまったく動かさない場合、IK計算しないで次に行く
@@ -292,10 +292,10 @@ ikLoop:
 			)
 
 			// IKボーンのグローバル位置
-			ikGlobalPosition := ikMatrixes.GetItem(ikBone.Name, frame).Position
+			ikGlobalPosition := ikMatrixes.Get(ikBone.Name, frame).Position
 
 			// 現在のIKターゲットボーンのグローバル位置を取得
-			effectorGlobalPosition := linkMatrixes.GetItem(effectorBone.Name, frame).Position
+			effectorGlobalPosition := linkMatrixes.Get(effectorBone.Name, frame).Position
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
@@ -316,7 +316,7 @@ ikLoop:
 			// }
 
 			// 注目ノード（実際に動かすボーン=リンクボーン）
-			linkMatrix := linkMatrixes.GetItem(linkBone.Name, frame).GlobalMatrix
+			linkMatrix := linkMatrixes.Get(linkBone.Name, frame).GlobalMatrix
 			// ワールド座標系から注目ノードの局所座標系への変換
 			linkInvMatrix := linkMatrix.Inverse()
 
@@ -328,15 +328,15 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				{
 					bf := NewBoneFrame(count)
-					bf.Position = ikMatrixes.GetItem(ikBone.Name, frame).FramePosition
-					bf.Rotation.SetQuaternion(ikMatrixes.GetItem(ikBone.Name, frame).FrameRotation)
+					bf.Position = ikMatrixes.Get(ikBone.Name, frame).FramePosition
+					bf.Rotation.SetQuaternion(ikMatrixes.Get(ikBone.Name, frame).FrameRotation)
 					ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
 					count++
 				}
 				{
 					bf := NewBoneFrame(count)
-					bf.Position = linkMatrixes.GetItem(linkBone.Name, frame).FramePosition
-					bf.Rotation.SetQuaternion(linkMatrixes.GetItem(linkBone.Name, frame).FrameRotation)
+					bf.Position = linkMatrixes.Get(linkBone.Name, frame).FramePosition
+					bf.Rotation.SetQuaternion(linkMatrixes.Get(linkBone.Name, frame).FrameRotation)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
 				}
@@ -789,9 +789,9 @@ func (fs *BoneFrames) getAnimatedBoneNames(
 			exists[boneName] = boneName
 
 			// 関連するボーンの追加
-			relativeBoneIndexes := model.Bones.GetItemByName(boneName).RelativeBoneIndexes
+			relativeBoneIndexes := model.Bones.GetByName(boneName).RelativeBoneIndexes
 			for _, index := range relativeBoneIndexes {
-				relativeBoneName := model.Bones.GetItem(index).Name
+				relativeBoneName := model.Bones.Get(index).Name
 				exists[relativeBoneName] = relativeBoneName
 			}
 		}
@@ -841,7 +841,7 @@ func (fs *BoneFrames) getBoneMatrixes(
 	// ボーンを一定件数ごとに並列処理
 	for i := 0; i < boneCount; i++ {
 		bone := targetBones[i]
-		bf := fs.GetItem(bone.Name).Get(frame)
+		bf := fs.Get(bone.Name).Get(frame)
 		// ボーンの移動位置、回転角度、拡大率を取得
 		positions[i] = fs.getPosition(bf, frame, bone, model, isCalcMorph, 0)
 		rotWithEffect, rotFk := fs.getRotation(bf, frame, bone, model, isCalcMorph, 0)
@@ -902,8 +902,8 @@ func (fs *BoneFrames) getPositionWithEffect(
 	}
 
 	// 付与親が存在する場合、付与親の回転角度を掛ける
-	effectBone := model.Bones.GetItem(bone.EffectIndex)
-	bf := fs.GetItem(effectBone.Name).Get(frame)
+	effectBone := model.Bones.Get(bone.EffectIndex)
+	bf := fs.Get(effectBone.Name).Get(frame)
 	posMat := fs.getPosition(bf, frame, effectBone, model, isCalcMorph, loop+1)
 
 	posMat[0][3] *= bone.EffectFactor
@@ -986,8 +986,8 @@ func (fs *BoneFrames) getRotationWithEffect(
 	}
 
 	// 付与親が存在する場合、付与親の回転角度を掛ける
-	effectBone := model.Bones.GetItem(bone.EffectIndex)
-	bf := fs.GetItem(effectBone.Name).Get(frame)
+	effectBone := model.Bones.Get(bone.EffectIndex)
+	bf := fs.Get(effectBone.Name).Get(frame)
 	rotWithEffect, _ := fs.getRotation(bf, frame, effectBone, model, isCalcMorph, loop+1)
 
 	return rotWithEffect.MulScalar(bone.EffectFactor).Shorten()

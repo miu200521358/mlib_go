@@ -58,7 +58,7 @@ func NewBoneDeltas() *BoneDeltas {
 	}
 }
 
-func (bts *BoneDeltas) GetItem(boneName string, frame int) *BoneDelta {
+func (bts *BoneDeltas) Get(boneName string, frame int) *BoneDelta {
 	return bts.Data[BoneNameFrameNo{boneName, frame}]
 }
 

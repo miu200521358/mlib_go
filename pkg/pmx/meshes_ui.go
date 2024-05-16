@@ -27,14 +27,14 @@ func NewMeshes(
 	// 頂点情報
 	vertices := make([]float32, 0, len(model.Vertices.Data))
 	for i := range len(model.Vertices.Data) {
-		vertices = append(vertices, model.Vertices.GetItem(i).GL()...)
+		vertices = append(vertices, model.Vertices.Get(i).GL()...)
 	}
 	// println("vertices", mutils.JoinSlice(mutils.ConvertFloat32ToInterfaceSlice(vertices)))
 
 	// 面情報
 	faces := make([]uint32, 0, len(model.Faces.Data)*3)
 	for i := range len(model.Faces.Data) {
-		vertices := model.Faces.GetItem(i).VertexIndexes
+		vertices := model.Faces.Get(i).VertexIndexes
 		faces = append(faces, uint32(vertices[2]))
 		faces = append(faces, uint32(vertices[1]))
 		faces = append(faces, uint32(vertices[0]))
@@ -45,7 +45,7 @@ func NewMeshes(
 	for i, m := range model.Materials.GetSortedData() {
 		var texture *Texture
 		if m.TextureIndex != -1 && model.Textures.Contains(m.TextureIndex) {
-			texture = model.Textures.GetItem(m.TextureIndex)
+			texture = model.Textures.Get(m.TextureIndex)
 		}
 
 		var toonTexture *Texture
@@ -53,20 +53,20 @@ func NewMeshes(
 		if m.ToonSharingFlag == TOON_SHARING_INDIVIDUAL &&
 			m.ToonTextureIndex != -1 &&
 			model.Textures.Contains(m.ToonTextureIndex) {
-			toonTexture = model.Textures.GetItem(m.ToonTextureIndex)
+			toonTexture = model.Textures.Get(m.ToonTextureIndex)
 		}
 		// 共有Toon
 		if m.ToonSharingFlag == TOON_SHARING_SHARING &&
 			m.ToonTextureIndex != -1 &&
 			model.ToonTextures.Contains(m.ToonTextureIndex) {
-			toonTexture = model.ToonTextures.GetItem(m.ToonTextureIndex)
+			toonTexture = model.ToonTextures.Get(m.ToonTextureIndex)
 		}
 
 		var sphereTexture *Texture
 		if m.SphereMode != SPHERE_MODE_INVALID &&
 			m.SphereTextureIndex != -1 &&
 			model.Textures.Contains(m.SphereTextureIndex) {
-			sphereTexture = model.Textures.GetItem(m.SphereTextureIndex)
+			sphereTexture = model.Textures.Get(m.SphereTextureIndex)
 		}
 
 		materialGl := m.GL(

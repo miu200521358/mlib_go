@@ -25,7 +25,7 @@ func (mfs *MorphFrames) Append(fs *MorphNameFrames) {
 	mfs.Data[fs.Name] = fs
 }
 
-func (mfs *MorphFrames) GetItem(morphName string) *MorphNameFrames {
+func (mfs *MorphFrames) Get(morphName string) *MorphNameFrames {
 	if !mfs.Contains(morphName) {
 		mfs.Append(NewMorphNameFrames(morphName))
 	}
@@ -43,19 +43,19 @@ func (mfs *MorphFrames) Animate(
 			continue
 		}
 
-		morph := model.Morphs.GetItemByName(morphName)
+		morph := model.Morphs.GetByName(morphName)
 		if morph.MorphType == pmx.MORPH_TYPE_VERTEX {
-			mfs.GetItem(morphName).AnimateVertex(frame, model, mds.Vertices)
+			mfs.Get(morphName).AnimateVertex(frame, model, mds.Vertices)
 		} else if morph.MorphType == pmx.MORPH_TYPE_AFTER_VERTEX {
-			mfs.GetItem(morphName).AnimateAfterVertex(frame, model, mds.Vertices)
+			mfs.Get(morphName).AnimateAfterVertex(frame, model, mds.Vertices)
 		} else if morph.MorphType == pmx.MORPH_TYPE_UV {
-			mfs.GetItem(morphName).AnimateUv(frame, model, mds.Vertices)
+			mfs.Get(morphName).AnimateUv(frame, model, mds.Vertices)
 		} else if morph.MorphType == pmx.MORPH_TYPE_EXTENDED_UV1 {
-			mfs.GetItem(morphName).AnimateUv1(frame, model, mds.Vertices)
+			mfs.Get(morphName).AnimateUv1(frame, model, mds.Vertices)
 		} else if morph.MorphType == pmx.MORPH_TYPE_BONE {
-			mfs.GetItem(morphName).AnimateBone(frame, model, mds.Bones)
+			mfs.Get(morphName).AnimateBone(frame, model, mds.Bones)
 		} else if morph.MorphType == pmx.MORPH_TYPE_MATERIAL {
-			mfs.GetItem(morphName).AnimateMaterial(frame, model, mds.Materials)
+			mfs.Get(morphName).AnimateMaterial(frame, model, mds.Materials)
 		}
 	}
 

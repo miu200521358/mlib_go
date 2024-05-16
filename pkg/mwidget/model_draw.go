@@ -34,7 +34,7 @@ func Draw(
 	boneTransforms := make([]*mbt.BtTransform, len(model.Bones.NameIndexes))
 	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))
 	for i, bone := range model.Bones.Data {
-		delta := deltas.Bones.GetItem(bone.Name, fno)
+		delta := deltas.Bones.Get(bone.Name, fno)
 		mat := delta.LocalMatrix.GL()
 		boneMatrixes[i] = mat
 		globalMatrixes[i] = delta.GlobalMatrix

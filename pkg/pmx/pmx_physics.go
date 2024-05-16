@@ -105,8 +105,8 @@ func (j *Joints) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodies *Rigid
 		if joint.RigidbodyIndexA >= 0 && rigidBodies.Contains(joint.RigidbodyIndexA) &&
 			joint.RigidbodyIndexB >= 0 && rigidBodies.Contains(joint.RigidbodyIndexB) {
 			joint.initPhysics(
-				modelPhysics, rigidBodies.GetItem(joint.RigidbodyIndexA),
-				rigidBodies.GetItem(joint.RigidbodyIndexB))
+				modelPhysics, rigidBodies.Get(joint.RigidbodyIndexA),
+				rigidBodies.Get(joint.RigidbodyIndexB))
 		}
 	}
 }

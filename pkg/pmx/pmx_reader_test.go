@@ -78,7 +78,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		v := model.Vertices.GetItem(13)
+		v := model.Vertices.Get(13)
 		expectedPosition := &mmath.MVec3{0.1565633, 16.62944, -0.2150156}
 		if !v.Position.PracticallyEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, v.Position)
@@ -127,7 +127,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		v := model.Vertices.GetItem(120)
+		v := model.Vertices.Get(120)
 		expectedPosition := &mmath.MVec3{1.529492, 5.757646, 0.4527041}
 		if !v.Position.PracticallyEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, v.Position)
@@ -164,7 +164,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		f := model.Faces.GetItem(19117)
+		f := model.Faces.Get(19117)
 		expectedFaceVertexIndexes := []int{8857, 8893, 8871}
 		if f.VertexIndexes[0] != expectedFaceVertexIndexes[0] {
 			t.Errorf("Expected Deform to be %v, got %v", expectedFaceVertexIndexes[0], f.VertexIndexes[0])
@@ -178,7 +178,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		tex := model.Textures.GetItem(10)
+		tex := model.Textures.Get(10)
 		expectedName := "tex\\_13_Toon.bmp"
 		if tex.Name != expectedName {
 			t.Errorf("Expected Path to be %q, got %q", expectedName, tex.Name)
@@ -186,7 +186,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		m := model.Materials.GetItem(10)
+		m := model.Materials.Get(10)
 		expectedName := "00_EyeWhite_はぅ"
 		if m.Name != expectedName {
 			t.Errorf("Expected Path to be %q, got %q", expectedName, m.Name)
@@ -250,7 +250,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		b := model.Bones.GetItem(5)
+		b := model.Bones.Get(5)
 		expectedName := "上半身"
 		if b.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name)
@@ -286,7 +286,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		b := model.Bones.GetItem(12)
+		b := model.Bones.Get(12)
 		expectedName := "右目"
 		if b.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name)
@@ -330,7 +330,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		b := model.Bones.GetItem(28)
+		b := model.Bones.Get(28)
 		expectedName := "左腕捩"
 		if b.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name)
@@ -378,7 +378,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		b := model.Bones.GetItem(98)
+		b := model.Bones.Get(98)
 		expectedName := "左足ＩＫ"
 		if b.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name)
@@ -456,7 +456,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		m := model.Morphs.GetItem(2)
+		m := model.Morphs.Get(2)
 		expectedName := "にこり"
 		if m.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, m.Name)
@@ -487,7 +487,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		m := model.Morphs.GetItem(111)
+		m := model.Morphs.Get(111)
 		expectedName := "いボーン"
 		if m.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, m.Name)
@@ -522,7 +522,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		m := model.Morphs.GetItem(122)
+		m := model.Morphs.Get(122)
 		expectedName := "なごみ材質"
 		if m.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, m.Name)
@@ -585,7 +585,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		m := model.Morphs.GetItem(137)
+		m := model.Morphs.Get(137)
 		expectedName := "ひそめ"
 		if m.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, m.Name)
@@ -616,7 +616,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		d := model.DisplaySlots.GetItem(0)
+		d := model.DisplaySlots.Get(0)
 		expectedName := "Root"
 		if d.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, d.Name)
@@ -647,7 +647,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		d := model.DisplaySlots.GetItem(1)
+		d := model.DisplaySlots.Get(1)
 		expectedName := "表情"
 		if d.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, d.Name)
@@ -678,7 +678,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		d := model.DisplaySlots.GetItem(9)
+		d := model.DisplaySlots.Get(9)
 		expectedName := "右指"
 		if d.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, d.Name)
@@ -709,7 +709,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		b := model.RigidBodies.GetItem(14)
+		b := model.RigidBodies.Get(14)
 		expectedName := "右腕"
 		if b.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name)
@@ -775,7 +775,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 
 	{
-		j := model.Joints.GetItem(13)
+		j := model.Joints.Get(13)
 		expectedName := "↓|頭|髪_06-01"
 		if j.Name != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, j.Name)
