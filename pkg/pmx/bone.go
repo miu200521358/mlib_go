@@ -96,6 +96,7 @@ type Bone struct {
 	OffsetMatrix           *mmath.MMat4     // オフセット行列 (自身の位置を原点に戻す行列)
 	TreeBoneIndexes        []int            // 自分のボーンまでのボーンIndexのリスト
 	ParentBoneIndexes      []int            // 自分の親ボーンからルートまでのボーンIndexのリスト
+	ParentBoneNames        []string         // 自分の親ボーンからルートまでのボーン名のリスト
 	RelativeBoneIndexes    []int            // 関連ボーンINDEX一覧（付与親とかIKとか）
 	ChildBoneIndexes       []int            // 自分を親として登録しているボーンINDEX一覧
 	EffectiveBoneIndexes   []int            // 自分を付与親として登録しているボーンINDEX一覧
@@ -141,6 +142,7 @@ func NewBone() *Bone {
 		RevertOffsetMatrix:     mmath.NewMMat4(),
 		OffsetMatrix:           mmath.NewMMat4(),
 		ParentBoneIndexes:      make([]int, 0),
+		ParentBoneNames:        make([]string, 0),
 		RelativeBoneIndexes:    make([]int, 0),
 		ChildBoneIndexes:       make([]int, 0),
 		EffectiveBoneIndexes:   make([]int, 0),
@@ -584,6 +586,12 @@ func (b *Bones) setup() {
 	for _, bone := range b.GetSortedData() {
 		// 影響があるボーンINDEXリスト
 		bone.ParentBoneIndexes, bone.RelativeBoneIndexes = b.getRelativeBoneIndexes(bone.Index, make([]int, 0), make([]int, 0))
+
+		// ボーンINDEXリストからボーン名リストを作成
+		bone.ParentBoneNames = make([]string, len(bone.ParentBoneIndexes))
+		for i, parentBoneIndex := range bone.ParentBoneIndexes {
+			bone.ParentBoneNames[i] = b.GetItem(parentBoneIndex).Name
+		}
 
 		// 親ボーンに子ボーンとして登録する
 		if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {

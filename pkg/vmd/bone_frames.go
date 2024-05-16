@@ -722,11 +722,17 @@ func (fs *BoneFrames) calcBoneMatrixes(
 		// 逆BOf行列(初期姿勢行列)
 		matrixes[i].Mul(bone.RevertOffsetMatrix)
 		// 位置
-		matrixes[i].Mul(positions[i])
+		if !positions[i].IsIdent() {
+			matrixes[i].Mul(positions[i])
+		}
 		// 回転
-		matrixes[i].Mul(rotations[i])
+		if !rotations[i].IsIdent() {
+			matrixes[i].Mul(rotations[i])
+		}
 		// スケール
-		matrixes[i].Mul(scales[i])
+		if !scales[i].IsIdent() {
+			matrixes[i].Mul(scales[i])
+		}
 	}
 
 	boneDeltas := NewBoneDeltas()
@@ -735,17 +741,22 @@ func (fs *BoneFrames) calcBoneMatrixes(
 	for i := 0; i < boneCount; i++ {
 		bone := targetBones[i]
 		localMatrix := mmath.NewMMat4()
-		for _, l := range bone.ParentBoneIndexes {
+		for _, parentName := range bone.ParentBoneNames {
 			// 親ボーンの変形行列を掛ける(親->子の順で掛ける)
-			parentName := model.Bones.GetItem(l).Name
 			// targetBoneNames の中にある parentName のINDEXを取得
 			parentIndex := targetBoneNames[parentName]
-			localMatrix.Mul(matrixes[parentIndex])
+			if !matrixes[parentIndex].IsIdent() {
+				localMatrix.Mul(matrixes[parentIndex])
+			}
 		}
 		// 最後に対象ボーン自身の行列をかける
-		localMatrix.Mul(matrixes[i])
+		if !matrixes[i].IsIdent() {
+			localMatrix.Mul(matrixes[i])
+		}
 		// BOf行列: 自身のボーンのボーンオフセット行列
-		localMatrix.Mul(bone.OffsetMatrix)
+		if !bone.OffsetMatrix.IsIdent() {
+			localMatrix.Mul(bone.OffsetMatrix)
+		}
 		resultMatrixes[i] = localMatrix
 	}
 
