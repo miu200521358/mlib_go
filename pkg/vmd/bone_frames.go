@@ -89,7 +89,7 @@ func (fs *BoneFrames) GetRegisteredIndexes() []int {
 	return indexes.List()
 }
 
-func (fs *BoneFrames) GetCount() int {
+func (fs *BoneFrames) Len() int {
 	count := 0
 	for _, fs := range fs.Data {
 		count += fs.RegisteredIndexes.Len()

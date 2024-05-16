@@ -66,41 +66,52 @@ func Write(motion *VmdMotion) error {
 }
 
 func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
+	names := motion.BoneFrames.GetNames()
 
-	binary.Write(fout, binary.LittleEndian, uint32(motion.BoneFrames.GetCount()))
-	for _, name := range motion.BoneFrames.GetNames() {
+	binary.Write(fout, binary.LittleEndian, uint32(motion.BoneFrames.Len()))
+	for _, name := range names {
 		fs := motion.BoneFrames.Data[name]
 
-		for fno := fs.RegisteredIndexes.Max(); fno >= 0; fno-- {
-			if !fs.RegisteredIndexes.Has(fno) {
-				continue
-			}
-			bf := motion.BoneFrames.Data[name].Get(fno)
-			encodedName, err := encodeName(name, 15)
-			if err != nil {
-				mlog.W(mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": name}))
-				continue
-			}
+		// 各ボーンの最大キーフレを先に出力する
+		bf := motion.BoneFrames.Data[name].Get(fs.RegisteredIndexes.Max())
+		writeBoneFrame(fout, name, bf)
+	}
 
-			binary.Write(fout, binary.LittleEndian, encodedName)
-			binary.Write(fout, binary.LittleEndian, uint32(bf.Index))
-			binary.Write(fout, binary.LittleEndian, float32(bf.Position.GetX()))
-			binary.Write(fout, binary.LittleEndian, float32(bf.Position.GetY()))
-			binary.Write(fout, binary.LittleEndian, float32(bf.Position.GetZ()))
-
-			v := bf.Rotation.GetQuaternion().Normalized()
-			binary.Write(fout, binary.LittleEndian, float32(v.GetX()))
-			binary.Write(fout, binary.LittleEndian, float32(v.GetY()))
-			binary.Write(fout, binary.LittleEndian, float32(v.GetZ()))
-			binary.Write(fout, binary.LittleEndian, float32(v.GetW()))
-
-			curves := make([]byte, len(bf.Curves.Values))
-			for i, x := range bf.Curves.Merge() {
-				curves[i] = byte(math.Min(255, math.Max(0, float64(x))))
-			}
-			binary.Write(fout, binary.LittleEndian, curves)
+	for _, name := range names {
+		fs := motion.BoneFrames.Data[name]
+		// 普通のキーフレをそのまま出力する
+		for _, bf := range fs.List()[:fs.Len()-1] {
+			writeBoneFrame(fout, name, bf)
 		}
 	}
+
+	return nil
+}
+
+func writeBoneFrame(fout *os.File, name string, bf *BoneFrame) error {
+	encodedName, err := encodeName(name, 15)
+	if err != nil {
+		mlog.W(mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": name}))
+		return err
+	}
+
+	binary.Write(fout, binary.LittleEndian, encodedName)
+	binary.Write(fout, binary.LittleEndian, uint32(bf.Index))
+	binary.Write(fout, binary.LittleEndian, float32(bf.Position.GetX()))
+	binary.Write(fout, binary.LittleEndian, float32(bf.Position.GetY()))
+	binary.Write(fout, binary.LittleEndian, float32(bf.Position.GetZ()))
+
+	v := bf.Rotation.GetQuaternion().Normalized()
+	binary.Write(fout, binary.LittleEndian, float32(v.GetX()))
+	binary.Write(fout, binary.LittleEndian, float32(v.GetY()))
+	binary.Write(fout, binary.LittleEndian, float32(v.GetZ()))
+	binary.Write(fout, binary.LittleEndian, float32(v.GetW()))
+
+	curves := make([]byte, len(bf.Curves.Values))
+	for i, x := range bf.Curves.Merge() {
+		curves[i] = byte(math.Min(255, math.Max(0, float64(x))))
+	}
+	binary.Write(fout, binary.LittleEndian, curves)
 
 	return nil
 }

@@ -148,12 +148,10 @@ func (fs *BaseFrames[T]) nextFrame(index int) int {
 }
 
 func (fs *BaseFrames[T]) List() []T {
-	list := make([]T, fs.RegisteredIndexes.Len())
+	list := make([]T, 0, fs.RegisteredIndexes.Len())
 
-	n := 0
 	fs.RegisteredIndexes.AscendRange(mcore.Int(0), mcore.Int(fs.RegisteredIndexes.Max()), func(i llrb.Item) bool {
-		list[n] = i.(T)
-		n++
+		list = append(list, fs.data[int(i.(mcore.Int))])
 		return true
 	})
 
@@ -225,4 +223,8 @@ func (fs *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {
 	}
 
 	fs.appendFrame(f)
+}
+
+func (fs *BaseFrames[T]) Len() int {
+	return fs.RegisteredIndexes.Len()
 }
