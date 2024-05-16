@@ -100,23 +100,20 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 func (v *BoneFrame) Copy() IBaseFrame {
 	copied := &BoneFrame{
 		BaseFrame:          NewFrame(v.GetIndex()).(*BaseFrame),
-		Position:           mmath.NewMVec3(),
+		Position:           v.Position.Copy(),
 		MorphPosition:      nil,
 		LocalPosition:      nil,
 		MorphLocalPosition: nil,
 		Rotation:           v.Rotation.Copy(),
-		MorphRotation:      v.MorphRotation.Copy(),
-		LocalRotation:      v.LocalRotation.Copy(),
-		MorphLocalRotation: v.MorphLocalRotation.Copy(),
+		MorphRotation:      nil,
+		LocalRotation:      nil,
+		MorphLocalRotation: nil,
 		Scale:              nil,
 		MorphScale:         nil,
 		LocalScale:         nil,
 		MorphLocalScale:    nil,
-		IkRotation:         v.IkRotation.Copy(),
-		Curves:             v.Curves.Copy(),
-	}
-	if v.Position != nil {
-		copied.Position = v.Position.Copy()
+		IkRotation:         nil,
+		Curves:             nil,
 	}
 	if v.MorphPosition != nil {
 		copied.MorphPosition = v.MorphPosition.Copy()
@@ -126,6 +123,15 @@ func (v *BoneFrame) Copy() IBaseFrame {
 	}
 	if v.MorphLocalPosition != nil {
 		copied.MorphLocalPosition = v.MorphLocalPosition.Copy()
+	}
+	if v.MorphRotation != nil {
+		copied.MorphRotation = v.MorphRotation.Copy()
+	}
+	if v.LocalRotation != nil {
+		copied.LocalRotation = v.LocalRotation.Copy()
+	}
+	if v.MorphLocalRotation != nil {
+		copied.MorphLocalRotation = v.MorphLocalRotation.Copy()
 	}
 	if v.Scale != nil {
 		copied.Scale = v.Scale.Copy()
@@ -138,6 +144,12 @@ func (v *BoneFrame) Copy() IBaseFrame {
 	}
 	if v.MorphLocalScale != nil {
 		copied.MorphLocalScale = v.MorphLocalScale.Copy()
+	}
+	if v.IkRotation != nil {
+		copied.IkRotation = v.IkRotation.Copy()
+	}
+	if v.Curves != nil {
+		copied.Curves = v.Curves.Copy()
 	}
 	return copied
 }

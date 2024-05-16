@@ -245,28 +245,31 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalVertexCount; i++ {
-		v := &Vertex{IndexModel: &mcore.IndexModel{Index: i}}
+		v := Vertex{IndexModel: &mcore.IndexModel{Index: i}}
 
 		// 12 : float3  | 位置(x,y,z)
-		v.Position, err = r.UnpackVec3()
+		pos, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readVertices UnpackFloat Position error: %v", i, err)
 			return err
 		}
+		v.Position = &pos
 
 		// 12 : float3  | 法線(x,y,z)
-		v.Normal, err = r.UnpackVec3()
+		normal, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readVertices UnpackFloat Normal[0] error: %v", i, err)
 			return err
 		}
+		v.Normal = &normal
 
 		// 8  : float2  | UV(u,v)
-		v.UV, err = r.UnpackVec2()
+		uv, err := r.UnpackVec2()
 		if err != nil {
 			mlog.E("[%d] readVertices UnpackFloat UV[0] error: %v", i, err)
 			return err
 		}
+		v.UV = &uv
 
 		// 16 * n : float4[n] | 追加UV(x,y,z,w)  PMXヘッダの追加UV数による
 		v.ExtendedUVs = make([]*mmath.MVec4, 0)
@@ -276,7 +279,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 				mlog.E("[%d][%d] readVertices UnpackVec4 ExtendedUV error: %v", i, j, err)
 				return err
 			}
-			v.ExtendedUVs = append(v.ExtendedUVs, extendedUV)
+			v.ExtendedUVs = append(v.ExtendedUVs, &extendedUV)
 		}
 
 		// 1 : byte    | ウェイト変形方式 0:BDEF1 1:BDEF2 2:BDEF4 3:SDEF
@@ -403,7 +406,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 				mlog.E("[%d] readVertices SDEF UnpackVec3 sdefR1 error: %v", i, err)
 				return err
 			}
-			v.Deform = NewSdef(boneIndex1, boneIndex2, boneWeight, sdefC, sdefR0, sdefR1)
+			v.Deform = NewSdef(boneIndex1, boneIndex2, boneWeight, &sdefC, &sdefR0, &sdefR1)
 		}
 
 		v.EdgeFactor, err = r.UnpackFloat()
@@ -412,7 +415,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 			return err
 		}
 
-		model.Vertices.Append(v)
+		model.Vertices.Append(&v)
 	}
 
 	return nil
@@ -426,7 +429,7 @@ func (r *PmxReader) readFaces(model *PmxModel) error {
 	}
 
 	for i := 0; i < totalFaceCount; i += 3 {
-		f := &Face{
+		f := Face{
 			IndexModel:    &mcore.IndexModel{Index: int(i / 3)},
 			VertexIndexes: [3]int{},
 		}
@@ -452,7 +455,7 @@ func (r *PmxReader) readFaces(model *PmxModel) error {
 			return err
 		}
 
-		model.Faces.Append(f)
+		model.Faces.Append(&f)
 	}
 
 	return nil
@@ -490,28 +493,31 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 		// 4 + n : TextBuf	| 材質名英
 		englishName := r.ReadText()
 
-		m := &Material{
+		m := Material{
 			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 		}
 
 		// 16 : float4	| Diffuse (R,G,B,A)
-		m.Diffuse, err = r.UnpackVec4()
+		diffuse, err := r.UnpackVec4()
 		if err != nil {
 			mlog.E("[%d] readMaterials UnpackVec4 Diffuse error: %v", i, err)
 			return err
 		}
+		m.Diffuse = &diffuse
 		// 12 : float3	| Specular (R,G,B,Specular係数)
-		m.Specular, err = r.UnpackVec4()
+		specular, err := r.UnpackVec4()
 		if err != nil {
 			mlog.E("[%d] readMaterials UnpackVec4 Specular error: %v", i, err)
 			return err
 		}
+		m.Specular = &specular
 		// 12 : float3	| Ambient (R,G,B)
-		m.Ambient, err = r.UnpackVec3()
+		ambient, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readMaterials UnpackVec3 Ambient error: %v", i, err)
 			return err
 		}
+		m.Ambient = &ambient
 		// 1  : bitFlag  	| 描画フラグ(8bit) - 各bit 0:OFF 1:ON
 		drawFlag, err := r.UnpackByte()
 		if err != nil {
@@ -520,11 +526,12 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 		}
 		m.DrawFlag = DrawFlag(drawFlag)
 		// 16 : float4	| エッジ色 (R,G,B,A)
-		m.Edge, err = r.UnpackVec4()
+		edge, err := r.UnpackVec4()
 		if err != nil {
 			mlog.E("[%d] readMaterials UnpackVec4 Edge error: %v", i, err)
 			return err
 		}
+		m.Edge = &edge
 		// 4  : float	| エッジサイズ
 		m.EdgeSize, err = r.UnpackFloat()
 		if err != nil {
@@ -587,7 +594,7 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 			return err
 		}
 
-		model.Materials.Append(m)
+		model.Materials.Append(&m)
 	}
 
 	return nil
@@ -607,7 +614,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 		// 4 + n : TextBuf	| ボーン名英
 		englishName := r.ReadText()
 
-		b := &Bone{
+		b := Bone{
 			IndexNameModel:         &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 			IkLinkBoneIndexes:      make([]int, 0),
 			IkTargetBoneIndexes:    make([]int, 0),
@@ -631,11 +638,12 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 		}
 
 		// 12 : float3	| 位置
-		b.Position, err = r.UnpackVec3()
+		pos, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readBones UnpackVec3 Position error: %v", i, err)
 			return err
 		}
+		b.Position = &pos
 		// n  : ボーンIndexサイズ	| 親ボーン
 		b.ParentIndex, err = r.unpackBoneIndex(model)
 		if err != nil {
@@ -668,11 +676,12 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 		} else {
 			//  12 : float3	| 座標オフセット, ボーン位置からの相対分
 			b.TailIndex = -1
-			b.TailPosition, err = r.UnpackVec3()
+			tailPos, err := r.UnpackVec3()
 			if err != nil {
 				mlog.E("[%d] readBones UnpackVec3 TailPosition error: %v", i, err)
 				return err
 			}
+			b.TailPosition = &tailPos
 		}
 
 		// 回転付与:1 または 移動付与:1 の場合
@@ -697,11 +706,12 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 		// 軸固定:1 の場合
 		if b.HasFixedAxis() {
 			// 12 : float3	| 軸の方向ベクトル
-			b.FixedAxis, err = r.UnpackVec3()
+			fixedAxis, err := r.UnpackVec3()
 			if err != nil {
 				mlog.E("[%d] readBones UnpackVec3 FixedAxis error: %v", i, err)
 				return err
 			}
+			b.FixedAxis = &fixedAxis
 			b.NormalizeFixedAxis(b.FixedAxis.Normalize())
 		} else {
 			b.FixedAxis = mmath.NewMVec3()
@@ -710,17 +720,19 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 		// ローカル軸:1 の場合
 		if b.HasLocalAxis() {
 			// 12 : float3	| X軸の方向ベクトル
-			b.LocalAxisX, err = r.UnpackVec3()
+			localAxisX, err := r.UnpackVec3()
 			if err != nil {
 				mlog.E("[%d] readBones UnpackVec3 LocalAxisX error: %v", i, err)
 				return err
 			}
+			b.LocalAxisX = &localAxisX
 			// 12 : float3	| Z軸の方向ベクトル
-			b.LocalAxisZ, err = r.UnpackVec3()
+			localAxisZ, err := r.UnpackVec3()
 			if err != nil {
 				mlog.E("[%d] readBones UnpackVec3 LocalAxisZ error: %v", i, err)
 				return err
 			}
+			b.LocalAxisZ = &localAxisZ
 			b.NormalizeLocalAxis(b.LocalAxisX.Normalize())
 		} else {
 			b.LocalAxisX = mmath.NewMVec3()
@@ -788,20 +800,20 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 						mlog.E("[%d][%d] readBones UnpackVec3 IkLink.MinAngleLimit error: %v", i, j, err)
 						return err
 					}
-					il.MinAngleLimit.SetRadians(minAngleLimit)
+					il.MinAngleLimit.SetRadians(&minAngleLimit)
 					// 12 : float3	| 上限 (x,y,z) -> ラジアン角
 					maxAngleLimit, err := r.UnpackVec3()
 					if err != nil {
 						mlog.E("[%d][%d] readBones UnpackVec3 IkLink.MaxAngleLimit error: %v", i, j, err)
 						return err
 					}
-					il.MaxAngleLimit.SetRadians(maxAngleLimit)
+					il.MaxAngleLimit.SetRadians(&maxAngleLimit)
 				}
 				b.Ik.Links = append(b.Ik.Links, il)
 			}
 		}
 
-		model.Bones.Append(b)
+		model.Bones.Append(&b)
 	}
 
 	return nil
@@ -820,7 +832,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 		// 4 + n : TextBuf	| モーフ名英
 		englishName := r.ReadText()
 
-		m := &Morph{
+		m := Morph{
 			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 		}
 
@@ -872,7 +884,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					mlog.E("[%d][%d] readMorphs UnpackVec3 Offset error: %v", i, j, err)
 					return err
 				}
-				m.Offsets = append(m.Offsets, NewVertexMorph(vertexIndex, offset))
+				m.Offsets = append(m.Offsets, NewVertexMorph(vertexIndex, &offset))
 			case MORPH_TYPE_BONE:
 				// n  : ボーンIndexサイズ  | ボーンIndex
 				boneIndex, err := r.unpackBoneIndex(model)
@@ -892,9 +904,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					mlog.E("[%d][%d] readMorphs UnpackQuaternion Quaternion error: %v", i, j, err)
 					return err
 				}
-				rotation := mmath.NewRotation()
-				rotation.SetQuaternion(qq)
-				m.Offsets = append(m.Offsets, NewBoneMorph(boneIndex, offset, rotation))
+				m.Offsets = append(m.Offsets, NewBoneMorph(boneIndex, &offset, mmath.NewRotationByQuaternion(&qq)))
 			case MORPH_TYPE_UV, MORPH_TYPE_EXTENDED_UV1, MORPH_TYPE_EXTENDED_UV2, MORPH_TYPE_EXTENDED_UV3, MORPH_TYPE_EXTENDED_UV4:
 				// n  : 頂点Indexサイズ  | 頂点Index
 				vertexIndex, err := r.unpackVertexIndex(model)
@@ -908,7 +918,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					mlog.E("[%d][%d] readMorphs UnpackVec4 Offset error: %v", i, j, err)
 					return err
 				}
-				m.Offsets = append(m.Offsets, NewUvMorph(vertexIndex, offset))
+				m.Offsets = append(m.Offsets, NewUvMorph(vertexIndex, &offset))
 			case MORPH_TYPE_MATERIAL:
 				// n  : 材質Indexサイズ  | 材質Index -> -1:全材質対象
 				materialIndex, err := r.unpackMaterialIndex(model)
@@ -973,19 +983,19 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 				m.Offsets = append(m.Offsets, NewMaterialMorph(
 					materialIndex,
 					MaterialMorphCalcMode(calcMode),
-					diffuse,
-					specular,
-					ambient,
-					edge,
+					&diffuse,
+					&specular,
+					&ambient,
+					&edge,
 					edgeSize,
-					textureFactor,
-					sphereTextureFactor,
-					toonTextureFactor,
+					&textureFactor,
+					&sphereTextureFactor,
+					&toonTextureFactor,
 				))
 			}
 		}
 
-		model.Morphs.Append(m)
+		model.Morphs.Append(&m)
 	}
 
 	return nil
@@ -1004,7 +1014,7 @@ func (r *PmxReader) readDisplaySlots(model *PmxModel) error {
 		// 4 + n : TextBuf	| 枠名英
 		englishName := r.ReadText()
 
-		d := &DisplaySlot{
+		d := DisplaySlot{
 			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 			References:     make([]Reference, 0),
 		}
@@ -1054,7 +1064,7 @@ func (r *PmxReader) readDisplaySlots(model *PmxModel) error {
 
 			d.References = append(d.References, *reference)
 		}
-		model.DisplaySlots.Append(d)
+		model.DisplaySlots.Append(&d)
 	}
 
 	return nil
@@ -1073,9 +1083,8 @@ func (r *PmxReader) readRigidBodies(model *PmxModel) error {
 		// 4 + n : TextBuf	| 剛体名英
 		englishName := r.ReadText()
 
-		b := &RigidBody{
+		b := RigidBody{
 			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
-			Rotation:       mmath.NewRotation(),
 			RigidBodyParam: NewRigidBodyParam(),
 		}
 
@@ -1108,24 +1117,26 @@ func (r *PmxReader) readRigidBodies(model *PmxModel) error {
 		}
 		b.ShapeType = Shape(shapeType)
 		// 12 : float3	| サイズ(x,y,z)
-		b.Size, err = r.UnpackVec3()
+		size, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readRigidBodies UnpackVec3 Size error: %v", i, err)
 			return err
 		}
+		b.Size = &size
 		// 12 : float3	| 位置(x,y,z)
-		b.Position, err = r.UnpackVec3()
+		position, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readRigidBodies UnpackVec3 Position error: %v", i, err)
 			return err
 		}
+		b.Position = &position
 		// 12 : float3	| 回転(x,y,z) -> ラジアン角
 		rads, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readRigidBodies UnpackVec3 Rotation error: %v", i, err)
 			return err
 		}
-		b.Rotation.SetRadians(rads)
+		b.Rotation = mmath.NewRotationByRadians(&rads)
 		// 4  : float	| 質量
 		b.RigidBodyParam.Mass, err = r.UnpackFloat()
 		if err != nil {
@@ -1164,7 +1175,7 @@ func (r *PmxReader) readRigidBodies(model *PmxModel) error {
 		}
 		b.PhysicsType = PhysicsType(physicsType)
 
-		model.RigidBodies.Append(b)
+		model.RigidBodies.Append(&b)
 	}
 
 	return nil
@@ -1183,9 +1194,8 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 		// 4 + n : TextBuf	| Joint名英
 		englishName := r.ReadText()
 
-		j := &Joint{
+		j := Joint{
 			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
-			Rotation:       mmath.NewRotation(),
 			JointParam:     NewJointParam(),
 		}
 
@@ -1208,59 +1218,63 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 			return err
 		}
 		// 12 : float3	| 位置(x,y,z)
-		j.Position, err = r.UnpackVec3()
+		position, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readJoints UnpackVec3 Position error: %v", i, err)
 			return err
 		}
+		j.Position = &position
 		// 12 : float3	| 回転(x,y,z) -> ラジアン角
 		rads, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readJoints UnpackVec3 Rotation error: %v", i, err)
 			return err
 		}
-		j.Rotation.SetRadians(rads)
+		j.Rotation = mmath.NewRotationByRadians(&rads)
 		// 12 : float3	| 移動制限-下限(x,y,z)
-		j.JointParam.TranslationLimitMin, err = r.UnpackVec3()
+		translationLimitMin, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readJoints UnpackVec3 TranslationLimitMin error: %v", i, err)
 			return err
 		}
+		j.JointParam.TranslationLimitMin = &translationLimitMin
 		// 12 : float3	| 移動制限-上限(x,y,z)
-		j.JointParam.TranslationLimitMax, err = r.UnpackVec3()
+		translationLimitMax, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readJoints UnpackVec3 TranslationLimitMax error: %v", i, err)
 			return err
 		}
+		j.JointParam.TranslationLimitMax = &translationLimitMax
 		// 12 : float3	| 回転制限-下限(x,y,z) -> ラジアン角
 		rotationLimitMin, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readJoints UnpackVec3 RotationLimitMin error: %v", i, err)
 			return err
 		}
-		j.JointParam.RotationLimitMin.SetRadians(rotationLimitMin)
+		j.JointParam.RotationLimitMin = mmath.NewRotationByRadians(&rotationLimitMin)
 		// 12 : float3	| 回転制限-上限(x,y,z) -> ラジアン角
 		rotationLimitMax, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readJoints UnpackVec3 RotationLimitMax error: %v", i, err)
 			return err
 		}
-		j.JointParam.RotationLimitMax.SetRadians(rotationLimitMax)
+		j.JointParam.RotationLimitMax = mmath.NewRotationByRadians(&rotationLimitMax)
 		// 12 : float3	| バネ定数-移動(x,y,z)
-		j.JointParam.SpringConstantTranslation, err = r.UnpackVec3()
+		springConstantTranslation, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readJoints UnpackVec3 SpringConstantTranslation error: %v", i, err)
 			return err
 		}
+		j.JointParam.SpringConstantTranslation = &springConstantTranslation
 		// 12 : float3	| バネ定数-回転(x,y,z)
 		springConstantRotation, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readJoints UnpackVec3 SpringConstantRotation error: %v", i, err)
 			return err
 		}
-		j.JointParam.SpringConstantRotation.SetDegrees(springConstantRotation)
+		j.JointParam.SpringConstantRotation = mmath.NewRotationByDegrees(&springConstantRotation)
 
-		model.Joints.Append(j)
+		model.Joints.Append(&j)
 	}
 
 	return nil

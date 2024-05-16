@@ -181,19 +181,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 
 	for i := 0; i < int(totalCount); i++ {
 		v := &BoneFrame{
-			BaseFrame:          NewFrame(i).(*BaseFrame),
-			MorphPosition:      nil,
-			LocalPosition:      nil,
-			MorphLocalPosition: nil,
-			Rotation:           mmath.NewRotation(),
-			MorphRotation:      mmath.NewRotation(),
-			LocalRotation:      mmath.NewRotation(),
-			MorphLocalRotation: mmath.NewRotation(),
-			Scale:              nil,
-			MorphScale:         nil,
-			LocalScale:         nil,
-			MorphLocalScale:    nil,
-			IkRotation:         mmath.NewRotation(),
+			BaseFrame: NewFrame(i).(*BaseFrame),
 		}
 		v.Read = true
 
@@ -213,11 +201,12 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 		v.SetIndex(int(index))
 
 		// 位置X,Y,Z
-		v.Position, err = r.UnpackVec3()
+		position, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readBones.Position error: %v", i, err)
 			return err
 		}
+		v.Position = &position
 
 		// 回転X,Y,Z,W
 		qq, err := r.UnpackQuaternion()
@@ -225,7 +214,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 			mlog.E("[%d] readBones.Quaternion error: %v", i, err)
 			return err
 		}
-		v.Rotation.SetQuaternion(qq)
+		v.Rotation = mmath.NewRotationByQuaternion(&qq)
 
 		// 補間曲線
 		curves, err := r.UnpackBytes(64)
@@ -309,11 +298,12 @@ func (r *VmdMotionReader) readCameras(motion *VmdMotion) error {
 		}
 
 		// 位置X,Y,Z
-		v.Position, err = r.UnpackVec3()
+		position, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readCameras.Position error: %v", i, err)
 			return err
 		}
+		v.Position = &position
 
 		// 回転(オイラー角度)
 		degrees, err := r.UnpackVec3()
@@ -321,7 +311,7 @@ func (r *VmdMotionReader) readCameras(motion *VmdMotion) error {
 			mlog.E("[%d] readCameras.Degrees error: %v", i, err)
 			return err
 		}
-		v.Rotation.SetDegrees(degrees)
+		v.Rotation = mmath.NewRotationByDegrees(&degrees)
 
 		// 補間曲線
 		curves, err := r.UnpackBytes(24)
@@ -374,18 +364,20 @@ func (r *VmdMotionReader) readLights(motion *VmdMotion) error {
 		v.SetIndex(int(index))
 
 		// 照明色
-		v.Color, err = r.UnpackVec3()
+		color, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readLights.Color error: %v", i, err)
 			return err
 		}
+		v.Color = &color
 
 		// 位置X,Y,Z
-		v.Position, err = r.UnpackVec3()
+		position, err := r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readLights.Position error: %v", i, err)
 			return err
 		}
+		v.Position = &position
 
 		motion.AppendLightFrame(v)
 	}
