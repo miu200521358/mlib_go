@@ -67,15 +67,15 @@ type TMorphOffset interface {
 
 // VertexMorphOffset represents a vertex morph.
 type VertexMorphOffset struct {
-	VertexIndex int         // 頂点INDEX
-	Position    mmath.MVec3 // 座標オフセット量(x,y,z)
+	VertexIndex int          // 頂点INDEX
+	Position    *mmath.MVec3 // 座標オフセット量(x,y,z)
 }
 
 func (v *VertexMorphOffset) GetType() int {
 	return int(MORPH_TYPE_VERTEX)
 }
 
-func NewVertexMorph(vertexIndex int, position mmath.MVec3) *VertexMorphOffset {
+func NewVertexMorph(vertexIndex int, position *mmath.MVec3) *VertexMorphOffset {
 	return &VertexMorphOffset{
 		VertexIndex: vertexIndex,
 		Position:    position,
@@ -84,15 +84,15 @@ func NewVertexMorph(vertexIndex int, position mmath.MVec3) *VertexMorphOffset {
 
 // UvMorphOffset represents a UV morph.
 type UvMorphOffset struct {
-	VertexIndex int         // 頂点INDEX
-	Uv          mmath.MVec4 // UVオフセット量(x,y,z,w)
+	VertexIndex int          // 頂点INDEX
+	Uv          *mmath.MVec4 // UVオフセット量(x,y,z,w)
 }
 
 func (v *UvMorphOffset) GetType() int {
 	return int(MORPH_TYPE_UV)
 }
 
-func NewUvMorph(vertexIndex int, uv mmath.MVec4) *UvMorphOffset {
+func NewUvMorph(vertexIndex int, uv *mmath.MVec4) *UvMorphOffset {
 	return &UvMorphOffset{
 		VertexIndex: vertexIndex,
 		Uv:          uv,
@@ -101,27 +101,27 @@ func NewUvMorph(vertexIndex int, uv mmath.MVec4) *UvMorphOffset {
 
 // BoneMorphOffset represents a bone morph.
 type BoneMorphOffset struct {
-	BoneIndex     int             // ボーンIndex
-	Position      mmath.MVec3     // グローバル移動量(x,y,z)
-	Rotation      mmath.MRotation // グローバル回転量-クォータニオン(x,y,z,w)
-	Scale         mmath.MVec3     // グローバル縮尺量(x,y,z) ※システム独自
-	LocalPosition mmath.MVec3     // ローカル軸に沿った移動量(x,y,z) ※システム独自
-	LocalRotation mmath.MRotation // ローカル軸に沿った回転量-クォータニオン(x,y,z,w) ※システム独自
-	LocalScale    mmath.MVec3     // ローカル軸に沿った縮尺量(x,y,z) ※システム独自
+	BoneIndex     int              // ボーンIndex
+	Position      *mmath.MVec3     // グローバル移動量(x,y,z)
+	Rotation      *mmath.MRotation // グローバル回転量-クォータニオン(x,y,z,w)
+	Scale         *mmath.MVec3     // グローバル縮尺量(x,y,z) ※システム独自
+	LocalPosition *mmath.MVec3     // ローカル軸に沿った移動量(x,y,z) ※システム独自
+	LocalRotation *mmath.MRotation // ローカル軸に沿った回転量-クォータニオン(x,y,z,w) ※システム独自
+	LocalScale    *mmath.MVec3     // ローカル軸に沿った縮尺量(x,y,z) ※システム独自
 }
 
 func (v *BoneMorphOffset) GetType() int {
 	return int(MORPH_TYPE_BONE)
 }
 
-func NewBoneMorph(boneIndex int, position mmath.MVec3, rotation mmath.MRotation) *BoneMorphOffset {
+func NewBoneMorph(boneIndex int, position *mmath.MVec3, rotation *mmath.MRotation) *BoneMorphOffset {
 	return &BoneMorphOffset{
 		BoneIndex:     boneIndex,
 		Position:      position,
 		Rotation:      rotation,
 		Scale:         mmath.NewMVec3(),
 		LocalPosition: mmath.NewMVec3(),
-		LocalRotation: *mmath.NewRotation(),
+		LocalRotation: mmath.NewRotation(),
 		LocalScale:    mmath.NewMVec3(),
 	}
 }
@@ -155,14 +155,14 @@ const (
 type MaterialMorphOffset struct {
 	MaterialIndex       int                   // 材質Index -> -1:全材質対象
 	CalcMode            MaterialMorphCalcMode // 0:乗算, 1:加算
-	Diffuse             mmath.MVec4           // Diffuse (R,G,B,A)
-	Specular            mmath.MVec4           // SpecularColor (R,G,B, 係数)
-	Ambient             mmath.MVec3           // AmbientColor (R,G,B)
-	Edge                mmath.MVec4           // エッジ色 (R,G,B,A)
+	Diffuse             *mmath.MVec4          // Diffuse (R,G,B,A)
+	Specular            *mmath.MVec4          // SpecularColor (R,G,B, 係数)
+	Ambient             *mmath.MVec3          // AmbientColor (R,G,B)
+	Edge                *mmath.MVec4          // エッジ色 (R,G,B,A)
 	EdgeSize            float64               // エッジサイズ
-	TextureFactor       mmath.MVec4           // テクスチャ係数 (R,G,B,A)
-	SphereTextureFactor mmath.MVec4           // スフィアテクスチャ係数 (R,G,B,A)
-	ToonTextureFactor   mmath.MVec4           // Toonテクスチャ係数 (R,G,B,A)
+	TextureFactor       *mmath.MVec4          // テクスチャ係数 (R,G,B,A)
+	SphereTextureFactor *mmath.MVec4          // スフィアテクスチャ係数 (R,G,B,A)
+	ToonTextureFactor   *mmath.MVec4          // Toonテクスチャ係数 (R,G,B,A)
 }
 
 func (v *MaterialMorphOffset) GetType() int {
@@ -172,14 +172,14 @@ func (v *MaterialMorphOffset) GetType() int {
 func NewMaterialMorph(
 	materialIndex int,
 	calcMode MaterialMorphCalcMode,
-	diffuse mmath.MVec4,
-	specular mmath.MVec4,
-	ambient mmath.MVec3,
-	edge mmath.MVec4,
+	diffuse *mmath.MVec4,
+	specular *mmath.MVec4,
+	ambient *mmath.MVec3,
+	edge *mmath.MVec4,
 	edgeSize float64,
-	textureFactor mmath.MVec4,
-	sphereTextureFactor mmath.MVec4,
-	toonTextureFactor mmath.MVec4,
+	textureFactor *mmath.MVec4,
+	sphereTextureFactor *mmath.MVec4,
+	toonTextureFactor *mmath.MVec4,
 ) *MaterialMorphOffset {
 	return &MaterialMorphOffset{
 		MaterialIndex:       materialIndex,

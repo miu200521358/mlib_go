@@ -28,8 +28,8 @@ var (
 
 type MVec2 mgl64.Vec2
 
-func NewMVec2() MVec2 {
-	return MVec2{}
+func NewMVec2() *MVec2 {
+	return &MVec2{}
 }
 
 // GetX returns the value of the X coordinate
@@ -378,8 +378,8 @@ func (v *MVec2) Rotate90DegRight() *MVec2 {
 }
 
 // Copy
-func (v *MVec2) Copy() MVec2 {
-	return MVec2{v.GetX(), v.GetY()}
+func (v *MVec2) Copy() *MVec2 {
+	return &MVec2{v.GetX(), v.GetY()}
 }
 
 // Vector

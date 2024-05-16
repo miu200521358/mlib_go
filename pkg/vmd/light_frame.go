@@ -5,9 +5,9 @@ import (
 )
 
 type LightFrame struct {
-	*BaseFrame             // キーフレ
-	Position   mmath.MVec3 // 位置
-	Color      mmath.MVec3 // 色
+	*BaseFrame              // キーフレ
+	Position   *mmath.MVec3 // 位置
+	Color      *mmath.MVec3 // 色
 }
 
 func NewLightFrame(index int) *LightFrame {
@@ -19,15 +19,15 @@ func NewLightFrame(index int) *LightFrame {
 }
 
 func (lf *LightFrame) Add(v *LightFrame) {
-	lf.Position.Add(&v.Position)
-	lf.Color.Add(&v.Color)
+	lf.Position.Add(v.Position)
+	lf.Color.Add(v.Color)
 }
 
 func (lf *LightFrame) Added(v *LightFrame) *LightFrame {
 	copied := lf.Copy().(*LightFrame)
 
-	copied.Position.Add(&v.Position)
-	copied.Color.Add(&v.Color)
+	copied.Position.Add(v.Position)
+	copied.Color.Add(v.Color)
 
 	return copied
 }
@@ -45,8 +45,8 @@ func (nextLf *LightFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame 
 	// 線形補間
 	t := float64(nextLf.GetIndex()-index) / float64(nextLf.GetIndex()-prevLf.GetIndex())
 	vv := &LightFrame{
-		Position: *mmath.LerpVec3(&prevLf.Position, &nextLf.Position, t),
-		Color:    *mmath.LerpVec3(&prevLf.Color, &nextLf.Color, t),
+		Position: mmath.LerpVec3(prevLf.Position, nextLf.Position, t),
+		Color:    mmath.LerpVec3(prevLf.Color, nextLf.Color, t),
 	}
 	return vv
 }

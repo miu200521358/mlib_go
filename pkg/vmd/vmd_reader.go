@@ -180,27 +180,19 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		morphPosition := mmath.NewMVec3()
-		localPosition := mmath.NewMVec3()
-		morphLocalPosition := mmath.NewMVec3()
-		scale := mmath.NewMVec3()
-		morphScale := mmath.NewMVec3()
-		localScale := mmath.NewMVec3()
-		morphLocalScale := mmath.NewMVec3()
-
 		v := &BoneFrame{
 			BaseFrame:          NewFrame(i).(*BaseFrame),
-			MorphPosition:      &morphPosition,
-			LocalPosition:      &localPosition,
-			MorphLocalPosition: &morphLocalPosition,
+			MorphPosition:      mmath.NewMVec3(),
+			LocalPosition:      mmath.NewMVec3(),
+			MorphLocalPosition: mmath.NewMVec3(),
 			Rotation:           mmath.NewRotation(),
 			MorphRotation:      mmath.NewRotation(),
 			LocalRotation:      mmath.NewRotation(),
 			MorphLocalRotation: mmath.NewRotation(),
-			Scale:              &scale,
-			MorphScale:         &morphScale,
-			LocalScale:         &localScale,
-			MorphLocalScale:    &morphLocalScale,
+			Scale:              mmath.NewMVec3(),
+			MorphScale:         mmath.NewMVec3(),
+			LocalScale:         mmath.NewMVec3(),
+			MorphLocalScale:    mmath.NewMVec3(),
 			IkRotation:         mmath.NewRotation(),
 		}
 		v.Read = true
@@ -221,12 +213,11 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 		v.SetIndex(int(index))
 
 		// 位置X,Y,Z
-		position, err := r.UnpackVec3()
+		v.Position, err = r.UnpackVec3()
 		if err != nil {
 			mlog.E("[%d] readBones.Position error: %v", i, err)
 			return err
 		}
-		v.Position = &position
 
 		// 回転X,Y,Z,W
 		qq, err := r.UnpackQuaternion()
@@ -234,7 +225,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 			mlog.E("[%d] readBones.Quaternion error: %v", i, err)
 			return err
 		}
-		v.Rotation.SetQuaternion(&qq)
+		v.Rotation.SetQuaternion(qq)
 
 		// 補間曲線
 		curves, err := r.UnpackBytes(64)
@@ -330,7 +321,7 @@ func (r *VmdMotionReader) readCameras(motion *VmdMotion) error {
 			mlog.E("[%d] readCameras.Degrees error: %v", i, err)
 			return err
 		}
-		v.Rotation.SetDegrees(&degrees)
+		v.Rotation.SetDegrees(degrees)
 
 		// 補間曲線
 		curves, err := r.UnpackBytes(24)

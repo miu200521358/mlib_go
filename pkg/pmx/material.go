@@ -75,22 +75,22 @@ const (
 
 type Material struct {
 	*mcore.IndexNameModel
-	Diffuse             mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
-	Specular            mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
-	Ambient             mmath.MVec3 // Ambient (R,G,B)(環境色)
-	DrawFlag            DrawFlag    // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
-	Edge                mmath.MVec4 // エッジ色 (R,G,B,A)
-	EdgeSize            float64     // エッジサイズ
-	TextureIndex        int         // 通常テクスチャINDEX
-	SphereTextureIndex  int         // スフィアテクスチャINDEX
-	SphereMode          SphereMode  // スフィアモード
-	ToonSharingFlag     ToonSharing // 共有Toonフラグ
-	ToonTextureIndex    int         // ToonテクスチャINDEX
-	Memo                string      // メモ
-	VerticesCount       int         // 材質に対応する面(頂点)数 (必ず3の倍数になる)
-	TextureFactor       mmath.MVec4 // テクスチャ係数
-	SphereTextureFactor mmath.MVec4 // スフィアテクスチャ係数
-	ToonTextureFactor   mmath.MVec4 // トゥーンテクスチャ係数
+	Diffuse             *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
+	Specular            *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
+	Ambient             *mmath.MVec3 // Ambient (R,G,B)(環境色)
+	DrawFlag            DrawFlag     // 描画フラグ(8bit) - 各bit 0:OFF 1:ON
+	Edge                *mmath.MVec4 // エッジ色 (R,G,B,A)
+	EdgeSize            float64      // エッジサイズ
+	TextureIndex        int          // 通常テクスチャINDEX
+	SphereTextureIndex  int          // スフィアテクスチャINDEX
+	SphereMode          SphereMode   // スフィアモード
+	ToonSharingFlag     ToonSharing  // 共有Toonフラグ
+	ToonTextureIndex    int          // ToonテクスチャINDEX
+	Memo                string       // メモ
+	VerticesCount       int          // 材質に対応する面(頂点)数 (必ず3の倍数になる)
+	TextureFactor       *mmath.MVec4 // テクスチャ係数
+	SphereTextureFactor *mmath.MVec4 // スフィアテクスチャ係数
+	ToonTextureFactor   *mmath.MVec4 // トゥーンテクスチャ係数
 }
 
 func NewMaterial() *Material {

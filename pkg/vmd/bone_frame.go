@@ -24,29 +24,20 @@ type BoneFrame struct {
 }
 
 func NewBoneFrame(index int) *BoneFrame {
-	position := mmath.NewMVec3()
-	morphPosition := mmath.NewMVec3()
-	localPosition := mmath.NewMVec3()
-	morphLocalPosition := mmath.NewMVec3()
-	scale := mmath.NewMVec3()
-	morphScale := mmath.NewMVec3()
-	localScale := mmath.NewMVec3()
-	morphLocalScale := mmath.NewMVec3()
-
 	return &BoneFrame{
 		BaseFrame:          NewFrame(index).(*BaseFrame),
-		Position:           &position,
-		MorphPosition:      &morphPosition,
-		LocalPosition:      &localPosition,
-		MorphLocalPosition: &morphLocalPosition,
+		Position:           mmath.NewMVec3(),
+		MorphPosition:      mmath.NewMVec3(),
+		LocalPosition:      mmath.NewMVec3(),
+		MorphLocalPosition: mmath.NewMVec3(),
 		Rotation:           mmath.NewRotation(),
 		MorphRotation:      mmath.NewRotation(),
 		LocalRotation:      mmath.NewRotation(),
 		MorphLocalRotation: mmath.NewRotation(),
-		Scale:              &scale,
-		MorphScale:         &morphScale,
-		LocalScale:         &localScale,
-		MorphLocalScale:    &morphLocalScale,
+		Scale:              mmath.NewMVec3(),
+		MorphScale:         mmath.NewMVec3(),
+		LocalScale:         mmath.NewMVec3(),
+		MorphLocalScale:    mmath.NewMVec3(),
 		IkRotation:         mmath.NewRotation(),
 		Curves:             NewBoneCurves(),
 	}
@@ -89,33 +80,24 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 }
 
 func (v *BoneFrame) Copy() IBaseFrame {
-	position := v.Position.Copy()
-	morphPosition := v.MorphPosition.Copy()
-	localPosition := v.LocalPosition.Copy()
-	morphLocalPosition := v.MorphLocalPosition.Copy()
-	scale := v.Scale.Copy()
-	morphScale := v.MorphScale.Copy()
-	localScale := v.LocalScale.Copy()
-	morphLocalScale := v.MorphLocalScale.Copy()
-
-	copied := BoneFrame{
+	copied := &BoneFrame{
 		BaseFrame:          NewFrame(v.GetIndex()).(*BaseFrame),
-		Position:           &position,
-		MorphPosition:      &morphPosition,
-		LocalPosition:      &localPosition,
-		MorphLocalPosition: &morphLocalPosition,
+		Position:           v.Position.Copy(),
+		MorphPosition:      v.MorphPosition.Copy(),
+		LocalPosition:      v.LocalPosition.Copy(),
+		MorphLocalPosition: v.MorphLocalPosition.Copy(),
 		Rotation:           v.Rotation.Copy(),
 		MorphRotation:      v.MorphRotation.Copy(),
 		LocalRotation:      v.LocalRotation.Copy(),
 		MorphLocalRotation: v.MorphLocalRotation.Copy(),
-		Scale:              &scale,
-		MorphScale:         &morphScale,
-		LocalScale:         &localScale,
-		MorphLocalScale:    &morphLocalScale,
+		Scale:              v.Scale.Copy(),
+		MorphScale:         v.MorphScale.Copy(),
+		LocalScale:         v.LocalScale.Copy(),
+		MorphLocalScale:    v.MorphLocalScale.Copy(),
 		IkRotation:         v.IkRotation.Copy(),
 		Curves:             v.Curves.Copy(),
 	}
-	return &copied
+	return copied
 }
 
 func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
@@ -136,31 +118,31 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	qq := prevBf.Rotation.GetQuaternion().Slerp(nextBf.Rotation.GetQuaternion(), ry)
 	bf.Rotation.SetQuaternion(qq)
 
-	prevX := mmath.MVec4{
+	prevX := &mmath.MVec4{
 		prevBf.Position.GetX(), prevBf.LocalPosition.GetX(), prevBf.Scale.GetX(), prevBf.LocalScale.GetX()}
-	nextX := mmath.MVec4{
+	nextX := &mmath.MVec4{
 		nextBf.Position.GetX(), nextBf.LocalPosition.GetX(), nextBf.Scale.GetX(), nextBf.LocalScale.GetX()}
-	nowX := mmath.LerpVec4(&prevX, &nextX, xy)
+	nowX := mmath.LerpVec4(prevX, nextX, xy)
 	bf.Position.SetX(nowX[0])
 	bf.LocalPosition.SetX(nowX[1])
 	bf.Scale.SetX(nowX[2])
 	bf.LocalScale.SetX(nowX[3])
 
-	prevY := mmath.MVec4{
+	prevY := &mmath.MVec4{
 		prevBf.Position.GetY(), prevBf.LocalPosition.GetY(), prevBf.Scale.GetY(), prevBf.LocalScale.GetY()}
-	nextY := mmath.MVec4{
+	nextY := &mmath.MVec4{
 		nextBf.Position.GetY(), nextBf.LocalPosition.GetY(), nextBf.Scale.GetY(), nextBf.LocalScale.GetY()}
-	nowY := mmath.LerpVec4(&prevY, &nextY, yy)
+	nowY := mmath.LerpVec4(prevY, nextY, yy)
 	bf.Position.SetY(nowY[0])
 	bf.LocalPosition.SetY(nowY[1])
 	bf.Scale.SetY(nowY[2])
 	bf.LocalScale.SetY(nowY[3])
 
-	prevZ := mmath.MVec4{
+	prevZ := &mmath.MVec4{
 		prevBf.Position.GetZ(), prevBf.LocalPosition.GetZ(), prevBf.Scale.GetZ(), prevBf.LocalScale.GetZ()}
-	nextZ := mmath.MVec4{
+	nextZ := &mmath.MVec4{
 		nextBf.Position.GetZ(), nextBf.LocalPosition.GetZ(), nextBf.Scale.GetZ(), nextBf.LocalScale.GetZ()}
-	nowZ := mmath.LerpVec4(&prevZ, &nextZ, zy)
+	nowZ := mmath.LerpVec4(prevZ, nextZ, zy)
 	bf.Position.SetZ(nowZ[0])
 	bf.LocalPosition.SetZ(nowZ[1])
 	bf.Scale.SetZ(nowZ[2])

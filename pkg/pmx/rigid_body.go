@@ -98,15 +98,15 @@ type RigidBody struct {
 	CollisionGroupMask      CollisionGroup   // 非衝突グループフラグ
 	CollisionGroupMaskValue int              // 非衝突グループフラグ値
 	ShapeType               Shape            // 形状
-	Size                    mmath.MVec3      // サイズ(x,y,z)
-	Position                mmath.MVec3      // 位置(x,y,z)
+	Size                    *mmath.MVec3     // サイズ(x,y,z)
+	Position                *mmath.MVec3     // 位置(x,y,z)
 	Rotation                *mmath.MRotation // 回転(x,y,z) -> ラジアン角
 	RigidBodyParam          *RigidBodyParam  // 剛体パラ
 	PhysicsType             PhysicsType      // 剛体の物理演算
 	CorrectPhysicsType      PhysicsType      // 剛体の物理演算(補正後)
-	XDirection              mmath.MVec3      // X軸方向
-	YDirection              mmath.MVec3      // Y軸方向
-	ZDirection              mmath.MVec3      // Z軸方向
+	XDirection              *mmath.MVec3     // X軸方向
+	YDirection              *mmath.MVec3     // Y軸方向
+	ZDirection              *mmath.MVec3     // Z軸方向
 	IsSystem                bool             // システムで追加した剛体か
 	Matrix                  *mmath.MMat4     // 剛体の行列
 	JointedBoneIndex        int              // ジョイントで繋がってるボーンIndex

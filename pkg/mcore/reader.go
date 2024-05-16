@@ -218,19 +218,19 @@ func (r *BaseReader[T]) UnpackFloat() (float64, error) {
 	return float64(math.Float32frombits(binary.LittleEndian.Uint32(chunk))), nil
 }
 
-func (r *BaseReader[T]) UnpackVec2() (mmath.MVec2, error) {
+func (r *BaseReader[T]) UnpackVec2() (*mmath.MVec2, error) {
 	x, err := r.UnpackFloat()
 	if err != nil {
-		return mmath.MVec2{}, err
+		return mmath.NewMVec2(), err
 	}
 	y, err := r.UnpackFloat()
 	if err != nil {
-		return mmath.MVec2{}, err
+		return mmath.NewMVec2(), err
 	}
-	return mmath.MVec2{x, y}, nil
+	return &mmath.MVec2{x, y}, nil
 }
 
-func (r *BaseReader[T]) UnpackVec3() (mmath.MVec3, error) {
+func (r *BaseReader[T]) UnpackVec3() (*mmath.MVec3, error) {
 	x, err := r.UnpackFloat()
 	if err != nil {
 		return mmath.NewMVec3(), err
@@ -243,10 +243,10 @@ func (r *BaseReader[T]) UnpackVec3() (mmath.MVec3, error) {
 	if err != nil {
 		return mmath.NewMVec3(), err
 	}
-	return mmath.MVec3{x, y, z}, nil
+	return &mmath.MVec3{x, y, z}, nil
 }
 
-func (r *BaseReader[T]) UnpackVec4() (mmath.MVec4, error) {
+func (r *BaseReader[T]) UnpackVec4() (*mmath.MVec4, error) {
 	x, err := r.UnpackFloat()
 	if err != nil {
 		return mmath.NewMVec4(), err
@@ -263,10 +263,10 @@ func (r *BaseReader[T]) UnpackVec4() (mmath.MVec4, error) {
 	if err != nil {
 		return mmath.NewMVec4(), err
 	}
-	return mmath.MVec4{x, y, z, w}, nil
+	return &mmath.MVec4{x, y, z, w}, nil
 }
 
-func (r *BaseReader[T]) UnpackQuaternion() (mmath.MQuaternion, error) {
+func (r *BaseReader[T]) UnpackQuaternion() (*mmath.MQuaternion, error) {
 	x, err := r.UnpackFloat()
 	if err != nil {
 		return mmath.NewMQuaternion(), err

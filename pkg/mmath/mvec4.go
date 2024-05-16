@@ -44,8 +44,8 @@ var (
 
 type MVec4 mgl64.Vec4
 
-func NewMVec4() MVec4 {
-	return MVec4{}
+func NewMVec4() *MVec4 {
+	return &MVec4{}
 }
 
 // GetX returns the value of the X coordinate
@@ -456,9 +456,9 @@ func (v *MVec4) Clamped01() *MVec4 {
 }
 
 // Copy
-func (v *MVec4) Copy() MVec4 {
+func (v *MVec4) Copy() *MVec4 {
 	copied := MVec4{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
-	return copied
+	return &copied
 }
 
 // Vector

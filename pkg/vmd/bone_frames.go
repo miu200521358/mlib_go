@@ -407,7 +407,7 @@ ikLoop:
 					ikLink.MaxAngleLimit.GetRadians().GetX() != 0 ||
 					ikLink.LocalMinAngleLimit.GetRadians().GetX() != 0 ||
 					ikLink.LocalMaxAngleLimit.GetRadians().GetX() != 0 {
-					axisVector := mmath.MVec3{1, 0, 0}
+					axisVector := &mmath.MVec3{1, 0, 0}
 					if ikLink.LocalAngleLimit {
 						axisVector = ikBone.NormalizedLocalAxisX
 					}
@@ -421,7 +421,7 @@ ikLoop:
 					ikLink.MaxAngleLimit.GetRadians().GetY() != 0 ||
 					ikLink.LocalMinAngleLimit.GetRadians().GetY() != 0 ||
 					ikLink.LocalMaxAngleLimit.GetRadians().GetY() != 0 {
-					axisVector := mmath.MVec3{0, 1, 0}
+					axisVector := &mmath.MVec3{0, 1, 0}
 					if ikLink.LocalAngleLimit {
 						axisVector = ikBone.NormalizedLocalAxisY
 					}
@@ -435,7 +435,7 @@ ikLoop:
 					ikLink.MaxAngleLimit.GetRadians().GetZ() != 0 ||
 					ikLink.LocalMinAngleLimit.GetRadians().GetZ() != 0 ||
 					ikLink.LocalMaxAngleLimit.GetRadians().GetZ() != 0 {
-					axisVector := mmath.MVec3{0, 0, 1}
+					axisVector := &mmath.MVec3{0, 0, 1}
 					if ikLink.LocalAngleLimit {
 						axisVector = ikBone.NormalizedLocalAxisZ
 					}
@@ -463,8 +463,7 @@ ikLoop:
 			} else {
 				if linkBone.HasFixedAxis() {
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-						qq := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
-						quat := qq.Shorten()
+						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
 						bf := NewBoneFrame(count)
 						bf.Rotation.SetQuaternion(quat)
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
@@ -479,11 +478,10 @@ ikLoop:
 					}
 
 					// 軸制限ありの場合、軸にそった理想回転量とする
-					linkAxis = &linkBone.NormalizedFixedAxis
+					linkAxis = linkBone.NormalizedFixedAxis
 
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-						qq := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
-						quat := qq.Shorten()
+						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
 						bf := NewBoneFrame(count)
 						bf.Rotation.SetQuaternion(quat)
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
@@ -498,8 +496,7 @@ ikLoop:
 					}
 				}
 
-				correctIkQq := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
-				correctIkQuat := correctIkQq.Shorten()
+				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
@@ -533,7 +530,7 @@ ikLoop:
 
 			if linkBone.HasFixedAxis() {
 				// 軸制限回転を求める
-				totalActualIkQuat = totalActualIkQuat.ToFixedAxisRotation(&linkBone.NormalizedFixedAxis)
+				totalActualIkQuat = totalActualIkQuat.ToFixedAxisRotation(linkBone.NormalizedFixedAxis)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
@@ -603,7 +600,7 @@ func (fs *BoneFrames) calcSingleAxisRad(
 	quatAxis *mmath.MVec3,
 	quatAngle float64,
 	axisIndex int,
-	axisVector mmath.MVec3,
+	axisVector *mmath.MVec3,
 	frame int,
 	count int,
 	loop int,
@@ -611,8 +608,7 @@ func (fs *BoneFrames) calcSingleAxisRad(
 	ikMotion *VmdMotion,
 	ikFile *os.File,
 ) *mmath.MQuaternion {
-	qq := mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle)
-	quat := qq.Shorten()
+	quat := mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle).Shorten()
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		bf := NewBoneFrame(count)
@@ -643,7 +639,7 @@ func (fs *BoneFrames) calcSingleAxisRad(
 
 	totalIkRad := totalIkQuat.ToRadian()
 	// TODO ローカル軸ベースの分割の場合、ローカル軸に合わせる
-	if quatAxis.Dot(&axisVector) < 0 {
+	if quatAxis.Dot(axisVector) < 0 {
 		totalIkRad *= -1
 	}
 
@@ -698,8 +694,7 @@ func (fs *BoneFrames) calcSingleAxisRad(
 		}
 	}
 
-	resultQq := mmath.NewMQuaternionFromAxisAngles(&axisVector, fX)
-	return resultQq.Shorten()
+	return mmath.NewMQuaternionFromAxisAngles(axisVector, fX).Shorten()
 }
 
 func (fs *BoneFrames) calcBoneMatrixes(
@@ -835,8 +830,7 @@ func (fs *BoneFrames) getBoneMatrixes(
 		positions[i] = mmath.NewMMat4()
 		rotations[i] = mmath.NewMMat4()
 		scales[i] = mmath.NewMMat4()
-		qq := mmath.NewMQuaternion()
-		quats[i] = &qq
+		quats[i] = mmath.NewMQuaternion()
 	}
 
 	// ボーンを一定件数ごとに並列処理
@@ -925,9 +919,7 @@ func (fs *BoneFrames) getRotation(
 ) (*mmath.MQuaternion, *mmath.MQuaternion) {
 	if loop > 20 {
 		// 無限ループを避ける
-		q1 := mmath.NewMQuaternion()
-		q2 := mmath.NewMQuaternion()
-		return &q1, &q2
+		return mmath.NewMQuaternion(), mmath.NewMQuaternion()
 	}
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
@@ -935,25 +927,21 @@ func (fs *BoneFrames) getRotation(
 	if bf.IkRotation != nil && !bf.IkRotation.GetRadians().IsZero() {
 		// IK用回転を持っている場合、置き換え
 		if isCalcMorph {
-			qq := bf.MorphRotation.GetQuaternion().Copy()
-			rot = &qq
+			rot = bf.MorphRotation.GetQuaternion().Copy()
 			rot.Mul(bf.IkRotation.GetQuaternion())
 		} else {
-			qq := bf.IkRotation.GetQuaternion().Copy()
-			rot = &qq
+			rot = bf.IkRotation.GetQuaternion().Copy()
 		}
 	} else {
 		if isCalcMorph {
-			qq := bf.MorphRotation.GetQuaternion().Copy()
-			rot = &qq
+			rot = bf.MorphRotation.GetQuaternion().Copy()
 			rot.Mul(bf.Rotation.GetQuaternion())
 		} else {
-			qq := bf.Rotation.GetQuaternion().Copy()
-			rot = &qq
+			rot = bf.Rotation.GetQuaternion().Copy()
 		}
 
 		if bone.HasFixedAxis() {
-			rot = rot.ToFixedAxisRotation(&bone.NormalizedFixedAxis)
+			rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
 		}
 	}
 
@@ -967,7 +955,7 @@ func (fs *BoneFrames) getRotation(
 
 	if bone.HasFixedAxis() {
 		// 軸制限回転を求める
-		rot = rot.ToFixedAxisRotation(&bone.NormalizedFixedAxis)
+		rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
 	}
 
 	return rotWithEffect.Shorten(), rot.Shorten()
@@ -984,14 +972,12 @@ func (fs *BoneFrames) getRotationWithEffect(
 	if bone.EffectFactor == 0 || loop > 20 {
 		// 付与率が0の場合、常に0になる
 		// MMDエンジン対策で無限ループを避ける
-		qq := mmath.NewMQuaternion()
-		return &qq
+		return mmath.NewMQuaternion()
 	}
 
 	if !(bone.EffectIndex > 0 && model.Bones.Contains(bone.EffectIndex)) {
 		// 付与親が存在しない場合、常に0になる
-		qq := mmath.NewMQuaternion()
-		return &qq
+		return mmath.NewMQuaternion()
 	}
 
 	// 付与親が存在する場合、付与親の回転角度を掛ける

@@ -44,8 +44,7 @@ func NewRotationByQuaternion(vQuaternion *MQuaternion) *MRotation {
 
 func (m *MRotation) GetQuaternion() *MQuaternion {
 	if m.quaternion == nil {
-		qq := NewMQuaternion()
-		m.quaternion = &qq
+		m.quaternion = NewMQuaternion()
 	}
 	return m.quaternion
 }
@@ -62,8 +61,7 @@ func (m *MRotation) SetQuaternion(v *MQuaternion) {
 
 func (m *MRotation) GetRadians() *MVec3 {
 	if m.radians == nil {
-		v := NewMVec3()
-		m.radians = &v
+		m.radians = NewMVec3()
 	}
 	return m.radians
 }
@@ -75,14 +73,12 @@ func (m *MRotation) SetRadians(v *MVec3) {
 		180.0 * v.GetY() / math.Pi,
 		180.0 * v.GetZ() / math.Pi,
 	}
-	qq := NewMQuaternionFromRadians(v.GetX(), v.GetY(), v.GetZ())
-	m.quaternion = &qq
+	m.quaternion = NewMQuaternionFromRadians(v.GetX(), v.GetY(), v.GetZ())
 }
 
 func (m *MRotation) GetDegrees() *MVec3 {
 	if m.degrees == nil {
-		v := NewMVec3()
-		m.degrees = &v
+		m.degrees = NewMVec3()
 	}
 	return m.degrees
 }
@@ -94,8 +90,7 @@ func (m *MRotation) SetDegrees(v *MVec3) {
 		math.Pi * v.GetY() / 180.0,
 		math.Pi * v.GetZ() / 180.0,
 	}
-	qq := NewMQuaternionFromRadians(m.radians.GetX(), m.radians.GetY(), m.radians.GetZ())
-	m.quaternion = &qq
+	m.quaternion = NewMQuaternionFromRadians(m.radians.GetX(), m.radians.GetY(), m.radians.GetZ())
 }
 
 // Copy
@@ -108,8 +103,8 @@ func (rot *MRotation) Copy() *MRotation {
 		copied.degrees = &MVec3{rot.degrees.GetX(), rot.degrees.GetY(), rot.degrees.GetZ()}
 	}
 	if rot.quaternion != nil {
-		quat := NewMQuaternionByValues(rot.quaternion.GetX(), rot.quaternion.GetY(), rot.quaternion.GetZ(), rot.quaternion.GetW())
-		copied.quaternion = &quat
+		copied.quaternion = NewMQuaternionByValues(
+			rot.quaternion.GetX(), rot.quaternion.GetY(), rot.quaternion.GetZ(), rot.quaternion.GetW())
 	}
 	return copied
 }
@@ -117,12 +112,10 @@ func (rot *MRotation) Copy() *MRotation {
 // Mul
 func (rot *MRotation) Mul(v *MRotation) {
 	if rot.quaternion == nil {
-		qq := NewMQuaternion()
-		rot.quaternion = &qq
+		rot.quaternion = NewMQuaternion()
 	}
 	if v.quaternion == nil {
-		qq := NewMQuaternion()
-		v.quaternion = &qq
+		v.quaternion = NewMQuaternion()
 	}
 	qq := rot.quaternion.Mul(v.quaternion)
 	rot.SetQuaternion(qq)
