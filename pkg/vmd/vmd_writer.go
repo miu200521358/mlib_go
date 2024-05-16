@@ -72,16 +72,20 @@ func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
 	for _, name := range names {
 		fs := motion.BoneFrames.Data[name]
 
-		// 各ボーンの最大キーフレを先に出力する
-		bf := motion.BoneFrames.Data[name].Get(fs.RegisteredIndexes.Max())
-		writeBoneFrame(fout, name, bf)
+		if fs.Len() > 0 {
+			// 各ボーンの最大キーフレを先に出力する
+			bf := motion.BoneFrames.Data[name].Get(fs.RegisteredIndexes.Max())
+			writeBoneFrame(fout, name, bf)
+		}
 	}
 
 	for _, name := range names {
 		fs := motion.BoneFrames.Data[name]
-		// 普通のキーフレをそのまま出力する
-		for _, bf := range fs.List()[:fs.Len()-1] {
-			writeBoneFrame(fout, name, bf)
+		if fs.Len() > 0 {
+			// 普通のキーフレをそのまま出力する
+			for _, bf := range fs.List()[:fs.Len()-1] {
+				writeBoneFrame(fout, name, bf)
+			}
 		}
 	}
 
