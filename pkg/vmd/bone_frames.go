@@ -180,7 +180,7 @@ func (fs *BoneFrames) clearIk(
 				// IKリンクボーンの回転量を初期化
 				linkBone := model.Bones.Get(linkIndex.BoneIndex)
 				linkBf := fs.Get(linkBone.Name).Get(frame)
-				linkBf.IkRotation = mmath.NewRotation()
+				linkBf.IkRotation = nil
 
 				// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
 				fs.Get(linkBone.Name).Append(linkBf)

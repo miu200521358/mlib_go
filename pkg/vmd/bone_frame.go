@@ -38,7 +38,7 @@ func NewBoneFrame(index int) *BoneFrame {
 		MorphScale:         mmath.NewMVec3(),
 		LocalScale:         mmath.NewMVec3(),
 		MorphLocalScale:    mmath.NewMVec3(),
-		IkRotation:         mmath.NewRotation(),
+		IkRotation:         nil,
 		Curves:             NewBoneCurves(),
 	}
 }
@@ -160,7 +160,7 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 		// 前がないか、最後より後の場合、次のキーフレをコピーして返す
 		frame := nextBf.Copy().(*BoneFrame)
 		// 計算情報はクリア
-		frame.IkRotation = mmath.NewRotation()
+		frame.IkRotation = nil
 		return frame
 	}
 
@@ -244,6 +244,8 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	bf.LocalPosition = &mmath.MVec3{nowX[1], nowY[1], nowZ[1]}
 	bf.Scale = &mmath.MVec3{nowX[2], nowY[2], nowZ[2]}
 	bf.LocalScale = &mmath.MVec3{nowX[3], nowY[3], nowZ[3]}
+
+	bf.IkRotation = nil
 
 	return bf
 }

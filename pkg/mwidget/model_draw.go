@@ -29,9 +29,9 @@ func Draw(
 	isBoneDebug bool,
 	enablePhysics bool,
 ) {
-	boneMatrixes := make([]*mgl32.Mat4, len(model.Bones.NameIndexes))
-	globalMatrixes := make([]*mmath.MMat4, len(model.Bones.NameIndexes))
-	boneTransforms := make([]*mbt.BtTransform, len(model.Bones.NameIndexes))
+	boneMatrixes := make([]*mgl32.Mat4, len(model.Bones.Data))
+	globalMatrixes := make([]*mmath.MMat4, len(model.Bones.Data))
+	boneTransforms := make([]*mbt.BtTransform, len(model.Bones.Data))
 	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))
 	for i, bone := range model.Bones.Data {
 		delta := deltas.Bones.Get(bone.Name, fno)
