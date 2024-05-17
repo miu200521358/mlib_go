@@ -3,6 +3,7 @@ package vmd
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"io"
 	"math"
 	"os"
@@ -94,7 +95,7 @@ func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
 
 func writeBoneFrame(fout *os.File, name string, bf *BoneFrame) error {
 	if bf == nil {
-		return nil
+		return fmt.Errorf("BoneFrame is nil")
 	}
 
 	encodedName, err := encodeName(name, 15)
