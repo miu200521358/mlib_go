@@ -38,6 +38,8 @@ const (
 	SHADER_MORPH_SPHERE_FACTOR          = "sphereFactor\x00"
 	SHADER_COLOR                        = "color\x00"
 	SHADER_ALPHA                        = "alpha\x00"
+	SHADER_EDGE_COLOR                   = "edgeColor\x00"
+	SHADER_EDGE_SIZE                    = "edgeSize\x00"
 )
 
 type ProgramType int
@@ -112,6 +114,18 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		shader.BoneProgram = boneProgram
 		shader.UseBoneProgram()
 		shader.initialize(shader.BoneProgram)
+		shader.Unuse()
+	}
+
+	{
+		edgeProgram, err := shader.newProgram(
+			resourceFiles, "resources/glsl/edge.vert", "resources/glsl/edge.frag")
+		if err != nil {
+			return nil, err
+		}
+		shader.EdgeProgram = edgeProgram
+		shader.UseEdgeProgram()
+		shader.initialize(shader.EdgeProgram)
 		shader.Unuse()
 	}
 
@@ -277,9 +291,8 @@ func (s *MShader) Fit(
 }
 
 func (s *MShader) updateCamera() {
-	for p := range []ProgramType{PROGRAM_TYPE_MODEL, PROGRAM_TYPE_EDGE, PROGRAM_TYPE_BONE} {
-		programType := ProgramType(p)
-		s.Use(programType)
+	for _, p := range s.GetPrograms() {
+		s.Use(ProgramType(p))
 
 		s.Unuse()
 	}
@@ -315,7 +328,7 @@ func (s *MShader) Use(programType ProgramType) {
 }
 
 func (s *MShader) GetPrograms() []uint32 {
-	return []uint32{s.ModelProgram, s.BoneProgram, s.PhysicsProgram}
+	return []uint32{s.ModelProgram, s.EdgeProgram, s.BoneProgram, s.PhysicsProgram}
 }
 
 func (s *MShader) Unuse() {

@@ -123,49 +123,6 @@ mat4 getBoneMatrix(int boneIndex) {
     return boneMatrix;
 }
 
-mat4 inverseMatrix(mat4 m) {
-    float s0 = m[0][0] * m[1][1] - m[1][0] * m[0][1];
-    float s1 = m[0][0] * m[1][2] - m[1][0] * m[0][2];
-    float s2 = m[0][0] * m[1][3] - m[1][0] * m[0][3];
-    float s3 = m[0][1] * m[1][2] - m[1][1] * m[0][2];
-    float s4 = m[0][1] * m[1][3] - m[1][1] * m[0][3];
-    float s5 = m[0][2] * m[1][3] - m[1][2] * m[0][3];
-
-    float c5 = m[2][2] * m[3][3] - m[3][2] * m[2][3];
-    float c4 = m[2][1] * m[3][3] - m[3][1] * m[2][3];
-    float c3 = m[2][1] * m[3][2] - m[3][1] * m[2][2];
-    float c2 = m[2][0] * m[3][3] - m[3][0] * m[2][3];
-    float c1 = m[2][0] * m[3][2] - m[3][0] * m[2][2];
-    float c0 = m[2][0] * m[3][1] - m[3][0] * m[2][1];
-
-    // Should check for 0 determinant
-    float invdet = 1.0 / (s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0);
-
-    mat4 invM;
-
-    invM[0][0] = (m[1][1] * c5 - m[1][2] * c4 + m[1][3] * c3) * invdet;
-    invM[0][1] = (-m[0][1] * c5 + m[0][2] * c4 - m[0][3] * c3) * invdet;
-    invM[0][2] = (m[3][1] * s5 - m[3][2] * s4 + m[3][3] * s3) * invdet;
-    invM[0][3] = (-m[2][1] * s5 + m[2][2] * s4 - m[2][3] * s3) * invdet;
-
-    invM[1][0] = (-m[1][0] * c5 + m[1][2] * c2 - m[1][3] * c1) * invdet;
-    invM[1][1] = (m[0][0] * c5 - m[0][2] * c2 + m[0][3] * c1) * invdet;
-    invM[1][2] = (-m[3][0] * s5 + m[3][2] * s2 - m[3][3] * s1) * invdet;
-    invM[1][3] = (m[2][0] * s5 - m[2][2] * s2 + m[2][3] * s1) * invdet;
-
-    invM[2][0] = (m[1][0] * c4 - m[1][1] * c2 + m[1][3] * c0) * invdet;
-    invM[2][1] = (-m[0][0] * c4 + m[0][1] * c2 - m[0][3] * c0) * invdet;
-    invM[2][2] = (m[3][0] * s4 - m[3][1] * s2 + m[3][3] * s0) * invdet;
-    invM[2][3] = (-m[2][0] * s4 + m[2][1] * s2 - m[2][3] * s0) * invdet;
-
-    invM[3][0] = (-m[1][0] * c3 + m[1][1] * c1 - m[1][2] * c0) * invdet;
-    invM[3][1] = (m[0][0] * c3 - m[0][1] * c1 + m[0][2] * c0) * invdet;
-    invM[3][2] = (-m[3][0] * s3 + m[3][1] * s1 - m[3][2] * s0) * invdet;
-    invM[3][3] = (m[2][0] * s3 - m[2][1] * s1 + m[2][2] * s0) * invdet;
-
-    return invM;
-}
-
 // クォータニオンによるボーンの回転を計算し、頂点Pを変形させる
 mat4 calculateSdefMatrix(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, float boneWeight1) {
     // ボーンのクォータニオン回転を取得

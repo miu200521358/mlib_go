@@ -65,14 +65,28 @@ func Draw(
 func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
 	vertexDeltas := make([][]float32, len(model.Vertices.Data))
 
+	chunkSize := int(math.Ceil(float64(len(model.Vertices.Data)) / float64(runtime.NumCPU())))
+	if chunkSize > 20000 {
+		return fetchVertexDeltasParallel(model, deltas)
+	}
+
+	for i, v := range deltas.Morphs.Vertices.Data {
+		if v != nil && (!v.Position.IsZero() || !v.Uv.IsZero() || !v.Uv1.IsZero() || !v.AfterPosition.IsZero()) {
+			// 必要な場合にのみ部分更新するよう設定
+			vertexDeltas[i] = v.GL()
+		}
+	}
+
+	return vertexDeltas
+}
+
+func fetchVertexDeltasParallel(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
+	vertexDeltas := make([][]float32, len(model.Vertices.Data))
+
 	var wg sync.WaitGroup
 
-	chunkSize := max(1000, int(math.Ceil(float64(len(model.Vertices.Data))/float64(runtime.NumCPU()))))
-	if chunkSize > len(model.Vertices.Data) {
-		wg.Add(1)
-	} else {
-		wg.Add(runtime.NumCPU())
-	}
+	chunkSize := int(math.Ceil(float64(len(model.Vertices.Data)) / float64(runtime.NumCPU())))
+	wg.Add(runtime.NumCPU())
 	for chunkStart := 0; chunkStart < len(model.Vertices.Data); chunkStart += chunkSize {
 		chunkEnd := chunkStart + chunkSize
 		if chunkEnd > len(model.Vertices.Data) {

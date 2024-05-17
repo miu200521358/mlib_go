@@ -50,8 +50,6 @@ func (m *Mesh) DrawModel(
 	boneMatrixes []*mgl32.Mat4,
 	materialDelta *Material,
 ) {
-	m.ibo.Bind()
-
 	if m.material.DrawFlag.IsDoubleSidedDrawing() {
 		// 両面描画
 		// カリングOFF
@@ -157,7 +155,39 @@ func (m *Mesh) DrawModel(
 	}
 
 	UnbindBoneMatrixes()
-	m.ibo.Unbind()
+}
+
+func (m *Mesh) DrawEdge(
+	shader *mview.MShader,
+	windowIndex int,
+	boneMatrixes []*mgl32.Mat4,
+	materialDelta *Material,
+) {
+	gl.Enable(gl.CULL_FACE)
+	gl.CullFace(gl.FRONT)
+
+	// ボーンデフォームテクスチャ設定
+	BindBoneMatrixes(boneMatrixes, shader, shader.EdgeProgram, windowIndex)
+
+	// ------------------
+	// エッジ色設定
+	edgeColor := materialDelta.EdgeGL()
+	edgeColorUniform := gl.GetUniformLocation(shader.EdgeProgram, gl.Str(mview.SHADER_EDGE_COLOR))
+	gl.Uniform4fv(edgeColorUniform, 1, &edgeColor[0])
+
+	// エッジサイズ
+	edgeSizeUniform := gl.GetUniformLocation(shader.EdgeProgram, gl.Str(mview.SHADER_EDGE_SIZE))
+	gl.Uniform1f(edgeSizeUniform, float32(materialDelta.EdgeSize))
+
+	// 三角形描画
+	gl.DrawElements(
+		gl.TRIANGLES,
+		int32(m.material.VerticesCount),
+		gl.UNSIGNED_INT,
+		nil,
+	)
+
+	UnbindBoneMatrixes()
 }
 
 func (m *Mesh) delete() {

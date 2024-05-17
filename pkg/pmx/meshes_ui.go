@@ -131,9 +131,20 @@ func (m *Meshes) Draw(
 	m.vbo.BindVertex(m.vertices, vertexDeltas)
 
 	for i, mesh := range m.meshes {
+		mesh.ibo.Bind()
+
 		shader.UseModelProgram()
 		mesh.DrawModel(shader, windowIndex, boneMatrixes, materialDeltas[i])
 		shader.Unuse()
+
+		if mesh.material.DrawFlag.IsDrawingEdge() {
+			// エッジ描画
+			shader.UseEdgeProgram()
+			mesh.DrawEdge(shader, windowIndex, boneMatrixes, materialDeltas[i])
+			shader.Unuse()
+		}
+
+		mesh.ibo.Unbind()
 	}
 
 	m.vbo.Unbind()

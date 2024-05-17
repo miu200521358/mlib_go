@@ -27,8 +27,8 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 	// solver.GetM_analyticsData().SetM_numIterationsUsed(200)
 	world := mbt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
 	world.SetGravity(mbt.NewBtVector3(float32(0), float32(-9.8), float32(0)))
-	world.GetSolverInfo().(mbt.BtContactSolverInfo).SetM_numIterations(50)
-	world.GetSolverInfo().(mbt.BtContactSolverInfo).SetM_splitImpulsePenetrationThreshold(-0.01)
+	// world.GetSolverInfo().(mbt.BtContactSolverInfo).SetM_numIterations(50)
+	// world.GetSolverInfo().(mbt.BtContactSolverInfo).SetM_splitImpulsePenetrationThreshold(-0.01)
 
 	groundShape := mbt.NewBtStaticPlaneShape(mbt.NewBtVector3(float32(0), float32(1), float32(0)), float32(0))
 	groundTransform := mbt.NewBtTransform()
