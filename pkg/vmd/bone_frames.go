@@ -738,13 +738,13 @@ func (fs *BoneFrames) calcBoneMatrixes(
 	quatsWithoutEffect []*mmath.MQuaternion,
 ) *BoneDeltas {
 	matrixes := make([]*mmath.MMat4, len(targetBones))
-	resultMatrixes := make([]*mmath.MMat4, len(targetBones))
+	globalMatrixes := make([]*mmath.MMat4, len(targetBones))
 	boneCount := len(targetBoneNames)
 
 	// 最初にフレーム数*ボーン数分のスライスを確保
 	for i := range boneCount {
 		matrixes[i] = mmath.NewMMat4()
-		resultMatrixes[i] = mmath.NewMMat4()
+		globalMatrixes[i] = mmath.NewMMat4()
 	}
 
 	// ボーンを一定件数ごとに並列処理（件数は変数保持）
@@ -772,36 +772,34 @@ func (fs *BoneFrames) calcBoneMatrixes(
 	// ボーンを一定件数ごとに並列処理（件数は変数保持）
 	for i := range boneCount {
 		bone := targetBones[i]
-		var localMatrix *mmath.MMat4
+		var mat *mmath.MMat4
 		// 直近の親ボーンの変形行列を元にする
 		if bone.ParentIndex >= 0 && model.Bones.Contains(bone.ParentIndex) {
 			// targetBoneNames の中にある parentName のINDEXを取得
 			parentIndex := targetBoneNames[model.Bones.Get(bone.ParentIndex).Name]
-			localMatrix = resultMatrixes[parentIndex].Copy()
+			mat = globalMatrixes[parentIndex].Copy()
 		} else {
-			localMatrix = mmath.NewMMat4()
+			mat = mmath.NewMMat4()
 		}
 		// 最後に対象ボーン自身の行列をかける
-		localMatrix.Mul(matrixes[i])
-		resultMatrixes[i] = localMatrix
+		mat.Mul(matrixes[i])
+		globalMatrixes[i] = mat
 	}
 
 	for i := range boneCount {
 		bone := targetBones[i]
-		localMatrix := resultMatrixes[i]
-		// BOf行列: 自身のボーンのボーンオフセット行列
-		localMatrix.Mul(bone.OffsetMatrix)
 		// 初期位置行列を掛けてグローバル行列を作成
 		boneDeltas.SetItem(bone.Name, frame, NewBoneDelta(
 			bone.Name,
 			frame,
-			localMatrix.Muled(bone.Position.ToMat4()), // グローバル行列
-			localMatrix,                // ローカル行列はそのまま
-			positions[i].Translation(), // 移動
-			rotations[i].Quaternion(),  // 回転
-			quatsWithoutEffect[i],      // 回転(付与親なし)
-			scales[i].Scaling(),        // 拡大率
-			matrixes[i],                // ボーン変形行列
+			globalMatrixes[i], // グローバル行列
+			// BOf行列: 自身のボーンのボーンオフセット行列
+			globalMatrixes[i].Muled(bone.OffsetMatrix), // ローカル行列
+			positions[i].Translation(),                 // 移動
+			rotations[i].Quaternion(),                  // 回転
+			quatsWithoutEffect[i],                      // 回転(付与親なし)
+			scales[i].Scaling(),                        // 拡大率
+			matrixes[i],                                // ボーン変形行列
 		))
 	}
 

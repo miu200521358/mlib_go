@@ -50,6 +50,7 @@ func Draw(
 	vertexDeltas := fetchVertexDeltas(model, deltas)
 
 	updatePhysics(modelPhysics, model, boneMatrixes, boneTransforms, deltas, fno, elapsed, enablePhysics)
+
 	model.Meshes.Draw(shader, boneMatrixes, vertexDeltas, materialDeltas, windowIndex)
 
 	// 物理デバッグ表示
@@ -65,9 +66,13 @@ func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
 	vertexDeltas := make([][]float32, len(model.Vertices.Data))
 
 	var wg sync.WaitGroup
-	wg.Add(runtime.NumCPU())
 
-	chunkSize := int(math.Ceil(float64(len(model.Vertices.Data)) / float64(runtime.NumCPU())))
+	chunkSize := max(1000, int(math.Ceil(float64(len(model.Vertices.Data))/float64(runtime.NumCPU()))))
+	if chunkSize > len(model.Vertices.Data) {
+		wg.Add(1)
+	} else {
+		wg.Add(runtime.NumCPU())
+	}
 	for chunkStart := 0; chunkStart < len(model.Vertices.Data); chunkStart += chunkSize {
 		chunkEnd := chunkStart + chunkSize
 		if chunkEnd > len(model.Vertices.Data) {
@@ -121,22 +126,37 @@ func updatePhysics(
 			rigidBody.UpdateMatrix(modelPhysics, boneMatrixes, boneTransforms)
 		}
 
-		// // 物理後ボーン位置を更新
-		// for boneIndex := range model.Bones.LayerSortedIndexes {
-		// 	bone := model.Bones.GetItem(boneIndex)
-		// 	if bone.IsAfterPhysicsvmd.) && bone.ParentIndex == -1 && model.Bones.Contains(bone.ParentIndex) {
-		// 		// 物理後ボーンで親が存在している場合、親の行列を取得する
-		// 		parentMat := boneMatrixes[bone.ParentIndex]
-		// 		pos := deltas.Bones.GetItem(bone.Name, fno).FramePosition.GL()
-		// 		rot := deltas.Bones.GetItem(bone.Name, fno).FrameRotation.GL()
-		// 		scl := deltas.Bones.GetItem(bone.Name, fno).FrameScale
+		if len(model.Bones.AfterPhysicsBoneIndexes) > 0 && enablePhysics {
+			// 物理後ボーン位置更新の場合
+			for _, boneIndex := range model.Bones.AfterPhysicsBoneIndexes {
+				// 物理後ボーンで親が存在している場合、親の行列を取得する
+				updateBoneMatrixAfterPhysics(model, boneMatrixes, deltas, fno, model.Bones.Get(boneIndex))
+			}
+		}
+	}
+}
 
-		// 		// 自身の行列を作成
-		// 		mat := parentMat.Mul4(mgl32.Translate3D(pos[0], pos[1], pos[2]))
-		// 		mat = mat.Mul4(mgl32.HomogRotate3D(rot[3], mgl32.Vec3{rot[0], rot[1], rot[2]}))
-		// 		mat = mat.Mul4(mgl32.Scale3D(float32(scl[0]), float32(scl[1]), float32(scl[2])))
-		// 		boneMatrixes[boneIndex] = &mat
-		// 	}
-		// }
+func updateBoneMatrixAfterPhysics(
+	model *pmx.PmxModel,
+	boneMatrixes []*mgl32.Mat4,
+	deltas *vmd.VmdDeltas,
+	fno int,
+	bone *pmx.Bone,
+) {
+	parentMat := boneMatrixes[bone.ParentIndex]
+
+	pos := deltas.Bones.Get(bone.Name, fno).FramePosition.GL()
+	rot := deltas.Bones.Get(bone.Name, fno).FrameRotation.GL()
+	scl := deltas.Bones.Get(bone.Name, fno).FrameScale
+
+	// 自身の行列を再作成
+	mat := parentMat.Mul4(mgl32.Translate3D(pos[0], pos[1], pos[2]))
+	mat = mat.Mul4(mgl32.HomogRotate3D(rot[3], mgl32.Vec3{rot[0], rot[1], rot[2]}))
+	mat = mat.Mul4(mgl32.Scale3D(float32(scl[0]), float32(scl[1]), float32(scl[2])))
+	boneMatrixes[bone.Index] = &mat
+
+	for _, childBoneIndex := range bone.ChildBoneIndexes {
+		// 子ボーンがいる場合、子ボーンの行列を再計算
+		updateBoneMatrixAfterPhysics(model, boneMatrixes, deltas, fno, model.Bones.Get(childBoneIndex))
 	}
 }

@@ -71,7 +71,14 @@ func (pm *PmxModel) SetUp() {
 	// ボーン情報のセットアップ
 	pm.Bones.setup()
 
-	// 剛体・ジョイント
+	// 剛体
+	for _, rb := range pm.RigidBodies.GetSortedData() {
+		if rb.BoneIndex >= 0 && pm.Bones.Contains(rb.BoneIndex) {
+			// 剛体に関連付けられたボーンが存在する場合、剛体にボーンを関連付ける
+			pm.Bones.Get(rb.BoneIndex).RigidBodyIndex = rb.Index
+		}
+	}
+	// ジョイント
 	for _, joint := range pm.Joints.GetSortedData() {
 		if joint.RigidbodyIndexA >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexA) &&
 			joint.RigidbodyIndexB >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexB) {

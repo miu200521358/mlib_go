@@ -109,6 +109,7 @@ type Bone struct {
 	LocalMinAngleLimit     *mmath.MRotation // 自分がIKリンクボーンのローカル軸角度制限の下限
 	LocalMaxAngleLimit     *mmath.MRotation // 自分がIKリンクボーンのローカル軸角度制限の上限
 	AxisSign               int              // ボーンの軸ベクトル(左は-1, 右は1)
+	RigidBodyIndex         int              // 物理演算用剛体INDEX
 }
 
 func NewBone() *Bone {
@@ -153,6 +154,7 @@ func NewBone() *Bone {
 		LocalMinAngleLimit:     mmath.NewRotation(),
 		LocalMaxAngleLimit:     mmath.NewRotation(),
 		AxisSign:               1,
+		RigidBodyIndex:         -1,
 	}
 	bone.NormalizedLocalAxisX = bone.LocalAxisX.Copy()
 	bone.NormalizedLocalAxisZ = bone.LocalAxisZ.Copy()
@@ -605,14 +607,17 @@ func (b *Bones) setup() {
 	// 変形階層・ボーンINDEXでソート
 	b.LayerSortedBones = make(map[int]*Bone, len(b.Data))
 	b.LayerSortedNames = make(map[string]int, len(b.Data))
+	b.AfterPhysicsBoneIndexes = make([]int, 0)
 	layerIndexes := b.GetLayerIndexes()
 
-	i := 0
-	for _, boneIndex := range layerIndexes {
+	for i, boneIndex := range layerIndexes {
 		bone := b.Get(boneIndex)
 		b.LayerSortedNames[bone.Name] = i
 		b.LayerSortedBones[i] = bone
-		i++
+		if bone.IsAfterPhysicsDeform() && bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
+			// 物理演算後に変形するボーンINDEXを登録
+			b.AfterPhysicsBoneIndexes = append(b.AfterPhysicsBoneIndexes, boneIndex)
+		}
 	}
 
 	// 変形階層順に親子を繋げていく
