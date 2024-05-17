@@ -56,6 +56,8 @@ func Write(motion *VmdMotion) error {
 		return err
 	}
 
+	// TODO 影とか諸々のフレームを書き込む
+
 	// foutを書き込んで終了する
 	err = fout.Close()
 	if err != nil {
@@ -76,7 +78,10 @@ func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
 		if fs.Len() > 0 {
 			// 各ボーンの最大キーフレを先に出力する
 			bf := motion.BoneFrames.Data[name].Get(fs.RegisteredIndexes.Max())
-			writeBoneFrame(fout, name, bf)
+			err := writeBoneFrame(fout, name, bf)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -84,8 +89,12 @@ func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
 		fs := motion.BoneFrames.Data[name]
 		if fs.Len() > 0 {
 			// 普通のキーフレをそのまま出力する
-			for _, bf := range fs.List()[:fs.Len()-1] {
-				writeBoneFrame(fout, name, bf)
+			for _, fno := range fs.RegisteredIndexes.List()[:fs.Len()-1] {
+				bf := fs.Get(fno)
+				err := writeBoneFrame(fout, name, bf)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}

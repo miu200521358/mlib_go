@@ -115,11 +115,24 @@ func (fs *BaseFrames[T]) Get(index int) T {
 	nextFrame := fs.nextFrame(index)
 	if nextFrame == prevFrame {
 		// 次のキーフレが無い場合、最大キーフレのコピーを返す
-		return fs.Get(int(nextFrame)).Copy().(T)
+		if fs.RegisteredIndexes.Len() == 0 {
+			// 登録キーが無い場合、現在登録されているすべてのキーフレの中から最大のものをコピーして返す
+			// 上でデータが無いことのチェックは済んでいるので何かしらのキーはあるはず
+			indexes := mcore.NewIntIndexes()
+			for i := range fs.data {
+				indexes.ReplaceOrInsert(mcore.Int(i))
+			}
+			copied := fs.data[indexes.Max()].Copy().(T)
+			copied.SetIndex(index)
+			return copied
+		}
+		copied := fs.data[fs.RegisteredIndexes.Max()].Copy().(T)
+		copied.SetIndex(index)
+		return copied
 	}
 
-	prevF := fs.Get(int(prevFrame))
-	nextF := fs.Get(int(nextFrame))
+	prevF := fs.Get(prevFrame)
+	nextF := fs.Get(nextFrame)
 
 	// 該当キーフレが無い場合、補間結果を返す
 	return nextF.lerpFrame(prevF, index).(T)
@@ -151,7 +164,9 @@ func (fs *BaseFrames[T]) List() []T {
 	list := make([]T, 0, fs.RegisteredIndexes.Len())
 
 	fs.RegisteredIndexes.AscendRange(mcore.Int(0), mcore.Int(fs.RegisteredIndexes.Max()), func(i llrb.Item) bool {
-		list = append(list, fs.data[int(i.(mcore.Int))])
+		if _, ok := fs.data[int(i.(mcore.Int))]; !ok {
+			list = append(list, fs.data[int(i.(mcore.Int))])
+		}
 		return true
 	})
 
@@ -162,7 +177,9 @@ func (fs *BaseFrames[T]) appendFrame(v T) {
 	fs.lock.Lock()
 	defer fs.lock.Unlock()
 
-	fs.RegisteredIndexes.ReplaceOrInsert(mcore.Int(v.GetIndex()))
+	if v.IsRegistered() {
+		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Int(v.GetIndex()))
+	}
 	fs.data[v.GetIndex()] = v
 }
 

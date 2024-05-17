@@ -70,9 +70,11 @@ func (i IntIndexes) Len() int {
 }
 
 func (i IntIndexes) List() []int {
-	list := make([]int, i.LLRB.Len())
+	list := make([]int, 0, i.LLRB.Len())
 	i.LLRB.AscendGreaterOrEqual(i.LLRB.Min(), func(item llrb.Item) bool {
-		list = append(list, int(item.(Int)))
+		if int(item.(Int)) >= 0 {
+			list = append(list, int(item.(Int)))
+		}
 		return true
 	})
 	return list
