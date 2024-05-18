@@ -300,11 +300,11 @@ func (r *RigidBody) UpdateMatrix(
 	modelPhysics *mphysics.MPhysics,
 	boneMatrixes []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
-) {
+) *mgl32.Mat4 {
 	btRigidBody, btRigidBodyTransform, _ := modelPhysics.GetRigidBody(r.Index)
 
 	if btRigidBody == nil || btRigidBody.GetMotionState() == nil || r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
-		return
+		return nil
 	}
 
 	// if r.Name == "前髪" {
@@ -376,6 +376,8 @@ func (r *RigidBody) UpdateMatrix(
 	} else if r.JointedBoneIndex >= 0 && r.JointedBoneIndex < len(boneTransforms) {
 		boneMatrixes[r.JointedBoneIndex] = &physicsBoneMatrix
 	}
+
+	return &physicsBoneMatrix
 }
 
 func (r *RigidBodies) initPhysics(physics *mphysics.MPhysics) {

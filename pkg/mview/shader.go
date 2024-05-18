@@ -70,7 +70,7 @@ type MShader struct {
 	FarPlane             float32
 	lightPosition        *mmath.MVec3
 	lightDirection       *mmath.MVec3
-	msaa                 *Msaa
+	Msaa                 *Msaa
 	ModelProgram         uint32
 	EdgeProgram          uint32
 	BoneProgram          uint32
@@ -89,7 +89,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		NearPlane:            0.1,
 		FarPlane:             1000.0,
 		lightPosition:        &mmath.MVec3{-0.5, -1.0, 0.5},
-		msaa:                 NewMsaa(int32(width), int32(height)),
+		Msaa:                 NewMsaa(int32(width), int32(height)),
 	}
 	shader.lightDirection = shader.lightPosition.Normalized()
 
@@ -154,7 +154,7 @@ func (s *MShader) Reset() {
 func (s *MShader) Resize(width, height int) {
 	s.Width = int32(width)
 	s.Height = int32(height)
-	s.msaa = NewMsaa(s.Width, s.Height)
+	s.Msaa = NewMsaa(s.Width, s.Height)
 	s.updateCamera()
 }
 
@@ -282,7 +282,7 @@ func (s *MShader) Fit(
 	s.Height = int32(height)
 
 	// MSAAも作り直し
-	s.msaa = NewMsaa(s.Width, s.Height)
+	s.Msaa = NewMsaa(s.Width, s.Height)
 
 	// ビューポートの設定
 	gl.Viewport(0, 0, s.Width, s.Height)

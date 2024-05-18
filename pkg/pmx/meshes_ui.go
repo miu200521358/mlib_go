@@ -127,6 +127,7 @@ func (m *Meshes) Draw(
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
+	shader.Msaa.Bind()
 	m.vao.Bind()
 	m.vbo.BindVertex(m.vertices, vertexDeltas)
 
@@ -149,6 +150,7 @@ func (m *Meshes) Draw(
 
 	m.vbo.Unbind()
 	m.vao.Unbind()
+	shader.Msaa.Unbind()
 
 	gl.Disable(gl.BLEND)
 	gl.Disable(gl.DEPTH_TEST)

@@ -137,7 +137,15 @@ func updatePhysics(
 
 		// 剛体位置を更新
 		for _, rigidBody := range model.RigidBodies.GetSortedData() {
-			rigidBody.UpdateMatrix(modelPhysics, boneMatrixes, boneTransforms)
+			physicsBoneMatrix := rigidBody.UpdateMatrix(modelPhysics, boneMatrixes, boneTransforms)
+			if len(model.Bones.AfterPhysicsBoneIndexes) > 0 && enablePhysics && physicsBoneMatrix != nil {
+				// 物理後ボーン用に行列を更新
+				bone := model.Bones.Get(rigidBody.BoneIndex)
+				delta := deltas.Bones.Get(bone.Name, fno)
+				delta.LocalMatrix = mmath.NewMMat4ByMgl(physicsBoneMatrix)
+				delta.FramePosition = delta.LocalMatrix.Translation()
+				delta.FrameRotation = delta.LocalMatrix.Quaternion()
+			}
 		}
 
 		if len(model.Bones.AfterPhysicsBoneIndexes) > 0 && enablePhysics {
@@ -157,17 +165,31 @@ func updateBoneMatrixAfterPhysics(
 	fno int,
 	bone *pmx.Bone,
 ) {
-	parentMat := boneMatrixes[bone.ParentIndex]
+	delta := deltas.Bones.Get(bone.Name, fno)
 
-	pos := deltas.Bones.Get(bone.Name, fno).FramePosition.GL()
-	rot := deltas.Bones.Get(bone.Name, fno).FrameRotation.GL()
-	scl := deltas.Bones.Get(bone.Name, fno).FrameScale
+	pos := delta.FramePosition
+	rot := delta.FrameRotationWithoutEffect
+	scl := delta.FrameScale
+
+	if bone.IsEffectorTranslation() && bone.EffectIndex >= 0 {
+		effectBone := model.Bones.Get(bone.EffectIndex)
+		pos.Add(deltas.Bones.Get(effectBone.Name, fno).FramePosition)
+	}
+
+	if bone.IsEffectorRotation() && bone.EffectIndex >= 0 {
+		effectBone := model.Bones.Get(bone.EffectIndex)
+		rot = rot.Mul(deltas.Bones.Get(effectBone.Name, fno).FrameRotation)
+	}
+
+	matrix := mmath.NewMMat4()
+	matrix.SetTranslation(pos)
+	matrix.Mul(rot.ToMat4())
+	matrix.ScaleVec3(scl)
 
 	// 自身の行列を再作成
-	mat := parentMat.Mul4(mgl32.Translate3D(pos[0], pos[1], pos[2]))
-	mat = mat.Mul4(mgl32.HomogRotate3D(rot[3], mgl32.Vec3{rot[0], rot[1], rot[2]}))
-	mat = mat.Mul4(mgl32.Scale3D(float32(scl[0]), float32(scl[1]), float32(scl[2])))
-	boneMatrixes[bone.Index] = &mat
+	parentBone := model.Bones.Get(bone.ParentIndex)
+	parentMat := deltas.Bones.Get(parentBone.Name, fno).LocalMatrix
+	boneMatrixes[bone.Index] = parentMat.Muled(matrix).GL()
 
 	for _, childBoneIndex := range bone.ChildBoneIndexes {
 		// 子ボーンがいる場合、子ボーンの行列を再計算

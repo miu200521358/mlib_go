@@ -31,6 +31,17 @@ func (m *MMat4) GL() *mgl32.Mat4 {
 	return &mat
 }
 
+// NewMMat4ByMgl OpenGL座標系からMMD座標系に変換された行列を返します
+func NewMMat4ByMgl(m *mgl32.Mat4) *MMat4 {
+	tm := m.Transpose()
+	return NewMMat4ByValues(
+		float64(tm.Col(0).X()), float64(-tm.Col(1).X()), float64(-tm.Col(2).X()), float64(-tm.Col(3).X()),
+		float64(-tm.Col(0).Y()), float64(tm.Col(1).Y()), float64(tm.Col(2).Y()), float64(tm.Col(3).Y()),
+		float64(-tm.Col(0).Z()), float64(tm.Col(1).Z()), float64(tm.Col(2).Z()), float64(tm.Col(3).Z()),
+		float64(tm.Col(0).W()), float64(tm.Col(1).W()), float64(tm.Col(2).W()), float64(tm.Col(3).W()),
+	)
+}
+
 // Bullet+OpenGL座標系に変換された行列ベクトルを返します
 func (v *MMat4) Bullet() mbt.BtMatrix3x3 {
 	glMat := v.GL()
