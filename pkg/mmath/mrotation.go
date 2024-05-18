@@ -66,6 +66,16 @@ func (m *MRotation) GetRadians() *MVec3 {
 	return m.radians
 }
 
+func (m *MRotation) GetRadiansMMD() *MVec3 {
+	if m.radians == nil {
+		m.radians = NewMVec3()
+	}
+	if m.quaternion != nil {
+		return m.quaternion.MMD().ToRadians()
+	}
+	return m.radians
+}
+
 func (m *MRotation) SetRadians(v *MVec3) {
 	m.radians = v
 	m.degrees = &MVec3{
@@ -79,6 +89,16 @@ func (m *MRotation) SetRadians(v *MVec3) {
 func (m *MRotation) GetDegrees() *MVec3 {
 	if m.degrees == nil {
 		m.degrees = NewMVec3()
+	}
+	return m.degrees
+}
+
+func (m *MRotation) GetDegreesMMD() *MVec3 {
+	if m.degrees == nil {
+		m.degrees = NewMVec3()
+	}
+	if m.quaternion != nil {
+		return m.quaternion.MMD().ToDegrees()
 	}
 	return m.degrees
 }

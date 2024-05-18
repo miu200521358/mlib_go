@@ -201,7 +201,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 		v.SetIndex(int(index))
 
 		// 位置X,Y,Z
-		position, err := r.UnpackVec3()
+		position, err := r.UnpackVec3(true)
 		if err != nil {
 			mlog.E("[%d] readBones.Position error: %v", i, err)
 			return err
@@ -209,7 +209,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 		v.Position = &position
 
 		// 回転X,Y,Z,W
-		qq, err := r.UnpackQuaternion()
+		qq, err := r.UnpackQuaternion(true)
 		if err != nil {
 			mlog.E("[%d] readBones.Quaternion error: %v", i, err)
 			return err
@@ -298,7 +298,7 @@ func (r *VmdMotionReader) readCameras(motion *VmdMotion) error {
 		}
 
 		// 位置X,Y,Z
-		position, err := r.UnpackVec3()
+		position, err := r.UnpackVec3(true)
 		if err != nil {
 			mlog.E("[%d] readCameras.Position error: %v", i, err)
 			return err
@@ -306,7 +306,7 @@ func (r *VmdMotionReader) readCameras(motion *VmdMotion) error {
 		v.Position = &position
 
 		// 回転(オイラー角度)
-		degrees, err := r.UnpackVec3()
+		degrees, err := r.UnpackVec3(true)
 		if err != nil {
 			mlog.E("[%d] readCameras.Degrees error: %v", i, err)
 			return err
@@ -364,7 +364,7 @@ func (r *VmdMotionReader) readLights(motion *VmdMotion) error {
 		v.SetIndex(int(index))
 
 		// 照明色
-		color, err := r.UnpackVec3()
+		color, err := r.UnpackVec3(false)
 		if err != nil {
 			mlog.E("[%d] readLights.Color error: %v", i, err)
 			return err
@@ -372,7 +372,7 @@ func (r *VmdMotionReader) readLights(motion *VmdMotion) error {
 		v.Color = &color
 
 		// 位置X,Y,Z
-		position, err := r.UnpackVec3()
+		position, err := r.UnpackVec3(true)
 		if err != nil {
 			mlog.E("[%d] readLights.Position error: %v", i, err)
 			return err

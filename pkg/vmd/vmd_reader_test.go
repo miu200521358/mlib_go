@@ -69,13 +69,13 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 位置
 		expectedPosition := &mmath.MVec3{1.094920158, 0, 0.100637913}
-		if !bf.Position.PracticallyEquals(expectedPosition, 1e-8) {
-			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position)
+		if !bf.Position.MMD().PracticallyEquals(expectedPosition, 1e-8) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転
 		expectedRotation := mmath.NewMQuaternionByValues(0, 0, 0, 1)
-		if 1-bf.Rotation.GetQuaternion().Dot(expectedRotation) > 1e-8 {
+		if 1-bf.Rotation.GetQuaternion().MMD().Dot(expectedRotation) > 1e-8 {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, bf.Rotation)
 		}
 
@@ -132,8 +132,8 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 位置
 		expectedPosition := &mmath.MVec3{0, 0, 0}
-		if !bf.Position.PracticallyEquals(expectedPosition, 1e-8) {
-			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position)
+		if !bf.Position.MMD().PracticallyEquals(expectedPosition, 1e-8) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転
@@ -195,8 +195,8 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 位置
 		expectedPosition := &mmath.MVec3{0.548680067, 0.134522215, -2.504074097}
-		if !bf.Position.PracticallyEquals(expectedPosition, 1e-8) {
-			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position)
+		if !bf.Position.MMD().PracticallyEquals(expectedPosition, 1e-8) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転
@@ -259,8 +259,8 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 位置
 		expectedPosition := &mmath.MVec3{-1.63, 0.05, 2.58}
-		if !bf.Position.PracticallyEquals(expectedPosition, 1e-2) {
-			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position)
+		if !bf.Position.MMD().PracticallyEquals(expectedPosition, 1e-2) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転
@@ -282,8 +282,8 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 位置
 		expectedPosition := &mmath.MVec3{0.76, 1.17, 1.34}
-		if !bf.Position.PracticallyEquals(expectedPosition, 1e-2) {
-			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position)
+		if !bf.Position.MMD().PracticallyEquals(expectedPosition, 1e-2) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転
@@ -305,8 +305,8 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 位置
 		expectedPosition := &mmath.MVec3{-0.76, -0.61, -1.76}
-		if !bf.Position.PracticallyEquals(expectedPosition, 1e-2) {
-			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position)
+		if !bf.Position.MMD().PracticallyEquals(expectedPosition, 1e-2) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転
@@ -328,8 +328,8 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 位置
 		expectedPosition := &mmath.MVec3{0.0, 0.0, 0.0}
-		if !bf.Position.PracticallyEquals(expectedPosition, 1e-2) {
-			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position)
+		if !bf.Position.MMD().PracticallyEquals(expectedPosition, 1e-2) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転

@@ -80,11 +80,11 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	{
 		v := model.Vertices.Get(13)
 		expectedPosition := &mmath.MVec3{0.1565633, 16.62944, -0.2150156}
-		if !v.Position.PracticallyEquals(expectedPosition, 1e-5) {
+		if !v.Position.MMD().PracticallyEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, v.Position)
 		}
 		expectedNormal := &mmath.MVec3{0.2274586, 0.6613649, -0.714744}
-		if !v.Normal.PracticallyEquals(expectedNormal, 1e-5) {
+		if !v.Normal.MMD().PracticallyEquals(expectedNormal, 1e-5) {
 			t.Errorf("Expected Normal to be %v, got %v", expectedNormal, v.Normal)
 		}
 		expectedUV := &mmath.MVec2{0.5112334, 0.1250942}
@@ -129,11 +129,11 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	{
 		v := model.Vertices.Get(120)
 		expectedPosition := &mmath.MVec3{1.529492, 5.757646, 0.4527041}
-		if !v.Position.PracticallyEquals(expectedPosition, 1e-5) {
+		if !v.Position.MMD().PracticallyEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, v.Position)
 		}
 		expectedNormal := &mmath.MVec3{0.9943396, 0.1054612, -0.0129031}
-		if !v.Normal.PracticallyEquals(expectedNormal, 1e-5) {
+		if !v.Normal.MMD().PracticallyEquals(expectedNormal, 1e-5) {
 			t.Errorf("Expected Normal to be %v, got %v", expectedNormal, v.Normal)
 		}
 		expectedUV := &mmath.MVec2{0.8788766, 0.7697825}
@@ -260,7 +260,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
 		}
 		expectedPosition := &mmath.MVec3{0.0, 12.39097, -0.2011687}
-		if !b.Position.PracticallyEquals(expectedPosition, 1e-5) {
+		if !b.Position.MMD().PracticallyEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
 		expectedParentBoneIndex := 3
@@ -276,7 +276,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
 		}
 		expectedTailPosition := &mmath.MVec3{0.0, 0.0, 0.0}
-		if !b.TailPosition.PracticallyEquals(expectedTailPosition, 1e-5) {
+		if !b.TailPosition.MMD().PracticallyEquals(expectedTailPosition, 1e-5) {
 			t.Errorf("Expected TailPosition to be %v, got %v", expectedTailPosition, b.TailPosition)
 		}
 		expectedTailIndex := 6
@@ -296,7 +296,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
 		}
 		expectedPosition := &mmath.MVec3{-0.1984593, 18.47478, 0.04549573}
-		if !b.Position.PracticallyEquals(expectedPosition, 1e-5) {
+		if !b.Position.MMD().PracticallyEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
 		expectedParentBoneIndex := 9
@@ -312,7 +312,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
 		}
 		expectedTailPosition := &mmath.MVec3{0.0, 0.0, 0.0}
-		if !b.TailPosition.PracticallyEquals(expectedTailPosition, 1e-5) {
+		if !b.TailPosition.MMD().PracticallyEquals(expectedTailPosition, 1e-5) {
 			t.Errorf("Expected TailPosition to be %v, got %v", expectedTailPosition, b.TailPosition)
 		}
 		expectedTailIndex := -1
@@ -340,7 +340,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
 		}
 		expectedPosition := &mmath.MVec3{2.482529, 15.52887, 0.3184027}
-		if !b.Position.PracticallyEquals(expectedPosition, 1e-5) {
+		if !b.Position.MMD().PracticallyEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
 		expectedParentBoneIndex := 27
@@ -356,7 +356,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
 		}
 		expectedTailPosition := &mmath.MVec3{0.0, 0.0, 0.0}
-		if !b.TailPosition.PracticallyEquals(expectedTailPosition, 1e-5) {
+		if !b.TailPosition.MMD().PracticallyEquals(expectedTailPosition, 1e-5) {
 			t.Errorf("Expected TailPosition to be %v, got %v", expectedTailPosition, b.TailPosition)
 		}
 		expectedTailIndex := -1
@@ -364,15 +364,15 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected TailIndex to be %v, got %v", expectedTailIndex, b.TailIndex)
 		}
 		expectedFixedAxis := &mmath.MVec3{0.819152, -0.5735764, -4.355049e-15}
-		if !b.FixedAxis.PracticallyEquals(expectedFixedAxis, 1e-5) {
+		if !b.FixedAxis.MMD().PracticallyEquals(expectedFixedAxis, 1e-5) {
 			t.Errorf("Expected FixedAxis to be %v, got %v", expectedFixedAxis, b.FixedAxis)
 		}
 		expectedLocalAxisX := &mmath.MVec3{0.8191521, -0.5735765, -4.35505e-15}
-		if !b.LocalAxisX.PracticallyEquals(expectedLocalAxisX, 1e-5) {
+		if !b.LocalAxisX.MMD().PracticallyEquals(expectedLocalAxisX, 1e-5) {
 			t.Errorf("Expected LocalAxisX to be %v, got %v", expectedLocalAxisX, b.LocalAxisX)
 		}
 		expectedLocalAxisZ := &mmath.MVec3{-3.567448e-15, 2.497953e-15, -1}
-		if !b.LocalAxisZ.PracticallyEquals(expectedLocalAxisZ, 1e-5) {
+		if !b.LocalAxisZ.MMD().PracticallyEquals(expectedLocalAxisZ, 1e-5) {
 			t.Errorf("Expected LocalAxisZ to be %v, got %v", expectedLocalAxisZ, b.LocalAxisZ)
 		}
 	}
@@ -388,7 +388,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
 		}
 		expectedPosition := &mmath.MVec3{0.9644502, 1.647273, 0.4050385}
-		if !b.Position.PracticallyEquals(expectedPosition, 1e-5) {
+		if !b.Position.MMD().PracticallyEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
 		expectedParentBoneIndex := 97
@@ -404,7 +404,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
 		}
 		expectedTailPosition := &mmath.MVec3{0.0, 0.0, 1.0}
-		if !b.TailPosition.PracticallyEquals(expectedTailPosition, 1e-5) {
+		if !b.TailPosition.MMD().PracticallyEquals(expectedTailPosition, 1e-5) {
 			t.Errorf("Expected TailPosition to be %v, got %v", expectedTailPosition, b.TailPosition)
 		}
 		expectedTailIndex := -1
@@ -480,7 +480,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 				t.Errorf("Expected VertexIndex to be %v, got %v", expectedVertexIndex, o.VertexIndex)
 			}
 			expectedPosition := &mmath.MVec3{-0.01209146, 0.1320038, -0.0121327}
-			if !o.Position.PracticallyEquals(expectedPosition, 1e-5) {
+			if !o.Position.MMD().PracticallyEquals(expectedPosition, 1e-5) {
 				t.Errorf("Expected Position to be %v, got %v", expectedPosition, o.Position)
 			}
 		}
@@ -511,11 +511,11 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 				t.Errorf("Expected BoneIndex to be %v, got %v", expectedBoneIndex, o.BoneIndex)
 			}
 			expectedPosition := &mmath.MVec3{0.0, 0.0, 0.0}
-			if !o.Position.PracticallyEquals(expectedPosition, 1e-5) {
+			if !o.Position.MMD().PracticallyEquals(expectedPosition, 1e-5) {
 				t.Errorf("Expected BoneIndex to be %v, got %v", expectedBoneIndex, o.BoneIndex)
 			}
 			expectedRotation := &mmath.MVec3{-6.000048, 3.952523e-14, -3.308919e-14}
-			if !o.Rotation.GetDegrees().PracticallyEquals(expectedRotation, 1e-5) {
+			if !o.Rotation.GetDegreesMMD().PracticallyEquals(expectedRotation, 1e-5) {
 				t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, o.Rotation.GetDegrees())
 			}
 		}
@@ -741,7 +741,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected Size to be %v, got %v", expectedSize, b.Size)
 		}
 		expectedPosition := &mmath.MVec3{-2.52586, 15.45157, 0.241455}
-		if !b.Position.PracticallyEquals(expectedPosition, 1e-5) {
+		if !b.Position.MMD().PracticallyEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
 		expectedRotation := &mmath.MVec3{0.0, 0.0, 125.00}
@@ -793,7 +793,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected RigidBodyIndexB to be %v, got %v", expectedRigidBodyIndexB, j.RigidbodyIndexB)
 		}
 		expectedPosition := &mmath.MVec3{-1.189768, 18.56266, 0.07277258}
-		if !j.Position.PracticallyEquals(expectedPosition, 1e-5) {
+		if !j.Position.MMD().PracticallyEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, j.Position)
 		}
 		expectedRotation := &mmath.MVec3{-15.10554, 91.26718, -4.187446}
