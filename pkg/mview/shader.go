@@ -49,6 +49,7 @@ const (
 	PROGRAM_TYPE_EDGE    ProgramType = iota
 	PROGRAM_TYPE_BONE    ProgramType = iota
 	PROGRAM_TYPE_PHYSICS ProgramType = iota
+	PROGRAM_TYPE_NORMAL  ProgramType = iota
 )
 
 const (
@@ -75,6 +76,7 @@ type MShader struct {
 	EdgeProgram          uint32
 	BoneProgram          uint32
 	PhysicsProgram       uint32
+	NormalProgram        uint32
 	BoneTextureId        uint32
 }
 
@@ -138,6 +140,18 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		shader.PhysicsProgram = physicsProgram
 		shader.UsePhysicsProgram()
 		shader.initialize(shader.PhysicsProgram)
+		shader.Unuse()
+	}
+
+	{
+		normalProgram, err := shader.newProgram(
+			resourceFiles, "resources/glsl/normal.vert", "resources/glsl/normal.frag")
+		if err != nil {
+			return nil, err
+		}
+		shader.NormalProgram = normalProgram
+		shader.UseNormalProgram()
+		shader.initialize(shader.NormalProgram)
 		shader.Unuse()
 	}
 
@@ -310,6 +324,10 @@ func (s *MShader) UseBoneProgram() {
 	s.Use(PROGRAM_TYPE_BONE)
 }
 
+func (s *MShader) UseNormalProgram() {
+	s.Use(PROGRAM_TYPE_NORMAL)
+}
+
 func (s *MShader) UsePhysicsProgram() {
 	s.Use(PROGRAM_TYPE_PHYSICS)
 }
@@ -324,11 +342,13 @@ func (s *MShader) Use(programType ProgramType) {
 		gl.UseProgram(s.BoneProgram)
 	case PROGRAM_TYPE_PHYSICS:
 		gl.UseProgram(s.PhysicsProgram)
+	case PROGRAM_TYPE_NORMAL:
+		gl.UseProgram(s.NormalProgram)
 	}
 }
 
 func (s *MShader) GetPrograms() []uint32 {
-	return []uint32{s.ModelProgram, s.EdgeProgram, s.BoneProgram, s.PhysicsProgram}
+	return []uint32{s.ModelProgram, s.EdgeProgram, s.BoneProgram, s.PhysicsProgram, s.NormalProgram}
 }
 
 func (s *MShader) Unuse() {
@@ -340,4 +360,5 @@ func (s *MShader) Delete() {
 	s.DeleteProgram(s.EdgeProgram)
 	s.DeleteProgram(s.BoneProgram)
 	s.DeleteProgram(s.PhysicsProgram)
+	s.DeleteProgram(s.NormalProgram)
 }

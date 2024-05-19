@@ -28,6 +28,7 @@ func Draw(
 	elapsed float32,
 	isBoneDebug bool,
 	enablePhysics bool,
+	isDrawNormal bool,
 ) {
 	boneMatrixes := make([]*mgl32.Mat4, len(model.Bones.Data))
 	globalMatrixes := make([]*mmath.MMat4, len(model.Bones.Data))
@@ -51,7 +52,7 @@ func Draw(
 
 	updatePhysics(modelPhysics, model, boneMatrixes, boneTransforms, deltas, fno, elapsed, enablePhysics)
 
-	model.Meshes.Draw(shader, boneMatrixes, vertexDeltas, materialDeltas, windowIndex)
+	model.Meshes.Draw(shader, boneMatrixes, vertexDeltas, materialDeltas, windowIndex, isDrawNormal)
 
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()

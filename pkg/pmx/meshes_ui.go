@@ -13,10 +13,14 @@ import (
 )
 
 type Meshes struct {
-	meshes   []*Mesh
-	vertices []float32
-	vao      *mview.VAO
-	vbo      *mview.VBO
+	meshes    []*Mesh
+	vertices  []float32
+	vao       *mview.VAO
+	vbo       *mview.VBO
+	normals   []float32
+	normalVao *mview.VAO
+	normalVbo *mview.VBO
+	normalIbo *mview.IBO
 }
 
 func NewMeshes(
@@ -25,11 +29,20 @@ func NewMeshes(
 	resourceFiles embed.FS,
 ) *Meshes {
 	// 頂点情報
+	normalVertices := make([]float32, 0, len(model.Vertices.Data)*2)
 	vertices := make([]float32, 0, len(model.Vertices.Data))
+	normalFaces := make([]uint32, 0, len(model.Faces.Data)*2)
+	n := 0
 	for i := range len(model.Vertices.Data) {
 		vertices = append(vertices, model.Vertices.Get(i).GL()...)
+
+		normalVertices = append(normalVertices, model.Vertices.Get(i).GL()...)
+		normalVertices = append(normalVertices, model.Vertices.Get(i).NormalGL()...)
+
+		normalFaces = append(normalFaces, uint32(n))
+		normalFaces = append(normalFaces, uint32(n+1))
+		n += 2
 	}
-	// println("vertices", mutils.JoinSlice(mutils.ConvertFloat32ToInterfaceSlice(vertices)))
 
 	// 面情報
 	faces := make([]uint32, 0, len(model.Faces.Data)*3)
@@ -90,16 +103,31 @@ func NewMeshes(
 
 	vao := mview.NewVAO()
 	vao.Bind()
+
 	vbo := mview.NewVBOForVertex(gl.Ptr(vertices), len(vertices))
 	vbo.BindVertex(nil, nil)
 	vbo.Unbind()
 	vao.Unbind()
 
+	normalVao := mview.NewVAO()
+	normalVao.Bind()
+	normalVbo := mview.NewVBOForVertex(gl.Ptr(normalVertices), len(normalVertices))
+	normalVbo.BindVertex(nil, nil)
+	normalIbo := mview.NewIBO(gl.Ptr(normalFaces), len(normalFaces))
+	normalIbo.Bind()
+	normalIbo.Unbind()
+	normalVbo.Unbind()
+	normalVao.Unbind()
+
 	return &Meshes{
-		meshes:   meshes,
-		vertices: vertices,
-		vao:      vao,
-		vbo:      vbo,
+		meshes:    meshes,
+		vertices:  vertices,
+		vao:       vao,
+		vbo:       vbo,
+		normals:   normalVertices,
+		normalVao: normalVao,
+		normalVbo: normalVbo,
+		normalIbo: normalIbo,
 	}
 }
 
@@ -117,6 +145,7 @@ func (m *Meshes) Draw(
 	vertexDeltas [][]float32,
 	materialDeltas []*Material,
 	windowIndex int,
+	isDrawNormal bool,
 ) {
 	// 隠面消去
 	// https://learnopengl.com/Advanced-OpenGL/Depth-testing
@@ -150,8 +179,46 @@ func (m *Meshes) Draw(
 
 	m.vbo.Unbind()
 	m.vao.Unbind()
+
+	if isDrawNormal {
+		m.drawNormal(shader, boneMatrixes, windowIndex)
+	}
+
 	shader.Msaa.Unbind()
 
 	gl.Disable(gl.BLEND)
 	gl.Disable(gl.DEPTH_TEST)
+}
+
+func (m *Meshes) drawNormal(
+	shader *mview.MShader,
+	boneMatrixes []*mgl32.Mat4,
+	windowIndex int,
+) {
+	shader.UseNormalProgram()
+
+	m.normalVao.Bind()
+	m.normalVbo.BindVertex(nil, nil)
+	m.normalIbo.Bind()
+
+	// ボーンデフォームテクスチャ設定
+	BindBoneMatrixes(boneMatrixes, shader, shader.NormalProgram, windowIndex)
+
+	normalColor := mgl32.Vec4{0.3, 0.3, 0.7, 0.5}
+	specularUniform := gl.GetUniformLocation(shader.NormalProgram, gl.Str(mview.SHADER_COLOR))
+	gl.Uniform4fv(specularUniform, 1, &normalColor[0])
+
+	// ライン描画
+	gl.DrawElements(
+		gl.LINES,
+		int32(len(m.normals)),
+		gl.UNSIGNED_INT,
+		nil,
+	)
+
+	m.normalIbo.Unbind()
+	m.normalVbo.Unbind()
+	m.normalVao.Unbind()
+
+	shader.Unuse()
 }

@@ -16,6 +16,10 @@
         "translation": "&Physics Reset"
     },
     {
+        "id": "&法線デバッグ表示",
+        "translation": "&Normal Debug Display"
+    },
+    {
         "id": "&ボーンデバッグ表示",
         "translation": "&Bone Debug Display"
     },

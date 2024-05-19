@@ -37,10 +37,11 @@ func (ms *ModelSet) Draw(
 	elapsed float32,
 	isBoneDebug bool,
 	enablePhysics bool,
+	isDrawNormal bool,
 ) {
 	fno := int(math.Round(float64(frame)))
 	deltas := ms.Motion.Animate(fno, ms.Model)
-	Draw(modelPhysics, ms.Model, shader, deltas, windowIndex, fno, elapsed, isBoneDebug, enablePhysics)
+	Draw(modelPhysics, ms.Model, shader, deltas, windowIndex, fno, elapsed, isBoneDebug, enablePhysics, isDrawNormal)
 }
 
 // 直角の定数値
@@ -63,6 +64,7 @@ type GlWindow struct {
 	ctrlPressed         bool
 	playing             bool
 	VisibleBone         bool
+	VisibleNormal       bool
 	EnablePhysics       bool
 	EnableFrameDrop     bool
 	frame               float32
@@ -160,6 +162,7 @@ func NewGlWindow(
 		shiftPressed:        false,
 		ctrlPressed:         false,
 		VisibleBone:         false,
+		VisibleNormal:       false,
 		playing:             true, // 最初は再生
 		EnablePhysics:       true, // 最初は物理ON
 		EnableFrameDrop:     true, // 最初はドロップON
@@ -343,8 +346,8 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 		}
 
 		// 右クリックはカメラ中心をそのままにカメラ位置を変える
-		xOffset := (w.prevCursorPos.GetX() - xpos) * ratio
-		yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
+		xOffset := (xpos - w.prevCursorPos.GetX()) * ratio
+		yOffset := (ypos - w.prevCursorPos.GetY()) * ratio
 
 		// 方位角と仰角を更新
 		w.yaw += xOffset
@@ -404,7 +407,7 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 			// 上下移動のベクトルを計算
 			upMovement := up.MulScalar(-yOffset) // Y軸が上向きなので、マウスのY軸移動は逆にする
 			// 左右移動のベクトルを計算
-			rightMovement := right.MulScalar(-xOffset) // X軸が右向きなので、マウスのX軸移動は逆にする
+			rightMovement := right.MulScalar(xOffset) // X軸が左向きなので、マウスのX軸移動はそのまま
 
 			// 移動ベクトルを合成してカメラ位置と中心を更新
 			movement := upMovement.Add(rightMovement)
@@ -464,7 +467,8 @@ func (w *GlWindow) Draw(frame float32, elapsed float32) {
 
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
-		modelSet.Draw(w.Physics, w.Shader, w.WindowIndex, frame, elapsed, w.VisibleBone, w.EnablePhysics)
+		modelSet.Draw(w.Physics, w.Shader, w.WindowIndex, frame, elapsed,
+			w.VisibleBone, w.EnablePhysics, w.VisibleNormal)
 	}
 }
 
