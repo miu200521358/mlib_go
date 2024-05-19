@@ -53,7 +53,7 @@ const (
 
 const (
 	INITIAL_CAMERA_POSITION_Y float64 = 11.0
-	INITIAL_CAMERA_POSITION_Z float64 = -40.0
+	INITIAL_CAMERA_POSITION_Z float64 = 40.0
 	INITIAL_LOOK_AT_CENTER_Y  float64 = 11.0
 	LIGHT_AMBIENT             float64 = 154.0 / 255.0
 	FIELD_OF_VIEW_ANGLE       float32 = 40.0
@@ -264,7 +264,7 @@ func (s *MShader) initialize(program uint32) {
 
 	// カメラ中心
 	lookAtCenter := s.LookAtCenterPosition.GL()
-	camera := mgl32.LookAtV(*cameraPosition, *lookAtCenter, mgl32.Vec3{0, 1, 0})
+	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 	cameraUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_MATRIX))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 

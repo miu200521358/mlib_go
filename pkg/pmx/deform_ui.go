@@ -6,7 +6,7 @@ package pmx
 import "github.com/go-gl/mathgl/mgl32"
 
 // SDEF用パラメーターを返す
-func (s *Sdef) GetSdefParams() (*mgl32.Vec3, *mgl32.Vec3, *mgl32.Vec3) {
+func (s *Sdef) GetSdefParams() (mgl32.Vec3, mgl32.Vec3, mgl32.Vec3) {
 	// CがR0とR1より先にいかないよう、重みに基づいて補正
 	copiedSdefR0 := s.SdefR0.Copy()
 	copiedSdefR1 := s.SdefR1.Copy()

@@ -6,56 +6,41 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 )
 
-type MMat4 [4]MVec4
-
-func NewMMat4FromQuaternion(rot *MQuaternion) *MMat4 {
-	mat := NewMMat4()
-	mat.AssignQuaternion(rot)
-	return mat
-}
+type MMat4 mgl64.Mat4
 
 var (
 	// Zero holds a zero matrix.
 	MMat4Zero = MMat4{
-		MVec4{0, 0, 0, 0},
-		MVec4{0, 0, 0, 0},
-		MVec4{0, 0, 0, 0},
-		MVec4{0, 0, 0, 0},
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0,
 	}
 
 	// Ident holds an ident matrix.
 	MMat4Ident = MMat4{
-		MVec4{1, 0, 0, 0},
-		MVec4{0, 1, 0, 0},
-		MVec4{0, 0, 1, 0},
-		MVec4{0, 0, 0, 1},
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1,
 	}
 )
 
 func NewMMat4() *MMat4 {
 	return &MMat4{
-		MVec4{1, 0, 0, 0},
-		MVec4{0, 1, 0, 0},
-		MVec4{0, 0, 1, 0},
-		MVec4{0, 0, 0, 1},
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1,
 	}
 }
 
 func NewMMat4ByValues(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44 float64) *MMat4 {
 	return &MMat4{
-		MVec4{m11, m12, m13, m14},
-		MVec4{m21, m22, m23, m24},
-		MVec4{m31, m32, m33, m34},
-		MVec4{m41, m42, m43, m44},
-	}
-}
-
-func NewMMat4ByVec4(v1, v2, v3, v4 *MVec4) *MMat4 {
-	return &MMat4{
-		*v1,
-		*v2,
-		*v3,
-		*v4,
+		m11, m12, m13, m14,
+		m21, m22, m23, m24,
+		m31, m32, m33, m34,
+		m41, m42, m43, m44,
 	}
 }
 
@@ -71,561 +56,105 @@ func (m *MMat4) IsIdent() bool {
 
 // String
 func (m *MMat4) String() string {
-	return m[0].String() + "\n" +
-		m[1].String() + "\n" +
-		m[2].String() + "\n" +
-		m[3].String()
+	return mgl64.Mat4(*m).String()
 }
 
 func (m *MMat4) Copy() *MMat4 {
 	copied := NewMMat4ByValues(
-		m[0][0], m[0][1], m[0][2], m[0][3],
-		m[1][0], m[1][1], m[1][2], m[1][3],
-		m[2][0], m[2][1], m[2][2], m[2][3],
-		m[3][0], m[3][1], m[3][2], m[3][3])
+		m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15])
 	return copied
 }
 
 // PracticallyEquals
 func (m *MMat4) PracticallyEquals(other *MMat4, tolerance float64) bool {
-	return m[0].PracticallyEquals(&other[0], tolerance) &&
-		m[1].PracticallyEquals(&other[1], tolerance) &&
-		m[2].PracticallyEquals(&other[2], tolerance) &&
-		m[3].PracticallyEquals(&other[3], tolerance)
-}
-
-// Scale multiplies the diagonal scale elements by f returns mat.
-func (mat *MMat4) Scale(f float64) *MMat4 {
-	mat[0][0] *= f
-	mat[1][1] *= f
-	mat[2][2] *= f
-	return mat
-}
-
-// Scaled returns a copy of the matrix with the diagonal scale elements multiplied by f.
-func (mat *MMat4) Scaled(f float64) *MMat4 {
-	r := *mat
-	return r.Scale(f)
+	return mgl64.Mat4(*m).ApproxEqualThreshold(mgl64.Mat4(*other), tolerance)
 }
 
 // Trace returns the trace value for the matrix.
 func (mat *MMat4) Trace() float64 {
-	return mat[0][0] + mat[1][1] + mat[2][2] + mat[3][3]
+	return mgl64.Mat4(*mat).Trace()
 }
 
 // Trace3 returns the trace value for the 3x3 sub-matrix.
 func (mat *MMat4) Trace3() float64 {
-	return mat[0][0] + mat[1][1] + mat[2][2]
-}
-
-// AssignMat3x3 assigns a 3x3 sub-matrix and sets the rest of the matrix to the ident value.
-func (mat *MMat4) AssignMat3x3(m *MMat3) *MMat4 {
-	*mat = MMat4{
-		MVec4{m[0][0], m[1][0], m[2][0], 0},
-		MVec4{m[0][1], m[1][1], m[2][1], 0},
-		MVec4{m[0][2], m[1][2], m[2][2], 0},
-		MVec4{0, 0, 0, 1},
-	}
-	return mat
-}
-
-// AssignMul multiplies a and b and assigns the result to T.
-func (mat *MMat4) AssignMul(a, b *MMat4) *MMat4 {
-	mat[0] = *a.MulVec4(&b[0])
-	mat[1] = *a.MulVec4(&b[1])
-	mat[2] = *a.MulVec4(&b[2])
-	mat[3] = *a.MulVec4(&b[3])
-	return mat
-}
-
-// MulVec4 multiplies v with mat and returns a new vector v' = M * v.
-func (mat *MMat4) MulVec4(v *MVec4) *MVec4 {
-	return &MVec4{
-		mat[0][0]*v[0] + mat[1][0]*v[1] + mat[2][0]*v[2] + mat[3][0]*v[3],
-		mat[0][1]*v[0] + mat[1][1]*v[1] + mat[2][1]*v[2] + mat[3][1]*v[3],
-		mat[0][2]*v[0] + mat[1][2]*v[1] + mat[2][2]*v[2] + mat[3][2]*v[3],
-		mat[0][3]*v[0] + mat[1][3]*v[1] + mat[2][3]*v[2] + mat[3][3]*v[3],
-	}
-}
-
-// TransformVec4 multiplies v with mat and saves the result in v.
-func (mat *MMat4) TransformVec4(v *MVec4) {
-	// Use intermediate variables to not alter further computations.
-	x := mat[0][0]*v[0] + mat[1][0]*v[1] + mat[2][0]*v[2] + mat[3][0]*v[3]
-	y := mat[0][1]*v[0] + mat[1][1]*v[1] + mat[2][1]*v[2] + mat[3][1]*v[3]
-	z := mat[0][2]*v[0] + mat[1][2]*v[1] + mat[2][2]*v[2] + mat[3][2]*v[3]
-	v[3] = mat[0][3]*v[0] + mat[1][3]*v[1] + mat[2][3]*v[2] + mat[3][3]*v[3]
-	v[0] = x
-	v[1] = y
-	v[2] = z
+	return mgl64.Mat4(*mat).Mat3().Trace()
 }
 
 // MulVec3 multiplies v (converted to a vec4 as (v_1, v_2, v_3, 1))
 // with mat and divides the result by w. Returns a new vec3.
 func (mat *MMat4) MulVec3(other *MVec3) *MVec3 {
-	s := [4]float64{
-		mat[0][0]*other[0] + mat[0][1]*other[1] + mat[0][2]*other[2] + mat[0][3],
-		mat[1][0]*other[0] + mat[1][1]*other[1] + mat[1][2]*other[2] + mat[1][3],
-		mat[2][0]*other[0] + mat[2][1]*other[1] + mat[2][2]*other[2] + mat[2][3],
-		mat[3][0]*other[0] + mat[3][1]*other[1] + mat[3][2]*other[2] + mat[3][3],
+	m := mgl64.Mat4{1, 0, 0, other[0], 0, 1, 0, other[1], 0, 0, 1, other[2], 0, 0, 0, 1}
+	s := m.Mul4(mgl64.Mat4(*mat))
+	if s[15] == 0 {
+		return &MVec3{s[3], s[7], s[11]}
 	}
-
-	if s[3] == 1.0 {
-		return &MVec3{s[0], s[1], s[2]}
-	} else if s[3] == 0.0 {
-		return NewMVec3()
-	} else {
-		return &MVec3{s[0] / s[3], s[1] / s[3], s[2] / s[3]}
-	}
-}
-
-// TransformVec3 multiplies v (converted to a vec4 as (v_1, v_2, v_3, 1))
-// with mat, divides the result by w and saves the result in v.
-func (mat *MMat4) TransformVec3(v *MVec3) {
-	x := mat[0][0]*v[0] + mat[1][0]*v[1] + mat[2][0]*v[2] + mat[3][0]
-	y := mat[0][1]*v[0] + mat[1][1]*v[1] + mat[2][1]*v[2] + mat[3][1]
-	z := mat[0][2]*v[0] + mat[1][2]*v[1] + mat[2][2]*v[2] + mat[3][2]
-	w := mat[0][3]*v[0] + mat[1][3]*v[1] + mat[2][3]*v[2] + mat[3][3]
-	oow := 1 / w
-	v[0] = x * oow
-	v[1] = y * oow
-	v[2] = z * oow
-}
-
-// MulVec3W multiplies v with mat with w as fourth component of the vector.
-// Useful to differentiate between vectors (w = 0) and points (w = 1)
-// without transforming them to vec4.
-func (mat *MMat4) MulVec3W(v *MVec3, w float64) *MVec3 {
-	result := *v
-	mat.TransformVec3W(&result, w)
-	return &result
-}
-
-// TransformVec3W multiplies v with mat with w as fourth component of the vector and
-// saves the result in v.
-// Useful to differentiate between vectors (w = 0) and points (w = 1)
-// without transforming them to vec4.
-func (mat *MMat4) TransformVec3W(v *MVec3, w float64) {
-	// use intermediate variables to not alter further computations
-	x := mat[0][0]*v[0] + mat[1][0]*v[1] + mat[2][0]*v[2] + mat[3][0]*w
-	y := mat[0][1]*v[0] + mat[1][1]*v[1] + mat[2][1]*v[2] + mat[3][1]*w
-	v[2] = mat[0][2]*v[0] + mat[1][2]*v[1] + mat[2][2]*v[2] + mat[3][2]*w
-	v[0] = x
-	v[1] = y
-}
-
-// SetTranslation sets the translation elements of the matrix.
-func (mat *MMat4) SetTranslation(v *MVec3) *MMat4 {
-	mat[0][3] = v[0]
-	mat[1][3] = v[1]
-	mat[2][3] = v[2]
-	return mat
+	return &MVec3{s[3] / s[15], s[7] / s[15], s[11] / s[15]}
 }
 
 // Translate adds v to the translation part of the matrix.
 func (mat *MMat4) Translate(v *MVec3) *MMat4 {
-	mat[0][3] += v[0]
-	mat[1][3] += v[1]
-	mat[2][3] += v[2]
+	mat[3] += v[0]
+	mat[7] += v[1]
+	mat[11] += v[2]
 	return mat
 }
 
-// TranslateX adds dx to the X-translation element of the matrix.
-func (mat *MMat4) TranslateX(dx float64) *MMat4 {
-	mat[0][3] += dx
+func (mat *MMat4) Translated(v *MVec3) *MMat4 {
+	return mat.Copy().Translate(v)
+}
+
+// 行列の移動情報
+func (mat *MMat4) Translation() *MVec3 {
+	return &MVec3{mat[3], mat[7], mat[11]}
+}
+
+func (mat *MMat4) Scale(s *MVec3) *MMat4 {
+	mat[0] *= s[0]
+	mat[5] *= s[1]
+	mat[10] *= s[2]
 	return mat
 }
 
-// TranslateY adds dy to the Y-translation element of the matrix.
-func (mat *MMat4) TranslateY(dy float64) *MMat4 {
-	mat[1][3] += dy
-	return mat
-}
-
-// TranslateZ adds dz to the Z-translation element of the matrix.
-func (mat *MMat4) TranslateZ(dz float64) *MMat4 {
-	mat[2][3] += dz
-	return mat
+// Scaled returns a copy of the matrix with the diagonal scale elements multiplied by f.
+func (mat *MMat4) Scaled(s *MVec3) *MMat4 {
+	return mat.Copy().Scale(s)
 }
 
 // Scaling returns the scaling diagonal of the matrix.
 func (mat *MMat4) Scaling() *MVec3 {
-	return &MVec3{mat[0][0], mat[1][1], mat[2][2]}
+	return &MVec3{mat[0], mat[5], mat[10]}
 }
 
-// SetScaling sets the scaling diagonal of the matrix.
-func (mat *MMat4) SetScaling(s *MVec4) *MMat4 {
-	mat[0][0] = s[0]
-	mat[1][1] = s[1]
-	mat[2][2] = s[2]
-	mat[3][3] = s[3]
-	return mat
-}
-
-// ScaleVec3 multiplies the scaling diagonal of the matrix by s.
-func (mat *MMat4) ScaleVec3(s *MVec3) *MMat4 {
-	mat[0][0] *= s[0]
-	mat[1][1] *= s[1]
-	mat[2][2] *= s[2]
-	return mat
-}
-
+// Rotate multiplies the matrix by a rotation matrix derived from the quaternion.
 func (mat *MMat4) Rotate(quat *MQuaternion) *MMat4 {
-	mat.Mul(NewMMat4FromQuaternion(quat))
+	mat.Mul(quat.ToMat4())
 	return mat
 }
 
 // Quaternion extracts a quaternion from the rotation part of the matrix.
 func (mat *MMat4) Quaternion() *MQuaternion {
-	trace := mat[0][0] + mat[1][1] + mat[2][2]
-
-	q := MQuaternion{}
-	if 0 < trace {
-		s := 0.5 / math.Sqrt(trace+1)
-		q.W = 0.25 / s
-		q.V[0] = (mat[2][1] - mat[1][2]) * s
-		q.V[1] = (mat[0][2] - mat[2][0]) * s
-		q.V[2] = (mat[1][0] - mat[0][1]) * s
-	} else {
-		if mat[0][0] > mat[1][1] && mat[0][0] > mat[2][2] {
-			s := 2 * math.Sqrt(1+mat[0][0]-mat[1][1]-mat[2][2])
-			q.W = (mat[2][1] - mat[1][2]) / s
-			q.V[0] = 0.25 * s
-			q.V[1] = (mat[0][1] + mat[1][0]) / s
-			q.V[2] = (mat[0][2] + mat[2][0]) / s
-		} else if mat[1][1] > mat[2][2] {
-			s := 2 * math.Sqrt(1+mat[1][1]-mat[0][0]-mat[2][2])
-			q.W = (mat[0][2] - mat[2][0]) / s
-			q.V[0] = (mat[0][1] + mat[1][0]) / s
-			q.V[1] = 0.25 * s
-			q.V[2] = (mat[1][2] + mat[2][1]) / s
-		} else {
-			s := 2 * math.Sqrt(1+mat[2][2]-mat[0][0]-mat[1][1])
-			q.W = (mat[1][0] - mat[0][1]) / s
-			q.V[0] = (mat[0][2] + mat[2][0]) / s
-			q.V[1] = (mat[1][2] + mat[2][1]) / s
-			q.V[2] = 0.25 * s
-		}
-	}
-
-	return q.Normalize()
+	q := mgl64.Mat4ToQuat(mgl64.Mat4(*mat))
+	return &MQuaternion{q.W, q.V}
 }
 
 func (mat *MMat4) Mat3() *MMat3 {
 	return &MMat3{
-		MVec3{mat[0][0], mat[0][1], mat[0][2]},
-		MVec3{mat[1][0], mat[1][1], mat[1][2]},
-		MVec3{mat[2][0], mat[2][1], mat[2][2]},
+		mat[0], mat[1], mat[2],
+		mat[4], mat[5], mat[6],
+		mat[8], mat[9], mat[10],
 	}
-}
-
-// AssignQuaternion assigns a quaternion to the rotations part of the matrix and sets the other elements to their ident value.
-func (mat *MMat4) AssignQuaternion(q *MQuaternion) *MMat4 {
-	xx := q.GetX() * q.GetX() * 2
-	yy := q.GetY() * q.GetY() * 2
-	zz := q.GetZ() * q.GetZ() * 2
-	xy := q.GetX() * q.GetY() * 2
-	xz := q.GetX() * q.GetZ() * 2
-	yz := q.GetY() * q.GetZ() * 2
-	wx := q.GetW() * q.GetX() * 2
-	wy := q.GetW() * q.GetY() * 2
-	wz := q.GetW() * q.GetZ() * 2
-
-	mat[0][0] = 1 - (yy + zz)
-	mat[0][1] = xy - wz
-	mat[0][2] = xz + wy
-	mat[0][3] = 0
-
-	mat[1][0] = xy + wz
-	mat[1][1] = 1 - (xx + zz)
-	mat[1][2] = yz - wx
-	mat[1][3] = 0
-
-	mat[2][0] = xz - wy
-	mat[2][1] = yz + wx
-	mat[2][2] = 1 - (xx + yy)
-	mat[2][3] = 0
-
-	mat[3][0] = 0
-	mat[3][1] = 0
-	mat[3][2] = 0
-	mat[3][3] = 1
-
-	return mat
-}
-
-// AssignXRotation assigns a rotation around the x axis to the rotation part of the matrix and sets the remaining elements to their ident value.
-func (mat *MMat4) AssignXRotation(angle float64) *MMat4 {
-	cosine := math.Cos(angle)
-	sine := math.Sin(angle)
-
-	mat[0][0] = 1
-	mat[0][1] = 0
-	mat[0][2] = 0
-	mat[0][3] = 0
-
-	mat[1][0] = 0
-	mat[1][1] = cosine
-	mat[1][2] = -sine
-	mat[1][3] = 0
-
-	mat[2][0] = 0
-	mat[2][1] = sine
-	mat[2][2] = cosine
-	mat[2][3] = 0
-
-	mat[3][0] = 0
-	mat[3][1] = 0
-	mat[3][2] = 0
-	mat[3][3] = 1
-
-	return mat
-}
-
-// AssignYRotation assigns a rotation around the y axis to the rotation part of the matrix and sets the remaining elements to their ident value.
-func (mat *MMat4) AssignYRotation(angle float64) *MMat4 {
-	cosine := math.Cos(angle)
-	sine := math.Sin(angle)
-
-	mat[0][0] = cosine
-	mat[0][1] = 0
-	mat[0][2] = sine
-	mat[0][3] = 0
-
-	mat[1][0] = 0
-	mat[1][1] = 1
-	mat[1][2] = 0
-	mat[1][3] = 0
-
-	mat[2][0] = -sine
-	mat[2][1] = 0
-	mat[2][2] = cosine
-	mat[2][3] = 0
-
-	mat[3][0] = 0
-	mat[3][1] = 0
-	mat[3][2] = 0
-	mat[3][3] = 1
-
-	return mat
-}
-
-// AssignZRotation assigns a rotation around the z axis to the rotation part of the matrix and sets the remaining elements to their ident value.
-func (mat *MMat4) AssignZRotation(angle float64) *MMat4 {
-	cosine := math.Cos(angle)
-	sine := math.Sin(angle)
-
-	mat[0][0] = cosine
-	mat[0][1] = -sine
-	mat[0][2] = 0
-	mat[0][3] = 0
-
-	mat[1][0] = sine
-	mat[1][1] = cosine
-	mat[1][2] = 0
-	mat[1][3] = 0
-
-	mat[2][0] = 0
-	mat[2][1] = 0
-	mat[2][2] = 1
-	mat[2][3] = 0
-
-	mat[3][0] = 0
-	mat[3][1] = 0
-	mat[3][2] = 0
-	mat[3][3] = 1
-
-	return mat
-}
-
-// AssignCoordinateSystem assigns the rotation of a orthogonal coordinates system to the rotation part of the matrix and sets the remaining elements to their ident value.
-func (mat *MMat4) AssignCoordinateSystem(x, y, z *MVec3) *MMat4 {
-	mat[0][0] = x[0]
-	mat[0][1] = x[1]
-	mat[0][2] = x[2]
-	mat[0][3] = 0
-
-	mat[1][0] = y[0]
-	mat[1][1] = y[1]
-	mat[1][2] = y[2]
-	mat[1][3] = 0
-
-	mat[2][0] = z[0]
-	mat[2][1] = z[1]
-	mat[2][2] = z[2]
-	mat[2][3] = 0
-
-	mat[3][0] = 0
-	mat[3][1] = 0
-	mat[3][2] = 0
-	mat[3][3] = 1
-
-	return mat
-}
-
-// AssignEulerRotation assigns Euler angle rotations to the rotation part of the matrix and sets the remaining elements to their ident value.
-func (mat *MMat4) AssignEulerRotation(xPitch, yHead, zRoll float64) *MMat4 {
-	sinH := math.Sin(yHead)
-	cosH := math.Cos(yHead)
-	sinP := math.Sin(xPitch)
-	cosP := math.Cos(xPitch)
-	sinR := math.Sin(zRoll)
-	cosR := math.Cos(zRoll)
-
-	mat[0][0] = cosR*cosH - sinR*sinP*sinH
-	mat[0][1] = -sinR * cosP
-	mat[0][2] = cosR*sinH + sinR*sinP*cosH
-	mat[0][3] = 0
-
-	mat[1][0] = sinR*cosH + cosR*sinP*sinH
-	mat[1][1] = cosR * cosP
-	mat[1][2] = sinR*sinH - cosR*sinP*cosH
-	mat[1][3] = 0
-
-	mat[2][0] = -cosP * sinH
-	mat[2][1] = sinP
-	mat[2][2] = cosP * cosH
-	mat[2][3] = 0
-
-	mat[3][0] = 0
-	mat[3][1] = 0
-	mat[3][2] = 0
-	mat[3][3] = 1
-
-	return mat
-}
-
-// ExtractEulerAngles extracts the rotation part of the matrix as Euler angle rotation values.
-func (mat *MMat4) ExtractEulerAngles() (xPitch, yHead, zRoll float64) {
-	xPitch = math.Asin(mat[1][2])
-	f12 := math.Abs(mat[1][2])
-	if f12 > (1.0-0.0001) && f12 < (1.0+0.0001) { // f12 == 1.0
-		yHead = 0.0
-		zRoll = math.Atan2(mat[0][1], mat[0][0])
-	} else {
-		yHead = math.Atan2(-mat[0][2], mat[2][2])
-		zRoll = math.Atan2(-mat[1][0], mat[1][1])
-	}
-	return yHead, xPitch, zRoll
-}
-
-// AssignPerspectiveProjection assigns a perspective projection transformation.
-func (mat *MMat4) AssignPerspectiveProjection(left, right, bottom, top, znear, zfar float64) *MMat4 {
-	near2 := znear + znear
-	ooFarNear := 1 / (zfar - znear)
-
-	mat[0][0] = near2 / (right - left)
-	mat[0][1] = 0
-	mat[0][2] = (right + left) / (right - left)
-	mat[0][3] = 0
-
-	mat[1][0] = 0
-	mat[1][1] = near2 / (top - bottom)
-	mat[1][2] = (top + bottom) / (top - bottom)
-	mat[1][3] = 0
-
-	mat[2][0] = 0
-	mat[2][1] = 0
-	mat[2][2] = -(zfar + znear) * ooFarNear
-	mat[2][3] = -2 * zfar * znear * ooFarNear
-
-	mat[3][0] = 0
-	mat[3][1] = 0
-	mat[3][2] = -1
-	mat[3][3] = 0
-
-	return mat
-}
-
-// AssignOrthogonalProjection assigns an orthogonal projection transformation.
-func (mat *MMat4) AssignOrthogonalProjection(left, right, bottom, top, znear, zfar float64) *MMat4 {
-	ooRightLeft := 1 / (right - left)
-	ooTopBottom := 1 / (top - bottom)
-	ooFarNear := 1 / (zfar - znear)
-
-	mat[0][0] = 2 * ooRightLeft
-	mat[0][1] = 0
-	mat[0][2] = 0
-	mat[0][3] = -(right + left) * ooRightLeft
-
-	mat[1][0] = 0
-	mat[1][1] = 2 * ooTopBottom
-	mat[1][2] = 0
-	mat[1][3] = -(top + bottom) * ooTopBottom
-
-	mat[2][0] = 0
-	mat[2][1] = 0
-	mat[2][2] = -2 * ooFarNear
-	mat[2][3] = -(zfar + znear) * ooFarNear
-
-	mat[3][0] = 0
-	mat[3][1] = 0
-	mat[3][2] = 0
-	mat[3][3] = 1
-
-	return mat
-}
-
-// Determinant3x3 returns the determinant of the 3x3 sub-matrix.
-func (mat *MMat4) Determinant3x3() float64 {
-	return mat[0][0]*mat[1][1]*mat[2][2] +
-		mat[1][0]*mat[2][1]*mat[0][2] +
-		mat[2][0]*mat[0][1]*mat[1][2] -
-		mat[2][0]*mat[1][1]*mat[0][2] -
-		mat[1][0]*mat[0][1]*mat[2][2] -
-		mat[0][0]*mat[2][1]*mat[1][2]
-}
-
-// IsReflective returns true if the matrix can be reflected by a plane.
-func (mat *MMat4) IsReflective() bool {
-	return mat.Determinant3x3() < 0
-}
-
-func swap(a, b *float64) {
-	*a, *b = *b, *a
 }
 
 // Transpose transposes the matrix.
 func (mat *MMat4) Transpose() *MMat4 {
-	swap(&mat[3][0], &mat[0][3])
-	swap(&mat[3][1], &mat[1][3])
-	swap(&mat[3][2], &mat[2][3])
-	return mat.Transpose3x3()
-}
-
-// Transpose3x3 transposes the 3x3 sub-matrix.
-func (mat *MMat4) Transpose3x3() *MMat4 {
-	swap(&mat[1][0], &mat[0][1])
-	swap(&mat[2][0], &mat[0][2])
-	swap(&mat[2][1], &mat[1][2])
-	return mat
+	tm := mgl64.Mat4(*mat).Transpose()
+	return (*MMat4)(&tm)
 }
 
 // Mul は行列の掛け算を行います
-func (m1 *MMat4) Mul(m2 *MMat4) {
-	var result MMat4
-	// ループを展開して直接各成分を計算します
-	result[0][0] = m1[0][0]*m2[0][0] + m1[0][1]*m2[1][0] + m1[0][2]*m2[2][0] + m1[0][3]*m2[3][0]
-	result[0][1] = m1[0][0]*m2[0][1] + m1[0][1]*m2[1][1] + m1[0][2]*m2[2][1] + m1[0][3]*m2[3][1]
-	result[0][2] = m1[0][0]*m2[0][2] + m1[0][1]*m2[1][2] + m1[0][2]*m2[2][2] + m1[0][3]*m2[3][2]
-	result[0][3] = m1[0][0]*m2[0][3] + m1[0][1]*m2[1][3] + m1[0][2]*m2[2][3] + m1[0][3]*m2[3][3]
-
-	result[1][0] = m1[1][0]*m2[0][0] + m1[1][1]*m2[1][0] + m1[1][2]*m2[2][0] + m1[1][3]*m2[3][0]
-	result[1][1] = m1[1][0]*m2[0][1] + m1[1][1]*m2[1][1] + m1[1][2]*m2[2][1] + m1[1][3]*m2[3][1]
-	result[1][2] = m1[1][0]*m2[0][2] + m1[1][1]*m2[1][2] + m1[1][2]*m2[2][2] + m1[1][3]*m2[3][2]
-	result[1][3] = m1[1][0]*m2[0][3] + m1[1][1]*m2[1][3] + m1[1][2]*m2[2][3] + m1[1][3]*m2[3][3]
-
-	result[2][0] = m1[2][0]*m2[0][0] + m1[2][1]*m2[1][0] + m1[2][2]*m2[2][0] + m1[2][3]*m2[3][0]
-	result[2][1] = m1[2][0]*m2[0][1] + m1[2][1]*m2[1][1] + m1[2][2]*m2[2][1] + m1[2][3]*m2[3][1]
-	result[2][2] = m1[2][0]*m2[0][2] + m1[2][1]*m2[1][2] + m1[2][2]*m2[2][2] + m1[2][3]*m2[3][2]
-	result[2][3] = m1[2][0]*m2[0][3] + m1[2][1]*m2[1][3] + m1[2][2]*m2[2][3] + m1[2][3]*m2[3][3]
-
-	result[3][0] = m1[3][0]*m2[0][0] + m1[3][1]*m2[1][0] + m1[3][2]*m2[2][0] + m1[3][3]*m2[3][0]
-	result[3][1] = m1[3][0]*m2[0][1] + m1[3][1]*m2[1][1] + m1[3][2]*m2[2][1] + m1[3][3]*m2[3][1]
-	result[3][2] = m1[3][0]*m2[0][2] + m1[3][1]*m2[1][2] + m1[3][2]*m2[2][2] + m1[3][3]*m2[3][2]
-	result[3][3] = m1[3][0]*m2[0][3] + m1[3][1]*m2[1][3] + m1[3][2]*m2[2][3] + m1[3][3]*m2[3][3]
-
-	*m1 = result
+func (m1 *MMat4) Mul(m2 *MMat4) *MMat4 {
+	*m1 = MMat4(mgl64.Mat4(*m1).Mul4(mgl64.Mat4(*m2)))
+	return m1
 }
 
 func (mat *MMat4) Muled(a *MMat4) *MMat4 {
@@ -634,114 +163,39 @@ func (mat *MMat4) Muled(a *MMat4) *MMat4 {
 	return copied
 }
 
+func (mat *MMat4) MulFactor(v float64) *MMat4 {
+	*mat = MMat4(mgl64.Mat4(*mat.Copy()).Mul(v))
+	return mat
+}
+
 func (mat *MMat4) MuledFactor(v float64) *MMat4 {
 	copied := mat.Copy()
-
-	copied[0][0] *= v
-	copied[0][1] *= v
-	copied[0][2] *= v
-	copied[0][3] *= v
-
-	copied[1][0] *= v
-	copied[1][1] *= v
-	copied[1][2] *= v
-	copied[1][3] *= v
-
-	copied[2][0] *= v
-	copied[2][1] *= v
-	copied[2][2] *= v
-	copied[2][3] *= v
-
-	copied[3][0] *= v
-	copied[3][1] *= v
-	copied[3][2] *= v
-	copied[3][3] *= v
-
+	copied.MulFactor(v)
 	return copied
 }
 
-// 行列の移動情報
-func (mat *MMat4) Translation() *MVec3 {
-	return &MVec3{mat[0][3], mat[1][3], mat[2][3]}
-}
-
 func (m *MMat4) Det() float64 {
-	return m[0][0]*m[1][1]*m[2][2]*m[3][3] - m[0][0]*m[1][1]*m[2][3]*m[3][2] - m[0][0]*m[1][2]*m[2][1]*m[3][3] + m[0][0]*m[1][2]*m[2][3]*m[3][1] + m[0][0]*m[1][3]*m[2][1]*m[3][2] - m[0][0]*m[1][3]*m[2][2]*m[3][1] - m[0][1]*m[1][0]*m[2][2]*m[3][3] + m[0][1]*m[1][0]*m[2][3]*m[3][2] + m[0][1]*m[1][2]*m[2][0]*m[3][3] - m[0][1]*m[1][2]*m[2][3]*m[3][0] - m[0][1]*m[1][3]*m[2][0]*m[3][2] + m[0][1]*m[1][3]*m[2][2]*m[3][0] + m[0][2]*m[1][0]*m[2][1]*m[3][3] - m[0][2]*m[1][0]*m[2][3]*m[3][1] - m[0][2]*m[1][1]*m[2][0]*m[3][3] + m[0][2]*m[1][1]*m[2][3]*m[3][0] + m[0][2]*m[1][3]*m[2][0]*m[3][1] - m[0][2]*m[1][3]*m[2][1]*m[3][0] - m[0][3]*m[1][0]*m[2][1]*m[3][2] + m[0][3]*m[1][0]*m[2][2]*m[3][1] + m[0][3]*m[1][1]*m[2][0]*m[3][2] - m[0][3]*m[1][1]*m[2][2]*m[3][0] - m[0][3]*m[1][2]*m[2][0]*m[3][1] + m[0][3]*m[1][2]*m[2][1]*m[3][0]
+	return mgl64.Mat4(*m).Det()
 }
 
 // 逆行列
 func (m *MMat4) Inverse() *MMat4 {
-	det := m.Det()
-	if mgl64.FloatEqual(det, float64(0.0)) {
-		return NewMMat4()
-	}
-
-	retMat := MMat4{
-		MVec4{
-			-m[1][3]*m[2][2]*m[3][1] + m[1][2]*m[2][3]*m[3][1] + m[1][3]*m[2][1]*m[3][2] - m[1][1]*m[2][3]*m[3][2] - m[1][2]*m[2][1]*m[3][3] + m[1][1]*m[2][2]*m[3][3],
-			m[0][3]*m[2][2]*m[3][1] - m[0][2]*m[2][3]*m[3][1] - m[0][3]*m[2][1]*m[3][2] + m[0][1]*m[2][3]*m[3][2] + m[0][2]*m[2][1]*m[3][3] - m[0][1]*m[2][2]*m[3][3],
-			-m[0][3]*m[1][2]*m[3][1] + m[0][2]*m[1][3]*m[3][1] + m[0][3]*m[1][1]*m[3][2] - m[0][1]*m[1][3]*m[3][2] - m[0][2]*m[1][1]*m[3][3] + m[0][1]*m[1][2]*m[3][3],
-			m[0][3]*m[1][2]*m[2][1] - m[0][2]*m[1][3]*m[2][1] - m[0][3]*m[1][1]*m[2][2] + m[0][1]*m[1][3]*m[2][2] + m[0][2]*m[1][1]*m[2][3] - m[0][1]*m[1][2]*m[2][3],
-		},
-		MVec4{
-			m[1][3]*m[2][2]*m[3][0] - m[1][2]*m[2][3]*m[3][0] - m[1][3]*m[2][0]*m[3][2] + m[1][0]*m[2][3]*m[3][2] + m[1][2]*m[2][0]*m[3][3] - m[1][0]*m[2][2]*m[3][3],
-			-m[0][3]*m[2][2]*m[3][0] + m[0][2]*m[2][3]*m[3][0] + m[0][3]*m[2][0]*m[3][2] - m[0][0]*m[2][3]*m[3][2] - m[0][2]*m[2][0]*m[3][3] + m[0][0]*m[2][2]*m[3][3],
-			m[0][3]*m[1][2]*m[3][0] - m[0][2]*m[1][3]*m[3][0] - m[0][3]*m[1][0]*m[3][2] + m[0][0]*m[1][3]*m[3][2] + m[0][2]*m[1][0]*m[3][3] - m[0][0]*m[1][2]*m[3][3],
-			-m[0][3]*m[1][2]*m[2][0] + m[0][2]*m[1][3]*m[2][0] + m[0][3]*m[1][0]*m[2][2] - m[0][0]*m[1][3]*m[2][2] - m[0][2]*m[1][0]*m[2][3] + m[0][0]*m[1][2]*m[2][3],
-		},
-		MVec4{
-			-m[1][3]*m[2][1]*m[3][0] + m[1][1]*m[2][3]*m[3][0] + m[1][3]*m[2][0]*m[3][1] - m[1][0]*m[2][3]*m[3][1] - m[1][1]*m[2][0]*m[3][3] + m[1][0]*m[2][1]*m[3][3],
-			m[0][3]*m[2][1]*m[3][0] - m[0][1]*m[2][3]*m[3][0] - m[0][3]*m[2][0]*m[3][1] + m[0][0]*m[2][3]*m[3][1] + m[0][1]*m[2][0]*m[3][3] - m[0][0]*m[2][1]*m[3][3],
-			-m[0][3]*m[1][1]*m[3][0] + m[0][1]*m[1][3]*m[3][0] + m[0][3]*m[1][0]*m[3][1] - m[0][0]*m[1][3]*m[3][1] - m[0][1]*m[1][0]*m[3][3] + m[0][0]*m[1][1]*m[3][3],
-			m[0][3]*m[1][1]*m[2][0] - m[0][1]*m[1][3]*m[2][0] - m[0][3]*m[1][0]*m[2][1] + m[0][0]*m[1][3]*m[2][1] + m[0][1]*m[1][0]*m[2][3] - m[0][0]*m[1][1]*m[2][3],
-		},
-		MVec4{
-			m[1][2]*m[2][1]*m[3][0] - m[1][1]*m[2][2]*m[3][0] - m[1][2]*m[2][0]*m[3][1] + m[1][0]*m[2][2]*m[3][1] + m[1][1]*m[2][0]*m[3][2] - m[1][0]*m[2][1]*m[3][2],
-			-m[0][2]*m[2][1]*m[3][0] + m[0][1]*m[2][2]*m[3][0] + m[0][2]*m[2][0]*m[3][1] - m[0][0]*m[2][2]*m[3][1] - m[0][1]*m[2][0]*m[3][2] + m[0][0]*m[2][1]*m[3][2],
-			m[0][2]*m[1][1]*m[3][0] - m[0][1]*m[1][2]*m[3][0] - m[0][2]*m[1][0]*m[3][1] + m[0][0]*m[1][2]*m[3][1] + m[0][1]*m[1][0]*m[3][2] - m[0][0]*m[1][1]*m[3][2],
-			-m[0][2]*m[1][1]*m[2][0] + m[0][1]*m[1][2]*m[2][0] + m[0][2]*m[1][0]*m[2][1] - m[0][0]*m[1][2]*m[2][1] - m[0][1]*m[1][0]*m[2][2] + m[0][0]*m[1][1]*m[2][2],
-		},
-	}
-
-	invDet := 1 / det
-
-	retMat[0][0] *= invDet
-	retMat[0][1] *= invDet
-	retMat[0][2] *= invDet
-	retMat[0][3] *= invDet
-
-	retMat[1][0] *= invDet
-	retMat[1][1] *= invDet
-	retMat[1][2] *= invDet
-	retMat[1][3] *= invDet
-
-	retMat[2][0] *= invDet
-	retMat[2][1] *= invDet
-	retMat[2][2] *= invDet
-	retMat[2][3] *= invDet
-
-	retMat[3][0] *= invDet
-	retMat[3][1] *= invDet
-	retMat[3][2] *= invDet
-	retMat[3][3] *= invDet
-
-	return &retMat
+	im := mgl64.Mat4(*m).Inv()
+	return (*MMat4)(&im)
 }
 
-func (m *MMat4) Inverted() *MMat4 {
-	copied := m.Copy()
+func (mat *MMat4) Inverted() *MMat4 {
+	copied := mat.Copy()
 	return copied.Inverse()
 }
 
 // ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
-func (v *MMat4) ClampIfVerySmall() *MMat4 {
+func (mat *MMat4) ClampIfVerySmall() *MMat4 {
 	epsilon := 1e-6
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
-			if math.Abs(v[i][j]) < epsilon {
-				v[i][j] = 0
-			}
+	for i := range mat {
+		if math.Abs(mat[i]) < epsilon {
+			mat[i] = 0
 		}
 	}
-	return v
+	return mat
 }

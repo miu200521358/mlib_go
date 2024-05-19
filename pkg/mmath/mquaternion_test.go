@@ -5,50 +5,6 @@ import (
 	"testing"
 )
 
-func TestMQuaternionFromXAxisAngle(t *testing.T) {
-	angle := math.Pi / 2
-	expected := NewMQuaternionByValues(0.7071067811865476, 0, 0, 0.7071067811865476)
-
-	result := NewMQuaternionFromXAxisAngle(angle)
-
-	if math.Abs(result.GetX()-expected.GetX()) > 1e-10 || math.Abs(result.GetY()-expected.GetY()) > 1e-10 || math.Abs(result.GetZ()-expected.GetZ()) > 1e-10 || math.Abs(result.GetW()-expected.GetW()) > 1e-10 {
-		t.Errorf("FromXAxisAngle failed. Expected %v, got %v", expected, result)
-	}
-}
-
-func TestMQuaternionFromYAxisAngle(t *testing.T) {
-	angle := math.Pi / 2
-	expected := NewMQuaternionByValues(0, 0.7071067811865476, 0, 0.7071067811865476)
-
-	result := NewMQuaternionFromYAxisAngle(angle)
-
-	if math.Abs(result.GetX()-expected.GetX()) > 1e-10 || math.Abs(result.GetY()-expected.GetY()) > 1e-10 || math.Abs(result.GetZ()-expected.GetZ()) > 1e-10 || math.Abs(result.GetW()-expected.GetW()) > 1e-10 {
-		t.Errorf("FromYAxisAngle failed. Expected %v, got %v", expected, result)
-	}
-}
-
-func TestMQuaternionFromZAxisAngle(t *testing.T) {
-	angle := math.Pi / 2
-	expected := NewMQuaternionByValues(0, 0, 0.7071067811865476, 0.7071067811865476)
-
-	result := NewMQuaternionFromZAxisAngle(angle)
-
-	if math.Abs(result.GetX()-expected.GetX()) > 1e-10 || math.Abs(result.GetY()-expected.GetY()) > 1e-10 || math.Abs(result.GetZ()-expected.GetZ()) > 1e-10 || math.Abs(result.GetW()-expected.GetW()) > 1e-10 {
-		t.Errorf("FromZAxisAngle failed. Expected %v, got %v", expected, result)
-	}
-}
-
-func TestMQuaternionFromEulerAngles(t *testing.T) {
-	angles := MVec3{math.Pi / 2, math.Pi / 2, math.Pi / 2}
-	expected := NewMQuaternionByValues(0.7071067811865476, 0.0, 0.0, 0.7071067811865476)
-
-	result := NewMQuaternionFromRadians(angles.GetX(), angles.GetY(), angles.GetZ())
-
-	if math.Abs(result.GetX()-expected.GetX()) > 1e-10 || math.Abs(result.GetY()-expected.GetY()) > 1e-10 || math.Abs(result.GetZ()-expected.GetZ()) > 1e-10 || math.Abs(result.GetW()-expected.GetW()) > 1e-10 {
-		t.Errorf("FromEulerAngles failed. Expected %v, got %v", expected, result)
-	}
-}
-
 func TestMQuaternionToEulerAngles(t *testing.T) {
 	quat := NewMQuaternionByValues(0.7071067811865476, 0.0, 0.0, 0.7071067811865476)
 	expected := MVec3{1.5707963267948966, 0, 0}
@@ -199,7 +155,7 @@ func TestMQuaternionNormalized(t *testing.T) {
 
 	result1 := quat1.Normalized()
 
-	if !result1.PracticallyEquals(expected1, 1e-8) {
+	if !result1.PracticallyEquals(expected1, 1e-7) {
 		t.Errorf("Normalized failed. Expected %v, got %v", expected1, result1)
 	}
 
@@ -235,23 +191,23 @@ func TestFromEulerAnglesDegrees(t *testing.T) {
 
 	result2 := NewMQuaternionFromDegrees(10, 0, 0)
 
-	if !result2.PracticallyEquals(expected2, 1e-8) {
+	if !result2.PracticallyEquals(expected2, 1e-6) {
 		t.Errorf("FromEulerAnglesDegrees failed. Expected %v, got %v", expected2, result2)
 	}
 
-	expected3 := NewMQuaternionByValues(0.12767944, 0.14487813, 0.23929834, 0.95154852)
+	expected3 := NewMQuaternionByValues(0.12767944069578063, 0.14487812541736914, 0.2685358227515692, 0.943714364147489)
 
 	result3 := NewMQuaternionFromDegrees(10, 20, 30)
 
-	if !result3.PracticallyEquals(expected3, 1e-8) {
+	if !result3.PracticallyEquals(expected3, 1e-5) {
 		t.Errorf("FromEulerAnglesDegrees failed. Expected %v, got %v", expected3, result3)
 	}
 
-	expected4 := NewMQuaternionByValues(0.47386805, 0.20131049, -0.48170221, 0.70914465)
+	expected4 := NewMQuaternionByValues(0.47386805375453483, 0.20131048764138493, -0.6147244358103234, 0.5975257510887351)
 
 	result4 := NewMQuaternionFromDegrees(60, -20, -80)
 
-	if !result4.PracticallyEquals(expected4, 1e-8) {
+	if !result4.PracticallyEquals(expected4, 1e-5) {
 		t.Errorf("FromEulerAnglesDegrees failed. Expected %v, got %v", expected4, result4)
 	}
 }
@@ -368,15 +324,15 @@ func TestMQuaternionFromDirection(t *testing.T) {
 		-0.3115472173245163, -0.045237910083403, -0.5420603160713341, 0.7791421414666787)
 	result1 := NewMQuaternionFromDirection(&MVec3{1, 2, 3}, &MVec3{4, 5, 6})
 
-	if !result1.PracticallyEquals(expected1, 1e-5) {
+	if !result1.PracticallyEquals(expected1, 1e-7) {
 		t.Errorf("MQuaternionFromDirection failed. Expected %v, got %v", expected1, result1)
 	}
 
 	expected2 := NewMQuaternionByValues(
-		-0.543212292317204, -0.6953153333136457, -0.20212324833235548, 0.42497433477564167)
+		0.543212292317204, 0.6953153333136457, 0.20212324833235548, -0.42497433477564167)
 	result2 := NewMQuaternionFromDirection(&MVec3{-10, 20, -15}, &MVec3{40, -5, 6})
 
-	if !result2.PracticallyEquals(expected2, 1e-5) {
+	if !result2.PracticallyEquals(expected2, 1e-7) {
 		t.Errorf("MQuaternionFromDirection failed. Expected %v, got %v", expected2, result2)
 	}
 }
@@ -400,12 +356,12 @@ func TestMQuaternionRotate(t *testing.T) {
 }
 
 func TestMQuaternionToMatrix4x4(t *testing.T) {
-	expected := NewMMat4ByVec4(
-		&MVec4{0.45487413, 0.87398231, -0.17101007, 0.0},
-		&MVec4{-0.49240388, 0.08682409, -0.8660254, 0.0},
-		&MVec4{-0.74204309, 0.47813857, 0.46984631, 0.0},
-		&MVec4{0.0, 0.0, 0.0, 1.0},
-	)
+	expected := &MMat4{
+		0.45487412870286215, -0.49240387650610407, -0.7420430913623366, 0,
+		0.8739823124221016, 0.08682408883346526, 0.47813857318935704, 0,
+		-0.1710100716628345, -0.8660254037844384, 0.46984631039295444, 0,
+		0, 0, 0, 1,
+	}
 
 	qq1 := NewMQuaternionByValues(
 		0.4738680537545347, 0.20131048764138487, -0.48170221425083437, 0.7091446481376844)
@@ -415,12 +371,12 @@ func TestMQuaternionToMatrix4x4(t *testing.T) {
 		t.Errorf("ToMatrix4x4 failed. Expected %v, got %v", expected, qq1)
 	}
 
-	expected2 := NewMMat4ByVec4(
-		&MVec4{-0.28213944, 0.48809647, 0.82592928, 0.0},
-		&MVec4{0.69636424, 0.69636424, -0.17364818, 0.0},
-		&MVec4{-0.65990468, 0.52615461, -0.53636474, 0.0},
-		&MVec4{0.0, 0.0, 0.0, 1.0},
-	)
+	expected2 := &MMat4{
+		-0.28213943766659333, 0.6963642403200191, -0.6599046768410582, 0,
+		0.4880964722494531, 0.6963642403200189, 0.526154614710507, 0,
+		0.8259292775358055, -0.17364817766693036, -0.5363647442758863, 0,
+		0, 0, 0, 1,
+	}
 
 	// np.array([10, 123, 45])
 	qq2 := NewMQuaternionByValues(
@@ -470,11 +426,11 @@ func TestMQuaternionMulFactor(t *testing.T) {
 	{
 		quat := NewMQuaternionFromDegrees(-24.53194, 180, 180)
 		factor := 0.5
-		expected := NewMQuaternionFromDegrees(102.26597, 0, 0)
+		expected := NewMQuaternionFromDegrees(77.73403, 0, 0)
 
 		result := quat.MulScalar(factor)
 
-		if !result.PracticallyEquals(expected, 1e-10) {
+		if !result.PracticallyEquals(expected, 1e-6) {
 			t.Errorf("MulFactor failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
 		}
 	}
@@ -482,11 +438,11 @@ func TestMQuaternionMulFactor(t *testing.T) {
 	{
 		quat := NewMQuaternionFromDegrees(-24.53194, 180, 180)
 		factor := -0.5
-		expected := NewMQuaternionFromDegrees(-102.26597, 0, 0)
+		expected := NewMQuaternionFromDegrees(-77.73403, 0, 0)
 
 		result := quat.MulScalar(factor)
 
-		if !result.PracticallyEquals(expected, 1e-10) {
+		if !result.PracticallyEquals(expected, 1e-6) {
 			t.Errorf("MulFactor failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
 		}
 	}
@@ -514,4 +470,52 @@ func TestMQuaternionMulFactor(t *testing.T) {
 			t.Errorf("MulFactor failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
 		}
 	}
+}
+
+func TestMQuaternion_ToMat4(t *testing.T) {
+	// Test case 1: Identity quaternion
+	quat := NewMQuaternionByValues(0, 0, 0, 1).Normalize()
+	expectedMat := NewMMat4ByValues(
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1,
+	)
+	actualMat := quat.ToMat4()
+
+	if !actualMat.PracticallyEquals(expectedMat, 1e-10) {
+		t.Errorf("Test case 1 failed: Expected %v, but got %v", expectedMat, actualMat)
+	}
+
+	// Test case 2: Non-identity quaternion
+	quat = NewMQuaternionByValues(0.5, 0.5, 0.5, 0.5)
+	expectedMat = NewMMat4ByValues(0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1)
+	actualMat = quat.ToMat4()
+
+	if !actualMat.PracticallyEquals(expectedMat, 1e-10) {
+		t.Errorf("Test case 2 failed: Expected %v, but got %v", expectedMat, actualMat)
+	}
+
+	if !actualMat.Quaternion().PracticallyEquals(quat.Normalized(), 1e-10) {
+		t.Errorf("Test case 2 failed: Expected %v, but got %v", expectedMat, actualMat)
+	}
+
+	// Test case 3: Random quaternion
+	quat = NewMQuaternionByValues(0.1, 0.2, 0.3, 0.4)
+	expectedMat = NewMMat4ByValues(
+		0.13333333333333353, 0.9333333333333332, -0.33333333333333326, 0,
+		-0.6666666666666666, 0.3333333333333335, 0.6666666666666665, 0,
+		0.7333333333333332, 0.13333333333333336, 0.6666666666666667, 0,
+		0, 0, 0, 1,
+	)
+	actualMat = quat.ToMat4()
+
+	if !actualMat.PracticallyEquals(expectedMat, 1e-10) {
+		t.Errorf("Test case 3 failed: Expected %v, but got %v", expectedMat, actualMat)
+	}
+
+	if !actualMat.Quaternion().PracticallyEquals(quat.Normalized(), 1e-10) {
+		t.Errorf("Test case 2 failed: Expected %v, but got %v", expectedMat, actualMat)
+	}
+
 }

@@ -3,7 +3,6 @@ package mmath
 import (
 	"math"
 	"testing"
-
 )
 
 func TestMVec3Interpolate(t *testing.T) {
@@ -311,26 +310,21 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 	v1 := MVec3{0.8, 0.6, 1}
 	localMatrix := v1.ToLocalMatrix4x4()
 
-	expected1 := [4][4]float64{
-		{0.56568542, 0.6, 0.56568542, 0.0},
-		{0.42426407, -0.8, 0.42426407, 0.0},
-		{0.70710678, 0.0, -0.70710678, 0.0},
-		{0.0, 0.0, 0.0, 1.0},
+	expected1 := MMat4{
+		0.565685424949238, 0.6, 0.5656854249492381, 0,
+		0.42426406871192845, -0.8, 0.4242640687119285, 0,
+		0.7071067811865475, 0, -0.7071067811865476, 0,
+		0, 0, 0, 1,
 	}
 
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
-			if math.Abs(localMatrix[i][j]-expected1[i][j]) > 1e-8 {
-				t.Errorf("ToLocalMatrix4x4 failed. Expected %v, got %v", expected1, localMatrix)
-				break
-			}
-		}
+	if !localMatrix.PracticallyEquals(&expected1, 1e-8) {
+		t.Errorf("Local matrix calculation failed. Expected %v, got %v", expected1, localMatrix)
 	}
 
 	v2 := MVec3{1, 0, 0}
 	localVector1 := localMatrix.MulVec3(&v2)
 
-	expected2 := MVec3{0.56568542, 0.42426407, 0.70710678}
+	expected2 := MVec3{0.565685424949238, 0.6, 0.5656854249492381}
 	if !localVector1.PracticallyEquals(&expected2, 1e-8) {
 		t.Errorf("Local vector calculation failed. Expected %v, got %v", expected2, localVector1)
 	}
@@ -338,7 +332,7 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 	v3 := MVec3{1, 0, 1}
 	localVector2 := localMatrix.MulVec3(&v3)
 
-	expected3 := MVec3{1.13137085, 0.848528137, -1.11022302e-16}
+	expected3 := MVec3{1.2727922061357855, 0.6, -0.14142135623730945}
 	if !localVector2.PracticallyEquals(&expected3, 1e-8) {
 		t.Errorf("Local vector calculation failed. Expected %v, got %v", expected3, localVector2)
 	}
@@ -346,20 +340,15 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 	v4 := MVec3{0, 0, -0.5}
 	localMatrix2 := v4.ToLocalMatrix4x4()
 
-	expected4 := [4][4]float64{
-		{1.0, 0.0, 0.0, 0.0},
-		{0.0, 1.0, 0.0, 0.0},
-		{0.0, 0.0, 1.0, 0.0},
-		{0.0, 0.0, 0.0, 1.0},
+	expected4 := MMat4{
+		1.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		0.0, 0.0, 0.0, 1.0,
 	}
 
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
-			if math.Abs(localMatrix2[i][j]-expected4[i][j]) > 1e-8 {
-				t.Errorf("ToLocalMatrix4x4 failed. Expected %v, got %v", expected4, localMatrix2)
-				break
-			}
-		}
+	if !localMatrix2.PracticallyEquals(&expected4, 1e-8) {
+		t.Errorf("Local matrix calculation failed. Expected %v, got %v", expected4, localMatrix2)
 	}
 }
 

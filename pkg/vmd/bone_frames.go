@@ -331,9 +331,12 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][00][Global] ikGlobalPosition: %s, effectorGlobalPosition: %s\n",
+					"[%04d][%03d][%s][%05d][00][Global] [%s]ikGlobalPosition: %s, "+
+						"[%s]effectorGlobalPosition: %s, [%s]effectorGlobalPosition: %s\n",
 					frame, loop, linkBone.Name, count-1,
-					ikGlobalPosition.String(), effectorGlobalPosition.String())
+					ikBone.Name, ikGlobalPosition.MMD().String(),
+					effectorBone.Name, effectorGlobalPosition.MMD().String(),
+					linkBone.Name, linkMatrixes.Get(linkBone.Name, frame).Position.MMD().String())
 			}
 
 			// fmt.Fprintf(ikFile,
@@ -377,7 +380,7 @@ ikLoop:
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][00][Local] effectorLocalPosition: %s, ikLocalPosition: %s\n",
 					frame, loop, linkBone.Name, count-1,
-					effectorLocalPosition.String(), ikLocalPosition.String())
+					effectorLocalPosition.MMD().String(), ikLocalPosition.MMD().String())
 			}
 
 			effectorLocalPosition.Normalize()
@@ -385,14 +388,14 @@ ikLoop:
 
 			// ベクトル (1) を (2) に一致させるための最短回転量（Axis-Angle）
 			// 回転軸
-			linkAxis := effectorLocalPosition.Cross(ikLocalPosition).Normalize()
+			linkAxis := ikLocalPosition.Cross(effectorLocalPosition).Normalize()
 			// 回転角(ラジアン)
 			linkAngle := math.Acos(mmath.ClampFloat(effectorLocalPosition.Dot(ikLocalPosition), -1, 1))
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][01][回転軸・角度] linkAxis: %s, linkAngle: %.5f\n",
-					frame, loop, linkBone.Name, count-1, linkAxis.String(), mmath.ToDegree(linkAngle),
+					frame, loop, linkBone.Name, count-1, linkAxis.MMD().String(), mmath.ToDegree(linkAngle),
 				)
 
 				fmt.Fprintf(ikFile,
@@ -428,7 +431,7 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][03][linkQuat] linkQuat: %s(%s)\n",
-					frame, loop, linkBone.Name, count-1, linkQuat.String(), linkQuat.ToDegrees().String(),
+					frame, loop, linkBone.Name, count-1, linkQuat.MMD().String(), linkQuat.MMD().ToDegrees().String(),
 				)
 			}
 
@@ -489,7 +492,7 @@ ikLoop:
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][11][角度制限結果] totalActualIkQuat: %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String(),
+						frame, loop, linkBone.Name, count-1, totalActualIkQuat.MMD().String(), totalActualIkQuat.MMD().ToDegrees().String(),
 					)
 				}
 			} else {
@@ -504,7 +507,7 @@ ikLoop:
 						if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 							fmt.Fprintf(ikFile,
 								"[%04d][%03d][%s][%05d][04][軸制限][理想回転] quat: %s(%s)\n",
-								frame, loop, linkBone.Name, count-1, quat.String(), quat.ToDegrees().String(),
+								frame, loop, linkBone.Name, count-1, quat.MMD().String(), quat.ToDegrees().String(),
 							)
 						}
 					}
@@ -522,7 +525,7 @@ ikLoop:
 						if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 							fmt.Fprintf(ikFile,
 								"[%04d][%03d][%s][%05d][04][軸制限][理想軸制限回転] quat: %s(%s)\n",
-								frame, loop, linkBone.Name, count-1, quat.String(), quat.ToDegrees().String(),
+								frame, loop, linkBone.Name, count-1, quat.MMD().String(), quat.ToDegrees().String(),
 							)
 						}
 					}
@@ -540,11 +543,11 @@ ikLoop:
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][13][角度制限なし] correctIkQuat: %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, correctIkQuat.String(), correctIkQuat.ToDegrees().String())
+						frame, loop, linkBone.Name, count-1, correctIkQuat.MMD().String(), correctIkQuat.MMD().ToDegrees().String())
 				}
 
 				// 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-				totalActualIkQuat = linkQuat.Muled(correctIkQuat)
+				totalActualIkQuat = correctIkQuat.Muled(linkQuat)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
@@ -556,7 +559,7 @@ ikLoop:
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][14][角度制限なし] totalActualIkQuat: %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String())
+						frame, loop, linkBone.Name, count-1, totalActualIkQuat.MMD().String(), totalActualIkQuat.MMD().ToDegrees().String())
 				}
 			}
 
@@ -574,7 +577,7 @@ ikLoop:
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][15][軸制限後処理] totalActualIkQuat: %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String())
+						frame, loop, linkBone.Name, count-1, totalActualIkQuat.MMD().String(), totalActualIkQuat.MMD().ToDegrees().String())
 				}
 			}
 
@@ -583,7 +586,7 @@ ikLoop:
 					"[%04d][%03d][%s][%05d][15] 前回差分中断判定: %v(%0.6f) 前回: %s 今回: %s\n",
 					frame, loop, linkBone.Name, count-1,
 					1-quatsWithoutEffect[linkIndex].Dot(totalActualIkQuat) < 1e-6, 1-quatsWithoutEffect[linkIndex].Dot(totalActualIkQuat),
-					quatsWithoutEffect[linkIndex].ToDegrees().String(), totalActualIkQuat.ToDegrees().String())
+					quatsWithoutEffect[linkIndex].ToDegrees().String(), totalActualIkQuat.MMD().ToDegrees().String())
 			}
 
 			// 前回（既存）とほぼ同じ回転量の場合、中断FLGを立てる
@@ -601,7 +604,7 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][16][結果] totalActualIkQuat: %s(%s)\n",
-					frame, loop, linkBone.Name, count-1, totalActualIkQuat.String(), totalActualIkQuat.ToDegrees().String())
+					frame, loop, linkBone.Name, count-1, totalActualIkQuat.MMD().String(), totalActualIkQuat.MMD().ToDegrees().String())
 			}
 
 			// IKの結果を更新
@@ -618,13 +621,18 @@ ikLoop:
 	return quatsWithoutEffect, effectorTargetBoneNames
 }
 
-// 全ての角度をラジアン角度に分割して、そのうちのひとつの軸だけを動かす回転を取得する
+// calcSingleAxisRad は単一軸の制限を持つ回転クォータニオンを計算し、その結果を返します。
 // minAngleLimit: 最小軸制限（ラジアン）
 // maxAngleLimit: 最大軸制限（ラジアン）
 // linkQuat: 現在のリンクボーンの回転量
 // quatAxis: 現在のIK回転の回転軸
 // quatAngle: 現在のIK回転の回転角度（ラジアン）
 // axisIndex: 制限軸INDEX
+// axisVector: 回転軸ベクトル
+// frame, count, loop: デバッグ用カウンター
+// linkBoneName: ボーン名
+// ikMotion: IKモーション
+// ikFile: IKファイル
 func (fs *BoneFrames) calcSingleAxisRad(
 	minAngleLimit float64,
 	maxAngleLimit float64,
@@ -651,11 +659,11 @@ func (fs *BoneFrames) calcSingleAxisRad(
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][04][角度制限] quat: %s(%s)\n",
-			frame, loop, linkBoneName, count-1, quat.String(), quat.ToDegrees().String())
+			frame, loop, linkBoneName, count-1, quat.MMD().String(), quat.MMD().ToDegrees().String())
 	}
 
 	// 現在IKリンクに入る可能性のあるすべての角度
-	totalIkQuat := linkQuat.Muled(quat)
+	totalIkQuat := quat.Muled(linkQuat)
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		bf := NewBoneFrame(count)
@@ -666,7 +674,7 @@ func (fs *BoneFrames) calcSingleAxisRad(
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][05][角度制限] totalIkQuat: %s(%s)\n",
-			frame, loop, linkBoneName, count-1, totalIkQuat.String(), totalIkQuat.ToDegrees().String())
+			frame, loop, linkBoneName, count-1, totalIkQuat.MMD().String(), totalIkQuat.MMD().ToDegrees().String())
 	}
 
 	totalIkRad := totalIkQuat.ToRadian()
@@ -751,20 +759,21 @@ func (fs *BoneFrames) calcBoneMatrixes(
 	for i := range boneCount {
 		// 各ボーンの座標変換行列×逆BOf行列
 		bone := targetBones[i]
-		// 逆BOf行列(初期姿勢行列)
-		matrixes[i].Mul(bone.RevertOffsetMatrix)
-		// 位置
-		if !positions[i].IsIdent() {
-			matrixes[i].Mul(positions[i])
+		// スケール
+		if !scales[i].IsIdent() {
+			matrixes[i].Mul(scales[i])
 		}
 		// 回転
 		if !rotations[i].IsIdent() {
 			matrixes[i].Mul(rotations[i])
 		}
-		// スケール
-		if !scales[i].IsIdent() {
-			matrixes[i].Mul(scales[i])
+		// 位置
+		if !positions[i].IsIdent() {
+			matrixes[i].Mul(positions[i])
 		}
+		// 逆BOf行列(初期姿勢行列)
+		matrixes[i].Mul(bone.RevertOffsetMatrix)
+		continue
 	}
 
 	boneDeltas := NewBoneDeltas()
@@ -772,18 +781,16 @@ func (fs *BoneFrames) calcBoneMatrixes(
 	// ボーンを一定件数ごとに並列処理（件数は変数保持）
 	for i := range boneCount {
 		bone := targetBones[i]
-		var mat *mmath.MMat4
 		// 直近の親ボーンの変形行列を元にする
 		if bone.ParentIndex >= 0 && model.Bones.Contains(bone.ParentIndex) {
 			// targetBoneNames の中にある parentName のINDEXを取得
 			parentIndex := targetBoneNames[model.Bones.Get(bone.ParentIndex).Name]
-			mat = globalMatrixes[parentIndex].Copy()
+			// 対象ボーン自身の行列をかける
+			globalMatrixes[i] = matrixes[i].Muled(globalMatrixes[parentIndex])
 		} else {
-			mat = mmath.NewMMat4()
+			globalMatrixes[i] = matrixes[i].Copy()
 		}
-		// 最後に対象ボーン自身の行列をかける
-		mat.Mul(matrixes[i])
-		globalMatrixes[i] = mat
+		continue
 	}
 
 	for i := range boneCount {
@@ -794,7 +801,7 @@ func (fs *BoneFrames) calcBoneMatrixes(
 			frame,
 			globalMatrixes[i], // グローバル行列
 			// BOf行列: 自身のボーンのボーンオフセット行列
-			globalMatrixes[i].Muled(bone.OffsetMatrix), // ローカル行列
+			bone.OffsetMatrix.Muled(globalMatrixes[i]), // ローカル行列
 			positions[i].Translation(),                 // 移動
 			rotations[i].Quaternion(),                  // 回転
 			quatsWithoutEffect[i],                      // 回転(付与親なし)
@@ -938,9 +945,9 @@ func (fs *BoneFrames) getPositionWithEffect(
 	bf := fs.Get(effectBone.Name).Get(frame)
 	posMat := fs.getPosition(bf, frame, effectBone, model, isCalcMorph, loop+1)
 
-	posMat[0][3] *= bone.EffectFactor
-	posMat[1][3] *= bone.EffectFactor
-	posMat[2][3] *= bone.EffectFactor
+	posMat[3] *= bone.EffectFactor
+	posMat[7] *= bone.EffectFactor
+	posMat[11] *= bone.EffectFactor
 
 	return posMat
 }
@@ -992,7 +999,7 @@ func (fs *BoneFrames) getRotation(
 
 	if bone.HasFixedAxis() {
 		// 軸制限回転を求める
-		rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
+		rotWithEffect = rotWithEffect.ToFixedAxisRotation(bone.NormalizedFixedAxis)
 	}
 
 	return rotWithEffect.Shorten(), rot.Shorten()
@@ -1036,10 +1043,10 @@ func (fs *BoneFrames) getScale(
 	mat := mmath.NewMMat4()
 
 	if isCalcMorph && bf.MorphScale != nil {
-		mat.ScaleVec3(bf.MorphScale.AddedScalar(1))
+		mat.Scale(bf.MorphScale.AddedScalar(1))
 	}
 	if bf.Scale != nil {
-		mat.ScaleVec3(bf.Scale.AddedScalar(1))
+		mat.Scale(bf.Scale.AddedScalar(1))
 	}
 
 	return mat

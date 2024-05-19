@@ -113,13 +113,14 @@ func writeBoneFrame(fout *os.File, name string, bf *BoneFrame) error {
 		return err
 	}
 
+	posMMD := bf.Position.MMD()
 	binary.Write(fout, binary.LittleEndian, encodedName)
 	binary.Write(fout, binary.LittleEndian, uint32(bf.Index))
-	binary.Write(fout, binary.LittleEndian, float32(bf.Position.GetX()))
-	binary.Write(fout, binary.LittleEndian, float32(bf.Position.GetY()))
-	binary.Write(fout, binary.LittleEndian, float32(bf.Position.GetZ()))
+	binary.Write(fout, binary.LittleEndian, float32(posMMD.GetX()))
+	binary.Write(fout, binary.LittleEndian, float32(posMMD.GetY()))
+	binary.Write(fout, binary.LittleEndian, float32(posMMD.GetZ()))
 
-	v := bf.Rotation.GetQuaternion().Normalized()
+	v := bf.Rotation.GetQuaternion().MMD().Normalized()
 	binary.Write(fout, binary.LittleEndian, float32(v.GetX()))
 	binary.Write(fout, binary.LittleEndian, float32(v.GetY()))
 	binary.Write(fout, binary.LittleEndian, float32(v.GetZ()))

@@ -25,7 +25,7 @@ type IDeform interface {
 	GetIndexes(weightThreshold float64) []int
 	GetWeights(weightThreshold float64) []float64
 	NormalizedDeform() [8]float32
-	GetSdefParams() (*mgl32.Vec3, *mgl32.Vec3, *mgl32.Vec3)
+	GetSdefParams() (mgl32.Vec3, mgl32.Vec3, mgl32.Vec3)
 }
 
 // Deform デフォーム既定構造体
@@ -135,8 +135,8 @@ func (d *Deform) NormalizedDeform() [8]float32 {
 }
 
 // SDEF用パラメーターを返す
-func (d *Deform) GetSdefParams() (*mgl32.Vec3, *mgl32.Vec3, *mgl32.Vec3) {
-	return &mgl32.Vec3{0, 0, 0}, &mgl32.Vec3{0, 0, 0}, &mgl32.Vec3{0, 0, 0}
+func (d *Deform) GetSdefParams() (mgl32.Vec3, mgl32.Vec3, mgl32.Vec3) {
+	return mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 0, 0}
 }
 
 // sortIndexesByWeight ウェイトの大きい順に指定個数までを対象とする

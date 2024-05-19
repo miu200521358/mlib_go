@@ -91,12 +91,6 @@ func (v *MQuaternion) SetXYZ(vec3 *MVec3) {
 	v.SetZ(vec3.GetZ())
 }
 
-func (v *MQuaternion) AssignVec3(vec3 *MVec3) {
-	v.SetX(vec3.GetX())
-	v.SetY(vec3.GetY())
-	v.SetZ(vec3.GetZ())
-}
-
 // String T の文字列表現を返します。
 func (v *MQuaternion) String() string {
 	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f, w=%.5f]", v.GetX(), v.GetY(), v.GetZ(), v.GetW())
@@ -104,45 +98,19 @@ func (v *MQuaternion) String() string {
 
 // MMD MMD(MikuMikuDance)座標系に変換されたクォータニオンベクトルを返します
 func (v *MQuaternion) MMD() *MQuaternion {
-	return &MQuaternion{-v.GetW(), mgl64.Vec3{-v.GetX(), v.GetY(), v.GetZ()}}
+	return &MQuaternion{-v.GetW(), mgl64.Vec3{-v.GetX(), v.GetY(), -v.GetZ()}}
 }
 
 // NewMQuaternionFromAxisAngles は、軸周りの回転を表す四元数を返します。
 func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
-	angle *= 0.5
-	sin := math.Sin(angle)
-	q := NewMQuaternionByValues(axis[0]*sin, axis[1]*sin, axis[2]*sin, math.Cos(angle))
-	return q.Normalize()
-}
-
-// NewMQuaternionFromXAxisAngleは、X軸周りの回転を表す四元数を返します。
-func NewMQuaternionFromXAxisAngle(angle float64) *MQuaternion {
-	angle *= 0.5
-	q := NewMQuaternionByValues(math.Sin(angle), 0, 0, math.Cos(angle))
-	return q.Normalize()
-}
-
-// NewMQuaternionFromYAxisAngleは、Y軸周りの回転を表す四元数を返します。
-func NewMQuaternionFromYAxisAngle(angle float64) *MQuaternion {
-	angle *= 0.5
-	q := NewMQuaternionByValues(0, math.Sin(angle), 0, math.Cos(angle))
-	return q.Normalize()
-}
-
-// NewMQuaternionFromZAxisAngleは、Z軸周りの回転を表す四元数を返します。
-func NewMQuaternionFromZAxisAngle(angle float64) *MQuaternion {
-	angle *= 0.5
-	q := NewMQuaternionByValues(0, 0, math.Sin(angle), math.Cos(angle))
-	return q.Normalize()
+	q := MQuaternion(mgl64.QuatRotate(angle, mgl64.Vec3(*axis)))
+	return &q
 }
 
 // NewMQuaternionFromRadiansは、オイラー角（ラジアン）回転を表す四元数を返します。
 func NewMQuaternionFromRadians(xPitch, yHead, zRoll float64) *MQuaternion {
-	qy := NewMQuaternionFromYAxisAngle(yHead)
-	qx := NewMQuaternionFromXAxisAngle(xPitch)
-	qz := NewMQuaternionFromZAxisAngle(zRoll)
-	q := qy.Mul(qx)
-	return q.Mul(qz).Normalize()
+	q := mgl64.AnglesToQuat(xPitch, yHead, zRoll, mgl64.XYZ)
+	return &MQuaternion{q.W, q.V}
 }
 
 // 参考URL:
@@ -178,14 +146,14 @@ func (v *MQuaternion) ToRadiansWithGimbal(axisIndex int) (*MVec3, bool) {
 
 	var other1Rad, other2Rad float64
 	if axisIndex == 0 {
-		other1Rad = math.Abs(r.Vector()[1])
-		other2Rad = math.Abs(r.Vector()[2])
+		other1Rad = math.Abs(r.GetY())
+		other2Rad = math.Abs(r.GetZ())
 	} else if axisIndex == 1 {
-		other1Rad = math.Abs(r.Vector()[0])
-		other2Rad = math.Abs(r.Vector()[2])
+		other1Rad = math.Abs(r.GetX())
+		other2Rad = math.Abs(r.GetZ())
 	} else {
-		other1Rad = math.Abs(r.Vector()[0])
-		other2Rad = math.Abs(r.Vector()[1])
+		other1Rad = math.Abs(r.GetX())
+		other2Rad = math.Abs(r.GetY())
 	}
 
 	// ジンバルロックを判定する
@@ -198,19 +166,28 @@ func (v *MQuaternion) ToRadiansWithGimbal(axisIndex int) (*MVec3, bool) {
 
 // NewMQuaternionFromDegreesは、オイラー角（度）回転を表す四元数を返します。
 func NewMQuaternionFromDegrees(xPitch, yHead, zRoll float64) *MQuaternion {
-	xPitchRadian := math.Pi * xPitch / 180.0
-	yHeadRadian := math.Pi * yHead / 180.0
-	zRollRadian := math.Pi * zRoll / 180.0
+	xPitchRadian := DegToRad(xPitch)
+	yHeadRadian := DegToRad(yHead)
+	zRollRadian := DegToRad(zRoll)
 	return NewMQuaternionFromRadians(xPitchRadian, yHeadRadian, zRollRadian)
+}
+
+// Utility functions to convert between degrees and radians
+func DegToRad(deg float64) float64 {
+	return deg * math.Pi / 180
+}
+
+func RadToDeg(rad float64) float64 {
+	return rad * 180 / math.Pi
 }
 
 // ToDegreesは、クォータニオンのオイラー角（度）回転を返します。
 func (quat *MQuaternion) ToDegrees() *MVec3 {
 	vec := quat.ToRadians()
 	return &MVec3{
-		180.0 * vec.GetX() / math.Pi,
-		180.0 * vec.GetY() / math.Pi,
-		180.0 * vec.GetZ() / math.Pi,
+		RadToDeg(vec.GetX()),
+		RadToDeg(vec.GetY()),
+		RadToDeg(vec.GetZ()),
 	}
 }
 
@@ -232,7 +209,7 @@ func (quat *MQuaternion) Vec3() *MVec3 {
 
 // AxisAngleは、正規化されたクォータニオンから、軸と回転角度の形で回転を取り出す。
 func (quat *MQuaternion) AxisAngle() (axis MVec3, angle float64) {
-	cos := quat.W
+	cos := quat.GetW()
 	sin := math.Sqrt(1 - cos*cos)
 	angle = math.Acos(cos) * 2
 
@@ -242,21 +219,21 @@ func (quat *MQuaternion) AxisAngle() (axis MVec3, angle float64) {
 	} else {
 		ooSin = 1 / sin
 	}
-	axis[0] = quat.V[0] * ooSin
-	axis[1] = quat.V[1] * ooSin
-	axis[2] = quat.V[2] * ooSin
+	axis[0] = quat.GetX() * ooSin
+	axis[1] = quat.GetY() * ooSin
+	axis[2] = quat.GetZ() * ooSin
 
 	return axis, angle
 }
 
-// Mul は、クォータニオンの積を返します。
+// Mulは、クォータニオンの積を返します。
 func (q1 *MQuaternion) MulShort(q2 *MQuaternion) *MQuaternion {
 	mat1 := q1.ToMat4()
 	mat2 := q2.ToMat4()
 	mat1.Mul(mat2)
 	qq := mat1.Quaternion()
 
-	return NewMQuaternionByValues(qq.V[0], qq.V[1], qq.V[2], qq.W)
+	return NewMQuaternionByValues(qq.GetX(), qq.GetY(), qq.GetZ(), qq.GetW())
 }
 
 func (q1 *MQuaternion) MuledShort(q2 *MQuaternion) *MQuaternion {
@@ -265,17 +242,9 @@ func (q1 *MQuaternion) MuledShort(q2 *MQuaternion) *MQuaternion {
 	return copied
 }
 
-// Mul は、クォータニオンの積を返します。
+// Mulは、クォータニオンの積を返します。
 func (q1 *MQuaternion) Mul(q2 *MQuaternion) *MQuaternion {
-	mat1 := q1.ToMat4()
-	mat2 := q2.ToMat4()
-	mat1.Mul(mat2)
-	qq := mat1.Quaternion()
-
-	q1.SetX(qq.GetX())
-	q1.SetY(qq.GetY())
-	q1.SetZ(qq.GetZ())
-	q1.SetW(qq.GetW())
+	*q1 = MQuaternion(mgl64.Quat(*q1).Mul(mgl64.Quat(*q2)))
 	return q1
 }
 
@@ -285,77 +254,56 @@ func (q1 *MQuaternion) Muled(q2 *MQuaternion) *MQuaternion {
 	return copied
 }
 
-// Norm はクォータニオンのノルム値を返します。
+// Normはクォータニオンのノルム値を返します。
 func (quat *MQuaternion) Norm() float64 {
-	return quat.V[0]*quat.V[0] + quat.V[1]*quat.V[1] + quat.V[2]*quat.V[2] + quat.W*quat.W
+	return mgl64.Quat(*quat).Norm()
 }
 
-// Len gives the Length of the quaternion, also known as its Norm. This is the
-// same thing as the Len of a Vec4.
-func (q1 MQuaternion) Length() float64 {
-	return math.Sqrt(float64(q1.W*q1.W + q1.V[0]*q1.V[0] + q1.V[1]*q1.V[1] + q1.V[2]*q1.V[2]))
+// Lengthはクォータニオンの長さ（ノルム）を返します。
+func (quat *MQuaternion) Length() float64 {
+	return mgl64.Quat(*quat).Len()
 }
 
 // Normalizeは、単位四位数に正規化する。
 func (quat *MQuaternion) Normalize() *MQuaternion {
-	norm := quat.Norm()
-	if norm != 1 && norm != 0 {
-		ool := 1 / math.Sqrt(norm)
-		quat.V[0] *= ool
-		quat.V[1] *= ool
-		quat.V[2] *= ool
-		quat.W *= ool
-	}
-	return quat
+	q := mgl64.Quat(*quat).Normalize()
+	return &MQuaternion{q.W, q.V}
 }
 
 // Normalizedは、単位を4進数に正規化したコピーを返す。
 func (quat *MQuaternion) Normalized() *MQuaternion {
-	norm := quat.Norm()
-	if norm != 1 && norm != 0 {
-		ool := 1 / math.Sqrt(norm)
-		q := NewMQuaternionByValues(
-			quat.V[0]*ool,
-			quat.V[1]*ool,
-			quat.V[2]*ool,
-			quat.W*ool,
-		)
-		return q
-	} else {
-		return quat
-	}
+	copied := quat.Copy()
+	return copied.Normalize()
 }
 
-// Negate negates the quaternion.
+// Negateはクォータニオンを反転する。
 func (quat *MQuaternion) Negate() *MQuaternion {
-	quat.V[0] = -quat.V[0]
-	quat.V[1] = -quat.V[1]
-	quat.V[2] = -quat.V[2]
-	quat.W = -quat.W
+	quat.SetX(-quat.GetX())
+	quat.SetY(-quat.GetY())
+	quat.SetZ(-quat.GetZ())
+	quat.SetW(-quat.GetW())
 	return quat
 }
 
-// Negated returns a negated quaternion.
+// Negatedは反転したクォータニオンを返します。
 func (quat *MQuaternion) Negated() *MQuaternion {
-	q := NewMQuaternionByValues(-quat.V[0], -quat.V[1], -quat.V[2], -quat.W)
-	return q
+	return NewMQuaternionByValues(-quat.GetX(), -quat.GetY(), -quat.GetZ(), -quat.GetW())
 }
 
-// Invert inverts the quaternion.
+// Invertは、クォータニオンを反転させます。
 func (quat *MQuaternion) Invert() *MQuaternion {
-	quat.V[0] = -quat.V[0]
-	quat.V[1] = -quat.V[1]
-	quat.V[2] = -quat.V[2]
+	quat.SetX(-quat.GetX())
+	quat.SetY(-quat.GetY())
+	quat.SetZ(-quat.GetZ())
 	return quat
 }
 
-// Inverted returns a inverted quaternion.
+// Invertedは反転したクォータニオンを返します。
 func (quat *MQuaternion) Inverted() *MQuaternion {
-	q := NewMQuaternionByValues(-quat.V[0], -quat.V[1], -quat.V[2], quat.W)
-	return q
+	return NewMQuaternionByValues(-quat.GetX(), -quat.GetY(), -quat.GetZ(), quat.GetW())
 }
 
-// SetShortestRotation は、クォータニオンが quat から other の方向への最短回転を表していない場合、そのクォータニオンを否定します。
+// SetShortestRotationは、クォータニオンが quat から other の方向への最短回転を表していない場合、そのクォータニオンを否定します。
 // (quatの向きからotherの向きへの回転には2つの方向があります)
 func (quat *MQuaternion) SetShortestRotation(other *MQuaternion) *MQuaternion {
 	if !quat.IsShortestRotation(other) {
@@ -364,102 +312,78 @@ func (quat *MQuaternion) SetShortestRotation(other *MQuaternion) *MQuaternion {
 	return quat
 }
 
-// IsShortestRotation は、a から b への回転が可能な限り最短の回転かどうかを返す。
-// (quatの向きから他の向きへの回転には2つの方向がある)
+// IsShortestRotationは、a から b への回転が可能な限り最短の回転かどうかを返します。
+// (quatの向きから他の向きへの回転には2つの方向があります)
 func (quat *MQuaternion) IsShortestRotation(other *MQuaternion) bool {
 	return quat.Dot(other) >= 0
 }
 
-// IsUnitQuat は、クォータニオンが単位クォータニオンの許容範囲内にあるかどうかを返します。
+// IsUnitQuatは、クォータニオンが単位クォータニオンの許容範囲内にあるかどうかを返します。
 func (quat *MQuaternion) IsUnitQuat(tolerance float64) bool {
 	norm := quat.Norm()
 	return norm >= (1.0-tolerance) && norm <= (1.0+tolerance)
 }
 
-// 最短回転に変換します
+// Shortenは、最短回転に変換します。
 func (quat *MQuaternion) Shorten() *MQuaternion {
-	if quat.W < 0 {
+	if quat.GetW() < 0 {
 		quat.Negate()
 	}
 	return quat
 }
 
-// RotateVec3 は、四元数によって表される回転によって v を回転させます。
-// https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
-func (quat *MQuaternion) RotateVec3(v *MVec3) {
-	u := MVec3{quat.V[0], quat.V[1], quat.V[2]}
-	s := quat.W
-	vt1 := u.MuledScalar(2 * u.Dot(v))
-	vt2 := v.MuledScalar(s*s - u.Dot(&u))
-	vt3 := u.Cross(v)
-	vt3 = vt3.MulScalar(2 * s)
-	v[0] = vt1[0] + vt2[0] + vt3[0]
-	v[1] = vt1[1] + vt2[1] + vt3[1]
-	v[2] = vt1[2] + vt2[2] + vt3[2]
+// RotateVec3は、四元数によって表される回転によって v を回転させます。
+func (quat *MQuaternion) RotateVec3(v *MVec3) *MVec3 {
+	r := mgl64.Quat(*quat).Rotate(mgl64.Vec3(*v))
+	return &MVec3{r[0], r[1], r[2]}
 }
 
-// RotatedVec3 は v の回転コピーを返す。
-// https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
+// RotatedVec3は v の回転コピーを返します。
 func (quat *MQuaternion) RotatedVec3(v *MVec3) *MVec3 {
-	u := MVec3{quat.V[0], quat.V[1], quat.V[2]}
-	s := quat.W
-	vt1 := u.MuledScalar(2 * u.Dot(v))
-	vt2 := v.MuledScalar(s*s - u.Dot(&u))
-	vt3 := u.Cross(v)
-	vt3 = vt3.MulScalar(2 * s)
-	return &MVec3{vt1[0] + vt2[0] + vt3[0], vt1[1] + vt2[1] + vt3[1], vt1[2] + vt2[2] + vt3[2]}
+	return quat.Copy().RotateVec3(v)
 }
 
-// Dot は2つのクォータニオンの内積を返す。
+// Dotは2つのクォータニオンの内積を返します。
 func (quat *MQuaternion) Dot(other *MQuaternion) float64 {
-	return quat.V[0]*other.V[0] + quat.V[1]*other.V[1] + quat.V[2]*other.V[2] + quat.W*other.W
+	return mgl64.Quat(*quat).Dot(mgl64.Quat(*other))
 }
 
-// MulScalar
+// MulScalarはクォータニオンにスカラーを掛け算します。
 func (quat *MQuaternion) MulScalar(factor float64) *MQuaternion {
 	if factor == 0.0 {
-		q := NewMQuaternion()
-		return q
+		return NewMQuaternion()
 	}
 
-	// qq := NewMQuaternion().Lerp(quat, math.Abs(factor))
-	// if factor < 0 {
-	// 	qq.Invert()
-	// }
-
-	// return qq.Normalize()
-
-	axis, angle := quat.ToAxisAngle()
+	axis, angle := quat.AxisAngle()
 
 	// factor をかけて角度を制限
 	angle = math.Mod(angle*factor, math.Pi*2)
 
-	result := NewMQuaternionFromAxisAngles(axis, angle)
-	return result
+	return NewMQuaternionFromAxisAngles(&axis, angle)
 }
 
-// ToAxisAngle converts the quaternion to an axis and an angle.
+// ToAxisAngleは、クォータニオンを軸と角度に変換します。
 func (quat *MQuaternion) ToAxisAngle() (*MVec3, float64) {
-	// Normalize the quaternion
+	// クォータニオンを正規化
 	quat.Normalize()
 
-	// Calculate the angle
-	angle := 2 * math.Acos(quat.W)
+	// 角度を計算
+	angle := 2 * math.Acos(quat.GetW())
 
-	// Calculate the components of the axis
-	s := math.Sqrt(1 - quat.W*quat.W)
+	// 軸の成分を計算
+	s := math.Sqrt(1 - quat.GetW()*quat.GetW())
 	if s < 1e-9 {
 		s = 1
 	}
 	axis := NewMVec3()
-	axis.SetX(quat.V[0] / s)
-	axis.SetY(quat.V[1] / s)
-	axis.SetZ(quat.V[2] / s)
+	axis.SetX(quat.GetX() / s)
+	axis.SetY(quat.GetY() / s)
+	axis.SetZ(quat.GetZ() / s)
 
 	return axis, angle
 }
 
-// Slerp は t (0,1) における a と b の間の球面線形補間クォータニオンを返す。
+// Slerpはt (0,1)におけるaとbの間の球面線形補間クォータニオンを返します。
 // See http://en.wikipedia.org/wiki/Slerp
 func (a *MQuaternion) Slerp(b *MQuaternion, t float64) *MQuaternion {
 	q := mgl64.QuatSlerp(mgl64.Quat(*a), mgl64.Quat(*b), t)
@@ -471,7 +395,7 @@ func (q *MQuaternion) Lerp(other *MQuaternion, t float64) *MQuaternion {
 	return (*MQuaternion)(&qq)
 }
 
-// Vec3Diff関数は、2つのベクトル間の回転四元数を返します。
+// Vec3Diffは、2つのベクトル間の回転四元数を返します。
 func (a *MVec3) Vec3Diff(b *MVec3) *MQuaternion {
 	cr := a.Cross(b)
 	sr := math.Sqrt(2 * (1 + a.Dot(b)))
@@ -481,22 +405,17 @@ func (a *MVec3) Vec3Diff(b *MVec3) *MQuaternion {
 	return q.Normalize()
 }
 
-// ToDegree は、クォータニオンを度に変換します。
+// ToDegreeは、クォータニオンを度に変換します。
 func (quat *MQuaternion) ToDegree() float64 {
-	w := quat.Normalize().GetW()
-	radian := 2 * math.Acos(math.Min(1, math.Max(-1, w)))
-	angle := radian * (180 / math.Pi)
-	return angle
+	return RadToDeg(quat.ToRadian())
 }
 
-// ToRadian は、クォータニオンをラジアンに変換します。
+// ToRadianは、クォータニオンをラジアンに変換します。
 func (quat *MQuaternion) ToRadian() float64 {
-	w := quat.Normalize().GetW()
-	radian := 2 * math.Acos(math.Min(1, math.Max(-1, w)))
-	return radian
+	return 2 * math.Acos(math.Min(1, math.Max(-1, quat.Normalize().GetW())))
 }
 
-// ToSignedDegree 符号付き角度に変換
+// ToSignedDegreeは、符号付き角度に変換します。
 func (quat *MQuaternion) ToSignedDegree() float64 {
 	// スカラー部分から基本的な角度を計算
 	basicAngle := quat.ToDegree()
@@ -515,7 +434,7 @@ func (quat *MQuaternion) ToSignedDegree() float64 {
 	return basicAngle
 }
 
-// ToSignedRadian 符号付きラジアンに変換
+// ToSignedRadianは、符号付きラジアンに変換します。
 func (quat *MQuaternion) ToSignedRadian(axisIndex int) float64 {
 	// スカラー部分から基本的な角度を計算
 	basicAngle := quat.ToRadian()
@@ -533,12 +452,12 @@ func (quat *MQuaternion) ToSignedRadian(axisIndex int) float64 {
 	return basicAngle
 }
 
-// ToTheta 自分ともうひとつの値vとのtheta（変位量）を返す
+// ToThetaは、自分ともうひとつの値vとのtheta（変位量）を返します。
 func (quat *MQuaternion) ToTheta(v *MQuaternion) float64 {
 	return math.Acos(math.Min(1, math.Max(-1, quat.Normalize().Dot(v.Normalize()))))
 }
 
-// 軸と角度からクォータニオンに変換する
+// NewMQuaternionFromDirectionは、軸と角度からクォータニオンに変換します。
 func NewMQuaternionFromDirection(direction *MVec3, up *MVec3) *MQuaternion {
 	if direction.Length() == 0 {
 		return NewMQuaternion()
@@ -558,20 +477,20 @@ func NewMQuaternionFromDirection(direction *MVec3, up *MVec3) *MQuaternion {
 	return result.Normalize()
 }
 
-// NewMQuaternionRotate fromベクトルからtoベクトルまでの回転量
+// NewMQuaternionRotateはfromベクトルからtoベクトルまでの回転量を計算します。
 func NewMQuaternionRotate(fromV, toV *MVec3) *MQuaternion {
 	v0 := fromV.Normalize()
 	v1 := toV.Normalize()
 	d := v0.Dot(v1) + 1.0
 
-	// if dest vector is close to the inverse of source vector, ANY axis of rotation is valid
+	// dest vectorがsource vectorの逆方向に近い場合、任意の回転軸が有効です。
 	if math.Abs(d) < 1e-6 {
 		axis := MVec3UnitX.Cross(v0)
 		if math.Abs(axis.LengthSqr()) < 1e-6 {
 			axis = MVec3UnitY.Cross(v0)
 		}
 		axis.Normalize()
-		// same as MQuaternion.fromAxisAndAngle(axis, 180.0)
+		// 同じくMQuaternion.fromAxisAndAngle(axis, 180.0)
 		return NewMQuaternionByValues(axis.GetX(), axis.GetY(), axis.GetZ(), 0.0)
 	}
 
@@ -580,17 +499,19 @@ func NewMQuaternionRotate(fromV, toV *MVec3) *MQuaternion {
 	return NewMQuaternionByValues(axis.GetX(), axis.GetY(), axis.GetZ(), d*0.5)
 }
 
-// NewMQuaternionFromAxes
+// NewMQuaternionFromAxesは、3つの軸ベクトルからクォータニオンを作成します。
 func NewMQuaternionFromAxes(xAxis, yAxis, zAxis *MVec3) *MQuaternion {
-	x := MVec3{xAxis.GetX(), yAxis.GetX(), zAxis.GetX()}
-	y := MVec3{xAxis.GetY(), yAxis.GetY(), zAxis.GetY()}
-	z := MVec3{xAxis.GetZ(), yAxis.GetZ(), zAxis.GetZ()}
-	mat := NewMMat3().AssignCoordinateSystem(&x, &y, &z)
+	mat := NewMMat4ByValues(
+		xAxis.GetX(), xAxis.GetY(), xAxis.GetZ(), 0,
+		yAxis.GetX(), yAxis.GetY(), yAxis.GetZ(), 0,
+		zAxis.GetX(), zAxis.GetY(), zAxis.GetZ(), 0,
+		0, 0, 0, 1,
+	)
 	qq := mat.Quaternion()
 	return qq
 }
 
-// SeparateByAxis separates the quaternion into four quaternions based on the global axis.
+// SeparateByAxisは、グローバル軸に基づいてクォータニオンを4つのクォータニオンに分割します。
 func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuaternion, *MQuaternion, *MQuaternion) {
 	localZAxis := MVec3UnitZ
 	globalXAxis := globalAxis.Normalize()
@@ -599,7 +520,7 @@ func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuat
 
 	if globalYAxis.Length() == 0 {
 		localYAxis := MVec3UnitY
-		globalZAxis := localYAxis.Cross(globalXAxis)
+		globalZAxis = localYAxis.Cross(globalXAxis)
 		globalYAxis = globalXAxis.Cross(globalZAxis)
 	}
 
@@ -634,24 +555,28 @@ func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuat
 	return xQQ, yQQ, zQQ, yzQQ
 }
 
-// Copy
+// Copyはクォータニオンのコピーを返します。
 func (qq *MQuaternion) Copy() *MQuaternion {
 	return NewMQuaternionByValues(qq.GetX(), qq.GetY(), qq.GetZ(), qq.GetW())
 }
 
-// Vector
+// Vectorはクォータニオンをベクトルに変換します。
 func (v *MQuaternion) Vector() []float64 {
 	return []float64{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
 }
 
+// ToMat4はクォータニオンを4x4行列に変換します。
 func (v *MQuaternion) ToMat4() *MMat4 {
-	mat := NewMMat4()
-	mat.AssignQuaternion(v)
-	return mat
+	m := mgl64.Quat(*v).Normalize().Mat4()
+	return NewMMat4ByValues(
+		m[0], m[1], m[2], m[3],
+		m[4], m[5], m[6], m[7],
+		m[8], m[9], m[10], m[11],
+		m[12], m[13], m[14], m[15],
+	)
 }
 
-// ToFixedAxisRotation 軸制限されたクォータニオンの回転
-// fixedAxis: 軸制限を表す3次元ベクトル
+// ToFixedAxisRotationは軸制限されたクォータニオンの回転を計算します。
 func (quat *MQuaternion) ToFixedAxisRotation(fixedAxis *MVec3) *MQuaternion {
 	normalizedFixedAxis := fixedAxis.Normalized()
 	quatAxis := quat.GetXYZ().Normalized()
@@ -663,36 +588,23 @@ func (quat *MQuaternion) ToFixedAxisRotation(fixedAxis *MVec3) *MQuaternion {
 	return result
 }
 
-// PracticallyEquals
+// PracticallyEqualsは2つのクォータニオンがほぼ等しいかどうかを判定します。
 func (quat *MQuaternion) PracticallyEquals(other *MQuaternion, epsilon float64) bool {
-	return (math.Abs(quat.V[0]-other.V[0]) <= epsilon) &&
-		(math.Abs(quat.V[1]-other.V[1]) <= epsilon) &&
-		(math.Abs(quat.V[2]-other.V[2]) <= epsilon) &&
-		(math.Abs(quat.W-other.W) <= epsilon)
+	return mgl64.Quat(*quat).ApproxEqualThreshold(mgl64.Quat(*other), epsilon)
 }
 
-// MulVec3 multiplies v (converted to a vec4 as (v_1, v_2, v_3, 1))
-// with mat and divides the result by w. Returns a new vec3.
+// MulVec3は、ベクトルvをクォータニオンで回転させた結果の新しいベクトルを返します。
 func (quat *MQuaternion) MulVec3(v *MVec3) *MVec3 {
-	return quat.ToMat4().MulVec3(v)
+	r := mgl64.Quat(*quat).Rotate(mgl64.Vec3(*v))
+	return &MVec3{r[0], r[1], r[2]}
 }
 
-// ラジアン角度をオイラー角度に変換
-func RadToDeg(rad float64) float64 {
-	return rad * 180 / math.Pi
-}
-
-// オイラー角度をラジアン角度に変換
-func DegToRad(deg float64) float64 {
-	return deg * math.Pi / 180
-}
-
-// VectorToDegree は、与えられた2つのベクトルから角度に変換します。
+// VectorToDegreeは、与えられた2つのベクトルから角度に変換します。
 func VectorToDegree(a *MVec3, b *MVec3) float64 {
 	return RadToDeg(VectorToRadian(a, b))
 }
 
-// VectorToRadian は、与えられた2つのベクトルからラジアン角度に変換します。
+// VectorToRadianは、与えられた2つのベクトルからラジアン角度に変換します。
 func VectorToRadian(a *MVec3, b *MVec3) float64 {
 	p := a.Dot(b)
 	normA := a.Length()
@@ -705,13 +617,13 @@ func VectorToRadian(a *MVec3, b *MVec3) float64 {
 	return rad
 }
 
-// FindSlerpT 始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q1, Q2, t) ≈ Qtとなるtを見つけます。
+// FindSlerpTは始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q1, Q2, t) ? Qtとなるtを見つけます。
 func FindSlerpT(Q1, Q2, Qt *MQuaternion) float64 {
 	tol := 1e-15
 	return findSlerpTGoldenSection(Q1, Q2, Qt, tol)
 }
 
-// findSlerpTGoldenSection ensures consistent quaternion signs before finding t.
+// findSlerpTGoldenSectionは一貫したクォータニオンサインを確保した上でtを見つけます。
 func findSlerpTGoldenSection(Q1, Q2, Qt *MQuaternion, tol float64) float64 {
 	phi := (1 + math.Sqrt(5)) / 2
 	maxIterations := 100
@@ -762,7 +674,7 @@ func findSlerpTGoldenSection(Q1, Q2, Qt *MQuaternion, tol float64) float64 {
 	return (a + b) / 2
 }
 
-// FindSlerpTBisection 始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q1, Q2, t) ≈ Qtとなるtを二分法で見つけます。
+// FindSlerpTBisectionは始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q1, Q2, t) ? Qtとなるtを二分法で見つけます。
 func FindSlerpTBisection(Q1, Q2, Qt *MQuaternion, tol float64) float64 {
 	low := 0.00001
 	high := 0.99999
@@ -794,49 +706,3 @@ func FindSlerpTBisection(Q1, Q2, Qt *MQuaternion, tol float64) float64 {
 
 	return mid
 }
-
-// // findSlerpT uses Newton's method to approximate the t value for which Slerp(Q1, Q2, t) approximates Qt.
-// func findSlerpT(Q1, Q2, Qt *MQuaternion, t0, eps, err, maxStep float64) float64 {
-// 	maxIterations := 20
-// 	for i := 0; i < maxIterations; i++ {
-// 		f := quatError(Q1, Q2, Qt, t0)
-// 		df := quatErrorDerivative(Q1, Q2, Qt, t0, eps)
-
-// 		// 微分値がしきい値以下ならば調整
-// 		if df == 0 {
-// 			df = eps
-// 		} else if math.Abs(df) < eps {
-// 			df = eps * (df / math.Abs(df)) // df の符号を保持しつつ小さい値で置換
-// 		}
-
-// 		// Update t0 using Newton's method with step limit
-// 		step := -f / df
-// 		if math.Abs(step) > maxStep {
-// 			step = maxStep * (step / math.Abs(step))
-// 		}
-
-// 		// Update t0 using Newton's method
-// 		t1 := t0 + step
-
-// 		if math.Abs(t1-t0) < err {
-// 			return t1
-// 		}
-
-// 		t0 = t1
-// 	}
-// 	return math.Min(math.Max(math.Abs(t0), 0), 1)
-// }
-
-// // quatError calculates the error between Slerp(Q1, Q2, t) and the target quaternion Qt.
-// func quatError(Q1, Q2, Qt *MQuaternion, t float64) float64 {
-// 	t2 := Q1.Slerp(Q2, t)
-// 	dot := math.Abs(t2.Dot(Qt))
-// 	return 1 - dot
-// }
-
-// // quatErrorDerivative calculates the derivative of the error function with respect to t using central difference.
-// func quatErrorDerivative(Q1, Q2, Qt *MQuaternion, t, eps float64) float64 {
-// 	fPlus := quatError(Q1, Q2, Qt, t+eps)
-// 	fMinus := quatError(Q1, Q2, Qt, t-eps)
-// 	return (fPlus - fMinus) / (2 * eps)
-// }

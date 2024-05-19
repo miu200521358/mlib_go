@@ -36,7 +36,7 @@ func Draw(
 	for i, bone := range model.Bones.Data {
 		delta := deltas.Bones.Get(bone.Name, fno)
 		mat := delta.LocalMatrix.GL()
-		boneMatrixes[i] = mat
+		boneMatrixes[i] = &mat
 		globalMatrixes[i] = delta.GlobalMatrix
 		t := mbt.NewBtTransform()
 		t.SetFromOpenGLMatrix(&mat[0])
@@ -182,14 +182,15 @@ func updateBoneMatrixAfterPhysics(
 	}
 
 	matrix := mmath.NewMMat4()
-	matrix.SetTranslation(pos)
-	matrix.Mul(rot.ToMat4())
-	matrix.ScaleVec3(scl)
+	matrix.Translate(pos)
+	matrix.Rotate(rot)
+	matrix.Scale(scl)
 
 	// 自身の行列を再作成
 	parentBone := model.Bones.Get(bone.ParentIndex)
 	parentMat := deltas.Bones.Get(parentBone.Name, fno).LocalMatrix
-	boneMatrixes[bone.Index] = parentMat.Muled(matrix).GL()
+	mat := parentMat.Muled(matrix).GL()
+	boneMatrixes[bone.Index] = &mat
 
 	for _, childBoneIndex := range bone.ChildBoneIndexes {
 		// 子ボーンがいる場合、子ボーンの行列を再計算

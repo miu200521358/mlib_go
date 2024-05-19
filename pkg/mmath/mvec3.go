@@ -94,7 +94,7 @@ func (v *MVec3) String() string {
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します
 func (v *MVec3) MMD() *MVec3 {
-	return &MVec3{-v.GetX(), v.GetY(), v.GetZ()}
+	return &MVec3{-v.GetX(), v.GetY(), -v.GetZ()}
 }
 
 // Add ベクトルに他のベクトルを加算します
@@ -405,9 +405,9 @@ func (v *MVec3) Vector() []float64 {
 
 func (v *MVec3) ToMat4() *MMat4 {
 	mat := NewMMat4()
-	mat[0][3] = v.GetX()
-	mat[1][3] = v.GetY()
-	mat[2][3] = v.GetZ()
+	mat[3] = v.GetX()
+	mat[7] = v.GetY()
+	mat[11] = v.GetZ()
 	return mat
 }
 
@@ -504,16 +504,12 @@ func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
 	zAxis.DivScalar(normZAxis)
 
 	// ローカル軸に合わせた回転行列を作成する
-	rotationMatrix := NewMMat4()
-	rotationMatrix[0][0] = xAxis.GetX()
-	rotationMatrix[1][0] = xAxis.GetY()
-	rotationMatrix[2][0] = xAxis.GetZ()
-	rotationMatrix[0][1] = yAxis.GetX()
-	rotationMatrix[1][1] = yAxis.GetY()
-	rotationMatrix[2][1] = yAxis.GetZ()
-	rotationMatrix[0][2] = zAxis.GetX()
-	rotationMatrix[1][2] = zAxis.GetY()
-	rotationMatrix[2][2] = zAxis.GetZ()
+	rotationMatrix := NewMMat4ByValues(
+		xAxis.GetX(), yAxis.GetX(), zAxis.GetX(), 0,
+		xAxis.GetY(), yAxis.GetY(), zAxis.GetY(), 0,
+		xAxis.GetZ(), yAxis.GetZ(), zAxis.GetZ(), 0,
+		0, 0, 0, 1,
+	)
 
 	return rotationMatrix
 }
