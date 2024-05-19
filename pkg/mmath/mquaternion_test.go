@@ -294,7 +294,7 @@ func TestMQuaternionMultiply(t *testing.T) {
 
 func TestNewMQuaternionFromAxisAngles(t *testing.T) {
 	expected1 := NewMQuaternionByValues(
-		0.25511557978461696, 0.5102311595692339, 0.7653467393538509, -0.2980345169879195)
+		0.25511557978461696, 0.5102311595692339, 0.7653467393538509, -0.29803451698791944)
 	result1 := NewMQuaternionFromAxisAngles(&MVec3{1, 2, 3}, 30)
 
 	if !result1.PracticallyEquals(expected1, 1e-5) {

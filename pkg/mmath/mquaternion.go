@@ -103,7 +103,7 @@ func (v *MQuaternion) MMD() *MQuaternion {
 
 // NewMQuaternionFromAxisAngles は、軸周りの回転を表す四元数を返します。
 func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
-	q := MQuaternion(mgl64.QuatRotate(angle, mgl64.Vec3(*axis)))
+	q := MQuaternion(mgl64.QuatRotate(angle, mgl64.Vec3(*axis)).Normalize())
 	return &q
 }
 
@@ -135,8 +135,12 @@ func (v *MQuaternion) ToRadians() *MVec3 {
 }
 
 const (
-	GIMBAL2_RAD = math.Pi * 88.0 * 2 / 180
-	ONE_RAD     = math.Pi
+	GIMBAL1_RAD    = 88.0 / 180.0 * math.Pi
+	GIMBAL_MIN_RAD = GIMBAL1_RAD * 0.07
+	GIMBAL0_5_RAD  = GIMBAL1_RAD * 0.5
+	GIMBAL1_5_RAD  = GIMBAL1_RAD * 1.5
+	GIMBAL2_RAD    = GIMBAL1_RAD * 2
+	ONE_RAD        = math.Pi
 )
 
 // ToRadiansWithGimbalは、クォータニオンを三軸のオイラー角（ラジアン）回転を返します。
@@ -441,7 +445,7 @@ func (quat *MQuaternion) ToSignedRadian(axisIndex int) float64 {
 
 	// ベクトルの長さを使って、角度の正負を決定
 	if quat.Vec3().Length() > 0 {
-		if (axisIndex == 0 && quat.GetX() < 0) ||
+		if (axisIndex == 0 && quat.GetX() > 0) ||
 			(axisIndex == 1 && quat.GetY() < 0) ||
 			(axisIndex == 2 && quat.GetZ() < 0) {
 			return -basicAngle

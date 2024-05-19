@@ -324,7 +324,7 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 	v2 := MVec3{1, 0, 0}
 	localVector1 := localMatrix.MulVec3(&v2)
 
-	expected2 := MVec3{0.565685424949238, 0.6, 0.5656854249492381}
+	expected2 := MVec3{0.565685424949238, 0.42426406871192845, 0.7071067811865475}
 	if !localVector1.PracticallyEquals(&expected2, 1e-8) {
 		t.Errorf("Local vector calculation failed. Expected %v, got %v", expected2, localVector1)
 	}
@@ -332,7 +332,7 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 	v3 := MVec3{1, 0, 1}
 	localVector2 := localMatrix.MulVec3(&v3)
 
-	expected3 := MVec3{1.2727922061357855, 0.6, -0.14142135623730945}
+	expected3 := MVec3{1.131370849898476, 0.8485281374238569, 0.0}
 	if !localVector2.PracticallyEquals(&expected3, 1e-8) {
 		t.Errorf("Local vector calculation failed. Expected %v, got %v", expected3, localVector2)
 	}

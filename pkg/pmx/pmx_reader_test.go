@@ -745,7 +745,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
 		expectedRotation := &mmath.MVec3{0.0, 0.0, 125.00}
-		if !b.Rotation.GetDegrees().PracticallyEquals(expectedRotation, 1e-5) {
+		if !b.Rotation.GetDegreesMMD().PracticallyEquals(expectedRotation, 1e-5) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, b.Rotation.GetDegrees())
 		}
 		expectedMass := 1.0
@@ -797,8 +797,8 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, j.Position)
 		}
 		expectedRotation := &mmath.MVec3{-15.10554, 91.26718, -4.187446}
-		if !j.Rotation.GetDegrees().PracticallyEquals(expectedRotation, 1e-5) {
-			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, j.Rotation.GetDegrees())
+		if !j.Rotation.GetDegreesMMD().PracticallyEquals(expectedRotation, 1e-5) {
+			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, j.Rotation.GetDegreesMMD())
 		}
 		expectedTranslationLimitMin := &mmath.MVec3{0.0, 0.0, 0.0}
 		if !j.JointParam.TranslationLimitMin.PracticallyEquals(expectedTranslationLimitMin, 1e-5) {
