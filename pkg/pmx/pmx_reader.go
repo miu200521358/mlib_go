@@ -1136,7 +1136,7 @@ func (r *PmxReader) readRigidBodies(model *PmxModel) error {
 		}
 		b.Position = &position
 		// 12 : float3	| 回転(x,y,z) -> ラジアン角
-		rads, err := r.UnpackVec3(true)
+		rads, err := r.UnpackVec3(false)
 		if err != nil {
 			mlog.E("[%d] readRigidBodies UnpackVec3 Rotation error: %v", i, err)
 			return err
@@ -1230,7 +1230,7 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 		}
 		j.Position = &position
 		// 12 : float3	| 回転(x,y,z) -> ラジアン角
-		rads, err := r.UnpackVec3(true)
+		rads, err := r.UnpackVec3(false)
 		if err != nil {
 			mlog.E("[%d] readJoints UnpackVec3 Rotation error: %v", i, err)
 			return err

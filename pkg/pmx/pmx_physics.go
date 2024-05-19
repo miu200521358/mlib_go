@@ -298,7 +298,7 @@ func (r *RigidBody) UpdateTransform(
 
 func (r *RigidBody) UpdateMatrix(
 	modelPhysics *mphysics.MPhysics,
-	boneMatrixes []*mgl32.Mat4,
+	boneDeltas []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
 ) *mgl32.Mat4 {
 	btRigidBody, btRigidBodyTransform, _ := modelPhysics.GetRigidBody(r.Index)
@@ -372,9 +372,9 @@ func (r *RigidBody) UpdateMatrix(
 	// }
 
 	if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
-		boneMatrixes[r.BoneIndex] = &physicsBoneMatrix
+		boneDeltas[r.BoneIndex] = &physicsBoneMatrix
 	} else if r.JointedBoneIndex >= 0 && r.JointedBoneIndex < len(boneTransforms) {
-		boneMatrixes[r.JointedBoneIndex] = &physicsBoneMatrix
+		boneDeltas[r.JointedBoneIndex] = &physicsBoneMatrix
 	}
 
 	return &physicsBoneMatrix

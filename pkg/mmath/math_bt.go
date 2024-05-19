@@ -16,7 +16,7 @@ func (v *MQuaternion) GL() [4]float32 {
 
 // Bullet+OpenGL座標系に変換されたクォータニオンベクトルを返します
 func (v *MQuaternion) Bullet() mbt.BtQuaternion {
-	return mbt.NewBtQuaternion(float32(v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(v.GetW()))
+	return mbt.NewBtQuaternion(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(v.GetW()))
 }
 
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します
@@ -65,7 +65,7 @@ func (v *MVec2) GL() mgl32.Vec2 {
 
 // GL OpenGL座標系に変換された4次元ベクトルを返します
 func (v *MVec4) GL() mgl32.Vec4 {
-	return mgl32.Vec4{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW())}
+	return mgl32.Vec4{float32(v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(v.GetW())}
 }
 
 // GL OpenGL座標系に変換されたベクトルを返します

@@ -43,50 +43,35 @@ func NewBoneDelta(
 	}
 }
 
-type BoneNameFrameNo struct {
-	BoneName string
-	Frame    int
-}
-
 type BoneDeltas struct {
-	Data map[BoneNameFrameNo]*BoneDelta
+	Data map[string]*BoneDelta
 }
 
 func NewBoneDeltas() *BoneDeltas {
 	return &BoneDeltas{
-		Data: make(map[BoneNameFrameNo]*BoneDelta, 0),
+		Data: make(map[string]*BoneDelta, 0),
 	}
 }
 
-func (bts *BoneDeltas) Get(boneName string, frame int) *BoneDelta {
-	return bts.Data[BoneNameFrameNo{boneName, frame}]
+func (bts *BoneDeltas) Get(boneName string) *BoneDelta {
+	return bts.Data[boneName]
 }
 
-func (bts *BoneDeltas) SetItem(boneName string, frame int, boneDelta *BoneDelta) {
-	bts.Data[BoneNameFrameNo{boneName, frame}] = boneDelta
+func (bts *BoneDeltas) SetItem(boneName string, boneDelta *BoneDelta) {
+	bts.Data[boneName] = boneDelta
 }
 
 func (bts *BoneDeltas) GetBoneNames() []string {
 	boneNames := make([]string, 0)
 	for key := range bts.Data {
-		if !slices.Contains(boneNames, key.BoneName) {
-			boneNames = append(boneNames, key.BoneName)
+		if !slices.Contains(boneNames, key) {
+			boneNames = append(boneNames, key)
 		}
 	}
 	return boneNames
 }
 
-func (bts *BoneDeltas) GetFrameNos() []int {
-	frames := make([]int, 0)
-	for key := range bts.Data {
-		if slices.Contains(frames, key.Frame) {
-			frames = append(frames, key.Frame)
-		}
-	}
-	return frames
-}
-
 func (bts *BoneDeltas) Contains(boneName string, frame int) bool {
-	_, ok := bts.Data[BoneNameFrameNo{boneName, frame}]
+	_, ok := bts.Data[boneName]
 	return ok
 }

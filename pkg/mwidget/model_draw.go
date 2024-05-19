@@ -30,14 +30,14 @@ func Draw(
 	enablePhysics bool,
 	isDrawNormal bool,
 ) {
-	boneMatrixes := make([]*mgl32.Mat4, len(model.Bones.Data))
+	boneDeltas := make([]*mgl32.Mat4, len(model.Bones.Data))
 	globalMatrixes := make([]*mmath.MMat4, len(model.Bones.Data))
 	boneTransforms := make([]*mbt.BtTransform, len(model.Bones.Data))
 	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))
 	for i, bone := range model.Bones.Data {
-		delta := deltas.Bones.Get(bone.Name, fno)
+		delta := deltas.Bones.Get(bone.Name)
 		mat := delta.LocalMatrix.GL()
-		boneMatrixes[i] = &mat
+		boneDeltas[i] = &mat
 		globalMatrixes[i] = delta.GlobalMatrix
 		t := mbt.NewBtTransform()
 		t.SetFromOpenGLMatrix(&mat[0])
@@ -50,9 +50,9 @@ func Draw(
 
 	vertexDeltas := fetchVertexDeltas(model, deltas)
 
-	updatePhysics(modelPhysics, model, boneMatrixes, boneTransforms, deltas, fno, elapsed, enablePhysics)
+	updatePhysics(modelPhysics, model, boneDeltas, boneTransforms, deltas, fno, elapsed, enablePhysics)
 
-	model.Meshes.Draw(shader, boneMatrixes, vertexDeltas, materialDeltas, windowIndex, isDrawNormal)
+	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, materialDeltas, windowIndex, isDrawNormal)
 
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()
@@ -116,7 +116,7 @@ func fetchVertexDeltasParallel(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]f
 func updatePhysics(
 	modelPhysics *mphysics.MPhysics,
 	model *pmx.PmxModel,
-	boneMatrixes []*mgl32.Mat4,
+	boneDeltas []*mgl32.Mat4,
 	boneTransforms []*mbt.BtTransform,
 	deltas *vmd.VmdDeltas,
 	fno int,
@@ -138,11 +138,11 @@ func updatePhysics(
 
 		// 剛体位置を更新
 		for _, rigidBody := range model.RigidBodies.GetSortedData() {
-			physicsBoneMatrix := rigidBody.UpdateMatrix(modelPhysics, boneMatrixes, boneTransforms)
+			physicsBoneMatrix := rigidBody.UpdateMatrix(modelPhysics, boneDeltas, boneTransforms)
 			if len(model.Bones.AfterPhysicsBoneIndexes) > 0 && enablePhysics && physicsBoneMatrix != nil {
 				// 物理後ボーン用に行列を更新
 				bone := model.Bones.Get(rigidBody.BoneIndex)
-				delta := deltas.Bones.Get(bone.Name, fno)
+				delta := deltas.Bones.Get(bone.Name)
 				delta.LocalMatrix = mmath.NewMMat4ByMgl(physicsBoneMatrix)
 				delta.FramePosition = delta.LocalMatrix.Translation()
 				delta.FrameRotation = delta.LocalMatrix.Quaternion()
@@ -153,7 +153,7 @@ func updatePhysics(
 			// 物理後ボーン位置更新の場合
 			for _, boneIndex := range model.Bones.AfterPhysicsBoneIndexes {
 				// 物理後ボーンで親が存在している場合、親の行列を取得する
-				updateBoneMatrixAfterPhysics(model, boneMatrixes, deltas, fno, model.Bones.Get(boneIndex))
+				updateBoneMatrixAfterPhysics(model, boneDeltas, deltas, model.Bones.Get(boneIndex))
 			}
 		}
 	}
@@ -161,12 +161,11 @@ func updatePhysics(
 
 func updateBoneMatrixAfterPhysics(
 	model *pmx.PmxModel,
-	boneMatrixes []*mgl32.Mat4,
+	boneDeltas []*mgl32.Mat4,
 	deltas *vmd.VmdDeltas,
-	fno int,
 	bone *pmx.Bone,
 ) {
-	delta := deltas.Bones.Get(bone.Name, fno)
+	delta := deltas.Bones.Get(bone.Name)
 
 	pos := delta.FramePosition
 	rot := delta.FrameRotationWithoutEffect
@@ -174,27 +173,27 @@ func updateBoneMatrixAfterPhysics(
 
 	if bone.IsEffectorTranslation() && bone.EffectIndex >= 0 {
 		effectBone := model.Bones.Get(bone.EffectIndex)
-		pos.Add(deltas.Bones.Get(effectBone.Name, fno).FramePosition)
+		pos.Add(deltas.Bones.Get(effectBone.Name).FramePosition)
 	}
 
 	if bone.IsEffectorRotation() && bone.EffectIndex >= 0 {
 		effectBone := model.Bones.Get(bone.EffectIndex)
-		rot = rot.Mul(deltas.Bones.Get(effectBone.Name, fno).FrameRotation)
+		rot = rot.Mul(deltas.Bones.Get(effectBone.Name).FrameRotation)
 	}
 
 	matrix := mmath.NewMMat4()
-	matrix.Translate(pos)
-	matrix.Rotate(rot)
 	matrix.Scale(scl)
+	matrix.Rotate(rot)
+	matrix.Translate(pos)
+	matrix.Mul(bone.RevertOffsetMatrix)
 
 	// 自身の行列を再作成
 	parentBone := model.Bones.Get(bone.ParentIndex)
-	parentMat := deltas.Bones.Get(parentBone.Name, fno).LocalMatrix
-	mat := parentMat.Muled(matrix).GL()
-	boneMatrixes[bone.Index] = &mat
+	mat := matrix.Muled(deltas.Bones.Get(parentBone.Name).LocalMatrix).GL()
+	boneDeltas[bone.Index] = &mat
 
-	for _, childBoneIndex := range bone.ChildBoneIndexes {
-		// 子ボーンがいる場合、子ボーンの行列を再計算
-		updateBoneMatrixAfterPhysics(model, boneMatrixes, deltas, fno, model.Bones.Get(childBoneIndex))
-	}
+	// for _, childBoneIndex := range bone.ChildBoneIndexes {
+	// 	// 子ボーンがいる場合、子ボーンの行列を再計算
+	// 	updateBoneMatrixAfterPhysics(model, boneDeltas, deltas, fno, model.Bones.Get(childBoneIndex))
+	// }
 }

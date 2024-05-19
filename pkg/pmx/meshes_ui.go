@@ -141,7 +141,7 @@ func (m *Meshes) delete() {
 
 func (m *Meshes) Draw(
 	shader *mview.MShader,
-	boneMatrixes []*mgl32.Mat4,
+	boneDeltas []*mgl32.Mat4,
 	vertexDeltas [][]float32,
 	materialDeltas []*Material,
 	windowIndex int,
@@ -164,13 +164,13 @@ func (m *Meshes) Draw(
 		mesh.ibo.Bind()
 
 		shader.UseModelProgram()
-		mesh.DrawModel(shader, windowIndex, boneMatrixes, materialDeltas[i])
+		mesh.DrawModel(shader, windowIndex, boneDeltas, materialDeltas[i])
 		shader.Unuse()
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
 			shader.UseEdgeProgram()
-			mesh.DrawEdge(shader, windowIndex, boneMatrixes, materialDeltas[i])
+			mesh.DrawEdge(shader, windowIndex, boneDeltas, materialDeltas[i])
 			shader.Unuse()
 		}
 
@@ -181,7 +181,7 @@ func (m *Meshes) Draw(
 	m.vao.Unbind()
 
 	if isDrawNormal {
-		m.drawNormal(shader, boneMatrixes, windowIndex)
+		m.drawNormal(shader, boneDeltas, windowIndex)
 	}
 
 	shader.Msaa.Unbind()
@@ -192,7 +192,7 @@ func (m *Meshes) Draw(
 
 func (m *Meshes) drawNormal(
 	shader *mview.MShader,
-	boneMatrixes []*mgl32.Mat4,
+	boneDeltas []*mgl32.Mat4,
 	windowIndex int,
 ) {
 	shader.UseNormalProgram()
@@ -202,7 +202,7 @@ func (m *Meshes) drawNormal(
 	m.normalIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	BindBoneMatrixes(boneMatrixes, shader, shader.NormalProgram, windowIndex)
+	BindBoneMatrixes(boneDeltas, shader, shader.NormalProgram, windowIndex)
 
 	normalColor := mgl32.Vec4{0.3, 0.3, 0.7, 0.5}
 	specularUniform := gl.GetUniformLocation(shader.NormalProgram, gl.Str(mview.SHADER_COLOR))

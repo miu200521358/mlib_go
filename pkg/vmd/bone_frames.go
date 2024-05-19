@@ -329,10 +329,10 @@ ikLoop:
 			)
 
 			// IKボーンのグローバル位置
-			ikGlobalPosition := ikMatrixes.Get(ikBone.Name, frame).Position
+			ikGlobalPosition := ikMatrixes.Get(ikBone.Name).Position
 
 			// 現在のIKターゲットボーンのグローバル位置を取得
-			effectorGlobalPosition := linkMatrixes.Get(effectorBone.Name, frame).Position
+			effectorGlobalPosition := linkMatrixes.Get(effectorBone.Name).Position
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
@@ -341,7 +341,7 @@ ikLoop:
 					frame, loop, linkBone.Name, count-1,
 					ikBone.Name, ikGlobalPosition.MMD().String(),
 					effectorBone.Name, effectorGlobalPosition.MMD().String(),
-					linkBone.Name, linkMatrixes.Get(linkBone.Name, frame).Position.MMD().String())
+					linkBone.Name, linkMatrixes.Get(linkBone.Name).Position.MMD().String())
 			}
 
 			// fmt.Fprintf(ikFile,
@@ -356,7 +356,7 @@ ikLoop:
 			// }
 
 			// 注目ノード（実際に動かすボーン=リンクボーン）
-			linkMatrix := linkMatrixes.Get(linkBone.Name, frame).GlobalMatrix
+			linkMatrix := linkMatrixes.Get(linkBone.Name).GlobalMatrix
 			// ワールド座標系から注目ノードの局所座標系への変換
 			linkInvMatrix := linkMatrix.Inverse()
 
@@ -368,15 +368,15 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				{
 					bf := NewBoneFrame(count)
-					bf.Position = ikMatrixes.Get(ikBone.Name, frame).FramePosition
-					bf.Rotation.SetQuaternion(ikMatrixes.Get(ikBone.Name, frame).FrameRotation)
+					bf.Position = ikMatrixes.Get(ikBone.Name).FramePosition
+					bf.Rotation.SetQuaternion(ikMatrixes.Get(ikBone.Name).FrameRotation)
 					ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
 					count++
 				}
 				{
 					bf := NewBoneFrame(count)
-					bf.Position = linkMatrixes.Get(linkBone.Name, frame).FramePosition
-					bf.Rotation.SetQuaternion(linkMatrixes.Get(linkBone.Name, frame).FrameRotation)
+					bf.Position = linkMatrixes.Get(linkBone.Name).FramePosition
+					bf.Rotation.SetQuaternion(linkMatrixes.Get(linkBone.Name).FrameRotation)
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
 				}
@@ -831,7 +831,7 @@ func (fs *BoneFrames) calcBoneMatrixes(
 	for i := range boneCount {
 		bone := targetBones[i]
 		// 初期位置行列を掛けてグローバル行列を作成
-		boneDeltas.SetItem(bone.Name, frame, NewBoneDelta(
+		boneDeltas.SetItem(bone.Name, NewBoneDelta(
 			bone.Name,
 			frame,
 			globalMatrixes[i], // グローバル行列
