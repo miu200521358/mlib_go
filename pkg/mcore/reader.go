@@ -218,7 +218,7 @@ func (r *BaseReader[T]) UnpackFloat() (float64, error) {
 	return float64(math.Float32frombits(binary.LittleEndian.Uint32(chunk))), nil
 }
 
-func (r *BaseReader[T]) UnpackVec2(isConvertGl bool) (mmath.MVec2, error) {
+func (r *BaseReader[T]) UnpackVec2() (mmath.MVec2, error) {
 	x, err := r.UnpackFloat()
 	if err != nil {
 		return *mmath.NewMVec2(), err
@@ -226,9 +226,6 @@ func (r *BaseReader[T]) UnpackVec2(isConvertGl bool) (mmath.MVec2, error) {
 	y, err := r.UnpackFloat()
 	if err != nil {
 		return *mmath.NewMVec2(), err
-	}
-	if isConvertGl {
-		x = -x
 	}
 	return mmath.MVec2{x, y}, nil
 }
@@ -247,7 +244,6 @@ func (r *BaseReader[T]) UnpackVec3(isConvertGl bool) (mmath.MVec3, error) {
 		return *mmath.NewMVec3(), err
 	}
 	if isConvertGl {
-		x = -x
 		z = -z
 	}
 	return mmath.MVec3{x, y, z}, nil
@@ -271,9 +267,7 @@ func (r *BaseReader[T]) UnpackVec4(isConvertGl bool) (mmath.MVec4, error) {
 		return *mmath.NewMVec4(), err
 	}
 	if isConvertGl {
-		x = -x
 		z = -z
-		w = -w
 	}
 	return mmath.MVec4{x, y, z, w}, nil
 }
@@ -296,9 +290,7 @@ func (r *BaseReader[T]) UnpackQuaternion(isConvertGl bool) (mmath.MQuaternion, e
 		return *mmath.NewMQuaternion(), err
 	}
 	if isConvertGl {
-		x = -x
 		z = -z
-		w = -w
 	}
 	return *mmath.NewMQuaternionByValues(x, y, z, w), nil
 }

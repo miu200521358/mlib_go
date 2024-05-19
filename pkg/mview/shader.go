@@ -88,7 +88,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		Height:               int32(height),
 		NearPlane:            0.1,
 		FarPlane:             1000.0,
-		lightPosition:        &mmath.MVec3{-0.5, -1.0, 0.5},
+		lightPosition:        &mmath.MVec3{-0.5, -1.0, -0.5},
 		Msaa:                 NewMsaa(int32(width), int32(height)),
 	}
 	shader.lightDirection = shader.lightPosition.Normalized()

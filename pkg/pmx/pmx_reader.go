@@ -264,7 +264,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 		v.Normal = &normal
 
 		// 8  : float2  | UV(u,v)
-		uv, err := r.UnpackVec2(false)
+		uv, err := r.UnpackVec2()
 		if err != nil {
 			mlog.E("[%d] readVertices UnpackFloat UV[0] error: %v", i, err)
 			return err
