@@ -40,6 +40,7 @@ func (fs *MorphNameFrames) AnimateVertex(
 				delta = NewVertexMorphDelta()
 			}
 			delta.Position.Add(offset.Position.MuledScalar(mf.Ratio))
+			deltas.Data[offset.VertexIndex] = delta
 		}
 	}
 }
@@ -63,6 +64,7 @@ func (fs *MorphNameFrames) AnimateAfterVertex(
 				delta = NewVertexMorphDelta()
 			}
 			delta.AfterPosition.Add(offset.Position.MuledScalar(mf.Ratio))
+			deltas.Data[offset.VertexIndex] = delta
 		}
 	}
 }
@@ -87,6 +89,7 @@ func (fs *MorphNameFrames) AnimateUv(
 			}
 			uv := offset.Uv.MuledScalar(mf.Ratio).GetXY()
 			delta.Uv.Add(uv)
+			deltas.Data[offset.VertexIndex] = delta
 		}
 	}
 }
@@ -111,6 +114,7 @@ func (fs *MorphNameFrames) AnimateUv1(
 			}
 			uv := offset.Uv.MuledScalar(mf.Ratio)
 			delta.Uv1.Add(uv.GetXY())
+			deltas.Data[offset.VertexIndex] = delta
 		}
 	}
 }
@@ -155,6 +159,7 @@ func (fs *MorphNameFrames) AnimateBone(
 				delta.MorphLocalScale = mmath.NewMVec3()
 			}
 			delta.MorphLocalScale.Add(offset.LocalScale.MuledScalar(mf.Ratio))
+			deltas.Data[offset.BoneIndex] = delta
 		}
 	}
 }
@@ -180,20 +185,29 @@ func (fs *MorphNameFrames) AnimateMaterial(
 			}
 			if offset.MaterialIndex < 0 {
 				// 全材質対象の場合
-				for _, delta := range deltas.Data {
+				for m, delta := range deltas.Data {
+					if delta == nil {
+						delta = NewMaterialMorphDelta(model.Materials.Get(m))
+					}
 					if calcMode == pmx.CALC_MODE_MULTIPLICATION {
 						delta.Mul(offset, mf.Ratio)
 					} else {
 						delta.Add(offset, mf.Ratio)
 					}
+					deltas.Data[m] = delta
 				}
 			} else if 0 < offset.MaterialIndex && offset.MaterialIndex <= len(deltas.Data) {
 				// 特定材質のみの場合
-				if calcMode == pmx.CALC_MODE_MULTIPLICATION {
-					deltas.Data[offset.MaterialIndex].Mul(offset, mf.Ratio)
-				} else {
-					deltas.Data[offset.MaterialIndex].Add(offset, mf.Ratio)
+				delta := deltas.Data[offset.MaterialIndex]
+				if delta == nil {
+					delta = NewMaterialMorphDelta(model.Materials.Get(offset.MaterialIndex))
 				}
+				if calcMode == pmx.CALC_MODE_MULTIPLICATION {
+					delta.Mul(offset, mf.Ratio)
+				} else {
+					delta.Add(offset, mf.Ratio)
+				}
+				deltas.Data[offset.MaterialIndex] = delta
 			}
 		}
 	}
