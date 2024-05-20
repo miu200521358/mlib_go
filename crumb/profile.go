@@ -34,7 +34,6 @@ func main() {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	miter.SetBlockSize(12)
 

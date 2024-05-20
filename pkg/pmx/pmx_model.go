@@ -67,7 +67,7 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 	pm.DisplaySlots.Append(d02)
 }
 
-func (pm *PmxModel) SetUp() {
+func (pm *PmxModel) setUp() {
 	// ボーン情報のセットアップ
 	pm.Bones.setup()
 

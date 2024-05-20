@@ -29,7 +29,7 @@ type ModelSet struct {
 	Motion *vmd.VmdMotion
 }
 
-func (ms *ModelSet) Draw(
+func (ms *ModelSet) draw(
 	modelPhysics *mphysics.MPhysics,
 	shader *mview.MShader,
 	windowIndex int,
@@ -41,7 +41,7 @@ func (ms *ModelSet) Draw(
 ) {
 	fno := int(math.Round(float64(frame)))
 	deltas := ms.Motion.Animate(fno, ms.Model)
-	Draw(modelPhysics, ms.Model, shader, deltas, windowIndex, fno, elapsed, enablePhysics, isDrawNormal, isDrawBone)
+	draw(modelPhysics, ms.Model, shader, deltas, windowIndex, fno, elapsed, enablePhysics, isDrawNormal, isDrawBone)
 }
 
 // 直角の定数値
@@ -174,12 +174,12 @@ func NewGlWindow(
 	w.SetCursorPosCallback(glWindow.handleCursorPosEvent)
 	w.SetKeyCallback(glWindow.handleKeyEvent)
 	w.SetCloseCallback(glWindow.Close)
-	w.SetSizeCallback(glWindow.Resize)
+	w.SetSizeCallback(glWindow.resize)
 
 	return &glWindow, nil
 }
 
-func (w *GlWindow) Resize(window *glfw.Window, width int, height int) {
+func (w *GlWindow) resize(window *glfw.Window, width int, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
 	w.Shader.Resize(width, height)
 }
@@ -446,7 +446,7 @@ func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
 	pmxModel.InitDraw(w.WindowIndex, w.resourceFiles)
 	pmxModel.InitPhysics(w.Physics)
 	w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel, Motion: vmdMotion})
-	w.Draw(0, 0)
+	w.draw(0, 0)
 }
 
 func (w *GlWindow) ClearData() {
@@ -457,7 +457,7 @@ func (w *GlWindow) ClearData() {
 	w.frame = 0
 }
 
-func (w *GlWindow) Draw(frame float32, elapsed float32) {
+func (w *GlWindow) draw(frame float32, elapsed float32) {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 
@@ -467,7 +467,7 @@ func (w *GlWindow) Draw(frame float32, elapsed float32) {
 
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
-		modelSet.Draw(w.Physics, w.Shader, w.WindowIndex, frame, elapsed,
+		modelSet.draw(w.Physics, w.Shader, w.WindowIndex, frame, elapsed,
 			w.EnablePhysics, w.VisibleNormal, w.VisibleBone)
 	}
 }
@@ -529,7 +529,7 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 		}
 
 		// 描画
-		w.Draw(w.frame*w.Physics.Fps, elapsed)
+		w.draw(w.frame*w.Physics.Fps, elapsed)
 
 		// if w.frame*w.Physics.Fps >= float32(100) {
 		// 	break

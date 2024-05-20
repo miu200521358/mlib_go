@@ -180,7 +180,6 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 				return err
 			}
 			model = data.(*pmx.PmxModel)
-			model.SetUp()
 		} else {
 			model = pmxReadPicker.GetCache().(*pmx.PmxModel)
 		}

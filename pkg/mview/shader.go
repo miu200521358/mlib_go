@@ -102,7 +102,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 			return nil, err
 		}
 		shader.ModelProgram = modelProgram
-		shader.UseModelProgram()
+		shader.Use(PROGRAM_TYPE_MODEL)
 		shader.initialize(shader.ModelProgram)
 		shader.Unuse()
 	}
@@ -114,7 +114,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 			return nil, err
 		}
 		shader.BoneProgram = boneProgram
-		shader.UseBoneProgram()
+		shader.Use(PROGRAM_TYPE_BONE)
 		shader.initialize(shader.BoneProgram)
 		shader.Unuse()
 	}
@@ -126,7 +126,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 			return nil, err
 		}
 		shader.EdgeProgram = edgeProgram
-		shader.UseEdgeProgram()
+		shader.Use(PROGRAM_TYPE_EDGE)
 		shader.initialize(shader.EdgeProgram)
 		shader.Unuse()
 	}
@@ -138,7 +138,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 			return nil, err
 		}
 		shader.PhysicsProgram = physicsProgram
-		shader.UsePhysicsProgram()
+		shader.Use(PROGRAM_TYPE_PHYSICS)
 		shader.initialize(shader.PhysicsProgram)
 		shader.Unuse()
 	}
@@ -150,7 +150,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 			return nil, err
 		}
 		shader.NormalProgram = normalProgram
-		shader.UseNormalProgram()
+		shader.Use(PROGRAM_TYPE_NORMAL)
 		shader.initialize(shader.NormalProgram)
 		shader.Unuse()
 	}
@@ -310,26 +310,6 @@ func (s *MShader) updateCamera() {
 
 		s.Unuse()
 	}
-}
-
-func (s *MShader) UseModelProgram() {
-	s.Use(PROGRAM_TYPE_MODEL)
-}
-
-func (s *MShader) UseEdgeProgram() {
-	s.Use(PROGRAM_TYPE_EDGE)
-}
-
-func (s *MShader) UseBoneProgram() {
-	s.Use(PROGRAM_TYPE_BONE)
-}
-
-func (s *MShader) UseNormalProgram() {
-	s.Use(PROGRAM_TYPE_NORMAL)
-}
-
-func (s *MShader) UsePhysicsProgram() {
-	s.Use(PROGRAM_TYPE_PHYSICS)
 }
 
 func (s *MShader) Use(programType ProgramType) {

@@ -26,7 +26,6 @@ func TestVmdMotion_AnimateBone_Exists(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -155,7 +154,6 @@ func TestVmdMotion_AnimateBone_Lerp(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 		fno := int(999)
@@ -284,7 +282,6 @@ func TestVmdMotion_AnimateBoneLegIk1_Matsu(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 		fno := int(29)
@@ -340,7 +337,6 @@ func TestVmdMotion_AnimateBoneLegIk2_Matsu(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -397,7 +393,6 @@ func TestVmdMotion_AnimateBoneLegIk3_Matsu(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -466,7 +461,6 @@ func TestVmdMotion_AnimateBoneLegIk4_Snow(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -525,7 +519,6 @@ func TestVmdMotion_AnimateBoneLegIk5_Snow(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -583,7 +576,6 @@ func TestVmdMotion_AnimateBoneLegIk6_SnowOff(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 		// IK OFF
@@ -625,7 +617,6 @@ func TestVmdMotion_AnimateBoneLegIk6_SnowOn(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 		// IK ON
@@ -670,7 +661,6 @@ func TestVmdMotion_AnimateBoneLegIk7_Syou(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	// 残存回転判定用
 	{
@@ -728,7 +718,6 @@ func TestVmdMotion_AnimateBoneLegIk8_Syou(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -785,7 +774,6 @@ func TestVmdMotion_AnimateBoneLegIk10_Syou(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1017,7 +1005,6 @@ func TestVmdMotion_AnimateBoneLegIk11_Shining_Miku(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1080,7 +1067,6 @@ func TestVmdMotion_AnimateBoneLegIk11_Shining_Vroid(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1137,7 +1123,6 @@ func TestVmdMotion_AnimateBoneLegIk12_Down_Miku(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1200,7 +1185,6 @@ func TestVmdMotion_AnimateBoneLegIk13_Lamb(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	matrixes := motion.AnimateBone(0, model,
 		[]string{pmx.LEG_IK.Right(), pmx.TOE.Right(), pmx.LEG_IK.Left(), pmx.TOE.Left()}, true)
@@ -1303,7 +1287,6 @@ func TestVmdMotion_AnimateBoneLegIk14_Ballet(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1367,7 +1350,6 @@ func TestVmdMotion_AnimateBoneLegIk15_Bottom(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1430,7 +1412,6 @@ func TestVmdMotion_AnimateBoneLegIk16_Lamb(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1495,7 +1476,6 @@ func TestVmdMotion_AnimateBoneLegIk17_Snow(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1552,7 +1532,6 @@ func TestVmdMotion_AnimateBoneLegIk18_Syou(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1609,7 +1588,6 @@ func TestVmdMotion_AnimateBoneLegIk19_Wa(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1666,7 +1644,6 @@ func TestVmdMotion_AnimateBoneLegIk20_Syou(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1723,7 +1700,6 @@ func TestVmdMotion_AnimateBoneLegIk21_FK(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1762,7 +1738,6 @@ func TestVmdMotion_AnimateBoneLegIk22_Bake(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1801,7 +1776,6 @@ func TestVmdMotion_AnimateBoneLegIk22_NoLimit(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1840,7 +1814,6 @@ func TestVmdMotion_AnimateBoneLegIk23_Addiction(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -1909,7 +1882,6 @@ func TestVmdMotion_AnimateBoneLegIk24_Positive(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 		fno := int(0)
@@ -2049,7 +2021,6 @@ func TestVmdMotion_AnimateBoneArmIk(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -2179,7 +2150,6 @@ func TestVmdMotion_AnimateBoneLegIk2(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -2368,7 +2338,6 @@ func TestVmdMotion_AnimateBoneArmIk2(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -2755,7 +2724,6 @@ func TestVmdMotion_AnimateBoneArmIk3(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 
@@ -2818,7 +2786,6 @@ func TestVmdMotion_AnimateBoneArmIk4_DMF(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	model.SetUp()
 
 	{
 

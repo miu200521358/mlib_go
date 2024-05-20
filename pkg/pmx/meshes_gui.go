@@ -194,13 +194,13 @@ func (m *Meshes) Draw(
 	for i, mesh := range m.meshes {
 		mesh.ibo.Bind()
 
-		shader.UseModelProgram()
+		shader.Use(mview.PROGRAM_TYPE_MODEL)
 		mesh.DrawModel(shader, windowIndex, boneDeltas, materialDeltas[i])
 		shader.Unuse()
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
-			shader.UseEdgeProgram()
+			shader.Use(mview.PROGRAM_TYPE_EDGE)
 			mesh.DrawEdge(shader, windowIndex, boneDeltas, materialDeltas[i])
 			shader.Unuse()
 		}
@@ -230,7 +230,7 @@ func (m *Meshes) drawNormal(
 	boneDeltas []*mgl32.Mat4,
 	windowIndex int,
 ) {
-	shader.UseNormalProgram()
+	shader.Use(mview.PROGRAM_TYPE_NORMAL)
 
 	m.normalVao.Bind()
 	m.normalVbo.BindVertex(nil, nil)
@@ -271,7 +271,7 @@ func (m *Meshes) drawBone(
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	shader.UseBoneProgram()
+	shader.Use(mview.PROGRAM_TYPE_BONE)
 
 	m.boneVao.Bind()
 	m.boneVbo.BindVertex(nil, nil)

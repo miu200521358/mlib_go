@@ -47,7 +47,7 @@ func NewMDebugDrawLiner(shader *mview.MShader) *MDebugDrawLiner {
 
 func (ddl MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color mbt.BtVector3) {
 	// mlog.D("MDebugDrawLiner.DrawLine")
-	ddl.shader.UsePhysicsProgram()
+	ddl.shader.Use(mview.PROGRAM_TYPE_PHYSICS)
 
 	// 色を設定
 	colorUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mview.SHADER_COLOR))

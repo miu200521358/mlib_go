@@ -18,7 +18,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
-func Draw(
+func draw(
 	modelPhysics *mphysics.MPhysics,
 	model *pmx.PmxModel,
 	shader *mview.MShader,

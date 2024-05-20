@@ -67,15 +67,15 @@ func (m *Mesh) DrawModel(
 	// ------------------
 	// 材質色設定
 	// full.fx の AmbientColor相当
-	diffuse := materialDelta.DiffuseGL()
+	diffuse := materialDelta.diffuseGL()
 	diffuseUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_DIFFUSE))
 	gl.Uniform4fv(diffuseUniform, 1, &diffuse[0])
 
-	ambient := materialDelta.AmbientGL()
+	ambient := materialDelta.ambientGL()
 	ambientUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_AMBIENT))
 	gl.Uniform3fv(ambientUniform, 1, &ambient[0])
 
-	specular := materialDelta.SpecularGL()
+	specular := materialDelta.specularGL()
 	specularUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_SPECULAR))
 	gl.Uniform4fv(specularUniform, 1, &specular[0])
 
@@ -171,7 +171,7 @@ func (m *Mesh) DrawEdge(
 
 	// ------------------
 	// エッジ色設定
-	edgeColor := materialDelta.EdgeGL()
+	edgeColor := materialDelta.edgeGL()
 	edgeColorUniform := gl.GetUniformLocation(shader.EdgeProgram, gl.Str(mview.SHADER_EDGE_COLOR))
 	gl.Uniform4fv(edgeColorUniform, 1, &edgeColor[0])
 
