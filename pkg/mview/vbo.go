@@ -240,54 +240,6 @@ func (v *VBO) BindVertex(vertices []float32, vertexDeltas [][]float32) {
 }
 
 // Creates a new VBO with given faceDtype.
-func NewVBOForBone(ptr unsafe.Pointer, count int) *VBO {
-	var vboId uint32
-	gl.GenBuffers(1, &vboId)
-
-	vbo := &VBO{
-		id:     vboId,
-		target: gl.ARRAY_BUFFER,
-		ptr:    ptr,
-	}
-	// 剛体構造体のサイズ(全部floatとする)
-	// position(3), color(4)
-	vbo.stride = int32(4 * (3 + 4))
-	vbo.size = count * 4
-
-	return vbo
-}
-
-// Binds VBO for rendering.
-func (v *VBO) BindBone() {
-	gl.BindBuffer(v.target, v.id)
-	gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
-	CheckGLError()
-
-	// 0: position
-	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointerWithOffset(
-		0,
-		3,
-		gl.FLOAT,
-		false,
-		v.stride,
-		0*4,
-	)
-
-	// 1: color
-	gl.EnableVertexAttribArray(1)
-	gl.VertexAttribPointerWithOffset(
-		1,
-		4,
-		gl.FLOAT,
-		false,
-		v.stride,
-		3*4,
-	)
-
-}
-
-// Creates a new VBO with given faceDtype.
 func NewVBOForDebug() *VBO {
 	var vboId uint32
 	gl.GenBuffers(1, &vboId)

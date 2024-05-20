@@ -35,13 +35,13 @@ func (ms *ModelSet) Draw(
 	windowIndex int,
 	frame float32,
 	elapsed float32,
-	isBoneDebug bool,
 	enablePhysics bool,
 	isDrawNormal bool,
+	isDrawBone bool,
 ) {
 	fno := int(math.Round(float64(frame)))
 	deltas := ms.Motion.Animate(fno, ms.Model)
-	Draw(modelPhysics, ms.Model, shader, deltas, windowIndex, fno, elapsed, isBoneDebug, enablePhysics, isDrawNormal)
+	Draw(modelPhysics, ms.Model, shader, deltas, windowIndex, fno, elapsed, enablePhysics, isDrawNormal, isDrawBone)
 }
 
 // 直角の定数値
@@ -468,7 +468,7 @@ func (w *GlWindow) Draw(frame float32, elapsed float32) {
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
 		modelSet.Draw(w.Physics, w.Shader, w.WindowIndex, frame, elapsed,
-			w.VisibleBone, w.EnablePhysics, w.VisibleNormal)
+			w.EnablePhysics, w.VisibleNormal, w.VisibleBone)
 	}
 }
 

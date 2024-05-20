@@ -21,6 +21,10 @@ type Meshes struct {
 	normalVao *mview.VAO
 	normalVbo *mview.VBO
 	normalIbo *mview.IBO
+	bones     []float32
+	boneVao   *mview.VAO
+	boneVbo   *mview.VBO
+	boneIbo   *mview.IBO
 }
 
 func NewMeshes(
@@ -29,9 +33,10 @@ func NewMeshes(
 	resourceFiles embed.FS,
 ) *Meshes {
 	// 頂点情報
-	normalVertices := make([]float32, 0, len(model.Vertices.Data)*2)
 	vertices := make([]float32, 0, len(model.Vertices.Data))
-	normalFaces := make([]uint32, 0, len(model.Faces.Data)*2)
+	normalVertices := make([]float32, 0, len(model.Vertices.Data)*2)
+	normalFaces := make([]uint32, 0, len(model.Vertices.Data)*2)
+
 	n := 0
 	for i := range len(model.Vertices.Data) {
 		vertices = append(vertices, model.Vertices.Get(i).GL()...)
@@ -101,6 +106,17 @@ func NewMeshes(
 		prevVerticesCount += m.VerticesCount
 	}
 
+	bones := make([]float32, 0, len(model.Bones.Data))
+	boneFaces := make([]uint32, 0, len(model.Bones.Data)*2)
+
+	for i := range len(model.Bones.Data) {
+		bone := model.Bones.Get(i)
+		bones = append(bones, bone.GL()...)
+
+		boneFaces = append(boneFaces, uint32(bone.Index))
+		boneFaces = append(boneFaces, uint32(bone.ParentIndex))
+	}
+
 	vao := mview.NewVAO()
 	vao.Bind()
 
@@ -119,6 +135,16 @@ func NewMeshes(
 	normalVbo.Unbind()
 	normalVao.Unbind()
 
+	boneVao := mview.NewVAO()
+	boneVao.Bind()
+	boneVbo := mview.NewVBOForVertex(gl.Ptr(bones), len(bones))
+	boneVbo.BindVertex(nil, nil)
+	boneIbo := mview.NewIBO(gl.Ptr(boneFaces), len(boneFaces))
+	boneIbo.Bind()
+	boneIbo.Unbind()
+	boneVbo.Unbind()
+	boneVao.Unbind()
+
 	return &Meshes{
 		meshes:    meshes,
 		vertices:  vertices,
@@ -128,6 +154,10 @@ func NewMeshes(
 		normalVao: normalVao,
 		normalVbo: normalVbo,
 		normalIbo: normalIbo,
+		bones:     bones,
+		boneVao:   boneVao,
+		boneVbo:   boneVbo,
+		boneIbo:   boneIbo,
 	}
 }
 
@@ -146,6 +176,7 @@ func (m *Meshes) Draw(
 	materialDeltas []*Material,
 	windowIndex int,
 	isDrawNormal bool,
+	isDrawBone bool,
 ) {
 	// 隠面消去
 	// https://learnopengl.com/Advanced-OpenGL/Depth-testing
@@ -184,6 +215,10 @@ func (m *Meshes) Draw(
 		m.drawNormal(shader, boneDeltas, windowIndex)
 	}
 
+	if isDrawBone {
+		m.drawBone(shader, boneDeltas, windowIndex)
+	}
+
 	shader.Msaa.Unbind()
 
 	gl.Disable(gl.BLEND)
@@ -219,6 +254,43 @@ func (m *Meshes) drawNormal(
 	m.normalIbo.Unbind()
 	m.normalVbo.Unbind()
 	m.normalVao.Unbind()
+
+	shader.Unuse()
+}
+
+func (m *Meshes) drawBone(
+	shader *mview.MShader,
+	boneDeltas []*mgl32.Mat4,
+	windowIndex int,
+) {
+	// ボーンをモデルメッシュの前面に描画するために深度テストを無効化
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.ALWAYS)
+
+	// ブレンディングを有効にする
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	shader.UseBoneProgram()
+
+	m.boneVao.Bind()
+	m.boneVbo.BindVertex(nil, nil)
+	m.boneIbo.Bind()
+
+	// ボーンデフォームテクスチャ設定
+	BindBoneMatrixes(boneDeltas, shader, shader.BoneProgram, windowIndex)
+
+	// ライン描画
+	gl.DrawElements(
+		gl.LINES,
+		int32(len(m.bones)),
+		gl.UNSIGNED_INT,
+		nil,
+	)
+
+	m.boneIbo.Unbind()
+	m.boneVbo.Unbind()
+	m.boneVao.Unbind()
 
 	shader.Unuse()
 }

@@ -26,9 +26,9 @@ func Draw(
 	windowIndex int,
 	fno int,
 	elapsed float32,
-	isBoneDebug bool,
 	enablePhysics bool,
 	isDrawNormal bool,
+	isDrawBone bool,
 ) {
 	boneDeltas := make([]*mgl32.Mat4, len(model.Bones.Data))
 	globalMatrixes := make([]*mmath.MMat4, len(model.Bones.Data))
@@ -52,15 +52,10 @@ func Draw(
 
 	updatePhysics(modelPhysics, model, boneDeltas, boneTransforms, deltas, fno, elapsed, enablePhysics)
 
-	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, materialDeltas, windowIndex, isDrawNormal)
+	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, materialDeltas, windowIndex, isDrawNormal, isDrawBone)
 
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()
-
-	// ボーンデバッグ表示
-	if isBoneDebug {
-		model.Bones.Draw(shader, globalMatrixes, windowIndex)
-	}
 }
 
 func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {

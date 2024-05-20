@@ -5,8 +5,123 @@ package pmx
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 )
+
+var bone_colors_ik = []float32{1.0, 0.38, 0, 1.0}
+var bone_colors_ik_normal = []float32{1.0, 0.58, 0.2, 0.7}
+var bone_colors_ik_target = []float32{1.0, 0.57, 0.61, 1.0}
+var bone_colors_ik_target_normal = []float32{1.0, 0.77, 0.81, 0.7}
+var bone_colors_ik_link = []float32{1.0, 0.83, 0.49, 1.0}
+var bone_colors_ik_link_normal = []float32{1.0, 1.0, 0.69, 0.7}
+var bone_colors_fixed = []float32{0.72, 0.32, 1.0, 1.0}
+var bone_colors_fixed_normal = []float32{0.92, 0.52, 1.0, 0.7}
+var bone_colors_effect = []float32{0.68, 0.64, 1.0, 1.0}
+var bone_colors_effect_normal = []float32{0.88, 0.84, 1.0, 0.7}
+var bone_colors_translate = []float32{0.70, 1.0, 0.54, 1.0}
+var bone_colors_translate_normal = []float32{0.90, 1.0, 0.74, 0.7}
+var bone_colors_invisible = []float32{0.82, 0.82, 0.82, 1.0}
+var bone_colors_invisible_normal = []float32{0.92, 0.92, 0.92, 0.7}
+var bone_colors_rotate = []float32{0.56, 0.78, 1.0, 1.0}
+var bone_colors_rotate_normal = []float32{0.76, 0.98, 1.00, 0.7}
+
+func (b *Bone) color(isNormal bool) []float32 {
+	// ボーンの種類で色を変える
+	if b.IsIK() {
+		// IKボーン
+		if isNormal {
+			return bone_colors_ik_normal
+		}
+		return bone_colors_ik
+	} else if len(b.IkTargetBoneIndexes) > 0 {
+		// IK先
+		if isNormal {
+			return bone_colors_ik_target_normal
+		}
+		return bone_colors_ik_target
+	} else if len(b.IkLinkBoneIndexes) > 0 {
+		// IKリンク
+		if isNormal {
+			return bone_colors_ik_link_normal
+		}
+		return bone_colors_ik_link
+	} else if b.HasFixedAxis() {
+		// 軸制限
+		if isNormal {
+			return bone_colors_fixed_normal
+		}
+		return bone_colors_fixed
+	} else if b.IsEffectorRotation() || b.IsEffectorTranslation() {
+		// 付与親
+		if isNormal {
+			return bone_colors_effect_normal
+		}
+		return bone_colors_effect
+	} else if b.CanTranslate() {
+		// 移動可能
+		if isNormal {
+			return bone_colors_translate_normal
+		}
+		return bone_colors_translate
+	} else if !b.IsVisible() {
+		// 非表示
+		if isNormal {
+			return bone_colors_invisible_normal
+		}
+		return bone_colors_invisible
+	}
+
+	// それ以外（回転）
+	if isNormal {
+		return bone_colors_rotate_normal
+	}
+	return bone_colors_rotate
+}
+
+func (b *Bone) GL() []float32 {
+	p := b.Position.GL()
+	c := b.color(false)
+	return []float32{
+		p[0], p[1], p[2], // 位置
+		0.0, 0.0, 0.0, // 法線
+		float32(0), float32(0), // UV
+		float32(0), float32(0), // 追加UV
+		float32(0),                // エッジ倍率
+		float32(b.Index), 0, 0, 0, // デフォームボーンINDEX
+		1, 0, 0, 0, // デフォームボーンウェイト
+		0,       // SDEFであるか否か
+		0, 0, 0, // SDEF-C
+		0, 0, 0, // SDEF-R0
+		0, 0, 0, // SDEF-R1
+		0.0, 0.0, 0.0, // 頂点モーフ
+		0.0, 0.0, 0.0, 0.0, // UVモーフ
+		c[0], c[1], c[2], c[3], // 追加UV1モーフ
+		0.0, 0.0, 0.0, // 変形後頂点モーフ
+	}
+}
+
+func (b *Bone) NormalGL() []float32 {
+	p := b.LocalMatrix.MulVec3(&mmath.MVec3{0, 0.6, 0}).GL()
+	c := b.color(true)
+	return []float32{
+		p[0], p[1], p[2], // 位置
+		0.0, 0.0, 0.0, // 法線
+		float32(0), float32(0), // UV
+		float32(0), float32(0), // 追加UV
+		float32(0),                // エッジ倍率
+		float32(b.Index), 0, 0, 0, // デフォームボーンINDEX
+		1, 0, 0, 0, // デフォームボーンウェイト
+		0,       // SDEFであるか否か
+		0, 0, 0, // SDEF-C
+		0, 0, 0, // SDEF-R0
+		0, 0, 0, // SDEF-R1
+		0.0, 0.0, 0.0, // 頂点モーフ
+		0.0, 0.0, 0.0, 0.0, // UVモーフ
+		c[0], c[1], c[2], c[3], // 追加UV1モーフ
+		0.0, 0.0, 0.0, // 変形後頂点モーフ
+	}
+}
 
 // ボーンリスト
 type Bones struct {

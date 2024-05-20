@@ -14,7 +14,6 @@ import (
 func (pm *PmxModel) InitDraw(windowIndex int, resourceFiles embed.FS) {
 	pm.ToonTextures.initGl(windowIndex, resourceFiles)
 	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
-	pm.Bones.prepareDraw()
 }
 
 func (pm *PmxModel) InitPhysics(physics *mphysics.MPhysics) {
