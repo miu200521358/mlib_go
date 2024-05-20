@@ -44,7 +44,7 @@ func NewMesh(
 	}
 }
 
-func (m *Mesh) DrawModel(
+func (m *Mesh) drawModel(
 	shader *mview.MShader,
 	windowIndex int,
 	boneDeltas []*mgl32.Mat4,
@@ -62,7 +62,7 @@ func (m *Mesh) DrawModel(
 	}
 
 	// ボーンデフォームテクスチャ設定
-	BindBoneMatrixes(boneDeltas, shader, shader.ModelProgram, windowIndex)
+	bindBoneMatrixes(boneDeltas, shader, shader.ModelProgram, windowIndex)
 
 	// ------------------
 	// 材質色設定
@@ -157,7 +157,7 @@ func (m *Mesh) DrawModel(
 	UnbindBoneMatrixes()
 }
 
-func (m *Mesh) DrawEdge(
+func (m *Mesh) drawEdge(
 	shader *mview.MShader,
 	windowIndex int,
 	boneDeltas []*mgl32.Mat4,
@@ -167,7 +167,7 @@ func (m *Mesh) DrawEdge(
 	gl.CullFace(gl.FRONT)
 
 	// ボーンデフォームテクスチャ設定
-	BindBoneMatrixes(boneDeltas, shader, shader.EdgeProgram, windowIndex)
+	bindBoneMatrixes(boneDeltas, shader, shader.EdgeProgram, windowIndex)
 
 	// ------------------
 	// エッジ色設定
@@ -197,7 +197,7 @@ func (m *Mesh) delete() {
 	}
 }
 
-func BindBoneMatrixes(
+func bindBoneMatrixes(
 	matrixes []*mgl32.Mat4,
 	shader *mview.MShader,
 	program uint32,

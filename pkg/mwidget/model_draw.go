@@ -6,6 +6,7 @@ package mwidget
 import (
 	"math"
 	"runtime"
+	"slices"
 	"sync"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -31,14 +32,12 @@ func draw(
 	isDrawBone bool,
 ) {
 	boneDeltas := make([]*mgl32.Mat4, len(model.Bones.Data))
-	globalMatrixes := make([]*mmath.MMat4, len(model.Bones.Data))
 	boneTransforms := make([]*mbt.BtTransform, len(model.Bones.Data))
 	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))
 	for i, bone := range model.Bones.Data {
 		delta := deltas.Bones.Get(bone.Name)
 		mat := delta.LocalMatrix.GL()
 		boneDeltas[i] = &mat
-		globalMatrixes[i] = delta.GlobalMatrix
 		t := mbt.NewBtTransform()
 		t.SetFromOpenGLMatrix(&mat[0])
 		boneTransforms[i] = &t
@@ -183,12 +182,18 @@ func updateBoneMatrixAfterPhysics(
 	matrix.Mul(bone.RevertOffsetMatrix)
 
 	// 自身の行列を再作成
-	parentBone := model.Bones.Get(bone.ParentIndex)
-	mat := matrix.Muled(deltas.Bones.Get(parentBone.Name).LocalMatrix).GL()
-	boneDeltas[bone.Index] = &mat
+	afterMat := mmath.NewMMat4()
+	for k := range len(model.Bones.LayerSortedBones) {
+		b := model.Bones.LayerSortedBones[k]
+		if slices.Contains(bone.ParentBoneIndexes, b.Index) {
+			afterMat = deltas.Bones.Get(b.Name).Matrix.Muled(afterMat)
+		}
+		if b.Index == bone.Index {
+			afterMat = matrix.Mul(afterMat)
+			break
+		}
+	}
 
-	// for _, childBoneIndex := range bone.ChildBoneIndexes {
-	// 	// 子ボーンがいる場合、子ボーンの行列を再計算
-	// 	updateBoneMatrixAfterPhysics(model, boneDeltas, deltas, fno, model.Bones.Get(childBoneIndex))
-	// }
+	lm := bone.OffsetMatrix.Muled(afterMat).GL()
+	boneDeltas[bone.Index] = &lm
 }

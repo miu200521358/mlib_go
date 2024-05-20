@@ -39,10 +39,11 @@ func NewMeshes(
 
 	n := 0
 	for i := range len(model.Vertices.Data) {
-		vertices = append(vertices, model.Vertices.Get(i).GL()...)
+		vertex := model.Vertices.Get(i)
+		vertices = append(vertices, vertex.GL()...)
 
-		normalVertices = append(normalVertices, model.Vertices.Get(i).GL()...)
-		normalVertices = append(normalVertices, model.Vertices.Get(i).NormalGL()...)
+		normalVertices = append(normalVertices, vertex.GL()...)
+		normalVertices = append(normalVertices, vertex.NormalGL()...)
 
 		normalFaces = append(normalFaces, uint32(n))
 		normalFaces = append(normalFaces, uint32(n+1))
@@ -106,15 +107,30 @@ func NewMeshes(
 		prevVerticesCount += m.VerticesCount
 	}
 
-	bones := make([]float32, 0, len(model.Bones.Data))
-	boneFaces := make([]uint32, 0, len(model.Bones.Data)*2)
+	bones := make([]float32, 0, len(model.Bones.Data)*4)
+	boneFaces := make([]uint32, 0, len(model.Bones.Data)*4)
 
+	n = 0
 	for i := range len(model.Bones.Data) {
 		bone := model.Bones.Get(i)
 		bones = append(bones, bone.GL()...)
+		bones = append(bones, bone.TailGL()...)
 
-		boneFaces = append(boneFaces, uint32(bone.Index))
-		boneFaces = append(boneFaces, uint32(bone.ParentIndex))
+		boneFaces = append(boneFaces, uint32(n))
+		boneFaces = append(boneFaces, uint32(n+1))
+
+		n += 2
+
+		if bone.ParentIndex >= 0 && model.Bones.Contains(bone.ParentIndex) &&
+			!model.Bones.Get(bone.ParentIndex).Position.IsZero() {
+			bones = append(bones, bone.GL()...)
+			bones = append(bones, bone.ParentGL()...)
+
+			boneFaces = append(boneFaces, uint32(n))
+			boneFaces = append(boneFaces, uint32(n+1))
+
+			n += 2
+		}
 	}
 
 	vao := mview.NewVAO()
@@ -195,13 +211,13 @@ func (m *Meshes) Draw(
 		mesh.ibo.Bind()
 
 		shader.Use(mview.PROGRAM_TYPE_MODEL)
-		mesh.DrawModel(shader, windowIndex, boneDeltas, materialDeltas[i])
+		mesh.drawModel(shader, windowIndex, boneDeltas, materialDeltas[i])
 		shader.Unuse()
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
 			shader.Use(mview.PROGRAM_TYPE_EDGE)
-			mesh.DrawEdge(shader, windowIndex, boneDeltas, materialDeltas[i])
+			mesh.drawEdge(shader, windowIndex, boneDeltas, materialDeltas[i])
 			shader.Unuse()
 		}
 
@@ -237,7 +253,7 @@ func (m *Meshes) drawNormal(
 	m.normalIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	BindBoneMatrixes(boneDeltas, shader, shader.NormalProgram, windowIndex)
+	bindBoneMatrixes(boneDeltas, shader, shader.NormalProgram, windowIndex)
 
 	normalColor := mgl32.Vec4{0.3, 0.3, 0.7, 0.5}
 	specularUniform := gl.GetUniformLocation(shader.NormalProgram, gl.Str(mview.SHADER_COLOR))
@@ -278,7 +294,7 @@ func (m *Meshes) drawBone(
 	m.boneIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	BindBoneMatrixes(boneDeltas, shader, shader.BoneProgram, windowIndex)
+	bindBoneMatrixes(boneDeltas, shader, shader.BoneProgram, windowIndex)
 
 	// ライン描画
 	gl.DrawElements(

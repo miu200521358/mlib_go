@@ -101,6 +101,50 @@ func (b *Bone) GL() []float32 {
 	}
 }
 
+func (b *Bone) ParentGL() []float32 {
+	p := b.Position.Subed(b.ParentRelativePosition).GL()
+	c := b.color(false)
+	return []float32{
+		p[0], p[1], p[2], // 位置
+		0.0, 0.0, 0.0, // 法線
+		float32(0), float32(0), // UV
+		float32(0), float32(0), // 追加UV
+		float32(0),                // エッジ倍率
+		float32(b.Index), 0, 0, 0, // デフォームボーンINDEX
+		1, 0, 0, 0, // デフォームボーンウェイト
+		0,       // SDEFであるか否か
+		0, 0, 0, // SDEF-C
+		0, 0, 0, // SDEF-R0
+		0, 0, 0, // SDEF-R1
+		0.0, 0.0, 0.0, // 頂点モーフ
+		0.0, 0.0, 0.0, 0.0, // UVモーフ
+		c[0], c[1], c[2], c[3], // 追加UV1モーフ
+		0.0, 0.0, 0.0, // 変形後頂点モーフ
+	}
+}
+
+func (b *Bone) TailGL() []float32 {
+	p := b.Position.Added(b.ChildRelativePosition).GL()
+	c := b.color(false)
+	return []float32{
+		p[0], p[1], p[2], // 位置
+		0.0, 0.0, 0.0, // 法線
+		float32(0), float32(0), // UV
+		float32(0), float32(0), // 追加UV
+		float32(0),                // エッジ倍率
+		float32(b.Index), 0, 0, 0, // デフォームボーンINDEX
+		1, 0, 0, 0, // デフォームボーンウェイト
+		0,       // SDEFであるか否か
+		0, 0, 0, // SDEF-C
+		0, 0, 0, // SDEF-R0
+		0, 0, 0, // SDEF-R1
+		0.0, 0.0, 0.0, // 頂点モーフ
+		0.0, 0.0, 0.0, 0.0, // UVモーフ
+		c[0], c[1], c[2], c[3], // 追加UV1モーフ
+		0.0, 0.0, 0.0, // 変形後頂点モーフ
+	}
+}
+
 func (b *Bone) NormalGL() []float32 {
 	p := b.LocalMatrix.MulVec3(&mmath.MVec3{0, 0.6, 0}).GL()
 	c := b.color(true)
