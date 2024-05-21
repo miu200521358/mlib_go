@@ -6,11 +6,9 @@ package mwidget
 import (
 	"math"
 	"runtime"
-	"slices"
 	"sync"
 
 	"github.com/go-gl/mathgl/mgl32"
-
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
@@ -19,37 +17,108 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
+func animateBone(
+	modelPhysics *mphysics.MPhysics,
+	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
+	frame int,
+	elapsed float32,
+	enablePhysics bool,
+) *vmd.BoneDeltas {
+	// 物理前のデフォーム情報
+	bfTargetBoneNames, bfTargetBones, bfPositions, bfRotations, bfScales, bfQuatsWithoutEffect :=
+		motion.BoneFrames.PrepareAnimate(frame, model, nil, true, true, true, false)
+
+	beforeBoneDeltas := motion.BoneFrames.CalcBoneMatrixes(
+		frame,
+		model,
+		bfTargetBoneNames, bfTargetBones, bfPositions, bfRotations, bfScales, bfQuatsWithoutEffect,
+		nil, nil, nil, nil, nil, nil,
+	)
+
+	// 物理更新
+	updatePhysics(modelPhysics, model, motion.BoneFrames, beforeBoneDeltas, frame, elapsed, enablePhysics)
+
+	// 物理後のデフォーム情報
+	afTargetBoneNames, afTargetBones, afPositions, afRotations, afScales, afQuatsWithoutEffect :=
+		motion.BoneFrames.PrepareAnimate(frame, model, nil, true, true, true, true)
+
+	// ボーン行列計算
+	return motion.BoneFrames.CalcBoneMatrixes(
+		frame,
+		model,
+		bfTargetBoneNames, bfTargetBones, bfPositions, bfRotations, bfScales, bfQuatsWithoutEffect,
+		afTargetBoneNames, afTargetBones, afPositions, afRotations, afScales, afQuatsWithoutEffect,
+	)
+}
+
+func animate(
+	modelPhysics *mphysics.MPhysics,
+	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
+	frame int,
+	elapsed float32,
+	enablePhysics bool,
+) *vmd.VmdDeltas {
+	vds := &vmd.VmdDeltas{}
+
+	vds.Morphs = motion.AnimateMorph(frame, model, nil)
+
+	for i, bd := range vds.Morphs.Bones.Data {
+		if bd == nil {
+			continue
+		}
+		bone := model.Bones.Get(i)
+		if !motion.BoneFrames.Contains(bone.Name) {
+			motion.BoneFrames.Append(vmd.NewBoneNameFrames(bone.Name))
+		}
+		bf := motion.BoneFrames.Get(bone.Name).Get(frame)
+
+		// 一旦モーフの値をクリア
+		bf.MorphPosition = nil
+		bf.MorphLocalPosition = nil
+		bf.MorphRotation = mmath.NewRotation()
+		bf.MorphLocalRotation = mmath.NewRotation()
+		bf.MorphScale = nil
+		bf.MorphLocalScale = nil
+
+		// 該当ボーンキーフレにモーフの値を加算
+		bf.Add(bd.BoneFrame)
+		motion.AppendBoneFrame(bone.Name, bf)
+	}
+
+	// モーフ付きで変形を計算
+	vds.Bones = animateBone(modelPhysics, model, motion, frame, elapsed, enablePhysics)
+
+	return vds
+}
+
 func draw(
 	modelPhysics *mphysics.MPhysics,
 	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
 	shader *mview.MShader,
-	deltas *vmd.VmdDeltas,
 	windowIndex int,
-	fno int,
+	frame int,
 	elapsed float32,
 	enablePhysics bool,
 	isDrawNormal bool,
 	isDrawBone bool,
 ) {
+	deltas := animate(modelPhysics, model, motion, frame, elapsed, enablePhysics)
+
 	boneDeltas := make([]*mgl32.Mat4, len(model.Bones.Data))
-	boneTransforms := make([]*mbt.BtTransform, len(model.Bones.Data))
-	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))
 	for i, bone := range model.Bones.Data {
-		delta := deltas.Bones.Get(bone.Name)
-		mat := delta.LocalMatrix.GL()
+		mat := deltas.Bones.Get(bone.Name).LocalMatrix.GL()
 		boneDeltas[i] = &mat
-		t := mbt.NewBtTransform()
-		t.SetFromOpenGLMatrix(&mat[0])
-		boneTransforms[i] = &t
 	}
 
+	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))
 	for i, md := range deltas.Morphs.Materials.Data {
 		materialDeltas[i] = md.Material
 	}
 
 	vertexDeltas := fetchVertexDeltas(model, deltas)
-
-	updatePhysics(modelPhysics, model, boneDeltas, boneTransforms, deltas, fno, elapsed, enablePhysics)
 
 	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, materialDeltas, windowIndex, isDrawNormal, isDrawBone)
 
@@ -110,15 +179,23 @@ func fetchVertexDeltasParallel(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]f
 func updatePhysics(
 	modelPhysics *mphysics.MPhysics,
 	model *pmx.PmxModel,
-	boneDeltas []*mgl32.Mat4,
-	boneTransforms []*mbt.BtTransform,
-	deltas *vmd.VmdDeltas,
-	fno int,
+	boneFrames *vmd.BoneFrames,
+	boneDeltas *vmd.BoneDeltas,
+	frame int,
 	elapsed float32,
 	enablePhysics bool,
 ) {
 	if modelPhysics == nil {
 		return
+	}
+
+	boneNames := boneDeltas.GetBoneNames()
+	boneTransforms := make([]*mbt.BtTransform, len(model.Bones.Data))
+	for _, boneName := range boneNames {
+		mat := boneDeltas.Get(boneName).GlobalMatrix.GL()
+		t := mbt.NewBtTransform()
+		t.SetFromOpenGLMatrix(&mat[0])
+		boneTransforms[model.Bones.GetByName(boneName).Index] = &t
 	}
 
 	for _, r := range model.RigidBodies.GetSortedData() {
@@ -127,73 +204,21 @@ func updatePhysics(
 		r.UpdateTransform(modelPhysics, boneTransforms, elapsed == 0.0 || !enablePhysics || forceUpdate)
 	}
 
-	if float32(fno) > modelPhysics.Spf {
+	if float32(frame) > modelPhysics.Spf {
 		modelPhysics.Update(elapsed)
 
 		// 剛体位置を更新
 		for _, rigidBody := range model.RigidBodies.GetSortedData() {
-			physicsBoneMatrix := rigidBody.UpdateMatrix(modelPhysics, boneDeltas, boneTransforms)
-			if len(model.Bones.AfterPhysicsBoneIndexes) > 0 && enablePhysics && physicsBoneMatrix != nil {
-				// 物理後ボーン用に行列を更新
-				bone := model.Bones.Get(rigidBody.BoneIndex)
-				delta := deltas.Bones.Get(bone.Name)
-				delta.LocalMatrix = mmath.NewMMat4ByMgl(physicsBoneMatrix)
-				delta.FramePosition = delta.LocalMatrix.Translation()
-				delta.FrameRotation = delta.LocalMatrix.Quaternion()
-			}
-		}
-
-		if len(model.Bones.AfterPhysicsBoneIndexes) > 0 && enablePhysics {
-			// 物理後ボーン位置更新の場合
-			for _, boneIndex := range model.Bones.AfterPhysicsBoneIndexes {
-				// 物理後ボーンで親が存在している場合、親の行列を取得する
-				updateBoneMatrixAfterPhysics(model, boneDeltas, deltas, model.Bones.Get(boneIndex))
+			bonePhysicsGlobalMatrix := rigidBody.UpdateMatrix(modelPhysics)
+			if bonePhysicsGlobalMatrix != nil && rigidBody.Bone != nil {
+				bf := boneFrames.Get(rigidBody.Bone.Name).Get(frame)
+				bf.PhysicsMatrix = bonePhysicsGlobalMatrix
+				// if rigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE {
+				// 	// 物理位置合わせの場合、位置は初期値を使う
+				// 	// TODO
+				// }
+				boneFrames.Get(rigidBody.Bone.Name).Append(bf)
 			}
 		}
 	}
-}
-
-func updateBoneMatrixAfterPhysics(
-	model *pmx.PmxModel,
-	boneDeltas []*mgl32.Mat4,
-	deltas *vmd.VmdDeltas,
-	bone *pmx.Bone,
-) {
-	delta := deltas.Bones.Get(bone.Name)
-
-	pos := delta.FramePosition
-	rot := delta.FrameRotationWithoutEffect
-	scl := delta.FrameScale
-
-	if bone.IsEffectorTranslation() && bone.EffectIndex >= 0 {
-		effectBone := model.Bones.Get(bone.EffectIndex)
-		pos.Add(deltas.Bones.Get(effectBone.Name).FramePosition)
-	}
-
-	if bone.IsEffectorRotation() && bone.EffectIndex >= 0 {
-		effectBone := model.Bones.Get(bone.EffectIndex)
-		rot = rot.Mul(deltas.Bones.Get(effectBone.Name).FrameRotation)
-	}
-
-	matrix := mmath.NewMMat4()
-	matrix.Scale(scl)
-	matrix.Rotate(rot)
-	matrix.Translate(pos)
-	matrix.Mul(bone.RevertOffsetMatrix)
-
-	// 自身の行列を再作成
-	afterMat := mmath.NewMMat4()
-	for k := range len(model.Bones.LayerSortedBones) {
-		b := model.Bones.LayerSortedBones[k]
-		if slices.Contains(bone.ParentBoneIndexes, b.Index) {
-			afterMat = deltas.Bones.Get(b.Name).Matrix.Muled(afterMat)
-		}
-		if b.Index == bone.Index {
-			afterMat = matrix.Mul(afterMat)
-			break
-		}
-	}
-
-	lm := bone.OffsetMatrix.Muled(afterMat).GL()
-	boneDeltas[bone.Index] = &lm
 }

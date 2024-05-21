@@ -40,8 +40,7 @@ func (ms *ModelSet) draw(
 	isDrawBone bool,
 ) {
 	fno := int(math.Round(float64(frame)))
-	deltas := ms.Motion.Animate(fno, ms.Model)
-	draw(modelPhysics, ms.Model, shader, deltas, windowIndex, fno, elapsed, enablePhysics, isDrawNormal, isDrawBone)
+	draw(modelPhysics, ms.Model, ms.Motion, shader, windowIndex, fno, elapsed, enablePhysics, isDrawNormal, isDrawBone)
 }
 
 // 直角の定数値
@@ -520,8 +519,8 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 		}
 
 		if w.playing {
-			// elapsed := float32(math.Ceil(elapsed * float64(w.Physics.Fps)))
-			// elapsed := float32(1.0)
+			// 経過秒数をキーフレームの進捗具合に合わせて調整
+			elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
 			w.frame += elapsed
 			if motionPlayer != nil {
 				motionPlayer.SetValue(float64(w.frame * w.Physics.Fps))
@@ -529,7 +528,7 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 		}
 
 		// 描画
-		w.draw(w.frame*w.Physics.Fps, elapsed)
+		w.draw(w.frame*30.0, elapsed)
 
 		// if w.frame*w.Physics.Fps >= float32(100) {
 		// 	break

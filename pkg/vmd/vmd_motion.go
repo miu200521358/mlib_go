@@ -4,7 +4,6 @@ import (
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
-	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
 
@@ -113,40 +112,6 @@ func (m *VmdMotion) InsertIkFrame(ikf *IkFrame) {
 	m.IkFrames.Insert(ikf)
 }
 
-func (m *VmdMotion) Animate(fno int, model *pmx.PmxModel) *VmdDeltas {
-	vds := &VmdDeltas{}
-
-	vds.Morphs = m.AnimateMorph(fno, model, nil)
-
-	for i, bd := range vds.Morphs.Bones.Data {
-		if bd == nil {
-			continue
-		}
-		bone := model.Bones.Get(i)
-		if !m.BoneFrames.Contains(bone.Name) {
-			m.BoneFrames.Append(NewBoneNameFrames(bone.Name))
-		}
-		bf := m.BoneFrames.Get(bone.Name).Get(fno)
-
-		// 一旦モーフの値をクリア
-		bf.MorphPosition = nil
-		bf.MorphLocalPosition = nil
-		bf.MorphRotation = mmath.NewRotation()
-		bf.MorphLocalRotation = mmath.NewRotation()
-		bf.MorphScale = nil
-		bf.MorphLocalScale = nil
-
-		// 該当ボーンキーフレにモーフの値を加算
-		bf.Add(bd.BoneFrame)
-		m.AppendBoneFrame(bone.Name, bf)
-	}
-
-	// モーフ付きで変形を計算
-	vds.Bones = m.animateBoneWithMorphs(fno, model, nil, true, true, true)
-
-	return vds
-}
-
 func (m *VmdMotion) AnimateMorph(
 	frame int,
 	model *pmx.PmxModel,
@@ -167,31 +132,30 @@ func (m *VmdMotion) AnimateMorph(
 	return m.MorphFrames.Animate(frame, model, morphNames)
 }
 
-// AnimateBone IK結果をクリアして計算する
-func (m *VmdMotion) AnimateBone(
-	frame int,
-	model *pmx.PmxModel,
-	boneNames []string,
-	isCalcIk bool,
-) *BoneDeltas {
-	return m.animateBoneWithMorphs(frame, model, boneNames, isCalcIk, true, false)
-}
-
-// AnimateBoneContinueIk IK結果をクリアせずに計算する
-func (m *VmdMotion) AnimateBoneContinueIk(
-	frame int,
-	model *pmx.PmxModel,
-	boneNames []string,
-	isCalcIk bool,
-) *BoneDeltas {
-	return m.animateBoneWithMorphs(frame, model, boneNames, isCalcIk, false, false)
-}
-
-func (m *VmdMotion) animateBoneWithMorphs(
+// AnimateBone 物理前ボーンのデフォーム計算する
+func (m *VmdMotion) Animate(
 	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk, isClearIk, isCalcMorph bool,
-) *BoneDeltas {
-	return m.BoneFrames.Animate(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph)
+) *VmdDeltas {
+	vds := &VmdDeltas{}
+
+	if isCalcMorph {
+		vds.Morphs = m.AnimateMorph(frame, model, nil)
+	}
+
+	bfTargetBoneNames, bfTargetBones, bfPositions, bfRotations, bfScales, bfQuatsWithoutEffect :=
+		m.BoneFrames.PrepareAnimate(frame, model, nil, isCalcIk, isClearIk, isCalcMorph, false)
+
+	vds.Bones = m.BoneFrames.CalcBoneMatrixes(
+		frame,
+		model,
+		bfTargetBoneNames, bfTargetBones, bfPositions, bfRotations, bfScales, bfQuatsWithoutEffect,
+		nil, nil, nil, nil, nil, nil,
+	)
+
+	// 物理後ボーンは計算しない
+
+	return vds
 }

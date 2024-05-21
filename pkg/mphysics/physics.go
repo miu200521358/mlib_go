@@ -9,14 +9,13 @@ import (
 )
 
 type MPhysics struct {
-	world                       mbt.BtDiscreteDynamicsWorld
-	MaxSubSteps                 int
-	Fps                         float32
-	Spf                         float32
-	joints                      []mbt.BtTypedConstraint
-	rigidBodies                 map[int]mbt.BtRigidBody
-	rigidBodyTransforms         map[int]mbt.BtTransform // 剛体の初期位置・回転情報
-	rigidBodyPositionTransforms map[int]mbt.BtTransform // 剛体の初期位置情報
+	world               mbt.BtDiscreteDynamicsWorld
+	MaxSubSteps         int
+	Fps                 float32
+	Spf                 float32
+	joints              []mbt.BtTypedConstraint
+	rigidBodies         map[int]mbt.BtRigidBody
+	rigidBodyTransforms map[int]mbt.BtTransform // 剛体の初期位置・回転情報
 }
 
 func NewMPhysics(shader *mview.MShader) *MPhysics {
@@ -47,12 +46,11 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 	// mlog.D("world.GetDebugDrawer()=%+v\n", world.GetDebugDrawer())
 
 	p := &MPhysics{
-		world:                       world,
-		MaxSubSteps:                 5,
-		Fps:                         30.0,
-		rigidBodies:                 make(map[int]mbt.BtRigidBody),
-		rigidBodyTransforms:         make(map[int]mbt.BtTransform),
-		rigidBodyPositionTransforms: make(map[int]mbt.BtTransform),
+		world:               world,
+		MaxSubSteps:         5,
+		Fps:                 60.0,
+		rigidBodies:         make(map[int]mbt.BtRigidBody),
+		rigidBodyTransforms: make(map[int]mbt.BtTransform),
 	}
 	p.Spf = 1.0 / p.Fps
 
@@ -113,16 +111,15 @@ func (p *MPhysics) DebugDrawWorld() {
 	// fmt.Print(buf.String())
 }
 
-func (p *MPhysics) GetRigidBody(index int) (mbt.BtRigidBody, mbt.BtTransform, mbt.BtTransform) {
-	return p.rigidBodies[index], p.rigidBodyTransforms[index], p.rigidBodyPositionTransforms[index]
+func (p *MPhysics) GetRigidBody(index int) (mbt.BtRigidBody, mbt.BtTransform) {
+	return p.rigidBodies[index], p.rigidBodyTransforms[index]
 }
 
 func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody, rigidBodyTransform mbt.BtTransform,
-	rigidBodyPositionTransform mbt.BtTransform, rigidBodyIndex int, group int, mask int) {
+	rigidBodyIndex int, group int, mask int) {
 	p.world.AddRigidBody(rigidBody, group, mask)
 	p.rigidBodies[rigidBodyIndex] = rigidBody
 	p.rigidBodyTransforms[rigidBodyIndex] = rigidBodyTransform
-	p.rigidBodyPositionTransforms[rigidBodyIndex] = rigidBodyPositionTransform
 }
 
 func (p *MPhysics) DeleteRigidBodies() {

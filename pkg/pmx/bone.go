@@ -109,7 +109,7 @@ type Bone struct {
 	LocalMinAngleLimit     *mmath.MRotation // 自分がIKリンクボーンのローカル軸角度制限の下限
 	LocalMaxAngleLimit     *mmath.MRotation // 自分がIKリンクボーンのローカル軸角度制限の上限
 	AxisSign               int              // ボーンの軸ベクトル(左は-1, 右は1)
-	RigidBodyIndex         int              // 物理演算用剛体INDEX
+	RigidBody              *RigidBody       // 物理演算用剛体
 }
 
 func NewBone() *Bone {
@@ -154,7 +154,7 @@ func NewBone() *Bone {
 		LocalMinAngleLimit:     mmath.NewRotation(),
 		LocalMaxAngleLimit:     mmath.NewRotation(),
 		AxisSign:               1,
-		RigidBodyIndex:         -1,
+		RigidBody:              nil,
 	}
 	bone.NormalizedLocalAxisX = bone.LocalAxisX.Copy()
 	bone.NormalizedLocalAxisZ = bone.LocalAxisZ.Copy()
@@ -373,7 +373,7 @@ func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 	if bone.IsTailBone() && bone.TailIndex >= 0 && slices.Contains(b.GetIndexes(), bone.TailIndex) {
 		toPosition = b.Get(bone.TailIndex).Position
 	} else if !bone.IsTailBone() && bone.TailPosition.Length() > 0 {
-		toPosition = bone.TailPosition.Add(bone.Position)
+		toPosition = bone.TailPosition.Added(bone.Position)
 	} else if bone.ParentIndex < 0 || !b.Contains(bone.ParentIndex) {
 		return mmath.NewMVec3()
 	} else {
@@ -405,27 +405,11 @@ func (b *Bones) GetInitializeLocalPosition(boneIndex int) *mmath.MVec3 {
 	return matrix.Translation()
 }
 
-func (b *Bones) GetLayerIndexes() []int {
+func (b *Bones) GetLayerIndexes(isAfterPhysics bool) []int {
 	layerIndexes := make(LayerIndexes, len(b.NameIndexes))
 	for i, boneIndex := range b.GetIndexes() {
 		bone := b.Get(boneIndex)
 		layerIndexes[i] = LayerIndex{Layer: bone.Layer, Index: boneIndex}
-	}
-	sort.Sort(layerIndexes)
-
-	indexes := make([]int, len(layerIndexes))
-	for i, layerIndex := range layerIndexes {
-		indexes[i] = layerIndex.Index
-	}
-
-	return indexes
-}
-
-func (b *Bones) GetLayerIndexesByValues(boneIndexes []int) []int {
-	layerIndexes := make(LayerIndexes, 0)
-	for _, boneIndex := range b.GetIndexes() {
-		bone := b.Get(boneIndex)
-		layerIndexes = append(layerIndexes, LayerIndex{Layer: bone.Layer, Index: boneIndex})
 	}
 	sort.Sort(layerIndexes)
 
@@ -504,7 +488,7 @@ func (b *Bones) getRelativeBoneIndexes(boneIndex int, parentBoneIndexes, relativ
 }
 
 // IKツリーの親INDEXを取得
-func (b *Bones) getIkTreeIndex(bone *Bone) *Bone {
+func (b *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool) *Bone {
 	if bone == nil || bone.ParentIndex < 0 || !b.Contains(bone.ParentIndex) {
 		return nil
 	}
@@ -514,10 +498,10 @@ func (b *Bones) getIkTreeIndex(bone *Bone) *Bone {
 		return nil
 	}
 
-	if _, ok := b.IkTreeIndexes[parentBone.Index]; ok {
+	if _, ok := b.IkTreeIndexes[isAfterPhysics][parentBone.Index]; ok {
 		return parentBone
 	} else {
-		parentLayerBone := b.getIkTreeIndex(parentBone)
+		parentLayerBone := b.getIkTreeIndex(parentBone, isAfterPhysics)
 		if parentLayerBone != nil {
 			return parentLayerBone
 		}
@@ -525,10 +509,10 @@ func (b *Bones) getIkTreeIndex(bone *Bone) *Bone {
 
 	if bone.IsEffectorRotation() || bone.IsEffectorTranslation() {
 		effectBone := b.Get(bone.EffectIndex)
-		if _, ok := b.IkTreeIndexes[effectBone.Index]; ok {
+		if _, ok := b.IkTreeIndexes[isAfterPhysics][effectBone.Index]; ok {
 			return effectBone
 		} else {
-			effectorLayerBone := b.getIkTreeIndex(effectBone)
+			effectorLayerBone := b.getIkTreeIndex(effectBone, isAfterPhysics)
 			if effectorLayerBone != nil {
 				return effectorLayerBone
 			}
@@ -605,19 +589,31 @@ func (b *Bones) setup() {
 	}
 
 	// 変形階層・ボーンINDEXでソート
-	b.LayerSortedBones = make(map[int]*Bone, len(b.Data))
-	b.LayerSortedNames = make(map[string]int, len(b.Data))
-	b.AfterPhysicsBoneIndexes = make([]int, 0)
-	layerIndexes := b.GetLayerIndexes()
+	b.LayerSortedBones = make(map[bool]map[int]*Bone)
+	b.LayerSortedNames = make(map[bool]map[string]int)
+
+	// 変形前と変形後に分けてINDEXリストを生成
+	b.createLayerIndexes(false)
+	b.createLayerIndexes(true)
+}
+
+func (b *Bones) createLayerIndexes(isAfterPhysics bool) []int {
+	if _, ok := b.LayerSortedBones[isAfterPhysics]; !ok {
+		b.LayerSortedBones[isAfterPhysics] = make(map[int]*Bone)
+	}
+	if _, ok := b.LayerSortedNames[isAfterPhysics]; !ok {
+		b.LayerSortedNames[isAfterPhysics] = make(map[string]int)
+	}
+	if _, ok := b.IkTreeIndexes[isAfterPhysics]; !ok {
+		b.IkTreeIndexes[isAfterPhysics] = make(map[int][]int)
+	}
+
+	layerIndexes := b.GetLayerIndexes(isAfterPhysics)
 
 	for i, boneIndex := range layerIndexes {
 		bone := b.Get(boneIndex)
-		b.LayerSortedNames[bone.Name] = i
-		b.LayerSortedBones[i] = bone
-		if bone.IsAfterPhysicsDeform() && bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
-			// 物理演算後に変形するボーンINDEXを登録
-			b.AfterPhysicsBoneIndexes = append(b.AfterPhysicsBoneIndexes, boneIndex)
-		}
+		b.LayerSortedNames[isAfterPhysics][bone.Name] = i
+		b.LayerSortedBones[isAfterPhysics][i] = bone
 	}
 
 	// 変形階層順に親子を繋げていく
@@ -625,20 +621,20 @@ ikLoop:
 	for _, boneIndex := range layerIndexes {
 		bone := b.Get(boneIndex)
 		if bone.IsIK() {
-			ikLayerBone := b.getIkTreeIndex(bone)
+			ikLayerBone := b.getIkTreeIndex(bone, isAfterPhysics)
 			if ikLayerBone != nil {
 				// 合致するIKツリーがある場合、そのレイヤーに登録
-				b.IkTreeIndexes[ikLayerBone.Index] =
-					append(b.IkTreeIndexes[ikLayerBone.Index], bone.Index)
+				b.IkTreeIndexes[isAfterPhysics][ikLayerBone.Index] =
+					append(b.IkTreeIndexes[isAfterPhysics][ikLayerBone.Index], bone.Index)
 				continue ikLoop
 			}
 			for _, link := range bone.Ik.Links {
 				linkBone := b.Get(link.BoneIndex)
-				linkLayerBone := b.getIkTreeIndex(linkBone)
+				linkLayerBone := b.getIkTreeIndex(linkBone, isAfterPhysics)
 				if linkLayerBone != nil {
 					// 合致するIKツリーがある場合、そのレイヤーに登録
-					b.IkTreeIndexes[linkLayerBone.Index] =
-						append(b.IkTreeIndexes[linkLayerBone.Index], bone.Index)
+					b.IkTreeIndexes[isAfterPhysics][linkLayerBone.Index] =
+						append(b.IkTreeIndexes[isAfterPhysics][linkLayerBone.Index], bone.Index)
 					continue ikLoop
 				}
 			}
@@ -648,12 +644,14 @@ ikLoop:
 			// b.IkTreeIndexes[linkBone.Index] = []int{bone.Index}
 			if linkBone.ParentIndex >= 0 && b.Contains(linkBone.ParentIndex) {
 				parentBone := b.Get(linkBone.ParentIndex)
-				b.IkTreeIndexes[parentBone.Index] = []int{bone.Index}
+				b.IkTreeIndexes[isAfterPhysics][parentBone.Index] = []int{bone.Index}
 			} else {
-				b.IkTreeIndexes[bone.Index] = []int{bone.Index}
+				b.IkTreeIndexes[isAfterPhysics][bone.Index] = []int{bone.Index}
 			}
 		}
 	}
+
+	return layerIndexes
 }
 
 // 変形階層とINDEXのソート用構造体

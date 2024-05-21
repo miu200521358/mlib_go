@@ -41,6 +41,6 @@ func main() {
 		if i%100 == 0 {
 			log.Printf("i: %d", i)
 		}
-		motion.AnimateBone(i, model, nil, true)
+		motion.Animate(i, model, nil, true, true, false)
 	}
 }

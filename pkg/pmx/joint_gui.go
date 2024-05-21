@@ -12,8 +12,8 @@ func (j *Joint) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBo
 	// ジョイントの位置と向き
 	jointTransform := mbt.NewBtTransform(j.Rotation.GetQuaternion().Bullet(), j.Position.Bullet())
 
-	btRigidBodyA, _, _ := modelPhysics.GetRigidBody(rigidBodyA.Index)
-	btRigidBodyB, _, _ := modelPhysics.GetRigidBody(rigidBodyB.Index)
+	btRigidBodyA, _ := modelPhysics.GetRigidBody(rigidBodyA.Index)
+	btRigidBodyB, _ := modelPhysics.GetRigidBody(rigidBodyB.Index)
 
 	// 剛体Aの現在の位置と向きを取得
 	worldTransformA := btRigidBodyA.GetWorldTransform().(mbt.BtTransform)

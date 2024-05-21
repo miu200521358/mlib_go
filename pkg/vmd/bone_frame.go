@@ -18,9 +18,9 @@ type BoneFrame struct {
 	MorphScale         *mmath.MVec3     // モーフスケール
 	LocalScale         *mmath.MVec3     // ローカルスケール
 	MorphLocalScale    *mmath.MVec3     // モーフローカルスケール
+	PhysicsMatrix      *mmath.MMat4     // 物理結果行列
 	IkRotation         *mmath.MRotation // IK回転
 	Curves             BoneCurves       // 補間曲線
-	IkRegistered       bool             // IK計算済み
 }
 
 func NewBoneFrame(index int) *BoneFrame {
@@ -38,6 +38,7 @@ func NewBoneFrame(index int) *BoneFrame {
 		MorphScale:         mmath.NewMVec3(),
 		LocalScale:         mmath.NewMVec3(),
 		MorphLocalScale:    mmath.NewMVec3(),
+		PhysicsMatrix:      nil,
 		IkRotation:         nil,
 		Curves:             NewBoneCurves(),
 	}

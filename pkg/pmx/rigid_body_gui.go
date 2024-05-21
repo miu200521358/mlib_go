@@ -5,12 +5,13 @@ package pmx
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 )
 
 func (r *RigidBody) UpdateFlags(modelPhysics *mphysics.MPhysics, enablePhysics bool) bool {
-	btRigidBody, _, _ := modelPhysics.GetRigidBody(r.Index)
+	btRigidBody, _ := modelPhysics.GetRigidBody(r.Index)
 
 	if r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
 		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時
@@ -114,10 +115,17 @@ func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 	// 剛体の初期位置と回転
 	btRigidBodyTransform := mbt.NewBtTransform(r.Rotation.GetQuaternion().Bullet(), r.Position.Bullet())
 
-	// 剛体の初期位置
-	btRigidBodyPositionTransform := mbt.NewBtTransform()
-	btRigidBodyPositionTransform.SetIdentity()
-	btRigidBodyPositionTransform.SetOrigin(r.Position.Bullet())
+	// ボーンから見た剛体の初期位置
+	var bPos *mmath.MVec3
+	if r.Bone != nil {
+		bPos = r.Bone.Position
+	} else if r.JointedBone != nil {
+		bPos = r.JointedBone.Position
+	} else {
+		bPos = mmath.NewMVec3()
+	}
+	rbLocalPos := r.Position.Subed(bPos)
+	btRigidBodyLocalTransform := mbt.NewBtTransform(r.Rotation.GetQuaternion().Bullet(), rbLocalPos.Bullet())
 
 	// {
 	// 	mlog.V("---------------------------------")
@@ -142,8 +150,8 @@ func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 
 	// modelPhysics.AddNonFilterProxy(btRigidBody.GetBroadphaseProxy())
 	// 剛体・剛体グループ・非衝突グループを追加
-	modelPhysics.AddRigidBody(btRigidBody, btRigidBodyTransform, btRigidBodyPositionTransform,
-		r.Index, 1<<r.CollisionGroup, r.CollisionGroupMaskValue)
+	modelPhysics.AddRigidBody(btRigidBody, btRigidBodyLocalTransform, r.Index,
+		1<<r.CollisionGroup, r.CollisionGroupMaskValue)
 
 	r.UpdateFlags(modelPhysics, true)
 }
@@ -153,7 +161,7 @@ func (r *RigidBody) UpdateTransform(
 	boneTransforms []*mbt.BtTransform,
 	isForce bool,
 ) {
-	btRigidBody, btRigidBodyTransform, _ := modelPhysics.GetRigidBody(r.Index)
+	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(r.Index)
 
 	if btRigidBody == nil || btRigidBody.GetMotionState() == nil ||
 		(r.CorrectPhysicsType == PHYSICS_TYPE_DYNAMIC && !isForce) {
@@ -165,11 +173,16 @@ func (r *RigidBody) UpdateTransform(
 	// }
 
 	// 剛体のグローバル位置を確定
-	rigidBodyTransform := mbt.NewBtTransform()
-	if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
-		rigidBodyTransform.Mult(*boneTransforms[r.BoneIndex], btRigidBodyTransform)
-	} else if r.JointedBoneIndex >= 0 && r.JointedBoneIndex < len(boneTransforms) {
-		rigidBodyTransform.Mult(*boneTransforms[r.JointedBoneIndex], btRigidBodyTransform)
+	motionState := btRigidBody.GetMotionState().(mbt.BtMotionState)
+	if r.Bone != nil && r.Bone.Index < len(boneTransforms) && boneTransforms[r.Bone.Index] != nil {
+		t := mbt.NewBtTransform()
+		t.Mult(*boneTransforms[r.Bone.Index], btRigidBodyLocalTransform)
+		motionState.SetWorldTransform(t)
+	} else if r.JointedBone != nil && r.JointedBone.Index < len(boneTransforms) &&
+		boneTransforms[r.JointedBone.Index] != nil {
+		t := mbt.NewBtTransform()
+		t.Mult(*boneTransforms[r.JointedBone.Index], btRigidBodyLocalTransform)
+		motionState.SetWorldTransform(t)
 	}
 
 	// if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
@@ -183,16 +196,12 @@ func (r *RigidBody) UpdateTransform(
 	// 	mlog.V("2. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
 	// }
 
-	motionState := btRigidBody.GetMotionState().(mbt.BtMotionState)
-	motionState.SetWorldTransform(rigidBodyTransform)
 }
 
 func (r *RigidBody) UpdateMatrix(
 	modelPhysics *mphysics.MPhysics,
-	boneDeltas []*mgl32.Mat4,
-	boneTransforms []*mbt.BtTransform,
-) *mgl32.Mat4 {
-	btRigidBody, btRigidBodyTransform, _ := modelPhysics.GetRigidBody(r.Index)
+) *mmath.MMat4 {
+	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(r.Index)
 
 	if btRigidBody == nil || btRigidBody.GetMotionState() == nil || r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
 		return nil
@@ -211,8 +220,8 @@ func (r *RigidBody) UpdateMatrix(
 
 	motionState := btRigidBody.GetMotionState().(mbt.BtMotionState)
 
-	rigidBodyTransform := mbt.NewBtTransform()
-	motionState.GetWorldTransform(rigidBodyTransform)
+	rigidBodyGlobalTransform := mbt.NewBtTransform()
+	motionState.GetWorldTransform(rigidBodyGlobalTransform)
 
 	// if r.CorrectPhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
 	// 	{
@@ -242,11 +251,12 @@ func (r *RigidBody) UpdateMatrix(
 	// 	}
 	// }
 
-	boneLocalTransform := mbt.NewBtTransform()
-	boneLocalTransform.Mult(rigidBodyTransform, btRigidBodyTransform.Inverse())
+	// ボーンのグローバル位置を剛体の現在グローバル行列に初期位置ローカル行列を掛けて求める
+	boneGlobalTransform := mbt.NewBtTransform()
+	boneGlobalTransform.Mult(rigidBodyGlobalTransform, btRigidBodyLocalTransform.Inverse())
 
-	physicsBoneMatrix := mgl32.Mat4{}
-	boneLocalTransform.GetOpenGLMatrix(&physicsBoneMatrix[0])
+	boneGlobalMatrixGL := mgl32.Mat4{}
+	boneGlobalTransform.GetOpenGLMatrix(&boneGlobalMatrixGL[0])
 
 	// if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
 	// 	mat := mgl32.Mat4{}
@@ -262,13 +272,7 @@ func (r *RigidBody) UpdateMatrix(
 	// 	mlog.V("3. [%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
 	// }
 
-	if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
-		boneDeltas[r.BoneIndex] = &physicsBoneMatrix
-	} else if r.JointedBoneIndex >= 0 && r.JointedBoneIndex < len(boneTransforms) {
-		boneDeltas[r.JointedBoneIndex] = &physicsBoneMatrix
-	}
-
-	return &physicsBoneMatrix
+	return mmath.NewMMat4ByMgl(&boneGlobalMatrixGL)
 }
 
 func (r *RigidBodies) initPhysics(physics *mphysics.MPhysics) {

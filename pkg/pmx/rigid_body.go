@@ -109,7 +109,8 @@ type RigidBody struct {
 	ZDirection              *mmath.MVec3     // Z軸方向
 	IsSystem                bool             // システムで追加した剛体か
 	Matrix                  *mmath.MMat4     // 剛体の行列
-	JointedBoneIndex        int              // ジョイントで繋がってるボーンIndex
+	Bone                    *Bone            // 繋がっているボーン
+	JointedBone             *Bone            // ジョイントで繋がってるボーン
 }
 
 // NewRigidBody creates a new rigid body.
@@ -131,7 +132,8 @@ func NewRigidBody() *RigidBody {
 		ZDirection:              mmath.NewMVec3(),
 		IsSystem:                false,
 		Matrix:                  mmath.NewMMat4(),
-		JointedBoneIndex:        -1,
+		Bone:                    nil,
+		JointedBone:             nil,
 	}
 }
 

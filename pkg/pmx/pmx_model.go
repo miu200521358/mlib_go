@@ -74,19 +74,24 @@ func (pm *PmxModel) setUp() {
 	// 剛体
 	for _, rb := range pm.RigidBodies.GetSortedData() {
 		if rb.BoneIndex >= 0 && pm.Bones.Contains(rb.BoneIndex) {
-			// 剛体に関連付けられたボーンが存在する場合、剛体にボーンを関連付ける
-			pm.Bones.Get(rb.BoneIndex).RigidBodyIndex = rb.Index
+			// 剛体に関連付けられたボーンが存在する場合、剛体とボーンを関連付ける
+			pm.Bones.Get(rb.BoneIndex).RigidBody = rb
+			rb.Bone = pm.Bones.Get(rb.BoneIndex)
 		}
 	}
 	// ジョイント
 	for _, joint := range pm.Joints.GetSortedData() {
 		if joint.RigidbodyIndexA >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexA) &&
-			joint.RigidbodyIndexB >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexB) {
+			joint.RigidbodyIndexB >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexB) &&
+			pm.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex >= 0 &&
+			pm.Bones.Contains(pm.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex) &&
+			pm.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex >= 0 &&
+			pm.Bones.Contains(pm.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex) {
 			// 剛体AもBも存在する場合、剛体Aと剛体Bを関連付ける
-			pm.RigidBodies.Get(joint.RigidbodyIndexA).JointedBoneIndex =
-				pm.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex
-			pm.RigidBodies.Get(joint.RigidbodyIndexB).JointedBoneIndex =
-				pm.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex
+			pm.RigidBodies.Get(joint.RigidbodyIndexA).JointedBone =
+				pm.Bones.Get(pm.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex)
+			pm.RigidBodies.Get(joint.RigidbodyIndexB).JointedBone =
+				pm.Bones.Get(pm.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex)
 		}
 	}
 }
