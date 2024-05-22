@@ -22,17 +22,6 @@ var (
 	// UnitXYZ holds a vector with X, Y, Z set to one.
 	MVec3UnitXYZ = &MVec3{1, 1, 1}
 
-	// Red holds the color red.
-	MVec3Red = &MVec3{1, 0, 0}
-	// Green holds the color green.
-	MVec3Green = &MVec3{0, 1, 0}
-	// Blue holds the color black.
-	MVec3Blue = &MVec3{0, 0, 1}
-	// Black holds the color black.
-	MVec3Black = &MVec3{0, 0, 0}
-	// White holds the color white.
-	MVec3White = &MVec3{1, 1, 1}
-
 	// MinVal holds a vector with the smallest possible component values.
 	MVec3MinVal = &MVec3{-math.MaxFloat64, -math.MaxFloat64, -math.MaxFloat64}
 	// MaxVal holds a vector with the highest possible component values.
@@ -270,7 +259,12 @@ func (v *MVec3) Hash() uint64 {
 
 // IsZero ベクトルがゼロベクトルかどうかをチェックします
 func (v *MVec3) IsZero() bool {
-	return v[0] == 0 && v[1] == 0 && v[2] == 0
+	return v.PracticallyEquals(MVec3Zero, 1e-10)
+}
+
+// IsZero ベクトルが1ベクトルかどうかをチェックします
+func (v *MVec3) IsOne() bool {
+	return v.PracticallyEquals(MVec3UnitXYZ, 1e-10)
 }
 
 // Length ベクトルの長さを返します

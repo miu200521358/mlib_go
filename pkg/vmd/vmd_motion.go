@@ -145,17 +145,11 @@ func (m *VmdMotion) Animate(
 		vds.Morphs = m.AnimateMorph(frame, model, nil)
 	}
 
-	bfTargetBoneNames, bfTargetBones, bfPositions, bfRotations, bfScales, bfQuatsWithoutEffect :=
-		m.BoneFrames.PrepareAnimate(frame, model, nil, isCalcIk, isClearIk, isCalcMorph, false)
+	// 物理前のデフォーム情報
+	beforeBoneDeltas := m.BoneFrames.Animate(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph, nil)
 
-	vds.Bones = m.BoneFrames.CalcBoneMatrixes(
-		frame,
-		model,
-		bfTargetBoneNames, bfTargetBones, bfPositions, bfRotations, bfScales, bfQuatsWithoutEffect,
-		nil, nil, nil, nil, nil, nil,
-	)
-
-	// 物理後ボーンは計算しない
+	// 物理後のデフォーム情報
+	vds.Bones = m.BoneFrames.Animate(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph, beforeBoneDeltas)
 
 	return vds
 }

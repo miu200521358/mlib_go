@@ -17,42 +17,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
-func animateBone(
-	modelPhysics *mphysics.MPhysics,
-	model *pmx.PmxModel,
-	motion *vmd.VmdMotion,
-	frame int,
-	elapsed float32,
-	enablePhysics bool,
-) *vmd.BoneDeltas {
-	// 物理前のデフォーム情報
-	bfTargetBoneNames, bfTargetBones, bfPositions, bfRotations, bfScales, bfQuatsWithoutEffect :=
-		motion.BoneFrames.PrepareAnimate(frame, model, nil, true, true, true, false)
-
-	beforeBoneDeltas := motion.BoneFrames.CalcBoneMatrixes(
-		frame,
-		model,
-		bfTargetBoneNames, bfTargetBones, bfPositions, bfRotations, bfScales, bfQuatsWithoutEffect,
-		nil, nil, nil, nil, nil, nil,
-	)
-
-	// 物理更新
-	updatePhysics(modelPhysics, model, motion.BoneFrames, beforeBoneDeltas, frame, elapsed, enablePhysics)
-
-	// 物理後のデフォーム情報
-	afTargetBoneNames, afTargetBones, afPositions, afRotations, afScales, afQuatsWithoutEffect :=
-		motion.BoneFrames.PrepareAnimate(frame, model, nil, true, true, true, true)
-
-	// ボーン行列計算
-	return motion.BoneFrames.CalcBoneMatrixes(
-		frame,
-		model,
-		bfTargetBoneNames, bfTargetBones, bfPositions, bfRotations, bfScales, bfQuatsWithoutEffect,
-		afTargetBoneNames, afTargetBones, afPositions, afRotations, afScales, afQuatsWithoutEffect,
-	)
-}
-
-func animate(
+func deform(
 	modelPhysics *mphysics.MPhysics,
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
@@ -87,8 +52,14 @@ func animate(
 		motion.AppendBoneFrame(bone.Name, bf)
 	}
 
-	// モーフ付きで変形を計算
-	vds.Bones = animateBone(modelPhysics, model, motion, frame, elapsed, enablePhysics)
+	// 物理前のデフォーム情報
+	beforeBoneDeltas := motion.BoneFrames.Animate(frame, model, nil, true, true, true, nil)
+
+	// 物理更新
+	updatePhysics(modelPhysics, model, motion.BoneFrames, beforeBoneDeltas, frame, elapsed, enablePhysics)
+
+	// 物理後のデフォーム情報
+	vds.Bones = motion.BoneFrames.Animate(frame, model, nil, true, true, true, beforeBoneDeltas)
 
 	return vds
 }
@@ -105,11 +76,11 @@ func draw(
 	isDrawNormal bool,
 	isDrawBone bool,
 ) {
-	deltas := animate(modelPhysics, model, motion, frame, elapsed, enablePhysics)
+	deltas := deform(modelPhysics, model, motion, frame, elapsed, enablePhysics)
 
 	boneDeltas := make([]*mgl32.Mat4, len(model.Bones.Data))
 	for i, bone := range model.Bones.Data {
-		mat := deltas.Bones.Get(bone.Name).LocalMatrix.GL()
+		mat := deltas.Bones.Get(bone.Index).LocalMatrix().GL()
 		boneDeltas[i] = &mat
 	}
 
@@ -189,13 +160,12 @@ func updatePhysics(
 		return
 	}
 
-	boneNames := boneDeltas.GetBoneNames()
 	boneTransforms := make([]*mbt.BtTransform, len(model.Bones.Data))
-	for _, boneName := range boneNames {
-		mat := boneDeltas.Get(boneName).GlobalMatrix.GL()
+	for _, delta := range boneDeltas.Data {
+		mat := delta.GlobalMatrix().GL()
 		t := mbt.NewBtTransform()
 		t.SetFromOpenGLMatrix(&mat[0])
-		boneTransforms[model.Bones.GetByName(boneName).Index] = &t
+		boneTransforms[delta.Bone.Index] = &t
 	}
 
 	for _, r := range model.RigidBodies.GetSortedData() {

@@ -406,10 +406,12 @@ func (b *Bones) GetInitializeLocalPosition(boneIndex int) *mmath.MVec3 {
 }
 
 func (b *Bones) GetLayerIndexes(isAfterPhysics bool) []int {
-	layerIndexes := make(LayerIndexes, len(b.NameIndexes))
-	for i, boneIndex := range b.GetIndexes() {
-		bone := b.Get(boneIndex)
-		layerIndexes[i] = LayerIndex{Layer: bone.Layer, Index: boneIndex}
+	layerIndexes := make(LayerIndexes, 0, len(b.NameIndexes))
+	for _, bone := range b.Data {
+		if (isAfterPhysics && bone.IsAfterPhysicsDeform()) || (!isAfterPhysics && !bone.IsAfterPhysicsDeform()) {
+			// 物理前後でフィルタリング
+			layerIndexes = append(layerIndexes, LayerIndex{Layer: bone.Layer, Index: bone.Index})
+		}
 	}
 	sort.Sort(layerIndexes)
 
@@ -498,7 +500,7 @@ func (b *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool) *Bone {
 		return nil
 	}
 
-	if _, ok := b.IkTreeIndexes[isAfterPhysics][parentBone.Index]; ok {
+	if _, ok := b.IkTreeIndexes[parentBone.Index]; ok {
 		return parentBone
 	} else {
 		parentLayerBone := b.getIkTreeIndex(parentBone, isAfterPhysics)
@@ -509,7 +511,7 @@ func (b *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool) *Bone {
 
 	if bone.IsEffectorRotation() || bone.IsEffectorTranslation() {
 		effectBone := b.Get(bone.EffectIndex)
-		if _, ok := b.IkTreeIndexes[isAfterPhysics][effectBone.Index]; ok {
+		if _, ok := b.IkTreeIndexes[effectBone.Index]; ok {
 			return effectBone
 		} else {
 			effectorLayerBone := b.getIkTreeIndex(effectBone, isAfterPhysics)
@@ -595,17 +597,51 @@ func (b *Bones) setup() {
 	// 変形前と変形後に分けてINDEXリストを生成
 	b.createLayerIndexes(false)
 	b.createLayerIndexes(true)
+
+	// 変形階層順に親子を繋げていく
+	for _, isAfterPhysics := range []bool{false, true} {
+	ikLoop:
+		for i := range len(b.LayerSortedBones[isAfterPhysics]) {
+			bone := b.LayerSortedBones[isAfterPhysics][i]
+			if bone.IsIK() {
+				ikLayerBone := b.getIkTreeIndex(bone, isAfterPhysics)
+				if ikLayerBone != nil {
+					// 合致するIKツリーがある場合、そのレイヤーに登録
+					b.IkTreeIndexes[ikLayerBone.Index] =
+						append(b.IkTreeIndexes[ikLayerBone.Index], bone.Index)
+					continue ikLoop
+				}
+				for _, link := range bone.Ik.Links {
+					linkBone := b.Get(link.BoneIndex)
+					linkLayerBone := b.getIkTreeIndex(linkBone, isAfterPhysics)
+					if linkLayerBone != nil {
+						// 合致するIKツリーがある場合、そのレイヤーに登録
+						b.IkTreeIndexes[linkLayerBone.Index] =
+							append(b.IkTreeIndexes[linkLayerBone.Index], bone.Index)
+						continue ikLoop
+					}
+				}
+
+				// 関連親がIKツリーに登録されていない場合、新規にIKツリーを作成
+				linkBone := b.Get(bone.Ik.Links[len(bone.Ik.Links)-1].BoneIndex)
+				// b.IkTreeIndexes[linkBone.Index] = []int{bone.Index}
+				if linkBone.ParentIndex >= 0 && b.Contains(linkBone.ParentIndex) {
+					parentBone := b.Get(linkBone.ParentIndex)
+					b.IkTreeIndexes[parentBone.Index] = []int{bone.Index}
+				} else {
+					b.IkTreeIndexes[bone.Index] = []int{bone.Index}
+				}
+			}
+		}
+	}
 }
 
-func (b *Bones) createLayerIndexes(isAfterPhysics bool) []int {
+func (b *Bones) createLayerIndexes(isAfterPhysics bool) {
 	if _, ok := b.LayerSortedBones[isAfterPhysics]; !ok {
 		b.LayerSortedBones[isAfterPhysics] = make(map[int]*Bone)
 	}
 	if _, ok := b.LayerSortedNames[isAfterPhysics]; !ok {
 		b.LayerSortedNames[isAfterPhysics] = make(map[string]int)
-	}
-	if _, ok := b.IkTreeIndexes[isAfterPhysics]; !ok {
-		b.IkTreeIndexes[isAfterPhysics] = make(map[int][]int)
 	}
 
 	layerIndexes := b.GetLayerIndexes(isAfterPhysics)
@@ -616,42 +652,6 @@ func (b *Bones) createLayerIndexes(isAfterPhysics bool) []int {
 		b.LayerSortedBones[isAfterPhysics][i] = bone
 	}
 
-	// 変形階層順に親子を繋げていく
-ikLoop:
-	for _, boneIndex := range layerIndexes {
-		bone := b.Get(boneIndex)
-		if bone.IsIK() {
-			ikLayerBone := b.getIkTreeIndex(bone, isAfterPhysics)
-			if ikLayerBone != nil {
-				// 合致するIKツリーがある場合、そのレイヤーに登録
-				b.IkTreeIndexes[isAfterPhysics][ikLayerBone.Index] =
-					append(b.IkTreeIndexes[isAfterPhysics][ikLayerBone.Index], bone.Index)
-				continue ikLoop
-			}
-			for _, link := range bone.Ik.Links {
-				linkBone := b.Get(link.BoneIndex)
-				linkLayerBone := b.getIkTreeIndex(linkBone, isAfterPhysics)
-				if linkLayerBone != nil {
-					// 合致するIKツリーがある場合、そのレイヤーに登録
-					b.IkTreeIndexes[isAfterPhysics][linkLayerBone.Index] =
-						append(b.IkTreeIndexes[isAfterPhysics][linkLayerBone.Index], bone.Index)
-					continue ikLoop
-				}
-			}
-
-			// 関連親がIKツリーに登録されていない場合、新規にIKツリーを作成
-			linkBone := b.Get(bone.Ik.Links[len(bone.Ik.Links)-1].BoneIndex)
-			// b.IkTreeIndexes[linkBone.Index] = []int{bone.Index}
-			if linkBone.ParentIndex >= 0 && b.Contains(linkBone.ParentIndex) {
-				parentBone := b.Get(linkBone.ParentIndex)
-				b.IkTreeIndexes[isAfterPhysics][parentBone.Index] = []int{bone.Index}
-			} else {
-				b.IkTreeIndexes[isAfterPhysics][bone.Index] = []int{bone.Index}
-			}
-		}
-	}
-
-	return layerIndexes
 }
 
 // 変形階層とINDEXのソート用構造体

@@ -170,7 +170,7 @@ func (b *Bone) NormalGL() []float32 {
 // ボーンリスト
 type Bones struct {
 	*mcore.IndexNameModels[*Bone]
-	IkTreeIndexes    map[bool]map[int][]int
+	IkTreeIndexes    map[int][]int
 	LayerSortedBones map[bool]map[int]*Bone
 	LayerSortedNames map[bool]map[string]int
 	positionVao      *mview.VAO
@@ -184,7 +184,7 @@ type Bones struct {
 func NewBones() *Bones {
 	return &Bones{
 		IndexNameModels:  mcore.NewIndexNameModels[*Bone](),
-		IkTreeIndexes:    make(map[bool]map[int][]int),
+		IkTreeIndexes:    make(map[int][]int),
 		LayerSortedBones: make(map[bool]map[int]*Bone),
 		LayerSortedNames: make(map[bool]map[string]int),
 		positionVao:      nil,

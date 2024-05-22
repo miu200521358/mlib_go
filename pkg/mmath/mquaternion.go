@@ -592,6 +592,10 @@ func (quat *MQuaternion) ToFixedAxisRotation(fixedAxis *MVec3) *MQuaternion {
 	return result
 }
 
+func (quat *MQuaternion) IsIdent() bool {
+	return quat.PracticallyEquals(&MQuaternionIdent, 1e-6)
+}
+
 // PracticallyEqualsは2つのクォータニオンがほぼ等しいかどうかを判定します。
 func (quat *MQuaternion) PracticallyEquals(other *MQuaternion, epsilon float64) bool {
 	return mgl64.Quat(*quat).ApproxEqualThreshold(mgl64.Quat(*other), epsilon)

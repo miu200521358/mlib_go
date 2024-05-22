@@ -11,6 +11,7 @@ import (
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
 
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
@@ -113,18 +114,28 @@ func writeBoneFrame(fout *os.File, name string, bf *BoneFrame) error {
 		return err
 	}
 
-	posMMD := bf.Position.MMD()
+	var posMMD *mmath.MVec3
+	if bf.Position != nil {
+		posMMD = bf.Position.MMD()
+	} else {
+		posMMD = mmath.MVec3Zero
+	}
 	binary.Write(fout, binary.LittleEndian, encodedName)
 	binary.Write(fout, binary.LittleEndian, uint32(bf.Index))
 	binary.Write(fout, binary.LittleEndian, float32(posMMD.GetX()))
 	binary.Write(fout, binary.LittleEndian, float32(posMMD.GetY()))
 	binary.Write(fout, binary.LittleEndian, float32(posMMD.GetZ()))
 
-	v := bf.Rotation.GetQuaternion().MMD().Normalized()
-	binary.Write(fout, binary.LittleEndian, float32(v.GetX()))
-	binary.Write(fout, binary.LittleEndian, float32(v.GetY()))
-	binary.Write(fout, binary.LittleEndian, float32(v.GetZ()))
-	binary.Write(fout, binary.LittleEndian, float32(v.GetW()))
+	var quatMMD *mmath.MQuaternion
+	if bf.Rotation != nil {
+		quatMMD = bf.Rotation.GetQuaternion().MMD().Normalized()
+	} else {
+		quatMMD = &mmath.MQuaternionIdent
+	}
+	binary.Write(fout, binary.LittleEndian, float32(quatMMD.GetX()))
+	binary.Write(fout, binary.LittleEndian, float32(quatMMD.GetY()))
+	binary.Write(fout, binary.LittleEndian, float32(quatMMD.GetZ()))
+	binary.Write(fout, binary.LittleEndian, float32(quatMMD.GetW()))
 
 	curves := make([]byte, len(bf.Curves.Values))
 	for i, x := range bf.Curves.Merge() {
