@@ -112,7 +112,7 @@ func (m *VmdMotion) InsertIkFrame(ikf *IkFrame) {
 	m.IkFrames.Insert(ikf)
 }
 
-func (m *VmdMotion) AnimateMorph(
+func (m *VmdMotion) DeformMorph(
 	frame int,
 	model *pmx.PmxModel,
 	morphNames []string,
@@ -129,11 +129,11 @@ func (m *VmdMotion) AnimateMorph(
 		morphNames = append(morphNames, morph.Name)
 	}
 
-	return m.MorphFrames.Animate(frame, model, morphNames)
+	return m.MorphFrames.Deform(frame, model, morphNames)
 }
 
 // AnimateBone 物理前ボーンのデフォーム計算する
-func (m *VmdMotion) Animate(
+func (m *VmdMotion) Deform(
 	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
@@ -142,14 +142,14 @@ func (m *VmdMotion) Animate(
 	vds := &VmdDeltas{}
 
 	if isCalcMorph {
-		vds.Morphs = m.AnimateMorph(frame, model, nil)
+		vds.Morphs = m.DeformMorph(frame, model, nil)
 	}
 
 	// 物理前のデフォーム情報
-	beforeBoneDeltas := m.BoneFrames.Animate(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph, nil)
+	beforeBoneDeltas := m.BoneFrames.Deform(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph, nil)
 
 	// 物理後のデフォーム情報
-	vds.Bones = m.BoneFrames.Animate(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph, beforeBoneDeltas)
+	vds.Bones = m.BoneFrames.Deform(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph, beforeBoneDeltas)
 
 	return vds
 }

@@ -27,7 +27,7 @@ func deform(
 ) *vmd.VmdDeltas {
 	vds := &vmd.VmdDeltas{}
 
-	vds.Morphs = motion.AnimateMorph(frame, model, nil)
+	vds.Morphs = motion.DeformMorph(frame, model, nil)
 
 	for i, bd := range vds.Morphs.Bones.Data {
 		if bd == nil {
@@ -53,13 +53,13 @@ func deform(
 	}
 
 	// 物理前のデフォーム情報
-	beforeBoneDeltas := motion.BoneFrames.Animate(frame, model, nil, true, true, true, nil)
+	beforeBoneDeltas := motion.BoneFrames.Deform(frame, model, nil, true, true, true, nil)
 
 	// 物理更新
 	updatePhysics(modelPhysics, model, motion.BoneFrames, beforeBoneDeltas, frame, elapsed, enablePhysics)
 
 	// 物理後のデフォーム情報
-	vds.Bones = motion.BoneFrames.Animate(frame, model, nil, true, true, true, beforeBoneDeltas)
+	vds.Bones = motion.BoneFrames.Deform(frame, model, nil, true, true, true, beforeBoneDeltas)
 
 	return vds
 }
@@ -181,13 +181,7 @@ func updatePhysics(
 		for _, rigidBody := range model.RigidBodies.GetSortedData() {
 			bonePhysicsGlobalMatrix := rigidBody.UpdateMatrix(modelPhysics)
 			if bonePhysicsGlobalMatrix != nil && rigidBody.Bone != nil {
-				bf := boneFrames.Get(rigidBody.Bone.Name).Get(frame)
-				bf.PhysicsMatrix = bonePhysicsGlobalMatrix
-				// if rigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE {
-				// 	// 物理位置合わせの場合、位置は初期値を使う
-				// 	// TODO
-				// }
-				boneFrames.Get(rigidBody.Bone.Name).Append(bf)
+				boneDeltas.Data[rigidBody.Bone.Index].SetPhysicsMatrix(bonePhysicsGlobalMatrix)
 			}
 		}
 	}

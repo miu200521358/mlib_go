@@ -32,7 +32,7 @@ func (mfs *MorphFrames) Get(morphName string) *MorphNameFrames {
 	return mfs.Data[morphName]
 }
 
-func (mfs *MorphFrames) Animate(
+func (mfs *MorphFrames) Deform(
 	frame int,
 	model *pmx.PmxModel,
 	morphNames []string,

@@ -14,6 +14,7 @@ type BoneDelta struct {
 	localMatrix         *mmath.MMat4       // ローカル行列
 	unitMatrix          *mmath.MMat4       // ボーン単体のデフォーム行列
 	globalPosition      *mmath.MVec3       // グローバル位置
+	physicsMatrix       *mmath.MMat4       // 物理演算行列
 	framePosition       *mmath.MVec3       // キーフレ位置の変動量
 	frameEffectPosition *mmath.MVec3       // キーフレ位置の変動量(付与親のみ)
 	frameRotation       *mmath.MQuaternion // キーフレ回転の変動量
@@ -42,6 +43,14 @@ func (bd *BoneDelta) UnitMatrix() *mmath.MMat4 {
 	return bd.unitMatrix
 }
 
+func (bd *BoneDelta) PhysicsMatrix() *mmath.MMat4 {
+	return bd.physicsMatrix
+}
+
+func (bd *BoneDelta) SetPhysicsMatrix(physicsMatrix *mmath.MMat4) {
+	bd.physicsMatrix = physicsMatrix
+}
+
 func (bd *BoneDelta) GlobalPosition() *mmath.MVec3 {
 	if bd.globalPosition == nil {
 		bd.globalPosition = mmath.NewMVec3()
@@ -50,7 +59,7 @@ func (bd *BoneDelta) GlobalPosition() *mmath.MVec3 {
 }
 
 func (bd *BoneDelta) GlobalRotation() *mmath.MQuaternion {
-	return bd.GlobalMatrix().Quaternion()
+	return bd.FrameEffectRotation().Muled(bd.FrameRotation())
 }
 
 func (bd *BoneDelta) FramePosition() *mmath.MVec3 {
@@ -91,16 +100,17 @@ func (bd *BoneDelta) FrameScale() *mmath.MVec3 {
 func NewBoneDelta(
 	bone *pmx.Bone,
 	frame int,
-	globalMatrix, localMatrix, unitMatrix *mmath.MMat4,
+	globalMatrix, unitMatrix *mmath.MMat4,
 	framePosition, frameEffectPosition *mmath.MVec3,
 	frameRotation, frameEffectRotation *mmath.MQuaternion,
 	frameScale *mmath.MVec3,
 ) *BoneDelta {
 	return &BoneDelta{
-		Bone:                bone,
-		Frame:               frame,
-		globalMatrix:        globalMatrix,
-		localMatrix:         localMatrix,
+		Bone:         bone,
+		Frame:        frame,
+		globalMatrix: globalMatrix,
+		// BOf行列: 自身のボーンのボーンオフセット行列をかけてローカル行列
+		localMatrix:         bone.OffsetMatrix.Muled(globalMatrix),
 		unitMatrix:          unitMatrix,
 		globalPosition:      globalMatrix.Translation(),
 		framePosition:       framePosition,
@@ -122,6 +132,9 @@ func NewBoneDeltas() *BoneDeltas {
 }
 
 func (bts *BoneDeltas) Get(boneIndex int) *BoneDelta {
+	if _, ok := bts.Data[boneIndex]; !ok {
+		return nil
+	}
 	return bts.Data[boneIndex]
 }
 

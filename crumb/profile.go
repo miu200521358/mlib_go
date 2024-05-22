@@ -41,6 +41,6 @@ func main() {
 		if i%100 == 0 {
 			log.Printf("i: %d", i)
 		}
-		motion.Animate(i, model, nil, true, true, false)
+		motion.Deform(i, model, nil, true, true, false)
 	}
 }
