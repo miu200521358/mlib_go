@@ -194,7 +194,7 @@ void main() {
         vec4 vecPosition = rotatedPosition - rotatedC + correctedC;
 
         // 頂点位置
-        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * (vec4(vecPosition.xyz + vertexDelta + (normal * edgeWight * 0.02), 1.0));
+        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * (vec4(vecPosition.xyz + (normal * edgeWight * 0.02), 1.0));
     } else {
         for(int i = 0; i < 4; i++) {
             float boneWeight = boneWeights[i];
@@ -208,6 +208,6 @@ void main() {
         }
 
         // 頂点位置
-        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * (vec4(position4.xyz + vertexDelta + (normal * edgeWight * 0.02), 1.0));
+        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * (vec4(position4.xyz + (normal * edgeWight * 0.02), 1.0));
     }
 }

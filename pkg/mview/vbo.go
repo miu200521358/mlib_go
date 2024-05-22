@@ -63,7 +63,7 @@ func (v *VBO) BindVertex(vertices []float32, vertexDeltas [][]float32) {
 			if vd != nil {
 				// 必要な場合にのみ部分更新
 				offsetStride := (i*v.strideSize + vboVertexSize) * 4
-				gl.BufferSubData(v.target, offsetStride, len(vertexDeltas[i])*4, gl.Ptr(vertexDeltas[i]))
+				gl.BufferSubData(v.target, offsetStride, len(vd)*4, gl.Ptr(vd))
 			}
 		}
 	} else {

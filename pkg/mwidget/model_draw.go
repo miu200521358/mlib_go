@@ -179,13 +179,17 @@ func updatePhysics(
 		// 剛体位置を更新
 		for _, rigidBody := range model.RigidBodies.GetSortedData() {
 			bonePhysicsGlobalMatrix := rigidBody.UpdateMatrix(modelPhysics)
-			if bonePhysicsGlobalMatrix != nil && rigidBody.Bone != nil {
-				globalMatrix := boneDeltas.Data[rigidBody.Bone.Index].GlobalMatrix()
-				if rigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE {
+			if boneDeltas != nil && bonePhysicsGlobalMatrix != nil && rigidBody.Bone != nil {
+				if rigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE &&
+					boneDeltas.Get(rigidBody.Bone.Index) != nil {
 					// ボーン位置合わせの場合、位置情報は計算したのを使う
+					globalMatrix := boneDeltas.Get(rigidBody.Bone.Index).GlobalMatrix()
 					bonePhysicsGlobalMatrix[3] = globalMatrix[3]
 					bonePhysicsGlobalMatrix[7] = globalMatrix[7]
 					bonePhysicsGlobalMatrix[11] = globalMatrix[11]
+				}
+				if boneDeltas.Get(rigidBody.Bone.Index) == nil {
+					boneDeltas.SetItem(rigidBody.Bone.Index, &vmd.BoneDelta{Bone: rigidBody.Bone, Frame: frame})
 				}
 				boneDeltas.Data[rigidBody.Bone.Index].SetGlobalMatrix(bonePhysicsGlobalMatrix)
 			}
