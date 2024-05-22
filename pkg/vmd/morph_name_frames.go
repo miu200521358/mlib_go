@@ -21,7 +21,7 @@ func (i *MorphNameFrames) NewFrame(index int) *MorphFrame {
 	return NewMorphFrame(index)
 }
 
-func (fs *MorphNameFrames) AnimateVertex(
+func (fs *MorphNameFrames) DeformVertex(
 	frame int,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
@@ -45,7 +45,7 @@ func (fs *MorphNameFrames) AnimateVertex(
 	}
 }
 
-func (fs *MorphNameFrames) AnimateAfterVertex(
+func (fs *MorphNameFrames) DeformAfterVertex(
 	frame int,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
@@ -69,7 +69,7 @@ func (fs *MorphNameFrames) AnimateAfterVertex(
 	}
 }
 
-func (fs *MorphNameFrames) AnimateUv(
+func (fs *MorphNameFrames) DeformUv(
 	frame int,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
@@ -94,7 +94,7 @@ func (fs *MorphNameFrames) AnimateUv(
 	}
 }
 
-func (fs *MorphNameFrames) AnimateUv1(
+func (fs *MorphNameFrames) DeformUv1(
 	frame int,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
@@ -119,7 +119,7 @@ func (fs *MorphNameFrames) AnimateUv1(
 	}
 }
 
-func (fs *MorphNameFrames) AnimateBone(
+func (fs *MorphNameFrames) DeformBone(
 	frame int,
 	model *pmx.PmxModel,
 	deltas *BoneMorphDeltas,
@@ -164,8 +164,8 @@ func (fs *MorphNameFrames) AnimateBone(
 	}
 }
 
-// AnimateMaterial 材質モーフの適用
-func (fs *MorphNameFrames) AnimateMaterial(
+// DeformMaterial 材質モーフの適用
+func (fs *MorphNameFrames) DeformMaterial(
 	frame int,
 	model *pmx.PmxModel,
 	deltas *MaterialMorphDeltas,

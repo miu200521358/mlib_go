@@ -125,11 +125,11 @@ func (fs *BoneFrames) Deform(
 	isCalcIk, isClearIk, isCalcMorph bool,
 	beforeBoneDeltas *BoneDeltas,
 ) *BoneDeltas {
-	boneDeformsMap := fs.prepareAnimate(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph, beforeBoneDeltas)
+	boneDeformsMap := fs.prepareDeform(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph, beforeBoneDeltas)
 	return fs.calcBoneDeltas(frame, model, boneDeformsMap, beforeBoneDeltas)
 }
 
-func (fs *BoneFrames) prepareAnimate(
+func (fs *BoneFrames) prepareDeform(
 	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
@@ -260,7 +260,7 @@ func (fs *BoneFrames) calcIk(
 	// IK関連の行列を一括計算
 	ikDeltas := fs.Deform(frame, model, []string{ikBone.Name}, false, false, false, beforeBoneDeltas)
 	// エフェクタ関連情報取得
-	effectorBoneDeformsMap := fs.prepareAnimate(
+	effectorBoneDeformsMap := fs.prepareDeform(
 		frame, model, []string{effectorBone.Name}, false, false, isCalcMorph, beforeBoneDeltas)
 
 	var ikFile *os.File
@@ -865,35 +865,13 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 
 	for _, boneIndex := range boneDeformsMap[isAfterPhysics].boneIndexes {
 		deform := boneDeformsMap[isAfterPhysics].deforms[boneIndex]
-		delta := boneDeltas.Get(boneIndex)
-
-		if delta != nil && delta.PhysicsMatrix() != nil {
-			// 物理演算後の行列が入っている場合、これを優先する
-			physicsMatrix := delta.PhysicsMatrix()
-			if model.Bones.Get(boneIndex).RigidBody != nil &&
-				model.Bones.Get(boneIndex).RigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE {
-				// ボーン位置合わせの場合、位置情報は計算したのを使う
-				parentBone := model.Bones.Get(deform.bone.ParentIndex)
-				parentDeform := getBoneDeform(boneDeformsMap, parentBone)
-				globalMatrix := deform.unitMatrix.Muled(parentDeform.globalMatrix)
-				deform.globalMatrix = mmath.NewMMat4ByValues(
-					physicsMatrix[0], physicsMatrix[1], physicsMatrix[2], globalMatrix[3],
-					physicsMatrix[4], physicsMatrix[5], physicsMatrix[6], globalMatrix[7],
-					physicsMatrix[8], physicsMatrix[9], physicsMatrix[10], globalMatrix[11],
-					0, 0, 0, 1,
-				)
-			} else {
-				deform.globalMatrix = physicsMatrix
-			}
-		} else if deform.globalMatrix == nil {
-			if deform.bone.ParentIndex >= 0 && boneDeltas.Get(deform.bone.ParentIndex) != nil {
-				// 直近の親ボーンの変形行列を元にする
-				parentDelta := boneDeltas.Get(deform.bone.ParentIndex)
-				deform.globalMatrix = deform.unitMatrix.Muled(parentDelta.GlobalMatrix())
-			} else {
-				// 対象ボーン自身の行列をかける
-				deform.globalMatrix = deform.unitMatrix.Copy()
-			}
+		if deform.bone.ParentIndex >= 0 && boneDeltas.Get(deform.bone.ParentIndex) != nil {
+			// 直近の親ボーンの変形行列を元にする
+			parentDelta := boneDeltas.Get(deform.bone.ParentIndex)
+			deform.globalMatrix = deform.unitMatrix.Muled(parentDelta.GlobalMatrix())
+		} else {
+			// 対象ボーン自身の行列をかける
+			deform.globalMatrix = deform.unitMatrix.Copy()
 		}
 
 		// 初期位置行列を掛けてグローバル行列を作成

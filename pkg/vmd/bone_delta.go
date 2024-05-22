@@ -14,7 +14,6 @@ type BoneDelta struct {
 	localMatrix         *mmath.MMat4       // ローカル行列
 	unitMatrix          *mmath.MMat4       // ボーン単体のデフォーム行列
 	globalPosition      *mmath.MVec3       // グローバル位置
-	physicsMatrix       *mmath.MMat4       // 物理演算行列
 	framePosition       *mmath.MVec3       // キーフレ位置の変動量
 	frameEffectPosition *mmath.MVec3       // キーフレ位置の変動量(付与親のみ)
 	frameRotation       *mmath.MQuaternion // キーフレ回転の変動量
@@ -43,12 +42,9 @@ func (bd *BoneDelta) UnitMatrix() *mmath.MMat4 {
 	return bd.unitMatrix
 }
 
-func (bd *BoneDelta) PhysicsMatrix() *mmath.MMat4 {
-	return bd.physicsMatrix
-}
-
-func (bd *BoneDelta) SetPhysicsMatrix(physicsMatrix *mmath.MMat4) {
-	bd.physicsMatrix = physicsMatrix
+func (bd *BoneDelta) SetGlobalMatrix(globalMatrix *mmath.MMat4) {
+	bd.globalMatrix = globalMatrix
+	bd.localMatrix = bd.Bone.OffsetMatrix.Muled(globalMatrix)
 }
 
 func (bd *BoneDelta) GlobalPosition() *mmath.MVec3 {

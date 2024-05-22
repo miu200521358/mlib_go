@@ -7,7 +7,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
 
-func TestVmdMotion_Animate_Exists(t *testing.T) {
+func TestVmdMotion_Deform_Exists(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/サンプルモーション.vmd")
 
@@ -135,7 +135,7 @@ func TestVmdMotion_Animate_Exists(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_Animate_Lerp(t *testing.T) {
+func TestVmdMotion_Deform_Lerp(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/サンプルモーション.vmd")
 
@@ -263,7 +263,7 @@ func TestVmdMotion_Animate_Lerp(t *testing.T) {
 
 }
 
-func TestVmdMotion_AnimateLegIk1_Matsu(t *testing.T) {
+func TestVmdMotion_DeformLegIk1_Matsu(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/サンプルモーション.vmd")
 
@@ -318,7 +318,7 @@ func TestVmdMotion_AnimateLegIk1_Matsu(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk2_Matsu(t *testing.T) {
+func TestVmdMotion_DeformLegIk2_Matsu(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/サンプルモーション.vmd")
 
@@ -374,7 +374,7 @@ func TestVmdMotion_AnimateLegIk2_Matsu(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk3_Matsu(t *testing.T) {
+func TestVmdMotion_DeformLegIk3_Matsu(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/好き雪.vmd")
 
@@ -442,7 +442,7 @@ func TestVmdMotion_AnimateLegIk3_Matsu(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk4_Snow(t *testing.T) {
+func TestVmdMotion_DeformLegIk4_Snow(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/好き雪_2794.vmd")
 
@@ -498,7 +498,7 @@ func TestVmdMotion_AnimateLegIk4_Snow(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk5_Snow(t *testing.T) {
+func TestVmdMotion_DeformLegIk5_Snow(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/好き雪.vmd")
 
@@ -555,7 +555,7 @@ func TestVmdMotion_AnimateLegIk5_Snow(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk6_SnowOff(t *testing.T) {
+func TestVmdMotion_DeformLegIk6_SnowOff(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/好き雪.vmd")
 
@@ -596,7 +596,7 @@ func TestVmdMotion_AnimateLegIk6_SnowOff(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk6_SnowOn(t *testing.T) {
+func TestVmdMotion_DeformLegIk6_SnowOn(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/好き雪.vmd")
 
@@ -638,7 +638,7 @@ func TestVmdMotion_AnimateLegIk6_SnowOn(t *testing.T) {
 
 }
 
-func TestVmdMotion_AnimateLegIk7_Syou(t *testing.T) {
+func TestVmdMotion_DeformLegIk7_Syou(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/唱(ダンスのみ)_0278F.vmd")
 
@@ -695,7 +695,7 @@ func TestVmdMotion_AnimateLegIk7_Syou(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk8_Syou(t *testing.T) {
+func TestVmdMotion_DeformLegIk8_Syou(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
@@ -751,7 +751,7 @@ func TestVmdMotion_AnimateLegIk8_Syou(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk10_Syou(t *testing.T) {
+func TestVmdMotion_DeformLegIk10_Syou(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
@@ -982,7 +982,7 @@ func TestVmdMotion_AnimateLegIk10_Syou(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk11_Shining_Miku(t *testing.T) {
+func TestVmdMotion_DeformLegIk11_Shining_Miku(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/シャイニングミラクル_50F.vmd")
 
@@ -1044,7 +1044,7 @@ func TestVmdMotion_AnimateLegIk11_Shining_Miku(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk11_Shining_Vroid(t *testing.T) {
+func TestVmdMotion_DeformLegIk11_Shining_Vroid(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/シャイニングミラクル_50F.vmd")
 
@@ -1100,7 +1100,7 @@ func TestVmdMotion_AnimateLegIk11_Shining_Vroid(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk12_Down_Miku(t *testing.T) {
+func TestVmdMotion_DeformLegIk12_Down_Miku(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/しゃがむ.vmd")
 
@@ -1162,7 +1162,7 @@ func TestVmdMotion_AnimateLegIk12_Down_Miku(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk13_Lamb(t *testing.T) {
+func TestVmdMotion_DeformLegIk13_Lamb(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/Lamb_2689F.vmd")
 
@@ -1264,7 +1264,7 @@ func TestVmdMotion_AnimateLegIk13_Lamb(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk14_Ballet(t *testing.T) {
+func TestVmdMotion_DeformLegIk14_Ballet(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/ミク用バレリーコ_1069.vmd")
 
@@ -1326,7 +1326,7 @@ func TestVmdMotion_AnimateLegIk14_Ballet(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk15_Bottom(t *testing.T) {
+func TestVmdMotion_DeformLegIk15_Bottom(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/●ボトム_0-300.vmd")
 
@@ -1388,7 +1388,7 @@ func TestVmdMotion_AnimateLegIk15_Bottom(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk16_Lamb(t *testing.T) {
+func TestVmdMotion_DeformLegIk16_Lamb(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/Lamb_2689F.vmd")
 
@@ -1450,7 +1450,7 @@ func TestVmdMotion_AnimateLegIk16_Lamb(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk17_Snow(t *testing.T) {
+func TestVmdMotion_DeformLegIk17_Snow(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/好き雪_1075.vmd")
 
@@ -1506,7 +1506,7 @@ func TestVmdMotion_AnimateLegIk17_Snow(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk18_Syou(t *testing.T) {
+func TestVmdMotion_DeformLegIk18_Syou(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
@@ -1562,7 +1562,7 @@ func TestVmdMotion_AnimateLegIk18_Syou(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk19_Wa(t *testing.T) {
+func TestVmdMotion_DeformLegIk19_Wa(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/129cm_001_10F.vmd")
 
@@ -1618,7 +1618,7 @@ func TestVmdMotion_AnimateLegIk19_Wa(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk20_Syou(t *testing.T) {
+func TestVmdMotion_DeformLegIk20_Syou(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
@@ -1674,7 +1674,7 @@ func TestVmdMotion_AnimateLegIk20_Syou(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk21_FK(t *testing.T) {
+func TestVmdMotion_DeformLegIk21_FK(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/足FK.vmd")
 
@@ -1712,7 +1712,7 @@ func TestVmdMotion_AnimateLegIk21_FK(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk22_Bake(t *testing.T) {
+func TestVmdMotion_DeformLegIk22_Bake(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/足FK焼き込み.vmd")
 
@@ -1750,7 +1750,7 @@ func TestVmdMotion_AnimateLegIk22_Bake(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk22_NoLimit(t *testing.T) {
+func TestVmdMotion_DeformLegIk22_NoLimit(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/足FK.vmd")
 
@@ -1788,7 +1788,7 @@ func TestVmdMotion_AnimateLegIk22_NoLimit(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk23_Addiction(t *testing.T) {
+func TestVmdMotion_DeformLegIk23_Addiction(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/[A]ddiction_Lat式_0171F.vmd")
 
@@ -1856,7 +1856,7 @@ func TestVmdMotion_AnimateLegIk23_Addiction(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk24_Positive(t *testing.T) {
+func TestVmdMotion_DeformLegIk24_Positive(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/ポジティブパレード_0526.vmd")
 
@@ -1995,7 +1995,7 @@ func TestVmdMotion_AnimateLegIk24_Positive(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateArmIk(t *testing.T) {
+func TestVmdMotion_DeformArmIk(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/サンプルモーション.vmd")
 
@@ -2124,7 +2124,7 @@ func TestVmdMotion_AnimateArmIk(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateLegIk2(t *testing.T) {
+func TestVmdMotion_DeformLegIk2(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("C:/MMD/mmd_base/tests/resources/唱(ダンスのみ)_0274F.vmd")
 
@@ -2312,7 +2312,7 @@ func TestVmdMotion_AnimateLegIk2(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateArmIk2(t *testing.T) {
+func TestVmdMotion_DeformArmIk2(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("C:/MMD/mmd_base/tests/resources/唱(ダンスのみ)_0274F.vmd")
 
@@ -2698,7 +2698,7 @@ func TestVmdMotion_AnimateArmIk2(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateArmIk3(t *testing.T) {
+func TestVmdMotion_DeformArmIk3(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("C:/MMD/mlib_go/test_resources/Addiction_0F.vmd")
 
@@ -2760,7 +2760,7 @@ func TestVmdMotion_AnimateArmIk3(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_AnimateArmIk4_DMF(t *testing.T) {
+func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/nac_dmf_601.vmd")
 

@@ -56,7 +56,7 @@ func deform(
 	beforeBoneDeltas := motion.BoneFrames.Deform(frame, model, nil, true, true, true, nil)
 
 	// 物理更新
-	updatePhysics(modelPhysics, model, motion.BoneFrames, beforeBoneDeltas, frame, elapsed, enablePhysics)
+	updatePhysics(modelPhysics, model, beforeBoneDeltas, frame, elapsed, enablePhysics)
 
 	// 物理後のデフォーム情報
 	vds.Bones = motion.BoneFrames.Deform(frame, model, nil, true, true, true, beforeBoneDeltas)
@@ -150,7 +150,6 @@ func fetchVertexDeltasParallel(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]f
 func updatePhysics(
 	modelPhysics *mphysics.MPhysics,
 	model *pmx.PmxModel,
-	boneFrames *vmd.BoneFrames,
 	boneDeltas *vmd.BoneDeltas,
 	frame int,
 	elapsed float32,
@@ -181,7 +180,14 @@ func updatePhysics(
 		for _, rigidBody := range model.RigidBodies.GetSortedData() {
 			bonePhysicsGlobalMatrix := rigidBody.UpdateMatrix(modelPhysics)
 			if bonePhysicsGlobalMatrix != nil && rigidBody.Bone != nil {
-				boneDeltas.Data[rigidBody.Bone.Index].SetPhysicsMatrix(bonePhysicsGlobalMatrix)
+				globalMatrix := boneDeltas.Data[rigidBody.Bone.Index].GlobalMatrix()
+				if rigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE {
+					// ボーン位置合わせの場合、位置情報は計算したのを使う
+					bonePhysicsGlobalMatrix[3] = globalMatrix[3]
+					bonePhysicsGlobalMatrix[7] = globalMatrix[7]
+					bonePhysicsGlobalMatrix[11] = globalMatrix[11]
+				}
+				boneDeltas.Data[rigidBody.Bone.Index].SetGlobalMatrix(bonePhysicsGlobalMatrix)
 			}
 		}
 	}

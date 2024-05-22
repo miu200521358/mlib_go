@@ -45,17 +45,17 @@ func (mfs *MorphFrames) Deform(
 
 		morph := model.Morphs.GetByName(morphName)
 		if morph.MorphType == pmx.MORPH_TYPE_VERTEX {
-			mfs.Get(morphName).AnimateVertex(frame, model, mds.Vertices)
+			mfs.Get(morphName).DeformVertex(frame, model, mds.Vertices)
 		} else if morph.MorphType == pmx.MORPH_TYPE_AFTER_VERTEX {
-			mfs.Get(morphName).AnimateAfterVertex(frame, model, mds.Vertices)
+			mfs.Get(morphName).DeformAfterVertex(frame, model, mds.Vertices)
 		} else if morph.MorphType == pmx.MORPH_TYPE_UV {
-			mfs.Get(morphName).AnimateUv(frame, model, mds.Vertices)
+			mfs.Get(morphName).DeformUv(frame, model, mds.Vertices)
 		} else if morph.MorphType == pmx.MORPH_TYPE_EXTENDED_UV1 {
-			mfs.Get(morphName).AnimateUv1(frame, model, mds.Vertices)
+			mfs.Get(morphName).DeformUv1(frame, model, mds.Vertices)
 		} else if morph.MorphType == pmx.MORPH_TYPE_BONE {
-			mfs.Get(morphName).AnimateBone(frame, model, mds.Bones)
+			mfs.Get(morphName).DeformBone(frame, model, mds.Bones)
 		} else if morph.MorphType == pmx.MORPH_TYPE_MATERIAL {
-			mfs.Get(morphName).AnimateMaterial(frame, model, mds.Materials)
+			mfs.Get(morphName).DeformMaterial(frame, model, mds.Materials)
 		}
 	}
 

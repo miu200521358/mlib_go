@@ -132,7 +132,7 @@ func (m *VmdMotion) DeformMorph(
 	return m.MorphFrames.Deform(frame, model, morphNames)
 }
 
-// AnimateBone 物理前ボーンのデフォーム計算する
+// DeformBone 物理前ボーンのデフォーム計算する
 func (m *VmdMotion) Deform(
 	frame int,
 	model *pmx.PmxModel,
