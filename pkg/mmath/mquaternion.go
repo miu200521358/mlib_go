@@ -506,9 +506,9 @@ func NewMQuaternionRotate(fromV, toV *MVec3) *MQuaternion {
 // NewMQuaternionFromAxesは、3つの軸ベクトルからクォータニオンを作成します。
 func NewMQuaternionFromAxes(xAxis, yAxis, zAxis *MVec3) *MQuaternion {
 	mat := NewMMat4ByValues(
-		xAxis.GetX(), xAxis.GetY(), xAxis.GetZ(), 0,
-		yAxis.GetX(), yAxis.GetY(), yAxis.GetZ(), 0,
-		zAxis.GetX(), zAxis.GetY(), zAxis.GetZ(), 0,
+		xAxis.GetX(), yAxis.GetX(), zAxis.GetX(), 0,
+		xAxis.GetY(), yAxis.GetY(), zAxis.GetY(), 0,
+		xAxis.GetZ(), yAxis.GetZ(), zAxis.GetZ(), 0,
 		0, 0, 0, 1,
 	)
 	qq := mat.Quaternion()
