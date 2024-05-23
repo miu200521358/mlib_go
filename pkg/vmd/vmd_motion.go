@@ -131,25 +131,3 @@ func (m *VmdMotion) DeformMorph(
 
 	return m.MorphFrames.Deform(frame, model, morphNames)
 }
-
-// DeformBone 物理前ボーンのデフォーム計算する
-func (m *VmdMotion) Deform(
-	frame int,
-	model *pmx.PmxModel,
-	boneNames []string,
-	isCalcIk, isClearIk, isCalcMorph bool,
-) *VmdDeltas {
-	vds := &VmdDeltas{}
-
-	if isCalcMorph {
-		vds.Morphs = m.DeformMorph(frame, model, nil)
-	}
-
-	// 物理前のデフォーム情報
-	beforeBoneDeltas := m.BoneFrames.Deform(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph, nil)
-
-	// 物理後のデフォーム情報
-	vds.Bones = m.BoneFrames.Deform(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph, beforeBoneDeltas)
-
-	return vds
-}

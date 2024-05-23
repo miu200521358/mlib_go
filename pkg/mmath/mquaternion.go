@@ -336,17 +336,6 @@ func (quat *MQuaternion) Shorten() *MQuaternion {
 	return quat
 }
 
-// RotateVec3は、四元数によって表される回転によって v を回転させます。
-func (quat *MQuaternion) RotateVec3(v *MVec3) *MVec3 {
-	r := mgl64.Quat(*quat).Rotate(mgl64.Vec3(*v))
-	return &MVec3{r[0], r[1], r[2]}
-}
-
-// RotatedVec3は v の回転コピーを返します。
-func (quat *MQuaternion) RotatedVec3(v *MVec3) *MVec3 {
-	return quat.Copy().RotateVec3(v)
-}
-
 // Dotは2つのクォータニオンの内積を返します。
 func (quat *MQuaternion) Dot(other *MQuaternion) float64 {
 	return mgl64.Quat(*quat).Dot(mgl64.Quat(*other))
@@ -483,24 +472,8 @@ func NewMQuaternionFromDirection(direction *MVec3, up *MVec3) *MQuaternion {
 
 // NewMQuaternionRotateはfromベクトルからtoベクトルまでの回転量を計算します。
 func NewMQuaternionRotate(fromV, toV *MVec3) *MQuaternion {
-	v0 := fromV.Normalize()
-	v1 := toV.Normalize()
-	d := v0.Dot(v1) + 1.0
-
-	// dest vectorがsource vectorの逆方向に近い場合、任意の回転軸が有効です。
-	if math.Abs(d) < 1e-6 {
-		axis := MVec3UnitX.Cross(v0)
-		if math.Abs(axis.LengthSqr()) < 1e-6 {
-			axis = MVec3UnitY.Cross(v0)
-		}
-		axis.Normalize()
-		// 同じくMQuaternion.fromAxisAndAngle(axis, 180.0)
-		return NewMQuaternionByValues(axis.GetX(), axis.GetY(), axis.GetZ(), 0.0)
-	}
-
-	d = math.Sqrt(2.0 * d)
-	axis := v0.Cross(v1).DivScalar(d)
-	return NewMQuaternionByValues(axis.GetX(), axis.GetY(), axis.GetZ(), d*0.5)
+	v := mgl64.QuatBetweenVectors(mgl64.Vec3(*fromV), mgl64.Vec3(*toV))
+	return NewMQuaternionByValues(v.V[0], v.V[1], v.V[2], v.W)
 }
 
 // NewMQuaternionFromAxesは、3つの軸ベクトルからクォータニオンを作成します。
@@ -515,9 +488,25 @@ func NewMQuaternionFromAxes(xAxis, yAxis, zAxis *MVec3) *MQuaternion {
 	return qq
 }
 
-// SeparateByAxisは、グローバル軸に基づいてクォータニオンを4つのクォータニオンに分割します。
-func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuaternion, *MQuaternion, *MQuaternion) {
-	localZAxis := MVec3UnitZ
+// SeparateByAxisは、グローバル軸に基づいてクォータニオンを2つのクォータニオン(捩りとそれ以外)に分割します。
+func (quat *MQuaternion) SeparateTwistByAxis(globalAxis *MVec3) (*MQuaternion, *MQuaternion) {
+	globalXAxis := globalAxis.Normalize()
+
+	// X成分を抽出する ------------
+
+	// グローバル軸方向に伸ばす
+	globalXVec := quat.MulVec3(globalXAxis)
+	// YZの回転量（自身のねじれを無視する）
+	yzQQ := NewMQuaternionRotate(globalXAxis, globalXVec.Normalize())
+	// 元々の回転量 から YZ回転 を除去して、除去されたX成分を求める
+	xQQ := yzQQ.Inverted().Mul(quat)
+
+	return xQQ, yzQQ
+}
+
+// SeparateByAxisは、グローバル軸に基づいてクォータニオンを3つのクォータニオン(x, y, z)に分割します。
+func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuaternion, *MQuaternion) {
+	localZAxis := MVec3{0, 0, -1}
 	globalXAxis := globalAxis.Normalize()
 	globalYAxis := localZAxis.Cross(globalXAxis)
 	globalZAxis := globalXAxis.Cross(globalYAxis)
@@ -531,32 +520,29 @@ func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuat
 	// X成分を抽出する ------------
 
 	// グローバル軸方向に伸ばす
-	globalXVec := quat.RotatedVec3(globalXAxis)
+	globalXVec := quat.MulVec3(globalXAxis)
 	// YZの回転量（自身のねじれを無視する）
 	yzQQ := NewMQuaternionRotate(globalXAxis, globalXVec.Normalize())
 	// 元々の回転量 から YZ回転 を除去して、除去されたX成分を求める
-	invYzQQ := yzQQ.Inverted()
-	xQQ := quat.Mul(invYzQQ)
+	xQQ := yzQQ.Invert().Mul(quat)
 
 	// Y成分を抽出する ------------
 	// グローバル軸方向に伸ばす
-	globalYVec := quat.RotatedVec3(globalYAxis)
+	globalYVec := quat.MulVec3(globalYAxis)
 	// XZの回転量（自身のねじれを無視する）
 	xzQQ := NewMQuaternionRotate(globalYAxis, globalYVec.Normalize())
 	// 元々の回転量 から XZ回転 を除去して、除去されたY成分を求める
-	invXzQQ := xzQQ.Inverted()
-	yQQ := quat.Mul(invXzQQ)
+	yQQ := xzQQ.Invert().Mul(quat)
 
 	// Z成分を抽出する ------------
 	// グローバル軸方向に伸ばす
-	globalZVec := quat.RotatedVec3(globalZAxis)
+	globalZVec := quat.MulVec3(globalZAxis)
 	// XYの回転量（自身のねじれを無視する）
 	xyQQ := NewMQuaternionRotate(globalZAxis, globalZVec.Normalize())
 	// 元々の回転量 から XY回転 を除去して、除去されたZ成分を求める
-	invXyQQ := xyQQ.Inverted()
-	zQQ := quat.Mul(invXyQQ)
+	zQQ := xyQQ.Invert().Mul(quat)
 
-	return xQQ, yQQ, zQQ, yzQQ
+	return xQQ, yQQ, zQQ
 }
 
 // Copyはクォータニオンのコピーを返します。

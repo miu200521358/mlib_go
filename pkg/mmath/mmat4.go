@@ -83,24 +83,17 @@ func (mat *MMat4) Trace3() float64 {
 // MulVec3 multiplies v (converted to a vec4 as (v_1, v_2, v_3, 1))
 // with mat and divides the result by w. Returns a new vec3.
 func (mat *MMat4) MulVec3(other *MVec3) *MVec3 {
-	m := mgl64.Mat4{1, 0, 0, other[0], 0, 1, 0, other[1], 0, 0, 1, other[2], 0, 0, 0, 1}
-	s := m.Mul4(mgl64.Mat4(*mat))
-	if s[15] == 0 {
-		return &MVec3{s[3], s[7], s[11]}
-	}
-	return &MVec3{s[3] / s[15], s[7] / s[15], s[11] / s[15]}
+	return mat.Translated(other).Translation()
 }
 
 // Translate adds v to the translation part of the matrix.
 func (mat *MMat4) Translate(v *MVec3) *MMat4 {
-	mat[3] += v[0]
-	mat[7] += v[1]
-	mat[11] += v[2]
+	*mat = *v.ToMat4().Mul(mat)
 	return mat
 }
 
 func (mat *MMat4) Translated(v *MVec3) *MMat4 {
-	return mat.Copy().Translate(v)
+	return v.ToMat4().Mul(mat)
 }
 
 // 行列の移動情報
@@ -127,8 +120,7 @@ func (mat *MMat4) Scaling() *MVec3 {
 
 // Rotate multiplies the matrix by a rotation matrix derived from the quaternion.
 func (mat *MMat4) Rotate(quat *MQuaternion) *MMat4 {
-	mat.Mul(quat.ToMat4())
-	return mat
+	return mat.Mul(quat.ToMat4())
 }
 
 // Quaternion extracts a quaternion from the rotation part of the matrix.

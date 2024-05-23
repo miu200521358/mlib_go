@@ -321,7 +321,7 @@ func TestNewMQuaternionFromAxisAngles(t *testing.T) {
 }
 func TestMQuaternionFromDirection(t *testing.T) {
 	expected1 := NewMQuaternionByValues(
-		-0.3115472173245163, -0.045237910083403, -0.5420603160713341, 0.7791421414666787)
+		0.3115472173245163, 0.04523791008340301, 0.5420603160713341, 0.7791421414666787)
 	result1 := NewMQuaternionFromDirection(&MVec3{1, 2, 3}, &MVec3{4, 5, 6})
 
 	if !result1.PracticallyEquals(expected1, 1e-7) {
@@ -329,7 +329,7 @@ func TestMQuaternionFromDirection(t *testing.T) {
 	}
 
 	expected2 := NewMQuaternionByValues(
-		0.543212292317204, 0.6953153333136457, 0.20212324833235548, -0.42497433477564167)
+		0.543212292317204, 0.6953153333136457, 0.20212324833235548, 0.42497433477564167)
 	result2 := NewMQuaternionFromDirection(&MVec3{-10, 20, -15}, &MVec3{40, -5, 6})
 
 	if !result2.PracticallyEquals(expected2, 1e-7) {
