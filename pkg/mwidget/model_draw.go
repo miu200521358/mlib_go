@@ -189,7 +189,7 @@ func updatePhysics(
 					bonePhysicsGlobalMatrix[11] = globalMatrix[11]
 				}
 				if boneDeltas.Get(rigidBody.Bone.Index) == nil {
-					boneDeltas.SetItem(rigidBody.Bone.Index, &vmd.BoneDelta{Bone: rigidBody.Bone, Frame: frame})
+					boneDeltas.SetItem(&vmd.BoneDelta{Bone: rigidBody.Bone, Frame: frame})
 				}
 				boneDeltas.Data[rigidBody.Bone.Index].SetGlobalMatrix(bonePhysicsGlobalMatrix)
 			}

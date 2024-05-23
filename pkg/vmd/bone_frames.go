@@ -126,7 +126,7 @@ func (fs *BoneFrames) Deform(
 	beforeBoneDeltas *BoneDeltas,
 ) *BoneDeltas {
 	boneDeformsMap := fs.prepareDeform(frame, model, boneNames, isCalcIk, isClearIk, isCalcMorph, beforeBoneDeltas)
-	return fs.calcBoneDeltas(frame, model, boneDeformsMap, beforeBoneDeltas)
+	return fs.calcBoneDeltas(frame, boneDeformsMap, beforeBoneDeltas)
 }
 
 func (fs *BoneFrames) prepareDeform(
@@ -336,7 +336,7 @@ ikLoop:
 			}
 
 			// IK関連の行列を取得
-			effectorDeltas := fs.calcBoneDeltas(frame, model, effectorBoneDeformsMap, beforeBoneDeltas)
+			effectorDeltas := fs.calcBoneDeltas(frame, effectorBoneDeformsMap, beforeBoneDeltas)
 
 			// IKボーンのグローバル位置
 			ikGlobalPosition := ikDeltas.Get(ikBone.Index).GlobalPosition()
@@ -652,7 +652,7 @@ ikLoop:
 				delta = &BoneDelta{Bone: linkBone, Frame: frame}
 			}
 			delta.frameRotation = totalActualIkQuat
-			boneDeltas.SetItem(linkBone.Index, delta)
+			boneDeltas.SetItem(delta)
 		}
 	}
 
@@ -804,20 +804,18 @@ func (fs *BoneFrames) calcIkSingleAxisRad(
 
 func (fs *BoneFrames) calcBoneDeltas(
 	frame int,
-	model *pmx.PmxModel,
 	boneDeformsMap map[bool]*boneDeforms,
 	beforeBoneDeltas *BoneDeltas,
 ) *BoneDeltas {
 	if beforeBoneDeltas != nil {
-		return fs.calcBoneDeltasByIsAfterPhysics(frame, model, boneDeformsMap, beforeBoneDeltas, true)
+		return fs.calcBoneDeltasByIsAfterPhysics(frame, boneDeformsMap, beforeBoneDeltas, true)
 	} else {
-		return fs.calcBoneDeltasByIsAfterPhysics(frame, model, boneDeformsMap, NewBoneDeltas(), false)
+		return fs.calcBoneDeltasByIsAfterPhysics(frame, boneDeformsMap, NewBoneDeltas(), false)
 	}
 }
 
 func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 	frame int,
-	model *pmx.PmxModel,
 	boneDeformsMap map[bool]*boneDeforms,
 	boneDeltas *BoneDeltas,
 	isAfterPhysics bool,
@@ -875,7 +873,7 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 		}
 
 		// 初期位置行列を掛けてグローバル行列を作成
-		boneDeltas.SetItem(deform.bone.Index, NewBoneDelta(
+		boneDeltas.SetItem(NewBoneDelta(
 			deform.bone,
 			frame,
 			deform.globalMatrix,   // グローバル行列

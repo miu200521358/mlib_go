@@ -118,12 +118,14 @@ func NewBoneDelta(
 }
 
 type BoneDeltas struct {
-	Data map[int]*BoneDelta
+	Data  map[int]*BoneDelta
+	Names map[string]int
 }
 
 func NewBoneDeltas() *BoneDeltas {
 	return &BoneDeltas{
-		Data: make(map[int]*BoneDelta, 0),
+		Data:  make(map[int]*BoneDelta, 0),
+		Names: make(map[string]int, 0),
 	}
 }
 
@@ -134,8 +136,16 @@ func (bts *BoneDeltas) Get(boneIndex int) *BoneDelta {
 	return bts.Data[boneIndex]
 }
 
-func (bts *BoneDeltas) SetItem(boneIndex int, boneDelta *BoneDelta) {
-	bts.Data[boneIndex] = boneDelta
+func (bts *BoneDeltas) GetByName(boneName string) *BoneDelta {
+	if _, ok := bts.Names[boneName]; !ok {
+		return nil
+	}
+	return bts.Get(bts.Names[boneName])
+}
+
+func (bts *BoneDeltas) SetItem(boneDelta *BoneDelta) {
+	bts.Data[boneDelta.Bone.Index] = boneDelta
+	bts.Names[boneDelta.Bone.Name] = boneDelta.Bone.Index
 }
 
 func (bts *BoneDeltas) GetBoneIndexes() []int {
