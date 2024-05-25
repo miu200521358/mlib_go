@@ -187,7 +187,7 @@ func (m *Meshes) delete() {
 
 func (m *Meshes) Draw(
 	shader *mview.MShader,
-	boneDeltas []*mgl32.Mat4,
+	boneDeltas []mgl32.Mat4,
 	vertexDeltas [][]float32,
 	materialDeltas []*Material,
 	windowIndex int,
@@ -243,7 +243,7 @@ func (m *Meshes) Draw(
 
 func (m *Meshes) drawNormal(
 	shader *mview.MShader,
-	boneDeltas []*mgl32.Mat4,
+	boneDeltas []mgl32.Mat4,
 	windowIndex int,
 ) {
 	shader.Use(mview.PROGRAM_TYPE_NORMAL)
@@ -253,7 +253,7 @@ func (m *Meshes) drawNormal(
 	m.normalIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(boneDeltas, shader, shader.NormalProgram, windowIndex)
+	bindBoneMatrixes(boneDeltas, shader, shader.NormalProgram)
 
 	normalColor := mgl32.Vec4{0.3, 0.3, 0.7, 0.5}
 	specularUniform := gl.GetUniformLocation(shader.NormalProgram, gl.Str(mview.SHADER_COLOR))
@@ -276,7 +276,7 @@ func (m *Meshes) drawNormal(
 
 func (m *Meshes) drawBone(
 	shader *mview.MShader,
-	boneDeltas []*mgl32.Mat4,
+	boneDeltas []mgl32.Mat4,
 	windowIndex int,
 ) {
 	// ボーンをモデルメッシュの前面に描画するために深度テストを無効化
@@ -294,7 +294,7 @@ func (m *Meshes) drawBone(
 	m.boneIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(boneDeltas, shader, shader.BoneProgram, windowIndex)
+	bindBoneMatrixes(boneDeltas, shader, shader.BoneProgram)
 
 	// ライン描画
 	gl.DrawElements(

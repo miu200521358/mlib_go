@@ -47,7 +47,7 @@ func NewMesh(
 func (m *Mesh) drawModel(
 	shader *mview.MShader,
 	windowIndex int,
-	boneDeltas []*mgl32.Mat4,
+	boneDeltas []mgl32.Mat4,
 	materialDelta *Material,
 ) {
 	if m.material.DrawFlag.IsDoubleSidedDrawing() {
@@ -62,7 +62,7 @@ func (m *Mesh) drawModel(
 	}
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(boneDeltas, shader, shader.ModelProgram, windowIndex)
+	bindBoneMatrixes(boneDeltas, shader, shader.ModelProgram)
 
 	// ------------------
 	// 材質色設定
@@ -160,14 +160,14 @@ func (m *Mesh) drawModel(
 func (m *Mesh) drawEdge(
 	shader *mview.MShader,
 	windowIndex int,
-	boneDeltas []*mgl32.Mat4,
+	boneDeltas []mgl32.Mat4,
 	materialDelta *Material,
 ) {
 	gl.Enable(gl.CULL_FACE)
 	gl.CullFace(gl.FRONT)
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(boneDeltas, shader, shader.EdgeProgram, windowIndex)
+	bindBoneMatrixes(boneDeltas, shader, shader.EdgeProgram)
 
 	// ------------------
 	// エッジ色設定
@@ -198,10 +198,9 @@ func (m *Mesh) delete() {
 }
 
 func bindBoneMatrixes(
-	matrixes []*mgl32.Mat4,
+	matrixes []mgl32.Mat4,
 	shader *mview.MShader,
 	program uint32,
-	windowIndex int,
 ) {
 
 	// テクスチャをアクティブにする

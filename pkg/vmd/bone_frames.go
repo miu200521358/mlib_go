@@ -347,7 +347,7 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][00][Global] [%s]ikGlobalPosition: %s, "+
-						"[%s]effectorGlobalPosition: %s, [%s]effectorGlobalPosition: %s\n",
+						"[%s]effectorGlobalPosition: %s, [%s]linkGlobalPosition: %s\n",
 					frame, loop, linkBone.Name, count-1,
 					ikBone.Name, ikGlobalPosition.MMD().String(),
 					effectorBone.Name, effectorGlobalPosition.MMD().String(),
@@ -649,6 +649,7 @@ ikLoop:
 			// IKの結果を更新
 			linkDeform.rotation = totalActualIkQuat
 			linkDeform.effectRotation = nil
+			linkDeform.unitMatrix = nil
 			linkDeform.globalMatrix = nil
 
 			var delta *BoneDelta
@@ -829,20 +830,17 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 ) *BoneDeltas {
 	for _, boneIndex := range boneDeformsMap[isAfterPhysics].boneIndexes {
 		deform := boneDeformsMap[isAfterPhysics].deforms[boneIndex]
-		if deform.globalMatrix != nil {
+		if deform.unitMatrix != nil {
 			// 既にグローバル行列が計算済みの場合、スルー
 			continue
 		}
 
-		matrix := mmath.NewMMat4()
+		// 逆BOf行列(初期姿勢行列)
+		deform.unitMatrix = mmath.NewMMat4()
 
-		// 移動
-		pos := deform.position
-		if deform.effectPosition != nil && !deform.effectPosition.IsZero() {
-			pos = pos.Add(deform.effectPosition)
-		}
-		if pos != nil && !pos.IsZero() {
-			matrix.Translate(pos)
+		// スケール
+		if deform.scale != nil && !deform.scale.IsOne() {
+			deform.unitMatrix.Mul(deform.scale.ToScaleMat4())
 		}
 
 		// 回転
@@ -857,18 +855,19 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 			rot = rot.ToFixedAxisRotation(deform.bone.NormalizedFixedAxis)
 		}
 		if rot != nil && !rot.IsIdent() {
-			matrix.Rotate(rot)
+			deform.unitMatrix.Mul(rot.ToMat4())
 		}
 
-		// スケール
-		if deform.scale != nil && !deform.scale.IsOne() {
-			matrix.Scale(deform.scale)
+		// 移動
+		pos := deform.position
+		if deform.effectPosition != nil && !deform.effectPosition.IsZero() {
+			pos = pos.Add(deform.effectPosition)
+		}
+		if pos != nil && !pos.IsZero() {
+			deform.unitMatrix.Mul(pos.ToMat4())
 		}
 
-		// 逆BOf行列(初期姿勢行列)
-		deform.unitMatrix = deform.bone.RevertOffsetMatrix.Muled(matrix)
-
-		continue
+		deform.unitMatrix.Mul(deform.bone.RevertOffsetMatrix)
 	}
 
 	for _, boneIndex := range boneDeformsMap[isAfterPhysics].boneIndexes {
@@ -876,7 +875,7 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 		if deform.bone.ParentIndex >= 0 && boneDeltas.Get(deform.bone.ParentIndex) != nil {
 			// 直近の親ボーンの変形行列を元にする
 			parentDelta := boneDeltas.Get(deform.bone.ParentIndex)
-			deform.globalMatrix = parentDelta.GlobalMatrix().Muled(deform.unitMatrix)
+			deform.globalMatrix = deform.unitMatrix.Muled(parentDelta.GlobalMatrix())
 		} else {
 			// 対象ボーン自身の行列をかける
 			deform.globalMatrix = deform.unitMatrix.Copy()
@@ -887,7 +886,6 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 			deform.bone,
 			frame,
 			deform.globalMatrix,   // グローバル行列
-			deform.unitMatrix,     // ボーン変形行列
 			deform.position,       // キーフレの移動量
 			deform.effectPosition, // キーフレの付与移動量
 			deform.rotation,       // キーフレの回転量

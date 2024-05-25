@@ -93,12 +93,12 @@ func (mat *MMat4) MulVec3(other *MVec3) *MVec3 {
 
 // Translate adds v to the translation part of the matrix.
 func (mat *MMat4) Translate(v *MVec3) *MMat4 {
-	*mat = *mat.Mul(v.ToMat4())
+	*mat = *v.ToMat4().Mul(mat)
 	return mat
 }
 
 func (mat *MMat4) Translated(v *MVec3) *MMat4 {
-	return mat.Copy().Mul(v.ToMat4())
+	return v.ToMat4().Mul(mat)
 }
 
 // 行列の移動情報
@@ -107,12 +107,12 @@ func (mat *MMat4) Translation() *MVec3 {
 }
 
 func (mat *MMat4) Scale(s *MVec3) *MMat4 {
-	*mat = *mat.Mul(s.ToScaleMat4())
+	*mat = *s.ToScaleMat4().Mul(mat)
 	return mat
 }
 
 func (mat *MMat4) Scaled(s *MVec3) *MMat4 {
-	return mat.Copy().Mul(s.ToScaleMat4())
+	return s.ToScaleMat4().Mul(mat)
 }
 
 func (mat *MMat4) Scaling() *MVec3 {
@@ -120,12 +120,12 @@ func (mat *MMat4) Scaling() *MVec3 {
 }
 
 func (mat *MMat4) Rotate(quat *MQuaternion) *MMat4 {
-	*mat = *mat.Mul(quat.ToMat4())
+	*mat = *quat.ToMat4().Mul(mat)
 	return mat
 }
 
 func (mat *MMat4) Rotated(quat *MQuaternion) *MMat4 {
-	return mat.Copy().Mul(quat.ToMat4())
+	return quat.ToMat4().Mul(mat)
 }
 
 func (mat *MMat4) Quaternion() *MQuaternion {
@@ -149,31 +149,34 @@ func (mat *MMat4) Transpose() *MMat4 {
 
 // Mul は行列の掛け算を行います
 func (m1 *MMat4) Mul(m2 *MMat4) *MMat4 {
-	var result MMat4
-
-	// ループを展開して直接各成分を計算します(行優先計算)
-	result[0] = m1[0]*m2[0] + m1[4]*m2[1] + m1[8]*m2[2] + m1[3]*m2[12]
-	result[4] = m1[0]*m2[4] + m1[4]*m2[5] + m1[8]*m2[6] + m1[3]*m2[13]
-	result[8] = m1[0]*m2[8] + m1[4]*m2[9] + m1[8]*m2[10] + m1[3]*m2[14]
-	result[3] = m1[0]*m2[3] + m1[4]*m2[7] + m1[8]*m2[11] + m1[3]*m2[15]
-
-	result[1] = m1[1]*m2[0] + m1[5]*m2[1] + m1[9]*m2[2] + m1[7]*m2[12]
-	result[5] = m1[1]*m2[4] + m1[5]*m2[5] + m1[9]*m2[6] + m1[7]*m2[13]
-	result[9] = m1[1]*m2[8] + m1[5]*m2[9] + m1[9]*m2[10] + m1[7]*m2[14]
-	result[7] = m1[1]*m2[3] + m1[5]*m2[7] + m1[9]*m2[11] + m1[7]*m2[15]
-
-	result[2] = m1[2]*m2[0] + m1[6]*m2[1] + m1[10]*m2[2] + m1[11]*m2[12]
-	result[6] = m1[2]*m2[4] + m1[6]*m2[5] + m1[10]*m2[6] + m1[11]*m2[13]
-	result[10] = m1[2]*m2[8] + m1[6]*m2[9] + m1[10]*m2[10] + m1[11]*m2[14]
-	result[11] = m1[2]*m2[3] + m1[6]*m2[7] + m1[10]*m2[11] + m1[11]*m2[15]
-
-	result[12] = m1[12]*m2[0] + m1[13]*m2[1] + m1[14]*m2[2] + m1[15]*m2[12]
-	result[13] = m1[12]*m2[4] + m1[13]*m2[5] + m1[14]*m2[6] + m1[15]*m2[13]
-	result[14] = m1[12]*m2[8] + m1[13]*m2[9] + m1[14]*m2[10] + m1[15]*m2[14]
-	result[15] = m1[12]*m2[3] + m1[13]*m2[7] + m1[14]*m2[11] + m1[15]*m2[15]
-
-	*m1 = result
+	*m1 = MMat4(mgl64.Mat4(*m1).Mul4(mgl64.Mat4(*m2)))
 	return m1
+
+	// var result MMat4
+
+	// // ループを展開して直接各成分を計算します(行優先計算)
+	// result[0] = m1[0]*m2[0] + m1[4]*m2[1] + m1[8]*m2[2] + m1[3]*m2[12]
+	// result[4] = m1[0]*m2[4] + m1[4]*m2[5] + m1[8]*m2[6] + m1[3]*m2[13]
+	// result[8] = m1[0]*m2[8] + m1[4]*m2[9] + m1[8]*m2[10] + m1[3]*m2[14]
+	// result[3] = m1[0]*m2[3] + m1[4]*m2[7] + m1[8]*m2[11] + m1[3]*m2[15]
+
+	// result[1] = m1[1]*m2[0] + m1[5]*m2[1] + m1[9]*m2[2] + m1[7]*m2[12]
+	// result[5] = m1[1]*m2[4] + m1[5]*m2[5] + m1[9]*m2[6] + m1[7]*m2[13]
+	// result[9] = m1[1]*m2[8] + m1[5]*m2[9] + m1[9]*m2[10] + m1[7]*m2[14]
+	// result[7] = m1[1]*m2[3] + m1[5]*m2[7] + m1[9]*m2[11] + m1[7]*m2[15]
+
+	// result[2] = m1[2]*m2[0] + m1[6]*m2[1] + m1[10]*m2[2] + m1[11]*m2[12]
+	// result[6] = m1[2]*m2[4] + m1[6]*m2[5] + m1[10]*m2[6] + m1[11]*m2[13]
+	// result[10] = m1[2]*m2[8] + m1[6]*m2[9] + m1[10]*m2[10] + m1[11]*m2[14]
+	// result[11] = m1[2]*m2[3] + m1[6]*m2[7] + m1[10]*m2[11] + m1[11]*m2[15]
+
+	// result[12] = m1[12]*m2[0] + m1[13]*m2[1] + m1[14]*m2[2] + m1[15]*m2[12]
+	// result[13] = m1[12]*m2[4] + m1[13]*m2[5] + m1[14]*m2[6] + m1[15]*m2[13]
+	// result[14] = m1[12]*m2[8] + m1[13]*m2[9] + m1[14]*m2[10] + m1[15]*m2[14]
+	// result[15] = m1[12]*m2[3] + m1[13]*m2[7] + m1[14]*m2[11] + m1[15]*m2[15]
+
+	// *m1 = result
+	// return m1
 }
 
 func (mat *MMat4) Muled(a *MMat4) *MMat4 {
@@ -194,62 +197,59 @@ func (mat *MMat4) MuledFactor(v float64) *MMat4 {
 }
 
 func (m *MMat4) Det() float64 {
-	return m[0]*m[5]*m[10]*m[15] - m[0]*m[5]*m[11]*m[14] - m[0]*m[9]*m[6]*m[15] + m[0]*m[9]*m[11]*m[13] +
-		m[0]*m[7]*m[6]*m[14] - m[0]*m[7]*m[10]*m[13] - m[4]*m[1]*m[10]*m[15] + m[4]*m[1]*m[11]*m[14] +
-		m[4]*m[9]*m[2]*m[15] - m[4]*m[9]*m[11]*m[12] - m[4]*m[7]*m[2]*m[14] + m[4]*m[7]*m[10]*m[12] +
-		m[8]*m[1]*m[6]*m[15] - m[8]*m[1]*m[11]*m[13] - m[8]*m[5]*m[2]*m[15] + m[8]*m[5]*m[11]*m[12] +
-		m[8]*m[7]*m[2]*m[13] - m[8]*m[7]*m[6]*m[12] - m[3]*m[1]*m[6]*m[14] + m[3]*m[1]*m[10]*m[13] +
-		m[3]*m[5]*m[2]*m[14] - m[3]*m[5]*m[10]*m[12] - m[3]*m[9]*m[2]*m[13] + m[3]*m[9]*m[6]*m[12]
+	return mgl64.Mat4(*m).Det()
 }
 
 // 逆行列
 func (m *MMat4) Inverse() *MMat4 {
-	det := m.Det()
-	if mgl64.FloatEqual(det, float64(0.0)) {
-		return NewMMat4()
-	}
+	im := mgl64.Mat4(*m).Inv()
+	return (*MMat4)(&im)
+	// det := m.Det()
+	// if mgl64.FloatEqual(det, float64(0.0)) {
+	// 	return NewMMat4()
+	// }
 
-	invDet := 1 / det
+	// invDet := 1 / det
 
-	var retMat MMat4
+	// var retMat MMat4
 
-	retMat[0] = (-m[7]*m[10]*m[13] + m[9]*m[11]*m[13] + m[7]*m[6]*m[14] - m[5]*m[11]*m[14] -
-		m[9]*m[6]*m[15] + m[5]*m[10]*m[15]) * invDet
-	retMat[4] = (m[3]*m[10]*m[13] - m[8]*m[11]*m[13] - m[3]*m[6]*m[14] + m[4]*m[11]*m[14] +
-		m[8]*m[6]*m[15] - m[4]*m[10]*m[15]) * invDet
-	retMat[8] = (-m[3]*m[9]*m[13] + m[8]*m[7]*m[13] + m[3]*m[5]*m[14] - m[4]*m[7]*m[14] -
-		m[8]*m[5]*m[15] + m[4]*m[9]*m[15]) * invDet
-	retMat[3] = (m[3]*m[9]*m[6] - m[8]*m[7]*m[6] - m[3]*m[5]*m[10] + m[4]*m[7]*m[10] +
-		m[8]*m[5]*m[11] - m[4]*m[9]*m[11]) * invDet
+	// retMat[0] = (-m[7]*m[10]*m[13] + m[9]*m[11]*m[13] + m[7]*m[6]*m[14] - m[5]*m[11]*m[14] -
+	// 	m[9]*m[6]*m[15] + m[5]*m[10]*m[15]) * invDet
+	// retMat[4] = (m[3]*m[10]*m[13] - m[8]*m[11]*m[13] - m[3]*m[6]*m[14] + m[4]*m[11]*m[14] +
+	// 	m[8]*m[6]*m[15] - m[4]*m[10]*m[15]) * invDet
+	// retMat[8] = (-m[3]*m[9]*m[13] + m[8]*m[7]*m[13] + m[3]*m[5]*m[14] - m[4]*m[7]*m[14] -
+	// 	m[8]*m[5]*m[15] + m[4]*m[9]*m[15]) * invDet
+	// retMat[3] = (m[3]*m[9]*m[6] - m[8]*m[7]*m[6] - m[3]*m[5]*m[10] + m[4]*m[7]*m[10] +
+	// 	m[8]*m[5]*m[11] - m[4]*m[9]*m[11]) * invDet
 
-	retMat[1] = (m[7]*m[10]*m[12] - m[9]*m[11]*m[12] - m[7]*m[2]*m[14] + m[1]*m[11]*m[14] +
-		m[9]*m[2]*m[15] - m[1]*m[10]*m[15]) * invDet
-	retMat[5] = (-m[3]*m[10]*m[12] + m[8]*m[11]*m[12] + m[3]*m[2]*m[14] - m[0]*m[11]*m[14] -
-		m[8]*m[2]*m[15] + m[0]*m[10]*m[15]) * invDet
-	retMat[9] = (m[3]*m[9]*m[12] - m[8]*m[7]*m[12] - m[3]*m[1]*m[14] + m[0]*m[7]*m[14] +
-		m[8]*m[1]*m[15] - m[0]*m[9]*m[15]) * invDet
-	retMat[7] = (-m[3]*m[9]*m[2] + m[8]*m[7]*m[2] + m[3]*m[1]*m[10] - m[0]*m[7]*m[10] -
-		m[8]*m[1]*m[11] + m[0]*m[9]*m[11]) * invDet
+	// retMat[1] = (m[7]*m[10]*m[12] - m[9]*m[11]*m[12] - m[7]*m[2]*m[14] + m[1]*m[11]*m[14] +
+	// 	m[9]*m[2]*m[15] - m[1]*m[10]*m[15]) * invDet
+	// retMat[5] = (-m[3]*m[10]*m[12] + m[8]*m[11]*m[12] + m[3]*m[2]*m[14] - m[0]*m[11]*m[14] -
+	// 	m[8]*m[2]*m[15] + m[0]*m[10]*m[15]) * invDet
+	// retMat[9] = (m[3]*m[9]*m[12] - m[8]*m[7]*m[12] - m[3]*m[1]*m[14] + m[0]*m[7]*m[14] +
+	// 	m[8]*m[1]*m[15] - m[0]*m[9]*m[15]) * invDet
+	// retMat[7] = (-m[3]*m[9]*m[2] + m[8]*m[7]*m[2] + m[3]*m[1]*m[10] - m[0]*m[7]*m[10] -
+	// 	m[8]*m[1]*m[11] + m[0]*m[9]*m[11]) * invDet
 
-	retMat[2] = (-m[7]*m[6]*m[12] + m[5]*m[11]*m[12] + m[7]*m[2]*m[13] - m[1]*m[11]*m[13] -
-		m[5]*m[2]*m[15] + m[1]*m[6]*m[15]) * invDet
-	retMat[6] = (m[3]*m[6]*m[12] - m[4]*m[11]*m[12] - m[3]*m[2]*m[13] + m[0]*m[11]*m[13] +
-		m[4]*m[2]*m[15] - m[0]*m[6]*m[15]) * invDet
-	retMat[10] = (-m[3]*m[5]*m[12] + m[4]*m[7]*m[12] + m[3]*m[1]*m[13] - m[0]*m[7]*m[13] -
-		m[4]*m[1]*m[15] + m[0]*m[5]*m[15]) * invDet
-	retMat[11] = (m[3]*m[5]*m[2] - m[4]*m[7]*m[2] - m[3]*m[1]*m[6] + m[0]*m[7]*m[6] +
-		m[4]*m[1]*m[11] - m[0]*m[5]*m[11]) * invDet
+	// retMat[2] = (-m[7]*m[6]*m[12] + m[5]*m[11]*m[12] + m[7]*m[2]*m[13] - m[1]*m[11]*m[13] -
+	// 	m[5]*m[2]*m[15] + m[1]*m[6]*m[15]) * invDet
+	// retMat[6] = (m[3]*m[6]*m[12] - m[4]*m[11]*m[12] - m[3]*m[2]*m[13] + m[0]*m[11]*m[13] +
+	// 	m[4]*m[2]*m[15] - m[0]*m[6]*m[15]) * invDet
+	// retMat[10] = (-m[3]*m[5]*m[12] + m[4]*m[7]*m[12] + m[3]*m[1]*m[13] - m[0]*m[7]*m[13] -
+	// 	m[4]*m[1]*m[15] + m[0]*m[5]*m[15]) * invDet
+	// retMat[11] = (m[3]*m[5]*m[2] - m[4]*m[7]*m[2] - m[3]*m[1]*m[6] + m[0]*m[7]*m[6] +
+	// 	m[4]*m[1]*m[11] - m[0]*m[5]*m[11]) * invDet
 
-	retMat[12] = (m[9]*m[6]*m[12] - m[5]*m[10]*m[12] - m[9]*m[2]*m[13] + m[1]*m[10]*m[13] +
-		m[5]*m[2]*m[14] - m[1]*m[6]*m[14]) * invDet
-	retMat[13] = (-m[8]*m[6]*m[12] + m[4]*m[10]*m[12] + m[8]*m[2]*m[13] - m[0]*m[10]*m[13] -
-		m[4]*m[2]*m[14] + m[0]*m[6]*m[14]) * invDet
-	retMat[14] = (m[8]*m[5]*m[12] - m[4]*m[9]*m[12] - m[8]*m[1]*m[13] + m[0]*m[9]*m[13] +
-		m[4]*m[1]*m[14] - m[0]*m[5]*m[14]) * invDet
-	retMat[15] = (-m[8]*m[5]*m[2] + m[4]*m[9]*m[2] + m[8]*m[1]*m[6] - m[0]*m[9]*m[6] -
-		m[4]*m[1]*m[10] + m[0]*m[5]*m[10]) * invDet
+	// retMat[12] = (m[9]*m[6]*m[12] - m[5]*m[10]*m[12] - m[9]*m[2]*m[13] + m[1]*m[10]*m[13] +
+	// 	m[5]*m[2]*m[14] - m[1]*m[6]*m[14]) * invDet
+	// retMat[13] = (-m[8]*m[6]*m[12] + m[4]*m[10]*m[12] + m[8]*m[2]*m[13] - m[0]*m[10]*m[13] -
+	// 	m[4]*m[2]*m[14] + m[0]*m[6]*m[14]) * invDet
+	// retMat[14] = (m[8]*m[5]*m[12] - m[4]*m[9]*m[12] - m[8]*m[1]*m[13] + m[0]*m[9]*m[13] +
+	// 	m[4]*m[1]*m[14] - m[0]*m[5]*m[14]) * invDet
+	// retMat[15] = (-m[8]*m[5]*m[2] + m[4]*m[9]*m[2] + m[8]*m[1]*m[6] - m[0]*m[9]*m[6] -
+	// 	m[4]*m[1]*m[10] + m[0]*m[5]*m[10]) * invDet
 
-	return &retMat
+	// return &retMat
 }
 
 func (mat *MMat4) Inverted() *MMat4 {

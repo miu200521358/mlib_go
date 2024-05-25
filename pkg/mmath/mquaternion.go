@@ -109,7 +109,7 @@ func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
 
 // NewMQuaternionFromRadiansは、オイラー角（ラジアン）回転を表す四元数を返します。
 func NewMQuaternionFromRadians(xPitch, yHead, zRoll float64) *MQuaternion {
-	q := mgl64.AnglesToQuat(xPitch, yHead, zRoll, mgl64.XYZ)
+	q := mgl64.AnglesToQuat(xPitch, yHead, zRoll, mgl64.XYZ).Normalize()
 	return &MQuaternion{q.W, q.V}
 }
 
@@ -568,10 +568,10 @@ func (v *MQuaternion) Vector() []float64 {
 func (v *MQuaternion) ToMat4() *MMat4 {
 	m := mgl64.Quat(*v).Normalize().Mat4()
 	return NewMMat4ByValues(
-		m[0], m[1], m[2], m[3],
-		m[4], m[5], m[6], m[7],
-		m[8], m[9], m[10], m[11],
-		m[12], m[13], m[14], m[15],
+		m[0], m[4], m[8], m[12],
+		m[1], m[5], m[9], m[13],
+		m[2], m[6], m[10], m[14],
+		m[3], m[7], m[11], m[15],
 	)
 }
 

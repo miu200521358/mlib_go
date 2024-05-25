@@ -345,8 +345,8 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 		}
 
 		// 右クリックはカメラ中心をそのままにカメラ位置を変える
-		xOffset := (xpos - w.prevCursorPos.GetX()) * ratio
-		yOffset := (ypos - w.prevCursorPos.GetY()) * ratio
+		xOffset := (w.prevCursorPos.GetX() - xpos) * ratio
+		yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
 
 		// 方位角と仰角を更新
 		w.yaw += xOffset
@@ -406,7 +406,7 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 			// 上下移動のベクトルを計算
 			upMovement := up.MulScalar(-yOffset) // Y軸が上向きなので、マウスのY軸移動は逆にする
 			// 左右移動のベクトルを計算
-			rightMovement := right.MulScalar(xOffset) // X軸が左向きなので、マウスのX軸移動はそのまま
+			rightMovement := right.MulScalar(-xOffset) // X軸が右向きなので、マウスのX軸移動は逆にする
 
 			// 移動ベクトルを合成してカメラ位置と中心を更新
 			movement := upMovement.Add(rightMovement)

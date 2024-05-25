@@ -12,7 +12,6 @@ type BoneDelta struct {
 	Frame               int                // キーフレーム
 	globalMatrix        *mmath.MMat4       // グローバル行列
 	localMatrix         *mmath.MMat4       // ローカル行列
-	unitMatrix          *mmath.MMat4       // ボーン単体のデフォーム行列
 	globalPosition      *mmath.MVec3       // グローバル位置
 	framePosition       *mmath.MVec3       // キーフレ位置の変動量
 	frameEffectPosition *mmath.MVec3       // キーフレ位置の変動量(付与親のみ)
@@ -33,13 +32,6 @@ func (bd *BoneDelta) LocalMatrix() *mmath.MMat4 {
 		bd.localMatrix = mmath.NewMMat4()
 	}
 	return bd.localMatrix
-}
-
-func (bd *BoneDelta) UnitMatrix() *mmath.MMat4 {
-	if bd.unitMatrix == nil {
-		bd.unitMatrix = mmath.NewMMat4()
-	}
-	return bd.unitMatrix
 }
 
 func (bd *BoneDelta) SetGlobalMatrix(globalMatrix *mmath.MMat4) {
@@ -96,7 +88,7 @@ func (bd *BoneDelta) FrameScale() *mmath.MVec3 {
 func NewBoneDelta(
 	bone *pmx.Bone,
 	frame int,
-	globalMatrix, unitMatrix *mmath.MMat4,
+	globalMatrix *mmath.MMat4,
 	framePosition, frameEffectPosition *mmath.MVec3,
 	frameRotation, frameEffectRotation *mmath.MQuaternion,
 	frameScale *mmath.MVec3,
@@ -106,8 +98,7 @@ func NewBoneDelta(
 		Frame:        frame,
 		globalMatrix: globalMatrix,
 		// BOf行列: 自身のボーンのボーンオフセット行列をかけてローカル行列
-		localMatrix:         globalMatrix.Muled(bone.OffsetMatrix),
-		unitMatrix:          unitMatrix,
+		localMatrix:         bone.OffsetMatrix.Muled(globalMatrix),
 		globalPosition:      globalMatrix.Translation(),
 		framePosition:       framePosition,
 		frameEffectPosition: frameEffectPosition,

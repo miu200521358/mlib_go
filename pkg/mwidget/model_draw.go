@@ -55,11 +55,13 @@ func deform(
 	// 物理前のデフォーム情報
 	beforeBoneDeltas := motion.BoneFrames.Deform(frame, model, nil, true, true, true, nil)
 
-	// 物理更新
-	updatePhysics(modelPhysics, model, beforeBoneDeltas, frame, elapsed, enablePhysics)
+	vds.Bones = beforeBoneDeltas
 
-	// 物理後のデフォーム情報
-	vds.Bones = motion.BoneFrames.Deform(frame, model, nil, true, true, true, beforeBoneDeltas)
+	// 物理更新
+	// updatePhysics(modelPhysics, model, beforeBoneDeltas, frame, elapsed, enablePhysics)
+
+	// // 物理後のデフォーム情報
+	// vds.Bones = motion.BoneFrames.Deform(frame, model, nil, true, true, true, beforeBoneDeltas)
 
 	return vds
 }
@@ -78,10 +80,9 @@ func draw(
 ) {
 	deltas := deform(modelPhysics, model, motion, frame, elapsed, enablePhysics)
 
-	boneDeltas := make([]*mgl32.Mat4, len(model.Bones.Data))
+	boneDeltas := make([]mgl32.Mat4, len(model.Bones.Data))
 	for i, bone := range model.Bones.Data {
-		mat := deltas.Bones.Get(bone.Index).LocalMatrix().GL()
-		boneDeltas[i] = &mat
+		boneDeltas[i] = deltas.Bones.Get(bone.Index).LocalMatrix().GL()
 	}
 
 	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))

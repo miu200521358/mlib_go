@@ -489,7 +489,11 @@ func TestMQuaternion_ToMat4(t *testing.T) {
 
 	// Test case 2: Non-identity quaternion
 	quat = NewMQuaternionByValues(0.5, 0.5, 0.5, 0.5)
-	expectedMat = NewMMat4ByValues(0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1)
+	expectedMat = NewMMat4ByValues(
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		1, 0, 0, 0,
+		0, 0, 0, 1)
 	actualMat = quat.ToMat4()
 
 	if !actualMat.PracticallyEquals(expectedMat, 1e-10) {

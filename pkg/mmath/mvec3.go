@@ -507,9 +507,9 @@ func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
 
 	// ローカル軸に合わせた回転行列を作成する
 	rotationMatrix := NewMMat4ByValues(
-		xAxis.GetX(), xAxis.GetY(), xAxis.GetZ(), 0,
-		yAxis.GetX(), yAxis.GetY(), yAxis.GetZ(), 0,
-		zAxis.GetX(), zAxis.GetY(), zAxis.GetZ(), 0,
+		xAxis.GetX(), yAxis.GetX(), zAxis.GetX(), 0,
+		xAxis.GetY(), yAxis.GetY(), zAxis.GetY(), 0,
+		xAxis.GetZ(), yAxis.GetZ(), zAxis.GetZ(), 0,
 		0, 0, 0, 1,
 	)
 
