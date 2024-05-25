@@ -404,9 +404,9 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 			up := right.Cross(forward.Normalize()).Normalize()
 
 			// 上下移動のベクトルを計算
-			upMovement := up.MulScalar(-yOffset) // Y軸が上向きなので、マウスのY軸移動は逆にする
+			upMovement := up.MulScalar(-yOffset)
 			// 左右移動のベクトルを計算
-			rightMovement := right.MulScalar(-xOffset) // X軸が右向きなので、マウスのX軸移動は逆にする
+			rightMovement := right.MulScalar(-xOffset)
 
 			// 移動ベクトルを合成してカメラ位置と中心を更新
 			movement := upMovement.Add(rightMovement)
