@@ -294,16 +294,16 @@ func TestMQuaternionMultiply(t *testing.T) {
 
 func TestNewMQuaternionFromAxisAngles(t *testing.T) {
 	expected1 := NewMQuaternionByValues(
-		0.25511557978461696, 0.5102311595692339, 0.7653467393538509, -0.29803451698791944)
-	result1 := NewMQuaternionFromAxisAngles(&MVec3{1, 2, 3}, 30)
+		0.0691722994246875, 0.138344598849375, 0.207516898274062, 0.965925826289068)
+	result1 := NewMQuaternionFromAxisAngles(&MVec3{1, 2, 3}, DegToRad(30))
 
 	if !result1.PracticallyEquals(expected1, 1e-5) {
 		t.Errorf("NewMQuaternionFromAxisAngles failed. Expected %v, got %v", expected1, result1)
 	}
 
 	expected2 := NewMQuaternionByValues(
-		0.1329649118205802, -0.8864327454705346, 0.4432163727352673, 0.01079661620640226)
-	result2 := NewMQuaternionFromAxisAngles(&MVec3{-3, 20, -10}, 123)
+		-0.116858651016609, 0.779057673444061, -0.389528836722031, 0.477158760259608)
+	result2 := NewMQuaternionFromAxisAngles(&MVec3{-3, 20, -10}, DegToRad(123))
 
 	if !result2.PracticallyEquals(expected2, 1e-5) {
 		t.Errorf("NewMQuaternionFromAxisAngles failed. Expected %v, got %v", expected2, result2)
@@ -311,7 +311,7 @@ func TestNewMQuaternionFromAxisAngles(t *testing.T) {
 
 	axis := MVec3{1, 0, 0}
 	angle := math.Pi / 2
-	expected := NewMQuaternionByValues(0.7071067811865476, 0, 0, 0.7071067811865476)
+	expected := NewMQuaternionByValues(0.707106781186548, 0, 0, 0.7071067811865476)
 
 	result := NewMQuaternionFromAxisAngles(&axis, angle)
 

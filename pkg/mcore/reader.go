@@ -290,6 +290,8 @@ func (r *BaseReader[T]) UnpackQuaternion(isConvertGl bool) (mmath.MQuaternion, e
 		return *mmath.NewMQuaternion(), err
 	}
 	if isConvertGl {
+		// x = -x
+		// y = -y
 		z = -z
 	}
 	return *mmath.NewMQuaternionByValues(x, y, z, w), nil

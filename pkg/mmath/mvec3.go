@@ -13,18 +13,17 @@ import (
 var (
 	MVec3Zero = &MVec3{}
 
-	// UnitX holds a vector with X set to one.
-	MVec3UnitX = &MVec3{1, 0, 0}
-	// UnitY holds a vector with Y set to one.
-	MVec3UnitY = &MVec3{0, 1, 0}
-	// UnitZ holds a vector with Z set to one.
-	MVec3UnitZ = &MVec3{0, 0, 1}
-	// UnitXYZ holds a vector with X, Y, Z set to one.
+	MVec3UnitX   = &MVec3{1, 0, 0}
+	MVec3UnitY   = &MVec3{0, 1, 0}
+	MVec3UnitZ   = &MVec3{0, 0, 1}
 	MVec3UnitXYZ = &MVec3{1, 1, 1}
 
-	// MinVal holds a vector with the smallest possible component values.
+	MVec3UnitXInv   = &MVec3{-1, 0, 0}
+	MVec3UnitYInv   = &MVec3{0, -1, 0}
+	MVec3UnitZInv   = &MVec3{0, 0, -1}
+	MVec3UnitXYZInv = &MVec3{-1, -1, -1}
+
 	MVec3MinVal = &MVec3{-math.MaxFloat64, -math.MaxFloat64, -math.MaxFloat64}
-	// MaxVal holds a vector with the highest possible component values.
 	MVec3MaxVal = &MVec3{+math.MaxFloat64, +math.MaxFloat64, +math.MaxFloat64}
 )
 
@@ -81,7 +80,7 @@ func (v *MVec3) String() string {
 	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f]", v.GetX(), v.GetY(), v.GetZ())
 }
 
-// MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します
+// MMD MMD(MikuMikuDance)座標系に変換された3次元ベクトルを返します
 func (v *MVec3) MMD() *MVec3 {
 	return &MVec3{v.GetX(), v.GetY(), -v.GetZ()}
 }
@@ -314,12 +313,13 @@ func (v *MVec3) Degree(other *MVec3) float64 {
 
 // Dot ベクトルの内積を返します
 func (v *MVec3) Dot(other *MVec3) float64 {
-	return v[0]*other[0] + v[1]*other[1] + v[2]*other[2]
+	return mgl64.Vec3(*v).Dot(mgl64.Vec3(*other))
 }
 
 // Cross ベクトルの外積を返します
 func (v1 *MVec3) Cross(v2 *MVec3) *MVec3 {
-	return &MVec3{v1[1]*v2[2] - v1[2]*v2[1], v1[2]*v2[0] - v1[0]*v2[2], v1[0]*v2[1] - v1[1]*v2[0]}
+	v := mgl64.Vec3(*v1).Cross(mgl64.Vec3(*v2))
+	return &MVec3{v[0], v[1], v[2]}
 }
 
 // Min ベクトルの各要素の最小値をTの各要素に設定して返します
@@ -402,6 +402,14 @@ func (v *MVec3) ToMat4() *MMat4 {
 	mat[3] = v.GetX()
 	mat[7] = v.GetY()
 	mat[11] = v.GetZ()
+	return mat
+}
+
+func (v *MVec3) ToScaleMat4() *MMat4 {
+	mat := NewMMat4()
+	mat[0] = v.GetX()
+	mat[5] = v.GetY()
+	mat[10] = v.GetZ()
 	return mat
 }
 

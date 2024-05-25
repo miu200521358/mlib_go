@@ -405,7 +405,7 @@ ikLoop:
 			// 回転軸
 			linkAxis := ikLocalPosition.Cross(effectorLocalPosition).Normalize()
 			// 回転角(ラジアン)
-			linkAngle := math.Acos(mmath.ClampFloat(effectorLocalPosition.Dot(ikLocalPosition), -1, 1))
+			linkAngle := math.Acos(mmath.ClampFloat(ikLocalPosition.Dot(effectorLocalPosition), -1, 1))
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
@@ -439,7 +439,7 @@ ikLoop:
 			if linkDeform != nil && linkDeform.rotation != nil {
 				linkQuat = linkDeform.rotation.Copy()
 				if linkDeform.effectRotation != nil {
-					linkQuat = linkDeform.effectRotation.Muled(linkQuat)
+					linkQuat = linkDeform.rotation.Muled(linkDeform.effectRotation)
 				}
 			} else {
 				linkQuat = mmath.NewMQuaternion()
@@ -838,7 +838,7 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 		rot := deform.rotation
 		isEffectorRot := false
 		if deform.effectRotation != nil {
-			rot = deform.effectRotation.Muled(rot)
+			rot.Mul(deform.effectRotation)
 			isEffectorRot = true
 		}
 		if isEffectorRot && deform.bone.HasFixedAxis() {
@@ -850,11 +850,12 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 		}
 
 		// 移動
+		pos := deform.position
 		if deform.effectPosition != nil && !deform.effectPosition.IsZero() {
-			matrix.Translate(deform.effectPosition)
+			pos = pos.Add(deform.effectPosition)
 		}
-		if deform.position != nil && !deform.position.IsZero() {
-			matrix.Translate(deform.position)
+		if pos != nil && !pos.IsZero() {
+			matrix.Translate(pos)
 		}
 
 		// 逆BOf行列(初期姿勢行列)
@@ -866,7 +867,7 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 		if deform.bone.ParentIndex >= 0 && boneDeltas.Get(deform.bone.ParentIndex) != nil {
 			// 直近の親ボーンの変形行列を元にする
 			parentDelta := boneDeltas.Get(deform.bone.ParentIndex)
-			deform.globalMatrix = deform.unitMatrix.Muled(parentDelta.GlobalMatrix())
+			deform.globalMatrix = deform.unitMatrix.Mul(parentDelta.GlobalMatrix())
 		} else {
 			// 対象ボーン自身の行列をかける
 			deform.globalMatrix = deform.unitMatrix.Copy()

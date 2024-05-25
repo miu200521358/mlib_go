@@ -103,8 +103,8 @@ func (v *MQuaternion) MMD() *MQuaternion {
 
 // NewMQuaternionFromAxisAngles は、軸周りの回転を表す四元数を返します。
 func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
-	q := MQuaternion(mgl64.QuatRotate(angle, mgl64.Vec3(*axis)).Normalize())
-	return &q
+	m := MMat4(mgl64.HomogRotate3D(angle, mgl64.Vec3(*axis.Normalize())))
+	return m.Quaternion()
 }
 
 // NewMQuaternionFromRadiansは、オイラー角（ラジアン）回転を表す四元数を返します。
@@ -253,9 +253,8 @@ func (q1 *MQuaternion) Mul(q2 *MQuaternion) *MQuaternion {
 }
 
 func (q1 *MQuaternion) Muled(q2 *MQuaternion) *MQuaternion {
-	copied := q1.Copy()
-	copied.Mul(q2)
-	return copied
+	q := MQuaternion(mgl64.Quat(*q1).Mul(mgl64.Quat(*q2)))
+	return &q
 }
 
 // Normはクォータニオンのノルム値を返します。

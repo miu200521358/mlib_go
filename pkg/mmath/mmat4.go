@@ -44,6 +44,11 @@ func NewMMat4ByValues(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34
 	}
 }
 
+func NewMMat4ByAxisAngle(axis *MVec3, angle float64) *MMat4 {
+	m := MMat4(mgl64.HomogRotate3D(angle, mgl64.Vec3(*axis)))
+	return &m
+}
+
 // IsZero
 func (m *MMat4) IsZero() bool {
 	return *m == MMat4Zero
@@ -88,12 +93,12 @@ func (mat *MMat4) MulVec3(other *MVec3) *MVec3 {
 
 // Translate adds v to the translation part of the matrix.
 func (mat *MMat4) Translate(v *MVec3) *MMat4 {
-	*mat = *v.ToMat4().Mul(mat)
+	*mat = *mat.Mul(v.ToMat4())
 	return mat
 }
 
 func (mat *MMat4) Translated(v *MVec3) *MMat4 {
-	return v.ToMat4().Mul(mat)
+	return mat.Copy().Mul(v.ToMat4())
 }
 
 // 行列の移動情報
@@ -102,28 +107,27 @@ func (mat *MMat4) Translation() *MVec3 {
 }
 
 func (mat *MMat4) Scale(s *MVec3) *MMat4 {
-	mat[0] *= s[0]
-	mat[5] *= s[1]
-	mat[10] *= s[2]
+	*mat = *mat.Mul(s.ToScaleMat4())
 	return mat
 }
 
-// Scaled returns a copy of the matrix with the diagonal scale elements multiplied by f.
 func (mat *MMat4) Scaled(s *MVec3) *MMat4 {
-	return mat.Copy().Scale(s)
+	return mat.Copy().Mul(s.ToScaleMat4())
 }
 
-// Scaling returns the scaling diagonal of the matrix.
 func (mat *MMat4) Scaling() *MVec3 {
 	return &MVec3{mat[0], mat[5], mat[10]}
 }
 
-// Rotate multiplies the matrix by a rotation matrix derived from the quaternion.
 func (mat *MMat4) Rotate(quat *MQuaternion) *MMat4 {
-	return mat.Mul(quat.ToMat4())
+	*mat = *mat.Mul(quat.ToMat4())
+	return mat
 }
 
-// Quaternion extracts a quaternion from the rotation part of the matrix.
+func (mat *MMat4) Rotated(quat *MQuaternion) *MMat4 {
+	return mat.Copy().Mul(quat.ToMat4())
+}
+
 func (mat *MMat4) Quaternion() *MQuaternion {
 	q := mgl64.Mat4ToQuat(mgl64.Mat4(*mat))
 	return &MQuaternion{q.W, q.V}

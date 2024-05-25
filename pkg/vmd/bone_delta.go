@@ -106,7 +106,7 @@ func NewBoneDelta(
 		Frame:        frame,
 		globalMatrix: globalMatrix,
 		// BOf行列: 自身のボーンのボーンオフセット行列をかけてローカル行列
-		localMatrix:         bone.OffsetMatrix.Muled(globalMatrix),
+		localMatrix:         globalMatrix.Muled(bone.OffsetMatrix),
 		unitMatrix:          unitMatrix,
 		globalPosition:      globalMatrix.Translation(),
 		framePosition:       framePosition,
