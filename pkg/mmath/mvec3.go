@@ -82,7 +82,7 @@ func (v *MVec3) String() string {
 
 // MMD MMD(MikuMikuDance)座標系に変換された3次元ベクトルを返します
 func (v *MVec3) MMD() *MVec3 {
-	return &MVec3{v.GetX(), v.GetY(), -v.GetZ()}
+	return &MVec3{v.GetX(), v.GetY(), v.GetZ()}
 }
 
 // Add ベクトルに他のベクトルを加算します
@@ -507,9 +507,9 @@ func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
 
 	// ローカル軸に合わせた回転行列を作成する
 	rotationMatrix := NewMMat4ByValues(
-		xAxis.GetX(), yAxis.GetX(), zAxis.GetX(), 0,
-		xAxis.GetY(), yAxis.GetY(), zAxis.GetY(), 0,
-		xAxis.GetZ(), yAxis.GetZ(), zAxis.GetZ(), 0,
+		xAxis.GetX(), xAxis.GetY(), xAxis.GetZ(), 0,
+		yAxis.GetX(), yAxis.GetY(), yAxis.GetZ(), 0,
+		zAxis.GetX(), zAxis.GetY(), zAxis.GetZ(), 0,
 		0, 0, 0, 1,
 	)
 

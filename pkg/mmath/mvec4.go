@@ -118,7 +118,7 @@ func (v *MVec4) String() string {
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します
 func (v *MVec4) MMD() *MVec4 {
-	return &MVec4{v.GetX(), v.GetY(), -v.GetZ(), v.GetW()}
+	return &MVec4{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
 }
 
 // Add ベクトルに他のベクトルを加算します

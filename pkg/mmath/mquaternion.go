@@ -98,7 +98,7 @@ func (v *MQuaternion) String() string {
 
 // MMD MMD(MikuMikuDance)座標系に変換されたクォータニオンベクトルを返します
 func (v *MQuaternion) MMD() *MQuaternion {
-	return &MQuaternion{v.GetW(), mgl64.Vec3{v.GetX(), v.GetY(), -v.GetZ()}}
+	return &MQuaternion{v.GetW(), mgl64.Vec3{v.GetX(), v.GetY(), v.GetZ()}}
 }
 
 // NewMQuaternionFromAxisAngles は、軸周りの回転を表す四元数を返します。
@@ -192,6 +192,16 @@ func (quat *MQuaternion) ToDegrees() *MVec3 {
 		RadToDeg(vec.GetX()),
 		RadToDeg(vec.GetY()),
 		RadToDeg(vec.GetZ()),
+	}
+}
+
+// ToDegreesは、クォータニオンのオイラー角（度）回転を返します。
+func (quat *MQuaternion) ToMMDDegrees() *MVec3 {
+	vec := quat.MMD().ToRadians()
+	return &MVec3{
+		RadToDeg(vec.GetX()),
+		RadToDeg(-vec.GetY()),
+		RadToDeg(-vec.GetZ()),
 	}
 }
 

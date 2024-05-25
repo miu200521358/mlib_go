@@ -243,9 +243,9 @@ func (r *BaseReader[T]) UnpackVec3(isConvertGl bool) (mmath.MVec3, error) {
 	if err != nil {
 		return *mmath.NewMVec3(), err
 	}
-	if isConvertGl {
-		z = -z
-	}
+	// if isConvertGl {
+	// 	z = -z
+	// }
 	return mmath.MVec3{x, y, z}, nil
 }
 
@@ -266,9 +266,9 @@ func (r *BaseReader[T]) UnpackVec4(isConvertGl bool) (mmath.MVec4, error) {
 	if err != nil {
 		return *mmath.NewMVec4(), err
 	}
-	if isConvertGl {
-		z = -z
-	}
+	// if isConvertGl {
+	// 	z = -z
+	// }
 	return mmath.MVec4{x, y, z, w}, nil
 }
 
@@ -289,11 +289,9 @@ func (r *BaseReader[T]) UnpackQuaternion(isConvertGl bool) (mmath.MQuaternion, e
 	if err != nil {
 		return *mmath.NewMQuaternion(), err
 	}
-	if isConvertGl {
-		// x = -x
-		// y = -y
-		z = -z
-	}
+	// if isConvertGl {
+	// 	z = -z
+	// }
 	return *mmath.NewMQuaternionByValues(x, y, z, w), nil
 }
 
