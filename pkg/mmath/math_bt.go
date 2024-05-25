@@ -21,7 +21,7 @@ func (v *MVec3) Bullet() mbt.BtVector3 {
 
 // Bullet+OpenGL座標系に変換されたクォータニオンベクトルを返します
 func (v *MQuaternion) Bullet() mbt.BtQuaternion {
-	return mbt.NewBtQuaternion(float32(v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(v.GetW()))
+	return mbt.NewBtQuaternion(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW()))
 }
 
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します
@@ -39,9 +39,9 @@ func (m *MMat4) GL() mgl32.Mat4 {
 func NewMMat4ByMgl(m *mgl32.Mat4) *MMat4 {
 	tm := m.Transpose()
 	return NewMMat4ByValues(
-		float64(tm.Col(0).X()), float64(-tm.Col(1).X()), float64(-tm.Col(2).X()), float64(-tm.Col(3).X()),
-		float64(-tm.Col(0).Y()), float64(tm.Col(1).Y()), float64(tm.Col(2).Y()), float64(tm.Col(3).Y()),
-		float64(-tm.Col(0).Z()), float64(tm.Col(1).Z()), float64(tm.Col(2).Z()), float64(tm.Col(3).Z()),
-		float64(tm.Col(0).W()), float64(tm.Col(1).W()), float64(tm.Col(2).W()), float64(tm.Col(3).W()),
+		float64(tm.Row(0).X()), float64(-tm.Row(1).X()), float64(-tm.Row(2).X()), float64(-tm.Row(3).X()),
+		float64(-tm.Row(0).Y()), float64(tm.Row(1).Y()), float64(tm.Row(2).Y()), float64(tm.Row(3).Y()),
+		float64(-tm.Row(0).Z()), float64(tm.Row(1).Z()), float64(tm.Row(2).Z()), float64(tm.Row(3).Z()),
+		float64(tm.Row(0).W()), float64(tm.Row(1).W()), float64(tm.Row(2).W()), float64(tm.Row(3).W()),
 	)
 }
