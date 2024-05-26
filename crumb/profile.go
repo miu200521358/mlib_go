@@ -41,6 +41,6 @@ func main() {
 		if i%100 == 0 {
 			log.Printf("i: %d", i)
 		}
-		motion.BoneFrames.Deform(i, model, nil, true, true, false, nil)
+		motion.BoneFrames.Deform(i, model, nil, true, nil)
 	}
 }

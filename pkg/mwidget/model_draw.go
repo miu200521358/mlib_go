@@ -53,13 +53,13 @@ func deform(
 	}
 
 	// 物理前のデフォーム情報
-	beforeBoneDeltas := motion.BoneFrames.Deform(frame, model, nil, true, true, true, nil)
+	beforeBoneDeltas := motion.BoneFrames.Deform(frame, model, nil, true, nil)
 
 	// 物理更新
 	updatePhysics(modelPhysics, model, beforeBoneDeltas, frame, elapsed, enablePhysics)
 
 	// 物理後のデフォーム情報
-	vds.Bones = motion.BoneFrames.Deform(frame, model, nil, true, true, true, beforeBoneDeltas)
+	vds.Bones = motion.BoneFrames.Deform(frame, model, nil, true, beforeBoneDeltas)
 
 	return vds
 }
