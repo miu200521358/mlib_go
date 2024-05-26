@@ -543,6 +543,10 @@ ikLoop:
 						}
 					}
 
+					if linkAxis.Dot(linkBone.NormalizedFixedAxis) < 0 {
+						linkAngle = -linkAngle
+					}
+
 					// 軸制限ありの場合、軸にそった理想回転量とする
 					linkAxis = linkBone.NormalizedFixedAxis
 
@@ -562,7 +566,7 @@ ikLoop:
 					}
 				}
 
-				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
+				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
@@ -835,7 +839,6 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 			continue
 		}
 
-		// 逆BOf行列(初期姿勢行列)
 		deform.unitMatrix = mmath.NewMMat4()
 
 		// スケール
@@ -867,6 +870,7 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 			deform.unitMatrix.Mul(pos.ToMat4())
 		}
 
+		// 逆BOf行列(初期姿勢行列)
 		deform.unitMatrix.Mul(deform.bone.RevertOffsetMatrix)
 	}
 

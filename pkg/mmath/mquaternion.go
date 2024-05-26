@@ -305,15 +305,14 @@ func (quat *MQuaternion) Negated() *MQuaternion {
 
 // Invertは、クォータニオンを反転させます。
 func (quat *MQuaternion) Invert() *MQuaternion {
-	quat.SetX(-quat.GetX())
-	quat.SetY(-quat.GetY())
-	quat.SetZ(-quat.GetZ())
+	*quat = MQuaternion(mgl64.Quat(*quat).Inverse())
 	return quat
 }
 
 // Invertedは反転したクォータニオンを返します。
 func (quat *MQuaternion) Inverted() *MQuaternion {
-	return NewMQuaternionByValues(-quat.GetX(), -quat.GetY(), -quat.GetZ(), quat.GetW())
+	q := MQuaternion(mgl64.Quat(*quat).Inverse())
+	return &q
 }
 
 // SetShortestRotationは、クォータニオンが quat から other の方向への最短回転を表していない場合、そのクォータニオンを否定します。
@@ -465,8 +464,8 @@ func NewMQuaternionFromDirection(direction *MVec3, up *MVec3) *MQuaternion {
 		return NewMQuaternion()
 	}
 
-	zAxis := direction.Normalize()
-	xAxis := up.Cross(zAxis).Normalize()
+	zAxis := direction.Normalized()
+	xAxis := up.Cross(zAxis).Normalized()
 
 	if xAxis.LengthSqr() == 0 {
 		// collinear or invalid up vector derive shortest arc to new direction
@@ -475,8 +474,7 @@ func NewMQuaternionFromDirection(direction *MVec3, up *MVec3) *MQuaternion {
 
 	yAxis := zAxis.Cross(xAxis)
 
-	result := NewMQuaternionFromAxes(xAxis, yAxis, zAxis)
-	return result.Normalize()
+	return NewMQuaternionFromAxes(xAxis, yAxis, zAxis).Normalize()
 }
 
 // NewMQuaternionRotateはfromベクトルからtoベクトルまでの回転量を計算します。
@@ -488,9 +486,9 @@ func NewMQuaternionRotate(fromV, toV *MVec3) *MQuaternion {
 // NewMQuaternionFromAxesは、3つの軸ベクトルからクォータニオンを作成します。
 func NewMQuaternionFromAxes(xAxis, yAxis, zAxis *MVec3) *MQuaternion {
 	mat := NewMMat4ByValues(
-		xAxis.GetX(), yAxis.GetX(), zAxis.GetX(), 0,
-		xAxis.GetY(), yAxis.GetY(), zAxis.GetY(), 0,
-		xAxis.GetZ(), yAxis.GetZ(), zAxis.GetZ(), 0,
+		xAxis.GetX(), xAxis.GetY(), xAxis.GetZ(), 0,
+		yAxis.GetX(), yAxis.GetY(), yAxis.GetZ(), 0,
+		zAxis.GetX(), zAxis.GetY(), zAxis.GetZ(), 0,
 		0, 0, 0, 1,
 	)
 	qq := mat.Quaternion()

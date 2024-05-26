@@ -116,7 +116,7 @@ func writeBoneFrame(fout *os.File, name string, bf *BoneFrame) error {
 
 	var posMMD *mmath.MVec3
 	if bf.Position != nil {
-		posMMD = bf.Position.MMD()
+		posMMD = bf.Position
 	} else {
 		posMMD = mmath.MVec3Zero
 	}
@@ -128,7 +128,7 @@ func writeBoneFrame(fout *os.File, name string, bf *BoneFrame) error {
 
 	var quatMMD *mmath.MQuaternion
 	if bf.Rotation != nil {
-		quatMMD = bf.Rotation.GetQuaternion().MMD().Normalized()
+		quatMMD = bf.Rotation.GetQuaternion().Normalized()
 	} else {
 		quatMMD = &mmath.MQuaternionIdent
 	}
