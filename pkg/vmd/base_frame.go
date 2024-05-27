@@ -81,6 +81,7 @@ func (bf *BaseFrame) IsRead() bool {
 
 type BaseFrames[T IBaseFrame] struct {
 	data              map[int]T         // キーフレリスト
+	Indexes           *mcore.IntIndexes // 全キーフレリスト
 	RegisteredIndexes *mcore.IntIndexes // 登録対象キーフレリスト
 	newFunc           func(index int) T // キーフレ生成関数
 	lock              sync.RWMutex      // マップアクセス制御用
@@ -89,6 +90,7 @@ type BaseFrames[T IBaseFrame] struct {
 func NewBaseFrames[T IBaseFrame](newFunc func(index int) T) *BaseFrames[T] {
 	return &BaseFrames[T]{
 		data:              make(map[int]T),
+		Indexes:           mcore.NewIntIndexes(),
 		RegisteredIndexes: mcore.NewIntIndexes(),
 		newFunc:           newFunc,
 		lock:              sync.RWMutex{},
@@ -116,13 +118,9 @@ func (fs *BaseFrames[T]) Get(index int) T {
 	if nextFrame == prevFrame {
 		// 次のキーフレが無い場合、最大キーフレのコピーを返す
 		if fs.RegisteredIndexes.Len() == 0 {
-			// 登録キーが無い場合、現在登録されているすべてのキーフレの中から最大のものをコピーして返す
+			// 登録キーが無い場合、現在設定されているすべてのキーフレの中から最大のものをコピーして返す
 			// 上でデータが無いことのチェックは済んでいるので何かしらのキーはあるはず
-			indexes := mcore.NewIntIndexes()
-			for i := range fs.data {
-				indexes.ReplaceOrInsert(mcore.Int(i))
-			}
-			copied := fs.data[indexes.Max()].Copy().(T)
+			copied := fs.data[fs.Indexes.Max()].Copy().(T)
 			copied.SetIndex(index)
 			return copied
 		}
@@ -180,7 +178,9 @@ func (fs *BaseFrames[T]) appendFrame(v T) {
 	if v.IsRegistered() {
 		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Int(v.GetIndex()))
 	}
+
 	fs.data[v.GetIndex()] = v
+	fs.Indexes.ReplaceOrInsert(mcore.Int(v.GetIndex()))
 }
 
 func (fs *BaseFrames[T]) GetMaxFrame() int {
