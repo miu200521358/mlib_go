@@ -427,7 +427,7 @@ func TestMQuaternionMulScalar(t *testing.T) {
 		factor := 0.5
 		expected := NewMQuaternionFromDegrees(45, 0, 0)
 
-		result := quat.MulScalar(factor)
+		result := quat.MuledScalar(factor)
 
 		if !result.PracticallyEquals(expected, 1e-10) {
 			t.Errorf("MulScalar failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
@@ -439,7 +439,7 @@ func TestMQuaternionMulScalar(t *testing.T) {
 		factor := 0.5
 		expected := NewMQuaternionFromDegrees(77.73403, 0, 0)
 
-		result := quat.MulScalar(factor)
+		result := quat.MuledScalar(factor)
 
 		if !result.PracticallyEquals(expected, 1e-6) {
 			t.Errorf("MulScalar failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
@@ -451,7 +451,7 @@ func TestMQuaternionMulScalar(t *testing.T) {
 		factor := -0.5
 		expected := NewMQuaternionFromDegrees(-77.73403, 0, 0)
 
-		result := quat.MulScalar(factor)
+		result := quat.MuledScalar(factor)
 
 		if !result.PracticallyEquals(expected, 1e-6) {
 			t.Errorf("MulScalar failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
@@ -463,7 +463,7 @@ func TestMQuaternionMulScalar(t *testing.T) {
 		factor := 0.5
 		expected := NewMQuaternionByValues(0, 0, 0, 1)
 
-		result := quat.MulScalar(factor)
+		result := quat.MuledScalar(factor)
 
 		if !result.PracticallyEquals(expected, 1e-10) {
 			t.Errorf("MulScalar failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
@@ -475,7 +475,7 @@ func TestMQuaternionMulScalar(t *testing.T) {
 		factor := 1.0
 		expected := NewMQuaternionByValues(0.08715574274765817, 0.0, 0.0, 0.9961946980917455)
 
-		result := quat.MulScalar(factor)
+		result := quat.MuledScalar(factor)
 
 		if !result.PracticallyEquals(expected, 1e-10) {
 			t.Errorf("MulScalar failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())

@@ -1130,7 +1130,7 @@ func (fs *BoneFrames) getEffectRotation(
 	if beforeBoneDeltas != nil {
 		effectDelta := beforeBoneDeltas.Get(effectBone.Index)
 		if effectDelta != nil && effectDelta.frameRotation != nil {
-			return effectDelta.frameRotation.MulScalar(bone.EffectFactor).Shorten()
+			return effectDelta.frameRotation.MuledScalar(bone.EffectFactor).Shorten()
 		}
 	}
 
@@ -1141,7 +1141,7 @@ func (fs *BoneFrames) getEffectRotation(
 		rot.Mul(effectRot)
 	}
 
-	return rot.MulScalar(bone.EffectFactor).Shorten()
+	return rot.MuledScalar(bone.EffectFactor).Shorten()
 }
 
 // 該当キーフレにおけるボーンの拡大率

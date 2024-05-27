@@ -349,8 +349,8 @@ func (quat *MQuaternion) Dot(other *MQuaternion) float64 {
 	return mgl64.Quat(*quat).Dot(mgl64.Quat(*other))
 }
 
-// MulScalarはクォータニオンにスカラーを掛け算します。
-func (quat *MQuaternion) MulScalar(factor float64) *MQuaternion {
+// MuledScalarはクォータニオンにスカラーを掛け算します。
+func (quat *MQuaternion) MuledScalar(factor float64) *MQuaternion {
 	if factor == 0.0 {
 		return NewMQuaternion()
 	}

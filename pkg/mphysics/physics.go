@@ -47,8 +47,8 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 
 	p := &MPhysics{
 		world:               world,
-		MaxSubSteps:         5,
-		Fps:                 60.0,
+		MaxSubSteps:         7,
+		Fps:                 30.0,
 		rigidBodies:         make(map[int]mbt.BtRigidBody),
 		rigidBodyTransforms: make(map[int]mbt.BtTransform),
 	}

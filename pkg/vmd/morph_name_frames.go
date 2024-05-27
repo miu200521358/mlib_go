@@ -1,7 +1,6 @@
 package vmd
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
 
@@ -137,28 +136,43 @@ func (fs *MorphNameFrames) DeformBone(
 			if delta == nil {
 				delta = NewBoneMorphDelta()
 			}
+
 			if delta.MorphPosition == nil {
-				delta.MorphPosition = mmath.NewMVec3()
+				delta.MorphPosition = offset.Position.MuledScalar(mf.Ratio).Copy()
+			} else {
+				delta.MorphPosition.Add(offset.Position.MuledScalar(mf.Ratio))
 			}
-			delta.MorphPosition.Add(offset.Position.MuledScalar(mf.Ratio))
+
 			if delta.MorphLocalPosition == nil {
-				delta.MorphLocalPosition = mmath.NewMVec3()
+				delta.MorphLocalPosition = offset.LocalPosition.MuledScalar(mf.Ratio).Copy()
+			} else {
+				delta.MorphLocalPosition.Add(offset.LocalPosition.MuledScalar(mf.Ratio))
 			}
-			delta.MorphLocalPosition.Add(offset.LocalPosition.MuledScalar(mf.Ratio))
-			deltaRad := offset.Rotation.GetRadians().MuledScalar(mf.Ratio)
-			delta.MorphRotation = delta.MorphRotation.Muled(
-				mmath.NewMQuaternionFromRadians(deltaRad.GetX(), deltaRad.GetY(), deltaRad.GetZ()))
-			deltaLocalRad := offset.LocalRotation.GetRadians().MuledScalar(mf.Ratio)
-			delta.MorphLocalRotation = delta.MorphLocalRotation.Muled(
-				mmath.NewMQuaternionFromRadians(deltaLocalRad.GetX(), deltaLocalRad.GetY(), deltaLocalRad.GetZ()))
+
+			if delta.MorphRotation == nil {
+				delta.MorphRotation = offset.Rotation.GetQuaternion().MuledScalar(mf.Ratio)
+			} else {
+				delta.MorphRotation.Mul(offset.Rotation.GetQuaternion().MuledScalar(mf.Ratio))
+			}
+
+			if delta.MorphLocalRotation == nil {
+				delta.MorphLocalRotation = offset.LocalRotation.GetQuaternion().MuledScalar(mf.Ratio)
+			} else {
+				delta.MorphLocalRotation.Mul(offset.LocalRotation.GetQuaternion().MuledScalar(mf.Ratio))
+			}
+
 			if delta.MorphScale == nil {
-				delta.MorphScale = mmath.NewMVec3()
+				delta.MorphScale = offset.Scale.MuledScalar(mf.Ratio).Copy()
+			} else {
+				delta.MorphScale.Add(offset.Scale.MuledScalar(mf.Ratio))
 			}
-			delta.MorphScale.Add(offset.Scale.MuledScalar(mf.Ratio))
+
 			if delta.MorphLocalScale == nil {
-				delta.MorphLocalScale = mmath.NewMVec3()
+				delta.MorphLocalScale = offset.LocalScale.MuledScalar(mf.Ratio).Copy()
+			} else {
+				delta.MorphLocalScale.Add(offset.LocalScale.MuledScalar(mf.Ratio))
 			}
-			delta.MorphLocalScale.Add(offset.LocalScale.MuledScalar(mf.Ratio))
+
 			deltas.Data[offset.BoneIndex] = delta
 		}
 	}

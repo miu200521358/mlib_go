@@ -38,7 +38,9 @@ func main() {
 	var mWindow *mwidget.MWindow
 	var err error
 
-	// defer mwidget.RecoverFromPanic(mWindow)
+	if !mlog.IsDebug() {
+		defer mwidget.RecoverFromPanic(mWindow)
+	}
 
 	mWindow, err = mwidget.NewMWindow(resourceFiles, true, 512, 768, getMenuItems)
 	mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
