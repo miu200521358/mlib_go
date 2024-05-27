@@ -134,7 +134,7 @@ func (bts *BoneDeltas) GetByName(boneName string) *BoneDelta {
 	return bts.Get(bts.Names[boneName])
 }
 
-func (bts *BoneDeltas) SetItem(boneDelta *BoneDelta) {
+func (bts *BoneDeltas) Append(boneDelta *BoneDelta) {
 	bts.Data[boneDelta.Bone.Index] = boneDelta
 	bts.Names[boneDelta.Bone.Name] = boneDelta.Bone.Index
 }

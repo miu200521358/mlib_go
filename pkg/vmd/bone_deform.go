@@ -19,8 +19,6 @@ type BoneDeform struct {
 	effectRotation *mmath.MQuaternion
 	scale          *mmath.MVec3
 	unitMatrix     *mmath.MMat4
-	globalMatrix   *mmath.MMat4
-	physicsMatrix  *mmath.MMat4
 }
 
 func getBoneDeform(boneDeformsMap map[bool]*boneDeforms, bone *pmx.Bone) *BoneDeform {
