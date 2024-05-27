@@ -421,7 +421,7 @@ func TestMQuaternionVectorToDegree(t *testing.T) {
 	}
 }
 
-func TestMQuaternionMulFactor(t *testing.T) {
+func TestMQuaternionMulScalar(t *testing.T) {
 	{
 		quat := NewMQuaternionFromDegrees(90, 0, 0)
 		factor := 0.5
@@ -430,7 +430,7 @@ func TestMQuaternionMulFactor(t *testing.T) {
 		result := quat.MulScalar(factor)
 
 		if !result.PracticallyEquals(expected, 1e-10) {
-			t.Errorf("MulFactor failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
+			t.Errorf("MulScalar failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
 		}
 	}
 
@@ -442,7 +442,7 @@ func TestMQuaternionMulFactor(t *testing.T) {
 		result := quat.MulScalar(factor)
 
 		if !result.PracticallyEquals(expected, 1e-6) {
-			t.Errorf("MulFactor failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
+			t.Errorf("MulScalar failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
 		}
 	}
 
@@ -454,7 +454,7 @@ func TestMQuaternionMulFactor(t *testing.T) {
 		result := quat.MulScalar(factor)
 
 		if !result.PracticallyEquals(expected, 1e-6) {
-			t.Errorf("MulFactor failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
+			t.Errorf("MulScalar failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
 		}
 	}
 
@@ -466,7 +466,7 @@ func TestMQuaternionMulFactor(t *testing.T) {
 		result := quat.MulScalar(factor)
 
 		if !result.PracticallyEquals(expected, 1e-10) {
-			t.Errorf("MulFactor failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
+			t.Errorf("MulScalar failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
 		}
 	}
 
@@ -478,7 +478,7 @@ func TestMQuaternionMulFactor(t *testing.T) {
 		result := quat.MulScalar(factor)
 
 		if !result.PracticallyEquals(expected, 1e-10) {
-			t.Errorf("MulFactor failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
+			t.Errorf("MulScalar failed. Expected %v, got %v(%v)", expected, result, result.ToDegrees())
 		}
 	}
 }

@@ -185,14 +185,14 @@ func (mat *MMat4) Muled(a *MMat4) *MMat4 {
 	return copied
 }
 
-func (mat *MMat4) MulFactor(v float64) *MMat4 {
+func (mat *MMat4) MulScalar(v float64) *MMat4 {
 	*mat = MMat4(mgl64.Mat4(*mat.Copy()).Mul(v))
 	return mat
 }
 
-func (mat *MMat4) MuledFactor(v float64) *MMat4 {
+func (mat *MMat4) MuledScalar(v float64) *MMat4 {
 	copied := mat.Copy()
-	copied.MulFactor(v)
+	copied.MulScalar(v)
 	return copied
 }
 
