@@ -157,18 +157,33 @@ func updatePhysics(
 		return
 	}
 
-	boneTransforms := make([]*mbt.BtTransform, len(model.Bones.Data))
-	for _, delta := range boneDeltas.Data {
-		mat := delta.GlobalMatrix().GL()
-		t := mbt.NewBtTransform()
-		t.SetFromOpenGLMatrix(&mat[0])
-		boneTransforms[delta.Bone.Index] = &t
-	}
-
 	for _, r := range model.RigidBodies.GetSortedData() {
+		// 現在のボーン変形情報を保持
+		rigidBodyBone := r.Bone
+		if rigidBodyBone == nil {
+			rigidBodyBone = r.JointedBone
+		}
+		if rigidBodyBone == nil || boneDeltas.Get(rigidBodyBone.Index) == nil {
+			continue
+		}
+
+		boneTransform := mbt.NewBtTransform()
+		// if r.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE {
+		// 	mat := boneDeltas.Get(rigidBodyBone.Index).GlobalMatrix()
+		// 	bonePhysicsGlobalMatrix := r.GetRigidBodyBoneMatrix(modelPhysics)
+
+		// 	bonePhysicsGlobalMatrix[3] = mat[3]
+		// 	bonePhysicsGlobalMatrix[7] = mat[7]
+		// 	bonePhysicsGlobalMatrix[11] = mat[11]
+		// } else {
+		mat := boneDeltas.Get(rigidBodyBone.Index).GlobalMatrix().GL()
+		boneTransform.SetFromOpenGLMatrix(&mat[0])
+		// }
+
 		// 物理フラグが落ちている場合があるので、強制的に起こす
 		forceUpdate := r.UpdateFlags(modelPhysics, enablePhysics)
-		r.UpdateTransform(modelPhysics, boneTransforms, elapsed == 0.0 || !enablePhysics || forceUpdate)
+		r.UpdateTransform(modelPhysics, rigidBodyBone, boneTransform,
+			elapsed == 0.0 || !enablePhysics || forceUpdate)
 	}
 
 	if float32(frame) > modelPhysics.Spf {
@@ -176,16 +191,16 @@ func updatePhysics(
 
 		// 剛体位置を更新
 		for _, rigidBody := range model.RigidBodies.GetSortedData() {
-			bonePhysicsGlobalMatrix := rigidBody.UpdateMatrix(modelPhysics)
+			bonePhysicsGlobalMatrix := rigidBody.GetRigidBodyBoneMatrix(modelPhysics)
 			if boneDeltas != nil && bonePhysicsGlobalMatrix != nil && rigidBody.Bone != nil {
-				if rigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE &&
-					boneDeltas.Get(rigidBody.Bone.Index) != nil {
-					// ボーン位置合わせの場合、位置情報は計算したのを使う
-					globalMatrix := boneDeltas.Get(rigidBody.Bone.Index).GlobalMatrix()
-					bonePhysicsGlobalMatrix[3] = globalMatrix[3]
-					bonePhysicsGlobalMatrix[7] = globalMatrix[7]
-					bonePhysicsGlobalMatrix[11] = globalMatrix[11]
-				}
+				// if rigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE &&
+				// 	boneDeltas.Get(rigidBody.Bone.Index) != nil {
+				// 	// ボーン位置合わせの場合、位置情報は計算したのを使う
+				// 	globalMatrix := boneDeltas.Get(rigidBody.Bone.Index).GlobalMatrix()
+				// 	bonePhysicsGlobalMatrix[3] = globalMatrix[3]
+				// 	bonePhysicsGlobalMatrix[7] = globalMatrix[7]
+				// 	bonePhysicsGlobalMatrix[11] = globalMatrix[11]
+				// }
 				if boneDeltas.Get(rigidBody.Bone.Index) == nil {
 					boneDeltas.Append(&vmd.BoneDelta{Bone: rigidBody.Bone, Frame: frame})
 				}

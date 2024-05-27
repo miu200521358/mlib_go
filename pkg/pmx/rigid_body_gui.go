@@ -113,7 +113,7 @@ func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 	// boneTransform.SetOrigin(boneLocalPosition.Bullet())
 
 	// 剛体の初期位置と回転
-	btRigidBodyTransform := mbt.NewBtTransform(r.Rotation.GetQuaternion().Bullet(), r.Position.Bullet())
+	btRigidBodyTransform := mbt.NewBtTransform(r.Rotation.Bullet(), r.Position.Bullet())
 
 	// ボーンから見た剛体の初期位置
 	var bPos *mmath.MVec3
@@ -125,7 +125,7 @@ func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 		bPos = mmath.NewMVec3()
 	}
 	rbLocalPos := r.Position.Subed(bPos)
-	btRigidBodyLocalTransform := mbt.NewBtTransform(r.Rotation.GetQuaternion().Bullet(), rbLocalPos.Bullet())
+	btRigidBodyLocalTransform := mbt.NewBtTransform(r.Rotation.Bullet(), rbLocalPos.Bullet())
 
 	// {
 	// 	mlog.V("---------------------------------")
@@ -158,12 +158,13 @@ func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 
 func (r *RigidBody) UpdateTransform(
 	modelPhysics *mphysics.MPhysics,
-	boneTransforms []*mbt.BtTransform,
+	rigidBodyBone *Bone,
+	boneTransform mbt.BtTransform,
 	isForce bool,
 ) {
 	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(r.Index)
 
-	if btRigidBody == nil || btRigidBody.GetMotionState() == nil ||
+	if btRigidBody == nil || btRigidBody.GetMotionState() == nil || boneTransform == nil ||
 		(r.CorrectPhysicsType == PHYSICS_TYPE_DYNAMIC && !isForce) {
 		return
 	}
@@ -174,16 +175,10 @@ func (r *RigidBody) UpdateTransform(
 
 	// 剛体のグローバル位置を確定
 	motionState := btRigidBody.GetMotionState().(mbt.BtMotionState)
-	if r.Bone != nil && r.Bone.Index < len(boneTransforms) && boneTransforms[r.Bone.Index] != nil {
-		t := mbt.NewBtTransform()
-		t.Mult(*boneTransforms[r.Bone.Index], btRigidBodyLocalTransform)
-		motionState.SetWorldTransform(t)
-	} else if r.JointedBone != nil && r.JointedBone.Index < len(boneTransforms) &&
-		boneTransforms[r.JointedBone.Index] != nil {
-		t := mbt.NewBtTransform()
-		t.Mult(*boneTransforms[r.JointedBone.Index], btRigidBodyLocalTransform)
-		motionState.SetWorldTransform(t)
-	}
+
+	t := mbt.NewBtTransform()
+	t.Mult(boneTransform, btRigidBodyLocalTransform)
+	motionState.SetWorldTransform(t)
 
 	// if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
 	// 	mat := mgl32.Mat4{}
@@ -198,7 +193,7 @@ func (r *RigidBody) UpdateTransform(
 
 }
 
-func (r *RigidBody) UpdateMatrix(
+func (r *RigidBody) GetRigidBodyBoneMatrix(
 	modelPhysics *mphysics.MPhysics,
 ) *mmath.MMat4 {
 	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(r.Index)

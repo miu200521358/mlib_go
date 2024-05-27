@@ -10,7 +10,7 @@ import (
 
 func (j *Joint) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody) {
 	// ジョイントの位置と向き
-	jointTransform := mbt.NewBtTransform(j.Rotation.GetQuaternion().Bullet(), j.Position.Bullet())
+	jointTransform := mbt.NewBtTransform(j.Rotation.Bullet(), j.Position.Bullet())
 
 	btRigidBodyA, _ := modelPhysics.GetRigidBody(rigidBodyA.Index)
 	btRigidBodyB, _ := modelPhysics.GetRigidBody(rigidBodyB.Index)

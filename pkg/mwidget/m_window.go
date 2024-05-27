@@ -36,12 +36,12 @@ type MWindow struct {
 
 func NewMWindow(
 	resourceFiles embed.FS,
+	appConfig *mconfig.AppConfig,
 	isHorizontal bool,
 	width int,
 	height int,
 	funcHelpMenuItems func() []declarative.MenuItem,
 ) (*MWindow, error) {
-	appConfig := mconfig.LoadAppConfig(resourceFiles)
 	mi18n.Initialize(resourceFiles)
 
 	mainWindow := &MWindow{

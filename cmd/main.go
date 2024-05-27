@@ -14,6 +14,7 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/mwidget"
@@ -38,11 +39,13 @@ func main() {
 	var mWindow *mwidget.MWindow
 	var err error
 
-	if !mlog.IsDebug() {
+	appConfig := mconfig.LoadAppConfig(resourceFiles)
+
+	if appConfig.IsEnvProd() {
 		defer mwidget.RecoverFromPanic(mWindow)
 	}
 
-	mWindow, err = mwidget.NewMWindow(resourceFiles, true, 512, 768, getMenuItems)
+	mWindow, err = mwidget.NewMWindow(resourceFiles, appConfig, true, 512, 768, getMenuItems)
 	mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
 
 	glWindow, err := mwidget.NewGlWindow(fmt.Sprintf("%s %s", mWindow.Title(), mi18n.T("ビューワー")),

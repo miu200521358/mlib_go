@@ -15,15 +15,22 @@ type AppConfig struct {
 	Env     string `json:"Env"`
 }
 
+func (ac *AppConfig) IsEnvProd() bool {
+	if ac == nil {
+		return false
+	}
+	return ac.Env == "prod"
+}
+
 // LoadAppConfig アプリ設定ファイルの読み込み
-func LoadAppConfig(resourceFiles embed.FS) AppConfig {
+func LoadAppConfig(resourceFiles embed.FS) *AppConfig {
 	fileData, err := fs.ReadFile(resourceFiles, "resources/app_config.json")
 	if err != nil {
-		return AppConfig{}
+		return &AppConfig{}
 	}
 	var appConfigData AppConfig
 	json.Unmarshal(fileData, &appConfigData)
-	return appConfigData
+	return &appConfigData
 }
 
 // LoadIconFile アイコンファイルの読み込み

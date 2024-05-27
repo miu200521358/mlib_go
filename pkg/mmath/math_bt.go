@@ -20,8 +20,11 @@ func (v *MVec3) Bullet() mbt.BtVector3 {
 }
 
 // Bullet+OpenGL座標系に変換されたクォータニオンベクトルを返します
-func (v *MQuaternion) Bullet() mbt.BtQuaternion {
-	return mbt.NewBtQuaternion(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()), float32(-v.GetW()))
+func (v *MRotation) Bullet() mbt.BtQuaternion {
+	rx := float32(v.GetRadians().GetX())
+	ry := float32(-v.GetRadians().GetY())
+	rz := float32(-v.GetRadians().GetZ())
+	return mbt.NewBtQuaternion(ry, rx, rz)
 }
 
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します
