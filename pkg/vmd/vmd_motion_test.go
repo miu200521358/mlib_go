@@ -3141,3 +3141,133 @@ func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 		}
 	}
 }
+
+func TestVmdMotion_DeformLegIk25_Addiction_Wa(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := &VmdMotionReader{}
+	motionData, err := vr.ReadByFilepath("../../test_resources/[A]ddiction_和洋_0126F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*VmdMotion)
+
+	pr := &pmx.PmxReader{}
+	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+
+	{
+
+		fno := int(0)
+		boneDeltas := motion.BoneFrames.Deform(fno, model, []string{"右襟先"}, true, nil)
+		{
+			expectedPosition := &mmath.MVec3{-0.225006, 9.705784, 2.033072}
+			if !boneDeltas.GetByName((pmx.UPPER.String())).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName((pmx.UPPER.String())).GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.237383, 10.769137, 2.039952}
+			if !boneDeltas.GetByName((pmx.UPPER2.String())).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName((pmx.UPPER2.String())).GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.630130, 13.306682, 2.752505}
+			if !boneDeltas.GetByName((pmx.SHOULDER_P.Right())).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.02) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName((pmx.SHOULDER_P.Right())).GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.630131, 13.306683, 2.742505}
+			if !boneDeltas.GetByName((pmx.SHOULDER.Right())).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName((pmx.SHOULDER.Right())).GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.948004, 13.753115, 2.690539}
+			if !boneDeltas.GetByName((pmx.ARM.Right())).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName((pmx.ARM.Right())).GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.611438, 12.394744, 2.353463}
+			if !boneDeltas.GetByName("右上半身C-A").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右上半身C-A").GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.270636, 13.350624, 2.258960}
+			if !boneDeltas.GetByName("右鎖骨").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右鎖骨").GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.963317, 14.098928, 2.497183}
+			if !boneDeltas.GetByName("右鎖骨先").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右鎖骨先").GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.235138, 13.300934, 2.666039}
+			if !boneDeltas.GetByName("右肩Rz検").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右肩Rz検").GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.847069, 13.997178, 2.886786}
+			if !boneDeltas.GetByName("右肩Rz検先").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右肩Rz検先").GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.235138, 13.300934, 2.666039}
+			if !boneDeltas.GetByName("右肩Ry検").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右肩Ry検").GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-1.172100, 13.315790, 2.838742}
+			if !boneDeltas.GetByName("右肩Ry検先").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右肩Ry検先").GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.591152, 12.674325, 2.391185}
+			if !boneDeltas.GetByName("右上半身C-B").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右上半身C-B").GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.588046, 12.954157, 2.432232}
+			if !boneDeltas.GetByName("右上半身C-C").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右上半身C-C").GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.672292, 10.939227, 2.148515}
+			if !boneDeltas.GetByName("右上半身2").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右上半身2").GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.520068, 14.089510, 2.812157}
+			if !boneDeltas.GetByName("右襟").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右襟").GlobalPosition().MMD())
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-0.491354, 14.225309, 2.502640}
+			if !boneDeltas.GetByName("右襟先").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右襟先").GlobalPosition().MMD())
+			}
+		}
+	}
+}
