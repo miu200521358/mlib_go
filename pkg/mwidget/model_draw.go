@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mview"
@@ -42,8 +41,8 @@ func deform(
 		// 一旦モーフの値をクリア
 		bf.MorphPosition = nil
 		bf.MorphLocalPosition = nil
-		bf.MorphRotation = mmath.NewRotation()
-		bf.MorphLocalRotation = mmath.NewRotation()
+		bf.MorphRotation = nil
+		bf.MorphLocalRotation = nil
 		bf.MorphScale = nil
 		bf.MorphLocalScale = nil
 

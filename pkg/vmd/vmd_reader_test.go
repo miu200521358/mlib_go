@@ -75,7 +75,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 回転
 		expectedRotation := mmath.NewMQuaternionByValues(0, 0, 0, 1)
-		if 1-bf.Rotation.GetQuaternion().Dot(expectedRotation) > 1e-8 {
+		if 1-bf.Rotation.Dot(expectedRotation) > 1e-8 {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, bf.Rotation)
 		}
 
@@ -138,7 +138,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 回転
 		expectedDegrees := &mmath.MVec3{-6.270921156, -26.96361355, 0.63172903}
-		if bf.Rotation.GetDegreesMMD().PracticallyEquals(expectedDegrees, 1e-8) {
+		if bf.Rotation.ToMMDDegrees().PracticallyEquals(expectedDegrees, 1e-8) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
 		}
 
@@ -201,7 +201,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 回転
 		expectedDegrees := &mmath.MVec3{22.20309405, 6.80959631, 2.583712695}
-		if bf.Rotation.GetDegreesMMD().PracticallyEquals(expectedDegrees, 1e-8) {
+		if bf.Rotation.ToMMDDegrees().PracticallyEquals(expectedDegrees, 1e-8) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
 		}
 
@@ -265,7 +265,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 回転
 		expectedDegrees := &mmath.MVec3{-1.4, 6.7, -5.2}
-		if bf.Rotation.GetDegreesMMD().PracticallyEquals(expectedDegrees, 1e-2) {
+		if bf.Rotation.ToMMDDegrees().PracticallyEquals(expectedDegrees, 1e-2) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
 		}
 	}
@@ -288,7 +288,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 回転
 		expectedDegrees := &mmath.MVec3{-41.9, -1.6, 1.0}
-		if bf.Rotation.GetDegreesMMD().PracticallyEquals(expectedDegrees, 1e-2) {
+		if bf.Rotation.ToMMDDegrees().PracticallyEquals(expectedDegrees, 1e-2) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
 		}
 	}
@@ -311,7 +311,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 回転
 		expectedDegrees := &mmath.MVec3{43.1, 0.0, 0.0}
-		if bf.Rotation.GetDegreesMMD().PracticallyEquals(expectedDegrees, 1e-2) {
+		if bf.Rotation.ToMMDDegrees().PracticallyEquals(expectedDegrees, 1e-2) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
 		}
 	}
@@ -334,7 +334,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 
 		// 回転
 		expectedDegrees := &mmath.MVec3{13.5, -4.3, 27.0}
-		if bf.Rotation.GetDegreesMMD().PracticallyEquals(expectedDegrees, 1e-2) {
+		if bf.Rotation.ToMMDDegrees().PracticallyEquals(expectedDegrees, 1e-2) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
 		}
 	}

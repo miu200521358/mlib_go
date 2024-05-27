@@ -128,7 +128,7 @@ func writeBoneFrame(fout *os.File, name string, bf *BoneFrame) error {
 
 	var quatMMD *mmath.MQuaternion
 	if bf.Rotation != nil {
-		quatMMD = bf.Rotation.GetQuaternion().Normalized()
+		quatMMD = bf.Rotation.Normalized()
 	} else {
 		quatMMD = &mmath.MQuaternionIdent
 	}

@@ -232,7 +232,7 @@ func (fs *BoneFrames) prepareIk(
 					effectorBoneDelta := effectorBoneDeltas.Get(linkBone.Index)
 					if effectorBoneDelta != nil {
 						linkBf := fs.Get(linkBone.Name).Get(frame)
-						linkBf.IkRotation = mmath.NewRotationByQuaternion(effectorBoneDelta.FrameRotation())
+						linkBf.IkRotation = effectorBoneDelta.FrameRotation()
 						// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
 						fs.Get(linkBone.Name).Append(linkBf)
 					}
@@ -384,14 +384,14 @@ ikLoop:
 				{
 					bf := NewBoneFrame(count)
 					bf.Position = ikDeltas.Get(ikBone.Index).framePosition
-					bf.Rotation.SetQuaternion(ikDeltas.Get(ikBone.Index).FrameRotation())
+					bf.Rotation = ikDeltas.Get(ikBone.Index).FrameRotation()
 					ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
 					count++
 				}
 				{
 					bf := NewBoneFrame(count)
 					bf.Position = effectorDeltas.Get(linkBone.Index).framePosition
-					bf.Rotation.SetQuaternion(effectorDeltas.Get(linkBone.Index).FrameRotation())
+					bf.Rotation = effectorDeltas.Get(linkBone.Index).FrameRotation()
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
 				}
@@ -452,7 +452,7 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := NewBoneFrame(count)
-				bf.Rotation.SetQuaternion(linkQuat)
+				bf.Rotation = linkQuat
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 				count++
 			}
@@ -513,7 +513,7 @@ ikLoop:
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
-					bf.Rotation.SetQuaternion(totalActualIkQuat)
+					bf.Rotation = totalActualIkQuat
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
 				}
@@ -529,7 +529,7 @@ ikLoop:
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
 						bf := NewBoneFrame(count)
-						bf.Rotation.SetQuaternion(quat)
+						bf.Rotation = quat
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 						count++
 
@@ -551,7 +551,7 @@ ikLoop:
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
 						bf := NewBoneFrame(count)
-						bf.Rotation.SetQuaternion(quat)
+						bf.Rotation = quat
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 						count++
 
@@ -568,7 +568,7 @@ ikLoop:
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
-					bf.Rotation.SetQuaternion(correctIkQuat)
+					bf.Rotation = correctIkQuat
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
 				}
@@ -584,7 +584,7 @@ ikLoop:
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
-					bf.Rotation.SetQuaternion(totalActualIkQuat)
+					bf.Rotation = totalActualIkQuat
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
 				}
@@ -602,7 +602,7 @@ ikLoop:
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
-					bf.Rotation.SetQuaternion(totalActualIkQuat)
+					bf.Rotation = totalActualIkQuat
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
 				}
@@ -637,7 +637,7 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := NewBoneFrame(count)
-				bf.Rotation.SetQuaternion(totalActualIkQuat)
+				bf.Rotation = totalActualIkQuat
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 				count++
 			}
@@ -699,7 +699,7 @@ func (fs *BoneFrames) calcIkSingleAxisRad(
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		bf := NewBoneFrame(count)
-		bf.Rotation.SetQuaternion(quat)
+		bf.Rotation = quat
 		ikMotion.AppendRegisteredBoneFrame(linkBoneName, bf)
 		count++
 	}
@@ -714,7 +714,7 @@ func (fs *BoneFrames) calcIkSingleAxisRad(
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		bf := NewBoneFrame(count)
-		bf.Rotation.SetQuaternion(totalIkQuat)
+		bf.Rotation = totalIkQuat
 		ikMotion.AppendRegisteredBoneFrame(linkBoneName, bf)
 		count++
 	}
@@ -1057,14 +1057,14 @@ func (fs *BoneFrames) getRotation(
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
 	rot := mmath.NewMQuaternion()
 	if bf.MorphRotation != nil {
-		rot.Mul(bf.MorphRotation.GetQuaternion())
+		rot.Mul(bf.MorphRotation)
 	}
 
-	if bf.IkRotation != nil && !bf.IkRotation.GetRadians().IsZero() {
+	if bf.IkRotation != nil && !bf.IkRotation.IsIdent() {
 		// IK用回転を持っている場合、置き換え
-		rot.Mul(bf.IkRotation.GetQuaternion())
+		rot.Mul(bf.IkRotation)
 	} else {
-		rot.Mul(bf.Rotation.GetQuaternion())
+		rot.Mul(bf.Rotation)
 
 		if bone.HasFixedAxis() {
 			rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)

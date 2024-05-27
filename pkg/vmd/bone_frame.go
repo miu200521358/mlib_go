@@ -5,22 +5,22 @@ import (
 )
 
 type BoneFrame struct {
-	*BaseFrame                          // キーフレ
-	Position           *mmath.MVec3     // 位置
-	MorphPosition      *mmath.MVec3     // モーフ位置
-	LocalPosition      *mmath.MVec3     // ローカル位置
-	MorphLocalPosition *mmath.MVec3     // モーフローカル位置
-	Rotation           *mmath.MRotation // 回転
-	MorphRotation      *mmath.MRotation // モーフ回転
-	LocalRotation      *mmath.MRotation // ローカル回転
-	MorphLocalRotation *mmath.MRotation // モーフローカル回転
-	Scale              *mmath.MVec3     // スケール
-	MorphScale         *mmath.MVec3     // モーフスケール
-	LocalScale         *mmath.MVec3     // ローカルスケール
-	MorphLocalScale    *mmath.MVec3     // モーフローカルスケール
-	PhysicsMatrix      *mmath.MMat4     // 物理結果行列
-	IkRotation         *mmath.MRotation // IK回転
-	Curves             BoneCurves       // 補間曲線
+	*BaseFrame                            // キーフレ
+	Position           *mmath.MVec3       // 位置
+	MorphPosition      *mmath.MVec3       // モーフ位置
+	LocalPosition      *mmath.MVec3       // ローカル位置
+	MorphLocalPosition *mmath.MVec3       // モーフローカル位置
+	Rotation           *mmath.MQuaternion // 回転
+	MorphRotation      *mmath.MQuaternion // モーフ回転
+	LocalRotation      *mmath.MQuaternion // ローカル回転
+	MorphLocalRotation *mmath.MQuaternion // モーフローカル回転
+	Scale              *mmath.MVec3       // スケール
+	MorphScale         *mmath.MVec3       // モーフスケール
+	LocalScale         *mmath.MVec3       // ローカルスケール
+	MorphLocalScale    *mmath.MVec3       // モーフローカルスケール
+	PhysicsMatrix      *mmath.MMat4       // 物理結果行列
+	IkRotation         *mmath.MQuaternion // IK回転
+	Curves             BoneCurves         // 補間曲線
 }
 
 func NewBoneFrame(index int) *BoneFrame {
@@ -30,10 +30,10 @@ func NewBoneFrame(index int) *BoneFrame {
 		MorphPosition:      mmath.NewMVec3(),
 		LocalPosition:      mmath.NewMVec3(),
 		MorphLocalPosition: mmath.NewMVec3(),
-		Rotation:           mmath.NewRotation(),
-		MorphRotation:      mmath.NewRotation(),
-		LocalRotation:      mmath.NewRotation(),
-		MorphLocalRotation: mmath.NewRotation(),
+		Rotation:           mmath.NewMQuaternion(),
+		MorphRotation:      nil,
+		LocalRotation:      nil,
+		MorphLocalRotation: nil,
 		Scale:              mmath.NewMVec3(),
 		MorphScale:         mmath.NewMVec3(),
 		LocalScale:         mmath.NewMVec3(),
@@ -169,8 +169,7 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 
 	xy, yy, zy, ry := nextBf.Curves.Evaluate(prevBf.GetIndex(), index, nextBf.GetIndex())
 
-	qq := prevBf.Rotation.GetQuaternion().Slerp(nextBf.Rotation.GetQuaternion(), ry)
-	bf.Rotation.SetQuaternion(qq)
+	bf.Rotation = prevBf.Rotation.Slerp(nextBf.Rotation, ry)
 
 	plpx := 0.0
 	plpy := 0.0
