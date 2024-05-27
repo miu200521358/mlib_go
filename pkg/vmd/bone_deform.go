@@ -21,7 +21,7 @@ type BoneDeform struct {
 	unitMatrix     *mmath.MMat4
 }
 
-func getBoneDeform(boneDeformsMap map[bool]*boneDeforms, bone *pmx.Bone) *BoneDeform {
+func findBoneDeform(boneDeformsMap map[bool]*boneDeforms, bone *pmx.Bone) *BoneDeform {
 	if _, ok := boneDeformsMap[false].deforms[bone.Index]; ok {
 		return boneDeformsMap[false].deforms[bone.Index]
 	} else if _, ok := boneDeformsMap[true].deforms[bone.Index]; ok {
