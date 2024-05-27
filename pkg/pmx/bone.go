@@ -181,7 +181,7 @@ func (bone *Bone) NormalizeFixedAxis(fixedAxis *mmath.MVec3) {
 
 func (bone *Bone) NormalizeLocalAxis(localAxisX *mmath.MVec3) {
 	bone.NormalizedLocalAxisX = localAxisX.Normalize()
-	bone.NormalizedLocalAxisY = bone.NormalizedLocalAxisX.Cross(mmath.MVec3UnitZ.Invert())
+	bone.NormalizedLocalAxisY = bone.NormalizedLocalAxisX.Cross(mmath.MVec3UnitZ.Inverse())
 	bone.NormalizedLocalAxisZ = bone.NormalizedLocalAxisX.Cross(bone.NormalizedLocalAxisY)
 }
 

@@ -515,7 +515,7 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 
 		if !w.EnableFrameDrop {
 			// フレームドロップOFFの場合、1Fずつ
-			elapsed = 1.0 / w.Physics.Fps
+			elapsed = 1.0 / w.Physics.MMDFps
 		}
 
 		if w.playing {
@@ -523,12 +523,12 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 			elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
 			w.frame += elapsed
 			if motionPlayer != nil {
-				motionPlayer.SetValue(float64(w.frame * w.Physics.Fps))
+				motionPlayer.SetValue(float64(w.frame * w.Physics.MMDFps))
 			}
 		}
 
 		// 描画
-		w.draw(w.frame*w.Physics.Fps, elapsed)
+		w.draw(w.frame*w.Physics.MMDFps, elapsed)
 
 		// if w.frame*w.Physics.Fps >= float32(100) {
 		// 	break

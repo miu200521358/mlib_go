@@ -632,7 +632,7 @@ ikLoop:
 
 			// if slices.Index(aborts, 0) == -1 {
 			// 	// すべてのリンクボーンで中断FLG > 0の場合、反対側に曲げる
-			// 	totalActualIkQuat.Invert()
+			// 	totalActualIkQuat.Inverse()
 			// }
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -1018,7 +1018,7 @@ func (fs *BoneFrames) getPosition(
 	}
 	vec.Add(bf.Position)
 
-	if bone.IsEffectorTranslation() {
+	if bone.IsEffectorTranslation() && bone.CanTranslate() {
 		// 外部親変形ありの場合、外部親位置を取得する
 		effectPos := fs.getEffectPosition(frame, bone, model, beforeBoneDeltas, isAfterPhysics, loop+1)
 		return vec, effectPos
@@ -1095,7 +1095,7 @@ func (fs *BoneFrames) getRotation(
 		}
 	}
 
-	if bone.IsEffectorRotation() {
+	if bone.IsEffectorRotation() && bone.CanRotate() {
 		// 外部親変形ありの場合、外部親回転を取得する
 		effectQuat := fs.getEffectRotation(frame, bone, model, beforeBoneDeltas, isAfterPhysics, loop+1)
 		return rot.Shorten(), effectQuat.Shorten()

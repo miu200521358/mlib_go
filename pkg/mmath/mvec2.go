@@ -199,8 +199,8 @@ func (v *MVec2) GreaterThanOrEquals(other *MVec2) bool {
 	return v.GetX() >= other.GetX() && v.GetY() >= other.GetY()
 }
 
-// Invert ベクトルの各要素の符号を反転します (-v)
-func (v *MVec2) Invert() *MVec2 {
+// Inverse ベクトルの各要素の符号を反転します (-v)
+func (v *MVec2) Inverse() *MVec2 {
 	v[0] = -v[0]
 	v[1] = -v[1]
 	return v

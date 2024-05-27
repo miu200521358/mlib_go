@@ -11,6 +11,7 @@ import (
 type MPhysics struct {
 	world               mbt.BtDiscreteDynamicsWorld
 	MaxSubSteps         int
+	MMDFps              float32
 	Fps                 float32
 	Spf                 float32
 	joints              []mbt.BtTypedConstraint
@@ -25,8 +26,8 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 	solver := mbt.NewBtSequentialImpulseConstraintSolver()
 	// solver.GetM_analyticsData().SetM_numIterationsUsed(200)
 	world := mbt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
-	world.SetGravity(mbt.NewBtVector3(float32(0), float32(-9.8), float32(0)))
-	// world.GetSolverInfo().(mbt.BtContactSolverInfo).SetM_numIterations(50)
+	// world.SetGravity(mbt.NewBtVector3(float32(0), float32(-9.8*1.5), float32(0)))
+	// world.GetSolverInfo().(mbt.BtContactSolverInfo).SetM_numIterations(20)
 	// world.GetSolverInfo().(mbt.BtContactSolverInfo).SetM_splitImpulsePenetrationThreshold(-0.01)
 
 	groundShape := mbt.NewBtStaticPlaneShape(mbt.NewBtVector3(float32(0), float32(1), float32(0)), float32(0))
@@ -47,8 +48,9 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 
 	p := &MPhysics{
 		world:               world,
-		MaxSubSteps:         7,
-		Fps:                 30.0,
+		MaxSubSteps:         5,
+		MMDFps:              30.0,
+		Fps:                 60.0,
 		rigidBodies:         make(map[int]mbt.BtRigidBody),
 		rigidBodyTransforms: make(map[int]mbt.BtTransform),
 	}

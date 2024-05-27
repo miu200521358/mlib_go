@@ -87,14 +87,14 @@ func NewMotionPlayer(parent walk.Container, mWindow *MWindow, resourceFiles embe
 	mp.FrameEdit.ValueChanged().Attach(func() {
 		if !mp.playing {
 			mWindow.GetMainGlWindow().SetFrame(
-				float32(mp.FrameEdit.Value()) / mWindow.GetMainGlWindow().Physics.Fps)
+				float32(mp.FrameEdit.Value()) / mWindow.GetMainGlWindow().Physics.MMDFps)
 			mp.FrameSlider.SetValue(int(mp.FrameEdit.Value()))
 		}
 	})
 	mp.FrameSlider.ValueChanged().Attach(func() {
 		if !mp.playing {
 			mWindow.GetMainGlWindow().SetFrame(
-				float32(mp.FrameSlider.Value()) / mWindow.GetMainGlWindow().Physics.Fps)
+				float32(mp.FrameSlider.Value()) / mWindow.GetMainGlWindow().Physics.MMDFps)
 			mp.FrameEdit.SetValue(float64(mp.FrameSlider.Value()))
 		}
 	})

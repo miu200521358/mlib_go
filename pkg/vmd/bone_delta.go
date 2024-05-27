@@ -159,18 +159,18 @@ func (bds *BoneDeltas) SetGlobalMatrix(bone *pmx.Bone, globalMatrix *mmath.MMat4
 	bd := bds.Get(bone.Index)
 	bd.globalMatrix = globalMatrix
 
-	// var parentGlobalMatrix *mmath.MMat4
-	// if bd.Bone.ParentIndex >= 0 {
-	// 	parentGlobalMatrix = bds.Get(bd.Bone.ParentIndex).GlobalMatrix()
-	// } else {
-	// 	parentGlobalMatrix = mmath.NewMMat4()
-	// }
-	// unitMatrix := globalMatrix.Muled(parentGlobalMatrix.Inverted())
+	var parentGlobalMatrix *mmath.MMat4
+	if bd.Bone.ParentIndex >= 0 {
+		parentGlobalMatrix = bds.Get(bd.Bone.ParentIndex).GlobalMatrix()
+	} else {
+		parentGlobalMatrix = mmath.NewMMat4()
+	}
+	unitMatrix := parentGlobalMatrix.Muled(globalMatrix.Inverted())
 
 	bd.localMatrix = bone.OffsetMatrix.Muled(globalMatrix)
 	bd.globalPosition = nil
-	bd.frameRotation = bd.localMatrix.Quaternion()
+	bd.frameRotation = unitMatrix.Quaternion()
 	bd.frameEffectRotation = nil
-	bd.framePosition = bd.localMatrix.Translation()
+	bd.framePosition = unitMatrix.Translation()
 	bd.frameEffectPosition = nil
 }
