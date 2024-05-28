@@ -18,7 +18,7 @@ func NewCameraFrame(index int) *CameraFrame {
 	return &CameraFrame{
 		BaseFrame:        NewFrame(index).(*BaseFrame),
 		Position:         mmath.NewMVec3(),
-		Rotation:         mmath.NewRotationByDegrees(&mmath.MVec3{0, 0, 0}),
+		Rotation:         mmath.NewRotationFromDegrees(&mmath.MVec3{0, 0, 0}),
 		Distance:         0.0,
 		ViewOfAngle:      0,
 		IsPerspectiveOff: true,

@@ -6,7 +6,7 @@ import (
 
 func TestNewRotationByRadians(t *testing.T) {
 	radians := &MVec3{1, 2, 3}
-	rotation := NewRotationByRadians(radians)
+	rotation := NewRotationFromRadians(radians)
 
 	if rotation.GetRadians() != radians {
 		t.Errorf("Expected GetRadians() to return %v, but got %v", radians, rotation.radians.String())
@@ -15,7 +15,7 @@ func TestNewRotationByRadians(t *testing.T) {
 
 func TestNewRotationByDegrees(t *testing.T) {
 	degrees := &MVec3{90, 180, 270}
-	rotation := NewRotationByDegrees(degrees)
+	rotation := NewRotationFromDegrees(degrees)
 
 	if rotation.GetDegrees() != degrees {
 		t.Errorf("Expected GetDegrees() to return %v, but got %v", degrees, rotation.degrees.String())
@@ -24,7 +24,7 @@ func TestNewRotationByDegrees(t *testing.T) {
 
 func TestNewRotationByQuaternion(t *testing.T) {
 	quaternion := NewMQuaternionByValues(1, 0, 0, 0)
-	rotation := NewRotationByQuaternion(quaternion)
+	rotation := NewRotationFromQuaternion(quaternion)
 
 	if rotation.GetQuaternion() != quaternion {
 		t.Errorf("Expected GetQuaternion() to return %v, but got %v", quaternion, rotation.quaternion.String())

@@ -44,7 +44,7 @@ func NewMMat4ByValues(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34
 	}
 }
 
-func NewMMat4ByAxisAngle(axis *MVec3, angle float64) *MMat4 {
+func NewMMat4FromAxisAngle(axis *MVec3, angle float64) *MMat4 {
 	m := MMat4(mgl64.HomogRotate3D(angle, mgl64.Vec3(*axis)))
 	return &m
 }

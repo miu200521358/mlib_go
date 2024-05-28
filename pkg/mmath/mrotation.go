@@ -21,22 +21,22 @@ func NewRotation() *MRotation {
 	return model
 }
 
-// NewRotationByRadians はラジアン角度からで回転を表すモデルを生成します。
-func NewRotationByRadians(vRadians *MVec3) *MRotation {
+// NewRotationFromRadians はラジアン角度からで回転を表すモデルを生成します。
+func NewRotationFromRadians(vRadians *MVec3) *MRotation {
 	model := NewRotation()
 	model.SetRadians(vRadians)
 	return model
 }
 
-// NewRotationByDegrees は度数角度からで回転を表すモデルを生成します。
-func NewRotationByDegrees(vDegrees *MVec3) *MRotation {
+// NewRotationFromDegrees は度数角度からで回転を表すモデルを生成します。
+func NewRotationFromDegrees(vDegrees *MVec3) *MRotation {
 	model := NewRotation()
 	model.SetDegrees(vDegrees)
 	return model
 }
 
-// NewRotationByQuaternion はクォータニオンからで回転を表すモデルを生成します。
-func NewRotationByQuaternion(vQuaternion *MQuaternion) *MRotation {
+// NewRotationFromQuaternion はクォータニオンからで回転を表すモデルを生成します。
+func NewRotationFromQuaternion(vQuaternion *MQuaternion) *MRotation {
 	model := NewRotation()
 	model.SetQuaternion(vQuaternion)
 	return model

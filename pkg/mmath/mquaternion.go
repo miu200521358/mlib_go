@@ -13,10 +13,6 @@ func NewMQuaternion() *MQuaternion {
 	return &MQuaternion{1., mgl64.Vec3{0, 0, 0}}
 }
 
-func NewMQuaternionByVec3(vec3 MVec3) *MQuaternion {
-	return NewMQuaternionByValues(vec3.GetX(), vec3.GetY(), vec3.GetZ(), 0)
-}
-
 // 指定された値でクォータニオンを作成します。
 // ただし必ず最短距離クォータニオンにします
 func NewMQuaternionByValuesShort(x, y, z, w float64) *MQuaternion {
@@ -203,11 +199,6 @@ func (quat *MQuaternion) ToMMDDegrees() *MVec3 {
 		RadToDeg(-vec.GetY()),
 		RadToDeg(-vec.GetZ()),
 	}
-}
-
-// NewMQuaternionFromVec4はvec4.Tをクォータニオンに変換する
-func NewMQuaternionFromVec4(v *MVec4) *MQuaternion {
-	return NewMQuaternionByValues(v.GetX(), v.GetY(), v.GetZ(), v.GetW())
 }
 
 // Vec4は四元数をvec4.Tに変換する

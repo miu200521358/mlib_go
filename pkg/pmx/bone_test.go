@@ -51,16 +51,16 @@ func TestIk_Copy(t *testing.T) {
 	ik := &Ik{
 		BoneIndex:    0,
 		LoopCount:    1,
-		UnitRotation: mmath.NewRotationByDegrees(&mmath.MVec3{1, 2, 3}),
+		UnitRotation: mmath.NewRotationFromDegrees(&mmath.MVec3{1, 2, 3}),
 		Links: []*IkLink{
 			{
 				BoneIndex:          0,
 				AngleLimit:         true,
-				MinAngleLimit:      mmath.NewRotationByDegrees(&mmath.MVec3{1, 2, 3}),
-				MaxAngleLimit:      mmath.NewRotationByDegrees(&mmath.MVec3{4, 5, 6}),
+				MinAngleLimit:      mmath.NewRotationFromDegrees(&mmath.MVec3{1, 2, 3}),
+				MaxAngleLimit:      mmath.NewRotationFromDegrees(&mmath.MVec3{4, 5, 6}),
 				LocalAngleLimit:    true,
-				LocalMinAngleLimit: mmath.NewRotationByDegrees(&mmath.MVec3{7, 8, 9}),
-				LocalMaxAngleLimit: mmath.NewRotationByDegrees(&mmath.MVec3{10, 11, 12}),
+				LocalMinAngleLimit: mmath.NewRotationFromDegrees(&mmath.MVec3{7, 8, 9}),
+				LocalMaxAngleLimit: mmath.NewRotationFromDegrees(&mmath.MVec3{10, 11, 12}),
 			},
 		},
 	}
@@ -147,10 +147,10 @@ func TestBone_Copy(t *testing.T) {
 			RelativeBoneIndexes:    []int{8, 9, 10},
 			ChildBoneIndexes:       []int{10, 11, 12},
 			EffectiveBoneIndexes:   []int{16, 17, 18},
-			MinAngleLimit:          mmath.NewRotationByRadians(&mmath.MVec3{1, 2, 3}),
-			MaxAngleLimit:          mmath.NewRotationByRadians(&mmath.MVec3{5, 6, 7}),
-			LocalMinAngleLimit:     mmath.NewRotationByRadians(&mmath.MVec3{10, 11, 12}),
-			LocalMaxAngleLimit:     mmath.NewRotationByRadians(&mmath.MVec3{16, 17, 18}),
+			MinAngleLimit:          mmath.NewRotationFromRadians(&mmath.MVec3{1, 2, 3}),
+			MaxAngleLimit:          mmath.NewRotationFromRadians(&mmath.MVec3{5, 6, 7}),
+			LocalMinAngleLimit:     mmath.NewRotationFromRadians(&mmath.MVec3{10, 11, 12}),
+			LocalMaxAngleLimit:     mmath.NewRotationFromRadians(&mmath.MVec3{16, 17, 18}),
 		}
 
 		copied := b.Copy().(*Bone)

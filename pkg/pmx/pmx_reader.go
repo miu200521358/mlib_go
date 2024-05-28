@@ -910,7 +910,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					mlog.E("[%d][%d] readMorphs UnpackQuaternion Quaternion error: %v", i, j, err)
 					return err
 				}
-				m.Offsets = append(m.Offsets, NewBoneMorph(boneIndex, &offset, mmath.NewRotationByQuaternion(&qq)))
+				m.Offsets = append(m.Offsets, NewBoneMorph(boneIndex, &offset, mmath.NewRotationFromQuaternion(&qq)))
 			case MORPH_TYPE_UV, MORPH_TYPE_EXTENDED_UV1, MORPH_TYPE_EXTENDED_UV2, MORPH_TYPE_EXTENDED_UV3, MORPH_TYPE_EXTENDED_UV4:
 				// n  : 頂点Indexサイズ  | 頂点Index
 				vertexIndex, err := r.unpackVertexIndex(model)
@@ -1142,7 +1142,7 @@ func (r *PmxReader) readRigidBodies(model *PmxModel) error {
 			mlog.E("[%d] readRigidBodies UnpackVec3 Rotation error: %v", i, err)
 			return err
 		}
-		b.Rotation = mmath.NewRotationByRadians(&rads)
+		b.Rotation = mmath.NewRotationFromRadians(&rads)
 		// 4  : float	| 質量
 		b.RigidBodyParam.Mass, err = r.UnpackFloat()
 		if err != nil {
@@ -1236,7 +1236,7 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 			mlog.E("[%d] readJoints UnpackVec3 Rotation error: %v", i, err)
 			return err
 		}
-		j.Rotation = mmath.NewRotationByRadians(&rads)
+		j.Rotation = mmath.NewRotationFromRadians(&rads)
 		// 12 : float3	| 移動制限-下限(x,y,z)
 		translationLimitMin, err := r.UnpackVec3(false)
 		if err != nil {
@@ -1257,14 +1257,14 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 			mlog.E("[%d] readJoints UnpackVec3 RotationLimitMin error: %v", i, err)
 			return err
 		}
-		j.JointParam.RotationLimitMin = mmath.NewRotationByRadians(&rotationLimitMin)
+		j.JointParam.RotationLimitMin = mmath.NewRotationFromRadians(&rotationLimitMin)
 		// 12 : float3	| 回転制限-上限(x,y,z) -> ラジアン角
 		rotationLimitMax, err := r.UnpackVec3(false)
 		if err != nil {
 			mlog.E("[%d] readJoints UnpackVec3 RotationLimitMax error: %v", i, err)
 			return err
 		}
-		j.JointParam.RotationLimitMax = mmath.NewRotationByRadians(&rotationLimitMax)
+		j.JointParam.RotationLimitMax = mmath.NewRotationFromRadians(&rotationLimitMax)
 		// 12 : float3	| バネ定数-移動(x,y,z)
 		springConstantTranslation, err := r.UnpackVec3(false)
 		if err != nil {
@@ -1278,7 +1278,7 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 			mlog.E("[%d] readJoints UnpackVec3 SpringConstantRotation error: %v", i, err)
 			return err
 		}
-		j.JointParam.SpringConstantRotation = mmath.NewRotationByDegrees(&springConstantRotation)
+		j.JointParam.SpringConstantRotation = mmath.NewRotationFromDegrees(&springConstantRotation)
 
 		model.Joints.Append(&j)
 	}
