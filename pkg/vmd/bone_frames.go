@@ -830,7 +830,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 
 	xQuat := mmath.NewMQuaternionFromAxisAngles(xAxisVector, fX)
 	yQuat := mmath.NewMQuaternionFromAxisAngles(yAxisVector, fY)
-	zQuat := mmath.NewMQuaternionFromAxisAngles(zAxisVector, -fZ)
+	zQuat := mmath.NewMQuaternionFromAxisAngles(zAxisVector, math.Abs(fZ))
 	totalActualIkQuat := yQuat.Muled(xQuat).Muled(zQuat).Shorten()
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
