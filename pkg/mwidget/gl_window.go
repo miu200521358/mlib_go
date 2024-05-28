@@ -33,14 +33,13 @@ func (ms *ModelSet) draw(
 	modelPhysics *mphysics.MPhysics,
 	shader *mview.MShader,
 	windowIndex int,
-	frame float32,
+	frame int,
 	elapsed float32,
 	enablePhysics bool,
 	isDrawNormal bool,
 	isDrawBone bool,
 ) {
-	fno := int(math.Round(float64(frame)))
-	draw(modelPhysics, ms.Model, ms.Motion, shader, windowIndex, fno, elapsed, enablePhysics, isDrawNormal, isDrawBone)
+	draw(modelPhysics, ms.Model, ms.Motion, shader, windowIndex, frame, elapsed, enablePhysics, isDrawNormal, isDrawBone)
 }
 
 // 直角の定数値
@@ -66,7 +65,7 @@ type GlWindow struct {
 	VisibleNormal       bool
 	EnablePhysics       bool
 	EnableFrameDrop     bool
-	frame               float32
+	frame               int
 }
 
 func NewGlWindow(
@@ -165,7 +164,7 @@ func NewGlWindow(
 		playing:             true, // 最初は再生
 		EnablePhysics:       true, // 最初は物理ON
 		EnableFrameDrop:     true, // 最初はドロップON
-		frame:               float32(0),
+		frame:               0,
 	}
 
 	w.SetScrollCallback(glWindow.handleScrollEvent)
@@ -187,11 +186,11 @@ func (w *GlWindow) Play(p bool) {
 	w.playing = p
 }
 
-func (w *GlWindow) GetFrame() float32 {
+func (w *GlWindow) GetFrame() int {
 	return w.frame
 }
 
-func (w *GlWindow) SetFrame(f float32) {
+func (w *GlWindow) SetFrame(f int) {
 	w.frame = f
 }
 
@@ -456,7 +455,7 @@ func (w *GlWindow) ClearData() {
 	w.frame = 0
 }
 
-func (w *GlWindow) draw(frame float32, elapsed float32) {
+func (w *GlWindow) draw(frame int, elapsed float32) {
 	// OpenGLコンテキストをこのウィンドウに設定
 	w.MakeContextCurrent()
 
@@ -515,20 +514,25 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 
 		if !w.EnableFrameDrop {
 			// フレームドロップOFFの場合、1Fずつ
-			elapsed = 1.0 / w.Physics.MMDFps
+			elapsed = 1.0 / w.Physics.Fps
 		}
 
 		if w.playing {
 			// 経過秒数をキーフレームの進捗具合に合わせて調整
-			elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
-			w.frame += elapsed
+			var frameCount float32 = 1
+			if w.EnableFrameDrop {
+				// 経過したフレーム数を計算
+				frameCount = elapsed / w.Physics.Spf
+				elapsed = frameCount / w.Physics.Fps
+			}
+			w.frame += int(frameCount)
 			if motionPlayer != nil {
-				motionPlayer.SetValue(float64(w.frame * w.Physics.MMDFps))
+				motionPlayer.SetValue(float64(w.frame))
 			}
 		}
 
 		// 描画
-		w.draw(w.frame*w.Physics.MMDFps, elapsed)
+		w.draw(w.frame, elapsed)
 
 		// if w.frame*w.Physics.Fps >= float32(100) {
 		// 	break
