@@ -682,6 +682,11 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 			frame, loop, linkBoneName, count-1, quat.String(), quat.ToMMDDegrees().String())
 	}
 
+	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][04][角度制限] minAngleLimitRadians: %s, maxAngleLimitRadians:%s\n",
+			frame, loop, linkBoneName, count-1, minAngleLimitRadians.String(), maxAngleLimitRadians.String())
+	}
+
 	// 現在IKリンクに入る可能性のあるすべての角度
 	totalIkQuat := quat.Muled(linkQuat)
 
