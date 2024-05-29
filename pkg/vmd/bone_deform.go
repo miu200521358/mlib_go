@@ -7,7 +7,6 @@ import (
 
 type boneDeforms struct {
 	deforms     map[int]*BoneDeform
-	names       map[string]int
 	boneIndexes []int
 }
 

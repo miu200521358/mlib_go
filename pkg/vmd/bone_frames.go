@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sort"
 	"sync"
 	"time"
 
@@ -170,7 +171,7 @@ func (fs *BoneFrames) clearIk(
 
 		for i := 0; i < len(model.Bones.IkTreeIndexes[boneDeform.bone.Index]); i++ {
 			ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[boneDeform.bone.Index][i])
-			if _, ok := boneDeforms.names[ikBone.Name]; !ok {
+			if _, ok := boneDeforms.deforms[ikBone.Index]; !ok {
 				continue
 			}
 
@@ -220,7 +221,7 @@ func (fs *BoneFrames) prepareIk(
 
 			for m := range len(model.Bones.IkTreeIndexes[bd.bone.Index]) {
 				ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[bd.bone.Index][m])
-				if _, ok := boneDeforms.names[ikBone.Name]; !ok {
+				if _, ok := boneDeforms.deforms[ikBone.Index]; !ok {
 					continue
 				}
 
@@ -299,8 +300,6 @@ func (fs *BoneFrames) calcIk(
 			ikFile.Close()
 		}
 	}()
-
-	loopLimitHalf := ikBone.Ik.LoopCount / 2
 
 	// IK計算
 ikLoop:
@@ -472,7 +471,6 @@ ikLoop:
 					mmath.MVec3UnitX,
 					mmath.MVec3UnitY,
 					mmath.MVec3UnitZ,
-					loopLimitHalf,
 					frame,
 					count,
 					loop,
@@ -491,7 +489,6 @@ ikLoop:
 					linkBone.NormalizedLocalAxisX,
 					linkBone.NormalizedLocalAxisY,
 					linkBone.NormalizedLocalAxisZ,
-					loopLimitHalf,
 					frame,
 					count,
 					loop,
@@ -660,7 +657,6 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 	xAxisVector *mmath.MVec3,
 	yAxisVector *mmath.MVec3,
 	zAxisVector *mmath.MVec3,
-	loopLimitHalf int,
 	frame int,
 	count int,
 	loop int,
@@ -768,7 +764,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 		}
 	}
 
-	fX = fs.judgeIkAngle(loopLimitHalf, minAngleLimitRadians.GetX(), maxAngleLimitRadians.GetX(), fX,
+	fX = fs.judgeIkAngle(minAngleLimitRadians.GetX(), maxAngleLimitRadians.GetX(), fX,
 		frame, count, loop, linkBoneName, ikMotion, ikFile)
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -790,7 +786,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 			frame, loop, linkBoneName, count-1, tY, fY)
 	}
 
-	fY = fs.judgeIkAngle(loopLimitHalf, minAngleLimitRadians.GetY(), maxAngleLimitRadians.GetY(), fY,
+	fY = fs.judgeIkAngle(minAngleLimitRadians.GetY(), maxAngleLimitRadians.GetY(), fY,
 		frame, count, loop, linkBoneName, ikMotion, ikFile)
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -807,7 +803,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 			frame, loop, linkBoneName, count-1, tZ, fZ)
 	}
 
-	fZ = fs.judgeIkAngle(loopLimitHalf, minAngleLimitRadians.GetZ(), maxAngleLimitRadians.GetZ(), fZ,
+	fZ = fs.judgeIkAngle(minAngleLimitRadians.GetZ(), maxAngleLimitRadians.GetZ(), fZ,
 		frame, count, loop, linkBoneName, ikMotion, ikFile)
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -879,7 +875,6 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 }
 
 func (fs *BoneFrames) judgeIkAngle(
-	loopLimitHalf int,
 	minAngleLimit float64,
 	maxAngleLimit float64,
 	fX float64,
@@ -1007,8 +1002,8 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 
 		var globalMatrix *mmath.MMat4
 		deform := boneDeforms.deforms[boneIndex]
-		if _, ok := boneDeltas.Data[deform.bone.ParentIndex]; ok {
-			parentDelta := boneDeltas.Get(deform.bone.ParentIndex)
+		parentDelta := boneDeltas.Get(deform.bone.ParentIndex)
+		if parentDelta != nil {
 			globalMatrix = deform.unitMatrix.Muled(parentDelta.GlobalMatrix())
 		} else {
 			// 対象ボーン自身の行列をかける
@@ -1046,47 +1041,47 @@ func (fs *BoneFrames) prepareBoneDeforms(
 	} else {
 		boneDeformsMap[true] = &boneDeforms{
 			deforms:     make(map[int]*BoneDeform),
-			names:       make(map[string]int),
 			boneIndexes: make([]int, 0),
 		}
 	}
 
 	for _, ap := range isAfterPhysicsList {
 		// ボーン名の存在チェック用マップ
-		exists := make(map[string]struct{})
+		targetSortedBones := model.Bones.LayerSortedBones[ap]
+
 		boneDeforms := &boneDeforms{
 			deforms:     make(map[int]*BoneDeform),
-			names:       make(map[string]int),
-			boneIndexes: make([]int, 0),
+			boneIndexes: make([]int, 0, len(targetSortedBones)),
 		}
 
 		if len(boneNames) > 0 {
+			// 指定ボーンに関連するボーンのみ対象とする
+			layerIndexes := make(pmx.LayerIndexes, 0, len(targetSortedBones))
+
 			for _, boneName := range boneNames {
 				// ボーン名の追加
-				exists[boneName] = struct{}{}
+				bone := model.Bones.GetByName(boneName)
+				layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
 
 				// 関連するボーンの追加
-				relativeBoneIndexes := model.Bones.GetByName(boneName).RelativeBoneIndexes
+				relativeBoneIndexes := bone.RelativeBoneIndexes
 				for _, index := range relativeBoneIndexes {
-					relativeBoneName := model.Bones.Get(index).Name
-					exists[relativeBoneName] = struct{}{}
+					bone := model.Bones.Get(index)
+					layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
 				}
 			}
-		}
+			sort.Sort(layerIndexes)
 
-		// 変形階層・ボーンINDEXでソート
-		targetSortedBones := model.Bones.LayerSortedBones[ap]
-		for k := range len(targetSortedBones) {
-			bone := targetSortedBones[k]
-			if len(boneNames) > 0 {
-				if _, ok := exists[bone.Name]; ok {
-					boneDeforms.deforms[bone.Index] = &BoneDeform{bone: bone}
-					boneDeforms.names[bone.Name] = bone.Index
-					boneDeforms.boneIndexes = append(boneDeforms.boneIndexes, bone.Index)
-				}
-			} else {
+			for _, layerIndex := range layerIndexes {
+				bone := model.Bones.Get(layerIndex.Index)
 				boneDeforms.deforms[bone.Index] = &BoneDeform{bone: bone}
-				boneDeforms.names[bone.Name] = bone.Index
+				boneDeforms.boneIndexes = append(boneDeforms.boneIndexes, bone.Index)
+			}
+		} else {
+			// 変形階層・ボーンINDEXでソート
+			for k := range len(targetSortedBones) {
+				bone := targetSortedBones[k]
+				boneDeforms.deforms[bone.Index] = &BoneDeform{bone: bone}
 				boneDeforms.boneIndexes = append(boneDeforms.boneIndexes, bone.Index)
 			}
 		}
@@ -1139,11 +1134,12 @@ func (fs *BoneFrames) getPosition(
 		return mmath.NewMVec3(), mmath.NewMVec3()
 	}
 
-	vec := mmath.NewMVec3()
+	var vec *mmath.MVec3
 	if bf.MorphPosition != nil {
-		vec.Add(bf.MorphPosition)
+		vec = bf.MorphPosition.Add(bf.Position)
+	} else {
+		vec = bf.Position
 	}
-	vec.Add(bf.Position)
 
 	if bone.IsEffectorTranslation() && bone.CanTranslate() {
 		// 外部親変形ありの場合、外部親位置を取得する
@@ -1206,20 +1202,20 @@ func (fs *BoneFrames) getRotation(
 	}
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
-	rot := mmath.NewMQuaternion()
-	if bf.MorphRotation != nil {
-		rot.Mul(bf.MorphRotation)
-	}
-
+	var rot *mmath.MQuaternion
 	if bf.IkRotation != nil && !bf.IkRotation.IsIdent() {
 		// IK用回転を持っている場合、置き換え
-		rot.Mul(bf.IkRotation)
+		rot = bf.IkRotation
 	} else {
-		rot.Mul(bf.Rotation)
+		rot = bf.Rotation
+	}
 
-		if bone.HasFixedAxis() {
-			rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
-		}
+	if bf.MorphRotation != nil {
+		rot = bf.MorphRotation.Mul(rot)
+	}
+
+	if bone.HasFixedAxis() {
+		rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
 	}
 
 	if bone.IsEffectorRotation() && bone.CanRotate() {
