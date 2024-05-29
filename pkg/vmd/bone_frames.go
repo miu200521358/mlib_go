@@ -1067,7 +1067,9 @@ func (fs *BoneFrames) prepareBoneDeforms(
 				relativeBoneIndexes := bone.RelativeBoneIndexes
 				for _, index := range relativeBoneIndexes {
 					bone := model.Bones.Get(index)
-					layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
+					if !layerIndexes.Contains(bone.Index) {
+						layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
+					}
 				}
 			}
 			sort.Sort(layerIndexes)
