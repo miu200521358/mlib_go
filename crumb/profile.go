@@ -5,7 +5,6 @@ import (
 
 	"github.com/pkg/profile"
 
-	"github.com/miu200521358/mlib_go/pkg/mutils/miter"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
@@ -34,8 +33,6 @@ func main() {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-
-	miter.SetBlockSize(12)
 
 	for i := 0; i < 500; i++ {
 		if i%100 == 0 {

@@ -418,6 +418,13 @@ func LerpFloat(v1, v2 float64, t float64) float64 {
 	return v1 + ((v2 - v1) * t)
 }
 
+func Sign(v float64) float64 {
+	if v < 0 {
+		return -1
+	}
+	return 1
+}
+
 func ToRadian(degree float64) float64 {
 	return degree * math.Pi / 180
 }
