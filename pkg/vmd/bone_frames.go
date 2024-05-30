@@ -703,10 +703,10 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 		(math.Abs(totalIkRads.GetX()) >= mmath.GIMBAL2_RAD && math.Abs(totalIkRads.GetY()) >= mmath.GIMBAL2_RAD)
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][05][角度制限] totalIkQuat: %s(%s), isXGimbal: %v, "+
-			"isYGimbal: %v, isZGimbal: %v\n",
+		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][05][角度制限] totalIkQuat: %s(%s), totalIkRad: %f, "+
+			"isXGimbal: %v, isYGimbal: %v, isZGimbal: %v\n",
 			frame, loop, linkBoneName, count-1, totalIkQuat.String(), totalIkQuat.ToMMDDegrees().String(),
-			isXGimbal, isYGimbal, isZGimbal)
+			totalIkRad, isXGimbal, isYGimbal, isZGimbal)
 	}
 
 	tX := totalIkRads.GetX()
@@ -773,7 +773,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 	}
 
 	if minAngleLimitRadians.GetX() != 0 || maxAngleLimitRadians.GetX() != 0 {
-		// X軸のみ回れるIK制限の場合、ここで終了(足IK想定)
+		// X軸のみ回れるIK制限の場合、ここで終了(足IK想定だが、XZ制限などの場合もこちらの方が結果が良い)
 		return mmath.NewMQuaternionFromAxisAngles(xAxisVector, fX).Shorten(), count
 	}
 

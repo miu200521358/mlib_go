@@ -181,6 +181,10 @@ func RadToDeg(rad float64) float64 {
 	return rad * 180 / math.Pi
 }
 
+func ThetaToRad(theta float64) float64 {
+	return math.Asin(math.Max(-1.0, math.Min(1.0, theta)))
+}
+
 // ToDegreesは、クォータニオンのオイラー角（度）回転を返します。
 func (quat *MQuaternion) ToDegrees() *MVec3 {
 	vec := quat.ToRadians()

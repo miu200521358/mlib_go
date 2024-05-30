@@ -425,6 +425,10 @@ func Sign(v float64) float64 {
 	return 1
 }
 
+func PracticallyEquals(v float64, other float64, epsilon float64) bool {
+	return math.Abs(v-other) <= epsilon
+}
+
 func ToRadian(degree float64) float64 {
 	return degree * math.Pi / 180
 }
