@@ -37,9 +37,9 @@ func (ms *ModelSet) draw(
 	elapsed float32,
 	enablePhysics bool,
 	isDrawNormal bool,
-	isDrawBone bool,
+	isDrawBones map[pmx.BoneFlag]bool,
 ) {
-	draw(modelPhysics, ms.Model, ms.Motion, shader, windowIndex, frame, elapsed, enablePhysics, isDrawNormal, isDrawBone)
+	draw(modelPhysics, ms.Model, ms.Motion, shader, windowIndex, frame, elapsed, enablePhysics, isDrawNormal, isDrawBones)
 }
 
 // 直角の定数値
@@ -61,7 +61,7 @@ type GlWindow struct {
 	shiftPressed        bool
 	ctrlPressed         bool
 	playing             bool
-	VisibleBone         bool
+	VisibleBones        map[pmx.BoneFlag]bool
 	VisibleNormal       bool
 	EnablePhysics       bool
 	EnableFrameDrop     bool
@@ -159,7 +159,7 @@ func NewGlWindow(
 		updatedPrev:         false,
 		shiftPressed:        false,
 		ctrlPressed:         false,
-		VisibleBone:         false,
+		VisibleBones:        make(map[pmx.BoneFlag]bool, 0),
 		VisibleNormal:       false,
 		playing:             true, // 最初は再生
 		EnablePhysics:       true, // 最初は物理ON
@@ -466,7 +466,7 @@ func (w *GlWindow) draw(frame int, elapsed float32) {
 	// モデル描画
 	for _, modelSet := range w.ModelSets {
 		modelSet.draw(w.Physics, w.Shader, w.WindowIndex, frame, elapsed,
-			w.EnablePhysics, w.VisibleNormal, w.VisibleBone)
+			w.EnablePhysics, w.VisibleNormal, w.VisibleBones)
 	}
 }
 

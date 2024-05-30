@@ -18,7 +18,7 @@ type VBO struct {
 	size       int            // size in bytes
 	ptr        unsafe.Pointer // verticesPtr
 	stride     int32          // stride
-	strideSize int            // strideSize
+	StrideSize int            // strideSize
 }
 
 // Delete this VBO.
@@ -44,8 +44,8 @@ func NewVBOForVertex(ptr unsafe.Pointer, count int) *VBO {
 	// 頂点構造体のサイズ(全部floatとする)
 	// position(3), normal(3), uv(2), extendedUV(2), edgeFactor(1), deformBoneIndex(4), deformBoneWeight(4),
 	// isSdef(1), sdefC(3), sdefR0(3), sdefR1(3), vertexDelta(3), uvDelta(4), uv1Delta(4), afterVertexDelta(3)
-	vbo.strideSize = 3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3 + 3 + 4 + 4 + 3
-	vbo.stride = int32(4 * vbo.strideSize)
+	vbo.StrideSize = 3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3 + 3 + 4 + 4 + 3
+	vbo.stride = int32(4 * vbo.StrideSize)
 	vbo.size = count * 4
 
 	return vbo
@@ -62,7 +62,7 @@ func (v *VBO) BindVertex(vertices []float32, vertexDeltas [][]float32) {
 		for i, vd := range vertexDeltas {
 			if vd != nil {
 				// 必要な場合にのみ部分更新
-				offsetStride := (i*v.strideSize + vboVertexSize) * 4
+				offsetStride := (i*v.StrideSize + vboVertexSize) * 4
 				gl.BufferSubData(v.target, offsetStride, len(vd)*4, gl.Ptr(vd))
 			}
 		}

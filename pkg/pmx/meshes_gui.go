@@ -13,18 +13,19 @@ import (
 )
 
 type Meshes struct {
-	meshes    []*Mesh
-	vertices  []float32
-	vao       *mview.VAO
-	vbo       *mview.VBO
-	normals   []float32
-	normalVao *mview.VAO
-	normalVbo *mview.VBO
-	normalIbo *mview.IBO
-	bones     []float32
-	boneVao   *mview.VAO
-	boneVbo   *mview.VBO
-	boneIbo   *mview.IBO
+	meshes      []*Mesh
+	vertices    []float32
+	vao         *mview.VAO
+	vbo         *mview.VBO
+	normals     []float32
+	normalVao   *mview.VAO
+	normalVbo   *mview.VBO
+	normalIbo   *mview.IBO
+	bones       []float32
+	boneVao     *mview.VAO
+	boneVbo     *mview.VBO
+	boneIbo     *mview.IBO
+	boneIndexes []int
 }
 
 func NewMeshes(
@@ -109,6 +110,7 @@ func NewMeshes(
 
 	bones := make([]float32, 0, len(model.Bones.Data)*4)
 	boneFaces := make([]uint32, 0, len(model.Bones.Data)*4)
+	boneIndexes := make([]int, 0, len(model.Bones.Data)*4)
 
 	n = 0
 	for i := range len(model.Bones.Data) {
@@ -119,6 +121,9 @@ func NewMeshes(
 		boneFaces = append(boneFaces, uint32(n))
 		boneFaces = append(boneFaces, uint32(n+1))
 
+		boneIndexes = append(boneIndexes, bone.Index)
+		boneIndexes = append(boneIndexes, bone.Index)
+
 		n += 2
 
 		if bone.ParentIndex >= 0 && model.Bones.Contains(bone.ParentIndex) &&
@@ -128,6 +133,9 @@ func NewMeshes(
 
 			boneFaces = append(boneFaces, uint32(n))
 			boneFaces = append(boneFaces, uint32(n+1))
+
+			boneIndexes = append(boneIndexes, bone.Index)
+			boneIndexes = append(boneIndexes, bone.ParentIndex)
 
 			n += 2
 		}
@@ -162,18 +170,19 @@ func NewMeshes(
 	boneVao.Unbind()
 
 	return &Meshes{
-		meshes:    meshes,
-		vertices:  vertices,
-		vao:       vao,
-		vbo:       vbo,
-		normals:   normalVertices,
-		normalVao: normalVao,
-		normalVbo: normalVbo,
-		normalIbo: normalIbo,
-		bones:     bones,
-		boneVao:   boneVao,
-		boneVbo:   boneVbo,
-		boneIbo:   boneIbo,
+		meshes:      meshes,
+		vertices:    vertices,
+		vao:         vao,
+		vbo:         vbo,
+		normals:     normalVertices,
+		normalVao:   normalVao,
+		normalVbo:   normalVbo,
+		normalIbo:   normalIbo,
+		bones:       bones,
+		boneVao:     boneVao,
+		boneVbo:     boneVbo,
+		boneIbo:     boneIbo,
+		boneIndexes: boneIndexes,
 	}
 }
 
@@ -192,7 +201,8 @@ func (m *Meshes) Draw(
 	materialDeltas []*Material,
 	windowIndex int,
 	isDrawNormal bool,
-	isDrawBone bool,
+	isDrawBones map[BoneFlag]bool,
+	bones *Bones,
 ) {
 	// 隠面消去
 	// https://learnopengl.com/Advanced-OpenGL/Depth-testing
@@ -231,8 +241,16 @@ func (m *Meshes) Draw(
 		m.drawNormal(shader, boneDeltas, windowIndex)
 	}
 
+	isDrawBone := false
+	for _, drawBone := range isDrawBones {
+		if drawBone {
+			isDrawBone = true
+			break
+		}
+	}
+
 	if isDrawBone {
-		m.drawBone(shader, boneDeltas, windowIndex)
+		m.drawBone(shader, bones, isDrawBones, boneDeltas, windowIndex)
 	}
 
 	shader.Msaa.Unbind()
@@ -276,6 +294,8 @@ func (m *Meshes) drawNormal(
 
 func (m *Meshes) drawBone(
 	shader *mview.MShader,
+	bones *Bones,
+	isDrawBones map[BoneFlag]bool,
 	boneDeltas []mgl32.Mat4,
 	windowIndex int,
 ) {
@@ -290,7 +310,7 @@ func (m *Meshes) drawBone(
 	shader.Use(mview.PROGRAM_TYPE_BONE)
 
 	m.boneVao.Bind()
-	m.boneVbo.BindVertex(nil, nil)
+	m.boneVbo.BindVertex(m.bones, m.fetchBoneDebugDeltas(bones, isDrawBones))
 	m.boneIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
@@ -309,4 +329,15 @@ func (m *Meshes) drawBone(
 	m.boneVao.Unbind()
 
 	shader.Unuse()
+}
+
+func (m *Meshes) fetchBoneDebugDeltas(bones *Bones, isDrawBones map[BoneFlag]bool) [][]float32 {
+	vertexDeltas := make([][]float32, len(m.bones)/m.boneVbo.StrideSize)
+
+	for i, boneIndex := range m.boneIndexes {
+		bone := bones.Get(boneIndex)
+		vertexDeltas[i] = bone.DeltaGL(isDrawBones)
+	}
+
+	return vertexDeltas
 }

@@ -24,6 +24,34 @@
         "translation": "&본 디버그 표시"
     },
     {
+        "id": "&全ボーン",
+        "translation": "&전체 뼈대"
+    },
+    {
+        "id": "&IKボーン",
+        "translation": "&IK 뼈대"
+    },
+    {
+        "id": "&付与親ボーン",
+        "translation": "&할당된 부모 뼈대"
+    },
+    {
+        "id": "&軸制限ボーン",
+        "translation": "&축 제한 뼈대"
+    },
+    {
+        "id": "&回転ボーン",
+        "translation": "&회전 뼈대"
+    },
+    {
+        "id": "&移動ボーン",
+        "translation": "&이동 뼈대"
+    },
+    {
+        "id": "&表示ボーン",
+        "translation": "&표시 뼈대"
+    },
+    {
         "id": "&剛体デバッグ表示",
         "translation": "&강체 디버그 표시"
     },

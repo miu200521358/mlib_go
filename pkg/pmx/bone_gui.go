@@ -84,7 +84,7 @@ func (b *Bone) GL() []float32 {
 	c := b.color(false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
-		0.0, 0.0, 0.0, // 法線
+		float32(b.BoneFlag), 0.0, 0.0, // 法線
 		float32(0), float32(0), // UV
 		float32(0), float32(0), // 追加UV
 		float32(0),                // エッジ倍率
@@ -106,7 +106,7 @@ func (b *Bone) ParentGL() []float32 {
 	c := b.color(false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
-		0.0, 0.0, 0.0, // 法線
+		float32(b.BoneFlag), 0.0, 0.0, // 法線
 		float32(0), float32(0), // UV
 		float32(0), float32(0), // 追加UV
 		float32(0),                // エッジ倍率
@@ -128,7 +128,7 @@ func (b *Bone) TailGL() []float32 {
 	c := b.color(false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
-		0.0, 0.0, 0.0, // 法線
+		float32(b.BoneFlag), 0.0, 0.0, // 法線
 		float32(0), float32(0), // UV
 		float32(0), float32(0), // 追加UV
 		float32(0),                // エッジ倍率
@@ -141,6 +141,63 @@ func (b *Bone) TailGL() []float32 {
 		0.0, 0.0, 0.0, // 頂点モーフ
 		0.0, 0.0, 0.0, 0.0, // UVモーフ
 		c[0], c[1], c[2], c[3], // 追加UV1モーフ
+		0.0, 0.0, 0.0, // 変形後頂点モーフ
+	}
+}
+
+func (b *Bone) DeltaGL(isDrawBones map[BoneFlag]bool) []float32 {
+	c := b.color(false)
+
+	ikAlpha := float32(1.0)
+	fixedAlpha := float32(1.0)
+	effectorRotateAlpha := float32(1.0)
+	effectorTranslateAlpha := float32(1.0)
+	rotateAlpha := float32(1.0)
+	translateAlpha := float32(1.0)
+	visibleAlpha := float32(1.0)
+	// IK
+	if (!isDrawBones[BONE_FLAG_IS_IK] && !isDrawBones[BONE_FLAG_NONE]) ||
+		(isDrawBones[BONE_FLAG_IS_IK] && !(b.IsIK() || len(b.IkLinkBoneIndexes) > 0 || len(b.IkTargetBoneIndexes) > 0)) {
+		ikAlpha = float32(0.0)
+	}
+	// 付与親回転
+	if (!isDrawBones[BONE_FLAG_IS_EXTERNAL_ROTATION] && !isDrawBones[BONE_FLAG_NONE]) ||
+		(isDrawBones[BONE_FLAG_IS_EXTERNAL_ROTATION] && !(b.IsEffectorRotation() || len(b.EffectiveBoneIndexes) > 0)) {
+		effectorRotateAlpha = float32(0.0)
+	}
+	// 付与親移動
+	if (!isDrawBones[BONE_FLAG_IS_EXTERNAL_TRANSLATION] && !isDrawBones[BONE_FLAG_NONE]) ||
+		(isDrawBones[BONE_FLAG_IS_EXTERNAL_TRANSLATION] && !(b.IsEffectorTranslation() || len(b.EffectiveBoneIndexes) > 0)) {
+		effectorTranslateAlpha = float32(0.0)
+	}
+	// 軸固定
+	if (!isDrawBones[BONE_FLAG_HAS_FIXED_AXIS] && !isDrawBones[BONE_FLAG_NONE]) ||
+		(isDrawBones[BONE_FLAG_HAS_FIXED_AXIS] && !b.HasFixedAxis()) {
+		fixedAlpha = float32(0.0)
+	}
+	// 回転
+	if (!isDrawBones[BONE_FLAG_CAN_ROTATE] && !isDrawBones[BONE_FLAG_NONE]) ||
+		(isDrawBones[BONE_FLAG_CAN_ROTATE] && !b.CanRotate()) {
+		rotateAlpha = float32(0.0)
+	}
+	// 移動
+	if (!isDrawBones[BONE_FLAG_CAN_TRANSLATE] && !isDrawBones[BONE_FLAG_NONE]) ||
+		(isDrawBones[BONE_FLAG_CAN_TRANSLATE] && !b.CanTranslate()) {
+		translateAlpha = float32(0.0)
+	}
+	// 表示
+	if (!isDrawBones[BONE_FLAG_IS_VISIBLE] && !isDrawBones[BONE_FLAG_NONE]) ||
+		(isDrawBones[BONE_FLAG_IS_VISIBLE] && !b.IsVisible()) {
+		visibleAlpha = float32(0.0)
+	}
+
+	// それぞれのボーン種別による透明度最大値を採用
+	alpha := max(ikAlpha, fixedAlpha, effectorRotateAlpha, effectorTranslateAlpha,
+		rotateAlpha, translateAlpha, visibleAlpha)
+	return []float32{
+		0.0, 0.0, 0.0, // 頂点モーフ
+		0.0, 0.0, 0.0, 0.0, // UVモーフ
+		c[0], c[1], c[2], c[3] * alpha, // 追加UV1モーフ
 		0.0, 0.0, 0.0, // 変形後頂点モーフ
 	}
 }

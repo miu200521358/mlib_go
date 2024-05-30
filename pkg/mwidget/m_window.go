@@ -14,24 +14,31 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
+	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
 
 type MWindow struct {
 	*walk.MainWindow
-	TabWidget               *MTabWidget  // タブウィジェット
-	isHorizontal            bool         // 横並びであるか否か
-	GlWindows               []*GlWindow  // 描画ウィンドウ
-	ConsoleView             *ConsoleView // コンソールビュー
-	frameDropAction         *walk.Action // フレームドロップON/OFF
-	physicsAction           *walk.Action // 物理ON/OFF
-	physicsResetAction      *walk.Action // 物理リセット
-	normalDebugAction       *walk.Action // ボーンデバッグ表示
-	boneDebugAction         *walk.Action // ボーンデバッグ表示
-	rigidBodyDebugAction    *walk.Action // 剛体デバッグ表示
-	jointDebugAction        *walk.Action // ジョイントデバッグ表示
-	logLevelDebugAction     *walk.Action // デバッグメッセージ表示
-	logLevelVerboseAction   *walk.Action // 冗長メッセージ表示
-	logLevelIkVerboseAction *walk.Action // IK冗長メッセージ表示
+	TabWidget                *MTabWidget  // タブウィジェット
+	isHorizontal             bool         // 横並びであるか否か
+	GlWindows                []*GlWindow  // 描画ウィンドウ
+	ConsoleView              *ConsoleView // コンソールビュー
+	frameDropAction          *walk.Action // フレームドロップON/OFF
+	physicsAction            *walk.Action // 物理ON/OFF
+	physicsResetAction       *walk.Action // 物理リセット
+	normalDebugAction        *walk.Action // ボーンデバッグ表示
+	boneDebugAllAction       *walk.Action // 全ボーンデバッグ表示
+	boneDebugIkAction        *walk.Action // IKボーンデバッグ表示
+	boneDebugEffectorAction  *walk.Action // 付与親ボーンデバッグ表示
+	boneDebugFixedAction     *walk.Action // 軸制限ボーンデバッグ表示
+	boneDebugRotateAction    *walk.Action // 回転ボーンデバッグ表示
+	boneDebugTranslateAction *walk.Action // 移動ボーンデバッグ表示
+	boneDebugVisibleAction   *walk.Action // 表示ボーンデバッグ表示
+	rigidBodyDebugAction     *walk.Action // 剛体デバッグ表示
+	jointDebugAction         *walk.Action // ジョイントデバッグ表示
+	logLevelDebugAction      *walk.Action // デバッグメッセージ表示
+	logLevelVerboseAction    *walk.Action // 冗長メッセージ表示
+	logLevelIkVerboseAction  *walk.Action // IK冗長メッセージ表示
 }
 
 func NewMWindow(
@@ -119,11 +126,53 @@ func NewMWindow(
 						OnTriggered: mainWindow.normalDebugViewTriggered,
 						AssignTo:    &mainWindow.normalDebugAction,
 					},
-					declarative.Action{
-						Text:        mi18n.T("&ボーンデバッグ表示"),
-						Checkable:   true,
-						OnTriggered: mainWindow.boneDebugViewTriggered,
-						AssignTo:    &mainWindow.boneDebugAction,
+					declarative.Menu{
+						Text: mi18n.T("&ボーンデバッグ表示"),
+						Items: []declarative.MenuItem{
+							declarative.Action{
+								Text:        mi18n.T("&全ボーン"),
+								Checkable:   true,
+								OnTriggered: mainWindow.boneDebugViewTriggered,
+								AssignTo:    &mainWindow.boneDebugAllAction,
+							},
+							declarative.Separator{},
+							declarative.Action{
+								Text:        mi18n.T("&IKボーン"),
+								Checkable:   true,
+								OnTriggered: mainWindow.boneDebugViewTriggered,
+								AssignTo:    &mainWindow.boneDebugIkAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&付与親ボーン"),
+								Checkable:   true,
+								OnTriggered: mainWindow.boneDebugViewTriggered,
+								AssignTo:    &mainWindow.boneDebugEffectorAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&軸制限ボーン"),
+								Checkable:   true,
+								OnTriggered: mainWindow.boneDebugViewTriggered,
+								AssignTo:    &mainWindow.boneDebugFixedAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&回転ボーン"),
+								Checkable:   true,
+								OnTriggered: mainWindow.boneDebugViewTriggered,
+								AssignTo:    &mainWindow.boneDebugRotateAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&移動ボーン"),
+								Checkable:   true,
+								OnTriggered: mainWindow.boneDebugViewTriggered,
+								AssignTo:    &mainWindow.boneDebugTranslateAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&表示ボーン"),
+								Checkable:   true,
+								OnTriggered: mainWindow.boneDebugViewTriggered,
+								AssignTo:    &mainWindow.boneDebugVisibleAction,
+							},
+						},
 					},
 					declarative.Separator{},
 					declarative.Action{
@@ -248,7 +297,21 @@ func (w *MWindow) normalDebugViewTriggered() {
 
 func (w *MWindow) boneDebugViewTriggered() {
 	for _, glWindow := range w.GlWindows {
-		glWindow.VisibleBone = w.boneDebugAction.Checked()
+		// 全ボーン表示
+		glWindow.VisibleBones[pmx.BONE_FLAG_NONE] = w.boneDebugAllAction.Checked()
+		// IKボーン表示
+		glWindow.VisibleBones[pmx.BONE_FLAG_IS_IK] = w.boneDebugIkAction.Checked()
+		// 付与親ボーン表示
+		glWindow.VisibleBones[pmx.BONE_FLAG_IS_EXTERNAL_ROTATION] = w.boneDebugEffectorAction.Checked()
+		glWindow.VisibleBones[pmx.BONE_FLAG_IS_EXTERNAL_TRANSLATION] = w.boneDebugEffectorAction.Checked()
+		// 軸制限ボーン表示
+		glWindow.VisibleBones[pmx.BONE_FLAG_HAS_FIXED_AXIS] = w.boneDebugFixedAction.Checked()
+		// 回転ボーン表示
+		glWindow.VisibleBones[pmx.BONE_FLAG_CAN_ROTATE] = w.boneDebugRotateAction.Checked()
+		// 移動ボーン表示
+		glWindow.VisibleBones[pmx.BONE_FLAG_CAN_TRANSLATE] = w.boneDebugTranslateAction.Checked()
+		// 表示ボーン表示
+		glWindow.VisibleBones[pmx.BONE_FLAG_IS_VISIBLE] = w.boneDebugVisibleAction.Checked()
 	}
 }
 

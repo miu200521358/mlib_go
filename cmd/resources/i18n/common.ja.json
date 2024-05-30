@@ -24,6 +24,34 @@
         "translation": "&ボーンデバッグ表示"
     },
     {
+        "id": "&全ボーン",
+        "translation": "&全ボーン"
+    },
+    {
+        "id": "&IKボーン",
+        "translation": "&IKボーン"
+    },
+    {
+        "id": "&付与親ボーン",
+        "translation": "&付与親ボーン"
+    },
+    {
+        "id": "&軸制限ボーン",
+        "translation": "&軸制限ボーン"
+    },
+    {
+        "id": "&回転ボーン",
+        "translation": "&回転ボーン"
+    },
+    {
+        "id": "&移動ボーン",
+        "translation": "&移動ボーン"
+    },
+    {
+        "id": "&表示ボーン",
+        "translation": "&表示ボーン"
+    },
+    {
         "id": "&剛体デバッグ表示",
         "translation": "&剛体デバッグ表示"
     },

@@ -73,7 +73,7 @@ func draw(
 	elapsed float32,
 	enablePhysics bool,
 	isDrawNormal bool,
-	isDrawBone bool,
+	isDrawBones map[pmx.BoneFlag]bool,
 ) {
 	deltas := deform(modelPhysics, model, motion, frame, elapsed, enablePhysics)
 
@@ -89,7 +89,8 @@ func draw(
 
 	vertexDeltas := fetchVertexDeltas(model, deltas)
 
-	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, materialDeltas, windowIndex, isDrawNormal, isDrawBone)
+	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, materialDeltas, windowIndex,
+		isDrawNormal, isDrawBones, model.Bones)
 
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()

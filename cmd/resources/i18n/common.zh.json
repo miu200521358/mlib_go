@@ -24,6 +24,34 @@
         "translation": "&骨骼调试显示"
     },
     {
+        "id": "&全ボーン",
+        "translation": "&全骨骼"
+    },
+    {
+        "id": "&IKボーン",
+        "translation": "&IK 骨骼"
+    },
+    {
+        "id": "&付与親ボーン",
+        "translation": "&赋予父骨骼"
+    },
+    {
+        "id": "&軸制限ボーン",
+        "translation": "&轴限制骨骼"
+    },
+    {
+        "id": "&回転ボーン",
+        "translation": "&旋转骨骼"
+    },
+    {
+        "id": "&移動ボーン",
+        "translation": "&移动骨骼"
+    },
+    {
+        "id": "&表示ボーン",
+        "translation": "&显示骨骼"
+    },
+    {
         "id": "&剛体デバッグ表示",
         "translation": "&刚体调试显示"
     },

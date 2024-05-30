@@ -24,6 +24,34 @@
         "translation": "&Bone Debug Display"
     },
     {
+        "id": "&全ボーン",
+        "translation": "&All Bones"
+    },
+    {
+        "id": "&IKボーン",
+        "translation": "&IK Bones"
+    },
+    {
+        "id": "&付与親ボーン",
+        "translation": "&Assigned Parent Bones"
+    },
+    {
+        "id": "&軸制限ボーン",
+        "translation": "&Axis Restricted Bones"
+    },
+    {
+        "id": "&回転ボーン",
+        "translation": "&Rotation Bones"
+    },
+    {
+        "id": "&移動ボーン",
+        "translation": "&Move Bones"
+    },
+    {
+        "id": "&表示ボーン",
+        "translation": "&Display Bones"
+    },
+    {
         "id": "&剛体デバッグ表示",
         "translation": "&Rigid Body Debug Display"
     },
