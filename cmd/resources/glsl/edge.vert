@@ -193,8 +193,13 @@ void main() {
 
         vec4 vecPosition = rotatedPosition - rotatedC + correctedC;
 
+        normalTransformMatrix = mat3(rotationMatrix);
+
+        // 頂点法線
+        vec3 vertexNormal = normalize(normalTransformMatrix * normalize(normal)).xyz;
+
         // 頂点位置
-        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * (vec4(vecPosition.xyz + (normal * edgeWight * 0.02), 1.0));
+        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * (vec4(vecPosition.xyz + (vertexNormal * edgeWight * 0.02), 1.0));
     } else {
         for(int i = 0; i < 4; i++) {
             float boneWeight = boneWeights[i];
@@ -207,7 +212,13 @@ void main() {
             boneTransformMatrix += boneMatrix * boneWeight;
         }
 
+        // 各頂点で使用される法線変形行列をボーン変形行列から回転情報のみ抽出して生成する
+        normalTransformMatrix = mat3(boneTransformMatrix);
+
+        // 頂点法線
+        vec3 vertexNormal = normalize(normalTransformMatrix * normalize(normal)).xyz;
+
         // 頂点位置
-        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * (vec4(position4.xyz + (normal * edgeWight * 0.02), 1.0));
+        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * (vec4(position4.xyz + (vertexNormal * edgeWight * 0.02), 1.0));
     }
 }

@@ -519,13 +519,8 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 
 		if w.playing {
 			// 経過秒数をキーフレームの進捗具合に合わせて調整
-			var frameCount float32 = 1
-			if w.EnableFrameDrop {
-				// 経過したフレーム数を計算
-				frameCount = elapsed / w.Physics.Spf
-				elapsed = frameCount / w.Physics.Fps
-			}
-			w.frame += int(frameCount)
+			elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
+			w.frame += int(elapsed * w.Physics.Fps)
 			if motionPlayer != nil {
 				motionPlayer.SetValue(float64(w.frame))
 			}

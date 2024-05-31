@@ -208,6 +208,20 @@ func (fs *BaseFrames[T]) Contains(index int) bool {
 	return false
 }
 
+func (fs *BaseFrames[T]) Delete(index int) {
+	fs.lock.Lock()
+	defer fs.lock.Unlock()
+
+	if _, ok := fs.data[index]; ok {
+		delete(fs.data, index)
+		fs.Indexes.Delete(mcore.Int(index))
+	}
+
+	if fs.RegisteredIndexes.Has(index) {
+		fs.RegisteredIndexes.Delete(mcore.Int(index))
+	}
+}
+
 // Append 補間曲線は分割しない
 func (fs *BaseFrames[T]) Append(f T) {
 	fs.appendOrInsert(f, false)
