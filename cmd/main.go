@@ -142,14 +142,52 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 
 		if pmxReadPicker.Exists() {
 			motionPlayer.PlayButton.SetEnabled(true)
+
+			data, err := pmxReadPicker.GetData()
+			if err != nil {
+				mlog.E(mi18n.T("Pmxファイル読み込みエラー"), err.Error())
+				return
+			}
+			model := data.(*pmx.PmxModel)
+			var motion *vmd.VmdMotion
+			if vmdReadPicker.IsCached() {
+				motion = vmdReadPicker.GetCache().(*vmd.VmdMotion)
+			} else {
+				motion = vmd.NewVmdMotion("")
+			}
+
+			mWindow.GetMainGlWindow().SetFrame(0)
+			mWindow.GetMainGlWindow().Play(false)
+			mWindow.GetMainGlWindow().ClearData()
+			mWindow.GetMainGlWindow().AddData(model, motion)
+			mWindow.GetMainGlWindow().Run(motionPlayer)
 		}
 
 		onFilePathChanged()
 	}
 
 	vmdReadPicker.OnPathChanged = func(path string) {
-		if pmxReadPicker.Exists() {
-			motionPlayer.PlayButton.SetEnabled(true)
+		if vmdReadPicker.Exists() {
+			motionData, err := vmdReadPicker.GetData()
+			if err != nil {
+				mlog.E(mi18n.T("Vmdファイル読み込みエラー"), err.Error())
+				return
+			}
+			motion := motionData.(*vmd.VmdMotion)
+
+			motionPlayer.SetRange(0, float64(motion.GetMaxFrame()+1))
+			motionPlayer.SetValue(0)
+
+			if pmxReadPicker.Exists() {
+				motionPlayer.PlayButton.SetEnabled(true)
+				model := pmxReadPicker.GetCache().(*pmx.PmxModel)
+
+				mWindow.GetMainGlWindow().SetFrame(0)
+				mWindow.GetMainGlWindow().Play(false)
+				mWindow.GetMainGlWindow().ClearData()
+				mWindow.GetMainGlWindow().AddData(model, motion)
+				mWindow.GetMainGlWindow().Run(motionPlayer)
+			}
 		}
 
 		onFilePathChanged()
@@ -167,62 +205,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 			pmxSavePicker.SetEnabled(false)
 		}
 
-		if !pmxReadPicker.Exists() {
-			err := fmt.Errorf("%s\n%s",
-				mi18n.T("Pmxファイル読み込みエラー"),
-				mi18n.T("有効なPmxファイルが入力されていません"))
-			return err
-		}
-
-		var model *pmx.PmxModel
-		modelCached := pmxReadPicker.IsCached()
-		motionCached := vmdReadPicker.IsCached()
-
-		if !modelCached {
-			data, err := pmxReadPicker.GetData()
-			if err != nil {
-				err := fmt.Errorf("%s\n%s", mi18n.T("Pmxファイル読み込みエラー"), err.Error())
-				return err
-			}
-			model = data.(*pmx.PmxModel)
-		} else {
-			model = pmxReadPicker.GetCache().(*pmx.PmxModel)
-		}
-
-		var motion *vmd.VmdMotion
-		if !motionCached {
-			if vmdReadPicker.Exists() {
-				motionData, err := vmdReadPicker.GetData()
-				if err != nil {
-					err := fmt.Errorf("%s\n%s", mi18n.T("Vmdファイル読み込みエラー"), err.Error())
-					return err
-				}
-				motion = motionData.(*vmd.VmdMotion)
-			}
-
-			if motion == nil {
-				motion = vmd.NewVmdMotion("")
-			}
-		} else {
-			motion = vmdReadPicker.GetCache().(*vmd.VmdMotion)
-		}
-
-		if modelCached && motionCached {
-			mWindow.GetMainGlWindow().Play(true)
-		} else {
-			motionPlayer.SetEnabled(false)
-			motionPlayer.SetRange(0, float64(motion.GetMaxFrame()+1))
-			motionPlayer.SetValue(0)
-
-			// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
-			// defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
-
-			mWindow.GetMainGlWindow().SetFrame(0)
-			mWindow.GetMainGlWindow().Play(true)
-			mWindow.GetMainGlWindow().ClearData()
-			mWindow.GetMainGlWindow().AddData(model, motion)
-			mWindow.GetMainGlWindow().Run(motionPlayer)
-		}
+		mWindow.GetMainGlWindow().Play(isPlaying)
 
 		return nil
 	}

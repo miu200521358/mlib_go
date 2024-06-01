@@ -323,8 +323,6 @@ func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 			item := choices[index]
 			// パスを入力欄に設定
 			picker.PathLineEdit.SetText(item)
-			// コールバックを呼び出し
-			picker.OnChanged(item)
 		}
 
 		historyListBox.SetModel(choices)
@@ -336,6 +334,8 @@ func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 		historyListBox.ItemActivated().Attach(func() {
 			itemActivated()
 			dlg.Accept()
+			// コールバックを呼び出し
+			picker.OnChanged(picker.PathLineEdit.Text())
 		})
 
 		// ボタンBox
@@ -356,6 +356,8 @@ func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 		okButton.Clicked().Attach(func() {
 			itemActivated()
 			dlg.Accept()
+			// コールバックを呼び出し
+			picker.OnChanged(picker.PathLineEdit.Text())
 		})
 
 		// Cancel ボタン
