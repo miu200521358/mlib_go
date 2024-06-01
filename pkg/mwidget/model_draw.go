@@ -4,10 +4,6 @@
 package mwidget
 
 import (
-	"math"
-	"runtime"
-	"sync"
-
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
@@ -99,11 +95,6 @@ func draw(
 func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
 	vertexDeltas := make([][]float32, len(model.Vertices.Data))
 
-	chunkSize := int(math.Ceil(float64(len(model.Vertices.Data)) / float64(runtime.NumCPU())))
-	if chunkSize > 20000 {
-		return fetchVertexDeltasParallel(model, deltas)
-	}
-
 	for i, v := range deltas.Morphs.Vertices.Data {
 		if v != nil && (!v.Position.IsZero() || !v.Uv.IsZero() || !v.Uv1.IsZero() || !v.AfterPosition.IsZero()) {
 			// 必要な場合にのみ部分更新するよう設定
@@ -114,37 +105,37 @@ func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
 	return vertexDeltas
 }
 
-func fetchVertexDeltasParallel(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
-	vertexDeltas := make([][]float32, len(model.Vertices.Data))
+// func fetchVertexDeltasParallel(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
+// 	vertexDeltas := make([][]float32, len(model.Vertices.Data))
 
-	var wg sync.WaitGroup
+// 	var wg sync.WaitGroup
 
-	chunkSize := int(math.Ceil(float64(len(model.Vertices.Data)) / float64(runtime.NumCPU())))
-	wg.Add(runtime.NumCPU())
-	for chunkStart := 0; chunkStart < len(model.Vertices.Data); chunkStart += chunkSize {
-		chunkEnd := chunkStart + chunkSize
-		if chunkEnd > len(model.Vertices.Data) {
-			chunkEnd = len(model.Vertices.Data)
-		}
+// 	chunkSize := int(math.Ceil(float64(len(model.Vertices.Data)) / float64(runtime.NumCPU())))
+// 	wg.Add(runtime.NumCPU())
+// 	for chunkStart := 0; chunkStart < len(model.Vertices.Data); chunkStart += chunkSize {
+// 		chunkEnd := chunkStart + chunkSize
+// 		if chunkEnd > len(model.Vertices.Data) {
+// 			chunkEnd = len(model.Vertices.Data)
+// 		}
 
-		go func(chunkStart, chunkEnd int) {
-			defer wg.Done()
-			for i := chunkStart; i < chunkEnd; i++ {
-				if deltas.Morphs.Vertices.Data[i] != nil &&
-					(!deltas.Morphs.Vertices.Data[i].Position.IsZero() ||
-						!deltas.Morphs.Vertices.Data[i].Uv.IsZero() ||
-						!deltas.Morphs.Vertices.Data[i].Uv1.IsZero() ||
-						!deltas.Morphs.Vertices.Data[i].AfterPosition.IsZero()) {
-					// 必要な場合にのみ部分更新するよう設定
-					vertexDeltas[i] = deltas.Morphs.Vertices.Data[i].GL()
-				}
-			}
-		}(chunkStart, chunkEnd)
-	}
-	wg.Wait()
+// 		go func(chunkStart, chunkEnd int) {
+// 			defer wg.Done()
+// 			for i := chunkStart; i < chunkEnd; i++ {
+// 				if deltas.Morphs.Vertices.Data[i] != nil &&
+// 					(!deltas.Morphs.Vertices.Data[i].Position.IsZero() ||
+// 						!deltas.Morphs.Vertices.Data[i].Uv.IsZero() ||
+// 						!deltas.Morphs.Vertices.Data[i].Uv1.IsZero() ||
+// 						!deltas.Morphs.Vertices.Data[i].AfterPosition.IsZero()) {
+// 					// 必要な場合にのみ部分更新するよう設定
+// 					vertexDeltas[i] = deltas.Morphs.Vertices.Data[i].GL()
+// 				}
+// 			}
+// 		}(chunkStart, chunkEnd)
+// 	}
+// 	wg.Wait()
 
-	return vertexDeltas
-}
+// 	return vertexDeltas
+// }
 
 func updatePhysics(
 	modelPhysics *mphysics.MPhysics,
@@ -158,11 +149,11 @@ func updatePhysics(
 		return
 	}
 
-	for _, r := range model.RigidBodies.GetSortedData() {
+	for _, rigidBody := range model.RigidBodies.Data {
 		// 現在のボーン変形情報を保持
-		rigidBodyBone := r.Bone
+		rigidBodyBone := rigidBody.Bone
 		if rigidBodyBone == nil {
-			rigidBodyBone = r.JointedBone
+			rigidBodyBone = rigidBody.JointedBone
 		}
 		if rigidBodyBone == nil || boneDeltas.Get(rigidBodyBone.Index) == nil {
 			continue
@@ -182,16 +173,16 @@ func updatePhysics(
 		// }
 
 		// 物理フラグが落ちている場合があるので、強制的に起こす
-		forceUpdate := r.UpdateFlags(modelPhysics, enablePhysics)
-		r.UpdateTransform(modelPhysics, rigidBodyBone, boneTransform,
+		forceUpdate := rigidBody.UpdateFlags(modelPhysics, enablePhysics)
+		rigidBody.UpdateTransform(modelPhysics, rigidBodyBone, boneTransform,
 			elapsed == 0.0 || !enablePhysics || forceUpdate)
 	}
 
-	if float32(frame) > modelPhysics.Spf {
+	if elapsed >= 1e-5 {
 		modelPhysics.Update(elapsed)
 
 		// 剛体位置を更新
-		for _, rigidBody := range model.RigidBodies.GetSortedData() {
+		for _, rigidBody := range model.RigidBodies.Data {
 			bonePhysicsGlobalMatrix := rigidBody.GetRigidBodyBoneMatrix(modelPhysics)
 			if boneDeltas != nil && bonePhysicsGlobalMatrix != nil && rigidBody.Bone != nil {
 				// if rigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE &&

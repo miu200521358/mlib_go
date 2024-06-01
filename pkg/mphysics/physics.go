@@ -26,7 +26,7 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 	solver := mbt.NewBtSequentialImpulseConstraintSolver()
 	// solver.GetM_analyticsData().SetM_numIterationsUsed(200)
 	world := mbt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
-	world.SetGravity(mbt.NewBtVector3(float32(0), float32(-9.8), float32(0)))
+	world.SetGravity(mbt.NewBtVector3(float32(0), float32(-9.8*10), float32(0)))
 	// world.GetSolverInfo().(mbt.BtContactSolverInfo).SetM_numIterations(100)
 	// world.GetSolverInfo().(mbt.BtContactSolverInfo).SetM_splitImpulse(1)
 
@@ -54,7 +54,7 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 		rigidBodyTransforms: make(map[int]mbt.BtTransform),
 	}
 	p.Spf = 1.0 / p.Fps
-	p.FixedTimeStep = p.Spf / float32(p.MaxSubSteps)
+	p.FixedTimeStep = p.Spf / float32(p.MaxSubSteps) / 2.0
 
 	p.VisibleRigidBody(false)
 	p.VisibleJoint(false)
@@ -141,13 +141,14 @@ func (p *MPhysics) DeleteJoints() {
 	}
 }
 
-func (p *MPhysics) Update(elapsed float32) {
+func (p *MPhysics) Update(timeStep float32) {
 	// // 標準出力を一時的にリダイレクトする
 	// old := os.Stdout // keep backup of the real stdout
 	// r, w, _ := os.Pipe()
 	// os.Stdout = w
-	// for range frameCount {
-	p.world.StepSimulation(elapsed, p.MaxSubSteps, p.FixedTimeStep)
+	// for range int(timeStep / p.Spf) {
+	// mlog.I("timeStep=%.8f, spf: %.8f", timeStep, p.Spf)
+	p.world.StepSimulation(timeStep, p.MaxSubSteps, p.FixedTimeStep)
 	// }
 
 	// // p.frame += float32(elapsed)

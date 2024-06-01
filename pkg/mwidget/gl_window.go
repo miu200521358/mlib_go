@@ -508,22 +508,28 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 		}
 
 		time := glfw.GetTime()
-		elapsed := float32(time - previousTime)
-		// Update
-		previousTime = time
 
-		if !w.EnableFrameDrop {
+		var elapsed float32
+		if w.EnableFrameDrop {
+			elapsed = float32(time - previousTime)
+		} else {
 			// フレームドロップOFFの場合、1Fずつ
 			elapsed = 1.0 / w.Physics.Fps
 		}
 
 		if w.playing {
-			// 経過秒数をキーフレームの進捗具合に合わせて調整
-			elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
+			// // 経過秒数をキーフレームの進捗具合に合わせて調整
+			// elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
 			w.frame += int(elapsed * w.Physics.Fps)
+			mlog.D("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%d", previousTime, time, elapsed, w.frame)
 			if motionPlayer != nil {
 				motionPlayer.SetValue(float64(w.frame))
 			}
+		}
+
+		if int(elapsed*w.Physics.Fps) > 0 {
+			// 1F以上描画が進んでいたら、前の時間を現在時間でUpdate
+			previousTime = time
 		}
 
 		// 描画

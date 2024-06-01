@@ -102,7 +102,7 @@ func NewMWindow(
 				Text: mi18n.T("&ビューワー"),
 				Items: []declarative.MenuItem{
 					declarative.Action{
-						Text:        mi18n.T("&フレームドロップON/OFF"),
+						Text:        mi18n.T("&フレームドロップON"),
 						Checkable:   true,
 						OnTriggered: mainWindow.frameDropTriggered,
 						AssignTo:    &mainWindow.frameDropAction,
