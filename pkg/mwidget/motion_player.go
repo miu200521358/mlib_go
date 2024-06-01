@@ -163,6 +163,7 @@ func (mp *MotionPlayer) SetEnabled(enabled bool) {
 		mp.FrameEdit.SetBackground(bg)
 	}
 	mp.FrameSlider.SetEnabled(enabled)
+	mp.PlayButton.SetEnabled(enabled)
 }
 
 func (*MotionPlayer) CreateLayoutItem(ctx *walk.LayoutContext) walk.LayoutItem {

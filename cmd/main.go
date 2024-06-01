@@ -114,18 +114,13 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 	motionPlayer, err := mwidget.NewMotionPlayer(page, mWindow, resourceFiles)
 	mwidget.CheckError(err, mWindow, mi18n.T("モーションプレイヤー生成エラー"))
 	motionPlayer.SetEnabled(false)
-	motionPlayer.PlayButton.SetEnabled(false)
 
 	var onFilePathChanged = func() {
 		if motionPlayer.Playing() {
 			mWindow.GetMainGlWindow().Play(false)
 			motionPlayer.Play(false)
 		}
-		if pmxReadPicker.Exists() && vmdReadPicker.ExistsOrEmpty() {
-			motionPlayer.PlayButton.SetEnabled(true)
-		} else {
-			motionPlayer.PlayButton.SetEnabled(false)
-		}
+		motionPlayer.SetEnabled(pmxReadPicker.Exists() && vmdReadPicker.ExistsOrEmpty())
 	}
 
 	pmxReadPicker.OnPathChanged = func(path string) {
@@ -141,8 +136,6 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 		pmxSavePicker.PathLineEdit.SetText(outputPath)
 
 		if pmxReadPicker.Exists() {
-			motionPlayer.PlayButton.SetEnabled(true)
-
 			data, err := pmxReadPicker.GetData()
 			if err != nil {
 				mlog.E(mi18n.T("Pmxファイル読み込みエラー"), err.Error())
@@ -156,6 +149,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 				motion = vmd.NewVmdMotion("")
 			}
 
+			motionPlayer.SetEnabled(true)
 			mWindow.GetMainGlWindow().SetFrame(0)
 			mWindow.GetMainGlWindow().Play(false)
 			mWindow.GetMainGlWindow().ClearData()
@@ -179,9 +173,9 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 			motionPlayer.SetValue(0)
 
 			if pmxReadPicker.Exists() {
-				motionPlayer.PlayButton.SetEnabled(true)
 				model := pmxReadPicker.GetCache().(*pmx.PmxModel)
 
+				motionPlayer.SetEnabled(true)
 				mWindow.GetMainGlWindow().SetFrame(0)
 				mWindow.GetMainGlWindow().Play(false)
 				mWindow.GetMainGlWindow().ClearData()
@@ -198,13 +192,13 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 			pmxReadPicker.SetEnabled(true)
 			vmdReadPicker.SetEnabled(true)
 			pmxSavePicker.SetEnabled(true)
-			return nil
 		} else {
 			pmxReadPicker.SetEnabled(false)
 			vmdReadPicker.SetEnabled(false)
 			pmxSavePicker.SetEnabled(false)
 		}
 
+		motionPlayer.PlayButton.SetEnabled(true)
 		mWindow.GetMainGlWindow().Play(isPlaying)
 
 		return nil
