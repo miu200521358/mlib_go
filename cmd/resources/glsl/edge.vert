@@ -162,7 +162,6 @@ void main() {
     // 各頂点で使用されるボーン変形行列を計算する
     totalBoneWeight = 0;
     mat4 boneTransformMatrix = mat4(0.0);
-    mat3 normalTransformMatrix = mat3(1.0);
 
     // ボーン変形後頂点モーフ変形量
     mat4 afterVertexTransformMatrix = mat4(1.0);
@@ -193,7 +192,7 @@ void main() {
 
         vec4 vecPosition = rotatedPosition - rotatedC + correctedC;
 
-        normalTransformMatrix = mat3(rotationMatrix);
+        mat3 normalTransformMatrix = mat3(rotationMatrix);
 
         // 頂点法線
         vec3 vertexNormal = normalize(normalTransformMatrix * normalize(normal)).xyz;
@@ -212,13 +211,7 @@ void main() {
             boneTransformMatrix += boneMatrix * boneWeight;
         }
 
-        // 各頂点で使用される法線変形行列をボーン変形行列から回転情報のみ抽出して生成する
-        normalTransformMatrix = mat3(boneTransformMatrix);
-
-        // 頂点法線
-        vec3 vertexNormal = normalize(normalTransformMatrix * normalize(normal)).xyz;
-
         // 頂点位置
-        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * (vec4(position4.xyz + (vertexNormal * edgeWight * 0.02), 1.0));
+        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * (vec4(position4.xyz + (normal * edgeWight * 0.02), 1.0));
     }
 }
