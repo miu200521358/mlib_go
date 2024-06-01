@@ -66,6 +66,7 @@ type GlWindow struct {
 	EnablePhysics       bool
 	EnableFrameDrop     bool
 	frame               int
+	motionPlayer        *MotionPlayer
 }
 
 func NewGlWindow(
@@ -75,6 +76,7 @@ func NewGlWindow(
 	windowIndex int,
 	resourceFiles embed.FS,
 	mainWindow *GlWindow,
+	motionPlayer *MotionPlayer,
 ) (*GlWindow, error) {
 	if mainWindow == nil {
 		// GLFW の初期化(最初の一回だけ)
@@ -100,6 +102,8 @@ func NewGlWindow(
 		return nil, err
 	}
 	w.MakeContextCurrent()
+	w.SetInputMode(glfw.StickyKeysMode, glfw.True)
+
 	iconImg, err := mconfig.LoadIconFile(resourceFiles)
 	if err == nil {
 		w.SetIcon([]image.Image{iconImg})
@@ -165,6 +169,7 @@ func NewGlWindow(
 		EnablePhysics:       true, // 最初は物理ON
 		EnableFrameDrop:     true, // 最初はドロップON
 		frame:               0,
+		motionPlayer:        motionPlayer,
 	}
 
 	w.SetScrollCallback(glWindow.handleScrollEvent)
@@ -214,7 +219,7 @@ func (w *GlWindow) handleKeyEvent(
 	action glfw.Action,
 	mods glfw.ModifierKey,
 ) {
-	if action != glfw.Press ||
+	if !(action == glfw.Press || action == glfw.Repeat) ||
 		!(key == glfw.KeyKP0 ||
 			key == glfw.KeyKP2 ||
 			key == glfw.KeyKP4 ||
@@ -224,8 +229,22 @@ func (w *GlWindow) handleKeyEvent(
 			key == glfw.KeyLeftShift ||
 			key == glfw.KeyRightShift ||
 			key == glfw.KeyLeftControl ||
-			key == glfw.KeyRightControl) {
+			key == glfw.KeyRightControl ||
+			key == glfw.KeyLeft ||
+			key == glfw.KeyRight ||
+			key == glfw.KeyUp ||
+			key == glfw.KeyDown) {
 		return
+	}
+
+	if w.motionPlayer != nil {
+		if key == glfw.KeyRight || key == glfw.KeyUp {
+			w.motionPlayer.SetValue(float64(w.GetFrame() + 1))
+			return
+		} else if key == glfw.KeyLeft || key == glfw.KeyDown {
+			w.motionPlayer.SetValue(float64(w.GetFrame() - 1))
+			return
+		}
 	}
 
 	if key == glfw.KeyLeftShift || key == glfw.KeyRightShift {
@@ -475,7 +494,7 @@ func (w *GlWindow) Size() walk.Size {
 	return walk.Size{Width: x, Height: y}
 }
 
-func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
+func (w *GlWindow) Run() {
 	previousTime := glfw.GetTime()
 
 	for w != nil && !CheckOpenGLError() && !w.ShouldClose() {
@@ -522,8 +541,8 @@ func (w *GlWindow) Run(motionPlayer *MotionPlayer) {
 			// elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
 			w.frame += int(elapsed * w.Physics.Fps)
 			mlog.D("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%d", previousTime, time, elapsed, w.frame)
-			if motionPlayer != nil {
-				motionPlayer.SetValue(float64(w.frame))
+			if w.motionPlayer != nil {
+				w.motionPlayer.SetValue(float64(w.frame))
 			}
 		}
 

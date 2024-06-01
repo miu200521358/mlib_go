@@ -9,6 +9,7 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 	"github.com/miu200521358/win"
 
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
@@ -142,9 +143,12 @@ func (mp *MotionPlayer) SetRange(min, max float64) {
 	mp.FrameSlider.SetRange(int(min), int(max))
 }
 
-func (mp *MotionPlayer) SetValue(value float64) {
-	mp.FrameEdit.SetValue(value)
-	mp.FrameSlider.SetValue(int(value))
+func (mp *MotionPlayer) SetValue(v float64) {
+	if mp.FrameEdit.Enabled() {
+		value := mmath.ClampFloat(v, mp.FrameEdit.MinValue(), mp.FrameEdit.MaxValue())
+		mp.FrameEdit.SetValue(value)
+		mp.FrameSlider.SetValue(int(value))
+	}
 }
 
 func (mp *MotionPlayer) SetEnabled(enabled bool) {

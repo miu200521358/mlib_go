@@ -48,12 +48,12 @@ func main() {
 	mWindow, err = mwidget.NewMWindow(resourceFiles, appConfig, true, 512, 768, getMenuItems)
 	mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
 
+	motionPlayer := NewFileTabPage(mWindow)
+
 	glWindow, err := mwidget.NewGlWindow(fmt.Sprintf("%s %s", mWindow.Title(), mi18n.T("ビューワー")),
-		512, 768, 0, resourceFiles, nil)
+		512, 768, 0, resourceFiles, nil, motionPlayer)
 	mwidget.CheckError(err, mWindow, mi18n.T("ビューワーウィンドウ生成エラー"))
 	mWindow.AddGlWindow(glWindow)
-
-	NewFileTabPage(mWindow)
 
 	// コンソールはタブ外に表示
 	mWindow.ConsoleView, err = mwidget.NewConsoleView(mWindow)
@@ -73,7 +73,7 @@ func getMenuItems() []declarative.MenuItem {
 	}
 }
 
-func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
+func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
 	page := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, mi18n.T("ファイル"))
 
 	mainLayout := walk.NewVBoxLayout()
@@ -154,7 +154,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 			mWindow.GetMainGlWindow().Play(false)
 			mWindow.GetMainGlWindow().ClearData()
 			mWindow.GetMainGlWindow().AddData(model, motion)
-			mWindow.GetMainGlWindow().Run(motionPlayer)
+			mWindow.GetMainGlWindow().Run()
 		}
 
 		onFilePathChanged()
@@ -180,7 +180,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 				mWindow.GetMainGlWindow().Play(false)
 				mWindow.GetMainGlWindow().ClearData()
 				mWindow.GetMainGlWindow().AddData(model, motion)
-				mWindow.GetMainGlWindow().Run(motionPlayer)
+				mWindow.GetMainGlWindow().Run()
 			}
 		}
 
@@ -206,5 +206,5 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MTabPage {
 
 	pmxReadPicker.PathLineEdit.SetFocus()
 
-	return page
+	return motionPlayer
 }
