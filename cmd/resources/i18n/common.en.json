@@ -270,5 +270,29 @@
     {
         "id": "&ハイスペックモード",
         "translation": "&High Spec Mode"
+    },
+    {
+        "id": "モデル名エンコードエラー",
+        "translation": "Since the model name ({{.Name}}) contains characters that are unreadable in Japanese or English (environment-dependent characters, foreign language characters, etc.), a temporary model name will be set."
+    },
+    {
+        "id": "ボーン名エンコードエラー",
+        "translation": "Since the bone name ({{.Name}}) contains characters that are unreadable in Japanese or English (environment-dependent characters, foreign language characters, etc.), it will be skipped."
+    },
+    {
+        "id": "ファイルクローズエラー",
+        "translation": "Failed to output the file to the file path ({{.Path}})."
+    },
+    {
+        "id": "ボーンフレーム書き込みエラー",
+        "translation": "Failed to write the bone data."
+    },
+    {
+        "id": "モーフフレーム書き込みエラー",
+        "translation": "Failed to write the morph data."
+    },
+    {
+        "id": "&IK冗長ログ表示",
+        "translation": "&IK verbose log display"
     }
 ]
