@@ -117,7 +117,10 @@ func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
 	vertexDeltas := make([][]float32, len(model.Vertices.Data))
 
 	for _, v := range deltas.Morphs.Vertices.Data {
-		if v != nil && (!v.Position.IsZero() || !v.Uv.IsZero() || !v.Uv1.IsZero() || !v.AfterPosition.IsZero()) {
+		if v != nil && ((v.Position != nil && !v.Position.IsZero()) ||
+			(v.Uv != nil && !v.Uv.IsZero()) ||
+			(v.Uv1 != nil && !v.Uv1.IsZero()) ||
+			(v.AfterPosition != nil && !v.AfterPosition.IsZero())) {
 			// 必要な場合にのみ部分更新するよう設定
 			vertexDeltas[v.Index] = v.GL()
 		}
