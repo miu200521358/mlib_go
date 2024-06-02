@@ -1207,9 +1207,9 @@ func (fs *BoneFrames) getRotation(
 	var rot *mmath.MQuaternion
 	if bf.IkRotation != nil && !bf.IkRotation.IsIdent() {
 		// IK用回転を持っている場合、置き換え
-		rot = bf.IkRotation
+		rot = bf.IkRotation.Copy()
 	} else {
-		rot = bf.Rotation
+		rot = bf.Rotation.Copy()
 	}
 
 	if bf.MorphRotation != nil {
