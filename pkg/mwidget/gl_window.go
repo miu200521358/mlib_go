@@ -541,14 +541,14 @@ func (w *GlWindow) Run() {
 		elapsed := float32(time - previousTime)
 		if !w.EnableFrameDrop {
 			// フレームドロップOFFの場合、最大1Fずつ
-			elapsed = mmath.ClampFloat32(elapsed, 0, 1.0/w.Physics.Fps)
+			elapsed = mmath.ClampFloat32(elapsed, 0, w.Physics.Spf)
 		}
 
 		if w.playing {
 			// // 経過秒数をキーフレームの進捗具合に合わせて調整
 			// elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
-			w.frame += int(elapsed * w.Physics.Fps)
-			mlog.D("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%d", previousTime, time, elapsed, w.frame)
+			w.frame += int(math.Round(float64(elapsed * w.Physics.Fps)))
+			mlog.V("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%d", previousTime, time, elapsed, w.frame)
 			if w.motionPlayer != nil {
 				w.motionPlayer.SetValue(w.frame)
 			}
