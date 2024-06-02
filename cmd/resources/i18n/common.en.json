@@ -225,7 +225,7 @@
     },
     {
         "id": "ビューワーの使い方メッセージ",
-        "translation": "・Zoom in and out with the mouse middle wheel\n・Move the mouse with the middle wheel clicked to change the camera position\n・Move the mouse with the right button clicked to change the camera direction\n・Press Shift while moving the mouse to increase the change amount\n・Press Ctrl while moving the mouse to decrease the change amount\n・Entering '0' in the keypad field will set the camera to view from below\n・Entering '2' in the keypad field will set the camera to front view\n・Entering '4' in the keypad field will set the camera to left view\n・Entering '5' in the keypad field will set the camera to top view\n・Entering '6' in the keypad field will set the camera to right view\n・Entering '8' in the keypad field will set the camera to back view"
+        "translation": "・Use the mouse wheel to zoom in and out.\n・Hold down the mouse wheel and move to change the camera position.\n・Hold down the right mouse button and move to change the camera angle.\n・Hold Shift while using the mouse to increase movement sensitivity.\n・Hold Ctrl while using the mouse to decrease movement sensitivity.\n・Press '0' on the keypad to set the camera view to the bottom.\n・Press '2' on the keypad to set the camera view to the front.\n・Press '4' on the keypad to set the camera view to the left.\n・Press '5' on the keypad to set the camera view to the top.\n・Press '6' on the keypad to set the camera view to the right.\n・Press '8' on the keypad to set the camera view to the back.\n・Use the right or up arrow keys on the keyboard to move forward a frame.\n・Use the left or down arrow keys on the keyboard to move back a frame."
     },
     {
         "id": "&再生フォームの使い方",
