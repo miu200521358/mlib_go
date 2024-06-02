@@ -7,7 +7,7 @@ type BoneNameFrames struct {
 
 func NewBoneNameFrames(name string) *BoneNameFrames {
 	return &BoneNameFrames{
-		BaseFrames: NewBaseFrames[*BoneFrame](NewBoneFrame),
+		BaseFrames: NewBaseFrames[*BoneFrame](NewBoneFrame, NullBoneFrame),
 		Name:       name,
 	}
 }

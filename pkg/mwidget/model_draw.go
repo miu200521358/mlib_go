@@ -34,17 +34,19 @@ func deform(
 		}
 		bf := motion.BoneFrames.Get(bone.Name).Get(frame)
 
-		// 一旦モーフの値をクリア
-		bf.MorphPosition = nil
-		bf.MorphLocalPosition = nil
-		bf.MorphRotation = nil
-		bf.MorphLocalRotation = nil
-		bf.MorphScale = nil
-		bf.MorphLocalScale = nil
+		if bf != nil {
+			// 一旦モーフの値をクリア
+			bf.MorphPosition = nil
+			bf.MorphLocalPosition = nil
+			bf.MorphRotation = nil
+			bf.MorphLocalRotation = nil
+			bf.MorphScale = nil
+			bf.MorphLocalScale = nil
 
-		// 該当ボーンキーフレにモーフの値を加算
-		bf.Add(bd.BoneFrame)
-		motion.AppendBoneFrame(bone.Name, bf)
+			// 該当ボーンキーフレにモーフの値を加算
+			bf.Add(bd.BoneFrame)
+			motion.AppendBoneFrame(bone.Name, bf)
+		}
 	}
 
 	// 物理前のデフォーム情報

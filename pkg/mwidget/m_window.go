@@ -248,7 +248,7 @@ func NewMWindow(
 	if err != nil {
 		return nil, err
 	}
-	icon, err := walk.NewIconFromImageForDPI(iconImg, 96)
+	icon, err := walk.NewIconFromImageForDPI(*iconImg, 96)
 	if err != nil {
 		return nil, err
 	}

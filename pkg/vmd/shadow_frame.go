@@ -16,6 +16,10 @@ func NewShadowFrame(index int) *ShadowFrame {
 	}
 }
 
+func NullShadowFrame() *ShadowFrame {
+	return nil
+}
+
 func (sf *ShadowFrame) Copy() IBaseFrame {
 	vv := &ShadowFrame{
 		ShadowMode: sf.ShadowMode,

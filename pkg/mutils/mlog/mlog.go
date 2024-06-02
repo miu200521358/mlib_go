@@ -1,6 +1,9 @@
 package mlog
 
-import "log"
+import (
+	"log"
+	"runtime"
+)
 
 var level = 20
 
@@ -120,4 +123,23 @@ func F(message string, param ...interface{}) {
 func FT(title string, message string, param ...interface{}) {
 	log.Printf("!!!!!!!!!! %s !!!!!!!!!!", title)
 	log.Printf(message, param...)
+}
+
+var prevMem uint64
+
+func Memory(prefix string) {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	mem := bToMb(m.Alloc)
+	if prevMem != mem {
+		log.Printf("[%s] Alloc = %v -> %v MiB, TotalAlloc = %v MiB, Sys = %v MiB, NumGC = %v\n",
+			prefix, prevMem, mem, bToMb(m.TotalAlloc), m.NumGC, bToMb(m.Sys))
+		prevMem = mem
+	}
+	// log.Printf("[%s] Alloc = %v MiB, TotalAlloc = %v MiB, Sys = %v MiB, NumGC = %v\n",
+	// 	prefix, bToMb(m.Alloc), bToMb(m.TotalAlloc), m.NumGC, bToMb(m.Sys))
+}
+
+func bToMb(b uint64) uint64 {
+	return b / 1024 / 1024
 }

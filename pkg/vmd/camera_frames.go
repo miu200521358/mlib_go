@@ -6,7 +6,7 @@ type CameraFrames struct {
 
 func NewCameraFrames() *CameraFrames {
 	return &CameraFrames{
-		BaseFrames: NewBaseFrames[*CameraFrame](NewCameraFrame),
+		BaseFrames: NewBaseFrames[*CameraFrame](NewCameraFrame, NullCameraFrame),
 	}
 }
 

@@ -137,9 +137,14 @@ func writeBoneFrame(fout *os.File, name string, bf *BoneFrame) error {
 	binary.Write(fout, binary.LittleEndian, float32(quatMMD.GetZ()))
 	binary.Write(fout, binary.LittleEndian, float32(quatMMD.GetW()))
 
-	curves := make([]byte, len(bf.Curves.Values))
-	for i, x := range bf.Curves.Merge() {
-		curves[i] = byte(math.Min(255, math.Max(0, float64(x))))
+	var curves []byte
+	if bf.Curves == nil {
+		curves = InitialBoneCurves
+	} else {
+		curves = make([]byte, len(bf.Curves.Values))
+		for i, x := range bf.Curves.Merge() {
+			curves[i] = byte(math.Min(255, math.Max(0, float64(x))))
+		}
 	}
 	binary.Write(fout, binary.LittleEndian, curves)
 

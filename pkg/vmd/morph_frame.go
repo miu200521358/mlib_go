@@ -12,6 +12,10 @@ func NewMorphFrame(index int) *MorphFrame {
 	}
 }
 
+func NullMorphFrame() *MorphFrame {
+	return nil
+}
+
 func (mf *MorphFrame) Add(v *MorphFrame) {
 	mf.Ratio += v.Ratio
 }

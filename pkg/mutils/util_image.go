@@ -22,7 +22,7 @@ import (
 )
 
 // 指定されたパスから画像を読み込む
-func LoadImage(path string) (image.Image, error) {
+func LoadImage(path string) (*image.Image, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func FlipImage(img *image.RGBA) *image.RGBA {
 }
 
 // ReadIconFile アイコンファイルの読み込み
-func LoadImageFromResources(resourceFiles embed.FS, fileName string) (image.Image, error) {
+func LoadImageFromResources(resourceFiles embed.FS, fileName string) (*image.Image, error) {
 	fileData, err := fs.ReadFile(resourceFiles, fileName)
 	if err != nil {
 		return nil, fmt.Errorf("image not found: %v", err)
@@ -76,43 +76,42 @@ func ConvertToNRGBA(img image.Image) *image.NRGBA {
 	return rgba
 }
 
-func loadImage(path string, file io.Reader) (image.Image, error) {
-
+func loadImage(path string, file io.Reader) (*image.Image, error) {
 	if strings.ToLower(path[len(path)-4:]) == ".png" {
 		img, err := png.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
-		return img, nil
+		return &img, nil
 	} else if strings.ToLower(path[len(path)-4:]) == ".tga" {
 		img, err := tga.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
-		return img, nil
+		return &img, nil
 	} else if strings.ToLower(path[len(path)-4:]) == ".gif" {
 		img, err := gif.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
-		return img, nil
+		return &img, nil
 	} else if strings.ToLower(path[len(path)-4:]) == ".dds" {
 		img, err := dds.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
-		return img, nil
+		return &img, nil
 	} else if strings.ToLower(path[len(path)-4:]) == ".jpg" || strings.ToLower(path[len(path)-5:]) == ".jpeg" {
 		img, err := jpeg.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
-		return img, nil
+		return &img, nil
 	} else if strings.ToLower(path[len(path)-4:]) == ".spa" || strings.ToLower(path[len(path)-4:]) == ".bmp" {
 		// スフィアファイルはbmpとして読み込む
 		img, err := bmp.Decode(file)
@@ -120,7 +119,7 @@ func loadImage(path string, file io.Reader) (image.Image, error) {
 			return nil, err
 		}
 
-		return img, nil
+		return &img, nil
 	}
 
 	img, _, err := image.Decode(file)
@@ -128,5 +127,5 @@ func loadImage(path string, file io.Reader) (image.Image, error) {
 		return nil, err
 	}
 
-	return img, nil
+	return &img, nil
 }

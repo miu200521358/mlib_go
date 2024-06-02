@@ -6,7 +6,7 @@ type IkFrames struct {
 
 func NewIkFrames() *IkFrames {
 	return &IkFrames{
-		BaseFrames: NewBaseFrames[*IkFrame](NewIkFrame),
+		BaseFrames: NewBaseFrames[*IkFrame](NewIkFrame, NullNewIkFrame),
 	}
 }
 

@@ -34,6 +34,6 @@ func LoadAppConfig(resourceFiles embed.FS) *AppConfig {
 }
 
 // LoadIconFile アイコンファイルの読み込み
-func LoadIconFile(resourceFiles embed.FS) (image.Image, error) {
+func LoadIconFile(resourceFiles embed.FS) (*image.Image, error) {
 	return mutils.LoadImageFromResources(resourceFiles, "resources/app.png")
 }

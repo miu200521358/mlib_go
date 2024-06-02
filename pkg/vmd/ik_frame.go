@@ -41,6 +41,10 @@ func NewIkFrame(index int) *IkFrame {
 	}
 }
 
+func NullNewIkFrame() *IkFrame {
+	return nil
+}
+
 func (ikf *IkFrame) Copy() IBaseFrame {
 	vv := &IkFrame{
 		Visible: ikf.Visible,

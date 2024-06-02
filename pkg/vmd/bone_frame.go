@@ -20,28 +20,17 @@ type BoneFrame struct {
 	MorphLocalScale    *mmath.MVec3       // モーフローカルスケール
 	PhysicsMatrix      *mmath.MMat4       // 物理結果行列
 	IkRotation         *mmath.MQuaternion // IK回転
-	Curves             BoneCurves         // 補間曲線
+	Curves             *BoneCurves        // 補間曲線
 }
 
 func NewBoneFrame(index int) *BoneFrame {
 	return &BoneFrame{
-		BaseFrame:          NewFrame(index).(*BaseFrame),
-		Position:           mmath.NewMVec3(),
-		MorphPosition:      nil,
-		LocalPosition:      nil,
-		MorphLocalPosition: nil,
-		Rotation:           mmath.NewMQuaternion(),
-		MorphRotation:      nil,
-		LocalRotation:      nil,
-		MorphLocalRotation: nil,
-		Scale:              nil,
-		MorphScale:         nil,
-		LocalScale:         nil,
-		MorphLocalScale:    nil,
-		PhysicsMatrix:      nil,
-		IkRotation:         nil,
-		Curves:             NewBoneCurves(),
+		BaseFrame: NewFrame(index).(*BaseFrame),
 	}
+}
+
+func NullBoneFrame() *BoneFrame {
+	return nil
 }
 
 func (bf *BoneFrame) Add(v *BoneFrame) *BoneFrame {
@@ -222,8 +211,16 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	}
 
 	bf := NewBoneFrame(index)
-
-	xy, yy, zy, ry := nextBf.Curves.Evaluate(prevBf.GetIndex(), index, nextBf.GetIndex())
+	var xy, yy, zy, ry float64
+	if nextBf.Curves == nil {
+		t := float64(index-prevBf.GetIndex()) / float64(nextBf.GetIndex()-prevBf.GetIndex())
+		xy = t
+		yy = t
+		zy = t
+		ry = t
+	} else {
+		xy, yy, zy, ry = nextBf.Curves.Evaluate(prevBf.GetIndex(), index, nextBf.GetIndex())
+	}
 
 	bf.Rotation = prevBf.Rotation.Slerp(nextBf.Rotation, ry)
 
@@ -281,22 +278,20 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	nextX := &mmath.MVec4{
 		nextBf.Position.GetX(), nlpx, nsx, nlsx}
 	nowX := mmath.LerpVec4(prevX, nextX, xy)
-	bf.Position.SetX(nowX[0])
 
 	prevY := &mmath.MVec4{
 		prevBf.Position.GetY(), plpy, psy, plsy}
 	nextY := &mmath.MVec4{
 		nextBf.Position.GetY(), nlpy, nsy, nlsy}
 	nowY := mmath.LerpVec4(prevY, nextY, yy)
-	bf.Position.SetY(nowY[0])
 
 	prevZ := &mmath.MVec4{
 		prevBf.Position.GetZ(), plpz, psz, plsz}
 	nextZ := &mmath.MVec4{
 		nextBf.Position.GetZ(), nlpz, nsz, nlsz}
 	nowZ := mmath.LerpVec4(prevZ, nextZ, zy)
-	bf.Position.SetZ(nowZ[0])
 
+	bf.Position = &mmath.MVec3{nowX[0], nowY[0], nowZ[0]}
 	bf.LocalPosition = &mmath.MVec3{nowX[1], nowY[1], nowZ[1]}
 	bf.Scale = &mmath.MVec3{nowX[2], nowY[2], nowZ[2]}
 	bf.LocalScale = &mmath.MVec3{nowX[3], nowY[3], nowZ[3]}

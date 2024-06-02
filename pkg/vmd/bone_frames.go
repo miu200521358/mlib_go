@@ -127,8 +127,12 @@ func (fs *BoneFrames) Deform(
 	isCalcIk bool,
 	beforeBoneDeltas *BoneDeltas,
 ) *BoneDeltas {
+	mlog.Memory(fmt.Sprintf("Deform 1)frame: %d", frame))
 	boneDeformsMap := fs.prepareDeform(frame, model, boneNames, isCalcIk, beforeBoneDeltas)
-	return fs.calcBoneDeltas(frame, boneDeformsMap, beforeBoneDeltas)
+	mlog.Memory(fmt.Sprintf("Deform 2)frame: %d", frame))
+	deltas := fs.calcBoneDeltas(frame, boneDeformsMap, beforeBoneDeltas)
+	mlog.Memory(fmt.Sprintf("Deform 3)frame: %d", frame))
+	return deltas
 }
 
 func (fs *BoneFrames) prepareDeform(
@@ -138,6 +142,8 @@ func (fs *BoneFrames) prepareDeform(
 	isCalcIk bool,
 	beforeBoneDeltas *BoneDeltas,
 ) map[bool]*boneDeforms {
+	mlog.Memory(fmt.Sprintf("prepareDeform 1)frame: %d", frame))
+
 	isAfterPhysics := false
 	if beforeBoneDeltas != nil {
 		isAfterPhysics = true
@@ -145,14 +151,20 @@ func (fs *BoneFrames) prepareDeform(
 
 	boneDeformsMap := fs.prepareBoneDeforms(model, boneNames, isAfterPhysics)
 
+	mlog.Memory(fmt.Sprintf("prepareDeform 2)frame: %d", frame))
+
 	// IK事前計算
 	if isCalcIk {
 		// ボーン変形行列操作
 		fs.prepareIk(frame, model, boneDeformsMap, beforeBoneDeltas)
 	}
 
+	mlog.Memory(fmt.Sprintf("prepareDeform 3)frame: %d", frame))
+
 	// ボーンデフォーム情報を埋める
 	fs.fillBoneDeform(frame, model, boneDeformsMap, beforeBoneDeltas, isAfterPhysics)
+
+	mlog.Memory(fmt.Sprintf("prepareDeform 4)frame: %d", frame))
 
 	return boneDeformsMap
 }
@@ -181,7 +193,6 @@ func (fs *BoneFrames) clearIk(
 				linkBf := fs.Get(linkBone.Name).data[frame]
 				if linkBf != nil {
 					linkBf.IkRotation = nil
-
 					// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
 					fs.Get(linkBone.Name).Append(linkBf)
 				}
@@ -234,6 +245,9 @@ func (fs *BoneFrames) prepareIk(
 					effectorBoneDelta := effectorBoneDeltas.Get(linkBone.Index)
 					if effectorBoneDelta != nil {
 						linkBf := fs.Get(linkBone.Name).Get(frame)
+						if linkBf == nil {
+							linkBf = NewBoneFrame(frame)
+						}
 						linkBf.IkRotation = effectorBoneDelta.FrameRotation()
 						// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
 						fs.Get(linkBone.Name).Append(linkBf)
@@ -1033,6 +1047,8 @@ func (fs *BoneFrames) prepareBoneDeforms(
 	boneNames []string,
 	isAfterPhysics bool,
 ) map[bool]*boneDeforms {
+	mlog.Memory("prepareBoneDeforms 1)")
+
 	boneDeformsMap := make(map[bool]*boneDeforms)
 	isAfterPhysicsList := make([]bool, 0, 2)
 	isAfterPhysicsList = append(isAfterPhysicsList, false)
@@ -1045,6 +1061,8 @@ func (fs *BoneFrames) prepareBoneDeforms(
 		}
 	}
 
+	mlog.Memory("prepareBoneDeforms 2)")
+
 	for _, ap := range isAfterPhysicsList {
 		// ボーン名の存在チェック用マップ
 		targetSortedBones := model.Bones.LayerSortedBones[ap]
@@ -1053,6 +1071,7 @@ func (fs *BoneFrames) prepareBoneDeforms(
 			deforms:     make(map[int]*BoneDeform),
 			boneIndexes: make([]int, 0, len(targetSortedBones)),
 		}
+		mlog.Memory("prepareBoneDeforms 3)")
 
 		if len(boneNames) > 0 {
 			// 指定ボーンに関連するボーンのみ対象とする
@@ -1073,6 +1092,7 @@ func (fs *BoneFrames) prepareBoneDeforms(
 				}
 			}
 			sort.Sort(layerIndexes)
+			mlog.Memory("prepareBoneDeforms 4)")
 
 			for _, layerIndex := range layerIndexes {
 				bone := model.Bones.Get(layerIndex.Index)
@@ -1090,6 +1110,8 @@ func (fs *BoneFrames) prepareBoneDeforms(
 
 		boneDeformsMap[ap] = boneDeforms
 	}
+
+	mlog.Memory("prepareBoneDeforms 5)")
 
 	return boneDeformsMap
 }
@@ -1111,12 +1133,14 @@ func (fs *BoneFrames) fillBoneDeform(
 
 		if boneDeform.unitMatrix == nil && (delta == nil || delta.globalMatrix == nil) {
 			bf := fs.Get(boneDeform.bone.Name).Get(frame)
-			// ボーンの移動位置、回転角度、拡大率を取得
-			boneDeform.position, boneDeform.effectPosition =
-				fs.getPosition(bf, frame, boneDeform.bone, model, beforeBoneDeltas, isAfterPhysics, 0)
-			boneDeform.rotation, boneDeform.effectRotation =
-				fs.getRotation(bf, frame, boneDeform.bone, model, beforeBoneDeltas, isAfterPhysics, 0)
-			boneDeform.scale = fs.getScale(bf, frame, boneDeform.bone, model)
+			if bf != nil {
+				// ボーンの移動位置、回転角度、拡大率を取得
+				boneDeform.position, boneDeform.effectPosition =
+					fs.getPosition(bf, frame, boneDeform.bone, model, beforeBoneDeltas, isAfterPhysics, 0)
+				boneDeform.rotation, boneDeform.effectRotation =
+					fs.getRotation(bf, frame, boneDeform.bone, model, beforeBoneDeltas, isAfterPhysics, 0)
+				boneDeform.scale = fs.getScale(bf, frame, boneDeform.bone, model)
+			}
 		}
 	}
 }
@@ -1137,10 +1161,12 @@ func (fs *BoneFrames) getPosition(
 	}
 
 	var vec *mmath.MVec3
-	if bf.MorphPosition != nil {
+	if bf.MorphPosition != nil && bf.Position != nil {
 		vec = bf.MorphPosition.Add(bf.Position)
-	} else {
+	} else if bf.Position != nil {
 		vec = bf.Position
+	} else {
+		vec = mmath.NewMVec3()
 	}
 
 	if bone.IsEffectorTranslation() && bone.CanTranslate() {
@@ -1183,6 +1209,9 @@ func (fs *BoneFrames) getEffectPosition(
 	}
 
 	bf := fs.Get(effectBone.Name).Get(frame)
+	if bf == nil {
+		return mmath.NewMVec3()
+	}
 	pos, effectPos := fs.getPosition(bf, frame, effectBone, model, beforeBoneDeltas, isAfterPhysics, loop+1)
 
 	return pos.Add(effectPos).MulScalar(bone.EffectFactor)
@@ -1208,8 +1237,10 @@ func (fs *BoneFrames) getRotation(
 	if bf.IkRotation != nil && !bf.IkRotation.IsIdent() {
 		// IK用回転を持っている場合、置き換え
 		rot = bf.IkRotation.Copy()
-	} else {
+	} else if bf.Rotation != nil {
 		rot = bf.Rotation.Copy()
+	} else {
+		rot = mmath.NewMQuaternion()
 	}
 
 	if bf.MorphRotation != nil {
@@ -1260,6 +1291,10 @@ func (fs *BoneFrames) getEffectRotation(
 	}
 
 	bf := fs.Get(effectBone.Name).Get(frame)
+	if bf == nil {
+		return mmath.NewMQuaternion()
+	}
+
 	rot, effectRot := fs.getRotation(bf, frame, effectBone, model, beforeBoneDeltas, isAfterPhysics, loop+1)
 
 	if effectRot != nil {

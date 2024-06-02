@@ -11,7 +11,7 @@ type MorphNameFrames struct {
 
 func NewMorphNameFrames(name string) *MorphNameFrames {
 	return &MorphNameFrames{
-		BaseFrames: NewBaseFrames[*MorphFrame](NewMorphFrame),
+		BaseFrames: NewBaseFrames[*MorphFrame](NewMorphFrame, NullMorphFrame),
 		Name:       name,
 	}
 }

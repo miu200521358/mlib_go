@@ -84,15 +84,17 @@ type BaseFrames[T IBaseFrame] struct {
 	Indexes           *mcore.IntIndexes // 全キーフレリスト
 	RegisteredIndexes *mcore.IntIndexes // 登録対象キーフレリスト
 	newFunc           func(index int) T // キーフレ生成関数
+	nullFunc          func() T          // 空キーフレ生成関数
 	lock              sync.RWMutex      // マップアクセス制御用
 }
 
-func NewBaseFrames[T IBaseFrame](newFunc func(index int) T) *BaseFrames[T] {
+func NewBaseFrames[T IBaseFrame](newFunc func(index int) T, nullFunc func() T) *BaseFrames[T] {
 	return &BaseFrames[T]{
 		data:              make(map[int]T),
 		Indexes:           mcore.NewIntIndexes(),
 		RegisteredIndexes: mcore.NewIntIndexes(),
 		newFunc:           newFunc,
+		nullFunc:          nullFunc,
 		lock:              sync.RWMutex{},
 	}
 }
@@ -118,11 +120,8 @@ func (fs *BaseFrames[T]) Get(index int) T {
 	if nextFrame == prevFrame {
 		// 次のキーフレが無い場合、最大キーフレのコピーを返す
 		if fs.RegisteredIndexes.Len() == 0 {
-			// 登録キーが無い場合、現在設定されているすべてのキーフレの中から最大のものをコピーして返す
-			// 上でデータが無いことのチェックは済んでいるので何かしらのキーはあるはず
-			copied := fs.data[fs.Indexes.Max()].Copy().(T)
-			copied.SetIndex(index)
-			return copied
+			// 存在しない場合nullを返す
+			return fs.nullFunc()
 		}
 		copied := fs.data[fs.RegisteredIndexes.Max()].Copy().(T)
 		copied.SetIndex(index)

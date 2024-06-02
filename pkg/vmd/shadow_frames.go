@@ -6,7 +6,7 @@ type ShadowFrames struct {
 
 func NewShadowFrames() *ShadowFrames {
 	return &ShadowFrames{
-		BaseFrames: NewBaseFrames[*ShadowFrame](NewShadowFrame),
+		BaseFrames: NewBaseFrames[*ShadowFrame](NewShadowFrame, NullShadowFrame),
 	}
 }
 

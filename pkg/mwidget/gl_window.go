@@ -60,6 +60,7 @@ type GlWindow struct {
 	updatedPrev         bool
 	shiftPressed        bool
 	ctrlPressed         bool
+	running             bool
 	playing             bool
 	VisibleBones        map[pmx.BoneFlag]bool
 	VisibleNormal       bool
@@ -106,7 +107,7 @@ func NewGlWindow(
 
 	iconImg, err := mconfig.LoadIconFile(resourceFiles)
 	if err == nil {
-		w.SetIcon([]image.Image{iconImg})
+		w.SetIcon([]image.Image{*iconImg})
 	}
 
 	// OpenGL の初期化
@@ -165,9 +166,10 @@ func NewGlWindow(
 		ctrlPressed:         false,
 		VisibleBones:        make(map[pmx.BoneFlag]bool, 0),
 		VisibleNormal:       false,
-		playing:             true, // 最初は再生
-		EnablePhysics:       true, // 最初は物理ON
-		EnableFrameDrop:     true, // 最初はドロップON
+		running:             false,
+		playing:             false, // 最初は再生OFF
+		EnablePhysics:       true,  // 最初は物理ON
+		EnableFrameDrop:     true,  // 最初はドロップON
 		frame:               0,
 		motionPlayer:        motionPlayer,
 	}
@@ -209,7 +211,7 @@ func (w *GlWindow) Close(window *glfw.Window) {
 		defer glfw.Terminate()
 		defer walk.App().Exit(0)
 	}
-	window.Destroy()
+	defer window.Destroy()
 }
 
 func (w *GlWindow) handleKeyEvent(
@@ -475,9 +477,6 @@ func (w *GlWindow) ClearData() {
 }
 
 func (w *GlWindow) draw(frame int, elapsed float32) {
-	// OpenGLコンテキストをこのウィンドウに設定
-	w.MakeContextCurrent()
-
 	// 背景色をクリア
 	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -495,9 +494,15 @@ func (w *GlWindow) Size() walk.Size {
 }
 
 func (w *GlWindow) Run() {
-	previousTime := glfw.GetTime()
+	if w == nil || w.running {
+		return
+	}
 
-	for w != nil && !CheckOpenGLError() && !w.ShouldClose() {
+	w.MakeContextCurrent()
+	previousTime := glfw.GetTime()
+	w.running = true
+
+	for !CheckOpenGLError() && !w.ShouldClose() {
 		if w.playing && w.motionPlayer != nil && w.frame >= int(w.motionPlayer.FrameEdit.MaxValue()) {
 			w.frame = 0
 			w.motionPlayer.SetValue(w.frame)
@@ -559,18 +564,17 @@ func (w *GlWindow) Run() {
 		// 描画
 		w.draw(w.frame, elapsed)
 
-		// if w.frame >= float32(100) {
-		// 	break
-		// }
-
-		// Maintenance
 		w.SwapBuffers()
 		glfw.PollEvents()
+
+		if w.frame >= 5000 {
+			break
+		}
 	}
-	if w != nil && !CheckOpenGLError() && w.ShouldClose() {
+	if !CheckOpenGLError() && w.ShouldClose() {
 		w.Close(w.Window)
 	}
-	if w == nil || w.WindowIndex == 0 {
+	if w.WindowIndex == 0 {
 		walk.App().Exit(0)
 	}
 }

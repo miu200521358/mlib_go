@@ -18,6 +18,10 @@ func NewLightFrame(index int) *LightFrame {
 	}
 }
 
+func NullLightFrame() *LightFrame {
+	return nil
+}
+
 func (lf *LightFrame) Add(v *LightFrame) {
 	lf.Position.Add(v.Position)
 	lf.Color.Add(v.Color)

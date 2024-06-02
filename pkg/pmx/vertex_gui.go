@@ -3,11 +3,20 @@
 
 package pmx
 
-import "github.com/miu200521358/mlib_go/pkg/mutils"
+import (
+	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
+)
 
-func (v *Vertex) GL() []float32 {
+func (v *Vertex) GL(isNormal bool) []float32 {
 	p := v.Position.GL()
-	n := v.Normal.GL()
+	var n mgl32.Vec3
+	if isNormal {
+		n = v.Normal.MuledScalar(0.5).GL()
+	} else {
+		n = v.Normal.GL()
+	}
+
 	eu := [2]float32{0.0, 0.0}
 	if len(v.ExtendedUVs) > 0 {
 		eu[0] = float32(v.ExtendedUVs[0].GetX())

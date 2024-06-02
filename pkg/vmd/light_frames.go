@@ -6,7 +6,7 @@ type LightFrames struct {
 
 func NewLightFrames() *LightFrames {
 	return &LightFrames{
-		BaseFrames: NewBaseFrames[*LightFrame](NewLightFrame),
+		BaseFrames: NewBaseFrames[*LightFrame](NewLightFrame, NullLightFrame),
 	}
 }
 

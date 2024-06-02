@@ -17,7 +17,7 @@ func LoadImageFile(resourceFiles embed.FS, imagePath string, dpi int) (walk.Imag
 	if err != nil {
 		return nil, err
 	}
-	img, err := walk.NewIconFromImageForDPI(image, dpi)
+	img, err := walk.NewIconFromImageForDPI(*image, dpi)
 	if err != nil {
 		return nil, err
 	}

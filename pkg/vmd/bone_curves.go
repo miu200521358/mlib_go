@@ -2,6 +2,73 @@ package vmd
 
 import "github.com/miu200521358/mlib_go/pkg/mmath"
 
+var InitialBoneCurves = []byte{
+	20,
+	20,
+	0,
+	0,
+	20,
+	20,
+	20,
+	20,
+	107,
+	107,
+	107,
+	107,
+	107,
+	107,
+	107,
+	107,
+	20,
+	20,
+	20,
+	20,
+	20,
+	20,
+	20,
+	107,
+	107,
+	107,
+	107,
+	107,
+	107,
+	107,
+	107,
+	0,
+	20,
+	20,
+	20,
+	20,
+	20,
+	20,
+	107,
+	107,
+	107,
+	107,
+	107,
+	107,
+	107,
+	107,
+	0,
+	0,
+	20,
+	20,
+	20,
+	20,
+	20,
+	107,
+	107,
+	107,
+	107,
+	107,
+	107,
+	107,
+	107,
+	0,
+	0,
+	0,
+}
+
 type BoneCurves struct {
 	TranslateX mmath.Curve // 移動X
 	TranslateY mmath.Curve // 移動Y
@@ -10,8 +77,8 @@ type BoneCurves struct {
 	Values     []byte      // 補間曲線の値
 }
 
-func NewBoneCurves() BoneCurves {
-	return BoneCurves{
+func NewBoneCurves() *BoneCurves {
+	return &BoneCurves{
 		TranslateX: mmath.NewCurve(),
 		TranslateY: mmath.NewCurve(),
 		TranslateZ: mmath.NewCurve(),
@@ -85,8 +152,8 @@ func NewBoneCurves() BoneCurves {
 	}
 }
 
-func NewBoneCurvesByValues(values []byte) BoneCurves {
-	curves := BoneCurves{
+func NewBoneCurvesByValues(values []byte) *BoneCurves {
+	curves := &BoneCurves{
 		TranslateX: mmath.NewCurve(),
 		TranslateY: mmath.NewCurve(),
 		TranslateZ: mmath.NewCurve(),
@@ -193,8 +260,8 @@ func (c *BoneCurves) Merge() []byte {
 	}
 }
 
-func (c *BoneCurves) Copy() BoneCurves {
-	return BoneCurves{
+func (c *BoneCurves) Copy() *BoneCurves {
+	return &BoneCurves{
 		TranslateX: c.TranslateX.Copy(),
 		TranslateY: c.TranslateY.Copy(),
 		TranslateZ: c.TranslateZ.Copy(),

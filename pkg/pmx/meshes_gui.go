@@ -41,13 +41,12 @@ func NewMeshes(
 	n := 0
 	for i := range len(model.Vertices.Data) {
 		vertex := model.Vertices.Get(i)
-		vertices = append(vertices, vertex.GL()...)
+		vertices = append(vertices, vertex.GL(false)...)
 
-		normalVertices = append(normalVertices, vertex.GL()...)
-		normalVertices = append(normalVertices, vertex.NormalGL()...)
+		normalVertices = append(normalVertices, vertex.GL(false)...)
+		normalVertices = append(normalVertices, vertex.GL(true)...)
 
-		normalFaces = append(normalFaces, uint32(n))
-		normalFaces = append(normalFaces, uint32(n+1))
+		normalFaces = append(normalFaces, uint32(n), uint32(n+1))
 		n += 2
 	}
 
@@ -55,9 +54,7 @@ func NewMeshes(
 	faces := make([]uint32, 0, len(model.Faces.Data)*3)
 	for i := range len(model.Faces.Data) {
 		vertices := model.Faces.Get(i).VertexIndexes
-		faces = append(faces, uint32(vertices[2]))
-		faces = append(faces, uint32(vertices[1]))
-		faces = append(faces, uint32(vertices[0]))
+		faces = append(faces, uint32(vertices[2]), uint32(vertices[1]), uint32(vertices[0]))
 	}
 
 	meshes := make([]*Mesh, len(model.Materials.GetIndexes()))
@@ -118,11 +115,8 @@ func NewMeshes(
 		bones = append(bones, bone.GL()...)
 		bones = append(bones, bone.TailGL()...)
 
-		boneFaces = append(boneFaces, uint32(n))
-		boneFaces = append(boneFaces, uint32(n+1))
-
-		boneIndexes = append(boneIndexes, bone.Index)
-		boneIndexes = append(boneIndexes, bone.Index)
+		boneFaces = append(boneFaces, uint32(n), uint32(n+1))
+		boneIndexes = append(boneIndexes, bone.Index, bone.Index)
 
 		n += 2
 
@@ -131,11 +125,8 @@ func NewMeshes(
 			bones = append(bones, bone.GL()...)
 			bones = append(bones, bone.ParentGL()...)
 
-			boneFaces = append(boneFaces, uint32(n))
-			boneFaces = append(boneFaces, uint32(n+1))
-
-			boneIndexes = append(boneIndexes, bone.Index)
-			boneIndexes = append(boneIndexes, bone.ParentIndex)
+			boneFaces = append(boneFaces, uint32(n), uint32(n+1))
+			boneIndexes = append(boneIndexes, bone.Index, bone.ParentIndex)
 
 			n += 2
 		}

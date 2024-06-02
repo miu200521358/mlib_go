@@ -26,6 +26,10 @@ func NewCameraFrame(index int) *CameraFrame {
 	}
 }
 
+func NullCameraFrame() *CameraFrame {
+	return nil
+}
+
 func (cf *CameraFrame) Add(v *CameraFrame) {
 	cf.Position.Add(v.Position)
 	cf.Rotation.Mul(v.Rotation)
