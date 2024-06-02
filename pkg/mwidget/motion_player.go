@@ -118,9 +118,6 @@ func (mp *MotionPlayer) Dispose() {
 }
 
 func (mp *MotionPlayer) Play(playing bool) {
-	for _, glWindow := range mp.mWindow.GlWindows {
-		glWindow.Play(playing)
-	}
 	if playing {
 		mp.PlayButton.SetText(mi18n.T("一時停止"))
 		mp.SetEnabled(false)
@@ -138,17 +135,15 @@ func (mp *MotionPlayer) Play(playing bool) {
 	}
 }
 
-func (mp *MotionPlayer) SetRange(min, max float64) {
-	mp.FrameEdit.SetRange(min, max)
-	mp.FrameSlider.SetRange(int(min), int(max))
+func (mp *MotionPlayer) SetRange(min, max int) {
+	mp.FrameEdit.SetRange(float64(min), float64(max))
+	mp.FrameSlider.SetRange(min, max)
 }
 
-func (mp *MotionPlayer) SetValue(v float64) {
-	if mp.FrameEdit.Enabled() {
-		value := mmath.ClampFloat(v, mp.FrameEdit.MinValue(), mp.FrameEdit.MaxValue())
-		mp.FrameEdit.SetValue(value)
-		mp.FrameSlider.SetValue(int(value))
-	}
+func (mp *MotionPlayer) SetValue(v int) {
+	value := mmath.ClampFloat(float64(v), mp.FrameEdit.MinValue(), mp.FrameEdit.MaxValue())
+	mp.FrameEdit.SetValue(value)
+	mp.FrameSlider.SetValue(int(value))
 }
 
 func (mp *MotionPlayer) SetEnabled(enabled bool) {

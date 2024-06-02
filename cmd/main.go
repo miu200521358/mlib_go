@@ -117,7 +117,6 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
 
 	var onFilePathChanged = func() {
 		if motionPlayer.Playing() {
-			mWindow.GetMainGlWindow().Play(false)
 			motionPlayer.Play(false)
 		}
 		motionPlayer.SetEnabled(pmxReadPicker.Exists() && vmdReadPicker.ExistsOrEmpty())
@@ -169,7 +168,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
 			}
 			motion := motionData.(*vmd.VmdMotion)
 
-			motionPlayer.SetRange(0, float64(motion.GetMaxFrame()+1))
+			motionPlayer.SetRange(0, motion.GetMaxFrame()+1)
 			motionPlayer.SetValue(0)
 
 			if pmxReadPicker.Exists() {

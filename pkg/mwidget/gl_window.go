@@ -239,10 +239,10 @@ func (w *GlWindow) handleKeyEvent(
 
 	if w.motionPlayer != nil {
 		if key == glfw.KeyRight || key == glfw.KeyUp {
-			w.motionPlayer.SetValue(float64(w.GetFrame() + 1))
+			w.motionPlayer.SetValue(w.GetFrame() + 1)
 			return
 		} else if key == glfw.KeyLeft || key == glfw.KeyDown {
-			w.motionPlayer.SetValue(float64(w.GetFrame() - 1))
+			w.motionPlayer.SetValue(w.GetFrame() - 1)
 			return
 		}
 	}
@@ -498,6 +498,11 @@ func (w *GlWindow) Run() {
 	previousTime := glfw.GetTime()
 
 	for w != nil && !CheckOpenGLError() && !w.ShouldClose() {
+		if w.playing && w.motionPlayer != nil && w.frame >= int(w.motionPlayer.FrameEdit.MaxValue()) {
+			w.frame = 0
+			w.motionPlayer.SetValue(w.frame)
+		}
+
 		// 深度バッファのクリア
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -542,7 +547,7 @@ func (w *GlWindow) Run() {
 			w.frame += int(elapsed * w.Physics.Fps)
 			mlog.D("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%d", previousTime, time, elapsed, w.frame)
 			if w.motionPlayer != nil {
-				w.motionPlayer.SetValue(float64(w.frame))
+				w.motionPlayer.SetValue(w.frame)
 			}
 		}
 
@@ -554,7 +559,7 @@ func (w *GlWindow) Run() {
 		// 描画
 		w.draw(w.frame, elapsed)
 
-		// if w.frame*w.Physics.Fps >= float32(100) {
+		// if w.frame >= float32(100) {
 		// 	break
 		// }
 
