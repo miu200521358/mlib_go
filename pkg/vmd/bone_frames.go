@@ -127,11 +127,11 @@ func (fs *BoneFrames) Deform(
 	isCalcIk bool,
 	beforeBoneDeltas *BoneDeltas,
 ) *BoneDeltas {
-	mlog.Memory(fmt.Sprintf("Deform 1)frame: %d", frame))
+	// mlog.Memory(fmt.Sprintf("Deform 1)frame: %d", frame))
 	deformBoneIndexes, boneDeltas := fs.prepareDeltas(frame, model, boneNames, isCalcIk, beforeBoneDeltas)
-	mlog.Memory(fmt.Sprintf("Deform 2)frame: %d", frame))
+	// mlog.Memory(fmt.Sprintf("Deform 2)frame: %d", frame))
 	boneDeltas = fs.calcBoneDeltas(frame, model, deformBoneIndexes, boneDeltas)
-	mlog.Memory(fmt.Sprintf("Deform 3)frame: %d", frame))
+	// mlog.Memory(fmt.Sprintf("Deform 3)frame: %d", frame))
 	return boneDeltas
 }
 
@@ -142,11 +142,11 @@ func (fs *BoneFrames) prepareDeltas(
 	isCalcIk bool,
 	beforeBoneDeltas *BoneDeltas,
 ) ([]int, *BoneDeltas) {
-	mlog.Memory(fmt.Sprintf("prepareDeltas 1)frame: %d", frame))
+	// mlog.Memory(fmt.Sprintf("prepareDeltas 1)frame: %d", frame))
 
 	deformBoneIndexes, boneDeltas := fs.createBoneDeltas(frame, model, boneNames, beforeBoneDeltas)
 
-	mlog.Memory(fmt.Sprintf("prepareDeltas 2)frame: %d", frame))
+	// mlog.Memory(fmt.Sprintf("prepareDeltas 2)frame: %d", frame))
 
 	// IK事前計算
 	if isCalcIk {
@@ -154,12 +154,12 @@ func (fs *BoneFrames) prepareDeltas(
 		boneDeltas = fs.prepareIk(frame, model, deformBoneIndexes, boneDeltas)
 	}
 
-	mlog.Memory(fmt.Sprintf("prepareDeltas 3)frame: %d", frame))
+	// mlog.Memory(fmt.Sprintf("prepareDeltas 3)frame: %d", frame))
 
 	// ボーンデフォーム情報を埋める
 	boneDeltas = fs.fillBoneDeform(frame, model, deformBoneIndexes, boneDeltas)
 
-	mlog.Memory(fmt.Sprintf("prepareDeltas 4)frame: %d", frame))
+	// mlog.Memory(fmt.Sprintf("prepareDeltas 4)frame: %d", frame))
 
 	return deformBoneIndexes, boneDeltas
 }
@@ -943,7 +943,7 @@ func (fs *BoneFrames) createBoneDeltas(
 	boneNames []string,
 	boneDeltas *BoneDeltas,
 ) ([]int, *BoneDeltas) {
-	mlog.Memory("createBoneDeltas 1)")
+	// mlog.Memory("createBoneDeltas 1)")
 
 	isAfterPhysics := (boneDeltas != nil)
 
@@ -954,7 +954,7 @@ func (fs *BoneFrames) createBoneDeltas(
 		boneDeltas = NewBoneDeltas()
 	}
 
-	mlog.Memory("createBoneDeltas 3)")
+	// mlog.Memory("createBoneDeltas 3)")
 	deformBoneIndexes := make([]int, 0, len(targetSortedBones))
 
 	if len(boneNames) > 0 {
@@ -976,7 +976,7 @@ func (fs *BoneFrames) createBoneDeltas(
 			}
 		}
 		sort.Sort(layerIndexes)
-		mlog.Memory("createBoneDeltas 4)")
+		// mlog.Memory("createBoneDeltas 4)")
 
 		for _, layerIndex := range layerIndexes {
 			bone := model.Bones.Get(layerIndex.Index)
@@ -997,7 +997,7 @@ func (fs *BoneFrames) createBoneDeltas(
 		}
 	}
 
-	mlog.Memory("createBoneDeltas 5)")
+	// mlog.Memory("createBoneDeltas 5)")
 
 	return deformBoneIndexes, boneDeltas
 }

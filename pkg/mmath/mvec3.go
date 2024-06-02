@@ -447,6 +447,16 @@ func ClampFloat(v float64, min float64, max float64) float64 {
 	return v
 }
 
+// Clamp01 ベクトルの各要素をmin～maxの範囲内にクランプします
+func ClampFloat32(v float32, min float32, max float32) float32 {
+	if v < min {
+		v = min
+	} else if v > max {
+		v = max
+	}
+	return v
+}
+
 // ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
 func (v *MVec3) ClampIfVerySmall() *MVec3 {
 	epsilon := 1e-6

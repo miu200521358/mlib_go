@@ -11,7 +11,6 @@ import (
 
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
-	"github.com/pkg/profile"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
@@ -38,7 +37,6 @@ var resourceFiles embed.FS
 func main() {
 	var mWindow *mwidget.MWindow
 	var err error
-	defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
 
 	appConfig := mconfig.LoadAppConfig(resourceFiles)
 
@@ -197,6 +195,9 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
 			vmdReadPicker.SetEnabled(false)
 			pmxSavePicker.SetEnabled(false)
 		}
+
+		// defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
+		// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
 
 		motionPlayer.PlayButton.SetEnabled(true)
 		mWindow.GetMainGlWindow().Play(isPlaying)

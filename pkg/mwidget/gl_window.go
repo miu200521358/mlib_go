@@ -538,12 +538,10 @@ func (w *GlWindow) Run() {
 
 		time := glfw.GetTime()
 
-		var elapsed float32
-		if w.EnableFrameDrop {
-			elapsed = float32(time - previousTime)
-		} else {
-			// フレームドロップOFFの場合、1Fずつ
-			elapsed = 1.0 / w.Physics.Fps
+		elapsed := float32(time - previousTime)
+		if !w.EnableFrameDrop {
+			// フレームドロップOFFの場合、最大1Fずつ
+			elapsed = mmath.ClampFloat32(elapsed, 0, 1.0/w.Physics.Fps)
 		}
 
 		if w.playing {
@@ -567,9 +565,9 @@ func (w *GlWindow) Run() {
 		w.SwapBuffers()
 		glfw.PollEvents()
 
-		if w.frame >= 5000 {
-			break
-		}
+		// if w.frame >= 100 {
+		// 	break
+		// }
 	}
 	if !CheckOpenGLError() && w.ShouldClose() {
 		w.Close(w.Window)
