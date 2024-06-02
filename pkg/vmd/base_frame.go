@@ -123,9 +123,9 @@ func (fs *BaseFrames[T]) Get(index int) T {
 			// 存在しない場合nullを返す
 			return fs.nullFunc()
 		}
-		copied := fs.data[fs.RegisteredIndexes.Max()].Copy().(T)
+		copied := fs.data[fs.RegisteredIndexes.Max()].Copy()
 		copied.SetIndex(index)
-		return copied
+		return copied.(T)
 	}
 
 	prevF := fs.Get(prevFrame)

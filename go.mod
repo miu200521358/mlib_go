@@ -10,14 +10,11 @@ require (
 	github.com/miu200521358/dds v0.0.0
 	github.com/miu200521358/walk v0.0.2
 	github.com/miu200521358/win v0.0.1
-	github.com/pkg/profile v1.7.0
 	golang.org/x/image v0.15.0
 	golang.org/x/text v0.14.0
 )
 
 require (
-	github.com/felixge/fgprof v0.9.3 // indirect
-	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/tools v0.15.0 // indirect
 )

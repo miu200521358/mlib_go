@@ -26,14 +26,14 @@ func (fs *MorphNameFrames) DeformVertex(
 	deltas *VertexMorphDeltas,
 ) {
 	mf := fs.Get(frame)
-	if mf.Ratio == 0.0 {
+	if mf == nil || mf.Ratio == 0.0 {
 		return
 	}
 
 	morph := model.Morphs.GetByName(fs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.VertexMorphOffset)
-		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
+		if 0 < offset.VertexIndex {
 			delta := deltas.Data[offset.VertexIndex]
 			if delta == nil {
 				delta = NewVertexMorphDelta(offset.VertexIndex)
@@ -56,14 +56,14 @@ func (fs *MorphNameFrames) DeformAfterVertex(
 	deltas *VertexMorphDeltas,
 ) {
 	mf := fs.Get(frame)
-	if mf.Ratio == 0.0 {
+	if mf == nil || mf.Ratio == 0.0 {
 		return
 	}
 
 	morph := model.Morphs.GetByName(fs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.VertexMorphOffset)
-		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
+		if 0 < offset.VertexIndex {
 			delta := deltas.Data[offset.VertexIndex]
 			if delta == nil {
 				delta = NewVertexMorphDelta(offset.VertexIndex)
@@ -80,14 +80,14 @@ func (fs *MorphNameFrames) DeformUv(
 	deltas *VertexMorphDeltas,
 ) {
 	mf := fs.Get(frame)
-	if mf.Ratio == 0.0 {
+	if mf == nil || mf.Ratio == 0.0 {
 		return
 	}
 
 	morph := model.Morphs.GetByName(fs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.UvMorphOffset)
-		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
+		if 0 < offset.VertexIndex {
 			delta := deltas.Data[offset.VertexIndex]
 			if delta == nil {
 				delta = NewVertexMorphDelta(offset.VertexIndex)
@@ -105,14 +105,14 @@ func (fs *MorphNameFrames) DeformUv1(
 	deltas *VertexMorphDeltas,
 ) {
 	mf := fs.Get(frame)
-	if mf.Ratio == 0.0 {
+	if mf == nil || mf.Ratio == 0.0 {
 		return
 	}
 
 	morph := model.Morphs.GetByName(fs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.UvMorphOffset)
-		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
+		if 0 < offset.VertexIndex {
 			delta := deltas.Data[offset.VertexIndex]
 			if delta == nil {
 				delta = NewVertexMorphDelta(offset.VertexIndex)
@@ -130,7 +130,7 @@ func (fs *MorphNameFrames) DeformBone(
 	deltas *BoneMorphDeltas,
 ) {
 	mf := fs.Get(frame)
-	if mf.Ratio == 0.0 {
+	if mf == nil || mf.Ratio == 0.0 {
 		return
 	}
 
@@ -191,7 +191,7 @@ func (fs *MorphNameFrames) DeformMaterial(
 	deltas *MaterialMorphDeltas,
 ) {
 	mf := fs.Get(frame)
-	if mf.Ratio == 0.0 {
+	if mf == nil || mf.Ratio == 0.0 {
 		return
 	}
 

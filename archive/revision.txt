@@ -200,3 +200,7 @@ MlibSample 1.0.0_beta_46
 　・画像を読み込んだ後、nilでGC対象に
 　・描画ループ時に強制GC
 
+MlibSample 1.0.0_beta_47
+　・強制GC削除
+　・IKキーフレのON/OFFを参照してIK計算有無を決める
+
