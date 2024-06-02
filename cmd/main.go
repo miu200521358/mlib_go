@@ -35,6 +35,9 @@ func init() {
 var resourceFiles embed.FS
 
 func main() {
+	// defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
+	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+
 	var mWindow *mwidget.MWindow
 	var err error
 
@@ -195,9 +198,6 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
 			vmdReadPicker.SetEnabled(false)
 			pmxSavePicker.SetEnabled(false)
 		}
-
-		// defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
-		// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
 
 		motionPlayer.PlayButton.SetEnabled(true)
 		mWindow.GetMainGlWindow().Play(isPlaying)

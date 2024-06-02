@@ -37,7 +37,7 @@ func (mfs *MorphFrames) Deform(
 	model *pmx.PmxModel,
 	morphNames []string,
 ) *MorphDeltas {
-	mds := NewMorphDeltas(len(model.Vertices.Data), len(model.Bones.Data), model.Materials)
+	mds := NewMorphDeltas(model.Materials)
 	for _, morphName := range morphNames {
 		if !mfs.Contains(morphName) || !model.Morphs.ContainsByName(morphName) {
 			continue

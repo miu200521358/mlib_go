@@ -73,34 +73,51 @@ func draw(
 	isDrawNormal bool,
 	isDrawBones map[pmx.BoneFlag]bool,
 ) {
+	// mlog.Memory(fmt.Sprintf("[%d] draw 1)", frame))
 	deltas := deform(modelPhysics, model, motion, frame, elapsed, enablePhysics)
 
+	// // ファイナライザを設定
+	// runtime.SetFinalizer(deltas, func(o *vmd.VmdDeltas) {
+	// 	fmt.Printf("[%d] deltas %d is being garbage collected\n", frame, len(deltas.Bones.Data))
+	// })
+
+	// mlog.Memory(fmt.Sprintf("[%d] draw 2)", frame))
 	boneDeltas := make([]mgl32.Mat4, len(model.Bones.Data))
 	for i, bone := range model.Bones.Data {
 		boneDeltas[i] = deltas.Bones.Get(bone.Index).LocalMatrix().GL()
 	}
 
+	// mlog.Memory(fmt.Sprintf("[%d] draw 3)", frame))
 	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))
 	for i, md := range deltas.Morphs.Materials.Data {
 		materialDeltas[i] = md.Material
 	}
 
+	// mlog.Memory(fmt.Sprintf("[%d] draw 4)", frame))
 	vertexDeltas := fetchVertexDeltas(model, deltas)
 
+	// mlog.Memory(fmt.Sprintf("[%d] draw 5)", frame))
 	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, materialDeltas, windowIndex,
 		isDrawNormal, isDrawBones, model.Bones)
 
+	// mlog.Memory(fmt.Sprintf("[%d] draw 6)", frame))
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()
+
+	// mlog.Memory(fmt.Sprintf("[%d] draw 8)", frame))
+	// // GCを強制的に実行
+	// runtime.GC()
+
+	//mlog.Memory(fmt.Sprintf("[%d] draw 9)", frame))
 }
 
 func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
 	vertexDeltas := make([][]float32, len(model.Vertices.Data))
 
-	for i, v := range deltas.Morphs.Vertices.Data {
+	for _, v := range deltas.Morphs.Vertices.Data {
 		if v != nil && (!v.Position.IsZero() || !v.Uv.IsZero() || !v.Uv1.IsZero() || !v.AfterPosition.IsZero()) {
 			// 必要な場合にのみ部分更新するよう設定
-			vertexDeltas[i] = v.GL()
+			vertexDeltas[v.Index] = v.GL()
 		}
 	}
 

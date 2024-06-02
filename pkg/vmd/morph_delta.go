@@ -6,30 +6,30 @@ import (
 )
 
 type VertexMorphDelta struct {
+	Index         int
 	Position      *mmath.MVec3
 	Uv            *mmath.MVec2
 	Uv1           *mmath.MVec2
 	AfterPosition *mmath.MVec3
 }
 
-func NewVertexMorphDelta() *VertexMorphDelta {
+func NewVertexMorphDelta(index int) *VertexMorphDelta {
 	return &VertexMorphDelta{
-		Position:      mmath.NewMVec3(),
-		Uv:            mmath.NewMVec2(),
-		Uv1:           mmath.NewMVec2(),
-		AfterPosition: mmath.NewMVec3(),
+		Index:         index,
+		Position:      nil,
+		Uv:            nil,
+		Uv1:           nil,
+		AfterPosition: nil,
 	}
 }
 
 type VertexMorphDeltas struct {
-	Data []*VertexMorphDelta
+	Data map[int]*VertexMorphDelta
 }
 
-func NewVertexMorphDeltas(vertexCount int) *VertexMorphDeltas {
-	deltas := make([]*VertexMorphDelta, vertexCount)
-
+func NewVertexMorphDeltas() *VertexMorphDeltas {
 	return &VertexMorphDeltas{
-		Data: deltas,
+		Data: make(map[int]*VertexMorphDelta),
 	}
 }
 
@@ -37,21 +37,19 @@ type BoneMorphDelta struct {
 	*BoneFrame
 }
 
-func NewBoneMorphDelta() *BoneMorphDelta {
+func NewBoneMorphDelta(index int) *BoneMorphDelta {
 	return &BoneMorphDelta{
-		BoneFrame: NewBoneFrame(0.0),
+		BoneFrame: NewBoneFrame(index),
 	}
 }
 
 type BoneMorphDeltas struct {
-	Data []*BoneMorphDelta
+	Data map[int]*BoneMorphDelta
 }
 
-func NewBoneMorphDeltas(boneCount int) *BoneMorphDeltas {
-	deltas := make([]*BoneMorphDelta, boneCount)
-
+func NewBoneMorphDeltas() *BoneMorphDeltas {
 	return &BoneMorphDeltas{
-		Data: deltas,
+		Data: make(map[int]*BoneMorphDelta),
 	}
 }
 
@@ -108,10 +106,10 @@ type MorphDeltas struct {
 	Materials *MaterialMorphDeltas
 }
 
-func NewMorphDeltas(vertexCount int, boneCount int, materials *pmx.Materials) *MorphDeltas {
+func NewMorphDeltas(materials *pmx.Materials) *MorphDeltas {
 	return &MorphDeltas{
-		Vertices:  NewVertexMorphDeltas(vertexCount),
-		Bones:     NewBoneMorphDeltas(boneCount),
+		Vertices:  NewVertexMorphDeltas(),
+		Bones:     NewBoneMorphDeltas(),
 		Materials: NewMaterialMorphDeltas(materials),
 	}
 }

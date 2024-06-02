@@ -89,6 +89,7 @@ func (t *Texture) GL(
 		t.Valid = false
 	} else {
 		t.Image = mutils.ConvertToNRGBA(*img)
+		*img = nil
 	}
 
 	if !t.Valid {
@@ -186,6 +187,7 @@ func (t *ToonTextures) initGl(
 		}
 		toon.Image = mutils.ConvertToNRGBA(*img)
 		toon.Valid = true
+		*img = nil
 
 		tGl := &TextureGL{}
 

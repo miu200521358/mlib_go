@@ -565,7 +565,7 @@ func (w *GlWindow) Run() {
 		w.SwapBuffers()
 		glfw.PollEvents()
 
-		// if w.frame >= 100 {
+		// if w.frame >= 1000 {
 		// 	break
 		// }
 	}

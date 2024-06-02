@@ -36,9 +36,15 @@ func (fs *MorphNameFrames) DeformVertex(
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
 			if delta == nil {
-				delta = NewVertexMorphDelta()
+				delta = NewVertexMorphDelta(offset.VertexIndex)
 			}
-			delta.Position.Add(offset.Position.MuledScalar(mf.Ratio))
+			if offset.Position != nil && !offset.Position.IsZero() {
+				if delta.Position == nil {
+					delta.Position = offset.Position.MuledScalar(mf.Ratio)
+				} else if !offset.Position.IsZero() {
+					delta.Position.Add(offset.Position.MuledScalar(mf.Ratio))
+				}
+			}
 			deltas.Data[offset.VertexIndex] = delta
 		}
 	}
@@ -60,7 +66,7 @@ func (fs *MorphNameFrames) DeformAfterVertex(
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
 			if delta == nil {
-				delta = NewVertexMorphDelta()
+				delta = NewVertexMorphDelta(offset.VertexIndex)
 			}
 			delta.AfterPosition.Add(offset.Position.MuledScalar(mf.Ratio))
 			deltas.Data[offset.VertexIndex] = delta
@@ -84,7 +90,7 @@ func (fs *MorphNameFrames) DeformUv(
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
 			if delta == nil {
-				delta = NewVertexMorphDelta()
+				delta = NewVertexMorphDelta(offset.VertexIndex)
 			}
 			uv := offset.Uv.MuledScalar(mf.Ratio).GetXY()
 			delta.Uv.Add(uv)
@@ -109,7 +115,7 @@ func (fs *MorphNameFrames) DeformUv1(
 		if 0 < offset.VertexIndex && offset.VertexIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.VertexIndex]
 			if delta == nil {
-				delta = NewVertexMorphDelta()
+				delta = NewVertexMorphDelta(offset.VertexIndex)
 			}
 			uv := offset.Uv.MuledScalar(mf.Ratio)
 			delta.Uv1.Add(uv.GetXY())
@@ -134,7 +140,7 @@ func (fs *MorphNameFrames) DeformBone(
 		if 0 < offset.BoneIndex && offset.BoneIndex <= len(deltas.Data) {
 			delta := deltas.Data[offset.BoneIndex]
 			if delta == nil {
-				delta = NewBoneMorphDelta()
+				delta = NewBoneMorphDelta(offset.BoneIndex)
 			}
 
 			if delta.MorphPosition == nil {
