@@ -64,10 +64,10 @@ func (j *Joint) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBo
 	constraint.EnableSpring(5, true)
 	constraint.SetStiffness(5, float32(j.JointParam.SpringConstantRotation.GetRadians().GetZ()))
 
-	// constraint.SetParam(int(mbt.BT_CONSTRAINT_ERP), float32(0.8), 0)
-	// constraint.SetParam(int(mbt.BT_CONSTRAINT_STOP_ERP), float32(0.8), 0)
-	// constraint.SetParam(int(mbt.BT_CONSTRAINT_CFM), float32(0.2), 0)
-	// constraint.SetParam(int(mbt.BT_CONSTRAINT_STOP_CFM), float32(0.2), 0)
+	constraint.SetParam(int(mbt.BT_CONSTRAINT_ERP), float32(0.5), 0)
+	constraint.SetParam(int(mbt.BT_CONSTRAINT_STOP_ERP), float32(0.5), 0)
+	constraint.SetParam(int(mbt.BT_CONSTRAINT_CFM), float32(0.1), 0)
+	constraint.SetParam(int(mbt.BT_CONSTRAINT_STOP_CFM), float32(0.1), 0)
 
 	// 円の表示サイズ
 	constraint.SetDbgDrawSize(float32(1.5))
