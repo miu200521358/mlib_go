@@ -72,7 +72,7 @@ func NewMWindow(
 		},
 	}
 
-	if appConfig.Env == "dev" {
+	if !appConfig.IsEnvProd() {
 		// 開発時のみ冗長ログ表示を追加
 		logMenuItems = append(logMenuItems,
 			declarative.Separator{})

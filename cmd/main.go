@@ -22,6 +22,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
+var env string
+
 func init() {
 	runtime.LockOSThread()
 
@@ -43,6 +45,7 @@ func main() {
 	var err error
 
 	appConfig := mconfig.LoadAppConfig(resourceFiles)
+	appConfig.Env = env
 
 	if appConfig.IsEnvProd() {
 		defer mwidget.RecoverFromPanic(mWindow)
