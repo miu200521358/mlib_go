@@ -41,10 +41,10 @@ func NewMeshes(
 	n := 0
 	for i := range len(model.Vertices.Data) {
 		vertex := model.Vertices.Get(i)
-		vertices = append(vertices, vertex.GL(false)...)
+		vertices = append(vertices, vertex.GL()...)
 
-		normalVertices = append(normalVertices, vertex.GL(false)...)
-		normalVertices = append(normalVertices, vertex.GL(true)...)
+		normalVertices = append(normalVertices, vertex.GL()...)
+		normalVertices = append(normalVertices, vertex.NormalGL()...)
 
 		normalFaces = append(normalFaces, uint32(n), uint32(n+1))
 		n += 2
