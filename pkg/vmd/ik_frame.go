@@ -71,3 +71,14 @@ func (nextIkf *IkFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 
 func (kf *IkFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
 }
+
+func (kf *IkFrame) IsEnable(boneName string) bool {
+	for _, ik := range kf.IkList {
+		if ik.BoneName == boneName {
+			// IKボーン名がある場合、その結果を取得する
+			return ik.Enabled
+		}
+	}
+	// キーが無い場合、IK有効がデフォルト
+	return true
+}

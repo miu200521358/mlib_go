@@ -49,14 +49,17 @@ func deform(
 		}
 	}
 
+	// IKのON/OFF
+	ikFrame := motion.IkFrames.Get(frame)
+
 	// 物理前のデフォーム情報
-	beforeBoneDeltas := motion.BoneFrames.Deform(frame, model, nil, true, nil)
+	beforeBoneDeltas := motion.BoneFrames.Deform(frame, model, nil, true, nil, ikFrame)
 
 	// 物理更新
 	updatePhysics(modelPhysics, model, beforeBoneDeltas, frame, elapsed, enablePhysics)
 
 	// 物理後のデフォーム情報
-	vds.Bones = motion.BoneFrames.Deform(frame, model, nil, true, beforeBoneDeltas)
+	vds.Bones = motion.BoneFrames.Deform(frame, model, nil, true, beforeBoneDeltas, ikFrame)
 
 	return vds
 }

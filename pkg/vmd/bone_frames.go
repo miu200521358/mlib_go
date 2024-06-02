@@ -126,9 +126,10 @@ func (fs *BoneFrames) Deform(
 	boneNames []string,
 	isCalcIk bool,
 	beforeBoneDeltas *BoneDeltas,
+	ikFrame *IkFrame,
 ) *BoneDeltas {
 	// mlog.Memory(fmt.Sprintf("Deform 1)frame: %d", frame))
-	deformBoneIndexes, boneDeltas := fs.prepareDeltas(frame, model, boneNames, isCalcIk, beforeBoneDeltas)
+	deformBoneIndexes, boneDeltas := fs.prepareDeltas(frame, model, boneNames, isCalcIk, beforeBoneDeltas, ikFrame)
 	// mlog.Memory(fmt.Sprintf("Deform 2)frame: %d", frame))
 	boneDeltas = fs.calcBoneDeltas(frame, model, deformBoneIndexes, boneDeltas)
 	// mlog.Memory(fmt.Sprintf("Deform 3)frame: %d", frame))
@@ -141,6 +142,7 @@ func (fs *BoneFrames) prepareDeltas(
 	boneNames []string,
 	isCalcIk bool,
 	beforeBoneDeltas *BoneDeltas,
+	ikFrame *IkFrame,
 ) ([]int, *BoneDeltas) {
 	// mlog.Memory(fmt.Sprintf("prepareDeltas 1)frame: %d", frame))
 
@@ -151,7 +153,7 @@ func (fs *BoneFrames) prepareDeltas(
 	// IK事前計算
 	if isCalcIk {
 		// ボーン変形行列操作
-		boneDeltas = fs.prepareIk(frame, model, deformBoneIndexes, boneDeltas)
+		boneDeltas = fs.prepareIk(frame, model, deformBoneIndexes, boneDeltas, ikFrame)
 	}
 
 	// mlog.Memory(fmt.Sprintf("prepareDeltas 3)frame: %d", frame))
@@ -170,6 +172,7 @@ func (fs *BoneFrames) prepareIk(
 	model *pmx.PmxModel,
 	deformBoneIndexes []int,
 	boneDeltas *BoneDeltas,
+	ikFrame *IkFrame,
 ) *BoneDeltas {
 	for _, boneIndex := range deformBoneIndexes {
 		// ボーンIndexがIkTreeIndexesに含まれていない場合、スルー
@@ -180,8 +183,10 @@ func (fs *BoneFrames) prepareIk(
 		for m := range len(model.Bones.IkTreeIndexes[boneIndex]) {
 			ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[boneIndex][m])
 
-			// IK計算
-			boneDeltas = fs.calcIk(frame, ikBone, model, boneDeltas)
+			if ikFrame == nil || ikFrame.IsEnable(ikBone.Name) {
+				// IKが有効な場合のみIK計算
+				boneDeltas = fs.calcIk(frame, ikBone, model, boneDeltas, ikFrame)
+			}
 		}
 	}
 
@@ -196,13 +201,15 @@ func (fs *BoneFrames) calcIk(
 	ikBone *pmx.Bone,
 	model *pmx.PmxModel,
 	boneDeltas *BoneDeltas,
+	ikFrame *IkFrame,
 ) *BoneDeltas {
 	// IKターゲットボーン
 	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
-	ikDeltas := fs.Deform(frame, model, []string{ikBone.Name}, false, boneDeltas)
+	ikDeltas := fs.Deform(frame, model, []string{ikBone.Name}, false, boneDeltas, ikFrame)
 	// エフェクタ関連情報取得
-	effectorDeformBoneIndexes, boneDeltas := fs.prepareDeltas(frame, model, []string{effectorBone.Name}, false, boneDeltas)
+	effectorDeformBoneIndexes, boneDeltas :=
+		fs.prepareDeltas(frame, model, []string{effectorBone.Name}, false, boneDeltas, ikFrame)
 	// 中断FLGが入ったか否か
 	aborts := make([]bool, len(ikBone.Ik.Links))
 
