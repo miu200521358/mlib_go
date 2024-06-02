@@ -6,6 +6,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"log"
 	"path/filepath"
 	"runtime"
 
@@ -60,7 +61,7 @@ func main() {
 	// コンソールはタブ外に表示
 	mWindow.ConsoleView, err = mwidget.NewConsoleView(mWindow)
 	mwidget.CheckError(err, mWindow, mi18n.T("コンソール生成エラー"))
-	// log.SetOutput(mWindow.ConsoleView)
+	log.SetOutput(mWindow.ConsoleView)
 
 	mWindow.Center()
 	mWindow.Run()
