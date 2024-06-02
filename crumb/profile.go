@@ -3,14 +3,12 @@ package main
 import (
 	"log"
 
-	"github.com/pkg/profile"
-
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
 func main() {
-	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
 	// defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
 
 	// --------------------------------------------

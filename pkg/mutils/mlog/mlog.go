@@ -132,8 +132,10 @@ func Memory(prefix string) {
 	runtime.ReadMemStats(&m)
 	mem := bToMb(m.Alloc)
 	// if prevMem != mem {
-	log.Printf("[%s] Alloc = %v -> %v MiB, HeapAlloc = %v MiB, TotalAlloc = %v MiB, Sys = %v MiB, NumGC = %v\n",
-		prefix, prevMem, mem, bToMb(m.HeapAlloc), bToMb(m.TotalAlloc), m.NumGC, bToMb(m.Sys))
+	log.Printf("[%s] Alloc = %v -> %v MiB, HeapAlloc = %v MiB, HeapSys = %v MiB, HeapIdle = %v MiB, "+
+		"HeapInuse = %v MiB, HeapReleased = %v MiB, TotalAlloc = %v MiB, Sys = %v MiB, NumGC = %v\n",
+		prefix, prevMem, mem, bToMb(m.HeapAlloc), bToMb(m.HeapSys), bToMb(m.HeapIdle),
+		bToMb(m.HeapInuse), bToMb(m.HeapReleased), bToMb(m.TotalAlloc), bToMb(m.Sys), m.NumGC)
 	prevMem = mem
 	// }
 	// log.Printf("[%s] Alloc = %v MiB, TotalAlloc = %v MiB, Sys = %v MiB, NumGC = %v\n",
