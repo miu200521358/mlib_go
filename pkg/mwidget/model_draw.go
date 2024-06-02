@@ -73,7 +73,8 @@ func draw(
 	isDrawNormal bool,
 	isDrawBones map[pmx.BoneFlag]bool,
 ) {
-	// mlog.Memory(fmt.Sprintf("[%d] draw 1)", frame))
+	// mlog.Memory(fmt.Sprintf("[%d] draw", frame))
+
 	deltas := deform(modelPhysics, model, motion, frame, elapsed, enablePhysics)
 
 	// // ファイナライザを設定
@@ -105,8 +106,6 @@ func draw(
 	modelPhysics.DebugDrawWorld()
 
 	// mlog.Memory(fmt.Sprintf("[%d] draw 8)", frame))
-	// // GCを強制的に実行
-	// runtime.GC()
 
 	//mlog.Memory(fmt.Sprintf("[%d] draw 9)", frame))
 }

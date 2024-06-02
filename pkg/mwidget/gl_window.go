@@ -7,6 +7,7 @@ import (
 	"embed"
 	"image"
 	"math"
+	"runtime"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -477,6 +478,9 @@ func (w *GlWindow) ClearData() {
 }
 
 func (w *GlWindow) draw(frame int, elapsed float32) {
+	// GCを強制的に実行
+	defer func() { runtime.GC() }()
+
 	// 背景色をクリア
 	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -565,7 +569,7 @@ func (w *GlWindow) Run() {
 		w.SwapBuffers()
 		glfw.PollEvents()
 
-		// if w.frame >= 1000 {
+		// if w.frame >= 5000 {
 		// 	break
 		// }
 	}
