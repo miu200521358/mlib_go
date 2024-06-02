@@ -57,6 +57,13 @@ func V2(message string, param ...interface{}) {
 	}
 }
 
+// Ik Verbose2 冗長ログ
+func IV(message string, param ...interface{}) {
+	if level == IK_VERBOSE {
+		log.Printf(message, param...)
+	}
+}
+
 // Debug デバッグログ
 func D(message string, param ...interface{}) {
 	if level < INFO {

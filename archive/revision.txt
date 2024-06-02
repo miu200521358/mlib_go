@@ -214,4 +214,8 @@ MlibSample 1.0.0_beta_49
 ・vpdの読み込み追加
 ・ジョイントのパラ調整
 
+MlibSample 1.0.0_beta_50
+・FixedTimeStep = 1 / 60.0 に変更（これまでは 1/300）
+・キーフレームの進捗を round で（これまでは切り捨て）
+
 

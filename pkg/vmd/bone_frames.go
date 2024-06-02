@@ -190,7 +190,7 @@ func (fs *BoneFrames) prepareIk(
 		}
 	}
 
-	mlog.V("[IK計算終了][%04d] -----------------------------------------------", frame)
+	mlog.IV("[IK計算終了][%04d] -----------------------------------------------", frame)
 
 	return boneDeltas
 }
@@ -239,7 +239,7 @@ func (fs *BoneFrames) calcIk(
 		fmt.Println(ikFile, "[IK計算出力先][%04d][%s] %s", frame, ikMotionPath)
 	}
 	defer func() {
-		mlog.V("[IK計算終了][%04d][%s]", frame, ikBone.Name)
+		mlog.IV("[IK計算終了][%04d][%s]", frame, ikBone.Name)
 
 		if ikMotion != nil {
 			Write(ikMotion)
