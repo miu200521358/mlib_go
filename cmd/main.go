@@ -92,7 +92,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
 		func(path string) {}))
 	mwidget.CheckError(err, mWindow, mi18n.T("Pmxファイルピッカー生成エラー"))
 
-	vmdReadPicker, err := (mwidget.NewVmdReadFilePicker(
+	vmdReadPicker, err := (mwidget.NewVmdVpdReadFilePicker(
 		mWindow,
 		page,
 		"VmdPath",

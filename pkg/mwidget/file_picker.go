@@ -60,6 +60,50 @@ func NewPmxReadFilePicker(
 		OnPathChanged)
 }
 
+func NewVpdReadFilePicker(
+	window *MWindow,
+	parent walk.Container,
+	historyKey string,
+	title string,
+	tooltip string,
+	description string,
+	OnPathChanged func(string),
+) (*FilePicker, error) {
+	return NewFilePicker(
+		window,
+		parent,
+		historyKey,
+		title,
+		tooltip,
+		description,
+		map[string]string{"*.vpd": "Vpd Files (*.vpd)", "*.*": "All Files (*.*)"},
+		50,
+		&vmd.VpdMotionReader{},
+		OnPathChanged)
+}
+
+func NewVmdVpdReadFilePicker(
+	window *MWindow,
+	parent walk.Container,
+	historyKey string,
+	title string,
+	tooltip string,
+	description string,
+	OnPathChanged func(string),
+) (*FilePicker, error) {
+	return NewFilePicker(
+		window,
+		parent,
+		historyKey,
+		title,
+		tooltip,
+		description,
+		map[string]string{"*.vmd": "Vmd Files (*.vmd)", "*.vpd": "Vpd Files (*.vpd)", "*.*": "All Files (*.*)"},
+		50,
+		vmd.NewVmdVpdMotionReader(),
+		OnPathChanged)
+}
+
 func NewVmdReadFilePicker(
 	window *MWindow,
 	parent walk.Container,

@@ -25,7 +25,7 @@ type ReaderInterface interface {
 }
 
 type BaseReader[T IHashModel] struct {
-	file     *os.File
+	File     *os.File
 	reader   *bufio.Reader
 	encoding encoding.Encoding
 	ReadText func() string
@@ -37,14 +37,14 @@ func (r *BaseReader[T]) Open(path string) error {
 	if err != nil {
 		return err
 	}
-	r.file = file
-	r.reader = bufio.NewReader(r.file)
+	r.File = file
+	r.reader = bufio.NewReader(r.File)
 
 	return nil
 }
 
 func (r *BaseReader[T]) Close() {
-	defer r.file.Close()
+	defer r.File.Close()
 }
 
 func (r *BaseReader[T]) ReadNameByFilepath(path string) (string, error) {
