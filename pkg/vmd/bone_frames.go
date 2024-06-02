@@ -128,136 +128,66 @@ func (fs *BoneFrames) Deform(
 	beforeBoneDeltas *BoneDeltas,
 ) *BoneDeltas {
 	mlog.Memory(fmt.Sprintf("Deform 1)frame: %d", frame))
-	boneDeformsMap := fs.prepareDeform(frame, model, boneNames, isCalcIk, beforeBoneDeltas)
+	deformBoneIndexes, boneDeltas := fs.prepareDeltas(frame, model, boneNames, isCalcIk, beforeBoneDeltas)
 	mlog.Memory(fmt.Sprintf("Deform 2)frame: %d", frame))
-	deltas := fs.calcBoneDeltas(frame, boneDeformsMap, beforeBoneDeltas)
+	boneDeltas = fs.calcBoneDeltas(frame, model, deformBoneIndexes, boneDeltas)
 	mlog.Memory(fmt.Sprintf("Deform 3)frame: %d", frame))
-	return deltas
+	return boneDeltas
 }
 
-func (fs *BoneFrames) prepareDeform(
+func (fs *BoneFrames) prepareDeltas(
 	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
 	isCalcIk bool,
 	beforeBoneDeltas *BoneDeltas,
-) map[bool]*boneDeforms {
-	mlog.Memory(fmt.Sprintf("prepareDeform 1)frame: %d", frame))
+) ([]int, *BoneDeltas) {
+	mlog.Memory(fmt.Sprintf("prepareDeltas 1)frame: %d", frame))
 
-	isAfterPhysics := false
-	if beforeBoneDeltas != nil {
-		isAfterPhysics = true
-	}
+	deformBoneIndexes, boneDeltas := fs.createBoneDeltas(frame, model, boneNames, beforeBoneDeltas)
 
-	boneDeformsMap := fs.prepareBoneDeforms(model, boneNames, isAfterPhysics)
-
-	mlog.Memory(fmt.Sprintf("prepareDeform 2)frame: %d", frame))
+	mlog.Memory(fmt.Sprintf("prepareDeltas 2)frame: %d", frame))
 
 	// IK事前計算
 	if isCalcIk {
 		// ボーン変形行列操作
-		fs.prepareIk(frame, model, boneDeformsMap, beforeBoneDeltas)
+		boneDeltas = fs.prepareIk(frame, model, deformBoneIndexes, boneDeltas)
 	}
 
-	mlog.Memory(fmt.Sprintf("prepareDeform 3)frame: %d", frame))
+	mlog.Memory(fmt.Sprintf("prepareDeltas 3)frame: %d", frame))
 
 	// ボーンデフォーム情報を埋める
-	fs.fillBoneDeform(frame, model, boneDeformsMap, beforeBoneDeltas, isAfterPhysics)
+	boneDeltas = fs.fillBoneDeform(frame, model, deformBoneIndexes, boneDeltas)
 
-	mlog.Memory(fmt.Sprintf("prepareDeform 4)frame: %d", frame))
+	mlog.Memory(fmt.Sprintf("prepareDeltas 4)frame: %d", frame))
 
-	return boneDeformsMap
-}
-
-// IK事前計算処理
-func (fs *BoneFrames) clearIk(
-	frame int,
-	model *pmx.PmxModel,
-	boneDeforms *boneDeforms,
-) {
-	for _, boneDeform := range boneDeforms.deforms {
-		// ボーンIndexがIkTreeIndexesに含まれていない場合、スルー
-		if _, ok := model.Bones.IkTreeIndexes[boneDeform.bone.Index]; !ok {
-			continue
-		}
-
-		for i := 0; i < len(model.Bones.IkTreeIndexes[boneDeform.bone.Index]); i++ {
-			ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[boneDeform.bone.Index][i])
-			if _, ok := boneDeforms.deforms[ikBone.Index]; !ok {
-				continue
-			}
-
-			for _, linkIndex := range ikBone.Ik.Links {
-				// IKリンクボーンの回転量を初期化
-				linkBone := model.Bones.Get(linkIndex.BoneIndex)
-				linkBf := fs.Get(linkBone.Name).data[frame]
-				if linkBf != nil {
-					linkBf.IkRotation = nil
-					// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
-					fs.Get(linkBone.Name).Append(linkBf)
-				}
-			}
-		}
-	}
+	return deformBoneIndexes, boneDeltas
 }
 
 // IK事前計算処理
 func (fs *BoneFrames) prepareIk(
 	frame int,
 	model *pmx.PmxModel,
-	boneDeformsMap map[bool]*boneDeforms,
-	beforeBoneDeltas *BoneDeltas,
-) {
-	isAfterPhysicsList := make([]bool, 0, 2)
-	isAfterPhysicsList = append(isAfterPhysicsList, false)
-	if beforeBoneDeltas != nil {
-		isAfterPhysicsList = append(isAfterPhysicsList, true)
-	}
+	deformBoneIndexes []int,
+	boneDeltas *BoneDeltas,
+) *BoneDeltas {
+	for _, boneIndex := range deformBoneIndexes {
+		// ボーンIndexがIkTreeIndexesに含まれていない場合、スルー
+		if _, ok := model.Bones.IkTreeIndexes[boneIndex]; !ok {
+			continue
+		}
 
-	for _, isAfterPhysics := range isAfterPhysicsList {
-		// IKクリア
-		fs.clearIk(frame, model, boneDeformsMap[isAfterPhysics])
-	}
+		for m := range len(model.Bones.IkTreeIndexes[boneIndex]) {
+			ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[boneIndex][m])
 
-	for _, isAfterPhysics := range isAfterPhysicsList {
-		boneDeforms := boneDeformsMap[isAfterPhysics]
-
-		for _, boneIndex := range boneDeforms.boneIndexes {
-			bd := boneDeforms.deforms[boneIndex]
-
-			// ボーンIndexがIkTreeIndexesに含まれていない場合、スルー
-			if _, ok := model.Bones.IkTreeIndexes[bd.bone.Index]; !ok {
-				continue
-			}
-
-			for m := range len(model.Bones.IkTreeIndexes[bd.bone.Index]) {
-				ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[bd.bone.Index][m])
-				if _, ok := boneDeforms.deforms[ikBone.Index]; !ok {
-					continue
-				}
-
-				// IK計算
-				effectorBoneDeltas := fs.calcIk(frame, ikBone, model, beforeBoneDeltas)
-
-				for _, linkIndex := range ikBone.Ik.Links {
-					// IKリンクボーンの回転量を更新
-					linkBone := model.Bones.Get(linkIndex.BoneIndex)
-					effectorBoneDelta := effectorBoneDeltas.Get(linkBone.Index)
-					if effectorBoneDelta != nil {
-						linkBf := fs.Get(linkBone.Name).Get(frame)
-						if linkBf == nil {
-							linkBf = NewBoneFrame(frame)
-						}
-						linkBf.IkRotation = effectorBoneDelta.FrameRotation()
-						// IK用なので登録フラグは既存のままで追加して補間曲線は分割しない
-						fs.Get(linkBone.Name).Append(linkBf)
-					}
-				}
-			}
+			// IK計算
+			boneDeltas = fs.calcIk(frame, ikBone, model, boneDeltas)
 		}
 	}
 
 	mlog.V("[IK計算終了][%04d] -----------------------------------------------", frame)
+
+	return boneDeltas
 }
 
 // IK計算
@@ -265,17 +195,14 @@ func (fs *BoneFrames) calcIk(
 	frame int,
 	ikBone *pmx.Bone,
 	model *pmx.PmxModel,
-	beforeBoneDeltas *BoneDeltas,
+	boneDeltas *BoneDeltas,
 ) *BoneDeltas {
-	boneDeltas := NewBoneDeltas()
-	isAfterPhysics := beforeBoneDeltas != nil
 	// IKターゲットボーン
 	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
-	ikDeltas := fs.Deform(frame, model, []string{ikBone.Name}, false, beforeBoneDeltas)
+	ikDeltas := fs.Deform(frame, model, []string{ikBone.Name}, false, boneDeltas)
 	// エフェクタ関連情報取得
-	effectorBoneDeformsMap := fs.prepareDeform(
-		frame, model, []string{effectorBone.Name}, false, beforeBoneDeltas)
+	effectorDeformBoneIndexes, boneDeltas := fs.prepareDeltas(frame, model, []string{effectorBone.Name}, false, boneDeltas)
 	// 中断FLGが入ったか否か
 	aborts := make([]bool, len(ikBone.Ik.Links))
 
@@ -341,22 +268,22 @@ ikLoop:
 			unitRad := ikBone.Ik.UnitRotation.GetRadians().GetX() * float64(lidx+1)
 
 			for _, l := range ikBone.Ik.Links {
-				if effectorBoneDeformsMap[isAfterPhysics].deforms[l.BoneIndex] != nil {
-					effectorBoneDeformsMap[isAfterPhysics].deforms[l.BoneIndex].unitMatrix = nil
+				if boneDeltas.Get(l.BoneIndex) != nil {
+					boneDeltas.Get(l.BoneIndex).unitMatrix = nil
 				}
 			}
-			if effectorBoneDeformsMap[isAfterPhysics].deforms[ikBone.Ik.BoneIndex] != nil {
-				effectorBoneDeformsMap[isAfterPhysics].deforms[ikBone.Ik.BoneIndex].unitMatrix = nil
+			if boneDeltas.Get(ikBone.Ik.BoneIndex) != nil {
+				boneDeltas.Get(ikBone.Ik.BoneIndex).unitMatrix = nil
 			}
 
 			// IK関連の行列を取得
-			effectorDeltas := fs.calcBoneDeltas(frame, effectorBoneDeformsMap, beforeBoneDeltas)
+			boneDeltas = fs.calcBoneDeltas(frame, model, effectorDeformBoneIndexes, boneDeltas)
 
 			// IKボーンのグローバル位置
 			ikGlobalPosition := ikDeltas.Get(ikBone.Index).GlobalPosition()
 
 			// 現在のIKターゲットボーンのグローバル位置を取得
-			effectorGlobalPosition := effectorDeltas.Get(effectorBone.Index).GlobalPosition()
+			effectorGlobalPosition := boneDeltas.Get(effectorBone.Index).GlobalPosition()
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
@@ -365,7 +292,7 @@ ikLoop:
 					frame, loop, linkBone.Name, count-1,
 					ikBone.Name, ikGlobalPosition.MMD().String(),
 					effectorBone.Name, effectorGlobalPosition.MMD().String(),
-					linkBone.Name, effectorDeltas.Get(linkBone.Index).GlobalPosition().MMD().String())
+					linkBone.Name, boneDeltas.Get(linkBone.Index).GlobalPosition().MMD().String())
 			}
 
 			// fmt.Fprintf(ikFile,
@@ -380,7 +307,7 @@ ikLoop:
 			// }
 
 			// 注目ノード（実際に動かすボーン=リンクボーン）
-			linkMatrix := effectorDeltas.Get(linkBone.Index).GlobalMatrix()
+			linkMatrix := boneDeltas.Get(linkBone.Index).GlobalMatrix()
 			// ワールド座標系から注目ノードの局所座標系への変換
 			linkInvMatrix := linkMatrix.Inverse()
 
@@ -399,9 +326,9 @@ ikLoop:
 				}
 				{
 					bf := NewBoneFrame(count)
-					bf.Position = effectorDeltas.Get(linkBone.Index).framePosition
-					bf.Rotation = effectorDeltas.Get(linkBone.Index).FrameRotation()
+					bf.Position = boneDeltas.Get(linkBone.Index).framePosition
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+					bf.Rotation = boneDeltas.Get(linkBone.Index).FrameRotation()
 					count++
 				}
 			}
@@ -448,15 +375,13 @@ ikLoop:
 			}
 
 			// リンクボーンの角度を取得
-			linkDeform := findBoneDeform(effectorBoneDeformsMap, linkBone)
+			linkDelta := boneDeltas.Get(linkBone.Index)
 			var linkQuat *mmath.MQuaternion
-			if linkDeform != nil && linkDeform.rotation != nil {
-				linkQuat = linkDeform.rotation.Copy()
-				if linkDeform.effectRotation != nil {
-					linkQuat = linkDeform.rotation.Muled(linkDeform.effectRotation)
-				}
-			} else {
+			if linkDelta == nil {
+				linkDelta = &BoneDelta{Bone: linkBone, Frame: frame}
 				linkQuat = mmath.NewMQuaternion()
+			} else {
+				linkQuat = linkDelta.FrameRotation()
 			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -600,16 +525,16 @@ ikLoop:
 				}
 			}
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil && linkDeform.rotation != nil {
+			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil && linkQuat != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][15] 前回差分中断判定: %v(%0.6f) 前回: %s 今回: %s\n",
 					frame, loop, linkBone.Name, count-1,
-					1-totalActualIkQuat.Dot(linkDeform.rotation) < 1e-8, 1-totalActualIkQuat.Dot(linkDeform.rotation),
-					linkDeform.rotation.ToDegrees().String(), totalActualIkQuat.ToMMDDegrees().String())
+					1-totalActualIkQuat.Dot(linkQuat) < 1e-8, 1-totalActualIkQuat.Dot(linkQuat),
+					linkQuat.ToDegrees().String(), totalActualIkQuat.ToMMDDegrees().String())
 			}
 
 			// 前回（既存）とほぼ同じ回転量の場合、中断FLGを立てる
-			if linkDeform.rotation != nil && 1-totalActualIkQuat.Dot(linkDeform.rotation) < 1e-8 {
+			if linkQuat != nil && 1-totalActualIkQuat.Dot(linkQuat) < 1e-8 {
 				aborts[lidx] = true
 			}
 
@@ -627,18 +552,8 @@ ikLoop:
 			}
 
 			// IKの結果を更新
-			linkDeform.rotation = totalActualIkQuat
-			linkDeform.effectRotation = nil
-			linkDeform.unitMatrix = nil
-			var delta *BoneDelta
-			if beforeBoneDeltas != nil {
-				delta = beforeBoneDeltas.Get(linkBone.Index)
-			}
-			if delta == nil {
-				delta = &BoneDelta{Bone: linkBone, Frame: frame}
-			}
-			delta.frameRotation = totalActualIkQuat
-			boneDeltas.Append(delta)
+			linkDelta.frameRotation = totalActualIkQuat
+			boneDeltas.Append(linkDelta)
 		}
 
 		if slices.Index(aborts, false) == -1 {
@@ -948,93 +863,73 @@ func (fs *BoneFrames) judgeIkAngle(
 
 func (fs *BoneFrames) calcBoneDeltas(
 	frame int,
-	boneDeformsMap map[bool]*boneDeforms,
-	beforeBoneDeltas *BoneDeltas,
-) *BoneDeltas {
-	if beforeBoneDeltas != nil {
-		return fs.calcBoneDeltasByIsAfterPhysics(frame, boneDeformsMap[true], beforeBoneDeltas)
-	} else {
-		return fs.calcBoneDeltasByIsAfterPhysics(frame, boneDeformsMap[false], NewBoneDeltas())
-	}
-}
-
-func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
-	frame int,
-	boneDeforms *boneDeforms,
+	model *pmx.PmxModel,
+	deformBoneIndexes []int,
 	boneDeltas *BoneDeltas,
 ) *BoneDeltas {
-	for _, boneIndex := range boneDeforms.boneIndexes {
+	for _, boneIndex := range deformBoneIndexes {
 		delta := boneDeltas.Get(boneIndex)
-		if delta != nil && delta.globalMatrix != nil {
-			// 既にグローバル行列が計算済みの場合、スルー
-			continue
+		bone := model.Bones.Get(boneIndex)
+		if delta == nil {
+			delta = &BoneDelta{Bone: bone, Frame: frame}
 		}
 
-		deform := boneDeforms.deforms[boneIndex]
-		deform.unitMatrix = mmath.NewMMat4()
+		delta.unitMatrix = mmath.NewMMat4()
 
 		// スケール
-		if deform.scale != nil && !deform.scale.IsOne() {
-			deform.unitMatrix.Mul(deform.scale.ToScaleMat4())
+		if delta.frameScale != nil && !delta.frameScale.IsOne() {
+			delta.unitMatrix.Mul(delta.frameScale.ToScaleMat4())
 		}
 
 		// 回転
-		rot := deform.rotation
+		rot := delta.frameRotation
+		if rot == nil {
+			rot = mmath.NewMQuaternion()
+		}
+
 		isEffectorRot := false
-		if deform.effectRotation != nil && !deform.effectRotation.IsIdent() {
-			rot = deform.effectRotation.Muled(rot)
+		if delta.frameEffectRotation != nil && !delta.frameEffectRotation.IsIdent() {
+			rot = delta.frameEffectRotation.Muled(rot)
 			isEffectorRot = true
 		}
-		if isEffectorRot && deform.bone.HasFixedAxis() {
+		if isEffectorRot && delta.Bone.HasFixedAxis() {
 			// 軸制限回転を求める
-			rot = rot.ToFixedAxisRotation(deform.bone.NormalizedFixedAxis)
+			rot = rot.ToFixedAxisRotation(delta.Bone.NormalizedFixedAxis)
 		}
 		if rot != nil && !rot.IsIdent() {
-			deform.unitMatrix.Mul(rot.ToMat4())
+			delta.unitMatrix.Mul(rot.ToMat4())
 		}
 
 		// 移動
-		pos := deform.position
-		if deform.effectPosition != nil && !deform.effectPosition.IsZero() {
-			pos = deform.effectPosition.Added(pos)
+		pos := delta.framePosition
+		if pos == nil {
+			pos = mmath.NewMVec3()
+		}
+
+		if delta.frameEffectPosition != nil && !delta.frameEffectPosition.IsZero() {
+			pos.Add(delta.frameEffectPosition)
 		}
 		if pos != nil && !pos.IsZero() {
-			deform.unitMatrix.Mul(pos.ToMat4())
+			delta.unitMatrix.Mul(pos.ToMat4())
 		}
 
 		// 逆BOf行列(初期姿勢行列)
-		deform.unitMatrix.Mul(deform.bone.RevertOffsetMatrix)
-		continue
+		delta.unitMatrix.Mul(delta.Bone.RevertOffsetMatrix)
 	}
 
-	for _, boneIndex := range boneDeforms.boneIndexes {
+	for _, boneIndex := range deformBoneIndexes {
 		delta := boneDeltas.Get(boneIndex)
-		if delta != nil && delta.globalMatrix != nil {
-			// 既にグローバル行列が計算済みの場合、スルー
-			continue
-		}
-
-		var globalMatrix *mmath.MMat4
-		deform := boneDeforms.deforms[boneIndex]
-		parentDelta := boneDeltas.Get(deform.bone.ParentIndex)
+		parentDelta := boneDeltas.Get(delta.Bone.ParentIndex)
 		if parentDelta != nil {
-			globalMatrix = deform.unitMatrix.Muled(parentDelta.GlobalMatrix())
+			delta.globalMatrix = delta.unitMatrix.Muled(parentDelta.GlobalMatrix())
 		} else {
 			// 対象ボーン自身の行列をかける
-			globalMatrix = deform.unitMatrix.Copy()
+			delta.globalMatrix = delta.unitMatrix.Copy()
 		}
 
-		delta = NewBoneDelta(
-			deform.bone,
-			frame,
-			globalMatrix,          // グローバル行列
-			deform.position,       // キーフレの移動量
-			deform.effectPosition, // キーフレの付与移動量
-			deform.rotation,       // キーフレの回転量
-			deform.effectRotation, // キーフレの付与回転量
-			deform.scale,          // 拡大率
-		)
-
+		// BOf行列: 自身のボーンのボーンオフセット行列をかけてローカル行列
+		delta.localMatrix = delta.Bone.OffsetMatrix.Muled(delta.globalMatrix)
+		delta.globalPosition = delta.globalMatrix.Translation()
 		boneDeltas.Append(delta)
 	}
 
@@ -1042,107 +937,97 @@ func (fs *BoneFrames) calcBoneDeltasByIsAfterPhysics(
 }
 
 // デフォーム対象ボーン情報一覧取得
-func (fs *BoneFrames) prepareBoneDeforms(
+func (fs *BoneFrames) createBoneDeltas(
+	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
-	isAfterPhysics bool,
-) map[bool]*boneDeforms {
-	mlog.Memory("prepareBoneDeforms 1)")
+	boneDeltas *BoneDeltas,
+) ([]int, *BoneDeltas) {
+	mlog.Memory("createBoneDeltas 1)")
 
-	boneDeformsMap := make(map[bool]*boneDeforms)
-	isAfterPhysicsList := make([]bool, 0, 2)
-	isAfterPhysicsList = append(isAfterPhysicsList, false)
-	if isAfterPhysics {
-		isAfterPhysicsList = append(isAfterPhysicsList, true)
-	} else {
-		boneDeformsMap[true] = &boneDeforms{
-			deforms:     make(map[int]*BoneDeform),
-			boneIndexes: make([]int, 0),
-		}
+	isAfterPhysics := (boneDeltas != nil)
+
+	// ボーン名の存在チェック用マップ
+	targetSortedBones := model.Bones.LayerSortedBones[isAfterPhysics]
+
+	if boneDeltas == nil {
+		boneDeltas = NewBoneDeltas()
 	}
 
-	mlog.Memory("prepareBoneDeforms 2)")
+	mlog.Memory("createBoneDeltas 3)")
+	deformBoneIndexes := make([]int, 0, len(targetSortedBones))
 
-	for _, ap := range isAfterPhysicsList {
-		// ボーン名の存在チェック用マップ
-		targetSortedBones := model.Bones.LayerSortedBones[ap]
+	if len(boneNames) > 0 {
+		// 指定ボーンに関連するボーンのみ対象とする
+		layerIndexes := make(pmx.LayerIndexes, 0, len(targetSortedBones))
 
-		boneDeforms := &boneDeforms{
-			deforms:     make(map[int]*BoneDeform),
-			boneIndexes: make([]int, 0, len(targetSortedBones)),
-		}
-		mlog.Memory("prepareBoneDeforms 3)")
+		for _, boneName := range boneNames {
+			// ボーン名の追加
+			bone := model.Bones.GetByName(boneName)
+			layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
 
-		if len(boneNames) > 0 {
-			// 指定ボーンに関連するボーンのみ対象とする
-			layerIndexes := make(pmx.LayerIndexes, 0, len(targetSortedBones))
-
-			for _, boneName := range boneNames {
-				// ボーン名の追加
-				bone := model.Bones.GetByName(boneName)
-				layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
-
-				// 関連するボーンの追加
-				relativeBoneIndexes := bone.RelativeBoneIndexes
-				for _, index := range relativeBoneIndexes {
-					bone := model.Bones.Get(index)
-					if !layerIndexes.Contains(bone.Index) {
-						layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
-					}
+			// 関連するボーンの追加
+			relativeBoneIndexes := bone.RelativeBoneIndexes
+			for _, index := range relativeBoneIndexes {
+				bone := model.Bones.Get(index)
+				if !layerIndexes.Contains(bone.Index) {
+					layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
 				}
 			}
-			sort.Sort(layerIndexes)
-			mlog.Memory("prepareBoneDeforms 4)")
+		}
+		sort.Sort(layerIndexes)
+		mlog.Memory("createBoneDeltas 4)")
 
-			for _, layerIndex := range layerIndexes {
-				bone := model.Bones.Get(layerIndex.Index)
-				boneDeforms.deforms[bone.Index] = &BoneDeform{bone: bone}
-				boneDeforms.boneIndexes = append(boneDeforms.boneIndexes, bone.Index)
-			}
-		} else {
-			// 変形階層・ボーンINDEXでソート
-			for k := range len(targetSortedBones) {
-				bone := targetSortedBones[k]
-				boneDeforms.deforms[bone.Index] = &BoneDeform{bone: bone}
-				boneDeforms.boneIndexes = append(boneDeforms.boneIndexes, bone.Index)
+		for _, layerIndex := range layerIndexes {
+			bone := model.Bones.Get(layerIndex.Index)
+			deformBoneIndexes = append(deformBoneIndexes, bone.Index)
+			if !boneDeltas.Contains(bone.Index) {
+				boneDeltas.Append(&BoneDelta{Bone: bone, Frame: frame})
 			}
 		}
-
-		boneDeformsMap[ap] = boneDeforms
+	} else {
+		// 変形階層・ボーンINDEXでソート
+		for k := range len(targetSortedBones) {
+			bone := targetSortedBones[k]
+			deformBoneIndexes = append(deformBoneIndexes, bone.Index)
+			boneDeltas.Append(&BoneDelta{Bone: bone, Frame: frame})
+			if !boneDeltas.Contains(bone.Index) {
+				boneDeltas.Append(&BoneDelta{Bone: bone, Frame: frame})
+			}
+		}
 	}
 
-	mlog.Memory("prepareBoneDeforms 5)")
+	mlog.Memory("createBoneDeltas 5)")
 
-	return boneDeformsMap
+	return deformBoneIndexes, boneDeltas
 }
 
 // デフォーム情報を求めて設定
 func (fs *BoneFrames) fillBoneDeform(
 	frame int,
 	model *pmx.PmxModel,
-	boneDeformsMap map[bool]*boneDeforms,
-	beforeBoneDeltas *BoneDeltas,
-	isAfterPhysics bool,
-) {
-	for _, boneIndex := range boneDeformsMap[isAfterPhysics].boneIndexes {
-		boneDeform := boneDeformsMap[isAfterPhysics].deforms[boneIndex]
-		var delta *BoneDelta
-		if beforeBoneDeltas != nil {
-			delta = beforeBoneDeltas.Get(boneIndex)
+	deformBoneIndexes []int,
+	boneDeltas *BoneDeltas,
+) *BoneDeltas {
+	for _, boneIndex := range deformBoneIndexes {
+		delta := boneDeltas.Get(boneIndex)
+		bone := model.Bones.Get(boneIndex)
+
+		if delta == nil {
+			delta = NewBoneDelta(bone, frame)
 		}
 
-		if boneDeform.unitMatrix == nil && (delta == nil || delta.globalMatrix == nil) {
-			bf := fs.Get(boneDeform.bone.Name).Get(frame)
-			if bf != nil {
-				// ボーンの移動位置、回転角度、拡大率を取得
-				boneDeform.position, boneDeform.effectPosition =
-					fs.getPosition(bf, frame, boneDeform.bone, model, beforeBoneDeltas, isAfterPhysics, 0)
-				boneDeform.rotation, boneDeform.effectRotation =
-					fs.getRotation(bf, frame, boneDeform.bone, model, beforeBoneDeltas, isAfterPhysics, 0)
-				boneDeform.scale = fs.getScale(bf, frame, boneDeform.bone, model)
-			}
+		bf := fs.Get(bone.Name).Get(frame)
+		if bf != nil {
+			// ボーンの移動位置、回転角度、拡大率を取得
+			delta.framePosition, delta.frameEffectPosition = fs.getPosition(bf, frame, bone, model, boneDeltas, 0)
+			delta.frameRotation, delta.frameEffectRotation = fs.getRotation(bf, frame, bone, model, boneDeltas, 0)
+			delta.frameScale = fs.getScale(bf, bone, boneDeltas)
 		}
+		boneDeltas.Append(delta)
 	}
+
+	return boneDeltas
 }
 
 // 該当キーフレにおけるボーンの移動位置
@@ -1151,31 +1036,34 @@ func (fs *BoneFrames) getPosition(
 	frame int,
 	bone *pmx.Bone,
 	model *pmx.PmxModel,
-	beforeBoneDeltas *BoneDeltas,
-	isAfterPhysics bool,
+	boneDeltas *BoneDeltas,
 	loop int,
 ) (*mmath.MVec3, *mmath.MVec3) {
 	if loop > 20 {
 		// 無限ループを避ける
-		return mmath.NewMVec3(), mmath.NewMVec3()
+		return mmath.NewMVec3(), nil
 	}
 
-	var vec *mmath.MVec3
-	if bf.MorphPosition != nil && bf.Position != nil {
-		vec = bf.MorphPosition.Add(bf.Position)
-	} else if bf.Position != nil {
-		vec = bf.Position
+	var pos *mmath.MVec3
+	if boneDeltas != nil && boneDeltas.Get(bone.Index) != nil && boneDeltas.Get(bone.Index).framePosition != nil {
+		pos = boneDeltas.Get(bone.Index).framePosition.Copy()
+	} else if bf.Position != nil && !bf.Position.IsZero() {
+		pos = bf.Position.Copy()
 	} else {
-		vec = mmath.NewMVec3()
+		pos = mmath.NewMVec3()
+	}
+
+	if bf.MorphPosition != nil && !bf.MorphPosition.IsZero() {
+		pos.Add(bf.MorphPosition)
 	}
 
 	if bone.IsEffectorTranslation() && bone.CanTranslate() {
 		// 外部親変形ありの場合、外部親位置を取得する
-		effectPos := fs.getEffectPosition(frame, bone, model, beforeBoneDeltas, isAfterPhysics, loop+1)
-		return vec, effectPos
+		effectPos := fs.getEffectPosition(frame, bone, model, boneDeltas, loop+1)
+		return pos, effectPos
 	}
 
-	return vec, mmath.NewMVec3()
+	return pos, nil
 }
 
 // 付与親を加味した移動位置
@@ -1183,8 +1071,7 @@ func (fs *BoneFrames) getEffectPosition(
 	frame int,
 	bone *pmx.Bone,
 	model *pmx.PmxModel,
-	beforeBoneDeltas *BoneDeltas,
-	isAfterPhysics bool,
+	boneDeltas *BoneDeltas,
 	loop int,
 ) *mmath.MVec3 {
 	if bone.EffectFactor == 0 || loop > 20 {
@@ -1201,8 +1088,8 @@ func (fs *BoneFrames) getEffectPosition(
 	// 付与親が存在する場合、付与親の回転角度を掛ける
 	effectBone := model.Bones.Get(bone.EffectIndex)
 
-	if beforeBoneDeltas != nil {
-		effectDelta := beforeBoneDeltas.Get(effectBone.Index)
+	if boneDeltas != nil {
+		effectDelta := boneDeltas.Get(effectBone.Index)
 		if effectDelta != nil && effectDelta.framePosition != nil {
 			return effectDelta.framePosition.MulScalar(bone.EffectFactor)
 		}
@@ -1212,7 +1099,12 @@ func (fs *BoneFrames) getEffectPosition(
 	if bf == nil {
 		return mmath.NewMVec3()
 	}
-	pos, effectPos := fs.getPosition(bf, frame, effectBone, model, beforeBoneDeltas, isAfterPhysics, loop+1)
+
+	pos, effectPos := fs.getPosition(bf, frame, effectBone, model, boneDeltas, loop+1)
+
+	if effectPos == nil {
+		return pos.MulScalar(bone.EffectFactor)
+	}
 
 	return pos.Add(effectPos).MulScalar(bone.EffectFactor)
 }
@@ -1223,21 +1115,19 @@ func (fs *BoneFrames) getRotation(
 	frame int,
 	bone *pmx.Bone,
 	model *pmx.PmxModel,
-	beforeBoneDeltas *BoneDeltas,
-	isAfterPhysics bool,
+	boneDeltas *BoneDeltas,
 	loop int,
 ) (*mmath.MQuaternion, *mmath.MQuaternion) {
 	if loop > 20 {
 		// 無限ループを避ける
-		return mmath.NewMQuaternion(), nil
+		return mmath.NewMQuaternion(), mmath.NewMQuaternion()
 	}
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
 	var rot *mmath.MQuaternion
-	if bf.IkRotation != nil && !bf.IkRotation.IsIdent() {
-		// IK用回転を持っている場合、置き換え
-		rot = bf.IkRotation.Copy()
-	} else if bf.Rotation != nil {
+	if boneDeltas != nil && boneDeltas.Get(bone.Index) != nil && boneDeltas.Get(bone.Index).frameRotation != nil {
+		rot = boneDeltas.Get(bone.Index).frameRotation.Copy()
+	} else if bf.Rotation != nil && !bf.Rotation.IsIdent() {
 		rot = bf.Rotation.Copy()
 	} else {
 		rot = mmath.NewMQuaternion()
@@ -1253,8 +1143,8 @@ func (fs *BoneFrames) getRotation(
 
 	if bone.IsEffectorRotation() && bone.CanRotate() {
 		// 外部親変形ありの場合、外部親回転を取得する
-		effectQuat := fs.getEffectRotation(frame, bone, model, beforeBoneDeltas, isAfterPhysics, loop+1)
-		return rot.Shorten(), effectQuat.Shorten()
+		effectRot := fs.getEffectRotation(frame, bone, model, boneDeltas, loop+1)
+		return rot.Shorten(), effectRot.Shorten()
 	}
 
 	return rot.Shorten(), nil
@@ -1265,8 +1155,7 @@ func (fs *BoneFrames) getEffectRotation(
 	frame int,
 	bone *pmx.Bone,
 	model *pmx.PmxModel,
-	beforeBoneDeltas *BoneDeltas,
-	isAfterPhysics bool,
+	boneDeltas *BoneDeltas,
 	loop int,
 ) *mmath.MQuaternion {
 	if bone.EffectFactor == 0 || loop > 20 {
@@ -1283,19 +1172,12 @@ func (fs *BoneFrames) getEffectRotation(
 	// 付与親が存在する場合、付与親の回転角度を掛ける
 	effectBone := model.Bones.Get(bone.EffectIndex)
 
-	if beforeBoneDeltas != nil {
-		effectDelta := beforeBoneDeltas.Get(effectBone.Index)
-		if effectDelta != nil && effectDelta.frameRotation != nil {
-			return effectDelta.frameRotation.MuledScalar(bone.EffectFactor).Shorten()
-		}
-	}
-
 	bf := fs.Get(effectBone.Name).Get(frame)
 	if bf == nil {
 		return mmath.NewMQuaternion()
 	}
 
-	rot, effectRot := fs.getRotation(bf, frame, effectBone, model, beforeBoneDeltas, isAfterPhysics, loop+1)
+	rot, effectRot := fs.getRotation(bf, frame, effectBone, model, boneDeltas, loop+1)
 
 	if effectRot != nil {
 		rot.Mul(effectRot)
@@ -1307,18 +1189,19 @@ func (fs *BoneFrames) getEffectRotation(
 // 該当キーフレにおけるボーンの拡大率
 func (fs *BoneFrames) getScale(
 	bf *BoneFrame,
-	frame int,
 	bone *pmx.Bone,
-	model *pmx.PmxModel,
+	boneDeltas *BoneDeltas,
 ) *mmath.MVec3 {
 
 	scale := &mmath.MVec3{1, 1, 1}
-	if bf.MorphScale != nil {
-		scale.Add(bf.MorphScale)
+	if boneDeltas != nil && boneDeltas.Get(bone.Index) != nil && boneDeltas.Get(bone.Index).frameScale != nil {
+		scale = boneDeltas.Get(bone.Index).frameScale
+	} else if bf.Scale != nil && !bf.Scale.IsZero() {
+		scale.Add(bf.Scale)
 	}
 
-	if bf.Scale != nil {
-		scale.Add(bf.Scale)
+	if bf.MorphScale != nil && !bf.MorphScale.IsZero() {
+		return scale.Add(bf.MorphScale)
 	}
 
 	return scale

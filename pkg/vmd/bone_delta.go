@@ -18,6 +18,7 @@ type BoneDelta struct {
 	frameRotation       *mmath.MQuaternion // キーフレ回転の変動量
 	frameEffectRotation *mmath.MQuaternion // キーフレ回転の変動量(付与親のみ)
 	frameScale          *mmath.MVec3       // キーフレスケールの変動量
+	unitMatrix          *mmath.MMat4
 }
 
 func (bd *BoneDelta) GlobalMatrix() *mmath.MMat4 {
@@ -89,23 +90,24 @@ func (bd *BoneDelta) FrameScale() *mmath.MVec3 {
 func NewBoneDelta(
 	bone *pmx.Bone,
 	frame int,
-	globalMatrix *mmath.MMat4,
-	framePosition, frameEffectPosition *mmath.MVec3,
-	frameRotation, frameEffectRotation *mmath.MQuaternion,
-	frameScale *mmath.MVec3,
+	// globalMatrix, unitMatrix *mmath.MMat4,
+	// framePosition, frameEffectPosition *mmath.MVec3,
+	// frameRotation, frameEffectRotation *mmath.MQuaternion,
+	// frameScale *mmath.MVec3,
 ) *BoneDelta {
 	return &BoneDelta{
-		Bone:         bone,
-		Frame:        frame,
-		globalMatrix: globalMatrix,
-		// BOf行列: 自身のボーンのボーンオフセット行列をかけてローカル行列
-		localMatrix:         bone.OffsetMatrix.Muled(globalMatrix),
-		globalPosition:      globalMatrix.Translation(),
-		framePosition:       framePosition,
-		frameEffectPosition: frameEffectPosition,
-		frameRotation:       frameRotation,
-		frameEffectRotation: frameEffectRotation,
-		frameScale:          frameScale,
+		Bone:  bone,
+		Frame: frame,
+		// globalMatrix: globalMatrix,
+		//
+		// localMatrix:         bone.OffsetMatrix.Muled(globalMatrix),
+		// globalPosition:
+		// framePosition:       framePosition,
+		// frameEffectPosition: frameEffectPosition,
+		// frameRotation:       frameRotation,
+		// frameEffectRotation: frameEffectRotation,
+		// frameScale:          frameScale,
+		// unitMatrix:          unitMatrix,
 	}
 }
 

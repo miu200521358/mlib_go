@@ -19,7 +19,6 @@ type BoneFrame struct {
 	LocalScale         *mmath.MVec3       // ローカルスケール
 	MorphLocalScale    *mmath.MVec3       // モーフローカルスケール
 	PhysicsMatrix      *mmath.MMat4       // 物理結果行列
-	IkRotation         *mmath.MQuaternion // IK回転
 	Curves             *BoneCurves        // 補間曲線
 }
 
@@ -127,14 +126,6 @@ func (bf *BoneFrame) Add(v *BoneFrame) *BoneFrame {
 		}
 	}
 
-	if bf.IkRotation != nil || v.IkRotation != nil {
-		if bf.IkRotation == nil {
-			bf.IkRotation = v.IkRotation.Copy()
-		} else if v.IkRotation != nil {
-			bf.IkRotation.Mul(v.IkRotation)
-		}
-	}
-
 	return bf
 }
 
@@ -158,7 +149,6 @@ func (v *BoneFrame) Copy() IBaseFrame {
 		MorphScale:         nil,
 		LocalScale:         nil,
 		MorphLocalScale:    nil,
-		IkRotation:         nil,
 		Curves:             NewBoneCurves(),
 	}
 	if v.MorphPosition != nil {
@@ -191,9 +181,6 @@ func (v *BoneFrame) Copy() IBaseFrame {
 	if v.MorphLocalScale != nil {
 		copied.MorphLocalScale = v.MorphLocalScale.Copy()
 	}
-	if v.IkRotation != nil {
-		copied.IkRotation = v.IkRotation.Copy()
-	}
 	copied.Curves = v.Curves.Copy()
 
 	return copied
@@ -204,10 +191,7 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 
 	if prevBf == nil || nextBf.GetIndex() <= index {
 		// 前がないか、最後より後の場合、次のキーフレをコピーして返す
-		frame := nextBf.Copy().(*BoneFrame)
-		// 計算情報はクリア
-		frame.IkRotation = nil
-		return frame
+		return nextBf.Copy().(*BoneFrame)
 	}
 
 	bf := NewBoneFrame(index)
@@ -295,8 +279,6 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	bf.LocalPosition = &mmath.MVec3{nowX[1], nowY[1], nowZ[1]}
 	bf.Scale = &mmath.MVec3{nowX[2], nowY[2], nowZ[2]}
 	bf.LocalScale = &mmath.MVec3{nowX[3], nowY[3], nowZ[3]}
-
-	bf.IkRotation = nil
 
 	return bf
 }
