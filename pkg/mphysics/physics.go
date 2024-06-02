@@ -54,7 +54,7 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 		rigidBodyTransforms: make(map[int]mbt.BtTransform),
 	}
 	p.Spf = 1.0 / p.Fps
-	p.FixedTimeStep = p.Spf / float32(p.MaxSubSteps) / 2.0
+	p.FixedTimeStep = 1 / 60.0
 
 	p.VisibleRigidBody(false)
 	p.VisibleJoint(false)
