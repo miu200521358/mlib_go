@@ -477,6 +477,8 @@ func (r *VmdMotionReader) readIks(motion *VmdMotion) error {
 				return err
 			}
 			ik.Enabled = enabled == 1
+
+			v.IkList = append(v.IkList, ik)
 		}
 
 		motion.AppendIkFrame(v)
