@@ -62,7 +62,7 @@ func main() {
 	mWindow.AddGlWindow(glWindow)
 
 	// コンソールはタブ外に表示
-	mWindow.ConsoleView, err = mwidget.NewConsoleView(mWindow)
+	mWindow.ConsoleView, err = mwidget.NewConsoleView(mWindow, 256, 30)
 	mwidget.CheckError(err, mWindow, mi18n.T("コンソール生成エラー"))
 	log.SetOutput(mWindow.ConsoleView)
 
@@ -82,8 +82,7 @@ func getMenuItems() []declarative.MenuItem {
 func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
 	page := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, mi18n.T("ファイル"))
 
-	mainLayout := walk.NewVBoxLayout()
-	page.SetLayout(mainLayout)
+	page.SetLayout(walk.NewVBoxLayout())
 
 	pmxReadPicker, err := (mwidget.NewPmxReadFilePicker(
 		mWindow,

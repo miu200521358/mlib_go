@@ -26,7 +26,7 @@ const (
 	TEM_APPENDTEXT   = win.WM_USER + 6
 )
 
-func NewConsoleView(parent walk.Container) (*ConsoleView, error) {
+func NewConsoleView(parent walk.Container, minWidth int, minHeight int) (*ConsoleView, error) {
 	lc := make(chan string, 1024)
 	cv := &ConsoleView{logChan: lc}
 
@@ -44,6 +44,9 @@ func NewConsoleView(parent walk.Container) (*ConsoleView, error) {
 	if err != nil {
 		return nil, err
 	}
+	te.SetMinMaxSize(
+		walk.Size{Width: minWidth, Height: minHeight},
+		walk.Size{Width: minWidth * 100, Height: minHeight * 100})
 	cv.Console = te
 	cv.Console.SetReadOnly(true)
 	cv.Console.SendMessage(win.EM_SETLIMITTEXT, 4294967295, 0)

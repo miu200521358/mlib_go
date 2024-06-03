@@ -126,6 +126,27 @@ func NewVmdReadFilePicker(
 		OnPathChanged)
 }
 
+func NewVmdSaveFilePicker(
+	window *MWindow,
+	parent walk.Container,
+	title string,
+	tooltip string,
+	description string,
+	OnPathChanged func(string),
+) (*FilePicker, error) {
+	return NewFilePicker(
+		window,
+		parent,
+		"",
+		title,
+		tooltip,
+		description,
+		map[string]string{"*.vmd": "Vmd Files (*.vmd)", "*.*": "All Files (*.*)"},
+		0,
+		nil,
+		OnPathChanged)
+}
+
 func NewPmxSaveFilePicker(
 	window *MWindow,
 	parent walk.Container,
@@ -183,9 +204,7 @@ func NewFilePicker(
 	if err != nil {
 		return nil, err
 	}
-	titleLayout := walk.NewHBoxLayout()
-	titleLayout.SetMargins(MARGIN_SMALL)
-	titleComposite.SetLayout(titleLayout)
+	titleComposite.SetLayout(walk.NewHBoxLayout())
 
 	titleLabel, err := walk.NewTextLabel(titleComposite)
 	if err != nil {
@@ -226,9 +245,7 @@ func NewFilePicker(
 	if err != nil {
 		return nil, err
 	}
-	inputLayout := walk.NewHBoxLayout()
-	inputLayout.SetMargins(MARGIN_SMALL)
-	inputComposite.SetLayout(inputLayout)
+	inputComposite.SetLayout(walk.NewHBoxLayout())
 
 	picker.PathLineEdit, err = walk.NewLineEdit(inputComposite)
 	if err != nil {
@@ -506,6 +523,14 @@ func (f *FilePicker) SetEnabled(enable bool) {
 
 func (f *FilePicker) Enabled() bool {
 	return f.PathLineEdit.Enabled()
+}
+
+func (f *FilePicker) SetVisible(visible bool) {
+	f.PathLineEdit.SetVisible(visible)
+	f.openPushButton.SetVisible(visible)
+	if f.historyPushButton != nil {
+		f.historyPushButton.SetVisible(visible)
+	}
 }
 
 type filePickerLayoutItem struct {

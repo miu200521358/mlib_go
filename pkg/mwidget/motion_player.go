@@ -45,7 +45,6 @@ func NewMotionPlayer(parent walk.Container, mWindow *MWindow, resourceFiles embe
 		return nil, err
 	}
 	layout := walk.NewHBoxLayout()
-	layout.SetMargins(MARGIN_SMALL)
 	playerComposite.SetLayout(layout)
 
 	// 再生エリア
