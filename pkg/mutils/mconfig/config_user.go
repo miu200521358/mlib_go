@@ -6,9 +6,11 @@ import (
 	"path/filepath"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 const USER_CONFIG_FILE_NAME = "user_config.json"
+const USER_CONFIG_OLD_FILE_NAME = "history.json"
 
 const (
 	FRAME_DROP     = "FrameDrop"
@@ -74,12 +76,17 @@ func LoadUserConfig(key string) []string {
 func LoadUserConfigAll(key string) ([]string, map[string]interface{}) {
 	// Configファイルのフルパスを取得
 	configFilePath := filepath.Join(mutils.GetAppRootDir(), USER_CONFIG_FILE_NAME)
-	println("LoadConfig: ", key, configFilePath)
+	mlog.D("LoadConfig: %s: %s", key, configFilePath)
 
 	// Read the config.json file
 	data, err := os.ReadFile(configFilePath)
 	if err != nil {
-		data = []byte("{}")
+		// user_config.jsonがない場合、history.jsonを読み込む(次回以降はuser_config.jsonに保存される)
+		configFilePath = filepath.Join(mutils.GetAppRootDir(), USER_CONFIG_OLD_FILE_NAME)
+		data, err = os.ReadFile(configFilePath)
+		if err != nil {
+			data = []byte("{}")
+		}
 	}
 
 	// Unmarshal the JSON data into a map
