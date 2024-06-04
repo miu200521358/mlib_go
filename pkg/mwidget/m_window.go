@@ -378,31 +378,37 @@ func (w *MWindow) Center() {
 	// ウィンドウのサイズを取得
 	windowSize := w.Size()
 
-	glWindowSize := walk.Size{Width: 0, Height: 0}
-	if w.GetMainGlWindow() != nil {
-		glWindowSize = w.GetMainGlWindow().Size()
+	glWindowWidth := 0
+	glWindowHeight := 0
+	for _, glWindow := range w.GlWindows {
+		glWindowWidth += glWindow.Size().Width
+		glWindowHeight += glWindow.Size().Height
 	}
 
 	// ウィンドウを中央に配置
 	if w.isHorizontal {
-		centerX := (screenWidth - (windowSize.Width + glWindowSize.Width)) / 2
+		centerX := (screenWidth - (windowSize.Width + glWindowWidth)) / 2
 		centerY := (screenHeight - windowSize.Height) / 2
 
-		w.SetX(centerX + glWindowSize.Width)
+		centerX += glWindowWidth
+		w.SetX(centerX)
 		w.SetY(centerY)
 
-		if w.GetMainGlWindow() != nil {
-			w.GetMainGlWindow().SetPos(centerX, centerY)
+		for _, glWindow := range w.GlWindows {
+			centerX -= glWindow.Size().Width
+			glWindow.SetPos(centerX, centerY)
 		}
 	} else {
 		centerX := (screenWidth - windowSize.Width) / 2
-		centerY := (screenHeight - (windowSize.Height + glWindowSize.Height)) / 2
+		centerY := (screenHeight - (windowSize.Height + glWindowHeight)) / 2
 
+		centerY += windowSize.Height
 		w.SetX(centerX)
-		w.SetY(centerY + glWindowSize.Height)
+		w.SetY(centerY)
 
-		if w.GetMainGlWindow() != nil {
-			w.GetMainGlWindow().SetPos(centerX, centerY)
+		for _, glWindow := range w.GlWindows {
+			centerY -= glWindow.Size().Height
+			glWindow.SetPos(centerX, centerY)
 		}
 	}
 }
