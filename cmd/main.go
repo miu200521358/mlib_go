@@ -80,7 +80,7 @@ func getMenuItems() []declarative.MenuItem {
 }
 
 func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
-	page := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, mi18n.T("ファイル"))
+	page, _ := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, mi18n.T("ファイル"))
 
 	page.SetLayout(walk.NewVBoxLayout())
 
