@@ -52,7 +52,7 @@ func (r *PmxReader) ReadByFilepath(path string) (mcore.IHashModel, error) {
 	}
 
 	r.Close()
-	model.setUp()
+	model.setup()
 
 	return model, nil
 }

@@ -309,6 +309,16 @@ func (picker *FilePicker) GetData() (mcore.IHashModel, error) {
 	return data, nil
 }
 
+func (picker *FilePicker) SetCache(data mcore.IHashModel) {
+	if data == nil {
+		picker.PathLineEdit.SetText("")
+		return
+	}
+
+	picker.cacheData = data
+	picker.PathLineEdit.SetText(data.GetPath())
+}
+
 func (picker *FilePicker) IsCached() bool {
 	if isExist, err := mutils.ExistsFile(picker.PathLineEdit.Text()); err != nil || !isExist {
 		return false

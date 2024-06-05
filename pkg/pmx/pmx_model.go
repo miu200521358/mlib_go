@@ -67,7 +67,7 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 	pm.DisplaySlots.Append(d02)
 }
 
-func (pm *PmxModel) setUp() {
+func (pm *PmxModel) setup() {
 	// ボーン情報のセットアップ
 	pm.Bones.setup()
 
@@ -95,6 +95,7 @@ func (pm *PmxModel) setUp() {
 		}
 	}
 }
+
 func (m *PmxModel) Copy() mcore.IHashModel {
 	copied := NewPmxModel("")
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})

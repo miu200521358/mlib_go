@@ -458,14 +458,9 @@ func (w *GlWindow) Reset() {
 }
 
 func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
-	// OpenGLコンテキストをこのウィンドウに設定
-	w.MakeContextCurrent()
-	w.Reset()
-
-	pmxModel.InitDraw(w.WindowIndex, w.resourceFiles)
+	pmxModel.InitDraw(len(w.ModelSets), w.resourceFiles)
 	pmxModel.InitPhysics(w.Physics)
 	w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel, Motion: vmdMotion})
-	w.draw(0, 0)
 }
 
 func (w *GlWindow) ClearData() {
@@ -474,18 +469,6 @@ func (w *GlWindow) ClearData() {
 	}
 	w.ModelSets = make([]ModelSet, 0)
 	w.frame = 0
-}
-
-func (w *GlWindow) draw(frame int, elapsed float32) {
-	// 背景色をクリア
-	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-	// モデル描画
-	for _, modelSet := range w.ModelSets {
-		modelSet.draw(w.Physics, w.Shader, w.WindowIndex, frame, elapsed,
-			w.EnablePhysics, w.VisibleNormal, w.VisibleBones)
-	}
 }
 
 func (w *GlWindow) Size() walk.Size {
@@ -509,9 +492,14 @@ func (w *GlWindow) Run() {
 		}
 
 		// 深度バッファのクリア
+		gl.ClearColor(0.7, 0.7, 0.7, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		for _, program := range w.Shader.GetPrograms() {
+			if CheckOpenGLError() || w.ShouldClose() {
+				break
+			}
+
 			// プログラムの切り替え
 			gl.UseProgram(program)
 			// カメラの再計算
@@ -544,10 +532,14 @@ func (w *GlWindow) Run() {
 			elapsed = mmath.ClampFloat32(elapsed, 0, w.Physics.Spf)
 		}
 
+		if CheckOpenGLError() || w.ShouldClose() {
+			break
+		}
+
 		if w.playing {
 			// // 経過秒数をキーフレームの進捗具合に合わせて調整
 			// elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
-			w.frame += int(math.Round(float64(elapsed * w.Physics.Fps)))
+			w.frame += int(float64(elapsed * w.Physics.Fps))
 			mlog.V("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%d", previousTime, time, elapsed, w.frame)
 			if w.motionPlayer != nil {
 				w.motionPlayer.SetValue(w.frame)
@@ -560,12 +552,32 @@ func (w *GlWindow) Run() {
 		}
 
 		// 描画
-		w.draw(w.frame, elapsed)
+		for i, modelSet := range w.ModelSets {
+			if CheckOpenGLError() || w.ShouldClose() {
+				break
+			}
+
+			modelSet.draw(w.Physics, w.Shader, i, w.frame, elapsed,
+				w.EnablePhysics, w.VisibleNormal, w.VisibleBones)
+		}
 
 		// mlog.Memory(fmt.Sprintf("[%d] Run", w.frame))
 
+		if CheckOpenGLError() || w.ShouldClose() {
+			break
+		}
+
 		w.SwapBuffers()
+
+		if CheckOpenGLError() || w.ShouldClose() {
+			break
+		}
+
 		glfw.PollEvents()
+
+		if CheckOpenGLError() || w.ShouldClose() {
+			break
+		}
 
 		// if w.frame >= 5000 {
 		// 	break

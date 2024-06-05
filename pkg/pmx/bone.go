@@ -514,7 +514,8 @@ func (b *Bones) setup() {
 	}
 
 	// 関連ボーンINDEX情報を設定
-	for _, bone := range b.GetSortedData() {
+	for i := range len(b.Data) {
+		bone := b.Get(i)
 		if strings.HasPrefix(bone.Name, "左") {
 			bone.AxisSign = -1
 		}
