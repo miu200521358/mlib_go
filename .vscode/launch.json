@@ -17,12 +17,19 @@
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/.vscode/scripts/build_exe.py",
-      "args": [
-        "--env",
-        "dev",
-      ],
       "env": {
         "WORKSPACE_FOLDER": "${workspaceFolder}",
+        "ENV": "dev"
+      },
+    },
+    {
+      "name": "[prod] Build",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/.vscode/scripts/build_exe.py",
+      "env": {
+        "WORKSPACE_FOLDER": "${workspaceFolder}",
+        "ENV": "prod"
       },
     }
   ]

@@ -70,11 +70,11 @@ var InitialBoneCurves = []byte{
 }
 
 type BoneCurves struct {
-	TranslateX mmath.Curve // 移動X
-	TranslateY mmath.Curve // 移動Y
-	TranslateZ mmath.Curve // 移動Z
-	Rotate     mmath.Curve // 回転
-	Values     []byte      // 補間曲線の値
+	TranslateX *mmath.Curve // 移動X
+	TranslateY *mmath.Curve // 移動Y
+	TranslateZ *mmath.Curve // 移動Z
+	Rotate     *mmath.Curve // 回転
+	Values     []byte       // 補間曲線の値
 }
 
 func NewBoneCurves() *BoneCurves {
@@ -154,28 +154,12 @@ func NewBoneCurves() *BoneCurves {
 
 func NewBoneCurvesByValues(values []byte) *BoneCurves {
 	curves := &BoneCurves{
-		TranslateX: mmath.NewCurve(),
-		TranslateY: mmath.NewCurve(),
-		TranslateZ: mmath.NewCurve(),
-		Rotate:     mmath.NewCurve(),
+		TranslateX: mmath.NewCurveByValues(values[0], values[4], values[8], values[12]),
+		TranslateY: mmath.NewCurveByValues(values[16], values[20], values[24], values[28]),
+		TranslateZ: mmath.NewCurveByValues(values[32], values[36], values[40], values[44]),
+		Rotate:     mmath.NewCurveByValues(values[48], values[52], values[56], values[60]),
 		Values:     values,
 	}
-	curves.TranslateX.Start.SetX(float64(values[0]))
-	curves.TranslateX.Start.SetY(float64(values[4]))
-	curves.TranslateX.End.SetX(float64(values[8]))
-	curves.TranslateX.End.SetY(float64(values[12]))
-	curves.TranslateY.Start.SetX(float64(values[16]))
-	curves.TranslateY.Start.SetY(float64(values[20]))
-	curves.TranslateY.End.SetX(float64(values[24]))
-	curves.TranslateY.End.SetY(float64(values[28]))
-	curves.TranslateZ.Start.SetX(float64(values[32]))
-	curves.TranslateZ.Start.SetY(float64(values[36]))
-	curves.TranslateZ.End.SetX(float64(values[40]))
-	curves.TranslateZ.End.SetY(float64(values[44]))
-	curves.Rotate.Start.SetX(float64(values[48]))
-	curves.Rotate.Start.SetY(float64(values[52]))
-	curves.Rotate.End.SetX(float64(values[56]))
-	curves.Rotate.End.SetY(float64(values[60]))
 
 	return curves
 }

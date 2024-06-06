@@ -16,15 +16,31 @@ const (
 	CURVE_MAX = 127.0
 )
 
-func NewCurve() Curve {
-	return Curve{
+var LINER_CURVE = &Curve{
+	Start: MVec2{20.0, 20.0},
+	End:   MVec2{107.0, 107.0},
+}
+
+func NewCurve() *Curve {
+	return &Curve{
 		Start: MVec2{20.0, 20.0},
 		End:   MVec2{107.0, 107.0},
 	}
 }
 
+func NewCurveByValues(startX, startY, endX, endY byte) *Curve {
+	if startX == 20 && startY == 20 && endX == 107 && endY == 107 {
+		return LINER_CURVE
+	}
+
+	return &Curve{
+		Start: MVec2{float64(startX), float64(startY)},
+		End:   MVec2{float64(endX), float64(endY)},
+	}
+}
+
 // Copy
-func (v *Curve) Copy() Curve {
+func (v *Curve) Copy() *Curve {
 	copied := NewCurve()
 	copied.Start.SetX(v.Start.GetX())
 	copied.Start.SetY(v.Start.GetY())
@@ -71,7 +87,7 @@ func (v *Curve) Normalize(begin, finish *MVec2) {
 // https://edvakf.hatenadiary.org/entry/20111016/1318716097
 // Evaluate 補間曲線を求めます。
 // return x（計算キーフレ時点のX値）, y（計算キーフレ時点のY値）, t（計算キーフレまでの変化量）
-func Evaluate(curve Curve, start, now, end int) (float64, float64, float64) {
+func Evaluate(curve *Curve, start, now, end int) (float64, float64, float64) {
 	if (now-start) == 0.0 || (end-start) == 0.0 {
 		return 0.0, 0.0, 0.0
 	}
@@ -131,7 +147,7 @@ func newton(x1, x2, x, t0, eps, err float64) float64 {
 }
 
 // SplitCurve 補間曲線を指定キーフレで前後に分割する
-func SplitCurve(curve Curve, start, now, end int) (Curve, Curve) {
+func SplitCurve(curve *Curve, start, now, end int) (*Curve, *Curve) {
 	if (now-start) == 0 || (end-start) == 0 {
 		return NewCurve(), NewCurve()
 	}
@@ -168,13 +184,13 @@ func SplitCurve(curve Curve, start, now, end int) (Curve, Curve) {
 	iJ := iHt1.Added(iIt2)
 
 	// 新たな4つのベジェ曲線の制御点は、A側がAEHJ、C側がJIGDとなる。
-	startCurve := Curve{
+	startCurve := &Curve{
 		Start: *iE,
 		End:   *iH,
 	}
 	startCurve.Normalize(iA, iJ)
 
-	endCurve := Curve{
+	endCurve := &Curve{
 		Start: *iI,
 		End:   *iG,
 	}
@@ -207,7 +223,7 @@ func Bezier(t float64, p0, p1, p2, p3 *MVec2) *MVec2 {
 
 // NewCurveFromValues calculates the control points of a cubic Bezier curve
 // that best fits a given set of y-values.
-func NewCurveFromValues(values []float64) Curve {
+func NewCurveFromValues(values []float64) *Curve {
 	n := len(values)
 	if n <= 2 {
 		return NewCurve()
@@ -268,7 +284,7 @@ func NewCurveFromValues(values []float64) Curve {
 	}
 
 	// Update p1 and p2 with optimized values
-	c := Curve{
+	c := &Curve{
 		Start: MVec2{result.X[0], result.X[1]},
 		End:   MVec2{result.X[2], result.X[3]},
 	}

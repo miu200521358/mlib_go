@@ -20,6 +20,9 @@ app_version = config_dict.get('Version')
 print(f"app_name: {app_name}")
 print(f"app_version: {app_version}")
 
+all_rebuild = "" if os.environ.get('ENV') == 'dev' else "-a"
+env_name = "dev" if os.environ.get('ENV') == 'dev' else "prod"
+
 # Build command
 # -o 出力フォルダ
 # -trimpath ビルドパスを削除
@@ -31,7 +34,7 @@ print(f"app_version: {app_version}")
 # -gcflags "all=-N -l" デバッグ情報を削除
 # -linkmode external -extldflags '-static -Wl,resources/app.res' リソースを埋め込む
 build_command = f"go build -o {workspace_folder}/build/{app_name}_{app_version}.exe -trimpath " \
-                f"-v -a -buildmode=exe -ldflags \"-s -w -H=windowsgui -X main.env=prod " \
+                f"-v {all_rebuild} -buildmode=exe -ldflags \"-s -w -H=windowsgui -X main.env={env_name} " \
                 f"-linkmode external -extldflags '-static -Wl,{workspace_folder}/resources/app.res'\" " \
                 f"{workspace_folder}/cmd/main.go"
 

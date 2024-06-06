@@ -579,9 +579,9 @@ func (w *GlWindow) Run() {
 			break
 		}
 
-		// if w.frame >= 100 {
-		// 	break
-		// }
+		if w.frame >= 1000 {
+			break
+		}
 	}
 	if !CheckOpenGLError() && w.ShouldClose() {
 		w.Close(w.Window)

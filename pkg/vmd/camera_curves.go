@@ -3,13 +3,13 @@ package vmd
 import "github.com/miu200521358/mlib_go/pkg/mmath"
 
 type CameraCurves struct {
-	TranslateX  mmath.Curve // 移動X
-	TranslateY  mmath.Curve // 移動Y
-	TranslateZ  mmath.Curve // 移動Z
-	Rotate      mmath.Curve // 回転
-	Distance    mmath.Curve // 距離
-	ViewOfAngle mmath.Curve // 視野角
-	values      []byte      // 補間曲線の値
+	TranslateX  *mmath.Curve // 移動X
+	TranslateY  *mmath.Curve // 移動Y
+	TranslateZ  *mmath.Curve // 移動Z
+	Rotate      *mmath.Curve // 回転
+	Distance    *mmath.Curve // 距離
+	ViewOfAngle *mmath.Curve // 視野角
+	values      []byte       // 補間曲線の値
 }
 
 func NewCameraCurves() *CameraCurves {
@@ -50,32 +50,40 @@ func NewCameraCurves() *CameraCurves {
 }
 
 func NewCameraCurvesByValues(values []byte) *CameraCurves {
-	curves := NewCameraCurves()
-	curves.values = values
-	curves.TranslateX.Start.SetX(float64(values[0]))
-	curves.TranslateY.Start.SetX(float64(values[1]))
-	curves.TranslateZ.Start.SetX(float64(values[2]))
-	curves.Rotate.Start.SetX(float64(values[3]))
-	curves.Distance.Start.SetX(float64(values[4]))
-	curves.ViewOfAngle.Start.SetX(float64(values[5]))
-	curves.TranslateX.Start.SetY(float64(values[6]))
-	curves.TranslateY.Start.SetY(float64(values[7]))
-	curves.TranslateZ.Start.SetY(float64(values[8]))
-	curves.Rotate.Start.SetY(float64(values[9]))
-	curves.Distance.Start.SetY(float64(values[10]))
-	curves.ViewOfAngle.Start.SetY(float64(values[11]))
-	curves.TranslateX.End.SetX(float64(values[12]))
-	curves.TranslateY.End.SetX(float64(values[13]))
-	curves.TranslateZ.End.SetX(float64(values[14]))
-	curves.Rotate.End.SetX(float64(values[15]))
-	curves.Distance.End.SetX(float64(values[16]))
-	curves.ViewOfAngle.End.SetX(float64(values[17]))
-	curves.TranslateX.End.SetY(float64(values[18]))
-	curves.TranslateY.End.SetY(float64(values[19]))
-	curves.TranslateZ.End.SetY(float64(values[20]))
-	curves.Rotate.End.SetY(float64(values[21]))
-	curves.Distance.End.SetY(float64(values[22]))
-	curves.ViewOfAngle.End.SetY(float64(values[23]))
+	curves := &CameraCurves{
+		TranslateX:  mmath.NewCurveByValues(values[0], values[6], values[12], values[18]),  // 移動X
+		TranslateY:  mmath.NewCurveByValues(values[1], values[7], values[13], values[19]),  // 移動Y
+		TranslateZ:  mmath.NewCurveByValues(values[2], values[8], values[14], values[20]),  // 移動Z
+		Rotate:      mmath.NewCurveByValues(values[3], values[9], values[15], values[21]),  // 回転
+		Distance:    mmath.NewCurveByValues(values[4], values[10], values[16], values[22]), // 距離
+		ViewOfAngle: mmath.NewCurveByValues(values[5], values[11], values[17], values[23]), // 視野角
+		values:      values,
+	}
+	// curves.values = values
+	// curves.TranslateX.Start.SetX(float64(values[0]))
+	// curves.TranslateY.Start.SetX(float64(values[1]))
+	// curves.TranslateZ.Start.SetX(float64(values[2]))
+	// curves.Rotate.Start.SetX(float64(values[3]))
+	// curves.Distance.Start.SetX(float64(values[4]))
+	// curves.ViewOfAngle.Start.SetX(float64(values[5]))
+	// curves.TranslateX.Start.SetY(float64(values[6]))
+	// curves.TranslateY.Start.SetY(float64(values[7]))
+	// curves.TranslateZ.Start.SetY(float64(values[8]))
+	// curves.Rotate.Start.SetY(float64(values[9]))
+	// curves.Distance.Start.SetY(float64(values[10]))
+	// curves.ViewOfAngle.Start.SetY(float64(values[11]))
+	// curves.TranslateX.End.SetX(float64(values[12]))
+	// curves.TranslateY.End.SetX(float64(values[13]))
+	// curves.TranslateZ.End.SetX(float64(values[14]))
+	// curves.Rotate.End.SetX(float64(values[15]))
+	// curves.Distance.End.SetX(float64(values[16]))
+	// curves.ViewOfAngle.End.SetX(float64(values[17]))
+	// curves.TranslateX.End.SetY(float64(values[18]))
+	// curves.TranslateY.End.SetY(float64(values[19]))
+	// curves.TranslateZ.End.SetY(float64(values[20]))
+	// curves.Rotate.End.SetY(float64(values[21]))
+	// curves.Distance.End.SetY(float64(values[22]))
+	// curves.ViewOfAngle.End.SetY(float64(values[23]))
 	return curves
 }
 
