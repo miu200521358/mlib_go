@@ -36,6 +36,7 @@ type FilePicker struct {
 	initialDirPath    string                // 初期ディレクトリ
 	cacheData         mcore.IHashModel      // キャッシュデータ
 	window            *MWindow              // MWindow
+	historyDialog     *walk.Dialog          // 履歴ダイアログ
 }
 
 func NewPmxReadFilePicker(
@@ -277,6 +278,11 @@ func NewFilePicker(
 		}
 		picker.historyPushButton.SetToolTipText(tooltip)
 		picker.historyPushButton.SetText(mi18n.T("履歴"))
+		picker.historyDialog, err = picker.createHistoryDialog()
+		if err != nil {
+			return nil, err
+		}
+
 		picker.historyPushButton.Clicked().Attach(picker.onClickHistoryButton())
 	}
 
@@ -364,89 +370,91 @@ func (picker *FilePicker) OnChanged(path string) {
 
 func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 	return func() {
-		// 履歴リストを取得
-		choices := mconfig.LoadUserConfig(picker.historyKey)
-
-		// 履歴ダイアログを開く
-		dlg, err := walk.NewDialog(picker.Form())
-		if err != nil {
-			walk.MsgBox(nil, mi18n.T("履歴ダイアログ生成エラー"), err.Error(), walk.MsgBoxIconError)
-			return
-		}
-		defer dlg.Dispose()
-		dlg.SetTitle(mi18n.T("履歴ダイアログタイトル", map[string]interface{}{"Title": picker.title}))
-		dlg.SetLayout(walk.NewVBoxLayout())
-		dlg.SetSize(walk.Size{Width: 800, Height: 400})
-
-		// 履歴リストを表示
-		historyListBox, err := walk.NewListBox(dlg)
-		if err != nil {
-			walk.MsgBox(nil, mi18n.T("履歴リスト生成エラー"), err.Error(), walk.MsgBoxIconError)
-			return
-		}
-
-		// OKボタンの動作を定義する関数
-		itemActivated := func() {
-			// 選択されたアイテムを取得
-			index := historyListBox.CurrentIndex()
-			if index < 0 {
-				return
-			}
-			item := choices[index]
-			// パスを入力欄に設定
-			picker.PathLineEdit.SetText(item)
-		}
-
-		historyListBox.SetModel(choices)
-		historyListBox.SetMinMaxSize(walk.Size{Width: 800, Height: 400}, walk.Size{Width: 800, Height: 400})
-		// 先頭を表示する（選択はできない）
-		historyListBox.SetCurrentIndex(-1)
-
-		// ダブルクリック時の動作を定義
-		historyListBox.ItemActivated().Attach(func() {
-			itemActivated()
-			dlg.Accept()
-			// コールバックを呼び出し
-			picker.OnChanged(picker.PathLineEdit.Text())
-		})
-
-		// ボタンBox
-		buttonComposite, err := walk.NewComposite(dlg)
-		if err != nil {
-			walk.MsgBox(nil, mi18n.T("ボタンBox生成エラー"), err.Error(), walk.MsgBoxIconError)
-			return
-		}
-		buttonComposite.SetLayout(walk.NewHBoxLayout())
-
-		// OKボタン
-		okButton, err := walk.NewPushButton(buttonComposite)
-		if err != nil {
-			walk.MsgBox(nil, mi18n.T("OKボタン生成エラー"), err.Error(), walk.MsgBoxIconError)
-			return
-		}
-		okButton.SetText("OK")
-		okButton.Clicked().Attach(func() {
-			itemActivated()
-			dlg.Accept()
-			// コールバックを呼び出し
-			picker.OnChanged(picker.PathLineEdit.Text())
-		})
-
-		// Cancel ボタン
-		cancelButton, err := walk.NewPushButton(buttonComposite)
-		if err != nil {
-			walk.MsgBox(nil, mi18n.T("Cancelボタン生成エラー"), err.Error(), walk.MsgBoxIconError)
-			return
-		}
-		cancelButton.SetText("Cancel")
-		cancelButton.Clicked().Attach(func() {
-			// ダイアログを閉じる
-			dlg.Cancel()
-		})
-
-		// ダイアログを表示
-		dlg.Run()
+		picker.historyDialog.Run()
 	}
+}
+
+func (picker *FilePicker) createHistoryDialog() (*walk.Dialog, error) {
+	// 履歴リストを取得
+	choices := mconfig.LoadUserConfig(picker.historyKey)
+
+	// 履歴ダイアログを開く
+	dlg, err := walk.NewDialog(picker.Form())
+	if err != nil {
+		walk.MsgBox(nil, mi18n.T("履歴ダイアログ生成エラー"), err.Error(), walk.MsgBoxIconError)
+		return nil, err
+	}
+	dlg.SetTitle(mi18n.T("履歴ダイアログタイトル", map[string]interface{}{"Title": picker.title}))
+	dlg.SetLayout(walk.NewVBoxLayout())
+	dlg.SetSize(walk.Size{Width: 800, Height: 400})
+
+	// 履歴リストを表示
+	historyListBox, err := walk.NewListBox(dlg)
+	if err != nil {
+		walk.MsgBox(nil, mi18n.T("履歴リスト生成エラー"), err.Error(), walk.MsgBoxIconError)
+		return nil, err
+	}
+
+	// OKボタンの動作を定義する関数
+	itemActivated := func() {
+		// 選択されたアイテムを取得
+		index := historyListBox.CurrentIndex()
+		if index < 0 {
+			return
+		}
+		item := choices[index]
+		// パスを入力欄に設定
+		picker.PathLineEdit.SetText(item)
+	}
+
+	historyListBox.SetModel(choices)
+	historyListBox.SetMinMaxSize(walk.Size{Width: 800, Height: 400}, walk.Size{Width: 800, Height: 400})
+	// 先頭を表示する（選択はできない）
+	historyListBox.SetCurrentIndex(-1)
+
+	// ダブルクリック時の動作を定義
+	historyListBox.ItemActivated().Attach(func() {
+		itemActivated()
+		dlg.Accept()
+		// コールバックを呼び出し
+		picker.OnChanged(picker.PathLineEdit.Text())
+	})
+
+	// ボタンBox
+	buttonComposite, err := walk.NewComposite(dlg)
+	if err != nil {
+		walk.MsgBox(nil, mi18n.T("ボタンBox生成エラー"), err.Error(), walk.MsgBoxIconError)
+		return nil, err
+	}
+	buttonComposite.SetLayout(walk.NewHBoxLayout())
+
+	// OKボタン
+	okButton, err := walk.NewPushButton(buttonComposite)
+	if err != nil {
+		walk.MsgBox(nil, mi18n.T("OKボタン生成エラー"), err.Error(), walk.MsgBoxIconError)
+		return nil, err
+	}
+	okButton.SetText("OK")
+	okButton.Clicked().Attach(func() {
+		itemActivated()
+		dlg.Accept()
+		// コールバックを呼び出し
+		picker.OnChanged(picker.PathLineEdit.Text())
+	})
+
+	// Cancel ボタン
+	cancelButton, err := walk.NewPushButton(buttonComposite)
+	if err != nil {
+		walk.MsgBox(nil, mi18n.T("Cancelボタン生成エラー"), err.Error(), walk.MsgBoxIconError)
+		return nil, err
+	}
+	cancelButton.SetText("Cancel")
+	cancelButton.Clicked().Attach(func() {
+		// ダイアログを閉じる
+		dlg.Cancel()
+	})
+
+	return dlg, nil
 }
 
 func (picker *FilePicker) onClickOpenButton() walk.EventHandler {
