@@ -579,7 +579,7 @@ func (w *GlWindow) Run() {
 			break
 		}
 
-		// if w.frame >= 5000 {
+		// if w.frame >= 100 {
 		// 	break
 		// }
 	}

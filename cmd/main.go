@@ -38,7 +38,7 @@ func init() {
 var resourceFiles embed.FS
 
 func main() {
-	// defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
+	// defer profile.Start(profile.MemProfile, profile.ProfilePath(time.Now().Format("20060102_150405"))).Stop()
 	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
 
 	var mWindow *mwidget.MWindow

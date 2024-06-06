@@ -228,3 +228,7 @@ MlibSample 1.0.0_beta_52
 
 MlibSample 1.0.0_beta_53
 ・SwapBuffers、PollEventsの前後にもshouldcloseチェック追加
+
+MlibSample 1.0.0_beta_54
+・walkのメモリリーク改善
+　・boxLayout生成時にmapに使わないオブジェクトをkey-valueのvalueに入れていたので、struct{}に変更

@@ -413,6 +413,13 @@ func (w *MWindow) Center() {
 	}
 }
 
+func (w *MWindow) Dispose() {
+	for _, glWindow := range w.GlWindows {
+		glWindow.Close(glWindow.Window)
+	}
+	w.MainWindow.Dispose()
+}
+
 const (
 	SM_CXSCREEN = 0
 	SM_CYSCREEN = 1

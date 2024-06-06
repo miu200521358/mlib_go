@@ -27,7 +27,7 @@ const (
 )
 
 func NewConsoleView(parent walk.Container, minWidth int, minHeight int) (*ConsoleView, error) {
-	lc := make(chan string, 1024)
+	lc := make(chan string, 512)
 	cv := &ConsoleView{logChan: lc}
 
 	if err := walk.InitWidget(

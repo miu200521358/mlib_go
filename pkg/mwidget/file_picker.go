@@ -373,6 +373,7 @@ func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 			walk.MsgBox(nil, mi18n.T("履歴ダイアログ生成エラー"), err.Error(), walk.MsgBoxIconError)
 			return
 		}
+		defer dlg.Dispose()
 		dlg.SetTitle(mi18n.T("履歴ダイアログタイトル", map[string]interface{}{"Title": picker.title}))
 		dlg.SetLayout(walk.NewVBoxLayout())
 		dlg.SetSize(walk.Size{Width: 800, Height: 400})
@@ -541,6 +542,15 @@ func (f *FilePicker) SetVisible(visible bool) {
 	if f.historyPushButton != nil {
 		f.historyPushButton.SetVisible(visible)
 	}
+}
+
+func (f *FilePicker) Dispose() {
+	f.PathLineEdit.Dispose()
+	f.openPushButton.Dispose()
+	if f.historyPushButton != nil {
+		f.historyPushButton.Dispose()
+	}
+	f.WidgetBase.Dispose()
 }
 
 type filePickerLayoutItem struct {
