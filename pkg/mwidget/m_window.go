@@ -262,10 +262,6 @@ func NewMWindow(
 	CheckError(err, mainWindow, mi18n.T("背景色生成エラー"))
 	mainWindow.SetBackground(bg)
 
-	mainWindow.MainWindow.MouseMove().Attach(func(x, y int, button walk.MouseButton) {
-		mlog.Memory(fmt.Sprintf("MouseMove x: %d, y: %d", x, y))
-	})
-
 	return mainWindow, nil
 }
 

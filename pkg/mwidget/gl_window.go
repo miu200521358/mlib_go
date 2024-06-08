@@ -491,20 +491,14 @@ func (w *GlWindow) Run() {
 			w.motionPlayer.SetValue(w.frame)
 		}
 
-		// mlog.Memory("GL.Run[1]")
-
 		// 深度バッファのクリア
 		gl.ClearColor(0.7, 0.7, 0.7, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-		// mlog.Memory("GL.Run[2]")
 
 		for _, program := range w.Shader.GetPrograms() {
 			if CheckOpenGLError() || w.ShouldClose() {
 				break
 			}
-
-			// mlog.Memory("GL.Run[3.1]")
 
 			// プログラムの切り替え
 			gl.UseProgram(program)
@@ -518,24 +512,16 @@ func (w *GlWindow) Run() {
 			projectionUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_MODEL_VIEW_PROJECTION_MATRIX))
 			gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
-			// mlog.Memory("GL.Run[3.2]")
-
 			// カメラの位置
 			cameraPosition := w.Shader.CameraPosition.GL()
 			cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_CAMERA_POSITION))
 			gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
-
-			// mlog.Memory("GL.Run[3.3]")
 
 			// カメラの中心
 			lookAtCenter := w.Shader.LookAtCenterPosition.GL()
 			camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 			cameraUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_MODEL_VIEW_MATRIX))
 			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
-
-			// mlog.Memory("GL.Run[3.4]")
-
-			gl.UseProgram(0)
 		}
 
 		time := glfw.GetTime()
@@ -565,8 +551,6 @@ func (w *GlWindow) Run() {
 			previousTime = time
 		}
 
-		// mlog.Memory("GL.Run[4]")
-
 		// 描画
 		for i, modelSet := range w.ModelSets {
 			if CheckOpenGLError() || w.ShouldClose() {
@@ -583,15 +567,11 @@ func (w *GlWindow) Run() {
 			break
 		}
 
-		// mlog.Memory("GL.Run[5]")
-
 		w.SwapBuffers()
 
 		if CheckOpenGLError() || w.ShouldClose() {
 			break
 		}
-
-		// mlog.Memory("GL.Run[6]")
 
 		glfw.PollEvents()
 
@@ -602,9 +582,9 @@ func (w *GlWindow) Run() {
 		// // GCを強制的に実行
 		// runtime.GC()
 
-		// if w.playing && w.frame >= 1000 {
-		// 	break
-		// }
+		if w.playing && w.frame >= 100 {
+			break
+		}
 	}
 	if !CheckOpenGLError() && w.ShouldClose() {
 		w.Close(w.Window)
