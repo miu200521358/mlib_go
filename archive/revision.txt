@@ -232,3 +232,8 @@ MlibSample 1.0.0_beta_53
 MlibSample 1.0.0_beta_54
 ・walkのメモリリーク改善
 　・boxLayout生成時にmapに使わないオブジェクトをkey-valueのvalueに入れていたので、struct{}に変更
+　・マップのキーをオブジェクト全体ではなく、小さなキーで持つように変更
+　・使い終わったら明示的にnil設定
+・Bulletの結果を受け取る btTransform を使い終わったらDeleteするよう修正
+・使い終わったら明示的にnil設定
+
