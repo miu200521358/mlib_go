@@ -14,6 +14,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
@@ -212,9 +213,9 @@ func NewFilePicker(
 	}
 	titleLabel.SetText(title)
 	titleLabel.SetToolTipText(tooltip)
-	// titleLabel.MouseDown().Attach(func(x, y int, button walk.MouseButton) {
-	// 	mlog.IL(description)
-	// })
+	titleLabel.MouseDown().Attach(func(x, y int, button walk.MouseButton) {
+		mlog.IL(description)
+	})
 
 	if historyKey != "" {
 		startBracketLabel, err := walk.NewTextLabel(titleComposite)

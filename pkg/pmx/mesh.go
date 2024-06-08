@@ -57,14 +57,11 @@ func (m *Mesh) drawModel(
 		// 片面描画
 		// カリングON
 		gl.Enable(gl.CULL_FACE)
-		defer gl.Disable(gl.CULL_FACE)
-
 		gl.CullFace(gl.BACK)
 	}
 
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.ModelProgram)
-	defer UnbindBoneMatrixes()
 
 	// ------------------
 	// 材質色設定
@@ -146,6 +143,8 @@ func (m *Mesh) drawModel(
 		gl.UNSIGNED_INT,
 		nil,
 	)
+
+	UnbindBoneMatrixes()
 }
 
 func (m *Mesh) drawEdge(
@@ -156,13 +155,10 @@ func (m *Mesh) drawEdge(
 	materialDelta *Material,
 ) {
 	gl.Enable(gl.CULL_FACE)
-	defer gl.Disable(gl.CULL_FACE)
-
 	gl.CullFace(gl.FRONT)
 
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.EdgeProgram)
-	defer UnbindBoneMatrixes()
 
 	// ------------------
 	// エッジ色設定
@@ -181,6 +177,8 @@ func (m *Mesh) drawEdge(
 		gl.UNSIGNED_INT,
 		nil,
 	)
+
+	UnbindBoneMatrixes()
 }
 
 func (m *Mesh) delete() {

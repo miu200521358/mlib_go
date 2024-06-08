@@ -199,24 +199,15 @@ func (m *Meshes) Draw(
 	// 隠面消去
 	// https://learnopengl.com/Advanced-OpenGL/Depth-testing
 	gl.Enable(gl.DEPTH_TEST)
-	defer gl.Disable(gl.DEPTH_TEST)
-
 	gl.DepthFunc(gl.LEQUAL)
 
 	// ブレンディングを有効にする
 	gl.Enable(gl.BLEND)
-	defer gl.Disable(gl.BLEND)
-
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	shader.Msaa.Bind()
-	defer shader.Msaa.Unbind()
-
 	m.vao.Bind()
-	defer m.vao.Unbind()
-
 	m.vbo.BindVertex(m.vertices, vertexDeltas)
-	defer m.vbo.Unbind()
 
 	paddedMatrixes, matrixWidth, matrixHeight := m.createBoneMatrixes(boneDeltas)
 
@@ -237,6 +228,9 @@ func (m *Meshes) Draw(
 		mesh.ibo.Unbind()
 	}
 
+	m.vbo.Unbind()
+	m.vao.Unbind()
+
 	if isDrawNormal {
 		m.drawNormal(shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
 	}
@@ -252,6 +246,11 @@ func (m *Meshes) Draw(
 	if isDrawBone {
 		m.drawBone(shader, bones, isDrawBones, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
 	}
+
+	shader.Msaa.Unbind()
+
+	gl.Disable(gl.BLEND)
+	gl.Disable(gl.DEPTH_TEST)
 }
 
 func (m *Meshes) createBoneMatrixes(matrixes []mgl32.Mat4) ([]float32, int, int) {
