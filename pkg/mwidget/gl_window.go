@@ -625,11 +625,8 @@ func (w *GlWindow) Run() {
 		// 	break
 		// }
 	}
-	if !CheckOpenGLError() && w.ShouldClose() {
-		w.Close(w.Window)
-	}
 	if w.WindowIndex == 0 {
-		walk.App().Exit(0)
+		defer walk.App().Exit(0)
 	}
 }
 
