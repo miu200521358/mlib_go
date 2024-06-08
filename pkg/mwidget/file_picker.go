@@ -370,7 +370,13 @@ func (picker *FilePicker) OnChanged(path string) {
 
 func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 	return func() {
-		picker.historyDialog.Run()
+		if dlg, err := picker.createHistoryDialog(); dlg != nil && err == nil {
+			if ok := dlg.Run(); ok == walk.DlgCmdOK {
+				// コールバックを呼び出し
+				picker.OnChanged(picker.PathLineEdit.Text())
+			}
+			dlg.Dispose()
+		}
 	}
 }
 
@@ -416,8 +422,6 @@ func (picker *FilePicker) createHistoryDialog() (*walk.Dialog, error) {
 	historyListBox.ItemActivated().Attach(func() {
 		itemActivated()
 		dlg.Accept()
-		// コールバックを呼び出し
-		picker.OnChanged(picker.PathLineEdit.Text())
 	})
 
 	// ボタンBox
@@ -438,8 +442,6 @@ func (picker *FilePicker) createHistoryDialog() (*walk.Dialog, error) {
 	okButton.Clicked().Attach(func() {
 		itemActivated()
 		dlg.Accept()
-		// コールバックを呼び出し
-		picker.OnChanged(picker.PathLineEdit.Text())
 	})
 
 	// Cancel ボタン
