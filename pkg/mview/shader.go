@@ -286,6 +286,8 @@ func (s *MShader) initialize(program uint32) {
 	gl.GenTextures(1, &s.BoneTextureId)
 
 	s.Fit(int(s.Width), int(s.Height))
+
+	gl.UseProgram(0)
 }
 
 func (s *MShader) Fit(
