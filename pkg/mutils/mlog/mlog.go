@@ -11,6 +11,7 @@ const (
 	VERBOSE    = 0
 	IK_VERBOSE = 1
 	VERBOSE2   = 2
+	VERBOSE9   = 9
 	DEBUG      = 10
 	INFO       = 20
 	WARN       = 30
@@ -32,6 +33,10 @@ func IsVerbose2() bool {
 
 func IsIkVerbose() bool {
 	return level == IK_VERBOSE
+}
+
+func IsVerbose9() bool {
+	return level < DEBUG
 }
 
 func IsDebug() bool {
