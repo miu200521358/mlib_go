@@ -7,7 +7,6 @@ import (
 	"embed"
 	"image"
 	"math"
-	"runtime"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -26,21 +25,9 @@ import (
 )
 
 type ModelSet struct {
-	Model  *pmx.PmxModel
-	Motion *vmd.VmdMotion
-}
-
-func (ms *ModelSet) draw(
-	modelPhysics *mphysics.MPhysics,
-	shader *mview.MShader,
-	windowIndex int,
-	frame int,
-	elapsed float32,
-	enablePhysics bool,
-	isDrawNormal bool,
-	isDrawBones map[pmx.BoneFlag]bool,
-) {
-	draw(modelPhysics, ms.Model, ms.Motion, shader, windowIndex, frame, elapsed, enablePhysics, isDrawNormal, isDrawBones)
+	model      *pmx.PmxModel
+	motion     *vmd.VmdMotion
+	prevDeltas *vmd.VmdDeltas
 }
 
 // 直角の定数値
@@ -67,8 +54,10 @@ type GlWindow struct {
 	VisibleNormal       bool
 	EnablePhysics       bool
 	EnableFrameDrop     bool
-	frame               int
+	frame               float64
 	motionPlayer        *MotionPlayer
+	width               int
+	height              int
 }
 
 func NewGlWindow(
@@ -173,6 +162,8 @@ func NewGlWindow(
 		EnableFrameDrop:     true,  // 最初はドロップON
 		frame:               0,
 		motionPlayer:        motionPlayer,
+		width:               width,
+		height:              height,
 	}
 
 	w.SetScrollCallback(glWindow.handleScrollEvent)
@@ -181,8 +172,17 @@ func NewGlWindow(
 	w.SetKeyCallback(glWindow.handleKeyEvent)
 	w.SetCloseCallback(glWindow.Close)
 	w.SetSizeCallback(glWindow.resize)
+	w.SetFramebufferSizeCallback(glWindow.resizeBuffer)
 
 	return &glWindow, nil
+}
+
+func (w *GlWindow) resizeBuffer(window *glfw.Window, width int, height int) {
+	w.width = width
+	w.height = height
+	if width > 0 && height > 0 {
+		gl.Viewport(0, 0, int32(width), int32(height))
+	}
 }
 
 func (w *GlWindow) resize(window *glfw.Window, width int, height int) {
@@ -195,18 +195,18 @@ func (w *GlWindow) Play(p bool) {
 }
 
 func (w *GlWindow) GetFrame() int {
-	return w.frame
+	return int(w.frame)
 }
 
 func (w *GlWindow) SetFrame(f int) {
-	w.frame = f
+	w.frame = float64(f)
 }
 
 func (w *GlWindow) Close(window *glfw.Window) {
 	window.SetShouldClose(true)
 	w.Shader.Delete()
 	for _, modelSet := range w.ModelSets {
-		modelSet.Model.Delete(w.Physics)
+		modelSet.model.Delete(w.Physics)
 	}
 	if w.WindowIndex == 0 {
 		defer glfw.Terminate()
@@ -442,8 +442,8 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 
 func (w *GlWindow) ResetPhysics() {
 	for _, modelSet := range w.ModelSets {
-		modelSet.Model.DeletePhysics(w.Physics)
-		modelSet.Model.InitPhysics(w.Physics)
+		modelSet.model.DeletePhysics(w.Physics)
+		modelSet.model.InitPhysics(w.Physics)
 	}
 }
 
@@ -461,12 +461,12 @@ func (w *GlWindow) Reset() {
 func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
 	pmxModel.InitDraw(len(w.ModelSets), w.resourceFiles)
 	pmxModel.InitPhysics(w.Physics)
-	w.ModelSets = append(w.ModelSets, ModelSet{Model: pmxModel, Motion: vmdMotion})
+	w.ModelSets = append(w.ModelSets, ModelSet{model: pmxModel, motion: vmdMotion, prevDeltas: nil})
 }
 
 func (w *GlWindow) ClearData() {
 	for _, modelSet := range w.ModelSets {
-		modelSet.Model.DeletePhysics(w.Physics)
+		modelSet.model.DeletePhysics(w.Physics)
 	}
 	w.ModelSets = make([]ModelSet, 0)
 	w.frame = 0
@@ -483,13 +483,22 @@ func (w *GlWindow) Run() {
 	}
 
 	w.MakeContextCurrent()
-	previousTime := glfw.GetTime()
+	prevTime := glfw.GetTime()
+	prevFrame := 0
 	w.running = true
 
 	for !CheckOpenGLError() && !w.ShouldClose() {
-		if w.playing && w.motionPlayer != nil && w.frame >= int(w.motionPlayer.FrameEdit.MaxValue()) {
+		if w.width == 0 || w.height == 0 {
+			// ウィンドウが最小化されている場合は描画をスキップ(フレームも進めない)
+			prevTime = glfw.GetTime()
+
+			glfw.PollEvents()
+			continue
+		}
+
+		if w.playing && w.motionPlayer != nil && w.frame >= w.motionPlayer.FrameEdit.MaxValue() {
 			w.frame = 0
-			w.motionPlayer.SetValue(w.frame)
+			w.motionPlayer.SetValue(int(w.frame))
 		}
 
 		// mlog.Memory("GL.Run[1]")
@@ -541,7 +550,7 @@ func (w *GlWindow) Run() {
 
 		time := glfw.GetTime()
 
-		elapsed := float32(time - previousTime)
+		elapsed := float32(time - prevTime)
 		if !w.EnableFrameDrop {
 			// フレームドロップOFFの場合、最大1Fずつ
 			elapsed = mmath.ClampFloat32(elapsed, 0, w.Physics.Spf)
@@ -554,16 +563,22 @@ func (w *GlWindow) Run() {
 		if w.playing {
 			// // 経過秒数をキーフレームの進捗具合に合わせて調整
 			// elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
-			w.frame += int(float64(elapsed * w.Physics.Fps))
-			mlog.V("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%d", previousTime, time, elapsed, w.frame)
+			w.frame += float64(elapsed * w.Physics.Fps)
+			mlog.V("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%.8f", prevTime, time, elapsed, w.frame)
 			if w.motionPlayer != nil {
-				w.motionPlayer.SetValue(w.frame)
+				w.motionPlayer.SetValue(int(w.frame))
 			}
 		}
 
-		if int(elapsed*w.Physics.Fps) > 0 {
-			// 1F以上描画が進んでいたら、前の時間を現在時間でUpdate
-			previousTime = time
+		prevTime = time
+
+		if int(w.frame) > prevFrame {
+			// フレーム番号上書き
+			prevFrame = int(w.frame)
+			for _, modelSet := range w.ModelSets {
+				// 前のデフォーム情報をクリア
+				modelSet.prevDeltas = nil
+			}
 		}
 
 		// mlog.Memory("GL.Run[4]")
@@ -574,8 +589,8 @@ func (w *GlWindow) Run() {
 				break
 			}
 
-			modelSet.draw(w.Physics, w.Shader, i, w.frame, elapsed,
-				w.EnablePhysics, w.VisibleNormal, w.VisibleBones)
+			modelSet.prevDeltas = draw(w.Physics, modelSet.model, modelSet.motion, w.Shader,
+				modelSet.prevDeltas, i, int(w.frame), elapsed, w.EnablePhysics, w.VisibleNormal, w.VisibleBones)
 		}
 
 		// mlog.Memory(fmt.Sprintf("[%d] Run", w.frame))
@@ -600,8 +615,8 @@ func (w *GlWindow) Run() {
 			break
 		}
 
-		// GCを強制的に実行
-		runtime.GC()
+		// // GCを強制的に実行
+		// runtime.GC()
 
 		// if w.playing && w.frame >= 100 {
 		// 	break

@@ -69,16 +69,24 @@ func draw(
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	shader *mview.MShader,
+	prevDeltas *vmd.VmdDeltas,
 	windowIndex int,
 	frame int,
 	elapsed float32,
 	enablePhysics bool,
 	isDrawNormal bool,
 	isDrawBones map[pmx.BoneFlag]bool,
-) {
+) *vmd.VmdDeltas {
 	// mlog.Memory(fmt.Sprintf("[%d] draw[1]", frame))
 
-	deltas := deform(modelPhysics, model, motion, frame, elapsed, enablePhysics)
+	var deltas *vmd.VmdDeltas
+	if prevDeltas == nil {
+		// 前のデフォーム情報がない場合はデフォーム処理を行う
+		deltas = deform(modelPhysics, model, motion, frame, elapsed, enablePhysics)
+	} else {
+		// 前のデフォーム情報がある場合はその情報を使う
+		deltas = prevDeltas
+	}
 
 	// mlog.Memory(fmt.Sprintf("[%d] draw[2]", frame))
 
@@ -106,8 +114,7 @@ func draw(
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()
 
-	deltas = nil
-	// mlog.Memory(fmt.Sprintf("[%d] draw[6]", frame))
+	return deltas
 }
 
 func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
