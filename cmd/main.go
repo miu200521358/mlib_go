@@ -7,10 +7,8 @@ import (
 	"embed"
 	"fmt"
 	"log"
-	"os"
 	"path/filepath"
 	"runtime"
-	"runtime/trace"
 
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
@@ -35,7 +33,7 @@ func init() {
 		walk.MustRegisterWindowClass(mwidget.ConsoleViewClass)
 	})
 
-	runtime.MemProfileRate = 1
+	// runtime.MemProfileRate = 1
 }
 
 //go:embed resources/*
@@ -48,19 +46,19 @@ func main() {
 	// 	log.Fatal(err)
 	// }
 
-	f, err := os.Create("trace.out")
-	if err != nil {
-		log.Fatalf("failed to create trace output file: %v", err)
-	}
-	defer f.Close()
+	// f, err := os.Create("trace.out")
+	// if err != nil {
+	// 	log.Fatalf("failed to create trace output file: %v", err)
+	// }
+	// defer f.Close()
 
-	if err := trace.Start(f); err != nil {
-		log.Fatalf("failed to start trace: %v", err)
-	}
-	defer trace.Stop()
+	// if err := trace.Start(f); err != nil {
+	// 	log.Fatalf("failed to start trace: %v", err)
+	// }
+	// defer trace.Stop()
 
 	var mWindow *mwidget.MWindow
-	// var err error
+	var err error
 
 	appConfig := mconfig.LoadAppConfig(resourceFiles)
 	appConfig.Env = env
