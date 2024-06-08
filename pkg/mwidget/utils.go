@@ -38,6 +38,15 @@ func RecoverFromPanic(mWindow *MWindow) {
 	if r := recover(); r != nil {
 		stackTrace := debug.Stack()
 
+		var errMsg string
+		// パニックの値がerror型である場合、エラーメッセージを取得
+		if err, ok := r.(error); ok {
+			errMsg = err.Error()
+		} else {
+			// それ以外の型の場合は、文字列に変換
+			errMsg = fmt.Sprintf("%v", r)
+		}
+
 		var errT *walk.TextEdit
 		if _, err := (declarative.MainWindow{
 			Title:   mi18n.T("予期せぬエラーが発生しました"),
@@ -51,6 +60,8 @@ func RecoverFromPanic(mWindow *MWindow) {
 				},
 				declarative.TextEdit{
 					Text: fmt.Sprintf("GLError: %d", gl.GetError()) +
+						string("\r\n------------\r\n") +
+						fmt.Sprintf("Error: %s", errMsg) +
 						string("\r\n------------\r\n") +
 						string(bytes.ReplaceAll(stackTrace, []byte("\n"), []byte("\r\n"))),
 					ReadOnly: true,
