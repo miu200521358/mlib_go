@@ -5,7 +5,6 @@ package pmx
 
 import (
 	"embed"
-	"math"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
@@ -199,46 +198,38 @@ func (m *Meshes) Draw(
 	// 隠面消去
 	// https://learnopengl.com/Advanced-OpenGL/Depth-testing
 	gl.Enable(gl.DEPTH_TEST)
-	defer gl.Disable(gl.DEPTH_TEST)
-
 	gl.DepthFunc(gl.LEQUAL)
 
 	// ブレンディングを有効にする
 	gl.Enable(gl.BLEND)
-	defer gl.Disable(gl.BLEND)
-
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	shader.Msaa.Bind()
-	defer shader.Msaa.Unbind()
-
 	m.vao.Bind()
-	defer m.vao.Unbind()
-
 	m.vbo.BindVertex(m.vertices, vertexDeltas)
-	defer m.vbo.Unbind()
-
-	paddedMatrixes, matrixWidth, matrixHeight := m.createBoneMatrixes(boneDeltas)
 
 	for i, mesh := range m.meshes {
 		mesh.ibo.Bind()
 
 		shader.Use(mview.PROGRAM_TYPE_MODEL)
-		mesh.drawModel(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, materialDeltas[i])
+		mesh.drawModel(shader, windowIndex, boneDeltas, materialDeltas[i])
 		shader.Unuse()
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
 			shader.Use(mview.PROGRAM_TYPE_EDGE)
-			mesh.drawEdge(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, materialDeltas[i])
+			mesh.drawEdge(shader, windowIndex, boneDeltas, materialDeltas[i])
 			shader.Unuse()
 		}
 
 		mesh.ibo.Unbind()
 	}
 
+	m.vbo.Unbind()
+	m.vao.Unbind()
+
 	if isDrawNormal {
-		m.drawNormal(shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
+		m.drawNormal(shader, boneDeltas, windowIndex)
 	}
 
 	isDrawBone := false
@@ -250,29 +241,18 @@ func (m *Meshes) Draw(
 	}
 
 	if isDrawBone {
-		m.drawBone(shader, bones, isDrawBones, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
-	}
-}
-
-func (m *Meshes) createBoneMatrixes(matrixes []mgl32.Mat4) ([]float32, int, int) {
-	// テクスチャのサイズを計算する
-	numBones := len(matrixes)
-	texSize := int(math.Ceil(math.Sqrt(float64(numBones))))
-	width := int(math.Ceil(float64(texSize)/4) * 4 * 4)
-	height := int(math.Ceil((float64(numBones) * 4) / float64(width)))
-
-	paddedMatrixes := make([]float32, height*width*4)
-	for i, matrix := range matrixes {
-		copy(paddedMatrixes[i*16:], matrix[:])
+		m.drawBone(shader, bones, isDrawBones, boneDeltas, windowIndex)
 	}
 
-	return paddedMatrixes, width, height
+	shader.Msaa.Unbind()
+
+	gl.Disable(gl.BLEND)
+	gl.Disable(gl.DEPTH_TEST)
 }
 
 func (m *Meshes) drawNormal(
 	shader *mview.MShader,
-	paddedMatrixes []float32,
-	width, height int,
+	boneDeltas []mgl32.Mat4,
 	windowIndex int,
 ) {
 	shader.Use(mview.PROGRAM_TYPE_NORMAL)
@@ -282,7 +262,7 @@ func (m *Meshes) drawNormal(
 	m.normalIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.NormalProgram)
+	bindBoneMatrixes(boneDeltas, shader, shader.NormalProgram)
 
 	normalColor := mgl32.Vec4{0.3, 0.3, 0.7, 0.5}
 	specularUniform := gl.GetUniformLocation(shader.NormalProgram, gl.Str(mview.SHADER_COLOR))
@@ -307,8 +287,7 @@ func (m *Meshes) drawBone(
 	shader *mview.MShader,
 	bones *Bones,
 	isDrawBones map[BoneFlag]bool,
-	paddedMatrixes []float32,
-	width, height int,
+	boneDeltas []mgl32.Mat4,
 	windowIndex int,
 ) {
 	// ボーンをモデルメッシュの前面に描画するために深度テストを無効化
@@ -326,7 +305,7 @@ func (m *Meshes) drawBone(
 	m.boneIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.BoneProgram)
+	bindBoneMatrixes(boneDeltas, shader, shader.BoneProgram)
 
 	// ライン描画
 	gl.DrawElements(

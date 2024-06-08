@@ -602,9 +602,9 @@ func (w *GlWindow) Run() {
 		// // GCを強制的に実行
 		// runtime.GC()
 
-		if w.playing && w.frame >= 100 {
-			break
-		}
+		// if w.playing && w.frame >= 1000 {
+		// 	break
+		// }
 	}
 	if !CheckOpenGLError() && w.ShouldClose() {
 		w.Close(w.Window)
