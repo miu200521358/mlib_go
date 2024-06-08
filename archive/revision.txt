@@ -245,6 +245,11 @@ MlibSample 1.0.0_beta_55
 ・キーフレの進み具合をMMDにあわせた
 　・キーフレへの加算時にint切り捨て加算していたのをfloat加算するよう修正（デフォーム時にint切り捨て）
 ・前のデフォームからフレーム(int)が増えてない場合、前のデフォーム結果を流用するよう修正
+・GCの強制解放コメントアウト
 
+MlibSample 1.0.0_beta_56
+・メモリリークリファクタリング
+　・inverseしたbtTransformのdelete
+　・getOpenGLでメモリから取得した mgl32.Mat4 への nil設定
 
 

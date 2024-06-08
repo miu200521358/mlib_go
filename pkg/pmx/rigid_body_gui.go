@@ -257,7 +257,10 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 	boneGlobalTransform := mbt.NewBtTransform()
 	defer mbt.DeleteBtTransform(boneGlobalTransform)
 
-	boneGlobalTransform.Mult(rigidBodyGlobalTransform, btRigidBodyLocalTransform.Inverse())
+	invRigidBodyLocalTransform := btRigidBodyLocalTransform.Inverse()
+	defer mbt.DeleteBtTransform(invRigidBodyLocalTransform)
+
+	boneGlobalTransform.Mult(rigidBodyGlobalTransform, invRigidBodyLocalTransform)
 
 	boneGlobalMatrixGL := mgl32.Mat4{}
 	boneGlobalTransform.GetOpenGLMatrix(&boneGlobalMatrixGL[0])

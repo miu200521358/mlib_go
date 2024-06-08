@@ -190,6 +190,7 @@ func updatePhysics(
 		}
 
 		boneTransform := mbt.NewBtTransform()
+		defer mbt.DeleteBtTransform(boneTransform)
 		// if r.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE {
 		// 	mat := boneDeltas.Get(rigidBodyBone.Index).GlobalMatrix()
 		// 	bonePhysicsGlobalMatrix := r.GetRigidBodyBoneMatrix(modelPhysics)

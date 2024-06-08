@@ -40,10 +40,12 @@ func (m *MMat4) GL() mgl32.Mat4 {
 
 // NewMMat4ByMgl OpenGL座標系からMMD座標系に変換された行列を返します
 func NewMMat4ByMgl(m *mgl32.Mat4) *MMat4 {
-	return NewMMat4ByValues(
+	mm := NewMMat4ByValues(
 		float64(m.Col(0).X()), float64(-m.Col(1).X()), float64(-m.Col(2).X()), float64(-m.Col(3).X()),
 		float64(-m.Col(0).Y()), float64(m.Col(1).Y()), float64(m.Col(2).Y()), float64(m.Col(3).Y()),
 		float64(-m.Col(0).Z()), float64(m.Col(1).Z()), float64(m.Col(2).Z()), float64(m.Col(3).Z()),
 		float64(m.Col(0).W()), float64(m.Col(1).W()), float64(m.Col(2).W()), float64(m.Col(3).W()),
 	)
+	m = nil
+	return mm
 }
