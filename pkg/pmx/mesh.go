@@ -4,11 +4,9 @@
 package pmx
 
 import (
-	"math"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
-	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mview"
@@ -47,7 +45,8 @@ func NewMesh(
 func (m *Mesh) drawModel(
 	shader *mview.MShader,
 	windowIndex int,
-	boneDeltas []mgl32.Mat4,
+	paddedMatrixes []float32,
+	width, height int,
 	materialDelta *Material,
 ) {
 	if m.material.DrawFlag.IsDoubleSidedDrawing() {
@@ -58,11 +57,14 @@ func (m *Mesh) drawModel(
 		// 片面描画
 		// カリングON
 		gl.Enable(gl.CULL_FACE)
+		defer gl.Disable(gl.CULL_FACE)
+
 		gl.CullFace(gl.BACK)
 	}
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(boneDeltas, shader, shader.ModelProgram)
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.ModelProgram)
+	defer UnbindBoneMatrixes()
 
 	// ------------------
 	// 材質色設定
@@ -84,6 +86,7 @@ func (m *Mesh) drawModel(
 	gl.Uniform1i(useTextureUniform, mutils.BoolToInt(m.material.Texture != nil))
 	if m.material.Texture != nil {
 		m.material.Texture.Bind()
+		defer m.material.Texture.Unbind()
 		textureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TEXTURE_SAMPLER))
 		gl.Uniform1i(textureUniform, int32(m.material.Texture.TextureUnitNo))
 	}
@@ -93,6 +96,7 @@ func (m *Mesh) drawModel(
 	gl.Uniform1i(useToonUniform, mutils.BoolToInt(m.material.ToonTexture != nil))
 	if m.material.ToonTexture != nil {
 		m.material.ToonTexture.Bind()
+		defer m.material.ToonTexture.Unbind()
 		toonUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TOON_SAMPLER))
 		gl.Uniform1i(toonUniform, int32(m.material.ToonTexture.TextureUnitNo))
 	}
@@ -102,6 +106,7 @@ func (m *Mesh) drawModel(
 	gl.Uniform1i(useSphereUniform, mutils.BoolToInt(m.material.SphereTexture != nil && m.material.SphereTexture.Valid))
 	if m.material.SphereTexture != nil && m.material.SphereTexture.Valid {
 		m.material.SphereTexture.Bind()
+		defer m.material.SphereTexture.Unbind()
 		sphereUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_SPHERE_SAMPLER))
 		gl.Uniform1i(sphereUniform, int32(m.material.SphereTexture.TextureUnitNo))
 	}
@@ -141,33 +146,23 @@ func (m *Mesh) drawModel(
 		gl.UNSIGNED_INT,
 		nil,
 	)
-
-	if m.material.Texture != nil {
-		m.material.Texture.Unbind()
-	}
-
-	if m.material.ToonTexture != nil {
-		m.material.ToonTexture.Unbind()
-	}
-
-	if m.material.SphereTexture != nil {
-		m.material.SphereTexture.Unbind()
-	}
-
-	UnbindBoneMatrixes()
 }
 
 func (m *Mesh) drawEdge(
 	shader *mview.MShader,
 	windowIndex int,
-	boneDeltas []mgl32.Mat4,
+	paddedMatrixes []float32,
+	width, height int,
 	materialDelta *Material,
 ) {
 	gl.Enable(gl.CULL_FACE)
+	defer gl.Disable(gl.CULL_FACE)
+
 	gl.CullFace(gl.FRONT)
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(boneDeltas, shader, shader.EdgeProgram)
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.EdgeProgram)
+	defer UnbindBoneMatrixes()
 
 	// ------------------
 	// エッジ色設定
@@ -186,8 +181,6 @@ func (m *Mesh) drawEdge(
 		gl.UNSIGNED_INT,
 		nil,
 	)
-
-	UnbindBoneMatrixes()
 }
 
 func (m *Mesh) delete() {
@@ -198,11 +191,11 @@ func (m *Mesh) delete() {
 }
 
 func bindBoneMatrixes(
-	matrixes []mgl32.Mat4,
+	paddedMatrixes []float32,
+	width, height int,
 	shader *mview.MShader,
 	program uint32,
 ) {
-
 	// テクスチャをアクティブにする
 	gl.ActiveTexture(gl.TEXTURE20)
 
@@ -215,17 +208,6 @@ func bindBoneMatrixes(
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-
-	// テクスチャのサイズを計算する
-	numBones := len(matrixes)
-	texSize := int(math.Ceil(math.Sqrt(float64(numBones))))
-	width := int(math.Ceil(float64(texSize)/4) * 4 * 4)
-	height := int(math.Ceil((float64(numBones) * 4) / float64(width)))
-
-	paddedMatrixes := make([]float32, height*width*4)
-	for i, matrix := range matrixes {
-		copy(paddedMatrixes[i*16:], matrix[:])
-	}
 
 	// テクスチャをシェーダーに渡す
 	gl.TexImage2D(
