@@ -7,13 +7,13 @@ import (
 	"embed"
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"runtime"
-	"time"
+	"runtime/trace"
 
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
-	"github.com/pkg/profile"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
@@ -34,17 +34,33 @@ func init() {
 		walk.MustRegisterWindowClass(mwidget.MotionPlayerClass)
 		walk.MustRegisterWindowClass(mwidget.ConsoleViewClass)
 	})
+
+	runtime.MemProfileRate = 1
 }
 
 //go:embed resources/*
 var resourceFiles embed.FS
 
 func main() {
-	defer profile.Start(profile.MemProfile, profile.ProfilePath(time.Now().Format("20060102_150405"))).Stop()
+	// defer profile.Start(profile.MemProfile, profile.ProfilePath(time.Now().Format("20060102_150405"))).Stop()
 	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+	// if err := agent.Listen(agent.Options{}); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	f, err := os.Create("trace.out")
+	if err != nil {
+		log.Fatalf("failed to create trace output file: %v", err)
+	}
+	defer f.Close()
+
+	if err := trace.Start(f); err != nil {
+		log.Fatalf("failed to start trace: %v", err)
+	}
+	defer trace.Stop()
 
 	var mWindow *mwidget.MWindow
-	var err error
+	// var err error
 
 	appConfig := mconfig.LoadAppConfig(resourceFiles)
 	appConfig.Env = env

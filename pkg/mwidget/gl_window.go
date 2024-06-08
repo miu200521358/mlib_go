@@ -579,7 +579,10 @@ func (w *GlWindow) Run() {
 			break
 		}
 
-		if w.frame >= 1000 {
+		// // GCを強制的に実行
+		// runtime.GC()
+
+		if w.playing && w.frame >= 100 {
 			break
 		}
 	}

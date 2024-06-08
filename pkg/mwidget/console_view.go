@@ -69,7 +69,10 @@ func (cv *ConsoleView) textLength() int {
 func (cv *ConsoleView) AppendText(value string) {
 	textLength := cv.textLength()
 	cv.setTextSelection(textLength, textLength)
-	cv.Console.SendMessage(win.EM_REPLACESEL, 0, uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(value))))
+	uv, err := syscall.UTF16PtrFromString(value)
+	if err == nil {
+		cv.Console.SendMessage(win.EM_REPLACESEL, 0, uintptr(unsafe.Pointer(uv)))
+	}
 }
 func (cv *ConsoleView) PostAppendText(value string) {
 	cv.mutex.Lock()
