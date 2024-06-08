@@ -12,6 +12,9 @@ import (
 
 func (r *RigidBody) UpdateFlags(modelPhysics *mphysics.MPhysics, enablePhysics bool) bool {
 	btRigidBody, _ := modelPhysics.GetRigidBody(r.Index)
+	if btRigidBody == nil {
+		return false
+	}
 
 	if r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
 		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時

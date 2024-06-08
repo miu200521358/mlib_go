@@ -14,6 +14,9 @@ func (j *Joint) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBo
 
 	btRigidBodyA, _ := modelPhysics.GetRigidBody(rigidBodyA.Index)
 	btRigidBodyB, _ := modelPhysics.GetRigidBody(rigidBodyB.Index)
+	if btRigidBodyA == nil || btRigidBodyB == nil {
+		return
+	}
 
 	// 剛体Aの現在の位置と向きを取得
 	worldTransformA := btRigidBodyA.GetWorldTransform().(mbt.BtTransform)
