@@ -65,7 +65,7 @@ func main() {
 	appConfig := mconfig.LoadAppConfig(resourceFiles)
 	appConfig.Env = env
 
-	if appConfig.IsEnvProd() {
+	if appConfig.IsEnvProd() || appConfig.IsEnvDev() {
 		defer mwidget.RecoverFromPanic(mWindow)
 	}
 

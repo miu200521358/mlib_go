@@ -22,6 +22,13 @@ func (ac *AppConfig) IsEnvProd() bool {
 	return ac.Env == "prod"
 }
 
+func (ac *AppConfig) IsEnvDev() bool {
+	if ac == nil {
+		return false
+	}
+	return ac.Env == "dev"
+}
+
 // LoadAppConfig アプリ設定ファイルの読み込み
 func LoadAppConfig(resourceFiles embed.FS) *AppConfig {
 	fileData, err := fs.ReadFile(resourceFiles, "resources/app_config.json")
