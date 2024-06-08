@@ -252,6 +252,11 @@ func (m *Meshes) Draw(
 	if isDrawBone {
 		m.drawBone(shader, bones, isDrawBones, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
 	}
+
+	paddedMatrixes = nil
+	boneDeltas = nil
+	vertexDeltas = nil
+	materialDeltas = nil
 }
 
 func (m *Meshes) createBoneMatrixes(matrixes []mgl32.Mat4) ([]float32, int, int) {

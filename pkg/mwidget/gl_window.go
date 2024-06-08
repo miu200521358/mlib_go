@@ -7,6 +7,7 @@ import (
 	"embed"
 	"image"
 	"math"
+	"runtime"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -599,8 +600,8 @@ func (w *GlWindow) Run() {
 			break
 		}
 
-		// // GCを強制的に実行
-		// runtime.GC()
+		// GCを強制的に実行
+		runtime.GC()
 
 		// if w.playing && w.frame >= 100 {
 		// 	break

@@ -569,6 +569,7 @@ ikLoop:
 		}
 	}
 
+	ikDeltas = nil
 	return boneDeltas
 }
 

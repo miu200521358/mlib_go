@@ -106,6 +106,7 @@ func draw(
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()
 
+	deltas = nil
 	// mlog.Memory(fmt.Sprintf("[%d] draw[6]", frame))
 }
 
