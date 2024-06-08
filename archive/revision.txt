@@ -252,4 +252,10 @@ MlibSample 1.0.0_beta_56
 　・inverseしたbtTransformのdelete
 　・getOpenGLでメモリから取得した mgl32.Mat4 への nil設定
 
+MlibSample 1.0.0_beta_57
+・履歴ボタンを二回目に起動した時にエラーになる問題を修正
+　・履歴画面でOKの挙動をしたときにダイアログが破棄されているようなので、作り直す
+・描画中にプレビューウィンドウを閉じた場合の挙動を修正
+　・drawingフラグを追加（windowが破棄されている時にループを抜ける検証条件としてglfw.Windowが使えないので、その外にフラグを持っておく）
+
 

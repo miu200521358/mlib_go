@@ -49,6 +49,7 @@ type GlWindow struct {
 	shiftPressed        bool
 	ctrlPressed         bool
 	running             bool
+	drawing             bool
 	playing             bool
 	VisibleBones        map[pmx.BoneFlag]bool
 	VisibleNormal       bool
@@ -157,6 +158,7 @@ func NewGlWindow(
 		VisibleBones:        make(map[pmx.BoneFlag]bool, 0),
 		VisibleNormal:       false,
 		running:             false,
+		drawing:             false,
 		playing:             false, // 最初は再生OFF
 		EnablePhysics:       true,  // 最初は物理ON
 		EnableFrameDrop:     true,  // 最初はドロップON
@@ -203,7 +205,8 @@ func (w *GlWindow) SetFrame(f int) {
 }
 
 func (w *GlWindow) Close(window *glfw.Window) {
-	window.SetShouldClose(true)
+	w.running = false
+	w.drawing = false
 	w.Shader.Delete()
 	for _, modelSet := range w.ModelSets {
 		modelSet.model.Delete(w.Physics)
@@ -212,7 +215,6 @@ func (w *GlWindow) Close(window *glfw.Window) {
 		defer glfw.Terminate()
 		defer walk.App().Exit(0)
 	}
-	defer window.Destroy()
 }
 
 func (w *GlWindow) handleKeyEvent(
@@ -459,6 +461,7 @@ func (w *GlWindow) Reset() {
 }
 
 func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
+	w.drawing = true
 	pmxModel.InitDraw(len(w.ModelSets), w.resourceFiles)
 	pmxModel.InitPhysics(w.Physics)
 	w.ModelSets = append(w.ModelSets, ModelSet{model: pmxModel, motion: vmdMotion, prevDeltas: nil})
@@ -487,7 +490,7 @@ func (w *GlWindow) Run() {
 	prevFrame := 0
 	w.running = true
 
-	for !CheckOpenGLError() && !w.ShouldClose() {
+	for w.IsRunning() {
 		if w.width == 0 || w.height == 0 {
 			// ウィンドウが最小化されている場合は描画をスキップ(フレームも進めない)
 			prevTime = glfw.GetTime()
@@ -510,7 +513,7 @@ func (w *GlWindow) Run() {
 		// mlog.Memory("GL.Run[2]")
 
 		for _, program := range w.Shader.GetPrograms() {
-			if CheckOpenGLError() || w.ShouldClose() {
+			if !w.IsRunning() {
 				break
 			}
 
@@ -556,7 +559,7 @@ func (w *GlWindow) Run() {
 			elapsed = mmath.ClampFloat32(elapsed, 0, w.Physics.Spf)
 		}
 
-		if CheckOpenGLError() || w.ShouldClose() {
+		if !w.IsRunning() {
 			break
 		}
 
@@ -565,9 +568,6 @@ func (w *GlWindow) Run() {
 			// elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
 			w.frame += float64(elapsed * w.Physics.Fps)
 			mlog.V("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%.8f", prevTime, time, elapsed, w.frame)
-			if w.motionPlayer != nil {
-				w.motionPlayer.SetValue(int(w.frame))
-			}
 		}
 
 		prevTime = time
@@ -579,13 +579,16 @@ func (w *GlWindow) Run() {
 				// 前のデフォーム情報をクリア
 				modelSet.prevDeltas = nil
 			}
+			if w.playing && w.motionPlayer != nil {
+				w.motionPlayer.SetValue(int(w.frame))
+			}
 		}
 
 		// mlog.Memory("GL.Run[4]")
 
 		// 描画
 		for i, modelSet := range w.ModelSets {
-			if CheckOpenGLError() || w.ShouldClose() {
+			if !w.IsRunning() {
 				break
 			}
 
@@ -595,7 +598,7 @@ func (w *GlWindow) Run() {
 
 		// mlog.Memory(fmt.Sprintf("[%d] Run", w.frame))
 
-		if CheckOpenGLError() || w.ShouldClose() {
+		if !w.IsRunning() {
 			break
 		}
 
@@ -603,7 +606,7 @@ func (w *GlWindow) Run() {
 
 		w.SwapBuffers()
 
-		if CheckOpenGLError() || w.ShouldClose() {
+		if !w.IsRunning() {
 			break
 		}
 
@@ -611,7 +614,7 @@ func (w *GlWindow) Run() {
 
 		glfw.PollEvents()
 
-		if CheckOpenGLError() || w.ShouldClose() {
+		if !w.IsRunning() {
 			break
 		}
 
@@ -628,4 +631,8 @@ func (w *GlWindow) Run() {
 	if w.WindowIndex == 0 {
 		walk.App().Exit(0)
 	}
+}
+
+func (w *GlWindow) IsRunning() bool {
+	return w.drawing && w.running && !CheckOpenGLError() && !w.ShouldClose()
 }

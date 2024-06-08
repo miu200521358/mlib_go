@@ -78,6 +78,7 @@ func main() {
 		512, 768, 0, resourceFiles, nil, motionPlayer)
 	mwidget.CheckError(err, mWindow, mi18n.T("ビューワーウィンドウ生成エラー"))
 	mWindow.AddGlWindow(glWindow)
+	defer glWindow.Close(glWindow.Window)
 
 	// コンソールはタブ外に表示
 	mWindow.ConsoleView, err = mwidget.NewConsoleView(mWindow, 256, 30)
