@@ -177,8 +177,6 @@ func (r *RigidBody) UpdateTransform(
 	motionState := btRigidBody.GetMotionState().(mbt.BtMotionState)
 
 	t := mbt.NewBtTransform()
-	defer mbt.DeleteBtTransform(t)
-
 	t.Mult(boneTransform, btRigidBodyLocalTransform)
 	motionState.SetWorldTransform(t)
 
@@ -218,8 +216,6 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 	motionState := btRigidBody.GetMotionState().(mbt.BtMotionState)
 
 	rigidBodyGlobalTransform := mbt.NewBtTransform()
-	defer mbt.DeleteBtTransform(rigidBodyGlobalTransform)
-
 	motionState.GetWorldTransform(rigidBodyGlobalTransform)
 
 	// if r.CorrectPhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
@@ -252,8 +248,6 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 
 	// ボーンのグローバル位置を剛体の現在グローバル行列に初期位置ローカル行列を掛けて求める
 	boneGlobalTransform := mbt.NewBtTransform()
-	defer mbt.DeleteBtTransform(boneGlobalTransform)
-
 	boneGlobalTransform.Mult(rigidBodyGlobalTransform, btRigidBodyLocalTransform.Inverse())
 
 	boneGlobalMatrixGL := mgl32.Mat4{}
