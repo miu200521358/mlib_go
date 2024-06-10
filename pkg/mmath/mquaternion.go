@@ -97,10 +97,16 @@ func (v *MQuaternion) MMD() *MQuaternion {
 	return &MQuaternion{v.GetW(), mgl64.Vec3{v.GetX(), v.GetY(), v.GetZ()}}
 }
 
-// NewMQuaternionFromAxisAngles は、軸周りの回転を表す四元数を返します。
-func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
+// NewMQuaternionFromAxisAnglesHomog は、軸周りの回転を表す四元数を返します。
+func NewMQuaternionFromAxisAnglesHomog(axis *MVec3, angle float64) *MQuaternion {
 	m := MMat4(mgl64.HomogRotate3D(angle, mgl64.Vec3(*axis.Normalize())))
 	return m.Quaternion()
+}
+
+// NewMQuaternionFromAxisAngles は、軸周りの回転を表す四元数を返します。
+func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
+	m := MQuaternion(mgl64.QuatRotate(angle, mgl64.Vec3(*axis.Normalize())))
+	return m.Normalize()
 }
 
 // NewMQuaternionFromRadiansは、オイラー角（ラジアン）回転を表す四元数を返します。
