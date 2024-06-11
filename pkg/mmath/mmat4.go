@@ -88,7 +88,7 @@ func (mat *MMat4) Trace3() float64 {
 // MulVec3 multiplies v (converted to a vec4 as (v_1, v_2, v_3, 1))
 // with mat and divides the result by w. Returns a new vec3.
 func (mat *MMat4) MulVec3(other *MVec3) *MVec3 {
-	return mat.Translated(other).Translation()
+	return other.ToMat4().Mul(mat.Copy()).Translation()
 }
 
 // Translate adds v to the translation part of the matrix.

@@ -97,14 +97,14 @@ func (v *MQuaternion) MMD() *MQuaternion {
 	return &MQuaternion{v.GetW(), mgl64.Vec3{v.GetX(), v.GetY(), v.GetZ()}}
 }
 
-// NewMQuaternionFromAxisAnglesHomog は、軸周りの回転を表す四元数を返します。
-func NewMQuaternionFromAxisAnglesHomog(axis *MVec3, angle float64) *MQuaternion {
+// NewMQuaternionFromAxisAngles は、軸周りの回転を表す四元数を返します。
+func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
 	m := MMat4(mgl64.HomogRotate3D(angle, mgl64.Vec3(*axis.Normalize())))
 	return m.Quaternion()
 }
 
-// NewMQuaternionFromAxisAngles は、軸周りの回転を表す四元数を返します。
-func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
+// NewMQuaternionFromAxisAnglesRotate は、軸周りの回転を表す四元数を返します。
+func NewMQuaternionFromAxisAnglesRotate(axis *MVec3, angle float64) *MQuaternion {
 	m := MQuaternion(mgl64.QuatRotate(angle, mgl64.Vec3(*axis.Normalize())))
 	return m.Normalize()
 }
@@ -361,7 +361,7 @@ func (quat *MQuaternion) MuledScalar(factor float64) *MQuaternion {
 	// factor をかけて角度を制限
 	angle = math.Mod(angle*factor, math.Pi*2)
 
-	return NewMQuaternionFromAxisAngles(&axis, angle)
+	return NewMQuaternionFromAxisAnglesRotate(&axis, angle)
 }
 
 // ToAxisAngleは、クォータニオンを軸と角度に変換します。

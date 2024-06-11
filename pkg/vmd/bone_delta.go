@@ -87,6 +87,22 @@ func (bd *BoneDelta) FrameScale() *mmath.MVec3 {
 	return bd.frameScale
 }
 
+func (bd *BoneDelta) Copy() *BoneDelta {
+	return &BoneDelta{
+		Bone:                bd.Bone,
+		Frame:               bd.Frame,
+		globalMatrix:        bd.GlobalMatrix().Copy(),
+		localMatrix:         bd.LocalMatrix().Copy(),
+		globalPosition:      bd.GlobalPosition().Copy(),
+		framePosition:       bd.FramePosition().Copy(),
+		frameEffectPosition: bd.FrameEffectPosition().Copy(),
+		frameRotation:       bd.FrameRotation().Copy(),
+		frameEffectRotation: bd.FrameEffectRotation().Copy(),
+		frameScale:          bd.FrameScale().Copy(),
+		unitMatrix:          bd.unitMatrix.Copy(),
+	}
+}
+
 func NewBoneDelta(
 	bone *pmx.Bone,
 	frame int,

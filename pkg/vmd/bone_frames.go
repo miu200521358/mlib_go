@@ -184,7 +184,6 @@ func (fs *BoneFrames) prepareIk(
 			ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[boneIndex][m])
 
 			if ikFrame == nil || ikFrame.IsEnable(ikBone.Name) {
-				// IK計算がONの場合のみIK計算
 				boneDeltas = fs.calcIk(frame, ikBone, model, boneDeltas, ikFrame)
 			}
 		}
@@ -368,9 +367,8 @@ ikLoop:
 			// }
 
 			// 注目ノード（実際に動かすボーン=リンクボーン）
-			linkMatrix := boneDeltas.Get(linkBone.Index).GlobalMatrix()
 			// ワールド座標系から注目ノードの局所座標系への変換
-			linkInvMatrix := linkMatrix.Inverse()
+			linkInvMatrix := boneDeltas.Get(linkBone.Index).GlobalMatrix().Inverted()
 
 			// 注目ノードを起点とした、エフェクタのローカル位置
 			effectorLocalPosition := linkInvMatrix.MulVec3(effectorGlobalPosition)
@@ -411,34 +409,50 @@ ikLoop:
 				break ikLoop
 			}
 
+			// 単位角
+			unitRad := ikBone.Ik.UnitRotation.GetRadians().GetX() * float64(lidx+1)
+
+			// 回転角(ラジアン)
+			linkDot := ikLocalPosition.Dot(effectorLocalPosition)
+
 			effectorLocalPosition.Normalize()
 			ikLocalPosition.Normalize()
+
+			if len(ikBone.Ik.Links) > 1 {
+				// 複数リンクボーンの場合、最短回転量を求める
+				linkDot = ikLocalPosition.Dot(effectorLocalPosition)
+			}
+
+			// 単位角を超えないようにする
+			var linkAngle float64
+			if linkDot > 1 {
+				linkAngle = unitRad * 2
+			} else if linkDot < -1 {
+				linkAngle = -unitRad * 2
+			} else {
+				linkAngle = math.Acos(linkDot)
+			}
+
+			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+				fmt.Fprintf(ikFile,
+					"[%04d][%03d][%s][%05d][01][回転角度] unitRad: %.5f, dot: %.8f, linkAngle: %0.6f(%.5f)\n",
+					frame, loop, linkBone.Name, count-1, unitRad, linkDot, linkAngle, mmath.ToDegree(linkAngle),
+				)
+			}
 
 			// ベクトル (1) を (2) に一致させるための最短回転量（Axis-Angle）
 			// 回転軸
 			linkAxis := effectorLocalPosition.Cross(ikLocalPosition).Normalize()
-			// 回転角(ラジアン)
-			linkAngle := math.Acos(mmath.ClampFloat(ikLocalPosition.Dot(effectorLocalPosition), -1, 1))
-
-			// 単位角
-			unitRad := ikBone.Ik.UnitRotation.GetRadians().GetX() * float64(lidx+1)
-
-			// 単位角を超えないようにする
-			linkAngle = mmath.ClampFloat(linkAngle, -unitRad, unitRad)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][01][回転軸・角度] linkAxis: %s, linkAngle: %.5f\n",
-					frame, loop, linkBone.Name, count-1, linkAxis.MMD().String(), mmath.ToDegree(linkAngle),
+					"[%04d][%03d][%s][%05d][01][回転軸・角度] linkAxis: %s\n",
+					frame, loop, linkBone.Name, count-1, linkAxis.MMD().String(),
 				)
-
-				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][01][回転角度終了判定] originalLinkAngle: %v(%0.6f)\n",
-					frame, loop, linkBone.Name, count-1, linkAngle < 1e-6, linkAngle)
 			}
 
 			// 角度がほとんどない場合、終了
-			if linkAngle < 1e-7 {
+			if math.Abs(linkAngle) < 1e-7 {
 				break ikLoop
 			}
 
@@ -513,7 +527,7 @@ ikLoop:
 			} else {
 				if linkBone.HasFixedAxis() {
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
+						quat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle).Shorten()
 						bf := NewBoneFrame(count)
 						bf.Rotation = quat
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
@@ -535,7 +549,7 @@ ikLoop:
 					linkAxis = linkBone.NormalizedFixedAxis
 
 					if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-						quat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle).Shorten()
+						quat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle).Shorten()
 						bf := NewBoneFrame(count)
 						bf.Rotation = quat
 						ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
@@ -550,7 +564,7 @@ ikLoop:
 					}
 				}
 
-				correctIkQuat := mmath.NewMQuaternionFromAxisAngles(linkAxis, linkAngle)
+				correctIkQuat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
@@ -667,7 +681,6 @@ ikLoop:
 		}
 	}
 
-	ikDeltas = nil
 	return boneDeltas
 }
 
@@ -699,7 +712,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 	ikMotion *VmdMotion,
 	ikFile *os.File,
 ) (*mmath.MQuaternion, int) {
-	quat := mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle).Shorten()
+	quat := mmath.NewMQuaternionFromAxisAnglesRotate(quatAxis, quatAngle).Shorten()
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		bf := NewBoneFrame(count)
@@ -809,7 +822,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 
 	if minAngleLimitRadians.GetX() != 0 || maxAngleLimitRadians.GetX() != 0 {
 		// X軸のみ回れるIK制限の場合、ここで終了(足IK想定だが、XZ制限などの場合もこちらの方が結果が良い)
-		return mmath.NewMQuaternionFromAxisAngles(xAxisVector, fX).Shorten(), count
+		return mmath.NewMQuaternionFromAxisAnglesRotate(xAxisVector, fX).Shorten(), count
 	}
 
 	// Y軸回り
@@ -846,9 +859,9 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 			frame, loop, linkBoneName, count-1, tZ, fZ)
 	}
 
-	xQuat := mmath.NewMQuaternionFromAxisAngles(xAxisVector, fX)
-	yQuat := mmath.NewMQuaternionFromAxisAngles(yAxisVector, -fY)
-	zQuat := mmath.NewMQuaternionFromAxisAngles(zAxisVector, -fZ)
+	xQuat := mmath.NewMQuaternionFromAxisAnglesRotate(xAxisVector, fX)
+	yQuat := mmath.NewMQuaternionFromAxisAnglesRotate(yAxisVector, -fY)
+	zQuat := mmath.NewMQuaternionFromAxisAnglesRotate(zAxisVector, -fZ)
 	totalActualIkQuat := yQuat.Muled(xQuat).Muled(zQuat).Shorten()
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
