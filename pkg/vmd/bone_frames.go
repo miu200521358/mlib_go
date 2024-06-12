@@ -436,7 +436,7 @@ ikLoop:
 			}
 
 			// 角度がほとんどない場合、終了
-			if linkAngle < 1e-7 {
+			if math.Abs(linkAngle) < 1e-7 {
 				break ikLoop
 			}
 
