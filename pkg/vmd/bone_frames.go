@@ -189,6 +189,19 @@ func (fs *BoneFrames) prepareIk(
 		}
 	}
 
+	for _, boneIndex := range deformBoneIndexes {
+		// ボーンIndexがIkTreeIndexesに含まれていない場合、スルー
+		if _, ok := model.Bones.IkTreeIndexes[boneIndex]; !ok {
+			continue
+		}
+
+		// IK計算がすべて終わったら、IKボーンターゲットのIK回転をクリア
+		for m := range len(model.Bones.IkTreeIndexes[boneIndex]) {
+			ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[boneIndex][m])
+			boneDeltas.Get(ikBone.Ik.BoneIndex).frameIkRotation = nil
+		}
+	}
+
 	mlog.IV("[IK計算終了][%04d] -----------------------------------------------", frame)
 
 	return boneDeltas
@@ -1051,13 +1064,13 @@ func (fs *BoneFrames) calcBoneDeltas(
 
 		isEffectorRot := false
 		isIkRot := false
-		if delta.frameEffectRotation != nil && !delta.frameEffectRotation.IsIdent() {
-			rot.Mul(delta.frameEffectRotation)
-			isEffectorRot = true
-		}
 		if delta.frameIkRotation != nil && !delta.frameIkRotation.IsIdent() {
-			rot.Mul(delta.frameIkRotation)
+			rot = rot.Muled(delta.frameIkRotation)
 			isIkRot = true
+		}
+		if delta.frameEffectRotation != nil && !delta.frameEffectRotation.IsIdent() {
+			rot = rot.Muled(delta.frameEffectRotation)
+			isEffectorRot = true
 		}
 		if (isIkRot || isEffectorRot) && delta.Bone.HasFixedAxis() {
 			// 軸制限回転を求める
