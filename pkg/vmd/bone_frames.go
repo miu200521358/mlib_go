@@ -412,22 +412,30 @@ ikLoop:
 			effectorLocalPosition.Normalize()
 			ikLocalPosition.Normalize()
 
-			// ベクトル (1) を (2) に一致させるための最短回転量（Axis-Angle）
-			// 回転軸
-			linkAxis := effectorLocalPosition.Cross(ikLocalPosition).Normalize()
-			// 回転角(ラジアン)
-			linkAngle := math.Acos(mmath.ClampFloat(ikLocalPosition.Dot(effectorLocalPosition), -1, 1))
-
 			// 単位角
 			unitRad := ikBone.Ik.UnitRotation.GetRadians().GetX() * float64(lidx+1)
+			linkDot := ikLocalPosition.Dot(effectorLocalPosition)
+			// 回転角(ラジアン)
+			var linkAngle float64
+			if linkDot > 1 {
+				linkAngle = unitRad
+			} else if linkDot < -1 {
+				linkAngle = -unitRad
+			} else {
+				linkAngle = math.Acos(linkDot)
+			}
 
 			// 単位角を超えないようにする
 			linkAngle = mmath.ClampFloat(linkAngle, -unitRad, unitRad)
 
+			// ベクトル (1) を (2) に一致させるための最短回転量（Axis-Angle）
+			// 回転軸
+			linkAxis := effectorLocalPosition.Cross(ikLocalPosition).Normalize()
+
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][01][回転軸・角度] linkAxis: %s, linkAngle: %.5f\n",
-					frame, loop, linkBone.Name, count-1, linkAxis.MMD().String(), mmath.ToDegree(linkAngle),
+					"[%04d][%03d][%s][%05d][01][回転軸・角度] linkDot: %.8f, linkAxis: %s, linkAngle: %.5f\n",
+					frame, loop, linkBone.Name, count-1, linkDot, linkAxis.MMD().String(), mmath.ToDegree(linkAngle),
 				)
 
 				fmt.Fprintf(ikFile,
@@ -626,7 +634,7 @@ ikLoop:
 				}
 			}
 
-			isAbort := linkQuat != nil && 1-totalActualIkQuat.Dot(linkQuat) < 1e-8
+			isAbort := linkQuat != nil && 1-totalActualIkQuat.Dot(linkQuat) < 1e-10
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil && linkQuat != nil {
 				fmt.Fprintf(ikFile,
@@ -717,7 +725,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 	}
 
 	// 現在IKリンクに入る可能性のあるすべての角度
-	totalIkQuat := quat.Muled(linkQuat)
+	totalIkQuat := linkQuat.Muled(quat)
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		bf := NewBoneFrame(count)
