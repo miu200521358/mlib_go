@@ -17,6 +17,7 @@ type BoneDelta struct {
 	frameEffectPosition *mmath.MVec3       // キーフレ位置の変動量(付与親のみ)
 	frameRotation       *mmath.MQuaternion // キーフレ回転の変動量
 	frameEffectRotation *mmath.MQuaternion // キーフレ回転の変動量(付与親のみ)
+	frameIkRotation     *mmath.MQuaternion // キーフレIK回転の変動量
 	frameScale          *mmath.MVec3       // キーフレスケールの変動量
 	unitMatrix          *mmath.MMat4
 }
