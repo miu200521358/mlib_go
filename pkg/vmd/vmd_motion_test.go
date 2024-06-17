@@ -431,8 +431,8 @@ func TestVmdMotion_DeformLegIk3_Matsu(t *testing.T) {
 		}
 		{
 			expectedPosition := &mmath.MVec3{2.263363, 7.061642, -3.837192}
-			if !boneDeltas.GetByName((pmx.KNEE_D.Left())).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
-				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName((pmx.KNEE.Left())).GlobalPosition().MMD())
+			if !boneDeltas.GetByName(pmx.KNEE_D.Left()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.01) {
+				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName(pmx.KNEE_D.Left()).GlobalPosition().MMD())
 			}
 		}
 		{

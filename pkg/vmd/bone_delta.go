@@ -17,9 +17,9 @@ type BoneDelta struct {
 	frameEffectPosition *mmath.MVec3       // キーフレ位置の変動量(付与親のみ)
 	frameRotation       *mmath.MQuaternion // キーフレ回転の変動量
 	frameEffectRotation *mmath.MQuaternion // キーフレ回転の変動量(付与親のみ)
-	// frameIkRotation     *mmath.MQuaternion // キーフレIK回転の変動量
-	frameScale *mmath.MVec3 // キーフレスケールの変動量
-	unitMatrix *mmath.MMat4
+	frameIkRotation     *mmath.MQuaternion // キーフレIK回転の変動量
+	frameScale          *mmath.MVec3       // キーフレスケールの変動量
+	unitMatrix          *mmath.MMat4
 }
 
 func (bd *BoneDelta) GlobalMatrix() *mmath.MMat4 {
@@ -44,13 +44,19 @@ func (bd *BoneDelta) GlobalPosition() *mmath.MVec3 {
 }
 
 func (bd *BoneDelta) LocalRotation() *mmath.MQuaternion {
-	if bd.frameRotation == nil {
-		bd.frameRotation = mmath.NewMQuaternion()
+	rot := bd.FrameRotation().Copy()
+	if bd.frameIkRotation != nil && !bd.frameIkRotation.IsIdent() {
+		rot.Mul(bd.frameIkRotation)
 	}
-	if bd.frameEffectRotation != nil {
-		return bd.FrameRotation().Muled(bd.FrameEffectRotation())
+	if bd.frameEffectRotation != nil && !bd.frameEffectRotation.IsIdent() {
+		rot.Mul(bd.frameEffectRotation)
 	}
-	return bd.FrameRotation()
+
+	if bd.Bone.HasFixedAxis() {
+		return rot.ToFixedAxisRotation(bd.Bone.FixedAxis)
+	}
+
+	return rot
 }
 
 func (bd *BoneDelta) GlobalRotation() *mmath.MQuaternion {
@@ -83,6 +89,13 @@ func (bd *BoneDelta) FrameEffectRotation() *mmath.MQuaternion {
 		bd.frameEffectRotation = mmath.NewMQuaternion()
 	}
 	return bd.frameEffectRotation
+}
+
+func (bd *BoneDelta) FrameIkRotation() *mmath.MQuaternion {
+	if bd.frameIkRotation == nil {
+		bd.frameIkRotation = mmath.NewMQuaternion()
+	}
+	return bd.frameIkRotation
 }
 
 func (bd *BoneDelta) FrameScale() *mmath.MVec3 {

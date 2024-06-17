@@ -345,6 +345,8 @@ func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk26_Far(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/足IK乖離.vmd")
 
