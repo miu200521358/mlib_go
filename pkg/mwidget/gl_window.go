@@ -56,6 +56,7 @@ type GlWindow struct {
 	EnablePhysics       bool
 	EnableFrameDrop     bool
 	frame               float64
+	prevFrame           int
 	motionPlayer        *MotionPlayer
 	width               int
 	height              int
@@ -163,6 +164,7 @@ func NewGlWindow(
 		EnablePhysics:       true,  // 最初は物理ON
 		EnableFrameDrop:     true,  // 最初はドロップON
 		frame:               0,
+		prevFrame:           0,
 		motionPlayer:        motionPlayer,
 		width:               width,
 		height:              height,
@@ -202,6 +204,12 @@ func (w *GlWindow) GetFrame() int {
 
 func (w *GlWindow) SetFrame(f int) {
 	w.frame = float64(f)
+	w.prevFrame = f
+
+	for i := range w.ModelSets {
+		// 前のデフォーム情報をクリア
+		w.ModelSets[i].prevDeltas = nil
+	}
 }
 
 func (w *GlWindow) Close(window *glfw.Window) {
@@ -487,7 +495,7 @@ func (w *GlWindow) Run() {
 
 	w.MakeContextCurrent()
 	prevTime := glfw.GetTime()
-	prevFrame := 0
+	w.prevFrame = 0
 	w.running = true
 
 	for w.IsRunning() {
@@ -572,9 +580,9 @@ func (w *GlWindow) Run() {
 
 		prevTime = time
 
-		if int(w.frame) > prevFrame {
+		if int(w.frame) > w.prevFrame {
 			// フレーム番号上書き
-			prevFrame = int(w.frame)
+			w.prevFrame = int(w.frame)
 			for _, modelSet := range w.ModelSets {
 				// 前のデフォーム情報をクリア
 				modelSet.prevDeltas = nil
@@ -592,7 +600,7 @@ func (w *GlWindow) Run() {
 				break
 			}
 
-			modelSet.prevDeltas = draw(w.Physics, modelSet.model, modelSet.motion, w.Shader,
+			w.ModelSets[i].prevDeltas = draw(w.Physics, modelSet.model, modelSet.motion, w.Shader,
 				modelSet.prevDeltas, i, int(w.frame), elapsed, w.EnablePhysics, w.VisibleNormal, w.VisibleBones)
 		}
 

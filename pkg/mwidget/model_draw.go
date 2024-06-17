@@ -16,44 +16,51 @@ func deform(
 	modelPhysics *mphysics.MPhysics,
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
+	prevDeltas *vmd.VmdDeltas,
 	frame int,
 	elapsed float32,
 	enablePhysics bool,
 ) *vmd.VmdDeltas {
 	vds := &vmd.VmdDeltas{}
-
-	vds.Morphs = motion.DeformMorph(frame, model, nil)
-
-	for i, bd := range vds.Morphs.Bones.Data {
-		if bd == nil {
-			continue
-		}
-		bone := model.Bones.Get(i)
-		if !motion.BoneFrames.Contains(bone.Name) {
-			motion.BoneFrames.Append(vmd.NewBoneNameFrames(bone.Name))
-		}
-		bf := motion.BoneFrames.Get(bone.Name).Get(frame)
-
-		if bf != nil {
-			// 一旦モーフの値をクリア
-			bf.MorphPosition = nil
-			bf.MorphLocalPosition = nil
-			bf.MorphRotation = nil
-			bf.MorphLocalRotation = nil
-			bf.MorphScale = nil
-			bf.MorphLocalScale = nil
-
-			// 該当ボーンキーフレにモーフの値を加算
-			bf.Add(bd.BoneFrame)
-			motion.AppendBoneFrame(bone.Name, bf)
-		}
-	}
+	var beforeBoneDeltas *vmd.BoneDeltas
 
 	// IKのON/OFF
 	ikFrame := motion.IkFrames.Get(frame)
 
-	// 物理前のデフォーム情報
-	beforeBoneDeltas := motion.BoneFrames.Deform(frame, model, nil, true, nil, ikFrame)
+	if prevDeltas == nil {
+		vds.Morphs = motion.DeformMorph(frame, model, nil)
+
+		for i, bd := range vds.Morphs.Bones.Data {
+			if bd == nil {
+				continue
+			}
+			bone := model.Bones.Get(i)
+			if !motion.BoneFrames.Contains(bone.Name) {
+				motion.BoneFrames.Append(vmd.NewBoneNameFrames(bone.Name))
+			}
+			bf := motion.BoneFrames.Get(bone.Name).Get(frame)
+
+			if bf != nil {
+				// 一旦モーフの値をクリア
+				bf.MorphPosition = nil
+				bf.MorphLocalPosition = nil
+				bf.MorphRotation = nil
+				bf.MorphLocalRotation = nil
+				bf.MorphScale = nil
+				bf.MorphLocalScale = nil
+
+				// 該当ボーンキーフレにモーフの値を加算
+				bf.Add(bd.BoneFrame)
+				motion.AppendBoneFrame(bone.Name, bf)
+			}
+		}
+
+		// 物理前のデフォーム情報
+		beforeBoneDeltas = motion.BoneFrames.Deform(frame, model, nil, true, nil, ikFrame)
+	} else {
+		vds.Morphs = prevDeltas.Morphs
+		beforeBoneDeltas = prevDeltas.Bones
+	}
 
 	// 物理更新
 	updatePhysics(modelPhysics, model, beforeBoneDeltas, frame, elapsed, enablePhysics)
@@ -79,14 +86,7 @@ func draw(
 ) *vmd.VmdDeltas {
 	// mlog.Memory(fmt.Sprintf("[%d] draw[1]", frame))
 
-	var deltas *vmd.VmdDeltas
-	if prevDeltas == nil {
-		// 前のデフォーム情報がない場合はデフォーム処理を行う
-		deltas = deform(modelPhysics, model, motion, frame, elapsed, enablePhysics)
-	} else {
-		// 前のデフォーム情報がある場合はその情報を使う
-		deltas = prevDeltas
-	}
+	deltas := deform(modelPhysics, model, motion, prevDeltas, frame, elapsed, enablePhysics)
 
 	// mlog.Memory(fmt.Sprintf("[%d] draw[2]", frame))
 

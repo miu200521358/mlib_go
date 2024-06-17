@@ -738,7 +738,7 @@ ikLoop:
 					frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
 			}
 
-			// IKターゲットの回転に差分を加算
+			// IKターゲットの回転に今回追加した回転量を加算
 			boneDeltas.Get(effectorBone.Index).frameRotation.Mul(ikQuat)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
