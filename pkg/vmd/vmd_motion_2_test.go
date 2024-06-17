@@ -401,7 +401,7 @@ func TestVmdMotion_DeformLegIk26_Far(t *testing.T) {
 		}
 		{
 			expectedPosition := &mmath.MVec3{-4.331888, 12.178923, -9.514071}
-			if !boneDeltas.GetByName("右かかと").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.2) {
+			if !boneDeltas.GetByName("右かかと").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.16) {
 				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName("右かかと").GlobalPosition().MMD())
 			}
 		}
