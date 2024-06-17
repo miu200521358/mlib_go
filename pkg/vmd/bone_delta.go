@@ -49,7 +49,7 @@ func (bd *BoneDelta) LocalRotation() *mmath.MQuaternion {
 		rot.Mul(bd.frameIkRotation)
 	}
 	if bd.frameEffectRotation != nil && !bd.frameEffectRotation.IsIdent() {
-		rot.Mul(bd.frameEffectRotation)
+		rot = bd.frameEffectRotation.Muled(rot)
 	}
 
 	if bd.Bone.HasFixedAxis() {
