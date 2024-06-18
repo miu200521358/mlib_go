@@ -583,9 +583,9 @@ func (w *GlWindow) Run() {
 		if int(w.frame) > w.prevFrame {
 			// フレーム番号上書き
 			w.prevFrame = int(w.frame)
-			for _, modelSet := range w.ModelSets {
+			for i := range w.ModelSets {
 				// 前のデフォーム情報をクリア
-				modelSet.prevDeltas = nil
+				w.ModelSets[i].prevDeltas = nil
 			}
 			if w.playing && w.motionPlayer != nil {
 				w.motionPlayer.SetValue(int(w.frame))
