@@ -6,7 +6,6 @@ import (
 	"math"
 	"os"
 	"path/filepath"
-	"slices"
 	"sort"
 	"sync"
 	"time"
@@ -189,6 +188,19 @@ func (fs *BoneFrames) prepareIk(
 		}
 	}
 
+	// for _, boneIndex := range deformBoneIndexes {
+	// 	// ボーンIndexがIkTreeIndexesに含まれていない場合、スルー
+	// 	if _, ok := model.Bones.IkTreeIndexes[boneIndex]; !ok {
+	// 		continue
+	// 	}
+
+	// 	// IK計算がすべて終わったら、IKボーンターゲットのIK回転をクリア
+	// 	for m := range len(model.Bones.IkTreeIndexes[boneIndex]) {
+	// 		ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[boneIndex][m])
+	// 		boneDeltas.Get(ikBone.Ik.BoneIndex).frameIkRotation = nil
+	// 	}
+	// }
+
 	mlog.IV("[IK計算終了][%04d] -----------------------------------------------", frame)
 
 	return boneDeltas
@@ -245,64 +257,64 @@ func (fs *BoneFrames) calcIk(
 	// エフェクタ関連情報取得
 	effectorDeformBoneIndexes, boneDeltas :=
 		fs.prepareDeltas(frame, model, []string{effectorBone.Name}, false, boneDeltas, ikFrame)
-	// 中断FLGが入ったか否か
-	aborts := make([]bool, len(ikBone.Ik.Links))
+		// // 中断FLGが入ったか否か
+		// aborts := make([]bool, len(ikBone.Ik.Links))
 
-	// if model.Bones.Get(ikBone.ParentIndex).IsIK() {
-	// 	// IKの親がIKの場合、リンクボーンに回転を委譲する
-	// 	ikParentBone := model.Bones.Get(ikBone.ParentIndex)
-	// 	topLinkBone := model.Bones.Get(ikBone.Ik.Links[len(ikBone.Ik.Links)-1].BoneIndex)
-	// 	boneDeltas.Get(topLinkBone.Index).frameRotation =
-	// 		ikDeltas.Get(ikParentBone.Index).frameRotation.Muled(boneDeltas.Get(topLinkBone.Index).frameRotation)
+		// if model.Bones.Get(ikBone.ParentIndex).IsIK() {
+		// 	// IKの親がIKの場合、リンクボーンに回転を委譲する
+		// 	ikParentBone := model.Bones.Get(ikBone.ParentIndex)
+		// 	topLinkBone := model.Bones.Get(ikBone.Ik.Links[len(ikBone.Ik.Links)-1].BoneIndex)
+		// 	boneDeltas.Get(topLinkBone.Index).frameRotation =
+		// 		ikDeltas.Get(ikParentBone.Index).frameRotation.Muled(boneDeltas.Get(topLinkBone.Index).frameRotation)
 
-	// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-	// 		{
-	// 			bf := NewBoneFrame(count)
-	// 			bf.Rotation = boneDeltas.Get(topLinkBone.Index).frameRotation
-	// 			ikMotion.AppendRegisteredBoneFrame(topLinkBone.Name, bf)
-	// 			count++
-	// 		}
-	// 	}
-	// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-	// 		fmt.Fprintf(ikFile, "[IK計算][%04d][%s] 親IKの回転: %s(%s)\n",
-	// 			frame, ikBone.Name, boneDeltas.Get(topLinkBone.Index).frameRotation.String(),
-	// 			boneDeltas.Get(topLinkBone.Index).frameRotation.ToMMDDegrees().String())
-	// 	}
+		// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		// 		{
+		// 			bf := NewBoneFrame(count)
+		// 			bf.Rotation = boneDeltas.Get(topLinkBone.Index).frameRotation
+		// 			ikMotion.AppendRegisteredBoneFrame(topLinkBone.Name, bf)
+		// 			count++
+		// 		}
+		// 	}
+		// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		// 		fmt.Fprintf(ikFile, "[IK計算][%04d][%s] 親IKの回転: %s(%s)\n",
+		// 			frame, ikBone.Name, boneDeltas.Get(topLinkBone.Index).frameRotation.String(),
+		// 			boneDeltas.Get(topLinkBone.Index).frameRotation.ToMMDDegrees().String())
+		// 	}
 
-	// 	// // IKの親がIKの場合、ターゲットの位置を調整
-	// 	// ikParentTargetPos := boneDeltas.Get(ikParentBone.Ik.BoneIndex).GlobalPosition()
-	// 	// ikParentPos := ikDeltas.Get(ikParentBone.Index).GlobalPosition()
-	// 	// ikDeltas.Get(ikBone.Index).globalPosition =
-	// 	// 	ikDeltas.Get(ikBone.Index).globalPosition.Add(ikParentTargetPos.Sub(ikParentPos))
+		// 	// // IKの親がIKの場合、ターゲットの位置を調整
+		// 	// ikParentTargetPos := boneDeltas.Get(ikParentBone.Ik.BoneIndex).GlobalPosition()
+		// 	// ikParentPos := ikDeltas.Get(ikParentBone.Index).GlobalPosition()
+		// 	// ikDeltas.Get(ikBone.Index).globalPosition =
+		// 	// 	ikDeltas.Get(ikBone.Index).globalPosition.Add(ikParentTargetPos.Sub(ikParentPos))
 
-	// 	// if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-	// 	// 	{
-	// 	// 		bf := NewBoneFrame(count)
-	// 	// 		bf.Position = boneDeltas.Get(ikBone.Index).GlobalPosition()
-	// 	// 		bf.Rotation = boneDeltas.Get(ikBone.Index).FrameRotation()
-	// 	// 		ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
-	// 	// 		count++
-	// 	// 	}
-	// 	// }
-	// 	// if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-	// 	// 	fmt.Fprintf(ikFile, "[IK計算][%04d][%s] IK位置委譲: %s, %s\n",
-	// 	// 		frame, ikBone.Name, ikParentTargetPos.String(), ikParentPos.String())
-	// 	// }
-	// }
+		// 	// if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		// 	// 	{
+		// 	// 		bf := NewBoneFrame(count)
+		// 	// 		bf.Position = boneDeltas.Get(ikBone.Index).GlobalPosition()
+		// 	// 		bf.Rotation = boneDeltas.Get(ikBone.Index).FrameRotation()
+		// 	// 		ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
+		// 	// 		count++
+		// 	// 	}
+		// 	// }
+		// 	// if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		// 	// 	fmt.Fprintf(ikFile, "[IK計算][%04d][%s] IK位置委譲: %s, %s\n",
+		// 	// 		frame, ikBone.Name, ikParentTargetPos.String(), ikParentPos.String())
+		// 	// }
+		// }
 
-	// if boneDeltas.Get(effectorBone.Index).frameRotation == nil {
-	// 	boneDeltas.Get(effectorBone.Index).frameRotation = mmath.NewMQuaternion()
-	// }
-	// if boneDeltas.Get(effectorBone.Index).frameIkRotation == nil {
-	// 	boneDeltas.Get(effectorBone.Index).frameIkRotation = mmath.NewMQuaternion()
-	// }
+		// if boneDeltas.Get(effectorBone.Index).frameRotation == nil {
+		// 	boneDeltas.Get(effectorBone.Index).frameRotation = mmath.NewMQuaternion()
+		// }
+		// if boneDeltas.Get(effectorBone.Index).frameIkRotation == nil {
+		// 	boneDeltas.Get(effectorBone.Index).frameIkRotation = mmath.NewMQuaternion()
+		// }
 
-	// ikLinkLength := 0.0
-	// for _, l := range ikBone.Ik.Links {
-	// 	ikLinkLength += model.Bones.Get(l.BoneIndex).ParentRelativePosition.Length()
-	// }
+		// ikLinkLength := 0.0
+		// for _, l := range ikBone.Ik.Links {
+		// 	ikLinkLength += model.Bones.Get(l.BoneIndex).ParentRelativePosition.Length()
+		// }
 
-	// IK計算
+		// IK計算
 ikLoop:
 	for loop := 0; loop < max(ikBone.Ik.LoopCount, 1); loop++ {
 		for lidx, ikLink := range ikBone.Ik.Links {
@@ -553,7 +565,6 @@ ikLoop:
 				linkDelta.frameIkRotation = nil
 			} else {
 				ikQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
-				resultIkQuat = linkQuat.Muled(ikQuat)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
@@ -576,21 +587,6 @@ ikLoop:
 			}
 
 			boneDeltas.Append(linkDelta)
-
-			// 前回（既存）とほぼ同じ回転量の場合、中断FLGを立てる
-			isAbort := linkQuat != nil && 1-resultIkQuat.Dot(linkQuat) < 1e-10
-
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil && linkQuat != nil {
-				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][15] 前回差分中断判定: %v(dot: %0.6f, distance: %0.8f) 前回: %s 今回: %s\n",
-					frame, loop, linkBone.Name, count-1,
-					isAbort, 1-resultIkQuat.Dot(linkQuat), effectorLocalPosition.Distance(ikLocalPosition),
-					linkQuat.ToDegrees().String(), resultIkQuat.ToMMDDegrees().String())
-			}
-
-			if isAbort {
-				aborts[lidx] = true
-			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := NewBoneFrame(count)
@@ -620,7 +616,7 @@ ikLoop:
 				boneDeltas.Get(effectorBone.Index).frameIkRotation = ikQuat
 			} else {
 				boneDeltas.Get(effectorBone.Index).frameIkRotation =
-					boneDeltas.Get(effectorBone.Index).FrameIkRotation().Muled(ikQuat)
+					ikQuat.Muled(boneDeltas.Get(effectorBone.Index).FrameIkRotation())
 			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -635,10 +631,10 @@ ikLoop:
 			}
 		}
 
-		if slices.Index(aborts, false) == -1 {
-			// すべてのリンクボーンで中断FLG = true の場合、終了
-			break ikLoop
-		}
+		// if slices.Index(aborts, false) == -1 {
+		// 	// すべてのリンクボーンで中断FLG = true の場合、終了
+		// 	break ikLoop
+		// }
 	}
 
 	ikDeltas = nil
@@ -883,7 +879,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 	}
 
 	ikQuat := resultIkQuat.Muled(linkQuat.Inverted())
-	return resultIkQuat.Shorten(), ikQuat, count
+	return resultIkQuat, ikQuat, count
 }
 
 func (fs *BoneFrames) judgeIkAngle(
@@ -1217,7 +1213,7 @@ func (fs *BoneFrames) getRotation(
 	if bone.IsEffectorRotation() && bone.CanRotate() {
 		// 外部親変形ありの場合、外部親回転を取得する
 		effectRot := fs.getEffectRotation(frame, bone, model, boneDeltas, loop+1)
-		return rot.Shorten(), ikRot, effectRot.Shorten()
+		return rot.Shorten(), ikRot, effectRot
 	}
 
 	return rot.Shorten(), ikRot, nil
