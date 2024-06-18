@@ -77,42 +77,48 @@ func ConvertToNRGBA(img image.Image) *image.NRGBA {
 }
 
 func loadImage(path string, file io.Reader) (*image.Image, error) {
-	if strings.ToLower(path[len(path)-4:]) == ".png" {
+	paths := strings.Split(path, ".")
+	if len(paths) < 2 {
+		return nil, fmt.Errorf("invalid file path: %s", path)
+	}
+
+	switch paths[len(paths)-1] {
+	case "png":
 		img, err := png.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
 		return &img, nil
-	} else if strings.ToLower(path[len(path)-4:]) == ".tga" {
+	case "tga":
 		img, err := tga.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
 		return &img, nil
-	} else if strings.ToLower(path[len(path)-4:]) == ".gif" {
+	case "gif":
 		img, err := gif.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
 		return &img, nil
-	} else if strings.ToLower(path[len(path)-4:]) == ".dds" {
+	case "dds":
 		img, err := dds.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
 		return &img, nil
-	} else if strings.ToLower(path[len(path)-4:]) == ".jpg" || strings.ToLower(path[len(path)-5:]) == ".jpeg" {
+	case "jpg", "jpeg":
 		img, err := jpeg.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
 		return &img, nil
-	} else if strings.ToLower(path[len(path)-4:]) == ".spa" || strings.ToLower(path[len(path)-4:]) == ".bmp" {
+	case "spa", "bmp":
 		// スフィアファイルはbmpとして読み込む
 		img, err := bmp.Decode(file)
 		if err != nil {
