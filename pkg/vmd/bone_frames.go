@@ -468,7 +468,7 @@ ikLoop:
 			var resultIkQuat, ikQuat *mmath.MQuaternion
 			if ikLink.AngleLimit {
 				// 角度制限が入ってる場合
-				resultIkQuat, count = fs.calcIkLimitQuaternion(
+				resultIkQuat, ikQuat, count = fs.calcIkLimitQuaternion(
 					ikLink.MinAngleLimit.GetRadians(),
 					ikLink.MaxAngleLimit.GetRadians(),
 					linkQuat,
@@ -489,7 +489,7 @@ ikLoop:
 				linkDelta.frameIkRotation = nil
 			} else if ikLink.LocalAngleLimit {
 				// ローカル角度制限が入ってる場合
-				resultIkQuat, count = fs.calcIkLimitQuaternion(
+				resultIkQuat, ikQuat, count = fs.calcIkLimitQuaternion(
 					ikLink.LocalMinAngleLimit.GetRadians(),
 					ikLink.LocalMaxAngleLimit.GetRadians(),
 					linkQuat,
@@ -541,7 +541,9 @@ ikLoop:
 					bf.Rotation = resultIkQuat
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
+				}
 
+				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][15][軸制限後処理] totalActualIkQuat: %s(%s)\n",
 						frame, loop, linkBone.Name, count-1, resultIkQuat.String(), resultIkQuat.ToMMDDegrees().String())
@@ -569,7 +571,7 @@ ikLoop:
 				if linkDelta.frameIkRotation == nil {
 					linkDelta.frameIkRotation = ikQuat
 				} else {
-					linkDelta.frameIkRotation = ikQuat.Mul(linkDelta.FrameIkRotation())
+					linkDelta.frameIkRotation = linkDelta.FrameIkRotation().Muled(ikQuat)
 				}
 			}
 
@@ -618,7 +620,7 @@ ikLoop:
 				boneDeltas.Get(effectorBone.Index).frameIkRotation = ikQuat
 			} else {
 				boneDeltas.Get(effectorBone.Index).frameIkRotation =
-					ikQuat.Mul(boneDeltas.Get(effectorBone.Index).FrameIkRotation())
+					boneDeltas.Get(effectorBone.Index).FrameIkRotation().Muled(ikQuat)
 			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -670,7 +672,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 	linkBoneName string,
 	ikMotion *VmdMotion,
 	ikFile *os.File,
-) (*mmath.MQuaternion, int) {
+) (*mmath.MQuaternion, *mmath.MQuaternion, int) {
 	quat := mmath.NewMQuaternionFromAxisAngles(quatAxis, quatAngle).Shorten()
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -782,8 +784,8 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 	if minAngleLimitRadians.GetX() != 0 || maxAngleLimitRadians.GetX() != 0 {
 		// X軸のみ回れるIK制限の場合、ここで終了(足IK想定だが、XZ制限などの場合もこちらの方が結果が良い)
 		resultIkQuat := mmath.NewMQuaternionFromAxisAngles(xAxisVector, fX).Shorten()
-		// ikQuat := resultIkQuat.Muled(linkQuat.Inverted())
-		return resultIkQuat, count
+		ikQuat := resultIkQuat.Muled(linkQuat.Inverted())
+		return resultIkQuat, ikQuat, count
 	}
 
 	// Y軸回り
@@ -880,8 +882,8 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 		}
 	}
 
-	// ikQuat := resultIkQuat.Muled(linkQuat.Inverted())
-	return resultIkQuat.Shorten(), count
+	ikQuat := resultIkQuat.Muled(linkQuat.Inverted())
+	return resultIkQuat.Shorten(), ikQuat, count
 }
 
 func (fs *BoneFrames) judgeIkAngle(
