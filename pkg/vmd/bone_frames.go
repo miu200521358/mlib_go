@@ -520,16 +520,52 @@ ikLoop:
 					ikMotion,
 					ikFile,
 				)
-			} else if linkBone.HasFixedAxis() {
-				if linkAxis.Dot(linkBone.NormalizedFixedAxis) < 0 {
-					linkAngle = -linkAngle
+				// } else if linkBone.HasFixedAxis() {
+				// 	// if linkAxis.Dot(linkBone.NormalizedFixedAxis) < 0 {
+				// 	// 	linkAngle = -linkAngle
+				// 	// }
+
+				// 	// // 軸制限ありの場合、軸にそった理想回転量とする
+				// 	// linkAxis = linkBone.NormalizedFixedAxis
+
+				// 	// 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
+				// 	ikQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle).Shorten()
+
+				// 	// if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+				// 	// 	bf := NewBoneFrame(count)
+				// 	// 	bf.Rotation = ikQuat.Copy()
+				// 	// 	ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+				// 	// 	count++
+
+				// 	// 	fmt.Fprintf(ikFile,
+				// 	// 		"[%04d][%03d][%s][%05d][軸制限][理想軸制限回転] quat: %s(%s)\n",
+				// 	// 		frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToDegrees().String(),
+				// 	// 	)
+				// 	// }
+
+				// 	resultIkQuat = linkQuat.Mul(ikQuat)
+
+				// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+				// 		bf := NewBoneFrame(count)
+				// 		bf.Rotation = resultIkQuat.Copy()
+				// 		ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+				// 		count++
+
+				// 		fmt.Fprintf(ikFile,
+				// 			"[%04d][%03d][%s][%05d][軸制限前] resultIkQuat: %s(%s)\n",
+				// 			frame, loop, linkBone.Name, count-1, resultIkQuat.String(), resultIkQuat.ToMMDDegrees().String())
+				// 	}
+			} else {
+				if linkBone.HasFixedAxis() {
+					if linkAxis.Dot(linkBone.NormalizedFixedAxis) < 0 {
+						linkAngle = -linkAngle
+					}
+
+					// 軸制限ありの場合、軸にそった理想回転量とする
+					linkAxis = linkBone.NormalizedFixedAxis
 				}
 
-				// 軸制限ありの場合、軸にそった理想回転量とする
-				linkAxis = linkBone.NormalizedFixedAxis
-
-				// 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
-				ikQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle).Shorten()
+				ikQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
@@ -538,12 +574,13 @@ ikLoop:
 					count++
 
 					fmt.Fprintf(ikFile,
-						"[%04d][%03d][%s][%05d][軸制限][理想軸制限回転] quat: %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToDegrees().String(),
-					)
+						"[%04d][%03d][%s][%05d][角度制限なし] ikQuat: %s(%s)\n",
+						frame, loop, linkBone.Name, count-1, ikQuat.String(), ikQuat.ToMMDDegrees().String())
 				}
 
-				resultIkQuat = linkQuat.Mul(ikQuat)
+				// 既存のFK回転・IK回転・今回の計算をすべて含めて実際回転を求める
+				resultIkQuat = linkQuat.Muled(ikQuat)
+				// resultIkQuat = ikQuat.Muled(linkQuat)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := NewBoneFrame(count)
@@ -552,10 +589,12 @@ ikLoop:
 					count++
 
 					fmt.Fprintf(ikFile,
-						"[%04d][%03d][%s][%05d][軸制限前] resultIkQuat: %s(%s)\n",
+						"[%04d][%03d][%s][%05d][角度制限なし] resultIkQuat: %s(%s)\n",
 						frame, loop, linkBone.Name, count-1, resultIkQuat.String(), resultIkQuat.ToMMDDegrees().String())
 				}
+			}
 
+			if linkBone.HasFixedAxis() {
 				// 軸制限回転を求める
 				resultIkQuat = resultIkQuat.ToFixedAxisRotation(linkBone.NormalizedFixedAxis)
 
@@ -568,20 +607,6 @@ ikLoop:
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][軸制限後処理] resultIkQuat: %s(%s)\n",
 						frame, loop, linkBone.Name, count-1, resultIkQuat.String(), resultIkQuat.ToMMDDegrees().String())
-				}
-			} else {
-				ikQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle).Shorten()
-				resultIkQuat = linkQuat.Mul(ikQuat)
-
-				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					bf := NewBoneFrame(count)
-					bf.Rotation = ikQuat.Copy()
-					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
-					count++
-
-					fmt.Fprintf(ikFile,
-						"[%04d][%03d][%s][%05d][角度制限なし] ikQuat: %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, ikQuat.String(), ikQuat.ToMMDDegrees().String())
 				}
 			}
 
@@ -632,8 +657,9 @@ ikLoop:
 			if boneDeltas.Get(effectorBone.Index).frameIkRotation == nil {
 				boneDeltas.Get(effectorBone.Index).frameIkRotation = ikQuat
 			} else {
-				boneDeltas.Get(effectorBone.Index).frameIkRotation =
-					ikQuat.Mul(boneDeltas.Get(effectorBone.Index).frameIkRotation)
+				// boneDeltas.Get(effectorBone.Index).frameIkRotation =
+				// 	ikQuat.Mul(boneDeltas.Get(effectorBone.Index).frameIkRotation)
+				boneDeltas.Get(effectorBone.Index).frameIkRotation.Mul(ikQuat)
 			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -979,6 +1005,26 @@ func (fs *BoneFrames) calcBoneDeltas(
 
 		// 回転
 		rot := delta.LocalRotation()
+		// rot := delta.frameRotation.Copy()
+		// if rot == nil {
+		// 	rot = mmath.NewMQuaternion()
+		// }
+
+		// isEffectorRot := false
+		// isIkRot := false
+		// if delta.frameIkRotation != nil && !delta.frameIkRotation.IsIdent() {
+		// 	rot = delta.frameIkRotation.Muled(rot)
+		// 	isIkRot = true
+		// }
+		// if delta.frameEffectRotation != nil && !delta.frameEffectRotation.IsIdent() {
+		// 	rot = rot.Muled(delta.frameEffectRotation)
+		// 	isEffectorRot = true
+		// }
+		// if (isIkRot || isEffectorRot) && delta.Bone.HasFixedAxis() {
+		// 	// 軸制限回転を求める
+		// 	rot = rot.ToFixedAxisRotation(delta.Bone.NormalizedFixedAxis)
+		// }
+
 		if rot != nil && !rot.IsIdent() {
 			delta.unitMatrix.Mul(rot.ToMat4())
 		}
@@ -1218,7 +1264,7 @@ func (fs *BoneFrames) getRotation(
 	}
 
 	if bf.MorphRotation != nil {
-		rot = bf.MorphRotation.Mul(rot)
+		rot = bf.MorphRotation.Muled(rot)
 	}
 
 	ikRot := boneDeltas.Get(bone.Index).frameIkRotation
@@ -1230,10 +1276,10 @@ func (fs *BoneFrames) getRotation(
 	if bone.IsEffectorRotation() && bone.CanRotate() {
 		// 外部親変形ありの場合、外部親回転を取得する
 		effectRot := fs.getEffectRotation(frame, bone, model, boneDeltas, loop+1)
-		return rot.Shorten(), ikRot, effectRot.Shorten()
+		return rot, ikRot, effectRot
 	}
 
-	return rot.Shorten(), ikRot, nil
+	return rot, ikRot, nil
 }
 
 // 付与親を加味した回転角度
@@ -1247,12 +1293,12 @@ func (fs *BoneFrames) getEffectRotation(
 	if bone.EffectFactor == 0 || loop > 20 {
 		// 付与率が0の場合、常に0になる
 		// MMDエンジン対策で無限ループを避ける
-		return mmath.NewMQuaternion()
+		return nil
 	}
 
 	if !(bone.EffectIndex > 0 && model.Bones.Contains(bone.EffectIndex)) {
 		// 付与親が存在しない場合、常に0になる
-		return mmath.NewMQuaternion()
+		return nil
 	}
 
 	// 付与親が存在する場合、付与親の回転角度を掛ける
@@ -1260,16 +1306,18 @@ func (fs *BoneFrames) getEffectRotation(
 
 	bf := fs.Get(effectBone.Name).Get(frame)
 	if bf == nil {
-		return mmath.NewMQuaternion()
+		return nil
 	}
 
 	rot, ikRot, effectRot := fs.getRotation(bf, frame, effectBone, model, boneDeltas, loop+1)
 
 	if ikRot != nil {
+		// rot = ikRot.Muled(rot)
 		rot.Mul(ikRot)
 	}
 
 	if effectRot != nil {
+		// rot.Mul(effectRot)
 		rot = effectRot.Mul(rot)
 	}
 

@@ -46,10 +46,12 @@ func (bd *BoneDelta) GlobalPosition() *mmath.MVec3 {
 func (bd *BoneDelta) LocalRotation() *mmath.MQuaternion {
 	rot := bd.FrameRotation().Copy()
 	if bd.frameIkRotation != nil && !bd.frameIkRotation.IsIdent() {
-		rot.Mul(bd.frameIkRotation)
+		// rot.Mul(bd.frameIkRotation)
+		rot = bd.frameIkRotation.Muled(rot)
 	}
 	if bd.frameEffectRotation != nil && !bd.frameEffectRotation.IsIdent() {
-		rot = bd.frameEffectRotation.Muled(rot)
+		// rot = bd.frameEffectRotation.Muled(rot)
+		rot.Mul(bd.frameEffectRotation)
 	}
 
 	if bd.Bone.HasFixedAxis() {
