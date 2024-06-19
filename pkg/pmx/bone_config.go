@@ -163,6 +163,7 @@ const (
 	LEG_IK_PARENT StandardBoneNames = "{d}足IK親"
 	LEG_IK        StandardBoneNames = "{d}足ＩＫ"
 	TOE_IK        StandardBoneNames = "{d}つま先ＩＫ"
+	HEEL          StandardBoneNames = "{d}かかと"
 )
 
 func (s StandardBoneNames) String() string {
