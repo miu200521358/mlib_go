@@ -357,12 +357,34 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				{
 					bf := NewBoneFrame(count)
-					bf.Rotation = linkDelta.frameRotation.Copy()
+					bf.Rotation = linkDelta.FrameRotation().Copy()
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 					count++
 
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][frameRotation] %s(%s)\n",
+						frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String(),
+					)
+				}
+				{
+					bf := NewBoneFrame(count)
+					bf.Rotation = linkDelta.FrameIkRotation().Copy()
+					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+					count++
+
+					fmt.Fprintf(ikFile,
+						"[%04d][%03d][%s][%05d][frameIkRotation] %s(%s)\n",
+						frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String(),
+					)
+				}
+				{
+					bf := NewBoneFrame(count)
+					bf.Rotation = linkDelta.FrameEffectRotation().Copy()
+					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+					count++
+
+					fmt.Fprintf(ikFile,
+						"[%04d][%03d][%s][%05d][frameEffectRotation] %s(%s)\n",
 						frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String(),
 					)
 				}
@@ -1321,8 +1343,8 @@ func (fs *BoneFrames) getEffectRotation(
 	}
 
 	if effectRot != nil {
-		// rot.Mul(effectRot)
-		rot = effectRot.Mul(rot)
+		rot.Mul(effectRot)
+		// rot = effectRot.Mul(rot)
 	}
 
 	return rot.MuledScalar(bone.EffectFactor).Shorten()
