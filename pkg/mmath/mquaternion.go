@@ -143,6 +143,7 @@ const (
 	GIMBAL1_5_RAD  = GIMBAL1_RAD * 1.5
 	GIMBAL2_RAD    = GIMBAL1_RAD * 2
 	ONE_RAD        = math.Pi
+	HALF_RAD       = math.Pi / 2
 )
 
 // ToRadiansWithGimbalは、クォータニオンを三軸のオイラー角（ラジアン）回転を返します。

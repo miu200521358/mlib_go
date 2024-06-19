@@ -240,3 +240,18 @@ func (mat *MMat4) ClampIfVerySmall() *MMat4 {
 	}
 	return mat
 }
+
+func (mat *MMat4) AxisX() *MVec3 {
+	v := MVec3(mgl64.Mat4(*mat).Row(0).Vec3())
+	return &v
+}
+
+func (mat *MMat4) AxisY() *MVec3 {
+	v := MVec3(mgl64.Mat4(*mat).Row(1).Vec3())
+	return &v
+}
+
+func (mat *MMat4) AxisZ() *MVec3 {
+	v := MVec3(mgl64.Mat4(*mat).Row(2).Vec3())
+	return &v
+}
