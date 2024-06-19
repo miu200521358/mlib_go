@@ -1091,6 +1091,10 @@ func (fs *BoneFrames) createBoneDeltas(
 		layerIndexes := make(pmx.LayerIndexes, 0, len(targetSortedBones))
 
 		for _, boneName := range boneNames {
+			if !model.Bones.ContainsName(boneName) {
+				continue
+			}
+
 			// ボーン名の追加
 			bone := model.Bones.GetByName(boneName)
 			layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
