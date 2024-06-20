@@ -69,9 +69,21 @@ func (md *MaterialMorphDelta) Add(m *pmx.MaterialMorphOffset, ratio float64) {
 	md.Ambient.Add(m.Ambient.MuledScalar(ratio))
 	md.Edge.Add(m.Edge.MuledScalar(ratio))
 	md.EdgeSize += m.EdgeSize * ratio
-	md.TextureFactor.Add(m.TextureFactor.MuledScalar(ratio))
-	md.SphereTextureFactor.Add(m.SphereTextureFactor.MuledScalar(ratio))
-	md.ToonTextureFactor.Add(m.ToonTextureFactor.MuledScalar(ratio))
+	if md.TextureFactor == nil {
+		md.TextureFactor = m.TextureFactor.MuledScalar(ratio)
+	} else {
+		md.TextureFactor.Add(m.TextureFactor.MuledScalar(ratio))
+	}
+	if md.SphereTextureFactor == nil {
+		md.SphereTextureFactor = m.SphereTextureFactor.MuledScalar(ratio)
+	} else {
+		md.SphereTextureFactor.Add(m.SphereTextureFactor.MuledScalar(ratio))
+	}
+	if md.ToonTextureFactor == nil {
+		md.ToonTextureFactor = m.ToonTextureFactor.MuledScalar(ratio)
+	} else {
+		md.ToonTextureFactor.Add(m.ToonTextureFactor.MuledScalar(ratio))
+	}
 }
 
 func (md *MaterialMorphDelta) Mul(m *pmx.MaterialMorphOffset, ratio float64) {
@@ -80,9 +92,21 @@ func (md *MaterialMorphDelta) Mul(m *pmx.MaterialMorphOffset, ratio float64) {
 	md.Ambient.Mul(m.Ambient.MuledScalar(ratio))
 	md.Edge.Mul(m.Edge.MuledScalar(ratio))
 	md.EdgeSize += m.EdgeSize * ratio
-	md.TextureFactor.Mul(m.TextureFactor.MuledScalar(ratio))
-	md.SphereTextureFactor.Mul(m.SphereTextureFactor.MuledScalar(ratio))
-	md.ToonTextureFactor.Mul(m.ToonTextureFactor.MuledScalar(ratio))
+	if md.TextureFactor == nil {
+		md.TextureFactor = m.TextureFactor.MuledScalar(ratio)
+	} else {
+		md.TextureFactor.Mul(m.TextureFactor.MuledScalar(ratio))
+	}
+	if md.SphereTextureFactor == nil {
+		md.SphereTextureFactor = m.SphereTextureFactor.MuledScalar(ratio)
+	} else {
+		md.SphereTextureFactor.Mul(m.SphereTextureFactor.MuledScalar(ratio))
+	}
+	if md.ToonTextureFactor == nil {
+		md.ToonTextureFactor = m.ToonTextureFactor.MuledScalar(ratio)
+	} else {
+		md.ToonTextureFactor.Mul(m.ToonTextureFactor.MuledScalar(ratio))
+	}
 }
 
 type MaterialMorphDeltas struct {
