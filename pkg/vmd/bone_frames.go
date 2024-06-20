@@ -407,22 +407,14 @@ ikLoop:
 
 			// 回転角(ラジアン)
 			// 単位角を超えないようにする
-			linkAngle := math.Acos(mmath.ClampFloat(linkDot, -1, 1))
+			originalLinkAngle := math.Acos(mmath.ClampFloat(linkDot, -1, 1))
+			linkAngle := mmath.ClampFloat(originalLinkAngle, -unitRad, unitRad)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][角度] linkAngle: %.8f (%.5f)\n",
+					"[%04d][%03d][%s][%05d][単位角制限] linkAngle: %.8f(%.5f), originalLinkAngle: %.8f(%.5f), unitRad: %.8f (%.5f)\n",
 					frame, loop, linkBone.Name, count-1, linkAngle, mmath.ToDegree(linkAngle),
-				)
-			}
-
-			linkAngle = mmath.ClampFloat(linkAngle, -unitRad, unitRad)
-
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][単位角制限] linkAngle: %.8f (%.5f), unitRad: %.8f (%.5f)\n",
-					frame, loop, linkBone.Name, count-1, linkAngle,
-					mmath.ToDegree(linkAngle), unitRad, mmath.ToDegree(unitRad),
+					originalLinkAngle, mmath.ToDegree(originalLinkAngle), unitRad, mmath.ToDegree(unitRad),
 				)
 			}
 
@@ -447,33 +439,34 @@ ikLoop:
 				}
 			}
 
-			originalIkQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, linkAngle)
+			originalIkQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, originalLinkAngle)
 			ikQuat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
-
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				bf := NewBoneFrame(count)
-				bf.Rotation = ikQuat.Copy()
-				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
-				count++
-
-				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][ikQuat] ikQuat: %s(%s), originalIkQuat: %s(%s)\n",
-					frame, loop, linkBone.Name, count-1, ikQuat.String(), ikQuat.ToMMDDegrees().String(),
-					originalIkQuat.String(), originalIkQuat.ToMMDDegrees().String())
-			}
 
 			originalTotalIkQuat := linkQuat.Muled(originalIkQuat)
 			totalIkQuat := linkQuat.Muled(ikQuat)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				bf := NewBoneFrame(count)
-				bf.Rotation = totalIkQuat.Copy()
-				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
-				count++
+				{
+					bf := NewBoneFrame(count)
+					bf.Rotation = originalTotalIkQuat.Copy()
+					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+					count++
 
-				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][totalIkQuat] %s(%s)\n",
-					frame, loop, linkBone.Name, count-1, totalIkQuat.String(), totalIkQuat.ToMMDDegrees().String())
+					fmt.Fprintf(ikFile,
+						"[%04d][%03d][%s][%05d][originalTotalIkQuat] %s(%s), originalIkQuat: %s(%s)\n",
+						frame, loop, linkBone.Name, count-1, originalTotalIkQuat.String(), originalTotalIkQuat.ToMMDDegrees().String(), originalIkQuat.String(), originalIkQuat.ToMMDDegrees().String())
+				}
+				{
+					bf := NewBoneFrame(count)
+					bf.Rotation = totalIkQuat.Copy()
+					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+					count++
+
+					fmt.Fprintf(ikFile,
+						"[%04d][%03d][%s][%05d][totalIkQuat] %s(%s), ikQuat: %s(%s)\n",
+						frame, loop, linkBone.Name, count-1, totalIkQuat.String(), totalIkQuat.ToMMDDegrees().String(),
+						ikQuat.String(), ikQuat.ToMMDDegrees().String())
+				}
 			}
 
 			var resultIkQuat *mmath.MQuaternion
@@ -587,7 +580,7 @@ ikLoop:
 					frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
 			}
 
-			remainingQuat := resultIkQuat.Muled(originalTotalIkQuat.Inverted()).Shorten()
+			remainingQuat := originalTotalIkQuat.Inverted().Mul(resultIkQuat)
 
 			// IKターゲットの回転に残回転量を加算
 			effectorDelta := boneDeltas.Get(effectorBone.Index)

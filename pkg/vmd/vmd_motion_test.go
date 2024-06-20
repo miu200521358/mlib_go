@@ -469,6 +469,8 @@ func TestVmdMotion_DeformLegIk3_Matsu(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk4_Snow(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/好き雪_2794.vmd")
 
