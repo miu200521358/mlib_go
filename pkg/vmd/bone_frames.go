@@ -404,13 +404,20 @@ ikLoop:
 				)
 			}
 
+			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+				fmt.Fprintf(ikFile,
+					"[%04d][%03d][%s][%05d][回転軸] linkAxis: %s, originalLinkAxis: %s\n",
+					frame, loop, linkBone.Name, count-1, linkAxis.String(), originalLinkAxis.String(),
+				)
+			}
+
 			// 単位角
 			unitRad := ikBone.Ik.UnitRotation.GetRadians().GetX() * float64(lidx+1)
 			linkDot := ikLocalPosition.Dot(effectorLocalPosition)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][回転軸・角度] unitRad: %.8f, linkDot: %.8f\n",
+					"[%04d][%03d][%s][%05d][回転角度] unitRad: %.8f, linkDot: %.8f\n",
 					frame, loop, linkBone.Name, count-1, unitRad, linkDot,
 				)
 			}
@@ -463,8 +470,12 @@ ikLoop:
 					count++
 
 					fmt.Fprintf(ikFile,
-						"[%04d][%03d][%s][%05d][originalTotalIkQuat] %s(%s), originalIkQuat: %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, originalTotalIkQuat.String(), originalTotalIkQuat.ToMMDDegrees().String(), originalIkQuat.String(), originalIkQuat.ToMMDDegrees().String())
+						"[%04d][%03d][%s][%05d][originalTotalIkQuat] %s(%s)\n",
+						frame, loop, linkBone.Name, count-1, originalTotalIkQuat.String(), originalTotalIkQuat.ToMMDDegrees().String())
+
+					fmt.Fprintf(ikFile,
+						"[%04d][%03d][%s][%05d][originalIkQuat] %s(%s)\n",
+						frame, loop, linkBone.Name, count-1, originalIkQuat.String(), originalIkQuat.ToMMDDegrees().String())
 				}
 				{
 					bf := NewBoneFrame(count)
@@ -473,9 +484,12 @@ ikLoop:
 					count++
 
 					fmt.Fprintf(ikFile,
-						"[%04d][%03d][%s][%05d][totalIkQuat] %s(%s), ikQuat: %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, totalIkQuat.String(), totalIkQuat.ToMMDDegrees().String(),
-						ikQuat.String(), ikQuat.ToMMDDegrees().String())
+						"[%04d][%03d][%s][%05d][totalIkQuat] %s(%s)\n",
+						frame, loop, linkBone.Name, count-1, totalIkQuat.String(), totalIkQuat.ToMMDDegrees().String())
+
+					fmt.Fprintf(ikFile,
+						"[%04d][%03d][%s][%05d][ikQuat] %s(%s)\n",
+						frame, loop, linkBone.Name, count-1, ikQuat.String(), ikQuat.ToMMDDegrees().String())
 				}
 			}
 
@@ -668,6 +682,9 @@ func (fs *BoneFrames) getLinkAxis(
 	}
 
 	linkMat := linkQuat.ToMat4()
+	fmt.Fprintf(ikFile,
+		"[%04d][%03d][%s][%05d][linkMat] %s\n",
+		frame, loop, linkBoneName, count-1, linkMat.String())
 
 	if minAngleLimitRadians.GetY() == 0 && maxAngleLimitRadians.GetY() == 0 &&
 		minAngleLimitRadians.GetZ() == 0 && maxAngleLimitRadians.GetZ() == 0 {
@@ -682,10 +699,8 @@ func (fs *BoneFrames) getLinkAxis(
 
 		if vv < 0 {
 			return mmath.MVec3UnitXInv, linkAxis
-		} else {
-			return mmath.MVec3UnitX, linkAxis
 		}
-		// return mmath.MVec3UnitX
+		return mmath.MVec3UnitX, linkAxis
 	} else if minAngleLimitRadians.GetX() == 0 && maxAngleLimitRadians.GetX() == 0 &&
 		minAngleLimitRadians.GetZ() == 0 && maxAngleLimitRadians.GetZ() == 0 {
 		// Y軸のみの制限の場合
@@ -699,10 +714,8 @@ func (fs *BoneFrames) getLinkAxis(
 
 		if vv < 0 {
 			return mmath.MVec3UnitYInv, linkAxis
-		} else {
-			return mmath.MVec3UnitY, linkAxis
 		}
-		// return mmath.MVec3UnitY
+		return mmath.MVec3UnitY, linkAxis
 	} else if minAngleLimitRadians.GetX() == 0 && maxAngleLimitRadians.GetX() == 0 &&
 		minAngleLimitRadians.GetY() == 0 && maxAngleLimitRadians.GetY() == 0 {
 		// Z軸のみの制限の場合
@@ -716,14 +729,11 @@ func (fs *BoneFrames) getLinkAxis(
 
 		if vv < 0 {
 			return mmath.MVec3UnitZInv, linkAxis
-		} else {
-			return mmath.MVec3UnitZ, linkAxis
 		}
-		// return mmath.MVec3UnitZ
+		return mmath.MVec3UnitZ, linkAxis
 	}
 
 	return linkAxis.Normalize(), linkAxis
-	// return linkMat.MulVec3(linkAxis).Normalize()
 }
 
 func (fs *BoneFrames) calcIkLimitQuaternion(

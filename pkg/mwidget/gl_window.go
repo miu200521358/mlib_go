@@ -509,6 +509,7 @@ func (w *GlWindow) Run() {
 
 		if w.playing && w.motionPlayer != nil && w.frame >= w.motionPlayer.FrameEdit.MaxValue() {
 			w.frame = 0
+			w.prevFrame = 0
 			w.motionPlayer.SetValue(int(w.frame))
 		}
 
