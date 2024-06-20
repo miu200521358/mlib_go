@@ -293,7 +293,7 @@ func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 	motion := motionData.(*VmdMotion)
 
 	pr := &pmx.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/019_にっかり青江/にっかり青江 帽子屋式 ver2.1/帽子屋式にっかり青江（戦装束）.pmx")
+	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/019_にっかり青江/にっかり青江 帽子屋式 ver2.1/帽子屋式にっかり青江（戦装束）_表示枠.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -304,7 +304,7 @@ func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 	{
 
 		fno := int(0)
-		boneDeltas := motion.BoneFrames.Deform(fno, model, []string{pmx.TOE.Left(), pmx.TOE_EX.Left()}, true, nil, nil)
+		boneDeltas := motion.BoneFrames.Deform(fno, model, []string{pmx.TOE.Left(), pmx.HEEL.Left(), pmx.TOE_EX.Left()}, true, nil, nil)
 		{
 			expectedPosition := &mmath.MVec3{-4.374956, 13.203792, 1.554190}
 			if !boneDeltas.GetByName(pmx.LOWER.String()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
@@ -339,6 +339,12 @@ func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 			expectedPosition := &mmath.MVec3{-12.845280, 2.816309, -2.136874}
 			if !boneDeltas.GetByName(pmx.TOE_EX.Left()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE_EX.Left()).GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE_EX.Left()).GlobalPosition().MMD()))
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-12.545708, 4.008257, -0.932670}
+			if !boneDeltas.GetByName(pmx.HEEL.Left()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.HEEL.Left()).GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.HEEL.Left()).GlobalPosition().MMD()))
 			}
 		}
 	}
