@@ -457,8 +457,9 @@ ikLoop:
 				count++
 
 				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][ikQuat] %s(%s)\n",
-					frame, loop, linkBone.Name, count-1, ikQuat.String(), ikQuat.ToMMDDegrees().String())
+					"[%04d][%03d][%s][%05d][ikQuat] ikQuat: %s(%s), originalIkQuat: %s(%s)\n",
+					frame, loop, linkBone.Name, count-1, ikQuat.String(), ikQuat.ToMMDDegrees().String(),
+					originalIkQuat.String(), originalIkQuat.ToMMDDegrees().String())
 			}
 
 			originalTotalIkQuat := linkQuat.Muled(originalIkQuat)
