@@ -412,7 +412,7 @@ ikLoop:
 			}
 
 			// 単位角
-			unitRad := ikBone.Ik.UnitRotation.GetRadians().GetX() * float64(lidx+1)
+			unitRad := ikBone.Ik.UnitRotation.GetRadians().GetX() // * float64(lidx+1)
 			linkDot := ikLocalPosition.Dot(effectorLocalPosition)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -746,10 +746,10 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 	loop int, // ループ回数
 	loopCount int, // ループ総回数
 	frame int, // キーフレーム
-	count int, // デバッグ用) キーフレ位置
-	linkBoneName string, // デバッグ用) リンクボーン名
-	ikMotion *VmdMotion, // デバッグ用) IKモーション
-	ikFile *os.File, // デバッグ用) IKファイル
+	count int, // デバッグ用: キーフレ位置
+	linkBoneName string, // デバッグ用: リンクボーン名
+	ikMotion *VmdMotion, // デバッグ用: IKモーション
+	ikFile *os.File, // デバッグ用: IKファイル
 ) (*mmath.MQuaternion, int) {
 	ikMat := ikQuat.ToMat4()
 
