@@ -682,9 +682,11 @@ func (fs *BoneFrames) getLinkAxis(
 	}
 
 	linkMat := linkQuat.ToMat4()
-	fmt.Fprintf(ikFile,
-		"[%04d][%03d][%s][%05d][linkMat] %s\n",
-		frame, loop, linkBoneName, count-1, linkMat.String())
+	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		fmt.Fprintf(ikFile,
+			"[%04d][%03d][%s][%05d][linkMat] %s (x: %s, y: %s, z: %s)\n",
+			frame, loop, linkBoneName, count-1, linkMat.String(), linkMat.AxisX().String(), linkMat.AxisY().String(), linkMat.AxisZ().String())
+	}
 
 	if minAngleLimitRadians.GetY() == 0 && maxAngleLimitRadians.GetY() == 0 &&
 		minAngleLimitRadians.GetZ() == 0 && maxAngleLimitRadians.GetZ() == 0 {
@@ -752,6 +754,11 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 	ikFile *os.File, // デバッグ用: IKファイル
 ) (*mmath.MQuaternion, int) {
 	ikMat := ikQuat.ToMat4()
+	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		fmt.Fprintf(ikFile,
+			"[%04d][%03d][%s][%05d][ikMat] %s (x: %s, y: %s, z: %s)\n",
+			frame, loop, linkBoneName, count-1, ikMat.String(), ikMat.AxisX().String(), ikMat.AxisY().String(), ikMat.AxisZ().String())
+	}
 
 	// 軸回転角度を算出
 	if minAngleLimitRadians.GetX() > -mmath.HALF_RAD && maxAngleLimitRadians.GetX() < mmath.HALF_RAD {
