@@ -367,10 +367,10 @@ ikLoop:
 			}
 
 			// 回転軸
-			var linkAxis *mmath.MVec3
+			var originalLinkAxis, linkAxis *mmath.MVec3
 			if ikLink.AngleLimit {
 				// グローバル軸制限
-				linkAxis = fs.getLinkAxis(
+				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.MinAngleLimit.GetRadians(),
 					ikLink.MaxAngleLimit.GetRadians(),
 					effectorLocalPosition, ikLocalPosition, linkQuat,
@@ -378,7 +378,7 @@ ikLoop:
 				)
 			} else if ikLink.LocalAngleLimit {
 				// ローカル軸制限
-				linkAxis = fs.getLinkAxis(
+				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.LocalMinAngleLimit.GetRadians(),
 					ikLink.LocalMaxAngleLimit.GetRadians(),
 					effectorLocalPosition, ikLocalPosition, linkQuat,
@@ -386,7 +386,7 @@ ikLoop:
 				)
 			} else {
 				// 軸制限なし
-				linkAxis = fs.getLinkAxis(
+				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					mmath.MVec3MinVal,
 					mmath.MVec3MaxVal,
 					effectorLocalPosition, ikLocalPosition, linkQuat,
@@ -447,6 +447,7 @@ ikLoop:
 				}
 			}
 
+			originalIkQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, linkAngle)
 			ikQuat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -460,6 +461,7 @@ ikLoop:
 					frame, loop, linkBone.Name, count-1, ikQuat.String(), ikQuat.ToMMDDegrees().String())
 			}
 
+			originalTotalIkQuat := linkQuat.Muled(originalIkQuat)
 			totalIkQuat := linkQuat.Muled(ikQuat)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -584,7 +586,7 @@ ikLoop:
 					frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
 			}
 
-			remainingQuat := resultIkQuat.Muled(totalIkQuat.Inverted())
+			remainingQuat := resultIkQuat.Muled(originalTotalIkQuat.Inverted()).Shorten()
 
 			// IKターゲットの回転に残回転量を加算
 			effectorDelta := boneDeltas.Get(effectorBone.Index)
@@ -592,7 +594,7 @@ ikLoop:
 				effectorDelta = &BoneDelta{Bone: effectorBone, Frame: frame}
 			}
 			effectorDelta.frameRotation = remainingQuat.Muled(effectorDelta.FrameRotation())
-			// effectorDelta.frameRotation = effectorDelta.FrameRotation().Muled(ikQuat)
+			// effectorDelta.frameRotation = effectorDelta.FrameRotation().Muled(remainingQuat)
 			boneDeltas.Append(effectorDelta)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -629,7 +631,7 @@ func (fs *BoneFrames) getLinkAxis(
 	linkBoneName string,
 	ikMotion *VmdMotion,
 	ikFile *os.File,
-) *mmath.MVec3 {
+) (*mmath.MVec3, *mmath.MVec3) {
 	// 回転軸
 	linkAxis := effectorLocalPosition.Cross(ikLocalPosition).Normalize()
 
@@ -654,9 +656,9 @@ func (fs *BoneFrames) getLinkAxis(
 		}
 
 		if vv < 0 {
-			return mmath.MVec3UnitXInv
+			return mmath.MVec3UnitXInv, linkAxis
 		} else {
-			return mmath.MVec3UnitX
+			return mmath.MVec3UnitX, linkAxis
 		}
 		// return mmath.MVec3UnitX
 	} else if minAngleLimitRadians.GetX() == 0 && maxAngleLimitRadians.GetX() == 0 &&
@@ -671,9 +673,9 @@ func (fs *BoneFrames) getLinkAxis(
 		}
 
 		if vv < 0 {
-			return mmath.MVec3UnitYInv
+			return mmath.MVec3UnitYInv, linkAxis
 		} else {
-			return mmath.MVec3UnitY
+			return mmath.MVec3UnitY, linkAxis
 		}
 		// return mmath.MVec3UnitY
 	} else if minAngleLimitRadians.GetX() == 0 && maxAngleLimitRadians.GetX() == 0 &&
@@ -688,14 +690,14 @@ func (fs *BoneFrames) getLinkAxis(
 		}
 
 		if vv < 0 {
-			return mmath.MVec3UnitZInv
+			return mmath.MVec3UnitZInv, linkAxis
 		} else {
-			return mmath.MVec3UnitZ
+			return mmath.MVec3UnitZ, linkAxis
 		}
 		// return mmath.MVec3UnitZ
 	}
 
-	return linkAxis.Normalize()
+	return linkAxis.Normalize(), linkAxis
 	// return linkMat.MulVec3(linkAxis).Normalize()
 }
 
