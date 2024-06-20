@@ -250,6 +250,14 @@ func (fs *BoneFrames) calcIk(
 
 	loopCount := max(ikBone.Ik.LoopCount, 1)
 
+	// // リンクボーン全体の長さ
+	// ikBoneTotalLength := 0.0
+	// for _, l := range ikBone.Ik.Links {
+	// 	if model.Bones.Contains(l.BoneIndex) {
+	// 		ikBoneTotalLength += model.Bones.Get(l.BoneIndex).ParentRelativePosition.Length()
+	// 	}
+	// }
+
 	// IK計算
 ikLoop:
 	for loop := 0; loop < loopCount; loop++ {
@@ -355,6 +363,8 @@ ikLoop:
 			if effectorLocalPosition.Distance(ikLocalPosition) < 1e-7 {
 				break ikLoop
 			}
+
+			// isIkFar := ikLocalPosition.Length()-ikBoneTotalLength > 0.1
 
 			effectorLocalPosition.Normalize()
 			ikLocalPosition.Normalize()
@@ -568,18 +578,29 @@ ikLoop:
 					frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
 			}
 
+			// remainAngle := resultIkQuat.ToSignedRadian() - originalTotalIkQuat.ToSignedRadian()
+			// remainingQuat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, remainAngle)
+
+			// remainingQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, remainAngle)
+			// var remainingQuat *mmath.MQuaternion
+			// if isIkFar {
+			// } else {
+			// 	remainAngle := resultIkQuat.ToSignedRadian() - originalTotalIkQuat.ToSignedRadian()
+			// 	remainingQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, remainAngle)
+			// }
+			// remainingQuat := resultIkQuat.Muled(originalTotalIkQuat.Inverted())
+			// remainingQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, resultIkQuat.Muled(originalTotalIkQuat.Inverted()).ToSignedRadian())
+			// remainingQuat := resultIkQuat .Muled(totalIkQuat.Inverted())
+
 			remainingQuat := resultIkQuat.Muled(originalTotalIkQuat.Inverted())
+
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][残存] remainingQuat: %s(%s)\n",
 					frame, loop, linkBone.Name, count-1, remainingQuat.String(), remainingQuat.ToMMDDegrees().String())
 			}
 
-			if !remainingQuat.IsIdent() {
-				// remainingQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, remainAngle)
-				// remainingQuat := resultIkQuat.Muled(originalTotalIkQuat.Inverted())
-				// remainingQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, resultIkQuat.Muled(originalTotalIkQuat.Inverted()).ToSignedRadian())
-
+			if !remainingQuat.IsIdent() && false {
 				// IKターゲットの回転に残回転量を加算
 				effectorDelta := boneDeltas.Get(effectorBone.Index)
 				if effectorDelta == nil {

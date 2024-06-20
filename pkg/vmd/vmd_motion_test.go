@@ -3332,12 +3332,6 @@ func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 			}
 		}
 		{
-			expectedPosition := &mmath.MVec3{7.772183, 12.307314, 1.428563}
-			if !boneDeltas.GetByName("左手YZ先").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手YZ先").GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手YZ先").GlobalPosition().MMD()))
-			}
-		}
-		{
 			expectedPosition := &mmath.MVec3{7.471097, 12.074032, 1.410383}
 			if !boneDeltas.GetByName("左手YZ先").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手YZ先").GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手YZ先").GlobalPosition().MMD()))
