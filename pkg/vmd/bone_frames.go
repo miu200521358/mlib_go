@@ -568,10 +568,15 @@ ikLoop:
 					frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
 			}
 
-			// IKターゲットの回転を更新
+			// IKターゲットの回転に残回転量を加算
+			effectorDelta := boneDeltas.Get(effectorBone.Index)
+			if effectorDelta == nil {
+				effectorDelta = &BoneDelta{Bone: effectorBone, Frame: frame}
+			}
+
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := NewBoneFrame(count)
-				bf.Rotation = boneDeltas.Get(effectorBone.Index).LocalRotation().Copy()
+				bf.Rotation = effectorDelta.frameRotation.Copy()
 				ikMotion.AppendRegisteredBoneFrame(effectorBone.Name, bf)
 				count++
 
@@ -580,13 +585,31 @@ ikLoop:
 					frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
 			}
 
-			remainingQuat := originalTotalIkQuat.Inverted().Mul(resultIkQuat)
+			remainingQuat := resultIkQuat.Muled(originalTotalIkQuat.Inverted())
+			// remainingQuat := resultIkQuat.Inverted().Muled(originalTotalIkQuat)
+			// remainingQuat := originalTotalIkQuat.Muled(resultIkQuat.Inverted())
+			// remainingQuat := originalTotalIkQuat.Inverted().Muled(resultIkQuat)
 
-			// IKターゲットの回転に残回転量を加算
-			effectorDelta := boneDeltas.Get(effectorBone.Index)
-			if effectorDelta == nil {
-				effectorDelta = &BoneDelta{Bone: effectorBone, Frame: frame}
-			}
+			// // 軸制限がかかっている場合は、該当制限軸を回さない
+			// if ikLink.AngleLimit {
+			// 	if ikLink.MinAngleLimit.GetRadians().GetX() == 0 &&
+			// 		ikLink.MaxAngleLimit.GetRadians().GetX() == 0 {
+			// 		// X軸に制限がかかっている場合
+			// 		remainingQuat.SetX(0)
+			// 	}
+			// 	if ikLink.MinAngleLimit.GetRadians().GetY() == 0 &&
+			// 		ikLink.MaxAngleLimit.GetRadians().GetY() == 0 {
+			// 		// Y軸に制限がかかっている場合
+			// 		remainingQuat.SetY(0)
+			// 	}
+			// 	if ikLink.MinAngleLimit.GetRadians().GetZ() == 0 &&
+			// 		ikLink.MaxAngleLimit.GetRadians().GetZ() == 0 {
+			// 		// Z軸に制限がかかっている場合
+			// 		remainingQuat.SetZ(0)
+			// 	}
+			// 	remainingQuat.Normalize()
+			// }
+
 			effectorDelta.frameRotation = remainingQuat.Muled(effectorDelta.FrameRotation())
 			// effectorDelta.frameRotation = effectorDelta.FrameRotation().Muled(remainingQuat)
 			boneDeltas.Append(effectorDelta)
