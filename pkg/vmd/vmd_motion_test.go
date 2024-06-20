@@ -767,7 +767,7 @@ func TestVmdMotion_DeformLegIk6_KoshiIkOff(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk7_Syou(t *testing.T) {
-	// mlog.SetLevel(mlog.IK_VERBOSE)
+	mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/唱(ダンスのみ)_0278F.vmd")
@@ -1797,7 +1797,7 @@ func TestVmdMotion_DeformLegIk17_Snow(t *testing.T) {
 			}
 		}
 		{
-			expectedPosition := &mmath.MVec3{-1.443098, 6.324932, 4.887177}
+			expectedPosition := &mmath.MVec3{-1.443098, 6.324932, 4.837177}
 			if !boneDeltas.GetByName(pmx.TOE.Right()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.02) {
 				t.Errorf("Expected %v, got %v", expectedPosition, boneDeltas.GetByName(pmx.TOE.Right()).GlobalPosition().MMD())
 			}
