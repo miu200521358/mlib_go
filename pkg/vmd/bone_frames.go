@@ -568,62 +568,49 @@ ikLoop:
 					frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
 			}
 
-			// IKターゲットの回転に残回転量を加算
-			effectorDelta := boneDeltas.Get(effectorBone.Index)
-			if effectorDelta == nil {
-				effectorDelta = &BoneDelta{Bone: effectorBone, Frame: frame}
-			}
-
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				bf := NewBoneFrame(count)
-				bf.Rotation = effectorDelta.frameRotation.Copy()
-				ikMotion.AppendRegisteredBoneFrame(effectorBone.Name, bf)
-				count++
-
-				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][ターゲット] effectorRot: %s(%s)\n",
-					frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
-			}
-
 			remainingQuat := resultIkQuat.Muled(originalTotalIkQuat.Inverted())
-			// remainingQuat := resultIkQuat.Inverted().Muled(originalTotalIkQuat)
-			// remainingQuat := originalTotalIkQuat.Muled(resultIkQuat.Inverted())
-			// remainingQuat := originalTotalIkQuat.Inverted().Muled(resultIkQuat)
-
-			// // 軸制限がかかっている場合は、該当制限軸を回さない
-			// if ikLink.AngleLimit {
-			// 	if ikLink.MinAngleLimit.GetRadians().GetX() == 0 &&
-			// 		ikLink.MaxAngleLimit.GetRadians().GetX() == 0 {
-			// 		// X軸に制限がかかっている場合
-			// 		remainingQuat.SetX(0)
-			// 	}
-			// 	if ikLink.MinAngleLimit.GetRadians().GetY() == 0 &&
-			// 		ikLink.MaxAngleLimit.GetRadians().GetY() == 0 {
-			// 		// Y軸に制限がかかっている場合
-			// 		remainingQuat.SetY(0)
-			// 	}
-			// 	if ikLink.MinAngleLimit.GetRadians().GetZ() == 0 &&
-			// 		ikLink.MaxAngleLimit.GetRadians().GetZ() == 0 {
-			// 		// Z軸に制限がかかっている場合
-			// 		remainingQuat.SetZ(0)
-			// 	}
-			// 	remainingQuat.Normalize()
-			// }
-
-			effectorDelta.frameRotation = remainingQuat.Muled(effectorDelta.FrameRotation())
-			// effectorDelta.frameRotation = effectorDelta.FrameRotation().Muled(remainingQuat)
-			boneDeltas.Append(effectorDelta)
-
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				bf := NewBoneFrame(count)
-				bf.Rotation = effectorDelta.frameRotation.Copy()
-				ikMotion.AppendRegisteredBoneFrame(effectorBone.Name, bf)
-				count++
-
 				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][ターゲット加算] effectorRot: %s(%s), remainingQuat: %s(%s)\n",
-					frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String(),
-					remainingQuat.String(), remainingQuat.ToMMDDegrees().String())
+					"[%04d][%03d][%s][%05d][残存] remainingQuat: %s(%s)\n",
+					frame, loop, linkBone.Name, count-1, remainingQuat.String(), remainingQuat.ToMMDDegrees().String())
+			}
+
+			if !remainingQuat.IsIdent() {
+				// remainingQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, remainAngle)
+				// remainingQuat := resultIkQuat.Muled(originalTotalIkQuat.Inverted())
+				// remainingQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, resultIkQuat.Muled(originalTotalIkQuat.Inverted()).ToSignedRadian())
+
+				// IKターゲットの回転に残回転量を加算
+				effectorDelta := boneDeltas.Get(effectorBone.Index)
+				if effectorDelta == nil {
+					effectorDelta = &BoneDelta{Bone: effectorBone, Frame: frame}
+				}
+
+				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+					bf := NewBoneFrame(count)
+					bf.Rotation = effectorDelta.frameRotation.Copy()
+					ikMotion.AppendRegisteredBoneFrame(effectorBone.Name, bf)
+					count++
+
+					fmt.Fprintf(ikFile,
+						"[%04d][%03d][%s][%05d][残存] effectorRot: %s(%s)\n",
+						frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
+				}
+
+				effectorDelta.frameRotation = remainingQuat.Muled(effectorDelta.FrameRotation())
+				// effectorDelta.frameRotation = effectorDelta.FrameRotation().Muled(remainingQuat)
+				boneDeltas.Append(effectorDelta)
+
+				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+					bf := NewBoneFrame(count)
+					bf.Rotation = effectorDelta.frameRotation.Copy()
+					ikMotion.AppendRegisteredBoneFrame(effectorBone.Name, bf)
+					count++
+
+					fmt.Fprintf(ikFile,
+						"[%04d][%03d][%s][%05d][残存加算] effectorRot: %s(%s)\n",
+						frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
+				}
 			}
 		}
 

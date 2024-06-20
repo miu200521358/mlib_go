@@ -438,15 +438,16 @@ func (quat *MQuaternion) ToSignedDegree() float64 {
 }
 
 // ToSignedRadianは、符号付きラジアンに変換します。
-func (quat *MQuaternion) ToSignedRadian(axisIndex int) float64 {
+func (quat *MQuaternion) ToSignedRadian() float64 {
 	// スカラー部分から基本的な角度を計算
 	basicAngle := quat.ToRadian()
 
 	// ベクトルの長さを使って、角度の正負を決定
 	if quat.Vec3().Length() > 0 {
-		if (axisIndex == 0 && quat.GetX() > 0) ||
-			(axisIndex == 1 && quat.GetY() < 0) ||
-			(axisIndex == 2 && quat.GetZ() < 0) {
+		// ベクトルの向きに基づいて角度を調整
+		if quat.GetW() >= 0 {
+			return basicAngle
+		} else {
 			return -basicAngle
 		}
 	}
