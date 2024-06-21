@@ -174,7 +174,7 @@ func (fs *BoneFrames) prepareIk(
 	boneDeltas *BoneDeltas,
 	ikFrame *IkFrame,
 ) *BoneDeltas {
-	for _, boneIndex := range deformBoneIndexes {
+	for i, boneIndex := range deformBoneIndexes {
 		// ボーンIndexがIkTreeIndexesに含まれていない場合、スルー
 		if _, ok := model.Bones.IkTreeIndexes[boneIndex]; !ok {
 			continue
@@ -184,7 +184,20 @@ func (fs *BoneFrames) prepareIk(
 			ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[boneIndex][m])
 
 			if ikFrame == nil || ikFrame.IsEnable(ikBone.Name) {
-				boneDeltas = fs.calcIk(frame, ikBone, model, boneDeltas, ikFrame)
+				var prefixPath string
+				if mlog.IsIkVerbose() {
+					// IK計算デバッグ用モーション
+					dirPath := fmt.Sprintf("%s/IK_step", filepath.Dir(model.Path))
+					err := os.MkdirAll(dirPath, 0755)
+					if err != nil {
+						log.Fatal(err)
+					}
+
+					date := time.Now().Format("20060102_150405")
+					prefixPath = fmt.Sprintf("%s/%04d_%s_%03d_%03d", dirPath, frame, date, i, m)
+				}
+
+				boneDeltas = fs.calcIk(frame, ikBone, model, boneDeltas, ikFrame, prefixPath)
 			}
 		}
 	}
@@ -201,23 +214,19 @@ func (fs *BoneFrames) calcIk(
 	model *pmx.PmxModel,
 	boneDeltas *BoneDeltas,
 	ikFrame *IkFrame,
+	prefixPath string,
 ) *BoneDeltas {
+	var err error
 	var ikFile *os.File
 	var ikMotion *VmdMotion
 	count := int(1.0)
+
 	if mlog.IsIkVerbose() {
 		// IK計算デバッグ用モーション
-		dirPath := fmt.Sprintf("%s/IK_step", filepath.Dir(model.Path))
-		err := os.MkdirAll(dirPath, 0755)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		date := time.Now().Format("20060102_150405")
-		ikMotionPath := fmt.Sprintf("%s/%04d_%s_%s.vmd", dirPath, frame, date, ikBone.Name)
+		ikMotionPath := fmt.Sprintf("%s_%s.vmd", prefixPath, ikBone.Name)
 		ikMotion = NewVmdMotion(ikMotionPath)
 
-		ikLogPath := fmt.Sprintf("%s/%04d_%s_%s.log", dirPath, frame, date, ikBone.Name)
+		ikLogPath := fmt.Sprintf("%s_%s.log", prefixPath, ikBone.Name)
 		ikFile, err = os.OpenFile(ikLogPath, os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
 			fmt.Println(err)
@@ -1215,8 +1224,7 @@ func (fs *BoneFrames) fillBoneDeform(
 		if bf != nil {
 			// ボーンの移動位置、回転角度、拡大率を取得
 			delta.framePosition, delta.frameEffectPosition = fs.getPosition(bf, frame, bone, model, boneDeltas, 0)
-			delta.frameRotation, delta.frameEffectRotation =
-				fs.getRotation(bf, frame, bone, model, boneDeltas, 0)
+			delta.frameRotation, delta.frameEffectRotation = fs.getRotation(bf, frame, bone, model, boneDeltas, 0)
 			delta.frameScale = fs.getScale(bf, bone, boneDeltas)
 		}
 		boneDeltas.Append(delta)
@@ -1252,7 +1260,7 @@ func (fs *BoneFrames) getPosition(
 		pos.Add(bf.MorphPosition)
 	}
 
-	if bone.IsEffectorTranslation() && bone.CanTranslate() {
+	if bone.IsEffectorTranslation() {
 		// 外部親変形ありの場合、外部親位置を取得する
 		effectPos := fs.getEffectPosition(frame, bone, model, boneDeltas, loop+1)
 		return pos, effectPos
@@ -1336,7 +1344,7 @@ func (fs *BoneFrames) getRotation(
 		rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
 	}
 
-	if bone.IsEffectorRotation() && bone.CanRotate() {
+	if bone.IsEffectorRotation() {
 		// 外部親変形ありの場合、外部親回転を取得する
 		effectRot := fs.getEffectRotation(frame, bone, model, boneDeltas, loop+1)
 		return rot, effectRot
@@ -1375,8 +1383,8 @@ func (fs *BoneFrames) getEffectRotation(
 	rot, effectRot := fs.getRotation(bf, frame, effectBone, model, boneDeltas, loop+1)
 
 	if effectRot != nil {
-		rot.Mul(effectRot)
-		// rot = effectRot.Mul(rot)
+		// rot.Mul(effectRot)
+		rot = effectRot.Muled(rot)
 	}
 
 	return rot.MuledScalar(bone.EffectFactor)

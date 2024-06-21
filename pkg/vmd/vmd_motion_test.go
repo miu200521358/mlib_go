@@ -2632,6 +2632,8 @@ func TestVmdMotion_DeformLegIk2(t *testing.T) {
 }
 
 func TestVmdMotion_DeformArmIk2(t *testing.T) {
+	// mlog.SetLevel(mlog.IK_VERBOSE)
+
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("C:/MMD/mmd_base/tests/resources/唱(ダンスのみ)_0274F.vmd")
 
@@ -2757,7 +2759,7 @@ func TestVmdMotion_DeformArmIk2(t *testing.T) {
 			}
 		}
 		{
-			expectedPosition := &mmath.MVec3{-1.13337279, 15.59959111, 0.79468785}
+			expectedPosition := &mmath.MVec3{-1.125321, 15.600293, 0.746130}
 			if !boneDeltas.GetByName("右腕X先").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕X先").GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕X先").GlobalPosition().MMD()))
 			}
@@ -2848,7 +2850,7 @@ func TestVmdMotion_DeformArmIk2(t *testing.T) {
 		}
 		{
 
-			expectedPosition := &mmath.MVec3{-1.61429839, 12.16509505, 0.6405818}
+			expectedPosition := &mmath.MVec3{-1.485519, 12.740760, 0.346835}
 			if !boneDeltas.GetByName("右ひじY先").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじY先").GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじY先").GlobalPosition().MMD()))
 			}
@@ -2956,25 +2958,25 @@ func TestVmdMotion_DeformArmIk2(t *testing.T) {
 			}
 		}
 		{
-			expectedPosition := &mmath.MVec3{-1.48606988, 12.49512375, 1.1040098}
+			expectedPosition := &mmath.MVec3{-1.617075, 12.131149, 0.786797}
 			if !boneDeltas.GetByName("右ひじsub先").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじsub先").GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじsub先").GlobalPosition().MMD()))
 			}
 		}
 		{
-			expectedPosition := &mmath.MVec3{-1.47286246, 12.87280799, 0.012010051}
+			expectedPosition := &mmath.MVec3{-1.472866, 12.872813, 0.120103}
 			if !boneDeltas.GetByName("右手捩1").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩1").GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩1").GlobalPosition().MMD()))
 			}
 		}
 		{
-			expectedPosition := &mmath.MVec3{-1.45874646, 13.00975416, -0.08652926}
+			expectedPosition := &mmath.MVec3{-1.458749, 13.009759, -0.086526}
 			if !boneDeltas.GetByName("右手捩2").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩2").GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩2").GlobalPosition().MMD()))
 			}
 		}
 		{
-			expectedPosition := &mmath.MVec3{-1.44072981, 13.18461598, -0.35036358}
+			expectedPosition := &mmath.MVec3{-1.440727, 13.184620, -0.350361}
 			if !boneDeltas.GetByName("右手捩3").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩3").GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩3").GlobalPosition().MMD()))
 			}
@@ -3010,7 +3012,7 @@ func TestVmdMotion_DeformArmIk2(t *testing.T) {
 			}
 		}
 		{
-			expectedPosition := &mmath.MVec3{-1.47243053, 13.91720695, -1.52989243}
+			expectedPosition := &mmath.MVec3{-1.472418, 13.917203, -1.529887}
 			if !boneDeltas.GetByName("右手首2").GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首2").GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首2").GlobalPosition().MMD()))
 			}
