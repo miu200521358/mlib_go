@@ -40,8 +40,8 @@ func (nextMf *MorphFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame 
 
 	mf := NewMorphFrame(index)
 
-	ry := (index - prevIndex) / (nextIndex - prevIndex)
-	mf.Ratio = prevMf.Ratio + (nextMf.Ratio-prevMf.Ratio)*float64(ry)
+	ry := float64(index-prevIndex) / float64(nextIndex-prevIndex)
+	mf.Ratio = prevMf.Ratio + (nextMf.Ratio-prevMf.Ratio)*ry
 
 	return mf
 }
