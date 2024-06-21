@@ -106,7 +106,7 @@ func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
 // NewMQuaternionFromAxisAnglesRotate は、軸周りの回転を表す四元数を返します。
 func NewMQuaternionFromAxisAnglesRotate(axis *MVec3, angle float64) *MQuaternion {
 	m := MQuaternion(mgl64.QuatRotate(angle, mgl64.Vec3(*axis.Normalize())))
-	return m.Normalize()
+	return &m
 }
 
 // NewMQuaternionFromRadiansは、オイラー角（ラジアン）回転を表す四元数を返します。

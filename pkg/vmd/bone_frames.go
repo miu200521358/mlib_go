@@ -355,13 +355,24 @@ ikLoop:
 					linkBone.Name, boneDeltas.Get(linkBone.Index).GlobalPosition().MMD().String())
 			}
 
+			linkGlobalPosition := boneDeltas.Get(linkBone.Index).GlobalPosition()
+			linkDiffPosition := mmath.NewMVec3()
+			if len(linkBone.IkTargetBoneIndexes) > 0 {
+				// IKターゲットボーンのグローバル位置を取得
+				if ikDeltas.Contains(linkBone.IkTargetBoneIndexes[0]) {
+					linkDiffPosition = linkGlobalPosition.Subed(ikDeltas.Get(linkBone.IkTargetBoneIndexes[0]).GlobalPosition())
+				} else if boneDeltas.Contains(linkBone.IkTargetBoneIndexes[0]) {
+					linkDiffPosition = linkGlobalPosition.Subed(boneDeltas.Get(linkBone.IkTargetBoneIndexes[0]).GlobalPosition())
+				}
+			}
+
 			// 注目ノード（実際に動かすボーン=リンクボーン）
 			// ワールド座標系から注目ノードの局所座標系への変換
 			linkInvMatrix := boneDeltas.Get(linkBone.Index).GlobalMatrix().Inverted()
 			// 注目ノードを起点とした、エフェクタのローカル位置
 			effectorLocalPosition := linkInvMatrix.MulVec3(effectorGlobalPosition)
 			// 注目ノードを起点とした、IK目標のグローバル差分
-			ikLocalPosition := linkInvMatrix.MulVec3(ikGlobalPosition)
+			ikLocalPosition := linkInvMatrix.MulVec3(ikGlobalPosition.Added(linkDiffPosition))
 
 			// // 注目ノード（実際に動かすボーン=リンクボーン）
 			// linkGlobalPosition := boneDeltas.Get(linkBone.Index).GlobalPosition()
@@ -372,9 +383,10 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][Local] effectorLocalPosition: %s, ikLocalPosition: %s\n",
+					"[%04d][%03d][%s][%05d][Local] effectorLocalPosition: %s, ikLocalPosition: %s (%f)\n",
 					frame, loop, linkBone.Name, count-1,
-					effectorLocalPosition.MMD().String(), ikLocalPosition.MMD().String())
+					effectorLocalPosition.MMD().String(), ikLocalPosition.MMD().String(),
+					effectorLocalPosition.Distance(ikLocalPosition))
 			}
 
 			if effectorLocalPosition.Distance(ikLocalPosition) < 1e-7 {
@@ -618,68 +630,7 @@ ikLoop:
 					"[%04d][%03d][%s][%05d][結果] bf.Rotation: %s(%s)\n",
 					frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
 			}
-
-			// remainAngle := resultIkQuat.ToSignedRadian() - originalTotalIkQuat.ToSignedRadian()
-			// remainingQuat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, remainAngle)
-
-			// remainingQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, remainAngle)
-			// var remainingQuat *mmath.MQuaternion
-			// if isIkFar {
-			// } else {
-			// 	remainAngle := resultIkQuat.ToSignedRadian() - originalTotalIkQuat.ToSignedRadian()
-			// 	remainingQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, remainAngle)
-			// }
-			// remainingQuat := resultIkQuat.Muled(originalTotalIkQuat.Inverted())
-			// remainingQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, resultIkQuat.Muled(originalTotalIkQuat.Inverted()).ToSignedRadian())
-			// remainingQuat := resultIkQuat .Muled(totalIkQuat.Inverted())
-
-			// remainingQuat := resultIkQuat.Muled(originalTotalIkQuat.Inverted())
-
-			// if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-			// 	fmt.Fprintf(ikFile,
-			// 		"[%04d][%03d][%s][%05d][残存] remainingQuat: %s(%s)\n",
-			// 		frame, loop, linkBone.Name, count-1, remainingQuat.String(), remainingQuat.ToMMDDegrees().String())
-			// }
-
-			// if !remainingQuat.IsIdent() && false {
-			// 	// IKターゲットの回転に残回転量を加算
-			// 	effectorDelta := boneDeltas.Get(effectorBone.Index)
-			// 	if effectorDelta == nil {
-			// 		effectorDelta = &BoneDelta{Bone: effectorBone, Frame: frame}
-			// 	}
-
-			// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-			// 		bf := NewBoneFrame(count)
-			// 		bf.Rotation = effectorDelta.frameRotation.Copy()
-			// 		ikMotion.AppendRegisteredBoneFrame(effectorBone.Name, bf)
-			// 		count++
-
-			// 		fmt.Fprintf(ikFile,
-			// 			"[%04d][%03d][%s][%05d][残存] effectorRot: %s(%s)\n",
-			// 			frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
-			// 	}
-
-			// 	effectorDelta.frameRotation = remainingQuat.Muled(effectorDelta.FrameRotation())
-			// 	// effectorDelta.frameRotation = effectorDelta.FrameRotation().Muled(remainingQuat)
-			// 	boneDeltas.Append(effectorDelta)
-
-			// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-			// 		bf := NewBoneFrame(count)
-			// 		bf.Rotation = effectorDelta.frameRotation.Copy()
-			// 		ikMotion.AppendRegisteredBoneFrame(effectorBone.Name, bf)
-			// 		count++
-
-			// 		fmt.Fprintf(ikFile,
-			// 			"[%04d][%03d][%s][%05d][残存加算] effectorRot: %s(%s)\n",
-			// 			frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
-			// 	}
-			// }
 		}
-
-		// if slices.Index(aborts, false) == -1 {
-		// 	// すべてのリンクボーンで中断FLG = true の場合、終了
-		// 	break ikLoop
-		// }
 	}
 
 	ikDeltas = nil
@@ -1021,16 +972,16 @@ func (fs *BoneFrames) getIkAxisValue(
 	ikMotion *VmdMotion,
 	ikFile *os.File,
 ) float64 {
-	isLoopOver := float64(loop) < float64(loopCount)/2.0
+	isInLoop := float64(loop) < float64(loopCount)/2.0
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-getIkAxisValue] loop: %d, loopCount: %d, float64(loopCount)/2.0: %f, isLoopOver: %v\n",
-			frame, loop, linkBoneName, count-1, axisName, loop, loopCount, float64(loopCount)/2.0, isLoopOver)
+			frame, loop, linkBoneName, count-1, axisName, loop, loopCount, float64(loopCount)/2.0, isInLoop)
 	}
 
 	if fV < minAngleLimit {
 		tf := 2*minAngleLimit - fV
-		if tf <= maxAngleLimit && isLoopOver {
+		if tf <= maxAngleLimit && isInLoop {
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-最小角度(loop内)] minAngleLimit: %f, fV: %f, tf: %f\n",
 					frame, loop, linkBoneName, count-1, axisName, minAngleLimit, fV, tf)
@@ -1049,7 +1000,7 @@ func (fs *BoneFrames) getIkAxisValue(
 
 	if fV > maxAngleLimit {
 		tf := 2*maxAngleLimit - fV
-		if tf >= minAngleLimit && isLoopOver {
+		if tf >= minAngleLimit && isInLoop {
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-最大角度(loop内)] maxAngleLimit: %f, fV: %f, tf: %f\n",
 					frame, loop, linkBoneName, count-1, axisName, maxAngleLimit, fV, tf)

@@ -336,15 +336,33 @@ func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 			}
 		}
 		{
-			expectedPosition := &mmath.MVec3{-12.845280, 2.816309, -2.136874}
-			if !boneDeltas.GetByName(pmx.TOE_EX.Left()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE_EX.Left()).GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE_EX.Left()).GlobalPosition().MMD()))
-			}
-		}
-		{
 			expectedPosition := &mmath.MVec3{-12.545708, 4.008257, -0.932670}
 			if !boneDeltas.GetByName(pmx.HEEL.Left()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.HEEL.Left()).GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.HEEL.Left()).GlobalPosition().MMD()))
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-3.481956, 11.214747, 1.127255}
+			if !boneDeltas.GetByName(pmx.LEG_D.Left()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG_D.Left()).GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG_D.Left()).GlobalPosition().MMD()))
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-7.173243, 7.787793, 0.013533}
+			if !boneDeltas.GetByName(pmx.KNEE_D.Left()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.KNEE_D.Left()).GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.KNEE_D.Left()).GlobalPosition().MMD()))
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-11.529483, 3.689184, -1.119154}
+			if !boneDeltas.GetByName(pmx.ANKLE_D.Left()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ANKLE_D.Left()).GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ANKLE_D.Left()).GlobalPosition().MMD()))
+			}
+		}
+		{
+			expectedPosition := &mmath.MVec3{-12.845280, 2.816309, -2.136874}
+			if !boneDeltas.GetByName(pmx.TOE_EX.Left()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE_EX.Left()).GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE_EX.Left()).GlobalPosition().MMD()))
 			}
 		}
 	}

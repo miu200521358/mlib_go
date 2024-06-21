@@ -955,6 +955,7 @@ func TestVmdMotion_DeformLegIk10_Syou1(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou2(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
@@ -1256,6 +1257,7 @@ func TestVmdMotion_DeformLegIk10_Syou6(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk11_Shining_Miku(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/シャイニングミラクル_50F.vmd")
 
@@ -1408,6 +1410,7 @@ func TestVmdMotion_DeformLegIk11_Shining_Vroid(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk12_Down_Miku(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/しゃがむ.vmd")
 
