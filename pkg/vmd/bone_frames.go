@@ -258,6 +258,9 @@ func (fs *BoneFrames) calcIk(
 	// 	}
 	// }
 
+	// 一段IKであるか否か
+	isOneLinkIk := len(ikBone.Ik.Links) == 1
+
 	// IK計算
 ikLoop:
 	for loop := 0; loop < loopCount; loop++ {
@@ -370,8 +373,6 @@ ikLoop:
 				break ikLoop
 			}
 
-			// isIkFar := ikLocalPosition.Length()-ikBoneTotalLength > 0.1
-
 			effectorLocalPosition.Normalize()
 			ikLocalPosition.Normalize()
 
@@ -413,7 +414,7 @@ ikLoop:
 
 			// 回転軸
 			var originalLinkAxis, linkAxis *mmath.MVec3
-			if ikLink.AngleLimit {
+			if !isOneLinkIk && ikLink.AngleLimit {
 				// グローバル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.MinAngleLimit.GetRadians(),
@@ -421,7 +422,7 @@ ikLoop:
 					effectorLocalPosition, ikLocalPosition,
 					frame, count, loop, linkBone.Name, ikMotion, ikFile,
 				)
-			} else if ikLink.LocalAngleLimit {
+			} else if !isOneLinkIk && ikLink.LocalAngleLimit {
 				// ローカル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.LocalMinAngleLimit.GetRadians(),
@@ -839,7 +840,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 				frame, loop, linkBoneName, count-1, fZ, zQuat.String(), zQuat.ToMMDDegrees().String())
 		}
 
-		return yQuat.Muled(xQuat).Muled(zQuat).Shorten(), count
+		return yQuat.Muled(xQuat).Muled(zQuat), count
 	} else if minAngleLimitRadians.GetY() > -mmath.HALF_RAD && maxAngleLimitRadians.GetY() < mmath.HALF_RAD {
 		// X*Y*Z順
 		// Y軸回り
@@ -914,7 +915,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 				frame, loop, linkBoneName, count-1, fZ, zQuat.String(), zQuat.ToMMDDegrees().String())
 		}
 
-		return zQuat.Muled(yQuat).Muled(xQuat).Shorten(), count
+		return zQuat.Muled(yQuat).Muled(xQuat), count
 	}
 
 	// Y*Z*X順
@@ -990,7 +991,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 			frame, loop, linkBoneName, count-1, fZ, zQuat.String(), zQuat.ToMMDDegrees().String())
 	}
 
-	return xQuat.Muled(zQuat).Muled(yQuat).Shorten(), count
+	return xQuat.Muled(zQuat).Muled(yQuat), count
 }
 
 func (fs *BoneFrames) getIkAxisValue(
@@ -1378,7 +1379,7 @@ func (fs *BoneFrames) getEffectRotation(
 		// rot = effectRot.Mul(rot)
 	}
 
-	return rot.MuledScalar(bone.EffectFactor).Shorten()
+	return rot.MuledScalar(bone.EffectFactor)
 }
 
 // 該当キーフレにおけるボーンの拡大率
