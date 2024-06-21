@@ -377,12 +377,12 @@ ikLoop:
 					effectorLocalPosition.MMD().String(), ikLocalPosition.MMD().String())
 			}
 
-			effectorLocalPosition.Normalize()
-			ikLocalPosition.Normalize()
-
 			if effectorLocalPosition.Distance(ikLocalPosition) < 1e-7 {
 				break ikLoop
 			}
+
+			effectorLocalPosition.Normalize()
+			ikLocalPosition.Normalize()
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
