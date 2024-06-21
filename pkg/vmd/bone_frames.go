@@ -413,7 +413,7 @@ ikLoop:
 
 			// 回転軸
 			var originalLinkAxis, linkAxis *mmath.MVec3
-			if ikLink.AngleLimit {
+			if lidx > 0 && ikLink.AngleLimit {
 				// グローバル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.MinAngleLimit.GetRadians(),
@@ -421,7 +421,7 @@ ikLoop:
 					effectorLocalPosition, ikLocalPosition,
 					frame, count, loop, linkBone.Name, ikMotion, ikFile,
 				)
-			} else if ikLink.LocalAngleLimit {
+			} else if lidx > 0 && ikLink.LocalAngleLimit {
 				// ローカル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.LocalMinAngleLimit.GetRadians(),
@@ -430,7 +430,7 @@ ikLoop:
 					frame, count, loop, linkBone.Name, ikMotion, ikFile,
 				)
 			} else {
-				// 軸制限なし
+				// 軸制限なし or 初回
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					mmath.MVec3MinVal,
 					mmath.MVec3MaxVal,
@@ -744,7 +744,7 @@ func (fs *BoneFrames) getLinkAxis(
 }
 
 func (fs *BoneFrames) calcIkLimitQuaternion(
-	ikQuat *mmath.MQuaternion, // リンクボーンの回転量
+	totalIkQuat *mmath.MQuaternion, // リンクボーンの全体回転量
 	minAngleLimitRadians *mmath.MVec3, // 最小軸制限（ラジアン）
 	maxAngleLimitRadians *mmath.MVec3, // 最大軸制限（ラジアン）
 	xAxisVector *mmath.MVec3, // X軸ベクトル
@@ -758,7 +758,7 @@ func (fs *BoneFrames) calcIkLimitQuaternion(
 	ikMotion *VmdMotion, // デバッグ用: IKモーション
 	ikFile *os.File, // デバッグ用: IKファイル
 ) (*mmath.MQuaternion, int) {
-	ikMat := ikQuat.ToMat4()
+	ikMat := totalIkQuat.ToMat4()
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		fmt.Fprintf(ikFile,
 			"[%04d][%03d][%s][%05d][ikMat] %s (x: %s, y: %s, z: %s)\n",
