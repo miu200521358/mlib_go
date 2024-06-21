@@ -388,8 +388,8 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][回転角度] unitRad: %.8f, linkDot: %.8f\n",
-					frame, loop, linkBone.Name, count-1, unitRad, linkDot,
+					"[%04d][%03d][%s][%05d][回転角度] unitRad: %.8f (%.5f), linkDot: %.8f\n",
+					frame, loop, linkBone.Name, count-1, unitRad, mmath.ToDegree(unitRad), linkDot,
 				)
 			}
 
@@ -400,9 +400,9 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d][単位角制限] linkAngle: %.8f(%.5f), originalLinkAngle: %.8f(%.5f), unitRad: %.8f (%.5f)\n",
+					"[%04d][%03d][%s][%05d][単位角制限] linkAngle: %.8f(%.5f), originalLinkAngle: %.8f(%.5f)\n",
 					frame, loop, linkBone.Name, count-1, linkAngle, mmath.ToDegree(linkAngle),
-					originalLinkAngle, mmath.ToDegree(originalLinkAngle), unitRad, mmath.ToDegree(unitRad),
+					originalLinkAngle, mmath.ToDegree(originalLinkAngle),
 				)
 			}
 
