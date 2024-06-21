@@ -569,7 +569,6 @@ ikLoop:
 
 			// IKの結果を更新
 			linkDelta.frameRotation = resultIkQuat
-			linkDelta.frameIkRotation = nil
 			boneDeltas.Append(linkDelta)
 
 			// 前回（既存）とほぼ同じ回転量の場合、中断FLGを立てる
@@ -1215,7 +1214,7 @@ func (fs *BoneFrames) fillBoneDeform(
 		if bf != nil {
 			// ボーンの移動位置、回転角度、拡大率を取得
 			delta.framePosition, delta.frameEffectPosition = fs.getPosition(bf, frame, bone, model, boneDeltas, 0)
-			delta.frameRotation, delta.frameIkRotation, delta.frameEffectRotation =
+			delta.frameRotation, delta.frameEffectRotation =
 				fs.getRotation(bf, frame, bone, model, boneDeltas, 0)
 			delta.frameScale = fs.getScale(bf, bone, boneDeltas)
 		}
@@ -1312,10 +1311,10 @@ func (fs *BoneFrames) getRotation(
 	model *pmx.PmxModel,
 	boneDeltas *BoneDeltas,
 	loop int,
-) (*mmath.MQuaternion, *mmath.MQuaternion, *mmath.MQuaternion) {
+) (*mmath.MQuaternion, *mmath.MQuaternion) {
 	if loop > 20 {
 		// 無限ループを避ける
-		return mmath.NewMQuaternion(), nil, nil
+		return mmath.NewMQuaternion(), nil
 	}
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
@@ -1328,8 +1327,6 @@ func (fs *BoneFrames) getRotation(
 		rot = mmath.NewMQuaternion()
 	}
 
-	ikRot := boneDeltas.Get(bone.Index).frameIkRotation
-
 	if bf.MorphRotation != nil {
 		rot = bf.MorphRotation.Muled(rot)
 	}
@@ -1341,10 +1338,10 @@ func (fs *BoneFrames) getRotation(
 	if bone.IsEffectorRotation() && bone.CanRotate() {
 		// 外部親変形ありの場合、外部親回転を取得する
 		effectRot := fs.getEffectRotation(frame, bone, model, boneDeltas, loop+1)
-		return rot, ikRot, effectRot
+		return rot, effectRot
 	}
 
-	return rot, ikRot, nil
+	return rot, nil
 }
 
 // 付与親を加味した回転角度
@@ -1374,12 +1371,7 @@ func (fs *BoneFrames) getEffectRotation(
 		return nil
 	}
 
-	rot, ikRot, effectRot := fs.getRotation(bf, frame, effectBone, model, boneDeltas, loop+1)
-
-	if ikRot != nil {
-		// rot = ikRot.Muled(rot)
-		rot.Mul(ikRot)
-	}
+	rot, effectRot := fs.getRotation(bf, frame, effectBone, model, boneDeltas, loop+1)
 
 	if effectRot != nil {
 		rot.Mul(effectRot)
