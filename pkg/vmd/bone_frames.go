@@ -413,7 +413,7 @@ ikLoop:
 
 			// 回転軸
 			var originalLinkAxis, linkAxis *mmath.MVec3
-			if lidx > 0 && ikLink.AngleLimit {
+			if ikLink.AngleLimit {
 				// グローバル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.MinAngleLimit.GetRadians(),
@@ -421,7 +421,7 @@ ikLoop:
 					effectorLocalPosition, ikLocalPosition,
 					frame, count, loop, linkBone.Name, ikMotion, ikFile,
 				)
-			} else if lidx > 0 && ikLink.LocalAngleLimit {
+			} else if ikLink.LocalAngleLimit {
 				// ローカル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.LocalMinAngleLimit.GetRadians(),
