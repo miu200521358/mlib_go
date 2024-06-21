@@ -32,7 +32,7 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Left(t *testing.T) {
 	{
 
 		fno := int(0)
-		boneDeltas := motion.BoneFrames.Deform(fno, model, []string{"左襟先"}, true, nil, nil)
+		boneDeltas := motion.BoneFrames.Deform(fno, model, nil, true, nil, nil)
 		{
 			expectedPosition := &mmath.MVec3{-0.225006, 9.705784, 2.033072}
 			if !boneDeltas.GetByName(pmx.UPPER.String()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {

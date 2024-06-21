@@ -6,7 +6,6 @@ import (
 	"math"
 	"os"
 	"path/filepath"
-	"slices"
 	"sort"
 	"sync"
 	"time"
@@ -257,8 +256,6 @@ func (fs *BoneFrames) calcIk(
 	// 中断FLGが入ったか否か
 	aborts := make([]bool, len(ikBone.Ik.Links))
 
-	loopCount := max(ikBone.Ik.LoopCount, 1)
-
 	// // リンクボーン全体の長さ
 	// ikBoneTotalLength := 0.0
 	// for _, l := range ikBone.Ik.Links {
@@ -269,6 +266,8 @@ func (fs *BoneFrames) calcIk(
 
 	// 一段IKであるか否か
 	isOneLinkIk := len(ikBone.Ik.Links) == 1
+	// ループ回数
+	loopCount := max(ikBone.Ik.LoopCount, 1)
 
 	// IK計算
 ikLoop:
@@ -378,12 +377,12 @@ ikLoop:
 					effectorLocalPosition.MMD().String(), ikLocalPosition.MMD().String())
 			}
 
+			effectorLocalPosition.Normalize()
+			ikLocalPosition.Normalize()
+
 			if effectorLocalPosition.Distance(ikLocalPosition) < 1e-7 {
 				break ikLoop
 			}
-
-			effectorLocalPosition.Normalize()
-			ikLocalPosition.Normalize()
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
@@ -416,9 +415,15 @@ ikLoop:
 				)
 			}
 
-			// 角度がほとんどない場合、終了
+			// 角度がほとんどない場合
 			if math.Abs(linkAngle) < 1e-8 {
-				break ikLoop
+				if isOneLinkIk {
+					// 一段IKは単位角度を回す
+					linkAngle = unitRad // * float64(loop+1)
+				} else {
+					// 多段IKは終了
+					break ikLoop
+				}
 			}
 
 			// 回転軸
@@ -480,6 +485,10 @@ ikLoop:
 
 			originalTotalIkQuat := linkQuat.Muled(originalIkQuat)
 			totalIkQuat := linkQuat.Muled(ikQuat)
+
+			if isOneLinkIk && loop == 1 {
+				totalIkQuat = ikQuat.Muled(linkQuat)
+			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				{
@@ -667,10 +676,10 @@ ikLoop:
 			// }
 		}
 
-		if slices.Index(aborts, false) == -1 {
-			// すべてのリンクボーンで中断FLG = true の場合、終了
-			break ikLoop
-		}
+		// if slices.Index(aborts, false) == -1 {
+		// 	// すべてのリンクボーンで中断FLG = true の場合、終了
+		// 	break ikLoop
+		// }
 	}
 
 	ikDeltas = nil
@@ -1111,7 +1120,6 @@ func (fs *BoneFrames) calcBoneDeltas(
 		if pos == nil {
 			pos = mmath.NewMVec3()
 		}
-
 		if delta.frameEffectPosition != nil && !delta.frameEffectPosition.IsZero() {
 			pos.Add(delta.frameEffectPosition)
 		}
@@ -1301,7 +1309,7 @@ func (fs *BoneFrames) getEffectPosition(
 	if boneDeltas != nil {
 		effectDelta := boneDeltas.Get(effectBone.Index)
 		if effectDelta != nil && effectDelta.framePosition != nil {
-			return effectDelta.framePosition.MulScalar(bone.EffectFactor)
+			return effectDelta.framePosition.MuledScalar(bone.EffectFactor)
 		}
 	}
 
@@ -1313,10 +1321,10 @@ func (fs *BoneFrames) getEffectPosition(
 	pos, effectPos := fs.getPosition(bf, frame, effectBone, model, boneDeltas, loop+1)
 
 	if effectPos == nil {
-		return pos.MulScalar(bone.EffectFactor)
+		return pos.MuledScalar(bone.EffectFactor)
 	}
 
-	return pos.Add(effectPos).MulScalar(bone.EffectFactor)
+	return pos.Added(effectPos).MulScalar(bone.EffectFactor)
 }
 
 // 該当キーフレにおけるボーンの回転角度
