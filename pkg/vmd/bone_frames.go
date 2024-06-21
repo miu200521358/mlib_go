@@ -423,7 +423,10 @@ ikLoop:
 
 			// 回転軸
 			var originalLinkAxis, linkAxis *mmath.MVec3
-			if !isOneLinkIk && ikLink.AngleLimit {
+			if (!isOneLinkIk ||
+				ikLink.MinAngleLimit.GetRadians().IsOnlyY() || ikLink.MaxAngleLimit.GetRadians().IsOnlyY() ||
+				ikLink.MinAngleLimit.GetRadians().IsOnlyZ() || ikLink.MaxAngleLimit.GetRadians().IsOnlyZ()) &&
+				ikLink.AngleLimit {
 				// グローバル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.MinAngleLimit.GetRadians(),
@@ -702,8 +705,7 @@ func (fs *BoneFrames) getLinkAxis(
 	// 		frame, loop, linkBoneName, count-1, linkMat.String(), linkMat.AxisX().String(), linkMat.AxisY().String(), linkMat.AxisZ().String())
 	// }
 
-	if minAngleLimitRadians.GetY() == 0 && maxAngleLimitRadians.GetY() == 0 &&
-		minAngleLimitRadians.GetZ() == 0 && maxAngleLimitRadians.GetZ() == 0 {
+	if minAngleLimitRadians.IsOnlyX() || maxAngleLimitRadians.IsOnlyX() {
 		// X軸のみの制限の場合
 		vv := linkAxis.GetX()
 
@@ -717,8 +719,7 @@ func (fs *BoneFrames) getLinkAxis(
 			return mmath.MVec3UnitXInv, linkAxis
 		}
 		return mmath.MVec3UnitX, linkAxis
-	} else if minAngleLimitRadians.GetX() == 0 && maxAngleLimitRadians.GetX() == 0 &&
-		minAngleLimitRadians.GetZ() == 0 && maxAngleLimitRadians.GetZ() == 0 {
+	} else if minAngleLimitRadians.IsOnlyY() || maxAngleLimitRadians.IsOnlyY() {
 		// Y軸のみの制限の場合
 		vv := linkAxis.GetY()
 
@@ -732,8 +733,7 @@ func (fs *BoneFrames) getLinkAxis(
 			return mmath.MVec3UnitYInv, linkAxis
 		}
 		return mmath.MVec3UnitY, linkAxis
-	} else if minAngleLimitRadians.GetX() == 0 && maxAngleLimitRadians.GetX() == 0 &&
-		minAngleLimitRadians.GetY() == 0 && maxAngleLimitRadians.GetY() == 0 {
+	} else if minAngleLimitRadians.IsOnlyZ() || maxAngleLimitRadians.IsOnlyZ() {
 		// Z軸のみの制限の場合
 		vv := linkAxis.GetZ()
 
@@ -1012,19 +1012,26 @@ func (fs *BoneFrames) getIkAxisValue(
 	ikMotion *VmdMotion,
 	ikFile *os.File,
 ) float64 {
+	isLoopOver := float64(loop) < float64(loopCount)/2.0
+
+	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-getIkAxisValue] loop: %d, loopCount: %d, float64(loopCount)/2.0: %f, isLoopOver: %v\n",
+			frame, loop, linkBoneName, count-1, axisName, loop, loopCount, float64(loopCount)/2.0, isLoopOver)
+	}
+
 	if fV < minAngleLimit {
 		tf := 2*minAngleLimit - fV
-		if tf <= maxAngleLimit && loop < loopCount/2 {
+		if tf <= maxAngleLimit && isLoopOver {
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-最小角度(loop内)] fV: %f, tf: %f\n",
-					frame, loop, linkBoneName, count-1, axisName, fV, tf)
+				fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-最小角度(loop内)] minAngleLimit: %f, fV: %f, tf: %f\n",
+					frame, loop, linkBoneName, count-1, axisName, minAngleLimit, fV, tf)
 			}
 
 			fV = tf
 		} else {
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-最小角度(loop外)] fV: %f, tf: %f\n",
-					frame, loop, linkBoneName, count-1, axisName, fV, tf)
+				fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-最小角度(loop外)] minAngleLimit: %f, fV: %f, tf: %f\n",
+					frame, loop, linkBoneName, count-1, axisName, minAngleLimit, fV, tf)
 			}
 
 			fV = minAngleLimit
@@ -1033,17 +1040,17 @@ func (fs *BoneFrames) getIkAxisValue(
 
 	if fV > maxAngleLimit {
 		tf := 2*maxAngleLimit - fV
-		if tf >= minAngleLimit && loop < loopCount/2 {
+		if tf >= minAngleLimit && isLoopOver {
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-最大角度(loop内)] fV: %f, tf: %f\n",
-					frame, loop, linkBoneName, count-1, axisName, fV, tf)
+				fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-最大角度(loop内)] maxAngleLimit: %f, fV: %f, tf: %f\n",
+					frame, loop, linkBoneName, count-1, axisName, maxAngleLimit, fV, tf)
 			}
 
 			fV = tf
 		} else {
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-最大角度(loop外)] fV: %f, tf: %f\n",
-					frame, loop, linkBoneName, count-1, axisName, fV, tf)
+				fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-最大角度(loop外)] maxAngleLimit: %f, fV: %f, tf: %f\n",
+					frame, loop, linkBoneName, count-1, axisName, maxAngleLimit, fV, tf)
 			}
 
 			fV = maxAngleLimit
@@ -1261,7 +1268,7 @@ func (fs *BoneFrames) getPosition(
 	}
 
 	if bone.IsEffectorTranslation() {
-		// 外部親変形ありの場合、外部親位置を取得する
+		// 付与親ありの場合、外部親位置を取得する
 		effectPos := fs.getEffectPosition(frame, bone, model, boneDeltas, loop+1)
 		return pos, effectPos
 	}
@@ -1337,7 +1344,7 @@ func (fs *BoneFrames) getRotation(
 	}
 
 	if bf.MorphRotation != nil {
-		rot = bf.MorphRotation.Muled(rot)
+		rot.Mul(bf.MorphRotation)
 	}
 
 	if bone.HasFixedAxis() {
@@ -1345,7 +1352,7 @@ func (fs *BoneFrames) getRotation(
 	}
 
 	if bone.IsEffectorRotation() {
-		// 外部親変形ありの場合、外部親回転を取得する
+		// 付与親ありの場合、外部親回転を取得する
 		effectRot := fs.getEffectRotation(frame, bone, model, boneDeltas, loop+1)
 		return rot, effectRot
 	}
@@ -1382,6 +1389,7 @@ func (fs *BoneFrames) getEffectRotation(
 
 	rot, effectRot := fs.getRotation(bf, frame, effectBone, model, boneDeltas, loop+1)
 
+	// 付与に対する付与は出来ない
 	if effectRot != nil {
 		// rot.Mul(effectRot)
 		rot = effectRot.Muled(rot)

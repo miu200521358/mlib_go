@@ -3083,6 +3083,8 @@ func TestVmdMotion_DeformArmIk3(t *testing.T) {
 }
 
 func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/nac_dmf_601.vmd")
 

@@ -75,6 +75,24 @@ func (v *MVec3) AddZ(z float64) {
 	v[2] += z
 }
 
+func (v *MVec3) IsOnlyX() bool {
+	return !PracticallyEquals(v.GetX(), 0, 1e-10) &&
+		PracticallyEquals(v.GetY(), 0, 1e-10) &&
+		PracticallyEquals(v.GetZ(), 0, 1e-10)
+}
+
+func (v *MVec3) IsOnlyY() bool {
+	return PracticallyEquals(v.GetX(), 0, 1e-10) &&
+		!PracticallyEquals(v.GetY(), 0, 1e-10) &&
+		PracticallyEquals(v.GetZ(), 0, 1e-10)
+}
+
+func (v *MVec3) IsOnlyZ() bool {
+	return PracticallyEquals(v.GetX(), 0, 1e-10) &&
+		PracticallyEquals(v.GetY(), 0, 1e-10) &&
+		!PracticallyEquals(v.GetZ(), 0, 1e-10)
+}
+
 // String T の文字列表現を返します。
 func (v *MVec3) String() string {
 	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f]", v.GetX(), v.GetY(), v.GetZ())
