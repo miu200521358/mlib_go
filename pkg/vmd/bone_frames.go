@@ -412,7 +412,7 @@ ikLoop:
 			}
 
 			// 単位角
-			unitRad := ikBone.Ik.UnitRotation.GetRadians().GetX() // * float64(lidx+1)
+			unitRad := ikBone.Ik.UnitRotation.GetRadians().GetX() * float64(lidx+1)
 			linkDot := ikLocalPosition.Dot(effectorLocalPosition)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
