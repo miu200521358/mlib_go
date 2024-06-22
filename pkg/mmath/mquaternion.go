@@ -360,9 +360,9 @@ func (quat *MQuaternion) MuledScalar(factor float64) *MQuaternion {
 	axis, angle := quat.AxisAngle()
 
 	// factor をかけて角度を制限
-	angle = math.Mod(angle*factor, math.Pi*2)
+	angle *= factor
 
-	return NewMQuaternionFromAxisAnglesRotate(&axis, angle)
+	return NewMQuaternionFromAxisAngles(&axis, angle)
 }
 
 // ToAxisAngleは、クォータニオンを軸と角度に変換します。
