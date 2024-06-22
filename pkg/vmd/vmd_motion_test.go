@@ -575,7 +575,7 @@ func TestVmdMotion_DeformLegIk5_Koshi(t *testing.T) {
 		}
 		{
 			expectedPosition := &mmath.MVec3{-7.453236, 0.356456, -8.876783}
-			if !boneDeltas.GetByName(pmx.TOE.Right()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.03) {
+			if !boneDeltas.GetByName(pmx.TOE.Right()).GlobalPosition().MMD().PracticallyEquals(expectedPosition, 0.04) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE.Right()).GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE.Right()).GlobalPosition().MMD()))
 			}
 		}

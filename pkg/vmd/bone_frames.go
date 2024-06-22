@@ -215,10 +215,15 @@ func (fs *BoneFrames) calcIk(
 	ikFrame *IkFrame,
 	prefixPath string,
 ) *BoneDeltas {
+	if len(ikBone.Ik.Links) < 1 {
+		// IKリンクが無ければスルー
+		return boneDeltas
+	}
+
 	var err error
 	var ikFile *os.File
 	var ikMotion *VmdMotion
-	count := int(1.0)
+	count := 1
 
 	if mlog.IsIkVerbose() {
 		// IK計算デバッグ用モーション
@@ -249,7 +254,7 @@ func (fs *BoneFrames) calcIk(
 	// IKターゲットボーン
 	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
-	ikDeltas := fs.Deform(frame, model, []string{ikBone.Name}, false, boneDeltas, ikFrame)
+	ikDeltas := fs.Deform(frame, model, []string{ikBone.Name, effectorBone.Name}, false, boneDeltas, ikFrame)
 	// エフェクタ関連情報取得
 	effectorDeformBoneIndexes, boneDeltas :=
 		fs.prepareDeltas(frame, model, []string{effectorBone.Name}, false, boneDeltas, ikFrame)
@@ -260,6 +265,65 @@ func (fs *BoneFrames) calcIk(
 	isOneLinkIk := len(ikBone.Ik.Links) == 1
 	// ループ回数
 	loopCount := max(ikBone.Ik.LoopCount, 1)
+
+	// IK事前計算
+	{
+		ikOffDeltas := fs.Deform(frame, model, []string{effectorBone.Name}, false, nil, ikFrame)
+
+		// IKボーンのグローバル位置
+		ikGlobalPosition := ikOffDeltas.Get(effectorBone.Index).GlobalPosition()
+		// IK OFF 時の IKターゲットボーンのグローバル位置を取得
+		effectorGlobalPosition := ikDeltas.Get(effectorBone.Index).GlobalPosition()
+
+		// 処理対象IKリンクボーン
+		ikLink := ikBone.Ik.Links[0]
+		linkBone := model.Bones.Get(ikLink.BoneIndex)
+
+		// リンクボーンの変形情報を取得
+		linkDelta := boneDeltas.Get(linkBone.Index)
+		if linkDelta == nil {
+			linkDelta = &BoneDelta{Bone: linkBone, Frame: frame}
+		}
+		linkQuat := linkDelta.LocalRotation()
+
+		// 注目ノード（実際に動かすボーン=リンクボーン）
+		// ワールド座標系から注目ノードの局所座標系への変換
+		linkInvMatrix := ikDeltas.Get(linkBone.Index).GlobalMatrix().Inverted()
+		// 注目ノードを起点とした、エフェクタのローカル位置
+		effectorLocalPosition := linkInvMatrix.MulVec3(effectorGlobalPosition)
+		// 注目ノードを起点とした、IK目標のグローバル差分
+		ikLocalPosition := linkInvMatrix.MulVec3(ikGlobalPosition)
+
+		effectorLocalPosition.Normalize()
+		ikLocalPosition.Normalize()
+
+		// 回転軸
+		linkAxis := effectorLocalPosition.Cross(ikLocalPosition).Normalize()
+		// 回転角(ラジアン)
+		linkDot := ikLocalPosition.Dot(effectorLocalPosition)
+		linkAngle := math.Acos(mmath.ClampFloat(linkDot, -1, 1))
+
+		ikQuat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
+		linkDelta.frameRotation = linkQuat.Muled(ikQuat)
+		boneDeltas.Append(linkDelta)
+
+		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			{
+				bf := NewBoneFrame(count)
+				bf.Rotation = linkDelta.frameRotation.Copy()
+				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+				count++
+
+				fmt.Fprintf(ikFile,
+					"[%04d][%03d][%s][%05d][事前回転] linkAxis: %s, linkAngle: %.8f(%.5f)\n",
+					frame, -1, linkBone.Name, count-1, linkAxis.MMD().String(), linkAngle, mmath.ToDegree(linkAngle),
+				)
+				fmt.Fprintf(ikFile,
+					"[%04d][%03d][%s][%05d][事前回転] %s(%s)\n",
+					frame, -1, linkBone.Name, count-1, linkDelta.frameRotation.String(), linkDelta.frameRotation.ToMMDDegrees().String())
+			}
+		}
+	}
 
 	// IK計算
 ikLoop:
@@ -312,7 +376,7 @@ ikLoop:
 			// IK関連の行列を取得
 			boneDeltas = fs.calcBoneDeltas(frame, model, effectorDeformBoneIndexes, boneDeltas)
 
-			// リンクボーンのIK角度を取得
+			// リンクボーンの変形情報を取得
 			linkDelta := boneDeltas.Get(linkBone.Index)
 			if linkDelta == nil {
 				linkDelta = &BoneDelta{Bone: linkBone, Frame: frame}
@@ -347,16 +411,16 @@ ikLoop:
 					linkBone.Name, boneDeltas.Get(linkBone.Index).GlobalPosition().MMD().String())
 			}
 
-			linkGlobalPosition := boneDeltas.Get(linkBone.Index).GlobalPosition()
-			linkDiffPosition := mmath.NewMVec3()
-			if len(linkBone.IkTargetBoneIndexes) > 0 {
-				// IKターゲットボーンのグローバル位置を取得
-				if ikDeltas.Contains(linkBone.IkTargetBoneIndexes[0]) {
-					linkDiffPosition = linkGlobalPosition.Subed(ikDeltas.Get(linkBone.IkTargetBoneIndexes[0]).GlobalPosition())
-				} else if boneDeltas.Contains(linkBone.IkTargetBoneIndexes[0]) {
-					linkDiffPosition = linkGlobalPosition.Subed(boneDeltas.Get(linkBone.IkTargetBoneIndexes[0]).GlobalPosition())
-				}
-			}
+			// linkGlobalPosition := boneDeltas.Get(linkBone.Index).GlobalPosition()
+			// linkDiffPosition := mmath.NewMVec3()
+			// if len(linkBone.IkTargetBoneIndexes) > 0 {
+			// 	// IKターゲットボーンのグローバル位置を取得
+			// 	if ikDeltas.Contains(linkBone.IkTargetBoneIndexes[0]) {
+			// 		linkDiffPosition = linkGlobalPosition.Subed(ikDeltas.Get(linkBone.IkTargetBoneIndexes[0]).GlobalPosition())
+			// 	} else if boneDeltas.Contains(linkBone.IkTargetBoneIndexes[0]) {
+			// 		linkDiffPosition = linkGlobalPosition.Subed(boneDeltas.Get(linkBone.IkTargetBoneIndexes[0]).GlobalPosition())
+			// 	}
+			// }
 
 			// 注目ノード（実際に動かすボーン=リンクボーン）
 			// ワールド座標系から注目ノードの局所座標系への変換
@@ -364,7 +428,7 @@ ikLoop:
 			// 注目ノードを起点とした、エフェクタのローカル位置
 			effectorLocalPosition := linkInvMatrix.MulVec3(effectorGlobalPosition)
 			// 注目ノードを起点とした、IK目標のグローバル差分
-			ikLocalPosition := linkInvMatrix.MulVec3(ikGlobalPosition.Added(linkDiffPosition))
+			ikLocalPosition := linkInvMatrix.MulVec3(ikGlobalPosition)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
@@ -419,10 +483,7 @@ ikLoop:
 
 			// 回転軸
 			var originalLinkAxis, linkAxis *mmath.MVec3
-			if (!isOneLinkIk ||
-				ikLink.MinAngleLimit.GetRadians().IsOnlyY() || ikLink.MaxAngleLimit.GetRadians().IsOnlyY() ||
-				ikLink.MinAngleLimit.GetRadians().IsOnlyZ() || ikLink.MaxAngleLimit.GetRadians().IsOnlyZ()) &&
-				ikLink.AngleLimit {
+			if !isOneLinkIk && ikLink.AngleLimit {
 				// グローバル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.MinAngleLimit.GetRadians(),
