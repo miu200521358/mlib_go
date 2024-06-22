@@ -1367,8 +1367,8 @@ func (fs *BoneFrames) getEffectRotation(
 	rot, effectRot := fs.getRotation(bf, frame, effectBone, model, boneDeltas, loop+1)
 
 	if effectRot != nil {
-		// rot.Mul(effectRot)
-		rot = effectRot.Muled(rot)
+		rot.Mul(effectRot)
+		// rot = effectRot.Muled(rot)
 	}
 
 	return rot.MuledScalar(bone.EffectFactor)
