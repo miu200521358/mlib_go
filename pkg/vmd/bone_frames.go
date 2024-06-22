@@ -483,7 +483,7 @@ ikLoop:
 
 			// 回転軸
 			var originalLinkAxis, linkAxis *mmath.MVec3
-			if !isOneLinkIk && ikLink.AngleLimit {
+			if ikLink.AngleLimit {
 				// グローバル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.MinAngleLimit.GetRadians(),
@@ -1011,8 +1011,8 @@ func (fs *BoneFrames) getIkAxisValue(
 	isInLoop := float64(loop) < float64(loopCount)/2.0
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-getIkAxisValue] loop: %d, loopCount: %d, float64(loopCount)/2.0: %f, isLoopOver: %v\n",
-			frame, loop, linkBoneName, count-1, axisName, loop, loopCount, float64(loopCount)/2.0, isInLoop)
+		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][%s-getIkAxisValue] loop: %d, isInLoop: %v\n",
+			frame, loop, linkBoneName, count-1, axisName, loop, isInLoop)
 	}
 
 	if fV < minAngleLimit {
