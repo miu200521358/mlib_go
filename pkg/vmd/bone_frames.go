@@ -1211,8 +1211,10 @@ func (fs *BoneFrames) fillBoneDeform(
 		bf := fs.Get(bone.Name).Get(frame)
 		if bf != nil {
 			// ボーンの移動位置、回転角度、拡大率を取得
-			delta.framePosition, delta.frameEffectPosition = fs.getPosition(bf, frame, bone, model, boneDeltas, morphDeltas, 0)
-			delta.frameRotation, delta.frameEffectRotation = fs.getRotation(bf, frame, bone, model, boneDeltas, morphDeltas, 0)
+			delta.framePosition, delta.frameMorphPosition, delta.frameEffectPosition =
+				fs.getPosition(bf, frame, bone, model, boneDeltas, morphDeltas, 0)
+			delta.frameRotation, delta.frameMorphRotation, delta.frameEffectRotation =
+				fs.getRotation(bf, frame, bone, model, boneDeltas, morphDeltas, 0)
 			delta.frameScale = fs.getScale(bf, bone, boneDeltas, morphDeltas)
 		}
 		boneDeltas.Append(delta)
@@ -1230,10 +1232,10 @@ func (fs *BoneFrames) getPosition(
 	boneDeltas *BoneDeltas,
 	morphDeltas *MorphDeltas,
 	loop int,
-) (*mmath.MVec3, *mmath.MVec3) {
+) (*mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
 	if loop > 20 || !bone.CanTranslate() {
 		// 無限ループを避ける
-		return mmath.NewMVec3(), nil
+		return mmath.NewMVec3(), nil, nil
 	}
 
 	var pos *mmath.MVec3
@@ -1246,18 +1248,19 @@ func (fs *BoneFrames) getPosition(
 		pos = mmath.NewMVec3()
 	}
 
+	var morphPos *mmath.MVec3
 	if morphDeltas != nil && morphDeltas.Bones.Get(bone.Index) != nil &&
 		morphDeltas.Bones.Get(bone.Index).framePosition != nil {
-		pos.Add(morphDeltas.Bones.Get(bone.Index).framePosition)
+		morphPos = morphDeltas.Bones.Get(bone.Index).framePosition
 	}
 
 	if bone.IsEffectorTranslation() {
 		// 付与親ありの場合、外部親位置を取得する
 		effectPos := fs.getEffectPosition(frame, bone, model, boneDeltas, morphDeltas, loop+1)
-		return pos, effectPos
+		return pos, morphPos, effectPos
 	}
 
-	return pos, nil
+	return pos, morphPos, nil
 }
 
 // 付与親を加味した移動位置
@@ -1288,13 +1291,17 @@ func (fs *BoneFrames) getEffectPosition(
 		return mmath.NewMVec3()
 	}
 
-	pos, effectPos := fs.getPosition(bf, frame, effectBone, model, boneDeltas, morphDeltas, loop+1)
+	pos, morphPos, effectPos := fs.getPosition(bf, frame, effectBone, model, boneDeltas, morphDeltas, loop+1)
 
-	if effectPos == nil {
-		return pos.MuledScalar(bone.EffectFactor)
+	if morphPos != nil {
+		pos.Add(morphPos)
 	}
 
-	return pos.Added(effectPos).MulScalar(bone.EffectFactor)
+	if effectPos != nil {
+		pos.Add(effectPos)
+	}
+
+	return pos.MuledScalar(bone.EffectFactor)
 }
 
 // 該当キーフレにおけるボーンの回転角度
@@ -1306,10 +1313,10 @@ func (fs *BoneFrames) getRotation(
 	boneDeltas *BoneDeltas,
 	morphDeltas *MorphDeltas,
 	loop int,
-) (*mmath.MQuaternion, *mmath.MQuaternion) {
+) (*mmath.MQuaternion, *mmath.MQuaternion, *mmath.MQuaternion) {
 	if loop > 20 || !bone.CanRotate() {
 		// 無限ループを避ける
-		return mmath.NewMQuaternion(), nil
+		return mmath.NewMQuaternion(), nil, nil
 	}
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
@@ -1323,9 +1330,12 @@ func (fs *BoneFrames) getRotation(
 		rot = mmath.NewMQuaternion()
 	}
 
+	var morphRot *mmath.MQuaternion
 	if morphDeltas != nil && morphDeltas.Bones.Get(bone.Index) != nil &&
 		morphDeltas.Bones.Get(bone.Index).frameRotation != nil {
-		rot.Mul(morphDeltas.Bones.Get(bone.Index).frameRotation)
+		morphRot = morphDeltas.Bones.Get(bone.Index).frameRotation
+		// mlog.I("[%s][%04d][%d]: rot: %s(%s), morphRot: %s(%s)\n", bone.Name, frame, loop,
+		// 	rot.String(), rot.ToMMDDegrees().String(), morphRot.String(), morphRot.ToMMDDegrees().String())
 	}
 
 	if bone.HasFixedAxis() {
@@ -1335,10 +1345,10 @@ func (fs *BoneFrames) getRotation(
 	if bone.IsEffectorRotation() {
 		// 付与親ありの場合、外部親回転を取得する
 		effectRot := fs.getEffectRotation(frame, bone, model, boneDeltas, morphDeltas, loop+1)
-		return rot, effectRot
+		return rot, morphRot, effectRot
 	}
 
-	return rot, nil
+	return rot, morphRot, nil
 }
 
 // 付与親を加味した回転角度
@@ -1369,7 +1379,11 @@ func (fs *BoneFrames) getEffectRotation(
 		return nil
 	}
 
-	rot, effectRot := fs.getRotation(bf, frame, effectBone, model, boneDeltas, morphDeltas, loop+1)
+	rot, morphRot, effectRot := fs.getRotation(bf, frame, effectBone, model, boneDeltas, morphDeltas, loop+1)
+
+	if morphRot != nil {
+		rot.Mul(morphRot)
+	}
 
 	if effectRot != nil {
 		rot.Mul(effectRot)

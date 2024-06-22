@@ -24,10 +24,10 @@ func (fs *MorphNameFrames) DeformVertex(
 	frame int,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
-) {
+) *VertexMorphDeltas {
 	mf := fs.Get(frame)
 	if mf == nil || mf.Ratio == 0.0 {
-		return
+		return deltas
 	}
 
 	morph := model.Morphs.GetByName(fs.Name)
@@ -48,16 +48,18 @@ func (fs *MorphNameFrames) DeformVertex(
 			deltas.Data[offset.VertexIndex] = delta
 		}
 	}
+
+	return deltas
 }
 
 func (fs *MorphNameFrames) DeformAfterVertex(
 	frame int,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
-) {
+) *VertexMorphDeltas {
 	mf := fs.Get(frame)
 	if mf == nil || mf.Ratio == 0.0 {
-		return
+		return deltas
 	}
 
 	morph := model.Morphs.GetByName(fs.Name)
@@ -72,16 +74,18 @@ func (fs *MorphNameFrames) DeformAfterVertex(
 			deltas.Data[offset.VertexIndex] = delta
 		}
 	}
+
+	return deltas
 }
 
 func (fs *MorphNameFrames) DeformUv(
 	frame int,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
-) {
+) *VertexMorphDeltas {
 	mf := fs.Get(frame)
 	if mf == nil || mf.Ratio == 0.0 {
-		return
+		return deltas
 	}
 
 	morph := model.Morphs.GetByName(fs.Name)
@@ -97,16 +101,18 @@ func (fs *MorphNameFrames) DeformUv(
 			deltas.Data[offset.VertexIndex] = delta
 		}
 	}
+
+	return deltas
 }
 
 func (fs *MorphNameFrames) DeformUv1(
 	frame int,
 	model *pmx.PmxModel,
 	deltas *VertexMorphDeltas,
-) {
+) *VertexMorphDeltas {
 	mf := fs.Get(frame)
 	if mf == nil || mf.Ratio == 0.0 {
-		return
+		return deltas
 	}
 
 	morph := model.Morphs.GetByName(fs.Name)
@@ -122,48 +128,56 @@ func (fs *MorphNameFrames) DeformUv1(
 			deltas.Data[offset.VertexIndex] = delta
 		}
 	}
+
+	return deltas
 }
 
 func (fs *MorphNameFrames) DeformBone(
 	frame int,
 	model *pmx.PmxModel,
 	deltas *BoneMorphDeltas,
-) {
+) *BoneMorphDeltas {
 	mf := fs.Get(frame)
 	if mf == nil || mf.Ratio == 0.0 {
-		return
+		return deltas
 	}
 
 	morph := model.Morphs.GetByName(fs.Name)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.BoneMorphOffset)
-		if 0 < offset.BoneIndex && offset.BoneIndex <= len(deltas.Data) {
-			delta := deltas.Data[offset.BoneIndex]
+		if 0 < offset.BoneIndex {
+			delta := deltas.Get(offset.BoneIndex)
 			if delta == nil {
 				delta = NewBoneMorphDelta(offset.BoneIndex)
 			}
 
+			offsetPos := offset.Position.MuledScalar(mf.Ratio)
+			offsetQuat := offset.Rotation.GetQuaternion().MuledScalar(mf.Ratio).Normalize()
+			offsetScale := offset.Scale.MuledScalar(mf.Ratio)
+
 			if delta.MorphFrameDelta.framePosition == nil {
-				delta.MorphFrameDelta.framePosition = offset.Position.MuledScalar(mf.Ratio).Copy()
+				delta.MorphFrameDelta.framePosition = offsetPos
 			} else {
-				delta.MorphFrameDelta.framePosition.Add(offset.Position.MuledScalar(mf.Ratio))
+				delta.MorphFrameDelta.framePosition.Add(offsetPos)
 			}
 
 			if delta.MorphFrameDelta.frameRotation == nil {
-				delta.MorphFrameDelta.frameRotation = offset.Rotation.GetQuaternion().MuledScalar(mf.Ratio)
+				delta.MorphFrameDelta.frameRotation = offsetQuat
 			} else {
-				delta.MorphFrameDelta.frameRotation.Mul(offset.Rotation.GetQuaternion().MuledScalar(mf.Ratio))
+				delta.MorphFrameDelta.frameRotation = offsetQuat.Mul(delta.MorphFrameDelta.frameRotation)
 			}
 
 			if delta.MorphFrameDelta.frameScale == nil {
-				delta.MorphFrameDelta.frameScale = offset.Scale.MuledScalar(mf.Ratio).Copy()
+				delta.MorphFrameDelta.frameScale = offsetScale
 			} else {
-				delta.MorphFrameDelta.frameScale.Add(offset.Scale.MuledScalar(mf.Ratio))
+				delta.MorphFrameDelta.frameScale.Add(offsetScale)
 			}
 
-			deltas.Data[offset.BoneIndex] = delta
+			deltas.Append(delta)
 		}
 	}
+
+	return deltas
 }
 
 // DeformMaterial 材質モーフの適用
@@ -171,10 +185,10 @@ func (fs *MorphNameFrames) DeformMaterial(
 	frame int,
 	model *pmx.PmxModel,
 	deltas *MaterialMorphDeltas,
-) {
+) *MaterialMorphDeltas {
 	mf := fs.Get(frame)
 	if mf == nil || mf.Ratio == 0.0 {
-		return
+		return deltas
 	}
 
 	morph := model.Morphs.GetByName(fs.Name)
@@ -213,4 +227,6 @@ func (fs *MorphNameFrames) DeformMaterial(
 			}
 		}
 	}
+
+	return deltas
 }

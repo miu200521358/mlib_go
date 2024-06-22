@@ -44,18 +44,19 @@ func (mfs *MorphFrames) Deform(
 		}
 
 		morph := model.Morphs.GetByName(morphName)
-		if morph.MorphType == pmx.MORPH_TYPE_VERTEX {
-			mfs.Get(morphName).DeformVertex(frame, model, mds.Vertices)
-		} else if morph.MorphType == pmx.MORPH_TYPE_AFTER_VERTEX {
-			mfs.Get(morphName).DeformAfterVertex(frame, model, mds.Vertices)
-		} else if morph.MorphType == pmx.MORPH_TYPE_UV {
-			mfs.Get(morphName).DeformUv(frame, model, mds.Vertices)
-		} else if morph.MorphType == pmx.MORPH_TYPE_EXTENDED_UV1 {
-			mfs.Get(morphName).DeformUv1(frame, model, mds.Vertices)
-		} else if morph.MorphType == pmx.MORPH_TYPE_BONE {
-			mfs.Get(morphName).DeformBone(frame, model, mds.Bones)
-		} else if morph.MorphType == pmx.MORPH_TYPE_MATERIAL {
-			mfs.Get(morphName).DeformMaterial(frame, model, mds.Materials)
+		switch morph.MorphType {
+		case pmx.MORPH_TYPE_VERTEX:
+			mds.Vertices = mfs.Get(morphName).DeformVertex(frame, model, mds.Vertices)
+		case pmx.MORPH_TYPE_AFTER_VERTEX:
+			mds.Vertices = mfs.Get(morphName).DeformAfterVertex(frame, model, mds.Vertices)
+		case pmx.MORPH_TYPE_UV:
+			mds.Vertices = mfs.Get(morphName).DeformUv(frame, model, mds.Vertices)
+		case pmx.MORPH_TYPE_EXTENDED_UV1:
+			mds.Vertices = mfs.Get(morphName).DeformUv1(frame, model, mds.Vertices)
+		case pmx.MORPH_TYPE_BONE:
+			mds.Bones = mfs.Get(morphName).DeformBone(frame, model, mds.Bones)
+		case pmx.MORPH_TYPE_MATERIAL:
+			mds.Materials = mfs.Get(morphName).DeformMaterial(frame, model, mds.Materials)
 		}
 	}
 

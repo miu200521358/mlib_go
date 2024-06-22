@@ -34,13 +34,16 @@ func NewVertexMorphDeltas() *VertexMorphDeltas {
 }
 
 type BoneMorphDelta struct {
+	BoneIndex int
 	*BoneFrame
 	*MorphFrameDelta
 }
 
-func NewBoneMorphDelta(index int) *BoneMorphDelta {
+func NewBoneMorphDelta(boneIndex int) *BoneMorphDelta {
 	return &BoneMorphDelta{
-		BoneFrame: NewBoneFrame(index),
+		BoneIndex:       boneIndex,
+		BoneFrame:       NewBoneFrame(boneIndex),
+		MorphFrameDelta: NewMorphFrameDelta(),
 	}
 }
 
@@ -59,6 +62,10 @@ func (bts *BoneMorphDeltas) Get(boneIndex int) *BoneMorphDelta {
 		return nil
 	}
 	return bts.Data[boneIndex]
+}
+
+func (bts *BoneMorphDeltas) Append(b *BoneMorphDelta) {
+	bts.Data[b.BoneIndex] = b
 }
 
 type MaterialMorphDelta struct {

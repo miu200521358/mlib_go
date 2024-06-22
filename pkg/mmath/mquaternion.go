@@ -223,25 +223,6 @@ func (quat *MQuaternion) Vec3() *MVec3 {
 	return &vec3
 }
 
-// AxisAngleは、正規化されたクォータニオンから、軸と回転角度の形で回転を取り出す。
-func (quat *MQuaternion) AxisAngle() (axis MVec3, angle float64) {
-	cos := quat.GetW()
-	sin := math.Sqrt(1 - cos*cos)
-	angle = math.Acos(cos) * 2
-
-	var ooSin float64
-	if math.Abs(sin) < 0.0005 {
-		ooSin = 1
-	} else {
-		ooSin = 1 / sin
-	}
-	axis[0] = quat.GetX() * ooSin
-	axis[1] = quat.GetY() * ooSin
-	axis[2] = quat.GetZ() * ooSin
-
-	return axis, angle
-}
-
 // Mulは、クォータニオンの積を返します。
 func (q1 *MQuaternion) MulShort(q2 *MQuaternion) *MQuaternion {
 	mat1 := q1.ToMat4()
@@ -357,12 +338,8 @@ func (quat *MQuaternion) MuledScalar(factor float64) *MQuaternion {
 		return NewMQuaternion()
 	}
 
-	axis, angle := quat.AxisAngle()
-
 	// factor をかけて角度を制限
-	angle *= factor
-
-	return NewMQuaternionFromAxisAngles(&axis, angle)
+	return MQuaternionIdent.Slerp(quat, factor)
 }
 
 // ToAxisAngleは、クォータニオンを軸と角度に変換します。
