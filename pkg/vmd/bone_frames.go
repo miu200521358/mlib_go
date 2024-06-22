@@ -256,14 +256,6 @@ func (fs *BoneFrames) calcIk(
 	// 中断FLGが入ったか否か
 	aborts := make([]bool, len(ikBone.Ik.Links))
 
-	// // リンクボーン全体の長さ
-	// ikBoneTotalLength := 0.0
-	// for _, l := range ikBone.Ik.Links {
-	// 	if model.Bones.Contains(l.BoneIndex) {
-	// 		ikBoneTotalLength += model.Bones.Get(l.BoneIndex).ParentRelativePosition.Length()
-	// 	}
-	// }
-
 	// 一段IKであるか否か
 	isOneLinkIk := len(ikBone.Ik.Links) == 1
 	// ループ回数
@@ -374,13 +366,6 @@ ikLoop:
 			// 注目ノードを起点とした、IK目標のグローバル差分
 			ikLocalPosition := linkInvMatrix.MulVec3(ikGlobalPosition.Added(linkDiffPosition))
 
-			// // 注目ノード（実際に動かすボーン=リンクボーン）
-			// linkGlobalPosition := boneDeltas.Get(linkBone.Index).GlobalPosition()
-			// // 注目ノードを起点とした、エフェクタのグローバル差分
-			// effectorLocalPosition := linkGlobalPosition.Subed(effectorGlobalPosition)
-			// // 注目ノードを起点とした、IK目標のグローバル差分
-			// ikLocalPosition := linkGlobalPosition.Subed(ikGlobalPosition)
-
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][Local] effectorLocalPosition: %s, ikLocalPosition: %s (%f)\n",
@@ -429,13 +414,7 @@ ikLoop:
 
 			// 角度がほとんどない場合
 			if math.Abs(linkAngle) < 1e-8 {
-				if isOneLinkIk {
-					// 一段IKは単位角度を回す
-					linkAngle = unitRad // * float64(loop+1)
-				} else {
-					// 多段IKは終了
-					break ikLoop
-				}
+				break ikLoop
 			}
 
 			// 回転軸
@@ -497,10 +476,6 @@ ikLoop:
 
 			originalTotalIkQuat := linkQuat.Muled(originalIkQuat)
 			totalIkQuat := linkQuat.Muled(ikQuat)
-
-			if isOneLinkIk && loop == 1 {
-				totalIkQuat = ikQuat.Muled(linkQuat)
-			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				{
