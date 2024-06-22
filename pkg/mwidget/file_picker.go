@@ -23,20 +23,20 @@ const FilePickerClass = "FilePicker Class"
 
 type FilePicker struct {
 	walk.WidgetBase
-	title             string                // ファイルタイトル
-	historyKey        string                // 履歴用キー(空欄の場合、保存用ファイルと見なす)
-	filterExtension   map[string]string     // フィルタ拡張子
-	PathLineEdit      *walk.LineEdit        // ファイルパス入力欄
-	nameLineEdit      *walk.LineEdit        // ファイル名入力欄
-	openPushButton    *walk.PushButton      // 開くボタン
-	historyPushButton *walk.PushButton      // 履歴ボタン
-	OnPathChanged     func(string)          // パス変更時のコールバック
-	limitHistory      int                   // 履歴リスト
-	modelReader       mcore.ReaderInterface // mcore
-	initialDirPath    string                // 初期ディレクトリ
-	cacheData         mcore.IHashModel      // キャッシュデータ
-	window            *MWindow              // MWindow
-	historyDialog     *walk.Dialog          // 履歴ダイアログ
+	title             string                    // ファイルタイトル
+	historyKey        string                    // 履歴用キー(空欄の場合、保存用ファイルと見なす)
+	filterExtension   map[int]map[string]string // フィルタ拡張子
+	PathLineEdit      *walk.LineEdit            // ファイルパス入力欄
+	nameLineEdit      *walk.LineEdit            // ファイル名入力欄
+	openPushButton    *walk.PushButton          // 開くボタン
+	historyPushButton *walk.PushButton          // 履歴ボタン
+	OnPathChanged     func(string)              // パス変更時のコールバック
+	limitHistory      int                       // 履歴リスト
+	modelReader       mcore.ReaderInterface     // mcore
+	initialDirPath    string                    // 初期ディレクトリ
+	cacheData         mcore.IHashModel          // キャッシュデータ
+	window            *MWindow                  // MWindow
+	historyDialog     *walk.Dialog              // 履歴ダイアログ
 }
 
 func NewPmxReadFilePicker(
@@ -55,7 +55,8 @@ func NewPmxReadFilePicker(
 		title,
 		tooltip,
 		description,
-		map[string]string{"*.pmx": "Pmx Files (*.pmx)", "*.*": "All Files (*.*)"},
+		map[int]map[string]string{
+			0: {"*.pmx": "Pmx Files (*.pmx)"}, 2: {"*.*": "All Files (*.*)"}},
 		50,
 		&pmx.PmxReader{},
 		OnPathChanged)
@@ -77,7 +78,8 @@ func NewVpdReadFilePicker(
 		title,
 		tooltip,
 		description,
-		map[string]string{"*.vpd": "Vpd Files (*.vpd)", "*.*": "All Files (*.*)"},
+		map[int]map[string]string{
+			0: {"*.vpd": "Vpd Files (*.vpd)"}, 1: {"*.*": "All Files (*.*)"}},
 		50,
 		&vmd.VpdMotionReader{},
 		OnPathChanged)
@@ -99,7 +101,10 @@ func NewVmdVpdReadFilePicker(
 		title,
 		tooltip,
 		description,
-		map[string]string{"*.vmd": "Vmd Files (*.vmd)", "*.vpd": "Vpd Files (*.vpd)", "*.*": "All Files (*.*)"},
+		map[int]map[string]string{
+			0: {"*.vmd": "Vmd Files (*.vmd)"},
+			1: {"*.vpd": "Vpd Files (*.vpd)"},
+			2: {"*.*": "All Files (*.*)"}},
 		50,
 		vmd.NewVmdVpdMotionReader(),
 		OnPathChanged)
@@ -121,7 +126,9 @@ func NewVmdReadFilePicker(
 		title,
 		tooltip,
 		description,
-		map[string]string{"*.vmd": "Vmd Files (*.vmd)", "*.*": "All Files (*.*)"},
+		map[int]map[string]string{
+			0: {"*.vmd": "Vmd Files (*.vmd)"},
+			1: {"*.*": "All Files (*.*)"}},
 		50,
 		&vmd.VmdMotionReader{},
 		OnPathChanged)
@@ -142,7 +149,9 @@ func NewVmdSaveFilePicker(
 		title,
 		tooltip,
 		description,
-		map[string]string{"*.vmd": "Vmd Files (*.vmd)", "*.*": "All Files (*.*)"},
+		map[int]map[string]string{
+			0: {"*.vmd": "Vmd Files (*.vmd)"},
+			1: {"*.*": "All Files (*.*)"}},
 		0,
 		nil,
 		OnPathChanged)
@@ -163,7 +172,9 @@ func NewPmxSaveFilePicker(
 		title,
 		tooltip,
 		description,
-		map[string]string{"*.pmx": "Pmx Files (*.pmx)", "*.*": "All Files (*.*)"},
+		map[int]map[string]string{
+			0: {"*.pmx": "Pmx Files (*.pmx)"},
+			1: {"*.*": "All Files (*.*)"}},
 		0,
 		nil,
 		onPathChanged)
@@ -176,7 +187,7 @@ func NewFilePicker(
 	title string,
 	tooltip string,
 	description string,
-	filterExtension map[string]string,
+	filterExtension map[int]map[string]string,
 	limitHistory int,
 	modelReader mcore.ReaderInterface,
 	onPathChanged func(string),
@@ -497,13 +508,16 @@ func (picker *FilePicker) onClickOpenButton() walk.EventHandler {
 	}
 }
 
-func (f *FilePicker) convertFilterExtension(filterExtension map[string]string) string {
+func (f *FilePicker) convertFilterExtension(filterExtension map[int]map[string]string) string {
 	var filterString string
-	for ext, desc := range filterExtension {
-		if filterString != "" {
-			filterString = filterString + "|"
+	for i := 0; i < len(filterExtension); i++ {
+		extData := filterExtension[i]
+		for ext, desc := range extData {
+			if filterString != "" {
+				filterString = filterString + "|"
+			}
+			filterString = filterString + desc + "|" + ext
 		}
-		filterString = filterString + desc + "|" + ext
 	}
 	return filterString
 }
