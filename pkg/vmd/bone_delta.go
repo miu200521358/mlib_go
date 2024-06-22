@@ -19,6 +19,7 @@ type BoneDelta struct {
 	frameEffectRotation *mmath.MQuaternion // キーフレ回転の変動量(付与親のみ)
 	frameScale          *mmath.MVec3       // キーフレスケールの変動量
 	unitMatrix          *mmath.MMat4
+	*MorphFrameDelta
 }
 
 func (bd *BoneDelta) GlobalMatrix() *mmath.MMat4 {
@@ -108,30 +109,18 @@ func (bd *BoneDelta) Copy() *BoneDelta {
 		frameEffectRotation: bd.FrameEffectRotation().Copy(),
 		frameScale:          bd.FrameScale().Copy(),
 		unitMatrix:          bd.unitMatrix.Copy(),
+		MorphFrameDelta:     bd.MorphFrameDelta.Copy(),
 	}
 }
 
 func NewBoneDelta(
 	bone *pmx.Bone,
 	frame int,
-	// globalMatrix, unitMatrix *mmath.MMat4,
-	// framePosition, frameEffectPosition *mmath.MVec3,
-	// frameRotation, frameEffectRotation *mmath.MQuaternion,
-	// frameScale *mmath.MVec3,
 ) *BoneDelta {
 	return &BoneDelta{
-		Bone:  bone,
-		Frame: frame,
-		// globalMatrix: globalMatrix,
-		//
-		// localMatrix:         bone.OffsetMatrix.Muled(globalMatrix),
-		// globalPosition:
-		// framePosition:       framePosition,
-		// frameEffectPosition: frameEffectPosition,
-		// frameRotation:       frameRotation,
-		// frameEffectRotation: frameEffectRotation,
-		// frameScale:          frameScale,
-		// unitMatrix:          unitMatrix,
+		Bone:            bone,
+		Frame:           frame,
+		MorphFrameDelta: NewMorphFrameDelta(),
 	}
 }
 

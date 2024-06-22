@@ -143,40 +143,22 @@ func (fs *MorphNameFrames) DeformBone(
 				delta = NewBoneMorphDelta(offset.BoneIndex)
 			}
 
-			if delta.MorphPosition == nil {
-				delta.MorphPosition = offset.Position.MuledScalar(mf.Ratio).Copy()
+			if delta.MorphFrameDelta.framePosition == nil {
+				delta.MorphFrameDelta.framePosition = offset.Position.MuledScalar(mf.Ratio).Copy()
 			} else {
-				delta.MorphPosition.Add(offset.Position.MuledScalar(mf.Ratio))
+				delta.MorphFrameDelta.framePosition.Add(offset.Position.MuledScalar(mf.Ratio))
 			}
 
-			if delta.MorphLocalPosition == nil {
-				delta.MorphLocalPosition = offset.LocalPosition.MuledScalar(mf.Ratio).Copy()
+			if delta.MorphFrameDelta.frameRotation == nil {
+				delta.MorphFrameDelta.frameRotation = offset.Rotation.GetQuaternion().MuledScalar(mf.Ratio)
 			} else {
-				delta.MorphLocalPosition.Add(offset.LocalPosition.MuledScalar(mf.Ratio))
+				delta.MorphFrameDelta.frameRotation.Mul(offset.Rotation.GetQuaternion().MuledScalar(mf.Ratio))
 			}
 
-			if delta.MorphRotation == nil {
-				delta.MorphRotation = offset.Rotation.GetQuaternion().MuledScalar(mf.Ratio)
+			if delta.MorphFrameDelta.frameScale == nil {
+				delta.MorphFrameDelta.frameScale = offset.Scale.MuledScalar(mf.Ratio).Copy()
 			} else {
-				delta.MorphRotation.Mul(offset.Rotation.GetQuaternion().MuledScalar(mf.Ratio))
-			}
-
-			if delta.MorphLocalRotation == nil {
-				delta.MorphLocalRotation = offset.LocalRotation.GetQuaternion().MuledScalar(mf.Ratio)
-			} else {
-				delta.MorphLocalRotation.Mul(offset.LocalRotation.GetQuaternion().MuledScalar(mf.Ratio))
-			}
-
-			if delta.MorphScale == nil {
-				delta.MorphScale = offset.Scale.MuledScalar(mf.Ratio).Copy()
-			} else {
-				delta.MorphScale.Add(offset.Scale.MuledScalar(mf.Ratio))
-			}
-
-			if delta.MorphLocalScale == nil {
-				delta.MorphLocalScale = offset.LocalScale.MuledScalar(mf.Ratio).Copy()
-			} else {
-				delta.MorphLocalScale.Add(offset.LocalScale.MuledScalar(mf.Ratio))
+				delta.MorphFrameDelta.frameScale.Add(offset.Scale.MuledScalar(mf.Ratio))
 			}
 
 			deltas.Data[offset.BoneIndex] = delta

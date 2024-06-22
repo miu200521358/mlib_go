@@ -1,5 +1,7 @@
 package vmd
 
+import "github.com/miu200521358/mlib_go/pkg/mmath"
+
 type MorphFrame struct {
 	*BaseFrame         // キーフレ
 	Ratio      float64 // モーフの割合
@@ -47,4 +49,43 @@ func (nextMf *MorphFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame 
 }
 
 func (mf *MorphFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
+}
+
+type MorphFrameDelta struct {
+	framePosition *mmath.MVec3       // キーフレ位置の変動量
+	frameRotation *mmath.MQuaternion // キーフレ回転の変動量
+	frameScale    *mmath.MVec3       // キーフレスケールの変動量
+}
+
+func (md *MorphFrameDelta) FramePosition() *mmath.MVec3 {
+	if md.framePosition == nil {
+		md.framePosition = mmath.NewMVec3()
+	}
+	return md.framePosition
+}
+
+func (md *MorphFrameDelta) FrameRotation() *mmath.MQuaternion {
+	if md.frameRotation == nil {
+		md.frameRotation = mmath.NewMQuaternion()
+	}
+	return md.frameRotation
+}
+
+func (md *MorphFrameDelta) FrameScale() *mmath.MVec3 {
+	if md.frameScale == nil {
+		md.frameScale = mmath.NewMVec3()
+	}
+	return md.frameScale
+}
+
+func NewMorphFrameDelta() *MorphFrameDelta {
+	return &MorphFrameDelta{}
+}
+
+func (md *MorphFrameDelta) Copy() *MorphFrameDelta {
+	return &MorphFrameDelta{
+		framePosition: md.FramePosition().Copy(),
+		frameRotation: md.FrameRotation().Copy(),
+		frameScale:    md.FrameScale().Copy(),
+	}
 }

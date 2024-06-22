@@ -29,34 +29,9 @@ func deform(
 
 	if prevDeltas == nil {
 		vds.Morphs = motion.DeformMorph(frame, model, nil)
-
-		for i, bd := range vds.Morphs.Bones.Data {
-			if bd == nil {
-				continue
-			}
-			bone := model.Bones.Get(i)
-			if !motion.BoneFrames.Contains(bone.Name) {
-				motion.BoneFrames.Append(vmd.NewBoneNameFrames(bone.Name))
-			}
-			bf := motion.BoneFrames.Get(bone.Name).Get(frame)
-
-			if bf != nil {
-				// 一旦モーフの値をクリア
-				bf.MorphPosition = nil
-				bf.MorphLocalPosition = nil
-				bf.MorphRotation = nil
-				bf.MorphLocalRotation = nil
-				bf.MorphScale = nil
-				bf.MorphLocalScale = nil
-
-				// 該当ボーンキーフレにモーフの値を加算
-				bf.Add(bd.BoneFrame)
-				motion.AppendBoneFrame(bone.Name, bf)
-			}
-		}
-
 		// 物理前のデフォーム情報
-		beforeBoneDeltas = motion.BoneFrames.Deform(frame, model, nil, true, nil, ikFrame)
+		beforeBoneDeltas = motion.BoneFrames.DeformByPhysicsFlag(frame, model, nil, true,
+			nil, vds.Morphs, ikFrame, false)
 	} else {
 		vds.Morphs = prevDeltas.Morphs
 		beforeBoneDeltas = prevDeltas.Bones
@@ -66,7 +41,8 @@ func deform(
 	updatePhysics(modelPhysics, model, beforeBoneDeltas, frame, elapsed, enablePhysics)
 
 	// 物理後のデフォーム情報
-	vds.Bones = motion.BoneFrames.Deform(frame, model, nil, true, beforeBoneDeltas, ikFrame)
+	vds.Bones = motion.BoneFrames.DeformByPhysicsFlag(frame, model, nil, true,
+		beforeBoneDeltas, vds.Morphs, ikFrame, true)
 
 	return vds
 }

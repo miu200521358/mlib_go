@@ -5,21 +5,15 @@ import (
 )
 
 type BoneFrame struct {
-	*BaseFrame                            // キーフレ
-	Position           *mmath.MVec3       // 位置
-	MorphPosition      *mmath.MVec3       // モーフ位置
-	LocalPosition      *mmath.MVec3       // ローカル位置
-	MorphLocalPosition *mmath.MVec3       // モーフローカル位置
-	Rotation           *mmath.MQuaternion // 回転
-	MorphRotation      *mmath.MQuaternion // モーフ回転
-	LocalRotation      *mmath.MQuaternion // ローカル回転
-	MorphLocalRotation *mmath.MQuaternion // モーフローカル回転
-	Scale              *mmath.MVec3       // スケール
-	MorphScale         *mmath.MVec3       // モーフスケール
-	LocalScale         *mmath.MVec3       // ローカルスケール
-	MorphLocalScale    *mmath.MVec3       // モーフローカルスケール
-	PhysicsMatrix      *mmath.MMat4       // 物理結果行列
-	Curves             *BoneCurves        // 補間曲線
+	*BaseFrame                       // キーフレ
+	Position      *mmath.MVec3       // 位置
+	LocalPosition *mmath.MVec3       // ローカル位置
+	Rotation      *mmath.MQuaternion // 回転
+	LocalRotation *mmath.MQuaternion // ローカル回転
+	Scale         *mmath.MVec3       // スケール
+	LocalScale    *mmath.MVec3       // ローカルスケール
+	PhysicsMatrix *mmath.MMat4       // 物理結果行列
+	Curves        *BoneCurves        // 補間曲線
 }
 
 func NewBoneFrame(index int) *BoneFrame {
@@ -40,25 +34,11 @@ func (bf *BoneFrame) Add(v *BoneFrame) *BoneFrame {
 			bf.Position.Add(v.Position)
 		}
 	}
-	if bf.MorphPosition != nil || v.MorphPosition != nil {
-		if bf.MorphPosition == nil {
-			bf.MorphPosition = v.MorphPosition.Copy()
-		} else if v.MorphPosition != nil {
-			bf.MorphPosition.Add(v.MorphPosition)
-		}
-	}
 	if bf.LocalPosition != nil || v.LocalPosition != nil {
 		if bf.LocalPosition == nil {
 			bf.LocalPosition = v.LocalPosition.Copy()
 		} else if v.LocalPosition != nil {
 			bf.LocalPosition.Add(v.LocalPosition)
-		}
-	}
-	if bf.MorphLocalPosition != nil || v.MorphLocalPosition != nil {
-		if bf.MorphLocalPosition == nil {
-			bf.MorphLocalPosition = v.MorphLocalPosition.Copy()
-		} else if v.MorphLocalPosition != nil {
-			bf.MorphLocalPosition.Add(v.MorphLocalPosition)
 		}
 	}
 
@@ -70,27 +50,11 @@ func (bf *BoneFrame) Add(v *BoneFrame) *BoneFrame {
 		}
 	}
 
-	if bf.MorphRotation != nil || v.MorphRotation != nil {
-		if bf.MorphRotation == nil {
-			bf.MorphRotation = v.MorphRotation.Copy()
-		} else if v.MorphRotation != nil {
-			bf.MorphRotation.Mul(v.MorphRotation)
-		}
-	}
-
 	if bf.LocalRotation != nil || v.LocalRotation != nil {
 		if bf.LocalRotation == nil {
 			bf.LocalRotation = v.LocalRotation.Copy()
 		} else if v.LocalRotation != nil {
 			bf.LocalRotation.Mul(v.LocalRotation)
-		}
-	}
-
-	if bf.MorphLocalRotation != nil || v.MorphLocalRotation != nil {
-		if bf.MorphLocalRotation == nil {
-			bf.MorphLocalRotation = v.MorphLocalRotation.Copy()
-		} else if v.MorphLocalRotation != nil {
-			bf.MorphLocalRotation.Mul(v.MorphLocalRotation)
 		}
 	}
 
@@ -102,27 +66,11 @@ func (bf *BoneFrame) Add(v *BoneFrame) *BoneFrame {
 		}
 	}
 
-	if bf.MorphScale != nil || v.MorphScale != nil {
-		if bf.MorphScale == nil {
-			bf.MorphScale = v.MorphScale.Copy()
-		} else if v.MorphScale != nil {
-			bf.MorphScale.Add(v.MorphScale)
-		}
-	}
-
 	if bf.LocalScale != nil || v.LocalScale != nil {
 		if bf.LocalScale == nil {
 			bf.LocalScale = v.LocalScale.Copy()
 		} else if v.LocalScale != nil {
 			bf.LocalScale.Add(v.LocalScale)
-		}
-	}
-
-	if bf.MorphLocalScale != nil || v.MorphLocalScale != nil {
-		if bf.MorphLocalScale == nil {
-			bf.MorphLocalScale = v.MorphLocalScale.Copy()
-		} else if v.MorphLocalScale != nil {
-			bf.MorphLocalScale.Add(v.MorphLocalScale)
 		}
 	}
 
@@ -136,50 +84,26 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 
 func (v *BoneFrame) Copy() IBaseFrame {
 	copied := &BoneFrame{
-		BaseFrame:          NewFrame(v.GetIndex()).(*BaseFrame),
-		Position:           v.Position.Copy(),
-		MorphPosition:      nil,
-		LocalPosition:      nil,
-		MorphLocalPosition: nil,
-		Rotation:           v.Rotation.Copy(),
-		MorphRotation:      nil,
-		LocalRotation:      nil,
-		MorphLocalRotation: nil,
-		Scale:              nil,
-		MorphScale:         nil,
-		LocalScale:         nil,
-		MorphLocalScale:    nil,
-		Curves:             NewBoneCurves(),
-	}
-	if v.MorphPosition != nil {
-		copied.MorphPosition = v.MorphPosition.Copy()
+		BaseFrame:     NewFrame(v.GetIndex()).(*BaseFrame),
+		Position:      v.Position.Copy(),
+		LocalPosition: nil,
+		Rotation:      v.Rotation.Copy(),
+		LocalRotation: nil,
+		Scale:         nil,
+		LocalScale:    nil,
+		Curves:        NewBoneCurves(),
 	}
 	if v.LocalPosition != nil {
 		copied.LocalPosition = v.LocalPosition.Copy()
 	}
-	if v.MorphLocalPosition != nil {
-		copied.MorphLocalPosition = v.MorphLocalPosition.Copy()
-	}
-	if v.MorphRotation != nil {
-		copied.MorphRotation = v.MorphRotation.Copy()
-	}
 	if v.LocalRotation != nil {
 		copied.LocalRotation = v.LocalRotation.Copy()
-	}
-	if v.MorphLocalRotation != nil {
-		copied.MorphLocalRotation = v.MorphLocalRotation.Copy()
 	}
 	if v.Scale != nil {
 		copied.Scale = v.Scale.Copy()
 	}
-	if v.MorphScale != nil {
-		copied.MorphScale = v.MorphScale.Copy()
-	}
 	if v.LocalScale != nil {
 		copied.LocalScale = v.LocalScale.Copy()
-	}
-	if v.MorphLocalScale != nil {
-		copied.MorphLocalScale = v.MorphLocalScale.Copy()
 	}
 	copied.Curves = v.Curves.Copy()
 
