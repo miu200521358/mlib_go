@@ -1060,25 +1060,6 @@ func (fs *BoneFrames) calcBoneDeltas(
 
 		// 回転
 		rot := delta.LocalRotation()
-		// rot := delta.frameRotation.Copy()
-		// if rot == nil {
-		// 	rot = mmath.NewMQuaternion()
-		// }
-
-		// isEffectorRot := false
-		// isIkRot := false
-		// if delta.frameIkRotation != nil && !delta.frameIkRotation.IsIdent() {
-		// 	rot = delta.frameIkRotation.Muled(rot)
-		// 	isIkRot = true
-		// }
-		// if delta.frameEffectRotation != nil && !delta.frameEffectRotation.IsIdent() {
-		// 	rot = rot.Muled(delta.frameEffectRotation)
-		// 	isEffectorRot = true
-		// }
-		// if (isIkRot || isEffectorRot) && delta.Bone.HasFixedAxis() {
-		// 	// 軸制限回転を求める
-		// 	rot = rot.ToFixedAxisRotation(delta.Bone.NormalizedFixedAxis)
-		// }
 
 		if rot != nil && !rot.IsIdent() {
 			delta.unitMatrix.Mul(rot.ToMat4())
@@ -1368,7 +1349,6 @@ func (fs *BoneFrames) getEffectRotation(
 
 	if effectRot != nil {
 		rot.Mul(effectRot)
-		// rot = effectRot.Muled(rot)
 	}
 
 	return rot.MuledScalar(bone.EffectFactor)
