@@ -6,7 +6,6 @@ import (
 	"math"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -278,11 +277,27 @@ func (fs *BoneFrames) calcIk(
 	// IK関連の行列を一括計算
 	ikDeltas := fs.DeformByPhysicsFlag(frame, model, []string{ikBone.Name, effectorBone.Name}, false,
 		boneDeltas, morphDeltas, ikFrame, isAfterPhysics)
+	if !ikDeltas.Contains(ikBone.Index) {
+		// IKボーンが存在しない場合、スルー
+		return boneDeltas
+	}
+
 	ikOffDeltas := fs.DeformByPhysicsFlag(frame, model, []string{effectorBone.Name}, false,
 		nil, morphDeltas, ikFrame, isAfterPhysics)
+	if !ikOffDeltas.Contains(effectorBone.Index) {
+		// IK OFFボーンが存在しない場合、スルー
+		return boneDeltas
+	}
+
 	// エフェクタ関連情報取得
 	effectorDeformBoneIndexes, boneDeltas :=
 		fs.prepareDeltas(frame, model, []string{effectorBone.Name}, false, boneDeltas, morphDeltas, ikFrame, isAfterPhysics)
+	if !boneDeltas.Contains(effectorBone.Index) || !boneDeltas.Contains(ikBone.Index) ||
+		!boneDeltas.Contains(ikBone.Ik.BoneIndex) {
+		// エフェクタボーンが存在しない場合、スルー
+		return boneDeltas
+	}
+
 	// 中断FLGが入ったか否か
 	aborts := make([]bool, len(ikBone.Ik.Links))
 
@@ -1095,8 +1110,6 @@ func (fs *BoneFrames) createBoneDeltas(
 	boneDeltas *BoneDeltas,
 	isAfterPhysics bool,
 ) ([]int, *BoneDeltas) {
-	// mlog.Memory("createBoneDeltas 1)")
-
 	// ボーン名の存在チェック用マップ
 	targetSortedBones := model.Bones.LayerSortedBones[isAfterPhysics]
 
@@ -1104,63 +1117,45 @@ func (fs *BoneFrames) createBoneDeltas(
 		boneDeltas = NewBoneDeltas()
 	}
 
-	// mlog.Memory("createBoneDeltas 3)")
+	// 変形階層順ボーンIndexリスト
 	deformBoneIndexes := make([]int, 0, len(targetSortedBones))
+
+	// 関連ボーンINDEXリスト（順不同）
+	relativeBoneIndexes := make(map[int]struct{})
 
 	if len(boneNames) > 0 {
 		// 指定ボーンに関連するボーンのみ対象とする
-		layerIndexes := make(pmx.LayerIndexes, 0, len(targetSortedBones))
 
 		for _, boneName := range boneNames {
 			if !model.Bones.ContainsName(boneName) {
 				continue
 			}
 
-			// ボーン名の追加
+			// ボーン
 			bone := model.Bones.GetByName(boneName)
-			layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
+
+			// 対象のボーンは常に追加
+			relativeBoneIndexes[bone.Index] = struct{}{}
 
 			// 関連するボーンの追加
-			relativeBoneIndexes := bone.RelativeBoneIndexes
-			for _, index := range relativeBoneIndexes {
-				bone := model.Bones.Get(index)
-				// if bone.RigidBody != nil && bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_DYNAMIC {
-				// 	// 物理ボーンはデフォームの処理対象外
-				// 	continue
-				// }
-				if !layerIndexes.Contains(bone.Index) {
-					layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
-				}
+			for _, index := range bone.RelativeBoneIndexes {
+				relativeBoneIndexes[index] = struct{}{}
 			}
 		}
-		sort.Sort(layerIndexes)
-		// mlog.Memory("createBoneDeltas 4)")
+	}
 
-		for _, layerIndex := range layerIndexes {
-			bone := model.Bones.Get(layerIndex.Index)
-			deformBoneIndexes = append(deformBoneIndexes, bone.Index)
-			if !boneDeltas.Contains(bone.Index) {
-				boneDeltas.Append(&BoneDelta{Bone: bone, Frame: frame})
-			}
-		}
-	} else {
-		// 変形階層・ボーンINDEXでソート
-		for k := range len(targetSortedBones) {
-			bone := targetSortedBones[k]
-			// if bone.RigidBody != nil && bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_DYNAMIC {
-			// 	// 物理ボーンはデフォームの処理対象外
-			// 	continue
-			// }
+	// 変形階層・ボーンINDEXでソート
+	for k := range len(targetSortedBones) {
+		bone := targetSortedBones[k]
+		_, isRelativeBone := relativeBoneIndexes[bone.Index]
 
+		if len(relativeBoneIndexes) == 0 || (len(boneNames) > 0 && isRelativeBone) {
 			deformBoneIndexes = append(deformBoneIndexes, bone.Index)
-			boneDeltas.Append(&BoneDelta{Bone: bone, Frame: frame})
 			if !boneDeltas.Contains(bone.Index) {
 				boneDeltas.Append(&BoneDelta{Bone: bone, Frame: frame})
 			}
 		}
 	}
-
-	// mlog.Memory("createBoneDeltas 5)")
 
 	return deformBoneIndexes, boneDeltas
 }
