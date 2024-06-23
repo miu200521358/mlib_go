@@ -29,12 +29,8 @@ func deform(
 
 	if isDeform || prevDeltas == nil {
 		vds.Morphs = motion.DeformMorph(frame, model, nil)
-		// 物理前のデフォーム情報
-		if prevDeltas != nil {
-			beforeBoneDeltas = prevDeltas.Bones
-		}
 		beforeBoneDeltas = motion.BoneFrames.DeformByPhysicsFlag(frame, model, nil, true,
-			beforeBoneDeltas, vds.Morphs, ikFrame, false)
+			nil, vds.Morphs, ikFrame, false)
 	} else {
 		vds.Morphs = prevDeltas.Morphs
 		beforeBoneDeltas = prevDeltas.Bones
