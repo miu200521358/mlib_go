@@ -272,6 +272,15 @@ func (fs *BoneFrames) calcIk(
 		}
 	}()
 
+	// つま先ＩＫであるか
+	isToeIk := strings.Contains(ikBone.Name, "つま先ＩＫ")
+	// ループ回数
+	loopCount := max(ikBone.Ik.LoopCount, 1)
+	if isToeIk {
+		// つま先IKの場合、初回に足首位置に向けるのでループ1回分余分に回す
+		loopCount += 1
+	}
+
 	// IKターゲットボーン
 	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
@@ -282,11 +291,14 @@ func (fs *BoneFrames) calcIk(
 		return boneDeltas
 	}
 
-	ikOffDeltas := fs.DeformByPhysicsFlag(frame, model, []string{effectorBone.Name}, false,
-		nil, morphDeltas, ikFrame, isAfterPhysics)
-	if !ikOffDeltas.Contains(effectorBone.Index) {
-		// IK OFFボーンが存在しない場合、スルー
-		return boneDeltas
+	var ikOffDeltas *BoneDeltas
+	if isToeIk {
+		ikOffDeltas = fs.DeformByPhysicsFlag(frame, model, []string{effectorBone.Name}, false,
+			nil, morphDeltas, ikFrame, isAfterPhysics)
+		if !ikOffDeltas.Contains(effectorBone.Index) {
+			// IK OFFボーンが存在しない場合、スルー
+			return boneDeltas
+		}
 	}
 
 	// エフェクタ関連情報取得
@@ -300,18 +312,6 @@ func (fs *BoneFrames) calcIk(
 
 	// 中断FLGが入ったか否か
 	aborts := make([]bool, len(ikBone.Ik.Links))
-
-	// つま先ＩＫであるか
-	isToeIk := strings.Contains(ikBone.Name, "つま先ＩＫ")
-	// 一段IKであるか否か
-	isOneLinkIk := len(ikBone.Ik.Links) == 1
-	// ループ回数
-	loopCount := max(ikBone.Ik.LoopCount, 1)
-
-	if isToeIk {
-		// つま先IKの場合、初回に足首位置に向けるのでループ1回分余分に回す
-		loopCount += 1
-	}
 
 	// IK計算
 ikLoop:
@@ -390,7 +390,7 @@ ikLoop:
 			effectorGlobalPosition := boneDeltas.Get(effectorBone.Index).GlobalPosition()
 
 			// 初回にIK事前計算
-			if loop == 0 && isToeIk {
+			if loop == 0 && isToeIk && ikOffDeltas != nil {
 				// IK OFF 時の IKターゲットボーンのグローバル位置を取得
 				ikGlobalPosition = ikOffDeltas.Get(effectorBone.Index).GlobalPosition()
 				// 現在のIKターゲットボーンのグローバル位置を取得
@@ -468,7 +468,7 @@ ikLoop:
 
 			// 回転軸
 			var originalLinkAxis, linkAxis *mmath.MVec3
-			if !isOneLinkIk && ikLink.AngleLimit {
+			if ikLink.AngleLimit {
 				// グローバル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.MinAngleLimit.GetRadians(),
@@ -476,7 +476,7 @@ ikLoop:
 					effectorLocalPosition, ikLocalPosition,
 					frame, count, loop, linkBone.Name, ikMotion, ikFile,
 				)
-			} else if !isOneLinkIk && ikLink.LocalAngleLimit {
+			} else if ikLink.LocalAngleLimit {
 				// ローカル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.LocalMinAngleLimit.GetRadians(),
@@ -1147,9 +1147,12 @@ func (fs *BoneFrames) createBoneDeltas(
 	// 変形階層・ボーンINDEXでソート
 	for k := range len(targetSortedBones) {
 		bone := targetSortedBones[k]
-		_, isRelativeBone := relativeBoneIndexes[bone.Index]
+		isRelativeBone := len(boneNames) == 0
+		if len(boneNames) > 0 {
+			_, isRelativeBone = relativeBoneIndexes[bone.Index]
+		}
 
-		if len(relativeBoneIndexes) == 0 || (len(boneNames) > 0 && isRelativeBone) {
+		if isRelativeBone {
 			deformBoneIndexes = append(deformBoneIndexes, bone.Index)
 			if !boneDeltas.Contains(bone.Index) {
 				boneDeltas.Append(&BoneDelta{Bone: bone, Frame: frame})
@@ -1176,15 +1179,19 @@ func (fs *BoneFrames) fillBoneDeform(
 			delta = NewBoneDelta(bone, frame)
 		}
 
-		bf := fs.Get(bone.Name).Get(frame)
-		if bf != nil {
-			// ボーンの移動位置、回転角度、拡大率を取得
-			delta.framePosition, delta.frameMorphPosition, delta.frameEffectPosition =
-				fs.getPosition(bf, frame, bone, model, boneDeltas, morphDeltas, 0)
-			delta.frameRotation, delta.frameMorphRotation, delta.frameEffectRotation =
-				fs.getRotation(bf, frame, bone, model, boneDeltas, morphDeltas, 0)
-			delta.frameScale = fs.getScale(bf, bone, boneDeltas, morphDeltas)
+		var bf *BoneFrame
+		if bone.IsAfterPhysicsDeform() || boneDeltas == nil || boneDeltas.Get(bone.Index) == nil ||
+			boneDeltas.Get(bone.Index).framePosition == nil ||
+			boneDeltas.Get(bone.Index).frameRotation == nil ||
+			boneDeltas.Get(bone.Index).frameScale == nil {
+			bf = fs.Get(bone.Name).Get(frame)
 		}
+		// ボーンの移動位置、回転角度、拡大率を取得
+		delta.framePosition, delta.frameMorphPosition, delta.frameEffectPosition =
+			fs.getPosition(bf, frame, bone, model, boneDeltas, morphDeltas, 0)
+		delta.frameRotation, delta.frameMorphRotation, delta.frameEffectRotation =
+			fs.getRotation(bf, frame, bone, model, boneDeltas, morphDeltas, 0)
+		delta.frameScale = fs.getScale(bf, bone, boneDeltas, morphDeltas)
 		boneDeltas.Append(delta)
 	}
 
@@ -1210,7 +1217,7 @@ func (fs *BoneFrames) getPosition(
 	if !bone.IsAfterPhysicsDeform() && boneDeltas != nil && boneDeltas.Get(bone.Index) != nil &&
 		boneDeltas.Get(bone.Index).framePosition != nil {
 		pos = boneDeltas.Get(bone.Index).framePosition.Copy()
-	} else if bf.Position != nil && !bf.Position.IsZero() {
+	} else if bf != nil && bf.Position != nil && !bf.Position.IsZero() {
 		pos = bf.Position.Copy()
 	} else {
 		pos = mmath.NewMVec3()
@@ -1296,7 +1303,7 @@ func (fs *BoneFrames) getRotation(
 	if !bone.IsAfterPhysicsDeform() && boneDeltas != nil && boneDeltas.Get(bone.Index) != nil &&
 		boneDeltas.Get(bone.Index).frameRotation != nil {
 		rot = boneDeltas.Get(bone.Index).frameRotation.Copy()
-	} else if bf.Rotation != nil && !bf.Rotation.IsIdent() {
+	} else if bf != nil && bf.Rotation != nil && !bf.Rotation.IsIdent() {
 		rot = bf.Rotation.Copy()
 	} else {
 		rot = mmath.NewMQuaternion()
@@ -1380,7 +1387,7 @@ func (fs *BoneFrames) getScale(
 	if boneDeltas != nil && boneDeltas.Get(bone.Index) != nil &&
 		boneDeltas.Get(bone.Index).frameScale != nil {
 		scale = boneDeltas.Get(bone.Index).frameScale
-	} else if bf.Scale != nil && !bf.Scale.IsZero() {
+	} else if bf != nil && bf.Scale != nil && !bf.Scale.IsZero() {
 		scale.Add(bf.Scale)
 	}
 
