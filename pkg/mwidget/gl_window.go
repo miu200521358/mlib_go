@@ -501,15 +501,6 @@ func (w *GlWindow) Run() {
 	w.prevFrame = 0
 	w.running = true
 
-	// 隠面消去
-	// https://learnopengl.com/Advanced-OpenGL/Depth-testing
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.LEQUAL)
-
-	// ブレンディングを有効にする
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
 	for w.IsRunning() {
 		if w.width == 0 || w.height == 0 {
 			// ウィンドウが最小化されている場合は描画をスキップ(フレームも進めない)
@@ -530,6 +521,15 @@ func (w *GlWindow) Run() {
 		// 深度バッファのクリア
 		gl.ClearColor(0.7, 0.7, 0.7, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+		// 隠面消去
+		// https://learnopengl.com/Advanced-OpenGL/Depth-testing
+		gl.Enable(gl.DEPTH_TEST)
+		gl.DepthFunc(gl.LEQUAL)
+
+		// ブレンディングを有効にする
+		gl.Enable(gl.BLEND)
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 		// mlog.Memory("GL.Run[2]")
 
