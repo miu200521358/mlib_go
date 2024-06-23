@@ -1159,10 +1159,10 @@ func (fs *BoneFrames) createBoneDeltas(
 			relativeBoneIndexes := bone.RelativeBoneIndexes
 			for _, index := range relativeBoneIndexes {
 				bone := model.Bones.Get(index)
-				if bone.RigidBody != nil && bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_DYNAMIC {
-					// 物理ボーンはデフォームの処理対象外
-					continue
-				}
+				// if bone.RigidBody != nil && bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_DYNAMIC {
+				// 	// 物理ボーンはデフォームの処理対象外
+				// 	continue
+				// }
 				if !layerIndexes.Contains(bone.Index) {
 					layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
 				}
@@ -1182,10 +1182,10 @@ func (fs *BoneFrames) createBoneDeltas(
 		// 変形階層・ボーンINDEXでソート
 		for k := range len(targetSortedBones) {
 			bone := targetSortedBones[k]
-			if bone.RigidBody != nil && bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_DYNAMIC {
-				// 物理ボーンはデフォームの処理対象外
-				continue
-			}
+			// if bone.RigidBody != nil && bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_DYNAMIC {
+			// 	// 物理ボーンはデフォームの処理対象外
+			// 	continue
+			// }
 
 			deformBoneIndexes = append(deformBoneIndexes, bone.Index)
 			boneDeltas.Append(&BoneDelta{Bone: bone, Frame: frame})

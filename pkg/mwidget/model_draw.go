@@ -160,8 +160,7 @@ func updatePhysics(
 		if rigidBodyBone == nil {
 			rigidBodyBone = rigidBody.JointedBone
 		}
-		if rigidBodyBone == nil || boneDeltas.Get(rigidBodyBone.Index) == nil ||
-			rigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC {
+		if rigidBodyBone == nil || boneDeltas.Get(rigidBodyBone.Index) == nil {
 			continue
 		}
 
