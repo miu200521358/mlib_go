@@ -1147,17 +1147,9 @@ func (fs *BoneFrames) createBoneDeltas(
 	// 変形階層・ボーンINDEXでソート
 	for k := range len(targetSortedBones) {
 		bone := targetSortedBones[k]
+		_, isRelativeBone := relativeBoneIndexes[bone.Index]
 
-		var isRelativeBone bool
-		if len(boneNames) > 0 {
-			// ボーン名が指定されている場合、関連ボーンであること
-			_, isRelativeBone = relativeBoneIndexes[bone.Index]
-		} else {
-			// ボーン名が指定されていない場合、全てのボーンが対象
-			isRelativeBone = true
-		}
-
-		if isRelativeBone {
+		if len(relativeBoneIndexes) == 0 || (len(boneNames) > 0 && isRelativeBone) {
 			deformBoneIndexes = append(deformBoneIndexes, bone.Index)
 			if !boneDeltas.Contains(bone.Index) {
 				boneDeltas.Append(&BoneDelta{Bone: bone, Frame: frame})

@@ -774,7 +774,7 @@ func TestVmdMotion_DeformArmIk2(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk25_Addiction_Wa_Left(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/[A]ddiction_和洋_0126F.vmd")
@@ -1180,7 +1180,7 @@ func TestVmdMotion_DeformIk29_Simple(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/[A]ddiction_和洋_1037F.vmd")
