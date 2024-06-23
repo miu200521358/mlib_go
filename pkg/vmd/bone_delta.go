@@ -227,20 +227,30 @@ func (bts *BoneDeltas) Contains(boneIndex int) bool {
 
 func (bds *BoneDeltas) SetGlobalMatrix(bone *pmx.Bone, globalMatrix *mmath.MMat4) {
 	bd := bds.Get(bone.Index)
-	bd.globalMatrix = globalMatrix
-
-	var parentGlobalMatrix *mmath.MMat4
-	if bd.Bone.ParentIndex >= 0 {
-		parentGlobalMatrix = bds.Get(bd.Bone.ParentIndex).GlobalMatrix()
-	} else {
-		parentGlobalMatrix = mmath.NewMMat4()
+	if bd == nil {
+		bd = NewBoneDelta(bone, 0)
 	}
-	unitMatrix := parentGlobalMatrix.Muled(globalMatrix.Inverted())
+	bd.globalMatrix = globalMatrix
+	bds.Append(bd)
+}
 
-	bd.localMatrix = bone.OffsetMatrix.Muled(globalMatrix)
-	bd.globalPosition = nil
-	bd.frameRotation = unitMatrix.Quaternion()
-	bd.frameEffectRotation = nil
-	bd.framePosition = unitMatrix.Translation()
-	bd.frameEffectPosition = nil
+func (bds *BoneDeltas) FillLocalMatrix() {
+	for _, bd := range bds.Data {
+		var parentGlobalMatrix *mmath.MMat4
+		if bd.Bone.ParentIndex >= 0 {
+			parentGlobalMatrix = bds.Get(bd.Bone.ParentIndex).GlobalMatrix()
+		} else {
+			parentGlobalMatrix = mmath.NewMMat4()
+		}
+		unitMatrix := parentGlobalMatrix.Muled(bd.globalMatrix.Inverted())
+
+		bd.localMatrix = bd.Bone.OffsetMatrix.Muled(bd.globalMatrix)
+		bd.globalPosition = nil
+		bd.framePosition = unitMatrix.Translation()
+		bd.frameMorphPosition = nil
+		bd.frameEffectPosition = nil
+		bd.frameRotation = unitMatrix.Quaternion()
+		bd.frameMorphRotation = nil
+		bd.frameEffectRotation = nil
+	}
 }

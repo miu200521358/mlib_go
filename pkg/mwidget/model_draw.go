@@ -19,7 +19,7 @@ func deform(
 	prevDeltas *vmd.VmdDeltas,
 	frame int,
 	elapsed float32,
-	enablePhysics bool,
+	isDeform, enablePhysics bool,
 ) *vmd.VmdDeltas {
 	vds := &vmd.VmdDeltas{}
 	var beforeBoneDeltas *vmd.BoneDeltas
@@ -27,11 +27,14 @@ func deform(
 	// IKのON/OFF
 	ikFrame := motion.IkFrames.Get(frame)
 
-	if prevDeltas == nil {
+	if isDeform || prevDeltas == nil {
 		vds.Morphs = motion.DeformMorph(frame, model, nil)
 		// 物理前のデフォーム情報
+		if prevDeltas != nil {
+			beforeBoneDeltas = prevDeltas.Bones
+		}
 		beforeBoneDeltas = motion.BoneFrames.DeformByPhysicsFlag(frame, model, nil, true,
-			nil, vds.Morphs, ikFrame, false)
+			beforeBoneDeltas, vds.Morphs, ikFrame, false)
 	} else {
 		vds.Morphs = prevDeltas.Morphs
 		beforeBoneDeltas = prevDeltas.Bones
@@ -56,13 +59,13 @@ func draw(
 	windowIndex int,
 	frame int,
 	elapsed float32,
-	enablePhysics bool,
+	isDeform, enablePhysics bool,
 	isDrawNormal bool,
 	isDrawBones map[pmx.BoneFlag]bool,
 ) *vmd.VmdDeltas {
 	// mlog.Memory(fmt.Sprintf("[%d] draw[1]", frame))
 
-	deltas := deform(modelPhysics, model, motion, prevDeltas, frame, elapsed, enablePhysics)
+	deltas := deform(modelPhysics, model, motion, prevDeltas, frame, elapsed, isDeform, enablePhysics)
 
 	// mlog.Memory(fmt.Sprintf("[%d] draw[2]", frame))
 
@@ -161,7 +164,8 @@ func updatePhysics(
 		if rigidBodyBone == nil {
 			rigidBodyBone = rigidBody.JointedBone
 		}
-		if rigidBodyBone == nil || boneDeltas.Get(rigidBodyBone.Index) == nil {
+		if rigidBodyBone == nil || boneDeltas.Get(rigidBodyBone.Index) == nil ||
+			rigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC {
 			continue
 		}
 
@@ -212,5 +216,8 @@ func updatePhysics(
 
 			// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[4][%d]", frame, rigidBody.Index))
 		}
+
+		// グローバル行列を埋め終わったらローカル行列の計算
+		boneDeltas.FillLocalMatrix()
 	}
 }

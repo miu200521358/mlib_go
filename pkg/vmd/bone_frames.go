@@ -1083,22 +1083,21 @@ func (fs *BoneFrames) calcBoneDeltas(
 
 		// 回転
 		rot := delta.LocalRotation()
-
 		if rot != nil && !rot.IsIdent() {
 			delta.unitMatrix.Mul(rot.ToMat4())
 		}
 
 		// 移動
-		pos := delta.framePosition
-		if pos == nil {
-			pos = mmath.NewMVec3()
-		}
-		if delta.frameEffectPosition != nil && !delta.frameEffectPosition.IsZero() {
-			pos.Add(delta.frameEffectPosition)
-		}
+		pos := delta.LocalPosition()
 		if pos != nil && !pos.IsZero() {
 			delta.unitMatrix.Mul(pos.ToMat4())
 		}
+
+		// x := math.Abs(rot.GetX())
+
+		// if bone.Name == "左袖_後_赤_04_04" {
+		// 	mlog.I("[%s][%04d]: pos: %s, rot: %s(%s), x: %f\n", bone.Name, frame, pos.String(), rot.String(), rot.ToMMDDegrees().String(), x)
+		// }
 
 		// 逆BOf行列(初期姿勢行列)
 		delta.unitMatrix.Mul(delta.Bone.RevertOffsetMatrix)
@@ -1160,6 +1159,10 @@ func (fs *BoneFrames) createBoneDeltas(
 			relativeBoneIndexes := bone.RelativeBoneIndexes
 			for _, index := range relativeBoneIndexes {
 				bone := model.Bones.Get(index)
+				if bone.RigidBody != nil && bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_DYNAMIC {
+					// 物理ボーンはデフォームの処理対象外
+					continue
+				}
 				if !layerIndexes.Contains(bone.Index) {
 					layerIndexes = append(layerIndexes, pmx.LayerIndex{Layer: bone.Layer, Index: bone.Index})
 				}
@@ -1179,6 +1182,11 @@ func (fs *BoneFrames) createBoneDeltas(
 		// 変形階層・ボーンINDEXでソート
 		for k := range len(targetSortedBones) {
 			bone := targetSortedBones[k]
+			if bone.RigidBody != nil && bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_DYNAMIC {
+				// 物理ボーンはデフォームの処理対象外
+				continue
+			}
+
 			deformBoneIndexes = append(deformBoneIndexes, bone.Index)
 			boneDeltas.Append(&BoneDelta{Bone: bone, Frame: frame})
 			if !boneDeltas.Contains(bone.Index) {
@@ -1257,6 +1265,10 @@ func (fs *BoneFrames) getPosition(
 	if bone.IsEffectorTranslation() {
 		// 付与親ありの場合、外部親位置を取得する
 		effectPos := fs.getEffectPosition(frame, bone, model, boneDeltas, morphDeltas, loop+1)
+		// if effectPos != nil && bone.Name == "左袖_後_赤_04_04" {
+		// 	mlog.I("[%s][%04d][%d]: pos: %s(%s), effectPos[%s]: %s(%s)\n", bone.Name, frame, loop,
+		// 		pos.String(), pos.String(), model.Bones.Get(bone.EffectIndex).Name, effectPos.String(), effectPos.String())
+		// }
 		return pos, morphPos, effectPos
 	}
 
@@ -1347,6 +1359,10 @@ func (fs *BoneFrames) getRotation(
 		effectRot := fs.getEffectRotation(frame, bone, model, boneDeltas, morphDeltas, loop+1)
 		return rot, morphRot, effectRot
 	}
+
+	// if rot != nil && bone.Name == "左袖_後_青_04_04" && math.Abs(rot.GetX()) > 0.3 {
+	// 	mlog.I("[%s][%04d][%d]: rot: %s(%s)\n", bone.Name, frame, loop, rot.String(), rot.ToMMDDegrees().String())
+	// }
 
 	return rot, morphRot, nil
 }
