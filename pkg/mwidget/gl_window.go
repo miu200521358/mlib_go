@@ -7,6 +7,7 @@ import (
 	"embed"
 	"image"
 	"math"
+	"time"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -560,9 +561,9 @@ func (w *GlWindow) Run() {
 			gl.UseProgram(0)
 		}
 
-		time := glfw.GetTime()
+		frameTime := glfw.GetTime()
+		elapsed := float32(frameTime - prevTime)
 
-		elapsed := float32(time - prevTime)
 		if !w.EnableFrameDrop {
 			// フレームドロップOFFの場合、最大1Fずつ
 			elapsed = mmath.ClampFloat32(elapsed, 0, w.Physics.Spf)
@@ -576,18 +577,20 @@ func (w *GlWindow) Run() {
 			// // 経過秒数をキーフレームの進捗具合に合わせて調整
 			// elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
 			w.frame += float64(elapsed * w.Physics.Fps)
-			mlog.V("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%.8f", prevTime, time, elapsed, w.frame)
+			mlog.V("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%.8f", prevTime, frameTime, elapsed, w.frame)
 		}
 
-		prevTime = time
+		prevTime = frameTime
 
+		isDeform := false
 		if int(w.frame) > w.prevFrame {
+			isDeform = true
 			// フレーム番号上書き
 			w.prevFrame = int(w.frame)
-			for i := range w.ModelSets {
-				// 前のデフォーム情報をクリア
-				w.ModelSets[i].prevDeltas = nil
-			}
+			// for i := range w.ModelSets {
+			// 	// 前のデフォーム情報をクリア
+			// 	w.ModelSets[i].prevDeltas = nil
+			// }
 			if w.playing && w.motionPlayer != nil {
 				w.motionPlayer.SetValue(int(w.frame))
 			}
@@ -602,7 +605,7 @@ func (w *GlWindow) Run() {
 			}
 
 			w.ModelSets[i].prevDeltas = draw(w.Physics, modelSet.model, modelSet.motion, w.Shader,
-				modelSet.prevDeltas, i, int(w.frame), elapsed, w.EnablePhysics, w.VisibleNormal, w.VisibleBones)
+				modelSet.prevDeltas, i, int(w.frame), elapsed, isDeform, w.EnablePhysics, w.VisibleNormal, w.VisibleBones)
 		}
 
 		// mlog.Memory(fmt.Sprintf("[%d] Run", w.frame))
@@ -633,6 +636,14 @@ func (w *GlWindow) Run() {
 		// if w.playing && w.frame >= 100 {
 		// 	break
 		// }
+
+		// 60fpsに制限するための処理
+		frameTime = glfw.GetTime()
+		elapsed64 := frameTime - prevTime
+		if elapsed64 < w.Physics.PhysicsSpf {
+			// mlog.I("PhysicsSleep frame=%.8f, elapsed64=%.8f, PhysicsSpf=%.8f", w.frame, elapsed64, w.Physics.PhysicsSpf)
+			time.Sleep(time.Duration((elapsed64 - w.Physics.PhysicsSpf) * float64(time.Second)))
+		}
 	}
 	if w.WindowIndex == 0 {
 		defer walk.App().Exit(0)
