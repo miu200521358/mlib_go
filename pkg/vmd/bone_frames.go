@@ -453,7 +453,7 @@ ikLoop:
 
 			// 回転軸
 			var originalLinkAxis, linkAxis *mmath.MVec3
-			if ikLink.AngleLimit {
+			if !isOneLinkIk && ikLink.AngleLimit {
 				// グローバル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.MinAngleLimit.GetRadians(),
