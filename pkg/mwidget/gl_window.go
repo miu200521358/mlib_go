@@ -61,6 +61,7 @@ type GlWindow struct {
 	motionPlayer        *MotionPlayer
 	width               int
 	height              int
+	floor               *MFloor
 }
 
 func NewGlWindow(
@@ -169,6 +170,7 @@ func NewGlWindow(
 		motionPlayer:        motionPlayer,
 		width:               width,
 		height:              height,
+		floor:               newMFloor(),
 	}
 
 	w.SetScrollCallback(glWindow.handleScrollEvent)
@@ -499,6 +501,15 @@ func (w *GlWindow) Run() {
 	w.prevFrame = 0
 	w.running = true
 
+	// 隠面消去
+	// https://learnopengl.com/Advanced-OpenGL/Depth-testing
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
+
+	// ブレンディングを有効にする
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
 	for w.IsRunning() {
 		if w.width == 0 || w.height == 0 {
 			// ウィンドウが最小化されている場合は描画をスキップ(フレームも進めない)
@@ -522,6 +533,21 @@ func (w *GlWindow) Run() {
 
 		// mlog.Memory("GL.Run[2]")
 
+		// カメラの再計算
+		projection := mgl32.Perspective(
+			mgl32.DegToRad(w.Shader.FieldOfViewAngle),
+			float32(w.Shader.Width)/float32(w.Shader.Height),
+			w.Shader.NearPlane,
+			w.Shader.FarPlane,
+		)
+
+		// カメラの位置
+		cameraPosition := w.Shader.CameraPosition.GL()
+
+		// カメラの中心
+		lookAtCenter := w.Shader.LookAtCenterPosition.GL()
+		camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
+
 		for _, program := range w.Shader.GetPrograms() {
 			if !w.IsRunning() {
 				break
@@ -531,28 +557,20 @@ func (w *GlWindow) Run() {
 
 			// プログラムの切り替え
 			gl.UseProgram(program)
+
 			// カメラの再計算
-			projection := mgl32.Perspective(
-				mgl32.DegToRad(w.Shader.FieldOfViewAngle),
-				float32(w.Shader.Width)/float32(w.Shader.Height),
-				w.Shader.NearPlane,
-				w.Shader.FarPlane,
-			)
 			projectionUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_MODEL_VIEW_PROJECTION_MATRIX))
 			gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
 			// mlog.Memory("GL.Run[3.2]")
 
 			// カメラの位置
-			cameraPosition := w.Shader.CameraPosition.GL()
 			cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_CAMERA_POSITION))
 			gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
 			// mlog.Memory("GL.Run[3.3]")
 
 			// カメラの中心
-			lookAtCenter := w.Shader.LookAtCenterPosition.GL()
-			camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 			cameraUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_MODEL_VIEW_MATRIX))
 			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
@@ -597,6 +615,10 @@ func (w *GlWindow) Run() {
 		}
 
 		// mlog.Memory("GL.Run[4]")
+		w.Shader.Msaa.Bind()
+
+		// 床平面を描画
+		w.drawFloor()
 
 		// 描画
 		for i, modelSet := range w.ModelSets {
@@ -607,6 +629,8 @@ func (w *GlWindow) Run() {
 			w.ModelSets[i].prevDeltas = draw(w.Physics, modelSet.model, modelSet.motion, w.Shader,
 				modelSet.prevDeltas, i, int(w.frame), elapsed, isDeform, w.EnablePhysics, w.VisibleNormal, w.VisibleBones)
 		}
+
+		w.Shader.Msaa.Unbind()
 
 		// mlog.Memory(fmt.Sprintf("[%d] Run", w.frame))
 
@@ -652,4 +676,39 @@ func (w *GlWindow) Run() {
 
 func (w *GlWindow) IsRunning() bool {
 	return w.drawing && w.running && !CheckOpenGLError() && !w.ShouldClose()
+}
+
+// 床描画 ------------------
+
+type MFloor struct {
+	vao *mview.VAO
+	vbo *mview.VBO
+}
+
+func newMFloor() *MFloor {
+	mf := &MFloor{}
+
+	mf.vao = mview.NewVAO()
+	mf.vao.Bind()
+	mf.vbo = mview.NewVBOForFloor()
+	mf.vbo.Unbind()
+	mf.vao.Unbind()
+
+	return mf
+}
+
+func (w *GlWindow) drawFloor() {
+	// mlog.D("MFloor.DrawLine")
+	w.Shader.Use(mview.PROGRAM_TYPE_FLOOR)
+
+	// 平面を引く
+	w.floor.vao.Bind()
+	w.floor.vbo.BindFloor()
+
+	gl.DrawArrays(gl.LINES, 0, 240)
+
+	w.floor.vbo.Unbind()
+	w.floor.vao.Unbind()
+
+	w.Shader.Unuse()
 }

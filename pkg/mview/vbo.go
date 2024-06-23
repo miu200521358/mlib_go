@@ -252,6 +252,7 @@ func NewVBOForDebug() *VBO {
 	// 剛体構造体のサイズ(全部floatとする)
 	// position(3)
 	vbo.stride = int32(4 * (3))
+	// verticesの要素数 * float32のサイズ
 	vbo.size = 6 * 4
 
 	return vbo
@@ -278,5 +279,64 @@ func (v *VBO) BindDebug(from mbt.BtVector3, to mbt.BtVector3) {
 		v.stride,
 		0*4,
 	)
+}
 
+// 床のVBOを作成
+func NewVBOForFloor() *VBO {
+
+	// 床のラインの頂点データ
+	floorVertices := make([]float32, 240*3)
+	n := 0
+	for x := -50; x <= 50; x += 5 {
+		floorVertices[n] = float32(x)
+		floorVertices[n+1] = 0.0
+		floorVertices[n+2] = float32(-50)
+		floorVertices[n+3] = float32(x)
+		floorVertices[n+4] = 0.0
+		floorVertices[n+5] = float32(50)
+		n += 6
+	}
+	for z := -50; z <= 50; z += 5 {
+		floorVertices[n] = float32(-50)
+		floorVertices[n+1] = 0.0
+		floorVertices[n+2] = float32(z)
+		floorVertices[n+3] = float32(50)
+		floorVertices[n+4] = 0.0
+		floorVertices[n+5] = float32(z)
+		n += 6
+	}
+
+	var vboId uint32
+	gl.GenBuffers(1, &vboId)
+
+	vbo := &VBO{
+		id:     vboId,
+		target: gl.ARRAY_BUFFER,
+		ptr:    gl.Ptr(&floorVertices[0]),
+	}
+	// 剛体構造体のサイズ(全部floatとする)
+	// position(3)
+	vbo.stride = int32(4 * (3))
+	// floorVerticesの要素数 * float32のサイズ
+	vbo.size = int(len(floorVertices) * 4)
+
+	return vbo
+}
+
+// 床描画
+func (v *VBO) BindFloor() {
+	gl.BindBuffer(v.target, v.id)
+	gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
+	CheckGLError()
+
+	// 0: position
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(
+		0,
+		3,
+		gl.FLOAT,
+		false,
+		v.stride,
+		0*4,
+	)
 }

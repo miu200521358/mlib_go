@@ -196,22 +196,6 @@ func (m *Meshes) Draw(
 	isDrawBones map[BoneFlag]bool,
 	bones *Bones,
 ) {
-	// 隠面消去
-	// https://learnopengl.com/Advanced-OpenGL/Depth-testing
-	gl.Enable(gl.DEPTH_TEST)
-	defer gl.Disable(gl.DEPTH_TEST)
-
-	gl.DepthFunc(gl.LEQUAL)
-
-	// ブレンディングを有効にする
-	gl.Enable(gl.BLEND)
-	defer gl.Disable(gl.BLEND)
-
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-	shader.Msaa.Bind()
-	defer shader.Msaa.Unbind()
-
 	m.vao.Bind()
 	defer m.vao.Unbind()
 
