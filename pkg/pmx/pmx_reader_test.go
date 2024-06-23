@@ -10,7 +10,7 @@ import (
 func TestPmxReader_ReadNameByFilepath(t *testing.T) {
 	r := &PmxReader{}
 
-	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル.pmx")
+	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
 
 	expectedName := "v2配布用素体03"
 	if modelName != expectedName {
@@ -40,7 +40,7 @@ func TestPmxReader_ReadNameByFilepath_2_1(t *testing.T) {
 func TestPmxReader_ReadNameByFilepath_NotExist(t *testing.T) {
 	r := &PmxReader{}
 
-	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル2.pmx")
+	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル_Nothing.pmx")
 
 	expectedName := ""
 	if modelName != expectedName {
@@ -55,7 +55,7 @@ func TestPmxReader_ReadNameByFilepath_NotExist(t *testing.T) {
 func TestPmxReader_ReadByFilepath(t *testing.T) {
 	r := &PmxReader{}
 
-	data, err := r.ReadByFilepath("../../test_resources/サンプルモデル.pmx")
+	data, err := r.ReadByFilepath("../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
 	model := data.(*PmxModel)
 
 	if err != nil {
@@ -412,18 +412,18 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 			t.Errorf("Expected TailIndex to be %v, got %v", expectedTailIndex, b.TailIndex)
 		}
 		expectedIkTargetBoneIndex := 95
-		if b.Ik.BoneIndex != expectedIkTargetBoneIndex {
+		if b.Ik == nil || b.Ik.BoneIndex != expectedIkTargetBoneIndex {
 			t.Errorf("Expected IkTargetBoneIndex to be %v, got %v", expectedIkTargetBoneIndex, b.Ik.BoneIndex)
 		}
 		expectedIkLoopCount := 40
-		if b.Ik.LoopCount != expectedIkLoopCount {
+		if b.Ik == nil || b.Ik.LoopCount != expectedIkLoopCount {
 			t.Errorf("Expected IkLoopCount to be %v, got %v", expectedIkLoopCount, b.Ik.LoopCount)
 		}
 		expectedIkLimitedDegree := 57.29578
-		if math.Abs(b.Ik.UnitRotation.GetDegrees().GetX()-expectedIkLimitedDegree) > 1e-5 {
+		if b.Ik == nil || math.Abs(b.Ik.UnitRotation.GetDegrees().GetX()-expectedIkLimitedDegree) > 1e-5 {
 			t.Errorf("Expected IkLimitedRadian to be %v, got %v", expectedIkLimitedDegree, b.Ik.UnitRotation.GetDegrees().GetX())
 		}
-		{
+		if b.Ik != nil {
 			il := b.Ik.Links[0]
 			expectedLinkBoneIndex := 94
 			if il.BoneIndex != expectedLinkBoneIndex {
@@ -442,7 +442,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 				t.Errorf("Expected MaxAngleLimit to be %v, got %v", expectedMaxAngleLimit, il.MaxAngleLimit.GetDegrees())
 			}
 		}
-		{
+		if b.Ik != nil {
 			il := b.Ik.Links[1]
 			expectedLinkBoneIndex := 93
 			if il.BoneIndex != expectedLinkBoneIndex {
