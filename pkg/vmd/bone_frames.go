@@ -473,7 +473,7 @@ ikLoop:
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.MinAngleLimit.GetRadians(),
 					ikLink.MaxAngleLimit.GetRadians(),
-					effectorLocalPosition, ikLocalPosition,
+					effectorLocalPosition, ikLocalPosition, linkQuat,
 					frame, count, loop, linkBone.Name, ikMotion, ikFile,
 				)
 			} else if ikLink.LocalAngleLimit {
@@ -481,7 +481,7 @@ ikLoop:
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.LocalMinAngleLimit.GetRadians(),
 					ikLink.LocalMaxAngleLimit.GetRadians(),
-					effectorLocalPosition, ikLocalPosition,
+					effectorLocalPosition, ikLocalPosition, linkQuat,
 					frame, count, loop, linkBone.Name, ikMotion, ikFile,
 				)
 			} else {
@@ -489,7 +489,7 @@ ikLoop:
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					mmath.MVec3MinVal,
 					mmath.MVec3MaxVal,
-					effectorLocalPosition, ikLocalPosition,
+					effectorLocalPosition, ikLocalPosition, linkQuat,
 					frame, count, loop, linkBone.Name, ikMotion, ikFile,
 				)
 			}
@@ -662,6 +662,7 @@ func (fs *BoneFrames) getLinkAxis(
 	minAngleLimitRadians *mmath.MVec3,
 	maxAngleLimitRadians *mmath.MVec3,
 	effectorLocalPosition, ikLocalPosition *mmath.MVec3,
+	linkQuat *mmath.MQuaternion,
 	frame int,
 	count int,
 	loop int,
@@ -679,16 +680,16 @@ func (fs *BoneFrames) getLinkAxis(
 		)
 	}
 
-	// linkMat := linkQuat.ToMat4()
-	// if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-	// 	fmt.Fprintf(ikFile,
-	// 		"[%04d][%03d][%s][%05d][linkMat] %s (x: %s, y: %s, z: %s)\n",
-	// 		frame, loop, linkBoneName, count-1, linkMat.String(), linkMat.AxisX().String(), linkMat.AxisY().String(), linkMat.AxisZ().String())
-	// }
+	linkMat := linkQuat.ToMat4()
+	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		fmt.Fprintf(ikFile,
+			"[%04d][%03d][%s][%05d][linkMat] %s (x: %s, y: %s, z: %s)\n",
+			frame, loop, linkBoneName, count-1, linkMat.String(), linkMat.AxisX().String(), linkMat.AxisY().String(), linkMat.AxisZ().String())
+	}
 
 	if minAngleLimitRadians.IsOnlyX() || maxAngleLimitRadians.IsOnlyX() {
 		// X軸のみの制限の場合
-		vv := linkAxis.GetX()
+		vv := linkMat.AxisX().Dot(linkAxis)
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			fmt.Fprintf(ikFile,
@@ -702,7 +703,7 @@ func (fs *BoneFrames) getLinkAxis(
 		return mmath.MVec3UnitX, linkAxis
 	} else if minAngleLimitRadians.IsOnlyY() || maxAngleLimitRadians.IsOnlyY() {
 		// Y軸のみの制限の場合
-		vv := linkAxis.GetY()
+		vv := linkMat.AxisY().Dot(linkAxis)
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			fmt.Fprintf(ikFile,
@@ -716,7 +717,7 @@ func (fs *BoneFrames) getLinkAxis(
 		return mmath.MVec3UnitY, linkAxis
 	} else if minAngleLimitRadians.IsOnlyZ() || maxAngleLimitRadians.IsOnlyZ() {
 		// Z軸のみの制限の場合
-		vv := linkAxis.GetZ()
+		vv := linkMat.AxisZ().Dot(linkAxis)
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			fmt.Fprintf(ikFile,
