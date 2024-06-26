@@ -62,6 +62,8 @@ func NewMeshes(
 	prevVerticesCount := 0
 	for i := range model.Materials.Len() {
 		m := model.Materials.Get(i)
+
+		// テクスチャ
 		var texture *Texture
 		if m.TextureIndex != -1 && model.Textures.Contains(m.TextureIndex) {
 			texture = model.Textures.Get(m.TextureIndex)
