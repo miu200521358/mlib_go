@@ -13,15 +13,15 @@ import (
 var (
 	MVec3Zero = &MVec3{}
 
-	MVec3UnitX   = &MVec3{1, 0, 0}
-	MVec3UnitY   = &MVec3{0, 1, 0}
-	MVec3UnitZ   = &MVec3{0, 0, 1}
-	MVec3UnitXYZ = &MVec3{1, 1, 1}
+	MVec3UnitX = &MVec3{1, 0, 0}
+	MVec3UnitY = &MVec3{0, 1, 0}
+	MVec3UnitZ = &MVec3{0, 0, 1}
+	MVec3One   = &MVec3{1, 1, 1}
 
-	MVec3UnitXInv   = &MVec3{-1, 0, 0}
-	MVec3UnitYInv   = &MVec3{0, -1, 0}
-	MVec3UnitZInv   = &MVec3{0, 0, -1}
-	MVec3UnitXYZInv = &MVec3{-1, -1, -1}
+	MVec3UnitXInv = &MVec3{-1, 0, 0}
+	MVec3UnitYInv = &MVec3{0, -1, 0}
+	MVec3UnitZInv = &MVec3{0, 0, -1}
+	MVec3OneInv   = &MVec3{-1, -1, -1}
 
 	MVec3MinVal = &MVec3{-math.MaxFloat64, -math.MaxFloat64, -math.MaxFloat64}
 	MVec3MaxVal = &MVec3{+math.MaxFloat64, +math.MaxFloat64, +math.MaxFloat64}
@@ -47,6 +47,18 @@ func (v *MVec3) AddX(x float64) {
 	v[0] += x
 }
 
+func (v *MVec3) SubX(x float64) {
+	v[0] -= x
+}
+
+func (v *MVec3) MulX(x float64) {
+	v[0] *= x
+}
+
+func (v *MVec3) DivX(x float64) {
+	v[0] /= x
+}
+
 // GetY returns the value of the Y coordinate
 func (v *MVec3) GetY() float64 {
 	return v[1]
@@ -61,6 +73,18 @@ func (v *MVec3) AddY(y float64) {
 	v[1] += y
 }
 
+func (v *MVec3) SubY(y float64) {
+	v[1] -= y
+}
+
+func (v *MVec3) MulY(y float64) {
+	v[1] *= y
+}
+
+func (v *MVec3) DivY(y float64) {
+	v[1] /= y
+}
+
 // GetZ returns the value of the Z coordinate
 func (v *MVec3) GetZ() float64 {
 	return v[2]
@@ -73,6 +97,18 @@ func (v *MVec3) SetZ(z float64) {
 
 func (v *MVec3) AddZ(z float64) {
 	v[2] += z
+}
+
+func (v *MVec3) SubZ(z float64) {
+	v[2] -= z
+}
+
+func (v *MVec3) MulZ(z float64) {
+	v[2] *= z
+}
+
+func (v *MVec3) DivZ(z float64) {
+	v[2] /= z
 }
 
 func (v *MVec3) IsOnlyX() bool {
@@ -281,7 +317,7 @@ func (v *MVec3) IsZero() bool {
 
 // IsZero ベクトルが1ベクトルかどうかをチェックします
 func (v *MVec3) IsOne() bool {
-	return v.PracticallyEquals(MVec3UnitXYZ, 1e-10)
+	return v.PracticallyEquals(MVec3One, 1e-10)
 }
 
 // Length ベクトルの長さを返します
@@ -395,7 +431,7 @@ func (v *MVec3) Clamped(min, max *MVec3) *MVec3 {
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
 func (v *MVec3) Clamp01() *MVec3 {
-	return v.Clamp(MVec3Zero, MVec3UnitXYZ)
+	return v.Clamp(MVec3Zero, MVec3One)
 }
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します

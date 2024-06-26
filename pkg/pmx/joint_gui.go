@@ -80,7 +80,8 @@ func (j *Joint) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBo
 
 func (j *Joints) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodies *RigidBodies) {
 	// ジョイントを順番に剛体と紐付けていく
-	for _, joint := range j.GetSortedData() {
+	for i := range j.Len() {
+		joint := j.Get(i)
 		if joint.RigidbodyIndexA >= 0 && rigidBodies.Contains(joint.RigidbodyIndexA) &&
 			joint.RigidbodyIndexB >= 0 && rigidBodies.Contains(joint.RigidbodyIndexB) {
 			joint.initPhysics(

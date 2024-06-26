@@ -72,7 +72,8 @@ func (pm *PmxModel) setup() {
 	pm.Bones.setup()
 
 	// 剛体
-	for _, rb := range pm.RigidBodies.GetSortedData() {
+	for i := range pm.RigidBodies.Len() {
+		rb := pm.RigidBodies.Get(i)
 		if rb.BoneIndex >= 0 && pm.Bones.Contains(rb.BoneIndex) {
 			// 剛体に関連付けられたボーンが存在する場合、剛体とボーンを関連付ける
 			pm.Bones.Get(rb.BoneIndex).RigidBody = rb
@@ -80,7 +81,8 @@ func (pm *PmxModel) setup() {
 		}
 	}
 	// ジョイント
-	for _, joint := range pm.Joints.GetSortedData() {
+	for i := range pm.Joints.Len() {
+		joint := pm.Joints.Get(i)
 		if joint.RigidbodyIndexA >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexA) &&
 			joint.RigidbodyIndexB >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexB) &&
 			pm.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex >= 0 &&

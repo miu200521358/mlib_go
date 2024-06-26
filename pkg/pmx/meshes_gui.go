@@ -60,7 +60,8 @@ func NewMeshes(
 
 	meshes := make([]*Mesh, len(model.Materials.GetIndexes()))
 	prevVerticesCount := 0
-	for i, m := range model.Materials.GetSortedData() {
+	for i := range model.Materials.Len() {
+		m := model.Materials.Get(i)
 		var texture *Texture
 		if m.TextureIndex != -1 && model.Textures.Contains(m.TextureIndex) {
 			texture = model.Textures.Get(m.TextureIndex)

@@ -11,34 +11,23 @@ import (
 )
 
 var (
-	MVec4Zero = MVec4{}
+	MVec4Zero = &MVec4{}
 
 	// UnitXW holds a vector with X and W set to one.
-	MVec4UnitXW = MVec4{1, 0, 0, 1}
+	MVec4UnitXW = &MVec4{1, 0, 0, 1}
 	// UnitYW holds a vector with Y and W set to one.
-	MVec4UnitYW = MVec4{0, 1, 0, 1}
+	MVec4UnitYW = &MVec4{0, 1, 0, 1}
 	// UnitZW holds a vector with Z and W set to one.
-	MVec4UnitZW = MVec4{0, 0, 1, 1}
+	MVec4UnitZW = &MVec4{0, 0, 1, 1}
 	// UnitW holds a vector with W set to one.
-	MVec4UnitW = MVec4{0, 0, 0, 1}
+	MVec4UnitW = &MVec4{0, 0, 0, 1}
 	// UnitXYZW holds a vector with X, Y, Z, W set to one.
-	MVec4UnitXYZW = MVec4{1, 1, 1, 1}
-
-	// Red holds the color red.
-	MVec4Red = MVec4{1, 0, 0, 1}
-	// Green holds the color green.
-	MVec4Green = MVec4{0, 1, 0, 1}
-	// Black holds the color black.
-	MVec4Blue = MVec4{0, 0, 1, 1}
-	// Black holds the color black.
-	MVec4Black = MVec4{0, 0, 0, 1}
-	// White holds the color white.
-	MVec4White = MVec4{1, 1, 1, 1}
+	MVec4One = &MVec4{1, 1, 1, 1}
 
 	// MinVal holds a vector with the smallest possible component values.
-	MVec4MinVal = MVec4{-math.MaxFloat64, -math.MaxFloat64, -math.MaxFloat64, 1}
+	MVec4MinVal = &MVec4{-math.MaxFloat64, -math.MaxFloat64, -math.MaxFloat64, 1}
 	// MaxVal holds a vector with the highest possible component values.
-	MVec4MaxVal = MVec4{+math.MaxFloat64, +math.MaxFloat64, +math.MaxFloat64, 1}
+	MVec4MaxVal = &MVec4{+math.MaxFloat64, +math.MaxFloat64, +math.MaxFloat64, 1}
 )
 
 type MVec4 mgl64.Vec4
@@ -61,6 +50,18 @@ func (v *MVec4) AddX(x float64) {
 	v[0] += x
 }
 
+func (v *MVec4) SubX(x float64) {
+	v[0] -= x
+}
+
+func (v *MVec4) MulX(x float64) {
+	v[0] *= x
+}
+
+func (v *MVec4) DivX(x float64) {
+	v[0] /= x
+}
+
 // GetY returns the value of the Y coordinate
 func (v *MVec4) GetY() float64 {
 	return v[1]
@@ -73,6 +74,18 @@ func (v *MVec4) SetY(y float64) {
 
 func (v *MVec4) AddY(y float64) {
 	v[1] += y
+}
+
+func (v *MVec4) SubY(y float64) {
+	v[1] -= y
+}
+
+func (v *MVec4) MulY(y float64) {
+	v[1] *= y
+}
+
+func (v *MVec4) DivY(y float64) {
+	v[1] /= y
 }
 
 // GetZ returns the value of the Z coordinate
@@ -89,6 +102,18 @@ func (v *MVec4) AddZ(z float64) {
 	v[2] += z
 }
 
+func (v *MVec4) SubZ(z float64) {
+	v[2] -= z
+}
+
+func (v *MVec4) MulZ(z float64) {
+	v[2] *= z
+}
+
+func (v *MVec4) DivZ(z float64) {
+	v[2] /= z
+}
+
 // GetW returns the value of the W coordinate
 func (v *MVec4) GetW() float64 {
 	return v[3]
@@ -101,6 +126,18 @@ func (v *MVec4) SetW(w float64) {
 
 func (v *MVec4) AddW(w float64) {
 	v[3] += w
+}
+
+func (v *MVec4) SubW(w float64) {
+	v[3] -= w
+}
+
+func (v *MVec4) MulW(w float64) {
+	v[3] *= w
+}
+
+func (v *MVec4) DivW(w float64) {
+	v[3] /= w
 }
 
 func (v *MVec4) GetXY() *MVec2 {
@@ -439,7 +476,7 @@ func (v *MVec4) Clamped(min, max *MVec4) *MVec4 {
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
 func (v *MVec4) Clamp01() *MVec4 {
-	return v.Clamp(&MVec4Zero, &MVec4UnitXYZW)
+	return v.Clamp(MVec4Zero, MVec4One)
 }
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します

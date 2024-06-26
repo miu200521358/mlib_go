@@ -141,16 +141,6 @@ func (c *IndexNameModels[T]) LastIndex() int {
 	return maxIndex
 }
 
-func (c *IndexNameModels[T]) GetSortedData() []T {
-	sortedData := make([]T, len(c.NameIndexes))
-	i := 0
-	for index := range c.GetIndexes() {
-		sortedData[i] = c.Data[index]
-		i++
-	}
-	return sortedData
-}
-
 func (c *IndexNameModels[T]) GetByName(name string) T {
 	if index, ok := c.NameIndexes[name]; ok {
 		return c.Data[index]

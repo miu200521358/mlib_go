@@ -549,7 +549,8 @@ func (b *Bones) setup() {
 		}
 	}
 
-	for _, bone := range b.GetSortedData() {
+	for i := range b.Len() {
+		bone := b.Get(i)
 		// 影響があるボーンINDEXリスト
 		bone.ParentBoneIndexes, bone.RelativeBoneIndexes = b.getRelativeBoneIndexes(bone.Index, make([]int, 0), make([]int, 0))
 

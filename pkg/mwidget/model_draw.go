@@ -59,11 +59,7 @@ func draw(
 	isDrawNormal bool,
 	isDrawBones map[pmx.BoneFlag]bool,
 ) *vmd.VmdDeltas {
-	// mlog.Memory(fmt.Sprintf("[%d] draw[1]", frame))
-
 	deltas := deform(modelPhysics, model, motion, prevDeltas, frame, elapsed, isDeform, enablePhysics)
-
-	// mlog.Memory(fmt.Sprintf("[%d] draw[2]", frame))
 
 	boneDeltas := make([]mgl32.Mat4, len(model.Bones.Data))
 	for i, bone := range model.Bones.Data {
@@ -72,19 +68,13 @@ func draw(
 
 	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))
 	for i, md := range deltas.Morphs.Materials.Data {
-		materialDeltas[i] = md.Material
+		materialDeltas[i] = md.Result()
 	}
-
-	// mlog.Memory(fmt.Sprintf("[%d] draw[3]", frame))
 
 	vertexDeltas := fetchVertexDeltas(model, deltas)
 
-	// mlog.Memory(fmt.Sprintf("[%d] draw[4]", frame))
-
 	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, materialDeltas, windowIndex,
 		isDrawNormal, isDrawBones, model.Bones)
-
-	// mlog.Memory(fmt.Sprintf("[%d] draw[5]", frame))
 
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()
