@@ -496,12 +496,13 @@ func (w *GlWindow) Run() {
 		return
 	}
 
-	w.MakeContextCurrent()
 	prevTime := glfw.GetTime()
 	w.prevFrame = 0
 	w.running = true
 
 	for w.IsRunning() {
+		w.MakeContextCurrent()
+
 		if w.width == 0 || w.height == 0 {
 			// ウィンドウが最小化されている場合は描画をスキップ(フレームも進めない)
 			prevTime = glfw.GetTime()
@@ -516,8 +517,6 @@ func (w *GlWindow) Run() {
 			w.motionPlayer.SetValue(int(w.frame))
 		}
 
-		// mlog.Memory("GL.Run[1]")
-
 		// 深度バッファのクリア
 		gl.ClearColor(0.7, 0.7, 0.7, 1.0)
 		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -530,8 +529,6 @@ func (w *GlWindow) Run() {
 		// ブレンディングを有効にする
 		gl.Enable(gl.BLEND)
 		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
-		// mlog.Memory("GL.Run[2]")
 
 		// カメラの再計算
 		projection := mgl32.Perspective(
@@ -553,8 +550,6 @@ func (w *GlWindow) Run() {
 				break
 			}
 
-			// mlog.Memory("GL.Run[3.1]")
-
 			// プログラムの切り替え
 			gl.UseProgram(program)
 
@@ -562,19 +557,13 @@ func (w *GlWindow) Run() {
 			projectionUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_MODEL_VIEW_PROJECTION_MATRIX))
 			gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
-			// mlog.Memory("GL.Run[3.2]")
-
 			// カメラの位置
 			cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_CAMERA_POSITION))
 			gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
-			// mlog.Memory("GL.Run[3.3]")
-
 			// カメラの中心
 			cameraUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_MODEL_VIEW_MATRIX))
 			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
-
-			// mlog.Memory("GL.Run[3.4]")
 
 			gl.UseProgram(0)
 		}
@@ -592,8 +581,7 @@ func (w *GlWindow) Run() {
 		}
 
 		if w.playing {
-			// // 経過秒数をキーフレームの進捗具合に合わせて調整
-			// elapsed = float32(math.Round(float64(elapsed*w.Physics.Fps))) / w.Physics.Fps
+			// 経過秒数をキーフレームの進捗具合に合わせて調整
 			w.frame += float64(elapsed * w.Physics.Fps)
 			mlog.V("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%.8f", prevTime, frameTime, elapsed, w.frame)
 		}
@@ -605,10 +593,6 @@ func (w *GlWindow) Run() {
 			isDeform = true
 			// フレーム番号上書き
 			w.prevFrame = int(w.frame)
-			// for i := range w.ModelSets {
-			// 	// 前のデフォーム情報をクリア
-			// 	w.ModelSets[i].prevDeltas = nil
-			// }
 			if w.playing && w.motionPlayer != nil {
 				w.motionPlayer.SetValue(int(w.frame))
 			}
@@ -632,13 +616,9 @@ func (w *GlWindow) Run() {
 
 		w.Shader.Msaa.Unbind()
 
-		// mlog.Memory(fmt.Sprintf("[%d] Run", w.frame))
-
 		if !w.IsRunning() {
 			break
 		}
-
-		// mlog.Memory("GL.Run[5]")
 
 		w.SwapBuffers()
 
@@ -646,20 +626,11 @@ func (w *GlWindow) Run() {
 			break
 		}
 
-		// mlog.Memory("GL.Run[6]")
-
 		glfw.PollEvents()
 
 		if !w.IsRunning() {
 			break
 		}
-
-		// // GCを強制的に実行
-		// runtime.GC()
-
-		// if w.playing && w.frame >= 100 {
-		// 	break
-		// }
 
 		// 60fpsに制限するための処理
 		frameTime = glfw.GetTime()
