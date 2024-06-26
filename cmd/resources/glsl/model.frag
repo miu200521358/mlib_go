@@ -11,6 +11,12 @@ uniform int sphereMode;
 uniform sampler2D sphereSampler;
 
 uniform vec3 lightDirection;
+uniform vec4 textureMulFactor;
+uniform vec4 textureAddFactor;
+uniform vec4 sphereMulFactor;
+uniform vec4 sphereAddFactor;
+uniform vec4 toonMulFactor;
+uniform vec4 toonAddFactor;
 
 in vec4 vertexColor;
 in vec3 vertexSpecular;
@@ -27,27 +33,32 @@ void main() {
 
     if (1 == useTexture) {
         // テクスチャ適用
-        outColor *= texture(textureSampler, vertexUv);
+        vec4 texColor = texture(textureSampler, vertexUv);
+        texColor = texColor * textureMulFactor + textureAddFactor;
+        outColor *= texColor;
     }
 
     if (1 == useSphere) {
         // Sphere適用
-        vec4 texColor = texture(sphereSampler, sphereUv);
+        vec4 sphColor = texture(sphereSampler, sphereUv);
+        sphColor = sphColor * sphereMulFactor + sphereAddFactor;
         if (2 == sphereMode) {
             // スフィア加算
-            outColor.rgb += texColor.rgb;
+            outColor.rgb += sphColor.rgb;
         }
         else {
             // スフィア乗算
-            outColor.rgb *= texColor.rgb;
+            outColor.rgb *= sphColor.rgb;
         }
-        outColor.a *= texColor.a;
+        outColor.a *= sphColor.a;
     }
 
     if (1 == useToon) {
         // Toon適用
         float lightNormal = dot( vertexNormal, -lightDirection );
-        outColor *= texture(toonSampler, vec2(0, 0.5 - lightNormal * 0.5));
+        vec4 toonColor = texture(toonSampler, vec2(0, 0.5 - lightNormal * 0.5));
+        toonColor = toonColor * toonMulFactor + toonAddFactor;
+        outColor *= toonColor;
     }
 
     if (outColor.a < 1e-6) {

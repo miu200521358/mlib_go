@@ -150,6 +150,6 @@ type RigidBodies struct {
 
 func NewRigidBodies() *RigidBodies {
 	return &RigidBodies{
-		IndexNameModels: mcore.NewIndexNameModels[*RigidBody](),
+		IndexNameModels: mcore.NewIndexNameModels[*RigidBody](func() *RigidBody { return nil }),
 	}
 }

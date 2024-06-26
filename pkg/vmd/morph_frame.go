@@ -1,6 +1,9 @@
 package vmd
 
-import "github.com/miu200521358/mlib_go/pkg/mmath"
+import (
+	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/pmx"
+)
 
 type MorphFrame struct {
 	*BaseFrame         // キーフレ
@@ -88,4 +91,191 @@ func (md *MorphFrameDelta) Copy() *MorphFrameDelta {
 		frameRotation: md.FrameRotation().Copy(),
 		frameScale:    md.FrameScale().Copy(),
 	}
+}
+
+func (mf *MorphFrame) DeformVertex(
+	morphName string,
+	model *pmx.PmxModel,
+	deltas *VertexMorphDeltas,
+	ratio float64,
+) *VertexMorphDeltas {
+	morph := model.Morphs.GetByName(morphName)
+	for _, o := range morph.Offsets {
+		offset := o.(*pmx.VertexMorphOffset)
+		if 0 < offset.VertexIndex {
+			delta := deltas.Data[offset.VertexIndex]
+			if delta == nil {
+				delta = NewVertexMorphDelta(offset.VertexIndex)
+			}
+			if offset.Position != nil && !offset.Position.IsZero() {
+				if delta.Position == nil {
+					delta.Position = offset.Position.MuledScalar(ratio)
+				} else if !offset.Position.IsZero() {
+					delta.Position.Add(offset.Position.MuledScalar(ratio))
+				}
+			}
+			deltas.Data[offset.VertexIndex] = delta
+		}
+	}
+
+	return deltas
+}
+
+func (mf *MorphFrame) DeformAfterVertex(
+	morphName string,
+	model *pmx.PmxModel,
+	deltas *VertexMorphDeltas,
+	ratio float64,
+) *VertexMorphDeltas {
+	morph := model.Morphs.GetByName(morphName)
+	for _, o := range morph.Offsets {
+		offset := o.(*pmx.VertexMorphOffset)
+		if 0 < offset.VertexIndex {
+			delta := deltas.Data[offset.VertexIndex]
+			if delta == nil {
+				delta = NewVertexMorphDelta(offset.VertexIndex)
+			}
+			delta.AfterPosition.Add(offset.Position.MuledScalar(ratio))
+			deltas.Data[offset.VertexIndex] = delta
+		}
+	}
+
+	return deltas
+}
+
+func (mf *MorphFrame) DeformUv(
+	morphName string,
+	model *pmx.PmxModel,
+	deltas *VertexMorphDeltas,
+	ratio float64,
+) *VertexMorphDeltas {
+	morph := model.Morphs.GetByName(morphName)
+	for _, o := range morph.Offsets {
+		offset := o.(*pmx.UvMorphOffset)
+		if 0 < offset.VertexIndex {
+			delta := deltas.Data[offset.VertexIndex]
+			if delta == nil {
+				delta = NewVertexMorphDelta(offset.VertexIndex)
+			}
+			uv := offset.Uv.MuledScalar(ratio).GetXY()
+			delta.Uv.Add(uv)
+			deltas.Data[offset.VertexIndex] = delta
+		}
+	}
+
+	return deltas
+}
+
+func (mf *MorphFrame) DeformUv1(
+	morphName string,
+	model *pmx.PmxModel,
+	deltas *VertexMorphDeltas,
+	ratio float64,
+) *VertexMorphDeltas {
+	morph := model.Morphs.GetByName(morphName)
+	for _, o := range morph.Offsets {
+		offset := o.(*pmx.UvMorphOffset)
+		if 0 < offset.VertexIndex {
+			delta := deltas.Data[offset.VertexIndex]
+			if delta == nil {
+				delta = NewVertexMorphDelta(offset.VertexIndex)
+			}
+			uv := offset.Uv.MuledScalar(ratio)
+			delta.Uv1.Add(uv.GetXY())
+			deltas.Data[offset.VertexIndex] = delta
+		}
+	}
+
+	return deltas
+}
+
+func (mf *MorphFrame) DeformBone(
+	morphName string,
+	model *pmx.PmxModel,
+	deltas *BoneMorphDeltas,
+	ratio float64,
+) *BoneMorphDeltas {
+	morph := model.Morphs.GetByName(morphName)
+	for _, o := range morph.Offsets {
+		offset := o.(*pmx.BoneMorphOffset)
+		if 0 < offset.BoneIndex {
+			delta := deltas.Get(offset.BoneIndex)
+			if delta == nil {
+				delta = NewBoneMorphDelta(offset.BoneIndex)
+			}
+
+			offsetPos := offset.Position.MuledScalar(ratio)
+			offsetQuat := offset.Rotation.GetQuaternion().MuledScalar(ratio).Normalize()
+			offsetScale := offset.Scale.MuledScalar(ratio)
+
+			if delta.MorphFrameDelta.framePosition == nil {
+				delta.MorphFrameDelta.framePosition = offsetPos
+			} else {
+				delta.MorphFrameDelta.framePosition.Add(offsetPos)
+			}
+
+			if delta.MorphFrameDelta.frameRotation == nil {
+				delta.MorphFrameDelta.frameRotation = offsetQuat
+			} else {
+				delta.MorphFrameDelta.frameRotation = offsetQuat.Mul(delta.MorphFrameDelta.frameRotation)
+			}
+
+			if delta.MorphFrameDelta.frameScale == nil {
+				delta.MorphFrameDelta.frameScale = offsetScale
+			} else {
+				delta.MorphFrameDelta.frameScale.Add(offsetScale)
+			}
+
+			deltas.Append(delta)
+		}
+	}
+
+	return deltas
+}
+
+// DeformMaterial 材質モーフの適用
+func (mf *MorphFrame) DeformMaterial(
+	morphName string,
+	model *pmx.PmxModel,
+	deltas *MaterialMorphDeltas,
+	ratio float64,
+) *MaterialMorphDeltas {
+	morph := model.Morphs.GetByName(morphName)
+	// 乗算→加算の順で処理
+	for _, calcMode := range []pmx.MaterialMorphCalcMode{pmx.CALC_MODE_MULTIPLICATION, pmx.CALC_MODE_ADDITION} {
+		for _, o := range morph.Offsets {
+			offset := o.(*pmx.MaterialMorphOffset)
+			if offset.CalcMode != calcMode {
+				continue
+			}
+			if offset.MaterialIndex < 0 {
+				// 全材質対象の場合
+				for m, delta := range deltas.Data {
+					if delta == nil {
+						delta = NewMaterialMorphDelta(model.Materials.Get(m))
+					}
+					if calcMode == pmx.CALC_MODE_MULTIPLICATION {
+						delta.Mul(offset, ratio)
+					} else {
+						delta.Add(offset, ratio)
+					}
+					deltas.Data[m] = delta
+				}
+			} else if 0 < offset.MaterialIndex && offset.MaterialIndex <= len(deltas.Data) {
+				// 特定材質のみの場合
+				delta := deltas.Data[offset.MaterialIndex]
+				if delta == nil {
+					delta = NewMaterialMorphDelta(model.Materials.Get(offset.MaterialIndex))
+				}
+				if calcMode == pmx.CALC_MODE_MULTIPLICATION {
+					delta.Mul(offset, ratio)
+				} else {
+					delta.Add(offset, ratio)
+				}
+				deltas.Data[offset.MaterialIndex] = delta
+			}
+		}
+	}
+
+	return deltas
 }

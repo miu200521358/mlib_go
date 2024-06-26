@@ -65,6 +65,6 @@ type DisplaySlots struct {
 
 func NewDisplaySlots() *DisplaySlots {
 	return &DisplaySlots{
-		IndexModels: mcore.NewIndexModels[*DisplaySlot](),
+		IndexModels: mcore.NewIndexModels[*DisplaySlot](func() *DisplaySlot { return nil }),
 	}
 }

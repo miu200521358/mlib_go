@@ -89,6 +89,7 @@ func (bd *BoneDelta) LocalRotation() *mmath.MQuaternion {
 	rot := bd.FrameRotation().Copy()
 
 	if bd.frameMorphRotation != nil && !bd.frameMorphRotation.IsIdent() {
+		// rot = bd.frameMorphRotation.Muled(rot)
 		rot.Mul(bd.frameMorphRotation)
 	}
 
@@ -97,6 +98,7 @@ func (bd *BoneDelta) LocalRotation() *mmath.MQuaternion {
 	}
 
 	if bd.frameEffectRotation != nil && !bd.frameEffectRotation.IsIdent() {
+		// rot = bd.frameEffectRotation.Muled(rot)
 		rot.Mul(bd.frameEffectRotation)
 	}
 

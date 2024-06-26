@@ -52,12 +52,14 @@ func (v *IndexNameModel) Copy() IIndexNameModel {
 type IndexNameModels[T IIndexNameModel] struct {
 	Data        map[int]T
 	NameIndexes map[string]int
+	nilFunc     func() T
 }
 
-func NewIndexNameModels[T IIndexNameModel]() *IndexNameModels[T] {
+func NewIndexNameModels[T IIndexNameModel](nilFunc func() T) *IndexNameModels[T] {
 	return &IndexNameModels[T]{
 		Data:        make(map[int]T, 0),
 		NameIndexes: make(map[string]int, 0),
+		nilFunc:     nilFunc,
 	}
 }
 
@@ -65,8 +67,7 @@ func (c *IndexNameModels[T]) Get(index int) T {
 	if val, ok := c.Data[index]; ok {
 		return val
 	}
-	// なかったらエラー
-	panic("[BaseIndexDictModel] index out of range: index: " + string(rune(index)))
+	return c.nilFunc()
 }
 
 func (c *IndexNameModels[T]) SetItem(index int, v T) {
@@ -145,7 +146,7 @@ func (c *IndexNameModels[T]) GetByName(name string) T {
 	if index, ok := c.NameIndexes[name]; ok {
 		return c.Data[index]
 	}
-	panic("[BaseIndexDictModel] name not found: name: " + name)
+	return c.nilFunc()
 }
 
 func (v *IndexNameModels[T]) Contains(index int) bool {

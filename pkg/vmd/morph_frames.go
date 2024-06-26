@@ -43,20 +43,55 @@ func (mfs *MorphFrames) Deform(
 			continue
 		}
 
+		mf := mfs.Get(morphName).Get(frame)
+		if mf == nil || mf.Ratio == 0.0 {
+			continue
+		}
+
 		morph := model.Morphs.GetByName(morphName)
 		switch morph.MorphType {
 		case pmx.MORPH_TYPE_VERTEX:
-			mds.Vertices = mfs.Get(morphName).DeformVertex(frame, model, mds.Vertices)
+			mds.Vertices = mf.DeformVertex(morphName, model, mds.Vertices, mf.Ratio)
 		case pmx.MORPH_TYPE_AFTER_VERTEX:
-			mds.Vertices = mfs.Get(morphName).DeformAfterVertex(frame, model, mds.Vertices)
+			mds.Vertices = mf.DeformAfterVertex(morphName, model, mds.Vertices, mf.Ratio)
 		case pmx.MORPH_TYPE_UV:
-			mds.Vertices = mfs.Get(morphName).DeformUv(frame, model, mds.Vertices)
+			mds.Vertices = mf.DeformUv(morphName, model, mds.Vertices, mf.Ratio)
 		case pmx.MORPH_TYPE_EXTENDED_UV1:
-			mds.Vertices = mfs.Get(morphName).DeformUv1(frame, model, mds.Vertices)
+			mds.Vertices = mf.DeformUv1(morphName, model, mds.Vertices, mf.Ratio)
 		case pmx.MORPH_TYPE_BONE:
-			mds.Bones = mfs.Get(morphName).DeformBone(frame, model, mds.Bones)
+			mds.Bones = mf.DeformBone(morphName, model, mds.Bones, mf.Ratio)
 		case pmx.MORPH_TYPE_MATERIAL:
-			mds.Materials = mfs.Get(morphName).DeformMaterial(frame, model, mds.Materials)
+			mds.Materials = mf.DeformMaterial(morphName, model, mds.Materials, mf.Ratio)
+		case pmx.MORPH_TYPE_GROUP:
+			// グループモーフは細分化
+			for _, offset := range morph.Offsets {
+				groupOffset := offset.(*pmx.GroupMorphOffset)
+				groupMorph := model.Morphs.Get(groupOffset.MorphIndex)
+				if groupMorph == nil {
+					continue
+				}
+				gmf := mfs.Get(groupMorph.Name).Get(frame)
+				switch groupMorph.MorphType {
+				case pmx.MORPH_TYPE_VERTEX:
+					mds.Vertices = gmf.DeformVertex(
+						groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
+				case pmx.MORPH_TYPE_AFTER_VERTEX:
+					mds.Vertices = gmf.DeformAfterVertex(
+						groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
+				case pmx.MORPH_TYPE_UV:
+					mds.Vertices = gmf.DeformUv(
+						groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
+				case pmx.MORPH_TYPE_EXTENDED_UV1:
+					mds.Vertices = gmf.DeformUv1(
+						groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
+				case pmx.MORPH_TYPE_BONE:
+					mds.Bones = gmf.DeformBone(
+						groupMorph.Name, model, mds.Bones, mf.Ratio*groupOffset.MorphFactor)
+				case pmx.MORPH_TYPE_MATERIAL:
+					mds.Materials = gmf.DeformMaterial(
+						groupMorph.Name, model, mds.Materials, mf.Ratio*groupOffset.MorphFactor)
+				}
+			}
 		}
 	}
 

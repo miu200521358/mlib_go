@@ -66,14 +66,14 @@ func draw(
 		boneDeltas[i] = deltas.Bones.Get(bone.Index).LocalMatrix().GL()
 	}
 
-	materialDeltas := make([]*pmx.Material, len(model.Materials.Data))
+	meshDeltas := make([]*pmx.MeshDelta, len(model.Materials.Data))
 	for i, md := range deltas.Morphs.Materials.Data {
-		materialDeltas[i] = md.Result()
+		meshDeltas[i] = md.Result()
 	}
 
 	vertexDeltas := fetchVertexDeltas(model, deltas)
 
-	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, materialDeltas, windowIndex,
+	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, meshDeltas, windowIndex,
 		isDrawNormal, isDrawBones, model.Bones)
 
 	// 物理デバッグ表示

@@ -191,7 +191,7 @@ func (m *Meshes) Draw(
 	shader *mview.MShader,
 	boneDeltas []mgl32.Mat4,
 	vertexDeltas [][]float32,
-	materialDeltas []*Material,
+	meshDeltas []*MeshDelta,
 	windowIndex int,
 	isDrawNormal bool,
 	isDrawBones map[BoneFlag]bool,
@@ -209,13 +209,13 @@ func (m *Meshes) Draw(
 		mesh.ibo.Bind()
 
 		shader.Use(mview.PROGRAM_TYPE_MODEL)
-		mesh.drawModel(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, materialDeltas[i])
+		mesh.drawModel(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
 		shader.Unuse()
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
 			shader.Use(mview.PROGRAM_TYPE_EDGE)
-			mesh.drawEdge(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, materialDeltas[i])
+			mesh.drawEdge(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
 			shader.Unuse()
 		}
 
@@ -241,7 +241,7 @@ func (m *Meshes) Draw(
 	paddedMatrixes = nil
 	boneDeltas = nil
 	vertexDeltas = nil
-	materialDeltas = nil
+	meshDeltas = nil
 }
 
 func (m *Meshes) createBoneMatrixes(matrixes []mgl32.Mat4) ([]float32, int, int) {

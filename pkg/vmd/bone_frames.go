@@ -168,8 +168,7 @@ func (fs *BoneFrames) prepareDeltas(
 	// IK事前計算
 	if isCalcIk {
 		// ボーン変形行列操作
-		boneDeltas = fs.prepareIk(frame, model, deformBoneIndexes, boneDeltas, morphDeltas,
-			ikFrame, isAfterPhysics)
+		boneDeltas = fs.prepareIk(frame, model, deformBoneIndexes, boneDeltas, morphDeltas, ikFrame, isAfterPhysics)
 	}
 
 	// mlog.Memory(fmt.Sprintf("prepareDeltas 3)frame: %d", frame))
@@ -286,7 +285,7 @@ func (fs *BoneFrames) calcIk(
 	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
 	ikDeltas := fs.DeformByPhysicsFlag(frame, model, []string{ikBone.Name, effectorBone.Name}, false,
-		boneDeltas, morphDeltas, ikFrame, isAfterPhysics)
+		boneDeltas, nil, ikFrame, isAfterPhysics)
 	if !ikDeltas.Contains(ikBone.Index) {
 		// IKボーンが存在しない場合、スルー
 		return boneDeltas
@@ -295,7 +294,7 @@ func (fs *BoneFrames) calcIk(
 	var ikOffDeltas *BoneDeltas
 	if isToeIk {
 		ikOffDeltas = fs.DeformByPhysicsFlag(frame, model, []string{effectorBone.Name}, false,
-			nil, morphDeltas, ikFrame, isAfterPhysics)
+			nil, nil, ikFrame, isAfterPhysics)
 		if !ikOffDeltas.Contains(effectorBone.Index) {
 			// IK OFFボーンが存在しない場合、スルー
 			return boneDeltas
@@ -304,7 +303,7 @@ func (fs *BoneFrames) calcIk(
 
 	// エフェクタ関連情報取得
 	effectorDeformBoneIndexes, boneDeltas :=
-		fs.prepareDeltas(frame, model, []string{effectorBone.Name}, false, boneDeltas, morphDeltas, ikFrame, isAfterPhysics)
+		fs.prepareDeltas(frame, model, []string{effectorBone.Name}, false, boneDeltas, nil, ikFrame, isAfterPhysics)
 	if !boneDeltas.Contains(effectorBone.Index) || !boneDeltas.Contains(ikBone.Index) ||
 		!boneDeltas.Contains(ikBone.Ik.BoneIndex) {
 		// エフェクタボーンが存在しない場合、スルー
@@ -605,6 +604,12 @@ ikLoop:
 			} else {
 				// 角度制限なしの場合
 				resultIkQuat = totalIkQuat
+			}
+
+			if loop == 0 && morphDeltas.Bones.Get(linkBone.Index) != nil &&
+				morphDeltas.Bones.Get(linkBone.Index).frameRotation != nil {
+				// モーフ変形がある場合、モーフ変形を追加適用
+				resultIkQuat = resultIkQuat.Muled(morphDeltas.Bones.Get(linkBone.Index).frameRotation)
 			}
 
 			if linkBone.HasFixedAxis() {
@@ -1301,21 +1306,24 @@ func (fs *BoneFrames) getRotation(
 
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
 	var rot *mmath.MQuaternion
+	var morphRot *mmath.MQuaternion
 	if !bone.IsAfterPhysicsDeform() && boneDeltas != nil && boneDeltas.Get(bone.Index) != nil &&
 		boneDeltas.Get(bone.Index).frameRotation != nil {
 		rot = boneDeltas.Get(bone.Index).frameRotation.Copy()
-	} else if bf != nil && bf.Rotation != nil && !bf.Rotation.IsIdent() {
-		rot = bf.Rotation.Copy()
 	} else {
-		rot = mmath.NewMQuaternion()
-	}
+		if bf != nil && bf.Rotation != nil && !bf.Rotation.IsIdent() {
+			rot = bf.Rotation.Copy()
+		} else {
+			rot = mmath.NewMQuaternion()
 
-	var morphRot *mmath.MQuaternion
-	if morphDeltas != nil && morphDeltas.Bones.Get(bone.Index) != nil &&
-		morphDeltas.Bones.Get(bone.Index).frameRotation != nil {
-		morphRot = morphDeltas.Bones.Get(bone.Index).frameRotation
-		// mlog.I("[%s][%04d][%d]: rot: %s(%s), morphRot: %s(%s)\n", bone.Name, frame, loop,
-		// 	rot.String(), rot.ToMMDDegrees().String(), morphRot.String(), morphRot.ToMMDDegrees().String())
+			if morphDeltas != nil && morphDeltas.Bones.Get(bone.Index) != nil &&
+				morphDeltas.Bones.Get(bone.Index).frameRotation != nil {
+				// IKの場合はIK計算時に組み込まれているので、まだframeRotationが無い場合のみ加味
+				morphRot = morphDeltas.Bones.Get(bone.Index).frameRotation
+				// mlog.I("[%s][%04d][%d]: rot: %s(%s), morphRot: %s(%s)\n", bone.Name, frame, loop,
+				// 	rot.String(), rot.ToMMDDegrees().String(), morphRot.String(), morphRot.ToMMDDegrees().String())
+			}
+		}
 	}
 
 	if bone.HasFixedAxis() {
@@ -1366,10 +1374,12 @@ func (fs *BoneFrames) getEffectRotation(
 	rot, morphRot, effectRot := fs.getRotation(bf, frame, effectBone, model, boneDeltas, morphDeltas, loop+1)
 
 	if morphRot != nil {
+		// rot = morphRot.Mul(rot)
 		rot.Mul(morphRot)
 	}
 
 	if effectRot != nil {
+		// rot = effectRot.Mul(rot)
 		rot.Mul(effectRot)
 	}
 

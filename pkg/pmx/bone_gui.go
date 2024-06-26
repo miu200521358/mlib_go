@@ -240,7 +240,7 @@ type Bones struct {
 
 func NewBones() *Bones {
 	return &Bones{
-		IndexNameModels:  mcore.NewIndexNameModels[*Bone](),
+		IndexNameModels:  mcore.NewIndexNameModels[*Bone](func() *Bone { return nil }),
 		IkTreeIndexes:    make(map[int][]int),
 		LayerSortedBones: make(map[bool]map[int]*Bone),
 		LayerSortedNames: make(map[bool]map[string]int),

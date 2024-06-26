@@ -71,6 +71,6 @@ type Joints struct {
 
 func NewJoints() *Joints {
 	return &Joints{
-		IndexNameModels: mcore.NewIndexNameModels[*Joint](),
+		IndexNameModels: mcore.NewIndexNameModels[*Joint](func() *Joint { return nil }),
 	}
 }

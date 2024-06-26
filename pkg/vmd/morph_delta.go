@@ -134,36 +134,6 @@ func NewMaterialMorphDelta(m *pmx.Material) *MaterialMorphDelta {
 	return mm
 }
 
-func (md *MaterialMorphDelta) Result() *pmx.Material {
-	material := &pmx.Material{
-		Diffuse: md.Material.Diffuse.
-			Muled(md.MulMaterial.Diffuse.Muled(md.MulRatios.Diffuse)).
-			Added(md.AddMaterial.Diffuse.Muled(md.AddRatios.Diffuse)),
-		Specular: md.Material.Specular.
-			Muled(md.MulMaterial.Specular.Muled(md.MulRatios.Specular)).
-			Added(md.AddMaterial.Specular.Muled(md.AddRatios.Specular)),
-		Ambient: md.Material.Ambient.
-			Muled(md.MulMaterial.Ambient.Muled(md.MulRatios.Ambient)).
-			Added(md.AddMaterial.Ambient.Muled(md.AddRatios.Ambient)),
-		Edge: md.Material.Edge.
-			Muled(md.MulMaterial.Edge.Muled(md.MulRatios.Edge)).
-			Added(md.AddMaterial.Edge.Muled(md.AddRatios.Edge)),
-		EdgeSize: md.Material.EdgeSize*(md.MulMaterial.EdgeSize*md.MulRatios.EdgeSize) +
-			(md.AddMaterial.EdgeSize * md.AddRatios.EdgeSize),
-		TextureFactor: md.Material.TextureFactor.
-			Muled(md.MulMaterial.TextureFactor.Muled(md.MulRatios.TextureFactor)).
-			Added(md.AddMaterial.TextureFactor.Muled(md.AddRatios.TextureFactor)),
-		SphereTextureFactor: md.Material.SphereTextureFactor.
-			Muled(md.MulMaterial.SphereTextureFactor.Muled(md.MulRatios.SphereTextureFactor)).
-			Added(md.AddMaterial.SphereTextureFactor.Muled(md.AddRatios.SphereTextureFactor)),
-		ToonTextureFactor: md.Material.ToonTextureFactor.
-			Muled(md.MulMaterial.ToonTextureFactor.Muled(md.MulRatios.ToonTextureFactor)).
-			Added(md.AddMaterial.ToonTextureFactor.Muled(md.AddRatios.ToonTextureFactor)),
-	}
-
-	return material
-}
-
 func (md *MaterialMorphDelta) Add(m *pmx.MaterialMorphOffset, ratio float64) {
 	md.AddMaterial.Diffuse.Add(m.Diffuse)
 	md.AddMaterial.Specular.Add(m.Specular)

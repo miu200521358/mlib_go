@@ -69,7 +69,7 @@ type Faces struct {
 
 func NewFaces() *Faces {
 	return &Faces{
-		IndexModels: NewIndexModels[*Face](),
+		IndexModels: NewIndexModels[*Face](func() *Face { return nil }),
 	}
 }
 
@@ -84,12 +84,12 @@ func TestIndexModelCorrection_GetItem(t *testing.T) {
 	}
 
 	// Test out of range index
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("Expected GetItem to panic with out of range index")
+	{
+		result := model.Get(1)
+		if result != nil {
+			t.Errorf("Expected GetItem to return nil, but got %v", result)
 		}
-	}()
-	model.Get(1)
+	}
 }
 
 func TestIndexModelCorrection_SetItem(t *testing.T) {
@@ -132,13 +132,12 @@ func TestIndexModelCorrection_DeleteItem(t *testing.T) {
 
 	model.DeleteItem(0)
 
-	// Test deleted item
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("Expected GetItem to panic with deleted item")
+	{
+		result := model.Get(0)
+		if result != nil {
+			t.Errorf("Expected GetItem to return nil, but got %v", result)
 		}
-	}()
-	model.Get(0)
+	}
 }
 
 func TestIndexModelCorrection_Len(t *testing.T) {

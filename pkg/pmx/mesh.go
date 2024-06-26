@@ -7,6 +7,7 @@ import (
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mview"
@@ -16,6 +17,20 @@ type Mesh struct {
 	material          MaterialGL // 描画用材質
 	prevVerticesCount int        // 前の頂点数
 	ibo               *mview.IBO // 頂点インデックスバッファ
+}
+
+type MeshDelta struct {
+	Diffuse          mgl32.Vec4
+	Specular         mgl32.Vec4
+	Ambient          mgl32.Vec3
+	Edge             mgl32.Vec4
+	EdgeSize         float32
+	TextureMulFactor mgl32.Vec4
+	TextureAddFactor mgl32.Vec4
+	SphereMulFactor  mgl32.Vec4
+	SphereAddFactor  mgl32.Vec4
+	ToonMulFactor    mgl32.Vec4
+	ToonAddFactor    mgl32.Vec4
 }
 
 func NewMesh(
@@ -47,7 +62,7 @@ func (m *Mesh) drawModel(
 	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
-	materialDelta *Material,
+	meshDelta *MeshDelta,
 ) {
 	if m.material.DrawFlag.IsDoubleSidedDrawing() {
 		// 両面描画
@@ -69,17 +84,14 @@ func (m *Mesh) drawModel(
 	// ------------------
 	// 材質色設定
 	// full.fx の AmbientColor相当
-	diffuse := materialDelta.diffuseGL()
 	diffuseUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_DIFFUSE))
-	gl.Uniform4fv(diffuseUniform, 1, &diffuse[0])
+	gl.Uniform4fv(diffuseUniform, 1, &meshDelta.Diffuse[0])
 
-	ambient := materialDelta.ambientGL()
 	ambientUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_AMBIENT))
-	gl.Uniform3fv(ambientUniform, 1, &ambient[0])
+	gl.Uniform3fv(ambientUniform, 1, &meshDelta.Ambient[0])
 
-	specular := materialDelta.specularGL()
 	specularUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_SPECULAR))
-	gl.Uniform4fv(specularUniform, 1, &specular[0])
+	gl.Uniform4fv(specularUniform, 1, &meshDelta.Specular[0])
 
 	// テクスチャ使用有無
 	useTextureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_USE_TEXTURE))
@@ -89,6 +101,12 @@ func (m *Mesh) drawModel(
 		defer m.material.Texture.Unbind()
 		textureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TEXTURE_SAMPLER))
 		gl.Uniform1i(textureUniform, int32(m.material.Texture.TextureUnitNo))
+
+		textureMulFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TEXTURE_MUL_FACTOR))
+		gl.Uniform4fv(textureMulFactorUniform, 1, &meshDelta.TextureMulFactor[0])
+
+		textureAddFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TEXTURE_ADD_FACTOR))
+		gl.Uniform4fv(textureAddFactorUniform, 1, &meshDelta.TextureAddFactor[0])
 	}
 
 	// Toon使用有無
@@ -99,6 +117,12 @@ func (m *Mesh) drawModel(
 		defer m.material.ToonTexture.Unbind()
 		toonUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TOON_SAMPLER))
 		gl.Uniform1i(toonUniform, int32(m.material.ToonTexture.TextureUnitNo))
+
+		toonMulFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TOON_MUL_FACTOR))
+		gl.Uniform4fv(toonMulFactorUniform, 1, &meshDelta.ToonMulFactor[0])
+
+		toonAddFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TOON_ADD_FACTOR))
+		gl.Uniform4fv(toonAddFactorUniform, 1, &meshDelta.ToonAddFactor[0])
 	}
 
 	// Sphere使用有無
@@ -109,6 +133,12 @@ func (m *Mesh) drawModel(
 		defer m.material.SphereTexture.Unbind()
 		sphereUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_SPHERE_SAMPLER))
 		gl.Uniform1i(sphereUniform, int32(m.material.SphereTexture.TextureUnitNo))
+
+		sphereMulFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_SPHERE_MUL_FACTOR))
+		gl.Uniform4fv(sphereMulFactorUniform, 1, &meshDelta.SphereMulFactor[0])
+
+		sphereAddFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_SPHERE_ADD_FACTOR))
+		gl.Uniform4fv(sphereAddFactorUniform, 1, &meshDelta.SphereAddFactor[0])
 	}
 
 	// SphereMode
@@ -153,7 +183,7 @@ func (m *Mesh) drawEdge(
 	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
-	materialDelta *Material,
+	meshDelta *MeshDelta,
 ) {
 	gl.Enable(gl.CULL_FACE)
 	defer gl.Disable(gl.CULL_FACE)
@@ -166,13 +196,12 @@ func (m *Mesh) drawEdge(
 
 	// ------------------
 	// エッジ色設定
-	edgeColor := materialDelta.edgeGL()
 	edgeColorUniform := gl.GetUniformLocation(shader.EdgeProgram, gl.Str(mview.SHADER_EDGE_COLOR))
-	gl.Uniform4fv(edgeColorUniform, 1, &edgeColor[0])
+	gl.Uniform4fv(edgeColorUniform, 1, &meshDelta.Edge[0])
 
 	// エッジサイズ
 	edgeSizeUniform := gl.GetUniformLocation(shader.EdgeProgram, gl.Str(mview.SHADER_EDGE_SIZE))
-	gl.Uniform1f(edgeSizeUniform, float32(materialDelta.EdgeSize))
+	gl.Uniform1f(edgeSizeUniform, meshDelta.EdgeSize)
 
 	// 三角形描画
 	gl.DrawElements(

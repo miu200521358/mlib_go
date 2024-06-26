@@ -36,12 +36,14 @@ func (v *IndexModel) Copy() IIndexModel {
 
 // Tのリスト基底クラス
 type IndexModels[T IIndexModel] struct {
-	Data map[int]T
+	Data    map[int]T
+	nilFunc func() T
 }
 
-func NewIndexModels[T IIndexModel]() *IndexModels[T] {
+func NewIndexModels[T IIndexModel](nilFunc func() T) *IndexModels[T] {
 	return &IndexModels[T]{
-		Data: make(map[int]T, 0),
+		Data:    make(map[int]T, 0),
+		nilFunc: nilFunc,
 	}
 }
 
@@ -49,8 +51,7 @@ func (c *IndexModels[T]) Get(index int) T {
 	if val, ok := c.Data[index]; ok {
 		return val
 	}
-	// なかったらエラー
-	panic("[BaseIndexDictModel] index out of range: index: " + string(rune(index)))
+	return c.nilFunc()
 }
 
 func (c *IndexModels[T]) SetItem(index int, v T) {

@@ -45,6 +45,6 @@ type Vertices struct {
 
 func NewVertices() *Vertices {
 	return &Vertices{
-		IndexModels: mcore.NewIndexModels[*Vertex](),
+		IndexModels: mcore.NewIndexModels[*Vertex](func() *Vertex { return nil }),
 	}
 }
