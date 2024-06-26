@@ -16,10 +16,24 @@ import (
 
 	"github.com/ftrvxmtrx/tga"
 	"github.com/miu200521358/dds/pkg/dds"
+	"github.com/miu200521358/walk/pkg/walk"
 	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/riff"
 	_ "golang.org/x/image/tiff"
 )
+
+// LoadWalkIcon 画像ファイルの読み込み
+func LoadWalkIcon(resourceFiles embed.FS, imagePath string, dpi int) (*walk.Icon, error) {
+	image, err := LoadImageFromResources(resourceFiles, imagePath)
+	if err != nil {
+		return nil, err
+	}
+	img, err := walk.NewIconFromImageForDPI(*image, dpi)
+	if err != nil {
+		return nil, err
+	}
+	return img, nil
+}
 
 // 指定されたパスから画像を読み込む
 func LoadImage(path string) (*image.Image, error) {
