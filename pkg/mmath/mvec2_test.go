@@ -13,25 +13,25 @@ func TestMVec2LerpVec2(t *testing.T) {
 
 	result := LerpVec2(v1, v2, t1) // Use v2 as a pointer
 
-	if !result.PracticallyEquals(&expected, 1e-8) {
+	if !result.NearEquals(&expected, 1e-8) {
 		t.Errorf("TestMVec2LerpVec2 failed. Expected %v, got %v", expected, result)
 	}
 }
 
-func TestMVec2PracticallyEquals(t *testing.T) {
+func TestMVec2NearEquals(t *testing.T) {
 	v1 := MVec2{1, 2}
 	v2 := MVec2{1.000001, 2.000001}
 	epsilon := 0.00001
 
-	if !v1.PracticallyEquals(&v2, epsilon) {
-		t.Errorf("PracticallyEquals failed. Expected true, got false")
+	if !v1.NearEquals(&v2, epsilon) {
+		t.Errorf("NearEquals failed. Expected true, got false")
 	}
 
 	v3 := MVec2{1, 2}
 	v4 := MVec2{1.0001, 2.0001}
 
-	if v3.PracticallyEquals(&v4, epsilon) {
-		t.Errorf("PracticallyEquals failed. Expected false, got true")
+	if v3.NearEquals(&v4, epsilon) {
+		t.Errorf("NearEquals failed. Expected false, got true")
 	}
 }
 

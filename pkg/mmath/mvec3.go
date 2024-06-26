@@ -112,21 +112,21 @@ func (v *MVec3) DivZ(z float64) {
 }
 
 func (v *MVec3) IsOnlyX() bool {
-	return !PracticallyEquals(v.GetX(), 0, 1e-10) &&
-		PracticallyEquals(v.GetY(), 0, 1e-10) &&
-		PracticallyEquals(v.GetZ(), 0, 1e-10)
+	return !NearEquals(v.GetX(), 0, 1e-10) &&
+		NearEquals(v.GetY(), 0, 1e-10) &&
+		NearEquals(v.GetZ(), 0, 1e-10)
 }
 
 func (v *MVec3) IsOnlyY() bool {
-	return PracticallyEquals(v.GetX(), 0, 1e-10) &&
-		!PracticallyEquals(v.GetY(), 0, 1e-10) &&
-		PracticallyEquals(v.GetZ(), 0, 1e-10)
+	return NearEquals(v.GetX(), 0, 1e-10) &&
+		!NearEquals(v.GetY(), 0, 1e-10) &&
+		NearEquals(v.GetZ(), 0, 1e-10)
 }
 
 func (v *MVec3) IsOnlyZ() bool {
-	return PracticallyEquals(v.GetX(), 0, 1e-10) &&
-		PracticallyEquals(v.GetY(), 0, 1e-10) &&
-		!PracticallyEquals(v.GetZ(), 0, 1e-10)
+	return NearEquals(v.GetX(), 0, 1e-10) &&
+		NearEquals(v.GetY(), 0, 1e-10) &&
+		!NearEquals(v.GetZ(), 0, 1e-10)
 }
 
 // String T の文字列表現を返します。
@@ -250,8 +250,8 @@ func (v *MVec3) NotEquals(other MVec3) bool {
 	return v.GetX() != other.GetX() || v.GetY() != other.GetY() || v.GetZ() != other.GetZ()
 }
 
-// PracticallyEquals ベクトルが他のベクトルとほぼ等しいかどうかをチェックします
-func (v *MVec3) PracticallyEquals(other *MVec3, epsilon float64) bool {
+// NearEquals ベクトルが他のベクトルとほぼ等しいかどうかをチェックします
+func (v *MVec3) NearEquals(other *MVec3, epsilon float64) bool {
 	return (math.Abs(v[0]-other[0]) <= epsilon) &&
 		(math.Abs(v[1]-other[1]) <= epsilon) &&
 		(math.Abs(v[2]-other[2]) <= epsilon)
@@ -312,12 +312,12 @@ func (v *MVec3) Hash() uint64 {
 
 // IsZero ベクトルがゼロベクトルかどうかをチェックします
 func (v *MVec3) IsZero() bool {
-	return v.PracticallyEquals(MVec3Zero, 1e-10)
+	return v.NearEquals(MVec3Zero, 1e-10)
 }
 
 // IsZero ベクトルが1ベクトルかどうかをチェックします
 func (v *MVec3) IsOne() bool {
-	return v.PracticallyEquals(MVec3One, 1e-10)
+	return v.NearEquals(MVec3One, 1e-10)
 }
 
 // Length ベクトルの長さを返します
@@ -467,50 +467,6 @@ func (v *MVec3) ToScaleMat4() *MMat4 {
 	return mat
 }
 
-// 線形補間
-func LerpFloat(v1, v2 float64, t float64) float64 {
-	return v1 + ((v2 - v1) * t)
-}
-
-func Sign(v float64) float64 {
-	if v < 0 {
-		return -1
-	}
-	return 1
-}
-
-func PracticallyEquals(v float64, other float64, epsilon float64) bool {
-	return math.Abs(v-other) <= epsilon
-}
-
-func ToRadian(degree float64) float64 {
-	return degree * math.Pi / 180
-}
-
-func ToDegree(radian float64) float64 {
-	return radian * 180 / math.Pi
-}
-
-// Clamp01 ベクトルの各要素をmin～maxの範囲内にクランプします
-func ClampFloat(v float64, min float64, max float64) float64 {
-	if v < min {
-		v = min
-	} else if v > max {
-		v = max
-	}
-	return v
-}
-
-// Clamp01 ベクトルの各要素をmin～maxの範囲内にクランプします
-func ClampFloat32(v float32, min float32, max float32) float32 {
-	if v < min {
-		v = min
-	} else if v > max {
-		v = max
-	}
-	return v
-}
-
 // ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
 func (v *MVec3) ClampIfVerySmall() *MVec3 {
 	epsilon := 1e-6
@@ -527,8 +483,8 @@ func (v *MVec3) ClampIfVerySmall() *MVec3 {
 }
 
 // 線形補間
-func LerpVec3(v1, v2 *MVec3, t float64) *MVec3 {
-	return (v2.Sub(v1)).MulScalar(t).Added(v1)
+func (v1 *MVec3) Lerp(v2 *MVec3, t float64) *MVec3 {
+	return (v2.Subed(v1)).MulScalar(t).Add(v1)
 }
 
 func (v *MVec3) Round() *MVec3 {
@@ -591,6 +547,26 @@ func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
 	return rotationMatrix
 }
 
+// One 0を1に変える
+func (v *MVec3) One() *MVec3 {
+	vec := v.Vector()
+	epsilon := 1e-14
+	for i := 0; i < len(vec); i++ {
+		if math.Abs(vec[i]) < epsilon {
+			vec[i] = 1
+		}
+	}
+	return &MVec3{vec[0], vec[1], vec[2]}
+}
+
+func (v *MVec3) Distance(other *MVec3) float64 {
+	return v.Subed(other).Length()
+}
+
+func (v *MVec3) Project(other *MVec3) *MVec3 {
+	return other.MuledScalar(v.Dot(other) / other.LengthSqr())
+}
+
 // 標準偏差を加味したmean処理
 func StdMeanVec3(values []MVec3, err float64) *MVec3 {
 	npStandardVectors := make([][]float64, len(values))
@@ -615,46 +591,4 @@ func StdMeanVec3(values []MVec3, err float64) *MVec3 {
 
 	mean := mutils.Mean2DVertical(filteredStandardValues)
 	return &MVec3{mean[0], mean[1], mean[2]}
-}
-
-// One 0を1に変える
-func (v *MVec3) One() *MVec3 {
-	vec := v.Vector()
-	epsilon := 1e-14
-	for i := 0; i < len(vec); i++ {
-		if math.Abs(vec[i]) < epsilon {
-			vec[i] = 1
-		}
-	}
-	return &MVec3{vec[0], vec[1], vec[2]}
-}
-
-func (v *MVec3) Distance(other *MVec3) float64 {
-	s := v.Subed(other)
-	return s.Length()
-}
-
-func (v *MVec3) Project(other *MVec3) *MVec3 {
-	return other.MuledScalar(v.Dot(other) / other.LengthSqr())
-}
-
-// ボーンから見た頂点ローカル位置を求める
-// vertexPositions: グローバル頂点位置
-// startBonePosition: 親ボーン位置
-// endBonePosition: 子ボーン位置
-func GetVertexLocalPositions(vertexPositions []*MVec3, startBonePosition *MVec3, endBonePosition *MVec3) []*MVec3 {
-	vertexSize := len(vertexPositions)
-	boneVector := endBonePosition.Sub(startBonePosition)
-	boneDirection := boneVector.Normalized()
-
-	localPositions := make([]*MVec3, vertexSize)
-	for i := 0; i < vertexSize; i++ {
-		vertexPosition := vertexPositions[i]
-		subedVertexPosition := vertexPosition.Subed(startBonePosition)
-		projection := subedVertexPosition.Project(boneDirection)
-		localPosition := endBonePosition.Added(projection)
-		localPositions[i] = localPosition
-	}
-
-	return localPositions
 }

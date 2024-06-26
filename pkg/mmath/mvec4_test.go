@@ -13,25 +13,25 @@ func TestMVec4Interpolate(t *testing.T) {
 
 	result := v1.Interpolate(v2, t1) // Use v2 as a pointer
 
-	if !result.PracticallyEquals(&expected, 1e-8) {
+	if !result.NearEquals(&expected, 1e-8) {
 		t.Errorf("Interpolation failed. Expected %v, got %v", expected, result)
 	}
 }
 
-func TestMVec4PracticallyEquals(t *testing.T) {
+func TestMVec4NearEquals(t *testing.T) {
 	v1 := MVec4{1, 2, 3}
 	v2 := MVec4{1.000001, 2.000001, 3.000001}
 	epsilon := 0.00001
 
-	if !v1.PracticallyEquals(&v2, epsilon) {
-		t.Errorf("PracticallyEquals failed. Expected true, got false")
+	if !v1.NearEquals(&v2, epsilon) {
+		t.Errorf("NearEquals failed. Expected true, got false")
 	}
 
 	v3 := MVec4{1, 2, 3}
 	v4 := MVec4{1.0001, 2.0001, 3.0001}
 
-	if v3.PracticallyEquals(&v4, epsilon) {
-		t.Errorf("PracticallyEquals failed. Expected false, got true")
+	if v3.NearEquals(&v4, epsilon) {
+		t.Errorf("NearEquals failed. Expected false, got true")
 	}
 }
 

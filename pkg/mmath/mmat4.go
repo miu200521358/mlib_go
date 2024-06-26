@@ -56,7 +56,7 @@ func (m *MMat4) IsZero() bool {
 
 // IsIdent
 func (m *MMat4) IsIdent() bool {
-	return m.PracticallyEquals(&MMat4Ident, 1e-10)
+	return m.NearEquals(&MMat4Ident, 1e-10)
 }
 
 // String
@@ -70,8 +70,8 @@ func (m *MMat4) Copy() *MMat4 {
 	return copied
 }
 
-// PracticallyEquals
-func (m *MMat4) PracticallyEquals(other *MMat4, tolerance float64) bool {
+// NearEquals
+func (m *MMat4) NearEquals(other *MMat4, tolerance float64) bool {
 	return mgl64.Mat4(*m).ApproxEqualThreshold(mgl64.Mat4(*other), tolerance)
 }
 

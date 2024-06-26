@@ -49,8 +49,8 @@ func (nextLf *LightFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame 
 	// 線形補間
 	t := float64(nextLf.GetIndex()-index) / float64(nextLf.GetIndex()-prevLf.GetIndex())
 	vv := &LightFrame{
-		Position: mmath.LerpVec3(prevLf.Position, nextLf.Position, t),
-		Color:    mmath.LerpVec3(prevLf.Color, nextLf.Color, t),
+		Position: prevLf.Position.Lerp(nextLf.Position, t),
+		Color:    prevLf.Color.Lerp(nextLf.Color, t),
 	}
 	return vv
 }

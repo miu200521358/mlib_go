@@ -44,10 +44,10 @@ func TestT_Copy(t *testing.T) {
 		t.Error("Expected Copy() to return a different instance")
 	}
 
-	if !copied.GetRadians().PracticallyEquals(rot.GetRadians(), 1e-10) {
+	if !copied.GetRadians().NearEquals(rot.GetRadians(), 1e-10) {
 		t.Errorf("Copied instance does not match the original (radians) %s %s", copied.radians.String(), rot.radians.String())
 	}
-	if !copied.GetDegrees().PracticallyEquals(rot.GetDegrees(), 1e-10) {
+	if !copied.GetDegrees().NearEquals(rot.GetDegrees(), 1e-10) {
 		t.Errorf("Copied instance does not match the original (degrees) %s %s", copied.degrees.String(), rot.degrees.String())
 	}
 	if 1-copied.GetQuaternion().Dot(rot.GetQuaternion()) > 1e-10 {

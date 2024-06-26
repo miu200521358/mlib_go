@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestMMat4_PracticallyEquals(t *testing.T) {
+func TestMMat4_NearEquals(t *testing.T) {
 	mat1 := &MMat4{
 		1, 2, 3, 4,
 		5, 6, 7, 8,
@@ -19,7 +19,7 @@ func TestMMat4_PracticallyEquals(t *testing.T) {
 		13.00000001, 14.00000001, 15.00000001, 16.00000001,
 	}
 
-	if !mat1.PracticallyEquals(mat2, 1e-8) {
+	if !mat1.NearEquals(mat2, 1e-8) {
 		t.Errorf("Expected mat1 to be practically equal to mat2")
 	}
 
@@ -37,7 +37,7 @@ func TestMMat4_PracticallyEquals(t *testing.T) {
 		13.0001, 14.0001, 15.0001, 16.0001,
 	}
 
-	if mat3.PracticallyEquals(mat4, 1e-8) {
+	if mat3.NearEquals(mat4, 1e-8) {
 		t.Errorf("Expected mat3 to not be practically equal to mat4")
 	}
 }
@@ -61,7 +61,7 @@ func TestMMat4_Translate(t *testing.T) {
 	mat.Translate(v)
 
 	// Verify the matrix values
-	if !mat.PracticallyEquals(expectedMat, 1e-10) {
+	if !mat.NearEquals(expectedMat, 1e-10) {
 		t.Errorf("Expected mat to be %v, got %v", expectedMat, mat)
 	}
 
@@ -81,7 +81,7 @@ func TestMMat4_Translate(t *testing.T) {
 			0.0, 0.0, 0.0, 1.0,
 		)
 
-		if !m.PracticallyEquals(expectedMat, 1e-8) {
+		if !m.NearEquals(expectedMat, 1e-8) {
 			t.Errorf("Expected mat to be %v, got %v", expectedMat, m)
 		}
 
@@ -94,7 +94,7 @@ func TestMMat4_Translate(t *testing.T) {
 			0.0, 0.0, 0.0, 1.0,
 		)
 
-		if !m.PracticallyEquals(expectedMat2, 1e-8) {
+		if !m.NearEquals(expectedMat2, 1e-8) {
 			t.Errorf("Expected mat to be %v, got %v", expectedMat2, m)
 		}
 	}
@@ -110,7 +110,7 @@ func TestMMat4_Rotate(t *testing.T) {
 	q := NewMQuaternionFromDegrees(10, 20, 30)
 	expectedQ := NewMQuaternionByValues(0.127679440695781, 0.144878125417369, 0.2685358227515692, 0.943714364147489)
 
-	if !q.PracticallyEquals(expectedQ, 1e-10) {
+	if !q.NearEquals(expectedQ, 1e-10) {
 		t.Errorf("Expected q to be %v, got %v", expectedQ, q)
 	}
 
@@ -123,7 +123,7 @@ func TestMMat4_Rotate(t *testing.T) {
 		0.0, 0.0, 0.0, 1.0,
 	)
 
-	if !m.PracticallyEquals(expectedMat, 1e-7) {
+	if !m.NearEquals(expectedMat, 1e-7) {
 		t.Errorf("Expected mat to be %v, got %v", expectedMat, m)
 	}
 
@@ -138,7 +138,7 @@ func TestMMat4_Rotate(t *testing.T) {
 
 	m.Rotate(q2)
 
-	if !m.PracticallyEquals(expectedMat2, 1e-7) {
+	if !m.NearEquals(expectedMat2, 1e-7) {
 		t.Errorf("Expected mat to be %v, got %v", expectedMat2, m)
 	}
 }
@@ -154,7 +154,7 @@ func TestMMat4_Scale(t *testing.T) {
 		0.0, 0.0, 0.0, 1.0,
 	)
 
-	if !m.PracticallyEquals(expectedMat, 1e-8) {
+	if !m.NearEquals(expectedMat, 1e-8) {
 		t.Errorf("Expected mat to be %v, got %v", expectedMat, m)
 	}
 
@@ -167,7 +167,7 @@ func TestMMat4_Scale(t *testing.T) {
 		0.0, 0.0, 0.0, 1.0,
 	)
 
-	if !m.PracticallyEquals(expectedMat2, 1e-8) {
+	if !m.NearEquals(expectedMat2, 1e-8) {
 		t.Errorf("Expected mat to be %v, got %v", expectedMat2, m)
 	}
 
@@ -180,7 +180,7 @@ func TestMMat4_Scale(t *testing.T) {
 		0.0, 0.0, 0.0, 1.0,
 	)
 
-	if !m.PracticallyEquals(expectedMat3, 1e-8) {
+	if !m.NearEquals(expectedMat3, 1e-8) {
 		t.Errorf("Expected mat to be %v, got %v", expectedMat3, m)
 	}
 
@@ -193,7 +193,7 @@ func TestMMat4_Scale(t *testing.T) {
 		0.0, 0.0, 0.0, 1.0,
 	)
 
-	if !m.PracticallyEquals(expectedMat4, 1e-8) {
+	if !m.NearEquals(expectedMat4, 1e-8) {
 		t.Errorf("Expected mat to be %v, got %v", expectedMat4, m)
 	}
 }
@@ -211,7 +211,7 @@ func TestMMat4_Quaternion(t *testing.T) {
 		q := mat.Quaternion().Shorten()
 
 		// Verify the quaternion values
-		if !q.PracticallyEquals(expectedQ, 1e-10) {
+		if !q.NearEquals(expectedQ, 1e-10) {
 			t.Errorf("Expected q to be %v, got %v", expectedQ, q)
 		}
 	}
@@ -227,7 +227,7 @@ func TestMMat4_Quaternion(t *testing.T) {
 		)
 		q := m.Quaternion().Shorten()
 
-		if !q.PracticallyEquals(expectedQ, 1e-8) {
+		if !q.NearEquals(expectedQ, 1e-8) {
 			t.Errorf("Expected q to be %v, got %v", expectedQ, q)
 		}
 	}
@@ -242,7 +242,7 @@ func TestMMat4_Quaternion(t *testing.T) {
 			0.0, 0.0, 0.0, 1.0)
 		q := m.Quaternion().Shorten()
 
-		if !q.PracticallyEquals(expectedQ, 1e-8) {
+		if !q.NearEquals(expectedQ, 1e-8) {
 			t.Errorf("Expected q to be %v, got %v", expectedQ, q)
 		}
 	}
@@ -272,7 +272,7 @@ func TestMMat4_Mul(t *testing.T) {
 	mat.Mul(a)
 
 	// Verify the matrix values
-	if !mat.PracticallyEquals(expectedMat, 1e-10) {
+	if !mat.NearEquals(expectedMat, 1e-10) {
 		t.Errorf("Expected mat to be %v, got %v", expectedMat, mat)
 	}
 }
@@ -290,7 +290,7 @@ func TestMMat4_Translation(t *testing.T) {
 	result := mat.Translation()
 
 	// Verify the vector values
-	if !result.PracticallyEquals(&expectedVec, 1e-8) {
+	if !result.NearEquals(&expectedVec, 1e-8) {
 		t.Errorf("Expected translation to be %v, got %v", expectedVec, result)
 	}
 }
@@ -313,7 +313,7 @@ func TestMMat4_Inverse(t *testing.T) {
 	result1 := mat1.Inverse()
 
 	// Verify the matrix values
-	if !result1.PracticallyEquals(&expected1, 1e-8) {
+	if !result1.NearEquals(&expected1, 1e-8) {
 		t.Errorf("Expected inverse matrix to be %v, got %v", expected1, result1)
 	}
 
@@ -334,7 +334,7 @@ func TestMMat4_Inverse(t *testing.T) {
 	result2 := mat2.Inverse()
 
 	// Verify the matrix values
-	if !result2.PracticallyEquals(&expected2, 1e-8) {
+	if !result2.NearEquals(&expected2, 1e-8) {
 		t.Errorf("Expected inverse matrix to be %v, got %v", expected2, result2)
 	}
 }
@@ -363,7 +363,7 @@ func TestMMat4Mul(t *testing.T) {
 		0, 0, 0, 1,
 	}
 
-	if !mat1.PracticallyEquals(&expected1, 1e-8) {
+	if !mat1.NearEquals(&expected1, 1e-8) {
 		t.Errorf("Expected matrix to be %v, got %v", expected1, mat1)
 	}
 
@@ -383,7 +383,7 @@ func TestMMat4Mul(t *testing.T) {
 		0, 0, 0, 1,
 	}
 
-	if !mat1.PracticallyEquals(&expected3, 1e-8) {
+	if !mat1.NearEquals(&expected3, 1e-8) {
 		t.Errorf("Expected matrix to be %v, got %v", expected3, mat1)
 	}
 }

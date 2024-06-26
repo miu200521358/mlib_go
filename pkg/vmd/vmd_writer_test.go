@@ -44,10 +44,10 @@ func TestVmdWriter_Write1(t *testing.T) {
 	}
 
 	reloadBf := reloadMotion.BoneFrames.Data["センター"].Get(0)
-	if reloadBf.Position.PracticallyEquals(bf.Position, 1e-8) == false {
+	if reloadBf.Position.NearEquals(bf.Position, 1e-8) == false {
 		t.Errorf("Expected position to be %v, got %v", bf.Position, reloadBf.Position.MMD())
 	}
-	// if reloadBf.Rotation.GetDegrees().PracticallyEquals(bf.Rotation.GetDegrees(), 1e-5) == false {
+	// if reloadBf.Rotation.GetDegrees().NearEquals(bf.Rotation.GetDegrees(), 1e-5) == false {
 	// 	t.Errorf("Expected rotation to be %v, got %v", bf.Rotation.GetDegrees(), reloadBf.Rotation.GetDegrees())
 	// }
 

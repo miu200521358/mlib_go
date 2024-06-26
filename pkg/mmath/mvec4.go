@@ -277,8 +277,8 @@ func (v *MVec4) NotEquals(other MVec4) bool {
 	return v.GetX() != other.GetX() || v.GetY() != other.GetY() || v.GetZ() != other.GetZ() || v.GetW() != other.GetW()
 }
 
-// PracticallyEquals ベクトルが他のベクトルとほぼ等しいかどうかをチェックします
-func (v *MVec4) PracticallyEquals(other *MVec4, epsilon float64) bool {
+// NearEquals ベクトルが他のベクトルとほぼ等しいかどうかをチェックします
+func (v *MVec4) NearEquals(other *MVec4, epsilon float64) bool {
 	return (math.Abs(v[0]-other[0]) <= epsilon) &&
 		(math.Abs(v[1]-other[1]) <= epsilon) &&
 		(math.Abs(v[2]-other[2]) <= epsilon) &&
@@ -498,8 +498,8 @@ func (v *MVec4) Vector() []float64 {
 }
 
 // 線形補間
-func LerpVec4(v1, v2 *MVec4, t float64) *MVec4 {
-	return (v2.Sub(v1)).MulScalar(t).Added(v1)
+func (v1 *MVec4) Lerp(v2 *MVec4, t float64) *MVec4 {
+	return (v2.Subed(v1)).MulScalar(t).Add(v1)
 }
 
 func (v *MVec4) Round() *MVec4 {

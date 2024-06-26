@@ -173,8 +173,8 @@ func (v *MVec2) NotEquals(other MVec2) bool {
 	return v.GetX() != other.GetX() || v.GetY() != other.GetY()
 }
 
-// PracticallyEquals ベクトルが他のベクトルとほぼ等しいかどうかをチェックします
-func (v *MVec2) PracticallyEquals(other *MVec2, epsilon float64) bool {
+// NearEquals ベクトルが他のベクトルとほぼ等しいかどうかをチェックします
+func (v *MVec2) NearEquals(other *MVec2, epsilon float64) bool {
 	return (math.Abs(v[0]-other[0]) <= epsilon) &&
 		(math.Abs(v[1]-other[1]) <= epsilon)
 }

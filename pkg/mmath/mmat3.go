@@ -37,7 +37,7 @@ func (m *MMat3) IsZero() bool {
 
 // IsIdent
 func (m *MMat3) IsIdent() bool {
-	return m.PracticallyEquals(&MMat3Ident, 1e-10)
+	return m.NearEquals(&MMat3Ident, 1e-10)
 }
 
 // String
@@ -54,7 +54,7 @@ func NewMMat3ByValues(m11, m12, m13, m21, m22, m23, m31, m32, m33 float64) *MMat
 	return (*MMat3)(&mgl64.Mat3{m11, m12, m13, m21, m22, m23, m31, m32, m33})
 }
 
-func (m *MMat3) PracticallyEquals(other *MMat3, tolerance float64) bool {
+func (m *MMat3) NearEquals(other *MMat3, tolerance float64) bool {
 	return mgl64.Mat3(*m).ApproxEqualThreshold(mgl64.Mat3(*other), tolerance)
 }
 

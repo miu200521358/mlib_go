@@ -13,25 +13,25 @@ func TestMVec3Interpolate(t *testing.T) {
 
 	result := v1.Interpolate(v2, t1) // Use v2 as a pointer
 
-	if !result.PracticallyEquals(&expected, 1e-8) {
+	if !result.NearEquals(&expected, 1e-8) {
 		t.Errorf("Interpolation failed. Expected %v, got %v", expected, result)
 	}
 }
 
-func TestMVec3PracticallyEquals(t *testing.T) {
+func TestMVec3NearEquals(t *testing.T) {
 	v1 := MVec3{1, 2, 3}
 	v2 := MVec3{1.000001, 2.000001, 3.000001}
 	epsilon := 0.00001
 
-	if !v1.PracticallyEquals(&v2, epsilon) {
-		t.Errorf("PracticallyEquals failed. Expected true, got false")
+	if !v1.NearEquals(&v2, epsilon) {
+		t.Errorf("NearEquals failed. Expected true, got false")
 	}
 
 	v3 := MVec3{1, 2, 3}
 	v4 := MVec3{1.0001, 2.0001, 3.0001}
 
-	if v3.PracticallyEquals(&v4, epsilon) {
-		t.Errorf("PracticallyEquals failed. Expected false, got true")
+	if v3.NearEquals(&v4, epsilon) {
+		t.Errorf("NearEquals failed. Expected false, got true")
 	}
 }
 
@@ -207,7 +207,7 @@ func TestStdMean(t *testing.T) {
 
 	result := StdMeanVec3(values, err)
 
-	if !result.PracticallyEquals(&expected, 1e-8) {
+	if !result.NearEquals(&expected, 1e-8) {
 		t.Errorf("StdMean failed. Expected %v, got %v", expected, result)
 	}
 }
@@ -215,28 +215,28 @@ func TestMVec3One(t *testing.T) {
 	v1 := MVec3{1, 2, 3.2}
 	expected1 := MVec3{1, 2, 3.2}
 	result1 := v1.One()
-	if !result1.PracticallyEquals(&expected1, 1e-8) {
+	if !result1.NearEquals(&expected1, 1e-8) {
 		t.Errorf("One failed. Expected %v, got %v", expected1, result1)
 	}
 
 	v2 := MVec3{0, 2, 3.2}
 	expected2 := MVec3{1, 2, 3.2}
 	result2 := v2.One()
-	if !result2.PracticallyEquals(&expected2, 1e-8) {
+	if !result2.NearEquals(&expected2, 1e-8) {
 		t.Errorf("One failed. Expected %v, got %v", expected2, result2)
 	}
 
 	v3 := MVec3{1, 0, 3.2}
 	expected3 := MVec3{1, 1, 3.2}
 	result3 := v3.One()
-	if !result3.PracticallyEquals(&expected3, 1e-8) {
+	if !result3.NearEquals(&expected3, 1e-8) {
 		t.Errorf("One failed. Expected %v, got %v", expected3, result3)
 	}
 
 	v4 := MVec3{2, 0, 0}
 	expected4 := MVec3{2, 1, 1}
 	result4 := v4.One()
-	if !result4.PracticallyEquals(&expected4, 1e-8) {
+	if !result4.NearEquals(&expected4, 1e-8) {
 		t.Errorf("One failed. Expected %v, got %v", expected4, result4)
 	}
 }
@@ -277,14 +277,14 @@ func TestMVec3Normalized(t *testing.T) {
 	v1 := MVec3{1, 2, 3}
 	expected1 := MVec3{0.2672612419124244, 0.5345224838248488, 0.8017837257372732}
 	result1 := v1.Normalized()
-	if !result1.PracticallyEquals(&expected1, 1e-8) {
+	if !result1.NearEquals(&expected1, 1e-8) {
 		t.Errorf("Normalized failed. Expected %v, got %v", expected1, result1)
 	}
 
 	v2 := MVec3{2.3, 0.2, 9}
 	expected2 := MVec3{0.24754089997827142, 0.021525295650284472, 0.9686383042628013}
 	result2 := v2.Normalized()
-	if !result2.PracticallyEquals(&expected2, 1e-8) {
+	if !result2.NearEquals(&expected2, 1e-8) {
 		t.Errorf("Normalized failed. Expected %v, got %v", expected2, result2)
 	}
 }
@@ -317,7 +317,7 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 		0., 0., 0., 1.,
 	}
 
-	if !localMatrix.PracticallyEquals(&expected1, 1e-8) {
+	if !localMatrix.NearEquals(&expected1, 1e-8) {
 		t.Errorf("Local matrix calculation failed. Expected %v, got %v", expected1, localMatrix)
 	}
 
@@ -325,7 +325,7 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 	localVector1 := localMatrix.MulVec3(&v2)
 
 	expected2 := &MVec3{0.56568542, 0.42426407, 0.70710678}
-	if !localVector1.PracticallyEquals(expected2, 1e-8) {
+	if !localVector1.NearEquals(expected2, 1e-8) {
 		t.Errorf("Local vector calculation failed. Expected %v, got %v", expected2, localVector1)
 	}
 
@@ -333,7 +333,7 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 	localVector2 := localMatrix.MulVec3(&v3)
 
 	expected3 := MVec3{1.13137085, 0.848528137, -1.11022302e-16}
-	if !localVector2.PracticallyEquals(&expected3, 1e-8) {
+	if !localVector2.NearEquals(&expected3, 1e-8) {
 		t.Errorf("Local vector calculation failed. Expected %v, got %v", expected3, localVector2)
 	}
 
@@ -347,7 +347,7 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 		0.0, 0.0, 0.0, 1.0,
 	}
 
-	if !localMatrix2.PracticallyEquals(&expected4, 1e-8) {
+	if !localMatrix2.NearEquals(&expected4, 1e-8) {
 		t.Errorf("Local matrix calculation failed. Expected %v, got %v", expected4, localMatrix2)
 	}
 }

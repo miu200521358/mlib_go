@@ -185,19 +185,19 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 		prevBf.Position.GetX(), plpx, psx, plsx}
 	nextX := &mmath.MVec4{
 		nextBf.Position.GetX(), nlpx, nsx, nlsx}
-	nowX := mmath.LerpVec4(prevX, nextX, xy)
+	nowX := prevX.Lerp(nextX, xy)
 
 	prevY := &mmath.MVec4{
 		prevBf.Position.GetY(), plpy, psy, plsy}
 	nextY := &mmath.MVec4{
 		nextBf.Position.GetY(), nlpy, nsy, nlsy}
-	nowY := mmath.LerpVec4(prevY, nextY, yy)
+	nowY := prevY.Lerp(nextY, yy)
 
 	prevZ := &mmath.MVec4{
 		prevBf.Position.GetZ(), plpz, psz, plsz}
 	nextZ := &mmath.MVec4{
 		nextBf.Position.GetZ(), nlpz, nsz, nlsz}
-	nowZ := mmath.LerpVec4(prevZ, nextZ, zy)
+	nowZ := prevZ.Lerp(nextZ, zy)
 
 	bf.Position = &mmath.MVec3{nowX[0], nowY[0], nowZ[0]}
 	bf.LocalPosition = &mmath.MVec3{nowX[1], nowY[1], nowZ[1]}

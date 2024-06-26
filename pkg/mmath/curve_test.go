@@ -56,22 +56,22 @@ func TestSplitCurve(t *testing.T) {
 	startCurve, endCurve := SplitCurve(curve, 0, 2, 10)
 
 	expectedStartStart := MVec2{50, 7}
-	if !startCurve.Start.PracticallyEquals(&expectedStartStart, 1e-1) {
+	if !startCurve.Start.NearEquals(&expectedStartStart, 1e-1) {
 		t.Errorf("Expected startCurve.Start to be %v, but got %v", expectedStartStart, startCurve.Start)
 	}
 
 	expectedStartEnd := MVec2{91, 52}
-	if !startCurve.End.PracticallyEquals(&expectedStartEnd, 1e-1) {
+	if !startCurve.End.NearEquals(&expectedStartEnd, 1e-1) {
 		t.Errorf("Expected startCurve.End to be %v, but got %v", expectedStartEnd, startCurve.End)
 	}
 
 	expectedEndStart := MVec2{71, 21}
-	if !endCurve.Start.PracticallyEquals(&expectedEndStart, 1e-1) {
+	if !endCurve.Start.NearEquals(&expectedEndStart, 1e-1) {
 		t.Errorf("Expected endCurve.Start to be %v, but got %v", expectedEndStart, endCurve.Start)
 	}
 
 	expectedEndEnd := MVec2{44, 108}
-	if !endCurve.End.PracticallyEquals(&expectedEndEnd, 1e-1) {
+	if !endCurve.End.NearEquals(&expectedEndEnd, 1e-1) {
 		t.Errorf("Expected endCurve.End to be %v, but got %v", expectedEndEnd, endCurve.End)
 	}
 }
@@ -84,22 +84,22 @@ func TestSplitCurve2(t *testing.T) {
 	startCurve, endCurve := SplitCurve(curve, 0, 2, 10)
 
 	expectedStartStart := MVec2{50, 7}
-	if !startCurve.Start.PracticallyEquals(&expectedStartStart, 1e-1) {
+	if !startCurve.Start.NearEquals(&expectedStartStart, 1e-1) {
 		t.Errorf("Expected startCurve.Start to be %v, but got %v", expectedStartStart, startCurve.Start)
 	}
 
 	expectedStartEnd := MVec2{91, 52}
-	if !startCurve.End.PracticallyEquals(&expectedStartEnd, 1e-1) {
+	if !startCurve.End.NearEquals(&expectedStartEnd, 1e-1) {
 		t.Errorf("Expected startCurve.End to be %v, but got %v", expectedStartEnd, startCurve.End)
 	}
 
 	expectedEndStart := MVec2{71, 21}
-	if !endCurve.Start.PracticallyEquals(&expectedEndStart, 1e-1) {
+	if !endCurve.Start.NearEquals(&expectedEndStart, 1e-1) {
 		t.Errorf("Expected endCurve.Start to be %v, but got %v", expectedEndStart, endCurve.Start)
 	}
 
 	expectedEndEnd := MVec2{44, 108}
-	if !endCurve.End.PracticallyEquals(&expectedEndEnd, 1e-1) {
+	if !endCurve.End.NearEquals(&expectedEndEnd, 1e-1) {
 		t.Errorf("Expected endCurve.End to be %v, but got %v", expectedEndEnd, endCurve.End)
 	}
 }

@@ -606,7 +606,8 @@ ikLoop:
 				resultIkQuat = totalIkQuat
 			}
 
-			if loop == 0 && morphDeltas.Bones.Get(linkBone.Index) != nil &&
+			if loop == 0 && morphDeltas != nil && morphDeltas.Bones != nil &&
+				morphDeltas.Bones.Get(linkBone.Index) != nil &&
 				morphDeltas.Bones.Get(linkBone.Index).frameRotation != nil {
 				// モーフ変形がある場合、モーフ変形を追加適用
 				resultIkQuat = resultIkQuat.Muled(morphDeltas.Bones.Get(linkBone.Index).frameRotation)
