@@ -71,10 +71,10 @@ func (md *MaterialMorphDelta) edge() mgl32.Vec4 {
 	ea := md.AddMaterial.Edge.Muled(md.AddRatios.Edge)
 
 	return mgl32.Vec4{
-		float32(e.GetX() * em.GetX() * ea.GetX()),
-		float32(e.GetY() * em.GetY() * ea.GetY()),
-		float32(e.GetZ() * em.GetZ() * ea.GetZ()),
-		float32(md.Edge.GetW()) * float32(md.Diffuse.GetW()*em.GetW()*ea.GetW()),
+		float32(e.GetX()*em.GetX() + ea.GetX()),
+		float32(e.GetY()*em.GetY() + ea.GetY()),
+		float32(e.GetZ()*em.GetZ() + ea.GetZ()),
+		float32(md.Edge.GetW()) * float32(md.Diffuse.GetW()*em.GetW()+ea.GetW()),
 	}
 }
 
