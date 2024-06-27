@@ -294,5 +294,33 @@
     {
         "id": "&IK冗長ログ表示",
         "translation": "&IK冗長 로그 표시"
+    },
+    {
+        "id": "固定ビュー表示",
+        "translation": "고정 보기 표시"
+    },
+    {
+        "id": "固定ビュー非表示",
+        "translation": "고정 보기 숨기기"
+    },
+    {
+        "id": "固定ビューウィジェット生成エラー",
+        "translation": "고정 보기 위젯 생성 오류"
+    },
+    {
+        "id": "正面",
+        "translation": "앞면"
+    },
+    {
+        "id": "左面",
+        "translation": "왼쪽"
+    },
+    {
+        "id": "右面",
+        "translation": "오른쪽"
+    },
+    {
+        "id": "背面",
+        "translation": "뒷면"
     }
 ]

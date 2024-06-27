@@ -294,5 +294,33 @@
     {
         "id": "&IK冗長ログ表示",
         "translation": "&IK详细日志显示"
+    },
+    {
+        "id": "固定ビュー表示",
+        "translation": "固定视图显示"
+    },
+    {
+        "id": "固定ビュー非表示",
+        "translation": "隐藏固定视图"
+    },
+    {
+        "id": "固定ビューウィジェット生成エラー",
+        "translation": "固定视图小部件生成错误"
+    },
+    {
+        "id": "正面",
+        "translation": "正面"
+    },
+    {
+        "id": "左面",
+        "translation": "左面"
+    },
+    {
+        "id": "右面",
+        "translation": "右面"
+    },
+    {
+        "id": "背面",
+        "translation": "背面"
     }
 ]

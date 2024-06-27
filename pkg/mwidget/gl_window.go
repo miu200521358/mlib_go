@@ -72,6 +72,7 @@ func NewGlWindow(
 	resourceFiles embed.FS,
 	mainWindow *GlWindow,
 	motionPlayer *MotionPlayer,
+	fixViewWidget *FixViewWidget,
 ) (*GlWindow, error) {
 	if mainWindow == nil {
 		// GLFW の初期化(最初の一回だけ)

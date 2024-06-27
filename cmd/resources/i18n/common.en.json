@@ -294,5 +294,33 @@
     {
         "id": "&IK冗長ログ表示",
         "translation": "&IK verbose log display"
+    },
+    {
+        "id": "固定ビュー表示",
+        "translation": "Fixed view display"
+    },
+    {
+        "id": "固定ビュー非表示",
+        "translation": "Hide fixed view"
+    },
+    {
+        "id": "固定ビューウィジェット生成エラー",
+        "translation": "Fixed view widget generation error"
+    },
+    {
+        "id": "正面",
+        "translation": "Front"
+    },
+    {
+        "id": "左面",
+        "translation": "Left"
+    },
+    {
+        "id": "右面",
+        "translation": "Right"
+    },
+    {
+        "id": "背面",
+        "translation": "Back"
     }
 ]

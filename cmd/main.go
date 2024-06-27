@@ -31,6 +31,7 @@ func init() {
 		walk.MustRegisterWindowClass(mwidget.FilePickerClass)
 		walk.MustRegisterWindowClass(mwidget.MotionPlayerClass)
 		walk.MustRegisterWindowClass(mwidget.ConsoleViewClass)
+		walk.MustRegisterWindowClass(mwidget.FixViewWidgetClass)
 	})
 
 	// runtime.MemProfileRate = 1
@@ -72,10 +73,10 @@ func main() {
 	mWindow, err = mwidget.NewMWindow(resourceFiles, appConfig, true, 512, 768, getMenuItems)
 	mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
 
-	motionPlayer := NewFileTabPage(mWindow)
+	motionPlayer, fixViewWidget := NewFileTabPage(mWindow)
 
 	glWindow, err := mwidget.NewGlWindow(fmt.Sprintf("%s %s", mWindow.Title(), mi18n.T("ビューワー")),
-		512, 768, 0, resourceFiles, nil, motionPlayer)
+		512, 768, 0, resourceFiles, nil, motionPlayer, fixViewWidget)
 	mwidget.CheckError(err, mWindow, mi18n.T("ビューワーウィンドウ生成エラー"))
 	mWindow.AddGlWindow(glWindow)
 	defer glWindow.Close(glWindow.Window)
@@ -98,7 +99,7 @@ func getMenuItems() []declarative.MenuItem {
 	}
 }
 
-func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
+func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.FixViewWidget) {
 	page, _ := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, mi18n.T("ファイル"))
 
 	page.SetLayout(walk.NewVBoxLayout())
@@ -139,11 +140,17 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
 	mwidget.CheckError(err, mWindow, mi18n.T("モーションプレイヤー生成エラー"))
 	motionPlayer.SetEnabled(false)
 
+	fixViewWidget, err := mwidget.NewFixViewWidget(page, mWindow)
+	mwidget.CheckError(err, mWindow, mi18n.T("固定ビューウィジェット生成エラー"))
+	fixViewWidget.SetEnabled(false)
+
 	var onFilePathChanged = func() {
 		if motionPlayer.Playing() {
 			motionPlayer.Play(false)
 		}
-		motionPlayer.SetEnabled(pmxReadPicker.Exists() && vmdReadPicker.ExistsOrEmpty())
+		enabled := pmxReadPicker.Exists() && vmdReadPicker.ExistsOrEmpty()
+		motionPlayer.SetEnabled(enabled)
+		fixViewWidget.SetEnabled(enabled)
 	}
 
 	pmxReadPicker.OnPathChanged = func(path string) {
@@ -173,6 +180,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
 			}
 
 			motionPlayer.SetEnabled(true)
+			fixViewWidget.SetEnabled(true)
 			mWindow.GetMainGlWindow().SetFrame(0)
 			mWindow.GetMainGlWindow().Play(false)
 			mWindow.GetMainGlWindow().ClearData()
@@ -199,6 +207,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
 				model := pmxReadPicker.GetCache().(*pmx.PmxModel)
 
 				motionPlayer.SetEnabled(true)
+				fixViewWidget.SetEnabled(true)
 				mWindow.GetMainGlWindow().SetFrame(0)
 				mWindow.GetMainGlWindow().Play(false)
 				mWindow.GetMainGlWindow().ClearData()
@@ -229,5 +238,5 @@ func NewFileTabPage(mWindow *mwidget.MWindow) *mwidget.MotionPlayer {
 
 	pmxReadPicker.PathLineEdit.SetFocus()
 
-	return motionPlayer
+	return motionPlayer, fixViewWidget
 }
