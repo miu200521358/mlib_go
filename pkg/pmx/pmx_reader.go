@@ -739,7 +739,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 				return err
 			}
 			b.LocalAxisZ = &localAxisZ
-			b.NormalizeLocalAxis(b.LocalAxisX.Normalize())
+			b.NormalizeLocalAxis(b.LocalAxisX)
 		} else {
 			b.LocalAxisX = mmath.NewMVec3()
 			b.LocalAxisZ = mmath.NewMVec3()

@@ -176,12 +176,12 @@ func (v *Bone) Copy() mcore.IIndexNameModel {
 }
 
 func (bone *Bone) NormalizeFixedAxis(fixedAxis *mmath.MVec3) {
-	bone.NormalizedFixedAxis = fixedAxis.Normalize()
+	bone.NormalizedFixedAxis = fixedAxis.Normalized()
 }
 
 func (bone *Bone) NormalizeLocalAxis(localAxisX *mmath.MVec3) {
-	bone.NormalizedLocalAxisX = localAxisX.Normalize()
-	bone.NormalizedLocalAxisY = bone.NormalizedLocalAxisX.Cross(mmath.MVec3UnitZ.Inverse())
+	bone.NormalizedLocalAxisX = localAxisX.Normalized()
+	bone.NormalizedLocalAxisY = bone.NormalizedLocalAxisX.Cross(mmath.MVec3UnitZInv)
 	bone.NormalizedLocalAxisZ = bone.NormalizedLocalAxisX.Cross(bone.NormalizedLocalAxisY)
 }
 
