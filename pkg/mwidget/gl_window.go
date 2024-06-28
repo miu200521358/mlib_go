@@ -62,6 +62,7 @@ type GlWindow struct {
 	width               int
 	height              int
 	floor               *MFloor
+	funcWorldPos        func(worldPos mmath.MVec3)
 }
 
 func NewGlWindow(
@@ -73,6 +74,7 @@ func NewGlWindow(
 	mainWindow *GlWindow,
 	motionPlayer *MotionPlayer,
 	fixViewWidget *FixViewWidget,
+	funcWorldPos func(worldPos mmath.MVec3),
 ) (*GlWindow, error) {
 	if mainWindow == nil {
 		// GLFW の初期化(最初の一回だけ)
@@ -172,6 +174,7 @@ func NewGlWindow(
 		width:               width,
 		height:              height,
 		floor:               newMFloor(),
+		funcWorldPos:        funcWorldPos,
 	}
 
 	w.SetScrollCallback(glWindow.handleScrollEvent)
@@ -357,7 +360,35 @@ func (w *GlWindow) handleMouseButtonEvent(
 		} else if action == glfw.Release {
 			w.rightButtonPressed = false
 		}
+	} else if button == glfw.MouseButtonLeft && action == glfw.Press && w.funcWorldPos != nil {
+		// クリック位置の取得
+		x, y := window.GetCursorPos()
+		worldPos := w.getWorldPosition(x, y)
+		w.funcWorldPos(worldPos)
 	}
+}
+
+// クリック位置をNDC（正規化デバイス座標）に変換し、逆変換を使用してワールド座標を取得
+func (gw *GlWindow) getWorldPosition(x, y float64) mmath.MVec3 {
+	// ウィンドウサイズを取得
+	w, h := float32(gw.width), float32(gw.height)
+
+	// クリック位置をNDC座標に変換
+	ndcX := (2.0*float32(x))/w - 1.0
+	ndcY := 1.0 - (2.0*float32(y))/h
+
+	// カメラ、ビュー、プロジェクション行列の設定
+	view := mgl32.LookAtV(mgl32.Vec3{0, 0, 5}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	projection := mgl32.Perspective(
+		mgl32.DegToRad(gw.Shader.FieldOfViewAngle), w/h, gw.Shader.NearPlane, gw.Shader.FarPlane)
+
+	// NDCからワールド座標への逆変換
+	inverseVP := projection.Mul4(view).Inv()
+	clickPos := mgl32.Vec4{ndcX, ndcY, -1.0, 1.0}
+	worldPos := inverseVP.Mul4x1(clickPos)
+	worldPos = worldPos.Mul(1.0 / worldPos.W())
+
+	return mmath.MVec3{float64(worldPos.X()), float64(worldPos.Y()), float64(worldPos.Z())}
 }
 
 func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos float64) {
@@ -482,6 +513,7 @@ func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
 func (w *GlWindow) ClearData() {
 	for _, modelSet := range w.ModelSets {
 		modelSet.model.DeletePhysics(w.Physics)
+		modelSet.prevDeltas = nil
 	}
 	w.ModelSets = make([]ModelSet, 0)
 	w.frame = 0

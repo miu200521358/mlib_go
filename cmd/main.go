@@ -13,6 +13,7 @@ import (
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
@@ -76,7 +77,9 @@ func main() {
 	motionPlayer, fixViewWidget := NewFileTabPage(mWindow)
 
 	glWindow, err := mwidget.NewGlWindow(fmt.Sprintf("%s %s", mWindow.Title(), mi18n.T("ビューワー")),
-		512, 768, 0, resourceFiles, nil, motionPlayer, fixViewWidget)
+		512, 768, 0, resourceFiles, nil, motionPlayer, fixViewWidget, func(worldPos mmath.MVec3) {
+
+		})
 	mwidget.CheckError(err, mWindow, mi18n.T("ビューワーウィンドウ生成エラー"))
 	mWindow.AddGlWindow(glWindow)
 	defer glWindow.Close(glWindow.Window)
@@ -182,6 +185,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 			motionPlayer.SetEnabled(true)
 			// fixViewWidget.SetEnabled(true)
 			mWindow.GetMainGlWindow().SetFrame(0)
+			motionPlayer.SetValue(0)
 			mWindow.GetMainGlWindow().Play(false)
 			mWindow.GetMainGlWindow().ClearData()
 			mWindow.GetMainGlWindow().AddData(model, motion)
@@ -209,6 +213,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 				motionPlayer.SetEnabled(true)
 				// fixViewWidget.SetEnabled(true)
 				mWindow.GetMainGlWindow().SetFrame(0)
+				motionPlayer.SetValue(0)
 				mWindow.GetMainGlWindow().Play(false)
 				mWindow.GetMainGlWindow().ClearData()
 				mWindow.GetMainGlWindow().AddData(model, motion)

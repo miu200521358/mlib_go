@@ -12,7 +12,6 @@ type BoneFrame struct {
 	LocalRotation *mmath.MQuaternion // ローカル回転
 	Scale         *mmath.MVec3       // スケール
 	LocalScale    *mmath.MVec3       // ローカルスケール
-	PhysicsMatrix *mmath.MMat4       // 物理結果行列
 	Curves        *BoneCurves        // 補間曲線
 }
 
