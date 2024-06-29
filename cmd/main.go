@@ -100,7 +100,7 @@ func getMenuItems() []declarative.MenuItem {
 	}
 }
 
-func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.FixViewWidget, func(worldPos mmath.MVec3)) {
+func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.FixViewWidget, func(worldPos, cameraForward, cameraRight, cameraUp *mmath.MVec3)) {
 	page, _ := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, mi18n.T("ファイル"))
 
 	page.SetLayout(walk.NewVBoxLayout())
@@ -241,11 +241,14 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 
 	pmxReadPicker.PathLineEdit.SetFocus()
 
-	funcWorldPos := func(worldPos mmath.MVec3) {
+	funcWorldPos := func(worldPos, cameraForward, cameraRight, cameraUp *mmath.MVec3) {
 		if pmxReadPicker.Exists() {
 			model := pmxReadPicker.GetCache().(*pmx.PmxModel)
-			nearestVertexIndex := worldPos.ArgMin(model.Vertices.Positions)
-			mlog.I("Nearest Vertex Index: %d (%s)", nearestVertexIndex, worldPos.String())
+			nearestVertexIndex := mmath.ArgMin(
+				mmath.DistanceLineToPoints(
+					worldPos, cameraForward, cameraRight, cameraUp, model.Vertices.Positions))
+			mlog.D("Nearest Vertex Index: %d (%s)", nearestVertexIndex,
+				model.Vertices.Get(nearestVertexIndex).Position.String())
 		}
 	}
 

@@ -62,7 +62,7 @@ type GlWindow struct {
 	width               int
 	height              int
 	floor               *MFloor
-	funcWorldPos        func(worldPos mmath.MVec3)
+	funcWorldPos        func(worldPos, cameraForward, cameraRight, cameraUp *mmath.MVec3)
 }
 
 func NewGlWindow(
@@ -74,7 +74,7 @@ func NewGlWindow(
 	mainWindow *GlWindow,
 	motionPlayer *MotionPlayer,
 	fixViewWidget *FixViewWidget,
-	funcWorldPos func(worldPos mmath.MVec3),
+	funcWorldPos func(worldPos, cameraForward, cameraRight, cameraUp *mmath.MVec3),
 ) (*GlWindow, error) {
 	if mainWindow == nil {
 		// GLFW の初期化(最初の一回だけ)
@@ -363,26 +363,21 @@ func (w *GlWindow) handleMouseButtonEvent(
 	} else if button == glfw.MouseButtonLeft && action == glfw.Press && w.funcWorldPos != nil {
 		// クリック位置の取得
 		x, y := window.GetCursorPos()
-		worldPos := w.getWorldPosition(x, y)
-		w.funcWorldPos(worldPos)
+		worldPos, forward, right, up := w.getWorldPosition(x, y)
+		w.funcWorldPos(worldPos, forward, right, up)
 	}
 }
 
-func (gw *GlWindow) getWorldPosition(x, y float64) mmath.MVec3 {
+func (gw *GlWindow) getWorldPosition(
+	x, y float64,
+) (*mmath.MVec3, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
+	mlog.D("x=%.8f, y=%.8f", x, y)
+
 	// ウィンドウサイズを取得
 	w, h := float32(gw.width), float32(gw.height)
 
-	// クリック位置をNDC座標に変換
-	ndcX := (2.0*float32(x))/w - 1.0
-	ndcY := 1.0 - (2.0*float32(y))/h
-	mlog.D("ndcX=%.8f, ndcY=%.8f", ndcX, ndcY)
-
-	// アスペクト比の計算を確認
-	aspectRatio := w / h
-	mlog.D("aspectRatio=%.8f", aspectRatio)
-
-	// プロジェクション行列の設定（アスペクト比を使用）
-	projection := mgl32.Perspective(mgl32.DegToRad(gw.Shader.FieldOfViewAngle), aspectRatio, gw.Shader.NearPlane, gw.Shader.FarPlane)
+	// プロジェクション行列の設定
+	projection := mgl32.Perspective(mgl32.DegToRad(gw.Shader.FieldOfViewAngle), w/h, gw.Shader.NearPlane, gw.Shader.FarPlane)
 	mlog.D("Projection: %s", projection.String())
 
 	// カメラの位置と中心からビュー行列を計算
@@ -392,65 +387,42 @@ func (gw *GlWindow) getWorldPosition(x, y float64) mmath.MVec3 {
 	mlog.D("CameraPosition: %s, LookAtCenterPosition: %s", gw.Shader.CameraPosition.String(), gw.Shader.LookAtCenterPosition.String())
 	mlog.D("View: %s", view.String())
 
-	// NDCからワールド座標への逆変換
-	inverseVP := projection.Mul4(view).Inv()
-	mlog.D("InverseVP: %s", inverseVP.String())
+	originProjectPos := mgl32.Project(mgl32.Vec3{0, 0, 0}, view, projection, 0, 0, int(w), int(h))
+	mlog.D("OriginProjectPos: x=%.8f, y=%.8f, z=%.8f", originProjectPos.X(), originProjectPos.Y(), originProjectPos.Z())
 
-	clickPos := mgl32.Vec4{ndcX, ndcY, 0.0, 1.0}
-	worldPos := inverseVP.Mul4x1(clickPos)
-	mlog.D("WorldPos1: x=%.8f, y=%.8f, z=%.8f, w=%.8f", worldPos.X(), worldPos.Y(), worldPos.Z(), worldPos.W())
-
-	// worldPosの正規化を確認
-	if worldPos.W() != 0 {
-		worldPos = worldPos.Mul(1.0 / worldPos.W())
+	worldCoords, err := mgl32.UnProject(
+		mgl32.Vec3{float32(x), float32(gw.height) - float32(y), originProjectPos.Z()},
+		view, projection, 0, 0, gw.width, gw.height)
+	if err != nil {
+		mlog.E("UnProject error: %v", err)
+		return nil, nil, nil, nil
 	}
-	mlog.D("WorldPosResult: x=%.8f, y=%.8f, z=%.8f", worldPos.X(), worldPos.Y(), worldPos.Z())
 
-	return mmath.MVec3{float64(worldPos.X()), float64(worldPos.Y()), float64(worldPos.Z())}
+	worldPos := &mmath.MVec3{float64(-worldCoords.X()), float64(worldCoords.Y()), float64(worldCoords.Z())}
+	mlog.D("WorldPosResult: x=%.8f, y=%.8f, z=%.8f", worldPos.GetX(), worldPos.GetY(), worldPos.GetZ())
+
+	// カメラの向きに基づいて移動方向を計算
+	forward := gw.Shader.LookAtCenterPosition.Subed(gw.Shader.CameraPosition)
+	right := forward.Cross(mmath.MVec3UnitY).Normalize()
+	up := right.Cross(forward.Normalize()).Normalize()
+
+	return worldPos, forward, right, up
 }
 
-// // クリック位置をNDC（正規化デバイス座標）に変換し、逆変換を使用してワールド座標を取得
-// func (gw *GlWindow) getWorldPosition(x, y float64) mmath.MVec3 {
-// 	// ウィンドウサイズを取得
-// 	w, h := float32(gw.width), float32(gw.height)
+// UnProjectWrapper は、マウスのクリック位置からワールド座標を取得するためのラッパー関数です。
+func (gw *GlWindow) unproject(
+	winX, winY, winZ float32, modelView mgl32.Mat4, projection mgl32.Mat4, viewportX, viewportY, viewportW, viewportH int,
+) (*mmath.MVec3, error) {
+	// mgl32.Vec3型に変換
+	worldCoords, err := mgl32.UnProject(
+		mgl32.Vec3{float32(winX), float32(winY), float32(winZ)},
+		modelView, projection, viewportX, viewportY, viewportW, viewportH)
+	if err != nil {
+		return nil, err
+	}
 
-// 	// クリック位置をNDC座標に変換
-// 	ndcX := (2.0*float32(x))/w - 1.0
-// 	ndcY := 1.0 - (2.0*float32(y))/h
-
-// 	mlog.D("ndcX=%.8f, ndcY=%.8f", ndcX, ndcY)
-
-// 	// カメラの位置
-// 	cameraPosition := gw.Shader.CameraPosition.GL()
-
-// 	// カメラの中心
-// 	lookAtCenter := gw.Shader.LookAtCenterPosition.GL()
-// 	view := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
-
-// 	mlog.D("CameraPosition: %s, LookAtCenterPosition: %s", gw.Shader.CameraPosition.String(), gw.Shader.LookAtCenterPosition.String())
-// 	mlog.D("View: %s", view.String())
-
-// 	// プロジェクション行列の設定
-// 	projection := mgl32.Perspective(
-// 		mgl32.DegToRad(gw.Shader.FieldOfViewAngle), w/h, gw.Shader.NearPlane, gw.Shader.FarPlane)
-
-// 	mlog.D("Projection: %s", projection.String())
-
-// 	// NDCからワールド座標への逆変換
-// 	inverseVP := projection.Mul4(view).Inv()
-// 	mlog.D("InverseVP: %s", inverseVP.String())
-
-// 	clickPos := mgl32.Vec4{ndcX, ndcY, 0.0, 1.0}
-// 	mlog.D("ClickPos: x=%.8f, y=%.8f", clickPos.X(), clickPos.Y())
-
-// 	worldPos := inverseVP.Mul4x1(clickPos)
-// 	mlog.D("WorldPos1: x=%.8f, y=%.8f, z=%.8f, w=%.8f", worldPos.X(), worldPos.Y(), worldPos.Z(), worldPos.W())
-
-// 	worldPos = worldPos.Mul(1.0 / worldPos.W())
-// 	mlog.D("WorldPosResult: x=%.8f, y=%.8f, z=%.8f", worldPos.X(), worldPos.Y(), worldPos.Z())
-
-// 	return mmath.MVec3{float64(worldPos.X()), float64(worldPos.Y()), float64(worldPos.Z())}
-// }
+	return &mmath.MVec3{float64(-worldCoords.X()), float64(worldCoords.Y()), float64(worldCoords.Z())}, nil
+}
 
 func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos float64) {
 	// mlog.D("[start] yaw %.8f, pitch %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",

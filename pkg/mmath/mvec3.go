@@ -8,6 +8,7 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 var (
@@ -571,30 +572,67 @@ func (v *MVec3) Distances(others []*MVec3) []float64 {
 	return distances
 }
 
-func (v *MVec3) ArgMin(others []*MVec3) int {
-	distances := v.Distances(others)
-	minValue := math.MaxFloat64
-	minIndex := -1
-	for i, d := range distances {
-		if d < minValue {
-			minValue = d
-			minIndex = i
-		}
-	}
-	return minIndex
+// 2点間のベクトルと点Pの直交距離を計算
+func DistanceFromPointToLine(a, b, p *MVec3) float64 {
+	lineVec := b.Subed(a)               // 線分ABのベクトル
+	pointVec := p.Subed(a)              // 点Pから点Aへのベクトル
+	crossVec := lineVec.Cross(pointVec) // 外積ベクトル
+	area := crossVec.Length()           // 平行四辺形の面積
+	lineLength := lineVec.Length()      // 線分ABの長さ
+	return area / lineLength            // 点Pから線分ABへの距離
 }
 
-func (v *MVec3) ArgMax(others []*MVec3) int {
-	distances := v.Distances(others)
-	maxValue := -math.MaxFloat64
-	maxIndex := -1
-	for i, d := range distances {
-		if d > maxValue {
-			maxValue = d
-			maxIndex = i
-		}
+// 2点間のベクトルと、点Pを含むカメラ平面と平行な面、との距離を計算
+func DistanceFromPlaneToLine(near, far, forward, right, up, p *MVec3) float64 {
+	// ステップ1: カメラ平面の法線ベクトルを計算
+	normal := forward.Cross(right)
+
+	// ステップ2: 点Pからカメラ平面へのベクトルを計算
+	vectorToPlane := p.Subed(near)
+
+	// ステップ3: 距離を計算
+	distance := math.Abs(vectorToPlane.Dot(normal)) / normal.Length()
+
+	return distance
+}
+
+// 2点間のベクトルと、点Pを含むカメラ平面と平行な面、との交点を計算
+func IntersectLinePlane(near, far, forward, right, up, p *MVec3) *MVec3 {
+	// ステップ1: カメラ平面の法線ベクトルを計算
+	normal := forward.Cross(right)
+
+	// ステップ2: nearからfarへのベクトルを計算
+	direction := far.Subed(near)
+
+	// ステップ3: 平面の方程式のD成分を計算
+	D := -normal.Dot(p)
+
+	// ステップ4: 方向ベクトルと法線ベクトルが平行かどうかを確認
+	denom := normal.Dot(direction)
+	if math.Abs(denom) < 1e-6 { // ほぼ0に近い場合、平行とみなす
+		return nil // 平行ならば交点は存在しない
 	}
-	return maxIndex
+
+	// ステップ5: 直線と平面の交点を計算
+	t := -(normal.Dot(near) + D) / denom
+	intersection := near.Added(direction.MuledScalar(t))
+	return intersection
+}
+
+// DistanceLineToPoints 線分と点の距離を計算します
+func DistanceLineToPoints(worldPos, forward, right, up *MVec3, points []*MVec3) []float64 {
+	distances := make([]float64, len(points))
+
+	// worldPos の Z方向のベクトル
+	worldDirection := worldPos.Added(MVec3UnitZInv)
+
+	for i, p := range points {
+		// 点PとworldPosのZ方向のベクトルとの距離を計算
+		distances[i] = DistanceFromPointToLine(worldPos, worldDirection, p)
+		mlog.D("DistanceLineToPoints[%d]: d: %.3f\n", i, distances[i])
+	}
+
+	return distances
 }
 
 func (v *MVec3) Project(other *MVec3) *MVec3 {

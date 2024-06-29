@@ -66,3 +66,27 @@ func GetVertexLocalPositions(vertexPositions []*MVec3, startBonePosition *MVec3,
 
 	return localPositions
 }
+
+func ArgMin(distances []float64) int {
+	minValue := math.MaxFloat64
+	minIndex := -1
+	for i, d := range distances {
+		if d < minValue {
+			minValue = d
+			minIndex = i
+		}
+	}
+	return minIndex
+}
+
+func ArgMax(distances []float64) int {
+	maxValue := -math.MaxFloat64
+	maxIndex := -1
+	for i, d := range distances {
+		if d > maxValue {
+			maxValue = d
+			maxIndex = i
+		}
+	}
+	return maxIndex
+}
