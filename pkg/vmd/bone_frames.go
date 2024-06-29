@@ -271,6 +271,8 @@ func (fs *BoneFrames) calcIk(
 
 	// つま先ＩＫであるか
 	isToeIk := strings.Contains(ikBone.Name, "つま先ＩＫ")
+	// 一段IKであるか
+	isSingleIk := len(ikBone.Ik.Links) == 1
 
 	// ループ回数
 	loopCount := max(ikBone.Ik.LoopCount, 1)
@@ -466,7 +468,7 @@ ikLoop:
 
 			// 回転軸
 			var originalLinkAxis, linkAxis *mmath.MVec3
-			if ikLink.AngleLimit {
+			if (!isSingleIk || (isSingleIk && linkAngle > mmath.GIMBAL1_RAD)) && ikLink.AngleLimit {
 				// グローバル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.MinAngleLimit.GetRadians(),
@@ -474,7 +476,7 @@ ikLoop:
 					effectorLocalPosition, ikLocalPosition,
 					frame, count, loop, linkBone.Name, ikMotion, ikFile,
 				)
-			} else if ikLink.LocalAngleLimit {
+			} else if (!isSingleIk || (isSingleIk && linkAngle > mmath.GIMBAL1_RAD)) && ikLink.LocalAngleLimit {
 				// ローカル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.LocalMinAngleLimit.GetRadians(),
@@ -483,7 +485,7 @@ ikLoop:
 					frame, count, loop, linkBone.Name, ikMotion, ikFile,
 				)
 			} else {
-				// 軸制限なし or 初回
+				// 軸制限なし
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					mmath.MVec3MinVal,
 					mmath.MVec3MaxVal,

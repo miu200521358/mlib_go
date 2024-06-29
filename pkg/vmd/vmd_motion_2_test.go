@@ -214,6 +214,7 @@ func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 			}
 		}
 		{
+			// FIXME
 			expectedPosition := &mmath.MVec3{9.560862, 13.926876, 1.431514}
 			if !boneDeltas.GetByName("左ひじY先").GlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじY先").GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじY先").GlobalPosition().MMD()))
@@ -871,6 +872,7 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Left(t *testing.T) {
 			}
 		}
 		{
+			// FIXME
 			expectedPosition := &mmath.MVec3{0.860159, 13.190875, 3.122428}
 			if !boneDeltas.GetByName("左肩Ry検先").GlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左肩Ry検先").GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左肩Ry検先").GlobalPosition().MMD()))
@@ -1252,6 +1254,7 @@ func TestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
 			}
 		}
 		{
+			// FIXME
 			expectedPosition := &mmath.MVec3{1.763123, 3.708842, 0.369619}
 			if !boneDeltas.GetByName("左足Dw").GlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
 				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足Dw").GlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足Dw").GlobalPosition().MMD()))

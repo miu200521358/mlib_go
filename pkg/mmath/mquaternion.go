@@ -137,13 +137,10 @@ func (v *MQuaternion) ToRadians() *MVec3 {
 }
 
 const (
-	GIMBAL1_RAD    = 88.0 / 180.0 * math.Pi
-	GIMBAL_MIN_RAD = GIMBAL1_RAD * 0.07
-	GIMBAL0_5_RAD  = GIMBAL1_RAD * 0.5
-	GIMBAL1_5_RAD  = GIMBAL1_RAD * 1.5
-	GIMBAL2_RAD    = GIMBAL1_RAD * 2
-	ONE_RAD        = math.Pi
-	HALF_RAD       = math.Pi / 2
+	GIMBAL1_RAD = 88.0 / 180.0 * math.Pi
+	GIMBAL2_RAD = GIMBAL1_RAD * 2
+	ONE_RAD     = math.Pi
+	HALF_RAD    = math.Pi / 2
 )
 
 // ToRadiansWithGimbalは、クォータニオンを三軸のオイラー角（ラジアン）回転を返します。
