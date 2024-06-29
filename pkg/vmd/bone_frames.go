@@ -502,21 +502,21 @@ ikLoop:
 				)
 			}
 
-			if linkBone.HasFixedAxis() {
-				if linkAxis.Dot(linkBone.NormalizedFixedAxis) < 0 {
-					linkAngle = -linkAngle
-				}
+			// if linkBone.HasFixedAxis() {
+			// 	if linkAxis.Dot(linkBone.NormalizedFixedAxis) < 0 {
+			// 		linkAngle = -linkAngle
+			// 	}
 
-				// 軸制限ありの場合、軸にそった理想回転量とする
-				linkAxis = linkBone.NormalizedFixedAxis
+			// 	// 軸制限ありの場合、軸にそった理想回転量とする
+			// 	linkAxis = linkBone.NormalizedFixedAxis
 
-				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					fmt.Fprintf(ikFile,
-						"[%04d][%03d][%s][%05d][軸制限] linkAxis: %s\n",
-						frame, loop, linkBone.Name, count-1, linkAxis.String(),
-					)
-				}
-			}
+			// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			// 		fmt.Fprintf(ikFile,
+			// 			"[%04d][%03d][%s][%05d][軸制限] linkAxis: %s\n",
+			// 			frame, loop, linkBone.Name, count-1, linkAxis.String(),
+			// 		)
+			// 	}
+			// }
 
 			originalIkQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, originalLinkAngle)
 			ikQuat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
