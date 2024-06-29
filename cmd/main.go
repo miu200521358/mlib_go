@@ -7,6 +7,7 @@ import (
 	"embed"
 	"fmt"
 	"log"
+	"math"
 	"path/filepath"
 	"runtime"
 
@@ -244,9 +245,21 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 	funcWorldPos := func(worldPos, cameraForward, cameraRight, cameraUp *mmath.MVec3) {
 		if pmxReadPicker.Exists() {
 			model := pmxReadPicker.GetCache().(*pmx.PmxModel)
-			nearestVertexIndex := mmath.ArgMin(
-				mmath.DistanceLineToPoints(
-					worldPos, cameraForward, cameraRight, cameraUp, model.Vertices.Positions))
+			distances := mmath.DistanceLineToPoints(
+				worldPos, cameraForward, cameraRight, cameraUp, model.Vertices.Positions)
+			sortedVertexIndexes := mutils.ArgSort(mutils.Float64Slice(distances))
+			nearestVertexIndex := sortedVertexIndexes[0]
+			// 大体近くて最も手前の頂点を選択
+			z := math.MaxFloat64
+			for i := range min(3, len(sortedVertexIndexes)) {
+				sortedVertexIndex := sortedVertexIndexes[i]
+				mlog.D("near vertex index: %d (%s)", sortedVertexIndex,
+					model.Vertices.Positions[sortedVertexIndex].String())
+				if model.Vertices.Positions[sortedVertexIndex].GetZ() < z {
+					nearestVertexIndex = sortedVertexIndex
+					z = model.Vertices.Positions[sortedVertexIndex].GetZ()
+				}
+			}
 			mlog.D("Nearest Vertex Index: %d (%s)", nearestVertexIndex,
 				model.Vertices.Get(nearestVertexIndex).Position.String())
 		}
