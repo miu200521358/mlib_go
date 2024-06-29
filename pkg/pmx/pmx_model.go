@@ -68,6 +68,8 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 }
 
 func (pm *PmxModel) setup() {
+	// 頂点情報のセットアップ
+	pm.Vertices.setup()
 	// ボーン情報のセットアップ
 	pm.Bones.setup()
 

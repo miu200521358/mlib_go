@@ -563,6 +563,40 @@ func (v *MVec3) Distance(other *MVec3) float64 {
 	return v.Subed(other).Length()
 }
 
+func (v *MVec3) Distances(others []*MVec3) []float64 {
+	distances := make([]float64, len(others))
+	for i, other := range others {
+		distances[i] = v.Distance(other)
+	}
+	return distances
+}
+
+func (v *MVec3) ArgMin(others []*MVec3) int {
+	distances := v.Distances(others)
+	minValue := math.MaxFloat64
+	minIndex := -1
+	for i, d := range distances {
+		if d < minValue {
+			minValue = d
+			minIndex = i
+		}
+	}
+	return minIndex
+}
+
+func (v *MVec3) ArgMax(others []*MVec3) int {
+	distances := v.Distances(others)
+	maxValue := -math.MaxFloat64
+	maxIndex := -1
+	for i, d := range distances {
+		if d > maxValue {
+			maxValue = d
+			maxIndex = i
+		}
+	}
+	return maxIndex
+}
+
 func (v *MVec3) Project(other *MVec3) *MVec3 {
 	return other.MuledScalar(v.Dot(other) / other.LengthSqr())
 }

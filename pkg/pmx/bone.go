@@ -570,6 +570,8 @@ func (b *Bones) setup() {
 		bone.ChildRelativePosition = b.getChildRelativePosition(bone.Index)
 		// ボーン単体のセットアップ
 		bone.setup()
+		// ボーンの位置を保持
+		b.Positions = append(b.Positions, bone.Position.Copy())
 	}
 
 	// 変形階層・ボーンINDEXでソート
@@ -633,7 +635,6 @@ func (b *Bones) createLayerIndexes(isAfterPhysics bool) {
 		b.LayerSortedNames[isAfterPhysics][bone.Name] = i
 		b.LayerSortedBones[isAfterPhysics][i] = bone
 	}
-
 }
 
 // 変形階層とINDEXのソート用構造体

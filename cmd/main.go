@@ -74,12 +74,10 @@ func main() {
 	mWindow, err = mwidget.NewMWindow(resourceFiles, appConfig, true, 512, 768, getMenuItems)
 	mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
 
-	motionPlayer, fixViewWidget := NewFileTabPage(mWindow)
+	motionPlayer, fixViewWidget, funcWorldPos := NewFileTabPage(mWindow)
 
 	glWindow, err := mwidget.NewGlWindow(fmt.Sprintf("%s %s", mWindow.Title(), mi18n.T("ビューワー")),
-		512, 768, 0, resourceFiles, nil, motionPlayer, fixViewWidget, func(worldPos mmath.MVec3) {
-
-		})
+		512, 768, 0, resourceFiles, nil, motionPlayer, fixViewWidget, funcWorldPos)
 	mwidget.CheckError(err, mWindow, mi18n.T("ビューワーウィンドウ生成エラー"))
 	mWindow.AddGlWindow(glWindow)
 	defer glWindow.Close(glWindow.Window)
@@ -102,7 +100,7 @@ func getMenuItems() []declarative.MenuItem {
 	}
 }
 
-func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.FixViewWidget) {
+func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.FixViewWidget, func(worldPos mmath.MVec3)) {
 	page, _ := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, mi18n.T("ファイル"))
 
 	page.SetLayout(walk.NewVBoxLayout())
@@ -243,5 +241,13 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 
 	pmxReadPicker.PathLineEdit.SetFocus()
 
-	return motionPlayer, nil
+	funcWorldPos := func(worldPos mmath.MVec3) {
+		if pmxReadPicker.Exists() {
+			model := pmxReadPicker.GetCache().(*pmx.PmxModel)
+			nearestVertexIndex := worldPos.ArgMin(model.Vertices.Positions)
+			mlog.I("Nearest Vertex Index: %d (%s)", nearestVertexIndex, worldPos.String())
+		}
+	}
+
+	return motionPlayer, nil, funcWorldPos
 }

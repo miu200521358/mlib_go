@@ -41,10 +41,18 @@ func (v *Vertex) Copy() mcore.IIndexModel {
 // 頂点リスト
 type Vertices struct {
 	*mcore.IndexModels[*Vertex]
+	Positions []*mmath.MVec3
 }
 
 func NewVertices() *Vertices {
 	return &Vertices{
 		IndexModels: mcore.NewIndexModels[*Vertex](func() *Vertex { return nil }),
+	}
+}
+
+func (vs *Vertices) setup() {
+	vs.Positions = make([]*mmath.MVec3, vs.IndexModels.Len())
+	for i := range vs.IndexModels.Len() {
+		vs.Positions[i] = vs.IndexModels.Get(i).Position
 	}
 }
