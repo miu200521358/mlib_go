@@ -322,5 +322,9 @@
     {
         "id": "背面",
         "translation": "Back"
+    },
+    {
+        "id": "&ワイヤーフレームデバッグ表示",
+        "translation": "&Wireframe Debug View"
     }
 ]

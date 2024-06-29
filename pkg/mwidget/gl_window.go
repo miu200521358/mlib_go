@@ -54,6 +54,7 @@ type GlWindow struct {
 	playing             bool
 	VisibleBones        map[pmx.BoneFlag]bool
 	VisibleNormal       bool
+	VisibleWire         bool
 	EnablePhysics       bool
 	EnableFrameDrop     bool
 	frame               float64
@@ -62,7 +63,7 @@ type GlWindow struct {
 	width               int
 	height              int
 	floor               *MFloor
-	funcWorldPos        func(worldPos, cameraForward, cameraRight, cameraUp *mmath.MVec3)
+	funcWorldPos        func(worldPos *mmath.MVec3, viewMat *mmath.MMat4)
 }
 
 func NewGlWindow(
@@ -74,7 +75,7 @@ func NewGlWindow(
 	mainWindow *GlWindow,
 	motionPlayer *MotionPlayer,
 	fixViewWidget *FixViewWidget,
-	funcWorldPos func(worldPos, cameraForward, cameraRight, cameraUp *mmath.MVec3),
+	funcWorldPos func(worldPos *mmath.MVec3, viewMat *mmath.MMat4),
 ) (*GlWindow, error) {
 	if mainWindow == nil {
 		// GLFW の初期化(最初の一回だけ)
@@ -163,6 +164,7 @@ func NewGlWindow(
 		ctrlPressed:         false,
 		VisibleBones:        make(map[pmx.BoneFlag]bool, 0),
 		VisibleNormal:       false,
+		VisibleWire:         false,
 		running:             false,
 		drawing:             false,
 		playing:             false, // 最初は再生OFF
@@ -363,14 +365,14 @@ func (w *GlWindow) handleMouseButtonEvent(
 	} else if button == glfw.MouseButtonLeft && action == glfw.Press && w.funcWorldPos != nil {
 		// クリック位置の取得
 		x, y := window.GetCursorPos()
-		worldPos, forward, right, up := w.getWorldPosition(x, y)
-		w.funcWorldPos(worldPos, forward, right, up)
+		worldPos, viewMat := w.getWorldPosition(x, y)
+		w.funcWorldPos(worldPos, viewMat)
 	}
 }
 
 func (gw *GlWindow) getWorldPosition(
 	x, y float64,
-) (*mmath.MVec3, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
+) (*mmath.MVec3, *mmath.MMat4) {
 	mlog.D("x=%.8f, y=%.8f", x, y)
 
 	// ウィンドウサイズを取得
@@ -395,33 +397,21 @@ func (gw *GlWindow) getWorldPosition(
 		view, projection, 0, 0, gw.width, gw.height)
 	if err != nil {
 		mlog.E("UnProject error: %v", err)
-		return nil, nil, nil, nil
+		return nil, nil
 	}
 
 	worldPos := &mmath.MVec3{float64(-worldCoords.X()), float64(worldCoords.Y()), float64(worldCoords.Z())}
 	mlog.D("WorldPosResult: x=%.8f, y=%.8f, z=%.8f", worldPos.GetX(), worldPos.GetY(), worldPos.GetZ())
 
-	// カメラの向きに基づいて移動方向を計算
-	forward := gw.Shader.LookAtCenterPosition.Subed(gw.Shader.CameraPosition)
-	right := forward.Cross(mmath.MVec3UnitY).Normalize()
-	up := right.Cross(forward.Normalize()).Normalize()
-
-	return worldPos, forward, right, up
-}
-
-// UnProjectWrapper は、マウスのクリック位置からワールド座標を取得するためのラッパー関数です。
-func (gw *GlWindow) unproject(
-	winX, winY, winZ float32, modelView mgl32.Mat4, projection mgl32.Mat4, viewportX, viewportY, viewportW, viewportH int,
-) (*mmath.MVec3, error) {
-	// mgl32.Vec3型に変換
-	worldCoords, err := mgl32.UnProject(
-		mgl32.Vec3{float32(winX), float32(winY), float32(winZ)},
-		modelView, projection, viewportX, viewportY, viewportW, viewportH)
-	if err != nil {
-		return nil, err
+	viewInv := view.Inv()
+	viewMat := &mmath.MMat4{
+		float64(viewInv[0]), float64(viewInv[1]), float64(viewInv[2]), float64(viewInv[3]),
+		float64(viewInv[4]), float64(viewInv[5]), float64(viewInv[6]), float64(viewInv[7]),
+		float64(viewInv[8]), float64(viewInv[9]), float64(viewInv[10]), float64(viewInv[11]),
+		float64(viewInv[12]), float64(viewInv[13]), float64(viewInv[14]), float64(viewInv[15]),
 	}
 
-	return &mmath.MVec3{float64(-worldCoords.X()), float64(worldCoords.Y()), float64(worldCoords.Z())}, nil
+	return worldPos, viewMat
 }
 
 func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos float64) {
@@ -677,7 +667,7 @@ func (w *GlWindow) Run() {
 			}
 
 			w.ModelSets[i].prevDeltas = draw(w.Physics, modelSet.model, modelSet.motion, w.Shader,
-				modelSet.prevDeltas, i, int(w.frame), elapsed, isDeform, w.EnablePhysics, w.VisibleNormal, w.VisibleBones)
+				modelSet.prevDeltas, i, int(w.frame), elapsed, isDeform, w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleBones)
 		}
 
 		w.Shader.Msaa.Unbind()

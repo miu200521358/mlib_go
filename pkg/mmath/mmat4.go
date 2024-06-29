@@ -49,6 +49,11 @@ func NewMMat4FromAxisAngle(axis *MVec3, angle float64) *MMat4 {
 	return &m
 }
 
+func NewMMat4FromLookAt(eye, center, up *MVec3) *MMat4 {
+	m := MMat4(mgl64.LookAtV(mgl64.Vec3(*eye), mgl64.Vec3(*center), mgl64.Vec3(*up)))
+	return &m
+}
+
 // IsZero
 func (m *MMat4) IsZero() bool {
 	return *m == MMat4Zero
@@ -177,52 +182,6 @@ func (m *MMat4) Det() float64 {
 func (m *MMat4) Inverse() *MMat4 {
 	im := mgl64.Mat4(*m).Inv()
 	return (*MMat4)(&im)
-	// det := m.Det()
-	// if mgl64.FloatEqual(det, float64(0.0)) {
-	// 	return NewMMat4()
-	// }
-
-	// invDet := 1 / det
-
-	// var retMat MMat4
-
-	// retMat[0] = (-m[7]*m[10]*m[13] + m[9]*m[11]*m[13] + m[7]*m[6]*m[14] - m[5]*m[11]*m[14] -
-	// 	m[9]*m[6]*m[15] + m[5]*m[10]*m[15]) * invDet
-	// retMat[4] = (m[3]*m[10]*m[13] - m[8]*m[11]*m[13] - m[3]*m[6]*m[14] + m[4]*m[11]*m[14] +
-	// 	m[8]*m[6]*m[15] - m[4]*m[10]*m[15]) * invDet
-	// retMat[8] = (-m[3]*m[9]*m[13] + m[8]*m[7]*m[13] + m[3]*m[5]*m[14] - m[4]*m[7]*m[14] -
-	// 	m[8]*m[5]*m[15] + m[4]*m[9]*m[15]) * invDet
-	// retMat[3] = (m[3]*m[9]*m[6] - m[8]*m[7]*m[6] - m[3]*m[5]*m[10] + m[4]*m[7]*m[10] +
-	// 	m[8]*m[5]*m[11] - m[4]*m[9]*m[11]) * invDet
-
-	// retMat[1] = (m[7]*m[10]*m[12] - m[9]*m[11]*m[12] - m[7]*m[2]*m[14] + m[1]*m[11]*m[14] +
-	// 	m[9]*m[2]*m[15] - m[1]*m[10]*m[15]) * invDet
-	// retMat[5] = (-m[3]*m[10]*m[12] + m[8]*m[11]*m[12] + m[3]*m[2]*m[14] - m[0]*m[11]*m[14] -
-	// 	m[8]*m[2]*m[15] + m[0]*m[10]*m[15]) * invDet
-	// retMat[9] = (m[3]*m[9]*m[12] - m[8]*m[7]*m[12] - m[3]*m[1]*m[14] + m[0]*m[7]*m[14] +
-	// 	m[8]*m[1]*m[15] - m[0]*m[9]*m[15]) * invDet
-	// retMat[7] = (-m[3]*m[9]*m[2] + m[8]*m[7]*m[2] + m[3]*m[1]*m[10] - m[0]*m[7]*m[10] -
-	// 	m[8]*m[1]*m[11] + m[0]*m[9]*m[11]) * invDet
-
-	// retMat[2] = (-m[7]*m[6]*m[12] + m[5]*m[11]*m[12] + m[7]*m[2]*m[13] - m[1]*m[11]*m[13] -
-	// 	m[5]*m[2]*m[15] + m[1]*m[6]*m[15]) * invDet
-	// retMat[6] = (m[3]*m[6]*m[12] - m[4]*m[11]*m[12] - m[3]*m[2]*m[13] + m[0]*m[11]*m[13] +
-	// 	m[4]*m[2]*m[15] - m[0]*m[6]*m[15]) * invDet
-	// retMat[10] = (-m[3]*m[5]*m[12] + m[4]*m[7]*m[12] + m[3]*m[1]*m[13] - m[0]*m[7]*m[13] -
-	// 	m[4]*m[1]*m[15] + m[0]*m[5]*m[15]) * invDet
-	// retMat[11] = (m[3]*m[5]*m[2] - m[4]*m[7]*m[2] - m[3]*m[1]*m[6] + m[0]*m[7]*m[6] +
-	// 	m[4]*m[1]*m[11] - m[0]*m[5]*m[11]) * invDet
-
-	// retMat[12] = (m[9]*m[6]*m[12] - m[5]*m[10]*m[12] - m[9]*m[2]*m[13] + m[1]*m[10]*m[13] +
-	// 	m[5]*m[2]*m[14] - m[1]*m[6]*m[14]) * invDet
-	// retMat[13] = (-m[8]*m[6]*m[12] + m[4]*m[10]*m[12] + m[8]*m[2]*m[13] - m[0]*m[10]*m[13] -
-	// 	m[4]*m[2]*m[14] + m[0]*m[6]*m[14]) * invDet
-	// retMat[14] = (m[8]*m[5]*m[12] - m[4]*m[9]*m[12] - m[8]*m[1]*m[13] + m[0]*m[9]*m[13] +
-	// 	m[4]*m[1]*m[14] - m[0]*m[5]*m[14]) * invDet
-	// retMat[15] = (-m[8]*m[5]*m[2] + m[4]*m[9]*m[2] + m[8]*m[1]*m[6] - m[0]*m[9]*m[6] -
-	// 	m[4]*m[1]*m[10] + m[0]*m[5]*m[10]) * invDet
-
-	// return &retMat
 }
 
 func (mat *MMat4) Inverted() *MMat4 {

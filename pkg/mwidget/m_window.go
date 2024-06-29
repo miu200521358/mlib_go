@@ -27,6 +27,7 @@ type MWindow struct {
 	physicsAction            *walk.Action // 物理ON/OFF
 	physicsResetAction       *walk.Action // 物理リセット
 	normalDebugAction        *walk.Action // ボーンデバッグ表示
+	wireDebugAction          *walk.Action // ワイヤーフレームデバッグ表示
 	boneDebugAllAction       *walk.Action // 全ボーンデバッグ表示
 	boneDebugIkAction        *walk.Action // IKボーンデバッグ表示
 	boneDebugEffectorAction  *walk.Action // 付与親ボーンデバッグ表示
@@ -126,6 +127,13 @@ func NewMWindow(
 						OnTriggered: mainWindow.normalDebugViewTriggered,
 						AssignTo:    &mainWindow.normalDebugAction,
 					},
+					declarative.Action{
+						Text:        mi18n.T("&ワイヤーフレームデバッグ表示"),
+						Checkable:   true,
+						OnTriggered: mainWindow.wireDebugViewTriggered,
+						AssignTo:    &mainWindow.wireDebugAction,
+					},
+					declarative.Separator{},
 					declarative.Menu{
 						Text: mi18n.T("&ボーンデバッグ表示"),
 						Items: []declarative.MenuItem{
@@ -292,6 +300,12 @@ func (w *MWindow) langTriggered(lang string) {
 func (w *MWindow) normalDebugViewTriggered() {
 	for _, glWindow := range w.GlWindows {
 		glWindow.VisibleNormal = w.normalDebugAction.Checked()
+	}
+}
+
+func (w *MWindow) wireDebugViewTriggered() {
+	for _, glWindow := range w.GlWindows {
+		glWindow.VisibleWire = w.wireDebugAction.Checked()
 	}
 }
 

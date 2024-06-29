@@ -620,7 +620,7 @@ func IntersectLinePlane(near, far, forward, right, up, p *MVec3) *MVec3 {
 }
 
 // DistanceLineToPoints 線分と点の距離を計算します
-func DistanceLineToPoints(worldPos, forward, right, up *MVec3, points []*MVec3) []float64 {
+func DistanceLineToPoints(worldPos *MVec3, points []*MVec3) []float64 {
 	distances := make([]float64, len(points))
 
 	// worldPos の Z方向のベクトル
