@@ -1213,7 +1213,7 @@ func (fs *BoneFrames) getPosition(
 	morphDeltas *MorphDeltas,
 	loop int,
 ) (*mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
-	if loop > 20 || !bone.CanTranslate() {
+	if loop > 20 {
 		// 無限ループを避ける
 		return mmath.NewMVec3(), nil, nil
 	}
@@ -1298,7 +1298,7 @@ func (fs *BoneFrames) getRotation(
 	morphDeltas *MorphDeltas,
 	loop int,
 ) (*mmath.MQuaternion, *mmath.MQuaternion, *mmath.MQuaternion) {
-	if loop > 20 || !bone.CanRotate() {
+	if loop > 20 {
 		// 無限ループを避ける
 		return mmath.NewMQuaternion(), nil, nil
 	}
