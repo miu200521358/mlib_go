@@ -468,7 +468,8 @@ ikLoop:
 
 			// 回転軸
 			var originalLinkAxis, linkAxis *mmath.MVec3
-			if (!isSingleIk || (isSingleIk && linkAngle > mmath.GIMBAL1_RAD)) && ikLink.AngleLimit {
+			// 一段IKでない場合、または一段IKでかつ回転角が88度以上の場合
+			if !isSingleIk || (isSingleIk && linkAngle > mmath.GIMBAL1_RAD) && ikLink.AngleLimit {
 				// グローバル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.MinAngleLimit.GetRadians(),
@@ -476,7 +477,7 @@ ikLoop:
 					effectorLocalPosition, ikLocalPosition,
 					frame, count, loop, linkBone.Name, ikMotion, ikFile,
 				)
-			} else if (!isSingleIk || (isSingleIk && linkAngle > mmath.GIMBAL1_RAD)) && ikLink.LocalAngleLimit {
+			} else if !isSingleIk || (isSingleIk && linkAngle > mmath.GIMBAL1_RAD) && ikLink.LocalAngleLimit {
 				// ローカル軸制限
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					ikLink.LocalMinAngleLimit.GetRadians(),
@@ -485,7 +486,7 @@ ikLoop:
 					frame, count, loop, linkBone.Name, ikMotion, ikFile,
 				)
 			} else {
-				// 軸制限なし
+				// 軸制限なし or 一段IKでかつ回転角が88度未満の場合
 				linkAxis, originalLinkAxis = fs.getLinkAxis(
 					mmath.MVec3MinVal,
 					mmath.MVec3MaxVal,
