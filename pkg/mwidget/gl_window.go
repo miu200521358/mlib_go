@@ -6,7 +6,10 @@ package mwidget
 import (
 	"embed"
 	"image"
+	"image/color"
+	"image/png"
 	"math"
+	"os"
 	"time"
 	"unsafe"
 
@@ -64,6 +67,12 @@ type GlWindow struct {
 	width               int
 	height              int
 	floor               *MFloor
+	msFBO               uint32
+	resolveFBO          uint32
+	colorBuffer         uint32
+	depthBuffer         uint32
+	colorBufferMS       uint32
+	depthBufferMS       uint32
 	funcWorldPos        func(worldPos *mmath.MVec3, viewMat *mmath.MMat4)
 }
 
@@ -177,6 +186,12 @@ func NewGlWindow(
 		width:               width,
 		height:              height,
 		floor:               newMFloor(),
+		msFBO:               0,
+		resolveFBO:          0,
+		colorBuffer:         0,
+		depthBuffer:         0,
+		colorBufferMS:       0,
+		depthBufferMS:       0,
 		funcWorldPos:        funcWorldPos,
 	}
 
@@ -188,7 +203,62 @@ func NewGlWindow(
 	w.SetSizeCallback(glWindow.resize)
 	w.SetFramebufferSizeCallback(glWindow.resizeBuffer)
 
+	glWindow.setupFramebuffers()
+
 	return &glWindow, nil
+}
+
+func (w *GlWindow) setupFramebuffers() {
+	// マルチサンプルフレームバッファの作成
+	gl.GenFramebuffers(1, &w.msFBO)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, w.msFBO)
+
+	// マルチサンプルカラーおよび深度バッファの作成
+	gl.GenRenderbuffers(1, &w.colorBufferMS)
+	gl.BindRenderbuffer(gl.RENDERBUFFER, w.colorBufferMS)
+	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, 4, gl.RGBA8, int32(w.width), int32(w.height))
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, w.colorBufferMS)
+
+	gl.GenRenderbuffers(1, &w.depthBufferMS)
+	gl.BindRenderbuffer(gl.RENDERBUFFER, w.depthBufferMS)
+	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, 4, gl.DEPTH_COMPONENT24, int32(w.width), int32(w.height))
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, w.depthBufferMS)
+
+	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+		mlog.F("Multisample Framebuffer is not complete")
+	}
+
+	// シングルサンプルフレームバッファの作成
+	gl.GenFramebuffers(1, &w.resolveFBO)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, w.resolveFBO)
+
+	// シングルサンプルカラーおよび深度バッファの作成
+	gl.GenRenderbuffers(1, &w.colorBuffer)
+	gl.BindRenderbuffer(gl.RENDERBUFFER, w.colorBuffer)
+	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.RGBA8, int32(w.width), int32(w.height))
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, w.colorBuffer)
+
+	gl.GenRenderbuffers(1, &w.depthBuffer)
+	gl.BindRenderbuffer(gl.RENDERBUFFER, w.depthBuffer)
+	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, int32(w.width), int32(w.height))
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, w.depthBuffer)
+
+	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+		mlog.F("Single-sample Framebuffer is not complete")
+	}
+
+	// アンバインド
+	gl.BindRenderbuffer(gl.RENDERBUFFER, 0)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+}
+
+func (w *GlWindow) deleteFramebuffers() {
+	gl.DeleteFramebuffers(1, &w.msFBO)
+	gl.DeleteRenderbuffers(1, &w.colorBufferMS)
+	gl.DeleteRenderbuffers(1, &w.depthBufferMS)
+	gl.DeleteFramebuffers(1, &w.resolveFBO)
+	gl.DeleteRenderbuffers(1, &w.colorBuffer)
+	gl.DeleteRenderbuffers(1, &w.depthBuffer)
 }
 
 func (w *GlWindow) resizeBuffer(window *glfw.Window, width int, height int) {
@@ -196,6 +266,9 @@ func (w *GlWindow) resizeBuffer(window *glfw.Window, width int, height int) {
 	w.height = height
 	if width > 0 && height > 0 {
 		gl.Viewport(0, 0, int32(width), int32(height))
+
+		w.deleteFramebuffers()
+		w.setupFramebuffers()
 	}
 }
 
@@ -366,15 +439,15 @@ func (w *GlWindow) handleMouseButtonEvent(
 	} else if button == glfw.MouseButtonLeft && action == glfw.Press && w.funcWorldPos != nil {
 		// クリック位置の取得
 		x, y := window.GetCursorPos()
-		worldPos, viewMat := w.getWorldPosition(x, y)
+		worldPos, viewMat := w.getWorldPosition(int(x), int(y))
 		w.funcWorldPos(worldPos, viewMat)
 	}
 }
 
 func (gw *GlWindow) getWorldPosition(
-	x, y float64,
+	x, y int,
 ) (*mmath.MVec3, *mmath.MMat4) {
-	mlog.D("x=%.8f, y=%.8f", x, y)
+	mlog.D("x=%d, y=%d", x, y)
 
 	// ウィンドウサイズを取得
 	w, h := float32(gw.width), float32(gw.height)
@@ -390,11 +463,9 @@ func (gw *GlWindow) getWorldPosition(
 	mlog.D("CameraPosition: %s, LookAtCenterPosition: %s", gw.Shader.CameraPosition.String(), gw.Shader.LookAtCenterPosition.String())
 	mlog.D("View: %s", view.String())
 
-	originProjectPos := mgl32.Project(mgl32.Vec3{0, 0, 0}, view, projection, 0, 0, int(w), int(h))
-	mlog.D("OriginProjectPos: x=%.8f, y=%.8f, z=%.8f", originProjectPos.X(), originProjectPos.Y(), originProjectPos.Z())
-
+	depth := gw.readDepthAt(x, y)
 	worldCoords, err := mgl32.UnProject(
-		mgl32.Vec3{float32(x), float32(gw.height) - float32(y), originProjectPos.Z()},
+		mgl32.Vec3{float32(x), float32(gw.height) - float32(y), depth},
 		view, projection, 0, 0, gw.width, gw.height)
 	if err != nil {
 		mlog.E("UnProject error: %v", err)
@@ -402,7 +473,7 @@ func (gw *GlWindow) getWorldPosition(
 	}
 
 	worldPos := &mmath.MVec3{float64(-worldCoords.X()), float64(worldCoords.Y()), float64(worldCoords.Z())}
-	mlog.D("WorldPosResult: x=%.8f, y=%.8f, z=%.8f", worldPos.GetX(), worldPos.GetY(), worldPos.GetZ())
+	mlog.D("WorldPosResult: x=%.8f, y=%.8f, z=%.8f (%.8f)", worldPos.GetX(), worldPos.GetY(), worldPos.GetZ(), depth)
 
 	viewInv := view.Inv()
 	viewMat := &mmath.MMat4{
@@ -413,6 +484,79 @@ func (gw *GlWindow) getWorldPosition(
 	}
 
 	return worldPos, viewMat
+}
+
+func (w *GlWindow) readDepthAt(x, y int) float32 {
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
+
+	// マウスクリック時に解像度をダウンしてFBOを解決
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, w.msFBO)
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, w.resolveFBO)
+	gl.BlitFramebuffer(0, 0, int32(w.width), int32(w.height), 0, 0, int32(w.width), int32(w.height),
+		gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT, gl.NEAREST)
+
+	// エラーが発生していないかチェック
+	if err := gl.GetError(); err != gl.NO_ERROR {
+		mlog.E("OpenGL Error after blit: %v", err)
+	}
+
+	// シングルサンプルFBOから読み取る
+	gl.BindFramebuffer(gl.FRAMEBUFFER, w.resolveFBO)
+	if status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); status != gl.FRAMEBUFFER_COMPLETE {
+		mlog.E("Framebuffer is not complete: %v", status)
+	}
+
+	var depth float32
+	// yは下が0なので、上下反転
+	gl.ReadPixels(int32(x), int32(w.height-y), 1, 1, gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth))
+
+	// エラーが発生していないかチェック
+	if err := gl.GetError(); err != gl.NO_ERROR {
+		mlog.E("OpenGL Error after ReadPixels: %v", err)
+	}
+
+	mlog.D("Depth at (%d, %d): %f", x, y, depth)
+
+	// フレームバッファの内容を画像ファイルとして保存
+	pixels := readFramebuffer(int32(w.width), int32(w.height))
+	err := saveImage("framebuffer_output.png", int32(w.width), int32(w.height), pixels)
+	if err != nil {
+		mlog.E("Failed to save framebuffer image: %v", err)
+	}
+
+	// フレームバッファをアンバインド
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, 0)
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
+
+	return depth
+}
+
+func readFramebuffer(w, h int32) []byte {
+	pixels := make([]byte, w*h*4) // RGBA形式で4バイト/ピクセル
+	gl.ReadPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pixels))
+	return pixels
+}
+
+func saveImage(filename string, w, h int32, pixels []byte) error {
+	img := image.NewRGBA(image.Rect(0, 0, int(w), int(h)))
+	for y := int32(0); y < h; y++ {
+		for x := int32(0); x < w; x++ {
+			i := (y*w + x) * 4
+			r := pixels[i]
+			g := pixels[i+1]
+			b := pixels[i+2]
+			a := pixels[i+3]
+			img.SetRGBA(int(x), int(h-y-1), color.RGBA{r, g, b, a}) // 画像の上下を反転
+		}
+	}
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	return png.Encode(file, img)
 }
 
 func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos float64) {
@@ -673,11 +817,10 @@ func (w *GlWindow) Run() {
 				modelSet.prevDeltas, i, int(w.frame), elapsed, isDeform, w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleBones)
 			if vertexGlPositions != nil {
 				w.ModelSets[i].vertexGlPositions = vertexGlPositions
-
-				mlog.L()
-				for i, v := range vertexGlPositions {
-					mlog.D("vertexGlPositions[%d]: x=%.8f, y=%.8f, z=%.8f", i, v.GetX(), v.GetY(), v.GetZ())
-				}
+				// mlog.L()
+				// for i, v := range vertexGlPositions {
+				// 	mlog.D("vertexGlPositions[%d]: x=%.8f, y=%.8f, z=%.8f", i, v.GetX(), v.GetY(), v.GetZ())
+				// }
 			}
 		}
 

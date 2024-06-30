@@ -464,6 +464,11 @@ func (m *Meshes) drawBone(
 	m.boneVao.Unbind()
 
 	shader.Unuse()
+
+	// 深度テストを有効に戻す
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
+
 }
 
 func (m *Meshes) fetchBoneDebugDeltas(bones *Bones, isDrawBones map[BoneFlag]bool) [][]float32 {
