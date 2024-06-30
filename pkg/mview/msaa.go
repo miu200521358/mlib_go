@@ -4,11 +4,6 @@
 package mview
 
 import (
-	"image"
-	"image/color"
-	"image/png"
-	"os"
-
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
@@ -58,40 +53,10 @@ func NewMsaa(width int32, height int32) *Msaa {
 	// アンバインド
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
-	// シングルサンプルフレームバッファの作成
-	gl.GenFramebuffers(1, &msaa.resolveFBO)
-	gl.BindFramebuffer(gl.FRAMEBUFFER, msaa.resolveFBO)
-
-	// シングルサンプルカラーおよび深度バッファの作成
-	gl.GenTextures(1, &msaa.colorBuffer)
-	gl.BindTexture(gl.TEXTURE_2D, msaa.colorBuffer)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, int32(msaa.width), int32(msaa.height), 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
-	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, msaa.colorBuffer, 0)
-
-	gl.GenTextures(1, &msaa.depthBuffer)
-	gl.BindTexture(gl.TEXTURE_2D, msaa.depthBuffer)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, int32(msaa.width), int32(msaa.height), 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_BYTE, nil)
-	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, msaa.depthBuffer, 0)
-
-	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		mlog.F("Single-sample Framebuffer is not complete")
-	}
-
-	// アンバインド
-	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-
 	return msaa
 }
 
 func (m *Msaa) ReadDepthAt(x, y, width, height int) float32 {
-	// マウスクリック時に解像度をダウンしてFBOを解決
-	m.Resolve()
-
-	// エラーが発生していないかチェック
-	if err := gl.GetError(); err != gl.NO_ERROR {
-		mlog.E("OpenGL Error after blit: %v", err)
-	}
-
 	// シングルサンプルFBOから読み取る
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.resolveFBO)
 	if status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); status != gl.FRAMEBUFFER_COMPLETE {
@@ -102,19 +67,19 @@ func (m *Msaa) ReadDepthAt(x, y, width, height int) float32 {
 	// yは下が0なので、上下反転
 	gl.ReadPixels(int32(x), int32(height-y), 1, 1, gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth))
 
-	// エラーが発生していないかチェック
-	if err := gl.GetError(); err != gl.NO_ERROR {
-		mlog.E("OpenGL Error after ReadPixels: %v", err)
-	}
+	// // エラーが発生していないかチェック
+	// if err := gl.GetError(); err != gl.NO_ERROR {
+	// 	mlog.E("OpenGL Error after ReadPixels: %v", err)
+	// }
 
-	mlog.D("Depth at (%d, %d): %f", x, y, depth)
+	// mlog.D("Depth at (%d, %d): %f", x, y, depth)
 
-	// フレームバッファの内容を画像ファイルとして保存
-	pixels := readFramebuffer(int32(m.width), int32(m.height))
-	err := saveImage("framebuffer_output.png", int32(m.width), int32(m.height), pixels)
-	if err != nil {
-		mlog.E("Failed to save framebuffer image: %v", err)
-	}
+	// // フレームバッファの内容を画像ファイルとして保存
+	// pixels := readFramebuffer(int32(m.width), int32(m.height))
+	// err := saveImage("framebuffer_output.png", int32(m.width), int32(m.height), pixels)
+	// if err != nil {
+	// 	mlog.E("Failed to save framebuffer image: %v", err)
+	// }
 
 	// フレームバッファをアンバインド
 	m.Unbind()
@@ -122,31 +87,31 @@ func (m *Msaa) ReadDepthAt(x, y, width, height int) float32 {
 	return depth
 }
 
-func readFramebuffer(w, h int32) []byte {
-	pixels := make([]byte, w*h*4) // RGBA形式で4バイト/ピクセル
-	gl.ReadPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pixels))
-	return pixels
-}
+// func readFramebuffer(w, h int32) []byte {
+// 	pixels := make([]byte, w*h*4) // RGBA形式で4バイト/ピクセル
+// 	gl.ReadPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pixels))
+// 	return pixels
+// }
 
-func saveImage(filename string, w, h int32, pixels []byte) error {
-	img := image.NewRGBA(image.Rect(0, 0, int(w), int(h)))
-	for y := int32(0); y < h; y++ {
-		for x := int32(0); x < w; x++ {
-			i := (y*w + x) * 4
-			r := pixels[i]
-			g := pixels[i+1]
-			b := pixels[i+2]
-			a := pixels[i+3]
-			img.SetRGBA(int(x), int(h-y-1), color.RGBA{r, g, b, a}) // 画像の上下を反転
-		}
-	}
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	return png.Encode(file, img)
-}
+// func saveImage(filename string, w, h int32, pixels []byte) error {
+// 	img := image.NewRGBA(image.Rect(0, 0, int(w), int(h)))
+// 	for y := int32(0); y < h; y++ {
+// 		for x := int32(0); x < w; x++ {
+// 			i := (y*w + x) * 4
+// 			r := pixels[i]
+// 			g := pixels[i+1]
+// 			b := pixels[i+2]
+// 			a := pixels[i+3]
+// 			img.SetRGBA(int(x), int(h-y-1), color.RGBA{r, g, b, a}) // 画像の上下を反転
+// 		}
+// 	}
+// 	file, err := os.Create(filename)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer file.Close()
+// 	return png.Encode(file, img)
+// }
 
 func (m *Msaa) Bind() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.msFBO)

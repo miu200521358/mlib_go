@@ -678,6 +678,7 @@ func (w *GlWindow) Run() {
 			}
 		}
 
+		w.Shader.Msaa.Resolve()
 		w.Shader.Msaa.Unbind()
 
 		if !w.IsRunning() {
