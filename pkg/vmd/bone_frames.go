@@ -1063,6 +1063,9 @@ func (fs *BoneFrames) calcBoneDeltas(
 		}
 
 		delta.unitMatrix = mmath.NewMMat4()
+		delta.globalMatrix = nil
+		delta.localMatrix = nil
+		delta.globalPosition = nil
 
 		// スケール
 		if delta.frameScale != nil && !delta.frameScale.IsOne() {
@@ -1101,9 +1104,8 @@ func (fs *BoneFrames) calcBoneDeltas(
 			delta.globalMatrix = delta.unitMatrix.Copy()
 		}
 
-		// BOf行列: 自身のボーンのボーンオフセット行列をかけてローカル行列
-		delta.localMatrix = delta.Bone.OffsetMatrix.Muled(delta.globalMatrix)
-		delta.globalPosition = delta.globalMatrix.Translation()
+		// delta.localMatrix = delta.Bone.OffsetMatrix.Muled(delta.globalMatrix)
+		// delta.globalPosition = delta.globalMatrix.Translation()
 		boneDeltas.Append(delta)
 	}
 

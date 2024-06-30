@@ -34,14 +34,15 @@ func (bd *BoneDelta) GlobalMatrix() *mmath.MMat4 {
 
 func (bd *BoneDelta) LocalMatrix() *mmath.MMat4 {
 	if bd.localMatrix == nil {
-		bd.localMatrix = mmath.NewMMat4()
+		// BOf行列: 自身のボーンのボーンオフセット行列をかけてローカル行列
+		bd.localMatrix = bd.Bone.OffsetMatrix.Muled(bd.globalMatrix)
 	}
 	return bd.localMatrix
 }
 
 func (bd *BoneDelta) GlobalPosition() *mmath.MVec3 {
 	if bd.globalPosition == nil {
-		bd.globalPosition = mmath.NewMVec3()
+		bd.globalPosition = bd.globalMatrix.Translation()
 	}
 	return bd.globalPosition
 }
@@ -236,6 +237,7 @@ func (bds *BoneDeltas) SetGlobalMatrix(bone *pmx.Bone, globalMatrix *mmath.MMat4
 	bds.Append(bd)
 }
 
+// FillLocalMatrix 物理演算後にグローバル行列を埋め終わった後に呼び出して、ローカル行列を計算する
 func (bds *BoneDeltas) FillLocalMatrix() {
 	for _, bd := range bds.Data {
 		var parentGlobalMatrix *mmath.MMat4
