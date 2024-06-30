@@ -85,10 +85,7 @@ func NewMsaa(width int32, height int32) *Msaa {
 
 func (m *Msaa) ReadDepthAt(x, y, width, height int) float32 {
 	// マウスクリック時に解像度をダウンしてFBOを解決
-	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.msFBO)
-	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, m.resolveFBO)
-	gl.BlitFramebuffer(0, 0, int32(m.width), int32(m.height), 0, 0, int32(m.width), int32(m.height),
-		gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT, gl.NEAREST)
+	m.Resolve()
 
 	// エラーが発生していないかチェック
 	if err := gl.GetError(); err != gl.NO_ERROR {
@@ -120,9 +117,7 @@ func (m *Msaa) ReadDepthAt(x, y, width, height int) float32 {
 	}
 
 	// フレームバッファをアンバインド
-	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, 0)
-	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
+	m.Unbind()
 
 	return depth
 }
@@ -160,6 +155,15 @@ func (m *Msaa) Bind() {
 
 func (m *Msaa) Unbind() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, 0)
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
+}
+
+func (m *Msaa) Resolve() {
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.msFBO)
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, m.resolveFBO)
+	gl.BlitFramebuffer(0, 0, int32(m.width), int32(m.height), 0, 0, int32(m.width), int32(m.height),
+		gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT, gl.NEAREST)
 }
 
 func (m *Msaa) Delete() {
