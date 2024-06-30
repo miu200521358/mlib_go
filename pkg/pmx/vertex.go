@@ -1,6 +1,8 @@
 package pmx
 
 import (
+	"math"
+
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
@@ -32,6 +34,14 @@ func NewVertex() *Vertex {
 	return v
 }
 
+func (v *Vertex) GetMapKey() mmath.MVec3 {
+	return mmath.MVec3{math.Round(v.Position.GetX()), math.Round(v.Position.GetY()), math.Round(v.Position.GetZ())}
+}
+
+func (v *Vertex) GetMapValue() *mmath.MVec3 {
+	return v.Position
+}
+
 func (v *Vertex) Copy() mcore.IIndexModel {
 	copied := NewTexture()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
@@ -41,18 +51,10 @@ func (v *Vertex) Copy() mcore.IIndexModel {
 // 頂点リスト
 type Vertices struct {
 	*mcore.IndexModels[*Vertex]
-	Positions []*mmath.MVec3
 }
 
 func NewVertices() *Vertices {
 	return &Vertices{
 		IndexModels: mcore.NewIndexModels[*Vertex](func() *Vertex { return nil }),
-	}
-}
-
-func (vs *Vertices) setup() {
-	vs.Positions = make([]*mmath.MVec3, vs.IndexModels.Len())
-	for i := range vs.IndexModels.Len() {
-		vs.Positions[i] = vs.IndexModels.Get(i).Position
 	}
 }

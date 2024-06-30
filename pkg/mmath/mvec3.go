@@ -635,6 +635,14 @@ func DistanceLineToPoints(worldPos *MVec3, points []*MVec3) []float64 {
 	return distances
 }
 
+func Distances(v *MVec3, others []*MVec3) []float64 {
+	distances := make([]float64, len(others))
+	for i, other := range others {
+		distances[i] = v.Distance(other)
+	}
+	return distances
+}
+
 func (v *MVec3) Project(other *MVec3) *MVec3 {
 	return other.MuledScalar(v.Dot(other) / other.LengthSqr())
 }

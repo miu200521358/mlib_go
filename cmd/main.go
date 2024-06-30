@@ -244,10 +244,14 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 	funcWorldPos := func(worldPos *mmath.MVec3, viewMat *mmath.MMat4) {
 		if pmxReadPicker.Exists() {
 			model := pmxReadPicker.GetCache().(*pmx.PmxModel)
-			distances := mmath.DistanceLineToPoints(worldPos, model.Vertices.Positions)
-			nearestVertexIndex := mmath.ArgMin(distances)
-			mlog.D("Nearest Vertex Index: %d (%s)", nearestVertexIndex,
-				model.Vertices.Get(nearestVertexIndex).Position.String())
+			tempVertex := pmx.NewVertex()
+			tempVertex.Position = worldPos
+			vertexIndexes, vertexPosition := model.Vertices.GetMapValues(tempVertex)
+			if len(vertexIndexes) > 0 {
+				distances := mmath.Distances(worldPos, vertexPosition)
+				nearestVertex := model.Vertices.Get(vertexIndexes[mmath.ArgMin(distances)])
+				mlog.D("Nearest Vertex Index: %d (%s)", nearestVertex.Index, nearestVertex.Position.String())
+			}
 		}
 	}
 

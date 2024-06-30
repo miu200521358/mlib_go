@@ -68,10 +68,14 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 }
 
 func (pm *PmxModel) setup() {
-	// 頂点情報のセットアップ
-	pm.Vertices.setup()
-	// ボーン情報のセットアップ
+	// セットアップ
 	pm.Bones.setup()
+
+	// 位置マッピングのセットアップ
+	pm.Vertices.SetupMapKeys()
+	pm.Bones.SetupMapKeys()
+	pm.RigidBodies.SetupMapKeys()
+	pm.Joints.SetupMapKeys()
 
 	// 剛体
 	for i := range pm.RigidBodies.Len() {

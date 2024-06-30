@@ -1,6 +1,7 @@
 package pmx
 
 import (
+	"math"
 	"slices"
 	"sort"
 	"strings"
@@ -167,6 +168,14 @@ func NewBoneByName(name string) *Bone {
 	bone := NewBone()
 	bone.Name = name
 	return bone
+}
+
+func (b *Bone) GetMapKey() mmath.MVec3 {
+	return mmath.MVec3{math.Round(b.Position.GetX()), math.Round(b.Position.GetY()), math.Round(b.Position.GetZ())}
+}
+
+func (b *Bone) GetMapValue() *mmath.MVec3 {
+	return b.Position
 }
 
 func (v *Bone) Copy() mcore.IIndexNameModel {
@@ -570,8 +579,6 @@ func (b *Bones) setup() {
 		bone.ChildRelativePosition = b.getChildRelativePosition(bone.Index)
 		// ボーン単体のセットアップ
 		bone.setup()
-		// ボーンの位置を保持
-		b.Positions = append(b.Positions, bone.Position.Copy())
 	}
 
 	// 変形階層・ボーンINDEXでソート

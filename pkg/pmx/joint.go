@@ -1,6 +1,8 @@
 package pmx
 
 import (
+	"math"
+
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
@@ -50,6 +52,14 @@ func NewJoint() *Joint {
 		JointParam:      NewJointParam(),
 		IsSystem:        false,
 	}
+}
+
+func (j *Joint) GetMapKey() mmath.MVec3 {
+	return mmath.MVec3{math.Round(j.Position.GetX()), math.Round(j.Position.GetY()), math.Round(j.Position.GetZ())}
+}
+
+func (j *Joint) GetMapValue() *mmath.MVec3 {
+	return j.Position
 }
 
 func (j *Joint) Copy() mcore.IIndexNameModel {

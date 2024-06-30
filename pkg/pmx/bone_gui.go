@@ -227,7 +227,6 @@ func (b *Bone) NormalGL() []float32 {
 // ボーンリスト
 type Bones struct {
 	*mcore.IndexNameModels[*Bone]
-	Positions        []*mmath.MVec3
 	IkTreeIndexes    map[int][]int
 	LayerSortedBones map[bool]map[int]*Bone
 	LayerSortedNames map[bool]map[string]int

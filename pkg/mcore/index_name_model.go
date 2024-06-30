@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/jinzhu/copier"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
 type IIndexNameModel interface {
@@ -13,6 +14,8 @@ type IIndexNameModel interface {
 	SetIndex(index int)
 	GetName() string
 	SetName(name string)
+	GetMapKey() mmath.MVec3
+	GetMapValue() *mmath.MVec3
 }
 
 // INDEXを持つ基底クラス
@@ -42,6 +45,14 @@ func (v *IndexNameModel) IsValid() bool {
 	return v.GetIndex() >= 0
 }
 
+func (v *IndexNameModel) GetMapKey() mmath.MVec3 {
+	return *mmath.MVec3Zero
+}
+
+func (v *IndexNameModel) GetMapValue() *mmath.MVec3 {
+	return nil
+}
+
 func (v *IndexNameModel) Copy() IIndexNameModel {
 	copied := IndexNameModel{Index: v.Index, Name: v.Name, EnglishName: v.EnglishName}
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
@@ -52,6 +63,7 @@ func (v *IndexNameModel) Copy() IIndexNameModel {
 type IndexNameModels[T IIndexNameModel] struct {
 	Data        map[int]T
 	NameIndexes map[string]int
+	IndexMap    map[mmath.MVec3][]int
 	nilFunc     func() T
 }
 
@@ -59,8 +71,46 @@ func NewIndexNameModels[T IIndexNameModel](nilFunc func() T) *IndexNameModels[T]
 	return &IndexNameModels[T]{
 		Data:        make(map[int]T, 0),
 		NameIndexes: make(map[string]int, 0),
+		IndexMap:    make(map[mmath.MVec3][]int, 0),
 		nilFunc:     nilFunc,
 	}
+}
+
+func (c *IndexNameModels[T]) SetupMapKeys() {
+	c.IndexMap = make(map[mmath.MVec3][]int)
+	for k, v := range c.Data {
+		baseKey := v.GetMapKey()
+		// 前後のオフセット込みでマッピング
+		for _, offset := range []*mmath.MVec3{
+			{0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1},
+			{0, 0, 0}, {-1, 0, 0}, {0, -1, 0}, {0, 0, -1},
+			{1, 1, 0}, {1, 0, 1}, {0, 1, 1}, {1, 1, 1},
+			{-1, -1, 0}, {-1, 0, -1}, {0, -1, -1}, {-1, -1, -1},
+			{1, -1, 0}, {1, 0, -1}, {0, 1, -1}, {1, -1, 1},
+			{-1, 1, 0}, {-1, 0, 1}, {0, -1, 1}, {-1, 1, -1},
+		} {
+			key := *baseKey.Added(offset)
+			if _, ok := c.IndexMap[key]; !ok {
+				c.IndexMap[key] = make([]int, 0)
+			}
+			c.IndexMap[key] = append(c.IndexMap[key], k)
+		}
+	}
+}
+
+func (c *IndexNameModels[T]) GetMapValues(v T) ([]int, []*mmath.MVec3) {
+	if c.Data == nil {
+		return nil, nil
+	}
+	key := v.GetMapKey()
+	values := make([]*mmath.MVec3, 0)
+	if indexes, ok := c.IndexMap[key]; ok {
+		for _, i := range indexes {
+			values = append(values, c.Get(i).GetMapValue())
+		}
+		return indexes, values
+	}
+	return nil, nil
 }
 
 func (c *IndexNameModels[T]) Get(index int) T {
