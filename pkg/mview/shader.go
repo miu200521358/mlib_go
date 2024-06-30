@@ -46,7 +46,7 @@ const (
 	SHADER_SPHERE_ADD_FACTOR            = "sphereAddFactor\x00"
 	SHADER_TOON_MUL_FACTOR              = "toonMulFactor\x00"
 	SHADER_TOON_ADD_FACTOR              = "toonAddFactor\x00"
-	SHADER_VERTEX_GL_POSITION           = "vertexGlPosition\x00"
+	SHADER_VERTEX_GL_POSITION           = "gl_Position\x00"
 )
 
 type ProgramType int

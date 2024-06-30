@@ -6,12 +6,12 @@ package pmx
 import (
 	"embed"
 	"math"
+	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
@@ -25,6 +25,7 @@ type Meshes struct {
 	normalVbo         *mview.VBO
 	normalIbo         *mview.IBO
 	wireVertexIndexes []int
+	ssbo              uint32
 	wires             []float32
 	wireVao           *mview.VAO
 	wireVbo           *mview.VBO
@@ -203,6 +204,15 @@ func NewMeshes(
 	boneVbo.Unbind()
 	boneVao.Unbind()
 
+	ssboVertexCount := len(wireVertexIndexes) * 4 // 4つのfloat32 を出力するため
+
+	// SSBOの作成
+	var ssbo uint32
+	gl.GenBuffers(1, &ssbo)
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, ssbo)
+	gl.BufferData(gl.SHADER_STORAGE_BUFFER, ssboVertexCount*int(unsafe.Sizeof([4]float32{})), nil, gl.DYNAMIC_COPY)
+	gl.BindBufferBase(gl.SHADER_STORAGE_BUFFER, 0, ssbo)
+
 	return &Meshes{
 		meshes:            meshes,
 		vertices:          vertices,
@@ -213,6 +223,7 @@ func NewMeshes(
 		normalVbo:         normalVbo,
 		normalIbo:         normalIbo,
 		wireVertexIndexes: wireVertexIndexes,
+		ssbo:              ssbo,
 		wires:             wireVertices,
 		wireVao:           wireVao,
 		wireVbo:           wireVbo,
@@ -231,6 +242,7 @@ func (m *Meshes) delete() {
 	}
 	m.vao.Delete()
 	m.vbo.Delete()
+	gl.DeleteBuffers(1, &m.ssbo)
 }
 
 func (m *Meshes) Draw(
@@ -276,7 +288,7 @@ func (m *Meshes) Draw(
 
 	var vertexGlPositions map[int]*mmath.MVec3
 	if isDrawWire {
-		vertexGlPositions = m.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex, isDeform)
+		vertexGlPositions = m.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
 	}
 
 	isDrawBone := false
@@ -353,36 +365,10 @@ func (m *Meshes) drawWire(
 	paddedMatrixes []float32,
 	width, height int,
 	windowIndex int,
-	isDeform bool,
 ) map[int]*mmath.MVec3 {
 	var vertexGlPositions map[int]*mmath.MVec3
 
-	// Transform Feedbackの出力変数を指定
-	var status int32
-	var feedbackBuffer uint32
-
 	shader.Use(mview.PROGRAM_TYPE_WIRE)
-
-	if isDeform {
-		varyings, _ := gl.Strs(mview.SHADER_VERTEX_GL_POSITION)
-		gl.TransformFeedbackVaryings(shader.WireProgram, 1, varyings, gl.INTERLEAVED_ATTRIBS)
-		gl.LinkProgram(shader.WireProgram)
-		gl.GetProgramiv(shader.WireProgram, gl.LINK_STATUS, &status)
-
-		if status == gl.TRUE {
-			// Transform Feedback用のバッファを作成
-			gl.GenBuffers(1, &feedbackBuffer)
-			gl.BindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, feedbackBuffer)
-			gl.BufferData(gl.TRANSFORM_FEEDBACK_BUFFER, len(m.wireVertexIndexes)*4*4, nil, gl.DYNAMIC_READ)
-			gl.BindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, feedbackBuffer)
-		} else {
-			var logLength int32
-			gl.GetProgramiv(shader.WireProgram, gl.INFO_LOG_LENGTH, &logLength)
-			log := make([]byte, logLength+1)
-			gl.GetProgramInfoLog(shader.WireProgram, logLength, nil, &log[0])
-			mlog.D("failed to link program: %s", log)
-		}
-	}
 
 	m.wireVao.Bind()
 	m.wireVbo.BindVertex(nil, nil)
@@ -391,14 +377,9 @@ func (m *Meshes) drawWire(
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.WireProgram)
 
-	wireColor := mgl32.Vec4{0.3, 0.7, 0.3, 0.5}
+	wireColor := mgl32.Vec4{0.2, 0.6, 0.2, 0.5}
 	specularUniform := gl.GetUniformLocation(shader.WireProgram, gl.Str(mview.SHADER_COLOR))
 	gl.Uniform4fv(specularUniform, 1, &wireColor[0])
-
-	if isDeform && status == gl.TRUE {
-		// Transform Feedbackの開始
-		gl.BeginTransformFeedback(gl.LINES)
-	}
 
 	// ライン描画
 	gl.DrawElements(
@@ -408,39 +389,33 @@ func (m *Meshes) drawWire(
 		nil,
 	)
 
-	if isDeform && status == gl.TRUE {
-		gl.EndTransformFeedback()
-		gl.Flush()
+	// データの読み取り
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, m.ssbo)
+	ptr := gl.MapBuffer(gl.SHADER_STORAGE_BUFFER, gl.READ_ONLY)
 
-		feedbackDataPtr := gl.MapBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, gl.READ_ONLY)
-		if feedbackDataPtr == nil {
-			// エラーハンドリング
-			mlog.D("Failed to map buffer")
-		} else {
-			feedbackData := (*[1 << 30]float32)(feedbackDataPtr)[:len(m.wireVertexIndexes)*4]
+	if ptr != nil {
+		// positions スライスを ptr から作成
+		positions := unsafe.Slice((*float32)(ptr), len(m.wireVertexIndexes)*4)
 
-			for i := 0; i < len(m.wireVertexIndexes); i++ {
-				vertexIndex := m.wireVertexIndexes[i]
-				if vertexIndex*4 >= len(feedbackData) {
-					continue
-				}
-
-				if vertexGlPositions == nil {
-					vertexGlPositions = make(map[int]*mmath.MVec3)
-				}
-
-				vertexGlPositions[vertexIndex] = &mmath.MVec3{
-					float64(feedbackData[vertexIndex*4]),
-					float64(feedbackData[vertexIndex*4+1]),
-					float64(feedbackData[vertexIndex*4+2])}
+		for i := 0; i < len(m.wireVertexIndexes); i++ {
+			vertexIndex := m.wireVertexIndexes[i]
+			if vertexIndex*4 >= len(positions) {
+				continue
 			}
 
-			gl.UnmapBuffer(gl.TRANSFORM_FEEDBACK_BUFFER)
-		}
+			if vertexGlPositions == nil {
+				vertexGlPositions = make(map[int]*mmath.MVec3)
+			}
 
-		// クリーンアップ
-		gl.DeleteBuffers(1, &feedbackBuffer)
+			vertexGlPositions[vertexIndex] = &mmath.MVec3{
+				float64(positions[vertexIndex*4]),
+				float64(positions[vertexIndex*4+1]),
+				float64(positions[vertexIndex*4+2])}
+		}
 	}
+
+	gl.UnmapBuffer(gl.SHADER_STORAGE_BUFFER)
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
 
 	m.wireIbo.Unbind()
 	m.wireVbo.Unbind()

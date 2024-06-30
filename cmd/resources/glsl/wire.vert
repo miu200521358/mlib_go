@@ -25,7 +25,10 @@ in layout(location = 13) vec4 uv1Delta; // 拡張UV1モーフ
 in layout(location = 14) vec3 afterVertexDelta; // ボーン変形後頂点モーフ
 
 out float totalBoneWeight;
-out vec4 vertexGlPosition;
+
+layout(std430, binding = 0) buffer OutputBuffer {
+    vec4 outPositions[];
+};
 
 // 球形補間
 vec4 slerp(vec4 q1, vec4 q2, float t) {
@@ -207,5 +210,5 @@ void main() {
         gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * position4;
     }
 
-    vertexGlPosition = gl_Position;
+    outPositions[gl_VertexID] = gl_Position;
 }
