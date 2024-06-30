@@ -12,6 +12,12 @@ import (
 func (pm *PmxModel) InitDraw(windowIndex int, resourceFiles embed.FS) {
 	pm.ToonTextures.initGl(windowIndex, resourceFiles)
 	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
+
+	// 位置マッピングのセットアップ
+	pm.Vertices.SetupMapKeys()
+	pm.Bones.SetupMapKeys()
+	pm.RigidBodies.SetupMapKeys()
+	pm.Joints.SetupMapKeys()
 }
 
 func (pm *PmxModel) InitPhysics(physics *mphysics.MPhysics) {

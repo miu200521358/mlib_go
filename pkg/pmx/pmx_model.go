@@ -71,12 +71,6 @@ func (pm *PmxModel) setup() {
 	// セットアップ
 	pm.Bones.setup()
 
-	// 位置マッピングのセットアップ
-	pm.Vertices.SetupMapKeys()
-	pm.Bones.SetupMapKeys()
-	pm.RigidBodies.SetupMapKeys()
-	pm.Joints.SetupMapKeys()
-
 	// 剛体
 	for i := range pm.RigidBodies.Len() {
 		rb := pm.RigidBodies.Get(i)
