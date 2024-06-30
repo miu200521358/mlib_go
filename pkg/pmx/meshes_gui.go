@@ -10,27 +10,30 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
+	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
 type Meshes struct {
-	meshes      []*Mesh
-	vertices    []float32
-	vao         *mview.VAO
-	vbo         *mview.VBO
-	normals     []float32
-	normalVao   *mview.VAO
-	normalVbo   *mview.VBO
-	normalIbo   *mview.IBO
-	wires       []float32
-	wireVao     *mview.VAO
-	wireVbo     *mview.VBO
-	wireIbo     *mview.IBO
-	bones       []float32
-	boneVao     *mview.VAO
-	boneVbo     *mview.VBO
-	boneIbo     *mview.IBO
-	boneIndexes []int
+	meshes            []*Mesh
+	vertices          []float32
+	vao               *mview.VAO
+	vbo               *mview.VBO
+	normals           []float32
+	normalVao         *mview.VAO
+	normalVbo         *mview.VBO
+	normalIbo         *mview.IBO
+	wireVertexIndexes []int
+	wires             []float32
+	wireVao           *mview.VAO
+	wireVbo           *mview.VBO
+	wireIbo           *mview.IBO
+	bones             []float32
+	boneVao           *mview.VAO
+	boneVbo           *mview.VBO
+	boneIbo           *mview.IBO
+	boneIndexes       []int
 }
 
 func NewMeshes(
@@ -59,25 +62,29 @@ func NewMeshes(
 
 	// 面情報
 	faces := make([]uint32, 0, len(model.Faces.Data)*3)
+	wireVertexIndexes := make([]int, 0, len(model.Faces.Data)*3)
+
 	n = 0
 	for i := range len(model.Faces.Data) {
 		vertices := model.Faces.Get(i).VertexIndexes
 		faces = append(faces, uint32(vertices[2]), uint32(vertices[1]), uint32(vertices[0]))
 
 		// ワイヤーフレーム描画用
+		wireVertexIndexes = append(wireVertexIndexes, vertices[0], vertices[1], vertices[2])
+
+		// 0-1
 		wireVertices = append(wireVertices, model.Vertices.Get(vertices[0]).GL()...)
 		wireVertices = append(wireVertices, model.Vertices.Get(vertices[1]).GL()...)
 		wireFaces = append(wireFaces, uint32(n), uint32(n+1))
 
-		wireVertices = append(wireVertices, model.Vertices.Get(vertices[1]).GL()...)
+		// 1-2
 		wireVertices = append(wireVertices, model.Vertices.Get(vertices[2]).GL()...)
-		wireFaces = append(wireFaces, uint32(n+2), uint32(n+3))
+		wireFaces = append(wireFaces, uint32(n+1), uint32(n+2))
 
-		wireVertices = append(wireVertices, model.Vertices.Get(vertices[2]).GL()...)
-		wireVertices = append(wireVertices, model.Vertices.Get(vertices[0]).GL()...)
-		wireFaces = append(wireFaces, uint32(n+4), uint32(n+5))
+		// 2-0
+		wireFaces = append(wireFaces, uint32(n+2), uint32(n))
 
-		n += 6
+		n += 3
 	}
 
 	meshes := make([]*Mesh, len(model.Materials.GetIndexes()))
@@ -197,23 +204,24 @@ func NewMeshes(
 	boneVao.Unbind()
 
 	return &Meshes{
-		meshes:      meshes,
-		vertices:    vertices,
-		vao:         vao,
-		vbo:         vbo,
-		normals:     normalVertices,
-		normalVao:   normalVao,
-		normalVbo:   normalVbo,
-		normalIbo:   normalIbo,
-		wires:       wireVertices,
-		wireVao:     wireVao,
-		wireVbo:     wireVbo,
-		wireIbo:     wireIbo,
-		bones:       bones,
-		boneVao:     boneVao,
-		boneVbo:     boneVbo,
-		boneIbo:     boneIbo,
-		boneIndexes: boneIndexes,
+		meshes:            meshes,
+		vertices:          vertices,
+		vao:               vao,
+		vbo:               vbo,
+		normals:           normalVertices,
+		normalVao:         normalVao,
+		normalVbo:         normalVbo,
+		normalIbo:         normalIbo,
+		wireVertexIndexes: wireVertexIndexes,
+		wires:             wireVertices,
+		wireVao:           wireVao,
+		wireVbo:           wireVbo,
+		wireIbo:           wireIbo,
+		bones:             bones,
+		boneVao:           boneVao,
+		boneVbo:           boneVbo,
+		boneIbo:           boneIbo,
+		boneIndexes:       boneIndexes,
 	}
 }
 
@@ -233,9 +241,10 @@ func (m *Meshes) Draw(
 	windowIndex int,
 	isDrawNormal bool,
 	isDrawWire bool,
+	isDeform bool,
 	isDrawBones map[BoneFlag]bool,
 	bones *Bones,
-) {
+) map[int]*mmath.MVec3 {
 	m.vao.Bind()
 	defer m.vao.Unbind()
 
@@ -265,8 +274,9 @@ func (m *Meshes) Draw(
 		m.drawNormal(shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
 	}
 
+	var vertexGlPositions map[int]*mmath.MVec3
 	if isDrawWire {
-		m.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
+		vertexGlPositions = m.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex, isDeform)
 	}
 
 	isDrawBone := false
@@ -285,6 +295,8 @@ func (m *Meshes) Draw(
 	boneDeltas = nil
 	vertexDeltas = nil
 	meshDeltas = nil
+
+	return vertexGlPositions
 }
 
 func (m *Meshes) createBoneMatrixes(matrixes []mgl32.Mat4) ([]float32, int, int) {
@@ -341,8 +353,36 @@ func (m *Meshes) drawWire(
 	paddedMatrixes []float32,
 	width, height int,
 	windowIndex int,
-) {
+	isDeform bool,
+) map[int]*mmath.MVec3 {
+	var vertexGlPositions map[int]*mmath.MVec3
+
+	// Transform Feedbackの出力変数を指定
+	var status int32
+	var feedbackBuffer uint32
+
 	shader.Use(mview.PROGRAM_TYPE_WIRE)
+
+	if isDeform {
+		varyings, _ := gl.Strs(mview.SHADER_VERTEX_GL_POSITION)
+		gl.TransformFeedbackVaryings(shader.WireProgram, 1, varyings, gl.INTERLEAVED_ATTRIBS)
+		gl.LinkProgram(shader.WireProgram)
+		gl.GetProgramiv(shader.WireProgram, gl.LINK_STATUS, &status)
+
+		if status == gl.TRUE {
+			// Transform Feedback用のバッファを作成
+			gl.GenBuffers(1, &feedbackBuffer)
+			gl.BindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, feedbackBuffer)
+			gl.BufferData(gl.TRANSFORM_FEEDBACK_BUFFER, len(m.wireVertexIndexes)*4*4, nil, gl.DYNAMIC_READ)
+			gl.BindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, feedbackBuffer)
+		} else {
+			var logLength int32
+			gl.GetProgramiv(shader.WireProgram, gl.INFO_LOG_LENGTH, &logLength)
+			log := make([]byte, logLength+1)
+			gl.GetProgramInfoLog(shader.WireProgram, logLength, nil, &log[0])
+			mlog.D("failed to link program: %s", log)
+		}
+	}
 
 	m.wireVao.Bind()
 	m.wireVbo.BindVertex(nil, nil)
@@ -355,6 +395,11 @@ func (m *Meshes) drawWire(
 	specularUniform := gl.GetUniformLocation(shader.WireProgram, gl.Str(mview.SHADER_COLOR))
 	gl.Uniform4fv(specularUniform, 1, &wireColor[0])
 
+	if isDeform && status == gl.TRUE {
+		// Transform Feedbackの開始
+		gl.BeginTransformFeedback(gl.LINES)
+	}
+
 	// ライン描画
 	gl.DrawElements(
 		gl.LINES,
@@ -363,11 +408,47 @@ func (m *Meshes) drawWire(
 		nil,
 	)
 
+	if isDeform && status == gl.TRUE {
+		gl.EndTransformFeedback()
+		gl.Flush()
+
+		feedbackDataPtr := gl.MapBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, gl.READ_ONLY)
+		if feedbackDataPtr == nil {
+			// エラーハンドリング
+			mlog.D("Failed to map buffer")
+		} else {
+			feedbackData := (*[1 << 30]float32)(feedbackDataPtr)[:len(m.wireVertexIndexes)*4]
+
+			for i := 0; i < len(m.wireVertexIndexes); i++ {
+				vertexIndex := m.wireVertexIndexes[i]
+				if vertexIndex*4 >= len(feedbackData) {
+					continue
+				}
+
+				if vertexGlPositions == nil {
+					vertexGlPositions = make(map[int]*mmath.MVec3)
+				}
+
+				vertexGlPositions[vertexIndex] = &mmath.MVec3{
+					float64(feedbackData[vertexIndex*4]),
+					float64(feedbackData[vertexIndex*4+1]),
+					float64(feedbackData[vertexIndex*4+2])}
+			}
+
+			gl.UnmapBuffer(gl.TRANSFORM_FEEDBACK_BUFFER)
+		}
+
+		// クリーンアップ
+		gl.DeleteBuffers(1, &feedbackBuffer)
+	}
+
 	m.wireIbo.Unbind()
 	m.wireVbo.Unbind()
 	m.wireVao.Unbind()
 
 	shader.Unuse()
+
+	return vertexGlPositions
 }
 
 func (m *Meshes) drawBone(

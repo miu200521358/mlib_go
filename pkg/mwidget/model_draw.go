@@ -5,6 +5,7 @@ package mwidget
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mview"
@@ -59,7 +60,7 @@ func draw(
 	isDrawNormal bool,
 	isDrawWire bool,
 	isDrawBones map[pmx.BoneFlag]bool,
-) *vmd.VmdDeltas {
+) (*vmd.VmdDeltas, map[int]*mmath.MVec3) {
 	deltas := deform(modelPhysics, model, motion, prevDeltas, frame, elapsed, isDeform, enablePhysics)
 
 	boneDeltas := make([]mgl32.Mat4, len(model.Bones.Data))
@@ -74,13 +75,13 @@ func draw(
 
 	vertexDeltas := fetchVertexDeltas(model, deltas)
 
-	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, meshDeltas, windowIndex,
-		isDrawNormal, isDrawWire, isDrawBones, model.Bones)
+	vertexGlPositions := model.Meshes.Draw(shader, boneDeltas, vertexDeltas, meshDeltas, windowIndex,
+		isDrawNormal, isDrawWire, isDeform || prevDeltas == nil, isDrawBones, model.Bones)
 
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()
 
-	return deltas
+	return deltas, vertexGlPositions
 }
 
 func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {

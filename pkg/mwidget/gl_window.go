@@ -26,9 +26,10 @@ import (
 )
 
 type ModelSet struct {
-	model      *pmx.PmxModel
-	motion     *vmd.VmdMotion
-	prevDeltas *vmd.VmdDeltas
+	model             *pmx.PmxModel
+	motion            *vmd.VmdMotion
+	prevDeltas        *vmd.VmdDeltas
+	vertexGlPositions map[int]*mmath.MVec3
 }
 
 // 直角の定数値
@@ -666,8 +667,18 @@ func (w *GlWindow) Run() {
 				break
 			}
 
-			w.ModelSets[i].prevDeltas = draw(w.Physics, modelSet.model, modelSet.motion, w.Shader,
+			var vertexGlPositions map[int]*mmath.MVec3
+			w.ModelSets[i].prevDeltas, vertexGlPositions = draw(
+				w.Physics, modelSet.model, modelSet.motion, w.Shader,
 				modelSet.prevDeltas, i, int(w.frame), elapsed, isDeform, w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleBones)
+			if vertexGlPositions != nil {
+				w.ModelSets[i].vertexGlPositions = vertexGlPositions
+
+				mlog.L()
+				for i, v := range vertexGlPositions {
+					mlog.D("vertexGlPositions[%d]: x=%.8f, y=%.8f, z=%.8f", i, v.GetX(), v.GetY(), v.GetZ())
+				}
+			}
 		}
 
 		w.Shader.Msaa.Unbind()
