@@ -384,4 +384,5 @@ func (s *MShader) Delete() {
 	s.DeleteProgram(s.NormalProgram)
 	s.DeleteProgram(s.FloorProgram)
 	s.DeleteProgram(s.WireProgram)
+	s.Msaa.Delete()
 }
