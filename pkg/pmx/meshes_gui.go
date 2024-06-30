@@ -11,7 +11,6 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
-	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
@@ -256,7 +255,7 @@ func (m *Meshes) Draw(
 	isDeform bool,
 	isDrawBones map[BoneFlag]bool,
 	bones *Bones,
-) map[int]*mmath.MVec3 {
+) {
 	m.vao.Bind()
 	defer m.vao.Unbind()
 
@@ -286,9 +285,8 @@ func (m *Meshes) Draw(
 		m.drawNormal(shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
 	}
 
-	var vertexGlPositions map[int]*mmath.MVec3
 	if isDrawWire {
-		vertexGlPositions = m.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
+		m.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
 	}
 
 	isDrawBone := false
@@ -307,8 +305,6 @@ func (m *Meshes) Draw(
 	boneDeltas = nil
 	vertexDeltas = nil
 	meshDeltas = nil
-
-	return vertexGlPositions
 }
 
 func (m *Meshes) createBoneMatrixes(matrixes []mgl32.Mat4) ([]float32, int, int) {
@@ -365,9 +361,7 @@ func (m *Meshes) drawWire(
 	paddedMatrixes []float32,
 	width, height int,
 	windowIndex int,
-) map[int]*mmath.MVec3 {
-	var vertexGlPositions map[int]*mmath.MVec3
-
+) {
 	shader.Use(mview.PROGRAM_TYPE_WIRE)
 
 	m.wireVao.Bind()
@@ -389,41 +383,11 @@ func (m *Meshes) drawWire(
 		nil,
 	)
 
-	// データの読み取り
-	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, m.ssbo)
-	ptr := gl.MapBuffer(gl.SHADER_STORAGE_BUFFER, gl.READ_ONLY)
-
-	if ptr != nil {
-		// positions スライスを ptr から作成
-		positions := unsafe.Slice((*float32)(ptr), len(m.wireVertexIndexes)*4)
-
-		for i := 0; i < len(m.wireVertexIndexes); i++ {
-			vertexIndex := m.wireVertexIndexes[i]
-			if vertexIndex*4 >= len(positions) {
-				continue
-			}
-
-			if vertexGlPositions == nil {
-				vertexGlPositions = make(map[int]*mmath.MVec3)
-			}
-
-			vertexGlPositions[vertexIndex] = &mmath.MVec3{
-				float64(positions[vertexIndex*4]),
-				float64(positions[vertexIndex*4+1]),
-				float64(positions[vertexIndex*4+2])}
-		}
-	}
-
-	gl.UnmapBuffer(gl.SHADER_STORAGE_BUFFER)
-	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
-
 	m.wireIbo.Unbind()
 	m.wireVbo.Unbind()
 	m.wireVao.Unbind()
 
 	shader.Unuse()
-
-	return vertexGlPositions
 }
 
 func (m *Meshes) drawBone(

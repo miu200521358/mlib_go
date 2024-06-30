@@ -7,7 +7,6 @@ import (
 	"embed"
 	"fmt"
 	"log"
-	"math"
 	"path/filepath"
 	"runtime"
 
@@ -245,24 +244,8 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 	funcWorldPos := func(worldPos *mmath.MVec3, viewMat *mmath.MMat4) {
 		if pmxReadPicker.Exists() {
 			model := pmxReadPicker.GetCache().(*pmx.PmxModel)
-			distances := mmath.DistanceLineToPoints(
-				worldPos, model.Vertices.Positions)
-			sortedVertexIndexes := mutils.ArgSort(mutils.Float64Slice(distances))
-			nearestVertexIndex := sortedVertexIndexes[0]
-			// 大体近くて最も手前の頂点を選択
-			z := math.MaxFloat64
-			for i := range min(3, len(sortedVertexIndexes)) {
-				sortedVertexIndex := sortedVertexIndexes[i]
-				vPos := model.Vertices.Positions[sortedVertexIndex]
-				// カメラの向きに応じた奥行きを取得
-				cameraVPos := viewMat.MulVec3(vPos)
-				if cameraVPos.GetZ() < z {
-					nearestVertexIndex = sortedVertexIndex
-					z = cameraVPos.GetZ()
-				}
-				mlog.D("near vertex index: %d worldPos: %s, cameraPos: %s",
-					sortedVertexIndex, vPos.String(), cameraVPos.String())
-			}
+			distances := mmath.DistanceLineToPoints(worldPos, model.Vertices.Positions)
+			nearestVertexIndex := mmath.ArgMin(distances)
 			mlog.D("Nearest Vertex Index: %d (%s)", nearestVertexIndex,
 				model.Vertices.Get(nearestVertexIndex).Position.String())
 		}
