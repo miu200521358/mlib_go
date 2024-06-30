@@ -2,8 +2,6 @@ package mmath
 
 import (
 	"math"
-
-	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 func gradient(values []float64) []float64 {
@@ -67,7 +65,7 @@ func MergeInflectionPoints(values []float64, inflectionPointsList []map[int]int,
 		}
 	}
 
-	mutils.SortInts(inflectionAllIndexes)
+	SortInts(inflectionAllIndexes)
 
 	inflectionPoints := make(map[int]int)
 	prevIdx := 0

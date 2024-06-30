@@ -63,7 +63,7 @@ func (v *IndexNameModel) Copy() IIndexNameModel {
 type IndexNameModels[T IIndexNameModel] struct {
 	Data        map[int]T
 	NameIndexes map[string]int
-	IndexMap    map[mmath.MVec3][]int
+	IndexMap    map[mmath.MVec3]map[int]T
 	nilFunc     func() T
 }
 
@@ -71,13 +71,13 @@ func NewIndexNameModels[T IIndexNameModel](nilFunc func() T) *IndexNameModels[T]
 	return &IndexNameModels[T]{
 		Data:        make(map[int]T, 0),
 		NameIndexes: make(map[string]int, 0),
-		IndexMap:    make(map[mmath.MVec3][]int, 0),
+		IndexMap:    make(map[mmath.MVec3]map[int]T),
 		nilFunc:     nilFunc,
 	}
 }
 
 func (c *IndexNameModels[T]) SetupMapKeys() {
-	c.IndexMap = make(map[mmath.MVec3][]int)
+	c.IndexMap = make(map[mmath.MVec3]map[int]T)
 	for k, v := range c.Data {
 		baseKey := v.GetMapKey()
 		// 前後のオフセット込みでマッピング
@@ -91,9 +91,9 @@ func (c *IndexNameModels[T]) SetupMapKeys() {
 		} {
 			key := *baseKey.Added(offset)
 			if _, ok := c.IndexMap[key]; !ok {
-				c.IndexMap[key] = make([]int, 0)
+				c.IndexMap[key] = make(map[int]T)
 			}
-			c.IndexMap[key] = append(c.IndexMap[key], k)
+			c.IndexMap[key][k] = v
 		}
 	}
 }
@@ -103,10 +103,12 @@ func (c *IndexNameModels[T]) GetMapValues(v T) ([]int, []*mmath.MVec3) {
 		return nil, nil
 	}
 	key := v.GetMapKey()
+	indexes := make([]int, 0)
 	values := make([]*mmath.MVec3, 0)
-	if indexes, ok := c.IndexMap[key]; ok {
-		for _, i := range indexes {
-			values = append(values, c.Get(i).GetMapValue())
+	if mapIndexes, ok := c.IndexMap[key]; ok {
+		for i, iv := range mapIndexes {
+			indexes = append(indexes, i)
+			values = append(values, iv.GetMapValue())
 		}
 		return indexes, values
 	}

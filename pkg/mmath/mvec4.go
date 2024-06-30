@@ -6,8 +6,6 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl64"
-
-	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 var (
@@ -543,8 +541,8 @@ func StdMeanVec4(values []MVec4, err float64) *MVec4 {
 		npStandardLengths[i] = v.Length()
 	}
 
-	medianStandardValues := mutils.Median(npStandardLengths)
-	stdStandardValues := mutils.Std(npStandardLengths)
+	medianStandardValues := Median(npStandardLengths)
+	stdStandardValues := Std(npStandardLengths)
 
 	// 中央値から標準偏差の一定範囲までの値を取得
 	var filteredStandardValues [][]float64
@@ -555,7 +553,7 @@ func StdMeanVec4(values []MVec4, err float64) *MVec4 {
 		}
 	}
 
-	mean := mutils.Mean2DVertical(filteredStandardValues)
+	mean := Mean2DVertical(filteredStandardValues)
 	return &MVec4{mean[0], mean[1], mean[2], mean[3]}
 }
 

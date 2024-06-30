@@ -4,7 +4,7 @@
 package pmx
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
 func (v *Vertex) GL() []float32 {
@@ -16,7 +16,7 @@ func (v *Vertex) GL() []float32 {
 		eu[1] = float32(v.ExtendedUVs[0].GetY())
 	}
 	d := v.Deform.NormalizedDeform()
-	s := float32(mutils.BoolToInt(v.DeformType == SDEF))
+	s := float32(mmath.BoolToInt(v.DeformType == SDEF))
 	sdefC, sdefR0, sdefR1 := v.Deform.GetSdefParams()
 	return []float32{
 		p[0], p[1], p[2], // 位置
@@ -41,7 +41,7 @@ func (v *Vertex) NormalGL() []float32 {
 	p := v.Position.GL()
 	n := v.Normal.MuledScalar(0.5).GL()
 	d := v.Deform.NormalizedDeform()
-	s := float32(mutils.BoolToInt(v.DeformType == SDEF))
+	s := float32(mmath.BoolToInt(v.DeformType == SDEF))
 	sdefC, sdefR0, sdefR1 := v.Deform.GetSdefParams()
 	return []float32{
 		p[0] + n[0], p[1] + n[1], p[2] + n[2], // 位置

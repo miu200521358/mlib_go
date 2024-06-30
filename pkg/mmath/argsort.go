@@ -1,7 +1,7 @@
 // Package argsort implements a variant of the sort function that returns a slice of indices that would sort the array.
 //
 // The name comes from the popular Python numpy.Argsort function.
-package mutils
+package mmath
 
 import (
 	"reflect"
