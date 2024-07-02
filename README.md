@@ -103,6 +103,8 @@ go get -u golang.org/x/image
 3. `go tool pprof -http=:8080 cpu.pprof`
 4. `go tool pprof -http=:8081 mem.pprof`
 
+プロファイル: ISAOミク+Addiction
+
 ## bullet
 
 1. swig インストール

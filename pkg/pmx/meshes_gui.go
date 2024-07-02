@@ -6,6 +6,7 @@ package pmx
 import (
 	"embed"
 	"math"
+	"sync"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
@@ -46,48 +47,66 @@ func NewMeshes(
 	wireVertices := make([]float32, 0, len(model.Vertices.Data)*3)
 	wireFaces := make([]uint32, 0, len(model.Vertices.Data)*3)
 
-	n := 0
-	for i := range len(model.Vertices.Data) {
-		vertex := model.Vertices.Get(i)
-		vertices = append(vertices, vertex.GL()...)
+	// WaitGroupを用いて並列処理を管理
+	var wg sync.WaitGroup
+	var mu sync.Mutex
 
-		normalVertices = append(normalVertices, vertex.GL()...)
-		normalVertices = append(normalVertices, vertex.NormalGL()...)
+	// 頂点情報の並列処理
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		n := 0
+		for i := 0; i < len(model.Vertices.Data); i++ {
+			vertex := model.Vertices.Get(i)
+			mu.Lock()
+			vertices = append(vertices, vertex.GL()...)
 
-		normalFaces = append(normalFaces, uint32(n), uint32(n+1))
-		n += 2
-	}
+			normalVertices = append(normalVertices, vertex.GL()...)
+			normalVertices = append(normalVertices, vertex.NormalGL()...)
+			normalFaces = append(normalFaces, uint32(n), uint32(n+1))
 
-	// 面情報
+			mu.Unlock()
+			n += 2
+		}
+	}()
+
+	// 面情報の並列処理
 	faces := make([]uint32, 0, len(model.Faces.Data)*3)
 	wireVertexIndexes := make([]int, 0, len(model.Faces.Data)*3)
 
-	n = 0
-	for i := range len(model.Faces.Data) {
-		vertices := model.Faces.Get(i).VertexIndexes
-		faces = append(faces, uint32(vertices[2]), uint32(vertices[1]), uint32(vertices[0]))
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		n := 0
+		for i := 0; i < len(model.Faces.Data); i++ {
+			vertices := model.Faces.Get(i).VertexIndexes
+			mu.Lock()
+			faces = append(faces, uint32(vertices[2]), uint32(vertices[1]), uint32(vertices[0]))
+			wireVertexIndexes = append(wireVertexIndexes, vertices[0], vertices[1], vertices[2])
 
-		// ワイヤーフレーム描画用
-		wireVertexIndexes = append(wireVertexIndexes, vertices[0], vertices[1], vertices[2])
+			// 0-1
+			wireVertices = append(wireVertices, model.Vertices.Get(vertices[0]).GL()...)
+			wireVertices = append(wireVertices, model.Vertices.Get(vertices[1]).GL()...)
+			wireFaces = append(wireFaces, uint32(n), uint32(n+1))
 
-		// 0-1
-		wireVertices = append(wireVertices, model.Vertices.Get(vertices[0]).GL()...)
-		wireVertices = append(wireVertices, model.Vertices.Get(vertices[1]).GL()...)
-		wireFaces = append(wireFaces, uint32(n), uint32(n+1))
+			// 1-2
+			wireVertices = append(wireVertices, model.Vertices.Get(vertices[2]).GL()...)
+			wireFaces = append(wireFaces, uint32(n+1), uint32(n+2))
 
-		// 1-2
-		wireVertices = append(wireVertices, model.Vertices.Get(vertices[2]).GL()...)
-		wireFaces = append(wireFaces, uint32(n+1), uint32(n+2))
+			// 2-0
+			wireFaces = append(wireFaces, uint32(n+2), uint32(n))
+			mu.Unlock()
 
-		// 2-0
-		wireFaces = append(wireFaces, uint32(n+2), uint32(n))
+			n += 3
+		}
+	}()
 
-		n += 3
-	}
-
+	// メッシュ情報の並列処理
 	meshes := make([]*Mesh, len(model.Materials.GetIndexes()))
 	prevVerticesCount := 0
-	for i := range model.Materials.Len() {
+
+	// テクスチャの gl.GenTextures はスレッドセーフではないので、並列化しない
+	for i := 0; i < len(model.Materials.Data); i++ {
 		m := model.Materials.Get(i)
 
 		// テクスチャ
@@ -131,38 +150,51 @@ func NewMeshes(
 			materialGl,
 			prevVerticesCount,
 		)
+		mu.Lock()
 		meshes[i] = mesh
+		mu.Unlock()
 
 		prevVerticesCount += m.VerticesCount
 	}
 
+	// ボーン情報の並列処理
 	bones := make([]float32, 0, len(model.Bones.Data)*4)
 	boneFaces := make([]uint32, 0, len(model.Bones.Data)*4)
 	boneIndexes := make([]int, 0, len(model.Bones.Data)*4)
 
-	n = 0
-	for i := range len(model.Bones.Data) {
-		bone := model.Bones.Get(i)
-		bones = append(bones, bone.GL()...)
-		bones = append(bones, bone.TailGL()...)
-
-		boneFaces = append(boneFaces, uint32(n), uint32(n+1))
-		boneIndexes = append(boneIndexes, bone.Index, bone.Index)
-
-		n += 2
-
-		if bone.ParentIndex >= 0 && model.Bones.Contains(bone.ParentIndex) &&
-			!model.Bones.Get(bone.ParentIndex).Position.IsZero() {
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		n := 0
+		for i := 0; i < len(model.Bones.Data); i++ {
+			bone := model.Bones.Get(i)
+			mu.Lock()
 			bones = append(bones, bone.GL()...)
-			bones = append(bones, bone.ParentGL()...)
-
+			bones = append(bones, bone.TailGL()...)
 			boneFaces = append(boneFaces, uint32(n), uint32(n+1))
-			boneIndexes = append(boneIndexes, bone.Index, bone.ParentIndex)
+			boneIndexes = append(boneIndexes, bone.Index, bone.Index)
+			mu.Unlock()
 
 			n += 2
-		}
-	}
 
+			if bone.ParentIndex >= 0 && model.Bones.Contains(bone.ParentIndex) &&
+				!model.Bones.Get(bone.ParentIndex).Position.IsZero() {
+				mu.Lock()
+				bones = append(bones, bone.GL()...)
+				bones = append(bones, bone.ParentGL()...)
+				boneFaces = append(boneFaces, uint32(n), uint32(n+1))
+				boneIndexes = append(boneIndexes, bone.Index, bone.ParentIndex)
+				mu.Unlock()
+
+				n += 2
+			}
+		}
+	}()
+
+	// WaitGroupの完了を待つ
+	wg.Wait()
+
+	// 以下の部分は並列化する必要がないのでそのままにする
 	vao := mview.NewVAO()
 	vao.Bind()
 

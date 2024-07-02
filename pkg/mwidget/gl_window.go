@@ -695,6 +695,10 @@ func (w *GlWindow) Run() {
 			// mlog.I("PhysicsSleep frame=%.8f, elapsed64=%.8f, PhysicsSpf=%.8f", w.frame, elapsed64, w.Physics.PhysicsSpf)
 			time.Sleep(time.Duration((elapsed64 - w.Physics.PhysicsSpf) * float64(time.Second)))
 		}
+
+		if int(w.frame) > 100 {
+			break
+		}
 	}
 	if w.WindowIndex == 0 {
 		defer walk.App().Exit(0)
