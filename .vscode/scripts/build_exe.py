@@ -32,10 +32,10 @@ env_name = "dev" if os.environ.get('ENV') == 'dev' else "prod"
 # -ldflags "-s -w" バイナリサイズを小さくする
 # -H=windowsgui コンソールを表示しない
 # -gcflags "all=-N -l" デバッグ情報を削除
-# -linkmode external -extldflags '-static -Wl,resources/app.res' リソースを埋め込む
+# -linkmode external -extldflags '-static -Wl,cmd/resources/app/app.res' リソースを埋め込む
 build_command = f"go build -o {workspace_folder}/build/{app_name}_{app_version}.exe -trimpath " \
                 f"-v {all_rebuild} -buildmode=exe -ldflags \"-s -w -H=windowsgui -X main.env={env_name} " \
-                f"-linkmode external -extldflags '-static -Wl,{workspace_folder}/resources/app.res'\" " \
+                f"-linkmode external -extldflags '-static -Wl,{workspace_folder}/cmd/resources/app/app.res'\" " \
                 f"{workspace_folder}/cmd/main.go"
 
 print(f"build_command: {build_command}")
