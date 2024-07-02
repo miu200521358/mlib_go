@@ -177,7 +177,7 @@ func updatePhysics(
 		// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[2][%d]", frame, rigidBody.Index))
 	}
 
-	if elapsed >= 1e-5 {
+	if enablePhysics && elapsed >= 1e-5 {
 		modelPhysics.Update(elapsed)
 
 		// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[3]", frame))
