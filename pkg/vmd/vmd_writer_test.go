@@ -19,7 +19,7 @@ func TestVmdWriter_Write1(t *testing.T) {
 	motion.AppendRegisteredBoneFrame("センター", bf)
 
 	// Create a VmdWriter instance
-	err := Write(motion)
+	err := motion.Save()
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
@@ -70,7 +70,7 @@ func TestVmdWriter_Write2(t *testing.T) {
 	motion.Path = outputPath
 
 	// Create a VmdWriter instance
-	err = Write(motion)
+	err = motion.Save()
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}

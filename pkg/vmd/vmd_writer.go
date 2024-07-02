@@ -16,7 +16,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
-func Write(motion *VmdMotion) error {
+func (motion *VmdMotion) Save() error {
 	// Open the output file
 	fout, err := os.Create(motion.GetPath())
 	if err != nil {

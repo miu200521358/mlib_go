@@ -262,7 +262,7 @@ func (fs *BoneFrames) calcIk(
 		mlog.IV("[IK計算終了][%04d][%s]", frame, ikBone.Name)
 
 		if ikMotion != nil {
-			Write(ikMotion)
+			ikMotion.Save()
 		}
 		if ikFile != nil {
 			ikFile.Close()
