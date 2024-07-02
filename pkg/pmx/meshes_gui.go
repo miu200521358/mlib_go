@@ -6,7 +6,6 @@ package pmx
 import (
 	"embed"
 	"math"
-	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
@@ -24,7 +23,6 @@ type Meshes struct {
 	normalVbo         *mview.VBO
 	normalIbo         *mview.IBO
 	wireVertexIndexes []int
-	ssbo              uint32
 	wires             []float32
 	wireVao           *mview.VAO
 	wireVbo           *mview.VBO
@@ -203,15 +201,6 @@ func NewMeshes(
 	boneVbo.Unbind()
 	boneVao.Unbind()
 
-	ssboVertexCount := len(wireVertexIndexes) * 4 // 4つのfloat32 を出力するため
-
-	// SSBOの作成
-	var ssbo uint32
-	gl.GenBuffers(1, &ssbo)
-	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, ssbo)
-	gl.BufferData(gl.SHADER_STORAGE_BUFFER, ssboVertexCount*int(unsafe.Sizeof([4]float32{})), nil, gl.DYNAMIC_COPY)
-	gl.BindBufferBase(gl.SHADER_STORAGE_BUFFER, 0, ssbo)
-
 	return &Meshes{
 		meshes:            meshes,
 		vertices:          vertices,
@@ -222,7 +211,6 @@ func NewMeshes(
 		normalVbo:         normalVbo,
 		normalIbo:         normalIbo,
 		wireVertexIndexes: wireVertexIndexes,
-		ssbo:              ssbo,
 		wires:             wireVertices,
 		wireVao:           wireVao,
 		wireVbo:           wireVbo,
@@ -241,7 +229,6 @@ func (m *Meshes) delete() {
 	}
 	m.vao.Delete()
 	m.vbo.Delete()
-	gl.DeleteBuffers(1, &m.ssbo)
 }
 
 func (m *Meshes) Draw(
