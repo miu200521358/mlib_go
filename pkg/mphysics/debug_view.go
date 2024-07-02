@@ -46,9 +46,11 @@ func NewMDebugDrawLiner(shader *mview.MShader) *MDebugDrawLiner {
 }
 
 func (ddl MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color mbt.BtVector3) {
-	// モデルメッシュの前面に描画するために深度テストを無効化
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.ALWAYS)
+	if ddl.shader.IsDrawRigidBodyFront {
+		// モデルメッシュの前面に描画するために深度テストを無効化
+		gl.Enable(gl.DEPTH_TEST)
+		gl.DepthFunc(gl.ALWAYS)
+	}
 
 	// mlog.D("MDebugDrawLiner.DrawLine")
 	ddl.shader.Use(mview.PROGRAM_TYPE_PHYSICS)

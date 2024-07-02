@@ -326,5 +326,13 @@
     {
         "id": "&ワイヤーフレームデバッグ表示",
         "translation": "&Wireframe Debug View"
+    },
+    {
+        "id": "&前面表示",
+        "translation": "&Front Display"
+    },
+    {
+        "id": "&埋め込み表示",
+        "translation": "&Embedded Display"
     }
 ]

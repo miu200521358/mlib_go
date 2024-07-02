@@ -89,6 +89,7 @@ type MShader struct {
 	FloorProgram         uint32
 	WireProgram          uint32
 	BoneTextureId        uint32
+	IsDrawRigidBodyFront bool
 }
 
 func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
@@ -103,6 +104,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 		FarPlane:             1000.0,
 		lightPosition:        &mmath.MVec3{-0.5, -1.0, 0.5},
 		Msaa:                 NewMsaa(int32(width), int32(height)),
+		IsDrawRigidBodyFront: true,
 	}
 	shader.lightDirection = shader.lightPosition.Normalized()
 
