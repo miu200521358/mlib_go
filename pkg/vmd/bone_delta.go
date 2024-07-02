@@ -1,7 +1,7 @@
 package vmd
 
 import (
-	"slices"
+	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
@@ -185,50 +185,67 @@ func NewBoneDelta(
 type BoneDeltas struct {
 	Data  map[int]*BoneDelta
 	Names map[string]int
+	mu    sync.RWMutex
 }
 
 func NewBoneDeltas() *BoneDeltas {
 	return &BoneDeltas{
-		Data:  make(map[int]*BoneDelta, 0),
-		Names: make(map[string]int, 0),
+		Data:  make(map[int]*BoneDelta),
+		Names: make(map[string]int),
 	}
 }
 
-func (bts *BoneDeltas) Get(boneIndex int) *BoneDelta {
-	if _, ok := bts.Data[boneIndex]; !ok {
+func (bds *BoneDeltas) Get(boneIndex int) *BoneDelta {
+	bds.mu.RLock()
+	defer bds.mu.RUnlock()
+
+	if _, ok := bds.Data[boneIndex]; !ok {
 		return nil
 	}
-	return bts.Data[boneIndex]
+	return bds.Data[boneIndex]
 }
 
-func (bts *BoneDeltas) GetByName(boneName string) *BoneDelta {
-	if _, ok := bts.Names[boneName]; !ok {
+func (bds *BoneDeltas) GetByName(boneName string) *BoneDelta {
+	bds.mu.RLock()
+	defer bds.mu.RUnlock()
+
+	if _, ok := bds.Names[boneName]; !ok {
 		return nil
 	}
-	return bts.Get(bts.Names[boneName])
+	return bds.Get(bds.Names[boneName])
 }
 
-func (bts *BoneDeltas) Append(boneDelta *BoneDelta) {
-	bts.Data[boneDelta.Bone.Index] = boneDelta
-	bts.Names[boneDelta.Bone.Name] = boneDelta.Bone.Index
+func (bds *BoneDeltas) Append(boneDelta *BoneDelta) {
+	bds.mu.Lock()
+	defer bds.mu.Unlock()
+
+	bds.Data[boneDelta.Bone.Index] = boneDelta
+	bds.Names[boneDelta.Bone.Name] = boneDelta.Bone.Index
 }
 
-func (bts *BoneDeltas) GetBoneIndexes() []int {
+func (bds *BoneDeltas) GetBoneIndexes() []int {
+	bds.mu.RLock()
+	defer bds.mu.RUnlock()
+
 	boneIndexes := make([]int, 0)
-	for key := range bts.Data {
-		if !slices.Contains(boneIndexes, key) {
-			boneIndexes = append(boneIndexes, key)
-		}
+	for key := range bds.Data {
+		boneIndexes = append(boneIndexes, key)
 	}
 	return boneIndexes
 }
 
-func (bts *BoneDeltas) Contains(boneIndex int) bool {
-	_, ok := bts.Data[boneIndex]
+func (bds *BoneDeltas) Contains(boneIndex int) bool {
+	bds.mu.RLock()
+	defer bds.mu.RUnlock()
+
+	_, ok := bds.Data[boneIndex]
 	return ok
 }
 
 func (bds *BoneDeltas) SetGlobalMatrix(bone *pmx.Bone, globalMatrix *mmath.MMat4) {
+	bds.mu.Lock()
+	defer bds.mu.Unlock()
+
 	bd := bds.Get(bone.Index)
 	if bd == nil {
 		bd = NewBoneDelta(bone, 0)
@@ -239,6 +256,9 @@ func (bds *BoneDeltas) SetGlobalMatrix(bone *pmx.Bone, globalMatrix *mmath.MMat4
 
 // FillLocalMatrix 物理演算後にグローバル行列を埋め終わった後に呼び出して、ローカル行列を計算する
 func (bds *BoneDeltas) FillLocalMatrix() {
+	bds.mu.Lock()
+	defer bds.mu.Unlock()
+
 	for _, bd := range bds.Data {
 		var parentGlobalMatrix *mmath.MMat4
 		if bd.Bone.ParentIndex >= 0 {

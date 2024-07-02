@@ -191,33 +191,41 @@ func (fs *BoneFrames) prepareIk(
 	ikFrame *IkFrame,
 	isAfterPhysics bool,
 ) *BoneDeltas {
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
 	for i, boneIndex := range deformBoneIndexes {
 		// ボーンIndexがIkTreeIndexesに含まれていない場合、スルー
 		if _, ok := model.Bones.IkTreeIndexes[boneIndex]; !ok {
 			continue
 		}
 
-		for m := range len(model.Bones.IkTreeIndexes[boneIndex]) {
-			ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[boneIndex][m])
+		wg.Add(1)
+		go func(i, boneIndex int) {
+			defer wg.Done()
+			for m := range len(model.Bones.IkTreeIndexes[boneIndex]) {
+				ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[boneIndex][m])
 
-			if ikFrame == nil || ikFrame.IsEnable(ikBone.Name) {
-				var prefixPath string
-				if mlog.IsIkVerbose() {
-					// IK計算デバッグ用モーション
-					dirPath := fmt.Sprintf("%s/IK_step", filepath.Dir(model.Path))
-					err := os.MkdirAll(dirPath, 0755)
-					if err != nil {
-						log.Fatal(err)
+				if ikFrame == nil || ikFrame.IsEnable(ikBone.Name) {
+					var prefixPath string
+					if mlog.IsIkVerbose() {
+						// IK計算デバッグ用モーション
+						dirPath := fmt.Sprintf("%s/IK_step", filepath.Dir(model.Path))
+						err := os.MkdirAll(dirPath, 0755)
+						if err != nil {
+							log.Fatal(err)
+						}
+
+						date := time.Now().Format("20060102_150405")
+						prefixPath = fmt.Sprintf("%s/%04d_%s_%03d_%03d", dirPath, frame, date, i, m)
 					}
 
-					date := time.Now().Format("20060102_150405")
-					prefixPath = fmt.Sprintf("%s/%04d_%s_%03d_%03d", dirPath, frame, date, i, m)
+					fs.calcIk(frame, ikBone, model, boneDeltas, morphDeltas, isAfterPhysics, &mu, ikFrame, prefixPath)
 				}
-
-				boneDeltas = fs.calcIk(frame, ikBone, model, boneDeltas, morphDeltas, isAfterPhysics, ikFrame, prefixPath)
 			}
-		}
+		}(i, boneIndex)
 	}
+	wg.Wait()
 
 	return boneDeltas
 }
@@ -230,12 +238,13 @@ func (fs *BoneFrames) calcIk(
 	boneDeltas *BoneDeltas,
 	morphDeltas *MorphDeltas,
 	isAfterPhysics bool,
+	mu *sync.Mutex,
 	ikFrame *IkFrame,
 	prefixPath string,
-) *BoneDeltas {
+) {
 	if len(ikBone.Ik.Links) < 1 {
 		// IKリンクが無ければスルー
-		return boneDeltas
+		return
 	}
 
 	var err error
@@ -284,30 +293,36 @@ func (fs *BoneFrames) calcIk(
 	// IKターゲットボーン
 	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
+	mu.Lock()
 	ikDeltas := fs.DeformByPhysicsFlag(frame, model, []string{ikBone.Name, effectorBone.Name}, false,
 		boneDeltas, nil, ikFrame, isAfterPhysics)
+	mu.Unlock()
 	if !ikDeltas.Contains(ikBone.Index) {
 		// IKボーンが存在しない場合、スルー
-		return boneDeltas
+		return
 	}
 
 	var ikOffDeltas *BoneDeltas
 	if isToeIk {
+		mu.Lock()
 		ikOffDeltas = fs.DeformByPhysicsFlag(frame, model, []string{effectorBone.Name}, false,
 			nil, nil, ikFrame, isAfterPhysics)
+		mu.Unlock()
 		if !ikOffDeltas.Contains(effectorBone.Index) {
 			// IK OFFボーンが存在しない場合、スルー
-			return boneDeltas
+			return
 		}
 	}
 
 	// エフェクタ関連情報取得
+	mu.Lock()
 	effectorDeformBoneIndexes, boneDeltas :=
 		fs.prepareDeltas(frame, model, []string{effectorBone.Name}, false, boneDeltas, nil, ikFrame, isAfterPhysics)
+	mu.Unlock()
 	if !boneDeltas.Contains(effectorBone.Index) || !boneDeltas.Contains(ikBone.Index) ||
 		!boneDeltas.Contains(ikBone.Ik.BoneIndex) {
 		// エフェクタボーンが存在しない場合、スルー
-		return boneDeltas
+		return
 	}
 
 	// 中断FLGが入ったか否か
@@ -362,7 +377,9 @@ ikLoop:
 			}
 
 			// IK関連の行列を取得
+			mu.Lock()
 			boneDeltas = fs.calcBoneDeltas(frame, model, effectorDeformBoneIndexes, boneDeltas)
+			mu.Unlock()
 
 			// リンクボーンの変形情報を取得
 			linkDelta := boneDeltas.Get(linkBone.Index)
@@ -632,7 +649,9 @@ ikLoop:
 
 			// IKの結果を更新
 			linkDelta.frameRotation = resultIkQuat
+			mu.Lock()
 			boneDeltas.Append(linkDelta)
+			mu.Unlock()
 
 			// 前回（既存）とほぼ同じ回転量の場合、中断FLGを立てる
 			isAbort := linkQuat != nil && 1-totalIkQuat.Dot(linkQuat) < 1e-10
@@ -663,7 +682,6 @@ ikLoop:
 	}
 
 	ikDeltas = nil
-	return boneDeltas
 }
 
 func (fs *BoneFrames) getLinkAxis(
