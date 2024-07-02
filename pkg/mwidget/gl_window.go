@@ -696,9 +696,9 @@ func (w *GlWindow) Run() {
 			time.Sleep(time.Duration((elapsed64 - w.Physics.PhysicsSpf) * float64(time.Second)))
 		}
 
-		if int(w.frame) > 100 {
-			break
-		}
+		// if int(w.frame) > 100 {
+		// 	break
+		// }
 	}
 	if w.WindowIndex == 0 {
 		defer walk.App().Exit(0)
