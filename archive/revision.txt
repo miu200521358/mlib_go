@@ -376,6 +376,8 @@ MlibSample 1.0.0_beta_78
 MlibSample 1.0.0_beta_79
 ・物理演算OFF時に演算が回るようになっていたので判定追加
 
+MlibSample 1.0.0_beta_80
+・OpenGLウィンドウとwalkコントローラーウィンドウの並列化処理を修正
 
 
 

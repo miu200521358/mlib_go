@@ -49,29 +49,42 @@ func main() {
 
 	appConfig := mconfig.LoadAppConfig(resourceFiles)
 	appConfig.Env = env
+	mi18n.Initialize(resourceFiles)
 
 	if appConfig.IsEnvProd() || appConfig.IsEnvDev() {
 		defer mwidget.RecoverFromPanic(mWindow)
 	}
 
-	mWindow, err = mwidget.NewMWindow(resourceFiles, appConfig, true, 512, 768, getMenuItems)
-	mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
+	glWindow, err := mwidget.NewGlWindow(mi18n.T("ビューワー"), 512, 768, 0, resourceFiles, nil, nil)
 
-	motionPlayer, fixViewWidget, funcWorldPos := NewFileTabPage(mWindow)
+	go func() {
+		mWindow, err = mwidget.NewMWindow(resourceFiles, appConfig, true, 512, 768, getMenuItems)
+		mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
 
-	glWindow, err := mwidget.NewGlWindow(fmt.Sprintf("%s %s", mWindow.Title(), mi18n.T("ビューワー")),
-		512, 768, 0, resourceFiles, nil, motionPlayer, fixViewWidget, funcWorldPos)
-	mwidget.CheckError(err, mWindow, mi18n.T("ビューワーウィンドウ生成エラー"))
-	mWindow.AddGlWindow(glWindow)
+		motionPlayer, _, funcWorldPos := NewFileTabPage(mWindow)
+
+		mwidget.CheckError(err, mWindow, mi18n.T("ビューワーウィンドウ生成エラー"))
+		mWindow.AddGlWindow(glWindow)
+		glWindow.SetFuncWorldPos(funcWorldPos)
+		glWindow.SetMotionPlayer(motionPlayer)
+		glWindow.SetTitle(fmt.Sprintf("%s %s", mWindow.Title(), mi18n.T("ビューワー")))
+
+		// コンソールはタブ外に表示
+		mWindow.ConsoleView, err = mwidget.NewConsoleView(mWindow, 256, 30)
+		mwidget.CheckError(err, mWindow, mi18n.T("コンソール生成エラー"))
+		log.SetOutput(mWindow.ConsoleView)
+
+		mWindow.AsFormBase().Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
+			mWindow.GetMainGlWindow().IsClosedChannel <- true
+			mWindow.Close()
+		})
+
+		mWindow.Center()
+		mWindow.Run()
+	}()
+
+	glWindow.Run()
 	defer glWindow.Close(glWindow.Window)
-
-	// コンソールはタブ外に表示
-	mWindow.ConsoleView, err = mwidget.NewConsoleView(mWindow, 256, 30)
-	mwidget.CheckError(err, mWindow, mi18n.T("コンソール生成エラー"))
-	log.SetOutput(mWindow.ConsoleView)
-
-	mWindow.Center()
-	mWindow.Run()
 }
 
 func getMenuItems() []declarative.MenuItem {
@@ -165,12 +178,19 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 
 			motionPlayer.SetEnabled(true)
 			// fixViewWidget.SetEnabled(true)
-			mWindow.GetMainGlWindow().SetFrame(0)
+			// mWindow.GetMainGlWindow().SetFrame(0)
 			motionPlayer.SetValue(0)
-			mWindow.GetMainGlWindow().Play(false)
-			mWindow.GetMainGlWindow().ClearData()
-			mWindow.GetMainGlWindow().AddData(model, motion)
-			mWindow.GetMainGlWindow().Run()
+			// mWindow.GetMainGlWindow().Play(false)
+			// mWindow.GetMainGlWindow().ClearData()
+			// mWindow.GetMainGlWindow().AddData(model, motion)
+
+			go func() {
+				mWindow.GetMainGlWindow().FrameChannel <- 0
+				mWindow.GetMainGlWindow().IsPlayingChannel <- false
+				// mWindow.GetMainGlWindow().RemoveModelSetIndexChannel <- 0
+				model.Initialized = false
+				mWindow.GetMainGlWindow().AppendModelSetChannel <- mwidget.ModelSet{Model: model, Motion: motion}
+			}()
 		}
 
 		onFilePathChanged()
@@ -193,12 +213,19 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 
 				motionPlayer.SetEnabled(true)
 				// fixViewWidget.SetEnabled(true)
-				mWindow.GetMainGlWindow().SetFrame(0)
+				// mWindow.GetMainGlWindow().SetFrame(0)
 				motionPlayer.SetValue(0)
-				mWindow.GetMainGlWindow().Play(false)
-				mWindow.GetMainGlWindow().ClearData()
-				mWindow.GetMainGlWindow().AddData(model, motion)
-				mWindow.GetMainGlWindow().Run()
+				// mWindow.GetMainGlWindow().Play(false)
+				// mWindow.GetMainGlWindow().ClearData()
+				// mWindow.GetMainGlWindow().AddData(model, motion)
+
+				go func() {
+					mWindow.GetMainGlWindow().FrameChannel <- 0
+					mWindow.GetMainGlWindow().IsPlayingChannel <- false
+					// mWindow.GetMainGlWindow().RemoveModelSetIndexChannel <- 0
+					model.Initialized = false
+					mWindow.GetMainGlWindow().AppendModelSetChannel <- mwidget.ModelSet{Model: model, Motion: motion}
+				}()
 			}
 		}
 
@@ -217,7 +244,9 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 		}
 
 		motionPlayer.PlayButton.SetEnabled(true)
-		mWindow.GetMainGlWindow().Play(isPlaying)
+		go func() {
+			mWindow.GetMainGlWindow().IsPlayingChannel <- isPlaying
+		}()
 
 		return nil
 	}

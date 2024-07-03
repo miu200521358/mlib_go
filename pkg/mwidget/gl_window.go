@@ -26,8 +26,8 @@ import (
 )
 
 type ModelSet struct {
-	model      *pmx.PmxModel
-	motion     *vmd.VmdMotion
+	Model      *pmx.PmxModel
+	Motion     *vmd.VmdMotion
 	prevDeltas *vmd.VmdDeltas
 }
 
@@ -36,34 +36,40 @@ const RIGHT_ANGLE = 89.9
 
 type GlWindow struct {
 	*glfw.Window
-	ModelSets           []ModelSet
-	Shader              *mview.MShader
-	WindowIndex         int
-	resourceFiles       embed.FS
-	prevCursorPos       *mmath.MVec2
-	yaw                 float64
-	pitch               float64
-	Physics             *mphysics.MPhysics
-	middleButtonPressed bool
-	rightButtonPressed  bool
-	updatedPrev         bool
-	shiftPressed        bool
-	ctrlPressed         bool
-	running             bool
-	drawing             bool
-	playing             bool
-	VisibleBones        map[pmx.BoneFlag]bool
-	VisibleNormal       bool
-	VisibleWire         bool
-	EnablePhysics       bool
-	EnableFrameDrop     bool
-	frame               float64
-	prevFrame           int
-	motionPlayer        *MotionPlayer
-	width               int
-	height              int
-	floor               *MFloor
-	funcWorldPos        func(worldPos *mmath.MVec3, viewMat *mmath.MMat4)
+	mWindow                    *MWindow
+	ModelSets                  []ModelSet
+	Shader                     *mview.MShader
+	WindowIndex                int
+	resourceFiles              embed.FS
+	prevCursorPos              *mmath.MVec2
+	yaw                        float64
+	pitch                      float64
+	Physics                    *mphysics.MPhysics
+	middleButtonPressed        bool
+	rightButtonPressed         bool
+	updatedPrev                bool
+	shiftPressed               bool
+	ctrlPressed                bool
+	running                    bool
+	playing                    bool
+	VisibleBones               map[pmx.BoneFlag]bool
+	VisibleNormal              bool
+	VisibleWire                bool
+	EnablePhysics              bool
+	EnableFrameDrop            bool
+	isClosed                   bool
+	frame                      float64
+	prevFrame                  int
+	motionPlayer               *MotionPlayer
+	width                      int
+	height                     int
+	floor                      *MFloor
+	funcWorldPos               func(worldPos *mmath.MVec3, viewMat *mmath.MMat4)
+	AppendModelSetChannel      chan ModelSet
+	RemoveModelSetIndexChannel chan int
+	IsPlayingChannel           chan bool
+	FrameChannel               chan int
+	IsClosedChannel            chan bool
 }
 
 func NewGlWindow(
@@ -73,9 +79,7 @@ func NewGlWindow(
 	windowIndex int,
 	resourceFiles embed.FS,
 	mainWindow *GlWindow,
-	motionPlayer *MotionPlayer,
 	fixViewWidget *FixViewWidget,
-	funcWorldPos func(worldPos *mmath.MVec3, viewMat *mmath.MMat4),
 ) (*GlWindow, error) {
 	if mainWindow == nil {
 		// GLFW の初期化(最初の一回だけ)
@@ -148,35 +152,37 @@ func NewGlWindow(
 	}
 
 	glWindow := GlWindow{
-		Window:              w,
-		ModelSets:           make([]ModelSet, 0),
-		Shader:              shader,
-		WindowIndex:         windowIndex,
-		resourceFiles:       resourceFiles,
-		prevCursorPos:       &mmath.MVec2{0, 0},
-		yaw:                 RIGHT_ANGLE,
-		pitch:               0.0,
-		Physics:             mphysics.NewMPhysics(shader),
-		middleButtonPressed: false,
-		rightButtonPressed:  false,
-		updatedPrev:         false,
-		shiftPressed:        false,
-		ctrlPressed:         false,
-		VisibleBones:        make(map[pmx.BoneFlag]bool, 0),
-		VisibleNormal:       false,
-		VisibleWire:         false,
-		running:             false,
-		drawing:             false,
-		playing:             false, // 最初は再生OFF
-		EnablePhysics:       true,  // 最初は物理ON
-		EnableFrameDrop:     true,  // 最初はドロップON
-		frame:               0,
-		prevFrame:           0,
-		motionPlayer:        motionPlayer,
-		width:               width,
-		height:              height,
-		floor:               newMFloor(),
-		funcWorldPos:        funcWorldPos,
+		Window:                     w,
+		ModelSets:                  make([]ModelSet, 0),
+		Shader:                     shader,
+		WindowIndex:                windowIndex,
+		resourceFiles:              resourceFiles,
+		prevCursorPos:              &mmath.MVec2{0, 0},
+		yaw:                        RIGHT_ANGLE,
+		pitch:                      0.0,
+		Physics:                    mphysics.NewMPhysics(shader),
+		middleButtonPressed:        false,
+		rightButtonPressed:         false,
+		updatedPrev:                false,
+		shiftPressed:               false,
+		ctrlPressed:                false,
+		VisibleBones:               make(map[pmx.BoneFlag]bool, 0),
+		VisibleNormal:              false,
+		VisibleWire:                false,
+		isClosed:                   false,
+		running:                    false,
+		playing:                    false, // 最初は再生OFF
+		EnablePhysics:              true,  // 最初は物理ON
+		EnableFrameDrop:            true,  // 最初はドロップON
+		frame:                      0,
+		prevFrame:                  0,
+		width:                      width,
+		height:                     height,
+		floor:                      newMFloor(),
+		AppendModelSetChannel:      make(chan ModelSet, 1),
+		RemoveModelSetIndexChannel: make(chan int, 1),
+		IsPlayingChannel:           make(chan bool, 1),
+		FrameChannel:               make(chan int, 1),
 	}
 
 	w.SetScrollCallback(glWindow.handleScrollEvent)
@@ -188,6 +194,18 @@ func NewGlWindow(
 	w.SetFramebufferSizeCallback(glWindow.resizeBuffer)
 
 	return &glWindow, nil
+}
+
+func (w *GlWindow) SetMWindow(mw *MWindow) {
+	w.mWindow = mw
+}
+
+func (w *GlWindow) SetMotionPlayer(mp *MotionPlayer) {
+	w.motionPlayer = mp
+}
+
+func (w *GlWindow) SetFuncWorldPos(f func(worldPos *mmath.MVec3, viewMat *mmath.MMat4)) {
+	w.funcWorldPos = f
 }
 
 func (w *GlWindow) resizeBuffer(window *glfw.Window, width int, height int) {
@@ -223,10 +241,9 @@ func (w *GlWindow) SetFrame(f int) {
 
 func (w *GlWindow) Close(window *glfw.Window) {
 	w.running = false
-	w.drawing = false
 	w.Shader.Delete()
 	for _, modelSet := range w.ModelSets {
-		modelSet.model.Delete(w.Physics)
+		modelSet.Model.Delete(w.Physics)
 	}
 	if w.WindowIndex == 0 {
 		defer glfw.Terminate()
@@ -508,8 +525,8 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 
 func (w *GlWindow) ResetPhysics() {
 	for _, modelSet := range w.ModelSets {
-		modelSet.model.DeletePhysics(w.Physics)
-		modelSet.model.InitPhysics(w.Physics)
+		modelSet.Model.DeletePhysics(w.Physics)
+		modelSet.Model.InitPhysics(w.Physics)
 	}
 }
 
@@ -524,17 +541,9 @@ func (w *GlWindow) Reset() {
 
 }
 
-func (w *GlWindow) AddData(pmxModel *pmx.PmxModel, vmdMotion *vmd.VmdMotion) {
-	w.drawing = true
-	pmxModel.InitDraw(len(w.ModelSets), w.resourceFiles)
-	pmxModel.InitPhysics(w.Physics)
-	w.ModelSets = append(w.ModelSets, ModelSet{model: pmxModel, motion: vmdMotion, prevDeltas: nil})
-}
-
 func (w *GlWindow) ClearData() {
 	for _, modelSet := range w.ModelSets {
-		modelSet.model.DeletePhysics(w.Physics)
-		modelSet.prevDeltas = nil
+		modelSet.Model.DeletePhysics(w.Physics)
 	}
 	w.ModelSets = make([]ModelSet, 0)
 	w.frame = 0
@@ -546,15 +555,43 @@ func (w *GlWindow) Size() walk.Size {
 }
 
 func (w *GlWindow) Run() {
-	if w == nil || w.running {
-		return
-	}
-
 	prevTime := glfw.GetTime()
 	w.prevFrame = 0
 	w.running = true
 
+	go func() {
+	channelLoop:
+		for {
+			select {
+			case pair := <-w.AppendModelSetChannel:
+				// 追加処理
+				w.ClearData()
+				w.ModelSets = append(w.ModelSets, ModelSet{Model: pair.Model, Motion: pair.Motion, prevDeltas: nil})
+			case index := <-w.RemoveModelSetIndexChannel:
+				// 削除処理
+				if index >= 0 && index < len(w.ModelSets) {
+					w.ModelSets[index].Model.DeletePhysics(w.Physics)
+					w.ModelSets = append(w.ModelSets[:index], w.ModelSets[index+1:]...)
+				} else if index == -1 {
+					w.ClearData()
+				}
+			case isPlaying := <-w.IsPlayingChannel:
+				// 再生設定
+				w.Play(isPlaying)
+			case frame := <-w.FrameChannel:
+				// フレーム設定
+				w.SetFrame(frame)
+			case isClosed := <-w.IsClosedChannel:
+				// ウィンドウが閉じられた場合
+				w.isClosed = isClosed
+				break channelLoop
+			}
+		}
+	}()
+
+RunLoop:
 	for w.IsRunning() {
+
 		w.MakeContextCurrent()
 
 		if w.width == 0 || w.height == 0 {
@@ -604,7 +641,7 @@ func (w *GlWindow) Run() {
 
 		for _, program := range w.Shader.GetPrograms() {
 			if !w.IsRunning() {
-				break
+				break RunLoop
 			}
 
 			// プログラムの切り替え
@@ -634,7 +671,7 @@ func (w *GlWindow) Run() {
 		}
 
 		if !w.IsRunning() {
-			break
+			break RunLoop
 		}
 
 		if w.playing {
@@ -655,45 +692,77 @@ func (w *GlWindow) Run() {
 			}
 		}
 
+		if !w.IsRunning() {
+			break RunLoop
+		}
+
 		// 床平面を描画
 		w.drawFloor()
+
+		if !w.IsRunning() {
+			break RunLoop
+		}
 
 		// 描画
 		for i, modelSet := range w.ModelSets {
 			if !w.IsRunning() {
-				break
+				break RunLoop
+			}
+
+			if !modelSet.Model.Initialized {
+				// モデルの初期化が終わっていない場合は初期化実行
+				modelSet.Model.InitDraw(0, w.resourceFiles)
+				modelSet.Model.InitPhysics(w.Physics)
+				modelSet.Model.Initialized = true
 			}
 
 			w.ModelSets[i].prevDeltas = draw(
-				w.Physics, modelSet.model, modelSet.motion, w.Shader,
+				w.Physics, modelSet.Model, modelSet.Motion, w.Shader,
 				modelSet.prevDeltas, i, int(w.frame), elapsed, isDeform, w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleBones)
+
+			if !w.IsRunning() {
+				break RunLoop
+			}
+		}
+
+		if !w.IsRunning() {
+			break RunLoop
 		}
 
 		w.Shader.Msaa.Resolve()
+
+		if !w.IsRunning() {
+			break RunLoop
+		}
+
 		w.Shader.Msaa.Unbind()
 
 		if !w.IsRunning() {
-			break
+			break RunLoop
 		}
 
 		w.SwapBuffers()
 
 		if !w.IsRunning() {
-			break
+			break RunLoop
 		}
 
 		glfw.PollEvents()
 
 		if !w.IsRunning() {
-			break
+			break RunLoop
 		}
 
 		// 60fpsに制限するための処理
 		frameTime = glfw.GetTime()
 		elapsed64 := frameTime - prevTime
-		if elapsed64 < w.Physics.PhysicsSpf {
-			// mlog.I("PhysicsSleep frame=%.8f, elapsed64=%.8f, PhysicsSpf=%.8f", w.frame, elapsed64, w.Physics.PhysicsSpf)
-			time.Sleep(time.Duration((elapsed64 - w.Physics.PhysicsSpf) * float64(time.Second)))
+		if w.IsRunning() && elapsed64 < w.Physics.PhysicsSpf {
+			sleepTime := time.Duration((w.Physics.PhysicsSpf - elapsed64) * float64(time.Second))
+			if sleepTime > 20000000 {
+				mlog.V("PhysicsSleep frame=%.8f, elapsed64=%.8f, PhysicsSpf=%.8f, sleepTime=%v", w.frame, elapsed64, w.
+					Physics.PhysicsSpf, sleepTime)
+			}
+			time.Sleep(sleepTime)
 		}
 
 		// if int(w.frame) > 100 {
@@ -706,7 +775,8 @@ func (w *GlWindow) Run() {
 }
 
 func (w *GlWindow) IsRunning() bool {
-	return w.drawing && w.running && !CheckOpenGLError() && !w.ShouldClose()
+	return !w.isClosed && !CheckOpenGLError() && !w.ShouldClose() &&
+		((w.mWindow != nil && !w.mWindow.IsDisposed()) || w.mWindow == nil)
 }
 
 // 床描画 ------------------

@@ -51,8 +51,6 @@ func NewMWindow(
 	height int,
 	funcHelpMenuItems func() []declarative.MenuItem,
 ) (*MWindow, error) {
-	mi18n.Initialize(resourceFiles)
-
 	mainWindow := &MWindow{
 		isHorizontal: isHorizontal,
 		GlWindows:    []*GlWindow{},
@@ -471,6 +469,7 @@ func (w *MWindow) Dispose() {
 		glWindow.Close(glWindow.Window)
 	}
 	w.MainWindow.Dispose()
+	defer walk.App().Exit(0)
 }
 
 const (

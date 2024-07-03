@@ -33,6 +33,7 @@ type PmxModel struct {
 	RigidBodies         *RigidBodies
 	Joints              *Joints
 	Meshes              *Meshes
+	Initialized         bool
 }
 
 func NewPmxModel(path string) *PmxModel {
@@ -49,6 +50,7 @@ func NewPmxModel(path string) *PmxModel {
 	model.DisplaySlots = NewDisplaySlots()
 	model.RigidBodies = NewRigidBodies()
 	model.Joints = NewJoints()
+	model.Initialized = false
 
 	return model
 }
