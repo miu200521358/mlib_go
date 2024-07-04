@@ -4,10 +4,12 @@ import (
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/mphysics"
 )
 
 type PmxModel struct {
 	*mcore.HashModel
+	physics             *mphysics.MPhysics
 	Signature           string
 	Version             float64
 	ExtendedUVCountType int
@@ -33,7 +35,7 @@ type PmxModel struct {
 	RigidBodies         *RigidBodies
 	Joints              *Joints
 	Meshes              *Meshes
-	Initialized         bool
+	DrawInitialized     bool
 }
 
 func NewPmxModel(path string) *PmxModel {
@@ -50,7 +52,7 @@ func NewPmxModel(path string) *PmxModel {
 	model.DisplaySlots = NewDisplaySlots()
 	model.RigidBodies = NewRigidBodies()
 	model.Joints = NewJoints()
-	model.Initialized = false
+	model.DrawInitialized = false
 
 	return model
 }

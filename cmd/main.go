@@ -75,7 +75,9 @@ func main() {
 		log.SetOutput(mWindow.ConsoleView)
 
 		mWindow.AsFormBase().Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
-			mWindow.GetMainGlWindow().IsClosedChannel <- true
+			go func() {
+				mWindow.GetMainGlWindow().IsClosedChannel <- true
+			}()
 			mWindow.Close()
 		})
 
@@ -187,9 +189,11 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 			go func() {
 				mWindow.GetMainGlWindow().FrameChannel <- 0
 				mWindow.GetMainGlWindow().IsPlayingChannel <- false
-				// mWindow.GetMainGlWindow().RemoveModelSetIndexChannel <- 0
-				model.Initialized = false
-				mWindow.GetMainGlWindow().AppendModelSetChannel <- mwidget.ModelSet{Model: model, Motion: motion}
+				mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]mwidget.ModelSet{0: {Model: model, Motion: motion}}
+			}()
+		} else {
+			go func() {
+				mWindow.GetMainGlWindow().RemoveModelSetIndexChannel <- 0
 			}()
 		}
 
@@ -222,9 +226,11 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 				go func() {
 					mWindow.GetMainGlWindow().FrameChannel <- 0
 					mWindow.GetMainGlWindow().IsPlayingChannel <- false
-					// mWindow.GetMainGlWindow().RemoveModelSetIndexChannel <- 0
-					model.Initialized = false
-					mWindow.GetMainGlWindow().AppendModelSetChannel <- mwidget.ModelSet{Model: model, Motion: motion}
+					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]mwidget.ModelSet{0: {Model: model, Motion: motion}}
+				}()
+			} else {
+				go func() {
+					mWindow.GetMainGlWindow().RemoveModelSetIndexChannel <- 0
 				}()
 			}
 		}

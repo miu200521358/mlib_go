@@ -318,6 +318,11 @@ func (picker *FilePicker) GetData() (mcore.IHashModel, error) {
 		return picker.cacheData, nil
 	}
 
+	if picker.cacheData != nil {
+		// キャッシュデータが残っており、現在の指定と異なる場合、前のを削除
+		picker.cacheData.Delete()
+	}
+
 	data, err := picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
 	if err != nil {
 		return nil, err

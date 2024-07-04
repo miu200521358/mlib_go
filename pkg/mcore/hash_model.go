@@ -8,6 +8,7 @@ type IHashModel interface {
 	GetHash() string
 	GetPath() string
 	SetPath(path string)
+	Delete()
 }
 
 type HashModel struct {
@@ -52,4 +53,7 @@ func (m *HashModel) IsNotEmpty() bool {
 func (m *HashModel) IsEmpty() bool {
 	// パスが定義されていなかったら、空
 	return len(m.Path) == 0
+}
+
+func (m *HashModel) Delete() {
 }

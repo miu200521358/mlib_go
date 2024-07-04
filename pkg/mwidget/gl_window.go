@@ -37,7 +37,7 @@ const RIGHT_ANGLE = 89.9
 type GlWindow struct {
 	*glfw.Window
 	mWindow                    *MWindow
-	ModelSets                  []ModelSet
+	ModelSets                  map[int]ModelSet
 	Shader                     *mview.MShader
 	WindowIndex                int
 	resourceFiles              embed.FS
@@ -67,6 +67,7 @@ type GlWindow struct {
 	funcWorldPos               func(worldPos *mmath.MVec3, viewMat *mmath.MMat4)
 	AppendModelSetChannel      chan ModelSet
 	RemoveModelSetIndexChannel chan int
+	ReplaceModelSetChannel     chan map[int]ModelSet
 	IsPlayingChannel           chan bool
 	FrameChannel               chan int
 	IsClosedChannel            chan bool
@@ -153,7 +154,7 @@ func NewGlWindow(
 
 	glWindow := GlWindow{
 		Window:                     w,
-		ModelSets:                  make([]ModelSet, 0),
+		ModelSets:                  make(map[int]ModelSet),
 		Shader:                     shader,
 		WindowIndex:                windowIndex,
 		resourceFiles:              resourceFiles,
@@ -181,6 +182,7 @@ func NewGlWindow(
 		floor:                      newMFloor(),
 		AppendModelSetChannel:      make(chan ModelSet, 1),
 		RemoveModelSetIndexChannel: make(chan int, 1),
+		ReplaceModelSetChannel:     make(chan map[int]ModelSet),
 		IsPlayingChannel:           make(chan bool, 1),
 		FrameChannel:               make(chan int, 1),
 	}
@@ -233,9 +235,9 @@ func (w *GlWindow) SetFrame(f int) {
 	w.frame = float64(f)
 	w.prevFrame = f
 
-	for i := range w.ModelSets {
+	for _, v := range w.ModelSets {
 		// 前のデフォーム情報をクリア
-		w.ModelSets[i].prevDeltas = nil
+		v.prevDeltas = nil
 	}
 }
 
@@ -243,7 +245,7 @@ func (w *GlWindow) Close(window *glfw.Window) {
 	w.running = false
 	w.Shader.Delete()
 	for _, modelSet := range w.ModelSets {
-		modelSet.Model.Delete(w.Physics)
+		modelSet.Model.Delete()
 	}
 	if w.WindowIndex == 0 {
 		defer glfw.Terminate()
@@ -525,7 +527,7 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 
 func (w *GlWindow) ResetPhysics() {
 	for _, modelSet := range w.ModelSets {
-		modelSet.Model.DeletePhysics(w.Physics)
+		modelSet.Model.DeletePhysics()
 		modelSet.Model.InitPhysics(w.Physics)
 	}
 }
@@ -539,14 +541,6 @@ func (w *GlWindow) Reset() {
 	w.middleButtonPressed = false
 	w.rightButtonPressed = false
 
-}
-
-func (w *GlWindow) ClearData() {
-	for _, modelSet := range w.ModelSets {
-		modelSet.Model.DeletePhysics(w.Physics)
-	}
-	w.ModelSets = make([]ModelSet, 0)
-	w.frame = 0
 }
 
 func (w *GlWindow) Size() walk.Size {
@@ -565,15 +559,16 @@ func (w *GlWindow) Run() {
 			select {
 			case pair := <-w.AppendModelSetChannel:
 				// 追加処理
-				w.ClearData()
-				w.ModelSets = append(w.ModelSets, ModelSet{Model: pair.Model, Motion: pair.Motion, prevDeltas: nil})
+				w.ModelSets[len(w.ModelSets)-1] = pair
+			case pairMap := <-w.ReplaceModelSetChannel:
+				// 入替処理
+				for k, v := range pairMap {
+					w.ModelSets[k] = v
+				}
 			case index := <-w.RemoveModelSetIndexChannel:
 				// 削除処理
-				if index >= 0 && index < len(w.ModelSets) {
-					w.ModelSets[index].Model.DeletePhysics(w.Physics)
-					w.ModelSets = append(w.ModelSets[:index], w.ModelSets[index+1:]...)
-				} else if index == -1 {
-					w.ClearData()
+				if _, ok := w.ModelSets[index]; ok {
+					w.ModelSets[index].Model.Delete()
 				}
 			case isPlaying := <-w.IsPlayingChannel:
 				// 再生設定
@@ -705,18 +700,17 @@ RunLoop:
 
 		// 描画
 		for i, modelSet := range w.ModelSets {
+			if !modelSet.Model.DrawInitialized {
+				// モデルの初期化が終わっていない場合は初期化実行
+				modelSet.Model.DrawInitialize(w.WindowIndex, w.resourceFiles, w.Physics)
+				isDeform = true
+			}
+
 			if !w.IsRunning() {
 				break RunLoop
 			}
 
-			if !modelSet.Model.Initialized {
-				// モデルの初期化が終わっていない場合は初期化実行
-				modelSet.Model.InitDraw(0, w.resourceFiles)
-				modelSet.Model.InitPhysics(w.Physics)
-				modelSet.Model.Initialized = true
-			}
-
-			w.ModelSets[i].prevDeltas = draw(
+			modelSet.prevDeltas = draw(
 				w.Physics, modelSet.Model, modelSet.Motion, w.Shader,
 				modelSet.prevDeltas, i, int(w.frame), elapsed, isDeform, w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleBones)
 
