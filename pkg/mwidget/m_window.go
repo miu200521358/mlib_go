@@ -38,6 +38,10 @@ type MWindow struct {
 	rigidBodyFrontDebugAction *walk.Action // 剛体デバッグ表示(前面)
 	rigidBodyBackDebugAction  *walk.Action // 剛体デバッグ表示(埋め込み)
 	jointDebugAction          *walk.Action // ジョイントデバッグ表示
+	infoDebugAction           *walk.Action // 情報デバッグ表示
+	fps30LimitAction          *walk.Action // 30FPS制限
+	fps60LimitAction          *walk.Action // 60FPS制限
+	fpsUnLimitAction          *walk.Action // FPS無制限
 	logLevelDebugAction       *walk.Action // デバッグメッセージ表示
 	logLevelVerboseAction     *walk.Action // 冗長メッセージ表示
 	logLevelIkVerboseAction   *walk.Action // IK冗長メッセージ表示
@@ -207,6 +211,36 @@ func NewMWindow(
 					},
 					declarative.Separator{},
 					declarative.Action{
+						Text:        mi18n.T("&情報表示"),
+						Checkable:   true,
+						OnTriggered: mainWindow.infoDebugViewTriggered,
+						AssignTo:    &mainWindow.infoDebugAction,
+					},
+					declarative.Menu{
+						Text: mi18n.T("&fps制限"),
+						Items: []declarative.MenuItem{
+							declarative.Action{
+								Text:        mi18n.T("&30fps制限"),
+								Checkable:   true,
+								OnTriggered: mainWindow.fps30LimitTriggered,
+								AssignTo:    &mainWindow.fps30LimitAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&60fps制限"),
+								Checkable:   true,
+								OnTriggered: mainWindow.fps60LimitTriggered,
+								AssignTo:    &mainWindow.fps60LimitAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&fps無制限"),
+								Checkable:   true,
+								OnTriggered: mainWindow.fpsUnLimitTriggered,
+								AssignTo:    &mainWindow.fpsUnLimitAction,
+							},
+						},
+					},
+					declarative.Separator{},
+					declarative.Action{
 						Text: mi18n.T("&使い方"),
 						OnTriggered: func() {
 							mlog.ILT(mi18n.T("ビューワーの使い方"), mi18n.T("ビューワーの使い方メッセージ"))
@@ -252,6 +286,8 @@ func NewMWindow(
 	mainWindow.physicsAction.SetChecked(true)
 	// 最初はフレームドロップON
 	mainWindow.frameDropAction.SetChecked(true)
+	// 最初は30fps制限
+	mainWindow.fps30LimitAction.SetChecked(true)
 
 	mainWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
 		if len(mainWindow.GlWindows) > 0 && !CheckOpenGLError() {
@@ -375,6 +411,36 @@ func (w *MWindow) rigidBodyDebugBackViewTriggered() {
 func (w *MWindow) jointDebugViewTriggered() {
 	for _, glWindow := range w.GlWindows {
 		glWindow.Physics.VisibleJoint(w.jointDebugAction.Checked())
+	}
+}
+
+func (w *MWindow) infoDebugViewTriggered() {
+	for _, glWindow := range w.GlWindows {
+		glWindow.isShowInfo = w.infoDebugAction.Checked()
+	}
+}
+
+func (w *MWindow) fps30LimitTriggered() {
+	w.fps60LimitAction.SetChecked(false)
+	w.fpsUnLimitAction.SetChecked(false)
+	for _, glWindow := range w.GlWindows {
+		glWindow.spfLimit = 1 / 30.0
+	}
+}
+
+func (w *MWindow) fps60LimitTriggered() {
+	w.fps30LimitAction.SetChecked(false)
+	w.fpsUnLimitAction.SetChecked(false)
+	for _, glWindow := range w.GlWindows {
+		glWindow.spfLimit = 1 / 60.0
+	}
+}
+
+func (w *MWindow) fpsUnLimitTriggered() {
+	w.fps30LimitAction.SetChecked(false)
+	w.fps60LimitAction.SetChecked(false)
+	for _, glWindow := range w.GlWindows {
+		glWindow.spfLimit = -1.0
 	}
 }
 

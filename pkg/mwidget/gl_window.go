@@ -5,6 +5,7 @@ package mwidget
 
 import (
 	"embed"
+	"fmt"
 	"image"
 	"math"
 	"time"
@@ -29,6 +30,7 @@ type ModelSet struct {
 	Model      *pmx.PmxModel
 	Motion     *vmd.VmdMotion
 	prevDeltas *vmd.VmdDeltas
+	isDeform   bool
 }
 
 // 直角の定数値
@@ -39,6 +41,7 @@ type GlWindow struct {
 	mWindow                    *MWindow
 	ModelSets                  map[int]ModelSet
 	Shader                     *mview.MShader
+	title                      string
 	WindowIndex                int
 	resourceFiles              embed.FS
 	prevCursorPos              *mmath.MVec2
@@ -58,6 +61,8 @@ type GlWindow struct {
 	EnablePhysics              bool
 	EnableFrameDrop            bool
 	isClosed                   bool
+	isShowInfo                 bool
+	spfLimit                   float64
 	frame                      float64
 	prevFrame                  int
 	motionPlayer               *MotionPlayer
@@ -156,6 +161,7 @@ func NewGlWindow(
 		Window:                     w,
 		ModelSets:                  make(map[int]ModelSet),
 		Shader:                     shader,
+		title:                      title,
 		WindowIndex:                windowIndex,
 		resourceFiles:              resourceFiles,
 		prevCursorPos:              &mmath.MVec2{0, 0},
@@ -171,6 +177,8 @@ func NewGlWindow(
 		VisibleNormal:              false,
 		VisibleWire:                false,
 		isClosed:                   false,
+		isShowInfo:                 false,
+		spfLimit:                   1.0 / 30.0,
 		running:                    false,
 		playing:                    false, // 最初は再生OFF
 		EnablePhysics:              true,  // 最初は物理ON
@@ -196,6 +204,11 @@ func NewGlWindow(
 	w.SetFramebufferSizeCallback(glWindow.resizeBuffer)
 
 	return &glWindow, nil
+}
+
+func (w *GlWindow) SetTitle(title string) {
+	w.title = title
+	w.Window.SetTitle(title)
 }
 
 func (w *GlWindow) SetMWindow(mw *MWindow) {
@@ -238,6 +251,7 @@ func (w *GlWindow) SetFrame(f int) {
 	for _, v := range w.ModelSets {
 		// 前のデフォーム情報をクリア
 		v.prevDeltas = nil
+		v.isDeform = true
 	}
 }
 
@@ -552,6 +566,7 @@ func (w *GlWindow) Run() {
 	prevTime := glfw.GetTime()
 	w.prevFrame = 0
 	w.running = true
+	sleepTime := time.Duration(0.0)
 
 	go func() {
 	channelLoop:
@@ -665,6 +680,12 @@ RunLoop:
 			elapsed = mmath.ClampFloat32(elapsed, 0, w.Physics.Spf)
 		}
 
+		if w.isShowInfo {
+			w.Window.SetTitle(fmt.Sprintf("%s - %.2f fps - %d ms sleep", w.title, 1.0/elapsed, sleepTime.Milliseconds()))
+		} else {
+			w.Window.SetTitle(w.title)
+		}
+
 		if !w.IsRunning() {
 			break RunLoop
 		}
@@ -677,9 +698,11 @@ RunLoop:
 
 		prevTime = frameTime
 
-		isDeform := false
 		if int(w.frame) > w.prevFrame {
-			isDeform = true
+			for _, modelSet := range w.ModelSets {
+				modelSet.isDeform = true
+			}
+
 			// フレーム番号上書き
 			w.prevFrame = int(w.frame)
 			if w.playing && w.motionPlayer != nil {
@@ -703,7 +726,7 @@ RunLoop:
 			if !modelSet.Model.DrawInitialized {
 				// モデルの初期化が終わっていない場合は初期化実行
 				modelSet.Model.DrawInitialize(w.WindowIndex, w.resourceFiles, w.Physics)
-				isDeform = true
+				modelSet.isDeform = true
 			}
 
 			if !w.IsRunning() {
@@ -712,7 +735,8 @@ RunLoop:
 
 			modelSet.prevDeltas = draw(
 				w.Physics, modelSet.Model, modelSet.Motion, w.Shader,
-				modelSet.prevDeltas, i, int(w.frame), elapsed, isDeform, w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleBones)
+				modelSet.prevDeltas, i, int(w.frame), elapsed, modelSet.isDeform,
+				w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleBones)
 
 			if !w.IsRunning() {
 				break RunLoop
@@ -747,14 +771,15 @@ RunLoop:
 			break RunLoop
 		}
 
-		// 60fpsに制限するための処理
-		frameTime = glfw.GetTime()
-		elapsed64 := frameTime - prevTime
-		if w.IsRunning() && elapsed64 < w.Physics.PhysicsSpf {
-			sleepTime := time.Duration((w.Physics.PhysicsSpf - elapsed64) * float64(time.Second))
-			mlog.V("PhysicsSleep frame=%.8f, elapsed64=%.8f, PhysicsSpf=%.8f, sleepTime=%v", w.frame, elapsed64, w.
-				Physics.PhysicsSpf, sleepTime)
-			time.Sleep(sleepTime)
+		// fps制限処理
+		sleepTime = time.Duration(0.0)
+		if w.IsRunning() && w.spfLimit > 0 {
+			frameTime = glfw.GetTime()
+			elapsed64 := frameTime - prevTime
+			if elapsed64 < w.spfLimit {
+				sleepTime = time.Duration((w.spfLimit - elapsed64) * float64(time.Second))
+				time.Sleep(sleepTime)
+			}
 		}
 
 		// if int(w.frame) > 100 {

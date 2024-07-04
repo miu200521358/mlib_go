@@ -334,5 +334,25 @@
     {
         "id": "&埋め込み表示",
         "translation": "&Embedded Display"
+    },
+    {
+        "id": "&情報表示",
+        "translation": "&Display Information"
+    },
+    {
+        "id": "&fps制限",
+        "translation": "&FPS Limit"
+    },
+    {
+        "id": "&30fps制限",
+        "translation": "&30 FPS Limit"
+    },
+    {
+        "id": "&60fps制限",
+        "translation": "&60 FPS Limit"
+    },
+    {
+        "id": "&fps無制限",
+        "translation": "&Unlimited FPS"
     }
 ]

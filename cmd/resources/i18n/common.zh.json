@@ -334,5 +334,25 @@
     {
         "id": "&埋め込み表示",
         "translation": "&嵌入显示"
+    },
+    {
+        "id": "&情報表示",
+        "translation": "&显示信息"
+    },
+    {
+        "id": "&fps制限",
+        "translation": "&FPS限制"
+    },
+    {
+        "id": "&30fps制限",
+        "translation": "&30 FPS限制"
+    },
+    {
+        "id": "&60fps制限",
+        "translation": "&60 FPS限制"
+    },
+    {
+        "id": "&fps無制限",
+        "translation": "&无限制FPS"
     }
 ]

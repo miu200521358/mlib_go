@@ -334,5 +334,25 @@
     {
         "id": "&埋め込み表示",
         "translation": "&埋め込み表示"
+    },
+    {
+        "id": "&情報表示",
+        "translation": "&情報表示"
+    },
+    {
+        "id": "&fps制限",
+        "translation": "&fps制限"
+    },
+    {
+        "id": "&30fps制限",
+        "translation": "&30fps制限"
+    },
+    {
+        "id": "&60fps制限",
+        "translation": "&60fps制限"
+    },
+    {
+        "id": "&fps無制限",
+        "translation": "&fps無制限"
     }
 ]

@@ -13,7 +13,6 @@ type MPhysics struct {
 	MaxSubSteps         int
 	Fps                 float32
 	Spf                 float32
-	PhysicsSpf          float64
 	FixedTimeStep       float32
 	joints              []mbt.BtTypedConstraint
 	rigidBodies         map[int]mbt.BtRigidBody
@@ -51,7 +50,6 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 		world:               world,
 		MaxSubSteps:         5,
 		Fps:                 30.0,
-		PhysicsSpf:          1.0 / 60.0,
 		rigidBodies:         make(map[int]mbt.BtRigidBody),
 		rigidBodyTransforms: make(map[int]mbt.BtTransform),
 	}
