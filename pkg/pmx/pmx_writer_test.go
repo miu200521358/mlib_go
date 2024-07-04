@@ -7,55 +7,23 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
-func TestPmxReader_ReadNameByFilepath(t *testing.T) {
-	r := &PmxReader{}
-
-	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
-
-	expectedName := "v2配布用素体03"
-	if modelName != expectedName {
-		t.Errorf("Expected Name to be %q, got %q", expectedName, modelName)
-	}
-
-	if err != nil {
-		t.Errorf("Expected error to be nil, got %q", err)
-	}
-}
-
-func TestPmxReader_ReadNameByFilepath_2_1(t *testing.T) {
-	r := &PmxReader{}
-
-	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
-
-	expectedName := "サンプルモデル迪卢克"
-	if modelName != expectedName {
-		t.Errorf("Expected Name to be %q, got %q", expectedName, modelName)
-	}
-
-	if err != nil {
-		t.Errorf("Expected error to be nil, got %q", err)
-	}
-}
-
-func TestPmxReader_ReadNameByFilepath_NotExist(t *testing.T) {
-	r := &PmxReader{}
-
-	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル_Nothing.pmx")
-
-	expectedName := ""
-	if modelName != expectedName {
-		t.Errorf("Expected Name to be %q, got %q", expectedName, modelName)
-	}
-
-	if err == nil {
-		t.Errorf("Expected error to be not nil, got %q", err)
-	}
-}
-
-func TestPmxReader_ReadByFilepath(t *testing.T) {
+func TestPmxWriter_Save1(t *testing.T) {
 	r := &PmxReader{}
 
 	data, err := r.ReadByFilepath("../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
+	originalModel := data.(*PmxModel)
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	// ------------------
+
+	overridePath := "../../test_resources/サンプルモデル_PMX読み取り確認用_output.pmx"
+	originalModel.Save(false, overridePath)
+
+	// ------------------
+	data, err = r.ReadByFilepath(overridePath)
 	model := data.(*PmxModel)
 
 	if err != nil {
@@ -824,31 +792,5 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 		if !j.JointParam.SpringConstantRotation.GetRadians().NearEquals(expectedSpringConstantRotation, 1e-5) {
 			t.Errorf("Expected SpringConstantRotation to be %v, got %v", expectedSpringConstantRotation, j.JointParam.SpringConstantRotation)
 		}
-	}
-}
-
-func TestPmxReader_ReadByFilepath_2_1(t *testing.T) {
-	r := &PmxReader{}
-
-	data, err := r.ReadByFilepath("../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
-	model := data.(*PmxModel)
-
-	if err != nil {
-		t.Errorf("Expected error to be nil, got %q", err)
-	}
-
-	expectedSignature := "PMX "
-	if model.Signature != expectedSignature {
-		t.Errorf("Expected Signature to be %q, got %q", expectedSignature, model.Signature)
-	}
-
-	expectedVersion := 2.1
-	if math.Abs(model.Version-expectedVersion) > 1e-5 {
-		t.Errorf("Expected Version to be %.8f, got %.8f", expectedVersion, model.Version)
-	}
-
-	expectedName := "サンプルモデル迪卢克"
-	if model.Name != expectedName {
-		t.Errorf("Expected Name to be %q, got %q", expectedName, model.Name)
 	}
 }

@@ -7,6 +7,9 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
+// MLIB_PREFIX システム用接頭辞
+const MLIB_PREFIX string = "[mlib]"
+
 type BoneFlag uint16
 
 const (

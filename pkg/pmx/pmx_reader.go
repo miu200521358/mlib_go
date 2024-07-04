@@ -124,7 +124,7 @@ func (r *PmxReader) readHeader(model *PmxModel) error {
 		mlog.E("UnpackByte extendedUVCount error: %v", err)
 		return err
 	}
-	model.ExtendedUVCountType = int(extendedUVCount)
+	model.ExtendedUVCount = int(extendedUVCount)
 	// [2] - 頂点Indexサイズ | 1,2,4 のいずれか
 	vertexCount, err := r.UnpackByte()
 	if err != nil {
@@ -270,17 +270,17 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 			mlog.E("[%d] readVertices UnpackFloat UV[0] error: %v", i, err)
 			return err
 		}
-		v.UV = &uv
+		v.Uv = &uv
 
 		// 16 * n : float4[n] | 追加UV(x,y,z,w)  PMXヘッダの追加UV数による
-		v.ExtendedUVs = make([]*mmath.MVec4, 0)
-		for j := 0; j < model.ExtendedUVCountType; j++ {
+		v.ExtendedUvs = make([]*mmath.MVec4, 0)
+		for j := 0; j < model.ExtendedUVCount; j++ {
 			extendedUV, err := r.UnpackVec4(false)
 			if err != nil {
 				mlog.E("[%d][%d] readVertices UnpackVec4 ExtendedUV error: %v", i, j, err)
 				return err
 			}
-			v.ExtendedUVs = append(v.ExtendedUVs, &extendedUV)
+			v.ExtendedUvs = append(v.ExtendedUvs, &extendedUV)
 		}
 
 		// 1 : byte    | ウェイト変形方式 0:BDEF1 1:BDEF2 2:BDEF4 3:SDEF
@@ -1278,7 +1278,7 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 			mlog.E("[%d] readJoints UnpackVec3 SpringConstantRotation error: %v", i, err)
 			return err
 		}
-		j.JointParam.SpringConstantRotation = mmath.NewRotationFromDegrees(&springConstantRotation)
+		j.JointParam.SpringConstantRotation = mmath.NewRotationFromRadians(&springConstantRotation)
 
 		model.Joints.Append(&j)
 	}

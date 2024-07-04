@@ -78,3 +78,23 @@ func ReadText(path string) (string, error) {
 
 	return string(content), nil
 }
+
+// 保存可能なファイルパスであるか否か
+func CanSave(path string) bool {
+	if path == "" {
+		return false
+	}
+
+	// ファイルパスまでのディレクトリ
+	dir := filepath.Dir(path)
+	if dir == "" || dir == "." {
+		return false
+	}
+
+	// ディレクトリが存在しない場合は作成不可
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return false
+	}
+
+	return true
+}

@@ -9,33 +9,33 @@ import (
 
 type PmxModel struct {
 	*mcore.HashModel
-	physics             *mphysics.MPhysics
-	Signature           string
-	Version             float64
-	ExtendedUVCountType int
-	VertexCountType     int
-	TextureCountType    int
-	MaterialCountType   int
-	BoneCountType       int
-	MorphCountType      int
-	RigidBodyCountType  int
-	Name                string
-	EnglishName         string
-	Comment             string
-	EnglishComment      string
-	JsonData            map[string]interface{}
-	Vertices            *Vertices
-	Faces               *Faces
-	Textures            *Textures
-	ToonTextures        *ToonTextures
-	Materials           *Materials
-	Bones               *Bones
-	Morphs              *Morphs
-	DisplaySlots        *DisplaySlots
-	RigidBodies         *RigidBodies
-	Joints              *Joints
-	Meshes              *Meshes
-	DrawInitialized     bool
+	physics            *mphysics.MPhysics
+	Signature          string
+	Version            float64
+	ExtendedUVCount    int
+	VertexCountType    int
+	TextureCountType   int
+	MaterialCountType  int
+	BoneCountType      int
+	MorphCountType     int
+	RigidBodyCountType int
+	Name               string
+	EnglishName        string
+	Comment            string
+	EnglishComment     string
+	JsonData           map[string]interface{}
+	Vertices           *Vertices
+	Faces              *Faces
+	Textures           *Textures
+	ToonTextures       *ToonTextures
+	Materials          *Materials
+	Bones              *Bones
+	Morphs             *Morphs
+	DisplaySlots       *DisplaySlots
+	RigidBodies        *RigidBodies
+	Joints             *Joints
+	Meshes             *Meshes
+	DrawInitialized    bool
 }
 
 func NewPmxModel(path string) *PmxModel {
