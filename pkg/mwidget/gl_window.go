@@ -248,10 +248,11 @@ func (w *GlWindow) SetFrame(f int) {
 	w.frame = float64(f)
 	w.prevFrame = f
 
-	for _, v := range w.ModelSets {
+	for k, v := range w.ModelSets {
 		// 前のデフォーム情報をクリア
 		v.prevDeltas = nil
 		v.isDeform = true
+		w.ModelSets[k] = v
 	}
 }
 
@@ -699,8 +700,9 @@ RunLoop:
 		prevTime = frameTime
 
 		if int(w.frame) > w.prevFrame {
-			for _, modelSet := range w.ModelSets {
-				modelSet.isDeform = true
+			for k, v := range w.ModelSets {
+				v.isDeform = true
+				w.ModelSets[k] = v
 			}
 
 			// フレーム番号上書き
@@ -722,7 +724,7 @@ RunLoop:
 		}
 
 		// 描画
-		for i, modelSet := range w.ModelSets {
+		for k, modelSet := range w.ModelSets {
 			if !modelSet.Model.DrawInitialized {
 				// モデルの初期化が終わっていない場合は初期化実行
 				modelSet.Model.DrawInitialize(w.WindowIndex, w.resourceFiles, w.Physics)
@@ -735,8 +737,12 @@ RunLoop:
 
 			modelSet.prevDeltas = draw(
 				w.Physics, modelSet.Model, modelSet.Motion, w.Shader,
-				modelSet.prevDeltas, i, int(w.frame), elapsed, modelSet.isDeform,
+				modelSet.prevDeltas, k, int(w.frame), elapsed, modelSet.isDeform,
 				w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleBones)
+
+			// 描画が終わったら一旦デフォームは外す
+			modelSet.isDeform = false
+			w.ModelSets[k] = modelSet
 
 			if !w.IsRunning() {
 				break RunLoop

@@ -261,7 +261,7 @@ func (mf *MorphFrame) DeformMaterial(
 					}
 					deltas.Data[m] = delta
 				}
-			} else if 0 < offset.MaterialIndex && offset.MaterialIndex <= len(deltas.Data) {
+			} else if 0 <= offset.MaterialIndex && offset.MaterialIndex <= len(deltas.Data) {
 				// 特定材質のみの場合
 				delta := deltas.Data[offset.MaterialIndex]
 				if delta == nil {
