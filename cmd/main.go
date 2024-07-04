@@ -179,17 +179,12 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 			}
 
 			motionPlayer.SetEnabled(true)
-			// fixViewWidget.SetEnabled(true)
-			// mWindow.GetMainGlWindow().SetFrame(0)
 			motionPlayer.SetValue(0)
-			// mWindow.GetMainGlWindow().Play(false)
-			// mWindow.GetMainGlWindow().ClearData()
-			// mWindow.GetMainGlWindow().AddData(model, motion)
 
 			go func() {
 				mWindow.GetMainGlWindow().FrameChannel <- 0
 				mWindow.GetMainGlWindow().IsPlayingChannel <- false
-				mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]mwidget.ModelSet{0: {Model: model, Motion: motion, IsDeform: true}}
+				mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*mwidget.ModelSet{0: {NextModel: model, NextMotion: motion}}
 			}()
 		} else {
 			go func() {
@@ -213,20 +208,13 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 			motionPlayer.SetValue(0)
 
 			if pmxReadPicker.Exists() {
-				model := pmxReadPicker.GetCache().(*pmx.PmxModel)
-
 				motionPlayer.SetEnabled(true)
-				// fixViewWidget.SetEnabled(true)
-				// mWindow.GetMainGlWindow().SetFrame(0)
 				motionPlayer.SetValue(0)
-				// mWindow.GetMainGlWindow().Play(false)
-				// mWindow.GetMainGlWindow().ClearData()
-				// mWindow.GetMainGlWindow().AddData(model, motion)
 
 				go func() {
 					mWindow.GetMainGlWindow().FrameChannel <- 0
 					mWindow.GetMainGlWindow().IsPlayingChannel <- false
-					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]mwidget.ModelSet{0: {Model: model, Motion: motion, IsDeform: true}}
+					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*mwidget.ModelSet{0: {NextMotion: motion}}
 				}()
 			} else {
 				go func() {

@@ -19,7 +19,7 @@ func deform(
 	prevDeltas *vmd.VmdDeltas,
 	frame int,
 	elapsed float64,
-	isDeform, enablePhysics bool,
+	enablePhysics bool,
 ) *vmd.VmdDeltas {
 	vds := &vmd.VmdDeltas{}
 	var beforeBoneDeltas *vmd.BoneDeltas
@@ -27,7 +27,7 @@ func deform(
 	// IKのON/OFF
 	ikFrame := motion.IkFrames.Get(frame)
 
-	if isDeform || prevDeltas == nil {
+	if prevDeltas == nil {
 		vds.Morphs = motion.DeformMorph(frame, model, nil)
 		beforeBoneDeltas = motion.BoneFrames.DeformByPhysicsFlag(frame, model, nil, true,
 			nil, vds.Morphs, ikFrame, false)
@@ -55,12 +55,12 @@ func draw(
 	windowIndex int,
 	frame int,
 	elapsed float64,
-	isDeform, enablePhysics bool,
+	enablePhysics bool,
 	isDrawNormal bool,
 	isDrawWire bool,
 	isDrawBones map[pmx.BoneFlag]bool,
 ) *vmd.VmdDeltas {
-	deltas := deform(modelPhysics, model, motion, prevDeltas, frame, elapsed, isDeform, enablePhysics)
+	deltas := deform(modelPhysics, model, motion, prevDeltas, frame, elapsed, enablePhysics)
 
 	boneDeltas := make([]mgl32.Mat4, len(model.Bones.Data))
 	for i, bone := range model.Bones.Data {
@@ -75,7 +75,7 @@ func draw(
 	vertexDeltas := fetchVertexDeltas(model, deltas)
 
 	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, meshDeltas, windowIndex,
-		isDrawNormal, isDrawWire, isDeform || prevDeltas == nil, isDrawBones, model.Bones)
+		isDrawNormal, isDrawWire, prevDeltas == nil, isDrawBones, model.Bones)
 
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()

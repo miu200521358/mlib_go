@@ -28,8 +28,9 @@ import (
 type ModelSet struct {
 	Model      *pmx.PmxModel
 	Motion     *vmd.VmdMotion
+	NextModel  *pmx.PmxModel
+	NextMotion *vmd.VmdMotion
 	prevDeltas *vmd.VmdDeltas
-	IsDeform   bool
 }
 
 // 直角の定数値
@@ -38,7 +39,7 @@ const RIGHT_ANGLE = 89.9
 type GlWindow struct {
 	*glfw.Window
 	mWindow                    *MWindow
-	ModelSets                  map[int]ModelSet
+	modelSets                  map[int]*ModelSet
 	Shader                     *mview.MShader
 	title                      string
 	WindowIndex                int
@@ -64,14 +65,15 @@ type GlWindow struct {
 	spfLimit                   float64
 	frame                      float64
 	prevFrame                  int
+	isSaveDelta                bool
 	motionPlayer               *MotionPlayer
 	width                      int
 	height                     int
 	floor                      *MFloor
 	funcWorldPos               func(worldPos *mmath.MVec3, viewMat *mmath.MMat4)
-	AppendModelSetChannel      chan ModelSet
+	AppendModelSetChannel      chan *ModelSet
 	RemoveModelSetIndexChannel chan int
-	ReplaceModelSetChannel     chan map[int]ModelSet
+	ReplaceModelSetChannel     chan map[int]*ModelSet
 	IsPlayingChannel           chan bool
 	FrameChannel               chan int
 	IsClosedChannel            chan bool
@@ -158,7 +160,7 @@ func NewGlWindow(
 
 	glWindow := GlWindow{
 		Window:                     w,
-		ModelSets:                  make(map[int]ModelSet),
+		modelSets:                  make(map[int]*ModelSet),
 		Shader:                     shader,
 		title:                      title,
 		WindowIndex:                windowIndex,
@@ -184,12 +186,13 @@ func NewGlWindow(
 		EnableFrameDrop:            true,  // 最初はドロップON
 		frame:                      0,
 		prevFrame:                  0,
+		isSaveDelta:                true,
 		width:                      width,
 		height:                     height,
 		floor:                      newMFloor(),
-		AppendModelSetChannel:      make(chan ModelSet, 1),
+		AppendModelSetChannel:      make(chan *ModelSet, 1),
 		RemoveModelSetIndexChannel: make(chan int, 1),
-		ReplaceModelSetChannel:     make(chan map[int]ModelSet),
+		ReplaceModelSetChannel:     make(chan map[int]*ModelSet),
 		IsPlayingChannel:           make(chan bool, 1),
 		FrameChannel:               make(chan int, 1),
 	}
@@ -246,20 +249,14 @@ func (w *GlWindow) GetFrame() int {
 func (w *GlWindow) SetFrame(f int) {
 	w.frame = float64(f)
 	w.prevFrame = f
-
-	for k, v := range w.ModelSets {
-		// 前のデフォーム情報をクリア
-		v.prevDeltas = nil
-		v.IsDeform = true
-		w.ModelSets[k] = v
-	}
+	w.isSaveDelta = false
 }
 
 func (w *GlWindow) Close(window *glfw.Window) {
 	w.running = false
 	w.Shader.Delete()
-	for _, modelSet := range w.ModelSets {
-		modelSet.Model.Delete()
+	for i := range w.modelSets {
+		w.modelSets[i].Model.Delete()
 	}
 	if w.WindowIndex == 0 {
 		defer glfw.Terminate()
@@ -540,9 +537,9 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 }
 
 func (w *GlWindow) ResetPhysics() {
-	for _, modelSet := range w.ModelSets {
-		modelSet.Model.DeletePhysics()
-		modelSet.Model.InitPhysics(w.Physics)
+	for i := range w.modelSets {
+		w.modelSets[i].Model.DeletePhysics()
+		w.modelSets[i].Model.InitPhysics(w.Physics)
 	}
 }
 
@@ -567,7 +564,6 @@ func (w *GlWindow) Run() {
 	prevShowTime := glfw.GetTime()
 	w.prevFrame = 0
 	w.running = true
-	// sleepTime := time.Duration(0.0)
 
 	go func() {
 	channelLoop:
@@ -575,23 +571,35 @@ func (w *GlWindow) Run() {
 			select {
 			case pair := <-w.AppendModelSetChannel:
 				// 追加処理
-				w.ModelSets[len(w.ModelSets)-1] = pair
+				w.modelSets[len(w.modelSets)-1] = pair
+				w.isSaveDelta = false
 			case pairMap := <-w.ReplaceModelSetChannel:
 				// 入替処理
-				for k, v := range pairMap {
-					w.ModelSets[k] = v
+				for k := range pairMap {
+					if _, ok := w.modelSets[k]; ok {
+						// 既存のがあれば、次のを設定
+						w.modelSets[k].NextModel = pairMap[k].NextModel
+						w.modelSets[k].NextMotion = pairMap[k].NextMotion
+					} else {
+						// なければ新規追加
+						w.modelSets[k] = pairMap[k]
+					}
 				}
+				w.isSaveDelta = false
 			case index := <-w.RemoveModelSetIndexChannel:
 				// 削除処理
-				if _, ok := w.ModelSets[index]; ok {
-					w.ModelSets[index].Model.Delete()
+				if _, ok := w.modelSets[index]; ok {
+					w.modelSets[index].Model.Delete()
+					delete(w.modelSets, index)
 				}
+				w.isSaveDelta = false
 			case isPlaying := <-w.IsPlayingChannel:
 				// 再生設定
 				w.Play(isPlaying)
 			case frame := <-w.FrameChannel:
 				// フレーム設定
 				w.SetFrame(frame)
+				w.isSaveDelta = false
 			case isClosed := <-w.IsClosedChannel:
 				// ウィンドウが閉じられた場合
 				w.isClosed = isClosed
@@ -661,10 +669,6 @@ RunLoop:
 		camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 
 		for _, program := range w.Shader.GetPrograms() {
-			if !w.IsRunning() {
-				break RunLoop
-			}
-
 			// プログラムの切り替え
 			gl.UseProgram(program)
 
@@ -681,7 +685,14 @@ RunLoop:
 			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
 			gl.UseProgram(0)
+
+			if !w.IsRunning() {
+				break RunLoop
+			}
 		}
+
+		// 床平面を描画
+		w.drawFloor()
 
 		if !w.IsRunning() {
 			break RunLoop
@@ -693,55 +704,60 @@ RunLoop:
 			mlog.V("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%.8f", prevTime, frameTime, elapsed, w.frame)
 		}
 
-		prevTime = frameTime
-
-		if int(w.frame) > w.prevFrame {
-			for k, v := range w.ModelSets {
-				v.IsDeform = true
-				w.ModelSets[k] = v
+		// 描画
+		for k := range w.modelSets {
+			if !w.IsRunning() {
+				break RunLoop
 			}
 
+			var prevDeltas *vmd.VmdDeltas
+			if w.modelSets[k].Model != nil {
+				prevDeltas = draw(
+					w.Physics, w.modelSets[k].Model, w.modelSets[k].Motion, w.Shader,
+					w.modelSets[k].prevDeltas, k, int(w.frame), elapsed,
+					w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleBones)
+			}
+
+			if !w.IsRunning() {
+				break RunLoop
+			}
+
+			// モデルが変わっている場合は最新の情報を取得する
+			if w.modelSets[k].NextModel != nil && !w.modelSets[k].NextModel.DrawInitialized {
+				// 次のモデルが指定されている場合、初期化して入替
+				if w.modelSets[k].Model != nil && w.modelSets[k].Model.DrawInitialized {
+					// 既存モデルが描画初期化されてたら削除
+					w.modelSets[k].Model.Delete()
+					w.modelSets[k].Model = nil
+				}
+				w.modelSets[k].Model = w.modelSets[k].NextModel
+				w.modelSets[k].Model.DrawInitialize(w.WindowIndex, w.resourceFiles, w.Physics)
+				w.modelSets[k].NextModel = nil
+				w.isSaveDelta = false
+			}
+
+			if w.modelSets[k].NextMotion != nil {
+				w.modelSets[k].Motion = w.modelSets[k].NextMotion
+				w.modelSets[k].NextMotion = nil
+				w.isSaveDelta = false
+			}
+
+			// キーフレの手動変更がなかった場合のみ前回デフォームとして保持
+			// 再生時には前回デフォームを破棄する
+			if !w.isSaveDelta || w.playing {
+				prevDeltas = nil
+			}
+			w.isSaveDelta = true
+			w.modelSets[k].prevDeltas = prevDeltas
+		}
+
+		prevTime = frameTime
+
+		if w.playing && int(w.frame) > w.prevFrame {
 			// フレーム番号上書き
 			w.prevFrame = int(w.frame)
 			if w.playing && w.motionPlayer != nil {
 				w.motionPlayer.SetValue(int(w.frame))
-			}
-		}
-
-		if !w.IsRunning() {
-			break RunLoop
-		}
-
-		// 床平面を描画
-		w.drawFloor()
-
-		if !w.IsRunning() {
-			break RunLoop
-		}
-
-		// 描画
-		for k, modelSet := range w.ModelSets {
-			if !modelSet.Model.DrawInitialized {
-				// モデルの初期化が終わっていない場合は初期化実行
-				modelSet.Model.DrawInitialize(w.WindowIndex, w.resourceFiles, w.Physics)
-				modelSet.IsDeform = true
-			}
-
-			if !w.IsRunning() {
-				break RunLoop
-			}
-
-			modelSet.prevDeltas = draw(
-				w.Physics, modelSet.Model, modelSet.Motion, w.Shader,
-				modelSet.prevDeltas, k, int(w.frame), elapsed, modelSet.IsDeform,
-				w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleBones)
-
-			// 描画が終わったら一旦デフォームは外す
-			modelSet.IsDeform = false
-			w.ModelSets[k] = modelSet
-
-			if !w.IsRunning() {
-				break RunLoop
 			}
 		}
 

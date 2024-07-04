@@ -36,7 +36,7 @@ func (pm *PmxModel) InitPhysics(physics *mphysics.MPhysics) {
 }
 
 func (pm *PmxModel) Delete() {
-	// pm.Meshes.delete()
+	pm.Meshes.delete()
 	pm.DeletePhysics()
 	pm.DrawInitialized = false
 }
