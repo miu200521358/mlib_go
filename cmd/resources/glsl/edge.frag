@@ -5,4 +5,8 @@ out vec4  outColor;
 
 void main() {
     outColor = edgeColor;
+
+    if (outColor.a < 1e-6) {
+        discard;
+    }
 }
