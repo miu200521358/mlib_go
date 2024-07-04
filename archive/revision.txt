@@ -378,7 +378,8 @@ MlibSample 1.0.0_beta_79
 
 MlibSample 1.0.0_beta_80
 ・OpenGLウィンドウとwalkコントローラーウィンドウの並列化処理を修正
-
+・情報表示機能追加（タイトル部分にfps追記）
+・fps制限変更機能追加
 
 
 
