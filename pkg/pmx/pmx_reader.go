@@ -876,7 +876,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					mlog.E("[%d][%d] readMorphs UnpackFloat MorphFactor error: %v", i, j, err)
 					return err
 				}
-				m.Offsets = append(m.Offsets, NewGroupMorph(morphIndex, morphFactor))
+				m.Offsets = append(m.Offsets, NewGroupMorphOffset(morphIndex, morphFactor))
 			case MORPH_TYPE_VERTEX:
 				// n  : 頂点Indexサイズ  | 頂点Index
 				vertexIndex, err := r.unpackVertexIndex(model)
@@ -890,7 +890,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					mlog.E("[%d][%d] readMorphs UnpackVec3 Offset error: %v", i, j, err)
 					return err
 				}
-				m.Offsets = append(m.Offsets, NewVertexMorph(vertexIndex, &offset))
+				m.Offsets = append(m.Offsets, NewVertexMorphOffset(vertexIndex, &offset))
 			case MORPH_TYPE_BONE:
 				// n  : ボーンIndexサイズ  | ボーンIndex
 				boneIndex, err := r.unpackBoneIndex(model)
@@ -910,7 +910,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					mlog.E("[%d][%d] readMorphs UnpackQuaternion Quaternion error: %v", i, j, err)
 					return err
 				}
-				m.Offsets = append(m.Offsets, NewBoneMorph(boneIndex, &offset, mmath.NewRotationFromQuaternion(&qq)))
+				m.Offsets = append(m.Offsets, NewBoneMorphOffset(boneIndex, &offset, mmath.NewRotationFromQuaternion(&qq)))
 			case MORPH_TYPE_UV, MORPH_TYPE_EXTENDED_UV1, MORPH_TYPE_EXTENDED_UV2, MORPH_TYPE_EXTENDED_UV3, MORPH_TYPE_EXTENDED_UV4:
 				// n  : 頂点Indexサイズ  | 頂点Index
 				vertexIndex, err := r.unpackVertexIndex(model)
@@ -924,7 +924,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					mlog.E("[%d][%d] readMorphs UnpackVec4 Offset error: %v", i, j, err)
 					return err
 				}
-				m.Offsets = append(m.Offsets, NewUvMorph(vertexIndex, &offset))
+				m.Offsets = append(m.Offsets, NewUvMorphOffset(vertexIndex, &offset))
 			case MORPH_TYPE_MATERIAL:
 				// n  : 材質Indexサイズ  | 材質Index -> -1:全材質対象
 				materialIndex, err := r.unpackMaterialIndex(model)
@@ -986,7 +986,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 					mlog.E("[%d][%d] readMorphs UnpackVec4 ToonTextureFactor error: %v", i, j, err)
 					return err
 				}
-				m.Offsets = append(m.Offsets, NewMaterialMorph(
+				m.Offsets = append(m.Offsets, NewMaterialMorphOffset(
 					materialIndex,
 					MaterialMorphCalcMode(calcMode),
 					&diffuse,

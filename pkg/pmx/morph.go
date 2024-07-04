@@ -75,7 +75,7 @@ func (v *VertexMorphOffset) GetType() int {
 	return int(MORPH_TYPE_VERTEX)
 }
 
-func NewVertexMorph(vertexIndex int, position *mmath.MVec3) *VertexMorphOffset {
+func NewVertexMorphOffset(vertexIndex int, position *mmath.MVec3) *VertexMorphOffset {
 	return &VertexMorphOffset{
 		VertexIndex: vertexIndex,
 		Position:    position,
@@ -92,7 +92,7 @@ func (v *UvMorphOffset) GetType() int {
 	return int(MORPH_TYPE_UV)
 }
 
-func NewUvMorph(vertexIndex int, uv *mmath.MVec4) *UvMorphOffset {
+func NewUvMorphOffset(vertexIndex int, uv *mmath.MVec4) *UvMorphOffset {
 	return &UvMorphOffset{
 		VertexIndex: vertexIndex,
 		Uv:          uv,
@@ -114,7 +114,7 @@ func (v *BoneMorphOffset) GetType() int {
 	return int(MORPH_TYPE_BONE)
 }
 
-func NewBoneMorph(boneIndex int, position *mmath.MVec3, rotation *mmath.MRotation) *BoneMorphOffset {
+func NewBoneMorphOffset(boneIndex int, position *mmath.MVec3, rotation *mmath.MRotation) *BoneMorphOffset {
 	return &BoneMorphOffset{
 		BoneIndex:     boneIndex,
 		Position:      position,
@@ -132,7 +132,7 @@ type GroupMorphOffset struct {
 	MorphFactor float64 // モーフ変動量
 }
 
-func NewGroupMorph(morphIndex int, morphFactor float64) *GroupMorphOffset {
+func NewGroupMorphOffset(morphIndex int, morphFactor float64) *GroupMorphOffset {
 	return &GroupMorphOffset{
 		MorphIndex:  morphIndex,
 		MorphFactor: morphFactor,
@@ -169,7 +169,7 @@ func (v *MaterialMorphOffset) GetType() int {
 	return int(MORPH_TYPE_MATERIAL)
 }
 
-func NewMaterialMorph(
+func NewMaterialMorphOffset(
 	materialIndex int,
 	calcMode MaterialMorphCalcMode,
 	diffuse *mmath.MVec4,
