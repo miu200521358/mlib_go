@@ -189,7 +189,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 			go func() {
 				mWindow.GetMainGlWindow().FrameChannel <- 0
 				mWindow.GetMainGlWindow().IsPlayingChannel <- false
-				mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]mwidget.ModelSet{0: {Model: model, Motion: motion}}
+				mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]mwidget.ModelSet{0: {Model: model, Motion: motion, IsDeform: true}}
 			}()
 		} else {
 			go func() {
@@ -226,7 +226,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 				go func() {
 					mWindow.GetMainGlWindow().FrameChannel <- 0
 					mWindow.GetMainGlWindow().IsPlayingChannel <- false
-					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]mwidget.ModelSet{0: {Model: model, Motion: motion}}
+					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]mwidget.ModelSet{0: {Model: model, Motion: motion, IsDeform: true}}
 				}()
 			} else {
 				go func() {

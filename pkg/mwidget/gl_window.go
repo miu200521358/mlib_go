@@ -29,7 +29,7 @@ type ModelSet struct {
 	Model      *pmx.PmxModel
 	Motion     *vmd.VmdMotion
 	prevDeltas *vmd.VmdDeltas
-	isDeform   bool
+	IsDeform   bool
 }
 
 // 直角の定数値
@@ -250,7 +250,7 @@ func (w *GlWindow) SetFrame(f int) {
 	for k, v := range w.ModelSets {
 		// 前のデフォーム情報をクリア
 		v.prevDeltas = nil
-		v.isDeform = true
+		v.IsDeform = true
 		w.ModelSets[k] = v
 	}
 }
@@ -697,7 +697,7 @@ RunLoop:
 
 		if int(w.frame) > w.prevFrame {
 			for k, v := range w.ModelSets {
-				v.isDeform = true
+				v.IsDeform = true
 				w.ModelSets[k] = v
 			}
 
@@ -724,7 +724,7 @@ RunLoop:
 			if !modelSet.Model.DrawInitialized {
 				// モデルの初期化が終わっていない場合は初期化実行
 				modelSet.Model.DrawInitialize(w.WindowIndex, w.resourceFiles, w.Physics)
-				modelSet.isDeform = true
+				modelSet.IsDeform = true
 			}
 
 			if !w.IsRunning() {
@@ -733,11 +733,11 @@ RunLoop:
 
 			modelSet.prevDeltas = draw(
 				w.Physics, modelSet.Model, modelSet.Motion, w.Shader,
-				modelSet.prevDeltas, k, int(w.frame), elapsed, modelSet.isDeform,
+				modelSet.prevDeltas, k, int(w.frame), elapsed, modelSet.IsDeform,
 				w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleBones)
 
 			// 描画が終わったら一旦デフォームは外す
-			modelSet.isDeform = false
+			modelSet.IsDeform = false
 			w.ModelSets[k] = modelSet
 
 			if !w.IsRunning() {
