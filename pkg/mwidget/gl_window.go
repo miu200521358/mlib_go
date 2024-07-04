@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"math"
-	"time"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -565,9 +564,10 @@ func (w *GlWindow) Size() walk.Size {
 
 func (w *GlWindow) Run() {
 	prevTime := glfw.GetTime()
+	prevShowTime := glfw.GetTime()
 	w.prevFrame = 0
 	w.running = true
-	sleepTime := time.Duration(0.0)
+	// sleepTime := time.Duration(0.0)
 
 	go func() {
 	channelLoop:
@@ -617,6 +617,16 @@ RunLoop:
 			w.frame = 0
 			w.prevFrame = 0
 			w.motionPlayer.SetValue(int(w.frame))
+		}
+
+		frameTime := glfw.GetTime()
+		elapsed := frameTime - prevTime
+
+		if elapsed < w.spfLimit {
+			// 1フレームの時間が経過していない場合はスキップ
+
+			glfw.PollEvents()
+			continue
 		}
 
 		// MSAAフレームバッファをバインド
@@ -673,27 +683,13 @@ RunLoop:
 			gl.UseProgram(0)
 		}
 
-		frameTime := glfw.GetTime()
-		elapsed := float32(frameTime - prevTime)
-
-		if !w.EnableFrameDrop {
-			// フレームドロップOFFの場合、最大1Fずつ
-			elapsed = mmath.ClampFloat32(elapsed, 0, w.Physics.Spf)
-		}
-
-		if w.isShowInfo {
-			w.Window.SetTitle(fmt.Sprintf("%s - %.2f fps - %d ms sleep", w.title, 1.0/elapsed, sleepTime.Milliseconds()))
-		} else {
-			w.Window.SetTitle(w.title)
-		}
-
 		if !w.IsRunning() {
 			break RunLoop
 		}
 
 		if w.playing {
 			// 経過秒数をキーフレームの進捗具合に合わせて調整
-			w.frame += float64(elapsed * w.Physics.Fps)
+			w.frame += elapsed * float64(w.Physics.Fps)
 			mlog.V("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%.8f", prevTime, frameTime, elapsed, w.frame)
 		}
 
@@ -777,16 +773,27 @@ RunLoop:
 			break RunLoop
 		}
 
-		// fps制限処理
-		sleepTime = time.Duration(0.0)
-		if w.IsRunning() && w.spfLimit > 0 {
-			frameTime = glfw.GetTime()
-			elapsed64 := frameTime - prevTime
-			if elapsed64 < w.spfLimit {
-				sleepTime = time.Duration((w.spfLimit - elapsed64) * float64(time.Second))
-				time.Sleep(sleepTime)
+		if w.isShowInfo {
+			nowShowTime := glfw.GetTime()
+			// 1秒ごとにFPSを表示
+			if nowShowTime-prevShowTime > 1.0 {
+				w.Window.SetTitle(fmt.Sprintf("%s - %.2f fps", w.title, 1.0/elapsed))
+				prevShowTime = nowShowTime
 			}
+		} else {
+			w.Window.SetTitle(w.title)
 		}
+
+		// // fps制限処理
+		// sleepTime = time.Duration(0.0)
+		// if w.IsRunning() && w.spfLimit > 0 {
+		// 	frameTime = glfw.GetTime()
+		// 	elapsed64 := frameTime - prevTime
+		// 	if elapsed64 < w.spfLimit {
+		// 		sleepTime = time.Duration((w.spfLimit - elapsed64) * float64(time.Second))
+		// 		time.Sleep(sleepTime)
+		// 	}
+		// }
 
 		// if int(w.frame) > 100 {
 		// 	break

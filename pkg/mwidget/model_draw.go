@@ -18,7 +18,7 @@ func deform(
 	motion *vmd.VmdMotion,
 	prevDeltas *vmd.VmdDeltas,
 	frame int,
-	elapsed float32,
+	elapsed float64,
 	isDeform, enablePhysics bool,
 ) *vmd.VmdDeltas {
 	vds := &vmd.VmdDeltas{}
@@ -54,7 +54,7 @@ func draw(
 	prevDeltas *vmd.VmdDeltas,
 	windowIndex int,
 	frame int,
-	elapsed float32,
+	elapsed float64,
 	isDeform, enablePhysics bool,
 	isDrawNormal bool,
 	isDrawWire bool,
@@ -136,7 +136,7 @@ func updatePhysics(
 	model *pmx.PmxModel,
 	boneDeltas *vmd.BoneDeltas,
 	frame int,
-	elapsed float32,
+	elapsed float64,
 	enablePhysics bool,
 ) {
 	if modelPhysics == nil {
@@ -178,7 +178,7 @@ func updatePhysics(
 	}
 
 	if enablePhysics && elapsed >= 1e-5 {
-		modelPhysics.Update(elapsed)
+		modelPhysics.Update(float32(elapsed))
 
 		// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[3]", frame))
 
