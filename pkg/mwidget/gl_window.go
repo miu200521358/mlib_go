@@ -752,10 +752,8 @@ RunLoop:
 		elapsed64 := frameTime - prevTime
 		if w.IsRunning() && elapsed64 < w.Physics.PhysicsSpf {
 			sleepTime := time.Duration((w.Physics.PhysicsSpf - elapsed64) * float64(time.Second))
-			if sleepTime > 20000000 {
-				mlog.V("PhysicsSleep frame=%.8f, elapsed64=%.8f, PhysicsSpf=%.8f, sleepTime=%v", w.frame, elapsed64, w.
-					Physics.PhysicsSpf, sleepTime)
-			}
+			mlog.V("PhysicsSleep frame=%.8f, elapsed64=%.8f, PhysicsSpf=%.8f, sleepTime=%v", w.frame, elapsed64, w.
+				Physics.PhysicsSpf, sleepTime)
 			time.Sleep(sleepTime)
 		}
 
