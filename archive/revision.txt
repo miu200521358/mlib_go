@@ -404,6 +404,10 @@ MlibSample 1.0.0_beta_83
 　・IsDeformフラグ削除
 　・isSaveDeltaフラグ追加：前回デフォーム結果を保持するか否か。再生中は保持しない
 
+MlibSample 1.0.0_beta_84
+・ドロップOFFの時、経過時間の最大値を 30fps までとするよう修正
+・w.MakeContextCurrent()の位置を描画確定の最初に行うよう修正
+・glfw.PollEvents()をすべてのループの最初に行うよう修正
 
 
 

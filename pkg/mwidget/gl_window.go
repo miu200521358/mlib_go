@@ -608,16 +608,12 @@ func (w *GlWindow) Run() {
 		}
 	}()
 
-RunLoop:
 	for w.IsRunning() {
-
-		w.MakeContextCurrent()
+		glfw.PollEvents()
 
 		if w.width == 0 || w.height == 0 {
 			// ウィンドウが最小化されている場合は描画をスキップ(フレームも進めない)
 			prevTime = glfw.GetTime()
-
-			glfw.PollEvents()
 			continue
 		}
 
@@ -630,12 +626,18 @@ RunLoop:
 		frameTime := glfw.GetTime()
 		elapsed := frameTime - prevTime
 
+		if !w.EnableFrameDrop {
+			// フレームドロップOFFの場合はスキップしない
+			w.spfLimit = 1 / float64(w.Physics.Fps)
+			elapsed = mmath.ClampFloat(elapsed, 0.0, w.spfLimit)
+		}
+
 		if elapsed < w.spfLimit {
 			// 1フレームの時間が経過していない場合はスキップ
-
-			glfw.PollEvents()
 			continue
 		}
+
+		w.MakeContextCurrent()
 
 		// MSAAフレームバッファをバインド
 		w.Shader.Msaa.Bind()
@@ -687,7 +689,7 @@ RunLoop:
 			gl.UseProgram(0)
 
 			if !w.IsRunning() {
-				break RunLoop
+				goto closeApp
 			}
 		}
 
@@ -695,7 +697,7 @@ RunLoop:
 		w.drawFloor()
 
 		if !w.IsRunning() {
-			break RunLoop
+			goto closeApp
 		}
 
 		if w.playing {
@@ -707,7 +709,7 @@ RunLoop:
 		// 描画
 		for k := range w.modelSets {
 			if !w.IsRunning() {
-				break RunLoop
+				goto closeApp
 			}
 
 			var prevDeltas *vmd.VmdDeltas
@@ -719,7 +721,7 @@ RunLoop:
 			}
 
 			if !w.IsRunning() {
-				break RunLoop
+				goto closeApp
 			}
 
 			// モデルが変わっている場合は最新の情報を取得する
@@ -762,59 +764,40 @@ RunLoop:
 		}
 
 		if !w.IsRunning() {
-			break RunLoop
+			goto closeApp
 		}
 
 		w.Shader.Msaa.Resolve()
 
 		if !w.IsRunning() {
-			break RunLoop
+			goto closeApp
 		}
 
 		w.Shader.Msaa.Unbind()
 
 		if !w.IsRunning() {
-			break RunLoop
+			goto closeApp
 		}
 
 		w.SwapBuffers()
 
 		if !w.IsRunning() {
-			break RunLoop
-		}
-
-		glfw.PollEvents()
-
-		if !w.IsRunning() {
-			break RunLoop
+			goto closeApp
 		}
 
 		if w.isShowInfo {
 			nowShowTime := glfw.GetTime()
 			// 1秒ごとにFPSを表示
-			if nowShowTime-prevShowTime > 1.0 {
+			if nowShowTime-prevShowTime >= 1.0 {
 				w.Window.SetTitle(fmt.Sprintf("%s - %.2f fps", w.title, 1.0/elapsed))
 				prevShowTime = nowShowTime
 			}
 		} else {
 			w.Window.SetTitle(w.title)
 		}
-
-		// // fps制限処理
-		// sleepTime = time.Duration(0.0)
-		// if w.IsRunning() && w.spfLimit > 0 {
-		// 	frameTime = glfw.GetTime()
-		// 	elapsed64 := frameTime - prevTime
-		// 	if elapsed64 < w.spfLimit {
-		// 		sleepTime = time.Duration((w.spfLimit - elapsed64) * float64(time.Second))
-		// 		time.Sleep(sleepTime)
-		// 	}
-		// }
-
-		// if int(w.frame) > 100 {
-		// 	break
-		// }
 	}
+
+closeApp:
 	if w.WindowIndex == 0 {
 		defer walk.App().Exit(0)
 	}
