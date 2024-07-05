@@ -95,7 +95,7 @@ func (m *Mesh) drawModel(
 
 	// テクスチャ使用有無
 	useTextureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_USE_TEXTURE))
-	gl.Uniform1i(useTextureUniform, mmath.BoolToInt(m.material.Texture != nil))
+	gl.Uniform1i(useTextureUniform, int32(mmath.BoolToInt(m.material.Texture != nil)))
 	if m.material.Texture != nil {
 		m.material.Texture.Bind()
 		defer m.material.Texture.Unbind()
@@ -111,7 +111,7 @@ func (m *Mesh) drawModel(
 
 	// Toon使用有無
 	useToonUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_USE_TOON))
-	gl.Uniform1i(useToonUniform, mmath.BoolToInt(m.material.ToonTexture != nil))
+	gl.Uniform1i(useToonUniform, int32(mmath.BoolToInt(m.material.ToonTexture != nil)))
 	if m.material.ToonTexture != nil {
 		m.material.ToonTexture.Bind()
 		defer m.material.ToonTexture.Unbind()
@@ -127,7 +127,7 @@ func (m *Mesh) drawModel(
 
 	// Sphere使用有無
 	useSphereUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_USE_SPHERE))
-	gl.Uniform1i(useSphereUniform, mmath.BoolToInt(m.material.SphereTexture != nil && m.material.SphereTexture.Valid))
+	gl.Uniform1i(useSphereUniform, int32(mmath.BoolToInt(m.material.SphereTexture != nil && m.material.SphereTexture.Valid)))
 	if m.material.SphereTexture != nil && m.material.SphereTexture.Valid {
 		m.material.SphereTexture.Bind()
 		defer m.material.SphereTexture.Unbind()

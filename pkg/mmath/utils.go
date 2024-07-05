@@ -6,11 +6,18 @@ import (
 	"sort"
 )
 
-func BoolToInt(b bool) int32 {
+func BoolToInt(b bool) int {
 	if b {
 		return 1
 	}
 	return 0
+}
+
+func BoolToFlag(b bool) float64 {
+	if b {
+		return 1.0
+	}
+	return -1.0
 }
 
 // slices.Contains の高速版
