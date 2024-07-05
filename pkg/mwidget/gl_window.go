@@ -635,8 +635,8 @@ func (w *GlWindow) Run() {
 		}
 
 		if elapsed < w.spfLimit {
-			// 1フレームの時間が経過していない場合はスキップ
-			continue
+			// 1フレームの時間が経過していない場合は待機
+			glfw.WaitEventsTimeout(w.spfLimit - elapsed)
 		}
 
 		// MSAAフレームバッファをバインド

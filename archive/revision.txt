@@ -408,8 +408,8 @@ MlibSample 1.0.0_beta_84
 ・ドロップOFFの時、経過時間の最大値を 30fps までとするよう修正
 ・glfw.PollEvents()をすべてのループの最初に行うよう修正
 ・w.MakeContextCurrent()の位置をメインループ開始前に実行するよう修正
-
-
+・1フレームの時間が経過していない場合は待機するときにglfw.WaitEventsTimeoutを使用
+・Pmxなどのファイルからの読み込みが完了したタイミングでGCを強制実行するよう処理追加
 
 
 TODO:
