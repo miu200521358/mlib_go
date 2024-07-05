@@ -435,7 +435,7 @@ func (gw *GlWindow) getWorldPosition(
 	}
 
 	worldPos := &mmath.MVec3{float64(-worldCoords.X()), float64(worldCoords.Y()), float64(worldCoords.Z())}
-	mlog.D("WorldPosResult: x=%.8f, y=%.8f, z=%.8f (%.8f)", worldPos.GetX(), worldPos.GetY(), worldPos.GetZ(), depth)
+	mlog.D("WorldPosResult: x=%.7f, y=%.7f, z=%.7f (%.7f)", worldPos.GetX(), worldPos.GetY(), worldPos.GetZ(), depth)
 
 	viewInv := view.Inv()
 	viewMat := &mmath.MMat4{
@@ -449,7 +449,7 @@ func (gw *GlWindow) getWorldPosition(
 }
 
 func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos float64) {
-	// mlog.D("[start] yaw %.8f, pitch %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
+	// mlog.D("[start] yaw %.7f, pitch %.7f, CameraPosition: %s, LookAtCenterPosition: %s\n",
 	// 	w.yaw, w.pitch, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
 
 	if !w.updatedPrev {
@@ -500,7 +500,7 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 		w.Shader.CameraPosition.SetX(cameraX)
 		w.Shader.CameraPosition.SetY(mview.INITIAL_CAMERA_POSITION_Y + cameraY)
 		w.Shader.CameraPosition.SetZ(cameraZ)
-		// mlog.D("xOffset %.8f, yOffset %.8f, CameraPosition: %s, LookAtCenterPosition: %s\n",
+		// mlog.D("xOffset %.7f, yOffset %.7f, CameraPosition: %s, LookAtCenterPosition: %s\n",
 		// 	xOffset, yOffset, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
 	} else if w.middleButtonPressed {
 		ratio := 0.07
@@ -616,10 +616,12 @@ func (w *GlWindow) Run() {
 		}
 	}()
 
-	w.MakeContextCurrent()
-
-	for w.IsRunning() {
+	for {
 		glfw.PollEvents()
+
+		if !w.IsRunning() {
+			goto closeApp
+		}
 
 		if w.width == 0 || w.height == 0 {
 			// ウィンドウが最小化されている場合は描画をスキップ(フレームも進めない)
@@ -644,8 +646,12 @@ func (w *GlWindow) Run() {
 
 		if elapsed < w.spfLimit {
 			// 1フレームの時間が経過していない場合は待機
-			glfw.WaitEventsTimeout(w.spfLimit - elapsed)
+			interval := w.spfLimit - elapsed
+			mlog.V("interval=%.7f, prevTime=%.7f, time=%.7f, elapsed=%.7f, frame=%.7f", interval, prevTime, frameTime, elapsed, w.frame)
+			glfw.WaitEventsTimeout(interval)
 		}
+
+		w.MakeContextCurrent()
 
 		// MSAAフレームバッファをバインド
 		w.Shader.Msaa.Bind()
@@ -695,31 +701,19 @@ func (w *GlWindow) Run() {
 			gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
 			gl.UseProgram(0)
-
-			if !w.IsRunning() {
-				goto closeApp
-			}
 		}
 
 		// 床平面を描画
 		w.drawFloor()
 
-		if !w.IsRunning() {
-			goto closeApp
-		}
-
 		if w.playing {
 			// 経過秒数をキーフレームの進捗具合に合わせて調整
 			w.frame += elapsed * float64(w.Physics.Fps)
-			mlog.V("previousTime=%.8f, time=%.8f, elapsed=%.8f, frame=%.8f", prevTime, frameTime, elapsed, w.frame)
+			// mlog.V("previousTime=%.7f, time=%.7f, elapsed=%.7f, frame=%.7f", prevTime, frameTime, elapsed, w.frame)
 		}
 
 		// 描画
 		for k := range w.modelSets {
-			if !w.IsRunning() {
-				goto closeApp
-			}
-
 			var prevDeltas *vmd.VmdDeltas
 			if w.modelSets[k].Model != nil {
 				prevDeltas = draw(
@@ -728,10 +722,6 @@ func (w *GlWindow) Run() {
 					w.modelSets[k].SelectedVertexIndexes, w.modelSets[k].NextSelectedVertexIndexes,
 					k, int(w.frame), elapsed,
 					w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones)
-			}
-
-			if !w.IsRunning() {
-				goto closeApp
 			}
 
 			// モデルが変わっている場合は最新の情報を取得する
@@ -783,27 +773,9 @@ func (w *GlWindow) Run() {
 			}
 		}
 
-		if !w.IsRunning() {
-			goto closeApp
-		}
-
 		w.Shader.Msaa.Resolve()
-
-		if !w.IsRunning() {
-			goto closeApp
-		}
-
 		w.Shader.Msaa.Unbind()
-
-		if !w.IsRunning() {
-			goto closeApp
-		}
-
 		w.SwapBuffers()
-
-		if !w.IsRunning() {
-			goto closeApp
-		}
 
 		if w.isShowInfo {
 			nowShowTime := glfw.GetTime()
@@ -815,16 +787,25 @@ func (w *GlWindow) Run() {
 		} else {
 			w.Window.SetTitle(w.title)
 		}
+
+		if !w.IsRunning() {
+			goto closeApp
+		}
 	}
 
 closeApp:
+	w.Shader.Delete()
+	for i := range w.modelSets {
+		w.modelSets[i].Model.Delete()
+	}
 	if w.WindowIndex == 0 {
-		defer walk.App().Exit(0)
+		glfw.Terminate()
+		walk.App().Exit(0)
 	}
 }
 
 func (w *GlWindow) IsRunning() bool {
-	return !w.isClosed && !CheckOpenGLError() && !w.ShouldClose() &&
+	return !w.isClosed && w.running && !CheckOpenGLError() && !w.ShouldClose() &&
 		((w.mWindow != nil && !w.mWindow.IsDisposed()) || w.mWindow == nil)
 }
 
