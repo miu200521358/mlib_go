@@ -6,6 +6,7 @@ package mwidget
 import (
 	"fmt"
 	"path/filepath"
+	"runtime"
 
 	"github.com/miu200521358/walk/pkg/walk"
 	"github.com/miu200521358/win"
@@ -319,10 +320,12 @@ func (picker *FilePicker) GetData() (mcore.IHashModel, error) {
 	}
 
 	data, err := picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
+	defer runtime.GC() // 読み込み時のメモリ解放
 	if err != nil {
 		return nil, err
 	}
 	picker.cacheData = data
+
 	return data, nil
 }
 
