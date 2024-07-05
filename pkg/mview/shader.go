@@ -52,13 +52,14 @@ const (
 type ProgramType int
 
 const (
-	PROGRAM_TYPE_MODEL   ProgramType = iota
-	PROGRAM_TYPE_EDGE    ProgramType = iota
-	PROGRAM_TYPE_BONE    ProgramType = iota
-	PROGRAM_TYPE_PHYSICS ProgramType = iota
-	PROGRAM_TYPE_NORMAL  ProgramType = iota
-	PROGRAM_TYPE_FLOOR   ProgramType = iota
-	PROGRAM_TYPE_WIRE    ProgramType = iota
+	PROGRAM_TYPE_MODEL           ProgramType = iota
+	PROGRAM_TYPE_EDGE            ProgramType = iota
+	PROGRAM_TYPE_BONE            ProgramType = iota
+	PROGRAM_TYPE_PHYSICS         ProgramType = iota
+	PROGRAM_TYPE_NORMAL          ProgramType = iota
+	PROGRAM_TYPE_FLOOR           ProgramType = iota
+	PROGRAM_TYPE_WIRE            ProgramType = iota
+	PROGRAM_TYPE_SELECTED_VERTEX ProgramType = iota
 )
 
 const (
@@ -70,26 +71,27 @@ const (
 )
 
 type MShader struct {
-	lightAmbient         *mmath.MVec4
-	CameraPosition       *mmath.MVec3
-	LookAtCenterPosition *mmath.MVec3
-	FieldOfViewAngle     float32
-	Width                int32
-	Height               int32
-	NearPlane            float32
-	FarPlane             float32
-	lightPosition        *mmath.MVec3
-	lightDirection       *mmath.MVec3
-	Msaa                 *Msaa
-	ModelProgram         uint32
-	EdgeProgram          uint32
-	BoneProgram          uint32
-	PhysicsProgram       uint32
-	NormalProgram        uint32
-	FloorProgram         uint32
-	WireProgram          uint32
-	BoneTextureId        uint32
-	IsDrawRigidBodyFront bool
+	lightAmbient          *mmath.MVec4
+	CameraPosition        *mmath.MVec3
+	LookAtCenterPosition  *mmath.MVec3
+	FieldOfViewAngle      float32
+	Width                 int32
+	Height                int32
+	NearPlane             float32
+	FarPlane              float32
+	lightPosition         *mmath.MVec3
+	lightDirection        *mmath.MVec3
+	Msaa                  *Msaa
+	ModelProgram          uint32
+	EdgeProgram           uint32
+	BoneProgram           uint32
+	PhysicsProgram        uint32
+	NormalProgram         uint32
+	FloorProgram          uint32
+	WireProgram           uint32
+	SelectedVertexProgram uint32
+	BoneTextureId         uint32
+	IsDrawRigidBodyFront  bool
 }
 
 func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
@@ -158,7 +160,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 
 	{
 		normalProgram, err := shader.newProgram(
-			resourceFiles, "resources/glsl/normal.vert", "resources/glsl/normal.frag")
+			resourceFiles, "resources/glsl/vertex.vert", "resources/glsl/vertex.frag")
 		if err != nil {
 			return nil, err
 		}
@@ -182,13 +184,25 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 
 	{
 		wireProgram, err := shader.newProgram(
-			resourceFiles, "resources/glsl/wire.vert", "resources/glsl/wire.frag")
+			resourceFiles, "resources/glsl/vertex.vert", "resources/glsl/vertex.frag")
 		if err != nil {
 			return nil, err
 		}
 		shader.WireProgram = wireProgram
 		shader.Use(PROGRAM_TYPE_WIRE)
 		shader.initialize(shader.WireProgram)
+		shader.Unuse()
+	}
+
+	{
+		selectedVertexProgram, err := shader.newProgram(
+			resourceFiles, "resources/glsl/vertex.vert", "resources/glsl/vertex.frag")
+		if err != nil {
+			return nil, err
+		}
+		shader.SelectedVertexProgram = selectedVertexProgram
+		shader.Use(PROGRAM_TYPE_SELECTED_VERTEX)
+		shader.initialize(shader.SelectedVertexProgram)
 		shader.Unuse()
 	}
 
@@ -367,11 +381,13 @@ func (s *MShader) Use(programType ProgramType) {
 		gl.UseProgram(s.FloorProgram)
 	case PROGRAM_TYPE_WIRE:
 		gl.UseProgram(s.WireProgram)
+	case PROGRAM_TYPE_SELECTED_VERTEX:
+		gl.UseProgram(s.SelectedVertexProgram)
 	}
 }
 
 func (s *MShader) GetPrograms() []uint32 {
-	return []uint32{s.ModelProgram, s.EdgeProgram, s.BoneProgram, s.PhysicsProgram, s.NormalProgram, s.FloorProgram, s.WireProgram}
+	return []uint32{s.ModelProgram, s.EdgeProgram, s.BoneProgram, s.PhysicsProgram, s.NormalProgram, s.FloorProgram, s.WireProgram, s.SelectedVertexProgram}
 }
 
 func (s *MShader) Unuse() {
@@ -386,5 +402,6 @@ func (s *MShader) Delete() {
 	s.DeleteProgram(s.NormalProgram)
 	s.DeleteProgram(s.FloorProgram)
 	s.DeleteProgram(s.WireProgram)
+	s.DeleteProgram(s.SelectedVertexProgram)
 	s.Msaa.Delete()
 }
