@@ -16,12 +16,12 @@
         "translation": "&Physics Reset"
     },
     {
-        "id": "&法線デバッグ表示",
-        "translation": "&Normal Debug Display"
+        "id": "&法線表示",
+        "translation": "&Normal Display"
     },
     {
-        "id": "&ボーンデバッグ表示",
-        "translation": "&Bone Debug Display"
+        "id": "&ボーン表示",
+        "translation": "&Bone Display"
     },
     {
         "id": "&全ボーン",
@@ -52,12 +52,12 @@
         "translation": "&Display Bones"
     },
     {
-        "id": "&剛体デバッグ表示",
-        "translation": "&Rigid Body Debug Display"
+        "id": "&剛体表示",
+        "translation": "&Rigid Body Display"
     },
     {
-        "id": "&ジョイントデバッグ表示",
-        "translation": "&Joint Debug Display"
+        "id": "&ジョイント表示",
+        "translation": "&Joint Display"
     },
     {
         "id": "背景色生成エラー",
@@ -324,8 +324,8 @@
         "translation": "Back"
     },
     {
-        "id": "&ワイヤーフレームデバッグ表示",
-        "translation": "&Wireframe Debug View"
+        "id": "&ワイヤーフレーム表示",
+        "translation": "&Wireframe Display"
     },
     {
         "id": "&前面表示",
@@ -354,5 +354,9 @@
     {
         "id": "&fps無制限",
         "translation": "&Unlimited FPS"
+    },
+    {
+        "id": "&選択頂点表示",
+        "translation": "&Selected Vertex Display"
     }
 ]
