@@ -63,6 +63,41 @@ func (d DrawFlag) IsDrawingEdge() bool {
 	return d&DRAW_FLAG_DRAWING_EDGE == DRAW_FLAG_DRAWING_EDGE
 }
 
+func (d DrawFlag) SetDrawingEdge(flag bool) DrawFlag {
+	if flag {
+		return d | DRAW_FLAG_DRAWING_EDGE
+	}
+	return d &^ DRAW_FLAG_DRAWING_EDGE
+}
+
+func (d DrawFlag) SetDoubleSidedDrawing(flag bool) DrawFlag {
+	if flag {
+		return d | DRAW_FLAG_DOUBLE_SIDED_DRAWING
+	}
+	return d &^ DRAW_FLAG_DOUBLE_SIDED_DRAWING
+}
+
+func (d DrawFlag) SetGroundShadow(flag bool) DrawFlag {
+	if flag {
+		return d | DRAW_FLAG_GROUND_SHADOW
+	}
+	return d &^ DRAW_FLAG_GROUND_SHADOW
+}
+
+func (d DrawFlag) SetDrawingOnSelfShadowMaps(flag bool) DrawFlag {
+	if flag {
+		return d | DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
+	}
+	return d &^ DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
+}
+
+func (d DrawFlag) SetDrawingSelfShadows(flag bool) DrawFlag {
+	if flag {
+		return d | DRAW_FLAG_DRAWING_SELF_SHADOWS
+	}
+	return d &^ DRAW_FLAG_DRAWING_SELF_SHADOWS
+}
+
 // 共有Toonフラグ
 type ToonSharing byte
 
