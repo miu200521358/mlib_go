@@ -107,3 +107,46 @@ func (m *PmxModel) Copy() mcore.IHashModel {
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied
 }
+
+// DuplicateMaterial は指定された材質を複製します。
+func (pm *PmxModel) DuplicateMaterial(materialIndex int, materialName, materialEnglishName string) error {
+	material := pm.Materials.Get(materialIndex)
+	duplicatedMaterial := material.Copy().(*Material)
+	duplicatedMaterial.Index = pm.Materials.Len()
+	duplicatedMaterial.Name = materialName
+	duplicatedMaterial.EnglishName = materialEnglishName
+
+	// 該当材質内の頂点と面を取得
+	prevVerticesCount := 0
+	for i := range pm.Materials.Len() {
+		if i < materialIndex {
+			prevVerticesCount += int(pm.Materials.Get(i).VerticesCount / 3)
+			continue
+		}
+
+		// 該当材質の場合
+		m := pm.Materials.Get(i)
+		for j := prevVerticesCount; j < prevVerticesCount+int(m.VerticesCount/3); j++ {
+			originalFace := pm.Faces.Get(j)
+			duplicatedFace := originalFace.Copy().(*Face)
+			duplicatedFace.Index = pm.Faces.Len()
+
+			for k, vertexIndex := range originalFace.VertexIndexes {
+				originalVertex := pm.Vertices.Get(vertexIndex)
+				duplicatedVertex := originalVertex.Copy().(*Vertex)
+				duplicatedVertex.Index = pm.Vertices.Len()
+				pm.Vertices.Append(duplicatedVertex)
+				duplicatedFace.VertexIndexes[k] = duplicatedVertex.Index
+			}
+
+			pm.Faces.Append(duplicatedFace)
+		}
+
+		// 該当材質の複製が終わったら終了
+		break
+	}
+
+	pm.Materials.Append(duplicatedMaterial)
+
+	return nil
+}

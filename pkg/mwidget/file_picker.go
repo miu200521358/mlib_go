@@ -360,6 +360,14 @@ func (picker *FilePicker) GetCache() mcore.IHashModel {
 	return picker.cacheData
 }
 
+func (picker *FilePicker) SetPath(path string) {
+	picker.PathLineEdit.SetText(path)
+}
+
+func (picker *FilePicker) GetPath() string {
+	return picker.PathLineEdit.Text()
+}
+
 func (picker *FilePicker) OnChanged(path string) {
 	picker.PathLineEdit.SetText(path)
 

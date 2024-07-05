@@ -45,7 +45,7 @@ func (v *Vertex) GetMapValue() *mmath.MVec3 {
 }
 
 func (v *Vertex) Copy() mcore.IIndexModel {
-	copied := NewTexture()
+	copied := NewVertex()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied
 }

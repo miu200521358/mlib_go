@@ -1,6 +1,7 @@
 package pmx
 
 import (
+	"github.com/jinzhu/copier"
 	"github.com/miu200521358/mlib_go/pkg/mcore"
 )
 
@@ -19,6 +20,12 @@ func NewFace() *Face {
 		IndexModel:    &mcore.IndexModel{Index: -1},
 		VertexIndexes: [3]int{0, 0, 0},
 	}
+}
+
+func (f *Face) Copy() mcore.IIndexModel {
+	copied := NewFace()
+	copier.CopyWithOption(copied, f, copier.Option{DeepCopy: true})
+	return copied
 }
 
 // 面リスト
