@@ -608,6 +608,8 @@ func (w *GlWindow) Run() {
 		}
 	}()
 
+	w.MakeContextCurrent()
+
 	for w.IsRunning() {
 		glfw.PollEvents()
 
@@ -636,8 +638,6 @@ func (w *GlWindow) Run() {
 			// 1フレームの時間が経過していない場合はスキップ
 			continue
 		}
-
-		w.MakeContextCurrent()
 
 		// MSAAフレームバッファをバインド
 		w.Shader.Msaa.Bind()
