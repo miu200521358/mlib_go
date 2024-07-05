@@ -3,6 +3,7 @@ package mutils
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -24,4 +25,25 @@ func RemoveFromSlice[S ~[]E, E comparable](slice S, value E) []E {
 		return slice
 	}
 	return append(slice[:index], slice[index+1:]...)
+}
+
+func JoinIntsWithComma(ints []int) string {
+	var strList []string
+	for _, num := range ints {
+		strList = append(strList, strconv.Itoa(num))
+	}
+	return strings.Join(strList, ", ")
+}
+
+func SplitCommaSeparatedInts(s string) ([]int, error) {
+	var ints []int
+	strList := strings.Split(s, ", ")
+	for _, str := range strList {
+		num, err := strconv.Atoi(str)
+		if err != nil {
+			return nil, err
+		}
+		ints = append(ints, num)
+	}
+	return ints, nil
 }
