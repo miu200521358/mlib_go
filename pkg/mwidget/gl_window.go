@@ -260,14 +260,6 @@ func (w *GlWindow) SetFrame(f int) {
 
 func (w *GlWindow) Close(window *glfw.Window) {
 	w.running = false
-	w.Shader.Delete()
-	for i := range w.modelSets {
-		w.modelSets[i].Model.Delete()
-	}
-	if w.WindowIndex == 0 {
-		defer glfw.Terminate()
-		defer walk.App().Exit(0)
-	}
 }
 
 func (w *GlWindow) handleKeyEvent(
