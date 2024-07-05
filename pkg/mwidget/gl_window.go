@@ -370,8 +370,8 @@ func (w *GlWindow) handleScrollEvent(window *glfw.Window, xoff float64, yoff flo
 
 	if yoff > 0 {
 		w.Shader.FieldOfViewAngle -= ratio
-		if w.Shader.FieldOfViewAngle < 5.0 {
-			w.Shader.FieldOfViewAngle = 5.0
+		if w.Shader.FieldOfViewAngle < 3.0 {
+			w.Shader.FieldOfViewAngle = 3.0
 		}
 	} else if yoff < 0 {
 		w.Shader.FieldOfViewAngle += ratio
