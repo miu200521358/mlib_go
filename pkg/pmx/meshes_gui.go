@@ -15,24 +15,22 @@ import (
 )
 
 type Meshes struct {
-	meshes            []*Mesh
-	vertices          []float32
-	vao               *mview.VAO
-	vbo               *mview.VBO
-	normals           []float32
-	normalVao         *mview.VAO
-	normalVbo         *mview.VBO
-	normalIbo         *mview.IBO
-	wireVertexIndexes []int
-	wires             []float32
-	wireVao           *mview.VAO
-	wireVbo           *mview.VBO
-	wireIbo           *mview.IBO
-	bones             []float32
-	boneVao           *mview.VAO
-	boneVbo           *mview.VBO
-	boneIbo           *mview.IBO
-	boneIndexes       []int
+	meshes      []*Mesh
+	vertices    []float32
+	vao         *mview.VAO
+	vbo         *mview.VBO
+	normals     []float32
+	normalVao   *mview.VAO
+	normalVbo   *mview.VBO
+	normalIbo   *mview.IBO
+	wireVao     *mview.VAO
+	wireVbo     *mview.VBO
+	wireIbo     *mview.IBO
+	bones       []float32
+	boneVao     *mview.VAO
+	boneVbo     *mview.VBO
+	boneIbo     *mview.IBO
+	boneIndexes []int
 }
 
 func NewMeshes(
@@ -44,7 +42,6 @@ func NewMeshes(
 	vertices := make([]float32, 0, len(model.Vertices.Data))
 	normalVertices := make([]float32, 0, len(model.Vertices.Data)*2)
 	normalFaces := make([]uint32, 0, len(model.Vertices.Data)*2)
-	wireVertices := make([]float32, 0, len(model.Vertices.Data)*3)
 	wireFaces := make([]uint32, 0, len(model.Vertices.Data)*3)
 
 	// WaitGroupを用いて並列処理を管理
@@ -72,7 +69,6 @@ func NewMeshes(
 
 	// 面情報の並列処理
 	faces := make([]uint32, 0, len(model.Faces.Data)*3)
-	wireVertexIndexes := make([]int, 0, len(model.Faces.Data)*3)
 
 	wg.Add(1)
 	go func() {
@@ -82,19 +78,13 @@ func NewMeshes(
 			vertices := model.Faces.Get(i).VertexIndexes
 			mu.Lock()
 			faces = append(faces, uint32(vertices[2]), uint32(vertices[1]), uint32(vertices[0]))
-			wireVertexIndexes = append(wireVertexIndexes, vertices[0], vertices[1], vertices[2])
 
 			// 0-1
-			wireVertices = append(wireVertices, model.Vertices.Get(vertices[0]).GL()...)
-			wireVertices = append(wireVertices, model.Vertices.Get(vertices[1]).GL()...)
-			wireFaces = append(wireFaces, uint32(n), uint32(n+1))
-
+			wireFaces = append(wireFaces, uint32(vertices[0]), uint32(vertices[1]))
 			// 1-2
-			wireVertices = append(wireVertices, model.Vertices.Get(vertices[2]).GL()...)
-			wireFaces = append(wireFaces, uint32(n+1), uint32(n+2))
-
+			wireFaces = append(wireFaces, uint32(vertices[1]), uint32(vertices[2]))
 			// 2-0
-			wireFaces = append(wireFaces, uint32(n+2), uint32(n))
+			wireFaces = append(wireFaces, uint32(vertices[2]), uint32(vertices[0]))
 			mu.Unlock()
 
 			n += 3
@@ -215,7 +205,7 @@ func NewMeshes(
 
 	wireVao := mview.NewVAO()
 	wireVao.Bind()
-	wireVbo := mview.NewVBOForVertex(gl.Ptr(wireVertices), len(wireVertices))
+	wireVbo := mview.NewVBOForVertex(gl.Ptr(vertices), len(vertices))
 	wireVbo.BindVertex(nil, nil)
 	wireIbo := mview.NewIBO(gl.Ptr(wireFaces), len(wireFaces))
 	wireIbo.Bind()
@@ -234,24 +224,22 @@ func NewMeshes(
 	boneVao.Unbind()
 
 	return &Meshes{
-		meshes:            meshes,
-		vertices:          vertices,
-		vao:               vao,
-		vbo:               vbo,
-		normals:           normalVertices,
-		normalVao:         normalVao,
-		normalVbo:         normalVbo,
-		normalIbo:         normalIbo,
-		wireVertexIndexes: wireVertexIndexes,
-		wires:             wireVertices,
-		wireVao:           wireVao,
-		wireVbo:           wireVbo,
-		wireIbo:           wireIbo,
-		bones:             bones,
-		boneVao:           boneVao,
-		boneVbo:           boneVbo,
-		boneIbo:           boneIbo,
-		boneIndexes:       boneIndexes,
+		meshes:      meshes,
+		vertices:    vertices,
+		vao:         vao,
+		vbo:         vbo,
+		normals:     normalVertices,
+		normalVao:   normalVao,
+		normalVbo:   normalVbo,
+		normalIbo:   normalIbo,
+		wireVao:     wireVao,
+		wireVbo:     wireVbo,
+		wireIbo:     wireIbo,
+		bones:       bones,
+		boneVao:     boneVao,
+		boneVbo:     boneVbo,
+		boneIbo:     boneIbo,
+		boneIndexes: boneIndexes,
 	}
 }
 
@@ -397,7 +385,42 @@ func (m *Meshes) drawWire(
 	// ライン描画
 	gl.DrawElements(
 		gl.LINES,
-		int32(len(m.wires)),
+		int32(len(m.vertices)),
+		gl.UNSIGNED_INT,
+		nil,
+	)
+
+	m.wireIbo.Unbind()
+	m.wireVbo.Unbind()
+	m.wireVao.Unbind()
+
+	shader.Unuse()
+}
+
+func (m *Meshes) drawSelectedVertices(
+	selectedVertexIndexes []int,
+	shader *mview.MShader,
+	paddedMatrixes []float32,
+	width, height int,
+	windowIndex int,
+) {
+	shader.Use(mview.PROGRAM_TYPE_SELECTED_VERTEX)
+
+	m.wireVao.Bind()
+	m.wireVbo.BindVertex(nil, nil)
+	m.wireIbo.Bind()
+
+	// ボーンデフォームテクスチャ設定
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.SelectedVertexProgram)
+
+	vertexColor := mgl32.Vec4{0.6, 0.4, 0.2, 0.7}
+	specularUniform := gl.GetUniformLocation(shader.SelectedVertexProgram, gl.Str(mview.SHADER_COLOR))
+	gl.Uniform4fv(specularUniform, 1, &vertexColor[0])
+
+	// 点描画
+	gl.DrawElements(
+		gl.POINTS,
+		int32(len(m.vertices)),
 		gl.UNSIGNED_INT,
 		nil,
 	)
