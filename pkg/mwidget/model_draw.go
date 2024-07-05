@@ -54,8 +54,7 @@ func draw(
 	motion *vmd.VmdMotion,
 	shader *mview.MShader,
 	prevDeltas *vmd.VmdDeltas,
-	selectedVertexIndexes []int,
-	nextSelectedVertexIndexes []int,
+	visibleMaterialIndexes, nextVisibleMaterialIndexes, selectedVertexIndexes, nextSelectedVertexIndexes []int,
 	windowIndex int,
 	frame int,
 	elapsed float64,
@@ -74,10 +73,12 @@ func draw(
 		meshDeltas[i] = md.Result()
 	}
 
-	vertexDeltas, selectedVertexDeltas :=
-		fetchVertexDeltas(model, deltas, selectedVertexIndexes, nextSelectedVertexIndexes)
+	vertexDeltas, wireVertexDeltas, selectedVertexDeltas :=
+		fetchVertexDeltas(model, deltas, visibleMaterialIndexes, nextVisibleMaterialIndexes,
+			selectedVertexIndexes, nextSelectedVertexIndexes)
 
-	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, meshDeltas, selectedVertexDeltas, windowIndex,
+	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, wireVertexDeltas, selectedVertexDeltas,
+		meshDeltas, windowIndex,
 		isDrawNormal, isDrawWire, isDrawSelectedVertex, prevDeltas == nil, isDrawBones, model.Bones)
 
 	// 物理デバッグ表示
@@ -87,12 +88,15 @@ func draw(
 }
 
 func fetchVertexDeltas(
-	model *pmx.PmxModel, deltas *vmd.VmdDeltas, selectedVertexIndexes, nextSelectedVertexIndexes []int,
-) ([][]float32, [][]float32) {
+	model *pmx.PmxModel, deltas *vmd.VmdDeltas,
+	invisibleMaterialIndexes, nextInvisibleMaterialIndexes, selectedVertexIndexes, nextSelectedVertexIndexes []int,
+) ([][]float32, [][]float32, [][]float32) {
 	vertexDeltas := make([][]float32, len(model.Vertices.Data))
+	wireVertexDeltas := make([][]float32, len(model.Vertices.Data))
 	selectedVertexDeltas := make([][]float32, len(model.Vertices.Data))
 
 	for i := range len(model.Vertices.Data) {
+		// モデル頂点
 		v := deltas.Morphs.Vertices.Data[i]
 		if v != nil && ((v.Position != nil && !v.Position.IsZero()) ||
 			(v.Uv != nil && !v.Uv.IsZero()) ||
@@ -101,6 +105,46 @@ func fetchVertexDeltas(
 			// 必要な場合にのみ部分更新するよう設定
 			vertexDeltas[i] = v.GL()
 		}
+
+		// ワイヤーフレーム頂点
+		if invisibleMaterialIndexes != nil && nextInvisibleMaterialIndexes != nil {
+			vertex := model.Vertices.Get(i)
+			for _, mi := range vertex.MaterialIndexes {
+				if slices.Contains(invisibleMaterialIndexes, mi) {
+					// 前回の非表示材質の場合、選択されている頂点のUVXを1にして（フラグをたてて）再表示する
+					wireVertexDeltas[i] = []float32{
+						0, 0, 0,
+						1, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0,
+					}
+				}
+				if slices.Contains(nextInvisibleMaterialIndexes, mi) {
+					// 今回の非表示材質の場合、選択されている頂点のUVXを-1にして（フラグを落として）非表示にする
+					wireVertexDeltas[i] = []float32{
+						0, 0, 0,
+						-1, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0,
+					}
+				}
+			}
+		} else if invisibleMaterialIndexes != nil {
+			vertex := model.Vertices.Get(i)
+			for _, mi := range vertex.MaterialIndexes {
+				if slices.Contains(invisibleMaterialIndexes, mi) {
+					// 今回の非表示材質の場合、選択されている頂点のUVXを-1にして（フラグを落として）非表示にする
+					wireVertexDeltas[i] = []float32{
+						0, 0, 0,
+						-1, 0, 0, 0,
+						0, 0, 0, 0,
+						0, 0, 0,
+					}
+				}
+			}
+		}
+
+		// 選択頂点
 		if selectedVertexIndexes != nil && nextSelectedVertexIndexes != nil {
 			if slices.Contains(selectedVertexIndexes, i) {
 				// 選択されている頂点のUVXを＋にして（フラグをたてて）非表示にする
@@ -111,7 +155,7 @@ func fetchVertexDeltas(
 					0, 0, 0,
 				}
 			} else if slices.Contains(nextSelectedVertexIndexes, i) {
-				// 選択されている頂点のUVXを0にして（フラグを落として）非表示にする
+				// 選択されている頂点のUVXを0にして（フラグを落として）表示する
 				selectedVertexDeltas[i] = []float32{
 					0, 0, 0,
 					0, 0, 0, 0,
@@ -120,7 +164,7 @@ func fetchVertexDeltas(
 				}
 			}
 		} else if selectedVertexIndexes != nil && slices.Contains(selectedVertexIndexes, i) {
-			// 選択されている頂点のUVXを0にして（フラグを落として）非表示にする
+			// 選択されている頂点のUVXを0にして（フラグを落として）表示する
 			selectedVertexDeltas[i] = []float32{
 				0, 0, 0,
 				0, 0, 0, 0,
@@ -131,7 +175,7 @@ func fetchVertexDeltas(
 
 	}
 
-	return vertexDeltas, selectedVertexDeltas
+	return vertexDeltas, wireVertexDeltas, selectedVertexDeltas
 }
 
 // func fetchVertexDeltasParallel(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {

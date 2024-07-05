@@ -45,6 +45,7 @@ func NewMeshes(
 	vertices := make([]float32, 0, len(model.Vertices.Data))
 	normalVertices := make([]float32, 0, len(model.Vertices.Data)*2)
 	normalFaces := make([]uint32, 0, len(model.Vertices.Data)*2)
+	wireVertices := make([]float32, 0, len(model.Vertices.Data))
 	wireFaces := make([]uint32, 0, len(model.Vertices.Data)*3)
 	selectedVertices := make([]float32, 0, len(model.Vertices.Data))
 	selectedVertexFaces := make([]uint32, 0, len(model.Vertices.Data))
@@ -63,6 +64,9 @@ func NewMeshes(
 			mu.Lock()
 			vgl := vertex.GL()
 			vertices = append(vertices, vgl...)
+
+			// ワイヤーフレーム
+			wireVertices = append(wireVertices, vertex.WireGL()...)
 
 			// 法線
 			normalVertices = append(normalVertices, vgl...)
@@ -279,8 +283,9 @@ func (m *Meshes) Draw(
 	shader *mview.MShader,
 	boneDeltas []mgl32.Mat4,
 	vertexDeltas [][]float32,
-	meshDeltas []*MeshDelta,
+	wireVertexDeltas [][]float32,
 	selectedVertexDeltas [][]float32,
+	meshDeltas []*MeshDelta,
 	windowIndex int,
 	isDrawNormal, isDrawWire, isDrawSelectedVertex, isDeform bool,
 	isDrawBones map[BoneFlag]bool,
@@ -312,7 +317,7 @@ func (m *Meshes) Draw(
 	}
 
 	if isDrawWire {
-		m.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
+		m.drawWire(wireVertexDeltas, shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
 	}
 
 	if isDrawSelectedVertex {
@@ -391,6 +396,7 @@ func (m *Meshes) drawNormal(
 }
 
 func (m *Meshes) drawWire(
+	vertexDeltas [][]float32,
 	shader *mview.MShader,
 	paddedMatrixes []float32,
 	width, height int,
@@ -399,7 +405,7 @@ func (m *Meshes) drawWire(
 	shader.Use(mview.PROGRAM_TYPE_WIRE)
 
 	m.wireVao.Bind()
-	m.wireVbo.BindVertex(nil)
+	m.wireVbo.BindVertex(vertexDeltas)
 	m.wireIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定

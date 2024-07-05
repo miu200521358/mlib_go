@@ -26,13 +26,15 @@ import (
 )
 
 type ModelSet struct {
-	Model                     *pmx.PmxModel
-	Motion                    *vmd.VmdMotion
-	SelectedVertexIndexes     []int
-	NextModel                 *pmx.PmxModel
-	NextMotion                *vmd.VmdMotion
-	NextSelectedVertexIndexes []int
-	prevDeltas                *vmd.VmdDeltas
+	Model                        *pmx.PmxModel  // 現在描画中のモデル
+	Motion                       *vmd.VmdMotion // 現在描画中のモーション
+	InvisibleMaterialIndexes     []int          // 非表示材質インデックス
+	SelectedVertexIndexes        []int          // 選択頂点インデックス
+	NextModel                    *pmx.PmxModel  // UIから渡された次のモデル
+	NextMotion                   *vmd.VmdMotion // UIから渡された次のモーション
+	NextInvisibleMaterialIndexes []int          // UIから渡された次の非表示材質インデックス
+	NextSelectedVertexIndexes    []int          // UIから渡された次の選択頂点インデックス
+	prevDeltas                   *vmd.VmdDeltas // 前回のデフォーム情報
 }
 
 // 直角の定数値
@@ -585,6 +587,7 @@ func (w *GlWindow) Run() {
 						w.modelSets[k].NextModel = pairMap[k].NextModel
 						w.modelSets[k].NextMotion = pairMap[k].NextMotion
 						w.modelSets[k].NextSelectedVertexIndexes = pairMap[k].NextSelectedVertexIndexes
+						w.modelSets[k].NextInvisibleMaterialIndexes = pairMap[k].NextInvisibleMaterialIndexes
 					} else {
 						// なければ新規追加
 						w.modelSets[k] = pairMap[k]
@@ -720,9 +723,10 @@ func (w *GlWindow) Run() {
 			var prevDeltas *vmd.VmdDeltas
 			if w.modelSets[k].Model != nil {
 				prevDeltas = draw(
-					w.Physics, w.modelSets[k].Model, w.modelSets[k].Motion, w.Shader,
-					w.modelSets[k].prevDeltas, w.modelSets[k].SelectedVertexIndexes,
-					w.modelSets[k].NextSelectedVertexIndexes, k, int(w.frame), elapsed,
+					w.Physics, w.modelSets[k].Model, w.modelSets[k].Motion, w.Shader, w.modelSets[k].prevDeltas,
+					w.modelSets[k].InvisibleMaterialIndexes, w.modelSets[k].NextInvisibleMaterialIndexes,
+					w.modelSets[k].SelectedVertexIndexes, w.modelSets[k].NextSelectedVertexIndexes,
+					k, int(w.frame), elapsed,
 					w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones)
 			}
 
@@ -748,6 +752,11 @@ func (w *GlWindow) Run() {
 				w.modelSets[k].Motion = w.modelSets[k].NextMotion
 				w.modelSets[k].NextMotion = nil
 				w.isSaveDelta = false
+			}
+
+			if w.modelSets[k].NextInvisibleMaterialIndexes != nil {
+				w.modelSets[k].InvisibleMaterialIndexes = w.modelSets[k].NextInvisibleMaterialIndexes
+				w.modelSets[k].NextInvisibleMaterialIndexes = nil
 			}
 
 			if w.modelSets[k].NextSelectedVertexIndexes != nil {

@@ -493,6 +493,7 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 		return err
 	}
 
+	prevVertexCount := 0
 	for i := 0; i < totalMaterialCount; i++ {
 		// 4 + n : TextBuf	| 材質名
 		name := r.ReadText()
@@ -601,6 +602,18 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 		}
 
 		model.Materials.Append(&m)
+
+		for j := prevVertexCount; j < prevVertexCount+int(m.VerticesCount/3); j++ {
+			face := model.Faces.Get(j)
+			for _, vertexIndexes := range face.VertexIndexes {
+				if !slices.Contains(model.Vertices.Get(vertexIndexes).MaterialIndexes, i) {
+					model.Vertices.Get(vertexIndexes).MaterialIndexes =
+						append(model.Vertices.Get(vertexIndexes).MaterialIndexes, i)
+				}
+			}
+		}
+
+		prevVertexCount += int(m.VerticesCount / 3)
 	}
 
 	return nil
