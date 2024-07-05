@@ -793,7 +793,9 @@ closeApp:
 }
 
 func (w *GlWindow) IsRunning() bool {
-	return !w.isClosed && w.running && !CheckOpenGLError() && !w.ShouldClose() &&
+	return !w.isClosed && // walkウィンドウ側が閉じられたか
+		w.running && // GLウィンドウ側が閉じられたか
+		!CheckOpenGLError() && !w.ShouldClose() &&
 		((w.mWindow != nil && !w.mWindow.IsDisposed()) || w.mWindow == nil)
 }
 
