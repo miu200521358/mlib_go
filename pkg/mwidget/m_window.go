@@ -350,6 +350,16 @@ func (w *MWindow) langTriggered(lang string) {
 	w.Close()
 }
 
+func (w *MWindow) SetCheckWireDebugView(checked bool) {
+	w.wireDebugAction.SetChecked(checked)
+	w.wireDebugViewTriggered()
+}
+
+func (w *MWindow) SetCheckSelectedVertexDebugView(checked bool) {
+	w.selectedVertexDebugAction.SetChecked(checked)
+	w.selectedVertexDebugViewTriggered()
+}
+
 func (w *MWindow) normalDebugViewTriggered() {
 	for _, glWindow := range w.GlWindows {
 		glWindow.VisibleNormal = w.normalDebugAction.Checked()
