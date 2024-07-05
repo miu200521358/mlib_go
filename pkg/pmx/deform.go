@@ -167,8 +167,8 @@ type Bdef1 struct {
 }
 
 // NewBdef1 creates a new Bdef1 instance.
-func NewBdef1(index0 int) Bdef1 {
-	return Bdef1{
+func NewBdef1(index0 int) *Bdef1 {
+	return &Bdef1{
 		Deform: Deform{
 			Indexes: []int{index0},
 			Weights: []float64{1.0},
@@ -193,8 +193,8 @@ type Bdef2 struct {
 }
 
 // NewBdef2 creates a new Bdef2 instance.
-func NewBdef2(index0, index1 int, weight0 float64) Bdef2 {
-	return Bdef2{
+func NewBdef2(index0, index1 int, weight0 float64) *Bdef2 {
+	return &Bdef2{
 		Deform: Deform{
 			Indexes: []int{index0, index1},
 			Weights: []float64{weight0, 1 - weight0},
@@ -221,8 +221,8 @@ type Bdef4 struct {
 }
 
 // NewBdef4 creates a new Bdef4 instance.
-func NewBdef4(index0, index1, index2, index3 int, weight0, weight1, weight2, weight3 float64) Bdef4 {
-	return Bdef4{
+func NewBdef4(index0, index1, index2, index3 int, weight0, weight1, weight2, weight3 float64) *Bdef4 {
+	return &Bdef4{
 		Deform: Deform{
 			Indexes: []int{index0, index1, index2, index3},
 			Weights: []float64{weight0, weight1, weight2, weight3},
@@ -252,8 +252,8 @@ type Sdef struct {
 }
 
 // NewSdef creates a new Sdef instance.
-func NewSdef(index0, index1 int, weight0 float64, sdefC, sdefR0, sdefR1 *mmath.MVec3) Sdef {
-	return Sdef{
+func NewSdef(index0, index1 int, weight0 float64, sdefC, sdefR0, sdefR1 *mmath.MVec3) *Sdef {
+	return &Sdef{
 		Deform: Deform{
 			Indexes: []int{index0, index1},
 			Weights: []float64{weight0, 1 - weight0},
