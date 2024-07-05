@@ -154,7 +154,8 @@ func fetchVertexDeltas(
 					0, 0, 0, 0,
 					0, 0, 0,
 				}
-			} else if slices.Contains(nextSelectedVertexIndexes, i) {
+			}
+			if slices.Contains(nextSelectedVertexIndexes, i) {
 				// 選択されている頂点のUVXを0にして（フラグを落として）表示する
 				selectedVertexDeltas[i] = []float32{
 					0, 0, 0,
