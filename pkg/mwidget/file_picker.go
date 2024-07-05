@@ -329,6 +329,15 @@ func (picker *FilePicker) GetData() (mcore.IHashModel, error) {
 	return data, nil
 }
 
+func (picker *FilePicker) GetDataForce() mcore.IHashModel {
+	data, err := picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
+	if err != nil {
+		return nil
+	}
+
+	return data
+}
+
 func (picker *FilePicker) SetCache(data mcore.IHashModel) {
 	if data == nil {
 		picker.PathLineEdit.SetText("")
