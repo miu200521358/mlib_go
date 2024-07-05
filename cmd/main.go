@@ -86,7 +86,7 @@ func main() {
 	}()
 
 	glWindow.Run()
-	defer glWindow.Close(glWindow.Window)
+	defer glWindow.TriggerClose(glWindow.Window)
 }
 
 func getMenuItems() []declarative.MenuItem {

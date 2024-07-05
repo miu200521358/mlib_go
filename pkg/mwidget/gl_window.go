@@ -42,46 +42,47 @@ const RIGHT_ANGLE = 89.9
 
 type GlWindow struct {
 	*glfw.Window
-	mWindow                    *MWindow
-	modelSets                  map[int]*ModelSet
-	Shader                     *mview.MShader
-	title                      string
-	WindowIndex                int
-	resourceFiles              embed.FS
-	prevCursorPos              *mmath.MVec2
-	yaw                        float64
-	pitch                      float64
-	Physics                    *mphysics.MPhysics
-	middleButtonPressed        bool
-	rightButtonPressed         bool
-	updatedPrev                bool
-	shiftPressed               bool
-	ctrlPressed                bool
-	running                    bool
-	playing                    bool
-	VisibleBones               map[pmx.BoneFlag]bool
-	VisibleNormal              bool
-	VisibleWire                bool
-	VisibleSelectedVertex      bool
-	EnablePhysics              bool
-	EnableFrameDrop            bool
-	isClosed                   bool
-	isShowInfo                 bool
-	spfLimit                   float64
-	frame                      float64
-	prevFrame                  int
-	isSaveDelta                bool
-	motionPlayer               *MotionPlayer
-	width                      int
-	height                     int
-	floor                      *MFloor
-	funcWorldPos               func(worldPos *mmath.MVec3, viewMat *mmath.MMat4)
-	AppendModelSetChannel      chan *ModelSet
-	RemoveModelSetIndexChannel chan int
-	ReplaceModelSetChannel     chan map[int]*ModelSet
-	IsPlayingChannel           chan bool
-	FrameChannel               chan int
-	IsClosedChannel            chan bool
+	mWindow                    *MWindow                                          // walkウィンドウ
+	modelSets                  map[int]*ModelSet                                 // モデルセット
+	Shader                     *mview.MShader                                    // シェーダー
+	title                      string                                            // ウィンドウタイトル(fpsとか入ってないオリジナル)
+	WindowIndex                int                                               // ウィンドウインデックス
+	resourceFiles              embed.FS                                          // リソースファイル
+	prevCursorPos              *mmath.MVec2                                      // 前回のカーソル位置
+	yaw                        float64                                           // ウィンドウ操作yaw
+	pitch                      float64                                           // ウィンドウ操作pitch
+	Physics                    *mphysics.MPhysics                                // 物理
+	middleButtonPressed        bool                                              // 中ボタン押下フラグ
+	rightButtonPressed         bool                                              // 右ボタン押下フラグ
+	updatedPrev                bool                                              // 前回のカーソル位置更新フラグ
+	shiftPressed               bool                                              // Shiftキー押下フラグ
+	ctrlPressed                bool                                              // Ctrlキー押下フラグ
+	running                    bool                                              // 描画ループ中フラグ
+	playing                    bool                                              // 再生中フラグ
+	doResetPhysics             bool                                              // 物理リセットフラグ
+	VisibleBones               map[pmx.BoneFlag]bool                             // ボーン表示フラグ
+	VisibleNormal              bool                                              // 法線表示フラグ
+	VisibleWire                bool                                              // ワイヤーフレーム表示フラグ
+	VisibleSelectedVertex      bool                                              // 選択頂点表示フラグ
+	EnablePhysics              bool                                              // 物理有効フラグ
+	EnableFrameDrop            bool                                              // フレームドロップ有効フラグ
+	isClosed                   bool                                              // walkウィンドウが閉じられたかどうか
+	isShowInfo                 bool                                              // 情報表示フラグ
+	spfLimit                   float64                                           //fps制限
+	frame                      float64                                           // 現在のフレーム
+	prevFrame                  int                                               // 前回のフレーム
+	isSaveDelta                bool                                              // 前回デフォーム保存フラグ
+	motionPlayer               *MotionPlayer                                     // 再生プレイヤー
+	width                      int                                               // ウィンドウ幅
+	height                     int                                               // ウィンドウ高さ
+	floor                      *MFloor                                           // 床
+	funcWorldPos               func(worldPos *mmath.MVec3, viewMat *mmath.MMat4) // 選択ポイントからのグローバル位置取得コールバック関数
+	AppendModelSetChannel      chan *ModelSet                                    // モデルセット追加チャネル
+	RemoveModelSetIndexChannel chan int                                          // モデルセット削除チャネル
+	ReplaceModelSetChannel     chan map[int]*ModelSet                            // モデルセット入替チャネル
+	IsPlayingChannel           chan bool                                         // 再生チャネル
+	FrameChannel               chan int                                          // フレームチャネル
+	IsClosedChannel            chan bool                                         // ウィンドウクローズチャネル
 }
 
 func NewGlWindow(
@@ -207,7 +208,7 @@ func NewGlWindow(
 	w.SetMouseButtonCallback(glWindow.handleMouseButtonEvent)
 	w.SetCursorPosCallback(glWindow.handleCursorPosEvent)
 	w.SetKeyCallback(glWindow.handleKeyEvent)
-	w.SetCloseCallback(glWindow.Close)
+	w.SetCloseCallback(glWindow.TriggerClose)
 	w.SetSizeCallback(glWindow.resize)
 	w.SetFramebufferSizeCallback(glWindow.resizeBuffer)
 
@@ -244,7 +245,7 @@ func (w *GlWindow) resize(window *glfw.Window, width int, height int) {
 	w.Shader.Resize(width, height)
 }
 
-func (w *GlWindow) Play(p bool) {
+func (w *GlWindow) TriggerPlay(p bool) {
 	w.playing = p
 }
 
@@ -258,7 +259,7 @@ func (w *GlWindow) SetFrame(f int) {
 	w.isSaveDelta = false
 }
 
-func (w *GlWindow) Close(window *glfw.Window) {
+func (w *GlWindow) TriggerClose(window *glfw.Window) {
 	w.running = false
 }
 
@@ -313,7 +314,7 @@ func (w *GlWindow) handleKeyEvent(
 		return
 	}
 
-	w.Reset()
+	w.TriggerViewReset()
 
 	switch key {
 	case glfw.KeyKP0: // 下面から
@@ -534,14 +535,21 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 	w.prevCursorPos.SetY(ypos)
 }
 
-func (w *GlWindow) ResetPhysics() {
-	for i := range w.modelSets {
-		w.modelSets[i].Model.DeletePhysics()
-		w.modelSets[i].Model.InitPhysics(w.Physics)
-	}
+func (w *GlWindow) TriggerPhysicsReset() {
+	w.doResetPhysics = true
 }
 
-func (w *GlWindow) Reset() {
+func (w *GlWindow) resetPhysics() {
+	for i := range w.modelSets {
+		w.modelSets[i].Model.DeletePhysics()
+	}
+	for i := range w.modelSets {
+		w.modelSets[i].Model.InitPhysics(w.Physics)
+	}
+	w.doResetPhysics = false
+}
+
+func (w *GlWindow) TriggerViewReset() {
 	// カメラとかリセット
 	w.Shader.Reset()
 	w.prevCursorPos = &mmath.MVec2{0, 0}
@@ -595,7 +603,7 @@ func (w *GlWindow) Run() {
 				w.isSaveDelta = false
 			case isPlaying := <-w.IsPlayingChannel:
 				// 再生設定
-				w.Play(isPlaying)
+				w.TriggerPlay(isPlaying)
 			case frame := <-w.FrameChannel:
 				// フレーム設定
 				w.SetFrame(frame)
@@ -702,6 +710,10 @@ func (w *GlWindow) Run() {
 			// 経過秒数をキーフレームの進捗具合に合わせて調整
 			w.frame += elapsed * float64(w.Physics.Fps)
 			// mlog.V("previousTime=%.7f, time=%.7f, elapsed=%.7f, frame=%.7f", prevTime, frameTime, elapsed, w.frame)
+		}
+
+		if w.doResetPhysics {
+			w.resetPhysics()
 		}
 
 		// 描画

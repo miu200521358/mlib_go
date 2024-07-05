@@ -475,7 +475,7 @@ func (w *MWindow) physicsTriggered() {
 
 func (w *MWindow) physicsResetTriggered() {
 	for _, glWindow := range w.GlWindows {
-		glWindow.ResetPhysics()
+		glWindow.TriggerPhysicsReset()
 	}
 }
 
@@ -555,7 +555,7 @@ func (w *MWindow) Center() {
 
 func (w *MWindow) Dispose() {
 	for _, glWindow := range w.GlWindows {
-		glWindow.Close(glWindow.Window)
+		glWindow.TriggerClose(glWindow.Window)
 	}
 	w.MainWindow.Dispose()
 	defer walk.App().Exit(0)
