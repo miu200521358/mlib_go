@@ -26,11 +26,13 @@ import (
 )
 
 type ModelSet struct {
-	Model      *pmx.PmxModel
-	Motion     *vmd.VmdMotion
-	NextModel  *pmx.PmxModel
-	NextMotion *vmd.VmdMotion
-	prevDeltas *vmd.VmdDeltas
+	Model                     *pmx.PmxModel
+	Motion                    *vmd.VmdMotion
+	SelectedVertexIndexes     []int
+	NextModel                 *pmx.PmxModel
+	NextMotion                *vmd.VmdMotion
+	NextSelectedVertexIndexes []int
+	prevDeltas                *vmd.VmdDeltas
 }
 
 // 直角の定数値
@@ -58,6 +60,7 @@ type GlWindow struct {
 	VisibleBones               map[pmx.BoneFlag]bool
 	VisibleNormal              bool
 	VisibleWire                bool
+	VisibleSelectedVertex      bool
 	EnablePhysics              bool
 	EnableFrameDrop            bool
 	isClosed                   bool
@@ -177,6 +180,7 @@ func NewGlWindow(
 		VisibleBones:               make(map[pmx.BoneFlag]bool, 0),
 		VisibleNormal:              false,
 		VisibleWire:                false,
+		VisibleSelectedVertex:      false,
 		isClosed:                   false,
 		isShowInfo:                 false,
 		spfLimit:                   1.0 / 30.0,
@@ -580,6 +584,7 @@ func (w *GlWindow) Run() {
 						// 既存のがあれば、次のを設定
 						w.modelSets[k].NextModel = pairMap[k].NextModel
 						w.modelSets[k].NextMotion = pairMap[k].NextMotion
+						w.modelSets[k].NextSelectedVertexIndexes = pairMap[k].NextSelectedVertexIndexes
 					} else {
 						// なければ新規追加
 						w.modelSets[k] = pairMap[k]
@@ -716,8 +721,9 @@ func (w *GlWindow) Run() {
 			if w.modelSets[k].Model != nil {
 				prevDeltas = draw(
 					w.Physics, w.modelSets[k].Model, w.modelSets[k].Motion, w.Shader,
-					w.modelSets[k].prevDeltas, k, int(w.frame), elapsed,
-					w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleBones)
+					w.modelSets[k].prevDeltas, w.modelSets[k].SelectedVertexIndexes,
+					w.modelSets[k].NextSelectedVertexIndexes, k, int(w.frame), elapsed,
+					w.EnablePhysics, w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones)
 			}
 
 			if !w.IsRunning() {
@@ -742,6 +748,11 @@ func (w *GlWindow) Run() {
 				w.modelSets[k].Motion = w.modelSets[k].NextMotion
 				w.modelSets[k].NextMotion = nil
 				w.isSaveDelta = false
+			}
+
+			if w.modelSets[k].NextSelectedVertexIndexes != nil {
+				w.modelSets[k].SelectedVertexIndexes = w.modelSets[k].NextSelectedVertexIndexes
+				w.modelSets[k].NextSelectedVertexIndexes = nil
 			}
 
 			// キーフレの手動変更がなかった場合のみ前回デフォームとして保持

@@ -4,6 +4,8 @@
 package mwidget
 
 import (
+	"slices"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
@@ -52,12 +54,12 @@ func draw(
 	motion *vmd.VmdMotion,
 	shader *mview.MShader,
 	prevDeltas *vmd.VmdDeltas,
+	selectedVertexIndexes []int,
+	nextSelectedVertexIndexes []int,
 	windowIndex int,
 	frame int,
 	elapsed float64,
-	enablePhysics bool,
-	isDrawNormal bool,
-	isDrawWire bool,
+	enablePhysics, isDrawNormal, isDrawWire, isDrawSelectedVertex bool,
 	isDrawBones map[pmx.BoneFlag]bool,
 ) *vmd.VmdDeltas {
 	deltas := deform(modelPhysics, model, motion, prevDeltas, frame, elapsed, enablePhysics)
@@ -72,10 +74,11 @@ func draw(
 		meshDeltas[i] = md.Result()
 	}
 
-	vertexDeltas := fetchVertexDeltas(model, deltas)
+	vertexDeltas, selectedVertexDeltas :=
+		fetchVertexDeltas(model, deltas, selectedVertexIndexes, nextSelectedVertexIndexes)
 
-	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, meshDeltas, windowIndex,
-		isDrawNormal, isDrawWire, prevDeltas == nil, isDrawBones, model.Bones)
+	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, meshDeltas, selectedVertexDeltas, windowIndex,
+		isDrawNormal, isDrawWire, isDrawSelectedVertex, prevDeltas == nil, isDrawBones, model.Bones)
 
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()
@@ -83,20 +86,52 @@ func draw(
 	return deltas
 }
 
-func fetchVertexDeltas(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {
+func fetchVertexDeltas(
+	model *pmx.PmxModel, deltas *vmd.VmdDeltas, selectedVertexIndexes, nextSelectedVertexIndexes []int,
+) ([][]float32, [][]float32) {
 	vertexDeltas := make([][]float32, len(model.Vertices.Data))
+	selectedVertexDeltas := make([][]float32, len(model.Vertices.Data))
 
-	for _, v := range deltas.Morphs.Vertices.Data {
+	for i := range len(model.Vertices.Data) {
+		v := deltas.Morphs.Vertices.Data[i]
 		if v != nil && ((v.Position != nil && !v.Position.IsZero()) ||
 			(v.Uv != nil && !v.Uv.IsZero()) ||
 			(v.Uv1 != nil && !v.Uv1.IsZero()) ||
 			(v.AfterPosition != nil && !v.AfterPosition.IsZero())) {
 			// 必要な場合にのみ部分更新するよう設定
-			vertexDeltas[v.Index] = v.GL()
+			vertexDeltas[i] = v.GL()
 		}
+		if selectedVertexIndexes != nil && nextSelectedVertexIndexes != nil {
+			if slices.Contains(selectedVertexIndexes, i) {
+				// 選択されている頂点のUVXを＋にして（フラグをたてて）非表示にする
+				selectedVertexDeltas[i] = []float32{
+					0, 0, 0,
+					1, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0,
+				}
+			} else if slices.Contains(nextSelectedVertexIndexes, i) {
+				// 選択されている頂点のUVXを0にして（フラグを落として）非表示にする
+				selectedVertexDeltas[i] = []float32{
+					0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0,
+				}
+			}
+		} else if selectedVertexIndexes != nil && slices.Contains(selectedVertexIndexes, i) {
+			// 選択されている頂点のUVXを0にして（フラグを落として）非表示にする
+			selectedVertexDeltas[i] = []float32{
+				0, 0, 0,
+				0, 0, 0, 0,
+				0, 0, 0, 0,
+				0, 0, 0,
+			}
+		}
+
 	}
 
-	return vertexDeltas
+	return vertexDeltas, selectedVertexDeltas
 }
 
 // func fetchVertexDeltasParallel(model *pmx.PmxModel, deltas *vmd.VmdDeltas) [][]float32 {

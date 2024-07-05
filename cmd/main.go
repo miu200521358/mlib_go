@@ -256,12 +256,16 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 			vertexIndexes, vertexPosition := model.Vertices.GetMapValues(tempVertex)
 			if len(vertexIndexes) > 0 {
 				distances := mmath.Float64Slice(mmath.Distances(worldPos, vertexPosition))
-				nearVertexIndexes := mmath.ArgSort(distances)
-				for i := range min(10, len(nearVertexIndexes)) {
-					nearestVertex := model.Vertices.Get(vertexIndexes[nearVertexIndexes[i]])
+				sortedVertexIndexes := mmath.ArgSort(distances)
+				for i := range min(10, len(sortedVertexIndexes)) {
+					nearestVertex := model.Vertices.Get(vertexIndexes[sortedVertexIndexes[i]])
 					mlog.D("Near Vertex Index: %d (%s:%.3f)",
-						nearestVertex.Index, nearestVertex.Position.String(), distances[nearVertexIndexes[i]])
+						nearestVertex.Index, nearestVertex.Position.String(), distances[sortedVertexIndexes[i]])
 				}
+
+				go func() {
+					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*mwidget.ModelSet{0: {NextSelectedVertexIndexes: []int{vertexIndexes[sortedVertexIndexes[0]]}}}
+				}()
 			}
 			// 大体近いボーンを取得
 			tempBone := pmx.NewBone()

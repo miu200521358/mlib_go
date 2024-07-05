@@ -28,6 +28,7 @@ type MWindow struct {
 	physicsResetAction        *walk.Action // 物理リセット
 	normalDebugAction         *walk.Action // ボーンデバッグ表示
 	wireDebugAction           *walk.Action // ワイヤーフレームデバッグ表示
+	selectedVertexDebugAction *walk.Action // 選択頂点デバッグ表示
 	boneDebugAllAction        *walk.Action // 全ボーンデバッグ表示
 	boneDebugIkAction         *walk.Action // IKボーンデバッグ表示
 	boneDebugEffectorAction   *walk.Action // 付与親ボーンデバッグ表示
@@ -125,20 +126,26 @@ func NewMWindow(
 					},
 					declarative.Separator{},
 					declarative.Action{
-						Text:        mi18n.T("&法線デバッグ表示"),
+						Text:        mi18n.T("&法線表示"),
 						Checkable:   true,
 						OnTriggered: mainWindow.normalDebugViewTriggered,
 						AssignTo:    &mainWindow.normalDebugAction,
 					},
 					declarative.Action{
-						Text:        mi18n.T("&ワイヤーフレームデバッグ表示"),
+						Text:        mi18n.T("&ワイヤーフレーム表示"),
 						Checkable:   true,
 						OnTriggered: mainWindow.wireDebugViewTriggered,
 						AssignTo:    &mainWindow.wireDebugAction,
 					},
+					declarative.Action{
+						Text:        mi18n.T("&選択頂点表示"),
+						Checkable:   true,
+						OnTriggered: mainWindow.selectedVertexDebugViewTriggered,
+						AssignTo:    &mainWindow.selectedVertexDebugAction,
+					},
 					declarative.Separator{},
 					declarative.Menu{
-						Text: mi18n.T("&ボーンデバッグ表示"),
+						Text: mi18n.T("&ボーン表示"),
 						Items: []declarative.MenuItem{
 							declarative.Action{
 								Text:        mi18n.T("&全ボーン"),
@@ -187,7 +194,7 @@ func NewMWindow(
 					},
 					declarative.Separator{},
 					declarative.Menu{
-						Text: mi18n.T("&剛体デバッグ表示"),
+						Text: mi18n.T("&剛体表示"),
 						Items: []declarative.MenuItem{
 							declarative.Action{
 								Text:        mi18n.T("&前面表示"),
@@ -204,7 +211,7 @@ func NewMWindow(
 						},
 					},
 					declarative.Action{
-						Text:        mi18n.T("&ジョイントデバッグ表示"),
+						Text:        mi18n.T("&ジョイント表示"),
 						Checkable:   true,
 						OnTriggered: mainWindow.jointDebugViewTriggered,
 						AssignTo:    &mainWindow.jointDebugAction,
@@ -352,6 +359,12 @@ func (w *MWindow) normalDebugViewTriggered() {
 func (w *MWindow) wireDebugViewTriggered() {
 	for _, glWindow := range w.GlWindows {
 		glWindow.VisibleWire = w.wireDebugAction.Checked()
+	}
+}
+
+func (w *MWindow) selectedVertexDebugViewTriggered() {
+	for _, glWindow := range w.GlWindows {
+		glWindow.VisibleSelectedVertex = w.selectedVertexDebugAction.Checked()
 	}
 }
 
