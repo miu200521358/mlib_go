@@ -419,6 +419,7 @@ MlibSample 1.0.0_beta_85
 ・外からワイヤーフレーム、頂点選択をONにできるように
 ・ウィンドウが閉じられているかのイベント判定処理修正
 　・glfw.PollEvents()の後に !w.IsRunning()
+・描画ループが終わった後に terminate を実行
 
 
 

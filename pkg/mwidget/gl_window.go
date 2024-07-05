@@ -787,10 +787,6 @@ func (w *GlWindow) Run() {
 		} else {
 			w.Window.SetTitle(w.title)
 		}
-
-		if !w.IsRunning() {
-			goto closeApp
-		}
 	}
 
 closeApp:
