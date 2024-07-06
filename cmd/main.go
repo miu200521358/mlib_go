@@ -56,7 +56,7 @@ func main() {
 		defer mwidget.RecoverFromPanic(mWindow)
 	}
 
-	glWindow, err := mwidget.NewGlWindow(mi18n.T("ビューワー"), 512, 768, 0, resourceFiles, nil, nil)
+	glWindow, err := mwidget.NewGlWindow(mi18n.T("ビューワー"), 512, 768, 0, resourceFiles, appConfig, nil, nil)
 
 	go func() {
 		mWindow, err = mwidget.NewMWindow(resourceFiles, appConfig, true, 512, 768, getMenuItems)

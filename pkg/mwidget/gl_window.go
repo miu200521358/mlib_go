@@ -45,6 +45,7 @@ type GlWindow struct {
 	mWindow                *MWindow              // walkウィンドウ
 	modelSets              map[int]*ModelSet     // モデルセット
 	Shader                 *mview.MShader        // シェーダー
+	appConfig              *mconfig.AppConfig    // アプリケーション設定
 	title                  string                // ウィンドウタイトル(fpsとか入ってないオリジナル)
 	WindowIndex            int                   // ウィンドウインデックス
 	resourceFiles          embed.FS              // リソースファイル
@@ -95,6 +96,7 @@ func NewGlWindow(
 	height int,
 	windowIndex int,
 	resourceFiles embed.FS,
+	appConfig *mconfig.AppConfig,
 	mainWindow *GlWindow,
 	fixViewWidget *FixViewWidget,
 ) (*GlWindow, error) {
@@ -172,6 +174,7 @@ func NewGlWindow(
 		Window:                     w,
 		modelSets:                  make(map[int]*ModelSet),
 		Shader:                     shader,
+		appConfig:                  appConfig,
 		title:                      title,
 		WindowIndex:                windowIndex,
 		resourceFiles:              resourceFiles,
@@ -850,7 +853,23 @@ func (w *GlWindow) Run() {
 			nowShowTime := glfw.GetTime()
 			// 1秒ごとにオリジナルの経過時間からFPSを表示
 			if nowShowTime-prevShowTime >= 1.0 {
-				w.Window.SetTitle(fmt.Sprintf("%s - %.2f fps", w.title, 1.0/timeStep))
+				var suffixFps string
+				if w.appConfig.IsEnvProd() {
+					// リリース版の場合、FPSの表示を簡略化
+					var showElapsed float64
+					if w.spfLimit < 0 {
+						showElapsed = float64(timeStep)
+					} else {
+						showElapsed = float64(elapsed)
+					}
+
+					suffixFps = fmt.Sprintf("%.2f fps", 1.0/showElapsed)
+				} else {
+					// 開発版の場合、FPSの表示を詳細化
+					suffixFps = fmt.Sprintf("d) %.2f/ p) %.2f fps", 1.0/elapsed, 1.0/timeStep)
+				}
+
+				w.Window.SetTitle(fmt.Sprintf("%s - %s", w.title, suffixFps))
 				prevShowTime = nowShowTime
 			}
 		} else {
