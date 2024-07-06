@@ -24,49 +24,55 @@ func NewConstBtMDefaultColors() mbt.BtMDefaultColors {
 
 type MDebugDrawLiner struct {
 	mbt.BtMDebugDrawLiner
-	shader *mview.MShader
-	vao    *mview.VAO
-	vbo    *mview.VBO
+	shader   *mview.MShader
+	vao      *mview.VAO
+	vbo      *mview.VBO
+	vertices []float32
+	count    int
 }
 
 func NewMDebugDrawLiner(shader *mview.MShader) *MDebugDrawLiner {
 	ddl := &MDebugDrawLiner{
-		shader: shader,
+		shader:   shader,
+		vertices: make([]float32, 0),
 	}
-	ddl.BtMDebugDrawLiner = mbt.NewDirectorBtMDebugDrawLiner(ddl)
 
 	ddl.vao = mview.NewVAO()
 	ddl.vao.Bind()
 	ddl.vbo = mview.NewVBOForDebug()
-	ddl.vbo.BindDebug(mbt.NewBtVector3(), mbt.NewBtVector3())
 	ddl.vbo.Unbind()
 	ddl.vao.Unbind()
+
+	ddl.BtMDebugDrawLiner = mbt.NewDirectorBtMDebugDrawLiner(ddl)
 
 	return ddl
 }
 
-func (ddl MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color mbt.BtVector3) {
+func (ddl *MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color mbt.BtVector3) {
+	ddl.vertices = append(ddl.vertices, from.GetX(), from.GetY(), from.GetZ())
+	ddl.vertices = append(ddl.vertices, color.GetX(), color.GetY(), color.GetZ(), 0.6)
+	ddl.count++
+
+	ddl.vertices = append(ddl.vertices, to.GetX(), to.GetY(), to.GetZ())
+	ddl.vertices = append(ddl.vertices, color.GetX(), color.GetY(), color.GetZ(), 0.6)
+	ddl.count++
+}
+
+func (ddl *MDebugDrawLiner) DrawDebugLines() {
 	if ddl.shader.IsDrawRigidBodyFront {
 		// モデルメッシュの前面に描画するために深度テストを無効化
 		gl.Enable(gl.DEPTH_TEST)
 		gl.DepthFunc(gl.ALWAYS)
 	}
 
-	// mlog.D("MDebugDrawLiner.DrawLine")
 	ddl.shader.Use(mview.PROGRAM_TYPE_PHYSICS)
-
-	// 色を設定
-	colorUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mview.SHADER_COLOR))
-	gl.Uniform3f(colorUniform, color.GetX(), color.GetY(), color.GetZ())
-
-	alphaUniform := gl.GetUniformLocation(ddl.shader.PhysicsProgram, gl.Str(mview.SHADER_ALPHA))
-	gl.Uniform1f(alphaUniform, 0.6)
 
 	// 線を引く
 	ddl.vao.Bind()
-	ddl.vbo.BindDebug(from, to)
+	ddl.vbo.BindDebug(ddl.vertices)
 
-	gl.DrawArrays(gl.LINES, 0, int32(2))
+	// ライン描画
+	gl.DrawArrays(gl.LINES, 0, int32(ddl.count))
 
 	ddl.vbo.Unbind()
 	ddl.vao.Unbind()

@@ -7,8 +7,6 @@ import (
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
-
-	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 )
 
 // Vertex Buffer Object.
@@ -251,19 +249,15 @@ func NewVBOForDebug() *VBO {
 	}
 	// 剛体構造体のサイズ(全部floatとする)
 	// position(3)
-	vbo.stride = int32(4 * (3))
-	// verticesの要素数 * float32のサイズ
-	vbo.size = 6 * 4
+	vbo.stride = int32(4 * (3 + 4))
 
 	return vbo
 }
 
 // Binds VBO for rendering.
-func (v *VBO) BindDebug(from mbt.BtVector3, to mbt.BtVector3) {
-	vertices := []float32{
-		from.GetX(), from.GetY(), from.GetZ(),
-		to.GetX(), to.GetY(), to.GetZ(),
-	}
+func (v *VBO) BindDebug(vertices []float32) {
+	// verticesの要素数 * float32のサイズ
+	v.size = len(vertices) * 4
 
 	gl.BindBuffer(v.target, v.id)
 	gl.BufferData(v.target, v.size, gl.Ptr(&vertices[0]), gl.STATIC_DRAW)
@@ -278,6 +272,17 @@ func (v *VBO) BindDebug(from mbt.BtVector3, to mbt.BtVector3) {
 		false,
 		v.stride,
 		0*4,
+	)
+
+	// 1: color
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointerWithOffset(
+		1,
+		4,
+		gl.FLOAT,
+		false,
+		v.stride,
+		3*4,
 	)
 }
 

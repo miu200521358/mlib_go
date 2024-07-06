@@ -9,14 +9,17 @@ import (
 )
 
 type MPhysics struct {
-	world         mbt.BtDiscreteDynamicsWorld
-	drawer        mbt.BtMDebugDraw
-	MaxSubSteps   int
-	Fps           float32
-	Spf           float32
-	FixedTimeStep float32
-	joints        map[jointKey]mbt.BtTypedConstraint
-	rigidBodies   map[rigidbodyKey]rigidbodyValue
+	world            mbt.BtDiscreteDynamicsWorld
+	drawer           mbt.BtMDebugDraw
+	liner            *MDebugDrawLiner
+	MaxSubSteps      int
+	Fps              float32
+	Spf              float32
+	FixedTimeStep    float32
+	joints           map[jointKey]mbt.BtTypedConstraint
+	rigidBodies      map[rigidbodyKey]rigidbodyValue
+	visibleRigidBody bool
+	visibleJoint     bool
 }
 
 type rigidbodyKey struct {
@@ -39,21 +42,24 @@ type jointKey struct {
 func NewMPhysics(shader *mview.MShader) *MPhysics {
 	world := createWorld()
 
-	// デバッグビューワー
-	drawer := mbt.NewBtMDebugDraw()
-	drawer.SetLiner(NewMDebugDrawLiner(shader))
-	drawer.SetMDefaultColors(NewConstBtMDefaultColors())
-	world.SetDebugDrawer(drawer)
-	// mlog.D("world.GetDebugDrawer()=%+v\n", world.GetDebugDrawer())
-
 	p := &MPhysics{
 		world:       world,
-		drawer:      drawer,
 		MaxSubSteps: 2,
 		Fps:         30.0,
 		rigidBodies: make(map[rigidbodyKey]rigidbodyValue),
 		joints:      make(map[jointKey]mbt.BtTypedConstraint),
 	}
+
+	// デバッグビューワー
+	liner := NewMDebugDrawLiner(shader)
+	drawer := mbt.NewBtMDebugDraw()
+	drawer.SetLiner(liner)
+	drawer.SetMDefaultColors(NewConstBtMDefaultColors())
+	world.SetDebugDrawer(drawer)
+	// mlog.D("world.GetDebugDrawer()=%+v\n", world.GetDebugDrawer())
+
+	p.drawer = drawer
+	p.liner = liner
 	p.Spf = 1.0 / p.Fps
 	p.FixedTimeStep = 1 / 60.0
 
@@ -115,6 +121,7 @@ func (p *MPhysics) VisibleRigidBody(enable bool) {
 					mbt.BtIDebugDrawDBG_DrawContactPoints,
 			))
 	}
+	p.visibleRigidBody = enable
 }
 
 func (p *MPhysics) VisibleJoint(enable bool) {
@@ -130,6 +137,14 @@ func (p *MPhysics) VisibleJoint(enable bool) {
 				mbt.BtIDebugDrawDBG_DrawConstraints|
 					mbt.BtIDebugDrawDBG_DrawConstraintLimits,
 			))
+	}
+	p.visibleJoint = enable
+}
+
+func (p *MPhysics) DrawDebugLines() {
+	if p.visibleRigidBody || p.visibleJoint {
+		p.liner.DrawDebugLines()
+		p.liner.vertices = []float32{}
 	}
 }
 
