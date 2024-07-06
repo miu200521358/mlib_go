@@ -18,7 +18,7 @@ func (r *RigidBody) UpdateFlags(
 		return false
 	}
 
-	if r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
+	if r.CorrectPhysicsType == PHYSICS_TYPE_STATIC || resetPhysics {
 		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時
 		// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
 		btRigidBody.SetCollisionFlags(
@@ -26,9 +26,10 @@ func (r *RigidBody) UpdateFlags(
 		// 毎ステップの剛体位置通知を無効にする
 		// MotionState::setWorldTransformの毎ステップ呼び出しが無効になる(剛体位置は判っているので不要)
 		btRigidBody.SetActivationState(mbt.DISABLE_SIMULATION)
-		// if prevActivationState != mbt.DISABLE_SIMULATION {
-		// 	return true
-		// }
+
+		if resetPhysics {
+			return true
+		}
 	} else {
 		prevActivationState := btRigidBody.GetActivationState()
 
@@ -37,12 +38,6 @@ func (r *RigidBody) UpdateFlags(
 			if prevActivationState != mbt.ACTIVE_TAG {
 				btRigidBody.SetCollisionFlags(0 & ^int(mbt.BtCollisionObjectCF_NO_CONTACT_RESPONSE))
 				btRigidBody.ForceActivationState(mbt.ACTIVE_TAG)
-
-				// localInertia := mbt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
-				// btRigidBody.GetCollisionShape().(mbt.BtCollisionShape).CalculateLocalInertia(
-				// 	float32(r.RigidBodyParam.Mass), localInertia)
-
-				// btRigidBody.GetMotionState().(mbt.BtMotionState).SetWorldTransform(r.BtRigidBodyTransform)
 
 				return true
 			} else {
@@ -58,14 +53,9 @@ func (r *RigidBody) UpdateFlags(
 			// 物理OFF時
 			btRigidBody.SetCollisionFlags(
 				btRigidBody.GetCollisionFlags() | int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT))
-			if resetPhysics {
-				// 物理リセット時には物理剛体を更新する
-				btRigidBody.SetActivationState(mbt.ACTIVE_TAG)
-			} else {
-				btRigidBody.SetActivationState(mbt.ISLAND_SLEEPING)
-			}
+			btRigidBody.SetActivationState(mbt.ISLAND_SLEEPING)
 
-			if resetPhysics || prevActivationState != mbt.ISLAND_SLEEPING {
+			if prevActivationState != mbt.ISLAND_SLEEPING {
 				return true
 			}
 		}
