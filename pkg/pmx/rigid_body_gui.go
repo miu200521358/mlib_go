@@ -65,19 +65,10 @@ func (r *RigidBody) UpdateFlags(
 				btRigidBody.SetActivationState(mbt.ISLAND_SLEEPING)
 			}
 
-			if prevActivationState != mbt.ISLAND_SLEEPING {
+			if resetPhysics || prevActivationState != mbt.ISLAND_SLEEPING {
 				return true
 			}
 		}
-		// if prevActivationState != mbt.ACTIVE_TAG {
-		// 	// btRigidBody.ForceActivationState(mbt.ACTIVE_TAG)
-		// 	// btRigidBody.Activate(true)
-		// 	modelPhysics.RemoveRigidBody(r.BtRigidBody)
-		// 	r.InitPhysics(modelPhysics)
-		// 	return true
-		// } else {
-		// 	btRigidBody.SetActivationState(mbt.ACTIVE_TAG)
-		// }
 	}
 
 	return false

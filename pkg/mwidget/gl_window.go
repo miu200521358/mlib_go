@@ -545,7 +545,9 @@ func (w *GlWindow) TriggerPhysicsEnabled(enabled bool) {
 }
 
 func (w *GlWindow) TriggerPhysicsReset() {
-	w.doResetPhysicsStart = true
+	if !w.doResetPhysicsProgress {
+		w.doResetPhysicsStart = true
+	}
 }
 
 func (w *GlWindow) resetPhysicsStart() {
@@ -648,23 +650,27 @@ func (w *GlWindow) Run() {
 		if w.playing && w.motionPlayer != nil && w.frame >= w.motionPlayer.FrameEdit.MaxValue() {
 			w.frame = 0
 			w.prevFrame = 0
-			w.motionPlayer.SetValue(int(w.frame))
+			go func() {
+				w.motionPlayer.SetValue(int(w.frame))
+			}()
 		}
 
 		frameTime := glfw.GetTime()
-		elapsed := frameTime - prevTime
+		originalElapsed := frameTime - prevTime
 
+		var elapsed float64
 		if !w.EnableFrameDrop {
 			// フレームドロップOFFの場合はスキップしない
 			w.spfLimit = 1 / float64(w.Physics.Fps)
-			elapsed = mmath.ClampFloat(elapsed, 0.0, w.spfLimit)
+			elapsed = mmath.ClampFloat(originalElapsed, 0.0, w.spfLimit)
+		} else {
+			// フレームドロップONの場合オリジナルそのまま
+			elapsed = originalElapsed
 		}
 
-		if elapsed < w.spfLimit && !(w.doResetPhysicsStart || w.doResetPhysicsProgress) {
-			// 1フレームの時間が経過していない場合は待機
-			interval := w.spfLimit - elapsed
-			mlog.V("interval=%.7f, prevTime=%.7f, time=%.7f, elapsed=%.7f, frame=%.7f", interval, prevTime, frameTime, elapsed, w.frame)
-			glfw.WaitEventsTimeout(interval)
+		if elapsed < w.spfLimit {
+			// 1フレームの時間が経過していない場合はスキップ
+			continue
 		}
 
 		w.MakeContextCurrent()
@@ -735,6 +741,11 @@ func (w *GlWindow) Run() {
 
 		// 描画
 		for k := range w.modelSets {
+			if int(w.frame) != w.prevFrame {
+				// フレーム番号が変わっている場合は前回デフォームを破棄
+				w.modelSets[k].prevDeltas = nil
+			}
+
 			var prevDeltas *vmd.VmdDeltas
 			if w.modelSets[k].Model != nil {
 				prevDeltas = draw(
@@ -777,8 +788,7 @@ func (w *GlWindow) Run() {
 			}
 
 			// キーフレの手動変更がなかった場合のみ前回デフォームとして保持
-			// 再生時には前回デフォームを破棄する
-			if !w.isSaveDelta || w.playing {
+			if !w.isSaveDelta {
 				prevDeltas = nil
 			}
 			w.isSaveDelta = true
@@ -803,7 +813,9 @@ func (w *GlWindow) Run() {
 			// フレーム番号上書き
 			w.prevFrame = int(w.frame)
 			if w.playing && w.motionPlayer != nil {
-				w.motionPlayer.SetValue(int(w.frame))
+				go func() {
+					w.motionPlayer.SetValue(int(w.frame))
+				}()
 			}
 		}
 
@@ -813,9 +825,9 @@ func (w *GlWindow) Run() {
 
 		if w.isShowInfo {
 			nowShowTime := glfw.GetTime()
-			// 1秒ごとにFPSを表示
+			// 1秒ごとにオリジナルの経過時間からFPSを表示
 			if nowShowTime-prevShowTime >= 1.0 {
-				w.Window.SetTitle(fmt.Sprintf("%s - %.2f fps", w.title, 1.0/elapsed))
+				w.Window.SetTitle(fmt.Sprintf("%s - %.2f fps", w.title, 1.0/originalElapsed))
 				prevShowTime = nowShowTime
 			}
 		} else {
