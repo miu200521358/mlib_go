@@ -110,7 +110,7 @@ func NewMeshes(
 	}()
 
 	// メッシュ情報の並列処理
-	meshes := make([]*Mesh, len(model.Materials.GetIndexes()))
+	meshes := make([]*Mesh, len(model.Materials.Data))
 	prevVerticesCount := 0
 
 	// テクスチャの gl.GenTextures はスレッドセーフではないので、並列化しない
