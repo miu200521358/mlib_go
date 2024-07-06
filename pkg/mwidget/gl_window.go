@@ -659,13 +659,16 @@ func (w *GlWindow) Run() {
 		originalElapsed := frameTime - prevTime
 
 		var elapsed float64
+		var timeStep float32
 		if !w.EnableFrameDrop {
 			// フレームドロップOFFの場合はスキップしない
 			w.spfLimit = 1 / float64(w.Physics.Fps)
 			elapsed = mmath.ClampFloat(originalElapsed, 0.0, w.spfLimit)
+			timeStep = float32(elapsed)
 		} else {
 			// フレームドロップONの場合オリジナルそのまま
 			elapsed = originalElapsed
+			timeStep = float32(w.spfLimit)
 		}
 
 		if elapsed < w.spfLimit {
@@ -752,7 +755,7 @@ func (w *GlWindow) Run() {
 					w.Physics, w.modelSets[k].Model, w.modelSets[k].Motion, w.Shader, w.modelSets[k].prevDeltas,
 					w.modelSets[k].InvisibleMaterialIndexes, w.modelSets[k].NextInvisibleMaterialIndexes,
 					w.modelSets[k].SelectedVertexIndexes, w.modelSets[k].NextSelectedVertexIndexes,
-					k, int(w.frame), elapsed, w.enablePhysics, w.doResetPhysicsProgress,
+					k, int(w.frame), timeStep, w.enablePhysics, w.doResetPhysicsProgress,
 					w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones)
 			}
 

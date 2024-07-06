@@ -15,23 +15,23 @@ type MPhysics struct {
 	Fps           float32
 	Spf           float32
 	FixedTimeStep float32
-	joints        []mbt.BtTypedConstraint
-	rigidBodies   map[RigidbodyKey]RigidbodyValue
+	joints        map[jointKey]mbt.BtTypedConstraint
+	rigidBodies   map[rigidbodyKey]rigidbodyValue
 }
 
-type RigidbodyKey struct {
+type rigidbodyKey struct {
 	ModelIndex     int
 	RigidBodyIndex int
 }
 
-type RigidbodyValue struct {
+type rigidbodyValue struct {
 	RigidBody mbt.BtRigidBody
 	Transform mbt.BtTransform
 	Mask      int
 	Group     int
 }
 
-type JointKey struct {
+type jointKey struct {
 	ModelIndex int
 	JointIndex int
 }
@@ -51,7 +51,8 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 		drawer:      drawer,
 		MaxSubSteps: 5,
 		Fps:         30.0,
-		rigidBodies: make(map[RigidbodyKey]RigidbodyValue),
+		rigidBodies: make(map[rigidbodyKey]rigidbodyValue),
+		joints:      make(map[jointKey]mbt.BtTypedConstraint),
 	}
 	p.Spf = 1.0 / p.Fps
 	p.FixedTimeStep = 1 / 60.0
@@ -152,33 +153,38 @@ func (p *MPhysics) DebugDrawWorld() {
 }
 
 func (p *MPhysics) GetRigidBody(modelIndex, rigidBodyIndex int) (mbt.BtRigidBody, mbt.BtTransform) {
-	r := p.rigidBodies[RigidbodyKey{ModelIndex: modelIndex, RigidBodyIndex: rigidBodyIndex}]
+	r := p.rigidBodies[rigidbodyKey{ModelIndex: modelIndex, RigidBodyIndex: rigidBodyIndex}]
 	return r.RigidBody, r.Transform
 }
 
 func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody, rigidBodyTransform mbt.BtTransform,
 	modelIndex, rigidBodyIndex, group, mask int) {
 	p.world.AddRigidBody(rigidBody, group, mask)
-	rigidBodyKey := RigidbodyKey{ModelIndex: modelIndex, RigidBodyIndex: rigidBodyIndex}
-	p.rigidBodies[rigidBodyKey] = RigidbodyValue{
+	rigidBodyKey := rigidbodyKey{ModelIndex: modelIndex, RigidBodyIndex: rigidBodyIndex}
+	p.rigidBodies[rigidBodyKey] = rigidbodyValue{
 		RigidBody: rigidBody, Transform: rigidBodyTransform, Mask: mask, Group: group}
 }
 
-func (p *MPhysics) DeleteRigidBodies() {
-	for _, r := range p.rigidBodies {
+func (p *MPhysics) DeleteRigidBodies(modelIndex int) {
+	for k, r := range p.rigidBodies {
 		rigidBody := r.RigidBody
-		p.world.RemoveRigidBody(rigidBody)
+		if k.ModelIndex == modelIndex {
+			p.world.RemoveRigidBody(rigidBody)
+		}
 	}
 }
 
-func (p *MPhysics) AddJoint(joint mbt.BtTypedConstraint) {
+func (p *MPhysics) AddJoint(modelIndex, jointIndex int, joint mbt.BtTypedConstraint) {
 	p.world.AddConstraint(joint, true)
-	p.joints = append(p.joints, joint)
+	key := jointKey{ModelIndex: modelIndex, JointIndex: jointIndex}
+	p.joints[key] = joint
 }
 
-func (p *MPhysics) DeleteJoints() {
-	for _, joint := range p.joints {
-		p.world.RemoveConstraint(joint)
+func (p *MPhysics) DeleteJoints(modelIndex int) {
+	for k, joint := range p.joints {
+		if k.ModelIndex == modelIndex {
+			p.world.RemoveConstraint(joint)
+		}
 	}
 }
 

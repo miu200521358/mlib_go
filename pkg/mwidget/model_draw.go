@@ -20,7 +20,7 @@ func deform(
 	motion *vmd.VmdMotion,
 	prevDeltas *vmd.VmdDeltas,
 	frame int,
-	elapsed float64,
+	timeStep float32,
 	enablePhysics, resetPhysics bool,
 ) *vmd.VmdDeltas {
 	vds := &vmd.VmdDeltas{}
@@ -39,7 +39,7 @@ func deform(
 	}
 
 	// 物理更新
-	updatePhysics(modelPhysics, model, beforeBoneDeltas, frame, elapsed, enablePhysics, resetPhysics)
+	updatePhysics(modelPhysics, model, beforeBoneDeltas, frame, timeStep, enablePhysics, resetPhysics)
 
 	// 物理後のデフォーム情報
 	vds.Bones = motion.BoneFrames.DeformByPhysicsFlag(frame, model, nil, true,
@@ -57,11 +57,11 @@ func draw(
 	visibleMaterialIndexes, nextVisibleMaterialIndexes, selectedVertexIndexes, nextSelectedVertexIndexes []int,
 	windowIndex int,
 	frame int,
-	elapsed float64,
+	timeStep float32,
 	enablePhysics, resetPhysics, isDrawNormal, isDrawWire, isDrawSelectedVertex bool,
 	isDrawBones map[pmx.BoneFlag]bool,
 ) *vmd.VmdDeltas {
-	deltas := deform(modelPhysics, model, motion, prevDeltas, frame, elapsed, enablePhysics, resetPhysics)
+	deltas := deform(modelPhysics, model, motion, prevDeltas, frame, timeStep, enablePhysics, resetPhysics)
 
 	boneDeltas := make([]mgl32.Mat4, len(model.Bones.Data))
 	for i, bone := range model.Bones.Data {
@@ -216,7 +216,7 @@ func updatePhysics(
 	model *pmx.PmxModel,
 	boneDeltas *vmd.BoneDeltas,
 	frame int,
-	elapsed float64,
+	timeStep float32,
 	enablePhysics bool,
 	resetPhysics bool,
 ) {
@@ -254,13 +254,13 @@ func updatePhysics(
 		// 物理フラグが落ちている場合があるので、強制的に起こす
 		forceUpdate := rigidBody.UpdateFlags(model.Index, modelPhysics, enablePhysics, resetPhysics)
 		rigidBody.UpdateTransform(model.Index, modelPhysics, rigidBodyBone, boneTransform,
-			elapsed == 0.0 || !enablePhysics || forceUpdate)
+			timeStep == 0.0 || !enablePhysics || forceUpdate)
 
 		// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[2][%d]", frame, rigidBody.Index))
 	}
 
-	if (enablePhysics || resetPhysics) && elapsed >= 1e-5 {
-		modelPhysics.Update(float32(elapsed))
+	if (enablePhysics || resetPhysics) && timeStep >= 1e-5 {
+		modelPhysics.Update(timeStep)
 
 		// 剛体位置を更新
 		physicsBoneIndexes := make([]int, 0)

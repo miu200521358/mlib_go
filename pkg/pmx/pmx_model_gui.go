@@ -43,7 +43,7 @@ func (pm *PmxModel) Delete() {
 
 func (pm *PmxModel) DeletePhysics() {
 	if pm.physics != nil {
-		pm.physics.DeleteRigidBodies()
-		pm.physics.DeleteJoints()
+		pm.physics.DeleteRigidBodies(pm.Index)
+		pm.physics.DeleteJoints(pm.Index)
 	}
 }

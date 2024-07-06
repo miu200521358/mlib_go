@@ -77,7 +77,7 @@ func (j *Joint) initPhysics(
 	// 円の表示サイズ
 	constraint.SetDbgDrawSize(float32(1.5))
 
-	modelPhysics.AddJoint(constraint)
+	modelPhysics.AddJoint(modelIndex, j.Index, constraint)
 }
 
 func (j *Joints) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics, rigidBodies *RigidBodies) {
