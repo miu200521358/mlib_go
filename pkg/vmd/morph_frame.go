@@ -107,7 +107,7 @@ func (mf *MorphFrame) DeformVertex(
 			if delta == nil {
 				delta = NewVertexMorphDelta(offset.VertexIndex)
 			}
-			if offset.Position != nil && !offset.Position.IsZero() {
+			if offset.Position != nil {
 				if delta.Position == nil {
 					delta.Position = offset.Position.MuledScalar(ratio)
 				} else if !offset.Position.IsZero() {
@@ -135,6 +135,9 @@ func (mf *MorphFrame) DeformAfterVertex(
 			if delta == nil {
 				delta = NewVertexMorphDelta(offset.VertexIndex)
 			}
+			if delta.AfterPosition == nil {
+				delta.AfterPosition = mmath.NewMVec3()
+			}
 			delta.AfterPosition.Add(offset.Position.MuledScalar(ratio))
 			deltas.Data[offset.VertexIndex] = delta
 		}
@@ -156,6 +159,9 @@ func (mf *MorphFrame) DeformUv(
 			delta := deltas.Data[offset.VertexIndex]
 			if delta == nil {
 				delta = NewVertexMorphDelta(offset.VertexIndex)
+			}
+			if delta.Uv == nil {
+				delta.Uv = mmath.NewMVec2()
 			}
 			uv := offset.Uv.MuledScalar(ratio).GetXY()
 			delta.Uv.Add(uv)
@@ -179,6 +185,9 @@ func (mf *MorphFrame) DeformUv1(
 			delta := deltas.Data[offset.VertexIndex]
 			if delta == nil {
 				delta = NewVertexMorphDelta(offset.VertexIndex)
+			}
+			if delta.Uv1 == nil {
+				delta.Uv1 = mmath.NewMVec2()
 			}
 			uv := offset.Uv.MuledScalar(ratio)
 			delta.Uv1.Add(uv.GetXY())
