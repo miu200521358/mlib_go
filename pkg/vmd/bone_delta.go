@@ -467,7 +467,8 @@ func (bds *BoneDeltas) GetNearestBones(worldPos *mmath.MVec3) []*pmx.Bone {
 
 	bones := make([]*pmx.Bone, 0)
 	distances := make([]float64, len(bds.Data))
-	for i, bd := range bds.Data {
+	for i := range len(bds.Data) {
+		bd := bds.Get(i)
 		distances[i] = worldPos.Distance(bd.GlobalPosition())
 	}
 	sortedDistances := mmath.Float64Slice(distances)

@@ -251,22 +251,18 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 	funcWorldPos := func(worldPos *mmath.MVec3, vmdDeltas []*vmd.VmdDeltas, viewMat *mmath.MMat4) {
 		if pmxReadPicker.Exists() {
 			model := pmxReadPicker.GetCache().(*pmx.PmxModel)
-			// 大体近い頂点を取得
-			tempVertexDelta := vmd.NewVertexDelta(worldPos)
-			vertexIndexes, vertexPosition := vmdDeltas[0].Vertices.GetMapValues(tempVertexDelta)
-			if len(vertexIndexes) > 0 {
-				distances := mmath.Float64Slice(mmath.Distances(worldPos, vertexPosition))
-				sortedVertexIndexes := mmath.ArgSort(distances)
-				for i := range min(10, len(sortedVertexIndexes)) {
-					nearestVertex := model.Vertices.Get(vertexIndexes[sortedVertexIndexes[i]])
-					mlog.D("Near Vertex Index: %d (%s:%.3f)",
-						nearestVertex.Index, nearestVertex.Position.String(), distances[sortedVertexIndexes[i]])
-				}
-
-				go func() {
-					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*mwidget.ModelSet{0: {NextSelectedVertexIndexes: []int{vertexIndexes[sortedVertexIndexes[0]]}}}
-				}()
+			// 直近頂点を取得
+			nearestVertexIndexes := vmdDeltas[0].Vertices.GetNearestVertexIndexes(worldPos)
+			for _, vertexIndex := range nearestVertexIndexes {
+				vertex := model.Vertices.Get(vertexIndex)
+				mlog.D("Near Bone: %d (元: %s)(変形: %s)",
+					vertex.Index, vertex.Position.String(),
+					vmdDeltas[0].Vertices.Get(vertex.Index).Position.String())
 			}
+			go func() {
+				mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*mwidget.ModelSet{0: {NextSelectedVertexIndexes: nearestVertexIndexes}}
+			}()
+
 			// 大体近いボーンを取得
 			nearestBones := vmdDeltas[0].Bones.GetNearestBones(worldPos)
 			for _, bone := range nearestBones {

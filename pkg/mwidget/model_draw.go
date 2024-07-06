@@ -85,7 +85,6 @@ func draw(
 	for i, pos := range vertexPositions {
 		deltas.Vertices.Data[i] = vmd.NewVertexDelta(&mmath.MVec3{float64(-pos[0]), float64(pos[1]), float64(pos[2])})
 	}
-	deltas.Vertices.SetupMapKeys()
 
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()

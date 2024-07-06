@@ -1,8 +1,6 @@
 package vmd
 
 import (
-	"math"
-
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
@@ -27,45 +25,29 @@ func NewVertexDeltas() *VertexDeltas {
 	}
 }
 
-func (vds *VertexDeltas) SetupMapKeys() {
-	vds.IndexMap = make(map[mmath.MVec3]map[int]*VertexDelta)
-	for k, v := range vds.Data {
-		baseKey := v.GetMapKey()
-		// 前後のオフセット込みでマッピング
-		for _, offset := range []*mmath.MVec3{
-			{0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1},
-			{0, 0, 0}, {-1, 0, 0}, {0, -1, 0}, {0, 0, -1},
-			{1, 1, 0}, {1, 0, 1}, {0, 1, 1}, {1, 1, 1},
-			{-1, -1, 0}, {-1, 0, -1}, {0, -1, -1}, {-1, -1, -1},
-			{1, -1, 0}, {1, 0, -1}, {0, 1, -1}, {1, -1, 1},
-			{-1, 1, 0}, {-1, 0, 1}, {0, -1, 1}, {-1, 1, -1},
-		} {
-			key := *baseKey.Added(offset)
-			if _, ok := vds.IndexMap[key]; !ok {
-				vds.IndexMap[key] = make(map[int]*VertexDelta)
+func (vds *VertexDeltas) Get(boneIndex int) *VertexDelta {
+	if _, ok := vds.Data[boneIndex]; ok {
+		return vds.Data[boneIndex]
+	}
+	return nil
+}
+
+func (vds *VertexDeltas) GetNearestVertexIndexes(worldPos *mmath.MVec3) []int {
+	vertexIndexes := make([]int, 0)
+	distances := make([]float64, len(vds.Data))
+	for i := range len(vds.Data) {
+		vd := vds.Get(i)
+		distances[i] = worldPos.Distance(vd.Position)
+	}
+	sortedDistances := mmath.Float64Slice(distances)
+	sortedIndexes := mmath.ArgSort(sortedDistances)
+	for i := range sortedIndexes {
+		if len(vertexIndexes) > 0 {
+			if !mmath.NearEquals(distances[sortedIndexes[i]], distances[sortedIndexes[0]], 0.01) {
+				break
 			}
-			vds.IndexMap[key][k] = v
 		}
+		vertexIndexes = append(vertexIndexes, sortedIndexes[i])
 	}
-}
-
-func (vds *VertexDeltas) GetMapValues(v *VertexDelta) ([]int, []*mmath.MVec3) {
-	if vds.Data == nil {
-		return nil, nil
-	}
-	key := v.GetMapKey()
-	indexes := make([]int, 0)
-	values := make([]*mmath.MVec3, 0)
-	if mapIndexes, ok := vds.IndexMap[key]; ok {
-		for i, iv := range mapIndexes {
-			indexes = append(indexes, i)
-			values = append(values, iv.Position)
-		}
-		return indexes, values
-	}
-	return nil, nil
-}
-
-func (vd *VertexDelta) GetMapKey() mmath.MVec3 {
-	return mmath.MVec3{math.Round(vd.Position.GetX()), math.Round(vd.Position.GetY()), math.Round(vd.Position.GetZ())}
+	return vertexIndexes
 }
