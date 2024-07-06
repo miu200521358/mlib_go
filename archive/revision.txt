@@ -446,7 +446,7 @@ MlibSample 1.0.0_beta_89
 ・1体目のモデルを読み込んだ後に2体目を読み込んで、その後に物理リセットするとクラッシュするのを修正
 　・BulletのJoint設定をすべて削除していたのでモデルごとに管理するよう修正
 
-MlibSample 1.0.0_beta_89
+MlibSample 1.0.0_beta_90
 ・MaxSubSteps=2に修正
 ・物理fps(timeStep)計測修正
 　・デフォームfpsとは別に作成
