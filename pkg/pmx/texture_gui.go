@@ -37,7 +37,6 @@ func (t *TextureGL) Bind() {
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
-	gl.GenerateMipmap(gl.TEXTURE_2D)
 }
 
 func (t *TextureGL) Unbind() {
