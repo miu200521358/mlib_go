@@ -444,6 +444,7 @@ func (w *MWindow) infoDebugViewTriggered() {
 }
 
 func (w *MWindow) fps30LimitTriggered() {
+	w.fps30LimitAction.SetChecked(true)
 	w.fps60LimitAction.SetChecked(false)
 	w.fpsUnLimitAction.SetChecked(false)
 	for _, glWindow := range w.GlWindows {
@@ -453,6 +454,7 @@ func (w *MWindow) fps30LimitTriggered() {
 
 func (w *MWindow) fps60LimitTriggered() {
 	w.fps30LimitAction.SetChecked(false)
+	w.fps60LimitAction.SetChecked(true)
 	w.fpsUnLimitAction.SetChecked(false)
 	for _, glWindow := range w.GlWindows {
 		glWindow.spfLimit = 1 / 60.0
@@ -462,6 +464,7 @@ func (w *MWindow) fps60LimitTriggered() {
 func (w *MWindow) fpsUnLimitTriggered() {
 	w.fps30LimitAction.SetChecked(false)
 	w.fps60LimitAction.SetChecked(false)
+	w.fpsUnLimitAction.SetChecked(true)
 	for _, glWindow := range w.GlWindows {
 		glWindow.spfLimit = -1.0
 	}
