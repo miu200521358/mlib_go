@@ -10,15 +10,19 @@ import (
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 type TextureGL struct {
-	Id            uint32      // OpenGLテクスチャID
-	Valid         bool        // テクスチャフルパスが有効であるか否か
-	TextureType   TextureType // テクスチャ種別
-	TextureUnitId uint32      // テクスチャ種類別描画先ユニットID
-	TextureUnitNo uint32      // テクスチャ種類別描画先ユニット番号
+	Id                uint32      // OpenGLテクスチャID
+	Valid             bool        // テクスチャフルパスが有効であるか否か
+	TextureType       TextureType // テクスチャ種別
+	TextureUnitId     uint32      // テクスチャ種類別描画先ユニットID
+	TextureUnitNo     uint32      // テクスチャ種類別描画先ユニット番号
+	IsGeneratedMipmap bool        // ミップマップが生成されているか否か
 }
 
 func (t *TextureGL) Bind() {
@@ -34,9 +38,14 @@ func (t *TextureGL) Bind() {
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
 	}
 
-	// gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)	// ミップマップをかけるため、コメントアウト
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+
+	if t.IsGeneratedMipmap {
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+	} else {
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	}
 }
 
 func (t *TextureGL) Unbind() {
@@ -69,6 +78,7 @@ func (t *Texture) GL(
 		tGl.TextureType = t.TextureType
 		tGl.TextureUnitId = t.textureUnitId
 		tGl.TextureUnitNo = t.textureUnitNo
+		tGl.IsGeneratedMipmap = t.IsGeneratedMipmap
 		return tGl
 	}
 
@@ -96,6 +106,9 @@ func (t *Texture) GL(
 		t.Initialized = true
 		return nil
 	}
+
+	t.IsGeneratedMipmap =
+		mmath.IsPowerOfTwo(t.Image.Rect.Size().X) && mmath.IsPowerOfTwo(t.Image.Rect.Size().Y)
 
 	t.TextureType = textureType
 
@@ -146,6 +159,7 @@ func (t *Texture) GL(
 	tGl.TextureType = t.TextureType
 	tGl.TextureUnitId = t.textureUnitId
 	tGl.TextureUnitNo = t.textureUnitNo
+	tGl.IsGeneratedMipmap = t.IsGeneratedMipmap
 
 	tGl.Bind()
 
@@ -161,7 +175,11 @@ func (t *Texture) GL(
 		gl.Ptr(t.Image.Pix),
 	)
 
-	gl.GenerateMipmap(gl.TEXTURE_2D)
+	if t.IsGeneratedMipmap {
+		gl.GenerateMipmap(gl.TEXTURE_2D)
+	} else {
+		mlog.W(mi18n.T("ミップマップ生成エラー", map[string]interface{}{"Name": t.Name}))
+	}
 
 	tGl.Unbind()
 
@@ -212,6 +230,7 @@ func (t *ToonTextures) initGl(
 		tGl.Valid = toon.Valid
 		tGl.TextureType = toon.TextureType
 		tGl.TextureUnitId = toon.textureUnitId
+		// tGl.IsGeneratedMipmap = toon.IsGeneratedMipmap	// Toonテクスチャはミップマップを生成しない
 
 		tGl.Bind()
 

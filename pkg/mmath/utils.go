@@ -6,6 +6,13 @@ import (
 	"sort"
 )
 
+func IsPowerOfTwo(n int) bool {
+	if n <= 0 {
+		return false
+	}
+	return (n & (n - 1)) == 0
+}
+
 func BoolToInt(b bool) int {
 	if b {
 		return 1

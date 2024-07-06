@@ -18,15 +18,16 @@ const (
 
 type Texture struct {
 	*mcore.IndexModel
-	Name          string       // テクスチャ名
-	TextureType   TextureType  // テクスチャ種別
-	Path          string       // テクスチャフルパス
-	Valid         bool         // テクスチャフルパスが有効であるか否か
-	glId          uint32       // OpenGLテクスチャID
-	Initialized   bool         // 描画初期化済みフラグ
-	Image         *image.NRGBA // テクスチャイメージ
-	textureUnitId uint32       // テクスチャ種類別描画先ユニットID
-	textureUnitNo uint32       // テクスチャ種類別描画先ユニット番号
+	Name              string       // テクスチャ名
+	TextureType       TextureType  // テクスチャ種別
+	Path              string       // テクスチャフルパス
+	Valid             bool         // テクスチャフルパスが有効であるか否か
+	glId              uint32       // OpenGLテクスチャID
+	Initialized       bool         // 描画初期化済みフラグ
+	Image             *image.NRGBA // テクスチャイメージ
+	textureUnitId     uint32       // テクスチャ種類別描画先ユニットID
+	textureUnitNo     uint32       // テクスチャ種類別描画先ユニット番号
+	IsGeneratedMipmap bool         // ミップマップが生成されているか否か
 }
 
 func NewTexture() *Texture {
