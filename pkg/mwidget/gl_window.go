@@ -396,10 +396,12 @@ func (w *GlWindow) handleMouseButtonEvent(
 			w.rightButtonPressed = false
 		}
 	} else if button == glfw.MouseButtonLeft && action == glfw.Press && w.funcWorldPos != nil {
-		// クリック位置の取得
-		x, y := window.GetCursorPos()
-		worldPos, vmdDeltas, viewMat := w.getWorldPosition(int(x), int(y))
-		w.funcWorldPos(worldPos, vmdDeltas, viewMat)
+		// クリック位置の取得(選択頂点ハイライト機能が有効な時のみ)
+		if w.VisibleSelectedVertex {
+			x, y := window.GetCursorPos()
+			worldPos, vmdDeltas, viewMat := w.getWorldPosition(int(x), int(y))
+			w.funcWorldPos(worldPos, vmdDeltas, viewMat)
+		}
 	}
 }
 
