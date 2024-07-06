@@ -659,15 +659,20 @@ func (w *GlWindow) Run() {
 		originalElapsed := frameTime - prevTime
 
 		var elapsed float64
-		var timeStep float32
 		if !w.EnableFrameDrop {
 			// フレームドロップOFFの場合はスキップしない
-			w.spfLimit = 1 / float64(w.Physics.Fps)
-			elapsed = mmath.ClampFloat(originalElapsed, 0.0, w.spfLimit)
-			timeStep = float32(elapsed)
+			elapsed = mmath.ClampFloat(originalElapsed, 0.0, 1/float64(w.Physics.Fps))
 		} else {
 			// フレームドロップONの場合オリジナルそのまま
 			elapsed = originalElapsed
+		}
+
+		var timeStep float32
+		if w.spfLimit < 0 {
+			// FPS制限なしの場合、オリジナルの経過時間をそのまま使う
+			timeStep = float32(originalElapsed)
+		} else {
+			// FPS制限ありの場合は指定fpsを使う
 			timeStep = float32(w.spfLimit)
 		}
 
@@ -830,7 +835,7 @@ func (w *GlWindow) Run() {
 			nowShowTime := glfw.GetTime()
 			// 1秒ごとにオリジナルの経過時間からFPSを表示
 			if nowShowTime-prevShowTime >= 1.0 {
-				w.Window.SetTitle(fmt.Sprintf("%s - %.2f fps", w.title, 1.0/originalElapsed))
+				w.Window.SetTitle(fmt.Sprintf("%s - %.2f fps", w.title, 1.0/timeStep))
 				prevShowTime = nowShowTime
 			}
 		} else {
