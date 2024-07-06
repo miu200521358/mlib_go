@@ -1,6 +1,13 @@
 package vmd
 
 type VmdDeltas struct {
-	Bones  *BoneDeltas
-	Morphs *MorphDeltas
+	Vertices *VertexDeltas
+	Bones    *BoneDeltas
+	Morphs   *MorphDeltas
+}
+
+func NewVmdDeltas() *VmdDeltas {
+	return &VmdDeltas{
+		Vertices: NewVertexDeltas(),
+	}
 }

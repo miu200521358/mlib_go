@@ -99,7 +99,7 @@ func getMenuItems() []declarative.MenuItem {
 	}
 }
 
-func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.FixViewWidget, func(worldPos *mmath.MVec3, viewMat *mmath.MMat4)) {
+func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.FixViewWidget, func(worldPos *mmath.MVec3, vmdDeltas []*vmd.VmdDeltas, viewMat *mmath.MMat4)) {
 	page, _ := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, mi18n.T("ファイル"))
 
 	page.SetLayout(walk.NewVBoxLayout())
@@ -248,13 +248,12 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 
 	pmxReadPicker.PathLineEdit.SetFocus()
 
-	funcWorldPos := func(worldPos *mmath.MVec3, viewMat *mmath.MMat4) {
+	funcWorldPos := func(worldPos *mmath.MVec3, vmdDeltas []*vmd.VmdDeltas, viewMat *mmath.MMat4) {
 		if pmxReadPicker.Exists() {
 			model := pmxReadPicker.GetCache().(*pmx.PmxModel)
 			// 大体近い頂点を取得
-			tempVertex := pmx.NewVertex()
-			tempVertex.Position = worldPos
-			vertexIndexes, vertexPosition := model.Vertices.GetMapValues(tempVertex)
+			tempVertexDelta := vmd.NewVertexDelta(worldPos)
+			vertexIndexes, vertexPosition := vmdDeltas[0].Vertices.GetMapValues(tempVertexDelta)
 			if len(vertexIndexes) > 0 {
 				distances := mmath.Float64Slice(mmath.Distances(worldPos, vertexPosition))
 				sortedVertexIndexes := mmath.ArgSort(distances)
@@ -269,18 +268,11 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 				}()
 			}
 			// 大体近いボーンを取得
-			tempBone := pmx.NewBone()
-			tempBone.Position = worldPos
-			boneIndexes, bonePosition := model.Bones.GetMapValues(tempBone)
-			if len(boneIndexes) > 0 {
-				distances := mmath.Float64Slice(mmath.Distances(worldPos, bonePosition))
-				nearBoneIndexes := mmath.ArgSort(distances)
-				for i := range min(5, len(nearBoneIndexes)) {
-					nearestBone := model.Bones.Get(boneIndexes[nearBoneIndexes[i]])
-					mlog.D("Near Bone Index: %d, %s (%s:%.3f)",
-						nearestBone.Index, nearestBone.Name, nearestBone.Position.String(),
-						distances[nearBoneIndexes[i]])
-				}
+			nearestBones := vmdDeltas[0].Bones.GetNearestBones(worldPos)
+			for _, bone := range nearestBones {
+				mlog.D("Near Bone: %d, %s (元: %s)(変形: %s)",
+					bone.Index, bone.Name, bone.Position.String(),
+					vmdDeltas[0].Bones.Get(bone.Index).GlobalPosition().String())
 			}
 		}
 	}

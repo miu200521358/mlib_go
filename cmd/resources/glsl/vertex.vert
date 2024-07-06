@@ -24,6 +24,10 @@ in layout(location = 12) vec4 uvDelta; // UVモーフ
 in layout(location = 13) vec4 uv1Delta; // 拡張UV1モーフ
 in layout(location = 14) vec3 afterVertexDelta; // ボーン変形後頂点モーフ
 
+layout(std430, binding = 0) buffer VertexBuffer {
+    vec4 positions[];
+};
+
 out float totalBoneWeight;
 out float vertexUvX;
 
@@ -190,7 +194,9 @@ void main() {
         vec4 vecPosition = rotatedPosition - rotatedC + correctedC;
 
         // 頂点位置
-        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix* vec4(vecPosition.xyz, 1.0);
+        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * vec4(vecPosition.xyz, 1.0);
+
+        positions[gl_VertexID] = vec4(vecPosition.xyz, 1.0);
     } else {
         for(int i = 0; i < 4; i++) {
             float boneWeight = boneWeights[i];
@@ -205,6 +211,8 @@ void main() {
 
         // 頂点位置
         gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * position4;
+
+        positions[gl_VertexID] = position4;
     }
 
     vertexUvX = uv.x * uvDelta.x;

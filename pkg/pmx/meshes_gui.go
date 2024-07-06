@@ -7,6 +7,7 @@ import (
 	"embed"
 	"math"
 	"sync"
+	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
@@ -34,6 +35,8 @@ type Meshes struct {
 	boneVbo           *mview.VBO
 	boneIbo           *mview.IBO
 	boneIndexes       []int
+	ssbo              uint32
+	vertexCount       int
 }
 
 func NewMeshes(
@@ -248,6 +251,13 @@ func NewMeshes(
 	selectedVertexVbo.Unbind()
 	selectedVertexVao.Unbind()
 
+	// SSBOの作成
+	var ssbo uint32
+	gl.GenBuffers(1, &ssbo)
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, ssbo)
+	gl.BufferData(gl.SHADER_STORAGE_BUFFER, model.Vertices.Len()*4*4, nil, gl.DYNAMIC_DRAW)
+	gl.BindBufferBase(gl.SHADER_STORAGE_BUFFER, 0, ssbo)
+
 	return &Meshes{
 		meshes:            meshes,
 		vertices:          vertices,
@@ -268,6 +278,8 @@ func NewMeshes(
 		boneVbo:           boneVbo,
 		boneIbo:           boneIbo,
 		boneIndexes:       boneIndexes,
+		ssbo:              ssbo,
+		vertexCount:       model.Vertices.Len(),
 	}
 }
 
@@ -290,7 +302,7 @@ func (m *Meshes) Draw(
 	isDrawNormal, isDrawWire, isDrawSelectedVertex, isDeform bool,
 	isDrawBones map[BoneFlag]bool,
 	bones *Bones,
-) {
+) [][]float32 {
 	m.vao.Bind()
 	defer m.vao.Unbind()
 
@@ -320,8 +332,9 @@ func (m *Meshes) Draw(
 		m.drawWire(wireVertexDeltas, shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
 	}
 
+	vertexPositions := make([][]float32, 0)
 	if isDrawSelectedVertex {
-		m.drawSelectedVertex(selectedVertexDeltas, shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
+		vertexPositions = m.drawSelectedVertex(selectedVertexDeltas, shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
 	}
 
 	if isDrawNormal {
@@ -344,6 +357,8 @@ func (m *Meshes) Draw(
 	boneDeltas = nil
 	vertexDeltas = nil
 	meshDeltas = nil
+
+	return vertexPositions
 }
 
 func (m *Meshes) createBoneMatrixes(matrixes []mgl32.Mat4) ([]float32, int, int) {
@@ -436,7 +451,7 @@ func (m *Meshes) drawSelectedVertex(
 	paddedMatrixes []float32,
 	width, height int,
 	windowIndex int,
-) {
+) [][]float32 {
 	// モデルメッシュの前面に描画するために深度テストを無効化
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
@@ -463,6 +478,28 @@ func (m *Meshes) drawSelectedVertex(
 		nil,
 	)
 
+	// SSBOからデータを読み込む
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, m.ssbo)
+	ptr := gl.MapBuffer(gl.SHADER_STORAGE_BUFFER, gl.READ_ONLY)
+	results := make([][]float32, m.vertexCount)
+
+	if ptr != nil {
+		// 頂点数を取得
+		for i := range results {
+			results[i] = make([]float32, 4)
+		}
+
+		// SSBOから読み取り
+		for i := 0; i < m.vertexCount; i++ {
+			for j := 0; j < 4; j++ {
+				results[i][j] = *(*float32)(unsafe.Pointer(uintptr(ptr) + uintptr((i*4+j)*4)))
+			}
+		}
+	}
+
+	gl.UnmapBuffer(gl.SHADER_STORAGE_BUFFER)
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
+
 	m.selectedVertexIbo.Unbind()
 	m.selectedVertexVbo.Unbind()
 	m.selectedVertexVao.Unbind()
@@ -472,6 +509,8 @@ func (m *Meshes) drawSelectedVertex(
 	// 深度テストを有効に戻す
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
+
+	return results
 }
 
 func (m *Meshes) drawBone(

@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mview"
@@ -23,7 +24,7 @@ func deform(
 	timeStep float32,
 	enablePhysics, resetPhysics bool,
 ) *vmd.VmdDeltas {
-	vds := &vmd.VmdDeltas{}
+	vds := vmd.NewVmdDeltas()
 	var beforeBoneDeltas *vmd.BoneDeltas
 
 	// IKのON/OFF
@@ -77,9 +78,14 @@ func draw(
 		fetchVertexDeltas(model, deltas, visibleMaterialIndexes, nextVisibleMaterialIndexes,
 			selectedVertexIndexes, nextSelectedVertexIndexes)
 
-	model.Meshes.Draw(shader, boneDeltas, vertexDeltas, wireVertexDeltas, selectedVertexDeltas,
+	vertexPositions := model.Meshes.Draw(shader, boneDeltas, vertexDeltas, wireVertexDeltas, selectedVertexDeltas,
 		meshDeltas, windowIndex,
 		isDrawNormal, isDrawWire, isDrawSelectedVertex, prevDeltas == nil, isDrawBones, model.Bones)
+
+	for i, pos := range vertexPositions {
+		deltas.Vertices.Data[i] = vmd.NewVertexDelta(&mmath.MVec3{float64(-pos[0]), float64(pos[1]), float64(pos[2])})
+	}
+	deltas.Vertices.SetupMapKeys()
 
 	// 物理デバッグ表示
 	modelPhysics.DebugDrawWorld()
@@ -173,7 +179,6 @@ func fetchVertexDeltas(
 				0, 0, 0,
 			}
 		}
-
 	}
 
 	return vertexDeltas, wireVertexDeltas, selectedVertexDeltas
