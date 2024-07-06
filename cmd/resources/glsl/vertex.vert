@@ -196,6 +196,7 @@ void main() {
         // 頂点位置
         gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * vec4(vecPosition.xyz, 1.0);
 
+        // SDEF結果頂点位置を格納
         positions[gl_VertexID] = vec4(vecPosition.xyz, 1.0);
     } else {
         for(int i = 0; i < 4; i++) {
@@ -212,7 +213,8 @@ void main() {
         // 頂点位置
         gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * position4;
 
-        positions[gl_VertexID] = position4;
+        // ボーン変形行列を加味した頂点位置を格納
+        positions[gl_VertexID] = boneTransformMatrix * position4;
     }
 
     vertexUvX = uv.x * uvDelta.x;

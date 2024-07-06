@@ -461,11 +461,11 @@ func (bds *BoneDeltas) FillLocalMatrix(physicsBoneIndexes []int) {
 	}
 }
 
-func (bds *BoneDeltas) GetNearestBones(worldPos *mmath.MVec3) []*pmx.Bone {
+func (bds *BoneDeltas) GetNearestBoneIndexes(worldPos *mmath.MVec3) []int {
 	bds.mu.RLock()
 	defer bds.mu.RUnlock()
 
-	bones := make([]*pmx.Bone, 0)
+	boneIndexes := make([]int, 0)
 	distances := make([]float64, len(bds.Data))
 	for i := range len(bds.Data) {
 		bd := bds.Get(i)
@@ -474,12 +474,12 @@ func (bds *BoneDeltas) GetNearestBones(worldPos *mmath.MVec3) []*pmx.Bone {
 	sortedDistances := mmath.Float64Slice(distances)
 	sortedIndexes := mmath.ArgSort(sortedDistances)
 	for i := range sortedIndexes {
-		if len(bones) > 0 {
+		if len(boneIndexes) > 0 {
 			if !mmath.NearEquals(distances[sortedIndexes[i]], distances[sortedIndexes[0]], 0.01) {
 				break
 			}
 		}
-		bones = append(bones, bds.Data[sortedIndexes[i]].Bone)
+		boneIndexes = append(boneIndexes, sortedIndexes[i])
 	}
-	return bones
+	return boneIndexes
 }

@@ -249,13 +249,16 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 	pmxReadPicker.PathLineEdit.SetFocus()
 
 	funcWorldPos := func(worldPos *mmath.MVec3, vmdDeltas []*vmd.VmdDeltas, viewMat *mmath.MMat4) {
+		mlog.L()
+		mlog.I("WorldPosResult: x=%.7f, y=%.7f, z=%.7f", worldPos.GetX(), worldPos.GetY(), worldPos.GetZ())
+
 		if pmxReadPicker.Exists() {
 			model := pmxReadPicker.GetCache().(*pmx.PmxModel)
 			// 直近頂点を取得
 			nearestVertexIndexes := vmdDeltas[0].Vertices.GetNearestVertexIndexes(worldPos)
 			for _, vertexIndex := range nearestVertexIndexes {
 				vertex := model.Vertices.Get(vertexIndex)
-				mlog.D("Near Bone: %d (元: %s)(変形: %s)",
+				mlog.I("Near Vertex: %d (元: %s)(変形: %s)",
 					vertex.Index, vertex.Position.String(),
 					vmdDeltas[0].Vertices.Get(vertex.Index).Position.String())
 			}
@@ -264,9 +267,10 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 			}()
 
 			// 大体近いボーンを取得
-			nearestBones := vmdDeltas[0].Bones.GetNearestBones(worldPos)
-			for _, bone := range nearestBones {
-				mlog.D("Near Bone: %d, %s (元: %s)(変形: %s)",
+			nearestBoneIndexes := vmdDeltas[0].Bones.GetNearestBoneIndexes(worldPos)
+			for _, boneIndex := range nearestBoneIndexes {
+				bone := model.Bones.Get(boneIndex)
+				mlog.I("Near Bone: %d, %s (元: %s)(変形: %s)",
 					bone.Index, bone.Name, bone.Position.String(),
 					vmdDeltas[0].Bones.Get(bone.Index).GlobalPosition().String())
 			}
