@@ -49,7 +49,7 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 	p := &MPhysics{
 		world:       world,
 		drawer:      drawer,
-		MaxSubSteps: 5,
+		MaxSubSteps: 2,
 		Fps:         30.0,
 		rigidBodies: make(map[rigidbodyKey]rigidbodyValue),
 		joints:      make(map[jointKey]mbt.BtTypedConstraint),
