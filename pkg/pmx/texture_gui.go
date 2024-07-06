@@ -34,7 +34,7 @@ func (t *TextureGL) Bind() {
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
 	}
 
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
+	// gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)	// ミップマップをかけるため、コメントアウト
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
 }
@@ -160,6 +160,8 @@ func (t *Texture) GL(
 		gl.UNSIGNED_BYTE,
 		gl.Ptr(t.Image.Pix),
 	)
+
+	gl.GenerateMipmap(gl.TEXTURE_2D)
 
 	tGl.Unbind()
 

@@ -483,7 +483,8 @@ MlibSample 1.0.0_beta_96
 　・開発版：デフォームFPS/物理FPSで表示
 　・リリース版：無制限の場合、物理FPS。制限ありの場合、デフォームFPS
 
-
+MlibSample 1.0.0_beta_97
+・ミップマップをかけるため、gl.TEXTURE_MAX_LEVELをコメントアウト
 
 
 
