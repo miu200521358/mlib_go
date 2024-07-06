@@ -60,7 +60,8 @@ type GlWindow struct {
 	running                    bool                                              // 描画ループ中フラグ
 	playing                    bool                                              // 再生中フラグ
 	doResetPhysicsStart        bool                                              // 物理リセット開始フラグ
-	doResetPhysicsFinish       bool                                              // 物理リセット終了フラグ
+	doResetPhysicsProgress     bool                                              // 物理リセット中フラグ
+	doResetPhysicsCount        int                                               // 物理リセット処理回数
 	VisibleBones               map[pmx.BoneFlag]bool                             // ボーン表示フラグ
 	VisibleNormal              bool                                              // 法線表示フラグ
 	VisibleWire                bool                                              // ワイヤーフレーム表示フラグ
@@ -550,22 +551,18 @@ func (w *GlWindow) TriggerPhysicsReset() {
 func (w *GlWindow) resetPhysicsStart() {
 	// 一旦物理OFFにする
 	w.TriggerPhysicsEnabled(false)
-	// for i := range w.modelSets {
-	// 	w.modelSets[i].Model.DeletePhysics()
-	// }
 	w.Physics.ResetWorld()
-	// for i := range w.modelSets {
-	// 	w.modelSets[i].Model.InitPhysics(w.Physics)
-	// }
 	w.doResetPhysicsStart = false
-	w.doResetPhysicsFinish = true
+	w.doResetPhysicsProgress = true
+	w.doResetPhysicsCount = 0
 }
 
 func (w *GlWindow) resetPhysicsFinish() {
 	// 物理ONに戻してリセットフラグを落とす
-	// w.TriggerPhysicsEnabled(true)
+	w.TriggerPhysicsEnabled(true)
 	w.doResetPhysicsStart = false
-	w.doResetPhysicsFinish = false
+	w.doResetPhysicsProgress = false
+	w.doResetPhysicsCount = 0
 }
 
 func (w *GlWindow) TriggerViewReset() {
@@ -663,7 +660,7 @@ func (w *GlWindow) Run() {
 			elapsed = mmath.ClampFloat(elapsed, 0.0, w.spfLimit)
 		}
 
-		if elapsed < w.spfLimit && !w.doResetPhysicsStart {
+		if elapsed < w.spfLimit && !(w.doResetPhysicsStart || w.doResetPhysicsProgress) {
 			// 1フレームの時間が経過していない場合は待機
 			interval := w.spfLimit - elapsed
 			mlog.V("interval=%.7f, prevTime=%.7f, time=%.7f, elapsed=%.7f, frame=%.7f", interval, prevTime, frameTime, elapsed, w.frame)
@@ -731,11 +728,6 @@ func (w *GlWindow) Run() {
 			// mlog.V("previousTime=%.7f, time=%.7f, elapsed=%.7f, frame=%.7f", prevTime, frameTime, elapsed, w.frame)
 		}
 
-		if w.doResetPhysicsFinish {
-			// 物理リセット完了
-			w.resetPhysicsFinish()
-		}
-
 		if w.doResetPhysicsStart {
 			// 物理リセット開始
 			w.resetPhysicsStart()
@@ -749,7 +741,7 @@ func (w *GlWindow) Run() {
 					w.Physics, w.modelSets[k].Model, w.modelSets[k].Motion, w.Shader, w.modelSets[k].prevDeltas,
 					w.modelSets[k].InvisibleMaterialIndexes, w.modelSets[k].NextInvisibleMaterialIndexes,
 					w.modelSets[k].SelectedVertexIndexes, w.modelSets[k].NextSelectedVertexIndexes,
-					k, int(w.frame), elapsed, w.enablePhysics, w.doResetPhysicsStart,
+					k, int(w.frame), elapsed, w.enablePhysics, w.doResetPhysicsProgress,
 					w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones)
 			}
 
@@ -791,6 +783,18 @@ func (w *GlWindow) Run() {
 			}
 			w.isSaveDelta = true
 			w.modelSets[k].prevDeltas = prevDeltas
+		}
+
+		if w.doResetPhysicsProgress {
+			if w.doResetPhysicsCount > 1 {
+				// 0: 物理リセット開始
+				// 1: 物理リセット中(リセット状態で物理更新)
+				// 2: 物理リセット完了
+				// 物理リセット完了
+				w.resetPhysicsFinish()
+			} else {
+				w.doResetPhysicsCount++
+			}
 		}
 
 		prevTime = frameTime

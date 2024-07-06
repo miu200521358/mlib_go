@@ -252,14 +252,14 @@ func updatePhysics(
 		// }
 
 		// 物理フラグが落ちている場合があるので、強制的に起こす
-		forceUpdate := rigidBody.UpdateFlags(model.Index, modelPhysics, enablePhysics)
+		forceUpdate := rigidBody.UpdateFlags(model.Index, modelPhysics, enablePhysics, resetPhysics)
 		rigidBody.UpdateTransform(model.Index, modelPhysics, rigidBodyBone, boneTransform,
 			elapsed == 0.0 || !enablePhysics || forceUpdate)
 
 		// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[2][%d]", frame, rigidBody.Index))
 	}
 
-	if enablePhysics && elapsed >= 1e-5 {
+	if (enablePhysics || resetPhysics) && elapsed >= 1e-5 {
 		modelPhysics.Update(float32(elapsed))
 
 		// 剛体位置を更新

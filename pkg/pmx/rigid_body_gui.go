@@ -10,7 +10,9 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 )
 
-func (r *RigidBody) UpdateFlags(modelIndex int, modelPhysics *mphysics.MPhysics, enablePhysics bool) bool {
+func (r *RigidBody) UpdateFlags(
+	modelIndex int, modelPhysics *mphysics.MPhysics, enablePhysics, resetPhysics bool,
+) bool {
 	btRigidBody, _ := modelPhysics.GetRigidBody(modelIndex, r.Index)
 	if btRigidBody == nil {
 		return false
@@ -56,7 +58,12 @@ func (r *RigidBody) UpdateFlags(modelIndex int, modelPhysics *mphysics.MPhysics,
 			// 物理OFF時
 			btRigidBody.SetCollisionFlags(
 				btRigidBody.GetCollisionFlags() | int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT))
-			btRigidBody.SetActivationState(mbt.ISLAND_SLEEPING)
+			if resetPhysics {
+				// 物理リセット時には物理剛体を更新する
+				btRigidBody.SetActivationState(mbt.ACTIVE_TAG)
+			} else {
+				btRigidBody.SetActivationState(mbt.ISLAND_SLEEPING)
+			}
 
 			if prevActivationState != mbt.ISLAND_SLEEPING {
 				return true
@@ -156,7 +163,7 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics)
 	modelPhysics.AddRigidBody(btRigidBody, btRigidBodyLocalTransform, modelIndex, r.Index,
 		1<<r.CollisionGroup, r.CollisionGroupMaskValue)
 
-	r.UpdateFlags(modelIndex, modelPhysics, true)
+	r.UpdateFlags(modelIndex, modelPhysics, true, false)
 }
 
 func (r *RigidBody) UpdateTransform(
