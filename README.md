@@ -9,15 +9,23 @@ go: creating new go.mod: module github.com/miu200521358/mlib_go
 
 ## Clone Build
 
+- VSCode に go 拡張をいれる `golang.go`
+- コマンドプロンプトで下記を実行（× Power Shell）
+- https://jmeubank.github.io/tdm-gcc/download/ をインストール
+    - `Minimal online installer. ` (多分最初のexeボタン)
+    - PATH に TDM-GCC-64 までのパスを追加
 - go.mod の最後の3行(replaceのとこ)をコメントアウト
     - 開発用にローカルのを参照しているため
 - ライブラリインポート
-    - `go get github.com/miu200521358/dds/pkg/dds`
-    - `go get github.com/miu200521358/walk/pkg/walk`
-    - `go get -u github.com/go-gl/gl/v4.4-core/gl`
-    - `go get -u github.com/go-gl/glfw/v3.3/glfw`
-    - `go get -u golang.org/x/image`
-- ビルドできるはず？
+    - `set GOOS=windows`
+    - `set GOARCH=amd64`
+    - `set CGO_ENABLED=1`
+    - `go mod tidy`
+- ビルドできるはず
+    - `set CGO_ENABLED=1`
+    - `go run main.go`
+    - `go build -o ../build/mlib.exe main.go`
+- ビルドできたらVSCode再起動で run もできるようになってるはず
 
 ## キャッシュクリア系
 
