@@ -41,9 +41,11 @@ func (vds *VertexDeltas) GetNearestVertexIndexes(worldPos *mmath.MVec3) []int {
 	}
 	sortedDistances := mmath.Float64Slice(distances)
 	sortedIndexes := mmath.ArgSort(sortedDistances)
+	nearestVertex := vds.Get(sortedIndexes[0])
 	for i := range sortedIndexes {
+		vd := vds.Get(sortedIndexes[i])
 		if len(vertexIndexes) > 0 {
-			if !mmath.NearEquals(distances[sortedIndexes[i]], distances[sortedIndexes[0]], 0.01) {
+			if !vd.Position.NearEquals(nearestVertex.Position, 0.01) {
 				break
 			}
 		}

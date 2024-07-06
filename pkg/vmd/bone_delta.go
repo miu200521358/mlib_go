@@ -473,9 +473,11 @@ func (bds *BoneDeltas) GetNearestBoneIndexes(worldPos *mmath.MVec3) []int {
 	}
 	sortedDistances := mmath.Float64Slice(distances)
 	sortedIndexes := mmath.ArgSort(sortedDistances)
+	nearestBone := bds.Get(sortedIndexes[0])
 	for i := range sortedIndexes {
+		bd := bds.Get(sortedIndexes[i])
 		if len(boneIndexes) > 0 {
-			if !mmath.NearEquals(distances[sortedIndexes[i]], distances[sortedIndexes[0]], 0.01) {
+			if !bd.GlobalPosition().NearEquals(nearestBone.GlobalPosition(), 0.01) {
 				break
 			}
 		}
