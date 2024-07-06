@@ -433,8 +433,13 @@ func (bds *BoneDeltas) SetFrameMorphScale(bone *pmx.Bone, frameMorphScale *mmath
 }
 
 // FillLocalMatrix 物理演算後にグローバル行列を埋め終わった後に呼び出して、ローカル行列を計算する
-func (bds *BoneDeltas) FillLocalMatrix() {
-	for _, bd := range bds.Data {
+func (bds *BoneDeltas) FillLocalMatrix(physicsBoneIndexes []int) {
+	for _, boneIndex := range physicsBoneIndexes {
+		bd := bds.Get(boneIndex)
+		if bd == nil {
+			continue
+		}
+
 		var parentGlobalMatrix *mmath.MMat4
 		if bd.Bone.ParentIndex >= 0 {
 			parentGlobalMatrix = bds.Get(bd.Bone.ParentIndex).GlobalMatrix()

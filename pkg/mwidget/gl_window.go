@@ -833,6 +833,10 @@ func (w *GlWindow) Run() {
 		} else {
 			w.Window.SetTitle(w.title)
 		}
+
+		// if w.frame > 100 {
+		// 	goto closeApp
+		// }
 	}
 
 closeApp:
