@@ -9,17 +9,60 @@ import (
 )
 
 type MPhysics struct {
-	world               mbt.BtDiscreteDynamicsWorld
-	MaxSubSteps         int
-	Fps                 float32
-	Spf                 float32
-	FixedTimeStep       float32
-	joints              []mbt.BtTypedConstraint
-	rigidBodies         map[int]mbt.BtRigidBody
-	rigidBodyTransforms map[int]mbt.BtTransform // 剛体の初期位置・回転情報
+	world         mbt.BtDiscreteDynamicsWorld
+	drawer        mbt.BtMDebugDraw
+	MaxSubSteps   int
+	Fps           float32
+	Spf           float32
+	FixedTimeStep float32
+	joints        []mbt.BtTypedConstraint
+	rigidBodies   map[RigidbodyKey]RigidbodyValue
+}
+
+type RigidbodyKey struct {
+	ModelIndex     int
+	RigidBodyIndex int
+}
+
+type RigidbodyValue struct {
+	RigidBody mbt.BtRigidBody
+	Transform mbt.BtTransform
+	Mask      int
+	Group     int
+}
+
+type JointKey struct {
+	ModelIndex int
+	JointIndex int
 }
 
 func NewMPhysics(shader *mview.MShader) *MPhysics {
+	world := createWorld()
+
+	// デバッグビューワー
+	drawer := mbt.NewBtMDebugDraw()
+	drawer.SetLiner(NewMDebugDrawLiner(shader))
+	drawer.SetMDefaultColors(NewConstBtMDefaultColors())
+	world.SetDebugDrawer(drawer)
+	// mlog.D("world.GetDebugDrawer()=%+v\n", world.GetDebugDrawer())
+
+	p := &MPhysics{
+		world:       world,
+		drawer:      drawer,
+		MaxSubSteps: 5,
+		Fps:         30.0,
+		rigidBodies: make(map[RigidbodyKey]RigidbodyValue),
+	}
+	p.Spf = 1.0 / p.Fps
+	p.FixedTimeStep = 1 / 60.0
+
+	p.VisibleRigidBody(false)
+	p.VisibleJoint(false)
+
+	return p
+}
+
+func createWorld() mbt.BtDiscreteDynamicsWorld {
 	broadphase := mbt.NewBtDbvtBroadphase()
 	collisionConfiguration := mbt.NewBtDefaultCollisionConfiguration()
 	dispatcher := mbt.NewBtCollisionDispatcher(collisionConfiguration)
@@ -39,27 +82,22 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 
 	world.AddRigidBody(groundRigidBody, 1<<15, 0xFFFF)
 
-	// デバッグビューワー
-	drawer := mbt.NewBtMDebugDraw()
-	drawer.SetLiner(NewMDebugDrawLiner(shader))
-	drawer.SetMDefaultColors(NewConstBtMDefaultColors())
-	world.SetDebugDrawer(drawer)
-	// mlog.D("world.GetDebugDrawer()=%+v\n", world.GetDebugDrawer())
+	return world
+}
 
-	p := &MPhysics{
-		world:               world,
-		MaxSubSteps:         5,
-		Fps:                 30.0,
-		rigidBodies:         make(map[int]mbt.BtRigidBody),
-		rigidBodyTransforms: make(map[int]mbt.BtTransform),
+func (p *MPhysics) ResetWorld() {
+	world := createWorld()
+	world.SetDebugDrawer(p.drawer)
+	p.world = world
+	for _, r := range p.rigidBodies {
+		rigidBody := r.RigidBody
+		group := r.Group
+		mask := r.Mask
+		p.world.AddRigidBody(rigidBody, group, mask)
 	}
-	p.Spf = 1.0 / p.Fps
-	p.FixedTimeStep = 1 / 60.0
-
-	p.VisibleRigidBody(false)
-	p.VisibleJoint(false)
-
-	return p
+	for _, joint := range p.joints {
+		p.world.AddConstraint(joint, true)
+	}
 }
 
 func (p *MPhysics) VisibleRigidBody(enable bool) {
@@ -113,19 +151,22 @@ func (p *MPhysics) DebugDrawWorld() {
 	// fmt.Print(buf.String())
 }
 
-func (p *MPhysics) GetRigidBody(index int) (mbt.BtRigidBody, mbt.BtTransform) {
-	return p.rigidBodies[index], p.rigidBodyTransforms[index]
+func (p *MPhysics) GetRigidBody(modelIndex, rigidBodyIndex int) (mbt.BtRigidBody, mbt.BtTransform) {
+	r := p.rigidBodies[RigidbodyKey{ModelIndex: modelIndex, RigidBodyIndex: rigidBodyIndex}]
+	return r.RigidBody, r.Transform
 }
 
 func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody, rigidBodyTransform mbt.BtTransform,
-	rigidBodyIndex int, group int, mask int) {
+	modelIndex, rigidBodyIndex, group, mask int) {
 	p.world.AddRigidBody(rigidBody, group, mask)
-	p.rigidBodies[rigidBodyIndex] = rigidBody
-	p.rigidBodyTransforms[rigidBodyIndex] = rigidBodyTransform
+	rigidBodyKey := RigidbodyKey{ModelIndex: modelIndex, RigidBodyIndex: rigidBodyIndex}
+	p.rigidBodies[rigidBodyKey] = RigidbodyValue{
+		RigidBody: rigidBody, Transform: rigidBodyTransform, Mask: mask, Group: group}
 }
 
 func (p *MPhysics) DeleteRigidBodies() {
-	for _, rigidBody := range p.rigidBodies {
+	for _, r := range p.rigidBodies {
+		rigidBody := r.RigidBody
 		p.world.RemoveRigidBody(rigidBody)
 	}
 }

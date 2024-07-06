@@ -31,8 +31,8 @@ func (pm *PmxModel) InitDraw(windowIndex int, resourceFiles embed.FS) {
 
 func (pm *PmxModel) InitPhysics(physics *mphysics.MPhysics) {
 	pm.physics = physics
-	pm.RigidBodies.initPhysics(physics)
-	pm.Joints.initPhysics(physics, pm.RigidBodies)
+	pm.RigidBodies.initPhysics(pm.Index, physics)
+	pm.Joints.initPhysics(pm.Index, physics, pm.RigidBodies)
 }
 
 func (pm *PmxModel) Delete() {

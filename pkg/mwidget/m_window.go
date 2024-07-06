@@ -469,7 +469,7 @@ func (w *MWindow) fpsUnLimitTriggered() {
 
 func (w *MWindow) physicsTriggered() {
 	for _, glWindow := range w.GlWindows {
-		glWindow.EnablePhysics = w.physicsAction.Checked()
+		glWindow.TriggerPhysicsEnabled(w.physicsAction.Checked())
 	}
 }
 

@@ -21,7 +21,7 @@ func deform(
 	prevDeltas *vmd.VmdDeltas,
 	frame int,
 	elapsed float64,
-	enablePhysics bool,
+	enablePhysics, resetPhysics bool,
 ) *vmd.VmdDeltas {
 	vds := &vmd.VmdDeltas{}
 	var beforeBoneDeltas *vmd.BoneDeltas
@@ -39,7 +39,7 @@ func deform(
 	}
 
 	// 物理更新
-	updatePhysics(modelPhysics, model, beforeBoneDeltas, frame, elapsed, enablePhysics)
+	updatePhysics(modelPhysics, model, beforeBoneDeltas, frame, elapsed, enablePhysics, resetPhysics)
 
 	// 物理後のデフォーム情報
 	vds.Bones = motion.BoneFrames.DeformByPhysicsFlag(frame, model, nil, true,
@@ -58,10 +58,10 @@ func draw(
 	windowIndex int,
 	frame int,
 	elapsed float64,
-	enablePhysics, isDrawNormal, isDrawWire, isDrawSelectedVertex bool,
+	enablePhysics, resetPhysics, isDrawNormal, isDrawWire, isDrawSelectedVertex bool,
 	isDrawBones map[pmx.BoneFlag]bool,
 ) *vmd.VmdDeltas {
-	deltas := deform(modelPhysics, model, motion, prevDeltas, frame, elapsed, enablePhysics)
+	deltas := deform(modelPhysics, model, motion, prevDeltas, frame, elapsed, enablePhysics, resetPhysics)
 
 	boneDeltas := make([]mgl32.Mat4, len(model.Bones.Data))
 	for i, bone := range model.Bones.Data {
@@ -218,6 +218,7 @@ func updatePhysics(
 	frame int,
 	elapsed float64,
 	enablePhysics bool,
+	resetPhysics bool,
 ) {
 	if modelPhysics == nil {
 		return
@@ -225,7 +226,8 @@ func updatePhysics(
 
 	// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[1]", frame))
 
-	for _, rigidBody := range model.RigidBodies.Data {
+	for i := range model.RigidBodies.Len() {
+		rigidBody := model.RigidBodies.Get(i)
 		// 現在のボーン変形情報を保持
 		rigidBodyBone := rigidBody.Bone
 		if rigidBodyBone == nil {
@@ -250,8 +252,8 @@ func updatePhysics(
 		// }
 
 		// 物理フラグが落ちている場合があるので、強制的に起こす
-		forceUpdate := rigidBody.UpdateFlags(modelPhysics, enablePhysics)
-		rigidBody.UpdateTransform(modelPhysics, rigidBodyBone, boneTransform,
+		forceUpdate := rigidBody.UpdateFlags(model.Index, modelPhysics, enablePhysics)
+		rigidBody.UpdateTransform(model.Index, modelPhysics, rigidBodyBone, boneTransform,
 			elapsed == 0.0 || !enablePhysics || forceUpdate)
 
 		// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[2][%d]", frame, rigidBody.Index))
@@ -260,11 +262,10 @@ func updatePhysics(
 	if enablePhysics && elapsed >= 1e-5 {
 		modelPhysics.Update(float32(elapsed))
 
-		// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[3]", frame))
-
 		// 剛体位置を更新
-		for _, rigidBody := range model.RigidBodies.Data {
-			bonePhysicsGlobalMatrix := rigidBody.GetRigidBodyBoneMatrix(modelPhysics)
+		for i := range model.RigidBodies.Len() {
+			rigidBody := model.RigidBodies.Get(i)
+			bonePhysicsGlobalMatrix := rigidBody.GetRigidBodyBoneMatrix(model.Index, modelPhysics)
 			if boneDeltas != nil && bonePhysicsGlobalMatrix != nil && rigidBody.Bone != nil {
 				// if rigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE &&
 				// 	boneDeltas.Get(rigidBody.Bone.Index) != nil {
@@ -281,9 +282,9 @@ func updatePhysics(
 			}
 
 			// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[4][%d]", frame, rigidBody.Index))
-		}
 
-		// グローバル行列を埋め終わったらローカル行列の計算
-		boneDeltas.FillLocalMatrix()
+			// グローバル行列を埋め終わったらローカル行列の計算
+			boneDeltas.FillLocalMatrix()
+		}
 	}
 }

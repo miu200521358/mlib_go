@@ -10,8 +10,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 )
 
-func (r *RigidBody) UpdateFlags(modelPhysics *mphysics.MPhysics, enablePhysics bool) bool {
-	btRigidBody, _ := modelPhysics.GetRigidBody(r.Index)
+func (r *RigidBody) UpdateFlags(modelIndex int, modelPhysics *mphysics.MPhysics, enablePhysics bool) bool {
+	btRigidBody, _ := modelPhysics.GetRigidBody(modelIndex, r.Index)
 	if btRigidBody == nil {
 		return false
 	}
@@ -76,7 +76,7 @@ func (r *RigidBody) UpdateFlags(modelPhysics *mphysics.MPhysics, enablePhysics b
 	return false
 }
 
-func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
+func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics) {
 	var btCollisionShape mbt.BtCollisionShape
 	switch r.ShapeType {
 	case SHAPE_SPHERE:
@@ -153,19 +153,20 @@ func (r *RigidBody) initPhysics(modelPhysics *mphysics.MPhysics) {
 
 	// modelPhysics.AddNonFilterProxy(btRigidBody.GetBroadphaseProxy())
 	// 剛体・剛体グループ・非衝突グループを追加
-	modelPhysics.AddRigidBody(btRigidBody, btRigidBodyLocalTransform, r.Index,
+	modelPhysics.AddRigidBody(btRigidBody, btRigidBodyLocalTransform, modelIndex, r.Index,
 		1<<r.CollisionGroup, r.CollisionGroupMaskValue)
 
-	r.UpdateFlags(modelPhysics, true)
+	r.UpdateFlags(modelIndex, modelPhysics, true)
 }
 
 func (r *RigidBody) UpdateTransform(
+	modelIndex int,
 	modelPhysics *mphysics.MPhysics,
 	rigidBodyBone *Bone,
 	boneTransform mbt.BtTransform,
 	isForce bool,
 ) {
-	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(r.Index)
+	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(modelIndex, r.Index)
 
 	if btRigidBody == nil || btRigidBody.GetMotionState() == nil || boneTransform == nil ||
 		(r.CorrectPhysicsType == PHYSICS_TYPE_DYNAMIC && !isForce) {
@@ -199,9 +200,10 @@ func (r *RigidBody) UpdateTransform(
 }
 
 func (r *RigidBody) GetRigidBodyBoneMatrix(
+	modelIndex int,
 	modelPhysics *mphysics.MPhysics,
 ) *mmath.MMat4 {
-	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(r.Index)
+	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(modelIndex, r.Index)
 
 	if btRigidBody == nil || btRigidBody.GetMotionState() == nil || r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
 		return nil
@@ -282,11 +284,11 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 	return mmath.NewMMat4ByMgl(&boneGlobalMatrixGL)
 }
 
-func (r *RigidBodies) initPhysics(physics *mphysics.MPhysics) {
+func (r *RigidBodies) initPhysics(modelIndex int, physics *mphysics.MPhysics) {
 	// 剛体を順番にボーンと紐付けていく
 	for i := range r.Len() {
 		rigidBody := r.Get(i)
 		// 物理設定の初期化
-		rigidBody.initPhysics(physics)
+		rigidBody.initPhysics(modelIndex, physics)
 	}
 }

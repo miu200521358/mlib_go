@@ -8,12 +8,14 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 )
 
-func (j *Joint) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody) {
+func (j *Joint) initPhysics(
+	modelIndex int, modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody,
+) {
 	// ジョイントの位置と向き
 	jointTransform := mbt.NewBtTransform(j.Rotation.Bullet(), j.Position.Bullet())
 
-	btRigidBodyA, _ := modelPhysics.GetRigidBody(rigidBodyA.Index)
-	btRigidBodyB, _ := modelPhysics.GetRigidBody(rigidBodyB.Index)
+	btRigidBodyA, _ := modelPhysics.GetRigidBody(modelIndex, rigidBodyA.Index)
+	btRigidBodyB, _ := modelPhysics.GetRigidBody(modelIndex, rigidBodyB.Index)
 	if btRigidBodyA == nil || btRigidBodyB == nil {
 		return
 	}
@@ -78,14 +80,14 @@ func (j *Joint) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBo
 	modelPhysics.AddJoint(constraint)
 }
 
-func (j *Joints) initPhysics(modelPhysics *mphysics.MPhysics, rigidBodies *RigidBodies) {
+func (j *Joints) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics, rigidBodies *RigidBodies) {
 	// ジョイントを順番に剛体と紐付けていく
 	for i := range j.Len() {
 		joint := j.Get(i)
 		if joint.RigidbodyIndexA >= 0 && rigidBodies.Contains(joint.RigidbodyIndexA) &&
 			joint.RigidbodyIndexB >= 0 && rigidBodies.Contains(joint.RigidbodyIndexB) {
 			joint.initPhysics(
-				modelPhysics, rigidBodies.Get(joint.RigidbodyIndexA),
+				modelIndex, modelPhysics, rigidBodies.Get(joint.RigidbodyIndexA),
 				rigidBodies.Get(joint.RigidbodyIndexB))
 		}
 	}

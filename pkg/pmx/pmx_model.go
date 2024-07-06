@@ -36,6 +36,7 @@ type PmxModel struct {
 	Joints             *Joints
 	Meshes             *Meshes
 	DrawInitialized    bool
+	Index              int // モデルインデックス(複数人モデル対応)
 }
 
 func NewPmxModel(path string) *PmxModel {
