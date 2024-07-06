@@ -551,12 +551,15 @@ func (w *GlWindow) TriggerPhysicsReset() {
 }
 
 func (w *GlWindow) resetPhysicsStart() {
-	// 一旦物理OFFにする
-	w.TriggerPhysicsEnabled(false)
-	w.Physics.ResetWorld()
-	w.doResetPhysicsStart = false
-	w.doResetPhysicsProgress = true
-	w.doResetPhysicsCount = 0
+	// 物理ONの時だけリセット処理を行う
+	if w.enablePhysics {
+		// 一旦物理OFFにする
+		w.TriggerPhysicsEnabled(false)
+		w.Physics.ResetWorld()
+		w.doResetPhysicsStart = false
+		w.doResetPhysicsProgress = true
+		w.doResetPhysicsCount = 0
+	}
 }
 
 func (w *GlWindow) resetPhysicsFinish() {
