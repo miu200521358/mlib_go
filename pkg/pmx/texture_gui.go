@@ -178,7 +178,7 @@ func (t *Texture) GL(
 	if t.IsGeneratedMipmap {
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 	} else {
-		mlog.W(mi18n.T("ミップマップ生成エラー", map[string]interface{}{"Name": t.Name}))
+		mlog.D(mi18n.T("ミップマップ生成エラー", map[string]interface{}{"Name": t.Name}))
 	}
 
 	tGl.Unbind()
