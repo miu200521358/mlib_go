@@ -103,10 +103,7 @@ func fetchVertexDeltas(
 	for i := range len(model.Vertices.Data) {
 		// モデル頂点
 		v := deltas.Morphs.Vertices.Data[i]
-		if v != nil && ((v.Position != nil && !v.Position.IsZero()) ||
-			(v.Uv != nil && !v.Uv.IsZero()) ||
-			(v.Uv1 != nil && !v.Uv1.IsZero()) ||
-			(v.AfterPosition != nil && !v.AfterPosition.IsZero())) {
+		if v != nil && (v.Position != nil || v.Uv != nil || v.Uv1 != nil || v.AfterPosition != nil) {
 			// 必要な場合にのみ部分更新するよう設定
 			vertexDeltas[i] = v.GL()
 		}

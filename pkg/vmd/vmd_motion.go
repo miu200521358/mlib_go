@@ -118,15 +118,11 @@ func (m *VmdMotion) DeformMorph(
 	morphNames []string,
 ) *MorphDeltas {
 	if morphNames == nil {
+		// モーフの指定がなければ全モーフチェック
 		morphNames = make([]string, 0)
-	}
-
-	for _, morph := range model.Morphs.Data {
-		// モーフフレームを生成
-		if !m.MorphFrames.Contains(morph.Name) {
-			m.MorphFrames.Append(NewMorphNameFrames(morph.Name))
+		for _, morph := range model.Morphs.Data {
+			morphNames = append(morphNames, morph.Name)
 		}
-		morphNames = append(morphNames, morph.Name)
 	}
 
 	return m.MorphFrames.Deform(frame, model, morphNames)

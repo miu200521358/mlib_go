@@ -264,6 +264,9 @@ func (w *GlWindow) SetFrame(f int) {
 	w.frame = float64(f)
 	w.prevFrame = f
 	w.isSaveDelta = false
+	for i := range w.modelSets {
+		w.modelSets[i].prevDeltas = nil
+	}
 }
 
 func (w *GlWindow) TriggerClose(window *glfw.Window) {
@@ -663,8 +666,8 @@ func (w *GlWindow) Run() {
 		}
 
 		if w.playing && w.motionPlayer != nil && w.frame >= w.motionPlayer.FrameEdit.MaxValue() {
-			w.frame = 0
-			w.prevFrame = 0
+			w.SetFrame(0)
+
 			go func() {
 				w.motionPlayer.SetValue(int(w.frame))
 			}()

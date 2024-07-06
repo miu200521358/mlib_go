@@ -44,9 +44,6 @@ func (mfs *MorphFrames) Deform(
 		}
 
 		mf := mfs.Get(morphName).Get(frame)
-		if mf == nil || mf.Ratio == 0.0 {
-			continue
-		}
 
 		morph := model.Morphs.GetByName(morphName)
 		switch morph.MorphType {
