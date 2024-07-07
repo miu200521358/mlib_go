@@ -74,7 +74,7 @@ type GlWindow struct {
 	frame                  float64               // 現在のフレーム
 	prevFrame              int                   // 前回のフレーム
 	isSaveDelta            bool                  // 前回デフォーム保存フラグ
-	motionPlayer           *MotionPlayer         // 再生プレイヤー
+	motionPlayer           *MotionPlayer         // 再生ウィジェット
 	width                  int                   // ウィンドウ幅
 	height                 int                   // ウィンドウ高さ
 	floor                  *MFloor               // 床

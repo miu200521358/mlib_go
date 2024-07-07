@@ -63,6 +63,8 @@ func NewMotionPlayer(parent walk.Container, mWindow *MWindow) (*MotionPlayer, er
 	mp.FrameEdit.SetDecimals(0)
 	mp.FrameEdit.SetRange(0, 1)
 	mp.FrameEdit.SetValue(0)
+	mp.FrameEdit.SetIncrement(1)
+	mp.FrameEdit.SetSpinButtonsVisible(true)
 
 	// フレームスライダー
 	mp.FrameSlider, err = walk.NewSlider(playerComposite)
@@ -96,7 +98,7 @@ func NewMotionPlayer(parent walk.Container, mWindow *MWindow) (*MotionPlayer, er
 	})
 
 	// レイアウト
-	layout.SetStretchFactor(mp.FrameEdit, 2)
+	layout.SetStretchFactor(mp.FrameEdit, 3)
 	layout.SetStretchFactor(mp.FrameSlider, 20)
 	layout.SetStretchFactor(mp.PlayButton, 2)
 
