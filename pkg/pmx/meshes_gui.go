@@ -23,9 +23,6 @@ type Meshes struct {
 	normalVao         *mview.VAO
 	normalVbo         *mview.VBO
 	normalIbo         *mview.IBO
-	wireVao           *mview.VAO
-	wireVbo           *mview.VBO
-	wireIbo           *mview.IBO
 	selectedVertexVao *mview.VAO
 	selectedVertexVbo *mview.VBO
 	selectedVertexIbo *mview.IBO
@@ -46,8 +43,6 @@ func NewMeshes(
 	vertices := make([]float32, 0, len(model.Vertices.Data))
 	normalVertices := make([]float32, 0, len(model.Vertices.Data)*2)
 	normalFaces := make([]uint32, 0, len(model.Vertices.Data)*2)
-	wireVertices := make([]float32, 0, len(model.Vertices.Data))
-	wireFaces := make([]uint32, 0, len(model.Vertices.Data)*3)
 	selectedVertices := make([]float32, 0, len(model.Vertices.Data))
 	selectedVertexFaces := make([]uint32, 0, len(model.Vertices.Data))
 
@@ -65,9 +60,6 @@ func NewMeshes(
 			mu.Lock()
 			vgl := vertex.GL()
 			vertices = append(vertices, vgl...)
-
-			// ワイヤーフレーム
-			wireVertices = append(wireVertices, vertex.WireGL()...)
 
 			// 法線
 			normalVertices = append(normalVertices, vgl...)
@@ -94,13 +86,6 @@ func NewMeshes(
 			vertices := model.Faces.Get(i).VertexIndexes
 			mu.Lock()
 			faces = append(faces, uint32(vertices[2]), uint32(vertices[1]), uint32(vertices[0]))
-
-			// 0-1
-			wireFaces = append(wireFaces, uint32(vertices[0]), uint32(vertices[1]))
-			// 1-2
-			wireFaces = append(wireFaces, uint32(vertices[1]), uint32(vertices[2]))
-			// 2-0
-			wireFaces = append(wireFaces, uint32(vertices[2]), uint32(vertices[0]))
 			mu.Unlock()
 
 			n += 3
@@ -218,16 +203,6 @@ func NewMeshes(
 	normalVbo.Unbind()
 	normalVao.Unbind()
 
-	wireVao := mview.NewVAO()
-	wireVao.Bind()
-	wireVbo := mview.NewVBOForVertex(gl.Ptr(vertices), len(vertices))
-	wireVbo.BindVertex(nil)
-	wireIbo := mview.NewIBO(gl.Ptr(wireFaces), len(wireFaces))
-	wireIbo.Bind()
-	wireIbo.Unbind()
-	wireVbo.Unbind()
-	wireVao.Unbind()
-
 	boneVao := mview.NewVAO()
 	boneVao.Bind()
 	boneVbo := mview.NewVBOForVertex(gl.Ptr(bones), len(bones))
@@ -264,9 +239,6 @@ func NewMeshes(
 		normalVao:         normalVao,
 		normalVbo:         normalVbo,
 		normalIbo:         normalIbo,
-		wireVao:           wireVao,
-		wireVbo:           wireVbo,
-		wireIbo:           wireIbo,
 		selectedVertexVao: selectedVertexVao,
 		selectedVertexVbo: selectedVertexVbo,
 		selectedVertexIbo: selectedVertexIbo,
@@ -322,12 +294,18 @@ func (m *Meshes) Draw(
 			shader.Unuse()
 		}
 
+		if isDrawWire {
+			shader.Use(mview.PROGRAM_TYPE_WIRE)
+			mesh.drawWire(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight)
+			shader.Unuse()
+		}
+
 		mesh.ibo.Unbind()
 	}
 
-	if isDrawWire {
-		m.drawWire(wireVertexDeltas, shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
-	}
+	// if isDrawWire {
+	// 	m.drawWire(wireVertexDeltas, shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
+	// }
 
 	vertexPositions := make([][]float32, 0)
 	if isDrawSelectedVertex {
@@ -403,41 +381,6 @@ func (m *Meshes) drawNormal(
 	m.normalIbo.Unbind()
 	m.normalVbo.Unbind()
 	m.normalVao.Unbind()
-
-	shader.Unuse()
-}
-
-func (m *Meshes) drawWire(
-	vertexDeltas [][]float32,
-	shader *mview.MShader,
-	paddedMatrixes []float32,
-	width, height int,
-	windowIndex int,
-) {
-	shader.Use(mview.PROGRAM_TYPE_WIRE)
-
-	m.wireVao.Bind()
-	m.wireVbo.BindVertex(vertexDeltas)
-	m.wireIbo.Bind()
-
-	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.WireProgram)
-
-	wireColor := mgl32.Vec4{0.2, 0.6, 0.2, 0.5}
-	specularUniform := gl.GetUniformLocation(shader.WireProgram, gl.Str(mview.SHADER_COLOR))
-	gl.Uniform4fv(specularUniform, 1, &wireColor[0])
-
-	// ライン描画
-	gl.DrawElements(
-		gl.LINES,
-		int32(len(m.vertices)),
-		gl.UNSIGNED_INT,
-		nil,
-	)
-
-	m.wireIbo.Unbind()
-	m.wireVbo.Unbind()
-	m.wireVao.Unbind()
 
 	shader.Unuse()
 }

@@ -212,6 +212,38 @@ func (m *Mesh) drawEdge(
 	)
 }
 
+func (m *Mesh) drawWire(
+	shader *mview.MShader,
+	windowIndex int,
+	paddedMatrixes []float32,
+	width, height int,
+) {
+	// カリングOFF
+	gl.Disable(gl.CULL_FACE)
+
+	// ボーンデフォームテクスチャ設定
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.WireProgram)
+	defer UnbindBoneMatrixes()
+
+	wireColor := mgl32.Vec4{0.2, 0.6, 0.2, 0.5}
+	specularUniform := gl.GetUniformLocation(shader.WireProgram, gl.Str(mview.SHADER_COLOR))
+	gl.Uniform4fv(specularUniform, 1, &wireColor[0])
+
+	// 描画モードをワイヤーフレームに変更
+	gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+
+	// 三角形描画
+	gl.DrawElements(
+		gl.TRIANGLES,
+		int32(m.material.VerticesCount),
+		gl.UNSIGNED_INT,
+		nil,
+	)
+
+	// 描画モードを元に戻す
+	gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
+}
+
 func (m *Mesh) delete() {
 	m.ibo.Delete()
 	if m.material.Texture != nil {
