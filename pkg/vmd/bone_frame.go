@@ -104,7 +104,9 @@ func (v *BoneFrame) Copy() IBaseFrame {
 	if v.LocalScale != nil {
 		copied.LocalScale = v.LocalScale.Copy()
 	}
-	copied.Curves = v.Curves.Copy()
+	if v.Curves != nil {
+		copied.Curves = v.Curves.Copy()
+	}
 
 	return copied
 }

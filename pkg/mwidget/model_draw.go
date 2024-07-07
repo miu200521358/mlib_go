@@ -172,7 +172,7 @@ func updatePhysics(
 				if boneDeltas.Get(rigidBody.Bone.Index) == nil {
 					boneDeltas.Update(&vmd.BoneDelta{Bone: rigidBody.Bone, Frame: frame})
 				}
-				boneDeltas.SetGlobalMatrix(rigidBody.Bone, bonePhysicsGlobalMatrix)
+				boneDeltas.SetGlobalMatrix(frame, rigidBody.Bone, bonePhysicsGlobalMatrix)
 				physicsBoneIndexes = append(physicsBoneIndexes, rigidBody.Bone.Index)
 			}
 
@@ -180,6 +180,6 @@ func updatePhysics(
 		}
 
 		// グローバル行列を埋め終わったらローカル行列の計算
-		boneDeltas.FillLocalMatrix(physicsBoneIndexes)
+		boneDeltas.FillLocalMatrix(frame, physicsBoneIndexes)
 	}
 }

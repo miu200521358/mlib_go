@@ -788,13 +788,13 @@ func (w *GlWindow) Run() {
 				w.modelSets[k].Model.Index = k
 				w.modelSets[k].Model.DrawInitialize(w.WindowIndex, w.Physics)
 				w.modelSets[k].NextModel = nil
-				prevDeltas = nil
+				w.isSaveDelta = false
 			}
 
 			if w.modelSets[k].NextMotion != nil {
 				w.modelSets[k].Motion = w.modelSets[k].NextMotion
 				w.modelSets[k].NextMotion = nil
-				prevDeltas = nil
+				w.isSaveDelta = false
 			}
 
 			if w.modelSets[k].NextInvisibleMaterialIndexes != nil {
