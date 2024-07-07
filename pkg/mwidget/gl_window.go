@@ -827,11 +827,12 @@ func (w *GlWindow) Run() {
 			}
 		}
 
-		// 物理デバッグ表示（要不要は中で見ている）
-		w.Physics.DrawDebugLines()
-
 		w.Shader.Msaa.Resolve()
 		w.Shader.Msaa.Unbind()
+
+		// 物理デバッグ表示（要不要は中で見ている）MSAAには含めない
+		w.Physics.DrawDebugLines()
+
 		w.SwapBuffers()
 
 		if w.isShowInfo {
