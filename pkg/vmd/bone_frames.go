@@ -450,8 +450,8 @@ ikLoop:
 
 			// 回転角(ラジアン)
 			// 単位角を超えないようにする
-			originalLinkAngle := math.Acos(mmath.ClampFloat(linkDot, -1, 1))
-			linkAngle := mmath.ClampFloat(originalLinkAngle, -unitRad, unitRad)
+			originalLinkAngle := math.Acos(mmath.ClampedFloat(linkDot, -1, 1))
+			linkAngle := mmath.ClampedFloat(originalLinkAngle, -unitRad, unitRad)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,

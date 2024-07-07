@@ -674,15 +674,14 @@ func (w *GlWindow) Run() {
 		var timeStep float32
 		if !w.EnableFrameDrop {
 			// フレームドロップOFF
-			// デフォームfpsは30fps上限の経過時間
-			elapsed = mmath.ClampFloat(originalElapsed, 0.0, float64(w.Physics.DeformSpf))
-			// 物理fpsは60fps上限の経過時間
-			timeStep = float32(mmath.ClampFloat(originalElapsed, 0.0, float64(w.Physics.PhysicsSpf)))
-		} else {
-			// フレームドロップONの場合オリジナルそのまま
-			elapsed = originalElapsed
 			// 物理fpsは60fps固定
-			timeStep = float32(w.Physics.PhysicsSpf)
+			timeStep = w.Physics.PhysicsSpf
+			// デフォームfpsは30fps上限の経過時間
+			elapsed = mmath.ClampedFloat(originalElapsed, 0.0, float64(w.Physics.DeformSpf))
+		} else {
+			// 物理fpsは経過時間
+			timeStep = float32(originalElapsed)
+			elapsed = originalElapsed
 		}
 
 		if elapsed < w.spfLimit {
@@ -748,11 +747,11 @@ func (w *GlWindow) Run() {
 
 		if w.playing {
 			// 経過秒数をキーフレームの進捗具合に合わせて調整
-			w.frame += elapsed * float64(w.Physics.DeformFps)
-			// mlog.V("previousTime=%.7f, time=%.7f, elapsed=%.7f, frame=%.7f", prevTime, frameTime, elapsed, w.frame)
 			if w.spfLimit < -1 {
 				// デフォームFPS制限なしの場合、フレーム番号を常に進める
 				w.frame += 1.0
+			} else {
+				w.frame += elapsed * float64(w.Physics.DeformFps)
 			}
 		}
 
@@ -859,7 +858,7 @@ func (w *GlWindow) Run() {
 					suffixFps = fmt.Sprintf("%.2f fps", 1.0/elapsed)
 				} else {
 					// 開発版の場合、FPSの表示を詳細化
-					suffixFps = fmt.Sprintf("%.2f fps (%.2f fps)", 1.0/originalElapsed, 1.0/elapsed)
+					suffixFps = fmt.Sprintf("d) %.2f (%.2f) / p) %.2f fps", 1.0/elapsed, 1/originalElapsed, 1.0/timeStep)
 				}
 
 				w.Window.SetTitle(fmt.Sprintf("%s - %s", w.title, suffixFps))

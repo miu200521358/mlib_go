@@ -27,7 +27,7 @@ func ToDegree(radian float64) float64 {
 }
 
 // Clamp01 ベクトルの各要素をmin～maxの範囲内にクランプします
-func ClampFloat(v float64, min float64, max float64) float64 {
+func ClampedFloat(v float64, min float64, max float64) float64 {
 	if v < min {
 		return min
 	} else if v > max {
@@ -37,7 +37,7 @@ func ClampFloat(v float64, min float64, max float64) float64 {
 }
 
 // Clamp01 ベクトルの各要素をmin～maxの範囲内にクランプします
-func ClampFloat32(v float32, min float32, max float32) float32 {
+func ClampedFloat32(v float32, min float32, max float32) float32 {
 	if v < min {
 		return min
 	} else if v > max {

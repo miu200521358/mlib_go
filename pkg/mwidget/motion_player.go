@@ -140,7 +140,7 @@ func (mp *MotionPlayer) SetRange(min, max int) {
 }
 
 func (mp *MotionPlayer) SetValue(v int) {
-	value := mmath.ClampFloat(float64(v), mp.FrameEdit.MinValue(), mp.FrameEdit.MaxValue())
+	value := mmath.ClampedFloat(float64(v), mp.FrameEdit.MinValue(), mp.FrameEdit.MaxValue())
 	mp.FrameEdit.SetValue(value)
 	mp.FrameSlider.SetValue(int(value))
 }

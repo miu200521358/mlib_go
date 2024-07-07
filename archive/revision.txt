@@ -521,7 +521,7 @@ MlibSample 1.0.0_beta_101
 MlibSample 1.0.0_beta_102
 ・fps整理
 　・デフォームfps ... ドロップOFF: 30fps上限の経過時間、ドロップON: 経過時間
-　・物理fps ... ドロップOFF: 60fps上限の経過時間、ドロップON: 60固定
+　・物理fps ... ドロップOFF: 60固定、ドロップON: 60fps上限の経過時間
 　・描画fps ... fps制限に応じて描画を更新する
 
 
