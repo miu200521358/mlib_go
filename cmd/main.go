@@ -39,6 +39,9 @@ func init() {
 //go:embed resources/*
 var resourceFiles embed.FS
 
+//go:embed i18n/*
+var appI18nFiles embed.FS
+
 func main() {
 	// defer profile.Start(profile.MemProfileHeap, profile.ProfilePath(time.Now().Format("20060102_150405"))).Stop()
 	// defer profile.Start(profile.MemProfile, profile.ProfilePath(time.Now().Format("20060102_150405"))).Stop()
@@ -50,7 +53,7 @@ func main() {
 
 	appConfig := mconfig.LoadAppConfig(resourceFiles)
 	appConfig.Env = env
-	mi18n.Initialize(resourceFiles)
+	mi18n.Initialize(appI18nFiles)
 
 	if appConfig.IsEnvProd() || appConfig.IsEnvDev() {
 		defer mwidget.RecoverFromPanic(mWindow)

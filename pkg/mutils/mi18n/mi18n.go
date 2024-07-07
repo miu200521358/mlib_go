@@ -13,7 +13,10 @@ import (
 var bundle *i18n.Bundle
 var localizer *i18n.Localizer
 
-func Initialize(resourceFiles embed.FS) {
+//go:embed i18n/*
+var commonI18nFiles embed.FS
+
+func Initialize(appI18nFiles embed.FS) {
 	langs := mconfig.LoadUserConfig("lang")
 
 	var lang string
@@ -39,14 +42,15 @@ func Initialize(resourceFiles embed.FS) {
 
 	bundle = i18n.NewBundle(langTag)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
-	bundle.LoadMessageFileFS(resourceFiles, "resources/i18n/common.ja.json")
-	bundle.LoadMessageFileFS(resourceFiles, "resources/i18n/app.ja.json")
-	bundle.LoadMessageFileFS(resourceFiles, "resources/i18n/common.en.json")
-	bundle.LoadMessageFileFS(resourceFiles, "resources/i18n/app.en.json")
-	bundle.LoadMessageFileFS(resourceFiles, "resources/i18n/common.zh.json")
-	bundle.LoadMessageFileFS(resourceFiles, "resources/i18n/app.zh.json")
-	bundle.LoadMessageFileFS(resourceFiles, "resources/i18n/common.ko.json")
-	bundle.LoadMessageFileFS(resourceFiles, "resources/i18n/app.ko.json")
+	bundle.LoadMessageFileFS(commonI18nFiles, "i18n/common.ja.json")
+	bundle.LoadMessageFileFS(commonI18nFiles, "i18n/common.en.json")
+	bundle.LoadMessageFileFS(commonI18nFiles, "i18n/common.zh.json")
+	bundle.LoadMessageFileFS(commonI18nFiles, "i18n/common.ko.json")
+
+	bundle.LoadMessageFileFS(appI18nFiles, "i18n/app.ja.json")
+	bundle.LoadMessageFileFS(appI18nFiles, "i18n/app.en.json")
+	bundle.LoadMessageFileFS(appI18nFiles, "i18n/app.zh.json")
+	bundle.LoadMessageFileFS(appI18nFiles, "i18n/app.ko.json")
 
 	localizer = i18n.NewLocalizer(bundle, lang)
 }
