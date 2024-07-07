@@ -8,7 +8,7 @@ workspace_folder = os.environ.get('WORKSPACE_FOLDER')
 print(f"workspace_folder: {workspace_folder}")
 
 # Read app_config.json file
-with open(f'{workspace_folder}/cmd/resources/app_config.json', 'r', encoding='utf-8') as file:
+with open(f'{workspace_folder}/cmd/app/app_config.json', 'r', encoding='utf-8') as file:
     config_data = json.load(file)
 
 # Convert JSON data to dictionary
@@ -31,10 +31,10 @@ env_name = "dev" if os.environ.get('ENV') == 'dev' else "prod"
 # -buildmode=exe 実行可能ファイルを生成
 # -ldflags "-s -w" バイナリサイズを小さくする
 # -H=windowsgui コンソールを表示しない
-# -linkmode external -extldflags '-static -Wl,cmd/resources/app/app.res' リソースを埋め込む
+# -linkmode external -extldflags '-static -Wl,cmd/app/app.res' リソースを埋め込む
 build_command = f"go build -o {workspace_folder}/build/{app_name}_{app_version}.exe -trimpath " \
                 f"-v {all_rebuild} -buildmode=exe -ldflags \"-s -w -H=windowsgui -X main.env={env_name} " \
-                f"-linkmode external -extldflags '-static -Wl,{workspace_folder}/cmd/resources/app/app.res'\" " \
+                f"-linkmode external -extldflags '-static -Wl,{workspace_folder}/cmd/app/app.res'\" " \
                 f" {workspace_folder}/cmd/main.go"
 
 print(f"build_command: {build_command}")
