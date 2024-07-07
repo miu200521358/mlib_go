@@ -262,7 +262,7 @@ func (fs *BoneFrames) calcIk(
 		mlog.IV("[IK計算終了][%04d][%s]", frame, ikBone.Name)
 
 		if ikMotion != nil {
-			ikMotion.Save()
+			ikMotion.Save("", "")
 		}
 		if ikFile != nil {
 			ikFile.Close()
@@ -289,6 +289,38 @@ func (fs *BoneFrames) calcIk(
 	if !ikDeltas.Contains(ikBone.Index) {
 		// IKボーンが存在しない場合、スルー
 		return boneDeltas
+	}
+
+	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		ikOffMotion := NewVmdMotion(fmt.Sprintf("%s_0_%s.vmd", prefixPath, ikBone.Name))
+
+		bif := NewIkFrame(0)
+		bif.Registered = true
+
+		for _, bone := range model.Bones.Data {
+			if bone.IsIK() {
+				ef := NewIkEnableFrame(0)
+				ef.Registered = true
+				ef.BoneName = bone.Name
+				ef.Enabled = false
+
+				bif.IkList = append(bif.IkList, ef)
+			}
+		}
+
+		ikOffMotion.AppendIkFrame(bif)
+
+		for _, ikDelta := range ikDeltas.Data {
+			if ikDelta == nil {
+				continue
+			}
+			bf := NewBoneFrame(0)
+			bf.Position = ikDelta.framePosition
+			bf.Rotation = ikDelta.frameRotation
+			ikOffMotion.AppendRegisteredBoneFrame(ikDelta.Bone.Name, bf)
+		}
+
+		ikOffMotion.Save("IK OFF", "")
 	}
 
 	var ikOffDeltas *BoneDeltas
@@ -423,7 +455,14 @@ ikLoop:
 					effectorLocalPosition.Distance(ikLocalPosition))
 			}
 
-			if effectorLocalPosition.Distance(ikLocalPosition) < 1e-7 {
+			distanceThreshold := effectorLocalPosition.Distance(ikLocalPosition)
+			if distanceThreshold < 1e-7 {
+				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+					fmt.Fprintf(ikFile,
+						"[%04d][%03d][%s][%05d][Local] ***BREAK*** distanceThreshold: %f\n",
+						frame, loop, linkBone.Name, count-1, distanceThreshold)
+				}
+
 				break ikLoop
 			}
 
@@ -462,7 +501,14 @@ ikLoop:
 			}
 
 			// 角度がほとんどない場合
-			if math.Abs(linkAngle) < 1e-8 {
+			angleThreshold := math.Abs(linkAngle)
+			if angleThreshold < 1e-8 {
+				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+					fmt.Fprintf(ikFile,
+						"[%04d][%03d][%s][%05d][Local] ***BREAK*** angleThreshold: %f\n",
+						frame, loop, linkBone.Name, count-1, angleThreshold)
+				}
+
 				break ikLoop
 			}
 
