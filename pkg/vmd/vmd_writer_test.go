@@ -19,7 +19,7 @@ func TestVmdWriter_Write1(t *testing.T) {
 	motion.AppendRegisteredBoneFrame("センター", bf)
 
 	// Create a VmdWriter instance
-	err := motion.Save()
+	err := motion.Save("", "")
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
@@ -70,7 +70,71 @@ func TestVmdWriter_Write2(t *testing.T) {
 	motion.Path = outputPath
 
 	// Create a VmdWriter instance
-	err = motion.Save()
+	err = motion.Save("", "")
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	reloadData, err := r.ReadByFilepath(outputPath)
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+	reloadMotion := reloadData.(*VmdMotion)
+
+	if reloadMotion.GetName() != motion.GetName() {
+		t.Errorf("Expected model name to be '%s', got %q", motion.GetName(), reloadMotion.GetName())
+	}
+
+}
+
+func TestVmdWriter_Write3(t *testing.T) {
+	// Test case 1: Successful read
+	readPath := "../../test_resources/ドクヘビ_178cmカメラ.vmd"
+
+	r := &VmdMotionReader{}
+	model, err := r.ReadByFilepath(readPath)
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	outputPath := "../../test_resources/test_output.vmd"
+	motion := model.(*VmdMotion)
+
+	// Create a VmdWriter instance
+	err = motion.Save("", outputPath)
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	reloadData, err := r.ReadByFilepath(outputPath)
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+	reloadMotion := reloadData.(*VmdMotion)
+
+	if reloadMotion.GetName() != motion.GetName() {
+		t.Errorf("Expected model name to be '%s', got %q", motion.GetName(), reloadMotion.GetName())
+	}
+
+}
+
+func TestVmdWriter_Write4(t *testing.T) {
+	// Test case 1: Successful read
+	readPath := "../../test_resources/モーフ_まばたき.vmd"
+
+	r := &VmdMotionReader{}
+	model, err := r.ReadByFilepath(readPath)
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	outputPath := "../../test_resources/test_output.vmd"
+	motion := model.(*VmdMotion)
+
+	// Create a VmdWriter instance
+	err = motion.Save("", outputPath)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}

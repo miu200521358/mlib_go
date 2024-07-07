@@ -25,6 +25,14 @@ func (mfs *MorphFrames) Update(fs *MorphNameFrames) {
 	mfs.Data[fs.Name] = fs
 }
 
+func (mfs *MorphFrames) GetNames() []string {
+	names := make([]string, 0, len(mfs.Data))
+	for name := range mfs.Data {
+		names = append(names, name)
+	}
+	return names
+}
+
 func (mfs *MorphFrames) Get(morphName string) *MorphNameFrames {
 	if !mfs.Contains(morphName) {
 		mfs.Update(NewMorphNameFrames(morphName))
@@ -44,6 +52,9 @@ func (mfs *MorphFrames) Deform(
 		}
 
 		mf := mfs.Get(morphName).Get(frame)
+		if mf == nil {
+			continue
+		}
 
 		morph := model.Morphs.GetByName(morphName)
 		switch morph.MorphType {
@@ -117,7 +128,7 @@ func (mfs *MorphFrames) GetMinFrame() int {
 	return minFno
 }
 
-func (fs *MorphFrames) GetCount() int {
+func (fs *MorphFrames) Len() int {
 	count := 0
 	for _, fs := range fs.Data {
 		count += fs.RegisteredIndexes.Len()
