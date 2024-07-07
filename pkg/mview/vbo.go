@@ -287,28 +287,174 @@ func (v *VBO) BindDebug(vertices []float32) {
 }
 
 // 床のVBOを作成
-func NewVBOForFloor() *VBO {
+func NewVBOForFloor() (*VBO, int32) {
 
 	// 床のラインの頂点データ
-	floorVertices := make([]float32, 240*3)
-	n := 0
-	for x := -50; x <= 50; x += 5 {
-		floorVertices[n] = float32(x)
-		floorVertices[n+1] = 0.0
-		floorVertices[n+2] = float32(-50)
-		floorVertices[n+3] = float32(x)
-		floorVertices[n+4] = 0.0
-		floorVertices[n+5] = float32(50)
-		n += 6
+	floorVertices := make([]float32, 0)
+	for x := -50; x < 0; x += 5 {
+		floorVertices = append(floorVertices, float32(x))
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, float32(-50))
+
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.7)
+
+		floorVertices = append(floorVertices, float32(x))
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, float32(50))
+
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.7)
 	}
-	for z := -50; z <= 50; z += 5 {
-		floorVertices[n] = float32(-50)
-		floorVertices[n+1] = 0.0
-		floorVertices[n+2] = float32(z)
-		floorVertices[n+3] = float32(50)
-		floorVertices[n+4] = 0.0
-		floorVertices[n+5] = float32(z)
-		n += 6
+	for x := 0; x <= 50; x += 5 {
+		floorVertices = append(floorVertices, float32(x))
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, float32(-50))
+
+		if x == 0 {
+			// 原点Z軸ライン
+			floorVertices = append(floorVertices, 0.0)
+			floorVertices = append(floorVertices, 0.0)
+			floorVertices = append(floorVertices, 1.0)
+			floorVertices = append(floorVertices, 1.0)
+		} else {
+			floorVertices = append(floorVertices, 0.9)
+			floorVertices = append(floorVertices, 0.9)
+			floorVertices = append(floorVertices, 0.9)
+			floorVertices = append(floorVertices, 0.7)
+		}
+
+		floorVertices = append(floorVertices, float32(x))
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, float32(0))
+
+		if x == 0 {
+			// 原点Z軸ライン
+			floorVertices = append(floorVertices, 0.0)
+			floorVertices = append(floorVertices, 0.0)
+			floorVertices = append(floorVertices, 1.0)
+			floorVertices = append(floorVertices, 1.0)
+		} else {
+			floorVertices = append(floorVertices, 0.9)
+			floorVertices = append(floorVertices, 0.9)
+			floorVertices = append(floorVertices, 0.9)
+			floorVertices = append(floorVertices, 0.7)
+		}
+
+		floorVertices = append(floorVertices, float32(x))
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, float32(0))
+
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.7)
+
+		floorVertices = append(floorVertices, float32(x))
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, float32(50))
+
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.7)
+	}
+	for z := -50; z < 0; z += 5 {
+		floorVertices = append(floorVertices, float32(-50))
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, float32(z))
+
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.7)
+
+		floorVertices = append(floorVertices, float32(50))
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, float32(z))
+
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.7)
+	}
+	for z := 0; z <= 50; z += 5 {
+		floorVertices = append(floorVertices, float32(-50))
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, float32(z))
+
+		if z == 0 {
+			// 原点X軸ライン
+			floorVertices = append(floorVertices, 1.0)
+			floorVertices = append(floorVertices, 0.0)
+			floorVertices = append(floorVertices, 0.0)
+			floorVertices = append(floorVertices, 1.0)
+		} else {
+			floorVertices = append(floorVertices, 0.9)
+			floorVertices = append(floorVertices, 0.9)
+			floorVertices = append(floorVertices, 0.9)
+			floorVertices = append(floorVertices, 0.7)
+		}
+
+		floorVertices = append(floorVertices, float32(0))
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, float32(z))
+
+		if z == 0 {
+			// 原点X軸ライン
+			floorVertices = append(floorVertices, 1.0)
+			floorVertices = append(floorVertices, 0.0)
+			floorVertices = append(floorVertices, 0.0)
+			floorVertices = append(floorVertices, 1.0)
+		} else {
+			floorVertices = append(floorVertices, 0.9)
+			floorVertices = append(floorVertices, 0.9)
+			floorVertices = append(floorVertices, 0.9)
+			floorVertices = append(floorVertices, 0.7)
+		}
+
+		floorVertices = append(floorVertices, float32(0))
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, float32(z))
+
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.7)
+
+		floorVertices = append(floorVertices, float32(50))
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, float32(z))
+
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.9)
+		floorVertices = append(floorVertices, 0.7)
+	}
+
+	// 原点Y軸ライン
+	{
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, 0.0)
+
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, 1.0)
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, 1.0)
+
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, 50.0)
+		floorVertices = append(floorVertices, 0.0)
+
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, 1.0)
+		floorVertices = append(floorVertices, 0.0)
+		floorVertices = append(floorVertices, 1.0)
 	}
 
 	var vboId uint32
@@ -321,11 +467,11 @@ func NewVBOForFloor() *VBO {
 	}
 	// 剛体構造体のサイズ(全部floatとする)
 	// position(3)
-	vbo.stride = int32(4 * (3))
+	vbo.stride = int32(4 * (3 + 4))
 	// floorVerticesの要素数 * float32のサイズ
 	vbo.size = int(len(floorVertices) * 4)
 
-	return vbo
+	return vbo, int32(len(floorVertices))
 }
 
 // 床描画
@@ -343,5 +489,16 @@ func (v *VBO) BindFloor() {
 		false,
 		v.stride,
 		0*4,
+	)
+
+	// 1: color
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointerWithOffset(
+		1,
+		4,
+		gl.FLOAT,
+		false,
+		v.stride,
+		3*4,
 	)
 }

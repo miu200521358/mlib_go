@@ -888,8 +888,9 @@ func (w *GlWindow) IsRunning() bool {
 // 床描画 ------------------
 
 type MFloor struct {
-	vao *mview.VAO
-	vbo *mview.VBO
+	vao   *mview.VAO
+	vbo   *mview.VBO
+	count int32
 }
 
 func newMFloor() *MFloor {
@@ -897,7 +898,7 @@ func newMFloor() *MFloor {
 
 	mf.vao = mview.NewVAO()
 	mf.vao.Bind()
-	mf.vbo = mview.NewVBOForFloor()
+	mf.vbo, mf.count = mview.NewVBOForFloor()
 	mf.vbo.Unbind()
 	mf.vao.Unbind()
 
@@ -912,7 +913,7 @@ func (w *GlWindow) drawFloor() {
 	w.floor.vao.Bind()
 	w.floor.vbo.BindFloor()
 
-	gl.DrawArrays(gl.LINES, 0, 240)
+	gl.DrawArrays(gl.LINES, 0, w.floor.count)
 
 	w.floor.vbo.Unbind()
 	w.floor.vao.Unbind()
