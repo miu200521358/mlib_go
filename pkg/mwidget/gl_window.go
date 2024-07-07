@@ -73,7 +73,7 @@ type GlWindow struct {
 	spfLimit               float64               //fps制限
 	frame                  float64               // 現在のフレーム
 	prevFrame              int                   // 前回のフレーム
-	isSaveDelta            bool                  // 前回デフォーム保存フラグ
+	isSaveDelta            bool                  // 前回デフォーム保存フラグ(walkウィンドウからの変更情報検知用)
 	motionPlayer           *MotionPlayer         // 再生ウィジェット
 	width                  int                   // ウィンドウ幅
 	height                 int                   // ウィンドウ高さ
