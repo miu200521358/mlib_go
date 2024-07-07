@@ -257,7 +257,6 @@ func (w *GlWindow) GetFrame() int {
 func (w *GlWindow) SetFrame(f int) {
 	w.frame = float64(f)
 	w.prevFrame = f
-	w.isSaveDelta = false
 	for i := range w.modelSets {
 		w.modelSets[i].prevDeltas = nil
 	}
@@ -789,13 +788,13 @@ func (w *GlWindow) Run() {
 				w.modelSets[k].Model.Index = k
 				w.modelSets[k].Model.DrawInitialize(w.WindowIndex, w.Physics)
 				w.modelSets[k].NextModel = nil
-				w.isSaveDelta = false
+				prevDeltas = nil
 			}
 
 			if w.modelSets[k].NextMotion != nil {
 				w.modelSets[k].Motion = w.modelSets[k].NextMotion
 				w.modelSets[k].NextMotion = nil
-				w.isSaveDelta = false
+				prevDeltas = nil
 			}
 
 			if w.modelSets[k].NextInvisibleMaterialIndexes != nil {
