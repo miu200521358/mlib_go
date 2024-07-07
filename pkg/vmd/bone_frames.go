@@ -456,7 +456,7 @@ ikLoop:
 			}
 
 			distanceThreshold := effectorLocalPosition.Distance(ikLocalPosition)
-			if distanceThreshold < 1e-7 {
+			if distanceThreshold < 1e-5 {
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][Local] ***BREAK*** distanceThreshold: %f\n",
@@ -502,7 +502,7 @@ ikLoop:
 
 			// 角度がほとんどない場合
 			angleThreshold := math.Abs(linkAngle)
-			if angleThreshold < 1e-8 {
+			if angleThreshold < 1e-5 {
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][Local] ***BREAK*** angleThreshold: %f\n",
