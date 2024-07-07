@@ -671,25 +671,23 @@ func (w *GlWindow) Run() {
 		originalElapsed := frameTime - prevTime
 
 		var elapsed float64
+		var timeStep float32
 		if !w.EnableFrameDrop {
-			// フレームドロップOFFの場合はスキップしない
-			elapsed = mmath.ClampFloat(originalElapsed, 0.0, 1/float64(w.Physics.Fps))
+			// フレームドロップOFF
+			// デフォームfpsは30fps上限の経過時間
+			elapsed = mmath.ClampFloat(originalElapsed, 0.0, float64(w.Physics.DeformSpf))
+			// 物理fpsは60fps上限の経過時間
+			timeStep = float32(mmath.ClampFloat(originalElapsed, 0.0, float64(w.Physics.PhysicsSpf)))
 		} else {
 			// フレームドロップONの場合オリジナルそのまま
 			elapsed = originalElapsed
-		}
-
-		var timeStep float32
-		if w.spfLimit < 0 {
-			// FPS制限なしの場合、オリジナルの経過時間をそのまま使う
-			timeStep = float32(originalElapsed)
-		} else {
-			// FPS制限ありの場合は指定fpsを使う
-			timeStep = float32(w.spfLimit)
+			// 物理fpsは60fps固定
+			timeStep = float32(w.Physics.PhysicsSpf)
 		}
 
 		if elapsed < w.spfLimit {
 			// 1フレームの時間が経過していない場合はスキップ
+			// fps制限は描画fpsにのみ依存
 			continue
 		}
 
@@ -750,7 +748,7 @@ func (w *GlWindow) Run() {
 
 		if w.playing {
 			// 経過秒数をキーフレームの進捗具合に合わせて調整
-			w.frame += elapsed * float64(w.Physics.Fps)
+			w.frame += elapsed * float64(w.Physics.DeformFps)
 			// mlog.V("previousTime=%.7f, time=%.7f, elapsed=%.7f, frame=%.7f", prevTime, frameTime, elapsed, w.frame)
 			if w.spfLimit < -1 {
 				// デフォームFPS制限なしの場合、フレーム番号を常に進める
@@ -858,17 +856,10 @@ func (w *GlWindow) Run() {
 				var suffixFps string
 				if w.appConfig.IsEnvProd() {
 					// リリース版の場合、FPSの表示を簡略化
-					var showElapsed float64
-					if w.spfLimit < 0 {
-						showElapsed = float64(timeStep)
-					} else {
-						showElapsed = float64(elapsed)
-					}
-
-					suffixFps = fmt.Sprintf("%.2f fps", 1.0/showElapsed)
+					suffixFps = fmt.Sprintf("%.2f fps", 1.0/elapsed)
 				} else {
 					// 開発版の場合、FPSの表示を詳細化
-					suffixFps = fmt.Sprintf("d) %.2f/ p) %.2f fps", 1.0/elapsed, 1.0/timeStep)
+					suffixFps = fmt.Sprintf("%.2f fps (%.2f fps)", 1.0/originalElapsed, 1.0/elapsed)
 				}
 
 				w.Window.SetTitle(fmt.Sprintf("%s - %s", w.title, suffixFps))

@@ -13,8 +13,10 @@ type MPhysics struct {
 	drawer           mbt.BtMDebugDraw
 	liner            *MDebugDrawLiner
 	MaxSubSteps      int
-	Fps              float32
-	Spf              float32
+	DeformFps        float32
+	DeformSpf        float32
+	PhysicsFps       float32
+	PhysicsSpf       float32
 	FixedTimeStep    float32
 	joints           map[jointKey]mbt.BtTypedConstraint
 	rigidBodies      map[rigidbodyKey]rigidbodyValue
@@ -45,7 +47,8 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 	p := &MPhysics{
 		world:       world,
 		MaxSubSteps: 2,
-		Fps:         30.0,
+		DeformFps:   30.0,
+		PhysicsFps:  60.0,
 		rigidBodies: make(map[rigidbodyKey]rigidbodyValue),
 		joints:      make(map[jointKey]mbt.BtTypedConstraint),
 	}
@@ -60,7 +63,8 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 
 	p.drawer = drawer
 	p.liner = liner
-	p.Spf = 1.0 / p.Fps
+	p.DeformSpf = 1.0 / p.DeformFps
+	p.PhysicsSpf = 1.0 / p.PhysicsFps
 	p.FixedTimeStep = 1 / 60.0
 
 	p.VisibleRigidBody(false)
