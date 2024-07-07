@@ -36,11 +36,14 @@ func init() {
 	})
 }
 
-//go:embed resources/*
-var resourceFiles embed.FS
+//go:embed app/*
+var appFiles embed.FS
 
 //go:embed i18n/*
 var appI18nFiles embed.FS
+
+//go:embed icon/*
+var iconFiles embed.FS
 
 func main() {
 	// defer profile.Start(profile.MemProfileHeap, profile.ProfilePath(time.Now().Format("20060102_150405"))).Stop()
@@ -51,7 +54,7 @@ func main() {
 	var mWindow *mwidget.MWindow
 	var err error
 
-	appConfig := mconfig.LoadAppConfig(resourceFiles)
+	appConfig := mconfig.LoadAppConfig(appFiles)
 	appConfig.Env = env
 	mi18n.Initialize(appI18nFiles)
 
@@ -59,10 +62,13 @@ func main() {
 		defer mwidget.RecoverFromPanic(mWindow)
 	}
 
-	glWindow, err := mwidget.NewGlWindow(mi18n.T("ビューワー"), 512, 768, 0, resourceFiles, appConfig, nil, nil)
+	iconImg, err := mconfig.LoadIconFile(appFiles)
+	mwidget.CheckError(err, nil, mi18n.T("アイコン生成エラー"))
+
+	glWindow, err := mwidget.NewGlWindow(512, 768, 0, iconImg, appConfig, nil, nil)
 
 	go func() {
-		mWindow, err = mwidget.NewMWindow(resourceFiles, appConfig, true, 512, 768, getMenuItems)
+		mWindow, err = mwidget.NewMWindow(512, 768, getMenuItems, iconImg, appConfig, true)
 		mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
 
 		motionPlayer, _, funcWorldPos := NewFileTabPage(mWindow)
@@ -139,7 +145,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 	_, err = walk.NewVSeparator(page)
 	mwidget.CheckError(err, mWindow, mi18n.T("セパレータ生成エラー"))
 
-	motionPlayer, err := mwidget.NewMotionPlayer(page, mWindow, resourceFiles)
+	motionPlayer, err := mwidget.NewMotionPlayer(page, mWindow, iconFiles)
 	mwidget.CheckError(err, mWindow, mi18n.T("モーションプレイヤー生成エラー"))
 	motionPlayer.SetEnabled(false)
 

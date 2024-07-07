@@ -30,8 +30,8 @@ func (ac *AppConfig) IsEnvDev() bool {
 }
 
 // LoadAppConfig アプリ設定ファイルの読み込み
-func LoadAppConfig(resourceFiles embed.FS) *AppConfig {
-	fileData, err := fs.ReadFile(resourceFiles, "resources/app_config.json")
+func LoadAppConfig(appFiles embed.FS) *AppConfig {
+	fileData, err := fs.ReadFile(appFiles, "app/app_config.json")
 	if err != nil {
 		return &AppConfig{}
 	}
@@ -41,6 +41,6 @@ func LoadAppConfig(resourceFiles embed.FS) *AppConfig {
 }
 
 // LoadIconFile アイコンファイルの読み込み
-func LoadIconFile(resourceFiles embed.FS) (*image.Image, error) {
-	return mutils.LoadImageFromResources(resourceFiles, "resources/app.png")
+func LoadIconFile(resources embed.FS) (*image.Image, error) {
+	return mutils.LoadImageFromResources(resources, "app/app.png")
 }

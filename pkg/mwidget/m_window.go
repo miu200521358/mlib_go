@@ -4,8 +4,8 @@
 package mwidget
 
 import (
-	"embed"
 	"fmt"
+	"image"
 	"syscall"
 
 	"github.com/miu200521358/walk/pkg/declarative"
@@ -49,12 +49,12 @@ type MWindow struct {
 }
 
 func NewMWindow(
-	resourceFiles embed.FS,
-	appConfig *mconfig.AppConfig,
-	isHorizontal bool,
 	width int,
 	height int,
 	funcHelpMenuItems func() []declarative.MenuItem,
+	iconImg *image.Image,
+	appConfig *mconfig.AppConfig,
+	isHorizontal bool,
 ) (*MWindow, error) {
 	mainWindow := &MWindow{
 		isHorizontal: isHorizontal,
@@ -305,10 +305,6 @@ func NewMWindow(
 		walk.App().Exit(0)
 	})
 
-	iconImg, err := mconfig.LoadIconFile(resourceFiles)
-	if err != nil {
-		return nil, err
-	}
 	icon, err := walk.NewIconFromImageForDPI(*iconImg, 96)
 	if err != nil {
 		return nil, err

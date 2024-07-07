@@ -194,7 +194,7 @@ func (t *ToonTextures) initGl(
 	windowIndex int,
 ) error {
 	for i := 0; i < 10; i++ {
-		filePath := fmt.Sprintf("resources/toon/toon%02d.bmp", i+1)
+		filePath := fmt.Sprintf("toon/toon%02d.bmp", i+1)
 
 		toon := NewTexture()
 		toon.Index = i

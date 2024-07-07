@@ -19,6 +19,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
@@ -91,11 +92,10 @@ type GlWindow struct {
 }
 
 func NewGlWindow(
-	title string,
 	width int,
 	height int,
 	windowIndex int,
-	resourceFiles embed.FS,
+	iconImg *image.Image,
 	appConfig *mconfig.AppConfig,
 	mainWindow *GlWindow,
 	fixViewWidget *FixViewWidget,
@@ -119,17 +119,14 @@ func NewGlWindow(
 	}
 
 	// ウィンドウの作成
+	title := mi18n.T("ビューワー")
 	w, err := glfw.CreateWindow(width, height, title, nil, mw)
 	if err != nil {
 		return nil, err
 	}
 	w.MakeContextCurrent()
 	w.SetInputMode(glfw.StickyKeysMode, glfw.True)
-
-	iconImg, err := mconfig.LoadIconFile(resourceFiles)
-	if err == nil {
-		w.SetIcon([]image.Image{*iconImg})
-	}
+	w.SetIcon([]image.Image{*iconImg})
 
 	// OpenGL の初期化
 	if err := gl.Init(); err != nil {
@@ -177,7 +174,6 @@ func NewGlWindow(
 		appConfig:                  appConfig,
 		title:                      title,
 		WindowIndex:                windowIndex,
-		resourceFiles:              resourceFiles,
 		prevCursorPos:              &mmath.MVec2{0, 0},
 		yaw:                        RIGHT_ANGLE,
 		pitch:                      0.0,

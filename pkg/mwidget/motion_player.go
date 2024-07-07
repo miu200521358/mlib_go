@@ -26,7 +26,7 @@ type MotionPlayer struct {
 
 const MotionPlayerClass = "MotionPlayer Class"
 
-func NewMotionPlayer(parent walk.Container, mWindow *MWindow, resourceFiles embed.FS) (*MotionPlayer, error) {
+func NewMotionPlayer(parent walk.Container, mWindow *MWindow, iconFiles embed.FS) (*MotionPlayer, error) {
 	mp := new(MotionPlayer)
 	mp.mWindow = mWindow
 
