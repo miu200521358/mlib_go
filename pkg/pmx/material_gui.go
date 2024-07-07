@@ -3,10 +3,6 @@
 
 package pmx
 
-import (
-	"embed"
-)
-
 type MaterialGL struct {
 	*Material
 	Texture           *TextureGL // 通常テクスチャ
@@ -22,21 +18,20 @@ func (m *Material) GL(
 	sphereTexture *Texture,
 	windowIndex int,
 	prevVerticesCount int,
-	resourceFiles embed.FS,
 ) *MaterialGL {
 	var textureGL *TextureGL
 	if texture != nil {
-		textureGL = texture.GL(modelPath, TEXTURE_TYPE_TEXTURE, windowIndex, resourceFiles)
+		textureGL = texture.GL(modelPath, TEXTURE_TYPE_TEXTURE, windowIndex)
 	}
 
 	var sphereTextureGL *TextureGL
 	if sphereTexture != nil {
-		sphereTextureGL = sphereTexture.GL(modelPath, TEXTURE_TYPE_SPHERE, windowIndex, resourceFiles)
+		sphereTextureGL = sphereTexture.GL(modelPath, TEXTURE_TYPE_SPHERE, windowIndex)
 	}
 
 	var tooTextureGL *TextureGL
 	if toonTexture != nil {
-		tooTextureGL = toonTexture.GL(modelPath, TEXTURE_TYPE_TOON, windowIndex, resourceFiles)
+		tooTextureGL = toonTexture.GL(modelPath, TEXTURE_TYPE_TOON, windowIndex)
 	}
 
 	return &MaterialGL{

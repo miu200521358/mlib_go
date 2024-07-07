@@ -4,7 +4,6 @@
 package pmx
 
 import (
-	"embed"
 	"math"
 	"sync"
 	"unsafe"
@@ -42,7 +41,6 @@ type Meshes struct {
 func NewMeshes(
 	model *PmxModel,
 	windowIndex int,
-	resourceFiles embed.FS,
 ) *Meshes {
 	// 頂点情報
 	vertices := make([]float32, 0, len(model.Vertices.Data))
@@ -151,7 +149,6 @@ func NewMeshes(
 			sphereTexture,
 			windowIndex,
 			prevVerticesCount,
-			resourceFiles,
 		)
 		mesh := NewMesh(
 			faces,

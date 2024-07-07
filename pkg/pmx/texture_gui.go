@@ -16,6 +16,9 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
+//go:embed toon/*
+var toonFiles embed.FS
+
 type TextureGL struct {
 	Id                uint32      // OpenGLテクスチャID
 	Valid             bool        // テクスチャフルパスが有効であるか否か
@@ -66,7 +69,6 @@ func (t *Texture) GL(
 	modelPath string,
 	textureType TextureType,
 	windowIndex int,
-	resourceFiles embed.FS,
 ) *TextureGL {
 	tGl := &TextureGL{}
 
@@ -190,7 +192,6 @@ func (t *Texture) GL(
 
 func (t *ToonTextures) initGl(
 	windowIndex int,
-	resourceFiles embed.FS,
 ) error {
 	for i := 0; i < 10; i++ {
 		filePath := fmt.Sprintf("resources/toon/toon%02d.bmp", i+1)
@@ -201,7 +202,7 @@ func (t *ToonTextures) initGl(
 		toon.TextureType = TEXTURE_TYPE_TOON
 		toon.Path = filePath
 
-		img, err := mutils.LoadImageFromResources(resourceFiles, filePath)
+		img, err := mutils.LoadImageFromResources(toonFiles, filePath)
 		if err != nil {
 			return err
 		}

@@ -4,23 +4,21 @@
 package pmx
 
 import (
-	"embed"
-
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 )
 
-func (pm *PmxModel) DrawInitialize(windowIndex int, resourceFiles embed.FS, physics *mphysics.MPhysics) {
+func (pm *PmxModel) DrawInitialize(windowIndex int, physics *mphysics.MPhysics) {
 	if !pm.DrawInitialized {
 		// モデルの初期化が終わっていない場合は初期化実行
-		pm.InitDraw(windowIndex, resourceFiles)
+		pm.InitDraw(windowIndex)
 		pm.InitPhysics(physics)
 		pm.DrawInitialized = true
 	}
 }
 
-func (pm *PmxModel) InitDraw(windowIndex int, resourceFiles embed.FS) {
-	pm.ToonTextures.initGl(windowIndex, resourceFiles)
-	pm.Meshes = NewMeshes(pm, windowIndex, resourceFiles)
+func (pm *PmxModel) InitDraw(windowIndex int) {
+	pm.ToonTextures.initGl(windowIndex)
+	pm.Meshes = NewMeshes(pm, windowIndex)
 
 	// 位置マッピングのセットアップ
 	pm.Vertices.SetupMapKeys()
