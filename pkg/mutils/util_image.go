@@ -23,8 +23,8 @@ import (
 )
 
 // LoadWalkIcon 画像ファイルの読み込み
-func LoadWalkIcon(resourceFiles embed.FS, imagePath string, dpi int) (*walk.Icon, error) {
-	image, err := LoadImageFromResources(resourceFiles, imagePath)
+func LoadWalkIcon(resources embed.FS, imagePath string, dpi int) (*walk.Icon, error) {
+	image, err := LoadImageFromResources(resources, imagePath)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +66,8 @@ func FlipImage(img *image.RGBA) *image.RGBA {
 }
 
 // ReadIconFile アイコンファイルの読み込み
-func LoadImageFromResources(resourceFiles embed.FS, fileName string) (*image.Image, error) {
-	fileData, err := fs.ReadFile(resourceFiles, fileName)
+func LoadImageFromResources(resources embed.FS, fileName string) (*image.Image, error) {
+	fileData, err := fs.ReadFile(resources, fileName)
 	if err != nil {
 		return nil, fmt.Errorf("image not found: %v", err)
 	}

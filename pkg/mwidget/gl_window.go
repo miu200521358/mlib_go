@@ -4,7 +4,6 @@
 package mwidget
 
 import (
-	"embed"
 	"fmt"
 	"image"
 	"math"
@@ -49,7 +48,6 @@ type GlWindow struct {
 	appConfig              *mconfig.AppConfig    // アプリケーション設定
 	title                  string                // ウィンドウタイトル(fpsとか入ってないオリジナル)
 	WindowIndex            int                   // ウィンドウインデックス
-	resourceFiles          embed.FS              // リソースファイル
 	prevCursorPos          *mmath.MVec2          // 前回のカーソル位置
 	yaw                    float64               // ウィンドウ操作yaw
 	pitch                  float64               // ウィンドウ操作pitch
