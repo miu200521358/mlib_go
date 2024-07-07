@@ -163,9 +163,9 @@ type Materials struct {
 	Faces    map[int][]int
 }
 
-func NewMaterials() *Materials {
+func NewMaterials(count int) *Materials {
 	return &Materials{
-		IndexNameModels: mcore.NewIndexNameModels[*Material](func() *Material { return nil }),
+		IndexNameModels: mcore.NewIndexNameModels[*Material](count, func() *Material { return nil }),
 		Vertices:        make(map[int][]int),
 		Faces:           make(map[int][]int),
 	}

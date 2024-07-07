@@ -19,12 +19,6 @@ func (pm *PmxModel) DrawInitialize(windowIndex int, physics *mphysics.MPhysics) 
 func (pm *PmxModel) InitDraw(windowIndex int) {
 	pm.ToonTextures.initGl(windowIndex)
 	pm.Meshes = NewMeshes(pm, windowIndex)
-
-	// 位置マッピングのセットアップ
-	pm.Vertices.SetupMapKeys()
-	pm.Bones.SetupMapKeys()
-	pm.RigidBodies.SetupMapKeys()
-	pm.Joints.SetupMapKeys()
 }
 
 func (pm *PmxModel) InitPhysics(physics *mphysics.MPhysics) {

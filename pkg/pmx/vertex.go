@@ -55,8 +55,8 @@ type Vertices struct {
 	*mcore.IndexModels[*Vertex]
 }
 
-func NewVertices() *Vertices {
+func NewVertices(count int) *Vertices {
 	return &Vertices{
-		IndexModels: mcore.NewIndexModels[*Vertex](func() *Vertex { return nil }),
+		IndexModels: mcore.NewIndexModels[*Vertex](count, func() *Vertex { return nil }),
 	}
 }

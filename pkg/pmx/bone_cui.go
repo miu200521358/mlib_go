@@ -15,9 +15,9 @@ type Bones struct {
 	LayerSortedNames map[bool]map[string]int
 }
 
-func NewBones() *Bones {
+func NewBones(count int) *Bones {
 	return &Bones{
-		IndexNameModels:  mcore.NewIndexNameModels[*Bone](func() *Bone { return nil }),
+		IndexNameModels:  mcore.NewIndexNameModels[*Bone](count, func() *Bone { return nil }),
 		IkTreeIndexes:    make(map[int][]int),
 		LayerSortedBones: make(map[bool]map[int]*Bone),
 		LayerSortedNames: make(map[bool]map[string]int),

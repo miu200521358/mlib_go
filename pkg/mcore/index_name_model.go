@@ -1,6 +1,7 @@
 package mcore
 
 import (
+	"reflect"
 	"sort"
 
 	"github.com/jinzhu/copier"
@@ -42,7 +43,7 @@ func (v *IndexNameModel) SetName(name string) {
 }
 
 func (v *IndexNameModel) IsValid() bool {
-	return v.GetIndex() >= 0
+	return v != nil && v.GetIndex() >= 0
 }
 
 func (v *IndexNameModel) GetMapKey() mmath.MVec3 {
@@ -61,72 +62,31 @@ func (v *IndexNameModel) Copy() IIndexNameModel {
 
 // Tのリスト基底クラス
 type IndexNameModels[T IIndexNameModel] struct {
-	Data        map[int]T
+	Data        []T
 	NameIndexes map[string]int
-	IndexMap    map[mmath.MVec3]map[int]T
 	nilFunc     func() T
 }
 
-func NewIndexNameModels[T IIndexNameModel](nilFunc func() T) *IndexNameModels[T] {
+func NewIndexNameModels[T IIndexNameModel](count int, nilFunc func() T) *IndexNameModels[T] {
 	return &IndexNameModels[T]{
-		Data:        make(map[int]T, 0),
+		Data:        make([]T, count),
 		NameIndexes: make(map[string]int, 0),
-		IndexMap:    make(map[mmath.MVec3]map[int]T),
 		nilFunc:     nilFunc,
 	}
 }
 
-func (c *IndexNameModels[T]) SetupMapKeys() {
-	c.IndexMap = make(map[mmath.MVec3]map[int]T)
-	for k, v := range c.Data {
-		baseKey := v.GetMapKey()
-		// 前後のオフセット込みでマッピング
-		for _, offset := range []*mmath.MVec3{
-			{0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1},
-			{0, 0, 0}, {-1, 0, 0}, {0, -1, 0}, {0, 0, -1},
-			{1, 1, 0}, {1, 0, 1}, {0, 1, 1}, {1, 1, 1},
-			{-1, -1, 0}, {-1, 0, -1}, {0, -1, -1}, {-1, -1, -1},
-			{1, -1, 0}, {1, 0, -1}, {0, 1, -1}, {1, -1, 1},
-			{-1, 1, 0}, {-1, 0, 1}, {0, -1, 1}, {-1, 1, -1},
-		} {
-			key := *baseKey.Added(offset)
-			if _, ok := c.IndexMap[key]; !ok {
-				c.IndexMap[key] = make(map[int]T)
-			}
-			c.IndexMap[key][k] = v
-		}
-	}
-}
-
-func (c *IndexNameModels[T]) GetMapValues(v T) ([]int, []*mmath.MVec3) {
-	if c.Data == nil {
-		return nil, nil
-	}
-	key := v.GetMapKey()
-	indexes := make([]int, 0)
-	values := make([]*mmath.MVec3, 0)
-	if mapIndexes, ok := c.IndexMap[key]; ok {
-		for i, iv := range mapIndexes {
-			indexes = append(indexes, i)
-			values = append(values, iv.GetMapValue())
-		}
-		return indexes, values
-	}
-	return nil, nil
-}
-
 func (c *IndexNameModels[T]) Get(index int) T {
-	if val, ok := c.Data[index]; ok {
-		return val
+	if index < 0 || index >= len(c.Data) {
+		return c.nilFunc()
 	}
-	return c.nilFunc()
+	return c.Data[index]
 }
 
 func (c *IndexNameModels[T]) SetItem(index int, v T) {
 	c.Data[index] = v
 }
 
-func (c *IndexNameModels[T]) Append(value T) {
+func (c *IndexNameModels[T]) Update(value T) {
 	if value.GetIndex() < 0 {
 		value.SetIndex(len(c.Data))
 	}
@@ -159,7 +119,7 @@ func (c *IndexNameModels[T]) GetNames() []string {
 }
 
 func (c *IndexNameModels[T]) DeleteItem(index int) {
-	delete(c.Data, index)
+	c.Data[index] = c.nilFunc()
 }
 
 func (c *IndexNameModels[T]) Len() int {
@@ -167,8 +127,7 @@ func (c *IndexNameModels[T]) Len() int {
 }
 
 func (c *IndexNameModels[T]) ContainsIndex(key int) bool {
-	_, ok := c.Data[key]
-	return ok
+	return c != nil && key >= 0 && key < len(c.Data) && !reflect.ValueOf(c.Data[key]).IsNil()
 }
 
 func (c *IndexNameModels[T]) ContainsName(key string) bool {
@@ -202,8 +161,7 @@ func (c *IndexNameModels[T]) GetByName(name string) T {
 }
 
 func (v *IndexNameModels[T]) Contains(index int) bool {
-	_, ok := v.Data[index]
-	return ok
+	return index >= 0 && index < len(v.Data) && v.Data[index].IsValid()
 }
 
 func (v *IndexNameModels[T]) ContainsByName(name string) bool {

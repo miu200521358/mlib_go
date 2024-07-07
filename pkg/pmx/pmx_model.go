@@ -43,16 +43,16 @@ func NewPmxModel(path string) *PmxModel {
 	model := &PmxModel{}
 	model.HashModel = mcore.NewHashModel(path)
 
-	model.Vertices = NewVertices()
-	model.Faces = NewFaces()
-	model.Textures = NewTextures()
-	model.ToonTextures = NewToonTextures()
-	model.Materials = NewMaterials()
-	model.Bones = NewBones()
-	model.Morphs = NewMorphs()
-	model.DisplaySlots = NewDisplaySlots()
-	model.RigidBodies = NewRigidBodies()
-	model.Joints = NewJoints()
+	model.Vertices = NewVertices(0)
+	model.Faces = NewFaces(0)
+	model.Textures = NewTextures(0)
+	model.ToonTextures = NewToonTextures(0)
+	model.Materials = NewMaterials(0)
+	model.Bones = NewBones(0)
+	model.Morphs = NewMorphs(0)
+	model.DisplaySlots = NewDisplaySlots(0)
+	model.RigidBodies = NewRigidBodies(0)
+	model.Joints = NewJoints(0)
 	model.DrawInitialized = false
 
 	return model
@@ -63,13 +63,13 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 	d01.Name = "Root"
 	d01.EnglishName = "Root"
 	d01.SpecialFlag = SPECIAL_FLAG_ON
-	pm.DisplaySlots.Append(d01)
+	pm.DisplaySlots.Update(d01)
 
 	d02 := NewDisplaySlot()
 	d02.Name = "表情"
 	d02.EnglishName = "Exp"
 	d02.SpecialFlag = SPECIAL_FLAG_ON
-	pm.DisplaySlots.Append(d02)
+	pm.DisplaySlots.Update(d02)
 }
 
 func (pm *PmxModel) setup() {

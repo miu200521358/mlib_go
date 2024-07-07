@@ -33,8 +33,8 @@ type Faces struct {
 	*mcore.IndexModels[*Face]
 }
 
-func NewFaces() *Faces {
+func NewFaces(count int) *Faces {
 	return &Faces{
-		IndexModels: mcore.NewIndexModels[*Face](func() *Face { return nil }),
+		IndexModels: mcore.NewIndexModels[*Face](count, func() *Face { return nil }),
 	}
 }

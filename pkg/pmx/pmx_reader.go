@@ -16,7 +16,9 @@ type PmxReader struct {
 }
 
 func (r *PmxReader) createModel(path string) *PmxModel {
-	model := NewPmxModel(path)
+	model := &PmxModel{
+		HashModel: mcore.NewHashModel(path),
+	}
 	return model
 }
 
@@ -245,8 +247,10 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 		return err
 	}
 
+	vertices := NewVertices(totalVertexCount)
+
 	for i := 0; i < totalVertexCount; i++ {
-		v := Vertex{IndexModel: &mcore.IndexModel{Index: i}}
+		v := &Vertex{IndexModel: &mcore.IndexModel{Index: i}}
 
 		// 12 : float3  | 位置(x,y,z)
 		pos, err := r.UnpackVec3(true)
@@ -417,8 +421,10 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 			return err
 		}
 
-		model.Vertices.Append(&v)
+		vertices.Update(v)
 	}
+
+	model.Vertices = vertices
 
 	return nil
 }
@@ -430,8 +436,10 @@ func (r *PmxReader) readFaces(model *PmxModel) error {
 		return err
 	}
 
+	faces := NewFaces(totalFaceCount / 3)
+
 	for i := 0; i < totalFaceCount; i += 3 {
-		f := Face{
+		f := &Face{
 			IndexModel:    &mcore.IndexModel{Index: int(i / 3)},
 			VertexIndexes: [3]int{},
 		}
@@ -457,8 +465,10 @@ func (r *PmxReader) readFaces(model *PmxModel) error {
 			return err
 		}
 
-		model.Faces.Append(&f)
+		faces.Update(f)
 	}
+
+	model.Faces = faces
 
 	return nil
 }
@@ -470,14 +480,18 @@ func (r *PmxReader) readTextures(model *PmxModel) error {
 		return err
 	}
 
+	textures := NewTextures(totalTextureCount)
+
 	for i := 0; i < totalTextureCount; i++ {
-		t := NewTexture()
+		t := &Texture{IndexModel: &mcore.IndexModel{Index: i}}
 
 		// 4 + n : TextBuf	| テクスチャパス
 		t.Name = r.ReadText()
 
-		model.Textures.Append(t)
+		textures.Update(t)
 	}
+
+	model.Textures = textures
 
 	return nil
 }
@@ -489,6 +503,8 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 		return err
 	}
 
+	materials := NewMaterials(totalMaterialCount)
+
 	prevVertexCount := 0
 	for i := 0; i < totalMaterialCount; i++ {
 		// 4 + n : TextBuf	| 材質名
@@ -496,7 +512,7 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 		// 4 + n : TextBuf	| 材質名英
 		englishName := r.ReadText()
 
-		m := Material{
+		m := &Material{
 			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 		}
 
@@ -597,7 +613,7 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 			return err
 		}
 
-		model.Materials.Append(&m)
+		materials.Update(m)
 
 		for j := prevVertexCount; j < prevVertexCount+int(m.VerticesCount/3); j++ {
 			face := model.Faces.Get(j)
@@ -612,6 +628,8 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 		prevVertexCount += int(m.VerticesCount / 3)
 	}
 
+	model.Materials = materials
+
 	return nil
 }
 
@@ -622,6 +640,8 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 		return err
 	}
 
+	bones := NewBones(totalBoneCount)
+
 	for i := 0; i < totalBoneCount; i++ {
 
 		// 4 + n : TextBuf	| ボーン名
@@ -629,7 +649,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 		// 4 + n : TextBuf	| ボーン名英
 		englishName := r.ReadText()
 
-		b := Bone{
+		b := &Bone{
 			IndexNameModel:         &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 			IkLinkBoneIndexes:      make([]int, 0),
 			IkTargetBoneIndexes:    make([]int, 0),
@@ -828,8 +848,10 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 			}
 		}
 
-		model.Bones.Append(&b)
+		bones.Update(b)
 	}
+
+	model.Bones = bones
 
 	return nil
 }
@@ -841,13 +863,15 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 		return err
 	}
 
+	morphs := NewMorphs(totalMorphCount)
+
 	for i := 0; i < totalMorphCount; i++ {
 		// 4 + n : TextBuf	| モーフ名
 		name := r.ReadText()
 		// 4 + n : TextBuf	| モーフ名英
 		englishName := r.ReadText()
 
-		m := Morph{
+		m := &Morph{
 			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 		}
 
@@ -1010,8 +1034,10 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 			}
 		}
 
-		model.Morphs.Append(&m)
+		morphs.Update(m)
 	}
+
+	model.Morphs = morphs
 
 	return nil
 }
@@ -1023,13 +1049,15 @@ func (r *PmxReader) readDisplaySlots(model *PmxModel) error {
 		return err
 	}
 
+	displaySlots := NewDisplaySlots(totalDisplaySlotCount)
+
 	for i := 0; i < totalDisplaySlotCount; i++ {
 		// 4 + n : TextBuf	| 枠名
 		name := r.ReadText()
 		// 4 + n : TextBuf	| 枠名英
 		englishName := r.ReadText()
 
-		d := DisplaySlot{
+		d := &DisplaySlot{
 			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 			References:     make([]Reference, 0),
 		}
@@ -1079,8 +1107,11 @@ func (r *PmxReader) readDisplaySlots(model *PmxModel) error {
 
 			d.References = append(d.References, *reference)
 		}
-		model.DisplaySlots.Append(&d)
+
+		displaySlots.Update(d)
 	}
+
+	model.DisplaySlots = displaySlots
 
 	return nil
 }
@@ -1092,13 +1123,15 @@ func (r *PmxReader) readRigidBodies(model *PmxModel) error {
 		return err
 	}
 
+	rigidBodies := NewRigidBodies(totalRigidBodyCount)
+
 	for i := 0; i < totalRigidBodyCount; i++ {
 		// 4 + n : TextBuf	| 剛体名
 		name := r.ReadText()
 		// 4 + n : TextBuf	| 剛体名英
 		englishName := r.ReadText()
 
-		b := RigidBody{
+		b := &RigidBody{
 			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 			RigidBodyParam: NewRigidBodyParam(),
 		}
@@ -1190,8 +1223,10 @@ func (r *PmxReader) readRigidBodies(model *PmxModel) error {
 		}
 		b.PhysicsType = PhysicsType(physicsType)
 
-		model.RigidBodies.Append(&b)
+		rigidBodies.Update(b)
 	}
+
+	model.RigidBodies = rigidBodies
 
 	return nil
 }
@@ -1203,13 +1238,15 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 		return err
 	}
 
+	joints := NewJoints(totalJointCount)
+
 	for i := 0; i < totalJointCount; i++ {
 		// 4 + n : TextBuf	| Joint名
 		name := r.ReadText()
 		// 4 + n : TextBuf	| Joint名英
 		englishName := r.ReadText()
 
-		j := Joint{
+		j := &Joint{
 			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 			JointParam:     NewJointParam(),
 		}
@@ -1289,8 +1326,10 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 		}
 		j.JointParam.SpringConstantRotation = mmath.NewRotationFromRadians(&springConstantRotation)
 
-		model.Joints.Append(&j)
+		joints.Update(j)
 	}
+
+	model.Joints = joints
 
 	return nil
 }

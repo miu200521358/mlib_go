@@ -79,8 +79,8 @@ type Joints struct {
 	*mcore.IndexNameModels[*Joint]
 }
 
-func NewJoints() *Joints {
+func NewJoints(count int) *Joints {
 	return &Joints{
-		IndexNameModels: mcore.NewIndexNameModels[*Joint](func() *Joint { return nil }),
+		IndexNameModels: mcore.NewIndexNameModels[*Joint](count, func() *Joint { return nil }),
 	}
 }

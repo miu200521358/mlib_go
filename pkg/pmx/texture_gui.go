@@ -250,7 +250,7 @@ func (t *ToonTextures) initGl(
 		tGl.Unbind()
 		toon.Initialized = true
 
-		t.Append(toon)
+		t.Update(toon)
 	}
 
 	return nil

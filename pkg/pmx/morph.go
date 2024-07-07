@@ -218,8 +218,8 @@ type Morphs struct {
 	*mcore.IndexNameModels[*Morph]
 }
 
-func NewMorphs() *Morphs {
+func NewMorphs(count int) *Morphs {
 	return &Morphs{
-		IndexNameModels: mcore.NewIndexNameModels[*Morph](func() *Morph { return nil }),
+		IndexNameModels: mcore.NewIndexNameModels[*Morph](count, func() *Morph { return nil }),
 	}
 }

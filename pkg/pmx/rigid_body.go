@@ -158,8 +158,8 @@ type RigidBodies struct {
 	*mcore.IndexNameModels[*RigidBody]
 }
 
-func NewRigidBodies() *RigidBodies {
+func NewRigidBodies(count int) *RigidBodies {
 	return &RigidBodies{
-		IndexNameModels: mcore.NewIndexNameModels[*RigidBody](func() *RigidBody { return nil }),
+		IndexNameModels: mcore.NewIndexNameModels[*RigidBody](count, func() *RigidBody { return nil }),
 	}
 }

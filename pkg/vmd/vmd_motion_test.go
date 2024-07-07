@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/mmath"
-	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
 
@@ -1778,7 +1777,7 @@ func TestVmdMotion_DeformLegIk16_Lamb(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk17_Snow(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/好き雪_1075.vmd")

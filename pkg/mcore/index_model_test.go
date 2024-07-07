@@ -63,13 +63,11 @@ func NewFace(index, vertexIndex0, vertexIndex1, vertexIndex2 int) *Face {
 // 面リスト
 type Faces struct {
 	*IndexModels[*Face]
-	Data    map[int]*Face
-	Indexes []int
 }
 
 func NewFaces() *Faces {
 	return &Faces{
-		IndexModels: NewIndexModels[*Face](func() *Face { return nil }),
+		IndexModels: NewIndexModels[*Face](2, func() *Face { return nil }),
 	}
 }
 
@@ -106,7 +104,7 @@ func TestIndexModelCorrection_SetItem(t *testing.T) {
 func TestIndexModelCorrection_Append(t *testing.T) {
 	model := NewFaces()
 	item := NewFace(0, 0, 0, 0)
-	model.Append(item)
+	model.Update(item)
 
 	result := model.Get(0)
 	if result != item {
@@ -115,7 +113,7 @@ func TestIndexModelCorrection_Append(t *testing.T) {
 
 	item2 := NewFace(1, 0, 0, 0)
 	// Test sorting
-	model.Append(item2)
+	model.Update(item2)
 	result = model.Get(0)
 	if result != item {
 		t.Errorf("Expected Append to sort the items, but got %v", result)
@@ -146,7 +144,7 @@ func TestIndexModelCorrection_Len(t *testing.T) {
 	model.SetItem(0, item)
 
 	result := model.Len()
-	if result != 1 {
+	if result != 2 {
 		t.Errorf("Expected Len to return 1, but got %d", result)
 	}
 }
@@ -164,22 +162,5 @@ func TestIndexModelCorrection_Contains(t *testing.T) {
 	result = model.Contains(1)
 	if result {
 		t.Error("Expected Contains to return false, but got true")
-	}
-}
-
-func TestIndexModelCorrection_IsEmpty(t *testing.T) {
-	model := NewFaces()
-
-	result := model.IsEmpty()
-	if !result {
-		t.Error("Expected IsEmpty to return true, but got false")
-	}
-
-	item := NewFace(0, 0, 0, 0)
-	model.SetItem(0, item)
-
-	result = model.IsEmpty()
-	if result {
-		t.Error("Expected IsEmpty to return false, but got true")
 	}
 }
