@@ -50,19 +50,18 @@ func NewVBOForVertex(ptr unsafe.Pointer, count int) *VBO {
 }
 
 // Binds VBO for rendering.
-func (v *VBO) BindVertex(vertexDeltas [][]float32) {
+func (v *VBO) BindVertex(vertexMorphIndexes []int, vertexMorphDeltas [][]float32) {
 	gl.BindBuffer(v.target, v.id)
 
-	if vertexDeltas != nil {
+	if vertexMorphIndexes != nil {
 		vboVertexSize := (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3)
 
 		// モーフ分の変動量を設定
-		for i, vd := range vertexDeltas {
-			offsetStride := (i*v.StrideSize + vboVertexSize) * 4
-			if vd != nil {
-				// 必要な場合にのみ部分更新
-				gl.BufferSubData(v.target, offsetStride, len(vd)*4, gl.Ptr(vd))
-			}
+		for i, vidx := range vertexMorphIndexes {
+			vd := vertexMorphDeltas[i]
+			offsetStride := (vidx*v.StrideSize + vboVertexSize) * 4
+			// 必要な場合にのみ部分更新
+			gl.BufferSubData(v.target, offsetStride, len(vd)*4, gl.Ptr(vd))
 		}
 	} else {
 		gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)

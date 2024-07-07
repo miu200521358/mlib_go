@@ -15,8 +15,7 @@ func NewVertexDelta(pos *mmath.MVec3) *VertexDelta {
 }
 
 type VertexDeltas struct {
-	Data     map[int]*VertexDelta
-	IndexMap map[mmath.MVec3]map[int]*VertexDelta
+	Data map[int]*VertexDelta
 }
 
 func NewVertexDeltas() *VertexDeltas {

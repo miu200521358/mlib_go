@@ -5,6 +5,7 @@ package pmx
 
 import (
 	"math"
+	"slices"
 	"sync"
 	"unsafe"
 
@@ -189,14 +190,14 @@ func NewMeshes(
 	vao.Bind()
 
 	vbo := mview.NewVBOForVertex(gl.Ptr(vertices), len(vertices))
-	vbo.BindVertex(nil)
+	vbo.BindVertex(nil, nil)
 	vbo.Unbind()
 	vao.Unbind()
 
 	normalVao := mview.NewVAO()
 	normalVao.Bind()
 	normalVbo := mview.NewVBOForVertex(gl.Ptr(normalVertices), len(normalVertices))
-	normalVbo.BindVertex(nil)
+	normalVbo.BindVertex(nil, nil)
 	normalIbo := mview.NewIBO(gl.Ptr(normalFaces), len(normalFaces))
 	normalIbo.Bind()
 	normalIbo.Unbind()
@@ -206,7 +207,7 @@ func NewMeshes(
 	boneVao := mview.NewVAO()
 	boneVao.Bind()
 	boneVbo := mview.NewVBOForVertex(gl.Ptr(bones), len(bones))
-	boneVbo.BindVertex(nil)
+	boneVbo.BindVertex(nil, nil)
 	boneIbo := mview.NewIBO(gl.Ptr(boneFaces), len(boneFaces))
 	boneIbo.Bind()
 	boneIbo.Unbind()
@@ -216,7 +217,7 @@ func NewMeshes(
 	selectedVertexVao := mview.NewVAO()
 	selectedVertexVao.Bind()
 	selectedVertexVbo := mview.NewVBOForVertex(gl.Ptr(selectedVertices), len(selectedVertices))
-	selectedVertexVbo.BindVertex(nil)
+	selectedVertexVbo.BindVertex(nil, nil)
 	selectedVertexIbo := mview.NewIBO(gl.Ptr(selectedVertexFaces), len(selectedVertexFaces))
 	selectedVertexIbo.Bind()
 	selectedVertexIbo.Unbind()
@@ -261,21 +262,16 @@ func (m *Meshes) delete() {
 }
 
 func (m *Meshes) Draw(
-	shader *mview.MShader,
-	boneDeltas []mgl32.Mat4,
-	vertexDeltas [][]float32,
-	wireVertexDeltas [][]float32,
-	selectedVertexDeltas [][]float32,
-	meshDeltas []*MeshDelta,
-	windowIndex int,
-	isDrawNormal, isDrawWire, isDrawSelectedVertex, isDeform bool,
-	isDrawBones map[BoneFlag]bool,
-	bones *Bones,
+	shader *mview.MShader, boneDeltas []mgl32.Mat4,
+	vertexMorphIndexes []int, vertexMorphDeltas [][]float32,
+	selectedVertexMorphIndexes []int, selectedVertexDeltas [][]float32, meshDeltas []*MeshDelta,
+	invisibleMaterialIndexes []int, nextInvisibleMaterialIndexes []int, windowIndex int,
+	isDrawNormal, isDrawWire, isDrawSelectedVertex bool, isDrawBones map[BoneFlag]bool, bones *Bones,
 ) [][]float32 {
 	m.vao.Bind()
 	defer m.vao.Unbind()
 
-	m.vbo.BindVertex(vertexDeltas)
+	m.vbo.BindVertex(vertexMorphIndexes, vertexMorphDeltas)
 	defer m.vbo.Unbind()
 
 	paddedMatrixes, matrixWidth, matrixHeight := m.createBoneMatrixes(boneDeltas)
@@ -296,7 +292,9 @@ func (m *Meshes) Draw(
 
 		if isDrawWire {
 			shader.Use(mview.PROGRAM_TYPE_WIRE)
-			mesh.drawWire(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight)
+			mesh.drawWire(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, ((len(invisibleMaterialIndexes) > 0 && len(nextInvisibleMaterialIndexes) == 0 &&
+				slices.Contains(invisibleMaterialIndexes, mesh.material.Index)) ||
+				slices.Contains(nextInvisibleMaterialIndexes, mesh.material.Index)))
 			shader.Unuse()
 		}
 
@@ -309,7 +307,8 @@ func (m *Meshes) Draw(
 
 	vertexPositions := make([][]float32, 0)
 	if isDrawSelectedVertex {
-		vertexPositions = m.drawSelectedVertex(selectedVertexDeltas, shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
+		vertexPositions = m.drawSelectedVertex(selectedVertexMorphIndexes, selectedVertexDeltas,
+			shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
 	}
 
 	if isDrawNormal {
@@ -330,7 +329,6 @@ func (m *Meshes) Draw(
 
 	paddedMatrixes = nil
 	boneDeltas = nil
-	vertexDeltas = nil
 	meshDeltas = nil
 
 	return vertexPositions
@@ -360,7 +358,7 @@ func (m *Meshes) drawNormal(
 	shader.Use(mview.PROGRAM_TYPE_NORMAL)
 
 	m.normalVao.Bind()
-	m.normalVbo.BindVertex(nil)
+	m.normalVbo.BindVertex(nil, nil)
 	m.normalIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
@@ -386,7 +384,8 @@ func (m *Meshes) drawNormal(
 }
 
 func (m *Meshes) drawSelectedVertex(
-	vertexDeltas [][]float32,
+	selectedVertexMorphIndexes []int,
+	selectedVertexDeltas [][]float32,
 	shader *mview.MShader,
 	paddedMatrixes []float32,
 	width, height int,
@@ -399,7 +398,7 @@ func (m *Meshes) drawSelectedVertex(
 	shader.Use(mview.PROGRAM_TYPE_SELECTED_VERTEX)
 
 	m.selectedVertexVao.Bind()
-	m.selectedVertexVbo.BindVertex(vertexDeltas)
+	m.selectedVertexVbo.BindVertex(selectedVertexMorphIndexes, selectedVertexDeltas)
 	m.selectedVertexIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
@@ -498,13 +497,15 @@ func (m *Meshes) drawBone(
 
 }
 
-func (m *Meshes) fetchBoneDebugDeltas(bones *Bones, isDrawBones map[BoneFlag]bool) [][]float32 {
-	vertexDeltas := make([][]float32, len(m.bones)/m.boneVbo.StrideSize)
+func (m *Meshes) fetchBoneDebugDeltas(bones *Bones, isDrawBones map[BoneFlag]bool) ([]int, [][]float32) {
+	indexes := make([]int, 0)
+	deltas := make([][]float32, 0)
 
-	for i, boneIndex := range m.boneIndexes {
+	for _, boneIndex := range m.boneIndexes {
 		bone := bones.Get(boneIndex)
-		vertexDeltas[i] = bone.DeltaGL(isDrawBones)
+		indexes = append(indexes, boneIndex)
+		deltas = append(deltas, bone.DeltaGL(isDrawBones))
 	}
 
-	return vertexDeltas
+	return indexes, deltas
 }

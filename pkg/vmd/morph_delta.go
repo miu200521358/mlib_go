@@ -33,6 +33,26 @@ func NewVertexMorphDeltas() *VertexMorphDeltas {
 	}
 }
 
+type WireVertexMorphDeltas struct {
+	*VertexMorphDeltas
+}
+
+func NewWireVertexMorphDeltas() *WireVertexMorphDeltas {
+	return &WireVertexMorphDeltas{
+		VertexMorphDeltas: NewVertexMorphDeltas(),
+	}
+}
+
+type SelectedVertexMorphDeltas struct {
+	*VertexMorphDeltas
+}
+
+func NewSelectedVertexMorphDeltas() *SelectedVertexMorphDeltas {
+	return &SelectedVertexMorphDeltas{
+		VertexMorphDeltas: NewVertexMorphDeltas(),
+	}
+}
+
 type BoneMorphDelta struct {
 	BoneIndex int
 	*BoneFrame

@@ -217,6 +217,7 @@ func (m *Mesh) drawWire(
 	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
+	invisibleMesh bool,
 ) {
 	// カリングOFF
 	gl.Disable(gl.CULL_FACE)
@@ -225,7 +226,12 @@ func (m *Mesh) drawWire(
 	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.WireProgram)
 	defer UnbindBoneMatrixes()
 
-	wireColor := mgl32.Vec4{0.2, 0.6, 0.2, 0.5}
+	var wireColor mgl32.Vec4
+	if invisibleMesh {
+		wireColor = mgl32.Vec4{0.0, 0.0, 0.0, 0.0}
+	} else {
+		wireColor = mgl32.Vec4{0.2, 0.6, 0.2, 0.5}
+	}
 	specularUniform := gl.GetUniformLocation(shader.WireProgram, gl.Str(mview.SHADER_COLOR))
 	gl.Uniform4fv(specularUniform, 1, &wireColor[0])
 
