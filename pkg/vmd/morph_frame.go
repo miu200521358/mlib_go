@@ -235,7 +235,7 @@ func (mf *MorphFrame) DeformBone(
 				delta.MorphFrameDelta.frameScale.Add(offsetScale)
 			}
 
-			deltas.Append(delta)
+			deltas.Update(delta)
 		}
 	}
 

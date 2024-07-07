@@ -21,13 +21,13 @@ func (mfs *MorphFrames) Contains(morphName string) bool {
 	return ok
 }
 
-func (mfs *MorphFrames) Append(fs *MorphNameFrames) {
+func (mfs *MorphFrames) Update(fs *MorphNameFrames) {
 	mfs.Data[fs.Name] = fs
 }
 
 func (mfs *MorphFrames) Get(morphName string) *MorphNameFrames {
 	if !mfs.Contains(morphName) {
-		mfs.Append(NewMorphNameFrames(morphName))
+		mfs.Update(NewMorphNameFrames(morphName))
 	}
 	return mfs.Data[morphName]
 }
@@ -37,7 +37,7 @@ func (mfs *MorphFrames) Deform(
 	model *pmx.PmxModel,
 	morphNames []string,
 ) *MorphDeltas {
-	mds := NewMorphDeltas(model.Materials)
+	mds := NewMorphDeltas(model.Materials, model.Bones)
 	for _, morphName := range morphNames {
 		if !mfs.Contains(morphName) || !model.Morphs.ContainsByName(morphName) {
 			continue

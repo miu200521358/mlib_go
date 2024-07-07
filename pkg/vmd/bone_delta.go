@@ -184,15 +184,15 @@ func NewBoneDelta(
 }
 
 type BoneDeltas struct {
-	Data  map[int]*BoneDelta
+	Data  []*BoneDelta
 	Names map[string]int
 	mu    sync.RWMutex
 }
 
-func NewBoneDeltas() *BoneDeltas {
+func NewBoneDeltas(bones *pmx.Bones) *BoneDeltas {
 	return &BoneDeltas{
-		Data:  make(map[int]*BoneDelta, 0),
-		Names: make(map[string]int, 0),
+		Data:  make([]*BoneDelta, bones.Len()),
+		Names: bones.NameIndexes,
 	}
 }
 
@@ -200,10 +200,11 @@ func (bds *BoneDeltas) Get(boneIndex int) *BoneDelta {
 	bds.mu.RLock()
 	defer bds.mu.RUnlock()
 
-	if _, ok := bds.Data[boneIndex]; ok {
-		return bds.Data[boneIndex]
+	if boneIndex < 0 || boneIndex >= len(bds.Data) {
+		return nil
 	}
-	return nil
+
+	return bds.Data[boneIndex]
 }
 
 func (bds *BoneDeltas) GetByName(boneName string) *BoneDelta {
@@ -216,7 +217,7 @@ func (bds *BoneDeltas) GetByName(boneName string) *BoneDelta {
 	return nil
 }
 
-func (bds *BoneDeltas) Append(boneDelta *BoneDelta) {
+func (bds *BoneDeltas) Update(boneDelta *BoneDelta) {
 	bds.mu.Lock()
 	defer bds.mu.Unlock()
 
@@ -241,8 +242,7 @@ func (bds *BoneDeltas) Contains(boneIndex int) bool {
 	bds.mu.RLock()
 	defer bds.mu.RUnlock()
 
-	_, ok := bds.Data[boneIndex]
-	return ok
+	return bds.Data[boneIndex] != nil
 }
 
 func (bds *BoneDeltas) SetGlobalMatrix(bone *pmx.Bone, globalMatrix *mmath.MMat4) {
@@ -250,183 +250,13 @@ func (bds *BoneDeltas) SetGlobalMatrix(bone *pmx.Bone, globalMatrix *mmath.MMat4
 	defer bds.mu.Unlock()
 
 	var bd *BoneDelta
-	if _, ok := bds.Data[bone.Index]; ok {
-		bd = bds.Data[bone.Index]
-	} else {
+	if bds.Data[bone.Index] == nil {
 		bd = NewBoneDelta(bone, 0)
+	} else {
+		bd = bds.Data[bone.Index]
 	}
 
 	bd.globalMatrix = globalMatrix
-
-	bds.Data[bd.Bone.Index] = bd
-	bds.Names[bd.Bone.Name] = bd.Bone.Index
-}
-
-func (bds *BoneDeltas) SetLocalMatrix(bone *pmx.Bone, localMatrix *mmath.MMat4) {
-	bds.mu.Lock()
-	defer bds.mu.Unlock()
-
-	var bd *BoneDelta
-	if _, ok := bds.Data[bone.Index]; ok {
-		bd = bds.Data[bone.Index]
-	} else {
-		bd = NewBoneDelta(bone, 0)
-	}
-
-	bd.localMatrix = localMatrix
-
-	bds.Data[bd.Bone.Index] = bd
-	bds.Names[bd.Bone.Name] = bd.Bone.Index
-}
-
-func (bds *BoneDeltas) SetUnitMatrix(bone *pmx.Bone, unitMatrix *mmath.MMat4) {
-	bds.mu.Lock()
-	defer bds.mu.Unlock()
-
-	var bd *BoneDelta
-	if _, ok := bds.Data[bone.Index]; ok {
-		bd = bds.Data[bone.Index]
-	} else {
-		bd = NewBoneDelta(bone, 0)
-	}
-
-	bd.unitMatrix = unitMatrix
-
-	bds.Data[bd.Bone.Index] = bd
-	bds.Names[bd.Bone.Name] = bd.Bone.Index
-}
-
-func (bds *BoneDeltas) SetFramePosition(bone *pmx.Bone, framePosition *mmath.MVec3) {
-	bds.mu.Lock()
-	defer bds.mu.Unlock()
-
-	var bd *BoneDelta
-	if _, ok := bds.Data[bone.Index]; ok {
-		bd = bds.Data[bone.Index]
-	} else {
-		bd = NewBoneDelta(bone, 0)
-	}
-
-	bd.framePosition = framePosition
-
-	bds.Data[bd.Bone.Index] = bd
-	bds.Names[bd.Bone.Name] = bd.Bone.Index
-}
-
-func (bds *BoneDeltas) SetFrameMorphPosition(bone *pmx.Bone, frameMorphPosition *mmath.MVec3) {
-	bds.mu.Lock()
-	defer bds.mu.Unlock()
-
-	var bd *BoneDelta
-	if _, ok := bds.Data[bone.Index]; ok {
-		bd = bds.Data[bone.Index]
-	} else {
-		bd = NewBoneDelta(bone, 0)
-	}
-
-	bd.frameMorphPosition = frameMorphPosition
-
-	bds.Data[bd.Bone.Index] = bd
-	bds.Names[bd.Bone.Name] = bd.Bone.Index
-}
-
-func (bds *BoneDeltas) SetFrameEffectPosition(bone *pmx.Bone, frameEffectPosition *mmath.MVec3) {
-	bds.mu.Lock()
-	defer bds.mu.Unlock()
-
-	var bd *BoneDelta
-	if _, ok := bds.Data[bone.Index]; ok {
-		bd = bds.Data[bone.Index]
-	} else {
-		bd = NewBoneDelta(bone, 0)
-	}
-
-	bd.frameEffectPosition = frameEffectPosition
-
-	bds.Data[bd.Bone.Index] = bd
-	bds.Names[bd.Bone.Name] = bd.Bone.Index
-}
-
-func (bds *BoneDeltas) SetFrameRotation(bone *pmx.Bone, frameRotation *mmath.MQuaternion) {
-	bds.mu.Lock()
-	defer bds.mu.Unlock()
-
-	var bd *BoneDelta
-	if _, ok := bds.Data[bone.Index]; ok {
-		bd = bds.Data[bone.Index]
-	} else {
-		bd = NewBoneDelta(bone, 0)
-	}
-
-	bd.frameRotation = frameRotation
-
-	bds.Data[bd.Bone.Index] = bd
-	bds.Names[bd.Bone.Name] = bd.Bone.Index
-}
-
-func (bds *BoneDeltas) SetFrameMorphRotation(bone *pmx.Bone, frameMorphRotation *mmath.MQuaternion) {
-	bds.mu.Lock()
-	defer bds.mu.Unlock()
-
-	var bd *BoneDelta
-	if _, ok := bds.Data[bone.Index]; ok {
-		bd = bds.Data[bone.Index]
-	} else {
-		bd = NewBoneDelta(bone, 0)
-	}
-
-	bd.frameMorphRotation = frameMorphRotation
-
-	bds.Data[bd.Bone.Index] = bd
-	bds.Names[bd.Bone.Name] = bd.Bone.Index
-}
-
-func (bds *BoneDeltas) SetFrameEffectRotation(bone *pmx.Bone, frameEffectRotation *mmath.MQuaternion) {
-	bds.mu.Lock()
-	defer bds.mu.Unlock()
-
-	var bd *BoneDelta
-	if _, ok := bds.Data[bone.Index]; ok {
-		bd = bds.Data[bone.Index]
-	} else {
-		bd = NewBoneDelta(bone, 0)
-	}
-
-	bd.frameEffectRotation = frameEffectRotation
-
-	bds.Data[bd.Bone.Index] = bd
-	bds.Names[bd.Bone.Name] = bd.Bone.Index
-}
-
-func (bds *BoneDeltas) SetFrameScale(bone *pmx.Bone, frameScale *mmath.MVec3) {
-	bds.mu.Lock()
-	defer bds.mu.Unlock()
-
-	var bd *BoneDelta
-	if _, ok := bds.Data[bone.Index]; ok {
-		bd = bds.Data[bone.Index]
-	} else {
-		bd = NewBoneDelta(bone, 0)
-	}
-
-	bd.frameScale = frameScale
-
-	bds.Data[bd.Bone.Index] = bd
-	bds.Names[bd.Bone.Name] = bd.Bone.Index
-}
-
-func (bds *BoneDeltas) SetFrameMorphScale(bone *pmx.Bone, frameMorphScale *mmath.MVec3) {
-	bds.mu.Lock()
-	defer bds.mu.Unlock()
-
-	var bd *BoneDelta
-	if _, ok := bds.Data[bone.Index]; ok {
-		bd = bds.Data[bone.Index]
-	} else {
-		bd = NewBoneDelta(bone, 0)
-	}
-
-	bd.frameMorphScale = frameMorphScale
 
 	bds.Data[bd.Bone.Index] = bd
 	bds.Names[bd.Bone.Name] = bd.Bone.Index

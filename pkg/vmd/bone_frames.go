@@ -632,7 +632,7 @@ ikLoop:
 
 			// IKの結果を更新
 			linkDelta.frameRotation = resultIkQuat
-			boneDeltas.Append(linkDelta)
+			boneDeltas.Update(linkDelta)
 
 			// 前回（既存）とほぼ同じ回転量の場合、中断FLGを立てる
 			isAbort := linkQuat != nil && 1-totalIkQuat.Dot(linkQuat) < 1e-10
@@ -1106,7 +1106,7 @@ func (fs *BoneFrames) calcBoneDeltas(
 
 		// delta.localMatrix = delta.Bone.OffsetMatrix.Muled(delta.globalMatrix)
 		// delta.globalPosition = delta.globalMatrix.Translation()
-		boneDeltas.Append(delta)
+		boneDeltas.Update(delta)
 	}
 
 	return boneDeltas
@@ -1124,7 +1124,7 @@ func (fs *BoneFrames) createBoneDeltas(
 	targetSortedBones := model.Bones.LayerSortedBones[isAfterPhysics]
 
 	if boneDeltas == nil {
-		boneDeltas = NewBoneDeltas()
+		boneDeltas = NewBoneDeltas(model.Bones)
 	}
 
 	// 変形階層順ボーンIndexリスト
@@ -1165,7 +1165,7 @@ func (fs *BoneFrames) createBoneDeltas(
 		if isRelativeBone {
 			deformBoneIndexes = append(deformBoneIndexes, bone.Index)
 			if !boneDeltas.Contains(bone.Index) {
-				boneDeltas.Append(&BoneDelta{Bone: bone, Frame: frame})
+				boneDeltas.Update(&BoneDelta{Bone: bone, Frame: frame})
 			}
 		}
 	}
@@ -1202,7 +1202,7 @@ func (fs *BoneFrames) fillBoneDeform(
 		delta.frameRotation, delta.frameMorphRotation, delta.frameEffectRotation =
 			fs.getRotation(bf, frame, bone, model, boneDeltas, morphDeltas, 0)
 		delta.frameScale = fs.getScale(bf, bone, boneDeltas, morphDeltas)
-		boneDeltas.Append(delta)
+		boneDeltas.Update(delta)
 	}
 
 	return boneDeltas

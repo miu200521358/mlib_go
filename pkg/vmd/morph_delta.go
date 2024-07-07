@@ -68,23 +68,24 @@ func NewBoneMorphDelta(boneIndex int) *BoneMorphDelta {
 }
 
 type BoneMorphDeltas struct {
-	Data map[int]*BoneMorphDelta
+	Data []*BoneMorphDelta
 }
 
-func NewBoneMorphDeltas() *BoneMorphDeltas {
+func NewBoneMorphDeltas(bones *pmx.Bones) *BoneMorphDeltas {
 	return &BoneMorphDeltas{
-		Data: make(map[int]*BoneMorphDelta),
+		Data: make([]*BoneMorphDelta, bones.Len()),
 	}
 }
 
 func (bts *BoneMorphDeltas) Get(boneIndex int) *BoneMorphDelta {
-	if _, ok := bts.Data[boneIndex]; !ok {
+	if boneIndex < 0 || boneIndex >= len(bts.Data) {
 		return nil
 	}
+
 	return bts.Data[boneIndex]
 }
 
-func (bts *BoneMorphDeltas) Append(b *BoneMorphDelta) {
+func (bts *BoneMorphDeltas) Update(b *BoneMorphDelta) {
 	bts.Data[b.BoneIndex] = b
 }
 
@@ -386,10 +387,10 @@ type MorphDeltas struct {
 	Materials *MaterialMorphDeltas
 }
 
-func NewMorphDeltas(materials *pmx.Materials) *MorphDeltas {
+func NewMorphDeltas(materials *pmx.Materials, bones *pmx.Bones) *MorphDeltas {
 	return &MorphDeltas{
 		Vertices:  NewVertexMorphDeltas(),
-		Bones:     NewBoneMorphDeltas(),
+		Bones:     NewBoneMorphDeltas(bones),
 		Materials: NewMaterialMorphDeltas(materials),
 	}
 }
