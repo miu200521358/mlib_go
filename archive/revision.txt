@@ -537,7 +537,7 @@ MlibSample 1.0.0_beta_104
 
 MlibSample 1.0.0_beta_105
 ・物理後のローカル行列生成処理が間違っていたので修正（INDEXの順番が担保されてなかった）
-
+・pmxのDataの持ち方をmapからスライスに変更
 
 
 

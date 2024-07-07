@@ -17,6 +17,7 @@ func (pm *PmxModel) DrawInitialize(windowIndex int, physics *mphysics.MPhysics) 
 }
 
 func (pm *PmxModel) InitDraw(windowIndex int) {
+	pm.ToonTextures = NewToonTextures()
 	pm.ToonTextures.initGl(windowIndex)
 	pm.Meshes = NewMeshes(pm, windowIndex)
 }

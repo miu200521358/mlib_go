@@ -46,7 +46,7 @@ func NewPmxModel(path string) *PmxModel {
 	model.Vertices = NewVertices(0)
 	model.Faces = NewFaces(0)
 	model.Textures = NewTextures(0)
-	model.ToonTextures = NewToonTextures(0)
+	model.ToonTextures = NewToonTextures()
 	model.Materials = NewMaterials(0)
 	model.Bones = NewBones(0)
 	model.Morphs = NewMorphs(0)

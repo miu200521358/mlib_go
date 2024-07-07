@@ -62,8 +62,8 @@ type ToonTextures struct {
 	*mcore.IndexModels[*Texture]
 }
 
-func NewToonTextures(count int) *ToonTextures {
+func NewToonTextures() *ToonTextures {
 	return &ToonTextures{
-		IndexModels: mcore.NewIndexModels[*Texture](count, func() *Texture { return nil }),
+		IndexModels: mcore.NewIndexModels[*Texture](10, func() *Texture { return nil }),
 	}
 }
