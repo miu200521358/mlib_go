@@ -4,8 +4,6 @@
 package mwidget
 
 import (
-	"embed"
-
 	"github.com/miu200521358/walk/pkg/walk"
 	"github.com/miu200521358/win"
 
@@ -26,7 +24,7 @@ type MotionPlayer struct {
 
 const MotionPlayerClass = "MotionPlayer Class"
 
-func NewMotionPlayer(parent walk.Container, mWindow *MWindow, iconFiles embed.FS) (*MotionPlayer, error) {
+func NewMotionPlayer(parent walk.Container, mWindow *MWindow) (*MotionPlayer, error) {
 	mp := new(MotionPlayer)
 	mp.mWindow = mWindow
 

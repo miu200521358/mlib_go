@@ -42,9 +42,6 @@ var appFiles embed.FS
 //go:embed i18n/*
 var appI18nFiles embed.FS
 
-//go:embed icon/*
-var iconFiles embed.FS
-
 func main() {
 	// defer profile.Start(profile.MemProfileHeap, profile.ProfilePath(time.Now().Format("20060102_150405"))).Stop()
 	// defer profile.Start(profile.MemProfile, profile.ProfilePath(time.Now().Format("20060102_150405"))).Stop()
@@ -145,7 +142,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 	_, err = walk.NewVSeparator(page)
 	mwidget.CheckError(err, mWindow, mi18n.T("セパレータ生成エラー"))
 
-	motionPlayer, err := mwidget.NewMotionPlayer(page, mWindow, iconFiles)
+	motionPlayer, err := mwidget.NewMotionPlayer(page, mWindow)
 	mwidget.CheckError(err, mWindow, mi18n.T("モーションプレイヤー生成エラー"))
 	motionPlayer.SetEnabled(false)
 

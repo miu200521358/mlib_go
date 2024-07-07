@@ -5,6 +5,7 @@ package mwidget
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"os"
 	"os/exec"
@@ -17,6 +18,9 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 )
+
+//go:embed icon/*
+var iconFiles embed.FS
 
 func CheckError(err error, w *MWindow, message string) {
 	if err != nil {
