@@ -67,6 +67,11 @@ func (m *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame) {
 	m.MorphFrames.Get(morphName).Append(mf)
 }
 
+func (m *VmdMotion) AppendRegisteredMorphFrame(morphName string, mf *MorphFrame) {
+	mf.Registered = true
+	m.MorphFrames.Get(morphName).Append(mf)
+}
+
 func (m *VmdMotion) AppendCameraFrame(cf *CameraFrame) {
 	m.CameraFrames.Append(cf)
 }

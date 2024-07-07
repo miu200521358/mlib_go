@@ -520,9 +520,17 @@ MlibSample 1.0.0_beta_101
 
 MlibSample 1.0.0_beta_102
 ・fps整理
-　・デフォームfps ... ドロップOFF: 30fps上限の経過時間、ドロップON: 経過時間
+　・デフォームfps ... ドロップOFF: fps制限値を上限とする経過時間、ドロップON: 経過時間
 　・物理fps ... ドロップOFF: 60固定、ドロップON: 60fps上限の経過時間
 　・描画fps ... fps制限に応じて描画を更新する
+
+MlibSample 1.0.0_beta_103
+・Ikデバッグログ
+　・IKOFFモーションの出力
+　・ブレイク条件ログの追加
+・GLスレッド内のisSaveDelta = false を削除（自分のスレッド内なのでprevDeltasを直接クリアで対応）
+・デフォーム時にデルタがある場合のみ変形情報を出力するよう修正
+・VMD出力にIK ON/OFFとか追加
 
 
 
