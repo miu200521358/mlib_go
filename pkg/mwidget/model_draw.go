@@ -161,22 +161,10 @@ func updatePhysics(
 			rigidBody := model.RigidBodies.Get(i)
 			bonePhysicsGlobalMatrix := rigidBody.GetRigidBodyBoneMatrix(model.Index, modelPhysics)
 			if boneDeltas != nil && bonePhysicsGlobalMatrix != nil && rigidBody.Bone != nil {
-				// if rigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_DYNAMIC_BONE &&
-				// 	boneDeltas.Get(rigidBody.Bone.Index) != nil {
-				// 	// ボーン位置合わせの場合、位置情報は計算したのを使う
-				// 	globalMatrix := boneDeltas.Get(rigidBody.Bone.Index).GlobalMatrix()
-				// 	bonePhysicsGlobalMatrix[3] = globalMatrix[3]
-				// 	bonePhysicsGlobalMatrix[7] = globalMatrix[7]
-				// 	bonePhysicsGlobalMatrix[11] = globalMatrix[11]
-				// }
-				if boneDeltas.Get(rigidBody.Bone.Index) == nil {
-					boneDeltas.Update(&vmd.BoneDelta{Bone: rigidBody.Bone, Frame: frame})
-				}
-				boneDeltas.SetGlobalMatrix(frame, rigidBody.Bone, bonePhysicsGlobalMatrix)
-				physicsBoneIndexes = append(physicsBoneIndexes, rigidBody.Bone.Index)
+				bd := vmd.NewBoneDelta(rigidBody.Bone, frame)
+				bd.SetGlobalMatrix(bonePhysicsGlobalMatrix)
+				boneDeltas.Update(bd)
 			}
-
-			// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[4][%d]", frame, rigidBody.Index))
 		}
 
 		// グローバル行列を埋め終わったらローカル行列の計算
