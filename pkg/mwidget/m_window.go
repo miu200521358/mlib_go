@@ -46,6 +46,7 @@ type MWindow struct {
 	logLevelDebugAction       *walk.Action // デバッグメッセージ表示
 	logLevelVerboseAction     *walk.Action // 冗長メッセージ表示
 	logLevelIkVerboseAction   *walk.Action // IK冗長メッセージ表示
+	fpsDeformUnLimitAction    *walk.Action // デフォームFPS無制限
 }
 
 func NewMWindow(
@@ -94,6 +95,38 @@ func NewMWindow(
 				Checkable:   true,
 				OnTriggered: mainWindow.logLevelTriggered,
 				AssignTo:    &mainWindow.logLevelIkVerboseAction,
+			})
+	}
+
+	fpsLImitMenuItems := []declarative.MenuItem{
+		declarative.Action{
+			Text:        mi18n.T("&30fps制限"),
+			Checkable:   true,
+			OnTriggered: mainWindow.fps30LimitTriggered,
+			AssignTo:    &mainWindow.fps30LimitAction,
+		},
+		declarative.Action{
+			Text:        mi18n.T("&60fps制限"),
+			Checkable:   true,
+			OnTriggered: mainWindow.fps60LimitTriggered,
+			AssignTo:    &mainWindow.fps60LimitAction,
+		},
+		declarative.Action{
+			Text:        mi18n.T("&fps無制限"),
+			Checkable:   true,
+			OnTriggered: mainWindow.fpsUnLimitTriggered,
+			AssignTo:    &mainWindow.fpsUnLimitAction,
+		},
+	}
+
+	if !appConfig.IsEnvProd() {
+		// 開発時にだけ描画無制限モードを追加
+		fpsLImitMenuItems = append(fpsLImitMenuItems,
+			declarative.Action{
+				Text:        "&デフォームfps無制限",
+				Checkable:   true,
+				OnTriggered: mainWindow.fpsDeformUnLimitTriggered,
+				AssignTo:    &mainWindow.fpsDeformUnLimitAction,
 			})
 	}
 
@@ -224,27 +257,8 @@ func NewMWindow(
 						AssignTo:    &mainWindow.infoDebugAction,
 					},
 					declarative.Menu{
-						Text: mi18n.T("&fps制限"),
-						Items: []declarative.MenuItem{
-							declarative.Action{
-								Text:        mi18n.T("&30fps制限"),
-								Checkable:   true,
-								OnTriggered: mainWindow.fps30LimitTriggered,
-								AssignTo:    &mainWindow.fps30LimitAction,
-							},
-							declarative.Action{
-								Text:        mi18n.T("&60fps制限"),
-								Checkable:   true,
-								OnTriggered: mainWindow.fps60LimitTriggered,
-								AssignTo:    &mainWindow.fps60LimitAction,
-							},
-							declarative.Action{
-								Text:        mi18n.T("&fps無制限"),
-								Checkable:   true,
-								OnTriggered: mainWindow.fpsUnLimitTriggered,
-								AssignTo:    &mainWindow.fpsUnLimitAction,
-							},
-						},
+						Text:  mi18n.T("&fps制限"),
+						Items: fpsLImitMenuItems,
 					},
 					declarative.Separator{},
 					declarative.Action{
@@ -443,6 +457,7 @@ func (w *MWindow) fps30LimitTriggered() {
 	w.fps30LimitAction.SetChecked(true)
 	w.fps60LimitAction.SetChecked(false)
 	w.fpsUnLimitAction.SetChecked(false)
+	w.fpsDeformUnLimitAction.SetChecked(false)
 	for _, glWindow := range w.GlWindows {
 		glWindow.spfLimit = 1 / 30.0
 	}
@@ -452,6 +467,7 @@ func (w *MWindow) fps60LimitTriggered() {
 	w.fps30LimitAction.SetChecked(false)
 	w.fps60LimitAction.SetChecked(true)
 	w.fpsUnLimitAction.SetChecked(false)
+	w.fpsDeformUnLimitAction.SetChecked(false)
 	for _, glWindow := range w.GlWindows {
 		glWindow.spfLimit = 1 / 60.0
 	}
@@ -461,8 +477,19 @@ func (w *MWindow) fpsUnLimitTriggered() {
 	w.fps30LimitAction.SetChecked(false)
 	w.fps60LimitAction.SetChecked(false)
 	w.fpsUnLimitAction.SetChecked(true)
+	w.fpsDeformUnLimitAction.SetChecked(false)
 	for _, glWindow := range w.GlWindows {
 		glWindow.spfLimit = -1.0
+	}
+}
+
+func (w *MWindow) fpsDeformUnLimitTriggered() {
+	w.fps30LimitAction.SetChecked(false)
+	w.fps60LimitAction.SetChecked(false)
+	w.fpsUnLimitAction.SetChecked(false)
+	w.fpsDeformUnLimitAction.SetChecked(true)
+	for _, glWindow := range w.GlWindows {
+		glWindow.spfLimit = -2.0
 	}
 }
 

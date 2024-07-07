@@ -752,6 +752,10 @@ func (w *GlWindow) Run() {
 			// 経過秒数をキーフレームの進捗具合に合わせて調整
 			w.frame += elapsed * float64(w.Physics.Fps)
 			// mlog.V("previousTime=%.7f, time=%.7f, elapsed=%.7f, frame=%.7f", prevTime, frameTime, elapsed, w.frame)
+			if w.spfLimit < -1 {
+				// デフォームFPS制限なしの場合、フレーム番号を常に進める
+				w.frame += 1.0
+			}
 		}
 
 		if w.doResetPhysicsStart {
