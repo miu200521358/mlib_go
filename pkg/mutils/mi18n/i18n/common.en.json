@@ -358,5 +358,13 @@
     {
         "id": "&選択頂点表示",
         "translation": "&Selected Vertex Display"
+    },
+    {
+        "id": "ミップマップ生成エラー",
+        "translation": "Mipmaps will not be generated because the texture size is not a power of two. Texture name: {{.Name}}"
+    },
+    {
+        "id": "アイコン生成エラー",
+        "translation": "Icon generation error"
     }
 ]
