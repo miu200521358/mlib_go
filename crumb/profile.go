@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
-	defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
+	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+	// defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
 
 	// --------------------------------------------
 
@@ -25,7 +25,8 @@ func main() {
 	motion := motionData.(*vmd.VmdMotion)
 
 	pr := &pmx.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4チャイナ/Miku_V4_チャイナ.pmx")
+	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/mlibkiller/mlibkiller.pmx")
+	// modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4チャイナ/Miku_V4_チャイナ.pmx")
 
 	if err != nil {
 		log.Fatalf("Expected error to be nil, got %q", err)

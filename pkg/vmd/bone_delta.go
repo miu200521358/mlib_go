@@ -194,12 +194,12 @@ func NewBoneDeltas(bones *pmx.Bones) *BoneDeltas {
 }
 
 func (bds *BoneDeltas) Get(boneIndex int) *BoneDelta {
-	bds.mu.RLock()
-	defer bds.mu.RUnlock()
-
 	if boneIndex < 0 || boneIndex >= len(bds.Data) {
 		return nil
 	}
+
+	bds.mu.RLock()
+	defer bds.mu.RUnlock()
 
 	return bds.Data[boneIndex]
 }
@@ -265,10 +265,7 @@ func (bds *BoneDeltas) FillLocalMatrix(frame int, physicsBoneIndexes []int) {
 		if !slices.Contains(physicsBoneIndexes, bone.Index) {
 			continue
 		}
-		bd := bds.Get(bone.Index)
-		if bd == nil {
-			bd = NewBoneDelta(bone, frame)
-		}
+		bd := NewBoneDelta(bone, frame)
 
 		var parentGlobalMatrix *mmath.MMat4
 		if bd.Bone.ParentIndex >= 0 && bds.Get(bd.Bone.ParentIndex) != nil {
@@ -276,17 +273,14 @@ func (bds *BoneDeltas) FillLocalMatrix(frame int, physicsBoneIndexes []int) {
 		} else {
 			parentGlobalMatrix = mmath.NewMMat4()
 		}
-		bds.mu.Lock()
 		unitMatrix := parentGlobalMatrix.Muled(bd.globalMatrix.Inverted())
 
 		bd.localMatrix = bd.Bone.OffsetMatrix.Muled(bd.globalMatrix)
-		bd.globalPosition = nil
 		bd.framePosition = unitMatrix.Translation()
-		bd.frameMorphPosition = nil
-		bd.frameEffectPosition = nil
 		bd.frameRotation = unitMatrix.Quaternion()
-		bd.frameMorphRotation = nil
-		bd.frameEffectRotation = nil
+
+		bds.mu.Lock()
+		bds.Data[bd.Bone.Index] = bd
 		bds.mu.Unlock()
 	}
 }
