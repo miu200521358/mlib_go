@@ -94,7 +94,10 @@ type MShader struct {
 	IsDrawRigidBodyFront  bool
 }
 
-func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
+//go:embed glsl/*
+var glslFiles embed.FS
+
+func NewMShader(width, height int) (*MShader, error) {
 	shader := &MShader{
 		lightAmbient:         &mmath.MVec4{LIGHT_AMBIENT, LIGHT_AMBIENT, LIGHT_AMBIENT, 1},
 		CameraPosition:       &mmath.MVec3{0.0, INITIAL_CAMERA_POSITION_Y, INITIAL_CAMERA_POSITION_Z},
@@ -112,7 +115,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 
 	{
 		modelProgram, err := shader.newProgram(
-			resourceFiles, "resources/glsl/model.vert", "resources/glsl/model.frag")
+			glslFiles, "glsl/model.vert", "glsl/model.frag")
 		if err != nil {
 			return nil, err
 		}
@@ -124,7 +127,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 
 	{
 		boneProgram, err := shader.newProgram(
-			resourceFiles, "resources/glsl/bone.vert", "resources/glsl/bone.frag")
+			glslFiles, "glsl/bone.vert", "glsl/bone.frag")
 		if err != nil {
 			return nil, err
 		}
@@ -136,7 +139,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 
 	{
 		edgeProgram, err := shader.newProgram(
-			resourceFiles, "resources/glsl/edge.vert", "resources/glsl/edge.frag")
+			glslFiles, "glsl/edge.vert", "glsl/edge.frag")
 		if err != nil {
 			return nil, err
 		}
@@ -148,7 +151,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 
 	{
 		physicsProgram, err := shader.newProgram(
-			resourceFiles, "resources/glsl/physics.vert", "resources/glsl/physics.frag")
+			glslFiles, "glsl/physics.vert", "glsl/physics.frag")
 		if err != nil {
 			return nil, err
 		}
@@ -160,7 +163,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 
 	{
 		normalProgram, err := shader.newProgram(
-			resourceFiles, "resources/glsl/vertex.vert", "resources/glsl/vertex.frag")
+			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
 			return nil, err
 		}
@@ -172,7 +175,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 
 	{
 		floorProgram, err := shader.newProgram(
-			resourceFiles, "resources/glsl/floor.vert", "resources/glsl/floor.frag")
+			glslFiles, "glsl/floor.vert", "glsl/floor.frag")
 		if err != nil {
 			return nil, err
 		}
@@ -184,7 +187,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 
 	{
 		wireProgram, err := shader.newProgram(
-			resourceFiles, "resources/glsl/vertex.vert", "resources/glsl/vertex.frag")
+			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
 			return nil, err
 		}
@@ -196,7 +199,7 @@ func NewMShader(width, height int, resourceFiles embed.FS) (*MShader, error) {
 
 	{
 		selectedVertexProgram, err := shader.newProgram(
-			resourceFiles, "resources/glsl/vertex.vert", "resources/glsl/vertex.frag")
+			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
 			return nil, err
 		}
@@ -253,17 +256,17 @@ func (s *MShader) compileShader(shaderName, source string, shaderType uint32) (u
 }
 
 func (s *MShader) newProgram(
-	resourceFiles embed.FS,
+	glslFiles embed.FS,
 	vertexShaderName, fragmentShaderName string,
 ) (uint32, error) {
-	vertexShaderFile, err := fs.ReadFile(resourceFiles, vertexShaderName)
+	vertexShaderFile, err := fs.ReadFile(glslFiles, vertexShaderName)
 	if err != nil {
 		return 0, err
 	}
 
 	vertexShaderSource := string(vertexShaderFile)
 
-	fragmentShaderFile, err := fs.ReadFile(resourceFiles, fragmentShaderName)
+	fragmentShaderFile, err := fs.ReadFile(glslFiles, fragmentShaderName)
 	if err != nil {
 		return 0, err
 	}

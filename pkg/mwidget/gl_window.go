@@ -165,7 +165,7 @@ func NewGlWindow(
 	gl.Enable(gl.DEBUG_OUTPUT)
 	gl.Enable(gl.DEBUG_OUTPUT_SYNCHRONOUS) // 同期的なデバッグ出力を有効にします。
 
-	shader, err := mview.NewMShader(width, height, resourceFiles)
+	shader, err := mview.NewMShader(width, height)
 	if err != nil {
 		return nil, err
 	}
