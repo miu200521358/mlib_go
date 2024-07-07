@@ -73,7 +73,6 @@ type GlWindow struct {
 	spfLimit               float64               //fps制限
 	frame                  float64               // 現在のフレーム
 	prevFrame              int                   // 前回のフレーム
-	isSaveDelta            bool                  // 前回デフォーム保存フラグ
 	motionPlayer           *MotionPlayer         // 再生ウィジェット
 	width                  int                   // ウィンドウ幅
 	height                 int                   // ウィンドウ高さ
@@ -194,7 +193,6 @@ func NewGlWindow(
 		EnableFrameDrop:            true,  // 最初はドロップON
 		frame:                      0,
 		prevFrame:                  0,
-		isSaveDelta:                true,
 		width:                      width,
 		height:                     height,
 		floor:                      newMFloor(),
@@ -257,7 +255,6 @@ func (w *GlWindow) GetFrame() int {
 func (w *GlWindow) SetFrame(f int) {
 	w.frame = float64(f)
 	w.prevFrame = f
-	w.isSaveDelta = false
 	for i := range w.modelSets {
 		w.modelSets[i].prevDeltas = nil
 	}
@@ -608,7 +605,6 @@ func (w *GlWindow) Run() {
 			case pair := <-w.AppendModelSetChannel:
 				// 追加処理
 				w.modelSets[len(w.modelSets)-1] = pair
-				w.isSaveDelta = false
 			case pairMap := <-w.ReplaceModelSetChannel:
 				// 入替処理
 				for k := range pairMap {
@@ -623,21 +619,18 @@ func (w *GlWindow) Run() {
 						w.modelSets[k] = pairMap[k]
 					}
 				}
-				w.isSaveDelta = false
 			case index := <-w.RemoveModelSetIndexChannel:
 				// 削除処理
 				if _, ok := w.modelSets[index]; ok {
 					w.modelSets[index].Model.Delete()
 					delete(w.modelSets, index)
 				}
-				w.isSaveDelta = false
 			case isPlaying := <-w.IsPlayingChannel:
 				// 再生設定
 				w.TriggerPlay(isPlaying)
 			case frame := <-w.FrameChannel:
 				// フレーム設定
 				w.SetFrame(frame)
-				w.isSaveDelta = false
 			case isClosed := <-w.IsClosedChannel:
 				// ウィンドウが閉じられた場合
 				w.isClosed = isClosed
@@ -788,13 +781,13 @@ func (w *GlWindow) Run() {
 				w.modelSets[k].Model.Index = k
 				w.modelSets[k].Model.DrawInitialize(w.WindowIndex, w.Physics)
 				w.modelSets[k].NextModel = nil
-				w.isSaveDelta = false
+				prevDeltas = nil
 			}
 
 			if w.modelSets[k].NextMotion != nil {
 				w.modelSets[k].Motion = w.modelSets[k].NextMotion
 				w.modelSets[k].NextMotion = nil
-				w.isSaveDelta = false
+				prevDeltas = nil
 			}
 
 			if w.modelSets[k].NextInvisibleMaterialIndexes != nil {
@@ -807,11 +800,6 @@ func (w *GlWindow) Run() {
 				w.modelSets[k].NextSelectedVertexIndexes = nil
 			}
 
-			// キーフレの手動変更がなかった場合のみ前回デフォームとして保持
-			if !w.isSaveDelta {
-				prevDeltas = nil
-			}
-			w.isSaveDelta = true
 			w.modelSets[k].prevDeltas = prevDeltas
 		}
 
