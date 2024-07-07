@@ -64,7 +64,10 @@ func draw(
 
 	boneDeltas := make([]mgl32.Mat4, len(model.Bones.Data))
 	for i, bone := range model.Bones.Data {
-		boneDeltas[i] = deltas.Bones.Get(bone.Index).LocalMatrix().GL()
+		delta := deltas.Bones.Get(bone.Index)
+		if delta != nil {
+			boneDeltas[i] = delta.LocalMatrix().GL()
+		}
 	}
 
 	meshDeltas := make([]*pmx.MeshDelta, len(model.Materials.Data))
