@@ -505,12 +505,20 @@ func (b *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool) *Bone {
 }
 
 func (b *Bones) setup() {
+	b.IkTreeIndexes = make(map[int][]int)
+	b.LayerSortedBones = make(map[bool][]*Bone)
+	b.LayerSortedNames = make(map[bool]map[string]int)
+
 	for _, bone := range b.Data {
 		// 関係ボーンリストを一旦クリア
 		bone.IkLinkBoneIndexes = make([]int, 0)
 		bone.IkTargetBoneIndexes = make([]int, 0)
 		bone.EffectiveBoneIndexes = make([]int, 0)
 		bone.ChildBoneIndexes = make([]int, 0)
+		bone.RelativeBoneIndexes = make([]int, 0)
+		bone.ParentBoneIndexes = make([]int, 0)
+		bone.ParentBoneNames = make([]string, 0)
+		bone.TreeBoneIndexes = make([]int, 0)
 	}
 
 	// 関連ボーンINDEX情報を設定

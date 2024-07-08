@@ -54,7 +54,7 @@ func (r *PmxReader) ReadByFilepath(path string) (mcore.IHashModel, error) {
 	}
 
 	r.Close()
-	model.setup()
+	model.Setup()
 
 	return model, nil
 }

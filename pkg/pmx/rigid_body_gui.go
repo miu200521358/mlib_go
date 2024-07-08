@@ -276,8 +276,7 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 
 func (r *RigidBodies) initPhysics(modelIndex int, physics *mphysics.MPhysics) {
 	// 剛体を順番にボーンと紐付けていく
-	for i := range r.Len() {
-		rigidBody := r.Get(i)
+	for _, rigidBody := range r.Data {
 		// 物理設定の初期化
 		rigidBody.initPhysics(modelIndex, physics)
 	}
