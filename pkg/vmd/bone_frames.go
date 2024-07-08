@@ -286,7 +286,12 @@ func (fs *BoneFrames) calcIk(
 	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
 	ikDeltas := fs.DeformByPhysicsFlag(frame, model, []string{ikBone.Name, effectorBone.Name}, false,
-		boneDeltas, nil, ikFrame, isAfterPhysics)
+		boneDeltas, nil, ikFrame, false)
+	if isAfterPhysics {
+		// 物理後の場合は物理後のも取得する
+		ikDeltas = fs.DeformByPhysicsFlag(frame, model, []string{ikBone.Name, effectorBone.Name}, false,
+			ikDeltas, nil, ikFrame, true)
+	}
 	if !ikDeltas.Contains(ikBone.Index) {
 		// IKボーンが存在しない場合、スルー
 		return boneDeltas
@@ -336,15 +341,17 @@ func (fs *BoneFrames) calcIk(
 
 	// エフェクタ関連情報取得
 	effectorDeformBoneIndexes, boneDeltas :=
-		fs.prepareDeltas(frame, model, []string{effectorBone.Name}, false, boneDeltas, nil, ikFrame, isAfterPhysics)
+		fs.prepareDeltas(frame, model, []string{effectorBone.Name}, false, boneDeltas, nil, ikFrame, false)
+	if isAfterPhysics {
+		// 物理後の場合は物理後のも取得する
+		effectorDeformBoneIndexes, boneDeltas =
+			fs.prepareDeltas(frame, model, []string{effectorBone.Name}, false, boneDeltas, nil, ikFrame, true)
+	}
 	if !boneDeltas.Contains(effectorBone.Index) || !boneDeltas.Contains(ikBone.Index) ||
 		!boneDeltas.Contains(ikBone.Ik.BoneIndex) {
 		// エフェクタボーンが存在しない場合、スルー
 		return boneDeltas
 	}
-
-	// 中断FLGが入ったか否か
-	aborts := make([]bool, len(ikBone.Ik.Links))
 
 	// IK計算
 ikLoop:
@@ -549,22 +556,6 @@ ikLoop:
 				)
 			}
 
-			// if linkBone.HasFixedAxis() {
-			// 	if linkAxis.Dot(linkBone.NormalizedFixedAxis) < 0 {
-			// 		linkAngle = -linkAngle
-			// 	}
-
-			// 	// 軸制限ありの場合、軸にそった理想回転量とする
-			// 	linkAxis = linkBone.NormalizedFixedAxis
-
-			// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-			// 		fmt.Fprintf(ikFile,
-			// 			"[%04d][%03d][%s][%05d][軸制限] linkAxis: %s\n",
-			// 			frame, loop, linkBone.Name, count-1, linkAxis.String(),
-			// 		)
-			// 	}
-			// }
-
 			originalIkQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, originalLinkAngle)
 			ikQuat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
 
@@ -681,21 +672,6 @@ ikLoop:
 			linkDelta.frameRotation = resultIkQuat
 			boneDeltas.Update(linkDelta)
 
-			// 前回（既存）とほぼ同じ回転量の場合、中断FLGを立てる
-			isAbort := linkQuat != nil && 1-totalIkQuat.Dot(linkQuat) < 1e-10
-
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil && linkQuat != nil {
-				fmt.Fprintf(ikFile,
-					"[%04d][%03d][%s][%05d] 前回差分中断判定: %v(dot: %0.6f, distance: %0.8f) 前回: %s 今回: %s\n",
-					frame, loop, linkBone.Name, count-1,
-					isAbort, 1-totalIkQuat.Dot(linkQuat), effectorLocalPosition.Distance(ikLocalPosition),
-					linkQuat.ToDegrees().String(), totalIkQuat.ToMMDDegrees().String())
-			}
-
-			if isAbort {
-				aborts[lidx] = true
-			}
-
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := NewBoneFrame(count)
 				bf.Rotation = linkDelta.LocalRotation().Copy()
@@ -709,7 +685,6 @@ ikLoop:
 		}
 	}
 
-	ikDeltas = nil
 	return boneDeltas
 }
 
@@ -1255,8 +1230,8 @@ func (fs *BoneFrames) fillBoneDeform(
 			bf = fs.Get(bone.Name).Get(frame)
 		}
 		// ボーンの移動位置、回転角度、拡大率を取得
-		delta.framePosition, delta.frameMorphPosition = fs.getPosition(bf, bone, boneDeltas, morphDeltas, 0)
-		delta.frameRotation, delta.frameMorphRotation = fs.getRotation(bf, bone, boneDeltas, morphDeltas, 0)
+		delta.framePosition, delta.frameMorphPosition = fs.getPosition(bf, bone, boneDeltas, morphDeltas)
+		delta.frameRotation, delta.frameMorphRotation = fs.getRotation(bf, bone, boneDeltas, morphDeltas)
 		delta.frameScale = fs.getScale(bf, bone, boneDeltas, morphDeltas)
 		boneDeltas.Update(delta)
 	}
@@ -1272,16 +1247,9 @@ func (fs *BoneFrames) getPosition(
 	// model *pmx.PmxModel,
 	boneDeltas *BoneDeltas,
 	morphDeltas *MorphDeltas,
-	loop int,
 ) (*mmath.MVec3, *mmath.MVec3) {
-	if loop > 20 {
-		// 無限ループを避ける
-		return mmath.NewMVec3(), nil
-	}
-
 	var pos *mmath.MVec3
-	if !bone.IsAfterPhysicsDeform() && boneDeltas != nil && boneDeltas.Get(bone.Index) != nil &&
-		boneDeltas.Get(bone.Index).framePosition != nil {
+	if boneDeltas != nil && boneDeltas.Get(bone.Index) != nil && boneDeltas.Get(bone.Index).framePosition != nil {
 		pos = boneDeltas.Get(bone.Index).framePosition.Copy()
 	} else if bf != nil && bf.Position != nil && !bf.Position.IsZero() {
 		pos = bf.Position.Copy()
@@ -1295,59 +1263,8 @@ func (fs *BoneFrames) getPosition(
 		morphPos = morphDeltas.Bones.Get(bone.Index).framePosition
 	}
 
-	// if bone.IsEffectorTranslation() {
-	// 	// 付与親ありの場合、外部親位置を取得する
-	// 	effectPos := fs.getEffectPosition(frame, bone, model, boneDeltas, morphDeltas, loop+1)
-	// 	// if effectPos != nil && bone.Name == "左袖_後_赤_04_04" {
-	// 	// 	mlog.I("[%s][%04d][%d]: pos: %s(%s), effectPos[%s]: %s(%s)\n", bone.Name, frame, loop,
-	// 	// 		pos.String(), pos.String(), model.Bones.Get(bone.EffectIndex).Name, effectPos.String(), effectPos.String())
-	// 	// }
-	// 	return pos, morphPos
-	// }
-
 	return pos, morphPos
 }
-
-// // 付与親を加味した移動位置
-// func (fs *BoneFrames) getEffectPosition(
-// 	frame int,
-// 	bone *pmx.Bone,
-// 	model *pmx.PmxModel,
-// 	boneDeltas *BoneDeltas,
-// 	morphDeltas *MorphDeltas,
-// 	loop int,
-// ) *mmath.MVec3 {
-// 	if bone.EffectFactor == 0 || loop > 20 {
-// 		// 付与率が0の場合、常に0になる
-// 		// MMDエンジン対策で無限ループを避ける
-// 		return mmath.NewMVec3()
-// 	}
-
-// 	if !(bone.EffectIndex > 0 && model.Bones.Contains(bone.EffectIndex)) {
-// 		// 付与親が存在しない場合、常に0になる
-// 		return mmath.NewMVec3()
-// 	}
-
-// 	// 付与親が存在する場合、付与親の移動量を加算する
-// 	effectBone := model.Bones.Get(bone.EffectIndex)
-
-// 	bf := fs.Get(effectBone.Name).Get(frame)
-// 	if bf == nil {
-// 		return mmath.NewMVec3()
-// 	}
-
-// 	pos, morphPos, effectPos := fs.getPosition(bf, frame, effectBone, model, boneDeltas, morphDeltas, loop+1)
-
-// 	if morphPos != nil {
-// 		pos.Add(morphPos)
-// 	}
-
-// 	if effectPos != nil {
-// 		pos.Add(effectPos)
-// 	}
-
-// 	return pos.MuledScalar(bone.EffectFactor)
-// }
 
 // 該当キーフレにおけるボーンの回転角度
 func (fs *BoneFrames) getRotation(
@@ -1357,18 +1274,11 @@ func (fs *BoneFrames) getRotation(
 	// model *pmx.PmxModel,
 	boneDeltas *BoneDeltas,
 	morphDeltas *MorphDeltas,
-	loop int,
 ) (*mmath.MQuaternion, *mmath.MQuaternion) {
-	if loop > 20 {
-		// 無限ループを避ける
-		return mmath.NewMQuaternion(), nil
-	}
-
 	// FK(捩り) > IK(捩り) > 付与親(捩り)
 	var rot *mmath.MQuaternion
 	var morphRot *mmath.MQuaternion
-	if !bone.IsAfterPhysicsDeform() && boneDeltas != nil && boneDeltas.Get(bone.Index) != nil &&
-		boneDeltas.Get(bone.Index).frameRotation != nil {
+	if boneDeltas != nil && boneDeltas.Get(bone.Index) != nil && boneDeltas.Get(bone.Index).frameRotation != nil {
 		rot = boneDeltas.Get(bone.Index).frameRotation.Copy()
 	} else {
 		if bf != nil && bf.Rotation != nil && !bf.Rotation.IsIdent() {
@@ -1390,61 +1300,8 @@ func (fs *BoneFrames) getRotation(
 		rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
 	}
 
-	// if bone.IsEffectorRotation() {
-	// 	// 付与親ありの場合、外部親回転を取得する
-	// 	effectRot := fs.getEffectRotation(frame, bone, model, boneDeltas, morphDeltas, loop+1)
-	// 	return rot, morphRot, effectRot
-	// }
-
-	// if rot != nil && bone.Name == "左袖_後_青_04_04" && math.Abs(rot.GetX()) > 0.3 {
-	// 	mlog.I("[%s][%04d][%d]: rot: %s(%s)\n", bone.Name, frame, loop, rot.String(), rot.ToMMDDegrees().String())
-	// }
-
 	return rot, morphRot
 }
-
-// // 付与親を加味した回転角度
-// func (fs *BoneFrames) getEffectRotation(
-// 	frame int,
-// 	bone *pmx.Bone,
-// 	model *pmx.PmxModel,
-// 	boneDeltas *BoneDeltas,
-// 	morphDeltas *MorphDeltas,
-// 	loop int,
-// ) *mmath.MQuaternion {
-// 	if bone.EffectFactor == 0 || loop > 20 {
-// 		// 付与率が0の場合、常に0になる
-// 		// MMDエンジン対策で無限ループを避ける
-// 		return nil
-// 	}
-
-// 	if !(bone.EffectIndex > 0 && model.Bones.Contains(bone.EffectIndex)) {
-// 		// 付与親が存在しない場合、常に0になる
-// 		return nil
-// 	}
-
-// 	// 付与親が存在する場合、付与親の回転角度を掛ける
-// 	effectBone := model.Bones.Get(bone.EffectIndex)
-
-// 	bf := fs.Get(effectBone.Name).Get(frame)
-// 	if bf == nil {
-// 		return nil
-// 	}
-
-// 	rot, morphRot, effectRot := fs.getRotation(bf, frame, effectBone, model, boneDeltas, morphDeltas, loop+1)
-
-// 	if morphRot != nil {
-// 		// rot = morphRot.Mul(rot)
-// 		rot.Mul(morphRot)
-// 	}
-
-// 	if effectRot != nil {
-// 		// rot = effectRot.Mul(rot)
-// 		rot.Mul(effectRot)
-// 	}
-
-// 	return rot.MuledScalar(bone.EffectFactor)
-// }
 
 // 該当キーフレにおけるボーンの拡大率
 func (fs *BoneFrames) getScale(
