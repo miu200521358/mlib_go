@@ -74,7 +74,7 @@ func (j *Joint) initPhysics(
 	constraint.SetParam(int(mbt.BT_CONSTRAINT_CFM), float32(0.1), 0)
 	constraint.SetParam(int(mbt.BT_CONSTRAINT_STOP_CFM), float32(0.1), 0)
 
-	// 円の表示サイズ
+	// デバッグ円の表示サイズ
 	constraint.SetDbgDrawSize(float32(1.5))
 
 	modelPhysics.AddJoint(modelIndex, j.Index, constraint)
