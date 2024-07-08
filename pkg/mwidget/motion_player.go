@@ -86,14 +86,18 @@ func NewMotionPlayer(parent walk.Container, mWindow *MWindow) (*MotionPlayer, er
 
 	mp.FrameEdit.ValueChanged().Attach(func() {
 		if !mp.playing {
-			mWindow.GetMainGlWindow().SetFrame(int(mp.FrameEdit.Value()))
-			mp.FrameSlider.SetValue(int(mp.FrameEdit.Value()))
+			go func() {
+				mWindow.GetMainGlWindow().SetFrame(int(mp.FrameEdit.Value()))
+				mp.FrameSlider.SetValue(int(mp.FrameEdit.Value()))
+			}()
 		}
 	})
 	mp.FrameSlider.ValueChanged().Attach(func() {
 		if !mp.playing {
-			mWindow.GetMainGlWindow().SetFrame(int(mp.FrameSlider.Value()))
-			mp.FrameEdit.SetValue(float64(mp.FrameSlider.Value()))
+			go func() {
+				mWindow.GetMainGlWindow().SetFrame(int(mp.FrameSlider.Value()))
+				mp.FrameEdit.SetValue(float64(mp.FrameSlider.Value()))
+			}()
 		}
 	})
 

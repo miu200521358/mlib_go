@@ -248,6 +248,7 @@ func (w *GlWindow) resize(window *glfw.Window, width int, height int) {
 
 func (w *GlWindow) TriggerPlay(p bool) {
 	w.playing = p
+	w.isSaveDelta = false
 }
 
 func (w *GlWindow) GetFrame() int {
@@ -257,9 +258,7 @@ func (w *GlWindow) GetFrame() int {
 func (w *GlWindow) SetFrame(f int) {
 	w.frame = float64(f)
 	w.prevFrame = f
-	for i := range w.modelSets {
-		w.modelSets[i].prevDeltas = nil
-	}
+	w.isSaveDelta = false
 }
 
 func (w *GlWindow) TriggerClose(window *glfw.Window) {
@@ -636,7 +635,6 @@ func (w *GlWindow) Run() {
 			case frame := <-w.FrameChannel:
 				// フレーム設定
 				w.SetFrame(frame)
-				w.isSaveDelta = false
 			case isClosed := <-w.IsClosedChannel:
 				// ウィンドウが閉じられた場合
 				w.isClosed = isClosed
