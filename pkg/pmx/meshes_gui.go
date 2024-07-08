@@ -56,10 +56,10 @@ func NewMeshes(
 	go func() {
 		defer wg.Done()
 		n := 0
-		for i := 0; i < len(model.Vertices.Data); i++ {
-			vertex := model.Vertices.Get(i)
-			mu.Lock()
+		for i, vertex := range model.Vertices.Data {
 			vgl := vertex.GL()
+
+			mu.Lock()
 			vertices = append(vertices, vgl...)
 
 			// 法線
@@ -83,8 +83,8 @@ func NewMeshes(
 	go func() {
 		defer wg.Done()
 		n := 0
-		for i := 0; i < len(model.Faces.Data); i++ {
-			vertices := model.Faces.Get(i).VertexIndexes
+		for _, face := range model.Faces.Data {
+			vertices := face.VertexIndexes
 			mu.Lock()
 			faces = append(faces, uint32(vertices[2]), uint32(vertices[1]), uint32(vertices[0]))
 			mu.Unlock()
@@ -98,9 +98,7 @@ func NewMeshes(
 	prevVerticesCount := 0
 
 	// テクスチャの gl.GenTextures はスレッドセーフではないので、並列化しない
-	for i := 0; i < len(model.Materials.Data); i++ {
-		m := model.Materials.Get(i)
-
+	for i, m := range model.Materials.Data {
 		// テクスチャ
 		var texture *Texture
 		if m.TextureIndex != -1 && model.Textures.Contains(m.TextureIndex) {
@@ -157,8 +155,7 @@ func NewMeshes(
 	go func() {
 		defer wg.Done()
 		n := 0
-		for i := 0; i < len(model.Bones.Data); i++ {
-			bone := model.Bones.Get(i)
+		for _, bone := range model.Bones.Data {
 			mu.Lock()
 			bones = append(bones, bone.GL()...)
 			bones = append(bones, bone.TailGL()...)
