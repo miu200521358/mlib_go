@@ -322,12 +322,12 @@ func (v *MVec3) IsOne() bool {
 
 // Length ベクトルの長さを返します
 func (v *MVec3) Length() float64 {
-	return math.Sqrt(v.LengthSqr())
+	return mgl64.Vec3(*v).Len()
 }
 
 // LengthSqr ベクトルの長さの2乗を返します
 func (v *MVec3) LengthSqr() float64 {
-	return v[0]*v[0] + v[1]*v[1] + v[2]*v[2]
+	return mgl64.Vec3(*v).LenSqr()
 }
 
 // Normalize ベクトルを正規化します
