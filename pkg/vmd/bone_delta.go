@@ -25,8 +25,28 @@ type BoneDelta struct {
 	*MorphFrameDelta
 }
 
-func (bd *BoneDelta) SetGlobalMatrix(globalMatrix *mmath.MMat4) {
-	bd.globalMatrix = globalMatrix
+func NewBoneDeltaByGlobalMatrix(
+	bone *pmx.Bone, frame int, globalMatrix *mmath.MMat4, parentDelta *BoneDelta,
+) *BoneDelta {
+	var parentGlobalMatrix *mmath.MMat4
+	if parentDelta != nil {
+		parentGlobalMatrix = parentDelta.GlobalMatrix()
+	} else {
+		parentGlobalMatrix = mmath.NewMMat4()
+	}
+	unitMatrix := parentGlobalMatrix.Muled(globalMatrix.Inverted())
+
+	return &BoneDelta{
+		Bone:            bone,
+		Frame:           frame,
+		MorphFrameDelta: NewMorphFrameDelta(),
+		globalMatrix:    globalMatrix,
+		localMatrix:     bone.OffsetMatrix.Muled(globalMatrix),
+		unitMatrix:      unitMatrix,
+		// 物理演算後の移動を受け取ると逆オフセットかけても一部モデルで破綻するので一旦コメントアウト
+		// framePosition:   unitMatrix.Translation(),
+		frameRotation: unitMatrix.Quaternion(),
+	}
 }
 
 func (bd *BoneDelta) GlobalMatrix() *mmath.MMat4 {
@@ -226,31 +246,6 @@ func (bds *BoneDeltas) GetBoneIndexes() []int {
 
 func (bds *BoneDeltas) Contains(boneIndex int) bool {
 	return bds.Data[boneIndex] != nil
-}
-
-// FillLocalMatrix 物理演算後にグローバル行列を埋め終わった後に呼び出して、ローカル行列を計算する
-func (bds *BoneDeltas) FillLocalMatrix(frame int, physicsBoneIndexes []int) {
-	for i := range len(bds.Bones.LayerSortedBones[true]) {
-		bone := bds.Bones.LayerSortedBones[true][i]
-		if !slices.Contains(physicsBoneIndexes, bone.Index) {
-			continue
-		}
-		bd := bds.Get(bone.Index)
-
-		var parentGlobalMatrix *mmath.MMat4
-		if bd.Bone.ParentIndex >= 0 && bds.Get(bd.Bone.ParentIndex) != nil {
-			parentGlobalMatrix = bds.Get(bd.Bone.ParentIndex).GlobalMatrix()
-		} else {
-			parentGlobalMatrix = mmath.NewMMat4()
-		}
-		unitMatrix := parentGlobalMatrix.Muled(bd.globalMatrix.Inverted())
-
-		bd.localMatrix = bd.Bone.OffsetMatrix.Muled(bd.globalMatrix)
-		bd.framePosition = unitMatrix.Translation()
-		bd.frameRotation = unitMatrix.Quaternion()
-
-		bds.Data[bd.Bone.Index] = bd
-	}
 }
 
 func (bds *BoneDeltas) GetNearestBoneIndexes(worldPos *mmath.MVec3) []int {

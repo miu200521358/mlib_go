@@ -119,8 +119,7 @@ func updatePhysics(
 
 	// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[1]", frame))
 
-	for i := range model.RigidBodies.Len() {
-		rigidBody := model.RigidBodies.Get(i)
+	for _, rigidBody := range model.RigidBodies.Data {
 		// 現在のボーン変形情報を保持
 		rigidBodyBone := rigidBody.Bone
 		if rigidBodyBone == nil {
@@ -155,19 +154,18 @@ func updatePhysics(
 	if (enablePhysics || resetPhysics) && timeStep >= 1e-5 {
 		modelPhysics.Update(timeStep)
 
-		// 剛体位置を更新
-		physicsBoneIndexes := make([]int, 0)
-		for i := range model.RigidBodies.Len() {
-			rigidBody := model.RigidBodies.Get(i)
-			bonePhysicsGlobalMatrix := rigidBody.GetRigidBodyBoneMatrix(model.Index, modelPhysics)
-			if boneDeltas != nil && bonePhysicsGlobalMatrix != nil && rigidBody.Bone != nil {
-				bd := vmd.NewBoneDelta(rigidBody.Bone, frame)
-				bd.SetGlobalMatrix(bonePhysicsGlobalMatrix)
+		// 物理（=物理後ではない）剛体位置を更新
+		for i := range len(boneDeltas.Bones.LayerSortedBones[false]) {
+			bone := boneDeltas.Bones.LayerSortedBones[false][i]
+			if bone.RigidBody == nil {
+				continue
+			}
+			bonePhysicsGlobalMatrix := bone.RigidBody.GetRigidBodyBoneMatrix(model.Index, modelPhysics)
+			if boneDeltas != nil && bonePhysicsGlobalMatrix != nil {
+				bd := vmd.NewBoneDeltaByGlobalMatrix(bone, frame,
+					bonePhysicsGlobalMatrix, boneDeltas.Get(bone.ParentIndex))
 				boneDeltas.Update(bd)
 			}
 		}
-
-		// グローバル行列を埋め終わったらローカル行列の計算
-		boneDeltas.FillLocalMatrix(frame, physicsBoneIndexes)
 	}
 }

@@ -1229,7 +1229,7 @@ func (fs *BoneFrames) fillBoneDeform(
 ) *BoneDeltas {
 	for _, boneIndex := range deformBoneIndexes {
 		bone := model.Bones.Get(boneIndex)
-		newDelta := NewBoneDelta(bone, frame)
+		delta := boneDeltas.Get(boneIndex)
 
 		var bf *BoneFrame
 		if bone.IsAfterPhysicsDeform() || boneDeltas == nil || boneDeltas.Get(bone.Index) == nil ||
@@ -1239,13 +1239,12 @@ func (fs *BoneFrames) fillBoneDeform(
 			bf = fs.Get(bone.Name).Get(frame)
 		}
 		// ボーンの移動位置、回転角度、拡大率を取得
-		// デルタ情報自体は作り直してグローバル位置とかクリアする
-		newDelta.framePosition, newDelta.frameMorphPosition, newDelta.frameEffectPosition =
+		delta.framePosition, delta.frameMorphPosition, delta.frameEffectPosition =
 			fs.getPosition(bf, frame, bone, model, boneDeltas, morphDeltas, 0)
-		newDelta.frameRotation, newDelta.frameMorphRotation, newDelta.frameEffectRotation =
+		delta.frameRotation, delta.frameMorphRotation, delta.frameEffectRotation =
 			fs.getRotation(bf, frame, bone, model, boneDeltas, morphDeltas, 0)
-		newDelta.frameScale = fs.getScale(bf, bone, boneDeltas, morphDeltas)
-		boneDeltas.Update(newDelta)
+		delta.frameScale = fs.getScale(bf, bone, boneDeltas, morphDeltas)
+		boneDeltas.Update(delta)
 	}
 
 	return boneDeltas
