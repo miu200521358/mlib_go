@@ -86,6 +86,17 @@ func (c *IndexNameModels[T]) Update(value T) {
 	}
 }
 
+func (c *IndexNameModels[T]) Append(value T) {
+	if value.GetIndex() < 0 {
+		value.SetIndex(len(c.Data))
+	}
+	c.Data = append(c.Data, value)
+	if _, ok := c.NameIndexes[value.GetName()]; !ok {
+		// 名前は先勝ち
+		c.NameIndexes[value.GetName()] = value.GetIndex()
+	}
+}
+
 func (c *IndexNameModels[T]) GetIndexes() []int {
 	indexes := make([]int, len(c.NameIndexes))
 	i := 0

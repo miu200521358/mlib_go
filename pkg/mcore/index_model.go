@@ -68,6 +68,13 @@ func (c *IndexModels[T]) Update(value T) {
 	c.Data[value.GetIndex()] = value
 }
 
+func (c *IndexModels[T]) Append(value T) {
+	if value.GetIndex() < 0 {
+		value.SetIndex(len(c.Data))
+	}
+	c.Data = append(c.Data, value)
+}
+
 func (c *IndexModels[T]) DeleteItem(index int) {
 	c.Data[index] = c.nilFunc()
 }
