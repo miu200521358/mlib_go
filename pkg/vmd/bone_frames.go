@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -1177,7 +1178,7 @@ func (fs *BoneFrames) createBoneDeltas(
 	deformBoneIndexes := make([]int, 0, len(targetSortedBones))
 
 	// 関連ボーンINDEXリスト（順不同）
-	relativeBoneIndexes := make(map[int]struct{})
+	relativeBoneIndexes := make([]int, 0)
 
 	if len(boneNames) > 0 {
 		// 指定ボーンに関連するボーンのみ対象とする
@@ -1191,27 +1192,42 @@ func (fs *BoneFrames) createBoneDeltas(
 			bone := model.Bones.GetByName(boneName)
 
 			// 対象のボーンは常に追加
-			relativeBoneIndexes[bone.Index] = struct{}{}
+			if !slices.Contains(relativeBoneIndexes, bone.Index) {
+				relativeBoneIndexes = append(relativeBoneIndexes, bone.Index)
+			}
 
 			// 関連するボーンの追加
 			for _, index := range bone.RelativeBoneIndexes {
-				relativeBoneIndexes[index] = struct{}{}
+				if !slices.Contains(relativeBoneIndexes, index) {
+					relativeBoneIndexes = append(relativeBoneIndexes, index)
+				}
+			}
+		}
+	} else {
+		// ボーン名未指定の場合、ボーンと関連ボーンを抽出する
+		for _, bone := range targetSortedBones {
+			// 対象のボーンは常に追加
+			if !slices.Contains(relativeBoneIndexes, bone.Index) {
+				relativeBoneIndexes = append(relativeBoneIndexes, bone.Index)
+			}
+
+			// 関連するボーンの追加
+			for _, index := range bone.RelativeBoneIndexes {
+				if !slices.Contains(relativeBoneIndexes, index) {
+					relativeBoneIndexes = append(relativeBoneIndexes, index)
+				}
 			}
 		}
 	}
 
 	// 変形階層・ボーンINDEXでソート
-	for k := range len(targetSortedBones) {
-		bone := targetSortedBones[k]
-		isRelativeBone := len(boneNames) == 0
-		if len(boneNames) > 0 {
-			_, isRelativeBone = relativeBoneIndexes[bone.Index]
-		}
-
-		if isRelativeBone {
-			deformBoneIndexes = append(deformBoneIndexes, bone.Index)
-			if !boneDeltas.Contains(bone.Index) {
-				boneDeltas.Update(&BoneDelta{Bone: bone, Frame: frame})
+	for _, ap := range []bool{false, true} {
+		for _, bone := range model.Bones.LayerSortedBones[ap] {
+			if slices.Contains(relativeBoneIndexes, bone.Index) {
+				deformBoneIndexes = append(deformBoneIndexes, bone.Index)
+				if !boneDeltas.Contains(bone.Index) {
+					boneDeltas.Update(&BoneDelta{Bone: bone, Frame: frame})
+				}
 			}
 		}
 	}
