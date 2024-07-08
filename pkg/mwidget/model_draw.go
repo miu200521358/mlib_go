@@ -22,7 +22,7 @@ func deform(
 	timeStep float32,
 	enablePhysics, resetPhysics bool,
 ) *vmd.VmdDeltas {
-	vds := vmd.NewVmdDeltas()
+	vds := vmd.NewVmdDeltas(model.Vertices)
 	var beforeBoneDeltas *vmd.BoneDeltas
 
 	// IKのON/OFF
@@ -151,20 +151,22 @@ func updatePhysics(
 		// mlog.Memory(fmt.Sprintf("[%d] updatePhysics[2][%d]", frame, rigidBody.Index))
 	}
 
-	if (enablePhysics || resetPhysics) && timeStep >= 1e-5 {
+	if enablePhysics || resetPhysics {
 		modelPhysics.Update(timeStep)
 
 		// 物理（=物理後ではない）剛体位置を更新
-		for i := range len(boneDeltas.Bones.LayerSortedBones[false]) {
-			bone := boneDeltas.Bones.LayerSortedBones[false][i]
-			if bone.RigidBody == nil {
-				continue
-			}
-			bonePhysicsGlobalMatrix := bone.RigidBody.GetRigidBodyBoneMatrix(model.Index, modelPhysics)
-			if boneDeltas != nil && bonePhysicsGlobalMatrix != nil {
-				bd := vmd.NewBoneDeltaByGlobalMatrix(bone, frame,
-					bonePhysicsGlobalMatrix, boneDeltas.Get(bone.ParentIndex))
-				boneDeltas.Update(bd)
+		for _, isAfterPhysics := range []bool{false, true} {
+			for i := range len(boneDeltas.Bones.LayerSortedBones[isAfterPhysics]) {
+				bone := boneDeltas.Bones.LayerSortedBones[isAfterPhysics][i]
+				if bone.RigidBody == nil {
+					continue
+				}
+				bonePhysicsGlobalMatrix := bone.RigidBody.GetRigidBodyBoneMatrix(model.Index, modelPhysics)
+				if boneDeltas != nil && bonePhysicsGlobalMatrix != nil {
+					bd := vmd.NewBoneDeltaByGlobalMatrix(bone, frame,
+						bonePhysicsGlobalMatrix, boneDeltas.Get(bone.ParentIndex))
+					boneDeltas.Update(bd)
+				}
 			}
 		}
 	}
