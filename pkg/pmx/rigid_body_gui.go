@@ -66,17 +66,21 @@ func (r *RigidBody) UpdateFlags(
 
 func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics) {
 	var btCollisionShape mbt.BtCollisionShape
+
+	// マイナスサイズは許容しない
+	size := r.Size.Absed()
+
 	switch r.ShapeType {
 	case SHAPE_SPHERE:
 		// 球剛体
-		btCollisionShape = mbt.NewBtSphereShape(float32(r.Size.GetX()))
+		btCollisionShape = mbt.NewBtSphereShape(float32(size.GetX()))
 	case SHAPE_BOX:
 		// 箱剛体
 		btCollisionShape = mbt.NewBtBoxShape(
-			mbt.NewBtVector3(float32(r.Size.GetX()), float32(r.Size.GetY()), float32(r.Size.GetZ())))
+			mbt.NewBtVector3(float32(size.GetX()), float32(size.GetY()), float32(size.GetZ())))
 	case SHAPE_CAPSULE:
 		// カプセル剛体
-		btCollisionShape = mbt.NewBtCapsuleShape(float32(r.Size.GetX()), float32(r.Size.GetY()))
+		btCollisionShape = mbt.NewBtCapsuleShape(float32(size.GetX()), float32(size.GetY()))
 	}
 	// btCollisionShape.SetMargin(0.0001)
 
