@@ -1,5 +1,7 @@
 package vmd
 
+import "github.com/miu200521358/mlib_go/pkg/pmx"
+
 type VmdDeltas struct {
 	Vertices             *VertexDeltas
 	Bones                *BoneDeltas
@@ -7,9 +9,9 @@ type VmdDeltas struct {
 	SelectedVertexDeltas *SelectedVertexMorphDeltas
 }
 
-func NewVmdDeltas() *VmdDeltas {
+func NewVmdDeltas(vertices *pmx.Vertices) *VmdDeltas {
 	return &VmdDeltas{
-		Vertices:             NewVertexDeltas(),
+		Vertices:             NewVertexDeltas(vertices),
 		SelectedVertexDeltas: NewSelectedVertexMorphDeltas(),
 	}
 }

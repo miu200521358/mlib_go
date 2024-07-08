@@ -1,7 +1,11 @@
 package vmd
 
 import (
+	"math"
+	"slices"
+
 	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
 
 type VertexDelta struct {
@@ -15,28 +19,44 @@ func NewVertexDelta(pos *mmath.MVec3) *VertexDelta {
 }
 
 type VertexDeltas struct {
-	Data map[int]*VertexDelta
+	Data     []*VertexDelta
+	Vertices *pmx.Vertices
 }
 
-func NewVertexDeltas() *VertexDeltas {
+func NewVertexDeltas(vertices *pmx.Vertices) *VertexDeltas {
 	return &VertexDeltas{
-		Data: make(map[int]*VertexDelta),
+		Data:     make([]*VertexDelta, vertices.Len()),
+		Vertices: vertices,
 	}
 }
 
-func (vds *VertexDeltas) Get(boneIndex int) *VertexDelta {
-	if _, ok := vds.Data[boneIndex]; ok {
-		return vds.Data[boneIndex]
+func (vds *VertexDeltas) Get(vertexIndex int) *VertexDelta {
+	if vertexIndex < 0 || vertexIndex >= len(vds.Data) {
+		return nil
 	}
-	return nil
+
+	return vds.Data[vertexIndex]
 }
 
-func (vds *VertexDeltas) GetNearestVertexIndexes(worldPos *mmath.MVec3) []int {
+func (vds *VertexDeltas) GetNearestVertexIndexes(worldPos *mmath.MVec3, visibleMaterialIndexes []int) []int {
 	vertexIndexes := make([]int, 0)
 	distances := make([]float64, len(vds.Data))
 	for i := range len(vds.Data) {
 		vd := vds.Get(i)
-		distances[i] = worldPos.Distance(vd.Position)
+		vertex := vds.Vertices.Get(i)
+		if visibleMaterialIndexes == nil {
+			distances[i] = worldPos.Distance(vd.Position)
+		} else {
+			for _, materialIndex := range visibleMaterialIndexes {
+				if slices.Contains(vertex.MaterialIndexes, materialIndex) {
+					distances[i] = worldPos.Distance(vd.Position)
+					break
+				} else {
+					// 非表示材質は最長距離をとりあえず入れておく
+					distances[i] = math.MaxFloat64
+				}
+			}
+		}
 	}
 	if len(distances) == 0 {
 		return vertexIndexes

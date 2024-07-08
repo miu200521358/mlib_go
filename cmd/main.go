@@ -264,7 +264,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 		if pmxReadPicker.Exists() {
 			model := pmxReadPicker.GetCache().(*pmx.PmxModel)
 			// 直近頂点を取得
-			nearestVertexIndexes := vmdDeltas[0].Vertices.GetNearestVertexIndexes(worldPos)
+			nearestVertexIndexes := vmdDeltas[0].Vertices.GetNearestVertexIndexes(worldPos, nil)
 			for _, vertexIndex := range nearestVertexIndexes {
 				vertex := model.Vertices.Get(vertexIndex)
 				mlog.I("Near Vertex: %d (元: %s)(変形: %s)",
