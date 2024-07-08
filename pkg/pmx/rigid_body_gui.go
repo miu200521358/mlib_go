@@ -152,12 +152,10 @@ func (r *RigidBody) UpdateTransform(
 	modelPhysics *mphysics.MPhysics,
 	rigidBodyBone *Bone,
 	boneTransform mbt.BtTransform,
-	isForce bool,
 ) {
 	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(modelIndex, r.Index)
 
-	if btRigidBody == nil || btRigidBody.GetMotionState() == nil || boneTransform == nil ||
-		(r.CorrectPhysicsType == PHYSICS_TYPE_DYNAMIC && !isForce) {
+	if btRigidBody == nil || btRigidBody.GetMotionState() == nil {
 		return
 	}
 
@@ -193,7 +191,7 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 ) *mmath.MMat4 {
 	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(modelIndex, r.Index)
 
-	if btRigidBody == nil || btRigidBody.GetMotionState() == nil || r.CorrectPhysicsType == PHYSICS_TYPE_STATIC {
+	if btRigidBody == nil || btRigidBody.GetMotionState() == nil {
 		return nil
 	}
 
