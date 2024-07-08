@@ -8,20 +8,18 @@ import (
 )
 
 type BoneDelta struct {
-	Bone                *pmx.Bone          // ボーン
-	Frame               int                // キーフレーム
-	globalMatrix        *mmath.MMat4       // グローバル行列
-	localMatrix         *mmath.MMat4       // ローカル行列
-	globalPosition      *mmath.MVec3       // グローバル位置
-	framePosition       *mmath.MVec3       // キーフレ位置の変動量
-	frameMorphPosition  *mmath.MVec3       // モーフ位置の変動量
-	frameEffectPosition *mmath.MVec3       // キーフレ位置の変動量(付与親のみ)
-	frameRotation       *mmath.MQuaternion // キーフレ回転の変動量
-	frameMorphRotation  *mmath.MQuaternion // モーフ回転の変動量
-	frameEffectRotation *mmath.MQuaternion // キーフレ回転の変動量(付与親のみ)
-	frameScale          *mmath.MVec3       // キーフレスケールの変動量
-	frameMorphScale     *mmath.MVec3       // モーフスケールの変動量
-	unitMatrix          *mmath.MMat4
+	Bone               *pmx.Bone          // ボーン
+	Frame              int                // キーフレーム
+	globalMatrix       *mmath.MMat4       // グローバル行列
+	localMatrix        *mmath.MMat4       // ローカル行列
+	globalPosition     *mmath.MVec3       // グローバル位置
+	framePosition      *mmath.MVec3       // キーフレ位置の変動量
+	frameMorphPosition *mmath.MVec3       // モーフ位置の変動量
+	frameRotation      *mmath.MQuaternion // キーフレ回転の変動量
+	frameMorphRotation *mmath.MQuaternion // モーフ回転の変動量
+	frameScale         *mmath.MVec3       // キーフレスケールの変動量
+	frameMorphScale    *mmath.MVec3       // モーフスケールの変動量
+	unitMatrix         *mmath.MMat4
 	*MorphFrameDelta
 }
 
@@ -82,11 +80,25 @@ func (bd *BoneDelta) LocalPosition() *mmath.MVec3 {
 		pos.Add(bd.frameMorphPosition)
 	}
 
-	if bd.frameEffectPosition != nil && !bd.frameEffectPosition.IsZero() {
-		pos.Add(bd.frameEffectPosition)
-	}
+	// if bd.frameEffectPosition != nil && !bd.frameEffectPosition.IsZero() {
+	// 	pos.Add(bd.frameEffectPosition)
+	// }
 
 	return pos
+}
+
+func (bd *BoneDelta) LocalEffectorPosition(effectorFactor float64) *mmath.MVec3 {
+	pos := bd.FramePosition().Copy()
+
+	if bd.frameMorphPosition != nil && !bd.frameMorphPosition.IsZero() {
+		pos.Add(bd.frameMorphPosition)
+	}
+
+	// if bd.frameEffectPosition != nil && !bd.frameEffectPosition.IsZero() {
+	// 	pos.Add(bd.frameEffectPosition)
+	// }
+
+	return pos.MuledScalar(effectorFactor)
 }
 
 func (bd *BoneDelta) FramePosition() *mmath.MVec3 {
@@ -103,13 +115,6 @@ func (bd *BoneDelta) FrameMorphPosition() *mmath.MVec3 {
 	return bd.frameMorphPosition
 }
 
-func (bd *BoneDelta) FrameEffectPosition() *mmath.MVec3 {
-	if bd.frameEffectPosition == nil {
-		bd.frameEffectPosition = mmath.NewMVec3()
-	}
-	return bd.frameEffectPosition
-}
-
 func (bd *BoneDelta) LocalRotation() *mmath.MQuaternion {
 	rot := bd.FrameRotation().Copy()
 
@@ -122,12 +127,16 @@ func (bd *BoneDelta) LocalRotation() *mmath.MQuaternion {
 		rot = rot.ToFixedAxisRotation(bd.Bone.NormalizedFixedAxis)
 	}
 
-	if bd.frameEffectRotation != nil && !bd.frameEffectRotation.IsIdent() {
-		// rot = bd.frameEffectRotation.Muled(rot)
-		rot.Mul(bd.frameEffectRotation)
-	}
+	// if bd.frameEffectRotation != nil && !bd.frameEffectRotation.IsIdent() {
+	// 	// rot = bd.frameEffectRotation.Muled(rot)
+	// 	rot.Mul(bd.frameEffectRotation)
+	// }
 
 	return rot
+}
+
+func (bd *BoneDelta) LocalEffectorRotation(effectorFactor float64) *mmath.MQuaternion {
+	return bd.LocalRotation().MuledScalar(effectorFactor)
 }
 
 func (bd *BoneDelta) FrameRotation() *mmath.MQuaternion {
@@ -135,13 +144,6 @@ func (bd *BoneDelta) FrameRotation() *mmath.MQuaternion {
 		bd.frameRotation = mmath.NewMQuaternion()
 	}
 	return bd.frameRotation
-}
-
-func (bd *BoneDelta) FrameEffectRotation() *mmath.MQuaternion {
-	if bd.frameEffectRotation == nil {
-		bd.frameEffectRotation = mmath.NewMQuaternion()
-	}
-	return bd.frameEffectRotation
 }
 
 func (bd *BoneDelta) FrameMorphRotation() *mmath.MQuaternion {
@@ -177,21 +179,19 @@ func (bd *BoneDelta) FrameMorphScale() *mmath.MVec3 {
 
 func (bd *BoneDelta) Copy() *BoneDelta {
 	return &BoneDelta{
-		Bone:                bd.Bone,
-		Frame:               bd.Frame,
-		globalMatrix:        bd.GlobalMatrix().Copy(),
-		localMatrix:         bd.LocalMatrix().Copy(),
-		globalPosition:      bd.GlobalPosition().Copy(),
-		framePosition:       bd.FramePosition().Copy(),
-		frameMorphPosition:  bd.FrameMorphPosition().Copy(),
-		frameEffectPosition: bd.FrameEffectPosition().Copy(),
-		frameRotation:       bd.FrameRotation().Copy(),
-		frameMorphRotation:  bd.FrameMorphRotation().Copy(),
-		frameEffectRotation: bd.FrameEffectRotation().Copy(),
-		frameScale:          bd.FrameScale().Copy(),
-		frameMorphScale:     bd.FrameMorphScale().Copy(),
-		unitMatrix:          bd.unitMatrix.Copy(),
-		MorphFrameDelta:     bd.MorphFrameDelta.Copy(),
+		Bone:               bd.Bone,
+		Frame:              bd.Frame,
+		globalMatrix:       bd.GlobalMatrix().Copy(),
+		localMatrix:        bd.LocalMatrix().Copy(),
+		globalPosition:     bd.GlobalPosition().Copy(),
+		framePosition:      bd.FramePosition().Copy(),
+		frameMorphPosition: bd.FrameMorphPosition().Copy(),
+		frameRotation:      bd.FrameRotation().Copy(),
+		frameMorphRotation: bd.FrameMorphRotation().Copy(),
+		frameScale:         bd.FrameScale().Copy(),
+		frameMorphScale:    bd.FrameMorphScale().Copy(),
+		unitMatrix:         bd.unitMatrix.Copy(),
+		MorphFrameDelta:    bd.MorphFrameDelta.Copy(),
 	}
 }
 
@@ -277,4 +277,36 @@ func (bds *BoneDeltas) GetNearestBoneIndexes(worldPos *mmath.MVec3) []int {
 		boneIndexes = append(boneIndexes, sortedIndexes[i])
 	}
 	return boneIndexes
+}
+
+func (bds *BoneDeltas) LocalRotation(boneIndex int, loop int) *mmath.MQuaternion {
+	bd := bds.Get(boneIndex)
+	if bd == nil || loop > 10 {
+		return mmath.NewMQuaternion()
+	}
+	rot := bd.LocalRotation()
+
+	if bd.Bone.IsEffectorRotation() {
+		// 付与親回転がある場合、再帰で回転を取得する
+		effectorRot := bds.LocalRotation(bd.Bone.EffectIndex, loop+1)
+		rot.Mul(effectorRot.MuledScalar(bd.Bone.EffectFactor))
+	}
+
+	return rot
+}
+
+func (bds *BoneDeltas) LocalPosition(boneIndex int, loop int) *mmath.MVec3 {
+	bd := bds.Get(boneIndex)
+	if bd == nil || loop > 10 {
+		return mmath.NewMVec3()
+	}
+	pos := bd.LocalPosition()
+
+	if bd.Bone.IsEffectorTranslation() {
+		// 付与親回転がある場合、再帰で回転を取得する
+		effectorPos := bds.LocalPosition(bd.Bone.EffectIndex, loop+1)
+		pos.Mul(effectorPos.MuledScalar(bd.Bone.EffectFactor))
+	}
+
+	return pos
 }
