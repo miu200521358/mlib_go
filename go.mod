@@ -8,7 +8,7 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240118000515-a250818d05e3
 	github.com/go-gl/mathgl v1.1.0
 	github.com/miu200521358/dds v0.0.0
-	github.com/miu200521358/walk v0.0.2
+	github.com/miu200521358/walk v0.0.3
 	github.com/miu200521358/win v0.0.1
 	github.com/pkg/profile v1.7.0
 	golang.org/x/image v0.15.0

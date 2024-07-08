@@ -1204,7 +1204,7 @@ func (fs *BoneFrames) createBoneDeltas(
 			}
 		}
 	} else {
-		// ボーン名未指定の場合、ボーンと関連ボーンを抽出する
+		// ボーン名の指定が無い場合、全ボーンを対象とする
 		for _, bone := range targetSortedBones {
 			// 対象のボーンは常に追加
 			if !slices.Contains(relativeBoneIndexes, bone.Index) {

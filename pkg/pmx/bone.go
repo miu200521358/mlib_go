@@ -573,7 +573,7 @@ func (b *Bones) setup() {
 	}
 
 	// 変形階層・ボーンINDEXでソート
-	b.LayerSortedBones = make(map[bool]map[int]*Bone)
+	b.LayerSortedBones = make(map[bool][]*Bone)
 	b.LayerSortedNames = make(map[bool]map[string]int)
 
 	// 変形前と変形後に分けてINDEXリストを生成
@@ -620,7 +620,7 @@ func (b *Bones) setup() {
 
 func (b *Bones) createLayerIndexes(isAfterPhysics bool) {
 	if _, ok := b.LayerSortedBones[isAfterPhysics]; !ok {
-		b.LayerSortedBones[isAfterPhysics] = make(map[int]*Bone)
+		b.LayerSortedBones[isAfterPhysics] = make([]*Bone, 0)
 	}
 	if _, ok := b.LayerSortedNames[isAfterPhysics]; !ok {
 		b.LayerSortedNames[isAfterPhysics] = make(map[string]int)
@@ -631,7 +631,7 @@ func (b *Bones) createLayerIndexes(isAfterPhysics bool) {
 	for i, boneIndex := range layerIndexes {
 		bone := b.Get(boneIndex)
 		b.LayerSortedNames[isAfterPhysics][bone.Name] = i
-		b.LayerSortedBones[isAfterPhysics][i] = bone
+		b.LayerSortedBones[isAfterPhysics] = append(b.LayerSortedBones[isAfterPhysics], bone)
 	}
 }
 
