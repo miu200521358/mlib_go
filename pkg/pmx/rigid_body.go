@@ -1,8 +1,6 @@
 package pmx
 
 import (
-	"math"
-
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
@@ -137,14 +135,6 @@ func NewRigidBody() *RigidBody {
 		Bone:                    nil,
 		JointedBone:             nil,
 	}
-}
-
-func (r *RigidBody) GetMapKey() mmath.MVec3 {
-	return mmath.MVec3{math.Round(r.Position.GetX()), math.Round(r.Position.GetY()), math.Round(r.Position.GetZ())}
-}
-
-func (r *RigidBody) GetMapValue() *mmath.MVec3 {
-	return r.Position
 }
 
 func (r *RigidBody) Copy() mcore.IIndexNameModel {

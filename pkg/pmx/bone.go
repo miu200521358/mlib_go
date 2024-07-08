@@ -1,7 +1,6 @@
 package pmx
 
 import (
-	"math"
 	"slices"
 	"sort"
 	"strings"
@@ -168,14 +167,6 @@ func NewBoneByName(name string) *Bone {
 	bone := NewBone()
 	bone.Name = name
 	return bone
-}
-
-func (b *Bone) GetMapKey() mmath.MVec3 {
-	return mmath.MVec3{math.Round(b.Position.GetX()), math.Round(b.Position.GetY()), math.Round(b.Position.GetZ())}
-}
-
-func (b *Bone) GetMapValue() *mmath.MVec3 {
-	return b.Position
 }
 
 func (v *Bone) Copy() mcore.IIndexNameModel {

@@ -1,8 +1,6 @@
 package pmx
 
 import (
-	"math"
-
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
@@ -34,14 +32,6 @@ func NewVertex() *Vertex {
 		MaterialIndexes: make([]int, 0),
 	}
 	return v
-}
-
-func (v *Vertex) GetMapKey() mmath.MVec3 {
-	return mmath.MVec3{math.Round(v.Position.GetX()), math.Round(v.Position.GetY()), math.Round(v.Position.GetZ())}
-}
-
-func (v *Vertex) GetMapValue() *mmath.MVec3 {
-	return v.Position
 }
 
 func (v *Vertex) Copy() mcore.IIndexModel {

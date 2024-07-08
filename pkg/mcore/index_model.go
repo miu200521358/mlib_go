@@ -4,7 +4,6 @@ import (
 	"reflect"
 
 	"github.com/jinzhu/copier"
-	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
 type IIndexModel interface {
@@ -12,8 +11,6 @@ type IIndexModel interface {
 	Copy() IIndexModel
 	GetIndex() int
 	SetIndex(index int)
-	GetMapKey() mmath.MVec3
-	GetMapValue() *mmath.MVec3
 }
 
 // INDEXを持つ基底クラス
@@ -31,14 +28,6 @@ func (v *IndexModel) SetIndex(index int) {
 
 func (v *IndexModel) IsValid() bool {
 	return v != nil && v.GetIndex() >= 0
-}
-
-func (v *IndexModel) GetMapKey() mmath.MVec3 {
-	return *mmath.MVec3Zero
-}
-
-func (v *IndexModel) GetMapValue() *mmath.MVec3 {
-	return nil
 }
 
 func (v *IndexModel) Copy() IIndexModel {
