@@ -335,10 +335,16 @@ func (quat *MQuaternion) MuledScalar(factor float64) *MQuaternion {
 		return NewMQuaternion()
 	} else if factor == 1.0 {
 		return quat
+	} else if factor == -1.0 {
+		return quat.Inverted()
 	}
 
 	// factor をかけて角度を制限
-	return MQuaternionIdent.Slerp(quat, factor)
+	if factor > 0 {
+		return MQuaternionIdent.Slerp(quat, factor)
+	} else {
+		return MQuaternionIdent.Slerp(quat, math.Abs(factor)).Inverse()
+	}
 }
 
 // ToAxisAngleは、クォータニオンを軸と角度に変換します。
