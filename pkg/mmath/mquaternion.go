@@ -333,6 +333,8 @@ func (quat *MQuaternion) Dot(other *MQuaternion) float64 {
 func (quat *MQuaternion) MuledScalar(factor float64) *MQuaternion {
 	if factor == 0.0 {
 		return NewMQuaternion()
+	} else if factor == 1.0 {
+		return quat
 	}
 
 	// factor をかけて角度を制限
