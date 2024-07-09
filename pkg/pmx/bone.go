@@ -508,6 +508,7 @@ func (b *Bones) setup() {
 	b.IkTreeIndexes = make(map[int][]int)
 	b.LayerSortedBones = make(map[bool][]*Bone)
 	b.LayerSortedNames = make(map[bool]map[string]int)
+	b.DeformBoneIndexes = make(map[int][]int)
 
 	for _, bone := range b.Data {
 		// 関係ボーンリストを一旦クリア
@@ -581,8 +582,6 @@ func (b *Bones) setup() {
 	}
 
 	// 変形階層・ボーンINDEXでソート
-	b.LayerSortedBones = make(map[bool][]*Bone)
-	b.LayerSortedNames = make(map[bool]map[string]int)
 
 	// 変形前と変形後に分けてINDEXリストを生成
 	b.createLayerIndexes(false)
@@ -622,8 +621,39 @@ func (b *Bones) setup() {
 					b.IkTreeIndexes[bone.Index] = []int{bone.Index}
 				}
 			}
+
+			// ボーンのデフォームINDEXリストを取得
+			b.createLayerSortedIkBones(bone)
 		}
 	}
+}
+
+func (b *Bones) createLayerSortedIkBones(bone *Bone) {
+	// 関連ボーンINDEXリスト（順不同）
+	relativeBoneIndexes := make(map[int]struct{})
+
+	// 対象のボーンは常に追加
+	if _, ok := relativeBoneIndexes[bone.Index]; !ok {
+		relativeBoneIndexes[bone.Index] = struct{}{}
+	}
+
+	// 関連するボーンの追加
+	for _, index := range bone.RelativeBoneIndexes {
+		if _, ok := relativeBoneIndexes[index]; !ok {
+			relativeBoneIndexes[index] = struct{}{}
+		}
+	}
+
+	deformBoneIndexes := make([]int, 0)
+	for _, ap := range []bool{false, true} {
+		for _, bone := range b.LayerSortedBones[ap] {
+			if _, ok := relativeBoneIndexes[bone.Index]; ok {
+				deformBoneIndexes = append(deformBoneIndexes, bone.Index)
+			}
+		}
+	}
+
+	b.DeformBoneIndexes[bone.Index] = deformBoneIndexes
 }
 
 func (b *Bones) createLayerIndexes(isAfterPhysics bool) {

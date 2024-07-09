@@ -10,9 +10,10 @@ import (
 // ボーンリスト
 type Bones struct {
 	*mcore.IndexNameModels[*Bone]
-	IkTreeIndexes    map[int][]int
-	LayerSortedBones map[bool][]*Bone
-	LayerSortedNames map[bool]map[string]int
+	IkTreeIndexes     map[int][]int
+	LayerSortedBones  map[bool][]*Bone
+	LayerSortedNames  map[bool]map[string]int
+	DeformBoneIndexes map[int][]int
 }
 
 func NewBones(count int) *Bones {

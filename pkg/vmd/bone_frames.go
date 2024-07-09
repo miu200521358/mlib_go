@@ -284,11 +284,11 @@ func (fs *BoneFrames) calcIk(
 	// IKターゲットボーン
 	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
-	ikDeltas := fs.DeformByPhysicsFlag(frame, model, []string{ikBone.Name, effectorBone.Name}, false,
+	ikDeltas := fs.DeformByPhysicsFlag(frame, model, []string{ikBone.Name}, false,
 		boneDeltas, nil, ikFrame, false)
 	if isAfterPhysics {
 		// 物理後の場合は物理後のも取得する
-		ikDeltas = fs.DeformByPhysicsFlag(frame, model, []string{ikBone.Name, effectorBone.Name}, false,
+		ikDeltas = fs.DeformByPhysicsFlag(frame, model, []string{ikBone.Name}, false,
 			ikDeltas, nil, ikFrame, true)
 	}
 	if !ikDeltas.Contains(ikBone.Index) {
@@ -1155,8 +1155,12 @@ func (fs *BoneFrames) createBoneDeltas(
 	relativeBoneIndexes := make(map[int]struct{})
 
 	if len(boneNames) > 0 {
-		// 指定ボーンに関連するボーンのみ対象とする
+		if len(boneNames) == 1 {
+			// 1ボーン指定の場合
+			return fs.createOneBoneDeltas(frame, model, boneNames[0], boneDeltas)
+		}
 
+		// 指定ボーンに関連するボーンのみ対象とする
 		for _, boneName := range boneNames {
 			if !model.Bones.ContainsName(boneName) {
 				continue
@@ -1177,8 +1181,8 @@ func (fs *BoneFrames) createBoneDeltas(
 				}
 			}
 		}
-	} else {
-		// ボーン名の指定が無い場合、全ボーンを対象とする
+	} else if isAfterPhysics {
+		// 物理後でボーン名の指定が無い場合、物理後全ボーンを対象とする
 		for _, bone := range targetSortedBones {
 			// 対象のボーンは常に追加
 			if _, ok := relativeBoneIndexes[bone.Index]; !ok {
@@ -1192,6 +1196,16 @@ func (fs *BoneFrames) createBoneDeltas(
 				}
 			}
 		}
+	} else {
+		// 物理前かつボーン名の指定が無い場合、物理前全ボーンを対象とする
+		for _, bone := range model.Bones.LayerSortedBones[isAfterPhysics] {
+			deformBoneIndexes = append(deformBoneIndexes, bone.Index)
+			if !boneDeltas.Contains(bone.Index) {
+				boneDeltas.Update(&BoneDelta{Bone: bone, Frame: frame})
+			}
+		}
+
+		return deformBoneIndexes, boneDeltas
 	}
 
 	// 変形階層・ボーンINDEXでソート
@@ -1209,6 +1223,31 @@ func (fs *BoneFrames) createBoneDeltas(
 	return deformBoneIndexes, boneDeltas
 }
 
+// 1デフォーム対象ボーン情報一覧取得
+func (fs *BoneFrames) createOneBoneDeltas(
+	frame int,
+	model *pmx.PmxModel,
+	boneName string,
+	boneDeltas *BoneDeltas,
+) ([]int, *BoneDeltas) {
+	if boneDeltas == nil {
+		boneDeltas = NewBoneDeltas(model.Bones)
+	}
+
+	bone := model.Bones.GetByName(boneName)
+
+	// 変形階層順ボーンIndexリスト
+	deformBoneIndexes := model.Bones.DeformBoneIndexes[bone.Index]
+
+	for _, index := range deformBoneIndexes {
+		if !boneDeltas.Contains(index) {
+			boneDeltas.Update(&BoneDelta{Bone: bone, Frame: frame})
+		}
+	}
+
+	return deformBoneIndexes, boneDeltas
+}
+
 // デフォーム情報を求めて設定
 func (fs *BoneFrames) fillBoneDeform(
 	frame int,
@@ -1220,6 +1259,9 @@ func (fs *BoneFrames) fillBoneDeform(
 	for _, boneIndex := range deformBoneIndexes {
 		bone := model.Bones.Get(boneIndex)
 		delta := boneDeltas.Get(boneIndex)
+		if delta == nil {
+			delta = &BoneDelta{Bone: bone, Frame: frame}
+		}
 
 		var bf *BoneFrame
 		if bone.IsAfterPhysicsDeform() || boneDeltas == nil || boneDeltas.Get(bone.Index) == nil ||
