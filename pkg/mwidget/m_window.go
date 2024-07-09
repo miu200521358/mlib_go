@@ -587,6 +587,10 @@ func (w *MWindow) Dispose() {
 	defer walk.App().Exit(0)
 }
 
+func (w *MWindow) Beep() {
+	procMessageBeep.Call(uintptr(MB_ICONASTERISK))
+}
+
 const (
 	SM_CXSCREEN = 0
 	SM_CYSCREEN = 1
@@ -595,6 +599,8 @@ const (
 var (
 	user32               = syscall.NewLazyDLL("user32.dll")
 	procGetSystemMetrics = user32.NewProc("GetSystemMetrics")
+	procMessageBeep      = user32.NewProc("MessageBeep")
+	MB_ICONASTERISK      = 0x00000040
 )
 
 func GetSystemMetrics(nIndex int) int {
