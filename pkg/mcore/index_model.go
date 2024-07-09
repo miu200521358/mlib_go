@@ -40,6 +40,7 @@ func (v *IndexModel) Copy() IIndexModel {
 type IndexModels[T IIndexModel] struct {
 	Data    []T
 	nilFunc func() T
+	isDirty bool
 }
 
 func NewIndexModels[T IIndexModel](count int, nilFunc func() T) *IndexModels[T] {
@@ -66,6 +67,7 @@ func (c *IndexModels[T]) Update(value T) {
 		value.SetIndex(len(c.Data))
 	}
 	c.Data[value.GetIndex()] = value
+	c.SetDirty(true)
 }
 
 func (c *IndexModels[T]) Append(value T) {
@@ -73,6 +75,7 @@ func (c *IndexModels[T]) Append(value T) {
 		value.SetIndex(len(c.Data))
 	}
 	c.Data = append(c.Data, value)
+	c.SetDirty(true)
 }
 
 func (c *IndexModels[T]) DeleteItem(index int) {
@@ -85,4 +88,12 @@ func (c *IndexModels[T]) Len() int {
 
 func (c *IndexModels[T]) Contains(key int) bool {
 	return c != nil && key >= 0 && key < len(c.Data) && !reflect.ValueOf(c.Data[key]).IsNil()
+}
+
+func (c *IndexModels[T]) IsDirty() bool {
+	return c.isDirty
+}
+
+func (c *IndexModels[T]) SetDirty(dirty bool) {
+	c.isDirty = dirty
 }

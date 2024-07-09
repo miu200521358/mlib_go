@@ -1,6 +1,8 @@
 package pmx
 
 import (
+	"slices"
+
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/mcore"
@@ -175,4 +177,26 @@ func (m *Material) Copy() mcore.IIndexNameModel {
 	copied := NewMaterial()
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied
+}
+
+func (ms *Materials) setup(vertices *Vertices, faces *Faces) {
+	prevVertexCount := 0
+
+	for _, v := range vertices.Data {
+		v.MaterialIndexes = make([]int, 0)
+	}
+
+	for _, m := range ms.Data {
+		for j := prevVertexCount; j < prevVertexCount+int(m.VerticesCount/3); j++ {
+			face := faces.Get(j)
+			for _, vertexIndexes := range face.VertexIndexes {
+				if !slices.Contains(vertices.Get(vertexIndexes).MaterialIndexes, m.Index) {
+					vertices.Get(vertexIndexes).MaterialIndexes =
+						append(vertices.Get(vertexIndexes).MaterialIndexes, m.Index)
+				}
+			}
+		}
+
+		prevVertexCount += int(m.VerticesCount / 3)
+	}
 }

@@ -610,6 +610,11 @@ func (w *GlWindow) Run() {
 			case pairMap := <-w.ReplaceModelSetChannel:
 				// 入替処理
 				for k := range pairMap {
+					// 変更が加えられている可能性があるので、セットアップ実施（変更がなければスルーされる）
+					if pairMap[k].NextModel != nil {
+						pairMap[k].NextModel.Setup()
+					}
+
 					if _, ok := w.modelSets[k]; ok {
 						// 既存のがあれば、次のを設定
 						w.modelSets[k].NextModel = pairMap[k].NextModel

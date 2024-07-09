@@ -73,7 +73,12 @@ func (pm *PmxModel) InitializeDisplaySlots() {
 }
 
 func (pm *PmxModel) Setup() {
+	if !pm.Materials.IsDirty() && !pm.Bones.IsDirty() && !pm.RigidBodies.IsDirty() && !pm.Joints.IsDirty() {
+		return
+	}
+
 	// セットアップ
+	pm.Materials.setup(pm.Vertices, pm.Faces)
 	pm.Bones.setup()
 
 	// 剛体
@@ -99,6 +104,10 @@ func (pm *PmxModel) Setup() {
 				pm.Bones.Get(pm.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex)
 		}
 	}
+
+	pm.Bones.SetDirty(false)
+	pm.RigidBodies.SetDirty(false)
+	pm.Joints.SetDirty(false)
 }
 
 func (m *PmxModel) Copy() mcore.IHashModel {

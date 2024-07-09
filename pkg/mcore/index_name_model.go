@@ -54,6 +54,7 @@ type IndexNameModels[T IIndexNameModel] struct {
 	Data        []T
 	NameIndexes map[string]int
 	nilFunc     func() T
+	isDirty     bool
 }
 
 func NewIndexNameModels[T IIndexNameModel](count int, nilFunc func() T) *IndexNameModels[T] {
@@ -84,6 +85,7 @@ func (c *IndexNameModels[T]) Update(value T) {
 		// 名前は先勝ち
 		c.NameIndexes[value.GetName()] = value.GetIndex()
 	}
+	c.SetDirty(true)
 }
 
 func (c *IndexNameModels[T]) Append(value T) {
@@ -95,6 +97,7 @@ func (c *IndexNameModels[T]) Append(value T) {
 		// 名前は先勝ち
 		c.NameIndexes[value.GetName()] = value.GetIndex()
 	}
+	c.SetDirty(true)
 }
 
 func (c *IndexNameModels[T]) GetIndexes() []int {
@@ -167,4 +170,12 @@ func (v *IndexNameModels[T]) Contains(index int) bool {
 func (v *IndexNameModels[T]) ContainsByName(name string) bool {
 	_, ok := v.NameIndexes[name]
 	return ok
+}
+
+func (v *IndexNameModels[T]) IsDirty() bool {
+	return v.isDirty
+}
+
+func (v *IndexNameModels[T]) SetDirty(dirty bool) {
+	v.isDirty = dirty
 }
