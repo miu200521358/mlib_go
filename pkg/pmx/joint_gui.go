@@ -56,18 +56,22 @@ func (j *Joint) initPhysics(
 		float32(j.JointParam.RotationLimitMax.GetRadians().GetX()),
 		float32(j.JointParam.RotationLimitMax.GetRadians().GetY()),
 		float32(j.JointParam.RotationLimitMax.GetRadians().GetZ())))
-	constraint.EnableSpring(0, true)
-	constraint.SetStiffness(0, float32(j.JointParam.SpringConstantTranslation.GetX()))
-	constraint.EnableSpring(1, true)
-	constraint.SetStiffness(1, float32(j.JointParam.SpringConstantTranslation.GetY()))
-	constraint.EnableSpring(2, true)
-	constraint.SetStiffness(2, float32(j.JointParam.SpringConstantTranslation.GetZ()))
-	constraint.EnableSpring(3, true)
-	constraint.SetStiffness(3, float32(j.JointParam.SpringConstantRotation.GetRadians().GetX()))
-	constraint.EnableSpring(4, true)
-	constraint.SetStiffness(4, float32(j.JointParam.SpringConstantRotation.GetRadians().GetY()))
-	constraint.EnableSpring(5, true)
-	constraint.SetStiffness(5, float32(j.JointParam.SpringConstantRotation.GetRadians().GetZ()))
+
+	if rigidBodyB.PhysicsType != PHYSICS_TYPE_STATIC {
+		// 剛体Bがボーン追従剛体の場合は、バネの値を設定しない
+		constraint.EnableSpring(0, true)
+		constraint.SetStiffness(0, float32(j.JointParam.SpringConstantTranslation.GetX()))
+		constraint.EnableSpring(1, true)
+		constraint.SetStiffness(1, float32(j.JointParam.SpringConstantTranslation.GetY()))
+		constraint.EnableSpring(2, true)
+		constraint.SetStiffness(2, float32(j.JointParam.SpringConstantTranslation.GetZ()))
+		constraint.EnableSpring(3, true)
+		constraint.SetStiffness(3, float32(j.JointParam.SpringConstantRotation.GetRadians().GetX()))
+		constraint.EnableSpring(4, true)
+		constraint.SetStiffness(4, float32(j.JointParam.SpringConstantRotation.GetRadians().GetY()))
+		constraint.EnableSpring(5, true)
+		constraint.SetStiffness(5, float32(j.JointParam.SpringConstantRotation.GetRadians().GetZ()))
+	}
 
 	constraint.SetParam(int(mbt.BT_CONSTRAINT_ERP), float32(0.5), 0)
 	constraint.SetParam(int(mbt.BT_CONSTRAINT_STOP_ERP), float32(0.5), 0)
