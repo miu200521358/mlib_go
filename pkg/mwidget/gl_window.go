@@ -780,7 +780,7 @@ func (w *GlWindow) Run() {
 			}
 
 			// モデルが変わっている場合は最新の情報を取得する
-			if w.modelSets[k].NextModel != nil && !w.modelSets[k].NextModel.DrawInitialized {
+			if w.modelSets[k].NextModel != nil {
 				// 次のモデルが指定されている場合、初期化して入替
 				if w.modelSets[k].Model != nil && w.modelSets[k].Model.DrawInitialized {
 					// 既存モデルが描画初期化されてたら削除
@@ -789,7 +789,9 @@ func (w *GlWindow) Run() {
 				}
 				w.modelSets[k].Model = w.modelSets[k].NextModel
 				w.modelSets[k].Model.Index = k
-				w.modelSets[k].Model.DrawInitialize(w.WindowIndex, w.Physics)
+				if !w.modelSets[k].NextModel.DrawInitialized {
+					w.modelSets[k].Model.DrawInitialize(w.WindowIndex, w.Physics)
+				}
 				w.modelSets[k].NextModel = nil
 				w.isSaveDelta = false
 			}
