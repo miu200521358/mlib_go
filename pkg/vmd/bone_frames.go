@@ -1148,6 +1148,12 @@ func (fs *BoneFrames) createBoneDeltas(
 		boneDeltas = NewBoneDeltas(model.Bones)
 	}
 
+	if len(boneNames) == 1 && model.Bones.ContainsByName(boneNames[0]) {
+		// 1ボーン指定の場合
+		bone := model.Bones.GetByName(boneNames[0])
+		return model.Bones.DeformBoneIndexes[bone.Index], boneDeltas
+	}
+
 	// 変形階層順ボーンIndexリスト
 	deformBoneIndexes := make([]int, 0, len(targetSortedBones))
 
@@ -1155,11 +1161,6 @@ func (fs *BoneFrames) createBoneDeltas(
 	relativeBoneIndexes := make(map[int]struct{})
 
 	if len(boneNames) > 0 {
-		if len(boneNames) == 1 {
-			// 1ボーン指定の場合
-			return fs.createOneBoneDeltas(frame, model, boneNames[0], boneDeltas)
-		}
-
 		// 指定ボーンに関連するボーンのみ対象とする
 		for _, boneName := range boneNames {
 			if !model.Bones.ContainsName(boneName) {
@@ -1217,31 +1218,6 @@ func (fs *BoneFrames) createBoneDeltas(
 					boneDeltas.Update(&BoneDelta{Bone: bone, Frame: frame})
 				}
 			}
-		}
-	}
-
-	return deformBoneIndexes, boneDeltas
-}
-
-// 1デフォーム対象ボーン情報一覧取得
-func (fs *BoneFrames) createOneBoneDeltas(
-	frame int,
-	model *pmx.PmxModel,
-	boneName string,
-	boneDeltas *BoneDeltas,
-) ([]int, *BoneDeltas) {
-	if boneDeltas == nil {
-		boneDeltas = NewBoneDeltas(model.Bones)
-	}
-
-	bone := model.Bones.GetByName(boneName)
-
-	// 変形階層順ボーンIndexリスト
-	deformBoneIndexes := model.Bones.DeformBoneIndexes[bone.Index]
-
-	for _, index := range deformBoneIndexes {
-		if !boneDeltas.Contains(index) {
-			boneDeltas.Update(&BoneDelta{Bone: bone, Frame: frame})
 		}
 	}
 

@@ -621,10 +621,12 @@ func (b *Bones) setup() {
 					b.IkTreeIndexes[bone.Index] = []int{bone.Index}
 				}
 			}
-
-			// ボーンのデフォームINDEXリストを取得
-			b.createLayerSortedIkBones(bone)
 		}
+	}
+
+	for _, bone := range b.Data {
+		// ボーンのデフォームINDEXリストを取得
+		b.createLayerSortedIkBones(bone)
 	}
 }
 
@@ -633,9 +635,7 @@ func (b *Bones) createLayerSortedIkBones(bone *Bone) {
 	relativeBoneIndexes := make(map[int]struct{})
 
 	// 対象のボーンは常に追加
-	if _, ok := relativeBoneIndexes[bone.Index]; !ok {
-		relativeBoneIndexes[bone.Index] = struct{}{}
-	}
+	relativeBoneIndexes[bone.Index] = struct{}{}
 
 	// 関連するボーンの追加
 	for _, index := range bone.RelativeBoneIndexes {
