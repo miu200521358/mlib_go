@@ -154,7 +154,8 @@ func (mat *MMat4) Transpose() *MMat4 {
 
 // Mul は行列の掛け算を行います
 func (m1 *MMat4) Mul(m2 *MMat4) *MMat4 {
-	*m1 = MMat4(mgl64.Mat4(*m1).Mul4(mgl64.Mat4(*m2)))
+	m := mgl64.Mat4(*m1).Mul4(mgl64.Mat4(*m2))
+	*m1 = MMat4(m)
 	return m1
 }
 
@@ -164,7 +165,8 @@ func (m1 *MMat4) Muled(m2 *MMat4) *MMat4 {
 }
 
 func (mat *MMat4) MulScalar(v float64) *MMat4 {
-	*mat = MMat4(mgl64.Mat4(*mat.Copy()).Mul(v))
+	m := mgl64.Mat4(*mat.Copy()).Mul(v)
+	*mat = MMat4(m)
 	return mat
 }
 

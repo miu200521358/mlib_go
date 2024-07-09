@@ -1112,7 +1112,7 @@ func TestVmdMotion_DeformIk28_Simple(t *testing.T) {
 }
 
 func TestVmdMotion_DeformIk29_Simple(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := &VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("../../test_resources/IKの挙動を見たい2_040.vmd")
