@@ -310,17 +310,10 @@ func (picker *FilePicker) GetData() (mcore.IHashModel, error) {
 		return nil, fmt.Errorf(mi18n.T("ファイルが存在しません"))
 	}
 
-	hash, err := picker.modelReader.ReadHashByFilePath(picker.PathLineEdit.Text())
-	if err != nil {
-		return nil, err
-	}
-
-	if picker.cacheData != nil && picker.cacheData.GetHash() == hash {
-		return picker.cacheData, nil
-	}
-
+	// キャッシュの有無は見ずに、必ず取得し直す
 	data, err := picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
 	defer runtime.GC() // 読み込み時のメモリ解放
+
 	if err != nil {
 		return nil, err
 	}
@@ -329,6 +322,7 @@ func (picker *FilePicker) GetData() (mcore.IHashModel, error) {
 	return data, nil
 }
 
+// パスが正しいことが分かっている上でデータだけ取り直したい場合
 func (picker *FilePicker) GetDataForce() mcore.IHashModel {
 	data, err := picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
 	if err != nil {
