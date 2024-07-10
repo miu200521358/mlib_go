@@ -103,10 +103,9 @@ func CanSave(path string) bool {
 func CreateOutputPath(originalPath, label string) string {
 	originalDir, fileName := filepath.Split(originalPath)
 	ext := filepath.Ext(fileName)
-	if label == "" {
-		return filepath.Join(originalDir, fmt.Sprintf("%s_%s_%s",
-			fileName[:len(fileName)-len(ext)], time.Now().Format("20060102_150405"), ext))
+	if label != "" {
+		label = label + "_"
 	}
-	return filepath.Join(originalDir, fmt.Sprintf("%s_%s_%s_%s",
-		fileName[:len(fileName)-len(ext)], label, time.Now().Format("20060102_150405"), ext))
+	return filepath.Join(originalDir, fmt.Sprintf("%s_%s%s%s", fileName[:len(fileName)-len(ext)],
+		label, time.Now().Format("20060102_150405"), ext))
 }

@@ -103,14 +103,14 @@ type RigidBody struct {
 	Rotation                *mmath.MRotation // 回転(x,y,z) -> ラジアン角
 	RigidBodyParam          *RigidBodyParam  // 剛体パラ
 	PhysicsType             PhysicsType      // 剛体の物理演算
-	CorrectPhysicsType      PhysicsType      // 剛体の物理演算(補正後)
-	XDirection              *mmath.MVec3     // X軸方向
-	YDirection              *mmath.MVec3     // Y軸方向
-	ZDirection              *mmath.MVec3     // Z軸方向
-	IsSystem                bool             // システムで追加した剛体か
-	Matrix                  *mmath.MMat4     // 剛体の行列
-	Bone                    *Bone            // 繋がっているボーン
-	JointedBone             *Bone            // ジョイントで繋がってるボーン
+	// CorrectPhysicsType      PhysicsType      // 剛体の物理演算(補正後)
+	XDirection  *mmath.MVec3 // X軸方向
+	YDirection  *mmath.MVec3 // Y軸方向
+	ZDirection  *mmath.MVec3 // Z軸方向
+	IsSystem    bool         // システムで追加した剛体か
+	Matrix      *mmath.MMat4 // 剛体の行列
+	Bone        *Bone        // 繋がっているボーン
+	JointedBone *Bone        // ジョイントで繋がってるボーン
 }
 
 // NewRigidBody creates a new rigid body.

@@ -64,7 +64,11 @@ func (bd *BoneDelta) LocalMatrix() *mmath.MMat4 {
 
 func (bd *BoneDelta) GlobalPosition() *mmath.MVec3 {
 	if bd.globalPosition == nil {
-		bd.globalPosition = bd.globalMatrix.Translation()
+		if bd.globalMatrix != nil {
+			bd.globalPosition = bd.globalMatrix.Translation()
+		} else {
+			bd.globalPosition = mmath.NewMVec3()
+		}
 	}
 	return bd.globalPosition
 }

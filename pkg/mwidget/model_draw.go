@@ -157,7 +157,7 @@ func deformBeforePhysics(
 		forceUpdate := rigidBody.UpdateFlags(model.Index, modelPhysics, enablePhysics, resetPhysics)
 		forceUpdate = timeStep == 0.0 || !enablePhysics || forceUpdate
 
-		if rigidBody.CorrectPhysicsType != pmx.PHYSICS_TYPE_DYNAMIC || forceUpdate {
+		if rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC || forceUpdate {
 			// ボーン追従剛体・物理＋ボーン位置もしくは強制更新の場合のみ剛体位置更新
 			boneTransform := mbt.NewBtTransform()
 			defer mbt.DeleteBtTransform(boneTransform)
@@ -191,7 +191,7 @@ func deformAfterPhysics(
 		// 物理剛体位置を更新
 		for _, isAfterPhysics := range []bool{false, true} {
 			for _, bone := range model.Bones.LayerSortedBones[isAfterPhysics] {
-				if bone.RigidBody == nil || bone.RigidBody.CorrectPhysicsType == pmx.PHYSICS_TYPE_STATIC {
+				if bone.RigidBody == nil || bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
 					continue
 				}
 				bonePhysicsGlobalMatrix := bone.RigidBody.GetRigidBodyBoneMatrix(model.Index, modelPhysics)

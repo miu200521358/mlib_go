@@ -775,11 +775,11 @@ func (w *GlWindow) Run() {
 					w.modelSets[k].Model.Delete()
 					w.modelSets[k].Model = nil
 				}
-				w.modelSets[k].Model = w.modelSets[k].NextModel
-				w.modelSets[k].Model.Index = k
 				if !w.modelSets[k].NextModel.DrawInitialized {
-					w.modelSets[k].Model.DrawInitialize(w.WindowIndex, w.Physics)
+					w.modelSets[k].NextModel.Index = k
+					w.modelSets[k].NextModel.DrawInitialize(w.WindowIndex, w.Physics)
 				}
+				w.modelSets[k].Model = w.modelSets[k].NextModel
 				w.modelSets[k].NextModel = nil
 				w.isSaveDelta = false
 			}

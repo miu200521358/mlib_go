@@ -18,7 +18,7 @@ func (r *RigidBody) UpdateFlags(
 		return false
 	}
 
-	if r.CorrectPhysicsType == PHYSICS_TYPE_STATIC || resetPhysics {
+	if r.PhysicsType == PHYSICS_TYPE_STATIC || resetPhysics {
 		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時
 		// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
 		btRigidBody.SetCollisionFlags(
@@ -84,7 +84,7 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics)
 	}
 	// btCollisionShape.SetMargin(0.0001)
 
-	r.CorrectPhysicsType = r.PhysicsType
+	// r.CorrectPhysicsType = r.PhysicsType
 	// if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE && r.BoneIndex < 0 {
 	// 	// ボーン追従 + 物理剛体の場合、ボーンIndexが設定されていない場合は物理剛体に変更
 	// 	r.CorrectPhysicsType = PHYSICS_TYPE_DYNAMIC
