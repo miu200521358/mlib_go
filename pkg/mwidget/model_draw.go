@@ -15,6 +15,27 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
+type ModelSet struct {
+	Model                        *pmx.PmxModel  // 現在描画中のモデル
+	Motion                       *vmd.VmdMotion // 現在描画中のモーション
+	InvisibleMaterialIndexes     []int          // 非表示材質インデックス
+	SelectedVertexIndexes        []int          // 選択頂点インデックス
+	NextModel                    *pmx.PmxModel  // UIから渡された次のモデル
+	NextMotion                   *vmd.VmdMotion // UIから渡された次のモーション
+	NextInvisibleMaterialIndexes []int          // UIから渡された次の非表示材質インデックス
+	NextSelectedVertexIndexes    []int          // UIから渡された次の選択頂点インデックス
+	prevDeltas                   *vmd.VmdDeltas // 前回のデフォーム情報
+}
+
+func NewModelSet() *ModelSet {
+	return &ModelSet{
+		InvisibleMaterialIndexes:     make([]int, 0),
+		SelectedVertexIndexes:        make([]int, 0),
+		NextInvisibleMaterialIndexes: make([]int, 0),
+		NextSelectedVertexIndexes:    make([]int, 0),
+	}
+}
+
 func deformsAll(
 	modelPhysics *mphysics.MPhysics,
 	modelSets []*ModelSet,
@@ -92,6 +113,10 @@ func deformBeforePhysics(
 	timeStep float32,
 	enablePhysics, resetPhysics bool,
 ) *vmd.VmdDeltas {
+	if motion == nil {
+		motion = vmd.NewVmdMotion("")
+	}
+
 	vds := vmd.NewVmdDeltas(model.Vertices)
 
 	// IKのON/OFF
@@ -155,6 +180,9 @@ func deformAfterPhysics(
 	frame int,
 	enablePhysics, resetPhysics bool,
 ) *vmd.VmdDeltas {
+	if motion == nil {
+		motion = vmd.NewVmdMotion("")
+	}
 
 	// IKのON/OFF
 	ikFrame := motion.IkFrames.Get(frame)

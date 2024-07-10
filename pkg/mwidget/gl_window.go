@@ -25,18 +25,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
-type ModelSet struct {
-	Model                        *pmx.PmxModel  // 現在描画中のモデル
-	Motion                       *vmd.VmdMotion // 現在描画中のモーション
-	InvisibleMaterialIndexes     []int          // 非表示材質インデックス
-	SelectedVertexIndexes        []int          // 選択頂点インデックス
-	NextModel                    *pmx.PmxModel  // UIから渡された次のモデル
-	NextMotion                   *vmd.VmdMotion // UIから渡された次のモーション
-	NextInvisibleMaterialIndexes []int          // UIから渡された次の非表示材質インデックス
-	NextSelectedVertexIndexes    []int          // UIから渡された次の選択頂点インデックス
-	prevDeltas                   *vmd.VmdDeltas // 前回のデフォーム情報
-}
-
 // 直角の定数値
 const RIGHT_ANGLE = 89.9
 
@@ -617,7 +605,7 @@ func (w *GlWindow) Run() {
 
 					for j := len(w.modelSets); j <= i; j++ {
 						// 既存のモデルセットがない場合は追加
-						w.modelSets = append(w.modelSets, &ModelSet{})
+						w.modelSets = append(w.modelSets, NewModelSet())
 					}
 
 					w.modelSets[i].NextModel = pairMap[i].NextModel
@@ -629,8 +617,10 @@ func (w *GlWindow) Run() {
 			case index := <-w.RemoveModelSetIndexChannel:
 				// 削除処理
 				if index < len(w.modelSets) {
-					w.modelSets[index].Model.Delete()
-					w.modelSets[index] = nil
+					if w.modelSets[index].Model != nil {
+						w.modelSets[index].Model.Delete()
+					}
+					w.modelSets[index] = NewModelSet()
 				}
 				w.isSaveDelta = false
 			case isPlaying := <-w.IsPlayingChannel:
