@@ -662,6 +662,8 @@ func (w *GlWindow) Run() {
 		}
 
 		if w.playing && w.motionPlayer != nil && w.frame >= w.motionPlayer.FrameEdit.MaxValue() {
+			// 再生中に最後までいったら最初にループして戻る
+			w.TriggerPhysicsReset()
 			w.SetFrame(0)
 
 			go func() {
