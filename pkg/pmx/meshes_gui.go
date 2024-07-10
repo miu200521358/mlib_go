@@ -261,7 +261,7 @@ func (m *Meshes) delete() {
 func (m *Meshes) Draw(
 	shader *mview.MShader, boneDeltas []mgl32.Mat4,
 	vertexMorphIndexes []int, vertexMorphDeltas [][]float32,
-	selectedVertexMorphIndexes []int, selectedVertexDeltas [][]float32, meshDeltas []*MeshDelta,
+	selectedVertexIndexes []int, selectedVertexDeltas [][]float32, meshDeltas []*MeshDelta,
 	invisibleMaterialIndexes []int, nextInvisibleMaterialIndexes []int, windowIndex int,
 	isDrawNormal, isDrawWire, isDrawSelectedVertex bool, isDrawBones map[BoneFlag]bool, bones *Bones,
 ) [][]float32 {
@@ -304,7 +304,7 @@ func (m *Meshes) Draw(
 
 	vertexPositions := make([][]float32, 0)
 	if isDrawSelectedVertex {
-		vertexPositions = m.drawSelectedVertex(selectedVertexMorphIndexes, selectedVertexDeltas,
+		vertexPositions = m.drawSelectedVertex(selectedVertexIndexes, selectedVertexDeltas,
 			shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
 	}
 
