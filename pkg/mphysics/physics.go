@@ -189,6 +189,7 @@ func (p *MPhysics) DeleteRigidBodies(modelIndex int) {
 		rigidBody := r.RigidBody
 		if k.ModelIndex == modelIndex {
 			p.world.RemoveRigidBody(rigidBody)
+			delete(p.rigidBodies, k)
 		}
 	}
 }
@@ -203,6 +204,7 @@ func (p *MPhysics) DeleteJoints(modelIndex int) {
 	for k, joint := range p.joints {
 		if k.ModelIndex == modelIndex {
 			p.world.RemoveConstraint(joint)
+			delete(p.joints, k)
 		}
 	}
 }
