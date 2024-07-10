@@ -43,7 +43,7 @@ const RIGHT_ANGLE = 89.9
 type GlWindow struct {
 	*glfw.Window
 	mWindow                *MWindow              // walkウィンドウ
-	modelSets              map[int]*ModelSet     // モデルセット
+	modelSets              []*ModelSet           // モデルセット
 	Shader                 *mview.MShader        // シェーダー
 	appConfig              *mconfig.AppConfig    // アプリケーション設定
 	title                  string                // ウィンドウタイトル(fpsとか入ってないオリジナル)
@@ -167,7 +167,7 @@ func NewGlWindow(
 
 	glWindow := GlWindow{
 		Window:                     w,
-		modelSets:                  make(map[int]*ModelSet),
+		modelSets:                  make([]*ModelSet, 0),
 		Shader:                     shader,
 		appConfig:                  appConfig,
 		title:                      title,
@@ -609,29 +609,28 @@ func (w *GlWindow) Run() {
 				w.isSaveDelta = false
 			case pairMap := <-w.ReplaceModelSetChannel:
 				// 入替処理
-				for k := range pairMap {
+				for i := range pairMap {
 					// 変更が加えられている可能性があるので、セットアップ実施（変更がなければスルーされる）
-					if pairMap[k].NextModel != nil {
-						pairMap[k].NextModel.Setup()
+					if pairMap[i].NextModel != nil {
+						pairMap[i].NextModel.Setup()
 					}
 
-					if _, ok := w.modelSets[k]; ok {
-						// 既存のがあれば、次のを設定
-						w.modelSets[k].NextModel = pairMap[k].NextModel
-						w.modelSets[k].NextMotion = pairMap[k].NextMotion
-						w.modelSets[k].NextSelectedVertexIndexes = pairMap[k].NextSelectedVertexIndexes
-						w.modelSets[k].NextInvisibleMaterialIndexes = pairMap[k].NextInvisibleMaterialIndexes
-					} else {
-						// なければ新規追加
-						w.modelSets[k] = pairMap[k]
+					for j := len(w.modelSets); j <= i; j++ {
+						// 既存のモデルセットがない場合は追加
+						w.modelSets = append(w.modelSets, &ModelSet{})
 					}
+
+					w.modelSets[i].NextModel = pairMap[i].NextModel
+					w.modelSets[i].NextMotion = pairMap[i].NextMotion
+					w.modelSets[i].NextSelectedVertexIndexes = pairMap[i].NextSelectedVertexIndexes
+					w.modelSets[i].NextInvisibleMaterialIndexes = pairMap[i].NextInvisibleMaterialIndexes
 				}
 				w.isSaveDelta = false
 			case index := <-w.RemoveModelSetIndexChannel:
 				// 削除処理
-				if _, ok := w.modelSets[index]; ok {
+				if index < len(w.modelSets) {
 					w.modelSets[index].Model.Delete()
-					delete(w.modelSets, index)
+					w.modelSets[index] = nil
 				}
 				w.isSaveDelta = false
 			case isPlaying := <-w.IsPlayingChannel:
@@ -764,21 +763,18 @@ func (w *GlWindow) Run() {
 			w.resetPhysicsStart()
 		}
 
+		// デフォーム
+		w.modelSets = deformsAll(
+			w.Physics, w.modelSets, int(w.frame), w.prevFrame,
+			timeStep, w.enablePhysics, w.doResetPhysicsProgress)
+
 		// 描画
 		for k := range w.modelSets {
-			if int(w.frame) != w.prevFrame {
-				// フレーム番号が変わっている場合は前回デフォームを破棄
-				w.modelSets[k].prevDeltas = nil
-			}
-
-			var prevDeltas *vmd.VmdDeltas
 			if w.modelSets[k].Model != nil {
-				prevDeltas = draw(
-					w.Physics, w.modelSets[k].Model, w.modelSets[k].Motion, w.Shader, w.modelSets[k].prevDeltas,
+				w.modelSets[k].prevDeltas = draw(
+					w.Physics, w.modelSets[k].Model, w.Shader, w.modelSets[k].prevDeltas,
 					w.modelSets[k].InvisibleMaterialIndexes, w.modelSets[k].NextInvisibleMaterialIndexes,
-					w.modelSets[k].SelectedVertexIndexes, w.modelSets[k].NextSelectedVertexIndexes,
-					k, int(w.frame), timeStep, w.enablePhysics, w.doResetPhysicsProgress,
-					w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones)
+					w.WindowIndex, w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones)
 			}
 
 			// モデルが変わっている場合は最新の情報を取得する
@@ -816,10 +812,9 @@ func (w *GlWindow) Run() {
 
 			// キーフレの手動変更がなかった場合のみ前回デフォームとして保持
 			if !w.isSaveDelta {
-				prevDeltas = nil
+				w.modelSets[k].prevDeltas = nil
 			}
 			w.isSaveDelta = true
-			w.modelSets[k].prevDeltas = prevDeltas
 		}
 
 		if w.doResetPhysicsProgress {
