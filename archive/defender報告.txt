@@ -1,0 +1,44 @@
+https://www.microsoft.com/en-us/wdsi/submissionhistory
+
+
+-------------------------
+
+
+このソフトウェアは私が開発したもので、マルウェアに関するコードは組み込んでません。
+Githubでコードを公開しています。
+
+本体
+https://github.com/miu200521358/vmd_sizing_t3/tree/develop
+
+依存ライブラリ
+https://github.com/miu200521358/mlib_go/tree/develop
+
+ご査収の程よろしくお願いいたします。
+
+
+----------------------
+
+This software was developed by me, and it does not contain any malware-related code.
+
+The code is publicly available on GitHub.
+
+Main repository
+https://github.com/miu200521358/sword_blur/tree/develop
+
+Dependencies library
+https://github.com/miu200521358/mlib_go/tree/develop
+
+Thank you for your consideration.
+
+
+-------------------------
+
+申し訳ありません。
+先日このソフトウェアを「マルウェアである」と報告しましたが、正しくは「マルウェアと誤検知される」ため、再審査をして頂きたかったソフトウェアになります。
+
+
+I'm sorry.
+
+Recently, I reported this software as "malware," but it is actually "misidentified as malware." I would like to request a re-examination of this software.
+
+
