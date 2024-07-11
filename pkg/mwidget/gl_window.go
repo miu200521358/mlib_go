@@ -824,8 +824,18 @@ func (w *GlWindow) Run() {
 					w.WindowIndex, w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones)
 			}
 
+			if w.modelSets[k].NextMotion != nil {
+				w.TriggerPhysicsReset()
+
+				w.modelSets[k].Motion = w.modelSets[k].NextMotion
+				w.modelSets[k].NextMotion = nil
+				w.isSaveDelta = false
+			}
+
 			// モデルが変わっている場合は最新の情報を取得する
 			if w.modelSets[k].NextModel != nil {
+				w.TriggerPhysicsReset()
+
 				// 次のモデルが指定されている場合、初期化して入替
 				if w.modelSets[k].Model != nil && w.modelSets[k].Model.DrawInitialized {
 					// 既存モデルが描画初期化されてたら削除
@@ -838,12 +848,6 @@ func (w *GlWindow) Run() {
 				}
 				w.modelSets[k].Model = w.modelSets[k].NextModel
 				w.modelSets[k].NextModel = nil
-				w.isSaveDelta = false
-			}
-
-			if w.modelSets[k].NextMotion != nil {
-				w.modelSets[k].Motion = w.modelSets[k].NextMotion
-				w.modelSets[k].NextMotion = nil
 				w.isSaveDelta = false
 			}
 
