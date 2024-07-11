@@ -470,8 +470,8 @@ func (b *Bones) getRelativeBoneIndexes(boneIndex int, parentBoneIndexes, relativ
 }
 
 // IKツリーの親INDEXを取得
-func (b *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool) *Bone {
-	if bone == nil || bone.ParentIndex < 0 || !b.Contains(bone.ParentIndex) {
+func (b *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool, loop int) *Bone {
+	if bone == nil || bone.ParentIndex < 0 || !b.Contains(bone.ParentIndex) || loop > 100 {
 		return nil
 	}
 
@@ -483,7 +483,7 @@ func (b *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool) *Bone {
 	if _, ok := b.IkTreeIndexes[parentBone.Index]; ok {
 		return parentBone
 	} else {
-		parentLayerBone := b.getIkTreeIndex(parentBone, isAfterPhysics)
+		parentLayerBone := b.getIkTreeIndex(parentBone, isAfterPhysics, loop+1)
 		if parentLayerBone != nil {
 			return parentLayerBone
 		}
@@ -494,7 +494,7 @@ func (b *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool) *Bone {
 		if _, ok := b.IkTreeIndexes[effectBone.Index]; ok {
 			return effectBone
 		} else {
-			effectorLayerBone := b.getIkTreeIndex(effectBone, isAfterPhysics)
+			effectorLayerBone := b.getIkTreeIndex(effectBone, isAfterPhysics, loop+1)
 			if effectorLayerBone != nil {
 				return effectorLayerBone
 			}
@@ -593,7 +593,7 @@ func (b *Bones) setup() {
 		for i := range len(b.LayerSortedBones[isAfterPhysics]) {
 			bone := b.LayerSortedBones[isAfterPhysics][i]
 			if bone.IsIK() {
-				ikLayerBone := b.getIkTreeIndex(bone, isAfterPhysics)
+				ikLayerBone := b.getIkTreeIndex(bone, isAfterPhysics, 0)
 				if ikLayerBone != nil {
 					// 合致するIKツリーがある場合、そのレイヤーに登録
 					b.IkTreeIndexes[ikLayerBone.Index] =
@@ -602,7 +602,7 @@ func (b *Bones) setup() {
 				}
 				for _, link := range bone.Ik.Links {
 					linkBone := b.Get(link.BoneIndex)
-					linkLayerBone := b.getIkTreeIndex(linkBone, isAfterPhysics)
+					linkLayerBone := b.getIkTreeIndex(linkBone, isAfterPhysics, 0)
 					if linkLayerBone != nil {
 						// 合致するIKツリーがある場合、そのレイヤーに登録
 						b.IkTreeIndexes[linkLayerBone.Index] =
