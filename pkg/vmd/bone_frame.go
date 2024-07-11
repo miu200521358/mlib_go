@@ -83,14 +83,13 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 
 func (v *BoneFrame) Copy() IBaseFrame {
 	copied := &BoneFrame{
-		BaseFrame:     NewFrame(v.GetIndex()).(*BaseFrame),
-		Position:      v.Position.Copy(),
-		LocalPosition: nil,
-		Rotation:      v.Rotation.Copy(),
-		LocalRotation: nil,
-		Scale:         nil,
-		LocalScale:    nil,
-		Curves:        NewBoneCurves(),
+		BaseFrame: NewFrame(v.GetIndex()).(*BaseFrame),
+	}
+	if v.Position != nil {
+		copied.Position = v.Position.Copy()
+	}
+	if v.Rotation != nil {
+		copied.Rotation = v.Rotation.Copy()
 	}
 	if v.LocalPosition != nil {
 		copied.LocalPosition = v.LocalPosition.Copy()

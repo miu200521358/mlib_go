@@ -119,11 +119,11 @@ func (fs *BaseFrames[T]) Get(index int) T {
 	nextFrame := fs.nextFrame(index)
 	if nextFrame == prevFrame {
 		// 次のキーフレが無い場合、最大キーフレのコピーを返す
-		if fs.RegisteredIndexes.Len() == 0 {
+		if fs.Indexes.Len() == 0 {
 			// 存在しない場合nullを返す
 			return fs.nullFunc()
 		}
-		copied := fs.data[fs.RegisteredIndexes.Max()].Copy()
+		copied := fs.data[fs.Indexes.Max()].Copy()
 		copied.SetIndex(index)
 		return copied.(T)
 	}
