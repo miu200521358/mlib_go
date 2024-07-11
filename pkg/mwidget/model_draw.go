@@ -92,8 +92,8 @@ func deformsAll(
 
 				modelSets[ii].prevDeltas = deformAfterPhysics(
 					modelPhysics, modelSets[ii].Model, modelSets[ii].Motion, modelSets[ii].prevDeltas,
-					modelSets[ii].SelectedVertexIndexes, modelSets[ii].NextSelectedVertexIndexes,
-					int(frame), enablePhysics, resetPhysics,
+					modelSets[ii].SelectedVertexIndexes, modelSets[ii].NextSelectedVertexIndexes, int(frame),
+					enablePhysics, resetPhysics,
 				)
 			}(i)
 		}
@@ -184,11 +184,11 @@ func deformAfterPhysics(
 		motion = vmd.NewVmdMotion("")
 	}
 
-	// IKのON/OFF
-	ikFrame := motion.IkFrames.Get(frame)
-
+	// 物理剛体位置を更新
 	if enablePhysics || resetPhysics {
-		// 物理剛体位置を更新
+		// IKのON/OFF
+		ikFrame := motion.IkFrames.Get(frame)
+
 		for _, isAfterPhysics := range []bool{false, true} {
 			for _, bone := range model.Bones.LayerSortedBones[isAfterPhysics] {
 				if bone.RigidBody == nil || bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
@@ -202,11 +202,11 @@ func deformAfterPhysics(
 				}
 			}
 		}
-	}
 
-	// 物理後のデフォーム情報
-	deltas.Bones = motion.BoneFrames.DeformByPhysicsFlag(frame, model, nil, true,
-		deltas.Bones, deltas.Morphs, ikFrame, true)
+		// 物理後のデフォーム情報
+		deltas.Bones = motion.BoneFrames.DeformByPhysicsFlag(frame, model, nil, true,
+			deltas.Bones, deltas.Morphs, ikFrame, true)
+	}
 
 	// GL描画用データの作成
 	deltas.BoneGlDeltas = make([]mgl32.Mat4, len(model.Bones.Data))

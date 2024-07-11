@@ -817,7 +817,7 @@ func (w *GlWindow) Run() {
 
 		// 描画
 		for k := range w.modelSets {
-			if w.modelSets[k].Model != nil {
+			if w.modelSets[k].Model != nil && w.modelSets[k].prevDeltas != nil {
 				w.modelSets[k].prevDeltas = draw(
 					w.Physics, w.modelSets[k].Model, w.Shader, w.modelSets[k].prevDeltas,
 					w.modelSets[k].InvisibleMaterialIndexes, w.modelSets[k].NextInvisibleMaterialIndexes,
