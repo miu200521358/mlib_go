@@ -325,6 +325,8 @@ func (picker *FilePicker) GetData() (mcore.IHashModel, error) {
 // パスが正しいことが分かっている上でデータだけ取り直したい場合
 func (picker *FilePicker) GetDataForce() mcore.IHashModel {
 	data, err := picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
+	defer runtime.GC() // 読み込み時のメモリ解放
+
 	if err != nil {
 		return nil
 	}
@@ -375,11 +377,15 @@ func (picker *FilePicker) OnChanged(path string) {
 	picker.PathLineEdit.SetText(path)
 
 	if picker.modelReader != nil && picker.historyKey != "" {
-		modelName, err := picker.modelReader.ReadNameByFilepath(path)
-		if err != nil {
-			picker.nameLineEdit.SetText(mi18n.T("読み込み失敗"))
+		if path == "" {
+			picker.nameLineEdit.SetText(mi18n.T("未設定"))
 		} else {
-			picker.nameLineEdit.SetText(modelName)
+			modelName, err := picker.modelReader.ReadNameByFilepath(path)
+			if err != nil {
+				picker.nameLineEdit.SetText(mi18n.T("読み込み失敗"))
+			} else {
+				picker.nameLineEdit.SetText(modelName)
+			}
 		}
 	}
 
