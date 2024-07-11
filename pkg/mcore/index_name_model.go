@@ -164,7 +164,7 @@ func (c *IndexNameModels[T]) GetByName(name string) T {
 }
 
 func (v *IndexNameModels[T]) Contains(index int) bool {
-	return index >= 0 && index < len(v.Data) && v.Data[index].IsValid()
+	return index >= 0 && index < len(v.Data) && !reflect.ValueOf(v.Data[index]).IsNil()
 }
 
 func (v *IndexNameModels[T]) ContainsByName(name string) bool {
