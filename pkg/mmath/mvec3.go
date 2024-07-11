@@ -111,6 +111,10 @@ func (v *MVec3) DivZ(z float64) {
 	v[2] /= z
 }
 
+func (v *MVec3) GetXY() *MVec2 {
+	return &MVec2{v.GetX(), v.GetY()}
+}
+
 func (v *MVec3) IsOnlyX() bool {
 	return !NearEquals(v.GetX(), 0, 1e-10) &&
 		NearEquals(v.GetY(), 0, 1e-10) &&
@@ -670,4 +674,40 @@ func StdMeanVec3(values []MVec3, err float64) *MVec3 {
 
 	mean := Mean2DVertical(filteredStandardValues)
 	return &MVec3{mean[0], mean[1], mean[2]}
+}
+
+// 点が直方体内にあるかどうかを判定する関数
+func (point *MVec3) IsPointInsideBox(min, max *MVec3) bool {
+	return point.GetX() >= min.GetX() && point.GetX() <= max.GetX() &&
+		point.GetY() >= min.GetY() && point.GetY() <= max.GetY() &&
+		point.GetZ() >= min.GetZ() && point.GetZ() <= max.GetZ()
+}
+
+// 直方体の境界を計算する関数
+func CalculateBoundingBox(points ...*MVec3) (minPos, maxPos *MVec3) {
+	minPos = &MVec3{math.Inf(1), math.Inf(1), math.Inf(1)}
+	maxPos = &MVec3{math.Inf(-1), math.Inf(-1), math.Inf(-1)}
+
+	for _, p := range points {
+		if p.GetX() < minPos.GetX() {
+			minPos.SetX(p.GetX())
+		}
+		if p.GetY() < minPos.GetY() {
+			minPos.SetY(p.GetY())
+		}
+		if p.GetZ() < minPos.GetZ() {
+			minPos.SetZ(p.GetZ())
+		}
+		if p.GetX() > maxPos.GetX() {
+			maxPos.SetX(p.GetX())
+		}
+		if p.GetY() > maxPos.GetY() {
+			maxPos.SetY(p.GetY())
+		}
+		if p.GetZ() > maxPos.GetZ() {
+			maxPos.SetZ(p.GetZ())
+		}
+	}
+
+	return minPos, maxPos
 }

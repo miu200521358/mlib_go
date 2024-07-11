@@ -38,18 +38,18 @@ func (vds *VertexDeltas) Get(vertexIndex int) *VertexDelta {
 	return vds.Data[vertexIndex]
 }
 
-func (vds *VertexDeltas) GetNearestVertexIndexes(worldPos *mmath.MVec3, visibleMaterialIndexes []int) []int {
+func (vds *VertexDeltas) FindNearestVertexIndexes(frontPos *mmath.MVec3, visibleMaterialIndexes []int) []int {
 	vertexIndexes := make([]int, 0)
 	distances := make([]float64, len(vds.Data))
 	for i := range len(vds.Data) {
 		vd := vds.Get(i)
 		vertex := vds.Vertices.Get(i)
 		if visibleMaterialIndexes == nil {
-			distances[i] = worldPos.Distance(vd.Position)
+			distances[i] = frontPos.Distance(vd.Position)
 		} else {
 			for _, materialIndex := range visibleMaterialIndexes {
 				if slices.Contains(vertex.MaterialIndexes, materialIndex) {
-					distances[i] = worldPos.Distance(vd.Position)
+					distances[i] = frontPos.Distance(vd.Position)
 					break
 				} else {
 					// 非表示材質は最長距離をとりあえず入れておく
@@ -73,5 +73,38 @@ func (vds *VertexDeltas) GetNearestVertexIndexes(worldPos *mmath.MVec3, visibleM
 		}
 		vertexIndexes = append(vertexIndexes, sortedIndexes[i])
 	}
+	return vertexIndexes
+}
+
+func (vds *VertexDeltas) FindVerticesInBox(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos,
+	prevXnowYBackPos, nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3,
+	visibleMaterialIndexes []int) []int {
+	vertexIndexes := make([]int, 0)
+
+	// 境界ボックスを計算
+	minPos, maxPos := mmath.CalculateBoundingBox(
+		prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
+		nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos,
+	)
+
+	for i := range len(vds.Data) {
+		vd := vds.Get(i)
+		vertex := vds.Vertices.Get(i)
+		if visibleMaterialIndexes == nil {
+			if vd.Position.IsPointInsideBox(minPos, maxPos) {
+				vertexIndexes = append(vertexIndexes, i)
+			}
+		} else {
+			for _, materialIndex := range visibleMaterialIndexes {
+				if slices.Contains(vertex.MaterialIndexes, materialIndex) {
+					if vd.Position.IsPointInsideBox(minPos, maxPos) {
+						vertexIndexes = append(vertexIndexes, i)
+					}
+					break
+				}
+			}
+		}
+	}
+
 	return vertexIndexes
 }

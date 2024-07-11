@@ -26,7 +26,7 @@ require (
 	github.com/jinzhu/copier v0.4.0
 	github.com/nicksnyder/go-i18n/v2 v2.4.0
 	github.com/petar/GoLLRB v0.0.0-20210522233825-ae3b015fd3e9
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.14.0
 	gonum.org/v1/gonum v0.15.0
 	gopkg.in/Knetic/govaluate.v3 v3.0.0 // indirect
 )

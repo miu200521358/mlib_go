@@ -37,9 +37,11 @@ type GlWindow struct {
 	title                  string                // ウィンドウタイトル(fpsとか入ってないオリジナル)
 	WindowIndex            int                   // ウィンドウインデックス
 	prevCursorPos          *mmath.MVec2          // 前回のカーソル位置
+	nowCursorPos           *mmath.MVec2          // 現在のカーソル位置
 	yaw                    float64               // ウィンドウ操作yaw
 	pitch                  float64               // ウィンドウ操作pitch
 	Physics                *mphysics.MPhysics    // 物理
+	leftButtonPressed      bool                  // 左ボタン押下フラグ
 	middleButtonPressed    bool                  // 中ボタン押下フラグ
 	rightButtonPressed     bool                  // 右ボタン押下フラグ
 	updatedPrev            bool                  // 前回のカーソル位置更新フラグ
@@ -66,9 +68,9 @@ type GlWindow struct {
 	width                  int                   // ウィンドウ幅
 	height                 int                   // ウィンドウ高さ
 	floor                  *MFloor               // 床
-	funcWorldPos           func(worldPos *mmath.MVec3,
-		vmdDeltas []*vmd.VmdDeltas,
-		viewMat *mmath.MMat4) // 選択ポイントからのグローバル位置取得コールバック関数
+	funcWorldPos           func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
+		nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3,
+		vmdDeltas []*vmd.VmdDeltas) // 選択ポイントからのグローバル位置取得コールバック関数
 	AppendModelSetChannel      chan *ModelSet         // モデルセット追加チャネル
 	RemoveModelSetIndexChannel chan int               // モデルセット削除チャネル
 	ReplaceModelSetChannel     chan map[int]*ModelSet // モデルセット入替チャネル
@@ -135,10 +137,10 @@ func NewGlWindow(
 				source, glType, severity, message)
 			panic("critical OpenGL error")
 		case gl.DEBUG_SEVERITY_MEDIUM:
-			mlog.D("[MEDIUM] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
+			mlog.V("[MEDIUM] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
 				source, glType, severity, message)
 		case gl.DEBUG_SEVERITY_LOW:
-			mlog.D("[LOW] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
+			mlog.V("[LOW] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
 				source, glType, severity, message)
 			// case gl.DEBUG_SEVERITY_NOTIFICATION:
 			// 	mlog.D("[NOTIFICATION] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
@@ -161,6 +163,7 @@ func NewGlWindow(
 		title:                      title,
 		WindowIndex:                windowIndex,
 		prevCursorPos:              &mmath.MVec2{0, 0},
+		nowCursorPos:               &mmath.MVec2{0, 0},
 		yaw:                        RIGHT_ANGLE,
 		pitch:                      0.0,
 		Physics:                    mphysics.NewMPhysics(shader),
@@ -217,7 +220,8 @@ func (w *GlWindow) SetMotionPlayer(mp *MotionPlayer) {
 	w.motionPlayer = mp
 }
 
-func (w *GlWindow) SetFuncWorldPos(f func(worldPos *mmath.MVec3, vmdDeltas []*vmd.VmdDeltas, viewMat *mmath.MMat4)) {
+func (w *GlWindow) SetFuncWorldPos(f func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
+	nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*vmd.VmdDeltas)) {
 	w.funcWorldPos = f
 }
 
@@ -381,61 +385,171 @@ func (w *GlWindow) handleMouseButtonEvent(
 		} else if action == glfw.Release {
 			w.rightButtonPressed = false
 		}
-	} else if button == glfw.MouseButtonLeft && action == glfw.Press && w.funcWorldPos != nil {
-		// クリック位置の取得(選択頂点ハイライト機能が有効な時のみ)
-		if w.VisibleSelectedVertex {
-			x, y := window.GetCursorPos()
-			worldPos, vmdDeltas, viewMat := w.getWorldPosition(int(x), int(y))
-			w.funcWorldPos(worldPos, vmdDeltas, viewMat)
+	} else if button == glfw.MouseButtonLeft && w.funcWorldPos != nil && w.VisibleSelectedVertex {
+		if action == glfw.Press {
+			w.leftButtonPressed = true
+			w.updatedPrev = false
+		} else if action == glfw.Release {
+			w.leftButtonPressed = false
+			w.execWorldPos()
+			w.nowCursorPos = &mmath.MVec2{0, 0}
 		}
 	}
 }
 
 func (gw *GlWindow) getWorldPosition(
-	x, y int,
-) (*mmath.MVec3, []*vmd.VmdDeltas, *mmath.MMat4) {
-	mlog.D("x=%d, y=%d", x, y)
-
+	x, y, z float32,
+) *mmath.MVec3 {
 	// ウィンドウサイズを取得
 	w, h := float32(gw.width), float32(gw.height)
 
 	// プロジェクション行列の設定
 	projection := mgl32.Perspective(mgl32.DegToRad(gw.Shader.FieldOfViewAngle), w/h, gw.Shader.NearPlane, gw.Shader.FarPlane)
-	mlog.D("Projection: %s", projection.String())
+	mlog.V("Projection: %s", projection.String())
 
 	// カメラの位置と中心からビュー行列を計算
 	cameraPosition := gw.Shader.CameraPosition.GL()
 	lookAtCenter := gw.Shader.LookAtCenterPosition.GL()
 	view := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
-	mlog.D("CameraPosition: %s, LookAtCenterPosition: %s", gw.Shader.CameraPosition.String(), gw.Shader.LookAtCenterPosition.String())
-	mlog.D("View: %s", view.String())
+	mlog.V("CameraPosition: %s, LookAtCenterPosition: %s", gw.Shader.CameraPosition.String(), gw.Shader.LookAtCenterPosition.String())
+	mlog.V("View: %s", view.String())
 
-	depth := gw.Shader.Msaa.ReadDepthAt(x, y, gw.width, gw.height)
 	worldCoords, err := mgl32.UnProject(
-		mgl32.Vec3{float32(x), float32(gw.height) - float32(y), depth},
+		mgl32.Vec3{x, float32(gw.height) - y, z},
 		view, projection, 0, 0, gw.width, gw.height)
 	if err != nil {
 		mlog.E("UnProject error: %v", err)
-		return nil, nil, nil
+		return nil
 	}
 
 	worldPos := &mmath.MVec3{float64(-worldCoords.X()), float64(worldCoords.Y()), float64(worldCoords.Z())}
-	mlog.D("WorldPosResult: x=%.7f, y=%.7f, z=%.7f (%.7f)", worldPos.GetX(), worldPos.GetY(), worldPos.GetZ(), depth)
+	mlog.D("WindowPos [x=%.3f, y=%.3f, z=%.7f] -> WorldPos [x=%.3f, y=%.3f, z=%.3f]",
+		x, y, z, worldPos.GetX(), worldPos.GetY(), worldPos.GetZ())
 
-	viewInv := view.Inv()
-	viewMat := &mmath.MMat4{
-		float64(viewInv[0]), float64(viewInv[1]), float64(viewInv[2]), float64(viewInv[3]),
-		float64(viewInv[4]), float64(viewInv[5]), float64(viewInv[6]), float64(viewInv[7]),
-		float64(viewInv[8]), float64(viewInv[9]), float64(viewInv[10]), float64(viewInv[11]),
-		float64(viewInv[12]), float64(viewInv[13]), float64(viewInv[14]), float64(viewInv[15]),
-	}
+	return worldPos
+}
 
-	vmdDeltas := make([]*vmd.VmdDeltas, len(gw.modelSets))
-	for i, modelSet := range gw.modelSets {
+func (w GlWindow) execWorldPos() {
+	prevX := w.prevCursorPos.GetX()
+	prevY := w.prevCursorPos.GetY()
+	nowX := w.nowCursorPos.GetX()
+	nowY := w.nowCursorPos.GetY()
+
+	vmdDeltas := make([]*vmd.VmdDeltas, len(w.modelSets))
+	for i, modelSet := range w.modelSets {
 		vmdDeltas[i] = modelSet.prevDeltas
 	}
 
-	return worldPos, vmdDeltas, viewMat
+	// x: prev, y: prevのワールド座標位置
+	depth := w.Shader.Msaa.ReadDepthAt(int(prevX), int(prevY), w.width, w.height)
+	prevXprevYFrontPos := w.getWorldPosition(float32(prevX), float32(prevY), max(depth-1e-6, 0.0))
+	prevXprevYBackPos := w.getWorldPosition(float32(prevX), float32(prevY), min(depth+1e-6, 1.0))
+
+	if w.nowCursorPos.Length() == 0 || w.prevCursorPos.Distance(w.nowCursorPos) < 0.1 {
+		// カーソルが動いていない場合は直近のだけ取得
+
+		w.funcWorldPos(prevXprevYFrontPos, prevXprevYBackPos, nil, nil, nil, nil, nil, nil, vmdDeltas)
+	} else {
+		// x: prev, y: nowのワールド座標位置
+		depth = w.Shader.Msaa.ReadDepthAt(int(prevX), int(nowY), w.width, w.height)
+		prevXnowYFrontPos := w.getWorldPosition(float32(prevX), float32(nowY), max(depth-1e-6, 0.0))
+		prevXnowYBackPos := w.getWorldPosition(float32(prevX), float32(nowY), min(depth+1e-6, 1.0))
+
+		// x: now, y: prevのワールド座標位置
+		depth = w.Shader.Msaa.ReadDepthAt(int(nowX), int(prevY), w.width, w.height)
+		nowXprevYFrontPos := w.getWorldPosition(float32(nowX), float32(prevY), max(depth-1e-6, 0.0))
+		nowXprevYBackPos := w.getWorldPosition(float32(nowX), float32(prevY), min(depth+1e-6, 1.0))
+
+		// x: now, y: nowのワールド座標位置
+		depth = w.Shader.Msaa.ReadDepthAt(int(nowX), int(nowY), w.width, w.height)
+		nowXnowYFrontPos := w.getWorldPosition(float32(nowX), float32(nowY), max(depth-1e-6, 0.0))
+		nowXnowYBackPos := w.getWorldPosition(float32(nowX), float32(nowY), min(depth+1e-6, 1.0))
+
+		w.funcWorldPos(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos, nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos, vmdDeltas)
+	}
+}
+
+func (w *GlWindow) updateCameraAngle(xpos, ypos float64) {
+
+	ratio := 0.1
+	if w.shiftPressed {
+		ratio *= 10
+	} else if w.ctrlPressed {
+		ratio *= 0.1
+	}
+
+	// 右クリックはカメラ中心をそのままにカメラ位置を変える
+	xOffset := (w.prevCursorPos.GetX() - xpos) * ratio
+	yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
+
+	// 方位角と仰角を更新
+	w.yaw += xOffset
+	w.pitch += yOffset
+
+	// 仰角の制限（水平面より上下に行き過ぎないようにする）
+	if w.pitch > RIGHT_ANGLE {
+		w.pitch = RIGHT_ANGLE
+	} else if w.pitch < -RIGHT_ANGLE {
+		w.pitch = -RIGHT_ANGLE
+	}
+
+	// 方位角の制限（360度を超えないようにする）
+	if w.yaw > 360.0 {
+		w.yaw -= 360.0
+	} else if w.yaw < -360.0 {
+		w.yaw += 360.0
+	}
+
+	// 球面座標系をデカルト座標系に変換
+	// radius := float64(-w.Shader.CameraPosition.Sub(w.Shader.LookAtCenterPosition).Length())
+	radius := float64(mview.INITIAL_CAMERA_POSITION_Z)
+	cameraX := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Cos(mgl64.DegToRad(w.yaw))
+	cameraY := radius * math.Sin(mgl64.DegToRad(w.pitch))
+	cameraZ := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw))
+
+	// カメラ位置を更新
+	w.Shader.CameraPosition.SetX(cameraX)
+	w.Shader.CameraPosition.SetY(mview.INITIAL_CAMERA_POSITION_Y + cameraY)
+	w.Shader.CameraPosition.SetZ(cameraZ)
+	// mlog.D("xOffset %.7f, yOffset %.7f, CameraPosition: %s, LookAtCenterPosition: %s\n",
+	// 	xOffset, yOffset, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
+}
+
+func (w *GlWindow) updateCameraPosition(xpos, ypos float64) {
+
+	ratio := 0.07
+	if w.shiftPressed {
+		ratio *= 10
+	} else if w.ctrlPressed {
+		ratio *= 0.1
+	}
+	// 中ボタンが押された場合の処理
+	if w.middleButtonPressed {
+		ratio := 0.07
+		if w.shiftPressed {
+			ratio *= 10
+		} else if w.ctrlPressed {
+			ratio *= 0.1
+		}
+
+		xOffset := (w.prevCursorPos.GetX() - xpos) * ratio
+		yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
+
+		// カメラの向きに基づいて移動方向を計算
+		forward := w.Shader.LookAtCenterPosition.Subed(w.Shader.CameraPosition)
+		right := forward.Cross(mmath.MVec3UnitY).Normalize()
+		up := right.Cross(forward.Normalize()).Normalize()
+
+		// 上下移動のベクトルを計算
+		upMovement := up.MulScalar(-yOffset)
+		// 左右移動のベクトルを計算
+		rightMovement := right.MulScalar(-xOffset)
+
+		// 移動ベクトルを合成してカメラ位置と中心を更新
+		movement := upMovement.Add(rightMovement)
+		w.Shader.CameraPosition.Add(movement)
+		w.Shader.LookAtCenterPosition.Add(movement)
+	}
 }
 
 func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos float64) {
@@ -449,83 +563,16 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 		return
 	}
 
-	if w.rightButtonPressed {
-		ratio := 0.1
-		if w.shiftPressed {
-			ratio *= 10
-		} else if w.ctrlPressed {
-			ratio *= 0.1
-		}
-
-		// 右クリックはカメラ中心をそのままにカメラ位置を変える
-		xOffset := (w.prevCursorPos.GetX() - xpos) * ratio
-		yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
-
-		// 方位角と仰角を更新
-		w.yaw += xOffset
-		w.pitch += yOffset
-
-		// 仰角の制限（水平面より上下に行き過ぎないようにする）
-		if w.pitch > RIGHT_ANGLE {
-			w.pitch = RIGHT_ANGLE
-		} else if w.pitch < -RIGHT_ANGLE {
-			w.pitch = -RIGHT_ANGLE
-		}
-
-		// 方位角の制限（360度を超えないようにする）
-		if w.yaw > 360.0 {
-			w.yaw -= 360.0
-		} else if w.yaw < -360.0 {
-			w.yaw += 360.0
-		}
-
-		// 球面座標系をデカルト座標系に変換
-		// radius := float64(-w.Shader.CameraPosition.Sub(w.Shader.LookAtCenterPosition).Length())
-		radius := float64(mview.INITIAL_CAMERA_POSITION_Z)
-		cameraX := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Cos(mgl64.DegToRad(w.yaw))
-		cameraY := radius * math.Sin(mgl64.DegToRad(w.pitch))
-		cameraZ := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw))
-
-		// カメラ位置を更新
-		w.Shader.CameraPosition.SetX(cameraX)
-		w.Shader.CameraPosition.SetY(mview.INITIAL_CAMERA_POSITION_Y + cameraY)
-		w.Shader.CameraPosition.SetZ(cameraZ)
-		// mlog.D("xOffset %.7f, yOffset %.7f, CameraPosition: %s, LookAtCenterPosition: %s\n",
-		// 	xOffset, yOffset, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
+	if w.leftButtonPressed {
+		w.nowCursorPos.SetX(xpos)
+		w.nowCursorPos.SetY(ypos)
+		return
+	} else if w.rightButtonPressed {
+		// 右クリックはカメラの角度を更新
+		w.updateCameraAngle(xpos, ypos)
 	} else if w.middleButtonPressed {
-		ratio := 0.07
-		if w.shiftPressed {
-			ratio *= 10
-		} else if w.ctrlPressed {
-			ratio *= 0.1
-		}
-		// 中ボタンが押された場合の処理
-		if w.middleButtonPressed {
-			ratio := 0.07
-			if w.shiftPressed {
-				ratio *= 10
-			} else if w.ctrlPressed {
-				ratio *= 0.1
-			}
-
-			xOffset := (w.prevCursorPos.GetX() - xpos) * ratio
-			yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
-
-			// カメラの向きに基づいて移動方向を計算
-			forward := w.Shader.LookAtCenterPosition.Subed(w.Shader.CameraPosition)
-			right := forward.Cross(mmath.MVec3UnitY).Normalize()
-			up := right.Cross(forward.Normalize()).Normalize()
-
-			// 上下移動のベクトルを計算
-			upMovement := up.MulScalar(-yOffset)
-			// 左右移動のベクトルを計算
-			rightMovement := right.MulScalar(-xOffset)
-
-			// 移動ベクトルを合成してカメラ位置と中心を更新
-			movement := upMovement.Add(rightMovement)
-			w.Shader.CameraPosition.Add(movement)
-			w.Shader.LookAtCenterPosition.Add(movement)
-		}
+		// 中クリックはカメラ位置と中心を移動
+		w.updateCameraPosition(xpos, ypos)
 	}
 
 	w.prevCursorPos.SetX(xpos)
