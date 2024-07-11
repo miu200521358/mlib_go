@@ -264,7 +264,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 
 		if pmxReadPicker.Exists() {
 			model := pmxReadPicker.GetCache().(*pmx.PmxModel)
-			var nearestVertexIndexes []int
+			var nearestVertexIndexes [][]int
 			// 直近頂点を取得
 			if prevXnowYFrontPos == nil {
 				nearestVertexIndexes = vmdDeltas[0].Vertices.FindNearestVertexIndexes(prevXprevYFrontPos, nil)
@@ -273,15 +273,18 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 					prevXnowYFrontPos, prevXnowYBackPos, nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos,
 					nowXnowYBackPos, nil)
 			}
-			for _, vertexIndex := range nearestVertexIndexes {
-				vertex := model.Vertices.Get(vertexIndex)
-				mlog.I("In Box Vertex: %d (元: %s)(変形: %s)",
-					vertex.Index, vertex.Position.String(),
-					vmdDeltas[0].Vertices.Get(vertex.Index).Position.String())
+
+			if len(nearestVertexIndexes) > 0 {
+				for _, vertexIndex := range nearestVertexIndexes {
+					vertex := model.Vertices.Get(vertexIndex[0])
+					mlog.I("In Box Vertex: %d (元: %s)(変形: %s)",
+						vertex.Index, vertex.Position.String(),
+						vmdDeltas[0].Vertices.Get(vertex.Index).Position.String())
+				}
+				go func() {
+					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*mwidget.ModelSet{0: {NextSelectedVertexIndexes: nearestVertexIndexes[0]}}
+				}()
 			}
-			go func() {
-				mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*mwidget.ModelSet{0: {NextSelectedVertexIndexes: nearestVertexIndexes}}
-			}()
 
 			// // 大体近いボーンを取得
 			// nearestBoneIndexes := vmdDeltas[0].Bones.GetNearestBoneIndexes(worldPos)

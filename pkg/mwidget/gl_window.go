@@ -440,30 +440,40 @@ func (w GlWindow) execWorldPos() {
 		vmdDeltas[i] = modelSet.prevDeltas
 	}
 
-	// x: prev, y: prevのワールド座標位置
-	depth := w.Shader.Msaa.ReadDepthAt(int(prevX), int(prevY), w.width, w.height)
-	prevXprevYFrontPos := w.getWorldPosition(float32(prevX), float32(prevY), max(depth-1e-6, 0.0))
-	prevXprevYBackPos := w.getWorldPosition(float32(prevX), float32(prevY), min(depth+1e-6, 1.0))
-
 	if w.nowCursorPos.Length() == 0 || w.prevCursorPos.Distance(w.nowCursorPos) < 0.1 {
 		// カーソルが動いていない場合は直近のだけ取得
+		// x: prev, y: prevのワールド座標位置
+		depth := w.Shader.Msaa.ReadDepthAt(int(prevX), int(prevY), w.width, w.height)
+		worldPos := w.getWorldPosition(float32(prevX), float32(prevY), depth)
 
-		w.funcWorldPos(prevXprevYFrontPos, prevXprevYBackPos, nil, nil, nil, nil, nil, nil, vmdDeltas)
+		w.funcWorldPos(worldPos, nil, nil, nil, nil, nil, nil, nil, vmdDeltas)
 	} else {
+		// x: prev, y: prevのワールド座標位置
+		prevXprevYDepth := w.Shader.Msaa.ReadDepthAt(int(prevX), int(prevY), w.width, w.height)
+		prevXnowYDepth := w.Shader.Msaa.ReadDepthAt(int(prevX), int(nowY), w.width, w.height)
+		nowXprevYDepth := w.Shader.Msaa.ReadDepthAt(int(nowX), int(prevY), w.width, w.height)
+		nowXnowYDepth := w.Shader.Msaa.ReadDepthAt(int(nowX), int(nowY), w.width, w.height)
+
+		mlog.D("prevXprevYDepth=%.3f, prevXnowYDepth=%.3f, nowXprevYDepth=%.3f, nowXnowYDepth=%.3f",
+			prevXprevYDepth, prevXnowYDepth, nowXprevYDepth, nowXnowYDepth)
+
+		// 最も手前を基準とする
+		depth := min(prevXprevYDepth, prevXnowYDepth, nowXprevYDepth, nowXnowYDepth)
+
+		prevXprevYFrontPos := w.getWorldPosition(float32(prevX), float32(prevY), max(depth-1e-5, 0.0))
+		prevXprevYBackPos := w.getWorldPosition(float32(prevX), float32(prevY), min(depth+1e-5, 1.0))
+
 		// x: prev, y: nowのワールド座標位置
-		depth = w.Shader.Msaa.ReadDepthAt(int(prevX), int(nowY), w.width, w.height)
-		prevXnowYFrontPos := w.getWorldPosition(float32(prevX), float32(nowY), max(depth-1e-6, 0.0))
-		prevXnowYBackPos := w.getWorldPosition(float32(prevX), float32(nowY), min(depth+1e-6, 1.0))
+		prevXnowYFrontPos := w.getWorldPosition(float32(prevX), float32(nowY), max(depth-1e-5, 0.0))
+		prevXnowYBackPos := w.getWorldPosition(float32(prevX), float32(nowY), min(depth+1e-5, 1.0))
 
 		// x: now, y: prevのワールド座標位置
-		depth = w.Shader.Msaa.ReadDepthAt(int(nowX), int(prevY), w.width, w.height)
-		nowXprevYFrontPos := w.getWorldPosition(float32(nowX), float32(prevY), max(depth-1e-6, 0.0))
-		nowXprevYBackPos := w.getWorldPosition(float32(nowX), float32(prevY), min(depth+1e-6, 1.0))
+		nowXprevYFrontPos := w.getWorldPosition(float32(nowX), float32(prevY), max(depth-1e-5, 0.0))
+		nowXprevYBackPos := w.getWorldPosition(float32(nowX), float32(prevY), min(depth+1e-5, 1.0))
 
 		// x: now, y: nowのワールド座標位置
-		depth = w.Shader.Msaa.ReadDepthAt(int(nowX), int(nowY), w.width, w.height)
-		nowXnowYFrontPos := w.getWorldPosition(float32(nowX), float32(nowY), max(depth-1e-6, 0.0))
-		nowXnowYBackPos := w.getWorldPosition(float32(nowX), float32(nowY), min(depth+1e-6, 1.0))
+		nowXnowYFrontPos := w.getWorldPosition(float32(nowX), float32(nowY), max(depth-1e-5, 0.0))
+		nowXnowYBackPos := w.getWorldPosition(float32(nowX), float32(nowY), min(depth+1e-5, 1.0))
 
 		w.funcWorldPos(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos, nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos, vmdDeltas)
 	}
