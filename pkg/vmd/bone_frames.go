@@ -1163,7 +1163,7 @@ func (fs *BoneFrames) createBoneDeltas(
 	if len(boneNames) > 0 {
 		// 指定ボーンに関連するボーンのみ対象とする
 		for _, boneName := range boneNames {
-			if !model.Bones.ContainsName(boneName) {
+			if !model.Bones.ContainsByName(boneName) {
 				continue
 			}
 
