@@ -6,10 +6,10 @@ package mwidget
 import (
 	"fmt"
 	"image"
-	"syscall"
 
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
+	"golang.org/x/sys/windows"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
@@ -587,6 +587,13 @@ func (w *MWindow) Dispose() {
 	defer walk.App().Exit(0)
 }
 
+var (
+	user32               = windows.NewLazySystemDLL("user32.dll")
+	procGetSystemMetrics = user32.NewProc("GetSystemMetrics")
+	procMessageBeep      = user32.NewProc("MessageBeep")
+	MB_ICONASTERISK      = 0x00000040
+)
+
 func (w *MWindow) Beep() {
 	procMessageBeep.Call(uintptr(MB_ICONASTERISK))
 }
@@ -594,13 +601,6 @@ func (w *MWindow) Beep() {
 const (
 	SM_CXSCREEN = 0
 	SM_CYSCREEN = 1
-)
-
-var (
-	user32               = syscall.NewLazyDLL("user32.dll")
-	procGetSystemMetrics = user32.NewProc("GetSystemMetrics")
-	procMessageBeep      = user32.NewProc("MessageBeep")
-	MB_ICONASTERISK      = 0x00000040
 )
 
 func GetSystemMetrics(nIndex int) int {
