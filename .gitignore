@@ -23,5 +23,12 @@
 # Go workspace file
 go.work
 
-build
+build/
+distribution/
 
+cmd/user_config.json
+*.vmd
+*.pmx
+*.pprof
+*.log
+cmd/framebuffer_output.png

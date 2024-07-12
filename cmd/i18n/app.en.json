@@ -1,0 +1,42 @@
+[
+    {
+        "id": "Pmxファイルを選択してください",
+        "translation": "Please select a PMX file"
+    },
+    {
+        "id": "Vmdファイルを選択してください",
+        "translation": "Please select a VMD file"
+    },
+    {
+        "id": "出力Pmxファイル",
+        "translation": "Output PMX file"
+    },
+    {
+        "id": "出力Pmxファイルパスを入力もしくは選択してください",
+        "translation": "Please enter or select the output PMX file path"
+    },
+    {
+        "id": "出力Pmxファイルピッカー生成エラー",
+        "translation": "Error generating output PMX file picker"
+    },
+    {
+        "id": "Pmxファイルの使い方",
+        "translation": "・You can set the Pmx model to be displayed in the viewer\n・You can select the text in the model name field\n・When a Pmx file is specified, the 'play' button becomes clickable"
+    },
+    {
+        "id": "Vmdファイルの使い方",
+        "translation": "・You can set the Vmd motion to be applied to the Pmx model displayed in the viewer\n・You can select the text in the model name field\n・If not specified, the model will be displayed in the default pose"
+    },
+    {
+        "id": "出力Pmxファイルの使い方",
+        "translation": "・You can enter or select the destination for the output Pmx file after adjustment\n・A value is set by default, but it can be changed to any path"
+    },
+    {
+        "id": "&サンプルメニュー",
+        "translation": "&Sample Menu"
+    },
+    {
+        "id": "サンプルヘルプ",
+        "translation": "Sample help message\nSample help message\nSample help message\nSample help message\nSample help message"
+    }
+]
