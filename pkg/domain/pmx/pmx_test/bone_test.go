@@ -1,14 +1,15 @@
-package pmx
+package pmx_test
 
 import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
 
 func TestIkLink_Copy(t *testing.T) {
-	ikLink := &IkLink{
+	ikLink := &pmx.IkLink{
 		BoneIndex:          0,
 		AngleLimit:         true,
 		MinAngleLimit:      mmath.NewRotation(),
@@ -48,11 +49,11 @@ func TestIkLink_Copy(t *testing.T) {
 }
 
 func TestIk_Copy(t *testing.T) {
-	ik := &Ik{
+	ik := &pmx.Ik{
 		BoneIndex:    0,
 		LoopCount:    1,
 		UnitRotation: mmath.NewRotationFromDegrees(&mmath.MVec3{1, 2, 3}),
-		Links: []*IkLink{
+		Links: []*pmx.IkLink{
 			{
 				BoneIndex:          0,
 				AngleLimit:         true,
@@ -89,7 +90,7 @@ func TestIk_Copy(t *testing.T) {
 }
 
 func TestBone_NormalizeFixedAxis(t *testing.T) {
-	b := &Bone{}
+	b := &pmx.Bone{}
 	correctedFixedAxis := mmath.MVec3{1, 0, 0}
 	b.NormalizeFixedAxis(&correctedFixedAxis)
 
@@ -99,7 +100,7 @@ func TestBone_NormalizeFixedAxis(t *testing.T) {
 }
 
 func TestBone_IsTailBone(t *testing.T) {
-	b := &Bone{BoneFlag: BONE_FLAG_TAIL_IS_BONE}
+	b := &pmx.Bone{BoneFlag: pmx.BONE_FLAG_TAIL_IS_BONE}
 	if !b.IsTailBone() {
 		t.Errorf("Expected IsTailBone to return true")
 	}
@@ -111,12 +112,12 @@ func TestBone_IsTailBone(t *testing.T) {
 }
 
 func TestBone_IsLegD(t *testing.T) {
-	b1 := NewBoneByName("左足D")
+	b1 := pmx.NewBoneByName("左足D")
 	if !b1.IsLegD() {
 		t.Errorf("Expected IsLegD to return true")
 	}
 
-	b2 := NewBoneByName("右腕")
+	b2 := pmx.NewBoneByName("右腕")
 	if b2.IsLegD() {
 		t.Errorf("Expected IsLegD to return false")
 	}
@@ -124,9 +125,9 @@ func TestBone_IsLegD(t *testing.T) {
 
 func TestBone_Copy(t *testing.T) {
 	t.Run("Test Copy", func(t *testing.T) {
-		b := &Bone{
+		b := &pmx.Bone{
 			IndexNameModel:         &core.IndexNameModel{Index: 0, Name: "Bone"},
-			Ik:                     NewIk(),
+			Ik:                     pmx.NewIk(),
 			Position:               &mmath.MVec3{1, 2, 3},
 			TailPosition:           &mmath.MVec3{4, 5, 6},
 			FixedAxis:              &mmath.MVec3{7, 8, 9},
@@ -153,7 +154,7 @@ func TestBone_Copy(t *testing.T) {
 			LocalMaxAngleLimit:     mmath.NewRotationFromRadians(&mmath.MVec3{16, 17, 18}),
 		}
 
-		copied := b.Copy().(*Bone)
+		copied := b.Copy().(*pmx.Bone)
 
 		// Assert copied fields are not the same as original
 		if copied == b {

@@ -1,30 +1,63 @@
-package pmx
+package reader
 
 import (
 	"math"
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
 
-func TestPmxWriter_Save1(t *testing.T) {
+func TestPmxReader_ReadNameByFilepath(t *testing.T) {
 	r := &PmxReader{}
 
-	data, err := r.ReadByFilepath("../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
-	originalModel := data.(*PmxModel)
+	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
+
+	expectedName := "v2配布用素体03"
+	if modelName != expectedName {
+		t.Errorf("Expected Name to be %q, got %q", expectedName, modelName)
+	}
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
+}
 
-	// ------------------
+func TestPmxReader_ReadNameByFilepath_2_1(t *testing.T) {
+	r := &PmxReader{}
 
-	overridePath := "../../test_resources/サンプルモデル_PMX読み取り確認用_output.pmx"
-	originalModel.Save(false, overridePath)
+	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
 
-	// ------------------
-	data, err = r.ReadByFilepath(overridePath)
-	model := data.(*PmxModel)
+	expectedName := "サンプルモデル迪卢克"
+	if modelName != expectedName {
+		t.Errorf("Expected Name to be %q, got %q", expectedName, modelName)
+	}
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+}
+
+func TestPmxReader_ReadNameByFilepath_NotExist(t *testing.T) {
+	r := &PmxReader{}
+
+	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル_Nothing.pmx")
+
+	expectedName := ""
+	if modelName != expectedName {
+		t.Errorf("Expected Name to be %q, got %q", expectedName, modelName)
+	}
+
+	if err == nil {
+		t.Errorf("Expected error to be not nil, got %q", err)
+	}
+}
+
+func TestPmxReader_ReadByFilepath(t *testing.T) {
+	r := &PmxReader{}
+
+	data, err := r.ReadByFilepath("../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
+	model := data.(*pmx.PmxModel)
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -59,11 +92,11 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if !v.Uv.NearEquals(expectedUV, 1e-5) {
 			t.Errorf("Expected UV to be %v, got %v", expectedUV, v.Uv)
 		}
-		expectedDeformType := BDEF4
+		expectedDeformType := pmx.BDEF4
 		if v.DeformType != expectedDeformType {
 			t.Errorf("Expected DeformType to be %d, got %d", expectedDeformType, v.DeformType)
 		}
-		expectedDeform := NewBdef4(7, 8, 25, 9, 0.6375693, 0.2368899, 0.06898639, 0.05655446)
+		expectedDeform := pmx.NewBdef4(7, 8, 25, 9, 0.6375693, 0.2368899, 0.06898639, 0.05655446)
 		if v.Deform.GetAllIndexes()[0] != expectedDeform.Indexes[0] {
 			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Indexes[0], v.Deform.GetAllIndexes()[0])
 		}
@@ -108,11 +141,11 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if !v.Uv.NearEquals(expectedUV, 1e-5) {
 			t.Errorf("Expected UV to be %v, got %v", expectedUV, v.Uv)
 		}
-		expectedDeformType := BDEF2
+		expectedDeformType := pmx.BDEF2
 		if v.DeformType != expectedDeformType {
 			t.Errorf("Expected DeformType to be %d, got %d", expectedDeformType, v.DeformType)
 		}
-		expectedDeform := NewBdef2(109, 108, 0.9845969)
+		expectedDeform := pmx.NewBdef2(109, 108, 0.9845969)
 		if v.Deform.GetAllIndexes()[0] != expectedDeform.Indexes[0] {
 			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Indexes[0], v.Deform.GetAllIndexes()[0])
 		}
@@ -175,7 +208,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if !m.Ambient.NearEquals(expectedAmbient, 1e-5) {
 			t.Errorf("Expected Ambient to be %v, got %v", expectedAmbient, m.Ambient)
 		}
-		expectedDrawFlag := DRAW_FLAG_GROUND_SHADOW | DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS | DRAW_FLAG_DRAWING_SELF_SHADOWS
+		expectedDrawFlag := pmx.DRAW_FLAG_GROUND_SHADOW | pmx.DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS | pmx.DRAW_FLAG_DRAWING_SELF_SHADOWS
 		if m.DrawFlag != expectedDrawFlag {
 			t.Errorf("Expected DrawFlag to be %v, got %v", expectedDrawFlag, m.DrawFlag)
 		}
@@ -195,11 +228,11 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if m.SphereTextureIndex != expectedSphereTextureIndex {
 			t.Errorf("Expected SphereTextureIndex to be %v, got %v", expectedSphereTextureIndex, m.SphereTextureIndex)
 		}
-		expectedSphereMode := SPHERE_MODE_ADDITION
+		expectedSphereMode := pmx.SPHERE_MODE_ADDITION
 		if m.SphereMode != expectedSphereMode {
 			t.Errorf("Expected SphereMode to be %v, got %v", expectedSphereMode, m.SphereMode)
 		}
-		expectedToonSharingFlag := TOON_SHARING_INDIVIDUAL
+		expectedToonSharingFlag := pmx.TOON_SHARING_INDIVIDUAL
 		if m.ToonSharingFlag != expectedToonSharingFlag {
 			t.Errorf("Expected ToonSharingFlag to be %v, got %v", expectedToonSharingFlag, m.ToonSharingFlag)
 		}
@@ -239,7 +272,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.Layer != expectedLayer {
 			t.Errorf("Expected Layer to be %v, got %v", expectedLayer, b.Layer)
 		}
-		expectedBoneFlag := BONE_FLAG_CAN_ROTATE | BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_TAIL_IS_BONE
+		expectedBoneFlag := pmx.BONE_FLAG_CAN_ROTATE | pmx.BONE_FLAG_IS_VISIBLE | pmx.BONE_FLAG_CAN_MANIPULATE | pmx.BONE_FLAG_TAIL_IS_BONE
 		if b.BoneFlag != expectedBoneFlag {
 			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
 		}
@@ -275,7 +308,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.Layer != expectedLayer {
 			t.Errorf("Expected Layer to be %v, got %v", expectedLayer, b.Layer)
 		}
-		expectedBoneFlag := BONE_FLAG_CAN_ROTATE | BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_TAIL_IS_BONE | BONE_FLAG_IS_EXTERNAL_ROTATION
+		expectedBoneFlag := pmx.BONE_FLAG_CAN_ROTATE | pmx.BONE_FLAG_IS_VISIBLE | pmx.BONE_FLAG_CAN_MANIPULATE | pmx.BONE_FLAG_TAIL_IS_BONE | pmx.BONE_FLAG_IS_EXTERNAL_ROTATION
 		if b.BoneFlag != expectedBoneFlag {
 			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
 		}
@@ -319,7 +352,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.Layer != expectedLayer {
 			t.Errorf("Expected Layer to be %v, got %v", expectedLayer, b.Layer)
 		}
-		expectedBoneFlag := BONE_FLAG_CAN_ROTATE | BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_TAIL_IS_BONE | BONE_FLAG_HAS_FIXED_AXIS | BONE_FLAG_HAS_LOCAL_AXIS
+		expectedBoneFlag := pmx.BONE_FLAG_CAN_ROTATE | pmx.BONE_FLAG_IS_VISIBLE | pmx.BONE_FLAG_CAN_MANIPULATE | pmx.BONE_FLAG_TAIL_IS_BONE | pmx.BONE_FLAG_HAS_FIXED_AXIS | pmx.BONE_FLAG_HAS_LOCAL_AXIS
 		if b.BoneFlag != expectedBoneFlag {
 			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
 		}
@@ -367,7 +400,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.Layer != expectedLayer {
 			t.Errorf("Expected Layer to be %v, got %v", expectedLayer, b.Layer)
 		}
-		expectedBoneFlag := BONE_FLAG_CAN_ROTATE | BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_IS_IK | BONE_FLAG_CAN_TRANSLATE
+		expectedBoneFlag := pmx.BONE_FLAG_CAN_ROTATE | pmx.BONE_FLAG_IS_VISIBLE | pmx.BONE_FLAG_CAN_MANIPULATE | pmx.BONE_FLAG_IS_IK | pmx.BONE_FLAG_CAN_TRANSLATE
 		if b.BoneFlag != expectedBoneFlag {
 			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
 		}
@@ -433,7 +466,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if m.EnglishName != expectedEnglishName {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, m.EnglishName)
 		}
-		expectedMorphType := MORPH_TYPE_VERTEX
+		expectedMorphType := pmx.MORPH_TYPE_VERTEX
 		if m.MorphType != expectedMorphType {
 			t.Errorf("Expected MorphType to be %v, got %v", expectedMorphType, m.MorphType)
 		}
@@ -442,7 +475,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 			t.Errorf("Expected OffsetCount to be %v, got %v", expectedOffsetCount, len(m.Offsets))
 		}
 		{
-			o := m.Offsets[30].(*VertexMorphOffset)
+			o := m.Offsets[30].(*pmx.VertexMorphOffset)
 			expectedVertexIndex := 19329
 			if o.VertexIndex != expectedVertexIndex {
 				t.Errorf("Expected VertexIndex to be %v, got %v", expectedVertexIndex, o.VertexIndex)
@@ -464,7 +497,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if m.EnglishName != expectedEnglishName {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, m.EnglishName)
 		}
-		expectedMorphType := MORPH_TYPE_BONE
+		expectedMorphType := pmx.MORPH_TYPE_BONE
 		if m.MorphType != expectedMorphType {
 			t.Errorf("Expected MorphType to be %v, got %v", expectedMorphType, m.MorphType)
 		}
@@ -473,7 +506,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 			t.Errorf("Expected OffsetCount to be %v, got %v", expectedOffsetCount, len(m.Offsets))
 		}
 		{
-			o := m.Offsets[1].(*BoneMorphOffset)
+			o := m.Offsets[1].(*pmx.BoneMorphOffset)
 			expectedBoneIndex := 17
 			if o.BoneIndex != expectedBoneIndex {
 				t.Errorf("Expected BoneIndex to be %v, got %v", expectedBoneIndex, o.BoneIndex)
@@ -499,7 +532,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if m.EnglishName != expectedEnglishName {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, m.EnglishName)
 		}
-		expectedMorphType := MORPH_TYPE_MATERIAL
+		expectedMorphType := pmx.MORPH_TYPE_MATERIAL
 		if m.MorphType != expectedMorphType {
 			t.Errorf("Expected MorphType to be %v, got %v", expectedMorphType, m.MorphType)
 		}
@@ -508,12 +541,12 @@ func TestPmxWriter_Save1(t *testing.T) {
 			t.Errorf("Expected OffsetCount to be %v, got %v", expectedOffsetCount, len(m.Offsets))
 		}
 		{
-			o := m.Offsets[3].(*MaterialMorphOffset)
+			o := m.Offsets[3].(*pmx.MaterialMorphOffset)
 			expectedMaterialIndex := 12
 			if o.MaterialIndex != expectedMaterialIndex {
 				t.Errorf("Expected MaterialIndex to be %v, got %v", expectedMaterialIndex, o.MaterialIndex)
 			}
-			expectedCalcMode := CALC_MODE_ADDITION
+			expectedCalcMode := pmx.CALC_MODE_ADDITION
 			if o.CalcMode != expectedCalcMode {
 				t.Errorf("Expected CalcMode to be %v, got %v", expectedCalcMode, o.CalcMode)
 			}
@@ -562,7 +595,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if m.EnglishName != expectedEnglishName {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, m.EnglishName)
 		}
-		expectedMorphType := MORPH_TYPE_GROUP
+		expectedMorphType := pmx.MORPH_TYPE_GROUP
 		if m.MorphType != expectedMorphType {
 			t.Errorf("Expected MorphType to be %v, got %v", expectedMorphType, m.MorphType)
 		}
@@ -571,7 +604,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 			t.Errorf("Expected OffsetCount to be %v, got %v", expectedOffsetCount, len(m.Offsets))
 		}
 		{
-			o := m.Offsets[2].(*GroupMorphOffset)
+			o := m.Offsets[2].(*pmx.GroupMorphOffset)
 			expectedMorphIndex := 21
 			if o.MorphIndex != expectedMorphIndex {
 				t.Errorf("Expected MorphIndex to be %v, got %v", expectedMorphIndex, o.MorphIndex)
@@ -593,7 +626,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if d.EnglishName != expectedEnglishName {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, d.EnglishName)
 		}
-		expectedSpecialFlag := SPECIAL_FLAG_ON
+		expectedSpecialFlag := pmx.SPECIAL_FLAG_ON
 		if d.SpecialFlag != expectedSpecialFlag {
 			t.Errorf("Expected SpecialFlag to be %v, got %v", expectedSpecialFlag, d.SpecialFlag)
 		}
@@ -603,7 +636,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		}
 		{
 			r := d.References[0]
-			expectedDisplayType := DISPLAY_TYPE_BONE
+			expectedDisplayType := pmx.DISPLAY_TYPE_BONE
 			if r.DisplayType != expectedDisplayType {
 				t.Errorf("Expected DisplayType to be %v, got %v", expectedDisplayType, r.DisplayType)
 			}
@@ -624,7 +657,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if d.EnglishName != expectedEnglishName {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, d.EnglishName)
 		}
-		expectedSpecialFlag := SPECIAL_FLAG_ON
+		expectedSpecialFlag := pmx.SPECIAL_FLAG_ON
 		if d.SpecialFlag != expectedSpecialFlag {
 			t.Errorf("Expected SpecialFlag to be %v, got %v", expectedSpecialFlag, d.SpecialFlag)
 		}
@@ -634,7 +667,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		}
 		{
 			r := d.References[50]
-			expectedDisplayType := DISPLAY_TYPE_MORPH
+			expectedDisplayType := pmx.DISPLAY_TYPE_MORPH
 			if r.DisplayType != expectedDisplayType {
 				t.Errorf("Expected DisplayType to be %v, got %v", expectedDisplayType, r.DisplayType)
 			}
@@ -655,7 +688,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if d.EnglishName != expectedEnglishName {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, d.EnglishName)
 		}
-		expectedSpecialFlag := SPECIAL_FLAG_OFF
+		expectedSpecialFlag := pmx.SPECIAL_FLAG_OFF
 		if d.SpecialFlag != expectedSpecialFlag {
 			t.Errorf("Expected SpecialFlag to be %v, got %v", expectedSpecialFlag, d.SpecialFlag)
 		}
@@ -665,7 +698,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		}
 		{
 			r := d.References[7]
-			expectedDisplayType := DISPLAY_TYPE_BONE
+			expectedDisplayType := pmx.DISPLAY_TYPE_BONE
 			if r.DisplayType != expectedDisplayType {
 				t.Errorf("Expected DisplayType to be %v, got %v", expectedDisplayType, r.DisplayType)
 			}
@@ -700,7 +733,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 				t.Errorf("Expected CollisionGroupMask to be %v, got %v (%v)", expectedCollisionGroupMasks[i], b.CollisionGroupMask.IsCollisions[i], i)
 			}
 		}
-		expectedShapeType := SHAPE_CAPSULE
+		expectedShapeType := pmx.SHAPE_CAPSULE
 		if b.ShapeType != expectedShapeType {
 			t.Errorf("Expected ShapeType to be %v, got %v", expectedShapeType, b.ShapeType)
 		}
@@ -736,7 +769,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if math.Abs(b.RigidBodyParam.Friction-expectedFriction) > 1e-5 {
 			t.Errorf("Expected Friction to be %v, got %v", expectedFriction, b.RigidBodyParam.Friction)
 		}
-		expectedPhysicsType := PHYSICS_TYPE_STATIC
+		expectedPhysicsType := pmx.PHYSICS_TYPE_STATIC
 		if b.PhysicsType != expectedPhysicsType {
 			t.Errorf("Expected PhysicsType to be %v, got %v", expectedPhysicsType, b.PhysicsType)
 		}
@@ -792,5 +825,31 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if !j.JointParam.SpringConstantRotation.GetRadians().NearEquals(expectedSpringConstantRotation, 1e-5) {
 			t.Errorf("Expected SpringConstantRotation to be %v, got %v", expectedSpringConstantRotation, j.JointParam.SpringConstantRotation)
 		}
+	}
+}
+
+func TestPmxReader_ReadByFilepath_2_1(t *testing.T) {
+	r := &PmxReader{}
+
+	data, err := r.ReadByFilepath("../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
+	model := data.(*pmx.PmxModel)
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	expectedSignature := "PMX "
+	if model.Signature != expectedSignature {
+		t.Errorf("Expected Signature to be %q, got %q", expectedSignature, model.Signature)
+	}
+
+	expectedVersion := 2.1
+	if math.Abs(model.Version-expectedVersion) > 1e-5 {
+		t.Errorf("Expected Version to be %.8f, got %.8f", expectedVersion, model.Version)
+	}
+
+	expectedName := "サンプルモデル迪卢克"
+	if model.Name != expectedName {
+		t.Errorf("Expected Name to be %q, got %q", expectedName, model.Name)
 	}
 }

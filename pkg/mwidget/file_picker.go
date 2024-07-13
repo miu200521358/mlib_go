@@ -12,11 +12,11 @@ import (
 	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/reader"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
@@ -59,7 +59,7 @@ func NewPmxReadFilePicker(
 		map[int]map[string]string{
 			0: {"*.pmx": "Pmx Files (*.pmx)"}, 2: {"*.*": "All Files (*.*)"}},
 		50,
-		&pmx.PmxReader{},
+		&reader.PmxReader{},
 		OnPathChanged)
 }
 

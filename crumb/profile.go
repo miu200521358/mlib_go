@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/reader"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 	"github.com/pkg/profile"
 )
@@ -24,7 +25,7 @@ func main() {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &pmx.PmxReader{}
+	pr := &reader.PmxReader{}
 	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/mlibkiller/mlibkiller.pmx")
 	// modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4チャイナ/Miku_V4_チャイナ.pmx")
 
