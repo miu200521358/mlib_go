@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package mview
+package buffer
 
 import (
 	"unsafe"
@@ -66,8 +66,6 @@ func (v *VBO) BindVertex(vertexMorphIndexes []int, vertexMorphDeltas [][]float32
 	} else {
 		gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
 	}
-
-	CheckGLError()
 
 	// 0: position
 	gl.EnableVertexAttribArray(0)
@@ -260,7 +258,6 @@ func (v *VBO) BindDebug(vertices []float32) {
 
 	gl.BindBuffer(v.target, v.id)
 	gl.BufferData(v.target, v.size, gl.Ptr(&vertices[0]), gl.STATIC_DRAW)
-	CheckGLError()
 
 	// 0: position
 	gl.EnableVertexAttribArray(0)
@@ -477,7 +474,6 @@ func NewVBOForFloor() (*VBO, int32) {
 func (v *VBO) BindFloor() {
 	gl.BindBuffer(v.target, v.id)
 	gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
-	CheckGLError()
 
 	// 0: position
 	gl.EnableVertexAttribArray(0)

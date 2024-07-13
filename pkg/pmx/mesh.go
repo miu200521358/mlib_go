@@ -9,14 +9,15 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
 type Mesh struct {
-	material          MaterialGL // 描画用材質
-	prevVerticesCount int        // 前の頂点数
-	ibo               *mview.IBO // 頂点インデックスバッファ
+	material          MaterialGL  // 描画用材質
+	prevVerticesCount int         // 前の頂点数
+	ibo               *buffer.IBO // 頂点インデックスバッファ
 }
 
 type MeshDelta struct {
@@ -48,7 +49,7 @@ func NewMesh(
 	// 	material.VerticesCount,
 	// )
 
-	ibo := mview.NewIBO(gl.Ptr(faces), len(faces))
+	ibo := buffer.NewIBO(gl.Ptr(faces), len(faces))
 
 	return &Mesh{
 		material:          *material,

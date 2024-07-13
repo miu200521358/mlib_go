@@ -12,25 +12,26 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
 type Meshes struct {
 	meshes            []*Mesh
 	vertices          []float32
-	vao               *mview.VAO
-	vbo               *mview.VBO
+	vao               *buffer.VAO
+	vbo               *buffer.VBO
 	normals           []float32
-	normalVao         *mview.VAO
-	normalVbo         *mview.VBO
-	normalIbo         *mview.IBO
-	selectedVertexVao *mview.VAO
-	selectedVertexVbo *mview.VBO
-	selectedVertexIbo *mview.IBO
+	normalVao         *buffer.VAO
+	normalVbo         *buffer.VBO
+	normalIbo         *buffer.IBO
+	selectedVertexVao *buffer.VAO
+	selectedVertexVbo *buffer.VBO
+	selectedVertexIbo *buffer.IBO
 	bones             []float32
-	boneVao           *mview.VAO
-	boneVbo           *mview.VBO
-	boneIbo           *mview.IBO
+	boneVao           *buffer.VAO
+	boneVbo           *buffer.VBO
+	boneIbo           *buffer.IBO
 	boneIndexes       []int
 	ssbo              uint32
 	vertexCount       int
@@ -183,39 +184,39 @@ func NewMeshes(
 	wg.Wait()
 
 	// 以下の部分は並列化する必要がないのでそのままにする
-	vao := mview.NewVAO()
+	vao := buffer.NewVAO()
 	vao.Bind()
 
-	vbo := mview.NewVBOForVertex(gl.Ptr(vertices), len(vertices))
+	vbo := buffer.NewVBOForVertex(gl.Ptr(vertices), len(vertices))
 	vbo.BindVertex(nil, nil)
 	vbo.Unbind()
 	vao.Unbind()
 
-	normalVao := mview.NewVAO()
+	normalVao := buffer.NewVAO()
 	normalVao.Bind()
-	normalVbo := mview.NewVBOForVertex(gl.Ptr(normalVertices), len(normalVertices))
+	normalVbo := buffer.NewVBOForVertex(gl.Ptr(normalVertices), len(normalVertices))
 	normalVbo.BindVertex(nil, nil)
-	normalIbo := mview.NewIBO(gl.Ptr(normalFaces), len(normalFaces))
+	normalIbo := buffer.NewIBO(gl.Ptr(normalFaces), len(normalFaces))
 	normalIbo.Bind()
 	normalIbo.Unbind()
 	normalVbo.Unbind()
 	normalVao.Unbind()
 
-	boneVao := mview.NewVAO()
+	boneVao := buffer.NewVAO()
 	boneVao.Bind()
-	boneVbo := mview.NewVBOForVertex(gl.Ptr(bones), len(bones))
+	boneVbo := buffer.NewVBOForVertex(gl.Ptr(bones), len(bones))
 	boneVbo.BindVertex(nil, nil)
-	boneIbo := mview.NewIBO(gl.Ptr(boneFaces), len(boneFaces))
+	boneIbo := buffer.NewIBO(gl.Ptr(boneFaces), len(boneFaces))
 	boneIbo.Bind()
 	boneIbo.Unbind()
 	boneVbo.Unbind()
 	boneVao.Unbind()
 
-	selectedVertexVao := mview.NewVAO()
+	selectedVertexVao := buffer.NewVAO()
 	selectedVertexVao.Bind()
-	selectedVertexVbo := mview.NewVBOForVertex(gl.Ptr(selectedVertices), len(selectedVertices))
+	selectedVertexVbo := buffer.NewVBOForVertex(gl.Ptr(selectedVertices), len(selectedVertices))
 	selectedVertexVbo.BindVertex(nil, nil)
-	selectedVertexIbo := mview.NewIBO(gl.Ptr(selectedVertexFaces), len(selectedVertexFaces))
+	selectedVertexIbo := buffer.NewIBO(gl.Ptr(selectedVertexFaces), len(selectedVertexFaces))
 	selectedVertexIbo.Bind()
 	selectedVertexIbo.Unbind()
 	selectedVertexVbo.Unbind()

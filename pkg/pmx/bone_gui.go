@@ -4,10 +4,10 @@
 package pmx
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
-	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
 var bone_colors_ik = []float32{1.0, 0.38, 0, 1.0}
@@ -232,11 +232,11 @@ type Bones struct {
 	LayerSortedBones  map[bool][]*Bone
 	LayerSortedNames  map[bool]map[string]int
 	DeformBoneIndexes map[int][]int
-	positionVao       *mview.VAO
-	positionIbo       *mview.IBO
+	positionVao       *buffer.VAO
+	positionIbo       *buffer.IBO
 	positionIboCount  int32
-	normalVao         *mview.VAO
-	normalIbo         *mview.IBO
+	normalVao         *buffer.VAO
+	normalIbo         *buffer.IBO
 	normalIboCount    int32
 }
 

@@ -15,6 +15,7 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/walk/pkg/walk"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
@@ -947,17 +948,17 @@ func (w *GlWindow) IsRunning() bool {
 // 床描画 ------------------
 
 type MFloor struct {
-	vao   *mview.VAO
-	vbo   *mview.VBO
+	vao   *buffer.VAO
+	vbo   *buffer.VBO
 	count int32
 }
 
 func newMFloor() *MFloor {
 	mf := &MFloor{}
 
-	mf.vao = mview.NewVAO()
+	mf.vao = buffer.NewVAO()
 	mf.vao.Bind()
-	mf.vbo, mf.count = mview.NewVBOForFloor()
+	mf.vbo, mf.count = buffer.NewVBOForFloor()
 	mf.vbo.Unbind()
 	mf.vao.Unbind()
 

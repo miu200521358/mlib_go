@@ -6,6 +6,7 @@ package mphysics
 import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 )
@@ -25,8 +26,8 @@ func NewConstBtMDefaultColors() bt.BtMDefaultColors {
 type MDebugDrawLiner struct {
 	bt.BtMDebugDrawLiner
 	shader   *mview.MShader
-	vao      *mview.VAO
-	vbo      *mview.VBO
+	vao      *buffer.VAO
+	vbo      *buffer.VBO
 	vertices []float32
 	count    int
 }
@@ -37,9 +38,9 @@ func NewMDebugDrawLiner(shader *mview.MShader) *MDebugDrawLiner {
 		vertices: make([]float32, 0),
 	}
 
-	ddl.vao = mview.NewVAO()
+	ddl.vao = buffer.NewVAO()
 	ddl.vao.Bind()
-	ddl.vbo = mview.NewVBOForDebug()
+	ddl.vbo = buffer.NewVBOForDebug()
 	ddl.vbo.Unbind()
 	ddl.vao.Unbind()
 

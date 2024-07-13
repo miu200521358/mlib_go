@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package mview
+package buffer
 
 import (
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -30,7 +30,6 @@ func (v *VAO) Delete() {
 // Binds VAO for rendering.
 func (v *VAO) Bind() {
 	gl.BindVertexArray(v.id)
-	CheckGLError()
 }
 
 // Unbinds.

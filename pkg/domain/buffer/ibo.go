@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package mview
+package buffer
 
 import (
 	"unsafe"
@@ -34,7 +34,6 @@ func NewIBO(facePtr unsafe.Pointer, count int) *IBO {
 func (ibo *IBO) Bind() {
 	gl.BindBuffer(ibo.target, ibo.id)
 	gl.BufferData(ibo.target, ibo.size, ibo.facePtr, gl.STATIC_DRAW)
-	CheckGLError()
 }
 
 func (ibo *IBO) Unbind() {
