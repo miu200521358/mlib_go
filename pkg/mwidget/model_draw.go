@@ -13,7 +13,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infra/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mview"
-	"github.com/miu200521358/mlib_go/pkg/vmd"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 )
 
 type ModelSet struct {
