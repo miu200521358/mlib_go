@@ -4,8 +4,8 @@
 package mbt
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/infra/bt"
-	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 type MPhysics struct {

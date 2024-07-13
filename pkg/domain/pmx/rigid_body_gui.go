@@ -6,9 +6,9 @@ package pmx
 import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/infra/bt"
-	"github.com/miu200521358/mlib_go/pkg/infra/mbt"
-	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 func (r *RigidBody) UpdateFlags(

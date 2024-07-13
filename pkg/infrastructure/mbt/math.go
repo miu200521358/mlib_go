@@ -5,7 +5,7 @@ package mbt
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/infra/bt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
 
 // Bullet+OpenGL座標系に変換された3次元ベクトルを返します

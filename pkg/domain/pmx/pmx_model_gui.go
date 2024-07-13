@@ -3,7 +3,7 @@
 
 package pmx
 
-import "github.com/miu200521358/mlib_go/pkg/infra/mbt"
+import "github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 
 func (pm *PmxModel) DrawInitialize(windowIndex int, physics *mbt.MPhysics) {
 	if !pm.DrawInitialized {
