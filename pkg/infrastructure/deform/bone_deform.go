@@ -13,6 +13,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/writer"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
@@ -43,7 +44,7 @@ func DeformByPhysicsFlag(
 	deformBoneIndexes, boneDeltas := prepareDeltas(fs, frame, model, boneNames, isCalcIk,
 		beforeBoneDeltas, morphDeltas, ikFrame, isAfterPhysics)
 	// mlog.Memory(fmt.Sprintf("Deform 2)frame: %d", frame))
-	boneDeltas = calcBoneDeltas(fs, frame, model, deformBoneIndexes, boneDeltas)
+	boneDeltas = calcBoneDeltas(frame, model, deformBoneIndexes, boneDeltas)
 	// mlog.Memory(fmt.Sprintf("Deform 3)frame: %d", frame))
 	return boneDeltas
 }
@@ -61,7 +62,7 @@ func prepareDeltas(
 ) ([]int, *delta.BoneDeltas) {
 	// mlog.Memory(fmt.Sprintf("prepareDeltas 1)frame: %d", frame))
 
-	deformBoneIndexes, boneDeltas := createBoneDeltas(fs, frame, model, boneNames, beforeBoneDeltas, isAfterPhysics)
+	deformBoneIndexes, boneDeltas := createBoneDeltas(frame, model, boneNames, beforeBoneDeltas, isAfterPhysics)
 
 	// mlog.Memory(fmt.Sprintf("prepareDeltas 2)frame: %d", frame))
 
@@ -164,7 +165,7 @@ func calcIk(
 		mlog.IV("[IK計算終了][%04d][%s]", frame, ikBone.Name)
 
 		if ikMotion != nil {
-			// ikMotion.Save("", "")
+			writer.VmdSave(ikMotion, "", "", true)
 		}
 		if ikFile != nil {
 			ikFile.Close()
@@ -303,7 +304,7 @@ ikLoop:
 			}
 
 			// IK関連の行列を取得
-			boneDeltas = calcBoneDeltas(fs, frame, model, effectorDeformBoneIndexes, boneDeltas)
+			boneDeltas = calcBoneDeltas(frame, model, effectorDeformBoneIndexes, boneDeltas)
 
 			// リンクボーンの変形情報を取得
 			linkDelta := boneDeltas.Get(linkBone.Index)
@@ -427,7 +428,6 @@ ikLoop:
 			if !isSingleIk || (isSingleIk && linkAngle > mmath.GIMBAL1_RAD) && ikLink.AngleLimit {
 				// グローバル軸制限
 				linkAxis, originalLinkAxis = getLinkAxis(
-					fs,
 					ikLink.MinAngleLimit.GetRadians(),
 					ikLink.MaxAngleLimit.GetRadians(),
 					effectorLocalPosition, ikLocalPosition,
@@ -436,7 +436,6 @@ ikLoop:
 			} else if !isSingleIk || (isSingleIk && linkAngle > mmath.GIMBAL1_RAD) && ikLink.LocalAngleLimit {
 				// ローカル軸制限
 				linkAxis, originalLinkAxis = getLinkAxis(
-					fs,
 					ikLink.LocalMinAngleLimit.GetRadians(),
 					ikLink.LocalMaxAngleLimit.GetRadians(),
 					effectorLocalPosition, ikLocalPosition,
@@ -445,7 +444,6 @@ ikLoop:
 			} else {
 				// 軸制限なし or 一段IKでかつ回転角が88度未満の場合
 				linkAxis, originalLinkAxis = getLinkAxis(
-					fs,
 					mmath.MVec3MinVal,
 					mmath.MVec3MaxVal,
 					effectorLocalPosition, ikLocalPosition,
@@ -501,7 +499,6 @@ ikLoop:
 			if ikLink.AngleLimit {
 				// 角度制限が入ってる場合
 				resultIkQuat, count = calcIkLimitQuaternion(
-					fs,
 					totalIkQuat,
 					ikLink.MinAngleLimit.GetRadians(),
 					ikLink.MaxAngleLimit.GetRadians(),
@@ -525,7 +522,6 @@ ikLoop:
 			} else if ikLink.LocalAngleLimit {
 				// ローカル角度制限が入ってる場合
 				resultIkQuat, count = calcIkLimitQuaternion(
-					fs,
 					totalIkQuat,
 					ikLink.LocalMinAngleLimit.GetRadians(),
 					ikLink.LocalMaxAngleLimit.GetRadians(),
@@ -595,7 +591,6 @@ ikLoop:
 }
 
 func getLinkAxis(
-	fs *vmd.BoneFrames,
 	minAngleLimitRadians *mmath.MVec3,
 	maxAngleLimitRadians *mmath.MVec3,
 	effectorLocalPosition, ikLocalPosition *mmath.MVec3,
@@ -671,7 +666,6 @@ func getLinkAxis(
 }
 
 func calcIkLimitQuaternion(
-	fs *vmd.BoneFrames,
 	totalIkQuat *mmath.MQuaternion, // リンクボーンの全体回転量
 	minAngleLimitRadians *mmath.MVec3, // 最小軸制限（ラジアン）
 	maxAngleLimitRadians *mmath.MVec3, // 最大軸制限（ラジアン）
@@ -742,11 +736,11 @@ func calcIkLimitQuaternion(
 		}
 
 		// 角度の制限
-		fX = getIkAxisValue(fs, fX, minAngleLimitRadians.GetX(), maxAngleLimitRadians.GetX(), loop, loopCount,
+		fX = getIkAxisValue(fX, minAngleLimitRadians.GetX(), maxAngleLimitRadians.GetX(), loop, loopCount,
 			frame, count, "X軸制限-X", linkBoneName, ikMotion, ikFile)
-		fY = getIkAxisValue(fs, fY, minAngleLimitRadians.GetY(), maxAngleLimitRadians.GetY(), loop, loopCount,
+		fY = getIkAxisValue(fY, minAngleLimitRadians.GetY(), maxAngleLimitRadians.GetY(), loop, loopCount,
 			frame, count, "X軸制限-Y", linkBoneName, ikMotion, ikFile)
-		fZ = getIkAxisValue(fs, fZ, minAngleLimitRadians.GetZ(), maxAngleLimitRadians.GetZ(), loop, loopCount,
+		fZ = getIkAxisValue(fZ, minAngleLimitRadians.GetZ(), maxAngleLimitRadians.GetZ(), loop, loopCount,
 			frame, count, "X軸制限-Z", linkBoneName, ikMotion, ikFile)
 
 		// 決定した角度でベクトルを回転
@@ -817,11 +811,11 @@ func calcIkLimitQuaternion(
 		}
 
 		// 角度の制限
-		fX = getIkAxisValue(fs, fX, minAngleLimitRadians.GetX(), maxAngleLimitRadians.GetX(), loop, loopCount,
+		fX = getIkAxisValue(fX, minAngleLimitRadians.GetX(), maxAngleLimitRadians.GetX(), loop, loopCount,
 			frame, count, "Y軸制限-X", linkBoneName, ikMotion, ikFile)
-		fY = getIkAxisValue(fs, fY, minAngleLimitRadians.GetY(), maxAngleLimitRadians.GetY(), loop, loopCount,
+		fY = getIkAxisValue(fY, minAngleLimitRadians.GetY(), maxAngleLimitRadians.GetY(), loop, loopCount,
 			frame, count, "Y軸制限-Y", linkBoneName, ikMotion, ikFile)
-		fZ = getIkAxisValue(fs, fZ, minAngleLimitRadians.GetZ(), maxAngleLimitRadians.GetZ(), loop, loopCount,
+		fZ = getIkAxisValue(fZ, minAngleLimitRadians.GetZ(), maxAngleLimitRadians.GetZ(), loop, loopCount,
 			frame, count, "Y軸制限-Z", linkBoneName, ikMotion, ikFile)
 
 		// 決定した角度でベクトルを回転
@@ -893,11 +887,11 @@ func calcIkLimitQuaternion(
 	}
 
 	// 角度の制限
-	fX = getIkAxisValue(fs, fX, minAngleLimitRadians.GetX(), maxAngleLimitRadians.GetX(), loop, loopCount,
+	fX = getIkAxisValue(fX, minAngleLimitRadians.GetX(), maxAngleLimitRadians.GetX(), loop, loopCount,
 		frame, count, "Z軸制限-X", linkBoneName, ikMotion, ikFile)
-	fY = getIkAxisValue(fs, fY, minAngleLimitRadians.GetY(), maxAngleLimitRadians.GetY(), loop, loopCount,
+	fY = getIkAxisValue(fY, minAngleLimitRadians.GetY(), maxAngleLimitRadians.GetY(), loop, loopCount,
 		frame, count, "Z軸制限-Y", linkBoneName, ikMotion, ikFile)
-	fZ = getIkAxisValue(fs, fZ, minAngleLimitRadians.GetZ(), maxAngleLimitRadians.GetZ(), loop, loopCount,
+	fZ = getIkAxisValue(fZ, minAngleLimitRadians.GetZ(), maxAngleLimitRadians.GetZ(), loop, loopCount,
 		frame, count, "Z軸制限-Z", linkBoneName, ikMotion, ikFile)
 
 	// 決定した角度でベクトルを回転
@@ -923,7 +917,6 @@ func calcIkLimitQuaternion(
 }
 
 func getIkAxisValue(
-	fs *vmd.BoneFrames,
 	fV, minAngleLimit, maxAngleLimit float64,
 	loop, loopCount int,
 	frame int,
@@ -981,7 +974,6 @@ func getIkAxisValue(
 }
 
 func calcBoneDeltas(
-	fs *vmd.BoneFrames,
 	frame int,
 	model *pmx.PmxModel,
 	deformBoneIndexes []int,
@@ -1046,7 +1038,6 @@ func calcBoneDeltas(
 
 // デフォーム対象ボーン情報一覧取得
 func createBoneDeltas(
-	fs *vmd.BoneFrames,
 	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
@@ -1160,9 +1151,9 @@ func fillBoneDeform(
 			bf = fs.Get(bone.Name).Get(frame)
 		}
 		// ボーンの移動位置、回転角度、拡大率を取得
-		d.FramePosition, d.FrameMorphPosition = getPosition(fs, bf, bone, boneDeltas, morphDeltas)
-		d.FrameRotation, d.FrameMorphRotation = getRotation(fs, bf, bone, boneDeltas, morphDeltas)
-		d.FrameScale = getScale(fs, bf, bone, boneDeltas, morphDeltas)
+		d.FramePosition, d.FrameMorphPosition = getPosition(bf, bone, boneDeltas, morphDeltas)
+		d.FrameRotation, d.FrameMorphRotation = getRotation(bf, bone, boneDeltas, morphDeltas)
+		d.FrameScale = getScale(bf, bone, boneDeltas, morphDeltas)
 		boneDeltas.Update(d)
 	}
 
@@ -1171,7 +1162,6 @@ func fillBoneDeform(
 
 // 該当キーフレにおけるボーンの移動位置
 func getPosition(
-	fs *vmd.BoneFrames,
 	bf *vmd.BoneFrame,
 	// frame int,
 	bone *pmx.Bone,
@@ -1199,7 +1189,6 @@ func getPosition(
 
 // 該当キーフレにおけるボーンの回転角度
 func getRotation(
-	fs *vmd.BoneFrames,
 	bf *vmd.BoneFrame,
 	// frame int,
 	bone *pmx.Bone,
@@ -1237,7 +1226,6 @@ func getRotation(
 
 // 該当キーフレにおけるボーンの拡大率
 func getScale(
-	fs *vmd.BoneFrames,
 	bf *vmd.BoneFrame,
 	bone *pmx.Bone,
 	boneDeltas *delta.BoneDeltas,
