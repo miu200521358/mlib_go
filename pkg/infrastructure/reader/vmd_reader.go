@@ -1,4 +1,4 @@
-package vmd
+package reader
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
@@ -16,11 +17,11 @@ import (
 
 // VMDリーダー
 type VmdMotionReader struct {
-	core.BaseReader[*VmdMotion]
+	core.BaseReader[*vmd.VmdMotion]
 }
 
-func (r *VmdMotionReader) createModel(path string) *VmdMotion {
-	model := NewVmdMotion(path)
+func (r *VmdMotionReader) createModel(path string) *vmd.VmdMotion {
+	model := vmd.NewVmdMotion(path)
 	return model
 }
 
@@ -107,7 +108,7 @@ func (r *VmdMotionReader) ReadText(size int) (string, error) {
 	return r.DecodeShiftJIS(fbytes)
 }
 
-func (r *VmdMotionReader) readHeader(motion *VmdMotion) error {
+func (r *VmdMotionReader) readHeader(motion *vmd.VmdMotion) error {
 	r.DefineEncoding(japanese.ShiftJIS)
 
 	// vmdバージョン
@@ -128,7 +129,7 @@ func (r *VmdMotionReader) readHeader(motion *VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readData(motion *VmdMotion) error {
+func (r *VmdMotionReader) readData(motion *vmd.VmdMotion) error {
 	err := r.readBones(motion)
 	if err != nil {
 		mlog.E("readData.readBones error: %v", err)
@@ -172,7 +173,7 @@ func (r *VmdMotionReader) readData(motion *VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
+func (r *VmdMotionReader) readBones(motion *vmd.VmdMotion) error {
 	totalCount, err := r.UnpackUInt()
 	if err != nil {
 		mlog.E("readBones.totalCount error: %v", err)
@@ -180,8 +181,8 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		v := &BoneFrame{
-			BaseFrame: NewFrame(i).(*BaseFrame),
+		v := &vmd.BoneFrame{
+			BaseFrame: vmd.NewFrame(i).(*vmd.BaseFrame),
 		}
 		v.Read = true
 
@@ -222,7 +223,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 			mlog.E("[%d] readBones.Curves error: %v", i, err)
 			return err
 		}
-		v.Curves = NewBoneCurvesByValues(curves)
+		v.Curves = vmd.NewBoneCurvesByValues(curves)
 
 		motion.AppendRegisteredBoneFrame(boneName, v)
 	}
@@ -230,7 +231,7 @@ func (r *VmdMotionReader) readBones(motion *VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readMorphs(motion *VmdMotion) error {
+func (r *VmdMotionReader) readMorphs(motion *vmd.VmdMotion) error {
 	totalCount, err := r.UnpackUInt()
 	if err != nil {
 		mlog.E("readMorphs.totalCount error: %v", err)
@@ -238,7 +239,7 @@ func (r *VmdMotionReader) readMorphs(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		v := NewMorphFrame(0)
+		v := vmd.NewMorphFrame(0)
 		v.Registered = true
 		v.Read = true
 
@@ -270,7 +271,7 @@ func (r *VmdMotionReader) readMorphs(motion *VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readCameras(motion *VmdMotion) error {
+func (r *VmdMotionReader) readCameras(motion *vmd.VmdMotion) error {
 	totalCount, err := r.UnpackUInt()
 	if err != nil {
 		mlog.E("readCameras.totalCount error: %v", err)
@@ -278,7 +279,7 @@ func (r *VmdMotionReader) readCameras(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		v := NewCameraFrame(0)
+		v := vmd.NewCameraFrame(0)
 		v.Registered = true
 		v.Read = true
 
@@ -319,7 +320,7 @@ func (r *VmdMotionReader) readCameras(motion *VmdMotion) error {
 			mlog.E("[%d] readCameras.Curves error: %v", i, err)
 			return err
 		}
-		v.Curves = NewCameraCurvesByValues(curves)
+		v.Curves = vmd.NewCameraCurvesByValues(curves)
 
 		// 視野角
 		viewOfAngle, err := r.UnpackUInt()
@@ -343,7 +344,7 @@ func (r *VmdMotionReader) readCameras(motion *VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readLights(motion *VmdMotion) error {
+func (r *VmdMotionReader) readLights(motion *vmd.VmdMotion) error {
 	totalCount, err := r.UnpackUInt()
 	if err != nil {
 		mlog.E("readLights.totalCount error: %v", err)
@@ -351,7 +352,7 @@ func (r *VmdMotionReader) readLights(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		v := NewLightFrame(0)
+		v := vmd.NewLightFrame(0)
 		v.Registered = true
 		v.Read = true
 
@@ -385,7 +386,7 @@ func (r *VmdMotionReader) readLights(motion *VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readShadows(motion *VmdMotion) error {
+func (r *VmdMotionReader) readShadows(motion *vmd.VmdMotion) error {
 	totalCount, err := r.UnpackUInt()
 	if err != nil {
 		mlog.E("readShadows.totalCount error: %v", err)
@@ -393,7 +394,7 @@ func (r *VmdMotionReader) readShadows(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		v := NewShadowFrame(0)
+		v := vmd.NewShadowFrame(0)
 		v.Registered = true
 		v.Read = true
 
@@ -426,7 +427,7 @@ func (r *VmdMotionReader) readShadows(motion *VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readIks(motion *VmdMotion) error {
+func (r *VmdMotionReader) readIks(motion *vmd.VmdMotion) error {
 	totalCount, err := r.UnpackUInt()
 	if err != nil {
 		mlog.E("readIks.totalCount error: %v", err)
@@ -434,7 +435,7 @@ func (r *VmdMotionReader) readIks(motion *VmdMotion) error {
 	}
 
 	for i := 0; i < int(totalCount); i++ {
-		v := NewIkFrame(0)
+		v := vmd.NewIkFrame(0)
 		v.Registered = true
 		v.Read = true
 
@@ -461,7 +462,7 @@ func (r *VmdMotionReader) readIks(motion *VmdMotion) error {
 			return err
 		}
 		for j := 0; j < int(ikCount); j++ {
-			ik := NewIkEnableFrame(v.GetIndex())
+			ik := vmd.NewIkEnableFrame(v.GetIndex())
 
 			// IKボーン名
 			ik.BoneName, err = r.ReadText(20)

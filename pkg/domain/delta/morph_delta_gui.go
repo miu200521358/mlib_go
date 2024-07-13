@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package vmd
+package delta
 
 import (
 	"slices"

@@ -12,7 +12,6 @@ import (
 	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
-	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/reader"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
@@ -82,7 +81,7 @@ func NewVpdReadFilePicker(
 		map[int]map[string]string{
 			0: {"*.vpd": "Vpd Files (*.vpd)"}, 1: {"*.*": "All Files (*.*)"}},
 		50,
-		&vmd.VpdMotionReader{},
+		&reader.VpdMotionReader{},
 		OnPathChanged)
 }
 
@@ -107,7 +106,7 @@ func NewVmdVpdReadFilePicker(
 			1: {"*.vpd": "Vpd Files (*.vpd)"},
 			2: {"*.*": "All Files (*.*)"}},
 		50,
-		vmd.NewVmdVpdMotionReader(),
+		reader.NewVmdVpdMotionReader(),
 		OnPathChanged)
 }
 
@@ -131,7 +130,7 @@ func NewVmdReadFilePicker(
 			0: {"*.vmd": "Vmd Files (*.vmd)"},
 			1: {"*.*": "All Files (*.*)"}},
 		50,
-		&vmd.VmdMotionReader{},
+		&reader.VmdMotionReader{},
 		OnPathChanged)
 }
 

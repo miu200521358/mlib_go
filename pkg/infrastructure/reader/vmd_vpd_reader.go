@@ -1,14 +1,15 @@
-package vmd
+package reader
 
 import (
 	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 )
 
 // VMDリーダー
 type VmdVpdMotionReader struct {
-	core.BaseReader[*VmdMotion]
+	core.BaseReader[*vmd.VmdMotion]
 	vmdReader *VmdMotionReader
 	vpdReader *VpdMotionReader
 }

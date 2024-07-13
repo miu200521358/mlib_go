@@ -1,4 +1,4 @@
-package vmd
+package reader
 
 import (
 	"bufio"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
@@ -15,12 +16,12 @@ import (
 
 // VMDリーダー
 type VpdMotionReader struct {
-	core.BaseReader[*VmdMotion]
+	core.BaseReader[*vmd.VmdMotion]
 	lines []string
 }
 
-func (r *VpdMotionReader) createModel(path string) *VmdMotion {
-	model := NewVmdMotion(path)
+func (r *VpdMotionReader) createModel(path string) *vmd.VmdMotion {
+	model := vmd.NewVmdMotion(path)
 	return model
 }
 
@@ -116,7 +117,7 @@ func (r *VpdMotionReader) ReadText(line string, pattern *regexp.Regexp) ([]strin
 	return nil, nil
 }
 
-func (r *VpdMotionReader) readHeader(motion *VmdMotion) error {
+func (r *VpdMotionReader) readHeader(motion *vmd.VmdMotion) error {
 	signaturePattern := regexp.MustCompile(`Vocaloid Pose Data file`)
 	modelNamePattern := regexp.MustCompile(`(.*)(\.osm;.*// 親ファイル名)`)
 
@@ -143,12 +144,12 @@ func (r *VpdMotionReader) readHeader(motion *VmdMotion) error {
 	return nil
 }
 
-func (r *VpdMotionReader) readData(motion *VmdMotion) error {
+func (r *VpdMotionReader) readData(motion *vmd.VmdMotion) error {
 	boneStartPattern := regexp.MustCompile(`(?:.*)(?:{)(.*)`)
 	bonePosPattern := regexp.MustCompile(`([+-]?\d+(?:\.\d+))(?:,)([+-]?\d+(?:\.\d+))(?:,)([+-]?\d+(?:\.\d+))(?:;)(?:.*trans.*)`)
 	boneRotPattern := regexp.MustCompile(`([+-]?\d+(?:\.\d+))(?:,)([+-]?\d+(?:\.\d+))(?:,)([+-]?\d+(?:\.\d+))(?:,)([+-]?\d+(?:\.\d+))(?:;)(?:.*Quaternion.*)`)
 
-	var bf *BoneFrame
+	var bf *vmd.BoneFrame
 	var boneName string
 	for _, line := range r.lines {
 		{
@@ -156,7 +157,7 @@ func (r *VpdMotionReader) readData(motion *VmdMotion) error {
 			matches, err := r.ReadText(line, boneStartPattern)
 			if err == nil && len(matches) > 0 {
 				boneName = matches[1]
-				bf = NewBoneFrame(0)
+				bf = vmd.NewBoneFrame(0)
 				continue
 			}
 		}

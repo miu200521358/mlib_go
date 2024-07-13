@@ -13,6 +13,7 @@ import (
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
@@ -109,7 +110,7 @@ func getMenuItems() []declarative.MenuItem {
 }
 
 func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
-	nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*vmd.VmdDeltas)) {
+	nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*delta.VmdDeltas)) {
 	page, _ := widget.NewMTabPage(mWindow.MainWindow, mWindow.TabWidget, mi18n.T("ファイル"))
 
 	page.SetLayout(walk.NewVBoxLayout())
@@ -259,7 +260,7 @@ func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXpr
 	pmxReadPicker.PathLineEdit.SetFocus()
 
 	funcWorldPos := func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
-		nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*vmd.VmdDeltas) {
+		nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*delta.VmdDeltas) {
 		mlog.L()
 
 		if pmxReadPicker.Exists() {

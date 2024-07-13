@@ -4,8 +4,9 @@ import (
 	"log"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/reader"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/reader"
 	"github.com/pkg/profile"
 )
 
@@ -15,7 +16,7 @@ func main() {
 
 	// --------------------------------------------
 
-	vr := &vmd.VmdMotionReader{}
+	vr := &reader.VmdMotionReader{}
 	motionData, err := vr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Motion/ダンス_1人/[A]ddiction_モーション hino/[A]ddiction_Lat式.vmd")
 	// motionData, err := vr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Motion/ダンス_1人/CH4NGE mobiusP/CH4NGE.vmd")
 
@@ -39,6 +40,6 @@ func main() {
 		if i%100 == 0 {
 			log.Printf("i: %d", i)
 		}
-		motion.BoneFrames.Deform(i, model, nil, true, nil, nil)
+		deform.DeformBone(motion.BoneFrames, i, model, nil, true, nil, nil)
 	}
 }

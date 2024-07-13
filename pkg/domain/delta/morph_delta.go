@@ -1,4 +1,4 @@
-package vmd
+package delta
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -55,14 +55,14 @@ func NewSelectedVertexMorphDeltas() *SelectedVertexMorphDeltas {
 
 type BoneMorphDelta struct {
 	BoneIndex int
-	*BoneFrame
+	// *vmd.BoneFrame
 	*MorphFrameDelta
 }
 
 func NewBoneMorphDelta(boneIndex int) *BoneMorphDelta {
 	return &BoneMorphDelta{
-		BoneIndex:       boneIndex,
-		BoneFrame:       NewBoneFrame(boneIndex),
+		BoneIndex: boneIndex,
+		// BoneFrame:       NewBoneFrame(boneIndex),
 		MorphFrameDelta: NewMorphFrameDelta(),
 	}
 }

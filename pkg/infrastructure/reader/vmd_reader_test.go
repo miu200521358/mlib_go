@@ -1,10 +1,11 @@
-package vmd
+package reader
 
 import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 )
 
 func TestVmdMotionReader_ReadNameByFilepath(t *testing.T) {
@@ -55,7 +56,7 @@ func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
 		t.Errorf("Expected modelName to be %q, got %q", expectedModelName, model.GetName())
 	}
 
-	motion := model.(*VmdMotion)
+	motion := model.(*vmd.VmdMotion)
 
 	// キーフレがある
 	{

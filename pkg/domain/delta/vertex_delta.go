@@ -1,4 +1,4 @@
-package vmd
+package delta
 
 import (
 	"math"

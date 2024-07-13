@@ -15,9 +15,9 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/walk/pkg/walk"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
-	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
@@ -72,7 +72,7 @@ type GlWindow struct {
 	floor                  *MFloor               // 床
 	funcWorldPos           func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
 		nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3,
-		vmdDeltas []*vmd.VmdDeltas) // 選択ポイントからのグローバル位置取得コールバック関数
+		vmdDeltas []*delta.VmdDeltas) // 選択ポイントからのグローバル位置取得コールバック関数
 	AppendModelSetChannel      chan *widget.ModelSet         // モデルセット追加チャネル
 	RemoveModelSetIndexChannel chan int                      // モデルセット削除チャネル
 	ReplaceModelSetChannel     chan map[int]*widget.ModelSet // モデルセット入替チャネル
@@ -222,7 +222,7 @@ func (w *GlWindow) SetMotionPlayer(mp *widget.MotionPlayer) {
 }
 
 func (w *GlWindow) SetFuncWorldPos(f func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
-	nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*vmd.VmdDeltas)) {
+	nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*delta.VmdDeltas)) {
 	w.funcWorldPos = f
 }
 
@@ -436,7 +436,7 @@ func (w GlWindow) execWorldPos() {
 	nowX := w.nowCursorPos.GetX()
 	nowY := w.nowCursorPos.GetY()
 
-	vmdDeltas := make([]*vmd.VmdDeltas, len(w.modelSets))
+	vmdDeltas := make([]*delta.VmdDeltas, len(w.modelSets))
 	for i, modelSet := range w.modelSets {
 		vmdDeltas[i] = modelSet.PrevDeltas
 	}

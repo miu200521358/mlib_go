@@ -7,24 +7,26 @@ import (
 	"sync"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 type ModelSet struct {
-	Model                        *pmx.PmxModel  // 現在描画中のモデル
-	Motion                       *vmd.VmdMotion // 現在描画中のモーション
-	InvisibleMaterialIndexes     []int          // 非表示材質インデックス
-	SelectedVertexIndexes        []int          // 選択頂点インデックス
-	NextModel                    *pmx.PmxModel  // UIから渡された次のモデル
-	NextMotion                   *vmd.VmdMotion // UIから渡された次のモーション
-	NextInvisibleMaterialIndexes []int          // UIから渡された次の非表示材質インデックス
-	NextSelectedVertexIndexes    []int          // UIから渡された次の選択頂点インデックス
-	PrevDeltas                   *vmd.VmdDeltas // 前回のデフォーム情報
+	Model                        *pmx.PmxModel    // 現在描画中のモデル
+	Motion                       *vmd.VmdMotion   // 現在描画中のモーション
+	InvisibleMaterialIndexes     []int            // 非表示材質インデックス
+	SelectedVertexIndexes        []int            // 選択頂点インデックス
+	NextModel                    *pmx.PmxModel    // UIから渡された次のモデル
+	NextMotion                   *vmd.VmdMotion   // UIから渡された次のモーション
+	NextInvisibleMaterialIndexes []int            // UIから渡された次の非表示材質インデックス
+	NextSelectedVertexIndexes    []int            // UIから渡された次の選択頂点インデックス
+	PrevDeltas                   *delta.VmdDeltas // 前回のデフォーム情報
 }
 
 func NewModelSet() *ModelSet {
@@ -108,23 +110,23 @@ func deformBeforePhysics(
 	modelPhysics *mbt.MPhysics,
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
-	prevDeltas *vmd.VmdDeltas,
+	prevDeltas *delta.VmdDeltas,
 	frame int,
 	timeStep float32,
 	enablePhysics, resetPhysics bool,
-) *vmd.VmdDeltas {
+) *delta.VmdDeltas {
 	if motion == nil {
 		motion = vmd.NewVmdMotion("")
 	}
 
-	vds := vmd.NewVmdDeltas(model.Vertices)
+	vds := delta.NewVmdDeltas(model.Vertices)
 
 	// IKのON/OFF
 	ikFrame := motion.IkFrames.Get(frame)
 
 	if prevDeltas == nil {
-		vds.Morphs = motion.DeformMorph(frame, model, nil)
-		vds.Bones = motion.BoneFrames.DeformByPhysicsFlag(frame, model, nil, true,
+		vds.Morphs = deform.DeformMorph(motion, motion.MorphFrames, frame, model, nil)
+		vds.Bones = deform.DeformByPhysicsFlag(motion.BoneFrames, frame, model, nil, true,
 			nil, vds.Morphs, ikFrame, false)
 
 		vds.MeshGlDeltas = make([]*pmx.MeshDelta, len(model.Materials.Data))
@@ -161,7 +163,7 @@ func deformBeforePhysics(
 			// ボーン追従剛体・物理＋ボーン位置もしくは強制更新の場合のみ剛体位置更新
 			boneTransform := bt.NewBtTransform()
 			defer bt.DeleteBtTransform(boneTransform)
-			mat := mgl.NewGlMat4FromMMat4(vds.Bones.Get(rigidBodyBone.Index).GlobalMatrix())
+			mat := mgl.NewGlMat4FromMMat4(vds.Bones.Get(rigidBodyBone.Index).GetGlobalMatrix())
 			boneTransform.SetFromOpenGLMatrix(&mat[0])
 
 			rigidBody.UpdateTransform(model.Index, modelPhysics, rigidBodyBone, boneTransform)
@@ -175,11 +177,11 @@ func deformAfterPhysics(
 	modelPhysics *mbt.MPhysics,
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
-	deltas *vmd.VmdDeltas,
+	deltas *delta.VmdDeltas,
 	selectedVertexIndexes, nextSelectedVertexIndexes []int,
 	frame int,
 	enablePhysics, resetPhysics bool,
-) *vmd.VmdDeltas {
+) *delta.VmdDeltas {
 	if motion == nil {
 		motion = vmd.NewVmdMotion("")
 	}
@@ -196,7 +198,7 @@ func deformAfterPhysics(
 				}
 				bonePhysicsGlobalMatrix := bone.RigidBody.GetRigidBodyBoneMatrix(model.Index, modelPhysics)
 				if deltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
-					bd := vmd.NewBoneDeltaByGlobalMatrix(bone, frame,
+					bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame,
 						bonePhysicsGlobalMatrix, deltas.Bones.Get(bone.ParentIndex))
 					deltas.Bones.Update(bd)
 				}
@@ -204,7 +206,7 @@ func deformAfterPhysics(
 		}
 
 		// 物理後のデフォーム情報
-		deltas.Bones = motion.BoneFrames.DeformByPhysicsFlag(frame, model, nil, true,
+		deltas.Bones = deform.DeformByPhysicsFlag(motion.BoneFrames, frame, model, nil, true,
 			deltas.Bones, deltas.Morphs, ikFrame, true)
 	}
 
@@ -213,7 +215,7 @@ func deformAfterPhysics(
 	for i, bone := range model.Bones.Data {
 		delta := deltas.Bones.Get(bone.Index)
 		if delta != nil {
-			deltas.BoneGlDeltas[i] = mgl.NewGlMat4FromMMat4(delta.LocalMatrix())
+			deltas.BoneGlDeltas[i] = mgl.NewGlMat4FromMMat4(delta.GetLocalMatrix())
 		}
 	}
 
@@ -228,12 +230,12 @@ func Draw(
 	modelPhysics *mbt.MPhysics,
 	model *pmx.PmxModel,
 	shader *mgl.MShader,
-	deltas *vmd.VmdDeltas,
+	deltas *delta.VmdDeltas,
 	invisibleMaterialIndexes, nextInvisibleMaterialIndexes []int,
 	windowIndex int,
 	isDrawNormal, isDrawWire, isDrawSelectedVertex bool,
 	isDrawBones map[pmx.BoneFlag]bool,
-) *vmd.VmdDeltas {
+) *delta.VmdDeltas {
 	vertexPositions := model.Meshes.Draw(
 		shader, deltas.BoneGlDeltas, deltas.VertexMorphIndexes, deltas.VertexMorphGlDeltas,
 		deltas.SelectedVertexIndexes, deltas.SelectedVertexGlDeltas, deltas.MeshGlDeltas,
@@ -241,7 +243,7 @@ func Draw(
 		isDrawNormal, isDrawWire, isDrawSelectedVertex, isDrawBones, model.Bones)
 
 	for i, pos := range vertexPositions {
-		deltas.Vertices.Data[i] = vmd.NewVertexDelta(&mmath.MVec3{float64(-pos[0]), float64(pos[1]), float64(pos[2])})
+		deltas.Vertices.Data[i] = delta.NewVertexDelta(&mmath.MVec3{float64(-pos[0]), float64(pos[1]), float64(pos[2])})
 	}
 
 	// 物理デバッグ表示

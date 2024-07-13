@@ -5,6 +5,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/reader"
 )
 
 func TestVmdWriter_Write1(t *testing.T) {
@@ -25,7 +26,7 @@ func TestVmdWriter_Write1(t *testing.T) {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
 
-	r := &vmd.VmdMotionReader{}
+	r := &reader.VmdMotionReader{}
 	reloadData, err := r.ReadByFilepath(path)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -58,7 +59,7 @@ func TestVmdWriter_Write2(t *testing.T) {
 	// Test case 1: Successful read
 	readPath := "../../../test_resources/サンプルモーション.vmd"
 
-	r := &vmd.VmdMotionReader{}
+	r := &reader.VmdMotionReader{}
 	data, err := r.ReadByFilepath(readPath)
 
 	if err != nil {
@@ -91,7 +92,7 @@ func TestVmdWriter_Write3(t *testing.T) {
 	// Test case 1: Successful read
 	readPath := "../../../test_resources/ドクヘビ_178cmカメラ.vmd"
 
-	r := &vmd.VmdMotionReader{}
+	r := &reader.VmdMotionReader{}
 	model, err := r.ReadByFilepath(readPath)
 
 	if err != nil {
@@ -123,7 +124,7 @@ func TestVmdWriter_Write4(t *testing.T) {
 	// Test case 1: Successful read
 	readPath := "../../../test_resources/モーフ_まばたき.vmd"
 
-	r := &vmd.VmdMotionReader{}
+	r := &reader.VmdMotionReader{}
 	model, err := r.ReadByFilepath(readPath)
 
 	if err != nil {

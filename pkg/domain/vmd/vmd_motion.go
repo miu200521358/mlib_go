@@ -4,7 +4,6 @@ import (
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
 
 type VmdMotion struct {
@@ -115,20 +114,4 @@ func (m *VmdMotion) InsertShadowFrame(sf *ShadowFrame) {
 
 func (m *VmdMotion) InsertIkFrame(ikf *IkFrame) {
 	m.IkFrames.Insert(ikf)
-}
-
-func (m *VmdMotion) DeformMorph(
-	frame int,
-	model *pmx.PmxModel,
-	morphNames []string,
-) *MorphDeltas {
-	if morphNames == nil {
-		// モーフの指定がなければ全モーフチェック
-		morphNames = make([]string, 0)
-		for _, morph := range model.Morphs.Data {
-			morphNames = append(morphNames, morph.Name)
-		}
-	}
-
-	return m.MorphFrames.Deform(frame, model, morphNames)
 }
