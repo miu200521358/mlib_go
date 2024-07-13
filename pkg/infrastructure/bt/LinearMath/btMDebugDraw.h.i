@@ -1,6 +1,6 @@
 ////// LinearMath/btMDebugDraw.h ----------------
 
-%module(directors="1") mbt
+%module(directors="1") bt
 %feature("director") btMDebugDrawLiner;
 
 %include "LinearMath/btMDebugDraw.h"

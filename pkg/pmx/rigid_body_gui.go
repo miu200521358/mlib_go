@@ -5,9 +5,9 @@ package pmx
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 )
 
 func (r *RigidBody) UpdateFlags(
@@ -22,10 +22,10 @@ func (r *RigidBody) UpdateFlags(
 		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時
 		// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
 		btRigidBody.SetCollisionFlags(
-			btRigidBody.GetCollisionFlags() | int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT))
+			btRigidBody.GetCollisionFlags() | int(bt.BtCollisionObjectCF_KINEMATIC_OBJECT))
 		// 毎ステップの剛体位置通知を無効にする
 		// MotionState::setWorldTransformの毎ステップ呼び出しが無効になる(剛体位置は判っているので不要)
-		btRigidBody.SetActivationState(mbt.DISABLE_SIMULATION)
+		btRigidBody.SetActivationState(bt.DISABLE_SIMULATION)
 
 		if resetPhysics {
 			return true
@@ -35,27 +35,27 @@ func (r *RigidBody) UpdateFlags(
 
 		if enablePhysics {
 			// 物理演算・物理+ボーン位置合わせの場合
-			if prevActivationState != mbt.ACTIVE_TAG {
-				btRigidBody.SetCollisionFlags(0 & ^int(mbt.BtCollisionObjectCF_NO_CONTACT_RESPONSE))
-				btRigidBody.ForceActivationState(mbt.ACTIVE_TAG)
+			if prevActivationState != bt.ACTIVE_TAG {
+				btRigidBody.SetCollisionFlags(0 & ^int(bt.BtCollisionObjectCF_NO_CONTACT_RESPONSE))
+				btRigidBody.ForceActivationState(bt.ACTIVE_TAG)
 
 				return true
 			} else {
 				// 剛体の位置更新に物理演算を使う。
 				// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
 				btRigidBody.SetCollisionFlags(
-					btRigidBody.GetCollisionFlags() & ^int(mbt.BtCollisionObjectCF_NO_CONTACT_RESPONSE))
+					btRigidBody.GetCollisionFlags() & ^int(bt.BtCollisionObjectCF_NO_CONTACT_RESPONSE))
 				// 毎ステップの剛体位置通知を有効にする
 				// MotionState::setWorldTransformの毎ステップ呼び出しが有効になる(剛体位置が変わるので必要)
-				btRigidBody.SetActivationState(mbt.ACTIVE_TAG)
+				btRigidBody.SetActivationState(bt.ACTIVE_TAG)
 			}
 		} else {
 			// 物理OFF時
 			btRigidBody.SetCollisionFlags(
-				btRigidBody.GetCollisionFlags() | int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT))
-			btRigidBody.SetActivationState(mbt.ISLAND_SLEEPING)
+				btRigidBody.GetCollisionFlags() | int(bt.BtCollisionObjectCF_KINEMATIC_OBJECT))
+			btRigidBody.SetActivationState(bt.ISLAND_SLEEPING)
 
-			if prevActivationState != mbt.ISLAND_SLEEPING {
+			if prevActivationState != bt.ISLAND_SLEEPING {
 				return true
 			}
 		}
@@ -65,7 +65,7 @@ func (r *RigidBody) UpdateFlags(
 }
 
 func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics) {
-	var btCollisionShape mbt.BtCollisionShape
+	var btCollisionShape bt.BtCollisionShape
 
 	// マイナスサイズは許容しない
 	size := r.Size.Absed()
@@ -73,14 +73,14 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics)
 	switch r.ShapeType {
 	case SHAPE_SPHERE:
 		// 球剛体
-		btCollisionShape = mbt.NewBtSphereShape(float32(size.GetX()))
+		btCollisionShape = bt.NewBtSphereShape(float32(size.GetX()))
 	case SHAPE_BOX:
 		// 箱剛体
-		btCollisionShape = mbt.NewBtBoxShape(
-			mbt.NewBtVector3(float32(size.GetX()), float32(size.GetY()), float32(size.GetZ())))
+		btCollisionShape = bt.NewBtBoxShape(
+			bt.NewBtVector3(float32(size.GetX()), float32(size.GetY()), float32(size.GetZ())))
 	case SHAPE_CAPSULE:
 		// カプセル剛体
-		btCollisionShape = mbt.NewBtCapsuleShape(float32(size.GetX()), float32(size.GetY()))
+		btCollisionShape = bt.NewBtCapsuleShape(float32(size.GetX()), float32(size.GetY()))
 	}
 	// btCollisionShape.SetMargin(0.0001)
 
@@ -92,7 +92,7 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics)
 
 	// 質量
 	mass := float32(0.0)
-	localInertia := mbt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
+	localInertia := bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
 	if r.PhysicsType != PHYSICS_TYPE_STATIC {
 		// ボーン追従ではない場合そのまま設定
 		mass = float32(r.RigidBodyParam.Mass)
@@ -103,12 +103,12 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics)
 	}
 
 	// // ボーンのローカル位置
-	// boneTransform := mbt.NewBtTransform()
+	// boneTransform := bt.NewBtTransform()
 	// boneTransform.SetIdentity()
 	// boneTransform.SetOrigin(boneLocalPosition.Bullet())
 
 	// 剛体の初期位置と回転
-	btRigidBodyTransform := mbt.NewBtTransform(r.Rotation.Bullet(), r.Position.Bullet())
+	btRigidBodyTransform := bt.NewBtTransform(r.Rotation.Bullet(), r.Position.Bullet())
 
 	// ボーンから見た剛体の初期位置
 	var bPos *mmath.MVec3
@@ -120,7 +120,7 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics)
 		bPos = mmath.NewMVec3()
 	}
 	rbLocalPos := r.Position.Subed(bPos)
-	btRigidBodyLocalTransform := mbt.NewBtTransform(r.Rotation.Bullet(), rbLocalPos.Bullet())
+	btRigidBodyLocalTransform := bt.NewBtTransform(r.Rotation.Bullet(), rbLocalPos.Bullet())
 
 	// {
 	// 	mlog.V("---------------------------------")
@@ -132,9 +132,9 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics)
 	// }
 
 	// 剛体のグローバル位置と回転
-	motionState := mbt.NewBtDefaultMotionState(btRigidBodyTransform)
+	motionState := bt.NewBtDefaultMotionState(btRigidBodyTransform)
 
-	btRigidBody := mbt.NewBtRigidBody(mass, motionState, btCollisionShape, localInertia)
+	btRigidBody := bt.NewBtRigidBody(mass, motionState, btCollisionShape, localInertia)
 	btRigidBody.SetDamping(float32(r.RigidBodyParam.LinearDamping), float32(r.RigidBodyParam.AngularDamping))
 	btRigidBody.SetRestitution(float32(r.RigidBodyParam.Restitution))
 	btRigidBody.SetFriction(float32(r.RigidBodyParam.Friction))
@@ -155,7 +155,7 @@ func (r *RigidBody) UpdateTransform(
 	modelIndex int,
 	modelPhysics *mphysics.MPhysics,
 	rigidBodyBone *Bone,
-	boneTransform mbt.BtTransform,
+	boneTransform bt.BtTransform,
 ) {
 	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(modelIndex, r.Index)
 
@@ -168,10 +168,10 @@ func (r *RigidBody) UpdateTransform(
 	// }
 
 	// 剛体のグローバル位置を確定
-	motionState := btRigidBody.GetMotionState().(mbt.BtMotionState)
+	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
 
-	t := mbt.NewBtTransform()
-	defer mbt.DeleteBtTransform(t)
+	t := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(t)
 
 	t.Mult(boneTransform, btRigidBodyLocalTransform)
 	motionState.SetWorldTransform(t)
@@ -203,17 +203,17 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 	// 	state := btRigidBody.GetActivationState()
 	// 	isStatic := btRigidBody.IsStaticOrKinematicObject()
 	// 	flags := btRigidBody.GetCollisionFlags()
-	// 	mlog.V("name: %s, state: %v, static: %v, flags: %v, isKinematic: %v, isStatic: %v\n", r.Name, state, isStatic, flags, flags&int(mbt.BtCollisionObjectCF_KINEMATIC_OBJECT) != 0, flags&int(mbt.BtCollisionObjectCF_STATIC_OBJECT) != 0)
+	// 	mlog.V("name: %s, state: %v, static: %v, flags: %v, isKinematic: %v, isStatic: %v\n", r.Name, state, isStatic, flags, flags&int(bt.BtCollisionObjectCF_KINEMATIC_OBJECT) != 0, flags&int(bt.BtCollisionObjectCF_STATIC_OBJECT) != 0)
 	// }
 
 	// {
 	// 	mlog.V("----------")
 	// }
 
-	motionState := btRigidBody.GetMotionState().(mbt.BtMotionState)
+	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
 
-	rigidBodyGlobalTransform := mbt.NewBtTransform()
-	defer mbt.DeleteBtTransform(rigidBodyGlobalTransform)
+	rigidBodyGlobalTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(rigidBodyGlobalTransform)
 
 	motionState.GetWorldTransform(rigidBodyGlobalTransform)
 
@@ -226,16 +226,16 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 
 	// 	if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
 	// 		// 物理+ボーン追従はボーン移動成分を現在のボーン位置にする
-	// 		boneGlobalTransform := mbt.NewBtTransform()
+	// 		boneGlobalTransform := bt.NewBtTransform()
 	// 		boneGlobalTransform.Mult(*boneTransforms[r.BoneIndex], r.BtRigidBodyTransform)
 
-	// 		rigidBodyTransform.SetOrigin(boneGlobalTransform.GetOrigin().(mbt.BtVector3))
+	// 		rigidBodyTransform.SetOrigin(boneGlobalTransform.GetOrigin().(bt.BtVector3))
 	// 	} else if r.JointedBoneIndex >= 0 && r.JointedBoneIndex < len(boneTransforms) {
 	// 		// ジョイントで繋がっているボーンがある場合はそのボーン位置にする
-	// 		boneGlobalTransform := mbt.NewBtTransform()
+	// 		boneGlobalTransform := bt.NewBtTransform()
 	// 		boneGlobalTransform.Mult(*boneTransforms[r.JointedBoneIndex], r.BtRigidBodyTransform)
 
-	// 		rigidBodyTransform.SetOrigin(boneGlobalTransform.GetOrigin().(mbt.BtVector3))
+	// 		rigidBodyTransform.SetOrigin(boneGlobalTransform.GetOrigin().(bt.BtVector3))
 	// 	}
 
 	// 	{
@@ -246,11 +246,11 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 	// }
 
 	// ボーンのグローバル位置を剛体の現在グローバル行列に初期位置ローカル行列を掛けて求める
-	boneGlobalTransform := mbt.NewBtTransform()
-	defer mbt.DeleteBtTransform(boneGlobalTransform)
+	boneGlobalTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(boneGlobalTransform)
 
 	invRigidBodyLocalTransform := btRigidBodyLocalTransform.Inverse()
-	defer mbt.DeleteBtTransform(invRigidBodyLocalTransform)
+	defer bt.DeleteBtTransform(invRigidBodyLocalTransform)
 
 	boneGlobalTransform.Mult(rigidBodyGlobalTransform, invRigidBodyLocalTransform)
 

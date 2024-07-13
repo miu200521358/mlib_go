@@ -6,24 +6,24 @@ package mphysics
 import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 
-	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
-func NewConstBtMDefaultColors() mbt.BtMDefaultColors {
-	return mbt.NewBtMDefaultColors(
-		mbt.NewBtVector3(float32(1.0), float32(0.0), float32(0.0)), // activeObject	(物理剛体)
-		mbt.NewBtVector3(float32(0.5), float32(0.5), float32(0.0)), // deactivatedObject
-		mbt.NewBtVector3(float32(0.5), float32(0.0), float32(0.5)), // wantsDeactivationObject
-		mbt.NewBtVector3(float32(0.0), float32(0.5), float32(0.5)), // disabledDeactivationObject
-		mbt.NewBtVector3(float32(0.0), float32(1.0), float32(0.0)), // disabledSimulationObject	(ボーン追従剛体)
-		mbt.NewBtVector3(float32(1.0), float32(1.0), float32(0.0)), // aabb
-		mbt.NewBtVector3(float32(0.0), float32(0.0), float32(1.0)), // contactPoint
+func NewConstBtMDefaultColors() bt.BtMDefaultColors {
+	return bt.NewBtMDefaultColors(
+		bt.NewBtVector3(float32(1.0), float32(0.0), float32(0.0)), // activeObject	(物理剛体)
+		bt.NewBtVector3(float32(0.5), float32(0.5), float32(0.0)), // deactivatedObject
+		bt.NewBtVector3(float32(0.5), float32(0.0), float32(0.5)), // wantsDeactivationObject
+		bt.NewBtVector3(float32(0.0), float32(0.5), float32(0.5)), // disabledDeactivationObject
+		bt.NewBtVector3(float32(0.0), float32(1.0), float32(0.0)), // disabledSimulationObject	(ボーン追従剛体)
+		bt.NewBtVector3(float32(1.0), float32(1.0), float32(0.0)), // aabb
+		bt.NewBtVector3(float32(0.0), float32(0.0), float32(1.0)), // contactPoint
 	)
 }
 
 type MDebugDrawLiner struct {
-	mbt.BtMDebugDrawLiner
+	bt.BtMDebugDrawLiner
 	shader   *mview.MShader
 	vao      *mview.VAO
 	vbo      *mview.VBO
@@ -43,12 +43,12 @@ func NewMDebugDrawLiner(shader *mview.MShader) *MDebugDrawLiner {
 	ddl.vbo.Unbind()
 	ddl.vao.Unbind()
 
-	ddl.BtMDebugDrawLiner = mbt.NewDirectorBtMDebugDrawLiner(ddl)
+	ddl.BtMDebugDrawLiner = bt.NewDirectorBtMDebugDrawLiner(ddl)
 
 	return ddl
 }
 
-func (ddl *MDebugDrawLiner) DrawLine(from mbt.BtVector3, to mbt.BtVector3, color mbt.BtVector3) {
+func (ddl *MDebugDrawLiner) DrawLine(from bt.BtVector3, to bt.BtVector3, color bt.BtVector3) {
 	ddl.vertices = append(ddl.vertices, from.GetX(), from.GetY(), from.GetZ())
 	ddl.vertices = append(ddl.vertices, color.GetX(), color.GetY(), color.GetZ(), 0.6)
 	ddl.count++

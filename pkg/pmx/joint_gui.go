@@ -4,15 +4,15 @@
 package pmx
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 )
 
 func (j *Joint) initPhysics(
 	modelIndex int, modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody,
 ) {
 	// ジョイントの位置と向き
-	jointTransform := mbt.NewBtTransform(j.Rotation.Bullet(), j.Position.Bullet())
+	jointTransform := bt.NewBtTransform(j.Rotation.Bullet(), j.Position.Bullet())
 
 	btRigidBodyA, _ := modelPhysics.GetRigidBody(modelIndex, rigidBodyA.Index)
 	btRigidBodyB, _ := modelPhysics.GetRigidBody(modelIndex, rigidBodyB.Index)
@@ -21,38 +21,38 @@ func (j *Joint) initPhysics(
 	}
 
 	// 剛体Aの現在の位置と向きを取得
-	worldTransformA := btRigidBodyA.GetWorldTransform().(mbt.BtTransform)
+	worldTransformA := btRigidBodyA.GetWorldTransform().(bt.BtTransform)
 
 	// 剛体Aのローカル座標系におけるジョイント
-	jointLocalTransformA := mbt.NewBtTransform()
+	jointLocalTransformA := bt.NewBtTransform()
 	jointLocalTransformA.SetIdentity()
 	jointLocalTransformA.Mult(worldTransformA.Inverse(), jointTransform)
 
 	// 剛体Bの現在の位置と向きを取得
-	worldTransformB := btRigidBodyB.GetWorldTransform().(mbt.BtTransform)
+	worldTransformB := btRigidBodyB.GetWorldTransform().(bt.BtTransform)
 
 	// 剛体Bのローカル座標系におけるジョイント
-	jointLocalTransformB := mbt.NewBtTransform()
+	jointLocalTransformB := bt.NewBtTransform()
 	jointLocalTransformB.SetIdentity()
 	jointLocalTransformB.Mult(worldTransformB.Inverse(), jointTransform)
 
 	// ジョイント係数
-	constraint := mbt.NewBtGeneric6DofSpringConstraint(
+	constraint := bt.NewBtGeneric6DofSpringConstraint(
 		btRigidBodyA, btRigidBodyB, jointLocalTransformA, jointLocalTransformB, true)
 	// 係数は符号を調整する必要がないため、そのまま設定
-	constraint.SetLinearLowerLimit(mbt.NewBtVector3(
+	constraint.SetLinearLowerLimit(bt.NewBtVector3(
 		float32(j.JointParam.TranslationLimitMin.GetX()),
 		float32(j.JointParam.TranslationLimitMin.GetY()),
 		float32(j.JointParam.TranslationLimitMin.GetZ())))
-	constraint.SetLinearUpperLimit(mbt.NewBtVector3(
+	constraint.SetLinearUpperLimit(bt.NewBtVector3(
 		float32(j.JointParam.TranslationLimitMax.GetX()),
 		float32(j.JointParam.TranslationLimitMax.GetY()),
 		float32(j.JointParam.TranslationLimitMax.GetZ())))
-	constraint.SetAngularLowerLimit(mbt.NewBtVector3(
+	constraint.SetAngularLowerLimit(bt.NewBtVector3(
 		float32(j.JointParam.RotationLimitMin.GetRadians().GetX()),
 		float32(j.JointParam.RotationLimitMin.GetRadians().GetY()),
 		float32(j.JointParam.RotationLimitMin.GetRadians().GetZ())))
-	constraint.SetAngularUpperLimit(mbt.NewBtVector3(
+	constraint.SetAngularUpperLimit(bt.NewBtVector3(
 		float32(j.JointParam.RotationLimitMax.GetRadians().GetX()),
 		float32(j.JointParam.RotationLimitMax.GetRadians().GetY()),
 		float32(j.JointParam.RotationLimitMax.GetRadians().GetZ())))
@@ -73,10 +73,10 @@ func (j *Joint) initPhysics(
 		constraint.SetStiffness(5, float32(j.JointParam.SpringConstantRotation.GetRadians().GetZ()))
 	}
 
-	constraint.SetParam(int(mbt.BT_CONSTRAINT_ERP), float32(0.5), 0)
-	constraint.SetParam(int(mbt.BT_CONSTRAINT_STOP_ERP), float32(0.5), 0)
-	constraint.SetParam(int(mbt.BT_CONSTRAINT_CFM), float32(0.1), 0)
-	constraint.SetParam(int(mbt.BT_CONSTRAINT_STOP_CFM), float32(0.1), 0)
+	constraint.SetParam(int(bt.BT_CONSTRAINT_ERP), float32(0.5), 0)
+	constraint.SetParam(int(bt.BT_CONSTRAINT_STOP_ERP), float32(0.5), 0)
+	constraint.SetParam(int(bt.BT_CONSTRAINT_CFM), float32(0.1), 0)
+	constraint.SetParam(int(bt.BT_CONSTRAINT_STOP_CFM), float32(0.1), 0)
 
 	// デバッグ円の表示サイズ
 	constraint.SetDbgDrawSize(float32(1.5))

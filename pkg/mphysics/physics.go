@@ -4,13 +4,13 @@
 package mphysics
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 
 type MPhysics struct {
-	world            mbt.BtDiscreteDynamicsWorld
-	drawer           mbt.BtMDebugDraw
+	world            bt.BtDiscreteDynamicsWorld
+	drawer           bt.BtMDebugDraw
 	liner            *MDebugDrawLiner
 	MaxSubSteps      int
 	DeformFps        float32
@@ -18,7 +18,7 @@ type MPhysics struct {
 	PhysicsFps       float32
 	PhysicsSpf       float32
 	FixedTimeStep    float32
-	joints           map[jointKey]mbt.BtTypedConstraint
+	joints           map[jointKey]bt.BtTypedConstraint
 	rigidBodies      map[rigidbodyKey]rigidbodyValue
 	visibleRigidBody bool
 	visibleJoint     bool
@@ -30,8 +30,8 @@ type rigidbodyKey struct {
 }
 
 type rigidbodyValue struct {
-	RigidBody mbt.BtRigidBody
-	Transform mbt.BtTransform
+	RigidBody bt.BtRigidBody
+	Transform bt.BtTransform
 	Mask      int
 	Group     int
 }
@@ -50,12 +50,12 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 		DeformFps:   30.0,
 		PhysicsFps:  60.0,
 		rigidBodies: make(map[rigidbodyKey]rigidbodyValue),
-		joints:      make(map[jointKey]mbt.BtTypedConstraint),
+		joints:      make(map[jointKey]bt.BtTypedConstraint),
 	}
 
 	// デバッグビューワー
 	liner := NewMDebugDrawLiner(shader)
-	drawer := mbt.NewBtMDebugDraw()
+	drawer := bt.NewBtMDebugDraw()
 	drawer.SetLiner(liner)
 	drawer.SetMDefaultColors(NewConstBtMDefaultColors())
 	world.SetDebugDrawer(drawer)
@@ -73,23 +73,23 @@ func NewMPhysics(shader *mview.MShader) *MPhysics {
 	return p
 }
 
-func createWorld() mbt.BtDiscreteDynamicsWorld {
-	broadphase := mbt.NewBtDbvtBroadphase()
-	collisionConfiguration := mbt.NewBtDefaultCollisionConfiguration()
-	dispatcher := mbt.NewBtCollisionDispatcher(collisionConfiguration)
-	solver := mbt.NewBtSequentialImpulseConstraintSolver()
+func createWorld() bt.BtDiscreteDynamicsWorld {
+	broadphase := bt.NewBtDbvtBroadphase()
+	collisionConfiguration := bt.NewBtDefaultCollisionConfiguration()
+	dispatcher := bt.NewBtCollisionDispatcher(collisionConfiguration)
+	solver := bt.NewBtSequentialImpulseConstraintSolver()
 	// solver.GetM_analyticsData().SetM_numIterationsUsed(200)
-	world := mbt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
-	world.SetGravity(mbt.NewBtVector3(float32(0), float32(-9.8*10), float32(0)))
-	// world.GetSolverInfo().(mbt.BtContactSolverInfo).SetM_numIterations(100)
-	// world.GetSolverInfo().(mbt.BtContactSolverInfo).SetM_splitImpulse(1)
+	world := bt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
+	world.SetGravity(bt.NewBtVector3(float32(0), float32(-9.8*10), float32(0)))
+	// world.GetSolverInfo().(bt.BtContactSolverInfo).SetM_numIterations(100)
+	// world.GetSolverInfo().(bt.BtContactSolverInfo).SetM_splitImpulse(1)
 
-	groundShape := mbt.NewBtStaticPlaneShape(mbt.NewBtVector3(float32(0), float32(1), float32(0)), float32(0))
-	groundTransform := mbt.NewBtTransform()
+	groundShape := bt.NewBtStaticPlaneShape(bt.NewBtVector3(float32(0), float32(1), float32(0)), float32(0))
+	groundTransform := bt.NewBtTransform()
 	groundTransform.SetIdentity()
-	groundTransform.SetOrigin(mbt.NewBtVector3(float32(0), float32(0), float32(0)))
-	groundMotionState := mbt.NewBtDefaultMotionState(groundTransform)
-	groundRigidBody := mbt.NewBtRigidBody(float32(0), groundMotionState, groundShape)
+	groundTransform.SetOrigin(bt.NewBtVector3(float32(0), float32(0), float32(0)))
+	groundMotionState := bt.NewBtDefaultMotionState(groundTransform)
+	groundRigidBody := bt.NewBtRigidBody(float32(0), groundMotionState, groundShape)
 
 	world.AddRigidBody(groundRigidBody, 1<<15, 0xFFFF)
 
@@ -115,14 +115,14 @@ func (p *MPhysics) VisibleRigidBody(enable bool) {
 	if enable {
 		p.world.GetDebugDrawer().SetDebugMode(
 			p.world.GetDebugDrawer().GetDebugMode() | int(
-				mbt.BtIDebugDrawDBG_DrawWireframe|
-					mbt.BtIDebugDrawDBG_DrawContactPoints,
+				bt.BtIDebugDrawDBG_DrawWireframe|
+					bt.BtIDebugDrawDBG_DrawContactPoints,
 			))
 	} else {
 		p.world.GetDebugDrawer().SetDebugMode(
 			p.world.GetDebugDrawer().GetDebugMode() & ^int(
-				mbt.BtIDebugDrawDBG_DrawWireframe|
-					mbt.BtIDebugDrawDBG_DrawContactPoints,
+				bt.BtIDebugDrawDBG_DrawWireframe|
+					bt.BtIDebugDrawDBG_DrawContactPoints,
 			))
 	}
 	p.visibleRigidBody = enable
@@ -132,14 +132,14 @@ func (p *MPhysics) VisibleJoint(enable bool) {
 	if enable {
 		p.world.GetDebugDrawer().SetDebugMode(
 			p.world.GetDebugDrawer().GetDebugMode() | int(
-				mbt.BtIDebugDrawDBG_DrawConstraints|
-					mbt.BtIDebugDrawDBG_DrawConstraintLimits,
+				bt.BtIDebugDrawDBG_DrawConstraints|
+					bt.BtIDebugDrawDBG_DrawConstraintLimits,
 			))
 	} else {
 		p.world.GetDebugDrawer().SetDebugMode(
 			p.world.GetDebugDrawer().GetDebugMode() & ^int(
-				mbt.BtIDebugDrawDBG_DrawConstraints|
-					mbt.BtIDebugDrawDBG_DrawConstraintLimits,
+				bt.BtIDebugDrawDBG_DrawConstraints|
+					bt.BtIDebugDrawDBG_DrawConstraintLimits,
 			))
 	}
 	p.visibleJoint = enable
@@ -171,12 +171,12 @@ func (p *MPhysics) DebugDrawWorld() {
 	// fmt.Print(buf.String())
 }
 
-func (p *MPhysics) GetRigidBody(modelIndex, rigidBodyIndex int) (mbt.BtRigidBody, mbt.BtTransform) {
+func (p *MPhysics) GetRigidBody(modelIndex, rigidBodyIndex int) (bt.BtRigidBody, bt.BtTransform) {
 	r := p.rigidBodies[rigidbodyKey{ModelIndex: modelIndex, RigidBodyIndex: rigidBodyIndex}]
 	return r.RigidBody, r.Transform
 }
 
-func (p *MPhysics) AddRigidBody(rigidBody mbt.BtRigidBody, rigidBodyTransform mbt.BtTransform,
+func (p *MPhysics) AddRigidBody(rigidBody bt.BtRigidBody, rigidBodyTransform bt.BtTransform,
 	modelIndex, rigidBodyIndex, group, mask int) {
 	p.world.AddRigidBody(rigidBody, group, mask)
 	rigidBodyKey := rigidbodyKey{ModelIndex: modelIndex, RigidBodyIndex: rigidBodyIndex}
@@ -194,7 +194,7 @@ func (p *MPhysics) DeleteRigidBodies(modelIndex int) {
 	}
 }
 
-func (p *MPhysics) AddJoint(modelIndex, jointIndex int, joint mbt.BtTypedConstraint) {
+func (p *MPhysics) AddJoint(modelIndex, jointIndex int, joint bt.BtTypedConstraint) {
 	p.world.AddConstraint(joint, true)
 	key := jointKey{ModelIndex: modelIndex, JointIndex: jointIndex}
 	p.joints[key] = joint

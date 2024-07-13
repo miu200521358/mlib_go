@@ -7,9 +7,9 @@ import (
 	"sync"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
-	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
@@ -159,8 +159,8 @@ func deformBeforePhysics(
 
 		if rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC || forceUpdate {
 			// ボーン追従剛体・物理＋ボーン位置もしくは強制更新の場合のみ剛体位置更新
-			boneTransform := mbt.NewBtTransform()
-			defer mbt.DeleteBtTransform(boneTransform)
+			boneTransform := bt.NewBtTransform()
+			defer bt.DeleteBtTransform(boneTransform)
 			mat := vds.Bones.Get(rigidBodyBone.Index).GlobalMatrix().GL()
 			boneTransform.SetFromOpenGLMatrix(&mat[0])
 

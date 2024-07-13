@@ -19,11 +19,7 @@ subject to the following restrictions:
 #include "btPointCollector.h"
 #include "LinearMath/btTransformUtil.h"
 
-#ifdef BT_USE_DOUBLE_PRECISION
 #define MAX_ITERATIONS 64
-#else
-#define MAX_ITERATIONS 32
-#endif
 
 btGjkConvexCast::btGjkConvexCast(const btConvexShape* convexA, const btConvexShape* convexB, btSimplexSolverInterface* simplexSolver)
 	: m_simplexSolver(simplexSolver),

@@ -6,7 +6,7 @@ package mmath
 import (
 	"github.com/go-gl/mathgl/mgl32"
 
-	"github.com/miu200521358/mlib_go/pkg/mphysics/mbt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
 
 // Gl OpenGL座標系に変換された3次元ベクトルを返します
@@ -15,16 +15,16 @@ func (v *MVec3) GL() mgl32.Vec3 {
 }
 
 // Bullet+OpenGL座標系に変換された3次元ベクトルを返します
-func (v *MVec3) Bullet() mbt.BtVector3 {
-	return mbt.NewBtVector3(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()))
+func (v *MVec3) Bullet() bt.BtVector3 {
+	return bt.NewBtVector3(float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ()))
 }
 
 // Bullet+OpenGL座標系に変換されたクォータニオンベクトルを返します
-func (v *MRotation) Bullet() mbt.BtQuaternion {
+func (v *MRotation) Bullet() bt.BtQuaternion {
 	rx := float32(v.GetRadians().GetX())
 	ry := float32(-v.GetRadians().GetY())
 	rz := float32(-v.GetRadians().GetZ())
-	return mbt.NewBtQuaternion(ry, rx, rz)
+	return bt.NewBtQuaternion(ry, rx, rz)
 }
 
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します

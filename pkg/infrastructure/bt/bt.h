@@ -6,10 +6,10 @@
  * the SWIG interface file instead.
  * ----------------------------------------------------------------------------- */
 
-// source: C:\MMD\mlib_go\pkg\mbt\bullet.i
+// source: C:\MMD\mlib_go\pkg\infrastructure\bt\bullet.i
 
-#ifndef SWIG_mbt_WRAP_H_
-#define SWIG_mbt_WRAP_H_
+#ifndef SWIG_bt_WRAP_H_
+#define SWIG_bt_WRAP_H_
 
 class Swig_memory;
 

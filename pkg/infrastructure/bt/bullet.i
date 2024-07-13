@@ -1,4 +1,4 @@
-%module mbt
+%module bt
 
 ////// included headers [LinearMath/btDefaultMotionState.h] ----------------------------------
 %include "LinearMath/btScalar.h.i"
