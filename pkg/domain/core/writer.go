@@ -1,5 +1,5 @@
 package core
 
 type IWriter interface {
-	Save(overridePath string) error
+	Save(data IHashModel, overridePath, overrideName string, includeSystem bool) error
 }

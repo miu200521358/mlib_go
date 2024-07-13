@@ -1,4 +1,4 @@
-package pmx
+package writer
 
 import (
 	"bytes"
@@ -8,7 +8,9 @@ import (
 	"os"
 	"unicode/utf16"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
@@ -27,7 +29,9 @@ const (
 	pmxBinaryType_unsignedLong  pmxBinaryType = "<L"
 )
 
-func (model *PmxModel) Save(includeSystem bool, overridePath string) error {
+func PmxSave(data core.IHashModel, overridePath, overrideName string, includeSystem bool) error {
+	model := data.(*pmx.PmxModel)
+
 	path := model.GetPath()
 	// 保存可能なパスである場合、上書き
 	if mutils.CanSave(overridePath) {
@@ -41,7 +45,7 @@ func (model *PmxModel) Save(includeSystem bool, overridePath string) error {
 	}
 	defer fout.Close()
 
-	filteredBones := []*Bone{}
+	filteredBones := []*pmx.Bone{}
 	for i := range model.Bones.Len() {
 		bone := model.Bones.Get(i)
 		if (!includeSystem && !bone.IsSystem) || includeSystem {
@@ -49,7 +53,7 @@ func (model *PmxModel) Save(includeSystem bool, overridePath string) error {
 		}
 	}
 
-	filteredMorphs := []*Morph{}
+	filteredMorphs := []*pmx.Morph{}
 	for i := range model.Morphs.Len() {
 		morph := model.Morphs.Get(i)
 		if (!includeSystem && !morph.IsSystem) || includeSystem {
@@ -118,7 +122,12 @@ func (model *PmxModel) Save(includeSystem bool, overridePath string) error {
 		return err
 	}
 
-	err = writeText(fout, model.Name, "Pmx Model")
+	modelName := model.Name
+	if overrideName != "" {
+		modelName = overrideName
+	}
+
+	err = writeText(fout, modelName, "Pmx Model")
 	if err != nil {
 		return err
 	}
@@ -187,7 +196,7 @@ func (model *PmxModel) Save(includeSystem bool, overridePath string) error {
 }
 
 // writeVertices 頂点データの書き込み
-func writeVertices(fout *os.File, model *PmxModel, boneIdxType pmxBinaryType) error {
+func writeVertices(fout *os.File, model *pmx.PmxModel, boneIdxType pmxBinaryType) error {
 	err := writeNumber(fout, pmxBinaryType_int, float64(model.Vertices.Len()), 0.0, true)
 	if err != nil {
 		return err
@@ -220,15 +229,15 @@ func writeVertices(fout *os.File, model *PmxModel, boneIdxType pmxBinaryType) er
 		}
 
 		switch v := vertex.Deform.(type) {
-		case *Bdef1:
+		case *pmx.Bdef1:
 			writeByte(fout, 0, false)
 			writeNumber(fout, boneIdxType, float64(v.Indexes[0]), 0.0, false)
-		case *Bdef2:
+		case *pmx.Bdef2:
 			writeByte(fout, 1, false)
 			writeNumber(fout, boneIdxType, float64(v.Indexes[0]), 0.0, false)
 			writeNumber(fout, boneIdxType, float64(v.Indexes[1]), 0.0, false)
 			writeNumber(fout, pmxBinaryType_float, v.Weights[0], 0.0, true)
-		case *Bdef4:
+		case *pmx.Bdef4:
 			writeByte(fout, 2, false)
 			writeNumber(fout, boneIdxType, float64(v.Indexes[0]), 0.0, false)
 			writeNumber(fout, boneIdxType, float64(v.Indexes[1]), 0.0, false)
@@ -238,7 +247,7 @@ func writeVertices(fout *os.File, model *PmxModel, boneIdxType pmxBinaryType) er
 			writeNumber(fout, pmxBinaryType_float, v.Weights[1], 0.0, true)
 			writeNumber(fout, pmxBinaryType_float, v.Weights[2], 0.0, true)
 			writeNumber(fout, pmxBinaryType_float, v.Weights[3], 0.0, true)
-		case *Sdef:
+		case *pmx.Sdef:
 			writeByte(fout, 3, false)
 			writeNumber(fout, boneIdxType, float64(v.Indexes[0]), 0.0, false)
 			writeNumber(fout, boneIdxType, float64(v.Indexes[1]), 0.0, false)
@@ -263,7 +272,7 @@ func writeVertices(fout *os.File, model *PmxModel, boneIdxType pmxBinaryType) er
 }
 
 // writeFaces 面データの書き込み
-func writeFaces(fout *os.File, model *PmxModel, vertexIdxType pmxBinaryType) error {
+func writeFaces(fout *os.File, model *pmx.PmxModel, vertexIdxType pmxBinaryType) error {
 	err := writeNumber(fout, pmxBinaryType_int, float64(model.Faces.Len()*3), 0.0, true)
 	if err != nil {
 		return err
@@ -284,7 +293,7 @@ func writeFaces(fout *os.File, model *PmxModel, vertexIdxType pmxBinaryType) err
 }
 
 // writeTextures テクスチャデータの書き込み
-func writeTextures(fout *os.File, model *PmxModel) error {
+func writeTextures(fout *os.File, model *pmx.PmxModel) error {
 	err := writeNumber(fout, pmxBinaryType_int, float64(model.Textures.Len()), 0.0, true)
 	if err != nil {
 		return err
@@ -302,7 +311,7 @@ func writeTextures(fout *os.File, model *PmxModel) error {
 }
 
 // writeMaterials 材質データの書き込み
-func writeMaterials(fout *os.File, model *PmxModel, textureIdxType pmxBinaryType) error {
+func writeMaterials(fout *os.File, model *pmx.PmxModel, textureIdxType pmxBinaryType) error {
 	err := writeNumber(fout, pmxBinaryType_int, float64(model.Materials.Len()), 0.0, true)
 	if err != nil {
 		return err
@@ -402,7 +411,7 @@ func writeMaterials(fout *os.File, model *PmxModel, textureIdxType pmxBinaryType
 		if err != nil {
 			return err
 		}
-		if material.ToonSharingFlag == TOON_SHARING_SHARING {
+		if material.ToonSharingFlag == pmx.TOON_SHARING_SHARING {
 			err = writeNumber(fout, textureIdxType, float64(material.ToonTextureIndex), 0.0, true)
 		} else {
 			err = writeByte(fout, int(material.ToonTextureIndex), true)
@@ -424,7 +433,7 @@ func writeMaterials(fout *os.File, model *PmxModel, textureIdxType pmxBinaryType
 }
 
 // writeBones ボーンデータの書き込み
-func writeBones(fout *os.File, targetBones []*Bone, boneIdxType pmxBinaryType) error {
+func writeBones(fout *os.File, targetBones []*pmx.Bone, boneIdxType pmxBinaryType) error {
 	err := writeNumber(fout, pmxBinaryType_int, float64(len(targetBones)), 0.0, true)
 	if err != nil {
 		return err
@@ -601,7 +610,7 @@ func writeBones(fout *os.File, targetBones []*Bone, boneIdxType pmxBinaryType) e
 
 // writeMorphs モーフデータの書き込み
 func writeMorphs(
-	fout *os.File, targetMorphs []*Morph, vertexIdxType, boneIdxType, materialIdxType, morphIdxType pmxBinaryType,
+	fout *os.File, targetMorphs []*pmx.Morph, vertexIdxType, boneIdxType, materialIdxType, morphIdxType pmxBinaryType,
 ) error {
 	err := writeNumber(fout, pmxBinaryType_int, float64(len(targetMorphs)), 0.0, true)
 	if err != nil {
@@ -632,7 +641,7 @@ func writeMorphs(
 
 		for _, offset := range morph.Offsets {
 			switch off := offset.(type) {
-			case *VertexMorphOffset:
+			case *pmx.VertexMorphOffset:
 				err = writeNumber(fout, vertexIdxType, float64(off.VertexIndex), 0.0, true)
 				if err != nil {
 					return err
@@ -649,7 +658,7 @@ func writeMorphs(
 				if err != nil {
 					return err
 				}
-			case *UvMorphOffset:
+			case *pmx.UvMorphOffset:
 				err = writeNumber(fout, vertexIdxType, float64(off.VertexIndex), 0.0, true)
 				if err != nil {
 					return err
@@ -670,7 +679,7 @@ func writeMorphs(
 				if err != nil {
 					return err
 				}
-			case *BoneMorphOffset:
+			case *pmx.BoneMorphOffset:
 				err = writeNumber(fout, boneIdxType, float64(off.BoneIndex), 0.0, true)
 				if err != nil {
 					return err
@@ -703,7 +712,7 @@ func writeMorphs(
 				if err != nil {
 					return err
 				}
-			case *MaterialMorphOffset:
+			case *pmx.MaterialMorphOffset:
 				err = writeNumber(fout, materialIdxType, float64(off.MaterialIndex), 0.0, true)
 				if err != nil {
 					return err
@@ -824,7 +833,7 @@ func writeMorphs(
 				if err != nil {
 					return err
 				}
-			case *GroupMorphOffset:
+			case *pmx.GroupMorphOffset:
 				err = writeNumber(fout, morphIdxType, float64(off.MorphIndex), 0.0, true)
 				if err != nil {
 					return err
@@ -841,7 +850,7 @@ func writeMorphs(
 }
 
 // writeDisplaySlots 表示枠データの書き込み
-func writeDisplaySlots(fout *os.File, model *PmxModel, boneIdxType, morphIdxType pmxBinaryType) error {
+func writeDisplaySlots(fout *os.File, model *pmx.PmxModel, boneIdxType, morphIdxType pmxBinaryType) error {
 	err := writeNumber(fout, pmxBinaryType_int, float64(model.DisplaySlots.Len()), 0.0, true)
 	if err != nil {
 		return err
@@ -872,7 +881,7 @@ func writeDisplaySlots(fout *os.File, model *PmxModel, boneIdxType, morphIdxType
 			if err != nil {
 				return err
 			}
-			if reference.DisplayType == DISPLAY_TYPE_BONE {
+			if reference.DisplayType == pmx.DISPLAY_TYPE_BONE {
 				err = writeNumber(fout, boneIdxType, float64(reference.DisplayIndex), 0.0, true)
 			} else {
 				err = writeNumber(fout, morphIdxType, float64(reference.DisplayIndex), 0.0, true)
@@ -887,7 +896,7 @@ func writeDisplaySlots(fout *os.File, model *PmxModel, boneIdxType, morphIdxType
 }
 
 // writeRigidBodies 剛体データの書き込み
-func writeRigidBodies(fout *os.File, model *PmxModel, boneIdxType pmxBinaryType) error {
+func writeRigidBodies(fout *os.File, model *pmx.PmxModel, boneIdxType pmxBinaryType) error {
 	err := writeNumber(fout, pmxBinaryType_int, float64(model.RigidBodies.Len()), 0.0, true)
 	if err != nil {
 		return err
@@ -985,7 +994,7 @@ func writeRigidBodies(fout *os.File, model *PmxModel, boneIdxType pmxBinaryType)
 }
 
 // writeJoints ジョイントデータの書き込み
-func writeJoints(fout *os.File, model *PmxModel, rigidbodyIdxType pmxBinaryType) error {
+func writeJoints(fout *os.File, model *pmx.PmxModel, rigidbodyIdxType pmxBinaryType) error {
 	err := writeNumber(fout, pmxBinaryType_int, float64(model.Joints.Len()), 0.0, true)
 	if err != nil {
 		return err

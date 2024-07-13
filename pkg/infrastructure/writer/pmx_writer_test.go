@@ -1,4 +1,4 @@
-package pmx_test
+package writer
 
 import (
 	"math"
@@ -22,7 +22,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 	// ------------------
 
 	overridePath := "../../test_resources/サンプルモデル_PMX読み取り確認用_output.pmx"
-	originalModel.Save(false, overridePath)
+	PmxSave(originalModel, overridePath, "", false)
 
 	// ------------------
 	data, err = r.ReadByFilepath(overridePath)
