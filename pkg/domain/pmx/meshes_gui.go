@@ -12,8 +12,8 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
-	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
 
 type Meshes struct {

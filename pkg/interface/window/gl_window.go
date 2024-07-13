@@ -15,12 +15,12 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/walk/pkg/walk"
 
-	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 	"github.com/miu200521358/mlib_go/pkg/interface/widget"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"

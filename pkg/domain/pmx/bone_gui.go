@@ -4,10 +4,10 @@
 package pmx
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
 
 var bone_colors_ik = []float32{1.0, 0.38, 0, 1.0}
