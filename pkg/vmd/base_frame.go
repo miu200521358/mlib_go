@@ -3,13 +3,13 @@ package vmd
 import (
 	"sync"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/petar/GoLLRB/llrb"
 )
 
 type IBaseFrame interface {
 	GetIndex() int
-	getIntIndex() mcore.Int
+	getIntIndex() core.Int
 	SetIndex(index int)
 	IsRegistered() bool
 	IsRead() bool
@@ -21,13 +21,13 @@ type IBaseFrame interface {
 }
 
 type BaseFrame struct {
-	Index      mcore.Int
+	Index      core.Int
 	Registered bool // 登録対象のキーフレであるか
 	Read       bool // VMDファイルから読み込んだキーフレであるか
 }
 
 func (b *BaseFrame) Less(than llrb.Item) bool {
-	return b.GetIndex() < int(than.(mcore.Int))
+	return b.GetIndex() < int(than.(core.Int))
 }
 
 func (b *BaseFrame) Copy() IBaseFrame {
@@ -40,13 +40,13 @@ func (b *BaseFrame) Copy() IBaseFrame {
 
 func (b *BaseFrame) New(index int) IBaseFrame {
 	return &BaseFrame{
-		Index: mcore.Int(index),
+		Index: core.Int(index),
 	}
 }
 
 func NewFrame(index int) IBaseFrame {
 	return &BaseFrame{
-		Index:      mcore.NewInt(index),
+		Index:      core.NewInt(index),
 		Registered: false,
 		Read:       false,
 	}
@@ -59,7 +59,7 @@ func (b *BaseFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 func (b *BaseFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
 }
 
-func (bf *BaseFrame) getIntIndex() mcore.Int {
+func (bf *BaseFrame) getIntIndex() core.Int {
 	return bf.Index
 }
 
@@ -68,7 +68,7 @@ func (bf *BaseFrame) GetIndex() int {
 }
 
 func (bf *BaseFrame) SetIndex(index int) {
-	bf.Index = mcore.NewInt(index)
+	bf.Index = core.NewInt(index)
 }
 
 func (bf *BaseFrame) IsRegistered() bool {
@@ -81,8 +81,8 @@ func (bf *BaseFrame) IsRead() bool {
 
 type BaseFrames[T IBaseFrame] struct {
 	data              map[int]T         // キーフレリスト
-	Indexes           *mcore.IntIndexes // 全キーフレリスト
-	RegisteredIndexes *mcore.IntIndexes // 登録対象キーフレリスト
+	Indexes           *core.IntIndexes  // 全キーフレリスト
+	RegisteredIndexes *core.IntIndexes  // 登録対象キーフレリスト
 	newFunc           func(index int) T // キーフレ生成関数
 	nullFunc          func() T          // 空キーフレ生成関数
 	lock              sync.RWMutex      // マップアクセス制御用
@@ -91,8 +91,8 @@ type BaseFrames[T IBaseFrame] struct {
 func NewBaseFrames[T IBaseFrame](newFunc func(index int) T, nullFunc func() T) *BaseFrames[T] {
 	return &BaseFrames[T]{
 		data:              make(map[int]T),
-		Indexes:           mcore.NewIntIndexes(),
-		RegisteredIndexes: mcore.NewIntIndexes(),
+		Indexes:           core.NewIntIndexes(),
+		RegisteredIndexes: core.NewIntIndexes(),
 		newFunc:           newFunc,
 		nullFunc:          nullFunc,
 		lock:              sync.RWMutex{},
@@ -138,8 +138,8 @@ func (fs *BaseFrames[T]) Get(index int) T {
 func (fs *BaseFrames[T]) prevFrame(index int) int {
 	prevFrame := fs.GetMinFrame()
 
-	fs.RegisteredIndexes.DescendLessOrEqual(mcore.Int(index), func(i llrb.Item) bool {
-		prevFrame = int(i.(mcore.Int))
+	fs.RegisteredIndexes.DescendLessOrEqual(core.Int(index), func(i llrb.Item) bool {
+		prevFrame = int(i.(core.Int))
 		return false
 	})
 
@@ -149,8 +149,8 @@ func (fs *BaseFrames[T]) prevFrame(index int) int {
 func (fs *BaseFrames[T]) nextFrame(index int) int {
 	nextFrame := fs.GetMaxFrame()
 
-	fs.RegisteredIndexes.AscendGreaterOrEqual(mcore.Int(index), func(i llrb.Item) bool {
-		nextFrame = int(i.(mcore.Int))
+	fs.RegisteredIndexes.AscendGreaterOrEqual(core.Int(index), func(i llrb.Item) bool {
+		nextFrame = int(i.(core.Int))
 		return false
 	})
 
@@ -160,9 +160,9 @@ func (fs *BaseFrames[T]) nextFrame(index int) int {
 func (fs *BaseFrames[T]) List() []T {
 	list := make([]T, 0, fs.RegisteredIndexes.Len())
 
-	fs.RegisteredIndexes.AscendRange(mcore.Int(0), mcore.Int(fs.RegisteredIndexes.Max()), func(i llrb.Item) bool {
-		if _, ok := fs.data[int(i.(mcore.Int))]; !ok {
-			list = append(list, fs.data[int(i.(mcore.Int))])
+	fs.RegisteredIndexes.AscendRange(core.Int(0), core.Int(fs.RegisteredIndexes.Max()), func(i llrb.Item) bool {
+		if _, ok := fs.data[int(i.(core.Int))]; !ok {
+			list = append(list, fs.data[int(i.(core.Int))])
 		}
 		return true
 	})
@@ -175,11 +175,11 @@ func (fs *BaseFrames[T]) appendFrame(v T) {
 	defer fs.lock.Unlock()
 
 	if v.IsRegistered() {
-		fs.RegisteredIndexes.ReplaceOrInsert(mcore.Int(v.GetIndex()))
+		fs.RegisteredIndexes.ReplaceOrInsert(core.Int(v.GetIndex()))
 	}
 
 	fs.data[v.GetIndex()] = v
-	fs.Indexes.ReplaceOrInsert(mcore.Int(v.GetIndex()))
+	fs.Indexes.ReplaceOrInsert(core.Int(v.GetIndex()))
 }
 
 func (fs *BaseFrames[T]) GetMaxFrame() int {
@@ -213,11 +213,11 @@ func (fs *BaseFrames[T]) Delete(index int) {
 
 	if _, ok := fs.data[index]; ok {
 		delete(fs.data, index)
-		fs.Indexes.Delete(mcore.Int(index))
+		fs.Indexes.Delete(core.Int(index))
 	}
 
 	if fs.RegisteredIndexes.Has(index) {
-		fs.RegisteredIndexes.Delete(mcore.Int(index))
+		fs.RegisteredIndexes.Delete(core.Int(index))
 	}
 }
 

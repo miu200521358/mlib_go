@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"golang.org/x/text/encoding/japanese"
@@ -15,7 +15,7 @@ import (
 
 // VMDリーダー
 type VpdMotionReader struct {
-	mcore.BaseReader[*VmdMotion]
+	core.BaseReader[*VmdMotion]
 	lines []string
 }
 
@@ -25,7 +25,7 @@ func (r *VpdMotionReader) createModel(path string) *VmdMotion {
 }
 
 // 指定されたパスのファイルからデータを読み込む
-func (r *VpdMotionReader) ReadByFilepath(path string) (mcore.IHashModel, error) {
+func (r *VpdMotionReader) ReadByFilepath(path string) (core.IHashModel, error) {
 	// モデルを新規作成
 	motion := r.createModel(path)
 
@@ -34,7 +34,7 @@ func (r *VpdMotionReader) ReadByFilepath(path string) (mcore.IHashModel, error) 
 		mlog.E("ReadByFilepath.ReadHashByFilePath error: %v", err)
 		return motion, err
 	}
-	motion.Hash = hash
+	motion.SetHash(hash)
 
 	// ファイルを開く
 	err = r.Open(path)

@@ -127,7 +127,7 @@ func NewMeshes(
 		}
 
 		materialGl := m.GL(
-			model.Path,
+			model.GetPath(),
 			texture,
 			toonTexture,
 			sphereTexture,

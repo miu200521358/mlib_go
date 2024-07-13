@@ -7,7 +7,7 @@ import (
 
 	"github.com/jinzhu/copier"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
@@ -68,7 +68,7 @@ func (t *Ik) Copy() *Ik {
 }
 
 type Bone struct {
-	*mcore.IndexNameModel
+	*core.IndexNameModel
 	Position               *mmath.MVec3     // ボーン位置
 	ParentIndex            int              // 親ボーンのボーンIndex
 	Layer                  int              // 変形階層
@@ -114,7 +114,7 @@ type Bone struct {
 
 func NewBone() *Bone {
 	bone := &Bone{
-		IndexNameModel:         &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		IndexNameModel:         &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 		Position:               mmath.NewMVec3(),
 		ParentIndex:            -1,
 		Layer:                  -1,
@@ -169,7 +169,7 @@ func NewBoneByName(name string) *Bone {
 	return bone
 }
 
-func (v *Bone) Copy() mcore.IIndexNameModel {
+func (v *Bone) Copy() core.IIndexNameModel {
 	copied := NewBone()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied

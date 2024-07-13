@@ -4,7 +4,7 @@
 package pmx
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 )
@@ -226,7 +226,7 @@ func (b *Bone) NormalGL() []float32 {
 
 // ボーンリスト
 type Bones struct {
-	*mcore.IndexNameModels[*Bone]
+	*core.IndexNameModels[*Bone]
 	IkTreeIndexes     map[int][]int
 	LayerSortedBones  map[bool][]*Bone
 	LayerSortedNames  map[bool]map[string]int
@@ -241,7 +241,7 @@ type Bones struct {
 
 func NewBones(count int) *Bones {
 	return &Bones{
-		IndexNameModels:  mcore.NewIndexNameModels[*Bone](count, func() *Bone { return nil }),
+		IndexNameModels:  core.NewIndexNameModels[*Bone](count, func() *Bone { return nil }),
 		IkTreeIndexes:    make(map[int][]int),
 		LayerSortedBones: make(map[bool][]*Bone),
 		LayerSortedNames: make(map[bool]map[string]int),

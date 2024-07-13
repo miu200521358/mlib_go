@@ -3,7 +3,7 @@ package pmx
 import (
 	"github.com/jinzhu/copier"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
@@ -28,7 +28,7 @@ func NewJointParam() *JointParam {
 }
 
 type Joint struct {
-	*mcore.IndexNameModel
+	*core.IndexNameModel
 	JointType       byte             // Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
 	RigidbodyIndexA int              // 関連剛体AのIndex
 	RigidbodyIndexB int              // 関連剛体BのIndex
@@ -40,7 +40,7 @@ type Joint struct {
 
 func NewJoint() *Joint {
 	return &Joint{
-		IndexNameModel: &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		IndexNameModel: &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 		// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
 		JointType:       0,
 		RigidbodyIndexA: -1,
@@ -52,7 +52,7 @@ func NewJoint() *Joint {
 	}
 }
 
-func (j *Joint) Copy() mcore.IIndexNameModel {
+func (j *Joint) Copy() core.IIndexNameModel {
 	copied := NewJoint()
 	copier.CopyWithOption(copied, j, copier.Option{DeepCopy: true})
 	return copied
@@ -66,11 +66,11 @@ func NewJointByName(name string) *Joint {
 
 // ジョイントリスト
 type Joints struct {
-	*mcore.IndexNameModels[*Joint]
+	*core.IndexNameModels[*Joint]
 }
 
 func NewJoints(count int) *Joints {
 	return &Joints{
-		IndexNameModels: mcore.NewIndexNameModels[*Joint](count, func() *Joint { return nil }),
+		IndexNameModels: core.NewIndexNameModels[*Joint](count, func() *Joint { return nil }),
 	}
 }

@@ -1,4 +1,4 @@
-package mcore
+package core
 
 import "github.com/petar/GoLLRB/llrb"
 

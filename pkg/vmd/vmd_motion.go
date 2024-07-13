@@ -3,12 +3,12 @@ package vmd
 import (
 	"github.com/jinzhu/copier"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
 )
 
 type VmdMotion struct {
-	*mcore.HashModel
+	*core.HashModel
 	Signature    string // vmdバージョン
 	ModelName    string // モデル名
 	BoneFrames   *BoneFrames
@@ -21,7 +21,7 @@ type VmdMotion struct {
 
 func NewVmdMotion(path string) *VmdMotion {
 	return &VmdMotion{
-		HashModel:    mcore.NewHashModel(path),
+		HashModel:    core.NewHashModel(path),
 		ModelName:    "",
 		BoneFrames:   NewBoneFrames(),
 		MorphFrames:  NewMorphFrames(),
@@ -32,7 +32,7 @@ func NewVmdMotion(path string) *VmdMotion {
 	}
 }
 
-func (m *VmdMotion) Copy() mcore.IHashModel {
+func (m *VmdMotion) Copy() core.IHashModel {
 	copied := NewVmdMotion("")
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied

@@ -4,7 +4,7 @@ import (
 	"image"
 
 	"github.com/jinzhu/copier"
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 )
 
 // テクスチャ種別
@@ -17,7 +17,7 @@ const (
 )
 
 type Texture struct {
-	*mcore.IndexModel
+	*core.IndexModel
 	Name              string       // テクスチャ名
 	TextureType       TextureType  // テクスチャ種別
 	Path              string       // テクスチャフルパス
@@ -32,7 +32,7 @@ type Texture struct {
 
 func NewTexture() *Texture {
 	return &Texture{
-		IndexModel:  &mcore.IndexModel{Index: -1},
+		IndexModel:  &core.IndexModel{Index: -1},
 		Name:        "",
 		TextureType: TEXTURE_TYPE_TEXTURE,
 		Path:        "",
@@ -40,7 +40,7 @@ func NewTexture() *Texture {
 	}
 }
 
-func (t *Texture) Copy() mcore.IIndexModel {
+func (t *Texture) Copy() core.IIndexModel {
 	copied := NewTexture()
 	copier.CopyWithOption(copied, t, copier.Option{DeepCopy: true})
 	return copied
@@ -48,22 +48,22 @@ func (t *Texture) Copy() mcore.IIndexModel {
 
 // テクスチャリスト
 type Textures struct {
-	*mcore.IndexModels[*Texture]
+	*core.IndexModels[*Texture]
 }
 
 func NewTextures(count int) *Textures {
 	return &Textures{
-		IndexModels: mcore.NewIndexModels[*Texture](count, func() *Texture { return nil }),
+		IndexModels: core.NewIndexModels[*Texture](count, func() *Texture { return nil }),
 	}
 }
 
 // 共有テクスチャ辞書
 type ToonTextures struct {
-	*mcore.IndexModels[*Texture]
+	*core.IndexModels[*Texture]
 }
 
 func NewToonTextures() *ToonTextures {
 	return &ToonTextures{
-		IndexModels: mcore.NewIndexModels[*Texture](10, func() *Texture { return nil }),
+		IndexModels: core.NewIndexModels[*Texture](10, func() *Texture { return nil }),
 	}
 }

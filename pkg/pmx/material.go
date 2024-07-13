@@ -5,7 +5,7 @@ import (
 
 	"github.com/jinzhu/copier"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
@@ -111,7 +111,7 @@ const (
 )
 
 type Material struct {
-	*mcore.IndexNameModel
+	*core.IndexNameModel
 	Diffuse             *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
 	Specular            *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
 	Ambient             *mmath.MVec3 // Ambient (R,G,B)(環境色)
@@ -132,7 +132,7 @@ type Material struct {
 
 func NewMaterial() *Material {
 	return &Material{
-		IndexNameModel:      &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		IndexNameModel:      &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 		Diffuse:             mmath.NewMVec4(),
 		Specular:            mmath.NewMVec4(),
 		Ambient:             mmath.NewMVec3(),
@@ -160,20 +160,20 @@ func NewMaterialByName(name string) *Material {
 
 // 材質リスト
 type Materials struct {
-	*mcore.IndexNameModels[*Material]
+	*core.IndexNameModels[*Material]
 	Vertices map[int][]int
 	Faces    map[int][]int
 }
 
 func NewMaterials(count int) *Materials {
 	return &Materials{
-		IndexNameModels: mcore.NewIndexNameModels[*Material](count, func() *Material { return nil }),
+		IndexNameModels: core.NewIndexNameModels[*Material](count, func() *Material { return nil }),
 		Vertices:        make(map[int][]int),
 		Faces:           make(map[int][]int),
 	}
 }
 
-func (m *Material) Copy() mcore.IIndexNameModel {
+func (m *Material) Copy() core.IIndexNameModel {
 	copied := NewMaterial()
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied

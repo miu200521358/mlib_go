@@ -11,7 +11,7 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 	"github.com/miu200521358/win"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
@@ -33,9 +33,9 @@ type FilePicker struct {
 	historyPushButton *walk.PushButton          // 履歴ボタン
 	OnPathChanged     func(string)              // パス変更時のコールバック
 	limitHistory      int                       // 履歴リスト
-	modelReader       mcore.ReaderInterface     // mcore
+	modelReader       core.IReader              // mcore
 	initialDirPath    string                    // 初期ディレクトリ
-	cacheData         mcore.IHashModel          // キャッシュデータ
+	cacheData         core.IHashModel           // キャッシュデータ
 	window            *MWindow                  // MWindow
 	historyDialog     *walk.Dialog              // 履歴ダイアログ
 }
@@ -190,7 +190,7 @@ func NewFilePicker(
 	description string,
 	filterExtension map[int]map[string]string,
 	limitHistory int,
-	modelReader mcore.ReaderInterface,
+	modelReader core.IReader,
 	onPathChanged func(string),
 ) (*FilePicker, error) {
 	picker := new(FilePicker)
@@ -301,7 +301,7 @@ func NewFilePicker(
 	return picker, nil
 }
 
-func (picker *FilePicker) GetData() (mcore.IHashModel, error) {
+func (picker *FilePicker) GetData() (core.IHashModel, error) {
 	if picker.PathLineEdit.Text() == "" || picker.modelReader == nil {
 		return nil, nil
 	}
@@ -323,7 +323,7 @@ func (picker *FilePicker) GetData() (mcore.IHashModel, error) {
 }
 
 // パスが正しいことが分かっている上でデータだけ取り直したい場合
-func (picker *FilePicker) GetDataForce() mcore.IHashModel {
+func (picker *FilePicker) GetDataForce() core.IHashModel {
 	data, err := picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
 	defer runtime.GC() // 読み込み時のメモリ解放
 
@@ -334,7 +334,7 @@ func (picker *FilePicker) GetDataForce() mcore.IHashModel {
 	return data
 }
 
-func (picker *FilePicker) SetCache(data mcore.IHashModel) {
+func (picker *FilePicker) SetCache(data core.IHashModel) {
 	if data == nil {
 		picker.PathLineEdit.SetText("")
 		return
@@ -361,7 +361,7 @@ func (picker *FilePicker) ClearCache() {
 	picker.cacheData = nil
 }
 
-func (picker *FilePicker) GetCache() mcore.IHashModel {
+func (picker *FilePicker) GetCache() core.IHashModel {
 	return picker.cacheData
 }
 

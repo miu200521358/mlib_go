@@ -3,7 +3,7 @@ package pmx
 import (
 	"github.com/jinzhu/copier"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
@@ -92,7 +92,7 @@ func NewCollisionGroup(collisionGroupMask uint16) []uint16 {
 }
 
 type RigidBody struct {
-	*mcore.IndexNameModel
+	*core.IndexNameModel
 	BoneIndex               int              // 関連ボーンIndex
 	CollisionGroup          byte             // グループ
 	CollisionGroupMask      CollisionGroup   // 非衝突グループフラグ
@@ -116,7 +116,7 @@ type RigidBody struct {
 // NewRigidBody creates a new rigid body.
 func NewRigidBody() *RigidBody {
 	return &RigidBody{
-		IndexNameModel:          &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		IndexNameModel:          &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 		BoneIndex:               -1,
 		CollisionGroup:          0,
 		CollisionGroupMask:      NewCollisionGroupFromSlice([]uint16{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
@@ -137,7 +137,7 @@ func NewRigidBody() *RigidBody {
 	}
 }
 
-func (r *RigidBody) Copy() mcore.IIndexNameModel {
+func (r *RigidBody) Copy() core.IIndexNameModel {
 	copied := NewMorph()
 	copier.CopyWithOption(copied, r, copier.Option{DeepCopy: true})
 	return copied
@@ -145,11 +145,11 @@ func (r *RigidBody) Copy() mcore.IIndexNameModel {
 
 // 剛体リスト
 type RigidBodies struct {
-	*mcore.IndexNameModels[*RigidBody]
+	*core.IndexNameModels[*RigidBody]
 }
 
 func NewRigidBodies(count int) *RigidBodies {
 	return &RigidBodies{
-		IndexNameModels: mcore.NewIndexNameModels[*RigidBody](count, func() *RigidBody { return nil }),
+		IndexNameModels: core.NewIndexNameModels[*RigidBody](count, func() *RigidBody { return nil }),
 	}
 }

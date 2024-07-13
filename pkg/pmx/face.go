@@ -2,12 +2,12 @@ package pmx
 
 import (
 	"github.com/jinzhu/copier"
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 )
 
 // 面データ
 type Face struct {
-	*mcore.IndexModel
+	*core.IndexModel
 	VertexIndexes [3]int // 頂点INDEXリスト
 }
 
@@ -17,12 +17,12 @@ type FaceGL struct {
 
 func NewFace() *Face {
 	return &Face{
-		IndexModel:    &mcore.IndexModel{Index: -1},
+		IndexModel:    &core.IndexModel{Index: -1},
 		VertexIndexes: [3]int{0, 0, 0},
 	}
 }
 
-func (f *Face) Copy() mcore.IIndexModel {
+func (f *Face) Copy() core.IIndexModel {
 	copied := NewFace()
 	copier.CopyWithOption(copied, f, copier.Option{DeepCopy: true})
 	return copied
@@ -30,11 +30,11 @@ func (f *Face) Copy() mcore.IIndexModel {
 
 // 面リスト
 type Faces struct {
-	*mcore.IndexModels[*Face]
+	*core.IndexModels[*Face]
 }
 
 func NewFaces(count int) *Faces {
 	return &Faces{
-		IndexModels: mcore.NewIndexModels[*Face](count, func() *Face { return nil }),
+		IndexModels: core.NewIndexModels[*Face](count, func() *Face { return nil }),
 	}
 }

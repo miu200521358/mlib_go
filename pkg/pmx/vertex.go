@@ -3,12 +3,12 @@ package pmx
 import (
 	"github.com/jinzhu/copier"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
 type Vertex struct {
-	*mcore.IndexModel
+	*core.IndexModel
 	Position        *mmath.MVec3   // 頂点位置
 	Normal          *mmath.MVec3   // 頂点法線
 	Uv              *mmath.MVec2   // UV
@@ -21,7 +21,7 @@ type Vertex struct {
 
 func NewVertex() *Vertex {
 	v := &Vertex{
-		IndexModel:      &mcore.IndexModel{Index: -1},
+		IndexModel:      &core.IndexModel{Index: -1},
 		Position:        mmath.NewMVec3(),
 		Normal:          mmath.NewMVec3(),
 		Uv:              mmath.NewMVec2(),
@@ -34,7 +34,7 @@ func NewVertex() *Vertex {
 	return v
 }
 
-func (v *Vertex) Copy() mcore.IIndexModel {
+func (v *Vertex) Copy() core.IIndexModel {
 	copied := NewVertex()
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return copied
@@ -42,11 +42,11 @@ func (v *Vertex) Copy() mcore.IIndexModel {
 
 // 頂点リスト
 type Vertices struct {
-	*mcore.IndexModels[*Vertex]
+	*core.IndexModels[*Vertex]
 }
 
 func NewVertices(count int) *Vertices {
 	return &Vertices{
-		IndexModels: mcore.NewIndexModels[*Vertex](count, func() *Vertex { return nil }),
+		IndexModels: core.NewIndexModels[*Vertex](count, func() *Vertex { return nil }),
 	}
 }

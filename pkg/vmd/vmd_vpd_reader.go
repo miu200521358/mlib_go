@@ -3,12 +3,12 @@ package vmd
 import (
 	"strings"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 )
 
 // VMDリーダー
 type VmdVpdMotionReader struct {
-	mcore.BaseReader[*VmdMotion]
+	core.BaseReader[*VmdMotion]
 	vmdReader *VmdMotionReader
 	vpdReader *VpdMotionReader
 }
@@ -21,7 +21,7 @@ func NewVmdVpdMotionReader() *VmdVpdMotionReader {
 }
 
 // 指定されたパスのファイルからデータを読み込む
-func (r *VmdVpdMotionReader) ReadByFilepath(path string) (mcore.IHashModel, error) {
+func (r *VmdVpdMotionReader) ReadByFilepath(path string) (core.IHashModel, error) {
 	if strings.HasSuffix(strings.ToLower(path), ".vpd") {
 		return r.vpdReader.ReadByFilepath(path)
 	} else {

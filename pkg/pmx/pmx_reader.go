@@ -6,24 +6,24 @@ import (
 
 	"golang.org/x/text/encoding/unicode"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 type PmxReader struct {
-	mcore.BaseReader[*PmxModel]
+	core.BaseReader[*PmxModel]
 }
 
 func (r *PmxReader) createModel(path string) *PmxModel {
 	model := &PmxModel{
-		HashModel: mcore.NewHashModel(path),
+		HashModel: core.NewHashModel(path),
 	}
 	return model
 }
 
 // 指定されたパスのファイルからデータを読み込む
-func (r *PmxReader) ReadByFilepath(path string) (mcore.IHashModel, error) {
+func (r *PmxReader) ReadByFilepath(path string) (core.IHashModel, error) {
 	// モデルを新規作成
 	model := r.createModel(path)
 
@@ -32,7 +32,7 @@ func (r *PmxReader) ReadByFilepath(path string) (mcore.IHashModel, error) {
 		mlog.E("ReadByFilepath.ReadHashByFilePath error: %v", err)
 		return nil, err
 	}
-	model.Hash = hash
+	model.SetHash(hash)
 
 	// ファイルを開く
 	err = r.Open(path)
@@ -250,7 +250,7 @@ func (r *PmxReader) readVertices(model *PmxModel) error {
 	vertices := NewVertices(totalVertexCount)
 
 	for i := 0; i < totalVertexCount; i++ {
-		v := &Vertex{IndexModel: &mcore.IndexModel{Index: i}}
+		v := &Vertex{IndexModel: &core.IndexModel{Index: i}}
 
 		// 12 : float3  | 位置(x,y,z)
 		pos, err := r.UnpackVec3(true)
@@ -440,7 +440,7 @@ func (r *PmxReader) readFaces(model *PmxModel) error {
 
 	for i := 0; i < totalFaceCount; i += 3 {
 		f := &Face{
-			IndexModel:    &mcore.IndexModel{Index: int(i / 3)},
+			IndexModel:    &core.IndexModel{Index: int(i / 3)},
 			VertexIndexes: [3]int{},
 		}
 
@@ -483,7 +483,7 @@ func (r *PmxReader) readTextures(model *PmxModel) error {
 	textures := NewTextures(totalTextureCount)
 
 	for i := 0; i < totalTextureCount; i++ {
-		t := &Texture{IndexModel: &mcore.IndexModel{Index: i}}
+		t := &Texture{IndexModel: &core.IndexModel{Index: i}}
 
 		// 4 + n : TextBuf	| テクスチャパス
 		t.Name = r.ReadText()
@@ -512,7 +512,7 @@ func (r *PmxReader) readMaterials(model *PmxModel) error {
 		englishName := r.ReadText()
 
 		m := &Material{
-			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 		}
 
 		// 16 : float4	| Diffuse (R,G,B,A)
@@ -638,7 +638,7 @@ func (r *PmxReader) readBones(model *PmxModel) error {
 		englishName := r.ReadText()
 
 		b := &Bone{
-			IndexNameModel:         &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IndexNameModel:         &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 			IkLinkBoneIndexes:      make([]int, 0),
 			IkTargetBoneIndexes:    make([]int, 0),
 			ParentRelativePosition: mmath.NewMVec3(),
@@ -860,7 +860,7 @@ func (r *PmxReader) readMorphs(model *PmxModel) error {
 		englishName := r.ReadText()
 
 		m := &Morph{
-			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 		}
 
 		// 1  : byte	| 操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約
@@ -1046,7 +1046,7 @@ func (r *PmxReader) readDisplaySlots(model *PmxModel) error {
 		englishName := r.ReadText()
 
 		d := &DisplaySlot{
-			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 			References:     make([]Reference, 0),
 		}
 
@@ -1120,7 +1120,7 @@ func (r *PmxReader) readRigidBodies(model *PmxModel) error {
 		englishName := r.ReadText()
 
 		b := &RigidBody{
-			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 			RigidBodyParam: NewRigidBodyParam(),
 		}
 
@@ -1235,7 +1235,7 @@ func (r *PmxReader) readJoints(model *PmxModel) error {
 		englishName := r.ReadText()
 
 		j := &Joint{
-			IndexNameModel: &mcore.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
 			JointParam:     NewJointParam(),
 		}
 

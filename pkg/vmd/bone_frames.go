@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
@@ -70,7 +70,7 @@ func (fs *BoneFrames) GetNames() []string {
 }
 
 func (fs *BoneFrames) GetIndexes() []int {
-	indexes := mcore.NewIntIndexes()
+	indexes := core.NewIntIndexes()
 	for _, fs := range fs.Data {
 		for _, f := range fs.List() {
 			indexes.ReplaceOrInsert(f.Index)
@@ -80,10 +80,10 @@ func (fs *BoneFrames) GetIndexes() []int {
 }
 
 func (fs *BoneFrames) GetRegisteredIndexes() []int {
-	indexes := mcore.NewIntIndexes()
+	indexes := core.NewIntIndexes()
 	for _, fs := range fs.Data {
 		for _, index := range fs.RegisteredIndexes.List() {
-			indexes.ReplaceOrInsert(mcore.NewInt(index))
+			indexes.ReplaceOrInsert(core.NewInt(index))
 		}
 	}
 	return indexes.List()
@@ -204,7 +204,7 @@ func (fs *BoneFrames) prepareIk(
 				var prefixPath string
 				if mlog.IsIkVerbose() {
 					// IK計算デバッグ用モーション
-					dirPath := fmt.Sprintf("%s/IK_step", filepath.Dir(model.Path))
+					dirPath := fmt.Sprintf("%s/IK_step", filepath.Dir(model.GetPath()))
 					err := os.MkdirAll(dirPath, 0755)
 					if err != nil {
 						log.Fatal(err)

@@ -3,7 +3,7 @@ package pmx
 import (
 	"github.com/jinzhu/copier"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
@@ -52,7 +52,7 @@ const (
 
 // Morph represents a morph.
 type Morph struct {
-	*mcore.IndexNameModel
+	*core.IndexNameModel
 	Panel       MorphPanel     // モーフパネル
 	MorphType   MorphType      // モーフ種類
 	Offsets     []TMorphOffset // モーフオフセット
@@ -198,7 +198,7 @@ func NewMaterialMorphOffset(
 // NewMorph
 func NewMorph() *Morph {
 	return &Morph{
-		IndexNameModel: &mcore.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		IndexNameModel: &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 		Panel:          MORPH_PANEL_SYSTEM,
 		MorphType:      MORPH_TYPE_VERTEX,
 		Offsets:        make([]TMorphOffset, 0),
@@ -207,7 +207,7 @@ func NewMorph() *Morph {
 	}
 }
 
-func (m *Morph) Copy() mcore.IIndexNameModel {
+func (m *Morph) Copy() core.IIndexNameModel {
 	copied := NewMorph()
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied
@@ -215,11 +215,11 @@ func (m *Morph) Copy() mcore.IIndexNameModel {
 
 // モーフリスト
 type Morphs struct {
-	*mcore.IndexNameModels[*Morph]
+	*core.IndexNameModels[*Morph]
 }
 
 func NewMorphs(count int) *Morphs {
 	return &Morphs{
-		IndexNameModels: mcore.NewIndexNameModels[*Morph](count, func() *Morph { return nil }),
+		IndexNameModels: core.NewIndexNameModels[*Morph](count, func() *Morph { return nil }),
 	}
 }

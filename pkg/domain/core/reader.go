@@ -1,4 +1,4 @@
-package mcore
+package core
 
 import (
 	"bufio"
@@ -18,7 +18,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
-type ReaderInterface interface {
+type IReader interface {
 	ReadNameByFilepath(path string) (string, error)
 	ReadByFilepath(path string) (IHashModel, error)
 	ReadHashByFilePath(path string) (string, error)

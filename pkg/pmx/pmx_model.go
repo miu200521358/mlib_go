@@ -3,12 +3,12 @@ package pmx
 import (
 	"github.com/jinzhu/copier"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 )
 
 type PmxModel struct {
-	*mcore.HashModel
+	*core.HashModel
 	physics            *mphysics.MPhysics
 	Signature          string
 	Version            float64
@@ -41,7 +41,7 @@ type PmxModel struct {
 
 func NewPmxModel(path string) *PmxModel {
 	model := &PmxModel{}
-	model.HashModel = mcore.NewHashModel(path)
+	model.HashModel = core.NewHashModel(path)
 
 	model.Vertices = NewVertices(0)
 	model.Faces = NewFaces(0)
@@ -112,7 +112,7 @@ func (pm *PmxModel) Setup() {
 	pm.Joints.SetDirty(false)
 }
 
-func (m *PmxModel) Copy() mcore.IHashModel {
+func (m *PmxModel) Copy() core.IHashModel {
 	copied := NewPmxModel("")
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied

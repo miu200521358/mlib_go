@@ -3,7 +3,7 @@ package pmx
 import (
 	"testing"
 
-	"github.com/miu200521358/mlib_go/pkg/mcore"
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/mmath"
 )
 
@@ -125,7 +125,7 @@ func TestBone_IsLegD(t *testing.T) {
 func TestBone_Copy(t *testing.T) {
 	t.Run("Test Copy", func(t *testing.T) {
 		b := &Bone{
-			IndexNameModel:         &mcore.IndexNameModel{Index: 0, Name: "Bone"},
+			IndexNameModel:         &core.IndexNameModel{Index: 0, Name: "Bone"},
 			Ik:                     NewIk(),
 			Position:               &mmath.MVec3{1, 2, 3},
 			TailPosition:           &mmath.MVec3{4, 5, 6},

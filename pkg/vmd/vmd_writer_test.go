@@ -67,7 +67,7 @@ func TestVmdWriter_Write2(t *testing.T) {
 	outputPath := "../../test_resources/test_output.vmd"
 
 	motion := model.(*VmdMotion)
-	motion.Path = outputPath
+	motion.SetPath(outputPath)
 
 	// Create a VmdWriter instance
 	err = motion.Save("", "")
