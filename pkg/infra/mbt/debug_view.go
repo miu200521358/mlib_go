@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package mphysics
+package mbt
 
 import (
 	"github.com/go-gl/gl/v4.4-core/gl"

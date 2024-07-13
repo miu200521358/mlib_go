@@ -6,11 +6,10 @@ package pmx
 import (
 	"github.com/miu200521358/mlib_go/pkg/infra/bt"
 	"github.com/miu200521358/mlib_go/pkg/infra/mbt"
-	"github.com/miu200521358/mlib_go/pkg/mphysics"
 )
 
 func (j *Joint) initPhysics(
-	modelIndex int, modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody,
+	modelIndex int, modelPhysics *mbt.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody,
 ) {
 	// ジョイントの位置と向き
 	jointTransform := bt.NewBtTransform(mbt.MRotationBullet(j.Rotation), mbt.MVec3Bullet(j.Position))
@@ -85,7 +84,7 @@ func (j *Joint) initPhysics(
 	modelPhysics.AddJoint(modelIndex, j.Index, constraint)
 }
 
-func (j *Joints) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics, rigidBodies *RigidBodies) {
+func (j *Joints) initPhysics(modelIndex int, modelPhysics *mbt.MPhysics, rigidBodies *RigidBodies) {
 	// ジョイントを順番に剛体と紐付けていく
 	for _, joint := range j.Data {
 		if joint.RigidbodyIndexA >= 0 && rigidBodies.Contains(joint.RigidbodyIndexA) &&

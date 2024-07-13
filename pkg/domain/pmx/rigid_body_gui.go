@@ -9,11 +9,10 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infra/bt"
 	"github.com/miu200521358/mlib_go/pkg/infra/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
-	"github.com/miu200521358/mlib_go/pkg/mphysics"
 )
 
 func (r *RigidBody) UpdateFlags(
-	modelIndex int, modelPhysics *mphysics.MPhysics, enablePhysics, resetPhysics bool,
+	modelIndex int, modelPhysics *mbt.MPhysics, enablePhysics, resetPhysics bool,
 ) bool {
 	btRigidBody, _ := modelPhysics.GetRigidBody(modelIndex, r.Index)
 	if btRigidBody == nil {
@@ -66,7 +65,7 @@ func (r *RigidBody) UpdateFlags(
 	return false
 }
 
-func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics) {
+func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mbt.MPhysics) {
 	var btCollisionShape bt.BtCollisionShape
 
 	// マイナスサイズは許容しない
@@ -155,7 +154,7 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics)
 
 func (r *RigidBody) UpdateTransform(
 	modelIndex int,
-	modelPhysics *mphysics.MPhysics,
+	modelPhysics *mbt.MPhysics,
 	rigidBodyBone *Bone,
 	boneTransform bt.BtTransform,
 ) {
@@ -193,7 +192,7 @@ func (r *RigidBody) UpdateTransform(
 
 func (r *RigidBody) GetRigidBodyBoneMatrix(
 	modelIndex int,
-	modelPhysics *mphysics.MPhysics,
+	modelPhysics *mbt.MPhysics,
 ) *mmath.MMat4 {
 	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(modelIndex, r.Index)
 
@@ -276,7 +275,7 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 	return mgl.NewMMat4ByMgl(&boneGlobalMatrixGL)
 }
 
-func (r *RigidBodies) initPhysics(modelIndex int, physics *mphysics.MPhysics) {
+func (r *RigidBodies) initPhysics(modelIndex int, physics *mbt.MPhysics) {
 	// 剛体を順番にボーンと紐付けていく
 	for _, rigidBody := range r.Data {
 		// 物理設定の初期化

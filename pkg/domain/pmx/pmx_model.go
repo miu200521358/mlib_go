@@ -4,12 +4,12 @@ import (
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
-	"github.com/miu200521358/mlib_go/pkg/mphysics"
+	"github.com/miu200521358/mlib_go/pkg/infra/mbt"
 )
 
 type PmxModel struct {
 	*core.HashModel
-	physics            *mphysics.MPhysics
+	physics            *mbt.MPhysics
 	Signature          string
 	Version            float64
 	ExtendedUVCount    int

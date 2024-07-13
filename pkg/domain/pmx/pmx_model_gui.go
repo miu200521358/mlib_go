@@ -3,11 +3,9 @@
 
 package pmx
 
-import (
-	"github.com/miu200521358/mlib_go/pkg/mphysics"
-)
+import "github.com/miu200521358/mlib_go/pkg/infra/mbt"
 
-func (pm *PmxModel) DrawInitialize(windowIndex int, physics *mphysics.MPhysics) {
+func (pm *PmxModel) DrawInitialize(windowIndex int, physics *mbt.MPhysics) {
 	if !pm.DrawInitialized {
 		// モデルの初期化が終わっていない場合は初期化実行
 		pm.InitDraw(windowIndex)
@@ -22,7 +20,7 @@ func (pm *PmxModel) InitDraw(windowIndex int) {
 	pm.Meshes = NewMeshes(pm, windowIndex)
 }
 
-func (pm *PmxModel) InitPhysics(physics *mphysics.MPhysics) {
+func (pm *PmxModel) InitPhysics(physics *mbt.MPhysics) {
 	pm.physics = physics
 	pm.RigidBodies.initPhysics(pm.Index, physics)
 	pm.Joints.initPhysics(pm.Index, physics, pm.RigidBodies)

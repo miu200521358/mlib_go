@@ -8,11 +8,11 @@ import (
 
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/infra/bt"
-	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
-	"github.com/miu200521358/mlib_go/pkg/mphysics"
-	"github.com/miu200521358/mlib_go/pkg/mview"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/infra/bt"
+	"github.com/miu200521358/mlib_go/pkg/infra/mbt"
+	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
+	"github.com/miu200521358/mlib_go/pkg/mview"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
@@ -38,7 +38,7 @@ func NewModelSet() *ModelSet {
 }
 
 func deformsAll(
-	modelPhysics *mphysics.MPhysics,
+	modelPhysics *mbt.MPhysics,
 	modelSets []*ModelSet,
 	frame, prevFrame int,
 	timeStep float32,
@@ -106,7 +106,7 @@ func deformsAll(
 }
 
 func deformBeforePhysics(
-	modelPhysics *mphysics.MPhysics,
+	modelPhysics *mbt.MPhysics,
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	prevDeltas *vmd.VmdDeltas,
@@ -173,7 +173,7 @@ func deformBeforePhysics(
 }
 
 func deformAfterPhysics(
-	modelPhysics *mphysics.MPhysics,
+	modelPhysics *mbt.MPhysics,
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	deltas *vmd.VmdDeltas,
@@ -226,7 +226,7 @@ func deformAfterPhysics(
 }
 
 func draw(
-	modelPhysics *mphysics.MPhysics,
+	modelPhysics *mbt.MPhysics,
 	model *pmx.PmxModel,
 	shader *mview.MShader,
 	deltas *vmd.VmdDeltas,

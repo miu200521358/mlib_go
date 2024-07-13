@@ -17,13 +17,13 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/infra/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
-	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/mview"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 )
 
@@ -42,7 +42,7 @@ type GlWindow struct {
 	nowCursorPos           *mmath.MVec2          // 現在のカーソル位置
 	yaw                    float64               // ウィンドウ操作yaw
 	pitch                  float64               // ウィンドウ操作pitch
-	Physics                *mphysics.MPhysics    // 物理
+	Physics                *mbt.MPhysics         // 物理
 	leftButtonPressed      bool                  // 左ボタン押下フラグ
 	middleButtonPressed    bool                  // 中ボタン押下フラグ
 	rightButtonPressed     bool                  // 右ボタン押下フラグ
@@ -168,7 +168,7 @@ func NewGlWindow(
 		nowCursorPos:               &mmath.MVec2{0, 0},
 		yaw:                        RIGHT_ANGLE,
 		pitch:                      0.0,
-		Physics:                    mphysics.NewMPhysics(shader),
+		Physics:                    mbt.NewMPhysics(shader),
 		middleButtonPressed:        false,
 		rightButtonPressed:         false,
 		updatedPrev:                false,
