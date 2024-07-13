@@ -5,7 +5,7 @@ package mbt
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/infra/bt"
-	"github.com/miu200521358/mlib_go/pkg/mview"
+	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
 )
 
 type MPhysics struct {
@@ -41,7 +41,7 @@ type jointKey struct {
 	JointIndex int
 }
 
-func NewMPhysics(shader *mview.MShader) *MPhysics {
+func NewMPhysics(shader *mgl.MShader) *MPhysics {
 	world := createWorld()
 
 	p := &MPhysics{

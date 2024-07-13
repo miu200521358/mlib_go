@@ -7,9 +7,8 @@ import (
 	"slices"
 
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
-	"github.com/miu200521358/mlib_go/pkg/mview"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
 )
 
 func (mds *VertexMorphDeltas) GL() ([]int, [][]float32) {
@@ -117,7 +116,7 @@ func (md *MaterialMorphDelta) Result() *pmx.MeshDelta {
 
 func (md *MaterialMorphDelta) diffuse() mgl32.Vec4 {
 	d1 := md.Diffuse.GetXYZ().Copy()
-	d2 := d1.MulScalar(float64(mview.LIGHT_AMBIENT)).Add(md.Ambient)
+	d2 := d1.MulScalar(float64(mgl.LIGHT_AMBIENT)).Add(md.Ambient)
 	dm := md.MulMaterial.Diffuse.Muled(md.MulRatios.Diffuse)
 	da := md.AddMaterial.Diffuse.Muled(md.AddRatios.Diffuse)
 
@@ -130,7 +129,7 @@ func (md *MaterialMorphDelta) diffuse() mgl32.Vec4 {
 }
 
 func (md *MaterialMorphDelta) specular() mgl32.Vec4 {
-	s1 := md.Specular.GetXYZ().MuledScalar(float64(mview.LIGHT_AMBIENT))
+	s1 := md.Specular.GetXYZ().MuledScalar(float64(mgl.LIGHT_AMBIENT))
 	sm := md.MulMaterial.Specular.Muled(md.MulRatios.Specular)
 	sa := md.AddMaterial.Specular.Muled(md.AddRatios.Specular)
 
@@ -143,7 +142,7 @@ func (md *MaterialMorphDelta) specular() mgl32.Vec4 {
 }
 
 func (md *MaterialMorphDelta) ambient() mgl32.Vec3 {
-	a := md.Diffuse.GetXYZ().MuledScalar(float64(mview.LIGHT_AMBIENT))
+	a := md.Diffuse.GetXYZ().MuledScalar(float64(mgl.LIGHT_AMBIENT))
 	am := md.MulMaterial.Ambient.Muled(md.MulRatios.Ambient)
 	aa := md.AddMaterial.Ambient.Muled(md.AddRatios.Ambient)
 	return mgl32.Vec3{

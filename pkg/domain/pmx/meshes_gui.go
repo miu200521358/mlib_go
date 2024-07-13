@@ -13,7 +13,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
-	"github.com/miu200521358/mlib_go/pkg/mview"
+	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
 )
 
 type Meshes struct {
@@ -260,7 +260,7 @@ func (m *Meshes) delete() {
 }
 
 func (m *Meshes) Draw(
-	shader *mview.MShader, boneDeltas []mgl32.Mat4,
+	shader *mgl.MShader, boneDeltas []mgl32.Mat4,
 	vertexMorphIndexes []int, vertexMorphDeltas [][]float32,
 	selectedVertexIndexes []int, selectedVertexDeltas [][]float32, meshDeltas []*MeshDelta,
 	invisibleMaterialIndexes []int, nextInvisibleMaterialIndexes []int, windowIndex int,
@@ -277,19 +277,19 @@ func (m *Meshes) Draw(
 	for i, mesh := range m.meshes {
 		mesh.ibo.Bind()
 
-		shader.Use(mview.PROGRAM_TYPE_MODEL)
+		shader.Use(mgl.PROGRAM_TYPE_MODEL)
 		mesh.drawModel(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
 		shader.Unuse()
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
-			shader.Use(mview.PROGRAM_TYPE_EDGE)
+			shader.Use(mgl.PROGRAM_TYPE_EDGE)
 			mesh.drawEdge(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
 			shader.Unuse()
 		}
 
 		if isDrawWire {
-			shader.Use(mview.PROGRAM_TYPE_WIRE)
+			shader.Use(mgl.PROGRAM_TYPE_WIRE)
 			mesh.drawWire(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, ((len(invisibleMaterialIndexes) > 0 && len(nextInvisibleMaterialIndexes) == 0 &&
 				slices.Contains(invisibleMaterialIndexes, mesh.material.Index)) ||
 				slices.Contains(nextInvisibleMaterialIndexes, mesh.material.Index)))
@@ -348,12 +348,12 @@ func (m *Meshes) createBoneMatrixes(matrixes []mgl32.Mat4) ([]float32, int, int)
 }
 
 func (m *Meshes) drawNormal(
-	shader *mview.MShader,
+	shader *mgl.MShader,
 	paddedMatrixes []float32,
 	width, height int,
 	windowIndex int,
 ) {
-	shader.Use(mview.PROGRAM_TYPE_NORMAL)
+	shader.Use(mgl.PROGRAM_TYPE_NORMAL)
 
 	m.normalVao.Bind()
 	m.normalVbo.BindVertex(nil, nil)
@@ -363,7 +363,7 @@ func (m *Meshes) drawNormal(
 	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.NormalProgram)
 
 	normalColor := mgl32.Vec4{0.3, 0.3, 0.7, 0.5}
-	specularUniform := gl.GetUniformLocation(shader.NormalProgram, gl.Str(mview.SHADER_COLOR))
+	specularUniform := gl.GetUniformLocation(shader.NormalProgram, gl.Str(mgl.SHADER_COLOR))
 	gl.Uniform4fv(specularUniform, 1, &normalColor[0])
 
 	// ライン描画
@@ -384,7 +384,7 @@ func (m *Meshes) drawNormal(
 func (m *Meshes) drawSelectedVertex(
 	selectedVertexMorphIndexes []int,
 	selectedVertexDeltas [][]float32,
-	shader *mview.MShader,
+	shader *mgl.MShader,
 	paddedMatrixes []float32,
 	width, height int,
 	windowIndex int,
@@ -393,7 +393,7 @@ func (m *Meshes) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
-	shader.Use(mview.PROGRAM_TYPE_SELECTED_VERTEX)
+	shader.Use(mgl.PROGRAM_TYPE_SELECTED_VERTEX)
 
 	m.selectedVertexVao.Bind()
 	m.selectedVertexVbo.BindVertex(selectedVertexMorphIndexes, selectedVertexDeltas)
@@ -403,7 +403,7 @@ func (m *Meshes) drawSelectedVertex(
 	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.SelectedVertexProgram)
 
 	vertexColor := mgl32.Vec4{1.0, 0.4, 0.0, 0.7}
-	specularUniform := gl.GetUniformLocation(shader.SelectedVertexProgram, gl.Str(mview.SHADER_COLOR))
+	specularUniform := gl.GetUniformLocation(shader.SelectedVertexProgram, gl.Str(mgl.SHADER_COLOR))
 	gl.Uniform4fv(specularUniform, 1, &vertexColor[0])
 	gl.PointSize(5.0) // 選択頂点のサイズ
 
@@ -451,7 +451,7 @@ func (m *Meshes) drawSelectedVertex(
 }
 
 func (m *Meshes) drawBone(
-	shader *mview.MShader,
+	shader *mgl.MShader,
 	bones *Bones,
 	isDrawBones map[BoneFlag]bool,
 	paddedMatrixes []float32,
@@ -466,7 +466,7 @@ func (m *Meshes) drawBone(
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	shader.Use(mview.PROGRAM_TYPE_BONE)
+	shader.Use(mgl.PROGRAM_TYPE_BONE)
 
 	m.boneVao.Bind()
 	m.boneVbo.BindVertex(m.fetchBoneDebugDeltas(bones, isDrawBones))

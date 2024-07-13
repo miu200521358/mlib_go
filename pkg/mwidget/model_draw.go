@@ -9,11 +9,10 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infra/bt"
 	"github.com/miu200521358/mlib_go/pkg/infra/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
-	"github.com/miu200521358/mlib_go/pkg/mview"
-	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 )
 
 type ModelSet struct {
@@ -228,7 +227,7 @@ func deformAfterPhysics(
 func draw(
 	modelPhysics *mbt.MPhysics,
 	model *pmx.PmxModel,
-	shader *mview.MShader,
+	shader *mgl.MShader,
 	deltas *vmd.VmdDeltas,
 	invisibleMaterialIndexes, nextInvisibleMaterialIndexes []int,
 	windowIndex int,

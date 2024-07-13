@@ -8,7 +8,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
 	"github.com/miu200521358/mlib_go/pkg/infra/bt"
-	"github.com/miu200521358/mlib_go/pkg/mview"
+	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
 )
 
 func NewConstBtMDefaultColors() bt.BtMDefaultColors {
@@ -25,14 +25,14 @@ func NewConstBtMDefaultColors() bt.BtMDefaultColors {
 
 type MDebugDrawLiner struct {
 	bt.BtMDebugDrawLiner
-	shader   *mview.MShader
+	shader   *mgl.MShader
 	vao      *buffer.VAO
 	vbo      *buffer.VBO
 	vertices []float32
 	count    int
 }
 
-func NewMDebugDrawLiner(shader *mview.MShader) *MDebugDrawLiner {
+func NewMDebugDrawLiner(shader *mgl.MShader) *MDebugDrawLiner {
 	ddl := &MDebugDrawLiner{
 		shader:   shader,
 		vertices: make([]float32, 0),
@@ -66,7 +66,7 @@ func (ddl *MDebugDrawLiner) DrawDebugLines() {
 		gl.DepthFunc(gl.ALWAYS)
 	}
 
-	ddl.shader.Use(mview.PROGRAM_TYPE_PHYSICS)
+	ddl.shader.Use(mgl.PROGRAM_TYPE_PHYSICS)
 
 	// 線を引く
 	ddl.vao.Bind()

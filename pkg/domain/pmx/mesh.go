@@ -11,7 +11,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/mview"
+	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
 )
 
 type Mesh struct {
@@ -59,7 +59,7 @@ func NewMesh(
 }
 
 func (m *Mesh) drawModel(
-	shader *mview.MShader,
+	shader *mgl.MShader,
 	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
@@ -85,74 +85,74 @@ func (m *Mesh) drawModel(
 	// ------------------
 	// 材質色設定
 	// full.fx の AmbientColor相当
-	diffuseUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_DIFFUSE))
+	diffuseUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_DIFFUSE))
 	gl.Uniform4fv(diffuseUniform, 1, &meshDelta.Diffuse[0])
 
-	ambientUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_AMBIENT))
+	ambientUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_AMBIENT))
 	gl.Uniform3fv(ambientUniform, 1, &meshDelta.Ambient[0])
 
-	specularUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_SPECULAR))
+	specularUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPECULAR))
 	gl.Uniform4fv(specularUniform, 1, &meshDelta.Specular[0])
 
 	// テクスチャ使用有無
-	useTextureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_USE_TEXTURE))
+	useTextureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_USE_TEXTURE))
 	gl.Uniform1i(useTextureUniform, int32(mmath.BoolToInt(m.material.Texture != nil)))
 	if m.material.Texture != nil {
 		m.material.Texture.Bind()
 		defer m.material.Texture.Unbind()
-		textureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TEXTURE_SAMPLER))
+		textureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TEXTURE_SAMPLER))
 		gl.Uniform1i(textureUniform, int32(m.material.Texture.TextureUnitNo))
 
-		textureMulFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TEXTURE_MUL_FACTOR))
+		textureMulFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TEXTURE_MUL_FACTOR))
 		gl.Uniform4fv(textureMulFactorUniform, 1, &meshDelta.TextureMulFactor[0])
 
-		textureAddFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TEXTURE_ADD_FACTOR))
+		textureAddFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TEXTURE_ADD_FACTOR))
 		gl.Uniform4fv(textureAddFactorUniform, 1, &meshDelta.TextureAddFactor[0])
 	}
 
 	// Toon使用有無
-	useToonUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_USE_TOON))
+	useToonUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_USE_TOON))
 	gl.Uniform1i(useToonUniform, int32(mmath.BoolToInt(m.material.ToonTexture != nil)))
 	if m.material.ToonTexture != nil {
 		m.material.ToonTexture.Bind()
 		defer m.material.ToonTexture.Unbind()
-		toonUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TOON_SAMPLER))
+		toonUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TOON_SAMPLER))
 		gl.Uniform1i(toonUniform, int32(m.material.ToonTexture.TextureUnitNo))
 
-		toonMulFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TOON_MUL_FACTOR))
+		toonMulFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TOON_MUL_FACTOR))
 		gl.Uniform4fv(toonMulFactorUniform, 1, &meshDelta.ToonMulFactor[0])
 
-		toonAddFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_TOON_ADD_FACTOR))
+		toonAddFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TOON_ADD_FACTOR))
 		gl.Uniform4fv(toonAddFactorUniform, 1, &meshDelta.ToonAddFactor[0])
 	}
 
 	// Sphere使用有無
-	useSphereUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_USE_SPHERE))
+	useSphereUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_USE_SPHERE))
 	gl.Uniform1i(useSphereUniform, int32(mmath.BoolToInt(m.material.SphereTexture != nil && m.material.SphereTexture.Valid)))
 	if m.material.SphereTexture != nil && m.material.SphereTexture.Valid {
 		m.material.SphereTexture.Bind()
 		defer m.material.SphereTexture.Unbind()
-		sphereUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_SPHERE_SAMPLER))
+		sphereUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPHERE_SAMPLER))
 		gl.Uniform1i(sphereUniform, int32(m.material.SphereTexture.TextureUnitNo))
 
-		sphereMulFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_SPHERE_MUL_FACTOR))
+		sphereMulFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPHERE_MUL_FACTOR))
 		gl.Uniform4fv(sphereMulFactorUniform, 1, &meshDelta.SphereMulFactor[0])
 
-		sphereAddFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_SPHERE_ADD_FACTOR))
+		sphereAddFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPHERE_ADD_FACTOR))
 		gl.Uniform4fv(sphereAddFactorUniform, 1, &meshDelta.SphereAddFactor[0])
 	}
 
 	// SphereMode
-	sphereModeUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mview.SHADER_SPHERE_MODE))
+	sphereModeUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPHERE_MODE))
 	gl.Uniform1i(sphereModeUniform, int32(m.material.SphereMode))
 
 	// // ウェイト描写
 	// gl.Uniform1i(
-	// 	shader.IsShowBoneWeightUniform[mview.PROGRAM_TYPE_MODEL],
+	// 	shader.IsShowBoneWeightUniform[mgl.PROGRAM_TYPE_MODEL],
 	// 	mutils.BoolToInt(isShowBoneWeight),
 	// )
 	// gl.Uniform1iv(
-	// 	shader.ShowBoneIndexesUniform[mview.PROGRAM_TYPE_MODEL],
+	// 	shader.ShowBoneIndexesUniform[mgl.PROGRAM_TYPE_MODEL],
 	// 	int32(len(showBoneIndexes)),
 	// 	(*int32)(unsafe.Pointer(&showBoneIndexes[0])),
 	// )
@@ -180,7 +180,7 @@ func (m *Mesh) drawModel(
 }
 
 func (m *Mesh) drawEdge(
-	shader *mview.MShader,
+	shader *mgl.MShader,
 	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
@@ -197,11 +197,11 @@ func (m *Mesh) drawEdge(
 
 	// ------------------
 	// エッジ色設定
-	edgeColorUniform := gl.GetUniformLocation(shader.EdgeProgram, gl.Str(mview.SHADER_EDGE_COLOR))
+	edgeColorUniform := gl.GetUniformLocation(shader.EdgeProgram, gl.Str(mgl.SHADER_EDGE_COLOR))
 	gl.Uniform4fv(edgeColorUniform, 1, &meshDelta.Edge[0])
 
 	// エッジサイズ
-	edgeSizeUniform := gl.GetUniformLocation(shader.EdgeProgram, gl.Str(mview.SHADER_EDGE_SIZE))
+	edgeSizeUniform := gl.GetUniformLocation(shader.EdgeProgram, gl.Str(mgl.SHADER_EDGE_SIZE))
 	gl.Uniform1f(edgeSizeUniform, meshDelta.EdgeSize)
 
 	// 三角形描画
@@ -214,7 +214,7 @@ func (m *Mesh) drawEdge(
 }
 
 func (m *Mesh) drawWire(
-	shader *mview.MShader,
+	shader *mgl.MShader,
 	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
@@ -233,7 +233,7 @@ func (m *Mesh) drawWire(
 	} else {
 		wireColor = mgl32.Vec4{0.2, 0.6, 0.2, 0.5}
 	}
-	specularUniform := gl.GetUniformLocation(shader.WireProgram, gl.Str(mview.SHADER_COLOR))
+	specularUniform := gl.GetUniformLocation(shader.WireProgram, gl.Str(mgl.SHADER_COLOR))
 	gl.Uniform4fv(specularUniform, 1, &wireColor[0])
 
 	// 描画モードをワイヤーフレームに変更
@@ -261,7 +261,7 @@ func (m *Mesh) delete() {
 func bindBoneMatrixes(
 	paddedMatrixes []float32,
 	width, height int,
-	shader *mview.MShader,
+	shader *mgl.MShader,
 	program uint32,
 ) {
 	// テクスチャをアクティブにする
@@ -290,13 +290,13 @@ func bindBoneMatrixes(
 		unsafe.Pointer(&paddedMatrixes[0]),
 	)
 
-	modelUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_BONE_MATRIX_TEXTURE))
+	modelUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE))
 	gl.Uniform1i(modelUniform, 20)
 
-	modelWidthUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_BONE_MATRIX_TEXTURE_WIDTH))
+	modelWidthUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE_WIDTH))
 	gl.Uniform1i(modelWidthUniform, int32(width))
 
-	modelHeightUniform := gl.GetUniformLocation(program, gl.Str(mview.SHADER_BONE_MATRIX_TEXTURE_HEIGHT))
+	modelHeightUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE_HEIGHT))
 	gl.Uniform1i(modelHeightUniform, int32(height))
 }
 
