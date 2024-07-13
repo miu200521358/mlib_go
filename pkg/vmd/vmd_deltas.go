@@ -2,7 +2,7 @@ package vmd
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/miu200521358/mlib_go/pkg/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
 
 type VmdDeltas struct {

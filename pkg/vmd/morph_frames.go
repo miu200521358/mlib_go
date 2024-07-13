@@ -3,7 +3,7 @@ package vmd
 import (
 	"math"
 
-	"github.com/miu200521358/mlib_go/pkg/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
 
 type MorphFrames struct {

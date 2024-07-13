@@ -9,7 +9,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mview"
-	"github.com/miu200521358/mlib_go/pkg/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
 
 func (mds *VertexMorphDeltas) GL() ([]int, [][]float32) {

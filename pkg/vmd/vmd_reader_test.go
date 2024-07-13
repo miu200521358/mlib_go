@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
 
 func TestVmdMotionReader_ReadNameByFilepath(t *testing.T) {
