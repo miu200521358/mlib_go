@@ -4,7 +4,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 // MLIB_PREFIX システム用接頭辞

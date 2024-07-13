@@ -5,8 +5,10 @@ package pmx
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
-	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 )
 
@@ -108,7 +110,7 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics)
 	// boneTransform.SetOrigin(boneLocalPosition.Bullet())
 
 	// 剛体の初期位置と回転
-	btRigidBodyTransform := bt.NewBtTransform(r.Rotation.Bullet(), r.Position.Bullet())
+	btRigidBodyTransform := bt.NewBtTransform(mbt.MRotationBullet(r.Rotation), mbt.MVec3Bullet(r.Position))
 
 	// ボーンから見た剛体の初期位置
 	var bPos *mmath.MVec3
@@ -120,7 +122,7 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mphysics.MPhysics)
 		bPos = mmath.NewMVec3()
 	}
 	rbLocalPos := r.Position.Subed(bPos)
-	btRigidBodyLocalTransform := bt.NewBtTransform(r.Rotation.Bullet(), rbLocalPos.Bullet())
+	btRigidBodyLocalTransform := bt.NewBtTransform(mbt.MRotationBullet(r.Rotation), mbt.MVec3Bullet(rbLocalPos))
 
 	// {
 	// 	mlog.V("---------------------------------")
@@ -271,7 +273,7 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 	// 	mlog.V("3. [%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
 	// }
 
-	return mmath.NewMMat4ByMgl(&boneGlobalMatrixGL)
+	return mgl.NewMMat4ByMgl(&boneGlobalMatrixGL)
 }
 
 func (r *RigidBodies) initPhysics(modelIndex int, physics *mphysics.MPhysics) {

@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 func TestPmxWriter_Save1(t *testing.T) {

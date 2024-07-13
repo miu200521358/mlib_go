@@ -5,6 +5,7 @@ package pmx
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 )
 
@@ -12,7 +13,7 @@ func (j *Joint) initPhysics(
 	modelIndex int, modelPhysics *mphysics.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody,
 ) {
 	// ジョイントの位置と向き
-	jointTransform := bt.NewBtTransform(j.Rotation.Bullet(), j.Position.Bullet())
+	jointTransform := bt.NewBtTransform(mbt.MRotationBullet(j.Rotation), mbt.MVec3Bullet(j.Position))
 
 	btRigidBodyA, _ := modelPhysics.GetRigidBody(modelIndex, rigidBodyA.Index)
 	btRigidBodyB, _ := modelPhysics.GetRigidBody(modelIndex, rigidBodyB.Index)

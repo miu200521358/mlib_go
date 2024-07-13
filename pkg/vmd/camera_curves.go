@@ -1,6 +1,6 @@
 package vmd
 
-import "github.com/miu200521358/mlib_go/pkg/mmath"
+import "github.com/miu200521358/mlib_go/pkg/domain/mmath"
 
 var InitialCameraCurves = []byte{
 	20,

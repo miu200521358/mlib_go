@@ -7,8 +7,9 @@ import (
 	"sync"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
-	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/mphysics"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 	"github.com/miu200521358/mlib_go/pkg/pmx"
@@ -161,7 +162,7 @@ func deformBeforePhysics(
 			// ボーン追従剛体・物理＋ボーン位置もしくは強制更新の場合のみ剛体位置更新
 			boneTransform := bt.NewBtTransform()
 			defer bt.DeleteBtTransform(boneTransform)
-			mat := vds.Bones.Get(rigidBodyBone.Index).GlobalMatrix().GL()
+			mat := mgl.NewGlMat4FromMMat4(vds.Bones.Get(rigidBodyBone.Index).GlobalMatrix())
 			boneTransform.SetFromOpenGLMatrix(&mat[0])
 
 			rigidBody.UpdateTransform(model.Index, modelPhysics, rigidBodyBone, boneTransform)
@@ -213,7 +214,7 @@ func deformAfterPhysics(
 	for i, bone := range model.Bones.Data {
 		delta := deltas.Bones.Get(bone.Index)
 		if delta != nil {
-			deltas.BoneGlDeltas[i] = delta.LocalMatrix().GL()
+			deltas.BoneGlDeltas[i] = mgl.NewGlMat4FromMMat4(delta.LocalMatrix())
 		}
 	}
 

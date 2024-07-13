@@ -3,7 +3,7 @@ package vmd
 import (
 	"testing"
 
-	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 func TestVmdWriter_Write1(t *testing.T) {

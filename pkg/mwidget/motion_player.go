@@ -7,7 +7,7 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 	"github.com/miu200521358/win"
 
-	"github.com/miu200521358/mlib_go/pkg/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
