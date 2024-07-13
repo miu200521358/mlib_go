@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/reader"
+	"github.com/miu200521358/mlib_go/pkg/infra/reader"
 	"github.com/miu200521358/mlib_go/pkg/vmd"
 	"github.com/pkg/profile"
 )

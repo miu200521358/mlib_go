@@ -7,7 +7,7 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/buffer"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
+	"github.com/miu200521358/mlib_go/pkg/infra/bt"
 	"github.com/miu200521358/mlib_go/pkg/mview"
 )
 

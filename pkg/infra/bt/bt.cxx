@@ -6,7 +6,7 @@
  * the SWIG interface file instead.
  * ----------------------------------------------------------------------------- */
 
-// source: C:\MMD\mlib_go\pkg\infrastructure\bt\bullet.i
+// source: C:\MMD\mlib_go\pkg\infra\bt\bullet.i
 
 
 extern
