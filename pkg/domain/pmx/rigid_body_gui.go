@@ -8,7 +8,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 func (r *RigidBody) UpdateFlags(
@@ -272,7 +271,7 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 	// 	mlog.V("3. [%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
 	// }
 
-	return mgl.NewMMat4ByMgl(&boneGlobalMatrixGL)
+	return mmath.NewMMat4ByMgl(&boneGlobalMatrixGL)
 }
 
 func (r *RigidBodies) initPhysics(modelIndex int, physics *mbt.MPhysics) {

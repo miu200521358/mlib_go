@@ -24,12 +24,12 @@ func (mds *VertexMorphDeltas) GL() ([]int, [][]float32) {
 func (md *VertexMorphDelta) GL() []float32 {
 	var p0, p1, p2 float32
 	if md.Position != nil {
-		p := mgl.NewGlVec3FromMVec3(md.Position)
+		p := md.Position.GL()
 		p0, p1, p2 = p[0], p[1], p[2]
 	}
 	var ap0, ap1, ap2 float32
 	if md.AfterPosition != nil {
-		ap := mgl.NewGlVec3FromMVec3(md.AfterPosition)
+		ap := md.AfterPosition.GL()
 		ap0, ap1, ap2 = ap[0], ap[1], ap[2]
 	}
 	// UVは符号関係ないのでそのまま取得する

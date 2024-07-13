@@ -409,8 +409,8 @@ func (gw *GlWindow) getWorldPosition(
 	mlog.V("Projection: %s", projection.String())
 
 	// カメラの位置と中心からビュー行列を計算
-	cameraPosition := mgl.NewGlVec3FromMVec3(gw.Shader.CameraPosition)
-	lookAtCenter := mgl.NewGlVec3FromMVec3(gw.Shader.LookAtCenterPosition)
+	cameraPosition := gw.Shader.CameraPosition.GL()
+	lookAtCenter := gw.Shader.LookAtCenterPosition.GL()
 	view := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 	mlog.V("CameraPosition: %s, LookAtCenterPosition: %s", gw.Shader.CameraPosition.String(), gw.Shader.LookAtCenterPosition.String())
 	mlog.V("View: %s", view.String())
@@ -768,10 +768,10 @@ func (w *GlWindow) Run() {
 		)
 
 		// カメラの位置
-		cameraPosition := mgl.NewGlVec3FromMVec3(w.Shader.CameraPosition)
+		cameraPosition := w.Shader.CameraPosition.GL()
 
 		// カメラの中心
-		lookAtCenter := mgl.NewGlVec3FromMVec3(w.Shader.LookAtCenterPosition)
+		lookAtCenter := w.Shader.LookAtCenterPosition.GL()
 		camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 
 		for _, program := range w.Shader.GetPrograms() {
