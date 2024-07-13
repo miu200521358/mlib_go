@@ -56,7 +56,7 @@ func TestPmxReader_ReadNameByFilepath_NotExist(t *testing.T) {
 func TestPmxReader_ReadByFilepath(t *testing.T) {
 	r := &PmxReader{}
 
-	data, err := r.ReadByFilepath("../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
+	data, err := r.ReadByFilepath("../../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
 	model := data.(*pmx.PmxModel)
 
 	if err != nil {
@@ -831,7 +831,7 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 func TestPmxReader_ReadByFilepath_2_1(t *testing.T) {
 	r := &PmxReader{}
 
-	data, err := r.ReadByFilepath("../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
+	data, err := r.ReadByFilepath("../../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
 	model := data.(*pmx.PmxModel)
 
 	if err != nil {

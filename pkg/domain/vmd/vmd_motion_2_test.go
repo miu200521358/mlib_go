@@ -13,7 +13,7 @@ func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := &VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../test_resources/nac_dmf_601.vmd")
+	motionData, err := vr.ReadByFilepath("../../../test_resources/nac_dmf_601.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -779,7 +779,7 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Left(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := &VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../test_resources/[A]ddiction_和洋_0126F.vmd")
+	motionData, err := vr.ReadByFilepath("../../../test_resources/[A]ddiction_和洋_0126F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -916,7 +916,7 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Right(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := &VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../test_resources/[A]ddiction_和洋_0126F.vmd")
+	motionData, err := vr.ReadByFilepath("../../../test_resources/[A]ddiction_和洋_0126F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1052,7 +1052,7 @@ func TestVmdMotion_DeformIk28_Simple(t *testing.T) {
 	mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := &VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../test_resources/IKの挙動を見たい_020.vmd")
+	motionData, err := vr.ReadByFilepath("../../../test_resources/IKの挙動を見たい_020.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1061,7 +1061,7 @@ func TestVmdMotion_DeformIk28_Simple(t *testing.T) {
 	motion := motionData.(*VmdMotion)
 
 	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../test_resources/IKの挙動を見たい.pmx")
+	modelData, err := pr.ReadByFilepath("../../../test_resources/IKの挙動を見たい.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1116,7 +1116,7 @@ func TestVmdMotion_DeformIk29_Simple(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := &VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../test_resources/IKの挙動を見たい2_040.vmd")
+	motionData, err := vr.ReadByFilepath("../../../test_resources/IKの挙動を見たい2_040.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1125,7 +1125,7 @@ func TestVmdMotion_DeformIk29_Simple(t *testing.T) {
 	motion := motionData.(*VmdMotion)
 
 	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../test_resources/IKの挙動を見たい2.pmx")
+	modelData, err := pr.ReadByFilepath("../../../test_resources/IKの挙動を見たい2.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1186,7 +1186,7 @@ func TestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := &VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../test_resources/[A]ddiction_和洋_1037F.vmd")
+	motionData, err := vr.ReadByFilepath("../../../test_resources/[A]ddiction_和洋_1037F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)

@@ -12,7 +12,7 @@ import (
 func TestPmxWriter_Save1(t *testing.T) {
 	r := &reader.PmxReader{}
 
-	data, err := r.ReadByFilepath("../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
+	data, err := r.ReadByFilepath("../../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
 	originalModel := data.(*pmx.PmxModel)
 
 	if err != nil {
@@ -21,7 +21,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 
 	// ------------------
 
-	overridePath := "../../test_resources/サンプルモデル_PMX読み取り確認用_output.pmx"
+	overridePath := "../../../test_resources/サンプルモデル_PMX読み取り確認用_output.pmx"
 	PmxSave(originalModel, overridePath, "", false)
 
 	// ------------------

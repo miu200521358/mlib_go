@@ -1,4 +1,4 @@
-package vmd
+package writer
 
 import (
 	"bytes"
@@ -11,13 +11,17 @@ import (
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
-func (motion *VmdMotion) Save(overrideModelName, overridePath string) error {
+func VmdSave(data core.IHashModel, overridePath, overrideName string, includeSystem bool) error {
+	motion := data.(*vmd.VmdMotion)
+
 	path := motion.GetPath()
 	// 保存可能なパスである場合、上書き
 	if mutils.CanSave(overridePath) {
@@ -26,8 +30,8 @@ func (motion *VmdMotion) Save(overrideModelName, overridePath string) error {
 
 	modelName := motion.GetName()
 	// モデル名が指定されている場合、上書き
-	if overrideModelName != "" {
-		modelName = overrideModelName
+	if overrideName != "" {
+		modelName = overrideName
 	}
 
 	// Open the output file
@@ -108,7 +112,7 @@ func (motion *VmdMotion) Save(overrideModelName, overridePath string) error {
 	return nil
 }
 
-func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
+func writeBoneFrames(fout *os.File, motion *vmd.VmdMotion) error {
 	names := motion.BoneFrames.GetNames()
 
 	binary.Write(fout, binary.LittleEndian, uint32(motion.BoneFrames.Len()))
@@ -142,7 +146,7 @@ func writeBoneFrames(fout *os.File, motion *VmdMotion) error {
 	return nil
 }
 
-func writeBoneFrame(fout *os.File, name string, bf *BoneFrame) error {
+func writeBoneFrame(fout *os.File, name string, bf *vmd.BoneFrame) error {
 	if bf == nil {
 		return fmt.Errorf("BoneFrame is nil")
 	}
@@ -178,7 +182,7 @@ func writeBoneFrame(fout *os.File, name string, bf *BoneFrame) error {
 
 	var curves []byte
 	if bf.Curves == nil {
-		curves = InitialBoneCurves
+		curves = vmd.InitialBoneCurves
 	} else {
 		curves = make([]byte, len(bf.Curves.Values))
 		for i, x := range bf.Curves.Merge() {
@@ -190,7 +194,7 @@ func writeBoneFrame(fout *os.File, name string, bf *BoneFrame) error {
 	return nil
 }
 
-func writeMorphFrames(fout *os.File, motion *VmdMotion) error {
+func writeMorphFrames(fout *os.File, motion *vmd.VmdMotion) error {
 	binary.Write(fout, binary.LittleEndian, uint32(motion.MorphFrames.Len()))
 
 	names := motion.MorphFrames.GetNames()
@@ -212,7 +216,7 @@ func writeMorphFrames(fout *os.File, motion *VmdMotion) error {
 	return nil
 }
 
-func writeMorphFrame(fout *os.File, name string, mf *MorphFrame) error {
+func writeMorphFrame(fout *os.File, name string, mf *vmd.MorphFrame) error {
 	if mf == nil {
 		return fmt.Errorf("MorphFrame is nil")
 	}
@@ -230,7 +234,7 @@ func writeMorphFrame(fout *os.File, name string, mf *MorphFrame) error {
 	return nil
 }
 
-func writeCameraFrames(fout *os.File, motion *VmdMotion) error {
+func writeCameraFrames(fout *os.File, motion *vmd.VmdMotion) error {
 	binary.Write(fout, binary.LittleEndian, uint32(motion.CameraFrames.Len()))
 
 	fs := motion.CameraFrames
@@ -248,7 +252,7 @@ func writeCameraFrames(fout *os.File, motion *VmdMotion) error {
 	return nil
 }
 
-func writeCameraFrame(fout *os.File, cf *CameraFrame) error {
+func writeCameraFrame(fout *os.File, cf *vmd.CameraFrame) error {
 	if cf == nil {
 		return fmt.Errorf("CameraFrame is nil")
 	}
@@ -279,7 +283,7 @@ func writeCameraFrame(fout *os.File, cf *CameraFrame) error {
 
 	var curves []byte
 	if cf.Curves == nil {
-		curves = InitialCameraCurves
+		curves = vmd.InitialCameraCurves
 	} else {
 		curves = make([]byte, len(cf.Curves.Values))
 		for i, x := range cf.Curves.Merge() {
@@ -294,7 +298,7 @@ func writeCameraFrame(fout *os.File, cf *CameraFrame) error {
 	return nil
 }
 
-func writeLightFrames(fout *os.File, motion *VmdMotion) error {
+func writeLightFrames(fout *os.File, motion *vmd.VmdMotion) error {
 	binary.Write(fout, binary.LittleEndian, uint32(motion.LightFrames.Len()))
 
 	fs := motion.LightFrames
@@ -312,7 +316,7 @@ func writeLightFrames(fout *os.File, motion *VmdMotion) error {
 	return nil
 }
 
-func writeLightFrame(fout *os.File, cf *LightFrame) error {
+func writeLightFrame(fout *os.File, cf *vmd.LightFrame) error {
 	if cf == nil {
 		return fmt.Errorf("LightFrame is nil")
 	}
@@ -344,7 +348,7 @@ func writeLightFrame(fout *os.File, cf *LightFrame) error {
 	return nil
 }
 
-func writeShadowFrames(fout *os.File, motion *VmdMotion) error {
+func writeShadowFrames(fout *os.File, motion *vmd.VmdMotion) error {
 	binary.Write(fout, binary.LittleEndian, uint32(motion.ShadowFrames.Len()))
 
 	fs := motion.ShadowFrames
@@ -362,7 +366,7 @@ func writeShadowFrames(fout *os.File, motion *VmdMotion) error {
 	return nil
 }
 
-func writeShadowFrame(fout *os.File, cf *ShadowFrame) error {
+func writeShadowFrame(fout *os.File, cf *vmd.ShadowFrame) error {
 	if cf == nil {
 		return fmt.Errorf("ShadowFrame is nil")
 	}
@@ -375,7 +379,7 @@ func writeShadowFrame(fout *os.File, cf *ShadowFrame) error {
 	return nil
 }
 
-func writeIkFrames(fout *os.File, motion *VmdMotion) error {
+func writeIkFrames(fout *os.File, motion *vmd.VmdMotion) error {
 	binary.Write(fout, binary.LittleEndian, uint32(motion.IkFrames.Len()))
 
 	fs := motion.IkFrames
@@ -393,7 +397,7 @@ func writeIkFrames(fout *os.File, motion *VmdMotion) error {
 	return nil
 }
 
-func writeIkFrame(fout *os.File, cf *IkFrame) error {
+func writeIkFrame(fout *os.File, cf *vmd.IkFrame) error {
 	if cf == nil {
 		return fmt.Errorf("IkFrame is nil")
 	}

@@ -1,35 +1,36 @@
-package vmd
+package writer
 
 import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 )
 
 func TestVmdWriter_Write1(t *testing.T) {
-	path := "../../test_resources/test_output.vmd"
+	path := "../../../test_resources/test_output.vmd"
 
 	// Create a VmdMotion instance for testing
-	motion := NewVmdMotion(path)
+	motion := vmd.NewVmdMotion(path)
 	motion.SetName("Null_00")
 
-	bf := NewBoneFrame(0)
+	bf := vmd.NewBoneFrame(0)
 	bf.Position = &mmath.MVec3{1, 2, 3}
 	bf.Rotation = mmath.NewMQuaternionFromDegrees(10, 20, 30)
 	motion.AppendRegisteredBoneFrame("センター", bf)
 
 	// Create a VmdWriter instance
-	err := motion.Save("", "")
+	err := VmdSave(motion, "", "", false)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
 
-	r := &VmdMotionReader{}
+	r := &vmd.VmdMotionReader{}
 	reloadData, err := r.ReadByFilepath(path)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
-	reloadMotion := reloadData.(*VmdMotion)
+	reloadMotion := reloadData.(*vmd.VmdMotion)
 
 	if reloadMotion.GetName() != motion.GetName() {
 		t.Errorf("Expected model name to be '%s', got %q", motion.GetName(), reloadMotion.GetName())
@@ -55,22 +56,21 @@ func TestVmdWriter_Write1(t *testing.T) {
 
 func TestVmdWriter_Write2(t *testing.T) {
 	// Test case 1: Successful read
-	readPath := "../../test_resources/サンプルモーション.vmd"
+	readPath := "../../../test_resources/サンプルモーション.vmd"
 
-	r := &VmdMotionReader{}
-	model, err := r.ReadByFilepath(readPath)
+	r := &vmd.VmdMotionReader{}
+	data, err := r.ReadByFilepath(readPath)
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
 
-	outputPath := "../../test_resources/test_output.vmd"
+	outputPath := "../../../test_resources/test_output.vmd"
 
-	motion := model.(*VmdMotion)
-	motion.SetPath(outputPath)
+	motion := data.(*vmd.VmdMotion)
 
 	// Create a VmdWriter instance
-	err = motion.Save("", "")
+	err = VmdSave(motion, outputPath, "", false)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
@@ -79,7 +79,7 @@ func TestVmdWriter_Write2(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
-	reloadMotion := reloadData.(*VmdMotion)
+	reloadMotion := reloadData.(*vmd.VmdMotion)
 
 	if reloadMotion.GetName() != motion.GetName() {
 		t.Errorf("Expected model name to be '%s', got %q", motion.GetName(), reloadMotion.GetName())
@@ -89,20 +89,20 @@ func TestVmdWriter_Write2(t *testing.T) {
 
 func TestVmdWriter_Write3(t *testing.T) {
 	// Test case 1: Successful read
-	readPath := "../../test_resources/ドクヘビ_178cmカメラ.vmd"
+	readPath := "../../../test_resources/ドクヘビ_178cmカメラ.vmd"
 
-	r := &VmdMotionReader{}
+	r := &vmd.VmdMotionReader{}
 	model, err := r.ReadByFilepath(readPath)
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
 
-	outputPath := "../../test_resources/test_output.vmd"
-	motion := model.(*VmdMotion)
+	outputPath := "../../../test_resources/test_output.vmd"
+	motion := model.(*vmd.VmdMotion)
 
 	// Create a VmdWriter instance
-	err = motion.Save("", outputPath)
+	err = VmdSave(motion, outputPath, "", false)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
@@ -111,7 +111,7 @@ func TestVmdWriter_Write3(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
-	reloadMotion := reloadData.(*VmdMotion)
+	reloadMotion := reloadData.(*vmd.VmdMotion)
 
 	if reloadMotion.GetName() != motion.GetName() {
 		t.Errorf("Expected model name to be '%s', got %q", motion.GetName(), reloadMotion.GetName())
@@ -121,20 +121,20 @@ func TestVmdWriter_Write3(t *testing.T) {
 
 func TestVmdWriter_Write4(t *testing.T) {
 	// Test case 1: Successful read
-	readPath := "../../test_resources/モーフ_まばたき.vmd"
+	readPath := "../../../test_resources/モーフ_まばたき.vmd"
 
-	r := &VmdMotionReader{}
+	r := &vmd.VmdMotionReader{}
 	model, err := r.ReadByFilepath(readPath)
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
 
-	outputPath := "../../test_resources/test_output.vmd"
-	motion := model.(*VmdMotion)
+	outputPath := "../../../test_resources/test_output.vmd"
+	motion := model.(*vmd.VmdMotion)
 
 	// Create a VmdWriter instance
-	err = motion.Save("", outputPath)
+	err = VmdSave(motion, outputPath, "", false)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
@@ -143,7 +143,7 @@ func TestVmdWriter_Write4(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
-	reloadMotion := reloadData.(*VmdMotion)
+	reloadMotion := reloadData.(*vmd.VmdMotion)
 
 	if reloadMotion.GetName() != motion.GetName() {
 		t.Errorf("Expected model name to be '%s', got %q", motion.GetName(), reloadMotion.GetName())

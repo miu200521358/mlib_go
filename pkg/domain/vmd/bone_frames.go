@@ -12,8 +12,8 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 type BoneFrames struct {
@@ -262,7 +262,7 @@ func (fs *BoneFrames) calcIk(
 		mlog.IV("[IK計算終了][%04d][%s]", frame, ikBone.Name)
 
 		if ikMotion != nil {
-			ikMotion.Save("", "")
+			// ikMotion.Save("", "")
 		}
 		if ikFile != nil {
 			ikFile.Close()
@@ -325,7 +325,7 @@ func (fs *BoneFrames) calcIk(
 			ikOffMotion.AppendRegisteredBoneFrame(ikDelta.Bone.Name, bf)
 		}
 
-		ikOffMotion.Save("IK OFF", "")
+		// ikOffMotion.Save("IK OFF", "")
 	}
 
 	var ikOffDeltas *BoneDeltas
