@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package mwidget
+package window
 
 import (
 	"fmt"
@@ -11,42 +11,44 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 	"golang.org/x/sys/windows"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
+	"github.com/miu200521358/mlib_go/pkg/interface/widget"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
 
 type MWindow struct {
 	*walk.MainWindow
-	TabWidget                 *MTabWidget  // タブウィジェット
-	isHorizontal              bool         // 横並びであるか否か
-	GlWindows                 []*GlWindow  // 描画ウィンドウ
-	ConsoleView               *ConsoleView // コンソールビュー
-	frameDropAction           *walk.Action // フレームドロップON/OFF
-	physicsAction             *walk.Action // 物理ON/OFF
-	physicsResetAction        *walk.Action // 物理リセット
-	normalDebugAction         *walk.Action // ボーンデバッグ表示
-	wireDebugAction           *walk.Action // ワイヤーフレームデバッグ表示
-	selectedVertexDebugAction *walk.Action // 選択頂点デバッグ表示
-	boneDebugAllAction        *walk.Action // 全ボーンデバッグ表示
-	boneDebugIkAction         *walk.Action // IKボーンデバッグ表示
-	boneDebugEffectorAction   *walk.Action // 付与親ボーンデバッグ表示
-	boneDebugFixedAction      *walk.Action // 軸制限ボーンデバッグ表示
-	boneDebugRotateAction     *walk.Action // 回転ボーンデバッグ表示
-	boneDebugTranslateAction  *walk.Action // 移動ボーンデバッグ表示
-	boneDebugVisibleAction    *walk.Action // 表示ボーンデバッグ表示
-	rigidBodyFrontDebugAction *walk.Action // 剛体デバッグ表示(前面)
-	rigidBodyBackDebugAction  *walk.Action // 剛体デバッグ表示(埋め込み)
-	jointDebugAction          *walk.Action // ジョイントデバッグ表示
-	infoDebugAction           *walk.Action // 情報デバッグ表示
-	fps30LimitAction          *walk.Action // 30FPS制限
-	fps60LimitAction          *walk.Action // 60FPS制限
-	fpsUnLimitAction          *walk.Action // FPS無制限
-	logLevelDebugAction       *walk.Action // デバッグメッセージ表示
-	logLevelVerboseAction     *walk.Action // 冗長メッセージ表示
-	logLevelIkVerboseAction   *walk.Action // IK冗長メッセージ表示
-	fpsDeformUnLimitAction    *walk.Action // デフォームFPS無制限
+	TabWidget                 *widget.MTabWidget  // タブウィジェット
+	isHorizontal              bool                // 横並びであるか否か
+	GlWindows                 []*GlWindow         // 描画ウィンドウ
+	ConsoleView               *widget.ConsoleView // コンソールビュー
+	frameDropAction           *walk.Action        // フレームドロップON/OFF
+	physicsAction             *walk.Action        // 物理ON/OFF
+	physicsResetAction        *walk.Action        // 物理リセット
+	normalDebugAction         *walk.Action        // ボーンデバッグ表示
+	wireDebugAction           *walk.Action        // ワイヤーフレームデバッグ表示
+	selectedVertexDebugAction *walk.Action        // 選択頂点デバッグ表示
+	boneDebugAllAction        *walk.Action        // 全ボーンデバッグ表示
+	boneDebugIkAction         *walk.Action        // IKボーンデバッグ表示
+	boneDebugEffectorAction   *walk.Action        // 付与親ボーンデバッグ表示
+	boneDebugFixedAction      *walk.Action        // 軸制限ボーンデバッグ表示
+	boneDebugRotateAction     *walk.Action        // 回転ボーンデバッグ表示
+	boneDebugTranslateAction  *walk.Action        // 移動ボーンデバッグ表示
+	boneDebugVisibleAction    *walk.Action        // 表示ボーンデバッグ表示
+	rigidBodyFrontDebugAction *walk.Action        // 剛体デバッグ表示(前面)
+	rigidBodyBackDebugAction  *walk.Action        // 剛体デバッグ表示(埋め込み)
+	jointDebugAction          *walk.Action        // ジョイントデバッグ表示
+	infoDebugAction           *walk.Action        // 情報デバッグ表示
+	fps30LimitAction          *walk.Action        // 30FPS制限
+	fps60LimitAction          *walk.Action        // 60FPS制限
+	fpsUnLimitAction          *walk.Action        // FPS無制限
+	logLevelDebugAction       *walk.Action        // デバッグメッセージ表示
+	logLevelVerboseAction     *walk.Action        // 冗長メッセージ表示
+	logLevelIkVerboseAction   *walk.Action        // IK冗長メッセージ表示
+	fpsDeformUnLimitAction    *walk.Action        // デフォームFPS無制限
 }
 
 func NewMWindow(
@@ -311,7 +313,7 @@ func NewMWindow(
 	mainWindow.fps30LimitAction.SetChecked(true)
 
 	mainWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
-		if len(mainWindow.GlWindows) > 0 && !CheckOpenGLError() {
+		if len(mainWindow.GlWindows) > 0 && !mgl.CheckOpenGLError() {
 			for _, glWindow := range mainWindow.GlWindows {
 				glWindow.SetShouldClose(true)
 			}
@@ -326,11 +328,11 @@ func NewMWindow(
 	mainWindow.SetIcon(icon)
 
 	// タブウィジェット追加
-	mainWindow.TabWidget = NewMTabWidget(mainWindow)
+	mainWindow.TabWidget = widget.NewMTabWidget(mainWindow.MainWindow)
 	mainWindow.Children().Add(mainWindow.TabWidget)
 
 	bg, err := walk.NewSystemColorBrush(walk.SysColor3DShadow)
-	CheckError(err, mainWindow, mi18n.T("背景色生成エラー"))
+	widget.CheckError(err, mainWindow.MainWindow, mi18n.T("背景色生成エラー"))
 	mainWindow.SetBackground(bg)
 
 	return mainWindow, nil

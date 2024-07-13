@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package mwidget
+package window
 
 import (
 	"fmt"
@@ -21,6 +21,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infra/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infra/mgl"
+	"github.com/miu200521358/mlib_go/pkg/interface/widget"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
@@ -32,7 +33,7 @@ const RIGHT_ANGLE = 89.9
 type GlWindow struct {
 	*glfw.Window
 	mWindow                *MWindow              // walkウィンドウ
-	modelSets              []*ModelSet           // モデルセット
+	modelSets              []*widget.ModelSet    // モデルセット
 	Shader                 *mgl.MShader          // シェーダー
 	appConfig              *mconfig.AppConfig    // アプリケーション設定
 	title                  string                // ウィンドウタイトル(fpsとか入ってないオリジナル)
@@ -65,19 +66,19 @@ type GlWindow struct {
 	frame                  float64               // 現在のフレーム
 	prevFrame              int                   // 前回のフレーム
 	isSaveDelta            bool                  // 前回デフォーム保存フラグ(walkウィンドウからの変更情報検知用)
-	motionPlayer           *MotionPlayer         // 再生ウィジェット
 	width                  int                   // ウィンドウ幅
 	height                 int                   // ウィンドウ高さ
+	motionPlayer           *widget.MotionPlayer  // モーションプレイヤー
 	floor                  *MFloor               // 床
 	funcWorldPos           func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
 		nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3,
 		vmdDeltas []*vmd.VmdDeltas) // 選択ポイントからのグローバル位置取得コールバック関数
-	AppendModelSetChannel      chan *ModelSet         // モデルセット追加チャネル
-	RemoveModelSetIndexChannel chan int               // モデルセット削除チャネル
-	ReplaceModelSetChannel     chan map[int]*ModelSet // モデルセット入替チャネル
-	IsPlayingChannel           chan bool              // 再生チャネル
-	FrameChannel               chan int               // フレームチャネル
-	IsClosedChannel            chan bool              // ウィンドウクローズチャネル
+	AppendModelSetChannel      chan *widget.ModelSet         // モデルセット追加チャネル
+	RemoveModelSetIndexChannel chan int                      // モデルセット削除チャネル
+	ReplaceModelSetChannel     chan map[int]*widget.ModelSet // モデルセット入替チャネル
+	IsPlayingChannel           chan bool                     // 再生チャネル
+	FrameChannel               chan int                      // フレームチャネル
+	IsClosedChannel            chan bool                     // ウィンドウクローズチャネル
 }
 
 func NewGlWindow(
@@ -87,7 +88,6 @@ func NewGlWindow(
 	iconImg *image.Image,
 	appConfig *mconfig.AppConfig,
 	mainWindow *GlWindow,
-	fixViewWidget *FixViewWidget,
 ) (*GlWindow, error) {
 	if mainWindow == nil {
 		// GLFW の初期化(最初の一回だけ)
@@ -158,7 +158,7 @@ func NewGlWindow(
 
 	glWindow := GlWindow{
 		Window:                     w,
-		modelSets:                  make([]*ModelSet, 0),
+		modelSets:                  make([]*widget.ModelSet, 0),
 		Shader:                     shader,
 		appConfig:                  appConfig,
 		title:                      title,
@@ -190,9 +190,9 @@ func NewGlWindow(
 		width:                      width,
 		height:                     height,
 		floor:                      newMFloor(),
-		AppendModelSetChannel:      make(chan *ModelSet, 1),
+		AppendModelSetChannel:      make(chan *widget.ModelSet, 1),
 		RemoveModelSetIndexChannel: make(chan int, 1),
-		ReplaceModelSetChannel:     make(chan map[int]*ModelSet),
+		ReplaceModelSetChannel:     make(chan map[int]*widget.ModelSet),
 		IsPlayingChannel:           make(chan bool, 1),
 		FrameChannel:               make(chan int, 1),
 	}
@@ -217,7 +217,7 @@ func (w *GlWindow) SetMWindow(mw *MWindow) {
 	w.mWindow = mw
 }
 
-func (w *GlWindow) SetMotionPlayer(mp *MotionPlayer) {
+func (w *GlWindow) SetMotionPlayer(mp *widget.MotionPlayer) {
 	w.motionPlayer = mp
 }
 
@@ -438,7 +438,7 @@ func (w GlWindow) execWorldPos() {
 
 	vmdDeltas := make([]*vmd.VmdDeltas, len(w.modelSets))
 	for i, modelSet := range w.modelSets {
-		vmdDeltas[i] = modelSet.prevDeltas
+		vmdDeltas[i] = modelSet.PrevDeltas
 	}
 
 	if w.nowCursorPos.Length() == 0 || w.prevCursorPos.Distance(w.nowCursorPos) < 0.1 {
@@ -593,7 +593,7 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 func (w *GlWindow) TriggerPhysicsEnabled(enabled bool) {
 	w.enablePhysics = enabled
 	for i := range w.modelSets {
-		w.modelSets[i].prevDeltas = nil
+		w.modelSets[i].PrevDeltas = nil
 	}
 }
 
@@ -663,7 +663,7 @@ func (w *GlWindow) Run() {
 
 					for j := len(w.modelSets); j <= i; j++ {
 						// 既存のモデルセットがない場合は追加
-						w.modelSets = append(w.modelSets, NewModelSet())
+						w.modelSets = append(w.modelSets, widget.NewModelSet())
 					}
 
 					w.modelSets[i].NextModel = pairMap[i].NextModel
@@ -678,7 +678,7 @@ func (w *GlWindow) Run() {
 					if w.modelSets[index].Model != nil {
 						w.modelSets[index].Model.Delete()
 					}
-					w.modelSets[index] = NewModelSet()
+					w.modelSets[index] = widget.NewModelSet()
 				}
 				w.isSaveDelta = false
 			case isPlaying := <-w.IsPlayingChannel:
@@ -812,15 +812,15 @@ func (w *GlWindow) Run() {
 		}
 
 		// デフォーム
-		w.modelSets = deformsAll(
+		w.modelSets = widget.DeformsAll(
 			w.Physics, w.modelSets, int(w.frame), w.prevFrame,
 			timeStep, w.enablePhysics, w.doResetPhysicsProgress)
 
 		// 描画
 		for k := range w.modelSets {
-			if w.modelSets[k].Model != nil && w.modelSets[k].prevDeltas != nil {
-				w.modelSets[k].prevDeltas = draw(
-					w.Physics, w.modelSets[k].Model, w.Shader, w.modelSets[k].prevDeltas,
+			if w.modelSets[k].Model != nil && w.modelSets[k].PrevDeltas != nil {
+				w.modelSets[k].PrevDeltas = widget.Draw(
+					w.Physics, w.modelSets[k].Model, w.Shader, w.modelSets[k].PrevDeltas,
 					w.modelSets[k].InvisibleMaterialIndexes, w.modelSets[k].NextInvisibleMaterialIndexes,
 					w.WindowIndex, w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones)
 			}
@@ -864,7 +864,7 @@ func (w *GlWindow) Run() {
 
 			// キーフレの手動変更がなかった場合のみ前回デフォームとして保持
 			if !w.isSaveDelta {
-				w.modelSets[k].prevDeltas = nil
+				w.modelSets[k].PrevDeltas = nil
 			}
 			w.isSaveDelta = true
 		}
@@ -940,7 +940,7 @@ closeApp:
 func (w *GlWindow) IsRunning() bool {
 	return !w.isClosed && // walkウィンドウ側が閉じられたか
 		w.running && // GLウィンドウ側が閉じられたか
-		!CheckOpenGLError() && !w.ShouldClose() &&
+		!mgl.CheckOpenGLError() && !w.ShouldClose() &&
 		((w.mWindow != nil && !w.mWindow.IsDisposed()) || w.mWindow == nil)
 }
 

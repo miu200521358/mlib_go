@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
+	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 func GetOpenGLErrorString(errCode uint32) string {
@@ -37,4 +38,10 @@ func CheckGLError() error {
 		return fmt.Errorf("OpenGL error: %v - %s", errCode, GetOpenGLErrorString(errCode))
 	}
 	return nil
+}
+
+func CheckOpenGLError() bool {
+	err := gl.GetError()
+	glfwErrorMessage := glfw.ErrorCode(err).String()
+	return err != gl.NO_ERROR || glfwErrorMessage != "ErrorCode(0)"
 }

@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package mwidget
+package widget
 
 import (
 	"github.com/miu200521358/walk/pkg/walk"
@@ -13,7 +13,7 @@ type MTabWidget struct {
 	*walk.TabWidget
 }
 
-func NewMTabWidget(mWindow *MWindow) *MTabWidget {
+func NewMTabWidget(mWindow *walk.MainWindow) *MTabWidget {
 	tabWidget, err := walk.NewTabWidget(mWindow)
 	CheckError(err, mWindow, mi18n.T("タブウィジェット生成エラー"))
 
@@ -26,10 +26,10 @@ func NewMTabWidget(mWindow *MWindow) *MTabWidget {
 
 type MTabPage struct {
 	*walk.TabPage
-	mWindow *MWindow
+	mWindow *walk.MainWindow
 }
 
-func NewMTabPage(mWindow *MWindow, tabWidget *MTabWidget, title string) (*MTabPage, error) {
+func NewMTabPage(mWindow *walk.MainWindow, tabWidget *MTabWidget, title string) (*MTabPage, error) {
 	tabPage, err := walk.NewTabPage()
 	if err != nil {
 		return nil, err

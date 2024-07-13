@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package mwidget
+package widget
 
 import (
 	"fmt"
@@ -12,12 +12,12 @@ import (
 	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infra/reader"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
-	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 )
 
 const FilePickerClass = "FilePicker Class"
@@ -36,12 +36,12 @@ type FilePicker struct {
 	modelReader       core.IReader              // mcore
 	initialDirPath    string                    // 初期ディレクトリ
 	cacheData         core.IHashModel           // キャッシュデータ
-	window            *MWindow                  // MWindow
+	window            *walk.MainWindow          // MainWindow
 	historyDialog     *walk.Dialog              // 履歴ダイアログ
 }
 
 func NewPmxReadFilePicker(
-	window *MWindow,
+	window *walk.MainWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,
@@ -64,7 +64,7 @@ func NewPmxReadFilePicker(
 }
 
 func NewVpdReadFilePicker(
-	window *MWindow,
+	window *walk.MainWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,
@@ -87,7 +87,7 @@ func NewVpdReadFilePicker(
 }
 
 func NewVmdVpdReadFilePicker(
-	window *MWindow,
+	window *walk.MainWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,
@@ -112,7 +112,7 @@ func NewVmdVpdReadFilePicker(
 }
 
 func NewVmdReadFilePicker(
-	window *MWindow,
+	window *walk.MainWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,
@@ -136,7 +136,7 @@ func NewVmdReadFilePicker(
 }
 
 func NewVmdSaveFilePicker(
-	window *MWindow,
+	window *walk.MainWindow,
 	parent walk.Container,
 	title string,
 	tooltip string,
@@ -159,7 +159,7 @@ func NewVmdSaveFilePicker(
 }
 
 func NewPmxSaveFilePicker(
-	window *MWindow,
+	window *walk.MainWindow,
 	parent walk.Container,
 	title string,
 	tooltip string,
@@ -182,7 +182,7 @@ func NewPmxSaveFilePicker(
 }
 
 func NewFilePicker(
-	window *MWindow,
+	window *walk.MainWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,

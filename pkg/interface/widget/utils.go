@@ -1,31 +1,26 @@
 //go:build windows
 // +build windows
 
-package mwidget
+package widget
 
 import (
 	"bytes"
-	"embed"
 	"fmt"
 	"os"
 	"os/exec"
 	"runtime/debug"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
-	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 )
 
-//go:embed icon/*
-var iconFiles embed.FS
-
-func CheckError(err error, w *MWindow, message string) {
+func CheckError(err error, w *walk.MainWindow, message string) {
 	if err != nil {
 		if w != nil {
-			walk.MsgBox(w.MainWindow, message, err.Error(), walk.MsgBoxIconError)
+			walk.MsgBox(w, message, err.Error(), walk.MsgBoxIconError)
 			w.Close()
 		} else {
 			walk.MsgBox(nil, message, err.Error(), walk.MsgBoxIconError)
@@ -38,7 +33,7 @@ var MARGIN_SMALL = walk.Margins{HNear: 3, VNear: 3, HFar: 3, VFar: 3}
 var MARGIN_MEDIUM = walk.Margins{HNear: 6, VNear: 6, HFar: 6, VFar: 6}
 
 // エラー監視
-func RecoverFromPanic(mWindow *MWindow) {
+func RecoverFromPanic(mWindow *walk.MainWindow) {
 	if r := recover(); r != nil {
 		stackTrace := debug.Stack()
 
@@ -102,10 +97,4 @@ func RecoverFromPanic(mWindow *MWindow) {
 			mWindow.Close()
 		}
 	}
-}
-
-func CheckOpenGLError() bool {
-	err := gl.GetError()
-	glfwErrorMessage := glfw.ErrorCode(err).String()
-	return err != gl.NO_ERROR || glfwErrorMessage != "ErrorCode(0)"
 }

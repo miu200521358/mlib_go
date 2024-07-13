@@ -14,13 +14,14 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/mlib_go/pkg/interface/widget"
+	"github.com/miu200521358/mlib_go/pkg/interface/window"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
-	"github.com/miu200521358/mlib_go/pkg/mwidget"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
-	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 )
 
 var env string
@@ -29,10 +30,9 @@ func init() {
 	runtime.LockOSThread()
 
 	walk.AppendToWalkInit(func() {
-		walk.MustRegisterWindowClass(mwidget.FilePickerClass)
-		walk.MustRegisterWindowClass(mwidget.MotionPlayerClass)
-		walk.MustRegisterWindowClass(mwidget.ConsoleViewClass)
-		walk.MustRegisterWindowClass(mwidget.FixViewWidgetClass)
+		walk.MustRegisterWindowClass(widget.FilePickerClass)
+		walk.MustRegisterWindowClass(widget.MotionPlayerClass)
+		walk.MustRegisterWindowClass(widget.ConsoleViewClass)
 	})
 }
 
@@ -51,7 +51,7 @@ func main() {
 	// システム上のすべての論理プロセッサを使用させる
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	var mWindow *mwidget.MWindow
+	var mWindow *window.MWindow
 	var err error
 
 	appConfig := mconfig.LoadAppConfig(appFiles)
@@ -59,29 +59,29 @@ func main() {
 	mi18n.Initialize(appI18nFiles)
 
 	if appConfig.IsEnvProd() || appConfig.IsEnvDev() {
-		defer mwidget.RecoverFromPanic(mWindow)
+		defer widget.RecoverFromPanic(mWindow.MainWindow)
 	}
 
 	iconImg, err := mconfig.LoadIconFile(appFiles)
-	mwidget.CheckError(err, nil, mi18n.T("アイコン生成エラー"))
+	widget.CheckError(err, nil, mi18n.T("アイコン生成エラー"))
 
-	glWindow, err := mwidget.NewGlWindow(512, 768, 0, iconImg, appConfig, nil, nil)
+	glWindow, err := window.NewGlWindow(512, 768, 0, iconImg, appConfig, nil)
 
 	go func() {
-		mWindow, err = mwidget.NewMWindow(512, 768, getMenuItems, iconImg, appConfig, true)
-		mwidget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
+		mWindow, err = window.NewMWindow(512, 768, getMenuItems, iconImg, appConfig, true)
+		widget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
 
-		motionPlayer, _, funcWorldPos := NewFileTabPage(mWindow)
+		motionPlayer, funcWorldPos := NewFileTabPage(mWindow)
 
-		mwidget.CheckError(err, mWindow, mi18n.T("ビューワーウィンドウ生成エラー"))
+		widget.CheckError(err, mWindow.MainWindow, mi18n.T("ビューワーウィンドウ生成エラー"))
 		mWindow.AddGlWindow(glWindow)
 		glWindow.SetFuncWorldPos(funcWorldPos)
 		glWindow.SetMotionPlayer(motionPlayer)
 		glWindow.SetTitle(fmt.Sprintf("%s %s", mWindow.Title(), mi18n.T("ビューワー")))
 
 		// コンソールはタブ外に表示
-		mWindow.ConsoleView, err = mwidget.NewConsoleView(mWindow, 256, 30)
-		mwidget.CheckError(err, mWindow, mi18n.T("コンソール生成エラー"))
+		mWindow.ConsoleView, err = widget.NewConsoleView(mWindow, 256, 30)
+		widget.CheckError(err, mWindow.MainWindow, mi18n.T("コンソール生成エラー"))
 		log.SetOutput(mWindow.ConsoleView)
 
 		mWindow.AsFormBase().Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
@@ -108,50 +108,50 @@ func getMenuItems() []declarative.MenuItem {
 	}
 }
 
-func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.FixViewWidget, func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
+func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
 	nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*vmd.VmdDeltas)) {
-	page, _ := mwidget.NewMTabPage(mWindow, mWindow.TabWidget, mi18n.T("ファイル"))
+	page, _ := widget.NewMTabPage(mWindow.MainWindow, mWindow.TabWidget, mi18n.T("ファイル"))
 
 	page.SetLayout(walk.NewVBoxLayout())
 
-	pmxReadPicker, err := (mwidget.NewPmxReadFilePicker(
-		mWindow,
+	pmxReadPicker, err := (widget.NewPmxReadFilePicker(
+		mWindow.MainWindow,
 		page,
 		"PmxPath",
 		mi18n.T("Pmxファイル"),
 		mi18n.T("Pmxファイルを選択してください"),
 		mi18n.T("Pmxファイルの使い方"),
 		func(path string) {}))
-	mwidget.CheckError(err, mWindow, mi18n.T("Pmxファイルピッカー生成エラー"))
+	widget.CheckError(err, mWindow.MainWindow, mi18n.T("Pmxファイルピッカー生成エラー"))
 
-	vmdReadPicker, err := (mwidget.NewVmdVpdReadFilePicker(
-		mWindow,
+	vmdReadPicker, err := (widget.NewVmdVpdReadFilePicker(
+		mWindow.MainWindow,
 		page,
 		"VmdPath",
 		mi18n.T("Vmdファイル"),
 		mi18n.T("Vmdファイルを選択してください"),
 		mi18n.T("Vmdファイルの使い方"),
 		func(path string) {}))
-	mwidget.CheckError(err, mWindow, mi18n.T("Vmdファイルピッカー生成エラー"))
+	widget.CheckError(err, mWindow.MainWindow, mi18n.T("Vmdファイルピッカー生成エラー"))
 
-	pmxSavePicker, err := (mwidget.NewPmxSaveFilePicker(
-		mWindow,
+	pmxSavePicker, err := (widget.NewPmxSaveFilePicker(
+		mWindow.MainWindow,
 		page,
 		mi18n.T("出力Pmxファイル"),
 		mi18n.T("出力Pmxファイルパスを入力もしくは選択してください"),
 		mi18n.T("出力Pmxファイルの使い方"),
 		func(path string) {}))
-	mwidget.CheckError(err, mWindow, mi18n.T("出力Pmxファイルピッカー生成エラー"))
+	widget.CheckError(err, mWindow.MainWindow, mi18n.T("出力Pmxファイルピッカー生成エラー"))
 
 	_, err = walk.NewVSeparator(page)
-	mwidget.CheckError(err, mWindow, mi18n.T("セパレータ生成エラー"))
+	widget.CheckError(err, mWindow.MainWindow, mi18n.T("セパレータ生成エラー"))
 
-	motionPlayer, err := mwidget.NewMotionPlayer(page, mWindow)
-	mwidget.CheckError(err, mWindow, mi18n.T("モーションプレイヤー生成エラー"))
+	motionPlayer, err := widget.NewMotionPlayer(page, mWindow.MainWindow)
+	widget.CheckError(err, mWindow.MainWindow, mi18n.T("モーションプレイヤー生成エラー"))
 	motionPlayer.SetEnabled(false)
 
-	// fixViewWidget, err := mwidget.NewFixViewWidget(page, mWindow)
-	// mwidget.CheckError(err, mWindow, mi18n.T("固定ビューウィジェット生成エラー"))
+	// fixViewWidget, err := widget.NewFixViewWidget(page, mWindow)
+	// widget.CheckError(err, mWindow.MainWindow, mi18n.T("固定ビューウィジェット生成エラー"))
 	// fixViewWidget.SetEnabled(false)
 
 	var onFilePathChanged = func() {
@@ -195,7 +195,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 			go func() {
 				mWindow.GetMainGlWindow().FrameChannel <- 0
 				mWindow.GetMainGlWindow().IsPlayingChannel <- false
-				mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*mwidget.ModelSet{0: {NextModel: model, NextMotion: motion}}
+				mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextModel: model, NextMotion: motion}}
 			}()
 		} else {
 			go func() {
@@ -225,7 +225,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 				go func() {
 					mWindow.GetMainGlWindow().FrameChannel <- 0
 					mWindow.GetMainGlWindow().IsPlayingChannel <- false
-					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*mwidget.ModelSet{0: {NextMotion: motion}}
+					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextMotion: motion}}
 				}()
 			} else {
 				go func() {
@@ -282,7 +282,7 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 						vmdDeltas[0].Vertices.Get(vertex.Index).Position.String())
 				}
 				go func() {
-					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*mwidget.ModelSet{0: {NextSelectedVertexIndexes: nearestVertexIndexes[0]}}
+					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextSelectedVertexIndexes: nearestVertexIndexes[0]}}
 				}()
 			}
 
@@ -297,5 +297,5 @@ func NewFileTabPage(mWindow *mwidget.MWindow) (*mwidget.MotionPlayer, *mwidget.F
 		}
 	}
 
-	return motionPlayer, nil, funcWorldPos
+	return motionPlayer, funcWorldPos
 }

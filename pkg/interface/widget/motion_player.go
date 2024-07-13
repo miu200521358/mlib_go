@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package mwidget
+package widget
 
 import (
 	"github.com/miu200521358/walk/pkg/walk"
@@ -14,7 +14,7 @@ import (
 
 type MotionPlayer struct {
 	walk.WidgetBase
-	mWindow     *MWindow         // メインウィンドウ
+	mWindow     *walk.MainWindow // メインウィンドウ
 	FrameEdit   *walk.NumberEdit // フレーム番号入力欄
 	FrameSlider *walk.Slider     // フレームスライダー
 	PlayButton  *walk.PushButton // 一時停止ボタン
@@ -24,7 +24,7 @@ type MotionPlayer struct {
 
 const MotionPlayerClass = "MotionPlayer Class"
 
-func NewMotionPlayer(parent walk.Container, mWindow *MWindow) (*MotionPlayer, error) {
+func NewMotionPlayer(parent walk.Container, mWindow *walk.MainWindow) (*MotionPlayer, error) {
 	mp := new(MotionPlayer)
 	mp.mWindow = mWindow
 
@@ -84,22 +84,22 @@ func NewMotionPlayer(parent walk.Container, mWindow *MWindow) (*MotionPlayer, er
 		mp.Play(mp.playing)
 	})
 
-	mp.FrameEdit.ValueChanged().Attach(func() {
-		if !mp.playing {
-			go func() {
-				mWindow.GetMainGlWindow().SetFrame(int(mp.FrameEdit.Value()))
-				mp.FrameSlider.SetValue(int(mp.FrameEdit.Value()))
-			}()
-		}
-	})
-	mp.FrameSlider.ValueChanged().Attach(func() {
-		if !mp.playing {
-			go func() {
-				mWindow.GetMainGlWindow().SetFrame(int(mp.FrameSlider.Value()))
-				mp.FrameEdit.SetValue(float64(mp.FrameSlider.Value()))
-			}()
-		}
-	})
+	// mp.FrameEdit.ValueChanged().Attach(func() {
+	// 	if !mp.playing {
+	// 		go func() {
+	// 			mWindow.GetMainGlWindow().SetFrame(int(mp.FrameEdit.Value()))
+	// 			mp.FrameSlider.SetValue(int(mp.FrameEdit.Value()))
+	// 		}()
+	// 	}
+	// })
+	// mp.FrameSlider.ValueChanged().Attach(func() {
+	// 	if !mp.playing {
+	// 		go func() {
+	// 			mWindow.GetMainGlWindow().SetFrame(int(mp.FrameSlider.Value()))
+	// 			mp.FrameEdit.SetValue(float64(mp.FrameSlider.Value()))
+	// 		}()
+	// 	}
+	// })
 
 	// レイアウト
 	layout.SetStretchFactor(mp.FrameEdit, 3)

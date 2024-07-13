@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package mwidget
+package widget
 
 import (
 	"sync"
@@ -24,7 +24,7 @@ type ModelSet struct {
 	NextMotion                   *vmd.VmdMotion // UIから渡された次のモーション
 	NextInvisibleMaterialIndexes []int          // UIから渡された次の非表示材質インデックス
 	NextSelectedVertexIndexes    []int          // UIから渡された次の選択頂点インデックス
-	prevDeltas                   *vmd.VmdDeltas // 前回のデフォーム情報
+	PrevDeltas                   *vmd.VmdDeltas // 前回のデフォーム情報
 }
 
 func NewModelSet() *ModelSet {
@@ -36,7 +36,7 @@ func NewModelSet() *ModelSet {
 	}
 }
 
-func deformsAll(
+func DeformsAll(
 	modelPhysics *mbt.MPhysics,
 	modelSets []*ModelSet,
 	frame, prevFrame int,
@@ -59,11 +59,11 @@ func deformsAll(
 
 				if int(frame) != prevFrame {
 					// フレーム番号が変わっている場合は前回デフォームを破棄
-					modelSets[ii].prevDeltas = nil
+					modelSets[ii].PrevDeltas = nil
 				}
 
-				modelSets[ii].prevDeltas = deformBeforePhysics(
-					modelPhysics, modelSets[ii].Model, modelSets[ii].Motion, modelSets[ii].prevDeltas,
+				modelSets[ii].PrevDeltas = deformBeforePhysics(
+					modelPhysics, modelSets[ii].Model, modelSets[ii].Motion, modelSets[ii].PrevDeltas,
 					int(frame), timeStep, enablePhysics, resetPhysics,
 				)
 			}(i)
@@ -90,8 +90,8 @@ func deformsAll(
 			go func(ii int) {
 				defer wg.Done()
 
-				modelSets[ii].prevDeltas = deformAfterPhysics(
-					modelPhysics, modelSets[ii].Model, modelSets[ii].Motion, modelSets[ii].prevDeltas,
+				modelSets[ii].PrevDeltas = deformAfterPhysics(
+					modelPhysics, modelSets[ii].Model, modelSets[ii].Motion, modelSets[ii].PrevDeltas,
 					modelSets[ii].SelectedVertexIndexes, modelSets[ii].NextSelectedVertexIndexes, int(frame),
 					enablePhysics, resetPhysics,
 				)
@@ -224,7 +224,7 @@ func deformAfterPhysics(
 	return deltas
 }
 
-func draw(
+func Draw(
 	modelPhysics *mbt.MPhysics,
 	model *pmx.PmxModel,
 	shader *mgl.MShader,
