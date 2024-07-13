@@ -37,351 +37,351 @@ func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 		boneDeltas := DeformBone(motion.BoneFrames, fno, model, nil, true, nil, nil)
 		{
 			expectedPosition := &mmath.MVec3{6.210230, 8.439670, 0.496305}
-			if !boneDeltas.GetByName(pmx.CENTER.String()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.CENTER.String()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.CENTER.String()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.CENTER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.CENTER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.CENTER.String()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{6.210230, 8.849669, 0.496305}
-			if !boneDeltas.GetByName(pmx.GROOVE.String()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.GROOVE.String()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.GROOVE.String()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.GROOVE.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.GROOVE.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.GROOVE.String()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{6.210230, 12.836980, -0.159825}
-			if !boneDeltas.GetByName("上半身").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("上半身").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("上半身").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("上半身").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{6.261481, 13.968025, 0.288966}
-			if !boneDeltas.GetByName("上半身2").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身2").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("上半身2").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("上半身2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("上半身2").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{6.541666, 15.754716, 1.421828}
-			if !boneDeltas.GetByName("左肩").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左肩").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左肩").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左肩").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左肩").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左肩").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.451898, 16.031992, 1.675949}
-			if !boneDeltas.GetByName("左腕").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.135534, 15.373729, 1.715530}
-			if !boneDeltas.GetByName("左腕捩").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕捩").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.646749, 13.918620, 1.803021}
-			if !boneDeltas.GetByName("左ひじ").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじ").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじ").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左ひじ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじ").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.164164, 13.503792, 1.706635}
-			if !boneDeltas.GetByName("左手捩").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.772219, 12.307291, 1.428628}
-			if !boneDeltas.GetByName("左手首").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手首").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手首").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手首").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手首").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手首").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.390504, 12.011601, 1.405503}
-			if !boneDeltas.GetByName("左手先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.451900, 16.031990, 1.675949}
-			if !boneDeltas.GetByName("左腕YZ").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕YZ").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕YZ").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕YZ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕YZ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕YZ").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.690105, 15.802624, 1.689741}
-			if !boneDeltas.GetByName("左腕YZ先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕YZ先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕YZ先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕YZ先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕YZ先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕YZ先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.690105, 15.802622, 1.689740}
-			if !boneDeltas.GetByName("左腕YZIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕YZIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕YZIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕YZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕YZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕YZIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.451899, 16.031988, 1.675950}
-			if !boneDeltas.GetByName("左腕X").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕X").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕X").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕X").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕X").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕X").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.816861, 16.406412, 1.599419}
-			if !boneDeltas.GetByName("左腕X先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕X先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕X先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕X先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕X先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕X先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.816858, 16.406418, 1.599418}
-			if !boneDeltas.GetByName("左腕XIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕XIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕XIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕XIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕XIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕XIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.135530, 15.373726, 1.715530}
-			if !boneDeltas.GetByName("左腕捩YZ").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩YZ").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩YZ").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕捩YZ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩YZ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩YZ").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.409824, 15.109610, 1.731412}
-			if !boneDeltas.GetByName("左腕捩YZTgt").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩YZTgt").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩YZTgt").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕捩YZTgt").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩YZTgt").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩YZTgt").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.409830, 15.109617, 1.731411}
-			if !boneDeltas.GetByName("左腕捩YZIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩YZIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩YZIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕捩YZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩YZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩YZIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.135530, 15.373725, 1.715531}
-			if !boneDeltas.GetByName("左腕捩X").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩X").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩X").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕捩X").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩X").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩X").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.500528, 15.748149, 1.639511}
-			if !boneDeltas.GetByName("左腕捩XTgt").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩XTgt").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩XTgt").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕捩XTgt").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩XTgt").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩XTgt").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.500531, 15.748233, 1.639508}
-			if !boneDeltas.GetByName("左腕捩XIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩XIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩XIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕捩XIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩XIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩XIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.646743, 13.918595, 1.803029}
-			if !boneDeltas.GetByName("左ひじYZ").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじYZ").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじYZ").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左ひじYZ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじYZ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじYZ").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.360763, 13.672787, 1.745903}
-			if !boneDeltas.GetByName("左ひじYZ先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじYZ先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじYZ先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左ひじYZ先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじYZ先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじYZ先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.360781, 13.672805, 1.745905}
-			if !boneDeltas.GetByName("左ひじYZIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじYZIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじYZIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左ひじYZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじYZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじYZIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.646734, 13.918593, 1.803028}
-			if !boneDeltas.GetByName("左ひじX").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじX").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじX").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左ひじX").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじX").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじX").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.944283, 13.652989, 1.456379}
-			if !boneDeltas.GetByName("左ひじX先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじX先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじX先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左ひじX先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじX先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじX先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.944304, 13.653007, 1.456381}
-			if !boneDeltas.GetByName("左ひじXIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじXIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじXIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左ひじXIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじXIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじXIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.646734, 13.918596, 1.803028}
-			if !boneDeltas.GetByName("左ひじY").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじY").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじY").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左ひじY").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじY").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじY").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			// FIXME
 			expectedPosition := &mmath.MVec3{9.560862, 13.926876, 1.431514}
-			if !boneDeltas.GetByName("左ひじY先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじY先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじY先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左ひじY先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじY先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじY先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.360781, 13.672805, 1.745905}
-			if !boneDeltas.GetByName("左ひじYIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじYIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじYIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左ひじYIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじYIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじYIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.164141, 13.503780, 1.706625}
-			if !boneDeltas.GetByName("左手捩YZ").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩YZ").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩YZ").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩YZ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩YZ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩YZ").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.414344, 12.859288, 1.556843}
-			if !boneDeltas.GetByName("左手捩YZTgt").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩YZTgt").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩YZTgt").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩YZTgt").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩YZTgt").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩YZTgt").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.414370, 12.859282, 1.556885}
-			if !boneDeltas.GetByName("左手捩YZIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩YZIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩YZIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩YZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩YZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩YZIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.164142, 13.503780, 1.706624}
-			if !boneDeltas.GetByName("左手捩X").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩X").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩X").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩X").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩X").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩X").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.511073, 12.928087, 2.447041}
-			if !boneDeltas.GetByName("左手捩XTgt").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩XTgt").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩XTgt").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩XTgt").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩XTgt").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩XTgt").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.511120, 12.928122, 2.447057}
-			if !boneDeltas.GetByName("左手捩XIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩XIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩XIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩XIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩XIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩XIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.471097, 12.074032, 1.410383}
-			if !boneDeltas.GetByName("左手YZ先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手YZ先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手YZ先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手YZ先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手YZ先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手YZ先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.471111, 12.074042, 1.410384}
-			if !boneDeltas.GetByName("左手YZIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手YZIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手YZIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手YZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手YZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手YZIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.772183, 12.307314, 1.428564}
-			if !boneDeltas.GetByName("左手X").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手X").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手X").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手X").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手X").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手X").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.802912, 12.308764, 0.901022}
-			if !boneDeltas.GetByName("左手X先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手X先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手X先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手X先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手X先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手X先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.802991, 12.308830, 0.901079}
-			if !boneDeltas.GetByName("左手XIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手XIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手XIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手XIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手XIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手XIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.130125, 15.368912, 1.728851}
-			if !boneDeltas.GetByName("左腕捩1").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩1").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩1").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕捩1").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩1").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩1").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.365511, 15.142246, 1.742475}
-			if !boneDeltas.GetByName("左腕捩2").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩2").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩2").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕捩2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩2").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.639965, 14.877952, 1.758356}
-			if !boneDeltas.GetByName("左腕捩3").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩3").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩3").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕捩3").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩3").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩3").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.901615, 14.625986, 1.773497}
-			if !boneDeltas.GetByName("左腕捩4").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩4").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩4").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左腕捩4").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕捩4").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左腕捩4").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.641270, 13.913721, 1.816324}
-			if !boneDeltas.GetByName("左ひじsub").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじsub").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじsub").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左ひじsub").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじsub").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじsub").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.907782, 13.661371, 2.034630}
-			if !boneDeltas.GetByName("左ひじsub先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじsub先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじsub先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左ひじsub先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじsub先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左ひじsub先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{9.165060, 13.499348, 1.721094}
-			if !boneDeltas.GetByName("左手捩1").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩1").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩1").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩1").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩1").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩1").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.978877, 13.339340, 1.683909}
-			if !boneDeltas.GetByName("左手捩2").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩2").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩2").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩2").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.741154, 13.135028, 1.636428}
-			if !boneDeltas.GetByName("左手捩3").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩3").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩3").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩3").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩3").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩3").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.516553, 12.942023, 1.591578}
-			if !boneDeltas.GetByName("左手捩4").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩4").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩4").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩4").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩4").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩4").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.301016, 12.748707, 1.544439}
-			if !boneDeltas.GetByName("左手捩5").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩5").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩5").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩5").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩5").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩5").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{8.145000, 12.614601, 1.513277}
-			if !boneDeltas.GetByName("左手捩6").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩6").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩6").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手捩6").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手捩6").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手捩6").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.777408, 12.298634, 1.439762}
-			if !boneDeltas.GetByName("左手首R").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手首R").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手首R").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手首R").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手首R").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手首R").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.777408, 12.298635, 1.439762}
-			if !boneDeltas.GetByName("左手首1").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手首1").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手首1").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手首1").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手首1").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手首1").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{7.670320, 12.202144, 1.486689}
-			if !boneDeltas.GetByName("左手首2").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手首2").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手首2").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左手首2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手首2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左手首2").FilledGlobalPosition().MMD()))
 			}
 		}
 	}
@@ -414,363 +414,363 @@ func TestVmdMotion_DeformArmIk2(t *testing.T) {
 		boneDeltas := DeformBone(motion.BoneFrames, fno, model, nil, true, nil, nil)
 		{
 			expectedPosition := &mmath.MVec3{0.04952335, 9.0, 1.72378033}
-			if !boneDeltas.GetByName(pmx.CENTER.String()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.CENTER.String()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.CENTER.String()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.CENTER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.CENTER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.CENTER.String()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.04952335, 7.97980869, 1.72378033}
-			if !boneDeltas.GetByName(pmx.GROOVE.String()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.GROOVE.String()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.GROOVE.String()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.GROOVE.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.GROOVE.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.GROOVE.String()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.04952335, 11.02838314, 2.29172656}
-			if !boneDeltas.GetByName("腰").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("腰").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("腰").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("腰").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("腰").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("腰").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.04952335, 11.9671191, 1.06765032}
-			if !boneDeltas.GetByName("上半身").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("上半身").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("上半身").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("上半身").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.26284261, 13.14576297, 0.84720008}
-			if !boneDeltas.GetByName("上半身2").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身2").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("上半身2").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("上半身2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("上半身2").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.33636433, 15.27729547, 0.77435588}
-			if !boneDeltas.GetByName("右肩").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右肩").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.63104276, 15.44542768, 0.8507726}
-			if !boneDeltas.GetByName("右肩C").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩C").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩C").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右肩C").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩C").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩C").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.63104276, 15.44542768, 0.8507726}
-			if !boneDeltas.GetByName("右腕").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.90326269, 14.53727204, 0.7925801}
-			if !boneDeltas.GetByName("右腕捩").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕捩").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.50502977, 12.52976106, 0.66393998}
-			if !boneDeltas.GetByName("右ひじ").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじ").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじ").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右ひじ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじ").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.46843236, 12.88476121, 0.12831076}
-			if !boneDeltas.GetByName("右手捩").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.36287259, 13.90869981, -1.41662258}
-			if !boneDeltas.GetByName("右手首").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手首").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.81521586, 14.00661535, -1.55616424}
-			if !boneDeltas.GetByName("右手先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.63104276, 15.44542768, 0.8507726}
-			if !boneDeltas.GetByName("右腕YZ").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕YZ").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕YZ").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕YZ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕YZ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕YZ").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.72589296, 15.12898892, 0.83049645}
-			if !boneDeltas.GetByName("右腕YZ先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕YZ先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕YZ先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕YZ先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕YZ先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕YZ先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.72589374, 15.12898632, 0.83049628}
-			if !boneDeltas.GetByName("右腕YZIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕YZIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕YZIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕YZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕YZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕YZIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.63104276, 15.44542768, 0.8507726}
-			if !boneDeltas.GetByName("右腕X").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕X").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕X").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕X").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕X").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕X").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.125321, 15.600293, 0.746130}
-			if !boneDeltas.GetByName("右腕X先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕X先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕X先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕X先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕X先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕X先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.1253241, 15.60029489, 0.7461294}
-			if !boneDeltas.GetByName("右腕XIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕XIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕XIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕XIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕XIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕XIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.90325538, 14.53727326, 0.79258165}
-			if !boneDeltas.GetByName("右腕捩YZ").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩YZ").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩YZ").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕捩YZ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩YZ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩YZ").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.01247534, 14.17289417, 0.76923367}
-			if !boneDeltas.GetByName("右腕捩YZTgt").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩YZTgt").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩YZTgt").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕捩YZTgt").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩YZTgt").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩YZTgt").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.01248754, 14.17289597, 0.76923112}
-			if !boneDeltas.GetByName("右腕捩YZIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩YZIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩YZIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕捩YZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩YZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩YZIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.90325538, 14.53727326, 0.79258165}
-			if !boneDeltas.GetByName("右腕捩X").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩X").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩X").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕捩X").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩X").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩X").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.40656426, 14.68386802, 0.85919594}
-			if !boneDeltas.GetByName("右腕捩XTgt").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩XTgt").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩XTgt").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕捩XTgt").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩XTgt").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩XTgt").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.40657579, 14.68387899, 0.8591982}
-			if !boneDeltas.GetByName("右腕捩XIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩XIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩XIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕捩XIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩XIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩XIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.50499623, 12.52974836, 0.66394738}
-			if !boneDeltas.GetByName("右ひじYZ").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじYZ").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじYZ").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右ひじYZ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじYZ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじYZ").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.48334366, 12.74011791, 0.34655051}
-			if !boneDeltas.GetByName("右ひじYZ先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじYZ先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじYZ先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右ひじYZ先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじYZ先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじYZ先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.48334297, 12.74012453, 0.34654052}
-			if !boneDeltas.GetByName("右ひじYZIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじYZIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじYZIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右ひじYZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじYZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじYZIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.50499623, 12.52974836, 0.66394738}
-			if !boneDeltas.GetByName("右ひじX").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじX").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじX").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右ひじX").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじX").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじX").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-2.01179616, 12.66809052, 0.72106658}
-			if !boneDeltas.GetByName("右ひじX先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじX先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじX先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右ひじX先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじX先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじX先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-2.00760407, 12.67958516, 0.7289003}
-			if !boneDeltas.GetByName("右ひじXIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじXIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじXIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右ひじXIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじXIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじXIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.50499623, 12.52974836, 0.66394738}
-			if !boneDeltas.GetByName("右ひじY").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじY").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじY").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右ひじY").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじY").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじY").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 
 			expectedPosition := &mmath.MVec3{-1.485519, 12.740760, 0.346835}
-			if !boneDeltas.GetByName("右ひじY先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじY先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじY先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右ひじY先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじY先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじY先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.48334297, 12.74012453, 0.34654052}
-			if !boneDeltas.GetByName("右ひじYIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじYIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじYIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右ひじYIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじYIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじYIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.46845628, 12.88475892, 0.12832214}
-			if !boneDeltas.GetByName("右手捩YZ").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩YZ").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩YZ").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩YZ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩YZ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩YZ").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.41168478, 13.4363328, -0.7038697}
-			if !boneDeltas.GetByName("右手捩YZTgt").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩YZTgt").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩YZTgt").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩YZTgt").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩YZTgt").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩YZTgt").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.41156715, 13.43632015, -0.70389025}
-			if !boneDeltas.GetByName("右手捩YZIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩YZIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩YZIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩YZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩YZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩YZIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.46845628, 12.88475892, 0.12832214}
-			if !boneDeltas.GetByName("右手捩X").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩X").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩X").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩X").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩X").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩X").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.5965686, 12.06213832, -0.42564769}
-			if !boneDeltas.GetByName("右手捩XTgt").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩XTgt").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩XTgt").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩XTgt").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩XTgt").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩XTgt").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.5965684, 12.06214091, -0.42565404}
-			if !boneDeltas.GetByName("右手捩XIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩XIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩XIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩XIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩XIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩XIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.7198605, 13.98597326, -1.5267472}
-			if !boneDeltas.GetByName("右手YZ先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手YZ先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手YZ先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手YZ先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手YZ先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手YZ先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.71969424, 13.98593727, -1.52669587}
-			if !boneDeltas.GetByName("右手YZIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手YZIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手YZIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手YZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手YZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手YZIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.36306295, 13.90872698, -1.41659848}
-			if !boneDeltas.GetByName("右手X").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手X").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手X").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手X").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手X").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手X").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.54727182, 13.56147176, -1.06342964}
-			if !boneDeltas.GetByName("右手X先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手X先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手X先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手X先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手X先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手X先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.54700171, 13.5614545, -1.0633896}
-			if !boneDeltas.GetByName("右手XIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手XIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手XIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手XIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手XIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手XIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.90581859, 14.5370842, 0.80752276}
-			if !boneDeltas.GetByName("右腕捩1").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩1").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩1").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕捩1").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩1").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩1").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.99954005, 14.2243783, 0.78748743}
-			if !boneDeltas.GetByName("右腕捩2").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩2").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩2").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕捩2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩2").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.10880907, 13.85976329, 0.76412793}
-			if !boneDeltas.GetByName("右腕捩3").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩3").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩3").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕捩3").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩3").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩3").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.21298069, 13.51216081, 0.74185819}
-			if !boneDeltas.GetByName("右腕捩4").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩4").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩4").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右腕捩4").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩4").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩4").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.5074743, 12.52953348, 0.67889319}
-			if !boneDeltas.GetByName("右ひじsub").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじsub").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじsub").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右ひじsub").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじsub").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじsub").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.617075, 12.131149, 0.786797}
-			if !boneDeltas.GetByName("右ひじsub先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじsub先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじsub先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右ひじsub先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじsub先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじsub先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.472866, 12.872813, 0.120103}
-			if !boneDeltas.GetByName("右手捩1").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩1").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩1").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩1").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩1").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩1").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.458749, 13.009759, -0.086526}
-			if !boneDeltas.GetByName("右手捩2").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩2").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩2").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩2").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.440727, 13.184620, -0.350361}
-			if !boneDeltas.GetByName("右手捩3").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩3").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩3").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩3").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩3").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩3").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.42368773, 13.34980879, -0.59962077}
-			if !boneDeltas.GetByName("右手捩4").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩4").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩4").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩4").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩4").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩4").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.40457204, 13.511055, -0.84384039}
-			if !boneDeltas.GetByName("右手捩5").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩5").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩5").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩5").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩5").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩5").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.39275926, 13.62582429, -1.01699954}
-			if !boneDeltas.GetByName("右手捩6").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩6").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩6").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手捩6").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩6").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩6").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.36500465, 13.89623575, -1.42501008}
-			if !boneDeltas.GetByName("右手首R").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首R").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首R").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手首R").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首R").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首R").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.36500465, 13.89623575, -1.42501008}
-			if !boneDeltas.GetByName("右手首1").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首1").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首1").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手首1").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首1").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首1").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.472418, 13.917203, -1.529887}
-			if !boneDeltas.GetByName("右手首2").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首2").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首2").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右手首2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首2").FilledGlobalPosition().MMD()))
 			}
 		}
 	}
@@ -803,111 +803,111 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Left(t *testing.T) {
 		boneDeltas := DeformBone(motion.BoneFrames, fno, model, nil, true, nil, nil)
 		{
 			expectedPosition := &mmath.MVec3{-0.225006, 9.705784, 2.033072}
-			if !boneDeltas.GetByName(pmx.UPPER.String()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.UPPER.String()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.UPPER.String()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.UPPER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.UPPER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.UPPER.String()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.237383, 10.769137, 2.039952}
-			if !boneDeltas.GetByName(pmx.UPPER2.String()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.UPPER2.String()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.UPPER2.String()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.UPPER2.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.UPPER2.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.UPPER2.String()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.460140, 13.290816, 2.531440}
-			if !boneDeltas.GetByName(pmx.SHOULDER_P.Left()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.SHOULDER_P.Left()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.SHOULDER_P.Left()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.SHOULDER_P.Left()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.SHOULDER_P.Left()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.SHOULDER_P.Left()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.460140, 13.290816, 2.531440}
-			if !boneDeltas.GetByName(pmx.SHOULDER.Left()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.SHOULDER.Left()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.SHOULDER.Left()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.SHOULDER.Left()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.SHOULDER.Left()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.SHOULDER.Left()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.784452, 13.728909, 2.608527}
-			if !boneDeltas.GetByName(pmx.ARM.Left()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ARM.Left()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ARM.Left()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.ARM.Left()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ARM.Left()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ARM.Left()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.272067, 12.381887, 2.182425}
-			if !boneDeltas.GetByName("左上半身C-A").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左上半身C-A").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左上半身C-A").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左上半身C-A").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左上半身C-A").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左上半身C-A").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.406217, 13.797803, 2.460243}
-			if !boneDeltas.GetByName("左鎖骨IK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左鎖骨IK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左鎖骨IK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左鎖骨IK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左鎖骨IK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左鎖骨IK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.052427, 13.347448, 2.216718}
-			if !boneDeltas.GetByName("左鎖骨").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左鎖骨").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左鎖骨").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左鎖骨").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左鎖骨").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左鎖骨").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.659554, 14.017852, 2.591099}
-			if !boneDeltas.GetByName("左鎖骨先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左鎖骨先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左鎖骨先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左鎖骨先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左鎖骨先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左鎖骨先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.065147, 13.296564, 2.607907}
-			if !boneDeltas.GetByName("左肩Rz検").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左肩Rz検").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左肩Rz検").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左肩Rz検").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左肩Rz検").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左肩Rz検").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.517776, 14.134196, 2.645912}
-			if !boneDeltas.GetByName("左肩Rz検先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左肩Rz検先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左肩Rz検先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左肩Rz検先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左肩Rz検先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左肩Rz検先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.065148, 13.296564, 2.607907}
-			if !boneDeltas.GetByName("左肩Ry検").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左肩Ry検").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左肩Ry検").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左肩Ry検").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左肩Ry検").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左肩Ry検").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			// FIXME
 			expectedPosition := &mmath.MVec3{0.860159, 13.190875, 3.122428}
-			if !boneDeltas.GetByName("左肩Ry検先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左肩Ry検先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左肩Ry検先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左肩Ry検先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左肩Ry検先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左肩Ry検先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.195053, 12.648546, 2.236849}
-			if !boneDeltas.GetByName("左上半身C-B").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左上半身C-B").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左上半身C-B").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左上半身C-B").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左上半身C-B").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左上半身C-B").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.294257, 12.912640, 2.257159}
-			if !boneDeltas.GetByName("左上半身C-C").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左上半身C-C").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左上半身C-C").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左上半身C-C").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左上半身C-C").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左上半身C-C").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.210011, 10.897711, 1.973442}
-			if !boneDeltas.GetByName("左上半身2").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左上半身2").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左上半身2").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左上半身2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左上半身2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左上半身2").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.320589, 14.049745, 2.637018}
-			if !boneDeltas.GetByName("左襟").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左襟").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左襟").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左襟").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左襟").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左襟").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.297636, 14.263302, 2.374467}
-			if !boneDeltas.GetByName("左襟先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左襟先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左襟先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左襟先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左襟先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左襟先").FilledGlobalPosition().MMD()))
 			}
 		}
 	}
@@ -940,110 +940,110 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Right(t *testing.T) {
 		boneDeltas := DeformBone(motion.BoneFrames, fno, model, []string{"右襟先"}, true, nil, nil)
 		{
 			expectedPosition := &mmath.MVec3{-0.225006, 9.705784, 2.033072}
-			if !boneDeltas.GetByName(pmx.UPPER.String()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.UPPER.String()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.UPPER.String()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.UPPER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.UPPER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.UPPER.String()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.237383, 10.769137, 2.039952}
-			if !boneDeltas.GetByName(pmx.UPPER2.String()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.UPPER2.String()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.UPPER2.String()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.UPPER2.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.UPPER2.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.UPPER2.String()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.630130, 13.306682, 2.752505}
-			if !boneDeltas.GetByName(pmx.SHOULDER_P.Right()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.SHOULDER_P.Right()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.SHOULDER_P.Right()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.SHOULDER_P.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.SHOULDER_P.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.SHOULDER_P.Right()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.630131, 13.306683, 2.742505}
-			if !boneDeltas.GetByName(pmx.SHOULDER.Right()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.SHOULDER.Right()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.SHOULDER.Right()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.SHOULDER.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.SHOULDER.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.SHOULDER.Right()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.948004, 13.753115, 2.690539}
-			if !boneDeltas.GetByName(pmx.ARM.Right()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ARM.Right()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ARM.Right()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.ARM.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ARM.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ARM.Right()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.611438, 12.394744, 2.353463}
-			if !boneDeltas.GetByName("右上半身C-A").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右上半身C-A").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右上半身C-A").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右上半身C-A").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右上半身C-A").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右上半身C-A").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.664344, 13.835273, 2.403165}
-			if !boneDeltas.GetByName("右鎖骨IK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右鎖骨IK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右鎖骨IK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右鎖骨IK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右鎖骨IK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右鎖骨IK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.270636, 13.350624, 2.258960}
-			if !boneDeltas.GetByName("右鎖骨").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右鎖骨").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右鎖骨").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右鎖骨").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右鎖骨").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右鎖骨").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.963317, 14.098928, 2.497183}
-			if !boneDeltas.GetByName("右鎖骨先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右鎖骨先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右鎖骨先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右鎖骨先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右鎖骨先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右鎖骨先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.235138, 13.300934, 2.666039}
-			if !boneDeltas.GetByName("右肩Rz検").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩Rz検").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩Rz検").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右肩Rz検").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩Rz検").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩Rz検").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.847069, 13.997178, 2.886786}
-			if !boneDeltas.GetByName("右肩Rz検先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩Rz検先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩Rz検先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右肩Rz検先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩Rz検先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩Rz検先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.235138, 13.300934, 2.666039}
-			if !boneDeltas.GetByName("右肩Ry検").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩Ry検").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩Ry検").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右肩Ry検").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩Ry検").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩Ry検").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.172100, 13.315790, 2.838742}
-			if !boneDeltas.GetByName("右肩Ry検先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩Ry検先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩Ry検先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右肩Ry検先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩Ry検先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩Ry検先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.591152, 12.674325, 2.391185}
-			if !boneDeltas.GetByName("右上半身C-B").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右上半身C-B").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右上半身C-B").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右上半身C-B").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右上半身C-B").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右上半身C-B").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.588046, 12.954157, 2.432232}
-			if !boneDeltas.GetByName("右上半身C-C").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右上半身C-C").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右上半身C-C").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右上半身C-C").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右上半身C-C").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右上半身C-C").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.672292, 10.939227, 2.148515}
-			if !boneDeltas.GetByName("右上半身2").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右上半身2").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右上半身2").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右上半身2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右上半身2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右上半身2").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.520068, 14.089510, 2.812157}
-			if !boneDeltas.GetByName("右襟").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右襟").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右襟").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右襟").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右襟").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右襟").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.491354, 14.225309, 2.502640}
-			if !boneDeltas.GetByName("右襟先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右襟先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右襟先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("右襟先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右襟先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右襟先").FilledGlobalPosition().MMD()))
 			}
 		}
 	}
@@ -1076,38 +1076,38 @@ func TestVmdMotion_DeformIk28_Simple(t *testing.T) {
 		boneDeltas := DeformBone(motion.BoneFrames, fno, model, nil, true, nil, nil)
 		{
 			expectedPosition := &mmath.MVec3{-9.433129, 1.363848, 1.867427}
-			if !boneDeltas.GetByName("A+tail").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("A+tail").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("A+tail").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("A+tail").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("A+tail").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("A+tail").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-9.433129, 1.363847, 1.867427}
-			if !boneDeltas.GetByName("A+IK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("A+IK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("A+IK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("A+IK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("A+IK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("A+IK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{5.0, 4.517528, 2.142881}
-			if !boneDeltas.GetByName("B+tail").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("B+tail").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("B+tail").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("B+tail").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("B+tail").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("B+tail").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.566871, 1.363847, 1.867427}
-			if !boneDeltas.GetByName("B+IK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("B+IK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("B+IK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("B+IK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("B+IK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("B+IK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{10.0, 3.020634, 3.984441}
-			if !boneDeltas.GetByName("C+tail").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("C+tail").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("C+tail").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("C+tail").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("C+tail").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("C+tail").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{5.566871, 1.363848, 1.867427}
-			if !boneDeltas.GetByName("C+IK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("C+IK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("C+IK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("C+IK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("C+IK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("C+IK").FilledGlobalPosition().MMD()))
 			}
 		}
 	}
@@ -1141,43 +1141,43 @@ func TestVmdMotion_DeformIk29_Simple(t *testing.T) {
 		{
 			boneName := "A+2"
 			expectedPosition := &mmath.MVec3{-5.440584, 2.324726, 0.816799}
-			if !boneDeltas.GetByName(boneName).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			boneName := "A+2tail"
 			expectedPosition := &mmath.MVec3{-4.671312, 3.980981, -0.895119}
-			if !boneDeltas.GetByName(boneName).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			boneName := "B+2"
 			expectedPosition := &mmath.MVec3{4.559244, 2.324562, 0.817174}
-			if !boneDeltas.GetByName(boneName).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			boneName := "B+2tail"
 			expectedPosition := &mmath.MVec3{5.328533, 3.980770, -0.894783}
-			if !boneDeltas.GetByName(boneName).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			boneName := "C+2"
 			expectedPosition := &mmath.MVec3{8.753987, 2.042284, -0.736314}
-			if !boneDeltas.GetByName(boneName).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			boneName := "C+2tail"
 			expectedPosition := &mmath.MVec3{10.328943, 3.981413, -0.894101}
-			if !boneDeltas.GetByName(boneName).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
 			}
 		}
 	}
@@ -1209,225 +1209,225 @@ func TestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
 		boneDeltas := DeformBone(motion.BoneFrames, fno, model, nil, true, nil, nil)
 		{
 			expectedPosition := &mmath.MVec3{0, 0, 0}
-			if !boneDeltas.GetByName(pmx.ROOT.String()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ROOT.String()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ROOT.String()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.ROOT.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ROOT.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ROOT.String()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.748025, 1.683590, 0.556993}
-			if !boneDeltas.GetByName(pmx.LEG_IK.Left()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG_IK.Right()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG_IK.Right()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.LEG_IK.Left()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG_IK.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG_IK.Right()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.111190, 4.955496, 1.070225}
-			if !boneDeltas.GetByName(pmx.LOWER.String()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LOWER.String()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LOWER.String()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.724965, 3.674735, 0.810759}
-			if !boneDeltas.GetByName(pmx.LEG.Left()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG.Right()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG.Right()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.LEG.Left()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.924419, 3.943549, -1.420897}
-			if !boneDeltas.GetByName(pmx.KNEE.Left()).GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.KNEE.Right()).GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.KNEE.Right()).GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName(pmx.KNEE.Left()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.743128, 1.672784, 0.551317}
-			if !boneDeltas.GetByName("左脛骨").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左脛骨").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左脛骨").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左脛骨").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左脛骨").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左脛骨").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.743128, 1.672784, 0.551317}
-			if !boneDeltas.GetByName("左脛骨D").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左脛骨D").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左脛骨D").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左脛骨D").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左脛骨D").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左脛骨D").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.118480, 3.432016, -1.657329}
-			if !boneDeltas.GetByName("左脛骨D先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左脛骨D先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左脛骨D先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左脛骨D先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左脛骨D先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左脛骨D先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			// FIXME
 			expectedPosition := &mmath.MVec3{1.763123, 3.708842, 0.369619}
-			if !boneDeltas.GetByName("左足Dw").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足Dw").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足Dw").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足Dw").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足Dw").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足Dw").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.698137, 0.674393, 0.043128}
-			if !boneDeltas.GetByName("左足先EX").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足先EX").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足先EX").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足先EX").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足先EX").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足先EX").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.712729, 0.919505, 0.174835}
-			if !boneDeltas.GetByName("左素足先A").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左素足先A").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左素足先A").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左素足先A").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左素足先A").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左素足先A").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.494684, 0.328695, -0.500715}
-			if !boneDeltas.GetByName("左素足先A先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左素足先A先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左素足先A先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左素足先A先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左素足先A先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左素足先A先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.494684, 0.328695, -0.500715}
-			if !boneDeltas.GetByName("左素足先AIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左素足先AIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左素足先AIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左素足先AIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左素足先AIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左素足先AIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.224127, 1.738605, 0.240794}
-			if !boneDeltas.GetByName("左素足先B").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左素足先B").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左素足先B").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左素足先B").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左素足先B").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左素足先B").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.582481, 0.627567, -0.222556}
-			if !boneDeltas.GetByName("左素足先B先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左素足先B先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左素足先B先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左素足先B先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左素足先B先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左素足先B先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.572457, 0.658645, -0.209595}
-			if !boneDeltas.GetByName("左素足先BIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左素足先BIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左素足先BIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左素足先BIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左素足先BIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左素足先BIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.448783, 1.760351, 0.405702}
-			if !boneDeltas.GetByName("左靴調節").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左靴調節").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左靴調節").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左靴調節").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左靴調節").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左靴調節").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.875421, 0.917357, 0.652144}
-			if !boneDeltas.GetByName("左靴追従").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左靴追従").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左靴追従").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左靴追従").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左靴追従").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左靴追従").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.404960, 1.846940, 0.380388}
-			if !boneDeltas.GetByName("左靴追従先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左靴追従先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左靴追従先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左靴追従先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左靴追従先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左靴追従先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.448783, 1.760351, 0.405702}
-			if !boneDeltas.GetByName("左靴追従IK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左靴追従IK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左靴追従IK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左靴追従IK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左靴追従IK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左靴追従IK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.330700, 3.021906, 0.153679}
-			if !boneDeltas.GetByName("左足補D").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足補D").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足補D").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足補D").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足補D").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足補D").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.625984, 3.444340, -1.272553}
-			if !boneDeltas.GetByName("左足補D先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足補D先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足補D先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足補D先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足補D先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足補D先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.625984, 3.444340, -1.272553}
-			if !boneDeltas.GetByName("左足補DIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足補DIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足補DIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足補DIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足補DIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足補DIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.724964, 3.674735, 0.810759}
-			if !boneDeltas.GetByName("左足向検A").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足向検A").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足向検A").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足向検A").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足向検A").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足向検A").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.924420, 3.943550, -1.420897}
-			if !boneDeltas.GetByName("左足向検A先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足向検A先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足向検A先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足向検A先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足向検A先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足向検A先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.924419, 3.943550, -1.420896}
-			if !boneDeltas.GetByName("左足向検AIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足向検AIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足向検AIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足向検AIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足向検AIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足向検AIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.724965, 3.674735, 0.810760}
-			if !boneDeltas.GetByName("左足向-").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足向-").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足向-").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足向-").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足向-").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足向-").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{1.566813, 3.645544, 0.177956}
-			if !boneDeltas.GetByName("左足w").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足w").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足w").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足w").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足w").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足w").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-1.879506, 3.670895, -2.715526}
-			if !boneDeltas.GetByName("左足w先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足w先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足w先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足w先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足w先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足w先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.631964, 3.647012, -1.211210}
-			if !boneDeltas.GetByName("左膝補").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左膝補").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左膝補").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左膝補").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左膝補").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左膝補").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.83923, 2.876222, -1.494900}
-			if !boneDeltas.GetByName("左膝補先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左膝補先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左膝補先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左膝補先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左膝補先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左膝補先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.686400, 3.444961, -1.285575}
-			if !boneDeltas.GetByName("左膝補IK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左膝補IK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左膝補IK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左膝補IK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左膝補IK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左膝補IK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.924420, 3.943550, -1.420896}
-			if !boneDeltas.GetByName("左足捩検B").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足捩検B").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足捩検B").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足捩検B").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足捩検B").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足捩検B").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.952927, 7.388766, -0.972059}
-			if !boneDeltas.GetByName("左足捩検B先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足捩検B先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足捩検B先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足捩検B先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足捩検B先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足捩検B先").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{-0.952927, 7.388766, -0.972060}
-			if !boneDeltas.GetByName("左足捩検BIK").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足捩検BIK").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足捩検BIK").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足捩検BIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足捩検BIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足捩検BIK").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.400272, 3.809143, -0.305068}
-			if !boneDeltas.GetByName("左足捩").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足捩").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足捩").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足捩").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足捩").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足捩").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
 			expectedPosition := &mmath.MVec3{0.371963, 4.256704, -0.267830}
-			if !boneDeltas.GetByName("左足捩先").GetGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足捩先").GetGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足捩先").GetGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("左足捩先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足捩先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足捩先").FilledGlobalPosition().MMD()))
 			}
 		}
 	}

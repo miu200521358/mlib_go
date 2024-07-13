@@ -36,17 +36,17 @@ func DeformMorph(
 		morph := model.Morphs.GetByName(morphName)
 		switch morph.MorphType {
 		case pmx.MORPH_TYPE_VERTEX:
-			mds.Vertices = deformVertex(mf, morphName, model, mds.Vertices, mf.Ratio)
+			mds.Vertices = deformVertex(morphName, model, mds.Vertices, mf.Ratio)
 		case pmx.MORPH_TYPE_AFTER_VERTEX:
-			mds.Vertices = deformAfterVertex(mf, morphName, model, mds.Vertices, mf.Ratio)
+			mds.Vertices = deformAfterVertex(morphName, model, mds.Vertices, mf.Ratio)
 		case pmx.MORPH_TYPE_UV:
-			mds.Vertices = deformUv(mf, morphName, model, mds.Vertices, mf.Ratio)
+			mds.Vertices = deformUv(morphName, model, mds.Vertices, mf.Ratio)
 		case pmx.MORPH_TYPE_EXTENDED_UV1:
-			mds.Vertices = deformUv1(mf, morphName, model, mds.Vertices, mf.Ratio)
+			mds.Vertices = deformUv1(morphName, model, mds.Vertices, mf.Ratio)
 		case pmx.MORPH_TYPE_BONE:
-			mds.Bones = deformBone(mf, morphName, model, mds.Bones, mf.Ratio)
+			mds.Bones = deformBone(morphName, model, mds.Bones, mf.Ratio)
 		case pmx.MORPH_TYPE_MATERIAL:
-			mds.Materials = deformMaterial(mf, morphName, model, mds.Materials, mf.Ratio)
+			mds.Materials = deformMaterial(morphName, model, mds.Materials, mf.Ratio)
 		case pmx.MORPH_TYPE_GROUP:
 			// グループモーフは細分化
 			for _, offset := range morph.Offsets {
@@ -55,26 +55,25 @@ func DeformMorph(
 				if groupMorph == nil {
 					continue
 				}
-				gmf := mfs.Get(groupMorph.Name).Get(frame)
 				switch groupMorph.MorphType {
 				case pmx.MORPH_TYPE_VERTEX:
 					mds.Vertices = deformVertex(
-						gmf, groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
+						groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
 				case pmx.MORPH_TYPE_AFTER_VERTEX:
 					mds.Vertices = deformAfterVertex(
-						gmf, groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
+						groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
 				case pmx.MORPH_TYPE_UV:
 					mds.Vertices = deformUv(
-						gmf, groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
+						groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
 				case pmx.MORPH_TYPE_EXTENDED_UV1:
 					mds.Vertices = deformUv1(
-						gmf, groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
+						groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
 				case pmx.MORPH_TYPE_BONE:
 					mds.Bones = deformBone(
-						gmf, groupMorph.Name, model, mds.Bones, mf.Ratio*groupOffset.MorphFactor)
+						groupMorph.Name, model, mds.Bones, mf.Ratio*groupOffset.MorphFactor)
 				case pmx.MORPH_TYPE_MATERIAL:
 					mds.Materials = deformMaterial(
-						gmf, groupMorph.Name, model, mds.Materials, mf.Ratio*groupOffset.MorphFactor)
+						groupMorph.Name, model, mds.Materials, mf.Ratio*groupOffset.MorphFactor)
 				}
 			}
 		}
@@ -84,7 +83,6 @@ func DeformMorph(
 }
 
 func deformVertex(
-	mf *vmd.MorphFrame,
 	morphName string,
 	model *pmx.PmxModel,
 	deltas *delta.VertexMorphDeltas,
@@ -113,7 +111,6 @@ func deformVertex(
 }
 
 func deformAfterVertex(
-	mf *vmd.MorphFrame,
 	morphName string,
 	model *pmx.PmxModel,
 	deltas *delta.VertexMorphDeltas,
@@ -139,7 +136,6 @@ func deformAfterVertex(
 }
 
 func deformUv(
-	mf *vmd.MorphFrame,
 	morphName string,
 	model *pmx.PmxModel,
 	deltas *delta.VertexMorphDeltas,
@@ -166,7 +162,6 @@ func deformUv(
 }
 
 func deformUv1(
-	mf *vmd.MorphFrame,
 	morphName string,
 	model *pmx.PmxModel,
 	deltas *delta.VertexMorphDeltas,
@@ -193,7 +188,6 @@ func deformUv1(
 }
 
 func deformBone(
-	mf *vmd.MorphFrame,
 	morphName string,
 	model *pmx.PmxModel,
 	deltas *delta.BoneMorphDeltas,
@@ -239,7 +233,6 @@ func deformBone(
 
 // DeformMaterial 材質モーフの適用
 func deformMaterial(
-	mf *vmd.MorphFrame,
 	morphName string,
 	model *pmx.PmxModel,
 	deltas *delta.MaterialMorphDeltas,

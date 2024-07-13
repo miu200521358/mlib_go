@@ -293,8 +293,8 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := vmd.NewBoneFrame(count)
-				bf.Position = ikDeltas.Get(ikBone.Index).GetFramePosition()
-				bf.Rotation = ikDeltas.Get(ikBone.Index).GetLocalRotation()
+				bf.Position = ikDeltas.Get(ikBone.Index).FilledFramePosition()
+				bf.Rotation = ikDeltas.Get(ikBone.Index).FilledLocalRotation()
 				ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
 				count++
 
@@ -310,7 +310,7 @@ ikLoop:
 			if linkDelta == nil {
 				linkDelta = &delta.BoneDelta{Bone: linkBone, Frame: frame}
 			}
-			linkQuat := linkDelta.GetLocalRotation()
+			linkQuat := linkDelta.FilledLocalRotation()
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := vmd.NewBoneFrame(count)
@@ -325,17 +325,17 @@ ikLoop:
 			}
 
 			// IKボーンのグローバル位置
-			ikGlobalPosition := ikDeltas.Get(ikBone.Index).GetGlobalPosition()
+			ikGlobalPosition := ikDeltas.Get(ikBone.Index).FilledGlobalPosition()
 
 			// 現在のIKターゲットボーンのグローバル位置を取得
-			effectorGlobalPosition := boneDeltas.Get(effectorBone.Index).GetGlobalPosition()
+			effectorGlobalPosition := boneDeltas.Get(effectorBone.Index).FilledGlobalPosition()
 
 			// 初回にIK事前計算
 			if loop == 0 && isToeIk && ikOffDeltas != nil {
 				// IK OFF 時の IKターゲットボーンのグローバル位置を取得
-				ikGlobalPosition = ikOffDeltas.Get(effectorBone.Index).GetGlobalPosition()
+				ikGlobalPosition = ikOffDeltas.Get(effectorBone.Index).FilledGlobalPosition()
 				// 現在のIKターゲットボーンのグローバル位置を取得
-				effectorGlobalPosition = ikDeltas.Get(effectorBone.Index).GetGlobalPosition()
+				effectorGlobalPosition = ikDeltas.Get(effectorBone.Index).FilledGlobalPosition()
 			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -345,12 +345,12 @@ ikLoop:
 					frame, loop, linkBone.Name, count-1,
 					ikBone.Name, ikGlobalPosition.MMD().String(),
 					effectorBone.Name, effectorGlobalPosition.MMD().String(),
-					linkBone.Name, boneDeltas.Get(linkBone.Index).GetGlobalPosition().MMD().String())
+					linkBone.Name, boneDeltas.Get(linkBone.Index).FilledGlobalPosition().MMD().String())
 			}
 
 			// 注目ノード（実際に動かすボーン=リンクボーン）
 			// ワールド座標系から注目ノードの局所座標系への変換
-			linkInvMatrix := boneDeltas.Get(linkBone.Index).GetGlobalMatrix().Inverted()
+			linkInvMatrix := boneDeltas.Get(linkBone.Index).FilledGlobalMatrix().Inverted()
 			// 注目ノードを起点とした、エフェクタのローカル位置
 			effectorLocalPosition := linkInvMatrix.MulVec3(effectorGlobalPosition)
 			// 注目ノードを起点とした、IK目標のローカル位置
@@ -580,7 +580,7 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := vmd.NewBoneFrame(count)
-				bf.Rotation = linkDelta.GetLocalRotation().Copy()
+				bf.Rotation = linkDelta.FilledLocalRotation().Copy()
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
 				count++
 
@@ -1005,13 +1005,13 @@ func calcBoneDeltas(
 		}
 
 		// 回転
-		rot := boneDeltas.GetLocalRotation(bone.Index, 0)
+		rot := boneDeltas.LocalRotation(bone.Index)
 		if rot != nil && !rot.IsIdent() {
 			d.UnitMatrix.Mul(rot.ToMat4())
 		}
 
 		// 移動
-		pos := boneDeltas.LocalPosition(bone.Index, 0)
+		pos := boneDeltas.LocalPosition(bone.Index)
 		if pos != nil && !pos.IsZero() {
 			d.UnitMatrix.Mul(pos.ToMat4())
 		}
