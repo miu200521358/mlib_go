@@ -1,18 +1,18 @@
 //go:build windows
 // +build windows
 
-package pmx
+package mbt
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 )
 
-func (j *Joint) initPhysics(
-	modelIndex int, modelPhysics *mbt.MPhysics, rigidBodyA *RigidBody, rigidBodyB *RigidBody,
+func initJointPhysics(
+	modelIndex int, modelPhysics *MPhysics, rigidBodyA *pmx.RigidBody, rigidBodyB *pmx.RigidBody, j *pmx.Joint,
 ) {
 	// ジョイントの位置と向き
-	jointTransform := bt.NewBtTransform(mbt.MRotationBullet(j.Rotation), mbt.MVec3Bullet(j.Position))
+	jointTransform := bt.NewBtTransform(MRotationBullet(j.Rotation), MVec3Bullet(j.Position))
 
 	btRigidBodyA, _ := modelPhysics.GetRigidBody(modelIndex, rigidBodyA.Index)
 	btRigidBodyB, _ := modelPhysics.GetRigidBody(modelIndex, rigidBodyB.Index)
@@ -57,7 +57,7 @@ func (j *Joint) initPhysics(
 		float32(j.JointParam.RotationLimitMax.GetRadians().GetY()),
 		float32(j.JointParam.RotationLimitMax.GetRadians().GetZ())))
 
-	if rigidBodyB.PhysicsType != PHYSICS_TYPE_STATIC {
+	if rigidBodyB.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
 		// 剛体Bがボーン追従剛体の場合は、バネの値を設定しない
 		constraint.EnableSpring(0, true)
 		constraint.SetStiffness(0, float32(j.JointParam.SpringConstantTranslation.GetX()))
@@ -84,14 +84,14 @@ func (j *Joint) initPhysics(
 	modelPhysics.AddJoint(modelIndex, j.Index, constraint)
 }
 
-func (j *Joints) initPhysics(modelIndex int, modelPhysics *mbt.MPhysics, rigidBodies *RigidBodies) {
+func initJointsPhysics(modelIndex int, modelPhysics *MPhysics, rigidBodies *pmx.RigidBodies, j *pmx.Joints) {
 	// ジョイントを順番に剛体と紐付けていく
 	for _, joint := range j.Data {
 		if joint.RigidbodyIndexA >= 0 && rigidBodies.Contains(joint.RigidbodyIndexA) &&
 			joint.RigidbodyIndexB >= 0 && rigidBodies.Contains(joint.RigidbodyIndexB) {
-			joint.initPhysics(
+			initJointPhysics(
 				modelIndex, modelPhysics, rigidBodies.Get(joint.RigidbodyIndexA),
-				rigidBodies.Get(joint.RigidbodyIndexB))
+				rigidBodies.Get(joint.RigidbodyIndexB), joint)
 		}
 	}
 }

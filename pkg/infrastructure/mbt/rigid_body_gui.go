@@ -1,24 +1,30 @@
 //go:build windows
 // +build windows
 
-package pmx
+package mbt
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 )
 
-func (r *RigidBody) UpdateFlags(
-	modelIndex int, modelPhysics *mbt.MPhysics, enablePhysics, resetPhysics bool,
+func InitPhysics(physics *MPhysics, pm *pmx.PmxModel) {
+	// pm.physics = physics
+	initRigidBodiesPhysics(pm.Index, physics, pm.RigidBodies)
+	initJointsPhysics(pm.Index, physics, pm.RigidBodies, pm.Joints)
+}
+
+func UpdateFlags(
+	modelIndex int, modelPhysics *MPhysics, r *pmx.RigidBody, enablePhysics, resetPhysics bool,
 ) bool {
 	btRigidBody, _ := modelPhysics.GetRigidBody(modelIndex, r.Index)
 	if btRigidBody == nil {
 		return false
 	}
 
-	if r.PhysicsType == PHYSICS_TYPE_STATIC || resetPhysics {
+	if r.PhysicsType == pmx.PHYSICS_TYPE_STATIC || resetPhysics {
 		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時
 		// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
 		btRigidBody.SetCollisionFlags(
@@ -64,21 +70,21 @@ func (r *RigidBody) UpdateFlags(
 	return false
 }
 
-func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mbt.MPhysics) {
+func InitRigidBodyPhysics(modelIndex int, modelPhysics *MPhysics, r *pmx.RigidBody) {
 	var btCollisionShape bt.BtCollisionShape
 
 	// マイナスサイズは許容しない
 	size := r.Size.Absed()
 
 	switch r.ShapeType {
-	case SHAPE_SPHERE:
+	case pmx.SHAPE_SPHERE:
 		// 球剛体
 		btCollisionShape = bt.NewBtSphereShape(float32(size.GetX()))
-	case SHAPE_BOX:
+	case pmx.SHAPE_BOX:
 		// 箱剛体
 		btCollisionShape = bt.NewBtBoxShape(
 			bt.NewBtVector3(float32(size.GetX()), float32(size.GetY()), float32(size.GetZ())))
-	case SHAPE_CAPSULE:
+	case pmx.SHAPE_CAPSULE:
 		// カプセル剛体
 		btCollisionShape = bt.NewBtCapsuleShape(float32(size.GetX()), float32(size.GetY()))
 	}
@@ -93,7 +99,7 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mbt.MPhysics) {
 	// 質量
 	mass := float32(0.0)
 	localInertia := bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
-	if r.PhysicsType != PHYSICS_TYPE_STATIC {
+	if r.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
 		// ボーン追従ではない場合そのまま設定
 		mass = float32(r.RigidBodyParam.Mass)
 	}
@@ -108,7 +114,7 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mbt.MPhysics) {
 	// boneTransform.SetOrigin(boneLocalPosition.Bullet())
 
 	// 剛体の初期位置と回転
-	btRigidBodyTransform := bt.NewBtTransform(mbt.MRotationBullet(r.Rotation), mbt.MVec3Bullet(r.Position))
+	btRigidBodyTransform := bt.NewBtTransform(MRotationBullet(r.Rotation), MVec3Bullet(r.Position))
 
 	// ボーンから見た剛体の初期位置
 	var bPos *mmath.MVec3
@@ -120,7 +126,7 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mbt.MPhysics) {
 		bPos = mmath.NewMVec3()
 	}
 	rbLocalPos := r.Position.Subed(bPos)
-	btRigidBodyLocalTransform := bt.NewBtTransform(mbt.MRotationBullet(r.Rotation), mbt.MVec3Bullet(rbLocalPos))
+	btRigidBodyLocalTransform := bt.NewBtTransform(MRotationBullet(r.Rotation), MVec3Bullet(rbLocalPos))
 
 	// {
 	// 	mlog.V("---------------------------------")
@@ -148,14 +154,15 @@ func (r *RigidBody) initPhysics(modelIndex int, modelPhysics *mbt.MPhysics) {
 	modelPhysics.AddRigidBody(btRigidBody, btRigidBodyLocalTransform, modelIndex, r.Index,
 		1<<r.CollisionGroup, r.CollisionGroupMaskValue)
 
-	r.UpdateFlags(modelIndex, modelPhysics, true, false)
+	UpdateFlags(modelIndex, modelPhysics, r, true, false)
 }
 
-func (r *RigidBody) UpdateTransform(
+func UpdateTransform(
 	modelIndex int,
-	modelPhysics *mbt.MPhysics,
-	rigidBodyBone *Bone,
+	modelPhysics *MPhysics,
+	rigidBodyBone *pmx.Bone,
 	boneTransform bt.BtTransform,
+	r *pmx.RigidBody,
 ) {
 	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(modelIndex, r.Index)
 
@@ -189,9 +196,10 @@ func (r *RigidBody) UpdateTransform(
 
 }
 
-func (r *RigidBody) GetRigidBodyBoneMatrix(
+func GetRigidBodyBoneMatrix(
 	modelIndex int,
-	modelPhysics *mbt.MPhysics,
+	modelPhysics *MPhysics,
+	r *pmx.RigidBody,
 ) *mmath.MMat4 {
 	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(modelIndex, r.Index)
 
@@ -274,10 +282,10 @@ func (r *RigidBody) GetRigidBodyBoneMatrix(
 	return mmath.NewMMat4ByMgl(&boneGlobalMatrixGL)
 }
 
-func (r *RigidBodies) initPhysics(modelIndex int, physics *mbt.MPhysics) {
+func initRigidBodiesPhysics(modelIndex int, physics *MPhysics, r *pmx.RigidBodies) {
 	// 剛体を順番にボーンと紐付けていく
 	for _, rigidBody := range r.Data {
 		// 物理設定の初期化
-		rigidBody.initPhysics(modelIndex, physics)
+		InitRigidBodyPhysics(modelIndex, physics, rigidBody)
 	}
 }

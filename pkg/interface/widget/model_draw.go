@@ -156,7 +156,7 @@ func deformBeforePhysics(
 		}
 
 		// 物理フラグが落ちている場合があるので、強制的に起こす
-		forceUpdate := rigidBody.UpdateFlags(model.Index, modelPhysics, enablePhysics, resetPhysics)
+		forceUpdate := mbt.UpdateFlags(model.Index, modelPhysics, rigidBody, enablePhysics, resetPhysics)
 		forceUpdate = timeStep == 0.0 || !enablePhysics || forceUpdate
 
 		if rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC || forceUpdate {
@@ -166,7 +166,7 @@ func deformBeforePhysics(
 			mat := vds.Bones.Get(rigidBodyBone.Index).FilledGlobalMatrix().GL()
 			boneTransform.SetFromOpenGLMatrix(&mat[0])
 
-			rigidBody.UpdateTransform(model.Index, modelPhysics, rigidBodyBone, boneTransform)
+			mbt.UpdateTransform(model.Index, modelPhysics, rigidBodyBone, boneTransform, rigidBody)
 		}
 	}
 
@@ -196,7 +196,7 @@ func deformAfterPhysics(
 				if bone.RigidBody == nil || bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
 					continue
 				}
-				bonePhysicsGlobalMatrix := bone.RigidBody.GetRigidBodyBoneMatrix(model.Index, modelPhysics)
+				bonePhysicsGlobalMatrix := mbt.GetRigidBodyBoneMatrix(model.Index, modelPhysics, bone.RigidBody)
 				if deltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
 					bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame,
 						bonePhysicsGlobalMatrix, deltas.Bones.Get(bone.ParentIndex))

@@ -845,7 +845,8 @@ func (w *GlWindow) Run() {
 				}
 				if !w.modelSets[k].NextModel.DrawInitialized {
 					w.modelSets[k].NextModel.Index = k
-					w.modelSets[k].NextModel.DrawInitialize(w.WindowIndex, w.Physics)
+					w.modelSets[k].NextModel.DrawInitialize(w.WindowIndex)
+					mbt.InitPhysics(w.Physics, w.modelSets[k].NextModel)
 				}
 				w.modelSets[k].Model = w.modelSets[k].NextModel
 				w.modelSets[k].NextModel = nil

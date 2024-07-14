@@ -3,13 +3,10 @@
 
 package pmx
 
-import "github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
-
-func (pm *PmxModel) DrawInitialize(windowIndex int, physics *mbt.MPhysics) {
+func (pm *PmxModel) DrawInitialize(windowIndex int) {
 	if !pm.DrawInitialized {
 		// モデルの初期化が終わっていない場合は初期化実行
 		pm.InitDraw(windowIndex)
-		pm.InitPhysics(physics)
 		pm.DrawInitialized = true
 	}
 }
@@ -20,12 +17,6 @@ func (pm *PmxModel) InitDraw(windowIndex int) {
 	pm.Meshes = NewMeshes(pm, windowIndex)
 }
 
-func (pm *PmxModel) InitPhysics(physics *mbt.MPhysics) {
-	pm.physics = physics
-	pm.RigidBodies.initPhysics(pm.Index, physics)
-	pm.Joints.initPhysics(pm.Index, physics, pm.RigidBodies)
-}
-
 func (pm *PmxModel) Delete() {
 	pm.Meshes.delete()
 	pm.DeletePhysics()
@@ -33,8 +24,8 @@ func (pm *PmxModel) Delete() {
 }
 
 func (pm *PmxModel) DeletePhysics() {
-	if pm.physics != nil {
-		pm.physics.DeleteRigidBodies(pm.Index)
-		pm.physics.DeleteJoints(pm.Index)
-	}
+	// if pm.physics != nil {
+	// 	pm.physics.DeleteRigidBodies(pm.Index)
+	// 	pm.physics.DeleteJoints(pm.Index)
+	// }
 }
