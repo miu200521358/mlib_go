@@ -1,4 +1,4 @@
-package reader
+package repository
 
 import (
 	"math"
@@ -8,10 +8,10 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
 
-func TestPmxReader_ReadNameByFilepath(t *testing.T) {
-	r := &PmxReader{}
+func TestPmxReader_LoadName(t *testing.T) {
+	r := NewPmxRepository()
 
-	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
+	modelName, err := r.LoadName("../../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
 
 	expectedName := "v2配布用素体03"
 	if modelName != expectedName {
@@ -23,10 +23,10 @@ func TestPmxReader_ReadNameByFilepath(t *testing.T) {
 	}
 }
 
-func TestPmxReader_ReadNameByFilepath_2_1(t *testing.T) {
-	r := &PmxReader{}
+func TestPmxReader_LoadName_2_1(t *testing.T) {
+	r := NewPmxRepository()
 
-	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
+	modelName, err := r.LoadName("../../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
 
 	expectedName := "サンプルモデル迪卢克"
 	if modelName != expectedName {
@@ -38,10 +38,10 @@ func TestPmxReader_ReadNameByFilepath_2_1(t *testing.T) {
 	}
 }
 
-func TestPmxReader_ReadNameByFilepath_NotExist(t *testing.T) {
-	r := &PmxReader{}
+func TestPmxReader_LoadName_NotExist(t *testing.T) {
+	r := NewPmxRepository()
 
-	modelName, err := r.ReadNameByFilepath("../../test_resources/サンプルモデル_Nothing.pmx")
+	modelName, err := r.LoadName("../../../test_resources/サンプルモデル_Nothing.pmx")
 
 	expectedName := ""
 	if modelName != expectedName {
@@ -53,10 +53,10 @@ func TestPmxReader_ReadNameByFilepath_NotExist(t *testing.T) {
 	}
 }
 
-func TestPmxReader_ReadByFilepath(t *testing.T) {
-	r := &PmxReader{}
+func TestPmxReader_Load(t *testing.T) {
+	r := NewPmxRepository()
 
-	data, err := r.ReadByFilepath("../../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
+	data, err := r.Load("../../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
 	model := data.(*pmx.PmxModel)
 
 	if err != nil {
@@ -828,10 +828,10 @@ func TestPmxReader_ReadByFilepath(t *testing.T) {
 	}
 }
 
-func TestPmxReader_ReadByFilepath_2_1(t *testing.T) {
-	r := &PmxReader{}
+func TestPmxReader_Load_2_1(t *testing.T) {
+	r := NewPmxRepository()
 
-	data, err := r.ReadByFilepath("../../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
+	data, err := r.Load("../../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
 	model := data.(*pmx.PmxModel)
 
 	if err != nil {
