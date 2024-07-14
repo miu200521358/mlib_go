@@ -2,6 +2,7 @@ package repository
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/sha1"
 	"encoding/binary"
 	"encoding/hex"
@@ -313,4 +314,117 @@ func (r *baseRepository[T]) unpack(size int) ([]byte, error) {
 	}
 
 	return chunk, nil
+}
+
+type binaryType string
+
+const (
+	binaryType_float         binaryType = "<f"
+	binaryType_byte          binaryType = "<b"
+	binaryType_unsignedByte  binaryType = "<B"
+	binaryType_short         binaryType = "<h"
+	binaryType_unsignedShort binaryType = "<H"
+	binaryType_int           binaryType = "<i"
+	binaryType_unsignedInt   binaryType = "<I"
+	binaryType_long          binaryType = "<l"
+	binaryType_unsignedLong  binaryType = "<L"
+)
+
+func (r *baseRepository[T]) writeNumber(
+	fout *os.File, valType binaryType, val float64, defaultValue float64, isPositiveOnly bool) error {
+	// 値の検証と修正
+	if math.IsNaN(val) || math.IsInf(val, 0) {
+		val = defaultValue
+	}
+	if isPositiveOnly && val < 0 {
+		val = 0
+	}
+
+	// バイナリデータの作成
+	var buf bytes.Buffer
+	var err error
+	switch valType {
+	case binaryType_float:
+		err = binary.Write(&buf, binary.LittleEndian, float32(val))
+	case binaryType_unsignedInt:
+		err = binary.Write(&buf, binary.LittleEndian, uint32(val))
+	case binaryType_unsignedByte:
+		err = binary.Write(&buf, binary.LittleEndian, uint8(val))
+	case binaryType_unsignedShort:
+		err = binary.Write(&buf, binary.LittleEndian, uint16(val))
+	case binaryType_byte:
+		err = binary.Write(&buf, binary.LittleEndian, int8(val))
+	case binaryType_short:
+		err = binary.Write(&buf, binary.LittleEndian, int16(val))
+	default:
+		err = binary.Write(&buf, binary.LittleEndian, int32(val))
+	}
+	if err != nil {
+		return r.writeDefaultNumber(fout, valType, defaultValue)
+	}
+
+	// ファイルへの書き込み
+	_, err = fout.Write(buf.Bytes())
+	if err != nil {
+		return r.writeDefaultNumber(fout, valType, defaultValue)
+	}
+	return nil
+}
+
+func (r *baseRepository[T]) writeDefaultNumber(fout *os.File, valType binaryType, defaultValue float64) error {
+	var buf bytes.Buffer
+	var err error
+	switch valType {
+	case binaryType_float:
+		err = binary.Write(&buf, binary.LittleEndian, float32(defaultValue))
+	default:
+		err = binary.Write(&buf, binary.LittleEndian, int32(defaultValue))
+	}
+	if err != nil {
+		return err
+	}
+	_, err = fout.Write(buf.Bytes())
+	return err
+}
+
+func (r *baseRepository[T]) writeBool(fout *os.File, val bool) error {
+	var buf bytes.Buffer
+	var err error
+
+	err = binary.Write(&buf, binary.LittleEndian, byte(mmath.BoolToInt(val)))
+
+	if err != nil {
+		return err
+	}
+
+	_, err = fout.Write(buf.Bytes())
+	return err
+}
+
+func (r *baseRepository[T]) writeByte(fout *os.File, val int, isUnsigned bool) error {
+	var buf bytes.Buffer
+	var err error
+
+	if isUnsigned {
+		err = binary.Write(&buf, binary.LittleEndian, uint8(val))
+	} else {
+		err = binary.Write(&buf, binary.LittleEndian, int8(val))
+	}
+
+	if err != nil {
+		return err
+	}
+
+	_, err = fout.Write(buf.Bytes())
+	return err
+}
+
+func (r *baseRepository[T]) writeShort(fout *os.File, val uint16) error {
+	var buf bytes.Buffer
+	err := binary.Write(&buf, binary.LittleEndian, val)
+	if err != nil {
+		return err
+	}
+	_, err = fout.Write(buf.Bytes())
+	return err
 }

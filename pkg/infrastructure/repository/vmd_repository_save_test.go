@@ -1,11 +1,10 @@
-package writer
+package repository
 
 import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/reader"
 )
 
 func TestVmdWriter_Write1(t *testing.T) {
@@ -20,14 +19,15 @@ func TestVmdWriter_Write1(t *testing.T) {
 	bf.Rotation = mmath.NewMQuaternionFromDegrees(10, 20, 30)
 	motion.AppendRegisteredBoneFrame("センター", bf)
 
+	r := NewVmdRepository()
+
 	// Create a VmdWriter instance
-	err := VmdSave(motion, "", "", false)
+	err := r.Save("", motion, false)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
 
-	r := &reader.VmdMotionReader{}
-	reloadData, err := r.ReadByFilepath(path)
+	reloadData, err := r.Load(path)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
@@ -59,8 +59,8 @@ func TestVmdWriter_Write2(t *testing.T) {
 	// Test case 1: Successful read
 	readPath := "../../../test_resources/サンプルモーション.vmd"
 
-	r := &reader.VmdMotionReader{}
-	data, err := r.ReadByFilepath(readPath)
+	r := NewVmdRepository()
+	data, err := r.Load(readPath)
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -71,12 +71,12 @@ func TestVmdWriter_Write2(t *testing.T) {
 	motion := data.(*vmd.VmdMotion)
 
 	// Create a VmdWriter instance
-	err = VmdSave(motion, outputPath, "", false)
+	err = r.Save(outputPath, motion, false)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
 
-	reloadData, err := r.ReadByFilepath(outputPath)
+	reloadData, err := r.Load(outputPath)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
@@ -92,8 +92,8 @@ func TestVmdWriter_Write3(t *testing.T) {
 	// Test case 1: Successful read
 	readPath := "../../../test_resources/ドクヘビ_178cmカメラ.vmd"
 
-	r := &reader.VmdMotionReader{}
-	model, err := r.ReadByFilepath(readPath)
+	r := NewVmdRepository()
+	model, err := r.Load(readPath)
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -103,12 +103,12 @@ func TestVmdWriter_Write3(t *testing.T) {
 	motion := model.(*vmd.VmdMotion)
 
 	// Create a VmdWriter instance
-	err = VmdSave(motion, outputPath, "", false)
+	err = r.Save(outputPath, motion, false)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
 
-	reloadData, err := r.ReadByFilepath(outputPath)
+	reloadData, err := r.Load(outputPath)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
@@ -124,8 +124,8 @@ func TestVmdWriter_Write4(t *testing.T) {
 	// Test case 1: Successful read
 	readPath := "../../../test_resources/モーフ_まばたき.vmd"
 
-	r := &reader.VmdMotionReader{}
-	model, err := r.ReadByFilepath(readPath)
+	r := NewVmdRepository()
+	model, err := r.Load(readPath)
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -135,12 +135,12 @@ func TestVmdWriter_Write4(t *testing.T) {
 	motion := model.(*vmd.VmdMotion)
 
 	// Create a VmdWriter instance
-	err = VmdSave(motion, outputPath, "", false)
+	err = r.Save(outputPath, motion, false)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
 
-	reloadData, err := r.ReadByFilepath(outputPath)
+	reloadData, err := r.Load(outputPath)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}

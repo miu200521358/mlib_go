@@ -1,89 +1,74 @@
-package reader
+package repository
 
 import (
 	"bytes"
-
-	"golang.org/x/text/encoding/japanese"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
+	"golang.org/x/text/encoding/japanese"
 )
 
-// https://hariganep.seesaa.net/article/201103article_1.html
-// https://blog.goo.ne.jp/torisu_tetosuki/e/bc9f1c4d597341b394bd02b64597499d
-// https://w.atwiki.jp/kumiho_k/pages/15.html
-
-// VMDリーダー
-type VmdMotionReader struct {
-	core.BaseReader[*vmd.VmdMotion]
-}
-
-func (r *VmdMotionReader) createModel(path string) *vmd.VmdMotion {
-	model := vmd.NewVmdMotion(path)
-	return model
-}
-
 // 指定されたパスのファイルからデータを読み込む
-func (r *VmdMotionReader) ReadByFilepath(path string) (core.IHashModel, error) {
+func (r *VmdRepository) Load(path string) (core.IHashModel, error) {
 	// モデルを新規作成
-	motion := r.createModel(path)
+	motion := r.newFunc(path)
 
-	hash, err := r.ReadHashByFilePath(path)
+	hash, err := r.LoadHash(path)
 	if err != nil {
-		mlog.E("ReadByFilepath.ReadHashByFilePath error: %v", err)
+		mlog.E("Load.LoadHash error: %v", err)
 		return motion, err
 	}
 	motion.SetHash(hash)
 
 	// ファイルを開く
-	err = r.Open(path)
+	err = r.open(path)
 	if err != nil {
-		mlog.E("ReadByFilepath.Open error: %v", err)
+		mlog.E("Load.Open error: %v", err)
 		return motion, err
 	}
 
 	err = r.readHeader(motion)
 	if err != nil {
-		mlog.E("ReadByFilepath.readHeader error: %v", err)
+		mlog.E("Load.readHeader error: %v", err)
 		return motion, err
 	}
 
-	err = r.readData(motion)
+	err = r.loadModel(motion)
 	if err != nil {
-		mlog.E("ReadByFilepath.readData error: %v", err)
+		mlog.E("Load.loadModel error: %v", err)
 		return motion, err
 	}
 
-	r.Close()
+	r.close()
 
 	return motion, nil
 }
 
-func (r *VmdMotionReader) ReadNameByFilepath(path string) (string, error) {
+func (r *VmdRepository) LoadName(path string) (string, error) {
 	// モデルを新規作成
-	motion := r.createModel(path)
+	motion := r.newFunc(path)
 
 	// ファイルを開く
-	err := r.Open(path)
+	err := r.open(path)
 	if err != nil {
-		mlog.E("ReadNameByFilepath.Open error: %v", err)
+		mlog.E("LoadName.Open error: %v", err)
 		return "", err
 	}
 
 	err = r.readHeader(motion)
 	if err != nil {
-		mlog.E("ReadNameByFilepath.readHeader error: %v", err)
+		mlog.E("LoadName.readHeader error: %v", err)
 		return "", err
 	}
 
-	r.Close()
+	r.close()
 
 	return motion.ModelName, nil
 }
 
-func (r *VmdMotionReader) DecodeShiftJIS(fbytes []byte) (string, error) {
+func (r *VmdRepository) decodeShiftJIS(fbytes []byte) (string, error) {
 	// VMDは空白込みで入っているので、正規表現で空白以降は削除する
 	decodedBytes, err := japanese.ShiftJIS.NewDecoder().Bytes(fbytes)
 	if err != nil {
@@ -99,20 +84,20 @@ func (r *VmdMotionReader) DecodeShiftJIS(fbytes []byte) (string, error) {
 	return decodedText, nil
 }
 
-func (r *VmdMotionReader) ReadText(size int) (string, error) {
-	fbytes, err := r.UnpackBytes(size)
+func (r *VmdRepository) readText(size int) (string, error) {
+	fbytes, err := r.unpackBytes(size)
 	if err != nil {
 		mlog.E("ReadText error: %v", err)
 		return "", err
 	}
-	return r.DecodeShiftJIS(fbytes)
+	return r.decodeShiftJIS(fbytes)
 }
 
-func (r *VmdMotionReader) readHeader(motion *vmd.VmdMotion) error {
-	r.DefineEncoding(japanese.ShiftJIS)
+func (r *VmdRepository) readHeader(motion *vmd.VmdMotion) error {
+	r.defineEncoding(japanese.ShiftJIS)
 
 	// vmdバージョン
-	signature, err := r.ReadText(30)
+	signature, err := r.readText(30)
 	if err != nil {
 		mlog.E("readHeader.ReadText error: %v", err)
 		return err
@@ -120,7 +105,7 @@ func (r *VmdMotionReader) readHeader(motion *vmd.VmdMotion) error {
 	motion.Signature = signature
 
 	// モデル名
-	motion.ModelName, err = r.ReadText(20)
+	motion.ModelName, err = r.readText(20)
 	if err != nil {
 		mlog.E("readHeader.ReadText error: %v", err)
 		return err
@@ -129,52 +114,52 @@ func (r *VmdMotionReader) readHeader(motion *vmd.VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readData(motion *vmd.VmdMotion) error {
-	err := r.readBones(motion)
+func (r *VmdRepository) loadModel(motion *vmd.VmdMotion) error {
+	err := r.loadBones(motion)
 	if err != nil {
-		mlog.E("readData.readBones error: %v", err)
+		mlog.E("loadModel.readBones error: %v", err)
 		return err
 	}
 
-	err = r.readMorphs(motion)
+	err = r.loadMorphs(motion)
 	if err != nil {
-		mlog.E("readData.readMorphs error: %v", err)
+		mlog.E("loadModel.readMorphs error: %v", err)
 		return err
 	}
 
-	err = r.readCameras(motion)
+	err = r.loadCameras(motion)
 	if err != nil {
 		// カメラがなくてもエラーにしないが、後続は読まない
-		mlog.E("readData.readCameras error: %v", err)
+		mlog.E("loadModel.readCameras error: %v", err)
 		return nil
 	}
 
-	err = r.readLights(motion)
+	err = r.loadLights(motion)
 	if err != nil {
 		// ライトがなくてもエラーにしないが、後続は読まない
-		mlog.E("readData.readLights error: %v", err)
+		mlog.E("loadModel.readLights error: %v", err)
 		return nil
 	}
 
-	err = r.readShadows(motion)
+	err = r.loadShadows(motion)
 	if err != nil {
 		// シャドウがなくてもエラーにしないが、後続は読まない
-		mlog.E("readData.readShadows error: %v", err)
+		mlog.E("loadModel.readShadows error: %v", err)
 		return nil
 	}
 
-	err = r.readIks(motion)
+	err = r.loadIks(motion)
 	if err != nil {
 		// IKがなくてもエラーにしないが、後続は読まない
-		mlog.E("readData.readIks error: %v", err)
+		mlog.E("loadModel.readIks error: %v", err)
 		return nil
 	}
 
 	return nil
 }
 
-func (r *VmdMotionReader) readBones(motion *vmd.VmdMotion) error {
-	totalCount, err := r.UnpackUInt()
+func (r *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
+	totalCount, err := r.unpackUInt()
 	if err != nil {
 		mlog.E("readBones.totalCount error: %v", err)
 		return err
@@ -187,14 +172,14 @@ func (r *VmdMotionReader) readBones(motion *vmd.VmdMotion) error {
 		v.Read = true
 
 		// ボーン名
-		boneName, err := r.ReadText(15)
+		boneName, err := r.readText(15)
 		if err != nil {
 			mlog.E("[%d] readBones.boneName error: %v", i, err)
 			return err
 		}
 
 		// キーフレ番号
-		index, err := r.UnpackUInt()
+		index, err := r.unpackUInt()
 		if err != nil {
 			mlog.E("[%d] readBones.index error: %v", i, err)
 			return err
@@ -202,7 +187,7 @@ func (r *VmdMotionReader) readBones(motion *vmd.VmdMotion) error {
 		v.SetIndex(int(index))
 
 		// 位置X,Y,Z
-		position, err := r.UnpackVec3(true)
+		position, err := r.unpackVec3(true)
 		if err != nil {
 			mlog.E("[%d] readBones.Position error: %v", i, err)
 			return err
@@ -210,7 +195,7 @@ func (r *VmdMotionReader) readBones(motion *vmd.VmdMotion) error {
 		v.Position = &position
 
 		// 回転X,Y,Z,W
-		qq, err := r.UnpackQuaternion(true)
+		qq, err := r.unpackQuaternion(true)
 		if err != nil {
 			mlog.E("[%d] readBones.Quaternion error: %v", i, err)
 			return err
@@ -218,7 +203,7 @@ func (r *VmdMotionReader) readBones(motion *vmd.VmdMotion) error {
 		v.Rotation = &qq
 
 		// 補間曲線
-		curves, err := r.UnpackBytes(64)
+		curves, err := r.unpackBytes(64)
 		if err != nil {
 			mlog.E("[%d] readBones.Curves error: %v", i, err)
 			return err
@@ -231,8 +216,8 @@ func (r *VmdMotionReader) readBones(motion *vmd.VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readMorphs(motion *vmd.VmdMotion) error {
-	totalCount, err := r.UnpackUInt()
+func (r *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
+	totalCount, err := r.unpackUInt()
 	if err != nil {
 		mlog.E("readMorphs.totalCount error: %v", err)
 		return err
@@ -244,14 +229,14 @@ func (r *VmdMotionReader) readMorphs(motion *vmd.VmdMotion) error {
 		v.Read = true
 
 		// モーフ名
-		morphName, err := r.ReadText(15)
+		morphName, err := r.readText(15)
 		if err != nil {
 			mlog.E("[%d] readMorphs.morphName error: %v", i, err)
 			return err
 		}
 
 		// キーフレ番号
-		index, err := r.UnpackUInt()
+		index, err := r.unpackUInt()
 		if err != nil {
 			mlog.E("[%d] readMorphs.index error: %v", i, err)
 			return err
@@ -259,7 +244,7 @@ func (r *VmdMotionReader) readMorphs(motion *vmd.VmdMotion) error {
 		v.SetIndex(int(index))
 
 		// ratio
-		v.Ratio, err = r.UnpackFloat()
+		v.Ratio, err = r.unpackFloat()
 		if err != nil {
 			mlog.E("[%d] readMorphs.Ratio error: %v", i, err)
 			return err
@@ -271,8 +256,8 @@ func (r *VmdMotionReader) readMorphs(motion *vmd.VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readCameras(motion *vmd.VmdMotion) error {
-	totalCount, err := r.UnpackUInt()
+func (r *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
+	totalCount, err := r.unpackUInt()
 	if err != nil {
 		mlog.E("readCameras.totalCount error: %v", err)
 		return err
@@ -284,7 +269,7 @@ func (r *VmdMotionReader) readCameras(motion *vmd.VmdMotion) error {
 		v.Read = true
 
 		// キーフレ番号
-		index, err := r.UnpackUInt()
+		index, err := r.unpackUInt()
 		if err != nil {
 			mlog.E("[%d] readCameras.index error: %v", i, err)
 			return err
@@ -292,14 +277,14 @@ func (r *VmdMotionReader) readCameras(motion *vmd.VmdMotion) error {
 		v.SetIndex(int(index))
 
 		// 距離
-		v.Distance, err = r.UnpackFloat()
+		v.Distance, err = r.unpackFloat()
 		if err != nil {
 			mlog.E("[%d] readCameras.Distance error: %v", i, err)
 			return err
 		}
 
 		// 位置X,Y,Z
-		position, err := r.UnpackVec3(true)
+		position, err := r.unpackVec3(true)
 		if err != nil {
 			mlog.E("[%d] readCameras.Position error: %v", i, err)
 			return err
@@ -307,7 +292,7 @@ func (r *VmdMotionReader) readCameras(motion *vmd.VmdMotion) error {
 		v.Position = &position
 
 		// 回転(オイラー角度)
-		degrees, err := r.UnpackVec3(true)
+		degrees, err := r.unpackVec3(true)
 		if err != nil {
 			mlog.E("[%d] readCameras.Degrees error: %v", i, err)
 			return err
@@ -315,7 +300,7 @@ func (r *VmdMotionReader) readCameras(motion *vmd.VmdMotion) error {
 		v.Rotation = mmath.NewRotationFromDegrees(&degrees)
 
 		// 補間曲線
-		curves, err := r.UnpackBytes(24)
+		curves, err := r.unpackBytes(24)
 		if err != nil {
 			mlog.E("[%d] readCameras.Curves error: %v", i, err)
 			return err
@@ -323,7 +308,7 @@ func (r *VmdMotionReader) readCameras(motion *vmd.VmdMotion) error {
 		v.Curves = vmd.NewCameraCurvesByValues(curves)
 
 		// 視野角
-		viewOfAngle, err := r.UnpackUInt()
+		viewOfAngle, err := r.unpackUInt()
 		if err != nil {
 			mlog.E("[%d] readCameras.ViewOfAngle error: %v", i, err)
 			return err
@@ -331,7 +316,7 @@ func (r *VmdMotionReader) readCameras(motion *vmd.VmdMotion) error {
 		v.ViewOfAngle = int(viewOfAngle)
 
 		// パースOFF
-		perspective, err := r.UnpackByte()
+		perspective, err := r.unpackByte()
 		if err != nil {
 			mlog.E("[%d] readCameras.Perspective error: %v", i, err)
 			return err
@@ -344,8 +329,8 @@ func (r *VmdMotionReader) readCameras(motion *vmd.VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readLights(motion *vmd.VmdMotion) error {
-	totalCount, err := r.UnpackUInt()
+func (r *VmdRepository) loadLights(motion *vmd.VmdMotion) error {
+	totalCount, err := r.unpackUInt()
 	if err != nil {
 		mlog.E("readLights.totalCount error: %v", err)
 		return err
@@ -357,7 +342,7 @@ func (r *VmdMotionReader) readLights(motion *vmd.VmdMotion) error {
 		v.Read = true
 
 		// キーフレ番号
-		index, err := r.UnpackUInt()
+		index, err := r.unpackUInt()
 		if err != nil {
 			mlog.E("[%d] readLights.index error: %v", i, err)
 			return err
@@ -365,7 +350,7 @@ func (r *VmdMotionReader) readLights(motion *vmd.VmdMotion) error {
 		v.SetIndex(int(index))
 
 		// 照明色
-		color, err := r.UnpackVec3(false)
+		color, err := r.unpackVec3(false)
 		if err != nil {
 			mlog.E("[%d] readLights.Color error: %v", i, err)
 			return err
@@ -373,7 +358,7 @@ func (r *VmdMotionReader) readLights(motion *vmd.VmdMotion) error {
 		v.Color = &color
 
 		// 位置X,Y,Z
-		position, err := r.UnpackVec3(true)
+		position, err := r.unpackVec3(true)
 		if err != nil {
 			mlog.E("[%d] readLights.Position error: %v", i, err)
 			return err
@@ -386,8 +371,8 @@ func (r *VmdMotionReader) readLights(motion *vmd.VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readShadows(motion *vmd.VmdMotion) error {
-	totalCount, err := r.UnpackUInt()
+func (r *VmdRepository) loadShadows(motion *vmd.VmdMotion) error {
+	totalCount, err := r.unpackUInt()
 	if err != nil {
 		mlog.E("readShadows.totalCount error: %v", err)
 		return err
@@ -399,7 +384,7 @@ func (r *VmdMotionReader) readShadows(motion *vmd.VmdMotion) error {
 		v.Read = true
 
 		// キーフレ番号
-		index, err := r.UnpackUInt()
+		index, err := r.unpackUInt()
 		if err != nil {
 			mlog.E("[%d] readShadows.index error: %v", i, err)
 			return err
@@ -407,7 +392,7 @@ func (r *VmdMotionReader) readShadows(motion *vmd.VmdMotion) error {
 		v.SetIndex(int(index))
 
 		// セルフ影タイプ
-		shadowMode, err := r.UnpackByte()
+		shadowMode, err := r.unpackByte()
 		if err != nil {
 			mlog.E("[%d] readShadows.ShadowMode error: %v", i, err)
 			return err
@@ -415,7 +400,7 @@ func (r *VmdMotionReader) readShadows(motion *vmd.VmdMotion) error {
 		v.ShadowMode = int(shadowMode)
 
 		// 距離
-		v.Distance, err = r.UnpackFloat()
+		v.Distance, err = r.unpackFloat()
 		if err != nil {
 			mlog.E("[%d] readShadows.Distance error: %v", i, err)
 			return err
@@ -427,8 +412,8 @@ func (r *VmdMotionReader) readShadows(motion *vmd.VmdMotion) error {
 	return nil
 }
 
-func (r *VmdMotionReader) readIks(motion *vmd.VmdMotion) error {
-	totalCount, err := r.UnpackUInt()
+func (r *VmdRepository) loadIks(motion *vmd.VmdMotion) error {
+	totalCount, err := r.unpackUInt()
 	if err != nil {
 		mlog.E("readIks.totalCount error: %v", err)
 		return err
@@ -440,7 +425,7 @@ func (r *VmdMotionReader) readIks(motion *vmd.VmdMotion) error {
 		v.Read = true
 
 		// キーフレ番号
-		index, err := r.UnpackUInt()
+		index, err := r.unpackUInt()
 		if err != nil {
 			mlog.E("[%d] readIks.index error: %v", i, err)
 			return err
@@ -448,7 +433,7 @@ func (r *VmdMotionReader) readIks(motion *vmd.VmdMotion) error {
 		v.SetIndex(int(index))
 
 		// モデル表示
-		visible, err := r.UnpackByte()
+		visible, err := r.unpackByte()
 		if err != nil {
 			mlog.E("[%d] readIks.Visible error: %v", i, err)
 			return err
@@ -456,7 +441,7 @@ func (r *VmdMotionReader) readIks(motion *vmd.VmdMotion) error {
 		v.Visible = visible == 1
 
 		// IKリストの数
-		ikCount, err := r.UnpackUInt()
+		ikCount, err := r.unpackUInt()
 		if err != nil {
 			mlog.E("[%d] readIks.IkCount error: %v", i, err)
 			return err
@@ -465,14 +450,14 @@ func (r *VmdMotionReader) readIks(motion *vmd.VmdMotion) error {
 			ik := vmd.NewIkEnableFrame(v.GetIndex())
 
 			// IKボーン名
-			ik.BoneName, err = r.ReadText(20)
+			ik.BoneName, err = r.readText(20)
 			if err != nil {
 				mlog.E("[%d][%d] readIks.Ik.BoneName error: %v", i, j, err)
 				return err
 			}
 
 			// IK有効無効
-			enabled, err := r.UnpackByte()
+			enabled, err := r.unpackByte()
 			if err != nil {
 				mlog.E("[%d][%d] readIks.Ik.Enabled error: %v", i, j, err)
 				return err

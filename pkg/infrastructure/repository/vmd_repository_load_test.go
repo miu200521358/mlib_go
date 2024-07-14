@@ -1,4 +1,4 @@
-package reader
+package repository
 
 import (
 	"testing"
@@ -8,12 +8,12 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 )
 
-func TestVmdMotionReader_ReadNameByFilepath(t *testing.T) {
-	r := &VmdMotionReader{}
+func TestVmdMotionReader_LoadName(t *testing.T) {
+	r := NewVmdRepository()
 
 	// Test case 1: Successful read
-	path := "../../test_resources/サンプルモーション_0046.vmd"
-	modelName, err := r.ReadNameByFilepath(path)
+	path := "../../../test_resources/サンプルモーション_0046.vmd"
+	modelName, err := r.LoadName(path)
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -25,20 +25,20 @@ func TestVmdMotionReader_ReadNameByFilepath(t *testing.T) {
 	}
 }
 
-func TestVmdMotionReader_ReadByFilepath(t *testing.T) {
-	r := &VmdMotionReader{}
+func TestVmdMotionReader_Load(t *testing.T) {
+	r := NewVmdRepository()
 
 	// Test case 2: File not found
-	invalidPath := "../../test_resources/nonexistent.vmd"
-	_, err := r.ReadByFilepath(invalidPath)
+	invalidPath := "../../../test_resources/nonexistent.vmd"
+	_, err := r.Load(invalidPath)
 
 	if err == nil {
 		t.Errorf("Expected error to be not nil, got nil")
 	}
 
 	// Test case 1: Successful read
-	path := "../../test_resources/サンプルモーション.vmd"
-	model, err := r.ReadByFilepath(path)
+	path := "../../../test_resources/サンプルモーション.vmd"
+	model, err := r.Load(path)
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)

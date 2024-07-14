@@ -13,7 +13,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/writer"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
@@ -165,7 +165,8 @@ func calcIk(
 		mlog.IV("[IK計算終了][%04d][%s]", frame, ikBone.Name)
 
 		if ikMotion != nil {
-			writer.VmdSave(ikMotion, "", "", true)
+			r := repository.NewVmdRepository()
+			r.Save("", ikMotion, true)
 		}
 		if ikFile != nil {
 			ikFile.Close()

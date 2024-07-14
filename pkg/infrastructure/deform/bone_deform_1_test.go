@@ -6,13 +6,12 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/reader"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
 )
 
 func TestVmdMotion_Deform_Exists(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/サンプルモーション.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/サンプルモーション.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -139,8 +138,8 @@ func TestVmdMotion_Deform_Exists(t *testing.T) {
 }
 
 func TestVmdMotion_Deform_Lerp(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/サンプルモーション.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/サンプルモーション.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -267,8 +266,8 @@ func TestVmdMotion_Deform_Lerp(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk1_Matsu(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/サンプルモーション.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/サンプルモーション.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -328,8 +327,8 @@ func TestVmdMotion_DeformLegIk1_Matsu(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk2_Matsu(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/サンプルモーション.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/サンプルモーション.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -391,8 +390,8 @@ func TestVmdMotion_DeformLegIk2_Matsu(t *testing.T) {
 
 func TestVmdMotion_DeformLegIk3_Matsu(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/腰元.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/腰元.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -467,8 +466,8 @@ func TestVmdMotion_DeformLegIk3_Matsu(t *testing.T) {
 func TestVmdMotion_DeformLegIk4_Snow(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/好き雪_2794.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/好き雪_2794.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -529,8 +528,8 @@ func TestVmdMotion_DeformLegIk4_Snow(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk5_Koshi(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/腰元.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/腰元.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -591,8 +590,8 @@ func TestVmdMotion_DeformLegIk5_Koshi(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk6_KoshiOff(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/腰元.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/腰元.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -632,8 +631,8 @@ func TestVmdMotion_DeformLegIk6_KoshiOff(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk6_KoshiOn(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/腰元.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/腰元.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -674,8 +673,8 @@ func TestVmdMotion_DeformLegIk6_KoshiOn(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk6_KoshiIkOn(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/腰元.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/腰元.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -723,8 +722,8 @@ func TestVmdMotion_DeformLegIk6_KoshiIkOn(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk6_KoshiIkOff(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/腰元.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/腰元.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -773,8 +772,8 @@ func TestVmdMotion_DeformLegIk6_KoshiIkOff(t *testing.T) {
 func TestVmdMotion_DeformLegIk7_Syou(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/唱(ダンスのみ)_0278F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0278F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -836,8 +835,8 @@ func TestVmdMotion_DeformLegIk7_Syou(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk8_Syou(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -898,8 +897,8 @@ func TestVmdMotion_DeformLegIk8_Syou(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou1(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -958,8 +957,8 @@ func TestVmdMotion_DeformLegIk10_Syou1(t *testing.T) {
 
 func TestVmdMotion_DeformLegIk10_Syou2(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1019,8 +1018,8 @@ func TestVmdMotion_DeformLegIk10_Syou2(t *testing.T) {
 
 func TestVmdMotion_DeformLegIk10_Syou3(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1079,8 +1078,8 @@ func TestVmdMotion_DeformLegIk10_Syou3(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou4(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1139,8 +1138,8 @@ func TestVmdMotion_DeformLegIk10_Syou4(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou5(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1199,8 +1198,8 @@ func TestVmdMotion_DeformLegIk10_Syou5(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou6(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1260,8 +1259,8 @@ func TestVmdMotion_DeformLegIk10_Syou6(t *testing.T) {
 
 func TestVmdMotion_DeformLegIk11_Shining_Miku(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/シャイニングミラクル_50F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/シャイニングミラクル_50F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1352,8 +1351,8 @@ func TestVmdMotion_DeformLegIk11_Shining_Miku(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk11_Shining_Vroid(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/シャイニングミラクル_50F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/シャイニングミラクル_50F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1413,8 +1412,8 @@ func TestVmdMotion_DeformLegIk11_Shining_Vroid(t *testing.T) {
 
 func TestVmdMotion_DeformLegIk12_Down_Miku(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/しゃがむ.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/しゃがむ.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1478,8 +1477,8 @@ func TestVmdMotion_DeformLegIk12_Down_Miku(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk13_Lamb(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/Lamb_2689F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/Lamb_2689F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1580,8 +1579,8 @@ func TestVmdMotion_DeformLegIk13_Lamb(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk14_Ballet(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/ミク用バレリーコ_1069.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/ミク用バレリーコ_1069.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1650,8 +1649,8 @@ func TestVmdMotion_DeformLegIk14_Ballet(t *testing.T) {
 func TestVmdMotion_DeformLegIk15_Bottom(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/●ボトム_0-300.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/●ボトム_0-300.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1718,8 +1717,8 @@ func TestVmdMotion_DeformLegIk15_Bottom(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk16_Lamb(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/Lamb_2689F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/Lamb_2689F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1782,8 +1781,8 @@ func TestVmdMotion_DeformLegIk16_Lamb(t *testing.T) {
 func TestVmdMotion_DeformLegIk17_Snow(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/好き雪_1075.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/好き雪_1075.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1844,8 +1843,8 @@ func TestVmdMotion_DeformLegIk17_Snow(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk18_Syou(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1906,8 +1905,8 @@ func TestVmdMotion_DeformLegIk18_Syou(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk19_Wa(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/129cm_001_10F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/129cm_001_10F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1962,8 +1961,8 @@ func TestVmdMotion_DeformLegIk19_Wa(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk20_Syou(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2024,8 +2023,8 @@ func TestVmdMotion_DeformLegIk20_Syou(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk21_FK(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/足FK.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/足FK.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2062,8 +2061,8 @@ func TestVmdMotion_DeformLegIk21_FK(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk22_Bake(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/足FK焼き込み.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/足FK焼き込み.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2100,8 +2099,8 @@ func TestVmdMotion_DeformLegIk22_Bake(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk22_NoLimit(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/足FK.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/足FK.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2138,8 +2137,8 @@ func TestVmdMotion_DeformLegIk22_NoLimit(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk23_Addiction(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/[A]ddiction_Lat式_0171F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/[A]ddiction_Lat式_0171F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2206,8 +2205,8 @@ func TestVmdMotion_DeformLegIk23_Addiction(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk24_Positive(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/ポジティブパレード_0526.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/ポジティブパレード_0526.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2345,8 +2344,8 @@ func TestVmdMotion_DeformLegIk24_Positive(t *testing.T) {
 }
 
 func TestVmdMotion_DeformArmIk(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/サンプルモーション.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/サンプルモーション.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2473,8 +2472,8 @@ func TestVmdMotion_DeformArmIk(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk2(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("C:/MMD/mmd_base/tests/resources/唱(ダンスのみ)_0274F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("C:/MMD/mmd_base/tests/resources/唱(ダンスのみ)_0274F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2656,8 +2655,8 @@ func TestVmdMotion_DeformLegIk2(t *testing.T) {
 }
 
 func TestVmdMotion_DeformArmIk3(t *testing.T) {
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("C:/MMD/mlib_go/test_resources/Addiction_0F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("C:/MMD/mlib_go/test_resources/Addiction_0F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2720,8 +2719,8 @@ func TestVmdMotion_DeformArmIk3(t *testing.T) {
 func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/青江バレリーコ_1543F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/青江バレリーコ_1543F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2808,8 +2807,8 @@ func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 func TestVmdMotion_DeformLegIk26_Far(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/足IK乖離.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/足IK乖離.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2872,8 +2871,8 @@ func TestVmdMotion_DeformLegIk26_Far(t *testing.T) {
 func TestVmdMotion_DeformLegIk27_Addiction_Shoes(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := &reader.VmdMotionReader{}
-	motionData, err := vr.ReadByFilepath("../../../test_resources/[A]ddiction_和洋_1074-1078F.vmd")
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/[A]ddiction_和洋_1074-1078F.vmd")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
