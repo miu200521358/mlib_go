@@ -12,7 +12,7 @@ import (
 	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/reader"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
@@ -32,7 +32,7 @@ type FilePicker struct {
 	historyPushButton *walk.PushButton          // 履歴ボタン
 	OnPathChanged     func(string)              // パス変更時のコールバック
 	limitHistory      int                       // 履歴リスト
-	modelReader       core.IReader              // mcore
+	rep               repository.IRepository    // mcore
 	initialDirPath    string                    // 初期ディレクトリ
 	cacheData         core.IHashModel           // キャッシュデータ
 	window            *walk.MainWindow          // MainWindow
@@ -58,7 +58,7 @@ func NewPmxReadFilePicker(
 		map[int]map[string]string{
 			0: {"*.pmx": "Pmx Files (*.pmx)"}, 2: {"*.*": "All Files (*.*)"}},
 		50,
-		&reader.PmxReader{},
+		repository.NewPmxRepository(),
 		OnPathChanged)
 }
 
@@ -81,7 +81,8 @@ func NewVpdReadFilePicker(
 		map[int]map[string]string{
 			0: {"*.vpd": "Vpd Files (*.vpd)"}, 1: {"*.*": "All Files (*.*)"}},
 		50,
-		&reader.VpdMotionReader{},
+		nil,
+		// &reader.VpdMotionReader{},
 		OnPathChanged)
 }
 
@@ -106,7 +107,8 @@ func NewVmdVpdReadFilePicker(
 			1: {"*.vpd": "Vpd Files (*.vpd)"},
 			2: {"*.*": "All Files (*.*)"}},
 		50,
-		reader.NewVmdVpdMotionReader(),
+		nil,
+		// reader.NewVmdVpdMotionReader(),
 		OnPathChanged)
 }
 
@@ -130,7 +132,8 @@ func NewVmdReadFilePicker(
 			0: {"*.vmd": "Vmd Files (*.vmd)"},
 			1: {"*.*": "All Files (*.*)"}},
 		50,
-		&reader.VmdMotionReader{},
+		nil,
+		// &reader.VmdMotionReader{},
 		OnPathChanged)
 }
 
@@ -189,7 +192,7 @@ func NewFilePicker(
 	description string,
 	filterExtension map[int]map[string]string,
 	limitHistory int,
-	modelReader core.IReader,
+	rep repository.IRepository,
 	onPathChanged func(string),
 ) (*FilePicker, error) {
 	picker := new(FilePicker)
@@ -198,7 +201,7 @@ func NewFilePicker(
 	picker.filterExtension = filterExtension
 	picker.OnPathChanged = onPathChanged
 	picker.limitHistory = limitHistory
-	picker.modelReader = modelReader
+	picker.rep = rep
 	picker.window = window
 
 	if err := walk.InitWidget(
@@ -301,7 +304,7 @@ func NewFilePicker(
 }
 
 func (picker *FilePicker) GetData() (core.IHashModel, error) {
-	if picker.PathLineEdit.Text() == "" || picker.modelReader == nil {
+	if picker.PathLineEdit.Text() == "" || picker.rep == nil {
 		return nil, nil
 	}
 
@@ -310,7 +313,7 @@ func (picker *FilePicker) GetData() (core.IHashModel, error) {
 	}
 
 	// キャッシュの有無は見ずに、必ず取得し直す
-	data, err := picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
+	data, err := picker.rep.Load(picker.PathLineEdit.Text())
 	defer runtime.GC() // 読み込み時のメモリ解放
 
 	if err != nil {
@@ -323,7 +326,7 @@ func (picker *FilePicker) GetData() (core.IHashModel, error) {
 
 // パスが正しいことが分かっている上でデータだけ取り直したい場合
 func (picker *FilePicker) GetDataForce() core.IHashModel {
-	data, err := picker.modelReader.ReadByFilepath(picker.PathLineEdit.Text())
+	data, err := picker.rep.Load(picker.PathLineEdit.Text())
 	defer runtime.GC() // 読み込み時のメモリ解放
 
 	if err != nil {
@@ -348,7 +351,7 @@ func (picker *FilePicker) IsCached() bool {
 		return false
 	}
 
-	hash, err := picker.modelReader.ReadHashByFilePath(picker.PathLineEdit.Text())
+	hash, err := picker.rep.LoadHash(picker.PathLineEdit.Text())
 	if err != nil {
 		return false
 	}
@@ -375,11 +378,11 @@ func (picker *FilePicker) GetPath() string {
 func (picker *FilePicker) OnChanged(path string) {
 	picker.PathLineEdit.SetText(path)
 
-	if picker.modelReader != nil && picker.historyKey != "" {
+	if picker.rep != nil && picker.historyKey != "" {
 		if path == "" {
 			picker.nameLineEdit.SetText(mi18n.T("未設定"))
 		} else {
-			modelName, err := picker.modelReader.ReadNameByFilepath(path)
+			modelName, err := picker.rep.LoadName(path)
 			if err != nil {
 				picker.nameLineEdit.SetText(mi18n.T("読み込み失敗"))
 			} else {

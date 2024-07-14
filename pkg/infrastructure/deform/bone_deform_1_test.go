@@ -7,6 +7,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/reader"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
 )
 
 func TestVmdMotion_Deform_Exists(t *testing.T) {
@@ -19,8 +20,8 @@ func TestVmdMotion_Deform_Exists(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -147,8 +148,8 @@ func TestVmdMotion_Deform_Lerp(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -275,8 +276,8 @@ func TestVmdMotion_DeformLegIk1_Matsu(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -336,8 +337,8 @@ func TestVmdMotion_DeformLegIk2_Matsu(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -399,8 +400,8 @@ func TestVmdMotion_DeformLegIk3_Matsu(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -475,8 +476,8 @@ func TestVmdMotion_DeformLegIk4_Snow(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -537,8 +538,8 @@ func TestVmdMotion_DeformLegIk5_Koshi(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -599,8 +600,8 @@ func TestVmdMotion_DeformLegIk6_KoshiOff(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -640,8 +641,8 @@ func TestVmdMotion_DeformLegIk6_KoshiOn(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -682,8 +683,8 @@ func TestVmdMotion_DeformLegIk6_KoshiIkOn(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -731,8 +732,8 @@ func TestVmdMotion_DeformLegIk6_KoshiIkOff(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -781,8 +782,8 @@ func TestVmdMotion_DeformLegIk7_Syou(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -844,8 +845,8 @@ func TestVmdMotion_DeformLegIk8_Syou(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -906,8 +907,8 @@ func TestVmdMotion_DeformLegIk10_Syou1(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -966,8 +967,8 @@ func TestVmdMotion_DeformLegIk10_Syou2(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1027,8 +1028,8 @@ func TestVmdMotion_DeformLegIk10_Syou3(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1087,8 +1088,8 @@ func TestVmdMotion_DeformLegIk10_Syou4(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1147,8 +1148,8 @@ func TestVmdMotion_DeformLegIk10_Syou5(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1207,8 +1208,8 @@ func TestVmdMotion_DeformLegIk10_Syou6(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1268,8 +1269,8 @@ func TestVmdMotion_DeformLegIk11_Shining_Miku(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式初音ミク_盗賊つばき流Ｍトレースモデル配布 v1.07/Tda式初音ミク_盗賊つばき流Mトレースモデルv1.07_かかと.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式初音ミク_盗賊つばき流Ｍトレースモデル配布 v1.07/Tda式初音ミク_盗賊つばき流Mトレースモデルv1.07_かかと.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1360,8 +1361,8 @@ func TestVmdMotion_DeformLegIk11_Shining_Vroid(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1421,8 +1422,8 @@ func TestVmdMotion_DeformLegIk12_Down_Miku(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式初音ミク_盗賊つばき流Ｍトレースモデル配布 v1.07/Tda式初音ミク_盗賊つばき流Mトレースモデルv1.07_かかと.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式初音ミク_盗賊つばき流Ｍトレースモデル配布 v1.07/Tda式初音ミク_盗賊つばき流Mトレースモデルv1.07_かかと.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1486,8 +1487,8 @@ func TestVmdMotion_DeformLegIk13_Lamb(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/ゲーム/戦国BASARA/幸村 たぬき式 ver.1.24/真田幸村没第二衣装1.24軽量版.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/ゲーム/戦国BASARA/幸村 たぬき式 ver.1.24/真田幸村没第二衣装1.24軽量版.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1588,8 +1589,8 @@ func TestVmdMotion_DeformLegIk14_Ballet(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式/初音ミク_準標準.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式/初音ミク_準標準.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1658,8 +1659,8 @@ func TestVmdMotion_DeformLegIk15_Bottom(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式初音ミク_盗賊つばき流Ｍトレースモデル配布 v1.07/Tda式初音ミク_盗賊つばき流Mトレースモデルv1.07_かかと.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式初音ミク_盗賊つばき流Ｍトレースモデル配布 v1.07/Tda式初音ミク_盗賊つばき流Mトレースモデルv1.07_かかと.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1726,8 +1727,8 @@ func TestVmdMotion_DeformLegIk16_Lamb(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/ゲーム/戦国BASARA/幸村 たぬき式 ver.1.24/真田幸村没第二衣装1.24軽量版.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/ゲーム/戦国BASARA/幸村 たぬき式 ver.1.24/真田幸村没第二衣装1.24軽量版.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1790,8 +1791,8 @@ func TestVmdMotion_DeformLegIk17_Snow(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Lat式ミクVer2.31/Lat式ミクVer2.31_White_準標準.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Lat式ミクVer2.31/Lat式ミクVer2.31_White_準標準.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1852,8 +1853,8 @@ func TestVmdMotion_DeformLegIk18_Syou(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1914,8 +1915,8 @@ func TestVmdMotion_DeformLegIk19_Wa(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_bone-structure.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_bone-structure.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -1970,8 +1971,8 @@ func TestVmdMotion_DeformLegIk20_Syou(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2032,8 +2033,8 @@ func TestVmdMotion_DeformLegIk21_FK(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル_ひざ制限なし.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル_ひざ制限なし.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2070,8 +2071,8 @@ func TestVmdMotion_DeformLegIk22_Bake(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル_ひざ制限なし.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル_ひざ制限なし.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2108,8 +2109,8 @@ func TestVmdMotion_DeformLegIk22_NoLimit(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/サンプルモデル_ひざ制限なし.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/サンプルモデル_ひざ制限なし.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2146,8 +2147,8 @@ func TestVmdMotion_DeformLegIk23_Addiction(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式ミクワンピース/Tda式ミクワンピースRSP.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式ミクワンピース/Tda式ミクワンピースRSP.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2214,8 +2215,8 @@ func TestVmdMotion_DeformLegIk24_Positive(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2353,8 +2354,8 @@ func TestVmdMotion_DeformArmIk(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("../../../test_resources/ボーンツリーテストモデル.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/ボーンツリーテストモデル.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2481,8 +2482,8 @@ func TestVmdMotion_DeformLegIk2(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4_準標準.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4_準標準.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2664,8 +2665,8 @@ func TestVmdMotion_DeformArmIk3(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Sour式初音ミクVer.1.02/Black_全表示.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Sour式初音ミクVer.1.02/Black_全表示.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2728,8 +2729,8 @@ func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/019_にっかり青江/にっかり青江 帽子屋式 ver2.1/帽子屋式にっかり青江（戦装束）_表示枠.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/019_にっかり青江/にっかり青江 帽子屋式 ver2.1/帽子屋式にっかり青江（戦装束）_表示枠.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2816,8 +2817,8 @@ func TestVmdMotion_DeformLegIk26_Far(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式ミク準標準見せパン/初音ミクVer2 準標準 見せパン 3.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式ミク準標準見せパン/初音ミクVer2 準標準 見せパン 3.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -2880,8 +2881,8 @@ func TestVmdMotion_DeformLegIk27_Addiction_Shoes(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := &reader.PmxReader{}
-	modelData, err := pr.ReadByFilepath("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)

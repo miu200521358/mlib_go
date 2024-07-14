@@ -23,15 +23,14 @@ type IRepository interface {
 	LoadName(path string) (string, error)
 	Load(path string) (core.IHashModel, error)
 	LoadHash(path string) (string, error)
-	Save(path string, model core.IHashModel) error
-	SaveIncludeSystem(path string, model core.IHashModel) error
+	Save(overridePath string, data core.IHashModel, includeSystem bool) error
 }
 
 type baseRepository[T core.IHashModel] struct {
 	file     *os.File
 	reader   *bufio.Reader
 	encoding encoding.Encoding
-	loadText func() string
+	readText func() string
 	newFunc  func(path string) T
 }
 
@@ -80,7 +79,7 @@ func (r *baseRepository[T]) LoadHash(path string) (string, error) {
 
 func (r *baseRepository[T]) defineEncoding(encoding encoding.Encoding) {
 	r.encoding = encoding
-	r.loadText = r.defineReadText(encoding)
+	r.readText = r.defineReadText(encoding)
 }
 
 func (r *baseRepository[T]) defineReadText(encoding encoding.Encoding) func() string {

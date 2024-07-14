@@ -160,13 +160,13 @@ func (r *PmxRepository) loadHeader(model *pmx.PmxModel) error {
 	model.RigidBodyCountType = int(rigidBodyCount)
 
 	// 4 + n : TextBuf	| モデル名
-	model.Name = r.loadText()
+	model.Name = r.readText()
 	// 4 + n : TextBuf	| モデル名英
-	model.EnglishName = r.loadText()
+	model.EnglishName = r.readText()
 	// 4 + n : TextBuf	| コメント
-	model.Comment = r.loadText()
+	model.Comment = r.readText()
 	// 4 + n : TextBuf	| コメント英
-	model.EnglishComment = r.loadText()
+	model.EnglishComment = r.readText()
 
 	return nil
 }
@@ -475,7 +475,7 @@ func (r *PmxRepository) loadTextures(model *pmx.PmxModel) error {
 		t := &pmx.Texture{IndexModel: &core.IndexModel{Index: i}}
 
 		// 4 + n : TextBuf	| テクスチャパス
-		t.Name = r.loadText()
+		t.Name = r.readText()
 
 		textures.Update(t)
 	}
@@ -496,9 +496,9 @@ func (r *PmxRepository) loadMaterials(model *pmx.PmxModel) error {
 
 	for i := 0; i < totalMaterialCount; i++ {
 		// 4 + n : TextBuf	| 材質名
-		name := r.loadText()
+		name := r.readText()
 		// 4 + n : TextBuf	| 材質名英
-		englishName := r.loadText()
+		englishName := r.readText()
 
 		m := &pmx.Material{
 			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
@@ -592,7 +592,7 @@ func (r *PmxRepository) loadMaterials(model *pmx.PmxModel) error {
 		}
 
 		// 4 + n : TextBuf	| メモ
-		m.Memo = r.loadText()
+		m.Memo = r.readText()
 
 		// 4  : int	| 材質に対応する面(頂点)数 (必ず3の倍数になる)
 		m.VerticesCount, err = r.unpackInt()
@@ -622,9 +622,9 @@ func (r *PmxRepository) loadBones(model *pmx.PmxModel) error {
 	for i := 0; i < totalBoneCount; i++ {
 
 		// 4 + n : TextBuf	| ボーン名
-		name := r.loadText()
+		name := r.readText()
 		// 4 + n : TextBuf	| ボーン名英
-		englishName := r.loadText()
+		englishName := r.readText()
 
 		b := &pmx.Bone{
 			IndexNameModel:         &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
@@ -844,9 +844,9 @@ func (r *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 
 	for i := 0; i < totalMorphCount; i++ {
 		// 4 + n : TextBuf	| モーフ名
-		name := r.loadText()
+		name := r.readText()
 		// 4 + n : TextBuf	| モーフ名英
-		englishName := r.loadText()
+		englishName := r.readText()
 
 		m := &pmx.Morph{
 			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
@@ -1030,9 +1030,9 @@ func (r *PmxRepository) loadDisplaySlots(model *pmx.PmxModel) error {
 
 	for i := 0; i < totalDisplaySlotCount; i++ {
 		// 4 + n : TextBuf	| 枠名
-		name := r.loadText()
+		name := r.readText()
 		// 4 + n : TextBuf	| 枠名英
-		englishName := r.loadText()
+		englishName := r.readText()
 
 		d := &pmx.DisplaySlot{
 			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
@@ -1104,9 +1104,9 @@ func (r *PmxRepository) loadRigidBodies(model *pmx.PmxModel) error {
 
 	for i := 0; i < totalRigidBodyCount; i++ {
 		// 4 + n : TextBuf	| 剛体名
-		name := r.loadText()
+		name := r.readText()
 		// 4 + n : TextBuf	| 剛体名英
-		englishName := r.loadText()
+		englishName := r.readText()
 
 		b := &pmx.RigidBody{
 			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
@@ -1219,9 +1219,9 @@ func (r *PmxRepository) loadJoints(model *pmx.PmxModel) error {
 
 	for i := 0; i < totalJointCount; i++ {
 		// 4 + n : TextBuf	| Joint名
-		name := r.loadText()
+		name := r.readText()
 		// 4 + n : TextBuf	| Joint名英
-		englishName := r.loadText()
+		englishName := r.readText()
 
 		j := &pmx.Joint{
 			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},

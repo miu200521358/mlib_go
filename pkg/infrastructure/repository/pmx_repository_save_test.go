@@ -1,4 +1,4 @@
-package writer
+package repository
 
 import (
 	"math"
@@ -6,13 +6,12 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/reader"
 )
 
 func TestPmxWriter_Save1(t *testing.T) {
-	r := &reader.PmxReader{}
+	r := NewPmxRepository()
 
-	data, err := r.ReadByFilepath("../../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
+	data, err := r.Load("../../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
 	originalModel := data.(*pmx.PmxModel)
 
 	if err != nil {
@@ -22,10 +21,10 @@ func TestPmxWriter_Save1(t *testing.T) {
 	// ------------------
 
 	overridePath := "../../../test_resources/サンプルモデル_PMX読み取り確認用_output.pmx"
-	PmxSave(originalModel, overridePath, "", false)
+	r.Save(overridePath, originalModel, false)
 
 	// ------------------
-	data, err = r.ReadByFilepath(overridePath)
+	data, err = r.Load(overridePath)
 	model := data.(*pmx.PmxModel)
 
 	if err != nil {
