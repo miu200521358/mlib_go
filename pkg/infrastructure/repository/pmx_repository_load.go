@@ -242,7 +242,7 @@ func (r *PmxRepository) loadVertices(model *pmx.PmxModel) error {
 		v := &pmx.Vertex{IndexModel: &core.IndexModel{Index: i}}
 
 		// 12 : float3  | 位置(x,y,z)
-		pos, err := r.unpackVec3(true)
+		pos, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadVertices UnpackFloat Position error: %v", i, err)
 			return err
@@ -250,7 +250,7 @@ func (r *PmxRepository) loadVertices(model *pmx.PmxModel) error {
 		v.Position = &pos
 
 		// 12 : float3  | 法線(x,y,z)
-		normal, err := r.unpackVec3(true)
+		normal, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadVertices UnpackFloat Normal[0] error: %v", i, err)
 			return err
@@ -268,7 +268,7 @@ func (r *PmxRepository) loadVertices(model *pmx.PmxModel) error {
 		// 16 * n : float4[n] | 追加UV(x,y,z,w)  PMXヘッダの追加UV数による
 		v.ExtendedUvs = make([]*mmath.MVec4, 0)
 		for j := 0; j < model.ExtendedUVCount; j++ {
-			extendedUV, err := r.unpackVec4(false)
+			extendedUV, err := r.unpackVec4()
 			if err != nil {
 				mlog.E("[%d][%d] loadVertices UnpackVec4 ExtendedUV error: %v", i, j, err)
 				return err
@@ -384,19 +384,19 @@ func (r *PmxRepository) loadVertices(model *pmx.PmxModel) error {
 				return err
 			}
 			// 12 : float3             | SDEF-C値(x,y,z)
-			sdefC, err := r.unpackVec3(true)
+			sdefC, err := r.unpackVec3()
 			if err != nil {
 				mlog.E("[%d] loadVertices SDEF UnpackVec3 sdefC error: %v", i, err)
 				return err
 			}
 			// 12 : float3             | SDEF-R0値(x,y,z)
-			sdefR0, err := r.unpackVec3(true)
+			sdefR0, err := r.unpackVec3()
 			if err != nil {
 				mlog.E("[%d] loadVertices SDEF UnpackVec3 sdefR0 error: %v", i, err)
 				return err
 			}
 			// 12 : float3             | SDEF-R1値(x,y,z) ※修正値を要計算
-			sdefR1, err := r.unpackVec3(true)
+			sdefR1, err := r.unpackVec3()
 			if err != nil {
 				mlog.E("[%d] loadVertices SDEF UnpackVec3 sdefR1 error: %v", i, err)
 				return err
@@ -505,21 +505,21 @@ func (r *PmxRepository) loadMaterials(model *pmx.PmxModel) error {
 		}
 
 		// 16 : float4	| Diffuse (R,G,B,A)
-		diffuse, err := r.unpackVec4(false)
+		diffuse, err := r.unpackVec4()
 		if err != nil {
 			mlog.E("[%d] loadMaterials UnpackVec4 Diffuse error: %v", i, err)
 			return err
 		}
 		m.Diffuse = &diffuse
 		// 12 : float3	| Specular (R,G,B,Specular係数)
-		specular, err := r.unpackVec4(false)
+		specular, err := r.unpackVec4()
 		if err != nil {
 			mlog.E("[%d] loadMaterials UnpackVec4 Specular error: %v", i, err)
 			return err
 		}
 		m.Specular = &specular
 		// 12 : float3	| Ambient (R,G,B)
-		ambient, err := r.unpackVec3(false)
+		ambient, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadMaterials UnpackVec3 Ambient error: %v", i, err)
 			return err
@@ -533,7 +533,7 @@ func (r *PmxRepository) loadMaterials(model *pmx.PmxModel) error {
 		}
 		m.DrawFlag = pmx.DrawFlag(drawFlag)
 		// 16 : float4	| エッジ色 (R,G,B,A)
-		edge, err := r.unpackVec4(false)
+		edge, err := r.unpackVec4()
 		if err != nil {
 			mlog.E("[%d] loadMaterials UnpackVec4 Edge error: %v", i, err)
 			return err
@@ -650,7 +650,7 @@ func (r *PmxRepository) loadBones(model *pmx.PmxModel) error {
 		}
 
 		// 12 : float3	| 位置
-		pos, err := r.unpackVec3(true)
+		pos, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadBones UnpackVec3 Position error: %v", i, err)
 			return err
@@ -688,7 +688,7 @@ func (r *PmxRepository) loadBones(model *pmx.PmxModel) error {
 		} else {
 			//  12 : float3	| 座標オフセット, ボーン位置からの相対分
 			b.TailIndex = -1
-			tailPos, err := r.unpackVec3(true)
+			tailPos, err := r.unpackVec3()
 			if err != nil {
 				mlog.E("[%d] loadBones UnpackVec3 TailPosition error: %v", i, err)
 				return err
@@ -718,7 +718,7 @@ func (r *PmxRepository) loadBones(model *pmx.PmxModel) error {
 		// 軸固定:1 の場合
 		if b.HasFixedAxis() {
 			// 12 : float3	| 軸の方向ベクトル
-			fixedAxis, err := r.unpackVec3(true)
+			fixedAxis, err := r.unpackVec3()
 			if err != nil {
 				mlog.E("[%d] loadBones UnpackVec3 FixedAxis error: %v", i, err)
 				return err
@@ -732,14 +732,14 @@ func (r *PmxRepository) loadBones(model *pmx.PmxModel) error {
 		// ローカル軸:1 の場合
 		if b.HasLocalAxis() {
 			// 12 : float3	| X軸の方向ベクトル
-			localAxisX, err := r.unpackVec3(true)
+			localAxisX, err := r.unpackVec3()
 			if err != nil {
 				mlog.E("[%d] loadBones UnpackVec3 LocalAxisX error: %v", i, err)
 				return err
 			}
 			b.LocalAxisX = &localAxisX
 			// 12 : float3	| Z軸の方向ベクトル
-			localAxisZ, err := r.unpackVec3(true)
+			localAxisZ, err := r.unpackVec3()
 			if err != nil {
 				mlog.E("[%d] loadBones UnpackVec3 LocalAxisZ error: %v", i, err)
 				return err
@@ -807,14 +807,14 @@ func (r *PmxRepository) loadBones(model *pmx.PmxModel) error {
 				il.AngleLimit = ikLinkAngleLimit == 1
 				if il.AngleLimit {
 					// 12 : float3	| 下限 (x,y,z) -> ラジアン角
-					minAngleLimit, err := r.unpackVec3(false)
+					minAngleLimit, err := r.unpackVec3()
 					if err != nil {
 						mlog.E("[%d][%d] loadBones UnpackVec3 IkLink.MinAngleLimit error: %v", i, j, err)
 						return err
 					}
 					il.MinAngleLimit.SetRadians(&minAngleLimit)
 					// 12 : float3	| 上限 (x,y,z) -> ラジアン角
-					maxAngleLimit, err := r.unpackVec3(false)
+					maxAngleLimit, err := r.unpackVec3()
 					if err != nil {
 						mlog.E("[%d][%d] loadBones UnpackVec3 IkLink.MaxAngleLimit error: %v", i, j, err)
 						return err
@@ -895,7 +895,7 @@ func (r *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 					return err
 				}
 				// 12 : float3	| 座標オフセット量(x,y,z)
-				offset, err := r.unpackVec3(true)
+				offset, err := r.unpackVec3()
 				if err != nil {
 					mlog.E("[%d][%d] loadMorphs UnpackVec3 Offset error: %v", i, j, err)
 					return err
@@ -909,13 +909,13 @@ func (r *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 					return err
 				}
 				// 12 : float3	| 移動量(x,y,z)
-				offset, err := r.unpackVec3(true)
+				offset, err := r.unpackVec3()
 				if err != nil {
 					mlog.E("[%d][%d] loadMorphs UnpackVec3 Offset error: %v", i, j, err)
 					return err
 				}
 				// 16 : float4	| 回転量(x,y,z,w)
-				qq, err := r.unpackQuaternion(true)
+				qq, err := r.unpackQuaternion()
 				if err != nil {
 					mlog.E("[%d][%d] loadMorphs UnpackQuaternion Quaternion error: %v", i, j, err)
 					return err
@@ -929,7 +929,7 @@ func (r *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 					return err
 				}
 				// 16 : float4	| UVオフセット量(x,y,z,w) ※通常UVはz,wが不要項目になるがモーフとしてのデータ値は記録しておく
-				offset, err := r.unpackVec4(false)
+				offset, err := r.unpackVec4()
 				if err != nil {
 					mlog.E("[%d][%d] loadMorphs UnpackVec4 Offset error: %v", i, j, err)
 					return err
@@ -949,25 +949,25 @@ func (r *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 					return err
 				}
 				// 16 : float4	| Diffuse (R,G,B,A) - 乗算:1.0／加算:0.0 が初期値となる(同以下)
-				diffuse, err := r.unpackVec4(false)
+				diffuse, err := r.unpackVec4()
 				if err != nil {
 					mlog.E("[%d][%d] loadMorphs UnpackVec4 Diffuse error: %v", i, j, err)
 					return err
 				}
 				// 12 : float3	| Specular (R,G,B, Specular係数)
-				specular, err := r.unpackVec4(false)
+				specular, err := r.unpackVec4()
 				if err != nil {
 					mlog.E("[%d][%d] loadMorphs UnpackVec4 Specular error: %v", i, j, err)
 					return err
 				}
 				// 12 : float3	| Ambient (R,G,B)
-				ambient, err := r.unpackVec3(false)
+				ambient, err := r.unpackVec3()
 				if err != nil {
 					mlog.E("[%d][%d] loadMorphs UnpackVec3 Ambient error: %v", i, j, err)
 					return err
 				}
 				// 16 : float4	| エッジ色 (R,G,B,A)
-				edge, err := r.unpackVec4(false)
+				edge, err := r.unpackVec4()
 				if err != nil {
 					mlog.E("[%d][%d] loadMorphs UnpackVec4 Edge error: %v", i, j, err)
 					return err
@@ -979,19 +979,19 @@ func (r *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 					return err
 				}
 				// 16 : float4	| テクスチャ係数 (R,G,B,A)
-				textureFactor, err := r.unpackVec4(false)
+				textureFactor, err := r.unpackVec4()
 				if err != nil {
 					mlog.E("[%d][%d] loadMorphs UnpackVec4 TextureFactor error: %v", i, j, err)
 					return err
 				}
 				// 16 : float4	| スフィアテクスチャ係数 (R,G,B,A)
-				sphereTextureFactor, err := r.unpackVec4(false)
+				sphereTextureFactor, err := r.unpackVec4()
 				if err != nil {
 					mlog.E("[%d][%d] loadMorphs UnpackVec4 SphereTextureFactor error: %v", i, j, err)
 					return err
 				}
 				// 16 : float4	| Toonテクスチャ係数 (R,G,B,A)
-				toonTextureFactor, err := r.unpackVec4(false)
+				toonTextureFactor, err := r.unpackVec4()
 				if err != nil {
 					mlog.E("[%d][%d] loadMorphs UnpackVec4 ToonTextureFactor error: %v", i, j, err)
 					return err
@@ -1142,21 +1142,21 @@ func (r *PmxRepository) loadRigidBodies(model *pmx.PmxModel) error {
 		}
 		b.ShapeType = pmx.Shape(shapeType)
 		// 12 : float3	| サイズ(x,y,z)
-		size, err := r.unpackVec3(false)
+		size, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadRigidBodies UnpackVec3 Size error: %v", i, err)
 			return err
 		}
 		b.Size = &size
 		// 12 : float3	| 位置(x,y,z)
-		position, err := r.unpackVec3(true)
+		position, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadRigidBodies UnpackVec3 Position error: %v", i, err)
 			return err
 		}
 		b.Position = &position
 		// 12 : float3	| 回転(x,y,z) -> ラジアン角
-		rads, err := r.unpackVec3(false)
+		rads, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadRigidBodies UnpackVec3 Rotation error: %v", i, err)
 			return err
@@ -1247,56 +1247,56 @@ func (r *PmxRepository) loadJoints(model *pmx.PmxModel) error {
 			return err
 		}
 		// 12 : float3	| 位置(x,y,z)
-		position, err := r.unpackVec3(true)
+		position, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadJoints UnpackVec3 Position error: %v", i, err)
 			return err
 		}
 		j.Position = &position
 		// 12 : float3	| 回転(x,y,z) -> ラジアン角
-		rads, err := r.unpackVec3(false)
+		rads, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadJoints UnpackVec3 Rotation error: %v", i, err)
 			return err
 		}
 		j.Rotation = mmath.NewRotationFromRadians(&rads)
 		// 12 : float3	| 移動制限-下限(x,y,z)
-		translationLimitMin, err := r.unpackVec3(false)
+		translationLimitMin, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadJoints UnpackVec3 TranslationLimitMin error: %v", i, err)
 			return err
 		}
 		j.JointParam.TranslationLimitMin = &translationLimitMin
 		// 12 : float3	| 移動制限-上限(x,y,z)
-		translationLimitMax, err := r.unpackVec3(false)
+		translationLimitMax, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadJoints UnpackVec3 TranslationLimitMax error: %v", i, err)
 			return err
 		}
 		j.JointParam.TranslationLimitMax = &translationLimitMax
 		// 12 : float3	| 回転制限-下限(x,y,z) -> ラジアン角
-		rotationLimitMin, err := r.unpackVec3(false)
+		rotationLimitMin, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadJoints UnpackVec3 RotationLimitMin error: %v", i, err)
 			return err
 		}
 		j.JointParam.RotationLimitMin = mmath.NewRotationFromRadians(&rotationLimitMin)
 		// 12 : float3	| 回転制限-上限(x,y,z) -> ラジアン角
-		rotationLimitMax, err := r.unpackVec3(false)
+		rotationLimitMax, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadJoints UnpackVec3 RotationLimitMax error: %v", i, err)
 			return err
 		}
 		j.JointParam.RotationLimitMax = mmath.NewRotationFromRadians(&rotationLimitMax)
 		// 12 : float3	| バネ定数-移動(x,y,z)
-		springConstantTranslation, err := r.unpackVec3(false)
+		springConstantTranslation, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadJoints UnpackVec3 SpringConstantTranslation error: %v", i, err)
 			return err
 		}
 		j.JointParam.SpringConstantTranslation = &springConstantTranslation
 		// 12 : float3	| バネ定数-回転(x,y,z)
-		springConstantRotation, err := r.unpackVec3(false)
+		springConstantRotation, err := r.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] loadJoints UnpackVec3 SpringConstantRotation error: %v", i, err)
 			return err

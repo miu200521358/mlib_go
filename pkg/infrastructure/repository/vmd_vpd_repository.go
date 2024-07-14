@@ -9,16 +9,16 @@ import (
 
 // VMDリーダー
 type VmdVpdRepository struct {
-	core.BaseReader[*vmd.VmdMotion]
+	baseRepository[*vmd.VmdMotion]
 	vmdRepository *VmdRepository
 	vpdRepository *VpdRepository
 }
 
 func NewVmdVpdRepository() *VmdVpdRepository {
-	reader := new(VmdVpdRepository)
-	reader.vmdRepository = NewVmdRepository()
-	reader.vpdRepository = NewVpdRepository()
-	return reader
+	rep := new(VmdVpdRepository)
+	rep.vmdRepository = NewVmdRepository()
+	rep.vpdRepository = NewVpdRepository()
+	return rep
 }
 
 // 指定されたパスのファイルからデータを読み込む
