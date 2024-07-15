@@ -15,14 +15,14 @@ import (
 )
 
 type Mesh struct {
-	material          MaterialGL  // 描画用材質
+	material          materialGL  // 描画用材質
 	prevVerticesCount int         // 前の頂点数
 	ibo               *buffer.IBO // 頂点インデックスバッファ
 }
 
 func NewMesh(
 	allFaces []uint32,
-	material *MaterialGL,
+	material *materialGL,
 	prevVerticesCount int,
 ) *Mesh {
 	faces := allFaces[prevVerticesCount:(prevVerticesCount + material.VerticesCount)]

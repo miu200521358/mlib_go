@@ -66,7 +66,7 @@ func (t *TextureGL) delete() {
 	}
 }
 
-func textureGLInit(
+func newTextureGl(
 	t *pmx.Texture,
 	modelPath string,
 	textureType pmx.TextureType,

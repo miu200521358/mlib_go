@@ -5,7 +5,7 @@ package renderer
 
 import "github.com/miu200521358/mlib_go/pkg/domain/pmx"
 
-type MaterialGL struct {
+type materialGL struct {
 	*pmx.Material
 	Texture           *TextureGL // 通常テクスチャ
 	SphereTexture     *TextureGL // スフィアテクスチャ
@@ -13,7 +13,7 @@ type MaterialGL struct {
 	PrevVerticesCount int        // 前の材質までの頂点数
 }
 
-func materialGL(
+func newMaterialGl(
 	m *pmx.Material,
 	modelPath string,
 	texture *pmx.Texture,
@@ -21,23 +21,23 @@ func materialGL(
 	sphereTexture *pmx.Texture,
 	windowIndex int,
 	prevVerticesCount int,
-) *MaterialGL {
+) *materialGL {
 	var textureGL *TextureGL
 	if texture != nil {
-		textureGL = textureGLInit(texture, modelPath, pmx.TEXTURE_TYPE_TEXTURE, windowIndex)
+		textureGL = newTextureGl(texture, modelPath, pmx.TEXTURE_TYPE_TEXTURE, windowIndex)
 	}
 
 	var sphereTextureGL *TextureGL
 	if sphereTexture != nil {
-		sphereTextureGL = textureGLInit(sphereTexture, modelPath, pmx.TEXTURE_TYPE_SPHERE, windowIndex)
+		sphereTextureGL = newTextureGl(sphereTexture, modelPath, pmx.TEXTURE_TYPE_SPHERE, windowIndex)
 	}
 
 	var tooTextureGL *TextureGL
 	if toonTexture != nil {
-		tooTextureGL = textureGLInit(toonTexture, modelPath, pmx.TEXTURE_TYPE_TOON, windowIndex)
+		tooTextureGL = newTextureGl(toonTexture, modelPath, pmx.TEXTURE_TYPE_TOON, windowIndex)
 	}
 
-	return &MaterialGL{
+	return &materialGL{
 		Material:          m,
 		Texture:           textureGL,
 		SphereTexture:     sphereTextureGL,

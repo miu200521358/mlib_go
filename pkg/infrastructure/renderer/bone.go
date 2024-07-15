@@ -4,7 +4,6 @@
 package renderer
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
@@ -26,7 +25,7 @@ var bone_colors_invisible_normal = []float32{0.92, 0.92, 0.92, 0.7}
 var bone_colors_rotate = []float32{0.56, 0.78, 1.0, 1.0}
 var bone_colors_rotate_normal = []float32{0.76, 0.98, 1.00, 0.7}
 
-func color(b *pmx.Bone, isNormal bool) []float32 {
+func getBoneColor(b *pmx.Bone, isNormal bool) []float32 {
 	// ボーンの種類で色を変える
 	if b.IsIK() {
 		// IKボーン
@@ -79,9 +78,9 @@ func color(b *pmx.Bone, isNormal bool) []float32 {
 	return bone_colors_rotate
 }
 
-func BoneGL(b *pmx.Bone) []float32 {
+func newBoneGl(b *pmx.Bone) []float32 {
 	p := mgl.NewGlVec3(b.Position)
-	c := color(b, false)
+	c := getBoneColor(b, false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		float32(b.BoneFlag), 0.0, 0.0, // 法線
@@ -101,9 +100,9 @@ func BoneGL(b *pmx.Bone) []float32 {
 	}
 }
 
-func ParentGL(b *pmx.Bone) []float32 {
+func newParentBoneGl(b *pmx.Bone) []float32 {
 	p := mgl.NewGlVec3(b.Position.Subed(b.Extend.ParentRelativePosition))
-	c := color(b, false)
+	c := getBoneColor(b, false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		float32(b.BoneFlag), 0.0, 0.0, // 法線
@@ -123,9 +122,9 @@ func ParentGL(b *pmx.Bone) []float32 {
 	}
 }
 
-func TailGL(b *pmx.Bone) []float32 {
+func newTailBoneGl(b *pmx.Bone) []float32 {
 	p := mgl.NewGlVec3(b.Position.Added(b.Extend.ChildRelativePosition))
-	c := color(b, false)
+	c := getBoneColor(b, false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		float32(b.BoneFlag), 0.0, 0.0, // 法線
@@ -145,8 +144,8 @@ func TailGL(b *pmx.Bone) []float32 {
 	}
 }
 
-func DeltaGL(b *pmx.Bone, isDrawBones map[pmx.BoneFlag]bool) []float32 {
-	c := color(b, false)
+func newBoneDebugAlphaGl(b *pmx.Bone, isDrawBones map[pmx.BoneFlag]bool) []float32 {
+	c := getBoneColor(b, false)
 
 	ikAlpha := float32(1.0)
 	fixedAlpha := float32(1.0)
@@ -198,28 +197,6 @@ func DeltaGL(b *pmx.Bone, isDrawBones map[pmx.BoneFlag]bool) []float32 {
 		0.0, 0.0, 0.0, // 頂点モーフ
 		0.0, 0.0, 0.0, 0.0, // UVモーフ
 		c[0], c[1], c[2], c[3] * alpha, // 追加UV1モーフ
-		0.0, 0.0, 0.0, // 変形後頂点モーフ
-	}
-}
-
-func NormalGL(b *pmx.Bone) []float32 {
-	p := mgl.NewGlVec3(b.Extend.LocalMatrix.MulVec3(&mmath.MVec3{0, 0.6, 0}))
-	c := color(b, true)
-	return []float32{
-		p[0], p[1], p[2], // 位置
-		0.0, 0.0, 0.0, // 法線
-		float32(0), float32(0), // UV
-		float32(0), float32(0), // 追加UV
-		float32(0),                // エッジ倍率
-		float32(b.Index), 0, 0, 0, // デフォームボーンINDEX
-		1, 0, 0, 0, // デフォームボーンウェイト
-		0,       // SDEFであるか否か
-		0, 0, 0, // SDEF-C
-		0, 0, 0, // SDEF-R0
-		0, 0, 0, // SDEF-R1
-		0.0, 0.0, 0.0, // 頂点モーフ
-		0.0, 0.0, 0.0, 0.0, // UVモーフ
-		c[0], c[1], c[2], c[3], // 追加UV1モーフ
 		0.0, 0.0, 0.0, // 変形後頂点モーフ
 	}
 }

@@ -826,7 +826,7 @@ func (w *GlWindow) Run() {
 		for k := range w.modelSets {
 			if w.modelSets[k].Model != nil && w.modelSets[k].PrevDeltas != nil {
 				w.modelSets[k].PrevDeltas = widget.Draw(
-					w.Physics, w.modelSets[k].Model, w.modelSets[k].Meshes, w.Shader, w.modelSets[k].PrevDeltas,
+					w.Physics, w.modelSets[k].Model, w.modelSets[k].RenderModel, w.Shader, w.modelSets[k].PrevDeltas,
 					w.modelSets[k].InvisibleMaterialIndexes, w.modelSets[k].NextInvisibleMaterialIndexes,
 					w.modelSets[k].BoneGlDeltas,
 					w.modelSets[k].MeshGlDeltas,
@@ -847,15 +847,15 @@ func (w *GlWindow) Run() {
 			// モデルが変わっている場合は最新の情報を取得する
 			if w.modelSets[k].NextModel != nil {
 				// 次のモデルが指定されている場合、初期化して入替
-				if w.modelSets[k].Model != nil && w.modelSets[k].Meshes != nil {
+				if w.modelSets[k].Model != nil && w.modelSets[k].RenderModel != nil {
 					// 既存モデルが描画初期化されてたら削除
 					w.modelSets[k].Model.Delete()
 					w.modelSets[k].Model = nil
 				}
 				w.modelSets[k].Model = w.modelSets[k].NextModel
 				w.modelSets[k].NextModel = nil
-				if w.modelSets[k].Meshes == nil {
-					w.modelSets[k].Meshes = renderer.DrawInitialize(w.WindowIndex, w.modelSets[k].Model)
+				if w.modelSets[k].RenderModel == nil {
+					w.modelSets[k].RenderModel = renderer.NewRenderModel(w.WindowIndex, w.modelSets[k].Model)
 					w.Physics.AddModel(k, w.modelSets[k].Model)
 				}
 				w.isSaveDelta = false

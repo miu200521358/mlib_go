@@ -19,16 +19,16 @@ import (
 )
 
 type ModelSet struct {
-	Model                        *pmx.PmxModel    // 現在描画中のモデル
-	Motion                       *vmd.VmdMotion   // 現在描画中のモーション
-	Meshes                       *renderer.Meshes // 現在描画中のメッシュ
-	InvisibleMaterialIndexes     []int            // 非表示材質インデックス
-	SelectedVertexIndexes        []int            // 選択頂点インデックス
-	NextModel                    *pmx.PmxModel    // UIから渡された次のモデル
-	NextMotion                   *vmd.VmdMotion   // UIから渡された次のモーション
-	NextInvisibleMaterialIndexes []int            // UIから渡された次の非表示材質インデックス
-	NextSelectedVertexIndexes    []int            // UIから渡された次の選択頂点インデックス
-	PrevDeltas                   *delta.VmdDeltas // 前回のデフォーム情報
+	Model                        *pmx.PmxModel         // 現在描画中のモデル
+	Motion                       *vmd.VmdMotion        // 現在描画中のモーション
+	RenderModel                  *renderer.RenderModel // 現在描画中のメッシュ
+	InvisibleMaterialIndexes     []int                 // 非表示材質インデックス
+	SelectedVertexIndexes        []int                 // 選択頂点インデックス
+	NextModel                    *pmx.PmxModel         // UIから渡された次のモデル
+	NextMotion                   *vmd.VmdMotion        // UIから渡された次のモーション
+	NextInvisibleMaterialIndexes []int                 // UIから渡された次の非表示材質インデックス
+	NextSelectedVertexIndexes    []int                 // UIから渡された次の選択頂点インデックス
+	PrevDeltas                   *delta.VmdDeltas      // 前回のデフォーム情報
 	BoneGlDeltas                 []mgl32.Mat4
 	MeshGlDeltas                 []*renderer.MeshDelta
 	VertexMorphIndexes           []int
@@ -232,7 +232,7 @@ func deformAfterPhysics(
 func Draw(
 	modelPhysics *mbt.MPhysics,
 	model *pmx.PmxModel,
-	meshes *renderer.Meshes,
+	renderModel *renderer.RenderModel,
 	shader *mgl.MShader,
 	deltas *delta.VmdDeltas,
 	invisibleMaterialIndexes, nextInvisibleMaterialIndexes []int,
@@ -247,7 +247,7 @@ func Draw(
 	isDrawBones map[pmx.BoneFlag]bool,
 	isDrawRigidBodyFront, visibleRigidBody, visibleJoint bool,
 ) *delta.VmdDeltas {
-	vertexPositions := meshes.Draw(
+	vertexPositions := renderModel.Draw(
 		shader, BoneGlDeltas, VertexMorphIndexes, VertexMorphGlDeltas,
 		SelectedVertexIndexesDeltas, SelectedVertexGlDeltasDeltas, MeshGlDeltas,
 		invisibleMaterialIndexes, nextInvisibleMaterialIndexes, windowIndex,
