@@ -11,12 +11,6 @@ uniform int sphereMode;
 uniform sampler2D sphereSampler;
 
 uniform vec3 lightDirection;
-uniform vec4 textureMulFactor;
-uniform vec4 textureAddFactor;
-uniform vec4 sphereMulFactor;
-uniform vec4 sphereAddFactor;
-uniform vec4 toonMulFactor;
-uniform vec4 toonAddFactor;
 
 in vec4 vertexColor;
 in vec3 vertexSpecular;

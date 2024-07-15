@@ -88,12 +88,6 @@ func (m *Mesh) drawModel(
 		defer m.material.Texture.Unbind()
 		textureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TEXTURE_SAMPLER))
 		gl.Uniform1i(textureUniform, int32(m.material.Texture.TextureUnitNo))
-
-		textureMulFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TEXTURE_MUL_FACTOR))
-		gl.Uniform4fv(textureMulFactorUniform, 1, &meshDelta.TextureMulFactor[0])
-
-		textureAddFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TEXTURE_ADD_FACTOR))
-		gl.Uniform4fv(textureAddFactorUniform, 1, &meshDelta.TextureAddFactor[0])
 	}
 
 	// Toon使用有無
@@ -104,12 +98,6 @@ func (m *Mesh) drawModel(
 		defer m.material.ToonTexture.Unbind()
 		toonUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TOON_SAMPLER))
 		gl.Uniform1i(toonUniform, int32(m.material.ToonTexture.TextureUnitNo))
-
-		toonMulFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TOON_MUL_FACTOR))
-		gl.Uniform4fv(toonMulFactorUniform, 1, &meshDelta.ToonMulFactor[0])
-
-		toonAddFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TOON_ADD_FACTOR))
-		gl.Uniform4fv(toonAddFactorUniform, 1, &meshDelta.ToonAddFactor[0])
 	}
 
 	// Sphere使用有無
@@ -120,12 +108,6 @@ func (m *Mesh) drawModel(
 		defer m.material.SphereTexture.Unbind()
 		sphereUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPHERE_SAMPLER))
 		gl.Uniform1i(sphereUniform, int32(m.material.SphereTexture.TextureUnitNo))
-
-		sphereMulFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPHERE_MUL_FACTOR))
-		gl.Uniform4fv(sphereMulFactorUniform, 1, &meshDelta.SphereMulFactor[0])
-
-		sphereAddFactorUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPHERE_ADD_FACTOR))
-		gl.Uniform4fv(sphereAddFactorUniform, 1, &meshDelta.SphereAddFactor[0])
 	}
 
 	// SphereMode

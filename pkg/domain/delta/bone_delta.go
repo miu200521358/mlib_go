@@ -13,13 +13,13 @@ type BoneDelta struct {
 	GlobalMatrix       *mmath.MMat4       // グローバル行列
 	LocalMatrix        *mmath.MMat4       // ローカル行列
 	GlobalPosition     *mmath.MVec3       // グローバル位置
+	UnitMatrix         *mmath.MMat4       // 親ボーンからの変位行列
 	FramePosition      *mmath.MVec3       // キーフレ位置の変動量
 	FrameMorphPosition *mmath.MVec3       // モーフ位置の変動量
 	FrameRotation      *mmath.MQuaternion // キーフレ回転の変動量
 	FrameMorphRotation *mmath.MQuaternion // モーフ回転の変動量
 	FrameScale         *mmath.MVec3       // キーフレスケールの変動量
 	FrameMorphScale    *mmath.MVec3       // モーフスケールの変動量
-	UnitMatrix         *mmath.MMat4
 }
 
 func NewBoneDeltaByGlobalMatrix(

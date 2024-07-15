@@ -119,55 +119,33 @@ func NewMaterialMorphDelta(m *pmx.Material) *MaterialMorphDelta {
 	mm := &MaterialMorphDelta{
 		Material: m.Copy().(*pmx.Material),
 		AddMaterial: &pmx.Material{
-			Diffuse:             &mmath.MVec4{},
-			Specular:            &mmath.MVec4{},
-			Ambient:             &mmath.MVec3{},
-			Edge:                &mmath.MVec4{},
-			EdgeSize:            0,
-			TextureFactor:       &mmath.MVec4{},
-			SphereTextureFactor: &mmath.MVec4{},
-			ToonTextureFactor:   &mmath.MVec4{},
+			Diffuse:  &mmath.MVec4{},
+			Specular: &mmath.MVec4{},
+			Ambient:  &mmath.MVec3{},
+			Edge:     &mmath.MVec4{},
+			EdgeSize: 0,
 		},
 		MulMaterial: &pmx.Material{
-			Diffuse:             &mmath.MVec4{1, 1, 1, 1},
-			Specular:            &mmath.MVec4{1, 1, 1, 1},
-			Ambient:             &mmath.MVec3{1, 1, 1},
-			Edge:                &mmath.MVec4{1, 1, 1, 1},
-			EdgeSize:            1,
-			TextureFactor:       &mmath.MVec4{1, 1, 1, 1},
-			SphereTextureFactor: &mmath.MVec4{1, 1, 1, 1},
-			ToonTextureFactor:   &mmath.MVec4{1, 1, 1, 1},
+			Diffuse:  &mmath.MVec4{1, 1, 1, 1},
+			Specular: &mmath.MVec4{1, 1, 1, 1},
+			Ambient:  &mmath.MVec3{1, 1, 1},
+			Edge:     &mmath.MVec4{1, 1, 1, 1},
+			EdgeSize: 1,
 		},
 		AddRatios: &pmx.Material{
-			Diffuse:             &mmath.MVec4{},
-			Specular:            &mmath.MVec4{},
-			Ambient:             &mmath.MVec3{},
-			Edge:                &mmath.MVec4{},
-			EdgeSize:            0,
-			TextureFactor:       &mmath.MVec4{},
-			SphereTextureFactor: &mmath.MVec4{},
-			ToonTextureFactor:   &mmath.MVec4{},
+			Diffuse:  &mmath.MVec4{},
+			Specular: &mmath.MVec4{},
+			Ambient:  &mmath.MVec3{},
+			Edge:     &mmath.MVec4{},
+			EdgeSize: 0,
 		},
 		MulRatios: &pmx.Material{
-			Diffuse:             &mmath.MVec4{1, 1, 1, 1},
-			Specular:            &mmath.MVec4{1, 1, 1, 1},
-			Ambient:             &mmath.MVec3{1, 1, 1},
-			Edge:                &mmath.MVec4{1, 1, 1, 1},
-			EdgeSize:            1,
-			TextureFactor:       &mmath.MVec4{1, 1, 1, 1},
-			SphereTextureFactor: &mmath.MVec4{1, 1, 1, 1},
-			ToonTextureFactor:   &mmath.MVec4{1, 1, 1, 1},
+			Diffuse:  &mmath.MVec4{1, 1, 1, 1},
+			Specular: &mmath.MVec4{1, 1, 1, 1},
+			Ambient:  &mmath.MVec3{1, 1, 1},
+			Edge:     &mmath.MVec4{1, 1, 1, 1},
+			EdgeSize: 1,
 		},
-	}
-
-	if mm.Material.TextureFactor == nil {
-		mm.Material.TextureFactor = &mmath.MVec4{1, 1, 1, 1}
-	}
-	if mm.Material.SphereTextureFactor == nil {
-		mm.Material.SphereTextureFactor = &mmath.MVec4{1, 1, 1, 1}
-	}
-	if mm.Material.ToonTextureFactor == nil {
-		mm.Material.ToonTextureFactor = &mmath.MVec4{1, 1, 1, 1}
 	}
 
 	return mm
@@ -179,9 +157,6 @@ func (md *MaterialMorphDelta) Add(m *pmx.MaterialMorphOffset, ratio float64) {
 	md.AddMaterial.Ambient.Add(m.Ambient)
 	md.AddMaterial.Edge.Add(m.Edge)
 	md.AddMaterial.EdgeSize += m.EdgeSize
-	md.AddMaterial.TextureFactor.Add(m.TextureFactor)
-	md.AddMaterial.SphereTextureFactor.Add(m.SphereTextureFactor)
-	md.AddMaterial.ToonTextureFactor.Add(m.ToonTextureFactor)
 	if m.Diffuse.GetX() != 0 {
 		md.AddRatios.Diffuse.AddX(ratio)
 	}
@@ -229,42 +204,6 @@ func (md *MaterialMorphDelta) Add(m *pmx.MaterialMorphOffset, ratio float64) {
 	}
 	if m.EdgeSize != 0 {
 		md.AddRatios.EdgeSize += ratio
-	}
-	if m.TextureFactor.GetX() != 0 {
-		md.AddRatios.TextureFactor.AddX(ratio)
-	}
-	if m.TextureFactor.GetY() != 0 {
-		md.AddRatios.TextureFactor.AddY(ratio)
-	}
-	if m.TextureFactor.GetZ() != 0 {
-		md.AddRatios.TextureFactor.AddZ(ratio)
-	}
-	if m.TextureFactor.GetW() != 0 {
-		md.AddRatios.TextureFactor.AddW(ratio)
-	}
-	if m.SphereTextureFactor.GetX() != 0 {
-		md.AddRatios.SphereTextureFactor.AddX(ratio)
-	}
-	if m.SphereTextureFactor.GetY() != 0 {
-		md.AddRatios.SphereTextureFactor.AddY(ratio)
-	}
-	if m.SphereTextureFactor.GetZ() != 0 {
-		md.AddRatios.SphereTextureFactor.AddZ(ratio)
-	}
-	if m.SphereTextureFactor.GetW() != 0 {
-		md.AddRatios.SphereTextureFactor.AddW(ratio)
-	}
-	if m.ToonTextureFactor.GetX() != 0 {
-		md.AddRatios.ToonTextureFactor.AddX(ratio)
-	}
-	if m.ToonTextureFactor.GetY() != 0 {
-		md.AddRatios.ToonTextureFactor.AddY(ratio)
-	}
-	if m.ToonTextureFactor.GetZ() != 0 {
-		md.AddRatios.ToonTextureFactor.AddZ(ratio)
-	}
-	if m.ToonTextureFactor.GetW() != 0 {
-		md.AddRatios.ToonTextureFactor.AddW(ratio)
 	}
 }
 
@@ -332,54 +271,6 @@ func (md *MaterialMorphDelta) Mul(m *pmx.MaterialMorphOffset, ratio float64) {
 	if m.EdgeSize != 1 {
 		md.MulMaterial.EdgeSize *= md.Material.EdgeSize - m.EdgeSize
 		md.MulRatios.EdgeSize *= ratio
-	}
-	if m.TextureFactor.GetX() != 1 {
-		md.MulMaterial.TextureFactor.MulX(md.Material.TextureFactor.GetX() - m.TextureFactor.GetX())
-		md.MulRatios.TextureFactor.MulX(1 - ratio)
-	}
-	if m.TextureFactor.GetY() != 1 {
-		md.MulMaterial.TextureFactor.MulY(md.Material.TextureFactor.GetY() - m.TextureFactor.GetY())
-		md.MulRatios.TextureFactor.MulY(1 - ratio)
-	}
-	if m.TextureFactor.GetZ() != 1 {
-		md.MulMaterial.TextureFactor.MulZ(md.Material.TextureFactor.GetZ() - m.TextureFactor.GetZ())
-		md.MulRatios.TextureFactor.MulZ(1 - ratio)
-	}
-	if m.TextureFactor.GetW() != 1 {
-		md.MulMaterial.TextureFactor.MulW(md.Material.TextureFactor.GetW() - m.TextureFactor.GetW())
-		md.MulRatios.TextureFactor.MulW(1 - ratio)
-	}
-	if m.SphereTextureFactor.GetX() != 1 {
-		md.MulMaterial.SphereTextureFactor.MulX(md.Material.SphereTextureFactor.GetX() - m.SphereTextureFactor.GetX())
-		md.MulRatios.SphereTextureFactor.MulX(1 - ratio)
-	}
-	if m.SphereTextureFactor.GetY() != 1 {
-		md.MulMaterial.SphereTextureFactor.MulY(md.Material.SphereTextureFactor.GetY() - m.SphereTextureFactor.GetY())
-		md.MulRatios.SphereTextureFactor.MulY(1 - ratio)
-	}
-	if m.SphereTextureFactor.GetZ() != 1 {
-		md.MulMaterial.SphereTextureFactor.MulZ(md.Material.SphereTextureFactor.GetZ() - m.SphereTextureFactor.GetZ())
-		md.MulRatios.SphereTextureFactor.MulZ(1 - ratio)
-	}
-	if m.SphereTextureFactor.GetW() != 1 {
-		md.MulMaterial.SphereTextureFactor.MulW(md.Material.SphereTextureFactor.GetW() - m.SphereTextureFactor.GetW())
-		md.MulRatios.SphereTextureFactor.MulW(1 - ratio)
-	}
-	if m.ToonTextureFactor.GetX() != 1 {
-		md.MulMaterial.ToonTextureFactor.MulX(md.Material.ToonTextureFactor.GetX() - m.ToonTextureFactor.GetX())
-		md.MulRatios.ToonTextureFactor.MulX(1 - ratio)
-	}
-	if m.ToonTextureFactor.GetY() != 1 {
-		md.MulMaterial.ToonTextureFactor.MulY(md.Material.ToonTextureFactor.GetY() - m.ToonTextureFactor.GetY())
-		md.MulRatios.ToonTextureFactor.MulY(1 - ratio)
-	}
-	if m.ToonTextureFactor.GetZ() != 1 {
-		md.MulMaterial.ToonTextureFactor.MulZ(md.Material.ToonTextureFactor.GetZ() - m.ToonTextureFactor.GetZ())
-		md.MulRatios.ToonTextureFactor.MulZ(1 - ratio)
-	}
-	if m.ToonTextureFactor.GetW() != 1 {
-		md.MulMaterial.ToonTextureFactor.MulW(md.Material.ToonTextureFactor.GetW() - m.ToonTextureFactor.GetW())
-		md.MulRatios.ToonTextureFactor.MulW(1 - ratio)
 	}
 }
 

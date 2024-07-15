@@ -100,17 +100,11 @@ func SelectedVertexMorphDeltasGL(
 
 func MaterialMorphDeltaResult(md *delta.MaterialMorphDelta) *MeshDelta {
 	material := &MeshDelta{
-		Diffuse:          diffuse(md),
-		Specular:         specular(md),
-		Ambient:          ambient(md),
-		Edge:             edge(md),
-		EdgeSize:         edgeSize(md),
-		TextureMulFactor: textureMulFactor(md),
-		TextureAddFactor: textureAddFactor(md),
-		SphereMulFactor:  sphereMulFactor(md),
-		SphereAddFactor:  sphereAddFactor(md),
-		ToonMulFactor:    toonMulFactor(md),
-		ToonAddFactor:    toonAddFactor(md),
+		Diffuse:  diffuse(md),
+		Specular: specular(md),
+		Ambient:  ambient(md),
+		Edge:     edge(md),
+		EdgeSize: edgeSize(md),
 	}
 
 	return material
@@ -170,58 +164,4 @@ func edge(md *delta.MaterialMorphDelta) mgl32.Vec4 {
 func edgeSize(md *delta.MaterialMorphDelta) float32 {
 	return float32(md.Material.EdgeSize*(md.MulMaterial.EdgeSize*md.MulRatios.EdgeSize) +
 		(md.AddMaterial.EdgeSize * md.AddRatios.EdgeSize))
-}
-
-func textureMulFactor(md *delta.MaterialMorphDelta) mgl32.Vec4 {
-	return mgl32.Vec4{
-		float32(md.MulMaterial.TextureFactor.GetX() * md.MulRatios.TextureFactor.GetX()),
-		float32(md.MulMaterial.TextureFactor.GetY() * md.MulRatios.TextureFactor.GetY()),
-		float32(md.MulMaterial.TextureFactor.GetZ() * md.MulRatios.TextureFactor.GetZ()),
-		float32(md.MulMaterial.TextureFactor.GetW() * md.MulRatios.TextureFactor.GetW()),
-	}
-}
-
-func textureAddFactor(md *delta.MaterialMorphDelta) mgl32.Vec4 {
-	return mgl32.Vec4{
-		float32(md.AddMaterial.TextureFactor.GetX() * md.AddRatios.TextureFactor.GetX()),
-		float32(md.AddMaterial.TextureFactor.GetY() * md.AddRatios.TextureFactor.GetY()),
-		float32(md.AddMaterial.TextureFactor.GetZ() * md.AddRatios.TextureFactor.GetZ()),
-		float32(md.AddMaterial.TextureFactor.GetW() * md.AddRatios.TextureFactor.GetW()),
-	}
-}
-
-func sphereMulFactor(md *delta.MaterialMorphDelta) mgl32.Vec4 {
-	return mgl32.Vec4{
-		float32(md.MulMaterial.SphereTextureFactor.GetX() * md.MulRatios.SphereTextureFactor.GetX()),
-		float32(md.MulMaterial.SphereTextureFactor.GetY() * md.MulRatios.SphereTextureFactor.GetY()),
-		float32(md.MulMaterial.SphereTextureFactor.GetZ() * md.MulRatios.SphereTextureFactor.GetZ()),
-		float32(md.MulMaterial.SphereTextureFactor.GetW() * md.MulRatios.SphereTextureFactor.GetW()),
-	}
-}
-
-func sphereAddFactor(md *delta.MaterialMorphDelta) mgl32.Vec4 {
-	return mgl32.Vec4{
-		float32(md.AddMaterial.SphereTextureFactor.GetX() * md.AddRatios.SphereTextureFactor.GetX()),
-		float32(md.AddMaterial.SphereTextureFactor.GetY() * md.AddRatios.SphereTextureFactor.GetY()),
-		float32(md.AddMaterial.SphereTextureFactor.GetZ() * md.AddRatios.SphereTextureFactor.GetZ()),
-		float32(md.AddMaterial.SphereTextureFactor.GetW() * md.AddRatios.SphereTextureFactor.GetW()),
-	}
-}
-
-func toonMulFactor(md *delta.MaterialMorphDelta) mgl32.Vec4 {
-	return mgl32.Vec4{
-		float32(md.MulMaterial.ToonTextureFactor.GetX() * md.MulRatios.ToonTextureFactor.GetX()),
-		float32(md.MulMaterial.ToonTextureFactor.GetY() * md.MulRatios.ToonTextureFactor.GetY()),
-		float32(md.MulMaterial.ToonTextureFactor.GetZ() * md.MulRatios.ToonTextureFactor.GetZ()),
-		float32(md.MulMaterial.ToonTextureFactor.GetW() * md.MulRatios.ToonTextureFactor.GetW()),
-	}
-}
-
-func toonAddFactor(md *delta.MaterialMorphDelta) mgl32.Vec4 {
-	return mgl32.Vec4{
-		float32(md.AddMaterial.ToonTextureFactor.GetX() * md.AddRatios.ToonTextureFactor.GetX()),
-		float32(md.AddMaterial.ToonTextureFactor.GetY() * md.AddRatios.ToonTextureFactor.GetY()),
-		float32(md.AddMaterial.ToonTextureFactor.GetZ() * md.AddRatios.ToonTextureFactor.GetZ()),
-		float32(md.AddMaterial.ToonTextureFactor.GetW() * md.AddRatios.ToonTextureFactor.GetW()),
-	}
 }

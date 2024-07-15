@@ -41,12 +41,6 @@ const (
 	SHADER_ALPHA                        = "alpha\x00"
 	SHADER_EDGE_COLOR                   = "edgeColor\x00"
 	SHADER_EDGE_SIZE                    = "edgeSize\x00"
-	SHADER_TEXTURE_MUL_FACTOR           = "textureMulFactor\x00"
-	SHADER_TEXTURE_ADD_FACTOR           = "textureAddFactor\x00"
-	SHADER_SPHERE_MUL_FACTOR            = "sphereMulFactor\x00"
-	SHADER_SPHERE_ADD_FACTOR            = "sphereAddFactor\x00"
-	SHADER_TOON_MUL_FACTOR              = "toonMulFactor\x00"
-	SHADER_TOON_ADD_FACTOR              = "toonAddFactor\x00"
 	SHADER_VERTEX_GL_POSITION           = "gl_Position\x00"
 )
 
