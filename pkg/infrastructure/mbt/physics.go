@@ -24,19 +24,6 @@ type MPhysics struct {
 	rigidBodies   map[int][]*rigidbodyValue
 }
 
-type rigidbodyValue struct {
-	pmxRigidBody     *pmx.RigidBody
-	btRigidBody      bt.BtRigidBody
-	btLocalTransform bt.BtTransform
-	mask             int
-	group            int
-}
-
-type jointValue struct {
-	pmxJoint *pmx.Joint
-	btJoint  bt.BtTypedConstraint
-}
-
 func NewMPhysics(shader *mgl.MShader) *MPhysics {
 	world := createWorld()
 
@@ -93,11 +80,27 @@ func (p *MPhysics) ResetWorld() {
 	world := createWorld()
 	world.SetDebugDrawer(p.drawer)
 	p.world = world
+	// 一旦削除
 	for modelIndex := range p.rigidBodies {
 		p.DeleteRigidBodies(modelIndex)
 	}
 	for modelIndex := range p.joints {
 		p.DeleteJoints(modelIndex)
+	}
+	// 登録し直し
+	for modelIndex := range p.rigidBodies {
+		for _, r := range p.rigidBodies[modelIndex] {
+			if r != nil {
+				p.initRigidBody(modelIndex, r.pmxRigidBody)
+			}
+		}
+	}
+	for modelIndex := range p.joints {
+		for _, j := range p.joints[modelIndex] {
+			if j != nil {
+				p.initJoint(modelIndex, j.pmxJoint)
+			}
+		}
 	}
 }
 
@@ -172,42 +175,21 @@ func (p *MPhysics) DebugDrawWorld(visibleRigidBody, visibleJoint bool) {
 
 func (p *MPhysics) GetRigidBody(modelIndex, rigidBodyIndex int) (bt.BtRigidBody, bt.BtTransform) {
 	r := p.rigidBodies[modelIndex][rigidBodyIndex]
-	return r.btRigidBody, r.btLocalTransform
+	return *r.btRigidBody, *r.btLocalTransform
 }
 
 func (p *MPhysics) DeleteRigidBodies(modelIndex int) {
 	for _, r := range p.rigidBodies[modelIndex] {
-		rigidBody := r.btRigidBody
-		group := r.group
-		mask := r.mask
-		p.world.AddRigidBody(rigidBody, group, mask)
+		p.world.RemoveRigidBody(*r.btRigidBody)
 	}
 }
 
 func (p *MPhysics) DeleteJoints(modelIndex int) {
 	for _, j := range p.joints[modelIndex] {
-		p.world.AddConstraint(j.btJoint, true)
+		p.world.RemoveConstraint(j.btJoint)
 	}
 }
 
-func (p *MPhysics) Update(timeStep float32) {
-	// // 標準出力を一時的にリダイレクトする
-	// old := os.Stdout // keep backup of the real stdout
-	// r, w, _ := os.Pipe()
-	// os.Stdout = w
-	// for range int(timeStep / p.Spf) {
-	// mlog.I("timeStep=%.8f, spf: %.8f", timeStep, p.Spf)
+func (p *MPhysics) StepSimulation(timeStep float32) {
 	p.world.StepSimulation(timeStep, p.MaxSubSteps, p.FixedTimeStep)
-	// }
-
-	// // p.frame += float32(elapsed)
-	// mlog.D("timeStep: %.8f [p.world.StepSimulation]\n", timeStep)
-
-	// // 標準出力を元に戻す
-	// w.Close()
-	// os.Stdout = old // restoring the real stdout
-
-	// var buf bytes.Buffer
-	// buf.ReadFrom(r)
-	// fmt.Print(buf.String())
 }

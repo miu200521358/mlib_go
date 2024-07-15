@@ -87,7 +87,7 @@ func DeformsAll(
 
 	if enablePhysics || resetPhysics {
 		// 物理更新
-		modelPhysics.Update(timeStep)
+		modelPhysics.StepSimulation(timeStep)
 	}
 
 	// 物理後デフォーム

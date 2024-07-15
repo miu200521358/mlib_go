@@ -4,11 +4,21 @@
 package mbt
 
 import (
+	"math"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
+
+type rigidbodyValue struct {
+	pmxRigidBody     *pmx.RigidBody
+	btRigidBody      *bt.BtRigidBody
+	btLocalTransform *bt.BtTransform
+	mask             int
+	group            int
+}
 
 func (physics *MPhysics) initRigidBodies(modelIndex int, rigidBodies *pmx.RigidBodies) {
 	// 剛体を順番にボーンと紐付けていく
@@ -43,7 +53,7 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 	localInertia := bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
 	if rigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
 		// ボーン追従ではない場合そのまま設定
-		mass = float32(rigidBody.RigidBodyParam.Mass)
+		mass = float32(mmath.ClampedFloat(rigidBody.RigidBodyParam.Mass, 0, math.MaxFloat64))
 	}
 	if mass != 0 {
 		// 質量が設定されている場合、慣性を計算
@@ -54,16 +64,16 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 	btRigidBodyTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation), MVec3Bullet(rigidBody.Position))
 
 	// ボーンから見た剛体の初期位置
-	var bPos *mmath.MVec3
+	var bonePos *mmath.MVec3
 	if rigidBody.Bone != nil {
-		bPos = rigidBody.Bone.Position
+		bonePos = rigidBody.Bone.Position
 	} else if rigidBody.JointedBone != nil {
-		bPos = rigidBody.JointedBone.Position
+		bonePos = rigidBody.JointedBone.Position
 	} else {
-		bPos = mmath.NewMVec3()
+		bonePos = mmath.NewMVec3()
 	}
-	rbLocalPos := rigidBody.Position.Subed(bPos)
-	btRigidBodyLocalTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation), MVec3Bullet(rbLocalPos))
+	rigidBodyLocalPos := rigidBody.Position.Subed(bonePos)
+	btRigidBodyLocalTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation), MVec3Bullet(rigidBodyLocalPos))
 
 	// 剛体のグローバル位置と回転
 	motionState := bt.NewBtDefaultMotionState(btRigidBodyTransform)
@@ -78,7 +88,7 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 	group := 1 << rigidBody.CollisionGroup
 	physics.world.AddRigidBody(btRigidBody, group, rigidBody.CollisionGroupMaskValue)
 	physics.rigidBodies[modelIndex][rigidBody.Index] = &rigidbodyValue{
-		pmxRigidBody: rigidBody, btRigidBody: btRigidBody, btLocalTransform: btRigidBodyLocalTransform,
+		pmxRigidBody: rigidBody, btRigidBody: &btRigidBody, btLocalTransform: &btRigidBodyLocalTransform,
 		mask: rigidBody.CollisionGroupMaskValue, group: group}
 
 	UpdateFlags(modelIndex, physics, rigidBody, true, false)

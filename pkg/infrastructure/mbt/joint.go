@@ -8,6 +8,11 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
 
+type jointValue struct {
+	pmxJoint *pmx.Joint
+	btJoint  bt.BtTypedConstraint
+}
+
 func (physics *MPhysics) initJoints(modelIndex int, rigidBodies *pmx.RigidBodies, j *pmx.Joints) {
 	// ジョイントを順番に剛体と紐付けていく
 	physics.joints[modelIndex] = make([]*jointValue, len(j.Data))
@@ -25,8 +30,8 @@ func (physics *MPhysics) initJoint(
 	jointTransform := bt.NewBtTransform(MRotationBullet(joint.Rotation), MVec3Bullet(joint.Position))
 
 	rigidBodyB := physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody
-	btRigidBodyA := physics.rigidBodies[modelIndex][joint.RigidbodyIndexA].btRigidBody
-	btRigidBodyB := physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].btRigidBody
+	btRigidBodyA := *physics.rigidBodies[modelIndex][joint.RigidbodyIndexA].btRigidBody
+	btRigidBodyB := *physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].btRigidBody
 
 	// 剛体Aの現在の位置と向きを取得
 	worldTransformA := btRigidBodyA.GetWorldTransform().(bt.BtTransform)

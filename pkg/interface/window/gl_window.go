@@ -838,8 +838,6 @@ func (w *GlWindow) Run() {
 			}
 
 			if w.modelSets[k].NextMotion != nil {
-				w.TriggerPhysicsReset()
-
 				w.modelSets[k].Motion = w.modelSets[k].NextMotion
 				w.modelSets[k].NextMotion = nil
 				w.isSaveDelta = false
@@ -847,8 +845,6 @@ func (w *GlWindow) Run() {
 
 			// モデルが変わっている場合は最新の情報を取得する
 			if w.modelSets[k].NextModel != nil {
-				w.TriggerPhysicsReset()
-
 				// 次のモデルが指定されている場合、初期化して入替
 				if w.modelSets[k].Model != nil && w.modelSets[k].Meshes != nil {
 					// 既存モデルが描画初期化されてたら削除
@@ -862,6 +858,7 @@ func (w *GlWindow) Run() {
 					w.Physics.AddModel(k, w.modelSets[k].Model)
 				}
 				w.isSaveDelta = false
+				w.TriggerPhysicsReset()
 			}
 
 			if w.modelSets[k].NextInvisibleMaterialIndexes != nil {
