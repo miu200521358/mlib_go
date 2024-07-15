@@ -627,26 +627,8 @@ func (r *PmxRepository) loadBones(model *pmx.PmxModel) error {
 		englishName := r.readText()
 
 		b := &pmx.Bone{
-			IndexNameModel:         &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
-			IkLinkBoneIndexes:      make([]int, 0),
-			IkTargetBoneIndexes:    make([]int, 0),
-			ParentRelativePosition: mmath.NewMVec3(),
-			ChildRelativePosition:  mmath.NewMVec3(),
-			NormalizedFixedAxis:    mmath.NewMVec3(),
-			TreeBoneIndexes:        make([]int, 0),
-			RevertOffsetMatrix:     mmath.NewMMat4(),
-			OffsetMatrix:           mmath.NewMMat4(),
-			ParentBoneIndexes:      make([]int, 0),
-			RelativeBoneIndexes:    make([]int, 0),
-			ChildBoneIndexes:       make([]int, 0),
-			EffectiveBoneIndexes:   make([]int, 0),
-			AngleLimit:             false,
-			MinAngleLimit:          mmath.NewMRotation(),
-			MaxAngleLimit:          mmath.NewMRotation(),
-			LocalAngleLimit:        false,
-			LocalMinAngleLimit:     mmath.NewMRotation(),
-			LocalMaxAngleLimit:     mmath.NewMRotation(),
-			AxisSign:               1,
+			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			Extend:         &pmx.BoneExtend{},
 		}
 
 		// 12 : float3	| 位置

@@ -79,7 +79,7 @@ func (pm *PmxModel) Setup() {
 	for i, rb := range pm.RigidBodies.Data {
 		if rb.BoneIndex >= 0 && pm.Bones.Contains(rb.BoneIndex) {
 			// 剛体に関連付けられたボーンが存在する場合、剛体とボーンを関連付ける
-			pm.Bones.Data[rb.BoneIndex].RigidBody = rb
+			pm.Bones.Data[rb.BoneIndex].Extend.RigidBody = rb
 			pm.RigidBodies.Data[i].Bone = pm.Bones.Get(rb.BoneIndex)
 		}
 	}

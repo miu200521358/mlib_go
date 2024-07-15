@@ -69,21 +69,25 @@ func (t *Ik) Copy() *Ik {
 
 type Bone struct {
 	*core.IndexNameModel
-	Position               *mmath.MVec3     // ボーン位置
-	ParentIndex            int              // 親ボーンのボーンIndex
-	Layer                  int              // 変形階層(pmxは整数だけど、間にシステムボーンを入れられるようにfloat64にしておく)
-	BoneFlag               BoneFlag         // ボーンフラグ(16bit) 各bit 0:OFF 1:ON
-	TailPosition           *mmath.MVec3     // 接続先:0 の場合 座標オフセット, ボーン位置からの相対分
-	TailIndex              int              // 接続先:1 の場合 接続先ボーンのボーンIndex
-	EffectIndex            int              // 回転付与:1 または 移動付与:1 の場合 付与親ボーンのボーンIndex
-	EffectFactor           float64          // 付与率
-	FixedAxis              *mmath.MVec3     // 軸固定:1 の場合 軸の方向ベクトル
-	LocalAxisX             *mmath.MVec3     // ローカル軸:1 の場合 X軸の方向ベクトル
-	LocalAxisZ             *mmath.MVec3     // ローカル軸:1 の場合 Z軸の方向ベクトル
-	EffectorKey            int              // 外部親変形:1 の場合 Key値
-	Ik                     *Ik              // IK:1 の場合 IKデータを格納
-	DisplaySlot            int              // 該当表示枠
-	IsSystem               bool             // システム計算用追加ボーン の場合 true
+	Position     *mmath.MVec3 // ボーン位置
+	ParentIndex  int          // 親ボーンのボーンIndex
+	Layer        int          // 変形階層(pmxは整数だけど、間にシステムボーンを入れられるようにfloat64にしておく)
+	BoneFlag     BoneFlag     // ボーンフラグ(16bit) 各bit 0:OFF 1:ON
+	TailPosition *mmath.MVec3 // 接続先:0 の場合 座標オフセット, ボーン位置からの相対分
+	TailIndex    int          // 接続先:1 の場合 接続先ボーンのボーンIndex
+	EffectIndex  int          // 回転付与:1 または 移動付与:1 の場合 付与親ボーンのボーンIndex
+	EffectFactor float64      // 付与率
+	FixedAxis    *mmath.MVec3 // 軸固定:1 の場合 軸の方向ベクトル
+	LocalAxisX   *mmath.MVec3 // ローカル軸:1 の場合 X軸の方向ベクトル
+	LocalAxisZ   *mmath.MVec3 // ローカル軸:1 の場合 Z軸の方向ベクトル
+	EffectorKey  int          // 外部親変形:1 の場合 Key値
+	Ik           *Ik          // IK:1 の場合 IKデータを格納
+	DisplaySlot  int          // 該当表示枠
+	IsSystem     bool         // システム計算用追加ボーン の場合 true
+	Extend       *BoneExtend  // 拡張情報
+}
+
+type BoneExtend struct {
 	NormalizedLocalAxisX   *mmath.MVec3     // 計算済みのX軸の方向ベクトル
 	NormalizedLocalAxisY   *mmath.MVec3     // 計算済みのY軸の方向ベクトル
 	NormalizedLocalAxisZ   *mmath.MVec3     // 計算済みのZ軸の方向ベクトル
@@ -114,52 +118,54 @@ type Bone struct {
 
 func NewBone() *Bone {
 	bone := &Bone{
-		IndexNameModel:         &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
-		Position:               mmath.NewMVec3(),
-		ParentIndex:            -1,
-		Layer:                  -1,
-		BoneFlag:               BONE_FLAG_NONE,
-		TailPosition:           mmath.NewMVec3(),
-		TailIndex:              -1,
-		EffectIndex:            -1,
-		EffectFactor:           0.0,
-		FixedAxis:              mmath.NewMVec3(),
-		LocalAxisX:             mmath.NewMVec3(),
-		LocalAxisZ:             mmath.NewMVec3(),
-		EffectorKey:            -1,
-		Ik:                     NewIk(),
-		DisplaySlot:            -1,
-		IsSystem:               true,
-		NormalizedLocalAxisX:   mmath.NewMVec3(),
-		NormalizedLocalAxisY:   mmath.NewMVec3(),
-		NormalizedLocalAxisZ:   mmath.NewMVec3(),
-		LocalAxis:              &mmath.MVec3{1, 0, 0},
-		IkLinkBoneIndexes:      make([]int, 0),
-		IkTargetBoneIndexes:    make([]int, 0),
-		ParentRelativePosition: mmath.NewMVec3(),
-		ChildRelativePosition:  mmath.NewMVec3(),
-		NormalizedFixedAxis:    mmath.NewMVec3(),
-		TreeBoneIndexes:        make([]int, 0),
-		RevertOffsetMatrix:     mmath.NewMMat4(),
-		OffsetMatrix:           mmath.NewMMat4(),
-		ParentBoneIndexes:      make([]int, 0),
-		ParentBoneNames:        make([]string, 0),
-		RelativeBoneIndexes:    make([]int, 0),
-		ChildBoneIndexes:       make([]int, 0),
-		EffectiveBoneIndexes:   make([]int, 0),
-		AngleLimit:             false,
-		MinAngleLimit:          mmath.NewMRotation(),
-		MaxAngleLimit:          mmath.NewMRotation(),
-		LocalAngleLimit:        false,
-		LocalMinAngleLimit:     mmath.NewMRotation(),
-		LocalMaxAngleLimit:     mmath.NewMRotation(),
-		AxisSign:               1,
-		RigidBody:              nil,
+		IndexNameModel: &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		Position:       mmath.NewMVec3(),
+		ParentIndex:    -1,
+		Layer:          -1,
+		BoneFlag:       BONE_FLAG_NONE,
+		TailPosition:   mmath.NewMVec3(),
+		TailIndex:      -1,
+		EffectIndex:    -1,
+		EffectFactor:   0.0,
+		FixedAxis:      mmath.NewMVec3(),
+		LocalAxisX:     mmath.NewMVec3(),
+		LocalAxisZ:     mmath.NewMVec3(),
+		EffectorKey:    -1,
+		Ik:             NewIk(),
+		DisplaySlot:    -1,
+		IsSystem:       true,
+		Extend: &BoneExtend{
+			NormalizedLocalAxisX:   mmath.NewMVec3(),
+			NormalizedLocalAxisY:   mmath.NewMVec3(),
+			NormalizedLocalAxisZ:   mmath.NewMVec3(),
+			LocalAxis:              &mmath.MVec3{1, 0, 0},
+			IkLinkBoneIndexes:      make([]int, 0),
+			IkTargetBoneIndexes:    make([]int, 0),
+			ParentRelativePosition: mmath.NewMVec3(),
+			ChildRelativePosition:  mmath.NewMVec3(),
+			NormalizedFixedAxis:    mmath.NewMVec3(),
+			TreeBoneIndexes:        make([]int, 0),
+			RevertOffsetMatrix:     mmath.NewMMat4(),
+			OffsetMatrix:           mmath.NewMMat4(),
+			ParentBoneIndexes:      make([]int, 0),
+			ParentBoneNames:        make([]string, 0),
+			RelativeBoneIndexes:    make([]int, 0),
+			ChildBoneIndexes:       make([]int, 0),
+			EffectiveBoneIndexes:   make([]int, 0),
+			AngleLimit:             false,
+			MinAngleLimit:          mmath.NewMRotation(),
+			MaxAngleLimit:          mmath.NewMRotation(),
+			LocalAngleLimit:        false,
+			LocalMinAngleLimit:     mmath.NewMRotation(),
+			LocalMaxAngleLimit:     mmath.NewMRotation(),
+			AxisSign:               1,
+			RigidBody:              nil,
+		},
 	}
-	bone.NormalizedLocalAxisX = bone.LocalAxisX.Copy()
-	bone.NormalizedLocalAxisZ = bone.LocalAxisZ.Copy()
-	bone.NormalizedLocalAxisY = bone.NormalizedLocalAxisZ.Cross(bone.NormalizedLocalAxisX)
-	bone.NormalizedFixedAxis = bone.FixedAxis.Copy()
+	bone.Extend.NormalizedLocalAxisX = bone.LocalAxisX.Copy()
+	bone.Extend.NormalizedLocalAxisZ = bone.LocalAxisZ.Copy()
+	bone.Extend.NormalizedLocalAxisY = bone.Extend.NormalizedLocalAxisZ.Cross(bone.Extend.NormalizedLocalAxisX)
+	bone.Extend.NormalizedFixedAxis = bone.FixedAxis.Copy()
 	return bone
 }
 
@@ -176,13 +182,13 @@ func (v *Bone) Copy() core.IIndexNameModel {
 }
 
 func (bone *Bone) NormalizeFixedAxis(fixedAxis *mmath.MVec3) {
-	bone.NormalizedFixedAxis = fixedAxis.Normalized()
+	bone.Extend.NormalizedFixedAxis = fixedAxis.Normalized()
 }
 
 func (bone *Bone) NormalizeLocalAxis(localAxisX *mmath.MVec3) {
-	bone.NormalizedLocalAxisX = localAxisX.Normalized()
-	bone.NormalizedLocalAxisY = bone.NormalizedLocalAxisX.Cross(mmath.MVec3UnitZInv)
-	bone.NormalizedLocalAxisZ = bone.NormalizedLocalAxisX.Cross(bone.NormalizedLocalAxisY)
+	bone.Extend.NormalizedLocalAxisX = localAxisX.Normalized()
+	bone.Extend.NormalizedLocalAxisY = bone.Extend.NormalizedLocalAxisX.Cross(mmath.MVec3UnitZInv)
+	bone.Extend.NormalizedLocalAxisZ = bone.Extend.NormalizedLocalAxisX.Cross(bone.Extend.NormalizedLocalAxisY)
 }
 
 // 表示先がボーンであるか
@@ -325,34 +331,34 @@ func (bone *Bone) containsCategory(category BoneCategory) bool {
 }
 
 func (bone *Bone) normalizeFixedAxis(fixedAxis *mmath.MVec3) {
-	bone.NormalizedFixedAxis = fixedAxis.Normalized()
+	bone.Extend.NormalizedFixedAxis = fixedAxis.Normalized()
 }
 
 func (bone *Bone) normalizeLocalAxis(localXVector *mmath.MVec3) {
 	v := localXVector.Normalized()
-	bone.NormalizedLocalAxisX = v
-	bone.NormalizedLocalAxisY = v.Cross(&mmath.MVec3{0, 0, -1})
-	bone.NormalizedLocalAxisZ = v.Cross(bone.NormalizedLocalAxisY)
+	bone.Extend.NormalizedLocalAxisX = v
+	bone.Extend.NormalizedLocalAxisY = v.Cross(&mmath.MVec3{0, 0, -1})
+	bone.Extend.NormalizedLocalAxisZ = v.Cross(bone.Extend.NormalizedLocalAxisY)
 }
 
 func (bone *Bone) setup() {
 	// 各ボーンのローカル軸
-	bone.LocalAxis = bone.ChildRelativePosition.Normalized()
+	bone.Extend.LocalAxis = bone.Extend.ChildRelativePosition.Normalized()
 	// ローカル軸行列
-	bone.LocalMatrix = bone.LocalAxis.ToLocalMatrix4x4()
+	bone.Extend.LocalMatrix = bone.Extend.LocalAxis.ToLocalMatrix4x4()
 
 	if bone.HasFixedAxis() {
-		bone.normalizeFixedAxis(bone.FixedAxis)
-		bone.normalizeLocalAxis(bone.FixedAxis)
+		bone.NormalizeFixedAxis(bone.FixedAxis)
+		bone.NormalizeLocalAxis(bone.FixedAxis)
 	} else {
-		bone.normalizeLocalAxis(bone.LocalAxis)
+		bone.NormalizeLocalAxis(bone.Extend.LocalAxis)
 	}
 
 	// オフセット行列は自身の位置を原点に戻す行列
-	bone.OffsetMatrix = bone.Position.Inverted().ToMat4()
+	bone.Extend.OffsetMatrix = bone.Position.Inverted().ToMat4()
 
 	// 逆オフセット行列は親ボーンからの相対位置分
-	bone.RevertOffsetMatrix = bone.ParentRelativePosition.ToMat4()
+	bone.Extend.RevertOffsetMatrix = bone.Extend.ParentRelativePosition.ToMat4()
 }
 
 func (b *Bones) getParentRelativePosition(boneIndex int) *mmath.MVec3 {
@@ -441,7 +447,7 @@ func (b *Bones) getRelativeBoneIndexes(boneIndex int, parentBoneIndexes, relativ
 			}
 		}
 	}
-	for _, boneIndex := range bone.EffectiveBoneIndexes {
+	for _, boneIndex := range bone.Extend.EffectiveBoneIndexes {
 		if b.Contains(boneIndex) && !slices.Contains(relativeBoneIndexes, boneIndex) {
 			// 外部子ボーンを辿る
 			relativeBoneIndexes = append(relativeBoneIndexes, boneIndex)
@@ -449,7 +455,7 @@ func (b *Bones) getRelativeBoneIndexes(boneIndex int, parentBoneIndexes, relativ
 				b.getRelativeBoneIndexes(boneIndex, parentBoneIndexes, relativeBoneIndexes)
 		}
 	}
-	for _, boneIndex := range bone.IkTargetBoneIndexes {
+	for _, boneIndex := range bone.Extend.IkTargetBoneIndexes {
 		if b.Contains(boneIndex) && !slices.Contains(relativeBoneIndexes, boneIndex) {
 			// IKターゲットボーンを辿る
 			relativeBoneIndexes = append(relativeBoneIndexes, boneIndex)
@@ -457,7 +463,7 @@ func (b *Bones) getRelativeBoneIndexes(boneIndex int, parentBoneIndexes, relativ
 				b.getRelativeBoneIndexes(boneIndex, parentBoneIndexes, relativeBoneIndexes)
 		}
 	}
-	for _, boneIndex := range bone.IkLinkBoneIndexes {
+	for _, boneIndex := range bone.Extend.IkLinkBoneIndexes {
 		if b.Contains(boneIndex) && !slices.Contains(relativeBoneIndexes, boneIndex) {
 			// IKリンクボーンを辿る
 			relativeBoneIndexes = append(relativeBoneIndexes, boneIndex)
@@ -512,71 +518,71 @@ func (b *Bones) setup() {
 
 	for _, bone := range b.Data {
 		// 関係ボーンリストを一旦クリア
-		bone.IkLinkBoneIndexes = make([]int, 0)
-		bone.IkTargetBoneIndexes = make([]int, 0)
-		bone.EffectiveBoneIndexes = make([]int, 0)
-		bone.ChildBoneIndexes = make([]int, 0)
-		bone.RelativeBoneIndexes = make([]int, 0)
-		bone.ParentBoneIndexes = make([]int, 0)
-		bone.ParentBoneNames = make([]string, 0)
-		bone.TreeBoneIndexes = make([]int, 0)
+		bone.Extend.IkLinkBoneIndexes = make([]int, 0)
+		bone.Extend.IkTargetBoneIndexes = make([]int, 0)
+		bone.Extend.EffectiveBoneIndexes = make([]int, 0)
+		bone.Extend.ChildBoneIndexes = make([]int, 0)
+		bone.Extend.RelativeBoneIndexes = make([]int, 0)
+		bone.Extend.ParentBoneIndexes = make([]int, 0)
+		bone.Extend.ParentBoneNames = make([]string, 0)
+		bone.Extend.TreeBoneIndexes = make([]int, 0)
 	}
 
 	// 関連ボーンINDEX情報を設定
 	for i := range len(b.Data) {
 		bone := b.Get(i)
 		if strings.HasPrefix(bone.Name, "左") {
-			bone.AxisSign = -1
+			bone.Extend.AxisSign = -1
 		}
 		if bone.IsIK() && bone.Ik != nil {
 			// IKのリンクとターゲット
 			for _, link := range bone.Ik.Links {
 				if b.Contains(link.BoneIndex) &&
-					!slices.Contains(b.Get(link.BoneIndex).IkLinkBoneIndexes, bone.Index) {
+					!slices.Contains(b.Get(link.BoneIndex).Extend.IkLinkBoneIndexes, bone.Index) {
 					// リンクボーンにフラグを立てる
 					linkBone := b.Get(link.BoneIndex)
-					linkBone.IkLinkBoneIndexes = append(linkBone.IkLinkBoneIndexes, bone.Index)
+					linkBone.Extend.IkLinkBoneIndexes = append(linkBone.Extend.IkLinkBoneIndexes, bone.Index)
 					// リンクの制限をコピーしておく
-					linkBone.AngleLimit = link.AngleLimit
-					linkBone.MinAngleLimit = link.MinAngleLimit
-					linkBone.MaxAngleLimit = link.MaxAngleLimit
-					linkBone.LocalAngleLimit = link.LocalAngleLimit
-					linkBone.LocalMinAngleLimit = link.LocalMinAngleLimit
-					linkBone.LocalMaxAngleLimit = link.LocalMaxAngleLimit
+					linkBone.Extend.AngleLimit = link.AngleLimit
+					linkBone.Extend.MinAngleLimit = link.MinAngleLimit
+					linkBone.Extend.MaxAngleLimit = link.MaxAngleLimit
+					linkBone.Extend.LocalAngleLimit = link.LocalAngleLimit
+					linkBone.Extend.LocalMinAngleLimit = link.LocalMinAngleLimit
+					linkBone.Extend.LocalMaxAngleLimit = link.LocalMaxAngleLimit
 				}
 			}
 			if b.Contains(bone.Ik.BoneIndex) &&
-				!slices.Contains(b.Get(bone.Ik.BoneIndex).IkTargetBoneIndexes, bone.Index) {
+				!slices.Contains(b.Get(bone.Ik.BoneIndex).Extend.IkTargetBoneIndexes, bone.Index) {
 				// ターゲットボーンにもフラグを立てる
-				b.Get(bone.Ik.BoneIndex).IkTargetBoneIndexes = append(b.Get(bone.Ik.BoneIndex).IkTargetBoneIndexes, bone.Index)
+				b.Get(bone.Ik.BoneIndex).Extend.IkTargetBoneIndexes = append(b.Get(bone.Ik.BoneIndex).Extend.IkTargetBoneIndexes, bone.Index)
 			}
 		}
 		if bone.EffectIndex >= 0 && b.Contains(bone.EffectIndex) &&
-			!slices.Contains(b.Get(bone.EffectIndex).EffectiveBoneIndexes, bone.Index) {
+			!slices.Contains(b.Get(bone.EffectIndex).Extend.EffectiveBoneIndexes, bone.Index) {
 			// 付与親の方に付与子情報を保持
-			b.Get(bone.EffectIndex).EffectiveBoneIndexes = append(b.Get(bone.EffectIndex).EffectiveBoneIndexes, bone.Index)
+			b.Get(bone.EffectIndex).Extend.EffectiveBoneIndexes = append(b.Get(bone.EffectIndex).Extend.EffectiveBoneIndexes, bone.Index)
 		}
 	}
 
 	for i := range b.Len() {
 		bone := b.Get(i)
 		// 影響があるボーンINDEXリスト
-		bone.ParentBoneIndexes, bone.RelativeBoneIndexes = b.getRelativeBoneIndexes(bone.Index, make([]int, 0), make([]int, 0))
+		bone.Extend.ParentBoneIndexes, bone.Extend.RelativeBoneIndexes = b.getRelativeBoneIndexes(bone.Index, make([]int, 0), make([]int, 0))
 
 		// ボーンINDEXリストからボーン名リストを作成
-		bone.ParentBoneNames = make([]string, len(bone.ParentBoneIndexes))
-		for i, parentBoneIndex := range bone.ParentBoneIndexes {
-			bone.ParentBoneNames[i] = b.Get(parentBoneIndex).Name
+		bone.Extend.ParentBoneNames = make([]string, len(bone.Extend.ParentBoneIndexes))
+		for i, parentBoneIndex := range bone.Extend.ParentBoneIndexes {
+			bone.Extend.ParentBoneNames[i] = b.Get(parentBoneIndex).Name
 		}
 
 		// 親ボーンに子ボーンとして登録する
 		if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
-			b.Get(bone.ParentIndex).ChildBoneIndexes = append(b.Get(bone.ParentIndex).ChildBoneIndexes, bone.Index)
+			b.Get(bone.ParentIndex).Extend.ChildBoneIndexes = append(b.Get(bone.ParentIndex).Extend.ChildBoneIndexes, bone.Index)
 		}
 		// 親からの相対位置
-		bone.ParentRelativePosition = b.getParentRelativePosition(bone.Index)
+		bone.Extend.ParentRelativePosition = b.getParentRelativePosition(bone.Index)
 		// 子への相対位置
-		bone.ChildRelativePosition = b.getChildRelativePosition(bone.Index)
+		bone.Extend.ChildRelativePosition = b.getChildRelativePosition(bone.Index)
 		// ボーン単体のセットアップ
 		bone.setup()
 	}
@@ -638,7 +644,7 @@ func (b *Bones) createLayerSortedIkBones(bone *Bone) {
 	relativeBoneIndexes[bone.Index] = struct{}{}
 
 	// 関連するボーンの追加
-	for _, index := range bone.RelativeBoneIndexes {
+	for _, index := range bone.Extend.RelativeBoneIndexes {
 		if _, ok := relativeBoneIndexes[index]; !ok {
 			relativeBoneIndexes[index] = struct{}{}
 		}

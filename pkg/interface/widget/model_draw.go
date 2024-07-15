@@ -204,10 +204,10 @@ func deformAfterPhysics(
 
 		for _, isAfterPhysics := range []bool{false, true} {
 			for _, bone := range model.Bones.LayerSortedBones[isAfterPhysics] {
-				if bone.RigidBody == nil || bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
+				if bone.Extend.RigidBody == nil || bone.Extend.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
 					continue
 				}
-				bonePhysicsGlobalMatrix := mbt.GetRigidBodyBoneMatrix(modelIndex, modelPhysics, bone.RigidBody)
+				bonePhysicsGlobalMatrix := mbt.GetRigidBodyBoneMatrix(modelIndex, modelPhysics, bone.Extend.RigidBody)
 				if deltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
 					bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame,
 						bonePhysicsGlobalMatrix, deltas.Bones.Get(bone.ParentIndex))
