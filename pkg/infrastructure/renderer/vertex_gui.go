@@ -23,7 +23,7 @@ func vertexGLInit(v *pmx.Vertex) []float32 {
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		n[0], n[1], n[2], // 法線
-		float32(v.Uv.GetX()), float32(v.Uv.GetY()), // UV
+		float32(v.Uv.X), float32(v.Uv.Y), // UV
 		eu[0], eu[1], // 追加UV
 		float32(v.EdgeFactor),  // エッジ倍率
 		d[0], d[1], d[2], d[3], // デフォームボーンINDEX

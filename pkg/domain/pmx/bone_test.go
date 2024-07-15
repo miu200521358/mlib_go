@@ -89,7 +89,7 @@ func TestIk_Copy(t *testing.T) {
 }
 
 func TestBone_NormalizeFixedAxis(t *testing.T) {
-	b := &Bone{}
+	b := NewBone()
 	correctedFixedAxis := mmath.MVec3{1, 0, 0}
 	b.NormalizeFixedAxis(&correctedFixedAxis)
 

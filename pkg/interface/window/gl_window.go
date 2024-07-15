@@ -435,10 +435,10 @@ func (gw *GlWindow) getWorldPosition(
 }
 
 func (w GlWindow) execWorldPos() {
-	prevX := w.prevCursorPos.GetX()
-	prevY := w.prevCursorPos.GetY()
-	nowX := w.nowCursorPos.GetX()
-	nowY := w.nowCursorPos.GetY()
+	prevX := w.prevCursorPos.X
+	prevY := w.prevCursorPos.Y
+	nowX := w.nowCursorPos.X
+	nowY := w.nowCursorPos.Y
 
 	vmdDeltas := make([]*delta.VmdDeltas, len(w.modelSets))
 	for i, modelSet := range w.modelSets {
@@ -494,8 +494,8 @@ func (w *GlWindow) updateCameraAngle(xpos, ypos float64) {
 	}
 
 	// 右クリックはカメラ中心をそのままにカメラ位置を変える
-	xOffset := (w.prevCursorPos.GetX() - xpos) * ratio
-	yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
+	xOffset := (w.prevCursorPos.X - xpos) * ratio
+	yOffset := (w.prevCursorPos.Y - ypos) * ratio
 
 	// 方位角と仰角を更新
 	w.yaw += xOffset
@@ -547,8 +547,8 @@ func (w *GlWindow) updateCameraPosition(xpos, ypos float64) {
 			ratio *= 0.1
 		}
 
-		xOffset := (w.prevCursorPos.GetX() - xpos) * ratio
-		yOffset := (w.prevCursorPos.GetY() - ypos) * ratio
+		xOffset := (w.prevCursorPos.X - xpos) * ratio
+		yOffset := (w.prevCursorPos.Y - ypos) * ratio
 
 		// カメラの向きに基づいて移動方向を計算
 		forward := w.Shader.LookAtCenterPosition.Subed(w.Shader.CameraPosition)
@@ -572,15 +572,15 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 	// 	w.yaw, w.pitch, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
 
 	if !w.updatedPrev {
-		w.prevCursorPos.SetX(xpos)
-		w.prevCursorPos.SetY(ypos)
+		w.prevCursorPos.X = xpos
+		w.prevCursorPos.Y = ypos
 		w.updatedPrev = true
 		return
 	}
 
 	if w.leftButtonPressed {
-		w.nowCursorPos.SetX(xpos)
-		w.nowCursorPos.SetY(ypos)
+		w.nowCursorPos.X = xpos
+		w.nowCursorPos.Y = ypos
 		return
 	} else if w.rightButtonPressed {
 		// 右クリックはカメラの角度を更新
@@ -590,8 +590,8 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 		w.updateCameraPosition(xpos, ypos)
 	}
 
-	w.prevCursorPos.SetX(xpos)
-	w.prevCursorPos.SetY(ypos)
+	w.prevCursorPos.X = xpos
+	w.prevCursorPos.Y = ypos
 }
 
 func (w *GlWindow) TriggerPhysicsEnabled(enabled bool) {

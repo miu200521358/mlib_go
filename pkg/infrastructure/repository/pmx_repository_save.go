@@ -191,8 +191,8 @@ func (r *PmxRepository) saveVertices(fout *os.File, model *pmx.PmxModel, boneIdx
 		r.writeNumber(fout, binaryType_float, vertex.Normal.GetX(), 0.0, false)
 		r.writeNumber(fout, binaryType_float, vertex.Normal.GetY(), 0.0, false)
 		r.writeNumber(fout, binaryType_float, vertex.Normal.GetZ(), 0.0, false)
-		r.writeNumber(fout, binaryType_float, vertex.Uv.GetX(), 0.0, false)
-		r.writeNumber(fout, binaryType_float, vertex.Uv.GetY(), 0.0, false)
+		r.writeNumber(fout, binaryType_float, vertex.Uv.X, 0.0, false)
+		r.writeNumber(fout, binaryType_float, vertex.Uv.Y, 0.0, false)
 
 		for _, uv := range vertex.ExtendedUvs {
 			r.writeNumber(fout, binaryType_float, uv.GetX(), 0.0, false)

@@ -36,12 +36,12 @@ func VertexMorphDeltaGL(md *delta.VertexMorphDelta) []float32 {
 	// UVは符号関係ないのでそのまま取得する
 	var u0x, u0y, u1x, u1y float32
 	if md.Uv != nil {
-		u0x = float32(md.Uv.GetX())
-		u0y = float32(md.Uv.GetY())
+		u0x = float32(md.Uv.X)
+		u0y = float32(md.Uv.Y)
 	}
 	if md.Uv1 != nil {
-		u1x = float32(md.Uv1.GetX())
-		u1y = float32(md.Uv1.GetY())
+		u1x = float32(md.Uv1.X)
+		u1y = float32(md.Uv1.Y)
 	}
 	return []float32{
 		p0, p1, p2,

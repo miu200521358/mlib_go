@@ -138,14 +138,6 @@ func (mat *MMat4) Quaternion() *MQuaternion {
 	return &MQuaternion{q.W, q.V}
 }
 
-func (mat *MMat4) Mat3() *MMat3 {
-	return &MMat3{
-		mat[0], mat[1], mat[2],
-		mat[4], mat[5], mat[6],
-		mat[8], mat[9], mat[10],
-	}
-}
-
 // Transpose transposes the matrix.
 func (mat *MMat4) Transpose() *MMat4 {
 	tm := mgl64.Mat4(*mat).Transpose()

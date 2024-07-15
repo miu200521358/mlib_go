@@ -42,10 +42,10 @@ func NewCurveByValues(startX, startY, endX, endY byte) *Curve {
 // Copy
 func (v *Curve) Copy() *Curve {
 	copied := NewCurve()
-	copied.Start.SetX(v.Start.GetX())
-	copied.Start.SetY(v.Start.GetY())
-	copied.End.SetX(v.End.GetX())
-	copied.End.SetY(v.End.GetY())
+	copied.Start.X = v.Start.X
+	copied.Start.Y = v.Start.Y
+	copied.End.X = v.End.X
+	copied.End.Y = v.End.Y
 	return copied
 }
 
@@ -54,30 +54,30 @@ func (v *Curve) Normalize(begin, finish *MVec2) {
 
 	v.Start = *v.Start.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
 
-	if v.Start.GetX() < 0 {
-		v.Start.SetX(0)
-	} else if v.Start.GetX() > CURVE_MAX {
-		v.Start.SetX(CURVE_MAX)
+	if v.Start.X < 0 {
+		v.Start.X = 0
+	} else if v.Start.X > CURVE_MAX {
+		v.Start.X = CURVE_MAX
 	}
 
-	if v.Start.GetY() < 0 {
-		v.Start.SetY(0)
-	} else if v.Start.GetY() > CURVE_MAX {
-		v.Start.SetY(CURVE_MAX)
+	if v.Start.Y < 0 {
+		v.Start.Y = 0
+	} else if v.Start.Y > CURVE_MAX {
+		v.Start.Y = CURVE_MAX
 	}
 
 	v.End = *v.End.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
 
-	if v.End.GetX() < 0 {
-		v.End.SetX(0)
-	} else if v.End.GetX() > CURVE_MAX {
-		v.End.SetX(CURVE_MAX)
+	if v.End.X < 0 {
+		v.End.X = 0
+	} else if v.End.X > CURVE_MAX {
+		v.End.X = CURVE_MAX
 	}
 
-	if v.End.GetY() < 0 {
-		v.End.SetY(0)
-	} else if v.End.GetY() > CURVE_MAX {
-		v.End.SetY(CURVE_MAX)
+	if v.End.Y < 0 {
+		v.End.Y = 0
+	} else if v.End.Y > CURVE_MAX {
+		v.End.Y = CURVE_MAX
 	}
 }
 
@@ -98,15 +98,15 @@ func Evaluate(curve *Curve, start, now, end int) (float64, float64, float64) {
 		return 1.0, 1.0, 1.0
 	}
 
-	if curve.Start.GetX() == curve.Start.GetY() && curve.End.GetX() == curve.End.GetY() {
+	if curve.Start.X == curve.Start.Y && curve.End.X == curve.End.Y {
 		// 前後が同じ場合、必ず線形補間になる
 		return x, x, x
 	}
 
-	x1 := curve.Start.GetX() / CURVE_MAX
-	y1 := curve.Start.GetY() / CURVE_MAX
-	x2 := curve.End.GetX() / CURVE_MAX
-	y2 := curve.End.GetY() / CURVE_MAX
+	x1 := curve.Start.X / CURVE_MAX
+	y1 := curve.Start.Y / CURVE_MAX
+	x2 := curve.End.X / CURVE_MAX
+	y2 := curve.End.Y / CURVE_MAX
 
 	t := newton(x1, x2, x, 0.5, 1e-15, 1e-20)
 	s := 1.0 - t
@@ -196,10 +196,10 @@ func SplitCurve(curve *Curve, start, now, end int) (*Curve, *Curve) {
 	}
 	endCurve.Normalize(iJ, iD)
 
-	if startCurve.Start.GetX() == startCurve.Start.GetY() &&
-		startCurve.End.GetX() == startCurve.End.GetY() &&
-		endCurve.Start.GetX() == endCurve.Start.GetY() &&
-		endCurve.End.GetX() == endCurve.End.GetY() {
+	if startCurve.Start.X == startCurve.Start.Y &&
+		startCurve.End.X == startCurve.End.Y &&
+		endCurve.Start.X == endCurve.Start.Y &&
+		endCurve.End.X == endCurve.End.Y {
 		// 線形の場合初期化
 		startCurve = NewCurve()
 		endCurve = NewCurve()
@@ -215,8 +215,8 @@ func Bezier(t float64, p0, p1, p2, p3 *MVec2) *MVec2 {
 	mt2 := mt * mt
 	mt3 := mt2 * mt
 
-	bx := mt3*p0.GetX() + 3*mt2*t*p1.GetX() + 3*mt*t2*p2.GetX() + t3*p3.GetX()
-	by := mt3*p0.GetY() + 3*mt2*t*p1.GetY() + 3*mt*t2*p2.GetY() + t3*p3.GetY()
+	bx := mt3*p0.X + 3*mt2*t*p1.X + 3*mt*t2*p2.X + t3*p3.X
+	by := mt3*p0.Y + 3*mt2*t*p1.Y + 3*mt*t2*p2.Y + t3*p3.Y
 
 	return &MVec2{bx, by}
 }
@@ -244,7 +244,7 @@ func NewCurveFromValues(values []float64) *Curve {
 		for i, y := range values {
 			t := float64(i) / float64(n-1)
 			bp := Bezier(t, p0, p1, p2, p3)
-			diff := bp.GetY() - y
+			diff := bp.Y - y
 			sumSq += diff * diff
 		}
 		return sumSq
@@ -275,7 +275,7 @@ func NewCurveFromValues(values []float64) *Curve {
 	method := &optimize.LBFGS{}
 
 	// Initial control points vector
-	initial := []float64{p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY()}
+	initial := []float64{p1.X, p1.Y, p2.X, p2.Y}
 
 	// Perform optimization
 	result, err := optimize.Minimize(problem, initial, settings, method)
@@ -290,7 +290,7 @@ func NewCurveFromValues(values []float64) *Curve {
 	}
 	c.Normalize(p0, p3)
 
-	if c.Start.GetX()/c.Start.GetY() == 1.0 && c.End.GetX()/c.End.GetY() == 1.0 {
+	if c.Start.X/c.Start.Y == 1.0 && c.End.X/c.End.Y == 1.0 {
 		// 線形の場合初期化
 		c = NewCurve()
 	}

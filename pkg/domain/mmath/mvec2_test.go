@@ -118,13 +118,13 @@ func TestMVec2Inverted(t *testing.T) {
 	v2 := MVec2{3, 4}
 
 	iv1 := v1.Inverted()
-	if iv1.GetX() != -1 || iv1.GetY() != -2 {
-		t.Errorf("Inverse failed. Expected (-1, -2), got (%v, %v)", iv1.GetX(), iv1.GetY())
+	if iv1.X != -1 || iv1.Y != -2 {
+		t.Errorf("Inverse failed. Expected (-1, -2), got (%v, %v)", iv1.X, iv1.Y)
 	}
 
 	iv2 := v2.Inverted()
-	if iv2.GetX() != -3 || iv2.GetY() != -4 {
-		t.Errorf("Inverse failed. Expected (-3, -4), got (%v, %v)", iv2.GetX(), iv2.GetY())
+	if iv2.X != -3 || iv2.Y != -4 {
+		t.Errorf("Inverse failed. Expected (-3, -4), got (%v, %v)", iv2.X, iv2.Y)
 	}
 }
 
