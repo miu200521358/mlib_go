@@ -1,12 +1,11 @@
 //go:build windows
 // +build windows
 
-package pmx
+package renderer
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
 
 var bone_colors_ik = []float32{1.0, 0.38, 0, 1.0}
@@ -26,7 +25,7 @@ var bone_colors_invisible_normal = []float32{0.92, 0.92, 0.92, 0.7}
 var bone_colors_rotate = []float32{0.56, 0.78, 1.0, 1.0}
 var bone_colors_rotate_normal = []float32{0.76, 0.98, 1.00, 0.7}
 
-func (b *Bone) color(isNormal bool) []float32 {
+func color(b *pmx.Bone, isNormal bool) []float32 {
 	// ボーンの種類で色を変える
 	if b.IsIK() {
 		// IKボーン
@@ -79,9 +78,9 @@ func (b *Bone) color(isNormal bool) []float32 {
 	return bone_colors_rotate
 }
 
-func (b *Bone) GL() []float32 {
+func BoneGL(b *pmx.Bone) []float32 {
 	p := b.Position.GL()
-	c := b.color(false)
+	c := color(b, false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		float32(b.BoneFlag), 0.0, 0.0, // 法線
@@ -101,9 +100,9 @@ func (b *Bone) GL() []float32 {
 	}
 }
 
-func (b *Bone) ParentGL() []float32 {
+func ParentGL(b *pmx.Bone) []float32 {
 	p := b.Position.Subed(b.ParentRelativePosition).GL()
-	c := b.color(false)
+	c := color(b, false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		float32(b.BoneFlag), 0.0, 0.0, // 法線
@@ -123,9 +122,9 @@ func (b *Bone) ParentGL() []float32 {
 	}
 }
 
-func (b *Bone) TailGL() []float32 {
+func TailGL(b *pmx.Bone) []float32 {
 	p := b.Position.Added(b.ChildRelativePosition).GL()
-	c := b.color(false)
+	c := color(b, false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		float32(b.BoneFlag), 0.0, 0.0, // 法線
@@ -145,8 +144,8 @@ func (b *Bone) TailGL() []float32 {
 	}
 }
 
-func (b *Bone) DeltaGL(isDrawBones map[BoneFlag]bool) []float32 {
-	c := b.color(false)
+func DeltaGL(b *pmx.Bone, isDrawBones map[pmx.BoneFlag]bool) []float32 {
+	c := color(b, false)
 
 	ikAlpha := float32(1.0)
 	fixedAlpha := float32(1.0)
@@ -156,38 +155,38 @@ func (b *Bone) DeltaGL(isDrawBones map[BoneFlag]bool) []float32 {
 	translateAlpha := float32(1.0)
 	visibleAlpha := float32(1.0)
 	// IK
-	if (!isDrawBones[BONE_FLAG_IS_IK] && !isDrawBones[BONE_FLAG_NONE]) ||
-		(isDrawBones[BONE_FLAG_IS_IK] && !(b.IsIK() || len(b.IkLinkBoneIndexes) > 0 || len(b.IkTargetBoneIndexes) > 0)) {
+	if (!isDrawBones[pmx.BONE_FLAG_IS_IK] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
+		(isDrawBones[pmx.BONE_FLAG_IS_IK] && !(b.IsIK() || len(b.IkLinkBoneIndexes) > 0 || len(b.IkTargetBoneIndexes) > 0)) {
 		ikAlpha = float32(0.0)
 	}
 	// 付与親回転
-	if (!isDrawBones[BONE_FLAG_IS_EXTERNAL_ROTATION] && !isDrawBones[BONE_FLAG_NONE]) ||
-		(isDrawBones[BONE_FLAG_IS_EXTERNAL_ROTATION] && !(b.IsEffectorRotation() || len(b.EffectiveBoneIndexes) > 0)) {
+	if (!isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_ROTATION] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
+		(isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_ROTATION] && !(b.IsEffectorRotation() || len(b.EffectiveBoneIndexes) > 0)) {
 		effectorRotateAlpha = float32(0.0)
 	}
 	// 付与親移動
-	if (!isDrawBones[BONE_FLAG_IS_EXTERNAL_TRANSLATION] && !isDrawBones[BONE_FLAG_NONE]) ||
-		(isDrawBones[BONE_FLAG_IS_EXTERNAL_TRANSLATION] && !(b.IsEffectorTranslation() || len(b.EffectiveBoneIndexes) > 0)) {
+	if (!isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_TRANSLATION] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
+		(isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_TRANSLATION] && !(b.IsEffectorTranslation() || len(b.EffectiveBoneIndexes) > 0)) {
 		effectorTranslateAlpha = float32(0.0)
 	}
 	// 軸固定
-	if (!isDrawBones[BONE_FLAG_HAS_FIXED_AXIS] && !isDrawBones[BONE_FLAG_NONE]) ||
-		(isDrawBones[BONE_FLAG_HAS_FIXED_AXIS] && !b.HasFixedAxis()) {
+	if (!isDrawBones[pmx.BONE_FLAG_HAS_FIXED_AXIS] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
+		(isDrawBones[pmx.BONE_FLAG_HAS_FIXED_AXIS] && !b.HasFixedAxis()) {
 		fixedAlpha = float32(0.0)
 	}
 	// 回転
-	if (!isDrawBones[BONE_FLAG_CAN_ROTATE] && !isDrawBones[BONE_FLAG_NONE]) ||
-		(isDrawBones[BONE_FLAG_CAN_ROTATE] && !b.CanRotate()) {
+	if (!isDrawBones[pmx.BONE_FLAG_CAN_ROTATE] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
+		(isDrawBones[pmx.BONE_FLAG_CAN_ROTATE] && !b.CanRotate()) {
 		rotateAlpha = float32(0.0)
 	}
 	// 移動
-	if (!isDrawBones[BONE_FLAG_CAN_TRANSLATE] && !isDrawBones[BONE_FLAG_NONE]) ||
-		(isDrawBones[BONE_FLAG_CAN_TRANSLATE] && !b.CanTranslate()) {
+	if (!isDrawBones[pmx.BONE_FLAG_CAN_TRANSLATE] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
+		(isDrawBones[pmx.BONE_FLAG_CAN_TRANSLATE] && !b.CanTranslate()) {
 		translateAlpha = float32(0.0)
 	}
 	// 表示
-	if (!isDrawBones[BONE_FLAG_IS_VISIBLE] && !isDrawBones[BONE_FLAG_NONE]) ||
-		(isDrawBones[BONE_FLAG_IS_VISIBLE] && !b.IsVisible()) {
+	if (!isDrawBones[pmx.BONE_FLAG_IS_VISIBLE] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
+		(isDrawBones[pmx.BONE_FLAG_IS_VISIBLE] && !b.IsVisible()) {
 		visibleAlpha = float32(0.0)
 	}
 
@@ -202,9 +201,9 @@ func (b *Bone) DeltaGL(isDrawBones map[BoneFlag]bool) []float32 {
 	}
 }
 
-func (b *Bone) NormalGL() []float32 {
+func NormalGL(b *pmx.Bone) []float32 {
 	p := b.LocalMatrix.MulVec3(&mmath.MVec3{0, 0.6, 0}).GL()
-	c := b.color(true)
+	c := color(b, true)
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		0.0, 0.0, 0.0, // 法線
@@ -221,35 +220,5 @@ func (b *Bone) NormalGL() []float32 {
 		0.0, 0.0, 0.0, 0.0, // UVモーフ
 		c[0], c[1], c[2], c[3], // 追加UV1モーフ
 		0.0, 0.0, 0.0, // 変形後頂点モーフ
-	}
-}
-
-// ボーンリスト
-type Bones struct {
-	*core.IndexNameModels[*Bone]
-	IkTreeIndexes     map[int][]int
-	LayerSortedBones  map[bool][]*Bone
-	LayerSortedNames  map[bool]map[string]int
-	DeformBoneIndexes map[int][]int
-	positionVao       *buffer.VAO
-	positionIbo       *buffer.IBO
-	positionIboCount  int32
-	normalVao         *buffer.VAO
-	normalIbo         *buffer.IBO
-	normalIboCount    int32
-}
-
-func NewBones(count int) *Bones {
-	return &Bones{
-		IndexNameModels:  core.NewIndexNameModels[*Bone](count, func() *Bone { return nil }),
-		IkTreeIndexes:    make(map[int][]int),
-		LayerSortedBones: make(map[bool][]*Bone),
-		LayerSortedNames: make(map[bool]map[string]int),
-		positionVao:      nil,
-		positionIbo:      nil,
-		positionIboCount: 0,
-		normalVao:        nil,
-		normalIbo:        nil,
-		normalIboCount:   0,
 	}
 }

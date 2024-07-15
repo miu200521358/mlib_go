@@ -160,8 +160,8 @@ func NewMeshes(
 		n := 0
 		for _, bone := range model.Bones.Data {
 			mu.Lock()
-			bones = append(bones, bone.GL()...)
-			bones = append(bones, bone.TailGL()...)
+			bones = append(bones, BoneGL(bone)...)
+			bones = append(bones, TailGL(bone)...)
 			boneFaces = append(boneFaces, uint32(n), uint32(n+1))
 			boneIndexes = append(boneIndexes, bone.Index, bone.Index)
 			mu.Unlock()
@@ -171,8 +171,8 @@ func NewMeshes(
 			if bone.ParentIndex >= 0 && model.Bones.Contains(bone.ParentIndex) &&
 				!model.Bones.Get(bone.ParentIndex).Position.IsZero() {
 				mu.Lock()
-				bones = append(bones, bone.GL()...)
-				bones = append(bones, bone.ParentGL()...)
+				bones = append(bones, BoneGL(bone)...)
+				bones = append(bones, ParentGL(bone)...)
 				boneFaces = append(boneFaces, uint32(n), uint32(n+1))
 				boneIndexes = append(boneIndexes, bone.Index, bone.ParentIndex)
 				mu.Unlock()
@@ -504,7 +504,7 @@ func (m *Meshes) fetchBoneDebugDeltas(bones *pmx.Bones, isDrawBones map[pmx.Bone
 	for _, boneIndex := range m.boneIndexes {
 		bone := bones.Get(boneIndex)
 		indexes = append(indexes, boneIndex)
-		deltas = append(deltas, bone.DeltaGL(isDrawBones))
+		deltas = append(deltas, DeltaGL(bone, isDrawBones))
 	}
 
 	return indexes, deltas
