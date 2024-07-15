@@ -43,16 +43,6 @@ func NewWireVertexMorphDeltas() *WireVertexMorphDeltas {
 	}
 }
 
-type SelectedVertexMorphDeltas struct {
-	*VertexMorphDeltas
-}
-
-func NewSelectedVertexMorphDeltas() *SelectedVertexMorphDeltas {
-	return &SelectedVertexMorphDeltas{
-		VertexMorphDeltas: NewVertexMorphDeltas(),
-	}
-}
-
 type BoneMorphDelta struct {
 	BoneIndex int
 	// *vmd.BoneFrame

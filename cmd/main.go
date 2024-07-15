@@ -260,44 +260,44 @@ func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXpr
 
 	pmxReadPicker.PathLineEdit.SetFocus()
 
-	funcWorldPos := func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
-		nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*delta.VmdDeltas) {
-		mlog.L()
+	// funcWorldPos := func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
+	// 	nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*delta.VmdDeltas) {
+	// 	mlog.L()
 
-		if pmxReadPicker.Exists() {
-			model := pmxReadPicker.GetCache().(*pmx.PmxModel)
-			var nearestVertexIndexes [][]int
-			// 直近頂点を取得
-			if prevXnowYFrontPos == nil {
-				nearestVertexIndexes = vmdDeltas[0].Vertices.FindNearestVertexIndexes(prevXprevYFrontPos, nil)
-			} else {
-				nearestVertexIndexes = vmdDeltas[0].Vertices.FindVerticesInBox(prevXprevYFrontPos, prevXprevYBackPos,
-					prevXnowYFrontPos, prevXnowYBackPos, nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos,
-					nowXnowYBackPos, nil)
-			}
+	// 	if pmxReadPicker.Exists() {
+	// 		model := pmxReadPicker.GetCache().(*pmx.PmxModel)
+	// 		var nearestVertexIndexes [][]int
+	// 		// 直近頂点を取得
+	// 		if prevXnowYFrontPos == nil {
+	// 			nearestVertexIndexes = vmdDeltas[0].Vertices.FindNearestVertexIndexes(prevXprevYFrontPos, nil)
+	// 		} else {
+	// 			nearestVertexIndexes = vmdDeltas[0].Vertices.FindVerticesInBox(prevXprevYFrontPos, prevXprevYBackPos,
+	// 				prevXnowYFrontPos, prevXnowYBackPos, nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos,
+	// 				nowXnowYBackPos, nil)
+	// 		}
 
-			if len(nearestVertexIndexes) > 0 {
-				for _, vertexIndex := range nearestVertexIndexes {
-					vertex := model.Vertices.Get(vertexIndex[0])
-					mlog.I("In Box Vertex: %d (元: %s)(変形: %s)",
-						vertex.Index, vertex.Position.String(),
-						vmdDeltas[0].Vertices.Get(vertex.Index).Position.String())
-				}
-				go func() {
-					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextSelectedVertexIndexes: nearestVertexIndexes[0]}}
-				}()
-			}
+	// 		if len(nearestVertexIndexes) > 0 {
+	// 			for _, vertexIndex := range nearestVertexIndexes {
+	// 				vertex := model.Vertices.Get(vertexIndex[0])
+	// 				mlog.I("In Box Vertex: %d (元: %s)(変形: %s)",
+	// 					vertex.Index, vertex.Position.String(),
+	// 					vmdDeltas[0].Vertices.Get(vertex.Index).Position.String())
+	// 			}
+	// 			go func() {
+	// 				mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextSelectedVertexIndexes: nearestVertexIndexes[0]}}
+	// 			}()
+	// 		}
 
-			// // 大体近いボーンを取得
-			// nearestBoneIndexes := vmdDeltas[0].Bones.GetNearestBoneIndexes(worldPos)
-			// for _, boneIndex := range nearestBoneIndexes {
-			// 	bone := model.Bones.Get(boneIndex)
-			// 	mlog.I("Near Bone: %d, %s (元: %s)(変形: %s)",
-			// 		bone.Index, bone.Name, bone.Position.String(),
-			// 		vmdDeltas[0].Bones.Get(bone.Index).GlobalPosition().String())
-			// }
-		}
-	}
+	// 		// // 大体近いボーンを取得
+	// 		// nearestBoneIndexes := vmdDeltas[0].Bones.GetNearestBoneIndexes(worldPos)
+	// 		// for _, boneIndex := range nearestBoneIndexes {
+	// 		// 	bone := model.Bones.Get(boneIndex)
+	// 		// 	mlog.I("Near Bone: %d, %s (元: %s)(変形: %s)",
+	// 		// 		bone.Index, bone.Name, bone.Position.String(),
+	// 		// 		vmdDeltas[0].Bones.Get(bone.Index).GlobalPosition().String())
+	// 		// }
+	// 	}
+	// }
 
-	return motionPlayer, funcWorldPos
+	return motionPlayer, nil
 }

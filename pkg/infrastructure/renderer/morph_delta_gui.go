@@ -52,7 +52,7 @@ func VertexMorphDeltaGL(md *delta.VertexMorphDelta) []float32 {
 }
 
 func SelectedVertexMorphDeltasGL(
-	mds *delta.SelectedVertexMorphDeltas,
+	mds *SelectedVertexMorphDeltas,
 	model *pmx.PmxModel, selectedVertexIndexes, nextSelectedVertexIndexes []int,
 ) ([]int, [][]float32) {
 	indices := make([]int, 0)

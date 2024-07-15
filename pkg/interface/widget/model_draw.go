@@ -35,6 +35,8 @@ type ModelSet struct {
 	VertexMorphGlDeltas          [][]float32
 	SelectedVertexIndexesDeltas  []int
 	SelectedVertexGlDeltasDeltas [][]float32
+	Vertices                     *renderer.VertexDeltas
+	SelectedVertexDeltas         *renderer.SelectedVertexMorphDeltas
 }
 
 func NewModelSet() *ModelSet {
@@ -43,6 +45,7 @@ func NewModelSet() *ModelSet {
 		SelectedVertexIndexes:        make([]int, 0),
 		NextInvisibleMaterialIndexes: make([]int, 0),
 		NextSelectedVertexIndexes:    make([]int, 0),
+		SelectedVertexDeltas:         renderer.NewSelectedVertexMorphDeltas(),
 	}
 }
 
@@ -102,8 +105,8 @@ func DeformsAll(
 
 				modelSets[ii].PrevDeltas, modelSets[ii].BoneGlDeltas, modelSets[ii].SelectedVertexIndexesDeltas, modelSets[ii].SelectedVertexGlDeltasDeltas = deformAfterPhysics(
 					modelPhysics, modelSets[ii].Model, modelSets[ii].Motion, modelSets[ii].PrevDeltas,
-					modelSets[ii].SelectedVertexIndexes, modelSets[ii].NextSelectedVertexIndexes, int(frame),
-					enablePhysics, resetPhysics,
+					modelSets[ii].SelectedVertexIndexes, modelSets[ii].NextSelectedVertexIndexes, modelSets[ii].SelectedVertexDeltas,
+					int(frame), enablePhysics, resetPhysics,
 				)
 			}(i)
 		}
@@ -182,6 +185,7 @@ func deformAfterPhysics(
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
 	selectedVertexIndexes, nextSelectedVertexIndexes []int,
+	SelectedVertexDeltas *renderer.SelectedVertexMorphDeltas,
 	frame int,
 	enablePhysics, resetPhysics bool,
 ) (*delta.VmdDeltas, []mgl32.Mat4, []int, [][]float32) {
@@ -224,7 +228,7 @@ func deformAfterPhysics(
 
 	// 選択頂点モーフの設定は常に更新する
 	SelectedVertexIndexesDeltas, SelectedVertexGlDeltas := renderer.SelectedVertexMorphDeltasGL(
-		deltas.SelectedVertexDeltas, model, selectedVertexIndexes, nextSelectedVertexIndexes)
+		SelectedVertexDeltas, model, selectedVertexIndexes, nextSelectedVertexIndexes)
 
 	return deltas, BoneGlDeltas, SelectedVertexIndexesDeltas, SelectedVertexGlDeltas
 }
@@ -253,8 +257,10 @@ func Draw(
 		invisibleMaterialIndexes, nextInvisibleMaterialIndexes, windowIndex,
 		isDrawNormal, isDrawWire, isDrawSelectedVertex, isDrawBones, model.Bones)
 
+	Vertices := renderer.NewVertexDeltas(model.Vertices)
+
 	for i, pos := range vertexPositions {
-		deltas.Vertices.Data[i] = delta.NewVertexDelta(&mmath.MVec3{float64(-pos[0]), float64(pos[1]), float64(pos[2])})
+		Vertices.Data[i] = renderer.NewVertexDelta(&mmath.MVec3{float64(-pos[0]), float64(pos[1]), float64(pos[2])})
 	}
 
 	// 物理デバッグ表示

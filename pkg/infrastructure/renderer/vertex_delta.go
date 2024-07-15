@@ -1,12 +1,23 @@
-package delta
+package renderer
 
 import (
 	"math"
 	"slices"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
+
+type SelectedVertexMorphDeltas struct {
+	*delta.VertexMorphDeltas
+}
+
+func NewSelectedVertexMorphDeltas() *SelectedVertexMorphDeltas {
+	return &SelectedVertexMorphDeltas{
+		VertexMorphDeltas: delta.NewVertexMorphDeltas(),
+	}
+}
 
 type VertexDelta struct {
 	Position *mmath.MVec3

@@ -5,15 +5,10 @@ import (
 )
 
 type VmdDeltas struct {
-	Vertices             *VertexDeltas
-	Bones                *BoneDeltas
-	Morphs               *MorphDeltas
-	SelectedVertexDeltas *SelectedVertexMorphDeltas
+	Bones  *BoneDeltas
+	Morphs *MorphDeltas
 }
 
 func NewVmdDeltas(vertices *pmx.Vertices) *VmdDeltas {
-	return &VmdDeltas{
-		Vertices:             NewVertexDeltas(vertices),
-		SelectedVertexDeltas: NewSelectedVertexMorphDeltas(),
-	}
+	return &VmdDeltas{}
 }
