@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package pmx
+package renderer
 
 import (
 	"unsafe"
@@ -9,6 +9,7 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
@@ -18,20 +19,6 @@ type Mesh struct {
 	material          MaterialGL  // 描画用材質
 	prevVerticesCount int         // 前の頂点数
 	ibo               *buffer.IBO // 頂点インデックスバッファ
-}
-
-type MeshDelta struct {
-	Diffuse          mgl32.Vec4
-	Specular         mgl32.Vec4
-	Ambient          mgl32.Vec3
-	Edge             mgl32.Vec4
-	EdgeSize         float32
-	TextureMulFactor mgl32.Vec4
-	TextureAddFactor mgl32.Vec4
-	SphereMulFactor  mgl32.Vec4
-	SphereAddFactor  mgl32.Vec4
-	ToonMulFactor    mgl32.Vec4
-	ToonAddFactor    mgl32.Vec4
 }
 
 func NewMesh(
@@ -63,7 +50,7 @@ func (m *Mesh) drawModel(
 	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
-	meshDelta *MeshDelta,
+	meshDelta *delta.MeshDelta,
 ) {
 	if m.material.DrawFlag.IsDoubleSidedDrawing() {
 		// 両面描画
@@ -184,7 +171,7 @@ func (m *Mesh) drawEdge(
 	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
-	meshDelta *MeshDelta,
+	meshDelta *delta.MeshDelta,
 ) {
 	gl.Enable(gl.CULL_FACE)
 	defer gl.Disable(gl.CULL_FACE)

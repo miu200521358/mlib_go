@@ -15,11 +15,13 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 )
 
 type ModelSet struct {
 	Model                        *pmx.PmxModel    // 現在描画中のモデル
 	Motion                       *vmd.VmdMotion   // 現在描画中のモーション
+	Meshes                       *renderer.Meshes // 現在描画中のメッシュ
 	InvisibleMaterialIndexes     []int            // 非表示材質インデックス
 	SelectedVertexIndexes        []int            // 選択頂点インデックス
 	NextModel                    *pmx.PmxModel    // UIから渡された次のモデル
@@ -129,7 +131,7 @@ func deformBeforePhysics(
 		vds.Bones = deform.DeformByPhysicsFlag(motion.BoneFrames, frame, model, nil, true,
 			nil, vds.Morphs, ikFrame, false)
 
-		vds.MeshGlDeltas = make([]*pmx.MeshDelta, len(model.Materials.Data))
+		vds.MeshGlDeltas = make([]*delta.MeshDelta, len(model.Materials.Data))
 		for i, md := range vds.Morphs.Materials.Data {
 			vds.MeshGlDeltas[i] = md.Result()
 		}
@@ -229,6 +231,7 @@ func deformAfterPhysics(
 func Draw(
 	modelPhysics *mbt.MPhysics,
 	model *pmx.PmxModel,
+	meshes *renderer.Meshes,
 	shader *mgl.MShader,
 	deltas *delta.VmdDeltas,
 	invisibleMaterialIndexes, nextInvisibleMaterialIndexes []int,
@@ -237,7 +240,7 @@ func Draw(
 	isDrawBones map[pmx.BoneFlag]bool,
 	isDrawRigidBodyFront, visibleRigidBody, visibleJoint bool,
 ) *delta.VmdDeltas {
-	vertexPositions := model.Meshes.Draw(
+	vertexPositions := meshes.Draw(
 		shader, deltas.BoneGlDeltas, deltas.VertexMorphIndexes, deltas.VertexMorphGlDeltas,
 		deltas.SelectedVertexIndexes, deltas.SelectedVertexGlDeltas, deltas.MeshGlDeltas,
 		invisibleMaterialIndexes, nextInvisibleMaterialIndexes, windowIndex,

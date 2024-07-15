@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package pmx
+package renderer
 
 import (
 	"math"
@@ -12,6 +12,8 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
@@ -38,7 +40,7 @@ type Meshes struct {
 }
 
 func NewMeshes(
-	model *PmxModel,
+	model *pmx.PmxModel,
 	windowIndex int,
 ) *Meshes {
 	// 頂点情報
@@ -58,18 +60,18 @@ func NewMeshes(
 		defer wg.Done()
 		n := 0
 		for i, vertex := range model.Vertices.Data {
-			vgl := vertex.GL()
+			vgl := vertexGLInit(vertex)
 
 			mu.Lock()
 			vertices = append(vertices, vgl...)
 
 			// 法線
 			normalVertices = append(normalVertices, vgl...)
-			normalVertices = append(normalVertices, vertex.NormalGL()...)
+			normalVertices = append(normalVertices, NormalVertexGL(vertex)...)
 			normalFaces = append(normalFaces, uint32(n), uint32(n+1))
 
 			// 選択頂点
-			selectedVertices = append(selectedVertices, vertex.SelectedGL()...)
+			selectedVertices = append(selectedVertices, SelectedGL(vertex)...)
 			selectedVertexFaces = append(selectedVertexFaces, uint32(i))
 
 			mu.Unlock()
@@ -101,33 +103,34 @@ func NewMeshes(
 	// テクスチャの gl.GenTextures はスレッドセーフではないので、並列化しない
 	for i, m := range model.Materials.Data {
 		// テクスチャ
-		var texture *Texture
+		var texture *pmx.Texture
 		if m.TextureIndex != -1 && model.Textures.Contains(m.TextureIndex) {
 			texture = model.Textures.Get(m.TextureIndex)
 		}
 
-		var toonTexture *Texture
+		var toonTexture *pmx.Texture
 		// 個別Toon
-		if m.ToonSharingFlag == TOON_SHARING_INDIVIDUAL &&
+		if m.ToonSharingFlag == pmx.TOON_SHARING_INDIVIDUAL &&
 			m.ToonTextureIndex != -1 &&
 			model.Textures.Contains(m.ToonTextureIndex) {
 			toonTexture = model.Textures.Get(m.ToonTextureIndex)
 		}
 		// 共有Toon
-		if m.ToonSharingFlag == TOON_SHARING_SHARING &&
+		if m.ToonSharingFlag == pmx.TOON_SHARING_SHARING &&
 			m.ToonTextureIndex != -1 &&
 			model.ToonTextures.Contains(m.ToonTextureIndex) {
 			toonTexture = model.ToonTextures.Get(m.ToonTextureIndex)
 		}
 
-		var sphereTexture *Texture
-		if m.SphereMode != SPHERE_MODE_INVALID &&
+		var sphereTexture *pmx.Texture
+		if m.SphereMode != pmx.SPHERE_MODE_INVALID &&
 			m.SphereTextureIndex != -1 &&
 			model.Textures.Contains(m.SphereTextureIndex) {
 			sphereTexture = model.Textures.Get(m.SphereTextureIndex)
 		}
 
-		materialGl := m.GL(
+		materialGl := materialGL(
+			m,
 			model.GetPath(),
 			texture,
 			toonTexture,
@@ -262,9 +265,9 @@ func (m *Meshes) delete() {
 func (m *Meshes) Draw(
 	shader *mgl.MShader, boneDeltas []mgl32.Mat4,
 	vertexMorphIndexes []int, vertexMorphDeltas [][]float32,
-	selectedVertexIndexes []int, selectedVertexDeltas [][]float32, meshDeltas []*MeshDelta,
+	selectedVertexIndexes []int, selectedVertexDeltas [][]float32, meshDeltas []*delta.MeshDelta,
 	invisibleMaterialIndexes []int, nextInvisibleMaterialIndexes []int, windowIndex int,
-	isDrawNormal, isDrawWire, isDrawSelectedVertex bool, isDrawBones map[BoneFlag]bool, bones *Bones,
+	isDrawNormal, isDrawWire, isDrawSelectedVertex bool, isDrawBones map[pmx.BoneFlag]bool, bones *pmx.Bones,
 ) [][]float32 {
 	m.vao.Bind()
 	defer m.vao.Unbind()
@@ -452,8 +455,8 @@ func (m *Meshes) drawSelectedVertex(
 
 func (m *Meshes) drawBone(
 	shader *mgl.MShader,
-	bones *Bones,
-	isDrawBones map[BoneFlag]bool,
+	bones *pmx.Bones,
+	isDrawBones map[pmx.BoneFlag]bool,
 	paddedMatrixes []float32,
 	width, height int,
 	windowIndex int,
@@ -495,7 +498,7 @@ func (m *Meshes) drawBone(
 
 }
 
-func (m *Meshes) fetchBoneDebugDeltas(bones *Bones, isDrawBones map[BoneFlag]bool) ([]int, [][]float32) {
+func (m *Meshes) fetchBoneDebugDeltas(bones *pmx.Bones, isDrawBones map[pmx.BoneFlag]bool) ([]int, [][]float32) {
 	indexes := make([]int, 0)
 	deltas := make([][]float32, 0)
 

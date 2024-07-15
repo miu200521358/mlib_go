@@ -1,13 +1,14 @@
 //go:build windows
 // +build windows
 
-package pmx
+package renderer
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
 
-func (v *Vertex) GL() []float32 {
+func vertexGLInit(v *pmx.Vertex) []float32 {
 	p := v.Position.GL()
 	n := v.Normal.GL()
 	eu := [2]float32{0.0, 0.0}
@@ -16,8 +17,8 @@ func (v *Vertex) GL() []float32 {
 		eu[1] = float32(v.ExtendedUvs[0].GetY())
 	}
 	d := v.Deform.NormalizedDeform()
-	s := float32(mmath.BoolToInt(v.DeformType == SDEF))
-	sdefC, sdefR0, sdefR1 := v.Deform.GetSdefParams()
+	s := float32(mmath.BoolToInt(v.DeformType == pmx.SDEF))
+	sdefC, sdefR0, sdefR1 := GetSdefParams(v.Deform)
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		n[0], n[1], n[2], // 法線
@@ -37,11 +38,11 @@ func (v *Vertex) GL() []float32 {
 	}
 }
 
-func (v *Vertex) NormalGL() []float32 {
+func NormalVertexGL(v *pmx.Vertex) []float32 {
 	p := v.Position.GL()
 	n := v.Normal.MuledScalar(0.5).GL()
 	d := v.Deform.NormalizedDeform()
-	s := float32(mmath.BoolToInt(v.DeformType == SDEF))
+	s := float32(mmath.BoolToInt(v.DeformType == pmx.SDEF))
 	sdefC, sdefR0, sdefR1 := v.Deform.GetSdefParams()
 	return []float32{
 		p[0] + n[0], p[1] + n[1], p[2] + n[2], // 位置
@@ -62,11 +63,11 @@ func (v *Vertex) NormalGL() []float32 {
 	}
 }
 
-func (v *Vertex) WireGL() []float32 {
+func WireGL(v *pmx.Vertex) []float32 {
 	p := v.Position.GL()
 	n := v.Normal.GL()
 	d := v.Deform.NormalizedDeform()
-	s := float32(mmath.BoolToInt(v.DeformType == SDEF))
+	s := float32(mmath.BoolToInt(v.DeformType == pmx.SDEF))
 	sdefC, sdefR0, sdefR1 := v.Deform.GetSdefParams()
 	return []float32{
 		p[0], p[1], p[2], // 位置
@@ -87,11 +88,11 @@ func (v *Vertex) WireGL() []float32 {
 	}
 }
 
-func (v *Vertex) SelectedGL() []float32 {
+func SelectedGL(v *pmx.Vertex) []float32 {
 	p := v.Position.GL()
 	n := v.Normal.GL()
 	d := v.Deform.NormalizedDeform()
-	s := float32(mmath.BoolToInt(v.DeformType == SDEF))
+	s := float32(mmath.BoolToInt(v.DeformType == pmx.SDEF))
 	sdefC, sdefR0, sdefR1 := v.Deform.GetSdefParams()
 	return []float32{
 		p[0], p[1], p[2], // 位置

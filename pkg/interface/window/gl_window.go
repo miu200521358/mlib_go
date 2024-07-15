@@ -21,6 +21,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 	"github.com/miu200521358/mlib_go/pkg/interface/widget"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
@@ -823,7 +824,7 @@ func (w *GlWindow) Run() {
 		for k := range w.modelSets {
 			if w.modelSets[k].Model != nil && w.modelSets[k].PrevDeltas != nil {
 				w.modelSets[k].PrevDeltas = widget.Draw(
-					w.Physics, w.modelSets[k].Model, w.Shader, w.modelSets[k].PrevDeltas,
+					w.Physics, w.modelSets[k].Model, w.modelSets[k].Meshes, w.Shader, w.modelSets[k].PrevDeltas,
 					w.modelSets[k].InvisibleMaterialIndexes, w.modelSets[k].NextInvisibleMaterialIndexes,
 					w.WindowIndex, w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones,
 					w.mWindow.rigidBodyFrontDebugAction.Checked(), w.mWindow.rigidBodyBackDebugAction.Checked(), w.mWindow.jointDebugAction.Checked())
@@ -849,7 +850,7 @@ func (w *GlWindow) Run() {
 				}
 				if !w.modelSets[k].NextModel.DrawInitialized {
 					w.modelSets[k].NextModel.Index = k
-					w.modelSets[k].NextModel.DrawInitialize(w.WindowIndex)
+					w.modelSets[k].Meshes = renderer.DrawInitialize(w.WindowIndex, w.modelSets[k].NextModel)
 					mbt.InitPhysics(w.Physics, w.modelSets[k].NextModel)
 				}
 				w.modelSets[k].Model = w.modelSets[k].NextModel

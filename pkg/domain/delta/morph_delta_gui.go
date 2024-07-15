@@ -96,8 +96,8 @@ func (mds *SelectedVertexMorphDeltas) GL(
 	return indices, vertices
 }
 
-func (md *MaterialMorphDelta) Result() *pmx.MeshDelta {
-	material := &pmx.MeshDelta{
+func (md *MaterialMorphDelta) Result() *MeshDelta {
+	material := &MeshDelta{
 		Diffuse:          md.diffuse(),
 		Specular:         md.specular(),
 		Ambient:          md.ambient(),

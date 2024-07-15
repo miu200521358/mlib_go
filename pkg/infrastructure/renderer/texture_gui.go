@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package pmx
+package renderer
 
 import (
 	"embed"
@@ -11,6 +11,7 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
@@ -20,12 +21,12 @@ import (
 var toonFiles embed.FS
 
 type TextureGL struct {
-	Id                uint32      // OpenGLテクスチャID
-	Valid             bool        // テクスチャフルパスが有効であるか否か
-	TextureType       TextureType // テクスチャ種別
-	TextureUnitId     uint32      // テクスチャ種類別描画先ユニットID
-	TextureUnitNo     uint32      // テクスチャ種類別描画先ユニット番号
-	IsGeneratedMipmap bool        // ミップマップが生成されているか否か
+	Id                uint32          // OpenGLテクスチャID
+	Valid             bool            // テクスチャフルパスが有効であるか否か
+	TextureType       pmx.TextureType // テクスチャ種別
+	TextureUnitId     uint32          // テクスチャ種類別描画先ユニットID
+	TextureUnitNo     uint32          // テクスチャ種類別描画先ユニット番号
+	IsGeneratedMipmap bool            // ミップマップが生成されているか否か
 }
 
 func (t *TextureGL) Bind() {
@@ -36,7 +37,7 @@ func (t *TextureGL) Bind() {
 	gl.ActiveTexture(t.TextureUnitId)
 	gl.BindTexture(gl.TEXTURE_2D, t.Id)
 
-	if t.TextureType == TEXTURE_TYPE_TOON {
+	if t.TextureType == pmx.TEXTURE_TYPE_TOON {
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
 	}
@@ -65,9 +66,10 @@ func (t *TextureGL) delete() {
 	}
 }
 
-func (t *Texture) GL(
+func textureGLInit(
+	t *pmx.Texture,
 	modelPath string,
-	textureType TextureType,
+	textureType pmx.TextureType,
 	windowIndex int,
 ) *TextureGL {
 	tGl := &TextureGL{}
@@ -75,11 +77,11 @@ func (t *Texture) GL(
 	if t.Initialized && t.Valid {
 		// 既にフラグが立ってたら描画初期化済み
 		// 共有Toonテクスチャの場合、既に初期化済み
-		tGl.Id = t.glId
+		tGl.Id = t.GlId
 		tGl.Valid = t.Valid
 		tGl.TextureType = t.TextureType
-		tGl.TextureUnitId = t.textureUnitId
-		tGl.TextureUnitNo = t.textureUnitNo
+		tGl.TextureUnitId = t.TextureUnitId
+		tGl.TextureUnitNo = t.TextureUnitNo
 		tGl.IsGeneratedMipmap = t.IsGeneratedMipmap
 		return tGl
 	}
@@ -116,51 +118,51 @@ func (t *Texture) GL(
 
 	// テクスチャオブジェクト生成
 	gl.GenTextures(1, &tGl.Id)
-	t.glId = tGl.Id
+	t.GlId = tGl.Id
 
 	// テクスチャ種別によってテクスチャユニットを変更
 	if windowIndex == 0 {
 		switch textureType {
-		case TEXTURE_TYPE_TEXTURE:
-			t.textureUnitId = gl.TEXTURE0
-			t.textureUnitNo = 0
-		case TEXTURE_TYPE_TOON:
-			t.textureUnitId = gl.TEXTURE1
-			t.textureUnitNo = 1
-		case TEXTURE_TYPE_SPHERE:
-			t.textureUnitId = gl.TEXTURE2
-			t.textureUnitNo = 2
+		case pmx.TEXTURE_TYPE_TEXTURE:
+			t.TextureUnitId = gl.TEXTURE0
+			t.TextureUnitNo = 0
+		case pmx.TEXTURE_TYPE_TOON:
+			t.TextureUnitId = gl.TEXTURE1
+			t.TextureUnitNo = 1
+		case pmx.TEXTURE_TYPE_SPHERE:
+			t.TextureUnitId = gl.TEXTURE2
+			t.TextureUnitNo = 2
 		}
 	} else if windowIndex == 1 {
 		switch textureType {
-		case TEXTURE_TYPE_TEXTURE:
-			t.textureUnitId = gl.TEXTURE3
-			t.textureUnitNo = 3
-		case TEXTURE_TYPE_TOON:
-			t.textureUnitId = gl.TEXTURE4
-			t.textureUnitNo = 4
-		case TEXTURE_TYPE_SPHERE:
-			t.textureUnitId = gl.TEXTURE5
-			t.textureUnitNo = 5
+		case pmx.TEXTURE_TYPE_TEXTURE:
+			t.TextureUnitId = gl.TEXTURE3
+			t.TextureUnitNo = 3
+		case pmx.TEXTURE_TYPE_TOON:
+			t.TextureUnitId = gl.TEXTURE4
+			t.TextureUnitNo = 4
+		case pmx.TEXTURE_TYPE_SPHERE:
+			t.TextureUnitId = gl.TEXTURE5
+			t.TextureUnitNo = 5
 		}
 	} else if windowIndex == 2 {
 		switch textureType {
-		case TEXTURE_TYPE_TEXTURE:
-			t.textureUnitId = gl.TEXTURE6
-			t.textureUnitNo = 6
-		case TEXTURE_TYPE_TOON:
-			t.textureUnitId = gl.TEXTURE7
-			t.textureUnitNo = 7
-		case TEXTURE_TYPE_SPHERE:
-			t.textureUnitId = gl.TEXTURE8
-			t.textureUnitNo = 8
+		case pmx.TEXTURE_TYPE_TEXTURE:
+			t.TextureUnitId = gl.TEXTURE6
+			t.TextureUnitNo = 6
+		case pmx.TEXTURE_TYPE_TOON:
+			t.TextureUnitId = gl.TEXTURE7
+			t.TextureUnitNo = 7
+		case pmx.TEXTURE_TYPE_SPHERE:
+			t.TextureUnitId = gl.TEXTURE8
+			t.TextureUnitNo = 8
 		}
 	}
 
 	tGl.Valid = t.Valid
 	tGl.TextureType = t.TextureType
-	tGl.TextureUnitId = t.textureUnitId
-	tGl.TextureUnitNo = t.textureUnitNo
+	tGl.TextureUnitId = t.TextureUnitId
+	tGl.TextureUnitNo = t.TextureUnitNo
 	tGl.IsGeneratedMipmap = t.IsGeneratedMipmap
 
 	tGl.Bind()
@@ -190,16 +192,17 @@ func (t *Texture) GL(
 	return tGl
 }
 
-func (t *ToonTextures) initGl(
+func initToonTexturesGl(
 	windowIndex int,
+	t *pmx.ToonTextures,
 ) error {
 	for i := 0; i < 10; i++ {
 		filePath := fmt.Sprintf("toon/toon%02d.bmp", i+1)
 
-		toon := NewTexture()
+		toon := pmx.NewTexture()
 		toon.Index = i
 		toon.Name = filePath
-		toon.TextureType = TEXTURE_TYPE_TOON
+		toon.TextureType = pmx.TEXTURE_TYPE_TOON
 		toon.Path = filePath
 
 		img, err := mutils.LoadImageFromResources(toonFiles, filePath)
@@ -214,23 +217,23 @@ func (t *ToonTextures) initGl(
 
 		// テクスチャオブジェクト生成
 		gl.GenTextures(1, &tGl.Id)
-		toon.glId = tGl.Id
+		toon.GlId = tGl.Id
 
 		// Toon用テクスチャユニットを設定
 		if windowIndex == 0 {
-			toon.textureUnitId = gl.TEXTURE10
-			toon.textureUnitNo = 10
+			toon.TextureUnitId = gl.TEXTURE10
+			toon.TextureUnitNo = 10
 		} else if windowIndex == 1 {
-			toon.textureUnitId = gl.TEXTURE11
-			toon.textureUnitNo = 11
+			toon.TextureUnitId = gl.TEXTURE11
+			toon.TextureUnitNo = 11
 		} else if windowIndex == 2 {
-			toon.textureUnitId = gl.TEXTURE12
-			toon.textureUnitNo = 12
+			toon.TextureUnitId = gl.TEXTURE12
+			toon.TextureUnitNo = 12
 		}
 
 		tGl.Valid = toon.Valid
 		tGl.TextureType = toon.TextureType
-		tGl.TextureUnitId = toon.textureUnitId
+		tGl.TextureUnitId = toon.TextureUnitId
 		// tGl.IsGeneratedMipmap = toon.IsGeneratedMipmap	// Toonテクスチャはミップマップを生成しない
 
 		tGl.Bind()

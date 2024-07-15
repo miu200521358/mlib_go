@@ -1,37 +1,40 @@
 //go:build windows
 // +build windows
 
-package pmx
+package renderer
+
+import "github.com/miu200521358/mlib_go/pkg/domain/pmx"
 
 type MaterialGL struct {
-	*Material
+	*pmx.Material
 	Texture           *TextureGL // 通常テクスチャ
 	SphereTexture     *TextureGL // スフィアテクスチャ
 	ToonTexture       *TextureGL // トゥーンテクスチャ
 	PrevVerticesCount int        // 前の材質までの頂点数
 }
 
-func (m *Material) GL(
+func materialGL(
+	m *pmx.Material,
 	modelPath string,
-	texture *Texture,
-	toonTexture *Texture,
-	sphereTexture *Texture,
+	texture *pmx.Texture,
+	toonTexture *pmx.Texture,
+	sphereTexture *pmx.Texture,
 	windowIndex int,
 	prevVerticesCount int,
 ) *MaterialGL {
 	var textureGL *TextureGL
 	if texture != nil {
-		textureGL = texture.GL(modelPath, TEXTURE_TYPE_TEXTURE, windowIndex)
+		textureGL = textureGLInit(texture, modelPath, pmx.TEXTURE_TYPE_TEXTURE, windowIndex)
 	}
 
 	var sphereTextureGL *TextureGL
 	if sphereTexture != nil {
-		sphereTextureGL = sphereTexture.GL(modelPath, TEXTURE_TYPE_SPHERE, windowIndex)
+		sphereTextureGL = textureGLInit(sphereTexture, modelPath, pmx.TEXTURE_TYPE_SPHERE, windowIndex)
 	}
 
 	var tooTextureGL *TextureGL
 	if toonTexture != nil {
-		tooTextureGL = toonTexture.GL(modelPath, TEXTURE_TYPE_TOON, windowIndex)
+		tooTextureGL = textureGLInit(toonTexture, modelPath, pmx.TEXTURE_TYPE_TOON, windowIndex)
 	}
 
 	return &MaterialGL{

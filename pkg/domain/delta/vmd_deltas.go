@@ -11,7 +11,7 @@ type VmdDeltas struct {
 	Morphs                 *MorphDeltas
 	SelectedVertexDeltas   *SelectedVertexMorphDeltas
 	BoneGlDeltas           []mgl32.Mat4
-	MeshGlDeltas           []*pmx.MeshDelta
+	MeshGlDeltas           []*MeshDelta
 	VertexMorphIndexes     []int
 	VertexMorphGlDeltas    [][]float32
 	SelectedVertexIndexes  []int
