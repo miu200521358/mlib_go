@@ -21,46 +21,50 @@ import (
 
 type MWindow struct {
 	*walk.MainWindow
-	TabWidget                 *widget.MTabWidget  // タブウィジェット
-	isHorizontal              bool                // 横並びであるか否か
-	GlWindows                 []*GlWindow         // 描画ウィンドウ
-	ConsoleView               *widget.ConsoleView // コンソールビュー
-	frameDropAction           *walk.Action        // フレームドロップON/OFF
-	physicsAction             *walk.Action        // 物理ON/OFF
-	physicsResetAction        *walk.Action        // 物理リセット
-	normalDebugAction         *walk.Action        // ボーンデバッグ表示
-	wireDebugAction           *walk.Action        // ワイヤーフレームデバッグ表示
-	selectedVertexDebugAction *walk.Action        // 選択頂点デバッグ表示
-	boneDebugAllAction        *walk.Action        // 全ボーンデバッグ表示
-	boneDebugIkAction         *walk.Action        // IKボーンデバッグ表示
-	boneDebugEffectorAction   *walk.Action        // 付与親ボーンデバッグ表示
-	boneDebugFixedAction      *walk.Action        // 軸制限ボーンデバッグ表示
-	boneDebugRotateAction     *walk.Action        // 回転ボーンデバッグ表示
-	boneDebugTranslateAction  *walk.Action        // 移動ボーンデバッグ表示
-	boneDebugVisibleAction    *walk.Action        // 表示ボーンデバッグ表示
-	rigidBodyFrontDebugAction *walk.Action        // 剛体デバッグ表示(前面)
-	rigidBodyBackDebugAction  *walk.Action        // 剛体デバッグ表示(埋め込み)
-	jointDebugAction          *walk.Action        // ジョイントデバッグ表示
-	infoDebugAction           *walk.Action        // 情報デバッグ表示
-	fps30LimitAction          *walk.Action        // 30FPS制限
-	fps60LimitAction          *walk.Action        // 60FPS制限
-	fpsUnLimitAction          *walk.Action        // FPS無制限
-	logLevelDebugAction       *walk.Action        // デバッグメッセージ表示
-	logLevelVerboseAction     *walk.Action        // 冗長メッセージ表示
-	logLevelIkVerboseAction   *walk.Action        // IK冗長メッセージ表示
-	fpsDeformUnLimitAction    *walk.Action        // デフォームFPS無制限
+	UiState                  *UiState             // UI状態
+	TabWidget                *widget.MTabWidget   // タブウィジェット
+	isHorizontal             bool                 // 横並びであるか否か
+	GlWindows                []*GlWindow          // 描画ウィンドウ
+	ConsoleView              *widget.ConsoleView  // コンソールビュー
+	MotionPlayer             *widget.MotionPlayer // モーションプレイヤー
+	enabledFrameDropAction   *walk.Action         // フレームドロップON/OFF
+	enabledPhysicsAction     *walk.Action         // 物理ON/OFF
+	physicsResetAction       *walk.Action         // 物理リセット
+	showNormalAction         *walk.Action         // ボーンデバッグ表示
+	showWireAction           *walk.Action         // ワイヤーフレームデバッグ表示
+	showSelectedVertexAction *walk.Action         // 選択頂点デバッグ表示
+	showBoneAllAction        *walk.Action         // 全ボーンデバッグ表示
+	showBoneIkAction         *walk.Action         // IKボーンデバッグ表示
+	showBoneEffectorAction   *walk.Action         // 付与親ボーンデバッグ表示
+	showBoneFixedAction      *walk.Action         // 軸制限ボーンデバッグ表示
+	showBoneRotateAction     *walk.Action         // 回転ボーンデバッグ表示
+	showBoneTranslateAction  *walk.Action         // 移動ボーンデバッグ表示
+	showBoneVisibleAction    *walk.Action         // 表示ボーンデバッグ表示
+	showRigidBodyFrontAction *walk.Action         // 剛体デバッグ表示(前面)
+	showRigidBodyBackAction  *walk.Action         // 剛体デバッグ表示(埋め込み)
+	showJointAction          *walk.Action         // ジョイントデバッグ表示
+	showInfoAction           *walk.Action         // 情報デバッグ表示
+	limitFps30Action         *walk.Action         // 30FPS制限
+	limitFps60Action         *walk.Action         // 60FPS制限
+	unLimitFpsAction         *walk.Action         // FPS無制限
+	unLimitFpsDeformAction   *walk.Action         // デフォームFPS無制限
+	logLevelDebugAction      *walk.Action         // デバッグメッセージ表示
+	logLevelVerboseAction    *walk.Action         // 冗長メッセージ表示
+	logLevelIkVerboseAction  *walk.Action         // IK冗長メッセージ表示
 }
 
 func NewMWindow(
 	width int,
 	height int,
-	funcHelpMenuItems func() []declarative.MenuItem,
+	isHorizontal bool,
+	helpMenuItemsFunc func() []declarative.MenuItem,
 	iconImg *image.Image,
 	appConfig *mconfig.AppConfig,
-	isHorizontal bool,
+	uiState *UiState,
 ) (*MWindow, error) {
 	mainWindow := &MWindow{
 		isHorizontal: isHorizontal,
+		UiState:      uiState,
 		GlWindows:    []*GlWindow{},
 	}
 
@@ -104,20 +108,20 @@ func NewMWindow(
 		declarative.Action{
 			Text:        mi18n.T("&30fps制限"),
 			Checkable:   true,
-			OnTriggered: mainWindow.fps30LimitTriggered,
-			AssignTo:    &mainWindow.fps30LimitAction,
+			OnTriggered: mainWindow.onTriggerFps30Limit,
+			AssignTo:    &mainWindow.limitFps30Action,
 		},
 		declarative.Action{
 			Text:        mi18n.T("&60fps制限"),
 			Checkable:   true,
-			OnTriggered: mainWindow.fps60LimitTriggered,
-			AssignTo:    &mainWindow.fps60LimitAction,
+			OnTriggered: mainWindow.onTriggerFps60Limit,
+			AssignTo:    &mainWindow.limitFps60Action,
 		},
 		declarative.Action{
 			Text:        mi18n.T("&fps無制限"),
 			Checkable:   true,
-			OnTriggered: mainWindow.fpsUnLimitTriggered,
-			AssignTo:    &mainWindow.fpsUnLimitAction,
+			OnTriggered: mainWindow.onTriggerUnLimitFps,
+			AssignTo:    &mainWindow.unLimitFpsAction,
 		},
 	}
 
@@ -127,8 +131,8 @@ func NewMWindow(
 			declarative.Action{
 				Text:        "&デフォームfps無制限",
 				Checkable:   true,
-				OnTriggered: mainWindow.fpsDeformUnLimitTriggered,
-				AssignTo:    &mainWindow.fpsDeformUnLimitAction,
+				OnTriggered: mainWindow.onTriggerUnLimitFpsDeform,
+				AssignTo:    &mainWindow.unLimitFpsDeformAction,
 			})
 	}
 
@@ -144,39 +148,39 @@ func NewMWindow(
 					declarative.Action{
 						Text:        mi18n.T("&フレームドロップON"),
 						Checkable:   true,
-						OnTriggered: mainWindow.frameDropTriggered,
-						AssignTo:    &mainWindow.frameDropAction,
+						OnTriggered: mainWindow.onTriggerFrameDrop,
+						AssignTo:    &mainWindow.enabledFrameDropAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
 						Text:        mi18n.T("&物理ON/OFF"),
 						Checkable:   true,
-						OnTriggered: mainWindow.physicsTriggered,
-						AssignTo:    &mainWindow.physicsAction,
+						OnTriggered: mainWindow.onTriggerPhysics,
+						AssignTo:    &mainWindow.enabledPhysicsAction,
 					},
 					declarative.Action{
 						Text:        mi18n.T("&物理リセット"),
-						OnTriggered: mainWindow.physicsResetTriggered,
+						OnTriggered: mainWindow.onTriggerPhysicsReset,
 						AssignTo:    &mainWindow.physicsResetAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
 						Text:        mi18n.T("&法線表示"),
 						Checkable:   true,
-						OnTriggered: mainWindow.normalDebugViewTriggered,
-						AssignTo:    &mainWindow.normalDebugAction,
+						OnTriggered: mainWindow.onTriggerShowNormal,
+						AssignTo:    &mainWindow.showNormalAction,
 					},
 					declarative.Action{
 						Text:        mi18n.T("&ワイヤーフレーム表示"),
 						Checkable:   true,
-						OnTriggered: mainWindow.wireDebugViewTriggered,
-						AssignTo:    &mainWindow.wireDebugAction,
+						OnTriggered: mainWindow.onTriggerShowWire,
+						AssignTo:    &mainWindow.showWireAction,
 					},
 					declarative.Action{
 						Text:        mi18n.T("&選択頂点表示"),
 						Checkable:   true,
-						OnTriggered: mainWindow.selectedVertexDebugViewTriggered,
-						AssignTo:    &mainWindow.selectedVertexDebugAction,
+						OnTriggered: mainWindow.onTriggerShowSelectedVertex,
+						AssignTo:    &mainWindow.showSelectedVertexAction,
 					},
 					declarative.Separator{},
 					declarative.Menu{
@@ -185,45 +189,45 @@ func NewMWindow(
 							declarative.Action{
 								Text:        mi18n.T("&全ボーン"),
 								Checkable:   true,
-								OnTriggered: mainWindow.boneDebugViewAllTriggered,
-								AssignTo:    &mainWindow.boneDebugAllAction,
+								OnTriggered: mainWindow.onTriggerShowBoneAll,
+								AssignTo:    &mainWindow.showBoneAllAction,
 							},
 							declarative.Separator{},
 							declarative.Action{
 								Text:        mi18n.T("&IKボーン"),
 								Checkable:   true,
-								OnTriggered: mainWindow.boneDebugViewIndividualTriggered,
-								AssignTo:    &mainWindow.boneDebugIkAction,
+								OnTriggered: mainWindow.onTriggerShowBoneOne,
+								AssignTo:    &mainWindow.showBoneIkAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&付与親ボーン"),
 								Checkable:   true,
-								OnTriggered: mainWindow.boneDebugViewIndividualTriggered,
-								AssignTo:    &mainWindow.boneDebugEffectorAction,
+								OnTriggered: mainWindow.onTriggerShowBoneOne,
+								AssignTo:    &mainWindow.showBoneEffectorAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&軸制限ボーン"),
 								Checkable:   true,
-								OnTriggered: mainWindow.boneDebugViewIndividualTriggered,
-								AssignTo:    &mainWindow.boneDebugFixedAction,
+								OnTriggered: mainWindow.onTriggerShowBoneOne,
+								AssignTo:    &mainWindow.showBoneFixedAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&回転ボーン"),
 								Checkable:   true,
-								OnTriggered: mainWindow.boneDebugViewIndividualTriggered,
-								AssignTo:    &mainWindow.boneDebugRotateAction,
+								OnTriggered: mainWindow.onTriggerShowBoneOne,
+								AssignTo:    &mainWindow.showBoneRotateAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&移動ボーン"),
 								Checkable:   true,
-								OnTriggered: mainWindow.boneDebugViewIndividualTriggered,
-								AssignTo:    &mainWindow.boneDebugTranslateAction,
+								OnTriggered: mainWindow.onTriggerShowBoneOne,
+								AssignTo:    &mainWindow.showBoneTranslateAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&表示ボーン"),
 								Checkable:   true,
-								OnTriggered: mainWindow.boneDebugViewIndividualTriggered,
-								AssignTo:    &mainWindow.boneDebugVisibleAction,
+								OnTriggered: mainWindow.onTriggerShowBoneOne,
+								AssignTo:    &mainWindow.showBoneVisibleAction,
 							},
 						},
 					},
@@ -234,29 +238,29 @@ func NewMWindow(
 							declarative.Action{
 								Text:        mi18n.T("&前面表示"),
 								Checkable:   true,
-								OnTriggered: mainWindow.rigidBodyDebugFrontViewTriggered,
-								AssignTo:    &mainWindow.rigidBodyFrontDebugAction,
+								OnTriggered: mainWindow.onTriggerShowRigidBodyFront,
+								AssignTo:    &mainWindow.showRigidBodyFrontAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&埋め込み表示"),
 								Checkable:   true,
-								OnTriggered: mainWindow.rigidBodyDebugBackViewTriggered,
-								AssignTo:    &mainWindow.rigidBodyBackDebugAction,
+								OnTriggered: mainWindow.onTriggerShowRigidBodyBack,
+								AssignTo:    &mainWindow.showRigidBodyBackAction,
 							},
 						},
 					},
 					declarative.Action{
 						Text:        mi18n.T("&ジョイント表示"),
 						Checkable:   true,
-						OnTriggered: mainWindow.jointDebugViewTriggered,
-						AssignTo:    &mainWindow.jointDebugAction,
+						OnTriggered: mainWindow.onTriggerShowJoint,
+						AssignTo:    &mainWindow.showJointAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
 						Text:        mi18n.T("&情報表示"),
 						Checkable:   true,
-						OnTriggered: mainWindow.infoDebugViewTriggered,
-						AssignTo:    &mainWindow.infoDebugAction,
+						OnTriggered: mainWindow.onTriggerShowInfo,
+						AssignTo:    &mainWindow.showInfoAction,
 					},
 					declarative.Menu{
 						Text:  mi18n.T("&fps制限"),
@@ -277,7 +281,7 @@ func NewMWindow(
 			},
 			declarative.Menu{
 				Text:  mi18n.T("&使い方"),
-				Items: funcHelpMenuItems(),
+				Items: helpMenuItemsFunc(),
 			},
 			declarative.Menu{
 				Text: mi18n.T("&言語"),
@@ -306,11 +310,14 @@ func NewMWindow(
 	}
 
 	// 最初は物理ON
-	mainWindow.physicsAction.SetChecked(true)
+	mainWindow.enabledPhysicsAction.SetChecked(true)
+	mainWindow.onTriggerPhysics()
 	// 最初はフレームドロップON
-	mainWindow.frameDropAction.SetChecked(true)
+	mainWindow.enabledFrameDropAction.SetChecked(true)
+	mainWindow.onTriggerFrameDrop()
 	// 最初は30fps制限
-	mainWindow.fps30LimitAction.SetChecked(true)
+	mainWindow.limitFps30Action.SetChecked(true)
+	mainWindow.onTriggerFps30Limit()
 
 	mainWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
 		if len(mainWindow.GlWindows) > 0 && !mgl.CheckOpenGLError() {
@@ -363,154 +370,141 @@ func (w *MWindow) langTriggered(lang string) {
 }
 
 func (w *MWindow) SetCheckWireDebugView(checked bool) {
-	w.wireDebugAction.SetChecked(checked)
-	w.wireDebugViewTriggered()
+	w.showWireAction.SetChecked(checked)
+	w.onTriggerShowWire()
 }
 
 func (w *MWindow) SetCheckSelectedVertexDebugView(checked bool) {
-	w.selectedVertexDebugAction.SetChecked(checked)
-	w.selectedVertexDebugViewTriggered()
+	w.showSelectedVertexAction.SetChecked(checked)
+	w.onTriggerShowSelectedVertex()
 }
 
-func (w *MWindow) normalDebugViewTriggered() {
-	for _, glWindow := range w.GlWindows {
-		glWindow.VisibleNormal = w.normalDebugAction.Checked()
-	}
+func (w *MWindow) onTriggerShowNormal() {
+	w.UiState.IsShowNormal = w.showNormalAction.Checked()
 }
 
-func (w *MWindow) wireDebugViewTriggered() {
-	for _, glWindow := range w.GlWindows {
-		glWindow.VisibleWire = w.wireDebugAction.Checked()
-	}
+func (w *MWindow) onTriggerShowWire() {
+	w.UiState.IsShowWire = w.showWireAction.Checked()
 }
 
-func (w *MWindow) selectedVertexDebugViewTriggered() {
-	for _, glWindow := range w.GlWindows {
-		glWindow.VisibleSelectedVertex = w.selectedVertexDebugAction.Checked()
-	}
+func (w *MWindow) onTriggerShowSelectedVertex() {
+	w.UiState.IsShowSelectedVertex = w.showSelectedVertexAction.Checked()
 }
 
-func (w *MWindow) boneDebugViewAllTriggered() {
-	w.boneDebugIkAction.SetChecked(false)
-	w.boneDebugEffectorAction.SetChecked(false)
-	w.boneDebugFixedAction.SetChecked(false)
-	w.boneDebugRotateAction.SetChecked(false)
-	w.boneDebugTranslateAction.SetChecked(false)
-	w.boneDebugVisibleAction.SetChecked(false)
+func (w *MWindow) onTriggerShowBoneAll() {
+	w.showBoneIkAction.SetChecked(false)
+	w.showBoneEffectorAction.SetChecked(false)
+	w.showBoneFixedAction.SetChecked(false)
+	w.showBoneRotateAction.SetChecked(false)
+	w.showBoneTranslateAction.SetChecked(false)
+	w.showBoneVisibleAction.SetChecked(false)
 
-	w.boneDebugViewTriggered()
+	w.onTriggerShowBone()
 }
 
-func (w *MWindow) boneDebugViewIndividualTriggered() {
-	w.boneDebugAllAction.SetChecked(false)
+func (w *MWindow) onTriggerShowBoneOne() {
+	w.showBoneAllAction.SetChecked(false)
 
-	w.boneDebugViewTriggered()
+	w.onTriggerShowBone()
 }
 
-func (w *MWindow) boneDebugViewTriggered() {
-	for _, glWindow := range w.GlWindows {
-		// 全ボーン表示
-		glWindow.VisibleBones[pmx.BONE_FLAG_NONE] = w.boneDebugAllAction.Checked()
-		// IKボーン表示
-		glWindow.VisibleBones[pmx.BONE_FLAG_IS_IK] = w.boneDebugIkAction.Checked()
-		// 付与親ボーン表示
-		glWindow.VisibleBones[pmx.BONE_FLAG_IS_EXTERNAL_ROTATION] = w.boneDebugEffectorAction.Checked()
-		glWindow.VisibleBones[pmx.BONE_FLAG_IS_EXTERNAL_TRANSLATION] = w.boneDebugEffectorAction.Checked()
-		// 軸制限ボーン表示
-		glWindow.VisibleBones[pmx.BONE_FLAG_HAS_FIXED_AXIS] = w.boneDebugFixedAction.Checked()
-		// 回転ボーン表示
-		glWindow.VisibleBones[pmx.BONE_FLAG_CAN_ROTATE] = w.boneDebugRotateAction.Checked()
-		// 移動ボーン表示
-		glWindow.VisibleBones[pmx.BONE_FLAG_CAN_TRANSLATE] = w.boneDebugTranslateAction.Checked()
-		// 表示ボーン表示
-		glWindow.VisibleBones[pmx.BONE_FLAG_IS_VISIBLE] = w.boneDebugVisibleAction.Checked()
-	}
+func (w *MWindow) onTriggerShowBone() {
+	w.UiState.IsShowBones[pmx.BONE_FLAG_NONE] = w.showBoneAllAction.Checked()
+	w.UiState.IsShowBones[pmx.BONE_FLAG_IS_IK] = w.showBoneIkAction.Checked()
+	w.UiState.IsShowBones[pmx.BONE_FLAG_IS_EXTERNAL_ROTATION] = w.showBoneEffectorAction.Checked()
+	w.UiState.IsShowBones[pmx.BONE_FLAG_IS_EXTERNAL_TRANSLATION] = w.showBoneEffectorAction.Checked()
+	w.UiState.IsShowBones[pmx.BONE_FLAG_HAS_FIXED_AXIS] = w.showBoneFixedAction.Checked()
+	w.UiState.IsShowBones[pmx.BONE_FLAG_CAN_ROTATE] = w.showBoneRotateAction.Checked()
+	w.UiState.IsShowBones[pmx.BONE_FLAG_CAN_TRANSLATE] = w.showBoneTranslateAction.Checked()
+	w.UiState.IsShowBones[pmx.BONE_FLAG_IS_VISIBLE] = w.showBoneVisibleAction.Checked()
 }
 
-func (w *MWindow) rigidBodyDebugFrontViewTriggered() {
-	w.rigidBodyBackDebugAction.SetChecked(false)
-	for _, glWindow := range w.GlWindows {
-		glWindow.VisibleRigidBody = w.rigidBodyFrontDebugAction.Checked()
-		glWindow.IsDrawRigidBodyFront = true
-	}
+func (w *MWindow) onTriggerShowRigidBodyFront() {
+	w.showRigidBodyBackAction.SetChecked(false)
+	w.UiState.IsShowRigidBodyFront = w.showRigidBodyFrontAction.Checked()
+	w.UiState.IsShowRigidBodyBack = false
 }
 
-func (w *MWindow) rigidBodyDebugBackViewTriggered() {
-	w.rigidBodyFrontDebugAction.SetChecked(false)
-	for _, glWindow := range w.GlWindows {
-		glWindow.VisibleRigidBody = w.rigidBodyBackDebugAction.Checked()
-		glWindow.IsDrawRigidBodyFront = false
-	}
+func (w *MWindow) onTriggerShowRigidBodyBack() {
+	w.showRigidBodyFrontAction.SetChecked(false)
+	w.UiState.IsShowRigidBodyBack = w.showRigidBodyBackAction.Checked()
+	w.UiState.IsShowRigidBodyFront = false
 }
 
-func (w *MWindow) jointDebugViewTriggered() {
-	for _, glWindow := range w.GlWindows {
-		glWindow.VisibleJoint = w.jointDebugAction.Checked()
-	}
+func (w *MWindow) onTriggerShowJoint() {
+	w.UiState.IsShowJoint = w.showJointAction.Checked()
 }
 
-func (w *MWindow) infoDebugViewTriggered() {
-	for _, glWindow := range w.GlWindows {
-		glWindow.isShowInfo = w.infoDebugAction.Checked()
-	}
+func (w *MWindow) onTriggerShowInfo() {
+	w.UiState.IsShowInfo = w.showInfoAction.Checked()
 }
 
-func (w *MWindow) fps30LimitTriggered() {
-	w.fps30LimitAction.SetChecked(true)
-	w.fps60LimitAction.SetChecked(false)
-	w.fpsUnLimitAction.SetChecked(false)
-	w.fpsDeformUnLimitAction.SetChecked(false)
-	for _, glWindow := range w.GlWindows {
-		glWindow.spfLimit = 1 / 30.0
-	}
+func (w *MWindow) onTriggerFps30Limit() {
+	w.limitFps30Action.SetChecked(true)
+	w.limitFps60Action.SetChecked(false)
+	w.unLimitFpsAction.SetChecked(false)
+	w.unLimitFpsDeformAction.SetChecked(false)
+
+	w.UiState.IsLimitFps30 = true
+	w.UiState.IsLimitFps60 = false
+	w.UiState.IsUnLimitFps = false
+	w.UiState.IsUnLimitFpsDeform = false
+
+	w.UiState.SpfLimit = 1 / 30.0
 }
 
-func (w *MWindow) fps60LimitTriggered() {
-	w.fps30LimitAction.SetChecked(false)
-	w.fps60LimitAction.SetChecked(true)
-	w.fpsUnLimitAction.SetChecked(false)
-	w.fpsDeformUnLimitAction.SetChecked(false)
-	for _, glWindow := range w.GlWindows {
-		glWindow.spfLimit = 1 / 60.0
-	}
+func (w *MWindow) onTriggerFps60Limit() {
+	w.limitFps30Action.SetChecked(false)
+	w.limitFps60Action.SetChecked(true)
+	w.unLimitFpsAction.SetChecked(false)
+	w.unLimitFpsDeformAction.SetChecked(false)
+
+	w.UiState.IsLimitFps30 = false
+	w.UiState.IsLimitFps60 = true
+	w.UiState.IsUnLimitFps = false
+	w.UiState.IsUnLimitFpsDeform = false
+
+	w.UiState.SpfLimit = 1 / 60.0
 }
 
-func (w *MWindow) fpsUnLimitTriggered() {
-	w.fps30LimitAction.SetChecked(false)
-	w.fps60LimitAction.SetChecked(false)
-	w.fpsUnLimitAction.SetChecked(true)
-	w.fpsDeformUnLimitAction.SetChecked(false)
-	for _, glWindow := range w.GlWindows {
-		glWindow.spfLimit = -1.0
-	}
+func (w *MWindow) onTriggerUnLimitFps() {
+	w.limitFps30Action.SetChecked(false)
+	w.limitFps60Action.SetChecked(false)
+	w.unLimitFpsAction.SetChecked(true)
+	w.unLimitFpsDeformAction.SetChecked(false)
+
+	w.UiState.IsLimitFps30 = false
+	w.UiState.IsLimitFps60 = false
+	w.UiState.IsUnLimitFps = true
+	w.UiState.IsUnLimitFpsDeform = false
+
+	w.UiState.SpfLimit = -1.0
 }
 
-func (w *MWindow) fpsDeformUnLimitTriggered() {
-	w.fps30LimitAction.SetChecked(false)
-	w.fps60LimitAction.SetChecked(false)
-	w.fpsUnLimitAction.SetChecked(false)
-	w.fpsDeformUnLimitAction.SetChecked(true)
-	for _, glWindow := range w.GlWindows {
-		glWindow.spfLimit = -2.0
-	}
+func (w *MWindow) onTriggerUnLimitFpsDeform() {
+	w.limitFps30Action.SetChecked(false)
+	w.limitFps60Action.SetChecked(false)
+	w.unLimitFpsAction.SetChecked(false)
+	w.unLimitFpsDeformAction.SetChecked(true)
+
+	w.UiState.IsLimitFps30 = false
+	w.UiState.IsLimitFps60 = false
+	w.UiState.IsUnLimitFps = false
+	w.UiState.IsUnLimitFpsDeform = true
+
+	w.UiState.SpfLimit = -2.0
 }
 
-func (w *MWindow) physicsTriggered() {
-	for _, glWindow := range w.GlWindows {
-		glWindow.TriggerPhysicsEnabled(w.physicsAction.Checked())
-	}
+func (w *MWindow) onTriggerPhysics() {
+	w.UiState.EnabledPhysics = w.enabledPhysicsAction.Checked()
 }
 
-func (w *MWindow) physicsResetTriggered() {
-	for _, glWindow := range w.GlWindows {
-		glWindow.TriggerPhysicsReset()
-	}
+func (w *MWindow) onTriggerPhysicsReset() {
+	w.UiState.DoPhysicsReset = true
 }
 
-func (w *MWindow) frameDropTriggered() {
-	for _, glWindow := range w.GlWindows {
-		glWindow.EnableFrameDrop = w.frameDropAction.Checked()
-	}
+func (w *MWindow) onTriggerFrameDrop() {
+	w.UiState.EnabledFrameDrop = w.enabledFrameDropAction.Checked()
 }
 
 func getWindowSize(width int, height int) declarative.Size {
@@ -529,13 +523,6 @@ func getWindowSize(width int, height int) declarative.Size {
 
 func (w *MWindow) AddGlWindow(glWindow *GlWindow) {
 	w.GlWindows = append(w.GlWindows, glWindow)
-}
-
-func (w *MWindow) GetMainGlWindow() *GlWindow {
-	if len(w.GlWindows) > 0 {
-		return w.GlWindows[0]
-	}
-	return nil
 }
 
 func (w *MWindow) Center() {

@@ -30,6 +30,9 @@ var env string
 func init() {
 	runtime.LockOSThread()
 
+	// システム上のすべての論理プロセッサを使用させる
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	walk.AppendToWalkInit(func() {
 		walk.MustRegisterWindowClass(widget.FilePickerClass)
 		walk.MustRegisterWindowClass(widget.MotionPlayerClass)
@@ -49,9 +52,6 @@ func main() {
 	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(fmt.Sprintf("cpu_%s", time.Now().Format("20060102_150405")))).Stop()
 	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(fmt.Sprintf("cpu_%s", time.Now().Format("20060102_150405")))).Stop()
 
-	// システム上のすべての論理プロセッサを使用させる
-	runtime.GOMAXPROCS(runtime.NumCPU())
-
 	var mWindow *window.MWindow
 	var err error
 
@@ -63,22 +63,24 @@ func main() {
 		defer widget.RecoverFromPanic(mWindow.MainWindow)
 	}
 
+	uiState := window.NewUiState()
+
 	iconImg, err := mconfig.LoadIconFile(appFiles)
 	widget.CheckError(err, nil, mi18n.T("アイコン生成エラー"))
 
-	glWindow, err := window.NewGlWindow(512, 768, 0, iconImg, appConfig, nil)
+	glWindow, err := window.NewGlWindow(512, 768, 0, iconImg, appConfig, nil, uiState)
 
 	go func() {
-		mWindow, err = window.NewMWindow(512, 768, getMenuItems, iconImg, appConfig, true)
+		mWindow, err = window.NewMWindow(512, 768, true, getMenuItems, iconImg, appConfig, uiState)
 		widget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
 
-		motionPlayer, funcWorldPos := NewFileTabPage(mWindow)
+		motionPlayer, worldPosFunc := NewFileTabPage(mWindow)
 
 		widget.CheckError(err, mWindow.MainWindow, mi18n.T("ビューワーウィンドウ生成エラー"))
 		mWindow.AddGlWindow(glWindow)
-		glWindow.SetFuncWorldPos(funcWorldPos)
-		glWindow.SetMotionPlayer(motionPlayer)
-		glWindow.SetMWindow(mWindow)
+		mWindow.MotionPlayer = motionPlayer
+
+		glWindow.SetFuncWorldPos(worldPosFunc)
 		glWindow.SetTitle(fmt.Sprintf("%s %s", mWindow.Title(), mi18n.T("ビューワー")))
 
 		// コンソールはタブ外に表示
@@ -88,7 +90,9 @@ func main() {
 
 		mWindow.AsFormBase().Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
 			go func() {
-				mWindow.GetMainGlWindow().IsClosedChannel <- true
+				for _, glWindow := range mWindow.GlWindows {
+					glWindow.IsClosedChannel <- true
+				}
 			}()
 			mWindow.Close()
 		})
@@ -184,24 +188,22 @@ func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXpr
 				return
 			}
 			model := data.(*pmx.PmxModel)
-			var motion *vmd.VmdMotion
-			if vmdReadPicker.IsCached() {
-				motion = vmdReadPicker.GetCache().(*vmd.VmdMotion)
-			} else {
-				motion = vmd.NewVmdMotion("")
-			}
 
 			motionPlayer.SetEnabled(true)
 			motionPlayer.SetValue(0)
 
 			go func() {
-				mWindow.GetMainGlWindow().FrameChannel <- 0
-				mWindow.GetMainGlWindow().IsPlayingChannel <- false
-				mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextModel: model, NextMotion: motion}}
+				for _, glWindow := range mWindow.GlWindows {
+					glWindow.FrameChannel <- 0
+					glWindow.IsPlayingChannel <- false
+					glWindow.ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextModel: model}}
+				}
 			}()
 		} else {
 			go func() {
-				mWindow.GetMainGlWindow().RemoveModelSetIndexChannel <- 0
+				for _, glWindow := range mWindow.GlWindows {
+					glWindow.RemoveModelSetIndexChannel <- 0
+				}
 			}()
 		}
 
@@ -225,14 +227,16 @@ func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXpr
 				motionPlayer.SetValue(0)
 
 				go func() {
-					mWindow.GetMainGlWindow().FrameChannel <- 0
-					mWindow.GetMainGlWindow().IsPlayingChannel <- false
-					mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextMotion: motion}}
+					for _, glWindow := range mWindow.GlWindows {
+						glWindow.FrameChannel <- 0
+						glWindow.IsPlayingChannel <- false
+						glWindow.ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextMotion: motion}}
+					}
 				}()
 			} else {
-				go func() {
-					mWindow.GetMainGlWindow().RemoveModelSetIndexChannel <- 0
-				}()
+				for _, glWindow := range mWindow.GlWindows {
+					glWindow.RemoveModelSetIndexChannel <- 0
+				}
 			}
 		}
 
@@ -252,7 +256,9 @@ func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXpr
 
 		motionPlayer.PlayButton.SetEnabled(true)
 		go func() {
-			mWindow.GetMainGlWindow().IsPlayingChannel <- isPlaying
+			for _, glWindow := range mWindow.GlWindows {
+				glWindow.IsPlayingChannel <- isPlaying
+			}
 		}()
 
 		return nil
@@ -260,7 +266,7 @@ func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXpr
 
 	pmxReadPicker.PathLineEdit.SetFocus()
 
-	// funcWorldPos := func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
+	// worldPosFunc := func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
 	// 	nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*delta.VmdDeltas) {
 	// 	mlog.L()
 
@@ -284,7 +290,7 @@ func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXpr
 	// 					vmdDeltas[0].Vertices.Get(vertex.Index).Position.String())
 	// 			}
 	// 			go func() {
-	// 				mWindow.GetMainGlWindow().ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextSelectedVertexIndexes: nearestVertexIndexes[0]}}
+	// 				glWindow.ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextSelectedVertexIndexes: nearestVertexIndexes[0]}}
 	// 			}()
 	// 		}
 

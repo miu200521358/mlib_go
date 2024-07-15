@@ -17,7 +17,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
@@ -33,49 +32,30 @@ const RIGHT_ANGLE = 89.9
 
 type GlWindow struct {
 	*glfw.Window
-	mWindow                *MWindow              // walkウィンドウ
-	modelSets              []*widget.ModelSet    // モデルセット
-	Shader                 *mgl.MShader          // シェーダー
-	appConfig              *mconfig.AppConfig    // アプリケーション設定
-	title                  string                // ウィンドウタイトル(fpsとか入ってないオリジナル)
-	WindowIndex            int                   // ウィンドウインデックス
-	prevCursorPos          *mmath.MVec2          // 前回のカーソル位置
-	nowCursorPos           *mmath.MVec2          // 現在のカーソル位置
-	yaw                    float64               // ウィンドウ操作yaw
-	pitch                  float64               // ウィンドウ操作pitch
-	Physics                *mbt.MPhysics         // 物理
-	leftButtonPressed      bool                  // 左ボタン押下フラグ
-	middleButtonPressed    bool                  // 中ボタン押下フラグ
-	rightButtonPressed     bool                  // 右ボタン押下フラグ
-	updatedPrev            bool                  // 前回のカーソル位置更新フラグ
-	shiftPressed           bool                  // Shiftキー押下フラグ
-	ctrlPressed            bool                  // Ctrlキー押下フラグ
-	running                bool                  // 描画ループ中フラグ
-	playing                bool                  // 再生中フラグ
-	doResetPhysicsStart    bool                  // 物理リセット開始フラグ
-	doResetPhysicsProgress bool                  // 物理リセット中フラグ
-	doResetPhysicsCount    int                   // 物理リセット処理回数
-	VisibleBones           map[pmx.BoneFlag]bool // ボーン表示フラグ
-	VisibleNormal          bool                  // 法線表示フラグ
-	VisibleWire            bool                  // ワイヤーフレーム表示フラグ
-	VisibleSelectedVertex  bool                  // 選択頂点表示フラグ
-	enablePhysics          bool                  // 物理有効フラグ
-	EnableFrameDrop        bool                  // フレームドロップ有効フラグ
-	isClosed               bool                  // walkウィンドウが閉じられたかどうか
-	isShowInfo             bool                  // 情報表示フラグ
-	IsDrawRigidBodyFront   bool                  // 剛体表示フラグ(手前)
-	VisibleRigidBody       bool                  // 剛体表示フラグ
-	VisibleJoint           bool                  // ジョイント表示フラグ
-	spfLimit               float64               //fps制限
-	frame                  float64               // 現在のフレーム
-	prevFrame              int                   // 前回のフレーム
-	isSaveDelta            bool                  // 前回デフォーム保存フラグ(walkウィンドウからの変更情報検知用)
-	width                  int                   // ウィンドウ幅
-	height                 int                   // ウィンドウ高さ
-	motionPlayer           *widget.MotionPlayer  // モーションプレイヤー
-	floor                  *MFloor               // 床
-	funcWorldPos           func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
-		nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3,
+	UiState       *UiState           // UI状態
+	modelSets     []*widget.ModelSet // モデルセット
+	shader        *mgl.MShader       // シェーダー
+	physics       *mbt.MPhysics      // 物理
+	appConfig     *mconfig.AppConfig // アプリケーション設定
+	title         string             // ウィンドウタイトル(fpsとか入ってないオリジナル)
+	WindowIndex   int                // ウィンドウインデックス
+	prevCursorPos *mmath.MVec2       // 前回のカーソル位置
+	nowCursorPos  *mmath.MVec2       // 現在のカーソル位置
+	yaw           float64            // ウィンドウ操作yaw
+	pitch         float64            // ウィンドウ操作pitch
+	frame         float64            // 現在のフレーム
+	prevFrame     int                // 前回のフレーム
+	width         int                // ウィンドウ幅
+	height        int                // ウィンドウ高さ
+	floor         *MFloor            // 床
+	worldPosFunc  func(prevXprevYFrontPos,
+		prevXprevYBackPos,
+		prevXnowYFrontPos,
+		prevXnowYBackPos,
+		nowXprevYFrontPos,
+		nowXprevYBackPos,
+		nowXnowYFrontPos,
+		nowXnowYBackPos *mmath.MVec3,
 		vmdDeltas []*delta.VmdDeltas) // 選択ポイントからのグローバル位置取得コールバック関数
 	AppendModelSetChannel      chan *widget.ModelSet         // モデルセット追加チャネル
 	RemoveModelSetIndexChannel chan int                      // モデルセット削除チャネル
@@ -92,8 +72,9 @@ func NewGlWindow(
 	iconImg *image.Image,
 	appConfig *mconfig.AppConfig,
 	mainWindow *GlWindow,
+	uiState *UiState,
 ) (*GlWindow, error) {
-	if mainWindow == nil {
+	if windowIndex == 0 {
 		// GLFW の初期化(最初の一回だけ)
 		if err := glfw.Init(); err != nil {
 			return nil, err
@@ -162,8 +143,9 @@ func NewGlWindow(
 
 	glWindow := GlWindow{
 		Window:                     w,
+		UiState:                    uiState,
 		modelSets:                  make([]*widget.ModelSet, 0),
-		Shader:                     shader,
+		shader:                     shader,
 		appConfig:                  appConfig,
 		title:                      title,
 		WindowIndex:                windowIndex,
@@ -171,26 +153,9 @@ func NewGlWindow(
 		nowCursorPos:               mmath.NewMVec2(),
 		yaw:                        RIGHT_ANGLE,
 		pitch:                      0.0,
-		Physics:                    mbt.NewMPhysics(),
-		middleButtonPressed:        false,
-		rightButtonPressed:         false,
-		updatedPrev:                false,
-		shiftPressed:               false,
-		ctrlPressed:                false,
-		VisibleBones:               make(map[pmx.BoneFlag]bool, 0),
-		VisibleNormal:              false,
-		VisibleWire:                false,
-		VisibleSelectedVertex:      false,
-		isClosed:                   false,
-		isShowInfo:                 false,
-		spfLimit:                   1.0 / 30.0,
-		running:                    false,
-		playing:                    false, // 最初は再生OFF
-		enablePhysics:              true,  // 最初は物理ON
-		EnableFrameDrop:            true,  // 最初はドロップON
+		physics:                    mbt.NewMPhysics(),
 		frame:                      0,
 		prevFrame:                  0,
-		isSaveDelta:                true,
 		width:                      width,
 		height:                     height,
 		floor:                      newMFloor(),
@@ -217,17 +182,9 @@ func (w *GlWindow) SetTitle(title string) {
 	w.Window.SetTitle(title)
 }
 
-func (w *GlWindow) SetMWindow(mw *MWindow) {
-	w.mWindow = mw
-}
-
-func (w *GlWindow) SetMotionPlayer(mp *widget.MotionPlayer) {
-	w.motionPlayer = mp
-}
-
 func (w *GlWindow) SetFuncWorldPos(f func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
 	nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*delta.VmdDeltas)) {
-	w.funcWorldPos = f
+	w.worldPosFunc = f
 }
 
 func (w *GlWindow) resizeBuffer(window *glfw.Window, width int, height int) {
@@ -240,26 +197,11 @@ func (w *GlWindow) resizeBuffer(window *glfw.Window, width int, height int) {
 
 func (w *GlWindow) resize(window *glfw.Window, width int, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
-	w.Shader.Resize(width, height)
-}
-
-func (w *GlWindow) TriggerPlay(p bool) {
-	w.playing = p
-	w.isSaveDelta = false
-}
-
-func (w *GlWindow) GetFrame() int {
-	return int(w.frame)
-}
-
-func (w *GlWindow) SetFrame(f int) {
-	w.frame = float64(f)
-	w.prevFrame = f
-	w.isSaveDelta = false
+	w.shader.Resize(width, height)
 }
 
 func (w *GlWindow) TriggerClose(window *glfw.Window) {
-	w.running = false
+	w.UiState.IsGlRunning = false
 }
 
 func (w *GlWindow) handleKeyEvent(
@@ -287,28 +229,24 @@ func (w *GlWindow) handleKeyEvent(
 		return
 	}
 
-	if w.motionPlayer != nil {
-		if key == glfw.KeyRight || key == glfw.KeyUp {
-			w.motionPlayer.SetValue(w.GetFrame() + 1)
-			return
-		} else if key == glfw.KeyLeft || key == glfw.KeyDown {
-			w.motionPlayer.SetValue(w.GetFrame() - 1)
-			return
-		}
+	if key == glfw.KeyRight || key == glfw.KeyUp {
+		w.UiState.Frame += 1
+	} else if key == glfw.KeyLeft || key == glfw.KeyDown {
+		w.UiState.Frame -= 1
 	}
 
 	if key == glfw.KeyLeftShift || key == glfw.KeyRightShift {
 		if action == glfw.Press {
-			w.shiftPressed = true
+			w.UiState.ShiftPressed = true
 		} else if action == glfw.Release {
-			w.shiftPressed = false
+			w.UiState.ShiftPressed = false
 		}
 		return
 	} else if key == glfw.KeyLeftControl || key == glfw.KeyRightControl {
 		if action == glfw.Press {
-			w.ctrlPressed = true
+			w.UiState.CtrlPressed = true
 		} else if action == glfw.Release {
-			w.ctrlPressed = false
+			w.UiState.CtrlPressed = false
 		}
 		return
 	}
@@ -347,26 +285,26 @@ func (w *GlWindow) handleKeyEvent(
 	cameraZ := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw))
 
 	// カメラ位置を更新
-	w.Shader.CameraPosition.X = cameraX
-	w.Shader.CameraPosition.Y = mgl.INITIAL_CAMERA_POSITION_Y + cameraY
-	w.Shader.CameraPosition.Z = cameraZ
+	w.shader.CameraPosition.X = cameraX
+	w.shader.CameraPosition.Y = mgl.INITIAL_CAMERA_POSITION_Y + cameraY
+	w.shader.CameraPosition.Z = cameraZ
 }
 
 func (w *GlWindow) handleScrollEvent(window *glfw.Window, xoff float64, yoff float64) {
 	ratio := float32(1.0)
-	if w.shiftPressed {
+	if w.UiState.ShiftPressed {
 		ratio *= 10
-	} else if w.ctrlPressed {
+	} else if w.UiState.CtrlPressed {
 		ratio *= 0.1
 	}
 
 	if yoff > 0 {
-		w.Shader.FieldOfViewAngle -= ratio
-		if w.Shader.FieldOfViewAngle < 3.0 {
-			w.Shader.FieldOfViewAngle = 3.0
+		w.shader.FieldOfViewAngle -= ratio
+		if w.shader.FieldOfViewAngle < 3.0 {
+			w.shader.FieldOfViewAngle = 3.0
 		}
 	} else if yoff < 0 {
-		w.Shader.FieldOfViewAngle += ratio
+		w.shader.FieldOfViewAngle += ratio
 	}
 }
 
@@ -378,24 +316,24 @@ func (w *GlWindow) handleMouseButtonEvent(
 ) {
 	if button == glfw.MouseButtonMiddle {
 		if action == glfw.Press {
-			w.middleButtonPressed = true
-			w.updatedPrev = false
+			w.UiState.MiddleButtonPressed = true
+			w.UiState.UpdatedPrev = false
 		} else if action == glfw.Release {
-			w.middleButtonPressed = false
+			w.UiState.MiddleButtonPressed = false
 		}
 	} else if button == glfw.MouseButtonRight {
 		if action == glfw.Press {
-			w.rightButtonPressed = true
-			w.updatedPrev = false
+			w.UiState.RightButtonPressed = true
+			w.UiState.UpdatedPrev = false
 		} else if action == glfw.Release {
-			w.rightButtonPressed = false
+			w.UiState.RightButtonPressed = false
 		}
-	} else if button == glfw.MouseButtonLeft && w.funcWorldPos != nil && w.VisibleSelectedVertex {
+	} else if button == glfw.MouseButtonLeft && w.worldPosFunc != nil && w.UiState.IsShowSelectedVertex {
 		if action == glfw.Press {
-			w.leftButtonPressed = true
-			w.updatedPrev = false
+			w.UiState.LeftButtonPressed = true
+			w.UiState.UpdatedPrev = false
 		} else if action == glfw.Release {
-			w.leftButtonPressed = false
+			w.UiState.LeftButtonPressed = false
 			w.execWorldPos()
 			w.nowCursorPos = &mmath.MVec2{X: 0, Y: 0}
 		}
@@ -409,14 +347,14 @@ func (gw *GlWindow) getWorldPosition(
 	w, h := float32(gw.width), float32(gw.height)
 
 	// プロジェクション行列の設定
-	projection := mgl32.Perspective(mgl32.DegToRad(gw.Shader.FieldOfViewAngle), w/h, gw.Shader.NearPlane, gw.Shader.FarPlane)
+	projection := mgl32.Perspective(mgl32.DegToRad(gw.shader.FieldOfViewAngle), w/h, gw.shader.NearPlane, gw.shader.FarPlane)
 	mlog.V("Projection: %s", projection.String())
 
 	// カメラの位置と中心からビュー行列を計算
-	cameraPosition := mgl.NewGlVec3(gw.Shader.CameraPosition)
-	lookAtCenter := mgl.NewGlVec3(gw.Shader.LookAtCenterPosition)
+	cameraPosition := mgl.NewGlVec3(gw.shader.CameraPosition)
+	lookAtCenter := mgl.NewGlVec3(gw.shader.LookAtCenterPosition)
 	view := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
-	mlog.V("CameraPosition: %s, LookAtCenterPosition: %s", gw.Shader.CameraPosition.String(), gw.Shader.LookAtCenterPosition.String())
+	mlog.V("CameraPosition: %s, LookAtCenterPosition: %s", gw.shader.CameraPosition.String(), gw.shader.LookAtCenterPosition.String())
 	mlog.V("View: %s", view.String())
 
 	worldCoords, err := mgl32.UnProject(
@@ -448,16 +386,16 @@ func (w GlWindow) execWorldPos() {
 	if w.nowCursorPos.Length() == 0 || w.prevCursorPos.Distance(w.nowCursorPos) < 0.1 {
 		// カーソルが動いていない場合は直近のだけ取得
 		// x: prev, y: prevのワールド座標位置
-		depth := w.Shader.Msaa.ReadDepthAt(int(prevX), int(prevY), w.width, w.height)
+		depth := w.shader.Msaa.ReadDepthAt(int(prevX), int(prevY), w.width, w.height)
 		worldPos := w.getWorldPosition(float32(prevX), float32(prevY), depth)
 
-		w.funcWorldPos(worldPos, nil, nil, nil, nil, nil, nil, nil, vmdDeltas)
+		w.worldPosFunc(worldPos, nil, nil, nil, nil, nil, nil, nil, vmdDeltas)
 	} else {
 		// x: prev, y: prevのワールド座標位置
-		prevXprevYDepth := w.Shader.Msaa.ReadDepthAt(int(prevX), int(prevY), w.width, w.height)
-		prevXnowYDepth := w.Shader.Msaa.ReadDepthAt(int(prevX), int(nowY), w.width, w.height)
-		nowXprevYDepth := w.Shader.Msaa.ReadDepthAt(int(nowX), int(prevY), w.width, w.height)
-		nowXnowYDepth := w.Shader.Msaa.ReadDepthAt(int(nowX), int(nowY), w.width, w.height)
+		prevXprevYDepth := w.shader.Msaa.ReadDepthAt(int(prevX), int(prevY), w.width, w.height)
+		prevXnowYDepth := w.shader.Msaa.ReadDepthAt(int(prevX), int(nowY), w.width, w.height)
+		nowXprevYDepth := w.shader.Msaa.ReadDepthAt(int(nowX), int(prevY), w.width, w.height)
+		nowXnowYDepth := w.shader.Msaa.ReadDepthAt(int(nowX), int(nowY), w.width, w.height)
 
 		mlog.D("prevXprevYDepth=%.3f, prevXnowYDepth=%.3f, nowXprevYDepth=%.3f, nowXnowYDepth=%.3f",
 			prevXprevYDepth, prevXnowYDepth, nowXprevYDepth, nowXnowYDepth)
@@ -480,16 +418,16 @@ func (w GlWindow) execWorldPos() {
 		nowXnowYFrontPos := w.getWorldPosition(float32(nowX), float32(nowY), max(depth-1e-5, 0.0))
 		nowXnowYBackPos := w.getWorldPosition(float32(nowX), float32(nowY), min(depth+1e-5, 1.0))
 
-		w.funcWorldPos(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos, nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos, vmdDeltas)
+		w.worldPosFunc(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos, nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos, vmdDeltas)
 	}
 }
 
 func (w *GlWindow) updateCameraAngle(xpos, ypos float64) {
 
 	ratio := 0.1
-	if w.shiftPressed {
+	if w.UiState.ShiftPressed {
 		ratio *= 10
-	} else if w.ctrlPressed {
+	} else if w.UiState.CtrlPressed {
 		ratio *= 0.1
 	}
 
@@ -516,34 +454,34 @@ func (w *GlWindow) updateCameraAngle(xpos, ypos float64) {
 	}
 
 	// 球面座標系をデカルト座標系に変換
-	// radius := float64(-w.Shader.CameraPosition.Sub(w.Shader.LookAtCenterPosition).Length())
+	// radius := float64(-w.shader.CameraPosition.Sub(w.shader.LookAtCenterPosition).Length())
 	radius := float64(mgl.INITIAL_CAMERA_POSITION_Z)
 	cameraX := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Cos(mgl64.DegToRad(w.yaw))
 	cameraY := radius * math.Sin(mgl64.DegToRad(w.pitch))
 	cameraZ := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw))
 
 	// カメラ位置を更新
-	w.Shader.CameraPosition.X = cameraX
-	w.Shader.CameraPosition.Y = mgl.INITIAL_CAMERA_POSITION_Y + cameraY
-	w.Shader.CameraPosition.X = cameraZ
+	w.shader.CameraPosition.X = cameraX
+	w.shader.CameraPosition.Y = mgl.INITIAL_CAMERA_POSITION_Y + cameraY
+	w.shader.CameraPosition.X = cameraZ
 	// mlog.D("xOffset %.7f, yOffset %.7f, CameraPosition: %s, LookAtCenterPosition: %s\n",
-	// 	xOffset, yOffset, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
+	// 	xOffset, yOffset, w.shader.CameraPosition.String(), w.shader.LookAtCenterPosition.String())
 }
 
 func (w *GlWindow) updateCameraPosition(xpos, ypos float64) {
 
 	ratio := 0.07
-	if w.shiftPressed {
+	if w.UiState.ShiftPressed {
 		ratio *= 10
-	} else if w.ctrlPressed {
+	} else if w.UiState.CtrlPressed {
 		ratio *= 0.1
 	}
 	// 中ボタンが押された場合の処理
-	if w.middleButtonPressed {
+	if w.UiState.MiddleButtonPressed {
 		ratio := 0.07
-		if w.shiftPressed {
+		if w.UiState.ShiftPressed {
 			ratio *= 10
-		} else if w.ctrlPressed {
+		} else if w.UiState.CtrlPressed {
 			ratio *= 0.1
 		}
 
@@ -551,7 +489,7 @@ func (w *GlWindow) updateCameraPosition(xpos, ypos float64) {
 		yOffset := (w.prevCursorPos.Y - ypos) * ratio
 
 		// カメラの向きに基づいて移動方向を計算
-		forward := w.Shader.LookAtCenterPosition.Subed(w.Shader.CameraPosition)
+		forward := w.shader.LookAtCenterPosition.Subed(w.shader.CameraPosition)
 		right := forward.Cross(mmath.MVec3UnitY).Normalize()
 		up := right.Cross(forward.Normalize()).Normalize()
 
@@ -562,30 +500,30 @@ func (w *GlWindow) updateCameraPosition(xpos, ypos float64) {
 
 		// 移動ベクトルを合成してカメラ位置と中心を更新
 		movement := upMovement.Add(rightMovement)
-		w.Shader.CameraPosition.Add(movement)
-		w.Shader.LookAtCenterPosition.Add(movement)
+		w.shader.CameraPosition.Add(movement)
+		w.shader.LookAtCenterPosition.Add(movement)
 	}
 }
 
 func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos float64) {
 	// mlog.D("[start] yaw %.7f, pitch %.7f, CameraPosition: %s, LookAtCenterPosition: %s\n",
-	// 	w.yaw, w.pitch, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
+	// 	w.yaw, w.pitch, w.shader.CameraPosition.String(), w.shader.LookAtCenterPosition.String())
 
-	if !w.updatedPrev {
+	if !w.UiState.UpdatedPrev {
 		w.prevCursorPos.X = xpos
 		w.prevCursorPos.Y = ypos
-		w.updatedPrev = true
+		w.UiState.UpdatedPrev = true
 		return
 	}
 
-	if w.leftButtonPressed {
+	if w.UiState.LeftButtonPressed {
 		w.nowCursorPos.X = xpos
 		w.nowCursorPos.Y = ypos
 		return
-	} else if w.rightButtonPressed {
+	} else if w.UiState.RightButtonPressed {
 		// 右クリックはカメラの角度を更新
 		w.updateCameraAngle(xpos, ypos)
-	} else if w.middleButtonPressed {
+	} else if w.UiState.MiddleButtonPressed {
 		// 中クリックはカメラ位置と中心を移動
 		w.updateCameraPosition(xpos, ypos)
 	}
@@ -594,48 +532,35 @@ func (w *GlWindow) handleCursorPosEvent(window *glfw.Window, xpos float64, ypos 
 	w.prevCursorPos.Y = ypos
 }
 
-func (w *GlWindow) TriggerPhysicsEnabled(enabled bool) {
-	w.enablePhysics = enabled
-	for i := range w.modelSets {
-		w.modelSets[i].PrevDeltas = nil
-	}
-}
-
-func (w *GlWindow) TriggerPhysicsReset() {
-	if !w.doResetPhysicsProgress {
-		w.doResetPhysicsStart = true
-	}
-}
-
 func (w *GlWindow) resetPhysicsStart() {
 	// 物理ON・まだリセット中ではないの時だけリセット処理を行う
-	if w.enablePhysics && !w.doResetPhysicsProgress {
+	if w.UiState.EnabledPhysics && !w.UiState.DoResetPhysicsProgress {
 		// 一旦物理OFFにする
-		w.TriggerPhysicsEnabled(false)
-		w.Physics.ResetWorld()
-		w.doResetPhysicsStart = false
-		w.doResetPhysicsProgress = true
-		w.doResetPhysicsCount = 0
+		w.UiState.TriggerPhysicsEnabled(false)
+		w.physics.ResetWorld()
+		w.UiState.DoResetPhysicsStart = false
+		w.UiState.DoResetPhysicsProgress = true
+		w.UiState.DoResetPhysicsCount = 0
 	}
 }
 
 func (w *GlWindow) resetPhysicsFinish() {
 	// 物理ONに戻してリセットフラグを落とす
-	w.TriggerPhysicsEnabled(true)
-	w.doResetPhysicsStart = false
-	w.doResetPhysicsProgress = false
-	w.doResetPhysicsCount = 0
+	w.UiState.TriggerPhysicsEnabled(true)
+	w.UiState.DoResetPhysicsStart = false
+	w.UiState.DoResetPhysicsProgress = false
+	w.UiState.DoResetPhysicsCount = 0
 }
 
 func (w *GlWindow) TriggerViewReset() {
 	// カメラとかリセット
-	w.Shader.Reset()
+	w.shader.Reset()
 	w.prevCursorPos = mmath.NewMVec2()
 	w.nowCursorPos = mmath.NewMVec2()
 	w.yaw = RIGHT_ANGLE
 	w.pitch = 0.0
-	w.middleButtonPressed = false
-	w.rightButtonPressed = false
+	w.UiState.MiddleButtonPressed = false
+	w.UiState.RightButtonPressed = false
 
 }
 
@@ -648,7 +573,7 @@ func (w *GlWindow) Run() {
 	prevTime := glfw.GetTime()
 	prevShowTime := glfw.GetTime()
 	w.prevFrame = 0
-	w.running = true
+	w.UiState.IsGlRunning = true
 
 	go func() {
 	channelLoop:
@@ -657,7 +582,7 @@ func (w *GlWindow) Run() {
 			case pair := <-w.AppendModelSetChannel:
 				// 追加処理
 				w.modelSets[len(w.modelSets)-1] = pair
-				w.isSaveDelta = false
+				w.UiState.IsSaveDelta = false
 			case pairMap := <-w.ReplaceModelSetChannel:
 				// 入替処理
 				for i := range pairMap {
@@ -676,26 +601,26 @@ func (w *GlWindow) Run() {
 					w.modelSets[i].NextSelectedVertexIndexes = pairMap[i].NextSelectedVertexIndexes
 					w.modelSets[i].NextInvisibleMaterialIndexes = pairMap[i].NextInvisibleMaterialIndexes
 				}
-				w.isSaveDelta = false
+				w.UiState.IsSaveDelta = false
 			case index := <-w.RemoveModelSetIndexChannel:
 				// 削除処理
 				if index < len(w.modelSets) {
 					if w.modelSets[index].Model != nil {
-						w.Physics.DeleteModel(index)
+						w.physics.DeleteModel(index)
 						w.modelSets[index].Model.Delete()
 					}
 					w.modelSets[index] = widget.NewModelSet()
 				}
-				w.isSaveDelta = false
+				w.UiState.IsSaveDelta = false
 			case isPlaying := <-w.IsPlayingChannel:
 				// 再生設定
-				w.TriggerPlay(isPlaying)
+				w.UiState.TriggerPlay(isPlaying)
 			case frame := <-w.FrameChannel:
 				// フレーム設定
-				w.SetFrame(frame)
+				w.UiState.Frame = frame
 			case isClosed := <-w.IsClosedChannel:
 				// ウィンドウが閉じられた場合
-				w.isClosed = isClosed
+				w.UiState.IsWalkRunning = !isClosed
 				break channelLoop
 			}
 		}
@@ -714,14 +639,10 @@ func (w *GlWindow) Run() {
 			continue
 		}
 
-		if w.playing && w.motionPlayer != nil && w.frame >= w.motionPlayer.FrameEdit.MaxValue() {
+		if w.UiState.Playing && w.frame >= float64(w.UiState.MaxFrame) {
 			// 再生中に最後までいったら最初にループして戻る
-			w.TriggerPhysicsReset()
-			w.SetFrame(0)
-
-			go func() {
-				w.motionPlayer.SetValue(int(w.frame))
-			}()
+			w.UiState.TriggerPhysicsReset()
+			w.UiState.Frame = 0
 		}
 
 		frameTime := glfw.GetTime()
@@ -729,19 +650,19 @@ func (w *GlWindow) Run() {
 
 		var elapsed float64
 		var timeStep float32
-		if !w.EnableFrameDrop {
+		if !w.UiState.EnabledFrameDrop {
 			// フレームドロップOFF
 			// 物理fpsは60fps固定
-			timeStep = w.Physics.PhysicsSpf
+			timeStep = w.physics.PhysicsSpf
 			// デフォームfpsは30fps上限の経過時間
-			elapsed = mmath.ClampedFloat(originalElapsed, 0.0, float64(w.Physics.DeformSpf))
+			elapsed = mmath.ClampedFloat(originalElapsed, 0.0, float64(w.physics.DeformSpf))
 		} else {
 			// 物理fpsは経過時間
 			timeStep = float32(originalElapsed)
 			elapsed = originalElapsed
 		}
 
-		if elapsed < w.spfLimit {
+		if elapsed < w.UiState.SpfLimit {
 			// 1フレームの時間が経過していない場合はスキップ
 			// fps制限は描画fpsにのみ依存
 			continue
@@ -750,7 +671,7 @@ func (w *GlWindow) Run() {
 		w.MakeContextCurrent()
 
 		// MSAAフレームバッファをバインド
-		w.Shader.Msaa.Bind()
+		w.shader.Msaa.Bind()
 
 		// 深度バッファのクリア
 		gl.ClearColor(0.7, 0.7, 0.7, 1.0)
@@ -767,20 +688,20 @@ func (w *GlWindow) Run() {
 
 		// カメラの再計算
 		projection := mgl32.Perspective(
-			mgl32.DegToRad(w.Shader.FieldOfViewAngle),
-			float32(w.Shader.Width)/float32(w.Shader.Height),
-			w.Shader.NearPlane,
-			w.Shader.FarPlane,
+			mgl32.DegToRad(w.shader.FieldOfViewAngle),
+			float32(w.shader.Width)/float32(w.shader.Height),
+			w.shader.NearPlane,
+			w.shader.FarPlane,
 		)
 
 		// カメラの位置
-		cameraPosition := mgl.NewGlVec3(w.Shader.CameraPosition)
+		cameraPosition := mgl.NewGlVec3(w.shader.CameraPosition)
 
 		// カメラの中心
-		lookAtCenter := mgl.NewGlVec3(w.Shader.LookAtCenterPosition)
+		lookAtCenter := mgl.NewGlVec3(w.shader.LookAtCenterPosition)
 		camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 
-		for _, program := range w.Shader.GetPrograms() {
+		for _, program := range w.shader.GetPrograms() {
 			// プログラムの切り替え
 			gl.UseProgram(program)
 
@@ -802,31 +723,31 @@ func (w *GlWindow) Run() {
 		// 床平面を描画
 		w.drawFloor()
 
-		if w.playing {
+		if w.UiState.Playing {
 			// 経過秒数をキーフレームの進捗具合に合わせて調整
-			if w.spfLimit < -1 {
+			if w.UiState.SpfLimit < -1 {
 				// デフォームFPS制限なしの場合、フレーム番号を常に進める
 				w.frame += 1.0
 			} else {
-				w.frame += elapsed * float64(w.Physics.DeformFps)
+				w.frame += elapsed * float64(w.physics.DeformFps)
 			}
 		}
 
-		if w.doResetPhysicsStart {
+		if w.UiState.DoResetPhysicsStart {
 			// 物理リセット開始
 			w.resetPhysicsStart()
 		}
 
 		// デフォーム
 		w.modelSets = widget.DeformsAll(
-			w.Physics, w.modelSets, int(w.frame), w.prevFrame,
-			timeStep, w.enablePhysics, w.doResetPhysicsProgress)
+			w.physics, w.modelSets, int(w.frame), w.prevFrame,
+			timeStep, w.UiState.EnabledPhysics, w.UiState.DoResetPhysicsProgress)
 
 		// 描画
 		for k := range w.modelSets {
 			if w.modelSets[k].Model != nil && w.modelSets[k].PrevDeltas != nil {
 				w.modelSets[k].PrevDeltas = widget.Draw(
-					w.Physics, w.modelSets[k].Model, w.modelSets[k].RenderModel, w.Shader, w.modelSets[k].PrevDeltas,
+					w.physics, w.modelSets[k].Model, w.modelSets[k].RenderModel, w.shader, w.modelSets[k].PrevDeltas,
 					w.modelSets[k].InvisibleMaterialIndexes, w.modelSets[k].NextInvisibleMaterialIndexes,
 					w.modelSets[k].BoneGlDeltas,
 					w.modelSets[k].MeshGlDeltas,
@@ -834,14 +755,15 @@ func (w *GlWindow) Run() {
 					w.modelSets[k].VertexMorphGlDeltas,
 					w.modelSets[k].SelectedVertexIndexesDeltas,
 					w.modelSets[k].SelectedVertexGlDeltasDeltas,
-					w.WindowIndex, w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones,
-					w.mWindow.rigidBodyFrontDebugAction.Checked(), w.mWindow.rigidBodyBackDebugAction.Checked(), w.mWindow.jointDebugAction.Checked())
+					w.WindowIndex, w.UiState.IsShowNormal, w.UiState.IsShowWire,
+					w.UiState.IsShowSelectedVertex, w.UiState.IsShowBones,
+					w.UiState.IsShowRigidBodyFront, w.UiState.IsShowRigidBodyBack, w.UiState.IsShowJoint)
 			}
 
 			if w.modelSets[k].NextMotion != nil {
 				w.modelSets[k].Motion = w.modelSets[k].NextMotion
 				w.modelSets[k].NextMotion = nil
-				w.isSaveDelta = false
+				w.UiState.IsSaveDelta = false
 			}
 
 			// モデルが変わっている場合は最新の情報を取得する
@@ -856,10 +778,9 @@ func (w *GlWindow) Run() {
 				w.modelSets[k].NextModel = nil
 				if w.modelSets[k].RenderModel == nil {
 					w.modelSets[k].RenderModel = renderer.NewRenderModel(w.WindowIndex, w.modelSets[k].Model)
-					w.Physics.AddModel(k, w.modelSets[k].Model)
+					w.physics.AddModel(k, w.modelSets[k].Model)
 				}
-				w.isSaveDelta = false
-				w.TriggerPhysicsReset()
+				w.UiState.TriggerPhysicsReset()
 			}
 
 			if w.modelSets[k].NextInvisibleMaterialIndexes != nil {
@@ -873,50 +794,46 @@ func (w *GlWindow) Run() {
 			}
 
 			// キーフレの手動変更がなかった場合のみ前回デフォームとして保持
-			if !w.isSaveDelta {
+			if !w.UiState.IsSaveDelta {
 				w.modelSets[k].PrevDeltas = nil
 			}
-			w.isSaveDelta = true
+			w.UiState.IsSaveDelta = true
 		}
 
-		if w.doResetPhysicsProgress {
-			if w.doResetPhysicsCount > 1 {
+		if w.UiState.DoResetPhysicsProgress {
+			if w.UiState.DoResetPhysicsCount > 1 {
 				// 0: 物理リセット開始
 				// 1: 物理リセット中(リセット状態で物理更新)
 				// 2: 物理リセット完了
 				// 物理リセット完了
 				w.resetPhysicsFinish()
 			} else {
-				w.doResetPhysicsCount++
+				w.UiState.DoResetPhysicsCount++
 			}
 		}
 
 		prevTime = frameTime
 
-		if w.playing && int(w.frame) > w.prevFrame {
+		if w.UiState.Playing && int(w.frame) > w.prevFrame {
 			// フレーム番号上書き
 			w.prevFrame = int(w.frame)
-			if w.playing && w.motionPlayer != nil {
-				go func() {
-					w.motionPlayer.SetValue(int(w.frame))
-				}()
+			if w.UiState.Playing {
+				w.UiState.Frame = w.prevFrame
 			}
 		}
 
-		w.Shader.Msaa.Resolve()
-		w.Shader.Msaa.Unbind()
+		w.shader.Msaa.Resolve()
+		w.shader.Msaa.Unbind()
 
 		// 物理デバッグ表示
-		w.Physics.DrawDebugLines(
-			w.Shader,
-			w.mWindow != nil && (w.mWindow.rigidBodyFrontDebugAction.Checked() ||
-				w.mWindow.rigidBodyBackDebugAction.Checked()),
-			w.mWindow != nil && w.mWindow.jointDebugAction.Checked(),
-			w.mWindow != nil && w.mWindow.rigidBodyFrontDebugAction.Checked())
+		w.physics.DrawDebugLines(
+			w.shader,
+			w.UiState.IsShowRigidBodyFront || w.UiState.IsShowRigidBodyBack,
+			w.UiState.IsShowJoint, w.UiState.IsShowRigidBodyFront)
 
 		w.SwapBuffers()
 
-		if w.isShowInfo {
+		if w.UiState.IsShowInfo {
 			nowShowTime := glfw.GetTime()
 			// 1秒ごとにオリジナルの経過時間からFPSを表示
 			if nowShowTime-prevShowTime >= 1.0 {
@@ -942,7 +859,7 @@ func (w *GlWindow) Run() {
 	}
 
 closeApp:
-	w.Shader.Delete()
+	w.shader.Delete()
 	for i := range w.modelSets {
 		w.modelSets[i].Model.Delete()
 	}
@@ -953,10 +870,9 @@ closeApp:
 }
 
 func (w *GlWindow) IsRunning() bool {
-	return !w.isClosed && // walkウィンドウ側が閉じられたか
-		w.running && // GLウィンドウ側が閉じられたか
-		!mgl.CheckOpenGLError() && !w.ShouldClose() &&
-		((w.mWindow != nil && !w.mWindow.IsDisposed()) || w.mWindow == nil)
+	return w.UiState.IsWalkRunning && // walkウィンドウ側が閉じられたか
+		w.UiState.IsGlRunning && // GLウィンドウ側が閉じられたか
+		!mgl.CheckOpenGLError() && !w.ShouldClose()
 }
 
 // 床描画 ------------------
@@ -981,7 +897,7 @@ func newMFloor() *MFloor {
 
 func (w *GlWindow) drawFloor() {
 	// mlog.D("MFloor.DrawLine")
-	program := w.Shader.GetProgram(mgl.PROGRAM_TYPE_FLOOR)
+	program := w.shader.GetProgram(mgl.PROGRAM_TYPE_FLOOR)
 	gl.UseProgram(program)
 
 	// 平面を引く
