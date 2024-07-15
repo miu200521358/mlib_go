@@ -30,6 +30,10 @@ type textureGl struct {
 	Initialized       bool            // 描画初期化済みフラグ
 }
 
+func (t *textureGl) delete() {
+	gl.DeleteTextures(1, &t.Id)
+}
+
 func (t *textureGl) bind() {
 	gl.ActiveTexture(t.TextureUnitId)
 	gl.BindTexture(gl.TEXTURE_2D, t.Id)
@@ -53,11 +57,11 @@ func (t *textureGl) unbind() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 
-func (renderModel *RenderModel) initTexturesGl(windowIndex int) error {
-	renderModel.textures = make([]*textureGl, len(renderModel.Model.Textures.Data))
+func (renderModel *RenderModel) initTexturesGl(windowIndex int, textures *pmx.Textures, modelPath string) error {
+	renderModel.textures = make([]*textureGl, textures.Len())
 
-	for _, texture := range renderModel.Model.Textures.Data {
-		texGl, err := renderModel.initTextureGl(windowIndex, texture)
+	for _, texture := range textures.Data {
+		texGl, err := renderModel.initTextureGl(windowIndex, texture, modelPath)
 		if err != nil {
 			mlog.D(fmt.Sprintf("texture error: %s", err))
 			continue
@@ -69,14 +73,14 @@ func (renderModel *RenderModel) initTexturesGl(windowIndex int) error {
 }
 
 func (renderModel *RenderModel) initTextureGl(
-	windowIndex int, texture *pmx.Texture,
+	windowIndex int, texture *pmx.Texture, modelPath string,
 ) (*textureGl, error) {
 	texGl := &textureGl{
 		Texture: texture,
 	}
 
 	// 通常テクスチャ
-	texPath := filepath.Join(filepath.Dir(renderModel.Model.GetPath()), texture.Name)
+	texPath := filepath.Join(filepath.Dir(modelPath), texture.Name)
 
 	// テクスチャがちゃんとある場合のみ初期化処理実施
 	valid, err := mutils.ExistsFile(texPath)

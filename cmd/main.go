@@ -198,13 +198,13 @@ func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXpr
 				for _, glWindow := range mWindow.GlWindows {
 					glWindow.FrameChannel <- 0
 					glWindow.IsPlayingChannel <- false
-					glWindow.ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextModel: model}}
+					glWindow.ReplaceModelChannel <- map[int]*pmx.PmxModel{0: model}
 				}
 			}()
 		} else {
 			go func() {
 				for _, glWindow := range mWindow.GlWindows {
-					glWindow.RemoveModelSetIndexChannel <- 0
+					glWindow.RemoveIndexChannel <- 0
 				}
 			}()
 		}
@@ -232,12 +232,12 @@ func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXpr
 					for _, glWindow := range mWindow.GlWindows {
 						glWindow.FrameChannel <- 0
 						glWindow.IsPlayingChannel <- false
-						glWindow.ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextMotion: motion}}
+						glWindow.ReplaceMotionChannel <- map[int]*vmd.VmdMotion{0: motion}
 					}
 				}()
 			} else {
 				for _, glWindow := range mWindow.GlWindows {
-					glWindow.RemoveModelSetIndexChannel <- 0
+					glWindow.RemoveIndexChannel <- 0
 				}
 			}
 		}

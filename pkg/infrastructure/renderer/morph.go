@@ -12,17 +12,17 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
-func VertexMorphDeltasGL(mds *delta.VertexMorphDeltas) ([]int, [][]float32) {
+func newVertexMorphDeltasGl(mds *delta.VertexMorphDeltas) ([]int, [][]float32) {
 	vertices := make([][]float32, 0)
 	indices := make([]int, 0)
 	for i, md := range mds.Data {
-		vertices = append(vertices, VertexMorphDeltaGL(md))
+		vertices = append(vertices, newVertexMorphDeltaGl(md))
 		indices = append(indices, i)
 	}
 	return indices, vertices
 }
 
-func VertexMorphDeltaGL(md *delta.VertexMorphDelta) []float32 {
+func newVertexMorphDeltaGl(md *delta.VertexMorphDelta) []float32 {
 	var p0, p1, p2 float32
 	if md.Position != nil {
 		p := mgl.NewGlVec3(md.Position)
@@ -51,7 +51,7 @@ func VertexMorphDeltaGL(md *delta.VertexMorphDelta) []float32 {
 	}
 }
 
-func SelectedVertexMorphDeltasGL(
+func newSelectedVertexMorphDeltasGL(
 	mds *SelectedVertexMorphDeltas,
 	model *pmx.PmxModel, selectedVertexIndexes, nextSelectedVertexIndexes []int,
 ) ([]int, [][]float32) {
@@ -98,7 +98,7 @@ func SelectedVertexMorphDeltasGL(
 	return indices, vertices
 }
 
-func MaterialMorphDeltaResult(md *delta.MaterialMorphDelta) *MeshDelta {
+func newMeshDelta(md *delta.MaterialMorphDelta) *MeshDelta {
 	material := &MeshDelta{
 		Diffuse:  diffuse(md),
 		Specular: specular(md),

@@ -8,10 +8,9 @@ import (
 )
 
 func DeformMorph(
-	m *vmd.VmdMotion,
+	model *pmx.PmxModel,
 	mfs *vmd.MorphFrames,
 	frame int,
-	model *pmx.PmxModel,
 	morphNames []string,
 ) *delta.MorphDeltas {
 	if morphNames == nil {

@@ -1,51 +1,78 @@
 package renderer
 
 import (
+	"math"
 	"slices"
 	"sync"
+	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
 
 type RenderModel struct {
-	Model             *pmx.PmxModel // PMXモデル
-	Initialized       bool          // 描画初期化済みフラグ
-	meshes            []*Mesh       // メッシュ
-	textures          []*textureGl  // テクスチャ
-	toonTextures      []*textureGl  // トゥーンテクスチャ
-	vertices          []float32     // 頂点情報
-	vao               *buffer.VAO   // 頂点VAO
-	vbo               *buffer.VBO   // 頂点VBO
-	normalVertices    []float32     // 法線情報
-	normalVao         *buffer.VAO   // 法線VAO
-	normalVbo         *buffer.VBO   // 法線VBO
-	normalIbo         *buffer.IBO   // 法線IBO
-	selectedVertexVao *buffer.VAO   // 選択頂点VAO
-	selectedVertexVbo *buffer.VBO   // 選択頂点VBO
-	selectedVertexIbo *buffer.IBO   // 選択頂点IBO
-	bones             []float32     // ボーン情報
-	boneVao           *buffer.VAO   // ボーンVAO
-	boneVbo           *buffer.VBO   // ボーンVBO
-	boneIbo           *buffer.IBO   // ボーンIBO
-	boneIndexes       []int         // ボーンインデックス
-	ssbo              uint32        // SSBO
+	Initialized       bool         // 描画初期化済みフラグ
+	meshes            []*Mesh      // メッシュ
+	textures          []*textureGl // テクスチャ
+	toonTextures      []*textureGl // トゥーンテクスチャ
+	vertices          []float32    // 頂点情報
+	vao               *buffer.VAO  // 頂点VAO
+	vbo               *buffer.VBO  // 頂点VBO
+	normalVertices    []float32    // 法線情報
+	normalVao         *buffer.VAO  // 法線VAO
+	normalVbo         *buffer.VBO  // 法線VBO
+	normalIbo         *buffer.IBO  // 法線IBO
+	selectedVertexVao *buffer.VAO  // 選択頂点VAO
+	selectedVertexVbo *buffer.VBO  // 選択頂点VBO
+	selectedVertexIbo *buffer.IBO  // 選択頂点IBO
+	bones             []float32    // ボーン情報
+	boneVao           *buffer.VAO  // ボーンVAO
+	boneVbo           *buffer.VBO  // ボーンVBO
+	boneIbo           *buffer.IBO  // ボーンIBO
+	boneIndexes       []int        // ボーンインデックス
+	ssbo              uint32       // SSBO
+	vertexCount       int          // 頂点数
 }
 
 func NewRenderModel(windowIndex int, model *pmx.PmxModel) *RenderModel {
 	m := &RenderModel{
-		Model:       model,
 		Initialized: false,
+		vertexCount: model.Vertices.Len(),
 	}
 	m.initToonTexturesGl(windowIndex)
-	m.initTexturesGl(windowIndex)
+	m.initTexturesGl(windowIndex, model.Textures, model.GetPath())
 
 	m.initializeBuffer(model)
 
 	return m
+}
+
+func (renderModel *RenderModel) Delete() {
+	renderModel.vao.Delete()
+	renderModel.vbo.Delete()
+	renderModel.normalVao.Delete()
+	renderModel.normalVbo.Delete()
+	renderModel.normalIbo.Delete()
+	renderModel.selectedVertexVao.Delete()
+	renderModel.selectedVertexVbo.Delete()
+	renderModel.selectedVertexIbo.Delete()
+	renderModel.boneVao.Delete()
+	renderModel.boneVbo.Delete()
+	renderModel.boneIbo.Delete()
+	gl.DeleteBuffers(1, &renderModel.ssbo)
+	for _, mesh := range renderModel.meshes {
+		mesh.delete()
+	}
+	for _, texture := range renderModel.textures {
+		texture.delete()
+	}
+	for _, texture := range renderModel.toonTextures {
+		texture.delete()
+	}
 }
 
 func (renderModel *RenderModel) initializeBuffer(
@@ -237,65 +264,277 @@ func (renderModel *RenderModel) initializeBuffer(
 	renderModel.ssbo = ssbo
 }
 
-func (renderModel *RenderModel) Draw(
-	shader *mgl.MShader, boneDeltas []mgl32.Mat4,
-	vertexMorphIndexes []int, vertexMorphDeltas [][]float32,
-	selectedVertexIndexes []int, selectedVertexDeltas [][]float32, meshDeltas []*MeshDelta,
-	invisibleMaterialIndexes []int, nextInvisibleMaterialIndexes []int, windowIndex int,
-	isDrawNormal, isDrawWire, isDrawSelectedVertex bool, isDrawBones map[pmx.BoneFlag]bool, bones *pmx.Bones,
-) [][]float32 {
+func (renderModel *RenderModel) Render(
+	shader *mgl.MShader, animationStates *AnimationStates, windowIndex int,
+	isShowNormal, isShowWire, isShowSelectedVertex bool, isShowBones map[pmx.BoneFlag]bool,
+) {
+	deltas := animationStates.Now.VmdDeltas
+
 	renderModel.vao.Bind()
 	defer renderModel.vao.Unbind()
 
-	renderModel.vbo.BindVertex(vertexMorphIndexes, vertexMorphDeltas)
+	renderModel.vbo.BindVertex(animationStates.Now.vertexMorphDeltaIndexes, animationStates.Now.vertexMorphDeltas)
 	defer renderModel.vbo.Unbind()
 
-	paddedMatrixes, matrixWidth, matrixHeight := renderModel.createBoneMatrixes(boneDeltas)
+	paddedMatrixes, matrixWidth, matrixHeight := renderModel.createBoneMatrixes(deltas.Bones)
 
 	for i, mesh := range renderModel.meshes {
 		mesh.ibo.Bind()
 
-		mesh.drawModel(shader, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
+		mesh.drawModel(shader, paddedMatrixes, matrixWidth, matrixHeight, animationStates.Now.meshDeltas[i])
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
-			mesh.drawEdge(shader, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
+			mesh.drawEdge(shader, paddedMatrixes, matrixWidth, matrixHeight, animationStates.Now.meshDeltas[i])
 		}
 
-		if isDrawWire {
-			mesh.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, ((len(invisibleMaterialIndexes) > 0 && len(nextInvisibleMaterialIndexes) == 0 &&
-				slices.Contains(invisibleMaterialIndexes, mesh.material.Index)) ||
-				slices.Contains(nextInvisibleMaterialIndexes, mesh.material.Index)))
+		if isShowWire {
+			mesh.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, ((len(animationStates.Now.InvisibleMaterialIndexes) > 0 && len(animationStates.Next.InvisibleMaterialIndexes) == 0 &&
+				slices.Contains(animationStates.Now.InvisibleMaterialIndexes, mesh.material.Index)) ||
+				slices.Contains(animationStates.Next.InvisibleMaterialIndexes, mesh.material.Index)))
 		}
 
 		mesh.ibo.Unbind()
 	}
 
-	vertexPositions := make([][]float32, 0)
-	if isDrawSelectedVertex {
-		vertexPositions = renderModel.drawSelectedVertex(selectedVertexIndexes, selectedVertexDeltas,
-			shader, paddedMatrixes, matrixWidth, matrixHeight)
-	}
-
-	if isDrawNormal {
+	if isShowNormal {
 		renderModel.drawNormal(shader, paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
-	isDrawBone := false
-	for _, drawBone := range isDrawBones {
+	isShowBone := false
+	for _, drawBone := range isShowBones {
 		if drawBone {
-			isDrawBone = true
+			isShowBone = true
 			break
 		}
 	}
 
-	if isDrawBone {
-		renderModel.drawBone(shader, bones, isDrawBones, paddedMatrixes, matrixWidth, matrixHeight)
+	if isShowBone {
+		renderModel.drawBone(shader, animationStates.Now.Model.Bones, isShowBones,
+			paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
-	paddedMatrixes = nil
-	boneDeltas = nil
-	meshDeltas = nil
+}
 
-	return vertexPositions
+func (renderModel *RenderModel) createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int) {
+	// テクスチャのサイズを計算する
+	numBones := len(boneDeltas.Data)
+	texSize := int(math.Ceil(math.Sqrt(float64(numBones))))
+	width := int(math.Ceil(float64(texSize)/4) * 4 * 4)
+	height := int(math.Ceil((float64(numBones) * 4) / float64(width)))
+
+	paddedMatrixes := make([]float32, height*width*4)
+	for i, d := range boneDeltas.Data {
+		m := mgl.NewGlMat4(d.FilledLocalMatrix())
+		copy(paddedMatrixes[i*16:], m[:])
+	}
+
+	return paddedMatrixes, width, height
+}
+
+func (renderModel *RenderModel) drawNormal(
+	shader *mgl.MShader,
+	paddedMatrixes []float32,
+	width, height int,
+) {
+	program := shader.GetProgram(mgl.PROGRAM_TYPE_NORMAL)
+	gl.UseProgram(program)
+
+	renderModel.normalVao.Bind()
+	renderModel.normalVbo.BindVertex(nil, nil)
+	renderModel.normalIbo.Bind()
+
+	// ボーンデフォームテクスチャ設定
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
+
+	normalColor := mgl32.Vec4{0.3, 0.3, 0.7, 0.5}
+	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
+	gl.Uniform4fv(specularUniform, 1, &normalColor[0])
+
+	// ライン描画
+	gl.DrawElements(
+		gl.LINES,
+		int32(len(renderModel.normalVertices)),
+		gl.UNSIGNED_INT,
+		nil,
+	)
+
+	renderModel.normalIbo.Unbind()
+	renderModel.normalVbo.Unbind()
+	renderModel.normalVao.Unbind()
+
+	gl.UseProgram(0)
+}
+
+func (renderModel *RenderModel) drawSelectedVertex(
+	selectedVertexMorphIndexes []int,
+	selectedVertexDeltas [][]float32,
+	shader *mgl.MShader,
+	paddedMatrixes []float32,
+	width, height int,
+) [][]float32 {
+	// モデルメッシュの前面に描画するために深度テストを無効化
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.ALWAYS)
+
+	program := shader.GetProgram(mgl.PROGRAM_TYPE_SELECTED_VERTEX)
+	gl.UseProgram(program)
+
+	renderModel.selectedVertexVao.Bind()
+	renderModel.selectedVertexVbo.BindVertex(selectedVertexMorphIndexes, selectedVertexDeltas)
+	renderModel.selectedVertexIbo.Bind()
+
+	// ボーンデフォームテクスチャ設定
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
+
+	vertexColor := mgl32.Vec4{1.0, 0.4, 0.0, 0.7}
+	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
+	gl.Uniform4fv(specularUniform, 1, &vertexColor[0])
+	gl.PointSize(5.0) // 選択頂点のサイズ
+
+	// 点描画
+	gl.DrawElements(
+		gl.POINTS,
+		int32(len(renderModel.vertices)),
+		gl.UNSIGNED_INT,
+		nil,
+	)
+
+	// SSBOからデータを読み込む
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, renderModel.ssbo)
+	ptr := gl.MapBuffer(gl.SHADER_STORAGE_BUFFER, gl.READ_ONLY)
+	results := make([][]float32, renderModel.vertexCount)
+
+	if ptr != nil {
+		// 頂点数を取得
+		for i := range results {
+			results[i] = make([]float32, 4)
+		}
+
+		// SSBOから読み取り
+		for i := 0; i < renderModel.vertexCount; i++ {
+			for j := 0; j < 4; j++ {
+				results[i][j] = *(*float32)(unsafe.Pointer(uintptr(ptr) + uintptr((i*4+j)*4)))
+			}
+		}
+	}
+
+	gl.UnmapBuffer(gl.SHADER_STORAGE_BUFFER)
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
+
+	renderModel.selectedVertexIbo.Unbind()
+	renderModel.selectedVertexVbo.Unbind()
+	renderModel.selectedVertexVao.Unbind()
+
+	gl.UseProgram(0)
+
+	// 深度テストを有効に戻す
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
+
+	return results
+}
+
+func (renderModel *RenderModel) drawBone(
+	shader *mgl.MShader,
+	bones *pmx.Bones,
+	isShowBones map[pmx.BoneFlag]bool,
+	paddedMatrixes []float32,
+	width, height int,
+) {
+	// ボーンをモデルメッシュの前面に描画するために深度テストを無効化
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.ALWAYS)
+
+	// ブレンディングを有効にする
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	program := shader.GetProgram(mgl.PROGRAM_TYPE_BONE)
+	gl.UseProgram(program)
+
+	renderModel.boneVao.Bind()
+	renderModel.boneVbo.BindVertex(renderModel.fetchBoneDebugDeltas(bones, isShowBones))
+	renderModel.boneIbo.Bind()
+
+	// ボーンデフォームテクスチャ設定
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
+
+	// ライン描画
+	gl.DrawElements(
+		gl.LINES,
+		int32(len(renderModel.bones)),
+		gl.UNSIGNED_INT,
+		nil,
+	)
+
+	renderModel.boneIbo.Unbind()
+	renderModel.boneVbo.Unbind()
+	renderModel.boneVao.Unbind()
+
+	gl.UseProgram(0)
+
+	// 深度テストを有効に戻す
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
+
+}
+
+func (renderModel *RenderModel) fetchBoneDebugDeltas(bones *pmx.Bones, isShowBones map[pmx.BoneFlag]bool) ([]int, [][]float32) {
+	indexes := make([]int, 0)
+	deltas := make([][]float32, 0)
+
+	for _, boneIndex := range renderModel.boneIndexes {
+		bone := bones.Get(boneIndex)
+		indexes = append(indexes, boneIndex)
+		deltas = append(deltas, newBoneDebugAlphaGl(bone, isShowBones))
+	}
+
+	return indexes, deltas
+}
+
+func bindBoneMatrixes(
+	paddedMatrixes []float32,
+	width, height int,
+	shader *mgl.MShader,
+	program uint32,
+) {
+	// テクスチャをアクティブにする
+	gl.ActiveTexture(gl.TEXTURE20)
+
+	// テクスチャをバインドする
+	gl.BindTexture(gl.TEXTURE_2D, shader.BoneTextureId)
+
+	// テクスチャのパラメーターの設定
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+	// テクスチャをシェーダーに渡す
+	gl.TexImage2D(
+		gl.TEXTURE_2D,
+		0,
+		gl.RGBA32F,
+		int32(width),
+		int32(height),
+		0,
+		gl.RGBA,
+		gl.FLOAT,
+		unsafe.Pointer(&paddedMatrixes[0]),
+	)
+
+	modelUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE))
+	gl.Uniform1i(modelUniform, 20)
+
+	modelWidthUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE_WIDTH))
+	gl.Uniform1i(modelWidthUniform, int32(width))
+
+	modelHeightUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE_HEIGHT))
+	gl.Uniform1i(modelHeightUniform, int32(height))
+}
+
+func unbindBoneMatrixes() {
+	gl.BindTexture(gl.TEXTURE_2D, 0)
 }

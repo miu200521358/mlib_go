@@ -4,8 +4,6 @@
 package renderer
 
 import (
-	"unsafe"
-
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
@@ -33,6 +31,10 @@ func newMesh(
 		prevVerticesCount: prevVerticesCount,
 		ibo:               ibo,
 	}
+}
+
+func (m *Mesh) delete() {
+	m.ibo.Delete()
 }
 
 func (m *Mesh) drawModel(
@@ -197,50 +199,4 @@ func (m *Mesh) drawWire(
 	gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 
 	gl.UseProgram(0)
-}
-
-func bindBoneMatrixes(
-	paddedMatrixes []float32,
-	width, height int,
-	shader *mgl.MShader,
-	program uint32,
-) {
-	// テクスチャをアクティブにする
-	gl.ActiveTexture(gl.TEXTURE20)
-
-	// テクスチャをバインドする
-	gl.BindTexture(gl.TEXTURE_2D, shader.BoneTextureId)
-
-	// テクスチャのパラメーターの設定
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-
-	// テクスチャをシェーダーに渡す
-	gl.TexImage2D(
-		gl.TEXTURE_2D,
-		0,
-		gl.RGBA32F,
-		int32(width),
-		int32(height),
-		0,
-		gl.RGBA,
-		gl.FLOAT,
-		unsafe.Pointer(&paddedMatrixes[0]),
-	)
-
-	modelUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE))
-	gl.Uniform1i(modelUniform, 20)
-
-	modelWidthUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE_WIDTH))
-	gl.Uniform1i(modelWidthUniform, int32(width))
-
-	modelHeightUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE_HEIGHT))
-	gl.Uniform1i(modelHeightUniform, int32(height))
-}
-
-func unbindBoneMatrixes() {
-	gl.BindTexture(gl.TEXTURE_2D, 0)
 }

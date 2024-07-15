@@ -123,15 +123,14 @@ func (physics *MPhysics) updateFlags(modelIndex int, rigidBody *pmx.RigidBody) {
 	}
 }
 
-func UpdateTransform(
+func (physics *MPhysics) UpdateTransform(
 	modelIndex int,
-	modelPhysics *MPhysics,
 	rigidBodyBone *pmx.Bone,
 	boneTransform bt.BtTransform,
 	r *pmx.RigidBody,
 ) {
-	btRigidBody := *modelPhysics.rigidBodies[modelIndex][r.Index].btRigidBody
-	btRigidBodyLocalTransform := *modelPhysics.rigidBodies[modelIndex][r.Index].btLocalTransform
+	btRigidBody := *physics.rigidBodies[modelIndex][r.Index].btRigidBody
+	btRigidBodyLocalTransform := *physics.rigidBodies[modelIndex][r.Index].btLocalTransform
 
 	// 剛体のグローバル位置を確定
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
@@ -143,13 +142,12 @@ func UpdateTransform(
 	motionState.SetWorldTransform(t)
 }
 
-func GetRigidBodyBoneMatrix(
+func (physics *MPhysics) GetRigidBodyBoneMatrix(
 	modelIndex int,
-	modelPhysics *MPhysics,
-	r *pmx.RigidBody,
+	rigidBody *pmx.RigidBody,
 ) *mmath.MMat4 {
-	btRigidBody := *modelPhysics.rigidBodies[modelIndex][r.Index].btRigidBody
-	btRigidBodyLocalTransform := *modelPhysics.rigidBodies[modelIndex][r.Index].btLocalTransform
+	btRigidBody := *physics.rigidBodies[modelIndex][rigidBody.Index].btRigidBody
+	btRigidBodyLocalTransform := *physics.rigidBodies[modelIndex][rigidBody.Index].btLocalTransform
 
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
 

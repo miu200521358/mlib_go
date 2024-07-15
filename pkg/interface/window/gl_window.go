@@ -15,6 +15,8 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
@@ -30,22 +32,22 @@ const RIGHT_ANGLE = 89.9
 
 type GlWindow struct {
 	*glfw.Window
-	UiState       *widget.UiState    // UI状態
-	modelSets     []*widget.ModelSet // モデルセット
-	shader        *mgl.MShader       // シェーダー
-	physics       *mbt.MPhysics      // 物理
-	appConfig     *mconfig.AppConfig // アプリケーション設定
-	title         string             // ウィンドウタイトル(fpsとか入ってないオリジナル)
-	WindowIndex   int                // ウィンドウインデックス
-	prevCursorPos *mmath.MVec2       // 前回のカーソル位置
-	nowCursorPos  *mmath.MVec2       // 現在のカーソル位置
-	yaw           float64            // ウィンドウ操作yaw
-	pitch         float64            // ウィンドウ操作pitch
-	prevFrame     int                // 前回のフレーム
-	width         int                // ウィンドウ幅
-	height        int                // ウィンドウ高さ
-	floor         *MFloor            // 床
-	worldPosFunc  func(prevXprevYFrontPos,
+	UiState         *widget.UiState             // UI状態
+	animationStates []*renderer.AnimationStates // アニメーション状態
+	shader          *mgl.MShader                // シェーダー
+	physics         *mbt.MPhysics               // 物理
+	appConfig       *mconfig.AppConfig          // アプリケーション設定
+	title           string                      // ウィンドウタイトル(fpsとか入ってないオリジナル)
+	WindowIndex     int                         // ウィンドウインデックス
+	prevCursorPos   *mmath.MVec2                // 前回のカーソル位置
+	nowCursorPos    *mmath.MVec2                // 現在のカーソル位置
+	yaw             float64                     // ウィンドウ操作yaw
+	pitch           float64                     // ウィンドウ操作pitch
+	prevFrame       int                         // 前回のフレーム
+	width           int                         // ウィンドウ幅
+	height          int                         // ウィンドウ高さ
+	floor           *MFloor                     // 床
+	worldPosFunc    func(prevXprevYFrontPos,
 		prevXprevYBackPos,
 		prevXnowYFrontPos,
 		prevXnowYBackPos,
@@ -54,12 +56,14 @@ type GlWindow struct {
 		nowXnowYFrontPos,
 		nowXnowYBackPos *mmath.MVec3,
 		vmdDeltas []*delta.VmdDeltas) // 選択ポイントからのグローバル位置取得コールバック関数
-	AppendModelSetChannel      chan *widget.ModelSet         // モデルセット追加チャネル
-	RemoveModelSetIndexChannel chan int                      // モデルセット削除チャネル
-	ReplaceModelSetChannel     chan map[int]*widget.ModelSet // モデルセット入替チャネル
-	IsPlayingChannel           chan bool                     // 再生チャネル
-	FrameChannel               chan int                      // フレームチャネル
-	IsClosedChannel            chan bool                     // ウィンドウクローズチャネル
+	RemoveIndexChannel   chan int                    // モデル削除チャネル
+	AppendModelChannel   chan *pmx.PmxModel          // モデル追加チャネル
+	ReplaceModelChannel  chan map[int]*pmx.PmxModel  // モデル入替チャネル
+	AppendMotionChannel  chan *vmd.VmdMotion         // モーション追加チャネル
+	ReplaceMotionChannel chan map[int]*vmd.VmdMotion // モーション入替チャネル
+	IsPlayingChannel     chan bool                   // 再生チャネル
+	FrameChannel         chan int                    // フレームチャネル
+	IsClosedChannel      chan bool                   // ウィンドウクローズチャネル
 }
 
 func NewGlWindow(
@@ -139,27 +143,29 @@ func NewGlWindow(
 	}
 
 	glWindow := GlWindow{
-		Window:                     w,
-		UiState:                    uiState,
-		modelSets:                  make([]*widget.ModelSet, 0),
-		shader:                     shader,
-		appConfig:                  appConfig,
-		title:                      title,
-		WindowIndex:                windowIndex,
-		prevCursorPos:              mmath.NewMVec2(),
-		nowCursorPos:               mmath.NewMVec2(),
-		yaw:                        RIGHT_ANGLE,
-		pitch:                      0.0,
-		physics:                    mbt.NewMPhysics(),
-		prevFrame:                  0,
-		width:                      width,
-		height:                     height,
-		floor:                      newMFloor(),
-		AppendModelSetChannel:      make(chan *widget.ModelSet, 1),
-		RemoveModelSetIndexChannel: make(chan int, 1),
-		ReplaceModelSetChannel:     make(chan map[int]*widget.ModelSet),
-		IsPlayingChannel:           make(chan bool, 1),
-		FrameChannel:               make(chan int, 1),
+		Window:               w,
+		UiState:              uiState,
+		animationStates:      make([]*renderer.AnimationStates, 0),
+		shader:               shader,
+		appConfig:            appConfig,
+		title:                title,
+		WindowIndex:          windowIndex,
+		prevCursorPos:        mmath.NewMVec2(),
+		nowCursorPos:         mmath.NewMVec2(),
+		yaw:                  RIGHT_ANGLE,
+		pitch:                0.0,
+		physics:              mbt.NewMPhysics(),
+		prevFrame:            0,
+		width:                width,
+		height:               height,
+		floor:                newMFloor(),
+		RemoveIndexChannel:   make(chan int, 1),
+		AppendModelChannel:   make(chan *pmx.PmxModel, 1),
+		ReplaceModelChannel:  make(chan map[int]*pmx.PmxModel, 1),
+		AppendMotionChannel:  make(chan *vmd.VmdMotion, 1),
+		ReplaceMotionChannel: make(chan map[int]*vmd.VmdMotion, 1),
+		IsPlayingChannel:     make(chan bool, 1),
+		FrameChannel:         make(chan int, 1),
 	}
 
 	w.SetScrollCallback(glWindow.handleScrollEvent)
@@ -220,53 +226,53 @@ func (gw *GlWindow) getWorldPosition(
 }
 
 func (w GlWindow) execWorldPos() {
-	prevX := w.prevCursorPos.X
-	prevY := w.prevCursorPos.Y
-	nowX := w.nowCursorPos.X
-	nowY := w.nowCursorPos.Y
+	// prevX := w.prevCursorPos.X
+	// prevY := w.prevCursorPos.Y
+	// nowX := w.nowCursorPos.X
+	// nowY := w.nowCursorPos.Y
 
-	vmdDeltas := make([]*delta.VmdDeltas, len(w.modelSets))
-	for i, modelSet := range w.modelSets {
-		vmdDeltas[i] = modelSet.PrevDeltas
-	}
+	// vmdDeltas := make([]*delta.VmdDeltas, len(w.animateStates))
+	// for i, modelSet := range w.animateStates {
+	// 	vmdDeltas[i] = modelSet.PrevDeltas
+	// }
 
-	if w.nowCursorPos.Length() == 0 || w.prevCursorPos.Distance(w.nowCursorPos) < 0.1 {
-		// カーソルが動いていない場合は直近のだけ取得
-		// x: prev, y: prevのワールド座標位置
-		depth := w.shader.Msaa.ReadDepthAt(int(prevX), int(prevY), w.width, w.height)
-		worldPos := w.getWorldPosition(float32(prevX), float32(prevY), depth)
+	// if w.nowCursorPos.Length() == 0 || w.prevCursorPos.Distance(w.nowCursorPos) < 0.1 {
+	// 	// カーソルが動いていない場合は直近のだけ取得
+	// 	// x: prev, y: prevのワールド座標位置
+	// 	depth := w.shader.Msaa.ReadDepthAt(int(prevX), int(prevY), w.width, w.height)
+	// 	worldPos := w.getWorldPosition(float32(prevX), float32(prevY), depth)
 
-		w.worldPosFunc(worldPos, nil, nil, nil, nil, nil, nil, nil, vmdDeltas)
-	} else {
-		// x: prev, y: prevのワールド座標位置
-		prevXprevYDepth := w.shader.Msaa.ReadDepthAt(int(prevX), int(prevY), w.width, w.height)
-		prevXnowYDepth := w.shader.Msaa.ReadDepthAt(int(prevX), int(nowY), w.width, w.height)
-		nowXprevYDepth := w.shader.Msaa.ReadDepthAt(int(nowX), int(prevY), w.width, w.height)
-		nowXnowYDepth := w.shader.Msaa.ReadDepthAt(int(nowX), int(nowY), w.width, w.height)
+	// 	w.worldPosFunc(worldPos, nil, nil, nil, nil, nil, nil, nil, vmdDeltas)
+	// } else {
+	// 	// x: prev, y: prevのワールド座標位置
+	// 	prevXprevYDepth := w.shader.Msaa.ReadDepthAt(int(prevX), int(prevY), w.width, w.height)
+	// 	prevXnowYDepth := w.shader.Msaa.ReadDepthAt(int(prevX), int(nowY), w.width, w.height)
+	// 	nowXprevYDepth := w.shader.Msaa.ReadDepthAt(int(nowX), int(prevY), w.width, w.height)
+	// 	nowXnowYDepth := w.shader.Msaa.ReadDepthAt(int(nowX), int(nowY), w.width, w.height)
 
-		mlog.D("prevXprevYDepth=%.3f, prevXnowYDepth=%.3f, nowXprevYDepth=%.3f, nowXnowYDepth=%.3f",
-			prevXprevYDepth, prevXnowYDepth, nowXprevYDepth, nowXnowYDepth)
+	// 	mlog.D("prevXprevYDepth=%.3f, prevXnowYDepth=%.3f, nowXprevYDepth=%.3f, nowXnowYDepth=%.3f",
+	// 		prevXprevYDepth, prevXnowYDepth, nowXprevYDepth, nowXnowYDepth)
 
-		// 最も手前を基準とする
-		depth := min(prevXprevYDepth, prevXnowYDepth, nowXprevYDepth, nowXnowYDepth)
+	// 	// 最も手前を基準とする
+	// 	depth := min(prevXprevYDepth, prevXnowYDepth, nowXprevYDepth, nowXnowYDepth)
 
-		prevXprevYFrontPos := w.getWorldPosition(float32(prevX), float32(prevY), max(depth-1e-5, 0.0))
-		prevXprevYBackPos := w.getWorldPosition(float32(prevX), float32(prevY), min(depth+1e-5, 1.0))
+	// 	prevXprevYFrontPos := w.getWorldPosition(float32(prevX), float32(prevY), max(depth-1e-5, 0.0))
+	// 	prevXprevYBackPos := w.getWorldPosition(float32(prevX), float32(prevY), min(depth+1e-5, 1.0))
 
-		// x: prev, y: nowのワールド座標位置
-		prevXnowYFrontPos := w.getWorldPosition(float32(prevX), float32(nowY), max(depth-1e-5, 0.0))
-		prevXnowYBackPos := w.getWorldPosition(float32(prevX), float32(nowY), min(depth+1e-5, 1.0))
+	// 	// x: prev, y: nowのワールド座標位置
+	// 	prevXnowYFrontPos := w.getWorldPosition(float32(prevX), float32(nowY), max(depth-1e-5, 0.0))
+	// 	prevXnowYBackPos := w.getWorldPosition(float32(prevX), float32(nowY), min(depth+1e-5, 1.0))
 
-		// x: now, y: prevのワールド座標位置
-		nowXprevYFrontPos := w.getWorldPosition(float32(nowX), float32(prevY), max(depth-1e-5, 0.0))
-		nowXprevYBackPos := w.getWorldPosition(float32(nowX), float32(prevY), min(depth+1e-5, 1.0))
+	// 	// x: now, y: prevのワールド座標位置
+	// 	nowXprevYFrontPos := w.getWorldPosition(float32(nowX), float32(prevY), max(depth-1e-5, 0.0))
+	// 	nowXprevYBackPos := w.getWorldPosition(float32(nowX), float32(prevY), min(depth+1e-5, 1.0))
 
-		// x: now, y: nowのワールド座標位置
-		nowXnowYFrontPos := w.getWorldPosition(float32(nowX), float32(nowY), max(depth-1e-5, 0.0))
-		nowXnowYBackPos := w.getWorldPosition(float32(nowX), float32(nowY), min(depth+1e-5, 1.0))
+	// 	// x: now, y: nowのワールド座標位置
+	// 	nowXnowYFrontPos := w.getWorldPosition(float32(nowX), float32(nowY), max(depth-1e-5, 0.0))
+	// 	nowXnowYBackPos := w.getWorldPosition(float32(nowX), float32(nowY), min(depth+1e-5, 1.0))
 
-		w.worldPosFunc(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos, nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos, vmdDeltas)
-	}
+	// 	w.worldPosFunc(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos, nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos, vmdDeltas)
+	// }
 }
 
 func (w *GlWindow) resetPhysicsStart() {
@@ -312,37 +318,49 @@ func (w *GlWindow) RunChannel() {
 	channelLoop:
 		for {
 			select {
-			case pair := <-w.AppendModelSetChannel:
-				// 追加処理
-				w.modelSets[len(w.modelSets)-1] = pair
+			case model := <-w.AppendModelChannel:
+				// モデル追加処理
+				w.animationStates[len(w.animationStates)-1].Next.Model = model
 				w.UiState.IsSaveDelta = false
-			case pairMap := <-w.ReplaceModelSetChannel:
-				// 入替処理
-				for i := range pairMap {
+			case models := <-w.ReplaceModelChannel:
+				// モデル入替処理
+				for i := range models {
 					// 変更が加えられている可能性があるので、セットアップ実施（変更がなければスルーされる）
-					if pairMap[i].NextModel != nil {
-						pairMap[i].NextModel.Setup()
-					}
-
-					for j := len(w.modelSets); j <= i; j++ {
+					for j := len(w.animationStates); j <= i; j++ {
 						// 既存のモデルセットがない場合は追加
-						w.modelSets = append(w.modelSets, widget.NewModelSet())
+						w.animationStates = append(w.animationStates, renderer.NewAnimationStates())
 					}
 
-					w.modelSets[i].NextModel = pairMap[i].NextModel
-					w.modelSets[i].NextMotion = pairMap[i].NextMotion
-					w.modelSets[i].NextSelectedVertexIndexes = pairMap[i].NextSelectedVertexIndexes
-					w.modelSets[i].NextInvisibleMaterialIndexes = pairMap[i].NextInvisibleMaterialIndexes
+					w.animationStates[i].Next.Model = models[i]
+					w.animationStates[i].Next.Model.Setup()
 				}
 				w.UiState.IsSaveDelta = false
-			case index := <-w.RemoveModelSetIndexChannel:
-				// 削除処理
-				if index < len(w.modelSets) {
-					if w.modelSets[index].Model != nil {
-						w.physics.DeleteModel(index)
-						w.modelSets[index].Model.Delete()
+			case motion := <-w.AppendMotionChannel:
+				// モーション追加処理
+				w.animationStates[len(w.animationStates)-1].Next.Motion = motion
+				w.UiState.IsSaveDelta = false
+			case motions := <-w.ReplaceMotionChannel:
+				// モーション入替処理
+				for i := range motions {
+					// 変更が加えられている可能性があるので、セットアップ実施（変更がなければスルーされる）
+					for j := len(w.animationStates); j <= i; j++ {
+						// 既存のモデルセットがない場合は追加
+						w.animationStates = append(w.animationStates, renderer.NewAnimationStates())
 					}
-					w.modelSets[index] = widget.NewModelSet()
+
+					w.animationStates[i].Next.Motion = motions[i]
+				}
+				w.UiState.IsSaveDelta = false
+			case index := <-w.RemoveIndexChannel:
+				// 削除処理
+				if index < len(w.animationStates) {
+					if w.animationStates[index].Now.Model != nil {
+						w.physics.DeleteModel(index)
+						if w.animationStates[index].Now.RenderModel != nil {
+							w.animationStates[index].Now.RenderModel.Delete()
+						}
+					}
+					w.animationStates[index] = renderer.NewAnimationStates()
 				}
 				w.UiState.IsSaveDelta = false
 			case isPlaying := <-w.IsPlayingChannel:
@@ -481,63 +499,54 @@ func (w *GlWindow) Run() {
 		}
 
 		// デフォーム
-		w.modelSets = widget.DeformsAll(
-			w.physics, w.modelSets, int(w.UiState.Frame()), w.prevFrame,
-			timeStep, w.UiState.EnabledPhysics, w.UiState.DoResetPhysicsProgress)
+		w.animationStates = renderer.Animate(
+			w.physics, w.animationStates, int(w.UiState.Frame()), timeStep, w.UiState.EnabledPhysics, w.UiState.DoResetPhysicsProgress)
 
 		// 描画
-		for k := range w.modelSets {
-			if w.modelSets[k].Model != nil && w.modelSets[k].PrevDeltas != nil {
-				w.modelSets[k].PrevDeltas = widget.Draw(
-					w.physics, w.modelSets[k].Model, w.modelSets[k].RenderModel, w.shader, w.modelSets[k].PrevDeltas,
-					w.modelSets[k].InvisibleMaterialIndexes, w.modelSets[k].NextInvisibleMaterialIndexes,
-					w.modelSets[k].BoneGlDeltas,
-					w.modelSets[k].MeshGlDeltas,
-					w.modelSets[k].VertexMorphIndexes,
-					w.modelSets[k].VertexMorphGlDeltas,
-					w.modelSets[k].SelectedVertexIndexesDeltas,
-					w.modelSets[k].SelectedVertexGlDeltasDeltas,
-					w.WindowIndex, w.UiState.IsShowNormal, w.UiState.IsShowWire,
-					w.UiState.IsShowSelectedVertex, w.UiState.IsShowBones,
-					w.UiState.IsShowRigidBodyFront, w.UiState.IsShowRigidBodyBack, w.UiState.IsShowJoint)
+		for k := range w.animationStates {
+			if w.animationStates[k].Now.RenderModel != nil && w.animationStates[k].Now.VmdDeltas != nil {
+				w.animationStates[k].Now.RenderModel.Render(
+					w.shader, w.animationStates[k], w.WindowIndex, w.UiState.IsShowNormal, w.UiState.IsShowWire,
+					w.UiState.IsShowSelectedVertex, w.UiState.IsShowBones)
 			}
 
-			if w.modelSets[k].NextMotion != nil {
-				w.modelSets[k].Motion = w.modelSets[k].NextMotion
-				w.modelSets[k].NextMotion = nil
+			if w.animationStates[k].Next.Motion != nil {
+				w.animationStates[k].Now.Motion = w.animationStates[k].Next.Motion
+				w.animationStates[k].Next.Motion = nil
 				w.UiState.IsSaveDelta = false
 			}
 
 			// モデルが変わっている場合は最新の情報を取得する
-			if w.modelSets[k].NextModel != nil {
+			if w.animationStates[k].Next.Model != nil {
 				// 次のモデルが指定されている場合、初期化して入替
-				if w.modelSets[k].Model != nil && w.modelSets[k].RenderModel != nil {
+				if w.animationStates[k].Now.RenderModel != nil {
 					// 既存モデルが描画初期化されてたら削除
-					w.modelSets[k].Model.Delete()
-					w.modelSets[k].Model = nil
+					w.physics.DeleteModel(k)
+					w.animationStates[k].Now.RenderModel.Delete()
+					w.animationStates[k].Now.Model = nil
 				}
-				w.modelSets[k].Model = w.modelSets[k].NextModel
-				w.modelSets[k].NextModel = nil
-				if w.modelSets[k].RenderModel == nil {
-					w.modelSets[k].RenderModel = renderer.NewRenderModel(w.WindowIndex, w.modelSets[k].Model)
-					w.physics.AddModel(k, w.modelSets[k].Model)
-				}
+				w.animationStates[k].Now.Model = w.animationStates[k].Next.Model
+				w.animationStates[k].Next.Model = nil
+				w.animationStates[k].Now.RenderModel =
+					renderer.NewRenderModel(w.WindowIndex, w.animationStates[k].Now.Model)
+				w.physics.AddModel(k, w.animationStates[k].Now.Model)
+
 				w.UiState.TriggerPhysicsReset()
 			}
 
-			if w.modelSets[k].NextInvisibleMaterialIndexes != nil {
-				w.modelSets[k].InvisibleMaterialIndexes = w.modelSets[k].NextInvisibleMaterialIndexes
-				w.modelSets[k].NextInvisibleMaterialIndexes = nil
+			if w.animationStates[k].Next.InvisibleMaterialIndexes != nil {
+				w.animationStates[k].Now.InvisibleMaterialIndexes = w.animationStates[k].Next.InvisibleMaterialIndexes
+				w.animationStates[k].Next.InvisibleMaterialIndexes = nil
 			}
 
-			if w.modelSets[k].NextSelectedVertexIndexes != nil {
-				w.modelSets[k].SelectedVertexIndexes = w.modelSets[k].NextSelectedVertexIndexes
-				w.modelSets[k].NextSelectedVertexIndexes = nil
+			if w.animationStates[k].Next.SelectedVertexIndexes != nil {
+				w.animationStates[k].Now.SelectedVertexIndexes = w.animationStates[k].Next.SelectedVertexIndexes
+				w.animationStates[k].Next.SelectedVertexIndexes = nil
 			}
 
 			// キーフレの手動変更がなかった場合のみ前回デフォームとして保持
 			if !w.UiState.IsSaveDelta {
-				w.modelSets[k].PrevDeltas = nil
+				w.animationStates[k].Now.VmdDeltas = nil
 			}
 			w.UiState.IsSaveDelta = true
 		}
@@ -601,10 +610,13 @@ func (w *GlWindow) Run() {
 	}
 
 closeApp:
-	w.shader.Delete()
-	for i := range w.modelSets {
-		w.modelSets[i].Model.Delete()
+	for i := range w.animationStates {
+		if w.animationStates[i].Now.RenderModel != nil {
+			w.physics.DeleteModel(i)
+			w.animationStates[i].Now.RenderModel.Delete()
+		}
 	}
+	w.shader.Delete()
 	if w.WindowIndex == 0 {
 		glfw.Terminate()
 		walk.App().Exit(0)
