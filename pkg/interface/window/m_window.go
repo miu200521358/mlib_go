@@ -21,7 +21,7 @@ import (
 
 type MWindow struct {
 	*walk.MainWindow
-	UiState                  *UiState             // UI状態
+	UiState                  *widget.UiState      // UI状態
 	TabWidget                *widget.MTabWidget   // タブウィジェット
 	isHorizontal             bool                 // 横並びであるか否か
 	GlWindows                []*GlWindow          // 描画ウィンドウ
@@ -60,7 +60,7 @@ func NewMWindow(
 	helpMenuItemsFunc func() []declarative.MenuItem,
 	iconImg *image.Image,
 	appConfig *mconfig.AppConfig,
-	uiState *UiState,
+	uiState *widget.UiState,
 ) (*MWindow, error) {
 	mainWindow := &MWindow{
 		isHorizontal: isHorizontal,

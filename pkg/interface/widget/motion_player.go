@@ -14,6 +14,7 @@ import (
 
 type MotionPlayer struct {
 	walk.WidgetBase
+	uiState     *UiState         // UI状態
 	mWindow     *walk.MainWindow // メインウィンドウ
 	FrameEdit   *walk.NumberEdit // フレーム番号入力欄
 	FrameSlider *walk.Slider     // フレームスライダー
@@ -24,9 +25,11 @@ type MotionPlayer struct {
 
 const MotionPlayerClass = "MotionPlayer Class"
 
-func NewMotionPlayer(parent walk.Container, mWindow *walk.MainWindow) (*MotionPlayer, error) {
+func NewMotionPlayer(parent walk.Container, mWindow *walk.MainWindow, uiState *UiState) (*MotionPlayer, error) {
 	mp := new(MotionPlayer)
 	mp.mWindow = mWindow
+	mp.uiState = uiState
+	mp.uiState.changeFrameFunc = mp.ChangeValue
 
 	if err := walk.InitWidget(
 		mp,
@@ -65,6 +68,10 @@ func NewMotionPlayer(parent walk.Container, mWindow *walk.MainWindow) (*MotionPl
 	mp.FrameEdit.SetValue(0)
 	mp.FrameEdit.SetIncrement(1)
 	mp.FrameEdit.SetSpinButtonsVisible(true)
+	mp.FrameEdit.ValueChanged().Attach(func() {
+		mp.FrameSlider.SetValue(int(mp.FrameEdit.Value()))
+		mp.uiState.ChangeFrame(mp.FrameEdit.Value())
+	})
 
 	// フレームスライダー
 	mp.FrameSlider, err = walk.NewSlider(playerComposite)
@@ -73,6 +80,10 @@ func NewMotionPlayer(parent walk.Container, mWindow *walk.MainWindow) (*MotionPl
 	}
 	mp.FrameSlider.SetRange(0, 1)
 	mp.FrameSlider.SetValue(0)
+	mp.FrameSlider.ValueChanged().Attach(func() {
+		mp.FrameEdit.SetValue(float64(mp.FrameSlider.Value()))
+		mp.uiState.ChangeFrame(float64(mp.FrameSlider.Value()))
+	})
 
 	mp.PlayButton, err = walk.NewPushButton(playerComposite)
 	if err != nil {
@@ -141,10 +152,18 @@ func (mp *MotionPlayer) Play(playing bool) {
 func (mp *MotionPlayer) SetRange(min, max int) {
 	mp.FrameEdit.SetRange(float64(min), float64(max))
 	mp.FrameSlider.SetRange(min, max)
+	mp.uiState.SetMaxFrame(max)
 }
 
 func (mp *MotionPlayer) SetValue(v int) {
 	value := mmath.ClampedFloat(float64(v), mp.FrameEdit.MinValue(), mp.FrameEdit.MaxValue())
+	mp.FrameEdit.SetValue(value)
+	mp.FrameSlider.SetValue(int(value))
+	mp.uiState.ChangeFrame(value)
+}
+
+func (mp *MotionPlayer) ChangeValue(v float64) {
+	value := mmath.ClampedFloat(v, mp.FrameEdit.MinValue(), mp.FrameEdit.MaxValue())
 	mp.FrameEdit.SetValue(value)
 	mp.FrameSlider.SetValue(int(value))
 }

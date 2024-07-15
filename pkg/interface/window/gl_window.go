@@ -32,7 +32,7 @@ const RIGHT_ANGLE = 89.9
 
 type GlWindow struct {
 	*glfw.Window
-	UiState       *UiState           // UI状態
+	UiState       *widget.UiState    // UI状態
 	modelSets     []*widget.ModelSet // モデルセット
 	shader        *mgl.MShader       // シェーダー
 	physics       *mbt.MPhysics      // 物理
@@ -43,7 +43,6 @@ type GlWindow struct {
 	nowCursorPos  *mmath.MVec2       // 現在のカーソル位置
 	yaw           float64            // ウィンドウ操作yaw
 	pitch         float64            // ウィンドウ操作pitch
-	frame         float64            // 現在のフレーム
 	prevFrame     int                // 前回のフレーム
 	width         int                // ウィンドウ幅
 	height        int                // ウィンドウ高さ
@@ -72,7 +71,7 @@ func NewGlWindow(
 	iconImg *image.Image,
 	appConfig *mconfig.AppConfig,
 	mainWindow *GlWindow,
-	uiState *UiState,
+	uiState *widget.UiState,
 ) (*GlWindow, error) {
 	if windowIndex == 0 {
 		// GLFW の初期化(最初の一回だけ)
@@ -154,7 +153,6 @@ func NewGlWindow(
 		yaw:                        RIGHT_ANGLE,
 		pitch:                      0.0,
 		physics:                    mbt.NewMPhysics(),
-		frame:                      0,
 		prevFrame:                  0,
 		width:                      width,
 		height:                     height,
@@ -230,9 +228,9 @@ func (w *GlWindow) handleKeyEvent(
 	}
 
 	if key == glfw.KeyRight || key == glfw.KeyUp {
-		w.UiState.Frame += 1
+		w.UiState.AddFrame(1.0)
 	} else if key == glfw.KeyLeft || key == glfw.KeyDown {
-		w.UiState.Frame -= 1
+		w.UiState.AddFrame(-1.0)
 	}
 
 	if key == glfw.KeyLeftShift || key == glfw.KeyRightShift {
@@ -617,7 +615,7 @@ func (w *GlWindow) Run() {
 				w.UiState.TriggerPlay(isPlaying)
 			case frame := <-w.FrameChannel:
 				// フレーム設定
-				w.UiState.Frame = frame
+				w.UiState.SetFrame(float64(frame))
 			case isClosed := <-w.IsClosedChannel:
 				// ウィンドウが閉じられた場合
 				w.UiState.IsWalkRunning = !isClosed
@@ -639,10 +637,10 @@ func (w *GlWindow) Run() {
 			continue
 		}
 
-		if w.UiState.Playing && w.frame >= float64(w.UiState.MaxFrame) {
+		if w.UiState.Playing && w.UiState.Frame() >= float64(w.UiState.MaxFrame) {
 			// 再生中に最後までいったら最初にループして戻る
 			w.UiState.TriggerPhysicsReset()
-			w.UiState.Frame = 0
+			w.UiState.SetFrame(0)
 		}
 
 		frameTime := glfw.GetTime()
@@ -727,9 +725,9 @@ func (w *GlWindow) Run() {
 			// 経過秒数をキーフレームの進捗具合に合わせて調整
 			if w.UiState.SpfLimit < -1 {
 				// デフォームFPS制限なしの場合、フレーム番号を常に進める
-				w.frame += 1.0
+				w.UiState.AddFrame(1.0)
 			} else {
-				w.frame += elapsed * float64(w.physics.DeformFps)
+				w.UiState.AddFrame(elapsed * float64(w.physics.DeformFps))
 			}
 		}
 
@@ -740,7 +738,7 @@ func (w *GlWindow) Run() {
 
 		// デフォーム
 		w.modelSets = widget.DeformsAll(
-			w.physics, w.modelSets, int(w.frame), w.prevFrame,
+			w.physics, w.modelSets, int(w.UiState.Frame()), w.prevFrame,
 			timeStep, w.UiState.EnabledPhysics, w.UiState.DoResetPhysicsProgress)
 
 		// 描画
@@ -814,11 +812,11 @@ func (w *GlWindow) Run() {
 
 		prevTime = frameTime
 
-		if w.UiState.Playing && int(w.frame) > w.prevFrame {
+		if w.UiState.Playing && int(w.UiState.Frame()) > w.prevFrame {
 			// フレーム番号上書き
-			w.prevFrame = int(w.frame)
+			w.prevFrame = int(w.UiState.Frame())
 			if w.UiState.Playing {
-				w.UiState.Frame = w.prevFrame
+				w.UiState.SetFrame(w.UiState.Frame())
 			}
 		}
 
@@ -853,7 +851,7 @@ func (w *GlWindow) Run() {
 			w.Window.SetTitle(w.title)
 		}
 
-		// if w.frame > 100 {
+		// if w.UiState.Frame() > 100 {
 		// 	goto closeApp
 		// }
 	}

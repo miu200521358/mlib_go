@@ -1,9 +1,9 @@
-package window
+package widget
 
 import "github.com/miu200521358/mlib_go/pkg/domain/pmx"
 
 type UiState struct {
-	Frame                  int                   // フレーム
+	frame                  float64               // フレーム
 	MaxFrame               int                   // 最大フレーム
 	EnabledFrameDrop       bool                  // フレームドロップON/OFF
 	EnabledPhysics         bool                  // 物理ON/OFF
@@ -37,6 +37,7 @@ type UiState struct {
 	DoResetPhysicsCount    int                   // 物理リセット処理回数
 	IsSaveDelta            bool                  // 前回デフォーム保存フラグ(walkウィンドウからの変更情報検知用)
 	Playing                bool                  // 再生中フラグ
+	changeFrameFunc        func(float64)         // フレーム変更コールバック
 }
 
 func NewUiState() *UiState {
@@ -64,4 +65,32 @@ func (u *UiState) TriggerPhysicsReset() {
 		u.DoResetPhysicsStart = true
 		u.IsSaveDelta = false
 	}
+}
+
+func (u *UiState) Frame() float64 {
+	return u.frame
+}
+
+func (u *UiState) AddFrame(v float64) {
+	u.SetFrame(u.frame + v)
+}
+
+func (u *UiState) SetFrame(frame float64) {
+	u.frame = frame
+	u.IsSaveDelta = false
+	if u.changeFrameFunc != nil {
+		go func() {
+			u.changeFrameFunc(u.frame)
+		}()
+	}
+}
+
+func (u *UiState) ChangeFrame(frame float64) {
+	u.frame = frame
+	u.IsSaveDelta = false
+}
+
+func (u *UiState) SetMaxFrame(maxFrame int) {
+	u.MaxFrame = maxFrame
+	u.IsSaveDelta = false
 }

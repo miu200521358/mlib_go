@@ -63,7 +63,7 @@ func main() {
 		defer widget.RecoverFromPanic(mWindow.MainWindow)
 	}
 
-	uiState := window.NewUiState()
+	uiState := widget.NewUiState()
 
 	iconImg, err := mconfig.LoadIconFile(appFiles)
 	widget.CheckError(err, nil, mi18n.T("アイコン生成エラー"))
@@ -152,7 +152,7 @@ func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXpr
 	_, err = walk.NewVSeparator(page)
 	widget.CheckError(err, mWindow.MainWindow, mi18n.T("セパレータ生成エラー"))
 
-	motionPlayer, err := widget.NewMotionPlayer(page, mWindow.MainWindow)
+	motionPlayer, err := widget.NewMotionPlayer(page, mWindow.MainWindow, mWindow.UiState)
 	widget.CheckError(err, mWindow.MainWindow, mi18n.T("モーションプレイヤー生成エラー"))
 	motionPlayer.SetEnabled(false)
 
