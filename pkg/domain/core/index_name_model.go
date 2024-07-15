@@ -78,7 +78,7 @@ func (c *IndexNameModels[T]) SetItem(index int, v T) {
 
 func (c *IndexNameModels[T]) Update(value T) {
 	if value.GetIndex() < 0 {
-		value.SetIndex(len(c.Data))
+		panic("Index is not set")
 	}
 	c.Data[value.GetIndex()] = value
 	if _, ok := c.NameIndexes[value.GetName()]; !ok {
@@ -129,31 +129,12 @@ func (c *IndexNameModels[T]) Len() int {
 	return len(c.Data)
 }
 
-func (c *IndexNameModels[T]) ContainsIndex(key int) bool {
-	return c != nil && key >= 0 && key < len(c.Data) && !reflect.ValueOf(c.Data[key]).IsNil()
-}
-
-func (c *IndexNameModels[T]) ContainsName(key string) bool {
-	_, ok := c.NameIndexes[key]
-	return ok
-}
-
 func (c *IndexNameModels[T]) IsEmpty() bool {
 	return len(c.Data) == 0
 }
 
 func (c *IndexNameModels[T]) IsNotEmpty() bool {
 	return len(c.Data) > 0
-}
-
-func (c *IndexNameModels[T]) LastIndex() int {
-	maxIndex := 0
-	for index := range c.Data {
-		if index > maxIndex {
-			maxIndex = index
-		}
-	}
-	return maxIndex
 }
 
 func (c *IndexNameModels[T]) GetByName(name string) T {

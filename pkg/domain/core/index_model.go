@@ -64,7 +64,7 @@ func (c *IndexModels[T]) SetItem(index int, v T) {
 
 func (c *IndexModels[T]) Update(value T) {
 	if value.GetIndex() < 0 {
-		value.SetIndex(len(c.Data))
+		panic("Index is not set")
 	}
 	c.Data[value.GetIndex()] = value
 	c.SetDirty(true)
