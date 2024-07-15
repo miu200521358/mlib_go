@@ -60,10 +60,8 @@ func (ddl *MDebugDrawLiner) DrawLine(from bt.BtVector3, to bt.BtVector3, color b
 }
 
 func (ddl *MDebugDrawLiner) DrawDebugLines() {
-	if ddl.shader.IsDrawRigidBodyFront {
-		// モデルメッシュの前面に描画するために深度テストを無効化
-		gl.Enable(gl.DEPTH_TEST)
-		gl.DepthFunc(gl.ALWAYS)
+	if len(ddl.vertices) == 0 {
+		return
 	}
 
 	ddl.shader.Use(mgl.PROGRAM_TYPE_PHYSICS)
@@ -80,7 +78,4 @@ func (ddl *MDebugDrawLiner) DrawDebugLines() {
 
 	ddl.shader.Unuse()
 
-	// 深度テストを有効に戻す
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.LEQUAL)
 }

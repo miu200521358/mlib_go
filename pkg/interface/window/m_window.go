@@ -430,22 +430,22 @@ func (w *MWindow) boneDebugViewTriggered() {
 func (w *MWindow) rigidBodyDebugFrontViewTriggered() {
 	w.rigidBodyBackDebugAction.SetChecked(false)
 	for _, glWindow := range w.GlWindows {
-		glWindow.Physics.VisibleRigidBody(w.rigidBodyFrontDebugAction.Checked())
-		glWindow.Shader.IsDrawRigidBodyFront = true
+		glWindow.VisibleRigidBody = w.rigidBodyFrontDebugAction.Checked()
+		glWindow.IsDrawRigidBodyFront = true
 	}
 }
 
 func (w *MWindow) rigidBodyDebugBackViewTriggered() {
 	w.rigidBodyFrontDebugAction.SetChecked(false)
 	for _, glWindow := range w.GlWindows {
-		glWindow.Physics.VisibleRigidBody(w.rigidBodyBackDebugAction.Checked())
-		glWindow.Shader.IsDrawRigidBodyFront = false
+		glWindow.VisibleRigidBody = w.rigidBodyBackDebugAction.Checked()
+		glWindow.IsDrawRigidBodyFront = false
 	}
 }
 
 func (w *MWindow) jointDebugViewTriggered() {
 	for _, glWindow := range w.GlWindows {
-		glWindow.Physics.VisibleJoint(w.jointDebugAction.Checked())
+		glWindow.VisibleJoint = w.jointDebugAction.Checked()
 	}
 }
 

@@ -62,6 +62,9 @@ type GlWindow struct {
 	EnableFrameDrop        bool                  // フレームドロップ有効フラグ
 	isClosed               bool                  // walkウィンドウが閉じられたかどうか
 	isShowInfo             bool                  // 情報表示フラグ
+	IsDrawRigidBodyFront   bool                  // 剛体表示フラグ(手前)
+	VisibleRigidBody       bool                  // 剛体表示フラグ
+	VisibleJoint           bool                  // ジョイント表示フラグ
 	spfLimit               float64               //fps制限
 	frame                  float64               // 現在のフレーム
 	prevFrame              int                   // 前回のフレーム
@@ -822,7 +825,8 @@ func (w *GlWindow) Run() {
 				w.modelSets[k].PrevDeltas = widget.Draw(
 					w.Physics, w.modelSets[k].Model, w.Shader, w.modelSets[k].PrevDeltas,
 					w.modelSets[k].InvisibleMaterialIndexes, w.modelSets[k].NextInvisibleMaterialIndexes,
-					w.WindowIndex, w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones)
+					w.WindowIndex, w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones,
+					w.mWindow.rigidBodyFrontDebugAction.Checked(), w.mWindow.rigidBodyBackDebugAction.Checked(), w.mWindow.jointDebugAction.Checked())
 			}
 
 			if w.modelSets[k].NextMotion != nil {
@@ -897,7 +901,7 @@ func (w *GlWindow) Run() {
 		w.Shader.Msaa.Resolve()
 		w.Shader.Msaa.Unbind()
 
-		// 物理デバッグ表示（要不要は中で見ている）MSAAには含めない
+		// 物理デバッグ表示MSAAには含めない
 		w.Physics.DrawDebugLines()
 
 		w.SwapBuffers()

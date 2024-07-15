@@ -92,7 +92,6 @@ type MShader struct {
 	WireProgram           uint32
 	SelectedVertexProgram uint32
 	BoneTextureId         uint32
-	IsDrawRigidBodyFront  bool
 }
 
 //go:embed glsl/*
@@ -110,7 +109,6 @@ func NewMShader(width, height int) (*MShader, error) {
 		FarPlane:             1000.0,
 		lightPosition:        &mmath.MVec3{-0.5, -1.0, 0.5},
 		Msaa:                 buffer.NewMsaa(int32(width), int32(height)),
-		IsDrawRigidBodyFront: true,
 	}
 	shader.lightDirection = shader.lightPosition.Normalized()
 

@@ -31,6 +31,10 @@ func NewVpdRepository() *VpdRepository {
 	}
 }
 
+func (r *VpdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
+	return nil
+}
+
 // 指定されたパスのファイルからデータを読み込む
 func (r *VpdRepository) Load(path string) (core.IHashModel, error) {
 	// モデルを新規作成

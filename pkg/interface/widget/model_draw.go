@@ -235,6 +235,7 @@ func Draw(
 	windowIndex int,
 	isDrawNormal, isDrawWire, isDrawSelectedVertex bool,
 	isDrawBones map[pmx.BoneFlag]bool,
+	isDrawRigidBodyFront, visibleRigidBody, visibleJoint bool,
 ) *delta.VmdDeltas {
 	vertexPositions := model.Meshes.Draw(
 		shader, deltas.BoneGlDeltas, deltas.VertexMorphIndexes, deltas.VertexMorphGlDeltas,
@@ -247,7 +248,7 @@ func Draw(
 	}
 
 	// 物理デバッグ表示
-	modelPhysics.DebugDrawWorld()
+	modelPhysics.DebugDrawWorld(isDrawRigidBodyFront, visibleRigidBody, visibleJoint)
 
 	return deltas
 }

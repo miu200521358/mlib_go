@@ -4,24 +4,23 @@
 package mbt
 
 import (
+	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 type MPhysics struct {
-	world            bt.BtDiscreteDynamicsWorld
-	drawer           bt.BtMDebugDraw
-	liner            *MDebugDrawLiner
-	MaxSubSteps      int
-	DeformFps        float32
-	DeformSpf        float32
-	PhysicsFps       float32
-	PhysicsSpf       float32
-	FixedTimeStep    float32
-	joints           map[jointKey]bt.BtTypedConstraint
-	rigidBodies      map[rigidbodyKey]rigidbodyValue
-	visibleRigidBody bool
-	visibleJoint     bool
+	world         bt.BtDiscreteDynamicsWorld
+	drawer        bt.BtMDebugDraw
+	liner         *MDebugDrawLiner
+	MaxSubSteps   int
+	DeformFps     float32
+	DeformSpf     float32
+	PhysicsFps    float32
+	PhysicsSpf    float32
+	FixedTimeStep float32
+	joints        map[jointKey]bt.BtTypedConstraint
+	rigidBodies   map[rigidbodyKey]rigidbodyValue
 }
 
 type rigidbodyKey struct {
@@ -67,9 +66,6 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 	p.PhysicsSpf = 1.0 / p.PhysicsFps
 	p.FixedTimeStep = 1 / 60.0
 
-	p.VisibleRigidBody(false)
-	p.VisibleJoint(false)
-
 	return p
 }
 
@@ -111,54 +107,51 @@ func (p *MPhysics) ResetWorld() {
 	}
 }
 
-func (p *MPhysics) VisibleRigidBody(enable bool) {
-	if enable {
-		p.world.GetDebugDrawer().SetDebugMode(
-			p.world.GetDebugDrawer().GetDebugMode() | int(
-				bt.BtIDebugDrawDBG_DrawWireframe|
-					bt.BtIDebugDrawDBG_DrawContactPoints,
-			))
-	} else {
-		p.world.GetDebugDrawer().SetDebugMode(
-			p.world.GetDebugDrawer().GetDebugMode() & ^int(
-				bt.BtIDebugDrawDBG_DrawWireframe|
-					bt.BtIDebugDrawDBG_DrawContactPoints,
-			))
-	}
-	p.visibleRigidBody = enable
-}
-
-func (p *MPhysics) VisibleJoint(enable bool) {
-	if enable {
-		p.world.GetDebugDrawer().SetDebugMode(
-			p.world.GetDebugDrawer().GetDebugMode() | int(
-				bt.BtIDebugDrawDBG_DrawConstraints|
-					bt.BtIDebugDrawDBG_DrawConstraintLimits,
-			))
-	} else {
-		p.world.GetDebugDrawer().SetDebugMode(
-			p.world.GetDebugDrawer().GetDebugMode() & ^int(
-				bt.BtIDebugDrawDBG_DrawConstraints|
-					bt.BtIDebugDrawDBG_DrawConstraintLimits,
-			))
-	}
-	p.visibleJoint = enable
-}
-
 func (p *MPhysics) DrawDebugLines() {
-	if p.visibleRigidBody || p.visibleJoint {
-		p.liner.DrawDebugLines()
-		p.liner.vertices = []float32{}
-	}
+	p.liner.DrawDebugLines()
+	p.liner.vertices = []float32{}
 }
 
-func (p *MPhysics) DebugDrawWorld() {
+func (p *MPhysics) DebugDrawWorld(isDrawRigidBodyFront, visibleRigidBody, visibleJoint bool) {
 	// mlog.D("DrawWorld p.world=%+v\n", p.world)
+
+	if visibleRigidBody {
+		p.world.GetDebugDrawer().SetDebugMode(
+			p.world.GetDebugDrawer().GetDebugMode() | int(
+				bt.BtIDebugDrawDBG_DrawWireframe|
+					bt.BtIDebugDrawDBG_DrawContactPoints,
+			))
+	} else {
+		p.world.GetDebugDrawer().SetDebugMode(
+			p.world.GetDebugDrawer().GetDebugMode() & ^int(
+				bt.BtIDebugDrawDBG_DrawWireframe|
+					bt.BtIDebugDrawDBG_DrawContactPoints,
+			))
+	}
+
+	if visibleJoint {
+		p.world.GetDebugDrawer().SetDebugMode(
+			p.world.GetDebugDrawer().GetDebugMode() | int(
+				bt.BtIDebugDrawDBG_DrawConstraints|
+					bt.BtIDebugDrawDBG_DrawConstraintLimits,
+			))
+	} else {
+		p.world.GetDebugDrawer().SetDebugMode(
+			p.world.GetDebugDrawer().GetDebugMode() & ^int(
+				bt.BtIDebugDrawDBG_DrawConstraints|
+					bt.BtIDebugDrawDBG_DrawConstraintLimits,
+			))
+	}
 
 	// // 標準出力を一時的にリダイレクトする
 	// old := os.Stdout // keep backup of the real stdout
 	// r, w, _ := os.Pipe()
 	// os.Stdout = w
+	if isDrawRigidBodyFront {
+		// モデルメッシュの前面に描画するために深度テストを無効化
+		gl.Enable(gl.DEPTH_TEST)
+		gl.DepthFunc(gl.ALWAYS)
+	}
 
 	p.world.DebugDrawWorld()
 
@@ -169,6 +162,12 @@ func (p *MPhysics) DebugDrawWorld() {
 	// var buf bytes.Buffer
 	// buf.ReadFrom(r)
 	// fmt.Print(buf.String())
+
+	// 深度テストを有効に戻す
+	if isDrawRigidBodyFront {
+		gl.Enable(gl.DEPTH_TEST)
+		gl.DepthFunc(gl.LEQUAL)
+	}
 }
 
 func (p *MPhysics) GetRigidBody(modelIndex, rigidBodyIndex int) (bt.BtRigidBody, bt.BtTransform) {

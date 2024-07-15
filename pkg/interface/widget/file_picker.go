@@ -81,8 +81,7 @@ func NewVpdReadFilePicker(
 		map[int]map[string]string{
 			0: {"*.vpd": "Vpd Files (*.vpd)"}, 1: {"*.*": "All Files (*.*)"}},
 		50,
-		nil,
-		// &reader.VpdMotionReader{},
+		repository.NewVpdRepository(),
 		OnPathChanged)
 }
 
@@ -107,8 +106,7 @@ func NewVmdVpdReadFilePicker(
 			1: {"*.vpd": "Vpd Files (*.vpd)"},
 			2: {"*.*": "All Files (*.*)"}},
 		50,
-		nil,
-		// reader.NewVmdVpdMotionReader(),
+		repository.NewVmdVpdRepository(),
 		OnPathChanged)
 }
 
