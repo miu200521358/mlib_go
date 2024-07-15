@@ -12,7 +12,7 @@ import (
 type MPhysics struct {
 	world         bt.BtDiscreteDynamicsWorld
 	drawer        bt.BtMDebugDraw
-	liner         *MDebugDrawLiner
+	liner         *mDebugDrawLiner
 	MaxSubSteps   int
 	DeformFps     float32
 	DeformSpf     float32
@@ -23,7 +23,7 @@ type MPhysics struct {
 	rigidBodies   map[int][]*rigidbodyValue
 }
 
-func NewMPhysics(shader *mgl.MShader) *MPhysics {
+func NewMPhysics() *MPhysics {
 	world := createWorld()
 
 	p := &MPhysics{
@@ -36,10 +36,10 @@ func NewMPhysics(shader *mgl.MShader) *MPhysics {
 	}
 
 	// デバッグビューワー
-	liner := NewMDebugDrawLiner(shader)
+	liner := newMDebugDrawLiner()
 	drawer := bt.NewBtMDebugDraw()
 	drawer.SetLiner(liner)
-	drawer.SetMDefaultColors(NewConstBtMDefaultColors())
+	drawer.SetMDefaultColors(newConstBtMDefaultColors())
 	world.SetDebugDrawer(drawer)
 	// mlog.D("world.GetDebugDrawer()=%+v\n", world.GetDebugDrawer())
 
@@ -111,15 +111,6 @@ func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
 
 func (p *MPhysics) DrawDebugLines(shader *mgl.MShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool) {
 	// 物理デバッグ取得
-	p.DebugDrawWorld(visibleRigidBody, visibleJoint)
-
-	p.liner.DrawDebugLines(shader, isDrawRigidBodyFront)
-	p.liner.vertices = []float32{}
-}
-
-func (p *MPhysics) DebugDrawWorld(visibleRigidBody, visibleJoint bool) {
-	// mlog.D("DrawWorld p.world=%+v\n", p.world)
-
 	if visibleRigidBody {
 		p.world.GetDebugDrawer().SetDebugMode(
 			p.world.GetDebugDrawer().GetDebugMode() | int(
@@ -150,13 +141,8 @@ func (p *MPhysics) DebugDrawWorld(visibleRigidBody, visibleJoint bool) {
 
 	p.world.DebugDrawWorld()
 
-	// // 標準出力を元に戻す
-	// w.Close()
-	// os.Stdout = old // restoring the real stdout
-
-	// var buf bytes.Buffer
-	// buf.ReadFrom(r)
-	// fmt.Print(buf.String())
+	p.liner.drawDebugLines(shader, isDrawRigidBodyFront)
+	p.liner.vertices = make([]float32, 0)
 }
 
 func (p *MPhysics) GetRigidBody(modelIndex, rigidBodyIndex int) (bt.BtRigidBody, bt.BtTransform) {

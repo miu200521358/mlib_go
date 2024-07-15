@@ -11,7 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
 
-func NewConstBtMDefaultColors() bt.BtMDefaultColors {
+func newConstBtMDefaultColors() bt.BtMDefaultColors {
 	return bt.NewBtMDefaultColors(
 		bt.NewBtVector3(float32(1.0), float32(0.0), float32(0.0)), // activeObject	(物理剛体)
 		bt.NewBtVector3(float32(0.5), float32(0.5), float32(0.0)), // deactivatedObject
@@ -23,15 +23,15 @@ func NewConstBtMDefaultColors() bt.BtMDefaultColors {
 	)
 }
 
-type MDebugDrawLiner struct {
+type mDebugDrawLiner struct {
 	bt.BtMDebugDrawLiner
 	debugVao *buffer.VAO
 	debugVbo *buffer.VBO
 	vertices []float32
 }
 
-func NewMDebugDrawLiner(shader *mgl.MShader) *MDebugDrawLiner {
-	ddl := &MDebugDrawLiner{
+func newMDebugDrawLiner() *mDebugDrawLiner {
+	ddl := &mDebugDrawLiner{
 		vertices: make([]float32, 0),
 	}
 
@@ -46,7 +46,7 @@ func NewMDebugDrawLiner(shader *mgl.MShader) *MDebugDrawLiner {
 	return ddl
 }
 
-func (ddl *MDebugDrawLiner) DrawLine(from bt.BtVector3, to bt.BtVector3, color bt.BtVector3) {
+func (ddl *mDebugDrawLiner) DrawLine(from bt.BtVector3, to bt.BtVector3, color bt.BtVector3) {
 	ddl.vertices = append(ddl.vertices, from.GetX(), from.GetY(), from.GetZ())
 	ddl.vertices = append(ddl.vertices, color.GetX(), color.GetY(), color.GetZ(), 0.6)
 
@@ -54,7 +54,7 @@ func (ddl *MDebugDrawLiner) DrawLine(from bt.BtVector3, to bt.BtVector3, color b
 	ddl.vertices = append(ddl.vertices, color.GetX(), color.GetY(), color.GetZ(), 0.6)
 }
 
-func (ddl *MDebugDrawLiner) DrawDebugLines(shader *mgl.MShader, isDrawRigidBodyFront bool) {
+func (ddl *mDebugDrawLiner) drawDebugLines(shader *mgl.MShader, isDrawRigidBodyFront bool) {
 	if len(ddl.vertices) == 0 {
 		return
 	}

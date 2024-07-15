@@ -171,7 +171,7 @@ func NewGlWindow(
 		nowCursorPos:               mmath.NewMVec2(),
 		yaw:                        RIGHT_ANGLE,
 		pitch:                      0.0,
-		Physics:                    mbt.NewMPhysics(shader),
+		Physics:                    mbt.NewMPhysics(),
 		middleButtonPressed:        false,
 		rightButtonPressed:         false,
 		updatedPrev:                false,
