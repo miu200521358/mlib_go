@@ -81,10 +81,7 @@ func (p *MPhysics) ResetWorld() {
 	p.world = world
 	// 一旦削除
 	for modelIndex := range p.rigidBodies {
-		p.DeleteRigidBodies(modelIndex)
-	}
-	for modelIndex := range p.joints {
-		p.DeleteJoints(modelIndex)
+		p.DeleteModel(modelIndex)
 	}
 	// 登録し直し
 	for modelIndex := range p.rigidBodies {
@@ -107,6 +104,12 @@ func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
 	// pm.physics = physics
 	physics.initRigidBodies(modelIndex, model.RigidBodies)
 	physics.initJoints(modelIndex, model.RigidBodies, model.Joints)
+}
+
+func (physics *MPhysics) DeleteModel(modelIndex int) {
+	// pm.physics = physics
+	physics.deleteRigidBodies(modelIndex)
+	physics.deleteJoints(modelIndex)
 }
 
 func (p *MPhysics) DrawDebugLines(shader *mgl.MShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool) {
@@ -143,23 +146,6 @@ func (p *MPhysics) DrawDebugLines(shader *mgl.MShader, visibleRigidBody, visible
 
 	p.liner.drawDebugLines(shader, isDrawRigidBodyFront)
 	p.liner.vertices = make([]float32, 0)
-}
-
-func (p *MPhysics) GetRigidBody(modelIndex, rigidBodyIndex int) (bt.BtRigidBody, bt.BtTransform) {
-	r := p.rigidBodies[modelIndex][rigidBodyIndex]
-	return *r.btRigidBody, *r.btLocalTransform
-}
-
-func (p *MPhysics) DeleteRigidBodies(modelIndex int) {
-	for _, r := range p.rigidBodies[modelIndex] {
-		p.world.RemoveRigidBody(*r.btRigidBody)
-	}
-}
-
-func (p *MPhysics) DeleteJoints(modelIndex int) {
-	for _, j := range p.joints[modelIndex] {
-		p.world.RemoveConstraint(j.btJoint)
-	}
 }
 
 func (p *MPhysics) StepSimulation(timeStep float32) {

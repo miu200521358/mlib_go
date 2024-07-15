@@ -94,13 +94,16 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 	UpdateFlags(modelIndex, physics, rigidBody, true, false)
 }
 
+func (p *MPhysics) deleteRigidBodies(modelIndex int) {
+	for _, r := range p.rigidBodies[modelIndex] {
+		p.world.RemoveRigidBody(*r.btRigidBody)
+	}
+}
+
 func UpdateFlags(
 	modelIndex int, modelPhysics *MPhysics, r *pmx.RigidBody, enablePhysics, resetPhysics bool,
 ) bool {
-	btRigidBody, _ := modelPhysics.GetRigidBody(modelIndex, r.Index)
-	if btRigidBody == nil {
-		return false
-	}
+	btRigidBody := *modelPhysics.rigidBodies[modelIndex][r.Index].btRigidBody
 
 	if r.PhysicsType == pmx.PHYSICS_TYPE_STATIC || resetPhysics {
 		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時
@@ -155,15 +158,8 @@ func UpdateTransform(
 	boneTransform bt.BtTransform,
 	r *pmx.RigidBody,
 ) {
-	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(modelIndex, r.Index)
-
-	if btRigidBody == nil || btRigidBody.GetMotionState() == nil {
-		return
-	}
-
-	// {
-	// 	mlog.V("----------")
-	// }
+	btRigidBody := *modelPhysics.rigidBodies[modelIndex][r.Index].btRigidBody
+	btRigidBodyLocalTransform := *modelPhysics.rigidBodies[modelIndex][r.Index].btLocalTransform
 
 	// 剛体のグローバル位置を確定
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
@@ -173,18 +169,6 @@ func UpdateTransform(
 
 	t.Mult(boneTransform, btRigidBodyLocalTransform)
 	motionState.SetWorldTransform(t)
-
-	// if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
-	// 	mat := mgl32.Mat4{}
-	// 	(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
-	// 	mlog.V("2. [%d] boneTransform: \n%v\n", r.BoneIndex, mat)
-	// }
-	// {
-	// 	mat := mgl32.Mat4{}
-	// 	rigidBodyTransform.GetOpenGLMatrix(&mat[0])
-	// 	mlog.V("2. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
-	// }
-
 }
 
 func GetRigidBodyBoneMatrix(
@@ -192,22 +176,8 @@ func GetRigidBodyBoneMatrix(
 	modelPhysics *MPhysics,
 	r *pmx.RigidBody,
 ) *mmath.MMat4 {
-	btRigidBody, btRigidBodyLocalTransform := modelPhysics.GetRigidBody(modelIndex, r.Index)
-
-	if btRigidBody == nil || btRigidBody.GetMotionState() == nil {
-		return nil
-	}
-
-	// if r.Name == "前髪" {
-	// 	state := btRigidBody.GetActivationState()
-	// 	isStatic := btRigidBody.IsStaticOrKinematicObject()
-	// 	flags := btRigidBody.GetCollisionFlags()
-	// 	mlog.V("name: %s, state: %v, static: %v, flags: %v, isKinematic: %v, isStatic: %v\n", r.Name, state, isStatic, flags, flags&int(bt.BtCollisionObjectCF_KINEMATIC_OBJECT) != 0, flags&int(bt.BtCollisionObjectCF_STATIC_OBJECT) != 0)
-	// }
-
-	// {
-	// 	mlog.V("----------")
-	// }
+	btRigidBody := *modelPhysics.rigidBodies[modelIndex][r.Index].btRigidBody
+	btRigidBodyLocalTransform := *modelPhysics.rigidBodies[modelIndex][r.Index].btLocalTransform
 
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
 
@@ -215,34 +185,6 @@ func GetRigidBodyBoneMatrix(
 	defer bt.DeleteBtTransform(rigidBodyGlobalTransform)
 
 	motionState.GetWorldTransform(rigidBodyGlobalTransform)
-
-	// if r.CorrectPhysicsType == PHYSICS_TYPE_DYNAMIC_BONE {
-	// 	{
-	// 		mat := mgl32.Mat4{}
-	// 		rigidBodyTransform.GetOpenGLMatrix(&mat[0])
-	// 		mlog.V("3. [%s] rigidBodyTransform Before: \n%v\n", r.Name, mat)
-	// 	}
-
-	// 	if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
-	// 		// 物理+ボーン追従はボーン移動成分を現在のボーン位置にする
-	// 		boneGlobalTransform := bt.NewBtTransform()
-	// 		boneGlobalTransform.Mult(*boneTransforms[r.BoneIndex], r.BtRigidBodyTransform)
-
-	// 		rigidBodyTransform.SetOrigin(boneGlobalTransform.GetOrigin().(bt.BtVector3))
-	// 	} else if r.JointedBoneIndex >= 0 && r.JointedBoneIndex < len(boneTransforms) {
-	// 		// ジョイントで繋がっているボーンがある場合はそのボーン位置にする
-	// 		boneGlobalTransform := bt.NewBtTransform()
-	// 		boneGlobalTransform.Mult(*boneTransforms[r.JointedBoneIndex], r.BtRigidBodyTransform)
-
-	// 		rigidBodyTransform.SetOrigin(boneGlobalTransform.GetOrigin().(bt.BtVector3))
-	// 	}
-
-	// 	{
-	// 		mat := mgl32.Mat4{}
-	// 		rigidBodyTransform.GetOpenGLMatrix(&mat[0])
-	// 		mlog.V("3. [%s] rigidBodyTransform After: \n%v\n", r.Name, mat)
-	// 	}
-	// }
 
 	// ボーンのグローバル位置を剛体の現在グローバル行列に初期位置ローカル行列を掛けて求める
 	boneGlobalTransform := bt.NewBtTransform()
@@ -255,20 +197,6 @@ func GetRigidBodyBoneMatrix(
 
 	boneGlobalMatrixGL := mgl32.Mat4{}
 	boneGlobalTransform.GetOpenGLMatrix(&boneGlobalMatrixGL[0])
-
-	// if r.BoneIndex >= 0 && r.BoneIndex < len(boneTransforms) {
-	// 	mat := mgl32.Mat4{}
-	// 	(*boneTransforms[r.BoneIndex]).GetOpenGLMatrix(&mat[0])
-	// 	mlog.V("3. [%d] boneTransform: \n%v\n", r.BoneIndex, mat)
-	// }
-	// {
-	// 	mat := mgl32.Mat4{}
-	// 	rigidBodyTransform.GetOpenGLMatrix(&mat[0])
-	// 	mlog.V("3. [%s] rigidBodyTransform: \n%v\n", r.Name, mat)
-	// }
-	// {
-	// 	mlog.V("3. [%s] physicsBoneMatrix: \n%v\n", r.Name, physicsBoneMatrix)
-	// }
 
 	return newMMat4ByMgl(&boneGlobalMatrixGL)
 }
