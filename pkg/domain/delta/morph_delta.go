@@ -44,16 +44,44 @@ func NewWireVertexMorphDeltas() *WireVertexMorphDeltas {
 }
 
 type BoneMorphDelta struct {
-	BoneIndex int
-	// *vmd.BoneFrame
-	*MorphBoneDelta
+	BoneIndex     int
+	FramePosition *mmath.MVec3       // キーフレ位置の変動量
+	FrameRotation *mmath.MQuaternion // キーフレ回転の変動量
+	FrameScale    *mmath.MVec3       // キーフレスケールの変動量
 }
 
 func NewBoneMorphDelta(boneIndex int) *BoneMorphDelta {
 	return &BoneMorphDelta{
 		BoneIndex: boneIndex,
-		// BoneFrame:       NewBoneFrame(boneIndex),
-		MorphBoneDelta: NewMorphBoneDelta(),
+	}
+}
+
+func (md *BoneMorphDelta) FilledMorphPosition() *mmath.MVec3 {
+	if md.FramePosition == nil {
+		md.FramePosition = mmath.NewMVec3()
+	}
+	return md.FramePosition
+}
+
+func (md *BoneMorphDelta) FilledMorphRotation() *mmath.MQuaternion {
+	if md.FrameRotation == nil {
+		md.FrameRotation = mmath.NewMQuaternion()
+	}
+	return md.FrameRotation
+}
+
+func (md *BoneMorphDelta) FilledMorphScale() *mmath.MVec3 {
+	if md.FrameScale == nil {
+		md.FrameScale = mmath.NewMVec3()
+	}
+	return md.FrameScale
+}
+
+func (md *BoneMorphDelta) Copy() *BoneMorphDelta {
+	return &BoneMorphDelta{
+		FramePosition: md.FilledMorphPosition().Copy(),
+		FrameRotation: md.FilledMorphRotation().Copy(),
+		FrameScale:    md.FilledMorphScale().Copy(),
 	}
 }
 

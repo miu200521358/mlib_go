@@ -550,9 +550,9 @@ ikLoop:
 
 			if loop == 0 && morphDeltas != nil && morphDeltas.Bones != nil &&
 				morphDeltas.Bones.Get(linkBone.Index) != nil &&
-				morphDeltas.Bones.Get(linkBone.Index).MorphRotation != nil {
+				morphDeltas.Bones.Get(linkBone.Index).FrameRotation != nil {
 				// モーフ変形がある場合、モーフ変形を追加適用
-				resultIkQuat = resultIkQuat.Muled(morphDeltas.Bones.Get(linkBone.Index).MorphRotation)
+				resultIkQuat = resultIkQuat.Muled(morphDeltas.Bones.Get(linkBone.Index).FrameRotation)
 			}
 
 			if linkBone.HasFixedAxis() {
@@ -1181,8 +1181,8 @@ func getPosition(
 
 	var morphPos *mmath.MVec3
 	if morphDeltas != nil && morphDeltas.Bones.Get(bone.Index) != nil &&
-		morphDeltas.Bones.Get(bone.Index).MorphPosition != nil {
-		morphPos = morphDeltas.Bones.Get(bone.Index).MorphPosition
+		morphDeltas.Bones.Get(bone.Index).FramePosition != nil {
+		morphPos = morphDeltas.Bones.Get(bone.Index).FramePosition
 	}
 
 	return pos, morphPos
@@ -1209,9 +1209,9 @@ func getRotation(
 			rot = mmath.NewMQuaternion()
 
 			if morphDeltas != nil && morphDeltas.Bones.Get(bone.Index) != nil &&
-				morphDeltas.Bones.Get(bone.Index).MorphRotation != nil {
+				morphDeltas.Bones.Get(bone.Index).FrameRotation != nil {
 				// IKの場合はIK計算時に組み込まれているので、まだframeRotationが無い場合のみ加味
-				morphRot = morphDeltas.Bones.Get(bone.Index).MorphRotation
+				morphRot = morphDeltas.Bones.Get(bone.Index).FrameRotation
 				// mlog.I("[%s][%04d][%d]: rot: %s(%s), morphRot: %s(%s)\n", bone.Name, frame, loop,
 				// 	rot.String(), rot.ToMMDDegrees().String(), morphRot.String(), morphRot.ToMMDDegrees().String())
 			}
@@ -1242,8 +1242,8 @@ func getScale(
 	}
 
 	if morphDeltas != nil && morphDeltas.Bones.Get(bone.Index) != nil &&
-		morphDeltas.Bones.Get(bone.Index).MorphScale != nil {
-		return scale.Add(morphDeltas.Bones.Get(bone.Index).MorphScale)
+		morphDeltas.Bones.Get(bone.Index).FrameScale != nil {
+		return scale.Add(morphDeltas.Bones.Get(bone.Index).FrameScale)
 	}
 
 	return scale
