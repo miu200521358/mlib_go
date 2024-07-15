@@ -10,10 +10,10 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
 
-func InitPhysics(physics *MPhysics, pm *pmx.PmxModel, modelIndex int) {
+func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
 	// pm.physics = physics
-	initRigidBodiesPhysics(modelIndex, physics, pm.RigidBodies)
-	initJointsPhysics(modelIndex, physics, pm.RigidBodies, pm.Joints)
+	initRigidBodiesPhysics(modelIndex, physics, model.RigidBodies)
+	initJointsPhysics(modelIndex, physics, model.RigidBodies, model.Joints)
 }
 
 func UpdateFlags(

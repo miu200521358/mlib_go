@@ -859,7 +859,7 @@ func (w *GlWindow) Run() {
 				w.modelSets[k].NextModel = nil
 				if w.modelSets[k].Meshes == nil {
 					w.modelSets[k].Meshes = renderer.DrawInitialize(w.WindowIndex, w.modelSets[k].Model)
-					mbt.InitPhysics(w.Physics, w.modelSets[k].Model, k)
+					w.Physics.AddModel(k, w.modelSets[k].Model)
 				}
 				w.isSaveDelta = false
 			}
