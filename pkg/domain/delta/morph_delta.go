@@ -46,14 +46,14 @@ func NewWireVertexMorphDeltas() *WireVertexMorphDeltas {
 type BoneMorphDelta struct {
 	BoneIndex int
 	// *vmd.BoneFrame
-	*MorphFrameDelta
+	*MorphBoneDelta
 }
 
 func NewBoneMorphDelta(boneIndex int) *BoneMorphDelta {
 	return &BoneMorphDelta{
 		BoneIndex: boneIndex,
 		// BoneFrame:       NewBoneFrame(boneIndex),
-		MorphFrameDelta: NewMorphFrameDelta(),
+		MorphBoneDelta: NewMorphBoneDelta(),
 	}
 }
 

@@ -206,22 +206,22 @@ func deformBone(
 			offsetQuat := offset.Rotation.GetQuaternion().MuledScalar(ratio).Normalize()
 			offsetScale := offset.Scale.MuledScalar(ratio)
 
-			if d.MorphFrameDelta.FramePosition == nil {
-				d.MorphFrameDelta.FramePosition = offsetPos
+			if d.MorphBoneDelta.MorphPosition == nil {
+				d.MorphBoneDelta.MorphPosition = offsetPos
 			} else {
-				d.MorphFrameDelta.FramePosition.Add(offsetPos)
+				d.MorphBoneDelta.MorphPosition.Add(offsetPos)
 			}
 
-			if d.MorphFrameDelta.FrameRotation == nil {
-				d.MorphFrameDelta.FrameRotation = offsetQuat
+			if d.MorphBoneDelta.MorphRotation == nil {
+				d.MorphBoneDelta.MorphRotation = offsetQuat
 			} else {
-				d.MorphFrameDelta.FrameRotation = offsetQuat.Mul(d.MorphFrameDelta.FrameRotation)
+				d.MorphBoneDelta.MorphRotation = offsetQuat.Mul(d.MorphBoneDelta.MorphRotation)
 			}
 
-			if d.MorphFrameDelta.FrameScale == nil {
-				d.MorphFrameDelta.FrameScale = offsetScale
+			if d.MorphBoneDelta.MorphScale == nil {
+				d.MorphBoneDelta.MorphScale = offsetScale
 			} else {
-				d.MorphFrameDelta.FrameScale.Add(offsetScale)
+				d.MorphBoneDelta.MorphScale.Add(offsetScale)
 			}
 
 			deltas.Update(d)

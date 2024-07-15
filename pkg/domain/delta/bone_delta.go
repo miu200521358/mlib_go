@@ -20,7 +20,7 @@ type BoneDelta struct {
 	FrameScale         *mmath.MVec3       // キーフレスケールの変動量
 	FrameMorphScale    *mmath.MVec3       // モーフスケールの変動量
 	UnitMatrix         *mmath.MMat4
-	*MorphFrameDelta
+	*MorphBoneDelta
 }
 
 func NewBoneDeltaByGlobalMatrix(
@@ -35,12 +35,12 @@ func NewBoneDeltaByGlobalMatrix(
 	unitMatrix := parentGlobalMatrix.Muled(globalMatrix.Inverted())
 
 	return &BoneDelta{
-		Bone:            bone,
-		Frame:           frame,
-		MorphFrameDelta: NewMorphFrameDelta(),
-		GlobalMatrix:    globalMatrix,
-		LocalMatrix:     bone.OffsetMatrix.Muled(globalMatrix),
-		UnitMatrix:      unitMatrix,
+		Bone:           bone,
+		Frame:          frame,
+		MorphBoneDelta: NewMorphBoneDelta(),
+		GlobalMatrix:   globalMatrix,
+		LocalMatrix:    bone.OffsetMatrix.Muled(globalMatrix),
+		UnitMatrix:     unitMatrix,
 		// 物理演算後の移動を受け取ると逆オフセットかけても一部モデルで破綻するので一旦コメントアウト
 		// framePosition:   unitMatrix.Translation(),
 		FrameRotation: unitMatrix.Quaternion(),
@@ -190,15 +190,15 @@ func (bd *BoneDelta) Copy() *BoneDelta {
 		FrameScale:         bd.FilledFrameScale().Copy(),
 		FrameMorphScale:    bd.FilledFrameMorphScale().Copy(),
 		UnitMatrix:         bd.UnitMatrix.Copy(),
-		MorphFrameDelta:    bd.MorphFrameDelta.Copy(),
+		MorphBoneDelta:     bd.MorphBoneDelta.Copy(),
 	}
 }
 
 func NewBoneDelta(bone *pmx.Bone, frame int) *BoneDelta {
 	return &BoneDelta{
-		Bone:            bone,
-		Frame:           frame,
-		MorphFrameDelta: NewMorphFrameDelta(),
+		Bone:           bone,
+		Frame:          frame,
+		MorphBoneDelta: NewMorphBoneDelta(),
 	}
 }
 
