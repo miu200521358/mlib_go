@@ -25,7 +25,6 @@ func NewConstBtMDefaultColors() bt.BtMDefaultColors {
 
 type MDebugDrawLiner struct {
 	bt.BtMDebugDrawLiner
-	shader   *mgl.MShader
 	debugVao *buffer.VAO
 	debugVbo *buffer.VBO
 	vertices []float32
@@ -33,7 +32,6 @@ type MDebugDrawLiner struct {
 
 func NewMDebugDrawLiner(shader *mgl.MShader) *MDebugDrawLiner {
 	ddl := &MDebugDrawLiner{
-		shader:   shader,
 		vertices: make([]float32, 0),
 	}
 
@@ -56,12 +54,12 @@ func (ddl *MDebugDrawLiner) DrawLine(from bt.BtVector3, to bt.BtVector3, color b
 	ddl.vertices = append(ddl.vertices, color.GetX(), color.GetY(), color.GetZ(), 0.6)
 }
 
-func (ddl *MDebugDrawLiner) DrawDebugLines(isDrawRigidBodyFront bool) {
+func (ddl *MDebugDrawLiner) DrawDebugLines(shader *mgl.MShader, isDrawRigidBodyFront bool) {
 	if len(ddl.vertices) == 0 {
 		return
 	}
 
-	ddl.shader.Use(mgl.PROGRAM_TYPE_PHYSICS)
+	shader.Use(mgl.PROGRAM_TYPE_PHYSICS)
 
 	if isDrawRigidBodyFront {
 		// モデルメッシュの前面に描画するために深度テストを無効化
@@ -85,5 +83,5 @@ func (ddl *MDebugDrawLiner) DrawDebugLines(isDrawRigidBodyFront bool) {
 		gl.DepthFunc(gl.LEQUAL)
 	}
 
-	ddl.shader.Unuse()
+	shader.Unuse()
 }

@@ -109,18 +109,12 @@ func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
 	physics.initJoints(modelIndex, model.RigidBodies, model.Joints)
 }
 
-func (p *MPhysics) DrawDebugLines(visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool) {
-
-	// 物理デバッグ表示
+func (p *MPhysics) DrawDebugLines(shader *mgl.MShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool) {
+	// 物理デバッグ取得
 	p.DebugDrawWorld(visibleRigidBody, visibleJoint)
 
-	// // 標準出力を一時的にリダイレクトする
-	// old := os.Stdout // keep backup of the real stdout
-	// r, w, _ := os.Pipe()
-	// os.Stdout = w
-	p.liner.DrawDebugLines(isDrawRigidBodyFront)
+	p.liner.DrawDebugLines(shader, isDrawRigidBodyFront)
 	p.liner.vertices = []float32{}
-
 }
 
 func (p *MPhysics) DebugDrawWorld(visibleRigidBody, visibleJoint bool) {
