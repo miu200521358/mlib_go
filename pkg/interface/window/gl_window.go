@@ -681,6 +681,7 @@ func (w *GlWindow) Run() {
 				// 削除処理
 				if index < len(w.modelSets) {
 					if w.modelSets[index].Model != nil {
+						w.Physics.DeleteModel(index)
 						w.modelSets[index].Model.Delete()
 					}
 					w.modelSets[index] = widget.NewModelSet()

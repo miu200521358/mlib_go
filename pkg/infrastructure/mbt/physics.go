@@ -142,10 +142,11 @@ func (p *MPhysics) DrawDebugLines(shader *mgl.MShader, visibleRigidBody, visible
 			))
 	}
 
+	// デバッグ情報取得
 	p.world.DebugDrawWorld()
 
+	// デバッグ描画
 	p.liner.drawDebugLines(shader, isDrawRigidBodyFront)
-	p.liner.vertices = make([]float32, 0)
 }
 
 func (p *MPhysics) StepSimulation(timeStep float32) {

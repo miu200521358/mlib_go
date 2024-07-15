@@ -84,4 +84,6 @@ func (ddl *mDebugDrawLiner) drawDebugLines(shader *mgl.MShader, isDrawRigidBodyF
 	}
 
 	shader.Unuse()
+
+	ddl.vertices = make([]float32, 0)
 }
