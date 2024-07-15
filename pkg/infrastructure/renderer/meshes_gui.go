@@ -12,7 +12,6 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
-	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
@@ -265,7 +264,7 @@ func (m *Meshes) delete() {
 func (m *Meshes) Draw(
 	shader *mgl.MShader, boneDeltas []mgl32.Mat4,
 	vertexMorphIndexes []int, vertexMorphDeltas [][]float32,
-	selectedVertexIndexes []int, selectedVertexDeltas [][]float32, meshDeltas []*delta.MeshDelta,
+	selectedVertexIndexes []int, selectedVertexDeltas [][]float32, meshDeltas []*MeshDelta,
 	invisibleMaterialIndexes []int, nextInvisibleMaterialIndexes []int, windowIndex int,
 	isDrawNormal, isDrawWire, isDrawSelectedVertex bool, isDrawBones map[pmx.BoneFlag]bool, bones *pmx.Bones,
 ) [][]float32 {

@@ -9,7 +9,6 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
-	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
@@ -50,7 +49,7 @@ func (m *Mesh) drawModel(
 	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
-	meshDelta *delta.MeshDelta,
+	meshDelta *MeshDelta,
 ) {
 	if m.material.DrawFlag.IsDoubleSidedDrawing() {
 		// 両面描画
@@ -171,7 +170,7 @@ func (m *Mesh) drawEdge(
 	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
-	meshDelta *delta.MeshDelta,
+	meshDelta *MeshDelta,
 ) {
 	gl.Enable(gl.CULL_FACE)
 	defer gl.Disable(gl.CULL_FACE)

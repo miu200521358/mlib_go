@@ -1,27 +1,28 @@
 //go:build windows
 // +build windows
 
-package delta
+package renderer
 
 import (
 	"slices"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
-func (mds *VertexMorphDeltas) GL() ([]int, [][]float32) {
+func VertexMorphDeltasGL(mds *delta.VertexMorphDeltas) ([]int, [][]float32) {
 	vertices := make([][]float32, 0)
 	indices := make([]int, 0)
 	for i, md := range mds.Data {
-		vertices = append(vertices, md.GL())
+		vertices = append(vertices, VertexMorphDeltaGL(md))
 		indices = append(indices, i)
 	}
 	return indices, vertices
 }
 
-func (md *VertexMorphDelta) GL() []float32 {
+func VertexMorphDeltaGL(md *delta.VertexMorphDelta) []float32 {
 	var p0, p1, p2 float32
 	if md.Position != nil {
 		p := md.Position.GL()
@@ -50,7 +51,8 @@ func (md *VertexMorphDelta) GL() []float32 {
 	}
 }
 
-func (mds *SelectedVertexMorphDeltas) GL(
+func SelectedVertexMorphDeltasGL(
+	mds *delta.SelectedVertexMorphDeltas,
 	model *pmx.PmxModel, selectedVertexIndexes, nextSelectedVertexIndexes []int,
 ) ([]int, [][]float32) {
 	indices := make([]int, 0)
@@ -96,25 +98,25 @@ func (mds *SelectedVertexMorphDeltas) GL(
 	return indices, vertices
 }
 
-func (md *MaterialMorphDelta) Result() *MeshDelta {
+func MaterialMorphDeltaResult(md *delta.MaterialMorphDelta) *MeshDelta {
 	material := &MeshDelta{
-		Diffuse:          md.diffuse(),
-		Specular:         md.specular(),
-		Ambient:          md.ambient(),
-		Edge:             md.edge(),
-		EdgeSize:         md.edgeSize(),
-		TextureMulFactor: md.textureMulFactor(),
-		TextureAddFactor: md.textureAddFactor(),
-		SphereMulFactor:  md.sphereMulFactor(),
-		SphereAddFactor:  md.sphereAddFactor(),
-		ToonMulFactor:    md.toonMulFactor(),
-		ToonAddFactor:    md.toonAddFactor(),
+		Diffuse:          diffuse(md),
+		Specular:         specular(md),
+		Ambient:          ambient(md),
+		Edge:             edge(md),
+		EdgeSize:         edgeSize(md),
+		TextureMulFactor: textureMulFactor(md),
+		TextureAddFactor: textureAddFactor(md),
+		SphereMulFactor:  sphereMulFactor(md),
+		SphereAddFactor:  sphereAddFactor(md),
+		ToonMulFactor:    toonMulFactor(md),
+		ToonAddFactor:    toonAddFactor(md),
 	}
 
 	return material
 }
 
-func (md *MaterialMorphDelta) diffuse() mgl32.Vec4 {
+func diffuse(md *delta.MaterialMorphDelta) mgl32.Vec4 {
 	d1 := md.Diffuse.GetXYZ().Copy()
 	d2 := d1.MulScalar(float64(mgl.LIGHT_AMBIENT)).Add(md.Ambient)
 	dm := md.MulMaterial.Diffuse.Muled(md.MulRatios.Diffuse)
@@ -128,7 +130,7 @@ func (md *MaterialMorphDelta) diffuse() mgl32.Vec4 {
 	}
 }
 
-func (md *MaterialMorphDelta) specular() mgl32.Vec4 {
+func specular(md *delta.MaterialMorphDelta) mgl32.Vec4 {
 	s1 := md.Specular.GetXYZ().MuledScalar(float64(mgl.LIGHT_AMBIENT))
 	sm := md.MulMaterial.Specular.Muled(md.MulRatios.Specular)
 	sa := md.AddMaterial.Specular.Muled(md.AddRatios.Specular)
@@ -141,7 +143,7 @@ func (md *MaterialMorphDelta) specular() mgl32.Vec4 {
 	}
 }
 
-func (md *MaterialMorphDelta) ambient() mgl32.Vec3 {
+func ambient(md *delta.MaterialMorphDelta) mgl32.Vec3 {
 	a := md.Diffuse.GetXYZ().MuledScalar(float64(mgl.LIGHT_AMBIENT))
 	am := md.MulMaterial.Ambient.Muled(md.MulRatios.Ambient)
 	aa := md.AddMaterial.Ambient.Muled(md.AddRatios.Ambient)
@@ -152,7 +154,7 @@ func (md *MaterialMorphDelta) ambient() mgl32.Vec3 {
 	}
 }
 
-func (md *MaterialMorphDelta) edge() mgl32.Vec4 {
+func edge(md *delta.MaterialMorphDelta) mgl32.Vec4 {
 	e := md.Edge.GetXYZ().MuledScalar(float64(md.Diffuse.GetW()))
 	em := md.MulMaterial.Edge.Muled(md.MulRatios.Edge)
 	ea := md.AddMaterial.Edge.Muled(md.AddRatios.Edge)
@@ -165,12 +167,12 @@ func (md *MaterialMorphDelta) edge() mgl32.Vec4 {
 	}
 }
 
-func (md *MaterialMorphDelta) edgeSize() float32 {
+func edgeSize(md *delta.MaterialMorphDelta) float32 {
 	return float32(md.Material.EdgeSize*(md.MulMaterial.EdgeSize*md.MulRatios.EdgeSize) +
 		(md.AddMaterial.EdgeSize * md.AddRatios.EdgeSize))
 }
 
-func (md *MaterialMorphDelta) textureMulFactor() mgl32.Vec4 {
+func textureMulFactor(md *delta.MaterialMorphDelta) mgl32.Vec4 {
 	return mgl32.Vec4{
 		float32(md.MulMaterial.TextureFactor.GetX() * md.MulRatios.TextureFactor.GetX()),
 		float32(md.MulMaterial.TextureFactor.GetY() * md.MulRatios.TextureFactor.GetY()),
@@ -179,7 +181,7 @@ func (md *MaterialMorphDelta) textureMulFactor() mgl32.Vec4 {
 	}
 }
 
-func (md *MaterialMorphDelta) textureAddFactor() mgl32.Vec4 {
+func textureAddFactor(md *delta.MaterialMorphDelta) mgl32.Vec4 {
 	return mgl32.Vec4{
 		float32(md.AddMaterial.TextureFactor.GetX() * md.AddRatios.TextureFactor.GetX()),
 		float32(md.AddMaterial.TextureFactor.GetY() * md.AddRatios.TextureFactor.GetY()),
@@ -188,7 +190,7 @@ func (md *MaterialMorphDelta) textureAddFactor() mgl32.Vec4 {
 	}
 }
 
-func (md *MaterialMorphDelta) sphereMulFactor() mgl32.Vec4 {
+func sphereMulFactor(md *delta.MaterialMorphDelta) mgl32.Vec4 {
 	return mgl32.Vec4{
 		float32(md.MulMaterial.SphereTextureFactor.GetX() * md.MulRatios.SphereTextureFactor.GetX()),
 		float32(md.MulMaterial.SphereTextureFactor.GetY() * md.MulRatios.SphereTextureFactor.GetY()),
@@ -197,7 +199,7 @@ func (md *MaterialMorphDelta) sphereMulFactor() mgl32.Vec4 {
 	}
 }
 
-func (md *MaterialMorphDelta) sphereAddFactor() mgl32.Vec4 {
+func sphereAddFactor(md *delta.MaterialMorphDelta) mgl32.Vec4 {
 	return mgl32.Vec4{
 		float32(md.AddMaterial.SphereTextureFactor.GetX() * md.AddRatios.SphereTextureFactor.GetX()),
 		float32(md.AddMaterial.SphereTextureFactor.GetY() * md.AddRatios.SphereTextureFactor.GetY()),
@@ -206,7 +208,7 @@ func (md *MaterialMorphDelta) sphereAddFactor() mgl32.Vec4 {
 	}
 }
 
-func (md *MaterialMorphDelta) toonMulFactor() mgl32.Vec4 {
+func toonMulFactor(md *delta.MaterialMorphDelta) mgl32.Vec4 {
 	return mgl32.Vec4{
 		float32(md.MulMaterial.ToonTextureFactor.GetX() * md.MulRatios.ToonTextureFactor.GetX()),
 		float32(md.MulMaterial.ToonTextureFactor.GetY() * md.MulRatios.ToonTextureFactor.GetY()),
@@ -215,7 +217,7 @@ func (md *MaterialMorphDelta) toonMulFactor() mgl32.Vec4 {
 	}
 }
 
-func (md *MaterialMorphDelta) toonAddFactor() mgl32.Vec4 {
+func toonAddFactor(md *delta.MaterialMorphDelta) mgl32.Vec4 {
 	return mgl32.Vec4{
 		float32(md.AddMaterial.ToonTextureFactor.GetX() * md.AddRatios.ToonTextureFactor.GetX()),
 		float32(md.AddMaterial.ToonTextureFactor.GetY() * md.AddRatios.ToonTextureFactor.GetY()),

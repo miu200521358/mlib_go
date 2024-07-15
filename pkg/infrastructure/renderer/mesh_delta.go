@@ -1,4 +1,4 @@
-package delta
+package renderer
 
 import "github.com/go-gl/mathgl/mgl32"
 

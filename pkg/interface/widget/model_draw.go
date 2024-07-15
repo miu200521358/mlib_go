@@ -29,6 +29,12 @@ type ModelSet struct {
 	NextInvisibleMaterialIndexes []int            // UIから渡された次の非表示材質インデックス
 	NextSelectedVertexIndexes    []int            // UIから渡された次の選択頂点インデックス
 	PrevDeltas                   *delta.VmdDeltas // 前回のデフォーム情報
+	BoneGlDeltas                 []mgl32.Mat4
+	MeshGlDeltas                 []*renderer.MeshDelta
+	VertexMorphIndexes           []int
+	VertexMorphGlDeltas          [][]float32
+	SelectedVertexIndexesDeltas  []int
+	SelectedVertexGlDeltasDeltas [][]float32
 }
 
 func NewModelSet() *ModelSet {
@@ -66,7 +72,7 @@ func DeformsAll(
 					modelSets[ii].PrevDeltas = nil
 				}
 
-				modelSets[ii].PrevDeltas = deformBeforePhysics(
+				modelSets[ii].PrevDeltas, modelSets[ii].MeshGlDeltas, modelSets[ii].VertexMorphIndexes, modelSets[ii].VertexMorphGlDeltas = deformBeforePhysics(
 					modelPhysics, modelSets[ii].Model, modelSets[ii].Motion, modelSets[ii].PrevDeltas,
 					int(frame), timeStep, enablePhysics, resetPhysics,
 				)
@@ -94,7 +100,7 @@ func DeformsAll(
 			go func(ii int) {
 				defer wg.Done()
 
-				modelSets[ii].PrevDeltas = deformAfterPhysics(
+				modelSets[ii].PrevDeltas, modelSets[ii].BoneGlDeltas, modelSets[ii].SelectedVertexIndexesDeltas, modelSets[ii].SelectedVertexGlDeltasDeltas = deformAfterPhysics(
 					modelPhysics, modelSets[ii].Model, modelSets[ii].Motion, modelSets[ii].PrevDeltas,
 					modelSets[ii].SelectedVertexIndexes, modelSets[ii].NextSelectedVertexIndexes, int(frame),
 					enablePhysics, resetPhysics,
@@ -116,7 +122,7 @@ func deformBeforePhysics(
 	frame int,
 	timeStep float32,
 	enablePhysics, resetPhysics bool,
-) *delta.VmdDeltas {
+) (*delta.VmdDeltas, []*renderer.MeshDelta, []int, [][]float32) {
 	if motion == nil {
 		motion = vmd.NewVmdMotion("")
 	}
@@ -130,22 +136,17 @@ func deformBeforePhysics(
 		vds.Morphs = deform.DeformMorph(motion, motion.MorphFrames, frame, model, nil)
 		vds.Bones = deform.DeformByPhysicsFlag(motion.BoneFrames, frame, model, nil, true,
 			nil, vds.Morphs, ikFrame, false)
-
-		vds.MeshGlDeltas = make([]*delta.MeshDelta, len(model.Materials.Data))
-		for i, md := range vds.Morphs.Materials.Data {
-			vds.MeshGlDeltas[i] = md.Result()
-		}
-
-		vds.VertexMorphIndexes, vds.VertexMorphGlDeltas = vds.Morphs.Vertices.GL()
 	} else {
 		vds.Morphs = prevDeltas.Morphs
 		vds.Bones = prevDeltas.Bones
-
-		vds.MeshGlDeltas = prevDeltas.MeshGlDeltas
-
-		vds.VertexMorphIndexes = prevDeltas.VertexMorphIndexes
-		vds.VertexMorphGlDeltas = prevDeltas.VertexMorphGlDeltas
 	}
+
+	MeshGlDeltas := make([]*renderer.MeshDelta, len(model.Materials.Data))
+	for i, md := range vds.Morphs.Materials.Data {
+		MeshGlDeltas[i] = renderer.MaterialMorphDeltaResult(md)
+	}
+
+	VertexMorphIndexes, VertexMorphGlDeltas := renderer.VertexMorphDeltasGL(vds.Morphs.Vertices)
 
 	for _, rigidBody := range model.RigidBodies.Data {
 		// 現在のボーン変形情報を保持
@@ -172,7 +173,7 @@ func deformBeforePhysics(
 		}
 	}
 
-	return vds
+	return vds, MeshGlDeltas, VertexMorphIndexes, VertexMorphGlDeltas
 }
 
 func deformAfterPhysics(
@@ -183,7 +184,7 @@ func deformAfterPhysics(
 	selectedVertexIndexes, nextSelectedVertexIndexes []int,
 	frame int,
 	enablePhysics, resetPhysics bool,
-) *delta.VmdDeltas {
+) (*delta.VmdDeltas, []mgl32.Mat4, []int, [][]float32) {
 	if motion == nil {
 		motion = vmd.NewVmdMotion("")
 	}
@@ -213,19 +214,19 @@ func deformAfterPhysics(
 	}
 
 	// GL描画用データの作成
-	deltas.BoneGlDeltas = make([]mgl32.Mat4, len(model.Bones.Data))
+	BoneGlDeltas := make([]mgl32.Mat4, len(model.Bones.Data))
 	for i, bone := range model.Bones.Data {
 		delta := deltas.Bones.Get(bone.Index)
 		if delta != nil {
-			deltas.BoneGlDeltas[i] = delta.FilledLocalMatrix().GL()
+			BoneGlDeltas[i] = delta.FilledLocalMatrix().GL()
 		}
 	}
 
 	// 選択頂点モーフの設定は常に更新する
-	deltas.SelectedVertexIndexes, deltas.SelectedVertexGlDeltas = deltas.SelectedVertexDeltas.GL(
-		model, selectedVertexIndexes, nextSelectedVertexIndexes)
+	SelectedVertexIndexesDeltas, SelectedVertexGlDeltas := renderer.SelectedVertexMorphDeltasGL(
+		deltas.SelectedVertexDeltas, model, selectedVertexIndexes, nextSelectedVertexIndexes)
 
-	return deltas
+	return deltas, BoneGlDeltas, SelectedVertexIndexesDeltas, SelectedVertexGlDeltas
 }
 
 func Draw(
@@ -235,14 +236,20 @@ func Draw(
 	shader *mgl.MShader,
 	deltas *delta.VmdDeltas,
 	invisibleMaterialIndexes, nextInvisibleMaterialIndexes []int,
+	BoneGlDeltas []mgl32.Mat4,
+	MeshGlDeltas []*renderer.MeshDelta,
+	VertexMorphIndexes []int,
+	VertexMorphGlDeltas [][]float32,
+	SelectedVertexIndexesDeltas []int,
+	SelectedVertexGlDeltasDeltas [][]float32,
 	windowIndex int,
 	isDrawNormal, isDrawWire, isDrawSelectedVertex bool,
 	isDrawBones map[pmx.BoneFlag]bool,
 	isDrawRigidBodyFront, visibleRigidBody, visibleJoint bool,
 ) *delta.VmdDeltas {
 	vertexPositions := meshes.Draw(
-		shader, deltas.BoneGlDeltas, deltas.VertexMorphIndexes, deltas.VertexMorphGlDeltas,
-		deltas.SelectedVertexIndexes, deltas.SelectedVertexGlDeltas, deltas.MeshGlDeltas,
+		shader, BoneGlDeltas, VertexMorphIndexes, VertexMorphGlDeltas,
+		SelectedVertexIndexesDeltas, SelectedVertexGlDeltasDeltas, MeshGlDeltas,
 		invisibleMaterialIndexes, nextInvisibleMaterialIndexes, windowIndex,
 		isDrawNormal, isDrawWire, isDrawSelectedVertex, isDrawBones, model.Bones)
 

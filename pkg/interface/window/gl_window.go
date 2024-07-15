@@ -826,6 +826,12 @@ func (w *GlWindow) Run() {
 				w.modelSets[k].PrevDeltas = widget.Draw(
 					w.Physics, w.modelSets[k].Model, w.modelSets[k].Meshes, w.Shader, w.modelSets[k].PrevDeltas,
 					w.modelSets[k].InvisibleMaterialIndexes, w.modelSets[k].NextInvisibleMaterialIndexes,
+					w.modelSets[k].BoneGlDeltas,
+					w.modelSets[k].MeshGlDeltas,
+					w.modelSets[k].VertexMorphIndexes,
+					w.modelSets[k].VertexMorphGlDeltas,
+					w.modelSets[k].SelectedVertexIndexesDeltas,
+					w.modelSets[k].SelectedVertexGlDeltasDeltas,
 					w.WindowIndex, w.VisibleNormal, w.VisibleWire, w.VisibleSelectedVertex, w.VisibleBones,
 					w.mWindow.rigidBodyFrontDebugAction.Checked(), w.mWindow.rigidBodyBackDebugAction.Checked(), w.mWindow.jointDebugAction.Checked())
 			}
