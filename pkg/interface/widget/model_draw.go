@@ -260,8 +260,5 @@ func Draw(
 			&mmath.MVec3{X: float64(-pos[0]), Y: float64(pos[1]), Z: float64(pos[2])})
 	}
 
-	// 物理デバッグ表示
-	modelPhysics.DebugDrawWorld(visibleRigidBody, visibleJoint)
-
 	return deltas
 }

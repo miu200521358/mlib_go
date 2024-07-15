@@ -4,7 +4,6 @@
 package mbt
 
 import (
-	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
@@ -110,25 +109,18 @@ func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
 	physics.initJoints(modelIndex, model.RigidBodies, model.Joints)
 }
 
-func (p *MPhysics) DrawDebugLines(isDrawRigidBodyFront bool) {
+func (p *MPhysics) DrawDebugLines(visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool) {
+
+	// 物理デバッグ表示
+	p.DebugDrawWorld(visibleRigidBody, visibleJoint)
+
 	// // 標準出力を一時的にリダイレクトする
 	// old := os.Stdout // keep backup of the real stdout
 	// r, w, _ := os.Pipe()
 	// os.Stdout = w
-	if isDrawRigidBodyFront {
-		// モデルメッシュの前面に描画するために深度テストを無効化
-		gl.Enable(gl.DEPTH_TEST)
-		gl.DepthFunc(gl.ALWAYS)
-	}
-
-	p.liner.DrawDebugLines()
+	p.liner.DrawDebugLines(isDrawRigidBodyFront)
 	p.liner.vertices = []float32{}
 
-	// 深度テストを有効に戻す
-	if isDrawRigidBodyFront {
-		gl.Enable(gl.DEPTH_TEST)
-		gl.DepthFunc(gl.LEQUAL)
-	}
 }
 
 func (p *MPhysics) DebugDrawWorld(visibleRigidBody, visibleJoint bool) {

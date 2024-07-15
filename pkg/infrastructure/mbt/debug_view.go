@@ -59,12 +59,18 @@ func (ddl *MDebugDrawLiner) DrawLine(from bt.BtVector3, to bt.BtVector3, color b
 	ddl.count++
 }
 
-func (ddl *MDebugDrawLiner) DrawDebugLines() {
+func (ddl *MDebugDrawLiner) DrawDebugLines(isDrawRigidBodyFront bool) {
 	if len(ddl.vertices) == 0 {
 		return
 	}
 
 	ddl.shader.Use(mgl.PROGRAM_TYPE_PHYSICS)
+
+	if isDrawRigidBodyFront {
+		// モデルメッシュの前面に描画するために深度テストを無効化
+		gl.Enable(gl.DEPTH_TEST)
+		gl.DepthFunc(gl.ALWAYS)
+	}
 
 	// 線を引く
 	ddl.vao.Bind()
@@ -76,6 +82,11 @@ func (ddl *MDebugDrawLiner) DrawDebugLines() {
 	ddl.vbo.Unbind()
 	ddl.vao.Unbind()
 
-	ddl.shader.Unuse()
+	// 深度テストを有効に戻す
+	if isDrawRigidBodyFront {
+		gl.Enable(gl.DEPTH_TEST)
+		gl.DepthFunc(gl.LEQUAL)
+	}
 
+	ddl.shader.Unuse()
 }
