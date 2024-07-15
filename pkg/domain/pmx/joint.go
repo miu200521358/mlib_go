@@ -13,7 +13,7 @@ type JointParam struct {
 	RotationLimitMin          *mmath.MRotation // 回転制限-下限
 	RotationLimitMax          *mmath.MRotation // 回転制限-上限
 	SpringConstantTranslation *mmath.MVec3     // バネ定数-移動(x,y,z)
-	SpringConstantRotation    *mmath.MRotation // バネ定数-回転(x,y,z)
+	SpringConstantRotation    *mmath.MVec3     // バネ定数-回転(x,y,z)
 }
 
 func NewJointParam() *JointParam {
@@ -23,7 +23,7 @@ func NewJointParam() *JointParam {
 		RotationLimitMin:          mmath.NewRotation(),
 		RotationLimitMax:          mmath.NewRotation(),
 		SpringConstantTranslation: mmath.NewMVec3(),
-		SpringConstantRotation:    mmath.NewRotation(),
+		SpringConstantRotation:    mmath.NewMVec3(),
 	}
 }
 

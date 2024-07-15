@@ -1087,15 +1087,15 @@ func (r *PmxRepository) saveJoints(fout *os.File, model *pmx.PmxModel, rigidbody
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.GetRadians().GetX(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.GetX(), 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.GetRadians().GetY(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.GetY(), 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.GetRadians().GetZ(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.GetZ(), 0.0, false)
 		if err != nil {
 			return err
 		}

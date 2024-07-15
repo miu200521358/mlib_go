@@ -43,7 +43,7 @@ func NormalVertexGL(v *pmx.Vertex) []float32 {
 	n := v.Normal.MuledScalar(0.5).GL()
 	d := v.Deform.NormalizedDeform()
 	s := float32(mmath.BoolToInt(v.DeformType == pmx.SDEF))
-	sdefC, sdefR0, sdefR1 := v.Deform.GetSdefParams()
+	sdefC, sdefR0, sdefR1 := GetSdefParams(v.Deform)
 	return []float32{
 		p[0] + n[0], p[1] + n[1], p[2] + n[2], // 位置
 		n[0], n[1], n[2], // 法線
@@ -68,7 +68,7 @@ func WireGL(v *pmx.Vertex) []float32 {
 	n := v.Normal.GL()
 	d := v.Deform.NormalizedDeform()
 	s := float32(mmath.BoolToInt(v.DeformType == pmx.SDEF))
-	sdefC, sdefR0, sdefR1 := v.Deform.GetSdefParams()
+	sdefC, sdefR0, sdefR1 := GetSdefParams(v.Deform)
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		n[0], n[1], n[2], // 法線
@@ -93,7 +93,7 @@ func SelectedGL(v *pmx.Vertex) []float32 {
 	n := v.Normal.GL()
 	d := v.Deform.NormalizedDeform()
 	s := float32(mmath.BoolToInt(v.DeformType == pmx.SDEF))
-	sdefC, sdefR0, sdefR1 := v.Deform.GetSdefParams()
+	sdefC, sdefR0, sdefR1 := GetSdefParams(v.Deform)
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		n[0], n[1], n[2], // 法線

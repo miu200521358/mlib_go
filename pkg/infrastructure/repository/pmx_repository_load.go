@@ -1285,7 +1285,7 @@ func (r *PmxRepository) loadJoints(model *pmx.PmxModel) error {
 			mlog.E("[%d] loadJoints UnpackVec3 SpringConstantRotation error: %v", i, err)
 			return err
 		}
-		j.JointParam.SpringConstantRotation = mmath.NewRotationFromRadians(&springConstantRotation)
+		j.JointParam.SpringConstantRotation = &springConstantRotation
 
 		joints.Update(j)
 	}

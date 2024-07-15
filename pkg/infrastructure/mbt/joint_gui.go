@@ -66,11 +66,11 @@ func initJointPhysics(
 		constraint.EnableSpring(2, true)
 		constraint.SetStiffness(2, float32(j.JointParam.SpringConstantTranslation.GetZ()))
 		constraint.EnableSpring(3, true)
-		constraint.SetStiffness(3, float32(j.JointParam.SpringConstantRotation.GetRadians().GetX()))
+		constraint.SetStiffness(3, float32(j.JointParam.SpringConstantRotation.GetX()))
 		constraint.EnableSpring(4, true)
-		constraint.SetStiffness(4, float32(j.JointParam.SpringConstantRotation.GetRadians().GetY()))
+		constraint.SetStiffness(4, float32(j.JointParam.SpringConstantRotation.GetY()))
 		constraint.EnableSpring(5, true)
-		constraint.SetStiffness(5, float32(j.JointParam.SpringConstantRotation.GetRadians().GetZ()))
+		constraint.SetStiffness(5, float32(j.JointParam.SpringConstantRotation.GetZ()))
 	}
 
 	constraint.SetParam(int(bt.BT_CONSTRAINT_ERP), float32(0.5), 0)

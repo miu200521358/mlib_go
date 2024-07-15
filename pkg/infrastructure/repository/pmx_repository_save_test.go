@@ -790,7 +790,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 			t.Errorf("Expected SpringConstantTranslation to be %v, got %v", expectedSpringConstantTranslation, j.JointParam.SpringConstantTranslation)
 		}
 		expectedSpringConstantRotation := &mmath.MVec3{60.0, 29.6667, 60.0}
-		if !j.JointParam.SpringConstantRotation.GetRadians().NearEquals(expectedSpringConstantRotation, 1e-5) {
+		if !j.JointParam.SpringConstantRotation.NearEquals(expectedSpringConstantRotation, 1e-5) {
 			t.Errorf("Expected SpringConstantRotation to be %v, got %v", expectedSpringConstantRotation, j.JointParam.SpringConstantRotation)
 		}
 	}

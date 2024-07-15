@@ -37,7 +37,6 @@ type DisplaySlot struct {
 	*core.IndexNameModel
 	SpecialFlag SpecialFlag // 特殊枠フラグ - 0:通常枠 1:特殊枠
 	References  []Reference // 表示枠要素
-	IsSystem    bool        // ツール側で追加した表示枠
 }
 
 // NewDisplaySlot
@@ -46,7 +45,6 @@ func NewDisplaySlot() *DisplaySlot {
 		IndexNameModel: &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
 		SpecialFlag:    SPECIAL_FLAG_OFF,
 		References:     make([]Reference, 0),
-		IsSystem:       false,
 	}
 }
 
