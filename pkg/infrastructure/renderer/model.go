@@ -1,10 +1,13 @@
 package renderer
 
 import (
+	"slices"
 	"sync"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
 
@@ -105,9 +108,6 @@ func (renderModel *RenderModel) initializeBuffer(
 	renderModel.meshes = make([]*Mesh, len(model.Materials.Data))
 	prevVerticesCount := 0
 
-	// wg.Add(1)
-	// go func() {
-	// 	defer wg.Done()
 	for i, m := range model.Materials.Data {
 		// テクスチャ
 		var texGl *textureGl
@@ -136,13 +136,13 @@ func (renderModel *RenderModel) initializeBuffer(
 
 		materialGl := &materialGL{
 			Material:          m,
-			Texture:           texGl,
-			SphereTexture:     sphereTexGl,
-			ToonTexture:       toonTexGl,
-			PrevVerticesCount: prevVerticesCount,
+			texture:           texGl,
+			sphereTexture:     sphereTexGl,
+			toonTexture:       toonTexGl,
+			prevVerticesCount: prevVerticesCount,
 		}
 
-		mesh := NewMesh(
+		mesh := newMesh(
 			faces,
 			materialGl,
 			prevVerticesCount,
@@ -151,7 +151,6 @@ func (renderModel *RenderModel) initializeBuffer(
 		renderModel.meshes[i] = mesh
 		prevVerticesCount += m.VerticesCount
 	}
-	// }()
 
 	// ボーン情報の並列処理
 	renderModel.bones = make([]float32, 0, len(model.Bones.Data)*4)
@@ -236,4 +235,67 @@ func (renderModel *RenderModel) initializeBuffer(
 	gl.BindBufferBase(gl.SHADER_STORAGE_BUFFER, 0, ssbo)
 
 	renderModel.ssbo = ssbo
+}
+
+func (renderModel *RenderModel) Draw(
+	shader *mgl.MShader, boneDeltas []mgl32.Mat4,
+	vertexMorphIndexes []int, vertexMorphDeltas [][]float32,
+	selectedVertexIndexes []int, selectedVertexDeltas [][]float32, meshDeltas []*MeshDelta,
+	invisibleMaterialIndexes []int, nextInvisibleMaterialIndexes []int, windowIndex int,
+	isDrawNormal, isDrawWire, isDrawSelectedVertex bool, isDrawBones map[pmx.BoneFlag]bool, bones *pmx.Bones,
+) [][]float32 {
+	renderModel.vao.Bind()
+	defer renderModel.vao.Unbind()
+
+	renderModel.vbo.BindVertex(vertexMorphIndexes, vertexMorphDeltas)
+	defer renderModel.vbo.Unbind()
+
+	paddedMatrixes, matrixWidth, matrixHeight := renderModel.createBoneMatrixes(boneDeltas)
+
+	for i, mesh := range renderModel.meshes {
+		mesh.ibo.Bind()
+
+		mesh.drawModel(shader, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
+
+		if mesh.material.DrawFlag.IsDrawingEdge() {
+			// エッジ描画
+			mesh.drawEdge(shader, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
+		}
+
+		if isDrawWire {
+			mesh.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, ((len(invisibleMaterialIndexes) > 0 && len(nextInvisibleMaterialIndexes) == 0 &&
+				slices.Contains(invisibleMaterialIndexes, mesh.material.Index)) ||
+				slices.Contains(nextInvisibleMaterialIndexes, mesh.material.Index)))
+		}
+
+		mesh.ibo.Unbind()
+	}
+
+	vertexPositions := make([][]float32, 0)
+	if isDrawSelectedVertex {
+		vertexPositions = renderModel.drawSelectedVertex(selectedVertexIndexes, selectedVertexDeltas,
+			shader, paddedMatrixes, matrixWidth, matrixHeight)
+	}
+
+	if isDrawNormal {
+		renderModel.drawNormal(shader, paddedMatrixes, matrixWidth, matrixHeight)
+	}
+
+	isDrawBone := false
+	for _, drawBone := range isDrawBones {
+		if drawBone {
+			isDrawBone = true
+			break
+		}
+	}
+
+	if isDrawBone {
+		renderModel.drawBone(shader, bones, isDrawBones, paddedMatrixes, matrixWidth, matrixHeight)
+	}
+
+	paddedMatrixes = nil
+	boneDeltas = nil
+	meshDeltas = nil
+
+	return vertexPositions
 }

@@ -20,7 +20,7 @@ type Mesh struct {
 	ibo               *buffer.IBO // 頂点インデックスバッファ
 }
 
-func NewMesh(
+func newMesh(
 	allFaces []uint32,
 	material *materialGL,
 	prevVerticesCount int,
@@ -59,7 +59,7 @@ func (m *Mesh) drawModel(
 
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(paddedMatrixes, width, height, shader, modelProgram)
-	defer UnbindBoneMatrixes()
+	defer unbindBoneMatrixes()
 
 	// ------------------
 	// 材質色設定
@@ -75,33 +75,33 @@ func (m *Mesh) drawModel(
 
 	// テクスチャ使用有無
 	useTextureUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_TEXTURE))
-	gl.Uniform1i(useTextureUniform, int32(mmath.BoolToInt(m.material.Texture != nil)))
-	if m.material.Texture != nil {
-		m.material.Texture.Bind()
-		defer m.material.Texture.Unbind()
+	gl.Uniform1i(useTextureUniform, int32(mmath.BoolToInt(m.material.texture != nil)))
+	if m.material.texture != nil {
+		m.material.texture.bind()
+		defer m.material.texture.unbind()
 		textureUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_TEXTURE_SAMPLER))
-		gl.Uniform1i(textureUniform, int32(m.material.Texture.TextureUnitNo))
+		gl.Uniform1i(textureUniform, int32(m.material.texture.TextureUnitNo))
 	}
 
 	// Toon使用有無
 	useToonUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_TOON))
-	gl.Uniform1i(useToonUniform, int32(mmath.BoolToInt(m.material.ToonTexture != nil)))
-	if m.material.ToonTexture != nil {
-		m.material.ToonTexture.Bind()
-		defer m.material.ToonTexture.Unbind()
+	gl.Uniform1i(useToonUniform, int32(mmath.BoolToInt(m.material.toonTexture != nil)))
+	if m.material.toonTexture != nil {
+		m.material.toonTexture.bind()
+		defer m.material.toonTexture.unbind()
 		toonUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_TOON_SAMPLER))
-		gl.Uniform1i(toonUniform, int32(m.material.ToonTexture.TextureUnitNo))
+		gl.Uniform1i(toonUniform, int32(m.material.toonTexture.TextureUnitNo))
 	}
 
 	// Sphere使用有無
 	useSphereUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_SPHERE))
 	gl.Uniform1i(useSphereUniform,
-		int32(mmath.BoolToInt(m.material.SphereTexture != nil && m.material.SphereTexture.Initialized)))
-	if m.material.SphereTexture != nil && m.material.SphereTexture.Initialized {
-		m.material.SphereTexture.Bind()
-		defer m.material.SphereTexture.Unbind()
+		int32(mmath.BoolToInt(m.material.sphereTexture != nil && m.material.sphereTexture.Initialized)))
+	if m.material.sphereTexture != nil && m.material.sphereTexture.Initialized {
+		m.material.sphereTexture.bind()
+		defer m.material.sphereTexture.unbind()
 		sphereUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_SPHERE_SAMPLER))
-		gl.Uniform1i(sphereUniform, int32(m.material.SphereTexture.TextureUnitNo))
+		gl.Uniform1i(sphereUniform, int32(m.material.sphereTexture.TextureUnitNo))
 	}
 
 	// SphereMode
@@ -135,7 +135,7 @@ func (m *Mesh) drawEdge(
 
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
-	defer UnbindBoneMatrixes()
+	defer unbindBoneMatrixes()
 
 	// ------------------
 	// エッジ色設定
@@ -171,7 +171,7 @@ func (m *Mesh) drawWire(
 
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
-	defer UnbindBoneMatrixes()
+	defer unbindBoneMatrixes()
 
 	var wireColor mgl32.Vec4
 	if invisibleMesh {
@@ -241,6 +241,6 @@ func bindBoneMatrixes(
 	gl.Uniform1i(modelHeightUniform, int32(height))
 }
 
-func UnbindBoneMatrixes() {
+func unbindBoneMatrixes() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }

@@ -30,7 +30,7 @@ type textureGl struct {
 	Initialized       bool            // 描画初期化済みフラグ
 }
 
-func (t *textureGl) Bind() {
+func (t *textureGl) bind() {
 	gl.ActiveTexture(t.TextureUnitId)
 	gl.BindTexture(gl.TEXTURE_2D, t.Id)
 
@@ -49,7 +49,7 @@ func (t *textureGl) Bind() {
 	}
 }
 
-func (t *textureGl) Unbind() {
+func (t *textureGl) unbind() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 
@@ -136,7 +136,7 @@ func (renderModel *RenderModel) initTextureGl(
 		}
 	}
 
-	texGl.Bind()
+	texGl.bind()
 
 	gl.TexImage2D(
 		gl.TEXTURE_2D,
@@ -156,7 +156,7 @@ func (renderModel *RenderModel) initTextureGl(
 		mlog.D(mi18n.T("ミップマップ生成エラー", map[string]interface{}{"Name": texture.Name}))
 	}
 
-	texGl.Unbind()
+	texGl.unbind()
 
 	// 描画初期化
 	texGl.Initialized = true
@@ -199,7 +199,7 @@ func (renderModel *RenderModel) initToonTexturesGl(windowIndex int) error {
 			toonGl.TextureUnitNo = 12
 		}
 
-		toonGl.Bind()
+		toonGl.bind()
 
 		gl.TexImage2D(
 			gl.TEXTURE_2D,
@@ -213,7 +213,7 @@ func (renderModel *RenderModel) initToonTexturesGl(windowIndex int) error {
 			gl.Ptr(image.Pix),
 		)
 
-		toonGl.Unbind()
+		toonGl.unbind()
 		toonGl.Initialized = true
 
 		renderModel.toonTextures[i] = toonGl

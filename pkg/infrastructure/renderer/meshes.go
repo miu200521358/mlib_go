@@ -5,7 +5,6 @@ package renderer
 
 import (
 	"math"
-	"slices"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -14,69 +13,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
-
-func (renderModel *RenderModel) Draw(
-	shader *mgl.MShader, boneDeltas []mgl32.Mat4,
-	vertexMorphIndexes []int, vertexMorphDeltas [][]float32,
-	selectedVertexIndexes []int, selectedVertexDeltas [][]float32, meshDeltas []*MeshDelta,
-	invisibleMaterialIndexes []int, nextInvisibleMaterialIndexes []int, windowIndex int,
-	isDrawNormal, isDrawWire, isDrawSelectedVertex bool, isDrawBones map[pmx.BoneFlag]bool, bones *pmx.Bones,
-) [][]float32 {
-	renderModel.vao.Bind()
-	defer renderModel.vao.Unbind()
-
-	renderModel.vbo.BindVertex(vertexMorphIndexes, vertexMorphDeltas)
-	defer renderModel.vbo.Unbind()
-
-	paddedMatrixes, matrixWidth, matrixHeight := renderModel.createBoneMatrixes(boneDeltas)
-
-	for i, mesh := range renderModel.meshes {
-		mesh.ibo.Bind()
-
-		mesh.drawModel(shader, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
-
-		if mesh.material.DrawFlag.IsDrawingEdge() {
-			// エッジ描画
-			mesh.drawEdge(shader, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
-		}
-
-		if isDrawWire {
-			mesh.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, ((len(invisibleMaterialIndexes) > 0 && len(nextInvisibleMaterialIndexes) == 0 &&
-				slices.Contains(invisibleMaterialIndexes, mesh.material.Index)) ||
-				slices.Contains(nextInvisibleMaterialIndexes, mesh.material.Index)))
-		}
-
-		mesh.ibo.Unbind()
-	}
-
-	vertexPositions := make([][]float32, 0)
-	if isDrawSelectedVertex {
-		vertexPositions = renderModel.drawSelectedVertex(selectedVertexIndexes, selectedVertexDeltas,
-			shader, paddedMatrixes, matrixWidth, matrixHeight)
-	}
-
-	if isDrawNormal {
-		renderModel.drawNormal(shader, paddedMatrixes, matrixWidth, matrixHeight)
-	}
-
-	isDrawBone := false
-	for _, drawBone := range isDrawBones {
-		if drawBone {
-			isDrawBone = true
-			break
-		}
-	}
-
-	if isDrawBone {
-		renderModel.drawBone(shader, bones, isDrawBones, paddedMatrixes, matrixWidth, matrixHeight)
-	}
-
-	paddedMatrixes = nil
-	boneDeltas = nil
-	meshDeltas = nil
-
-	return vertexPositions
-}
 
 func (renderModel *RenderModel) createBoneMatrixes(matrixes []mgl32.Mat4) ([]float32, int, int) {
 	// テクスチャのサイズを計算する
