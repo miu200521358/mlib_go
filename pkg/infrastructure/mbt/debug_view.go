@@ -26,10 +26,9 @@ func NewConstBtMDefaultColors() bt.BtMDefaultColors {
 type MDebugDrawLiner struct {
 	bt.BtMDebugDrawLiner
 	shader   *mgl.MShader
-	vao      *buffer.VAO
-	vbo      *buffer.VBO
+	debugVao *buffer.VAO
+	debugVbo *buffer.VBO
 	vertices []float32
-	count    int
 }
 
 func NewMDebugDrawLiner(shader *mgl.MShader) *MDebugDrawLiner {
@@ -38,11 +37,11 @@ func NewMDebugDrawLiner(shader *mgl.MShader) *MDebugDrawLiner {
 		vertices: make([]float32, 0),
 	}
 
-	ddl.vao = buffer.NewVAO()
-	ddl.vao.Bind()
-	ddl.vbo = buffer.NewVBOForDebug()
-	ddl.vbo.Unbind()
-	ddl.vao.Unbind()
+	ddl.debugVao = buffer.NewVAO()
+	ddl.debugVao.Bind()
+	ddl.debugVbo = buffer.NewVBOForDebug()
+	ddl.debugVbo.Unbind()
+	ddl.debugVao.Unbind()
 
 	ddl.BtMDebugDrawLiner = bt.NewDirectorBtMDebugDrawLiner(ddl)
 
@@ -52,11 +51,9 @@ func NewMDebugDrawLiner(shader *mgl.MShader) *MDebugDrawLiner {
 func (ddl *MDebugDrawLiner) DrawLine(from bt.BtVector3, to bt.BtVector3, color bt.BtVector3) {
 	ddl.vertices = append(ddl.vertices, from.GetX(), from.GetY(), from.GetZ())
 	ddl.vertices = append(ddl.vertices, color.GetX(), color.GetY(), color.GetZ(), 0.6)
-	ddl.count++
 
 	ddl.vertices = append(ddl.vertices, to.GetX(), to.GetY(), to.GetZ())
 	ddl.vertices = append(ddl.vertices, color.GetX(), color.GetY(), color.GetZ(), 0.6)
-	ddl.count++
 }
 
 func (ddl *MDebugDrawLiner) DrawDebugLines(isDrawRigidBodyFront bool) {
@@ -73,14 +70,14 @@ func (ddl *MDebugDrawLiner) DrawDebugLines(isDrawRigidBodyFront bool) {
 	}
 
 	// 線を引く
-	ddl.vao.Bind()
-	ddl.vbo.BindDebug(ddl.vertices)
+	ddl.debugVao.Bind()
+	ddl.debugVbo.BindDebug(ddl.vertices)
 
 	// ライン描画
-	gl.DrawArrays(gl.LINES, 0, int32(ddl.count))
+	gl.DrawArrays(gl.LINES, 0, int32(len(ddl.vertices)/7))
 
-	ddl.vbo.Unbind()
-	ddl.vao.Unbind()
+	ddl.debugVbo.Unbind()
+	ddl.debugVao.Unbind()
 
 	// 深度テストを有効に戻す
 	if isDrawRigidBodyFront {
