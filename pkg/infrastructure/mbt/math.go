@@ -15,8 +15,6 @@ func MVec3Bullet(v *mmath.MVec3) bt.BtVector3 {
 
 // Bullet+OpenGL座標系に変換されたクォータニオンベクトルを返します
 func MRotationBullet(v *mmath.MRotation) bt.BtQuaternion {
-	rx := float32(v.GetRadians().X)
-	ry := float32(-v.GetRadians().Y)
-	rz := float32(-v.GetRadians().Z)
-	return bt.NewBtQuaternion(ry, rx, rz)
+	r := v.GetRadians()
+	return bt.NewBtQuaternion(float32(-r.Y), float32(r.X), float32(-r.Z))
 }

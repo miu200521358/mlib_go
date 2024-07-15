@@ -1235,7 +1235,7 @@ func getScale(
 	morphDeltas *delta.MorphDeltas,
 ) (*mmath.MVec3, *mmath.MVec3) {
 
-	scale := &mmath.MVec3{1, 1, 1}
+	scale := &mmath.MVec3{X: 1, Y: 1, Z: 1}
 	if boneDeltas != nil && boneDeltas.Get(bone.Index) != nil &&
 		boneDeltas.Get(bone.Index).FrameScale != nil {
 		scale = boneDeltas.Get(bone.Index).FrameScale

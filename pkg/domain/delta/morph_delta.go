@@ -126,10 +126,10 @@ func NewMaterialMorphDelta(m *pmx.Material) *MaterialMorphDelta {
 			EdgeSize: 0,
 		},
 		MulMaterial: &pmx.Material{
-			Diffuse:  &mmath.MVec4{1, 1, 1, 1},
-			Specular: &mmath.MVec4{1, 1, 1, 1},
-			Ambient:  &mmath.MVec3{1, 1, 1},
-			Edge:     &mmath.MVec4{1, 1, 1, 1},
+			Diffuse:  &mmath.MVec4{X: 1, Y: 1, Z: 1, W: 1},
+			Specular: &mmath.MVec4{X: 1, Y: 1, Z: 1, W: 1},
+			Ambient:  &mmath.MVec3{X: 1, Y: 1, Z: 1},
+			Edge:     &mmath.MVec4{X: 1, Y: 1, Z: 1, W: 1},
 			EdgeSize: 1,
 		},
 		AddRatios: &pmx.Material{
@@ -140,10 +140,10 @@ func NewMaterialMorphDelta(m *pmx.Material) *MaterialMorphDelta {
 			EdgeSize: 0,
 		},
 		MulRatios: &pmx.Material{
-			Diffuse:  &mmath.MVec4{1, 1, 1, 1},
-			Specular: &mmath.MVec4{1, 1, 1, 1},
-			Ambient:  &mmath.MVec3{1, 1, 1},
-			Edge:     &mmath.MVec4{1, 1, 1, 1},
+			Diffuse:  &mmath.MVec4{X: 1, Y: 1, Z: 1, W: 1},
+			Specular: &mmath.MVec4{X: 1, Y: 1, Z: 1, W: 1},
+			Ambient:  &mmath.MVec3{X: 1, Y: 1, Z: 1},
+			Edge:     &mmath.MVec4{X: 1, Y: 1, Z: 1, W: 1},
 			EdgeSize: 1,
 		},
 	}
