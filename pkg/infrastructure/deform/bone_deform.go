@@ -26,18 +26,18 @@ func DeformBone(
 	frame int,
 	boneNames []string,
 ) *delta.BoneDeltas {
-	return DeformBoneByPhysicsFlag(boneFrames, frame, model, boneNames, isCalcIk, beforeBoneDeltas, nil, ikFrame, false)
+	return DeformBoneByPhysicsFlag(model, boneFrames, ikFrame, beforeBoneDeltas, nil, isCalcIk, frame, boneNames, false)
 }
 
 func DeformBoneByPhysicsFlag(
-	boneFrames *vmd.BoneFrames,
-	frame int,
 	model *pmx.PmxModel,
-	boneNames []string,
-	isCalcIk bool,
+	boneFrames *vmd.BoneFrames,
+	ikFrame *vmd.IkFrame,
 	beforeBoneDeltas *delta.BoneDeltas,
 	morphDeltas *delta.MorphDeltas,
-	ikFrame *vmd.IkFrame,
+	isCalcIk bool,
+	frame int,
+	boneNames []string,
 	isAfterPhysics bool,
 ) *delta.BoneDeltas {
 	// mlog.Memory(fmt.Sprintf("Deform 1)frame: %d", frame))
@@ -188,12 +188,10 @@ func calcIk(
 	// IKターゲットボーン
 	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
-	ikDeltas := DeformBoneByPhysicsFlag(boneFrames, frame, model, []string{ikBone.Name}, false,
-		boneDeltas, nil, ikFrame, false)
+	ikDeltas := DeformBoneByPhysicsFlag(model, boneFrames, ikFrame, boneDeltas, nil, false, frame, []string{ikBone.Name}, false)
 	if isAfterPhysics {
 		// 物理後の場合は物理後のも取得する
-		ikDeltas = DeformBoneByPhysicsFlag(boneFrames, frame, model, []string{ikBone.Name}, false,
-			ikDeltas, nil, ikFrame, true)
+		ikDeltas = DeformBoneByPhysicsFlag(model, boneFrames, ikFrame, boneDeltas, nil, false, frame, []string{ikBone.Name}, true)
 	}
 	if !ikDeltas.Contains(ikBone.Index) {
 		// IKボーンが存在しない場合、スルー
@@ -234,8 +232,8 @@ func calcIk(
 
 	var ikOffDeltas *delta.BoneDeltas
 	if isToeIk {
-		ikOffDeltas = DeformBoneByPhysicsFlag(boneFrames, frame, model, []string{effectorBone.Name}, false,
-			nil, nil, ikFrame, isAfterPhysics)
+		ikOffDeltas = DeformBoneByPhysicsFlag(model, boneFrames, ikFrame, boneDeltas, nil, false, frame,
+			[]string{effectorBone.Name}, isAfterPhysics)
 		if !ikOffDeltas.Contains(effectorBone.Index) {
 			// IK OFFボーンが存在しない場合、スルー
 			return boneDeltas
