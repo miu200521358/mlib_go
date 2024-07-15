@@ -248,7 +248,7 @@ func Draw(
 	}
 
 	// 物理デバッグ表示
-	modelPhysics.DebugDrawWorld(isDrawRigidBodyFront, visibleRigidBody, visibleJoint)
+	modelPhysics.DebugDrawWorld(visibleRigidBody, visibleJoint)
 
 	return deltas
 }

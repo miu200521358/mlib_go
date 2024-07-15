@@ -107,12 +107,28 @@ func (p *MPhysics) ResetWorld() {
 	}
 }
 
-func (p *MPhysics) DrawDebugLines() {
+func (p *MPhysics) DrawDebugLines(isDrawRigidBodyFront bool) {
+	// // 標準出力を一時的にリダイレクトする
+	// old := os.Stdout // keep backup of the real stdout
+	// r, w, _ := os.Pipe()
+	// os.Stdout = w
+	if isDrawRigidBodyFront {
+		// モデルメッシュの前面に描画するために深度テストを無効化
+		gl.Enable(gl.DEPTH_TEST)
+		gl.DepthFunc(gl.ALWAYS)
+	}
+
 	p.liner.DrawDebugLines()
 	p.liner.vertices = []float32{}
+
+	// 深度テストを有効に戻す
+	if isDrawRigidBodyFront {
+		gl.Enable(gl.DEPTH_TEST)
+		gl.DepthFunc(gl.LEQUAL)
+	}
 }
 
-func (p *MPhysics) DebugDrawWorld(isDrawRigidBodyFront, visibleRigidBody, visibleJoint bool) {
+func (p *MPhysics) DebugDrawWorld(visibleRigidBody, visibleJoint bool) {
 	// mlog.D("DrawWorld p.world=%+v\n", p.world)
 
 	if visibleRigidBody {
@@ -143,16 +159,6 @@ func (p *MPhysics) DebugDrawWorld(isDrawRigidBodyFront, visibleRigidBody, visibl
 			))
 	}
 
-	// // 標準出力を一時的にリダイレクトする
-	// old := os.Stdout // keep backup of the real stdout
-	// r, w, _ := os.Pipe()
-	// os.Stdout = w
-	if isDrawRigidBodyFront {
-		// モデルメッシュの前面に描画するために深度テストを無効化
-		gl.Enable(gl.DEPTH_TEST)
-		gl.DepthFunc(gl.ALWAYS)
-	}
-
 	p.world.DebugDrawWorld()
 
 	// // 標準出力を元に戻す
@@ -162,12 +168,6 @@ func (p *MPhysics) DebugDrawWorld(isDrawRigidBodyFront, visibleRigidBody, visibl
 	// var buf bytes.Buffer
 	// buf.ReadFrom(r)
 	// fmt.Print(buf.String())
-
-	// 深度テストを有効に戻す
-	if isDrawRigidBodyFront {
-		gl.Enable(gl.DEPTH_TEST)
-		gl.DepthFunc(gl.LEQUAL)
-	}
 }
 
 func (p *MPhysics) GetRigidBody(modelIndex, rigidBodyIndex int) (bt.BtRigidBody, bt.BtTransform) {

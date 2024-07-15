@@ -898,11 +898,11 @@ func (w *GlWindow) Run() {
 			}
 		}
 
+		// 物理デバッグ表示
+		w.Physics.DrawDebugLines(w.mWindow != nil && w.mWindow.rigidBodyFrontDebugAction.Checked())
+
 		w.Shader.Msaa.Resolve()
 		w.Shader.Msaa.Unbind()
-
-		// 物理デバッグ表示MSAAには含めない
-		w.Physics.DrawDebugLines()
 
 		w.SwapBuffers()
 
