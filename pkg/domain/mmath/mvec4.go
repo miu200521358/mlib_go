@@ -47,7 +47,7 @@ func (v *MVec4) GetXYZ() *MVec3 {
 
 // String T の文字列表現を返します。
 func (v *MVec4) String() string {
-	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f, w=%.5f]", v.X, v.Y, v.Z, v.W)
+	return fmt.Sprintf("[x=%.7f, y=%.7f, z=%.7f, w=%.7f]", v.X, v.Y, v.Z, v.W)
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します

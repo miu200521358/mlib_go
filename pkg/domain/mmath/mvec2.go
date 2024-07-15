@@ -33,7 +33,7 @@ func NewMVec2() *MVec2 {
 
 // String 文字列表現を返します。
 func (v *MVec2) String() string {
-	return fmt.Sprintf("[x=%.5f, y=%.5f]", v.X, v.Y)
+	return fmt.Sprintf("[x=%.7f, y=%.7f]", v.X, v.Y)
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します

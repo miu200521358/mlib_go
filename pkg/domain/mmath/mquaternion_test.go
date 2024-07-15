@@ -11,7 +11,7 @@ func TestMQuaternionToEulerAngles(t *testing.T) {
 
 	result := quat.ToRadians()
 
-	if result.NearEquals(&expected, 1e-10) {
+	if !result.NearEquals(&expected, 1e-10) {
 		t.Errorf("ToEulerAngles failed. Expected %v, got %v", expected, result)
 	}
 }
@@ -97,7 +97,7 @@ func TestMQuaternionSlerp(t *testing.T) {
 
 	result := quat1.Slerp(quat2, tValue)
 
-	if math.Abs(result.GetX()-expected.GetX()) > 1e-10 || math.Abs(result.GetY()-expected.GetY()) > 1e-10 || math.Abs(result.GetZ()-expected.GetZ()) > 1e-10 || math.Abs(result.GetW()-expected.GetW()) > 1e-10 {
+	if !result.NearEquals(expected, 1e-10) {
 		t.Errorf("Slerp failed. Expected %v, got %v", expected, result)
 	}
 }
@@ -519,7 +519,7 @@ func TestMQuaternion_ToMat4(t *testing.T) {
 		-0.33333333, 0.66666667, 0.66666667, 0.,
 		0., 0., 0., 1.,
 	)
-	actualMat = quat.ToMat4()
+	actualMat = quat.Normalize().ToMat4()
 
 	if !actualMat.NearEquals(expectedMat, 1e-5) {
 		t.Errorf("Test case 3 failed: Expected %v, but got %v", expectedMat, actualMat)

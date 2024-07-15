@@ -118,7 +118,7 @@ func (rot *MRotation) Copy() *MRotation {
 	}
 	if rot.quaternion != nil {
 		copied.quaternion = NewMQuaternionByValues(
-			rot.quaternion.GetX(), rot.quaternion.GetY(), rot.quaternion.GetZ(), rot.quaternion.GetW())
+			rot.quaternion.X, rot.quaternion.Y, rot.quaternion.Z, rot.quaternion.W)
 	}
 	return copied
 }

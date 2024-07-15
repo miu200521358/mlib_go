@@ -366,7 +366,7 @@ func TestGetVertexLocalPositions(t *testing.T) {
 	}
 
 	for i := 0; i < 3; i++ {
-		if vertexLocalPositions[i].NearEquals(expected[i], 1e-8) {
+		if !vertexLocalPositions[i].NearEquals(expected[i], 1e-8) {
 			t.Errorf("GetVertexLocalPositions failed. Expected %v, got %v", expected, vertexLocalPositions)
 			break
 		}

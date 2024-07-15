@@ -15,7 +15,7 @@ func NewMRect() MRect {
 
 // String は MRect の文字列表現を返します。
 func (v MRect) String() string {
-	return fmt.Sprintf("[min=(%.5f, %.5f), max=(%.5f, %.5f)]", v.Min.X, v.Min.Y, v.Max.X, v.Max.Y)
+	return fmt.Sprintf("[min=(%.7f, %.7f), max=(%.7f, %.7f)]", v.Min.X, v.Min.Y, v.Max.X, v.Max.Y)
 }
 
 // ContainsPoint returns if a point is contained within the rectangle.

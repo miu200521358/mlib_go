@@ -61,7 +61,7 @@ func (v *MVec3) IsOnlyZ() bool {
 
 // String T の文字列表現を返します。
 func (v *MVec3) String() string {
-	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f]", v.X, v.Y, v.Z)
+	return fmt.Sprintf("[x=%.7f, y=%.7f, z=%.7f]", v.X, v.Y, v.Z)
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された3次元ベクトルを返します

@@ -136,7 +136,7 @@ func (mat *MMat4) Rotated(quat *MQuaternion) *MMat4 {
 
 func (mat *MMat4) Quaternion() *MQuaternion {
 	q := mgl64.Mat4ToQuat(mgl64.Mat4(*mat))
-	return &MQuaternion{q.W, q.V}
+	return &MQuaternion{q.X(), q.Y(), q.Z(), q.W}
 }
 
 // Transpose transposes the matrix.
