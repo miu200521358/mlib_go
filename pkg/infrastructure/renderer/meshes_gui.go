@@ -279,23 +279,17 @@ func (m *Meshes) Draw(
 	for i, mesh := range m.meshes {
 		mesh.ibo.Bind()
 
-		shader.Use(mgl.PROGRAM_TYPE_MODEL)
 		mesh.drawModel(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
-		shader.Unuse()
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
-			shader.Use(mgl.PROGRAM_TYPE_EDGE)
 			mesh.drawEdge(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
-			shader.Unuse()
 		}
 
 		if isDrawWire {
-			shader.Use(mgl.PROGRAM_TYPE_WIRE)
 			mesh.drawWire(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, ((len(invisibleMaterialIndexes) > 0 && len(nextInvisibleMaterialIndexes) == 0 &&
 				slices.Contains(invisibleMaterialIndexes, mesh.material.Index)) ||
 				slices.Contains(nextInvisibleMaterialIndexes, mesh.material.Index)))
-			shader.Unuse()
 		}
 
 		mesh.ibo.Unbind()
@@ -355,17 +349,18 @@ func (m *Meshes) drawNormal(
 	width, height int,
 	windowIndex int,
 ) {
-	shader.Use(mgl.PROGRAM_TYPE_NORMAL)
+	program := shader.GetProgram(mgl.PROGRAM_TYPE_NORMAL)
+	gl.UseProgram(program)
 
 	m.normalVao.Bind()
 	m.normalVbo.BindVertex(nil, nil)
 	m.normalIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.NormalProgram)
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
 
 	normalColor := mgl32.Vec4{0.3, 0.3, 0.7, 0.5}
-	specularUniform := gl.GetUniformLocation(shader.NormalProgram, gl.Str(mgl.SHADER_COLOR))
+	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
 	gl.Uniform4fv(specularUniform, 1, &normalColor[0])
 
 	// ライン描画
@@ -380,7 +375,7 @@ func (m *Meshes) drawNormal(
 	m.normalVbo.Unbind()
 	m.normalVao.Unbind()
 
-	shader.Unuse()
+	gl.UseProgram(0)
 }
 
 func (m *Meshes) drawSelectedVertex(
@@ -395,17 +390,18 @@ func (m *Meshes) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
-	shader.Use(mgl.PROGRAM_TYPE_SELECTED_VERTEX)
+	program := shader.GetProgram(mgl.PROGRAM_TYPE_SELECTED_VERTEX)
+	gl.UseProgram(program)
 
 	m.selectedVertexVao.Bind()
 	m.selectedVertexVbo.BindVertex(selectedVertexMorphIndexes, selectedVertexDeltas)
 	m.selectedVertexIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.SelectedVertexProgram)
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
 
 	vertexColor := mgl32.Vec4{1.0, 0.4, 0.0, 0.7}
-	specularUniform := gl.GetUniformLocation(shader.SelectedVertexProgram, gl.Str(mgl.SHADER_COLOR))
+	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
 	gl.Uniform4fv(specularUniform, 1, &vertexColor[0])
 	gl.PointSize(5.0) // 選択頂点のサイズ
 
@@ -443,7 +439,7 @@ func (m *Meshes) drawSelectedVertex(
 	m.selectedVertexVbo.Unbind()
 	m.selectedVertexVao.Unbind()
 
-	shader.Unuse()
+	gl.UseProgram(0)
 
 	// 深度テストを有効に戻す
 	gl.Enable(gl.DEPTH_TEST)
@@ -468,14 +464,15 @@ func (m *Meshes) drawBone(
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	shader.Use(mgl.PROGRAM_TYPE_BONE)
+	program := shader.GetProgram(mgl.PROGRAM_TYPE_BONE)
+	gl.UseProgram(program)
 
 	m.boneVao.Bind()
 	m.boneVbo.BindVertex(m.fetchBoneDebugDeltas(bones, isDrawBones))
 	m.boneIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.BoneProgram)
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
 
 	// ライン描画
 	gl.DrawElements(
@@ -489,7 +486,7 @@ func (m *Meshes) drawBone(
 	m.boneVbo.Unbind()
 	m.boneVao.Unbind()
 
-	shader.Unuse()
+	gl.UseProgram(0)
 
 	// 深度テストを有効に戻す
 	gl.Enable(gl.DEPTH_TEST)

@@ -51,6 +51,9 @@ func (m *Mesh) drawModel(
 	width, height int,
 	meshDelta *MeshDelta,
 ) {
+	modelProgram := shader.GetProgram(mgl.PROGRAM_TYPE_MODEL)
+	gl.UseProgram(modelProgram)
+
 	if m.material.DrawFlag.IsDoubleSidedDrawing() {
 		// 両面描画
 		// カリングOFF
@@ -65,53 +68,53 @@ func (m *Mesh) drawModel(
 	}
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.ModelProgram)
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, modelProgram)
 	defer UnbindBoneMatrixes()
 
 	// ------------------
 	// 材質色設定
 	// full.fx の AmbientColor相当
-	diffuseUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_DIFFUSE))
+	diffuseUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_DIFFUSE))
 	gl.Uniform4fv(diffuseUniform, 1, &meshDelta.Diffuse[0])
 
-	ambientUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_AMBIENT))
+	ambientUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_AMBIENT))
 	gl.Uniform3fv(ambientUniform, 1, &meshDelta.Ambient[0])
 
-	specularUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPECULAR))
+	specularUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_SPECULAR))
 	gl.Uniform4fv(specularUniform, 1, &meshDelta.Specular[0])
 
 	// テクスチャ使用有無
-	useTextureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_USE_TEXTURE))
+	useTextureUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_TEXTURE))
 	gl.Uniform1i(useTextureUniform, int32(mmath.BoolToInt(m.material.Texture != nil)))
 	if m.material.Texture != nil {
 		m.material.Texture.Bind()
 		defer m.material.Texture.Unbind()
-		textureUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TEXTURE_SAMPLER))
+		textureUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_TEXTURE_SAMPLER))
 		gl.Uniform1i(textureUniform, int32(m.material.Texture.TextureUnitNo))
 	}
 
 	// Toon使用有無
-	useToonUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_USE_TOON))
+	useToonUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_TOON))
 	gl.Uniform1i(useToonUniform, int32(mmath.BoolToInt(m.material.ToonTexture != nil)))
 	if m.material.ToonTexture != nil {
 		m.material.ToonTexture.Bind()
 		defer m.material.ToonTexture.Unbind()
-		toonUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_TOON_SAMPLER))
+		toonUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_TOON_SAMPLER))
 		gl.Uniform1i(toonUniform, int32(m.material.ToonTexture.TextureUnitNo))
 	}
 
 	// Sphere使用有無
-	useSphereUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_USE_SPHERE))
+	useSphereUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_SPHERE))
 	gl.Uniform1i(useSphereUniform, int32(mmath.BoolToInt(m.material.SphereTexture != nil && m.material.SphereTexture.Valid)))
 	if m.material.SphereTexture != nil && m.material.SphereTexture.Valid {
 		m.material.SphereTexture.Bind()
 		defer m.material.SphereTexture.Unbind()
-		sphereUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPHERE_SAMPLER))
+		sphereUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_SPHERE_SAMPLER))
 		gl.Uniform1i(sphereUniform, int32(m.material.SphereTexture.TextureUnitNo))
 	}
 
 	// SphereMode
-	sphereModeUniform := gl.GetUniformLocation(shader.ModelProgram, gl.Str(mgl.SHADER_SPHERE_MODE))
+	sphereModeUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_SPHERE_MODE))
 	gl.Uniform1i(sphereModeUniform, int32(m.material.SphereMode))
 
 	// // ウェイト描写
@@ -145,6 +148,8 @@ func (m *Mesh) drawModel(
 		gl.UNSIGNED_INT,
 		nil,
 	)
+
+	gl.UseProgram(0)
 }
 
 func (m *Mesh) drawEdge(
@@ -154,22 +159,25 @@ func (m *Mesh) drawEdge(
 	width, height int,
 	meshDelta *MeshDelta,
 ) {
+	program := shader.GetProgram(mgl.PROGRAM_TYPE_EDGE)
+	gl.UseProgram(program)
+
 	gl.Enable(gl.CULL_FACE)
 	defer gl.Disable(gl.CULL_FACE)
 
 	gl.CullFace(gl.FRONT)
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.EdgeProgram)
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
 	defer UnbindBoneMatrixes()
 
 	// ------------------
 	// エッジ色設定
-	edgeColorUniform := gl.GetUniformLocation(shader.EdgeProgram, gl.Str(mgl.SHADER_EDGE_COLOR))
+	edgeColorUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_EDGE_COLOR))
 	gl.Uniform4fv(edgeColorUniform, 1, &meshDelta.Edge[0])
 
 	// エッジサイズ
-	edgeSizeUniform := gl.GetUniformLocation(shader.EdgeProgram, gl.Str(mgl.SHADER_EDGE_SIZE))
+	edgeSizeUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_EDGE_SIZE))
 	gl.Uniform1f(edgeSizeUniform, meshDelta.EdgeSize)
 
 	// 三角形描画
@@ -179,6 +187,8 @@ func (m *Mesh) drawEdge(
 		gl.UNSIGNED_INT,
 		nil,
 	)
+
+	gl.UseProgram(0)
 }
 
 func (m *Mesh) drawWire(
@@ -188,11 +198,14 @@ func (m *Mesh) drawWire(
 	width, height int,
 	invisibleMesh bool,
 ) {
+	program := shader.GetProgram(mgl.PROGRAM_TYPE_WIRE)
+	gl.UseProgram(program)
+
 	// カリングOFF
 	gl.Disable(gl.CULL_FACE)
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, shader.WireProgram)
+	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
 	defer UnbindBoneMatrixes()
 
 	var wireColor mgl32.Vec4
@@ -201,7 +214,7 @@ func (m *Mesh) drawWire(
 	} else {
 		wireColor = mgl32.Vec4{0.2, 0.6, 0.2, 0.5}
 	}
-	specularUniform := gl.GetUniformLocation(shader.WireProgram, gl.Str(mgl.SHADER_COLOR))
+	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
 	gl.Uniform4fv(specularUniform, 1, &wireColor[0])
 
 	// 描画モードをワイヤーフレームに変更
@@ -217,6 +230,8 @@ func (m *Mesh) drawWire(
 
 	// 描画モードを元に戻す
 	gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
+
+	gl.UseProgram(0)
 }
 
 func (m *Mesh) delete() {

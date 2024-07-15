@@ -59,7 +59,8 @@ func (ddl *mDebugDrawLiner) drawDebugLines(shader *mgl.MShader, isDrawRigidBodyF
 		return
 	}
 
-	shader.Use(mgl.PROGRAM_TYPE_PHYSICS)
+	program := shader.GetProgram(mgl.PROGRAM_TYPE_PHYSICS)
+	gl.UseProgram(program)
 
 	if isDrawRigidBodyFront {
 		// モデルメッシュの前面に描画するために深度テストを無効化
@@ -83,7 +84,7 @@ func (ddl *mDebugDrawLiner) drawDebugLines(shader *mgl.MShader, isDrawRigidBodyF
 		gl.DepthFunc(gl.LEQUAL)
 	}
 
-	shader.Unuse()
+	gl.UseProgram(0)
 
 	ddl.vertices = make([]float32, 0)
 }

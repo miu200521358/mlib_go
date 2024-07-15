@@ -65,8 +65,12 @@ const (
 	FIELD_OF_VIEW_ANGLE       float32 = 40.0
 )
 
+var (
+	initialCameraPosition = &mmath.MVec3{X: 0.0, Y: INITIAL_CAMERA_POSITION_Y, Z: INITIAL_CAMERA_POSITION_Z}
+	initialLookAtPosition = &mmath.MVec3{X: 0.0, Y: INITIAL_LOOK_AT_CENTER_Y, Z: 0.0}
+)
+
 type MShader struct {
-	lightAmbient          *mmath.MVec4
 	CameraPosition        *mmath.MVec3
 	LookAtCenterPosition  *mmath.MVec3
 	FieldOfViewAngle      float32
@@ -93,121 +97,113 @@ var glslFiles embed.FS
 
 func NewMShader(width, height int) (*MShader, error) {
 	shader := &MShader{
-		lightAmbient:         &mmath.MVec4{LIGHT_AMBIENT, LIGHT_AMBIENT, LIGHT_AMBIENT, 1},
-		CameraPosition:       &mmath.MVec3{0.0, INITIAL_CAMERA_POSITION_Y, INITIAL_CAMERA_POSITION_Z},
-		LookAtCenterPosition: &mmath.MVec3{0.0, INITIAL_LOOK_AT_CENTER_Y, 0.0},
+		CameraPosition:       initialCameraPosition.Copy(),
+		LookAtCenterPosition: initialLookAtPosition.Copy(),
 		FieldOfViewAngle:     FIELD_OF_VIEW_ANGLE,
 		Width:                int32(width),
 		Height:               int32(height),
 		NearPlane:            0.1,
 		FarPlane:             1000.0,
-		lightPosition:        &mmath.MVec3{-0.5, -1.0, 0.5},
+		lightPosition:        &mmath.MVec3{X: -0.5, Y: -1.0, Z: 0.5},
 		Msaa:                 buffer.NewMsaa(int32(width), int32(height)),
 	}
 	shader.lightDirection = shader.lightPosition.Normalized()
 
+	var err error
 	{
-		modelProgram, err := shader.newProgram(
+		shader.ModelProgram, err = shader.newProgram(
 			glslFiles, "glsl/model.vert", "glsl/model.frag")
 		if err != nil {
 			return nil, err
 		}
-		shader.ModelProgram = modelProgram
-		shader.Use(PROGRAM_TYPE_MODEL)
+		gl.UseProgram(shader.ModelProgram)
 		shader.initialize(shader.ModelProgram)
-		shader.Unuse()
+		gl.UseProgram(0)
 	}
 
 	{
-		boneProgram, err := shader.newProgram(
+		shader.BoneProgram, err = shader.newProgram(
 			glslFiles, "glsl/bone.vert", "glsl/bone.frag")
 		if err != nil {
 			return nil, err
 		}
-		shader.BoneProgram = boneProgram
-		shader.Use(PROGRAM_TYPE_BONE)
+		gl.UseProgram(shader.BoneProgram)
 		shader.initialize(shader.BoneProgram)
-		shader.Unuse()
+		gl.UseProgram(0)
 	}
 
 	{
-		edgeProgram, err := shader.newProgram(
+		shader.EdgeProgram, err = shader.newProgram(
 			glslFiles, "glsl/edge.vert", "glsl/edge.frag")
 		if err != nil {
 			return nil, err
 		}
-		shader.EdgeProgram = edgeProgram
-		shader.Use(PROGRAM_TYPE_EDGE)
+		gl.UseProgram(shader.EdgeProgram)
 		shader.initialize(shader.EdgeProgram)
-		shader.Unuse()
+		gl.UseProgram(0)
 	}
 
 	{
-		physicsProgram, err := shader.newProgram(
+		shader.PhysicsProgram, err = shader.newProgram(
 			glslFiles, "glsl/physics.vert", "glsl/physics.frag")
 		if err != nil {
 			return nil, err
 		}
-		shader.PhysicsProgram = physicsProgram
-		shader.Use(PROGRAM_TYPE_PHYSICS)
+		gl.UseProgram(shader.PhysicsProgram)
 		shader.initialize(shader.PhysicsProgram)
-		shader.Unuse()
+		gl.UseProgram(0)
 	}
 
 	{
-		normalProgram, err := shader.newProgram(
+		shader.NormalProgram, err = shader.newProgram(
 			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
 			return nil, err
 		}
-		shader.NormalProgram = normalProgram
-		shader.Use(PROGRAM_TYPE_NORMAL)
+		gl.UseProgram(shader.NormalProgram)
 		shader.initialize(shader.NormalProgram)
-		shader.Unuse()
+		gl.UseProgram(0)
 	}
 
 	{
-		floorProgram, err := shader.newProgram(
+		shader.FloorProgram, err = shader.newProgram(
 			glslFiles, "glsl/floor.vert", "glsl/floor.frag")
 		if err != nil {
 			return nil, err
 		}
-		shader.FloorProgram = floorProgram
-		shader.Use(PROGRAM_TYPE_FLOOR)
+		gl.UseProgram(shader.FloorProgram)
 		shader.initialize(shader.FloorProgram)
-		shader.Unuse()
+		gl.UseProgram(0)
 	}
 
 	{
-		wireProgram, err := shader.newProgram(
+		shader.WireProgram, err = shader.newProgram(
 			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
 			return nil, err
 		}
-		shader.WireProgram = wireProgram
-		shader.Use(PROGRAM_TYPE_WIRE)
+		gl.UseProgram(shader.WireProgram)
 		shader.initialize(shader.WireProgram)
-		shader.Unuse()
+		gl.UseProgram(0)
 	}
 
 	{
-		selectedVertexProgram, err := shader.newProgram(
+		shader.SelectedVertexProgram, err = shader.newProgram(
 			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
 			return nil, err
 		}
-		shader.SelectedVertexProgram = selectedVertexProgram
-		shader.Use(PROGRAM_TYPE_SELECTED_VERTEX)
+		gl.UseProgram(shader.SelectedVertexProgram)
 		shader.initialize(shader.SelectedVertexProgram)
-		shader.Unuse()
+		gl.UseProgram(0)
 	}
 
 	return shader, nil
 }
 
 func (s *MShader) Reset() {
-	s.CameraPosition = &mmath.MVec3{0.0, INITIAL_CAMERA_POSITION_Y, INITIAL_CAMERA_POSITION_Z}
-	s.LookAtCenterPosition = &mmath.MVec3{0.0, INITIAL_LOOK_AT_CENTER_Y, 0.0}
+	s.CameraPosition = initialCameraPosition.Copy()
+	s.LookAtCenterPosition = initialLookAtPosition.Copy()
 	s.FieldOfViewAngle = FIELD_OF_VIEW_ANGLE
 	s.Resize(int(s.Width), int(s.Height))
 }
@@ -216,7 +212,6 @@ func (s *MShader) Resize(width, height int) {
 	s.Width = int32(width)
 	s.Height = int32(height)
 	s.Msaa = buffer.NewMsaa(s.Width, s.Height)
-	s.updateCamera()
 }
 
 func (s *MShader) DeleteProgram(program uint32) {
@@ -301,11 +296,6 @@ func (s *MShader) newProgram(
 }
 
 func (s *MShader) initialize(program uint32) {
-	// light color
-	// MMD Light Diffuse は必ず0
-	// MMDの照明色そのまま: light_diffuse == MMDのambient
-	s.lightAmbient = &mmath.MVec4{LIGHT_AMBIENT, LIGHT_AMBIENT, LIGHT_AMBIENT, 1}
-
 	gl.UseProgram(program)
 
 	projection := mgl32.Perspective(
@@ -349,45 +339,32 @@ func (s *MShader) Fit(
 
 	// ビューポートの設定
 	gl.Viewport(0, 0, s.Width, s.Height)
-
-	s.updateCamera()
 }
 
-func (s *MShader) updateCamera() {
-	for _, p := range s.GetPrograms() {
-		s.Use(ProgramType(p))
-
-		s.Unuse()
-	}
-}
-
-func (s *MShader) Use(programType ProgramType) {
+func (s *MShader) GetProgram(programType ProgramType) uint32 {
 	switch programType {
 	case PROGRAM_TYPE_MODEL:
-		gl.UseProgram(s.ModelProgram)
+		return s.ModelProgram
 	case PROGRAM_TYPE_EDGE:
-		gl.UseProgram(s.EdgeProgram)
+		return s.EdgeProgram
 	case PROGRAM_TYPE_BONE:
-		gl.UseProgram(s.BoneProgram)
+		return s.BoneProgram
 	case PROGRAM_TYPE_PHYSICS:
-		gl.UseProgram(s.PhysicsProgram)
+		return s.PhysicsProgram
 	case PROGRAM_TYPE_NORMAL:
-		gl.UseProgram(s.NormalProgram)
+		return s.NormalProgram
 	case PROGRAM_TYPE_FLOOR:
-		gl.UseProgram(s.FloorProgram)
+		return s.FloorProgram
 	case PROGRAM_TYPE_WIRE:
-		gl.UseProgram(s.WireProgram)
+		return s.WireProgram
 	case PROGRAM_TYPE_SELECTED_VERTEX:
-		gl.UseProgram(s.SelectedVertexProgram)
+		return s.SelectedVertexProgram
 	}
+	return 0
 }
 
 func (s *MShader) GetPrograms() []uint32 {
 	return []uint32{s.ModelProgram, s.EdgeProgram, s.BoneProgram, s.PhysicsProgram, s.NormalProgram, s.FloorProgram, s.WireProgram, s.SelectedVertexProgram}
-}
-
-func (s *MShader) Unuse() {
-	gl.UseProgram(0)
 }
 
 func (s *MShader) Delete() {

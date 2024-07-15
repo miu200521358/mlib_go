@@ -981,7 +981,8 @@ func newMFloor() *MFloor {
 
 func (w *GlWindow) drawFloor() {
 	// mlog.D("MFloor.DrawLine")
-	w.Shader.Use(mgl.PROGRAM_TYPE_FLOOR)
+	program := w.Shader.GetProgram(mgl.PROGRAM_TYPE_FLOOR)
+	gl.UseProgram(program)
 
 	// 平面を引く
 	w.floor.vao.Bind()
@@ -992,5 +993,5 @@ func (w *GlWindow) drawFloor() {
 	w.floor.vbo.Unbind()
 	w.floor.vao.Unbind()
 
-	w.Shader.Unuse()
+	gl.UseProgram(0)
 }
