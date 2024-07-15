@@ -71,7 +71,7 @@ type Bone struct {
 	*core.IndexNameModel
 	Position     *mmath.MVec3 // ボーン位置
 	ParentIndex  int          // 親ボーンのボーンIndex
-	Layer        int          // 変形階層(pmxは整数だけど、間にシステムボーンを入れられるようにfloat64にしておく)
+	Layer        float64      // 変形階層(pmxは整数だけど、間にシステムボーンを入れられるようにfloat64にしておく)
 	BoneFlag     BoneFlag     // ボーンフラグ(16bit) 各bit 0:OFF 1:ON
 	TailPosition *mmath.MVec3 // 接続先:0 の場合 座標オフセット, ボーン位置からの相対分
 	TailIndex    int          // 接続先:1 の場合 接続先ボーンのボーンIndex
@@ -392,11 +392,11 @@ func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 }
 
 func (b *Bones) GetLayerIndexes(isAfterPhysics bool) []int {
-	layerIndexes := make(LayerIndexes, 0, len(b.NameIndexes))
+	layerIndexes := make(layerIndexes, 0, len(b.NameIndexes))
 	for _, bone := range b.Data {
 		if (isAfterPhysics && bone.IsAfterPhysicsDeform()) || (!isAfterPhysics && !bone.IsAfterPhysicsDeform()) {
 			// 物理前後でフィルタリング
-			layerIndexes = append(layerIndexes, LayerIndex{Layer: bone.Layer, Index: bone.Index})
+			layerIndexes = append(layerIndexes, layerIndex{Layer: bone.Layer, Index: bone.Index})
 		}
 	}
 	sort.Sort(layerIndexes)
@@ -680,24 +680,24 @@ func (b *Bones) createLayerIndexes(isAfterPhysics bool) {
 }
 
 // 変形階層とINDEXのソート用構造体
-type LayerIndex struct {
-	Layer int
+type layerIndex struct {
+	Layer float64
 	Index int
 }
 
-type LayerIndexes []LayerIndex
+type layerIndexes []layerIndex
 
-func (p LayerIndexes) Len() int {
+func (p layerIndexes) Len() int {
 	return len(p)
 }
-func (p LayerIndexes) Less(i, j int) bool {
+func (p layerIndexes) Less(i, j int) bool {
 	return p[i].Layer < p[j].Layer || (p[i].Layer == p[j].Layer && p[i].Index < p[j].Index)
 }
-func (p LayerIndexes) Swap(i, j int) {
+func (p layerIndexes) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
-func (p LayerIndexes) Contains(index int) bool {
+func (p layerIndexes) Contains(index int) bool {
 	for _, layerIndex := range p {
 		if layerIndex.Index == index {
 			return true
