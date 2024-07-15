@@ -204,7 +204,7 @@ func deformBone(
 
 			offsetPos := offset.Position.MuledScalar(ratio)
 			offsetQuat := offset.Rotation.GetQuaternion().MuledScalar(ratio).Normalize()
-			offsetScale := offset.Scale.MuledScalar(ratio)
+			offsetScale := offset.Extend.Scale.MuledScalar(ratio)
 
 			if d.FramePosition == nil {
 				d.FramePosition = offsetPos

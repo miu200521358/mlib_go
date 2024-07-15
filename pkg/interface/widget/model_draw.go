@@ -151,6 +151,8 @@ func deformBeforePhysics(
 
 	VertexMorphIndexes, VertexMorphGlDeltas := renderer.VertexMorphDeltasGL(vds.Morphs.Vertices)
 
+	modelIndex := 0
+
 	for _, rigidBody := range model.RigidBodies.Data {
 		// 現在のボーン変形情報を保持
 		rigidBodyBone := rigidBody.Bone
@@ -162,7 +164,7 @@ func deformBeforePhysics(
 		}
 
 		// 物理フラグが落ちている場合があるので、強制的に起こす
-		forceUpdate := mbt.UpdateFlags(model.Index, modelPhysics, rigidBody, enablePhysics, resetPhysics)
+		forceUpdate := mbt.UpdateFlags(modelIndex, modelPhysics, rigidBody, enablePhysics, resetPhysics)
 		forceUpdate = timeStep == 0.0 || !enablePhysics || forceUpdate
 
 		if rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC || forceUpdate {
@@ -172,7 +174,7 @@ func deformBeforePhysics(
 			mat := vds.Bones.Get(rigidBodyBone.Index).FilledGlobalMatrix().GL()
 			boneTransform.SetFromOpenGLMatrix(&mat[0])
 
-			mbt.UpdateTransform(model.Index, modelPhysics, rigidBodyBone, boneTransform, rigidBody)
+			mbt.UpdateTransform(modelIndex, modelPhysics, rigidBodyBone, boneTransform, rigidBody)
 		}
 	}
 
@@ -193,6 +195,8 @@ func deformAfterPhysics(
 		motion = vmd.NewVmdMotion("")
 	}
 
+	modelIndex := 0
+
 	// 物理剛体位置を更新
 	if enablePhysics || resetPhysics {
 		// IKのON/OFF
@@ -203,7 +207,7 @@ func deformAfterPhysics(
 				if bone.Extend.RigidBody == nil || bone.Extend.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
 					continue
 				}
-				bonePhysicsGlobalMatrix := mbt.GetRigidBodyBoneMatrix(model.Index, modelPhysics, bone.Extend.RigidBody)
+				bonePhysicsGlobalMatrix := mbt.GetRigidBodyBoneMatrix(modelIndex, modelPhysics, bone.Extend.RigidBody)
 				if deltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
 					bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame,
 						bonePhysicsGlobalMatrix, deltas.Bones.Get(bone.ParentIndex))

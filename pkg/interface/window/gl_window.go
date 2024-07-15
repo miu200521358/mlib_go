@@ -849,15 +849,14 @@ func (w *GlWindow) Run() {
 				w.TriggerPhysicsReset()
 
 				// 次のモデルが指定されている場合、初期化して入替
-				if w.modelSets[k].Model != nil && w.modelSets[k].Model.DrawInitialized {
+				if w.modelSets[k].Model != nil && w.modelSets[k].Meshes != nil {
 					// 既存モデルが描画初期化されてたら削除
 					w.modelSets[k].Model.Delete()
 					w.modelSets[k].Model = nil
 				}
-				if !w.modelSets[k].NextModel.DrawInitialized {
-					w.modelSets[k].NextModel.Index = k
+				if w.modelSets[k].Meshes == nil {
 					w.modelSets[k].Meshes = renderer.DrawInitialize(w.WindowIndex, w.modelSets[k].NextModel)
-					mbt.InitPhysics(w.Physics, w.modelSets[k].NextModel)
+					mbt.InitPhysics(w.Physics, w.modelSets[k].NextModel, k)
 				}
 				w.modelSets[k].Model = w.modelSets[k].NextModel
 				w.modelSets[k].NextModel = nil

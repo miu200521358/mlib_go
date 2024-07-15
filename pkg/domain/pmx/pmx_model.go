@@ -32,8 +32,6 @@ type PmxModel struct {
 	DisplaySlots       *DisplaySlots
 	RigidBodies        *RigidBodies
 	Joints             *Joints
-	DrawInitialized    bool
-	Index              int // モデルインデックス(複数人モデル対応)
 }
 
 func NewPmxModel(path string) *PmxModel {
@@ -50,7 +48,6 @@ func NewPmxModel(path string) *PmxModel {
 	model.DisplaySlots = NewDisplaySlots(0)
 	model.RigidBodies = NewRigidBodies(0)
 	model.Joints = NewJoints(0)
-	model.DrawInitialized = false
 
 	return model
 }
