@@ -269,12 +269,12 @@ ikLoop:
 			linkBone := model.Bones.Get(ikLink.BoneIndex)
 
 			// 角度制限があってまったく動かさない場合、IK計算しないで次に行く
-			if (linkBone.AngleLimit &&
-				linkBone.MinAngleLimit.GetRadians().IsZero() &&
-				linkBone.MaxAngleLimit.GetRadians().IsZero()) ||
-				(linkBone.LocalAngleLimit &&
-					linkBone.LocalMinAngleLimit.GetRadians().IsZero() &&
-					linkBone.LocalMaxAngleLimit.GetRadians().IsZero()) {
+			if (linkBone.Extend.AngleLimit &&
+				linkBone.Extend.MinAngleLimit.GetRadians().IsZero() &&
+				linkBone.Extend.MaxAngleLimit.GetRadians().IsZero()) ||
+				(linkBone.Extend.LocalAngleLimit &&
+					linkBone.Extend.LocalMinAngleLimit.GetRadians().IsZero() &&
+					linkBone.Extend.LocalMaxAngleLimit.GetRadians().IsZero()) {
 				continue
 			}
 
@@ -526,7 +526,9 @@ ikLoop:
 					totalIkQuat,
 					ikLink.LocalMinAngleLimit.GetRadians(),
 					ikLink.LocalMaxAngleLimit.GetRadians(),
-					linkBone.NormalizedLocalAxisX, linkBone.NormalizedLocalAxisY, linkBone.NormalizedLocalAxisZ,
+					linkBone.Extend.NormalizedLocalAxisX,
+					linkBone.Extend.NormalizedLocalAxisY,
+					linkBone.Extend.NormalizedLocalAxisZ,
 					loop, loopCount,
 					frame, count, linkBone.Name, ikMotion, ikFile,
 				)
@@ -1016,7 +1018,7 @@ func calcBoneDeltas(
 		// }
 
 		// 逆BOf行列(初期姿勢行列)
-		d.UnitMatrix.Mul(d.Bone.RevertOffsetMatrix)
+		d.UnitMatrix.Mul(d.Bone.Extend.RevertOffsetMatrix)
 	}
 
 	for _, boneIndex := range deformBoneIndexes {
@@ -1080,7 +1082,7 @@ func createBoneDeltas(
 			}
 
 			// 関連するボーンの追加
-			for _, index := range bone.RelativeBoneIndexes {
+			for _, index := range bone.Extend.RelativeBoneIndexes {
 				if _, ok := relativeBoneIndexes[index]; !ok {
 					relativeBoneIndexes[index] = struct{}{}
 				}
@@ -1095,7 +1097,7 @@ func createBoneDeltas(
 			}
 
 			// 関連するボーンの追加
-			for _, index := range bone.RelativeBoneIndexes {
+			for _, index := range bone.Extend.RelativeBoneIndexes {
 				if _, ok := relativeBoneIndexes[index]; !ok {
 					relativeBoneIndexes[index] = struct{}{}
 				}
@@ -1219,7 +1221,7 @@ func getRotation(
 	}
 
 	if bone.HasFixedAxis() {
-		rot = rot.ToFixedAxisRotation(bone.NormalizedFixedAxis)
+		rot = rot.ToFixedAxisRotation(bone.Extend.NormalizedFixedAxis)
 	}
 
 	return rot, morphRot

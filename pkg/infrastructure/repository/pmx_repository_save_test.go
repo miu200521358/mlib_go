@@ -236,7 +236,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.ParentIndex != expectedParentBoneIndex {
 			t.Errorf("Expected ParentBoneIndex to be %v, got %v", expectedParentBoneIndex, b.ParentIndex)
 		}
-		expectedLayer := 0
+		expectedLayer := 0.0
 		if b.Layer != expectedLayer {
 			t.Errorf("Expected Layer to be %v, got %v", expectedLayer, b.Layer)
 		}
@@ -272,7 +272,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.ParentIndex != expectedParentBoneIndex {
 			t.Errorf("Expected ParentBoneIndex to be %v, got %v", expectedParentBoneIndex, b.ParentIndex)
 		}
-		expectedLayer := 0
+		expectedLayer := 0.0
 		if b.Layer != expectedLayer {
 			t.Errorf("Expected Layer to be %v, got %v", expectedLayer, b.Layer)
 		}
@@ -316,7 +316,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.ParentIndex != expectedParentBoneIndex {
 			t.Errorf("Expected ParentBoneIndex to be %v, got %v", expectedParentBoneIndex, b.ParentIndex)
 		}
-		expectedLayer := 0
+		expectedLayer := 0.0
 		if b.Layer != expectedLayer {
 			t.Errorf("Expected Layer to be %v, got %v", expectedLayer, b.Layer)
 		}
@@ -364,7 +364,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.ParentIndex != expectedParentBoneIndex {
 			t.Errorf("Expected ParentBoneIndex to be %v, got %v", expectedParentBoneIndex, b.ParentIndex)
 		}
-		expectedLayer := 0
+		expectedLayer := 0.0
 		if b.Layer != expectedLayer {
 			t.Errorf("Expected Layer to be %v, got %v", expectedLayer, b.Layer)
 		}
