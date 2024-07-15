@@ -171,7 +171,7 @@ func deformBeforePhysics(
 			// ボーン追従剛体・物理＋ボーン位置もしくは強制更新の場合のみ剛体位置更新
 			boneTransform := bt.NewBtTransform()
 			defer bt.DeleteBtTransform(boneTransform)
-			mat := vds.Bones.Get(rigidBodyBone.Index).FilledGlobalMatrix().GL()
+			mat := mgl.NewGlMat4(vds.Bones.Get(rigidBodyBone.Index).FilledGlobalMatrix())
 			boneTransform.SetFromOpenGLMatrix(&mat[0])
 
 			mbt.UpdateTransform(modelIndex, modelPhysics, rigidBodyBone, boneTransform, rigidBody)
@@ -226,7 +226,7 @@ func deformAfterPhysics(
 	for i, bone := range model.Bones.Data {
 		delta := deltas.Bones.Get(bone.Index)
 		if delta != nil {
-			BoneGlDeltas[i] = delta.FilledLocalMatrix().GL()
+			BoneGlDeltas[i] = mgl.NewGlMat4(delta.FilledLocalMatrix())
 		}
 	}
 

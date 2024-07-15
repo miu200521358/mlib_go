@@ -314,17 +314,17 @@ func (s *MShader) initialize(program uint32) {
 	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
 	// カメラの位置
-	cameraPosition := s.CameraPosition.GL()
+	cameraPosition := NewGlVec3(s.CameraPosition)
 	cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_CAMERA_POSITION))
 	gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
 	// ライト
-	lightDirection := s.lightDirection.GL()
+	lightDirection := NewGlVec3(s.lightDirection)
 	lightDirectionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_LIGHT_DIRECTION))
 	gl.Uniform3fv(lightDirectionUniform, 1, &lightDirection[0])
 
 	// カメラ中心
-	lookAtCenter := s.LookAtCenterPosition.GL()
+	lookAtCenter := NewGlVec3(s.LookAtCenterPosition)
 	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 	cameraUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_MATRIX))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])

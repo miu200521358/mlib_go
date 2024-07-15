@@ -6,6 +6,7 @@ package renderer
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 var bone_colors_ik = []float32{1.0, 0.38, 0, 1.0}
@@ -79,7 +80,7 @@ func color(b *pmx.Bone, isNormal bool) []float32 {
 }
 
 func BoneGL(b *pmx.Bone) []float32 {
-	p := b.Position.GL()
+	p := mgl.NewGlVec3(b.Position)
 	c := color(b, false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
@@ -101,7 +102,7 @@ func BoneGL(b *pmx.Bone) []float32 {
 }
 
 func ParentGL(b *pmx.Bone) []float32 {
-	p := b.Position.Subed(b.Extend.ParentRelativePosition).GL()
+	p := mgl.NewGlVec3(b.Position.Subed(b.Extend.ParentRelativePosition))
 	c := color(b, false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
@@ -123,7 +124,7 @@ func ParentGL(b *pmx.Bone) []float32 {
 }
 
 func TailGL(b *pmx.Bone) []float32 {
-	p := b.Position.Added(b.Extend.ChildRelativePosition).GL()
+	p := mgl.NewGlVec3(b.Position.Added(b.Extend.ChildRelativePosition))
 	c := color(b, false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
@@ -202,7 +203,7 @@ func DeltaGL(b *pmx.Bone, isDrawBones map[pmx.BoneFlag]bool) []float32 {
 }
 
 func NormalGL(b *pmx.Bone) []float32 {
-	p := b.Extend.LocalMatrix.MulVec3(&mmath.MVec3{0, 0.6, 0}).GL()
+	p := mgl.NewGlVec3(b.Extend.LocalMatrix.MulVec3(&mmath.MVec3{0, 0.6, 0}))
 	c := color(b, true)
 	return []float32{
 		p[0], p[1], p[2], // 位置

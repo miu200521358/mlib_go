@@ -6,6 +6,7 @@ package renderer
 import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 // SDEF用パラメーターを返す
@@ -23,7 +24,7 @@ func GetSdefParams(d pmx.IDeform) (mgl32.Vec3, mgl32.Vec3, mgl32.Vec3) {
 		sdefR0 := copiedSdefCR0.Add(s.SdefR0).Sub(weight)
 		sdefR1 := copiedSdefCR1.Add(s.SdefR1).Sub(weight)
 
-		return s.SdefC.GL(), sdefR0.GL(), sdefR1.GL()
+		return mgl.NewGlVec3(s.SdefC), mgl.NewGlVec3(sdefR0), mgl.NewGlVec3(sdefR1)
 	}
 	return mgl32.Vec3{}, mgl32.Vec3{}, mgl32.Vec3{}
 }

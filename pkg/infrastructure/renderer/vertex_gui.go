@@ -6,11 +6,12 @@ package renderer
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 func vertexGLInit(v *pmx.Vertex) []float32 {
-	p := v.Position.GL()
-	n := v.Normal.GL()
+	p := mgl.NewGlVec3(v.Position)
+	n := mgl.NewGlVec3(v.Normal)
 	eu := [2]float32{0.0, 0.0}
 	if len(v.ExtendedUvs) > 0 {
 		eu[0] = float32(v.ExtendedUvs[0].GetX())
@@ -39,8 +40,8 @@ func vertexGLInit(v *pmx.Vertex) []float32 {
 }
 
 func NormalVertexGL(v *pmx.Vertex) []float32 {
-	p := v.Position.GL()
-	n := v.Normal.MuledScalar(0.5).GL()
+	p := mgl.NewGlVec3(v.Position)
+	n := mgl.NewGlVec3(v.Normal.MuledScalar(0.5))
 	d := v.Deform.NormalizedDeform()
 	s := float32(mmath.BoolToInt(v.DeformType == pmx.SDEF))
 	sdefC, sdefR0, sdefR1 := GetSdefParams(v.Deform)
@@ -64,8 +65,8 @@ func NormalVertexGL(v *pmx.Vertex) []float32 {
 }
 
 func WireGL(v *pmx.Vertex) []float32 {
-	p := v.Position.GL()
-	n := v.Normal.GL()
+	p := mgl.NewGlVec3(v.Position)
+	n := mgl.NewGlVec3(v.Normal)
 	d := v.Deform.NormalizedDeform()
 	s := float32(mmath.BoolToInt(v.DeformType == pmx.SDEF))
 	sdefC, sdefR0, sdefR1 := GetSdefParams(v.Deform)
@@ -89,8 +90,8 @@ func WireGL(v *pmx.Vertex) []float32 {
 }
 
 func SelectedGL(v *pmx.Vertex) []float32 {
-	p := v.Position.GL()
-	n := v.Normal.GL()
+	p := mgl.NewGlVec3(v.Position)
+	n := mgl.NewGlVec3(v.Normal)
 	d := v.Deform.NormalizedDeform()
 	s := float32(mmath.BoolToInt(v.DeformType == pmx.SDEF))
 	sdefC, sdefR0, sdefR1 := GetSdefParams(v.Deform)
