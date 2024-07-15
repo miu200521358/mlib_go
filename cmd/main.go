@@ -80,7 +80,7 @@ func main() {
 		mWindow.AddGlWindow(glWindow)
 		mWindow.MotionPlayer = motionPlayer
 
-		glWindow.SetFuncWorldPos(worldPosFunc)
+		glWindow.SetWorldPosFunc(worldPosFunc)
 		glWindow.SetTitle(fmt.Sprintf("%s %s", mWindow.Title(), mi18n.T("ビューワー")))
 
 		// コンソールはタブ外に表示
@@ -101,7 +101,9 @@ func main() {
 		mWindow.Run()
 	}()
 
+	glWindow.RunChannel()
 	glWindow.Run()
+
 	defer glWindow.TriggerClose(glWindow.Window)
 }
 

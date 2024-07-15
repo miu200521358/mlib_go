@@ -322,7 +322,7 @@ func NewMWindow(
 	mainWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
 		if len(mainWindow.GlWindows) > 0 && !mgl.CheckOpenGLError() {
 			for _, glWindow := range mainWindow.GlWindows {
-				glWindow.SetShouldClose(true)
+				glWindow.TriggerClose(glWindow.Window)
 			}
 		}
 		walk.App().Exit(0)
