@@ -138,7 +138,7 @@ func NewBone() *Bone {
 			NormalizedLocalAxisX:   mmath.NewMVec3(),
 			NormalizedLocalAxisY:   mmath.NewMVec3(),
 			NormalizedLocalAxisZ:   mmath.NewMVec3(),
-			LocalAxis:              &mmath.MVec3{1, 0, 0},
+			LocalAxis:              &mmath.MVec3{X: 1, Y: 0, Z: 0},
 			IkLinkBoneIndexes:      make([]int, 0),
 			IkTargetBoneIndexes:    make([]int, 0),
 			ParentRelativePosition: mmath.NewMVec3(),
@@ -328,17 +328,6 @@ func (bone *Bone) containsCategory(category BoneCategory) bool {
 		}
 	}
 	return false
-}
-
-func (bone *Bone) normalizeFixedAxis(fixedAxis *mmath.MVec3) {
-	bone.Extend.NormalizedFixedAxis = fixedAxis.Normalized()
-}
-
-func (bone *Bone) normalizeLocalAxis(localXVector *mmath.MVec3) {
-	v := localXVector.Normalized()
-	bone.Extend.NormalizedLocalAxisX = v
-	bone.Extend.NormalizedLocalAxisY = v.Cross(&mmath.MVec3{0, 0, -1})
-	bone.Extend.NormalizedLocalAxisZ = v.Cross(bone.Extend.NormalizedLocalAxisY)
 }
 
 func (bone *Bone) setup() {

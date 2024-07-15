@@ -167,8 +167,8 @@ func NewGlWindow(
 		appConfig:                  appConfig,
 		title:                      title,
 		WindowIndex:                windowIndex,
-		prevCursorPos:              &mmath.MVec2{0, 0},
-		nowCursorPos:               &mmath.MVec2{0, 0},
+		prevCursorPos:              mmath.NewMVec2(),
+		nowCursorPos:               mmath.NewMVec2(),
 		yaw:                        RIGHT_ANGLE,
 		pitch:                      0.0,
 		Physics:                    mbt.NewMPhysics(shader),
@@ -630,7 +630,8 @@ func (w *GlWindow) resetPhysicsFinish() {
 func (w *GlWindow) TriggerViewReset() {
 	// カメラとかリセット
 	w.Shader.Reset()
-	w.prevCursorPos = &mmath.MVec2{0, 0}
+	w.prevCursorPos = mmath.NewMVec2()
+	w.nowCursorPos = mmath.NewMVec2()
 	w.yaw = RIGHT_ANGLE
 	w.pitch = 0.0
 	w.middleButtonPressed = false

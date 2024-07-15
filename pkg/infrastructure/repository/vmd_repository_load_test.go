@@ -69,7 +69,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		}
 
 		// 位置
-		expectedPosition := &mmath.MVec3{1.094920158, 0, 0.100637913}
+		expectedPosition := &mmath.MVec3{X: 1.094920158, Y: 0, Z: 0.100637913}
 		if !bf.Position.MMD().NearEquals(expectedPosition, 1e-8) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
@@ -81,42 +81,42 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		}
 
 		// 補間曲線
-		expectedTranslateXStart := &mmath.MVec2{64, 0}
+		expectedTranslateXStart := &mmath.MVec2{X: 64, Y: 0}
 		if !bf.Curves.TranslateX.Start.NearEquals(expectedTranslateXStart, 1e-5) {
 			t.Errorf("Expected TranslateX.Start to be %v, got %v", expectedTranslateXStart, bf.Curves.TranslateX.Start)
 		}
 
-		expectedTranslateXEnd := &mmath.MVec2{87, 87}
+		expectedTranslateXEnd := &mmath.MVec2{X: 87, Y: 87}
 		if !bf.Curves.TranslateX.End.NearEquals(expectedTranslateXEnd, 1e-5) {
 			t.Errorf("Expected TranslateX.End to be %v, got %v", expectedTranslateXEnd, bf.Curves.TranslateX.End)
 		}
 
-		expectedTranslateYStart := &mmath.MVec2{20, 20}
+		expectedTranslateYStart := &mmath.MVec2{X: 20, Y: 20}
 		if !bf.Curves.TranslateY.Start.NearEquals(expectedTranslateYStart, 1e-5) {
 			t.Errorf("Expected TranslateY.Start to be %v, got %v", expectedTranslateYStart, bf.Curves.TranslateY.Start)
 		}
 
-		expectedTranslateYEnd := &mmath.MVec2{107, 107}
+		expectedTranslateYEnd := &mmath.MVec2{X: 107, Y: 107}
 		if !bf.Curves.TranslateY.End.NearEquals(expectedTranslateYEnd, 1e-5) {
 			t.Errorf("Expected TranslateY.End to be %v, got %v", expectedTranslateYEnd, bf.Curves.TranslateY.End)
 		}
 
-		expectedTranslateZStart := &mmath.MVec2{64, 0}
+		expectedTranslateZStart := &mmath.MVec2{X: 64, Y: 0}
 		if !bf.Curves.TranslateZ.Start.NearEquals(expectedTranslateZStart, 1e-5) {
 			t.Errorf("Expected TranslateZ.Start to be %v, got %v", expectedTranslateZStart, bf.Curves.TranslateZ.Start)
 		}
 
-		expectedTranslateZEnd := &mmath.MVec2{87, 87}
+		expectedTranslateZEnd := &mmath.MVec2{X: 87, Y: 87}
 		if !bf.Curves.TranslateZ.End.NearEquals(expectedTranslateZEnd, 1e-5) {
 			t.Errorf("Expected TranslateZ.End to be %v, got %v", expectedTranslateZEnd, bf.Curves.TranslateZ.End)
 		}
 
-		expectedRotateStart := &mmath.MVec2{20, 20}
+		expectedRotateStart := &mmath.MVec2{X: 20, Y: 20}
 		if !bf.Curves.Rotate.Start.NearEquals(expectedRotateStart, 1e-5) {
 			t.Errorf("Expected Rotate.Start to be %v, got %v", expectedRotateStart, bf.Curves.Rotate.Start)
 		}
 
-		expectedRotateEnd := &mmath.MVec2{107, 107}
+		expectedRotateEnd := &mmath.MVec2{X: 107, Y: 107}
 		if !bf.Curves.Rotate.End.NearEquals(expectedRotateEnd, 1e-5) {
 			t.Errorf("Expected Rotate.End to be %v, got %v", expectedRotateEnd, bf.Curves.Rotate.End)
 		}
@@ -132,54 +132,54 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		}
 
 		// 位置
-		expectedPosition := &mmath.MVec3{0, 0, 0}
+		expectedPosition := &mmath.MVec3{X: 0, Y: 0, Z: 0}
 		if !bf.Position.MMD().NearEquals(expectedPosition, 1e-8) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転
-		expectedDegrees := &mmath.MVec3{-6.270921156, -26.96361355, 0.63172903}
+		expectedDegrees := &mmath.MVec3{X: -6.270921156, Y: -26.96361355, Z: 0.63172903}
 		if bf.Rotation.ToMMDDegrees().NearEquals(expectedDegrees, 1e-8) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
 		}
 
 		// 補間曲線
-		expectedTranslateXStart := &mmath.MVec2{20, 20}
+		expectedTranslateXStart := &mmath.MVec2{X: 20, Y: 20}
 		if !bf.Curves.TranslateX.Start.NearEquals(expectedTranslateXStart, 1e-5) {
 			t.Errorf("Expected TranslateX.Start to be %v, got %v", expectedTranslateXStart, bf.Curves.TranslateX.Start)
 		}
 
-		expectedTranslateXEnd := &mmath.MVec2{107, 107}
+		expectedTranslateXEnd := &mmath.MVec2{X: 107, Y: 107}
 		if !bf.Curves.TranslateX.End.NearEquals(expectedTranslateXEnd, 1e-5) {
 			t.Errorf("Expected TranslateX.End to be %v, got %v", expectedTranslateXEnd, bf.Curves.TranslateX.End)
 		}
 
-		expectedTranslateYStart := &mmath.MVec2{20, 20}
+		expectedTranslateYStart := &mmath.MVec2{X: 20, Y: 20}
 		if !bf.Curves.TranslateY.Start.NearEquals(expectedTranslateYStart, 1e-5) {
 			t.Errorf("Expected TranslateY.Start to be %v, got %v", expectedTranslateYStart, bf.Curves.TranslateY.Start)
 		}
 
-		expectedTranslateYEnd := &mmath.MVec2{107, 107}
+		expectedTranslateYEnd := &mmath.MVec2{X: 107, Y: 107}
 		if !bf.Curves.TranslateY.End.NearEquals(expectedTranslateYEnd, 1e-5) {
 			t.Errorf("Expected TranslateY.End to be %v, got %v", expectedTranslateYEnd, bf.Curves.TranslateY.End)
 		}
 
-		expectedTranslateZStart := &mmath.MVec2{20, 20}
+		expectedTranslateZStart := &mmath.MVec2{X: 20, Y: 20}
 		if !bf.Curves.TranslateZ.Start.NearEquals(expectedTranslateZStart, 1e-5) {
 			t.Errorf("Expected TranslateZ.Start to be %v, got %v", expectedTranslateZStart, bf.Curves.TranslateZ.Start)
 		}
 
-		expectedTranslateZEnd := &mmath.MVec2{107, 107}
+		expectedTranslateZEnd := &mmath.MVec2{X: 107, Y: 107}
 		if !bf.Curves.TranslateZ.End.NearEquals(expectedTranslateZEnd, 1e-5) {
 			t.Errorf("Expected TranslateZ.End to be %v, got %v", expectedTranslateZEnd, bf.Curves.TranslateZ.End)
 		}
 
-		expectedRotateStart := &mmath.MVec2{20, 20}
+		expectedRotateStart := &mmath.MVec2{X: 20, Y: 20}
 		if !bf.Curves.Rotate.Start.NearEquals(expectedRotateStart, 1e-5) {
 			t.Errorf("Expected Rotate.Start to be %v, got %v", expectedRotateStart, bf.Curves.Rotate.Start)
 		}
 
-		expectedRotateEnd := &mmath.MVec2{107, 107}
+		expectedRotateEnd := &mmath.MVec2{X: 107, Y: 107}
 		if !bf.Curves.Rotate.End.NearEquals(expectedRotateEnd, 1e-5) {
 			t.Errorf("Expected Rotate.End to be %v, got %v", expectedRotateEnd, bf.Curves.Rotate.End)
 		}
@@ -195,54 +195,54 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		}
 
 		// 位置
-		expectedPosition := &mmath.MVec3{0.548680067, 0.134522215, -2.504074097}
+		expectedPosition := &mmath.MVec3{X: 0.548680067, Y: 0.134522215, Z: -2.504074097}
 		if !bf.Position.MMD().NearEquals(expectedPosition, 1e-8) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転
-		expectedDegrees := &mmath.MVec3{22.20309405, 6.80959631, 2.583712695}
+		expectedDegrees := &mmath.MVec3{X: 22.20309405, Y: 6.80959631, Z: 2.583712695}
 		if bf.Rotation.ToMMDDegrees().NearEquals(expectedDegrees, 1e-8) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
 		}
 
 		// 補間曲線
-		expectedTranslateXStart := &mmath.MVec2{64, 0}
+		expectedTranslateXStart := &mmath.MVec2{X: 64, Y: 0}
 		if !bf.Curves.TranslateX.Start.NearEquals(expectedTranslateXStart, 1e-5) {
 			t.Errorf("Expected TranslateX.Start to be %v, got %v", expectedTranslateXStart, bf.Curves.TranslateX.Start)
 		}
 
-		expectedTranslateXEnd := &mmath.MVec2{64, 127}
+		expectedTranslateXEnd := &mmath.MVec2{X: 64, Y: 127}
 		if !bf.Curves.TranslateX.End.NearEquals(expectedTranslateXEnd, 1e-5) {
 			t.Errorf("Expected TranslateX.End to be %v, got %v", expectedTranslateXEnd, bf.Curves.TranslateX.End)
 		}
 
-		expectedTranslateYStart := &mmath.MVec2{64, 0}
+		expectedTranslateYStart := &mmath.MVec2{X: 64, Y: 0}
 		if !bf.Curves.TranslateY.Start.NearEquals(expectedTranslateYStart, 1e-5) {
 			t.Errorf("Expected TranslateY.Start to be %v, got %v", expectedTranslateYStart, bf.Curves.TranslateY.Start)
 		}
 
-		expectedTranslateYEnd := &mmath.MVec2{87, 87}
+		expectedTranslateYEnd := &mmath.MVec2{X: 87, Y: 87}
 		if !bf.Curves.TranslateY.End.NearEquals(expectedTranslateYEnd, 1e-5) {
 			t.Errorf("Expected TranslateY.End to be %v, got %v", expectedTranslateYEnd, bf.Curves.TranslateY.End)
 		}
 
-		expectedTranslateZStart := &mmath.MVec2{64, 0}
+		expectedTranslateZStart := &mmath.MVec2{X: 64, Y: 0}
 		if !bf.Curves.TranslateZ.Start.NearEquals(expectedTranslateZStart, 1e-5) {
 			t.Errorf("Expected TranslateZ.Start to be %v, got %v", expectedTranslateZStart, bf.Curves.TranslateZ.Start)
 		}
 
-		expectedTranslateZEnd := &mmath.MVec2{64, 127}
+		expectedTranslateZEnd := &mmath.MVec2{X: 64, Y: 127}
 		if !bf.Curves.TranslateZ.End.NearEquals(expectedTranslateZEnd, 1e-5) {
 			t.Errorf("Expected TranslateZ.End to be %v, got %v", expectedTranslateZEnd, bf.Curves.TranslateZ.End)
 		}
 
-		expectedRotateStart := &mmath.MVec2{64, 0}
+		expectedRotateStart := &mmath.MVec2{X: 64, Y: 0}
 		if !bf.Curves.Rotate.Start.NearEquals(expectedRotateStart, 1e-5) {
 			t.Errorf("Expected Rotate.Start to be %v, got %v", expectedRotateStart, bf.Curves.Rotate.Start)
 		}
 
-		expectedRotateEnd := &mmath.MVec2{87, 87}
+		expectedRotateEnd := &mmath.MVec2{X: 87, Y: 87}
 		if !bf.Curves.Rotate.End.NearEquals(expectedRotateEnd, 1e-5) {
 			t.Errorf("Expected Rotate.End to be %v, got %v", expectedRotateEnd, bf.Curves.Rotate.End)
 		}
@@ -259,13 +259,13 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		}
 
 		// 位置
-		expectedPosition := &mmath.MVec3{-1.63, 0.05, 2.58}
+		expectedPosition := &mmath.MVec3{X: -1.63, Y: 0.05, Z: 2.58}
 		if !bf.Position.MMD().NearEquals(expectedPosition, 1e-2) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転
-		expectedDegrees := &mmath.MVec3{-1.4, 6.7, -5.2}
+		expectedDegrees := &mmath.MVec3{X: -1.4, Y: 6.7, Z: -5.2}
 		if bf.Rotation.ToMMDDegrees().NearEquals(expectedDegrees, 1e-2) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
 		}
@@ -282,13 +282,13 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		}
 
 		// 位置
-		expectedPosition := &mmath.MVec3{0.76, 1.17, 1.34}
+		expectedPosition := &mmath.MVec3{X: 0.76, Y: 1.17, Z: 1.34}
 		if !bf.Position.MMD().NearEquals(expectedPosition, 1e-2) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転
-		expectedDegrees := &mmath.MVec3{-41.9, -1.6, 1.0}
+		expectedDegrees := &mmath.MVec3{X: -41.9, Y: -1.6, Z: 1.0}
 		if bf.Rotation.ToMMDDegrees().NearEquals(expectedDegrees, 1e-2) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
 		}
@@ -305,13 +305,13 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		}
 
 		// 位置
-		expectedPosition := &mmath.MVec3{-0.76, -0.61, -1.76}
+		expectedPosition := &mmath.MVec3{X: -0.76, Y: -0.61, Z: -1.76}
 		if !bf.Position.MMD().NearEquals(expectedPosition, 1e-2) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転
-		expectedDegrees := &mmath.MVec3{43.1, 0.0, 0.0}
+		expectedDegrees := &mmath.MVec3{X: 43.1, Y: 0.0, Z: 0.0}
 		if bf.Rotation.ToMMDDegrees().NearEquals(expectedDegrees, 1e-2) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
 		}
@@ -328,13 +328,13 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		}
 
 		// 位置
-		expectedPosition := &mmath.MVec3{0.0, 0.0, 0.0}
+		expectedPosition := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 0.0}
 		if !bf.Position.MMD().NearEquals(expectedPosition, 1e-2) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, bf.Position.MMD())
 		}
 
 		// 回転
-		expectedDegrees := &mmath.MVec3{13.5, -4.3, 27.0}
+		expectedDegrees := &mmath.MVec3{X: 13.5, Y: -4.3, Z: 27.0}
 		if bf.Rotation.ToMMDDegrees().NearEquals(expectedDegrees, 1e-2) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedDegrees, bf.Rotation)
 		}

@@ -231,7 +231,7 @@ func (r *baseRepository[T]) unpackVec2() (mmath.MVec2, error) {
 	if err != nil {
 		return *mmath.NewMVec2(), err
 	}
-	return mmath.MVec2{x, y}, nil
+	return mmath.MVec2{X: x, Y: y}, nil
 }
 
 func (r *baseRepository[T]) unpackVec3() (mmath.MVec3, error) {
@@ -250,7 +250,7 @@ func (r *baseRepository[T]) unpackVec3() (mmath.MVec3, error) {
 	// if isConvertGl {
 	// 	z = -z
 	// }
-	return mmath.MVec3{x, y, z}, nil
+	return mmath.MVec3{X: x, Y: y, Z: z}, nil
 }
 
 func (r *baseRepository[T]) unpackVec4() (mmath.MVec4, error) {
@@ -273,7 +273,7 @@ func (r *baseRepository[T]) unpackVec4() (mmath.MVec4, error) {
 	// if isConvertGl {
 	// 	z = -z
 	// }
-	return mmath.MVec4{x, y, z, w}, nil
+	return mmath.MVec4{X: x, Y: y, Z: z, W: w}, nil
 }
 
 func (r *baseRepository[T]) unpackQuaternion() (mmath.MQuaternion, error) {

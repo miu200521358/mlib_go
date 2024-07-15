@@ -15,7 +15,7 @@ func TestVmdWriter_Write1(t *testing.T) {
 	motion.SetName("Null_00")
 
 	bf := vmd.NewBoneFrame(0)
-	bf.Position = &mmath.MVec3{1, 2, 3}
+	bf.Position = &mmath.MVec3{X: 1, Y: 2, Z: 3}
 	bf.Rotation = mmath.NewMQuaternionFromDegrees(10, 20, 30)
 	motion.AppendRegisteredBoneFrame("センター", bf)
 

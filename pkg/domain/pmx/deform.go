@@ -263,6 +263,7 @@ func (s *Sdef) GetType() DeformType {
 }
 
 // NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
+// TODO: SDEFパラメーターの正規化
 func (d *Sdef) NormalizedDeform() [8]float32 {
 	return [8]float32{
 		float32(d.Indexes[0]), float32(d.Indexes[1]), 0, 0,

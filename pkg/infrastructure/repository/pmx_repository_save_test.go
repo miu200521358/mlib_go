@@ -48,15 +48,15 @@ func TestPmxWriter_Save1(t *testing.T) {
 
 	{
 		v := model.Vertices.Get(13)
-		expectedPosition := &mmath.MVec3{0.1565633, 16.62944, -0.2150156}
+		expectedPosition := &mmath.MVec3{X: 0.1565633, Y: 16.62944, Z: -0.2150156}
 		if !v.Position.MMD().NearEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, v.Position)
 		}
-		expectedNormal := &mmath.MVec3{0.2274586, 0.6613649, -0.714744}
+		expectedNormal := &mmath.MVec3{X: 0.2274586, Y: 0.6613649, Z: -0.714744}
 		if !v.Normal.MMD().NearEquals(expectedNormal, 1e-5) {
 			t.Errorf("Expected Normal to be %v, got %v", expectedNormal, v.Normal)
 		}
-		expectedUV := &mmath.MVec2{0.5112334, 0.1250942}
+		expectedUV := &mmath.MVec2{X: 0.5112334, Y: 0.1250942}
 		if !v.Uv.NearEquals(expectedUV, 1e-5) {
 			t.Errorf("Expected UV to be %v, got %v", expectedUV, v.Uv)
 		}
@@ -97,15 +97,15 @@ func TestPmxWriter_Save1(t *testing.T) {
 
 	{
 		v := model.Vertices.Get(120)
-		expectedPosition := &mmath.MVec3{1.529492, 5.757646, 0.4527041}
+		expectedPosition := &mmath.MVec3{X: 1.529492, Y: 5.757646, Z: 0.4527041}
 		if !v.Position.MMD().NearEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, v.Position)
 		}
-		expectedNormal := &mmath.MVec3{0.9943396, 0.1054612, -0.0129031}
+		expectedNormal := &mmath.MVec3{X: 0.9943396, Y: 0.1054612, Z: -0.0129031}
 		if !v.Normal.MMD().NearEquals(expectedNormal, 1e-5) {
 			t.Errorf("Expected Normal to be %v, got %v", expectedNormal, v.Normal)
 		}
-		expectedUV := &mmath.MVec2{0.8788766, 0.7697825}
+		expectedUV := &mmath.MVec2{X: 0.8788766, Y: 0.7697825}
 		if !v.Uv.NearEquals(expectedUV, 1e-5) {
 			t.Errorf("Expected UV to be %v, got %v", expectedUV, v.Uv)
 		}
@@ -164,15 +164,15 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if m.EnglishName != expectedEnglishName {
 			t.Errorf("Expected Path to be %q, got %q", expectedEnglishName, m.EnglishName)
 		}
-		expectedDiffuse := &mmath.MVec4{1.0, 1.0, 1.0, 0.0}
+		expectedDiffuse := &mmath.MVec4{X: 1.0, Y: 1.0, Z: 1.0, W: 0.0}
 		if !m.Diffuse.NearEquals(expectedDiffuse, 1e-5) {
 			t.Errorf("Expected Diffuse to be %v, got %v", expectedDiffuse, m.Diffuse)
 		}
-		expectedSpecular := &mmath.MVec4{0.0, 0.0, 0.0, 0.0}
+		expectedSpecular := &mmath.MVec4{X: 0.0, Y: 0.0, Z: 0.0, W: 0.0}
 		if !m.Specular.NearEquals(expectedSpecular, 1e-5) {
 			t.Errorf("Expected Specular to be %v, got %v", expectedSpecular, m.Specular)
 		}
-		expectedAmbient := &mmath.MVec3{0.5, 0.5, 0.5}
+		expectedAmbient := &mmath.MVec3{X: 0.5, Y: 0.5, Z: 0.5}
 		if !m.Ambient.NearEquals(expectedAmbient, 1e-5) {
 			t.Errorf("Expected Ambient to be %v, got %v", expectedAmbient, m.Ambient)
 		}
@@ -180,7 +180,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if m.DrawFlag != expectedDrawFlag {
 			t.Errorf("Expected DrawFlag to be %v, got %v", expectedDrawFlag, m.DrawFlag)
 		}
-		expectedEdge := &mmath.MVec4{0.2745098, 0.09019607, 0.1254902, 1.0}
+		expectedEdge := &mmath.MVec4{X: 0.2745098, Y: 0.09019607, Z: 0.1254902, W: 1.0}
 		if !m.Edge.NearEquals(expectedEdge, 1e-5) {
 			t.Errorf("Expected Edge to be %v, got %v", expectedEdge, m.Edge)
 		}
@@ -228,7 +228,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.EnglishName != expectedEnglishName {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
 		}
-		expectedPosition := &mmath.MVec3{0.0, 12.39097, -0.2011687}
+		expectedPosition := &mmath.MVec3{X: 0.0, Y: 12.39097, Z: -0.2011687}
 		if !b.Position.MMD().NearEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
@@ -244,7 +244,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.BoneFlag != expectedBoneFlag {
 			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
 		}
-		expectedTailPosition := &mmath.MVec3{0.0, 0.0, 0.0}
+		expectedTailPosition := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 0.0}
 		if !b.TailPosition.MMD().NearEquals(expectedTailPosition, 1e-5) {
 			t.Errorf("Expected TailPosition to be %v, got %v", expectedTailPosition, b.TailPosition)
 		}
@@ -264,7 +264,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.EnglishName != expectedEnglishName {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
 		}
-		expectedPosition := &mmath.MVec3{-0.1984593, 18.47478, 0.04549573}
+		expectedPosition := &mmath.MVec3{X: -0.1984593, Y: 18.47478, Z: 0.04549573}
 		if !b.Position.MMD().NearEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
@@ -280,7 +280,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.BoneFlag != expectedBoneFlag {
 			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
 		}
-		expectedTailPosition := &mmath.MVec3{0.0, 0.0, 0.0}
+		expectedTailPosition := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 0.0}
 		if !b.TailPosition.MMD().NearEquals(expectedTailPosition, 1e-5) {
 			t.Errorf("Expected TailPosition to be %v, got %v", expectedTailPosition, b.TailPosition)
 		}
@@ -308,7 +308,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.EnglishName != expectedEnglishName {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
 		}
-		expectedPosition := &mmath.MVec3{2.482529, 15.52887, 0.3184027}
+		expectedPosition := &mmath.MVec3{X: 2.482529, Y: 15.52887, Z: 0.3184027}
 		if !b.Position.MMD().NearEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
@@ -324,7 +324,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.BoneFlag != expectedBoneFlag {
 			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
 		}
-		expectedTailPosition := &mmath.MVec3{0.0, 0.0, 0.0}
+		expectedTailPosition := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 0.0}
 		if !b.TailPosition.MMD().NearEquals(expectedTailPosition, 1e-5) {
 			t.Errorf("Expected TailPosition to be %v, got %v", expectedTailPosition, b.TailPosition)
 		}
@@ -332,15 +332,15 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.TailIndex != expectedTailIndex {
 			t.Errorf("Expected TailIndex to be %v, got %v", expectedTailIndex, b.TailIndex)
 		}
-		expectedFixedAxis := &mmath.MVec3{0.819152, -0.5735764, -4.355049e-15}
+		expectedFixedAxis := &mmath.MVec3{X: 0.819152, Y: -0.5735764, Z: -4.355049e-15}
 		if !b.FixedAxis.MMD().NearEquals(expectedFixedAxis, 1e-5) {
 			t.Errorf("Expected FixedAxis to be %v, got %v", expectedFixedAxis, b.FixedAxis)
 		}
-		expectedLocalAxisX := &mmath.MVec3{0.8191521, -0.5735765, -4.35505e-15}
+		expectedLocalAxisX := &mmath.MVec3{X: 0.8191521, Y: -0.5735765, Z: -4.35505e-15}
 		if !b.LocalAxisX.MMD().NearEquals(expectedLocalAxisX, 1e-5) {
 			t.Errorf("Expected LocalAxisX to be %v, got %v", expectedLocalAxisX, b.LocalAxisX)
 		}
-		expectedLocalAxisZ := &mmath.MVec3{-3.567448e-15, 2.497953e-15, -1}
+		expectedLocalAxisZ := &mmath.MVec3{X: -3.567448e-15, Y: 2.497953e-15, Z: -1}
 		if !b.LocalAxisZ.MMD().NearEquals(expectedLocalAxisZ, 1e-5) {
 			t.Errorf("Expected LocalAxisZ to be %v, got %v", expectedLocalAxisZ, b.LocalAxisZ)
 		}
@@ -356,7 +356,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.EnglishName != expectedEnglishName {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
 		}
-		expectedPosition := &mmath.MVec3{0.9644502, 1.647273, 0.4050385}
+		expectedPosition := &mmath.MVec3{X: 0.9644502, Y: 1.647273, Z: 0.4050385}
 		if !b.Position.MMD().NearEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
@@ -372,7 +372,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.BoneFlag != expectedBoneFlag {
 			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
 		}
-		expectedTailPosition := &mmath.MVec3{0.0, 0.0, 1.0}
+		expectedTailPosition := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 1.0}
 		if !b.TailPosition.MMD().NearEquals(expectedTailPosition, 1e-5) {
 			t.Errorf("Expected TailPosition to be %v, got %v", expectedTailPosition, b.TailPosition)
 		}
@@ -402,11 +402,11 @@ func TestPmxWriter_Save1(t *testing.T) {
 			if il.AngleLimit != expectedAngleLimit {
 				t.Errorf("Expected AngleLimit to be %v, got %v", expectedAngleLimit, il.AngleLimit)
 			}
-			expectedMinAngleLimit := &mmath.MVec3{-180.0, 0.0, 0.0}
+			expectedMinAngleLimit := &mmath.MVec3{X: -180.0, Y: 0.0, Z: 0.0}
 			if !il.MinAngleLimit.GetDegrees().NearEquals(expectedMinAngleLimit, 1e-5) {
 				t.Errorf("Expected MinAngleLimit to be %v, got %v", expectedMinAngleLimit, il.MinAngleLimit.GetDegrees())
 			}
-			expectedMaxAngleLimit := &mmath.MVec3{-0.5, 0.0, 0.0}
+			expectedMaxAngleLimit := &mmath.MVec3{X: -0.5, Y: 0.0, Z: 0.0}
 			if !il.MaxAngleLimit.GetDegrees().NearEquals(expectedMaxAngleLimit, 1e-5) {
 				t.Errorf("Expected MaxAngleLimit to be %v, got %v", expectedMaxAngleLimit, il.MaxAngleLimit.GetDegrees())
 			}
@@ -448,7 +448,7 @@ func TestPmxWriter_Save1(t *testing.T) {
 			if o.VertexIndex != expectedVertexIndex {
 				t.Errorf("Expected VertexIndex to be %v, got %v", expectedVertexIndex, o.VertexIndex)
 			}
-			expectedPosition := &mmath.MVec3{-0.01209146, 0.1320038, -0.0121327}
+			expectedPosition := &mmath.MVec3{X: -0.01209146, Y: 0.1320038, Z: -0.0121327}
 			if !o.Position.MMD().NearEquals(expectedPosition, 1e-5) {
 				t.Errorf("Expected Position to be %v, got %v", expectedPosition, o.Position)
 			}
@@ -479,11 +479,11 @@ func TestPmxWriter_Save1(t *testing.T) {
 			if o.BoneIndex != expectedBoneIndex {
 				t.Errorf("Expected BoneIndex to be %v, got %v", expectedBoneIndex, o.BoneIndex)
 			}
-			expectedPosition := &mmath.MVec3{0.0, 0.0, 0.0}
+			expectedPosition := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 0.0}
 			if !o.Position.MMD().NearEquals(expectedPosition, 1e-5) {
 				t.Errorf("Expected BoneIndex to be %v, got %v", expectedBoneIndex, o.BoneIndex)
 			}
-			expectedRotation := &mmath.MVec3{-6.000048, 3.952523e-14, -3.308919e-14}
+			expectedRotation := &mmath.MVec3{X: -6.000048, Y: 3.952523e-14, Z: -3.308919e-14}
 			if !o.Rotation.GetDegreesMMD().NearEquals(expectedRotation, 1e-5) {
 				t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, o.Rotation.GetDegrees())
 			}
@@ -518,19 +518,19 @@ func TestPmxWriter_Save1(t *testing.T) {
 			if o.CalcMode != expectedCalcMode {
 				t.Errorf("Expected CalcMode to be %v, got %v", expectedCalcMode, o.CalcMode)
 			}
-			expectedDiffuse := &mmath.MVec4{0.0, 0.0, 0.0, 1.0}
+			expectedDiffuse := &mmath.MVec4{X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
 			if !o.Diffuse.NearEquals(expectedDiffuse, 1e-5) {
 				t.Errorf("Expected Diffuse to be %v, got %v", expectedDiffuse, o.Diffuse)
 			}
-			expectedSpecular := &mmath.MVec4{0.0, 0.0, 0.0, 0.0}
+			expectedSpecular := &mmath.MVec4{X: 0.0, Y: 0.0, Z: 0.0, W: 0.0}
 			if !o.Specular.NearEquals(expectedSpecular, 1e-5) {
 				t.Errorf("Expected Specular to be %v, got %v", expectedSpecular, o.Specular)
 			}
-			expectedAmbient := &mmath.MVec3{0.0, 0.0, 0.0}
+			expectedAmbient := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 0.0}
 			if !o.Ambient.NearEquals(expectedAmbient, 1e-5) {
 				t.Errorf("Expected Ambient to be %v, got %v", expectedAmbient, o.Ambient)
 			}
-			expectedEdge := &mmath.MVec4{0.0, 0.0, 0.0, 0.0}
+			expectedEdge := &mmath.MVec4{X: 0.0, Y: 0.0, Z: 0.0, W: 0.0}
 			if !o.Edge.NearEquals(expectedEdge, 1e-5) {
 				t.Errorf("Expected Edge to be %v, got %v", expectedEdge, o.Edge)
 			}
@@ -538,15 +538,15 @@ func TestPmxWriter_Save1(t *testing.T) {
 			if math.Abs(o.EdgeSize-expectedEdgeSize) > 1e-5 {
 				t.Errorf("Expected EdgeSize to be %v, got %v", expectedEdgeSize, o.EdgeSize)
 			}
-			expectedTextureFactor := &mmath.MVec4{0.0, 0.0, 0.0, 0.0}
+			expectedTextureFactor := &mmath.MVec4{X: 0.0, Y: 0.0, Z: 0.0, W: 0.0}
 			if !o.TextureFactor.NearEquals(expectedTextureFactor, 1e-5) {
 				t.Errorf("Expected TextureFactor to be %v, got %v", expectedTextureFactor, o.TextureFactor)
 			}
-			expectedSphereTextureFactor := &mmath.MVec4{0.0, 0.0, 0.0, 0.0}
+			expectedSphereTextureFactor := &mmath.MVec4{X: 0.0, Y: 0.0, Z: 0.0, W: 0.0}
 			if !o.SphereTextureFactor.NearEquals(expectedSphereTextureFactor, 1e-5) {
 				t.Errorf("Expected SphereTextureFactor to be %v, got %v", expectedSphereTextureFactor, o.SphereTextureFactor)
 			}
-			expectedToonTextureFactor := &mmath.MVec4{0.0, 0.0, 0.0, 0.0}
+			expectedToonTextureFactor := &mmath.MVec4{X: 0.0, Y: 0.0, Z: 0.0, W: 0.0}
 			if !o.ToonTextureFactor.NearEquals(expectedToonTextureFactor, 1e-5) {
 				t.Errorf("Expected ToonTextureFactor to be %v, got %v", expectedToonTextureFactor, o.ToonTextureFactor)
 			}
@@ -705,15 +705,15 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if b.ShapeType != expectedShapeType {
 			t.Errorf("Expected ShapeType to be %v, got %v", expectedShapeType, b.ShapeType)
 		}
-		expectedSize := &mmath.MVec3{0.5398922, 2.553789, 0.0}
+		expectedSize := &mmath.MVec3{X: 0.5398922, Y: 2.553789, Z: 0.0}
 		if !b.Size.NearEquals(expectedSize, 1e-5) {
 			t.Errorf("Expected Size to be %v, got %v", expectedSize, b.Size)
 		}
-		expectedPosition := &mmath.MVec3{-2.52586, 15.45157, 0.241455}
+		expectedPosition := &mmath.MVec3{X: -2.52586, Y: 15.45157, Z: 0.241455}
 		if !b.Position.MMD().NearEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
-		expectedRotation := &mmath.MVec3{0.0, 0.0, 125.00}
+		expectedRotation := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 125.00}
 		if !b.Rotation.GetDegrees().NearEquals(expectedRotation, 1e-5) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, b.Rotation.GetDegrees())
 		}
@@ -761,35 +761,35 @@ func TestPmxWriter_Save1(t *testing.T) {
 		if j.RigidbodyIndexB != expectedRigidBodyIndexB {
 			t.Errorf("Expected RigidBodyIndexB to be %v, got %v", expectedRigidBodyIndexB, j.RigidbodyIndexB)
 		}
-		expectedPosition := &mmath.MVec3{-1.189768, 18.56266, 0.07277258}
+		expectedPosition := &mmath.MVec3{X: -1.189768, Y: 18.56266, Z: 0.07277258}
 		if !j.Position.MMD().NearEquals(expectedPosition, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, j.Position)
 		}
-		expectedRotation := &mmath.MVec3{-15.10554, 91.26718, -4.187446}
+		expectedRotation := &mmath.MVec3{X: -15.10554, Y: 91.26718, Z: -4.187446}
 		if !j.Rotation.GetDegrees().NearEquals(expectedRotation, 1e-5) {
 			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, j.Rotation.GetDegrees())
 		}
-		expectedTranslationLimitMin := &mmath.MVec3{0.0, 0.0, 0.0}
+		expectedTranslationLimitMin := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 0.0}
 		if !j.JointParam.TranslationLimitMin.NearEquals(expectedTranslationLimitMin, 1e-5) {
 			t.Errorf("Expected TranslationLimitation1 to be %v, got %v", expectedTranslationLimitMin, j.JointParam.TranslationLimitMin)
 		}
-		expectedTranslationLimitMax := &mmath.MVec3{0.0, 0.0, 0.0}
+		expectedTranslationLimitMax := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 0.0}
 		if !j.JointParam.TranslationLimitMax.NearEquals(expectedTranslationLimitMax, 1e-5) {
 			t.Errorf("Expected TranslationLimitation2 to be %v, got %v", expectedTranslationLimitMax, j.JointParam.TranslationLimitMax)
 		}
-		expectedRotationLimitMin := &mmath.MVec3{-29.04, -14.3587, -29.04}
+		expectedRotationLimitMin := &mmath.MVec3{X: -29.04, Y: -14.3587, Z: -29.04}
 		if !j.JointParam.RotationLimitMin.GetDegrees().NearEquals(expectedRotationLimitMin, 1e-5) {
 			t.Errorf("Expected RotationLimitation1 to be %v, got %v", expectedRotationLimitMin, j.JointParam.RotationLimitMin.GetDegrees())
 		}
-		expectedRotationLimitMax := &mmath.MVec3{29.04, 14.3587, 29.04}
+		expectedRotationLimitMax := &mmath.MVec3{X: 29.04, Y: 14.3587, Z: 29.04}
 		if !j.JointParam.RotationLimitMax.GetDegrees().NearEquals(expectedRotationLimitMax, 1e-5) {
 			t.Errorf("Expected RotationLimitation2 to be %v, got %v", expectedRotationLimitMax, j.JointParam.RotationLimitMax.GetDegrees())
 		}
-		expectedSpringConstantTranslation := &mmath.MVec3{0.0, 0.0, 0.0}
+		expectedSpringConstantTranslation := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 0.0}
 		if !j.JointParam.SpringConstantTranslation.NearEquals(expectedSpringConstantTranslation, 1e-5) {
 			t.Errorf("Expected SpringConstantTranslation to be %v, got %v", expectedSpringConstantTranslation, j.JointParam.SpringConstantTranslation)
 		}
-		expectedSpringConstantRotation := &mmath.MVec3{60.0, 29.6667, 60.0}
+		expectedSpringConstantRotation := &mmath.MVec3{X: 60.0, Y: 29.6667, Z: 60.0}
 		if !j.JointParam.SpringConstantRotation.NearEquals(expectedSpringConstantRotation, 1e-5) {
 			t.Errorf("Expected SpringConstantRotation to be %v, got %v", expectedSpringConstantRotation, j.JointParam.SpringConstantRotation)
 		}

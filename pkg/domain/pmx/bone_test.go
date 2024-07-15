@@ -51,16 +51,16 @@ func TestIk_Copy(t *testing.T) {
 	ik := &Ik{
 		BoneIndex:    0,
 		LoopCount:    1,
-		UnitRotation: mmath.NewMRotationFromDegrees(&mmath.MVec3{1, 2, 3}),
+		UnitRotation: mmath.NewMRotationFromDegrees(&mmath.MVec3{X: 1, Y: 2, Z: 3}),
 		Links: []*IkLink{
 			{
 				BoneIndex:          0,
 				AngleLimit:         true,
-				MinAngleLimit:      mmath.NewMRotationFromDegrees(&mmath.MVec3{1, 2, 3}),
-				MaxAngleLimit:      mmath.NewMRotationFromDegrees(&mmath.MVec3{4, 5, 6}),
+				MinAngleLimit:      mmath.NewMRotationFromDegrees(&mmath.MVec3{X: 1, Y: 2, Z: 3}),
+				MaxAngleLimit:      mmath.NewMRotationFromDegrees(&mmath.MVec3{X: 4, Y: 5, Z: 6}),
 				LocalAngleLimit:    true,
-				LocalMinAngleLimit: mmath.NewMRotationFromDegrees(&mmath.MVec3{7, 8, 9}),
-				LocalMaxAngleLimit: mmath.NewMRotationFromDegrees(&mmath.MVec3{10, 11, 12}),
+				LocalMinAngleLimit: mmath.NewMRotationFromDegrees(&mmath.MVec3{X: 7, Y: 8, Z: 9}),
+				LocalMaxAngleLimit: mmath.NewMRotationFromDegrees(&mmath.MVec3{X: 10, Y: 11, Z: 12}),
 			},
 		},
 	}
@@ -90,7 +90,7 @@ func TestIk_Copy(t *testing.T) {
 
 func TestBone_NormalizeFixedAxis(t *testing.T) {
 	b := NewBone()
-	correctedFixedAxis := mmath.MVec3{1, 0, 0}
+	correctedFixedAxis := mmath.MVec3{X: 1, Y: 0, Z: 0}
 	b.NormalizeFixedAxis(&correctedFixedAxis)
 
 	if !b.Extend.NormalizedFixedAxis.Equals(correctedFixedAxis.Normalize()) {
@@ -127,19 +127,19 @@ func TestBone_Copy(t *testing.T) {
 		b := &Bone{
 			IndexNameModel: &core.IndexNameModel{Index: 0, Name: "Bone"},
 			Ik:             NewIk(),
-			Position:       &mmath.MVec3{1, 2, 3},
-			TailPosition:   &mmath.MVec3{4, 5, 6},
-			FixedAxis:      &mmath.MVec3{7, 8, 9},
-			LocalAxisX:     &mmath.MVec3{10, 11, 12},
-			LocalAxisZ:     &mmath.MVec3{13, 14, 15},
+			Position:       &mmath.MVec3{X: 1, Y: 2, Z: 3},
+			TailPosition:   &mmath.MVec3{X: 4, Y: 5, Z: 6},
+			FixedAxis:      &mmath.MVec3{X: 7, Y: 8, Z: 9},
+			LocalAxisX:     &mmath.MVec3{X: 10, Y: 11, Z: 12},
+			LocalAxisZ:     &mmath.MVec3{X: 13, Y: 14, Z: 15},
 			Extend: &BoneExtend{
-				NormalizedLocalAxisZ:   &mmath.MVec3{16, 17, 18},
-				NormalizedLocalAxisX:   &mmath.MVec3{19, 20, 21},
-				NormalizedLocalAxisY:   &mmath.MVec3{22, 23, 24},
-				LocalAxis:              &mmath.MVec3{25, 26, 27},
-				ParentRelativePosition: &mmath.MVec3{28, 29, 30},
-				ChildRelativePosition:  &mmath.MVec3{31, 32, 33},
-				NormalizedFixedAxis:    &mmath.MVec3{34, 35, 36},
+				NormalizedLocalAxisZ:   &mmath.MVec3{X: 16, Y: 17, Z: 18},
+				NormalizedLocalAxisX:   &mmath.MVec3{X: 19, Y: 20, Z: 21},
+				NormalizedLocalAxisY:   &mmath.MVec3{X: 22, Y: 23, Z: 24},
+				LocalAxis:              &mmath.MVec3{X: 25, Y: 26, Z: 27},
+				ParentRelativePosition: &mmath.MVec3{X: 28, Y: 29, Z: 30},
+				ChildRelativePosition:  &mmath.MVec3{X: 31, Y: 32, Z: 33},
+				NormalizedFixedAxis:    &mmath.MVec3{X: 34, Y: 35, Z: 36},
 				IkLinkBoneIndexes:      []int{1, 3, 5},
 				IkTargetBoneIndexes:    []int{2, 4, 6},
 				TreeBoneIndexes:        []int{3, 5, 7},
@@ -148,10 +148,10 @@ func TestBone_Copy(t *testing.T) {
 				RelativeBoneIndexes:    []int{8, 9, 10},
 				ChildBoneIndexes:       []int{10, 11, 12},
 				EffectiveBoneIndexes:   []int{16, 17, 18},
-				MinAngleLimit:          mmath.NewMRotationFromRadians(&mmath.MVec3{1, 2, 3}),
-				MaxAngleLimit:          mmath.NewMRotationFromRadians(&mmath.MVec3{5, 6, 7}),
-				LocalMinAngleLimit:     mmath.NewMRotationFromRadians(&mmath.MVec3{10, 11, 12}),
-				LocalMaxAngleLimit:     mmath.NewMRotationFromRadians(&mmath.MVec3{16, 17, 18}),
+				MinAngleLimit:          mmath.NewMRotationFromRadians(&mmath.MVec3{X: 1, Y: 2, Z: 3}),
+				MaxAngleLimit:          mmath.NewMRotationFromRadians(&mmath.MVec3{X: 5, Y: 6, Z: 7}),
+				LocalMinAngleLimit:     mmath.NewMRotationFromRadians(&mmath.MVec3{X: 10, Y: 11, Z: 12}),
+				LocalMaxAngleLimit:     mmath.NewMRotationFromRadians(&mmath.MVec3{X: 16, Y: 17, Z: 18}),
 			},
 		}
 

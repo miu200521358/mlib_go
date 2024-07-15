@@ -766,7 +766,7 @@ func (r *PmxRepository) loadBones(model *pmx.PmxModel) error {
 				mlog.E("[%d] loadBones UnpackFloat unitRot error: %v", i, err)
 				return err
 			}
-			b.Ik.UnitRotation.SetRadians(&mmath.MVec3{unitRot, unitRot, unitRot})
+			b.Ik.UnitRotation.SetRadians(&mmath.MVec3{X: unitRot, Y: unitRot, Z: unitRot})
 			// 4  : int  	| IKリンク数 : 後続の要素数
 			ikLinkCount, err := r.unpackInt()
 			if err != nil {
@@ -1208,7 +1208,7 @@ func (r *PmxRepository) loadJoints(model *pmx.PmxModel) error {
 
 		j := &pmx.Joint{
 			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
-			JointParam:     pmx.NewJointParam(),
+			JointParam:     &pmx.JointParam{},
 		}
 
 		// 1  : byte	| Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)

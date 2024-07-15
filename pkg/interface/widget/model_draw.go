@@ -264,7 +264,8 @@ func Draw(
 	Vertices := renderer.NewVertexDeltas(model.Vertices)
 
 	for i, pos := range vertexPositions {
-		Vertices.Data[i] = renderer.NewVertexDelta(&mmath.MVec3{float64(-pos[0]), float64(pos[1]), float64(pos[2])})
+		Vertices.Data[i] = renderer.NewVertexDelta(
+			&mmath.MVec3{X: float64(-pos[0]), Y: float64(pos[1]), Z: float64(pos[2])})
 	}
 
 	// 物理デバッグ表示

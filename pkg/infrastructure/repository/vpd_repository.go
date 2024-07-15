@@ -178,7 +178,7 @@ func (r *VpdRepository) loadModel(motion *vmd.VmdMotion) error {
 				x, _ := strconv.ParseFloat(matches[1], 64)
 				y, _ := strconv.ParseFloat(matches[2], 64)
 				z, _ := strconv.ParseFloat(matches[3], 64)
-				bf.Position = &mmath.MVec3{x, y, z}
+				bf.Position = &mmath.MVec3{X: x, Y: y, Z: z}
 				continue
 			}
 		}
