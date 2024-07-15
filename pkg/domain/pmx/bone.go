@@ -579,8 +579,8 @@ func (b *Bones) setup() {
 	// 変形階層・ボーンINDEXでソート
 
 	// 変形前と変形後に分けてINDEXリストを生成
-	b.createLayerIndexes(false)
-	b.createLayerIndexes(true)
+	b.createLayerIndexesBeforePhysics()
+	b.createLayerIndexesAfterPhysics()
 
 	// 変形階層順に親子を繋げていく
 	for _, isAfterPhysics := range []bool{false, true} {
@@ -621,11 +621,11 @@ func (b *Bones) setup() {
 
 	for _, bone := range b.Data {
 		// ボーンのデフォームINDEXリストを取得
-		b.createLayerSortedIkBones(bone)
+		b.createLayerSortedBones(bone)
 	}
 }
 
-func (b *Bones) createLayerSortedIkBones(bone *Bone) {
+func (b *Bones) createLayerSortedBones(bone *Bone) {
 	// 関連ボーンINDEXリスト（順不同）
 	relativeBoneIndexes := make(map[int]struct{})
 
@@ -651,20 +651,51 @@ func (b *Bones) createLayerSortedIkBones(bone *Bone) {
 	b.DeformBoneIndexes[bone.Index] = deformBoneIndexes
 }
 
-func (b *Bones) createLayerIndexes(isAfterPhysics bool) {
-	if _, ok := b.LayerSortedBones[isAfterPhysics]; !ok {
-		b.LayerSortedBones[isAfterPhysics] = make([]*Bone, 0)
+func (b *Bones) createLayerIndexesBeforePhysics() {
+	if _, ok := b.LayerSortedBones[false]; !ok {
+		b.LayerSortedBones[false] = make([]*Bone, 0)
 	}
-	if _, ok := b.LayerSortedNames[isAfterPhysics]; !ok {
-		b.LayerSortedNames[isAfterPhysics] = make(map[string]int)
+	if _, ok := b.LayerSortedNames[false]; !ok {
+		b.LayerSortedNames[false] = make(map[string]int)
 	}
 
-	layerIndexes := b.GetLayerIndexes(isAfterPhysics)
+	layerIndexes := b.GetLayerIndexes(false)
 
 	for i, boneIndex := range layerIndexes {
 		bone := b.Get(boneIndex)
-		b.LayerSortedNames[isAfterPhysics][bone.Name] = i
-		b.LayerSortedBones[isAfterPhysics] = append(b.LayerSortedBones[isAfterPhysics], bone)
+		b.LayerSortedNames[false][bone.Name] = i
+		b.LayerSortedBones[false] = append(b.LayerSortedBones[false], bone)
+	}
+}
+
+func (b *Bones) createLayerIndexesAfterPhysics() {
+	if _, ok := b.LayerSortedBones[true]; !ok {
+		b.LayerSortedBones[true] = make([]*Bone, 0)
+	}
+	if _, ok := b.LayerSortedNames[true]; !ok {
+		b.LayerSortedNames[true] = make(map[string]int)
+	}
+
+	beforeLayerIndexes := b.GetLayerIndexes(false)
+	afterLayerIndexes := b.GetLayerIndexes(true)
+
+	n := 0
+	for _, beforeBoneIndex := range beforeLayerIndexes {
+		for _, afterBoneIndex := range afterLayerIndexes {
+			bone := b.Get(afterBoneIndex)
+			if slices.Contains(bone.Extend.ParentBoneIndexes, beforeBoneIndex) {
+				b.LayerSortedNames[true][bone.Name] = n
+				b.LayerSortedBones[true] = append(b.LayerSortedBones[true], bone)
+				n++
+			}
+		}
+	}
+
+	for _, boneIndex := range afterLayerIndexes {
+		bone := b.Get(boneIndex)
+		b.LayerSortedNames[true][bone.Name] = n
+		b.LayerSortedBones[true] = append(b.LayerSortedBones[true], bone)
+		n++
 	}
 }
 

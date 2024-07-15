@@ -132,12 +132,9 @@ func deformBeforePhysics(
 
 	vds := delta.NewVmdDeltas(model.Vertices)
 
-	// IKのON/OFF
-	ikFrame := motion.IkFrames.Get(frame)
-
 	if prevDeltas == nil {
 		vds.Morphs = deform.DeformMorph(motion, motion.MorphFrames, frame, model, nil)
-		vds.Bones = deform.DeformBoneByPhysicsFlag(model, motion.BoneFrames, ikFrame, nil, vds.Morphs, true, frame, nil, false)
+		vds.Bones = deform.DeformBoneByPhysicsFlag(model, motion, nil, true, frame, nil, false)
 	} else {
 		vds.Morphs = prevDeltas.Morphs
 		vds.Bones = prevDeltas.Bones
@@ -198,9 +195,6 @@ func deformAfterPhysics(
 
 	// 物理剛体位置を更新
 	if enablePhysics || resetPhysics {
-		// IKのON/OFF
-		ikFrame := motion.IkFrames.Get(frame)
-
 		for _, isAfterPhysics := range []bool{false, true} {
 			for _, bone := range model.Bones.LayerSortedBones[isAfterPhysics] {
 				if bone.Extend.RigidBody == nil || bone.Extend.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
@@ -216,7 +210,7 @@ func deformAfterPhysics(
 		}
 
 		// 物理後のデフォーム情報
-		deltas.Bones = deform.DeformBoneByPhysicsFlag(model, motion.BoneFrames, ikFrame, deltas.Bones, deltas.Morphs, true, frame, nil, true)
+		deltas.Bones = deform.DeformBoneByPhysicsFlag(model, motion, nil, true, frame, nil, true)
 	}
 
 	// GL描画用データの作成

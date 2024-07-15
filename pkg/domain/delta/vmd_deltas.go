@@ -9,6 +9,9 @@ type VmdDeltas struct {
 	Morphs *MorphDeltas
 }
 
-func NewVmdDeltas(vertices *pmx.Vertices) *VmdDeltas {
-	return &VmdDeltas{}
+func NewVmdDeltas(materials *pmx.Materials, bones *pmx.Bones) *VmdDeltas {
+	return &VmdDeltas{
+		Bones:  NewBoneDeltas(bones),
+		Morphs: NewMorphDeltas(materials, bones),
+	}
 }
