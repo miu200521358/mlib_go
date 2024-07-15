@@ -101,6 +101,12 @@ func (p *MPhysics) ResetWorld() {
 	}
 }
 
+func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
+	// pm.physics = physics
+	physics.initRigidBodies(modelIndex, model.RigidBodies)
+	initJointsPhysics(modelIndex, physics, model.RigidBodies, model.Joints)
+}
+
 func (p *MPhysics) DrawDebugLines(isDrawRigidBodyFront bool) {
 	// // 標準出力を一時的にリダイレクトする
 	// old := os.Stdout // keep backup of the real stdout
@@ -167,13 +173,6 @@ func (p *MPhysics) DebugDrawWorld(visibleRigidBody, visibleJoint bool) {
 func (p *MPhysics) GetRigidBody(modelIndex, rigidBodyIndex int) (bt.BtRigidBody, bt.BtTransform) {
 	r := p.rigidBodies[modelIndex][rigidBodyIndex]
 	return r.btRigidBody, r.btLocalTransform
-}
-
-func (p *MPhysics) AddRigidBody(btRigidBody bt.BtRigidBody, localTransform bt.BtTransform,
-	modelIndex, rigidBodyIndex, group, mask int) {
-	p.world.AddRigidBody(btRigidBody, group, mask)
-	p.rigidBodies[modelIndex][rigidBodyIndex] = &rigidbodyValue{
-		btRigidBody: btRigidBody, btLocalTransform: localTransform, mask: mask, group: group}
 }
 
 func (p *MPhysics) DeleteRigidBodies(modelIndex int) {

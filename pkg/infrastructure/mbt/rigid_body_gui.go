@@ -10,10 +10,78 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
 
-func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
-	// pm.physics = physics
-	initRigidBodiesPhysics(modelIndex, physics, model.RigidBodies)
-	initJointsPhysics(modelIndex, physics, model.RigidBodies, model.Joints)
+func (physics *MPhysics) initRigidBodies(modelIndex int, rigidBodies *pmx.RigidBodies) {
+	// 剛体を順番にボーンと紐付けていく
+	physics.rigidBodies[modelIndex] = make([]*rigidbodyValue, len(rigidBodies.Data))
+	for _, rigidBody := range rigidBodies.Data {
+		// 物理設定の初期化
+		physics.initRigidBody(modelIndex, rigidBody)
+	}
+}
+
+func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody) {
+	var btCollisionShape bt.BtCollisionShape
+
+	// マイナスサイズは許容しない
+	size := rigidBody.Size.Clamped(mmath.MVec3Zero, mmath.MVec3MaxVal)
+
+	switch rigidBody.ShapeType {
+	case pmx.SHAPE_SPHERE:
+		// 球剛体
+		btCollisionShape = bt.NewBtSphereShape(float32(size.X))
+	case pmx.SHAPE_BOX:
+		// 箱剛体
+		btCollisionShape = bt.NewBtBoxShape(
+			bt.NewBtVector3(float32(size.X), float32(size.Y), float32(size.Z)))
+	case pmx.SHAPE_CAPSULE:
+		// カプセル剛体
+		btCollisionShape = bt.NewBtCapsuleShape(float32(size.X), float32(size.Y))
+	}
+
+	// 質量
+	mass := float32(0.0)
+	localInertia := bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
+	if rigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
+		// ボーン追従ではない場合そのまま設定
+		mass = float32(rigidBody.RigidBodyParam.Mass)
+	}
+	if mass != 0 {
+		// 質量が設定されている場合、慣性を計算
+		btCollisionShape.CalculateLocalInertia(mass, localInertia)
+	}
+
+	// 剛体の初期位置と回転
+	btRigidBodyTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation), MVec3Bullet(rigidBody.Position))
+
+	// ボーンから見た剛体の初期位置
+	var bPos *mmath.MVec3
+	if rigidBody.Bone != nil {
+		bPos = rigidBody.Bone.Position
+	} else if rigidBody.JointedBone != nil {
+		bPos = rigidBody.JointedBone.Position
+	} else {
+		bPos = mmath.NewMVec3()
+	}
+	rbLocalPos := rigidBody.Position.Subed(bPos)
+	btRigidBodyLocalTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation), MVec3Bullet(rbLocalPos))
+
+	// 剛体のグローバル位置と回転
+	motionState := bt.NewBtDefaultMotionState(btRigidBodyTransform)
+
+	btRigidBody := bt.NewBtRigidBody(mass, motionState, btCollisionShape, localInertia)
+	btRigidBody.SetDamping(float32(rigidBody.RigidBodyParam.LinearDamping), float32(rigidBody.RigidBodyParam.AngularDamping))
+	btRigidBody.SetRestitution(float32(rigidBody.RigidBodyParam.Restitution))
+	btRigidBody.SetFriction(float32(rigidBody.RigidBodyParam.Friction))
+	btRigidBody.SetUserIndex(rigidBody.Index)
+
+	// 剛体・剛体グループ・非衝突グループを追加
+	group := 1 << rigidBody.CollisionGroup
+	physics.world.AddRigidBody(btRigidBody, group, rigidBody.CollisionGroupMaskValue)
+	physics.rigidBodies[modelIndex][rigidBody.Index] = &rigidbodyValue{
+		btRigidBody: btRigidBody, btLocalTransform: btRigidBodyLocalTransform,
+		mask: rigidBody.CollisionGroupMaskValue, group: group}
+
+	UpdateFlags(modelIndex, physics, rigidBody, true, false)
 }
 
 func UpdateFlags(
@@ -68,93 +136,6 @@ func UpdateFlags(
 	}
 
 	return false
-}
-
-func InitRigidBodyPhysics(modelIndex int, modelPhysics *MPhysics, r *pmx.RigidBody) {
-	var btCollisionShape bt.BtCollisionShape
-
-	// マイナスサイズは許容しない
-	size := r.Size.Absed()
-
-	switch r.ShapeType {
-	case pmx.SHAPE_SPHERE:
-		// 球剛体
-		btCollisionShape = bt.NewBtSphereShape(float32(size.X))
-	case pmx.SHAPE_BOX:
-		// 箱剛体
-		btCollisionShape = bt.NewBtBoxShape(
-			bt.NewBtVector3(float32(size.X), float32(size.Y), float32(size.Z)))
-	case pmx.SHAPE_CAPSULE:
-		// カプセル剛体
-		btCollisionShape = bt.NewBtCapsuleShape(float32(size.X), float32(size.Y))
-	}
-	// btCollisionShape.SetMargin(0.0001)
-
-	// r.CorrectPhysicsType = r.PhysicsType
-	// if r.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE && r.BoneIndex < 0 {
-	// 	// ボーン追従 + 物理剛体の場合、ボーンIndexが設定されていない場合は物理剛体に変更
-	// 	r.CorrectPhysicsType = PHYSICS_TYPE_DYNAMIC
-	// }
-
-	// 質量
-	mass := float32(0.0)
-	localInertia := bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
-	if r.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
-		// ボーン追従ではない場合そのまま設定
-		mass = float32(r.RigidBodyParam.Mass)
-	}
-	if mass != 0 {
-		// 質量が設定されている場合、慣性を計算
-		btCollisionShape.CalculateLocalInertia(mass, localInertia)
-	}
-
-	// // ボーンのローカル位置
-	// boneTransform := bt.NewBtTransform()
-	// boneTransform.SetIdentity()
-	// boneTransform.SetOrigin(boneLocalPosition.Bullet())
-
-	// 剛体の初期位置と回転
-	btRigidBodyTransform := bt.NewBtTransform(MRotationBullet(r.Rotation), MVec3Bullet(r.Position))
-
-	// ボーンから見た剛体の初期位置
-	var bPos *mmath.MVec3
-	if r.Bone != nil {
-		bPos = r.Bone.Position
-	} else if r.JointedBone != nil {
-		bPos = r.JointedBone.Position
-	} else {
-		bPos = mmath.NewMVec3()
-	}
-	rbLocalPos := r.Position.Subed(bPos)
-	btRigidBodyLocalTransform := bt.NewBtTransform(MRotationBullet(r.Rotation), MVec3Bullet(rbLocalPos))
-
-	// {
-	// 	mlog.V("---------------------------------")
-	// }
-	// {
-	// 	mat := mgl32.Mat4{}
-	// 	r.BtRigidBodyTransform.GetOpenGLMatrix(&mat[0])
-	// 	mlog.V("1. [%s] BtRigidBodyTransform: \n%v\n", r.Name, mat)
-	// }
-
-	// 剛体のグローバル位置と回転
-	motionState := bt.NewBtDefaultMotionState(btRigidBodyTransform)
-
-	btRigidBody := bt.NewBtRigidBody(mass, motionState, btCollisionShape, localInertia)
-	btRigidBody.SetDamping(float32(r.RigidBodyParam.LinearDamping), float32(r.RigidBodyParam.AngularDamping))
-	btRigidBody.SetRestitution(float32(r.RigidBodyParam.Restitution))
-	btRigidBody.SetFriction(float32(r.RigidBodyParam.Friction))
-	btRigidBody.SetUserIndex(r.Index)
-	// btRigidBody.SetSleepingThresholds(0.1, (180.0 * 0.1 / math.Pi))
-
-	// mlog.V("name: %s, group: %d, mask: %d\n", r.Name, r.CollisionGroup, r.CollisionGroupMaskValue)
-
-	// modelPhysics.AddNonFilterProxy(btRigidBody.GetBroadphaseProxy())
-	// 剛体・剛体グループ・非衝突グループを追加
-	modelPhysics.AddRigidBody(btRigidBody, btRigidBodyLocalTransform, modelIndex, r.Index,
-		1<<r.CollisionGroup, r.CollisionGroupMaskValue)
-
-	UpdateFlags(modelIndex, modelPhysics, r, true, false)
 }
 
 func UpdateTransform(
@@ -280,15 +261,6 @@ func GetRigidBodyBoneMatrix(
 	// }
 
 	return newMMat4ByMgl(&boneGlobalMatrixGL)
-}
-
-func initRigidBodiesPhysics(modelIndex int, physics *MPhysics, r *pmx.RigidBodies) {
-	// 剛体を順番にボーンと紐付けていく
-	physics.rigidBodies[modelIndex] = make([]*rigidbodyValue, len(r.Data))
-	for _, rigidBody := range r.Data {
-		// 物理設定の初期化
-		InitRigidBodyPhysics(modelIndex, physics, rigidBody)
-	}
 }
 
 // NewMMat4ByMgl OpenGL座標系からMMD座標系に変換された行列を返します
