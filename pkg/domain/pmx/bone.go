@@ -25,11 +25,11 @@ func NewIkLink() *IkLink {
 	return &IkLink{
 		BoneIndex:          -1,
 		AngleLimit:         false,
-		MinAngleLimit:      mmath.NewRotation(),
-		MaxAngleLimit:      mmath.NewRotation(),
+		MinAngleLimit:      mmath.NewMRotation(),
+		MaxAngleLimit:      mmath.NewMRotation(),
 		LocalAngleLimit:    false,
-		LocalMinAngleLimit: mmath.NewRotation(),
-		LocalMaxAngleLimit: mmath.NewRotation(),
+		LocalMinAngleLimit: mmath.NewMRotation(),
+		LocalMaxAngleLimit: mmath.NewMRotation(),
 	}
 }
 
@@ -50,7 +50,7 @@ func NewIk() *Ik {
 	return &Ik{
 		BoneIndex:    -1,
 		LoopCount:    0,
-		UnitRotation: mmath.NewRotation(),
+		UnitRotation: mmath.NewMRotation(),
 		Links:        []*IkLink{},
 	}
 }
@@ -148,11 +148,11 @@ func NewBone() *Bone {
 		ChildBoneIndexes:       make([]int, 0),
 		EffectiveBoneIndexes:   make([]int, 0),
 		AngleLimit:             false,
-		MinAngleLimit:          mmath.NewRotation(),
-		MaxAngleLimit:          mmath.NewRotation(),
+		MinAngleLimit:          mmath.NewMRotation(),
+		MaxAngleLimit:          mmath.NewMRotation(),
 		LocalAngleLimit:        false,
-		LocalMinAngleLimit:     mmath.NewRotation(),
-		LocalMaxAngleLimit:     mmath.NewRotation(),
+		LocalMinAngleLimit:     mmath.NewMRotation(),
+		LocalMaxAngleLimit:     mmath.NewMRotation(),
 		AxisSign:               1,
 		RigidBody:              nil,
 	}

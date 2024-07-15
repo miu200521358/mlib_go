@@ -123,7 +123,12 @@ func NewBoneMorphOffset(boneIndex int, position *mmath.MVec3, rotation *mmath.MR
 		BoneIndex: boneIndex,
 		Position:  position,
 		Rotation:  rotation,
-		Extend:    &BoneMorphOffsetExtend{},
+		Extend: &BoneMorphOffsetExtend{
+			Scale:         &mmath.MVec3{1, 1, 1},
+			LocalPosition: &mmath.MVec3{0, 0, 0},
+			LocalRotation: mmath.NewMRotation(),
+			LocalScale:    &mmath.MVec3{1, 1, 1},
+		},
 	}
 }
 

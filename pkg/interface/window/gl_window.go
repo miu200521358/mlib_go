@@ -854,12 +854,12 @@ func (w *GlWindow) Run() {
 					w.modelSets[k].Model.Delete()
 					w.modelSets[k].Model = nil
 				}
-				if w.modelSets[k].Meshes == nil {
-					w.modelSets[k].Meshes = renderer.DrawInitialize(w.WindowIndex, w.modelSets[k].NextModel)
-					mbt.InitPhysics(w.Physics, w.modelSets[k].NextModel, k)
-				}
 				w.modelSets[k].Model = w.modelSets[k].NextModel
 				w.modelSets[k].NextModel = nil
+				if w.modelSets[k].Meshes == nil {
+					w.modelSets[k].Meshes = renderer.DrawInitialize(w.WindowIndex, w.modelSets[k].Model)
+					mbt.InitPhysics(w.Physics, w.modelSets[k].Model, k)
+				}
 				w.isSaveDelta = false
 			}
 

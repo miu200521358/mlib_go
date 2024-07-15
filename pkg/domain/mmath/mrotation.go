@@ -12,7 +12,7 @@ type MRotation struct {
 	quaternion *MQuaternion
 }
 
-func NewRotation() *MRotation {
+func NewMRotation() *MRotation {
 	model := &MRotation{
 		radians:    nil,
 		degrees:    nil,
@@ -23,21 +23,21 @@ func NewRotation() *MRotation {
 
 // NewRotationFromRadians はラジアン角度からで回転を表すモデルを生成します。
 func NewRotationFromRadians(vRadians *MVec3) *MRotation {
-	model := NewRotation()
+	model := NewMRotation()
 	model.SetRadians(vRadians)
 	return model
 }
 
 // NewRotationFromDegrees は度数角度からで回転を表すモデルを生成します。
 func NewRotationFromDegrees(vDegrees *MVec3) *MRotation {
-	model := NewRotation()
+	model := NewMRotation()
 	model.SetDegrees(vDegrees)
 	return model
 }
 
 // NewRotationFromQuaternion はクォータニオンからで回転を表すモデルを生成します。
 func NewRotationFromQuaternion(vQuaternion *MQuaternion) *MRotation {
-	model := NewRotation()
+	model := NewMRotation()
 	model.SetQuaternion(vQuaternion)
 	return model
 }
@@ -109,7 +109,7 @@ func (m *MRotation) SetDegrees(v *MVec3) {
 
 // Copy
 func (rot *MRotation) Copy() *MRotation {
-	copied := NewRotation()
+	copied := NewMRotation()
 	if rot.radians != nil {
 		copied.radians = &MVec3{rot.radians.GetX(), rot.radians.GetY(), rot.radians.GetZ()}
 	}

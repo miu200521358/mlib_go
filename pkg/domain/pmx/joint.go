@@ -20,8 +20,8 @@ func NewJointParam() *JointParam {
 	return &JointParam{
 		TranslationLimitMin:       mmath.NewMVec3(),
 		TranslationLimitMax:       mmath.NewMVec3(),
-		RotationLimitMin:          mmath.NewRotation(),
-		RotationLimitMax:          mmath.NewRotation(),
+		RotationLimitMin:          mmath.NewMRotation(),
+		RotationLimitMax:          mmath.NewMRotation(),
 		SpringConstantTranslation: mmath.NewMVec3(),
 		SpringConstantRotation:    mmath.NewMVec3(),
 	}
@@ -46,7 +46,7 @@ func NewJoint() *Joint {
 		RigidbodyIndexA: -1,
 		RigidbodyIndexB: -1,
 		Position:        mmath.NewMVec3(),
-		Rotation:        mmath.NewRotation(),
+		Rotation:        mmath.NewMRotation(),
 		JointParam:      NewJointParam(),
 		IsSystem:        false,
 	}

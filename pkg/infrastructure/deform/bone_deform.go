@@ -1154,7 +1154,7 @@ func fillBoneDeform(
 		// ボーンの移動位置、回転角度、拡大率を取得
 		d.FramePosition, d.FrameMorphPosition = getPosition(bf, bone, boneDeltas, morphDeltas)
 		d.FrameRotation, d.FrameMorphRotation = getRotation(bf, bone, boneDeltas, morphDeltas)
-		d.FrameScale = getScale(bf, bone, boneDeltas, morphDeltas)
+		d.FrameScale, d.FrameMorphScale = getScale(bf, bone, boneDeltas, morphDeltas)
 		boneDeltas.Update(d)
 	}
 
@@ -1182,7 +1182,7 @@ func getPosition(
 	var morphPos *mmath.MVec3
 	if morphDeltas != nil && morphDeltas.Bones.Get(bone.Index) != nil &&
 		morphDeltas.Bones.Get(bone.Index).FramePosition != nil {
-		morphPos = morphDeltas.Bones.Get(bone.Index).FramePosition
+		morphPos = morphDeltas.Bones.Get(bone.Index).FramePosition.Copy()
 	}
 
 	return pos, morphPos
@@ -1211,7 +1211,7 @@ func getRotation(
 			if morphDeltas != nil && morphDeltas.Bones.Get(bone.Index) != nil &&
 				morphDeltas.Bones.Get(bone.Index).FrameRotation != nil {
 				// IKの場合はIK計算時に組み込まれているので、まだframeRotationが無い場合のみ加味
-				morphRot = morphDeltas.Bones.Get(bone.Index).FrameRotation
+				morphRot = morphDeltas.Bones.Get(bone.Index).FrameRotation.Copy()
 				// mlog.I("[%s][%04d][%d]: rot: %s(%s), morphRot: %s(%s)\n", bone.Name, frame, loop,
 				// 	rot.String(), rot.ToMMDDegrees().String(), morphRot.String(), morphRot.ToMMDDegrees().String())
 			}
@@ -1231,7 +1231,7 @@ func getScale(
 	bone *pmx.Bone,
 	boneDeltas *delta.BoneDeltas,
 	morphDeltas *delta.MorphDeltas,
-) *mmath.MVec3 {
+) (*mmath.MVec3, *mmath.MVec3) {
 
 	scale := &mmath.MVec3{1, 1, 1}
 	if boneDeltas != nil && boneDeltas.Get(bone.Index) != nil &&
@@ -1241,10 +1241,11 @@ func getScale(
 		scale.Add(bf.Scale)
 	}
 
+	var morphScale *mmath.MVec3
 	if morphDeltas != nil && morphDeltas.Bones.Get(bone.Index) != nil &&
 		morphDeltas.Bones.Get(bone.Index).FrameScale != nil {
-		return scale.Add(morphDeltas.Bones.Get(bone.Index).FrameScale)
+		morphScale = morphDeltas.Bones.Get(bone.Index).FrameScale.Copy()
 	}
 
-	return scale
+	return scale, morphScale
 }

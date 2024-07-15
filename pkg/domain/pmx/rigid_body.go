@@ -124,7 +124,7 @@ func NewRigidBody() *RigidBody {
 		ShapeType:               SHAPE_BOX,
 		Size:                    mmath.NewMVec3(),
 		Position:                mmath.NewMVec3(),
-		Rotation:                mmath.NewRotation(),
+		Rotation:                mmath.NewMRotation(),
 		RigidBodyParam:          NewRigidBodyParam(),
 		PhysicsType:             PHYSICS_TYPE_STATIC,
 		XDirection:              mmath.NewMVec3(),

@@ -641,11 +641,11 @@ func (r *PmxRepository) loadBones(model *pmx.PmxModel) error {
 			ChildBoneIndexes:       make([]int, 0),
 			EffectiveBoneIndexes:   make([]int, 0),
 			AngleLimit:             false,
-			MinAngleLimit:          mmath.NewRotation(),
-			MaxAngleLimit:          mmath.NewRotation(),
+			MinAngleLimit:          mmath.NewMRotation(),
+			MaxAngleLimit:          mmath.NewMRotation(),
 			LocalAngleLimit:        false,
-			LocalMinAngleLimit:     mmath.NewRotation(),
-			LocalMaxAngleLimit:     mmath.NewRotation(),
+			LocalMinAngleLimit:     mmath.NewMRotation(),
+			LocalMaxAngleLimit:     mmath.NewMRotation(),
 			AxisSign:               1,
 		}
 
