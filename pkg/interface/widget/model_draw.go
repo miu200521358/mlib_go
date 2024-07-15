@@ -130,11 +130,11 @@ func deformBeforePhysics(
 		motion = vmd.NewVmdMotion("")
 	}
 
-	vds := delta.NewVmdDeltas(model.Vertices)
+	vds := delta.NewVmdDeltas(model.Materials, model.Bones)
 
 	if prevDeltas == nil {
 		vds.Morphs = deform.DeformMorph(motion, motion.MorphFrames, frame, model, nil)
-		vds.Bones = deform.DeformBoneByPhysicsFlag(model, motion, nil, true, frame, nil, false)
+		vds = deform.DeformBoneByPhysicsFlag(model, motion, vds, true, frame, nil, false)
 	} else {
 		vds.Morphs = prevDeltas.Morphs
 		vds.Bones = prevDeltas.Bones
@@ -210,7 +210,7 @@ func deformAfterPhysics(
 		}
 
 		// 物理後のデフォーム情報
-		deltas.Bones = deform.DeformBoneByPhysicsFlag(model, motion, nil, true, frame, nil, true)
+		deltas = deform.DeformBoneByPhysicsFlag(model, motion, deltas, true, frame, nil, true)
 	}
 
 	// GL描画用データの作成
