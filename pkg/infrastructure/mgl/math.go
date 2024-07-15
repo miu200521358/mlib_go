@@ -10,7 +10,7 @@ import (
 
 // Gl OpenGL座標系に変換された3次元ベクトルを返します
 func NewGlVec3(v *mmath.MVec3) mgl32.Vec3 {
-	return mgl32.Vec3{float32(-v.GetX()), float32(v.GetY()), float32(v.GetZ())}
+	return mgl32.Vec3{float32(-v.X), float32(v.Y), float32(v.Z)}
 }
 
 // GL OpenGL座標系に変換されたクォータニオンベクトルを返します

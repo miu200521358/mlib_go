@@ -117,10 +117,10 @@ func diffuse(md *delta.MaterialMorphDelta) mgl32.Vec4 {
 	da := md.AddMaterial.Diffuse.Muled(md.AddRatios.Diffuse)
 
 	return mgl32.Vec4{
-		float32(d2.GetX()*dm.GetX() + da.GetX()),
-		float32(d2.GetY()*dm.GetY() + da.GetY()),
-		float32(d2.GetZ()*dm.GetZ() + da.GetZ()),
-		float32(md.Diffuse.GetW()*dm.GetW() + da.GetW()),
+		float32(d2.X*dm.X + da.X),
+		float32(d2.Y*dm.Y + da.Y),
+		float32(d2.Z*dm.Z + da.Z),
+		float32(md.Diffuse.W*dm.W + da.W),
 	}
 }
 
@@ -130,10 +130,10 @@ func specular(md *delta.MaterialMorphDelta) mgl32.Vec4 {
 	sa := md.AddMaterial.Specular.Muled(md.AddRatios.Specular)
 
 	return mgl32.Vec4{
-		float32(s1.GetX()*sm.GetX() + sa.GetX()),
-		float32(s1.GetY()*sm.GetY() + sa.GetY()),
-		float32(s1.GetZ()*sm.GetZ() + sa.GetZ()),
-		float32(md.Specular.GetW()*sm.GetW() + sa.GetW()),
+		float32(s1.X*sm.X + sa.X),
+		float32(s1.Y*sm.Y + sa.Y),
+		float32(s1.Z*sm.Z + sa.Z),
+		float32(md.Specular.W*sm.W + sa.W),
 	}
 }
 
@@ -142,22 +142,22 @@ func ambient(md *delta.MaterialMorphDelta) mgl32.Vec3 {
 	am := md.MulMaterial.Ambient.Muled(md.MulRatios.Ambient)
 	aa := md.AddMaterial.Ambient.Muled(md.AddRatios.Ambient)
 	return mgl32.Vec3{
-		float32(a.GetX()*am.GetX() + aa.GetX()),
-		float32(a.GetY()*am.GetY() + aa.GetY()),
-		float32(a.GetZ()*am.GetZ() + aa.GetZ()),
+		float32(a.X*am.X + aa.X),
+		float32(a.Y*am.Y + aa.Y),
+		float32(a.Z*am.Z + aa.Z),
 	}
 }
 
 func edge(md *delta.MaterialMorphDelta) mgl32.Vec4 {
-	e := md.Edge.GetXYZ().MuledScalar(float64(md.Diffuse.GetW()))
+	e := md.Edge.GetXYZ().MuledScalar(float64(md.Diffuse.W))
 	em := md.MulMaterial.Edge.Muled(md.MulRatios.Edge)
 	ea := md.AddMaterial.Edge.Muled(md.AddRatios.Edge)
 
 	return mgl32.Vec4{
-		float32(e.GetX()*em.GetX() + ea.GetX()),
-		float32(e.GetY()*em.GetY() + ea.GetY()),
-		float32(e.GetZ()*em.GetZ() + ea.GetZ()),
-		float32(md.Edge.GetW()) * float32(md.Diffuse.GetW()*em.GetW()+ea.GetW()),
+		float32(e.X*em.X + ea.X),
+		float32(e.Y*em.Y + ea.Y),
+		float32(e.Z*em.Z + ea.Z),
+		float32(md.Edge.W) * float32(md.Diffuse.W*em.W+ea.W),
 	}
 }
 

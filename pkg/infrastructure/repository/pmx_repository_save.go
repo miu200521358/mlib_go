@@ -185,20 +185,20 @@ func (r *PmxRepository) saveVertices(fout *os.File, model *pmx.PmxModel, boneIdx
 	for i := range model.Vertices.Len() {
 		vertex := model.Vertices.Get(i)
 
-		r.writeNumber(fout, binaryType_float, vertex.Position.GetX(), 0.0, false)
-		r.writeNumber(fout, binaryType_float, vertex.Position.GetY(), 0.0, false)
-		r.writeNumber(fout, binaryType_float, vertex.Position.GetZ(), 0.0, false)
-		r.writeNumber(fout, binaryType_float, vertex.Normal.GetX(), 0.0, false)
-		r.writeNumber(fout, binaryType_float, vertex.Normal.GetY(), 0.0, false)
-		r.writeNumber(fout, binaryType_float, vertex.Normal.GetZ(), 0.0, false)
+		r.writeNumber(fout, binaryType_float, vertex.Position.X, 0.0, false)
+		r.writeNumber(fout, binaryType_float, vertex.Position.Y, 0.0, false)
+		r.writeNumber(fout, binaryType_float, vertex.Position.Z, 0.0, false)
+		r.writeNumber(fout, binaryType_float, vertex.Normal.X, 0.0, false)
+		r.writeNumber(fout, binaryType_float, vertex.Normal.Y, 0.0, false)
+		r.writeNumber(fout, binaryType_float, vertex.Normal.Z, 0.0, false)
 		r.writeNumber(fout, binaryType_float, vertex.Uv.X, 0.0, false)
 		r.writeNumber(fout, binaryType_float, vertex.Uv.Y, 0.0, false)
 
 		for _, uv := range vertex.ExtendedUvs {
-			r.writeNumber(fout, binaryType_float, uv.GetX(), 0.0, false)
-			r.writeNumber(fout, binaryType_float, uv.GetY(), 0.0, false)
-			r.writeNumber(fout, binaryType_float, uv.GetZ(), 0.0, false)
-			r.writeNumber(fout, binaryType_float, uv.GetW(), 0.0, false)
+			r.writeNumber(fout, binaryType_float, uv.X, 0.0, false)
+			r.writeNumber(fout, binaryType_float, uv.Y, 0.0, false)
+			r.writeNumber(fout, binaryType_float, uv.Z, 0.0, false)
+			r.writeNumber(fout, binaryType_float, uv.W, 0.0, false)
 		}
 
 		for j := len(vertex.ExtendedUvs); j < model.ExtendedUVCount; j++ {
@@ -232,15 +232,15 @@ func (r *PmxRepository) saveVertices(fout *os.File, model *pmx.PmxModel, boneIdx
 			r.writeNumber(fout, boneIdxType, float64(v.Indexes[0]), 0.0, false)
 			r.writeNumber(fout, boneIdxType, float64(v.Indexes[1]), 0.0, false)
 			r.writeNumber(fout, binaryType_float, v.Weights[0], 0.0, true)
-			r.writeNumber(fout, binaryType_float, v.SdefC.GetX(), 0.0, false)
-			r.writeNumber(fout, binaryType_float, v.SdefC.GetY(), 0.0, false)
-			r.writeNumber(fout, binaryType_float, v.SdefC.GetZ(), 0.0, false)
-			r.writeNumber(fout, binaryType_float, v.SdefR0.GetX(), 0.0, false)
-			r.writeNumber(fout, binaryType_float, v.SdefR0.GetY(), 0.0, false)
-			r.writeNumber(fout, binaryType_float, v.SdefR0.GetZ(), 0.0, false)
-			r.writeNumber(fout, binaryType_float, v.SdefR1.GetX(), 0.0, false)
-			r.writeNumber(fout, binaryType_float, v.SdefR1.GetY(), 0.0, false)
-			r.writeNumber(fout, binaryType_float, v.SdefR1.GetZ(), 0.0, false)
+			r.writeNumber(fout, binaryType_float, v.SdefC.X, 0.0, false)
+			r.writeNumber(fout, binaryType_float, v.SdefC.Y, 0.0, false)
+			r.writeNumber(fout, binaryType_float, v.SdefC.Z, 0.0, false)
+			r.writeNumber(fout, binaryType_float, v.SdefR0.X, 0.0, false)
+			r.writeNumber(fout, binaryType_float, v.SdefR0.Y, 0.0, false)
+			r.writeNumber(fout, binaryType_float, v.SdefR0.Z, 0.0, false)
+			r.writeNumber(fout, binaryType_float, v.SdefR1.X, 0.0, false)
+			r.writeNumber(fout, binaryType_float, v.SdefR1.Y, 0.0, false)
+			r.writeNumber(fout, binaryType_float, v.SdefR1.Z, 0.0, false)
 		default:
 			mlog.W("頂点deformなし: %v\n", vertex)
 		}
@@ -307,47 +307,47 @@ func (r *PmxRepository) saveMaterials(fout *os.File, model *pmx.PmxModel, textur
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Diffuse.GetX(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Diffuse.X, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Diffuse.GetY(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Diffuse.Y, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Diffuse.GetZ(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Diffuse.Z, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Diffuse.GetW(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Diffuse.W, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Specular.GetX(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Specular.X, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Specular.GetY(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Specular.Y, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Specular.GetZ(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Specular.Z, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Specular.GetW(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Specular.W, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Ambient.GetX(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Ambient.X, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Ambient.GetY(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Ambient.Y, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Ambient.GetZ(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Ambient.Z, 0.0, true)
 		if err != nil {
 			return err
 		}
@@ -355,19 +355,19 @@ func (r *PmxRepository) saveMaterials(fout *os.File, model *pmx.PmxModel, textur
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Edge.GetX(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Edge.X, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Edge.GetY(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Edge.Y, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Edge.GetZ(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Edge.Z, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, material.Edge.GetW(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, material.Edge.W, 0.0, true)
 		if err != nil {
 			return err
 		}
@@ -428,15 +428,15 @@ func (r *PmxRepository) saveBones(fout *os.File, targetBones []*pmx.Bone, boneId
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, bone.Position.GetX(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, bone.Position.X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, bone.Position.GetY(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, bone.Position.Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, bone.Position.GetZ(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, bone.Position.Z, 0.0, false)
 		if err != nil {
 			return err
 		}
@@ -459,15 +459,15 @@ func (r *PmxRepository) saveBones(fout *os.File, targetBones []*pmx.Bone, boneId
 				return err
 			}
 		} else {
-			err = r.writeNumber(fout, binaryType_float, bone.TailPosition.GetX(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.TailPosition.X, 0.0, false)
 			if err != nil {
 				return err
 			}
-			err = r.writeNumber(fout, binaryType_float, bone.TailPosition.GetY(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.TailPosition.Y, 0.0, false)
 			if err != nil {
 				return err
 			}
-			err = r.writeNumber(fout, binaryType_float, bone.TailPosition.GetZ(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.TailPosition.Z, 0.0, false)
 			if err != nil {
 				return err
 			}
@@ -483,41 +483,41 @@ func (r *PmxRepository) saveBones(fout *os.File, targetBones []*pmx.Bone, boneId
 			}
 		}
 		if bone.HasFixedAxis() {
-			err = r.writeNumber(fout, binaryType_float, bone.FixedAxis.GetX(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.FixedAxis.X, 0.0, false)
 			if err != nil {
 				return err
 			}
-			err = r.writeNumber(fout, binaryType_float, bone.FixedAxis.GetY(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.FixedAxis.Y, 0.0, false)
 			if err != nil {
 				return err
 			}
-			err = r.writeNumber(fout, binaryType_float, bone.FixedAxis.GetZ(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.FixedAxis.Z, 0.0, false)
 			if err != nil {
 				return err
 			}
 		}
 		if bone.HasLocalAxis() {
-			err = r.writeNumber(fout, binaryType_float, bone.LocalAxisX.GetX(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.LocalAxisX.X, 0.0, false)
 			if err != nil {
 				return err
 			}
-			err = r.writeNumber(fout, binaryType_float, bone.LocalAxisX.GetY(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.LocalAxisX.Y, 0.0, false)
 			if err != nil {
 				return err
 			}
-			err = r.writeNumber(fout, binaryType_float, bone.LocalAxisX.GetZ(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.LocalAxisX.Z, 0.0, false)
 			if err != nil {
 				return err
 			}
-			err = r.writeNumber(fout, binaryType_float, bone.LocalAxisZ.GetX(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.LocalAxisZ.X, 0.0, false)
 			if err != nil {
 				return err
 			}
-			err = r.writeNumber(fout, binaryType_float, bone.LocalAxisZ.GetY(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.LocalAxisZ.Y, 0.0, false)
 			if err != nil {
 				return err
 			}
-			err = r.writeNumber(fout, binaryType_float, bone.LocalAxisZ.GetZ(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.LocalAxisZ.Z, 0.0, false)
 			if err != nil {
 				return err
 			}
@@ -537,7 +537,7 @@ func (r *PmxRepository) saveBones(fout *os.File, targetBones []*pmx.Bone, boneId
 			if err != nil {
 				return err
 			}
-			err = r.writeNumber(fout, binaryType_float, bone.Ik.UnitRotation.GetRadians().GetX(), 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.Ik.UnitRotation.GetRadians().X, 0.0, false)
 			if err != nil {
 				return err
 			}
@@ -556,27 +556,27 @@ func (r *PmxRepository) saveBones(fout *os.File, targetBones []*pmx.Bone, boneId
 					return err
 				}
 				if link.AngleLimit {
-					err = r.writeNumber(fout, binaryType_float, link.MinAngleLimit.GetRadians().GetX(), 0.0, false)
+					err = r.writeNumber(fout, binaryType_float, link.MinAngleLimit.GetRadians().X, 0.0, false)
 					if err != nil {
 						return err
 					}
-					err = r.writeNumber(fout, binaryType_float, link.MinAngleLimit.GetRadians().GetY(), 0.0, false)
+					err = r.writeNumber(fout, binaryType_float, link.MinAngleLimit.GetRadians().Y, 0.0, false)
 					if err != nil {
 						return err
 					}
-					err = r.writeNumber(fout, binaryType_float, link.MinAngleLimit.GetRadians().GetZ(), 0.0, false)
+					err = r.writeNumber(fout, binaryType_float, link.MinAngleLimit.GetRadians().Z, 0.0, false)
 					if err != nil {
 						return err
 					}
-					err = r.writeNumber(fout, binaryType_float, link.MaxAngleLimit.GetRadians().GetX(), 0.0, false)
+					err = r.writeNumber(fout, binaryType_float, link.MaxAngleLimit.GetRadians().X, 0.0, false)
 					if err != nil {
 						return err
 					}
-					err = r.writeNumber(fout, binaryType_float, link.MaxAngleLimit.GetRadians().GetY(), 0.0, false)
+					err = r.writeNumber(fout, binaryType_float, link.MaxAngleLimit.GetRadians().Y, 0.0, false)
 					if err != nil {
 						return err
 					}
-					err = r.writeNumber(fout, binaryType_float, link.MaxAngleLimit.GetRadians().GetZ(), 0.0, false)
+					err = r.writeNumber(fout, binaryType_float, link.MaxAngleLimit.GetRadians().Z, 0.0, false)
 					if err != nil {
 						return err
 					}
@@ -626,15 +626,15 @@ func (r *PmxRepository) saveMorphs(
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Position.GetX(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Position.X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Position.GetY(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Position.Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Position.GetZ(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Position.Z, 0.0, false)
 				if err != nil {
 					return err
 				}
@@ -643,19 +643,19 @@ func (r *PmxRepository) saveMorphs(
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Uv.GetX(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Uv.X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Uv.GetY(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Uv.Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Uv.GetZ(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Uv.Z, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Uv.GetZ(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Uv.Z, 0.0, false)
 				if err != nil {
 					return err
 				}
@@ -664,31 +664,31 @@ func (r *PmxRepository) saveMorphs(
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Position.GetX(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Position.X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Position.GetY(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Position.Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Position.GetZ(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Position.Z, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Rotation.GetQuaternion().GetX(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Rotation.GetQuaternion().Vec3().X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Rotation.GetQuaternion().GetY(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Rotation.GetQuaternion().Vec3().Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Rotation.GetQuaternion().GetZ(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Rotation.GetQuaternion().Vec3().Z, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Rotation.GetQuaternion().GetW(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Rotation.GetQuaternion().W, 0.0, false)
 				if err != nil {
 					return err
 				}
@@ -701,63 +701,63 @@ func (r *PmxRepository) saveMorphs(
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Diffuse.GetX(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Diffuse.X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Diffuse.GetY(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Diffuse.Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Diffuse.GetZ(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Diffuse.Z, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Diffuse.GetW(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Diffuse.W, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Specular.GetX(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Specular.X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Specular.GetY(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Specular.Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Specular.GetZ(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Specular.Z, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Specular.GetW(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Specular.W, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Ambient.GetX(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Ambient.X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Ambient.GetY(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Ambient.Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Ambient.GetZ(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Ambient.Z, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Edge.GetX(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Edge.X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Edge.GetY(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Edge.Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Edge.GetZ(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Edge.Z, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Edge.GetW(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Edge.W, 0.0, false)
 				if err != nil {
 					return err
 				}
@@ -765,51 +765,51 @@ func (r *PmxRepository) saveMorphs(
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.TextureFactor.GetX(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.TextureFactor.X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.TextureFactor.GetY(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.TextureFactor.Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.TextureFactor.GetZ(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.TextureFactor.Z, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.TextureFactor.GetW(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.TextureFactor.W, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.SphereTextureFactor.GetX(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.SphereTextureFactor.X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.SphereTextureFactor.GetY(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.SphereTextureFactor.Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.SphereTextureFactor.GetZ(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.SphereTextureFactor.Z, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.SphereTextureFactor.GetW(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.SphereTextureFactor.W, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.ToonTextureFactor.GetX(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.ToonTextureFactor.X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.ToonTextureFactor.GetY(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.ToonTextureFactor.Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.ToonTextureFactor.GetZ(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.ToonTextureFactor.Z, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.ToonTextureFactor.GetW(), 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.ToonTextureFactor.W, 0.0, false)
 				if err != nil {
 					return err
 				}
@@ -908,39 +908,39 @@ func (r *PmxRepository) saveRigidBodies(fout *os.File, model *pmx.PmxModel, bone
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, rigidbody.Size.GetX(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, rigidbody.Size.X, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, rigidbody.Size.GetY(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, rigidbody.Size.Y, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, rigidbody.Size.GetZ(), 0.0, true)
+		err = r.writeNumber(fout, binaryType_float, rigidbody.Size.Z, 0.0, true)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, rigidbody.Position.GetX(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, rigidbody.Position.X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, rigidbody.Position.GetY(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, rigidbody.Position.Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, rigidbody.Position.GetZ(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, rigidbody.Position.Z, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, rigidbody.Rotation.GetRadians().GetX(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, rigidbody.Rotation.GetRadians().X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, rigidbody.Rotation.GetRadians().GetY(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, rigidbody.Rotation.GetRadians().Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, rigidbody.Rotation.GetRadians().GetZ(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, rigidbody.Rotation.GetRadians().Z, 0.0, false)
 		if err != nil {
 			return err
 		}
@@ -1003,99 +1003,99 @@ func (r *PmxRepository) saveJoints(fout *os.File, model *pmx.PmxModel, rigidbody
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.Position.GetX(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.Position.X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.Position.GetY(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.Position.Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.Position.GetZ(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.Position.Z, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.Rotation.GetRadians().GetX(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.Rotation.GetRadians().X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.Rotation.GetRadians().GetY(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.Rotation.GetRadians().Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.Rotation.GetRadians().GetZ(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.Rotation.GetRadians().Z, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMin.GetX(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMin.X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMin.GetY(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMin.Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMin.GetZ(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMin.Z, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMax.GetX(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMax.X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMax.GetY(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMax.Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMax.GetZ(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMax.Z, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.GetRadians().GetX(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.GetRadians().X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.GetRadians().GetY(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.GetRadians().Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.GetRadians().GetZ(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.GetRadians().Z, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.GetRadians().GetX(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.GetRadians().X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.GetRadians().GetY(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.GetRadians().Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.GetRadians().GetZ(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.GetRadians().Z, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantTranslation.GetX(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantTranslation.X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantTranslation.GetY(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantTranslation.Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantTranslation.GetZ(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantTranslation.Z, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.GetX(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.GetY(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.GetZ(), 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.Z, 0.0, false)
 		if err != nil {
 			return err
 		}

@@ -159,9 +159,9 @@ func (r *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.BoneFr
 	}
 	binary.Write(fout, binary.LittleEndian, encodedName)
 	r.writeNumber(fout, binaryType_unsignedInt, float64(bf.Index), 0.0, true)
-	r.writeNumber(fout, binaryType_float, posMMD.GetX(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, posMMD.GetY(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, posMMD.GetZ(), 0.0, false)
+	r.writeNumber(fout, binaryType_float, posMMD.X, 0.0, false)
+	r.writeNumber(fout, binaryType_float, posMMD.Y, 0.0, false)
+	r.writeNumber(fout, binaryType_float, posMMD.Z, 0.0, false)
 
 	var quatMMD *mmath.MQuaternion
 	if bf.Rotation != nil {
@@ -169,10 +169,10 @@ func (r *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.BoneFr
 	} else {
 		quatMMD = &mmath.MQuaternionIdent
 	}
-	r.writeNumber(fout, binaryType_float, quatMMD.GetX(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, quatMMD.GetY(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, quatMMD.GetZ(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, quatMMD.GetW(), 0.0, false)
+	r.writeNumber(fout, binaryType_float, quatMMD.Vec3().X, 0.0, false)
+	r.writeNumber(fout, binaryType_float, quatMMD.Vec3().Y, 0.0, false)
+	r.writeNumber(fout, binaryType_float, quatMMD.Vec3().Z, 0.0, false)
+	r.writeNumber(fout, binaryType_float, quatMMD.W, 0.0, false)
 
 	var curves []byte
 	if bf.Curves == nil {
@@ -261,9 +261,9 @@ func (r *VmdRepository) saveCameraFrame(fout *os.File, cf *vmd.CameraFrame) erro
 		posMMD = mmath.MVec3Zero
 	}
 
-	r.writeNumber(fout, binaryType_float, posMMD.GetX(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, posMMD.GetY(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, posMMD.GetZ(), 0.0, false)
+	r.writeNumber(fout, binaryType_float, posMMD.X, 0.0, false)
+	r.writeNumber(fout, binaryType_float, posMMD.Y, 0.0, false)
+	r.writeNumber(fout, binaryType_float, posMMD.Z, 0.0, false)
 
 	var degreeMMD *mmath.MVec3
 	if cf.Rotation != nil {
@@ -271,9 +271,9 @@ func (r *VmdRepository) saveCameraFrame(fout *os.File, cf *vmd.CameraFrame) erro
 	} else {
 		degreeMMD = mmath.MVec3Zero
 	}
-	r.writeNumber(fout, binaryType_float, degreeMMD.GetX(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, degreeMMD.GetY(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, degreeMMD.GetZ(), 0.0, false)
+	r.writeNumber(fout, binaryType_float, degreeMMD.X, 0.0, false)
+	r.writeNumber(fout, binaryType_float, degreeMMD.Y, 0.0, false)
+	r.writeNumber(fout, binaryType_float, degreeMMD.Z, 0.0, false)
 
 	var curves []byte
 	if cf.Curves == nil {
@@ -324,9 +324,9 @@ func (r *VmdRepository) saveLightFrame(fout *os.File, cf *vmd.LightFrame) error 
 		colorMMD = mmath.MVec3Zero
 	}
 
-	r.writeNumber(fout, binaryType_float, colorMMD.GetX(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, colorMMD.GetY(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, colorMMD.GetZ(), 0.0, false)
+	r.writeNumber(fout, binaryType_float, colorMMD.X, 0.0, false)
+	r.writeNumber(fout, binaryType_float, colorMMD.Y, 0.0, false)
+	r.writeNumber(fout, binaryType_float, colorMMD.Z, 0.0, false)
 
 	var posMMD *mmath.MVec3
 	if cf.Position != nil {
@@ -335,9 +335,9 @@ func (r *VmdRepository) saveLightFrame(fout *os.File, cf *vmd.LightFrame) error 
 		posMMD = mmath.MVec3Zero
 	}
 
-	r.writeNumber(fout, binaryType_float, posMMD.GetX(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, posMMD.GetY(), 0.0, false)
-	r.writeNumber(fout, binaryType_float, posMMD.GetZ(), 0.0, false)
+	r.writeNumber(fout, binaryType_float, posMMD.X, 0.0, false)
+	r.writeNumber(fout, binaryType_float, posMMD.Y, 0.0, false)
+	r.writeNumber(fout, binaryType_float, posMMD.Z, 0.0, false)
 
 	return nil
 }

@@ -347,9 +347,9 @@ func (w *GlWindow) handleKeyEvent(
 	cameraZ := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw))
 
 	// カメラ位置を更新
-	w.Shader.CameraPosition.SetX(cameraX)
-	w.Shader.CameraPosition.SetY(mgl.INITIAL_CAMERA_POSITION_Y + cameraY)
-	w.Shader.CameraPosition.SetZ(cameraZ)
+	w.Shader.CameraPosition.X = cameraX
+	w.Shader.CameraPosition.Y = mgl.INITIAL_CAMERA_POSITION_Y + cameraY
+	w.Shader.CameraPosition.Z = cameraZ
 }
 
 func (w *GlWindow) handleScrollEvent(window *glfw.Window, xoff float64, yoff float64) {
@@ -397,7 +397,7 @@ func (w *GlWindow) handleMouseButtonEvent(
 		} else if action == glfw.Release {
 			w.leftButtonPressed = false
 			w.execWorldPos()
-			w.nowCursorPos = &mmath.MVec2{0, 0}
+			w.nowCursorPos = &mmath.MVec2{X: 0, Y: 0}
 		}
 	}
 }
@@ -427,9 +427,9 @@ func (gw *GlWindow) getWorldPosition(
 		return nil
 	}
 
-	worldPos := &mmath.MVec3{float64(-worldCoords.X()), float64(worldCoords.Y()), float64(worldCoords.Z())}
+	worldPos := &mmath.MVec3{X: float64(-worldCoords.X()), Y: float64(worldCoords.Y()), Z: float64(worldCoords.Z())}
 	mlog.D("WindowPos [x=%.3f, y=%.3f, z=%.7f] -> WorldPos [x=%.3f, y=%.3f, z=%.3f]",
-		x, y, z, worldPos.GetX(), worldPos.GetY(), worldPos.GetZ())
+		x, y, z, worldPos.X, worldPos.Y, worldPos.Z)
 
 	return worldPos
 }
@@ -523,9 +523,9 @@ func (w *GlWindow) updateCameraAngle(xpos, ypos float64) {
 	cameraZ := radius * math.Cos(mgl64.DegToRad(w.pitch)) * math.Sin(mgl64.DegToRad(w.yaw))
 
 	// カメラ位置を更新
-	w.Shader.CameraPosition.SetX(cameraX)
-	w.Shader.CameraPosition.SetY(mgl.INITIAL_CAMERA_POSITION_Y + cameraY)
-	w.Shader.CameraPosition.SetZ(cameraZ)
+	w.Shader.CameraPosition.X = cameraX
+	w.Shader.CameraPosition.Y = mgl.INITIAL_CAMERA_POSITION_Y + cameraY
+	w.Shader.CameraPosition.X = cameraZ
 	// mlog.D("xOffset %.7f, yOffset %.7f, CameraPosition: %s, LookAtCenterPosition: %s\n",
 	// 	xOffset, yOffset, w.Shader.CameraPosition.String(), w.Shader.LookAtCenterPosition.String())
 }

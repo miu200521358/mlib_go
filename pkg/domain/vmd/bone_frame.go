@@ -136,73 +136,67 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	plpy := 0.0
 	plpz := 0.0
 	if prevBf.LocalPosition != nil {
-		plpx = prevBf.LocalPosition.GetX()
-		plpy = prevBf.LocalPosition.GetY()
-		plpz = prevBf.LocalPosition.GetZ()
+		plpx = prevBf.LocalPosition.X
+		plpy = prevBf.LocalPosition.Y
+		plpz = prevBf.LocalPosition.Z
 	}
 	psx := 0.0
 	psy := 0.0
 	psz := 0.0
 	if prevBf.Scale != nil {
-		psx = prevBf.Scale.GetX()
-		psy = prevBf.Scale.GetY()
-		psz = prevBf.Scale.GetZ()
+		psx = prevBf.Scale.X
+		psy = prevBf.Scale.Y
+		psz = prevBf.Scale.Z
 	}
 	plsx := 0.0
 	plsy := 0.0
 	plsz := 0.0
 	if prevBf.LocalScale != nil {
-		plsx = prevBf.LocalScale.GetX()
-		plsy = prevBf.LocalScale.GetY()
-		plsz = prevBf.LocalScale.GetZ()
+		plsx = prevBf.LocalScale.X
+		plsy = prevBf.LocalScale.Y
+		plsz = prevBf.LocalScale.Z
 	}
 	nlpx := 0.0
 	nlpy := 0.0
 	nlpz := 0.0
 	if nextBf.LocalPosition != nil {
-		nlpx = nextBf.LocalPosition.GetX()
-		nlpy = nextBf.LocalPosition.GetY()
-		nlpz = nextBf.LocalPosition.GetZ()
+		nlpx = nextBf.LocalPosition.X
+		nlpy = nextBf.LocalPosition.Y
+		nlpz = nextBf.LocalPosition.Z
 	}
 	nsx := 0.0
 	nsy := 0.0
 	nsz := 0.0
 	if nextBf.Scale != nil {
-		nsx = nextBf.Scale.GetX()
-		nsy = nextBf.Scale.GetY()
-		nsz = nextBf.Scale.GetZ()
+		nsx = nextBf.Scale.X
+		nsy = nextBf.Scale.Y
+		nsz = nextBf.Scale.Z
 	}
 	nlsx := 0.0
 	nlsy := 0.0
 	nlsz := 0.0
 	if nextBf.LocalScale != nil {
-		nlsx = nextBf.LocalScale.GetX()
-		nlsy = nextBf.LocalScale.GetY()
-		nlsz = nextBf.LocalScale.GetZ()
+		nlsx = nextBf.LocalScale.X
+		nlsy = nextBf.LocalScale.Y
+		nlsz = nextBf.LocalScale.Z
 	}
 
-	prevX := &mmath.MVec4{
-		prevBf.Position.GetX(), plpx, psx, plsx}
-	nextX := &mmath.MVec4{
-		nextBf.Position.GetX(), nlpx, nsx, nlsx}
+	prevX := &mmath.MVec4{X: prevBf.Position.X, Y: plpx, Z: psx, W: plsx}
+	nextX := &mmath.MVec4{X: nextBf.Position.X, Y: nlpx, Z: nsx, W: nlsx}
 	nowX := prevX.Lerp(nextX, xy)
 
-	prevY := &mmath.MVec4{
-		prevBf.Position.GetY(), plpy, psy, plsy}
-	nextY := &mmath.MVec4{
-		nextBf.Position.GetY(), nlpy, nsy, nlsy}
+	prevY := &mmath.MVec4{X: prevBf.Position.Y, Y: plpy, Z: psy, W: plsy}
+	nextY := &mmath.MVec4{X: nextBf.Position.Y, Y: nlpy, Z: nsy, W: nlsy}
 	nowY := prevY.Lerp(nextY, yy)
 
-	prevZ := &mmath.MVec4{
-		prevBf.Position.GetZ(), plpz, psz, plsz}
-	nextZ := &mmath.MVec4{
-		nextBf.Position.GetZ(), nlpz, nsz, nlsz}
+	prevZ := &mmath.MVec4{X: prevBf.Position.Z, Y: plpz, Z: psz, W: plsz}
+	nextZ := &mmath.MVec4{X: nextBf.Position.Z, Y: nlpz, Z: nsz, W: nlsz}
 	nowZ := prevZ.Lerp(nextZ, zy)
 
-	bf.Position = &mmath.MVec3{nowX[0], nowY[0], nowZ[0]}
-	bf.LocalPosition = &mmath.MVec3{nowX[1], nowY[1], nowZ[1]}
-	bf.Scale = &mmath.MVec3{nowX[2], nowY[2], nowZ[2]}
-	bf.LocalScale = &mmath.MVec3{nowX[3], nowY[3], nowZ[3]}
+	bf.Position = &mmath.MVec3{X: nowX.X, Y: nowY.X, Z: nowZ.X}
+	bf.LocalPosition = &mmath.MVec3{X: nowX.Y, Y: nowY.Y, Z: nowZ.Y}
+	bf.Scale = &mmath.MVec3{X: nowX.Z, Y: nowY.Z, Z: nowZ.Z}
+	bf.LocalScale = &mmath.MVec3{X: nowX.W, Y: nowY.W, Z: nowZ.W}
 
 	return bf
 }

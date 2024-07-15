@@ -389,8 +389,8 @@ func TestPmxWriter_Save1(t *testing.T) {
 			t.Errorf("Expected IkLoopCount to be %v, got %v", expectedIkLoopCount, b.Ik.LoopCount)
 		}
 		expectedIkLimitedDegree := 57.29578
-		if b.Ik == nil || math.Abs(b.Ik.UnitRotation.GetDegrees().GetX()-expectedIkLimitedDegree) > 1e-5 {
-			t.Errorf("Expected IkLimitedRadian to be %v, got %v", expectedIkLimitedDegree, b.Ik.UnitRotation.GetDegrees().GetX())
+		if b.Ik == nil || math.Abs(b.Ik.UnitRotation.GetDegrees().X-expectedIkLimitedDegree) > 1e-5 {
+			t.Errorf("Expected IkLimitedRadian to be %v, got %v", expectedIkLimitedDegree, b.Ik.UnitRotation.GetDegrees().X)
 		}
 		if b.Ik != nil {
 			il := b.Ik.Links[0]

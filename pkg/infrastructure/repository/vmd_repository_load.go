@@ -297,7 +297,7 @@ func (r *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 			mlog.E("[%d] readCameras.Degrees error: %v", i, err)
 			return err
 		}
-		v.Rotation = mmath.NewRotationFromDegrees(&degrees)
+		v.Rotation = mmath.NewMRotationFromDegrees(&degrees)
 
 		// 補間曲線
 		curves, err := r.unpackBytes(24)

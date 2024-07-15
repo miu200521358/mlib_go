@@ -41,36 +41,36 @@ func initJointPhysics(
 		btRigidBodyA, btRigidBodyB, jointLocalTransformA, jointLocalTransformB, true)
 	// 係数は符号を調整する必要がないため、そのまま設定
 	constraint.SetLinearLowerLimit(bt.NewBtVector3(
-		float32(j.JointParam.TranslationLimitMin.GetX()),
-		float32(j.JointParam.TranslationLimitMin.GetY()),
-		float32(j.JointParam.TranslationLimitMin.GetZ())))
+		float32(j.JointParam.TranslationLimitMin.X),
+		float32(j.JointParam.TranslationLimitMin.Y),
+		float32(j.JointParam.TranslationLimitMin.Z)))
 	constraint.SetLinearUpperLimit(bt.NewBtVector3(
-		float32(j.JointParam.TranslationLimitMax.GetX()),
-		float32(j.JointParam.TranslationLimitMax.GetY()),
-		float32(j.JointParam.TranslationLimitMax.GetZ())))
+		float32(j.JointParam.TranslationLimitMax.X),
+		float32(j.JointParam.TranslationLimitMax.Y),
+		float32(j.JointParam.TranslationLimitMax.Z)))
 	constraint.SetAngularLowerLimit(bt.NewBtVector3(
-		float32(j.JointParam.RotationLimitMin.GetRadians().GetX()),
-		float32(j.JointParam.RotationLimitMin.GetRadians().GetY()),
-		float32(j.JointParam.RotationLimitMin.GetRadians().GetZ())))
+		float32(j.JointParam.RotationLimitMin.GetRadians().X),
+		float32(j.JointParam.RotationLimitMin.GetRadians().Y),
+		float32(j.JointParam.RotationLimitMin.GetRadians().Z)))
 	constraint.SetAngularUpperLimit(bt.NewBtVector3(
-		float32(j.JointParam.RotationLimitMax.GetRadians().GetX()),
-		float32(j.JointParam.RotationLimitMax.GetRadians().GetY()),
-		float32(j.JointParam.RotationLimitMax.GetRadians().GetZ())))
+		float32(j.JointParam.RotationLimitMax.GetRadians().X),
+		float32(j.JointParam.RotationLimitMax.GetRadians().Y),
+		float32(j.JointParam.RotationLimitMax.GetRadians().Z)))
 
 	if rigidBodyB.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
 		// 剛体Bがボーン追従剛体の場合は、バネの値を設定しない
 		constraint.EnableSpring(0, true)
-		constraint.SetStiffness(0, float32(j.JointParam.SpringConstantTranslation.GetX()))
+		constraint.SetStiffness(0, float32(j.JointParam.SpringConstantTranslation.X))
 		constraint.EnableSpring(1, true)
-		constraint.SetStiffness(1, float32(j.JointParam.SpringConstantTranslation.GetY()))
+		constraint.SetStiffness(1, float32(j.JointParam.SpringConstantTranslation.Y))
 		constraint.EnableSpring(2, true)
-		constraint.SetStiffness(2, float32(j.JointParam.SpringConstantTranslation.GetZ()))
+		constraint.SetStiffness(2, float32(j.JointParam.SpringConstantTranslation.Z))
 		constraint.EnableSpring(3, true)
-		constraint.SetStiffness(3, float32(j.JointParam.SpringConstantRotation.GetX()))
+		constraint.SetStiffness(3, float32(j.JointParam.SpringConstantRotation.X))
 		constraint.EnableSpring(4, true)
-		constraint.SetStiffness(4, float32(j.JointParam.SpringConstantRotation.GetY()))
+		constraint.SetStiffness(4, float32(j.JointParam.SpringConstantRotation.Y))
 		constraint.EnableSpring(5, true)
-		constraint.SetStiffness(5, float32(j.JointParam.SpringConstantRotation.GetZ()))
+		constraint.SetStiffness(5, float32(j.JointParam.SpringConstantRotation.Z))
 	}
 
 	constraint.SetParam(int(bt.BT_CONSTRAINT_ERP), float32(0.5), 0)

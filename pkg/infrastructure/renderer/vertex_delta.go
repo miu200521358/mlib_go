@@ -108,8 +108,10 @@ func (vds *VertexDeltas) FindVerticesInBox(prevXprevYFrontPos, prevXprevYBackPos
 		if visibleMaterialIndexes == nil {
 			if vd.Position.IsPointInsideBox(minPos, maxPos) {
 				// 小数点第二位で四捨五入
-				posKey := mmath.MVec3{math.Round(vd.Position.GetX()*100) / 100,
-					math.Round(vd.Position.GetY()*100) / 100, math.Round(vd.Position.GetZ()*100) / 100}
+				posKey := mmath.MVec3{
+					X: math.Round(vd.Position.X*100) / 100,
+					Y: math.Round(vd.Position.Y*100) / 100,
+					Z: math.Round(vd.Position.Z*100) / 100}
 				if _, ok := vertexIndexMap[posKey]; !ok {
 					vertexIndexMap[posKey] = make([]int, 0)
 				}
@@ -120,8 +122,10 @@ func (vds *VertexDeltas) FindVerticesInBox(prevXprevYFrontPos, prevXprevYBackPos
 				if slices.Contains(vertex.MaterialIndexes, materialIndex) {
 					if vd.Position.IsPointInsideBox(minPos, maxPos) {
 						// 小数点第二位で四捨五入
-						posKey := mmath.MVec3{math.Round(vd.Position.GetX()*100) / 100,
-							math.Round(vd.Position.GetY()*100) / 100, math.Round(vd.Position.GetZ()*100) / 100}
+						posKey := mmath.MVec3{
+							X: math.Round(vd.Position.X*100) / 100,
+							Y: math.Round(vd.Position.Y*100) / 100,
+							Z: math.Round(vd.Position.Z*100) / 100}
 						if _, ok := vertexIndexMap[posKey]; !ok {
 							vertexIndexMap[posKey] = make([]int, 0)
 						}

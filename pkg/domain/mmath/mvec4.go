@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"hash/fnv"
 	"math"
-
-	"github.com/go-gl/mathgl/mgl64"
 )
 
 var (
@@ -28,319 +26,220 @@ var (
 	MVec4MaxVal = &MVec4{+math.MaxFloat64, +math.MaxFloat64, +math.MaxFloat64, 1}
 )
 
-type MVec4 mgl64.Vec4
+type MVec4 struct {
+	X float64
+	Y float64
+	Z float64
+	W float64
+}
 
 func NewMVec4() *MVec4 {
 	return &MVec4{}
 }
 
-// GetX returns the value of the X coordinate
-func (v *MVec4) GetX() float64 {
-	return v[0]
-}
-
-// SetX sets the value of the X coordinate
-func (v *MVec4) SetX(x float64) {
-	v[0] = x
-}
-
-func (v *MVec4) AddX(x float64) {
-	v[0] += x
-}
-
-func (v *MVec4) SubX(x float64) {
-	v[0] -= x
-}
-
-func (v *MVec4) MulX(x float64) {
-	v[0] *= x
-}
-
-func (v *MVec4) DivX(x float64) {
-	v[0] /= x
-}
-
-// GetY returns the value of the Y coordinate
-func (v *MVec4) GetY() float64 {
-	return v[1]
-}
-
-// SetY sets the value of the Y coordinate
-func (v *MVec4) SetY(y float64) {
-	v[1] = y
-}
-
-func (v *MVec4) AddY(y float64) {
-	v[1] += y
-}
-
-func (v *MVec4) SubY(y float64) {
-	v[1] -= y
-}
-
-func (v *MVec4) MulY(y float64) {
-	v[1] *= y
-}
-
-func (v *MVec4) DivY(y float64) {
-	v[1] /= y
-}
-
-// GetZ returns the value of the Z coordinate
-func (v *MVec4) GetZ() float64 {
-	return v[2]
-}
-
-// SetZ sets the value of the Z coordinate
-func (v *MVec4) SetZ(z float64) {
-	v[2] = z
-}
-
-func (v *MVec4) AddZ(z float64) {
-	v[2] += z
-}
-
-func (v *MVec4) SubZ(z float64) {
-	v[2] -= z
-}
-
-func (v *MVec4) MulZ(z float64) {
-	v[2] *= z
-}
-
-func (v *MVec4) DivZ(z float64) {
-	v[2] /= z
-}
-
-// GetW returns the value of the W coordinate
-func (v *MVec4) GetW() float64 {
-	return v[3]
-}
-
-// SetW sets the value of the W coordinate
-func (v *MVec4) SetW(w float64) {
-	v[3] = w
-}
-
-func (v *MVec4) AddW(w float64) {
-	v[3] += w
-}
-
-func (v *MVec4) SubW(w float64) {
-	v[3] -= w
-}
-
-func (v *MVec4) MulW(w float64) {
-	v[3] *= w
-}
-
-func (v *MVec4) DivW(w float64) {
-	v[3] /= w
-}
-
 func (v *MVec4) GetXY() *MVec2 {
-	return &MVec2{v[0], v[1]}
+	return &MVec2{v.X, v.Y}
 }
 
 func (v *MVec4) GetXYZ() *MVec3 {
-	return &MVec3{v[0], v[1], v[2]}
+	return &MVec3{v.X, v.Y, v.Z}
 }
 
 // String T の文字列表現を返します。
 func (v *MVec4) String() string {
-	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f, w=%.5f]", v.GetX(), v.GetY(), v.GetZ(), v.GetW())
+	return fmt.Sprintf("[x=%.5f, y=%.5f, z=%.5f, w=%.5f]", v.X, v.Y, v.Z, v.W)
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された2次元ベクトルを返します
 func (v *MVec4) MMD() *MVec4 {
-	return &MVec4{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
+	return &MVec4{v.X, v.Y, v.Z, v.W}
 }
 
 // Add ベクトルに他のベクトルを加算します
 func (v *MVec4) Add(other *MVec4) *MVec4 {
-	v[0] += other[0]
-	v[1] += other[1]
-	v[2] += other[2]
-	v[3] += other[3]
+	v.X += other.X
+	v.Y += other.Y
+	v.Z += other.Z
+	v.W += other.W
 	return v
 }
 
 // AddScalar ベクトルの各要素にスカラーを加算します
 func (v *MVec4) AddScalar(s float64) *MVec4 {
-	v[0] += s
-	v[1] += s
-	v[2] += s
-	v[3] += s
+	v.X += s
+	v.Y += s
+	v.Z += s
+	v.W += s
 	return v
 }
 
 // Added ベクトルに他のベクトルを加算した結果を返します
 func (v *MVec4) Added(other *MVec4) *MVec4 {
-	return &MVec4{v[0] + other[0], v[1] + other[1], v[2] + other[2], v[3] + other[3]}
+	return &MVec4{v.X + other.X, v.Y + other.Y, v.Z + other.Z, v.W + other.W}
 }
 
 func (v *MVec4) AddedScalar(s float64) *MVec4 {
-	return &MVec4{v[0] + s, v[1] + s, v[2] + s, v[3] + s}
+	return &MVec4{v.X + s, v.Y + s, v.Z + s, v.W + s}
 }
 
 // Sub ベクトルから他のベクトルを減算します
 func (v *MVec4) Sub(other *MVec4) *MVec4 {
-	v[0] -= other[0]
-	v[1] -= other[1]
-	v[2] -= other[2]
-	v[3] -= other[3]
+	v.X -= other.X
+	v.Y -= other.Y
+	v.Z -= other.Z
+	v.W -= other.W
 	return v
 }
 
 // SubScalar ベクトルの各要素からスカラーを減算します
 func (v *MVec4) SubScalar(s float64) *MVec4 {
-	v[0] -= s
-	v[1] -= s
-	v[2] -= s
-	v[3] -= s
+	v.X -= s
+	v.Y -= s
+	v.Z -= s
+	v.W -= s
 	return v
 }
 
 // Subed ベクトルから他のベクトルを減算した結果を返します
 func (v *MVec4) Subed(other *MVec4) *MVec4 {
-	return &MVec4{v[0] - other[0], v[1] - other[1], v[2] - other[2], v[3] - other[3]}
+	return &MVec4{v.X - other.X, v.Y - other.Y, v.Z - other.Z, v.W - other.W}
 }
 
 func (v *MVec4) SubedScalar(s float64) *MVec4 {
-	return &MVec4{v[0] - s, v[1] - s, v[2] - s, v[3] - s}
+	return &MVec4{v.X - s, v.Y - s, v.Z - s, v.W - s}
 }
 
 // Mul ベクトルの各要素に他のベクトルの各要素を乗算します
 func (v *MVec4) Mul(other *MVec4) *MVec4 {
-	v[0] *= other[0]
-	v[1] *= other[1]
-	v[2] *= other[2]
-	v[3] *= other[3]
+	v.X *= other.X
+	v.Y *= other.Y
+	v.Z *= other.Z
+	v.W *= other.W
 	return v
 }
 
 // MulScalar ベクトルの各要素にスカラーを乗算します
 func (v *MVec4) MulScalar(s float64) *MVec4 {
-	v[0] *= s
-	v[1] *= s
-	v[2] *= s
-	v[3] *= s
+	v.X *= s
+	v.Y *= s
+	v.Z *= s
+	v.W *= s
 	return v
 }
 
 // Muled ベクトルの各要素に他のベクトルの各要素を乗算した結果を返します
 func (v *MVec4) Muled(other *MVec4) *MVec4 {
-	return &MVec4{v[0] * other[0], v[1] * other[1], v[2] * other[2], v[3] * other[3]}
+	return &MVec4{v.X * other.X, v.Y * other.Y, v.Z * other.Z, v.W * other.W}
 }
 
 func (v *MVec4) MuledScalar(s float64) *MVec4 {
-	return &MVec4{v[0] * s, v[1] * s, v[2] * s, v[3] * s}
+	return &MVec4{v.X * s, v.Y * s, v.Z * s, v.W * s}
 }
 
 // Div ベクトルの各要素を他のベクトルの各要素で除算します
 func (v *MVec4) Div(other *MVec4) *MVec4 {
-	v[0] /= other[0]
-	v[1] /= other[1]
-	v[2] /= other[2]
-	v[3] /= other[3]
+	v.X /= other.X
+	v.Y /= other.Y
+	v.Z /= other.Z
+	v.W /= other.W
 	return v
 }
 
 // DivScalar ベクトルの各要素をスカラーで除算します
 func (v *MVec4) DivScalar(s float64) *MVec4 {
-	v[0] /= s
-	v[1] /= s
-	v[2] /= s
-	v[3] /= s
+	v.X /= s
+	v.Y /= s
+	v.Z /= s
+	v.W /= s
 	return v
 }
 
 // Dived ベクトルの各要素を他のベクトルの各要素で除算した結果を返します
 func (v *MVec4) Dived(other *MVec4) *MVec4 {
-	return &MVec4{v[0] / other[0], v[1] / other[1], v[2] / other[2], v[3] / other[3]}
+	return &MVec4{v.X / other.X, v.Y / other.Y, v.Z / other.Z, v.W / other.W}
 }
 
 // DivedScalar ベクトルの各要素をスカラーで除算した結果を返します
 func (v *MVec4) DivedScalar(s float64) *MVec4 {
-	return &MVec4{v[0] / s, v[1] / s, v[2] / s, v[3] / s}
+	return &MVec4{v.X / s, v.Y / s, v.Z / s, v.W / s}
 }
 
 // Equal ベクトルが他のベクトルと等しいかどうかをチェックします
 func (v *MVec4) Equals(other *MVec4) bool {
-	return v.GetX() == other.GetX() && v.GetY() == other.GetY() && v.GetZ() == other.GetZ() && v.GetW() == other.GetW()
+	return v.X == other.X && v.Y == other.Y && v.Z == other.Z && v.W == other.W
 }
 
 // NotEqual ベクトルが他のベクトルと等しくないかどうかをチェックします
 func (v *MVec4) NotEquals(other MVec4) bool {
-	return v.GetX() != other.GetX() || v.GetY() != other.GetY() || v.GetZ() != other.GetZ() || v.GetW() != other.GetW()
+	return v.X != other.X || v.Y != other.Y || v.Z != other.Z || v.W != other.W
 }
 
 // NearEquals ベクトルが他のベクトルとほぼ等しいかどうかをチェックします
 func (v *MVec4) NearEquals(other *MVec4, epsilon float64) bool {
-	return (math.Abs(v[0]-other[0]) <= epsilon) &&
-		(math.Abs(v[1]-other[1]) <= epsilon) &&
-		(math.Abs(v[2]-other[2]) <= epsilon) &&
-		(math.Abs(v[3]-other[3]) <= epsilon)
+	return (math.Abs(v.X-other.X) <= epsilon) &&
+		(math.Abs(v.Y-other.Y) <= epsilon) &&
+		(math.Abs(v.Z-other.Z) <= epsilon) &&
+		(math.Abs(v.W-other.W) <= epsilon)
 }
 
 // LessThan ベクトルが他のベクトルより小さいかどうかをチェックします (<)
 func (v *MVec4) LessThan(other *MVec4) bool {
-	return v.GetX() < other.GetX() && v.GetY() < other.GetY() && v.GetZ() < other.GetZ() && v.GetW() < other.GetW()
+	return v.X < other.X && v.Y < other.Y && v.Z < other.Z && v.W < other.W
 }
 
 // LessThanOrEqual ベクトルが他のベクトル以下かどうかをチェックします (<=)
 func (v *MVec4) LessThanOrEquals(other *MVec4) bool {
-	return v.GetX() <= other.GetX() && v.GetY() <= other.GetY() && v.GetZ() <= other.GetZ() && v.GetW() <= other.GetW()
+	return v.X <= other.X && v.Y <= other.Y && v.Z <= other.Z && v.W <= other.W
 }
 
 // GreaterThan ベクトルが他のベクトルより大きいかどうかをチェックします (>)
 func (v *MVec4) GreaterThan(other *MVec4) bool {
-	return v.GetX() > other.GetX() && v.GetY() > other.GetY() && v.GetZ() > other.GetZ() && v.GetW() > other.GetW()
+	return v.X > other.X && v.Y > other.Y && v.Z > other.Z && v.W > other.W
 }
 
 // GreaterThanOrEqual ベクトルが他のベクトル以上かどうかをチェックします (>=)
 func (v *MVec4) GreaterThanOrEquals(other *MVec4) bool {
-	return v.GetX() >= other.GetX() && v.GetY() >= other.GetY() && v.GetZ() >= other.GetZ() && v.GetW() >= other.GetW()
+	return v.X >= other.X && v.Y >= other.Y && v.Z >= other.Z && v.W >= other.W
 }
 
 // Inverse ベクトルの各要素の符号を反転します (-v)
 func (v *MVec4) Inverse() *MVec4 {
-	v[0] = -v[0]
-	v[1] = -v[1]
-	v[2] = -v[2]
-	v[3] = -v[3]
+	v.X = -v.X
+	v.Y = -v.Y
+	v.Z = -v.Z
+	v.W = -v.W
 	return v
 }
 
 // Inverted ベクトルの各要素の符号を反転した結果を返します (-v)
 func (v *MVec4) Inverted() *MVec4 {
-	return &MVec4{-v[0], -v[1], -v[2], -v[3]}
+	return &MVec4{-v.X, -v.Y, -v.Z, -v.W}
 }
 
 // Abs ベクトルの各要素の絶対値を返します
 func (v *MVec4) Abs() *MVec4 {
-	v[0] = math.Abs(v[0])
-	v[1] = math.Abs(v[1])
-	v[2] = math.Abs(v[2])
-	v[3] = math.Abs(v[3])
+	v.X = math.Abs(v.X)
+	v.Y = math.Abs(v.Y)
+	v.Z = math.Abs(v.Z)
+	v.W = math.Abs(v.W)
 	return v
 }
 
 // Absed ベクトルの各要素の絶対値を返します
 func (v *MVec4) Absed() *MVec4 {
-	return &MVec4{math.Abs(v[0]), math.Abs(v[1]), math.Abs(v[2]), math.Abs(v[3])}
+	return &MVec4{math.Abs(v.X), math.Abs(v.Y), math.Abs(v.Z), math.Abs(v.W)}
 }
 
 // Hash ベクトルのハッシュ値を計算します
 func (v *MVec4) Hash() uint64 {
 	h := fnv.New64a()
-	h.Write([]byte(fmt.Sprintf("%.10f,%.10f,%.10f,%.10f", v.GetX(), v.GetY(), v.GetZ(), v.GetW())))
+	h.Write([]byte(fmt.Sprintf("%.10f,%.10f,%.10f,%.10f", v.X, v.Y, v.Z, v.W)))
 	return h.Sum64()
 }
 
 // IsZero ベクトルがゼロベクトルかどうかをチェックします
 func (v *MVec4) IsZero() bool {
-	return v[0] == 0 && v[1] == 0 && v[2] == 0 && v[3] == 0
+	return v.X == 0 && v.Y == 0 && v.Z == 0 && v.W == 0
 }
 
 // Length ベクトルの長さを返します
@@ -359,10 +258,10 @@ func (v *MVec4) LengthSqr() float64 {
 func (v *MVec4) Normalize() *MVec4 {
 	v3 := v.Vec3DividedByW()
 	v3.Normalize()
-	v[0] = v3[0]
-	v[1] = v3[1]
-	v[2] = v3[2]
-	v[3] = 1
+	v.X = v3.X
+	v.Y = v3.Y
+	v.Z = v3.Z
+	v.W = 1
 	return v
 }
 
@@ -371,25 +270,6 @@ func (v *MVec4) Normalized() *MVec4 {
 	vec := *v
 	vec.Normalize()
 	return &vec
-}
-
-// Angle ベクトルの角度(ラジアン角度)を返します
-func (v *MVec4) Angle(other *MVec4) float64 {
-	vec := v.Dot(other) / (v.Length() * other.Length())
-	// prevent NaN
-	if vec > 1. {
-		vec = vec - 2
-	} else if vec < -1. {
-		vec = vec + 2
-	}
-	return math.Acos(vec)
-}
-
-// Degree ベクトルの角度(度数)を返します
-func (v *MVec4) Degree(other *MVec4) float64 {
-	radian := v.Angle(other)
-	degree := radian * (180 / math.Pi)
-	return degree
 }
 
 // Dot ベクトルの内積を返します
@@ -401,7 +281,7 @@ func (v *MVec4) Dot(other *MVec4) float64 {
 
 // Dot4 returns the 4 element vdot product of two vectors.
 func Dot4(a, b *MVec4) float64 {
-	return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3]
+	return a.X*b.X + a.Y*b.Y + a.Z*b.Z + a.W*b.W
 }
 
 // Cross ベクトルの外積を返します
@@ -409,35 +289,35 @@ func (v *MVec4) Cross(other *MVec4) *MVec4 {
 	a3 := v.Vec3DividedByW()
 	b3 := other.Vec3DividedByW()
 	c3 := a3.Cross(b3)
-	return &MVec4{c3[0], c3[1], c3[2], 1}
+	return &MVec4{c3.X, c3.Y, c3.Z, 1}
 }
 
 // Min ベクトルの各要素の最小値をTの各要素に設定して返します
 func (v *MVec4) Min() *MVec4 {
-	min := v.GetX()
-	if v.GetY() < min {
-		min = v.GetY()
+	min := v.X
+	if v.Y < min {
+		min = v.Y
 	}
-	if v.GetZ() < min {
-		min = v.GetZ()
+	if v.Z < min {
+		min = v.Z
 	}
-	if v.GetW() < min {
-		min = v.GetW()
+	if v.W < min {
+		min = v.W
 	}
 	return &MVec4{min, min, min, min}
 }
 
 // Max ベクトルの各要素の最大値を返します
 func (v *MVec4) Max() *MVec4 {
-	max := v.GetX()
-	if v.GetY() > max {
-		max = v.GetY()
+	max := v.X
+	if v.Y > max {
+		max = v.Y
 	}
-	if v.GetZ() > max {
-		max = v.GetZ()
+	if v.Z > max {
+		max = v.Z
 	}
-	if v.GetW() > max {
-		max = v.GetW()
+	if v.W > max {
+		max = v.W
 	}
 	return &MVec4{max, max, max, max}
 }
@@ -446,22 +326,20 @@ func (v *MVec4) Max() *MVec4 {
 func (v *MVec4) Interpolate(other *MVec4, t float64) *MVec4 {
 	t1 := 1 - t
 	return &MVec4{
-		v[0]*t1 + other[0]*t,
-		v[1]*t1 + other[1]*t,
-		v[2]*t1 + other[2]*t,
-		v[3]*t1 + other[3]*t,
+		v.X*t1 + other.X*t,
+		v.Y*t1 + other.Y*t,
+		v.Z*t1 + other.Z*t,
+		v.W*t1 + other.W*t,
 	}
 }
 
 // Clamp ベクトルの各要素を指定された範囲内にクランプします
 func (v *MVec4) Clamp(min, max *MVec4) *MVec4 {
-	for i := range v {
-		if v[i] < min[i] {
-			v[i] = min[i]
-		} else if v[i] > max[i] {
-			v[i] = max[i]
-		}
-	}
+	v.X = ClampedFloat(v.X, min.X, max.X)
+	v.Y = ClampedFloat(v.Y, min.Y, max.Y)
+	v.Z = ClampedFloat(v.Z, min.Z, max.Z)
+	v.W = ClampedFloat(v.W, min.W, max.W)
+
 	return v
 }
 
@@ -486,13 +364,13 @@ func (v *MVec4) Clamped01() *MVec4 {
 
 // Copy
 func (v *MVec4) Copy() *MVec4 {
-	copied := MVec4{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
+	copied := MVec4{v.X, v.Y, v.Z, v.W}
 	return &copied
 }
 
 // Vector
 func (v *MVec4) Vector() []float64 {
-	return []float64{v.GetX(), v.GetY(), v.GetZ(), v.GetW()}
+	return []float64{v.X, v.Y, v.Z, v.W}
 }
 
 // 線形補間
@@ -502,32 +380,32 @@ func (v1 *MVec4) Lerp(v2 *MVec4, t float64) *MVec4 {
 
 func (v *MVec4) Round() *MVec4 {
 	return &MVec4{
-		math.Round(v.GetX()),
-		math.Round(v.GetY()),
-		math.Round(v.GetZ()),
-		math.Round(v.GetW()),
+		math.Round(v.X),
+		math.Round(v.Y),
+		math.Round(v.Z),
+		math.Round(v.W),
 	}
 }
 
 // Vec3DividedByW returns a vec3.T version of the vector by dividing the first three vector components (XYZ) by the last one (W).
 func (vec *MVec4) Vec3DividedByW() *MVec3 {
-	oow := 1 / vec[3]
-	return &MVec3{vec[0] * oow, vec[1] * oow, vec[2] * oow}
+	oow := 1 / vec.W
+	return &MVec3{vec.X * oow, vec.Y * oow, vec.Z * oow}
 }
 
 // DividedByW returns a copy of the vector with the first three components (XYZ) divided by the last one (W).
 func (vec *MVec4) DividedByW() *MVec4 {
-	oow := 1 / vec[3]
-	return &MVec4{vec[0] * oow, vec[1] * oow, vec[2] * oow, 1}
+	oow := 1 / vec.W
+	return &MVec4{vec.X * oow, vec.Y * oow, vec.Z * oow, 1}
 }
 
 // DivideByW divides the first three components (XYZ) by the last one (W).
 func (vec *MVec4) DivideByW() *MVec4 {
-	oow := 1 / vec[3]
-	vec[0] *= oow
-	vec[1] *= oow
-	vec[2] *= oow
-	vec[3] = 1
+	oow := 1 / vec.W
+	vec.X *= oow
+	vec.Y *= oow
+	vec.Z *= oow
+	vec.W = 1
 	return vec
 }
 
@@ -577,17 +455,17 @@ func (v *MVec4) Distance(other *MVec4) float64 {
 // ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
 func (v *MVec4) ClampIfVerySmall() *MVec4 {
 	epsilon := 1e-6
-	if math.Abs(v.GetX()) < epsilon {
-		v.SetX(0)
+	if math.Abs(v.X) < epsilon {
+		v.X = 0
 	}
-	if math.Abs(v.GetY()) < epsilon {
-		v.SetY(0)
+	if math.Abs(v.Y) < epsilon {
+		v.Y = 0
 	}
-	if math.Abs(v.GetZ()) < epsilon {
-		v.SetZ(0)
+	if math.Abs(v.Z) < epsilon {
+		v.Z = 0
 	}
-	if math.Abs(v.GetW()) < epsilon {
-		v.SetW(0)
+	if math.Abs(v.W) < epsilon {
+		v.W = 0
 	}
 	return v
 }

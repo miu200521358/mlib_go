@@ -45,12 +45,13 @@ func NewMMat4ByValues(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34
 }
 
 func NewMMat4FromAxisAngle(axis *MVec3, angle float64) *MMat4 {
-	m := MMat4(mgl64.HomogRotate3D(angle, mgl64.Vec3(*axis)))
+	m := MMat4(mgl64.HomogRotate3D(angle, mgl64.Vec3{axis.X, axis.Y, axis.Z}))
 	return &m
 }
 
 func NewMMat4FromLookAt(eye, center, up *MVec3) *MMat4 {
-	m := MMat4(mgl64.LookAtV(mgl64.Vec3(*eye), mgl64.Vec3(*center), mgl64.Vec3(*up)))
+	m := MMat4(mgl64.LookAtV(mgl64.Vec3{eye.X, eye.Y, eye.Z},
+		mgl64.Vec3{center.X, center.Y, center.Z}, mgl64.Vec3{up.X, up.Y, up.Z}))
 	return &m
 }
 
@@ -195,16 +196,16 @@ func (mat *MMat4) ClampIfVerySmall() *MMat4 {
 }
 
 func (mat *MMat4) AxisX() *MVec3 {
-	v := MVec3(mgl64.Mat4(*mat).Row(0).Vec3())
-	return &v
+	v := mgl64.Mat4(*mat).Row(0)
+	return &MVec3{v.X(), v.Y(), v.Z()}
 }
 
 func (mat *MMat4) AxisY() *MVec3 {
-	v := MVec3(mgl64.Mat4(*mat).Row(1).Vec3())
-	return &v
+	v := mgl64.Mat4(*mat).Row(1)
+	return &MVec3{v.X(), v.Y(), v.Z()}
 }
 
 func (mat *MMat4) AxisZ() *MVec3 {
-	v := MVec3(mgl64.Mat4(*mat).Row(2).Vec3())
-	return &v
+	v := mgl64.Mat4(*mat).Row(2)
+	return &MVec3{v.X(), v.Y(), v.Z()}
 }

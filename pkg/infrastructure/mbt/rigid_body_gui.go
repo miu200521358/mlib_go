@@ -79,14 +79,14 @@ func InitRigidBodyPhysics(modelIndex int, modelPhysics *MPhysics, r *pmx.RigidBo
 	switch r.ShapeType {
 	case pmx.SHAPE_SPHERE:
 		// 球剛体
-		btCollisionShape = bt.NewBtSphereShape(float32(size.GetX()))
+		btCollisionShape = bt.NewBtSphereShape(float32(size.X))
 	case pmx.SHAPE_BOX:
 		// 箱剛体
 		btCollisionShape = bt.NewBtBoxShape(
-			bt.NewBtVector3(float32(size.GetX()), float32(size.GetY()), float32(size.GetZ())))
+			bt.NewBtVector3(float32(size.X), float32(size.Y), float32(size.Z)))
 	case pmx.SHAPE_CAPSULE:
 		// カプセル剛体
-		btCollisionShape = bt.NewBtCapsuleShape(float32(size.GetX()), float32(size.GetY()))
+		btCollisionShape = bt.NewBtCapsuleShape(float32(size.X), float32(size.Y))
 	}
 	// btCollisionShape.SetMargin(0.0001)
 

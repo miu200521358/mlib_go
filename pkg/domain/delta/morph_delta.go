@@ -157,50 +157,50 @@ func (md *MaterialMorphDelta) Add(m *pmx.MaterialMorphOffset, ratio float64) {
 	md.AddMaterial.Ambient.Add(m.Ambient)
 	md.AddMaterial.Edge.Add(m.Edge)
 	md.AddMaterial.EdgeSize += m.EdgeSize
-	if m.Diffuse.GetX() != 0 {
-		md.AddRatios.Diffuse.AddX(ratio)
+	if m.Diffuse.X != 0 {
+		md.AddRatios.Diffuse.X += ratio
 	}
-	if m.Diffuse.GetY() != 0 {
-		md.AddRatios.Diffuse.AddY(ratio)
+	if m.Diffuse.Y != 0 {
+		md.AddRatios.Diffuse.Y += ratio
 	}
-	if m.Diffuse.GetZ() != 0 {
-		md.AddRatios.Diffuse.AddZ(ratio)
+	if m.Diffuse.Z != 0 {
+		md.AddRatios.Diffuse.Z += ratio
 	}
-	if m.Diffuse.GetW() != 0 {
-		md.AddRatios.Diffuse.AddW(ratio)
+	if m.Diffuse.W != 0 {
+		md.AddRatios.Diffuse.W += ratio
 	}
-	if m.Specular.GetX() != 0 {
-		md.AddRatios.Specular.AddX(ratio)
+	if m.Specular.X != 0 {
+		md.AddRatios.Specular.X += ratio
 	}
-	if m.Specular.GetY() != 0 {
-		md.AddRatios.Specular.AddY(ratio)
+	if m.Specular.Y != 0 {
+		md.AddRatios.Specular.Y += ratio
 	}
-	if m.Specular.GetZ() != 0 {
-		md.AddRatios.Specular.AddZ(ratio)
+	if m.Specular.Z != 0 {
+		md.AddRatios.Specular.Z += ratio
 	}
-	if m.Specular.GetW() != 0 {
-		md.AddRatios.Specular.AddW(ratio)
+	if m.Specular.W != 0 {
+		md.AddRatios.Specular.W += ratio
 	}
-	if m.Ambient.GetX() != 0 {
-		md.AddRatios.Ambient.AddX(ratio)
+	if m.Ambient.X != 0 {
+		md.AddRatios.Ambient.X += ratio
 	}
-	if m.Ambient.GetY() != 0 {
-		md.AddRatios.Ambient.AddY(ratio)
+	if m.Ambient.Y != 0 {
+		md.AddRatios.Ambient.Y += ratio
 	}
-	if m.Ambient.GetZ() != 0 {
-		md.AddRatios.Ambient.AddZ(ratio)
+	if m.Ambient.Z != 0 {
+		md.AddRatios.Ambient.Z += ratio
 	}
-	if m.Edge.GetX() != 0 {
-		md.AddRatios.Edge.AddX(ratio)
+	if m.Edge.X != 0 {
+		md.AddRatios.Edge.X += ratio
 	}
-	if m.Edge.GetY() != 0 {
-		md.AddRatios.Edge.AddY(ratio)
+	if m.Edge.Y != 0 {
+		md.AddRatios.Edge.Y += ratio
 	}
-	if m.Edge.GetZ() != 0 {
-		md.AddRatios.Edge.AddZ(ratio)
+	if m.Edge.Z != 0 {
+		md.AddRatios.Edge.Z += ratio
 	}
-	if m.Edge.GetW() != 0 {
-		md.AddRatios.Edge.AddW(ratio)
+	if m.Edge.W != 0 {
+		md.AddRatios.Edge.W += ratio
 	}
 	if m.EdgeSize != 0 {
 		md.AddRatios.EdgeSize += ratio
@@ -208,65 +208,65 @@ func (md *MaterialMorphDelta) Add(m *pmx.MaterialMorphOffset, ratio float64) {
 }
 
 func (md *MaterialMorphDelta) Mul(m *pmx.MaterialMorphOffset, ratio float64) {
-	if m.Diffuse.GetX() != 1 {
-		md.MulMaterial.Diffuse.MulX(md.Material.Diffuse.GetX() - m.Diffuse.GetX())
-		md.MulRatios.Diffuse.MulX(1 - ratio)
+	if m.Diffuse.X != 1 {
+		md.MulMaterial.Diffuse.X *= md.Material.Diffuse.X - m.Diffuse.X
+		md.MulRatios.Diffuse.X *= 1 - ratio
 	}
-	if m.Diffuse.GetY() != 1 {
-		md.MulMaterial.Diffuse.MulY(md.Material.Diffuse.GetY() - m.Diffuse.GetY())
-		md.MulRatios.Diffuse.MulY(1 - ratio)
+	if m.Diffuse.Y != 1 {
+		md.MulMaterial.Diffuse.Y *= md.Material.Diffuse.Y - m.Diffuse.Y
+		md.MulRatios.Diffuse.Y *= 1 - ratio
 	}
-	if m.Diffuse.GetZ() != 1 {
-		md.MulMaterial.Diffuse.MulZ(md.Material.Diffuse.GetZ() - m.Diffuse.GetZ())
-		md.MulRatios.Diffuse.MulZ(1 - ratio)
+	if m.Diffuse.Z != 1 {
+		md.MulMaterial.Diffuse.Z *= md.Material.Diffuse.Z - m.Diffuse.Z
+		md.MulRatios.Diffuse.Z *= 1 - ratio
 	}
-	if m.Diffuse.GetW() != 1 {
-		md.MulMaterial.Diffuse.MulW(md.Material.Diffuse.GetW() - m.Diffuse.GetW())
-		md.MulRatios.Diffuse.MulW(1 - ratio)
+	if m.Diffuse.W != 1 {
+		md.MulMaterial.Diffuse.W *= md.Material.Diffuse.W - m.Diffuse.W
+		md.MulRatios.Diffuse.W *= 1 - ratio
 	}
-	if m.Specular.GetX() != 1 {
-		md.MulMaterial.Specular.MulX(md.Material.Specular.GetX() - m.Specular.GetX())
-		md.MulRatios.Specular.MulX(1 - ratio)
+	if m.Specular.X != 1 {
+		md.MulMaterial.Specular.X *= md.Material.Specular.X - m.Specular.X
+		md.MulRatios.Specular.X *= 1 - ratio
 	}
-	if m.Specular.GetY() != 1 {
-		md.MulMaterial.Specular.MulY(md.Material.Specular.GetY() - m.Specular.GetY())
-		md.MulRatios.Specular.MulY(1 - ratio)
+	if m.Specular.Y != 1 {
+		md.MulMaterial.Specular.Y *= md.Material.Specular.Y - m.Specular.Y
+		md.MulRatios.Specular.Y *= 1 - ratio
 	}
-	if m.Specular.GetZ() != 1 {
-		md.MulMaterial.Specular.MulZ(md.Material.Specular.GetZ() - m.Specular.GetZ())
-		md.MulRatios.Specular.MulZ(1 - ratio)
+	if m.Specular.Z != 1 {
+		md.MulMaterial.Specular.Z *= md.Material.Specular.Z - m.Specular.Z
+		md.MulRatios.Specular.Z *= 1 - ratio
 	}
-	if m.Specular.GetW() != 1 {
-		md.MulMaterial.Specular.MulW(md.Material.Specular.GetW() - m.Specular.GetW())
-		md.MulRatios.Specular.MulW(1 - ratio)
+	if m.Specular.W != 1 {
+		md.MulMaterial.Specular.W *= md.Material.Specular.W - m.Specular.W
+		md.MulRatios.Specular.W *= 1 - ratio
 	}
-	if m.Ambient.GetX() != 1 {
-		md.MulMaterial.Ambient.MulX(md.Material.Ambient.GetX() - m.Ambient.GetX())
-		md.MulRatios.Ambient.MulX(1 - ratio)
+	if m.Ambient.X != 1 {
+		md.MulMaterial.Ambient.X *= md.Material.Ambient.X - m.Ambient.X
+		md.MulRatios.Ambient.X *= 1 - ratio
 	}
-	if m.Ambient.GetY() != 1 {
-		md.MulMaterial.Ambient.MulY(md.Material.Ambient.GetY() - m.Ambient.GetY())
-		md.MulRatios.Ambient.MulY(1 - ratio)
+	if m.Ambient.Y != 1 {
+		md.MulMaterial.Ambient.Y *= md.Material.Ambient.Y - m.Ambient.Y
+		md.MulRatios.Ambient.Y *= 1 - ratio
 	}
-	if m.Ambient.GetZ() != 1 {
-		md.MulMaterial.Ambient.MulZ(md.Material.Ambient.GetZ() - m.Ambient.GetZ())
-		md.MulRatios.Ambient.MulZ(1 - ratio)
+	if m.Ambient.Z != 1 {
+		md.MulMaterial.Ambient.Z *= md.Material.Ambient.Z - m.Ambient.Z
+		md.MulRatios.Ambient.Z *= 1 - ratio
 	}
-	if m.Edge.GetX() != 1 {
-		md.MulMaterial.Edge.MulX(md.Material.Edge.GetX() - m.Edge.GetX())
-		md.MulRatios.Edge.MulX(1 - ratio)
+	if m.Edge.X != 1 {
+		md.MulMaterial.Edge.X *= md.Material.Edge.X - m.Edge.X
+		md.MulRatios.Edge.X *= 1 - ratio
 	}
-	if m.Edge.GetY() != 1 {
-		md.MulMaterial.Edge.MulY(md.Material.Edge.GetY() - m.Edge.GetY())
-		md.MulRatios.Edge.MulY(1 - ratio)
+	if m.Edge.Y != 1 {
+		md.MulMaterial.Edge.Y *= md.Material.Edge.Y - m.Edge.Y
+		md.MulRatios.Edge.Y *= 1 - ratio
 	}
-	if m.Edge.GetZ() != 1 {
-		md.MulMaterial.Edge.MulZ(md.Material.Edge.GetZ() - m.Edge.GetZ())
-		md.MulRatios.Edge.MulZ(1 - ratio)
+	if m.Edge.Z != 1 {
+		md.MulMaterial.Edge.Z *= md.Material.Edge.Z - m.Edge.Z
+		md.MulRatios.Edge.Z *= 1 - ratio
 	}
-	if m.Edge.GetW() != 1 {
-		md.MulMaterial.Edge.MulW(md.Material.Edge.GetW() - m.Edge.GetW())
-		md.MulRatios.Edge.MulW(1 - ratio)
+	if m.Edge.W != 1 {
+		md.MulMaterial.Edge.W *= md.Material.Edge.W - m.Edge.W
+		md.MulRatios.Edge.W *= 1 - ratio
 	}
 	if m.EdgeSize != 1 {
 		md.MulMaterial.EdgeSize *= md.Material.EdgeSize - m.EdgeSize

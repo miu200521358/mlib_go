@@ -66,8 +66,8 @@ func TestMVec3LessThanOrEquals(t *testing.T) {
 		t.Errorf("LessThanOrEqual failed. Expected false, got true")
 	}
 
-	v5 := MVec3{1, 2}
-	v6 := MVec3{1, 2}
+	v5 := MVec3{1, 2, 3}
+	v6 := MVec3{1, 2, 3}
 
 	if !v5.LessThanOrEquals(&v6) {
 		t.Errorf("LessThanOrEqual failed. Expected true, got false")
@@ -118,13 +118,13 @@ func TestMVec3Inverted(t *testing.T) {
 	v2 := MVec3{3, 4, 5}
 
 	iv1 := v1.Inverted()
-	if iv1.GetX() != -1 || iv1.GetY() != -2 || iv1.GetZ() != -3 {
-		t.Errorf("Inverse failed. Expected (-1, -2, -3), got (%v, %v, %v)", iv1.GetX(), iv1.GetY(), iv1.GetZ())
+	if iv1.X != -1 || iv1.Y != -2 || iv1.Z != -3 {
+		t.Errorf("Inverse failed. Expected (-1, -2, -3), got (%v, %v, %v)", iv1.X, iv1.Y, iv1.Z)
 	}
 
 	iv2 := v2.Inverted()
-	if iv2.GetX() != -3 || iv2.GetY() != -4 || iv2.GetZ() != -5 {
-		t.Errorf("Inverse failed. Expected (-3, -4, -5), got (%v, %v, %v)", iv2.GetX(), iv2.GetY(), iv2.GetZ())
+	if iv2.X != -3 || iv2.Y != -4 || iv2.Z != -5 {
+		t.Errorf("Inverse failed. Expected (-3, -4, -5), got (%v, %v, %v)", iv2.X, iv2.Y, iv2.Z)
 	}
 }
 
@@ -143,8 +143,8 @@ func TestMVec3Abs(t *testing.T) {
 		t.Errorf("Abs failed. Expected %v, got %v", expected2, result2)
 	}
 
-	v3 := MVec3{0, 0}
-	expected3 := MVec3{0, 0}
+	v3 := MVec3{0, 0, 0}
+	expected3 := MVec3{0, 0, 0}
 	result3 := v3.Abs()
 	if !result3.Equals(&expected3) {
 		t.Errorf("Abs failed. Expected %v, got %v", expected3, result3)
@@ -359,18 +359,16 @@ func TestGetVertexLocalPositions(t *testing.T) {
 		&MVec3{0.7, 2, 1.5},
 	)
 
-	expected := [][]float64{
+	expected := []*MVec3{
 		{0.10944881889763777, 0.8208661417322836, 0.2736220472440945},
 		{0.5346456692913384, 4.009842519685039, 1.3366141732283463},
 		{-0.04015748031496058, -0.3011811023622044, -0.10039370078740151},
 	}
 
 	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
-			if math.Abs(vertexLocalPositions[i][j]-expected[i][j]) > 1e-8 {
-				t.Errorf("GetVertexLocalPositions failed. Expected %v, got %v", expected, vertexLocalPositions)
-				break
-			}
+		if vertexLocalPositions[i].NearEquals(expected[i], 1e-8) {
+			t.Errorf("GetVertexLocalPositions failed. Expected %v, got %v", expected, vertexLocalPositions)
+			break
 		}
 	}
 }

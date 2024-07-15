@@ -14,8 +14,8 @@ func vertexGLInit(v *pmx.Vertex) []float32 {
 	n := mgl.NewGlVec3(v.Normal)
 	eu := [2]float32{0.0, 0.0}
 	if len(v.ExtendedUvs) > 0 {
-		eu[0] = float32(v.ExtendedUvs[0].GetX())
-		eu[1] = float32(v.ExtendedUvs[0].GetY())
+		eu[0] = float32(v.ExtendedUvs[0].X)
+		eu[1] = float32(v.ExtendedUvs[0].Y)
 	}
 	d := v.Deform.NormalizedDeform()
 	s := float32(mmath.BoolToInt(v.DeformType == pmx.SDEF))

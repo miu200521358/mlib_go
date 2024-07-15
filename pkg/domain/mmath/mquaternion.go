@@ -81,10 +81,10 @@ func (v *MQuaternion) GetXYZ() *MVec3 {
 	return &MVec3{v.GetX(), v.GetY(), v.GetZ()}
 }
 
-func (v *MQuaternion) SetXYZ(vec3 *MVec3) {
-	v.SetX(vec3.GetX())
-	v.SetY(vec3.GetY())
-	v.SetZ(vec3.GetZ())
+func (v *MQuaternion) SetXYZ(v3 *MVec3) {
+	v.SetX(v3.X)
+	v.SetY(v3.Y)
+	v.SetZ(v3.Z)
 }
 
 // String T の文字列表現を返します。
@@ -99,13 +99,15 @@ func (v *MQuaternion) MMD() *MQuaternion {
 
 // NewMQuaternionFromAxisAngles は、軸周りの回転を表す四元数を返します。
 func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
-	m := MMat4(mgl64.HomogRotate3D(angle, mgl64.Vec3(*axis.Normalize())))
+	axis.Normalize()
+	m := MMat4(mgl64.HomogRotate3D(angle, mgl64.Vec3{axis.X, axis.Y, axis.Z}))
 	return m.Quaternion()
 }
 
 // NewMQuaternionFromAxisAnglesRotate は、軸周りの回転を表す四元数を返します。
 func NewMQuaternionFromAxisAnglesRotate(axis *MVec3, angle float64) *MQuaternion {
-	m := MQuaternion(mgl64.QuatRotate(angle, mgl64.Vec3(*axis.Normalize())))
+	axis.Normalize()
+	m := MQuaternion(mgl64.QuatRotate(angle, mgl64.Vec3{axis.X, axis.Y, axis.Z}))
 	return m.Normalize()
 }
 
@@ -150,14 +152,14 @@ func (v *MQuaternion) ToRadiansWithGimbal(axisIndex int) (*MVec3, bool) {
 
 	var other1Rad, other2Rad float64
 	if axisIndex == 0 {
-		other1Rad = math.Abs(r.GetY())
-		other2Rad = math.Abs(r.GetZ())
+		other1Rad = math.Abs(r.Y)
+		other2Rad = math.Abs(r.Z)
 	} else if axisIndex == 1 {
-		other1Rad = math.Abs(r.GetX())
-		other2Rad = math.Abs(r.GetZ())
+		other1Rad = math.Abs(r.X)
+		other2Rad = math.Abs(r.Z)
 	} else {
-		other1Rad = math.Abs(r.GetX())
-		other2Rad = math.Abs(r.GetY())
+		other1Rad = math.Abs(r.X)
+		other2Rad = math.Abs(r.Y)
 	}
 
 	// ジンバルロックを判定する
@@ -193,9 +195,9 @@ func ThetaToRad(theta float64) float64 {
 func (quat *MQuaternion) ToDegrees() *MVec3 {
 	vec := quat.ToRadians()
 	return &MVec3{
-		RadToDeg(vec.GetX()),
-		RadToDeg(vec.GetY()),
-		RadToDeg(vec.GetZ()),
+		RadToDeg(vec.X),
+		RadToDeg(vec.Y),
+		RadToDeg(vec.Z),
 	}
 }
 
@@ -203,9 +205,9 @@ func (quat *MQuaternion) ToDegrees() *MVec3 {
 func (quat *MQuaternion) ToMMDDegrees() *MVec3 {
 	vec := quat.MMD().ToRadians()
 	return &MVec3{
-		RadToDeg(vec.GetX()),
-		RadToDeg(-vec.GetY()),
-		RadToDeg(-vec.GetZ()),
+		RadToDeg(vec.X),
+		RadToDeg(-vec.Y),
+		RadToDeg(-vec.Z),
 	}
 }
 
@@ -361,9 +363,9 @@ func (quat *MQuaternion) ToAxisAngle() (*MVec3, float64) {
 		s = 1
 	}
 	axis := NewMVec3()
-	axis.SetX(quat.GetX() / s)
-	axis.SetY(quat.GetY() / s)
-	axis.SetZ(quat.GetZ() / s)
+	axis.X = quat.GetX() / s
+	axis.Y = quat.GetY() / s
+	axis.Z = quat.GetZ() / s
 
 	return axis, angle
 }
@@ -386,7 +388,7 @@ func (a *MVec3) Vec3Diff(b *MVec3) *MQuaternion {
 	sr := math.Sqrt(2 * (1 + a.Dot(b)))
 	oosr := 1 / sr
 
-	q := NewMQuaternionByValues(cr[0]*oosr, cr[1]*oosr, cr[2]*oosr, sr*0.5)
+	q := NewMQuaternionByValues(cr.X*oosr, cr.Y*oosr, cr.Z*oosr, sr*0.5)
 	return q.Normalize()
 }
 
@@ -464,16 +466,16 @@ func NewMQuaternionFromDirection(direction *MVec3, up *MVec3) *MQuaternion {
 
 // NewMQuaternionRotateはfromベクトルからtoベクトルまでの回転量を計算します。
 func NewMQuaternionRotate(fromV, toV *MVec3) *MQuaternion {
-	v := mgl64.QuatBetweenVectors(mgl64.Vec3(*fromV), mgl64.Vec3(*toV))
+	v := mgl64.QuatBetweenVectors(mgl64.Vec3{fromV.X, fromV.Y, fromV.Z}, mgl64.Vec3{toV.X, toV.Y, toV.Z})
 	return NewMQuaternionByValues(v.V[0], v.V[1], v.V[2], v.W)
 }
 
 // NewMQuaternionFromAxesは、3つの軸ベクトルからクォータニオンを作成します。
 func NewMQuaternionFromAxes(xAxis, yAxis, zAxis *MVec3) *MQuaternion {
 	mat := NewMMat4ByValues(
-		xAxis.GetX(), xAxis.GetY(), xAxis.GetZ(), 0,
-		yAxis.GetX(), yAxis.GetY(), yAxis.GetZ(), 0,
-		zAxis.GetX(), zAxis.GetY(), zAxis.GetZ(), 0,
+		xAxis.X, xAxis.Y, xAxis.Z, 0,
+		yAxis.X, yAxis.Y, yAxis.Z, 0,
+		zAxis.X, zAxis.Y, zAxis.Z, 0,
 		0, 0, 0, 1,
 	)
 	qq := mat.Quaternion()
@@ -581,7 +583,7 @@ func (quat *MQuaternion) NearEquals(other *MQuaternion, epsilon float64) bool {
 
 // MulVec3は、ベクトルvをクォータニオンで回転させた結果の新しいベクトルを返します。
 func (quat *MQuaternion) MulVec3(v *MVec3) *MVec3 {
-	r := mgl64.Quat(*quat).Rotate(mgl64.Vec3(*v))
+	r := mgl64.Quat(*quat).Rotate(mgl64.Vec3{v.X, v.Y, v.Z})
 	return &MVec3{r[0], r[1], r[2]}
 }
 

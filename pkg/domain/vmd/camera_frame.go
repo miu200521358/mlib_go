@@ -18,7 +18,7 @@ func NewCameraFrame(index int) *CameraFrame {
 	return &CameraFrame{
 		BaseFrame:        NewFrame(index).(*BaseFrame),
 		Position:         mmath.NewMVec3(),
-		Rotation:         mmath.NewRotationFromDegrees(&mmath.MVec3{0, 0, 0}),
+		Rotation:         mmath.NewMRotation(),
 		Distance:         0.0,
 		ViewOfAngle:      0,
 		IsPerspectiveOff: true,
@@ -81,9 +81,9 @@ func (nextCf *CameraFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame
 	qq := prevCf.Rotation.GetQuaternion().Slerp(nextCf.Rotation.GetQuaternion(), ry)
 	cf.Rotation.SetQuaternion(qq)
 
-	cf.Position.SetX(mmath.LerpFloat(prevCf.Position.GetX(), nextCf.Position.GetX(), xy))
-	cf.Position.SetY(mmath.LerpFloat(prevCf.Position.GetY(), nextCf.Position.GetY(), yy))
-	cf.Position.SetZ(mmath.LerpFloat(prevCf.Position.GetZ(), nextCf.Position.GetZ(), zy))
+	cf.Position.X = mmath.LerpFloat(prevCf.Position.X, nextCf.Position.X, xy)
+	cf.Position.Y = mmath.LerpFloat(prevCf.Position.Y, nextCf.Position.Y, yy)
+	cf.Position.Z = mmath.LerpFloat(prevCf.Position.Z, nextCf.Position.Z, zy)
 
 	cf.Distance = mmath.LerpFloat(prevCf.Distance, nextCf.Distance, dy)
 	cf.ViewOfAngle = int(mmath.LerpFloat(float64(prevCf.ViewOfAngle), float64(nextCf.ViewOfAngle), vy))

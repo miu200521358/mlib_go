@@ -388,7 +388,7 @@ ikLoop:
 			}
 
 			// 単位角
-			unitRad := ikBone.Ik.UnitRotation.GetRadians().GetX() * float64(lidx+1)
+			unitRad := ikBone.Ik.UnitRotation.GetRadians().X * float64(lidx+1)
 			linkDot := ikLocalPosition.Dot(effectorLocalPosition)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -623,7 +623,7 @@ func getLinkAxis(
 
 	if minAngleLimitRadians.IsOnlyX() || maxAngleLimitRadians.IsOnlyX() {
 		// X軸のみの制限の場合
-		vv := linkAxis.GetX()
+		vv := linkAxis.X
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			fmt.Fprintf(ikFile,
@@ -637,7 +637,7 @@ func getLinkAxis(
 		return mmath.MVec3UnitX, linkAxis
 	} else if minAngleLimitRadians.IsOnlyY() || maxAngleLimitRadians.IsOnlyY() {
 		// Y軸のみの制限の場合
-		vv := linkAxis.GetY()
+		vv := linkAxis.Y
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			fmt.Fprintf(ikFile,
@@ -651,7 +651,7 @@ func getLinkAxis(
 		return mmath.MVec3UnitY, linkAxis
 	} else if minAngleLimitRadians.IsOnlyZ() || maxAngleLimitRadians.IsOnlyZ() {
 		// Z軸のみの制限の場合
-		vv := linkAxis.GetZ()
+		vv := linkAxis.Z
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			fmt.Fprintf(ikFile,
@@ -691,12 +691,12 @@ func calcIkLimitQuaternion(
 	}
 
 	// 軸回転角度を算出
-	if minAngleLimitRadians.GetX() > -mmath.HALF_RAD && maxAngleLimitRadians.GetX() < mmath.HALF_RAD {
+	if minAngleLimitRadians.X > -mmath.HALF_RAD && maxAngleLimitRadians.X < mmath.HALF_RAD {
 		// Z*X*Y順
 		// X軸回り
-		fSX := -ikMat.AxisZ().GetY() // sin(θx) = -m32
-		fX := math.Asin(fSX)         // X軸回り決定
-		fCX := math.Cos(fX)          // cos(θx)
+		fSX := -ikMat.AxisZ().Y // sin(θx) = -m32
+		fX := math.Asin(fSX)    // X軸回り決定
+		fCX := math.Cos(fX)     // cos(θx)
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][X軸制限] fSX: %f, fX: %f, fCX: %f\n",
@@ -719,9 +719,9 @@ func calcIkLimitQuaternion(
 		}
 
 		// Y軸回り
-		fSY := ikMat.AxisZ().GetX() / fCX // sin(θy) = m31 / cos(θx)
-		fCY := ikMat.AxisZ().GetZ() / fCX // cos(θy) = m33 / cos(θx)
-		fY := math.Atan2(fSY, fCY)        // Y軸回り決定
+		fSY := ikMat.AxisZ().X / fCX // sin(θy) = m31 / cos(θx)
+		fCY := ikMat.AxisZ().Z / fCX // cos(θy) = m33 / cos(θx)
+		fY := math.Atan2(fSY, fCY)   // Y軸回り決定
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][X軸制限-Y軸回り] fSY: %f, fCY: %f, fY: %f\n",
@@ -729,9 +729,9 @@ func calcIkLimitQuaternion(
 		}
 
 		// Z軸周り
-		fSZ := ikMat.AxisX().GetY() / fCX // sin(θz) = m12 / cos(θx)
-		fCZ := ikMat.AxisY().GetY() / fCX // cos(θz) = m22 / cos(θx)
-		fZ := math.Atan2(fSZ, fCZ)        // Z軸回り決定
+		fSZ := ikMat.AxisX().Y / fCX // sin(θz) = m12 / cos(θx)
+		fCZ := ikMat.AxisY().Y / fCX // cos(θz) = m22 / cos(θx)
+		fZ := math.Atan2(fSZ, fCZ)   // Z軸回り決定
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][X軸制限-Z軸回り] fSZ: %f, fCZ: %f, fZ: %f\n",
@@ -739,11 +739,11 @@ func calcIkLimitQuaternion(
 		}
 
 		// 角度の制限
-		fX = getIkAxisValue(fX, minAngleLimitRadians.GetX(), maxAngleLimitRadians.GetX(), loop, loopCount,
+		fX = getIkAxisValue(fX, minAngleLimitRadians.X, maxAngleLimitRadians.X, loop, loopCount,
 			frame, count, "X軸制限-X", linkBoneName, ikMotion, ikFile)
-		fY = getIkAxisValue(fY, minAngleLimitRadians.GetY(), maxAngleLimitRadians.GetY(), loop, loopCount,
+		fY = getIkAxisValue(fY, minAngleLimitRadians.Y, maxAngleLimitRadians.Y, loop, loopCount,
 			frame, count, "X軸制限-Y", linkBoneName, ikMotion, ikFile)
-		fZ = getIkAxisValue(fZ, minAngleLimitRadians.GetZ(), maxAngleLimitRadians.GetZ(), loop, loopCount,
+		fZ = getIkAxisValue(fZ, minAngleLimitRadians.Z, maxAngleLimitRadians.Z, loop, loopCount,
 			frame, count, "X軸制限-Z", linkBoneName, ikMotion, ikFile)
 
 		// 決定した角度でベクトルを回転
@@ -766,12 +766,12 @@ func calcIkLimitQuaternion(
 		}
 
 		return yQuat.Muled(xQuat).Muled(zQuat), count
-	} else if minAngleLimitRadians.GetY() > -mmath.HALF_RAD && maxAngleLimitRadians.GetY() < mmath.HALF_RAD {
+	} else if minAngleLimitRadians.Y > -mmath.HALF_RAD && maxAngleLimitRadians.Y < mmath.HALF_RAD {
 		// X*Y*Z順
 		// Y軸回り
-		fSY := -ikMat.AxisX().GetZ() // sin(θy) = m13
-		fY := math.Asin(fSY)         // Y軸回り決定
-		fCY := math.Cos(fY)          // cos(θy)
+		fSY := -ikMat.AxisX().Z // sin(θy) = m13
+		fY := math.Asin(fSY)    // Y軸回り決定
+		fCY := math.Cos(fY)     // cos(θy)
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][Y軸制限] fSY: %f, fY: %f, fCY: %f\n",
@@ -794,9 +794,9 @@ func calcIkLimitQuaternion(
 		}
 
 		// X軸回り
-		fSX := ikMat.AxisY().GetZ() / fCY // sin(θx) = m23 / cos(θy)
-		fCX := ikMat.AxisZ().GetZ() / fCY // cos(θx) = m33 / cos(θy)
-		fX := math.Atan2(fSX, fCX)        // X軸回り決定
+		fSX := ikMat.AxisY().Z / fCY // sin(θx) = m23 / cos(θy)
+		fCX := ikMat.AxisZ().Z / fCY // cos(θx) = m33 / cos(θy)
+		fX := math.Atan2(fSX, fCX)   // X軸回り決定
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][Y軸制限-X軸回り] fSX: %f, fCX: %f, fX: %f\n",
@@ -804,9 +804,9 @@ func calcIkLimitQuaternion(
 		}
 
 		// Z軸周り
-		fSZ := ikMat.AxisX().GetY() / fCY // sin(θz) = m12 / cos(θy)
-		fCZ := ikMat.AxisX().GetX() / fCY // cos(θz) = m11 / cos(θy)
-		fZ := math.Atan2(fSZ, fCZ)        // Z軸回り決定
+		fSZ := ikMat.AxisX().Y / fCY // sin(θz) = m12 / cos(θy)
+		fCZ := ikMat.AxisX().X / fCY // cos(θz) = m11 / cos(θy)
+		fZ := math.Atan2(fSZ, fCZ)   // Z軸回り決定
 
 		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][Y軸制限-Z軸回り] fSZ: %f, fCZ: %f, fZ: %f\n",
@@ -814,11 +814,11 @@ func calcIkLimitQuaternion(
 		}
 
 		// 角度の制限
-		fX = getIkAxisValue(fX, minAngleLimitRadians.GetX(), maxAngleLimitRadians.GetX(), loop, loopCount,
+		fX = getIkAxisValue(fX, minAngleLimitRadians.X, maxAngleLimitRadians.X, loop, loopCount,
 			frame, count, "Y軸制限-X", linkBoneName, ikMotion, ikFile)
-		fY = getIkAxisValue(fY, minAngleLimitRadians.GetY(), maxAngleLimitRadians.GetY(), loop, loopCount,
+		fY = getIkAxisValue(fY, minAngleLimitRadians.Y, maxAngleLimitRadians.Y, loop, loopCount,
 			frame, count, "Y軸制限-Y", linkBoneName, ikMotion, ikFile)
-		fZ = getIkAxisValue(fZ, minAngleLimitRadians.GetZ(), maxAngleLimitRadians.GetZ(), loop, loopCount,
+		fZ = getIkAxisValue(fZ, minAngleLimitRadians.Z, maxAngleLimitRadians.Z, loop, loopCount,
 			frame, count, "Y軸制限-Z", linkBoneName, ikMotion, ikFile)
 
 		// 決定した角度でベクトルを回転
@@ -845,9 +845,9 @@ func calcIkLimitQuaternion(
 
 	// Y*Z*X順
 	// Z軸回り
-	fSZ := -ikMat.AxisY().GetX() // sin(θz) = m21
-	fZ := math.Asin(fSZ)         // Z軸回り決定
-	fCZ := math.Cos(fZ)          // cos(θz)
+	fSZ := -ikMat.AxisY().X // sin(θz) = m21
+	fZ := math.Asin(fSZ)    // Z軸回り決定
+	fCZ := math.Cos(fZ)     // cos(θz)
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][Z軸制限] fSZ: %f, fZ: %f, fCZ: %f\n",
@@ -870,9 +870,9 @@ func calcIkLimitQuaternion(
 	}
 
 	// X軸回り
-	fSX := ikMat.AxisY().GetZ() / fCZ // sin(θx) = m23 / cos(θz)
-	fCX := ikMat.AxisY().GetY() / fCZ // cos(θx) = m22 / cos(θz)
-	fX := math.Atan2(fSX, fCX)        // X軸回り決定
+	fSX := ikMat.AxisY().Z / fCZ // sin(θx) = m23 / cos(θz)
+	fCX := ikMat.AxisY().Y / fCZ // cos(θx) = m22 / cos(θz)
+	fX := math.Atan2(fSX, fCX)   // X軸回り決定
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][Z軸制限-X軸回り] fSX: %f, fCX: %f, fX: %f\n",
@@ -880,9 +880,9 @@ func calcIkLimitQuaternion(
 	}
 
 	// Y軸周り
-	fSY := ikMat.AxisZ().GetX() / fCZ // sin(θy) = m31 / cos(θz)
-	fCY := ikMat.AxisX().GetX() / fCZ // cos(θy) = m11 / cos(θz)
-	fY := math.Atan2(fSY, fCY)        // Y軸回り決定
+	fSY := ikMat.AxisZ().X / fCZ // sin(θy) = m31 / cos(θz)
+	fCY := ikMat.AxisX().X / fCZ // cos(θy) = m11 / cos(θz)
+	fY := math.Atan2(fSY, fCY)   // Y軸回り決定
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][Z軸制限-Y軸回り] fSY: %f, fCY: %f, fY: %f\n",
@@ -890,11 +890,11 @@ func calcIkLimitQuaternion(
 	}
 
 	// 角度の制限
-	fX = getIkAxisValue(fX, minAngleLimitRadians.GetX(), maxAngleLimitRadians.GetX(), loop, loopCount,
+	fX = getIkAxisValue(fX, minAngleLimitRadians.X, maxAngleLimitRadians.X, loop, loopCount,
 		frame, count, "Z軸制限-X", linkBoneName, ikMotion, ikFile)
-	fY = getIkAxisValue(fY, minAngleLimitRadians.GetY(), maxAngleLimitRadians.GetY(), loop, loopCount,
+	fY = getIkAxisValue(fY, minAngleLimitRadians.Y, maxAngleLimitRadians.Y, loop, loopCount,
 		frame, count, "Z軸制限-Y", linkBoneName, ikMotion, ikFile)
-	fZ = getIkAxisValue(fZ, minAngleLimitRadians.GetZ(), maxAngleLimitRadians.GetZ(), loop, loopCount,
+	fZ = getIkAxisValue(fZ, minAngleLimitRadians.Z, maxAngleLimitRadians.Z, loop, loopCount,
 		frame, count, "Z軸制限-Z", linkBoneName, ikMotion, ikFile)
 
 	// 決定した角度でベクトルを回転
@@ -1011,7 +1011,7 @@ func calcBoneDeltas(
 			d.UnitMatrix.Mul(pos.ToMat4())
 		}
 
-		// x := math.Abs(rot.GetX())
+		// x := math.Abs(rot.X)
 
 		// if bone.Name == "左袖_後_赤_04_04" {
 		// 	mlog.I("[%s][%04d]: pos: %s, rot: %s(%s), x: %f\n", bone.Name, frame, pos.String(), rot.String(), rot.ToMMDDegrees().String(), x)

@@ -11,7 +11,7 @@ func TestMQuaternionToEulerAngles(t *testing.T) {
 
 	result := quat.ToRadians()
 
-	if math.Abs(result.GetX()-expected.GetX()) > 1e-10 || math.Abs(result.GetY()-expected.GetY()) > 1e-10 || math.Abs(result.GetZ()-expected.GetZ()) > 1e-10 {
+	if result.NearEquals(&expected, 1e-10) {
 		t.Errorf("ToEulerAngles failed. Expected %v, got %v", expected, result)
 	}
 }
