@@ -36,10 +36,10 @@ func main() {
 
 	model := modelData.(*pmx.PmxModel)
 
-	for i := 0; i < 500; i++ {
+	for i := 0; i <= 500; i++ {
 		if i%100 == 0 {
 			log.Printf("i: %d", i)
 		}
-		deform.DeformBone(motion.BoneFrames, i, model, nil, true, nil, nil)
+		deform.DeformBone(model, motion.BoneFrames, nil, nil, true, i, nil)
 	}
 }

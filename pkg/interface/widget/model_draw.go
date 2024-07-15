@@ -137,7 +137,7 @@ func deformBeforePhysics(
 
 	if prevDeltas == nil {
 		vds.Morphs = deform.DeformMorph(motion, motion.MorphFrames, frame, model, nil)
-		vds.Bones = deform.DeformByPhysicsFlag(motion.BoneFrames, frame, model, nil, true,
+		vds.Bones = deform.DeformBoneByPhysicsFlag(motion.BoneFrames, frame, model, nil, true,
 			nil, vds.Morphs, ikFrame, false)
 	} else {
 		vds.Morphs = prevDeltas.Morphs
@@ -217,7 +217,7 @@ func deformAfterPhysics(
 		}
 
 		// 物理後のデフォーム情報
-		deltas.Bones = deform.DeformByPhysicsFlag(motion.BoneFrames, frame, model, nil, true,
+		deltas.Bones = deform.DeformBoneByPhysicsFlag(motion.BoneFrames, frame, model, nil, true,
 			deltas.Bones, deltas.Morphs, ikFrame, true)
 	}
 

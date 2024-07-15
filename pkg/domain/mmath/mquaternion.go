@@ -312,6 +312,7 @@ func (quat *MQuaternion) MuledScalar(factor float64) *MQuaternion {
 	}
 
 	// factor をかけて角度を制限
+	// TODO: Vectorにfactorをかけて、normalize？
 	if factor > 0 {
 		return MQuaternionIdent.Slerp(quat, factor)
 	} else {

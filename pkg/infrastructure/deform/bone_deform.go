@@ -18,19 +18,19 @@ import (
 )
 
 func DeformBone(
-	fs *vmd.BoneFrames,
-	frame int,
 	model *pmx.PmxModel,
-	boneNames []string,
-	isCalcIk bool,
-	beforeBoneDeltas *delta.BoneDeltas,
+	boneFrames *vmd.BoneFrames,
 	ikFrame *vmd.IkFrame,
+	beforeBoneDeltas *delta.BoneDeltas,
+	isCalcIk bool,
+	frame int,
+	boneNames []string,
 ) *delta.BoneDeltas {
-	return DeformByPhysicsFlag(fs, frame, model, boneNames, isCalcIk, beforeBoneDeltas, nil, ikFrame, false)
+	return DeformBoneByPhysicsFlag(boneFrames, frame, model, boneNames, isCalcIk, beforeBoneDeltas, nil, ikFrame, false)
 }
 
-func DeformByPhysicsFlag(
-	fs *vmd.BoneFrames,
+func DeformBoneByPhysicsFlag(
+	boneFrames *vmd.BoneFrames,
 	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
@@ -41,7 +41,7 @@ func DeformByPhysicsFlag(
 	isAfterPhysics bool,
 ) *delta.BoneDeltas {
 	// mlog.Memory(fmt.Sprintf("Deform 1)frame: %d", frame))
-	deformBoneIndexes, boneDeltas := prepareDeltas(fs, frame, model, boneNames, isCalcIk,
+	deformBoneIndexes, boneDeltas := prepareDeltas(boneFrames, frame, model, boneNames, isCalcIk,
 		beforeBoneDeltas, morphDeltas, ikFrame, isAfterPhysics)
 	// mlog.Memory(fmt.Sprintf("Deform 2)frame: %d", frame))
 	boneDeltas = calcBoneDeltas(frame, model, deformBoneIndexes, boneDeltas)
@@ -50,7 +50,7 @@ func DeformByPhysicsFlag(
 }
 
 func prepareDeltas(
-	fs *vmd.BoneFrames,
+	boneFrames *vmd.BoneFrames,
 	frame int,
 	model *pmx.PmxModel,
 	boneNames []string,
@@ -69,13 +69,13 @@ func prepareDeltas(
 	// IK事前計算
 	if isCalcIk {
 		// ボーン変形行列操作
-		boneDeltas = prepareIk(fs, frame, model, deformBoneIndexes, boneDeltas, morphDeltas, ikFrame, isAfterPhysics)
+		boneDeltas = prepareIk(boneFrames, frame, model, deformBoneIndexes, boneDeltas, morphDeltas, ikFrame, isAfterPhysics)
 	}
 
 	// mlog.Memory(fmt.Sprintf("prepareDeltas 3)frame: %d", frame))
 
 	// ボーンデフォーム情報を埋める
-	boneDeltas = fillBoneDeform(fs, frame, model, deformBoneIndexes, boneDeltas, morphDeltas)
+	boneDeltas = fillBoneDeform(boneFrames, frame, model, deformBoneIndexes, boneDeltas, morphDeltas)
 
 	// mlog.Memory(fmt.Sprintf("prepareDeltas 4)frame: %d", frame))
 
@@ -84,7 +84,7 @@ func prepareDeltas(
 
 // IK事前計算処理
 func prepareIk(
-	fs *vmd.BoneFrames,
+	boneFrames *vmd.BoneFrames,
 	frame int,
 	model *pmx.PmxModel,
 	deformBoneIndexes []int,
@@ -116,7 +116,7 @@ func prepareIk(
 					prefixPath = fmt.Sprintf("%s/%04d_%s_%03d_%03d", dirPath, frame, date, i, m)
 				}
 
-				boneDeltas = calcIk(fs, frame, ikBone, model, boneDeltas, morphDeltas, isAfterPhysics, ikFrame, prefixPath)
+				boneDeltas = calcIk(boneFrames, frame, ikBone, model, boneDeltas, morphDeltas, isAfterPhysics, ikFrame, prefixPath)
 			}
 		}
 	}
@@ -126,7 +126,7 @@ func prepareIk(
 
 // IK計算
 func calcIk(
-	fs *vmd.BoneFrames,
+	boneFrames *vmd.BoneFrames,
 	frame int,
 	ikBone *pmx.Bone,
 	model *pmx.PmxModel,
@@ -188,11 +188,11 @@ func calcIk(
 	// IKターゲットボーン
 	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の行列を一括計算
-	ikDeltas := DeformByPhysicsFlag(fs, frame, model, []string{ikBone.Name}, false,
+	ikDeltas := DeformBoneByPhysicsFlag(boneFrames, frame, model, []string{ikBone.Name}, false,
 		boneDeltas, nil, ikFrame, false)
 	if isAfterPhysics {
 		// 物理後の場合は物理後のも取得する
-		ikDeltas = DeformByPhysicsFlag(fs, frame, model, []string{ikBone.Name}, false,
+		ikDeltas = DeformBoneByPhysicsFlag(boneFrames, frame, model, []string{ikBone.Name}, false,
 			ikDeltas, nil, ikFrame, true)
 	}
 	if !ikDeltas.Contains(ikBone.Index) {
@@ -234,7 +234,7 @@ func calcIk(
 
 	var ikOffDeltas *delta.BoneDeltas
 	if isToeIk {
-		ikOffDeltas = DeformByPhysicsFlag(fs, frame, model, []string{effectorBone.Name}, false,
+		ikOffDeltas = DeformBoneByPhysicsFlag(boneFrames, frame, model, []string{effectorBone.Name}, false,
 			nil, nil, ikFrame, isAfterPhysics)
 		if !ikOffDeltas.Contains(effectorBone.Index) {
 			// IK OFFボーンが存在しない場合、スルー
@@ -244,11 +244,11 @@ func calcIk(
 
 	// エフェクタ関連情報取得
 	effectorDeformBoneIndexes, boneDeltas :=
-		prepareDeltas(fs, frame, model, []string{effectorBone.Name}, false, boneDeltas, nil, ikFrame, false)
+		prepareDeltas(boneFrames, frame, model, []string{effectorBone.Name}, false, boneDeltas, nil, ikFrame, false)
 	if isAfterPhysics {
 		// 物理後の場合は物理後のも取得する
 		effectorDeformBoneIndexes, boneDeltas =
-			prepareDeltas(fs, frame, model, []string{effectorBone.Name}, false, boneDeltas, nil, ikFrame, true)
+			prepareDeltas(boneFrames, frame, model, []string{effectorBone.Name}, false, boneDeltas, nil, ikFrame, true)
 	}
 	if !boneDeltas.Contains(effectorBone.Index) || !boneDeltas.Contains(ikBone.Index) ||
 		!boneDeltas.Contains(ikBone.Ik.BoneIndex) {
@@ -1031,7 +1031,7 @@ func calcBoneDeltas(
 			delta.GlobalMatrix = delta.UnitMatrix.Copy()
 		}
 
-		// delta.localMatrix = delta.Bone.OffsetMatrix.Muled(delta.globalMatrix)
+		// delta.localMatrix = delta.Bone.OfboneFramesetMatrix.Muled(delta.globalMatrix)
 		// delta.globalPosition = delta.globalMatrix.Translation()
 		boneDeltas.Update(delta)
 	}
@@ -1132,7 +1132,7 @@ func createBoneDeltas(
 
 // デフォーム情報を求めて設定
 func fillBoneDeform(
-	fs *vmd.BoneFrames,
+	boneFrames *vmd.BoneFrames,
 	frame int,
 	model *pmx.PmxModel,
 	deformBoneIndexes []int,
@@ -1151,7 +1151,7 @@ func fillBoneDeform(
 			boneDeltas.Get(bone.Index).FramePosition == nil ||
 			boneDeltas.Get(bone.Index).FrameRotation == nil ||
 			boneDeltas.Get(bone.Index).FrameScale == nil {
-			bf = fs.Get(bone.Name).Get(frame)
+			bf = boneFrames.Get(bone.Name).Get(frame)
 		}
 		// ボーンの移動位置、回転角度、拡大率を取得
 		d.FramePosition, d.FrameMorphPosition = getPosition(bf, bone, boneDeltas, morphDeltas)

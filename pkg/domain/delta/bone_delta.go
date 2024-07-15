@@ -162,7 +162,7 @@ func (bd *BoneDelta) FilledLocalScale() *mmath.MVec3 {
 
 func (bd *BoneDelta) FilledFrameScale() *mmath.MVec3 {
 	if bd.FrameScale == nil {
-		bd.FrameScale = &mmath.MVec3{1, 1, 1}
+		bd.FrameScale = &mmath.MVec3{X: 1, Y: 1, Z: 1}
 	}
 	return bd.FrameScale
 }
