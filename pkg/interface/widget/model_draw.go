@@ -160,8 +160,8 @@ func deformBeforePhysics(
 		}
 
 		// 物理フラグが落ちている場合があるので、強制的に起こす
-		forceUpdate := mbt.UpdateFlags(modelIndex, modelPhysics, rigidBody, enablePhysics, resetPhysics)
-		forceUpdate = timeStep == 0.0 || !enablePhysics || forceUpdate
+		// forceUpdate := mbt.UpdateFlags(modelIndex, modelPhysics, rigidBody, enablePhysics, resetPhysics)
+		forceUpdate := timeStep == 0.0 || !enablePhysics
 
 		if rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC || forceUpdate {
 			// ボーン追従剛体・物理＋ボーン位置もしくは強制更新の場合のみ剛体位置更新

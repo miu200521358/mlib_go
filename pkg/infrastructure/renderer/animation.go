@@ -12,3 +12,26 @@ type Animation struct {
 	InvisibleMaterialIndexes []int            // 非表示材質インデックス
 	SelectedVertexIndexes    []int            // 選択頂点インデックス
 }
+
+type Animations struct {
+	Now  *Animation
+	Next *Animation
+}
+
+func NewAnimation() *Animation {
+	return &Animation{
+		InvisibleMaterialIndexes: make([]int, 0),
+		SelectedVertexIndexes:    make([]int, 0),
+	}
+}
+
+func NewAnimations() *Animations {
+	return &Animations{
+		Now:  NewAnimation(),
+		Next: NewAnimation(),
+	}
+}
+
+func Animate() {
+
+}

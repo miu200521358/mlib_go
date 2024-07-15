@@ -91,7 +91,7 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 		pmxRigidBody: rigidBody, btRigidBody: &btRigidBody, btLocalTransform: &btRigidBodyLocalTransform,
 		mask: rigidBody.CollisionGroupMaskValue, group: group}
 
-	UpdateFlags(modelIndex, physics, rigidBody, true, false)
+	physics.updateFlags(modelIndex, rigidBody)
 }
 
 func (p *MPhysics) deleteRigidBodies(modelIndex int) {
@@ -100,12 +100,10 @@ func (p *MPhysics) deleteRigidBodies(modelIndex int) {
 	}
 }
 
-func UpdateFlags(
-	modelIndex int, modelPhysics *MPhysics, r *pmx.RigidBody, enablePhysics, resetPhysics bool,
-) bool {
-	btRigidBody := *modelPhysics.rigidBodies[modelIndex][r.Index].btRigidBody
+func (physics *MPhysics) updateFlags(modelIndex int, rigidBody *pmx.RigidBody) {
+	btRigidBody := *physics.rigidBodies[modelIndex][rigidBody.Index].btRigidBody
 
-	if r.PhysicsType == pmx.PHYSICS_TYPE_STATIC || resetPhysics {
+	if rigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
 		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時
 		// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
 		btRigidBody.SetCollisionFlags(
@@ -113,42 +111,16 @@ func UpdateFlags(
 		// 毎ステップの剛体位置通知を無効にする
 		// MotionState::setWorldTransformの毎ステップ呼び出しが無効になる(剛体位置は判っているので不要)
 		btRigidBody.SetActivationState(bt.DISABLE_SIMULATION)
-
-		if resetPhysics {
-			return true
-		}
 	} else {
-		prevActivationState := btRigidBody.GetActivationState()
-
-		if enablePhysics {
-			// 物理演算・物理+ボーン位置合わせの場合
-			if prevActivationState != bt.ACTIVE_TAG {
-				btRigidBody.SetCollisionFlags(0 & ^int(bt.BtCollisionObjectCF_NO_CONTACT_RESPONSE))
-				btRigidBody.ForceActivationState(bt.ACTIVE_TAG)
-
-				return true
-			} else {
-				// 剛体の位置更新に物理演算を使う。
-				// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
-				btRigidBody.SetCollisionFlags(
-					btRigidBody.GetCollisionFlags() & ^int(bt.BtCollisionObjectCF_NO_CONTACT_RESPONSE))
-				// 毎ステップの剛体位置通知を有効にする
-				// MotionState::setWorldTransformの毎ステップ呼び出しが有効になる(剛体位置が変わるので必要)
-				btRigidBody.SetActivationState(bt.ACTIVE_TAG)
-			}
-		} else {
-			// 物理OFF時
-			btRigidBody.SetCollisionFlags(
-				btRigidBody.GetCollisionFlags() | int(bt.BtCollisionObjectCF_KINEMATIC_OBJECT))
-			btRigidBody.SetActivationState(bt.ISLAND_SLEEPING)
-
-			if prevActivationState != bt.ISLAND_SLEEPING {
-				return true
-			}
-		}
+		// 物理演算・物理+ボーン位置合わせの場合
+		// 剛体の位置更新に物理演算を使う。
+		// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
+		btRigidBody.SetCollisionFlags(
+			btRigidBody.GetCollisionFlags() & ^int(bt.BtCollisionObjectCF_NO_CONTACT_RESPONSE))
+		// 毎ステップの剛体位置通知を有効にする
+		// MotionState::setWorldTransformの毎ステップ呼び出しが有効になる(剛体位置が変わるので必要)
+		btRigidBody.SetActivationState(bt.DISABLE_DEACTIVATION)
 	}
-
-	return false
 }
 
 func UpdateTransform(
