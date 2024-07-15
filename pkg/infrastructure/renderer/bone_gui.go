@@ -33,13 +33,13 @@ func color(b *pmx.Bone, isNormal bool) []float32 {
 			return bone_colors_ik_normal
 		}
 		return bone_colors_ik
-	} else if len(b.Extend.IkTargetBoneIndexes) > 0 {
+	} else if len(b.IkTargetBoneIndexes) > 0 {
 		// IK先
 		if isNormal {
 			return bone_colors_ik_target_normal
 		}
 		return bone_colors_ik_target
-	} else if len(b.Extend.IkLinkBoneIndexes) > 0 {
+	} else if len(b.IkLinkBoneIndexes) > 0 {
 		// IKリンク
 		if isNormal {
 			return bone_colors_ik_link_normal
@@ -101,7 +101,7 @@ func BoneGL(b *pmx.Bone) []float32 {
 }
 
 func ParentGL(b *pmx.Bone) []float32 {
-	p := b.Position.Subed(b.Extend.ParentRelativePosition).GL()
+	p := b.Position.Subed(b.ParentRelativePosition).GL()
 	c := color(b, false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
@@ -123,7 +123,7 @@ func ParentGL(b *pmx.Bone) []float32 {
 }
 
 func TailGL(b *pmx.Bone) []float32 {
-	p := b.Position.Added(b.Extend.ChildRelativePosition).GL()
+	p := b.Position.Added(b.ChildRelativePosition).GL()
 	c := color(b, false)
 	return []float32{
 		p[0], p[1], p[2], // 位置
@@ -156,17 +156,17 @@ func DeltaGL(b *pmx.Bone, isDrawBones map[pmx.BoneFlag]bool) []float32 {
 	visibleAlpha := float32(1.0)
 	// IK
 	if (!isDrawBones[pmx.BONE_FLAG_IS_IK] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
-		(isDrawBones[pmx.BONE_FLAG_IS_IK] && !(b.IsIK() || len(b.Extend.IkLinkBoneIndexes) > 0 || len(b.Extend.IkTargetBoneIndexes) > 0)) {
+		(isDrawBones[pmx.BONE_FLAG_IS_IK] && !(b.IsIK() || len(b.IkLinkBoneIndexes) > 0 || len(b.IkTargetBoneIndexes) > 0)) {
 		ikAlpha = float32(0.0)
 	}
 	// 付与親回転
 	if (!isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_ROTATION] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
-		(isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_ROTATION] && !(b.IsEffectorRotation() || len(b.Extend.EffectiveBoneIndexes) > 0)) {
+		(isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_ROTATION] && !(b.IsEffectorRotation() || len(b.EffectiveBoneIndexes) > 0)) {
 		effectorRotateAlpha = float32(0.0)
 	}
 	// 付与親移動
 	if (!isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_TRANSLATION] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
-		(isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_TRANSLATION] && !(b.IsEffectorTranslation() || len(b.Extend.EffectiveBoneIndexes) > 0)) {
+		(isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_TRANSLATION] && !(b.IsEffectorTranslation() || len(b.EffectiveBoneIndexes) > 0)) {
 		effectorTranslateAlpha = float32(0.0)
 	}
 	// 軸固定
@@ -202,7 +202,7 @@ func DeltaGL(b *pmx.Bone, isDrawBones map[pmx.BoneFlag]bool) []float32 {
 }
 
 func NormalGL(b *pmx.Bone) []float32 {
-	p := b.Extend.LocalMatrix.MulVec3(&mmath.MVec3{0, 0.6, 0}).GL()
+	p := b.LocalMatrix.MulVec3(&mmath.MVec3{0, 0.6, 0}).GL()
 	c := color(b, true)
 	return []float32{
 		p[0], p[1], p[2], // 位置

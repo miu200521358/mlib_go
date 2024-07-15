@@ -627,8 +627,26 @@ func (r *PmxRepository) loadBones(model *pmx.PmxModel) error {
 		englishName := r.readText()
 
 		b := &pmx.Bone{
-			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
-			Extend:         &pmx.BoneExtend{},
+			IndexNameModel:         &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IkLinkBoneIndexes:      make([]int, 0),
+			IkTargetBoneIndexes:    make([]int, 0),
+			ParentRelativePosition: mmath.NewMVec3(),
+			ChildRelativePosition:  mmath.NewMVec3(),
+			NormalizedFixedAxis:    mmath.NewMVec3(),
+			TreeBoneIndexes:        make([]int, 0),
+			RevertOffsetMatrix:     mmath.NewMMat4(),
+			OffsetMatrix:           mmath.NewMMat4(),
+			ParentBoneIndexes:      make([]int, 0),
+			RelativeBoneIndexes:    make([]int, 0),
+			ChildBoneIndexes:       make([]int, 0),
+			EffectiveBoneIndexes:   make([]int, 0),
+			AngleLimit:             false,
+			MinAngleLimit:          mmath.NewRotation(),
+			MaxAngleLimit:          mmath.NewRotation(),
+			LocalAngleLimit:        false,
+			LocalMinAngleLimit:     mmath.NewRotation(),
+			LocalMaxAngleLimit:     mmath.NewRotation(),
+			AxisSign:               1,
 		}
 
 		// 12 : float3	| 位置
@@ -645,13 +663,11 @@ func (r *PmxRepository) loadBones(model *pmx.PmxModel) error {
 			return err
 		}
 		// 4  : int	| 変形階層
-		layer, err := r.unpackInt()
+		b.Layer, err = r.unpackInt()
 		if err != nil {
 			mlog.E("[%d] UnpackInt Layer error: %v", i, err)
 			return err
 		}
-		b.Layer = float64(layer)
-
 		// 2  : bitFlag*2	| ボーンフラグ(16bit) 各bit 0:OFF 1:ON
 		boneFlag, err := r.unpackBytes(2)
 		if err != nil {
