@@ -78,7 +78,7 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 	group := 1 << rigidBody.CollisionGroup
 	physics.world.AddRigidBody(btRigidBody, group, rigidBody.CollisionGroupMaskValue)
 	physics.rigidBodies[modelIndex][rigidBody.Index] = &rigidbodyValue{
-		btRigidBody: btRigidBody, btLocalTransform: btRigidBodyLocalTransform,
+		pmxRigidBody: rigidBody, btRigidBody: btRigidBody, btLocalTransform: btRigidBodyLocalTransform,
 		mask: rigidBody.CollisionGroupMaskValue, group: group}
 
 	UpdateFlags(modelIndex, physics, rigidBody, true, false)

@@ -104,7 +104,7 @@ func (p *MPhysics) ResetWorld() {
 func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
 	// pm.physics = physics
 	physics.initRigidBodies(modelIndex, model.RigidBodies)
-	initJointsPhysics(modelIndex, physics, model.RigidBodies, model.Joints)
+	physics.initJoints(modelIndex, model.RigidBodies, model.Joints)
 }
 
 func (p *MPhysics) DrawDebugLines(isDrawRigidBodyFront bool) {
@@ -182,11 +182,6 @@ func (p *MPhysics) DeleteRigidBodies(modelIndex int) {
 		mask := r.mask
 		p.world.AddRigidBody(rigidBody, group, mask)
 	}
-}
-
-func (p *MPhysics) AddJoint(modelIndex, jointIndex int, joint bt.BtTypedConstraint) {
-	p.world.AddConstraint(joint, true)
-	p.joints[modelIndex][jointIndex] = &jointValue{btJoint: joint}
 }
 
 func (p *MPhysics) DeleteJoints(modelIndex int) {
