@@ -1,8 +1,6 @@
 package pmx
 
 import (
-	"image"
-
 	"github.com/jinzhu/copier"
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 )
@@ -18,25 +16,14 @@ const (
 
 type Texture struct {
 	*core.IndexModel
-	Name              string       // テクスチャ名
-	TextureType       TextureType  // テクスチャ種別
-	Path              string       // テクスチャフルパス
-	Valid             bool         // テクスチャフルパスが有効であるか否か
-	GlId              uint32       // OpenGLテクスチャID
-	Initialized       bool         // 描画初期化済みフラグ
-	Image             *image.NRGBA // テクスチャイメージ
-	TextureUnitId     uint32       // テクスチャ種類別描画先ユニットID
-	TextureUnitNo     uint32       // テクスチャ種類別描画先ユニット番号
-	IsGeneratedMipmap bool         // ミップマップが生成されているか否か
+	Name        string      // テクスチャ名
+	TextureType TextureType // テクスチャ種別
 }
 
 func NewTexture() *Texture {
 	return &Texture{
-		IndexModel:  &core.IndexModel{Index: -1},
-		Name:        "",
-		TextureType: TEXTURE_TYPE_TEXTURE,
-		Path:        "",
-		Valid:       false,
+		IndexModel: &core.IndexModel{Index: -1},
+		Name:       "",
 	}
 }
 

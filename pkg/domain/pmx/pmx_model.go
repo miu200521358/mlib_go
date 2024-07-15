@@ -25,7 +25,6 @@ type PmxModel struct {
 	Vertices           *Vertices
 	Faces              *Faces
 	Textures           *Textures
-	ToonTextures       *ToonTextures
 	Materials          *Materials
 	Bones              *Bones
 	Morphs             *Morphs
@@ -41,7 +40,6 @@ func NewPmxModel(path string) *PmxModel {
 	model.Vertices = NewVertices(0)
 	model.Faces = NewFaces(0)
 	model.Textures = NewTextures(0)
-	model.ToonTextures = NewToonTextures()
 	model.Materials = NewMaterials(0)
 	model.Bones = NewBones(0)
 	model.Morphs = NewMorphs(0)
@@ -72,7 +70,7 @@ func (pm *PmxModel) Setup() {
 	}
 
 	// セットアップ
-	pm.Materials.setup(pm.Vertices, pm.Faces)
+	pm.Materials.setup(pm.Vertices, pm.Faces, pm.Textures)
 	pm.Bones.setup()
 
 	// 剛体

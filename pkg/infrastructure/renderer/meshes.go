@@ -33,15 +33,15 @@ func (renderModel *RenderModel) Draw(
 	for i, mesh := range renderModel.meshes {
 		mesh.ibo.Bind()
 
-		mesh.drawModel(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
+		mesh.drawModel(shader, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
-			mesh.drawEdge(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
+			mesh.drawEdge(shader, paddedMatrixes, matrixWidth, matrixHeight, meshDeltas[i])
 		}
 
 		if isDrawWire {
-			mesh.drawWire(shader, windowIndex, paddedMatrixes, matrixWidth, matrixHeight, ((len(invisibleMaterialIndexes) > 0 && len(nextInvisibleMaterialIndexes) == 0 &&
+			mesh.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, ((len(invisibleMaterialIndexes) > 0 && len(nextInvisibleMaterialIndexes) == 0 &&
 				slices.Contains(invisibleMaterialIndexes, mesh.material.Index)) ||
 				slices.Contains(nextInvisibleMaterialIndexes, mesh.material.Index)))
 		}
@@ -49,18 +49,14 @@ func (renderModel *RenderModel) Draw(
 		mesh.ibo.Unbind()
 	}
 
-	// if isDrawWire {
-	// 	renderModel.drawWire(wireVertexDeltas, shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
-	// }
-
 	vertexPositions := make([][]float32, 0)
 	if isDrawSelectedVertex {
 		vertexPositions = renderModel.drawSelectedVertex(selectedVertexIndexes, selectedVertexDeltas,
-			shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
+			shader, paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
 	if isDrawNormal {
-		renderModel.drawNormal(shader, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
+		renderModel.drawNormal(shader, paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
 	isDrawBone := false
@@ -72,7 +68,7 @@ func (renderModel *RenderModel) Draw(
 	}
 
 	if isDrawBone {
-		renderModel.drawBone(shader, bones, isDrawBones, paddedMatrixes, matrixWidth, matrixHeight, windowIndex)
+		renderModel.drawBone(shader, bones, isDrawBones, paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
 	paddedMatrixes = nil
@@ -101,7 +97,6 @@ func (renderModel *RenderModel) drawNormal(
 	shader *mgl.MShader,
 	paddedMatrixes []float32,
 	width, height int,
-	windowIndex int,
 ) {
 	program := shader.GetProgram(mgl.PROGRAM_TYPE_NORMAL)
 	gl.UseProgram(program)
@@ -138,7 +133,6 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	shader *mgl.MShader,
 	paddedMatrixes []float32,
 	width, height int,
-	windowIndex int,
 ) [][]float32 {
 	// モデルメッシュの前面に描画するために深度テストを無効化
 	gl.Enable(gl.DEPTH_TEST)
@@ -170,7 +164,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	// SSBOからデータを読み込む
 	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, renderModel.ssbo)
 	ptr := gl.MapBuffer(gl.SHADER_STORAGE_BUFFER, gl.READ_ONLY)
-	results := make([][]float32, renderModel.vertexCount)
+	results := make([][]float32, renderModel.Model.Vertices.Len())
 
 	if ptr != nil {
 		// 頂点数を取得
@@ -179,7 +173,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 		}
 
 		// SSBOから読み取り
-		for i := 0; i < renderModel.vertexCount; i++ {
+		for i := 0; i < renderModel.Model.Vertices.Len(); i++ {
 			for j := 0; j < 4; j++ {
 				results[i][j] = *(*float32)(unsafe.Pointer(uintptr(ptr) + uintptr((i*4+j)*4)))
 			}
@@ -208,7 +202,6 @@ func (renderModel *RenderModel) drawBone(
 	isDrawBones map[pmx.BoneFlag]bool,
 	paddedMatrixes []float32,
 	width, height int,
-	windowIndex int,
 ) {
 	// ボーンをモデルメッシュの前面に描画するために深度テストを無効化
 	gl.Enable(gl.DEPTH_TEST)

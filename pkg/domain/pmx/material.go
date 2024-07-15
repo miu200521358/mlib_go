@@ -173,7 +173,7 @@ func (m *Material) Copy() core.IIndexNameModel {
 	return copied
 }
 
-func (ms *Materials) setup(vertices *Vertices, faces *Faces) {
+func (ms *Materials) setup(vertices *Vertices, faces *Faces, textures *Textures) {
 	prevVertexCount := 0
 
 	for _, v := range vertices.Data {
@@ -192,5 +192,16 @@ func (ms *Materials) setup(vertices *Vertices, faces *Faces) {
 		}
 
 		prevVertexCount += int(m.VerticesCount / 3)
+
+		if m.TextureIndex != -1 && textures.Contains(m.TextureIndex) {
+			textures.Get(m.TextureIndex).TextureType = TEXTURE_TYPE_TEXTURE
+		}
+		if m.ToonTextureIndex != -1 && m.ToonSharingFlag == TOON_SHARING_INDIVIDUAL &&
+			textures.Contains(m.ToonTextureIndex) {
+			textures.Get(m.ToonTextureIndex).TextureType = TEXTURE_TYPE_TOON
+		}
+		if m.SphereTextureIndex != -1 && textures.Contains(m.SphereTextureIndex) {
+			textures.Get(m.SphereTextureIndex).TextureType = TEXTURE_TYPE_SPHERE
+		}
 	}
 }

@@ -26,15 +26,6 @@ func NewMesh(
 	prevVerticesCount int,
 ) *Mesh {
 	faces := allFaces[prevVerticesCount:(prevVerticesCount + material.VerticesCount)]
-	// println(
-	// 	"faces",
-	// 	mutils.JoinSlice(mutils.ConvertUint32ToInterfaceSlice(faces)),
-	// 	"prevVerticesCount",
-	// 	prevVerticesCount,
-	// 	"material.VerticesCount",
-	// 	material.VerticesCount,
-	// )
-
 	ibo := buffer.NewIBO(gl.Ptr(faces), len(faces))
 
 	return &Mesh{
@@ -46,7 +37,6 @@ func NewMesh(
 
 func (m *Mesh) drawModel(
 	shader *mgl.MShader,
-	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
 	meshDelta *MeshDelta,
@@ -105,8 +95,9 @@ func (m *Mesh) drawModel(
 
 	// Sphere使用有無
 	useSphereUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_SPHERE))
-	gl.Uniform1i(useSphereUniform, int32(mmath.BoolToInt(m.material.SphereTexture != nil && m.material.SphereTexture.Valid)))
-	if m.material.SphereTexture != nil && m.material.SphereTexture.Valid {
+	gl.Uniform1i(useSphereUniform,
+		int32(mmath.BoolToInt(m.material.SphereTexture != nil && m.material.SphereTexture.Initialized)))
+	if m.material.SphereTexture != nil && m.material.SphereTexture.Initialized {
 		m.material.SphereTexture.Bind()
 		defer m.material.SphereTexture.Unbind()
 		sphereUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_SPHERE_SAMPLER))
@@ -116,30 +107,6 @@ func (m *Mesh) drawModel(
 	// SphereMode
 	sphereModeUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_SPHERE_MODE))
 	gl.Uniform1i(sphereModeUniform, int32(m.material.SphereMode))
-
-	// // ウェイト描写
-	// gl.Uniform1i(
-	// 	shader.IsShowBoneWeightUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 	mutils.BoolToInt(isShowBoneWeight),
-	// )
-	// gl.Uniform1iv(
-	// 	shader.ShowBoneIndexesUniform[mgl.PROGRAM_TYPE_MODEL],
-	// 	int32(len(showBoneIndexes)),
-	// 	(*int32)(unsafe.Pointer(&showBoneIndexes[0])),
-	// )
-
-	// prevVerticesSize := m.prevVerticesCount * int(ibo.Dtype)
-
-	// if err := CheckGLError(); err != nil {
-	// 	panic(fmt.Errorf("Mesh DrawElements failed: %v", err))
-	// }
-
-	// gl.DrawElements(
-	// 	gl.TRIANGLES,
-	// 	int32(m.material.VerticesCount),
-	// 	ibo.Dtype,
-	// 	unsafe.Pointer(&prevVerticesCount),
-	// )
 
 	// 三角形描画
 	gl.DrawElements(
@@ -154,7 +121,6 @@ func (m *Mesh) drawModel(
 
 func (m *Mesh) drawEdge(
 	shader *mgl.MShader,
-	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
 	meshDelta *MeshDelta,
@@ -193,7 +159,6 @@ func (m *Mesh) drawEdge(
 
 func (m *Mesh) drawWire(
 	shader *mgl.MShader,
-	windowIndex int,
 	paddedMatrixes []float32,
 	width, height int,
 	invisibleMesh bool,
@@ -232,13 +197,6 @@ func (m *Mesh) drawWire(
 	gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
 
 	gl.UseProgram(0)
-}
-
-func (m *Mesh) delete() {
-	m.ibo.Delete()
-	if m.material.Texture != nil {
-		m.material.Texture.delete()
-	}
 }
 
 func bindBoneMatrixes(

@@ -9,26 +9,27 @@ import (
 )
 
 type RenderModel struct {
-	Model             *pmx.PmxModel
-	Initialized       bool
-	meshes            []*Mesh
-	vertices          []float32
-	vao               *buffer.VAO
-	vbo               *buffer.VBO
-	normalVertices    []float32
-	normalVao         *buffer.VAO
-	normalVbo         *buffer.VBO
-	normalIbo         *buffer.IBO
-	selectedVertexVao *buffer.VAO
-	selectedVertexVbo *buffer.VBO
-	selectedVertexIbo *buffer.IBO
-	bones             []float32
-	boneVao           *buffer.VAO
-	boneVbo           *buffer.VBO
-	boneIbo           *buffer.IBO
-	boneIndexes       []int
-	ssbo              uint32
-	vertexCount       int
+	Model             *pmx.PmxModel // PMXモデル
+	Initialized       bool          // 描画初期化済みフラグ
+	meshes            []*Mesh       // メッシュ
+	textures          []*textureGl  // テクスチャ
+	toonTextures      []*textureGl  // トゥーンテクスチャ
+	vertices          []float32     // 頂点情報
+	vao               *buffer.VAO   // 頂点VAO
+	vbo               *buffer.VBO   // 頂点VBO
+	normalVertices    []float32     // 法線情報
+	normalVao         *buffer.VAO   // 法線VAO
+	normalVbo         *buffer.VBO   // 法線VBO
+	normalIbo         *buffer.IBO   // 法線IBO
+	selectedVertexVao *buffer.VAO   // 選択頂点VAO
+	selectedVertexVbo *buffer.VBO   // 選択頂点VBO
+	selectedVertexIbo *buffer.IBO   // 選択頂点IBO
+	bones             []float32     // ボーン情報
+	boneVao           *buffer.VAO   // ボーンVAO
+	boneVbo           *buffer.VBO   // ボーンVBO
+	boneIbo           *buffer.IBO   // ボーンIBO
+	boneIndexes       []int         // ボーンインデックス
+	ssbo              uint32        // SSBO
 }
 
 func NewRenderModel(windowIndex int, model *pmx.PmxModel) *RenderModel {
@@ -36,17 +37,16 @@ func NewRenderModel(windowIndex int, model *pmx.PmxModel) *RenderModel {
 		Model:       model,
 		Initialized: false,
 	}
-	model.ToonTextures = pmx.NewToonTextures()
-	initToonTexturesGl(windowIndex, model.ToonTextures)
+	m.initToonTexturesGl(windowIndex)
+	m.initTexturesGl(windowIndex)
 
-	m.initialize(model, windowIndex)
+	m.initializeBuffer(model)
 
 	return m
 }
 
-func (renderModel *RenderModel) initialize(
+func (renderModel *RenderModel) initializeBuffer(
 	model *pmx.PmxModel,
-	windowIndex int,
 ) {
 	// 頂点情報
 	renderModel.vertices = make([]float32, 0, len(model.Vertices.Data))
@@ -105,55 +105,53 @@ func (renderModel *RenderModel) initialize(
 	renderModel.meshes = make([]*Mesh, len(model.Materials.Data))
 	prevVerticesCount := 0
 
-	// テクスチャの gl.GenTextures はスレッドセーフではないので、並列化しない
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
 	for i, m := range model.Materials.Data {
 		// テクスチャ
-		var texture *pmx.Texture
+		var texGl *textureGl
 		if m.TextureIndex != -1 && model.Textures.Contains(m.TextureIndex) {
-			texture = model.Textures.Get(m.TextureIndex)
+			texGl = renderModel.textures[m.TextureIndex]
 		}
 
-		var toonTexture *pmx.Texture
-		// 個別Toon
+		var toonTexGl *textureGl
 		if m.ToonSharingFlag == pmx.TOON_SHARING_INDIVIDUAL &&
 			m.ToonTextureIndex != -1 &&
 			model.Textures.Contains(m.ToonTextureIndex) {
-			toonTexture = model.Textures.Get(m.ToonTextureIndex)
-		}
-		// 共有Toon
-		if m.ToonSharingFlag == pmx.TOON_SHARING_SHARING &&
-			m.ToonTextureIndex != -1 &&
-			model.ToonTextures.Contains(m.ToonTextureIndex) {
-			toonTexture = model.ToonTextures.Get(m.ToonTextureIndex)
+			// 個別Toon
+			toonTexGl = renderModel.textures[m.ToonTextureIndex]
+		} else if m.ToonSharingFlag == pmx.TOON_SHARING_SHARING &&
+			m.ToonTextureIndex != -1 {
+			// 共有Toon
+			toonTexGl = renderModel.toonTextures[m.ToonTextureIndex]
 		}
 
-		var sphereTexture *pmx.Texture
+		var sphereTexGl *textureGl
 		if m.SphereMode != pmx.SPHERE_MODE_INVALID &&
 			m.SphereTextureIndex != -1 &&
 			model.Textures.Contains(m.SphereTextureIndex) {
-			sphereTexture = model.Textures.Get(m.SphereTextureIndex)
+			sphereTexGl = renderModel.textures[m.SphereTextureIndex]
 		}
 
-		materialGl := newMaterialGl(
-			m,
-			model.GetPath(),
-			texture,
-			toonTexture,
-			sphereTexture,
-			windowIndex,
-			prevVerticesCount,
-		)
+		materialGl := &materialGL{
+			Material:          m,
+			Texture:           texGl,
+			SphereTexture:     sphereTexGl,
+			ToonTexture:       toonTexGl,
+			PrevVerticesCount: prevVerticesCount,
+		}
+
 		mesh := NewMesh(
 			faces,
 			materialGl,
 			prevVerticesCount,
 		)
-		mu.Lock()
-		renderModel.meshes[i] = mesh
-		mu.Unlock()
 
+		renderModel.meshes[i] = mesh
 		prevVerticesCount += m.VerticesCount
 	}
+	// }()
 
 	// ボーン情報の並列処理
 	renderModel.bones = make([]float32, 0, len(model.Bones.Data)*4)
@@ -238,5 +236,4 @@ func (renderModel *RenderModel) initialize(
 	gl.BindBufferBase(gl.SHADER_STORAGE_BUFFER, 0, ssbo)
 
 	renderModel.ssbo = ssbo
-	renderModel.vertexCount = model.Vertices.Len()
 }
