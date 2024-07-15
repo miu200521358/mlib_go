@@ -284,6 +284,7 @@ func GetRigidBodyBoneMatrix(
 
 func initRigidBodiesPhysics(modelIndex int, physics *MPhysics, r *pmx.RigidBodies) {
 	// 剛体を順番にボーンと紐付けていく
+	physics.rigidBodies[modelIndex] = make([]*rigidbodyValue, len(r.Data))
 	for _, rigidBody := range r.Data {
 		// 物理設定の初期化
 		InitRigidBodyPhysics(modelIndex, physics, rigidBody)

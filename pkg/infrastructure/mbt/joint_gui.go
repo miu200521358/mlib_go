@@ -86,6 +86,7 @@ func initJointPhysics(
 
 func initJointsPhysics(modelIndex int, modelPhysics *MPhysics, rigidBodies *pmx.RigidBodies, j *pmx.Joints) {
 	// ジョイントを順番に剛体と紐付けていく
+	modelPhysics.joints[modelIndex] = make([]*jointValue, len(j.Data))
 	for _, joint := range j.Data {
 		if joint.RigidbodyIndexA >= 0 && rigidBodies.Contains(joint.RigidbodyIndexA) &&
 			joint.RigidbodyIndexB >= 0 && rigidBodies.Contains(joint.RigidbodyIndexB) {
