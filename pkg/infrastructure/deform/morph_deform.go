@@ -206,19 +206,19 @@ func deformBone(
 			offsetScale := offset.Extend.Scale.MuledScalar(ratio)
 
 			if d.FramePosition == nil {
-				d.FramePosition = offsetPos
+				d.FramePosition = offsetPos.Copy()
 			} else {
 				d.FramePosition.Add(offsetPos)
 			}
 
 			if d.FrameRotation == nil {
-				d.FrameRotation = offsetQuat
+				d.FrameRotation = offsetQuat.Copy()
 			} else {
-				d.FrameRotation = offsetQuat.Mul(d.FrameRotation)
+				d.FrameRotation = offsetQuat.Muled(d.FrameRotation)
 			}
 
 			if d.FrameScale == nil {
-				d.FrameScale = offsetScale
+				d.FrameScale = offsetScale.Copy()
 			} else {
 				d.FrameScale.Add(offsetScale)
 			}
