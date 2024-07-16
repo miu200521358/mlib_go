@@ -60,7 +60,7 @@ func Animate(
 			go func(ii int) {
 				defer wg.Done()
 				animationStates[ii].Now =
-					deformBeforePhysics(physics, animationStates[ii].Now, int(frame), enabledPhysics)
+					animateBeforePhysics(physics, animationStates[ii].Now, int(frame), enabledPhysics)
 			}(i)
 		}
 
@@ -85,7 +85,7 @@ func Animate(
 			go func(ii int) {
 				defer wg.Done()
 				animationStates[ii].Now =
-					deformAfterPhysics(physics, animationStates[ii].Now, int(frame), enabledPhysics, resetPhysics)
+					animateAfterPhysics(physics, animationStates[ii].Now, int(frame), enabledPhysics, resetPhysics)
 			}(i)
 		}
 
@@ -95,7 +95,7 @@ func Animate(
 	return animationStates
 }
 
-func deformBeforePhysics(
+func animateBeforePhysics(
 	physics *mbt.MPhysics, animationState *AnimationState,
 	frame int, enabledPhysics bool,
 ) *AnimationState {
@@ -121,13 +121,6 @@ func deformBeforePhysics(
 		deltas.Morphs = animationState.VmdDeltas.Morphs
 		deltas.Bones = animationState.VmdDeltas.Bones
 	}
-
-	// MeshGlDeltas := make([]*renderer.MeshDelta, len(model.Materials.Data))
-	// for i, md := range vds.Morphs.Materials.Data {
-	// 	MeshGlDeltas[i] = renderer.MaterialMorphDeltaResult(md)
-	// }
-
-	// VertexMorphIndexes, VertexMorphGlDeltas := renderer.VertexMorphDeltasGL(vds.Morphs.Vertices)
 
 	modelIndex := 0
 
@@ -157,7 +150,7 @@ func deformBeforePhysics(
 	return animationState
 }
 
-func deformAfterPhysics(
+func animateAfterPhysics(
 	physics *mbt.MPhysics, animationState *AnimationState,
 	frame int, enabledPhysics, resetPhysics bool,
 ) *AnimationState {
@@ -183,15 +176,6 @@ func deformAfterPhysics(
 	// 物理後のデフォーム情報
 	animationState.VmdDeltas = deform.DeformBoneByPhysicsFlag(animationState.Model,
 		animationState.Motion, animationState.VmdDeltas, true, frame, nil, true)
-
-	// // GL描画用データの作成
-	// BoneGlDeltas := make([]mgl32.Mat4, len(model.Bones.Data))
-	// for i, bone := range model.Bones.Data {
-	// 	delta := deltas.Bones.Get(bone.Index)
-	// 	if delta != nil {
-	// 		BoneGlDeltas[i] = mgl.NewGlMat4(delta.FilledLocalMatrix())
-	// 	}
-	// }
 
 	// // 選択頂点モーフの設定は常に更新する
 	// SelectedVertexIndexesDeltas, SelectedVertexGlDeltas := renderer.SelectedVertexMorphDeltasGL(

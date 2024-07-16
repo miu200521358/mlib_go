@@ -4,6 +4,11 @@
 package renderer
 
 import (
+	"math"
+	"unsafe"
+
+	"github.com/go-gl/gl/all-core/gl"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
@@ -199,4 +204,66 @@ func newBoneDebugAlphaGl(b *pmx.Bone, isDrawBones map[pmx.BoneFlag]bool) []float
 		c[0], c[1], c[2], c[3] * alpha, // 追加UV1モーフ
 		0.0, 0.0, 0.0, // 変形後頂点モーフ
 	}
+}
+
+func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int) {
+	// テクスチャのサイズを計算する
+	numBones := len(boneDeltas.Data)
+	texSize := int(math.Ceil(math.Sqrt(float64(numBones))))
+	width := int(math.Ceil(float64(texSize)/4) * 4 * 4)
+	height := int(math.Ceil((float64(numBones) * 4) / float64(width)))
+
+	paddedMatrixes := make([]float32, height*width*4)
+	for i, d := range boneDeltas.Data {
+		m := mgl.NewGlMat4(d.FilledLocalMatrix())
+		copy(paddedMatrixes[i*16:], m[:])
+	}
+
+	return paddedMatrixes, width, height
+}
+
+func bindBoneMatrixes(
+	paddedMatrixes []float32,
+	width, height int,
+	shader *mgl.MShader,
+	program uint32,
+) {
+	// テクスチャをアクティブにする
+	gl.ActiveTexture(gl.TEXTURE20)
+
+	// テクスチャをバインドする
+	gl.BindTexture(gl.TEXTURE_2D, shader.BoneTextureId)
+
+	// テクスチャのパラメーターの設定
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+	// テクスチャをシェーダーに渡す
+	gl.TexImage2D(
+		gl.TEXTURE_2D,
+		0,
+		gl.RGBA32F,
+		int32(width),
+		int32(height),
+		0,
+		gl.RGBA,
+		gl.FLOAT,
+		unsafe.Pointer(&paddedMatrixes[0]),
+	)
+
+	modelUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE))
+	gl.Uniform1i(modelUniform, 20)
+
+	modelWidthUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE_WIDTH))
+	gl.Uniform1i(modelWidthUniform, int32(width))
+
+	modelHeightUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE_HEIGHT))
+	gl.Uniform1i(modelHeightUniform, int32(height))
+}
+
+func unbindBoneMatrixes() {
+	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
