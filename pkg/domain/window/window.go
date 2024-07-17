@@ -1,6 +1,9 @@
 package window
 
-import "github.com/go-gl/glfw/v3.3/glfw"
+import (
+	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/miu200521358/walk/pkg/walk"
+)
 
 type IControlWindow interface {
 	Run()
@@ -8,6 +11,10 @@ type IControlWindow interface {
 	Close()
 	Size() (int, int)
 	SetPosition(x, y int)
+	AppState() IAppState
+	GetMainWindow() *walk.MainWindow
+	InitTabWidget()
+	AddTabPage(tabPage *walk.TabPage)
 }
 
 type IViewWindow interface {
@@ -19,4 +26,5 @@ type IViewWindow interface {
 	TriggerClose(window *glfw.Window)
 	GetWindow() *glfw.Window
 	ResetPhysicsStart()
+	AppState() IAppState
 }

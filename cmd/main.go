@@ -8,9 +8,12 @@ import (
 	"runtime"
 
 	"github.com/miu200521358/walk/pkg/declarative"
+	"github.com/miu200521358/walk/pkg/walk"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/window"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
+	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/interface/viewer"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
@@ -25,11 +28,11 @@ func init() {
 	// システム上のすべての論理プロセッサを使用させる
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	// walk.AppendToWalkInit(func() {
-	// 	walk.MustRegisterWindowClass(widget.FilePickerClass)
-	// 	walk.MustRegisterWindowClass(widget.MotionPlayerClass)
-	// 	walk.MustRegisterWindowClass(widget.ConsoleViewClass)
-	// })
+	walk.AppendToWalkInit(func() {
+		walk.MustRegisterWindowClass(widget.FilePickerClass)
+		// walk.MustRegisterWindowClass(widget.MotionPlayerClass)
+		// walk.MustRegisterWindowClass(widget.ConsoleViewClass)
+	})
 }
 
 //go:embed app/*
@@ -49,12 +52,27 @@ func main() {
 	mi18n.Initialize(appI18nFiles)
 
 	mApp := app.NewMApp(appConfig)
-	mApp.SetControlWindow(controller.NewMWindow(appConfig, mApp, getMenuItems))
-	mApp.AddViewWindow(viewer.NewGlWindow(mApp.ViewerCount(), appConfig, mApp))
-	mApp.AddViewWindow(viewer.NewGlWindow(mApp.ViewerCount(), appConfig, mApp))
 
-	// mWindow, err = window.NewMWindow(512, 768, true, getMenuItems, iconImg, appConfig, uiState)
-	// widget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))
+	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp))
+	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp))
+
+	go func() {
+		if appConfig.IsEnvProd() || appConfig.IsEnvDev() {
+			defer mApp.RecoverFromPanic()
+		}
+
+		// 操作ウィンドウは別スレッドで起動
+		controlWindow := controller.NewControlWindow(appConfig, mApp, getMenuItems)
+		mApp.SetControlWindow(controlWindow)
+
+		controlWindow.InitTabWidget()
+		_ = newFilePage(controlWindow)
+
+		mApp.Center()
+		mApp.ControllerRun()
+	}()
+
+	mApp.ViewerRun()
 
 	// motionPlayer, worldPosFunc := NewFileTabPage(mWindow)
 
@@ -78,10 +96,6 @@ func main() {
 	// 	}()
 	// 	mWindow.Close()
 	// })
-
-	mApp.Center()
-	mApp.ControllerRun()
-	mApp.ViewerRun()
 }
 
 func getMenuItems() []declarative.MenuItem {
@@ -93,9 +107,29 @@ func getMenuItems() []declarative.MenuItem {
 	}
 }
 
+func newFilePage(controlWindow window.IControlWindow) *widget.MTabPage {
+	tabPage := widget.NewMTabPage(mi18n.T("ファイル"))
+	controlWindow.AddTabPage(tabPage.TabPage)
+
+	tabPage.SetLayout(walk.NewVBoxLayout())
+
+	pmxReadPicker := widget.NewPmxReadFilePicker(
+		controlWindow,
+		tabPage,
+		"PmxPath",
+		mi18n.T("Pmxファイル"),
+		mi18n.T("Pmxファイルを選択してください"),
+		mi18n.T("Pmxファイルの使い方"))
+
+	pmxReadPicker.SetOnPathChanged(func(path string) {
+
+	})
+
+	return tabPage
+}
+
 // func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
 // 	nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*delta.VmdDeltas)) {
-// 	page, _ := widget.NewMTabPage(mWindow.MainWindow, mWindow.TabWidget, mi18n.T("ファイル"))
 
 // 	page.SetLayout(walk.NewVBoxLayout())
 

@@ -42,10 +42,8 @@ func NewMApp(appConfig *mconfig.AppConfig) *MApp {
 }
 
 func (a *MApp) ControllerRun() {
-	go func() {
-		// 操作ウィンドウは別スレッドで起動
-		a.controlWindow.Run()
-	}()
+	// 操作ウィンドウは別スレッドで起動
+	a.controlWindow.Run()
 }
 
 func (a *MApp) ViewerRun() {
@@ -66,14 +64,16 @@ func (a *MApp) Close() {
 	for _, w := range a.viewWindows {
 		w.Close()
 	}
-	a.controlWindow.Close()
+	if a.controlWindow != nil {
+		a.controlWindow.Close()
+	}
 
 	glfw.Terminate()
 	walk.App().Exit(0)
 }
 
 // エラー監視
-func (a *MApp) recoverFromPanic() {
+func (a *MApp) RecoverFromPanic() {
 	if r := recover(); r != nil {
 		stackTrace := debug.Stack()
 
@@ -137,10 +137,6 @@ func (a *MApp) recoverFromPanic() {
 
 func (a *MApp) SetControlWindow(controlWindow window.IControlWindow) {
 	a.controlWindow = controlWindow
-
-	if a.appConfig.IsEnvProd() || a.appConfig.IsEnvDev() {
-		defer a.recoverFromPanic()
-	}
 }
 
 func (a *MApp) AddViewWindow(viewWindow window.IViewWindow) {

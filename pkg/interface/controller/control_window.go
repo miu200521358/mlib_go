@@ -7,6 +7,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/window"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
+	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
@@ -16,6 +17,7 @@ import (
 
 type ControlWindow struct {
 	*walk.MainWindow
+	tabWidget                   *widget.MTabWidget // タブウィジェット
 	appConfig                   *mconfig.AppConfig // アプリケーション設定
 	appState                    window.IAppState   // UI状態
 	enabledFrameDropAction      *walk.Action       // フレームドロップON/OFF
@@ -44,12 +46,12 @@ type ControlWindow struct {
 	logLevelIkVerboseAction     *walk.Action       // IK冗長メッセージ表示
 }
 
-func NewMWindow(
+func NewControlWindow(
 	appConfig *mconfig.AppConfig,
 	uiState window.IAppState,
 	helpMenuItemsFunc func() []declarative.MenuItem,
 ) *ControlWindow {
-	mWindow := &ControlWindow{
+	controlWindow := &ControlWindow{
 		appConfig: appConfig,
 		appState:  uiState,
 	}
@@ -65,8 +67,8 @@ func NewMWindow(
 		declarative.Action{
 			Text:        mi18n.T("&デバッグログ表示"),
 			Checkable:   true,
-			OnTriggered: mWindow.logLevelTriggered,
-			AssignTo:    &mWindow.logLevelDebugAction,
+			OnTriggered: controlWindow.logLevelTriggered,
+			AssignTo:    &controlWindow.logLevelDebugAction,
 		},
 	}
 
@@ -78,15 +80,15 @@ func NewMWindow(
 			declarative.Action{
 				Text:        mi18n.T("&冗長ログ表示"),
 				Checkable:   true,
-				OnTriggered: mWindow.logLevelTriggered,
-				AssignTo:    &mWindow.logLevelVerboseAction,
+				OnTriggered: controlWindow.logLevelTriggered,
+				AssignTo:    &controlWindow.logLevelVerboseAction,
 			})
 		logMenuItems = append(logMenuItems,
 			declarative.Action{
 				Text:        mi18n.T("&IK冗長ログ表示"),
 				Checkable:   true,
-				OnTriggered: mWindow.logLevelTriggered,
-				AssignTo:    &mWindow.logLevelIkVerboseAction,
+				OnTriggered: controlWindow.logLevelTriggered,
+				AssignTo:    &controlWindow.logLevelIkVerboseAction,
 			})
 	}
 
@@ -94,20 +96,20 @@ func NewMWindow(
 		declarative.Action{
 			Text:        mi18n.T("&30fps制限"),
 			Checkable:   true,
-			OnTriggered: mWindow.onTriggerFps30Limit,
-			AssignTo:    &mWindow.limitFps30Action,
+			OnTriggered: controlWindow.onTriggerFps30Limit,
+			AssignTo:    &controlWindow.limitFps30Action,
 		},
 		declarative.Action{
 			Text:        mi18n.T("&60fps制限"),
 			Checkable:   true,
-			OnTriggered: mWindow.onTriggerFps60Limit,
-			AssignTo:    &mWindow.limitFps60Action,
+			OnTriggered: controlWindow.onTriggerFps60Limit,
+			AssignTo:    &controlWindow.limitFps60Action,
 		},
 		declarative.Action{
 			Text:        mi18n.T("&fps無制限"),
 			Checkable:   true,
-			OnTriggered: mWindow.onTriggerUnLimitFps,
-			AssignTo:    &mWindow.limitFpsUnLimitAction,
+			OnTriggered: controlWindow.onTriggerUnLimitFps,
+			AssignTo:    &controlWindow.limitFpsUnLimitAction,
 		},
 	}
 
@@ -117,13 +119,13 @@ func NewMWindow(
 			declarative.Action{
 				Text:        "&デフォームfps無制限",
 				Checkable:   true,
-				OnTriggered: mWindow.onTriggerUnLimitFpsDeform,
-				AssignTo:    &mWindow.limitFpsDeformUnLimitAction,
+				OnTriggered: controlWindow.onTriggerUnLimitFpsDeform,
+				AssignTo:    &controlWindow.limitFpsDeformUnLimitAction,
 			})
 	}
 
 	if err := (declarative.MainWindow{
-		AssignTo: &mWindow.MainWindow,
+		AssignTo: &controlWindow.MainWindow,
 		Title:    fmt.Sprintf("%s %s", appConfig.Name, appConfig.Version),
 		Size:     app.GetWindowSize(appConfig.ControlWindowSize.Width, appConfig.ControlWindowSize.Height),
 		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear, MarginsZero: true, SpacingZero: true},
@@ -134,39 +136,49 @@ func NewMWindow(
 					declarative.Action{
 						Text:        mi18n.T("&フレームドロップON"),
 						Checkable:   true,
-						OnTriggered: mWindow.onTriggerEnabledFrameDrop,
-						AssignTo:    &mWindow.enabledFrameDropAction,
+						OnTriggered: controlWindow.onTriggerEnabledFrameDrop,
+						AssignTo:    &controlWindow.enabledFrameDropAction,
+					},
+					declarative.Menu{
+						Text:  mi18n.T("&fps制限"),
+						Items: fpsLImitMenuItems,
+					},
+					declarative.Action{
+						Text:        mi18n.T("&情報表示"),
+						Checkable:   true,
+						OnTriggered: controlWindow.onTriggerShowInfo,
+						AssignTo:    &controlWindow.showInfoAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
 						Text:        mi18n.T("&物理ON/OFF"),
 						Checkable:   true,
-						OnTriggered: mWindow.onTriggerEnabledPhysics,
-						AssignTo:    &mWindow.enabledPhysicsAction,
+						OnTriggered: controlWindow.onTriggerEnabledPhysics,
+						AssignTo:    &controlWindow.enabledPhysicsAction,
 					},
 					declarative.Action{
 						Text:        mi18n.T("&物理リセット"),
-						OnTriggered: mWindow.onTriggerPhysicsReset,
-						AssignTo:    &mWindow.physicsResetAction,
+						OnTriggered: controlWindow.onTriggerPhysicsReset,
+						AssignTo:    &controlWindow.physicsResetAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
 						Text:        mi18n.T("&法線表示"),
 						Checkable:   true,
-						OnTriggered: mWindow.onTriggerShowNormal,
-						AssignTo:    &mWindow.showNormalAction,
+						OnTriggered: controlWindow.onTriggerShowNormal,
+						AssignTo:    &controlWindow.showNormalAction,
 					},
 					declarative.Action{
 						Text:        mi18n.T("&ワイヤーフレーム表示"),
 						Checkable:   true,
-						OnTriggered: mWindow.onTriggerShowWire,
-						AssignTo:    &mWindow.showWireAction,
+						OnTriggered: controlWindow.onTriggerShowWire,
+						AssignTo:    &controlWindow.showWireAction,
 					},
 					declarative.Action{
 						Text:        mi18n.T("&選択頂点表示"),
 						Checkable:   true,
-						OnTriggered: mWindow.onTriggerShowSelectedVertex,
-						AssignTo:    &mWindow.showSelectedVertexAction,
+						OnTriggered: controlWindow.onTriggerShowSelectedVertex,
+						AssignTo:    &controlWindow.showSelectedVertexAction,
 					},
 					declarative.Separator{},
 					declarative.Menu{
@@ -175,45 +187,45 @@ func NewMWindow(
 							declarative.Action{
 								Text:        mi18n.T("&全ボーン"),
 								Checkable:   true,
-								OnTriggered: mWindow.onTriggerShowBoneAll,
-								AssignTo:    &mWindow.showBoneAllAction,
+								OnTriggered: controlWindow.onTriggerShowBoneAll,
+								AssignTo:    &controlWindow.showBoneAllAction,
 							},
 							declarative.Separator{},
 							declarative.Action{
 								Text:        mi18n.T("&IKボーン"),
 								Checkable:   true,
-								OnTriggered: mWindow.onTriggerShowBoneIk,
-								AssignTo:    &mWindow.showBoneIkAction,
+								OnTriggered: controlWindow.onTriggerShowBoneIk,
+								AssignTo:    &controlWindow.showBoneIkAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&付与親ボーン"),
 								Checkable:   true,
-								OnTriggered: mWindow.onTriggerShowBoneEffector,
-								AssignTo:    &mWindow.showBoneEffectorAction,
+								OnTriggered: controlWindow.onTriggerShowBoneEffector,
+								AssignTo:    &controlWindow.showBoneEffectorAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&軸制限ボーン"),
 								Checkable:   true,
-								OnTriggered: mWindow.onTriggerShowBoneFixed,
-								AssignTo:    &mWindow.showBoneFixedAction,
+								OnTriggered: controlWindow.onTriggerShowBoneFixed,
+								AssignTo:    &controlWindow.showBoneFixedAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&回転ボーン"),
 								Checkable:   true,
-								OnTriggered: mWindow.onTriggerShowBoneRotate,
-								AssignTo:    &mWindow.showBoneRotateAction,
+								OnTriggered: controlWindow.onTriggerShowBoneRotate,
+								AssignTo:    &controlWindow.showBoneRotateAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&移動ボーン"),
 								Checkable:   true,
-								OnTriggered: mWindow.onTriggerShowBoneTranslate,
-								AssignTo:    &mWindow.showBoneTranslateAction,
+								OnTriggered: controlWindow.onTriggerShowBoneTranslate,
+								AssignTo:    &controlWindow.showBoneTranslateAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&表示ボーン"),
 								Checkable:   true,
-								OnTriggered: mWindow.onTriggerShowBoneVisible,
-								AssignTo:    &mWindow.showBoneVisibleAction,
+								OnTriggered: controlWindow.onTriggerShowBoneVisible,
+								AssignTo:    &controlWindow.showBoneVisibleAction,
 							},
 						},
 					},
@@ -224,33 +236,22 @@ func NewMWindow(
 							declarative.Action{
 								Text:        mi18n.T("&前面表示"),
 								Checkable:   true,
-								OnTriggered: mWindow.onTriggerShowRigidBodyFront,
-								AssignTo:    &mWindow.showRigidBodyFrontAction,
+								OnTriggered: controlWindow.onTriggerShowRigidBodyFront,
+								AssignTo:    &controlWindow.showRigidBodyFrontAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&埋め込み表示"),
 								Checkable:   true,
-								OnTriggered: mWindow.onTriggerShowRigidBodyBack,
-								AssignTo:    &mWindow.showRigidBodyBackAction,
+								OnTriggered: controlWindow.onTriggerShowRigidBodyBack,
+								AssignTo:    &controlWindow.showRigidBodyBackAction,
 							},
 						},
 					},
 					declarative.Action{
 						Text:        mi18n.T("&ジョイント表示"),
 						Checkable:   true,
-						OnTriggered: mWindow.onTriggerShowJoint,
-						AssignTo:    &mWindow.showJointAction,
-					},
-					declarative.Separator{},
-					declarative.Action{
-						Text:        mi18n.T("&情報表示"),
-						Checkable:   true,
-						OnTriggered: mWindow.onTriggerShowInfo,
-						AssignTo:    &mWindow.showInfoAction,
-					},
-					declarative.Menu{
-						Text:  mi18n.T("&fps制限"),
-						Items: fpsLImitMenuItems,
+						OnTriggered: controlWindow.onTriggerShowJoint,
+						AssignTo:    &controlWindow.showJointAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
@@ -262,7 +263,7 @@ func NewMWindow(
 				},
 			},
 			declarative.Menu{
-				Text:  mi18n.T("&メイン画面"),
+				Text:  mi18n.T("&操作画面"),
 				Items: logMenuItems,
 			},
 			declarative.Menu{
@@ -274,46 +275,44 @@ func NewMWindow(
 				Items: []declarative.MenuItem{
 					declarative.Action{
 						Text:        "日本語",
-						OnTriggered: func() { mWindow.langTriggered("ja") },
+						OnTriggered: func() { controlWindow.langTriggered("ja") },
 					},
 					declarative.Action{
 						Text:        "English",
-						OnTriggered: func() { mWindow.langTriggered("en") },
+						OnTriggered: func() { controlWindow.langTriggered("en") },
 					},
 					declarative.Action{
 						Text:        "中文",
-						OnTriggered: func() { mWindow.langTriggered("zh") },
+						OnTriggered: func() { controlWindow.langTriggered("zh") },
 					},
 					declarative.Action{
-						Text:        "???",
-						OnTriggered: func() { mWindow.langTriggered("ko") },
+						Text:        "한국어",
+						OnTriggered: func() { controlWindow.langTriggered("ko") },
 					},
 				},
 			},
 		},
 	}).Create(); err != nil {
-		return nil
+		widget.RaiseError(err)
 	}
 
-	mWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
-		mWindow.appState.SetClosed(true)
+	controlWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
+		controlWindow.appState.SetClosed(true)
 	})
 
 	icon, err := walk.NewIconFromImageForDPI(*appConfig.IconImage, 96)
 	if err != nil {
-		return nil
+		widget.RaiseError(err)
 	}
-	mWindow.SetIcon(icon)
+	controlWindow.SetIcon(icon)
 
-	// // タブウィジェット追加
-	// mWindow.TabWidget = widget.NewMTabWidget(mWindow.MainWindow)
-	// mWindow.Children().Add(mWindow.TabWidget)
+	bg, err := walk.NewSystemColorBrush(walk.SysColor3DShadow)
+	if err != nil {
+		widget.RaiseError(err)
+	}
+	controlWindow.SetBackground(bg)
 
-	// bg, err := walk.NewSystemColorBrush(walk.SysColor3DShadow)
-	// widget.CheckError(err, mWindow.MainWindow, mi18n.T("背景色生成エラー"))
-	// mWindow.SetBackground(bg)
-
-	return mWindow
+	return controlWindow
 }
 
 func (w *ControlWindow) Dispose() {
@@ -337,6 +336,25 @@ func (w *ControlWindow) Size() (int, int) {
 func (w *ControlWindow) SetPosition(x, y int) {
 	w.MainWindow.SetX(x)
 	w.MainWindow.SetY(y)
+}
+
+func (w *ControlWindow) AppState() window.IAppState {
+	return w.appState
+}
+
+func (w *ControlWindow) GetMainWindow() *walk.MainWindow {
+	return w.MainWindow
+}
+
+func (w *ControlWindow) InitTabWidget() {
+	w.tabWidget = widget.NewMTabWidget(w.GetMainWindow())
+}
+
+func (w *ControlWindow) AddTabPage(tabPage *walk.TabPage) {
+	err := w.tabWidget.Pages().Add(tabPage)
+	if err != nil {
+		widget.RaiseError(err)
+	}
 }
 
 func (w *ControlWindow) langTriggered(lang string) {

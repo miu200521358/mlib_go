@@ -1,6 +1,7 @@
 package viewer
 
 import (
+	"fmt"
 	"image"
 	"unsafe"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/window"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
@@ -27,7 +29,7 @@ type ViewWindow struct {
 	doResetPhysicsCount    int                // 物理リセット処理回数
 }
 
-func NewGlWindow(
+func NewViewWindow(
 	windowIndex int,
 	appConfig *mconfig.AppConfig,
 	uiState window.IAppState,
@@ -42,8 +44,7 @@ func NewGlWindow(
 	glWindow, err := glfw.CreateWindow(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height,
 		mi18n.T("ビューワー"), nil, nil)
 	if err != nil {
-		mlog.E("Failed to create window: %v", err)
-		return nil
+		widget.RaiseError(err)
 	}
 
 	glWindow.MakeContextCurrent()
@@ -52,8 +53,7 @@ func NewGlWindow(
 
 	// OpenGL の初期化
 	if err := gl.Init(); err != nil {
-		mlog.E("Failed to initialize OpenGL: %v", err)
-		return nil
+		widget.RaiseError(err)
 	}
 
 	viewWindow := &ViewWindow{
@@ -89,9 +89,8 @@ func (viewWindow *ViewWindow) debugMessageCallback(
 ) {
 	switch severity {
 	case gl.DEBUG_SEVERITY_HIGH:
-		mlog.E("[HIGH] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
-			source, glType, severity, message)
-		panic("critical OpenGL error")
+		widget.RaiseError(fmt.Errorf("[HIGH] GL CRITICAL ERROR: %v type = 0x%x, severity = 0x%x, message = %s",
+			source, glType, severity, message))
 	case gl.DEBUG_SEVERITY_MEDIUM:
 		mlog.V("[MEDIUM] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
 			source, glType, severity, message)
@@ -118,6 +117,10 @@ func (w *ViewWindow) Size() (int, int) {
 
 func (w *ViewWindow) SetPosition(x, y int) {
 	w.SetPos(x, y)
+}
+
+func (w *ViewWindow) AppState() window.IAppState {
+	return w.appState
 }
 
 func (w *ViewWindow) TriggerClose(window *glfw.Window) {
