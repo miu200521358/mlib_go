@@ -82,14 +82,14 @@ type MShader struct {
 	lightPosition         *mmath.MVec3
 	lightDirection        *mmath.MVec3
 	Msaa                  *buffer.Msaa
-	ModelProgram          uint32
-	EdgeProgram           uint32
-	BoneProgram           uint32
-	PhysicsProgram        uint32
-	NormalProgram         uint32
-	FloorProgram          uint32
-	WireProgram           uint32
-	SelectedVertexProgram uint32
+	modelProgram          uint32
+	edgeProgram           uint32
+	boneProgram           uint32
+	physicsProgram        uint32
+	normalProgram         uint32
+	floorProgram          uint32
+	wireProgram           uint32
+	selectedVertexProgram uint32
 	BoneTextureId         uint32
 	floor                 *MFloor
 }
@@ -114,98 +114,98 @@ func NewMShader(width, height int) *MShader {
 
 	var err error
 	{
-		shader.ModelProgram, err = shader.newProgram(
+		shader.modelProgram, err = shader.newProgram(
 			glslFiles, "glsl/model.vert", "glsl/model.frag")
 		if err != nil {
 			mlog.E("Failed to create model program: %v", err)
 			return nil
 		}
-		gl.UseProgram(shader.ModelProgram)
-		shader.initialize(shader.ModelProgram)
+		gl.UseProgram(shader.modelProgram)
+		shader.initialize(shader.modelProgram)
 		gl.UseProgram(0)
 	}
 
 	{
-		shader.BoneProgram, err = shader.newProgram(
+		shader.boneProgram, err = shader.newProgram(
 			glslFiles, "glsl/bone.vert", "glsl/bone.frag")
 		if err != nil {
 			mlog.E("Failed to create bone program: %v", err)
 			return nil
 		}
-		gl.UseProgram(shader.BoneProgram)
-		shader.initialize(shader.BoneProgram)
+		gl.UseProgram(shader.boneProgram)
+		shader.initialize(shader.boneProgram)
 		gl.UseProgram(0)
 	}
 
 	{
-		shader.EdgeProgram, err = shader.newProgram(
+		shader.edgeProgram, err = shader.newProgram(
 			glslFiles, "glsl/edge.vert", "glsl/edge.frag")
 		if err != nil {
 			mlog.E("Failed to create edge program: %v", err)
 			return nil
 		}
-		gl.UseProgram(shader.EdgeProgram)
-		shader.initialize(shader.EdgeProgram)
+		gl.UseProgram(shader.edgeProgram)
+		shader.initialize(shader.edgeProgram)
 		gl.UseProgram(0)
 	}
 
 	{
-		shader.PhysicsProgram, err = shader.newProgram(
+		shader.physicsProgram, err = shader.newProgram(
 			glslFiles, "glsl/physics.vert", "glsl/physics.frag")
 		if err != nil {
 			mlog.E("Failed to create physics program: %v", err)
 			return nil
 		}
-		gl.UseProgram(shader.PhysicsProgram)
-		shader.initialize(shader.PhysicsProgram)
+		gl.UseProgram(shader.physicsProgram)
+		shader.initialize(shader.physicsProgram)
 		gl.UseProgram(0)
 	}
 
 	{
-		shader.NormalProgram, err = shader.newProgram(
+		shader.normalProgram, err = shader.newProgram(
 			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
 			mlog.E("Failed to create normal program: %v", err)
 			return nil
 		}
-		gl.UseProgram(shader.NormalProgram)
-		shader.initialize(shader.NormalProgram)
+		gl.UseProgram(shader.normalProgram)
+		shader.initialize(shader.normalProgram)
 		gl.UseProgram(0)
 	}
 
 	{
-		shader.FloorProgram, err = shader.newProgram(
+		shader.floorProgram, err = shader.newProgram(
 			glslFiles, "glsl/floor.vert", "glsl/floor.frag")
 		if err != nil {
 			mlog.E("Failed to create floor program: %v", err)
 			return nil
 		}
-		gl.UseProgram(shader.FloorProgram)
-		shader.initialize(shader.FloorProgram)
+		gl.UseProgram(shader.floorProgram)
+		shader.initialize(shader.floorProgram)
 		gl.UseProgram(0)
 	}
 
 	{
-		shader.WireProgram, err = shader.newProgram(
+		shader.wireProgram, err = shader.newProgram(
 			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
 			mlog.E("Failed to create wire program: %v", err)
 			return nil
 		}
-		gl.UseProgram(shader.WireProgram)
-		shader.initialize(shader.WireProgram)
+		gl.UseProgram(shader.wireProgram)
+		shader.initialize(shader.wireProgram)
 		gl.UseProgram(0)
 	}
 
 	{
-		shader.SelectedVertexProgram, err = shader.newProgram(
+		shader.selectedVertexProgram, err = shader.newProgram(
 			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
 			mlog.E("Failed to create selected vertex program: %v", err)
 			return nil
 		}
-		gl.UseProgram(shader.SelectedVertexProgram)
-		shader.initialize(shader.SelectedVertexProgram)
+		gl.UseProgram(shader.selectedVertexProgram)
+		shader.initialize(shader.selectedVertexProgram)
 		gl.UseProgram(0)
 	}
 
@@ -352,37 +352,37 @@ func (s *MShader) Fit(width int, height int) {
 func (s *MShader) GetProgram(programType ProgramType) uint32 {
 	switch programType {
 	case PROGRAM_TYPE_MODEL:
-		return s.ModelProgram
+		return s.modelProgram
 	case PROGRAM_TYPE_EDGE:
-		return s.EdgeProgram
+		return s.edgeProgram
 	case PROGRAM_TYPE_BONE:
-		return s.BoneProgram
+		return s.boneProgram
 	case PROGRAM_TYPE_PHYSICS:
-		return s.PhysicsProgram
+		return s.physicsProgram
 	case PROGRAM_TYPE_NORMAL:
-		return s.NormalProgram
+		return s.normalProgram
 	case PROGRAM_TYPE_FLOOR:
-		return s.FloorProgram
+		return s.floorProgram
 	case PROGRAM_TYPE_WIRE:
-		return s.WireProgram
+		return s.wireProgram
 	case PROGRAM_TYPE_SELECTED_VERTEX:
-		return s.SelectedVertexProgram
+		return s.selectedVertexProgram
 	}
 	return 0
 }
 
 func (s *MShader) GetPrograms() []uint32 {
-	return []uint32{s.ModelProgram, s.EdgeProgram, s.BoneProgram, s.PhysicsProgram, s.NormalProgram, s.FloorProgram, s.WireProgram, s.SelectedVertexProgram}
+	return []uint32{s.modelProgram, s.edgeProgram, s.boneProgram, s.physicsProgram, s.normalProgram, s.floorProgram, s.wireProgram, s.selectedVertexProgram}
 }
 
 func (s *MShader) Delete() {
-	s.DeleteProgram(s.ModelProgram)
-	s.DeleteProgram(s.EdgeProgram)
-	s.DeleteProgram(s.BoneProgram)
-	s.DeleteProgram(s.PhysicsProgram)
-	s.DeleteProgram(s.NormalProgram)
-	s.DeleteProgram(s.FloorProgram)
-	s.DeleteProgram(s.WireProgram)
-	s.DeleteProgram(s.SelectedVertexProgram)
+	s.DeleteProgram(s.modelProgram)
+	s.DeleteProgram(s.edgeProgram)
+	s.DeleteProgram(s.boneProgram)
+	s.DeleteProgram(s.physicsProgram)
+	s.DeleteProgram(s.normalProgram)
+	s.DeleteProgram(s.floorProgram)
+	s.DeleteProgram(s.wireProgram)
+	s.DeleteProgram(s.selectedVertexProgram)
 	s.Msaa.Delete()
 }

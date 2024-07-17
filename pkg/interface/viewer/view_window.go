@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/window"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
@@ -38,16 +39,16 @@ func NewGlWindow(
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
 
-	w, err := glfw.CreateWindow(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height,
+	glWindow, err := glfw.CreateWindow(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height,
 		mi18n.T("ビューワー"), nil, nil)
 	if err != nil {
 		mlog.E("Failed to create window: %v", err)
 		return nil
 	}
 
-	w.MakeContextCurrent()
-	w.SetInputMode(glfw.StickyKeysMode, glfw.True)
-	w.SetIcon([]image.Image{*appConfig.IconImage})
+	glWindow.MakeContextCurrent()
+	glWindow.SetInputMode(glfw.StickyKeysMode, glfw.True)
+	glWindow.SetIcon([]image.Image{*appConfig.IconImage})
 
 	// OpenGL の初期化
 	if err := gl.Init(); err != nil {
@@ -55,12 +56,8 @@ func NewGlWindow(
 		return nil
 	}
 
-	gl.Enable(gl.DEBUG_OUTPUT)
-	gl.Enable(gl.DEBUG_OUTPUT_SYNCHRONOUS)             // 同期的なデバッグ出力有効
-	gl.DebugMessageCallback(debugMessageCallback, nil) // デバッグコールバック
-
 	viewWindow := &ViewWindow{
-		Window:      w,
+		Window:      glWindow,
 		windowIndex: windowIndex,
 		appConfig:   appConfig,
 		appState:    uiState,
@@ -68,10 +65,20 @@ func NewGlWindow(
 		physics:     mbt.NewMPhysics(),
 	}
 
+	glWindow.SetCloseCallback(viewWindow.closeCallback)
+
+	gl.Enable(gl.DEBUG_OUTPUT)
+	gl.Enable(gl.DEBUG_OUTPUT_SYNCHRONOUS)                        // 同期的なデバッグ出力有効
+	gl.DebugMessageCallback(viewWindow.debugMessageCallback, nil) // デバッグコールバック
+
 	return viewWindow
 }
 
-func debugMessageCallback(
+func (viewWindow *ViewWindow) closeCallback(w *glfw.Window) {
+	viewWindow.appState.SetClosed(true)
+}
+
+func (viewWindow *ViewWindow) debugMessageCallback(
 	source uint32,
 	glType uint32,
 	id uint32,
@@ -135,6 +142,69 @@ func (w *ViewWindow) ResetPhysicsStart() {
 }
 
 func (w *ViewWindow) Render() {
-	w.SwapBuffers()
 	glfw.PollEvents()
+
+	w.MakeContextCurrent()
+
+	// MSAAフレームバッファをバインド
+	w.shader.Msaa.Bind()
+
+	// 深度バッファのクリア
+	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+	// 隠面消去
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
+
+	// ブレンディングを有効にする
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	// カメラの再計算
+	w.updateCamera()
+
+	// 床描画
+	w.shader.DrawFloor()
+
+	w.shader.Msaa.Resolve()
+	w.shader.Msaa.Unbind()
+
+	w.SwapBuffers()
+}
+
+func (w *ViewWindow) updateCamera() {
+	// カメラの再計算
+	projection := mgl32.Perspective(
+		mgl32.DegToRad(w.shader.FieldOfViewAngle),
+		float32(w.shader.Width)/float32(w.shader.Height),
+		w.shader.NearPlane,
+		w.shader.FarPlane,
+	)
+
+	// カメラの位置
+	cameraPosition := mgl.NewGlVec3(w.shader.CameraPosition)
+
+	// カメラの中心
+	lookAtCenter := mgl.NewGlVec3(w.shader.LookAtCenterPosition)
+	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
+
+	for _, program := range w.shader.GetPrograms() {
+		// プログラムの切り替え
+		gl.UseProgram(program)
+
+		// カメラの再計算
+		projectionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_PROJECTION_MATRIX))
+		gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
+
+		// カメラの位置
+		cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_CAMERA_POSITION))
+		gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
+
+		// カメラの中心
+		cameraUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_MATRIX))
+		gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
+
+		gl.UseProgram(0)
+	}
 }

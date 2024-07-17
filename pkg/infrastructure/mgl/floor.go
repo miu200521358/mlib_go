@@ -1,7 +1,7 @@
 package mgl
 
 import (
-	"github.com/go-gl/gl/v2.1/gl"
+	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
 

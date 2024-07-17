@@ -50,7 +50,8 @@ func main() {
 
 	mApp := app.NewMApp(appConfig)
 	mApp.SetControlWindow(controller.NewMWindow(appConfig, mApp, getMenuItems))
-	mApp.AddViewWindow(viewer.NewGlWindow(0, appConfig, mApp))
+	mApp.AddViewWindow(viewer.NewGlWindow(mApp.ViewerCount(), appConfig, mApp))
+	mApp.AddViewWindow(viewer.NewGlWindow(mApp.ViewerCount(), appConfig, mApp))
 
 	// mWindow, err = window.NewMWindow(512, 768, true, getMenuItems, iconImg, appConfig, uiState)
 	// widget.CheckError(err, nil, mi18n.T("メインウィンドウ生成エラー"))

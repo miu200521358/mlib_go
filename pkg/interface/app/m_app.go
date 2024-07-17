@@ -21,8 +21,8 @@ import (
 type MApp struct {
 	*appState                           // UI状態
 	appConfig     *mconfig.AppConfig    // アプリケーション設定
-	ViewWindows   []window.IViewWindow  // 描画ウィンドウリスト
-	ControlWindow window.IControlWindow // 操作ウィンドウ
+	viewWindows   []window.IViewWindow  // 描画ウィンドウリスト
+	controlWindow window.IControlWindow // 操作ウィンドウ
 }
 
 func NewMApp(appConfig *mconfig.AppConfig) *MApp {
@@ -35,7 +35,7 @@ func NewMApp(appConfig *mconfig.AppConfig) *MApp {
 	app := &MApp{
 		appState:    newAppState(),
 		appConfig:   appConfig,
-		ViewWindows: make([]window.IViewWindow, 0),
+		viewWindows: make([]window.IViewWindow, 0),
 	}
 
 	return app
@@ -44,25 +44,29 @@ func NewMApp(appConfig *mconfig.AppConfig) *MApp {
 func (a *MApp) ControllerRun() {
 	go func() {
 		// 操作ウィンドウは別スレッドで起動
-		a.ControlWindow.Run()
+		a.controlWindow.Run()
 	}()
 }
 
 func (a *MApp) ViewerRun() {
-	// 描画ウィンドウはメインスレッドで起動
+	// 描画ウィンドウはメインスレッドで起動して描画し続ける
 	for !a.isClosed {
-		for _, w := range a.ViewWindows {
+		for _, w := range a.viewWindows {
 			w.Render()
 		}
 	}
 	a.Close()
 }
 
+func (a *MApp) ViewerCount() int {
+	return len(a.viewWindows)
+}
+
 func (a *MApp) Close() {
-	for _, w := range a.ViewWindows {
+	for _, w := range a.viewWindows {
 		w.Close()
 	}
-	a.ControlWindow.Close()
+	a.controlWindow.Close()
 
 	glfw.Terminate()
 	walk.App().Exit(0)
@@ -132,7 +136,7 @@ func (a *MApp) recoverFromPanic() {
 }
 
 func (a *MApp) SetControlWindow(controlWindow window.IControlWindow) {
-	a.ControlWindow = controlWindow
+	a.controlWindow = controlWindow
 
 	if a.appConfig.IsEnvProd() || a.appConfig.IsEnvDev() {
 		defer a.recoverFromPanic()
@@ -140,20 +144,20 @@ func (a *MApp) SetControlWindow(controlWindow window.IControlWindow) {
 }
 
 func (a *MApp) AddViewWindow(viewWindow window.IViewWindow) {
-	a.ViewWindows = append(a.ViewWindows, viewWindow)
+	a.viewWindows = append(a.viewWindows, viewWindow)
 }
 
 func (a *MApp) Dispose() {
-	for _, w := range a.ViewWindows {
+	for _, w := range a.viewWindows {
 		w.Dispose()
 	}
-	a.ControlWindow.Dispose()
+	a.controlWindow.Dispose()
 }
 
 func (a *MApp) ResetPhysics() {
 	// 物理ON・まだリセット中ではないの時だけリセット処理を行う
 	if a.IsEnabledPhysics() {
-		for _, w := range a.ViewWindows {
+		for _, w := range a.viewWindows {
 			w.ResetPhysicsStart()
 		}
 	}
@@ -196,11 +200,11 @@ func (a *MApp) Center() {
 	screenHeight := getSystemMetrics(SM_CYSCREEN)
 
 	// ウィンドウのサイズを取得
-	mWidth, mHeight := a.ControlWindow.Size()
+	mWidth, mHeight := a.controlWindow.Size()
 
 	viewWindowWidth := 0
 	viewWindowHeight := 0
-	for _, w := range a.ViewWindows {
+	for _, w := range a.viewWindows {
 		gWidth, gHeight := w.Size()
 		viewWindowWidth += gWidth
 		viewWindowHeight += gHeight
@@ -212,9 +216,9 @@ func (a *MApp) Center() {
 		centerY := (screenHeight - mHeight) / 2
 
 		centerX += viewWindowWidth
-		a.ControlWindow.SetPosition(centerX, centerY)
+		a.controlWindow.SetPosition(centerX, centerY)
 
-		for _, w := range a.ViewWindows {
+		for _, w := range a.viewWindows {
 			gWidth, _ := w.Size()
 			centerX -= gWidth
 			w.SetPosition(centerX, centerY)
@@ -224,9 +228,9 @@ func (a *MApp) Center() {
 		centerY := (screenHeight - (mHeight + viewWindowHeight)) / 2
 
 		centerY += mHeight
-		a.ControlWindow.SetPosition(centerX, centerY)
+		a.controlWindow.SetPosition(centerX, centerY)
 
-		for _, w := range a.ViewWindows {
+		for _, w := range a.viewWindows {
 			_, gHeight := w.Size()
 			centerY -= gHeight
 			w.SetPosition(centerX, centerY)
