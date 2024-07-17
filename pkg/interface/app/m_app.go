@@ -41,6 +41,33 @@ func NewMApp(appConfig *mconfig.AppConfig) *MApp {
 	return app
 }
 
+func (a *MApp) ControllerRun() {
+	go func() {
+		// 操作ウィンドウは別スレッドで起動
+		a.ControlWindow.Run()
+	}()
+}
+
+func (a *MApp) ViewerRun() {
+	// 描画ウィンドウはメインスレッドで起動
+	for !a.isClosed {
+		for _, w := range a.ViewWindows {
+			w.Render()
+		}
+	}
+	a.Close()
+}
+
+func (a *MApp) Close() {
+	for _, w := range a.ViewWindows {
+		w.Close()
+	}
+	a.ControlWindow.Close()
+
+	glfw.Terminate()
+	walk.App().Exit(0)
+}
+
 // エラー監視
 func (a *MApp) recoverFromPanic() {
 	if r := recover(); r != nil {
@@ -91,10 +118,8 @@ func (a *MApp) recoverFromPanic() {
 				declarative.PushButton{
 					Text: mi18n.T("アプリを終了"),
 					OnClicked: func() {
+						a.Close()
 						os.Exit(1)
-						if a.ControlWindow != nil {
-							a.ControlWindow.Close()
-						}
 					},
 				},
 			},
@@ -102,9 +127,7 @@ func (a *MApp) recoverFromPanic() {
 			walk.MsgBox(nil, mi18n.T("エラーダイアログ起動失敗"), string(stackTrace), walk.MsgBoxIconError)
 		}
 
-		if a.ControlWindow != nil {
-			a.ControlWindow.Close()
-		}
+		a.Close()
 	}
 }
 
@@ -118,28 +141,6 @@ func (a *MApp) SetControlWindow(controlWindow window.IControlWindow) {
 
 func (a *MApp) AddViewWindow(viewWindow window.IViewWindow) {
 	a.ViewWindows = append(a.ViewWindows, viewWindow)
-}
-
-func (a *MApp) ControllerRun() {
-	go func() {
-		// 操作ウィンドウは別スレッドで起動
-		a.ControlWindow.Run()
-	}()
-}
-
-func (a *MApp) ViewerRun() {
-	// 描画ウィンドウはメインスレッドで起動
-	for _, w := range a.ViewWindows {
-		w.Run()
-	}
-}
-
-func (a *MApp) Close() {
-	for _, w := range a.ViewWindows {
-		w.TriggerClose(w.GetWindow())
-	}
-	a.ControlWindow.Close()
-	walk.App().Exit(0)
 }
 
 func (a *MApp) Dispose() {

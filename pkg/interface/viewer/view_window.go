@@ -18,7 +18,7 @@ type ViewWindow struct {
 	*glfw.Window
 	windowIndex            int                // ウィンドウインデックス
 	appConfig              *mconfig.AppConfig // アプリケーション設定
-	uiState                window.IAppState   // UI状態
+	appState               window.IAppState   // UI状態
 	physics                *mbt.MPhysics      // 物理
 	shader                 *mgl.MShader       // シェーダ
 	doResetPhysicsStart    bool               // 物理リセット開始フラグ
@@ -63,10 +63,10 @@ func NewGlWindow(
 		Window:      w,
 		windowIndex: windowIndex,
 		appConfig:   appConfig,
-		uiState:     uiState,
+		appState:    uiState,
+		shader:      mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height),
+		physics:     mbt.NewMPhysics(),
 	}
-
-	viewWindow.shader = mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height)
 
 	return viewWindow
 }
@@ -102,7 +102,7 @@ func (w *ViewWindow) Dispose() {
 }
 
 func (w *ViewWindow) Close() {
-	w.uiState.SetClosed(true)
+	w.Window.Destroy()
 }
 
 func (w *ViewWindow) Size() (int, int) {
@@ -114,7 +114,7 @@ func (w *ViewWindow) SetPosition(x, y int) {
 }
 
 func (w *ViewWindow) TriggerClose(window *glfw.Window) {
-	w.Close()
+	w.appState.SetClosed(true)
 }
 
 func (w *ViewWindow) GetWindow() *glfw.Window {
@@ -134,9 +134,7 @@ func (w *ViewWindow) ResetPhysicsStart() {
 	}
 }
 
-func (w *ViewWindow) Run() {
-	for !w.ShouldClose() {
-		w.SwapBuffers()
-		glfw.PollEvents()
-	}
+func (w *ViewWindow) Render() {
+	w.SwapBuffers()
+	glfw.PollEvents()
 }

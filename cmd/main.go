@@ -80,9 +80,7 @@ func main() {
 
 	mApp.Center()
 	mApp.ControllerRun()
-
 	mApp.ViewerRun()
-	defer mApp.Close()
 }
 
 func getMenuItems() []declarative.MenuItem {

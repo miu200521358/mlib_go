@@ -11,7 +11,7 @@ type IControlWindow interface {
 }
 
 type IViewWindow interface {
-	Run()
+	Render()
 	Dispose()
 	Close()
 	Size() (int, int)
