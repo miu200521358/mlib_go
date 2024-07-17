@@ -14,6 +14,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 const (
@@ -74,8 +75,8 @@ type MShader struct {
 	CameraPosition        *mmath.MVec3
 	LookAtCenterPosition  *mmath.MVec3
 	FieldOfViewAngle      float32
-	Width                 int32
-	Height                int32
+	Width                 int
+	Height                int
 	NearPlane             float32
 	FarPlane              float32
 	lightPosition         *mmath.MVec3
@@ -90,22 +91,24 @@ type MShader struct {
 	WireProgram           uint32
 	SelectedVertexProgram uint32
 	BoneTextureId         uint32
+	floor                 *MFloor
 }
 
 //go:embed glsl/*
 var glslFiles embed.FS
 
-func NewMShader(width, height int) (*MShader, error) {
+func NewMShader(width, height int) *MShader {
 	shader := &MShader{
 		CameraPosition:       initialCameraPosition.Copy(),
 		LookAtCenterPosition: initialLookAtPosition.Copy(),
 		FieldOfViewAngle:     FIELD_OF_VIEW_ANGLE,
-		Width:                int32(width),
-		Height:               int32(height),
+		Width:                width,
+		Height:               height,
 		NearPlane:            0.1,
 		FarPlane:             1000.0,
 		lightPosition:        &mmath.MVec3{X: -0.5, Y: -1.0, Z: 0.5},
-		Msaa:                 buffer.NewMsaa(int32(width), int32(height)),
+		// Msaa:                 buffer.NewMsaa(width, height),
+		// floor:                newMFloor(),
 	}
 	shader.lightDirection = shader.lightPosition.Normalized()
 
@@ -114,7 +117,8 @@ func NewMShader(width, height int) (*MShader, error) {
 		shader.ModelProgram, err = shader.newProgram(
 			glslFiles, "glsl/model.vert", "glsl/model.frag")
 		if err != nil {
-			return nil, err
+			mlog.E("Failed to create model program: %v", err)
+			return nil
 		}
 		gl.UseProgram(shader.ModelProgram)
 		shader.initialize(shader.ModelProgram)
@@ -125,7 +129,8 @@ func NewMShader(width, height int) (*MShader, error) {
 		shader.BoneProgram, err = shader.newProgram(
 			glslFiles, "glsl/bone.vert", "glsl/bone.frag")
 		if err != nil {
-			return nil, err
+			mlog.E("Failed to create bone program: %v", err)
+			return nil
 		}
 		gl.UseProgram(shader.BoneProgram)
 		shader.initialize(shader.BoneProgram)
@@ -136,7 +141,8 @@ func NewMShader(width, height int) (*MShader, error) {
 		shader.EdgeProgram, err = shader.newProgram(
 			glslFiles, "glsl/edge.vert", "glsl/edge.frag")
 		if err != nil {
-			return nil, err
+			mlog.E("Failed to create edge program: %v", err)
+			return nil
 		}
 		gl.UseProgram(shader.EdgeProgram)
 		shader.initialize(shader.EdgeProgram)
@@ -147,7 +153,8 @@ func NewMShader(width, height int) (*MShader, error) {
 		shader.PhysicsProgram, err = shader.newProgram(
 			glslFiles, "glsl/physics.vert", "glsl/physics.frag")
 		if err != nil {
-			return nil, err
+			mlog.E("Failed to create physics program: %v", err)
+			return nil
 		}
 		gl.UseProgram(shader.PhysicsProgram)
 		shader.initialize(shader.PhysicsProgram)
@@ -158,7 +165,8 @@ func NewMShader(width, height int) (*MShader, error) {
 		shader.NormalProgram, err = shader.newProgram(
 			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
-			return nil, err
+			mlog.E("Failed to create normal program: %v", err)
+			return nil
 		}
 		gl.UseProgram(shader.NormalProgram)
 		shader.initialize(shader.NormalProgram)
@@ -169,7 +177,8 @@ func NewMShader(width, height int) (*MShader, error) {
 		shader.FloorProgram, err = shader.newProgram(
 			glslFiles, "glsl/floor.vert", "glsl/floor.frag")
 		if err != nil {
-			return nil, err
+			mlog.E("Failed to create floor program: %v", err)
+			return nil
 		}
 		gl.UseProgram(shader.FloorProgram)
 		shader.initialize(shader.FloorProgram)
@@ -180,7 +189,8 @@ func NewMShader(width, height int) (*MShader, error) {
 		shader.WireProgram, err = shader.newProgram(
 			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
-			return nil, err
+			mlog.E("Failed to create wire program: %v", err)
+			return nil
 		}
 		gl.UseProgram(shader.WireProgram)
 		shader.initialize(shader.WireProgram)
@@ -191,14 +201,15 @@ func NewMShader(width, height int) (*MShader, error) {
 		shader.SelectedVertexProgram, err = shader.newProgram(
 			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
-			return nil, err
+			mlog.E("Failed to create selected vertex program: %v", err)
+			return nil
 		}
 		gl.UseProgram(shader.SelectedVertexProgram)
 		shader.initialize(shader.SelectedVertexProgram)
 		gl.UseProgram(0)
 	}
 
-	return shader, nil
+	return shader
 }
 
 func (s *MShader) Reset() {
@@ -209,8 +220,8 @@ func (s *MShader) Reset() {
 }
 
 func (s *MShader) Resize(width, height int) {
-	s.Width = int32(width)
-	s.Height = int32(height)
+	s.Width = width
+	s.Height = height
 	s.Msaa = buffer.NewMsaa(s.Width, s.Height)
 }
 
@@ -327,18 +338,15 @@ func (s *MShader) initialize(program uint32) {
 	gl.UseProgram(0)
 }
 
-func (s *MShader) Fit(
-	width int,
-	height int,
-) {
-	s.Width = int32(width)
-	s.Height = int32(height)
+func (s *MShader) Fit(width int, height int) {
+	s.Width = width
+	s.Height = height
 
 	// MSAAも作り直し
 	s.Msaa = buffer.NewMsaa(s.Width, s.Height)
 
 	// ビューポートの設定
-	gl.Viewport(0, 0, s.Width, s.Height)
+	gl.Viewport(0, 0, int32(s.Width), int32(s.Height))
 }
 
 func (s *MShader) GetProgram(programType ProgramType) uint32 {

@@ -10,23 +10,25 @@ import (
 )
 
 type MPhysics struct {
-	world         bt.BtDiscreteDynamicsWorld
-	drawer        bt.BtMDebugDraw
-	liner         *mDebugDrawLiner
-	MaxSubSteps   int
-	DeformFps     float32
-	DeformSpf     float32
-	PhysicsFps    float32
-	PhysicsSpf    float32
-	FixedTimeStep float32
-	joints        map[int][]*jointValue
-	rigidBodies   map[int][]*rigidbodyValue
+	Enabled       bool                       // 物理有効
+	world         bt.BtDiscreteDynamicsWorld // ワールド
+	drawer        bt.BtMDebugDraw            // デバッグビューワー
+	liner         *mDebugDrawLiner           // ライナー
+	MaxSubSteps   int                        // 最大ステップ数
+	DeformFps     float32                    // デフォームfps
+	DeformSpf     float32                    // デフォームspf
+	PhysicsFps    float32                    // 物理fps
+	PhysicsSpf    float32                    // 物理spf
+	FixedTimeStep float32                    // 固定タイムステップ
+	joints        map[int][]*jointValue      // ジョイント
+	rigidBodies   map[int][]*rigidbodyValue  // 剛体
 }
 
 func NewMPhysics() *MPhysics {
 	world := createWorld()
 
 	p := &MPhysics{
+		Enabled:     true,
 		world:       world,
 		MaxSubSteps: 2,
 		DeformFps:   30.0,

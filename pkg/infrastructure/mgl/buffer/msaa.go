@@ -20,10 +20,10 @@ type Msaa struct {
 	depthBufferMS uint32
 }
 
-func NewMsaa(width int32, height int32) *Msaa {
+func NewMsaa(width int, height int) *Msaa {
 	msaa := &Msaa{
-		width:        width,
-		height:       height,
+		width:        int32(width),
+		height:       int32(height),
 		msaa_samples: 4,
 	}
 
