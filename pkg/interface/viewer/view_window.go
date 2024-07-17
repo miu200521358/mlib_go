@@ -4,7 +4,7 @@ import (
 	"image"
 	"unsafe"
 
-	"github.com/go-gl/gl/v2.1/gl"
+	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/domain/window"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
@@ -18,7 +18,7 @@ type ViewWindow struct {
 	*glfw.Window
 	windowIndex            int                // ウィンドウインデックス
 	appConfig              *mconfig.AppConfig // アプリケーション設定
-	uiState                window.IUiState    // UI状態
+	uiState                window.IAppState   // UI状態
 	physics                *mbt.MPhysics      // 物理
 	shader                 *mgl.MShader       // シェーダ
 	doResetPhysicsStart    bool               // 物理リセット開始フラグ
@@ -29,13 +29,14 @@ type ViewWindow struct {
 func NewGlWindow(
 	windowIndex int,
 	appConfig *mconfig.AppConfig,
-	uiState window.IUiState,
+	uiState window.IAppState,
 ) *ViewWindow {
 	glfw.WindowHint(glfw.Resizable, glfw.True)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
 	glfw.WindowHint(glfw.ContextVersionMinor, 4)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+	glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
 
 	w, err := glfw.CreateWindow(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height,
 		mi18n.T("ビューワー"), nil, nil)
@@ -54,6 +55,10 @@ func NewGlWindow(
 		return nil
 	}
 
+	gl.Enable(gl.DEBUG_OUTPUT)
+	gl.Enable(gl.DEBUG_OUTPUT_SYNCHRONOUS)             // 同期的なデバッグ出力有効
+	gl.DebugMessageCallback(debugMessageCallback, nil) // デバッグコールバック
+
 	viewWindow := &ViewWindow{
 		Window:      w,
 		windowIndex: windowIndex,
@@ -61,16 +66,12 @@ func NewGlWindow(
 		uiState:     uiState,
 	}
 
-	gl.DebugMessageCallback(viewWindow.debugMessageCallback, gl.Ptr(nil)) // デバッグコールバック
-	gl.Enable(gl.DEBUG_OUTPUT)
-	gl.Enable(gl.DEBUG_OUTPUT_SYNCHRONOUS) // 同期的なデバッグ出力有効
-
-	// viewWindow.shader = mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height)
+	viewWindow.shader = mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height)
 
 	return viewWindow
 }
 
-func (w *ViewWindow) debugMessageCallback(
+func debugMessageCallback(
 	source uint32,
 	glType uint32,
 	id uint32,

@@ -107,8 +107,8 @@ func NewMShader(width, height int) *MShader {
 		NearPlane:            0.1,
 		FarPlane:             1000.0,
 		lightPosition:        &mmath.MVec3{X: -0.5, Y: -1.0, Z: 0.5},
-		// Msaa:                 buffer.NewMsaa(width, height),
-		// floor:                newMFloor(),
+		Msaa:                 buffer.NewMsaa(width, height),
+		floor:                newMFloor(),
 	}
 	shader.lightDirection = shader.lightPosition.Normalized()
 

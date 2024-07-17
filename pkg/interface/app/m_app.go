@@ -12,6 +12,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/window"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 	"golang.org/x/sys/windows"
@@ -25,8 +26,9 @@ type MApp struct {
 }
 
 func NewMApp(appConfig *mconfig.AppConfig) *MApp {
-	// GLFW の初期化
+	// GL初期化
 	if err := glfw.Init(); err != nil {
+		mlog.F("Failed to initialize GLFW: %v", err)
 		return nil
 	}
 

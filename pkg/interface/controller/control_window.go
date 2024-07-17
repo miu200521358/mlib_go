@@ -17,7 +17,7 @@ import (
 type ControlWindow struct {
 	*walk.MainWindow
 	appConfig                   *mconfig.AppConfig // アプリケーション設定
-	uiState                     window.IUiState    // UI状態
+	uiState                     window.IAppState   // UI状態
 	enabledFrameDropAction      *walk.Action       // フレームドロップON/OFF
 	enabledPhysicsAction        *walk.Action       // 物理ON/OFF
 	physicsResetAction          *walk.Action       // 物理リセット
@@ -46,7 +46,7 @@ type ControlWindow struct {
 
 func NewMWindow(
 	appConfig *mconfig.AppConfig,
-	uiState window.IUiState,
+	uiState window.IAppState,
 	helpMenuItemsFunc func() []declarative.MenuItem,
 ) *ControlWindow {
 	mWindow := &ControlWindow{

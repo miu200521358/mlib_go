@@ -1,6 +1,6 @@
 package window
 
-type IUiState interface {
+type IAppState interface {
 	Frame() float64
 	SetFrame(frame float64)
 	ChangeFrame(frame float64)
