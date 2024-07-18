@@ -13,15 +13,15 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
-	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 type ViewWindow struct {
 	*glfw.Window
 	windowIndex            int                // ウィンドウインデックス
+	title                  string             // ウィンドウタイトル
 	appConfig              *mconfig.AppConfig // アプリケーション設定
-	appState               window.IAppState   // UI状態
+	appState               window.IAppState   // アプリ状態
 	physics                *mbt.MPhysics      // 物理
 	shader                 *mgl.MShader       // シェーダ
 	doResetPhysicsStart    bool               // 物理リセット開始フラグ
@@ -32,7 +32,8 @@ type ViewWindow struct {
 func NewViewWindow(
 	windowIndex int,
 	appConfig *mconfig.AppConfig,
-	uiState window.IAppState,
+	appState window.IAppState,
+	title string,
 ) *ViewWindow {
 	glfw.WindowHint(glfw.Resizable, glfw.True)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
@@ -41,8 +42,8 @@ func NewViewWindow(
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
 
-	glWindow, err := glfw.CreateWindow(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height,
-		mi18n.T("ビューワー"), nil, nil)
+	glWindow, err := glfw.CreateWindow(
+		appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height, title, nil, nil)
 	if err != nil {
 		widget.RaiseError(err)
 	}
@@ -58,9 +59,10 @@ func NewViewWindow(
 
 	viewWindow := &ViewWindow{
 		Window:      glWindow,
+		appState:    appState,
 		windowIndex: windowIndex,
+		title:       title,
 		appConfig:   appConfig,
-		appState:    uiState,
 		shader:      mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height),
 		physics:     mbt.NewMPhysics(),
 	}

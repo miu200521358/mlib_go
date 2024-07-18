@@ -5,6 +5,7 @@ package main
 
 import (
 	"embed"
+	"log"
 	"runtime"
 
 	"github.com/miu200521358/walk/pkg/declarative"
@@ -30,8 +31,8 @@ func init() {
 
 	walk.AppendToWalkInit(func() {
 		walk.MustRegisterWindowClass(widget.FilePickerClass)
-		// walk.MustRegisterWindowClass(widget.MotionPlayerClass)
-		// walk.MustRegisterWindowClass(widget.ConsoleViewClass)
+		walk.MustRegisterWindowClass(widget.MotionPlayerClass)
+		walk.MustRegisterWindowClass(widget.ConsoleViewClass)
 	})
 }
 
@@ -53,8 +54,8 @@ func main() {
 
 	mApp := app.NewMApp(appConfig)
 
-	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp))
-	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp))
+	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.1 ビューワー"))
+	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.2 ビューワー"))
 
 	go func() {
 		// 操作ウィンドウは別スレッドで起動
@@ -67,30 +68,8 @@ func main() {
 		mApp.ControllerRun()
 	}()
 
+	mApp.Center()
 	mApp.ViewerRun()
-
-	// motionPlayer, worldPosFunc := NewFileTabPage(mWindow)
-
-	// widget.CheckError(err, mWindow.MainWindow, mi18n.T("ビューワーウィンドウ生成エラー"))
-	// mWindow.AddGlWindow(glWindow)
-	// mWindow.MotionPlayer = motionPlayer
-
-	// glWindow.SetWorldPosFunc(worldPosFunc)
-	// glWindow.SetTitle(fmt.Sprintf("%s %s", mWindow.Title(), mi18n.T("ビューワー")))
-
-	// // コンソールはタブ外に表示
-	// mWindow.ConsoleView, err = widget.NewConsoleView(mWindow, 256, 30)
-	// widget.CheckError(err, mWindow.MainWindow, mi18n.T("コンソール生成エラー"))
-	// log.SetOutput(mWindow.ConsoleView)
-
-	// mWindow.AsFormBase().Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
-	// 	go func() {
-	// 		for _, glWindow := range mWindow.GlWindows {
-	// 			glWindow.IsClosedChannel <- true
-	// 		}
-	// 	}()
-	// 	mWindow.Close()
-	// })
 }
 
 func getMenuItems() []declarative.MenuItem {
@@ -103,22 +82,67 @@ func getMenuItems() []declarative.MenuItem {
 }
 
 func newFilePage(controlWindow window.IControlWindow) *widget.MTabPage {
-	tabPage := widget.NewMTabPage(mi18n.T("ファイル"))
+	tabPage := widget.NewMTabPage("ファイル")
 	controlWindow.AddTabPage(tabPage.TabPage)
 
 	tabPage.SetLayout(walk.NewVBoxLayout())
 
-	pmxReadPicker := widget.NewPmxReadFilePicker(
+	pmx1ReadPicker := widget.NewPmxReadFilePicker(
 		controlWindow,
 		tabPage,
 		"PmxPath",
-		mi18n.T("Pmxファイル"),
-		mi18n.T("Pmxファイルを選択してください"),
-		mi18n.T("Pmxファイルの使い方"))
+		"No.1 Pmxファイル",
+		"Pmxファイルを選択してください",
+		"Pmxファイルの使い方")
 
-	pmxReadPicker.SetOnPathChanged(func(path string) {
+	pmx1ReadPicker.SetOnPathChanged(func(path string) {
 
 	})
+
+	vmd1ReadPicker := widget.NewVmdVpdReadFilePicker(
+		controlWindow,
+		tabPage,
+		"VmdPath",
+		"No.1 Vmdファイル",
+		"Vmdファイルを選択してください",
+		"Vmdファイルの使い方")
+
+	vmd1ReadPicker.SetOnPathChanged(func(path string) {
+
+	})
+
+	walk.NewVSeparator(tabPage)
+
+	pmx2ReadPicker := widget.NewPmxReadFilePicker(
+		controlWindow,
+		tabPage,
+		"PmxPath",
+		"No.2 Pmxファイル",
+		"Pmxファイルを選択してください",
+		"Pmxファイルの使い方")
+
+	pmx2ReadPicker.SetOnPathChanged(func(path string) {
+
+	})
+
+	vmd2ReadPicker := widget.NewVmdVpdReadFilePicker(
+		controlWindow,
+		tabPage,
+		"VmdPath",
+		"No.2 Vmdファイル",
+		"Vmdファイルを選択してください",
+		"Vmdファイルの使い方")
+
+	vmd2ReadPicker.SetOnPathChanged(func(path string) {
+
+	})
+
+	walk.NewVSeparator(tabPage)
+
+	widget.NewMotionPlayer(tabPage, controlWindow)
+
+	consoleView := widget.NewConsoleView(tabPage, 256, 10)
+	log.SetOutput(consoleView)
 
 	return tabPage
 }

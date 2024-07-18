@@ -15,21 +15,21 @@ import (
 
 type MotionPlayer struct {
 	walk.WidgetBase
-	appState      window.IAppState      // UI状態
-	controlWindow window.IControlWindow // メインウィンドウ
-	frameEdit     *walk.NumberEdit      // フレーム番号入力欄
-	frameSlider   *walk.Slider          // フレームスライダー
-	playButton    *walk.PushButton      // 一時停止ボタン
-	OnPlay        func(bool) error      // 再生/一時停止時のコールバック
+	appState    window.IAppState // UI状態
+	prevFrame   int              // 前回フレーム
+	frameEdit   *walk.NumberEdit // フレーム番号入力欄
+	frameSlider *walk.Slider     // フレームスライダー
+	playButton  *walk.PushButton // 一時停止ボタン
+	onPlay      func(bool) error // 再生/一時停止時のコールバック
 }
 
 const MotionPlayerClass = "MotionPlayer Class"
 
 func NewMotionPlayer(
 	parent walk.Container, controlWindow window.IControlWindow,
-) (*MotionPlayer, error) {
+) *MotionPlayer {
 	mp := new(MotionPlayer)
-	mp.controlWindow = controlWindow
+	mp.appState = controlWindow.AppState()
 
 	if err := walk.InitWidget(
 		mp,
@@ -37,21 +37,26 @@ func NewMotionPlayer(
 		MotionPlayerClass,
 		win.WS_DISABLED,
 		0); err != nil {
-
-		return nil, err
+		RaiseError(err)
 	}
 
 	playerComposite, err := walk.NewComposite(parent)
 	if err != nil {
-		return nil, err
+		RaiseError(err)
 	}
 	layout := walk.NewHBoxLayout()
 	playerComposite.SetLayout(layout)
 
+	bg, err := walk.NewSystemColorBrush(walk.SysColor3DFace)
+	if err != nil {
+		RaiseError(err)
+	}
+	playerComposite.SetBackground(bg)
+
 	// 再生エリア
 	titleLabel, err := walk.NewTextLabel(playerComposite)
 	if err != nil {
-		return nil, err
+		RaiseError(err)
 	}
 	titleLabel.SetText(mi18n.T("再生"))
 	titleLabel.MouseDown().Attach(func(x, y int, button walk.MouseButton) {
@@ -61,7 +66,7 @@ func NewMotionPlayer(
 	// キーフレ番号
 	mp.frameEdit, err = walk.NewNumberEdit(playerComposite)
 	if err != nil {
-		return nil, err
+		RaiseError(err)
 	}
 	mp.frameEdit.SetDecimals(0)
 	mp.frameEdit.SetRange(0, 1)
@@ -69,55 +74,39 @@ func NewMotionPlayer(
 	mp.frameEdit.SetIncrement(1)
 	mp.frameEdit.SetSpinButtonsVisible(true)
 	mp.frameEdit.ValueChanged().Attach(func() {
-		mp.frameSlider.SetValue(int(mp.frameEdit.Value()))
-		mp.appState.ChangeFrame(mp.frameEdit.Value())
+		if !mp.appState.Playing() {
+			mp.SetFrame(mp.frameEdit.Value())
+		}
 	})
 
 	// フレームスライダー
 	mp.frameSlider, err = walk.NewSlider(playerComposite)
 	if err != nil {
-		return nil, err
+		RaiseError(err)
 	}
 	mp.frameSlider.SetRange(0, 1)
 	mp.frameSlider.SetValue(0)
 	mp.frameSlider.ValueChanged().Attach(func() {
-		mp.frameEdit.SetValue(float64(mp.frameSlider.Value()))
-		mp.appState.ChangeFrame(float64(mp.frameSlider.Value()))
+		if !mp.appState.Playing() {
+			mp.SetFrame(float64(mp.frameSlider.Value()))
+		}
 	})
 
 	mp.playButton, err = walk.NewPushButton(playerComposite)
 	if err != nil {
-		return nil, err
+		RaiseError(err)
 	}
 	mp.playButton.SetText(mi18n.T("再生"))
 	mp.playButton.Clicked().Attach(func() {
-		// mp.playing = !mp.playing
-		// mp.Play(mp.playing)
+		mp.appState.TriggerPlay(!mp.appState.Playing())
 	})
-
-	// mp.FrameEdit.ValueChanged().Attach(func() {
-	// 	if !mp.playing {
-	// 		go func() {
-	// 			mWindow.GetMainGlWindow().SetFrame(int(mp.FrameEdit.Value()))
-	// 			mp.FrameSlider.SetValue(int(mp.FrameEdit.Value()))
-	// 		}()
-	// 	}
-	// })
-	// mp.FrameSlider.ValueChanged().Attach(func() {
-	// 	if !mp.playing {
-	// 		go func() {
-	// 			mWindow.GetMainGlWindow().SetFrame(int(mp.FrameSlider.Value()))
-	// 			mp.FrameEdit.SetValue(float64(mp.FrameSlider.Value()))
-	// 		}()
-	// 	}
-	// })
 
 	// レイアウト
 	layout.SetStretchFactor(mp.frameEdit, 3)
 	layout.SetStretchFactor(mp.frameSlider, 20)
 	layout.SetStretchFactor(mp.playButton, 2)
 
-	return mp, nil
+	return mp
 }
 
 func (mp *MotionPlayer) Dispose() {
@@ -136,8 +125,8 @@ func (mp *MotionPlayer) Play(playing bool) {
 		mp.SetEnabled(true)
 	}
 
-	if mp.OnPlay != nil {
-		err := mp.OnPlay(playing)
+	if mp.onPlay != nil {
+		err := mp.onPlay(playing)
 		if err != nil {
 			mlog.ET("再生失敗", err.Error())
 			mp.Play(false)
@@ -145,23 +134,42 @@ func (mp *MotionPlayer) Play(playing bool) {
 	}
 }
 
+func (mp *MotionPlayer) PrevFrame() int {
+	return mp.prevFrame
+}
+
+func (mp *MotionPlayer) SetPrevFrame(v int) {
+	mp.prevFrame = v
+}
+
+func (mp *MotionPlayer) Frame() float64 {
+	return mp.frameEdit.Value()
+}
+
+func (mp *MotionPlayer) SetFrame(v float64) {
+	if mp.appState.Playing() && v > float64(mp.appState.MaxFrame()) {
+		v = 0
+	}
+	value := mmath.ClampedFloat(v, mp.frameEdit.MinValue(), mp.frameEdit.MaxValue())
+	mp.frameEdit.SetValue(value)
+	mp.frameSlider.SetValue(int(value))
+	mp.appState.SetFrame(value)
+}
+
+func (mp *MotionPlayer) MaxFrame() int {
+	return mp.appState.MaxFrame()
+}
+
+func (mp *MotionPlayer) SetMaxFrame(max int) {
+	mp.frameEdit.SetRange(mp.frameEdit.MinValue(), float64(max))
+	mp.frameSlider.SetRange(int(mp.frameEdit.MinValue()), max)
+	mp.appState.SetMaxFrame(max)
+}
+
 func (mp *MotionPlayer) SetRange(min, max int) {
 	mp.frameEdit.SetRange(float64(min), float64(max))
 	mp.frameSlider.SetRange(min, max)
 	mp.appState.SetMaxFrame(max)
-}
-
-func (mp *MotionPlayer) SetValue(v int) {
-	value := mmath.ClampedFloat(float64(v), mp.frameEdit.MinValue(), mp.frameEdit.MaxValue())
-	mp.frameEdit.SetValue(value)
-	mp.frameSlider.SetValue(int(value))
-	mp.appState.ChangeFrame(value)
-}
-
-func (mp *MotionPlayer) ChangeValue(v float64) {
-	value := mmath.ClampedFloat(v, mp.frameEdit.MinValue(), mp.frameEdit.MaxValue())
-	mp.frameEdit.SetValue(value)
-	mp.frameSlider.SetValue(int(value))
 }
 
 func (mp *MotionPlayer) SetEnabled(enabled bool) {

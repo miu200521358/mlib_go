@@ -3,7 +3,6 @@ package window
 type IAppState interface {
 	Frame() float64
 	SetFrame(frame float64)
-	ChangeFrame(frame float64)
 	AddFrame(v float64)
 	MaxFrame() int
 	SetMaxFrame(maxFrame int)

@@ -46,13 +46,12 @@ func (a *MApp) ControllerRun() {
 	if a.appConfig.IsEnvProd() || a.appConfig.IsEnvDev() {
 		defer a.RecoverFromPanic()
 	}
-	a.Center()
 	a.controlWindow.Run()
 }
 
 func (a *MApp) ViewerRun() {
 	// 描画ウィンドウはメインスレッドで起動して描画し続ける
-	for !a.isClosed {
+	for !a.IsClosed() {
 		for _, w := range a.viewWindows {
 			w.Render()
 		}
@@ -195,45 +194,53 @@ func GetWindowSize(width int, height int) declarative.Size {
 }
 
 func (a *MApp) Center() {
-	// スクリーンの解像度を取得
-	screenWidth := getSystemMetrics(SM_CXSCREEN)
-	screenHeight := getSystemMetrics(SM_CYSCREEN)
-
-	// ウィンドウのサイズを取得
-	mWidth, mHeight := a.controlWindow.Size()
-
-	viewWindowWidth := 0
-	viewWindowHeight := 0
-	for _, w := range a.viewWindows {
-		gWidth, gHeight := w.Size()
-		viewWindowWidth += gWidth
-		viewWindowHeight += gHeight
-	}
-
-	// ウィンドウを中央に配置
-	if a.appConfig.Horizontal {
-		centerX := (screenWidth - (mWidth + viewWindowWidth)) / 2
-		centerY := (screenHeight - mHeight) / 2
-
-		centerX += viewWindowWidth
-		a.controlWindow.SetPosition(centerX, centerY)
-
-		for _, w := range a.viewWindows {
-			gWidth, _ := w.Size()
-			centerX -= gWidth
-			w.SetPosition(centerX, centerY)
+	go func() {
+		for {
+			if a.controlWindow != nil && len(a.viewWindows) > 0 {
+				break
+			}
 		}
-	} else {
-		centerX := (screenWidth - mWidth) / 2
-		centerY := (screenHeight - (mHeight + viewWindowHeight)) / 2
 
-		centerY += mHeight
-		a.controlWindow.SetPosition(centerX, centerY)
+		// スクリーンの解像度を取得
+		screenWidth := getSystemMetrics(SM_CXSCREEN)
+		screenHeight := getSystemMetrics(SM_CYSCREEN)
 
+		// ウィンドウのサイズを取得
+		mWidth, mHeight := a.controlWindow.Size()
+
+		viewWindowWidth := 0
+		viewWindowHeight := 0
 		for _, w := range a.viewWindows {
-			_, gHeight := w.Size()
-			centerY -= gHeight
-			w.SetPosition(centerX, centerY)
+			gWidth, gHeight := w.Size()
+			viewWindowWidth += gWidth
+			viewWindowHeight += gHeight
 		}
-	}
+
+		// ウィンドウを中央に配置
+		if a.appConfig.Horizontal {
+			centerX := (screenWidth - (mWidth + viewWindowWidth)) / 2
+			centerY := (screenHeight - mHeight) / 2
+
+			centerX += viewWindowWidth
+			a.controlWindow.SetPosition(centerX, centerY)
+
+			for _, w := range a.viewWindows {
+				gWidth, _ := w.Size()
+				centerX -= gWidth
+				w.SetPosition(centerX, centerY)
+			}
+		} else {
+			centerX := (screenWidth - mWidth) / 2
+			centerY := (screenHeight - (mHeight + viewWindowHeight)) / 2
+
+			centerY += mHeight
+			a.controlWindow.SetPosition(centerX, centerY)
+
+			for _, w := range a.viewWindows {
+				_, gHeight := w.Size()
+				centerY -= gHeight
+				w.SetPosition(centerX, centerY)
+			}
+		}
+	}()
 }

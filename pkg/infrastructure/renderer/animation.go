@@ -16,6 +16,8 @@ import (
 )
 
 type AnimationState struct {
+	WindowIndex              int              // ウィンドウインデックス
+	ModelIndex               int              // モデルインデックス
 	RenderModel              *RenderModel     // 描画モデル
 	Model                    *pmx.PmxModel    // モデル
 	Motion                   *vmd.VmdMotion   // モーション

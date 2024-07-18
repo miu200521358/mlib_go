@@ -6,6 +6,7 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/window"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
@@ -17,43 +18,45 @@ import (
 
 type ControlWindow struct {
 	*walk.MainWindow
-	tabWidget                   *widget.MTabWidget // タブウィジェット
-	appConfig                   *mconfig.AppConfig // アプリケーション設定
-	appState                    window.IAppState   // UI状態
-	enabledFrameDropAction      *walk.Action       // フレームドロップON/OFF
-	enabledPhysicsAction        *walk.Action       // 物理ON/OFF
-	physicsResetAction          *walk.Action       // 物理リセット
-	showNormalAction            *walk.Action       // ボーンデバッグ表示
-	showWireAction              *walk.Action       // ワイヤーフレームデバッグ表示
-	showSelectedVertexAction    *walk.Action       // 選択頂点デバッグ表示
-	showBoneAllAction           *walk.Action       // 全ボーンデバッグ表示
-	showBoneIkAction            *walk.Action       // IKボーンデバッグ表示
-	showBoneEffectorAction      *walk.Action       // 付与親ボーンデバッグ表示
-	showBoneFixedAction         *walk.Action       // 軸制限ボーンデバッグ表示
-	showBoneRotateAction        *walk.Action       // 回転ボーンデバッグ表示
-	showBoneTranslateAction     *walk.Action       // 移動ボーンデバッグ表示
-	showBoneVisibleAction       *walk.Action       // 表示ボーンデバッグ表示
-	showRigidBodyFrontAction    *walk.Action       // 剛体デバッグ表示(前面)
-	showRigidBodyBackAction     *walk.Action       // 剛体デバッグ表示(埋め込み)
-	showJointAction             *walk.Action       // ジョイントデバッグ表示
-	showInfoAction              *walk.Action       // 情報デバッグ表示
-	limitFps30Action            *walk.Action       // 30FPS制限
-	limitFps60Action            *walk.Action       // 60FPS制限
-	limitFpsUnLimitAction       *walk.Action       // FPS無制限
-	limitFpsDeformUnLimitAction *walk.Action       // デフォームFPS無制限
-	logLevelDebugAction         *walk.Action       // デバッグメッセージ表示
-	logLevelVerboseAction       *walk.Action       // 冗長メッセージ表示
-	logLevelIkVerboseAction     *walk.Action       // IK冗長メッセージ表示
+	tabWidget                   *widget.MTabWidget            // タブウィジェット
+	motionPlayer                *widget.MotionPlayer          // モーションプレイヤー
+	appConfig                   *mconfig.AppConfig            // アプリケーション設定
+	appState                    window.IAppState              // UI状態
+	enabledFrameDropAction      *walk.Action                  // フレームドロップON/OFF
+	enabledPhysicsAction        *walk.Action                  // 物理ON/OFF
+	physicsResetAction          *walk.Action                  // 物理リセット
+	showNormalAction            *walk.Action                  // ボーンデバッグ表示
+	showWireAction              *walk.Action                  // ワイヤーフレームデバッグ表示
+	showSelectedVertexAction    *walk.Action                  // 選択頂点デバッグ表示
+	showBoneAllAction           *walk.Action                  // 全ボーンデバッグ表示
+	showBoneIkAction            *walk.Action                  // IKボーンデバッグ表示
+	showBoneEffectorAction      *walk.Action                  // 付与親ボーンデバッグ表示
+	showBoneFixedAction         *walk.Action                  // 軸制限ボーンデバッグ表示
+	showBoneRotateAction        *walk.Action                  // 回転ボーンデバッグ表示
+	showBoneTranslateAction     *walk.Action                  // 移動ボーンデバッグ表示
+	showBoneVisibleAction       *walk.Action                  // 表示ボーンデバッグ表示
+	showRigidBodyFrontAction    *walk.Action                  // 剛体デバッグ表示(前面)
+	showRigidBodyBackAction     *walk.Action                  // 剛体デバッグ表示(埋め込み)
+	showJointAction             *walk.Action                  // ジョイントデバッグ表示
+	showInfoAction              *walk.Action                  // 情報デバッグ表示
+	limitFps30Action            *walk.Action                  // 30FPS制限
+	limitFps60Action            *walk.Action                  // 60FPS制限
+	limitFpsUnLimitAction       *walk.Action                  // FPS無制限
+	limitFpsDeformUnLimitAction *walk.Action                  // デフォームFPS無制限
+	logLevelDebugAction         *walk.Action                  // デバッグメッセージ表示
+	logLevelVerboseAction       *walk.Action                  // 冗長メッセージ表示
+	logLevelIkVerboseAction     *walk.Action                  // IK冗長メッセージ表示
+	animationStates             [][]*renderer.AnimationStates // アニメーションステート
 }
 
 func NewControlWindow(
 	appConfig *mconfig.AppConfig,
-	uiState window.IAppState,
+	appState window.IAppState,
 	helpMenuItemsFunc func() []declarative.MenuItem,
 ) *ControlWindow {
 	controlWindow := &ControlWindow{
 		appConfig: appConfig,
-		appState:  uiState,
+		appState:  appState,
 	}
 
 	logMenuItems := []declarative.MenuItem{
@@ -357,6 +360,10 @@ func (w *ControlWindow) AddTabPage(tabPage *walk.TabPage) {
 	}
 }
 
+func (w *ControlWindow) SetPlayer(player *widget.MotionPlayer) {
+	w.motionPlayer = player
+}
+
 func (w *ControlWindow) langTriggered(lang string) {
 	mi18n.SetLang(lang)
 	walk.MsgBox(
@@ -535,4 +542,40 @@ func (w *ControlWindow) onTriggerUnLimitFpsDeform() {
 	w.limitFpsUnLimitAction.SetChecked(false)
 	w.limitFpsDeformUnLimitAction.SetChecked(true)
 	w.appState.SetSpfLimit(-2.0)
+}
+
+func (w *ControlWindow) Frame() float64 {
+	return w.motionPlayer.Frame()
+}
+
+func (w *ControlWindow) SetFrame(frame float64) {
+	go func() {
+		w.motionPlayer.SetFrame(frame)
+	}()
+}
+
+func (w *ControlWindow) AddFrame(v float64) {
+	go func() {
+		w.motionPlayer.SetFrame(w.motionPlayer.Frame() + v)
+	}()
+}
+
+func (w *ControlWindow) MaxFrame() int {
+	return w.motionPlayer.MaxFrame()
+}
+
+func (w *ControlWindow) SetMaxFrame(maxFrame int) {
+	go func() {
+		w.motionPlayer.SetMaxFrame(maxFrame)
+	}()
+}
+
+func (w *ControlWindow) PrevFrame() int {
+	return w.motionPlayer.PrevFrame()
+}
+
+func (w *ControlWindow) SetPrevFrame(prevFrame int) {
+	go func() {
+		w.motionPlayer.SetPrevFrame(prevFrame)
+	}()
 }
