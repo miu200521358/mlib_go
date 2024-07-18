@@ -46,6 +46,7 @@ func (a *MApp) ControllerRun() {
 	if a.appConfig.IsEnvProd() || a.appConfig.IsEnvDev() {
 		defer a.RecoverFromPanic()
 	}
+	a.controlWindow.ChannelRun()
 	a.controlWindow.Run()
 }
 

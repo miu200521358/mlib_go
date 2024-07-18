@@ -59,7 +59,15 @@ func (a *appState) SetAnimationState(s state.IAnimationState) {
 	for len(a.animationStates[windowIndex]) <= modelIndex {
 		a.animationStates[windowIndex] = append(a.animationStates[windowIndex], renderer.NewAnimationState())
 	}
-	a.animationStates[windowIndex][modelIndex] = s
+	if s.Model() != nil {
+		a.animationStates[windowIndex][modelIndex].SetModel(s.Model())
+	}
+	if s.Motion() != nil {
+		a.animationStates[windowIndex][modelIndex].SetMotion(s.Motion())
+	}
+	if s.VmdDeltas() != nil {
+		a.animationStates[windowIndex][modelIndex].SetVmdDeltas(s.VmdDeltas())
+	}
 }
 
 func (a *appState) Frame() float64 {

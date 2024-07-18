@@ -11,6 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
@@ -18,15 +19,16 @@ import (
 
 type ViewWindow struct {
 	*glfw.Window
-	windowIndex            int                // ウィンドウインデックス
-	title                  string             // ウィンドウタイトル
-	appConfig              *mconfig.AppConfig // アプリケーション設定
-	appState               state.IAppState    // アプリ状態
-	physics                *mbt.MPhysics      // 物理
-	shader                 *mgl.MShader       // シェーダ
-	doResetPhysicsStart    bool               // 物理リセット開始フラグ
-	doResetPhysicsProgress bool               // 物理リセット中フラグ
-	doResetPhysicsCount    int                // 物理リセット処理回数
+	windowIndex     int                        // ウィンドウインデックス
+	title           string                     // ウィンドウタイトル
+	appConfig       *mconfig.AppConfig         // アプリケーション設定
+	appState        state.IAppState            // アプリ状態
+	physics         *mbt.MPhysics              // 物理
+	shader          *mgl.MShader               // シェーダ
+	animationStates []*renderer.AnimationState // アニメーションステート
+	// doResetPhysicsStart    bool               // 物理リセット開始フラグ
+	// doResetPhysicsProgress bool               // 物理リセット中フラグ
+	// doResetPhysicsCount    int                // 物理リセット処理回数
 }
 
 func NewViewWindow(
@@ -134,15 +136,34 @@ func (w *ViewWindow) GetWindow() *glfw.Window {
 }
 
 func (w *ViewWindow) ResetPhysicsStart() {
-	// 物理ON・まだリセット中ではないの時だけリセット処理を行う
-	if w.physics.Enabled && !w.doResetPhysicsProgress {
-		// 一旦物理OFFにする
-		w.physics.Enabled = false
-		// 物理ワールドを作り直す
-		w.physics.ResetWorld()
-		w.doResetPhysicsStart = false
-		w.doResetPhysicsProgress = true
-		w.doResetPhysicsCount = 0
+	// // 物理ON・まだリセット中ではないの時だけリセット処理を行う
+	// if w.physics.Enabled && !w.doResetPhysicsProgress {
+	// 	// 一旦物理OFFにする
+	// 	w.physics.Enabled = false
+	// 	// 物理ワールドを作り直す
+	// 	w.physics.ResetWorld()
+	// 	w.doResetPhysicsStart = false
+	// 	w.doResetPhysicsProgress = true
+	// 	w.doResetPhysicsCount = 0
+	// }
+}
+
+func (w *ViewWindow) load(states []state.IAnimationState) {
+	for len(w.animationStates) < len(states) {
+		w.animationStates = append(w.animationStates, renderer.NewAnimationState())
+	}
+	for _, s := range states {
+		if s.Model() != nil {
+			w.animationStates[s.ModelIndex()].SetModel(s.Model())
+			w.animationStates[s.ModelIndex()].Load()
+			w.physics.AddModel(s.ModelIndex(), s.Model())
+		}
+		if s.Motion() != nil {
+			w.animationStates[s.ModelIndex()].SetMotion(s.Motion())
+		}
+		if s.VmdDeltas() != nil {
+			w.animationStates[s.ModelIndex()].SetVmdDeltas(s.VmdDeltas())
+		}
 	}
 }
 
@@ -171,6 +192,18 @@ func (w *ViewWindow) Render(states []state.IAnimationState) {
 
 	// 床描画
 	w.shader.DrawFloor()
+
+	// モデル読み込み
+	w.load(states)
+
+	// モデル描画
+	for i, s := range w.animationStates {
+		if s.Model() != nil {
+			w.animationStates[i] =
+				renderer.AnimateBeforePhysics(w.physics, w.animationStates[i], int(w.appState.Frame()), true)
+			s.RenderModel().Render(w.windowIndex, w.shader, s, w.appState)
+		}
+	}
 
 	w.shader.Msaa.Resolve()
 	w.shader.Msaa.Unbind()

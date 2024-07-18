@@ -11,7 +11,9 @@ import (
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
@@ -65,7 +67,7 @@ func main() {
 		mApp.SetControlWindow(controlWindow)
 
 		controlWindow.InitTabWidget()
-		_ = newFilePage(controlWindow)
+		_ = newFilePage(controlWindow, controlState)
 
 		mApp.ControllerRun()
 	}()
@@ -83,7 +85,7 @@ func getMenuItems() []declarative.MenuItem {
 	}
 }
 
-func newFilePage(controlWindow state.IControlWindow) *widget.MTabPage {
+func newFilePage(controlWindow state.IControlWindow, controlState state.IAppState) *widget.MTabPage {
 	tabPage := widget.NewMTabPage("ファイル")
 	controlWindow.AddTabPage(tabPage.TabPage)
 
@@ -98,7 +100,14 @@ func newFilePage(controlWindow state.IControlWindow) *widget.MTabPage {
 		"Pmxファイルの使い方")
 
 	pmx1ReadPicker.SetOnPathChanged(func(path string) {
-
+		if data, err := pmx1ReadPicker.Load(); err == nil {
+			model := data.(*pmx.PmxModel)
+			animationState := renderer.NewAnimationState()
+			animationState.SetWindowIndex(0)
+			animationState.SetModelIndex(0)
+			animationState.SetModel(model)
+			controlState.SetAnimationState(animationState)
+		}
 	})
 
 	vmd1ReadPicker := widget.NewVmdVpdReadFilePicker(

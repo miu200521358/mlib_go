@@ -4,19 +4,18 @@
 package renderer
 
 import (
-	"slices"
 	"sync"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
 
 type RenderModel struct {
-	Initialized       bool         // 描画初期化済みフラグ
 	meshes            []*Mesh      // メッシュ
 	textures          []*textureGl // テクスチャ
 	toonTextures      []*textureGl // トゥーンテクスチャ
@@ -41,7 +40,6 @@ type RenderModel struct {
 
 func NewRenderModel(windowIndex int, model *pmx.PmxModel) *RenderModel {
 	m := &RenderModel{
-		Initialized: false,
 		vertexCount: model.Vertices.Len(),
 	}
 	m.initToonTexturesGl(windowIndex)
@@ -216,7 +214,7 @@ func (renderModel *RenderModel) initializeBuffer(
 	// WaitGroupの完了を待つ
 	wg.Wait()
 
-	// 以下の部分は並列化する必要がないのでそのままにする
+	// GLオブジェクトの生成は並列化しない
 	renderModel.vao = buffer.NewVAO()
 	renderModel.vao.Bind()
 
@@ -266,15 +264,14 @@ func (renderModel *RenderModel) initializeBuffer(
 }
 
 func (renderModel *RenderModel) Render(
-	shader *mgl.MShader, animationStates *AnimationStates, windowIndex int,
-	isShowNormal, isShowWire, isShowSelectedVertex bool, isShowBones map[pmx.BoneFlag]bool,
+	windowIndex int, shader *mgl.MShader, animationState *AnimationState, appState state.IAppState,
 ) {
-	deltas := animationStates.Now.vmdDeltas
+	deltas := animationState.vmdDeltas
 
 	renderModel.vao.Bind()
 	defer renderModel.vao.Unbind()
 
-	renderModel.vbo.BindVertex(animationStates.Now.vertexMorphDeltaIndexes, animationStates.Now.vertexMorphDeltas)
+	renderModel.vbo.BindVertex(animationState.vertexMorphDeltaIndexes, animationState.vertexMorphDeltas)
 	defer renderModel.vbo.Unbind()
 
 	paddedMatrixes, matrixWidth, matrixHeight := createBoneMatrixes(deltas.Bones)
@@ -282,36 +279,30 @@ func (renderModel *RenderModel) Render(
 	for i, mesh := range renderModel.meshes {
 		mesh.ibo.Bind()
 
-		mesh.drawModel(shader, paddedMatrixes, matrixWidth, matrixHeight, animationStates.Now.meshDeltas[i])
+		mesh.drawModel(shader, paddedMatrixes, matrixWidth, matrixHeight, animationState.meshDeltas[i])
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
-			mesh.drawEdge(shader, paddedMatrixes, matrixWidth, matrixHeight, animationStates.Now.meshDeltas[i])
+			mesh.drawEdge(shader, paddedMatrixes, matrixWidth, matrixHeight, animationState.meshDeltas[i])
 		}
 
-		if isShowWire {
-			mesh.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, ((len(animationStates.Now.invisibleMaterialIndexes) > 0 && len(animationStates.Next.invisibleMaterialIndexes) == 0 &&
-				slices.Contains(animationStates.Now.invisibleMaterialIndexes, mesh.material.Index)) ||
-				slices.Contains(animationStates.Next.invisibleMaterialIndexes, mesh.material.Index)))
+		if appState.IsShowWire() {
+			mesh.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, false)
 		}
 
 		mesh.ibo.Unbind()
 	}
 
-	if isShowNormal {
+	if appState.IsShowNormal() {
 		renderModel.drawNormal(shader, paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
-	isShowBone := false
-	for _, drawBone := range isShowBones {
-		if drawBone {
-			isShowBone = true
-			break
-		}
-	}
+	isShowBone := appState.IsShowBoneAll() || appState.IsShowBoneEffector() || appState.IsShowBoneIk() ||
+		appState.IsShowBoneFixed() || appState.IsShowBoneRotate() ||
+		appState.IsShowBoneTranslate() || appState.IsShowBoneVisible()
 
 	if isShowBone {
-		renderModel.drawBone(shader, animationStates.Now.model.Bones, isShowBones,
+		renderModel.drawBone(shader, animationState.model.Bones, appState,
 			paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
@@ -423,7 +414,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 func (renderModel *RenderModel) drawBone(
 	shader *mgl.MShader,
 	bones *pmx.Bones,
-	isShowBones map[pmx.BoneFlag]bool,
+	appState state.IAppState,
 	paddedMatrixes []float32,
 	width, height int,
 ) {
@@ -439,7 +430,7 @@ func (renderModel *RenderModel) drawBone(
 	gl.UseProgram(program)
 
 	renderModel.boneVao.Bind()
-	renderModel.boneVbo.BindVertex(renderModel.fetchBoneDebugDeltas(bones, isShowBones))
+	renderModel.boneVbo.BindVertex(renderModel.fetchBoneDebugDeltas(bones, appState))
 	renderModel.boneIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
@@ -466,7 +457,7 @@ func (renderModel *RenderModel) drawBone(
 }
 
 func (renderModel *RenderModel) fetchBoneDebugDeltas(
-	bones *pmx.Bones, isShowBones map[pmx.BoneFlag]bool,
+	bones *pmx.Bones, appState state.IAppState,
 ) ([]int, [][]float32) {
 	indexes := make([]int, 0)
 	deltas := make([][]float32, 0)
@@ -474,7 +465,7 @@ func (renderModel *RenderModel) fetchBoneDebugDeltas(
 	for _, boneIndex := range renderModel.boneIndexes {
 		bone := bones.Get(boneIndex)
 		indexes = append(indexes, boneIndex)
-		deltas = append(deltas, newBoneDebugAlphaGl(bone, isShowBones))
+		deltas = append(deltas, newBoneDebugAlphaGl(bone, appState))
 	}
 
 	return indexes, deltas

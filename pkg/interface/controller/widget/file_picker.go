@@ -287,7 +287,7 @@ func newFilePicker(
 	return picker
 }
 
-func (picker *FilePicker) GetData() (core.IHashModel, error) {
+func (picker *FilePicker) Load() (core.IHashModel, error) {
 	if picker.pathLineEdit.Text() == "" || picker.rep == nil {
 		return nil, nil
 	}
@@ -309,7 +309,7 @@ func (picker *FilePicker) GetData() (core.IHashModel, error) {
 }
 
 // パスが正しいことが分かっている上でデータだけ取り直したい場合
-func (picker *FilePicker) GetDataForce() core.IHashModel {
+func (picker *FilePicker) LoadForce() core.IHashModel {
 	data, err := picker.rep.Load(picker.pathLineEdit.Text())
 	defer runtime.GC() // 読み込み時のメモリ解放
 
@@ -380,7 +380,7 @@ func (picker *FilePicker) OnChanged(path string) {
 		mconfig.SaveUserConfig(picker.historyKey, path, picker.limitHistory)
 	}
 
-	if picker.onPathChanged != nil {
+	if path != "" && picker.onPathChanged != nil {
 		picker.onPathChanged(path)
 	}
 }

@@ -7,9 +7,10 @@ import (
 	"math"
 	"unsafe"
 
-	"github.com/go-gl/gl/all-core/gl"
+	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
@@ -149,7 +150,7 @@ func newTailBoneGl(b *pmx.Bone) []float32 {
 	}
 }
 
-func newBoneDebugAlphaGl(b *pmx.Bone, isDrawBones map[pmx.BoneFlag]bool) []float32 {
+func newBoneDebugAlphaGl(b *pmx.Bone, appState state.IAppState) []float32 {
 	c := getBoneColor(b, false)
 
 	ikAlpha := float32(1.0)
@@ -160,38 +161,34 @@ func newBoneDebugAlphaGl(b *pmx.Bone, isDrawBones map[pmx.BoneFlag]bool) []float
 	translateAlpha := float32(1.0)
 	visibleAlpha := float32(1.0)
 	// IK
-	if (!isDrawBones[pmx.BONE_FLAG_IS_IK] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
-		(isDrawBones[pmx.BONE_FLAG_IS_IK] && !(b.IsIK() || len(b.Extend.IkLinkBoneIndexes) > 0 || len(b.Extend.IkTargetBoneIndexes) > 0)) {
+	if !appState.IsShowBoneAll() &&
+		(appState.IsShowBoneIk() && !(b.IsIK() || len(b.Extend.IkLinkBoneIndexes) > 0 || len(b.Extend.IkTargetBoneIndexes) > 0)) {
 		ikAlpha = float32(0.0)
 	}
 	// 付与親回転
-	if (!isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_ROTATION] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
-		(isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_ROTATION] && !(b.IsEffectorRotation() || len(b.Extend.EffectiveBoneIndexes) > 0)) {
+	if !appState.IsShowBoneAll() &&
+		(appState.IsShowBoneEffector() && !(b.IsEffectorRotation() || len(b.Extend.EffectiveBoneIndexes) > 0)) {
 		effectorRotateAlpha = float32(0.0)
 	}
 	// 付与親移動
-	if (!isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_TRANSLATION] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
-		(isDrawBones[pmx.BONE_FLAG_IS_EXTERNAL_TRANSLATION] && !(b.IsEffectorTranslation() || len(b.Extend.EffectiveBoneIndexes) > 0)) {
+	if !appState.IsShowBoneAll() &&
+		(appState.IsShowBoneEffector() && !(b.IsEffectorTranslation() || len(b.Extend.EffectiveBoneIndexes) > 0)) {
 		effectorTranslateAlpha = float32(0.0)
 	}
 	// 軸固定
-	if (!isDrawBones[pmx.BONE_FLAG_HAS_FIXED_AXIS] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
-		(isDrawBones[pmx.BONE_FLAG_HAS_FIXED_AXIS] && !b.HasFixedAxis()) {
+	if !appState.IsShowBoneAll() && (appState.IsShowBoneFixed() && !b.HasFixedAxis()) {
 		fixedAlpha = float32(0.0)
 	}
 	// 回転
-	if (!isDrawBones[pmx.BONE_FLAG_CAN_ROTATE] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
-		(isDrawBones[pmx.BONE_FLAG_CAN_ROTATE] && !b.CanRotate()) {
+	if !appState.IsShowBoneAll() && (appState.IsShowBoneRotate() && !b.CanRotate()) {
 		rotateAlpha = float32(0.0)
 	}
 	// 移動
-	if (!isDrawBones[pmx.BONE_FLAG_CAN_TRANSLATE] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
-		(isDrawBones[pmx.BONE_FLAG_CAN_TRANSLATE] && !b.CanTranslate()) {
+	if !appState.IsShowBoneAll() && (appState.IsShowBoneTranslate() && !b.CanTranslate()) {
 		translateAlpha = float32(0.0)
 	}
 	// 表示
-	if (!isDrawBones[pmx.BONE_FLAG_IS_VISIBLE] && !isDrawBones[pmx.BONE_FLAG_NONE]) ||
-		(isDrawBones[pmx.BONE_FLAG_IS_VISIBLE] && !b.IsVisible()) {
+	if !appState.IsShowBoneAll() && (appState.IsShowBoneVisible() && !b.IsVisible()) {
 		visibleAlpha = float32(0.0)
 	}
 

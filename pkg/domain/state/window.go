@@ -16,6 +16,7 @@ type IControlWindow interface {
 	InitTabWidget()
 	AddTabPage(tabPage *walk.TabPage)
 	ControlState() IAppState
+	ChannelRun()
 }
 
 type IViewWindow interface {
