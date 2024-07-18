@@ -146,7 +146,7 @@ func (w *ViewWindow) ResetPhysicsStart() {
 	}
 }
 
-func (w *ViewWindow) Render() {
+func (w *ViewWindow) Render(states []window.IAnimationState) {
 	glfw.PollEvents()
 
 	w.MakeContextCurrent()

@@ -1,36 +1,42 @@
 package app
 
+import (
+	"github.com/miu200521358/mlib_go/pkg/domain/window"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
+)
+
 type appState struct {
-	frame                float64 // フレーム
-	prevFrame            int     // 前回のフレーム
-	maxFrame             int     // 最大フレーム
-	isEnabledFrameDrop   bool    // フレームドロップON/OFF
-	isEnabledPhysics     bool    // 物理ON/OFF
-	isPhysicsReset       bool    // 物理リセット
-	isShowNormal         bool    // ボーンデバッグ表示
-	isShowWire           bool    // ワイヤーフレームデバッグ表示
-	isShowSelectedVertex bool    // 選択頂点デバッグ表示
-	isShowBoneAll        bool    // 全ボーンデバッグ表示
-	isShowBoneIk         bool    // IKボーンデバッグ表示
-	isShowBoneEffector   bool    // 付与親ボーンデバッグ表示
-	isShowBoneFixed      bool    // 軸制限ボーンデバッグ表示
-	isShowBoneRotate     bool    // 回転ボーンデバッグ表示
-	isShowBoneTranslate  bool    // 移動ボーンデバッグ表示
-	isShowBoneVisible    bool    // 表示ボーンデバッグ表示
-	isShowRigidBodyFront bool    // 剛体デバッグ表示(前面)
-	isShowRigidBodyBack  bool    // 剛体デバッグ表示(埋め込み)
-	isShowJoint          bool    // ジョイントデバッグ表示
-	isShowInfo           bool    // 情報デバッグ表示
-	isLimitFps30         bool    // 30FPS制限
-	isLimitFps60         bool    // 60FPS制限
-	isUnLimitFps         bool    // FPS無制限
-	isUnLimitFpsDeform   bool    // デフォームFPS無制限
-	isLogLevelDebug      bool    // デバッグメッセージ表示
-	isLogLevelVerbose    bool    // 冗長メッセージ表示
-	isLogLevelIkVerbose  bool    // IK冗長メッセージ表示
-	isClosed             bool    // ウィンドウクローズ
-	playing              bool    // 再生中フラグ
-	spfLimit             float64 // FPS制限
+	frame                float64                    // フレーム
+	prevFrame            int                        // 前回のフレーム
+	maxFrame             int                        // 最大フレーム
+	isEnabledFrameDrop   bool                       // フレームドロップON/OFF
+	isEnabledPhysics     bool                       // 物理ON/OFF
+	isPhysicsReset       bool                       // 物理リセット
+	isShowNormal         bool                       // ボーンデバッグ表示
+	isShowWire           bool                       // ワイヤーフレームデバッグ表示
+	isShowSelectedVertex bool                       // 選択頂点デバッグ表示
+	isShowBoneAll        bool                       // 全ボーンデバッグ表示
+	isShowBoneIk         bool                       // IKボーンデバッグ表示
+	isShowBoneEffector   bool                       // 付与親ボーンデバッグ表示
+	isShowBoneFixed      bool                       // 軸制限ボーンデバッグ表示
+	isShowBoneRotate     bool                       // 回転ボーンデバッグ表示
+	isShowBoneTranslate  bool                       // 移動ボーンデバッグ表示
+	isShowBoneVisible    bool                       // 表示ボーンデバッグ表示
+	isShowRigidBodyFront bool                       // 剛体デバッグ表示(前面)
+	isShowRigidBodyBack  bool                       // 剛体デバッグ表示(埋め込み)
+	isShowJoint          bool                       // ジョイントデバッグ表示
+	isShowInfo           bool                       // 情報デバッグ表示
+	isLimitFps30         bool                       // 30FPS制限
+	isLimitFps60         bool                       // 60FPS制限
+	isUnLimitFps         bool                       // FPS無制限
+	isUnLimitFpsDeform   bool                       // デフォームFPS無制限
+	isLogLevelDebug      bool                       // デバッグメッセージ表示
+	isLogLevelVerbose    bool                       // 冗長メッセージ表示
+	isLogLevelIkVerbose  bool                       // IK冗長メッセージ表示
+	isClosed             bool                       // ウィンドウクローズ
+	playing              bool                       // 再生中フラグ
+	spfLimit             float64                    // FPS制限
+	animationStates      [][]window.IAnimationState // アニメーションステート
 }
 
 func newAppState() *appState {
@@ -38,255 +44,268 @@ func newAppState() *appState {
 		isEnabledPhysics:   true, // 最初は物理ON
 		isEnabledFrameDrop: true, // 最初はフレームドロップON
 		isLimitFps30:       true, // 最初は30fps制限
+		animationStates:    make([][]window.IAnimationState, 0),
 	}
 
 	return u
 }
 
-func (u *appState) Frame() float64 {
-	return u.frame
+func (a *appState) SetAnimationState(state window.IAnimationState) {
+	windowIndex := state.WindowIndex()
+	modelIndex := state.ModelIndex()
+	for len(a.animationStates) <= windowIndex {
+		a.animationStates = append(a.animationStates, make([]window.IAnimationState, 0))
+	}
+	for len(a.animationStates[windowIndex]) <= modelIndex {
+		a.animationStates[windowIndex] = append(a.animationStates[windowIndex], renderer.NewAnimationState())
+	}
+	a.animationStates[windowIndex][modelIndex] = state
 }
 
-func (u *appState) SetFrame(frame float64) {
-	u.frame = frame
+func (a *appState) Frame() float64 {
+	return a.frame
 }
 
-func (u *appState) ChangeFrame(frame float64) {
-	u.frame = frame
+func (a *appState) SetFrame(frame float64) {
+	a.frame = frame
 }
 
-func (u *appState) AddFrame(v float64) {
-	u.frame += v
+func (a *appState) ChangeFrame(frame float64) {
+	a.frame = frame
 }
 
-func (u *appState) MaxFrame() int {
-	return u.maxFrame
+func (a *appState) AddFrame(v float64) {
+	a.frame += v
 }
 
-func (u *appState) SetMaxFrame(maxFrame int) {
-	u.maxFrame = maxFrame
+func (a *appState) MaxFrame() int {
+	return a.maxFrame
 }
 
-func (u *appState) PrevFrame() int {
-	return u.prevFrame
+func (a *appState) SetMaxFrame(maxFrame int) {
+	a.maxFrame = maxFrame
 }
 
-func (u *appState) SetPrevFrame(prevFrame int) {
-	u.prevFrame = prevFrame
+func (a *appState) PrevFrame() int {
+	return a.prevFrame
 }
 
-func (u *appState) IsEnabledFrameDrop() bool {
-	return u.isEnabledFrameDrop
+func (a *appState) SetPrevFrame(prevFrame int) {
+	a.prevFrame = prevFrame
 }
 
-func (u *appState) SetEnabledFrameDrop(enabled bool) {
-	u.isEnabledFrameDrop = enabled
+func (a *appState) IsEnabledFrameDrop() bool {
+	return a.isEnabledFrameDrop
 }
 
-func (u *appState) IsEnabledPhysics() bool {
-	return u.isEnabledPhysics
+func (a *appState) SetEnabledFrameDrop(enabled bool) {
+	a.isEnabledFrameDrop = enabled
 }
 
-func (u *appState) SetEnabledPhysics(enabled bool) {
-	u.isEnabledPhysics = enabled
+func (a *appState) IsEnabledPhysics() bool {
+	return a.isEnabledPhysics
 }
 
-func (u *appState) IsPhysicsReset() bool {
-	return u.isPhysicsReset
+func (a *appState) SetEnabledPhysics(enabled bool) {
+	a.isEnabledPhysics = enabled
 }
 
-func (u *appState) SetPhysicsReset(reset bool) {
-	u.isPhysicsReset = reset
+func (a *appState) IsPhysicsReset() bool {
+	return a.isPhysicsReset
 }
 
-func (u *appState) IsShowNormal() bool {
-	return u.isShowNormal
+func (a *appState) SetPhysicsReset(reset bool) {
+	a.isPhysicsReset = reset
 }
 
-func (u *appState) SetShowNormal(show bool) {
-	u.isShowNormal = show
+func (a *appState) IsShowNormal() bool {
+	return a.isShowNormal
 }
 
-func (u *appState) IsShowWire() bool {
-	return u.isShowWire
+func (a *appState) SetShowNormal(show bool) {
+	a.isShowNormal = show
 }
 
-func (u *appState) SetShowWire(show bool) {
-	u.isShowWire = show
+func (a *appState) IsShowWire() bool {
+	return a.isShowWire
 }
 
-func (u *appState) IsShowSelectedVertex() bool {
-	return u.isShowSelectedVertex
+func (a *appState) SetShowWire(show bool) {
+	a.isShowWire = show
 }
 
-func (u *appState) SetShowSelectedVertex(show bool) {
-	u.isShowSelectedVertex = show
+func (a *appState) IsShowSelectedVertex() bool {
+	return a.isShowSelectedVertex
 }
 
-func (u *appState) IsShowBoneAll() bool {
-	return u.isShowBoneAll
+func (a *appState) SetShowSelectedVertex(show bool) {
+	a.isShowSelectedVertex = show
 }
 
-func (u *appState) SetShowBoneAll(show bool) {
-	u.isShowBoneAll = show
+func (a *appState) IsShowBoneAll() bool {
+	return a.isShowBoneAll
 }
 
-func (u *appState) IsShowBoneIk() bool {
-	return u.isShowBoneIk
+func (a *appState) SetShowBoneAll(show bool) {
+	a.isShowBoneAll = show
 }
 
-func (u *appState) SetShowBoneIk(show bool) {
-	u.isShowBoneIk = show
+func (a *appState) IsShowBoneIk() bool {
+	return a.isShowBoneIk
 }
 
-func (u *appState) IsShowBoneEffector() bool {
-	return u.isShowBoneEffector
+func (a *appState) SetShowBoneIk(show bool) {
+	a.isShowBoneIk = show
 }
 
-func (u *appState) SetShowBoneEffector(show bool) {
-	u.isShowBoneEffector = show
+func (a *appState) IsShowBoneEffector() bool {
+	return a.isShowBoneEffector
 }
 
-func (u *appState) IsShowBoneFixed() bool {
-	return u.isShowBoneFixed
+func (a *appState) SetShowBoneEffector(show bool) {
+	a.isShowBoneEffector = show
 }
 
-func (u *appState) SetShowBoneFixed(show bool) {
-	u.isShowBoneFixed = show
+func (a *appState) IsShowBoneFixed() bool {
+	return a.isShowBoneFixed
 }
 
-func (u *appState) IsShowBoneRotate() bool {
-	return u.isShowBoneRotate
+func (a *appState) SetShowBoneFixed(show bool) {
+	a.isShowBoneFixed = show
 }
 
-func (u *appState) SetShowBoneRotate(show bool) {
-	u.isShowBoneRotate = show
+func (a *appState) IsShowBoneRotate() bool {
+	return a.isShowBoneRotate
 }
 
-func (u *appState) IsShowBoneTranslate() bool {
-	return u.isShowBoneTranslate
+func (a *appState) SetShowBoneRotate(show bool) {
+	a.isShowBoneRotate = show
 }
 
-func (u *appState) SetShowBoneTranslate(show bool) {
-	u.isShowBoneTranslate = show
+func (a *appState) IsShowBoneTranslate() bool {
+	return a.isShowBoneTranslate
 }
 
-func (u *appState) IsShowBoneVisible() bool {
-	return u.isShowBoneVisible
+func (a *appState) SetShowBoneTranslate(show bool) {
+	a.isShowBoneTranslate = show
 }
 
-func (u *appState) SetShowBoneVisible(show bool) {
-	u.isShowBoneVisible = show
+func (a *appState) IsShowBoneVisible() bool {
+	return a.isShowBoneVisible
 }
 
-func (u *appState) IsShowRigidBodyFront() bool {
-	return u.isShowRigidBodyFront
+func (a *appState) SetShowBoneVisible(show bool) {
+	a.isShowBoneVisible = show
 }
 
-func (u *appState) SetShowRigidBodyFront(show bool) {
-	u.isShowRigidBodyFront = show
+func (a *appState) IsShowRigidBodyFront() bool {
+	return a.isShowRigidBodyFront
 }
 
-func (u *appState) IsShowRigidBodyBack() bool {
-	return u.isShowRigidBodyBack
+func (a *appState) SetShowRigidBodyFront(show bool) {
+	a.isShowRigidBodyFront = show
 }
 
-func (u *appState) SetShowRigidBodyBack(show bool) {
-	u.isShowRigidBodyBack = show
+func (a *appState) IsShowRigidBodyBack() bool {
+	return a.isShowRigidBodyBack
 }
 
-func (u *appState) IsShowJoint() bool {
-	return u.isShowJoint
+func (a *appState) SetShowRigidBodyBack(show bool) {
+	a.isShowRigidBodyBack = show
 }
 
-func (u *appState) SetShowJoint(show bool) {
-	u.isShowJoint = show
+func (a *appState) IsShowJoint() bool {
+	return a.isShowJoint
 }
 
-func (u *appState) IsShowInfo() bool {
-	return u.isShowInfo
+func (a *appState) SetShowJoint(show bool) {
+	a.isShowJoint = show
 }
 
-func (u *appState) SetShowInfo(show bool) {
-	u.isShowInfo = show
+func (a *appState) IsShowInfo() bool {
+	return a.isShowInfo
 }
 
-func (u *appState) IsLimitFps30() bool {
-	return u.isLimitFps30
+func (a *appState) SetShowInfo(show bool) {
+	a.isShowInfo = show
 }
 
-func (u *appState) SetLimitFps30(limit bool) {
-	u.isLimitFps30 = limit
+func (a *appState) IsLimitFps30() bool {
+	return a.isLimitFps30
 }
 
-func (u *appState) IsLimitFps60() bool {
-	return u.isLimitFps60
+func (a *appState) SetLimitFps30(limit bool) {
+	a.isLimitFps30 = limit
 }
 
-func (u *appState) SetLimitFps60(limit bool) {
-	u.isLimitFps60 = limit
+func (a *appState) IsLimitFps60() bool {
+	return a.isLimitFps60
 }
 
-func (u *appState) IsUnLimitFps() bool {
-	return u.isUnLimitFps
+func (a *appState) SetLimitFps60(limit bool) {
+	a.isLimitFps60 = limit
 }
 
-func (u *appState) SetUnLimitFps(limit bool) {
-	u.isUnLimitFps = limit
+func (a *appState) IsUnLimitFps() bool {
+	return a.isUnLimitFps
 }
 
-func (u *appState) IsUnLimitFpsDeform() bool {
-	return u.isUnLimitFpsDeform
+func (a *appState) SetUnLimitFps(limit bool) {
+	a.isUnLimitFps = limit
 }
 
-func (u *appState) SetUnLimitFpsDeform(limit bool) {
-	u.isUnLimitFpsDeform = limit
+func (a *appState) IsUnLimitFpsDeform() bool {
+	return a.isUnLimitFpsDeform
 }
 
-func (u *appState) IsLogLevelDebug() bool {
-	return u.isLogLevelDebug
+func (a *appState) SetUnLimitFpsDeform(limit bool) {
+	a.isUnLimitFpsDeform = limit
 }
 
-func (u *appState) SetLogLevelDebug(log bool) {
-	u.isLogLevelDebug = log
+func (a *appState) IsLogLevelDebug() bool {
+	return a.isLogLevelDebug
 }
 
-func (u *appState) IsLogLevelVerbose() bool {
-	return u.isLogLevelVerbose
+func (a *appState) SetLogLevelDebug(log bool) {
+	a.isLogLevelDebug = log
 }
 
-func (u *appState) SetLogLevelVerbose(log bool) {
-	u.isLogLevelVerbose = log
+func (a *appState) IsLogLevelVerbose() bool {
+	return a.isLogLevelVerbose
 }
 
-func (u *appState) IsLogLevelIkVerbose() bool {
-	return u.isLogLevelIkVerbose
+func (a *appState) SetLogLevelVerbose(log bool) {
+	a.isLogLevelVerbose = log
 }
 
-func (u *appState) SetLogLevelIkVerbose(log bool) {
-	u.isLogLevelIkVerbose = log
+func (a *appState) IsLogLevelIkVerbose() bool {
+	return a.isLogLevelIkVerbose
 }
 
-func (u *appState) IsClosed() bool {
-	return u.isClosed
+func (a *appState) SetLogLevelIkVerbose(log bool) {
+	a.isLogLevelIkVerbose = log
 }
 
-func (u *appState) SetClosed(closed bool) {
-	u.isClosed = closed
+func (a *appState) IsClosed() bool {
+	return a.isClosed
 }
 
-func (u *appState) Playing() bool {
-	return u.playing
+func (a *appState) SetClosed(closed bool) {
+	a.isClosed = closed
 }
 
-func (u *appState) TriggerPlay(p bool) {
-	u.playing = p
+func (a *appState) Playing() bool {
+	return a.playing
 }
 
-func (u *appState) SpfLimit() float64 {
-	return u.spfLimit
+func (a *appState) TriggerPlay(p bool) {
+	a.playing = p
 }
 
-func (u *appState) SetSpfLimit(spf float64) {
-	u.spfLimit = spf
+func (a *appState) SpfLimit() float64 {
+	return a.spfLimit
+}
+
+func (a *appState) SetSpfLimit(spf float64) {
+	a.spfLimit = spf
 }

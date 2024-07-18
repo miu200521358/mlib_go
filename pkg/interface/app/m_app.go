@@ -52,8 +52,8 @@ func (a *MApp) ControllerRun() {
 func (a *MApp) ViewerRun() {
 	// 描画ウィンドウはメインスレッドで起動して描画し続ける
 	for !a.IsClosed() {
-		for _, w := range a.viewWindows {
-			w.Render()
+		for i, w := range a.viewWindows {
+			w.Render(a.animationStates[i])
 		}
 	}
 	a.Close()
@@ -144,6 +144,7 @@ func (a *MApp) SetControlWindow(controlWindow window.IControlWindow) {
 
 func (a *MApp) AddViewWindow(viewWindow window.IViewWindow) {
 	a.viewWindows = append(a.viewWindows, viewWindow)
+	a.animationStates = append(a.animationStates, make([]window.IAnimationState, 0))
 }
 
 func (a *MApp) Dispose() {

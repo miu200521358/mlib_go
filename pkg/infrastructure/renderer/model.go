@@ -269,7 +269,7 @@ func (renderModel *RenderModel) Render(
 	shader *mgl.MShader, animationStates *AnimationStates, windowIndex int,
 	isShowNormal, isShowWire, isShowSelectedVertex bool, isShowBones map[pmx.BoneFlag]bool,
 ) {
-	deltas := animationStates.Now.VmdDeltas
+	deltas := animationStates.Now.vmdDeltas
 
 	renderModel.vao.Bind()
 	defer renderModel.vao.Unbind()
@@ -290,9 +290,9 @@ func (renderModel *RenderModel) Render(
 		}
 
 		if isShowWire {
-			mesh.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, ((len(animationStates.Now.InvisibleMaterialIndexes) > 0 && len(animationStates.Next.InvisibleMaterialIndexes) == 0 &&
-				slices.Contains(animationStates.Now.InvisibleMaterialIndexes, mesh.material.Index)) ||
-				slices.Contains(animationStates.Next.InvisibleMaterialIndexes, mesh.material.Index)))
+			mesh.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, ((len(animationStates.Now.invisibleMaterialIndexes) > 0 && len(animationStates.Next.invisibleMaterialIndexes) == 0 &&
+				slices.Contains(animationStates.Now.invisibleMaterialIndexes, mesh.material.Index)) ||
+				slices.Contains(animationStates.Next.invisibleMaterialIndexes, mesh.material.Index)))
 		}
 
 		mesh.ibo.Unbind()
@@ -311,7 +311,7 @@ func (renderModel *RenderModel) Render(
 	}
 
 	if isShowBone {
-		renderModel.drawBone(shader, animationStates.Now.Model.Bones, isShowBones,
+		renderModel.drawBone(shader, animationStates.Now.model.Bones, isShowBones,
 			paddedMatrixes, matrixWidth, matrixHeight)
 	}
 

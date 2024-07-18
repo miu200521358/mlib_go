@@ -16,17 +16,57 @@ import (
 )
 
 type AnimationState struct {
-	WindowIndex              int              // ウィンドウインデックス
-	ModelIndex               int              // モデルインデックス
-	RenderModel              *RenderModel     // 描画モデル
-	Model                    *pmx.PmxModel    // モデル
-	Motion                   *vmd.VmdMotion   // モーション
-	VmdDeltas                *delta.VmdDeltas // モーション変化量
-	InvisibleMaterialIndexes []int            // 非表示材質インデックス
-	SelectedVertexIndexes    []int            // 選択頂点インデックス
+	windowIndex              int              // ウィンドウインデックス
+	modelIndex               int              // モデルインデックス
+	renderModel              *RenderModel     // 描画モデル
+	model                    *pmx.PmxModel    // モデル
+	motion                   *vmd.VmdMotion   // モーション
+	vmdDeltas                *delta.VmdDeltas // モーション変化量
+	invisibleMaterialIndexes []int            // 非表示材質インデックス
+	selectedVertexIndexes    []int            // 選択頂点インデックス
 	vertexMorphDeltaIndexes  []int            // 頂点モーフインデックス
 	vertexMorphDeltas        [][]float32      // 頂点モーフデルタ
 	meshDeltas               []*MeshDelta     // メッシュデルタ
+}
+
+func (a *AnimationState) WindowIndex() int {
+	return a.windowIndex
+}
+
+func (a *AnimationState) SetWindowIndex(index int) {
+	a.windowIndex = index
+}
+
+func (a *AnimationState) ModelIndex() int {
+	return a.modelIndex
+}
+
+func (a *AnimationState) SetModelIndex(index int) {
+	a.modelIndex = index
+}
+
+func (a *AnimationState) Model() *pmx.PmxModel {
+	return a.model
+}
+
+func (a *AnimationState) SetModel(model *pmx.PmxModel) {
+	a.model = model
+}
+
+func (a *AnimationState) Motion() *vmd.VmdMotion {
+	return a.motion
+}
+
+func (a *AnimationState) SetMotion(motion *vmd.VmdMotion) {
+	a.motion = motion
+}
+
+func (a *AnimationState) VmdDeltas() *delta.VmdDeltas {
+	return a.vmdDeltas
+}
+
+func (a *AnimationState) SetVmdDeltas(deltas *delta.VmdDeltas) {
+	a.vmdDeltas = deltas
 }
 
 type AnimationStates struct {
@@ -36,8 +76,8 @@ type AnimationStates struct {
 
 func NewAnimationState() *AnimationState {
 	return &AnimationState{
-		InvisibleMaterialIndexes: make([]int, 0),
-		SelectedVertexIndexes:    make([]int, 0),
+		invisibleMaterialIndexes: make([]int, 0),
+		selectedVertexIndexes:    make([]int, 0),
 	}
 }
 
@@ -57,7 +97,7 @@ func Animate(
 		var wg sync.WaitGroup
 
 		for i := range animationStates {
-			if animationStates[i].Now.Model == nil {
+			if animationStates[i].Now.model == nil {
 				continue
 			}
 
@@ -82,7 +122,7 @@ func Animate(
 		var wg sync.WaitGroup
 
 		for i := range animationStates {
-			if animationStates[i].Now.RenderModel == nil {
+			if animationStates[i].Now.renderModel == nil {
 				continue
 			}
 
@@ -104,32 +144,32 @@ func animateBeforePhysics(
 	physics *mbt.MPhysics, animationState *AnimationState,
 	frame int, enabledPhysics bool,
 ) *AnimationState {
-	if animationState.Motion == nil {
-		animationState.Motion = vmd.NewVmdMotion("")
+	if animationState.motion == nil {
+		animationState.motion = vmd.NewVmdMotion("")
 	}
 
-	deltas := delta.NewVmdDeltas(animationState.Model.Materials, animationState.Model.Bones)
+	deltas := delta.NewVmdDeltas(animationState.model.Materials, animationState.model.Bones)
 
-	if animationState.VmdDeltas == nil {
-		deltas.Morphs = deform.DeformMorph(animationState.Model, animationState.Motion.MorphFrames, frame, nil)
-		deltas = deform.DeformBoneByPhysicsFlag(animationState.Model,
-			animationState.Motion, deltas, true, frame, nil, false)
+	if animationState.vmdDeltas == nil {
+		deltas.Morphs = deform.DeformMorph(animationState.model, animationState.motion.MorphFrames, frame, nil)
+		deltas = deform.DeformBoneByPhysicsFlag(animationState.model,
+			animationState.motion, deltas, true, frame, nil, false)
 
 		animationState.vertexMorphDeltaIndexes, animationState.vertexMorphDeltas =
 			newVertexMorphDeltasGl(deltas.Morphs.Vertices)
 
-		animationState.meshDeltas = make([]*MeshDelta, len(animationState.Model.Materials.Data))
+		animationState.meshDeltas = make([]*MeshDelta, len(animationState.model.Materials.Data))
 		for i, md := range deltas.Morphs.Materials.Data {
 			animationState.meshDeltas[i] = newMeshDelta(md)
 		}
 	} else {
-		deltas.Morphs = animationState.VmdDeltas.Morphs
-		deltas.Bones = animationState.VmdDeltas.Bones
+		deltas.Morphs = animationState.vmdDeltas.Morphs
+		deltas.Bones = animationState.vmdDeltas.Bones
 	}
 
 	modelIndex := 0
 
-	for _, rigidBody := range animationState.Model.RigidBodies.Data {
+	for _, rigidBody := range animationState.model.RigidBodies.Data {
 		// 現在のボーン変形情報を保持
 		rigidBodyBone := rigidBody.Bone
 		if rigidBodyBone == nil {
@@ -150,7 +190,7 @@ func animateBeforePhysics(
 		}
 	}
 
-	animationState.VmdDeltas = deltas
+	animationState.vmdDeltas = deltas
 
 	return animationState
 }
@@ -164,23 +204,23 @@ func animateAfterPhysics(
 	// 物理剛体位置を更新
 	if enabledPhysics || resetPhysics {
 		for _, isAfterPhysics := range []bool{false, true} {
-			for _, bone := range animationState.Model.Bones.LayerSortedBones[isAfterPhysics] {
+			for _, bone := range animationState.model.Bones.LayerSortedBones[isAfterPhysics] {
 				if bone.Extend.RigidBody == nil || bone.Extend.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
 					continue
 				}
 				bonePhysicsGlobalMatrix := physics.GetRigidBodyBoneMatrix(modelIndex, bone.Extend.RigidBody)
-				if animationState.VmdDeltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
+				if animationState.vmdDeltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
 					bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame,
-						bonePhysicsGlobalMatrix, animationState.VmdDeltas.Bones.Get(bone.ParentIndex))
-					animationState.VmdDeltas.Bones.Update(bd)
+						bonePhysicsGlobalMatrix, animationState.vmdDeltas.Bones.Get(bone.ParentIndex))
+					animationState.vmdDeltas.Bones.Update(bd)
 				}
 			}
 		}
 	}
 
 	// 物理後のデフォーム情報
-	animationState.VmdDeltas = deform.DeformBoneByPhysicsFlag(animationState.Model,
-		animationState.Motion, animationState.VmdDeltas, true, frame, nil, true)
+	animationState.vmdDeltas = deform.DeformBoneByPhysicsFlag(animationState.model,
+		animationState.motion, animationState.vmdDeltas, true, frame, nil, true)
 
 	// // 選択頂点モーフの設定は常に更新する
 	// SelectedVertexIndexesDeltas, SelectedVertexGlDeltas := renderer.SelectedVertexMorphDeltasGL(

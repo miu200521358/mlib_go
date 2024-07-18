@@ -15,10 +15,11 @@ type IControlWindow interface {
 	GetMainWindow() *walk.MainWindow
 	InitTabWidget()
 	AddTabPage(tabPage *walk.TabPage)
+	ControlState() IAppState
 }
 
 type IViewWindow interface {
-	Render()
+	Render(states []IAnimationState)
 	Dispose()
 	Close()
 	Size() (int, int)

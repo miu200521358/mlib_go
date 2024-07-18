@@ -1,5 +1,11 @@
 package window
 
+import (
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+)
+
 type IAppState interface {
 	Frame() float64
 	SetFrame(frame float64)
@@ -62,4 +68,18 @@ type IAppState interface {
 	TriggerPlay(p bool)
 	SpfLimit() float64
 	SetSpfLimit(spf float64)
+	SetAnimationState(state IAnimationState)
+}
+
+type IAnimationState interface {
+	WindowIndex() int
+	SetWindowIndex(index int)
+	ModelIndex() int
+	SetModelIndex(index int)
+	Model() *pmx.PmxModel
+	SetModel(model *pmx.PmxModel)
+	Motion() *vmd.VmdMotion
+	SetMotion(motion *vmd.VmdMotion)
+	VmdDeltas() *delta.VmdDeltas
+	SetVmdDeltas(deltas *delta.VmdDeltas)
 }
