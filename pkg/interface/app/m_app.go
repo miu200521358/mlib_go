@@ -42,7 +42,11 @@ func NewMApp(appConfig *mconfig.AppConfig) *MApp {
 }
 
 func (a *MApp) ControllerRun() {
-	// 操作ウィンドウは別スレッドで起動
+	// 操作ウィンドウは別スレッドで起動している前提
+	if a.appConfig.IsEnvProd() || a.appConfig.IsEnvDev() {
+		defer a.RecoverFromPanic()
+	}
+	a.Center()
 	a.controlWindow.Run()
 }
 

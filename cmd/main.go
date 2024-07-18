@@ -57,10 +57,6 @@ func main() {
 	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp))
 
 	go func() {
-		if appConfig.IsEnvProd() || appConfig.IsEnvDev() {
-			defer mApp.RecoverFromPanic()
-		}
-
 		// 操作ウィンドウは別スレッドで起動
 		controlWindow := controller.NewControlWindow(appConfig, mApp, getMenuItems)
 		mApp.SetControlWindow(controlWindow)
@@ -68,7 +64,6 @@ func main() {
 		controlWindow.InitTabWidget()
 		_ = newFilePage(controlWindow)
 
-		mApp.Center()
 		mApp.ControllerRun()
 	}()
 
