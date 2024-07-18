@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
@@ -17,6 +18,9 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 	"golang.org/x/sys/windows"
 )
+
+const physicsDefaultSpf = 1.0 / 60.0
+const deformDefaultSpf = 1.0 / 30.0
 
 type MApp struct {
 	*appState                          // UI状態
@@ -52,10 +56,40 @@ func (a *MApp) ControllerRun() {
 
 func (a *MApp) ViewerRun() {
 	// 描画ウィンドウはメインスレッドで起動して描画し続ける
+	a.appState.SetPrevFrame(0)
+	a.appState.SetFrame(0)
+	prevTime := glfw.GetTime()
+
 	for !a.IsClosed() {
-		for i, w := range a.viewWindows {
-			w.Render(a.animationStates[i])
+		frameTime := glfw.GetTime()
+		originalElapsed := frameTime - prevTime
+
+		var elapsed float64
+		var timeStep float32
+		if !a.appState.IsEnabledFrameDrop() {
+			// フレームドロップOFF
+			// 物理fpsは60fps固定
+			timeStep = physicsDefaultSpf
+			// デフォームfpsは30fps上限の経過時間
+			elapsed = mmath.ClampedFloat(originalElapsed, 0.0, deformDefaultSpf)
+		} else {
+			// 物理fpsは経過時間
+			timeStep = float32(originalElapsed)
+			elapsed = originalElapsed
 		}
+
+		if elapsed < a.appState.SpfLimit() {
+			// 1フレームの時間が経過していない場合はスキップ
+			// fps制限は描画fpsにのみ依存
+			continue
+		}
+
+		for i, w := range a.viewWindows {
+			w.Render(a.animationStates[i], timeStep)
+			a.animationStates[i] = nil
+		}
+
+		prevTime = frameTime
 	}
 	a.Close()
 }

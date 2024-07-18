@@ -41,9 +41,10 @@ type appState struct {
 
 func newAppState() *appState {
 	u := &appState{
-		isEnabledPhysics:   true, // 最初は物理ON
-		isEnabledFrameDrop: true, // 最初はフレームドロップON
-		isLimitFps30:       true, // 最初は30fps制限
+		isEnabledPhysics:   true,       // 物理ON
+		isEnabledFrameDrop: true,       // フレームドロップON
+		isLimitFps30:       true,       // 30fps制限
+		spfLimit:           1.0 / 30.0, // 30fps
 		animationStates:    make([][]state.IAnimationState, 0),
 	}
 
@@ -67,6 +68,12 @@ func (a *appState) SetAnimationState(s state.IAnimationState) {
 	}
 	if s.Motion() != nil {
 		a.animationStates[windowIndex][modelIndex].SetMotion(s.Motion())
+		a.animationStates[windowIndex][modelIndex].SetFrame(0)
+		a.animationStates[windowIndex][modelIndex].SetVmdDeltas(nil)
+	}
+	if s.Frame() >= 0 {
+		a.animationStates[windowIndex][modelIndex].SetFrame(s.Frame())
+		a.animationStates[windowIndex][modelIndex].SetVmdDeltas(nil)
 	}
 	if s.VmdDeltas() != nil {
 		a.animationStates[windowIndex][modelIndex].SetVmdDeltas(s.VmdDeltas())

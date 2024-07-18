@@ -316,6 +316,11 @@ func NewControlWindow(
 	}
 	controlWindow.SetBackground(bg)
 
+	// 初期設定
+	controlWindow.limitFps30Action.SetChecked(true)       // 物理ON
+	controlWindow.enabledPhysicsAction.SetChecked(true)   // フレームドロップON
+	controlWindow.enabledFrameDropAction.SetChecked(true) // 30fps制限
+
 	return controlWindow
 }
 

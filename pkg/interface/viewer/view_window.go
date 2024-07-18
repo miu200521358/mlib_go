@@ -161,6 +161,11 @@ func (w *ViewWindow) load(states []state.IAnimationState) {
 		}
 		if s.Motion() != nil {
 			w.animationStates[s.ModelIndex()].SetMotion(s.Motion())
+			w.animationStates[s.ModelIndex()].SetVmdDeltas(nil)
+		}
+		if s.Frame() >= 0 {
+			w.animationStates[s.ModelIndex()].SetFrame(s.Frame())
+			w.animationStates[s.ModelIndex()].SetVmdDeltas(nil)
 		}
 		if s.VmdDeltas() != nil {
 			w.animationStates[s.ModelIndex()].SetVmdDeltas(s.VmdDeltas())
@@ -168,7 +173,7 @@ func (w *ViewWindow) load(states []state.IAnimationState) {
 	}
 }
 
-func (w *ViewWindow) Render(states []state.IAnimationState) {
+func (w *ViewWindow) Render(states []state.IAnimationState, timeStep float32) {
 	glfw.PollEvents()
 
 	w.MakeContextCurrent()
@@ -195,13 +200,16 @@ func (w *ViewWindow) Render(states []state.IAnimationState) {
 	w.shader.DrawFloor()
 
 	// モデル読み込み
-	w.load(states)
+	if len(states) > 0 {
+		w.load(states)
+	}
+
+	// アニメーション
+	w.animationStates = renderer.Animate(w.physics, w.animationStates, w.appState, timeStep)
 
 	// モデル描画
-	for i, s := range w.animationStates {
-		if s.Model() != nil {
-			w.animationStates[i] =
-				renderer.AnimateBeforePhysics(w.physics, w.animationStates[i], int(w.appState.Frame()), true)
+	for _, s := range w.animationStates {
+		if s.RenderModel() != nil && s != nil {
 			s.RenderModel().Render(w.windowIndex, w.shader, s, w.appState)
 		}
 	}

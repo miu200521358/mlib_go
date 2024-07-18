@@ -20,7 +20,7 @@ type IControlWindow interface {
 }
 
 type IViewWindow interface {
-	Render(states []IAnimationState)
+	Render(states []IAnimationState, timeStep float32)
 	Dispose()
 	Close()
 	Size() (int, int)

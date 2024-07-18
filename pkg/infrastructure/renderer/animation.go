@@ -4,8 +4,11 @@
 package renderer
 
 import (
+	"sync"
+
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
@@ -16,6 +19,7 @@ import (
 type AnimationState struct {
 	windowIndex              int              // ウィンドウインデックス
 	modelIndex               int              // モデルインデックス
+	frame                    int              // フレーム
 	renderModel              *RenderModel     // 描画モデル
 	model                    *pmx.PmxModel    // モデル
 	motion                   *vmd.VmdMotion   // モーション
@@ -41,6 +45,14 @@ func (a *AnimationState) ModelIndex() int {
 
 func (a *AnimationState) SetModelIndex(index int) {
 	a.modelIndex = index
+}
+
+func (a *AnimationState) Frame() int {
+	return a.frame
+}
+
+func (a *AnimationState) SetFrame(frame int) {
+	a.frame = frame
 }
 
 func (a *AnimationState) Model() *pmx.PmxModel {
@@ -83,64 +95,64 @@ func NewAnimationState(windowIndex, modelIndex int) *AnimationState {
 	return &AnimationState{
 		windowIndex:              windowIndex,
 		modelIndex:               modelIndex,
+		frame:                    -1,
 		invisibleMaterialIndexes: make([]int, 0),
 		selectedVertexIndexes:    make([]int, 0),
 	}
 }
 
-// func Animate(
-// 	physics *mbt.MPhysics, animationStates []*AnimationStates,
-// 	frame int, timeStep float32, enabledPhysics, resetPhysics bool,
-// ) []*AnimationStates {
-// 	// 物理前デフォーム
-// 	{
-// 		var wg sync.WaitGroup
+func Animate(
+	physics *mbt.MPhysics, animationStates []*AnimationState, appState state.IAppState, timeStep float32,
+) []*AnimationState {
+	// 物理前デフォーム
+	{
+		var wg sync.WaitGroup
 
-// 		for i := range animationStates {
-// 			if animationStates[i].Now.model == nil {
-// 				continue
-// 			}
+		for i := range animationStates {
+			if animationStates[i].model == nil {
+				continue
+			}
 
-// 			wg.Add(1)
-// 			go func(ii int) {
-// 				defer wg.Done()
-// 				animationStates[ii].Now =
-// 					animateBeforePhysics(physics, animationStates[ii].Now, int(frame), enabledPhysics)
-// 			}(i)
-// 		}
+			wg.Add(1)
+			go func(ii int) {
+				defer wg.Done()
+				animationStates[ii] = animateBeforePhysics(physics, animationStates[ii],
+					animationStates[ii].frame, appState.IsEnabledPhysics())
+			}(i)
+		}
 
-// 		wg.Wait()
-// 	}
+		wg.Wait()
+	}
 
-// 	if enabledPhysics || resetPhysics {
-// 		// 物理更新
-// 		physics.StepSimulation(timeStep)
-// 	}
+	if appState.IsEnabledPhysics() || appState.IsPhysicsReset() {
+		// 物理更新
+		physics.StepSimulation(timeStep)
+	}
 
-// 	// 物理後デフォーム
-// 	{
-// 		var wg sync.WaitGroup
+	// 物理後デフォーム
+	{
+		var wg sync.WaitGroup
 
-// 		for i := range animationStates {
-// 			if animationStates[i].Now.renderModel == nil {
-// 				continue
-// 			}
+		for i := range animationStates {
+			if animationStates[i].renderModel == nil {
+				continue
+			}
 
-// 			wg.Add(1)
-// 			go func(ii int) {
-// 				defer wg.Done()
-// 				animationStates[ii].Now =
-// 					animateAfterPhysics(physics, animationStates[ii].Now, int(frame), enabledPhysics, resetPhysics)
-// 			}(i)
-// 		}
+			wg.Add(1)
+			go func(ii int) {
+				defer wg.Done()
+				animationStates[ii] = animateAfterPhysics(physics, animationStates[ii],
+					animationStates[ii].frame, appState.IsEnabledPhysics(), appState.IsPhysicsReset())
+			}(i)
+		}
 
-// 		wg.Wait()
-// 	}
+		wg.Wait()
+	}
 
-// 	return animationStates
-// }
+	return animationStates
+}
 
-func AnimateBeforePhysics(
+func animateBeforePhysics(
 	physics *mbt.MPhysics, animationState *AnimationState,
 	frame int, enabledPhysics bool,
 ) *AnimationState {
