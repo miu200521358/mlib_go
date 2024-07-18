@@ -149,10 +149,11 @@ func (w *ViewWindow) ResetPhysicsStart() {
 }
 
 func (w *ViewWindow) load(states []state.IAnimationState) {
-	for len(w.animationStates) < len(states) {
-		w.animationStates = append(w.animationStates, renderer.NewAnimationState())
-	}
 	for _, s := range states {
+		if len(w.animationStates) <= s.ModelIndex() {
+			w.animationStates = append(w.animationStates, renderer.NewAnimationState(w.windowIndex, s.ModelIndex()))
+		}
+
 		if s.Model() != nil {
 			w.animationStates[s.ModelIndex()].SetModel(s.Model())
 			w.animationStates[s.ModelIndex()].Load()

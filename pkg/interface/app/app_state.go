@@ -56,8 +56,11 @@ func (a *appState) SetAnimationState(s state.IAnimationState) {
 	for len(a.animationStates) <= windowIndex {
 		a.animationStates = append(a.animationStates, make([]state.IAnimationState, 0))
 	}
-	for len(a.animationStates[windowIndex]) <= modelIndex {
-		a.animationStates[windowIndex] = append(a.animationStates[windowIndex], renderer.NewAnimationState())
+	for i := 0; i < len(a.animationStates); i++ {
+		for len(a.animationStates[i]) <= modelIndex {
+			a.animationStates[i] = append(a.animationStates[i],
+				renderer.NewAnimationState(windowIndex, len(a.animationStates[i])))
+		}
 	}
 	if s.Model() != nil {
 		a.animationStates[windowIndex][modelIndex].SetModel(s.Model())

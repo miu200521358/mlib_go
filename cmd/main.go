@@ -13,6 +13,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
@@ -102,9 +103,7 @@ func newFilePage(controlWindow state.IControlWindow, controlState state.IAppStat
 	pmx1ReadPicker.SetOnPathChanged(func(path string) {
 		if data, err := pmx1ReadPicker.Load(); err == nil {
 			model := data.(*pmx.PmxModel)
-			animationState := renderer.NewAnimationState()
-			animationState.SetWindowIndex(0)
-			animationState.SetModelIndex(0)
+			animationState := renderer.NewAnimationState(0, 0)
 			animationState.SetModel(model)
 			controlState.SetAnimationState(animationState)
 		}
@@ -119,7 +118,12 @@ func newFilePage(controlWindow state.IControlWindow, controlState state.IAppStat
 		"Vmdファイルの使い方")
 
 	vmd1ReadPicker.SetOnPathChanged(func(path string) {
-
+		if data, err := vmd1ReadPicker.Load(); err == nil {
+			motion := data.(*vmd.VmdMotion)
+			animationState := renderer.NewAnimationState(0, 0)
+			animationState.SetMotion(motion)
+			controlState.SetAnimationState(animationState)
+		}
 	})
 
 	walk.NewVSeparator(tabPage)
@@ -133,7 +137,12 @@ func newFilePage(controlWindow state.IControlWindow, controlState state.IAppStat
 		"Pmxファイルの使い方")
 
 	pmx2ReadPicker.SetOnPathChanged(func(path string) {
-
+		if data, err := pmx2ReadPicker.Load(); err == nil {
+			model := data.(*pmx.PmxModel)
+			animationState := renderer.NewAnimationState(1, 0)
+			animationState.SetModel(model)
+			controlState.SetAnimationState(animationState)
+		}
 	})
 
 	vmd2ReadPicker := widget.NewVmdVpdReadFilePicker(
@@ -145,7 +154,12 @@ func newFilePage(controlWindow state.IControlWindow, controlState state.IAppStat
 		"Vmdファイルの使い方")
 
 	vmd2ReadPicker.SetOnPathChanged(func(path string) {
-
+		if data, err := vmd2ReadPicker.Load(); err == nil {
+			motion := data.(*vmd.VmdMotion)
+			animationState := renderer.NewAnimationState(1, 0)
+			animationState.SetMotion(motion)
+			controlState.SetAnimationState(animationState)
+		}
 	})
 
 	walk.NewVSeparator(tabPage)

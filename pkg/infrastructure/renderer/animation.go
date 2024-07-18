@@ -79,8 +79,10 @@ func (a *AnimationState) Load() {
 	a.renderModel = NewRenderModel(a.windowIndex, a.model)
 }
 
-func NewAnimationState() *AnimationState {
+func NewAnimationState(windowIndex, modelIndex int) *AnimationState {
 	return &AnimationState{
+		windowIndex:              windowIndex,
+		modelIndex:               modelIndex,
 		invisibleMaterialIndexes: make([]int, 0),
 		selectedVertexIndexes:    make([]int, 0),
 	}
