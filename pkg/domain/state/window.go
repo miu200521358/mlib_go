@@ -1,4 +1,4 @@
-package window
+package state
 
 import (
 	"github.com/go-gl/glfw/v3.3/glfw"

@@ -1,42 +1,42 @@
 package app
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/domain/window"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 )
 
 type appState struct {
-	frame                float64                    // フレーム
-	prevFrame            int                        // 前回のフレーム
-	maxFrame             int                        // 最大フレーム
-	isEnabledFrameDrop   bool                       // フレームドロップON/OFF
-	isEnabledPhysics     bool                       // 物理ON/OFF
-	isPhysicsReset       bool                       // 物理リセット
-	isShowNormal         bool                       // ボーンデバッグ表示
-	isShowWire           bool                       // ワイヤーフレームデバッグ表示
-	isShowSelectedVertex bool                       // 選択頂点デバッグ表示
-	isShowBoneAll        bool                       // 全ボーンデバッグ表示
-	isShowBoneIk         bool                       // IKボーンデバッグ表示
-	isShowBoneEffector   bool                       // 付与親ボーンデバッグ表示
-	isShowBoneFixed      bool                       // 軸制限ボーンデバッグ表示
-	isShowBoneRotate     bool                       // 回転ボーンデバッグ表示
-	isShowBoneTranslate  bool                       // 移動ボーンデバッグ表示
-	isShowBoneVisible    bool                       // 表示ボーンデバッグ表示
-	isShowRigidBodyFront bool                       // 剛体デバッグ表示(前面)
-	isShowRigidBodyBack  bool                       // 剛体デバッグ表示(埋め込み)
-	isShowJoint          bool                       // ジョイントデバッグ表示
-	isShowInfo           bool                       // 情報デバッグ表示
-	isLimitFps30         bool                       // 30FPS制限
-	isLimitFps60         bool                       // 60FPS制限
-	isUnLimitFps         bool                       // FPS無制限
-	isUnLimitFpsDeform   bool                       // デフォームFPS無制限
-	isLogLevelDebug      bool                       // デバッグメッセージ表示
-	isLogLevelVerbose    bool                       // 冗長メッセージ表示
-	isLogLevelIkVerbose  bool                       // IK冗長メッセージ表示
-	isClosed             bool                       // ウィンドウクローズ
-	playing              bool                       // 再生中フラグ
-	spfLimit             float64                    // FPS制限
-	animationStates      [][]window.IAnimationState // アニメーションステート
+	frame                float64                   // フレーム
+	prevFrame            int                       // 前回のフレーム
+	maxFrame             int                       // 最大フレーム
+	isEnabledFrameDrop   bool                      // フレームドロップON/OFF
+	isEnabledPhysics     bool                      // 物理ON/OFF
+	isPhysicsReset       bool                      // 物理リセット
+	isShowNormal         bool                      // ボーンデバッグ表示
+	isShowWire           bool                      // ワイヤーフレームデバッグ表示
+	isShowSelectedVertex bool                      // 選択頂点デバッグ表示
+	isShowBoneAll        bool                      // 全ボーンデバッグ表示
+	isShowBoneIk         bool                      // IKボーンデバッグ表示
+	isShowBoneEffector   bool                      // 付与親ボーンデバッグ表示
+	isShowBoneFixed      bool                      // 軸制限ボーンデバッグ表示
+	isShowBoneRotate     bool                      // 回転ボーンデバッグ表示
+	isShowBoneTranslate  bool                      // 移動ボーンデバッグ表示
+	isShowBoneVisible    bool                      // 表示ボーンデバッグ表示
+	isShowRigidBodyFront bool                      // 剛体デバッグ表示(前面)
+	isShowRigidBodyBack  bool                      // 剛体デバッグ表示(埋め込み)
+	isShowJoint          bool                      // ジョイントデバッグ表示
+	isShowInfo           bool                      // 情報デバッグ表示
+	isLimitFps30         bool                      // 30FPS制限
+	isLimitFps60         bool                      // 60FPS制限
+	isUnLimitFps         bool                      // FPS無制限
+	isUnLimitFpsDeform   bool                      // デフォームFPS無制限
+	isLogLevelDebug      bool                      // デバッグメッセージ表示
+	isLogLevelVerbose    bool                      // 冗長メッセージ表示
+	isLogLevelIkVerbose  bool                      // IK冗長メッセージ表示
+	isClosed             bool                      // ウィンドウクローズ
+	playing              bool                      // 再生中フラグ
+	spfLimit             float64                   // FPS制限
+	animationStates      [][]state.IAnimationState // アニメーションステート
 }
 
 func newAppState() *appState {
@@ -44,22 +44,22 @@ func newAppState() *appState {
 		isEnabledPhysics:   true, // 最初は物理ON
 		isEnabledFrameDrop: true, // 最初はフレームドロップON
 		isLimitFps30:       true, // 最初は30fps制限
-		animationStates:    make([][]window.IAnimationState, 0),
+		animationStates:    make([][]state.IAnimationState, 0),
 	}
 
 	return u
 }
 
-func (a *appState) SetAnimationState(state window.IAnimationState) {
-	windowIndex := state.WindowIndex()
-	modelIndex := state.ModelIndex()
+func (a *appState) SetAnimationState(s state.IAnimationState) {
+	windowIndex := s.WindowIndex()
+	modelIndex := s.ModelIndex()
 	for len(a.animationStates) <= windowIndex {
-		a.animationStates = append(a.animationStates, make([]window.IAnimationState, 0))
+		a.animationStates = append(a.animationStates, make([]state.IAnimationState, 0))
 	}
 	for len(a.animationStates[windowIndex]) <= modelIndex {
 		a.animationStates[windowIndex] = append(a.animationStates[windowIndex], renderer.NewAnimationState())
 	}
-	a.animationStates[windowIndex][modelIndex] = state
+	a.animationStates[windowIndex][modelIndex] = s
 }
 
 func (a *appState) Frame() float64 {

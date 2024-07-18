@@ -12,7 +12,7 @@ import (
 	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
-	"github.com/miu200521358/mlib_go/pkg/domain/window"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
@@ -36,12 +36,12 @@ type FilePicker struct {
 	rep               repository.IRepository    // リポジトリ
 	initialDirPath    string                    // 初期ディレクトリ
 	cacheData         core.IHashModel           // キャッシュデータ
-	window            window.IControlWindow     // MainWindow
+	window            state.IControlWindow      // MainWindow
 	historyDialog     *walk.Dialog              // 履歴ダイアログ
 }
 
 func NewPmxReadFilePicker(
-	window window.IControlWindow,
+	window state.IControlWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,
@@ -63,7 +63,7 @@ func NewPmxReadFilePicker(
 }
 
 func NewVpdReadFilePicker(
-	window window.IControlWindow,
+	window state.IControlWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,
@@ -84,7 +84,7 @@ func NewVpdReadFilePicker(
 }
 
 func NewVmdVpdReadFilePicker(
-	window window.IControlWindow,
+	window state.IControlWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,
@@ -107,7 +107,7 @@ func NewVmdVpdReadFilePicker(
 }
 
 func NewVmdReadFilePicker(
-	window window.IControlWindow,
+	window state.IControlWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,
@@ -129,7 +129,7 @@ func NewVmdReadFilePicker(
 }
 
 func NewVmdSaveFilePicker(
-	window window.IControlWindow,
+	window state.IControlWindow,
 	parent walk.Container,
 	title string,
 	tooltip string,
@@ -150,7 +150,7 @@ func NewVmdSaveFilePicker(
 }
 
 func NewPmxSaveFilePicker(
-	window window.IControlWindow,
+	window state.IControlWindow,
 	parent walk.Container,
 	title string,
 	tooltip string,
@@ -171,7 +171,7 @@ func NewPmxSaveFilePicker(
 }
 
 func newFilePicker(
-	window window.IControlWindow,
+	window state.IControlWindow,
 	parent walk.Container,
 	historyKey string,
 	title string,

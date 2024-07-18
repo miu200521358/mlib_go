@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/domain/window"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 )
 
@@ -79,7 +79,7 @@ func NewControlState() *controlState {
 	return u
 }
 
-func (c *controlState) SetAnimationState(state window.IAnimationState) {
+func (c *controlState) SetAnimationState(state state.IAnimationState) {
 	c.animationState <- state.(*renderer.AnimationState)
 }
 

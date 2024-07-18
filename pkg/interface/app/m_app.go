@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/miu200521358/mlib_go/pkg/domain/window"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
@@ -19,10 +19,10 @@ import (
 )
 
 type MApp struct {
-	*appState                           // UI状態
-	appConfig     *mconfig.AppConfig    // アプリケーション設定
-	viewWindows   []window.IViewWindow  // 描画ウィンドウリスト
-	controlWindow window.IControlWindow // 操作ウィンドウ
+	*appState                          // UI状態
+	appConfig     *mconfig.AppConfig   // アプリケーション設定
+	viewWindows   []state.IViewWindow  // 描画ウィンドウリスト
+	controlWindow state.IControlWindow // 操作ウィンドウ
 }
 
 func NewMApp(appConfig *mconfig.AppConfig) *MApp {
@@ -35,7 +35,7 @@ func NewMApp(appConfig *mconfig.AppConfig) *MApp {
 	app := &MApp{
 		appState:    newAppState(),
 		appConfig:   appConfig,
-		viewWindows: make([]window.IViewWindow, 0),
+		viewWindows: make([]state.IViewWindow, 0),
 	}
 
 	return app
@@ -138,13 +138,13 @@ func (a *MApp) RecoverFromPanic() {
 	}
 }
 
-func (a *MApp) SetControlWindow(controlWindow window.IControlWindow) {
+func (a *MApp) SetControlWindow(controlWindow state.IControlWindow) {
 	a.controlWindow = controlWindow
 }
 
-func (a *MApp) AddViewWindow(viewWindow window.IViewWindow) {
+func (a *MApp) AddViewWindow(viewWindow state.IViewWindow) {
 	a.viewWindows = append(a.viewWindows, viewWindow)
-	a.animationStates = append(a.animationStates, make([]window.IAnimationState, 0))
+	a.animationStates = append(a.animationStates, make([]state.IAnimationState, 0))
 }
 
 func (a *MApp) Dispose() {

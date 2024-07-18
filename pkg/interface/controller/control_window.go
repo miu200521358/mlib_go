@@ -5,7 +5,7 @@ import (
 
 	"github.com/miu200521358/walk/pkg/walk"
 
-	"github.com/miu200521358/mlib_go/pkg/domain/window"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
@@ -20,7 +20,7 @@ type ControlWindow struct {
 	tabWidget                   *widget.MTabWidget   // タブウィジェット
 	motionPlayer                *widget.MotionPlayer // モーションプレイヤー
 	appConfig                   *mconfig.AppConfig   // アプリケーション設定
-	appState                    window.IAppState     // UI状態
+	appState                    state.IAppState      // UI状態
 	controlState                *controlState        // 操作状態
 	enabledFrameDropAction      *walk.Action         // フレームドロップON/OFF
 	enabledPhysicsAction        *walk.Action         // 物理ON/OFF
@@ -50,7 +50,7 @@ type ControlWindow struct {
 
 func NewControlWindow(
 	appConfig *mconfig.AppConfig,
-	appState window.IAppState,
+	appState state.IAppState,
 	controlState *controlState,
 	helpMenuItemsFunc func() []declarative.MenuItem,
 ) *ControlWindow {
@@ -415,11 +415,11 @@ func (w *ControlWindow) SetPosition(x, y int) {
 	w.MainWindow.SetY(y)
 }
 
-func (w *ControlWindow) AppState() window.IAppState {
+func (w *ControlWindow) AppState() state.IAppState {
 	return w.appState
 }
 
-func (w *ControlWindow) ControlState() window.IAppState {
+func (w *ControlWindow) ControlState() state.IAppState {
 	return w.controlState
 }
 

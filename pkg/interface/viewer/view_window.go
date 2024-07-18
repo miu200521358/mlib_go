@@ -8,7 +8,7 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/miu200521358/mlib_go/pkg/domain/window"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
@@ -21,7 +21,7 @@ type ViewWindow struct {
 	windowIndex            int                // ウィンドウインデックス
 	title                  string             // ウィンドウタイトル
 	appConfig              *mconfig.AppConfig // アプリケーション設定
-	appState               window.IAppState   // アプリ状態
+	appState               state.IAppState    // アプリ状態
 	physics                *mbt.MPhysics      // 物理
 	shader                 *mgl.MShader       // シェーダ
 	doResetPhysicsStart    bool               // 物理リセット開始フラグ
@@ -32,7 +32,7 @@ type ViewWindow struct {
 func NewViewWindow(
 	windowIndex int,
 	appConfig *mconfig.AppConfig,
-	appState window.IAppState,
+	appState state.IAppState,
 	title string,
 ) *ViewWindow {
 	glfw.WindowHint(glfw.Resizable, glfw.True)
@@ -121,7 +121,7 @@ func (w *ViewWindow) SetPosition(x, y int) {
 	w.SetPos(x, y)
 }
 
-func (w *ViewWindow) AppState() window.IAppState {
+func (w *ViewWindow) AppState() state.IAppState {
 	return w.appState
 }
 
@@ -146,7 +146,7 @@ func (w *ViewWindow) ResetPhysicsStart() {
 	}
 }
 
-func (w *ViewWindow) Render(states []window.IAnimationState) {
+func (w *ViewWindow) Render(states []state.IAnimationState) {
 	glfw.PollEvents()
 
 	w.MakeContextCurrent()

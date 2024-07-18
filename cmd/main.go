@@ -11,7 +11,7 @@ import (
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
-	"github.com/miu200521358/mlib_go/pkg/domain/window"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
@@ -83,7 +83,7 @@ func getMenuItems() []declarative.MenuItem {
 	}
 }
 
-func newFilePage(controlWindow window.IControlWindow) *widget.MTabPage {
+func newFilePage(controlWindow state.IControlWindow) *widget.MTabPage {
 	tabPage := widget.NewMTabPage("ファイル")
 	controlWindow.AddTabPage(tabPage.TabPage)
 
@@ -149,7 +149,7 @@ func newFilePage(controlWindow window.IControlWindow) *widget.MTabPage {
 	return tabPage
 }
 
-// func NewFileTabPage(mWindow *window.MWindow) (*widget.MotionPlayer, func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
+// func NewFileTabPage(mWindow *state.MWindow) (*widget.MotionPlayer, func(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos, prevXnowYBackPos,
 // 	nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3, vmdDeltas []*delta.VmdDeltas)) {
 
 // 	page.SetLayout(walk.NewVBoxLayout())
