@@ -4,6 +4,8 @@
 package widget
 
 import (
+	"math"
+
 	"github.com/miu200521358/walk/pkg/walk"
 	"github.com/miu200521358/win"
 
@@ -15,7 +17,7 @@ import (
 
 type MotionPlayer struct {
 	walk.WidgetBase
-	appState    state.IAppState  // UI状態
+	appState    state.IAppState  // アプリ状態
 	prevFrame   int              // 前回フレーム
 	frameEdit   *walk.NumberEdit // フレーム番号入力欄
 	frameSlider *walk.Slider     // フレームスライダー
@@ -164,6 +166,11 @@ func (mp *MotionPlayer) SetMaxFrame(max int) {
 	mp.frameEdit.SetRange(mp.frameEdit.MinValue(), float64(max))
 	mp.frameSlider.SetRange(int(mp.frameEdit.MinValue()), max)
 	mp.appState.SetMaxFrame(max)
+}
+
+func (mp *MotionPlayer) UpdateMaxFrame(max int) {
+	nowMax := mp.frameSlider.MaxValue()
+	mp.SetMaxFrame(int(math.Max(float64(nowMax), float64(max))))
 }
 
 func (mp *MotionPlayer) SetRange(min, max int) {

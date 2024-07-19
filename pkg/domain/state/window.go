@@ -2,7 +2,6 @@ package state
 
 import (
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/miu200521358/walk/pkg/walk"
 )
 
 type IControlWindow interface {
@@ -12,11 +11,6 @@ type IControlWindow interface {
 	Size() (int, int)
 	SetPosition(x, y int)
 	AppState() IAppState
-	GetMainWindow() *walk.MainWindow
-	InitTabWidget()
-	AddTabPage(tabPage *walk.TabPage)
-	ControlState() IAppState
-	ChannelRun()
 }
 
 type IViewWindow interface {

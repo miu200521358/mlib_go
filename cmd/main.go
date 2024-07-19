@@ -12,7 +12,6 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
-	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
@@ -60,15 +59,16 @@ func main() {
 	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.1 ビューワー"))
 	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.2 ビューワー"))
 
-	controlState := controller.NewControlState()
+	controlState := controller.NewControlState(mApp)
+	controlState.Run()
 
 	go func() {
 		// 操作ウィンドウは別スレッドで起動
-		controlWindow := controller.NewControlWindow(appConfig, mApp, controlState, getMenuItems)
+		controlWindow := controller.NewControlWindow(appConfig, controlState, getMenuItems)
 		mApp.SetControlWindow(controlWindow)
 
 		controlWindow.InitTabWidget()
-		_ = newFilePage(controlWindow, controlState)
+		_ = newFilePage(controlWindow)
 
 		mApp.ControllerRun()
 	}()
@@ -86,7 +86,7 @@ func getMenuItems() []declarative.MenuItem {
 	}
 }
 
-func newFilePage(controlWindow state.IControlWindow, controlState state.IAppState) *widget.MTabPage {
+func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 	tabPage := widget.NewMTabPage("ファイル")
 	controlWindow.AddTabPage(tabPage.TabPage)
 
@@ -105,7 +105,7 @@ func newFilePage(controlWindow state.IControlWindow, controlState state.IAppStat
 			model := data.(*pmx.PmxModel)
 			animationState := renderer.NewAnimationState(0, 0)
 			animationState.SetModel(model)
-			controlState.SetAnimationState(animationState)
+			controlWindow.ControlState().SetAnimationState(animationState)
 		}
 	})
 
@@ -122,7 +122,7 @@ func newFilePage(controlWindow state.IControlWindow, controlState state.IAppStat
 			motion := data.(*vmd.VmdMotion)
 			animationState := renderer.NewAnimationState(0, 0)
 			animationState.SetMotion(motion)
-			controlState.SetAnimationState(animationState)
+			controlWindow.ControlState().SetAnimationState(animationState)
 		}
 	})
 
@@ -141,7 +141,7 @@ func newFilePage(controlWindow state.IControlWindow, controlState state.IAppStat
 			model := data.(*pmx.PmxModel)
 			animationState := renderer.NewAnimationState(1, 0)
 			animationState.SetModel(model)
-			controlState.SetAnimationState(animationState)
+			controlWindow.ControlState().SetAnimationState(animationState)
 		}
 	})
 
@@ -158,7 +158,7 @@ func newFilePage(controlWindow state.IControlWindow, controlState state.IAppStat
 			motion := data.(*vmd.VmdMotion)
 			animationState := renderer.NewAnimationState(1, 0)
 			animationState.SetMotion(motion)
-			controlState.SetAnimationState(animationState)
+			controlWindow.ControlState().SetAnimationState(animationState)
 		}
 	})
 

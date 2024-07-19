@@ -20,8 +20,7 @@ type ControlWindow struct {
 	tabWidget                   *widget.MTabWidget   // タブウィジェット
 	motionPlayer                *widget.MotionPlayer // モーションプレイヤー
 	appConfig                   *mconfig.AppConfig   // アプリケーション設定
-	appState                    state.IAppState      // UI状態
-	controlState                *controlState        // 操作状態
+	appState                    state.IAppState      // 操作状態
 	enabledFrameDropAction      *walk.Action         // フレームドロップON/OFF
 	enabledPhysicsAction        *walk.Action         // 物理ON/OFF
 	physicsResetAction          *walk.Action         // 物理リセット
@@ -51,13 +50,11 @@ type ControlWindow struct {
 func NewControlWindow(
 	appConfig *mconfig.AppConfig,
 	appState state.IAppState,
-	controlState *controlState,
 	helpMenuItemsFunc func() []declarative.MenuItem,
 ) *ControlWindow {
 	controlWindow := &ControlWindow{
-		appConfig:    appConfig,
-		appState:     appState,
-		controlState: controlState,
+		appConfig: appConfig,
+		appState:  appState,
 	}
 
 	logMenuItems := []declarative.MenuItem{
@@ -333,65 +330,6 @@ func (w *ControlWindow) Close() {
 	w.appState.SetClosed(true)
 }
 
-func (c *ControlWindow) ChannelRun() {
-	go func() {
-		for {
-			select {
-			case prevFrame := <-c.controlState.prevFrameChan:
-				c.appState.SetPrevFrame(prevFrame)
-			case frame := <-c.controlState.frameChan:
-				c.appState.SetFrame(frame)
-			case maxFrame := <-c.controlState.maxFrameChan:
-				c.appState.SetMaxFrame(maxFrame)
-			case enabledFrameDrop := <-c.controlState.isEnabledFrameDropChan:
-				c.appState.SetEnabledFrameDrop(enabledFrameDrop)
-			case enabledPhysics := <-c.controlState.isEnabledPhysicsChan:
-				c.appState.SetEnabledPhysics(enabledPhysics)
-			case resetPhysics := <-c.controlState.physicsResetChan:
-				c.appState.SetPhysicsReset(resetPhysics)
-			case showNormal := <-c.controlState.isShowNormalChan:
-				c.appState.SetShowNormal(showNormal)
-			case showWire := <-c.controlState.isShowWireChan:
-				c.appState.SetShowWire(showWire)
-			case showSelectedVertex := <-c.controlState.isShowSelectedVertexChan:
-				c.appState.SetShowSelectedVertex(showSelectedVertex)
-			case showBoneAll := <-c.controlState.isShowBoneAllChan:
-				c.appState.SetShowBoneAll(showBoneAll)
-			case showBoneIk := <-c.controlState.isShowBoneIkChan:
-				c.appState.SetShowBoneIk(showBoneIk)
-			case showBoneEffector := <-c.controlState.isShowBoneEffectorChan:
-				c.appState.SetShowBoneEffector(showBoneEffector)
-			case showBoneFixed := <-c.controlState.isShowBoneFixedChan:
-				c.appState.SetShowBoneFixed(showBoneFixed)
-			case showBoneRotate := <-c.controlState.isShowBoneRotateChan:
-				c.appState.SetShowBoneRotate(showBoneRotate)
-			case showBoneTranslate := <-c.controlState.isShowBoneTranslateChan:
-				c.appState.SetShowBoneTranslate(showBoneTranslate)
-			case showBoneVisible := <-c.controlState.isShowBoneVisibleChan:
-				c.appState.SetShowBoneVisible(showBoneVisible)
-			case showRigidBodyFront := <-c.controlState.isShowRigidBodyFrontChan:
-				c.appState.SetShowRigidBodyFront(showRigidBodyFront)
-			case showRigidBodyBack := <-c.controlState.isShowRigidBodyBackChan:
-				c.appState.SetShowRigidBodyBack(showRigidBodyBack)
-			case showJoint := <-c.controlState.isShowJointChan:
-				c.appState.SetShowJoint(showJoint)
-			case showInfo := <-c.controlState.isShowInfoChan:
-				c.appState.SetShowInfo(showInfo)
-			case spfLimit := <-c.controlState.spfLimitChan:
-				c.appState.SetSpfLimit(spfLimit)
-			case closed := <-c.controlState.isClosedChan:
-				c.appState.SetClosed(closed)
-			case playing := <-c.controlState.playingChan:
-				c.appState.TriggerPlay(playing)
-			case spfLimit := <-c.controlState.spfLimitChan:
-				c.appState.SetSpfLimit(spfLimit)
-			case animationState := <-c.controlState.animationState:
-				c.appState.SetAnimationState(animationState)
-			}
-		}
-	}()
-}
-
 func (w *ControlWindow) Run() {
 	w.MainWindow.Run()
 }
@@ -411,7 +349,7 @@ func (w *ControlWindow) AppState() state.IAppState {
 }
 
 func (w *ControlWindow) ControlState() state.IAppState {
-	return w.controlState
+	return w.appState
 }
 
 func (w *ControlWindow) GetMainWindow() *walk.MainWindow {
@@ -419,7 +357,7 @@ func (w *ControlWindow) GetMainWindow() *walk.MainWindow {
 }
 
 func (w *ControlWindow) InitTabWidget() {
-	w.tabWidget = widget.NewMTabWidget(w.GetMainWindow())
+	w.tabWidget = widget.NewMTabWidget(w.MainWindow)
 }
 
 func (w *ControlWindow) AddTabPage(tabPage *walk.TabPage) {
@@ -427,10 +365,6 @@ func (w *ControlWindow) AddTabPage(tabPage *walk.TabPage) {
 	if err != nil {
 		widget.RaiseError(err)
 	}
-}
-
-func (w *ControlWindow) SetPlayer(player *widget.MotionPlayer) {
-	w.motionPlayer = player
 }
 
 func (w *ControlWindow) langTriggered(lang string) {
@@ -441,7 +375,7 @@ func (w *ControlWindow) langTriggered(lang string) {
 		mi18n.TWithLocale(lang, "LanguageChanged.Message"),
 		walk.MsgBoxOK|walk.MsgBoxIconInformation,
 	)
-	w.controlState.SetClosed(true)
+	w.appState.SetClosed(true)
 }
 
 func (w *ControlWindow) logLevelTriggered() {
@@ -458,127 +392,127 @@ func (w *ControlWindow) logLevelTriggered() {
 }
 
 func (w *ControlWindow) onTriggerEnabledFrameDrop() {
-	w.controlState.SetEnabledFrameDrop(w.enabledFrameDropAction.Checked())
+	w.appState.SetEnabledFrameDrop(w.enabledFrameDropAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerEnabledPhysics() {
-	w.controlState.SetEnabledPhysics(w.enabledPhysicsAction.Checked())
+	w.appState.SetEnabledPhysics(w.enabledPhysicsAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerPhysicsReset() {
-	w.controlState.SetPhysicsReset(true)
+	w.appState.SetPhysicsReset(true)
 }
 
 func (w *ControlWindow) onTriggerShowNormal() {
-	w.controlState.SetShowNormal(w.showNormalAction.Checked())
+	w.appState.SetShowNormal(w.showNormalAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowWire() {
-	w.controlState.SetShowWire(w.showWireAction.Checked())
+	w.appState.SetShowWire(w.showWireAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowSelectedVertex() {
-	w.controlState.SetShowSelectedVertex(w.showSelectedVertexAction.Checked())
+	w.appState.SetShowSelectedVertex(w.showSelectedVertexAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowBoneAll() {
-	w.controlState.SetShowBoneAll(true)
-	w.controlState.SetShowBoneIk(false)
-	w.controlState.SetShowBoneEffector(false)
-	w.controlState.SetShowBoneFixed(false)
-	w.controlState.SetShowBoneRotate(false)
-	w.controlState.SetShowBoneTranslate(false)
-	w.controlState.SetShowBoneVisible(false)
+	w.appState.SetShowBoneAll(true)
+	w.appState.SetShowBoneIk(false)
+	w.appState.SetShowBoneEffector(false)
+	w.appState.SetShowBoneFixed(false)
+	w.appState.SetShowBoneRotate(false)
+	w.appState.SetShowBoneTranslate(false)
+	w.appState.SetShowBoneVisible(false)
 
 	w.showBoneAllAction.SetChecked(true)
 }
 
 func (w *ControlWindow) onTriggerShowBoneIk() {
-	w.controlState.SetShowBoneAll(false)
-	w.controlState.SetShowBoneIk(true)
-	w.controlState.SetShowBoneEffector(false)
-	w.controlState.SetShowBoneFixed(false)
-	w.controlState.SetShowBoneRotate(false)
-	w.controlState.SetShowBoneTranslate(false)
-	w.controlState.SetShowBoneVisible(false)
+	w.appState.SetShowBoneAll(false)
+	w.appState.SetShowBoneIk(true)
+	w.appState.SetShowBoneEffector(false)
+	w.appState.SetShowBoneFixed(false)
+	w.appState.SetShowBoneRotate(false)
+	w.appState.SetShowBoneTranslate(false)
+	w.appState.SetShowBoneVisible(false)
 
 	w.showBoneIkAction.SetChecked(true)
 }
 
 func (w *ControlWindow) onTriggerShowBoneEffector() {
-	w.controlState.SetShowBoneAll(false)
-	w.controlState.SetShowBoneIk(false)
-	w.controlState.SetShowBoneEffector(true)
-	w.controlState.SetShowBoneFixed(false)
-	w.controlState.SetShowBoneRotate(false)
-	w.controlState.SetShowBoneTranslate(false)
-	w.controlState.SetShowBoneVisible(false)
+	w.appState.SetShowBoneAll(false)
+	w.appState.SetShowBoneIk(false)
+	w.appState.SetShowBoneEffector(true)
+	w.appState.SetShowBoneFixed(false)
+	w.appState.SetShowBoneRotate(false)
+	w.appState.SetShowBoneTranslate(false)
+	w.appState.SetShowBoneVisible(false)
 
 	w.showBoneEffectorAction.SetChecked(true)
 }
 
 func (w *ControlWindow) onTriggerShowBoneFixed() {
-	w.controlState.SetShowBoneAll(false)
-	w.controlState.SetShowBoneIk(false)
-	w.controlState.SetShowBoneEffector(false)
-	w.controlState.SetShowBoneFixed(true)
-	w.controlState.SetShowBoneRotate(false)
-	w.controlState.SetShowBoneTranslate(false)
-	w.controlState.SetShowBoneVisible(false)
+	w.appState.SetShowBoneAll(false)
+	w.appState.SetShowBoneIk(false)
+	w.appState.SetShowBoneEffector(false)
+	w.appState.SetShowBoneFixed(true)
+	w.appState.SetShowBoneRotate(false)
+	w.appState.SetShowBoneTranslate(false)
+	w.appState.SetShowBoneVisible(false)
 
 	w.showBoneFixedAction.SetChecked(true)
 }
 
 func (w *ControlWindow) onTriggerShowBoneRotate() {
-	w.controlState.SetShowBoneAll(false)
-	w.controlState.SetShowBoneIk(false)
-	w.controlState.SetShowBoneEffector(false)
-	w.controlState.SetShowBoneFixed(false)
-	w.controlState.SetShowBoneRotate(true)
-	w.controlState.SetShowBoneTranslate(false)
-	w.controlState.SetShowBoneVisible(false)
+	w.appState.SetShowBoneAll(false)
+	w.appState.SetShowBoneIk(false)
+	w.appState.SetShowBoneEffector(false)
+	w.appState.SetShowBoneFixed(false)
+	w.appState.SetShowBoneRotate(true)
+	w.appState.SetShowBoneTranslate(false)
+	w.appState.SetShowBoneVisible(false)
 
 	w.showBoneRotateAction.SetChecked(true)
 }
 
 func (w *ControlWindow) onTriggerShowBoneTranslate() {
-	w.controlState.SetShowBoneAll(false)
-	w.controlState.SetShowBoneIk(false)
-	w.controlState.SetShowBoneEffector(false)
-	w.controlState.SetShowBoneFixed(false)
-	w.controlState.SetShowBoneRotate(false)
-	w.controlState.SetShowBoneTranslate(true)
-	w.controlState.SetShowBoneVisible(false)
+	w.appState.SetShowBoneAll(false)
+	w.appState.SetShowBoneIk(false)
+	w.appState.SetShowBoneEffector(false)
+	w.appState.SetShowBoneFixed(false)
+	w.appState.SetShowBoneRotate(false)
+	w.appState.SetShowBoneTranslate(true)
+	w.appState.SetShowBoneVisible(false)
 
 	w.showBoneTranslateAction.SetChecked(true)
 }
 
 func (w *ControlWindow) onTriggerShowBoneVisible() {
-	w.controlState.SetShowBoneAll(false)
-	w.controlState.SetShowBoneIk(false)
-	w.controlState.SetShowBoneEffector(false)
-	w.controlState.SetShowBoneFixed(false)
-	w.controlState.SetShowBoneRotate(false)
-	w.controlState.SetShowBoneTranslate(false)
-	w.controlState.SetShowBoneVisible(true)
+	w.appState.SetShowBoneAll(false)
+	w.appState.SetShowBoneIk(false)
+	w.appState.SetShowBoneEffector(false)
+	w.appState.SetShowBoneFixed(false)
+	w.appState.SetShowBoneRotate(false)
+	w.appState.SetShowBoneTranslate(false)
+	w.appState.SetShowBoneVisible(true)
 
 	w.showBoneVisibleAction.SetChecked(true)
 }
 
 func (w *ControlWindow) onTriggerShowRigidBodyFront() {
-	w.controlState.SetShowRigidBodyFront(w.showRigidBodyFrontAction.Checked())
+	w.appState.SetShowRigidBodyFront(w.showRigidBodyFrontAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowRigidBodyBack() {
-	w.controlState.SetShowRigidBodyBack(w.showRigidBodyBackAction.Checked())
+	w.appState.SetShowRigidBodyBack(w.showRigidBodyBackAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowJoint() {
-	w.controlState.SetShowJoint(w.showJointAction.Checked())
+	w.appState.SetShowJoint(w.showJointAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowInfo() {
-	w.controlState.SetShowInfo(w.showInfoAction.Checked())
+	w.appState.SetShowInfo(w.showInfoAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerFps30Limit() {
@@ -586,7 +520,7 @@ func (w *ControlWindow) onTriggerFps30Limit() {
 	w.limitFps60Action.SetChecked(false)
 	w.limitFpsUnLimitAction.SetChecked(false)
 	w.limitFpsDeformUnLimitAction.SetChecked(false)
-	w.controlState.SetSpfLimit(1 / 30.0)
+	w.appState.SetSpfLimit(1 / 30.0)
 }
 
 func (w *ControlWindow) onTriggerFps60Limit() {
@@ -594,7 +528,7 @@ func (w *ControlWindow) onTriggerFps60Limit() {
 	w.limitFps60Action.SetChecked(true)
 	w.limitFpsUnLimitAction.SetChecked(false)
 	w.limitFpsDeformUnLimitAction.SetChecked(false)
-	w.controlState.SetSpfLimit(1 / 60.0)
+	w.appState.SetSpfLimit(1 / 60.0)
 }
 
 func (w *ControlWindow) onTriggerUnLimitFps() {
@@ -602,7 +536,7 @@ func (w *ControlWindow) onTriggerUnLimitFps() {
 	w.limitFps60Action.SetChecked(false)
 	w.limitFpsUnLimitAction.SetChecked(true)
 	w.limitFpsDeformUnLimitAction.SetChecked(false)
-	w.controlState.SetSpfLimit(-1.0)
+	w.appState.SetSpfLimit(-1.0)
 }
 
 func (w *ControlWindow) onTriggerUnLimitFpsDeform() {
@@ -610,41 +544,5 @@ func (w *ControlWindow) onTriggerUnLimitFpsDeform() {
 	w.limitFps60Action.SetChecked(false)
 	w.limitFpsUnLimitAction.SetChecked(false)
 	w.limitFpsDeformUnLimitAction.SetChecked(true)
-	w.controlState.SetSpfLimit(-2.0)
-}
-
-func (w *ControlWindow) Frame() float64 {
-	return w.motionPlayer.Frame()
-}
-
-func (w *ControlWindow) SetFrame(frame float64) {
-	go func() {
-		w.motionPlayer.SetFrame(frame)
-	}()
-}
-
-func (w *ControlWindow) AddFrame(v float64) {
-	go func() {
-		w.motionPlayer.SetFrame(w.motionPlayer.Frame() + v)
-	}()
-}
-
-func (w *ControlWindow) MaxFrame() int {
-	return w.motionPlayer.MaxFrame()
-}
-
-func (w *ControlWindow) SetMaxFrame(maxFrame int) {
-	go func() {
-		w.motionPlayer.SetMaxFrame(maxFrame)
-	}()
-}
-
-func (w *ControlWindow) PrevFrame() int {
-	return w.motionPlayer.PrevFrame()
-}
-
-func (w *ControlWindow) SetPrevFrame(prevFrame int) {
-	go func() {
-		w.motionPlayer.SetPrevFrame(prevFrame)
-	}()
+	w.appState.SetSpfLimit(-2.0)
 }

@@ -23,7 +23,7 @@ const physicsDefaultSpf = 1.0 / 60.0
 const deformDefaultSpf = 1.0 / 30.0
 
 type MApp struct {
-	*appState                          // UI状態
+	*appState                          // アプリ状態
 	appConfig     *mconfig.AppConfig   // アプリケーション設定
 	viewWindows   []state.IViewWindow  // 描画ウィンドウリスト
 	controlWindow state.IControlWindow // 操作ウィンドウ
@@ -48,9 +48,8 @@ func NewMApp(appConfig *mconfig.AppConfig) *MApp {
 func (a *MApp) ControllerRun() {
 	// 操作ウィンドウは別スレッドで起動している前提
 	if a.appConfig.IsEnvProd() || a.appConfig.IsEnvDev() {
-		defer a.RecoverFromPanic()
+		defer a.recoverFromPanic()
 	}
-	a.controlWindow.ChannelRun()
 	a.controlWindow.Run()
 }
 
@@ -111,7 +110,7 @@ func (a *MApp) Close() {
 }
 
 // エラー監視
-func (a *MApp) RecoverFromPanic() {
+func (a *MApp) recoverFromPanic() {
 	if r := recover(); r != nil {
 		stackTrace := debug.Stack()
 

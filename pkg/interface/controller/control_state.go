@@ -6,6 +6,7 @@ import (
 )
 
 type controlState struct {
+	appState                 state.IAppState               // アプリ状態
 	prevFrameChan            chan int                      // 前回フレーム
 	frameChan                chan float64                  // フレーム
 	maxFrameChan             chan int                      // 最大フレーム
@@ -40,8 +41,9 @@ type controlState struct {
 	animationState           chan *renderer.AnimationState // アニメーションステート
 }
 
-func NewControlState() *controlState {
+func NewControlState(appState state.IAppState) *controlState {
 	u := &controlState{
+		appState:                 appState,
 		prevFrameChan:            make(chan int),
 		frameChan:                make(chan float64),
 		maxFrameChan:             make(chan int),
@@ -77,6 +79,65 @@ func NewControlState() *controlState {
 	}
 
 	return u
+}
+
+func (s *controlState) Run() {
+	go func() {
+		for {
+			select {
+			case prevFrame := <-s.prevFrameChan:
+				s.appState.SetPrevFrame(prevFrame)
+			case frame := <-s.frameChan:
+				s.appState.SetFrame(frame)
+			case maxFrame := <-s.maxFrameChan:
+				s.appState.SetMaxFrame(maxFrame)
+			case enabledFrameDrop := <-s.isEnabledFrameDropChan:
+				s.appState.SetEnabledFrameDrop(enabledFrameDrop)
+			case enabledPhysics := <-s.isEnabledPhysicsChan:
+				s.appState.SetEnabledPhysics(enabledPhysics)
+			case resetPhysics := <-s.physicsResetChan:
+				s.appState.SetPhysicsReset(resetPhysics)
+			case showNormal := <-s.isShowNormalChan:
+				s.appState.SetShowNormal(showNormal)
+			case showWire := <-s.isShowWireChan:
+				s.appState.SetShowWire(showWire)
+			case showSelectedVertex := <-s.isShowSelectedVertexChan:
+				s.appState.SetShowSelectedVertex(showSelectedVertex)
+			case showBoneAll := <-s.isShowBoneAllChan:
+				s.appState.SetShowBoneAll(showBoneAll)
+			case showBoneIk := <-s.isShowBoneIkChan:
+				s.appState.SetShowBoneIk(showBoneIk)
+			case showBoneEffector := <-s.isShowBoneEffectorChan:
+				s.appState.SetShowBoneEffector(showBoneEffector)
+			case showBoneFixed := <-s.isShowBoneFixedChan:
+				s.appState.SetShowBoneFixed(showBoneFixed)
+			case showBoneRotate := <-s.isShowBoneRotateChan:
+				s.appState.SetShowBoneRotate(showBoneRotate)
+			case showBoneTranslate := <-s.isShowBoneTranslateChan:
+				s.appState.SetShowBoneTranslate(showBoneTranslate)
+			case showBoneVisible := <-s.isShowBoneVisibleChan:
+				s.appState.SetShowBoneVisible(showBoneVisible)
+			case showRigidBodyFront := <-s.isShowRigidBodyFrontChan:
+				s.appState.SetShowRigidBodyFront(showRigidBodyFront)
+			case showRigidBodyBack := <-s.isShowRigidBodyBackChan:
+				s.appState.SetShowRigidBodyBack(showRigidBodyBack)
+			case showJoint := <-s.isShowJointChan:
+				s.appState.SetShowJoint(showJoint)
+			case showInfo := <-s.isShowInfoChan:
+				s.appState.SetShowInfo(showInfo)
+			case spfLimit := <-s.spfLimitChan:
+				s.appState.SetSpfLimit(spfLimit)
+			case closed := <-s.isClosedChan:
+				s.appState.SetClosed(closed)
+			case playing := <-s.playingChan:
+				s.appState.TriggerPlay(playing)
+			case spfLimit := <-s.spfLimitChan:
+				s.appState.SetSpfLimit(spfLimit)
+			case animationState := <-s.animationState:
+				s.appState.SetAnimationState(animationState)
+			}
+		}
+	}()
 }
 
 func (c *controlState) SetAnimationState(state state.IAnimationState) {

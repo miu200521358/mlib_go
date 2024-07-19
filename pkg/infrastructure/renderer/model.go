@@ -297,11 +297,9 @@ func (renderModel *RenderModel) Render(
 		renderModel.drawNormal(shader, paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
-	isShowBone := appState.IsShowBoneAll() || appState.IsShowBoneEffector() || appState.IsShowBoneIk() ||
+	if appState.IsShowBoneAll() || appState.IsShowBoneEffector() || appState.IsShowBoneIk() ||
 		appState.IsShowBoneFixed() || appState.IsShowBoneRotate() ||
-		appState.IsShowBoneTranslate() || appState.IsShowBoneVisible()
-
-	if isShowBone {
+		appState.IsShowBoneTranslate() || appState.IsShowBoneVisible() {
 		renderModel.drawBone(shader, animationState.model.Bones, appState,
 			paddedMatrixes, matrixWidth, matrixHeight)
 	}
