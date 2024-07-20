@@ -5,7 +5,10 @@ package delta
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+)
+
+const (
+	LIGHT_AMBIENT float64 = 154.0 / 255.0
 )
 
 type RenderDeltas struct {
@@ -48,7 +51,7 @@ func NewMeshDelta(md *MaterialMorphDelta) *MeshDelta {
 
 func diffuse(md *MaterialMorphDelta) mgl32.Vec4 {
 	d1 := md.Diffuse.GetXYZ().Copy()
-	d2 := d1.MulScalar(float64(mgl.LIGHT_AMBIENT)).Add(md.Ambient)
+	d2 := d1.MulScalar(float64(LIGHT_AMBIENT)).Add(md.Ambient)
 	dm := md.MulMaterial.Diffuse.Muled(md.MulRatios.Diffuse)
 	da := md.AddMaterial.Diffuse.Muled(md.AddRatios.Diffuse)
 
@@ -61,7 +64,7 @@ func diffuse(md *MaterialMorphDelta) mgl32.Vec4 {
 }
 
 func specular(md *MaterialMorphDelta) mgl32.Vec4 {
-	s1 := md.Specular.GetXYZ().MuledScalar(float64(mgl.LIGHT_AMBIENT))
+	s1 := md.Specular.GetXYZ().MuledScalar(float64(LIGHT_AMBIENT))
 	sm := md.MulMaterial.Specular.Muled(md.MulRatios.Specular)
 	sa := md.AddMaterial.Specular.Muled(md.AddRatios.Specular)
 
@@ -74,7 +77,7 @@ func specular(md *MaterialMorphDelta) mgl32.Vec4 {
 }
 
 func ambient(md *MaterialMorphDelta) mgl32.Vec3 {
-	a := md.Diffuse.GetXYZ().MuledScalar(float64(mgl.LIGHT_AMBIENT))
+	a := md.Diffuse.GetXYZ().MuledScalar(float64(LIGHT_AMBIENT))
 	am := md.MulMaterial.Ambient.Muled(md.MulRatios.Ambient)
 	aa := md.AddMaterial.Ambient.Muled(md.AddRatios.Ambient)
 	return mgl32.Vec3{

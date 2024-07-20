@@ -5,6 +5,7 @@ package mgl
 
 import (
 	"github.com/go-gl/gl/v4.4-core/gl"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
 
@@ -28,7 +29,7 @@ func newMFloor() *MFloor {
 
 func (s *MShader) DrawFloor() {
 	// mlog.D("MFloor.DrawLine")
-	program := s.GetProgram(PROGRAM_TYPE_FLOOR)
+	program := s.GetProgram(state.PROGRAM_TYPE_FLOOR)
 	gl.UseProgram(program)
 
 	// 平面を引く

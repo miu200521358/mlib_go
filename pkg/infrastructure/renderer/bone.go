@@ -222,14 +222,14 @@ func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int) {
 func bindBoneMatrixes(
 	paddedMatrixes []float32,
 	width, height int,
-	shader *mgl.MShader,
+	shader state.IShader,
 	program uint32,
 ) {
 	// テクスチャをアクティブにする
 	gl.ActiveTexture(gl.TEXTURE20)
 
 	// テクスチャをバインドする
-	gl.BindTexture(gl.TEXTURE_2D, shader.BoneTextureId)
+	gl.BindTexture(gl.TEXTURE_2D, shader.BoneTextureId())
 
 	// テクスチャのパラメーターの設定
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)

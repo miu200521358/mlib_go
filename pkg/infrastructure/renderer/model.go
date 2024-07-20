@@ -270,7 +270,7 @@ func (renderModel *RenderModel) initializeBuffer(
 }
 
 func (renderModel *RenderModel) Render(
-	shader *mgl.MShader, appState state.IAppState, animationState state.IAnimationState,
+	shader state.IShader, appState state.IAppState, animationState state.IAnimationState,
 ) {
 	if animationState == nil || animationState.Model() == nil ||
 		animationState.VmdDeltas() == nil || animationState.RenderDeltas() == nil {
@@ -319,11 +319,11 @@ func (renderModel *RenderModel) Render(
 }
 
 func (renderModel *RenderModel) drawNormal(
-	shader *mgl.MShader,
+	shader state.IShader,
 	paddedMatrixes []float32,
 	width, height int,
 ) {
-	program := shader.GetProgram(mgl.PROGRAM_TYPE_NORMAL)
+	program := shader.GetProgram(state.PROGRAM_TYPE_NORMAL)
 	gl.UseProgram(program)
 
 	renderModel.normalVao.Bind()
@@ -355,7 +355,7 @@ func (renderModel *RenderModel) drawNormal(
 func (renderModel *RenderModel) drawSelectedVertex(
 	selectedVertexMorphIndexes []int,
 	selectedVertexDeltas [][]float32,
-	shader *mgl.MShader,
+	shader state.IShader,
 	paddedMatrixes []float32,
 	width, height int,
 ) [][]float32 {
@@ -363,7 +363,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
-	program := shader.GetProgram(mgl.PROGRAM_TYPE_SELECTED_VERTEX)
+	program := shader.GetProgram(state.PROGRAM_TYPE_SELECTED_VERTEX)
 	gl.UseProgram(program)
 
 	renderModel.selectedVertexVao.Bind()
@@ -422,7 +422,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 }
 
 func (renderModel *RenderModel) drawBone(
-	shader *mgl.MShader,
+	shader state.IShader,
 	bones *pmx.Bones,
 	appState state.IAppState,
 	paddedMatrixes []float32,
@@ -436,7 +436,7 @@ func (renderModel *RenderModel) drawBone(
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	program := shader.GetProgram(mgl.PROGRAM_TYPE_BONE)
+	program := shader.GetProgram(state.PROGRAM_TYPE_BONE)
 	gl.UseProgram(program)
 
 	renderModel.boneVao.Bind()

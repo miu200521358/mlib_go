@@ -13,6 +13,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
@@ -45,24 +46,10 @@ const (
 	SHADER_VERTEX_GL_POSITION           = "gl_Position\x00"
 )
 
-type ProgramType int
-
-const (
-	PROGRAM_TYPE_MODEL           ProgramType = iota
-	PROGRAM_TYPE_EDGE            ProgramType = iota
-	PROGRAM_TYPE_BONE            ProgramType = iota
-	PROGRAM_TYPE_PHYSICS         ProgramType = iota
-	PROGRAM_TYPE_NORMAL          ProgramType = iota
-	PROGRAM_TYPE_FLOOR           ProgramType = iota
-	PROGRAM_TYPE_WIRE            ProgramType = iota
-	PROGRAM_TYPE_SELECTED_VERTEX ProgramType = iota
-)
-
 const (
 	INITIAL_CAMERA_POSITION_Y float64 = 11.0
 	INITIAL_CAMERA_POSITION_Z float64 = -40.0
 	INITIAL_LOOK_AT_CENTER_Y  float64 = 11.0
-	LIGHT_AMBIENT             float64 = 154.0 / 255.0
 	FIELD_OF_VIEW_ANGLE       float32 = 40.0
 )
 
@@ -90,7 +77,7 @@ type MShader struct {
 	floorProgram          uint32
 	wireProgram           uint32
 	selectedVertexProgram uint32
-	BoneTextureId         uint32
+	boneTextureId         uint32
 	floor                 *MFloor
 }
 
@@ -331,11 +318,15 @@ func (s *MShader) initialize(program uint32) {
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
 	// ボーン行列用テクスチャ生成
-	gl.GenTextures(1, &s.BoneTextureId)
+	gl.GenTextures(1, &s.boneTextureId)
 
 	s.Fit(int(s.Width), int(s.Height))
 
 	gl.UseProgram(0)
+}
+
+func (s *MShader) BoneTextureId() uint32 {
+	return s.boneTextureId
 }
 
 func (s *MShader) Fit(width int, height int) {
@@ -349,23 +340,23 @@ func (s *MShader) Fit(width int, height int) {
 	gl.Viewport(0, 0, int32(s.Width), int32(s.Height))
 }
 
-func (s *MShader) GetProgram(programType ProgramType) uint32 {
+func (s *MShader) GetProgram(programType state.ProgramType) uint32 {
 	switch programType {
-	case PROGRAM_TYPE_MODEL:
+	case state.PROGRAM_TYPE_MODEL:
 		return s.modelProgram
-	case PROGRAM_TYPE_EDGE:
+	case state.PROGRAM_TYPE_EDGE:
 		return s.edgeProgram
-	case PROGRAM_TYPE_BONE:
+	case state.PROGRAM_TYPE_BONE:
 		return s.boneProgram
-	case PROGRAM_TYPE_PHYSICS:
+	case state.PROGRAM_TYPE_PHYSICS:
 		return s.physicsProgram
-	case PROGRAM_TYPE_NORMAL:
+	case state.PROGRAM_TYPE_NORMAL:
 		return s.normalProgram
-	case PROGRAM_TYPE_FLOOR:
+	case state.PROGRAM_TYPE_FLOOR:
 		return s.floorProgram
-	case PROGRAM_TYPE_WIRE:
+	case state.PROGRAM_TYPE_WIRE:
 		return s.wireProgram
-	case PROGRAM_TYPE_SELECTED_VERTEX:
+	case state.PROGRAM_TYPE_SELECTED_VERTEX:
 		return s.selectedVertexProgram
 	}
 	return 0

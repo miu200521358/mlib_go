@@ -9,6 +9,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
@@ -39,12 +40,12 @@ func (m *Mesh) delete() {
 }
 
 func (m *Mesh) drawModel(
-	shader *mgl.MShader,
+	shader state.IShader,
 	paddedMatrixes []float32,
 	width, height int,
 	meshDelta *delta.MeshDelta,
 ) {
-	modelProgram := shader.GetProgram(mgl.PROGRAM_TYPE_MODEL)
+	modelProgram := shader.GetProgram(state.PROGRAM_TYPE_MODEL)
 	gl.UseProgram(modelProgram)
 
 	if m.material.DrawFlag.IsDoubleSidedDrawing() {
@@ -123,12 +124,12 @@ func (m *Mesh) drawModel(
 }
 
 func (m *Mesh) drawEdge(
-	shader *mgl.MShader,
+	shader state.IShader,
 	paddedMatrixes []float32,
 	width, height int,
 	meshDelta *delta.MeshDelta,
 ) {
-	program := shader.GetProgram(mgl.PROGRAM_TYPE_EDGE)
+	program := shader.GetProgram(state.PROGRAM_TYPE_EDGE)
 	gl.UseProgram(program)
 
 	gl.Enable(gl.CULL_FACE)
@@ -161,12 +162,12 @@ func (m *Mesh) drawEdge(
 }
 
 func (m *Mesh) drawWire(
-	shader *mgl.MShader,
+	shader state.IShader,
 	paddedMatrixes []float32,
 	width, height int,
 	invisibleMesh bool,
 ) {
-	program := shader.GetProgram(mgl.PROGRAM_TYPE_WIRE)
+	program := shader.GetProgram(state.PROGRAM_TYPE_WIRE)
 	gl.UseProgram(program)
 
 	// カリングOFF

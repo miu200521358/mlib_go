@@ -6,6 +6,7 @@ package mbt
 import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
@@ -59,7 +60,7 @@ func (ddl *mDebugDrawLiner) drawDebugLines(shader *mgl.MShader, isDrawRigidBodyF
 		return
 	}
 
-	program := shader.GetProgram(mgl.PROGRAM_TYPE_PHYSICS)
+	program := shader.GetProgram(state.PROGRAM_TYPE_PHYSICS)
 	gl.UseProgram(program)
 
 	if isDrawRigidBodyFront {

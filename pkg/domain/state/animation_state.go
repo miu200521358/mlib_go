@@ -7,8 +7,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 type IAnimationState interface {
@@ -27,14 +25,14 @@ type IAnimationState interface {
 	Frame() float64
 	SetFrame(frame float64)
 	AnimateBeforePhysics(appState IAppState, model *pmx.PmxModel) (*delta.VmdDeltas, *delta.RenderDeltas)
-	AnimatePhysics(physics *mbt.MPhysics, appState IAppState)
-	AnimateAfterPhysics(physics *mbt.MPhysics, appState IAppState)
+	AnimatePhysics(physics IPhysics, appState IAppState)
+	AnimateAfterPhysics(physics IPhysics, appState IAppState)
 	RenderModel() IRenderModel
 	SetRenderModel(model IRenderModel)
-	Render(shader *mgl.MShader, appState IAppState)
+	Render(shader IShader, appState IAppState)
 }
 
 type IRenderModel interface {
-	Render(shader *mgl.MShader, appState IAppState, animationState IAnimationState)
+	Render(shader IShader, appState IAppState, animationState IAnimationState)
 	Hash() string
 }

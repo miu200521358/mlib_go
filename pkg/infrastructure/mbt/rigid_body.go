@@ -10,6 +10,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 type rigidbodyValue struct {
@@ -126,9 +127,15 @@ func (physics *MPhysics) updateFlags(modelIndex int, rigidBody *pmx.RigidBody) {
 func (physics *MPhysics) UpdateTransform(
 	modelIndex int,
 	rigidBodyBone *pmx.Bone,
-	boneTransform bt.BtTransform,
+	boneGlobalMatrix *mmath.MMat4,
 	r *pmx.RigidBody,
 ) {
+	boneTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(boneTransform)
+
+	mat := mgl.NewGlMat4(boneGlobalMatrix)
+	boneTransform.SetFromOpenGLMatrix(&mat[0])
+
 	btRigidBody := *physics.rigidBodies[modelIndex][r.Index].btRigidBody
 	btRigidBodyLocalTransform := *physics.rigidBodies[modelIndex][r.Index].btLocalTransform
 

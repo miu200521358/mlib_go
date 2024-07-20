@@ -8,7 +8,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 type AnimationState struct {
@@ -92,7 +91,7 @@ func (a *AnimationState) Load() {
 	}
 }
 
-func (animationState *AnimationState) Render(shader *mgl.MShader, appState state.IAppState) {
+func (animationState *AnimationState) Render(shader state.IShader, appState state.IAppState) {
 	if animationState.renderModel != nil && animationState.model != nil {
 		animationState.renderModel.Render(shader, appState, animationState)
 	}
