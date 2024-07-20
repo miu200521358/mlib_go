@@ -24,12 +24,18 @@ import (
 
 type ViewWindow struct {
 	*glfw.Window
-	windowIndex int                // ウィンドウインデックス
-	title       string             // ウィンドウタイトル
-	appConfig   *mconfig.AppConfig // アプリケーション設定
-	appState    core.IAppState     // アプリ状態
-	physics     *mbt.MPhysics      // 物理
-	shader      *mgl.MShader       // シェーダ
+	windowIndex         int                // ウィンドウインデックス
+	title               string             // ウィンドウタイトル
+	appConfig           *mconfig.AppConfig // アプリケーション設定
+	appState            core.IAppState     // アプリ状態
+	physics             *mbt.MPhysics      // 物理
+	shader              *mgl.MShader       // シェーダ
+	leftButtonPressed   bool               // 左ボタン押下フラグ
+	middleButtonPressed bool               // 中ボタン押下フラグ
+	rightButtonPressed  bool               // 右ボタン押下フラグ
+	updatedPrev         bool               // 前回のカーソル位置更新フラグ
+	shiftPressed        bool               // Shiftキー押下フラグ
+	ctrlPressed         bool               // Ctrlキー押下フラグ
 }
 
 func NewViewWindow(
@@ -71,12 +77,50 @@ func NewViewWindow(
 	}
 
 	glWindow.SetCloseCallback(viewWindow.closeCallback)
+	glWindow.SetScrollCallback(viewWindow.scrollCallback)
+	glWindow.SetKeyCallback(viewWindow.keyCallback)
 
 	gl.Enable(gl.DEBUG_OUTPUT)
 	gl.Enable(gl.DEBUG_OUTPUT_SYNCHRONOUS)                        // 同期的なデバッグ出力有効
 	gl.DebugMessageCallback(viewWindow.debugMessageCallback, nil) // デバッグコールバック
 
 	return viewWindow
+}
+
+func (viewWindow *ViewWindow) keyCallback(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+	if action == glfw.Press {
+		switch key {
+		case glfw.KeyLeftShift, glfw.KeyRightShift:
+			viewWindow.shiftPressed = true
+		case glfw.KeyLeftControl, glfw.KeyRightControl:
+			viewWindow.ctrlPressed = true
+		}
+	} else if action == glfw.Release {
+		switch key {
+		case glfw.KeyLeftShift, glfw.KeyRightShift:
+			viewWindow.shiftPressed = false
+		case glfw.KeyLeftControl, glfw.KeyRightControl:
+			viewWindow.ctrlPressed = false
+		}
+	}
+}
+
+func (viewWindow *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64) {
+	ratio := float32(1.0)
+	if viewWindow.shiftPressed {
+		ratio *= 10
+	} else if viewWindow.ctrlPressed {
+		ratio *= 0.1
+	}
+
+	if yoff > 0 {
+		viewWindow.shader.FieldOfViewAngle -= ratio
+		if viewWindow.shader.FieldOfViewAngle < 1.0 {
+			viewWindow.shader.FieldOfViewAngle = 1.0
+		}
+	} else if yoff < 0 {
+		viewWindow.shader.FieldOfViewAngle += ratio
+	}
 }
 
 func (viewWindow *ViewWindow) closeCallback(w *glfw.Window) {
@@ -144,7 +188,7 @@ func (w *ViewWindow) GetWindow() *glfw.Window {
 func (w *ViewWindow) ResetPhysics(animationStates []core.IAnimationState) {
 	// 物理を削除
 	for _, s := range animationStates {
-		if s.Model() != nil {
+		if s.Model() != nil && s.RenderModel() != nil {
 			w.physics.DeleteModel(s.ModelIndex())
 		}
 	}
@@ -152,7 +196,7 @@ func (w *ViewWindow) ResetPhysics(animationStates []core.IAnimationState) {
 	w.physics.ResetWorld()
 	// 物理を登録
 	for _, s := range animationStates {
-		if s.Model() != nil {
+		if s.Model() != nil && s.RenderModel() != nil {
 			w.physics.AddModel(s.ModelIndex(), s.Model())
 		}
 	}
