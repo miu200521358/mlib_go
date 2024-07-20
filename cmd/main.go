@@ -71,7 +71,7 @@ func main() {
 	}()
 
 	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.1 ビューワー"))
-	// mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.2 ビューワー"))
+	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.2 ビューワー"))
 
 	mApp.Center()
 	mApp.ViewerRun()
@@ -92,16 +92,16 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 
 	tabPage.SetLayout(walk.NewVBoxLayout())
 
-	pmx1ReadPicker := widget.NewPmxReadFilePicker(
+	pmx11ReadPicker := widget.NewPmxReadFilePicker(
 		controlWindow,
 		tabPage,
 		"PmxPath",
-		"No.1 Pmxファイル",
+		"No.1-1 Pmxファイル",
 		"Pmxファイルを選択してください",
 		"Pmxファイルの使い方")
 
-	pmx1ReadPicker.SetOnPathChanged(func(path string) {
-		if data, err := pmx1ReadPicker.Load(); err == nil {
+	pmx11ReadPicker.SetOnPathChanged(func(path string) {
+		if data, err := pmx11ReadPicker.Load(); err == nil {
 			model := data.(*pmx.PmxModel)
 			animationState := renderer.NewAnimationState(0, 0)
 			animationState.SetModel(model)
@@ -109,18 +109,55 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 		}
 	})
 
-	vmd1ReadPicker := widget.NewVmdVpdReadFilePicker(
+	vmd11ReadPicker := widget.NewVmdVpdReadFilePicker(
 		controlWindow,
 		tabPage,
 		"VmdPath",
-		"No.1 Vmdファイル",
+		"No.1-1 Vmdファイル",
 		"Vmdファイルを選択してください",
 		"Vmdファイルの使い方")
 
-	vmd1ReadPicker.SetOnPathChanged(func(path string) {
-		if data, err := vmd1ReadPicker.Load(); err == nil {
+	vmd11ReadPicker.SetOnPathChanged(func(path string) {
+		if data, err := vmd11ReadPicker.Load(); err == nil {
 			motion := data.(*vmd.VmdMotion)
 			animationState := renderer.NewAnimationState(0, 0)
+			animationState.SetMotion(motion)
+			controlWindow.SetAnimationState(animationState)
+			controlWindow.UpdateMaxFrame(motion.GetMaxFrame())
+		}
+	})
+
+	walk.NewVSeparator(tabPage)
+
+	pmx12ReadPicker := widget.NewPmxReadFilePicker(
+		controlWindow,
+		tabPage,
+		"PmxPath",
+		"No.1-2 Pmxファイル",
+		"Pmxファイルを選択してください",
+		"Pmxファイルの使い方")
+
+	pmx12ReadPicker.SetOnPathChanged(func(path string) {
+		if data, err := pmx12ReadPicker.Load(); err == nil {
+			model := data.(*pmx.PmxModel)
+			animationState := renderer.NewAnimationState(0, 1)
+			animationState.SetModel(model)
+			controlWindow.SetAnimationState(animationState)
+		}
+	})
+
+	vmd12ReadPicker := widget.NewVmdVpdReadFilePicker(
+		controlWindow,
+		tabPage,
+		"VmdPath",
+		"No.1-2 Vmdファイル",
+		"Vmdファイルを選択してください",
+		"Vmdファイルの使い方")
+
+	vmd12ReadPicker.SetOnPathChanged(func(path string) {
+		if data, err := vmd12ReadPicker.Load(); err == nil {
+			motion := data.(*vmd.VmdMotion)
+			animationState := renderer.NewAnimationState(0, 1)
 			animationState.SetMotion(motion)
 			controlWindow.SetAnimationState(animationState)
 			controlWindow.UpdateMaxFrame(motion.GetMaxFrame())
