@@ -42,7 +42,7 @@ func NewMRotationFromQuaternion(vQuaternion *MQuaternion) *MRotation {
 	return model
 }
 
-func (m *MRotation) GetQuaternion() *MQuaternion {
+func (m *MRotation) Quaternion() *MQuaternion {
 	if m.quaternion == nil {
 		m.quaternion = NewMQuaternion()
 	}
@@ -59,7 +59,7 @@ func (m *MRotation) SetQuaternion(v *MQuaternion) {
 	}
 }
 
-func (m *MRotation) GetRadians() *MVec3 {
+func (m *MRotation) Radians() *MVec3 {
 	if m.radians == nil {
 		m.radians = NewMVec3()
 	}
@@ -83,14 +83,14 @@ func (m *MRotation) SetRadians(v *MVec3) {
 	m.quaternion = NewMQuaternionFromRadians(v.X, v.Y, v.Z)
 }
 
-func (m *MRotation) GetDegrees() *MVec3 {
+func (m *MRotation) Degrees() *MVec3 {
 	if m.degrees == nil {
 		m.degrees = NewMVec3()
 	}
 	return m.degrees
 }
 
-func (m *MRotation) GetDegreesMMD() *MVec3 {
+func (m *MRotation) DegreesMMD() *MVec3 {
 	if m.degrees == nil {
 		m.degrees = NewMVec3()
 	}

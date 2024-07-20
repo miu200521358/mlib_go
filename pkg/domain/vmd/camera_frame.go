@@ -78,7 +78,7 @@ func (nextCf *CameraFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame
 
 	xy, yy, zy, ry, dy, vy := nextCf.Curves.Evaluate(prevCf.Index(), index, nextCf.Index())
 
-	qq := prevCf.Rotation.GetQuaternion().Slerp(nextCf.Rotation.GetQuaternion(), ry)
+	qq := prevCf.Rotation.Quaternion().Slerp(nextCf.Rotation.Quaternion(), ry)
 	cf.Rotation.SetQuaternion(qq)
 
 	cf.Position.X = mmath.LerpFloat(prevCf.Position.X, nextCf.Position.X, xy)

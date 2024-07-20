@@ -52,7 +52,7 @@ func (fs *BoneFrames) Get(boneName string) *BoneNameFrames {
 	return fs.Data[boneName]
 }
 
-func (fs *BoneFrames) GetNames() []string {
+func (fs *BoneFrames) Names() []string {
 	names := make([]string, 0, len(fs.Data))
 	for name := range fs.Data {
 		names = append(names, name)
@@ -88,10 +88,10 @@ func (fs *BoneFrames) Len() int {
 	return count
 }
 
-func (fs *BoneFrames) GetMaxFrame() int {
+func (fs *BoneFrames) MaxFrame() int {
 	maxFno := int(0)
 	for _, fs := range fs.Data {
-		fno := fs.GetMaxFrame()
+		fno := fs.MaxFrame()
 		if fno > maxFno {
 			maxFno = fno
 		}
@@ -99,10 +99,10 @@ func (fs *BoneFrames) GetMaxFrame() int {
 	return maxFno
 }
 
-func (fs *BoneFrames) GetMinFrame() int {
+func (fs *BoneFrames) MinFrame() int {
 	minFno := math.MaxInt
 	for _, fs := range fs.Data {
-		fno := fs.GetMinFrame()
+		fno := fs.MinFrame()
 		if fno < minFno {
 			minFno = fno
 		}

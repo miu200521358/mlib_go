@@ -444,7 +444,7 @@ func (w *ViewWindow) updateCamera() {
 	lookAtCenter := mgl.NewGlVec3(w.shader.LookAtCenterPosition)
 	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 
-	for _, program := range w.shader.GetPrograms() {
+	for _, program := range w.shader.Programs() {
 		// プログラムの切り替え
 		gl.UseProgram(program)
 

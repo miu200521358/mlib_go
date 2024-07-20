@@ -157,7 +157,7 @@ func (renderModel *RenderModel) initTextureGl(
 	if texGl.IsGeneratedMipmap {
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 	} else {
-		mlog.D(mi18n.T("ミップマップ生成エラー", map[string]interface{}{"Name": texture.Name}))
+		mlog.D(mi18n.T("ミップマップ生成エラー", map[string]interface{}{"Name": texture.Name()}))
 	}
 
 	texGl.unbind()

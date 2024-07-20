@@ -37,11 +37,11 @@ func NewMVec4() *MVec4 {
 	return &MVec4{}
 }
 
-func (v *MVec4) GetXY() *MVec2 {
+func (v *MVec4) XY() *MVec2 {
 	return &MVec2{v.X, v.Y}
 }
 
-func (v *MVec4) GetXYZ() *MVec3 {
+func (v *MVec4) XYZ() *MVec3 {
 	return &MVec3{v.X, v.Y, v.Z}
 }
 

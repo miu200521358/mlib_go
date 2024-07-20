@@ -45,12 +45,12 @@ func (m *VmdMotion) SetName(name string) {
 	m.ModelName = name
 }
 
-func (m *VmdMotion) GetMaxFrame() int {
-	return max(m.BoneFrames.GetMaxFrame(), m.MorphFrames.GetMaxFrame())
+func (m *VmdMotion) MaxFrame() int {
+	return max(m.BoneFrames.MaxFrame(), m.MorphFrames.MaxFrame())
 }
 
-func (m *VmdMotion) GetMinFrame() int {
-	return min(m.BoneFrames.GetMinFrame(), m.MorphFrames.GetMinFrame())
+func (m *VmdMotion) MinFrame() int {
+	return min(m.BoneFrames.MinFrame(), m.MorphFrames.MinFrame())
 }
 
 func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {

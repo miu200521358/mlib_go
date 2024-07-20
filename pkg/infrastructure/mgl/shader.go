@@ -380,7 +380,7 @@ func (s *MShader) GetProgram(programType ProgramType) uint32 {
 	return 0
 }
 
-func (s *MShader) GetPrograms() []uint32 {
+func (s *MShader) Programs() []uint32 {
 	return []uint32{s.modelProgram, s.edgeProgram, s.boneProgram, s.physicsProgram, s.normalProgram, s.floorProgram, s.wireProgram, s.selectedVertexProgram}
 }
 

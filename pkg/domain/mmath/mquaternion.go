@@ -42,7 +42,7 @@ var (
 	MQuaternionIdent = MQuaternion{0, 0, 0, 1}
 )
 
-func (v *MQuaternion) GetXYZ() *MVec3 {
+func (v *MQuaternion) XYZ() *MVec3 {
 	return &MVec3{v.X, v.Y, v.Z}
 }
 
@@ -538,7 +538,7 @@ func (v *MQuaternion) ToMat4() *MMat4 {
 // ToFixedAxisRotationは軸制限されたクォータニオンの回転を計算します。
 func (quat *MQuaternion) ToFixedAxisRotation(fixedAxis *MVec3) *MQuaternion {
 	normalizedFixedAxis := fixedAxis.Normalized()
-	quatAxis := quat.GetXYZ().Normalized()
+	quatAxis := quat.XYZ().Normalized()
 	rad := quat.ToRadian()
 	if normalizedFixedAxis.Dot(quatAxis) < 0 {
 		rad *= -1

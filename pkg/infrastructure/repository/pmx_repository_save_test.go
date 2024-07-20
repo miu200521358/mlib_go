@@ -389,8 +389,8 @@ func TestPmxWriter_Save1(t *testing.T) {
 			t.Errorf("Expected IkLoopCount to be %v, got %v", expectedIkLoopCount, b.Ik.LoopCount)
 		}
 		expectedIkLimitedDegree := 57.29578
-		if b.Ik == nil || math.Abs(b.Ik.UnitRotation.GetDegrees().X-expectedIkLimitedDegree) > 1e-5 {
-			t.Errorf("Expected IkLimitedRadian to be %v, got %v", expectedIkLimitedDegree, b.Ik.UnitRotation.GetDegrees().X)
+		if b.Ik == nil || math.Abs(b.Ik.UnitRotation.Degrees().X-expectedIkLimitedDegree) > 1e-5 {
+			t.Errorf("Expected IkLimitedRadian to be %v, got %v", expectedIkLimitedDegree, b.Ik.UnitRotation.Degrees().X)
 		}
 		if b.Ik != nil {
 			il := b.Ik.Links[0]
@@ -403,12 +403,12 @@ func TestPmxWriter_Save1(t *testing.T) {
 				t.Errorf("Expected AngleLimit to be %v, got %v", expectedAngleLimit, il.AngleLimit)
 			}
 			expectedMinAngleLimit := &mmath.MVec3{X: -180.0, Y: 0.0, Z: 0.0}
-			if !il.MinAngleLimit.GetDegrees().NearEquals(expectedMinAngleLimit, 1e-5) {
-				t.Errorf("Expected MinAngleLimit to be %v, got %v", expectedMinAngleLimit, il.MinAngleLimit.GetDegrees())
+			if !il.MinAngleLimit.Degrees().NearEquals(expectedMinAngleLimit, 1e-5) {
+				t.Errorf("Expected MinAngleLimit to be %v, got %v", expectedMinAngleLimit, il.MinAngleLimit.Degrees())
 			}
 			expectedMaxAngleLimit := &mmath.MVec3{X: -0.5, Y: 0.0, Z: 0.0}
-			if !il.MaxAngleLimit.GetDegrees().NearEquals(expectedMaxAngleLimit, 1e-5) {
-				t.Errorf("Expected MaxAngleLimit to be %v, got %v", expectedMaxAngleLimit, il.MaxAngleLimit.GetDegrees())
+			if !il.MaxAngleLimit.Degrees().NearEquals(expectedMaxAngleLimit, 1e-5) {
+				t.Errorf("Expected MaxAngleLimit to be %v, got %v", expectedMaxAngleLimit, il.MaxAngleLimit.Degrees())
 			}
 		}
 		if b.Ik != nil {
@@ -484,8 +484,8 @@ func TestPmxWriter_Save1(t *testing.T) {
 				t.Errorf("Expected BoneIndex to be %v, got %v", expectedBoneIndex, o.BoneIndex)
 			}
 			expectedRotation := &mmath.MVec3{X: -6.000048, Y: 3.952523e-14, Z: -3.308919e-14}
-			if !o.Rotation.GetDegreesMMD().NearEquals(expectedRotation, 1e-5) {
-				t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, o.Rotation.GetDegrees())
+			if !o.Rotation.DegreesMMD().NearEquals(expectedRotation, 1e-5) {
+				t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, o.Rotation.Degrees())
 			}
 		}
 	}
@@ -714,8 +714,8 @@ func TestPmxWriter_Save1(t *testing.T) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, b.Position)
 		}
 		expectedRotation := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 125.00}
-		if !b.Rotation.GetDegrees().NearEquals(expectedRotation, 1e-5) {
-			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, b.Rotation.GetDegrees())
+		if !b.Rotation.Degrees().NearEquals(expectedRotation, 1e-5) {
+			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, b.Rotation.Degrees())
 		}
 		expectedMass := 1.0
 		if math.Abs(b.RigidBodyParam.Mass-expectedMass) > 1e-5 {
@@ -766,8 +766,8 @@ func TestPmxWriter_Save1(t *testing.T) {
 			t.Errorf("Expected Position to be %v, got %v", expectedPosition, j.Position)
 		}
 		expectedRotation := &mmath.MVec3{X: -15.10554, Y: 91.26718, Z: -4.187446}
-		if !j.Rotation.GetDegrees().NearEquals(expectedRotation, 1e-5) {
-			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, j.Rotation.GetDegrees())
+		if !j.Rotation.Degrees().NearEquals(expectedRotation, 1e-5) {
+			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, j.Rotation.Degrees())
 		}
 		expectedTranslationLimitMin := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 0.0}
 		if !j.JointParam.TranslationLimitMin.NearEquals(expectedTranslationLimitMin, 1e-5) {
@@ -778,12 +778,12 @@ func TestPmxWriter_Save1(t *testing.T) {
 			t.Errorf("Expected TranslationLimitation2 to be %v, got %v", expectedTranslationLimitMax, j.JointParam.TranslationLimitMax)
 		}
 		expectedRotationLimitMin := &mmath.MVec3{X: -29.04, Y: -14.3587, Z: -29.04}
-		if !j.JointParam.RotationLimitMin.GetDegrees().NearEquals(expectedRotationLimitMin, 1e-5) {
-			t.Errorf("Expected RotationLimitation1 to be %v, got %v", expectedRotationLimitMin, j.JointParam.RotationLimitMin.GetDegrees())
+		if !j.JointParam.RotationLimitMin.Degrees().NearEquals(expectedRotationLimitMin, 1e-5) {
+			t.Errorf("Expected RotationLimitation1 to be %v, got %v", expectedRotationLimitMin, j.JointParam.RotationLimitMin.Degrees())
 		}
 		expectedRotationLimitMax := &mmath.MVec3{X: 29.04, Y: 14.3587, Z: 29.04}
-		if !j.JointParam.RotationLimitMax.GetDegrees().NearEquals(expectedRotationLimitMax, 1e-5) {
-			t.Errorf("Expected RotationLimitation2 to be %v, got %v", expectedRotationLimitMax, j.JointParam.RotationLimitMax.GetDegrees())
+		if !j.JointParam.RotationLimitMax.Degrees().NearEquals(expectedRotationLimitMax, 1e-5) {
+			t.Errorf("Expected RotationLimitation2 to be %v, got %v", expectedRotationLimitMax, j.JointParam.RotationLimitMax.Degrees())
 		}
 		expectedSpringConstantTranslation := &mmath.MVec3{X: 0.0, Y: 0.0, Z: 0.0}
 		if !j.JointParam.SpringConstantTranslation.NearEquals(expectedSpringConstantTranslation, 1e-5) {

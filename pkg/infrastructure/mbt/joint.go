@@ -62,13 +62,13 @@ func (physics *MPhysics) initJoint(
 		float32(joint.JointParam.TranslationLimitMax.Y),
 		float32(joint.JointParam.TranslationLimitMax.Z)))
 	constraint.SetAngularLowerLimit(bt.NewBtVector3(
-		float32(joint.JointParam.RotationLimitMin.GetRadians().X),
-		float32(joint.JointParam.RotationLimitMin.GetRadians().Y),
-		float32(joint.JointParam.RotationLimitMin.GetRadians().Z)))
+		float32(joint.JointParam.RotationLimitMin.Radians().X),
+		float32(joint.JointParam.RotationLimitMin.Radians().Y),
+		float32(joint.JointParam.RotationLimitMin.Radians().Z)))
 	constraint.SetAngularUpperLimit(bt.NewBtVector3(
-		float32(joint.JointParam.RotationLimitMax.GetRadians().X),
-		float32(joint.JointParam.RotationLimitMax.GetRadians().Y),
-		float32(joint.JointParam.RotationLimitMax.GetRadians().Z)))
+		float32(joint.JointParam.RotationLimitMax.Radians().X),
+		float32(joint.JointParam.RotationLimitMax.Radians().Y),
+		float32(joint.JointParam.RotationLimitMax.Radians().Z)))
 
 	if rigidBodyB.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
 		// 剛体Bがボーン追従剛体の場合は、バネの値を設定しない

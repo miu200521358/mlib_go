@@ -107,7 +107,7 @@ func (r *VmdRepository) Save(overridePath string, data core.IHashModel, includeS
 }
 
 func (r *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) error {
-	names := motion.BoneFrames.GetNames()
+	names := motion.BoneFrames.Names()
 
 	r.writeNumber(fout, binaryType_unsignedInt, float64(motion.BoneFrames.Len()), 0.0, true)
 	for _, name := range names {
@@ -191,7 +191,7 @@ func (r *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.BoneFr
 func (r *VmdRepository) saveMorphFrames(fout *os.File, motion *vmd.VmdMotion) error {
 	r.writeNumber(fout, binaryType_unsignedInt, float64(motion.MorphFrames.Len()), 0.0, true)
 
-	names := motion.MorphFrames.GetNames()
+	names := motion.MorphFrames.Names()
 
 	for _, name := range names {
 		fs := motion.MorphFrames.Data[name]
@@ -267,7 +267,7 @@ func (r *VmdRepository) saveCameraFrame(fout *os.File, cf *vmd.CameraFrame) erro
 
 	var degreeMMD *mmath.MVec3
 	if cf.Rotation != nil {
-		degreeMMD = cf.Rotation.GetDegrees()
+		degreeMMD = cf.Rotation.Degrees()
 	} else {
 		degreeMMD = mmath.MVec3Zero
 	}

@@ -136,7 +136,7 @@ func (fs *BaseFrames[T]) Get(index int) T {
 }
 
 func (fs *BaseFrames[T]) prevFrame(index int) int {
-	prevFrame := fs.GetMinFrame()
+	prevFrame := fs.MinFrame()
 
 	fs.RegisteredIndexes.DescendLessOrEqual(core.Int(index), func(i llrb.Item) bool {
 		prevFrame = int(i.(core.Int))
@@ -147,7 +147,7 @@ func (fs *BaseFrames[T]) prevFrame(index int) int {
 }
 
 func (fs *BaseFrames[T]) nextFrame(index int) int {
-	nextFrame := fs.GetMaxFrame()
+	nextFrame := fs.MaxFrame()
 
 	fs.RegisteredIndexes.AscendGreaterOrEqual(core.Int(index), func(i llrb.Item) bool {
 		nextFrame = int(i.(core.Int))
@@ -182,14 +182,14 @@ func (fs *BaseFrames[T]) appendFrame(v T) {
 	fs.Indexes.ReplaceOrInsert(core.Int(v.Index()))
 }
 
-func (fs *BaseFrames[T]) GetMaxFrame() int {
+func (fs *BaseFrames[T]) MaxFrame() int {
 	if fs.RegisteredIndexes.Len() == 0 {
 		return 0
 	}
 	return fs.RegisteredIndexes.Max()
 }
 
-func (fs *BaseFrames[T]) GetMinFrame() int {
+func (fs *BaseFrames[T]) MinFrame() int {
 	if fs.RegisteredIndexes.Len() == 0 {
 		return 0
 	}

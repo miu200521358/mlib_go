@@ -23,7 +23,7 @@ func (mfs *MorphFrames) Update(fs *MorphNameFrames) {
 	mfs.Data[fs.Name] = fs
 }
 
-func (mfs *MorphFrames) GetNames() []string {
+func (mfs *MorphFrames) Names() []string {
 	names := make([]string, 0, len(mfs.Data))
 	for name := range mfs.Data {
 		names = append(names, name)
@@ -38,10 +38,10 @@ func (mfs *MorphFrames) Get(morphName string) *MorphNameFrames {
 	return mfs.Data[morphName]
 }
 
-func (mfs *MorphFrames) GetMaxFrame() int {
+func (mfs *MorphFrames) MaxFrame() int {
 	maxFno := int(0)
 	for _, mnfs := range mfs.Data {
-		fno := mnfs.GetMaxFrame()
+		fno := mnfs.MaxFrame()
 		if fno > maxFno {
 			maxFno = fno
 		}
@@ -49,10 +49,10 @@ func (mfs *MorphFrames) GetMaxFrame() int {
 	return maxFno
 }
 
-func (mfs *MorphFrames) GetMinFrame() int {
+func (mfs *MorphFrames) MinFrame() int {
 	minFno := math.MaxInt
 	for _, mnfs := range mfs.Data {
-		fno := mnfs.GetMinFrame()
+		fno := mnfs.MinFrame()
 		if fno < minFno {
 			minFno = fno
 		}

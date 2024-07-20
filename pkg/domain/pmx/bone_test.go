@@ -75,7 +75,7 @@ func TestIk_Copy(t *testing.T) {
 		t.Error("Expected LoopCount to match the original")
 	}
 
-	if !copied.UnitRotation.GetDegrees().NearEquals(ik.UnitRotation.GetDegrees(), 1e-8) {
+	if !copied.UnitRotation.Degrees().NearEquals(ik.UnitRotation.Degrees(), 1e-8) {
 		t.Error("Expected UnitRotation to match the original")
 	}
 
@@ -268,26 +268,26 @@ func TestBone_Copy(t *testing.T) {
 		if len(copied.Extend.EffectiveBoneIndexes) != len(b.Extend.EffectiveBoneIndexes) {
 			t.Errorf("Expected copied EffectiveBoneIndexes to have the same length as original")
 		}
-		if !copied.Extend.MinAngleLimit.GetDegrees().NearEquals(b.Extend.MinAngleLimit.GetDegrees(), 1e-10) {
-			t.Errorf("Expected copied MinAngleLimit to be a deep copy %s %s", copied.Extend.MinAngleLimit.GetDegrees().String(), b.Extend.MinAngleLimit.GetDegrees().String())
+		if !copied.Extend.MinAngleLimit.Degrees().NearEquals(b.Extend.MinAngleLimit.Degrees(), 1e-10) {
+			t.Errorf("Expected copied MinAngleLimit to be a deep copy %s %s", copied.Extend.MinAngleLimit.Degrees().String(), b.Extend.MinAngleLimit.Degrees().String())
 		}
 		if &copied.Extend.MinAngleLimit == &b.Extend.MinAngleLimit {
 			t.Errorf("Expected copied MinAngleLimit to be a deep copy")
 		}
-		if !copied.Extend.MaxAngleLimit.GetDegrees().NearEquals(b.Extend.MaxAngleLimit.GetDegrees(), 1e-10) {
-			t.Errorf("Expected copied MaxAngleLimit to be a deep copy %s %s", copied.Extend.MaxAngleLimit.GetDegrees().String(), b.Extend.MaxAngleLimit.GetDegrees().String())
+		if !copied.Extend.MaxAngleLimit.Degrees().NearEquals(b.Extend.MaxAngleLimit.Degrees(), 1e-10) {
+			t.Errorf("Expected copied MaxAngleLimit to be a deep copy %s %s", copied.Extend.MaxAngleLimit.Degrees().String(), b.Extend.MaxAngleLimit.Degrees().String())
 		}
 		if &copied.Extend.MaxAngleLimit == &b.Extend.MaxAngleLimit {
 			t.Errorf("Expected copied MaxAngleLimit to be a deep copy")
 		}
-		if !copied.Extend.LocalMinAngleLimit.GetDegrees().NearEquals(b.Extend.LocalMinAngleLimit.GetDegrees(), 1e-10) {
-			t.Errorf("Expected copied LocalMinAngleLimit to be a deep copy %s %s", copied.Extend.LocalMinAngleLimit.GetDegrees().String(), b.Extend.LocalMinAngleLimit.GetDegrees().String())
+		if !copied.Extend.LocalMinAngleLimit.Degrees().NearEquals(b.Extend.LocalMinAngleLimit.Degrees(), 1e-10) {
+			t.Errorf("Expected copied LocalMinAngleLimit to be a deep copy %s %s", copied.Extend.LocalMinAngleLimit.Degrees().String(), b.Extend.LocalMinAngleLimit.Degrees().String())
 		}
 		if &copied.Extend.LocalMinAngleLimit == &b.Extend.LocalMinAngleLimit {
 			t.Errorf("Expected copied LocalMinAngleLimit to be a deep copy")
 		}
-		if !copied.Extend.LocalMaxAngleLimit.GetDegrees().NearEquals(b.Extend.LocalMaxAngleLimit.GetDegrees(), 1e-10) {
-			t.Errorf("Expected copied LocalMaxAngleLimit to be a deep copy %s %s", copied.Extend.LocalMaxAngleLimit.GetDegrees().String(), b.Extend.LocalMaxAngleLimit.GetDegrees().String())
+		if !copied.Extend.LocalMaxAngleLimit.Degrees().NearEquals(b.Extend.LocalMaxAngleLimit.Degrees(), 1e-10) {
+			t.Errorf("Expected copied LocalMaxAngleLimit to be a deep copy %s %s", copied.Extend.LocalMaxAngleLimit.Degrees().String(), b.Extend.LocalMaxAngleLimit.Degrees().String())
 		}
 		if &copied.Extend.LocalMaxAngleLimit == &b.Extend.LocalMaxAngleLimit {
 			t.Errorf("Expected copied LocalMaxAngleLimit to be a deep copy")

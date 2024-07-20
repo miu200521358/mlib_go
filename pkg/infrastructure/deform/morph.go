@@ -151,7 +151,7 @@ func deformUv(
 			if d.Uv == nil {
 				d.Uv = mmath.NewMVec2()
 			}
-			uv := offset.Uv.MuledScalar(ratio).GetXY()
+			uv := offset.Uv.MuledScalar(ratio).XY()
 			d.Uv.Add(uv)
 			deltas.Data[offset.VertexIndex] = d
 		}
@@ -178,7 +178,7 @@ func deformUv1(
 				d.Uv1 = mmath.NewMVec2()
 			}
 			uv := offset.Uv.MuledScalar(ratio)
-			d.Uv1.Add(uv.GetXY())
+			d.Uv1.Add(uv.XY())
 			deltas.Data[offset.VertexIndex] = d
 		}
 	}
@@ -202,7 +202,7 @@ func deformBone(
 			}
 
 			offsetPos := offset.Position.MuledScalar(ratio)
-			offsetQuat := offset.Rotation.GetQuaternion().MuledScalar(ratio).Normalize()
+			offsetQuat := offset.Rotation.Quaternion().MuledScalar(ratio).Normalize()
 			offsetScale := offset.Extend.Scale.MuledScalar(ratio)
 
 			if d.FramePosition == nil {

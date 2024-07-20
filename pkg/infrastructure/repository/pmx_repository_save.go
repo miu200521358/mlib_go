@@ -537,7 +537,7 @@ func (r *PmxRepository) saveBones(fout *os.File, targetBones []*pmx.Bone, boneId
 			if err != nil {
 				return err
 			}
-			err = r.writeNumber(fout, binaryType_float, bone.Ik.UnitRotation.GetRadians().X, 0.0, false)
+			err = r.writeNumber(fout, binaryType_float, bone.Ik.UnitRotation.Radians().X, 0.0, false)
 			if err != nil {
 				return err
 			}
@@ -556,27 +556,27 @@ func (r *PmxRepository) saveBones(fout *os.File, targetBones []*pmx.Bone, boneId
 					return err
 				}
 				if link.AngleLimit {
-					err = r.writeNumber(fout, binaryType_float, link.MinAngleLimit.GetRadians().X, 0.0, false)
+					err = r.writeNumber(fout, binaryType_float, link.MinAngleLimit.Radians().X, 0.0, false)
 					if err != nil {
 						return err
 					}
-					err = r.writeNumber(fout, binaryType_float, link.MinAngleLimit.GetRadians().Y, 0.0, false)
+					err = r.writeNumber(fout, binaryType_float, link.MinAngleLimit.Radians().Y, 0.0, false)
 					if err != nil {
 						return err
 					}
-					err = r.writeNumber(fout, binaryType_float, link.MinAngleLimit.GetRadians().Z, 0.0, false)
+					err = r.writeNumber(fout, binaryType_float, link.MinAngleLimit.Radians().Z, 0.0, false)
 					if err != nil {
 						return err
 					}
-					err = r.writeNumber(fout, binaryType_float, link.MaxAngleLimit.GetRadians().X, 0.0, false)
+					err = r.writeNumber(fout, binaryType_float, link.MaxAngleLimit.Radians().X, 0.0, false)
 					if err != nil {
 						return err
 					}
-					err = r.writeNumber(fout, binaryType_float, link.MaxAngleLimit.GetRadians().Y, 0.0, false)
+					err = r.writeNumber(fout, binaryType_float, link.MaxAngleLimit.Radians().Y, 0.0, false)
 					if err != nil {
 						return err
 					}
-					err = r.writeNumber(fout, binaryType_float, link.MaxAngleLimit.GetRadians().Z, 0.0, false)
+					err = r.writeNumber(fout, binaryType_float, link.MaxAngleLimit.Radians().Z, 0.0, false)
 					if err != nil {
 						return err
 					}
@@ -676,19 +676,19 @@ func (r *PmxRepository) saveMorphs(
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Rotation.GetQuaternion().Vec3().X, 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Rotation.Quaternion().Vec3().X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Rotation.GetQuaternion().Vec3().Y, 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Rotation.Quaternion().Vec3().Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Rotation.GetQuaternion().Vec3().Z, 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Rotation.Quaternion().Vec3().Z, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = r.writeNumber(fout, binaryType_float, off.Rotation.GetQuaternion().W, 0.0, false)
+				err = r.writeNumber(fout, binaryType_float, off.Rotation.Quaternion().W, 0.0, false)
 				if err != nil {
 					return err
 				}
@@ -932,15 +932,15 @@ func (r *PmxRepository) saveRigidBodies(fout *os.File, model *pmx.PmxModel, bone
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, rigidbody.Rotation.GetRadians().X, 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, rigidbody.Rotation.Radians().X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, rigidbody.Rotation.GetRadians().Y, 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, rigidbody.Rotation.Radians().Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, rigidbody.Rotation.GetRadians().Z, 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, rigidbody.Rotation.Radians().Z, 0.0, false)
 		if err != nil {
 			return err
 		}
@@ -1015,15 +1015,15 @@ func (r *PmxRepository) saveJoints(fout *os.File, model *pmx.PmxModel, rigidbody
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.Rotation.GetRadians().X, 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.Rotation.Radians().X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.Rotation.GetRadians().Y, 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.Rotation.Radians().Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.Rotation.GetRadians().Z, 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.Rotation.Radians().Z, 0.0, false)
 		if err != nil {
 			return err
 		}
@@ -1051,27 +1051,27 @@ func (r *PmxRepository) saveJoints(fout *os.File, model *pmx.PmxModel, rigidbody
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.GetRadians().X, 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.Radians().X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.GetRadians().Y, 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.Radians().Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.GetRadians().Z, 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.Radians().Z, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.GetRadians().X, 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.Radians().X, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.GetRadians().Y, 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.Radians().Y, 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.GetRadians().Z, 0.0, false)
+		err = r.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.Radians().Z, 0.0, false)
 		if err != nil {
 			return err
 		}

@@ -254,11 +254,11 @@ ikLoop:
 
 			// 角度制限があってまったく動かさない場合、IK計算しないで次に行く
 			if (linkBone.Extend.AngleLimit &&
-				linkBone.Extend.MinAngleLimit.GetRadians().IsZero() &&
-				linkBone.Extend.MaxAngleLimit.GetRadians().IsZero()) ||
+				linkBone.Extend.MinAngleLimit.Radians().IsZero() &&
+				linkBone.Extend.MaxAngleLimit.Radians().IsZero()) ||
 				(linkBone.Extend.LocalAngleLimit &&
-					linkBone.Extend.LocalMinAngleLimit.GetRadians().IsZero() &&
-					linkBone.Extend.LocalMaxAngleLimit.GetRadians().IsZero()) {
+					linkBone.Extend.LocalMinAngleLimit.Radians().IsZero() &&
+					linkBone.Extend.LocalMaxAngleLimit.Radians().IsZero()) {
 				continue
 			}
 
@@ -372,7 +372,7 @@ ikLoop:
 			}
 
 			// 単位角
-			unitRad := ikBone.Ik.UnitRotation.GetRadians().X * float64(lidx+1)
+			unitRad := ikBone.Ik.UnitRotation.Radians().X * float64(lidx+1)
 			linkDot := ikLocalPosition.Dot(effectorLocalPosition)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -413,16 +413,16 @@ ikLoop:
 			if !isSingleIk || (isSingleIk && linkAngle > mmath.GIMBAL1_RAD) && ikLink.AngleLimit {
 				// グローバル軸制限
 				linkAxis, originalLinkAxis = getLinkAxis(
-					ikLink.MinAngleLimit.GetRadians(),
-					ikLink.MaxAngleLimit.GetRadians(),
+					ikLink.MinAngleLimit.Radians(),
+					ikLink.MaxAngleLimit.Radians(),
 					effectorLocalPosition, ikLocalPosition,
 					frame, count, loop, linkBone.Name(), ikMotion, ikFile,
 				)
 			} else if !isSingleIk || (isSingleIk && linkAngle > mmath.GIMBAL1_RAD) && ikLink.LocalAngleLimit {
 				// ローカル軸制限
 				linkAxis, originalLinkAxis = getLinkAxis(
-					ikLink.LocalMinAngleLimit.GetRadians(),
-					ikLink.LocalMaxAngleLimit.GetRadians(),
+					ikLink.LocalMinAngleLimit.Radians(),
+					ikLink.LocalMaxAngleLimit.Radians(),
 					effectorLocalPosition, ikLocalPosition,
 					frame, count, loop, linkBone.Name(), ikMotion, ikFile,
 				)
@@ -485,8 +485,8 @@ ikLoop:
 				// 角度制限が入ってる場合
 				resultIkQuat, count = calcIkLimitQuaternion(
 					totalIkQuat,
-					ikLink.MinAngleLimit.GetRadians(),
-					ikLink.MaxAngleLimit.GetRadians(),
+					ikLink.MinAngleLimit.Radians(),
+					ikLink.MaxAngleLimit.Radians(),
 					mmath.MVec3UnitX, mmath.MVec3UnitY, mmath.MVec3UnitZ,
 					loop, loopCount,
 					frame, count, linkBone.Name(), ikMotion, ikFile,
@@ -508,8 +508,8 @@ ikLoop:
 				// ローカル角度制限が入ってる場合
 				resultIkQuat, count = calcIkLimitQuaternion(
 					totalIkQuat,
-					ikLink.LocalMinAngleLimit.GetRadians(),
-					ikLink.LocalMaxAngleLimit.GetRadians(),
+					ikLink.LocalMinAngleLimit.Radians(),
+					ikLink.LocalMaxAngleLimit.Radians(),
 					linkBone.Extend.NormalizedLocalAxisX,
 					linkBone.Extend.NormalizedLocalAxisY,
 					linkBone.Extend.NormalizedLocalAxisZ,
