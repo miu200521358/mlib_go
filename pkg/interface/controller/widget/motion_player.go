@@ -161,19 +161,6 @@ func (mp *MotionPlayer) SetRange(min, max int) {
 
 func (mp *MotionPlayer) SetEnabled(enabled bool) {
 	mp.frameEdit.SetEnabled(enabled)
-	if !enabled {
-		bg, err := walk.NewSystemColorBrush(walk.SysColor3DFace)
-		if err != nil {
-			return
-		}
-		mp.frameEdit.SetBackground(bg)
-	} else {
-		bg, err := walk.NewSolidColorBrush(walk.RGB(255, 255, 255))
-		if err != nil {
-			return
-		}
-		mp.frameEdit.SetBackground(bg)
-	}
 	mp.frameSlider.SetEnabled(enabled)
 	mp.playButton.SetEnabled(enabled)
 }
