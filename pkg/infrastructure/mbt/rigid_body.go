@@ -99,6 +99,7 @@ func (p *MPhysics) deleteRigidBodies(modelIndex int) {
 	for _, r := range p.rigidBodies[modelIndex] {
 		p.world.RemoveRigidBody(*r.btRigidBody)
 	}
+	p.rigidBodies[modelIndex] = nil
 }
 
 func (physics *MPhysics) updateFlags(modelIndex int, rigidBody *pmx.RigidBody) {

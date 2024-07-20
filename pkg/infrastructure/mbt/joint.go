@@ -102,4 +102,5 @@ func (p *MPhysics) deleteJoints(modelIndex int) {
 	for _, j := range p.joints[modelIndex] {
 		p.world.RemoveConstraint(j.btJoint)
 	}
+	p.joints[modelIndex] = nil
 }

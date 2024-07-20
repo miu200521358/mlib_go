@@ -30,10 +30,6 @@ type ViewWindow struct {
 	appState    core.IAppState     // アプリ状態
 	physics     *mbt.MPhysics      // 物理
 	shader      *mgl.MShader       // シェーダ
-	// animationStates []*renderer.AnimationState // アニメーションステート
-	// doResetPhysicsStart    bool               // 物理リセット開始フラグ
-	// doResetPhysicsProgress bool               // 物理リセット中フラグ
-	// doResetPhysicsCount    int                // 物理リセット処理回数
 }
 
 func NewViewWindow(
@@ -145,42 +141,22 @@ func (w *ViewWindow) GetWindow() *glfw.Window {
 	return w.Window
 }
 
-func (w *ViewWindow) ResetPhysicsStart() {
-	// // 物理ON・まだリセット中ではないの時だけリセット処理を行う
-	// if w.physics.Enabled && !w.doResetPhysicsProgress {
-	// 	// 一旦物理OFFにする
-	// 	w.physics.Enabled = false
-	// 	// 物理ワールドを作り直す
-	// 	w.physics.ResetWorld()
-	// 	w.doResetPhysicsStart = false
-	// 	w.doResetPhysicsProgress = true
-	// 	w.doResetPhysicsCount = 0
-	// }
+func (w *ViewWindow) ResetPhysics(animationStates []core.IAnimationState) {
+	// 物理を削除
+	for _, s := range animationStates {
+		if s.Model() != nil {
+			w.physics.DeleteModel(s.ModelIndex())
+		}
+	}
+	// 物理ワールドを作り直す
+	w.physics.ResetWorld()
+	// 物理を登録
+	for _, s := range animationStates {
+		if s.Model() != nil {
+			w.physics.AddModel(s.ModelIndex(), s.Model())
+		}
+	}
 }
-
-// func (w *ViewWindow) load(states []core.IAnimationState) {
-// 	for _, s := range states {
-// 		if len(w.animationStates) <= s.ModelIndex() {
-// 			w.animationStates = append(w.animationStates, renderer.NewAnimationState(w.windowIndex, s.ModelIndex()))
-// 		}
-
-// 		if s.Model() != nil {
-// 			w.animationStates[s.ModelIndex()].SetModel(s.Model())
-// 			w.animationStates[s.ModelIndex()].Load()
-// 			w.physics.AddModel(s.ModelIndex(), s.Model())
-// 		}
-// 		if s.Motion() != nil {
-// 			w.animationStates[s.ModelIndex()].SetMotion(s.Motion())
-// 		}
-// 		if s.VmdDeltas() != nil {
-// 			w.animationStates[s.ModelIndex()].SetVmdDeltas(s.VmdDeltas())
-// 		}
-// 		if s.RenderDeltas() != nil {
-// 			w.animationStates[s.ModelIndex()].SetRenderDeltas(s.RenderDeltas())
-// 		}
-// 		w.animationStates[s.ModelIndex()].SetFrame(s.Frame())
-// 	}
-// }
 
 func (w *ViewWindow) Render(animationStates []core.IAnimationState, timeStep float32) {
 	glfw.PollEvents()

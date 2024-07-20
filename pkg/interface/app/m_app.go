@@ -86,6 +86,15 @@ func (a *MApp) ViewerRun() {
 			continue
 		}
 
+		if a.IsEnabledPhysics() && a.IsPhysicsReset() {
+			// 物理ONの時だけ物理リセット
+			for i, w := range a.viewWindows {
+				w.ResetPhysics(a.animationStates[i])
+			}
+			// リセットフラグOFF
+			a.SetPhysicsReset(false)
+		}
+
 		for i, w := range a.viewWindows {
 			w.Render(a.animationStates[i], timeStep)
 		}
@@ -188,15 +197,6 @@ func (a *MApp) Dispose() {
 		w.Dispose()
 	}
 	a.controlWindow.Dispose()
-}
-
-func (a *MApp) ResetPhysics() {
-	// 物理ON・まだリセット中ではないの時だけリセット処理を行う
-	if a.IsEnabledPhysics() {
-		for _, w := range a.viewWindows {
-			w.ResetPhysicsStart()
-		}
-	}
 }
 
 // ----------------------

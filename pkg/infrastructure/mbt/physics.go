@@ -20,7 +20,6 @@ type IPhysics interface {
 }
 
 type MPhysics struct {
-	Enabled       bool                       // 物理有効
 	world         bt.BtDiscreteDynamicsWorld // ワールド
 	drawer        bt.BtMDebugDraw            // デバッグビューワー
 	liner         *mDebugDrawLiner           // ライナー
@@ -38,7 +37,6 @@ func NewMPhysics() *MPhysics {
 	world := createWorld()
 
 	p := &MPhysics{
-		Enabled:     true,
 		world:       world,
 		MaxSubSteps: 2,
 		DeformFps:   30.0,
@@ -91,35 +89,14 @@ func (p *MPhysics) ResetWorld() {
 	world := createWorld()
 	world.SetDebugDrawer(p.drawer)
 	p.world = world
-	// 一旦削除
-	for modelIndex := range p.rigidBodies {
-		p.DeleteModel(modelIndex)
-	}
-	// 登録し直し
-	for modelIndex := range p.rigidBodies {
-		for _, r := range p.rigidBodies[modelIndex] {
-			if r != nil {
-				p.initRigidBody(modelIndex, r.pmxRigidBody)
-			}
-		}
-	}
-	for modelIndex := range p.joints {
-		for _, j := range p.joints[modelIndex] {
-			if j != nil {
-				p.initJoint(modelIndex, j.pmxJoint)
-			}
-		}
-	}
 }
 
 func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
-	// pm.physics = physics
 	physics.initRigidBodies(modelIndex, model.RigidBodies)
 	physics.initJoints(modelIndex, model.RigidBodies, model.Joints)
 }
 
 func (physics *MPhysics) DeleteModel(modelIndex int) {
-	// pm.physics = physics
 	physics.deleteRigidBodies(modelIndex)
 	physics.deleteJoints(modelIndex)
 }

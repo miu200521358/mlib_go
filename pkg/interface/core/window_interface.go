@@ -23,7 +23,7 @@ type IViewWindow interface {
 	SetPosition(x, y int)
 	TriggerClose(window *glfw.Window)
 	GetWindow() *glfw.Window
-	ResetPhysicsStart()
+	ResetPhysics(animationStates []IAnimationState)
 	AppState() IAppState
 }
 
