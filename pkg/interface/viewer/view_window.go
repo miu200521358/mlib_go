@@ -46,6 +46,7 @@ type ViewWindow struct {
 	prevCursorPos       *mmath.MVec2       // 前回のカーソル位置
 	yaw                 float64            // カメラyaw
 	pitch               float64            // カメラpitch
+	size                *mmath.MVec2       // ウィンドウサイズ
 }
 
 func NewViewWindow(
@@ -85,6 +86,8 @@ func NewViewWindow(
 		shader:        mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height),
 		physics:       mbt.NewMPhysics(),
 		prevCursorPos: mmath.NewMVec2(),
+		size: &mmath.MVec2{X: float64(appConfig.ViewWindowSize.Width),
+			Y: float64(appConfig.ViewWindowSize.Height)},
 	}
 
 	glWindow.SetCloseCallback(viewWindow.closeCallback)
@@ -103,7 +106,8 @@ func NewViewWindow(
 }
 
 func (viewWindow *ViewWindow) resizeCallback(w *glfw.Window, width int, height int) {
-	viewWindow.shader.Resize(width, height)
+	viewWindow.size.X = float64(width)
+	viewWindow.size.Y = float64(height)
 }
 
 func (viewWindow *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
@@ -384,11 +388,15 @@ func (w *ViewWindow) Render(
 ) {
 	glfw.PollEvents()
 
-	if w.shader.Width == 0 || w.shader.Height == 0 {
+	if w.size.X == 0 || w.size.Y == 0 {
 		return
 	}
 
 	w.MakeContextCurrent()
+
+	if w.size.X != float64(w.shader.Width) || w.size.Y != float64(w.shader.Height) {
+		w.shader.Resize(int(w.size.X), int(w.size.Y))
+	}
 
 	// MSAAフレームバッファをバインド
 	w.shader.Msaa.Bind()

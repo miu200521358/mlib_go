@@ -345,11 +345,12 @@ func (s *MShader) Resize(width int, height int) {
 	s.Width = width
 	s.Height = height
 
-	if width != 0 && height != 0 {
-		// ビューポートの設定
-		gl.Viewport(0, 0, int32(s.Width), int32(s.Height))
+	// ビューポートの設定
+	gl.Viewport(0, 0, int32(s.Width), int32(s.Height))
 
+	if width != 0 && height != 0 {
 		// MSAAも作り直し
+		s.Msaa.Delete()
 		s.Msaa = buffer.NewMsaa(s.Width, s.Height)
 	}
 }

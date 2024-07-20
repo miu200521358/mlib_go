@@ -130,28 +130,28 @@ func (r *VmdRepository) loadModel(motion *vmd.VmdMotion) error {
 	err = r.loadCameras(motion)
 	if err != nil {
 		// カメラがなくてもエラーにしないが、後続は読まない
-		mlog.E("loadModel.readCameras error: %v", err)
+		mlog.D("loadModel.readCameras error: %v", err)
 		return nil
 	}
 
 	err = r.loadLights(motion)
 	if err != nil {
 		// ライトがなくてもエラーにしないが、後続は読まない
-		mlog.E("loadModel.readLights error: %v", err)
+		mlog.D("loadModel.readLights error: %v", err)
 		return nil
 	}
 
 	err = r.loadShadows(motion)
 	if err != nil {
 		// シャドウがなくてもエラーにしないが、後続は読まない
-		mlog.E("loadModel.readShadows error: %v", err)
+		mlog.D("loadModel.readShadows error: %v", err)
 		return nil
 	}
 
 	err = r.loadIks(motion)
 	if err != nil {
 		// IKがなくてもエラーにしないが、後続は読まない
-		mlog.E("loadModel.readIks error: %v", err)
+		mlog.D("loadModel.readIks error: %v", err)
 		return nil
 	}
 
@@ -259,7 +259,7 @@ func (r *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
 func (r *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 	totalCount, err := r.unpackUInt()
 	if err != nil {
-		mlog.E("readCameras.totalCount error: %v", err)
+		mlog.D("readCameras.totalCount error: %v", err)
 		return err
 	}
 
@@ -332,7 +332,7 @@ func (r *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 func (r *VmdRepository) loadLights(motion *vmd.VmdMotion) error {
 	totalCount, err := r.unpackUInt()
 	if err != nil {
-		mlog.E("readLights.totalCount error: %v", err)
+		mlog.D("readLights.totalCount error: %v", err)
 		return err
 	}
 
@@ -374,7 +374,7 @@ func (r *VmdRepository) loadLights(motion *vmd.VmdMotion) error {
 func (r *VmdRepository) loadShadows(motion *vmd.VmdMotion) error {
 	totalCount, err := r.unpackUInt()
 	if err != nil {
-		mlog.E("readShadows.totalCount error: %v", err)
+		mlog.D("readShadows.totalCount error: %v", err)
 		return err
 	}
 
@@ -415,7 +415,7 @@ func (r *VmdRepository) loadShadows(motion *vmd.VmdMotion) error {
 func (r *VmdRepository) loadIks(motion *vmd.VmdMotion) error {
 	totalCount, err := r.unpackUInt()
 	if err != nil {
-		mlog.E("readIks.totalCount error: %v", err)
+		mlog.D("readIks.totalCount error: %v", err)
 		return err
 	}
 

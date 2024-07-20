@@ -47,7 +47,7 @@ func NewMsaa(width int, height int) *Msaa {
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, msaa.depthBufferMS)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		mlog.F("Multisample Framebuffer is not complete")
+		mlog.F("MSAA生成失敗")
 	}
 
 	// アンバインド
