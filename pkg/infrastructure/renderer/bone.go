@@ -10,8 +10,8 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
-	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+	"github.com/miu200521358/mlib_go/pkg/interface/core"
 )
 
 var bone_colors_ik = []float32{1.0, 0.38, 0, 1.0}
@@ -150,7 +150,7 @@ func newTailBoneGl(b *pmx.Bone) []float32 {
 	}
 }
 
-func newBoneDebugAlphaGl(b *pmx.Bone, appState state.IAppState) []float32 {
+func newBoneDebugAlphaGl(b *pmx.Bone, appState core.IAppState) []float32 {
 	c := getBoneColor(b, false)
 
 	ikAlpha := float32(1.0)
@@ -222,7 +222,7 @@ func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int) {
 func bindBoneMatrixes(
 	paddedMatrixes []float32,
 	width, height int,
-	shader state.IShader,
+	shader mgl.IShader,
 	program uint32,
 ) {
 	// テクスチャをアクティブにする

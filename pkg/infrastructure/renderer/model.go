@@ -10,9 +10,9 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
-	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
+	"github.com/miu200521358/mlib_go/pkg/interface/core"
 )
 
 type RenderModel struct {
@@ -270,7 +270,7 @@ func (renderModel *RenderModel) initializeBuffer(
 }
 
 func (renderModel *RenderModel) Render(
-	shader state.IShader, appState state.IAppState, animationState state.IAnimationState,
+	shader mgl.IShader, appState core.IAppState, animationState core.IAnimationState,
 ) {
 	if animationState == nil || animationState.Model() == nil ||
 		animationState.VmdDeltas() == nil || animationState.RenderDeltas() == nil {
@@ -319,11 +319,11 @@ func (renderModel *RenderModel) Render(
 }
 
 func (renderModel *RenderModel) drawNormal(
-	shader state.IShader,
+	shader mgl.IShader,
 	paddedMatrixes []float32,
 	width, height int,
 ) {
-	program := shader.GetProgram(state.PROGRAM_TYPE_NORMAL)
+	program := shader.GetProgram(mgl.PROGRAM_TYPE_NORMAL)
 	gl.UseProgram(program)
 
 	renderModel.normalVao.Bind()
@@ -355,7 +355,7 @@ func (renderModel *RenderModel) drawNormal(
 func (renderModel *RenderModel) drawSelectedVertex(
 	selectedVertexMorphIndexes []int,
 	selectedVertexDeltas [][]float32,
-	shader state.IShader,
+	shader mgl.IShader,
 	paddedMatrixes []float32,
 	width, height int,
 ) [][]float32 {
@@ -363,7 +363,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
-	program := shader.GetProgram(state.PROGRAM_TYPE_SELECTED_VERTEX)
+	program := shader.GetProgram(mgl.PROGRAM_TYPE_SELECTED_VERTEX)
 	gl.UseProgram(program)
 
 	renderModel.selectedVertexVao.Bind()
@@ -422,9 +422,9 @@ func (renderModel *RenderModel) drawSelectedVertex(
 }
 
 func (renderModel *RenderModel) drawBone(
-	shader state.IShader,
+	shader mgl.IShader,
 	bones *pmx.Bones,
-	appState state.IAppState,
+	appState core.IAppState,
 	paddedMatrixes []float32,
 	width, height int,
 ) {
@@ -436,7 +436,7 @@ func (renderModel *RenderModel) drawBone(
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	program := shader.GetProgram(state.PROGRAM_TYPE_BONE)
+	program := shader.GetProgram(mgl.PROGRAM_TYPE_BONE)
 	gl.UseProgram(program)
 
 	renderModel.boneVao.Bind()
@@ -467,7 +467,7 @@ func (renderModel *RenderModel) drawBone(
 }
 
 func (renderModel *RenderModel) fetchBoneDebugDeltas(
-	bones *pmx.Bones, appState state.IAppState,
+	bones *pmx.Bones, appState core.IAppState,
 ) ([]int, [][]float32) {
 	indexes := make([]int, 0)
 	deltas := make([][]float32, 0)

@@ -13,7 +13,7 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/state"
+	"github.com/miu200521358/mlib_go/pkg/interface/core"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
@@ -26,10 +26,10 @@ const physicsDefaultSpf = 1.0 / 60.0
 const deformDefaultSpf = 1.0 / 30.0
 
 type MApp struct {
-	*appState                          // アプリ状態
-	appConfig     *mconfig.AppConfig   // アプリケーション設定
-	viewWindows   []state.IViewWindow  // 描画ウィンドウリスト
-	controlWindow state.IControlWindow // 操作ウィンドウ
+	*appState                         // アプリ状態
+	appConfig     *mconfig.AppConfig  // アプリケーション設定
+	viewWindows   []core.IViewWindow  // 描画ウィンドウリスト
+	controlWindow core.IControlWindow // 操作ウィンドウ
 }
 
 func NewMApp(appConfig *mconfig.AppConfig) *MApp {
@@ -42,7 +42,7 @@ func NewMApp(appConfig *mconfig.AppConfig) *MApp {
 	app := &MApp{
 		appState:    newAppState(),
 		appConfig:   appConfig,
-		viewWindows: make([]state.IViewWindow, 0),
+		viewWindows: make([]core.IViewWindow, 0),
 	}
 
 	return app
@@ -174,13 +174,13 @@ func (a *MApp) recoverFromPanic() {
 	}
 }
 
-func (a *MApp) SetControlWindow(controlWindow state.IControlWindow) {
+func (a *MApp) SetControlWindow(controlWindow core.IControlWindow) {
 	a.controlWindow = controlWindow
 }
 
-func (a *MApp) AddViewWindow(viewWindow state.IViewWindow) {
+func (a *MApp) AddViewWindow(viewWindow core.IViewWindow) {
 	a.viewWindows = append(a.viewWindows, viewWindow)
-	a.animationStates = append(a.animationStates, make([]state.IAnimationState, 0))
+	a.animationStates = append(a.animationStates, make([]core.IAnimationState, 0))
 }
 
 func (a *MApp) Dispose() {

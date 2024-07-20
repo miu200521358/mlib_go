@@ -8,14 +8,14 @@ import (
 	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/state"
+	"github.com/miu200521358/mlib_go/pkg/interface/core"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 type MotionPlayer struct {
 	walk.WidgetBase
-	appState    state.IAppState  // アプリ状態
+	appState    core.IAppState   // アプリ状態
 	prevFrame   int              // 前回フレーム
 	playing     bool             // 再生中かどうか
 	frameEdit   *walk.NumberEdit // フレーム番号入力欄
@@ -28,7 +28,7 @@ const MotionPlayerClass = "MotionPlayer Class"
 
 func NewMotionPlayer(
 	parent walk.Container,
-	appState state.IAppState,
+	appState core.IAppState,
 ) *MotionPlayer {
 	mp := new(MotionPlayer)
 	mp.appState = appState

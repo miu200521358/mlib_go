@@ -1,12 +1,14 @@
 //go:build windows
 // +build windows
 
-package state
+package core
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 type IAnimationState interface {
@@ -25,14 +27,14 @@ type IAnimationState interface {
 	Frame() float64
 	SetFrame(frame float64)
 	AnimateBeforePhysics(appState IAppState, model *pmx.PmxModel) (*delta.VmdDeltas, *delta.RenderDeltas)
-	AnimatePhysics(physics IPhysics, appState IAppState)
-	AnimateAfterPhysics(physics IPhysics, appState IAppState)
+	AnimatePhysics(physics mbt.IPhysics, appState IAppState)
+	AnimateAfterPhysics(physics mbt.IPhysics, appState IAppState)
 	RenderModel() IRenderModel
 	SetRenderModel(model IRenderModel)
-	Render(shader IShader, appState IAppState)
+	Render(shader mgl.IShader, appState IAppState)
 }
 
 type IRenderModel interface {
-	Render(shader IShader, appState IAppState, animationState IAnimationState)
+	Render(shader mgl.IShader, appState IAppState, animationState IAnimationState)
 	Hash() string
 }

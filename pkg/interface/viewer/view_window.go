@@ -11,11 +11,11 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
+	"github.com/miu200521358/mlib_go/pkg/interface/core"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
@@ -25,7 +25,7 @@ type ViewWindow struct {
 	windowIndex int                // ウィンドウインデックス
 	title       string             // ウィンドウタイトル
 	appConfig   *mconfig.AppConfig // アプリケーション設定
-	appState    state.IAppState    // アプリ状態
+	appState    core.IAppState     // アプリ状態
 	physics     *mbt.MPhysics      // 物理
 	shader      *mgl.MShader       // シェーダ
 	// animationStates []*renderer.AnimationState // アニメーションステート
@@ -37,7 +37,7 @@ type ViewWindow struct {
 func NewViewWindow(
 	windowIndex int,
 	appConfig *mconfig.AppConfig,
-	appState state.IAppState,
+	appState core.IAppState,
 	title string,
 ) *ViewWindow {
 	glfw.WindowHint(glfw.Resizable, glfw.True)
@@ -126,7 +126,7 @@ func (w *ViewWindow) SetPosition(x, y int) {
 	w.SetPos(x, y)
 }
 
-func (w *ViewWindow) AppState() state.IAppState {
+func (w *ViewWindow) AppState() core.IAppState {
 	return w.appState
 }
 
@@ -151,7 +151,7 @@ func (w *ViewWindow) ResetPhysicsStart() {
 	// }
 }
 
-// func (w *ViewWindow) load(states []state.IAnimationState) {
+// func (w *ViewWindow) load(states []core.IAnimationState) {
 // 	for _, s := range states {
 // 		if len(w.animationStates) <= s.ModelIndex() {
 // 			w.animationStates = append(w.animationStates, renderer.NewAnimationState(w.windowIndex, s.ModelIndex()))
@@ -175,7 +175,7 @@ func (w *ViewWindow) ResetPhysicsStart() {
 // 	}
 // }
 
-func (w *ViewWindow) Render(animationStates []state.IAnimationState, timeStep float32) {
+func (w *ViewWindow) Render(animationStates []core.IAnimationState, timeStep float32) {
 	glfw.PollEvents()
 
 	w.MakeContextCurrent()

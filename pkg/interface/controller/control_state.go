@@ -4,14 +4,14 @@
 package controller
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
+	"github.com/miu200521358/mlib_go/pkg/interface/core"
 )
 
 type ControlState struct {
-	appState                 state.IAppState               // アプリ状態
-	motionPlayer             state.IPlayer                 // モーションプレイヤー
-	controlWindow            state.IControlWindow          // コントロールウィンドウ
+	appState                 core.IAppState                // アプリ状態
+	motionPlayer             core.IPlayer                  // モーションプレイヤー
+	controlWindow            core.IControlWindow           // コントロールウィンドウ
 	prevFrameChan            chan int                      // 前回フレーム
 	frameChan                chan float64                  // フレーム
 	maxFrameChan             chan int                      // 最大フレーム
@@ -46,7 +46,7 @@ type ControlState struct {
 	animationState           chan *renderer.AnimationState // アニメーションステート
 }
 
-func NewControlState(appState state.IAppState) *ControlState {
+func NewControlState(appState core.IAppState) *ControlState {
 	u := &ControlState{
 		appState:                 appState,
 		prevFrameChan:            make(chan int),
@@ -145,15 +145,15 @@ func (s *ControlState) Run() {
 	}()
 }
 
-func (c *ControlState) SetPlayer(mp state.IPlayer) {
+func (c *ControlState) SetPlayer(mp core.IPlayer) {
 	c.motionPlayer = mp
 }
 
-func (c *ControlState) SetControlWindow(cw state.IControlWindow) {
+func (c *ControlState) SetControlWindow(cw core.IControlWindow) {
 	c.controlWindow = cw
 }
 
-func (c *ControlState) SetAnimationState(state state.IAnimationState) {
+func (c *ControlState) SetAnimationState(state core.IAnimationState) {
 	c.animationState <- state.(*renderer.AnimationState)
 }
 

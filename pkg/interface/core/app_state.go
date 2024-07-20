@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package state
+package core
 
 type IAppState interface {
 	Frame() float64

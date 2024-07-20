@@ -13,7 +13,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
@@ -53,10 +52,28 @@ const (
 	FIELD_OF_VIEW_ANGLE       float32 = 40.0
 )
 
+type ProgramType int
+
+const (
+	PROGRAM_TYPE_MODEL           ProgramType = iota
+	PROGRAM_TYPE_EDGE            ProgramType = iota
+	PROGRAM_TYPE_BONE            ProgramType = iota
+	PROGRAM_TYPE_PHYSICS         ProgramType = iota
+	PROGRAM_TYPE_NORMAL          ProgramType = iota
+	PROGRAM_TYPE_FLOOR           ProgramType = iota
+	PROGRAM_TYPE_WIRE            ProgramType = iota
+	PROGRAM_TYPE_SELECTED_VERTEX ProgramType = iota
+)
+
 var (
 	initialCameraPosition = &mmath.MVec3{X: 0.0, Y: INITIAL_CAMERA_POSITION_Y, Z: INITIAL_CAMERA_POSITION_Z}
 	initialLookAtPosition = &mmath.MVec3{X: 0.0, Y: INITIAL_LOOK_AT_CENTER_Y, Z: 0.0}
 )
+
+type IShader interface {
+	GetProgram(programType ProgramType) uint32
+	BoneTextureId() uint32
+}
 
 type MShader struct {
 	CameraPosition        *mmath.MVec3
@@ -340,23 +357,23 @@ func (s *MShader) Fit(width int, height int) {
 	gl.Viewport(0, 0, int32(s.Width), int32(s.Height))
 }
 
-func (s *MShader) GetProgram(programType state.ProgramType) uint32 {
+func (s *MShader) GetProgram(programType ProgramType) uint32 {
 	switch programType {
-	case state.PROGRAM_TYPE_MODEL:
+	case PROGRAM_TYPE_MODEL:
 		return s.modelProgram
-	case state.PROGRAM_TYPE_EDGE:
+	case PROGRAM_TYPE_EDGE:
 		return s.edgeProgram
-	case state.PROGRAM_TYPE_BONE:
+	case PROGRAM_TYPE_BONE:
 		return s.boneProgram
-	case state.PROGRAM_TYPE_PHYSICS:
+	case PROGRAM_TYPE_PHYSICS:
 		return s.physicsProgram
-	case state.PROGRAM_TYPE_NORMAL:
+	case PROGRAM_TYPE_NORMAL:
 		return s.normalProgram
-	case state.PROGRAM_TYPE_FLOOR:
+	case PROGRAM_TYPE_FLOOR:
 		return s.floorProgram
-	case state.PROGRAM_TYPE_WIRE:
+	case PROGRAM_TYPE_WIRE:
 		return s.wireProgram
-	case state.PROGRAM_TYPE_SELECTED_VERTEX:
+	case PROGRAM_TYPE_SELECTED_VERTEX:
 		return s.selectedVertexProgram
 	}
 	return 0

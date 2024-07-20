@@ -6,15 +6,16 @@ package renderer
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
-	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+	"github.com/miu200521358/mlib_go/pkg/interface/core"
 )
 
 type AnimationState struct {
 	windowIndex  int                 // ウィンドウインデックス
 	modelIndex   int                 // モデルインデックス
 	frame        float64             // フレーム
-	renderModel  state.IRenderModel  // 描画モデル
+	renderModel  core.IRenderModel   // 描画モデル
 	model        *pmx.PmxModel       // モデル
 	motion       *vmd.VmdMotion      // モーション
 	vmdDeltas    *delta.VmdDeltas    // モーション変化量
@@ -53,11 +54,11 @@ func (a *AnimationState) SetModel(model *pmx.PmxModel) {
 	a.model = model
 }
 
-func (a *AnimationState) RenderModel() state.IRenderModel {
+func (a *AnimationState) RenderModel() core.IRenderModel {
 	return a.renderModel
 }
 
-func (a *AnimationState) SetRenderModel(renderModel state.IRenderModel) {
+func (a *AnimationState) SetRenderModel(renderModel core.IRenderModel) {
 	a.renderModel = renderModel
 }
 
@@ -91,7 +92,7 @@ func (a *AnimationState) Load() {
 	}
 }
 
-func (animationState *AnimationState) Render(shader state.IShader, appState state.IAppState) {
+func (animationState *AnimationState) Render(shader mgl.IShader, appState core.IAppState) {
 	if animationState.renderModel != nil && animationState.model != nil {
 		animationState.renderModel.Render(shader, appState, animationState)
 	}

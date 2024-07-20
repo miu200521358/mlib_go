@@ -8,13 +8,14 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
-	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
+	"github.com/miu200521358/mlib_go/pkg/interface/core"
 )
 
 func Animate(
-	physics state.IPhysics, animationStates []state.IAnimationState, appState state.IAppState, timeStep float32,
+	physics mbt.IPhysics, animationStates []core.IAnimationState, appState core.IAppState, timeStep float32,
 ) {
 	// モデルの描画モデルが未設定の場合は設定
 	for i := range animationStates {
@@ -70,7 +71,7 @@ func Animate(
 }
 
 func (animationState *AnimationState) AnimateBeforePhysics(
-	appState state.IAppState, model *pmx.PmxModel,
+	appState core.IAppState, model *pmx.PmxModel,
 ) (*delta.VmdDeltas, *delta.RenderDeltas) {
 	if animationState.motion == nil {
 		animationState.motion = vmd.NewVmdMotion("")
@@ -96,7 +97,7 @@ func (animationState *AnimationState) AnimateBeforePhysics(
 	return vmdDeltas, renderDeltas
 }
 
-func (animationState *AnimationState) AnimatePhysics(physics state.IPhysics, appState state.IAppState) {
+func (animationState *AnimationState) AnimatePhysics(physics mbt.IPhysics, appState core.IAppState) {
 	if appState.IsEnabledPhysics() && animationState.model != nil && animationState.vmdDeltas != nil {
 		for _, rigidBody := range animationState.model.RigidBodies.Data {
 			// 現在のボーン変形情報を保持
@@ -117,7 +118,7 @@ func (animationState *AnimationState) AnimatePhysics(physics state.IPhysics, app
 	}
 }
 
-func (animationState *AnimationState) AnimateAfterPhysics(physics state.IPhysics, appState state.IAppState) {
+func (animationState *AnimationState) AnimateAfterPhysics(physics mbt.IPhysics, appState core.IAppState) {
 	// 物理剛体位置を更新
 	if (appState.IsEnabledPhysics() || appState.IsPhysicsReset()) &&
 		animationState.model != nil && animationState.vmdDeltas != nil {
