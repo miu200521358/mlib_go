@@ -117,7 +117,7 @@ func (s *ControlState) Run() {
 	}()
 
 	go func() {
-		for {
+		for !s.appState.IsClosed() {
 			select {
 			case prevFrame := <-s.prevFrameChan:
 				s.appState.SetPrevFrame(prevFrame)

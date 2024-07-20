@@ -211,7 +211,17 @@ func (w *ViewWindow) Render(animationStates []core.IAnimationState, timeStep flo
 		}
 	}
 
-	w.shader.Msaa.Resolve()
+	if animationStates != nil {
+		// 何かしらアニメーション情報がある場合の処理
+
+		// 物理描画
+		w.physics.DrawDebugLines(w.shader, w.appState.IsShowRigidBodyFront() || w.appState.IsShowRigidBodyBack(),
+			w.appState.IsShowJoint(), w.appState.IsShowRigidBodyFront())
+
+		// 深度解決
+		w.shader.Msaa.Resolve()
+	}
+
 	w.shader.Msaa.Unbind()
 
 	w.SwapBuffers()

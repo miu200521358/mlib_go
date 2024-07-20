@@ -125,6 +125,10 @@ func (physics *MPhysics) DeleteModel(modelIndex int) {
 }
 
 func (p *MPhysics) DrawDebugLines(shader *mgl.MShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool) {
+	if !(visibleRigidBody || visibleJoint) {
+		return
+	}
+
 	// 物理デバッグ取得
 	if visibleRigidBody {
 		p.world.GetDebugDrawer().SetDebugMode(

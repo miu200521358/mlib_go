@@ -13,10 +13,10 @@ import (
 
 func newConstBtMDefaultColors() bt.BtMDefaultColors {
 	return bt.NewBtMDefaultColors(
-		bt.NewBtVector3(float32(1.0), float32(0.0), float32(0.0)), // activeObject	(物理剛体)
+		bt.NewBtVector3(float32(0.0), float32(0.5), float32(0.5)), // activeObject	(物理剛体)
 		bt.NewBtVector3(float32(0.5), float32(0.5), float32(0.0)), // deactivatedObject
 		bt.NewBtVector3(float32(0.5), float32(0.0), float32(0.5)), // wantsDeactivationObject
-		bt.NewBtVector3(float32(0.0), float32(0.5), float32(0.5)), // disabledDeactivationObject
+		bt.NewBtVector3(float32(1.0), float32(0.0), float32(0.0)), // disabledDeactivationObject
 		bt.NewBtVector3(float32(0.0), float32(1.0), float32(0.0)), // disabledSimulationObject	(ボーン追従剛体)
 		bt.NewBtVector3(float32(1.0), float32(1.0), float32(0.0)), // aabb
 		bt.NewBtVector3(float32(0.0), float32(0.0), float32(1.0)), // contactPoint

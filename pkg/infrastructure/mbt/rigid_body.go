@@ -128,7 +128,7 @@ func (physics *MPhysics) UpdateTransform(
 	modelIndex int,
 	rigidBodyBone *pmx.Bone,
 	boneGlobalMatrix *mmath.MMat4,
-	r *pmx.RigidBody,
+	rigidBody *pmx.RigidBody,
 ) {
 	boneTransform := bt.NewBtTransform()
 	defer bt.DeleteBtTransform(boneTransform)
@@ -136,8 +136,8 @@ func (physics *MPhysics) UpdateTransform(
 	mat := mgl.NewGlMat4(boneGlobalMatrix)
 	boneTransform.SetFromOpenGLMatrix(&mat[0])
 
-	btRigidBody := *physics.rigidBodies[modelIndex][r.Index].btRigidBody
-	btRigidBodyLocalTransform := *physics.rigidBodies[modelIndex][r.Index].btLocalTransform
+	btRigidBody := *physics.rigidBodies[modelIndex][rigidBody.Index].btRigidBody
+	btRigidBodyLocalTransform := *physics.rigidBodies[modelIndex][rigidBody.Index].btLocalTransform
 
 	// 剛体のグローバル位置を確定
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
