@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package renderer
+package animation
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"

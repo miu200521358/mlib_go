@@ -15,9 +15,9 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/animation"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
@@ -378,8 +378,8 @@ func (w *ViewWindow) ResetPhysics(animationStates []state.IAnimationState) {
 
 func (w *ViewWindow) InitRenderModel(modelIndex int, model *pmx.PmxModel) state.IRenderModel {
 	w.physics.DeleteModel(modelIndex)
-	renderModel := renderer.NewRenderModel(w.windowIndex, model)
-	w.physics.AddModel(w.windowIndex, model)
+	renderModel := animation.NewRenderModel(w.windowIndex, model)
+	w.physics.AddModel(modelIndex, model)
 	return renderModel
 }
 
@@ -429,8 +429,8 @@ func (w *ViewWindow) Render(
 			animationStates[nextState.ModelIndex()].SetModel(nextState.Model())
 		}
 
-		// アニメーション
-		renderer.Animate(w.physics, animationStates, w.appState, timeStep)
+		// デフォーム
+		animation.Deform(w.physics, animationStates, w.appState, timeStep)
 
 		// モデル描画
 		for _, animationState := range animationStates {

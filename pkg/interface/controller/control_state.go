@@ -5,47 +5,47 @@ package controller
 
 import (
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/animation"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 )
 
 type controlState struct {
-	appState                 state.IAppState               // アプリ状態
-	motionPlayer             app.IPlayer                   // モーションプレイヤー
-	controlWindow            app.IControlWindow            // コントロールウィンドウ
-	prevFrameChan            chan int                      // 前回フレーム
-	frameChan                chan float64                  // フレーム
-	maxFrameChan             chan int                      // 最大フレーム
-	isEnabledFrameDropChan   chan bool                     // フレームドロップON/OFF
-	isEnabledPhysicsChan     chan bool                     // 物理ON/OFF
-	isPhysicsResetChan       chan bool                     // 物理リセット
-	isShowNormalChan         chan bool                     // ボーンデバッグ表示
-	isShowWireChan           chan bool                     // ワイヤーフレームデバッグ表示
-	isShowSelectedVertexChan chan bool                     // 選択頂点デバッグ表示
-	isShowBoneAllChan        chan bool                     // 全ボーンデバッグ表示
-	isShowBoneIkChan         chan bool                     // IKボーンデバッグ表示
-	isShowBoneEffectorChan   chan bool                     // 付与親ボーンデバッグ表示
-	isShowBoneFixedChan      chan bool                     // 軸制限ボーンデバッグ表示
-	isShowBoneRotateChan     chan bool                     // 回転ボーンデバッグ表示
-	isShowBoneTranslateChan  chan bool                     // 移動ボーンデバッグ表示
-	isShowBoneVisibleChan    chan bool                     // 表示ボーンデバッグ表示
-	isShowRigidBodyFrontChan chan bool                     // 剛体デバッグ表示(前面)
-	isShowRigidBodyBackChan  chan bool                     // 剛体デバッグ表示(埋め込み)
-	isShowJointChan          chan bool                     // ジョイントデバッグ表示
-	isShowInfoChan           chan bool                     // 情報デバッグ表示
-	isLimitFps30Chan         chan bool                     // 30FPS制限
-	isLimitFps60Chan         chan bool                     // 60FPS制限
-	isUnLimitFpsChan         chan bool                     // FPS無制限
-	isUnLimitFpsDeformChan   chan bool                     // デフォームFPS無制限
-	isLogLevelDebugChan      chan bool                     // デバッグメッセージ表示
-	isLogLevelVerboseChan    chan bool                     // 冗長メッセージ表示
-	isLogLevelIkVerboseChan  chan bool                     // IK冗長メッセージ表示
-	isClosedChan             chan bool                     // ウィンドウクローズ
-	playingChan              chan bool                     // 再生中フラグ
-	physicsResetChan         chan bool                     // 物理リセット
-	spfLimitChan             chan float64                  // FPS制限
-	animationState           chan *renderer.AnimationState // アニメーションステート
+	appState                 state.IAppState                // アプリ状態
+	motionPlayer             app.IPlayer                    // モーションプレイヤー
+	controlWindow            app.IControlWindow             // コントロールウィンドウ
+	prevFrameChan            chan int                       // 前回フレーム
+	frameChan                chan float64                   // フレーム
+	maxFrameChan             chan int                       // 最大フレーム
+	isEnabledFrameDropChan   chan bool                      // フレームドロップON/OFF
+	isEnabledPhysicsChan     chan bool                      // 物理ON/OFF
+	isPhysicsResetChan       chan bool                      // 物理リセット
+	isShowNormalChan         chan bool                      // ボーンデバッグ表示
+	isShowWireChan           chan bool                      // ワイヤーフレームデバッグ表示
+	isShowSelectedVertexChan chan bool                      // 選択頂点デバッグ表示
+	isShowBoneAllChan        chan bool                      // 全ボーンデバッグ表示
+	isShowBoneIkChan         chan bool                      // IKボーンデバッグ表示
+	isShowBoneEffectorChan   chan bool                      // 付与親ボーンデバッグ表示
+	isShowBoneFixedChan      chan bool                      // 軸制限ボーンデバッグ表示
+	isShowBoneRotateChan     chan bool                      // 回転ボーンデバッグ表示
+	isShowBoneTranslateChan  chan bool                      // 移動ボーンデバッグ表示
+	isShowBoneVisibleChan    chan bool                      // 表示ボーンデバッグ表示
+	isShowRigidBodyFrontChan chan bool                      // 剛体デバッグ表示(前面)
+	isShowRigidBodyBackChan  chan bool                      // 剛体デバッグ表示(埋め込み)
+	isShowJointChan          chan bool                      // ジョイントデバッグ表示
+	isShowInfoChan           chan bool                      // 情報デバッグ表示
+	isLimitFps30Chan         chan bool                      // 30FPS制限
+	isLimitFps60Chan         chan bool                      // 60FPS制限
+	isUnLimitFpsChan         chan bool                      // FPS無制限
+	isUnLimitFpsDeformChan   chan bool                      // デフォームFPS無制限
+	isLogLevelDebugChan      chan bool                      // デバッグメッセージ表示
+	isLogLevelVerboseChan    chan bool                      // 冗長メッセージ表示
+	isLogLevelIkVerboseChan  chan bool                      // IK冗長メッセージ表示
+	isClosedChan             chan bool                      // ウィンドウクローズ
+	playingChan              chan bool                      // 再生中フラグ
+	physicsResetChan         chan bool                      // 物理リセット
+	spfLimitChan             chan float64                   // FPS制限
+	animationState           chan *animation.AnimationState // アニメーションステート
 }
 
 func NewControlState(appState state.IAppState) *controlState {
@@ -82,7 +82,7 @@ func NewControlState(appState state.IAppState) *controlState {
 		playingChan:              make(chan bool),
 		physicsResetChan:         make(chan bool),
 		spfLimitChan:             make(chan float64),
-		animationState:           make(chan *renderer.AnimationState),
+		animationState:           make(chan *animation.AnimationState),
 	}
 
 	return u
@@ -191,10 +191,10 @@ func (c *controlState) SetControlWindow(cw app.IControlWindow) {
 }
 
 func (c *controlState) SetAnimationState(state state.IAnimationState) {
-	c.animationState <- state.(*renderer.AnimationState)
+	c.animationState <- state.(*animation.AnimationState)
 }
 
-func (c *controlState) AnimationState() *renderer.AnimationState {
+func (c *controlState) AnimationState() *animation.AnimationState {
 	return <-c.animationState
 }
 

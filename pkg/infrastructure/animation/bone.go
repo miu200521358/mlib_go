@@ -1,14 +1,13 @@
 //go:build windows
 // +build windows
 
-package renderer
+package animation
 
 import (
 	"math"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
-	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
@@ -95,12 +94,7 @@ func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int) {
 
 	paddedMatrixes := make([]float32, height*width*4)
 	for i, d := range boneDeltas.Data {
-		var m mgl32.Mat4
-		if d == nil {
-			m = mgl32.Ident4()
-		} else {
-			m = mgl.NewGlMat4(d.FilledLocalMatrix())
-		}
+		m := mgl.NewGlMat4(d.FilledLocalMatrix())
 		copy(paddedMatrixes[i*16:], m[:])
 	}
 

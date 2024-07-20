@@ -98,8 +98,11 @@ func (a *MApp) ViewerRun() {
 		for i, w := range a.viewWindows {
 			w.Render(a.animationStates[i], a.nextState, timeStep)
 
-			// 描画が終わったら受け取り終わってるのでクリア
-			a.nextState = nil
+			if a.nextState != nil && a.nextState.Model() != nil &&
+				a.animationStates[i][a.nextState.ModelIndex()].RenderModel() != nil {
+				// モデルの受け渡しが終わっていたらクリア
+				a.nextState = nil
+			}
 		}
 
 		prevTime = frameTime

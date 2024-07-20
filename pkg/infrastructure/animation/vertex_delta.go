@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package renderer
+package animation
 
 import (
 	"math"

@@ -19,7 +19,7 @@ subject to the following restrictions:
 #include "btVector3.h"
 #include "btTransform.h"
 
-///The btIDebugDraw interface class allows hooking up a debug renderer to visually debug simulations.
+///The btIDebugDraw interface class allows hooking up a debug animation to visually debug simulations.
 ///Typical use case: create a debug drawer object, and assign it to a btCollisionWorld or btDynamicsWorld using setDebugDrawer and call debugDrawWorld.
 ///A class that implements the btIDebugDraw interface will need to provide non-empty implementations of the the drawLine and getDebugMode methods at a minimum.
 ///For color arguments the X,Y,Z components refer to Red, Green and Blue each in the range [0..1]

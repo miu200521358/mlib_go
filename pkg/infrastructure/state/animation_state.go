@@ -26,9 +26,9 @@ type IAnimationState interface {
 	SetRenderDeltas(deltas *delta.RenderDeltas)
 	Frame() float64
 	SetFrame(frame float64)
-	AnimateBeforePhysics(appState IAppState, model *pmx.PmxModel) (*delta.VmdDeltas, *delta.RenderDeltas)
-	AnimatePhysics(physics mbt.IPhysics, appState IAppState)
-	AnimateAfterPhysics(physics mbt.IPhysics, appState IAppState)
+	DeformBeforePhysics(appState IAppState, model *pmx.PmxModel) (*delta.VmdDeltas, *delta.RenderDeltas)
+	DeformPhysics(physics mbt.IPhysics, appState IAppState)
+	DeformAfterPhysics(physics mbt.IPhysics, appState IAppState)
 	RenderModel() IRenderModel
 	SetRenderModel(model IRenderModel)
 	Render(shader mgl.IShader, appState IAppState)

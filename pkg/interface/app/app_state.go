@@ -5,7 +5,7 @@ package app
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/animation"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 )
 
@@ -59,9 +59,9 @@ func newAppState() *appState {
 	return u
 }
 
-func (appState *appState) SetAnimationState(animationState state.IAnimationState) {
-	windowIndex := animationState.WindowIndex()
-	modelIndex := animationState.ModelIndex()
+func (appState *appState) SetAnimationState(nextState state.IAnimationState) {
+	windowIndex := nextState.WindowIndex()
+	modelIndex := nextState.ModelIndex()
 
 	// 必要に応じて拡張
 	for len(appState.animationStates) <= windowIndex {
@@ -70,30 +70,32 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 	for i := 0; i < len(appState.animationStates); i++ {
 		for len(appState.animationStates[i]) <= modelIndex {
 			appState.animationStates[i] = append(appState.animationStates[i],
-				renderer.NewAnimationState(windowIndex, len(appState.animationStates[i])))
+				animation.NewAnimationState(windowIndex, len(appState.animationStates[i])))
 		}
 	}
 
 	// モーションが指定されてたらセット
-	model := animationState.Model()
-	if animationState.Motion() != nil {
-		appState.animationStates[windowIndex][modelIndex].SetMotion(animationState.Motion())
+	model := nextState.Model()
+	if nextState.Motion() != nil {
+		appState.animationStates[windowIndex][modelIndex].SetMotion(nextState.Motion())
 		model = appState.animationStates[windowIndex][modelIndex].Model()
 	} else if appState.animationStates[windowIndex][modelIndex].Motion() == nil {
 		// モーション未指定の場合、空のモーションを設定しておく
 		appState.animationStates[windowIndex][modelIndex].SetMotion(vmd.NewVmdMotion(""))
 	}
 
-	vmdDeltas, renderDeltas :=
-		appState.animationStates[windowIndex][modelIndex].AnimateBeforePhysics(
-			appState, model)
-	appState.animationStates[windowIndex][modelIndex].SetVmdDeltas(vmdDeltas)
-	appState.animationStates[windowIndex][modelIndex].SetRenderDeltas(renderDeltas)
+	if model != nil {
+		vmdDeltas, renderDeltas :=
+			appState.animationStates[windowIndex][modelIndex].DeformBeforePhysics(
+				appState, model)
+		appState.animationStates[windowIndex][modelIndex].SetVmdDeltas(vmdDeltas)
+		appState.animationStates[windowIndex][modelIndex].SetRenderDeltas(renderDeltas)
+	}
 
-	if animationState.Model() != nil {
+	if nextState.Model() != nil {
 		// 次のステータスとしてモデル情報だけセット
-		appState.nextState = renderer.NewAnimationState(windowIndex, modelIndex)
-		appState.nextState.SetModel(animationState.Model())
+		appState.nextState = animation.NewAnimationState(windowIndex, modelIndex)
+		appState.nextState.SetModel(nextState.Model())
 	}
 }
 
@@ -106,7 +108,7 @@ func (appState *appState) SetFrame(frame float64) {
 	for i := 0; i < len(appState.animationStates); i++ {
 		for j := 0; j < len(appState.animationStates[i]); j++ {
 			if appState.animationStates[i][j] != nil && appState.animationStates[i][j].Model() != nil {
-				vmdDeltas, renderDeltas := appState.animationStates[i][j].AnimateBeforePhysics(
+				vmdDeltas, renderDeltas := appState.animationStates[i][j].DeformBeforePhysics(
 					appState, appState.animationStates[i][j].Model())
 				appState.animationStates[i][j].SetVmdDeltas(vmdDeltas)
 				appState.animationStates[i][j].SetRenderDeltas(renderDeltas)
