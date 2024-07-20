@@ -6,11 +6,14 @@ package viewer
 import (
 	"fmt"
 	"image"
+	"math"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/go-gl/mathgl/mgl64"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
@@ -21,6 +24,9 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"github.com/miu200521358/walk/pkg/walk"
 )
+
+// 直角の定数値
+const rightAngle = 89.9
 
 type ViewWindow struct {
 	*glfw.Window
@@ -33,9 +39,12 @@ type ViewWindow struct {
 	leftButtonPressed   bool               // 左ボタン押下フラグ
 	middleButtonPressed bool               // 中ボタン押下フラグ
 	rightButtonPressed  bool               // 右ボタン押下フラグ
-	updatedPrev         bool               // 前回のカーソル位置更新フラグ
 	shiftPressed        bool               // Shiftキー押下フラグ
 	ctrlPressed         bool               // Ctrlキー押下フラグ
+	updatedPrevCursor   bool               // 前回のカーソル位置更新フラグ
+	prevCursorPos       *mmath.MVec2       // 前回のカーソル位置
+	yaw                 float64            // カメラyaw
+	pitch               float64            // カメラpitch
 }
 
 func NewViewWindow(
@@ -67,18 +76,22 @@ func NewViewWindow(
 	}
 
 	viewWindow := &ViewWindow{
-		Window:      glWindow,
-		appState:    appState,
-		windowIndex: windowIndex,
-		title:       title,
-		appConfig:   appConfig,
-		shader:      mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height),
-		physics:     mbt.NewMPhysics(),
+		Window:        glWindow,
+		appState:      appState,
+		windowIndex:   windowIndex,
+		title:         title,
+		appConfig:     appConfig,
+		shader:        mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height),
+		physics:       mbt.NewMPhysics(),
+		prevCursorPos: mmath.NewMVec2(),
 	}
 
 	glWindow.SetCloseCallback(viewWindow.closeCallback)
 	glWindow.SetScrollCallback(viewWindow.scrollCallback)
 	glWindow.SetKeyCallback(viewWindow.keyCallback)
+	glWindow.SetMouseButtonCallback(viewWindow.mouseCallback)
+	glWindow.SetCursorPosCallback(viewWindow.cursorPosCallback)
+	glWindow.SetFramebufferSizeCallback(viewWindow.resizeCallback)
 
 	gl.Enable(gl.DEBUG_OUTPUT)
 	gl.Enable(gl.DEBUG_OUTPUT_SYNCHRONOUS)                        // 同期的なデバッグ出力有効
@@ -87,7 +100,139 @@ func NewViewWindow(
 	return viewWindow
 }
 
-func (viewWindow *ViewWindow) keyCallback(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+func (viewWindow *ViewWindow) resizeCallback(w *glfw.Window, width int, height int) {
+	if width > 0 && height > 0 {
+		viewWindow.shader.Fit(width, height)
+	}
+}
+
+func (viewWindow *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
+
+	if !viewWindow.updatedPrevCursor {
+		viewWindow.prevCursorPos.X = xpos
+		viewWindow.prevCursorPos.Y = ypos
+		viewWindow.updatedPrevCursor = true
+		return
+	}
+
+	if viewWindow.rightButtonPressed {
+		// 右クリックはカメラの角度を更新
+		viewWindow.updateCameraAngleByCursor(xpos, ypos)
+	} else if viewWindow.middleButtonPressed {
+		// 中クリックはカメラ位置と中心を移動
+		viewWindow.updateCameraPositionByCursor(xpos, ypos)
+	}
+
+	viewWindow.prevCursorPos.X = xpos
+	viewWindow.prevCursorPos.Y = ypos
+}
+
+func (viewWindow *ViewWindow) updateCameraAngleByCursor(xpos, ypos float64) {
+	ratio := 0.1
+	if viewWindow.shiftPressed {
+		ratio *= 10
+	} else if viewWindow.ctrlPressed {
+		ratio *= 0.1
+	}
+
+	// 右クリックはカメラ中心をそのままにカメラ位置を変える
+	xOffset := (viewWindow.prevCursorPos.X - xpos) * ratio
+	yOffset := (viewWindow.prevCursorPos.Y - ypos) * ratio
+
+	// 方位角と仰角を更新
+	viewWindow.yaw += xOffset
+	viewWindow.pitch += yOffset
+
+	// 仰角の制限（水平面より上下に行き過ぎないようにする）
+	viewWindow.pitch = mmath.ClampedFloat(viewWindow.pitch, -rightAngle, rightAngle)
+
+	// 方位角の制限（360度を超えないようにする）
+	if viewWindow.yaw > 360.0 {
+		viewWindow.yaw -= 360.0
+	} else if viewWindow.yaw < -360.0 {
+		viewWindow.yaw += 360.0
+	}
+
+	viewWindow.updateCameraAngle()
+}
+
+func (viewWindow *ViewWindow) updateCameraAngle() {
+	// 球面座標系をデカルト座標系に変換
+	radius := float64(mgl.INITIAL_CAMERA_POSITION_Z)
+	cameraX := radius * math.Cos(mgl64.DegToRad(viewWindow.pitch)) * math.Cos(mgl64.DegToRad(viewWindow.yaw))
+	cameraY := radius * math.Sin(mgl64.DegToRad(viewWindow.pitch))
+	cameraZ := radius * math.Cos(mgl64.DegToRad(viewWindow.pitch)) * math.Sin(mgl64.DegToRad(viewWindow.yaw))
+
+	// カメラ位置を更新
+	viewWindow.shader.CameraPosition.X = cameraX
+	viewWindow.shader.CameraPosition.Y = mgl.INITIAL_CAMERA_POSITION_Y + cameraY
+	viewWindow.shader.CameraPosition.Z = cameraZ
+}
+
+func (viewWindow *ViewWindow) updateCameraPositionByCursor(xpos float64, ypos float64) {
+	ratio := 0.07
+	if viewWindow.shiftPressed {
+		ratio *= 10
+	} else if viewWindow.ctrlPressed {
+		ratio *= 0.1
+	}
+
+	// 中ボタンが押された場合の処理
+	if viewWindow.middleButtonPressed {
+		ratio := 0.07
+		if viewWindow.shiftPressed {
+			ratio *= 10
+		} else if viewWindow.ctrlPressed {
+			ratio *= 0.1
+		}
+
+		xOffset := (viewWindow.prevCursorPos.X - xpos) * ratio
+		yOffset := (viewWindow.prevCursorPos.Y - ypos) * ratio
+
+		// カメラの向きに基づいて移動方向を計算
+		forward := viewWindow.shader.LookAtCenterPosition.Subed(viewWindow.shader.CameraPosition)
+		right := forward.Cross(mmath.MVec3UnitY).Normalize()
+		up := right.Cross(forward.Normalize()).Normalize()
+
+		// 上下移動のベクトルを計算
+		upMovement := up.MulScalar(-yOffset)
+		// 左右移動のベクトルを計算
+		rightMovement := right.MulScalar(-xOffset)
+
+		// 移動ベクトルを合成してカメラ位置と中心を更新
+		movement := upMovement.Add(rightMovement)
+		viewWindow.shader.CameraPosition.Add(movement)
+		viewWindow.shader.LookAtCenterPosition.Add(movement)
+	}
+}
+
+func (viewWindow *ViewWindow) mouseCallback(
+	w *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey,
+) {
+	if action == glfw.Press {
+		switch button {
+		case glfw.MouseButtonLeft:
+			viewWindow.leftButtonPressed = true
+		case glfw.MouseButtonMiddle:
+			viewWindow.middleButtonPressed = true
+		case glfw.MouseButtonRight:
+			viewWindow.rightButtonPressed = true
+		}
+	} else if action == glfw.Release {
+		switch button {
+		case glfw.MouseButtonLeft:
+			viewWindow.leftButtonPressed = false
+		case glfw.MouseButtonMiddle:
+			viewWindow.middleButtonPressed = false
+		case glfw.MouseButtonRight:
+			viewWindow.rightButtonPressed = false
+		}
+	}
+}
+
+func (viewWindow *ViewWindow) keyCallback(
+	w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey,
+) {
 	if action == glfw.Press {
 		switch key {
 		case glfw.KeyLeftShift, glfw.KeyRightShift:
@@ -103,6 +248,31 @@ func (viewWindow *ViewWindow) keyCallback(w *glfw.Window, key glfw.Key, scancode
 			viewWindow.ctrlPressed = false
 		}
 	}
+
+	switch key {
+	case glfw.KeyKP0: // 下面から
+		viewWindow.yaw = rightAngle
+		viewWindow.pitch = rightAngle
+	case glfw.KeyKP2: // 正面から
+		viewWindow.yaw = rightAngle
+		viewWindow.pitch = 0
+	case glfw.KeyKP4: // 左面から
+		viewWindow.yaw = 180
+		viewWindow.pitch = 0
+	case glfw.KeyKP5: // 上面から
+		viewWindow.yaw = rightAngle
+		viewWindow.pitch = -rightAngle
+	case glfw.KeyKP6: // 右面から
+		viewWindow.yaw = 0
+		viewWindow.pitch = 0
+	case glfw.KeyKP8: // 背面から
+		viewWindow.yaw = -rightAngle
+		viewWindow.pitch = 0
+	default:
+		return
+	}
+
+	viewWindow.updateCameraAngle()
 }
 
 func (viewWindow *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64) {
@@ -204,6 +374,10 @@ func (w *ViewWindow) ResetPhysics(animationStates []core.IAnimationState) {
 
 func (w *ViewWindow) Render(animationStates []core.IAnimationState, timeStep float32) {
 	glfw.PollEvents()
+
+	if w.shader.Width == 0 || w.shader.Height == 0 {
+		return
+	}
 
 	w.MakeContextCurrent()
 

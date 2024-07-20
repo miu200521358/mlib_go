@@ -73,6 +73,7 @@ var (
 type IShader interface {
 	GetProgram(programType ProgramType) uint32
 	BoneTextureId() uint32
+	Resize(width, height int)
 }
 
 type MShader struct {
