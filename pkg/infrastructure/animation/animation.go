@@ -21,7 +21,7 @@ func Deform(
 		var wg sync.WaitGroup
 
 		for i := range animationStates {
-			if animationStates[i].Model() == nil {
+			if animationStates[i] == nil || animationStates[i].Model() == nil {
 				continue
 			}
 
@@ -45,7 +45,7 @@ func Deform(
 		var wg sync.WaitGroup
 
 		for i := range animationStates {
-			if animationStates[i].Model() == nil {
+			if animationStates[i] == nil || animationStates[i].Model() == nil {
 				continue
 			}
 

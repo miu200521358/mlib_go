@@ -415,23 +415,35 @@ func (w *ViewWindow) Animate(
 	if animationStates != nil {
 		// 何かしら描画対象情報がある場合の処理
 
-		// モデルが指定されてたら初期化してセット
-		if nextState != nil && nextState.Model() != nil {
-			modelIndex := nextState.ModelIndex()
-			w.physics.DeleteModel(modelIndex)
-			animationStates[nextState.ModelIndex()].Load(nextState.Model())
-			w.physics.AddModel(modelIndex, nextState.Model())
+		if nextState != nil {
+			// モデルが指定されてたら初期化してセット
+			if nextState.Model() != nil {
+				modelIndex := nextState.ModelIndex()
+				w.physics.DeleteModel(modelIndex)
+				animationStates[nextState.ModelIndex()].Load(nextState.Model())
+				w.physics.AddModel(modelIndex, nextState.Model())
 
-			if animationStates[modelIndex].Motion() == nil {
-				// モーション未指定の場合、空のモーションを設定しておく
-				animationStates[modelIndex].SetMotion(vmd.NewVmdMotion(""))
+				if animationStates[modelIndex].Motion() == nil {
+					// モーション未指定の場合、空のモーションを設定しておく
+					animationStates[modelIndex].SetMotion(vmd.NewVmdMotion(""))
+				}
+
+				// モーションを初回適用
+				vmdDeltas, renderDeltas :=
+					animationStates[modelIndex].DeformBeforePhysics(w.appState, nextState.Model())
+				animationStates[modelIndex].SetVmdDeltas(vmdDeltas)
+				animationStates[modelIndex].SetRenderDeltas(renderDeltas)
 			}
-
-			// モーションを初回適用
-			vmdDeltas, renderDeltas :=
-				animationStates[modelIndex].DeformBeforePhysics(w.appState, nextState.Model())
-			animationStates[modelIndex].SetVmdDeltas(vmdDeltas)
-			animationStates[modelIndex].SetRenderDeltas(renderDeltas)
+			// モーションが指定されてたらセット
+			if nextState.Motion() != nil {
+				animationStates[nextState.ModelIndex()].SetMotion(nextState.Motion())
+			}
+			if nextState.VmdDeltas() != nil {
+				animationStates[nextState.ModelIndex()].SetVmdDeltas(nextState.VmdDeltas())
+			}
+			if nextState.RenderDeltas() != nil {
+				animationStates[nextState.ModelIndex()].SetRenderDeltas(nextState.RenderDeltas())
+			}
 
 			nextState = nil
 		}

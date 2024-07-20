@@ -313,7 +313,10 @@ func (renderModel *RenderModel) Render(
 		animationState.RenderDeltas().VertexMorphDeltaIndexes, animationState.RenderDeltas().VertexMorphDeltas)
 	defer renderModel.vbo.Unbind()
 
-	paddedMatrixes, matrixWidth, matrixHeight := createBoneMatrixes(deltas.Bones)
+	paddedMatrixes, matrixWidth, matrixHeight, err := createBoneMatrixes(deltas.Bones)
+	if err != nil {
+		return
+	}
 
 	for i, mesh := range renderModel.meshes {
 		mesh.ibo.Bind()

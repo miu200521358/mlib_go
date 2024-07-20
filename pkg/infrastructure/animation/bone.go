@@ -4,10 +4,12 @@
 package animation
 
 import (
+	"fmt"
 	"math"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
@@ -85,7 +87,7 @@ func getBoneDebugColor(b *pmx.Bone, appState state.IAppState) []float32 {
 	return []float32{0.0, 0.0, 0.0, 0.0}
 }
 
-func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int) {
+func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int, error) {
 	// テクスチャのサイズを計算する
 	numBones := len(boneDeltas.Data)
 	texSize := int(math.Ceil(math.Sqrt(float64(numBones))))
@@ -94,11 +96,16 @@ func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int) {
 
 	paddedMatrixes := make([]float32, height*width*4)
 	for i, d := range boneDeltas.Data {
-		m := mgl.NewGlMat4(d.FilledLocalMatrix())
+		var m mgl32.Mat4
+		if d == nil {
+			return nil, 0, 0, fmt.Errorf("boneDeltas[%d] is nil", i)
+		} else {
+			m = mgl.NewGlMat4(d.FilledLocalMatrix())
+		}
 		copy(paddedMatrixes[i*16:], m[:])
 	}
 
-	return paddedMatrixes, width, height
+	return paddedMatrixes, width, height, nil
 }
 
 func bindBoneMatrixes(

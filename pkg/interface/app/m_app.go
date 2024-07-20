@@ -97,6 +97,8 @@ func (a *MApp) ViewerRun() {
 
 		for i, w := range a.viewWindows {
 			if a.nextState != nil && a.nextState.WindowIndex() == i {
+				// アニメーション領域を確保しておく
+				a.ExtendAnimationState(i, a.nextState.ModelIndex())
 				a.animationStates[i], a.nextState = w.Animate(a.animationStates[i], a.nextState, timeStep)
 			} else {
 				a.animationStates[i], _ = w.Animate(a.animationStates[i], nil, timeStep)
