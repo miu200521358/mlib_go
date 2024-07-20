@@ -158,10 +158,12 @@ func (w *ViewWindow) load(states []state.IAnimationState) {
 			w.animationStates[s.ModelIndex()].SetModel(s.Model())
 			w.animationStates[s.ModelIndex()].Load()
 			w.physics.AddModel(s.ModelIndex(), s.Model())
+			s.SetModel(nil)
 		}
 		if s.Motion() != nil {
 			w.animationStates[s.ModelIndex()].SetMotion(s.Motion())
 			w.animationStates[s.ModelIndex()].SetVmdDeltas(nil)
+			s.SetMotion(nil)
 		}
 		if s.Frame() >= 0 {
 			w.animationStates[s.ModelIndex()].SetFrame(s.Frame())
@@ -169,6 +171,7 @@ func (w *ViewWindow) load(states []state.IAnimationState) {
 		}
 		if s.VmdDeltas() != nil {
 			w.animationStates[s.ModelIndex()].SetVmdDeltas(s.VmdDeltas())
+			s.SetVmdDeltas(nil)
 		}
 	}
 }
@@ -200,9 +203,7 @@ func (w *ViewWindow) Render(states []state.IAnimationState, timeStep float32) {
 	w.shader.DrawFloor()
 
 	// モデル読み込み
-	if len(states) > 0 {
-		w.load(states)
-	}
+	w.load(states)
 
 	// アニメーション
 	w.animationStates = renderer.Animate(w.physics, w.animationStates, w.appState, timeStep)

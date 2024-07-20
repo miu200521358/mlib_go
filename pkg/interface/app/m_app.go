@@ -85,7 +85,6 @@ func (a *MApp) ViewerRun() {
 
 		for i, w := range a.viewWindows {
 			w.Render(a.animationStates[i], timeStep)
-			a.animationStates[i] = nil
 		}
 
 		prevTime = frameTime
