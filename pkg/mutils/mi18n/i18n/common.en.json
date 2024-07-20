@@ -374,5 +374,13 @@
     {
         "id": "終了確認メッセージ",
         "translation": "Are you sure you want to exit the app?"
+    },
+    {
+        "id": "言語変更",
+        "translation": "Language Change"
+    },
+    {
+        "id": "言語変更メッセージ",
+        "translation": "The language change on the screen will take effect after restarting.\nDo you want to exit the app?"
     }
 ]

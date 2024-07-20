@@ -281,19 +281,19 @@ func NewControlWindow(
 				Items: []declarative.MenuItem{
 					declarative.Action{
 						Text:        "日本語",
-						OnTriggered: func() { controlWindow.langTriggered("ja") },
+						OnTriggered: func() { controlWindow.onChangeLanguage("ja") },
 					},
 					declarative.Action{
 						Text:        "English",
-						OnTriggered: func() { controlWindow.langTriggered("en") },
+						OnTriggered: func() { controlWindow.onChangeLanguage("en") },
 					},
 					declarative.Action{
 						Text:        "中文",
-						OnTriggered: func() { controlWindow.langTriggered("zh") },
+						OnTriggered: func() { controlWindow.onChangeLanguage("zh") },
 					},
 					declarative.Action{
 						Text:        "한국어",
-						OnTriggered: func() { controlWindow.langTriggered("ko") },
+						OnTriggered: func() { controlWindow.onChangeLanguage("ko") },
 					},
 				},
 			},
@@ -368,15 +368,16 @@ func (w *ControlWindow) SetPlayer(player core.IPlayer) {
 	w.controlState.SetPlayer(player)
 }
 
-func (w *ControlWindow) langTriggered(lang string) {
-	mi18n.SetLang(lang)
-	walk.MsgBox(
+func (w *ControlWindow) onChangeLanguage(lang string) {
+	if result := walk.MsgBox(
 		w.MainWindow,
-		mi18n.TWithLocale(lang, "LanguageChanged.Title"),
-		mi18n.TWithLocale(lang, "LanguageChanged.Message"),
-		walk.MsgBoxOK|walk.MsgBoxIconInformation,
-	)
-	w.controlState.SetClosed(true)
+		mi18n.TWithLocale(lang, "言語変更"),
+		mi18n.TWithLocale(lang, "言語変更メッセージ"),
+		walk.MsgBoxOKCancel|walk.MsgBoxIconInformation,
+	); result == walk.DlgCmdOK {
+		mi18n.SetLang(lang)
+		w.controlState.SetClosed(true)
+	}
 }
 
 func (w *ControlWindow) logLevelTriggered() {

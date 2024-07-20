@@ -68,14 +68,6 @@
         "translation": "&言語"
     },
     {
-        "id": "LanguageChanged.Title",
-        "translation": "言語変更"
-    },
-    {
-        "id": "LanguageChanged.Message",
-        "translation": "画面上の言語の変更は再起動後に有効になります\nアプリを終了します"
-    },
-    {
         "id": "未設定",
         "translation": "未設定"
     },
@@ -374,5 +366,13 @@
     {
         "id": "終了確認メッセージ",
         "translation": "アプリを終了してよろしいですか？"
+    },
+    {
+        "id": "言語変更",
+        "translation": "言語変更"
+    },
+    {
+        "id": "言語変更メッセージ",
+        "translation": "画面上の言語の変更は再起動後に有効になります\nアプリを終了してよろしいですか？"
     }
 ]
