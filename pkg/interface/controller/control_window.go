@@ -794,25 +794,28 @@ func (w *ControlWindow) SetSpfLimit(spf float64) {
 	w.spfLimit = spf
 }
 
-func (w *ControlWindow) SetEnabled(enabled bool) {
-	if w.tabWidget != nil {
-		for i := range w.tabWidget.Pages().Len() {
-			w.tabWidget.Pages().At(i).SetEnabled(enabled)
+func (controlWindow *ControlWindow) SetEnabled(enabled bool) {
+	if controlWindow.tabWidget != nil {
+		for i := range controlWindow.tabWidget.Pages().Len() {
+			for j := range controlWindow.tabWidget.Pages().At(i).Children().Len() {
+				controlWindow.tabWidget.Pages().At(i).Children().At(j).SetEnabled(enabled)
+			}
 		}
+		// controlWindow.tabWidget.SetEnabled(enabled)
 	}
-	if w.controlState.motionPlayer != nil {
-		w.controlState.motionPlayer.SetEnabled(enabled)
+	if controlWindow.controlState.motionPlayer != nil {
+		controlWindow.controlState.motionPlayer.SetEnabled(enabled)
 	}
 }
 
 func (w *ControlWindow) Enabled() bool {
 	if w.tabWidget != nil {
 		for i := range w.tabWidget.Pages().Len() {
-			if w.tabWidget.Pages().At(i) != nil && w.tabWidget.Pages().At(i).Enabled() {
-				return true
+			if w.tabWidget.Pages().At(i) != nil && !w.tabWidget.Pages().At(i).Enabled() {
+				return false
 			}
 		}
 	}
 
-	return false
+	return true
 }

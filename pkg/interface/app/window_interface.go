@@ -16,6 +16,7 @@ type IControlWindow interface {
 	SetPosition(x, y int)
 	Enabled() bool
 	SetEnabled(enabled bool)
+	SetFrame(frame float64)
 }
 
 type IViewWindow interface {

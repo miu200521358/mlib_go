@@ -8,29 +8,29 @@ import (
 	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
+	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 type MotionPlayer struct {
 	walk.WidgetBase
-	appState    state.IAppState  // アプリ状態
-	prevFrame   int              // 前回フレーム
-	playing     bool             // 再生中かどうか
-	frameEdit   *walk.NumberEdit // フレーム番号入力欄
-	frameSlider *walk.Slider     // フレームスライダー
-	playButton  *walk.PushButton // 一時停止ボタン
+	controlWindow app.IControlWindow // アプリ状態
+	prevFrame     int                // 前回フレーム
+	playing       bool               // 再生中かどうか
+	frameEdit     *walk.NumberEdit   // フレーム番号入力欄
+	frameSlider   *walk.Slider       // フレームスライダー
+	playButton    *walk.PushButton   // 一時停止ボタン
 }
 
 const MotionPlayerClass = "MotionPlayer Class"
 
 func NewMotionPlayer(
 	parent walk.Container,
-	appState state.IAppState,
+	controlWindow app.IControlWindow,
 ) *MotionPlayer {
 	mp := new(MotionPlayer)
-	mp.appState = appState
+	mp.controlWindow = controlWindow
 
 	if err := walk.InitWidget(
 		mp,
@@ -76,7 +76,7 @@ func NewMotionPlayer(
 	mp.frameEdit.SetSpinButtonsVisible(true)
 	mp.frameEdit.ValueChanged().Attach(func() {
 		if !mp.Playing() {
-			mp.appState.SetFrame(mp.frameEdit.Value())
+			mp.controlWindow.SetFrame(mp.frameEdit.Value())
 		}
 	})
 
@@ -89,7 +89,7 @@ func NewMotionPlayer(
 	mp.frameSlider.SetValue(0)
 	mp.frameSlider.ValueChanged().Attach(func() {
 		if !mp.Playing() {
-			mp.appState.SetFrame(float64(mp.frameSlider.Value()))
+			mp.controlWindow.SetFrame(float64(mp.frameSlider.Value()))
 		}
 	})
 
@@ -181,8 +181,12 @@ func (mp *MotionPlayer) TriggerPlay(playing bool) {
 
 	if playing {
 		mp.playButton.SetText(mi18n.T("一時停止"))
+		mp.controlWindow.SetEnabled(false)
+		mp.SetEnabled(false)
 	} else {
 		mp.playButton.SetText(mi18n.T("再生"))
+		mp.controlWindow.SetEnabled(true)
+		mp.SetEnabled(true)
 	}
 }
 
