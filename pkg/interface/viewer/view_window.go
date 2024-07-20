@@ -14,7 +14,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/animation"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
@@ -422,17 +421,6 @@ func (w *ViewWindow) Animate(
 					w.physics.DeleteModel(modelIndex)
 					animationStates[nextState.ModelIndex()].Load(nextState.Model())
 					w.physics.AddModel(modelIndex, nextState.Model())
-
-					if animationStates[modelIndex].Motion() == nil {
-						// モーション未指定の場合、空のモーションを設定しておく
-						animationStates[modelIndex].SetMotion(vmd.NewVmdMotion(""))
-					}
-
-					// モーションを初回適用
-					vmdDeltas, renderDeltas :=
-						animationStates[modelIndex].DeformBeforePhysics(w.appState, nextState.Model())
-					animationStates[modelIndex].SetVmdDeltas(vmdDeltas)
-					animationStates[modelIndex].SetRenderDeltas(renderDeltas)
 					nextState.SetModel(nil)
 				}
 				// モーションが指定されてたらセット
