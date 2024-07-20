@@ -5,12 +5,12 @@ import (
 )
 
 type IControlWindow interface {
+	IAppState
 	Run()
 	Dispose()
 	Close()
 	Size() (int, int)
 	SetPosition(x, y int)
-	AppState() IAppState
 }
 
 type IViewWindow interface {
@@ -26,7 +26,8 @@ type IViewWindow interface {
 }
 
 type IPlayer interface {
-	Play(playing bool)
+	Playing() bool
+	SetPlaying(playing bool)
 	PrevFrame() int
 	SetPrevFrame(v int)
 	Frame() float64

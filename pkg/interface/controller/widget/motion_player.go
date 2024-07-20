@@ -15,26 +15,23 @@ import (
 
 type MotionPlayer struct {
 	walk.WidgetBase
-	appState     state.IAppState  // アプリ状態
-	controlState state.IAppState  // コントロール状態
-	prevFrame    int              // 前回フレーム
-	playing      bool             // 再生中かどうか
-	frameEdit    *walk.NumberEdit // フレーム番号入力欄
-	frameSlider  *walk.Slider     // フレームスライダー
-	playButton   *walk.PushButton // 一時停止ボタン
-	onPlay       func(bool) error // 再生/一時停止時のコールバック
+	appState    state.IAppState  // アプリ状態
+	prevFrame   int              // 前回フレーム
+	playing     bool             // 再生中かどうか
+	frameEdit   *walk.NumberEdit // フレーム番号入力欄
+	frameSlider *walk.Slider     // フレームスライダー
+	playButton  *walk.PushButton // 一時停止ボタン
+	onPlay      func(bool) error // 再生/一時停止時のコールバック
 }
 
 const MotionPlayerClass = "MotionPlayer Class"
 
 func NewMotionPlayer(
 	parent walk.Container,
-	controlWindow state.IControlWindow,
 	appState state.IAppState,
 ) *MotionPlayer {
 	mp := new(MotionPlayer)
 	mp.appState = appState
-	mp.controlState = controlWindow.AppState()
 
 	if err := walk.InitWidget(
 		mp,
@@ -79,8 +76,8 @@ func NewMotionPlayer(
 	mp.frameEdit.SetIncrement(1)
 	mp.frameEdit.SetSpinButtonsVisible(true)
 	mp.frameEdit.ValueChanged().Attach(func() {
-		if !mp.playing {
-			mp.SetFrame(mp.frameEdit.Value())
+		if !mp.Playing() {
+			mp.appState.SetFrame(mp.frameEdit.Value())
 		}
 	})
 
@@ -92,8 +89,8 @@ func NewMotionPlayer(
 	mp.frameSlider.SetRange(0, 1)
 	mp.frameSlider.SetValue(0)
 	mp.frameSlider.ValueChanged().Attach(func() {
-		if !mp.playing {
-			mp.SetFrame(float64(mp.frameSlider.Value()))
+		if !mp.Playing() {
+			mp.appState.SetFrame(float64(mp.frameSlider.Value()))
 		}
 	})
 
@@ -103,8 +100,7 @@ func NewMotionPlayer(
 	}
 	mp.playButton.SetText(mi18n.T("再生"))
 	mp.playButton.Clicked().Attach(func() {
-		mp.playing = !mp.playing
-		mp.appState.TriggerPlay(mp.playing)
+		mp.SetPlaying(!mp.Playing())
 	})
 
 	// レイアウト
@@ -120,24 +116,6 @@ func (mp *MotionPlayer) Dispose() {
 	mp.frameEdit.Dispose()
 	mp.frameSlider.Dispose()
 	mp.playButton.Dispose()
-}
-
-func (mp *MotionPlayer) Play(playing bool) {
-	if playing {
-		mp.playButton.SetText(mi18n.T("一時停止"))
-		mp.SetEnabled(false)
-	} else {
-		mp.playButton.SetText(mi18n.T("再生"))
-		mp.SetEnabled(true)
-	}
-
-	if mp.onPlay != nil {
-		err := mp.onPlay(playing)
-		if err != nil {
-			mlog.ET("再生失敗", err.Error())
-			mp.Play(false)
-		}
-	}
 }
 
 func (mp *MotionPlayer) PrevFrame() int {
@@ -157,9 +135,8 @@ func (mp *MotionPlayer) SetFrame(v float64) {
 		v = 0
 	}
 	value := mmath.ClampedFloat(v, mp.frameEdit.MinValue(), mp.frameEdit.MaxValue())
-	mp.frameEdit.SetValue(value)
-	mp.frameSlider.SetValue(int(value))
-	// mp.appState.SetFrame(value)
+	mp.frameEdit.ChangeValue(value)
+	mp.frameSlider.ChangeValue(int(value))
 }
 
 func (mp *MotionPlayer) MaxFrame() int {
@@ -201,6 +178,33 @@ func (mp *MotionPlayer) SetEnabled(enabled bool) {
 	mp.frameSlider.SetEnabled(enabled)
 	mp.playButton.SetEnabled(enabled)
 }
+
+func (mp *MotionPlayer) Playing() bool {
+	return mp.playing
+}
+
+func (mp *MotionPlayer) SetPlaying(playing bool) {
+	mp.playing = playing
+	mp.appState.TriggerPlay(mp.playing)
+
+	if playing {
+		mp.playButton.SetText(mi18n.T("一時停止"))
+		mp.SetEnabled(false)
+	} else {
+		mp.playButton.SetText(mi18n.T("再生"))
+		mp.SetEnabled(true)
+	}
+
+	if mp.onPlay != nil {
+		err := mp.onPlay(playing)
+		if err != nil {
+			mlog.ET("再生失敗", err.Error())
+			mp.SetPlaying(false)
+		}
+	}
+}
+
+// --------------------------------
 
 func (*MotionPlayer) CreateLayoutItem(ctx *walk.LayoutContext) walk.LayoutItem {
 	return &motionPlayerLayoutItem{idealSize: walk.SizeFrom96DPI(walk.Size{Width: 50, Height: 50}, ctx.DPI())}

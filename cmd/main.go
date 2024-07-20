@@ -12,7 +12,6 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
-	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
@@ -69,7 +68,7 @@ func main() {
 		mApp.SetControlWindow(controlWindow)
 
 		controlWindow.InitTabWidget()
-		newFilePage(controlWindow, mApp)
+		newFilePage(controlWindow)
 
 		mApp.ControllerRun()
 	}()
@@ -87,7 +86,7 @@ func getMenuItems() []declarative.MenuItem {
 	}
 }
 
-func newFilePage(controlWindow *controller.ControlWindow, appState state.IAppState) *widget.MTabPage {
+func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 	tabPage := widget.NewMTabPage("ファイル")
 	controlWindow.AddTabPage(tabPage.TabPage)
 
@@ -106,7 +105,7 @@ func newFilePage(controlWindow *controller.ControlWindow, appState state.IAppSta
 			model := data.(*pmx.PmxModel)
 			animationState := renderer.NewAnimationState(0, 0)
 			animationState.SetModel(model)
-			controlWindow.AppState().SetAnimationState(animationState)
+			controlWindow.SetAnimationState(animationState)
 		}
 	})
 
@@ -123,8 +122,8 @@ func newFilePage(controlWindow *controller.ControlWindow, appState state.IAppSta
 			motion := data.(*vmd.VmdMotion)
 			animationState := renderer.NewAnimationState(0, 0)
 			animationState.SetMotion(motion)
-			controlWindow.AppState().SetAnimationState(animationState)
-			// controlWindow.AppState().UpdateMaxFrame(motion.GetMaxFrame())
+			controlWindow.SetAnimationState(animationState)
+			controlWindow.UpdateMaxFrame(motion.GetMaxFrame())
 		}
 	})
 
@@ -143,7 +142,7 @@ func newFilePage(controlWindow *controller.ControlWindow, appState state.IAppSta
 			model := data.(*pmx.PmxModel)
 			animationState := renderer.NewAnimationState(1, 0)
 			animationState.SetModel(model)
-			controlWindow.AppState().SetAnimationState(animationState)
+			controlWindow.SetAnimationState(animationState)
 		}
 	})
 
@@ -160,15 +159,15 @@ func newFilePage(controlWindow *controller.ControlWindow, appState state.IAppSta
 			motion := data.(*vmd.VmdMotion)
 			animationState := renderer.NewAnimationState(1, 0)
 			animationState.SetMotion(motion)
-			controlWindow.AppState().SetAnimationState(animationState)
-			// controlWindow.AppState().UpdateMaxFrame(motion.GetMaxFrame())
+			controlWindow.SetAnimationState(animationState)
+			// controlWindow.UpdateMaxFrame(motion.GetMaxFrame())
 		}
 	})
 
 	walk.NewVSeparator(tabPage)
 
-	player := widget.NewMotionPlayer(tabPage, controlWindow, appState)
-	controlWindow.SetMotionPlayer(player)
+	player := widget.NewMotionPlayer(tabPage, controlWindow)
+	controlWindow.SetPlayer(player)
 
 	consoleView := widget.NewConsoleView(tabPage, 256, 10)
 	log.SetOutput(consoleView)

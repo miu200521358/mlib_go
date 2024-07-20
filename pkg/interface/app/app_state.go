@@ -97,6 +97,7 @@ func (a *appState) ChangeFrame(frame float64) {
 
 func (a *appState) AddFrame(v float64) {
 	a.frame += v
+	a.SetAnimationState(nil)
 }
 
 func (a *appState) MaxFrame() int {

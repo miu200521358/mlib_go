@@ -19,7 +19,8 @@ type ControlWindow struct {
 	*walk.MainWindow
 	tabWidget                   *widget.MTabWidget // タブウィジェット
 	appConfig                   *mconfig.AppConfig // アプリケーション設定
-	controlState                *controlState      // 操作状態
+	controlState                *ControlState      // 操作状態
+	spfLimit                    float64            // FPS制限
 	enabledFrameDropAction      *walk.Action       // フレームドロップON/OFF
 	enabledPhysicsAction        *walk.Action       // 物理ON/OFF
 	physicsResetAction          *walk.Action       // 物理リセット
@@ -48,12 +49,13 @@ type ControlWindow struct {
 
 func NewControlWindow(
 	appConfig *mconfig.AppConfig,
-	appState *controlState,
+	controlState *ControlState,
 	helpMenuItemsFunc func() []declarative.MenuItem,
 ) *ControlWindow {
 	controlWindow := &ControlWindow{
 		appConfig:    appConfig,
-		controlState: appState,
+		controlState: controlState,
+		spfLimit:     1 / 30.0,
 	}
 
 	logMenuItems := []declarative.MenuItem{
@@ -343,10 +345,6 @@ func (w *ControlWindow) SetPosition(x, y int) {
 	w.MainWindow.SetY(y)
 }
 
-func (w *ControlWindow) AppState() state.IAppState {
-	return w.controlState
-}
-
 func (w *ControlWindow) GetMainWindow() *walk.MainWindow {
 	return w.MainWindow
 }
@@ -362,12 +360,8 @@ func (w *ControlWindow) AddTabPage(tabPage *walk.TabPage) {
 	}
 }
 
-func (w *ControlWindow) SetMotionPlayer(motionPlayer *widget.MotionPlayer) {
-	w.controlState.motionPlayer = motionPlayer
-}
-
-func (w *ControlWindow) MotionPlayer() *widget.MotionPlayer {
-	return w.controlState.motionPlayer
+func (w *ControlWindow) SetPlayer(player state.IPlayer) {
+	w.controlState.SetPlayer(player)
 }
 
 func (w *ControlWindow) langTriggered(lang string) {
@@ -523,7 +517,8 @@ func (w *ControlWindow) onTriggerFps30Limit() {
 	w.limitFps60Action.SetChecked(false)
 	w.limitFpsUnLimitAction.SetChecked(false)
 	w.limitFpsDeformUnLimitAction.SetChecked(false)
-	w.controlState.SetSpfLimit(1 / 30.0)
+	w.SetSpfLimit(1 / 30.0)
+	w.controlState.SetSpfLimit(w.SpfLimit())
 }
 
 func (w *ControlWindow) onTriggerFps60Limit() {
@@ -531,7 +526,8 @@ func (w *ControlWindow) onTriggerFps60Limit() {
 	w.limitFps60Action.SetChecked(true)
 	w.limitFpsUnLimitAction.SetChecked(false)
 	w.limitFpsDeformUnLimitAction.SetChecked(false)
-	w.controlState.SetSpfLimit(1 / 60.0)
+	w.SetSpfLimit(1 / 60.0)
+	w.controlState.SetSpfLimit(w.SpfLimit())
 }
 
 func (w *ControlWindow) onTriggerUnLimitFps() {
@@ -539,7 +535,8 @@ func (w *ControlWindow) onTriggerUnLimitFps() {
 	w.limitFps60Action.SetChecked(false)
 	w.limitFpsUnLimitAction.SetChecked(true)
 	w.limitFpsDeformUnLimitAction.SetChecked(false)
-	w.controlState.SetSpfLimit(-1.0)
+	w.SetSpfLimit(-1.0)
+	w.controlState.SetSpfLimit(w.SpfLimit())
 }
 
 func (w *ControlWindow) onTriggerUnLimitFpsDeform() {
@@ -547,5 +544,265 @@ func (w *ControlWindow) onTriggerUnLimitFpsDeform() {
 	w.limitFps60Action.SetChecked(false)
 	w.limitFpsUnLimitAction.SetChecked(false)
 	w.limitFpsDeformUnLimitAction.SetChecked(true)
-	w.controlState.SetSpfLimit(-2.0)
+	w.SetSpfLimit(-2.0)
+	w.controlState.SetSpfLimit(w.SpfLimit())
+}
+
+func (w *ControlWindow) Frame() float64 {
+	return w.controlState.Frame()
+}
+
+func (w *ControlWindow) SetFrame(frame float64) {
+	w.controlState.SetFrame(frame)
+}
+
+func (w *ControlWindow) ChangeFrame(frame float64) {
+	w.controlState.SetFrame(frame)
+}
+
+func (w *ControlWindow) AddFrame(v float64) {
+	f := w.controlState.Frame() + v
+	w.controlState.SetFrame(f)
+}
+
+func (w *ControlWindow) MaxFrame() int {
+	return w.controlState.MaxFrame()
+}
+
+func (w *ControlWindow) UpdateMaxFrame(maxFrame int) {
+	if w.MaxFrame() < maxFrame {
+		w.controlState.SetMaxFrame(maxFrame)
+	}
+}
+
+func (w *ControlWindow) SetMaxFrame(maxFrame int) {
+	w.controlState.SetMaxFrame(maxFrame)
+}
+
+func (w *ControlWindow) PrevFrame() int {
+	return w.controlState.PrevFrame()
+}
+
+func (w *ControlWindow) SetPrevFrame(prevFrame int) {
+	w.controlState.SetPrevFrame(prevFrame)
+}
+
+func (w *ControlWindow) SetAnimationState(state state.IAnimationState) {
+	w.controlState.SetAnimationState(state)
+}
+
+func (w *ControlWindow) IsEnabledFrameDrop() bool {
+	return w.enabledFrameDropAction.Checked()
+}
+
+func (w *ControlWindow) SetEnabledFrameDrop(enabled bool) {
+	w.enabledFrameDropAction.SetChecked(enabled)
+}
+
+func (w *ControlWindow) IsEnabledPhysics() bool {
+	return w.enabledPhysicsAction.Checked()
+}
+
+func (w *ControlWindow) SetEnabledPhysics(enabled bool) {
+	w.enabledPhysicsAction.SetChecked(enabled)
+}
+
+func (w *ControlWindow) IsPhysicsReset() bool {
+	return w.physicsResetAction.Checked()
+}
+
+func (w *ControlWindow) SetPhysicsReset(reset bool) {
+	w.physicsResetAction.SetChecked(reset)
+}
+
+func (w *ControlWindow) IsShowNormal() bool {
+	return w.showNormalAction.Checked()
+}
+
+func (w *ControlWindow) SetShowNormal(show bool) {
+	w.showNormalAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowWire() bool {
+	return w.showWireAction.Checked()
+}
+
+func (w *ControlWindow) SetShowWire(show bool) {
+	w.showWireAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowSelectedVertex() bool {
+	return w.showSelectedVertexAction.Checked()
+}
+
+func (w *ControlWindow) SetShowSelectedVertex(show bool) {
+	w.showSelectedVertexAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowBoneAll() bool {
+	return w.showBoneAllAction.Checked()
+}
+
+func (w *ControlWindow) SetShowBoneAll(show bool) {
+	w.showBoneAllAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowBoneIk() bool {
+	return w.showBoneIkAction.Checked()
+}
+
+func (w *ControlWindow) SetShowBoneIk(show bool) {
+	w.showBoneIkAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowBoneEffector() bool {
+	return w.showBoneEffectorAction.Checked()
+}
+
+func (w *ControlWindow) SetShowBoneEffector(show bool) {
+	w.showBoneEffectorAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowBoneFixed() bool {
+	return w.showBoneFixedAction.Checked()
+}
+
+func (w *ControlWindow) SetShowBoneFixed(show bool) {
+	w.showBoneFixedAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowBoneRotate() bool {
+	return w.showBoneRotateAction.Checked()
+}
+
+func (w *ControlWindow) SetShowBoneRotate(show bool) {
+	w.showBoneRotateAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowBoneTranslate() bool {
+	return w.showBoneTranslateAction.Checked()
+}
+
+func (w *ControlWindow) SetShowBoneTranslate(show bool) {
+	w.showBoneTranslateAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowBoneVisible() bool {
+	return w.showBoneVisibleAction.Checked()
+}
+
+func (w *ControlWindow) SetShowBoneVisible(show bool) {
+	w.showBoneVisibleAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowRigidBodyFront() bool {
+	return w.showRigidBodyFrontAction.Checked()
+}
+
+func (w *ControlWindow) SetShowRigidBodyFront(show bool) {
+	w.showRigidBodyFrontAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowRigidBodyBack() bool {
+	return w.showRigidBodyBackAction.Checked()
+}
+
+func (w *ControlWindow) SetShowRigidBodyBack(show bool) {
+	w.showRigidBodyBackAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowJoint() bool {
+	return w.showJointAction.Checked()
+}
+
+func (w *ControlWindow) SetShowJoint(show bool) {
+	w.showJointAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsShowInfo() bool {
+	return w.showInfoAction.Checked()
+}
+
+func (w *ControlWindow) SetShowInfo(show bool) {
+	w.showInfoAction.SetChecked(show)
+}
+
+func (w *ControlWindow) IsLimitFps30() bool {
+	return w.limitFps30Action.Checked()
+}
+
+func (w *ControlWindow) SetLimitFps30(limit bool) {
+	w.limitFps30Action.SetChecked(limit)
+}
+
+func (w *ControlWindow) IsLimitFps60() bool {
+	return w.limitFps60Action.Checked()
+}
+
+func (w *ControlWindow) SetLimitFps60(limit bool) {
+	w.limitFps60Action.SetChecked(limit)
+}
+
+func (w *ControlWindow) IsUnLimitFps() bool {
+	return w.limitFpsUnLimitAction.Checked()
+}
+
+func (w *ControlWindow) SetUnLimitFps(limit bool) {
+	w.limitFpsUnLimitAction.SetChecked(limit)
+}
+
+func (w *ControlWindow) IsUnLimitFpsDeform() bool {
+	return w.limitFpsDeformUnLimitAction.Checked()
+}
+
+func (w *ControlWindow) SetUnLimitFpsDeform(limit bool) {
+	w.limitFpsDeformUnLimitAction.SetChecked(limit)
+}
+
+func (w *ControlWindow) IsLogLevelDebug() bool {
+	return w.logLevelDebugAction.Checked()
+}
+
+func (w *ControlWindow) SetLogLevelDebug(log bool) {
+	w.logLevelDebugAction.SetChecked(log)
+}
+
+func (w *ControlWindow) IsLogLevelVerbose() bool {
+	return w.logLevelVerboseAction.Checked()
+}
+
+func (w *ControlWindow) SetLogLevelVerbose(log bool) {
+	w.logLevelVerboseAction.SetChecked(log)
+}
+
+func (w *ControlWindow) IsLogLevelIkVerbose() bool {
+	return w.logLevelIkVerboseAction.Checked()
+}
+
+func (w *ControlWindow) SetLogLevelIkVerbose(log bool) {
+	w.logLevelIkVerboseAction.SetChecked(log)
+}
+
+func (w *ControlWindow) IsClosed() bool {
+	return w.controlState.IsClosed()
+}
+
+func (w *ControlWindow) SetClosed(closed bool) {
+	w.controlState.SetClosed(closed)
+}
+
+func (w *ControlWindow) Playing() bool {
+	return w.controlState.Playing()
+}
+
+func (w *ControlWindow) TriggerPlay(p bool) {
+	w.controlState.TriggerPlay(p)
+}
+
+func (w *ControlWindow) SpfLimit() float64 {
+	return w.spfLimit
+}
+
+func (w *ControlWindow) SetSpfLimit(spf float64) {
+	w.spfLimit = spf
 }
