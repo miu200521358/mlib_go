@@ -46,34 +46,40 @@ func newTailBoneGl(b *pmx.Bone) []float32 {
 
 func getBoneDebugColor(b *pmx.Bone, appState core.IAppState) []float32 {
 	// IK
-	if (appState.IsShowBoneAll() || appState.IsShowBoneIk()) && b.IsIK() {
+	if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneIk()) && b.IsIK() {
 		// IK
 		return bone_colors_ik
-	} else if (appState.IsShowBoneAll() || appState.IsShowBoneIk()) && len(b.Extend.IkLinkBoneIndexes) > 0 {
+	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneIk()) &&
+		len(b.Extend.IkLinkBoneIndexes) > 0 {
 		// IKリンク
 		return bone_colors_ik_link
-	} else if (appState.IsShowBoneAll() || appState.IsShowBoneIk()) && len(b.Extend.IkTargetBoneIndexes) > 0 {
+	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneIk()) &&
+		len(b.Extend.IkTargetBoneIndexes) > 0 {
 		// IKターゲット
 		return bone_colors_ik_target
-	} else if (appState.IsShowBoneAll() || appState.IsShowBoneEffector()) &&
+	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneEffector()) &&
 		(b.IsEffectorRotation() || b.IsEffectorTranslation()) {
 		// 付与親
 		return bone_colors_effect
-	} else if (appState.IsShowBoneAll() || appState.IsShowBoneEffector()) && len(b.Extend.EffectiveBoneIndexes) > 0 {
+	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneEffector()) &&
+		len(b.Extend.EffectiveBoneIndexes) > 0 {
 		// 付与親の付与元
 		return bone_colors_effect_effector
-	} else if (appState.IsShowBoneAll() || appState.IsShowBoneFixed()) && b.HasFixedAxis() {
+	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneFixed()) &&
+		b.HasFixedAxis() {
 		// 軸固定
 		return bone_colors_fixed
+	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneTranslate()) &&
+		b.CanTranslate() {
+		// 移動
+		return bone_colors_translate
+	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneRotate()) &&
+		b.CanRotate() {
+		// 回転
+		return bone_colors_rotate
 	} else if appState.IsShowBoneAll() && !b.IsVisible() {
 		// 非表示
 		return bone_colors_invisible
-	} else if (appState.IsShowBoneAll() || appState.IsShowBoneTranslate()) && b.CanTranslate() {
-		// 移動
-		return bone_colors_translate
-	} else if (appState.IsShowBoneAll() || appState.IsShowBoneRotate()) && b.CanRotate() {
-		// 回転
-		return bone_colors_rotate
 	}
 
 	return []float32{0.0, 0.0, 0.0, 0.0}

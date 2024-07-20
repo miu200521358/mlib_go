@@ -9,7 +9,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/interface/core"
 )
 
-type ControlState struct {
+type controlState struct {
 	appState                 core.IAppState                // アプリ状態
 	motionPlayer             core.IPlayer                  // モーションプレイヤー
 	controlWindow            core.IControlWindow           // コントロールウィンドウ
@@ -47,8 +47,8 @@ type ControlState struct {
 	animationState           chan *renderer.AnimationState // アニメーションステート
 }
 
-func NewControlState(appState core.IAppState) *ControlState {
-	u := &ControlState{
+func NewControlState(appState core.IAppState) *controlState {
+	u := &controlState{
 		appState:                 appState,
 		prevFrameChan:            make(chan int),
 		frameChan:                make(chan float64),
@@ -87,7 +87,7 @@ func NewControlState(appState core.IAppState) *ControlState {
 	return u
 }
 
-func (s *ControlState) Run() {
+func (s *controlState) Run() {
 	go func() {
 		prevTime := glfw.GetTime()
 
@@ -174,167 +174,167 @@ func (s *ControlState) Run() {
 	}()
 }
 
-func (c *ControlState) SetPlayer(mp core.IPlayer) {
+func (c *controlState) SetPlayer(mp core.IPlayer) {
 	c.motionPlayer = mp
 }
 
-func (c *ControlState) SetControlWindow(cw core.IControlWindow) {
+func (c *controlState) SetControlWindow(cw core.IControlWindow) {
 	c.controlWindow = cw
 }
 
-func (c *ControlState) SetAnimationState(state core.IAnimationState) {
+func (c *controlState) SetAnimationState(state core.IAnimationState) {
 	c.animationState <- state.(*renderer.AnimationState)
 }
 
-func (c *ControlState) AnimationState() *renderer.AnimationState {
+func (c *controlState) AnimationState() *renderer.AnimationState {
 	return <-c.animationState
 }
 
-func (c *ControlState) Frame() float64 {
+func (c *controlState) Frame() float64 {
 	return c.motionPlayer.Frame()
 }
 
-func (c *ControlState) SetFrame(frame float64) {
+func (c *controlState) SetFrame(frame float64) {
 	c.motionPlayer.SetFrame(frame)
 	c.frameChan <- frame
 }
 
-func (c *ControlState) AddFrame(v float64) {
+func (c *controlState) AddFrame(v float64) {
 	f := c.Frame()
 	c.SetFrame(f + v)
 }
 
-func (c *ControlState) MaxFrame() int {
+func (c *controlState) MaxFrame() int {
 	return c.motionPlayer.MaxFrame()
 }
 
-func (c *ControlState) SetMaxFrame(maxFrame int) {
+func (c *controlState) SetMaxFrame(maxFrame int) {
 	c.motionPlayer.SetMaxFrame(maxFrame)
 	c.maxFrameChan <- maxFrame
 }
 
-func (c *ControlState) UpdateMaxFrame(maxFrame int) {
+func (c *controlState) UpdateMaxFrame(maxFrame int) {
 	c.motionPlayer.UpdateMaxFrame(maxFrame)
 	c.maxFrameChan <- maxFrame
 }
 
-func (c *ControlState) PrevFrame() int {
+func (c *controlState) PrevFrame() int {
 	return c.motionPlayer.PrevFrame()
 }
 
-func (c *ControlState) SetPrevFrame(prevFrame int) {
+func (c *controlState) SetPrevFrame(prevFrame int) {
 	c.motionPlayer.SetPrevFrame(prevFrame)
 	c.prevFrameChan <- prevFrame
 }
 
-func (c *ControlState) SetEnabledFrameDrop(enabled bool) {
+func (c *controlState) SetEnabledFrameDrop(enabled bool) {
 	c.isEnabledFrameDropChan <- enabled
 }
 
-func (c *ControlState) SetEnabledPhysics(enabled bool) {
+func (c *controlState) SetEnabledPhysics(enabled bool) {
 	c.isEnabledPhysicsChan <- enabled
 }
 
-func (c *ControlState) SetPhysicsReset(reset bool) {
+func (c *controlState) SetPhysicsReset(reset bool) {
 	c.physicsResetChan <- reset
 }
 
-func (c *ControlState) SetShowNormal(show bool) {
+func (c *controlState) SetShowNormal(show bool) {
 	c.isShowNormalChan <- show
 }
 
-func (c *ControlState) SetShowWire(show bool) {
+func (c *controlState) SetShowWire(show bool) {
 	c.isShowWireChan <- show
 }
 
-func (c *ControlState) SetShowSelectedVertex(show bool) {
+func (c *controlState) SetShowSelectedVertex(show bool) {
 	c.isShowSelectedVertexChan <- show
 }
 
-func (c *ControlState) SetShowBoneAll(show bool) {
+func (c *controlState) SetShowBoneAll(show bool) {
 	c.isShowBoneAllChan <- show
 }
 
-func (c *ControlState) SetShowBoneIk(show bool) {
+func (c *controlState) SetShowBoneIk(show bool) {
 	c.isShowBoneIkChan <- show
 }
 
-func (c *ControlState) SetShowBoneEffector(show bool) {
+func (c *controlState) SetShowBoneEffector(show bool) {
 	c.isShowBoneEffectorChan <- show
 }
 
-func (c *ControlState) SetShowBoneFixed(show bool) {
+func (c *controlState) SetShowBoneFixed(show bool) {
 	c.isShowBoneFixedChan <- show
 }
 
-func (c *ControlState) SetShowBoneRotate(show bool) {
+func (c *controlState) SetShowBoneRotate(show bool) {
 	c.isShowBoneRotateChan <- show
 }
 
-func (c *ControlState) SetShowBoneTranslate(show bool) {
+func (c *controlState) SetShowBoneTranslate(show bool) {
 	c.isShowBoneTranslateChan <- show
 }
 
-func (c *ControlState) SetShowBoneVisible(show bool) {
+func (c *controlState) SetShowBoneVisible(show bool) {
 	c.isShowBoneVisibleChan <- show
 }
 
-func (c *ControlState) SetShowRigidBodyFront(show bool) {
+func (c *controlState) SetShowRigidBodyFront(show bool) {
 	c.isShowRigidBodyFrontChan <- show
 }
 
-func (c *ControlState) SetShowRigidBodyBack(show bool) {
+func (c *controlState) SetShowRigidBodyBack(show bool) {
 	c.isShowRigidBodyBackChan <- show
 }
 
-func (c *ControlState) SetShowJoint(show bool) {
+func (c *controlState) SetShowJoint(show bool) {
 	c.isShowJointChan <- show
 }
 
-func (c *ControlState) SetShowInfo(show bool) {
+func (c *controlState) SetShowInfo(show bool) {
 	c.isShowInfoChan <- show
 }
 
-func (c *ControlState) SetLimitFps30(limit bool) {
+func (c *controlState) SetLimitFps30(limit bool) {
 	c.isLimitFps30Chan <- limit
 }
 
-func (c *ControlState) SetLimitFps60(limit bool) {
+func (c *controlState) SetLimitFps60(limit bool) {
 	c.isLimitFps60Chan <- limit
 }
 
-func (c *ControlState) SetUnLimitFps(limit bool) {
+func (c *controlState) SetUnLimitFps(limit bool) {
 	c.isUnLimitFpsChan <- limit
 }
 
-func (c *ControlState) SetUnLimitFpsDeform(limit bool) {
+func (c *controlState) SetUnLimitFpsDeform(limit bool) {
 	c.isUnLimitFpsDeformChan <- limit
 }
 
-func (c *ControlState) SetLogLevelDebug(log bool) {
+func (c *controlState) SetLogLevelDebug(log bool) {
 	c.isLogLevelDebugChan <- log
 }
 
-func (c *ControlState) SetLogLevelVerbose(log bool) {
+func (c *controlState) SetLogLevelVerbose(log bool) {
 	c.isLogLevelVerboseChan <- log
 }
 
-func (c *ControlState) SetLogLevelIkVerbose(log bool) {
+func (c *controlState) SetLogLevelIkVerbose(log bool) {
 	c.isLogLevelIkVerboseChan <- log
 }
 
-func (c *ControlState) SetClosed(closed bool) {
+func (c *controlState) SetClosed(closed bool) {
 	c.isClosedChan <- closed
 }
 
-func (c *ControlState) Playing() bool {
+func (c *controlState) Playing() bool {
 	return c.motionPlayer != nil && c.motionPlayer.Playing()
 }
 
-func (c *ControlState) TriggerPlay(p bool) {
+func (c *controlState) TriggerPlay(p bool) {
 	c.playingChan <- p
 }
 
-func (c *ControlState) SetSpfLimit(spf float64) {
+func (c *controlState) SetSpfLimit(spf float64) {
 	c.spfLimitChan <- spf
 }
