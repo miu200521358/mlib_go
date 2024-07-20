@@ -4,8 +4,6 @@
 package widget
 
 import (
-	"math"
-
 	"github.com/miu200521358/walk/pkg/walk"
 	"github.com/miu200521358/win"
 
@@ -17,21 +15,26 @@ import (
 
 type MotionPlayer struct {
 	walk.WidgetBase
-	appState    state.IAppState  // アプリ状態
-	prevFrame   int              // 前回フレーム
-	frameEdit   *walk.NumberEdit // フレーム番号入力欄
-	frameSlider *walk.Slider     // フレームスライダー
-	playButton  *walk.PushButton // 一時停止ボタン
-	onPlay      func(bool) error // 再生/一時停止時のコールバック
+	appState     state.IAppState  // アプリ状態
+	controlState state.IAppState  // コントロール状態
+	prevFrame    int              // 前回フレーム
+	playing      bool             // 再生中かどうか
+	frameEdit    *walk.NumberEdit // フレーム番号入力欄
+	frameSlider  *walk.Slider     // フレームスライダー
+	playButton   *walk.PushButton // 一時停止ボタン
+	onPlay       func(bool) error // 再生/一時停止時のコールバック
 }
 
 const MotionPlayerClass = "MotionPlayer Class"
 
 func NewMotionPlayer(
-	parent walk.Container, controlWindow state.IControlWindow,
+	parent walk.Container,
+	controlWindow state.IControlWindow,
+	appState state.IAppState,
 ) *MotionPlayer {
 	mp := new(MotionPlayer)
-	mp.appState = controlWindow.AppState()
+	mp.appState = appState
+	mp.controlState = controlWindow.AppState()
 
 	if err := walk.InitWidget(
 		mp,
@@ -76,7 +79,7 @@ func NewMotionPlayer(
 	mp.frameEdit.SetIncrement(1)
 	mp.frameEdit.SetSpinButtonsVisible(true)
 	mp.frameEdit.ValueChanged().Attach(func() {
-		if !mp.appState.Playing() {
+		if !mp.playing {
 			mp.SetFrame(mp.frameEdit.Value())
 		}
 	})
@@ -89,7 +92,7 @@ func NewMotionPlayer(
 	mp.frameSlider.SetRange(0, 1)
 	mp.frameSlider.SetValue(0)
 	mp.frameSlider.ValueChanged().Attach(func() {
-		if !mp.appState.Playing() {
+		if !mp.playing {
 			mp.SetFrame(float64(mp.frameSlider.Value()))
 		}
 	})
@@ -100,7 +103,8 @@ func NewMotionPlayer(
 	}
 	mp.playButton.SetText(mi18n.T("再生"))
 	mp.playButton.Clicked().Attach(func() {
-		mp.appState.TriggerPlay(!mp.appState.Playing())
+		mp.playing = !mp.playing
+		mp.appState.TriggerPlay(mp.playing)
 	})
 
 	// レイアウト
@@ -149,34 +153,34 @@ func (mp *MotionPlayer) Frame() float64 {
 }
 
 func (mp *MotionPlayer) SetFrame(v float64) {
-	if mp.appState.Playing() && v > float64(mp.appState.MaxFrame()) {
+	if mp.playing && v > mp.frameEdit.MaxValue() {
 		v = 0
 	}
 	value := mmath.ClampedFloat(v, mp.frameEdit.MinValue(), mp.frameEdit.MaxValue())
 	mp.frameEdit.SetValue(value)
 	mp.frameSlider.SetValue(int(value))
-	mp.appState.SetFrame(value)
+	// mp.appState.SetFrame(value)
 }
 
 func (mp *MotionPlayer) MaxFrame() int {
-	return mp.appState.MaxFrame()
+	return mp.frameSlider.MaxValue()
 }
 
 func (mp *MotionPlayer) SetMaxFrame(max int) {
 	mp.frameEdit.SetRange(mp.frameEdit.MinValue(), float64(max))
 	mp.frameSlider.SetRange(int(mp.frameEdit.MinValue()), max)
-	mp.appState.SetMaxFrame(max)
 }
 
 func (mp *MotionPlayer) UpdateMaxFrame(max int) {
 	nowMax := mp.frameSlider.MaxValue()
-	mp.SetMaxFrame(int(math.Max(float64(nowMax), float64(max))))
+	if nowMax < max {
+		mp.SetMaxFrame(max)
+	}
 }
 
 func (mp *MotionPlayer) SetRange(min, max int) {
 	mp.frameEdit.SetRange(float64(min), float64(max))
 	mp.frameSlider.SetRange(min, max)
-	mp.appState.SetMaxFrame(max)
 }
 
 func (mp *MotionPlayer) SetEnabled(enabled bool) {

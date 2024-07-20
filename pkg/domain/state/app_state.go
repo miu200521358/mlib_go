@@ -12,6 +12,7 @@ type IAppState interface {
 	AddFrame(v float64)
 	MaxFrame() int
 	SetMaxFrame(maxFrame int)
+	UpdateMaxFrame(maxFrame int)
 	PrevFrame() int
 	SetPrevFrame(prevFrame int)
 	IsEnabledFrameDrop() bool

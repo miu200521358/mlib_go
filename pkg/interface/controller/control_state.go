@@ -3,10 +3,12 @@ package controller
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
+	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 )
 
 type controlState struct {
 	appState                 state.IAppState               // アプリ状態
+	motionPlayer             *widget.MotionPlayer          // モーションプレイヤー
 	prevFrameChan            chan int                      // 前回フレーム
 	frameChan                chan float64                  // フレーム
 	maxFrameChan             chan int                      // 最大フレーム
@@ -89,8 +91,10 @@ func (s *controlState) Run() {
 				s.appState.SetPrevFrame(prevFrame)
 			case frame := <-s.frameChan:
 				s.appState.SetFrame(frame)
+				// s.motionPlayer.SetFrame(frame)
 			case maxFrame := <-s.maxFrameChan:
-				s.appState.SetMaxFrame(maxFrame)
+				s.appState.UpdateMaxFrame(maxFrame)
+				// s.motionPlayer.UpdateMaxFrame(maxFrame)
 			case enabledFrameDrop := <-s.isEnabledFrameDropChan:
 				s.appState.SetEnabledFrameDrop(enabledFrameDrop)
 			case enabledPhysics := <-s.isEnabledPhysicsChan:
@@ -140,6 +144,10 @@ func (s *controlState) Run() {
 	}()
 }
 
+func (c *controlState) SetMotionPlayer(mp *widget.MotionPlayer) {
+	c.motionPlayer = mp
+}
+
 func (c *controlState) SetAnimationState(state state.IAnimationState) {
 	c.animationState <- state.(*renderer.AnimationState)
 }
@@ -166,6 +174,10 @@ func (c *controlState) MaxFrame() int {
 }
 
 func (c *controlState) SetMaxFrame(maxFrame int) {
+	c.maxFrameChan <- maxFrame
+}
+
+func (c *controlState) UpdateMaxFrame(maxFrame int) {
 	c.maxFrameChan <- maxFrame
 }
 

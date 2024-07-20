@@ -45,6 +45,9 @@ func newAppState() *appState {
 		isEnabledFrameDrop: true,       // フレームドロップON
 		isLimitFps30:       true,       // 30fps制限
 		spfLimit:           1.0 / 30.0, // 30fps
+		prevFrame:          -1,
+		frame:              0,
+		maxFrame:           1,
 		animationStates:    make([][]state.IAnimationState, 0),
 	}
 
@@ -98,6 +101,12 @@ func (a *appState) AddFrame(v float64) {
 
 func (a *appState) MaxFrame() int {
 	return a.maxFrame
+}
+
+func (a *appState) UpdateMaxFrame(maxFrame int) {
+	if a.maxFrame < maxFrame {
+		a.maxFrame = maxFrame
+	}
 }
 
 func (a *appState) SetMaxFrame(maxFrame int) {

@@ -24,3 +24,16 @@ type IViewWindow interface {
 	ResetPhysicsStart()
 	AppState() IAppState
 }
+
+type IPlayer interface {
+	Play(playing bool)
+	PrevFrame() int
+	SetPrevFrame(v int)
+	Frame() float64
+	SetFrame(v float64)
+	MaxFrame() int
+	SetMaxFrame(max int)
+	UpdateMaxFrame(max int)
+	SetRange(min, max int)
+	SetEnabled(enabled bool)
+}
