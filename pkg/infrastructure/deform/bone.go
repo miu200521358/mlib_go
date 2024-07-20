@@ -350,6 +350,9 @@ ikLoop:
 					effectorLocalPosition.Distance(ikLocalPosition))
 			}
 
+			effectorLocalPosition.Normalize()
+			ikLocalPosition.Normalize()
+
 			distanceThreshold := effectorLocalPosition.Distance(ikLocalPosition)
 			if distanceThreshold < 1e-5 {
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
@@ -360,9 +363,6 @@ ikLoop:
 
 				break ikLoop
 			}
-
-			effectorLocalPosition.Normalize()
-			ikLocalPosition.Normalize()
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
@@ -395,17 +395,17 @@ ikLoop:
 				)
 			}
 
-			// 角度がほとんどない場合
-			angleThreshold := math.Abs(linkAngle)
-			if angleThreshold < 1e-5 {
-				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					fmt.Fprintf(ikFile,
-						"[%04d][%03d][%s][%05d][Local] ***BREAK*** angleThreshold: %f\n",
-						frame, loop, linkBone.Name, count-1, angleThreshold)
-				}
+			// // 角度がほとんどない場合
+			// angleThreshold := math.Abs(linkAngle)
+			// if angleThreshold < 1e-5 {
+			// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			// 		fmt.Fprintf(ikFile,
+			// 			"[%04d][%03d][%s][%05d][Local] ***BREAK*** angleThreshold: %f\n",
+			// 			frame, loop, linkBone.Name, count-1, angleThreshold)
+			// 	}
 
-				break ikLoop
-			}
+			// 	break ikLoop
+			// }
 
 			// 回転軸
 			var originalLinkAxis, linkAxis *mmath.MVec3
