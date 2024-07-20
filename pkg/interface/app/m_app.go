@@ -96,13 +96,9 @@ func (a *MApp) ViewerRun() {
 		}
 
 		for i, w := range a.viewWindows {
-			if a.nextState != nil && a.nextState.WindowIndex() == i {
-				// アニメーション領域を確保しておく
-				a.ExtendAnimationState(i, a.nextState.ModelIndex())
-				a.animationStates[i], a.nextState = w.Animate(a.animationStates[i], a.nextState, timeStep)
-			} else {
-				a.animationStates[i], _ = w.Animate(a.animationStates[i], nil, timeStep)
-			}
+			// アニメーション領域を確保しておく
+			a.animationStates[i], a.nextAnimationStates[i] =
+				w.Animate(a.animationStates[i], a.nextAnimationStates[i], timeStep)
 		}
 
 		prevTime = frameTime
@@ -196,6 +192,7 @@ func (a *MApp) SetControlWindow(controlWindow IControlWindow) {
 func (a *MApp) AddViewWindow(viewWindow IViewWindow) {
 	a.viewWindows = append(a.viewWindows, viewWindow)
 	a.animationStates = append(a.animationStates, make([]state.IAnimationState, 0))
+	a.nextAnimationStates = append(a.nextAnimationStates, make([]state.IAnimationState, 0))
 }
 
 func (a *MApp) Dispose() {

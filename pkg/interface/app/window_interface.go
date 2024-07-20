@@ -17,7 +17,7 @@ type IControlWindow interface {
 }
 
 type IViewWindow interface {
-	Animate(states []state.IAnimationState, nextState state.IAnimationState, timeStep float32) ([]state.IAnimationState, state.IAnimationState)
+	Animate(states []state.IAnimationState, nextStates []state.IAnimationState, timeStep float32) ([]state.IAnimationState, []state.IAnimationState)
 	Dispose()
 	Close()
 	Size() (int, int)

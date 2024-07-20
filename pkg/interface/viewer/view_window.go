@@ -377,12 +377,12 @@ func (w *ViewWindow) ResetPhysics(animationStates []state.IAnimationState) {
 }
 
 func (w *ViewWindow) Animate(
-	animationStates []state.IAnimationState, nextState state.IAnimationState, timeStep float32,
-) ([]state.IAnimationState, state.IAnimationState) {
+	animationStates []state.IAnimationState, nextStates []state.IAnimationState, timeStep float32,
+) ([]state.IAnimationState, []state.IAnimationState) {
 	glfw.PollEvents()
 
 	if w.size.X == 0 || w.size.Y == 0 {
-		return animationStates, nextState
+		return animationStates, nextStates
 	}
 
 	w.MakeContextCurrent()
@@ -414,38 +414,41 @@ func (w *ViewWindow) Animate(
 
 	if animationStates != nil {
 		// 何かしら描画対象情報がある場合の処理
+		for _, nextState := range nextStates {
+			if nextState != nil {
+				// モデルが指定されてたら初期化してセット
+				if nextState.Model() != nil {
+					modelIndex := nextState.ModelIndex()
+					w.physics.DeleteModel(modelIndex)
+					animationStates[nextState.ModelIndex()].Load(nextState.Model())
+					w.physics.AddModel(modelIndex, nextState.Model())
 
-		if nextState != nil {
-			// モデルが指定されてたら初期化してセット
-			if nextState.Model() != nil {
-				modelIndex := nextState.ModelIndex()
-				w.physics.DeleteModel(modelIndex)
-				animationStates[nextState.ModelIndex()].Load(nextState.Model())
-				w.physics.AddModel(modelIndex, nextState.Model())
+					if animationStates[modelIndex].Motion() == nil {
+						// モーション未指定の場合、空のモーションを設定しておく
+						animationStates[modelIndex].SetMotion(vmd.NewVmdMotion(""))
+					}
 
-				if animationStates[modelIndex].Motion() == nil {
-					// モーション未指定の場合、空のモーションを設定しておく
-					animationStates[modelIndex].SetMotion(vmd.NewVmdMotion(""))
+					// モーションを初回適用
+					vmdDeltas, renderDeltas :=
+						animationStates[modelIndex].DeformBeforePhysics(w.appState, nextState.Model())
+					animationStates[modelIndex].SetVmdDeltas(vmdDeltas)
+					animationStates[modelIndex].SetRenderDeltas(renderDeltas)
+					nextState.SetModel(nil)
 				}
-
-				// モーションを初回適用
-				vmdDeltas, renderDeltas :=
-					animationStates[modelIndex].DeformBeforePhysics(w.appState, nextState.Model())
-				animationStates[modelIndex].SetVmdDeltas(vmdDeltas)
-				animationStates[modelIndex].SetRenderDeltas(renderDeltas)
+				// モーションが指定されてたらセット
+				if nextState.Motion() != nil {
+					animationStates[nextState.ModelIndex()].SetMotion(nextState.Motion())
+					nextState.SetMotion(nil)
+				}
+				if nextState.VmdDeltas() != nil {
+					animationStates[nextState.ModelIndex()].SetVmdDeltas(nextState.VmdDeltas())
+					nextState.SetVmdDeltas(nil)
+				}
+				if nextState.RenderDeltas() != nil {
+					animationStates[nextState.ModelIndex()].SetRenderDeltas(nextState.RenderDeltas())
+					nextState.SetRenderDeltas(nil)
+				}
 			}
-			// モーションが指定されてたらセット
-			if nextState.Motion() != nil {
-				animationStates[nextState.ModelIndex()].SetMotion(nextState.Motion())
-			}
-			if nextState.VmdDeltas() != nil {
-				animationStates[nextState.ModelIndex()].SetVmdDeltas(nextState.VmdDeltas())
-			}
-			if nextState.RenderDeltas() != nil {
-				animationStates[nextState.ModelIndex()].SetRenderDeltas(nextState.RenderDeltas())
-			}
-
-			nextState = nil
 		}
 
 		// デフォーム
@@ -470,7 +473,7 @@ func (w *ViewWindow) Animate(
 
 	w.SwapBuffers()
 
-	return animationStates, nextState
+	return animationStates, nextStates
 }
 
 func (w *ViewWindow) updateCamera() {

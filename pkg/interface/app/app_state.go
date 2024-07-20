@@ -41,19 +41,20 @@ type appState struct {
 	playing              bool                      // 再生中フラグ
 	spfLimit             float64                   // FPS制限
 	animationStates      [][]state.IAnimationState // アニメーションステート
-	nextState            state.IAnimationState     // 次のアニメーションステート
+	nextAnimationStates  [][]state.IAnimationState // 次のアニメーションステート
 }
 
 func newAppState() *appState {
 	u := &appState{
-		isEnabledPhysics:   true,       // 物理ON
-		isEnabledFrameDrop: true,       // フレームドロップON
-		isLimitFps30:       true,       // 30fps制限
-		spfLimit:           1.0 / 30.0, // 30fps
-		prevFrame:          -1,
-		frame:              0,
-		maxFrame:           1,
-		animationStates:    make([][]state.IAnimationState, 0),
+		isEnabledPhysics:    true,       // 物理ON
+		isEnabledFrameDrop:  true,       // フレームドロップON
+		isLimitFps30:        true,       // 30fps制限
+		spfLimit:            1.0 / 30.0, // 30fps
+		prevFrame:           -1,
+		frame:               0,
+		maxFrame:            1,
+		animationStates:     make([][]state.IAnimationState, 0),
+		nextAnimationStates: make([][]state.IAnimationState, 0),
 	}
 
 	return u
@@ -62,10 +63,13 @@ func newAppState() *appState {
 func (appState *appState) ExtendAnimationState(windowIndex, modelIndex int) {
 	for len(appState.animationStates) <= windowIndex {
 		appState.animationStates = append(appState.animationStates, make([]state.IAnimationState, 0))
+		appState.nextAnimationStates = append(appState.nextAnimationStates, make([]state.IAnimationState, 0))
 	}
 	for len(appState.animationStates[windowIndex]) <= modelIndex {
 		appState.animationStates[windowIndex] =
 			append(appState.animationStates[windowIndex], animation.NewAnimationState(windowIndex, modelIndex))
+		appState.nextAnimationStates[windowIndex] =
+			append(appState.nextAnimationStates[windowIndex], animation.NewAnimationState(windowIndex, modelIndex))
 	}
 }
 
@@ -75,8 +79,8 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 	appState.ExtendAnimationState(windowIndex, modelIndex)
 
 	if animationState.Model() != nil {
-		appState.nextState = animation.NewAnimationState(windowIndex, modelIndex)
-		appState.nextState.SetModel(animationState.Model())
+		appState.nextAnimationStates[windowIndex][modelIndex] = animation.NewAnimationState(windowIndex, modelIndex)
+		appState.nextAnimationStates[windowIndex][modelIndex].SetModel(animationState.Model())
 
 		motion := appState.animationStates[windowIndex][modelIndex].Motion()
 		if motion == nil {
@@ -85,20 +89,20 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 		animationState.SetMotion(motion)
 
 		vmdDeltas, renderDeltas := animationState.DeformBeforePhysics(appState, animationState.Model())
-		appState.nextState.SetMotion(animationState.Motion())
-		appState.nextState.SetVmdDeltas(vmdDeltas)
-		appState.nextState.SetRenderDeltas(renderDeltas)
+		appState.nextAnimationStates[windowIndex][modelIndex].SetMotion(animationState.Motion())
+		appState.nextAnimationStates[windowIndex][modelIndex].SetVmdDeltas(vmdDeltas)
+		appState.nextAnimationStates[windowIndex][modelIndex].SetRenderDeltas(renderDeltas)
 
 	} else if animationState.Motion() != nil {
 		// モーションが指定されてたらセット
 		model := appState.animationStates[windowIndex][modelIndex].Model()
 		if model != nil {
-			appState.nextState = animation.NewAnimationState(windowIndex, modelIndex)
+			appState.nextAnimationStates[windowIndex][modelIndex] = animation.NewAnimationState(windowIndex, modelIndex)
 
 			vmdDeltas, renderDeltas := animationState.DeformBeforePhysics(appState, model)
-			appState.nextState.SetMotion(animationState.Motion())
-			appState.nextState.SetVmdDeltas(vmdDeltas)
-			appState.nextState.SetRenderDeltas(renderDeltas)
+			appState.nextAnimationStates[windowIndex][modelIndex].SetMotion(animationState.Motion())
+			appState.nextAnimationStates[windowIndex][modelIndex].SetVmdDeltas(vmdDeltas)
+			appState.nextAnimationStates[windowIndex][modelIndex].SetRenderDeltas(renderDeltas)
 		}
 	}
 }
@@ -115,9 +119,9 @@ func (appState *appState) SetFrame(frame float64) {
 				vmdDeltas, renderDeltas := appState.animationStates[i][j].DeformBeforePhysics(
 					appState, appState.animationStates[i][j].Model())
 
-				appState.nextState = animation.NewAnimationState(i, j)
-				appState.nextState.SetVmdDeltas(vmdDeltas)
-				appState.nextState.SetRenderDeltas(renderDeltas)
+				appState.nextAnimationStates[i][j] = animation.NewAnimationState(i, j)
+				appState.nextAnimationStates[i][j].SetVmdDeltas(vmdDeltas)
+				appState.nextAnimationStates[i][j].SetRenderDeltas(renderDeltas)
 			}
 		}
 	}
