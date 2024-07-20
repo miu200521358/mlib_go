@@ -1,3 +1,6 @@
+//go:build windows
+// +build windows
+
 package app
 
 import (
@@ -54,50 +57,48 @@ func newAppState() *appState {
 	return u
 }
 
-func (a *appState) SetAnimationState(s state.IAnimationState) {
-	windowIndex := s.WindowIndex()
-	modelIndex := s.ModelIndex()
-	for len(a.animationStates) <= windowIndex {
-		a.animationStates = append(a.animationStates, make([]state.IAnimationState, 0))
+func (appState *appState) SetAnimationState(animationState state.IAnimationState) {
+	windowIndex := animationState.WindowIndex()
+	modelIndex := animationState.ModelIndex()
+	for len(appState.animationStates) <= windowIndex {
+		appState.animationStates = append(appState.animationStates, make([]state.IAnimationState, 0))
 	}
-	for i := 0; i < len(a.animationStates); i++ {
-		for len(a.animationStates[i]) <= modelIndex {
-			a.animationStates[i] = append(a.animationStates[i],
-				renderer.NewAnimationState(windowIndex, len(a.animationStates[i])))
+	for i := 0; i < len(appState.animationStates); i++ {
+		for len(appState.animationStates[i]) <= modelIndex {
+			appState.animationStates[i] = append(appState.animationStates[i],
+				renderer.NewAnimationState(windowIndex, len(appState.animationStates[i])))
 		}
 	}
-	if s.Model() != nil {
-		a.animationStates[windowIndex][modelIndex].SetModel(s.Model())
+	if animationState.Model() != nil {
+		appState.animationStates[windowIndex][modelIndex].SetModel(animationState.Model())
+		appState.SetFrame(appState.frame)
 	}
-	if s.Motion() != nil {
-		a.animationStates[windowIndex][modelIndex].SetMotion(s.Motion())
-		a.animationStates[windowIndex][modelIndex].SetFrame(0)
-		a.animationStates[windowIndex][modelIndex].SetVmdDeltas(nil)
-	}
-	if s.Frame() >= 0 {
-		a.animationStates[windowIndex][modelIndex].SetFrame(s.Frame())
-		a.animationStates[windowIndex][modelIndex].SetVmdDeltas(nil)
-	}
-	if s.VmdDeltas() != nil {
-		a.animationStates[windowIndex][modelIndex].SetVmdDeltas(s.VmdDeltas())
+	if animationState.Motion() != nil {
+		appState.animationStates[windowIndex][modelIndex].SetMotion(animationState.Motion())
+		appState.SetFrame(appState.frame)
 	}
 }
 
-func (a *appState) Frame() float64 {
-	return a.frame
+func (appState *appState) Frame() float64 {
+	return appState.frame
 }
 
-func (a *appState) SetFrame(frame float64) {
-	a.frame = frame
-}
-
-func (a *appState) ChangeFrame(frame float64) {
-	a.frame = frame
+func (appState *appState) SetFrame(frame float64) {
+	appState.frame = frame
+	for i := 0; i < len(appState.animationStates); i++ {
+		for j := 0; j < len(appState.animationStates[i]); j++ {
+			if appState.animationStates[i][j] != nil && appState.animationStates[i][j].Model() != nil {
+				vmdDeltas, renderDeltas := appState.animationStates[i][j].AnimateBeforePhysics(
+					appState, appState.animationStates[i][j].Model())
+				appState.animationStates[i][j].SetVmdDeltas(vmdDeltas)
+				appState.animationStates[i][j].SetRenderDeltas(renderDeltas)
+			}
+		}
+	}
 }
 
 func (a *appState) AddFrame(v float64) {
-	a.frame += v
-	a.SetAnimationState(nil)
+	a.SetFrame(a.frame + v)
 }
 
 func (a *appState) MaxFrame() int {

@@ -38,6 +38,9 @@ func DeformBoneByPhysicsFlag(
 	boneNames []string,
 	isAfterPhysics bool,
 ) *delta.VmdDeltas {
+	if model == nil || motion == nil {
+		return deltas
+	}
 	deformBoneIndexes, deltas := prepareDeltas(model, motion, deltas, isCalcIk, frame, boneNames, isAfterPhysics)
 	deltas.Bones = calcBoneDeltas(frame, model, deformBoneIndexes, deltas.Bones)
 	return deltas

@@ -1,3 +1,6 @@
+//go:build windows
+// +build windows
+
 package viewer
 
 import (
@@ -19,13 +22,13 @@ import (
 
 type ViewWindow struct {
 	*glfw.Window
-	windowIndex     int                        // ウィンドウインデックス
-	title           string                     // ウィンドウタイトル
-	appConfig       *mconfig.AppConfig         // アプリケーション設定
-	appState        state.IAppState            // アプリ状態
-	physics         *mbt.MPhysics              // 物理
-	shader          *mgl.MShader               // シェーダ
-	animationStates []*renderer.AnimationState // アニメーションステート
+	windowIndex int                // ウィンドウインデックス
+	title       string             // ウィンドウタイトル
+	appConfig   *mconfig.AppConfig // アプリケーション設定
+	appState    state.IAppState    // アプリ状態
+	physics     *mbt.MPhysics      // 物理
+	shader      *mgl.MShader       // シェーダ
+	// animationStates []*renderer.AnimationState // アニメーションステート
 	// doResetPhysicsStart    bool               // 物理リセット開始フラグ
 	// doResetPhysicsProgress bool               // 物理リセット中フラグ
 	// doResetPhysicsCount    int                // 物理リセット処理回数
@@ -148,35 +151,31 @@ func (w *ViewWindow) ResetPhysicsStart() {
 	// }
 }
 
-func (w *ViewWindow) load(states []state.IAnimationState) {
-	for _, s := range states {
-		if len(w.animationStates) <= s.ModelIndex() {
-			w.animationStates = append(w.animationStates, renderer.NewAnimationState(w.windowIndex, s.ModelIndex()))
-		}
+// func (w *ViewWindow) load(states []state.IAnimationState) {
+// 	for _, s := range states {
+// 		if len(w.animationStates) <= s.ModelIndex() {
+// 			w.animationStates = append(w.animationStates, renderer.NewAnimationState(w.windowIndex, s.ModelIndex()))
+// 		}
 
-		if s.Model() != nil {
-			w.animationStates[s.ModelIndex()].SetModel(s.Model())
-			w.animationStates[s.ModelIndex()].Load()
-			w.physics.AddModel(s.ModelIndex(), s.Model())
-			s.SetModel(nil)
-		}
-		if s.Motion() != nil {
-			w.animationStates[s.ModelIndex()].SetMotion(s.Motion())
-			w.animationStates[s.ModelIndex()].SetVmdDeltas(nil)
-			s.SetMotion(nil)
-		}
-		if s.Frame() >= 0 {
-			w.animationStates[s.ModelIndex()].SetFrame(s.Frame())
-			w.animationStates[s.ModelIndex()].SetVmdDeltas(nil)
-		}
-		if s.VmdDeltas() != nil {
-			w.animationStates[s.ModelIndex()].SetVmdDeltas(s.VmdDeltas())
-			s.SetVmdDeltas(nil)
-		}
-	}
-}
+// 		if s.Model() != nil {
+// 			w.animationStates[s.ModelIndex()].SetModel(s.Model())
+// 			w.animationStates[s.ModelIndex()].Load()
+// 			w.physics.AddModel(s.ModelIndex(), s.Model())
+// 		}
+// 		if s.Motion() != nil {
+// 			w.animationStates[s.ModelIndex()].SetMotion(s.Motion())
+// 		}
+// 		if s.VmdDeltas() != nil {
+// 			w.animationStates[s.ModelIndex()].SetVmdDeltas(s.VmdDeltas())
+// 		}
+// 		if s.RenderDeltas() != nil {
+// 			w.animationStates[s.ModelIndex()].SetRenderDeltas(s.RenderDeltas())
+// 		}
+// 		w.animationStates[s.ModelIndex()].SetFrame(s.Frame())
+// 	}
+// }
 
-func (w *ViewWindow) Render(states []state.IAnimationState, timeStep float32) {
+func (w *ViewWindow) Render(animationStates []state.IAnimationState, timeStep float32) {
 	glfw.PollEvents()
 
 	w.MakeContextCurrent()
@@ -202,16 +201,13 @@ func (w *ViewWindow) Render(states []state.IAnimationState, timeStep float32) {
 	// 床描画
 	w.shader.DrawFloor()
 
-	// モデル読み込み
-	w.load(states)
-
 	// アニメーション
-	w.animationStates = renderer.Animate(w.physics, w.animationStates, w.appState, timeStep)
+	renderer.Animate(w.physics, animationStates, w.appState, timeStep)
 
 	// モデル描画
-	for _, s := range w.animationStates {
-		if s.RenderModel() != nil && s != nil {
-			s.RenderModel().Render(w.windowIndex, w.shader, s, w.appState)
+	for _, animationState := range animationStates {
+		if animationState != nil {
+			animationState.Render(w.shader, w.appState)
 		}
 	}
 

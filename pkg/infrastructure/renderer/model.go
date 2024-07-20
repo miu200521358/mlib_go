@@ -16,6 +16,7 @@ import (
 )
 
 type RenderModel struct {
+	hash              string       // ハッシュ
 	meshes            []*Mesh      // メッシュ
 	textures          []*textureGl // テクスチャ
 	toonTextures      []*textureGl // トゥーンテクスチャ
@@ -46,8 +47,13 @@ func NewRenderModel(windowIndex int, model *pmx.PmxModel) *RenderModel {
 	m.initTexturesGl(windowIndex, model.Textures, model.GetPath())
 
 	m.initializeBuffer(model)
+	m.hash = model.GetHash()
 
 	return m
+}
+
+func (renderModel *RenderModel) Hash() string {
+	return renderModel.hash
 }
 
 func (renderModel *RenderModel) Delete() {
@@ -264,14 +270,20 @@ func (renderModel *RenderModel) initializeBuffer(
 }
 
 func (renderModel *RenderModel) Render(
-	windowIndex int, shader *mgl.MShader, animationState *AnimationState, appState state.IAppState,
+	shader *mgl.MShader, appState state.IAppState, animationState state.IAnimationState,
 ) {
-	deltas := animationState.vmdDeltas
+	if animationState == nil || animationState.Model() == nil ||
+		animationState.VmdDeltas() == nil || animationState.RenderDeltas() == nil {
+		return
+	}
+
+	deltas := animationState.VmdDeltas()
 
 	renderModel.vao.Bind()
 	defer renderModel.vao.Unbind()
 
-	renderModel.vbo.BindVertex(animationState.vertexMorphDeltaIndexes, animationState.vertexMorphDeltas)
+	renderModel.vbo.BindVertex(
+		animationState.RenderDeltas().VertexMorphDeltaIndexes, animationState.RenderDeltas().VertexMorphDeltas)
 	defer renderModel.vbo.Unbind()
 
 	paddedMatrixes, matrixWidth, matrixHeight := createBoneMatrixes(deltas.Bones)
@@ -279,11 +291,11 @@ func (renderModel *RenderModel) Render(
 	for i, mesh := range renderModel.meshes {
 		mesh.ibo.Bind()
 
-		mesh.drawModel(shader, paddedMatrixes, matrixWidth, matrixHeight, animationState.meshDeltas[i])
+		mesh.drawModel(shader, paddedMatrixes, matrixWidth, matrixHeight, animationState.RenderDeltas().MeshDeltas[i])
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
-			mesh.drawEdge(shader, paddedMatrixes, matrixWidth, matrixHeight, animationState.meshDeltas[i])
+			mesh.drawEdge(shader, paddedMatrixes, matrixWidth, matrixHeight, animationState.RenderDeltas().MeshDeltas[i])
 		}
 
 		if appState.IsShowWire() {
@@ -300,7 +312,7 @@ func (renderModel *RenderModel) Render(
 	if appState.IsShowBoneAll() || appState.IsShowBoneEffector() || appState.IsShowBoneIk() ||
 		appState.IsShowBoneFixed() || appState.IsShowBoneRotate() ||
 		appState.IsShowBoneTranslate() || appState.IsShowBoneVisible() {
-		renderModel.drawBone(shader, animationState.model.Bones, appState,
+		renderModel.drawBone(shader, animationState.Model().Bones, appState,
 			paddedMatrixes, matrixWidth, matrixHeight)
 	}
 

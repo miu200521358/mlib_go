@@ -7,6 +7,7 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
@@ -41,7 +42,7 @@ func (m *Mesh) drawModel(
 	shader *mgl.MShader,
 	paddedMatrixes []float32,
 	width, height int,
-	meshDelta *MeshDelta,
+	meshDelta *delta.MeshDelta,
 ) {
 	modelProgram := shader.GetProgram(mgl.PROGRAM_TYPE_MODEL)
 	gl.UseProgram(modelProgram)
@@ -125,7 +126,7 @@ func (m *Mesh) drawEdge(
 	shader *mgl.MShader,
 	paddedMatrixes []float32,
 	width, height int,
-	meshDelta *MeshDelta,
+	meshDelta *delta.MeshDelta,
 ) {
 	program := shader.GetProgram(mgl.PROGRAM_TYPE_EDGE)
 	gl.UseProgram(program)

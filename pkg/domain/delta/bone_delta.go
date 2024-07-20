@@ -55,7 +55,7 @@ func (bd *BoneDelta) FilledGlobalMatrix() *mmath.MMat4 {
 func (bd *BoneDelta) FilledLocalMatrix() *mmath.MMat4 {
 	if bd.LocalMatrix == nil {
 		// BOf行列: 自身のボーンのボーンオフセット行列をかけてローカル行列
-		bd.LocalMatrix = bd.Bone.Extend.OffsetMatrix.Muled(bd.GlobalMatrix)
+		bd.LocalMatrix = bd.Bone.Extend.OffsetMatrix.Muled(bd.FilledGlobalMatrix())
 	}
 	return bd.LocalMatrix
 }
