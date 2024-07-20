@@ -92,6 +92,7 @@ func NewViewWindow(
 	glWindow.SetKeyCallback(viewWindow.keyCallback)
 	glWindow.SetMouseButtonCallback(viewWindow.mouseCallback)
 	glWindow.SetCursorPosCallback(viewWindow.cursorPosCallback)
+	glWindow.SetSizeCallback(viewWindow.resizeCallback)
 	glWindow.SetFramebufferSizeCallback(viewWindow.resizeCallback)
 
 	gl.Enable(gl.DEBUG_OUTPUT)
@@ -102,9 +103,7 @@ func NewViewWindow(
 }
 
 func (viewWindow *ViewWindow) resizeCallback(w *glfw.Window, width int, height int) {
-	if width > 0 && height > 0 {
-		viewWindow.shader.Fit(width, height)
-	}
+	viewWindow.shader.Resize(width, height)
 }
 
 func (viewWindow *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {

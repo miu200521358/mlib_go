@@ -224,12 +224,6 @@ func (s *MShader) Reset() {
 	s.Resize(int(s.Width), int(s.Height))
 }
 
-func (s *MShader) Resize(width, height int) {
-	s.Width = width
-	s.Height = height
-	s.Msaa = buffer.NewMsaa(s.Width, s.Height)
-}
-
 func (s *MShader) DeleteProgram(program uint32) {
 	if program != 0 {
 		gl.DeleteProgram(program)
@@ -338,7 +332,7 @@ func (s *MShader) initialize(program uint32) {
 	// ボーン行列用テクスチャ生成
 	gl.GenTextures(1, &s.boneTextureId)
 
-	s.Fit(int(s.Width), int(s.Height))
+	s.Resize(int(s.Width), int(s.Height))
 
 	gl.UseProgram(0)
 }
@@ -347,15 +341,17 @@ func (s *MShader) BoneTextureId() uint32 {
 	return s.boneTextureId
 }
 
-func (s *MShader) Fit(width int, height int) {
+func (s *MShader) Resize(width int, height int) {
 	s.Width = width
 	s.Height = height
 
-	// MSAAも作り直し
-	s.Msaa = buffer.NewMsaa(s.Width, s.Height)
+	if width != 0 && height != 0 {
+		// ビューポートの設定
+		gl.Viewport(0, 0, int32(s.Width), int32(s.Height))
 
-	// ビューポートの設定
-	gl.Viewport(0, 0, int32(s.Width), int32(s.Height))
+		// MSAAも作り直し
+		s.Msaa = buffer.NewMsaa(s.Width, s.Height)
+	}
 }
 
 func (s *MShader) GetProgram(programType ProgramType) uint32 {
