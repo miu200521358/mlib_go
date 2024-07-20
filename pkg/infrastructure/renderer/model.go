@@ -30,11 +30,16 @@ type RenderModel struct {
 	selectedVertexVao *buffer.VAO  // 選択頂点VAO
 	selectedVertexVbo *buffer.VBO  // 選択頂点VBO
 	selectedVertexIbo *buffer.IBO  // 選択頂点IBO
-	boneCount         int          // ボーン情報
-	boneVao           *buffer.VAO  // ボーンVAO
-	boneVbo           *buffer.VBO  // ボーンVBO
-	boneIbo           *buffer.IBO  // ボーンIBO
-	boneIndexes       []int        // ボーンインデックス
+	boneLineCount     int          // ボーン情報
+	boneLineVao       *buffer.VAO  // ボーンVAO
+	boneLineVbo       *buffer.VBO  // ボーンVBO
+	boneLineIbo       *buffer.IBO  // ボーンIBO
+	boneLineIndexes   []int        // ボーンインデックス
+	bonePointCount    int          // ボーン情報
+	bonePointVao      *buffer.VAO  // ボーンVAO
+	bonePointVbo      *buffer.VBO  // ボーンVBO
+	bonePointIbo      *buffer.IBO  // ボーンIBO
+	bonePointIndexes  []int        // ボーンインデックス
 	ssbo              uint32       // SSBO
 	vertexCount       int          // 頂点数
 }
@@ -65,9 +70,9 @@ func (renderModel *RenderModel) Delete() {
 	renderModel.selectedVertexVao.Delete()
 	renderModel.selectedVertexVbo.Delete()
 	renderModel.selectedVertexIbo.Delete()
-	renderModel.boneVao.Delete()
-	renderModel.boneVbo.Delete()
-	renderModel.boneIbo.Delete()
+	renderModel.boneLineVao.Delete()
+	renderModel.boneLineVbo.Delete()
+	renderModel.boneLineIbo.Delete()
 	gl.DeleteBuffers(1, &renderModel.ssbo)
 	for _, mesh := range renderModel.meshes {
 		mesh.delete()
@@ -189,6 +194,10 @@ func (renderModel *RenderModel) initializeBuffer(
 	boneFaces := make([]uint32, 0, len(model.Bones.Data)*2)
 	boneIndexes := make([]int, len(model.Bones.Data)*2)
 
+	bonePoints := make([]float32, 0)
+	bonePointFaces := make([]uint32, len(model.Bones.Data))
+	bonePointIndexes := make([]int, len(model.Bones.Data))
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -199,6 +208,10 @@ func (renderModel *RenderModel) initializeBuffer(
 			boneFaces = append(boneFaces, uint32(n), uint32(n+1))
 			boneIndexes[n] = bone.Index
 			boneIndexes[n+1] = bone.Index
+
+			bonePoints = append(bonePoints, newBoneGl(bone)...)
+			bonePointFaces[bone.Index] = uint32(bone.Index)
+			bonePointIndexes[bone.Index] = bone.Index
 
 			n += 2
 
@@ -238,17 +251,29 @@ func (renderModel *RenderModel) initializeBuffer(
 	renderModel.normalVbo.Unbind()
 	renderModel.normalVao.Unbind()
 
-	renderModel.boneCount = len(bones)
-	renderModel.boneIndexes = boneIndexes
-	renderModel.boneVao = buffer.NewVAO()
-	renderModel.boneVao.Bind()
-	renderModel.boneVbo = buffer.NewVBOForBone(gl.Ptr(bones), len(bones))
-	renderModel.boneVbo.BindBone(nil, nil)
-	renderModel.boneIbo = buffer.NewIBO(gl.Ptr(boneFaces), len(boneFaces))
-	renderModel.boneIbo.Bind()
-	renderModel.boneIbo.Unbind()
-	renderModel.boneVbo.Unbind()
-	renderModel.boneVao.Unbind()
+	renderModel.boneLineCount = len(bones)
+	renderModel.boneLineIndexes = boneIndexes
+	renderModel.boneLineVao = buffer.NewVAO()
+	renderModel.boneLineVao.Bind()
+	renderModel.boneLineVbo = buffer.NewVBOForBone(gl.Ptr(bones), len(bones))
+	renderModel.boneLineVbo.BindBone(nil, nil)
+	renderModel.boneLineIbo = buffer.NewIBO(gl.Ptr(boneFaces), len(boneFaces))
+	renderModel.boneLineIbo.Bind()
+	renderModel.boneLineIbo.Unbind()
+	renderModel.boneLineVbo.Unbind()
+	renderModel.boneLineVao.Unbind()
+
+	renderModel.bonePointCount = len(bonePoints)
+	renderModel.bonePointIndexes = bonePointIndexes
+	renderModel.bonePointVao = buffer.NewVAO()
+	renderModel.bonePointVao.Bind()
+	renderModel.bonePointVbo = buffer.NewVBOForBone(gl.Ptr(bonePoints), len(bonePoints))
+	renderModel.bonePointVbo.BindBone(nil, nil)
+	renderModel.bonePointIbo = buffer.NewIBO(gl.Ptr(bonePointFaces), len(bonePointFaces))
+	renderModel.bonePointIbo.Bind()
+	renderModel.bonePointIbo.Unbind()
+	renderModel.bonePointVbo.Unbind()
+	renderModel.bonePointVao.Unbind()
 
 	renderModel.selectedVertexVao = buffer.NewVAO()
 	renderModel.selectedVertexVao.Bind()
@@ -446,24 +471,42 @@ func (renderModel *RenderModel) drawBone(
 	program := shader.GetProgram(mgl.PROGRAM_TYPE_BONE)
 	gl.UseProgram(program)
 
-	renderModel.boneVao.Bind()
-	renderModel.boneVbo.BindBone(renderModel.fetchBoneDebugDeltas(bones, appState))
-	renderModel.boneIbo.Bind()
-
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
+
+	renderModel.boneLineVao.Bind()
+	renderModel.boneLineVbo.BindBone(renderModel.fetchBoneLineDeltas(bones, appState))
+	renderModel.boneLineIbo.Bind()
 
 	// ライン描画
 	gl.DrawElements(
 		gl.LINES,
-		int32(renderModel.boneCount),
+		int32(renderModel.boneLineCount),
 		gl.UNSIGNED_INT,
 		nil,
 	)
 
-	renderModel.boneIbo.Unbind()
-	renderModel.boneVbo.Unbind()
-	renderModel.boneVao.Unbind()
+	renderModel.boneLineIbo.Unbind()
+	renderModel.boneLineVbo.Unbind()
+	renderModel.boneLineVao.Unbind()
+
+	renderModel.bonePointVao.Bind()
+	renderModel.bonePointVbo.BindBone(renderModel.fetchBonePointDeltas(bones, appState))
+	renderModel.bonePointIbo.Bind()
+
+	gl.PointSize(5.0) // 選択頂点のサイズ
+
+	// 点描画
+	gl.DrawElements(
+		gl.POINTS,
+		int32(len(renderModel.vertices)),
+		gl.UNSIGNED_INT,
+		nil,
+	)
+
+	renderModel.bonePointIbo.Unbind()
+	renderModel.bonePointVbo.Unbind()
+	renderModel.bonePointVao.Unbind()
 
 	gl.UseProgram(0)
 
@@ -473,13 +516,27 @@ func (renderModel *RenderModel) drawBone(
 
 }
 
-func (renderModel *RenderModel) fetchBoneDebugDeltas(
+func (renderModel *RenderModel) fetchBoneLineDeltas(
 	bones *pmx.Bones, appState core.IAppState,
 ) ([]int, [][]float32) {
-	indexes := make([]int, len(renderModel.boneIndexes))
-	deltas := make([][]float32, len(renderModel.boneIndexes))
+	indexes := make([]int, len(renderModel.boneLineIndexes))
+	deltas := make([][]float32, len(renderModel.boneLineIndexes))
 
-	for i, boneIndex := range renderModel.boneIndexes {
+	for i, boneIndex := range renderModel.boneLineIndexes {
+		indexes[i] = i
+		deltas[i] = getBoneDebugColor(bones.Get(boneIndex), appState)
+	}
+
+	return indexes, deltas
+}
+
+func (renderModel *RenderModel) fetchBonePointDeltas(
+	bones *pmx.Bones, appState core.IAppState,
+) ([]int, [][]float32) {
+	indexes := make([]int, len(renderModel.bonePointIndexes))
+	deltas := make([][]float32, len(renderModel.bonePointIndexes))
+
+	for i, boneIndex := range renderModel.bonePointIndexes {
 		indexes[i] = i
 		deltas[i] = getBoneDebugColor(bones.Get(boneIndex), appState)
 	}
