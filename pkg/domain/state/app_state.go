@@ -83,6 +83,6 @@ type IAnimationState interface {
 	SetMotion(motion *vmd.VmdMotion)
 	VmdDeltas() *delta.VmdDeltas
 	SetVmdDeltas(deltas *delta.VmdDeltas)
-	Frame() int
-	SetFrame(frame int)
+	Frame() float64
+	SetFrame(frame float64)
 }

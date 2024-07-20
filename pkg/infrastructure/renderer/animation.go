@@ -19,7 +19,7 @@ import (
 type AnimationState struct {
 	windowIndex              int              // ウィンドウインデックス
 	modelIndex               int              // モデルインデックス
-	frame                    int              // フレーム
+	frame                    float64          // フレーム
 	renderModel              *RenderModel     // 描画モデル
 	model                    *pmx.PmxModel    // モデル
 	motion                   *vmd.VmdMotion   // モーション
@@ -47,11 +47,11 @@ func (a *AnimationState) SetModelIndex(index int) {
 	a.modelIndex = index
 }
 
-func (a *AnimationState) Frame() int {
+func (a *AnimationState) Frame() float64 {
 	return a.frame
 }
 
-func (a *AnimationState) SetFrame(frame int) {
+func (a *AnimationState) SetFrame(frame float64) {
 	a.frame = frame
 }
 
@@ -116,8 +116,7 @@ func Animate(
 			wg.Add(1)
 			go func(ii int) {
 				defer wg.Done()
-				animationStates[ii] = animateBeforePhysics(physics, animationStates[ii],
-					animationStates[ii].frame, appState.IsEnabledPhysics())
+				animationStates[ii] = animateBeforePhysics(physics, animationStates[ii], appState)
 			}(i)
 		}
 
@@ -141,8 +140,7 @@ func Animate(
 			wg.Add(1)
 			go func(ii int) {
 				defer wg.Done()
-				animationStates[ii] = animateAfterPhysics(physics, animationStates[ii],
-					animationStates[ii].frame, appState.IsEnabledPhysics(), appState.IsPhysicsReset())
+				animationStates[ii] = animateAfterPhysics(physics, animationStates[ii], appState)
 			}(i)
 		}
 
@@ -153,8 +151,7 @@ func Animate(
 }
 
 func animateBeforePhysics(
-	physics *mbt.MPhysics, animationState *AnimationState,
-	frame int, enabledPhysics bool,
+	physics *mbt.MPhysics, animationState *AnimationState, appState state.IAppState,
 ) *AnimationState {
 	if animationState.motion == nil {
 		animationState.motion = vmd.NewVmdMotion("")
@@ -162,7 +159,9 @@ func animateBeforePhysics(
 
 	deltas := delta.NewVmdDeltas(animationState.model.Materials, animationState.model.Bones)
 
-	if animationState.vmdDeltas == nil {
+	if animationState.vmdDeltas == nil || animationState.frame != appState.Frame() {
+		frame := int(appState.Frame())
+
 		deltas.Morphs = deform.DeformMorph(animationState.model, animationState.motion.MorphFrames, frame, nil)
 		deltas = deform.DeformBoneByPhysicsFlag(animationState.model,
 			animationState.motion, deltas, true, frame, nil, false)
@@ -174,6 +173,8 @@ func animateBeforePhysics(
 		for i, md := range deltas.Morphs.Materials.Data {
 			animationState.meshDeltas[i] = newMeshDelta(md)
 		}
+
+		animationState.frame = appState.Frame()
 	} else {
 		deltas.Morphs = animationState.vmdDeltas.Morphs
 		deltas.Bones = animationState.vmdDeltas.Bones
@@ -181,24 +182,26 @@ func animateBeforePhysics(
 
 	modelIndex := 0
 
-	for _, rigidBody := range animationState.model.RigidBodies.Data {
-		// 現在のボーン変形情報を保持
-		rigidBodyBone := rigidBody.Bone
-		if rigidBodyBone == nil {
-			rigidBodyBone = rigidBody.JointedBone
-		}
-		if rigidBodyBone == nil || deltas.Bones.Get(rigidBodyBone.Index) == nil {
-			continue
-		}
+	if appState.IsEnabledPhysics() {
+		for _, rigidBody := range animationState.model.RigidBodies.Data {
+			// 現在のボーン変形情報を保持
+			rigidBodyBone := rigidBody.Bone
+			if rigidBodyBone == nil {
+				rigidBodyBone = rigidBody.JointedBone
+			}
+			if rigidBodyBone == nil || deltas.Bones.Get(rigidBodyBone.Index) == nil {
+				continue
+			}
 
-		if rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC || !enabledPhysics {
-			// ボーン追従剛体・物理＋ボーン位置もしくは強制更新の場合のみ剛体位置更新
-			boneTransform := bt.NewBtTransform()
-			defer bt.DeleteBtTransform(boneTransform)
-			mat := mgl.NewGlMat4(deltas.Bones.Get(rigidBodyBone.Index).FilledGlobalMatrix())
-			boneTransform.SetFromOpenGLMatrix(&mat[0])
+			if rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC {
+				// ボーン追従剛体・物理＋ボーン位置もしくは強制更新の場合のみ剛体位置更新
+				boneTransform := bt.NewBtTransform()
+				defer bt.DeleteBtTransform(boneTransform)
+				mat := mgl.NewGlMat4(deltas.Bones.Get(rigidBodyBone.Index).FilledGlobalMatrix())
+				boneTransform.SetFromOpenGLMatrix(&mat[0])
 
-			physics.UpdateTransform(modelIndex, rigidBodyBone, boneTransform, rigidBody)
+				physics.UpdateTransform(modelIndex, rigidBodyBone, boneTransform, rigidBody)
+			}
 		}
 	}
 
@@ -208,13 +211,12 @@ func animateBeforePhysics(
 }
 
 func animateAfterPhysics(
-	physics *mbt.MPhysics, animationState *AnimationState,
-	frame int, enabledPhysics, resetPhysics bool,
+	physics *mbt.MPhysics, animationState *AnimationState, appState state.IAppState,
 ) *AnimationState {
 	modelIndex := 0
 
 	// 物理剛体位置を更新
-	if enabledPhysics || resetPhysics {
+	if appState.IsEnabledPhysics() || appState.IsPhysicsReset() {
 		for _, isAfterPhysics := range []bool{false, true} {
 			for _, bone := range animationState.model.Bones.LayerSortedBones[isAfterPhysics] {
 				if bone.Extend.RigidBody == nil || bone.Extend.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
@@ -222,7 +224,7 @@ func animateAfterPhysics(
 				}
 				bonePhysicsGlobalMatrix := physics.GetRigidBodyBoneMatrix(modelIndex, bone.Extend.RigidBody)
 				if animationState.vmdDeltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
-					bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame,
+					bd := delta.NewBoneDeltaByGlobalMatrix(bone, int(appState.Frame()),
 						bonePhysicsGlobalMatrix, animationState.vmdDeltas.Bones.Get(bone.ParentIndex))
 					animationState.vmdDeltas.Bones.Update(bd)
 				}
@@ -232,7 +234,7 @@ func animateAfterPhysics(
 
 	// 物理後のデフォーム情報
 	animationState.vmdDeltas = deform.DeformBoneByPhysicsFlag(animationState.model,
-		animationState.motion, animationState.vmdDeltas, true, frame, nil, true)
+		animationState.motion, animationState.vmdDeltas, true, int(appState.Frame()), nil, true)
 
 	// // 選択頂点モーフの設定は常に更新する
 	// SelectedVertexIndexesDeltas, SelectedVertexGlDeltas := renderer.SelectedVertexMorphDeltasGL(
