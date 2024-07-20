@@ -75,13 +75,19 @@ func (renderModel *RenderModel) Delete() {
 	renderModel.boneLineIbo.Delete()
 	gl.DeleteBuffers(1, &renderModel.ssbo)
 	for _, mesh := range renderModel.meshes {
-		mesh.delete()
+		if mesh != nil {
+			mesh.delete()
+		}
 	}
 	for _, texture := range renderModel.textures {
-		texture.delete()
+		if texture != nil {
+			texture.delete()
+		}
 	}
 	for _, texture := range renderModel.toonTextures {
-		texture.delete()
+		if texture != nil {
+			texture.delete()
+		}
 	}
 }
 

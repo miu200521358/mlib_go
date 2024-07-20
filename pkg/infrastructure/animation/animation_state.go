@@ -86,9 +86,13 @@ func (a *AnimationState) SetRenderDeltas(deltas *delta.RenderDeltas) {
 	a.renderDeltas = deltas
 }
 
-func (a *AnimationState) Load() {
-	if a.renderModel == nil || a.renderModel.Hash() != a.model.Hash() {
-		a.renderModel = NewRenderModel(a.windowIndex, a.model)
+func (a *AnimationState) Load(model *pmx.PmxModel) {
+	if a.renderModel == nil || a.renderModel.Hash() != model.Hash() {
+		if a.renderModel != nil {
+			a.renderModel.Delete()
+		}
+		a.renderModel = NewRenderModel(a.windowIndex, model)
+		a.model = model
 	}
 }
 

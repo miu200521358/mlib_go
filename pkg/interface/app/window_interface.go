@@ -5,7 +5,6 @@ package app
 
 import (
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 )
 
@@ -18,8 +17,7 @@ type IControlWindow interface {
 }
 
 type IViewWindow interface {
-	InitRenderModel(modelIndex int, model *pmx.PmxModel) state.IRenderModel
-	Render(states []state.IAnimationState, nextState state.IAnimationState, timeStep float32)
+	Animate(states []state.IAnimationState, nextState state.IAnimationState, timeStep float32) ([]state.IAnimationState, state.IAnimationState)
 	Dispose()
 	Close()
 	Size() (int, int)

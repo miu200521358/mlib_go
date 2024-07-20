@@ -32,6 +32,7 @@ type IAnimationState interface {
 	RenderModel() IRenderModel
 	SetRenderModel(model IRenderModel)
 	Render(shader mgl.IShader, appState IAppState)
+	Load(model *pmx.PmxModel)
 }
 
 type IRenderModel interface {

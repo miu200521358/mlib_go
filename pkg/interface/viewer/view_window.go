@@ -14,7 +14,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/animation"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
@@ -376,20 +376,13 @@ func (w *ViewWindow) ResetPhysics(animationStates []state.IAnimationState) {
 	}
 }
 
-func (w *ViewWindow) InitRenderModel(modelIndex int, model *pmx.PmxModel) state.IRenderModel {
-	w.physics.DeleteModel(modelIndex)
-	renderModel := animation.NewRenderModel(w.windowIndex, model)
-	w.physics.AddModel(modelIndex, model)
-	return renderModel
-}
-
-func (w *ViewWindow) Render(
+func (w *ViewWindow) Animate(
 	animationStates []state.IAnimationState, nextState state.IAnimationState, timeStep float32,
-) {
+) ([]state.IAnimationState, state.IAnimationState) {
 	glfw.PollEvents()
 
 	if w.size.X == 0 || w.size.Y == 0 {
-		return
+		return animationStates, nextState
 	}
 
 	w.MakeContextCurrent()
@@ -424,9 +417,23 @@ func (w *ViewWindow) Render(
 
 		// モデルが指定されてたら初期化してセット
 		if nextState != nil && nextState.Model() != nil {
-			animationStates[nextState.ModelIndex()].SetRenderModel(
-				w.InitRenderModel(nextState.ModelIndex(), nextState.Model()))
-			animationStates[nextState.ModelIndex()].SetModel(nextState.Model())
+			modelIndex := nextState.ModelIndex()
+			w.physics.DeleteModel(modelIndex)
+			animationStates[nextState.ModelIndex()].Load(nextState.Model())
+			w.physics.AddModel(modelIndex, nextState.Model())
+
+			if animationStates[modelIndex].Motion() == nil {
+				// モーション未指定の場合、空のモーションを設定しておく
+				animationStates[modelIndex].SetMotion(vmd.NewVmdMotion(""))
+			}
+
+			// モーションを初回適用
+			vmdDeltas, renderDeltas :=
+				animationStates[modelIndex].DeformBeforePhysics(w.appState, nextState.Model())
+			animationStates[modelIndex].SetVmdDeltas(vmdDeltas)
+			animationStates[modelIndex].SetRenderDeltas(renderDeltas)
+
+			nextState = nil
 		}
 
 		// デフォーム
@@ -450,6 +457,8 @@ func (w *ViewWindow) Render(
 	w.shader.Msaa.Unbind()
 
 	w.SwapBuffers()
+
+	return animationStates, nextState
 }
 
 func (w *ViewWindow) updateCamera() {

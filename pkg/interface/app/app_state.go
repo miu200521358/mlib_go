@@ -4,7 +4,6 @@
 package app
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/animation"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 )
@@ -75,21 +74,15 @@ func (appState *appState) SetAnimationState(nextState state.IAnimationState) {
 	}
 
 	// モーションが指定されてたらセット
-	model := nextState.Model()
 	if nextState.Motion() != nil {
 		appState.animationStates[windowIndex][modelIndex].SetMotion(nextState.Motion())
-		model = appState.animationStates[windowIndex][modelIndex].Model()
-	} else if appState.animationStates[windowIndex][modelIndex].Motion() == nil {
-		// モーション未指定の場合、空のモーションを設定しておく
-		appState.animationStates[windowIndex][modelIndex].SetMotion(vmd.NewVmdMotion(""))
-	}
-
-	if model != nil {
-		vmdDeltas, renderDeltas :=
-			appState.animationStates[windowIndex][modelIndex].DeformBeforePhysics(
-				appState, model)
-		appState.animationStates[windowIndex][modelIndex].SetVmdDeltas(vmdDeltas)
-		appState.animationStates[windowIndex][modelIndex].SetRenderDeltas(renderDeltas)
+		model := appState.animationStates[windowIndex][modelIndex].Model()
+		if model != nil {
+			vmdDeltas, renderDeltas :=
+				appState.animationStates[windowIndex][modelIndex].DeformBeforePhysics(appState, model)
+			appState.animationStates[windowIndex][modelIndex].SetVmdDeltas(vmdDeltas)
+			appState.animationStates[windowIndex][modelIndex].SetRenderDeltas(renderDeltas)
+		}
 	}
 
 	if nextState.Model() != nil {

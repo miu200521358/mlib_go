@@ -8,7 +8,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
-	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
@@ -64,17 +63,11 @@ func Deform(
 func (animationState *AnimationState) DeformBeforePhysics(
 	appState state.IAppState, model *pmx.PmxModel,
 ) (*delta.VmdDeltas, *delta.RenderDeltas) {
-	if animationState.motion == nil {
-		animationState.motion = vmd.NewVmdMotion("")
-	}
-
 	frame := int(appState.Frame())
 
 	vmdDeltas := delta.NewVmdDeltas(model.Materials, model.Bones)
-	vmdDeltas.Morphs = deform.DeformMorph(
-		model, animationState.motion.MorphFrames, frame, nil)
-	vmdDeltas = deform.DeformBoneByPhysicsFlag(model,
-		animationState.motion, vmdDeltas, true, frame, nil, false)
+	vmdDeltas.Morphs = deform.DeformMorph(model, animationState.motion.MorphFrames, frame, nil)
+	vmdDeltas = deform.DeformBoneByPhysicsFlag(model, animationState.motion, vmdDeltas, true, frame, nil, false)
 
 	renderDeltas := delta.NewRenderDeltas()
 	renderDeltas.VertexMorphDeltaIndexes, renderDeltas.VertexMorphDeltas =

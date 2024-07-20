@@ -96,12 +96,10 @@ func (a *MApp) ViewerRun() {
 		}
 
 		for i, w := range a.viewWindows {
-			w.Render(a.animationStates[i], a.nextState, timeStep)
-
-			if a.nextState != nil && a.nextState.Model() != nil &&
-				a.animationStates[i][a.nextState.ModelIndex()].RenderModel() != nil {
-				// モデルの受け渡しが終わっていたらクリア
-				a.nextState = nil
+			if a.nextState != nil && a.nextState.WindowIndex() == i {
+				a.animationStates[i], a.nextState = w.Animate(a.animationStates[i], a.nextState, timeStep)
+			} else {
+				a.animationStates[i], _ = w.Animate(a.animationStates[i], nil, timeStep)
 			}
 		}
 
