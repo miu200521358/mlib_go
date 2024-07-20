@@ -4,6 +4,7 @@
 package controller
 
 import (
+	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
 	"github.com/miu200521358/mlib_go/pkg/interface/core"
 )
@@ -87,6 +88,34 @@ func NewControlState(appState core.IAppState) *ControlState {
 }
 
 func (s *ControlState) Run() {
+	go func() {
+		prevTime := glfw.GetTime()
+
+		for !s.appState.IsClosed() {
+			frameTime := glfw.GetTime()
+			elapsed := frameTime - prevTime
+
+			if s.Playing() {
+				// 再生中はフレームを進める
+				// 経過秒数をキーフレームの進捗具合に合わせて調整
+				if s.appState.SpfLimit() < -1 || elapsed >= s.appState.SpfLimit() {
+					// デフォームFPS制限なしの場合、フレーム番号を常に進める
+					if s.appState.IsEnabledFrameDrop() {
+						// フレームドロップONの時、経過秒数分進める
+						s.AddFrame(elapsed * 30)
+					} else {
+						// フレームドロップOFFの時、1だけ進める
+						s.AddFrame(1)
+					}
+					prevTime = frameTime
+				}
+			} else {
+				// 停止中はそのまま進める
+				prevTime = frameTime
+			}
+		}
+	}()
+
 	go func() {
 		for {
 			select {
@@ -198,200 +227,100 @@ func (c *ControlState) SetPrevFrame(prevFrame int) {
 	c.prevFrameChan <- prevFrame
 }
 
-func (c *ControlState) IsEnabledFrameDrop() bool {
-	return c.controlWindow.IsEnabledFrameDrop()
-}
-
 func (c *ControlState) SetEnabledFrameDrop(enabled bool) {
 	c.isEnabledFrameDropChan <- enabled
-}
-
-func (c *ControlState) IsEnabledPhysics() bool {
-	return <-c.isEnabledPhysicsChan
 }
 
 func (c *ControlState) SetEnabledPhysics(enabled bool) {
 	c.isEnabledPhysicsChan <- enabled
 }
 
-func (c *ControlState) IsPhysicsReset() bool {
-	return <-c.isPhysicsResetChan
-}
-
 func (c *ControlState) SetPhysicsReset(reset bool) {
 	c.physicsResetChan <- reset
-}
-
-func (c *ControlState) IsShowNormal() bool {
-	return <-c.isShowNormalChan
 }
 
 func (c *ControlState) SetShowNormal(show bool) {
 	c.isShowNormalChan <- show
 }
 
-func (c *ControlState) IsShowWire() bool {
-	return <-c.isShowWireChan
-}
-
 func (c *ControlState) SetShowWire(show bool) {
 	c.isShowWireChan <- show
-}
-
-func (c *ControlState) IsShowSelectedVertex() bool {
-	return <-c.isShowSelectedVertexChan
 }
 
 func (c *ControlState) SetShowSelectedVertex(show bool) {
 	c.isShowSelectedVertexChan <- show
 }
 
-func (c *ControlState) IsShowBoneAll() bool {
-	return <-c.isShowBoneAllChan
-}
-
 func (c *ControlState) SetShowBoneAll(show bool) {
 	c.isShowBoneAllChan <- show
-}
-
-func (c *ControlState) IsShowBoneIk() bool {
-	return <-c.isShowBoneIkChan
 }
 
 func (c *ControlState) SetShowBoneIk(show bool) {
 	c.isShowBoneIkChan <- show
 }
 
-func (c *ControlState) IsShowBoneEffector() bool {
-	return <-c.isShowBoneEffectorChan
-}
-
 func (c *ControlState) SetShowBoneEffector(show bool) {
 	c.isShowBoneEffectorChan <- show
-}
-
-func (c *ControlState) IsShowBoneFixed() bool {
-	return <-c.isShowBoneFixedChan
 }
 
 func (c *ControlState) SetShowBoneFixed(show bool) {
 	c.isShowBoneFixedChan <- show
 }
 
-func (c *ControlState) IsShowBoneRotate() bool {
-	return <-c.isShowBoneRotateChan
-}
-
 func (c *ControlState) SetShowBoneRotate(show bool) {
 	c.isShowBoneRotateChan <- show
-}
-
-func (c *ControlState) IsShowBoneTranslate() bool {
-	return <-c.isShowBoneTranslateChan
 }
 
 func (c *ControlState) SetShowBoneTranslate(show bool) {
 	c.isShowBoneTranslateChan <- show
 }
 
-func (c *ControlState) IsShowBoneVisible() bool {
-	return <-c.isShowBoneVisibleChan
-}
-
 func (c *ControlState) SetShowBoneVisible(show bool) {
 	c.isShowBoneVisibleChan <- show
-}
-
-func (c *ControlState) IsShowRigidBodyFront() bool {
-	return <-c.isShowRigidBodyFrontChan
 }
 
 func (c *ControlState) SetShowRigidBodyFront(show bool) {
 	c.isShowRigidBodyFrontChan <- show
 }
 
-func (c *ControlState) IsShowRigidBodyBack() bool {
-	return <-c.isShowRigidBodyBackChan
-}
-
 func (c *ControlState) SetShowRigidBodyBack(show bool) {
 	c.isShowRigidBodyBackChan <- show
-}
-
-func (c *ControlState) IsShowJoint() bool {
-	return <-c.isShowJointChan
 }
 
 func (c *ControlState) SetShowJoint(show bool) {
 	c.isShowJointChan <- show
 }
 
-func (c *ControlState) IsShowInfo() bool {
-	return <-c.isShowInfoChan
-}
-
 func (c *ControlState) SetShowInfo(show bool) {
 	c.isShowInfoChan <- show
-}
-
-func (c *ControlState) IsLimitFps30() bool {
-	return <-c.isLimitFps30Chan
 }
 
 func (c *ControlState) SetLimitFps30(limit bool) {
 	c.isLimitFps30Chan <- limit
 }
 
-func (c *ControlState) IsLimitFps60() bool {
-	return <-c.isLimitFps60Chan
-}
-
 func (c *ControlState) SetLimitFps60(limit bool) {
 	c.isLimitFps60Chan <- limit
-}
-
-func (c *ControlState) IsUnLimitFps() bool {
-	return <-c.isUnLimitFpsChan
 }
 
 func (c *ControlState) SetUnLimitFps(limit bool) {
 	c.isUnLimitFpsChan <- limit
 }
 
-func (c *ControlState) IsUnLimitFpsDeform() bool {
-	return <-c.isUnLimitFpsDeformChan
-}
-
 func (c *ControlState) SetUnLimitFpsDeform(limit bool) {
 	c.isUnLimitFpsDeformChan <- limit
-}
-
-func (c *ControlState) IsLogLevelDebug() bool {
-	return <-c.isLogLevelDebugChan
 }
 
 func (c *ControlState) SetLogLevelDebug(log bool) {
 	c.isLogLevelDebugChan <- log
 }
 
-func (c *ControlState) IsLogLevelVerbose() bool {
-	return <-c.isLogLevelVerboseChan
-}
-
 func (c *ControlState) SetLogLevelVerbose(log bool) {
 	c.isLogLevelVerboseChan <- log
 }
 
-func (c *ControlState) IsLogLevelIkVerbose() bool {
-	return <-c.isLogLevelIkVerboseChan
-}
-
 func (c *ControlState) SetLogLevelIkVerbose(log bool) {
 	c.isLogLevelIkVerboseChan <- log
-}
-
-func (c *ControlState) IsClosed() bool {
-	return <-c.isClosedChan
 }
 
 func (c *ControlState) SetClosed(closed bool) {
@@ -399,15 +328,11 @@ func (c *ControlState) SetClosed(closed bool) {
 }
 
 func (c *ControlState) Playing() bool {
-	return <-c.playingChan
+	return c.motionPlayer != nil && c.motionPlayer.Playing()
 }
 
 func (c *ControlState) TriggerPlay(p bool) {
 	c.playingChan <- p
-}
-
-func (c *ControlState) SpfLimit() float64 {
-	return <-c.spfLimitChan
 }
 
 func (c *ControlState) SetSpfLimit(spf float64) {

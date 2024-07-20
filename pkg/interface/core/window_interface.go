@@ -8,7 +8,6 @@ import (
 )
 
 type IControlWindow interface {
-	IAppState
 	Run()
 	Dispose()
 	Close()
@@ -30,7 +29,7 @@ type IViewWindow interface {
 
 type IPlayer interface {
 	Playing() bool
-	SetPlaying(playing bool)
+	TriggerPlay(playing bool)
 	PrevFrame() int
 	SetPrevFrame(v int)
 	Frame() float64
