@@ -97,6 +97,10 @@ func (s *controlState) Run() {
 			elapsed := frameTime - prevTime
 
 			if s.Playing() {
+				if s.controlWindow != nil && s.controlWindow.Enabled() {
+					s.controlWindow.SetEnabled(false)
+				}
+
 				// 再生中はフレームを進める
 				// 経過秒数をキーフレームの進捗具合に合わせて調整
 				if s.appState.SpfLimit() < -1 || elapsed >= s.appState.SpfLimit() {
@@ -120,6 +124,14 @@ func (s *controlState) Run() {
 			} else {
 				// 停止中はそのまま進める
 				prevTime = frameTime
+
+				if s.controlWindow != nil && !s.controlWindow.Enabled() {
+					s.controlWindow.SetEnabled(true)
+				}
+
+				if s.motionPlayer != nil && !s.motionPlayer.Enabled() {
+					s.motionPlayer.SetEnabled(true)
+				}
 			}
 		}
 	}()

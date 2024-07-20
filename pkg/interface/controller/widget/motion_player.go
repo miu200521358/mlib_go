@@ -159,9 +159,16 @@ func (mp *MotionPlayer) SetRange(min, max int) {
 	mp.frameSlider.SetRange(min, max)
 }
 
+func (mp *MotionPlayer) Enabled() bool {
+	return mp.frameEdit.Enabled()
+}
+
 func (mp *MotionPlayer) SetEnabled(enabled bool) {
 	mp.frameEdit.SetEnabled(enabled)
 	mp.frameSlider.SetEnabled(enabled)
+}
+
+func (mp *MotionPlayer) SetEnabledOnlyButton(enabled bool) {
 	mp.playButton.SetEnabled(enabled)
 }
 
@@ -174,11 +181,8 @@ func (mp *MotionPlayer) TriggerPlay(playing bool) {
 
 	if playing {
 		mp.playButton.SetText(mi18n.T("一時停止"))
-		mp.SetEnabled(false)
-		mp.playButton.SetEnabled(true)
 	} else {
 		mp.playButton.SetText(mi18n.T("再生"))
-		mp.SetEnabled(true)
 	}
 }
 

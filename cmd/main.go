@@ -67,6 +67,12 @@ func main() {
 		controlWindow.InitTabWidget()
 		newFilePage(controlWindow)
 
+		player := widget.NewMotionPlayer(controlWindow.MainWindow, controlWindow)
+		controlWindow.SetPlayer(player)
+
+		consoleView := widget.NewConsoleView(controlWindow.MainWindow, 256, 50)
+		log.SetOutput(consoleView)
+
 		mApp.ControllerRun()
 	}()
 
@@ -201,13 +207,7 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 		}
 	})
 
-	walk.NewVSeparator(tabPage)
-
-	player := widget.NewMotionPlayer(tabPage, controlWindow)
-	controlWindow.SetPlayer(player)
-
-	consoleView := widget.NewConsoleView(tabPage, 256, 10)
-	log.SetOutput(consoleView)
+	walk.NewVSpacer(tabPage)
 
 	return tabPage
 }

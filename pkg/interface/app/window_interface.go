@@ -14,6 +14,8 @@ type IControlWindow interface {
 	Close()
 	Size() (int, int)
 	SetPosition(x, y int)
+	Enabled() bool
+	SetEnabled(enabled bool)
 }
 
 type IViewWindow interface {
@@ -40,4 +42,6 @@ type IPlayer interface {
 	UpdateMaxFrame(max int)
 	SetRange(min, max int)
 	SetEnabled(enabled bool)
+	SetEnabledOnlyButton(enabled bool)
+	Enabled() bool
 }

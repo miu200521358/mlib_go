@@ -793,3 +793,26 @@ func (w *ControlWindow) SpfLimit() float64 {
 func (w *ControlWindow) SetSpfLimit(spf float64) {
 	w.spfLimit = spf
 }
+
+func (w *ControlWindow) SetEnabled(enabled bool) {
+	if w.tabWidget != nil {
+		for i := range w.tabWidget.Pages().Len() {
+			w.tabWidget.Pages().At(i).SetEnabled(enabled)
+		}
+	}
+	if w.controlState.motionPlayer != nil {
+		w.controlState.motionPlayer.SetEnabled(enabled)
+	}
+}
+
+func (w *ControlWindow) Enabled() bool {
+	if w.tabWidget != nil {
+		for i := range w.tabWidget.Pages().Len() {
+			if w.tabWidget.Pages().At(i) != nil && w.tabWidget.Pages().At(i).Enabled() {
+				return true
+			}
+		}
+	}
+
+	return false
+}

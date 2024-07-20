@@ -4,6 +4,8 @@
 package app
 
 import (
+	"sync"
+
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/animation"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
@@ -42,6 +44,7 @@ type appState struct {
 	spfLimit             float64                   // FPS制限
 	animationStates      [][]state.IAnimationState // アニメーションステート
 	nextAnimationStates  [][]state.IAnimationState // 次のアニメーションステート
+	mu                   sync.Mutex
 }
 
 func newAppState() *appState {
@@ -110,21 +113,34 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 func (appState *appState) Frame() float64 {
 	return appState.frame
 }
-
 func (appState *appState) SetFrame(frame float64) {
 	appState.frame = frame
-	for i := range len(appState.animationStates) {
-		for j := range len(appState.animationStates[i]) {
-			if appState.animationStates[i][j] != nil && appState.animationStates[i][j].Model() != nil {
-				vmdDeltas, renderDeltas := appState.animationStates[i][j].DeformBeforePhysics(
-					appState, appState.animationStates[i][j].Model())
 
-				appState.nextAnimationStates[i][j] = animation.NewAnimationState(i, j)
-				appState.nextAnimationStates[i][j].SetVmdDeltas(vmdDeltas)
-				appState.nextAnimationStates[i][j].SetRenderDeltas(renderDeltas)
+	var wg sync.WaitGroup
+	for i := range appState.animationStates {
+		for j := range appState.animationStates[i] {
+			if appState.animationStates[i][j] != nil && appState.animationStates[i][j].Model() != nil {
+				wg.Add(1)
+				go func(i, j int) {
+					defer wg.Done()
+
+					vmdDeltas, renderDeltas := appState.animationStates[i][j].DeformBeforePhysics(
+						appState, appState.animationStates[i][j].Model())
+
+					nextState := animation.NewAnimationState(i, j)
+					nextState.SetVmdDeltas(vmdDeltas)
+					nextState.SetRenderDeltas(renderDeltas)
+
+					appState.mu.Lock()
+					defer appState.mu.Unlock()
+					appState.nextAnimationStates[i][j] = nextState
+				}(i, j)
 			}
 		}
 	}
+
+	// すべてのGoroutineが終了するのを待つ
+	wg.Wait()
 }
 
 func (a *appState) AddFrame(v float64) {
