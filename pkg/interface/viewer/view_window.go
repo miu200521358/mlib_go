@@ -17,7 +17,9 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/interface/core"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
+	"github.com/miu200521358/walk/pkg/walk"
 )
 
 type ViewWindow struct {
@@ -55,7 +57,7 @@ func NewViewWindow(
 
 	glWindow.MakeContextCurrent()
 	glWindow.SetInputMode(glfw.StickyKeysMode, glfw.True)
-	glWindow.SetIcon([]image.Image{*appConfig.IconImage})
+	glWindow.SetIcon([]image.Image{appConfig.IconImage})
 
 	// OpenGL の初期化
 	if err := gl.Init(); err != nil {
@@ -82,7 +84,12 @@ func NewViewWindow(
 }
 
 func (viewWindow *ViewWindow) closeCallback(w *glfw.Window) {
-	viewWindow.appState.SetClosed(true)
+	if !viewWindow.appState.IsClosed() {
+		if result := walk.MsgBox(nil, mi18n.T("終了確認"), mi18n.T("終了確認メッセージ"),
+			walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel); result == walk.DlgCmdOK {
+			viewWindow.appState.SetClosed(true)
+		}
+	}
 }
 
 func (viewWindow *ViewWindow) debugMessageCallback(
@@ -201,18 +208,18 @@ func (w *ViewWindow) Render(animationStates []core.IAnimationState, timeStep flo
 	// 床描画
 	w.shader.DrawFloor()
 
-	// アニメーション
-	renderer.Animate(w.physics, animationStates, w.appState, timeStep)
-
-	// モデル描画
-	for _, animationState := range animationStates {
-		if animationState != nil {
-			animationState.Render(w.shader, w.appState)
-		}
-	}
-
 	if animationStates != nil {
-		// 何かしらアニメーション情報がある場合の処理
+		// 何かしら描画対象情報がある場合の処理
+
+		// アニメーション
+		renderer.Animate(w.physics, animationStates, w.appState, timeStep)
+
+		// モデル描画
+		for _, animationState := range animationStates {
+			if animationState != nil {
+				animationState.Render(w.shader, w.appState)
+			}
+		}
 
 		// 物理描画
 		w.physics.DrawDebugLines(w.shader, w.appState.IsShowRigidBodyFront() || w.appState.IsShowRigidBodyBack(),

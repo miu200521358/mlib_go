@@ -366,5 +366,13 @@
     {
         "id": "アイコン生成エラー",
         "translation": "Icon generation error"
+    },
+    {
+        "id": "終了確認",
+        "translation": "Exit Confirmation"
+    },
+    {
+        "id": "終了確認メッセージ",
+        "translation": "Are you sure you want to exit the app?"
     }
 ]

@@ -39,6 +39,7 @@ func (m *Mesh) delete() {
 }
 
 func (m *Mesh) drawModel(
+	windowIndex int,
 	shader mgl.IShader,
 	paddedMatrixes []float32,
 	width, height int,
@@ -61,7 +62,7 @@ func (m *Mesh) drawModel(
 	}
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, modelProgram)
+	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, modelProgram)
 	defer unbindBoneMatrixes()
 
 	// ------------------
@@ -123,6 +124,7 @@ func (m *Mesh) drawModel(
 }
 
 func (m *Mesh) drawEdge(
+	windowIndex int,
 	shader mgl.IShader,
 	paddedMatrixes []float32,
 	width, height int,
@@ -137,7 +139,7 @@ func (m *Mesh) drawEdge(
 	gl.CullFace(gl.FRONT)
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
+	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
 	defer unbindBoneMatrixes()
 
 	// ------------------
@@ -161,6 +163,7 @@ func (m *Mesh) drawEdge(
 }
 
 func (m *Mesh) drawWire(
+	windowIndex int,
 	shader mgl.IShader,
 	paddedMatrixes []float32,
 	width, height int,
@@ -173,7 +176,7 @@ func (m *Mesh) drawWire(
 	gl.Disable(gl.CULL_FACE)
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
+	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
 	defer unbindBoneMatrixes()
 
 	var wireColor mgl32.Vec4

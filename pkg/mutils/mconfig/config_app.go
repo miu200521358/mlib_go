@@ -1,12 +1,15 @@
 package mconfig
 
 import (
+	"bytes"
 	"embed"
 	"encoding/json"
+	"fmt"
 	"image"
+	"image/png"
 	"io/fs"
 
-	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/walk/pkg/walk"
 )
 
 type Size struct {
@@ -21,7 +24,8 @@ type AppConfig struct {
 	ControlWindowSize Size   `json:"ControlWindowSize"`
 	ViewWindowSize    Size   `json:"ViewWindowSize"`
 	Env               string
-	IconImage         *image.Image
+	Icon              *walk.Icon
+	IconImage         image.Image
 }
 
 func (ac *AppConfig) IsEnvProd() bool {
@@ -47,12 +51,31 @@ func LoadAppConfig(appFiles embed.FS) *AppConfig {
 	var appConfigData AppConfig
 	json.Unmarshal(fileData, &appConfigData)
 
-	appConfigData.IconImage, _ = loadIconFile(appFiles)
+	err = appConfigData.loadImageFile(appFiles)
+	if err != nil {
+		return &AppConfig{}
+	}
 
 	return &appConfigData
 }
 
 // LoadIconFile アイコンファイルの読み込み
-func loadIconFile(resources embed.FS) (*image.Image, error) {
-	return mutils.LoadImageFromResources(resources, "app/app.png")
+func (ac *AppConfig) loadImageFile(resources embed.FS) error {
+	fileData, err := fs.ReadFile(resources, "app/app.png")
+	if err != nil {
+		return fmt.Errorf("image not found: %v", err)
+	}
+	file := bytes.NewReader(fileData)
+
+	ac.IconImage, err = png.Decode(file)
+	if err != nil {
+		return err
+	}
+
+	ac.Icon, err = walk.NewIconFromImageForDPI(ac.IconImage, 96)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

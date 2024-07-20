@@ -93,7 +93,7 @@ func (renderModel *RenderModel) initTextureGl(
 	if err != nil {
 		return nil, err
 	}
-	image := mutils.ConvertToNRGBA(*img)
+	image := mutils.ConvertToNRGBA(img)
 
 	texGl.IsGeneratedMipmap =
 		mmath.IsPowerOfTwo(image.Rect.Size().X) && mmath.IsPowerOfTwo(image.Rect.Size().Y)
@@ -182,7 +182,7 @@ func (renderModel *RenderModel) initToonTexturesGl(windowIndex int) error {
 		if err != nil {
 			return err
 		}
-		image := mutils.ConvertToNRGBA(*img)
+		image := mutils.ConvertToNRGBA(img)
 
 		toonGl := &textureGl{
 			Texture: toon,

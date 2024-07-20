@@ -56,9 +56,6 @@ func main() {
 
 	mApp := app.NewMApp(appConfig)
 
-	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.1 ビューワー"))
-	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.2 ビューワー"))
-
 	controlState := controller.NewControlState(mApp)
 	controlState.Run()
 
@@ -72,6 +69,9 @@ func main() {
 
 		mApp.ControllerRun()
 	}()
+
+	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.1 ビューワー"))
+	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.2 ビューワー"))
 
 	mApp.Center()
 	mApp.ViewerRun()

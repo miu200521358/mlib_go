@@ -203,17 +203,17 @@ func (renderModel *RenderModel) initializeBuffer(
 
 			n += 2
 
-			if bone.ParentIndex >= 0 && model.Bones.Contains(bone.ParentIndex) &&
-				!model.Bones.Get(bone.ParentIndex).Position.IsZero() {
-				mu.Lock()
-				renderModel.bones = append(renderModel.bones, newBoneGl(bone)...)
-				renderModel.bones = append(renderModel.bones, newParentBoneGl(bone)...)
-				boneFaces = append(boneFaces, uint32(n), uint32(n+1))
-				renderModel.boneIndexes = append(renderModel.boneIndexes, bone.Index, bone.ParentIndex)
-				mu.Unlock()
+			// if bone.ParentIndex >= 0 && model.Bones.Contains(bone.ParentIndex) &&
+			// 	!model.Bones.Get(bone.ParentIndex).Position.IsZero() {
+			// 	mu.Lock()
+			// 	renderModel.bones = append(renderModel.bones, newBoneGl(bone)...)
+			// 	renderModel.bones = append(renderModel.bones, newParentBoneGl(bone)...)
+			// 	boneFaces = append(boneFaces, uint32(n), uint32(n+1))
+			// 	renderModel.boneIndexes = append(renderModel.boneIndexes, bone.Index, bone.ParentIndex)
+			// 	mu.Unlock()
 
-				n += 2
-			}
+			// 	n += 2
+			// }
 		}
 	}()
 
@@ -241,7 +241,7 @@ func (renderModel *RenderModel) initializeBuffer(
 
 	renderModel.boneVao = buffer.NewVAO()
 	renderModel.boneVao.Bind()
-	renderModel.boneVbo = buffer.NewVBOForVertex(gl.Ptr(renderModel.bones), len(renderModel.bones))
+	renderModel.boneVbo = buffer.NewVBOForBone(gl.Ptr(renderModel.bones), len(renderModel.bones))
 	renderModel.boneVbo.BindVertex(nil, nil)
 	renderModel.boneIbo = buffer.NewIBO(gl.Ptr(boneFaces), len(boneFaces))
 	renderModel.boneIbo.Bind()
@@ -291,34 +291,38 @@ func (renderModel *RenderModel) Render(
 	for i, mesh := range renderModel.meshes {
 		mesh.ibo.Bind()
 
-		mesh.drawModel(shader, paddedMatrixes, matrixWidth, matrixHeight, animationState.RenderDeltas().MeshDeltas[i])
+		mesh.drawModel(animationState.WindowIndex(), shader, paddedMatrixes, matrixWidth, matrixHeight,
+			animationState.RenderDeltas().MeshDeltas[i])
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
-			mesh.drawEdge(shader, paddedMatrixes, matrixWidth, matrixHeight, animationState.RenderDeltas().MeshDeltas[i])
+			mesh.drawEdge(animationState.WindowIndex(), shader, paddedMatrixes,
+				matrixWidth, matrixHeight, animationState.RenderDeltas().MeshDeltas[i])
 		}
 
 		if appState.IsShowWire() {
-			mesh.drawWire(shader, paddedMatrixes, matrixWidth, matrixHeight, false)
+			mesh.drawWire(animationState.WindowIndex(), shader, paddedMatrixes, matrixWidth, matrixHeight, false)
 		}
 
 		mesh.ibo.Unbind()
 	}
 
 	if appState.IsShowNormal() {
-		renderModel.drawNormal(shader, paddedMatrixes, matrixWidth, matrixHeight)
+		renderModel.drawNormal(animationState.WindowIndex(), shader, paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
 	if appState.IsShowBoneAll() || appState.IsShowBoneEffector() || appState.IsShowBoneIk() ||
 		appState.IsShowBoneFixed() || appState.IsShowBoneRotate() ||
 		appState.IsShowBoneTranslate() || appState.IsShowBoneVisible() {
-		renderModel.drawBone(shader, animationState.Model().Bones, appState,
+		renderModel.drawBone(animationState.WindowIndex(),
+			shader, animationState.Model().Bones, appState,
 			paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
 }
 
 func (renderModel *RenderModel) drawNormal(
+	windowIndex int,
 	shader mgl.IShader,
 	paddedMatrixes []float32,
 	width, height int,
@@ -331,7 +335,7 @@ func (renderModel *RenderModel) drawNormal(
 	renderModel.normalIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
+	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
 
 	normalColor := mgl32.Vec4{0.3, 0.3, 0.7, 0.5}
 	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
@@ -353,6 +357,7 @@ func (renderModel *RenderModel) drawNormal(
 }
 
 func (renderModel *RenderModel) drawSelectedVertex(
+	windowIndex int,
 	selectedVertexMorphIndexes []int,
 	selectedVertexDeltas [][]float32,
 	shader mgl.IShader,
@@ -371,7 +376,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	renderModel.selectedVertexIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
+	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
 
 	vertexColor := mgl32.Vec4{1.0, 0.4, 0.0, 0.7}
 	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
@@ -422,6 +427,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 }
 
 func (renderModel *RenderModel) drawBone(
+	windowIndex int,
 	shader mgl.IShader,
 	bones *pmx.Bones,
 	appState core.IAppState,
@@ -440,11 +446,11 @@ func (renderModel *RenderModel) drawBone(
 	gl.UseProgram(program)
 
 	renderModel.boneVao.Bind()
-	renderModel.boneVbo.BindVertex(renderModel.fetchBoneDebugDeltas(bones, appState))
+	renderModel.boneVbo.BindBone(renderModel.fetchBoneDebugDeltas(bones, appState))
 	renderModel.boneIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(paddedMatrixes, width, height, shader, program)
+	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
 
 	// ライン描画
 	gl.DrawElements(
@@ -469,14 +475,11 @@ func (renderModel *RenderModel) drawBone(
 func (renderModel *RenderModel) fetchBoneDebugDeltas(
 	bones *pmx.Bones, appState core.IAppState,
 ) ([]int, [][]float32) {
-	indexes := make([]int, 0)
-	deltas := make([][]float32, 0)
+	deltas := make([][]float32, len(renderModel.boneIndexes))
 
-	for _, boneIndex := range renderModel.boneIndexes {
-		bone := bones.Get(boneIndex)
-		indexes = append(indexes, boneIndex)
-		deltas = append(deltas, newBoneDebugAlphaGl(bone, appState))
+	for i, boneIndex := range renderModel.boneIndexes {
+		deltas[i] = getBoneDebugColor(bones.Get(boneIndex), appState)
 	}
 
-	return indexes, deltas
+	return renderModel.boneIndexes, deltas
 }

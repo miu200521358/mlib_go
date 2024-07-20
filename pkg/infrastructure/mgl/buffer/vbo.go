@@ -234,6 +234,88 @@ func (v *VBO) BindVertex(vertexMorphIndexes []int, vertexMorphDeltas [][]float32
 
 }
 
+func NewVBOForBone(ptr unsafe.Pointer, count int) *VBO {
+	var vboId uint32
+	gl.GenBuffers(1, &vboId)
+
+	vbo := &VBO{
+		id:     vboId,
+		target: gl.ARRAY_BUFFER,
+		ptr:    ptr,
+	}
+	// 頂点構造体のサイズ(全部floatとする)
+	// position(3), deformBoneIndex(4), deformBoneWeight(4), color(4)
+	vbo.StrideSize = 3 + 4 + 4 + 4
+	vbo.stride = int32(4 * vbo.StrideSize)
+	vbo.size = count * 4
+
+	return vbo
+}
+
+// Binds VBO for rendering.
+func (v *VBO) BindBone(boneIndexes []int, boneDeltas [][]float32) {
+	gl.BindBuffer(v.target, v.id)
+
+	if boneIndexes != nil {
+		vboVertexSize := (3 + 4 + 4)
+
+		// モーフ分の変動量を設定
+		for i, vidx := range boneIndexes {
+			vd := boneDeltas[i]
+			offsetStride := (vidx*v.StrideSize + vboVertexSize) * 4
+			// 必要な場合にのみ部分更新
+			gl.BufferSubData(v.target, offsetStride, len(vd)*4, gl.Ptr(vd))
+		}
+	} else {
+		gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
+	}
+
+	// 0: position
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(
+		0,        // 属性のインデックス
+		3,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		0,        // オフセット（構造体内の位置）
+	)
+
+	// 1: deformBoneIndex
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointerWithOffset(
+		1,
+		4,
+		gl.FLOAT,
+		false,
+		v.stride,
+		3*4,
+	)
+
+	// 2: deformBoneWeight
+	gl.EnableVertexAttribArray(2)
+	gl.VertexAttribPointerWithOffset(
+		2,
+		4,
+		gl.FLOAT,
+		false,
+		v.stride,
+		7*4,
+	)
+
+	// 3: color
+	gl.EnableVertexAttribArray(3)
+	gl.VertexAttribPointerWithOffset(
+		3,
+		4,
+		gl.FLOAT,
+		false,
+		v.stride,
+		11*4,
+	)
+
+}
+
 // Creates a new VBO with given faceDtype.
 func NewVBOForDebug() *VBO {
 	var vboId uint32

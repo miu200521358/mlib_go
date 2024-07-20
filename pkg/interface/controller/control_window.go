@@ -303,14 +303,15 @@ func NewControlWindow(
 	}
 
 	controlWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
-		controlWindow.SetClosed(true)
+		if !controlWindow.appState.IsClosed() {
+			if result := walk.MsgBox(nil, mi18n.T("終了確認"), mi18n.T("終了確認メッセージ"),
+				walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel); result == walk.DlgCmdOK {
+				controlWindow.SetClosed(true)
+			}
+		}
 	})
 
-	icon, err := walk.NewIconFromImageForDPI(*appConfig.IconImage, 96)
-	if err != nil {
-		widget.RaiseError(err)
-	}
-	controlWindow.SetIcon(icon)
+	controlWindow.SetIcon(appConfig.Icon)
 
 	bg, err := walk.NewSystemColorBrush(walk.SysColor3DShadow)
 	if err != nil {
@@ -332,7 +333,6 @@ func (w *ControlWindow) Dispose() {
 
 func (w *ControlWindow) Close() {
 	w.MainWindow.Close()
-	w.ControlState.SetClosed(true)
 }
 
 func (w *ControlWindow) Run() {
@@ -417,87 +417,57 @@ func (w *ControlWindow) onTriggerShowSelectedVertex() {
 }
 
 func (w *ControlWindow) onTriggerShowBoneAll() {
-	w.ControlState.SetShowBoneAll(true)
-	w.ControlState.SetShowBoneIk(false)
-	w.ControlState.SetShowBoneEffector(false)
-	w.ControlState.SetShowBoneFixed(false)
-	w.ControlState.SetShowBoneRotate(false)
-	w.ControlState.SetShowBoneTranslate(false)
-	w.ControlState.SetShowBoneVisible(false)
-
-	w.showBoneAllAction.SetChecked(true)
+	if w.showBoneAllAction.Checked() {
+		w.ControlState.SetShowBoneIk(false)
+		w.ControlState.SetShowBoneEffector(false)
+		w.ControlState.SetShowBoneFixed(false)
+		w.ControlState.SetShowBoneRotate(false)
+		w.ControlState.SetShowBoneTranslate(false)
+		w.ControlState.SetShowBoneVisible(false)
+	}
+	w.ControlState.SetShowBoneAll(w.showBoneAllAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowBoneIk() {
-	w.ControlState.SetShowBoneAll(false)
-	w.ControlState.SetShowBoneIk(true)
-	w.ControlState.SetShowBoneEffector(false)
-	w.ControlState.SetShowBoneFixed(false)
-	w.ControlState.SetShowBoneRotate(false)
-	w.ControlState.SetShowBoneTranslate(false)
-	w.ControlState.SetShowBoneVisible(false)
-
-	w.showBoneIkAction.SetChecked(true)
+	if w.showBoneIkAction.Checked() {
+		w.ControlState.SetShowBoneAll(false)
+	}
+	w.ControlState.SetShowBoneIk(w.showBoneIkAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowBoneEffector() {
-	w.ControlState.SetShowBoneAll(false)
-	w.ControlState.SetShowBoneIk(false)
-	w.ControlState.SetShowBoneEffector(true)
-	w.ControlState.SetShowBoneFixed(false)
-	w.ControlState.SetShowBoneRotate(false)
-	w.ControlState.SetShowBoneTranslate(false)
-	w.ControlState.SetShowBoneVisible(false)
-
-	w.showBoneEffectorAction.SetChecked(true)
+	if w.showBoneEffectorAction.Checked() {
+		w.ControlState.SetShowBoneAll(false)
+	}
+	w.ControlState.SetShowBoneEffector(w.showBoneEffectorAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowBoneFixed() {
-	w.ControlState.SetShowBoneAll(false)
-	w.ControlState.SetShowBoneIk(false)
-	w.ControlState.SetShowBoneEffector(false)
-	w.ControlState.SetShowBoneFixed(true)
-	w.ControlState.SetShowBoneRotate(false)
-	w.ControlState.SetShowBoneTranslate(false)
-	w.ControlState.SetShowBoneVisible(false)
-
-	w.showBoneFixedAction.SetChecked(true)
+	if w.showBoneFixedAction.Checked() {
+		w.ControlState.SetShowBoneAll(false)
+	}
+	w.ControlState.SetShowBoneFixed(w.showBoneFixedAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowBoneRotate() {
-	w.ControlState.SetShowBoneAll(false)
-	w.ControlState.SetShowBoneIk(false)
-	w.ControlState.SetShowBoneEffector(false)
-	w.ControlState.SetShowBoneFixed(false)
-	w.ControlState.SetShowBoneRotate(true)
-	w.ControlState.SetShowBoneTranslate(false)
-	w.ControlState.SetShowBoneVisible(false)
-
-	w.showBoneRotateAction.SetChecked(true)
+	if w.showBoneRotateAction.Checked() {
+		w.ControlState.SetShowBoneAll(false)
+	}
+	w.ControlState.SetShowBoneRotate(w.showBoneRotateAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowBoneTranslate() {
-	w.ControlState.SetShowBoneAll(false)
-	w.ControlState.SetShowBoneIk(false)
-	w.ControlState.SetShowBoneEffector(false)
-	w.ControlState.SetShowBoneFixed(false)
-	w.ControlState.SetShowBoneRotate(false)
-	w.ControlState.SetShowBoneTranslate(true)
-	w.ControlState.SetShowBoneVisible(false)
-
-	w.showBoneTranslateAction.SetChecked(true)
+	if w.showBoneTranslateAction.Checked() {
+		w.ControlState.SetShowBoneAll(false)
+	}
+	w.ControlState.SetShowBoneTranslate(w.showBoneTranslateAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowBoneVisible() {
-	w.ControlState.SetShowBoneAll(false)
-	w.ControlState.SetShowBoneIk(false)
-	w.ControlState.SetShowBoneEffector(false)
-	w.ControlState.SetShowBoneFixed(false)
-	w.ControlState.SetShowBoneRotate(false)
-	w.ControlState.SetShowBoneTranslate(false)
-	w.ControlState.SetShowBoneVisible(true)
-
-	w.showBoneVisibleAction.SetChecked(true)
+	if w.showBoneVisibleAction.Checked() {
+		w.ControlState.SetShowBoneAll(false)
+	}
+	w.ControlState.SetShowBoneVisible(w.showBoneVisibleAction.Checked())
 }
 
 func (w *ControlWindow) onTriggerShowRigidBodyFront() {

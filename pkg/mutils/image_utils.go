@@ -16,27 +16,13 @@ import (
 
 	"github.com/ftrvxmtrx/tga"
 	"github.com/miu200521358/dds/pkg/dds"
-	"github.com/miu200521358/walk/pkg/walk"
 	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/riff"
 	_ "golang.org/x/image/tiff"
 )
 
-// LoadWalkIcon 画像ファイルの読み込み
-func LoadWalkIcon(resources embed.FS, imagePath string, dpi int) (*walk.Icon, error) {
-	image, err := LoadImageFromResources(resources, imagePath)
-	if err != nil {
-		return nil, err
-	}
-	img, err := walk.NewIconFromImageForDPI(*image, dpi)
-	if err != nil {
-		return nil, err
-	}
-	return img, nil
-}
-
 // 指定されたパスから画像を読み込む
-func LoadImage(path string) (*image.Image, error) {
+func LoadImage(path string) (image.Image, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -66,7 +52,7 @@ func FlipImage(img *image.RGBA) *image.RGBA {
 }
 
 // ReadIconFile アイコンファイルの読み込み
-func LoadImageFromResources(resources embed.FS, fileName string) (*image.Image, error) {
+func LoadImageFromResources(resources embed.FS, fileName string) (image.Image, error) {
 	fileData, err := fs.ReadFile(resources, fileName)
 	if err != nil {
 		return nil, fmt.Errorf("image not found: %v", err)
@@ -90,7 +76,7 @@ func ConvertToNRGBA(img image.Image) *image.NRGBA {
 	return rgba
 }
 
-func loadImage(path string, file io.Reader) (*image.Image, error) {
+func loadImage(path string, file io.Reader) (image.Image, error) {
 	paths := strings.Split(path, ".")
 	if len(paths) < 2 {
 		return nil, fmt.Errorf("invalid file path: %s", path)
@@ -103,35 +89,35 @@ func loadImage(path string, file io.Reader) (*image.Image, error) {
 			return nil, err
 		}
 
-		return &img, nil
+		return img, nil
 	case "tga":
 		img, err := tga.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
-		return &img, nil
+		return img, nil
 	case "gif":
 		img, err := gif.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
-		return &img, nil
+		return img, nil
 	case "dds":
 		img, err := dds.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
-		return &img, nil
+		return img, nil
 	case "jpg", "jpeg":
 		img, err := jpeg.Decode(file)
 		if err != nil {
 			return nil, err
 		}
 
-		return &img, nil
+		return img, nil
 	case "spa", "bmp":
 		// スフィアファイルはbmpとして読み込む
 		img, err := bmp.Decode(file)
@@ -139,7 +125,7 @@ func loadImage(path string, file io.Reader) (*image.Image, error) {
 			return nil, err
 		}
 
-		return &img, nil
+		return img, nil
 	}
 
 	img, _, err := image.Decode(file)
@@ -147,5 +133,5 @@ func loadImage(path string, file io.Reader) (*image.Image, error) {
 		return nil, err
 	}
 
-	return &img, nil
+	return img, nil
 }
