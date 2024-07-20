@@ -17,8 +17,7 @@ type PmxModel struct {
 	BoneCountType      int
 	MorphCountType     int
 	RigidBodyCountType int
-	Name               string
-	EnglishName        string
+	englishName        string
 	Comment            string
 	EnglishComment     string
 	JsonData           map[string]interface{}
@@ -52,14 +51,14 @@ func NewPmxModel(path string) *PmxModel {
 
 func (pm *PmxModel) InitializeDisplaySlots() {
 	d01 := NewDisplaySlot()
-	d01.Name = "Root"
-	d01.EnglishName = "Root"
+	d01.SetName("Root")
+	d01.SetEnglishName("Root")
 	d01.SpecialFlag = SPECIAL_FLAG_ON
 	pm.DisplaySlots.Update(d01)
 
 	d02 := NewDisplaySlot()
-	d02.Name = "表情"
-	d02.EnglishName = "Exp"
+	d02.SetName("表情")
+	d02.SetEnglishName("Exp")
 	d02.SpecialFlag = SPECIAL_FLAG_ON
 	pm.DisplaySlots.Update(d02)
 }
@@ -108,4 +107,12 @@ func (m *PmxModel) Copy() core.IHashModel {
 	copied := NewPmxModel("")
 	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
 	return copied
+}
+
+func (pm *PmxModel) EnglishName() string {
+	return pm.englishName
+}
+
+func (pm *PmxModel) SetEnglishName(name string) {
+	pm.englishName = name
 }

@@ -17,7 +17,7 @@ type FaceGL struct {
 
 func NewFace() *Face {
 	return &Face{
-		IndexModel:    &core.IndexModel{Index: -1},
+		IndexModel:    core.NewIndexModel(-1),
 		VertexIndexes: [3]int{0, 0, 0},
 	}
 }

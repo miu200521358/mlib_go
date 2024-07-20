@@ -22,7 +22,7 @@ import (
 func (r *VmdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
 	motion := data.(*vmd.VmdMotion)
 
-	path := motion.GetPath()
+	path := motion.Path()
 	// 保存可能なパスである場合、上書き
 	if mutils.CanSave(overridePath) {
 		path = overridePath
@@ -42,9 +42,9 @@ func (r *VmdRepository) Save(overridePath string, data core.IHashModel, includeS
 	}
 
 	// Convert model name to shift_jis encoding
-	modelBName, err := r.encodeName(motion.GetName(), 20)
+	modelBName, err := r.encodeName(motion.Name(), 20)
 	if err != nil {
-		mlog.W(mi18n.T("モデル名エンコードエラー", map[string]interface{}{"Name": motion.GetName()}))
+		mlog.W(mi18n.T("モデル名エンコードエラー", map[string]interface{}{"Name": motion.Name()}))
 		modelBName = []byte("Vmd Model")
 	}
 
@@ -99,7 +99,7 @@ func (r *VmdRepository) Save(overridePath string, data core.IHashModel, includeS
 	// foutを書き込んで終了する
 	err = fout.Close()
 	if err != nil {
-		mlog.E(mi18n.T("ファイルクローズエラー", map[string]interface{}{"Path": motion.GetPath()}))
+		mlog.E(mi18n.T("ファイルクローズエラー", map[string]interface{}{"Path": motion.Path()}))
 		return err
 	}
 
@@ -158,7 +158,7 @@ func (r *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.BoneFr
 		posMMD = mmath.MVec3Zero
 	}
 	binary.Write(fout, binary.LittleEndian, encodedName)
-	r.writeNumber(fout, binaryType_unsignedInt, float64(bf.Index), 0.0, true)
+	r.writeNumber(fout, binaryType_unsignedInt, float64(bf.Index()), 0.0, true)
 	r.writeNumber(fout, binaryType_float, posMMD.X, 0.0, false)
 	r.writeNumber(fout, binaryType_float, posMMD.Y, 0.0, false)
 	r.writeNumber(fout, binaryType_float, posMMD.Z, 0.0, false)
@@ -222,7 +222,7 @@ func (r *VmdRepository) saveMorphFrame(fout *os.File, name string, mf *vmd.Morph
 	}
 
 	binary.Write(fout, binary.LittleEndian, encodedName)
-	r.writeNumber(fout, binaryType_unsignedInt, float64(mf.Index), 0.0, true)
+	r.writeNumber(fout, binaryType_unsignedInt, float64(mf.Index()), 0.0, true)
 	r.writeNumber(fout, binaryType_float, mf.Ratio, 0.0, false)
 
 	return nil
@@ -251,7 +251,7 @@ func (r *VmdRepository) saveCameraFrame(fout *os.File, cf *vmd.CameraFrame) erro
 		return fmt.Errorf("CameraFrame is nil")
 	}
 
-	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index), 0.0, true)
+	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index()), 0.0, true)
 	r.writeNumber(fout, binaryType_float, cf.Distance, 0.0, false)
 
 	var posMMD *mmath.MVec3
@@ -315,7 +315,7 @@ func (r *VmdRepository) saveLightFrame(fout *os.File, cf *vmd.LightFrame) error 
 		return fmt.Errorf("LightFrame is nil")
 	}
 
-	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index), 0.0, true)
+	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index()), 0.0, true)
 
 	var colorMMD *mmath.MVec3
 	if cf.Color != nil {
@@ -365,7 +365,7 @@ func (r *VmdRepository) sveShadowFrame(fout *os.File, cf *vmd.ShadowFrame) error
 		return fmt.Errorf("ShadowFrame is nil")
 	}
 
-	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index), 0.0, true)
+	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index()), 0.0, true)
 
 	r.writeNumber(fout, binaryType_float, float64(cf.ShadowMode), 0.0, false)
 	r.writeNumber(fout, binaryType_float, cf.Distance, 0.0, false)
@@ -396,7 +396,7 @@ func (r *VmdRepository) saveIkFrame(fout *os.File, cf *vmd.IkFrame) error {
 		return fmt.Errorf("IkFrame is nil")
 	}
 
-	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index), 0.0, true)
+	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index()), 0.0, true)
 	r.writeBool(fout, cf.Visible)
 	r.writeNumber(fout, binaryType_unsignedInt, float64(len(cf.IkList)), 0.0, true)
 

@@ -27,7 +27,7 @@ func (mf *MorphFrame) Added(v *MorphFrame) *MorphFrame {
 }
 
 func (mf *MorphFrame) Copy() IBaseFrame {
-	copied := NewMorphFrame(mf.GetIndex())
+	copied := NewMorphFrame(mf.Index())
 	copied.Ratio = mf.Ratio
 	return copied
 }
@@ -35,8 +35,8 @@ func (mf *MorphFrame) Copy() IBaseFrame {
 func (nextMf *MorphFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	prevMf := prevFrame.(*MorphFrame)
 
-	prevIndex := prevMf.GetIndex()
-	nextIndex := nextMf.GetIndex()
+	prevIndex := prevMf.Index()
+	nextIndex := nextMf.Index()
 
 	mf := NewMorphFrame(index)
 

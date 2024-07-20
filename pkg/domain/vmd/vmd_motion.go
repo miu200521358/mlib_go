@@ -37,7 +37,7 @@ func (m *VmdMotion) Copy() core.IHashModel {
 	return copied
 }
 
-func (m *VmdMotion) GetName() string {
+func (m *VmdMotion) Name() string {
 	return m.ModelName
 }
 

@@ -37,7 +37,7 @@ func (lf *LightFrame) Added(v *LightFrame) *LightFrame {
 }
 
 func (lf *LightFrame) Copy() IBaseFrame {
-	copied := NewLightFrame(lf.GetIndex())
+	copied := NewLightFrame(lf.Index())
 	copied.Position = lf.Position
 	copied.Color = lf.Color
 
@@ -47,7 +47,7 @@ func (lf *LightFrame) Copy() IBaseFrame {
 func (nextLf *LightFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	prevLf := prevFrame.(*LightFrame)
 	// 線形補間
-	t := float64(nextLf.GetIndex()-index) / float64(nextLf.GetIndex()-prevLf.GetIndex())
+	t := float64(nextLf.Index()-index) / float64(nextLf.Index()-prevLf.Index())
 	vv := &LightFrame{
 		Position: prevLf.Position.Lerp(nextLf.Position, t),
 		Color:    prevLf.Color.Lerp(nextLf.Color, t),

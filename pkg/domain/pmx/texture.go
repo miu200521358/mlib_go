@@ -15,15 +15,13 @@ const (
 )
 
 type Texture struct {
-	*core.IndexModel
-	Name        string      // テクスチャ名
+	*core.IndexNameModel
 	TextureType TextureType // テクスチャ種別
 }
 
 func NewTexture() *Texture {
 	return &Texture{
-		IndexModel: &core.IndexModel{Index: -1},
-		Name:       "",
+		IndexNameModel: core.NewIndexNameModel(-1, "", ""),
 	}
 }
 

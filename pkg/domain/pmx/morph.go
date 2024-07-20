@@ -204,7 +204,7 @@ func NewMaterialMorphOffset(
 // NewMorph
 func NewMorph() *Morph {
 	return &Morph{
-		IndexNameModel: &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		IndexNameModel: core.NewIndexNameModel(-1, "", ""),
 		Panel:          MORPH_PANEL_SYSTEM,
 		MorphType:      MORPH_TYPE_VERTEX,
 		Offsets:        make([]TMorphOffset, 0),

@@ -95,7 +95,7 @@ func (physics *MPhysics) initJoint(
 	constraint.SetDbgDrawSize(float32(1.5))
 
 	physics.world.AddConstraint(constraint, true)
-	physics.joints[modelIndex][joint.Index] = &jointValue{pmxJoint: joint, btJoint: constraint}
+	physics.joints[modelIndex][joint.Index()] = &jointValue{pmxJoint: joint, btJoint: constraint}
 }
 
 func (p *MPhysics) deleteJoints(modelIndex int) {

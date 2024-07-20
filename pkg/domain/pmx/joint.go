@@ -40,7 +40,7 @@ type Joint struct {
 
 func NewJoint() *Joint {
 	return &Joint{
-		IndexNameModel: &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		IndexNameModel: core.NewIndexNameModel(-1, "", ""),
 		// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
 		JointType:       0,
 		RigidbodyIndexA: -1,
@@ -60,7 +60,7 @@ func (j *Joint) Copy() core.IIndexNameModel {
 
 func NewJointByName(name string) *Joint {
 	j := NewJoint()
-	j.Name = name
+	j.SetName(name)
 	return j
 }
 

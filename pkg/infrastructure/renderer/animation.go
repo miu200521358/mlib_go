@@ -105,14 +105,14 @@ func (animationState *AnimationState) AnimatePhysics(physics mbt.IPhysics, appSt
 			if rigidBodyBone == nil {
 				rigidBodyBone = rigidBody.JointedBone
 			}
-			if rigidBodyBone == nil || animationState.vmdDeltas.Bones.Get(rigidBodyBone.Index) == nil {
+			if rigidBodyBone == nil || animationState.vmdDeltas.Bones.Get(rigidBodyBone.Index()) == nil {
 				continue
 			}
 
 			if rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC {
 				// ボーン追従剛体・物理＋ボーン位置もしくは強制更新の場合のみ剛体位置更新
 				physics.UpdateTransform(animationState.ModelIndex(), rigidBodyBone,
-					animationState.vmdDeltas.Bones.Get(rigidBodyBone.Index).FilledGlobalMatrix(), rigidBody)
+					animationState.vmdDeltas.Bones.Get(rigidBodyBone.Index()).FilledGlobalMatrix(), rigidBody)
 			}
 		}
 	}

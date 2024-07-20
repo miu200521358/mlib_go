@@ -226,7 +226,7 @@ func (bds *BoneDeltas) GetByName(boneName string) *BoneDelta {
 }
 
 func (bds *BoneDeltas) Update(boneDelta *BoneDelta) {
-	bds.Data[boneDelta.Bone.Index] = boneDelta
+	bds.Data[boneDelta.Bone.Index()] = boneDelta
 }
 
 func (bds *BoneDeltas) GetBoneIndexes() []int {

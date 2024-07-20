@@ -125,7 +125,7 @@ func TestBone_IsLegD(t *testing.T) {
 func TestBone_Copy(t *testing.T) {
 	t.Run("Test Copy", func(t *testing.T) {
 		b := &Bone{
-			IndexNameModel: &core.IndexNameModel{Index: 0, Name: "Bone"},
+			IndexNameModel: core.NewIndexNameModel(0, "Bone", "Bone"),
 			Ik:             NewIk(),
 			Position:       &mmath.MVec3{X: 1, Y: 2, Z: 3},
 			TailPosition:   &mmath.MVec3{X: 4, Y: 5, Z: 6},

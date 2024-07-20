@@ -101,7 +101,7 @@ func getSdefParams(d pmx.IDeform) (mgl32.Vec3, mgl32.Vec3, mgl32.Vec3) {
 		copiedSdefCR0 := s.SdefC.Copy()
 		copiedSdefCR1 := s.SdefC.Copy()
 
-		weight := copiedSdefR0.MulScalar(s.Weights[0]).Add(copiedSdefR1.MulScalar(1 - s.Weights[0]))
+		weight := copiedSdefR0.MulScalar(s.AllWeights()[0]).Add(copiedSdefR1.MulScalar(1 - s.AllWeights()[0]))
 		sdefR0 := copiedSdefCR0.Add(s.SdefR0).Sub(weight)
 		sdefR1 := copiedSdefCR1.Add(s.SdefR1).Sub(weight)
 

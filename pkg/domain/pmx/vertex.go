@@ -21,7 +21,7 @@ type Vertex struct {
 
 func NewVertex() *Vertex {
 	v := &Vertex{
-		IndexModel:      &core.IndexModel{Index: -1},
+		IndexModel:      core.NewIndexModel(-1),
 		Position:        mmath.NewMVec3(),
 		Normal:          mmath.NewMVec3(),
 		Uv:              mmath.NewMVec2(),

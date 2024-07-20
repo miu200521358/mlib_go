@@ -49,7 +49,7 @@ func (cf *CameraFrame) Added(v *CameraFrame) *CameraFrame {
 }
 
 func (cf *CameraFrame) Copy() IBaseFrame {
-	copied := NewCameraFrame(cf.GetIndex())
+	copied := NewCameraFrame(cf.Index())
 	copied.Position = cf.Position
 	copied.Rotation = cf.Rotation.Copy()
 	copied.Distance = cf.Distance
@@ -63,7 +63,7 @@ func (cf *CameraFrame) Copy() IBaseFrame {
 func (nextCf *CameraFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	prevCf := prevFrame.(*CameraFrame)
 
-	if prevCf == nil || nextCf.GetIndex() <= index {
+	if prevCf == nil || nextCf.Index() <= index {
 		// 前がないか、最後より後の場合、次のキーフレをコピーして返す
 		frame := nextCf.Copy()
 		return frame
@@ -76,7 +76,7 @@ func (nextCf *CameraFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame
 
 	cf := NewCameraFrame(index)
 
-	xy, yy, zy, ry, dy, vy := nextCf.Curves.Evaluate(prevCf.GetIndex(), index, nextCf.GetIndex())
+	xy, yy, zy, ry, dy, vy := nextCf.Curves.Evaluate(prevCf.Index(), index, nextCf.Index())
 
 	qq := prevCf.Rotation.GetQuaternion().Slerp(nextCf.Rotation.GetQuaternion(), ry)
 	cf.Rotation.SetQuaternion(qq)
@@ -97,15 +97,15 @@ func (cf *CameraFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, in
 	nextCf := nextFrame.(*CameraFrame)
 
 	cf.Curves.TranslateX, nextCf.Curves.TranslateX =
-		mmath.SplitCurve(nextCf.Curves.TranslateX, prevCf.GetIndex(), index, nextCf.GetIndex())
+		mmath.SplitCurve(nextCf.Curves.TranslateX, prevCf.Index(), index, nextCf.Index())
 	cf.Curves.TranslateY, nextCf.Curves.TranslateY =
-		mmath.SplitCurve(nextCf.Curves.TranslateY, prevCf.GetIndex(), index, nextCf.GetIndex())
+		mmath.SplitCurve(nextCf.Curves.TranslateY, prevCf.Index(), index, nextCf.Index())
 	cf.Curves.TranslateZ, nextCf.Curves.TranslateZ =
-		mmath.SplitCurve(nextCf.Curves.TranslateZ, prevCf.GetIndex(), index, nextCf.GetIndex())
+		mmath.SplitCurve(nextCf.Curves.TranslateZ, prevCf.Index(), index, nextCf.Index())
 	cf.Curves.Rotate, nextCf.Curves.Rotate =
-		mmath.SplitCurve(nextCf.Curves.Rotate, prevCf.GetIndex(), index, nextCf.GetIndex())
+		mmath.SplitCurve(nextCf.Curves.Rotate, prevCf.Index(), index, nextCf.Index())
 	cf.Curves.Distance, nextCf.Curves.Distance =
-		mmath.SplitCurve(nextCf.Curves.Distance, prevCf.GetIndex(), index, nextCf.GetIndex())
+		mmath.SplitCurve(nextCf.Curves.Distance, prevCf.Index(), index, nextCf.Index())
 	cf.Curves.ViewOfAngle, nextCf.Curves.ViewOfAngle =
-		mmath.SplitCurve(nextCf.Curves.ViewOfAngle, prevCf.GetIndex(), index, nextCf.GetIndex())
+		mmath.SplitCurve(nextCf.Curves.ViewOfAngle, prevCf.Index(), index, nextCf.Index())
 }

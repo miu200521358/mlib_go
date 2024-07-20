@@ -383,8 +383,8 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 // 	// 			for _, vertexIndex := range nearestVertexIndexes {
 // 	// 				vertex := model.Vertices.Get(vertexIndex[0])
 // 	// 				mlog.I("In Box Vertex: %d (元: %s)(変形: %s)",
-// 	// 					vertex.Index, vertex.Position.String(),
-// 	// 					vmdDeltas[0].Vertices.Get(vertex.Index).Position.String())
+// 	// 					vertex.Index(), vertex.Position.String(),
+// 	// 					vmdDeltas[0].Vertices.Get(vertex.Index()).Position.String())
 // 	// 			}
 // 	// 			go func() {
 // 	// 				glWindow.ReplaceModelSetChannel <- map[int]*widget.ModelSet{0: {NextSelectedVertexIndexes: nearestVertexIndexes[0]}}
@@ -396,8 +396,8 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 // 	// 		// for _, boneIndex := range nearestBoneIndexes {
 // 	// 		// 	bone := model.Bones.Get(boneIndex)
 // 	// 		// 	mlog.I("Near Bone: %d, %s (元: %s)(変形: %s)",
-// 	// 		// 		bone.Index, bone.Name, bone.Position.String(),
-// 	// 		// 		vmdDeltas[0].Bones.Get(bone.Index).GlobalPosition().String())
+// 	// 		// 		bone.Index(), bone.Name, bone.Position.String(),
+// 	// 		// 		vmdDeltas[0].Bones.Get(bone.Index()).GlobalPosition().String())
 // 	// 		// }
 // 	// 	}
 // 	// }

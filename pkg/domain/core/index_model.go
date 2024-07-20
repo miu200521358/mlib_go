@@ -9,29 +9,33 @@ import (
 type IIndexModel interface {
 	IsValid() bool
 	Copy() IIndexModel
-	GetIndex() int
+	Index() int
 	SetIndex(index int)
 }
 
 // INDEXを持つ基底クラス
 type IndexModel struct {
-	Index int
+	index int
 }
 
-func (v *IndexModel) GetIndex() int {
-	return v.Index
+func NewIndexModel(index int) *IndexModel {
+	return &IndexModel{index: index}
+}
+
+func (v *IndexModel) Index() int {
+	return v.index
 }
 
 func (v *IndexModel) SetIndex(index int) {
-	v.Index = index
+	v.index = index
 }
 
 func (v *IndexModel) IsValid() bool {
-	return v != nil && v.GetIndex() >= 0
+	return v != nil && v.Index() >= 0
 }
 
 func (v *IndexModel) Copy() IIndexModel {
-	copied := IndexModel{Index: v.Index}
+	copied := IndexModel{index: v.index}
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return &copied
 }
@@ -63,15 +67,15 @@ func (c *IndexModels[T]) SetItem(index int, v T) {
 }
 
 func (c *IndexModels[T]) Update(value T) {
-	if value.GetIndex() < 0 {
+	if value.Index() < 0 {
 		panic("Index is not set")
 	}
-	c.Data[value.GetIndex()] = value
+	c.Data[value.Index()] = value
 	c.SetDirty(true)
 }
 
 func (c *IndexModels[T]) Append(value T) {
-	if value.GetIndex() < 0 {
+	if value.Index() < 0 {
 		value.SetIndex(len(c.Data))
 	}
 	c.Data = append(c.Data, value)

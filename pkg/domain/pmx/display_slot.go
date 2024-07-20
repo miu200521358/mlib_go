@@ -42,7 +42,7 @@ type DisplaySlot struct {
 // NewDisplaySlot
 func NewDisplaySlot() *DisplaySlot {
 	return &DisplaySlot{
-		IndexNameModel: &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		IndexNameModel: core.NewIndexNameModel(-1, "", ""),
 		SpecialFlag:    SPECIAL_FLAG_OFF,
 		References:     make([]Reference, 0),
 	}

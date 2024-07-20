@@ -17,7 +17,7 @@ import (
 func (r *PmxRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
 	model := data.(*pmx.PmxModel)
 
-	path := model.GetPath()
+	path := model.Path()
 	// 保存可能なパスである場合、上書き
 	if mutils.CanSave(overridePath) {
 		path = overridePath
@@ -107,12 +107,12 @@ func (r *PmxRepository) Save(overridePath string, data core.IHashModel, includeS
 		return err
 	}
 
-	err = r.writeText(fout, model.Name, "Pmx Model")
+	err = r.writeText(fout, model.Name(), "Pmx Model")
 	if err != nil {
 		return err
 	}
 
-	err = r.writeText(fout, model.EnglishName, "Pmx Model")
+	err = r.writeText(fout, model.EnglishName(), "Pmx Model")
 	if err != nil {
 		return err
 	}
@@ -211,27 +211,27 @@ func (r *PmxRepository) saveVertices(fout *os.File, model *pmx.PmxModel, boneIdx
 		switch v := vertex.Deform.(type) {
 		case *pmx.Bdef1:
 			r.writeByte(fout, 0, false)
-			r.writeNumber(fout, boneIdxType, float64(v.Indexes[0]), 0.0, false)
+			r.writeNumber(fout, boneIdxType, float64(v.AllIndexes()[0]), 0.0, false)
 		case *pmx.Bdef2:
 			r.writeByte(fout, 1, false)
-			r.writeNumber(fout, boneIdxType, float64(v.Indexes[0]), 0.0, false)
-			r.writeNumber(fout, boneIdxType, float64(v.Indexes[1]), 0.0, false)
-			r.writeNumber(fout, binaryType_float, v.Weights[0], 0.0, true)
+			r.writeNumber(fout, boneIdxType, float64(v.AllIndexes()[0]), 0.0, false)
+			r.writeNumber(fout, boneIdxType, float64(v.AllIndexes()[1]), 0.0, false)
+			r.writeNumber(fout, binaryType_float, v.AllWeights()[0], 0.0, true)
 		case *pmx.Bdef4:
 			r.writeByte(fout, 2, false)
-			r.writeNumber(fout, boneIdxType, float64(v.Indexes[0]), 0.0, false)
-			r.writeNumber(fout, boneIdxType, float64(v.Indexes[1]), 0.0, false)
-			r.writeNumber(fout, boneIdxType, float64(v.Indexes[2]), 0.0, false)
-			r.writeNumber(fout, boneIdxType, float64(v.Indexes[3]), 0.0, false)
-			r.writeNumber(fout, binaryType_float, v.Weights[0], 0.0, true)
-			r.writeNumber(fout, binaryType_float, v.Weights[1], 0.0, true)
-			r.writeNumber(fout, binaryType_float, v.Weights[2], 0.0, true)
-			r.writeNumber(fout, binaryType_float, v.Weights[3], 0.0, true)
+			r.writeNumber(fout, boneIdxType, float64(v.AllIndexes()[0]), 0.0, false)
+			r.writeNumber(fout, boneIdxType, float64(v.AllIndexes()[1]), 0.0, false)
+			r.writeNumber(fout, boneIdxType, float64(v.AllIndexes()[2]), 0.0, false)
+			r.writeNumber(fout, boneIdxType, float64(v.AllIndexes()[3]), 0.0, false)
+			r.writeNumber(fout, binaryType_float, v.AllWeights()[0], 0.0, true)
+			r.writeNumber(fout, binaryType_float, v.AllWeights()[1], 0.0, true)
+			r.writeNumber(fout, binaryType_float, v.AllWeights()[2], 0.0, true)
+			r.writeNumber(fout, binaryType_float, v.AllWeights()[3], 0.0, true)
 		case *pmx.Sdef:
 			r.writeByte(fout, 3, false)
-			r.writeNumber(fout, boneIdxType, float64(v.Indexes[0]), 0.0, false)
-			r.writeNumber(fout, boneIdxType, float64(v.Indexes[1]), 0.0, false)
-			r.writeNumber(fout, binaryType_float, v.Weights[0], 0.0, true)
+			r.writeNumber(fout, boneIdxType, float64(v.AllIndexes()[0]), 0.0, false)
+			r.writeNumber(fout, boneIdxType, float64(v.AllIndexes()[1]), 0.0, false)
+			r.writeNumber(fout, binaryType_float, v.AllWeights()[0], 0.0, true)
 			r.writeNumber(fout, binaryType_float, v.SdefC.X, 0.0, false)
 			r.writeNumber(fout, binaryType_float, v.SdefC.Y, 0.0, false)
 			r.writeNumber(fout, binaryType_float, v.SdefC.Z, 0.0, false)
@@ -281,7 +281,7 @@ func (r *PmxRepository) saveTextures(fout *os.File, model *pmx.PmxModel) error {
 
 	for i := range model.Textures.Len() {
 		texture := model.Textures.Get(i)
-		err = r.writeText(fout, texture.Name, "")
+		err = r.writeText(fout, texture.Name(), "")
 		if err != nil {
 			return err
 		}
@@ -299,11 +299,11 @@ func (r *PmxRepository) saveMaterials(fout *os.File, model *pmx.PmxModel, textur
 
 	for i := range model.Materials.Len() {
 		material := model.Materials.Get(i)
-		err = r.writeText(fout, material.Name, fmt.Sprintf("Material %d", i))
+		err = r.writeText(fout, material.Name(), fmt.Sprintf("Material %d", i))
 		if err != nil {
 			return err
 		}
-		err = r.writeText(fout, material.EnglishName, fmt.Sprintf("Material %d", i))
+		err = r.writeText(fout, material.EnglishName(), fmt.Sprintf("Material %d", i))
 		if err != nil {
 			return err
 		}
@@ -420,11 +420,11 @@ func (r *PmxRepository) saveBones(fout *os.File, targetBones []*pmx.Bone, boneId
 	}
 
 	for i, bone := range targetBones {
-		err = r.writeText(fout, bone.Name, fmt.Sprintf("Bone %d", i))
+		err = r.writeText(fout, bone.Name(), fmt.Sprintf("Bone %d", i))
 		if err != nil {
 			return err
 		}
-		err = r.writeText(fout, bone.EnglishName, fmt.Sprintf("Bone %d", i))
+		err = r.writeText(fout, bone.EnglishName(), fmt.Sprintf("Bone %d", i))
 		if err != nil {
 			return err
 		}
@@ -598,11 +598,11 @@ func (r *PmxRepository) saveMorphs(
 	}
 
 	for i, morph := range targetMorphs {
-		err = r.writeText(fout, morph.Name, fmt.Sprintf("Morph %d", i))
+		err = r.writeText(fout, morph.Name(), fmt.Sprintf("Morph %d", i))
 		if err != nil {
 			return err
 		}
-		err = r.writeText(fout, morph.EnglishName, fmt.Sprintf("Morph %d", i))
+		err = r.writeText(fout, morph.EnglishName(), fmt.Sprintf("Morph %d", i))
 		if err != nil {
 			return err
 		}
@@ -839,11 +839,11 @@ func (r *PmxRepository) saveDisplaySlots(fout *os.File, model *pmx.PmxModel, bon
 	for i := range model.DisplaySlots.Len() {
 		displaySlot := model.DisplaySlots.Get(i)
 
-		err = r.writeText(fout, displaySlot.Name, fmt.Sprintf("Display %d", i))
+		err = r.writeText(fout, displaySlot.Name(), fmt.Sprintf("Display %d", i))
 		if err != nil {
 			return err
 		}
-		err = r.writeText(fout, displaySlot.EnglishName, fmt.Sprintf("Display %d", i))
+		err = r.writeText(fout, displaySlot.EnglishName(), fmt.Sprintf("Display %d", i))
 		if err != nil {
 			return err
 		}
@@ -884,11 +884,11 @@ func (r *PmxRepository) saveRigidBodies(fout *os.File, model *pmx.PmxModel, bone
 
 	for i := range model.RigidBodies.Len() {
 		rigidbody := model.RigidBodies.Get(i)
-		err = r.writeText(fout, rigidbody.Name, fmt.Sprintf("Rigidbody %d", i))
+		err = r.writeText(fout, rigidbody.Name(), fmt.Sprintf("Rigidbody %d", i))
 		if err != nil {
 			return err
 		}
-		err = r.writeText(fout, rigidbody.EnglishName, fmt.Sprintf("Rigidbody %d", i))
+		err = r.writeText(fout, rigidbody.EnglishName(), fmt.Sprintf("Rigidbody %d", i))
 		if err != nil {
 			return err
 		}
@@ -983,11 +983,11 @@ func (r *PmxRepository) saveJoints(fout *os.File, model *pmx.PmxModel, rigidbody
 	for i := range model.Joints.Len() {
 		joint := model.Joints.Get(i)
 
-		err = r.writeText(fout, joint.Name, fmt.Sprintf("Joint %d", i))
+		err = r.writeText(fout, joint.Name(), fmt.Sprintf("Joint %d", i))
 		if err != nil {
 			return err
 		}
-		err = r.writeText(fout, joint.EnglishName, fmt.Sprintf("Joint %d", i))
+		err = r.writeText(fout, joint.EnglishName(), fmt.Sprintf("Joint %d", i))
 		if err != nil {
 			return err
 		}

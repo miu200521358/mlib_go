@@ -10,41 +10,55 @@ import (
 type IIndexNameModel interface {
 	IsValid() bool
 	Copy() IIndexNameModel
-	GetIndex() int
+	Index() int
 	SetIndex(index int)
-	GetName() string
+	Name() string
 	SetName(name string)
+	EnglishName() string
+	SetEnglishName(englishName string)
 }
 
 // INDEXを持つ基底クラス
 type IndexNameModel struct {
-	Index       int
-	Name        string
-	EnglishName string
+	index       int
+	name        string
+	englishName string
 }
 
-func (v *IndexNameModel) GetIndex() int {
-	return v.Index
+func NewIndexNameModel(index int, name string, englishName string) *IndexNameModel {
+	return &IndexNameModel{index: index, name: name, englishName: englishName}
+}
+
+func (v *IndexNameModel) Index() int {
+	return v.index
 }
 
 func (v *IndexNameModel) SetIndex(index int) {
-	v.Index = index
+	v.index = index
 }
 
-func (v *IndexNameModel) GetName() string {
-	return v.Name
+func (v *IndexNameModel) Name() string {
+	return v.name
 }
 
 func (v *IndexNameModel) SetName(name string) {
-	v.Name = name
+	v.name = name
+}
+
+func (v *IndexNameModel) EnglishName() string {
+	return v.englishName
+}
+
+func (v *IndexNameModel) SetEnglishName(englishName string) {
+	v.englishName = englishName
 }
 
 func (v *IndexNameModel) IsValid() bool {
-	return v != nil && v.GetIndex() >= 0
+	return v != nil && v.index >= 0
 }
 
 func (v *IndexNameModel) Copy() IIndexNameModel {
-	copied := IndexNameModel{Index: v.Index, Name: v.Name, EnglishName: v.EnglishName}
+	copied := IndexNameModel{index: v.index, name: v.name, englishName: v.englishName}
 	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
 	return &copied
 }
@@ -77,30 +91,30 @@ func (c *IndexNameModels[T]) SetItem(index int, v T) {
 }
 
 func (c *IndexNameModels[T]) Update(value T) {
-	if value.GetIndex() < 0 {
+	if value.Index() < 0 {
 		panic("Index is not set")
 	}
-	c.Data[value.GetIndex()] = value
-	if _, ok := c.NameIndexes[value.GetName()]; !ok {
+	c.Data[value.Index()] = value
+	if _, ok := c.NameIndexes[value.Name()]; !ok {
 		// 名前は先勝ち
-		c.NameIndexes[value.GetName()] = value.GetIndex()
+		c.NameIndexes[value.Name()] = value.Index()
 	}
 	c.SetDirty(true)
 }
 
 func (c *IndexNameModels[T]) Append(value T) {
-	if value.GetIndex() < 0 {
+	if value.Index() < 0 {
 		value.SetIndex(len(c.Data))
 	}
 	c.Data = append(c.Data, value)
-	if _, ok := c.NameIndexes[value.GetName()]; !ok {
+	if _, ok := c.NameIndexes[value.Name()]; !ok {
 		// 名前は先勝ち
-		c.NameIndexes[value.GetName()] = value.GetIndex()
+		c.NameIndexes[value.Name()] = value.Index()
 	}
 	c.SetDirty(true)
 }
 
-func (c *IndexNameModels[T]) GetIndexes() []int {
+func (c *IndexNameModels[T]) Indexes() []int {
 	indexes := make([]int, len(c.NameIndexes))
 	i := 0
 	for _, index := range c.NameIndexes {
@@ -114,8 +128,8 @@ func (c *IndexNameModels[T]) GetIndexes() []int {
 func (c *IndexNameModels[T]) GetNames() []string {
 	names := make([]string, len(c.NameIndexes))
 	i := 0
-	for index := range c.GetIndexes() {
-		names[i] = c.Data[index].GetName()
+	for index := range c.Indexes() {
+		names[i] = c.Data[index].Name()
 		i++
 	}
 	return names

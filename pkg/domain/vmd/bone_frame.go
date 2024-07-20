@@ -83,7 +83,7 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 
 func (v *BoneFrame) Copy() IBaseFrame {
 	copied := &BoneFrame{
-		BaseFrame: NewFrame(v.GetIndex()).(*BaseFrame),
+		BaseFrame: NewFrame(v.Index()).(*BaseFrame),
 	}
 	if v.Position != nil {
 		copied.Position = v.Position.Copy()
@@ -113,7 +113,7 @@ func (v *BoneFrame) Copy() IBaseFrame {
 func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	prevBf := prevFrame.(*BoneFrame)
 
-	if prevBf == nil || nextBf.GetIndex() <= index {
+	if prevBf == nil || nextBf.Index() <= index {
 		// 前がないか、最後より後の場合、次のキーフレをコピーして返す
 		return nextBf.Copy().(*BoneFrame)
 	}
@@ -121,13 +121,13 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	bf := NewBoneFrame(index)
 	var xy, yy, zy, ry float64
 	if nextBf.Curves == nil {
-		t := float64(index-prevBf.GetIndex()) / float64(nextBf.GetIndex()-prevBf.GetIndex())
+		t := float64(index-prevBf.Index()) / float64(nextBf.Index()-prevBf.Index())
 		xy = t
 		yy = t
 		zy = t
 		ry = t
 	} else {
-		xy, yy, zy, ry = nextBf.Curves.Evaluate(prevBf.GetIndex(), index, nextBf.GetIndex())
+		xy, yy, zy, ry = nextBf.Curves.Evaluate(prevBf.Index(), index, nextBf.Index())
 	}
 
 	bf.Rotation = prevBf.Rotation.Slerp(nextBf.Rotation, ry)
@@ -206,11 +206,11 @@ func (bf *BoneFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, inde
 	prevBf := prevFrame.(*BoneFrame)
 
 	bf.Curves.TranslateX, nextBf.Curves.TranslateX =
-		mmath.SplitCurve(nextBf.Curves.TranslateX, prevBf.GetIndex(), bf.GetIndex(), nextBf.GetIndex())
+		mmath.SplitCurve(nextBf.Curves.TranslateX, prevBf.Index(), bf.Index(), nextBf.Index())
 	bf.Curves.TranslateY, nextBf.Curves.TranslateY =
-		mmath.SplitCurve(nextBf.Curves.TranslateY, prevBf.GetIndex(), bf.GetIndex(), nextBf.GetIndex())
+		mmath.SplitCurve(nextBf.Curves.TranslateY, prevBf.Index(), bf.Index(), nextBf.Index())
 	bf.Curves.TranslateZ, nextBf.Curves.TranslateZ =
-		mmath.SplitCurve(nextBf.Curves.TranslateZ, prevBf.GetIndex(), bf.GetIndex(), nextBf.GetIndex())
+		mmath.SplitCurve(nextBf.Curves.TranslateZ, prevBf.Index(), bf.Index(), nextBf.Index())
 	bf.Curves.Rotate, nextBf.Curves.Rotate =
-		mmath.SplitCurve(nextBf.Curves.Rotate, prevBf.GetIndex(), bf.GetIndex(), nextBf.GetIndex())
+		mmath.SplitCurve(nextBf.Curves.Rotate, prevBf.Index(), bf.Index(), nextBf.Index())
 }

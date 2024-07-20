@@ -18,52 +18,52 @@ const (
 
 type IDeform interface {
 	GetType() DeformType
-	GetAllIndexes() []int
-	GetAllWeights() []float64
-	GetIndexes(weightThreshold float64) []int
-	GetWeights(weightThreshold float64) []float64
+	AllIndexes() []int
+	AllWeights() []float64
+	Indexes(weightThreshold float64) []int
+	Weights(weightThreshold float64) []float64
 	NormalizedDeform() [8]float32
 }
 
 // Deform デフォーム既定構造体
 type Deform struct {
-	Indexes []int     // ボーンINDEXリスト
-	Weights []float64 // ウェイトリスト
+	indexes []int     // ボーンINDEXリスト
+	weights []float64 // ウェイトリスト
 	Count   int       // デフォームボーン個数
 }
 
 // NewDeform creates a new Deform instance.
 func NewDeform(indexes []int, weights []float64, count int) Deform {
 	return Deform{
-		Indexes: indexes,
-		Weights: weights,
+		indexes: indexes,
+		weights: weights,
 		Count:   count,
 	}
 }
 
-func (d *Deform) GetAllIndexes() []int {
-	return d.Indexes
+func (d *Deform) AllIndexes() []int {
+	return d.indexes
 }
 
-func (d *Deform) GetAllWeights() []float64 {
-	return d.Weights
+func (d *Deform) AllWeights() []float64 {
+	return d.weights
 }
 
-// GetIndexes ウェイト閾値以上のウェイトを持っているINDEXのみを取得する
-func (d *Deform) GetIndexes(weightThreshold float64) []int {
+// Indexes ウェイト閾値以上のウェイトを持っているINDEXのみを取得する
+func (d *Deform) Indexes(weightThreshold float64) []int {
 	var indexes []int
-	for i, weight := range d.Weights {
+	for i, weight := range d.weights {
 		if weight >= weightThreshold {
-			indexes = append(indexes, d.Indexes[i])
+			indexes = append(indexes, d.indexes[i])
 		}
 	}
 	return indexes
 }
 
-// GetWeights ウェイト閾値以上のウェイトを持っているウェイトのみを取得する
-func (d *Deform) GetWeights(weightThreshold float64) []float64 {
+// Weights ウェイト閾値以上のウェイトを持っているウェイトのみを取得する
+func (d *Deform) Weights(weightThreshold float64) []float64 {
 	var weights []float64
-	for _, weight := range d.Weights {
+	for _, weight := range d.weights {
 		if weight >= weightThreshold {
 			weights = append(weights, weight)
 		}
@@ -76,11 +76,11 @@ func (d *Deform) Normalize(align bool) {
 	if align {
 		// ウェイトを統合する
 		indexWeights := make(map[int]float64)
-		for i, index := range d.Indexes {
+		for i, index := range d.indexes {
 			if _, ok := indexWeights[index]; !ok {
 				indexWeights[index] = 0.0
 			}
-			indexWeights[index] += d.Weights[i]
+			indexWeights[index] += d.weights[i]
 		}
 
 		// 揃える必要がある場合、数が足りるよう、かさ増しする
@@ -105,26 +105,26 @@ func (d *Deform) Normalize(align bool) {
 		}
 
 		// ウェイトの大きい順に指定個数までを対象とする
-		d.Indexes, d.Weights = sortIndexesByWeight(ilist, wlist)
+		d.indexes, d.weights = sortIndexesByWeight(ilist, wlist)
 	}
 
 	// ウェイト正規化
 	sum := 0.0
-	for _, weight := range d.Weights {
+	for _, weight := range d.weights {
 		sum += weight
 	}
-	for i := range d.Weights {
-		d.Weights[i] /= sum
+	for i := range d.weights {
+		d.weights[i] /= sum
 	}
 }
 
 // NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
 func (d *Deform) NormalizedDeform() [8]float32 {
 	normalizedDeform := [8]float32{0, 0, 0, 0, 0, 0, 0, 0}
-	for i, index := range d.Indexes {
+	for i, index := range d.indexes {
 		normalizedDeform[i] = float32(index)
 	}
-	for i, weight := range d.Weights {
+	for i, weight := range d.weights {
 		normalizedDeform[i+4] = float32(weight)
 	}
 
@@ -162,8 +162,8 @@ type Bdef1 struct {
 func NewBdef1(index0 int) *Bdef1 {
 	return &Bdef1{
 		Deform: Deform{
-			Indexes: []int{index0},
-			Weights: []float64{1.0},
+			indexes: []int{index0},
+			weights: []float64{1.0},
 			Count:   1,
 		},
 	}
@@ -176,7 +176,7 @@ func (b *Bdef1) GetType() DeformType {
 
 // NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
 func (d *Bdef1) NormalizedDeform() [8]float32 {
-	return [8]float32{float32(d.Indexes[0]), 0, 0, 0, 1.0, 0, 0, 0}
+	return [8]float32{float32(d.indexes[0]), 0, 0, 0, 1.0, 0, 0, 0}
 }
 
 // Bdef2 represents the BDEF2 deformation.
@@ -188,8 +188,8 @@ type Bdef2 struct {
 func NewBdef2(index0, index1 int, weight0 float64) *Bdef2 {
 	return &Bdef2{
 		Deform: Deform{
-			Indexes: []int{index0, index1},
-			Weights: []float64{weight0, 1 - weight0},
+			indexes: []int{index0, index1},
+			weights: []float64{weight0, 1 - weight0},
 			Count:   2,
 		},
 	}
@@ -203,8 +203,8 @@ func (b *Bdef2) GetType() DeformType {
 // NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
 func (d *Bdef2) NormalizedDeform() [8]float32 {
 	return [8]float32{
-		float32(d.Indexes[0]), float32(d.Indexes[1]), 0, 0,
-		float32(d.Weights[0]), float32(1 - d.Weights[0]), 0, 0}
+		float32(d.indexes[0]), float32(d.indexes[1]), 0, 0,
+		float32(d.weights[0]), float32(1 - d.weights[0]), 0, 0}
 }
 
 // Bdef4 represents the BDEF4 deformation.
@@ -216,8 +216,8 @@ type Bdef4 struct {
 func NewBdef4(index0, index1, index2, index3 int, weight0, weight1, weight2, weight3 float64) *Bdef4 {
 	return &Bdef4{
 		Deform: Deform{
-			Indexes: []int{index0, index1, index2, index3},
-			Weights: []float64{weight0, weight1, weight2, weight3},
+			indexes: []int{index0, index1, index2, index3},
+			weights: []float64{weight0, weight1, weight2, weight3},
 			Count:   4,
 		},
 	}
@@ -231,8 +231,8 @@ func (b *Bdef4) GetType() DeformType {
 // NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
 func (d *Bdef4) NormalizedDeform() [8]float32 {
 	return [8]float32{
-		float32(d.Indexes[0]), float32(d.Indexes[1]), float32(d.Indexes[2]), float32(d.Indexes[3]),
-		float32(d.Weights[0]), float32(d.Weights[1]), float32(d.Weights[2]), float32(d.Weights[3])}
+		float32(d.indexes[0]), float32(d.indexes[1]), float32(d.indexes[2]), float32(d.indexes[3]),
+		float32(d.weights[0]), float32(d.weights[1]), float32(d.weights[2]), float32(d.weights[3])}
 }
 
 // Sdef represents the SDEF deformation.
@@ -247,8 +247,8 @@ type Sdef struct {
 func NewSdef(index0, index1 int, weight0 float64, sdefC, sdefR0, sdefR1 *mmath.MVec3) *Sdef {
 	return &Sdef{
 		Deform: Deform{
-			Indexes: []int{index0, index1},
-			Weights: []float64{weight0, 1 - weight0},
+			indexes: []int{index0, index1},
+			weights: []float64{weight0, 1 - weight0},
 			Count:   2,
 		},
 		SdefC:  sdefC,
@@ -266,6 +266,6 @@ func (s *Sdef) GetType() DeformType {
 // TODO: SDEFパラメーターの正規化
 func (d *Sdef) NormalizedDeform() [8]float32 {
 	return [8]float32{
-		float32(d.Indexes[0]), float32(d.Indexes[1]), 0, 0,
-		float32(d.Weights[0]), float32(1 - d.Weights[0]), 0, 0}
+		float32(d.indexes[0]), float32(d.indexes[1]), 0, 0,
+		float32(d.weights[0]), float32(1 - d.weights[0]), 0, 0}
 }

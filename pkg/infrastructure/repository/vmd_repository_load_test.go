@@ -46,14 +46,14 @@ func TestVmdMotionReader_Load(t *testing.T) {
 
 	// Verify the model properties
 	expectedPath := path
-	if model.GetPath() != expectedPath {
-		t.Errorf("Expected Path to be %q, got %q", expectedPath, model.GetPath())
+	if model.Path() != expectedPath {
+		t.Errorf("Expected Path to be %q, got %q", expectedPath, model.Path())
 	}
 
 	// モデル名
 	expectedModelName := "日本 roco式 トレス用"
-	if model.GetName() != expectedModelName {
-		t.Errorf("Expected modelName to be %q, got %q", expectedModelName, model.GetName())
+	if model.Name() != expectedModelName {
+		t.Errorf("Expected modelName to be %q, got %q", expectedModelName, model.Name())
 	}
 
 	motion := model.(*vmd.VmdMotion)
@@ -64,8 +64,8 @@ func TestVmdMotionReader_Load(t *testing.T) {
 
 		// フレーム番号
 		expectedFrameNo := int(358)
-		if bf.GetIndex() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.GetIndex())
+		if bf.Index() != expectedFrameNo {
+			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
@@ -127,8 +127,8 @@ func TestVmdMotionReader_Load(t *testing.T) {
 
 		// フレーム番号
 		expectedFrameNo := int(689)
-		if bf.GetIndex() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.GetIndex())
+		if bf.Index() != expectedFrameNo {
+			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
@@ -190,8 +190,8 @@ func TestVmdMotionReader_Load(t *testing.T) {
 
 		// フレーム番号
 		expectedFrameNo := int(384)
-		if bf.GetIndex() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.GetIndex())
+		if bf.Index() != expectedFrameNo {
+			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
@@ -254,8 +254,8 @@ func TestVmdMotionReader_Load(t *testing.T) {
 
 		// フレーム番号
 		expectedFrameNo := int(384)
-		if bf.GetIndex() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.GetIndex())
+		if bf.Index() != expectedFrameNo {
+			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
@@ -277,8 +277,8 @@ func TestVmdMotionReader_Load(t *testing.T) {
 
 		// フレーム番号
 		expectedFrameNo := int(394)
-		if bf.GetIndex() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.GetIndex())
+		if bf.Index() != expectedFrameNo {
+			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
@@ -300,8 +300,8 @@ func TestVmdMotionReader_Load(t *testing.T) {
 
 		// フレーム番号
 		expectedFrameNo := int(412)
-		if bf.GetIndex() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.GetIndex())
+		if bf.Index() != expectedFrameNo {
+			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
@@ -323,8 +323,8 @@ func TestVmdMotionReader_Load(t *testing.T) {
 
 		// フレーム番号
 		expectedFrameNo := int(384)
-		if bf.GetIndex() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.GetIndex())
+		if bf.Index() != expectedFrameNo {
+			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
 		}
 
 		// 位置

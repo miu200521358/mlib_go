@@ -8,7 +8,7 @@ import (
 )
 
 type IBaseFrame interface {
-	GetIndex() int
+	Index() int
 	getIntIndex() core.Int
 	SetIndex(index int)
 	IsRegistered() bool
@@ -21,18 +21,18 @@ type IBaseFrame interface {
 }
 
 type BaseFrame struct {
-	Index      core.Int
+	index      core.Int
 	Registered bool // 登録対象のキーフレであるか
 	Read       bool // VMDファイルから読み込んだキーフレであるか
 }
 
 func (b *BaseFrame) Less(than llrb.Item) bool {
-	return b.GetIndex() < int(than.(core.Int))
+	return b.Index() < int(than.(core.Int))
 }
 
 func (b *BaseFrame) Copy() IBaseFrame {
 	return &BaseFrame{
-		Index:      b.Index,
+		index:      b.index,
 		Registered: b.Registered,
 		Read:       b.Read,
 	}
@@ -40,13 +40,13 @@ func (b *BaseFrame) Copy() IBaseFrame {
 
 func (b *BaseFrame) New(index int) IBaseFrame {
 	return &BaseFrame{
-		Index: core.Int(index),
+		index: core.Int(index),
 	}
 }
 
 func NewFrame(index int) IBaseFrame {
 	return &BaseFrame{
-		Index:      core.NewInt(index),
+		index:      core.NewInt(index),
 		Registered: false,
 		Read:       false,
 	}
@@ -60,15 +60,15 @@ func (b *BaseFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index
 }
 
 func (bf *BaseFrame) getIntIndex() core.Int {
-	return bf.Index
+	return bf.index
 }
 
-func (bf *BaseFrame) GetIndex() int {
-	return int(bf.Index)
+func (bf *BaseFrame) Index() int {
+	return int(bf.index)
 }
 
 func (bf *BaseFrame) SetIndex(index int) {
-	bf.Index = core.NewInt(index)
+	bf.index = core.NewInt(index)
 }
 
 func (bf *BaseFrame) IsRegistered() bool {
@@ -175,11 +175,11 @@ func (fs *BaseFrames[T]) appendFrame(v T) {
 	defer fs.lock.Unlock()
 
 	if v.IsRegistered() {
-		fs.RegisteredIndexes.ReplaceOrInsert(core.Int(v.GetIndex()))
+		fs.RegisteredIndexes.ReplaceOrInsert(core.Int(v.Index()))
 	}
 
-	fs.data[v.GetIndex()] = v
-	fs.Indexes.ReplaceOrInsert(core.Int(v.GetIndex()))
+	fs.data[v.Index()] = v
+	fs.Indexes.ReplaceOrInsert(core.Int(v.Index()))
 }
 
 func (fs *BaseFrames[T]) GetMaxFrame() int {
@@ -241,12 +241,12 @@ func (fs *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {
 
 		if isSplitCurve {
 			// 補間曲線を分割する
-			prevF := fs.Get(fs.prevFrame(f.GetIndex()))
-			nextF := fs.Get(fs.nextFrame(f.GetIndex()))
+			prevF := fs.Get(fs.prevFrame(f.Index()))
+			nextF := fs.Get(fs.nextFrame(f.Index()))
 
 			// 補間曲線を分割する
-			if nextF.GetIndex() > f.GetIndex() && prevF.GetIndex() < f.GetIndex() {
-				index := f.GetIndex()
+			if nextF.Index() > f.Index() && prevF.Index() < f.Index() {
+				index := f.Index()
 				f.splitCurve(prevF, nextF, index)
 			}
 		}

@@ -66,7 +66,7 @@ func (renderModel *RenderModel) initTexturesGl(windowIndex int, textures *pmx.Te
 			mlog.D(fmt.Sprintf("texture error: %s", err))
 			continue
 		}
-		renderModel.textures[texture.Index] = texGl
+		renderModel.textures[texture.Index()] = texGl
 	}
 
 	return nil
@@ -80,7 +80,7 @@ func (renderModel *RenderModel) initTextureGl(
 	}
 
 	// 通常テクスチャ
-	texPath := filepath.Join(filepath.Dir(modelPath), texture.Name)
+	texPath := filepath.Join(filepath.Dir(modelPath), texture.Name())
 
 	// テクスチャがちゃんとある場合のみ初期化処理実施
 	valid, err := mutils.ExistsFile(texPath)
@@ -174,8 +174,8 @@ func (renderModel *RenderModel) initToonTexturesGl(windowIndex int) error {
 		filePath := fmt.Sprintf("toon/toon%02d.bmp", i+1)
 
 		toon := pmx.NewTexture()
-		toon.Index = i
-		toon.Name = filePath
+		toon.SetIndex(i)
+		toon.SetName(filePath)
 		toon.TextureType = pmx.TEXTURE_TYPE_TOON
 
 		img, err := mutils.LoadImageFromResources(toonFiles, filePath)

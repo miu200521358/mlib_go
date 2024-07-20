@@ -87,7 +87,7 @@ func (a *AnimationState) SetRenderDeltas(deltas *delta.RenderDeltas) {
 }
 
 func (a *AnimationState) Load() {
-	if a.renderModel == nil || a.renderModel.Hash() != a.model.GetHash() {
+	if a.renderModel == nil || a.renderModel.Hash() != a.model.Hash() {
 		a.renderModel = NewRenderModel(a.windowIndex, a.model)
 	}
 }

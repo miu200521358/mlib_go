@@ -118,7 +118,7 @@ func (vds *VertexDeltas) FindVerticesInBox(prevXprevYFrontPos, prevXprevYBackPos
 				if _, ok := vertexIndexMap[posKey]; !ok {
 					vertexIndexMap[posKey] = make([]int, 0)
 				}
-				vertexIndexMap[posKey] = append(vertexIndexMap[posKey], vertex.Index)
+				vertexIndexMap[posKey] = append(vertexIndexMap[posKey], vertex.Index())
 			}
 		} else {
 			for _, materialIndex := range visibleMaterialIndexes {
@@ -132,7 +132,7 @@ func (vds *VertexDeltas) FindVerticesInBox(prevXprevYFrontPos, prevXprevYBackPos
 						if _, ok := vertexIndexMap[posKey]; !ok {
 							vertexIndexMap[posKey] = make([]int, 0)
 						}
-						vertexIndexMap[posKey] = append(vertexIndexMap[posKey], vertex.Index)
+						vertexIndexMap[posKey] = append(vertexIndexMap[posKey], vertex.Index())
 					}
 					break
 				}

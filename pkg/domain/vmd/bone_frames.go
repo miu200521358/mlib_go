@@ -60,11 +60,11 @@ func (fs *BoneFrames) GetNames() []string {
 	return names
 }
 
-func (fs *BoneFrames) GetIndexes() []int {
+func (fs *BoneFrames) Indexes() []int {
 	indexes := core.NewIntIndexes()
 	for _, fs := range fs.Data {
 		for _, f := range fs.List() {
-			indexes.ReplaceOrInsert(f.Index)
+			indexes.ReplaceOrInsert(f.index)
 		}
 	}
 	return indexes.List()

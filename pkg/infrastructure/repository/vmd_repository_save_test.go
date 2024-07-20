@@ -33,8 +33,8 @@ func TestVmdWriter_Write1(t *testing.T) {
 	}
 	reloadMotion := reloadData.(*vmd.VmdMotion)
 
-	if reloadMotion.GetName() != motion.GetName() {
-		t.Errorf("Expected model name to be '%s', got %q", motion.GetName(), reloadMotion.GetName())
+	if reloadMotion.Name() != motion.Name() {
+		t.Errorf("Expected model name to be '%s', got %q", motion.Name(), reloadMotion.Name())
 	}
 
 	if reloadMotion.BoneFrames.Contains("センター") == false {
@@ -82,8 +82,8 @@ func TestVmdWriter_Write2(t *testing.T) {
 	}
 	reloadMotion := reloadData.(*vmd.VmdMotion)
 
-	if reloadMotion.GetName() != motion.GetName() {
-		t.Errorf("Expected model name to be '%s', got %q", motion.GetName(), reloadMotion.GetName())
+	if reloadMotion.Name() != motion.Name() {
+		t.Errorf("Expected model name to be '%s', got %q", motion.Name(), reloadMotion.Name())
 	}
 
 }
@@ -114,8 +114,8 @@ func TestVmdWriter_Write3(t *testing.T) {
 	}
 	reloadMotion := reloadData.(*vmd.VmdMotion)
 
-	if reloadMotion.GetName() != motion.GetName() {
-		t.Errorf("Expected model name to be '%s', got %q", motion.GetName(), reloadMotion.GetName())
+	if reloadMotion.Name() != motion.Name() {
+		t.Errorf("Expected model name to be '%s', got %q", motion.Name(), reloadMotion.Name())
 	}
 
 }
@@ -146,8 +146,8 @@ func TestVmdWriter_Write4(t *testing.T) {
 	}
 	reloadMotion := reloadData.(*vmd.VmdMotion)
 
-	if reloadMotion.GetName() != motion.GetName() {
-		t.Errorf("Expected model name to be '%s', got %q", motion.GetName(), reloadMotion.GetName())
+	if reloadMotion.Name() != motion.Name() {
+		t.Errorf("Expected model name to be '%s', got %q", motion.Name(), reloadMotion.Name())
 	}
 
 }

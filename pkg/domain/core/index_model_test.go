@@ -4,9 +4,9 @@ import (
 	"testing"
 )
 
-func TestIndexModel_GetIndex(t *testing.T) {
-	model := &IndexModel{Index: 5}
-	index := model.GetIndex()
+func TestIndexModel_Index(t *testing.T) {
+	model := &IndexModel{index: 5}
+	index := model.Index()
 	if index != 5 {
 		t.Errorf("Expected index to be 5, but got %d", index)
 	}
@@ -15,13 +15,13 @@ func TestIndexModel_GetIndex(t *testing.T) {
 func TestIndexModel_SetIndex(t *testing.T) {
 	model := &IndexModel{}
 	model.SetIndex(10)
-	if model.Index != 10 {
-		t.Errorf("Expected index to be 10, but got %d", model.Index)
+	if model.Index() != 10 {
+		t.Errorf("Expected index to be 10, but got %d", model.Index())
 	}
 }
 
 func TestIndexModel_IsValid(t *testing.T) {
-	model := &IndexModel{Index: 3}
+	model := &IndexModel{index: 3}
 	valid := model.IsValid()
 	if !valid {
 		t.Error("Expected IsValid to return true, but got false")
@@ -35,16 +35,16 @@ func TestIndexModel_IsValid(t *testing.T) {
 }
 
 func TestIndexModel_Copy(t *testing.T) {
-	model := &IndexModel{Index: 7}
+	model := &IndexModel{index: 7}
 	copied := model.Copy().(*IndexModel)
-	if copied.Index != 7 {
-		t.Errorf("Expected copied index to be 7, but got %d", copied.Index)
+	if copied.Index() != 7 {
+		t.Errorf("Expected copied index to be 7, but got %d", copied.Index())
 	}
 
 	// Modify the copied model
 	copied.SetIndex(9)
-	if model.Index == copied.Index {
-		t.Errorf("Expected copied model to be a separate instance, but both have the same index %d", model.Index)
+	if model.Index() == copied.Index() {
+		t.Errorf("Expected copied model to be a separate instance, but both have the same index %d", model.Index())
 	}
 }
 
@@ -55,7 +55,7 @@ type Face struct {
 
 func NewFace(index, vertexIndex0, vertexIndex1, vertexIndex2 int) *Face {
 	return &Face{
-		IndexModel:    &IndexModel{Index: index},
+		IndexModel:    &IndexModel{index: index},
 		VertexIndexes: [3]int{vertexIndex0, vertexIndex1, vertexIndex2},
 	}
 }

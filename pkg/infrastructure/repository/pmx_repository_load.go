@@ -67,7 +67,7 @@ func (r *PmxRepository) LoadName(path string) (string, error) {
 
 	r.close()
 
-	return model.Name, nil
+	return model.Name(), nil
 }
 
 func (r *PmxRepository) loadHeader(model *pmx.PmxModel) error {
@@ -160,9 +160,9 @@ func (r *PmxRepository) loadHeader(model *pmx.PmxModel) error {
 	model.RigidBodyCountType = int(rigidBodyCount)
 
 	// 4 + n : TextBuf	| モデル名
-	model.Name = r.readText()
+	model.SetName(r.readText())
 	// 4 + n : TextBuf	| モデル名英
-	model.EnglishName = r.readText()
+	model.SetEnglishName(r.readText())
 	// 4 + n : TextBuf	| コメント
 	model.Comment = r.readText()
 	// 4 + n : TextBuf	| コメント英
@@ -239,7 +239,7 @@ func (r *PmxRepository) loadVertices(model *pmx.PmxModel) error {
 	vertices := pmx.NewVertices(totalVertexCount)
 
 	for i := 0; i < totalVertexCount; i++ {
-		v := &pmx.Vertex{IndexModel: &core.IndexModel{Index: i}}
+		v := &pmx.Vertex{IndexModel: core.NewIndexModel(i)}
 
 		// 12 : float3  | 位置(x,y,z)
 		pos, err := r.unpackVec3()
@@ -429,7 +429,7 @@ func (r *PmxRepository) loadFaces(model *pmx.PmxModel) error {
 
 	for i := 0; i < totalFaceCount; i += 3 {
 		f := &pmx.Face{
-			IndexModel:    &core.IndexModel{Index: int(i / 3)},
+			IndexModel:    core.NewIndexModel(int(i / 3)),
 			VertexIndexes: [3]int{},
 		}
 
@@ -472,10 +472,10 @@ func (r *PmxRepository) loadTextures(model *pmx.PmxModel) error {
 	textures := pmx.NewTextures(totalTextureCount)
 
 	for i := 0; i < totalTextureCount; i++ {
-		t := &pmx.Texture{IndexModel: &core.IndexModel{Index: i}}
-
 		// 4 + n : TextBuf	| テクスチャパス
-		t.Name = r.readText()
+		name := r.readText()
+
+		t := &pmx.Texture{IndexNameModel: core.NewIndexNameModel(i, name, name)}
 
 		textures.Update(t)
 	}
@@ -501,7 +501,7 @@ func (r *PmxRepository) loadMaterials(model *pmx.PmxModel) error {
 		englishName := r.readText()
 
 		m := &pmx.Material{
-			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IndexNameModel: core.NewIndexNameModel(i, name, englishName),
 		}
 
 		// 16 : float4	| Diffuse (R,G,B,A)
@@ -627,7 +627,7 @@ func (r *PmxRepository) loadBones(model *pmx.PmxModel) error {
 		englishName := r.readText()
 
 		b := &pmx.Bone{
-			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IndexNameModel: core.NewIndexNameModel(i, name, englishName),
 			Extend:         &pmx.BoneExtend{},
 		}
 
@@ -832,7 +832,7 @@ func (r *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 		englishName := r.readText()
 
 		m := &pmx.Morph{
-			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IndexNameModel: core.NewIndexNameModel(i, name, englishName),
 		}
 
 		// 1  : byte	| 操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約
@@ -1018,7 +1018,7 @@ func (r *PmxRepository) loadDisplaySlots(model *pmx.PmxModel) error {
 		englishName := r.readText()
 
 		d := &pmx.DisplaySlot{
-			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IndexNameModel: core.NewIndexNameModel(i, name, englishName),
 			References:     make([]pmx.Reference, 0),
 		}
 
@@ -1092,7 +1092,7 @@ func (r *PmxRepository) loadRigidBodies(model *pmx.PmxModel) error {
 		englishName := r.readText()
 
 		b := &pmx.RigidBody{
-			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IndexNameModel: core.NewIndexNameModel(i, name, englishName),
 			RigidBodyParam: pmx.NewRigidBodyParam(),
 		}
 
@@ -1207,7 +1207,7 @@ func (r *PmxRepository) loadJoints(model *pmx.PmxModel) error {
 		englishName := r.readText()
 
 		j := &pmx.Joint{
-			IndexNameModel: &core.IndexNameModel{Index: i, Name: name, EnglishName: englishName},
+			IndexNameModel: core.NewIndexNameModel(i, name, englishName),
 			JointParam:     &pmx.JointParam{},
 		}
 

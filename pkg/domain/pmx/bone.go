@@ -118,7 +118,7 @@ type BoneExtend struct {
 
 func NewBone() *Bone {
 	bone := &Bone{
-		IndexNameModel: &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		IndexNameModel: core.NewIndexNameModel(-1, "", ""),
 		Position:       mmath.NewMVec3(),
 		ParentIndex:    -1,
 		Layer:          -1,
@@ -171,7 +171,7 @@ func NewBone() *Bone {
 
 func NewBoneByName(name string) *Bone {
 	bone := NewBone()
-	bone.Name = name
+	bone.SetName(name)
 	return bone
 }
 
@@ -309,7 +309,7 @@ func (bone *Bone) IsUpper() bool {
 // ローカル軸行列計算で親のキャンセルをさせないボーンであるか
 func (bone *Bone) IsNoLocalCancel() bool {
 	// 捩り分散ボーンも含む
-	if strings.Contains(bone.Name, "捩") {
+	if strings.Contains(bone.Name(), "捩") {
 		return true
 	}
 
@@ -320,9 +320,9 @@ func (bone *Bone) IsNoLocalCancel() bool {
 func (bone *Bone) containsCategory(category BoneCategory) bool {
 	for _, boneConfig := range GetStandardBoneConfigs() {
 		for _, c := range boneConfig.Categories {
-			if c == category && (boneConfig.Name.String() == bone.Name ||
-				boneConfig.Name.Right() == bone.Name ||
-				boneConfig.Name.Left() == bone.Name) {
+			if c == category && (boneConfig.Name.String() == bone.Name() ||
+				boneConfig.Name.Right() == bone.Name() ||
+				boneConfig.Name.Left() == bone.Name()) {
 				return true
 			}
 		}
@@ -365,7 +365,7 @@ func (b *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 	fromPosition := bone.Position
 	var toPosition *mmath.MVec3
 
-	if bone.IsTailBone() && bone.TailIndex >= 0 && slices.Contains(b.GetIndexes(), bone.TailIndex) {
+	if bone.IsTailBone() && bone.TailIndex >= 0 && slices.Contains(b.Indexes(), bone.TailIndex) {
 		toPosition = b.Get(bone.TailIndex).Position
 	} else if !bone.IsTailBone() && bone.TailPosition.Length() > 0 {
 		toPosition = bone.TailPosition.Added(bone.Position)
@@ -385,7 +385,7 @@ func (b *Bones) GetLayerIndexes(isAfterPhysics bool) []int {
 	for _, bone := range b.Data {
 		if (isAfterPhysics && bone.IsAfterPhysicsDeform()) || (!isAfterPhysics && !bone.IsAfterPhysicsDeform()) {
 			// 物理前後でフィルタリング
-			layerIndexes = append(layerIndexes, layerIndex{Layer: bone.Layer, Index: bone.Index})
+			layerIndexes = append(layerIndexes, layerIndex{Layer: bone.Layer, Index: bone.Index()})
 		}
 	}
 	sort.Sort(layerIndexes)
@@ -471,11 +471,11 @@ func (b *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool, loop int) *Bone 
 	}
 
 	parentBone := b.Get(bone.ParentIndex)
-	if parentBone.Index < 0 {
+	if parentBone.Index() < 0 {
 		return nil
 	}
 
-	if _, ok := b.IkTreeIndexes[parentBone.Index]; ok {
+	if _, ok := b.IkTreeIndexes[parentBone.Index()]; ok {
 		return parentBone
 	} else {
 		parentLayerBone := b.getIkTreeIndex(parentBone, isAfterPhysics, loop+1)
@@ -486,7 +486,7 @@ func (b *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool, loop int) *Bone 
 
 	if bone.IsEffectorRotation() || bone.IsEffectorTranslation() {
 		effectBone := b.Get(bone.EffectIndex)
-		if _, ok := b.IkTreeIndexes[effectBone.Index]; ok {
+		if _, ok := b.IkTreeIndexes[effectBone.Index()]; ok {
 			return effectBone
 		} else {
 			effectorLayerBone := b.getIkTreeIndex(effectBone, isAfterPhysics, loop+1)
@@ -520,17 +520,17 @@ func (b *Bones) setup() {
 	// 関連ボーンINDEX情報を設定
 	for i := range len(b.Data) {
 		bone := b.Get(i)
-		if strings.HasPrefix(bone.Name, "左") {
+		if strings.HasPrefix(bone.Name(), "左") {
 			bone.Extend.AxisSign = -1
 		}
 		if bone.IsIK() && bone.Ik != nil {
 			// IKのリンクとターゲット
 			for _, link := range bone.Ik.Links {
 				if b.Contains(link.BoneIndex) &&
-					!slices.Contains(b.Get(link.BoneIndex).Extend.IkLinkBoneIndexes, bone.Index) {
+					!slices.Contains(b.Get(link.BoneIndex).Extend.IkLinkBoneIndexes, bone.Index()) {
 					// リンクボーンにフラグを立てる
 					linkBone := b.Get(link.BoneIndex)
-					linkBone.Extend.IkLinkBoneIndexes = append(linkBone.Extend.IkLinkBoneIndexes, bone.Index)
+					linkBone.Extend.IkLinkBoneIndexes = append(linkBone.Extend.IkLinkBoneIndexes, bone.Index())
 					// リンクの制限をコピーしておく
 					linkBone.Extend.AngleLimit = link.AngleLimit
 					linkBone.Extend.MinAngleLimit = link.MinAngleLimit
@@ -541,37 +541,37 @@ func (b *Bones) setup() {
 				}
 			}
 			if b.Contains(bone.Ik.BoneIndex) &&
-				!slices.Contains(b.Get(bone.Ik.BoneIndex).Extend.IkTargetBoneIndexes, bone.Index) {
+				!slices.Contains(b.Get(bone.Ik.BoneIndex).Extend.IkTargetBoneIndexes, bone.Index()) {
 				// ターゲットボーンにもフラグを立てる
-				b.Get(bone.Ik.BoneIndex).Extend.IkTargetBoneIndexes = append(b.Get(bone.Ik.BoneIndex).Extend.IkTargetBoneIndexes, bone.Index)
+				b.Get(bone.Ik.BoneIndex).Extend.IkTargetBoneIndexes = append(b.Get(bone.Ik.BoneIndex).Extend.IkTargetBoneIndexes, bone.Index())
 			}
 		}
 		if bone.EffectIndex >= 0 && b.Contains(bone.EffectIndex) &&
-			!slices.Contains(b.Get(bone.EffectIndex).Extend.EffectiveBoneIndexes, bone.Index) {
+			!slices.Contains(b.Get(bone.EffectIndex).Extend.EffectiveBoneIndexes, bone.Index()) {
 			// 付与親の方に付与子情報を保持
-			b.Get(bone.EffectIndex).Extend.EffectiveBoneIndexes = append(b.Get(bone.EffectIndex).Extend.EffectiveBoneIndexes, bone.Index)
+			b.Get(bone.EffectIndex).Extend.EffectiveBoneIndexes = append(b.Get(bone.EffectIndex).Extend.EffectiveBoneIndexes, bone.Index())
 		}
 	}
 
 	for i := range b.Len() {
 		bone := b.Get(i)
 		// 影響があるボーンINDEXリスト
-		bone.Extend.ParentBoneIndexes, bone.Extend.RelativeBoneIndexes = b.getRelativeBoneIndexes(bone.Index, make([]int, 0), make([]int, 0))
+		bone.Extend.ParentBoneIndexes, bone.Extend.RelativeBoneIndexes = b.getRelativeBoneIndexes(bone.Index(), make([]int, 0), make([]int, 0))
 
 		// ボーンINDEXリストからボーン名リストを作成
 		bone.Extend.ParentBoneNames = make([]string, len(bone.Extend.ParentBoneIndexes))
 		for i, parentBoneIndex := range bone.Extend.ParentBoneIndexes {
-			bone.Extend.ParentBoneNames[i] = b.Get(parentBoneIndex).Name
+			bone.Extend.ParentBoneNames[i] = b.Get(parentBoneIndex).Name()
 		}
 
 		// 親ボーンに子ボーンとして登録する
 		if bone.ParentIndex >= 0 && b.Contains(bone.ParentIndex) {
-			b.Get(bone.ParentIndex).Extend.ChildBoneIndexes = append(b.Get(bone.ParentIndex).Extend.ChildBoneIndexes, bone.Index)
+			b.Get(bone.ParentIndex).Extend.ChildBoneIndexes = append(b.Get(bone.ParentIndex).Extend.ChildBoneIndexes, bone.Index())
 		}
 		// 親からの相対位置
-		bone.Extend.ParentRelativePosition = b.getParentRelativePosition(bone.Index)
+		bone.Extend.ParentRelativePosition = b.getParentRelativePosition(bone.Index())
 		// 子への相対位置
-		bone.Extend.ChildRelativePosition = b.getChildRelativePosition(bone.Index)
+		bone.Extend.ChildRelativePosition = b.getChildRelativePosition(bone.Index())
 		// ボーン単体のセットアップ
 		bone.setup()
 	}
@@ -591,8 +591,8 @@ func (b *Bones) setup() {
 				ikLayerBone := b.getIkTreeIndex(bone, isAfterPhysics, 0)
 				if ikLayerBone != nil {
 					// 合致するIKツリーがある場合、そのレイヤーに登録
-					b.IkTreeIndexes[ikLayerBone.Index] =
-						append(b.IkTreeIndexes[ikLayerBone.Index], bone.Index)
+					b.IkTreeIndexes[ikLayerBone.Index()] =
+						append(b.IkTreeIndexes[ikLayerBone.Index()], bone.Index())
 					continue ikLoop
 				}
 				for _, link := range bone.Ik.Links {
@@ -600,20 +600,20 @@ func (b *Bones) setup() {
 					linkLayerBone := b.getIkTreeIndex(linkBone, isAfterPhysics, 0)
 					if linkLayerBone != nil {
 						// 合致するIKツリーがある場合、そのレイヤーに登録
-						b.IkTreeIndexes[linkLayerBone.Index] =
-							append(b.IkTreeIndexes[linkLayerBone.Index], bone.Index)
+						b.IkTreeIndexes[linkLayerBone.Index()] =
+							append(b.IkTreeIndexes[linkLayerBone.Index()], bone.Index())
 						continue ikLoop
 					}
 				}
 
 				// 関連親がIKツリーに登録されていない場合、新規にIKツリーを作成
 				linkBone := b.Get(bone.Ik.Links[len(bone.Ik.Links)-1].BoneIndex)
-				// b.IkTreeIndexes[linkBone.Index] = []int{bone.Index}
+				// b.IkTreeIndexes[linkBone.Index()] = []int{bone.Index()}
 				if linkBone.ParentIndex >= 0 && b.Contains(linkBone.ParentIndex) {
 					parentBone := b.Get(linkBone.ParentIndex)
-					b.IkTreeIndexes[parentBone.Index] = []int{bone.Index}
+					b.IkTreeIndexes[parentBone.Index()] = []int{bone.Index()}
 				} else {
-					b.IkTreeIndexes[bone.Index] = []int{bone.Index}
+					b.IkTreeIndexes[bone.Index()] = []int{bone.Index()}
 				}
 			}
 		}
@@ -630,7 +630,7 @@ func (b *Bones) createLayerSortedBones(bone *Bone) {
 	relativeBoneIndexes := make(map[int]struct{})
 
 	// 対象のボーンは常に追加
-	relativeBoneIndexes[bone.Index] = struct{}{}
+	relativeBoneIndexes[bone.Index()] = struct{}{}
 
 	// 関連するボーンの追加
 	for _, index := range bone.Extend.RelativeBoneIndexes {
@@ -642,13 +642,13 @@ func (b *Bones) createLayerSortedBones(bone *Bone) {
 	deformBoneIndexes := make([]int, 0)
 	for _, ap := range []bool{false, true} {
 		for _, bone := range b.LayerSortedBones[ap] {
-			if _, ok := relativeBoneIndexes[bone.Index]; ok {
-				deformBoneIndexes = append(deformBoneIndexes, bone.Index)
+			if _, ok := relativeBoneIndexes[bone.Index()]; ok {
+				deformBoneIndexes = append(deformBoneIndexes, bone.Index())
 			}
 		}
 	}
 
-	b.DeformBoneIndexes[bone.Index] = deformBoneIndexes
+	b.DeformBoneIndexes[bone.Index()] = deformBoneIndexes
 }
 
 func (b *Bones) createLayerIndexesBeforePhysics() {
@@ -663,7 +663,7 @@ func (b *Bones) createLayerIndexesBeforePhysics() {
 
 	for i, boneIndex := range layerIndexes {
 		bone := b.Get(boneIndex)
-		b.LayerSortedNames[false][bone.Name] = i
+		b.LayerSortedNames[false][bone.Name()] = i
 		b.LayerSortedBones[false] = append(b.LayerSortedBones[false], bone)
 	}
 }
@@ -684,7 +684,7 @@ func (b *Bones) createLayerIndexesAfterPhysics() {
 		for _, afterBoneIndex := range afterLayerIndexes {
 			bone := b.Get(afterBoneIndex)
 			if slices.Contains(bone.Extend.ParentBoneIndexes, beforeBoneIndex) {
-				b.LayerSortedNames[true][bone.Name] = n
+				b.LayerSortedNames[true][bone.Name()] = n
 				b.LayerSortedBones[true] = append(b.LayerSortedBones[true], bone)
 				n++
 			}
@@ -693,7 +693,7 @@ func (b *Bones) createLayerIndexesAfterPhysics() {
 
 	for _, boneIndex := range afterLayerIndexes {
 		bone := b.Get(boneIndex)
-		b.LayerSortedNames[true][bone.Name] = n
+		b.LayerSortedNames[true][bone.Name()] = n
 		b.LayerSortedBones[true] = append(b.LayerSortedBones[true], bone)
 		n++
 	}

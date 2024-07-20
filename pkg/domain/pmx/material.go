@@ -129,7 +129,7 @@ type Material struct {
 
 func NewMaterial() *Material {
 	return &Material{
-		IndexNameModel:     &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		IndexNameModel:     core.NewIndexNameModel(-1, "", ""),
 		Diffuse:            mmath.NewMVec4(),
 		Specular:           mmath.NewMVec4(),
 		Ambient:            mmath.NewMVec3(),
@@ -148,7 +148,7 @@ func NewMaterial() *Material {
 
 func NewMaterialByName(name string) *Material {
 	m := NewMaterial()
-	m.Name = name
+	m.SetName(name)
 	return m
 }
 
@@ -184,9 +184,9 @@ func (ms *Materials) setup(vertices *Vertices, faces *Faces, textures *Textures)
 		for j := prevVertexCount; j < prevVertexCount+int(m.VerticesCount/3); j++ {
 			face := faces.Get(j)
 			for _, vertexIndexes := range face.VertexIndexes {
-				if !slices.Contains(vertices.Get(vertexIndexes).MaterialIndexes, m.Index) {
+				if !slices.Contains(vertices.Get(vertexIndexes).MaterialIndexes, m.Index()) {
 					vertices.Get(vertexIndexes).MaterialIndexes =
-						append(vertices.Get(vertexIndexes).MaterialIndexes, m.Index)
+						append(vertices.Get(vertexIndexes).MaterialIndexes, m.Index())
 				}
 			}
 		}

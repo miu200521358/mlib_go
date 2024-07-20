@@ -90,11 +90,11 @@ func prepareIk(
 		for m := range len(model.Bones.IkTreeIndexes[boneIndex]) {
 			ikBone := model.Bones.Get(model.Bones.IkTreeIndexes[boneIndex][m])
 
-			if ikFrame == nil || ikFrame.IsEnable(ikBone.Name) {
+			if ikFrame == nil || ikFrame.IsEnable(ikBone.Name()) {
 				var prefixPath string
 				if mlog.IsIkVerbose() {
 					// IK計算デバッグ用モーション
-					dirPath := fmt.Sprintf("%s/IK_step", filepath.Dir(model.GetPath()))
+					dirPath := fmt.Sprintf("%s/IK_step", filepath.Dir(model.Path()))
 					err := os.MkdirAll(dirPath, 0755)
 					if err != nil {
 						log.Fatal(err)
@@ -134,10 +134,10 @@ func calcIk(
 
 	if mlog.IsIkVerbose() {
 		// IK計算デバッグ用モーション
-		ikMotionPath := fmt.Sprintf("%s_%s.vmd", prefixPath, ikBone.Name)
+		ikMotionPath := fmt.Sprintf("%s_%s.vmd", prefixPath, ikBone.Name())
 		ikMotion = vmd.NewVmdMotion(ikMotionPath)
 
-		ikLogPath := fmt.Sprintf("%s_%s.log", prefixPath, ikBone.Name)
+		ikLogPath := fmt.Sprintf("%s_%s.log", prefixPath, ikBone.Name())
 		ikFile, err = os.OpenFile(ikLogPath, os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
 			fmt.Println(err)
@@ -148,7 +148,7 @@ func calcIk(
 		fmt.Println(ikFile, "[IK計算出力先][%04d][%s] %s", frame, ikMotionPath)
 	}
 	defer func() {
-		mlog.IV("[IK計算終了][%04d][%s]", frame, ikBone.Name)
+		mlog.IV("[IK計算終了][%04d][%s]", frame, ikBone.Name())
 
 		if ikMotion != nil {
 			r := repository.NewVmdRepository()
@@ -160,7 +160,7 @@ func calcIk(
 	}()
 
 	// つま先ＩＫであるか
-	isToeIk := strings.Contains(ikBone.Name, "つま先ＩＫ")
+	isToeIk := strings.Contains(ikBone.Name(), "つま先ＩＫ")
 	// 一段IKであるか
 	isSingleIk := len(ikBone.Ik.Links) == 1
 
@@ -174,18 +174,18 @@ func calcIk(
 	// IKターゲットボーン
 	effectorBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	// IK関連の物理前の行列を一括計算
-	ikDeltas := DeformBoneByPhysicsFlag(model, motion, deltas, false, frame, []string{ikBone.Name}, false)
+	ikDeltas := DeformBoneByPhysicsFlag(model, motion, deltas, false, frame, []string{ikBone.Name()}, false)
 	if isAfterPhysics {
 		// 物理後の場合は物理後のも取得する
-		ikDeltas = DeformBoneByPhysicsFlag(model, motion, deltas, false, frame, []string{ikBone.Name}, true)
+		ikDeltas = DeformBoneByPhysicsFlag(model, motion, deltas, false, frame, []string{ikBone.Name()}, true)
 	}
-	if !ikDeltas.Bones.Contains(ikBone.Index) {
+	if !ikDeltas.Bones.Contains(ikBone.Index()) {
 		// IKボーンが存在しない場合、スルー
 		return deltas.Bones
 	}
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-		ikOffMotion := vmd.NewVmdMotion(fmt.Sprintf("%s_0_%s.vmd", prefixPath, ikBone.Name))
+		ikOffMotion := vmd.NewVmdMotion(fmt.Sprintf("%s_0_%s.vmd", prefixPath, ikBone.Name()))
 
 		bif := vmd.NewIkFrame(0)
 		bif.Registered = true
@@ -194,7 +194,7 @@ func calcIk(
 			if bone.IsIK() {
 				ef := vmd.NewIkEnableFrame(0)
 				ef.Registered = true
-				ef.BoneName = bone.Name
+				ef.BoneName = bone.Name()
 				ef.Enabled = false
 
 				bif.IkList = append(bif.IkList, ef)
@@ -210,7 +210,7 @@ func calcIk(
 			bf := vmd.NewBoneFrame(0)
 			bf.Position = ikDelta.FramePosition
 			bf.Rotation = ikDelta.FrameRotation
-			ikOffMotion.AppendRegisteredBoneFrame(ikDelta.Bone.Name, bf)
+			ikOffMotion.AppendRegisteredBoneFrame(ikDelta.Bone.Name(), bf)
 		}
 
 		// ikOffMotion.Save("IK OFF", "")
@@ -219,8 +219,8 @@ func calcIk(
 	var ikOffDeltas *delta.VmdDeltas
 	if isToeIk {
 		ikOffDeltas = DeformBoneByPhysicsFlag(model, motion, nil, false, frame,
-			[]string{effectorBone.Name}, isAfterPhysics)
-		if !ikOffDeltas.Bones.Contains(effectorBone.Index) {
+			[]string{effectorBone.Name()}, isAfterPhysics)
+		if !ikOffDeltas.Bones.Contains(effectorBone.Index()) {
 			// IK OFFボーンが存在しない場合、スルー
 			return deltas.Bones
 		}
@@ -228,13 +228,13 @@ func calcIk(
 
 	// エフェクタ関連情報取得
 	effectorDeformBoneIndexes, deltas :=
-		prepareDeltas(model, motion, deltas, false, frame, []string{effectorBone.Name}, false)
+		prepareDeltas(model, motion, deltas, false, frame, []string{effectorBone.Name()}, false)
 	if isAfterPhysics {
 		// 物理後の場合は物理後のも取得する
 		effectorDeformBoneIndexes, deltas =
-			prepareDeltas(model, motion, deltas, false, frame, []string{effectorBone.Name}, true)
+			prepareDeltas(model, motion, deltas, false, frame, []string{effectorBone.Name()}, true)
 	}
-	if !deltas.Bones.Contains(effectorBone.Index) || !deltas.Bones.Contains(ikBone.Index) ||
+	if !deltas.Bones.Contains(effectorBone.Index()) || !deltas.Bones.Contains(ikBone.Index()) ||
 		!deltas.Bones.Contains(ikBone.Ik.BoneIndex) {
 		// エフェクタボーンが存在しない場合、スルー
 		return deltas.Bones
@@ -265,7 +265,7 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d] -------------------------------------------- \n",
-					frame, loop, linkBone.Name, count-1)
+					frame, loop, linkBone.Name(), count-1)
 			}
 
 			for _, l := range ikBone.Ik.Links {
@@ -279,20 +279,20 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := vmd.NewBoneFrame(count)
-				bf.Position = ikDeltas.Bones.Get(ikBone.Index).FilledFramePosition()
-				bf.Rotation = ikDeltas.Bones.Get(ikBone.Index).FilledLocalRotation()
-				ikMotion.AppendRegisteredBoneFrame(ikBone.Name, bf)
+				bf.Position = ikDeltas.Bones.Get(ikBone.Index()).FilledFramePosition()
+				bf.Rotation = ikDeltas.Bones.Get(ikBone.Index()).FilledLocalRotation()
+				ikMotion.AppendRegisteredBoneFrame(ikBone.Name(), bf)
 				count++
 
 				fmt.Fprintf(ikFile, "[%04d][%03d][%s][%05d][Local] ikGlobalPosition: %s\n",
-					frame, loop, linkBone.Name, count-1, bf.Position.MMD().String())
+					frame, loop, linkBone.Name(), count-1, bf.Position.MMD().String())
 			}
 
 			// IK関連の行列を取得
 			deltas.Bones = calcBoneDeltas(frame, model, effectorDeformBoneIndexes, deltas.Bones)
 
 			// リンクボーンの変形情報を取得
-			linkDelta := deltas.Bones.Get(linkBone.Index)
+			linkDelta := deltas.Bones.Get(linkBone.Index())
 			if linkDelta == nil {
 				linkDelta = &delta.BoneDelta{Bone: linkBone, Frame: frame}
 			}
@@ -301,42 +301,42 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := vmd.NewBoneFrame(count)
 				bf.Rotation = linkQuat.Copy()
-				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+				ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 				count++
 
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][linkQuat] %s(%s)\n",
-					frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String(),
+					frame, loop, linkBone.Name(), count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String(),
 				)
 			}
 
 			// IKボーンのグローバル位置
-			ikGlobalPosition := ikDeltas.Bones.Get(ikBone.Index).FilledGlobalPosition()
+			ikGlobalPosition := ikDeltas.Bones.Get(ikBone.Index()).FilledGlobalPosition()
 
 			// 現在のIKターゲットボーンのグローバル位置を取得
-			effectorGlobalPosition := deltas.Bones.Get(effectorBone.Index).FilledGlobalPosition()
+			effectorGlobalPosition := deltas.Bones.Get(effectorBone.Index()).FilledGlobalPosition()
 
 			// 初回にIK事前計算
 			if loop == 0 && isToeIk && ikOffDeltas != nil && ikOffDeltas.Bones != nil {
 				// IK OFF 時の IKターゲットボーンのグローバル位置を取得
-				ikGlobalPosition = ikOffDeltas.Bones.Get(effectorBone.Index).FilledGlobalPosition()
+				ikGlobalPosition = ikOffDeltas.Bones.Get(effectorBone.Index()).FilledGlobalPosition()
 				// 現在のIKターゲットボーンのグローバル位置を取得
-				effectorGlobalPosition = ikDeltas.Bones.Get(effectorBone.Index).FilledGlobalPosition()
+				effectorGlobalPosition = ikDeltas.Bones.Get(effectorBone.Index()).FilledGlobalPosition()
 			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][Global] [%s]ikGlobalPosition: %s, "+
 						"[%s]effectorGlobalPosition: %s, [%s]linkGlobalPosition: %s\n",
-					frame, loop, linkBone.Name, count-1,
-					ikBone.Name, ikGlobalPosition.MMD().String(),
-					effectorBone.Name, effectorGlobalPosition.MMD().String(),
-					linkBone.Name, deltas.Bones.Get(linkBone.Index).FilledGlobalPosition().MMD().String())
+					frame, loop, linkBone.Name(), count-1,
+					ikBone.Name(), ikGlobalPosition.MMD().String(),
+					effectorBone.Name(), effectorGlobalPosition.MMD().String(),
+					linkBone.Name(), deltas.Bones.Get(linkBone.Index()).FilledGlobalPosition().MMD().String())
 			}
 
 			// 注目ノード（実際に動かすボーン=リンクボーン）
 			// ワールド座標系から注目ノードの局所座標系への変換
-			linkInvMatrix := deltas.Bones.Get(linkBone.Index).FilledGlobalMatrix().Inverted()
+			linkInvMatrix := deltas.Bones.Get(linkBone.Index()).FilledGlobalMatrix().Inverted()
 			// 注目ノードを起点とした、エフェクタのローカル位置
 			effectorLocalPosition := linkInvMatrix.MulVec3(effectorGlobalPosition)
 			// 注目ノードを起点とした、IK目標のローカル位置
@@ -345,7 +345,7 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][Local] effectorLocalPosition: %s, ikLocalPosition: %s (%f)\n",
-					frame, loop, linkBone.Name, count-1,
+					frame, loop, linkBone.Name(), count-1,
 					effectorLocalPosition.MMD().String(), ikLocalPosition.MMD().String(),
 					effectorLocalPosition.Distance(ikLocalPosition))
 			}
@@ -358,7 +358,7 @@ ikLoop:
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][Local] ***BREAK*** distanceThreshold: %f\n",
-						frame, loop, linkBone.Name, count-1, distanceThreshold)
+						frame, loop, linkBone.Name(), count-1, distanceThreshold)
 				}
 
 				break ikLoop
@@ -367,7 +367,7 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][Local] effectorLocalPositionNorm: %s, ikLocalPositionNorm: %s\n",
-					frame, loop, linkBone.Name, count-1,
+					frame, loop, linkBone.Name(), count-1,
 					effectorLocalPosition.MMD().String(), ikLocalPosition.MMD().String())
 			}
 
@@ -378,7 +378,7 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][回転角度] unitRad: %.8f (%.5f), linkDot: %.8f\n",
-					frame, loop, linkBone.Name, count-1, unitRad, mmath.ToDegree(unitRad), linkDot,
+					frame, loop, linkBone.Name(), count-1, unitRad, mmath.ToDegree(unitRad), linkDot,
 				)
 			}
 
@@ -390,7 +390,7 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][単位角制限] linkAngle: %.8f(%.5f), originalLinkAngle: %.8f(%.5f)\n",
-					frame, loop, linkBone.Name, count-1, linkAngle, mmath.ToDegree(linkAngle),
+					frame, loop, linkBone.Name(), count-1, linkAngle, mmath.ToDegree(linkAngle),
 					originalLinkAngle, mmath.ToDegree(originalLinkAngle),
 				)
 			}
@@ -401,7 +401,7 @@ ikLoop:
 			// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 			// 		fmt.Fprintf(ikFile,
 			// 			"[%04d][%03d][%s][%05d][Local] ***BREAK*** angleThreshold: %f\n",
-			// 			frame, loop, linkBone.Name, count-1, angleThreshold)
+			// 			frame, loop, linkBone.Name(), count-1, angleThreshold)
 			// 	}
 
 			// 	break ikLoop
@@ -416,7 +416,7 @@ ikLoop:
 					ikLink.MinAngleLimit.GetRadians(),
 					ikLink.MaxAngleLimit.GetRadians(),
 					effectorLocalPosition, ikLocalPosition,
-					frame, count, loop, linkBone.Name, ikMotion, ikFile,
+					frame, count, loop, linkBone.Name(), ikMotion, ikFile,
 				)
 			} else if !isSingleIk || (isSingleIk && linkAngle > mmath.GIMBAL1_RAD) && ikLink.LocalAngleLimit {
 				// ローカル軸制限
@@ -424,7 +424,7 @@ ikLoop:
 					ikLink.LocalMinAngleLimit.GetRadians(),
 					ikLink.LocalMaxAngleLimit.GetRadians(),
 					effectorLocalPosition, ikLocalPosition,
-					frame, count, loop, linkBone.Name, ikMotion, ikFile,
+					frame, count, loop, linkBone.Name(), ikMotion, ikFile,
 				)
 			} else {
 				// 軸制限なし or 一段IKでかつ回転角が88度未満の場合
@@ -432,14 +432,14 @@ ikLoop:
 					mmath.MVec3MinVal,
 					mmath.MVec3MaxVal,
 					effectorLocalPosition, ikLocalPosition,
-					frame, count, loop, linkBone.Name, ikMotion, ikFile,
+					frame, count, loop, linkBone.Name(), ikMotion, ikFile,
 				)
 			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][回転軸] linkAxis: %s, originalLinkAxis: %s\n",
-					frame, loop, linkBone.Name, count-1, linkAxis.String(), originalLinkAxis.String(),
+					frame, loop, linkBone.Name(), count-1, linkAxis.String(), originalLinkAxis.String(),
 				)
 			}
 
@@ -453,30 +453,30 @@ ikLoop:
 				{
 					bf := vmd.NewBoneFrame(count)
 					bf.Rotation = originalTotalIkQuat.Copy()
-					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 					count++
 
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][originalTotalIkQuat] %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, originalTotalIkQuat.String(), originalTotalIkQuat.ToMMDDegrees().String())
+						frame, loop, linkBone.Name(), count-1, originalTotalIkQuat.String(), originalTotalIkQuat.ToMMDDegrees().String())
 
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][originalIkQuat] %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, originalIkQuat.String(), originalIkQuat.ToMMDDegrees().String())
+						frame, loop, linkBone.Name(), count-1, originalIkQuat.String(), originalIkQuat.ToMMDDegrees().String())
 				}
 				{
 					bf := vmd.NewBoneFrame(count)
 					bf.Rotation = totalIkQuat.Copy()
-					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 					count++
 
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][totalIkQuat] %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, totalIkQuat.String(), totalIkQuat.ToMMDDegrees().String())
+						frame, loop, linkBone.Name(), count-1, totalIkQuat.String(), totalIkQuat.ToMMDDegrees().String())
 
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][ikQuat] %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, ikQuat.String(), ikQuat.ToMMDDegrees().String())
+						frame, loop, linkBone.Name(), count-1, ikQuat.String(), ikQuat.ToMMDDegrees().String())
 				}
 			}
 
@@ -489,18 +489,18 @@ ikLoop:
 					ikLink.MaxAngleLimit.GetRadians(),
 					mmath.MVec3UnitX, mmath.MVec3UnitY, mmath.MVec3UnitZ,
 					loop, loopCount,
-					frame, count, linkBone.Name, ikMotion, ikFile,
+					frame, count, linkBone.Name(), ikMotion, ikFile,
 				)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := vmd.NewBoneFrame(count)
 					bf.Rotation = resultIkQuat.Copy()
-					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 					count++
 
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][角度制限後] resultIkQuat: %s(%s), totalIkQuat: %s(%s), ikQuat: %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, resultIkQuat.String(), resultIkQuat.ToMMDDegrees().String(),
+						frame, loop, linkBone.Name(), count-1, resultIkQuat.String(), resultIkQuat.ToMMDDegrees().String(),
 						totalIkQuat.String(), totalIkQuat.ToMMDDegrees().String(),
 						ikQuat.String(), ikQuat.ToMMDDegrees().String())
 				}
@@ -514,18 +514,18 @@ ikLoop:
 					linkBone.Extend.NormalizedLocalAxisY,
 					linkBone.Extend.NormalizedLocalAxisZ,
 					loop, loopCount,
-					frame, count, linkBone.Name, ikMotion, ikFile,
+					frame, count, linkBone.Name(), ikMotion, ikFile,
 				)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := vmd.NewBoneFrame(count)
 					bf.Rotation = resultIkQuat.Copy()
-					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 					count++
 
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][ローカル角度制限後] resultIkQuat: %s(%s), totalIkQuat: %s(%s), ikQuat: %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, resultIkQuat.String(), resultIkQuat.ToMMDDegrees().String(),
+						frame, loop, linkBone.Name(), count-1, resultIkQuat.String(), resultIkQuat.ToMMDDegrees().String(),
 						totalIkQuat.String(), totalIkQuat.ToMMDDegrees().String(),
 						ikQuat.String(), ikQuat.ToMMDDegrees().String())
 				}
@@ -535,10 +535,10 @@ ikLoop:
 			}
 
 			if loop == 0 && deltas.Morphs != nil && deltas.Morphs.Bones != nil &&
-				deltas.Morphs.Bones.Get(linkBone.Index) != nil &&
-				deltas.Morphs.Bones.Get(linkBone.Index).FrameRotation != nil {
+				deltas.Morphs.Bones.Get(linkBone.Index()) != nil &&
+				deltas.Morphs.Bones.Get(linkBone.Index()).FrameRotation != nil {
 				// モーフ変形がある場合、モーフ変形を追加適用
-				resultIkQuat = resultIkQuat.Muled(deltas.Morphs.Bones.Get(linkBone.Index).FrameRotation)
+				resultIkQuat = resultIkQuat.Muled(deltas.Morphs.Bones.Get(linkBone.Index()).FrameRotation)
 			}
 
 			if linkBone.HasFixedAxis() {
@@ -548,12 +548,12 @@ ikLoop:
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := vmd.NewBoneFrame(count)
 					bf.Rotation = resultIkQuat.Copy()
-					ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 					count++
 
 					fmt.Fprintf(ikFile,
 						"[%04d][%03d][%s][%05d][軸制限後] resultIkQuat: %s(%s)\n",
-						frame, loop, linkBone.Name, count-1, resultIkQuat.String(), resultIkQuat.ToMMDDegrees().String())
+						frame, loop, linkBone.Name(), count-1, resultIkQuat.String(), resultIkQuat.ToMMDDegrees().String())
 				}
 			}
 
@@ -564,12 +564,12 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := vmd.NewBoneFrame(count)
 				bf.Rotation = linkDelta.FilledLocalRotation().Copy()
-				ikMotion.AppendRegisteredBoneFrame(linkBone.Name, bf)
+				ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 				count++
 
 				fmt.Fprintf(ikFile,
 					"[%04d][%03d][%s][%05d][結果] bf.Rotation: %s(%s)\n",
-					frame, loop, linkBone.Name, count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
+					frame, loop, linkBone.Name(), count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String())
 			}
 		}
 	}
@@ -984,21 +984,21 @@ func calcBoneDeltas(
 		}
 
 		// 回転
-		rot := boneDeltas.LocalRotation(bone.Index)
+		rot := boneDeltas.LocalRotation(bone.Index())
 		if rot != nil && !rot.IsIdent() {
 			d.UnitMatrix.Mul(rot.ToMat4())
 		}
 
 		// 移動
-		pos := boneDeltas.LocalPosition(bone.Index)
+		pos := boneDeltas.LocalPosition(bone.Index())
 		if pos != nil && !pos.IsZero() {
 			d.UnitMatrix.Mul(pos.ToMat4())
 		}
 
 		// x := math.Abs(rot.X)
 
-		// if bone.Name == "左袖_後_赤_04_04" {
-		// 	mlog.I("[%s][%04d]: pos: %s, rot: %s(%s), x: %f\n", bone.Name, frame, pos.String(), rot.String(), rot.ToMMDDegrees().String(), x)
+		// if bone.Name() == "左袖_後_赤_04_04" {
+		// 	mlog.I("[%s][%04d]: pos: %s, rot: %s(%s), x: %f\n", bone.Name(), frame, pos.String(), rot.String(), rot.ToMMDDegrees().String(), x)
 		// }
 
 		// 逆BOf行列(初期姿勢行列)
@@ -1039,7 +1039,7 @@ func newVmdDeltas(
 	if len(boneNames) == 1 && model.Bones.ContainsByName(boneNames[0]) {
 		// 1ボーン指定の場合
 		bone := model.Bones.GetByName(boneNames[0])
-		return model.Bones.DeformBoneIndexes[bone.Index], deltas
+		return model.Bones.DeformBoneIndexes[bone.Index()], deltas
 	}
 
 	// 変形階層順ボーンIndexリスト
@@ -1059,8 +1059,8 @@ func newVmdDeltas(
 			bone := model.Bones.GetByName(boneName)
 
 			// 対象のボーンは常に追加
-			if _, ok := relativeBoneIndexes[bone.Index]; !ok {
-				relativeBoneIndexes[bone.Index] = struct{}{}
+			if _, ok := relativeBoneIndexes[bone.Index()]; !ok {
+				relativeBoneIndexes[bone.Index()] = struct{}{}
 			}
 
 			// 関連するボーンの追加
@@ -1073,8 +1073,8 @@ func newVmdDeltas(
 	} else {
 		// 物理前かつボーン名の指定が無い場合、物理前全ボーンを対象とする
 		for _, bone := range model.Bones.LayerSortedBones[isAfterPhysics] {
-			deformBoneIndexes = append(deformBoneIndexes, bone.Index)
-			if !deltas.Bones.Contains(bone.Index) {
+			deformBoneIndexes = append(deformBoneIndexes, bone.Index())
+			if !deltas.Bones.Contains(bone.Index()) {
 				deltas.Bones.Update(&delta.BoneDelta{Bone: bone, Frame: frame})
 			}
 		}
@@ -1085,9 +1085,9 @@ func newVmdDeltas(
 	// 変形階層・ボーンINDEXでソート
 	for _, ap := range []bool{false, true} {
 		for _, bone := range model.Bones.LayerSortedBones[ap] {
-			if _, ok := relativeBoneIndexes[bone.Index]; ok {
-				deformBoneIndexes = append(deformBoneIndexes, bone.Index)
-				if !deltas.Bones.Contains(bone.Index) {
+			if _, ok := relativeBoneIndexes[bone.Index()]; ok {
+				deformBoneIndexes = append(deformBoneIndexes, bone.Index())
+				if !deltas.Bones.Contains(bone.Index()) {
 					deltas.Bones.Update(&delta.BoneDelta{Bone: bone, Frame: frame})
 				}
 			}
@@ -1113,11 +1113,11 @@ func fillBoneDeform(
 		}
 
 		var bf *vmd.BoneFrame
-		if bone.IsAfterPhysicsDeform() || deltas.Bones == nil || deltas.Bones.Get(bone.Index) == nil ||
-			deltas.Bones.Get(bone.Index).FramePosition == nil ||
-			deltas.Bones.Get(bone.Index).FrameRotation == nil ||
-			deltas.Bones.Get(bone.Index).FrameScale == nil {
-			bf = motion.BoneFrames.Get(bone.Name).Get(frame)
+		if bone.IsAfterPhysicsDeform() || deltas.Bones == nil || deltas.Bones.Get(bone.Index()) == nil ||
+			deltas.Bones.Get(bone.Index()).FramePosition == nil ||
+			deltas.Bones.Get(bone.Index()).FrameRotation == nil ||
+			deltas.Bones.Get(bone.Index()).FrameScale == nil {
+			bf = motion.BoneFrames.Get(bone.Name()).Get(frame)
 		}
 
 		// ボーンの移動位置、回転角度、拡大率を取得
@@ -1137,8 +1137,8 @@ func getPosition(
 	bf *vmd.BoneFrame,
 ) (*mmath.MVec3, *mmath.MVec3) {
 	var pos *mmath.MVec3
-	if deltas.Bones != nil && deltas.Bones.Get(bone.Index) != nil && deltas.Bones.Get(bone.Index).FramePosition != nil {
-		pos = deltas.Bones.Get(bone.Index).FramePosition.Copy()
+	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil && deltas.Bones.Get(bone.Index()).FramePosition != nil {
+		pos = deltas.Bones.Get(bone.Index()).FramePosition.Copy()
 	} else if bf != nil && bf.Position != nil && !bf.Position.IsZero() {
 		pos = bf.Position.Copy()
 	} else {
@@ -1146,9 +1146,9 @@ func getPosition(
 	}
 
 	var morphPos *mmath.MVec3
-	if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index) != nil &&
-		deltas.Morphs.Bones.Get(bone.Index).FramePosition != nil {
-		morphPos = deltas.Morphs.Bones.Get(bone.Index).FramePosition.Copy()
+	if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
+		deltas.Morphs.Bones.Get(bone.Index()).FramePosition != nil {
+		morphPos = deltas.Morphs.Bones.Get(bone.Index()).FramePosition.Copy()
 	}
 
 	return pos, morphPos
@@ -1162,19 +1162,19 @@ func getRotation(
 ) (*mmath.MQuaternion, *mmath.MQuaternion) {
 	var rot *mmath.MQuaternion
 	var morphRot *mmath.MQuaternion
-	if deltas.Bones != nil && deltas.Bones.Get(bone.Index) != nil && deltas.Bones.Get(bone.Index).FrameRotation != nil {
-		rot = deltas.Bones.Get(bone.Index).FrameRotation.Copy()
+	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil && deltas.Bones.Get(bone.Index()).FrameRotation != nil {
+		rot = deltas.Bones.Get(bone.Index()).FrameRotation.Copy()
 	} else {
 		if bf != nil && bf.Rotation != nil && !bf.Rotation.IsIdent() {
 			rot = bf.Rotation.Copy()
 		} else {
 			rot = mmath.NewMQuaternion()
 
-			if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index) != nil &&
-				deltas.Morphs.Bones.Get(bone.Index).FrameRotation != nil {
+			if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
+				deltas.Morphs.Bones.Get(bone.Index()).FrameRotation != nil {
 				// IKの場合はIK計算時に組み込まれているので、まだframeRotationが無い場合のみ加味
-				morphRot = deltas.Morphs.Bones.Get(bone.Index).FrameRotation.Copy()
-				// mlog.I("[%s][%04d][%d]: rot: %s(%s), morphRot: %s(%s)\n", bone.Name, frame, loop,
+				morphRot = deltas.Morphs.Bones.Get(bone.Index()).FrameRotation.Copy()
+				// mlog.I("[%s][%04d][%d]: rot: %s(%s), morphRot: %s(%s)\n", bone.Name(), frame, loop,
 				// 	rot.String(), rot.ToMMDDegrees().String(), morphRot.String(), morphRot.ToMMDDegrees().String())
 			}
 		}
@@ -1195,17 +1195,17 @@ func getScale(
 ) (*mmath.MVec3, *mmath.MVec3) {
 
 	scale := &mmath.MVec3{X: 1, Y: 1, Z: 1}
-	if deltas.Bones != nil && deltas.Bones.Get(bone.Index) != nil &&
-		deltas.Bones.Get(bone.Index).FrameScale != nil {
-		scale = deltas.Bones.Get(bone.Index).FrameScale
+	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil &&
+		deltas.Bones.Get(bone.Index()).FrameScale != nil {
+		scale = deltas.Bones.Get(bone.Index()).FrameScale
 	} else if bf != nil && bf.Scale != nil && !bf.Scale.IsZero() {
 		scale.Add(bf.Scale)
 	}
 
 	var morphScale *mmath.MVec3
-	if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index) != nil &&
-		deltas.Morphs.Bones.Get(bone.Index).FrameScale != nil {
-		morphScale = deltas.Morphs.Bones.Get(bone.Index).FrameScale.Copy()
+	if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
+		deltas.Morphs.Bones.Get(bone.Index()).FrameScale != nil {
+		morphScale = deltas.Morphs.Bones.Get(bone.Index()).FrameScale.Copy()
 	}
 
 	return scale, morphScale

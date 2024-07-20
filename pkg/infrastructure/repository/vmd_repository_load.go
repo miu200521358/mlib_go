@@ -447,7 +447,7 @@ func (r *VmdRepository) loadIks(motion *vmd.VmdMotion) error {
 			return err
 		}
 		for j := 0; j < int(ikCount); j++ {
-			ik := vmd.NewIkEnableFrame(v.GetIndex())
+			ik := vmd.NewIkEnableFrame(v.Index())
 
 			// IKボーン名
 			ik.BoneName, err = r.readText(20)

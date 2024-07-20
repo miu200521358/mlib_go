@@ -116,7 +116,7 @@ type RigidBody struct {
 // NewRigidBody creates a new rigid body.
 func NewRigidBody() *RigidBody {
 	return &RigidBody{
-		IndexNameModel:          &core.IndexNameModel{Index: -1, Name: "", EnglishName: ""},
+		IndexNameModel:          core.NewIndexNameModel(-1, "", ""),
 		BoneIndex:               -1,
 		CollisionGroup:          0,
 		CollisionGroupMask:      NewCollisionGroupFromSlice([]uint16{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),

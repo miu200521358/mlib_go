@@ -31,8 +31,8 @@ func (sf *ShadowFrame) Copy() IBaseFrame {
 func (nextSf *ShadowFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	prevSf := prevFrame.(*ShadowFrame)
 
-	prevIndex := prevSf.GetIndex()
-	nextIndex := nextSf.GetIndex()
+	prevIndex := prevSf.Index()
+	nextIndex := nextSf.Index()
 
 	sf := NewShadowFrame(index)
 

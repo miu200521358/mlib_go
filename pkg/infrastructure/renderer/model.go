@@ -49,10 +49,10 @@ func NewRenderModel(windowIndex int, model *pmx.PmxModel) *RenderModel {
 		vertexCount: model.Vertices.Len(),
 	}
 	m.initToonTexturesGl(windowIndex)
-	m.initTexturesGl(windowIndex, model.Textures, model.GetPath())
+	m.initTexturesGl(windowIndex, model.Textures, model.Path())
 
 	m.initializeBuffer(model)
-	m.hash = model.GetHash()
+	m.hash = model.Hash()
 
 	return m
 }
@@ -206,12 +206,12 @@ func (renderModel *RenderModel) initializeBuffer(
 			bones = append(bones, newBoneGl(bone)...)
 			bones = append(bones, newTailBoneGl(bone)...)
 			boneFaces = append(boneFaces, uint32(n), uint32(n+1))
-			boneIndexes[n] = bone.Index
-			boneIndexes[n+1] = bone.Index
+			boneIndexes[n] = bone.Index()
+			boneIndexes[n+1] = bone.Index()
 
 			bonePoints = append(bonePoints, newBoneGl(bone)...)
-			bonePointFaces[bone.Index] = uint32(bone.Index)
-			bonePointIndexes[bone.Index] = bone.Index
+			bonePointFaces[bone.Index()] = uint32(bone.Index())
+			bonePointIndexes[bone.Index()] = bone.Index()
 
 			n += 2
 
@@ -221,7 +221,7 @@ func (renderModel *RenderModel) initializeBuffer(
 			// 	renderModel.bones = append(renderModel.bones, newBoneGl(bone)...)
 			// 	renderModel.bones = append(renderModel.bones, newParentBoneGl(bone)...)
 			// 	boneFaces = append(boneFaces, uint32(n), uint32(n+1))
-			// 	renderModel.boneIndexes = append(renderModel.boneIndexes, bone.Index, bone.ParentIndex)
+			// 	renderModel.boneIndexes = append(renderModel.boneIndexes, bone.Index(), bone.ParentIndex)
 			// 	mu.Unlock()
 
 			// 	n += 2

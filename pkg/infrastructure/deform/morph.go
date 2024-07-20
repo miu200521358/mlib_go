@@ -17,7 +17,7 @@ func DeformMorph(
 		// モーフの指定がなければ全モーフチェック
 		morphNames = make([]string, 0)
 		for _, morph := range model.Morphs.Data {
-			morphNames = append(morphNames, morph.Name)
+			morphNames = append(morphNames, morph.Name())
 		}
 	}
 
@@ -57,22 +57,22 @@ func DeformMorph(
 				switch groupMorph.MorphType {
 				case pmx.MORPH_TYPE_VERTEX:
 					mds.Vertices = deformVertex(
-						groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
+						groupMorph.Name(), model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
 				case pmx.MORPH_TYPE_AFTER_VERTEX:
 					mds.Vertices = deformAfterVertex(
-						groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
+						groupMorph.Name(), model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
 				case pmx.MORPH_TYPE_UV:
 					mds.Vertices = deformUv(
-						groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
+						groupMorph.Name(), model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
 				case pmx.MORPH_TYPE_EXTENDED_UV1:
 					mds.Vertices = deformUv1(
-						groupMorph.Name, model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
+						groupMorph.Name(), model, mds.Vertices, mf.Ratio*groupOffset.MorphFactor)
 				case pmx.MORPH_TYPE_BONE:
 					mds.Bones = deformBone(
-						groupMorph.Name, model, mds.Bones, mf.Ratio*groupOffset.MorphFactor)
+						groupMorph.Name(), model, mds.Bones, mf.Ratio*groupOffset.MorphFactor)
 				case pmx.MORPH_TYPE_MATERIAL:
 					mds.Materials = deformMaterial(
-						groupMorph.Name, model, mds.Materials, mf.Ratio*groupOffset.MorphFactor)
+						groupMorph.Name(), model, mds.Materials, mf.Ratio*groupOffset.MorphFactor)
 				}
 			}
 		}

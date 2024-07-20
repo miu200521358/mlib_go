@@ -74,8 +74,8 @@ func TestPmxReader_Load(t *testing.T) {
 	}
 
 	expectedName := "v2配布用素体03"
-	if model.Name != expectedName {
-		t.Errorf("Expected Name to be %q, got %q", expectedName, model.Name)
+	if model.Name() != expectedName {
+		t.Errorf("Expected Name to be %q, got %q", expectedName, model.Name())
 	}
 
 	{
@@ -97,29 +97,29 @@ func TestPmxReader_Load(t *testing.T) {
 			t.Errorf("Expected DeformType to be %d, got %d", expectedDeformType, v.DeformType)
 		}
 		expectedDeform := pmx.NewBdef4(7, 8, 25, 9, 0.6375693, 0.2368899, 0.06898639, 0.05655446)
-		if v.Deform.GetAllIndexes()[0] != expectedDeform.Indexes[0] {
-			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Indexes[0], v.Deform.GetAllIndexes()[0])
+		if v.Deform.AllIndexes()[0] != expectedDeform.AllIndexes()[0] {
+			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.AllIndexes()[0], v.Deform.AllIndexes()[0])
 		}
-		if v.Deform.GetAllIndexes()[1] != expectedDeform.Indexes[1] {
-			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Indexes[1], v.Deform.GetAllIndexes()[1])
+		if v.Deform.AllIndexes()[1] != expectedDeform.AllIndexes()[1] {
+			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.AllIndexes()[1], v.Deform.AllIndexes()[1])
 		}
-		if v.Deform.GetAllIndexes()[2] != expectedDeform.Indexes[2] {
-			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Indexes[2], v.Deform.GetAllIndexes()[2])
+		if v.Deform.AllIndexes()[2] != expectedDeform.AllIndexes()[2] {
+			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.AllIndexes()[2], v.Deform.AllIndexes()[2])
 		}
-		if v.Deform.GetAllIndexes()[3] != expectedDeform.Indexes[3] {
-			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Indexes[3], v.Deform.GetAllIndexes()[3])
+		if v.Deform.AllIndexes()[3] != expectedDeform.AllIndexes()[3] {
+			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.AllIndexes()[3], v.Deform.AllIndexes()[3])
 		}
-		if math.Abs(v.Deform.GetAllWeights()[0]-expectedDeform.Weights[0]) > 1e-5 {
-			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Weights[0], v.Deform.GetAllWeights()[0])
+		if math.Abs(v.Deform.AllWeights()[0]-expectedDeform.AllWeights()[0]) > 1e-5 {
+			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.AllWeights()[0], v.Deform.AllWeights()[0])
 		}
-		if math.Abs(v.Deform.GetAllWeights()[1]-expectedDeform.Weights[1]) > 1e-5 {
-			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Weights[1], v.Deform.GetAllWeights()[1])
+		if math.Abs(v.Deform.AllWeights()[1]-expectedDeform.AllWeights()[1]) > 1e-5 {
+			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.AllWeights()[1], v.Deform.AllWeights()[1])
 		}
-		if math.Abs(v.Deform.GetAllWeights()[2]-expectedDeform.Weights[2]) > 1e-5 {
-			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Weights[2], v.Deform.GetAllWeights()[2])
+		if math.Abs(v.Deform.AllWeights()[2]-expectedDeform.AllWeights()[2]) > 1e-5 {
+			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.AllWeights()[2], v.Deform.AllWeights()[2])
 		}
-		if math.Abs(v.Deform.GetAllWeights()[3]-expectedDeform.Weights[3]) > 1e-5 {
-			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Weights[3], v.Deform.GetAllWeights()[3])
+		if math.Abs(v.Deform.AllWeights()[3]-expectedDeform.AllWeights()[3]) > 1e-5 {
+			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.AllWeights()[3], v.Deform.AllWeights()[3])
 		}
 		expectedEdgeFactor := 1.0
 		if math.Abs(v.EdgeFactor-expectedEdgeFactor) > 1e-5 {
@@ -146,17 +146,17 @@ func TestPmxReader_Load(t *testing.T) {
 			t.Errorf("Expected DeformType to be %d, got %d", expectedDeformType, v.DeformType)
 		}
 		expectedDeform := pmx.NewBdef2(109, 108, 0.9845969)
-		if v.Deform.GetAllIndexes()[0] != expectedDeform.Indexes[0] {
-			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Indexes[0], v.Deform.GetAllIndexes()[0])
+		if v.Deform.AllIndexes()[0] != expectedDeform.AllIndexes()[0] {
+			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.AllIndexes()[0], v.Deform.AllIndexes()[0])
 		}
-		if v.Deform.GetAllIndexes()[1] != expectedDeform.Indexes[1] {
-			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Indexes[1], v.Deform.GetAllIndexes()[1])
+		if v.Deform.AllIndexes()[1] != expectedDeform.AllIndexes()[1] {
+			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.AllIndexes()[1], v.Deform.AllIndexes()[1])
 		}
-		if math.Abs(v.Deform.GetAllWeights()[0]-expectedDeform.Weights[0]) > 1e-5 {
-			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Weights[0], v.Deform.GetAllWeights()[0])
+		if math.Abs(v.Deform.AllWeights()[0]-expectedDeform.AllWeights()[0]) > 1e-5 {
+			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.AllWeights()[0], v.Deform.AllWeights()[0])
 		}
-		if math.Abs(v.Deform.GetAllWeights()[1]-expectedDeform.Weights[1]) > 1e-5 {
-			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.Weights[1], v.Deform.GetAllWeights()[1])
+		if math.Abs(v.Deform.AllWeights()[1]-expectedDeform.AllWeights()[1]) > 1e-5 {
+			t.Errorf("Expected Deform to be %v, got %v", expectedDeform.AllWeights()[1], v.Deform.AllWeights()[1])
 		}
 		expectedEdgeFactor := 1.0
 		if math.Abs(v.EdgeFactor-expectedEdgeFactor) > 1e-5 {
@@ -181,20 +181,20 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		tex := model.Textures.Get(10)
 		expectedName := "tex\\_13_Toon.bmp"
-		if tex.Name != expectedName {
-			t.Errorf("Expected Path to be %q, got %q", expectedName, tex.Name)
+		if tex.Name() != expectedName {
+			t.Errorf("Expected Path to be %q, got %q", expectedName, tex.Name())
 		}
 	}
 
 	{
 		m := model.Materials.Get(10)
 		expectedName := "00_EyeWhite_はぅ"
-		if m.Name != expectedName {
-			t.Errorf("Expected Path to be %q, got %q", expectedName, m.Name)
+		if m.Name() != expectedName {
+			t.Errorf("Expected Path to be %q, got %q", expectedName, m.Name())
 		}
 		expectedEnglishName := "N00_000_00_EyeWhite_00_EYE (Instance)_Hau"
-		if m.EnglishName != expectedEnglishName {
-			t.Errorf("Expected Path to be %q, got %q", expectedEnglishName, m.EnglishName)
+		if m.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected Path to be %q, got %q", expectedEnglishName, m.EnglishName())
 		}
 		expectedDiffuse := &mmath.MVec4{X: 1.0, Y: 1.0, Z: 1.0, W: 0.0}
 		if !m.Diffuse.NearEquals(expectedDiffuse, 1e-5) {
@@ -253,12 +253,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		b := model.Bones.Get(5)
 		expectedName := "上半身"
-		if b.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name)
+		if b.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name())
 		}
 		expectedEnglishName := "J_Bip_C_Spine2"
-		if b.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
+		if b.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName())
 		}
 		expectedPosition := &mmath.MVec3{X: 0.0, Y: 12.39097, Z: -0.2011687}
 		if !b.Position.MMD().NearEquals(expectedPosition, 1e-5) {
@@ -289,12 +289,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		b := model.Bones.Get(12)
 		expectedName := "右目"
-		if b.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name)
+		if b.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name())
 		}
 		expectedEnglishName := "J_Adj_R_FaceEye"
-		if b.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
+		if b.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName())
 		}
 		expectedPosition := &mmath.MVec3{X: -0.1984593, Y: 18.47478, Z: 0.04549573}
 		if !b.Position.MMD().NearEquals(expectedPosition, 1e-5) {
@@ -333,12 +333,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		b := model.Bones.Get(28)
 		expectedName := "左腕捩"
-		if b.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name)
+		if b.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name())
 		}
 		expectedEnglishName := "arm_twist_L"
-		if b.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
+		if b.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName())
 		}
 		expectedPosition := &mmath.MVec3{X: 2.482529, Y: 15.52887, Z: 0.3184027}
 		if !b.Position.MMD().NearEquals(expectedPosition, 1e-5) {
@@ -381,12 +381,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		b := model.Bones.Get(98)
 		expectedName := "左足ＩＫ"
-		if b.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name)
+		if b.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name())
 		}
 		expectedEnglishName := "leg_IK_L"
-		if b.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
+		if b.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName())
 		}
 		expectedPosition := &mmath.MVec3{X: 0.9644502, Y: 1.647273, Z: 0.4050385}
 		if !b.Position.MMD().NearEquals(expectedPosition, 1e-5) {
@@ -459,12 +459,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		m := model.Morphs.Get(2)
 		expectedName := "にこり"
-		if m.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, m.Name)
+		if m.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, m.Name())
 		}
 		expectedEnglishName := "Fcl_BRW_Fun"
-		if m.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, m.EnglishName)
+		if m.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, m.EnglishName())
 		}
 		expectedMorphType := pmx.MORPH_TYPE_VERTEX
 		if m.MorphType != expectedMorphType {
@@ -490,12 +490,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		m := model.Morphs.Get(111)
 		expectedName := "いボーン"
-		if m.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, m.Name)
+		if m.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, m.Name())
 		}
 		expectedEnglishName := "Fcl_MTH_I_Bone"
-		if m.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, m.EnglishName)
+		if m.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, m.EnglishName())
 		}
 		expectedMorphType := pmx.MORPH_TYPE_BONE
 		if m.MorphType != expectedMorphType {
@@ -525,12 +525,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		m := model.Morphs.Get(122)
 		expectedName := "なごみ材質"
-		if m.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, m.Name)
+		if m.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, m.Name())
 		}
 		expectedEnglishName := "eye_Nagomi_Material"
-		if m.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, m.EnglishName)
+		if m.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, m.EnglishName())
 		}
 		expectedMorphType := pmx.MORPH_TYPE_MATERIAL
 		if m.MorphType != expectedMorphType {
@@ -588,12 +588,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		m := model.Morphs.Get(137)
 		expectedName := "ひそめ"
-		if m.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, m.Name)
+		if m.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, m.Name())
 		}
 		expectedEnglishName := "brow_Frown"
-		if m.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, m.EnglishName)
+		if m.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, m.EnglishName())
 		}
 		expectedMorphType := pmx.MORPH_TYPE_GROUP
 		if m.MorphType != expectedMorphType {
@@ -619,12 +619,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		d := model.DisplaySlots.Get(0)
 		expectedName := "Root"
-		if d.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, d.Name)
+		if d.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, d.Name())
 		}
 		expectedEnglishName := "Root"
-		if d.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, d.EnglishName)
+		if d.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, d.EnglishName())
 		}
 		expectedSpecialFlag := pmx.SPECIAL_FLAG_ON
 		if d.SpecialFlag != expectedSpecialFlag {
@@ -650,12 +650,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		d := model.DisplaySlots.Get(1)
 		expectedName := "表情"
-		if d.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, d.Name)
+		if d.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, d.Name())
 		}
 		expectedEnglishName := "Exp"
-		if d.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, d.EnglishName)
+		if d.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, d.EnglishName())
 		}
 		expectedSpecialFlag := pmx.SPECIAL_FLAG_ON
 		if d.SpecialFlag != expectedSpecialFlag {
@@ -681,12 +681,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		d := model.DisplaySlots.Get(9)
 		expectedName := "右指"
-		if d.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, d.Name)
+		if d.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, d.Name())
 		}
 		expectedEnglishName := "right hand"
-		if d.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, d.EnglishName)
+		if d.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, d.EnglishName())
 		}
 		expectedSpecialFlag := pmx.SPECIAL_FLAG_OFF
 		if d.SpecialFlag != expectedSpecialFlag {
@@ -712,12 +712,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		b := model.RigidBodies.Get(14)
 		expectedName := "右腕"
-		if b.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name)
+		if b.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name())
 		}
 		expectedEnglishName := "J_Bip_R_UpperArm"
-		if b.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName)
+		if b.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, b.EnglishName())
 		}
 		expectedBoneIndex := 61
 		if b.BoneIndex != expectedBoneIndex {
@@ -778,12 +778,12 @@ func TestPmxReader_Load(t *testing.T) {
 	{
 		j := model.Joints.Get(13)
 		expectedName := "↓|頭|髪_06-01"
-		if j.Name != expectedName {
-			t.Errorf("Expected Name to be %q, got %q", expectedName, j.Name)
+		if j.Name() != expectedName {
+			t.Errorf("Expected Name to be %q, got %q", expectedName, j.Name())
 		}
 		expectedEnglishName := "↓|頭|髪_06-01"
-		if j.EnglishName != expectedEnglishName {
-			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, j.EnglishName)
+		if j.EnglishName() != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, j.EnglishName())
 		}
 		expectedRigidBodyIndexA := 5
 		if j.RigidbodyIndexA != expectedRigidBodyIndexA {
@@ -849,7 +849,7 @@ func TestPmxReader_Load_2_1(t *testing.T) {
 	}
 
 	expectedName := "サンプルモデル迪卢克"
-	if model.Name != expectedName {
-		t.Errorf("Expected Name to be %q, got %q", expectedName, model.Name)
+	if model.Name() != expectedName {
+		t.Errorf("Expected Name to be %q, got %q", expectedName, model.Name())
 	}
 }

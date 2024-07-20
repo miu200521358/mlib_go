@@ -335,7 +335,7 @@ func (picker *FilePicker) SetCache(data core.IHashModel) {
 	}
 
 	picker.cacheData = data
-	picker.pathLineEdit.SetText(data.GetPath())
+	picker.pathLineEdit.SetText(data.Path())
 }
 
 func (picker *FilePicker) IsCached() bool {
@@ -348,7 +348,7 @@ func (picker *FilePicker) IsCached() bool {
 		return false
 	}
 
-	return picker.cacheData != nil && picker.cacheData.GetHash() == hash
+	return picker.cacheData != nil && picker.cacheData.Hash() == hash
 }
 
 func (picker *FilePicker) SetPath(path string) {

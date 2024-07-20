@@ -83,12 +83,12 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 	btRigidBody.SetDamping(float32(rigidBody.RigidBodyParam.LinearDamping), float32(rigidBody.RigidBodyParam.AngularDamping))
 	btRigidBody.SetRestitution(float32(rigidBody.RigidBodyParam.Restitution))
 	btRigidBody.SetFriction(float32(rigidBody.RigidBodyParam.Friction))
-	btRigidBody.SetUserIndex(rigidBody.Index)
+	btRigidBody.SetUserIndex(rigidBody.Index())
 
 	// 剛体・剛体グループ・非衝突グループを追加
 	group := 1 << rigidBody.CollisionGroup
 	physics.world.AddRigidBody(btRigidBody, group, rigidBody.CollisionGroupMaskValue)
-	physics.rigidBodies[modelIndex][rigidBody.Index] = &rigidbodyValue{
+	physics.rigidBodies[modelIndex][rigidBody.Index()] = &rigidbodyValue{
 		pmxRigidBody: rigidBody, btRigidBody: &btRigidBody, btLocalTransform: &btRigidBodyLocalTransform,
 		mask: rigidBody.CollisionGroupMaskValue, group: group}
 
@@ -103,7 +103,7 @@ func (p *MPhysics) deleteRigidBodies(modelIndex int) {
 }
 
 func (physics *MPhysics) updateFlags(modelIndex int, rigidBody *pmx.RigidBody) {
-	btRigidBody := *physics.rigidBodies[modelIndex][rigidBody.Index].btRigidBody
+	btRigidBody := *physics.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
 
 	if rigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
 		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時
@@ -137,8 +137,8 @@ func (physics *MPhysics) UpdateTransform(
 	mat := mgl.NewGlMat4(boneGlobalMatrix)
 	boneTransform.SetFromOpenGLMatrix(&mat[0])
 
-	btRigidBody := *physics.rigidBodies[modelIndex][rigidBody.Index].btRigidBody
-	btRigidBodyLocalTransform := *physics.rigidBodies[modelIndex][rigidBody.Index].btLocalTransform
+	btRigidBody := *physics.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
+	btRigidBodyLocalTransform := *physics.rigidBodies[modelIndex][rigidBody.Index()].btLocalTransform
 
 	// 剛体のグローバル位置を確定
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
@@ -154,8 +154,8 @@ func (physics *MPhysics) GetRigidBodyBoneMatrix(
 	modelIndex int,
 	rigidBody *pmx.RigidBody,
 ) *mmath.MMat4 {
-	btRigidBody := *physics.rigidBodies[modelIndex][rigidBody.Index].btRigidBody
-	btRigidBodyLocalTransform := *physics.rigidBodies[modelIndex][rigidBody.Index].btLocalTransform
+	btRigidBody := *physics.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
+	btRigidBodyLocalTransform := *physics.rigidBodies[modelIndex][rigidBody.Index()].btLocalTransform
 
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
 

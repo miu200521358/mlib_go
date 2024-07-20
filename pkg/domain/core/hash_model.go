@@ -1,18 +1,19 @@
 package core
 
 type IHashModel interface {
-	GetName() string
+	Name() string
 	SetName(name string)
 	IsNotEmpty() bool
 	IsEmpty() bool
-	GetHash() string
+	Hash() string
 	SetHash(hash string)
-	GetPath() string
+	Path() string
 	SetPath(path string)
 	Delete()
 }
 
 type HashModel struct {
+	name string
 	path string
 	hash string
 }
@@ -24,7 +25,7 @@ func NewHashModel(path string) *HashModel {
 	}
 }
 
-func (m *HashModel) GetPath() string {
+func (m *HashModel) Path() string {
 	return m.path
 }
 
@@ -33,16 +34,16 @@ func (m *HashModel) SetPath(path string) {
 }
 
 // モデル内の名前に相当する値を返す
-func (m *HashModel) GetName() string {
-	panic("not implemented")
+func (m *HashModel) Name() string {
+	return m.name
 }
 
 // モデル内の名前に相当する値を設定する
 func (m *HashModel) SetName(name string) {
-	panic("not implemented")
+	m.name = name
 }
 
-func (m *HashModel) GetHash() string {
+func (m *HashModel) Hash() string {
 	return m.hash
 }
 
