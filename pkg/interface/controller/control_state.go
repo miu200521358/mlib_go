@@ -6,13 +6,14 @@ package controller
 import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
-	"github.com/miu200521358/mlib_go/pkg/interface/core"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
+	"github.com/miu200521358/mlib_go/pkg/interface/app"
 )
 
 type controlState struct {
-	appState                 core.IAppState                // アプリ状態
-	motionPlayer             core.IPlayer                  // モーションプレイヤー
-	controlWindow            core.IControlWindow           // コントロールウィンドウ
+	appState                 state.IAppState               // アプリ状態
+	motionPlayer             app.IPlayer                   // モーションプレイヤー
+	controlWindow            app.IControlWindow            // コントロールウィンドウ
 	prevFrameChan            chan int                      // 前回フレーム
 	frameChan                chan float64                  // フレーム
 	maxFrameChan             chan int                      // 最大フレーム
@@ -47,7 +48,7 @@ type controlState struct {
 	animationState           chan *renderer.AnimationState // アニメーションステート
 }
 
-func NewControlState(appState core.IAppState) *controlState {
+func NewControlState(appState state.IAppState) *controlState {
 	u := &controlState{
 		appState:                 appState,
 		prevFrameChan:            make(chan int),
@@ -107,6 +108,13 @@ func (s *controlState) Run() {
 						// フレームドロップOFFの時、1だけ進める
 						s.AddFrame(1)
 					}
+
+					if s.Frame() > float64(s.MaxFrame()) {
+						// 最後まで行ったら物理リセットフラグを立てて、最初に戻す
+						s.appState.SetPhysicsReset(true)
+						s.appState.SetFrame(0)
+					}
+
 					prevTime = frameTime
 				}
 			} else {
@@ -174,15 +182,15 @@ func (s *controlState) Run() {
 	}()
 }
 
-func (c *controlState) SetPlayer(mp core.IPlayer) {
+func (c *controlState) SetPlayer(mp app.IPlayer) {
 	c.motionPlayer = mp
 }
 
-func (c *controlState) SetControlWindow(cw core.IControlWindow) {
+func (c *controlState) SetControlWindow(cw app.IControlWindow) {
 	c.controlWindow = cw
 }
 
-func (c *controlState) SetAnimationState(state core.IAnimationState) {
+func (c *controlState) SetAnimationState(state state.IAnimationState) {
 	c.animationState <- state.(*renderer.AnimationState)
 }
 

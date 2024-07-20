@@ -12,7 +12,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
-	"github.com/miu200521358/mlib_go/pkg/interface/core"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 )
 
 var bone_colors_ik = []float32{1.0, 0.38, 0, 1.0}
@@ -45,7 +45,7 @@ func newTailBoneGl(b *pmx.Bone) []float32 {
 	}
 }
 
-func getBoneDebugColor(b *pmx.Bone, appState core.IAppState) []float32 {
+func getBoneDebugColor(b *pmx.Bone, appState state.IAppState) []float32 {
 	// IK
 	if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneIk()) && b.IsIK() {
 		// IK

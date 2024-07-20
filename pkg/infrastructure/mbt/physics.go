@@ -17,6 +17,7 @@ type IPhysics interface {
 	StepSimulation(timeStep float32)
 	UpdateTransform(modelIndex int, rigidBodyBone *pmx.Bone, boneGlobalMatrix *mmath.MMat4, r *pmx.RigidBody)
 	GetRigidBodyBoneMatrix(modelIndex int, rigidBody *pmx.RigidBody) *mmath.MMat4
+	Exists(modelIndex int) bool
 }
 
 type MPhysics struct {
@@ -144,4 +145,9 @@ func (p *MPhysics) DrawDebugLines(shader *mgl.MShader, visibleRigidBody, visible
 
 func (p *MPhysics) StepSimulation(timeStep float32) {
 	p.world.StepSimulation(timeStep, p.MaxSubSteps, p.FixedTimeStep)
+}
+
+func (p *MPhysics) Exists(modelIndex int) bool {
+	_, ok := p.rigidBodies[modelIndex]
+	return ok
 }

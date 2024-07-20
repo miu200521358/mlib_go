@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package core
+package state
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
@@ -35,6 +35,7 @@ type IAnimationState interface {
 }
 
 type IRenderModel interface {
+	Delete()
 	Render(shader mgl.IShader, appState IAppState, animationState IAnimationState)
 	Hash() string
 }

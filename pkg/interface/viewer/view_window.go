@@ -14,11 +14,12 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
-	"github.com/miu200521358/mlib_go/pkg/interface/core"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
@@ -33,7 +34,7 @@ type ViewWindow struct {
 	windowIndex         int                // ウィンドウインデックス
 	title               string             // ウィンドウタイトル
 	appConfig           *mconfig.AppConfig // アプリケーション設定
-	appState            core.IAppState     // アプリ状態
+	appState            state.IAppState    // アプリ状態
 	physics             *mbt.MPhysics      // 物理
 	shader              *mgl.MShader       // シェーダ
 	leftButtonPressed   bool               // 左ボタン押下フラグ
@@ -50,7 +51,7 @@ type ViewWindow struct {
 func NewViewWindow(
 	windowIndex int,
 	appConfig *mconfig.AppConfig,
-	appState core.IAppState,
+	appState state.IAppState,
 	title string,
 ) *ViewWindow {
 	glfw.WindowHint(glfw.Resizable, glfw.True)
@@ -343,7 +344,7 @@ func (w *ViewWindow) SetPosition(x, y int) {
 	w.SetPos(x, y)
 }
 
-func (w *ViewWindow) AppState() core.IAppState {
+func (w *ViewWindow) AppState() state.IAppState {
 	return w.appState
 }
 
@@ -355,7 +356,7 @@ func (w *ViewWindow) GetWindow() *glfw.Window {
 	return w.Window
 }
 
-func (w *ViewWindow) ResetPhysics(animationStates []core.IAnimationState) {
+func (w *ViewWindow) ResetPhysics(animationStates []state.IAnimationState) {
 	// 物理を削除
 	for _, s := range animationStates {
 		if s.Model() != nil && s.RenderModel() != nil {
@@ -372,7 +373,16 @@ func (w *ViewWindow) ResetPhysics(animationStates []core.IAnimationState) {
 	}
 }
 
-func (w *ViewWindow) Render(animationStates []core.IAnimationState, timeStep float32) {
+func (w *ViewWindow) InitRenderModel(modelIndex int, model *pmx.PmxModel) state.IRenderModel {
+	w.physics.DeleteModel(modelIndex)
+	renderModel := renderer.NewRenderModel(w.windowIndex, model)
+	w.physics.AddModel(w.windowIndex, model)
+	return renderModel
+}
+
+func (w *ViewWindow) Render(
+	animationStates []state.IAnimationState, nextState state.IAnimationState, timeStep float32,
+) {
 	glfw.PollEvents()
 
 	if w.shader.Width == 0 || w.shader.Height == 0 {
@@ -404,6 +414,13 @@ func (w *ViewWindow) Render(animationStates []core.IAnimationState, timeStep flo
 
 	if animationStates != nil {
 		// 何かしら描画対象情報がある場合の処理
+
+		// モデルが指定されてたら初期化してセット
+		if nextState != nil && nextState.Model() != nil {
+			animationStates[nextState.ModelIndex()].SetRenderModel(
+				w.InitRenderModel(nextState.ModelIndex(), nextState.Model()))
+			animationStates[nextState.ModelIndex()].SetModel(nextState.Model())
+		}
 
 		// アニメーション
 		renderer.Animate(w.physics, animationStates, w.appState, timeStep)

@@ -8,9 +8,9 @@ import (
 
 	"github.com/miu200521358/walk/pkg/walk"
 
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
-	"github.com/miu200521358/mlib_go/pkg/interface/core"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
@@ -307,6 +307,9 @@ func NewControlWindow(
 			if result := walk.MsgBox(nil, mi18n.T("終了確認"), mi18n.T("終了確認メッセージ"),
 				walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel); result == walk.DlgCmdOK {
 				controlWindow.SetClosed(true)
+			} else {
+				// 閉じない場合はキャンセル
+				*canceled = true
 			}
 		}
 	})
@@ -364,7 +367,7 @@ func (w *ControlWindow) AddTabPage(tabPage *walk.TabPage) {
 	}
 }
 
-func (w *ControlWindow) SetPlayer(player core.IPlayer) {
+func (w *ControlWindow) SetPlayer(player app.IPlayer) {
 	w.controlState.SetPlayer(player)
 }
 
@@ -571,7 +574,7 @@ func (w *ControlWindow) SetPrevFrame(prevFrame int) {
 	w.controlState.SetPrevFrame(prevFrame)
 }
 
-func (w *ControlWindow) SetAnimationState(state core.IAnimationState) {
+func (w *ControlWindow) SetAnimationState(state state.IAnimationState) {
 	w.controlState.SetAnimationState(state)
 }
 

@@ -12,7 +12,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
-	"github.com/miu200521358/mlib_go/pkg/interface/core"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 )
 
 type RenderModel struct {
@@ -221,7 +221,7 @@ func (renderModel *RenderModel) initializeBuffer(
 			// 	renderModel.bones = append(renderModel.bones, newBoneGl(bone)...)
 			// 	renderModel.bones = append(renderModel.bones, newParentBoneGl(bone)...)
 			// 	boneFaces = append(boneFaces, uint32(n), uint32(n+1))
-			// 	renderModel.boneIndexes = append(renderModel.boneIndexes, bone.Index(), bone.ParentIndex)
+			// 	renderModel.boneIndexes = append(renderModel.boneIndexes, bone.Index, bone.ParentIndex)
 			// 	mu.Unlock()
 
 			// 	n += 2
@@ -296,13 +296,8 @@ func (renderModel *RenderModel) initializeBuffer(
 }
 
 func (renderModel *RenderModel) Render(
-	shader mgl.IShader, appState core.IAppState, animationState core.IAnimationState,
+	shader mgl.IShader, appState state.IAppState, animationState state.IAnimationState,
 ) {
-	if animationState == nil || animationState.Model() == nil ||
-		animationState.VmdDeltas() == nil || animationState.RenderDeltas() == nil {
-		return
-	}
-
 	deltas := animationState.VmdDeltas()
 
 	renderModel.vao.Bind()
@@ -456,7 +451,7 @@ func (renderModel *RenderModel) drawBone(
 	windowIndex int,
 	shader mgl.IShader,
 	bones *pmx.Bones,
-	appState core.IAppState,
+	appState state.IAppState,
 	paddedMatrixes []float32,
 	width, height int,
 ) {
@@ -517,7 +512,7 @@ func (renderModel *RenderModel) drawBone(
 }
 
 func (renderModel *RenderModel) fetchBoneLineDeltas(
-	bones *pmx.Bones, appState core.IAppState,
+	bones *pmx.Bones, appState state.IAppState,
 ) ([]int, [][]float32) {
 	indexes := make([]int, len(renderModel.boneLineIndexes))
 	deltas := make([][]float32, len(renderModel.boneLineIndexes))
@@ -531,7 +526,7 @@ func (renderModel *RenderModel) fetchBoneLineDeltas(
 }
 
 func (renderModel *RenderModel) fetchBonePointDeltas(
-	bones *pmx.Bones, appState core.IAppState,
+	bones *pmx.Bones, appState state.IAppState,
 ) ([]int, [][]float32) {
 	indexes := make([]int, len(renderModel.bonePointIndexes))
 	deltas := make([][]float32, len(renderModel.bonePointIndexes))

@@ -4,42 +4,44 @@
 package app
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/renderer"
-	"github.com/miu200521358/mlib_go/pkg/interface/core"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 )
 
 type appState struct {
-	frame                float64                  // フレーム
-	prevFrame            int                      // 前回のフレーム
-	maxFrame             int                      // 最大フレーム
-	isEnabledFrameDrop   bool                     // フレームドロップON/OFF
-	isEnabledPhysics     bool                     // 物理ON/OFF
-	isPhysicsReset       bool                     // 物理リセット
-	isShowNormal         bool                     // ボーンデバッグ表示
-	isShowWire           bool                     // ワイヤーフレームデバッグ表示
-	isShowSelectedVertex bool                     // 選択頂点デバッグ表示
-	isShowBoneAll        bool                     // 全ボーンデバッグ表示
-	isShowBoneIk         bool                     // IKボーンデバッグ表示
-	isShowBoneEffector   bool                     // 付与親ボーンデバッグ表示
-	isShowBoneFixed      bool                     // 軸制限ボーンデバッグ表示
-	isShowBoneRotate     bool                     // 回転ボーンデバッグ表示
-	isShowBoneTranslate  bool                     // 移動ボーンデバッグ表示
-	isShowBoneVisible    bool                     // 表示ボーンデバッグ表示
-	isShowRigidBodyFront bool                     // 剛体デバッグ表示(前面)
-	isShowRigidBodyBack  bool                     // 剛体デバッグ表示(埋め込み)
-	isShowJoint          bool                     // ジョイントデバッグ表示
-	isShowInfo           bool                     // 情報デバッグ表示
-	isLimitFps30         bool                     // 30FPS制限
-	isLimitFps60         bool                     // 60FPS制限
-	isUnLimitFps         bool                     // FPS無制限
-	isUnLimitFpsDeform   bool                     // デフォームFPS無制限
-	isLogLevelDebug      bool                     // デバッグメッセージ表示
-	isLogLevelVerbose    bool                     // 冗長メッセージ表示
-	isLogLevelIkVerbose  bool                     // IK冗長メッセージ表示
-	isClosed             bool                     // ウィンドウクローズ
-	playing              bool                     // 再生中フラグ
-	spfLimit             float64                  // FPS制限
-	animationStates      [][]core.IAnimationState // アニメーションステート
+	frame                float64                   // フレーム
+	prevFrame            int                       // 前回のフレーム
+	maxFrame             int                       // 最大フレーム
+	isEnabledFrameDrop   bool                      // フレームドロップON/OFF
+	isEnabledPhysics     bool                      // 物理ON/OFF
+	isPhysicsReset       bool                      // 物理リセット
+	isShowNormal         bool                      // ボーンデバッグ表示
+	isShowWire           bool                      // ワイヤーフレームデバッグ表示
+	isShowSelectedVertex bool                      // 選択頂点デバッグ表示
+	isShowBoneAll        bool                      // 全ボーンデバッグ表示
+	isShowBoneIk         bool                      // IKボーンデバッグ表示
+	isShowBoneEffector   bool                      // 付与親ボーンデバッグ表示
+	isShowBoneFixed      bool                      // 軸制限ボーンデバッグ表示
+	isShowBoneRotate     bool                      // 回転ボーンデバッグ表示
+	isShowBoneTranslate  bool                      // 移動ボーンデバッグ表示
+	isShowBoneVisible    bool                      // 表示ボーンデバッグ表示
+	isShowRigidBodyFront bool                      // 剛体デバッグ表示(前面)
+	isShowRigidBodyBack  bool                      // 剛体デバッグ表示(埋め込み)
+	isShowJoint          bool                      // ジョイントデバッグ表示
+	isShowInfo           bool                      // 情報デバッグ表示
+	isLimitFps30         bool                      // 30FPS制限
+	isLimitFps60         bool                      // 60FPS制限
+	isUnLimitFps         bool                      // FPS無制限
+	isUnLimitFpsDeform   bool                      // デフォームFPS無制限
+	isLogLevelDebug      bool                      // デバッグメッセージ表示
+	isLogLevelVerbose    bool                      // 冗長メッセージ表示
+	isLogLevelIkVerbose  bool                      // IK冗長メッセージ表示
+	isClosed             bool                      // ウィンドウクローズ
+	playing              bool                      // 再生中フラグ
+	spfLimit             float64                   // FPS制限
+	animationStates      [][]state.IAnimationState // アニメーションステート
+	nextState            state.IAnimationState     // 次のアニメーションステート
 }
 
 func newAppState() *appState {
@@ -51,17 +53,19 @@ func newAppState() *appState {
 		prevFrame:          -1,
 		frame:              0,
 		maxFrame:           1,
-		animationStates:    make([][]core.IAnimationState, 0),
+		animationStates:    make([][]state.IAnimationState, 0),
 	}
 
 	return u
 }
 
-func (appState *appState) SetAnimationState(animationState core.IAnimationState) {
+func (appState *appState) SetAnimationState(animationState state.IAnimationState) {
 	windowIndex := animationState.WindowIndex()
 	modelIndex := animationState.ModelIndex()
+
+	// 必要に応じて拡張
 	for len(appState.animationStates) <= windowIndex {
-		appState.animationStates = append(appState.animationStates, make([]core.IAnimationState, 0))
+		appState.animationStates = append(appState.animationStates, make([]state.IAnimationState, 0))
 	}
 	for i := 0; i < len(appState.animationStates); i++ {
 		for len(appState.animationStates[i]) <= modelIndex {
@@ -69,13 +73,27 @@ func (appState *appState) SetAnimationState(animationState core.IAnimationState)
 				renderer.NewAnimationState(windowIndex, len(appState.animationStates[i])))
 		}
 	}
-	if animationState.Model() != nil {
-		appState.animationStates[windowIndex][modelIndex].SetModel(animationState.Model())
-		appState.SetFrame(appState.frame)
-	}
+
+	// モーションが指定されてたらセット
+	model := animationState.Model()
 	if animationState.Motion() != nil {
 		appState.animationStates[windowIndex][modelIndex].SetMotion(animationState.Motion())
-		appState.SetFrame(appState.frame)
+		model = appState.animationStates[windowIndex][modelIndex].Model()
+	} else if appState.animationStates[windowIndex][modelIndex].Motion() == nil {
+		// モーション未指定の場合、空のモーションを設定しておく
+		appState.animationStates[windowIndex][modelIndex].SetMotion(vmd.NewVmdMotion(""))
+	}
+
+	vmdDeltas, renderDeltas :=
+		appState.animationStates[windowIndex][modelIndex].AnimateBeforePhysics(
+			appState, model)
+	appState.animationStates[windowIndex][modelIndex].SetVmdDeltas(vmdDeltas)
+	appState.animationStates[windowIndex][modelIndex].SetRenderDeltas(renderDeltas)
+
+	if animationState.Model() != nil {
+		// 次のステータスとしてモデル情報だけセット
+		appState.nextState = renderer.NewAnimationState(windowIndex, modelIndex)
+		appState.nextState.SetModel(animationState.Model())
 	}
 }
 
