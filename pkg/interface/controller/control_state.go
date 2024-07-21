@@ -346,3 +346,11 @@ func (contState *controlState) TriggerPlay(p bool) {
 func (contState *controlState) SetSpfLimit(spf float64) {
 	contState.spfLimitChan <- spf
 }
+
+func (contState *controlState) SetWindowOpacity(index int, enabled bool) {
+	contState.appState.SetWindowOpacity(index, enabled)
+}
+
+func (contState *controlState) WindowOpacity(index int) bool {
+	return contState.appState.WindowOpacity(index)
+}

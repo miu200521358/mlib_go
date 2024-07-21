@@ -382,5 +382,9 @@
     {
         "id": "言語変更メッセージ",
         "translation": "The language change on the screen will take effect after restarting.\nDo you want to exit the app?"
+    },
+    {
+        "id": "&ウィンドウ半透明",
+        "translation": "&Window Translucent"
     }
 ]

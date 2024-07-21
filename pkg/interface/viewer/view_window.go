@@ -61,6 +61,7 @@ func NewViewWindow(
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
+	glfw.WindowHint(glfw.TransparentFramebuffer, glfw.True) // 透明フレームバッファを有効
 
 	glWindow, err := glfw.CreateWindow(
 		appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height, title, nil, nil)
