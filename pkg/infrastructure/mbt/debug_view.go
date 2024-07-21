@@ -68,6 +68,9 @@ func (ddl *mDebugDrawLiner) drawDebugLines(shader *mgl.MShader, isDrawRigidBodyF
 		gl.DepthFunc(gl.ALWAYS)
 	}
 
+	windowOpacityUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_WINDOW_OPACITY))
+	gl.Uniform1f(windowOpacityUniform, shader.WindowOpacity())
+
 	// 線を引く
 	ddl.debugVao.Bind()
 	ddl.debugVbo.BindDebug(ddl.vertices)

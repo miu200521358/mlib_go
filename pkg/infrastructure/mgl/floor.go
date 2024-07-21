@@ -31,6 +31,9 @@ func (shader *MShader) DrawFloor() {
 	program := shader.Program(PROGRAM_TYPE_FLOOR)
 	gl.UseProgram(program)
 
+	windowOpacityUniform := gl.GetUniformLocation(program, gl.Str(SHADER_WINDOW_OPACITY))
+	gl.Uniform1f(windowOpacityUniform, shader.WindowOpacity())
+
 	// 平面を引く
 	shader.floor.vao.Bind()
 	shader.floor.vbo.BindFloor()

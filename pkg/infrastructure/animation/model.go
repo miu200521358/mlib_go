@@ -371,6 +371,9 @@ func (renderModel *RenderModel) drawNormal(
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
 
+	windowOpacityUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_WINDOW_OPACITY))
+	gl.Uniform1f(windowOpacityUniform, shader.WindowOpacity())
+
 	normalColor := mgl32.Vec4{0.3, 0.3, 0.7, 0.5}
 	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
 	gl.Uniform4fv(specularUniform, 1, &normalColor[0])
@@ -411,6 +414,9 @@ func (renderModel *RenderModel) drawSelectedVertex(
 
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
+
+	windowOpacityUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_WINDOW_OPACITY))
+	gl.Uniform1f(windowOpacityUniform, shader.WindowOpacity())
 
 	vertexColor := mgl32.Vec4{1.0, 0.4, 0.0, 0.7}
 	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
@@ -481,6 +487,9 @@ func (renderModel *RenderModel) drawBone(
 
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
+
+	windowOpacityUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_WINDOW_OPACITY))
+	gl.Uniform1f(windowOpacityUniform, shader.WindowOpacity())
 
 	renderModel.boneLineVao.Bind()
 	renderModel.boneLineVbo.BindBone(renderModel.fetchBoneLineDeltas(bones, appState))

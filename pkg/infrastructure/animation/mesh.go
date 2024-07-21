@@ -45,8 +45,8 @@ func (mesh *Mesh) drawModel(
 	width, height int,
 	meshDelta *delta.MeshDelta,
 ) {
-	modelProgram := shader.Program(mgl.PROGRAM_TYPE_MODEL)
-	gl.UseProgram(modelProgram)
+	program := shader.Program(mgl.PROGRAM_TYPE_MODEL)
+	gl.UseProgram(program)
 
 	if mesh.material.DrawFlag.IsDoubleSidedDrawing() {
 		// 両面描画
@@ -62,54 +62,57 @@ func (mesh *Mesh) drawModel(
 	}
 
 	// ボーンデフォームテクスチャ設定
-	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, modelProgram)
+	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
 	defer unbindBoneMatrixes()
+
+	windowOpacityUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_WINDOW_OPACITY))
+	gl.Uniform1f(windowOpacityUniform, shader.WindowOpacity())
 
 	// ------------------
 	// 材質色設定
 	// full.fx の AmbientColor相当
-	diffuseUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_DIFFUSE))
+	diffuseUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_DIFFUSE))
 	gl.Uniform4fv(diffuseUniform, 1, &meshDelta.Diffuse[0])
 
-	ambientUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_AMBIENT))
+	ambientUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_AMBIENT))
 	gl.Uniform3fv(ambientUniform, 1, &meshDelta.Ambient[0])
 
-	specularUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_SPECULAR))
+	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_SPECULAR))
 	gl.Uniform4fv(specularUniform, 1, &meshDelta.Specular[0])
 
 	// テクスチャ使用有無
-	useTextureUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_TEXTURE))
+	useTextureUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_USE_TEXTURE))
 	gl.Uniform1i(useTextureUniform, int32(mmath.BoolToInt(mesh.material.texture != nil)))
 	if mesh.material.texture != nil {
 		mesh.material.texture.bind()
 		defer mesh.material.texture.unbind()
-		textureUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_TEXTURE_SAMPLER))
+		textureUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_TEXTURE_SAMPLER))
 		gl.Uniform1i(textureUniform, int32(mesh.material.texture.TextureUnitNo))
 	}
 
 	// Toon使用有無
-	useToonUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_TOON))
+	useToonUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_USE_TOON))
 	gl.Uniform1i(useToonUniform, int32(mmath.BoolToInt(mesh.material.toonTexture != nil)))
 	if mesh.material.toonTexture != nil {
 		mesh.material.toonTexture.bind()
 		defer mesh.material.toonTexture.unbind()
-		toonUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_TOON_SAMPLER))
+		toonUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_TOON_SAMPLER))
 		gl.Uniform1i(toonUniform, int32(mesh.material.toonTexture.TextureUnitNo))
 	}
 
 	// Sphere使用有無
-	useSphereUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_SPHERE))
+	useSphereUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_USE_SPHERE))
 	gl.Uniform1i(useSphereUniform,
 		int32(mmath.BoolToInt(mesh.material.sphereTexture != nil && mesh.material.sphereTexture.Initialized)))
 	if mesh.material.sphereTexture != nil && mesh.material.sphereTexture.Initialized {
 		mesh.material.sphereTexture.bind()
 		defer mesh.material.sphereTexture.unbind()
-		sphereUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_SPHERE_SAMPLER))
+		sphereUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_SPHERE_SAMPLER))
 		gl.Uniform1i(sphereUniform, int32(mesh.material.sphereTexture.TextureUnitNo))
 	}
 
 	// SphereMode
-	sphereModeUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_SPHERE_MODE))
+	sphereModeUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_SPHERE_MODE))
 	gl.Uniform1i(sphereModeUniform, int32(mesh.material.SphereMode))
 
 	// 三角形描画
@@ -141,6 +144,9 @@ func (mesh *Mesh) drawEdge(
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
 	defer unbindBoneMatrixes()
+
+	windowOpacityUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_WINDOW_OPACITY))
+	gl.Uniform1f(windowOpacityUniform, shader.WindowOpacity())
 
 	// ------------------
 	// エッジ色設定
@@ -174,6 +180,9 @@ func (mesh *Mesh) drawWire(
 
 	// カリングOFF
 	gl.Disable(gl.CULL_FACE)
+
+	windowOpacityUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_WINDOW_OPACITY))
+	gl.Uniform1f(windowOpacityUniform, shader.WindowOpacity())
 
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
