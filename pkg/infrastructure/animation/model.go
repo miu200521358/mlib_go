@@ -478,10 +478,6 @@ func (renderModel *RenderModel) drawBone(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
-	// ブレンディングを有効にする
-	gl.Enable(gl.BLEND)
-	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-
 	program := shader.Program(mgl.PROGRAM_TYPE_BONE)
 	gl.UseProgram(program)
 
