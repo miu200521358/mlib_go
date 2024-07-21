@@ -298,8 +298,7 @@ func (rep *baseRepository[T]) unpackFloat() (float64, error) {
 }
 
 // バイナリデータから float64 を複数個一気に読み出す
-func (rep *baseRepository[T]) unpackFloats(count int) ([]float64, error) {
-	values := make([]float64, count)
+func (rep *baseRepository[T]) unpackFloats(values []float64, count int) ([]float64, error) {
 	// 単精度実数(4byte)なので、一旦uint32にしてからfloat32に変換する
 	chunk, err := rep.unpack(4 * count)
 	if err != nil {

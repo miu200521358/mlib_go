@@ -165,6 +165,7 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 		return err
 	}
 
+	bfValues := make([]float64, 7)
 	for i := 0; i < int(totalCount); i++ {
 		bf := &vmd.BoneFrame{
 			BaseFrame: vmd.NewFrame(i).(*vmd.BaseFrame),
@@ -188,7 +189,7 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 
 		// 位置X,Y,Z
 		// 回転X,Y,Z,W
-		bfValues, err := rep.unpackFloats(7)
+		bfValues, err = rep.unpackFloats(bfValues, 7)
 		if err != nil {
 			mlog.E("[%d] readBones.bfValues error: %v", i, err)
 			return err
