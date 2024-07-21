@@ -187,20 +187,18 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 		bf.SetIndex(int(index))
 
 		// 位置X,Y,Z
-		position, err := rep.unpackVec3()
+		bf.Position, err = rep.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] readBones.Position error: %v", i, err)
 			return err
 		}
-		bf.Position = &position
 
 		// 回転X,Y,Z,W
-		qq, err := rep.unpackQuaternion()
+		bf.Rotation, err = rep.unpackQuaternion()
 		if err != nil {
 			mlog.E("[%d] readBones.Quaternion error: %v", i, err)
 			return err
 		}
-		bf.Rotation = &qq
 
 		// 補間曲線
 		curves, err := rep.unpackBytes(64)
@@ -284,12 +282,11 @@ func (rep *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 		}
 
 		// 位置X,Y,Z
-		position, err := rep.unpackVec3()
+		cf.Position, err = rep.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] readCameras.Position error: %v", i, err)
 			return err
 		}
-		cf.Position = &position
 
 		// 回転(オイラー角度)
 		degrees, err := rep.unpackVec3()
@@ -297,7 +294,7 @@ func (rep *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 			mlog.E("[%d] readCameras.Degrees error: %v", i, err)
 			return err
 		}
-		cf.Rotation = mmath.NewMRotationFromDegrees(&degrees)
+		cf.Rotation = mmath.NewMRotationFromDegrees(degrees)
 
 		// 補間曲線
 		curves, err := rep.unpackBytes(24)
@@ -350,20 +347,18 @@ func (rep *VmdRepository) loadLights(motion *vmd.VmdMotion) error {
 		lf.SetIndex(int(index))
 
 		// 照明色
-		color, err := rep.unpackVec3()
+		lf.Color, err = rep.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] readLights.Color error: %v", i, err)
 			return err
 		}
-		lf.Color = &color
 
 		// 位置X,Y,Z
-		position, err := rep.unpackVec3()
+		lf.Position, err = rep.unpackVec3()
 		if err != nil {
 			mlog.E("[%d] readLights.Position error: %v", i, err)
 			return err
 		}
-		lf.Position = &position
 
 		motion.AppendLightFrame(lf)
 	}

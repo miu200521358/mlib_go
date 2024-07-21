@@ -222,81 +222,81 @@ func (rep *baseRepository[T]) unpackFloat() (float64, error) {
 	return float64(math.Float32frombits(binary.LittleEndian.Uint32(chunk))), nil
 }
 
-func (rep *baseRepository[T]) unpackVec2() (mmath.MVec2, error) {
+func (rep *baseRepository[T]) unpackVec2() (*mmath.MVec2, error) {
 	x, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMVec2(), err
+		return mmath.NewMVec2(), err
 	}
 	y, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMVec2(), err
+		return mmath.NewMVec2(), err
 	}
-	return mmath.MVec2{X: x, Y: y}, nil
+	return &mmath.MVec2{X: x, Y: y}, nil
 }
 
-func (rep *baseRepository[T]) unpackVec3() (mmath.MVec3, error) {
+func (rep *baseRepository[T]) unpackVec3() (*mmath.MVec3, error) {
 	x, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMVec3(), err
+		return mmath.NewMVec3(), err
 	}
 	y, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMVec3(), err
+		return mmath.NewMVec3(), err
 	}
 	z, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMVec3(), err
+		return mmath.NewMVec3(), err
 	}
 	// if isConvertGl {
 	// 	z = -z
 	// }
-	return mmath.MVec3{X: x, Y: y, Z: z}, nil
+	return &mmath.MVec3{X: x, Y: y, Z: z}, nil
 }
 
-func (rep *baseRepository[T]) unpackVec4() (mmath.MVec4, error) {
+func (rep *baseRepository[T]) unpackVec4() (*mmath.MVec4, error) {
 	x, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMVec4(), err
+		return mmath.NewMVec4(), err
 	}
 	y, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMVec4(), err
+		return mmath.NewMVec4(), err
 	}
 	z, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMVec4(), err
+		return mmath.NewMVec4(), err
 	}
 	w, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMVec4(), err
+		return mmath.NewMVec4(), err
 	}
 	// if isConvertGl {
 	// 	z = -z
 	// }
-	return mmath.MVec4{X: x, Y: y, Z: z, W: w}, nil
+	return &mmath.MVec4{X: x, Y: y, Z: z, W: w}, nil
 }
 
-func (rep *baseRepository[T]) unpackQuaternion() (mmath.MQuaternion, error) {
+func (rep *baseRepository[T]) unpackQuaternion() (*mmath.MQuaternion, error) {
 	x, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMQuaternion(), err
+		return mmath.NewMQuaternion(), err
 	}
 	y, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMQuaternion(), err
+		return mmath.NewMQuaternion(), err
 	}
 	z, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMQuaternion(), err
+		return mmath.NewMQuaternion(), err
 	}
 	w, err := rep.unpackFloat()
 	if err != nil {
-		return *mmath.NewMQuaternion(), err
+		return mmath.NewMQuaternion(), err
 	}
 	// if isConvertGl {
 	// 	z = -z
 	// }
-	return *mmath.NewMQuaternionByValues(x, y, z, w), nil
+	return mmath.NewMQuaternionByValues(x, y, z, w), nil
 }
 
 func (rep *baseRepository[T]) unpack(size int) ([]byte, error) {
