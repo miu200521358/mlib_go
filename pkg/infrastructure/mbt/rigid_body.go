@@ -95,11 +95,11 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 	physics.updateFlags(modelIndex, rigidBody)
 }
 
-func (p *MPhysics) deleteRigidBodies(modelIndex int) {
-	for _, r := range p.rigidBodies[modelIndex] {
-		p.world.RemoveRigidBody(*r.btRigidBody)
+func (physics *MPhysics) deleteRigidBodies(modelIndex int) {
+	for _, r := range physics.rigidBodies[modelIndex] {
+		physics.world.RemoveRigidBody(*r.btRigidBody)
 	}
-	p.rigidBodies[modelIndex] = nil
+	physics.rigidBodies[modelIndex] = nil
 }
 
 func (physics *MPhysics) updateFlags(modelIndex int, rigidBody *pmx.RigidBody) {
@@ -180,13 +180,13 @@ func (physics *MPhysics) GetRigidBodyBoneMatrix(
 }
 
 // NewMMat4ByMgl OpenGL座標系からMMD座標系に変換された行列を返します
-func newMMat4ByMgl(m *mgl32.Mat4) *mmath.MMat4 {
+func newMMat4ByMgl(mat *mgl32.Mat4) *mmath.MMat4 {
 	mm := mmath.NewMMat4ByValues(
-		float64(m.Col(0).X()), float64(-m.Col(1).X()), float64(-m.Col(2).X()), float64(-m.Col(3).X()),
-		float64(-m.Col(0).Y()), float64(m.Col(1).Y()), float64(m.Col(2).Y()), float64(m.Col(3).Y()),
-		float64(-m.Col(0).Z()), float64(m.Col(1).Z()), float64(m.Col(2).Z()), float64(m.Col(3).Z()),
-		float64(m.Col(0).W()), float64(m.Col(1).W()), float64(m.Col(2).W()), float64(m.Col(3).W()),
+		float64(mat.Col(0).X()), float64(-mat.Col(1).X()), float64(-mat.Col(2).X()), float64(-mat.Col(3).X()),
+		float64(-mat.Col(0).Y()), float64(mat.Col(1).Y()), float64(mat.Col(2).Y()), float64(mat.Col(3).Y()),
+		float64(-mat.Col(0).Z()), float64(mat.Col(1).Z()), float64(mat.Col(2).Z()), float64(mat.Col(3).Z()),
+		float64(mat.Col(0).W()), float64(mat.Col(1).W()), float64(mat.Col(2).W()), float64(mat.Col(3).W()),
 	)
-	m = nil
+	mat = nil
 	return mm
 }

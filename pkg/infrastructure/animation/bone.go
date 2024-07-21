@@ -26,60 +26,60 @@ var bone_colors_translate = []float32{0.70, 1.0, 0.54, 1.0}
 var bone_colors_rotate = []float32{0.56, 0.78, 1.0, 1.0}
 var bone_colors_invisible = []float32{0.82, 0.82, 0.82, 1.0}
 
-func newBoneGl(b *pmx.Bone) []float32 {
-	p := mgl.NewGlVec3(b.Position)
+func newBoneGl(bone *pmx.Bone) []float32 {
+	p := mgl.NewGlVec3(bone.Position)
 	return []float32{
 		p[0], p[1], p[2], // 位置
-		float32(b.Index()), 0, 0, 0, // デフォームボーンINDEX
+		float32(bone.Index()), 0, 0, 0, // デフォームボーンINDEX
 		1, 0, 0, 0, // デフォームボーンウェイト
 		0.0, 0.0, 0.0, 0.0, // 色
 	}
 }
 
-func newTailBoneGl(b *pmx.Bone) []float32 {
-	p := mgl.NewGlVec3(b.Position.Added(b.Extend.ChildRelativePosition))
+func newTailBoneGl(bone *pmx.Bone) []float32 {
+	p := mgl.NewGlVec3(bone.Position.Added(bone.Extend.ChildRelativePosition))
 	return []float32{
 		p[0], p[1], p[2], // 位置
-		float32(b.Index()), 0, 0, 0, // デフォームボーンINDEX
+		float32(bone.Index()), 0, 0, 0, // デフォームボーンINDEX
 		1, 0, 0, 0, // デフォームボーンウェイト
 		0.0, 0.0, 0.0, 0.0, // 色
 	}
 }
 
-func getBoneDebugColor(b *pmx.Bone, appState state.IAppState) []float32 {
+func getBoneDebugColor(bone *pmx.Bone, appState state.IAppState) []float32 {
 	// IK
-	if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneIk()) && b.IsIK() {
+	if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneIk()) && bone.IsIK() {
 		// IK
 		return bone_colors_ik
 	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneIk()) &&
-		len(b.Extend.IkLinkBoneIndexes) > 0 {
+		len(bone.Extend.IkLinkBoneIndexes) > 0 {
 		// IKリンク
 		return bone_colors_ik_link
 	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneIk()) &&
-		len(b.Extend.IkTargetBoneIndexes) > 0 {
+		len(bone.Extend.IkTargetBoneIndexes) > 0 {
 		// IKターゲット
 		return bone_colors_ik_target
 	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneEffector()) &&
-		(b.IsEffectorRotation() || b.IsEffectorTranslation()) {
+		(bone.IsEffectorRotation() || bone.IsEffectorTranslation()) {
 		// 付与親
 		return bone_colors_effect
 	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneEffector()) &&
-		len(b.Extend.EffectiveBoneIndexes) > 0 {
+		len(bone.Extend.EffectiveBoneIndexes) > 0 {
 		// 付与親の付与元
 		return bone_colors_effect_effector
 	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneFixed()) &&
-		b.HasFixedAxis() {
+		bone.HasFixedAxis() {
 		// 軸固定
 		return bone_colors_fixed
 	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneTranslate()) &&
-		b.CanTranslate() {
+		bone.CanTranslate() {
 		// 移動
 		return bone_colors_translate
 	} else if (appState.IsShowBoneAll() || appState.IsShowBoneVisible() || appState.IsShowBoneRotate()) &&
-		b.CanRotate() {
+		bone.CanRotate() {
 		// 回転
 		return bone_colors_rotate
-	} else if appState.IsShowBoneAll() && !b.IsVisible() {
+	} else if appState.IsShowBoneAll() && !bone.IsVisible() {
 		// 非表示
 		return bone_colors_invisible
 	}

@@ -26,19 +26,19 @@ func newMFloor() *MFloor {
 	return mf
 }
 
-func (s *MShader) DrawFloor() {
+func (shader *MShader) DrawFloor() {
 	// mlog.D("MFloor.DrawLine")
-	program := s.GetProgram(PROGRAM_TYPE_FLOOR)
+	program := shader.Program(PROGRAM_TYPE_FLOOR)
 	gl.UseProgram(program)
 
 	// 平面を引く
-	s.floor.vao.Bind()
-	s.floor.vbo.BindFloor()
+	shader.floor.vao.Bind()
+	shader.floor.vbo.BindFloor()
 
-	gl.DrawArrays(gl.LINES, 0, s.floor.count)
+	gl.DrawArrays(gl.LINES, 0, shader.floor.count)
 
-	s.floor.vbo.Unbind()
-	s.floor.vao.Unbind()
+	shader.floor.vbo.Unbind()
+	shader.floor.vao.Unbind()
 
 	gl.UseProgram(0)
 }

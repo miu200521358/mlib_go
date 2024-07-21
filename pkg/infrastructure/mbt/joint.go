@@ -98,9 +98,9 @@ func (physics *MPhysics) initJoint(
 	physics.joints[modelIndex][joint.Index()] = &jointValue{pmxJoint: joint, btJoint: constraint}
 }
 
-func (p *MPhysics) deleteJoints(modelIndex int) {
-	for _, j := range p.joints[modelIndex] {
-		p.world.RemoveConstraint(j.btJoint)
+func (physics *MPhysics) deleteJoints(modelIndex int) {
+	for _, j := range physics.joints[modelIndex] {
+		physics.world.RemoveConstraint(j.btJoint)
 	}
-	p.joints[modelIndex] = nil
+	physics.joints[modelIndex] = nil
 }

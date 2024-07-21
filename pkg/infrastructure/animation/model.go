@@ -361,7 +361,7 @@ func (renderModel *RenderModel) drawNormal(
 	paddedMatrixes []float32,
 	width, height int,
 ) {
-	program := shader.GetProgram(mgl.PROGRAM_TYPE_NORMAL)
+	program := shader.Program(mgl.PROGRAM_TYPE_NORMAL)
 	gl.UseProgram(program)
 
 	renderModel.normalVao.Bind()
@@ -402,7 +402,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
-	program := shader.GetProgram(mgl.PROGRAM_TYPE_SELECTED_VERTEX)
+	program := shader.Program(mgl.PROGRAM_TYPE_SELECTED_VERTEX)
 	gl.UseProgram(program)
 
 	renderModel.selectedVertexVao.Bind()
@@ -476,7 +476,7 @@ func (renderModel *RenderModel) drawBone(
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
-	program := shader.GetProgram(mgl.PROGRAM_TYPE_BONE)
+	program := shader.Program(mgl.PROGRAM_TYPE_BONE)
 	gl.UseProgram(program)
 
 	// ボーンデフォームテクスチャ設定

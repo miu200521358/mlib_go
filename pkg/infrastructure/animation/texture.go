@@ -30,22 +30,22 @@ type textureGl struct {
 	Initialized       bool            // 描画初期化済みフラグ
 }
 
-func (t *textureGl) delete() {
-	gl.DeleteTextures(1, &t.Id)
+func (texGl *textureGl) delete() {
+	gl.DeleteTextures(1, &texGl.Id)
 }
 
-func (t *textureGl) bind() {
-	gl.ActiveTexture(t.TextureUnitId)
-	gl.BindTexture(gl.TEXTURE_2D, t.Id)
+func (texGl *textureGl) bind() {
+	gl.ActiveTexture(texGl.TextureUnitId)
+	gl.BindTexture(gl.TEXTURE_2D, texGl.Id)
 
-	if t.TextureType == pmx.TEXTURE_TYPE_TOON {
+	if texGl.TextureType == pmx.TEXTURE_TYPE_TOON {
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
 	}
 
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 
-	if t.IsGeneratedMipmap {
+	if texGl.IsGeneratedMipmap {
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
 	} else {
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
@@ -53,7 +53,7 @@ func (t *textureGl) bind() {
 	}
 }
 
-func (t *textureGl) unbind() {
+func (texGl *textureGl) unbind() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 

@@ -31,16 +31,16 @@ func NewVpdRepository() *VpdRepository {
 	}
 }
 
-func (r *VpdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
+func (rep *VpdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
 	return nil
 }
 
 // 指定されたパスのファイルからデータを読み込む
-func (r *VpdRepository) Load(path string) (core.IHashModel, error) {
+func (rep *VpdRepository) Load(path string) (core.IHashModel, error) {
 	// モデルを新規作成
-	motion := r.newFunc(path)
+	motion := rep.newFunc(path)
 
-	hash, err := r.LoadHash(path)
+	hash, err := rep.LoadHash(path)
 	if err != nil {
 		mlog.E("Load.LoadHash error: %v", err)
 		return motion, err
@@ -48,78 +48,78 @@ func (r *VpdRepository) Load(path string) (core.IHashModel, error) {
 	motion.SetHash(hash)
 
 	// ファイルを開く
-	err = r.open(path)
+	err = rep.open(path)
 	if err != nil {
 		mlog.E("Load.Open error: %v", err)
 		return motion, err
 	}
 
-	err = r.readLines()
+	err = rep.readLines()
 	if err != nil {
 		mlog.E("Load.readLines error: %v", err)
 		return motion, err
 	}
 
-	err = r.loadHeader(motion)
+	err = rep.loadHeader(motion)
 	if err != nil {
 		mlog.E("Load.readHeader error: %v", err)
 		return motion, err
 	}
 
-	err = r.loadModel(motion)
+	err = rep.loadModel(motion)
 	if err != nil {
 		mlog.E("Load.readData error: %v", err)
 		return motion, err
 	}
 
-	r.close()
+	rep.close()
 
 	return motion, nil
 }
 
-func (r *VpdRepository) LoadName(path string) (string, error) {
+func (rep *VpdRepository) LoadName(path string) (string, error) {
 	// モデルを新規作成
-	motion := r.newFunc(path)
+	motion := rep.newFunc(path)
 
 	// ファイルを開く
-	err := r.open(path)
+	err := rep.open(path)
 	if err != nil {
 		mlog.E("LoadName.Open error: %v", err)
 		return "", err
 	}
 
-	err = r.readLines()
+	err = rep.readLines()
 	if err != nil {
 		mlog.E("Load.readLines error: %v", err)
 		return "", err
 	}
 
-	err = r.loadHeader(motion)
+	err = rep.loadHeader(motion)
 	if err != nil {
 		mlog.E("LoadName.readHeader error: %v", err)
 		return "", err
 	}
 
-	r.close()
+	rep.close()
 
 	return motion.ModelName, nil
 }
 
-func (r *VpdRepository) readLines() error {
+func (rep *VpdRepository) readLines() error {
 	var lines []string
 
-	sjisReader := transform.NewReader(r.file, japanese.ShiftJIS.NewDecoder())
+	sjisReader := transform.NewReader(rep.file, japanese.ShiftJIS.NewDecoder())
 	scanner := bufio.NewScanner(sjisReader)
 	for scanner.Scan() {
 		txt := scanner.Text()
 		txt = strings.ReplaceAll(txt, "\t", "    ")
 		lines = append(lines, txt)
 	}
-	r.lines = lines
+	rep.lines = lines
 	return scanner.Err()
 }
 
-func (r *VpdRepository) readText(line string, pattern *regexp.Regexp) ([]string, error) {
+func (rep *VpdRepository) readText(line string, pattern *regexp.Regexp) ([]string, error) {
 	matches := pattern.FindStringSubmatch(line)
 	if len(matches) > 0 {
 		return matches, nil
@@ -127,13 +127,13 @@ func (r *VpdRepository) readText(line string, pattern *regexp.Regexp) ([]string,
 	return nil, nil
 }
 
-func (r *VpdRepository) loadHeader(motion *vmd.VmdMotion) error {
+func (rep *VpdRepository) loadHeader(motion *vmd.VmdMotion) error {
 	signaturePattern := regexp.MustCompile(`Vocaloid Pose Data file`)
 	modelNamePattern := regexp.MustCompile(`(.*)(\.osm;.*// 親ファイル名)`)
 
 	// signature
 	{
-		matches, err := r.readText(r.lines[0], signaturePattern)
+		matches, err := rep.readText(rep.lines[0], signaturePattern)
 		if err != nil || len(matches) == 0 {
 			mlog.E("readHeader.readText error: %v", err)
 			return err
@@ -141,7 +141,7 @@ func (r *VpdRepository) loadHeader(motion *vmd.VmdMotion) error {
 	}
 
 	// モデル名
-	matches, err := r.readText(r.lines[2], modelNamePattern)
+	matches, err := rep.readText(rep.lines[2], modelNamePattern)
 	if err != nil {
 		mlog.E("readHeader.readText error: %v", err)
 		return err
@@ -154,17 +154,17 @@ func (r *VpdRepository) loadHeader(motion *vmd.VmdMotion) error {
 	return nil
 }
 
-func (r *VpdRepository) loadModel(motion *vmd.VmdMotion) error {
+func (rep *VpdRepository) loadModel(motion *vmd.VmdMotion) error {
 	boneStartPattern := regexp.MustCompile(`(?:.*)(?:{)(.*)`)
 	bonePosPattern := regexp.MustCompile(`([+-]?\d+(?:\.\d+))(?:,)([+-]?\d+(?:\.\d+))(?:,)([+-]?\d+(?:\.\d+))(?:;)(?:.*trans.*)`)
 	boneRotPattern := regexp.MustCompile(`([+-]?\d+(?:\.\d+))(?:,)([+-]?\d+(?:\.\d+))(?:,)([+-]?\d+(?:\.\d+))(?:,)([+-]?\d+(?:\.\d+))(?:;)(?:.*Quaternion.*)`)
 
 	var bf *vmd.BoneFrame
 	var boneName string
-	for _, line := range r.lines {
+	for _, line := range rep.lines {
 		{
 			// 括弧開始: ボーン名
-			matches, err := r.readText(line, boneStartPattern)
+			matches, err := rep.readText(line, boneStartPattern)
 			if err == nil && len(matches) > 0 {
 				boneName = matches[1]
 				bf = vmd.NewBoneFrame(0)
@@ -173,7 +173,7 @@ func (r *VpdRepository) loadModel(motion *vmd.VmdMotion) error {
 		}
 		{
 			// ボーン位置
-			matches, err := r.readText(line, bonePosPattern)
+			matches, err := rep.readText(line, bonePosPattern)
 			if err == nil && len(matches) > 0 {
 				x, _ := strconv.ParseFloat(matches[1], 64)
 				y, _ := strconv.ParseFloat(matches[2], 64)
@@ -184,7 +184,7 @@ func (r *VpdRepository) loadModel(motion *vmd.VmdMotion) error {
 		}
 		{
 			// ボーン角度
-			matches, err := r.readText(line, boneRotPattern)
+			matches, err := rep.readText(line, boneRotPattern)
 			if err == nil && len(matches) > 0 {
 				x, _ := strconv.ParseFloat(matches[1], 64)
 				y, _ := strconv.ParseFloat(matches[2], 64)

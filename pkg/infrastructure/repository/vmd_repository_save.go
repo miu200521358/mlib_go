@@ -19,7 +19,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
-func (r *VmdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
+func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
 	motion := data.(*vmd.VmdMotion)
 
 	path := motion.Path()
@@ -42,7 +42,7 @@ func (r *VmdRepository) Save(overridePath string, data core.IHashModel, includeS
 	}
 
 	// Convert model name to shift_jis encoding
-	modelBName, err := r.encodeName(motion.Name(), 20)
+	modelBName, err := rep.encodeName(motion.Name(), 20)
 	if err != nil {
 		mlog.W(mi18n.T("モデル名エンコードエラー", map[string]interface{}{"Name": motion.Name()}))
 		modelBName = []byte("Vmd Model")
@@ -55,42 +55,42 @@ func (r *VmdRepository) Save(overridePath string, data core.IHashModel, includeS
 	}
 
 	// Write the bone frames
-	err = r.saveBoneFrames(fout, motion)
+	err = rep.saveBoneFrames(fout, motion)
 	if err != nil {
 		mlog.E(mi18n.T("ボーンフレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the morph frames
-	err = r.saveMorphFrames(fout, motion)
+	err = rep.saveMorphFrames(fout, motion)
 	if err != nil {
 		mlog.E(mi18n.T("モーフフレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the camera frames
-	err = r.saveCameraFrames(fout, motion)
+	err = rep.saveCameraFrames(fout, motion)
 	if err != nil {
 		mlog.E(mi18n.T("カメラフレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the Light frames
-	err = r.saveLightFrames(fout, motion)
+	err = rep.saveLightFrames(fout, motion)
 	if err != nil {
 		mlog.E(mi18n.T("照明フレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the Shadow frames
-	err = r.saveShadowFrames(fout, motion)
+	err = rep.saveShadowFrames(fout, motion)
 	if err != nil {
 		mlog.E(mi18n.T("照明フレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the IK frames
-	err = r.saveIkFrames(fout, motion)
+	err = rep.saveIkFrames(fout, motion)
 	if err != nil {
 		mlog.E(mi18n.T("IKフレーム書き込みエラー"))
 		return err
@@ -106,17 +106,17 @@ func (r *VmdRepository) Save(overridePath string, data core.IHashModel, includeS
 	return nil
 }
 
-func (r *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) error {
+func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) error {
 	names := motion.BoneFrames.Names()
 
-	r.writeNumber(fout, binaryType_unsignedInt, float64(motion.BoneFrames.Len()), 0.0, true)
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(motion.BoneFrames.Len()), 0.0, true)
 	for _, name := range names {
-		fs := motion.BoneFrames.Data[name]
+		boneFrames := motion.BoneFrames.Data[name]
 
-		if fs.Len() > 0 {
+		if boneFrames.Len() > 0 {
 			// 各ボーンの最大キーフレを先に出力する
-			bf := motion.BoneFrames.Data[name].Get(fs.RegisteredIndexes.Max())
-			err := r.saveBoneFrame(fout, name, bf)
+			bf := motion.BoneFrames.Data[name].Get(boneFrames.RegisteredIndexes.Max())
+			err := rep.saveBoneFrame(fout, name, bf)
 			if err != nil {
 				return err
 			}
@@ -129,7 +129,7 @@ func (r *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) err
 			// 普通のキーフレをそのまま出力する
 			for _, fno := range fs.RegisteredIndexes.List()[:fs.Len()-1] {
 				bf := fs.Get(fno)
-				err := r.saveBoneFrame(fout, name, bf)
+				err := rep.saveBoneFrame(fout, name, bf)
 				if err != nil {
 					return err
 				}
@@ -140,12 +140,12 @@ func (r *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) err
 	return nil
 }
 
-func (r *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.BoneFrame) error {
+func (rep *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.BoneFrame) error {
 	if bf == nil {
 		return fmt.Errorf("BoneFrame is nil")
 	}
 
-	encodedName, err := r.encodeName(name, 15)
+	encodedName, err := rep.encodeName(name, 15)
 	if err != nil {
 		mlog.W(mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": name}))
 		return err
@@ -158,10 +158,10 @@ func (r *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.BoneFr
 		posMMD = mmath.MVec3Zero
 	}
 	binary.Write(fout, binary.LittleEndian, encodedName)
-	r.writeNumber(fout, binaryType_unsignedInt, float64(bf.Index()), 0.0, true)
-	r.writeNumber(fout, binaryType_float, posMMD.X, 0.0, false)
-	r.writeNumber(fout, binaryType_float, posMMD.Y, 0.0, false)
-	r.writeNumber(fout, binaryType_float, posMMD.Z, 0.0, false)
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(bf.Index()), 0.0, true)
+	rep.writeNumber(fout, binaryType_float, posMMD.X, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, posMMD.Y, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, posMMD.Z, 0.0, false)
 
 	var quatMMD *mmath.MQuaternion
 	if bf.Rotation != nil {
@@ -169,10 +169,10 @@ func (r *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.BoneFr
 	} else {
 		quatMMD = &mmath.MQuaternionIdent
 	}
-	r.writeNumber(fout, binaryType_float, quatMMD.Vec3().X, 0.0, false)
-	r.writeNumber(fout, binaryType_float, quatMMD.Vec3().Y, 0.0, false)
-	r.writeNumber(fout, binaryType_float, quatMMD.Vec3().Z, 0.0, false)
-	r.writeNumber(fout, binaryType_float, quatMMD.W, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, quatMMD.Vec3().X, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, quatMMD.Vec3().Y, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, quatMMD.Vec3().Z, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, quatMMD.W, 0.0, false)
 
 	var curves []byte
 	if bf.Curves == nil {
@@ -188,18 +188,18 @@ func (r *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.BoneFr
 	return nil
 }
 
-func (r *VmdRepository) saveMorphFrames(fout *os.File, motion *vmd.VmdMotion) error {
-	r.writeNumber(fout, binaryType_unsignedInt, float64(motion.MorphFrames.Len()), 0.0, true)
+func (rep *VmdRepository) saveMorphFrames(fout *os.File, motion *vmd.VmdMotion) error {
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(motion.MorphFrames.Len()), 0.0, true)
 
 	names := motion.MorphFrames.Names()
 
 	for _, name := range names {
-		fs := motion.MorphFrames.Data[name]
-		if fs.RegisteredIndexes.Len() > 0 {
+		morphFrames := motion.MorphFrames.Data[name]
+		if morphFrames.RegisteredIndexes.Len() > 0 {
 			// 普通のキーフレをそのまま出力する
-			for _, fno := range fs.RegisteredIndexes.List() {
-				mf := fs.Get(fno)
-				err := r.saveMorphFrame(fout, name, mf)
+			for _, fno := range morphFrames.RegisteredIndexes.List() {
+				mf := morphFrames.Get(fno)
+				err := rep.saveMorphFrame(fout, name, mf)
 				if err != nil {
 					return err
 				}
@@ -210,33 +210,33 @@ func (r *VmdRepository) saveMorphFrames(fout *os.File, motion *vmd.VmdMotion) er
 	return nil
 }
 
-func (r *VmdRepository) saveMorphFrame(fout *os.File, name string, mf *vmd.MorphFrame) error {
+func (rep *VmdRepository) saveMorphFrame(fout *os.File, name string, mf *vmd.MorphFrame) error {
 	if mf == nil {
 		return fmt.Errorf("MorphFrame is nil")
 	}
 
-	encodedName, err := r.encodeName(name, 15)
+	encodedName, err := rep.encodeName(name, 15)
 	if err != nil {
 		mlog.W(mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": name}))
 		return err
 	}
 
 	binary.Write(fout, binary.LittleEndian, encodedName)
-	r.writeNumber(fout, binaryType_unsignedInt, float64(mf.Index()), 0.0, true)
-	r.writeNumber(fout, binaryType_float, mf.Ratio, 0.0, false)
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(mf.Index()), 0.0, true)
+	rep.writeNumber(fout, binaryType_float, mf.Ratio, 0.0, false)
 
 	return nil
 }
 
-func (r *VmdRepository) saveCameraFrames(fout *os.File, motion *vmd.VmdMotion) error {
-	r.writeNumber(fout, binaryType_unsignedInt, float64(motion.CameraFrames.Len()), 0.0, true)
+func (rep *VmdRepository) saveCameraFrames(fout *os.File, motion *vmd.VmdMotion) error {
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(motion.CameraFrames.Len()), 0.0, true)
 
-	fs := motion.CameraFrames
-	if fs.RegisteredIndexes.Len() > 0 {
+	cameraFrames := motion.CameraFrames
+	if cameraFrames.RegisteredIndexes.Len() > 0 {
 		// 普通のキーフレをそのまま出力する
-		for _, fno := range fs.RegisteredIndexes.List() {
-			cf := fs.Get(fno)
-			err := r.saveCameraFrame(fout, cf)
+		for _, fno := range cameraFrames.RegisteredIndexes.List() {
+			cf := cameraFrames.Get(fno)
+			err := rep.saveCameraFrame(fout, cf)
 			if err != nil {
 				return err
 			}
@@ -246,13 +246,13 @@ func (r *VmdRepository) saveCameraFrames(fout *os.File, motion *vmd.VmdMotion) e
 	return nil
 }
 
-func (r *VmdRepository) saveCameraFrame(fout *os.File, cf *vmd.CameraFrame) error {
+func (rep *VmdRepository) saveCameraFrame(fout *os.File, cf *vmd.CameraFrame) error {
 	if cf == nil {
 		return fmt.Errorf("CameraFrame is nil")
 	}
 
-	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index()), 0.0, true)
-	r.writeNumber(fout, binaryType_float, cf.Distance, 0.0, false)
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index()), 0.0, true)
+	rep.writeNumber(fout, binaryType_float, cf.Distance, 0.0, false)
 
 	var posMMD *mmath.MVec3
 	if cf.Position != nil {
@@ -261,9 +261,9 @@ func (r *VmdRepository) saveCameraFrame(fout *os.File, cf *vmd.CameraFrame) erro
 		posMMD = mmath.MVec3Zero
 	}
 
-	r.writeNumber(fout, binaryType_float, posMMD.X, 0.0, false)
-	r.writeNumber(fout, binaryType_float, posMMD.Y, 0.0, false)
-	r.writeNumber(fout, binaryType_float, posMMD.Z, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, posMMD.X, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, posMMD.Y, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, posMMD.Z, 0.0, false)
 
 	var degreeMMD *mmath.MVec3
 	if cf.Rotation != nil {
@@ -271,9 +271,9 @@ func (r *VmdRepository) saveCameraFrame(fout *os.File, cf *vmd.CameraFrame) erro
 	} else {
 		degreeMMD = mmath.MVec3Zero
 	}
-	r.writeNumber(fout, binaryType_float, degreeMMD.X, 0.0, false)
-	r.writeNumber(fout, binaryType_float, degreeMMD.Y, 0.0, false)
-	r.writeNumber(fout, binaryType_float, degreeMMD.Z, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, degreeMMD.X, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, degreeMMD.Y, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, degreeMMD.Z, 0.0, false)
 
 	var curves []byte
 	if cf.Curves == nil {
@@ -286,21 +286,21 @@ func (r *VmdRepository) saveCameraFrame(fout *os.File, cf *vmd.CameraFrame) erro
 	}
 	binary.Write(fout, binary.LittleEndian, curves)
 
-	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.ViewOfAngle), 0.0, true)
-	r.writeBool(fout, cf.IsPerspectiveOff)
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(cf.ViewOfAngle), 0.0, true)
+	rep.writeBool(fout, cf.IsPerspectiveOff)
 
 	return nil
 }
 
-func (r *VmdRepository) saveLightFrames(fout *os.File, motion *vmd.VmdMotion) error {
-	r.writeNumber(fout, binaryType_unsignedInt, float64(motion.LightFrames.Len()), 0.0, true)
+func (rep *VmdRepository) saveLightFrames(fout *os.File, motion *vmd.VmdMotion) error {
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(motion.LightFrames.Len()), 0.0, true)
 
-	fs := motion.LightFrames
-	if fs.RegisteredIndexes.Len() > 0 {
+	lightFrames := motion.LightFrames
+	if lightFrames.RegisteredIndexes.Len() > 0 {
 		// 普通のキーフレをそのまま出力する
-		for _, fno := range fs.RegisteredIndexes.List() {
-			cf := fs.Get(fno)
-			err := r.saveLightFrame(fout, cf)
+		for _, fno := range lightFrames.RegisteredIndexes.List() {
+			lf := lightFrames.Get(fno)
+			err := rep.saveLightFrame(fout, lf)
 			if err != nil {
 				return err
 			}
@@ -310,47 +310,47 @@ func (r *VmdRepository) saveLightFrames(fout *os.File, motion *vmd.VmdMotion) er
 	return nil
 }
 
-func (r *VmdRepository) saveLightFrame(fout *os.File, cf *vmd.LightFrame) error {
-	if cf == nil {
+func (rep *VmdRepository) saveLightFrame(fout *os.File, lf *vmd.LightFrame) error {
+	if lf == nil {
 		return fmt.Errorf("LightFrame is nil")
 	}
 
-	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index()), 0.0, true)
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(lf.Index()), 0.0, true)
 
 	var colorMMD *mmath.MVec3
-	if cf.Color != nil {
-		colorMMD = cf.Color
+	if lf.Color != nil {
+		colorMMD = lf.Color
 	} else {
 		colorMMD = mmath.MVec3Zero
 	}
 
-	r.writeNumber(fout, binaryType_float, colorMMD.X, 0.0, false)
-	r.writeNumber(fout, binaryType_float, colorMMD.Y, 0.0, false)
-	r.writeNumber(fout, binaryType_float, colorMMD.Z, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, colorMMD.X, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, colorMMD.Y, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, colorMMD.Z, 0.0, false)
 
 	var posMMD *mmath.MVec3
-	if cf.Position != nil {
-		posMMD = cf.Position
+	if lf.Position != nil {
+		posMMD = lf.Position
 	} else {
 		posMMD = mmath.MVec3Zero
 	}
 
-	r.writeNumber(fout, binaryType_float, posMMD.X, 0.0, false)
-	r.writeNumber(fout, binaryType_float, posMMD.Y, 0.0, false)
-	r.writeNumber(fout, binaryType_float, posMMD.Z, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, posMMD.X, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, posMMD.Y, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, posMMD.Z, 0.0, false)
 
 	return nil
 }
 
-func (r *VmdRepository) saveShadowFrames(fout *os.File, motion *vmd.VmdMotion) error {
-	r.writeNumber(fout, binaryType_unsignedInt, float64(motion.ShadowFrames.Len()), 0.0, true)
+func (rep *VmdRepository) saveShadowFrames(fout *os.File, motion *vmd.VmdMotion) error {
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(motion.ShadowFrames.Len()), 0.0, true)
 
-	fs := motion.ShadowFrames
-	if fs.RegisteredIndexes.Len() > 0 {
+	shadowFrames := motion.ShadowFrames
+	if shadowFrames.RegisteredIndexes.Len() > 0 {
 		// 普通のキーフレをそのまま出力する
-		for _, fno := range fs.RegisteredIndexes.List() {
-			cf := fs.Get(fno)
-			err := r.sveShadowFrame(fout, cf)
+		for _, fno := range shadowFrames.RegisteredIndexes.List() {
+			sf := shadowFrames.Get(fno)
+			err := rep.sveShadowFrame(fout, sf)
 			if err != nil {
 				return err
 			}
@@ -360,28 +360,28 @@ func (r *VmdRepository) saveShadowFrames(fout *os.File, motion *vmd.VmdMotion) e
 	return nil
 }
 
-func (r *VmdRepository) sveShadowFrame(fout *os.File, cf *vmd.ShadowFrame) error {
-	if cf == nil {
+func (rep *VmdRepository) sveShadowFrame(fout *os.File, sf *vmd.ShadowFrame) error {
+	if sf == nil {
 		return fmt.Errorf("ShadowFrame is nil")
 	}
 
-	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index()), 0.0, true)
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(sf.Index()), 0.0, true)
 
-	r.writeNumber(fout, binaryType_float, float64(cf.ShadowMode), 0.0, false)
-	r.writeNumber(fout, binaryType_float, cf.Distance, 0.0, false)
+	rep.writeNumber(fout, binaryType_float, float64(sf.ShadowMode), 0.0, false)
+	rep.writeNumber(fout, binaryType_float, sf.Distance, 0.0, false)
 
 	return nil
 }
 
-func (r *VmdRepository) saveIkFrames(fout *os.File, motion *vmd.VmdMotion) error {
-	r.writeNumber(fout, binaryType_unsignedInt, float64(motion.IkFrames.Len()), 0.0, true)
+func (rep *VmdRepository) saveIkFrames(fout *os.File, motion *vmd.VmdMotion) error {
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(motion.IkFrames.Len()), 0.0, true)
 
-	fs := motion.IkFrames
-	if fs.RegisteredIndexes.Len() > 0 {
+	ikFrames := motion.IkFrames
+	if ikFrames.RegisteredIndexes.Len() > 0 {
 		// 普通のキーフレをそのまま出力する
-		for _, fno := range fs.RegisteredIndexes.List() {
-			cf := fs.Get(fno)
-			err := r.saveIkFrame(fout, cf)
+		for _, fno := range ikFrames.RegisteredIndexes.List() {
+			ikf := ikFrames.Get(fno)
+			err := rep.saveIkFrame(fout, ikf)
 			if err != nil {
 				return err
 			}
@@ -391,34 +391,34 @@ func (r *VmdRepository) saveIkFrames(fout *os.File, motion *vmd.VmdMotion) error
 	return nil
 }
 
-func (r *VmdRepository) saveIkFrame(fout *os.File, cf *vmd.IkFrame) error {
-	if cf == nil {
+func (rep *VmdRepository) saveIkFrame(fout *os.File, ikf *vmd.IkFrame) error {
+	if ikf == nil {
 		return fmt.Errorf("IkFrame is nil")
 	}
 
-	r.writeNumber(fout, binaryType_unsignedInt, float64(cf.Index()), 0.0, true)
-	r.writeBool(fout, cf.Visible)
-	r.writeNumber(fout, binaryType_unsignedInt, float64(len(cf.IkList)), 0.0, true)
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(ikf.Index()), 0.0, true)
+	rep.writeBool(fout, ikf.Visible)
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(len(ikf.IkList)), 0.0, true)
 
-	fs := cf.IkList
+	fs := ikf.IkList
 	if len(fs) > 0 {
 		// 普通のキーフレをそのまま出力する
 		for _, ik := range fs {
-			encodedName, err := r.encodeName(ik.BoneName, 20)
+			encodedName, err := rep.encodeName(ik.BoneName, 20)
 			if err != nil {
 				mlog.W(mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": ik.BoneName}))
 				return err
 			}
 
 			binary.Write(fout, binary.LittleEndian, encodedName)
-			r.writeBool(fout, ik.Enabled)
+			rep.writeBool(fout, ik.Enabled)
 		}
 	}
 
 	return nil
 }
 
-func (r *VmdRepository) encodeName(name string, limit int) ([]byte, error) {
+func (rep *VmdRepository) encodeName(name string, limit int) ([]byte, error) {
 	// Encode to CP932
 	cp932Encoder := japanese.ShiftJIS.NewEncoder()
 	cp932Encoded, err := cp932Encoder.String(name)

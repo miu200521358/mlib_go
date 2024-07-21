@@ -44,20 +44,20 @@ func NewVertexDeltas(vertices *pmx.Vertices) *VertexDeltas {
 	}
 }
 
-func (vds *VertexDeltas) Get(vertexIndex int) *VertexDelta {
-	if vertexIndex < 0 || vertexIndex >= len(vds.Data) {
+func (vertexDeltas *VertexDeltas) Get(vertexIndex int) *VertexDelta {
+	if vertexIndex < 0 || vertexIndex >= len(vertexDeltas.Data) {
 		return nil
 	}
 
-	return vds.Data[vertexIndex]
+	return vertexDeltas.Data[vertexIndex]
 }
 
-func (vds *VertexDeltas) FindNearestVertexIndexes(frontPos *mmath.MVec3, visibleMaterialIndexes []int) [][]int {
+func (vertexDeltas *VertexDeltas) FindNearestVertexIndexes(frontPos *mmath.MVec3, visibleMaterialIndexes []int) [][]int {
 	nearestVertexIndexes := make([][]int, 0)
-	distances := make([]float64, len(vds.Data))
-	for i := range len(vds.Data) {
-		vd := vds.Get(i)
-		vertex := vds.Vertices.Get(i)
+	distances := make([]float64, len(vertexDeltas.Data))
+	for i := range len(vertexDeltas.Data) {
+		vd := vertexDeltas.Get(i)
+		vertex := vertexDeltas.Vertices.Get(i)
 		if visibleMaterialIndexes == nil {
 			distances[i] = frontPos.Distance(vd.Position)
 		} else {
@@ -77,13 +77,13 @@ func (vds *VertexDeltas) FindNearestVertexIndexes(frontPos *mmath.MVec3, visible
 	}
 	sortedDistances := mmath.Float64Slice(distances)
 	sortedIndexes := mmath.ArgSort(sortedDistances)
-	nearestVertex := vds.Get(sortedIndexes[0])
+	nearestVertex := vertexDeltas.Get(sortedIndexes[0])
 
 	nearestVertexIndexes = append(nearestVertexIndexes, make([]int, 0))
 	nearestVertexIndexes[0] = append(nearestVertexIndexes[0], sortedIndexes[0])
 
 	for i := range sortedIndexes {
-		vd := vds.Get(sortedIndexes[i])
+		vd := vertexDeltas.Get(sortedIndexes[i])
 		if !vd.Position.NearEquals(nearestVertex.Position, 0.01) {
 			break
 		}
@@ -92,7 +92,7 @@ func (vds *VertexDeltas) FindNearestVertexIndexes(frontPos *mmath.MVec3, visible
 	return nearestVertexIndexes
 }
 
-func (vds *VertexDeltas) FindVerticesInBox(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos,
+func (vertexDeltas *VertexDeltas) FindVerticesInBox(prevXprevYFrontPos, prevXprevYBackPos, prevXnowYFrontPos,
 	prevXnowYBackPos, nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos *mmath.MVec3,
 	visibleMaterialIndexes []int) [][]int {
 
@@ -105,9 +105,9 @@ func (vds *VertexDeltas) FindVerticesInBox(prevXprevYFrontPos, prevXprevYBackPos
 		nowXprevYFrontPos, nowXprevYBackPos, nowXnowYFrontPos, nowXnowYBackPos,
 	)
 
-	for i := range len(vds.Data) {
-		vd := vds.Get(i)
-		vertex := vds.Vertices.Get(i)
+	for i := range len(vertexDeltas.Data) {
+		vd := vertexDeltas.Get(i)
+		vertex := vertexDeltas.Vertices.Get(i)
 		if visibleMaterialIndexes == nil {
 			if vd.Position.IsPointInsideBox(minPos, maxPos) {
 				// 小数点第二位で四捨五入

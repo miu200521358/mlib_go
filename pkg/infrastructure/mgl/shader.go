@@ -71,7 +71,7 @@ var (
 )
 
 type IShader interface {
-	GetProgram(programType ProgramType) uint32
+	Program(programType ProgramType) uint32
 	BoneTextureId() uint32
 	Resize(width, height int)
 }
@@ -217,43 +217,43 @@ func NewMShader(width, height int) *MShader {
 	return shader
 }
 
-func (s *MShader) Reset() {
-	s.CameraPosition = initialCameraPosition.Copy()
-	s.LookAtCenterPosition = initialLookAtPosition.Copy()
-	s.FieldOfViewAngle = FIELD_OF_VIEW_ANGLE
-	s.Resize(int(s.Width), int(s.Height))
+func (shader *MShader) Reset() {
+	shader.CameraPosition = initialCameraPosition.Copy()
+	shader.LookAtCenterPosition = initialLookAtPosition.Copy()
+	shader.FieldOfViewAngle = FIELD_OF_VIEW_ANGLE
+	shader.Resize(int(shader.Width), int(shader.Height))
 }
 
-func (s *MShader) DeleteProgram(program uint32) {
+func (shader *MShader) DeleteProgram(program uint32) {
 	if program != 0 {
 		gl.DeleteProgram(program)
 	}
 }
 
-func (s *MShader) compileShader(shaderName, source string, shaderType uint32) (uint32, error) {
-	shader := gl.CreateShader(shaderType)
+func (shader *MShader) compileShader(shaderName, source string, shaderType uint32) (uint32, error) {
+	s := gl.CreateShader(shaderType)
 
 	csources, free := gl.Strs(source + "\x00")
-	gl.ShaderSource(shader, 1, csources, nil)
+	gl.ShaderSource(s, 1, csources, nil)
 	free()
-	gl.CompileShader(shader)
+	gl.CompileShader(s)
 
 	var status int32
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
+	gl.GetShaderiv(s, gl.COMPILE_STATUS, &status)
 	if status != gl.TRUE {
 		var logLength int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
+		gl.GetShaderiv(s, gl.INFO_LOG_LENGTH, &logLength)
 
 		log := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
+		gl.GetShaderInfoLog(s, logLength, nil, gl.Str(log))
 
 		return 0, fmt.Errorf("failed to compile %v: %v", shaderName, log)
 	}
 
-	return shader, nil
+	return s, nil
 }
 
-func (s *MShader) newProgram(
+func (shader *MShader) newProgram(
 	glslFiles embed.FS,
 	vertexShaderName, fragmentShaderName string,
 ) (uint32, error) {
@@ -271,12 +271,12 @@ func (s *MShader) newProgram(
 
 	fragmentShaderSource := string(fragmentShaderFile)
 
-	vertexShader, err := s.compileShader(vertexShaderName, vertexShaderSource, gl.VERTEX_SHADER)
+	vertexShader, err := shader.compileShader(vertexShaderName, vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		return 0, err
 	}
 
-	fragmentShader, err := s.compileShader(fragmentShaderName, fragmentShaderSource, gl.FRAGMENT_SHADER)
+	fragmentShader, err := shader.compileShader(fragmentShaderName, fragmentShaderSource, gl.FRAGMENT_SHADER)
 	if err != nil {
 		return 0, err
 	}
@@ -305,90 +305,92 @@ func (s *MShader) newProgram(
 	return program, nil
 }
 
-func (s *MShader) initialize(program uint32) {
+func (shader *MShader) initialize(program uint32) {
 	gl.UseProgram(program)
 
 	projection := mgl32.Perspective(
-		mgl32.DegToRad(s.FieldOfViewAngle), float32(s.Width)/float32(s.Height), s.NearPlane, s.FarPlane)
+		mgl32.DegToRad(shader.FieldOfViewAngle), float32(shader.Width)/float32(shader.Height),
+		shader.NearPlane, shader.FarPlane)
 	projectionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_PROJECTION_MATRIX))
 	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
 	// カメラの位置
-	cameraPosition := NewGlVec3(s.CameraPosition)
+	cameraPosition := NewGlVec3(shader.CameraPosition)
 	cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_CAMERA_POSITION))
 	gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
 	// ライト
-	lightDirection := NewGlVec3(s.lightDirection)
+	lightDirection := NewGlVec3(shader.lightDirection)
 	lightDirectionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_LIGHT_DIRECTION))
 	gl.Uniform3fv(lightDirectionUniform, 1, &lightDirection[0])
 
 	// カメラ中心
-	lookAtCenter := NewGlVec3(s.LookAtCenterPosition)
+	lookAtCenter := NewGlVec3(shader.LookAtCenterPosition)
 	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 	cameraUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_MATRIX))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
 	// ボーン行列用テクスチャ生成
-	gl.GenTextures(1, &s.boneTextureId)
+	gl.GenTextures(1, &shader.boneTextureId)
 
-	s.Resize(int(s.Width), int(s.Height))
+	shader.Resize(int(shader.Width), int(shader.Height))
 
 	gl.UseProgram(0)
 }
 
-func (s *MShader) BoneTextureId() uint32 {
-	return s.boneTextureId
+func (shader *MShader) BoneTextureId() uint32 {
+	return shader.boneTextureId
 }
 
-func (s *MShader) Resize(width int, height int) {
-	s.Width = width
-	s.Height = height
+func (shader *MShader) Resize(width int, height int) {
+	shader.Width = width
+	shader.Height = height
 
 	// ビューポートの設定
-	gl.Viewport(0, 0, int32(s.Width), int32(s.Height))
+	gl.Viewport(0, 0, int32(shader.Width), int32(shader.Height))
 
 	if width != 0 && height != 0 {
 		// MSAAも作り直し
-		s.Msaa.Delete()
-		s.Msaa = buffer.NewMsaa(s.Width, s.Height)
+		shader.Msaa.Delete()
+		shader.Msaa = buffer.NewMsaa(shader.Width, shader.Height)
 	}
 }
 
-func (s *MShader) GetProgram(programType ProgramType) uint32 {
+func (shader *MShader) Program(programType ProgramType) uint32 {
 	switch programType {
 	case PROGRAM_TYPE_MODEL:
-		return s.modelProgram
+		return shader.modelProgram
 	case PROGRAM_TYPE_EDGE:
-		return s.edgeProgram
+		return shader.edgeProgram
 	case PROGRAM_TYPE_BONE:
-		return s.boneProgram
+		return shader.boneProgram
 	case PROGRAM_TYPE_PHYSICS:
-		return s.physicsProgram
+		return shader.physicsProgram
 	case PROGRAM_TYPE_NORMAL:
-		return s.normalProgram
+		return shader.normalProgram
 	case PROGRAM_TYPE_FLOOR:
-		return s.floorProgram
+		return shader.floorProgram
 	case PROGRAM_TYPE_WIRE:
-		return s.wireProgram
+		return shader.wireProgram
 	case PROGRAM_TYPE_SELECTED_VERTEX:
-		return s.selectedVertexProgram
+		return shader.selectedVertexProgram
 	}
 	return 0
 }
 
-func (s *MShader) Programs() []uint32 {
-	return []uint32{s.modelProgram, s.edgeProgram, s.boneProgram, s.physicsProgram, s.normalProgram, s.floorProgram, s.wireProgram, s.selectedVertexProgram}
+func (shader *MShader) Programs() []uint32 {
+	return []uint32{shader.modelProgram, shader.edgeProgram, shader.boneProgram, shader.physicsProgram,
+		shader.normalProgram, shader.floorProgram, shader.wireProgram, shader.selectedVertexProgram}
 }
 
-func (s *MShader) Delete() {
-	s.DeleteProgram(s.modelProgram)
-	s.DeleteProgram(s.edgeProgram)
-	s.DeleteProgram(s.boneProgram)
-	s.DeleteProgram(s.physicsProgram)
-	s.DeleteProgram(s.normalProgram)
-	s.DeleteProgram(s.floorProgram)
-	s.DeleteProgram(s.wireProgram)
-	s.DeleteProgram(s.selectedVertexProgram)
-	s.Msaa.Delete()
+func (shader *MShader) Delete() {
+	shader.DeleteProgram(shader.modelProgram)
+	shader.DeleteProgram(shader.edgeProgram)
+	shader.DeleteProgram(shader.boneProgram)
+	shader.DeleteProgram(shader.physicsProgram)
+	shader.DeleteProgram(shader.normalProgram)
+	shader.DeleteProgram(shader.floorProgram)
+	shader.DeleteProgram(shader.wireProgram)
+	shader.DeleteProgram(shader.selectedVertexProgram)
+	shader.Msaa.Delete()
 }

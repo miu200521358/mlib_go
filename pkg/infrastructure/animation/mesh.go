@@ -34,21 +34,21 @@ func newMesh(
 	}
 }
 
-func (m *Mesh) delete() {
-	m.ibo.Delete()
+func (mesh *Mesh) delete() {
+	mesh.ibo.Delete()
 }
 
-func (m *Mesh) drawModel(
+func (mesh *Mesh) drawModel(
 	windowIndex int,
 	shader mgl.IShader,
 	paddedMatrixes []float32,
 	width, height int,
 	meshDelta *delta.MeshDelta,
 ) {
-	modelProgram := shader.GetProgram(mgl.PROGRAM_TYPE_MODEL)
+	modelProgram := shader.Program(mgl.PROGRAM_TYPE_MODEL)
 	gl.UseProgram(modelProgram)
 
-	if m.material.DrawFlag.IsDoubleSidedDrawing() {
+	if mesh.material.DrawFlag.IsDoubleSidedDrawing() {
 		// 両面描画
 		// カリングOFF
 		gl.Disable(gl.CULL_FACE)
@@ -79,43 +79,43 @@ func (m *Mesh) drawModel(
 
 	// テクスチャ使用有無
 	useTextureUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_TEXTURE))
-	gl.Uniform1i(useTextureUniform, int32(mmath.BoolToInt(m.material.texture != nil)))
-	if m.material.texture != nil {
-		m.material.texture.bind()
-		defer m.material.texture.unbind()
+	gl.Uniform1i(useTextureUniform, int32(mmath.BoolToInt(mesh.material.texture != nil)))
+	if mesh.material.texture != nil {
+		mesh.material.texture.bind()
+		defer mesh.material.texture.unbind()
 		textureUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_TEXTURE_SAMPLER))
-		gl.Uniform1i(textureUniform, int32(m.material.texture.TextureUnitNo))
+		gl.Uniform1i(textureUniform, int32(mesh.material.texture.TextureUnitNo))
 	}
 
 	// Toon使用有無
 	useToonUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_TOON))
-	gl.Uniform1i(useToonUniform, int32(mmath.BoolToInt(m.material.toonTexture != nil)))
-	if m.material.toonTexture != nil {
-		m.material.toonTexture.bind()
-		defer m.material.toonTexture.unbind()
+	gl.Uniform1i(useToonUniform, int32(mmath.BoolToInt(mesh.material.toonTexture != nil)))
+	if mesh.material.toonTexture != nil {
+		mesh.material.toonTexture.bind()
+		defer mesh.material.toonTexture.unbind()
 		toonUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_TOON_SAMPLER))
-		gl.Uniform1i(toonUniform, int32(m.material.toonTexture.TextureUnitNo))
+		gl.Uniform1i(toonUniform, int32(mesh.material.toonTexture.TextureUnitNo))
 	}
 
 	// Sphere使用有無
 	useSphereUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_SPHERE))
 	gl.Uniform1i(useSphereUniform,
-		int32(mmath.BoolToInt(m.material.sphereTexture != nil && m.material.sphereTexture.Initialized)))
-	if m.material.sphereTexture != nil && m.material.sphereTexture.Initialized {
-		m.material.sphereTexture.bind()
-		defer m.material.sphereTexture.unbind()
+		int32(mmath.BoolToInt(mesh.material.sphereTexture != nil && mesh.material.sphereTexture.Initialized)))
+	if mesh.material.sphereTexture != nil && mesh.material.sphereTexture.Initialized {
+		mesh.material.sphereTexture.bind()
+		defer mesh.material.sphereTexture.unbind()
 		sphereUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_SPHERE_SAMPLER))
-		gl.Uniform1i(sphereUniform, int32(m.material.sphereTexture.TextureUnitNo))
+		gl.Uniform1i(sphereUniform, int32(mesh.material.sphereTexture.TextureUnitNo))
 	}
 
 	// SphereMode
 	sphereModeUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_SPHERE_MODE))
-	gl.Uniform1i(sphereModeUniform, int32(m.material.SphereMode))
+	gl.Uniform1i(sphereModeUniform, int32(mesh.material.SphereMode))
 
 	// 三角形描画
 	gl.DrawElements(
 		gl.TRIANGLES,
-		int32(m.material.VerticesCount),
+		int32(mesh.material.VerticesCount),
 		gl.UNSIGNED_INT,
 		nil,
 	)
@@ -123,14 +123,14 @@ func (m *Mesh) drawModel(
 	gl.UseProgram(0)
 }
 
-func (m *Mesh) drawEdge(
+func (mesh *Mesh) drawEdge(
 	windowIndex int,
 	shader mgl.IShader,
 	paddedMatrixes []float32,
 	width, height int,
 	meshDelta *delta.MeshDelta,
 ) {
-	program := shader.GetProgram(mgl.PROGRAM_TYPE_EDGE)
+	program := shader.Program(mgl.PROGRAM_TYPE_EDGE)
 	gl.UseProgram(program)
 
 	gl.Enable(gl.CULL_FACE)
@@ -154,7 +154,7 @@ func (m *Mesh) drawEdge(
 	// 三角形描画
 	gl.DrawElements(
 		gl.TRIANGLES,
-		int32(m.material.VerticesCount),
+		int32(mesh.material.VerticesCount),
 		gl.UNSIGNED_INT,
 		nil,
 	)
@@ -162,14 +162,14 @@ func (m *Mesh) drawEdge(
 	gl.UseProgram(0)
 }
 
-func (m *Mesh) drawWire(
+func (mesh *Mesh) drawWire(
 	windowIndex int,
 	shader mgl.IShader,
 	paddedMatrixes []float32,
 	width, height int,
 	invisibleMesh bool,
 ) {
-	program := shader.GetProgram(mgl.PROGRAM_TYPE_WIRE)
+	program := shader.Program(mgl.PROGRAM_TYPE_WIRE)
 	gl.UseProgram(program)
 
 	// カリングOFF
@@ -194,7 +194,7 @@ func (m *Mesh) drawWire(
 	// 三角形描画
 	gl.DrawElements(
 		gl.TRIANGLES,
-		int32(m.material.VerticesCount),
+		int32(mesh.material.VerticesCount),
 		gl.UNSIGNED_INT,
 		nil,
 	)

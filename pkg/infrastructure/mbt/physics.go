@@ -7,7 +7,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 type IPhysics interface {
@@ -37,7 +36,7 @@ type MPhysics struct {
 func NewMPhysics() *MPhysics {
 	world := createWorld()
 
-	p := &MPhysics{
+	physics := &MPhysics{
 		world:       world,
 		MaxSubSteps: 2,
 		DeformFps:   30.0,
@@ -54,13 +53,13 @@ func NewMPhysics() *MPhysics {
 	world.SetDebugDrawer(drawer)
 	// mlog.D("world.GetDebugDrawer()=%+v\n", world.GetDebugDrawer())
 
-	p.drawer = drawer
-	p.liner = liner
-	p.DeformSpf = 1.0 / p.DeformFps
-	p.PhysicsSpf = 1.0 / p.PhysicsFps
-	p.FixedTimeStep = 1 / 60.0
+	physics.drawer = drawer
+	physics.liner = liner
+	physics.DeformSpf = 1.0 / physics.DeformFps
+	physics.PhysicsSpf = 1.0 / physics.PhysicsFps
+	physics.FixedTimeStep = 1 / 60.0
 
-	return p
+	return physics
 }
 
 func createWorld() bt.BtDiscreteDynamicsWorld {
@@ -86,10 +85,10 @@ func createWorld() bt.BtDiscreteDynamicsWorld {
 	return world
 }
 
-func (p *MPhysics) ResetWorld() {
+func (physics *MPhysics) ResetWorld() {
 	world := createWorld()
-	world.SetDebugDrawer(p.drawer)
-	p.world = world
+	world.SetDebugDrawer(physics.drawer)
+	physics.world = world
 }
 
 func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
@@ -102,52 +101,11 @@ func (physics *MPhysics) DeleteModel(modelIndex int) {
 	physics.deleteJoints(modelIndex)
 }
 
-func (p *MPhysics) DrawDebugLines(shader *mgl.MShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool) {
-	if !(visibleRigidBody || visibleJoint) {
-		return
-	}
-
-	// 物理デバッグ取得
-	if visibleRigidBody {
-		p.world.GetDebugDrawer().SetDebugMode(
-			p.world.GetDebugDrawer().GetDebugMode() | int(
-				bt.BtIDebugDrawDBG_DrawWireframe|
-					bt.BtIDebugDrawDBG_DrawContactPoints,
-			))
-	} else {
-		p.world.GetDebugDrawer().SetDebugMode(
-			p.world.GetDebugDrawer().GetDebugMode() & ^int(
-				bt.BtIDebugDrawDBG_DrawWireframe|
-					bt.BtIDebugDrawDBG_DrawContactPoints,
-			))
-	}
-
-	if visibleJoint {
-		p.world.GetDebugDrawer().SetDebugMode(
-			p.world.GetDebugDrawer().GetDebugMode() | int(
-				bt.BtIDebugDrawDBG_DrawConstraints|
-					bt.BtIDebugDrawDBG_DrawConstraintLimits,
-			))
-	} else {
-		p.world.GetDebugDrawer().SetDebugMode(
-			p.world.GetDebugDrawer().GetDebugMode() & ^int(
-				bt.BtIDebugDrawDBG_DrawConstraints|
-					bt.BtIDebugDrawDBG_DrawConstraintLimits,
-			))
-	}
-
-	// デバッグ情報取得
-	p.world.DebugDrawWorld()
-
-	// デバッグ描画
-	p.liner.drawDebugLines(shader, isDrawRigidBodyFront)
+func (physics *MPhysics) StepSimulation(timeStep float32) {
+	physics.world.StepSimulation(timeStep, physics.MaxSubSteps, physics.FixedTimeStep)
 }
 
-func (p *MPhysics) StepSimulation(timeStep float32) {
-	p.world.StepSimulation(timeStep, p.MaxSubSteps, p.FixedTimeStep)
-}
-
-func (p *MPhysics) Exists(modelIndex int) bool {
-	_, ok := p.rigidBodies[modelIndex]
+func (physics *MPhysics) Exists(modelIndex int) bool {
+	_, ok := physics.rigidBodies[modelIndex]
 	return ok
 }

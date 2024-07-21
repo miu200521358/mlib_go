@@ -35,31 +35,31 @@ type baseRepository[T core.IHashModel] struct {
 	newFunc  func(path string) T
 }
 
-func (r *baseRepository[T]) open(path string) error {
+func (rep *baseRepository[T]) open(path string) error {
 
 	file, err := mutils.Open(path)
 	if err != nil {
 		return err
 	}
-	r.file = file
-	r.reader = bufio.NewReader(r.file)
+	rep.file = file
+	rep.reader = bufio.NewReader(rep.file)
 
 	return nil
 }
 
-func (r *baseRepository[T]) close() {
-	defer r.file.Close()
+func (rep *baseRepository[T]) close() {
+	defer rep.file.Close()
 }
 
-func (r *baseRepository[T]) LoadName(path string) (string, error) {
+func (rep *baseRepository[T]) LoadName(path string) (string, error) {
 	panic("not implemented")
 }
 
-func (r *baseRepository[T]) Load(path string) (T, error) {
+func (rep *baseRepository[T]) Load(path string) (T, error) {
 	panic("not implemented")
 }
 
-func (r *baseRepository[T]) LoadHash(path string) (string, error) {
+func (rep *baseRepository[T]) LoadHash(path string) (string, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return "", err
@@ -78,26 +78,26 @@ func (r *baseRepository[T]) LoadHash(path string) (string, error) {
 
 }
 
-func (r *baseRepository[T]) defineEncoding(encoding encoding.Encoding) {
-	r.encoding = encoding
-	r.readText = r.defineReadText(encoding)
+func (rep *baseRepository[T]) defineEncoding(encoding encoding.Encoding) {
+	rep.encoding = encoding
+	rep.readText = rep.defineReadText(encoding)
 }
 
-func (r *baseRepository[T]) defineReadText(encoding encoding.Encoding) func() string {
+func (rep *baseRepository[T]) defineReadText(encoding encoding.Encoding) func() string {
 	return func() string {
-		size, err := r.unpackInt()
+		size, err := rep.unpackInt()
 		if err != nil {
 			return ""
 		}
-		fbytes, err := r.unpackBytes(int(size))
+		fbytes, err := rep.unpackBytes(int(size))
 		if err != nil {
 			return ""
 		}
-		return r.decodeText(encoding, fbytes)
+		return rep.decodeText(encoding, fbytes)
 	}
 }
 
-func (r *baseRepository[T]) decodeText(mainEncoding encoding.Encoding, fbytes []byte) string {
+func (rep *baseRepository[T]) decodeText(mainEncoding encoding.Encoding, fbytes []byte) string {
 	// 基本のエンコーディングを第一候補でデコードして、ダメなら順次テスト
 	for _, targetEncoding := range []encoding.Encoding{
 		mainEncoding,
@@ -109,13 +109,13 @@ func (r *baseRepository[T]) decodeText(mainEncoding encoding.Encoding, fbytes []
 		var err error
 		if targetEncoding == japanese.ShiftJIS {
 			// shift-jisは一旦cp932に変換してもう一度戻したので返す
-			decodedText, err = r.decodeShiftJIS(fbytes)
+			decodedText, err = rep.decodeShiftJIS(fbytes)
 			if err != nil {
 				continue
 			}
 		} else {
 			// 変換できなかった文字は「?」に変換する
-			decodedText, err = r.decodeBytes(fbytes, targetEncoding)
+			decodedText, err = rep.decodeBytes(fbytes, targetEncoding)
 			if err != nil {
 				continue
 			}
@@ -125,7 +125,7 @@ func (r *baseRepository[T]) decodeText(mainEncoding encoding.Encoding, fbytes []
 	return ""
 }
 
-func (r *baseRepository[T]) decodeShiftJIS(fbytes []byte) (string, error) {
+func (rep *baseRepository[T]) decodeShiftJIS(fbytes []byte) (string, error) {
 	decodedText, err := japanese.ShiftJIS.NewDecoder().Bytes(fbytes)
 	if err != nil {
 		return "", err
@@ -133,7 +133,7 @@ func (r *baseRepository[T]) decodeShiftJIS(fbytes []byte) (string, error) {
 	return string(decodedText), nil
 }
 
-func (r *baseRepository[T]) decodeBytes(fbytes []byte, encoding encoding.Encoding) (string, error) {
+func (rep *baseRepository[T]) decodeBytes(fbytes []byte, encoding encoding.Encoding) (string, error) {
 	decodedText, err := encoding.NewDecoder().Bytes(fbytes)
 	if err != nil {
 		return "", err
@@ -142,8 +142,8 @@ func (r *baseRepository[T]) decodeBytes(fbytes []byte, encoding encoding.Encodin
 }
 
 // バイナリデータから bytes を読み出す
-func (r *baseRepository[T]) unpackBytes(size int) ([]byte, error) {
-	chunk, err := r.unpack(size)
+func (rep *baseRepository[T]) unpackBytes(size int) ([]byte, error) {
+	chunk, err := rep.unpack(size)
 	if err != nil {
 		return nil, err
 	}
@@ -152,8 +152,8 @@ func (r *baseRepository[T]) unpackBytes(size int) ([]byte, error) {
 }
 
 // バイナリデータから byte を読み出す
-func (r *baseRepository[T]) unpackByte() (byte, error) {
-	chunk, err := r.unpack(1)
+func (rep *baseRepository[T]) unpackByte() (byte, error) {
+	chunk, err := rep.unpack(1)
 	if err != nil {
 		return 0, err
 	}
@@ -162,8 +162,8 @@ func (r *baseRepository[T]) unpackByte() (byte, error) {
 }
 
 // バイナリデータから sbyte を読み出す
-func (r *baseRepository[T]) unpackSByte() (int8, error) {
-	chunk, err := r.unpack(1)
+func (rep *baseRepository[T]) unpackSByte() (int8, error) {
+	chunk, err := rep.unpack(1)
 	if err != nil {
 		return 0, err
 	}
@@ -172,8 +172,8 @@ func (r *baseRepository[T]) unpackSByte() (int8, error) {
 }
 
 // バイナリデータから int16 を読み出す
-func (r *baseRepository[T]) unpackShort() (int16, error) {
-	chunk, err := r.unpack(2)
+func (rep *baseRepository[T]) unpackShort() (int16, error) {
+	chunk, err := rep.unpack(2)
 	if err != nil {
 		return 0, err
 	}
@@ -182,8 +182,8 @@ func (r *baseRepository[T]) unpackShort() (int16, error) {
 }
 
 // バイナリデータから uint16 を読み出す
-func (r *baseRepository[T]) unpackUShort() (uint16, error) {
-	chunk, err := r.unpack(2)
+func (rep *baseRepository[T]) unpackUShort() (uint16, error) {
+	chunk, err := rep.unpack(2)
 	if err != nil {
 		return 0, err
 	}
@@ -192,8 +192,8 @@ func (r *baseRepository[T]) unpackUShort() (uint16, error) {
 }
 
 // バイナリデータから uint を読み出す
-func (r *baseRepository[T]) unpackUInt() (uint, error) {
-	chunk, err := r.unpack(4)
+func (rep *baseRepository[T]) unpackUInt() (uint, error) {
+	chunk, err := rep.unpack(4)
 	if err != nil {
 		return 0, err
 	}
@@ -202,8 +202,8 @@ func (r *baseRepository[T]) unpackUInt() (uint, error) {
 }
 
 // バイナリデータから int を読み出す
-func (r *baseRepository[T]) unpackInt() (int, error) {
-	chunk, err := r.unpack(4)
+func (rep *baseRepository[T]) unpackInt() (int, error) {
+	chunk, err := rep.unpack(4)
 	if err != nil {
 		return 0, err
 	}
@@ -212,9 +212,9 @@ func (r *baseRepository[T]) unpackInt() (int, error) {
 }
 
 // バイナリデータから float64 を読み出す
-func (r *baseRepository[T]) unpackFloat() (float64, error) {
+func (rep *baseRepository[T]) unpackFloat() (float64, error) {
 	// 単精度実数(4byte)なので、一旦uint32にしてからfloat32に変換する
-	chunk, err := r.unpack(4)
+	chunk, err := rep.unpack(4)
 	if err != nil {
 		return 0, err
 	}
@@ -222,28 +222,28 @@ func (r *baseRepository[T]) unpackFloat() (float64, error) {
 	return float64(math.Float32frombits(binary.LittleEndian.Uint32(chunk))), nil
 }
 
-func (r *baseRepository[T]) unpackVec2() (mmath.MVec2, error) {
-	x, err := r.unpackFloat()
+func (rep *baseRepository[T]) unpackVec2() (mmath.MVec2, error) {
+	x, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMVec2(), err
 	}
-	y, err := r.unpackFloat()
+	y, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMVec2(), err
 	}
 	return mmath.MVec2{X: x, Y: y}, nil
 }
 
-func (r *baseRepository[T]) unpackVec3() (mmath.MVec3, error) {
-	x, err := r.unpackFloat()
+func (rep *baseRepository[T]) unpackVec3() (mmath.MVec3, error) {
+	x, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMVec3(), err
 	}
-	y, err := r.unpackFloat()
+	y, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMVec3(), err
 	}
-	z, err := r.unpackFloat()
+	z, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMVec3(), err
 	}
@@ -253,20 +253,20 @@ func (r *baseRepository[T]) unpackVec3() (mmath.MVec3, error) {
 	return mmath.MVec3{X: x, Y: y, Z: z}, nil
 }
 
-func (r *baseRepository[T]) unpackVec4() (mmath.MVec4, error) {
-	x, err := r.unpackFloat()
+func (rep *baseRepository[T]) unpackVec4() (mmath.MVec4, error) {
+	x, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMVec4(), err
 	}
-	y, err := r.unpackFloat()
+	y, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMVec4(), err
 	}
-	z, err := r.unpackFloat()
+	z, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMVec4(), err
 	}
-	w, err := r.unpackFloat()
+	w, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMVec4(), err
 	}
@@ -276,20 +276,20 @@ func (r *baseRepository[T]) unpackVec4() (mmath.MVec4, error) {
 	return mmath.MVec4{X: x, Y: y, Z: z, W: w}, nil
 }
 
-func (r *baseRepository[T]) unpackQuaternion() (mmath.MQuaternion, error) {
-	x, err := r.unpackFloat()
+func (rep *baseRepository[T]) unpackQuaternion() (mmath.MQuaternion, error) {
+	x, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMQuaternion(), err
 	}
-	y, err := r.unpackFloat()
+	y, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMQuaternion(), err
 	}
-	z, err := r.unpackFloat()
+	z, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMQuaternion(), err
 	}
-	w, err := r.unpackFloat()
+	w, err := rep.unpackFloat()
 	if err != nil {
 		return *mmath.NewMQuaternion(), err
 	}
@@ -299,13 +299,13 @@ func (r *baseRepository[T]) unpackQuaternion() (mmath.MQuaternion, error) {
 	return *mmath.NewMQuaternionByValues(x, y, z, w), nil
 }
 
-func (r *baseRepository[T]) unpack(size int) ([]byte, error) {
-	if r.reader == nil {
+func (rep *baseRepository[T]) unpack(size int) ([]byte, error) {
+	if rep.reader == nil {
 		return nil, fmt.Errorf("file is not opened")
 	}
 
 	chunk := make([]byte, size)
-	_, err := io.ReadFull(r.reader, chunk)
+	_, err := io.ReadFull(rep.reader, chunk)
 	if err != nil {
 		if err == io.EOF {
 			return nil, fmt.Errorf("EOF")
@@ -330,7 +330,7 @@ const (
 	binaryType_unsignedLong  binaryType = "<L"
 )
 
-func (r *baseRepository[T]) writeNumber(
+func (rep *baseRepository[T]) writeNumber(
 	fout *os.File, valType binaryType, val float64, defaultValue float64, isPositiveOnly bool) error {
 	// 値の検証と修正
 	if math.IsNaN(val) || math.IsInf(val, 0) {
@@ -360,18 +360,18 @@ func (r *baseRepository[T]) writeNumber(
 		err = binary.Write(&buf, binary.LittleEndian, int32(val))
 	}
 	if err != nil {
-		return r.writeDefaultNumber(fout, valType, defaultValue)
+		return rep.writeDefaultNumber(fout, valType, defaultValue)
 	}
 
 	// ファイルへの書き込み
 	_, err = fout.Write(buf.Bytes())
 	if err != nil {
-		return r.writeDefaultNumber(fout, valType, defaultValue)
+		return rep.writeDefaultNumber(fout, valType, defaultValue)
 	}
 	return nil
 }
 
-func (r *baseRepository[T]) writeDefaultNumber(fout *os.File, valType binaryType, defaultValue float64) error {
+func (rep *baseRepository[T]) writeDefaultNumber(fout *os.File, valType binaryType, defaultValue float64) error {
 	var buf bytes.Buffer
 	var err error
 	switch valType {
@@ -387,7 +387,7 @@ func (r *baseRepository[T]) writeDefaultNumber(fout *os.File, valType binaryType
 	return err
 }
 
-func (r *baseRepository[T]) writeBool(fout *os.File, val bool) error {
+func (rep *baseRepository[T]) writeBool(fout *os.File, val bool) error {
 	var buf bytes.Buffer
 	var err error
 
@@ -401,7 +401,7 @@ func (r *baseRepository[T]) writeBool(fout *os.File, val bool) error {
 	return err
 }
 
-func (r *baseRepository[T]) writeByte(fout *os.File, val int, isUnsigned bool) error {
+func (rep *baseRepository[T]) writeByte(fout *os.File, val int, isUnsigned bool) error {
 	var buf bytes.Buffer
 	var err error
 
@@ -419,7 +419,7 @@ func (r *baseRepository[T]) writeByte(fout *os.File, val int, isUnsigned bool) e
 	return err
 }
 
-func (r *baseRepository[T]) writeShort(fout *os.File, val uint16) error {
+func (rep *baseRepository[T]) writeShort(fout *os.File, val uint16) error {
 	var buf bytes.Buffer
 	err := binary.Write(&buf, binary.LittleEndian, val)
 	if err != nil {

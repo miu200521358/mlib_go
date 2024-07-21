@@ -21,23 +21,23 @@ func NewVmdVpdRepository() *VmdVpdRepository {
 	return rep
 }
 
-func (r *VmdVpdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
+func (rep *VmdVpdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
 	return nil
 }
 
 // 指定されたパスのファイルからデータを読み込む
-func (r *VmdVpdRepository) Load(path string) (core.IHashModel, error) {
+func (rep *VmdVpdRepository) Load(path string) (core.IHashModel, error) {
 	if strings.HasSuffix(strings.ToLower(path), ".vpd") {
-		return r.vpdRepository.Load(path)
+		return rep.vpdRepository.Load(path)
 	} else {
-		return r.vmdRepository.Load(path)
+		return rep.vmdRepository.Load(path)
 	}
 }
 
-func (r *VmdVpdRepository) LoadName(path string) (string, error) {
+func (rep *VmdVpdRepository) LoadName(path string) (string, error) {
 	if strings.HasSuffix(strings.ToLower(path), ".vpd") {
-		return r.vpdRepository.LoadName(path)
+		return rep.vpdRepository.LoadName(path)
 	} else {
-		return r.vmdRepository.LoadName(path)
+		return rep.vmdRepository.LoadName(path)
 	}
 }

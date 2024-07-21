@@ -59,7 +59,7 @@ func (ddl *mDebugDrawLiner) drawDebugLines(shader *mgl.MShader, isDrawRigidBodyF
 		return
 	}
 
-	program := shader.GetProgram(mgl.PROGRAM_TYPE_PHYSICS)
+	program := shader.Program(mgl.PROGRAM_TYPE_PHYSICS)
 	gl.UseProgram(program)
 
 	if isDrawRigidBodyFront {
@@ -87,4 +87,47 @@ func (ddl *mDebugDrawLiner) drawDebugLines(shader *mgl.MShader, isDrawRigidBodyF
 	gl.UseProgram(0)
 
 	ddl.vertices = make([]float32, 0)
+}
+
+func (physics *MPhysics) DrawDebugLines(
+	shader *mgl.MShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool,
+) {
+	if !(visibleRigidBody || visibleJoint) {
+		return
+	}
+
+	// 物理デバッグ取得
+	if visibleRigidBody {
+		physics.world.GetDebugDrawer().SetDebugMode(
+			physics.world.GetDebugDrawer().GetDebugMode() | int(
+				bt.BtIDebugDrawDBG_DrawWireframe|
+					bt.BtIDebugDrawDBG_DrawContactPoints,
+			))
+	} else {
+		physics.world.GetDebugDrawer().SetDebugMode(
+			physics.world.GetDebugDrawer().GetDebugMode() & ^int(
+				bt.BtIDebugDrawDBG_DrawWireframe|
+					bt.BtIDebugDrawDBG_DrawContactPoints,
+			))
+	}
+
+	if visibleJoint {
+		physics.world.GetDebugDrawer().SetDebugMode(
+			physics.world.GetDebugDrawer().GetDebugMode() | int(
+				bt.BtIDebugDrawDBG_DrawConstraints|
+					bt.BtIDebugDrawDBG_DrawConstraintLimits,
+			))
+	} else {
+		physics.world.GetDebugDrawer().SetDebugMode(
+			physics.world.GetDebugDrawer().GetDebugMode() & ^int(
+				bt.BtIDebugDrawDBG_DrawConstraints|
+					bt.BtIDebugDrawDBG_DrawConstraintLimits,
+			))
+	}
+
+	// デバッグ情報取得
+	physics.world.DebugDrawWorld()
+
+	// デバッグ描画
+	physics.liner.drawDebugLines(shader, isDrawRigidBodyFront)
 }
