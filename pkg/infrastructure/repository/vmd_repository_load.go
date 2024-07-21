@@ -187,18 +187,15 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 		bf.SetIndex(int(index))
 
 		// 位置X,Y,Z
-		bf.Position, err = rep.unpackVec3()
+		// 回転X,Y,Z,W
+		bfValues, err := rep.unpackFloats(7)
 		if err != nil {
-			mlog.E("[%d] readBones.Position error: %v", i, err)
+			mlog.E("[%d] readBones.bfValues error: %v", i, err)
 			return err
 		}
 
-		// 回転X,Y,Z,W
-		bf.Rotation, err = rep.unpackQuaternion()
-		if err != nil {
-			mlog.E("[%d] readBones.Quaternion error: %v", i, err)
-			return err
-		}
+		bf.Position = &mmath.MVec3{X: bfValues[0], Y: bfValues[1], Z: bfValues[2]}
+		bf.Rotation = mmath.NewMQuaternionByValues(bfValues[3], bfValues[4], bfValues[5], bfValues[6])
 
 		// 補間曲線
 		curves, err := rep.unpackBytes(64)
