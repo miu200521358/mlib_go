@@ -11,5 +11,5 @@ void main() {
     }
 
     outColor = edgeColor;
-    outColor.a *= windowOpacity;
+    outColor *= windowOpacity;
 }
