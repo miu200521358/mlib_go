@@ -213,7 +213,8 @@ func calcIk(
 			ikOffMotion.AppendRegisteredBoneFrame(ikDelta.Bone.Name(), bf)
 		}
 
-		// ikOffMotion.Save("IK OFF", "")
+		r := repository.NewVmdRepository()
+		r.Save("", ikOffMotion, true)
 	}
 
 	var ikOffDeltas *delta.VmdDeltas
