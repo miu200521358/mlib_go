@@ -35,12 +35,12 @@ func NewMMat4() *MMat4 {
 	}
 }
 
-func NewMMat4ByValues(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44 float64) *MMat4 {
+func NewMMat4ByValues(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, mat1, mat2, mat3, mat4 float64) *MMat4 {
 	return &MMat4{
 		m11, m12, m13, m14,
 		m21, m22, m23, m24,
 		m31, m32, m33, m34,
-		m41, m42, m43, m44,
+		mat1, mat2, mat3, mat4,
 	}
 }
 
@@ -56,29 +56,29 @@ func NewMMat4FromLookAt(eye, center, up *MVec3) *MMat4 {
 }
 
 // IsZero
-func (m *MMat4) IsZero() bool {
-	return *m == MMat4Zero
+func (mat *MMat4) IsZero() bool {
+	return *mat == MMat4Zero
 }
 
 // IsIdent
-func (m *MMat4) IsIdent() bool {
-	return m.NearEquals(&MMat4Ident, 1e-10)
+func (mat *MMat4) IsIdent() bool {
+	return mat.NearEquals(&MMat4Ident, 1e-10)
 }
 
 // String
-func (m *MMat4) String() string {
-	return mgl64.Mat4(*m).String()
+func (mat *MMat4) String() string {
+	return mgl64.Mat4(*mat).String()
 }
 
-func (m *MMat4) Copy() *MMat4 {
+func (mat *MMat4) Copy() *MMat4 {
 	copied := NewMMat4ByValues(
-		m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15])
+		mat[0], mat[1], mat[2], mat[3], mat[4], mat[5], mat[6], mat[7], mat[8], mat[9], mat[10], mat[11], mat[12], mat[13], mat[14], mat[15])
 	return copied
 }
 
 // NearEquals
-func (m *MMat4) NearEquals(other *MMat4, tolerance float64) bool {
-	return mgl64.Mat4(*m).ApproxEqualThreshold(mgl64.Mat4(*other), tolerance)
+func (mat *MMat4) NearEquals(other *MMat4, tolerance float64) bool {
+	return mgl64.Mat4(*mat).ApproxEqualThreshold(mgl64.Mat4(*other), tolerance)
 }
 
 // Trace returns the trace value for the matrix.
@@ -146,14 +146,14 @@ func (mat *MMat4) Transpose() *MMat4 {
 }
 
 // Mul は行列の掛け算を行います
-func (m1 *MMat4) Mul(m2 *MMat4) *MMat4 {
-	m := mgl64.Mat4(*m1).Mul4(mgl64.Mat4(*m2))
-	*m1 = MMat4(m)
-	return m1
+func (mat1 *MMat4) Mul(mat2 *MMat4) *MMat4 {
+	m := mgl64.Mat4(*mat1).Mul4(mgl64.Mat4(*mat2))
+	*mat1 = MMat4(m)
+	return mat1
 }
 
-func (m1 *MMat4) Muled(m2 *MMat4) *MMat4 {
-	m := MMat4(mgl64.Mat4(*m1).Mul4(mgl64.Mat4(*m2)))
+func (mat1 *MMat4) Muled(mat2 *MMat4) *MMat4 {
+	m := MMat4(mgl64.Mat4(*mat1).Mul4(mgl64.Mat4(*mat2)))
 	return &m
 }
 
@@ -169,13 +169,13 @@ func (mat *MMat4) MuledScalar(v float64) *MMat4 {
 	return copied
 }
 
-func (m *MMat4) Det() float64 {
-	return mgl64.Mat4(*m).Det()
+func (mat *MMat4) Det() float64 {
+	return mgl64.Mat4(*mat).Det()
 }
 
 // 逆行列
-func (m *MMat4) Inverse() *MMat4 {
-	im := mgl64.Mat4(*m).Inv()
+func (mat *MMat4) Inverse() *MMat4 {
+	im := mgl64.Mat4(*mat).Inv()
 	return (*MMat4)(&im)
 }
 

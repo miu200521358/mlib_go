@@ -19,8 +19,8 @@ const (
 )
 
 // PanelName returns the name of the operation panel.
-func (p MorphPanel) PanelName() string {
-	switch p {
+func (morphPanel MorphPanel) PanelName() string {
+	switch morphPanel {
 	case MORPH_PANEL_EYEBROW_LOWER_LEFT:
 		return "眉"
 	case MORPH_PANEL_EYE_UPPER_LEFT:
@@ -55,14 +55,14 @@ type Morph struct {
 	*core.IndexNameModel
 	Panel       MorphPanel     // モーフパネル
 	MorphType   MorphType      // モーフ種類
-	Offsets     []TMorphOffset // モーフオフセット
+	Offsets     []IMorphOffset // モーフオフセット
 	DisplaySlot int            // 表示枠
 	IsSystem    bool           // ツール側で追加したモーフ
 }
 
-// TMorphOffset represents a morph offset.
-type TMorphOffset interface {
-	GetType() int
+// IMorphOffset represents a morph offset.
+type IMorphOffset interface {
+	Type() int
 }
 
 // VertexMorphOffset represents a vertex morph.
@@ -71,7 +71,7 @@ type VertexMorphOffset struct {
 	Position    *mmath.MVec3 // 座標オフセット量(x,y,z)
 }
 
-func (v *VertexMorphOffset) GetType() int {
+func (offset *VertexMorphOffset) Type() int {
 	return int(MORPH_TYPE_VERTEX)
 }
 
@@ -88,7 +88,7 @@ type UvMorphOffset struct {
 	Uv          *mmath.MVec4 // UVオフセット量(x,y,z,w)
 }
 
-func (v *UvMorphOffset) GetType() int {
+func (offset *UvMorphOffset) Type() int {
 	return int(MORPH_TYPE_UV)
 }
 
@@ -114,7 +114,7 @@ type BoneMorphOffsetExtend struct {
 	LocalScale    *mmath.MVec3     // ローカル軸に沿った縮尺量(x,y,z)
 }
 
-func (v *BoneMorphOffset) GetType() int {
+func (offset *BoneMorphOffset) Type() int {
 	return int(MORPH_TYPE_BONE)
 }
 
@@ -124,10 +124,10 @@ func NewBoneMorphOffset(boneIndex int, position *mmath.MVec3, rotation *mmath.MR
 		Position:  position,
 		Rotation:  rotation,
 		Extend: &BoneMorphOffsetExtend{
-			Scale:         &mmath.MVec3{1, 1, 1},
-			LocalPosition: &mmath.MVec3{0, 0, 0},
+			Scale:         mmath.NewMVec3(),
+			LocalPosition: mmath.NewMVec3(),
 			LocalRotation: mmath.NewMRotation(),
-			LocalScale:    &mmath.MVec3{1, 1, 1},
+			LocalScale:    mmath.NewMVec3(),
 		},
 	}
 }
@@ -145,7 +145,7 @@ func NewGroupMorphOffset(morphIndex int, morphFactor float64) *GroupMorphOffset 
 	}
 }
 
-func (v *GroupMorphOffset) GetType() int {
+func (offset *GroupMorphOffset) Type() int {
 	return int(MORPH_TYPE_GROUP)
 }
 
@@ -171,7 +171,7 @@ type MaterialMorphOffset struct {
 	ToonTextureFactor   *mmath.MVec4          // Toonテクスチャ係数 (R,G,B,A)
 }
 
-func (v *MaterialMorphOffset) GetType() int {
+func (offset *MaterialMorphOffset) Type() int {
 	return int(MORPH_TYPE_MATERIAL)
 }
 
@@ -207,15 +207,15 @@ func NewMorph() *Morph {
 		IndexNameModel: core.NewIndexNameModel(-1, "", ""),
 		Panel:          MORPH_PANEL_SYSTEM,
 		MorphType:      MORPH_TYPE_VERTEX,
-		Offsets:        make([]TMorphOffset, 0),
+		Offsets:        make([]IMorphOffset, 0),
 		DisplaySlot:    -1,
 		IsSystem:       false,
 	}
 }
 
-func (m *Morph) Copy() core.IIndexNameModel {
+func (morph *Morph) Copy() core.IIndexNameModel {
 	copied := NewMorph()
-	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
+	copier.CopyWithOption(copied, morph, copier.Option{DeepCopy: true})
 	return copied
 }
 

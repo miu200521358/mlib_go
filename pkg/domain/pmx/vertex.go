@@ -34,9 +34,9 @@ func NewVertex() *Vertex {
 	return v
 }
 
-func (v *Vertex) Copy() core.IIndexModel {
+func (vertex *Vertex) Copy() core.IIndexModel {
 	copied := NewVertex()
-	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+	copier.CopyWithOption(copied, vertex, copier.Option{DeepCopy: true})
 	return copied
 }
 

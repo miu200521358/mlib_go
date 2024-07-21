@@ -41,63 +41,63 @@ const (
 )
 
 // 0x01:両面描画
-func (d DrawFlag) IsDoubleSidedDrawing() bool {
-	return d&DRAW_FLAG_DOUBLE_SIDED_DRAWING == DRAW_FLAG_DOUBLE_SIDED_DRAWING
+func (drawFlg DrawFlag) IsDoubleSidedDrawing() bool {
+	return drawFlg&DRAW_FLAG_DOUBLE_SIDED_DRAWING == DRAW_FLAG_DOUBLE_SIDED_DRAWING
 }
 
 // 0x02:地面影
-func (d DrawFlag) IsGroundShadow() bool {
-	return d&DRAW_FLAG_GROUND_SHADOW == DRAW_FLAG_GROUND_SHADOW
+func (drawFlg DrawFlag) IsGroundShadow() bool {
+	return drawFlg&DRAW_FLAG_GROUND_SHADOW == DRAW_FLAG_GROUND_SHADOW
 }
 
 // 0x04:セルフシャドウマップへの描画
-func (d DrawFlag) IsDrawingOnSelfShadowMaps() bool {
-	return d&DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS == DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
+func (drawFlg DrawFlag) IsDrawingOnSelfShadowMaps() bool {
+	return drawFlg&DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS == DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
 }
 
 // 0x08:セルフシャドウの描画
-func (d DrawFlag) IsDrawingSelfShadows() bool {
-	return d&DRAW_FLAG_DRAWING_SELF_SHADOWS == DRAW_FLAG_DRAWING_SELF_SHADOWS
+func (drawFlg DrawFlag) IsDrawingSelfShadows() bool {
+	return drawFlg&DRAW_FLAG_DRAWING_SELF_SHADOWS == DRAW_FLAG_DRAWING_SELF_SHADOWS
 }
 
 // 0x10:エッジ描画
-func (d DrawFlag) IsDrawingEdge() bool {
-	return d&DRAW_FLAG_DRAWING_EDGE == DRAW_FLAG_DRAWING_EDGE
+func (drawFlg DrawFlag) IsDrawingEdge() bool {
+	return drawFlg&DRAW_FLAG_DRAWING_EDGE == DRAW_FLAG_DRAWING_EDGE
 }
 
-func (d DrawFlag) SetDrawingEdge(flag bool) DrawFlag {
+func (drawFlg DrawFlag) SetDrawingEdge(flag bool) DrawFlag {
 	if flag {
-		return d | DRAW_FLAG_DRAWING_EDGE
+		return drawFlg | DRAW_FLAG_DRAWING_EDGE
 	}
-	return d &^ DRAW_FLAG_DRAWING_EDGE
+	return drawFlg &^ DRAW_FLAG_DRAWING_EDGE
 }
 
-func (d DrawFlag) SetDoubleSidedDrawing(flag bool) DrawFlag {
+func (drawFlg DrawFlag) SetDoubleSidedDrawing(flag bool) DrawFlag {
 	if flag {
-		return d | DRAW_FLAG_DOUBLE_SIDED_DRAWING
+		return drawFlg | DRAW_FLAG_DOUBLE_SIDED_DRAWING
 	}
-	return d &^ DRAW_FLAG_DOUBLE_SIDED_DRAWING
+	return drawFlg &^ DRAW_FLAG_DOUBLE_SIDED_DRAWING
 }
 
-func (d DrawFlag) SetGroundShadow(flag bool) DrawFlag {
+func (drawFlg DrawFlag) SetGroundShadow(flag bool) DrawFlag {
 	if flag {
-		return d | DRAW_FLAG_GROUND_SHADOW
+		return drawFlg | DRAW_FLAG_GROUND_SHADOW
 	}
-	return d &^ DRAW_FLAG_GROUND_SHADOW
+	return drawFlg &^ DRAW_FLAG_GROUND_SHADOW
 }
 
-func (d DrawFlag) SetDrawingOnSelfShadowMaps(flag bool) DrawFlag {
+func (drawFlg DrawFlag) SetDrawingOnSelfShadowMaps(flag bool) DrawFlag {
 	if flag {
-		return d | DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
+		return drawFlg | DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
 	}
-	return d &^ DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
+	return drawFlg &^ DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
 }
 
-func (d DrawFlag) SetDrawingSelfShadows(flag bool) DrawFlag {
+func (drawFlg DrawFlag) SetDrawingSelfShadows(flag bool) DrawFlag {
 	if flag {
-		return d | DRAW_FLAG_DRAWING_SELF_SHADOWS
+		return drawFlg | DRAW_FLAG_DRAWING_SELF_SHADOWS
 	}
-	return d &^ DRAW_FLAG_DRAWING_SELF_SHADOWS
+	return drawFlg &^ DRAW_FLAG_DRAWING_SELF_SHADOWS
 }
 
 // 共有Toonフラグ
@@ -147,9 +147,9 @@ func NewMaterial() *Material {
 }
 
 func NewMaterialByName(name string) *Material {
-	m := NewMaterial()
-	m.SetName(name)
-	return m
+	material := NewMaterial()
+	material.SetName(name)
+	return material
 }
 
 // 材質リスト
@@ -167,20 +167,20 @@ func NewMaterials(count int) *Materials {
 	}
 }
 
-func (m *Material) Copy() core.IIndexNameModel {
+func (material *Material) Copy() core.IIndexNameModel {
 	copied := NewMaterial()
-	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
+	copier.CopyWithOption(copied, material, copier.Option{DeepCopy: true})
 	return copied
 }
 
-func (ms *Materials) setup(vertices *Vertices, faces *Faces, textures *Textures) {
+func (materials *Materials) setup(vertices *Vertices, faces *Faces, textures *Textures) {
 	prevVertexCount := 0
 
 	for _, v := range vertices.Data {
 		v.MaterialIndexes = make([]int, 0)
 	}
 
-	for _, m := range ms.Data {
+	for _, m := range materials.Data {
 		for j := prevVertexCount; j < prevVertexCount+int(m.VerticesCount/3); j++ {
 			face := faces.Get(j)
 			for _, vertexIndexes := range face.VertexIndexes {

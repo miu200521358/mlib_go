@@ -8,11 +8,11 @@ func NewInt(v int) Int {
 	return Int(v)
 }
 
-func (v Int) Less(than llrb.Item) bool {
+func (vInt Int) Less(than llrb.Item) bool {
 	if than == nil {
 		return false
 	}
-	return v < than.(Int)
+	return vInt < than.(Int)
 }
 
 type IntIndexes struct {
@@ -25,10 +25,10 @@ func NewIntIndexes() *IntIndexes {
 	}
 }
 
-func (i IntIndexes) Prev(index int) int {
+func (vInts IntIndexes) Prev(index int) int {
 	prevIndex := Int(0)
 
-	i.DescendLessOrEqual(Int(index), func(i llrb.Item) bool {
+	vInts.DescendLessOrEqual(Int(index), func(i llrb.Item) bool {
 		prevIndex = i.(Int)
 		return false
 	})
@@ -36,10 +36,10 @@ func (i IntIndexes) Prev(index int) int {
 	return int(prevIndex)
 }
 
-func (i IntIndexes) Next(index int) int {
+func (vInts IntIndexes) Next(index int) int {
 	nextIndex := Int(index)
 
-	i.AscendGreaterOrEqual(Int(index), func(i llrb.Item) bool {
+	vInts.AscendGreaterOrEqual(Int(index), func(i llrb.Item) bool {
 		nextIndex = i.(Int)
 		return false
 	})
@@ -47,35 +47,35 @@ func (i IntIndexes) Next(index int) int {
 	return int(nextIndex)
 }
 
-func (i IntIndexes) Has(index int) bool {
-	return i.LLRB.Has(Int(index))
+func (vInts IntIndexes) Has(index int) bool {
+	return vInts.LLRB.Has(Int(index))
 }
 
-func (i IntIndexes) Max() int {
-	if i.LLRB.Len() == 0 {
+func (vInts IntIndexes) Max() int {
+	if vInts.LLRB.Len() == 0 {
 		return 0
 	}
-	return int(i.LLRB.Max().(Int))
+	return int(vInts.LLRB.Max().(Int))
 }
 
-func (i IntIndexes) Min() int {
-	if i.LLRB.Len() == 0 {
+func (vInts IntIndexes) Min() int {
+	if vInts.LLRB.Len() == 0 {
 		return 0
 	}
-	return int(i.LLRB.Min().(Int))
+	return int(vInts.LLRB.Min().(Int))
 }
 
-func (i IntIndexes) Len() int {
-	return i.LLRB.Len()
+func (vInts IntIndexes) Len() int {
+	return vInts.LLRB.Len()
 }
 
-func (i IntIndexes) List() []int {
-	list := make([]int, 0, i.LLRB.Len())
-	i.LLRB.AscendGreaterOrEqual(i.LLRB.Min(), func(item llrb.Item) bool {
+func (vInts IntIndexes) List() []int {
+	values := make([]int, 0, vInts.LLRB.Len())
+	vInts.LLRB.AscendGreaterOrEqual(vInts.LLRB.Min(), func(item llrb.Item) bool {
 		if int(item.(Int)) >= 0 {
-			list = append(list, int(item.(Int)))
+			values = append(values, int(item.(Int)))
 		}
 		return true
 	})
-	return list
+	return values
 }

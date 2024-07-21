@@ -56,32 +56,32 @@ func NewBoneMorphDelta(boneIndex int) *BoneMorphDelta {
 	}
 }
 
-func (md *BoneMorphDelta) FilledMorphPosition() *mmath.MVec3 {
-	if md.FramePosition == nil {
-		md.FramePosition = mmath.NewMVec3()
+func (boneMorphDelta *BoneMorphDelta) FilledMorphPosition() *mmath.MVec3 {
+	if boneMorphDelta.FramePosition == nil {
+		boneMorphDelta.FramePosition = mmath.NewMVec3()
 	}
-	return md.FramePosition
+	return boneMorphDelta.FramePosition
 }
 
-func (md *BoneMorphDelta) FilledMorphRotation() *mmath.MQuaternion {
-	if md.FrameRotation == nil {
-		md.FrameRotation = mmath.NewMQuaternion()
+func (boneMorph *BoneMorphDelta) FilledMorphRotation() *mmath.MQuaternion {
+	if boneMorph.FrameRotation == nil {
+		boneMorph.FrameRotation = mmath.NewMQuaternion()
 	}
-	return md.FrameRotation
+	return boneMorph.FrameRotation
 }
 
-func (md *BoneMorphDelta) FilledMorphScale() *mmath.MVec3 {
-	if md.FrameScale == nil {
-		md.FrameScale = mmath.NewMVec3()
+func (boneMorphDelta *BoneMorphDelta) FilledMorphScale() *mmath.MVec3 {
+	if boneMorphDelta.FrameScale == nil {
+		boneMorphDelta.FrameScale = mmath.NewMVec3()
 	}
-	return md.FrameScale
+	return boneMorphDelta.FrameScale
 }
 
-func (md *BoneMorphDelta) Copy() *BoneMorphDelta {
+func (boneMorphDelta *BoneMorphDelta) Copy() *BoneMorphDelta {
 	return &BoneMorphDelta{
-		FramePosition: md.FilledMorphPosition().Copy(),
-		FrameRotation: md.FilledMorphRotation().Copy(),
-		FrameScale:    md.FilledMorphScale().Copy(),
+		FramePosition: boneMorphDelta.FilledMorphPosition().Copy(),
+		FrameRotation: boneMorphDelta.FilledMorphRotation().Copy(),
+		FrameScale:    boneMorphDelta.FilledMorphScale().Copy(),
 	}
 }
 
@@ -95,16 +95,16 @@ func NewBoneMorphDeltas(bones *pmx.Bones) *BoneMorphDeltas {
 	}
 }
 
-func (bts *BoneMorphDeltas) Get(boneIndex int) *BoneMorphDelta {
-	if boneIndex < 0 || boneIndex >= len(bts.Data) {
+func (boneMorphDeltas *BoneMorphDeltas) Get(boneIndex int) *BoneMorphDelta {
+	if boneIndex < 0 || boneIndex >= len(boneMorphDeltas.Data) {
 		return nil
 	}
 
-	return bts.Data[boneIndex]
+	return boneMorphDeltas.Data[boneIndex]
 }
 
-func (bts *BoneMorphDeltas) Update(b *BoneMorphDelta) {
-	bts.Data[b.BoneIndex] = b
+func (boneMorphDeltas *BoneMorphDeltas) Update(b *BoneMorphDelta) {
+	boneMorphDeltas.Data[b.BoneIndex] = b
 }
 
 type MaterialMorphDelta struct {
@@ -151,126 +151,126 @@ func NewMaterialMorphDelta(m *pmx.Material) *MaterialMorphDelta {
 	return mm
 }
 
-func (md *MaterialMorphDelta) Add(m *pmx.MaterialMorphOffset, ratio float64) {
-	md.AddMaterial.Diffuse.Add(m.Diffuse)
-	md.AddMaterial.Specular.Add(m.Specular)
-	md.AddMaterial.Ambient.Add(m.Ambient)
-	md.AddMaterial.Edge.Add(m.Edge)
-	md.AddMaterial.EdgeSize += m.EdgeSize
+func (materialMorphDelta *MaterialMorphDelta) Add(m *pmx.MaterialMorphOffset, ratio float64) {
+	materialMorphDelta.AddMaterial.Diffuse.Add(m.Diffuse)
+	materialMorphDelta.AddMaterial.Specular.Add(m.Specular)
+	materialMorphDelta.AddMaterial.Ambient.Add(m.Ambient)
+	materialMorphDelta.AddMaterial.Edge.Add(m.Edge)
+	materialMorphDelta.AddMaterial.EdgeSize += m.EdgeSize
 	if m.Diffuse.X != 0 {
-		md.AddRatios.Diffuse.X += ratio
+		materialMorphDelta.AddRatios.Diffuse.X += ratio
 	}
 	if m.Diffuse.Y != 0 {
-		md.AddRatios.Diffuse.Y += ratio
+		materialMorphDelta.AddRatios.Diffuse.Y += ratio
 	}
 	if m.Diffuse.Z != 0 {
-		md.AddRatios.Diffuse.Z += ratio
+		materialMorphDelta.AddRatios.Diffuse.Z += ratio
 	}
 	if m.Diffuse.W != 0 {
-		md.AddRatios.Diffuse.W += ratio
+		materialMorphDelta.AddRatios.Diffuse.W += ratio
 	}
 	if m.Specular.X != 0 {
-		md.AddRatios.Specular.X += ratio
+		materialMorphDelta.AddRatios.Specular.X += ratio
 	}
 	if m.Specular.Y != 0 {
-		md.AddRatios.Specular.Y += ratio
+		materialMorphDelta.AddRatios.Specular.Y += ratio
 	}
 	if m.Specular.Z != 0 {
-		md.AddRatios.Specular.Z += ratio
+		materialMorphDelta.AddRatios.Specular.Z += ratio
 	}
 	if m.Specular.W != 0 {
-		md.AddRatios.Specular.W += ratio
+		materialMorphDelta.AddRatios.Specular.W += ratio
 	}
 	if m.Ambient.X != 0 {
-		md.AddRatios.Ambient.X += ratio
+		materialMorphDelta.AddRatios.Ambient.X += ratio
 	}
 	if m.Ambient.Y != 0 {
-		md.AddRatios.Ambient.Y += ratio
+		materialMorphDelta.AddRatios.Ambient.Y += ratio
 	}
 	if m.Ambient.Z != 0 {
-		md.AddRatios.Ambient.Z += ratio
+		materialMorphDelta.AddRatios.Ambient.Z += ratio
 	}
 	if m.Edge.X != 0 {
-		md.AddRatios.Edge.X += ratio
+		materialMorphDelta.AddRatios.Edge.X += ratio
 	}
 	if m.Edge.Y != 0 {
-		md.AddRatios.Edge.Y += ratio
+		materialMorphDelta.AddRatios.Edge.Y += ratio
 	}
 	if m.Edge.Z != 0 {
-		md.AddRatios.Edge.Z += ratio
+		materialMorphDelta.AddRatios.Edge.Z += ratio
 	}
 	if m.Edge.W != 0 {
-		md.AddRatios.Edge.W += ratio
+		materialMorphDelta.AddRatios.Edge.W += ratio
 	}
 	if m.EdgeSize != 0 {
-		md.AddRatios.EdgeSize += ratio
+		materialMorphDelta.AddRatios.EdgeSize += ratio
 	}
 }
 
-func (md *MaterialMorphDelta) Mul(m *pmx.MaterialMorphOffset, ratio float64) {
+func (materialMorphDelta *MaterialMorphDelta) Mul(m *pmx.MaterialMorphOffset, ratio float64) {
 	if m.Diffuse.X != 1 {
-		md.MulMaterial.Diffuse.X *= md.Material.Diffuse.X - m.Diffuse.X
-		md.MulRatios.Diffuse.X *= 1 - ratio
+		materialMorphDelta.MulMaterial.Diffuse.X *= materialMorphDelta.Material.Diffuse.X - m.Diffuse.X
+		materialMorphDelta.MulRatios.Diffuse.X *= 1 - ratio
 	}
 	if m.Diffuse.Y != 1 {
-		md.MulMaterial.Diffuse.Y *= md.Material.Diffuse.Y - m.Diffuse.Y
-		md.MulRatios.Diffuse.Y *= 1 - ratio
+		materialMorphDelta.MulMaterial.Diffuse.Y *= materialMorphDelta.Material.Diffuse.Y - m.Diffuse.Y
+		materialMorphDelta.MulRatios.Diffuse.Y *= 1 - ratio
 	}
 	if m.Diffuse.Z != 1 {
-		md.MulMaterial.Diffuse.Z *= md.Material.Diffuse.Z - m.Diffuse.Z
-		md.MulRatios.Diffuse.Z *= 1 - ratio
+		materialMorphDelta.MulMaterial.Diffuse.Z *= materialMorphDelta.Material.Diffuse.Z - m.Diffuse.Z
+		materialMorphDelta.MulRatios.Diffuse.Z *= 1 - ratio
 	}
 	if m.Diffuse.W != 1 {
-		md.MulMaterial.Diffuse.W *= md.Material.Diffuse.W - m.Diffuse.W
-		md.MulRatios.Diffuse.W *= 1 - ratio
+		materialMorphDelta.MulMaterial.Diffuse.W *= materialMorphDelta.Material.Diffuse.W - m.Diffuse.W
+		materialMorphDelta.MulRatios.Diffuse.W *= 1 - ratio
 	}
 	if m.Specular.X != 1 {
-		md.MulMaterial.Specular.X *= md.Material.Specular.X - m.Specular.X
-		md.MulRatios.Specular.X *= 1 - ratio
+		materialMorphDelta.MulMaterial.Specular.X *= materialMorphDelta.Material.Specular.X - m.Specular.X
+		materialMorphDelta.MulRatios.Specular.X *= 1 - ratio
 	}
 	if m.Specular.Y != 1 {
-		md.MulMaterial.Specular.Y *= md.Material.Specular.Y - m.Specular.Y
-		md.MulRatios.Specular.Y *= 1 - ratio
+		materialMorphDelta.MulMaterial.Specular.Y *= materialMorphDelta.Material.Specular.Y - m.Specular.Y
+		materialMorphDelta.MulRatios.Specular.Y *= 1 - ratio
 	}
 	if m.Specular.Z != 1 {
-		md.MulMaterial.Specular.Z *= md.Material.Specular.Z - m.Specular.Z
-		md.MulRatios.Specular.Z *= 1 - ratio
+		materialMorphDelta.MulMaterial.Specular.Z *= materialMorphDelta.Material.Specular.Z - m.Specular.Z
+		materialMorphDelta.MulRatios.Specular.Z *= 1 - ratio
 	}
 	if m.Specular.W != 1 {
-		md.MulMaterial.Specular.W *= md.Material.Specular.W - m.Specular.W
-		md.MulRatios.Specular.W *= 1 - ratio
+		materialMorphDelta.MulMaterial.Specular.W *= materialMorphDelta.Material.Specular.W - m.Specular.W
+		materialMorphDelta.MulRatios.Specular.W *= 1 - ratio
 	}
 	if m.Ambient.X != 1 {
-		md.MulMaterial.Ambient.X *= md.Material.Ambient.X - m.Ambient.X
-		md.MulRatios.Ambient.X *= 1 - ratio
+		materialMorphDelta.MulMaterial.Ambient.X *= materialMorphDelta.Material.Ambient.X - m.Ambient.X
+		materialMorphDelta.MulRatios.Ambient.X *= 1 - ratio
 	}
 	if m.Ambient.Y != 1 {
-		md.MulMaterial.Ambient.Y *= md.Material.Ambient.Y - m.Ambient.Y
-		md.MulRatios.Ambient.Y *= 1 - ratio
+		materialMorphDelta.MulMaterial.Ambient.Y *= materialMorphDelta.Material.Ambient.Y - m.Ambient.Y
+		materialMorphDelta.MulRatios.Ambient.Y *= 1 - ratio
 	}
 	if m.Ambient.Z != 1 {
-		md.MulMaterial.Ambient.Z *= md.Material.Ambient.Z - m.Ambient.Z
-		md.MulRatios.Ambient.Z *= 1 - ratio
+		materialMorphDelta.MulMaterial.Ambient.Z *= materialMorphDelta.Material.Ambient.Z - m.Ambient.Z
+		materialMorphDelta.MulRatios.Ambient.Z *= 1 - ratio
 	}
 	if m.Edge.X != 1 {
-		md.MulMaterial.Edge.X *= md.Material.Edge.X - m.Edge.X
-		md.MulRatios.Edge.X *= 1 - ratio
+		materialMorphDelta.MulMaterial.Edge.X *= materialMorphDelta.Material.Edge.X - m.Edge.X
+		materialMorphDelta.MulRatios.Edge.X *= 1 - ratio
 	}
 	if m.Edge.Y != 1 {
-		md.MulMaterial.Edge.Y *= md.Material.Edge.Y - m.Edge.Y
-		md.MulRatios.Edge.Y *= 1 - ratio
+		materialMorphDelta.MulMaterial.Edge.Y *= materialMorphDelta.Material.Edge.Y - m.Edge.Y
+		materialMorphDelta.MulRatios.Edge.Y *= 1 - ratio
 	}
 	if m.Edge.Z != 1 {
-		md.MulMaterial.Edge.Z *= md.Material.Edge.Z - m.Edge.Z
-		md.MulRatios.Edge.Z *= 1 - ratio
+		materialMorphDelta.MulMaterial.Edge.Z *= materialMorphDelta.Material.Edge.Z - m.Edge.Z
+		materialMorphDelta.MulRatios.Edge.Z *= 1 - ratio
 	}
 	if m.Edge.W != 1 {
-		md.MulMaterial.Edge.W *= md.Material.Edge.W - m.Edge.W
-		md.MulRatios.Edge.W *= 1 - ratio
+		materialMorphDelta.MulMaterial.Edge.W *= materialMorphDelta.Material.Edge.W - m.Edge.W
+		materialMorphDelta.MulRatios.Edge.W *= 1 - ratio
 	}
 	if m.EdgeSize != 1 {
-		md.MulMaterial.EdgeSize *= md.Material.EdgeSize - m.EdgeSize
-		md.MulRatios.EdgeSize *= ratio
+		materialMorphDelta.MulMaterial.EdgeSize *= materialMorphDelta.Material.EdgeSize - m.EdgeSize
+		materialMorphDelta.MulRatios.EdgeSize *= ratio
 	}
 }
 

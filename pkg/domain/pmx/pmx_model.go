@@ -49,70 +49,70 @@ func NewPmxModel(path string) *PmxModel {
 	return model
 }
 
-func (pm *PmxModel) InitializeDisplaySlots() {
+func (model *PmxModel) InitializeDisplaySlots() {
 	d01 := NewDisplaySlot()
 	d01.SetName("Root")
 	d01.SetEnglishName("Root")
 	d01.SpecialFlag = SPECIAL_FLAG_ON
-	pm.DisplaySlots.Update(d01)
+	model.DisplaySlots.Update(d01)
 
 	d02 := NewDisplaySlot()
 	d02.SetName("表情")
 	d02.SetEnglishName("Exp")
 	d02.SpecialFlag = SPECIAL_FLAG_ON
-	pm.DisplaySlots.Update(d02)
+	model.DisplaySlots.Update(d02)
 }
 
-func (pm *PmxModel) Setup() {
-	if !pm.Materials.IsDirty() && !pm.Bones.IsDirty() && !pm.RigidBodies.IsDirty() && !pm.Joints.IsDirty() {
+func (model *PmxModel) Setup() {
+	if !model.Materials.IsDirty() && !model.Bones.IsDirty() && !model.RigidBodies.IsDirty() && !model.Joints.IsDirty() {
 		return
 	}
 
 	// セットアップ
-	pm.Materials.setup(pm.Vertices, pm.Faces, pm.Textures)
-	pm.Bones.setup()
+	model.Materials.setup(model.Vertices, model.Faces, model.Textures)
+	model.Bones.setup()
 
 	// 剛体
-	for i, rb := range pm.RigidBodies.Data {
-		if rb.BoneIndex >= 0 && pm.Bones.Contains(rb.BoneIndex) {
+	for i, rb := range model.RigidBodies.Data {
+		if rb.BoneIndex >= 0 && model.Bones.Contains(rb.BoneIndex) {
 			// 剛体に関連付けられたボーンが存在する場合、剛体とボーンを関連付ける
-			pm.Bones.Data[rb.BoneIndex].Extend.RigidBody = rb
-			pm.RigidBodies.Data[i].Bone = pm.Bones.Get(rb.BoneIndex)
+			model.Bones.Data[rb.BoneIndex].Extend.RigidBody = rb
+			model.RigidBodies.Data[i].Bone = model.Bones.Get(rb.BoneIndex)
 		}
 	}
 
 	// ジョイント
-	for _, joint := range pm.Joints.Data {
-		if joint.RigidbodyIndexA >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexA) &&
-			joint.RigidbodyIndexB >= 0 && pm.RigidBodies.Contains(joint.RigidbodyIndexB) &&
-			pm.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex >= 0 &&
-			pm.Bones.Contains(pm.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex) &&
-			pm.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex >= 0 &&
-			pm.Bones.Contains(pm.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex) {
+	for _, joint := range model.Joints.Data {
+		if joint.RigidbodyIndexA >= 0 && model.RigidBodies.Contains(joint.RigidbodyIndexA) &&
+			joint.RigidbodyIndexB >= 0 && model.RigidBodies.Contains(joint.RigidbodyIndexB) &&
+			model.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex >= 0 &&
+			model.Bones.Contains(model.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex) &&
+			model.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex >= 0 &&
+			model.Bones.Contains(model.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex) {
 
 			// 剛体AもBも存在する場合、剛体Aと剛体Bを関連付ける
-			pm.RigidBodies.Data[joint.RigidbodyIndexA].JointedBone =
-				pm.Bones.Get(pm.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex)
-			pm.RigidBodies.Data[joint.RigidbodyIndexB].JointedBone =
-				pm.Bones.Get(pm.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex)
+			model.RigidBodies.Data[joint.RigidbodyIndexA].JointedBone =
+				model.Bones.Get(model.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex)
+			model.RigidBodies.Data[joint.RigidbodyIndexB].JointedBone =
+				model.Bones.Get(model.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex)
 		}
 	}
 
-	pm.Bones.SetDirty(false)
-	pm.RigidBodies.SetDirty(false)
-	pm.Joints.SetDirty(false)
+	model.Bones.SetDirty(false)
+	model.RigidBodies.SetDirty(false)
+	model.Joints.SetDirty(false)
 }
 
-func (m *PmxModel) Copy() core.IHashModel {
+func (model *PmxModel) Copy() core.IHashModel {
 	copied := NewPmxModel("")
-	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
+	copier.CopyWithOption(copied, model, copier.Option{DeepCopy: true})
 	return copied
 }
 
-func (pm *PmxModel) EnglishName() string {
-	return pm.englishName
+func (model *PmxModel) EnglishName() string {
+	return model.englishName
 }
 
-func (pm *PmxModel) SetEnglishName(name string) {
-	pm.englishName = name
+func (model *PmxModel) SetEnglishName(name string) {
+	model.englishName = name
 }

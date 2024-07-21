@@ -37,248 +37,248 @@ func NewMVec3() *MVec3 {
 	return &MVec3{}
 }
 
-func (v *MVec3) GetXY() *MVec2 {
-	return &MVec2{v.X, v.Y}
+func (vec3 *MVec3) GetXY() *MVec2 {
+	return &MVec2{vec3.X, vec3.Y}
 }
 
-func (v *MVec3) IsOnlyX() bool {
-	return !NearEquals(v.X, 0, 1e-10) &&
-		NearEquals(v.Y, 0, 1e-10) &&
-		NearEquals(v.Z, 0, 1e-10)
+func (vec3 *MVec3) IsOnlyX() bool {
+	return !NearEquals(vec3.X, 0, 1e-10) &&
+		NearEquals(vec3.Y, 0, 1e-10) &&
+		NearEquals(vec3.Z, 0, 1e-10)
 }
 
-func (v *MVec3) IsOnlyY() bool {
-	return NearEquals(v.X, 0, 1e-10) &&
-		!NearEquals(v.Y, 0, 1e-10) &&
-		NearEquals(v.Z, 0, 1e-10)
+func (vec3 *MVec3) IsOnlyY() bool {
+	return NearEquals(vec3.X, 0, 1e-10) &&
+		!NearEquals(vec3.Y, 0, 1e-10) &&
+		NearEquals(vec3.Z, 0, 1e-10)
 }
 
-func (v *MVec3) IsOnlyZ() bool {
-	return NearEquals(v.X, 0, 1e-10) &&
-		NearEquals(v.Y, 0, 1e-10) &&
-		!NearEquals(v.Z, 0, 1e-10)
+func (vec3 *MVec3) IsOnlyZ() bool {
+	return NearEquals(vec3.X, 0, 1e-10) &&
+		NearEquals(vec3.Y, 0, 1e-10) &&
+		!NearEquals(vec3.Z, 0, 1e-10)
 }
 
 // String T の文字列表現を返します。
-func (v *MVec3) String() string {
-	return fmt.Sprintf("[x=%.7f, y=%.7f, z=%.7f]", v.X, v.Y, v.Z)
+func (vec3 *MVec3) String() string {
+	return fmt.Sprintf("[x=%.7f, y=%.7f, z=%.7f]", vec3.X, vec3.Y, vec3.Z)
 }
 
 // MMD MMD(MikuMikuDance)座標系に変換された3次元ベクトルを返します
-func (v *MVec3) MMD() *MVec3 {
-	return &MVec3{v.X, v.Y, v.Z}
+func (vec3 *MVec3) MMD() *MVec3 {
+	return &MVec3{vec3.X, vec3.Y, vec3.Z}
 }
 
 // Add ベクトルに他のベクトルを加算します
-func (v *MVec3) Add(other *MVec3) *MVec3 {
-	v.X += other.X
-	v.Y += other.Y
-	v.Z += other.Z
-	return v
+func (vec3 *MVec3) Add(other *MVec3) *MVec3 {
+	vec3.X += other.X
+	vec3.Y += other.Y
+	vec3.Z += other.Z
+	return vec3
 }
 
 // AddScalar ベクトルの各要素にスカラーを加算します
-func (v *MVec3) AddScalar(s float64) *MVec3 {
-	v.X += s
-	v.Y += s
-	v.Z += s
-	return v
+func (vec3 *MVec3) AddScalar(s float64) *MVec3 {
+	vec3.X += s
+	vec3.Y += s
+	vec3.Z += s
+	return vec3
 }
 
 // Added ベクトルに他のベクトルを加算した結果を返します
-func (v *MVec3) Added(other *MVec3) *MVec3 {
-	return &MVec3{v.X + other.X, v.Y + other.Y, v.Z + other.Z}
+func (vec3 *MVec3) Added(other *MVec3) *MVec3 {
+	return &MVec3{vec3.X + other.X, vec3.Y + other.Y, vec3.Z + other.Z}
 }
 
-func (v *MVec3) AddedScalar(s float64) *MVec3 {
-	return &MVec3{v.X + s, v.Y + s, v.Z + s}
+func (vec3 *MVec3) AddedScalar(s float64) *MVec3 {
+	return &MVec3{vec3.X + s, vec3.Y + s, vec3.Z + s}
 }
 
 // Sub ベクトルから他のベクトルを減算します
-func (v *MVec3) Sub(other *MVec3) *MVec3 {
-	v.X -= other.X
-	v.Y -= other.Y
-	v.Z -= other.Z
-	return v
+func (vec3 *MVec3) Sub(other *MVec3) *MVec3 {
+	vec3.X -= other.X
+	vec3.Y -= other.Y
+	vec3.Z -= other.Z
+	return vec3
 }
 
 // SubScalar ベクトルの各要素からスカラーを減算します
-func (v *MVec3) SubScalar(s float64) *MVec3 {
-	v.X -= s
-	v.Y -= s
-	v.Z -= s
-	return v
+func (vec3 *MVec3) SubScalar(s float64) *MVec3 {
+	vec3.X -= s
+	vec3.Y -= s
+	vec3.Z -= s
+	return vec3
 }
 
 // Subed ベクトルから他のベクトルを減算した結果を返します
-func (v *MVec3) Subed(other *MVec3) *MVec3 {
-	return &MVec3{v.X - other.X, v.Y - other.Y, v.Z - other.Z}
+func (vec3 *MVec3) Subed(other *MVec3) *MVec3 {
+	return &MVec3{vec3.X - other.X, vec3.Y - other.Y, vec3.Z - other.Z}
 }
 
-func (v *MVec3) SubedScalar(s float64) *MVec3 {
-	return &MVec3{v.X - s, v.Y - s, v.Z - s}
+func (vec3 *MVec3) SubedScalar(s float64) *MVec3 {
+	return &MVec3{vec3.X - s, vec3.Y - s, vec3.Z - s}
 }
 
 // Mul ベクトルの各要素に他のベクトルの各要素を乗算します
-func (v *MVec3) Mul(other *MVec3) *MVec3 {
-	v.X *= other.X
-	v.Y *= other.Y
-	v.Z *= other.Z
-	return v
+func (vec3 *MVec3) Mul(other *MVec3) *MVec3 {
+	vec3.X *= other.X
+	vec3.Y *= other.Y
+	vec3.Z *= other.Z
+	return vec3
 }
 
 // MulScalar ベクトルの各要素にスカラーを乗算します
-func (v *MVec3) MulScalar(s float64) *MVec3 {
-	v.X *= s
-	v.Y *= s
-	v.Z *= s
-	return v
+func (vec3 *MVec3) MulScalar(s float64) *MVec3 {
+	vec3.X *= s
+	vec3.Y *= s
+	vec3.Z *= s
+	return vec3
 }
 
 // Muled ベクトルの各要素に他のベクトルの各要素を乗算した結果を返します
-func (v *MVec3) Muled(other *MVec3) *MVec3 {
-	return &MVec3{v.X * other.X, v.Y * other.Y, v.Z * other.Z}
+func (vec3 *MVec3) Muled(other *MVec3) *MVec3 {
+	return &MVec3{vec3.X * other.X, vec3.Y * other.Y, vec3.Z * other.Z}
 }
 
-func (v *MVec3) MuledScalar(s float64) *MVec3 {
-	return &MVec3{v.X * s, v.Y * s, v.Z * s}
+func (vec3 *MVec3) MuledScalar(s float64) *MVec3 {
+	return &MVec3{vec3.X * s, vec3.Y * s, vec3.Z * s}
 }
 
 // Div ベクトルの各要素を他のベクトルの各要素で除算します
-func (v *MVec3) Div(other *MVec3) *MVec3 {
-	v.X /= other.X
-	v.Y /= other.Y
-	v.Z /= other.Z
-	return v
+func (vec3 *MVec3) Div(other *MVec3) *MVec3 {
+	vec3.X /= other.X
+	vec3.Y /= other.Y
+	vec3.Z /= other.Z
+	return vec3
 }
 
 // DivScalar ベクトルの各要素をスカラーで除算します
-func (v *MVec3) DivScalar(s float64) *MVec3 {
-	v.X /= s
-	v.Y /= s
-	v.Z /= s
-	return v
+func (vec3 *MVec3) DivScalar(s float64) *MVec3 {
+	vec3.X /= s
+	vec3.Y /= s
+	vec3.Z /= s
+	return vec3
 }
 
 // Dived ベクトルの各要素を他のベクトルの各要素で除算した結果を返します
-func (v *MVec3) Dived(other *MVec3) *MVec3 {
-	return &MVec3{v.X / other.X, v.Y / other.Y, v.Z / other.Z}
+func (vec3 *MVec3) Dived(other *MVec3) *MVec3 {
+	return &MVec3{vec3.X / other.X, vec3.Y / other.Y, vec3.Z / other.Z}
 }
 
 // DivedScalar ベクトルの各要素をスカラーで除算した結果を返します
-func (v *MVec3) DivedScalar(s float64) *MVec3 {
-	return &MVec3{v.X / s, v.Y / s, v.Z / s}
+func (vec3 *MVec3) DivedScalar(s float64) *MVec3 {
+	return &MVec3{vec3.X / s, vec3.Y / s, vec3.Z / s}
 }
 
 // Equal ベクトルが他のベクトルと等しいかどうかをチェックします
-func (v *MVec3) Equals(other *MVec3) bool {
-	return v.X == other.X && v.Y == other.Y && v.Z == other.Z
+func (vec3 *MVec3) Equals(other *MVec3) bool {
+	return vec3.X == other.X && vec3.Y == other.Y && vec3.Z == other.Z
 }
 
 // NotEqual ベクトルが他のベクトルと等しくないかどうかをチェックします
-func (v *MVec3) NotEquals(other MVec3) bool {
-	return v.X != other.X || v.Y != other.Y || v.Z != other.Z
+func (vec3 *MVec3) NotEquals(other MVec3) bool {
+	return vec3.X != other.X || vec3.Y != other.Y || vec3.Z != other.Z
 }
 
 // NearEquals ベクトルが他のベクトルとほぼ等しいかどうかをチェックします
-func (v *MVec3) NearEquals(other *MVec3, epsilon float64) bool {
-	return (math.Abs(v.X-other.X) <= epsilon) &&
-		(math.Abs(v.Y-other.Y) <= epsilon) &&
-		(math.Abs(v.Z-other.Z) <= epsilon)
+func (vec3 *MVec3) NearEquals(other *MVec3, epsilon float64) bool {
+	return (math.Abs(vec3.X-other.X) <= epsilon) &&
+		(math.Abs(vec3.Y-other.Y) <= epsilon) &&
+		(math.Abs(vec3.Z-other.Z) <= epsilon)
 }
 
 // LessThan ベクトルが他のベクトルより小さいかどうかをチェックします (<)
-func (v *MVec3) LessThan(other *MVec3) bool {
-	return v.X < other.X && v.Y < other.Y && v.Z < other.Z
+func (vec3 *MVec3) LessThan(other *MVec3) bool {
+	return vec3.X < other.X && vec3.Y < other.Y && vec3.Z < other.Z
 }
 
 // LessThanOrEqual ベクトルが他のベクトル以下かどうかをチェックします (<=)
-func (v *MVec3) LessThanOrEquals(other *MVec3) bool {
-	return v.X <= other.X && v.Y <= other.Y && v.Z <= other.Z
+func (vec3 *MVec3) LessThanOrEquals(other *MVec3) bool {
+	return vec3.X <= other.X && vec3.Y <= other.Y && vec3.Z <= other.Z
 }
 
 // GreaterThan ベクトルが他のベクトルより大きいかどうかをチェックします (>)
-func (v *MVec3) GreaterThan(other *MVec3) bool {
-	return v.X > other.X && v.Y > other.Y && v.Z > other.Z
+func (vec3 *MVec3) GreaterThan(other *MVec3) bool {
+	return vec3.X > other.X && vec3.Y > other.Y && vec3.Z > other.Z
 }
 
 // GreaterThanOrEqual ベクトルが他のベクトル以上かどうかをチェックします (>=)
-func (v *MVec3) GreaterThanOrEquals(other *MVec3) bool {
-	return v.X >= other.X && v.Y >= other.Y && v.Z >= other.Z
+func (vec3 *MVec3) GreaterThanOrEquals(other *MVec3) bool {
+	return vec3.X >= other.X && vec3.Y >= other.Y && vec3.Z >= other.Z
 }
 
 // Inverse ベクトルの各要素の符号を反転します (-v)
-func (v *MVec3) Inverse() *MVec3 {
-	v.X = -v.X
-	v.Y = -v.Y
-	v.Z = -v.Z
-	return v
+func (vec3 *MVec3) Inverse() *MVec3 {
+	vec3.X = -vec3.X
+	vec3.Y = -vec3.Y
+	vec3.Z = -vec3.Z
+	return vec3
 }
 
 // Inverted ベクトルの各要素の符号を反転した結果を返します (-v)
-func (v *MVec3) Inverted() *MVec3 {
-	return &MVec3{-v.X, -v.Y, -v.Z}
+func (vec3 *MVec3) Inverted() *MVec3 {
+	return &MVec3{-vec3.X, -vec3.Y, -vec3.Z}
 }
 
 // Abs ベクトルの各要素の絶対値を返します
-func (v *MVec3) Abs() *MVec3 {
-	v.X = math.Abs(v.X)
-	v.Y = math.Abs(v.Y)
-	v.Z = math.Abs(v.Z)
-	return v
+func (vec3 *MVec3) Abs() *MVec3 {
+	vec3.X = math.Abs(vec3.X)
+	vec3.Y = math.Abs(vec3.Y)
+	vec3.Z = math.Abs(vec3.Z)
+	return vec3
 }
 
 // Absed ベクトルの各要素の絶対値を返します
-func (v *MVec3) Absed() *MVec3 {
-	return &MVec3{math.Abs(v.X), math.Abs(v.Y), math.Abs(v.Z)}
+func (vec3 *MVec3) Absed() *MVec3 {
+	return &MVec3{math.Abs(vec3.X), math.Abs(vec3.Y), math.Abs(vec3.Z)}
 }
 
 // Hash ベクトルのハッシュ値を計算します
-func (v *MVec3) Hash() uint64 {
+func (vec3 *MVec3) Hash() uint64 {
 	h := fnv.New64a()
-	h.Write([]byte(fmt.Sprintf("%.10f,%.10f,%.10f", v.X, v.Y, v.Z)))
+	h.Write([]byte(fmt.Sprintf("%.10f,%.10f,%.10f", vec3.X, vec3.Y, vec3.Z)))
 	return h.Sum64()
 }
 
 // IsZero ベクトルがゼロベクトルかどうかをチェックします
-func (v *MVec3) IsZero() bool {
-	return v.NearEquals(MVec3Zero, 1e-10)
+func (vec3 *MVec3) IsZero() bool {
+	return vec3.NearEquals(MVec3Zero, 1e-10)
 }
 
 // IsZero ベクトルが1ベクトルかどうかをチェックします
-func (v *MVec3) IsOne() bool {
-	return v.NearEquals(MVec3One, 1e-10)
+func (vec3 *MVec3) IsOne() bool {
+	return vec3.NearEquals(MVec3One, 1e-10)
 }
 
 // Length ベクトルの長さを返します
-func (v *MVec3) Length() float64 {
-	return mgl64.Vec3{v.X, v.Y, v.Z}.Len()
+func (vec3 *MVec3) Length() float64 {
+	return mgl64.Vec3{vec3.X, vec3.Y, vec3.Z}.Len()
 }
 
 // LengthSqr ベクトルの長さの2乗を返します
-func (v *MVec3) LengthSqr() float64 {
-	return mgl64.Vec3{v.X, v.Y, v.Z}.LenSqr()
+func (vec3 *MVec3) LengthSqr() float64 {
+	return mgl64.Vec3{vec3.X, vec3.Y, vec3.Z}.LenSqr()
 }
 
 // Normalize ベクトルを正規化します
-func (v *MVec3) Normalize() *MVec3 {
-	sl := v.LengthSqr()
+func (vec3 *MVec3) Normalize() *MVec3 {
+	sl := vec3.LengthSqr()
 	if sl == 0 || sl == 1 {
-		return v
+		return vec3
 	}
-	return v.MulScalar(1 / math.Sqrt(sl))
+	return vec3.MulScalar(1 / math.Sqrt(sl))
 }
 
 // Normalized ベクトルを正規化した結果を返します
-func (v *MVec3) Normalized() *MVec3 {
-	vec := MVec3{v.X, v.Y, v.Z}
+func (vec3 *MVec3) Normalized() *MVec3 {
+	vec := MVec3{vec3.X, vec3.Y, vec3.Z}
 	vec.Normalize()
 	return &vec
 }
 
 // Angle ベクトルの角度(ラジアン角度)を返します
-func (v *MVec3) Angle(other *MVec3) float64 {
-	vec := v.Dot(other) / (v.Length() * other.Length())
+func (vec3 *MVec3) Angle(other *MVec3) float64 {
+	vec := vec3.Dot(other) / (vec3.Length() * other.Length())
 	// prevent NaN
 	if vec > 1. {
 		return 0
@@ -289,128 +289,128 @@ func (v *MVec3) Angle(other *MVec3) float64 {
 }
 
 // Degree ベクトルの角度(度数)を返します
-func (v *MVec3) Degree(other *MVec3) float64 {
-	radian := v.Angle(other)
+func (vec3 *MVec3) Degree(other *MVec3) float64 {
+	radian := vec3.Angle(other)
 	degree := radian * (180 / math.Pi)
 	return degree
 }
 
 // Dot ベクトルの内積を返します
-func (v *MVec3) Dot(other *MVec3) float64 {
-	return mgl64.Vec3{v.X, v.Y, v.Z}.Dot(mgl64.Vec3{other.X, other.Y, other.Z})
+func (vec3 *MVec3) Dot(other *MVec3) float64 {
+	return mgl64.Vec3{vec3.X, vec3.Y, vec3.Z}.Dot(mgl64.Vec3{other.X, other.Y, other.Z})
 }
 
 // Cross ベクトルの外積を返します
-func (v1 *MVec3) Cross(v2 *MVec3) *MVec3 {
-	v := mgl64.Vec3{v1.X, v1.Y, v1.Z}.Cross(mgl64.Vec3{v2.X, v2.Y, v2.Z})
+func (vec3 *MVec3) Cross(other *MVec3) *MVec3 {
+	v := mgl64.Vec3{vec3.X, vec3.Y, vec3.Z}.Cross(mgl64.Vec3{other.X, other.Y, other.Z})
 	return &MVec3{v[0], v[1], v[2]}
 }
 
 // Min ベクトルの各要素の最小値をTの各要素に設定して返します
-func (v *MVec3) Min() *MVec3 {
-	min := v.X
-	if v.Y < min {
-		min = v.Y
+func (vec3 *MVec3) Min() *MVec3 {
+	min := vec3.X
+	if vec3.Y < min {
+		min = vec3.Y
 	}
-	if v.Z < min {
-		min = v.Z
+	if vec3.Z < min {
+		min = vec3.Z
 	}
 	return &MVec3{min, min, min}
 }
 
 // Max ベクトルの各要素の最大値を返します
-func (v *MVec3) Max() *MVec3 {
-	max := v.X
-	if v.Y > max {
-		max = v.Y
+func (vec3 *MVec3) Max() *MVec3 {
+	max := vec3.X
+	if vec3.Y > max {
+		max = vec3.Y
 	}
-	if v.Z > max {
-		max = v.Z
+	if vec3.Z > max {
+		max = vec3.Z
 	}
 	return &MVec3{max, max, max}
 }
 
 // Interpolate ベクトルの線形補間を行います
-func (v *MVec3) Interpolate(other *MVec3, t float64) *MVec3 {
+func (vec3 *MVec3) Interpolate(other *MVec3, t float64) *MVec3 {
 	t1 := 1 - t
 	return &MVec3{
-		v.X*t1 + other.X*t,
-		v.Y*t1 + other.Y*t,
-		v.Z*t1 + other.Z*t,
+		vec3.X*t1 + other.X*t,
+		vec3.Y*t1 + other.Y*t,
+		vec3.Z*t1 + other.Z*t,
 	}
 }
 
 // Clamp ベクトルの各要素を指定された範囲内にクランプします
-func (v *MVec3) Clamp(min, max *MVec3) *MVec3 {
-	v.X = ClampedFloat(v.X, min.X, max.X)
-	v.Y = ClampedFloat(v.Y, min.Y, max.Y)
-	v.Z = ClampedFloat(v.Z, min.Z, max.Z)
-	return v
+func (vec3 *MVec3) Clamp(min, max *MVec3) *MVec3 {
+	vec3.X = ClampedFloat(vec3.X, min.X, max.X)
+	vec3.Y = ClampedFloat(vec3.Y, min.Y, max.Y)
+	vec3.Z = ClampedFloat(vec3.Z, min.Z, max.Z)
+	return vec3
 }
 
 // Clamped ベクトルの各要素を指定された範囲内にクランプした結果を返します
-func (v *MVec3) Clamped(min, max *MVec3) *MVec3 {
-	result := MVec3{v.X, v.Y, v.Z}
+func (vec3 *MVec3) Clamped(min, max *MVec3) *MVec3 {
+	result := MVec3{vec3.X, vec3.Y, vec3.Z}
 	result.Clamp(min, max)
 	return &result
 }
 
 // Clamp01 ベクトルの各要素を0.0～1.0の範囲内にクランプします
-func (v *MVec3) Clamp01() *MVec3 {
-	return v.Clamp(MVec3Zero, MVec3One)
+func (vec3 *MVec3) Clamp01() *MVec3 {
+	return vec3.Clamp(MVec3Zero, MVec3One)
 }
 
 // Clamped01 ベクトルの各要素を0.0～1.0の範囲内にクランプした結果を返します
-func (v *MVec3) Clamped01() *MVec3 {
-	result := MVec3{v.X, v.Y, v.Z}
+func (vec3 *MVec3) Clamped01() *MVec3 {
+	result := MVec3{vec3.X, vec3.Y, vec3.Z}
 	result.Clamp01()
 	return &result
 }
 
 // Copy
-func (v *MVec3) Copy() *MVec3 {
-	return &MVec3{v.X, v.Y, v.Z}
+func (vec3 *MVec3) Copy() *MVec3 {
+	return &MVec3{vec3.X, vec3.Y, vec3.Z}
 }
 
 // Vector
-func (v *MVec3) Vector() []float64 {
-	return []float64{v.X, v.Y, v.Z}
+func (vec3 *MVec3) Vector() []float64 {
+	return []float64{vec3.X, vec3.Y, vec3.Z}
 }
 
-func (v *MVec3) ToMat4() *MMat4 {
+func (vec3 *MVec3) ToMat4() *MMat4 {
 	mat := NewMMat4()
-	mat[3] = v.X
-	mat[7] = v.Y
-	mat[11] = v.Z
+	mat[3] = vec3.X
+	mat[7] = vec3.Y
+	mat[11] = vec3.Z
 	return mat
 }
 
-func (v *MVec3) ToScaleMat4() *MMat4 {
+func (vec3 *MVec3) ToScaleMat4() *MMat4 {
 	mat := NewMMat4()
-	mat[0] = v.X
-	mat[5] = v.Y
-	mat[10] = v.Z
+	mat[0] = vec3.X
+	mat[5] = vec3.Y
+	mat[10] = vec3.Z
 	return mat
 }
 
 // ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
-func (v *MVec3) ClampIfVerySmall() *MVec3 {
+func (vec3 *MVec3) ClampIfVerySmall() *MVec3 {
 	epsilon := 1e-6
-	if math.Abs(v.X) < epsilon {
-		v.X = 0
+	if math.Abs(vec3.X) < epsilon {
+		vec3.X = 0
 	}
-	if math.Abs(v.Y) < epsilon {
-		v.Y = 0
+	if math.Abs(vec3.Y) < epsilon {
+		vec3.Y = 0
 	}
-	if math.Abs(v.Z) < epsilon {
-		v.Z = 0
+	if math.Abs(vec3.Z) < epsilon {
+		vec3.Z = 0
 	}
-	return v
+	return vec3
 }
 
 // 線形補間
-func (v1 *MVec3) Lerp(v2 *MVec3, t float64) *MVec3 {
-	return (v2.Subed(v1)).MulScalar(t).Add(v1)
+func (vec3 *MVec3) Lerp(other *MVec3, t float64) *MVec3 {
+	return (other.Subed(vec3)).MulScalar(t).Add(vec3)
 }
 
 func (v *MVec3) Round() *MVec3 {
@@ -422,13 +422,13 @@ func (v *MVec3) Round() *MVec3 {
 }
 
 // ToLocalMatrix4x4 自身をローカル軸とした場合の回転行列を取得します
-func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
-	if v.IsZero() {
+func (vec3 *MVec3) ToLocalMatrix4x4() *MMat4 {
+	if vec3.IsZero() {
 		return NewMMat4()
 	}
 
 	// ローカルX軸の方向ベクトル
-	xAxis := v.Copy()
+	xAxis := vec3.Copy()
 	normXAxis := xAxis.Length()
 	if normXAxis == 0 {
 		return NewMMat4()
@@ -441,7 +441,7 @@ func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
 
 	// ローカルZ軸の方向ベクトル
 	zAxis := &MVec3{0.0, 0.0, -1.0}
-	if zAxis.Equals(v) {
+	if zAxis.Equals(vec3) {
 		// 自身がほぼZ軸ベクトルの場合、別ベクトルを与える
 		zAxis = &MVec3{0.0, 1.0, 0.0}
 	}
@@ -474,8 +474,8 @@ func (v *MVec3) ToLocalMatrix4x4() *MMat4 {
 }
 
 // One 0を1に変える
-func (v *MVec3) One() *MVec3 {
-	vec := v.Vector()
+func (vec3 *MVec3) One() *MVec3 {
+	vec := vec3.Vector()
 	epsilon := 1e-14
 	for i := 0; i < len(vec); i++ {
 		if math.Abs(vec[i]) < epsilon {
@@ -485,22 +485,22 @@ func (v *MVec3) One() *MVec3 {
 	return &MVec3{vec[0], vec[1], vec[2]}
 }
 
-func (v *MVec3) Distance(other *MVec3) float64 {
-	return v.Subed(other).Length()
+func (vec3 *MVec3) Distance(other *MVec3) float64 {
+	return vec3.Subed(other).Length()
 }
 
-func (v *MVec3) Distances(others []*MVec3) []float64 {
+func (vec3 *MVec3) Distances(others []*MVec3) []float64 {
 	distances := make([]float64, len(others))
 	for i, other := range others {
-		distances[i] = v.Distance(other)
+		distances[i] = vec3.Distance(other)
 	}
 	return distances
 }
 
 // 2点間のベクトルと点Pの直交距離を計算
-func DistanceFromPointToLine(a, b, p *MVec3) float64 {
-	lineVec := b.Subed(a)               // 線分ABのベクトル
-	pointVec := p.Subed(a)              // 点Pから点Aへのベクトル
+func DistanceFromPointToLine(vec1, vec2, point *MVec3) float64 {
+	lineVec := vec2.Subed(vec1)         // 線分ABのベクトル
+	pointVec := point.Subed(vec1)       // 点Pから点Aへのベクトル
 	crossVec := lineVec.Cross(pointVec) // 外積ベクトル
 	area := crossVec.Length()           // 平行四辺形の面積
 	lineLength := lineVec.Length()      // 線分ABの長さ
@@ -508,12 +508,12 @@ func DistanceFromPointToLine(a, b, p *MVec3) float64 {
 }
 
 // 2点間のベクトルと、点Pを含むカメラ平面と平行な面、との距離を計算
-func DistanceFromPlaneToLine(near, far, forward, right, up, p *MVec3) float64 {
+func DistanceFromPlaneToLine(near, far, forward, right, up, point *MVec3) float64 {
 	// ステップ1: カメラ平面の法線ベクトルを計算
 	normal := forward.Cross(right)
 
 	// ステップ2: 点Pからカメラ平面へのベクトルを計算
-	vectorToPlane := p.Subed(near)
+	vectorToPlane := point.Subed(near)
 
 	// ステップ3: 距離を計算
 	distance := math.Abs(vectorToPlane.Dot(normal)) / normal.Length()
@@ -522,7 +522,7 @@ func DistanceFromPlaneToLine(near, far, forward, right, up, p *MVec3) float64 {
 }
 
 // 2点間のベクトルと、点Pを含むカメラ平面と平行な面、との交点を計算
-func IntersectLinePlane(near, far, forward, right, up, p *MVec3) *MVec3 {
+func IntersectLinePlane(near, far, forward, right, up, point *MVec3) *MVec3 {
 	// ステップ1: カメラ平面の法線ベクトルを計算
 	normal := forward.Cross(right)
 
@@ -530,7 +530,7 @@ func IntersectLinePlane(near, far, forward, right, up, p *MVec3) *MVec3 {
 	direction := far.Subed(near)
 
 	// ステップ3: 平面の方程式のD成分を計算
-	D := -normal.Dot(p)
+	D := -normal.Dot(point)
 
 	// ステップ4: 方向ベクトルと法線ベクトルが平行かどうかを確認
 	denom := normal.Dot(direction)
@@ -560,16 +560,16 @@ func DistanceLineToPoints(worldPos *MVec3, points []*MVec3) []float64 {
 	return distances
 }
 
-func Distances(v *MVec3, others []*MVec3) []float64 {
+func Distances(vec3 *MVec3, others []*MVec3) []float64 {
 	distances := make([]float64, len(others))
 	for i, other := range others {
-		distances[i] = v.Distance(other)
+		distances[i] = vec3.Distance(other)
 	}
 	return distances
 }
 
-func (v *MVec3) Project(other *MVec3) *MVec3 {
-	return other.MuledScalar(v.Dot(other) / other.LengthSqr())
+func (vec3 *MVec3) Project(other *MVec3) *MVec3 {
+	return other.MuledScalar(vec3.Dot(other) / other.LengthSqr())
 }
 
 // 標準偏差を加味したmean処理
@@ -599,10 +599,10 @@ func StdMeanVec3(values []MVec3, err float64) *MVec3 {
 }
 
 // 点が直方体内にあるかどうかを判定する関数
-func (point *MVec3) IsPointInsideBox(min, max *MVec3) bool {
-	return point.X >= min.X && point.X <= max.X &&
-		point.Y >= min.Y && point.Y <= max.Y &&
-		point.Z >= min.Z && point.Z <= max.Z
+func (vec3 *MVec3) IsPointInsideBox(min, max *MVec3) bool {
+	return vec3.X >= min.X && vec3.X <= max.X &&
+		vec3.Y >= min.Y && vec3.Y <= max.Y &&
+		vec3.Z >= min.Z && vec3.Z <= max.Z
 }
 
 // 直方体の境界を計算する関数
@@ -632,4 +632,14 @@ func CalculateBoundingBox(points ...*MVec3) (minPos, maxPos *MVec3) {
 	}
 
 	return minPos, maxPos
+}
+
+// Vec3Diffは、2つのベクトル間の回転四元数を返します。
+func (vec1 *MVec3) Vec3Diff(vec2 *MVec3) *MQuaternion {
+	cr := vec1.Cross(vec2)
+	sr := math.Sqrt(2 * (1 + vec1.Dot(vec2)))
+	oosr := 1 / sr
+
+	q := NewMQuaternionByValues(cr.X*oosr, cr.Y*oosr, cr.Z*oosr, sr*0.5)
+	return q.Normalize()
 }

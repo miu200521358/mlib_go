@@ -10,6 +10,6 @@ func NewShadowFrames() *ShadowFrames {
 	}
 }
 
-func (i *ShadowFrames) NewFrame(index int) *ShadowFrame {
+func (shadowFrames *ShadowFrames) NewFrame(index int) *ShadowFrame {
 	return NewShadowFrame(index)
 }

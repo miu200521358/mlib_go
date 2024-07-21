@@ -42,69 +42,69 @@ func NewMRotationFromQuaternion(vQuaternion *MQuaternion) *MRotation {
 	return model
 }
 
-func (m *MRotation) Quaternion() *MQuaternion {
-	if m.quaternion == nil {
-		m.quaternion = NewMQuaternion()
+func (rot *MRotation) Quaternion() *MQuaternion {
+	if rot.quaternion == nil {
+		rot.quaternion = NewMQuaternion()
 	}
-	return m.quaternion
+	return rot.quaternion
 }
 
-func (m *MRotation) SetQuaternion(v *MQuaternion) {
-	m.quaternion = v
-	m.radians = v.ToRadians()
-	m.degrees = &MVec3{
-		180.0 * m.radians.X / math.Pi,
-		180.0 * m.radians.Y / math.Pi,
-		180.0 * m.radians.Z / math.Pi,
+func (rot *MRotation) SetQuaternion(v *MQuaternion) {
+	rot.quaternion = v
+	rot.radians = v.ToRadians()
+	rot.degrees = &MVec3{
+		180.0 * rot.radians.X / math.Pi,
+		180.0 * rot.radians.Y / math.Pi,
+		180.0 * rot.radians.Z / math.Pi,
 	}
 }
 
-func (m *MRotation) Radians() *MVec3 {
-	if m.radians == nil {
-		m.radians = NewMVec3()
+func (rot *MRotation) Radians() *MVec3 {
+	if rot.radians == nil {
+		rot.radians = NewMVec3()
 	}
-	return m.radians
+	return rot.radians
 }
 
-func (m *MRotation) GetRadiansMMD() *MVec3 {
-	if m.radians == nil {
-		m.radians = NewMVec3()
+func (rot *MRotation) GetRadiansMMD() *MVec3 {
+	if rot.radians == nil {
+		rot.radians = NewMVec3()
 	}
-	return m.radians.MMD()
+	return rot.radians.MMD()
 }
 
-func (m *MRotation) SetRadians(v *MVec3) {
-	m.radians = v
-	m.degrees = &MVec3{
+func (rot *MRotation) SetRadians(v *MVec3) {
+	rot.radians = v
+	rot.degrees = &MVec3{
 		180.0 * v.X / math.Pi,
 		180.0 * v.Y / math.Pi,
 		180.0 * v.Z / math.Pi,
 	}
-	m.quaternion = NewMQuaternionFromRadians(v.X, v.Y, v.Z)
+	rot.quaternion = NewMQuaternionFromRadians(v.X, v.Y, v.Z)
 }
 
-func (m *MRotation) Degrees() *MVec3 {
-	if m.degrees == nil {
-		m.degrees = NewMVec3()
+func (rot *MRotation) Degrees() *MVec3 {
+	if rot.degrees == nil {
+		rot.degrees = NewMVec3()
 	}
-	return m.degrees
+	return rot.degrees
 }
 
-func (m *MRotation) DegreesMMD() *MVec3 {
-	if m.degrees == nil {
-		m.degrees = NewMVec3()
+func (rot *MRotation) DegreesMMD() *MVec3 {
+	if rot.degrees == nil {
+		rot.degrees = NewMVec3()
 	}
-	return m.degrees.MMD()
+	return rot.degrees.MMD()
 }
 
-func (m *MRotation) SetDegrees(v *MVec3) {
-	m.degrees = v
-	m.radians = &MVec3{
+func (rot *MRotation) SetDegrees(v *MVec3) {
+	rot.degrees = v
+	rot.radians = &MVec3{
 		math.Pi * v.X / 180.0,
 		math.Pi * v.Y / 180.0,
 		math.Pi * v.Z / 180.0,
 	}
-	m.quaternion = NewMQuaternionFromRadians(m.radians.X, m.radians.Y, m.radians.Z)
+	rot.quaternion = NewMQuaternionFromRadians(rot.radians.X, rot.radians.Y, rot.radians.Z)
 }
 
 // Copy

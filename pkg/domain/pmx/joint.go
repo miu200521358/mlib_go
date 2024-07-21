@@ -52,16 +52,16 @@ func NewJoint() *Joint {
 	}
 }
 
-func (j *Joint) Copy() core.IIndexNameModel {
+func (joint *Joint) Copy() core.IIndexNameModel {
 	copied := NewJoint()
-	copier.CopyWithOption(copied, j, copier.Option{DeepCopy: true})
+	copier.CopyWithOption(copied, joint, copier.Option{DeepCopy: true})
 	return copied
 }
 
 func NewJointByName(name string) *Joint {
-	j := NewJoint()
-	j.SetName(name)
-	return j
+	joint := NewJoint()
+	joint.SetName(name)
+	return joint
 }
 
 // ジョイントリスト

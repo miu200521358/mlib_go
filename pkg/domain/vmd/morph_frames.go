@@ -14,33 +14,33 @@ func NewMorphFrames() *MorphFrames {
 	}
 }
 
-func (mfs *MorphFrames) Contains(morphName string) bool {
-	_, ok := mfs.Data[morphName]
+func (morphFrames *MorphFrames) Contains(morphName string) bool {
+	_, ok := morphFrames.Data[morphName]
 	return ok
 }
 
-func (mfs *MorphFrames) Update(fs *MorphNameFrames) {
-	mfs.Data[fs.Name] = fs
+func (morphFrames *MorphFrames) Update(morphNameFrames *MorphNameFrames) {
+	morphFrames.Data[morphNameFrames.Name] = morphNameFrames
 }
 
-func (mfs *MorphFrames) Names() []string {
-	names := make([]string, 0, len(mfs.Data))
-	for name := range mfs.Data {
+func (morphFrames *MorphFrames) Names() []string {
+	names := make([]string, 0, len(morphFrames.Data))
+	for name := range morphFrames.Data {
 		names = append(names, name)
 	}
 	return names
 }
 
-func (mfs *MorphFrames) Get(morphName string) *MorphNameFrames {
-	if !mfs.Contains(morphName) {
-		mfs.Update(NewMorphNameFrames(morphName))
+func (morphFrames *MorphFrames) Get(morphName string) *MorphNameFrames {
+	if !morphFrames.Contains(morphName) {
+		morphFrames.Update(NewMorphNameFrames(morphName))
 	}
-	return mfs.Data[morphName]
+	return morphFrames.Data[morphName]
 }
 
-func (mfs *MorphFrames) MaxFrame() int {
+func (morphFrames *MorphFrames) MaxFrame() int {
 	maxFno := int(0)
-	for _, mnfs := range mfs.Data {
+	for _, mnfs := range morphFrames.Data {
 		fno := mnfs.MaxFrame()
 		if fno > maxFno {
 			maxFno = fno
@@ -49,9 +49,9 @@ func (mfs *MorphFrames) MaxFrame() int {
 	return maxFno
 }
 
-func (mfs *MorphFrames) MinFrame() int {
+func (morphFrames *MorphFrames) MinFrame() int {
 	minFno := math.MaxInt
-	for _, mnfs := range mfs.Data {
+	for _, mnfs := range morphFrames.Data {
 		fno := mnfs.MinFrame()
 		if fno < minFno {
 			minFno = fno
@@ -60,9 +60,9 @@ func (mfs *MorphFrames) MinFrame() int {
 	return minFno
 }
 
-func (fs *MorphFrames) Len() int {
+func (morphFrames *MorphFrames) Len() int {
 	count := 0
-	for _, fs := range fs.Data {
+	for _, fs := range morphFrames.Data {
 		count += fs.RegisteredIndexes.Len()
 	}
 	return count

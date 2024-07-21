@@ -25,9 +25,9 @@ func NewTexture() *Texture {
 	}
 }
 
-func (t *Texture) Copy() core.IIndexModel {
+func (tex *Texture) Copy() core.IIndexModel {
 	copied := NewTexture()
-	copier.CopyWithOption(copied, t, copier.Option{DeepCopy: true})
+	copier.CopyWithOption(copied, tex, copier.Option{DeepCopy: true})
 	return copied
 }
 

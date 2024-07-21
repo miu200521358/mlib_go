@@ -10,6 +10,6 @@ func NewLightFrames() *LightFrames {
 	}
 }
 
-func (i *LightFrames) NewFrame(index int) *LightFrame {
+func (lightFrames *LightFrames) NewFrame(index int) *LightFrame {
 	return NewLightFrame(index)
 }

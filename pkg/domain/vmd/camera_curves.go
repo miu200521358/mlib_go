@@ -90,54 +90,54 @@ func NewCameraCurvesByValues(values []byte) *CameraCurves {
 }
 
 // 補間曲線の計算
-func (v *CameraCurves) Evaluate(prevIndex, nowIndex, nextIndex int) (float64, float64, float64, float64, float64, float64) {
+func (cameraCurves *CameraCurves) Evaluate(prevIndex, nowIndex, nextIndex int) (float64, float64, float64, float64, float64, float64) {
 	var xy, yy, zy, ry, dy, vy float64
-	_, xy, _ = mmath.Evaluate(v.TranslateX, prevIndex, nowIndex, nextIndex)
-	_, yy, _ = mmath.Evaluate(v.TranslateY, prevIndex, nowIndex, nextIndex)
-	_, zy, _ = mmath.Evaluate(v.TranslateZ, prevIndex, nowIndex, nextIndex)
-	_, ry, _ = mmath.Evaluate(v.Rotate, prevIndex, nowIndex, nextIndex)
-	_, dy, _ = mmath.Evaluate(v.Distance, prevIndex, nowIndex, nextIndex)
-	_, vy, _ = mmath.Evaluate(v.ViewOfAngle, prevIndex, nowIndex, nextIndex)
+	_, xy, _ = mmath.Evaluate(cameraCurves.TranslateX, prevIndex, nowIndex, nextIndex)
+	_, yy, _ = mmath.Evaluate(cameraCurves.TranslateY, prevIndex, nowIndex, nextIndex)
+	_, zy, _ = mmath.Evaluate(cameraCurves.TranslateZ, prevIndex, nowIndex, nextIndex)
+	_, ry, _ = mmath.Evaluate(cameraCurves.Rotate, prevIndex, nowIndex, nextIndex)
+	_, dy, _ = mmath.Evaluate(cameraCurves.Distance, prevIndex, nowIndex, nextIndex)
+	_, vy, _ = mmath.Evaluate(cameraCurves.ViewOfAngle, prevIndex, nowIndex, nextIndex)
 
 	return xy, yy, zy, ry, dy, vy
 }
 
-func (c *CameraCurves) Merge() []byte {
+func (cameraCurves *CameraCurves) Merge() []byte {
 	return []byte{
-		byte(c.TranslateX.Start.X),
-		byte(c.TranslateY.Start.X),
-		byte(c.TranslateZ.Start.X),
-		byte(c.Rotate.Start.X),
-		byte(c.Distance.Start.X),
-		byte(c.ViewOfAngle.Start.X),
-		byte(c.TranslateX.Start.Y),
-		byte(c.TranslateY.Start.Y),
-		byte(c.TranslateZ.Start.Y),
-		byte(c.Rotate.Start.Y),
-		byte(c.Distance.Start.Y),
-		byte(c.ViewOfAngle.Start.Y),
-		byte(c.TranslateX.End.X),
-		byte(c.TranslateY.End.X),
-		byte(c.TranslateZ.End.X),
-		byte(c.Rotate.End.X),
-		byte(c.Distance.End.X),
-		byte(c.ViewOfAngle.End.X),
-		byte(c.TranslateX.End.Y),
-		byte(c.TranslateY.End.Y),
-		byte(c.TranslateZ.End.Y),
-		byte(c.Rotate.End.Y),
-		byte(c.Distance.End.Y),
-		byte(c.ViewOfAngle.End.Y),
+		byte(cameraCurves.TranslateX.Start.X),
+		byte(cameraCurves.TranslateY.Start.X),
+		byte(cameraCurves.TranslateZ.Start.X),
+		byte(cameraCurves.Rotate.Start.X),
+		byte(cameraCurves.Distance.Start.X),
+		byte(cameraCurves.ViewOfAngle.Start.X),
+		byte(cameraCurves.TranslateX.Start.Y),
+		byte(cameraCurves.TranslateY.Start.Y),
+		byte(cameraCurves.TranslateZ.Start.Y),
+		byte(cameraCurves.Rotate.Start.Y),
+		byte(cameraCurves.Distance.Start.Y),
+		byte(cameraCurves.ViewOfAngle.Start.Y),
+		byte(cameraCurves.TranslateX.End.X),
+		byte(cameraCurves.TranslateY.End.X),
+		byte(cameraCurves.TranslateZ.End.X),
+		byte(cameraCurves.Rotate.End.X),
+		byte(cameraCurves.Distance.End.X),
+		byte(cameraCurves.ViewOfAngle.End.X),
+		byte(cameraCurves.TranslateX.End.Y),
+		byte(cameraCurves.TranslateY.End.Y),
+		byte(cameraCurves.TranslateZ.End.Y),
+		byte(cameraCurves.Rotate.End.Y),
+		byte(cameraCurves.Distance.End.Y),
+		byte(cameraCurves.ViewOfAngle.End.Y),
 	}
 }
 
-func (c *CameraCurves) Copy() *CameraCurves {
+func (cameraCurves *CameraCurves) Copy() *CameraCurves {
 	return &CameraCurves{
-		TranslateX:  c.TranslateX.Copy(),
-		TranslateY:  c.TranslateY.Copy(),
-		TranslateZ:  c.TranslateZ.Copy(),
-		Rotate:      c.Rotate.Copy(),
-		Distance:    c.Distance.Copy(),
-		ViewOfAngle: c.ViewOfAngle.Copy(),
+		TranslateX:  cameraCurves.TranslateX.Copy(),
+		TranslateY:  cameraCurves.TranslateY.Copy(),
+		TranslateZ:  cameraCurves.TranslateZ.Copy(),
+		Rotate:      cameraCurves.Rotate.Copy(),
+		Distance:    cameraCurves.Distance.Copy(),
+		ViewOfAngle: cameraCurves.ViewOfAngle.Copy(),
 	}
 }

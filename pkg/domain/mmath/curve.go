@@ -40,44 +40,44 @@ func NewCurveByValues(startX, startY, endX, endY byte) *Curve {
 }
 
 // Copy
-func (v *Curve) Copy() *Curve {
+func (curve *Curve) Copy() *Curve {
 	copied := NewCurve()
-	copied.Start.X = v.Start.X
-	copied.Start.Y = v.Start.Y
-	copied.End.X = v.End.X
-	copied.End.Y = v.End.Y
+	copied.Start.X = curve.Start.X
+	copied.Start.Y = curve.Start.Y
+	copied.End.X = curve.End.X
+	copied.End.Y = curve.End.Y
 	return copied
 }
 
-func (v *Curve) Normalize(begin, finish *MVec2) {
+func (curve *Curve) Normalize(begin, finish *MVec2) {
 	diff := finish.Subed(begin)
 
-	v.Start = *v.Start.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
+	curve.Start = *curve.Start.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
 
-	if v.Start.X < 0 {
-		v.Start.X = 0
-	} else if v.Start.X > CURVE_MAX {
-		v.Start.X = CURVE_MAX
+	if curve.Start.X < 0 {
+		curve.Start.X = 0
+	} else if curve.Start.X > CURVE_MAX {
+		curve.Start.X = CURVE_MAX
 	}
 
-	if v.Start.Y < 0 {
-		v.Start.Y = 0
-	} else if v.Start.Y > CURVE_MAX {
-		v.Start.Y = CURVE_MAX
+	if curve.Start.Y < 0 {
+		curve.Start.Y = 0
+	} else if curve.Start.Y > CURVE_MAX {
+		curve.Start.Y = CURVE_MAX
 	}
 
-	v.End = *v.End.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
+	curve.End = *curve.End.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
 
-	if v.End.X < 0 {
-		v.End.X = 0
-	} else if v.End.X > CURVE_MAX {
-		v.End.X = CURVE_MAX
+	if curve.End.X < 0 {
+		curve.End.X = 0
+	} else if curve.End.X > CURVE_MAX {
+		curve.End.X = CURVE_MAX
 	}
 
-	if v.End.Y < 0 {
-		v.End.Y = 0
-	} else if v.End.Y > CURVE_MAX {
-		v.End.Y = CURVE_MAX
+	if curve.End.Y < 0 {
+		curve.End.Y = 0
+	} else if curve.End.Y > CURVE_MAX {
+		curve.End.Y = CURVE_MAX
 	}
 }
 
@@ -208,7 +208,7 @@ func SplitCurve(curve *Curve, start, now, end int) (*Curve, *Curve) {
 	return startCurve, endCurve
 }
 
-func Bezier(t float64, p0, p1, p2, p3 *MVec2) *MVec2 {
+func bezier(t float64, p0, p1, p2, p3 *MVec2) *MVec2 {
 	t2 := t * t
 	t3 := t2 * t
 	mt := 1 - t
@@ -243,7 +243,7 @@ func NewCurveFromValues(values []float64) *Curve {
 		sumSq := 0.0
 		for i, y := range values {
 			t := float64(i) / float64(n-1)
-			bp := Bezier(t, p0, p1, p2, p3)
+			bp := bezier(t, p0, p1, p2, p3)
 			diff := bp.Y - y
 			sumSq += diff * diff
 		}

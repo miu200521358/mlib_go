@@ -81,30 +81,30 @@ func (bf *BoneFrame) Added(v *BoneFrame) *BoneFrame {
 	return copied.Add(v)
 }
 
-func (v *BoneFrame) Copy() IBaseFrame {
+func (bf *BoneFrame) Copy() IBaseFrame {
 	copied := &BoneFrame{
-		BaseFrame: NewFrame(v.Index()).(*BaseFrame),
+		BaseFrame: NewFrame(bf.Index()).(*BaseFrame),
 	}
-	if v.Position != nil {
-		copied.Position = v.Position.Copy()
+	if bf.Position != nil {
+		copied.Position = bf.Position.Copy()
 	}
-	if v.Rotation != nil {
-		copied.Rotation = v.Rotation.Copy()
+	if bf.Rotation != nil {
+		copied.Rotation = bf.Rotation.Copy()
 	}
-	if v.LocalPosition != nil {
-		copied.LocalPosition = v.LocalPosition.Copy()
+	if bf.LocalPosition != nil {
+		copied.LocalPosition = bf.LocalPosition.Copy()
 	}
-	if v.LocalRotation != nil {
-		copied.LocalRotation = v.LocalRotation.Copy()
+	if bf.LocalRotation != nil {
+		copied.LocalRotation = bf.LocalRotation.Copy()
 	}
-	if v.Scale != nil {
-		copied.Scale = v.Scale.Copy()
+	if bf.Scale != nil {
+		copied.Scale = bf.Scale.Copy()
 	}
-	if v.LocalScale != nil {
-		copied.LocalScale = v.LocalScale.Copy()
+	if bf.LocalScale != nil {
+		copied.LocalScale = bf.LocalScale.Copy()
 	}
-	if v.Curves != nil {
-		copied.Curves = v.Curves.Copy()
+	if bf.Curves != nil {
+		copied.Curves = bf.Curves.Copy()
 	}
 
 	return copied

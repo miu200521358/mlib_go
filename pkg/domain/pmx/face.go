@@ -22,9 +22,9 @@ func NewFace() *Face {
 	}
 }
 
-func (f *Face) Copy() core.IIndexModel {
+func (face *Face) Copy() core.IIndexModel {
 	copied := NewFace()
-	copier.CopyWithOption(copied, f, copier.Option{DeepCopy: true})
+	copier.CopyWithOption(copied, face, copier.Option{DeepCopy: true})
 	return copied
 }
 

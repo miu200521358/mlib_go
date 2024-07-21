@@ -49,9 +49,9 @@ func NewDisplaySlot() *DisplaySlot {
 }
 
 // Copy
-func (v *DisplaySlot) Copy() core.IIndexModel {
+func (displaySlot *DisplaySlot) Copy() core.IIndexModel {
 	copied := NewDisplaySlot()
-	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+	copier.CopyWithOption(copied, displaySlot, copier.Option{DeepCopy: true})
 	return copied
 }
 

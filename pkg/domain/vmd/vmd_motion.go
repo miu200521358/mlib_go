@@ -31,87 +31,87 @@ func NewVmdMotion(path string) *VmdMotion {
 	}
 }
 
-func (m *VmdMotion) Copy() core.IHashModel {
+func (motion *VmdMotion) Copy() core.IHashModel {
 	copied := NewVmdMotion("")
-	copier.CopyWithOption(copied, m, copier.Option{DeepCopy: true})
+	copier.CopyWithOption(copied, motion, copier.Option{DeepCopy: true})
 	return copied
 }
 
-func (m *VmdMotion) Name() string {
-	return m.ModelName
+func (motion *VmdMotion) Name() string {
+	return motion.ModelName
 }
 
-func (m *VmdMotion) SetName(name string) {
-	m.ModelName = name
+func (motion *VmdMotion) SetName(name string) {
+	motion.ModelName = name
 }
 
-func (m *VmdMotion) MaxFrame() int {
-	return max(m.BoneFrames.MaxFrame(), m.MorphFrames.MaxFrame())
+func (motion *VmdMotion) MaxFrame() int {
+	return max(motion.BoneFrames.MaxFrame(), motion.MorphFrames.MaxFrame())
 }
 
-func (m *VmdMotion) MinFrame() int {
-	return min(m.BoneFrames.MinFrame(), m.MorphFrames.MinFrame())
+func (motion *VmdMotion) MinFrame() int {
+	return min(motion.BoneFrames.MinFrame(), motion.MorphFrames.MinFrame())
 }
 
-func (m *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {
-	m.BoneFrames.Get(boneName).Append(bf)
+func (motion *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {
+	motion.BoneFrames.Get(boneName).Append(bf)
 }
 
-func (m *VmdMotion) AppendRegisteredBoneFrame(boneName string, bf *BoneFrame) {
+func (motion *VmdMotion) AppendRegisteredBoneFrame(boneName string, bf *BoneFrame) {
 	bf.Registered = true
-	m.BoneFrames.Get(boneName).Append(bf)
+	motion.BoneFrames.Get(boneName).Append(bf)
 }
 
-func (m *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame) {
-	m.MorphFrames.Get(morphName).Append(mf)
+func (motion *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame) {
+	motion.MorphFrames.Get(morphName).Append(mf)
 }
 
-func (m *VmdMotion) AppendRegisteredMorphFrame(morphName string, mf *MorphFrame) {
+func (motion *VmdMotion) AppendRegisteredMorphFrame(morphName string, mf *MorphFrame) {
 	mf.Registered = true
-	m.MorphFrames.Get(morphName).Append(mf)
+	motion.MorphFrames.Get(morphName).Append(mf)
 }
 
-func (m *VmdMotion) AppendCameraFrame(cf *CameraFrame) {
-	m.CameraFrames.Append(cf)
+func (motion *VmdMotion) AppendCameraFrame(cf *CameraFrame) {
+	motion.CameraFrames.Append(cf)
 }
 
-func (m *VmdMotion) AppendLightFrame(lf *LightFrame) {
-	m.LightFrames.Append(lf)
+func (motion *VmdMotion) AppendLightFrame(lf *LightFrame) {
+	motion.LightFrames.Append(lf)
 }
 
-func (m *VmdMotion) AppendShadowFrame(sf *ShadowFrame) {
-	m.ShadowFrames.Append(sf)
+func (motion *VmdMotion) AppendShadowFrame(sf *ShadowFrame) {
+	motion.ShadowFrames.Append(sf)
 }
 
-func (m *VmdMotion) AppendIkFrame(ikf *IkFrame) {
-	m.IkFrames.Append(ikf)
+func (motion *VmdMotion) AppendIkFrame(ikf *IkFrame) {
+	motion.IkFrames.Append(ikf)
 }
 
-func (m *VmdMotion) InsertBoneFrame(boneName string, bf *BoneFrame) {
-	m.BoneFrames.Get(boneName).Insert(bf)
+func (motion *VmdMotion) InsertBoneFrame(boneName string, bf *BoneFrame) {
+	motion.BoneFrames.Get(boneName).Insert(bf)
 }
 
-func (m *VmdMotion) InsertRegisteredBoneFrame(boneName string, bf *BoneFrame) {
+func (motion *VmdMotion) InsertRegisteredBoneFrame(boneName string, bf *BoneFrame) {
 	bf.Registered = true
-	m.BoneFrames.Get(boneName).Insert(bf)
+	motion.BoneFrames.Get(boneName).Insert(bf)
 }
 
-func (m *VmdMotion) InsertMorphFrame(morphName string, mf *MorphFrame) {
-	m.MorphFrames.Get(morphName).Insert(mf)
+func (motion *VmdMotion) InsertMorphFrame(morphName string, mf *MorphFrame) {
+	motion.MorphFrames.Get(morphName).Insert(mf)
 }
 
-func (m *VmdMotion) InsertCameraFrame(cf *CameraFrame) {
-	m.CameraFrames.Insert(cf)
+func (motion *VmdMotion) InsertCameraFrame(cf *CameraFrame) {
+	motion.CameraFrames.Insert(cf)
 }
 
-func (m *VmdMotion) InsertLightFrame(lf *LightFrame) {
-	m.LightFrames.Insert(lf)
+func (motion *VmdMotion) InsertLightFrame(lf *LightFrame) {
+	motion.LightFrames.Insert(lf)
 }
 
-func (m *VmdMotion) InsertShadowFrame(sf *ShadowFrame) {
-	m.ShadowFrames.Insert(sf)
+func (motion *VmdMotion) InsertShadowFrame(sf *ShadowFrame) {
+	motion.ShadowFrames.Insert(sf)
 }
 
-func (m *VmdMotion) InsertIkFrame(ikf *IkFrame) {
-	m.IkFrames.Insert(ikf)
+func (motion *VmdMotion) InsertIkFrame(ikf *IkFrame) {
+	motion.IkFrames.Insert(ikf)
 }

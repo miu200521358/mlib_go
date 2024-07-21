@@ -19,79 +19,79 @@ func NewBoneFrames() *BoneFrames {
 	}
 }
 
-func (fs *BoneFrames) Contains(boneName string) bool {
-	fs.lock.RLock()
-	defer fs.lock.RUnlock()
+func (boneFrames *BoneFrames) Contains(boneName string) bool {
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
 
-	_, ok := fs.Data[boneName]
+	_, ok := boneFrames.Data[boneName]
 	return ok
 }
 
-func (fs *BoneFrames) Append(nfs *BoneNameFrames) {
-	fs.lock.Lock()
-	defer fs.lock.Unlock()
+func (boneFrames *BoneFrames) Append(boneNameFrames *BoneNameFrames) {
+	boneFrames.lock.Lock()
+	defer boneFrames.lock.Unlock()
 
-	fs.Data[nfs.Name] = nfs
+	boneFrames.Data[boneNameFrames.Name] = boneNameFrames
 }
 
-func (fs *BoneFrames) Delete(boneName string) {
-	fs.lock.Lock()
-	defer fs.lock.Unlock()
+func (boneFrames *BoneFrames) Delete(boneName string) {
+	boneFrames.lock.Lock()
+	defer boneFrames.lock.Unlock()
 
-	delete(fs.Data, boneName)
+	delete(boneFrames.Data, boneName)
 }
 
-func (fs *BoneFrames) Get(boneName string) *BoneNameFrames {
-	if !fs.Contains(boneName) {
-		fs.Append(NewBoneNameFrames(boneName))
+func (boneFrames *BoneFrames) Get(boneName string) *BoneNameFrames {
+	if !boneFrames.Contains(boneName) {
+		boneFrames.Append(NewBoneNameFrames(boneName))
 	}
 
-	fs.lock.RLock()
-	defer fs.lock.RUnlock()
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
 
-	return fs.Data[boneName]
+	return boneFrames.Data[boneName]
 }
 
-func (fs *BoneFrames) Names() []string {
-	names := make([]string, 0, len(fs.Data))
-	for name := range fs.Data {
+func (boneFrames *BoneFrames) Names() []string {
+	names := make([]string, 0, len(boneFrames.Data))
+	for name := range boneFrames.Data {
 		names = append(names, name)
 	}
 	return names
 }
 
-func (fs *BoneFrames) Indexes() []int {
+func (boneFrames *BoneFrames) Indexes() []int {
 	indexes := core.NewIntIndexes()
-	for _, fs := range fs.Data {
-		for _, f := range fs.List() {
+	for _, boneFrames := range boneFrames.Data {
+		for _, f := range boneFrames.List() {
 			indexes.ReplaceOrInsert(f.index)
 		}
 	}
 	return indexes.List()
 }
 
-func (fs *BoneFrames) GetRegisteredIndexes() []int {
+func (boneFrames *BoneFrames) GetRegisteredIndexes() []int {
 	indexes := core.NewIntIndexes()
-	for _, fs := range fs.Data {
-		for _, index := range fs.RegisteredIndexes.List() {
+	for _, boneFrames := range boneFrames.Data {
+		for _, index := range boneFrames.RegisteredIndexes.List() {
 			indexes.ReplaceOrInsert(core.NewInt(index))
 		}
 	}
 	return indexes.List()
 }
 
-func (fs *BoneFrames) Len() int {
+func (boneFrames *BoneFrames) Len() int {
 	count := 0
-	for _, fs := range fs.Data {
-		count += fs.RegisteredIndexes.Len()
+	for _, boneFrames := range boneFrames.Data {
+		count += boneFrames.RegisteredIndexes.Len()
 	}
 	return count
 }
 
-func (fs *BoneFrames) MaxFrame() int {
+func (boneFrames *BoneFrames) MaxFrame() int {
 	maxFno := int(0)
-	for _, fs := range fs.Data {
-		fno := fs.MaxFrame()
+	for _, boneFrames := range boneFrames.Data {
+		fno := boneFrames.MaxFrame()
 		if fno > maxFno {
 			maxFno = fno
 		}
@@ -99,10 +99,10 @@ func (fs *BoneFrames) MaxFrame() int {
 	return maxFno
 }
 
-func (fs *BoneFrames) MinFrame() int {
+func (boneFrames *BoneFrames) MinFrame() int {
 	minFno := math.MaxInt
-	for _, fs := range fs.Data {
-		fno := fs.MinFrame()
+	for _, boneFrames := range boneFrames.Data {
+		fno := boneFrames.MinFrame()
 		if fno < minFno {
 			minFno = fno
 		}

@@ -26,19 +26,19 @@ type BaseFrame struct {
 	Read       bool // VMDファイルから読み込んだキーフレであるか
 }
 
-func (b *BaseFrame) Less(than llrb.Item) bool {
-	return b.Index() < int(than.(core.Int))
+func (baseFrame *BaseFrame) Less(than llrb.Item) bool {
+	return baseFrame.Index() < int(than.(core.Int))
 }
 
-func (b *BaseFrame) Copy() IBaseFrame {
+func (baseFrame *BaseFrame) Copy() IBaseFrame {
 	return &BaseFrame{
-		index:      b.index,
-		Registered: b.Registered,
-		Read:       b.Read,
+		index:      baseFrame.index,
+		Registered: baseFrame.Registered,
+		Read:       baseFrame.Read,
 	}
 }
 
-func (b *BaseFrame) New(index int) IBaseFrame {
+func (baseFrame *BaseFrame) New(index int) IBaseFrame {
 	return &BaseFrame{
 		index: core.Int(index),
 	}
@@ -52,31 +52,31 @@ func NewFrame(index int) IBaseFrame {
 	}
 }
 
-func (b *BaseFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
-	return b.Copy()
+func (baseFrame *BaseFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
+	return baseFrame.Copy()
 }
 
-func (b *BaseFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
+func (baseFrame *BaseFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
 }
 
-func (bf *BaseFrame) getIntIndex() core.Int {
-	return bf.index
+func (baseFrame *BaseFrame) getIntIndex() core.Int {
+	return baseFrame.index
 }
 
-func (bf *BaseFrame) Index() int {
-	return int(bf.index)
+func (baseFrame *BaseFrame) Index() int {
+	return int(baseFrame.index)
 }
 
-func (bf *BaseFrame) SetIndex(index int) {
-	bf.index = core.NewInt(index)
+func (baseFrame *BaseFrame) SetIndex(index int) {
+	baseFrame.index = core.NewInt(index)
 }
 
-func (bf *BaseFrame) IsRegistered() bool {
-	return bf.Registered
+func (baseFrame *BaseFrame) IsRegistered() bool {
+	return baseFrame.Registered
 }
 
-func (bf *BaseFrame) IsRead() bool {
-	return bf.Read
+func (baseFrame *BaseFrame) IsRead() bool {
+	return baseFrame.Read
 }
 
 type BaseFrames[T IBaseFrame] struct {
@@ -99,46 +99,46 @@ func NewBaseFrames[T IBaseFrame](newFunc func(index int) T, nullFunc func() T) *
 	}
 }
 
-func (fs *BaseFrames[T]) NewFrame(index int) T {
+func (baseFrames *BaseFrames[T]) NewFrame(index int) T {
 	return NewFrame(index).(T)
 }
 
-func (fs *BaseFrames[T]) Get(index int) T {
-	fs.lock.RLock()
-	defer fs.lock.RUnlock()
+func (baseFrames *BaseFrames[T]) Get(index int) T {
+	baseFrames.lock.RLock()
+	defer baseFrames.lock.RUnlock()
 
-	if _, ok := fs.data[index]; ok {
-		return fs.data[index]
+	if _, ok := baseFrames.data[index]; ok {
+		return baseFrames.data[index]
 	}
 
-	if len(fs.data) == 0 {
-		return fs.newFunc(index)
+	if len(baseFrames.data) == 0 {
+		return baseFrames.newFunc(index)
 	}
 
-	prevFrame := fs.prevFrame(index)
-	nextFrame := fs.nextFrame(index)
+	prevFrame := baseFrames.prevFrame(index)
+	nextFrame := baseFrames.nextFrame(index)
 	if nextFrame == prevFrame {
 		// 次のキーフレが無い場合、最大キーフレのコピーを返す
-		if fs.Indexes.Len() == 0 {
+		if baseFrames.Indexes.Len() == 0 {
 			// 存在しない場合nullを返す
-			return fs.nullFunc()
+			return baseFrames.nullFunc()
 		}
-		copied := fs.data[fs.Indexes.Max()].Copy()
+		copied := baseFrames.data[baseFrames.Indexes.Max()].Copy()
 		copied.SetIndex(index)
 		return copied.(T)
 	}
 
-	prevF := fs.Get(prevFrame)
-	nextF := fs.Get(nextFrame)
+	prevF := baseFrames.Get(prevFrame)
+	nextF := baseFrames.Get(nextFrame)
 
 	// 該当キーフレが無い場合、補間結果を返す
 	return nextF.lerpFrame(prevF, index).(T)
 }
 
-func (fs *BaseFrames[T]) prevFrame(index int) int {
-	prevFrame := fs.MinFrame()
+func (baseFrames *BaseFrames[T]) prevFrame(index int) int {
+	prevFrame := baseFrames.MinFrame()
 
-	fs.RegisteredIndexes.DescendLessOrEqual(core.Int(index), func(i llrb.Item) bool {
+	baseFrames.RegisteredIndexes.DescendLessOrEqual(core.Int(index), func(i llrb.Item) bool {
 		prevFrame = int(i.(core.Int))
 		return false
 	})
@@ -146,10 +146,10 @@ func (fs *BaseFrames[T]) prevFrame(index int) int {
 	return prevFrame
 }
 
-func (fs *BaseFrames[T]) nextFrame(index int) int {
-	nextFrame := fs.MaxFrame()
+func (baseFrames *BaseFrames[T]) nextFrame(index int) int {
+	nextFrame := baseFrames.MaxFrame()
 
-	fs.RegisteredIndexes.AscendGreaterOrEqual(core.Int(index), func(i llrb.Item) bool {
+	baseFrames.RegisteredIndexes.AscendGreaterOrEqual(core.Int(index), func(i llrb.Item) bool {
 		nextFrame = int(i.(core.Int))
 		return false
 	})
@@ -157,12 +157,12 @@ func (fs *BaseFrames[T]) nextFrame(index int) int {
 	return nextFrame
 }
 
-func (fs *BaseFrames[T]) List() []T {
-	list := make([]T, 0, fs.RegisteredIndexes.Len())
+func (baseFrames *BaseFrames[T]) List() []T {
+	list := make([]T, 0, baseFrames.RegisteredIndexes.Len())
 
-	fs.RegisteredIndexes.AscendRange(core.Int(0), core.Int(fs.RegisteredIndexes.Max()), func(i llrb.Item) bool {
-		if _, ok := fs.data[int(i.(core.Int))]; !ok {
-			list = append(list, fs.data[int(i.(core.Int))])
+	baseFrames.RegisteredIndexes.AscendRange(core.Int(0), core.Int(baseFrames.RegisteredIndexes.Max()), func(i llrb.Item) bool {
+		if _, ok := baseFrames.data[int(i.(core.Int))]; !ok {
+			list = append(list, baseFrames.data[int(i.(core.Int))])
 		}
 		return true
 	})
@@ -170,79 +170,79 @@ func (fs *BaseFrames[T]) List() []T {
 	return list
 }
 
-func (fs *BaseFrames[T]) appendFrame(v T) {
-	fs.lock.Lock()
-	defer fs.lock.Unlock()
+func (baseFrames *BaseFrames[T]) appendFrame(v T) {
+	baseFrames.lock.Lock()
+	defer baseFrames.lock.Unlock()
 
 	if v.IsRegistered() {
-		fs.RegisteredIndexes.ReplaceOrInsert(core.Int(v.Index()))
+		baseFrames.RegisteredIndexes.ReplaceOrInsert(core.Int(v.Index()))
 	}
 
-	fs.data[v.Index()] = v
-	fs.Indexes.ReplaceOrInsert(core.Int(v.Index()))
+	baseFrames.data[v.Index()] = v
+	baseFrames.Indexes.ReplaceOrInsert(core.Int(v.Index()))
 }
 
-func (fs *BaseFrames[T]) MaxFrame() int {
-	if fs.RegisteredIndexes.Len() == 0 {
+func (baseFrames *BaseFrames[T]) MaxFrame() int {
+	if baseFrames.RegisteredIndexes.Len() == 0 {
 		return 0
 	}
-	return fs.RegisteredIndexes.Max()
+	return baseFrames.RegisteredIndexes.Max()
 }
 
-func (fs *BaseFrames[T]) MinFrame() int {
-	if fs.RegisteredIndexes.Len() == 0 {
+func (baseFrames *BaseFrames[T]) MinFrame() int {
+	if baseFrames.RegisteredIndexes.Len() == 0 {
 		return 0
 	}
-	return fs.RegisteredIndexes.Min()
+	return baseFrames.RegisteredIndexes.Min()
 }
 
-func (fs *BaseFrames[T]) ContainsRegistered(index int) bool {
-	return fs.RegisteredIndexes.Has(index)
+func (baseFrames *BaseFrames[T]) ContainsRegistered(index int) bool {
+	return baseFrames.RegisteredIndexes.Has(index)
 }
 
-func (fs *BaseFrames[T]) Contains(index int) bool {
-	if _, ok := fs.data[index]; ok {
+func (baseFrames *BaseFrames[T]) Contains(index int) bool {
+	if _, ok := baseFrames.data[index]; ok {
 		return true
 	}
 	return false
 }
 
-func (fs *BaseFrames[T]) Delete(index int) {
-	fs.lock.Lock()
-	defer fs.lock.Unlock()
+func (baseFrames *BaseFrames[T]) Delete(index int) {
+	baseFrames.lock.Lock()
+	defer baseFrames.lock.Unlock()
 
-	if _, ok := fs.data[index]; ok {
-		delete(fs.data, index)
-		fs.Indexes.Delete(core.Int(index))
+	if _, ok := baseFrames.data[index]; ok {
+		delete(baseFrames.data, index)
+		baseFrames.Indexes.Delete(core.Int(index))
 	}
 
-	if fs.RegisteredIndexes.Has(index) {
-		fs.RegisteredIndexes.Delete(core.Int(index))
+	if baseFrames.RegisteredIndexes.Has(index) {
+		baseFrames.RegisteredIndexes.Delete(core.Int(index))
 	}
 }
 
 // Append 補間曲線は分割しない
-func (fs *BaseFrames[T]) Append(f T) {
-	fs.appendOrInsert(f, false)
+func (baseFrames *BaseFrames[T]) Append(f T) {
+	baseFrames.appendOrInsert(f, false)
 }
 
 // Insert Registered が true の場合、補間曲線を分割して登録する
-func (fs *BaseFrames[T]) Insert(f T) {
-	fs.appendOrInsert(f, true)
+func (baseFrames *BaseFrames[T]) Insert(f T) {
+	baseFrames.appendOrInsert(f, true)
 }
 
-func (fs *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {
+func (baseFrames *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {
 	if f.IsRegistered() {
-		if fs.RegisteredIndexes.Len() == 0 {
+		if baseFrames.RegisteredIndexes.Len() == 0 {
 			// フレームがない場合、何もしない
-			fs.appendFrame(f)
+			baseFrames.appendFrame(f)
 			return
 		}
 
 		if isSplitCurve {
 			// 補間曲線を分割する
-			prevF := fs.Get(fs.prevFrame(f.Index()))
-			nextF := fs.Get(fs.nextFrame(f.Index()))
+			prevF := baseFrames.Get(baseFrames.prevFrame(f.Index()))
+			nextF := baseFrames.Get(baseFrames.nextFrame(f.Index()))
 
 			// 補間曲線を分割する
 			if nextF.Index() > f.Index() && prevF.Index() < f.Index() {
@@ -252,9 +252,9 @@ func (fs *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {
 		}
 	}
 
-	fs.appendFrame(f)
+	baseFrames.appendFrame(f)
 }
 
-func (fs *BaseFrames[T]) Len() int {
-	return fs.RegisteredIndexes.Len()
+func (baseFrames *BaseFrames[T]) Len() int {
+	return baseFrames.RegisteredIndexes.Len()
 }

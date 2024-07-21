@@ -29,37 +29,37 @@ func NewIndexNameModel(index int, name string, englishName string) *IndexNameMod
 	return &IndexNameModel{index: index, name: name, englishName: englishName}
 }
 
-func (v *IndexNameModel) Index() int {
-	return v.index
+func (iModel *IndexNameModel) Index() int {
+	return iModel.index
 }
 
-func (v *IndexNameModel) SetIndex(index int) {
-	v.index = index
+func (iModel *IndexNameModel) SetIndex(index int) {
+	iModel.index = index
 }
 
-func (v *IndexNameModel) Name() string {
-	return v.name
+func (iModel *IndexNameModel) Name() string {
+	return iModel.name
 }
 
-func (v *IndexNameModel) SetName(name string) {
-	v.name = name
+func (iModel *IndexNameModel) SetName(name string) {
+	iModel.name = name
 }
 
-func (v *IndexNameModel) EnglishName() string {
-	return v.englishName
+func (iModel *IndexNameModel) EnglishName() string {
+	return iModel.englishName
 }
 
-func (v *IndexNameModel) SetEnglishName(englishName string) {
-	v.englishName = englishName
+func (iModel *IndexNameModel) SetEnglishName(englishName string) {
+	iModel.englishName = englishName
 }
 
-func (v *IndexNameModel) IsValid() bool {
-	return v != nil && v.index >= 0
+func (iModel *IndexNameModel) IsValid() bool {
+	return iModel != nil && iModel.index >= 0
 }
 
-func (v *IndexNameModel) Copy() IIndexNameModel {
-	copied := IndexNameModel{index: v.index, name: v.name, englishName: v.englishName}
-	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+func (iModel *IndexNameModel) Copy() IIndexNameModel {
+	copied := IndexNameModel{index: iModel.index, name: iModel.name, englishName: iModel.englishName}
+	copier.CopyWithOption(copied, iModel, copier.Option{DeepCopy: true})
 	return &copied
 }
 
@@ -79,45 +79,45 @@ func NewIndexNameModels[T IIndexNameModel](count int, nilFunc func() T) *IndexNa
 	}
 }
 
-func (c *IndexNameModels[T]) Get(index int) T {
-	if index < 0 || index >= len(c.Data) {
-		return c.nilFunc()
+func (iModels *IndexNameModels[T]) Get(index int) T {
+	if index < 0 || index >= len(iModels.Data) {
+		return iModels.nilFunc()
 	}
-	return c.Data[index]
+	return iModels.Data[index]
 }
 
-func (c *IndexNameModels[T]) SetItem(index int, v T) {
-	c.Data[index] = v
+func (iModels *IndexNameModels[T]) SetItem(index int, v T) {
+	iModels.Data[index] = v
 }
 
-func (c *IndexNameModels[T]) Update(value T) {
+func (iModels *IndexNameModels[T]) Update(value T) {
 	if value.Index() < 0 {
 		panic("Index is not set")
 	}
-	c.Data[value.Index()] = value
-	if _, ok := c.NameIndexes[value.Name()]; !ok {
+	iModels.Data[value.Index()] = value
+	if _, ok := iModels.NameIndexes[value.Name()]; !ok {
 		// 名前は先勝ち
-		c.NameIndexes[value.Name()] = value.Index()
+		iModels.NameIndexes[value.Name()] = value.Index()
 	}
-	c.SetDirty(true)
+	iModels.SetDirty(true)
 }
 
-func (c *IndexNameModels[T]) Append(value T) {
+func (iModels *IndexNameModels[T]) Append(value T) {
 	if value.Index() < 0 {
-		value.SetIndex(len(c.Data))
+		value.SetIndex(len(iModels.Data))
 	}
-	c.Data = append(c.Data, value)
-	if _, ok := c.NameIndexes[value.Name()]; !ok {
+	iModels.Data = append(iModels.Data, value)
+	if _, ok := iModels.NameIndexes[value.Name()]; !ok {
 		// 名前は先勝ち
-		c.NameIndexes[value.Name()] = value.Index()
+		iModels.NameIndexes[value.Name()] = value.Index()
 	}
-	c.SetDirty(true)
+	iModels.SetDirty(true)
 }
 
-func (c *IndexNameModels[T]) Indexes() []int {
-	indexes := make([]int, len(c.NameIndexes))
+func (iModels *IndexNameModels[T]) Indexes() []int {
+	indexes := make([]int, len(iModels.NameIndexes))
 	i := 0
-	for _, index := range c.NameIndexes {
+	for _, index := range iModels.NameIndexes {
 		indexes[i] = index
 		i++
 	}
@@ -125,52 +125,52 @@ func (c *IndexNameModels[T]) Indexes() []int {
 	return indexes
 }
 
-func (c *IndexNameModels[T]) GetNames() []string {
-	names := make([]string, len(c.NameIndexes))
+func (iModels *IndexNameModels[T]) GetNames() []string {
+	names := make([]string, len(iModels.NameIndexes))
 	i := 0
-	for index := range c.Indexes() {
-		names[i] = c.Data[index].Name()
+	for index := range iModels.Indexes() {
+		names[i] = iModels.Data[index].Name()
 		i++
 	}
 	return names
 }
 
-func (c *IndexNameModels[T]) DeleteItem(index int) {
-	c.Data[index] = c.nilFunc()
+func (iModels *IndexNameModels[T]) DeleteItem(index int) {
+	iModels.Data[index] = iModels.nilFunc()
 }
 
-func (c *IndexNameModels[T]) Len() int {
-	return len(c.Data)
+func (iModels *IndexNameModels[T]) Len() int {
+	return len(iModels.Data)
 }
 
-func (c *IndexNameModels[T]) IsEmpty() bool {
-	return len(c.Data) == 0
+func (iModels *IndexNameModels[T]) IsEmpty() bool {
+	return len(iModels.Data) == 0
 }
 
-func (c *IndexNameModels[T]) IsNotEmpty() bool {
-	return len(c.Data) > 0
+func (iModels *IndexNameModels[T]) IsNotEmpty() bool {
+	return len(iModels.Data) > 0
 }
 
-func (c *IndexNameModels[T]) GetByName(name string) T {
-	if index, ok := c.NameIndexes[name]; ok {
-		return c.Data[index]
+func (iModels *IndexNameModels[T]) GetByName(name string) T {
+	if index, ok := iModels.NameIndexes[name]; ok {
+		return iModels.Data[index]
 	}
-	return c.nilFunc()
+	return iModels.nilFunc()
 }
 
-func (v *IndexNameModels[T]) Contains(index int) bool {
-	return index >= 0 && index < len(v.Data) && !reflect.ValueOf(v.Data[index]).IsNil()
+func (iModels *IndexNameModels[T]) Contains(index int) bool {
+	return index >= 0 && index < len(iModels.Data) && !reflect.ValueOf(iModels.Data[index]).IsNil()
 }
 
-func (v *IndexNameModels[T]) ContainsByName(name string) bool {
-	_, ok := v.NameIndexes[name]
+func (iModels *IndexNameModels[T]) ContainsByName(name string) bool {
+	_, ok := iModels.NameIndexes[name]
 	return ok
 }
 
-func (v *IndexNameModels[T]) IsDirty() bool {
-	return v.isDirty
+func (iModels *IndexNameModels[T]) IsDirty() bool {
+	return iModels.isDirty
 }
 
-func (v *IndexNameModels[T]) SetDirty(dirty bool) {
-	v.isDirty = dirty
+func (iModels *IndexNameModels[T]) SetDirty(dirty bool) {
+	iModels.isDirty = dirty
 }

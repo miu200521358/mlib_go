@@ -10,6 +10,6 @@ func NewIkFrames() *IkFrames {
 	}
 }
 
-func (i *IkFrames) NewFrame(index int) *IkFrame {
+func (ikFrames *IkFrames) NewFrame(index int) *IkFrame {
 	return NewIkFrame(index)
 }

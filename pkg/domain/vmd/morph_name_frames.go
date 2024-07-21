@@ -12,6 +12,6 @@ func NewMorphNameFrames(name string) *MorphNameFrames {
 	}
 }
 
-func (i *MorphNameFrames) NewFrame(index int) *MorphFrame {
+func (morphNameFrames *MorphNameFrames) NewFrame(index int) *MorphFrame {
 	return NewMorphFrame(index)
 }

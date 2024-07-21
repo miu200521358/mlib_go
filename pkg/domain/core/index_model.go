@@ -22,21 +22,21 @@ func NewIndexModel(index int) *IndexModel {
 	return &IndexModel{index: index}
 }
 
-func (v *IndexModel) Index() int {
-	return v.index
+func (iModel *IndexModel) Index() int {
+	return iModel.index
 }
 
-func (v *IndexModel) SetIndex(index int) {
-	v.index = index
+func (iModel *IndexModel) SetIndex(index int) {
+	iModel.index = index
 }
 
-func (v *IndexModel) IsValid() bool {
-	return v != nil && v.Index() >= 0
+func (iModel *IndexModel) IsValid() bool {
+	return iModel != nil && iModel.Index() >= 0
 }
 
-func (v *IndexModel) Copy() IIndexModel {
-	copied := IndexModel{index: v.index}
-	copier.CopyWithOption(copied, v, copier.Option{DeepCopy: true})
+func (iModel *IndexModel) Copy() IIndexModel {
+	copied := IndexModel{index: iModel.index}
+	copier.CopyWithOption(copied, iModel, copier.Option{DeepCopy: true})
 	return &copied
 }
 
@@ -54,50 +54,50 @@ func NewIndexModels[T IIndexModel](count int, nilFunc func() T) *IndexModels[T] 
 	}
 }
 
-func (c *IndexModels[T]) Get(index int) T {
-	if index < 0 || index >= len(c.Data) {
-		return c.nilFunc()
+func (iModels *IndexModels[T]) Get(index int) T {
+	if index < 0 || index >= len(iModels.Data) {
+		return iModels.nilFunc()
 	}
 
-	return c.Data[index]
+	return iModels.Data[index]
 }
 
-func (c *IndexModels[T]) SetItem(index int, v T) {
-	c.Data[index] = v
+func (iModels *IndexModels[T]) SetItem(index int, v T) {
+	iModels.Data[index] = v
 }
 
-func (c *IndexModels[T]) Update(value T) {
+func (iModels *IndexModels[T]) Update(value T) {
 	if value.Index() < 0 {
 		panic("Index is not set")
 	}
-	c.Data[value.Index()] = value
-	c.SetDirty(true)
+	iModels.Data[value.Index()] = value
+	iModels.SetDirty(true)
 }
 
-func (c *IndexModels[T]) Append(value T) {
+func (iModels *IndexModels[T]) Append(value T) {
 	if value.Index() < 0 {
-		value.SetIndex(len(c.Data))
+		value.SetIndex(len(iModels.Data))
 	}
-	c.Data = append(c.Data, value)
-	c.SetDirty(true)
+	iModels.Data = append(iModels.Data, value)
+	iModels.SetDirty(true)
 }
 
-func (c *IndexModels[T]) DeleteItem(index int) {
-	c.Data[index] = c.nilFunc()
+func (iModels *IndexModels[T]) DeleteItem(index int) {
+	iModels.Data[index] = iModels.nilFunc()
 }
 
-func (c *IndexModels[T]) Len() int {
-	return len(c.Data)
+func (iModels *IndexModels[T]) Len() int {
+	return len(iModels.Data)
 }
 
-func (c *IndexModels[T]) Contains(key int) bool {
-	return c != nil && key >= 0 && key < len(c.Data) && !reflect.ValueOf(c.Data[key]).IsNil()
+func (iModels *IndexModels[T]) Contains(key int) bool {
+	return iModels != nil && key >= 0 && key < len(iModels.Data) && !reflect.ValueOf(iModels.Data[key]).IsNil()
 }
 
-func (c *IndexModels[T]) IsDirty() bool {
-	return c.isDirty
+func (iModels *IndexModels[T]) IsDirty() bool {
+	return iModels.isDirty
 }
 
-func (c *IndexModels[T]) SetDirty(dirty bool) {
-	c.isDirty = dirty
+func (iModels *IndexModels[T]) SetDirty(dirty bool) {
+	iModels.isDirty = dirty
 }

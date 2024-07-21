@@ -70,11 +70,11 @@ func (nextIkf *IkFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	return vv
 }
 
-func (kf *IkFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
+func (ikf *IkFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
 }
 
-func (kf *IkFrame) IsEnable(boneName string) bool {
-	for _, ik := range kf.IkList {
+func (ikf *IkFrame) IsEnable(boneName string) bool {
+	for _, ik := range ikf.IkList {
 		if ik.BoneName == boneName {
 			// IKボーン名がある場合、その結果を取得する
 			return ik.Enabled

@@ -3,8 +3,6 @@ package core
 type IHashModel interface {
 	Name() string
 	SetName(name string)
-	IsNotEmpty() bool
-	IsEmpty() bool
 	Hash() string
 	SetHash(hash string)
 	Path() string
@@ -25,41 +23,31 @@ func NewHashModel(path string) *HashModel {
 	}
 }
 
-func (m *HashModel) Path() string {
-	return m.path
+func (hModel *HashModel) Path() string {
+	return hModel.path
 }
 
-func (m *HashModel) SetPath(path string) {
-	m.path = path
+func (hModel *HashModel) SetPath(path string) {
+	hModel.path = path
 }
 
 // モデル内の名前に相当する値を返す
-func (m *HashModel) Name() string {
-	return m.name
+func (hModel *HashModel) Name() string {
+	return hModel.name
 }
 
 // モデル内の名前に相当する値を設定する
-func (m *HashModel) SetName(name string) {
-	m.name = name
+func (hModel *HashModel) SetName(name string) {
+	hModel.name = name
 }
 
-func (m *HashModel) Hash() string {
-	return m.hash
+func (hModel *HashModel) Hash() string {
+	return hModel.hash
 }
 
-func (m *HashModel) SetHash(hash string) {
-	m.hash = hash
+func (hModel *HashModel) SetHash(hash string) {
+	hModel.hash = hash
 }
 
-// パスが定義されていたら、中身入り
-func (m *HashModel) IsNotEmpty() bool {
-	return len(m.path) > 0
-}
-
-// パスが定義されていなかったら、空
-func (m *HashModel) IsEmpty() bool {
-	return len(m.path) == 0
-}
-
-func (m *HashModel) Delete() {
+func (hModel *HashModel) Delete() {
 }
