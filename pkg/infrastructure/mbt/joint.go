@@ -30,8 +30,8 @@ func (physics *MPhysics) initJoint(
 	jointTransform := bt.NewBtTransform(MRotationBullet(joint.Rotation), MVec3Bullet(joint.Position))
 
 	rigidBodyB := physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody
-	btRigidBodyA := *physics.rigidBodies[modelIndex][joint.RigidbodyIndexA].btRigidBody
-	btRigidBodyB := *physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].btRigidBody
+	btRigidBodyA := physics.rigidBodies[modelIndex][joint.RigidbodyIndexA].btRigidBody
+	btRigidBodyB := physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].btRigidBody
 
 	// 剛体Aの現在の位置と向きを取得
 	worldTransformA := btRigidBodyA.GetWorldTransform().(bt.BtTransform)
@@ -101,6 +101,7 @@ func (physics *MPhysics) initJoint(
 func (physics *MPhysics) deleteJoints(modelIndex int) {
 	for _, j := range physics.joints[modelIndex] {
 		physics.world.RemoveConstraint(j.btJoint)
+		bt.DeleteBtTypedConstraint(j.btJoint)
 	}
 	physics.joints[modelIndex] = nil
 }

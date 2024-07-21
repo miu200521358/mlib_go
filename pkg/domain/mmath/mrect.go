@@ -9,8 +9,8 @@ type MRect struct {
 	Max *MVec2
 }
 
-func NewMRect() MRect {
-	return MRect{Min: &MVec2{0, 0}, Max: &MVec2{0, 0}}
+func NewMRect() *MRect {
+	return &MRect{Min: &MVec2{0, 0}, Max: &MVec2{0, 0}}
 }
 
 // String は MRect の文字列表現を返します。

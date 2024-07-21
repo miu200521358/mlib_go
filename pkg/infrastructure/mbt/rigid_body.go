@@ -15,7 +15,7 @@ import (
 
 type rigidbodyValue struct {
 	pmxRigidBody     *pmx.RigidBody
-	btRigidBody      *bt.BtRigidBody
+	btRigidBody      bt.BtRigidBody
 	btLocalTransform *bt.BtTransform
 	mask             int
 	group            int
@@ -89,7 +89,7 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 	group := 1 << rigidBody.CollisionGroup
 	physics.world.AddRigidBody(btRigidBody, group, rigidBody.CollisionGroupMaskValue)
 	physics.rigidBodies[modelIndex][rigidBody.Index()] = &rigidbodyValue{
-		pmxRigidBody: rigidBody, btRigidBody: &btRigidBody, btLocalTransform: &btRigidBodyLocalTransform,
+		pmxRigidBody: rigidBody, btRigidBody: btRigidBody, btLocalTransform: &btRigidBodyLocalTransform,
 		mask: rigidBody.CollisionGroupMaskValue, group: group}
 
 	physics.updateFlags(modelIndex, rigidBody)
@@ -97,13 +97,14 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 
 func (physics *MPhysics) deleteRigidBodies(modelIndex int) {
 	for _, r := range physics.rigidBodies[modelIndex] {
-		physics.world.RemoveRigidBody(*r.btRigidBody)
+		physics.world.RemoveRigidBody(r.btRigidBody)
+		bt.DeleteBtRigidBody(r.btRigidBody)
 	}
 	physics.rigidBodies[modelIndex] = nil
 }
 
 func (physics *MPhysics) updateFlags(modelIndex int, rigidBody *pmx.RigidBody) {
-	btRigidBody := *physics.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
+	btRigidBody := physics.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
 
 	if rigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
 		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時
@@ -137,7 +138,7 @@ func (physics *MPhysics) UpdateTransform(
 	mat := mgl.NewGlMat4(boneGlobalMatrix)
 	boneTransform.SetFromOpenGLMatrix(&mat[0])
 
-	btRigidBody := *physics.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
+	btRigidBody := physics.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
 	btRigidBodyLocalTransform := *physics.rigidBodies[modelIndex][rigidBody.Index()].btLocalTransform
 
 	// 剛体のグローバル位置を確定
@@ -154,7 +155,7 @@ func (physics *MPhysics) GetRigidBodyBoneMatrix(
 	modelIndex int,
 	rigidBody *pmx.RigidBody,
 ) *mmath.MMat4 {
-	btRigidBody := *physics.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
+	btRigidBody := physics.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
 	btRigidBodyLocalTransform := *physics.rigidBodies[modelIndex][rigidBody.Index()].btLocalTransform
 
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)

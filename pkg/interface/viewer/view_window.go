@@ -78,14 +78,15 @@ func NewViewWindow(
 	}
 
 	viewWindow := &ViewWindow{
-		Window:        glWindow,
-		appState:      appState,
-		windowIndex:   windowIndex,
-		title:         title,
-		appConfig:     appConfig,
-		shader:        mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height),
-		physics:       mbt.NewMPhysics(),
-		prevCursorPos: mmath.NewMVec2(),
+		Window:            glWindow,
+		appState:          appState,
+		windowIndex:       windowIndex,
+		title:             title,
+		appConfig:         appConfig,
+		shader:            mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height),
+		physics:           mbt.NewMPhysics(),
+		prevCursorPos:     mmath.NewMVec2(),
+		prevLeftCursorPos: mmath.NewMRect(),
 		size: &mmath.MVec2{X: float64(appConfig.ViewWindowSize.Width),
 			Y: float64(appConfig.ViewWindowSize.Height)},
 	}
@@ -448,7 +449,8 @@ func (viewWindow *ViewWindow) Animate(
 		}
 
 		// 物理描画
-		viewWindow.physics.DrawDebugLines(viewWindow.shader, viewWindow.appState.IsShowRigidBodyFront() || viewWindow.appState.IsShowRigidBodyBack(),
+		viewWindow.physics.DrawDebugLines(viewWindow.shader,
+			viewWindow.appState.IsShowRigidBodyFront() || viewWindow.appState.IsShowRigidBodyBack(),
 			viewWindow.appState.IsShowJoint(), viewWindow.appState.IsShowRigidBodyFront())
 
 		// 深度解決
