@@ -334,68 +334,68 @@ func (viewWindow *ViewWindow) debugMessageCallback(
 	}
 }
 
-func (w *ViewWindow) Dispose() {
-	w.Window.Destroy()
+func (viewWindow *ViewWindow) Dispose() {
+	viewWindow.Window.Destroy()
 }
 
-func (w *ViewWindow) Close() {
-	w.Window.Destroy()
+func (viewWindow *ViewWindow) Close() {
+	viewWindow.Window.Destroy()
 }
 
-func (w *ViewWindow) Size() (int, int) {
-	return w.appConfig.ViewWindowSize.Width, w.appConfig.ViewWindowSize.Height
+func (viewWindow *ViewWindow) Size() (int, int) {
+	return viewWindow.appConfig.ViewWindowSize.Width, viewWindow.appConfig.ViewWindowSize.Height
 }
 
-func (w *ViewWindow) SetPosition(x, y int) {
-	w.SetPos(x, y)
+func (viewWindow *ViewWindow) SetPosition(x, y int) {
+	viewWindow.SetPos(x, y)
 }
 
-func (w *ViewWindow) AppState() state.IAppState {
-	return w.appState
+func (viewWindow *ViewWindow) AppState() state.IAppState {
+	return viewWindow.appState
 }
 
-func (w *ViewWindow) TriggerClose(window *glfw.Window) {
-	w.appState.SetClosed(true)
+func (viewWindow *ViewWindow) TriggerClose(window *glfw.Window) {
+	viewWindow.appState.SetClosed(true)
 }
 
-func (w *ViewWindow) GetWindow() *glfw.Window {
-	return w.Window
+func (viewWindow *ViewWindow) GetWindow() *glfw.Window {
+	return viewWindow.Window
 }
 
-func (w *ViewWindow) ResetPhysics(animationStates []state.IAnimationState) {
+func (viewWindow *ViewWindow) ResetPhysics(animationStates []state.IAnimationState) {
 	// 物理を削除
 	for _, s := range animationStates {
 		if s.Model() != nil && s.RenderModel() != nil {
-			w.physics.DeleteModel(s.ModelIndex())
+			viewWindow.physics.DeleteModel(s.ModelIndex())
 		}
 	}
 	// 物理ワールドを作り直す
-	w.physics.ResetWorld()
+	viewWindow.physics.ResetWorld()
 	// 物理を登録
 	for _, s := range animationStates {
 		if s.Model() != nil && s.RenderModel() != nil {
-			w.physics.AddModel(s.ModelIndex(), s.Model())
+			viewWindow.physics.AddModel(s.ModelIndex(), s.Model())
 		}
 	}
 }
 
-func (w *ViewWindow) Animate(
+func (viewWindow *ViewWindow) Animate(
 	animationStates []state.IAnimationState, nextStates []state.IAnimationState, timeStep float32,
 ) ([]state.IAnimationState, []state.IAnimationState) {
 	glfw.PollEvents()
 
-	if w.size.X == 0 || w.size.Y == 0 {
+	if viewWindow.size.X == 0 || viewWindow.size.Y == 0 {
 		return animationStates, nextStates
 	}
 
-	w.MakeContextCurrent()
+	viewWindow.MakeContextCurrent()
 
-	if w.size.X != float64(w.shader.Width) || w.size.Y != float64(w.shader.Height) {
-		w.shader.Resize(int(w.size.X), int(w.size.Y))
+	if viewWindow.size.X != float64(viewWindow.shader.Width) || viewWindow.size.Y != float64(viewWindow.shader.Height) {
+		viewWindow.shader.Resize(int(viewWindow.size.X), int(viewWindow.size.Y))
 	}
 
 	// MSAAフレームバッファをバインド
-	w.shader.Msaa.Bind()
+	viewWindow.shader.Msaa.Bind()
 
 	// 深度バッファのクリア
 	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
@@ -410,10 +410,10 @@ func (w *ViewWindow) Animate(
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	// カメラの再計算
-	w.updateCamera()
+	viewWindow.updateCamera()
 
 	// 床描画
-	w.shader.DrawFloor()
+	viewWindow.shader.DrawFloor()
 
 	if animationStates != nil {
 		// 何かしら描画対象情報がある場合の処理
@@ -422,9 +422,9 @@ func (w *ViewWindow) Animate(
 				// モデルが指定されてたら初期化してセット
 				if nextState.Model() != nil {
 					modelIndex := nextState.ModelIndex()
-					w.physics.DeleteModel(modelIndex)
+					viewWindow.physics.DeleteModel(modelIndex)
 					animationStates[nextState.ModelIndex()].Load(nextState.Model())
-					w.physics.AddModel(modelIndex, nextState.Model())
+					viewWindow.physics.AddModel(modelIndex, nextState.Model())
 					nextState.SetModel(nil)
 				}
 				// モーションが指定されてたらセット
@@ -444,47 +444,47 @@ func (w *ViewWindow) Animate(
 		}
 
 		// デフォーム
-		animation.Deform(w.physics, animationStates, w.appState, timeStep)
+		animation.Deform(viewWindow.physics, animationStates, viewWindow.appState, timeStep)
 
 		// モデル描画
 		for _, animationState := range animationStates {
 			if animationState != nil {
-				animationState.Render(w.shader, w.appState)
+				animationState.Render(viewWindow.shader, viewWindow.appState)
 			}
 		}
 
 		// 物理描画
-		w.physics.DrawDebugLines(w.shader, w.appState.IsShowRigidBodyFront() || w.appState.IsShowRigidBodyBack(),
-			w.appState.IsShowJoint(), w.appState.IsShowRigidBodyFront())
+		viewWindow.physics.DrawDebugLines(viewWindow.shader, viewWindow.appState.IsShowRigidBodyFront() || viewWindow.appState.IsShowRigidBodyBack(),
+			viewWindow.appState.IsShowJoint(), viewWindow.appState.IsShowRigidBodyFront())
 
 		// 深度解決
-		w.shader.Msaa.Resolve()
+		viewWindow.shader.Msaa.Resolve()
 	}
 
-	w.shader.Msaa.Unbind()
+	viewWindow.shader.Msaa.Unbind()
 
-	w.SwapBuffers()
+	viewWindow.SwapBuffers()
 
 	return animationStates, nextStates
 }
 
-func (w *ViewWindow) updateCamera() {
+func (viewWindow *ViewWindow) updateCamera() {
 	// カメラの再計算
 	projection := mgl32.Perspective(
-		mgl32.DegToRad(w.shader.FieldOfViewAngle),
-		float32(w.shader.Width)/float32(w.shader.Height),
-		w.shader.NearPlane,
-		w.shader.FarPlane,
+		mgl32.DegToRad(viewWindow.shader.FieldOfViewAngle),
+		float32(viewWindow.shader.Width)/float32(viewWindow.shader.Height),
+		viewWindow.shader.NearPlane,
+		viewWindow.shader.FarPlane,
 	)
 
 	// カメラの位置
-	cameraPosition := mgl.NewGlVec3(w.shader.CameraPosition)
+	cameraPosition := mgl.NewGlVec3(viewWindow.shader.CameraPosition)
 
 	// カメラの中心
-	lookAtCenter := mgl.NewGlVec3(w.shader.LookAtCenterPosition)
+	lookAtCenter := mgl.NewGlVec3(viewWindow.shader.LookAtCenterPosition)
 	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
 
-	for _, program := range w.shader.Programs() {
+	for _, program := range viewWindow.shader.Programs() {
 		// プログラムの切り替え
 		gl.UseProgram(program)
 

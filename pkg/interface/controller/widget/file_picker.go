@@ -518,7 +518,7 @@ func (picker *FilePicker) onClickOpenButton() walk.EventHandler {
 	}
 }
 
-func (f *FilePicker) convertFilterExtension(filterExtension map[int]map[string]string) string {
+func (picker *FilePicker) convertFilterExtension(filterExtension map[int]map[string]string) string {
 	var filterString string
 	for i := 0; i < len(filterExtension); i++ {
 		extData := filterExtension[i]
@@ -532,59 +532,59 @@ func (f *FilePicker) convertFilterExtension(filterExtension map[int]map[string]s
 	return filterString
 }
 
-func (*FilePicker) CreateLayoutItem(ctx *walk.LayoutContext) walk.LayoutItem {
+func (picker *FilePicker) CreateLayoutItem(ctx *walk.LayoutContext) walk.LayoutItem {
 	return &filePickerLayoutItem{idealSize: walk.SizeFrom96DPI(walk.Size{Width: 50, Height: 50}, ctx.DPI())}
 }
 
-func (f *FilePicker) Exists() bool {
-	if f.pathLineEdit.Text() == "" {
+func (picker *FilePicker) Exists() bool {
+	if picker.pathLineEdit.Text() == "" {
 		return false
 	}
-	isExist, err := mutils.ExistsFile(f.pathLineEdit.Text())
+	isExist, err := mutils.ExistsFile(picker.pathLineEdit.Text())
 	if err != nil {
 		return false
 	}
 	return isExist
 }
 
-func (f *FilePicker) ExistsOrEmpty() bool {
-	if f.pathLineEdit.Text() == "" {
+func (picker *FilePicker) ExistsOrEmpty() bool {
+	if picker.pathLineEdit.Text() == "" {
 		return true
 	}
-	isExist, err := mutils.ExistsFile(f.pathLineEdit.Text())
+	isExist, err := mutils.ExistsFile(picker.pathLineEdit.Text())
 	if err != nil {
 		return false
 	}
 	return isExist
 }
 
-func (f *FilePicker) SetEnabled(enable bool) {
-	f.pathLineEdit.SetEnabled(enable)
-	f.openPushButton.SetEnabled(enable)
-	if f.historyPushButton != nil {
-		f.historyPushButton.SetEnabled(enable)
+func (picker *FilePicker) SetEnabled(enable bool) {
+	picker.pathLineEdit.SetEnabled(enable)
+	picker.openPushButton.SetEnabled(enable)
+	if picker.historyPushButton != nil {
+		picker.historyPushButton.SetEnabled(enable)
 	}
 }
 
-func (f *FilePicker) Enabled() bool {
-	return f.pathLineEdit.Enabled()
+func (picker *FilePicker) Enabled() bool {
+	return picker.pathLineEdit.Enabled()
 }
 
-func (f *FilePicker) SetVisible(visible bool) {
-	f.pathLineEdit.SetVisible(visible)
-	f.openPushButton.SetVisible(visible)
-	if f.historyPushButton != nil {
-		f.historyPushButton.SetVisible(visible)
+func (picker *FilePicker) SetVisible(visible bool) {
+	picker.pathLineEdit.SetVisible(visible)
+	picker.openPushButton.SetVisible(visible)
+	if picker.historyPushButton != nil {
+		picker.historyPushButton.SetVisible(visible)
 	}
 }
 
-func (f *FilePicker) Dispose() {
-	f.pathLineEdit.Dispose()
-	f.openPushButton.Dispose()
-	if f.historyPushButton != nil {
-		f.historyPushButton.Dispose()
+func (picker *FilePicker) Dispose() {
+	picker.pathLineEdit.Dispose()
+	picker.openPushButton.Dispose()
+	if picker.historyPushButton != nil {
+		picker.historyPushButton.Dispose()
 	}
-	f.WidgetBase.Dispose()
+	picker.WidgetBase.Dispose()
 }
 
 type filePickerLayoutItem struct {

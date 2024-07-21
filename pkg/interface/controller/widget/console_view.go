@@ -54,35 +54,35 @@ func NewConsoleView(parent walk.Container, minWidth int, minHeight int) *Console
 	return cv
 }
 
-func (cv *ConsoleView) CreateLayoutItem(ctx *walk.LayoutContext) walk.LayoutItem {
+func (controlView *ConsoleView) CreateLayoutItem(ctx *walk.LayoutContext) walk.LayoutItem {
 	return walk.NewGreedyLayoutItem()
 }
 
-func (cv *ConsoleView) setTextSelection(start, end int) {
-	cv.Console.SendMessage(win.EM_SETSEL, uintptr(start), uintptr(end))
+func (controlView *ConsoleView) setTextSelection(start, end int) {
+	controlView.Console.SendMessage(win.EM_SETSEL, uintptr(start), uintptr(end))
 }
 
-func (cv *ConsoleView) textLength() int {
-	return int(cv.Console.SendMessage(0x000E, uintptr(0), uintptr(0)))
+func (controlView *ConsoleView) textLength() int {
+	return int(controlView.Console.SendMessage(0x000E, uintptr(0), uintptr(0)))
 }
 
-func (cv *ConsoleView) AppendText(value string) {
-	textLength := cv.textLength()
-	cv.setTextSelection(textLength, textLength)
+func (controlView *ConsoleView) AppendText(value string) {
+	textLength := controlView.textLength()
+	controlView.setTextSelection(textLength, textLength)
 	uv, err := syscall.UTF16PtrFromString(value)
 	if err == nil {
-		cv.Console.SendMessage(win.EM_REPLACESEL, 0, uintptr(unsafe.Pointer(uv)))
+		controlView.Console.SendMessage(win.EM_REPLACESEL, 0, uintptr(unsafe.Pointer(uv)))
 	}
 }
-func (cv *ConsoleView) PostAppendText(value string) {
-	cv.mutex.Lock()
-	defer cv.mutex.Unlock()
+func (controlView *ConsoleView) PostAppendText(value string) {
+	controlView.mutex.Lock()
+	defer controlView.mutex.Unlock()
 
-	cv.logChan <- value
-	win.PostMessage(cv.Handle(), TEM_APPENDTEXT, 0, 0)
+	controlView.logChan <- value
+	win.PostMessage(controlView.Handle(), TEM_APPENDTEXT, 0, 0)
 }
 
-func (cv *ConsoleView) WndProc(hwnd win.HWND, msg uint32, wParam, lParam uintptr) uintptr {
+func (controlView *ConsoleView) WndProc(hwnd win.HWND, msg uint32, wParam, lParam uintptr) uintptr {
 	switch msg {
 	case win.WM_GETDLGCODE:
 		if wParam == win.VK_RETURN {
@@ -92,22 +92,22 @@ func (cv *ConsoleView) WndProc(hwnd win.HWND, msg uint32, wParam, lParam uintptr
 		return win.DLGC_HASSETSEL | win.DLGC_WANTARROWS | win.DLGC_WANTCHARS
 	case TEM_APPENDTEXT:
 		select {
-		case value := <-cv.logChan:
-			cv.AppendText(value)
+		case value := <-controlView.logChan:
+			controlView.AppendText(value)
 		default:
 			return 0
 		}
 	}
 
-	return cv.WidgetBase.WndProc(hwnd, msg, wParam, lParam)
+	return controlView.WidgetBase.WndProc(hwnd, msg, wParam, lParam)
 }
 
 // Write はio.Writerインターフェースを実装し、logの出力をConsoleViewにリダイレクトします。
-func (cv *ConsoleView) Write(p []byte) (n int, err error) {
+func (controlView *ConsoleView) Write(p []byte) (n int, err error) {
 
 	// 改行が文字列内にある場合、コンソール内で改行が行われるよう置換する
 	p = bytes.ReplaceAll(p, []byte("\n"), []byte("\r\n"))
-	cv.PostAppendText(string(p))
+	controlView.PostAppendText(string(p))
 
 	return n, nil
 }

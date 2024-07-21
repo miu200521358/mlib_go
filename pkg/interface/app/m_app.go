@@ -48,30 +48,30 @@ func NewMApp(appConfig *mconfig.AppConfig) *MApp {
 	return app
 }
 
-func (a *MApp) ControllerRun() {
+func (app *MApp) ControllerRun() {
 	// 操作ウィンドウは別スレッドで起動している前提
-	if a.appConfig.IsEnvProd() || a.appConfig.IsEnvDev() {
-		defer a.recoverFromPanic()
+	if app.appConfig.IsEnvProd() || app.appConfig.IsEnvDev() {
+		defer app.recoverFromPanic()
 	}
-	a.controlWindow.SetEnabled(true)
-	a.controlWindow.Run()
+	app.controlWindow.SetEnabled(true)
+	app.controlWindow.Run()
 }
 
-func (a *MApp) ViewerRun() {
+func (app *MApp) ViewerRun() {
 	// 描画ウィンドウはメインスレッドで起動して描画し続ける
-	a.appState.SetPrevFrame(0)
-	a.appState.SetFrame(0)
+	app.appState.SetPrevFrame(0)
+	app.appState.SetFrame(0)
 	prevTime := glfw.GetTime()
 	prevShowTime := glfw.GetTime()
 	elapsedList := make([]float64, 0)
 
-	for !a.IsClosed() {
+	for !app.IsClosed() {
 		frameTime := glfw.GetTime()
 		originalElapsed := frameTime - prevTime
 
 		var elapsed float64
 		var timeStep float32
-		if !a.appState.IsEnabledFrameDrop() {
+		if !app.appState.IsEnabledFrameDrop() {
 			// フレームドロップOFF
 			// 物理fpsは60fps固定
 			timeStep = physicsDefaultSpf
@@ -83,44 +83,44 @@ func (a *MApp) ViewerRun() {
 			elapsed = originalElapsed
 		}
 
-		if elapsed < a.appState.SpfLimit() {
+		if elapsed < app.appState.SpfLimit() {
 			// 1フレームの時間が経過していない場合はスキップ
 			// fps制限は描画fpsにのみ依存
 			continue
 		}
 
-		if a.IsEnabledPhysics() && a.IsPhysicsReset() {
+		if app.IsEnabledPhysics() && app.IsPhysicsReset() {
 			// 物理ONの時だけ物理リセット
-			for i, w := range a.viewWindows {
-				w.ResetPhysics(a.animationStates[i])
+			for i, w := range app.viewWindows {
+				w.ResetPhysics(app.animationStates[i])
 			}
 			// リセットフラグOFF
-			a.SetPhysicsReset(false)
+			app.SetPhysicsReset(false)
 		}
 
-		for i, w := range a.viewWindows {
+		for i, w := range app.viewWindows {
 			// アニメーション領域を確保しておく
-			a.animationStates[i], a.nextAnimationStates[i] =
-				w.Animate(a.animationStates[i], a.nextAnimationStates[i], timeStep)
+			app.animationStates[i], app.nextAnimationStates[i] =
+				w.Animate(app.animationStates[i], app.nextAnimationStates[i], timeStep)
 		}
 
 		prevTime = frameTime
 		elapsedList = append(elapsedList, elapsed)
-		if a.IsShowInfo() {
-			prevShowTime, elapsedList = a.showInfo(elapsedList, prevShowTime, timeStep)
+		if app.IsShowInfo() {
+			prevShowTime, elapsedList = app.showInfo(elapsedList, prevShowTime, timeStep)
 		}
 	}
-	a.Close()
+	app.Close()
 }
 
-func (a *MApp) showInfo(elapsedList []float64, prevShowTime float64, timeStep float32) (float64, []float64) {
+func (app *MApp) showInfo(elapsedList []float64, prevShowTime float64, timeStep float32) (float64, []float64) {
 	nowShowTime := glfw.GetTime()
 
 	// 1秒ごとにオリジナルの経過時間からFPSを表示
 	if nowShowTime-prevShowTime >= 1.0 {
 		elapsed := mmath.Avg(elapsedList)
 		var suffixFps string
-		if a.appConfig.IsEnvProd() {
+		if app.appConfig.IsEnvProd() {
 			// リリース版の場合、FPSの表示を簡略化
 			suffixFps = fmt.Sprintf("%.2f fps", 1.0/elapsed)
 		} else {
@@ -128,7 +128,7 @@ func (a *MApp) showInfo(elapsedList []float64, prevShowTime float64, timeStep fl
 			suffixFps = fmt.Sprintf("d) %.2f / p) %.2f fps", 1.0/elapsed, 1.0/timeStep)
 		}
 
-		for _, w := range a.viewWindows {
+		for _, w := range app.viewWindows {
 			w.GetWindow().SetTitle(fmt.Sprintf("%s - %s", w.Title(), suffixFps))
 		}
 
@@ -138,16 +138,16 @@ func (a *MApp) showInfo(elapsedList []float64, prevShowTime float64, timeStep fl
 	return prevShowTime, elapsedList
 }
 
-func (a *MApp) ViewerCount() int {
-	return len(a.viewWindows)
+func (app *MApp) ViewerCount() int {
+	return len(app.viewWindows)
 }
 
-func (a *MApp) Close() {
-	for _, w := range a.viewWindows {
+func (app *MApp) Close() {
+	for _, w := range app.viewWindows {
 		w.Close()
 	}
-	if a.controlWindow != nil {
-		a.controlWindow.Close()
+	if app.controlWindow != nil {
+		app.controlWindow.Close()
 	}
 
 	glfw.Terminate()
@@ -155,7 +155,7 @@ func (a *MApp) Close() {
 }
 
 // エラー監視
-func (a *MApp) recoverFromPanic() {
+func (app *MApp) recoverFromPanic() {
 	if r := recover(); r != nil {
 		stackTrace := debug.Stack()
 
@@ -204,7 +204,7 @@ func (a *MApp) recoverFromPanic() {
 				declarative.PushButton{
 					Text: mi18n.T("アプリを終了"),
 					OnClicked: func() {
-						a.Close()
+						app.Close()
 						os.Exit(1)
 					},
 				},
@@ -213,25 +213,25 @@ func (a *MApp) recoverFromPanic() {
 			walk.MsgBox(nil, mi18n.T("エラーダイアログ起動失敗"), string(stackTrace), walk.MsgBoxIconError)
 		}
 
-		a.Close()
+		app.Close()
 	}
 }
 
-func (a *MApp) SetControlWindow(controlWindow IControlWindow) {
-	a.controlWindow = controlWindow
+func (app *MApp) SetControlWindow(controlWindow IControlWindow) {
+	app.controlWindow = controlWindow
 }
 
-func (a *MApp) AddViewWindow(viewWindow IViewWindow) {
-	a.viewWindows = append(a.viewWindows, viewWindow)
-	a.animationStates = append(a.animationStates, make([]state.IAnimationState, 0))
-	a.nextAnimationStates = append(a.nextAnimationStates, make([]state.IAnimationState, 0))
+func (app *MApp) AddViewWindow(viewWindow IViewWindow) {
+	app.viewWindows = append(app.viewWindows, viewWindow)
+	app.animationStates = append(app.animationStates, make([]state.IAnimationState, 0))
+	app.nextAnimationStates = append(app.nextAnimationStates, make([]state.IAnimationState, 0))
 }
 
-func (a *MApp) Dispose() {
-	for _, w := range a.viewWindows {
+func (app *MApp) Dispose() {
+	for _, w := range app.viewWindows {
 		w.Dispose()
 	}
-	a.controlWindow.Dispose()
+	app.controlWindow.Dispose()
 }
 
 // ----------------------
@@ -265,10 +265,10 @@ func GetWindowSize(width int, height int) declarative.Size {
 	return declarative.Size{Width: width, Height: height}
 }
 
-func (a *MApp) Center() {
+func (app *MApp) Center() {
 	go func() {
 		for {
-			if a.controlWindow != nil && len(a.viewWindows) > 0 {
+			if app.controlWindow != nil && len(app.viewWindows) > 0 {
 				break
 			}
 		}
@@ -278,25 +278,25 @@ func (a *MApp) Center() {
 		screenHeight := getSystemMetrics(SM_CYSCREEN)
 
 		// ウィンドウのサイズを取得
-		mWidth, mHeight := a.controlWindow.Size()
+		mWidth, mHeight := app.controlWindow.Size()
 
 		viewWindowWidth := 0
 		viewWindowHeight := 0
-		for _, w := range a.viewWindows {
+		for _, w := range app.viewWindows {
 			gWidth, gHeight := w.Size()
 			viewWindowWidth += gWidth
 			viewWindowHeight += gHeight
 		}
 
 		// ウィンドウを中央に配置
-		if a.appConfig.Horizontal {
+		if app.appConfig.Horizontal {
 			centerX := (screenWidth - (mWidth + viewWindowWidth)) / 2
 			centerY := (screenHeight - mHeight) / 2
 
 			centerX += viewWindowWidth
-			a.controlWindow.SetPosition(centerX, centerY)
+			app.controlWindow.SetPosition(centerX, centerY)
 
-			for _, w := range a.viewWindows {
+			for _, w := range app.viewWindows {
 				gWidth, _ := w.Size()
 				centerX -= gWidth
 				w.SetPosition(centerX, centerY)
@@ -306,9 +306,9 @@ func (a *MApp) Center() {
 			centerY := (screenHeight - (mHeight + viewWindowHeight)) / 2
 
 			centerY += mHeight
-			a.controlWindow.SetPosition(centerX, centerY)
+			app.controlWindow.SetPosition(centerX, centerY)
 
-			for _, w := range a.viewWindows {
+			for _, w := range app.viewWindows {
 				_, gHeight := w.Size()
 				centerY -= gHeight
 				w.SetPosition(centerX, centerY)
