@@ -43,6 +43,7 @@ type ViewWindow struct {
 	ctrlPressed         bool               // Ctrlキー押下フラグ
 	updatedPrevCursor   bool               // 前回のカーソル位置更新フラグ
 	prevCursorPos       *mmath.MVec2       // 前回のカーソル位置
+	prevLeftCursorPos   *mmath.MRect       // 前回の左クリック位置
 	yaw                 float64            // カメラyaw
 	pitch               float64            // カメラpitch
 	size                *mmath.MVec2       // ウィンドウサイズ
@@ -177,6 +178,7 @@ func (viewWindow *ViewWindow) updateCameraAngle() {
 }
 
 func (viewWindow *ViewWindow) updateCameraPositionByCursor(xpos float64, ypos float64) {
+	// 中ボタンが押された場合の処理
 	ratio := 0.07
 	if viewWindow.shiftPressed {
 		ratio *= 10
@@ -184,33 +186,23 @@ func (viewWindow *ViewWindow) updateCameraPositionByCursor(xpos float64, ypos fl
 		ratio *= 0.1
 	}
 
-	// 中ボタンが押された場合の処理
-	if viewWindow.middleButtonPressed {
-		ratio := 0.07
-		if viewWindow.shiftPressed {
-			ratio *= 10
-		} else if viewWindow.ctrlPressed {
-			ratio *= 0.1
-		}
+	xOffset := (viewWindow.prevCursorPos.X - xpos) * ratio
+	yOffset := (viewWindow.prevCursorPos.Y - ypos) * ratio
 
-		xOffset := (viewWindow.prevCursorPos.X - xpos) * ratio
-		yOffset := (viewWindow.prevCursorPos.Y - ypos) * ratio
+	// カメラの向きに基づいて移動方向を計算
+	forward := viewWindow.shader.LookAtCenterPosition.Subed(viewWindow.shader.CameraPosition)
+	right := forward.Cross(mmath.MVec3UnitY).Normalize()
+	up := right.Cross(forward.Normalize()).Normalize()
 
-		// カメラの向きに基づいて移動方向を計算
-		forward := viewWindow.shader.LookAtCenterPosition.Subed(viewWindow.shader.CameraPosition)
-		right := forward.Cross(mmath.MVec3UnitY).Normalize()
-		up := right.Cross(forward.Normalize()).Normalize()
+	// 上下移動のベクトルを計算
+	upMovement := up.MulScalar(-yOffset)
+	// 左右移動のベクトルを計算
+	rightMovement := right.MulScalar(-xOffset)
 
-		// 上下移動のベクトルを計算
-		upMovement := up.MulScalar(-yOffset)
-		// 左右移動のベクトルを計算
-		rightMovement := right.MulScalar(-xOffset)
-
-		// 移動ベクトルを合成してカメラ位置と中心を更新
-		movement := upMovement.Add(rightMovement)
-		viewWindow.shader.CameraPosition.Add(movement)
-		viewWindow.shader.LookAtCenterPosition.Add(movement)
-	}
+	// 移動ベクトルを合成してカメラ位置と中心を更新
+	movement := upMovement.Add(rightMovement)
+	viewWindow.shader.CameraPosition.Add(movement)
+	viewWindow.shader.LookAtCenterPosition.Add(movement)
 }
 
 func (viewWindow *ViewWindow) mouseCallback(
@@ -220,6 +212,7 @@ func (viewWindow *ViewWindow) mouseCallback(
 		switch button {
 		case glfw.MouseButtonLeft:
 			viewWindow.leftButtonPressed = true
+			viewWindow.prevLeftCursorPos.Min.X, viewWindow.prevLeftCursorPos.Min.Y = viewWindow.GetCursorPos()
 		case glfw.MouseButtonMiddle:
 			viewWindow.middleButtonPressed = true
 		case glfw.MouseButtonRight:
@@ -229,6 +222,7 @@ func (viewWindow *ViewWindow) mouseCallback(
 		switch button {
 		case glfw.MouseButtonLeft:
 			viewWindow.leftButtonPressed = false
+			viewWindow.prevLeftCursorPos.Max.X, viewWindow.prevLeftCursorPos.Max.Y = viewWindow.GetCursorPos()
 		case glfw.MouseButtonMiddle:
 			viewWindow.middleButtonPressed = false
 		case glfw.MouseButtonRight:
@@ -468,9 +462,9 @@ func (viewWindow *ViewWindow) Animate(
 	return animationStates, nextStates
 }
 
-func (viewWindow *ViewWindow) updateCamera() {
+func (viewWindow *ViewWindow) getCameraParameter() (mgl32.Mat4, mgl32.Vec3, mgl32.Mat4) {
 	// カメラの再計算
-	projection := mgl32.Perspective(
+	projectionMatrix := mgl32.Perspective(
 		mgl32.DegToRad(viewWindow.shader.FieldOfViewAngle),
 		float32(viewWindow.shader.Width)/float32(viewWindow.shader.Height),
 		viewWindow.shader.NearPlane,
@@ -482,7 +476,13 @@ func (viewWindow *ViewWindow) updateCamera() {
 
 	// カメラの中心
 	lookAtCenter := mgl.NewGlVec3(viewWindow.shader.LookAtCenterPosition)
-	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
+	viewMatrix := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
+
+	return projectionMatrix, cameraPosition, viewMatrix
+}
+
+func (viewWindow *ViewWindow) updateCamera() {
+	projectionMatrix, cameraPosition, viewMatrix := viewWindow.getCameraParameter()
 
 	for _, program := range viewWindow.shader.Programs() {
 		// プログラムの切り替え
@@ -490,7 +490,7 @@ func (viewWindow *ViewWindow) updateCamera() {
 
 		// カメラの再計算
 		projectionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_PROJECTION_MATRIX))
-		gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
+		gl.UniformMatrix4fv(projectionUniform, 1, false, &projectionMatrix[0])
 
 		// カメラの位置
 		cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_CAMERA_POSITION))
@@ -498,7 +498,7 @@ func (viewWindow *ViewWindow) updateCamera() {
 
 		// カメラの中心
 		cameraUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_MATRIX))
-		gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
+		gl.UniformMatrix4fv(cameraUniform, 1, false, &viewMatrix[0])
 
 		gl.UseProgram(0)
 	}
