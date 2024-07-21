@@ -171,6 +171,21 @@ func (rep *baseRepository[T]) unpackSByte() (int8, error) {
 	return int8(chunk[0]), nil
 }
 
+// バイナリデータから sbyte を読み出す
+func (rep *baseRepository[T]) unpackSBytes(count int) ([]int8, error) {
+	values := make([]int8, count)
+	chunk, err := rep.unpack(count)
+	if err != nil {
+		return values, err
+	}
+
+	for i := 0; i < count; i++ {
+		values[i] = int8(chunk[i])
+	}
+
+	return values, nil
+}
+
 // バイナリデータから int16 を読み出す
 func (rep *baseRepository[T]) unpackShort() (int16, error) {
 	chunk, err := rep.unpack(2)
@@ -179,6 +194,21 @@ func (rep *baseRepository[T]) unpackShort() (int16, error) {
 	}
 
 	return int16(binary.LittleEndian.Uint16(chunk)), nil
+}
+
+// バイナリデータから int16 を読み出す
+func (rep *baseRepository[T]) unpackShorts(count int) ([]int16, error) {
+	values := make([]int16, count)
+	chunk, err := rep.unpack(2 * count)
+	if err != nil {
+		return values, err
+	}
+
+	for i := 0; i < count; i++ {
+		values[i] = int16(binary.LittleEndian.Uint16(chunk[i*2 : (i+1)*2]))
+	}
+
+	return values, nil
 }
 
 // バイナリデータから uint16 を読み出す
@@ -191,6 +221,21 @@ func (rep *baseRepository[T]) unpackUShort() (uint16, error) {
 	return binary.LittleEndian.Uint16(chunk), nil
 }
 
+// バイナリデータから uint16 を読み出す
+func (rep *baseRepository[T]) unpackUShorts(count int) ([]uint16, error) {
+	values := make([]uint16, count)
+	chunk, err := rep.unpack(2 * count)
+	if err != nil {
+		return values, err
+	}
+
+	for i := 0; i < count; i++ {
+		values[i] = binary.LittleEndian.Uint16(chunk[i*2 : (i+1)*2])
+	}
+
+	return values, nil
+}
+
 // バイナリデータから uint を読み出す
 func (rep *baseRepository[T]) unpackUInt() (uint, error) {
 	chunk, err := rep.unpack(4)
@@ -199,6 +244,21 @@ func (rep *baseRepository[T]) unpackUInt() (uint, error) {
 	}
 
 	return uint(binary.LittleEndian.Uint32(chunk)), nil
+}
+
+// バイナリデータから uint を読み出す
+func (rep *baseRepository[T]) unpackUInts(count int) ([]uint, error) {
+	values := make([]uint, count)
+	chunk, err := rep.unpack(4 * count)
+	if err != nil {
+		return values, err
+	}
+
+	for i := 0; i < count; i++ {
+		values[i] = uint(binary.LittleEndian.Uint32(chunk[i*4 : (i+1)*4]))
+	}
+
+	return values, nil
 }
 
 // バイナリデータから int を読み出す
@@ -211,6 +271,21 @@ func (rep *baseRepository[T]) unpackInt() (int, error) {
 	return int(binary.LittleEndian.Uint32(chunk)), nil
 }
 
+// バイナリデータから int を読み出す
+func (rep *baseRepository[T]) unpackInts(count int) ([]int, error) {
+	values := make([]int, count)
+	chunk, err := rep.unpack(4 * count)
+	if err != nil {
+		return values, err
+	}
+
+	for i := 0; i < count; i++ {
+		values[i] = int(binary.LittleEndian.Uint32(chunk[i*4 : (i+1)*4]))
+	}
+
+	return values, nil
+}
+
 // バイナリデータから float64 を読み出す
 func (rep *baseRepository[T]) unpackFloat() (float64, error) {
 	// 単精度実数(4byte)なので、一旦uint32にしてからfloat32に変換する
@@ -220,6 +295,22 @@ func (rep *baseRepository[T]) unpackFloat() (float64, error) {
 	}
 
 	return float64(math.Float32frombits(binary.LittleEndian.Uint32(chunk))), nil
+}
+
+// バイナリデータから float64 を複数個一気に読み出す
+func (rep *baseRepository[T]) unpackFloats(count int) ([]float64, error) {
+	values := make([]float64, count)
+	// 単精度実数(4byte)なので、一旦uint32にしてからfloat32に変換する
+	chunk, err := rep.unpack(4 * count)
+	if err != nil {
+		return values, err
+	}
+
+	for i := 0; i < count; i++ {
+		values[i] = float64(math.Float32frombits(binary.LittleEndian.Uint32(chunk[i*4 : (i+1)*4])))
+	}
+
+	return values, nil
 }
 
 func (rep *baseRepository[T]) unpackVec2() (*mmath.MVec2, error) {

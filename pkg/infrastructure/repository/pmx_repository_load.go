@@ -241,36 +241,35 @@ func (rep *PmxRepository) loadVertices(model *pmx.PmxModel) error {
 	for i := 0; i < totalVertexCount; i++ {
 		vertex := &pmx.Vertex{IndexModel: core.NewIndexModel(i)}
 
-		// 12 : float3  | 位置(x,y,z)
-		vertex.Position, err = rep.unpackVec3()
+		vertexValues, err := rep.unpackFloats(8)
 		if err != nil {
-			mlog.E("[%d] loadVertices UnpackFloat Position error: %v", i, err)
+			mlog.E("[%d] loadVertices UnpackFloats 1 error: %v", i, err)
 			return err
 		}
+
+		// 12 : float3  | 位置(x,y,z)
+		vertex.Position = &mmath.MVec3{X: vertexValues[0], Y: vertexValues[1], Z: vertexValues[2]}
 
 		// 12 : float3  | 法線(x,y,z)
-		vertex.Normal, err = rep.unpackVec3()
-		if err != nil {
-			mlog.E("[%d] loadVertices UnpackFloat Normal[0] error: %v", i, err)
-			return err
-		}
+		vertex.Normal = &mmath.MVec3{X: vertexValues[3], Y: vertexValues[4], Z: vertexValues[5]}
 
 		// 8  : float2  | UV(u,v)
-		vertex.Uv, err = rep.unpackVec2()
-		if err != nil {
-			mlog.E("[%d] loadVertices UnpackFloat UV[0] error: %v", i, err)
-			return err
-		}
+		vertex.Uv = &mmath.MVec2{X: vertexValues[6], Y: vertexValues[7]}
 
 		// 16 * n : float4[n] | 追加UV(x,y,z,w)  PMXヘッダの追加UV数による
 		vertex.ExtendedUvs = make([]*mmath.MVec4, 0)
-		for j := 0; j < model.ExtendedUVCount; j++ {
-			extendedUV, err := rep.unpackVec4()
+		if model.ExtendedUVCount > 0 {
+			extendedUvs, err := rep.unpackFloats(model.ExtendedUVCount * 4)
 			if err != nil {
-				mlog.E("[%d][%d] loadVertices UnpackVec4 ExtendedUV error: %v", i, j, err)
+				mlog.E("[%d] loadVertices UnpackVec4 ExtendedUVs error: %v", i, err)
 				return err
 			}
-			vertex.ExtendedUvs = append(vertex.ExtendedUvs, extendedUV)
+
+			for j := 0; j < model.ExtendedUVCount; j++ {
+				vertex.ExtendedUvs = append(vertex.ExtendedUvs,
+					&mmath.MVec4{X: extendedUvs[j*4], Y: extendedUvs[j*4+1],
+						Z: extendedUvs[j*4+2], W: extendedUvs[j*4+3]})
+			}
 		}
 
 		// 1 : byte    | ウェイト変形方式 0:BDEF1 1:BDEF2 2:BDEF4 3:SDEF
@@ -335,32 +334,19 @@ func (rep *PmxRepository) loadVertices(model *pmx.PmxModel) error {
 				mlog.E("[%d] loadVertices BDEF4 unpackBoneIndex boneIndex4 error: %v", i, err)
 				return err
 			}
+
 			// 4 : float              | ボーン1のウェイト値
-			boneWeight1, err := rep.unpackFloat()
-			if err != nil {
-				mlog.E("[%d] loadVertices BDEF4 UnpackFloat boneWeight1 error: %v", i, err)
-				return err
-			}
 			// 4 : float              | ボーン2のウェイト値
-			boneWeight2, err := rep.unpackFloat()
-			if err != nil {
-				mlog.E("[%d] loadVertices BDEF4 UnpackFloat boneWeight2 error: %v", i, err)
-				return err
-			}
 			// 4 : float              | ボーン3のウェイト値
-			boneWeight3, err := rep.unpackFloat()
-			if err != nil {
-				mlog.E("[%d] loadVertices BDEF4 UnpackFloat boneWeight3 error: %v", i, err)
-				return err
-			}
 			// 4 : float              | ボーン4のウェイト値 (ウェイト計1.0の保障はない)
-			boneWeight4, err := rep.unpackFloat()
+			boneWeights, err := rep.unpackFloats(4)
 			if err != nil {
-				mlog.E("[%d] loadVertices BDEF4 UnpackFloat boneWeight4 error: %v", i, err)
+				mlog.E("[%d] loadVertices BDEF4 UnpackFloats boneWeights error: %v", i, err)
 				return err
 			}
+
 			vertex.Deform = pmx.NewBdef4(boneIndex1, boneIndex2, boneIndex3, boneIndex4,
-				boneWeight1, boneWeight2, boneWeight3, boneWeight4)
+				boneWeights[0], boneWeights[1], boneWeights[2], boneWeights[3])
 		case pmx.SDEF:
 			// n : ボーンIndexサイズ  | ボーン1の参照Index
 			boneIndex1, err := rep.unpackBoneIndex(model)
@@ -374,31 +360,21 @@ func (rep *PmxRepository) loadVertices(model *pmx.PmxModel) error {
 				mlog.E("[%d] loadVertices SDEF unpackBoneIndex boneIndex2 error: %v", i, err)
 				return err
 			}
+
+			boneWeights, err := rep.unpackFloats(10)
+			if err != nil {
+				mlog.E("[%d] loadVertices SDEF UnpackFloats boneWeights error: %v", i, err)
+				return err
+			}
+
 			// 4 : float              | ボーン1のウェイト値(0～1.0), ボーン2のウェイト値は 1.0-ボーン1ウェイト
-			boneWeight, err := rep.unpackFloat()
-			if err != nil {
-				mlog.E("[%d] loadVertices SDEF UnpackFloat boneWeight error: %v", i, err)
-				return err
-			}
 			// 12 : float3             | SDEF-C値(x,y,z)
-			sdefC, err := rep.unpackVec3()
-			if err != nil {
-				mlog.E("[%d] loadVertices SDEF UnpackVec3 sdefC error: %v", i, err)
-				return err
-			}
 			// 12 : float3             | SDEF-R0値(x,y,z)
-			sdefR0, err := rep.unpackVec3()
-			if err != nil {
-				mlog.E("[%d] loadVertices SDEF UnpackVec3 sdefR0 error: %v", i, err)
-				return err
-			}
 			// 12 : float3             | SDEF-R1値(x,y,z) ※修正値を要計算
-			sdefR1, err := rep.unpackVec3()
-			if err != nil {
-				mlog.E("[%d] loadVertices SDEF UnpackVec3 sdefR1 error: %v", i, err)
-				return err
-			}
-			vertex.Deform = pmx.NewSdef(boneIndex1, boneIndex2, boneWeight, sdefC, sdefR0, sdefR1)
+			vertex.Deform = pmx.NewSdef(boneIndex1, boneIndex2, boneWeights[0],
+				&mmath.MVec3{X: boneWeights[1], Y: boneWeights[2], Z: boneWeights[3]},
+				&mmath.MVec3{X: boneWeights[4], Y: boneWeights[5], Z: boneWeights[6]},
+				&mmath.MVec3{X: boneWeights[7], Y: boneWeights[8], Z: boneWeights[9]})
 		}
 
 		vertex.EdgeFactor, err = rep.unpackFloat()
@@ -424,33 +400,24 @@ func (rep *PmxRepository) loadFaces(model *pmx.PmxModel) error {
 
 	faces := pmx.NewFaces(totalFaceCount / 3)
 
+	vertexIndexes, err := rep.unpackVertexIndexes(model, totalFaceCount)
+	if err != nil {
+		mlog.E("loadFaces unpackVertexIndexes VertexIndexes error: %v", err)
+		return err
+	}
+
 	for i := 0; i < totalFaceCount; i += 3 {
+		// n : 頂点Indexサイズ     | 頂点の参照Index
+		// n : 頂点Indexサイズ     | 頂点の参照Index
+		// n : 頂点Indexサイズ     | 頂点の参照Index
 		face := &pmx.Face{
-			IndexModel:    core.NewIndexModel(int(i / 3)),
-			VertexIndexes: [3]int{},
+			IndexModel: core.NewIndexModel(int(i / 3)),
+			VertexIndexes: [3]int{
+				vertexIndexes[i],
+				vertexIndexes[i+1],
+				vertexIndexes[i+2],
+			},
 		}
-
-		// n : 頂点Indexサイズ     | 頂点の参照Index
-		face.VertexIndexes[0], err = rep.unpackVertexIndex(model)
-		if err != nil {
-			mlog.E("[%d] loadFaces unpackVertexIndex VertexIndexes[0] error: %v", i, err)
-			return err
-		}
-
-		// n : 頂点Indexサイズ     | 頂点の参照Index
-		face.VertexIndexes[1], err = rep.unpackVertexIndex(model)
-		if err != nil {
-			mlog.E("[%d] loadFaces unpackVertexIndex VertexIndexes[1] error: %v", i, err)
-			return err
-		}
-
-		// n : 頂点Indexサイズ     | 頂点の参照Index
-		face.VertexIndexes[2], err = rep.unpackVertexIndex(model)
-		if err != nil {
-			mlog.E("[%d] loadFaces unpackVertexIndex VertexIndexes[2] error: %v", i, err)
-			return err
-		}
-
 		faces.Update(face)
 	}
 
@@ -502,23 +469,22 @@ func (rep *PmxRepository) loadMaterials(model *pmx.PmxModel) error {
 		}
 
 		// 16 : float4	| Diffuse (R,G,B,A)
-		material.Diffuse, err = rep.unpackVec4()
-		if err != nil {
-			mlog.E("[%d] loadMaterials UnpackVec4 Diffuse error: %v", i, err)
-			return err
-		}
-		// 12 : float3	| Specular (R,G,B,Specular係数)
-		material.Specular, err = rep.unpackVec4()
-		if err != nil {
-			mlog.E("[%d] loadMaterials UnpackVec4 Specular error: %v", i, err)
-			return err
-		}
+		// 12 : float3	| Specular (R,G,B)
+		// 4: float | Specular係数
 		// 12 : float3	| Ambient (R,G,B)
-		material.Ambient, err = rep.unpackVec3()
+		materialValues, err := rep.unpackFloats(11)
 		if err != nil {
-			mlog.E("[%d] loadMaterials UnpackVec3 Ambient error: %v", i, err)
+			mlog.E("[%d] loadMaterials unpackFloats error: %v", i, err)
 			return err
 		}
+
+		material.Diffuse = &mmath.MVec4{X: materialValues[0], Y: materialValues[1],
+			Z: materialValues[2], W: materialValues[3]}
+		material.Specular = &mmath.MVec4{X: materialValues[4], Y: materialValues[5],
+			Z: materialValues[6], W: materialValues[7]}
+		material.Ambient = &mmath.MVec3{X: materialValues[8], Y: materialValues[9],
+			Z: materialValues[10]}
+
 		// 1  : bitFlag  	| 描画フラグ(8bit) - 各bit 0:OFF 1:ON
 		drawFlag, err := rep.unpackByte()
 		if err != nil {
@@ -526,18 +492,19 @@ func (rep *PmxRepository) loadMaterials(model *pmx.PmxModel) error {
 			return err
 		}
 		material.DrawFlag = pmx.DrawFlag(drawFlag)
+
 		// 16 : float4	| エッジ色 (R,G,B,A)
-		material.Edge, err = rep.unpackVec4()
-		if err != nil {
-			mlog.E("[%d] loadMaterials UnpackVec4 Edge error: %v", i, err)
-			return err
-		}
 		// 4  : float	| エッジサイズ
-		material.EdgeSize, err = rep.unpackFloat()
+		edgeValues, err := rep.unpackFloats(5)
 		if err != nil {
-			mlog.E("[%d] loadMaterials UnpackFloat EdgeSize error: %v", i, err)
+			mlog.E("[%d] loadMaterials unpackFloats Edge error: %v", i, err)
 			return err
 		}
+
+		material.Edge = &mmath.MVec4{X: edgeValues[0], Y: edgeValues[1],
+			Z: edgeValues[2], W: edgeValues[3]}
+		material.EdgeSize = edgeValues[4]
+
 		// n  : テクスチャIndexサイズ	| 通常テクスチャ
 		material.TextureIndex, err = rep.unpackTextureIndex(model)
 		if err != nil {
@@ -880,19 +847,18 @@ func (rep *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 					return err
 				}
 				// 12 : float3	| 移動量(x,y,z)
-				offset, err := rep.unpackVec3()
-				if err != nil {
-					mlog.E("[%d][%d] loadMorphs UnpackVec3 Offset error: %v", i, j, err)
-					return err
-				}
 				// 16 : float4	| 回転量(x,y,z,w)
-				qq, err := rep.unpackQuaternion()
+				offsetValues, err := rep.unpackFloats(7)
 				if err != nil {
-					mlog.E("[%d][%d] loadMorphs UnpackQuaternion Quaternion error: %v", i, j, err)
+					mlog.E("[%d][%d] loadMorphs Bone Offset error: %v", i, j, err)
 					return err
 				}
-				morph.Offsets = append(morph.Offsets, pmx.NewBoneMorphOffset(boneIndex, offset,
-					mmath.NewMRotationFromQuaternion(qq)))
+
+				morph.Offsets = append(morph.Offsets, pmx.NewBoneMorphOffset(boneIndex,
+					&mmath.MVec3{X: offsetValues[0], Y: offsetValues[1], Z: offsetValues[2]},
+					mmath.NewMRotationFromQuaternion(mmath.NewMQuaternionByValues(
+						offsetValues[3], offsetValues[4], offsetValues[5], offsetValues[6])),
+				))
 			case pmx.MORPH_TYPE_UV, pmx.MORPH_TYPE_EXTENDED_UV1, pmx.MORPH_TYPE_EXTENDED_UV2, pmx.MORPH_TYPE_EXTENDED_UV3, pmx.MORPH_TYPE_EXTENDED_UV4:
 				// n  : 頂点Indexサイズ  | 頂点Index
 				vertexIndex, err := rep.unpackVertexIndex(model)
@@ -920,65 +886,31 @@ func (rep *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 					mlog.E("[%d][%d] loadMorphs UnpackByte CalcMode error: %v", i, j, err)
 					return err
 				}
+
 				// 16 : float4	| Diffuse (R,G,B,A) - 乗算:1.0／加算:0.0 が初期値となる(同以下)
-				diffuse, err := rep.unpackVec4()
-				if err != nil {
-					mlog.E("[%d][%d] loadMorphs UnpackVec4 Diffuse error: %v", i, j, err)
-					return err
-				}
-				// 12 : float3	| Specular (R,G,B, Specular係数)
-				specular, err := rep.unpackVec4()
-				if err != nil {
-					mlog.E("[%d][%d] loadMorphs UnpackVec4 Specular error: %v", i, j, err)
-					return err
-				}
+				// 16 : float4	| Specular (R,G,B, Specular係数)
 				// 12 : float3	| Ambient (R,G,B)
-				ambient, err := rep.unpackVec3()
-				if err != nil {
-					mlog.E("[%d][%d] loadMorphs UnpackVec3 Ambient error: %v", i, j, err)
-					return err
-				}
 				// 16 : float4	| エッジ色 (R,G,B,A)
-				edge, err := rep.unpackVec4()
-				if err != nil {
-					mlog.E("[%d][%d] loadMorphs UnpackVec4 Edge error: %v", i, j, err)
-					return err
-				}
 				// 4  : float	| エッジサイズ
-				edgeSize, err := rep.unpackFloat()
-				if err != nil {
-					mlog.E("[%d][%d] loadMorphs UnpackFloat EdgeSize error: %v", i, j, err)
-					return err
-				}
 				// 16 : float4	| テクスチャ係数 (R,G,B,A)
-				textureFactor, err := rep.unpackVec4()
-				if err != nil {
-					mlog.E("[%d][%d] loadMorphs UnpackVec4 TextureFactor error: %v", i, j, err)
-					return err
-				}
 				// 16 : float4	| スフィアテクスチャ係数 (R,G,B,A)
-				sphereTextureFactor, err := rep.unpackVec4()
-				if err != nil {
-					mlog.E("[%d][%d] loadMorphs UnpackVec4 SphereTextureFactor error: %v", i, j, err)
-					return err
-				}
 				// 16 : float4	| Toonテクスチャ係数 (R,G,B,A)
-				toonTextureFactor, err := rep.unpackVec4()
+				offsetValues, err := rep.unpackFloats(28)
 				if err != nil {
-					mlog.E("[%d][%d] loadMorphs UnpackVec4 ToonTextureFactor error: %v", i, j, err)
+					mlog.E("[%d][%d] loadMorphs UnpackVec4 material error: %v", i, j, err)
 					return err
 				}
 				morph.Offsets = append(morph.Offsets, pmx.NewMaterialMorphOffset(
 					materialIndex,
 					pmx.MaterialMorphCalcMode(calcMode),
-					diffuse,
-					specular,
-					ambient,
-					edge,
-					edgeSize,
-					textureFactor,
-					sphereTextureFactor,
-					toonTextureFactor,
+					&mmath.MVec4{X: offsetValues[0], Y: offsetValues[1], Z: offsetValues[2], W: offsetValues[3]},
+					&mmath.MVec4{X: offsetValues[4], Y: offsetValues[5], Z: offsetValues[6], W: offsetValues[7]},
+					&mmath.MVec3{X: offsetValues[8], Y: offsetValues[9], Z: offsetValues[10]},
+					&mmath.MVec4{X: offsetValues[11], Y: offsetValues[12], Z: offsetValues[13], W: offsetValues[14]},
+					offsetValues[15],
+					&mmath.MVec4{X: offsetValues[16], Y: offsetValues[17], Z: offsetValues[18], W: offsetValues[19]},
+					&mmath.MVec4{X: offsetValues[20], Y: offsetValues[21], Z: offsetValues[22], W: offsetValues[23]},
+					&mmath.MVec4{X: offsetValues[24], Y: offsetValues[25], Z: offsetValues[26], W: offsetValues[27]},
 				))
 			}
 		}
@@ -1113,55 +1045,31 @@ func (rep *PmxRepository) loadRigidBodies(model *pmx.PmxModel) error {
 			return err
 		}
 		rigidBody.ShapeType = pmx.Shape(shapeType)
+
 		// 12 : float3	| サイズ(x,y,z)
-		rigidBody.Size, err = rep.unpackVec3()
-		if err != nil {
-			mlog.E("[%d] loadRigidBodies UnpackVec3 Size error: %v", i, err)
-			return err
-		}
 		// 12 : float3	| 位置(x,y,z)
-		rigidBody.Position, err = rep.unpackVec3()
-		if err != nil {
-			mlog.E("[%d] loadRigidBodies UnpackVec3 Position error: %v", i, err)
-			return err
-		}
 		// 12 : float3	| 回転(x,y,z) -> ラジアン角
-		rads, err := rep.unpackVec3()
-		if err != nil {
-			mlog.E("[%d] loadRigidBodies UnpackVec3 Rotation error: %v", i, err)
-			return err
-		}
-		rigidBody.Rotation = mmath.NewMRotationFromRadians(rads)
 		// 4  : float	| 質量
-		rigidBody.RigidBodyParam.Mass, err = rep.unpackFloat()
-		if err != nil {
-			mlog.E("[%d] loadRigidBodies UnpackFloat Mass error: %v", i, err)
-			return err
-		}
 		// 4  : float	| 移動減衰
-		rigidBody.RigidBodyParam.LinearDamping, err = rep.unpackFloat()
-		if err != nil {
-			mlog.E("[%d] loadRigidBodies UnpackFloat LinearDamping error: %v", i, err)
-			return err
-		}
 		// 4  : float	| 回転減衰
-		rigidBody.RigidBodyParam.AngularDamping, err = rep.unpackFloat()
-		if err != nil {
-			mlog.E("[%d] loadRigidBodies UnpackFloat AngularDamping error: %v", i, err)
-			return err
-		}
 		// 4  : float	| 反発力
-		rigidBody.RigidBodyParam.Restitution, err = rep.unpackFloat()
-		if err != nil {
-			mlog.E("[%d] loadRigidBodies UnpackFloat Restitution error: %v", i, err)
-			return err
-		}
 		// 4  : float	| 摩擦力
-		rigidBody.RigidBodyParam.Friction, err = rep.unpackFloat()
+		rigidBodyValues, err := rep.unpackFloats(14)
 		if err != nil {
-			mlog.E("[%d] loadRigidBodies UnpackFloat Friction error: %v", i, err)
+			mlog.E("[%d] loadRigidBodies rigidBodyValues error: %v", i, err)
 			return err
 		}
+
+		rigidBody.Size = &mmath.MVec3{X: rigidBodyValues[0], Y: rigidBodyValues[1], Z: rigidBodyValues[2]}
+		rigidBody.Position = &mmath.MVec3{X: rigidBodyValues[3], Y: rigidBodyValues[4], Z: rigidBodyValues[5]}
+		rigidBody.Rotation = mmath.NewMRotationFromRadians(
+			&mmath.MVec3{X: rigidBodyValues[6], Y: rigidBodyValues[7], Z: rigidBodyValues[8]})
+		rigidBody.RigidBodyParam.Mass = rigidBodyValues[9]
+		rigidBody.RigidBodyParam.LinearDamping = rigidBodyValues[10]
+		rigidBody.RigidBodyParam.AngularDamping = rigidBodyValues[11]
+		rigidBody.RigidBodyParam.Restitution = rigidBodyValues[12]
+		rigidBody.RigidBodyParam.Friction = rigidBodyValues[13]
+
 		// 1  : byte	| 剛体の物理演算 - 0:ボーン追従(static) 1:物理演算(dynamic) 2:物理演算 + Bone位置合わせ
 		physicsType, err := rep.unpackByte()
 		if err != nil {
@@ -1216,57 +1124,34 @@ func (rep *PmxRepository) loadJoints(model *pmx.PmxModel) error {
 			mlog.E("[%d] loadJoints unpackRigidBodyIndex RigidbodyIndexB error: %v", i, err)
 			return err
 		}
+
 		// 12 : float3	| 位置(x,y,z)
-		joint.Position, err = rep.unpackVec3()
-		if err != nil {
-			mlog.E("[%d] loadJoints UnpackVec3 Position error: %v", i, err)
-			return err
-		}
 		// 12 : float3	| 回転(x,y,z) -> ラジアン角
-		rads, err := rep.unpackVec3()
-		if err != nil {
-			mlog.E("[%d] loadJoints UnpackVec3 Rotation error: %v", i, err)
-			return err
-		}
-		joint.Rotation = mmath.NewMRotationFromRadians(rads)
 		// 12 : float3	| 移動制限-下限(x,y,z)
-		joint.JointParam.TranslationLimitMin, err = rep.unpackVec3()
-		if err != nil {
-			mlog.E("[%d] loadJoints UnpackVec3 TranslationLimitMin error: %v", i, err)
-			return err
-		}
 		// 12 : float3	| 移動制限-上限(x,y,z)
-		joint.JointParam.TranslationLimitMax, err = rep.unpackVec3()
-		if err != nil {
-			mlog.E("[%d] loadJoints UnpackVec3 TranslationLimitMax error: %v", i, err)
-			return err
-		}
 		// 12 : float3	| 回転制限-下限(x,y,z) -> ラジアン角
-		rotationLimitMin, err := rep.unpackVec3()
-		if err != nil {
-			mlog.E("[%d] loadJoints UnpackVec3 RotationLimitMin error: %v", i, err)
-			return err
-		}
-		joint.JointParam.RotationLimitMin = mmath.NewMRotationFromRadians(rotationLimitMin)
 		// 12 : float3	| 回転制限-上限(x,y,z) -> ラジアン角
-		rotationLimitMax, err := rep.unpackVec3()
-		if err != nil {
-			mlog.E("[%d] loadJoints UnpackVec3 RotationLimitMax error: %v", i, err)
-			return err
-		}
-		joint.JointParam.RotationLimitMax = mmath.NewMRotationFromRadians(rotationLimitMax)
 		// 12 : float3	| バネ定数-移動(x,y,z)
-		joint.JointParam.SpringConstantTranslation, err = rep.unpackVec3()
-		if err != nil {
-			mlog.E("[%d] loadJoints UnpackVec3 SpringConstantTranslation error: %v", i, err)
-			return err
-		}
 		// 12 : float3	| バネ定数-回転(x,y,z)
-		joint.JointParam.SpringConstantRotation, err = rep.unpackVec3()
+		jointValues, err := rep.unpackFloats(24)
 		if err != nil {
-			mlog.E("[%d] loadJoints UnpackVec3 SpringConstantRotation error: %v", i, err)
+			mlog.E("[%d] loadJoints jointValues error: %v", i, err)
 			return err
 		}
+
+		joint.Position = &mmath.MVec3{X: jointValues[0], Y: jointValues[1], Z: jointValues[2]}
+		joint.Rotation = mmath.NewMRotationFromRadians(
+			&mmath.MVec3{X: jointValues[3], Y: jointValues[4], Z: jointValues[5]})
+		joint.JointParam.TranslationLimitMin = &mmath.MVec3{X: jointValues[6], Y: jointValues[7], Z: jointValues[8]}
+		joint.JointParam.TranslationLimitMax = &mmath.MVec3{X: jointValues[9], Y: jointValues[10], Z: jointValues[11]}
+		joint.JointParam.RotationLimitMin = mmath.NewMRotationFromRadians(
+			&mmath.MVec3{X: jointValues[12], Y: jointValues[13], Z: jointValues[14]})
+		joint.JointParam.RotationLimitMax = mmath.NewMRotationFromRadians(
+			&mmath.MVec3{X: jointValues[15], Y: jointValues[16], Z: jointValues[17]})
+		joint.JointParam.SpringConstantTranslation =
+			&mmath.MVec3{X: jointValues[18], Y: jointValues[19], Z: jointValues[20]}
+		joint.JointParam.SpringConstantRotation =
+			&mmath.MVec3{X: jointValues[21], Y: jointValues[22], Z: jointValues[23]}
 
 		joints.Update(joint)
 	}
@@ -1302,6 +1187,45 @@ func (rep *PmxRepository) unpackVertexIndex(model *pmx.PmxModel) (int, error) {
 		return v, nil
 	}
 	return 0, fmt.Errorf("未知のVertexIndexサイズです。vertexCount: %d", model.VertexCountType)
+}
+
+// テキストデータを読み取る
+func (rep *PmxRepository) unpackVertexIndexes(model *pmx.PmxModel, count int) ([]int, error) {
+	indexes := make([]int, count)
+
+	switch model.VertexCountType {
+	case 1:
+		values, err := rep.unpackBytes(count)
+		if err != nil {
+			mlog.E("unpackVertexIndex.UnpackByte error: %v", err)
+			return indexes, err
+		}
+
+		for i, b := range values {
+			indexes[i] = int(b)
+		}
+		return indexes, nil
+	case 2:
+		values, err := rep.unpackUShorts(count)
+		if err != nil {
+			mlog.E("unpackVertexIndex.UnpackUShort error: %v", err)
+			return indexes, err
+		}
+
+		for i, s := range values {
+			indexes[i] = int(s)
+		}
+
+		return indexes, nil
+	case 4:
+		indexes, err := rep.unpackInts(count)
+		if err != nil {
+			mlog.E("unpackVertexIndex.UnpackInt error: %v", err)
+			return indexes, err
+		}
+		return indexes, nil
+	}
+	return indexes, fmt.Errorf("未知のVertexIndexサイズです。vertexCount: %d", model.VertexCountType)
 }
 
 // テクスチャIndexを読み取る
