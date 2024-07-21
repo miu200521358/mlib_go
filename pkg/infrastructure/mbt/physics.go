@@ -14,6 +14,7 @@ type IPhysics interface {
 	AddModel(modelIndex int, model *pmx.PmxModel)
 	DeleteModel(modelIndex int)
 	StepSimulation(timeStep float32)
+	UpdateFlags(isReset bool)
 	UpdateTransform(modelIndex int, rigidBodyBone *pmx.Bone, boneGlobalMatrix *mmath.MMat4, r *pmx.RigidBody)
 	GetRigidBodyBoneMatrix(modelIndex int, rigidBody *pmx.RigidBody) *mmath.MMat4
 	Exists(modelIndex int) bool

@@ -92,7 +92,7 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 		pmxRigidBody: rigidBody, btRigidBody: btRigidBody, btLocalTransform: &btRigidBodyLocalTransform,
 		mask: rigidBody.CollisionGroupMaskValue, group: group}
 
-	physics.updateFlags(modelIndex, rigidBody)
+	physics.updateFlag(modelIndex, rigidBody, false)
 }
 
 func (physics *MPhysics) deleteRigidBodies(modelIndex int) {
@@ -103,7 +103,15 @@ func (physics *MPhysics) deleteRigidBodies(modelIndex int) {
 	physics.rigidBodies[modelIndex] = nil
 }
 
-func (physics *MPhysics) updateFlags(modelIndex int, rigidBody *pmx.RigidBody) {
+func (physics *MPhysics) UpdateFlags(isReset bool) {
+	for modelIndex := range physics.rigidBodies {
+		for _, rigidBody := range physics.rigidBodies[modelIndex] {
+			physics.updateFlag(modelIndex, rigidBody.pmxRigidBody, isReset)
+		}
+	}
+}
+
+func (physics *MPhysics) updateFlag(modelIndex int, rigidBody *pmx.RigidBody, isReset bool) {
 	btRigidBody := physics.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
 
 	if rigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
@@ -115,11 +123,17 @@ func (physics *MPhysics) updateFlags(modelIndex int, rigidBody *pmx.RigidBody) {
 		// MotionState::setWorldTransformの毎ステップ呼び出しが無効になる(剛体位置は判っているので不要)
 		btRigidBody.SetActivationState(bt.DISABLE_SIMULATION)
 	} else {
-		// 物理演算・物理+ボーン位置合わせの場合
-		// 剛体の位置更新に物理演算を使う。
-		// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
-		btRigidBody.SetCollisionFlags(
-			btRigidBody.GetCollisionFlags() & ^int(bt.BtCollisionObjectCF_NO_CONTACT_RESPONSE))
+		if isReset {
+			// 物理リセット時
+			btRigidBody.SetCollisionFlags(
+				btRigidBody.GetCollisionFlags() | int(bt.BtCollisionObjectCF_KINEMATIC_OBJECT))
+		} else {
+			// 物理演算・物理+ボーン位置合わせの場合
+			// 剛体の位置更新に物理演算を使う。
+			// MotionState::getWorldTransformが毎ステップコールされるようになるのでここで剛体位置を更新する。
+			btRigidBody.SetCollisionFlags(btRigidBody.GetCollisionFlags() &
+				^int(bt.BtCollisionObjectCF_NO_CONTACT_RESPONSE) & ^int(bt.BtCollisionObjectCF_KINEMATIC_OBJECT))
+		}
 		// 毎ステップの剛体位置通知を有効にする
 		// MotionState::setWorldTransformの毎ステップ呼び出しが有効になる(剛体位置が変わるので必要)
 		btRigidBody.SetActivationState(bt.DISABLE_DEACTIVATION)

@@ -251,6 +251,8 @@ func (viewWindow *ViewWindow) keyCallback(
 		}
 	}
 
+	viewWindow.resetView()
+
 	switch key {
 	case glfw.KeyKP0: // 下面から
 		viewWindow.yaw = rightAngle
@@ -275,6 +277,17 @@ func (viewWindow *ViewWindow) keyCallback(
 	}
 
 	viewWindow.updateCameraAngle()
+}
+
+func (viewWindow *ViewWindow) resetView() {
+	// カメラとかリセット
+	viewWindow.shader.Reset()
+	viewWindow.prevCursorPos = mmath.NewMVec2()
+	viewWindow.yaw = rightAngle
+	viewWindow.pitch = 0.0
+	viewWindow.leftButtonPressed = false
+	viewWindow.middleButtonPressed = false
+	viewWindow.rightButtonPressed = false
 }
 
 func (viewWindow *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64) {
@@ -358,20 +371,11 @@ func (viewWindow *ViewWindow) GetWindow() *glfw.Window {
 }
 
 func (viewWindow *ViewWindow) ResetPhysics(animationStates []state.IAnimationState) {
-	// 物理を削除
-	for _, s := range animationStates {
-		if s.Model() != nil && s.RenderModel() != nil {
-			viewWindow.physics.DeleteModel(s.ModelIndex())
-		}
-	}
-	// 物理ワールドを作り直す
-	viewWindow.physics.ResetWorld()
-	// 物理を登録
-	for _, s := range animationStates {
-		if s.Model() != nil && s.RenderModel() != nil {
-			viewWindow.physics.AddModel(s.ModelIndex(), s.Model())
-		}
-	}
+	// デフォーム再設定
+	animation.Deform(viewWindow.physics, animationStates, viewWindow.appState, viewWindow.physics.PhysicsSpf)
+
+	// リセットなしでフラグを更新
+	viewWindow.physics.UpdateFlags(false)
 }
 
 func (viewWindow *ViewWindow) Animate(

@@ -182,6 +182,7 @@ func (appState *appState) IsEnabledPhysics() bool {
 }
 
 func (appState *appState) SetEnabledPhysics(enabled bool) {
+	appState.SetFrame(appState.frame)
 	appState.isEnabledPhysics = enabled
 }
 
@@ -190,6 +191,7 @@ func (appState *appState) IsPhysicsReset() bool {
 }
 
 func (appState *appState) SetPhysicsReset(reset bool) {
+	appState.SetFrame(appState.frame)
 	appState.isPhysicsReset = reset
 }
 

@@ -89,23 +89,36 @@ func (app *MApp) ViewerRun() {
 			continue
 		}
 
-		if app.IsEnabledPhysics() && app.IsPhysicsReset() {
-			// 物理ONの時だけ物理リセット
+		// if app.IsEnabledPhysics() && app.IsPhysicsReset() {
+
+		// 	// リセットフラグOFF
+		// 	app.SetPhysicsReset(false)
+		// }
+
+		if app.IsPhysicsReset() {
+			for i, w := range app.viewWindows {
+				// 一旦アニメーション
+				app.animationStates[i], app.nextAnimationStates[i] =
+					w.Animate(app.animationStates[i], app.nextAnimationStates[i], timeStep)
+			}
+
 			for i, w := range app.viewWindows {
 				w.ResetPhysics(app.animationStates[i])
 			}
-			// リセットフラグOFF
+
+			// リセットが終わったらフラグを落とす
 			app.SetPhysicsReset(false)
 		}
 
 		for i, w := range app.viewWindows {
-			// アニメーション領域を確保しておく
+			// アニメーション
 			app.animationStates[i], app.nextAnimationStates[i] =
 				w.Animate(app.animationStates[i], app.nextAnimationStates[i], timeStep)
 		}
 
 		prevTime = frameTime
 		elapsedList = append(elapsedList, elapsed)
+
 		if app.IsShowInfo() {
 			prevShowTime, elapsedList = app.showInfo(elapsedList, prevShowTime, timeStep)
 		}

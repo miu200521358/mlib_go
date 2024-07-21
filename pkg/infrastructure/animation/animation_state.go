@@ -137,7 +137,7 @@ func (animationState *AnimationState) DeformBeforePhysics(
 }
 
 func (animationState *AnimationState) DeformPhysics(physics mbt.IPhysics, appState state.IAppState) {
-	if animationState.model == nil || !appState.IsEnabledPhysics() {
+	if animationState.model == nil || (!appState.IsEnabledPhysics() && !appState.IsPhysicsReset()) {
 		return
 	}
 
@@ -147,12 +147,14 @@ func (animationState *AnimationState) DeformPhysics(physics mbt.IPhysics, appSta
 		if rigidBodyBone == nil {
 			rigidBodyBone = rigidBody.JointedBone
 		}
+
 		if rigidBodyBone == nil || animationState.vmdDeltas.Bones.Get(rigidBodyBone.Index()) == nil {
 			continue
 		}
 
-		if rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC {
-			// ボーン追従剛体・物理＋ボーン剛体
+		if (appState.IsEnabledPhysics() && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC) ||
+			appState.IsPhysicsReset() {
+			// 通常はボーン追従剛体・物理＋ボーン剛体だけ。物理リセット時は全部更新
 			physics.UpdateTransform(animationState.ModelIndex(), rigidBodyBone,
 				animationState.vmdDeltas.Bones.Get(rigidBodyBone.Index()).FilledGlobalMatrix(), rigidBody)
 		}
@@ -160,7 +162,7 @@ func (animationState *AnimationState) DeformPhysics(physics mbt.IPhysics, appSta
 }
 
 func (animationState *AnimationState) DeformAfterPhysics(physics mbt.IPhysics, appState state.IAppState) {
-	if animationState.model != nil && appState.IsEnabledPhysics() {
+	if animationState.model != nil && appState.IsEnabledPhysics() && !appState.IsPhysicsReset() {
 		// 物理剛体位置を更新
 		for _, isAfterPhysics := range []bool{false, true} {
 			for _, bone := range animationState.model.Bones.LayerSortedBones[isAfterPhysics] {
@@ -207,6 +209,10 @@ func Deform(
 		}
 
 		wg.Wait()
+	}
+
+	if appState.IsPhysicsReset() {
+		physics.UpdateFlags(true)
 	}
 
 	if appState.IsEnabledPhysics() || appState.IsPhysicsReset() {
