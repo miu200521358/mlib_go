@@ -68,7 +68,9 @@ func (ik *Ik) Copy() *Ik {
 }
 
 type Bone struct {
-	*core.IndexNameModel
+	index        int          // ボーンINDEX
+	name         string       // ボーン名
+	englishName  string       // ボーン英名
 	Position     *mmath.MVec3 // ボーン位置
 	ParentIndex  int          // 親ボーンのボーンIndex
 	Layer        float64      // 変形階層(pmxは整数だけど、間にシステムボーンを入れられるようにfloat64にしておく)
@@ -118,22 +120,24 @@ type BoneExtend struct {
 
 func NewBone() *Bone {
 	bone := &Bone{
-		IndexNameModel: core.NewIndexNameModel(-1, "", ""),
-		Position:       mmath.NewMVec3(),
-		ParentIndex:    -1,
-		Layer:          -1,
-		BoneFlag:       BONE_FLAG_NONE,
-		TailPosition:   mmath.NewMVec3(),
-		TailIndex:      -1,
-		EffectIndex:    -1,
-		EffectFactor:   0.0,
-		FixedAxis:      mmath.NewMVec3(),
-		LocalAxisX:     mmath.NewMVec3(),
-		LocalAxisZ:     mmath.NewMVec3(),
-		EffectorKey:    -1,
-		Ik:             NewIk(),
-		DisplaySlot:    -1,
-		IsSystem:       true,
+		index:        -1,
+		name:         "",
+		englishName:  "",
+		Position:     mmath.NewMVec3(),
+		ParentIndex:  -1,
+		Layer:        -1,
+		BoneFlag:     BONE_FLAG_NONE,
+		TailPosition: mmath.NewMVec3(),
+		TailIndex:    -1,
+		EffectIndex:  -1,
+		EffectFactor: 0.0,
+		FixedAxis:    mmath.NewMVec3(),
+		LocalAxisX:   mmath.NewMVec3(),
+		LocalAxisZ:   mmath.NewMVec3(),
+		EffectorKey:  -1,
+		Ik:           NewIk(),
+		DisplaySlot:  -1,
+		IsSystem:     true,
 		Extend: &BoneExtend{
 			NormalizedLocalAxisX:   mmath.NewMVec3(),
 			NormalizedLocalAxisY:   mmath.NewMVec3(),
@@ -173,6 +177,34 @@ func NewBoneByName(name string) *Bone {
 	bone := NewBone()
 	bone.SetName(name)
 	return bone
+}
+
+func (bone *Bone) Index() int {
+	return bone.index
+}
+
+func (bone *Bone) SetIndex(index int) {
+	bone.index = index
+}
+
+func (bone *Bone) Name() string {
+	return bone.name
+}
+
+func (bone *Bone) SetName(name string) {
+	bone.name = name
+}
+
+func (bone *Bone) EnglishName() string {
+	return bone.englishName
+}
+
+func (bone *Bone) SetEnglishName(englishName string) {
+	bone.englishName = englishName
+}
+
+func (bone *Bone) IsValid() bool {
+	return bone != nil && bone.index >= 0
 }
 
 func (bone *Bone) Copy() core.IIndexNameModel {

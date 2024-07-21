@@ -11,7 +11,6 @@ type VmdDeltas struct {
 
 func NewVmdDeltas(materials *pmx.Materials, bones *pmx.Bones) *VmdDeltas {
 	return &VmdDeltas{
-		Bones:  NewBoneDeltas(bones),
-		Morphs: NewMorphDeltas(materials, bones),
+		Bones: NewBoneDeltas(bones),
 	}
 }

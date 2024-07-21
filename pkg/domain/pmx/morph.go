@@ -52,12 +52,42 @@ const (
 
 // Morph represents a morph.
 type Morph struct {
-	*core.IndexNameModel
+	index       int            // モーフINDEX
+	name        string         // モーフ名
+	englishName string         // モーフ英名
 	Panel       MorphPanel     // モーフパネル
 	MorphType   MorphType      // モーフ種類
 	Offsets     []IMorphOffset // モーフオフセット
 	DisplaySlot int            // 表示枠
 	IsSystem    bool           // ツール側で追加したモーフ
+}
+
+func (morph *Morph) Index() int {
+	return morph.index
+}
+
+func (morph *Morph) SetIndex(index int) {
+	morph.index = index
+}
+
+func (morph *Morph) Name() string {
+	return morph.name
+}
+
+func (morph *Morph) SetName(name string) {
+	morph.name = name
+}
+
+func (morph *Morph) EnglishName() string {
+	return morph.englishName
+}
+
+func (morph *Morph) SetEnglishName(englishName string) {
+	morph.englishName = englishName
+}
+
+func (morph *Morph) IsValid() bool {
+	return morph != nil && morph.index >= 0
 }
 
 // IMorphOffset represents a morph offset.
@@ -204,12 +234,14 @@ func NewMaterialMorphOffset(
 // NewMorph
 func NewMorph() *Morph {
 	return &Morph{
-		IndexNameModel: core.NewIndexNameModel(-1, "", ""),
-		Panel:          MORPH_PANEL_SYSTEM,
-		MorphType:      MORPH_TYPE_VERTEX,
-		Offsets:        make([]IMorphOffset, 0),
-		DisplaySlot:    -1,
-		IsSystem:       false,
+		index:       -1,
+		name:        "",
+		englishName: "",
+		Panel:       MORPH_PANEL_SYSTEM,
+		MorphType:   MORPH_TYPE_VERTEX,
+		Offsets:     make([]IMorphOffset, 0),
+		DisplaySlot: -1,
+		IsSystem:    false,
 	}
 }
 

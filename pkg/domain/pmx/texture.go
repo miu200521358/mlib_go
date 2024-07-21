@@ -15,14 +15,46 @@ const (
 )
 
 type Texture struct {
-	*core.IndexNameModel
+	index       int         // テクスチャINDEX
+	name        string      // テクスチャ名
+	englishName string      // テクスチャ英名
 	TextureType TextureType // テクスチャ種別
 }
 
 func NewTexture() *Texture {
 	return &Texture{
-		IndexNameModel: core.NewIndexNameModel(-1, "", ""),
+		index:       -1,
+		name:        "",
+		englishName: "",
 	}
+}
+
+func (tex *Texture) Index() int {
+	return tex.index
+}
+
+func (tex *Texture) SetIndex(index int) {
+	tex.index = index
+}
+
+func (tex *Texture) Name() string {
+	return tex.name
+}
+
+func (tex *Texture) SetName(name string) {
+	tex.name = name
+}
+
+func (tex *Texture) EnglishName() string {
+	return tex.englishName
+}
+
+func (tex *Texture) SetEnglishName(englishName string) {
+	tex.englishName = englishName
+}
+
+func (tex *Texture) IsValid() bool {
+	return tex != nil && tex.index >= 0
 }
 
 func (tex *Texture) Copy() core.IIndexModel {

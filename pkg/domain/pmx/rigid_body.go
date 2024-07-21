@@ -92,7 +92,9 @@ func NewCollisionGroup(collisionGroupMask uint16) []uint16 {
 }
 
 type RigidBody struct {
-	*core.IndexNameModel
+	index                   int              // 剛体INDEX
+	name                    string           // 剛体名
+	englishName             string           // 剛体英名
 	BoneIndex               int              // 関連ボーンIndex
 	CollisionGroup          byte             // グループ
 	CollisionGroupMask      CollisionGroup   // 非衝突グループフラグ
@@ -116,7 +118,9 @@ type RigidBody struct {
 // NewRigidBody creates a new rigid body.
 func NewRigidBody() *RigidBody {
 	return &RigidBody{
-		IndexNameModel:          core.NewIndexNameModel(-1, "", ""),
+		index:                   -1,
+		name:                    "",
+		englishName:             "",
 		BoneIndex:               -1,
 		CollisionGroup:          0,
 		CollisionGroupMask:      NewCollisionGroupFromSlice([]uint16{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
@@ -135,6 +139,34 @@ func NewRigidBody() *RigidBody {
 		Bone:                    nil,
 		JointedBone:             nil,
 	}
+}
+
+func (rigidBody *RigidBody) Index() int {
+	return rigidBody.index
+}
+
+func (rigidBody *RigidBody) SetIndex(index int) {
+	rigidBody.index = index
+}
+
+func (rigidBody *RigidBody) Name() string {
+	return rigidBody.name
+}
+
+func (rigidBody *RigidBody) SetName(name string) {
+	rigidBody.name = name
+}
+
+func (rigidBody *RigidBody) EnglishName() string {
+	return rigidBody.englishName
+}
+
+func (rigidBody *RigidBody) SetEnglishName(englishName string) {
+	rigidBody.englishName = englishName
+}
+
+func (rigidBody *RigidBody) IsValid() bool {
+	return rigidBody != nil && rigidBody.index >= 0
 }
 
 func (rigidBody *RigidBody) Copy() core.IIndexNameModel {

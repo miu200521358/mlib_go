@@ -3,8 +3,6 @@ package core
 import (
 	"reflect"
 	"sort"
-
-	"github.com/jinzhu/copier"
 )
 
 type IIndexNameModel interface {
@@ -16,51 +14,6 @@ type IIndexNameModel interface {
 	SetName(name string)
 	EnglishName() string
 	SetEnglishName(englishName string)
-}
-
-// INDEXを持つ基底クラス
-type IndexNameModel struct {
-	index       int
-	name        string
-	englishName string
-}
-
-func NewIndexNameModel(index int, name string, englishName string) *IndexNameModel {
-	return &IndexNameModel{index: index, name: name, englishName: englishName}
-}
-
-func (iModel *IndexNameModel) Index() int {
-	return iModel.index
-}
-
-func (iModel *IndexNameModel) SetIndex(index int) {
-	iModel.index = index
-}
-
-func (iModel *IndexNameModel) Name() string {
-	return iModel.name
-}
-
-func (iModel *IndexNameModel) SetName(name string) {
-	iModel.name = name
-}
-
-func (iModel *IndexNameModel) EnglishName() string {
-	return iModel.englishName
-}
-
-func (iModel *IndexNameModel) SetEnglishName(englishName string) {
-	iModel.englishName = englishName
-}
-
-func (iModel *IndexNameModel) IsValid() bool {
-	return iModel != nil && iModel.index >= 0
-}
-
-func (iModel *IndexNameModel) Copy() IIndexNameModel {
-	copied := IndexNameModel{index: iModel.index, name: iModel.name, englishName: iModel.englishName}
-	copier.CopyWithOption(copied, iModel, copier.Option{DeepCopy: true})
-	return &copied
 }
 
 // Tのリスト基底クラス

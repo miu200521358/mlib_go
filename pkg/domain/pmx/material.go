@@ -111,7 +111,9 @@ const (
 )
 
 type Material struct {
-	*core.IndexNameModel
+	index              int          // 材質INDEX
+	name               string       // 材質名
+	englishName        string       // 材質英名
 	Diffuse            *mmath.MVec4 // Diffuse (R,G,B,A)(拡散色＋非透過度)
 	Specular           *mmath.MVec4 // Specular (R,G,B,A)(反射色 + 反射強度)
 	Ambient            *mmath.MVec3 // Ambient (R,G,B)(環境色)
@@ -129,7 +131,9 @@ type Material struct {
 
 func NewMaterial() *Material {
 	return &Material{
-		IndexNameModel:     core.NewIndexNameModel(-1, "", ""),
+		index:              -1,
+		name:               "",
+		englishName:        "",
 		Diffuse:            mmath.NewMVec4(),
 		Specular:           mmath.NewMVec4(),
 		Ambient:            mmath.NewMVec3(),
@@ -152,6 +156,40 @@ func NewMaterialByName(name string) *Material {
 	return material
 }
 
+func (material *Material) Index() int {
+	return material.index
+}
+
+func (material *Material) SetIndex(index int) {
+	material.index = index
+}
+
+func (material *Material) Name() string {
+	return material.name
+}
+
+func (material *Material) SetName(name string) {
+	material.name = name
+}
+
+func (material *Material) EnglishName() string {
+	return material.englishName
+}
+
+func (material *Material) SetEnglishName(englishName string) {
+	material.englishName = englishName
+}
+
+func (material *Material) IsValid() bool {
+	return material != nil && material.index >= 0
+}
+
+func (material *Material) Copy() core.IIndexNameModel {
+	copied := NewMaterial()
+	copier.CopyWithOption(copied, material, copier.Option{DeepCopy: true})
+	return copied
+}
+
 // 材質リスト
 type Materials struct {
 	*core.IndexNameModels[*Material]
@@ -165,12 +203,6 @@ func NewMaterials(count int) *Materials {
 		Vertices:        make(map[int][]int),
 		Faces:           make(map[int][]int),
 	}
-}
-
-func (material *Material) Copy() core.IIndexNameModel {
-	copied := NewMaterial()
-	copier.CopyWithOption(copied, material, copier.Option{DeepCopy: true})
-	return copied
 }
 
 func (materials *Materials) setup(vertices *Vertices, faces *Faces, textures *Textures) {

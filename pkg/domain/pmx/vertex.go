@@ -8,7 +8,7 @@ import (
 )
 
 type Vertex struct {
-	*core.IndexModel
+	index           int            // 頂点INDEX
 	Position        *mmath.MVec3   // 頂点位置
 	Normal          *mmath.MVec3   // 頂点法線
 	Uv              *mmath.MVec2   // UV
@@ -21,7 +21,7 @@ type Vertex struct {
 
 func NewVertex() *Vertex {
 	v := &Vertex{
-		IndexModel:      core.NewIndexModel(-1),
+		index:           -1,
 		Position:        mmath.NewMVec3(),
 		Normal:          mmath.NewMVec3(),
 		Uv:              mmath.NewMVec2(),
@@ -32,6 +32,18 @@ func NewVertex() *Vertex {
 		MaterialIndexes: make([]int, 0),
 	}
 	return v
+}
+
+func (vertex *Vertex) Index() int {
+	return vertex.index
+}
+
+func (vertex *Vertex) SetIndex(index int) {
+	vertex.index = index
+}
+
+func (vertex *Vertex) IsValid() bool {
+	return vertex != nil && vertex.Index() >= 0
 }
 
 func (vertex *Vertex) Copy() core.IIndexModel {

@@ -2,8 +2,6 @@ package core
 
 import (
 	"reflect"
-
-	"github.com/jinzhu/copier"
 )
 
 type IIndexModel interface {
@@ -11,33 +9,6 @@ type IIndexModel interface {
 	Copy() IIndexModel
 	Index() int
 	SetIndex(index int)
-}
-
-// INDEXを持つ基底クラス
-type IndexModel struct {
-	index int
-}
-
-func NewIndexModel(index int) *IndexModel {
-	return &IndexModel{index: index}
-}
-
-func (iModel *IndexModel) Index() int {
-	return iModel.index
-}
-
-func (iModel *IndexModel) SetIndex(index int) {
-	iModel.index = index
-}
-
-func (iModel *IndexModel) IsValid() bool {
-	return iModel != nil && iModel.Index() >= 0
-}
-
-func (iModel *IndexModel) Copy() IIndexModel {
-	copied := IndexModel{index: iModel.index}
-	copier.CopyWithOption(copied, iModel, copier.Option{DeepCopy: true})
-	return &copied
 }
 
 // Tのリスト基底クラス

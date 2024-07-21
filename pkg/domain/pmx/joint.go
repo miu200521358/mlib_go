@@ -28,7 +28,9 @@ func NewJointParam() *JointParam {
 }
 
 type Joint struct {
-	*core.IndexNameModel
+	index           int              // ジョイントINDEX
+	name            string           // ジョイント名
+	englishName     string           // ジョイント英名
 	JointType       byte             // Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
 	RigidbodyIndexA int              // 関連剛体AのIndex
 	RigidbodyIndexB int              // 関連剛体BのIndex
@@ -40,7 +42,9 @@ type Joint struct {
 
 func NewJoint() *Joint {
 	return &Joint{
-		IndexNameModel: core.NewIndexNameModel(-1, "", ""),
+		index:       -1,
+		name:        "",
+		englishName: "",
 		// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
 		JointType:       0,
 		RigidbodyIndexA: -1,
@@ -50,6 +54,34 @@ func NewJoint() *Joint {
 		JointParam:      NewJointParam(),
 		IsSystem:        false,
 	}
+}
+
+func (joint *Joint) Index() int {
+	return joint.index
+}
+
+func (joint *Joint) SetIndex(index int) {
+	joint.index = index
+}
+
+func (joint *Joint) Name() string {
+	return joint.name
+}
+
+func (joint *Joint) SetName(name string) {
+	joint.name = name
+}
+
+func (joint *Joint) EnglishName() string {
+	return joint.englishName
+}
+
+func (joint *Joint) SetEnglishName(englishName string) {
+	joint.englishName = englishName
+}
+
+func (joint *Joint) IsValid() bool {
+	return joint != nil && joint.index >= 0
 }
 
 func (joint *Joint) Copy() core.IIndexNameModel {

@@ -3,7 +3,6 @@ package pmx
 import (
 	"testing"
 
-	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
@@ -125,13 +124,15 @@ func TestBone_IsLegD(t *testing.T) {
 func TestBone_Copy(t *testing.T) {
 	t.Run("Test Copy", func(t *testing.T) {
 		b := &Bone{
-			IndexNameModel: core.NewIndexNameModel(0, "Bone", "Bone"),
-			Ik:             NewIk(),
-			Position:       &mmath.MVec3{X: 1, Y: 2, Z: 3},
-			TailPosition:   &mmath.MVec3{X: 4, Y: 5, Z: 6},
-			FixedAxis:      &mmath.MVec3{X: 7, Y: 8, Z: 9},
-			LocalAxisX:     &mmath.MVec3{X: 10, Y: 11, Z: 12},
-			LocalAxisZ:     &mmath.MVec3{X: 13, Y: 14, Z: 15},
+			index:        0,
+			name:         "Bone",
+			englishName:  "Bone",
+			Ik:           NewIk(),
+			Position:     &mmath.MVec3{X: 1, Y: 2, Z: 3},
+			TailPosition: &mmath.MVec3{X: 4, Y: 5, Z: 6},
+			FixedAxis:    &mmath.MVec3{X: 7, Y: 8, Z: 9},
+			LocalAxisX:   &mmath.MVec3{X: 10, Y: 11, Z: 12},
+			LocalAxisZ:   &mmath.MVec3{X: 13, Y: 14, Z: 15},
 			Extend: &BoneExtend{
 				NormalizedLocalAxisZ:   &mmath.MVec3{X: 16, Y: 17, Z: 18},
 				NormalizedLocalAxisX:   &mmath.MVec3{X: 19, Y: 20, Z: 21},

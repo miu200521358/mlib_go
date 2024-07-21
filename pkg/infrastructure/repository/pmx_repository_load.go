@@ -253,12 +253,12 @@ func (rep *PmxRepository) loadVertices(model *pmx.PmxModel) error {
 		}
 
 		vertex := &pmx.Vertex{
-			IndexModel:  core.NewIndexModel(i),
 			Position:    &mmath.MVec3{X: vertexValues[0], Y: vertexValues[1], Z: vertexValues[2]},
 			Normal:      &mmath.MVec3{X: vertexValues[3], Y: vertexValues[4], Z: vertexValues[5]},
 			Uv:          &mmath.MVec2{X: vertexValues[6], Y: vertexValues[7]},
 			ExtendedUvs: make([]*mmath.MVec4, model.ExtendedUVCount),
 		}
+		vertex.SetIndex(i)
 
 		// 16 * n : float4[n] | 追加UV(x,y,z,w)  PMXヘッダの追加UV数による
 		if model.ExtendedUVCount > 0 {
@@ -413,13 +413,13 @@ func (rep *PmxRepository) loadFaces(model *pmx.PmxModel) error {
 		// n : 頂点Indexサイズ     | 頂点の参照Index
 		// n : 頂点Indexサイズ     | 頂点の参照Index
 		face := &pmx.Face{
-			IndexModel: core.NewIndexModel(int(i / 3)),
 			VertexIndexes: [3]int{
 				vertexIndexes[i],
 				vertexIndexes[i+1],
 				vertexIndexes[i+2],
 			},
 		}
+		face.SetIndex(int(i / 3))
 		faces.Update(face)
 	}
 
@@ -439,9 +439,9 @@ func (rep *PmxRepository) loadTextures(model *pmx.PmxModel) error {
 
 	for i := 0; i < totalTextureCount; i++ {
 		// 4 + n : TextBuf	| テクスチャパス
-		name := rep.readText()
-
-		tex := &pmx.Texture{IndexNameModel: core.NewIndexNameModel(i, name, name)}
+		tex := &pmx.Texture{}
+		tex.SetIndex(i)
+		tex.SetName(rep.readText())
 
 		textures.Update(tex)
 	}
@@ -463,14 +463,12 @@ func (rep *PmxRepository) loadMaterials(model *pmx.PmxModel) error {
 	materialValues := make([]float64, 11)
 	edgeValues := make([]float64, 5)
 	for i := 0; i < totalMaterialCount; i++ {
+		material := &pmx.Material{}
+		material.SetIndex(i)
 		// 4 + n : TextBuf	| 材質名
-		name := rep.readText()
+		material.SetName(rep.readText())
 		// 4 + n : TextBuf	| 材質名英
-		englishName := rep.readText()
-
-		material := &pmx.Material{
-			IndexNameModel: core.NewIndexNameModel(i, name, englishName),
-		}
+		material.SetEnglishName(rep.readText())
 
 		// 16 : float4	| Diffuse (R,G,B,A)
 		// 12 : float3	| Specular (R,G,B)
@@ -584,16 +582,14 @@ func (rep *PmxRepository) loadBones(model *pmx.PmxModel) error {
 	bones := pmx.NewBones(totalBoneCount)
 
 	for i := 0; i < totalBoneCount; i++ {
-
-		// 4 + n : TextBuf	| ボーン名
-		name := rep.readText()
-		// 4 + n : TextBuf	| ボーン名英
-		englishName := rep.readText()
-
 		bone := &pmx.Bone{
-			IndexNameModel: core.NewIndexNameModel(i, name, englishName),
-			Extend:         &pmx.BoneExtend{},
+			Extend: &pmx.BoneExtend{},
 		}
+		bone.SetIndex(i)
+		// 4 + n : TextBuf	| ボーン名
+		bone.SetName(rep.readText())
+		// 4 + n : TextBuf	| ボーン名英
+		bone.SetEnglishName(rep.readText())
 
 		// 12 : float3	| 位置
 		bone.Position, err = rep.unpackVec3()
@@ -787,14 +783,12 @@ func (rep *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 	boneOffsetValues := make([]float64, 7)
 	materialOffsetValues := make([]float64, 28)
 	for i := 0; i < totalMorphCount; i++ {
+		morph := &pmx.Morph{}
+		morph.SetIndex(i)
 		// 4 + n : TextBuf	| モーフ名
-		name := rep.readText()
+		morph.SetName(rep.readText())
 		// 4 + n : TextBuf	| モーフ名英
-		englishName := rep.readText()
-
-		morph := &pmx.Morph{
-			IndexNameModel: core.NewIndexNameModel(i, name, englishName),
-		}
+		morph.SetEnglishName(rep.readText())
 
 		// 1  : byte	| 操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約
 		panel, err := rep.unpackByte()
@@ -939,15 +933,14 @@ func (rep *PmxRepository) loadDisplaySlots(model *pmx.PmxModel) error {
 	displaySlots := pmx.NewDisplaySlots(totalDisplaySlotCount)
 
 	for i := 0; i < totalDisplaySlotCount; i++ {
-		// 4 + n : TextBuf	| 枠名
-		name := rep.readText()
-		// 4 + n : TextBuf	| 枠名英
-		englishName := rep.readText()
-
 		displaySlot := &pmx.DisplaySlot{
-			IndexNameModel: core.NewIndexNameModel(i, name, englishName),
-			References:     make([]pmx.Reference, 0),
+			References: make([]pmx.Reference, 0),
 		}
+		displaySlot.SetIndex(i)
+		// 4 + n : TextBuf	| 枠名
+		displaySlot.SetName(rep.readText())
+		// 4 + n : TextBuf	| 枠名英
+		displaySlot.SetEnglishName(rep.readText())
 
 		// 1  : byte	| 特殊枠フラグ - 0:通常枠 1:特殊枠
 		specialFlag, err := rep.unpackByte()
@@ -1014,15 +1007,14 @@ func (rep *PmxRepository) loadRigidBodies(model *pmx.PmxModel) error {
 
 	rigidBodyValues := make([]float64, 14)
 	for i := 0; i < totalRigidBodyCount; i++ {
-		// 4 + n : TextBuf	| 剛体名
-		name := rep.readText()
-		// 4 + n : TextBuf	| 剛体名英
-		englishName := rep.readText()
-
 		rigidBody := &pmx.RigidBody{
-			IndexNameModel: core.NewIndexNameModel(i, name, englishName),
 			RigidBodyParam: pmx.NewRigidBodyParam(),
 		}
+		rigidBody.SetIndex(i)
+		// 4 + n : TextBuf	| 剛体名
+		rigidBody.SetName(rep.readText())
+		// 4 + n : TextBuf	| 剛体名英
+		rigidBody.SetEnglishName(rep.readText())
 
 		// n  : ボーンIndexサイズ  | 関連ボーンIndex - 関連なしの場合は-1
 		rigidBody.BoneIndex, err = rep.unpackBoneIndex(model)
@@ -1104,15 +1096,14 @@ func (rep *PmxRepository) loadJoints(model *pmx.PmxModel) error {
 
 	jointValues := make([]float64, 24)
 	for i := 0; i < totalJointCount; i++ {
-		// 4 + n : TextBuf	| Joint名
-		name := rep.readText()
-		// 4 + n : TextBuf	| Joint名英
-		englishName := rep.readText()
-
 		joint := &pmx.Joint{
-			IndexNameModel: core.NewIndexNameModel(i, name, englishName),
-			JointParam:     &pmx.JointParam{},
+			JointParam: &pmx.JointParam{},
 		}
+		joint.SetIndex(i)
+		// 4 + n : TextBuf	| Joint名
+		joint.SetName(rep.readText())
+		// 4 + n : TextBuf	| Joint名英
+		joint.SetEnglishName(rep.readText())
 
 		// 1  : byte	| Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
 		joint.JointType, err = rep.unpackByte()

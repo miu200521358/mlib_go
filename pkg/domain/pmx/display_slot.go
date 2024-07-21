@@ -34,7 +34,9 @@ const (
 )
 
 type DisplaySlot struct {
-	*core.IndexNameModel
+	index       int         // 表示枠INDEX
+	name        string      // 表示枠名
+	englishName string      // 表示枠英名
 	SpecialFlag SpecialFlag // 特殊枠フラグ - 0:通常枠 1:特殊枠
 	References  []Reference // 表示枠要素
 }
@@ -42,10 +44,40 @@ type DisplaySlot struct {
 // NewDisplaySlot
 func NewDisplaySlot() *DisplaySlot {
 	return &DisplaySlot{
-		IndexNameModel: core.NewIndexNameModel(-1, "", ""),
-		SpecialFlag:    SPECIAL_FLAG_OFF,
-		References:     make([]Reference, 0),
+		index:       -1,
+		name:        "",
+		englishName: "",
+		SpecialFlag: SPECIAL_FLAG_OFF,
+		References:  make([]Reference, 0),
 	}
+}
+
+func (displaySlot *DisplaySlot) Index() int {
+	return displaySlot.index
+}
+
+func (displaySlot *DisplaySlot) SetIndex(index int) {
+	displaySlot.index = index
+}
+
+func (displaySlot *DisplaySlot) Name() string {
+	return displaySlot.name
+}
+
+func (displaySlot *DisplaySlot) SetName(name string) {
+	displaySlot.name = name
+}
+
+func (displaySlot *DisplaySlot) EnglishName() string {
+	return displaySlot.englishName
+}
+
+func (displaySlot *DisplaySlot) SetEnglishName(englishName string) {
+	displaySlot.englishName = englishName
+}
+
+func (displaySlot *DisplaySlot) IsValid() bool {
+	return displaySlot != nil && displaySlot.index >= 0
 }
 
 // Copy
