@@ -99,9 +99,9 @@ func (contState *controlState) Run() {
 			if contState.Playing() {
 				// 再生中はフレームを進める
 				// 経過秒数をキーフレームの進捗具合に合わせて調整
-				if contState.appState.SpfLimit() < -1 || elapsed >= contState.appState.SpfLimit() {
+				if elapsed >= contState.appState.SpfLimit() {
 					// デフォームFPS制限なしの場合、フレーム番号を常に進める
-					if contState.appState.IsEnabledFrameDrop() && contState.appState.SpfLimit() >= -1 {
+					if contState.appState.IsEnabledFrameDrop() {
 						// フレームドロップONの時、経過秒数分進める
 						contState.AddFrame(elapsed * 30)
 					} else {

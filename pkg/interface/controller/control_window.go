@@ -20,34 +20,33 @@ import (
 
 type ControlWindow struct {
 	*walk.MainWindow
-	*controlState                                  // 操作状態
-	tabWidget                   *widget.MTabWidget // タブウィジェット
-	appConfig                   *mconfig.AppConfig // アプリケーション設定
-	spfLimit                    float64            // FPS制限
-	enabledFrameDropAction      *walk.Action       // フレームドロップON/OFF
-	enabledPhysicsAction        *walk.Action       // 物理ON/OFF
-	physicsResetAction          *walk.Action       // 物理リセット
-	showNormalAction            *walk.Action       // ボーンデバッグ表示
-	showWireAction              *walk.Action       // ワイヤーフレームデバッグ表示
-	showSelectedVertexAction    *walk.Action       // 選択頂点デバッグ表示
-	showBoneAllAction           *walk.Action       // 全ボーンデバッグ表示
-	showBoneIkAction            *walk.Action       // IKボーンデバッグ表示
-	showBoneEffectorAction      *walk.Action       // 付与親ボーンデバッグ表示
-	showBoneFixedAction         *walk.Action       // 軸制限ボーンデバッグ表示
-	showBoneRotateAction        *walk.Action       // 回転ボーンデバッグ表示
-	showBoneTranslateAction     *walk.Action       // 移動ボーンデバッグ表示
-	showBoneVisibleAction       *walk.Action       // 表示ボーンデバッグ表示
-	showRigidBodyFrontAction    *walk.Action       // 剛体デバッグ表示(前面)
-	showRigidBodyBackAction     *walk.Action       // 剛体デバッグ表示(埋め込み)
-	showJointAction             *walk.Action       // ジョイントデバッグ表示
-	showInfoAction              *walk.Action       // 情報デバッグ表示
-	limitFps30Action            *walk.Action       // 30FPS制限
-	limitFps60Action            *walk.Action       // 60FPS制限
-	limitFpsUnLimitAction       *walk.Action       // FPS無制限
-	limitFpsDeformUnLimitAction *walk.Action       // デフォームFPS無制限
-	logLevelDebugAction         *walk.Action       // デバッグメッセージ表示
-	logLevelVerboseAction       *walk.Action       // 冗長メッセージ表示
-	logLevelIkVerboseAction     *walk.Action       // IK冗長メッセージ表示
+	*controlState                               // 操作状態
+	tabWidget                *widget.MTabWidget // タブウィジェット
+	appConfig                *mconfig.AppConfig // アプリケーション設定
+	spfLimit                 float64            // FPS制限
+	enabledFrameDropAction   *walk.Action       // フレームドロップON/OFF
+	enabledPhysicsAction     *walk.Action       // 物理ON/OFF
+	physicsResetAction       *walk.Action       // 物理リセット
+	showNormalAction         *walk.Action       // ボーンデバッグ表示
+	showWireAction           *walk.Action       // ワイヤーフレームデバッグ表示
+	showSelectedVertexAction *walk.Action       // 選択頂点デバッグ表示
+	showBoneAllAction        *walk.Action       // 全ボーンデバッグ表示
+	showBoneIkAction         *walk.Action       // IKボーンデバッグ表示
+	showBoneEffectorAction   *walk.Action       // 付与親ボーンデバッグ表示
+	showBoneFixedAction      *walk.Action       // 軸制限ボーンデバッグ表示
+	showBoneRotateAction     *walk.Action       // 回転ボーンデバッグ表示
+	showBoneTranslateAction  *walk.Action       // 移動ボーンデバッグ表示
+	showBoneVisibleAction    *walk.Action       // 表示ボーンデバッグ表示
+	showRigidBodyFrontAction *walk.Action       // 剛体デバッグ表示(前面)
+	showRigidBodyBackAction  *walk.Action       // 剛体デバッグ表示(埋め込み)
+	showJointAction          *walk.Action       // ジョイントデバッグ表示
+	showInfoAction           *walk.Action       // 情報デバッグ表示
+	limitFps30Action         *walk.Action       // 30FPS制限
+	limitFps60Action         *walk.Action       // 60FPS制限
+	limitFpsUnLimitAction    *walk.Action       // FPS無制限
+	logLevelDebugAction      *walk.Action       // デバッグメッセージ表示
+	logLevelVerboseAction    *walk.Action       // 冗長メッセージ表示
+	logLevelIkVerboseAction  *walk.Action       // IK冗長メッセージ表示
 }
 
 func NewControlWindow(
@@ -117,17 +116,6 @@ func NewControlWindow(
 			OnTriggered: controlWindow.onTriggerUnLimitFps,
 			AssignTo:    &controlWindow.limitFpsUnLimitAction,
 		},
-	}
-
-	if !appConfig.IsEnvProd() {
-		// 開発時にだけ描画無制限モードを追加
-		fpsLImitMenuItems = append(fpsLImitMenuItems,
-			declarative.Action{
-				Text:        "&デフォームfps無制限",
-				Checkable:   true,
-				OnTriggered: controlWindow.onTriggerUnLimitFpsDeform,
-				AssignTo:    &controlWindow.limitFpsDeformUnLimitAction,
-			})
 	}
 
 	if err := (declarative.MainWindow{
@@ -507,7 +495,6 @@ func (controlWindow *ControlWindow) onTriggerFps30Limit() {
 	controlWindow.limitFps30Action.SetChecked(true)
 	controlWindow.limitFps60Action.SetChecked(false)
 	controlWindow.limitFpsUnLimitAction.SetChecked(false)
-	controlWindow.limitFpsDeformUnLimitAction.SetChecked(false)
 	controlWindow.SetSpfLimit(1 / 30.0)
 	controlWindow.controlState.SetSpfLimit(controlWindow.SpfLimit())
 }
@@ -516,7 +503,6 @@ func (controlWindow *ControlWindow) onTriggerFps60Limit() {
 	controlWindow.limitFps30Action.SetChecked(false)
 	controlWindow.limitFps60Action.SetChecked(true)
 	controlWindow.limitFpsUnLimitAction.SetChecked(false)
-	controlWindow.limitFpsDeformUnLimitAction.SetChecked(false)
 	controlWindow.SetSpfLimit(1 / 60.0)
 	controlWindow.controlState.SetSpfLimit(controlWindow.SpfLimit())
 }
@@ -525,17 +511,7 @@ func (controlWindow *ControlWindow) onTriggerUnLimitFps() {
 	controlWindow.limitFps30Action.SetChecked(false)
 	controlWindow.limitFps60Action.SetChecked(false)
 	controlWindow.limitFpsUnLimitAction.SetChecked(true)
-	controlWindow.limitFpsDeformUnLimitAction.SetChecked(false)
 	controlWindow.SetSpfLimit(-1.0)
-	controlWindow.controlState.SetSpfLimit(controlWindow.SpfLimit())
-}
-
-func (controlWindow *ControlWindow) onTriggerUnLimitFpsDeform() {
-	controlWindow.limitFps30Action.SetChecked(false)
-	controlWindow.limitFps60Action.SetChecked(false)
-	controlWindow.limitFpsUnLimitAction.SetChecked(false)
-	controlWindow.limitFpsDeformUnLimitAction.SetChecked(true)
-	controlWindow.SetSpfLimit(-2.0)
 	controlWindow.controlState.SetSpfLimit(controlWindow.SpfLimit())
 }
 
@@ -736,14 +712,6 @@ func (controlWindow *ControlWindow) IsUnLimitFps() bool {
 
 func (controlWindow *ControlWindow) SetUnLimitFps(limit bool) {
 	controlWindow.limitFpsUnLimitAction.SetChecked(limit)
-}
-
-func (controlWindow *ControlWindow) IsUnLimitFpsDeform() bool {
-	return controlWindow.limitFpsDeformUnLimitAction.Checked()
-}
-
-func (controlWindow *ControlWindow) SetUnLimitFpsDeform(limit bool) {
-	controlWindow.limitFpsDeformUnLimitAction.SetChecked(limit)
 }
 
 func (controlWindow *ControlWindow) IsLogLevelDebug() bool {
