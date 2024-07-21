@@ -62,6 +62,8 @@ func (a *MApp) ViewerRun() {
 	a.appState.SetPrevFrame(0)
 	a.appState.SetFrame(0)
 	prevTime := glfw.GetTime()
+	prevShowTime := glfw.GetTime()
+	elapsedList := make([]float64, 0)
 
 	for !a.IsClosed() {
 		frameTime := glfw.GetTime()
@@ -103,8 +105,37 @@ func (a *MApp) ViewerRun() {
 		}
 
 		prevTime = frameTime
+		elapsedList = append(elapsedList, elapsed)
+		if a.IsShowInfo() {
+			prevShowTime, elapsedList = a.showInfo(elapsedList, prevShowTime, timeStep)
+		}
 	}
 	a.Close()
+}
+
+func (a *MApp) showInfo(elapsedList []float64, prevShowTime float64, timeStep float32) (float64, []float64) {
+	nowShowTime := glfw.GetTime()
+
+	// 1秒ごとにオリジナルの経過時間からFPSを表示
+	if nowShowTime-prevShowTime >= 1.0 {
+		elapsed := mmath.Avg(elapsedList)
+		var suffixFps string
+		if a.appConfig.IsEnvProd() {
+			// リリース版の場合、FPSの表示を簡略化
+			suffixFps = fmt.Sprintf("%.2f fps", 1.0/elapsed)
+		} else {
+			// 開発版の場合、FPSの表示を詳細化
+			suffixFps = fmt.Sprintf("d) %.2f / p) %.2f fps", 1.0/elapsed, 1.0/timeStep)
+		}
+
+		for _, w := range a.viewWindows {
+			w.GetWindow().SetTitle(fmt.Sprintf("%s - %s", w.Title(), suffixFps))
+		}
+
+		return nowShowTime, make([]float64, 0)
+	}
+
+	return prevShowTime, elapsedList
 }
 
 func (a *MApp) ViewerCount() int {

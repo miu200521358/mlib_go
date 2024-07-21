@@ -319,6 +319,10 @@ func (renderModel *RenderModel) Render(
 	}
 
 	for i, mesh := range renderModel.meshes {
+		if mesh == nil || animationState.RenderDeltas() == nil || len(animationState.RenderDeltas().MeshDeltas) <= i {
+			continue
+		}
+
 		mesh.ibo.Bind()
 
 		mesh.drawModel(animationState.WindowIndex(), shader, paddedMatrixes, matrixWidth, matrixHeight,

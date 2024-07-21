@@ -104,6 +104,10 @@ func NewViewWindow(
 	return viewWindow
 }
 
+func (viewWindow *ViewWindow) Title() string {
+	return viewWindow.title
+}
+
 func (viewWindow *ViewWindow) resizeCallback(w *glfw.Window, width int, height int) {
 	viewWindow.size.X = float64(width)
 	viewWindow.size.Y = float64(height)

@@ -29,6 +29,7 @@ type IViewWindow interface {
 	GetWindow() *glfw.Window
 	ResetPhysics(animationStates []state.IAnimationState)
 	AppState() state.IAppState
+	Title() string
 }
 
 type IPlayer interface {

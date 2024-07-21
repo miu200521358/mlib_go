@@ -6,6 +6,14 @@ import (
 	"sort"
 )
 
+func Avg(vs []float64) float64 {
+	sum := 0.0
+	for _, v := range vs {
+		sum += v
+	}
+	return sum / float64(len(vs))
+}
+
 // 線形補間
 func LerpFloat(v1, v2 float64, t float64) float64 {
 	return v1 + ((v2 - v1) * t)

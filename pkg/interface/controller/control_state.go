@@ -101,11 +101,11 @@ func (s *controlState) Run() {
 				// 経過秒数をキーフレームの進捗具合に合わせて調整
 				if s.appState.SpfLimit() < -1 || elapsed >= s.appState.SpfLimit() {
 					// デフォームFPS制限なしの場合、フレーム番号を常に進める
-					if s.appState.IsEnabledFrameDrop() {
+					if s.appState.IsEnabledFrameDrop() && s.appState.SpfLimit() >= -1 {
 						// フレームドロップONの時、経過秒数分進める
 						s.AddFrame(elapsed * 30)
 					} else {
-						// フレームドロップOFFの時、1だけ進める
+						// フレームドロップOFFもしくはデフォーム無制限の時、1だけ進める
 						s.AddFrame(1)
 					}
 
