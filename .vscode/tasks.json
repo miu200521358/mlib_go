@@ -7,7 +7,7 @@
 			"command": "cmd.exe",
 			"args": [
 				"/c",
-				"set \"workspaceFolder=${workspaceFolder}\" && C:/MMD/mlib_go/.vscode/scripts/delete_pre_debug_exe.bat"
+				"set \"workspaceFolder=${workspaceFolder}\" && ${workspaceFolder}/.vscode/scripts/delete_pre_debug_exe.bat"
 			],
 			"group": {
 				"kind": "none",
