@@ -41,7 +41,6 @@ type appState struct {
 	isLogLevelIkVerbose  bool                      // IK冗長メッセージ表示
 	isClosed             bool                      // ウィンドウクローズ
 	playing              bool                      // 再生中フラグ
-	isWindowOpacities    [10]bool                  // ウィンドウ透過度
 	spfLimit             float64                   // FPS制限
 	animationStates      [][]state.IAnimationState // アニメーションステート
 	nextAnimationStates  [][]state.IAnimationState // 次のアニメーションステート
@@ -59,7 +58,6 @@ func newAppState() *appState {
 		maxFrame:            1,
 		animationStates:     make([][]state.IAnimationState, 0),
 		nextAnimationStates: make([][]state.IAnimationState, 0),
-		isWindowOpacities:   [10]bool{false, false, false, false, false, false, false, false, false, false},
 	}
 
 	return u
@@ -387,12 +385,4 @@ func (appState *appState) SpfLimit() float64 {
 
 func (appState *appState) SetSpfLimit(spf float64) {
 	appState.spfLimit = spf
-}
-
-func (appState *appState) SetWindowOpacity(index int, enabled bool) {
-	appState.isWindowOpacities[index] = enabled
-}
-
-func (appState *appState) WindowOpacity(index int) bool {
-	return appState.isWindowOpacities[index]
 }
