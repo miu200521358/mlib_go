@@ -394,18 +394,11 @@ func (viewWindow *ViewWindow) Animate(
 		viewWindow.shader.Resize(int(viewWindow.size.X), int(viewWindow.size.Y))
 	}
 
-	if viewWindow.appState.WindowOpacity(viewWindow.windowIndex) {
-		// 半透明ONの場合、ウィンドウと描画を半透明にする
-		viewWindow.shader.SetWindowOpacity(0.6)
-	} else {
-		viewWindow.shader.SetWindowOpacity(1.0)
-	}
-
 	// MSAAフレームバッファをバインド
 	viewWindow.shader.Msaa.Bind()
 
 	// 深度バッファのクリア
-	gl.ClearColor(0.6, 0.6, 0.6, 1.0*viewWindow.shader.WindowOpacity())
+	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	// 隠面消去

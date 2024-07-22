@@ -12,8 +12,6 @@ uniform sampler2D sphereSampler;
 
 uniform vec3 lightDirection;
 
-uniform float windowOpacity;
-
 in vec4 vertexColor;
 in vec3 vertexSpecular;
 in vec2 vertexUv;
@@ -63,5 +61,4 @@ void main() {
 
     // スペキュラ適用
     outColor.rgb += vertexSpecular;
-    outColor.a *= windowOpacity;
 }

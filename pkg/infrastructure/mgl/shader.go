@@ -43,7 +43,6 @@ const (
 	SHADER_EDGE_COLOR                   = "edgeColor\x00"
 	SHADER_EDGE_SIZE                    = "edgeSize\x00"
 	SHADER_VERTEX_GL_POSITION           = "gl_Position\x00"
-	SHADER_WINDOW_OPACITY               = "windowOpacity\x00"
 )
 
 const (
@@ -75,8 +74,6 @@ type IShader interface {
 	Program(programType ProgramType) uint32
 	BoneTextureId() uint32
 	Resize(width, height int)
-	SetWindowOpacity(opacity float32)
-	WindowOpacity() float32
 }
 
 type MShader struct {
@@ -100,7 +97,6 @@ type MShader struct {
 	selectedVertexProgram uint32
 	boneTextureId         uint32
 	floor                 *MFloor
-	windowOpacity         float32
 }
 
 //go:embed glsl/*
@@ -118,7 +114,6 @@ func NewMShader(width, height int) *MShader {
 		lightPosition:        &mmath.MVec3{X: -0.5, Y: -1.0, Z: 0.5},
 		Msaa:                 buffer.NewMsaa(width, height),
 		floor:                newMFloor(),
-		windowOpacity:        1.0,
 	}
 	shader.lightDirection = shader.lightPosition.Normalized()
 
@@ -398,12 +393,4 @@ func (shader *MShader) Delete() {
 	shader.DeleteProgram(shader.wireProgram)
 	shader.DeleteProgram(shader.selectedVertexProgram)
 	shader.Msaa.Delete()
-}
-
-func (shader *MShader) SetWindowOpacity(opacity float32) {
-	shader.windowOpacity = opacity
-}
-
-func (shader *MShader) WindowOpacity() float32 {
-	return shader.windowOpacity
 }

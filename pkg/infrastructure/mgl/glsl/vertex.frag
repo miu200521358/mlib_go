@@ -1,7 +1,6 @@
 #version 440 core
 
 uniform vec4 color;
-uniform float windowOpacity;
 
 in float vertexUvX;
 
@@ -14,5 +13,4 @@ void main() {
     }
 
     outColor = color;
-    outColor.a *= windowOpacity;
 }

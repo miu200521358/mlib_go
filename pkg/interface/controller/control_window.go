@@ -61,8 +61,7 @@ func NewControlWindow(
 		controlState:           controlState,
 		appConfig:              appConfig,
 		spfLimit:               1 / 30.0,
-		windowOpacityActions:   make([]*walk.Action, 0),
-		windowOpacityMenuItems: make([]declarative.MenuItem, 0),
+		windowOpacityMenuItems: []declarative.MenuItem{},
 	}
 	controlState.SetControlWindow(controlWindow)
 	controlWindow.addWindowOpacityActions(viewWindowTitles)
@@ -798,8 +797,8 @@ func (controlWindow *ControlWindow) Enabled() bool {
 }
 
 func (controlWindow *ControlWindow) addWindowOpacityActions(titles []string) {
-	controlWindow.windowOpacityActions = make([]*walk.Action, len(titles))
 	for i, title := range titles {
+		controlWindow.windowOpacityActions = append(controlWindow.windowOpacityActions, walk.NewAction())
 		controlWindow.windowOpacityMenuItems = append(controlWindow.windowOpacityMenuItems,
 			declarative.Action{
 				Text:        title,
@@ -812,7 +811,11 @@ func (controlWindow *ControlWindow) addWindowOpacityActions(titles []string) {
 
 func (controlWindow *ControlWindow) onTriggerWindowOpacity() {
 	for i := range controlWindow.windowOpacityActions {
-		controlWindow.controlState.SetWindowOpacity(i, controlWindow.windowOpacityActions[i].Checked())
+		if controlWindow.windowOpacityActions[i].Checked() {
+			controlWindow.controlState.SetWindowOpacity(i, true)
+		} else {
+			controlWindow.controlState.SetWindowOpacity(i, false)
+		}
 	}
 }
 
