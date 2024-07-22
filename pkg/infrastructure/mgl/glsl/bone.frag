@@ -11,5 +11,5 @@ void main() {
     }
 
     outColor = boneColor;
-    outColor *= windowOpacity;
+    outColor.a *= windowOpacity;
 }

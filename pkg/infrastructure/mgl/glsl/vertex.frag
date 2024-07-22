@@ -14,5 +14,5 @@ void main() {
     }
 
     outColor = color;
-    outColor *= windowOpacity;
+    outColor.a *= windowOpacity;
 }

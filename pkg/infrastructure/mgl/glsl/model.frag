@@ -63,5 +63,5 @@ void main() {
 
     // スペキュラ適用
     outColor.rgb += vertexSpecular;
-    outColor *= windowOpacity;
+    outColor.a *= windowOpacity;
 }

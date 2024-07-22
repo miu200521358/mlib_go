@@ -7,5 +7,5 @@ uniform float windowOpacity;
 
 void main() {
     outColor = color4;
-    outColor *= windowOpacity;
+    outColor.a *= windowOpacity;
 }

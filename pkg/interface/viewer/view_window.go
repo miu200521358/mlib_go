@@ -405,8 +405,7 @@ func (viewWindow *ViewWindow) Animate(
 	viewWindow.shader.Msaa.Bind()
 
 	// 深度バッファのクリア
-	gl.ClearColor(0.7*viewWindow.shader.WindowOpacity(), 0.7*viewWindow.shader.WindowOpacity(),
-		0.7*viewWindow.shader.WindowOpacity(), 1.0*viewWindow.shader.WindowOpacity())
+	gl.ClearColor(0.6, 0.6, 0.6, 1.0*viewWindow.shader.WindowOpacity())
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	// 隠面消去
