@@ -616,5 +616,5 @@ MlibSample 1.0.0_beta_112
 MlibSample 1.0.0_beta_113
 ・IKデバッグモーションのIKOFFモーションの出力処理を戻してなかったので復活
 ・ウィンドウ半透明機能追加
-
+　・一部モデルが「glfw.WindowHint(glfw.TransparentFramebuffer, glfw.True)」を有効にした時点で少しだけ透明度が入っている問題がある
 
