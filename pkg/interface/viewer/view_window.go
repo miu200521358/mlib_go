@@ -43,7 +43,7 @@ type ViewWindow struct {
 	ctrlPressed         bool               // Ctrlキー押下フラグ
 	updatedPrevCursor   bool               // 前回のカーソル位置更新フラグ
 	prevCursorPos       *mmath.MVec2       // 前回のカーソル位置
-	prevLeftCursorPos   *mmath.MRect       // 前回の左クリック位置
+	leftCursorRect      *mmath.MRect       // 前回の左クリック位置
 	yaw                 float64            // カメラyaw
 	pitch               float64            // カメラpitch
 	size                *mmath.MVec2       // ウィンドウサイズ
@@ -78,15 +78,15 @@ func NewViewWindow(
 	}
 
 	viewWindow := &ViewWindow{
-		Window:            glWindow,
-		appState:          appState,
-		windowIndex:       windowIndex,
-		title:             title,
-		appConfig:         appConfig,
-		shader:            mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height),
-		physics:           mbt.NewMPhysics(),
-		prevCursorPos:     mmath.NewMVec2(),
-		prevLeftCursorPos: mmath.NewMRect(),
+		Window:         glWindow,
+		appState:       appState,
+		windowIndex:    windowIndex,
+		title:          title,
+		appConfig:      appConfig,
+		shader:         mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height),
+		physics:        mbt.NewMPhysics(),
+		prevCursorPos:  mmath.NewMVec2(),
+		leftCursorRect: mmath.NewMRect(),
 		size: &mmath.MVec2{X: float64(appConfig.ViewWindowSize.Width),
 			Y: float64(appConfig.ViewWindowSize.Height)},
 	}
@@ -213,7 +213,8 @@ func (viewWindow *ViewWindow) mouseCallback(
 		switch button {
 		case glfw.MouseButtonLeft:
 			viewWindow.leftButtonPressed = true
-			viewWindow.prevLeftCursorPos.Min.X, viewWindow.prevLeftCursorPos.Min.Y = viewWindow.GetCursorPos()
+			viewWindow.leftCursorRect.Min.X, viewWindow.leftCursorRect.Min.Y = viewWindow.GetCursorPos()
+			viewWindow.leftCursorRect.Max.X, viewWindow.leftCursorRect.Max.Y = viewWindow.GetCursorPos()
 		case glfw.MouseButtonMiddle:
 			viewWindow.middleButtonPressed = true
 		case glfw.MouseButtonRight:
@@ -223,7 +224,7 @@ func (viewWindow *ViewWindow) mouseCallback(
 		switch button {
 		case glfw.MouseButtonLeft:
 			viewWindow.leftButtonPressed = false
-			viewWindow.prevLeftCursorPos.Max.X, viewWindow.prevLeftCursorPos.Max.Y = viewWindow.GetCursorPos()
+			viewWindow.leftCursorRect.Max.X, viewWindow.leftCursorRect.Max.Y = viewWindow.GetCursorPos()
 		case glfw.MouseButtonMiddle:
 			viewWindow.middleButtonPressed = false
 		case glfw.MouseButtonRight:
@@ -448,7 +449,8 @@ func (viewWindow *ViewWindow) Animate(
 		// モデル描画
 		for _, animationState := range animationStates {
 			if animationState != nil {
-				animationState.Render(viewWindow.shader, viewWindow.appState)
+				animationState.Render(viewWindow.shader, viewWindow.appState,
+					viewWindow.leftCursorRect, viewWindow.size)
 			}
 		}
 

@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
@@ -100,9 +101,11 @@ func (animationState *AnimationState) Load(model *pmx.PmxModel) {
 	}
 }
 
-func (animationState *AnimationState) Render(shader mgl.IShader, appState state.IAppState) {
+func (animationState *AnimationState) Render(
+	shader mgl.IShader, appState state.IAppState, cursorRect *mmath.MRect, windowSize *mmath.MVec2,
+) {
 	if animationState.renderModel != nil && animationState.model != nil {
-		animationState.renderModel.Render(shader, appState, animationState)
+		animationState.renderModel.Render(shader, appState, animationState, cursorRect, windowSize)
 	}
 }
 

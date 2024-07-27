@@ -8,6 +8,9 @@ uniform sampler2D boneMatrixTexture;
 uniform int boneMatrixWidth;
 uniform int boneMatrixHeight;
 
+uniform vec2 windowSize;
+uniform vec4 cursorRect;
+
 in layout(location = 0) vec3 position;
 in layout(location = 1) vec3 normal;
 in layout(location = 2) vec2 uv;
@@ -25,7 +28,7 @@ in layout(location = 13) vec4 uv1Delta; // 拡張UV1モーフ
 in layout(location = 14) vec3 afterVertexDelta; // ボーン変形後頂点モーフ
 
 layout(std430, binding = 0) buffer VertexBuffer {
-    vec4 positions[];
+    vec4 vertexPositions[];
 };
 
 out float totalBoneWeight;
@@ -159,6 +162,79 @@ vec4 calculateCorrectedC(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, 
     return (weightedC + biasR) * 0.5;
 }
 
+// 逆行列
+// 4x4行列の逆行列を求める関数
+mat4 inverse(mat4 m) {
+    float
+    a00 = m[0][0], a01 = m[0][1], a02 = m[0][2], a03 = m[0][3],
+    a10 = m[1][0], a11 = m[1][1], a12 = m[1][2], a13 = m[1][3],
+    a20 = m[2][0], a21 = m[2][1], a22 = m[2][2], a23 = m[2][3],
+    a30 = m[3][0], a31 = m[3][1], a32 = m[3][2], a33 = m[3][3];
+
+    float
+    b00 = a00 * a11 - a01 * a10,
+    b01 = a00 * a12 - a02 * a10,
+    b02 = a00 * a13 - a03 * a10,
+    b03 = a01 * a12 - a02 * a11,
+    b04 = a01 * a13 - a03 * a11,
+    b05 = a02 * a13 - a03 * a12,
+    b06 = a20 * a31 - a21 * a30,
+    b07 = a20 * a32 - a22 * a30,
+    b08 = a20 * a33 - a23 * a30,
+    b09 = a21 * a32 - a22 * a31,
+    b10 = a21 * a33 - a23 * a31,
+    b11 = a22 * a33 - a23 * a32;
+
+    float
+    det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+
+    return mat4(
+        a11 * b11 - a12 * b10 + a13 * b09,
+        a02 * b10 - a01 * b11 - a03 * b09,
+        a31 * b05 - a32 * b04 + a33 * b03,
+        a22 * b04 - a21 * b05 - a23 * b03,
+        a12 * b08 - a10 * b11 - a13 * b07,
+        a00 * b11 - a02 * b08 + a03 * b07,
+        a32 * b02 - a30 * b05 - a33 * b01,
+        a20 * b05 - a22 * b02 + a23 * b01,
+        a10 * b10 - a11 * b08 + a13 * b06,
+        a01 * b08 - a00 * b10 - a03 * b06,
+        a30 * b04 - a31 * b02 + a33 * b00,
+        a21 * b02 - a20 * b04 - a23 * b00,
+        a11 * b07 - a10 * b09 - a12 * b06,
+        a00 * b09 - a01 * b07 + a02 * b06,
+        a31 * b01 - a30 * b03 - a32 * b00,
+        a20 * b03 - a21 * b01 + a22 * b00) / det;
+}
+
+// 左上端と右下端の座標から、その矩形内に点が含まれるか判定する
+bool isInBoundingBox(vec4 cursorStartPos, vec4 cursorEndPos, vec4 position) {
+    vec2 minPos = min(cursorStartPos.xy, cursorEndPos.xy);
+    vec2 maxPos = max(cursorStartPos.xy, cursorEndPos.xy);
+
+    return all(greaterThanEqual(position.xy, minPos)) && all(lessThanEqual(position.xy, maxPos));
+}
+
+vec4 cursorToWorldPosition(vec4 glPosition, vec2 cursorPosition) {
+    // スクリーン空間からクリップ空間に変換
+    vec4 clipSpacePos;
+    clipSpacePos.xy = (cursorPosition / windowSize); // スクリーン空間 (0, windowSize) -> クリップ空間 (0, 1)
+    clipSpacePos.z = glPosition.z;
+    clipSpacePos.w = glPosition.w;
+
+    // クリップ空間からワールド空間に逆変換
+    mat4 invProjectionMatrix = inverse(modelViewProjectionMatrix);
+    mat4 invViewMatrix = inverse(modelViewMatrix);
+
+    // クリップ空間からカメラ空間に変換
+    vec4 cameraSpacePos = invProjectionMatrix * clipSpacePos;
+    cameraSpacePos /= cameraSpacePos.w;
+
+    // カメラ空間からワールド空間に変換
+    vec4 worldSpacePos = invViewMatrix * cameraSpacePos;
+    return worldSpacePos;
+}
+
 void main() {
     vec4 position4 = vec4(position + vertexDelta, 1.0);
 
@@ -167,9 +243,7 @@ void main() {
     mat4 boneTransformMatrix = mat4(0.0);
     mat3 normalTransformMatrix = mat3(1.0);
 
-    // ボーン変形後頂点モーフ変形量
-    mat4 afterVertexTransformMatrix = mat4(1.0);
-    afterVertexTransformMatrix[3] = vec4(afterVertexDelta, 1.0); // 4列目に移動量を設定
+    vec4 vecGlobalPosition;
 
     if(isSdef == 1.0) {
         // SDEFの場合は、SDEF用の頂点位置を計算する
@@ -194,10 +268,10 @@ void main() {
         vec4 vecPosition = rotatedPosition - rotatedC + correctedC;
 
         // 頂点位置
-        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * vec4(vecPosition.xyz, 1.0);
+        gl_Position = modelViewProjectionMatrix * modelViewMatrix * vec4(vecPosition.xyz, 1.0);
 
         // SDEF結果頂点位置を格納
-        positions[gl_VertexID] = vec4(vecPosition.xyz, 1.0);
+        vecGlobalPosition = vec4(vecPosition.xyz, 1.0);
     } else {
         for(int i = 0; i < 4; i++) {
             float boneWeight = boneWeights[i];
@@ -211,11 +285,24 @@ void main() {
         }
 
         // 頂点位置
-        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * position4;
+        gl_Position = modelViewProjectionMatrix * modelViewMatrix * boneTransformMatrix * position4;
 
         // ボーン変形行列を加味した頂点位置を格納
-        positions[gl_VertexID] = boneTransformMatrix * position4;
+        vecGlobalPosition = boneTransformMatrix * position4;
     }
+
+    // ウィンドウ上のカーソル位置をグローバル座標軸に変換
+    vec4 cursorStartPos = cursorToWorldPosition(gl_Position, cursorRect.xy);
+    vec4 cursorEndPos = cursorToWorldPosition(gl_Position, cursorRect.zw);
+
+    vertexPositions[gl_VertexID] = cursorStartPos;
+
+    // // カーソルの矩形範囲内にある場合のみ、頂点インデックスを格納する
+    // if (isInBoundingBox(cursorStartPos, cursorEndPos, vecGlobalPosition)) {
+    //     vertexPositions[gl_VertexID] = vecGlobalPosition;
+    // } else {
+    //     vertexPositions[gl_VertexID] = vec4(0);
+    // }
 
     vertexUvX = uv.x * uvDelta.x;
 }
