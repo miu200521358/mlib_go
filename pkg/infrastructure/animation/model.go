@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
@@ -220,18 +221,6 @@ func (renderModel *RenderModel) initializeBuffer(
 			bonePointIndexes[bone.Index()] = bone.Index()
 
 			n += 2
-
-			// if bone.ParentIndex >= 0 && model.Bones.Contains(bone.ParentIndex) &&
-			// 	!model.Bones.Get(bone.ParentIndex).Position.IsZero() {
-			// 	mu.Lock()
-			// 	renderModel.bones = append(renderModel.bones, newBoneGl(bone)...)
-			// 	renderModel.bones = append(renderModel.bones, newParentBoneGl(bone)...)
-			// 	boneFaces = append(boneFaces, uint32(n), uint32(n+1))
-			// 	renderModel.boneIndexes = append(renderModel.boneIndexes, bone.Index, bone.ParentIndex)
-			// 	mu.Unlock()
-
-			// 	n += 2
-			// }
 		}
 	}()
 
@@ -295,7 +284,7 @@ func (renderModel *RenderModel) initializeBuffer(
 	var ssbo uint32
 	gl.GenBuffers(1, &ssbo)
 	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, ssbo)
-	gl.BufferData(gl.SHADER_STORAGE_BUFFER, model.Vertices.Len()*4*4, nil, gl.DYNAMIC_DRAW)
+	gl.BufferData(gl.SHADER_STORAGE_BUFFER, model.Vertices.Len()*4, nil, gl.DYNAMIC_DRAW)
 	gl.BindBufferBase(gl.SHADER_STORAGE_BUFFER, 0, ssbo)
 
 	renderModel.ssbo = ssbo
@@ -303,6 +292,7 @@ func (renderModel *RenderModel) initializeBuffer(
 
 func (renderModel *RenderModel) Render(
 	shader mgl.IShader, appState state.IAppState, animationState state.IAnimationState,
+	leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3,
 ) {
 	deltas := animationState.VmdDeltas()
 
@@ -353,6 +343,12 @@ func (renderModel *RenderModel) Render(
 			paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
+	if appState.IsShowSelectedVertex() {
+		selectedVertexIndexes := renderModel.drawSelectedVertex(
+			animationState.WindowIndex(), animationState.SelectedVertexIndexes(),
+			shader, paddedMatrixes, matrixWidth, matrixHeight, leftCursorStartPos, leftCursorEndPos)
+		animationState.SetSelectedVertexIndexes(selectedVertexIndexes)
+	}
 }
 
 func (renderModel *RenderModel) drawNormal(
@@ -370,6 +366,7 @@ func (renderModel *RenderModel) drawNormal(
 
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
+	defer unbindBoneMatrixes()
 
 	normalColor := mgl32.Vec4{0.3, 0.3, 0.7, 0.5}
 	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
@@ -393,11 +390,10 @@ func (renderModel *RenderModel) drawNormal(
 func (renderModel *RenderModel) drawSelectedVertex(
 	windowIndex int,
 	selectedVertexMorphIndexes []int,
-	selectedVertexDeltas [][]float32,
 	shader mgl.IShader,
-	paddedMatrixes []float32,
-	width, height int,
-) [][]float32 {
+	paddedMatrixes []float32, width, height int,
+	leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3,
+) []int {
 	// モデルメッシュの前面に描画するために深度テストを無効化
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
@@ -405,12 +401,46 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	program := shader.Program(mgl.PROGRAM_TYPE_SELECTED_VERTEX)
 	gl.UseProgram(program)
 
+	selectedVertexDeltas := make([][]float32, renderModel.vertexCount)
+	for i := range renderModel.vertexCount {
+		if mmath.Contains(selectedVertexMorphIndexes, i) {
+			// 選択されている頂点の追加UVXを＋にして（フラグをたてて）表示する
+			selectedVertexDeltas[i] = []float32{
+				0, 0, 0,
+				1, 0, 0, 0,
+				0, 0, 0, 0,
+				0, 0, 0,
+			}
+		} else {
+			// 選択されていない頂点の追加UVXを０にして表示しない
+			selectedVertexDeltas[i] = []float32{
+				0, 0, 0,
+				0, 0, 0, 0,
+				0, 0, 0, 0,
+				0, 0, 0,
+			}
+		}
+	}
+
 	renderModel.selectedVertexVao.Bind()
 	renderModel.selectedVertexVbo.BindVertex(selectedVertexMorphIndexes, selectedVertexDeltas)
 	renderModel.selectedVertexIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
+	defer unbindBoneMatrixes()
+
+	// カーソルの始点位置
+	if leftCursorStartPos != nil {
+		cursorStartPositionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_CURSOR_START_POSITION))
+		gl.Uniform3f(cursorStartPositionUniform, leftCursorStartPos[0], leftCursorStartPos[1], leftCursorStartPos[2])
+	}
+
+	// カーソルの終点位置
+	if leftCursorEndPos != nil {
+		cursorEndPositionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_CURSOR_END_POSITION))
+		gl.Uniform3f(cursorEndPositionUniform, leftCursorEndPos[0], leftCursorEndPos[1], leftCursorEndPos[2])
+	}
 
 	vertexColor := mgl32.Vec4{1.0, 0.4, 0.0, 0.7}
 	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
@@ -428,18 +458,15 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	// SSBOからデータを読み込む
 	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, renderModel.ssbo)
 	ptr := gl.MapBuffer(gl.SHADER_STORAGE_BUFFER, gl.READ_ONLY)
-	results := make([][]float32, renderModel.vertexCount)
+	vertexIndexes := make([]int32, renderModel.vertexCount)
+	selectedVertexIndexes := make([]int, 0, renderModel.vertexCount)
 
 	if ptr != nil {
-		// 頂点数を取得
-		for i := range results {
-			results[i] = make([]float32, 4)
-		}
-
 		// SSBOから読み取り
 		for i := 0; i < renderModel.vertexCount; i++ {
-			for j := 0; j < 4; j++ {
-				results[i][j] = *(*float32)(unsafe.Pointer(uintptr(ptr) + uintptr((i*4+j)*4)))
+			vertexIndexes[i] = *(*int32)(unsafe.Pointer(uintptr(ptr) + uintptr(i*4)))
+			if vertexIndexes[i] >= 0 {
+				selectedVertexIndexes = append(selectedVertexIndexes, int(vertexIndexes[i]))
 			}
 		}
 	}
@@ -457,7 +484,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
 
-	return results
+	return selectedVertexIndexes
 }
 
 func (renderModel *RenderModel) drawBone(
@@ -477,6 +504,7 @@ func (renderModel *RenderModel) drawBone(
 
 	// ボーンデフォームテクスチャ設定
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
+	defer unbindBoneMatrixes()
 
 	renderModel.boneLineVao.Bind()
 	renderModel.boneLineVbo.BindBone(renderModel.fetchBoneLineDeltas(bones, appState))

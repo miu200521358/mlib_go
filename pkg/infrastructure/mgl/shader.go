@@ -42,6 +42,8 @@ const (
 	SHADER_ALPHA                        = "alpha\x00"
 	SHADER_EDGE_COLOR                   = "edgeColor\x00"
 	SHADER_EDGE_SIZE                    = "edgeSize\x00"
+	SHADER_CURSOR_START_POSITION        = "cursorStartPosition\x00"
+	SHADER_CURSOR_END_POSITION          = "cursorEndPosition\x00"
 	SHADER_VERTEX_GL_POSITION           = "gl_Position\x00"
 )
 
@@ -119,8 +121,7 @@ func NewMShader(width, height int) *MShader {
 
 	var err error
 	{
-		shader.modelProgram, err = shader.newProgram(
-			glslFiles, "glsl/model.vert", "glsl/model.frag")
+		shader.modelProgram, err = shader.newProgram("glsl/model.vert", "glsl/model.frag")
 		if err != nil {
 			mlog.E("Failed to create model program: %v", err)
 			return nil
@@ -131,8 +132,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.boneProgram, err = shader.newProgram(
-			glslFiles, "glsl/bone.vert", "glsl/bone.frag")
+		shader.boneProgram, err = shader.newProgram("glsl/bone.vert", "glsl/bone.frag")
 		if err != nil {
 			mlog.E("Failed to create bone program: %v", err)
 			return nil
@@ -143,8 +143,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.edgeProgram, err = shader.newProgram(
-			glslFiles, "glsl/edge.vert", "glsl/edge.frag")
+		shader.edgeProgram, err = shader.newProgram("glsl/edge.vert", "glsl/edge.frag")
 		if err != nil {
 			mlog.E("Failed to create edge program: %v", err)
 			return nil
@@ -155,8 +154,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.physicsProgram, err = shader.newProgram(
-			glslFiles, "glsl/physics.vert", "glsl/physics.frag")
+		shader.physicsProgram, err = shader.newProgram("glsl/physics.vert", "glsl/physics.frag")
 		if err != nil {
 			mlog.E("Failed to create physics program: %v", err)
 			return nil
@@ -167,8 +165,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.normalProgram, err = shader.newProgram(
-			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
+		shader.normalProgram, err = shader.newProgram("glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
 			mlog.E("Failed to create normal program: %v", err)
 			return nil
@@ -179,8 +176,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.floorProgram, err = shader.newProgram(
-			glslFiles, "glsl/floor.vert", "glsl/floor.frag")
+		shader.floorProgram, err = shader.newProgram("glsl/floor.vert", "glsl/floor.frag")
 		if err != nil {
 			mlog.E("Failed to create floor program: %v", err)
 			return nil
@@ -191,8 +187,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.wireProgram, err = shader.newProgram(
-			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
+		shader.wireProgram, err = shader.newProgram("glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
 			mlog.E("Failed to create wire program: %v", err)
 			return nil
@@ -203,8 +198,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.selectedVertexProgram, err = shader.newProgram(
-			glslFiles, "glsl/vertex.vert", "glsl/vertex.frag")
+		shader.selectedVertexProgram, err = shader.newProgram("glsl/vertex.vert", "glsl/vertex.frag")
 		if err != nil {
 			mlog.E("Failed to create selected vertex program: %v", err)
 			return nil
@@ -254,7 +248,6 @@ func (shader *MShader) compileShader(shaderName, source string, shaderType uint3
 }
 
 func (shader *MShader) newProgram(
-	glslFiles embed.FS,
 	vertexShaderName, fragmentShaderName string,
 ) (uint32, error) {
 	vertexShaderFile, err := fs.ReadFile(glslFiles, vertexShaderName)

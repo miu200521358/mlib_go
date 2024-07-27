@@ -6,6 +6,7 @@ package animation
 import (
 	"sync"
 
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
@@ -16,14 +17,16 @@ import (
 )
 
 type AnimationState struct {
-	windowIndex  int                 // ウィンドウインデックス
-	modelIndex   int                 // モデルインデックス
-	frame        float64             // フレーム
-	renderModel  *RenderModel        // 描画モデル
-	model        *pmx.PmxModel       // モデル
-	motion       *vmd.VmdMotion      // モーション
-	vmdDeltas    *delta.VmdDeltas    // モーション変化量
-	renderDeltas *delta.RenderDeltas // 描画変化量
+	windowIndex              int                 // ウィンドウインデックス
+	modelIndex               int                 // モデルインデックス
+	frame                    float64             // フレーム
+	renderModel              *RenderModel        // 描画モデル
+	model                    *pmx.PmxModel       // モデル
+	motion                   *vmd.VmdMotion      // モーション
+	invisibleMaterialIndexes []int               // 非表示材質インデックス
+	selectedVertexIndexes    []int               // 選択頂点インデックス
+	vmdDeltas                *delta.VmdDeltas    // モーション変化量
+	renderDeltas             *delta.RenderDeltas // 描画変化量
 }
 
 func (animationState *AnimationState) WindowIndex() int {
@@ -90,6 +93,22 @@ func (animationState *AnimationState) SetRenderDeltas(deltas *delta.RenderDeltas
 	animationState.renderDeltas = deltas
 }
 
+func (animationState *AnimationState) InvisibleMaterialIndexes() []int {
+	return animationState.invisibleMaterialIndexes
+}
+
+func (animationState *AnimationState) SetInvisibleMaterialIndexes(indexes []int) {
+	animationState.invisibleMaterialIndexes = indexes
+}
+
+func (animationState *AnimationState) SelectedVertexIndexes() []int {
+	return animationState.selectedVertexIndexes
+}
+
+func (animationState *AnimationState) SetSelectedVertexIndexes(indexes []int) {
+	animationState.selectedVertexIndexes = indexes
+}
+
 func (animationState *AnimationState) Load(model *pmx.PmxModel) {
 	if animationState.renderModel == nil || animationState.renderModel.Hash() != model.Hash() {
 		if animationState.renderModel != nil {
@@ -100,18 +119,22 @@ func (animationState *AnimationState) Load(model *pmx.PmxModel) {
 	}
 }
 
-func (animationState *AnimationState) Render(shader mgl.IShader, appState state.IAppState) {
+func (animationState *AnimationState) Render(
+	shader mgl.IShader, appState state.IAppState, leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3,
+) {
 	if animationState.renderModel != nil && animationState.model != nil {
-		animationState.renderModel.Render(shader, appState, animationState)
+		animationState.renderModel.Render(shader, appState, animationState, leftCursorStartPos, leftCursorEndPos)
 	}
 }
 
 func NewAnimationState(windowIndex, modelIndex int) *AnimationState {
 	return &AnimationState{
-		windowIndex:  windowIndex,
-		modelIndex:   modelIndex,
-		frame:        -1,
-		renderDeltas: delta.NewRenderDeltas(),
+		windowIndex:              windowIndex,
+		modelIndex:               modelIndex,
+		frame:                    -1,
+		invisibleMaterialIndexes: make([]int, 0),
+		selectedVertexIndexes:    make([]int, 0),
+		renderDeltas:             delta.NewRenderDeltas(),
 	}
 }
 
@@ -125,9 +148,6 @@ func (animationState *AnimationState) DeformBeforePhysics(
 	vmdDeltas = deform.DeformBoneByPhysicsFlag(model, animationState.motion, vmdDeltas, true, frame, nil, false)
 
 	renderDeltas := delta.NewRenderDeltas()
-	renderDeltas.VertexMorphDeltaIndexes, renderDeltas.VertexMorphDeltas =
-		newVertexMorphDeltasGl(vmdDeltas.Morphs.Vertices)
-
 	renderDeltas.MeshDeltas = make([]*delta.MeshDelta, len(model.Materials.Data))
 	for i, md := range vmdDeltas.Morphs.Materials.Data {
 		renderDeltas.MeshDeltas[i] = delta.NewMeshDelta(md)

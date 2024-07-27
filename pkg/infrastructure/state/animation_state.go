@@ -4,6 +4,7 @@
 package state
 
 import (
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
@@ -31,12 +32,17 @@ type IAnimationState interface {
 	DeformAfterPhysics(physics mbt.IPhysics, appState IAppState)
 	RenderModel() IRenderModel
 	SetRenderModel(model IRenderModel)
-	Render(shader mgl.IShader, appState IAppState)
+	Render(shader mgl.IShader, appState IAppState, leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3)
 	Load(model *pmx.PmxModel)
+	InvisibleMaterialIndexes() []int
+	SetInvisibleMaterialIndexes(indexes []int)
+	SelectedVertexIndexes() []int
+	SetSelectedVertexIndexes(indexes []int)
 }
 
 type IRenderModel interface {
 	Delete()
-	Render(shader mgl.IShader, appState IAppState, animationState IAnimationState)
+	Render(shader mgl.IShader, appState IAppState, animationState IAnimationState,
+		leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3)
 	Hash() string
 }

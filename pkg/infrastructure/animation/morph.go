@@ -4,10 +4,7 @@
 package animation
 
 import (
-	"slices"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
@@ -48,51 +45,4 @@ func newVertexMorphDeltaGl(md *delta.VertexMorphDelta) []float32 {
 		u1x, u1y, 0, 0,
 		ap0, ap1, ap2,
 	}
-}
-
-func newSelectedVertexMorphDeltasGL(
-	mds *SelectedVertexMorphDeltas,
-	model *pmx.PmxModel, selectedVertexIndexes, nextSelectedVertexIndexes []int,
-) ([]int, [][]float32) {
-	indices := make([]int, 0)
-	vertices := make([][]float32, 0)
-	for i := range len(model.Vertices.Data) {
-		// 選択頂点
-		var selectedVertexDelta []float32
-		// 選択頂点
-		if selectedVertexIndexes != nil && nextSelectedVertexIndexes != nil {
-			if slices.Contains(selectedVertexIndexes, i) {
-				// 選択されている頂点のUVXを＋にして（フラグをたてて）非表示にする
-				selectedVertexDelta = []float32{
-					0, 0, 0,
-					1, 0, 0, 0,
-					0, 0, 0, 0,
-					0, 0, 0,
-				}
-			}
-			if slices.Contains(nextSelectedVertexIndexes, i) {
-				// 選択されている頂点のUVXを0にして（フラグを落として）表示する
-				selectedVertexDelta = []float32{
-					0, 0, 0,
-					0, 0, 0, 0,
-					0, 0, 0, 0,
-					0, 0, 0,
-				}
-			}
-		} else if selectedVertexIndexes != nil && slices.Contains(selectedVertexIndexes, i) {
-			// 選択されている頂点のUVXを0にして（フラグを落として）表示する
-			selectedVertexDelta = []float32{
-				0, 0, 0,
-				0, 0, 0, 0,
-				0, 0, 0, 0,
-				0, 0, 0,
-			}
-		}
-
-		if selectedVertexDelta != nil {
-			vertices = append(vertices, selectedVertexDelta)
-			indices = append(indices, i)
-		}
-	}
-	return indices, vertices
 }

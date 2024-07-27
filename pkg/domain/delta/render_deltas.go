@@ -12,20 +12,16 @@ const (
 )
 
 type RenderDeltas struct {
-	InvisibleMaterialIndexes []int        // 非表示材質インデックス
-	SelectedVertexIndexes    []int        // 選択頂点インデックス
-	VertexMorphDeltaIndexes  []int        // 頂点モーフインデックス
-	VertexMorphDeltas        [][]float32  // 頂点モーフデルタ
-	MeshDeltas               []*MeshDelta // メッシュデルタ
+	VertexMorphDeltaIndexes []int        // 選択頂点インデックス
+	VertexMorphDeltas       [][]float32  // 選択頂点デルタ
+	MeshDeltas              []*MeshDelta // メッシュデルタ
 }
 
 func NewRenderDeltas() *RenderDeltas {
 	return &RenderDeltas{
-		InvisibleMaterialIndexes: make([]int, 0),
-		SelectedVertexIndexes:    make([]int, 0),
-		VertexMorphDeltaIndexes:  make([]int, 0),
-		VertexMorphDeltas:        make([][]float32, 0),
-		MeshDeltas:               make([]*MeshDelta, 0),
+		VertexMorphDeltaIndexes: make([]int, 0),
+		VertexMorphDeltas:       make([][]float32, 0),
+		MeshDeltas:              make([]*MeshDelta, 0),
 	}
 }
 
