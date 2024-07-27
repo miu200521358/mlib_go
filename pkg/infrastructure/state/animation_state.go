@@ -5,7 +5,6 @@ package state
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
-	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
@@ -32,13 +31,12 @@ type IAnimationState interface {
 	DeformAfterPhysics(physics mbt.IPhysics, appState IAppState)
 	RenderModel() IRenderModel
 	SetRenderModel(model IRenderModel)
-	Render(shader mgl.IShader, appState IAppState, cursorRect *mmath.MRect, windowSize *mmath.MVec2)
+	Render(shader mgl.IShader, appState IAppState)
 	Load(model *pmx.PmxModel)
 }
 
 type IRenderModel interface {
 	Delete()
-	Render(shader mgl.IShader, appState IAppState, animationState IAnimationState,
-		cursorRect *mmath.MRect, windowSize *mmath.MVec2)
+	Render(shader mgl.IShader, appState IAppState, animationState IAnimationState)
 	Hash() string
 }

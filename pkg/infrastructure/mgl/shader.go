@@ -42,8 +42,6 @@ const (
 	SHADER_ALPHA                        = "alpha\x00"
 	SHADER_EDGE_COLOR                   = "edgeColor\x00"
 	SHADER_EDGE_SIZE                    = "edgeSize\x00"
-	SHADER_CURSOR_RECT                  = "cursorRect\x00"
-	SHADER_WINDOW_SIZE                  = "windowSize\x00"
 	SHADER_VERTEX_GL_POSITION           = "gl_Position\x00"
 )
 

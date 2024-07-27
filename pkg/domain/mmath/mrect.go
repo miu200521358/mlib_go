@@ -36,18 +36,3 @@ func (rect *MRect) Contains(other *MRect) bool {
 func (rect *MRect) Area() float64 {
 	return (rect.Max.X - rect.Min.X) * (rect.Max.Y - rect.Min.Y)
 }
-
-func (rect *MRect) Vectors() []float32 {
-	// 左側を先に、右側を後に
-	if rect.Min.X > rect.Max.X {
-		return []float32{
-			float32(rect.Max.X), float32(rect.Max.Y),
-			float32(rect.Min.X), float32(rect.Min.Y),
-		}
-	}
-
-	return []float32{
-		float32(rect.Min.X), float32(rect.Min.Y),
-		float32(rect.Max.X), float32(rect.Max.Y),
-	}
-}

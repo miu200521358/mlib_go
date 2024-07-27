@@ -618,8 +618,4 @@ MlibSample 1.0.0_beta_113
 ・ウィンドウ半透明機能追加
 　・一部モデルが「glfw.WindowHint(glfw.TransparentFramebuffer, glfw.True)」を有効にした時点で少しだけ透明度が入っている問題がある
 
-MlibSample 1.0.0_beta_114
-・ウィンドウ半透明機能削除
-
-
 
