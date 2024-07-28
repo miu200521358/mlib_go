@@ -114,6 +114,10 @@ func (animationState *AnimationState) SetSelectedVertexIndexes(indexes []int) {
 	animationState.selectedVertexIndexes = indexes
 }
 
+func (animationState *AnimationState) UpdateSelectedVertexIndexes(indexes []int) {
+	animationState.selectedVertexIndexes = indexes
+}
+
 func (animationState *AnimationState) Load(model *pmx.PmxModel) {
 	if animationState.renderModel == nil || animationState.renderModel.Hash() != model.Hash() {
 		if animationState.renderModel != nil {
@@ -139,6 +143,7 @@ func NewAnimationState(windowIndex, modelIndex int) *AnimationState {
 		frame:                    -1,
 		invisibleMaterialIndexes: make([]int, 0),
 		selectedVertexIndexes:    make([]int, 0),
+		noSelectedVertexIndexes:  make([]int, 0),
 		renderDeltas:             delta.NewRenderDeltas(),
 	}
 }

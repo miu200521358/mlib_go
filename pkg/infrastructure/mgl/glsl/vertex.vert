@@ -209,8 +209,8 @@ mat4 inverse(mat4 m) {
 
 // 左上端と右下端の座標から、その矩形内に点が含まれるか判定する
 bool isInBoundingBox(vec4 position) {
-    vec3 minPos = min(cursorStartPosition.xyz, cursorEndPosition.xyz) - vec3(0.1, 0.1, 0.3);
-    vec3 maxPos = max(cursorStartPosition.xyz, cursorEndPosition.xyz) + vec3(0.1, 0.1, 0.3);
+    vec3 minPos = min(cursorStartPosition.xyz, cursorEndPosition.xyz) - 0.3;
+    vec3 maxPos = max(cursorStartPosition.xyz, cursorEndPosition.xyz) + 0.3;
 
     return all(greaterThanEqual(position.xyz, minPos.xyz)) && all(lessThanEqual(position.xyz, maxPos.xyz));
 }

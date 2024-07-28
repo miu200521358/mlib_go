@@ -747,7 +747,7 @@ func (controlWindow *ControlWindow) SetClosed(closed bool) {
 }
 
 func (controlWindow *ControlWindow) Playing() bool {
-	return controlWindow.controlState.motionPlayer.Playing()
+	return controlWindow.controlState.motionPlayer != nil && controlWindow.controlState.motionPlayer.Playing()
 }
 
 func (controlWindow *ControlWindow) TriggerPlay(p bool) {

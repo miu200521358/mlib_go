@@ -13,6 +13,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 type RenderModel struct {
@@ -343,10 +344,11 @@ func (renderModel *RenderModel) Render(
 	}
 
 	if appState.IsShowSelectedVertex() {
-		renderModel.drawSelectedVertex(
+		selectedVertexIndexes := renderModel.drawSelectedVertex(
 			animationState.WindowIndex(),
 			animationState.SelectedVertexIndexes(), animationState.NoSelectedVertexIndexes(),
 			shader, paddedMatrixes, matrixWidth, matrixHeight, leftCursorStartPos, leftCursorEndPos)
+		animationState.UpdateSelectedVertexIndexes(selectedVertexIndexes)
 	}
 }
 
@@ -393,7 +395,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	shader mgl.IShader,
 	paddedMatrixes []float32, width, height int,
 	leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3,
-) map[int]*mgl32.Vec3 {
+) []int {
 	// モデルメッシュの前面に描画するために深度テストを無効化
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
@@ -458,7 +460,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	// SSBOからデータを読み込む
 	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, renderModel.ssbo)
 	ptr := gl.MapBuffer(gl.SHADER_STORAGE_BUFFER, gl.READ_ONLY)
-	nowTargetVertexPositions := make(map[int]*mgl32.Vec3)
+	nowTargetVertexPositions := make(map[int]mgl32.Vec3)
 
 	if ptr != nil {
 		// SSBOから読み取り
@@ -470,7 +472,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 			if vertexPositions[0] != -1 || vertexPositions[1] != -1 ||
 				vertexPositions[2] != -1 || vertexPositions[3] != -1 {
 				// いずれが-1でない場合はマップに保持
-				nowTargetVertexPositions[i] = &mgl32.Vec3{vertexPositions[0], vertexPositions[1], vertexPositions[2]}
+				nowTargetVertexPositions[i] = mgl32.Vec3{vertexPositions[0], vertexPositions[1], vertexPositions[2]}
 			}
 		}
 	}
@@ -488,7 +490,47 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
 
-	return nowTargetVertexPositions
+	selectedVertexIndexes := make([]int, 0, len(nowTargetVertexPositions))
+
+	if leftCursorStartPos != nil &&
+		leftCursorStartPos[0] != 0 && leftCursorStartPos[1] != 0 && leftCursorStartPos[2] != 0 {
+		// カーソルの始点から終点までのベクトル
+		cursorVector := leftCursorEndPos.Sub(*leftCursorStartPos).Normalize()
+
+		mlog.IL("leftCursorStartPos: %v, leftCursorEndPos: %v, cursorVector: %v",
+			leftCursorStartPos, leftCursorEndPos, cursorVector)
+
+		// カーソルの始点から終点までのベクトルと頂点位置の距離を計算
+		for index, position := range nowTargetVertexPositions {
+			distance := distanceToVector(position, *leftCursorStartPos, cursorVector)
+			if distance < 0.2 {
+				mlog.I("index: %d, position: %v, distance: %.3f", index, position, distance)
+			}
+			// if distance < 0.1 {
+			selectedVertexIndexes = append(selectedVertexIndexes, index)
+			// }
+		}
+	}
+
+	return selectedVertexIndexes
+}
+
+// DistanceToVector は点とベクトル間の最短距離を計算します
+func distanceToVector(point, start, cursorVector mgl32.Vec3) float32 {
+	w := point.Sub(start)
+
+	// ベクトルの長さを計算
+	c1 := cursorVector.Dot(w)
+	c2 := cursorVector.Dot(cursorVector)
+	b := c1 / c2
+
+	// 垂直なベクトルのポイントを計算
+	pb := start.Add(cursorVector.Mul(b))
+
+	// 点と垂直なベクトルのポイント間の距離を計算
+	d := point.Sub(pb)
+
+	return d.Len()
 }
 
 func (renderModel *RenderModel) drawBone(

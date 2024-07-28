@@ -5,7 +5,6 @@ package main
 
 import (
 	"embed"
-	"log"
 	"runtime"
 
 	"github.com/miu200521358/walk/pkg/declarative"
@@ -70,8 +69,9 @@ func main() {
 		player := widget.NewMotionPlayer(controlWindow.MainWindow, controlWindow)
 		controlWindow.SetPlayer(player)
 
-		consoleView := widget.NewConsoleView(controlWindow.MainWindow, 256, 50)
-		log.SetOutput(consoleView)
+		widget.NewConsoleView(controlWindow.MainWindow, 256, 50)
+		// consoleView := widget.NewConsoleView(controlWindow.MainWindow, 256, 50)
+		// log.SetOutput(consoleView)
 
 		mApp.ControllerRun()
 	}()
