@@ -169,10 +169,16 @@ func NewControlWindow(
 						AssignTo:    &controlWindow.showWireAction,
 					},
 					declarative.Action{
-						Text:        mi18n.T("&選択頂点表示"),
+						Text:        mi18n.T("&頂点ライン選択"),
 						Checkable:   true,
 						OnTriggered: controlWindow.onTriggerShowSelectedVertex,
 						AssignTo:    &controlWindow.showSelectedVertexAction,
+					},
+					declarative.Action{
+						Text: mi18n.T("&頂点ライン選択使い方"),
+						OnTriggered: func() {
+							mlog.ILT(mi18n.T("&頂点ライン選択使い方"), mi18n.T("頂点ライン選択使い方メッセージ"))
+						},
 					},
 					declarative.Separator{},
 					declarative.Menu{
