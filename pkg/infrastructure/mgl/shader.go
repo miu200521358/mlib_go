@@ -43,6 +43,7 @@ const (
 	SHADER_EDGE_COLOR                 = "edgeColor\x00"
 	SHADER_EDGE_SIZE                  = "edgeSize\x00"
 	SHADER_CURSOR_POSITIONS           = "cursorPositions\x00"
+	SHADER_LINE_WIDTH                 = "lineWidth\x00"
 )
 
 const (
@@ -64,7 +65,7 @@ const (
 	PROGRAM_TYPE_WIRE            ProgramType = iota
 	PROGRAM_TYPE_SELECTED_VERTEX ProgramType = iota
 	PROGRAM_TYPE_OVERRIDE        ProgramType = iota
-	PROGRAM_TYPE_CURSOR_LINE     ProgramType = iota
+	PROGRAM_TYPE_CURSOR          ProgramType = iota
 )
 
 var (
@@ -127,7 +128,7 @@ func NewMShader(width, height int) *MShader {
 
 	var err error
 	{
-		shader.modelProgram, err = shader.newProgram("glsl/model.vert", "glsl/model.frag")
+		shader.modelProgram, err = shader.newProgram("glsl/model.vert", "glsl/model.frag", "")
 		if err != nil {
 			mlog.E("Failed to create model program: %v", err)
 			return nil
@@ -138,7 +139,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.boneProgram, err = shader.newProgram("glsl/bone.vert", "glsl/bone.frag")
+		shader.boneProgram, err = shader.newProgram("glsl/bone.vert", "glsl/bone.frag", "")
 		if err != nil {
 			mlog.E("Failed to create bone program: %v", err)
 			return nil
@@ -149,7 +150,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.edgeProgram, err = shader.newProgram("glsl/edge.vert", "glsl/edge.frag")
+		shader.edgeProgram, err = shader.newProgram("glsl/edge.vert", "glsl/edge.frag", "")
 		if err != nil {
 			mlog.E("Failed to create edge program: %v", err)
 			return nil
@@ -160,7 +161,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.physicsProgram, err = shader.newProgram("glsl/physics.vert", "glsl/physics.frag")
+		shader.physicsProgram, err = shader.newProgram("glsl/physics.vert", "glsl/physics.frag", "")
 		if err != nil {
 			mlog.E("Failed to create physics program: %v", err)
 			return nil
@@ -171,7 +172,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.normalProgram, err = shader.newProgram("glsl/vertex.vert", "glsl/vertex.frag")
+		shader.normalProgram, err = shader.newProgram("glsl/vertex.vert", "glsl/vertex.frag", "")
 		if err != nil {
 			mlog.E("Failed to create normal program: %v", err)
 			return nil
@@ -182,7 +183,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.floorProgram, err = shader.newProgram("glsl/floor.vert", "glsl/floor.frag")
+		shader.floorProgram, err = shader.newProgram("glsl/floor.vert", "glsl/floor.frag", "")
 		if err != nil {
 			mlog.E("Failed to create floor program: %v", err)
 			return nil
@@ -193,7 +194,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.wireProgram, err = shader.newProgram("glsl/vertex.vert", "glsl/vertex.frag")
+		shader.wireProgram, err = shader.newProgram("glsl/vertex.vert", "glsl/vertex.frag", "")
 		if err != nil {
 			mlog.E("Failed to create wire program: %v", err)
 			return nil
@@ -204,7 +205,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.selectedVertexProgram, err = shader.newProgram("glsl/vertex.vert", "glsl/vertex.frag")
+		shader.selectedVertexProgram, err = shader.newProgram("glsl/vertex.vert", "glsl/vertex.frag", "")
 		if err != nil {
 			mlog.E("Failed to create selected vertex program: %v", err)
 			return nil
@@ -215,7 +216,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.overrideProgram, err = shader.newProgram("glsl/override.vert", "glsl/override.frag")
+		shader.overrideProgram, err = shader.newProgram("glsl/override.vert", "glsl/override.frag", "")
 		if err != nil {
 			mlog.E("Failed to create selected override program: %v", err)
 			return nil
@@ -226,7 +227,7 @@ func NewMShader(width, height int) *MShader {
 	}
 
 	{
-		shader.cursorProgram, err = shader.newProgram("glsl/cursor.vert", "glsl/cursor.frag")
+		shader.cursorProgram, err = shader.newProgram("glsl/cursor.vert", "glsl/cursor.frag", "")
 		if err != nil {
 			mlog.E("Failed to create selected cursor program: %v", err)
 			return nil
@@ -279,7 +280,7 @@ func (shader *MShader) compileShader(shaderName, source string, shaderType uint3
 }
 
 func (shader *MShader) newProgram(
-	vertexShaderName, fragmentShaderName string,
+	vertexShaderName, fragmentShaderName, geometryShaderName string,
 ) (uint32, error) {
 	vertexShaderFile, err := fs.ReadFile(glslFiles, vertexShaderName)
 	if err != nil {
@@ -307,8 +308,26 @@ func (shader *MShader) newProgram(
 
 	program := gl.CreateProgram()
 
+	var geometryShader uint32
+	if geometryShaderName != "" {
+		geometryShaderFile, err := fs.ReadFile(glslFiles, geometryShaderName)
+		if err != nil {
+			return 0, err
+		}
+
+		geometryShaderSource := string(geometryShaderFile)
+
+		geometryShader, err = shader.compileShader(geometryShaderName, geometryShaderSource, gl.GEOMETRY_SHADER)
+		if err != nil {
+			return 0, err
+		}
+	}
+
 	gl.AttachShader(program, vertexShader)
 	gl.AttachShader(program, fragmentShader)
+	if geometryShaderName != "" && geometryShader != 0 {
+		gl.AttachShader(program, geometryShader)
+	}
 	gl.LinkProgram(program)
 
 	var status int32
@@ -407,7 +426,7 @@ func (shader *MShader) Program(programType ProgramType) uint32 {
 		return shader.selectedVertexProgram
 	case PROGRAM_TYPE_OVERRIDE:
 		return shader.overrideProgram
-	case PROGRAM_TYPE_CURSOR_LINE:
+	case PROGRAM_TYPE_CURSOR:
 		return shader.cursorProgram
 	}
 	return 0

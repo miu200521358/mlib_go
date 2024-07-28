@@ -364,13 +364,14 @@ func (renderModel *RenderModel) Render(
 				cursorPositions[i*3+2] = pos[2]
 			}
 		}
-		for i := len(leftCursorPositions); i < 50; i++ {
-			// 固定で50個までのカーソル位置を確保
-			cursorPositions = append(cursorPositions, 0, 0, 0)
-		}
 
 		if len(leftCursorPositions) > 1 {
 			renderModel.drawCursorLine(shader, cursorPositions)
+		}
+
+		for i := len(leftCursorPositions); i < 100; i++ {
+			// 追加固定で100個までのカーソル位置を確保
+			cursorPositions = append(cursorPositions, 0, 0, 0)
 		}
 
 		selectedVertexIndexes := renderModel.drawSelectedVertex(
@@ -426,19 +427,18 @@ func (renderModel *RenderModel) drawCursorLine(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
-	program := shader.Program(mgl.PROGRAM_TYPE_CURSOR_LINE)
+	program := shader.Program(mgl.PROGRAM_TYPE_CURSOR)
 	gl.UseProgram(program)
 
-	vertexColor := mgl32.Vec4{1.0, 0.85, 0.46, 0.4}
+	vertexColor := mgl32.Vec4{1.0, 0, 0, 1.0}
 	colorUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
 	gl.Uniform4fv(colorUniform, 1, &vertexColor[0])
-	gl.PointSize(10.0) // ラインのサイズ
 
 	renderModel.cursorPositionVao.Bind()
 	renderModel.cursorPositionVbo.BindCursorPosition(cursorPositions)
 
 	// ライン描画
-	gl.DrawArrays(gl.LINES, 0, 2)
+	gl.DrawArrays(gl.LINES, 0, int32(len(cursorPositions)/3))
 
 	renderModel.cursorPositionVbo.Unbind()
 	renderModel.cursorPositionVao.Unbind()
@@ -546,16 +546,18 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
 
-	if cursorPositions[0] != 0 {
-		mlog.L()
-		for i := 0; i < 50; i += 3 {
-			mlog.I("CURSOR index: %d, position: %v", i/3, cursorPositions[i:i+3])
-			if cursorPositions[i] == 0 {
-				break
+	if mlog.IsVerbose() {
+		if cursorPositions[0] != 0 {
+			mlog.L()
+			for i := 0; i < 100; i += 3 {
+				if cursorPositions[i] == 0 {
+					break
+				}
+				mlog.V("CURSOR index: %d, position: %v", i/3, cursorPositions[i:i+3])
 			}
-		}
-		for i, position := range selectedVertexPositions {
-			mlog.I("VERTEX index: %d, position: %v", i, position)
+			for i, position := range selectedVertexPositions {
+				mlog.V("VERTEX index: %d, position: %v", i, position)
+			}
 		}
 	}
 

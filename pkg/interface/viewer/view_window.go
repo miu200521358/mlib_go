@@ -141,7 +141,6 @@ func (viewWindow *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float
 				viewWindow.leftCursorWindowPositions[len(viewWindow.leftCursorWindowPositions)-1].Y() != float32(ypos)) {
 			viewWindow.leftCursorWindowPositions = append(viewWindow.leftCursorWindowPositions,
 				&mgl32.Vec3{float32(xpos), float32(ypos), 0.0})
-			mlog.I("CursorPos: %v, %v", xpos, ypos)
 		}
 	}
 
