@@ -188,6 +188,14 @@ func NewControlWindow(
 						OnTriggered: controlWindow.onTriggerShowOverride,
 						AssignTo:    &controlWindow.showOverrideAction,
 					},
+					declarative.Action{
+						Text: mi18n.T("&サブビューワーオーバーレイの使い方"),
+						OnTriggered: func() {
+							mlog.ILT(mi18n.T("&サブビューワーオーバーレイの使い方"),
+								mi18n.T("サブビューワーオーバーレイの使い方メッセージ"))
+						},
+					},
+					declarative.Separator{},
 					declarative.Menu{
 						Text: mi18n.T("&ボーン表示"),
 						Items: []declarative.MenuItem{
@@ -261,9 +269,9 @@ func NewControlWindow(
 					},
 					declarative.Separator{},
 					declarative.Action{
-						Text: mi18n.T("&使い方"),
+						Text: mi18n.T("&ビューワーの使い方"),
 						OnTriggered: func() {
-							mlog.ILT(mi18n.T("ビューワーの使い方"), mi18n.T("ビューワーの使い方メッセージ"))
+							mlog.ILT(mi18n.T("&ビューワーの使い方"), mi18n.T("ビューワーの使い方メッセージ"))
 						},
 					},
 				},

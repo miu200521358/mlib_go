@@ -220,12 +220,12 @@
         "translation": "&How to use"
     },
     {
-        "id": "ビューワーの使い方",
-        "translation": "How to use the viewer"
+        "id": "&ビューワーの使い方",
+        "translation": "&How to use the viewer"
     },
     {
         "id": "ビューワーの使い方メッセージ",
-        "translation": "・Use the mouse wheel to zoom in and out.\n・Hold down the mouse wheel and move to change the camera position.\n・Hold down the right mouse button and move to change the camera angle.\n・Hold Shift while using the mouse to increase movement sensitivity.\n・Hold Ctrl while using the mouse to decrease movement sensitivity.\n・Press '0' on the keypad to set the camera view to the bottom.\n・Press '2' on the keypad to set the camera view to the front.\n・Press '4' on the keypad to set the camera view to the left.\n・Press '5' on the keypad to set the camera view to the top.\n・Press '6' on the keypad to set the camera view to the right.\n・Press '8' on the keypad to set the camera view to the back.\n・Use the right or up arrow keys on the keyboard to move forward a frame.\n・Use the left or down arrow keys on the keyboard to move back a frame."
+        "translation": "・Use the mouse wheel up and down to zoom in and out\n・Click and move the mouse wheel to change the camera position\n・Click and move the right mouse button to change the camera direction\n・Hold Shift while operating the mouse to increase the movement amount\n・Hold Ctrl while operating the mouse to decrease the movement amount\n・Enter '1' on the keypad to view from the bottom\n・Enter '2' on the keypad to view from the front\n・Enter '4' on the keypad to view from the left\n・Enter '5' on the keypad to view from the top\n・Enter '6' on the keypad to view from the right\n・Enter '8' on the keypad to view from the back"
     },
     {
         "id": "&再生フォームの使い方",
@@ -394,5 +394,13 @@
     {
         "id": "&サブビューワーオーバーレイ",
         "translation": "&Subviewer Overlay"
+    },
+    {
+        "id": "&サブビューワーオーバーレイの使い方",
+        "translation": "&How to use the sub-viewer overlay"
+    },
+    {
+        "id": "サブビューワーオーバーレイの使い方メッセージ",
+        "translation": "When checked, the drawing of the sub-window is overlaid on the main window.\nWhile checked, operating the main window will also synchronize the movements of the sub-window.\nIn the sub-window alone, only the field of view can be operated."
     }
 ]
