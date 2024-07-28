@@ -114,6 +114,12 @@ func (app *MApp) ViewerRun() {
 		if app.IsShowOverride() {
 			for i := 1; i < len(app.viewWindows); i++ {
 				app.viewWindows[i].SetOverrideTextureId(app.viewWindows[0].OverrideTextureId())
+				// カメラの向きとか同期させる
+				app.viewWindows[i].UpdateViewerParameter(app.viewWindows[0].GetViewerParameter())
+			}
+		} else {
+			for i := 1; i < len(app.viewWindows); i++ {
+				app.viewWindows[i].SetOverrideTextureId(0)
 			}
 		}
 

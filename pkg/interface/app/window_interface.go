@@ -5,6 +5,7 @@ package app
 
 import (
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 )
 
@@ -32,6 +33,8 @@ type IViewWindow interface {
 	Title() string
 	OverrideTextureId() uint32
 	SetOverrideTextureId(id uint32)
+	GetViewerParameter() (float64, float64, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3)
+	UpdateViewerParameter(yaw, pitch float64, cameraPos, cameraUp, lookAtCenter *mmath.MVec3)
 }
 
 type IPlayer interface {

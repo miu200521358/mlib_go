@@ -154,18 +154,12 @@ func (msaa *Msaa) Resolve() {
 	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, msaa.resolveFBO)
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
 	gl.BlitFramebuffer(0, 0, msaa.width, msaa.height, 0, 0, msaa.width, msaa.height, gl.COLOR_BUFFER_BIT, gl.NEAREST)
-}
 
-func (msaa *Msaa) ResolveOverride() {
-	// マルチサンプルフレームバッファの内容を解決フレームバッファにコピー
-	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, msaa.msFBO)
-	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, msaa.resolveFBO)
-	gl.BlitFramebuffer(0, 0, int32(msaa.width), int32(msaa.height), 0, 0, int32(msaa.width), int32(msaa.height),
-		gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT, gl.NEAREST)
-
-	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, msaa.resolveFBO)
-	gl.BindTexture(gl.TEXTURE_2D, msaa.overrideTargetTexture)
-	gl.CopyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, msaa.width, msaa.height, 0)
+	if msaa.overrideTargetTexture != 0 {
+		gl.BindFramebuffer(gl.READ_FRAMEBUFFER, msaa.resolveFBO)
+		gl.BindTexture(gl.TEXTURE_2D, msaa.overrideTargetTexture)
+		gl.CopyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, msaa.width, msaa.height, 0)
+	}
 }
 
 func (msaa *Msaa) Delete() {

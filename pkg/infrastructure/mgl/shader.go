@@ -228,12 +228,14 @@ func NewMShader(width, height int) *MShader {
 	return shader
 }
 
-func (shader *MShader) Reset() {
+func (shader *MShader) Reset(isResize bool) {
 	shader.CameraPosition = initialCameraPosition.Copy()
 	shader.LookAtCenterPosition = initialLookAtPosition.Copy()
 	shader.CameraUp = initialCameraUp.Copy()
 	shader.FieldOfViewAngle = FIELD_OF_VIEW_ANGLE
-	shader.Resize(int(shader.Width), int(shader.Height))
+	if isResize {
+		shader.Resize(int(shader.Width), int(shader.Height))
+	}
 }
 
 func (shader *MShader) DeleteProgram(program uint32) {

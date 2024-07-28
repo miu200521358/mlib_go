@@ -120,6 +120,7 @@ func (viewWindow *ViewWindow) Title() string {
 func (viewWindow *ViewWindow) resizeCallback(w *glfw.Window, width int, height int) {
 	viewWindow.size.X = float64(width)
 	viewWindow.size.Y = float64(height)
+	viewWindow.shader.Reset(true)
 }
 
 func (viewWindow *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
@@ -331,49 +332,38 @@ func (viewWindow *ViewWindow) keyCallback(
 
 	switch key {
 	case glfw.KeyKP1: // 下面から
-		viewWindow.resetView()
 		viewWindow.yaw = 0
 		viewWindow.pitch = -rightAngle
+		viewWindow.shader.Reset(false)
 		viewWindow.updateCameraAngle()
 	case glfw.KeyKP2: // 正面から
-		viewWindow.resetView()
 		viewWindow.yaw = 0
 		viewWindow.pitch = 0
+		viewWindow.shader.Reset(false)
 		viewWindow.updateCameraAngle()
 	case glfw.KeyKP4: // 左面から
-		viewWindow.resetView()
 		viewWindow.yaw = -rightAngle
 		viewWindow.pitch = 0
+		viewWindow.shader.Reset(false)
 		viewWindow.updateCameraAngle()
 	case glfw.KeyKP5: // 上面から
-		viewWindow.resetView()
 		viewWindow.yaw = 0
 		viewWindow.pitch = rightAngle
+		viewWindow.shader.Reset(false)
 		viewWindow.updateCameraAngle()
 	case glfw.KeyKP6: // 右面から
-		viewWindow.resetView()
 		viewWindow.yaw = rightAngle
 		viewWindow.pitch = 0
+		viewWindow.shader.Reset(false)
 		viewWindow.updateCameraAngle()
 	case glfw.KeyKP8: // 背面から
-		viewWindow.resetView()
 		viewWindow.yaw = 180
 		viewWindow.pitch = 0
+		viewWindow.shader.Reset(false)
 		viewWindow.updateCameraAngle()
 	default:
 		return
 	}
-}
-
-func (viewWindow *ViewWindow) resetView() {
-	// カメラとかリセット
-	viewWindow.shader.Reset()
-	viewWindow.prevCursorPos = mmath.NewMVec2()
-	viewWindow.yaw = 0.0
-	viewWindow.pitch = 0.0
-	viewWindow.leftButtonPressed = false
-	viewWindow.middleButtonPressed = false
-	viewWindow.rightButtonPressed = false
 }
 
 func (viewWindow *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64) {
@@ -414,7 +404,7 @@ func (viewWindow *ViewWindow) debugMessageCallback(
 ) {
 	switch severity {
 	case gl.DEBUG_SEVERITY_HIGH:
-		widget.RaiseError(fmt.Errorf("[HIGH] GL CRITICAL ERROR: %v type = 0x%x, severity = 0x%x, message = %s",
+		panic(fmt.Errorf("[HIGH] GL CRITICAL ERROR: %v type = 0x%x, severity = 0x%x, message = %s",
 			source, glType, severity, message))
 	case gl.DEBUG_SEVERITY_MEDIUM:
 		mlog.V("[MEDIUM] GL CALLBACK: %v type = 0x%x, severity = 0x%x, message = %s\n",
@@ -550,18 +540,32 @@ func (viewWindow *ViewWindow) Animate(
 
 	// 深度解決
 	viewWindow.shader.Msaa.Resolve()
-	if viewWindow.appState.IsShowOverride() {
-		if viewWindow.windowIndex == 0 {
-			viewWindow.drawOverride()
-		} else {
-			viewWindow.shader.Msaa.ResolveOverride()
-		}
+	if viewWindow.appState.IsShowOverride() && viewWindow.windowIndex == 0 {
+		viewWindow.drawOverride()
 	}
 	viewWindow.shader.Msaa.Unbind()
 
 	viewWindow.SwapBuffers()
 
 	return animationStates, nextStates
+}
+
+func (viewWindow *ViewWindow) GetViewerParameter() (float64, float64, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
+	return viewWindow.yaw, viewWindow.pitch, viewWindow.shader.CameraPosition, viewWindow.shader.CameraUp,
+		viewWindow.shader.LookAtCenterPosition
+}
+
+func (viewWindow *ViewWindow) UpdateViewerParameter(
+	yaw, pitch float64, cameraPos, cameraUp, lookAtCenter *mmath.MVec3,
+) {
+	viewWindow.yaw = yaw
+	viewWindow.pitch = pitch
+
+	viewWindow.shader.CameraPosition = cameraPos.Copy()
+	viewWindow.shader.CameraUp = cameraUp.Copy()
+	viewWindow.shader.LookAtCenterPosition = lookAtCenter.Copy()
+
+	viewWindow.updateCameraAngle()
 }
 
 func (viewWindow *ViewWindow) getCameraParameter() (mgl32.Mat4, mgl32.Vec3, mgl32.Mat4) {
