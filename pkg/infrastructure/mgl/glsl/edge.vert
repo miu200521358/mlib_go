@@ -1,7 +1,7 @@
 #version 440 core
 
-uniform mat4 modelViewProjectionMatrix;
-uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
 
 // ボーン変形行列を格納するテクスチャ
 uniform sampler2D boneMatrixTexture;
@@ -198,7 +198,7 @@ void main() {
         vec3 vertexNormal = normalize(normalTransformMatrix * normalize(normal)).xyz;
 
         // 頂点位置
-        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * (vec4(vecPosition.xyz + (vertexNormal * edgeWight * 0.02), 1.0));
+        gl_Position = projectionMatrix * afterVertexTransformMatrix * viewMatrix * (vec4(vecPosition.xyz + (vertexNormal * edgeWight * 0.02), 1.0));
     } else {
         for(int i = 0; i < 4; i++) {
             float boneWeight = boneWeights[i];
@@ -212,6 +212,6 @@ void main() {
         }
 
         // 頂点位置
-        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * (vec4(position4.xyz + (normal * edgeWight * 0.02), 1.0));
+        gl_Position = projectionMatrix * afterVertexTransformMatrix * viewMatrix * boneTransformMatrix * (vec4(position4.xyz + (normal * edgeWight * 0.02), 1.0));
     }
 }

@@ -1,7 +1,7 @@
 #version 440 core
 
-uniform mat4 modelViewProjectionMatrix;
-uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
 
 // ボーン変形行列を格納するテクスチャ
 uniform sampler2D boneMatrixTexture;
@@ -49,7 +49,7 @@ void main() {
     }
 
         // 頂点位置
-    gl_Position = modelViewProjectionMatrix * modelViewMatrix * boneTransformMatrix * position4;
+    gl_Position = projectionMatrix * viewMatrix * boneTransformMatrix * position4;
 
     // ボーンカラーを出力
     boneColor = color;

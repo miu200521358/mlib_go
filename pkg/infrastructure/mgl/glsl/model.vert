@@ -1,7 +1,7 @@
 #version 440 core
 
-uniform mat4 modelViewProjectionMatrix;
-uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
 
 // ボーン変形行列を格納するテクスチャ
 uniform sampler2D boneMatrixTexture;
@@ -205,7 +205,7 @@ void main() {
 
         vec4 vecPosition = rotatedPosition - rotatedC + correctedC;
 
-        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * vec4(vecPosition.xyz, 1.0);
+        gl_Position = projectionMatrix * afterVertexTransformMatrix * viewMatrix * vec4(vecPosition.xyz, 1.0);
 
         // 各頂点で使用される法線変形行列をSDEF変形行列から回転情報のみ抽出して生成する
         normalTransformMatrix = mat3(rotationMatrix);
@@ -221,7 +221,7 @@ void main() {
             boneTransformMatrix += boneMatrix * boneWeight;
         }
 
-        gl_Position = modelViewProjectionMatrix * afterVertexTransformMatrix * modelViewMatrix * boneTransformMatrix * position4;
+        gl_Position = projectionMatrix * afterVertexTransformMatrix * viewMatrix * boneTransformMatrix * position4;
 
         // 各頂点で使用される法線変形行列をボーン変形行列から回転情報のみ抽出して生成する
         normalTransformMatrix = mat3(boneTransformMatrix);
@@ -252,7 +252,7 @@ void main() {
             sphereUv = extendUv;
         } else {
 	        // スフィアマップテクスチャ座標
-            vec3 normalWv = mat3(modelViewMatrix) * vertexNormal;
+            vec3 normalWv = mat3(viewMatrix) * vertexNormal;
             sphereUv.x = normalWv.x * 0.5 + 0.5;
             sphereUv.y = normalWv.y * -0.5 + 0.5;
         }

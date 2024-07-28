@@ -602,7 +602,7 @@ func (viewWindow *ViewWindow) updateCamera() {
 		gl.UseProgram(program)
 
 		// カメラの再計算
-		projectionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_PROJECTION_MATRIX))
+		projectionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_PROJECTION_MATRIX))
 		gl.UniformMatrix4fv(projectionUniform, 1, false, &projectionMatrix[0])
 
 		// カメラの位置
@@ -610,7 +610,7 @@ func (viewWindow *ViewWindow) updateCamera() {
 		gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
 		// カメラの中心
-		cameraUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_MODEL_VIEW_MATRIX))
+		cameraUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_VIEW_MATRIX))
 		gl.UniformMatrix4fv(cameraUniform, 1, false, &viewMatrix[0])
 
 		gl.UseProgram(0)

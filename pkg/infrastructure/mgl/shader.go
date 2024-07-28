@@ -18,33 +18,32 @@ import (
 )
 
 const (
-	SHADER_BONE_MATRIX_TEXTURE          = "boneMatrixTexture\x00"
-	SHADER_BONE_MATRIX_TEXTURE_WIDTH    = "boneMatrixWidth\x00"
-	SHADER_BONE_MATRIX_TEXTURE_HEIGHT   = "boneMatrixHeight\x00"
-	SHADER_MODEL_VIEW_MATRIX            = "modelViewMatrix\x00"
-	SHADER_MODEL_VIEW_PROJECTION_MATRIX = "modelViewProjectionMatrix\x00"
-	SHADER_CAMERA_POSITION              = "cameraPosition\x00"
-	SHADER_LIGHT_DIRECTION              = "lightDirection\x00"
-	SHADER_DIFFUSE                      = "diffuse\x00"
-	SHADER_AMBIENT                      = "ambient\x00"
-	SHADER_SPECULAR                     = "specular\x00"
-	SHADER_TEXTURE_SAMPLER              = "textureSampler\x00"
-	SHADER_TOON_SAMPLER                 = "toonSampler\x00"
-	SHADER_SPHERE_SAMPLER               = "sphereSampler\x00"
-	SHADER_USE_TEXTURE                  = "useTexture\x00"
-	SHADER_USE_TOON                     = "useToon\x00"
-	SHADER_USE_SPHERE                   = "useSphere\x00"
-	SHADER_SPHERE_MODE                  = "sphereMode\x00"
-	SHADER_MORPH_TEXTURE_FACTOR         = "textureFactor\x00"
-	SHADER_MORPH_TOON_FACTOR            = "toonFactor\x00"
-	SHADER_MORPH_SPHERE_FACTOR          = "sphereFactor\x00"
-	SHADER_COLOR                        = "color\x00"
-	SHADER_ALPHA                        = "alpha\x00"
-	SHADER_EDGE_COLOR                   = "edgeColor\x00"
-	SHADER_EDGE_SIZE                    = "edgeSize\x00"
-	SHADER_CURSOR_START_POSITION        = "cursorStartPosition\x00"
-	SHADER_CURSOR_END_POSITION          = "cursorEndPosition\x00"
-	SHADER_VERTEX_GL_POSITION           = "gl_Position\x00"
+	SHADER_BONE_MATRIX_TEXTURE        = "boneMatrixTexture\x00"
+	SHADER_BONE_MATRIX_TEXTURE_WIDTH  = "boneMatrixWidth\x00"
+	SHADER_BONE_MATRIX_TEXTURE_HEIGHT = "boneMatrixHeight\x00"
+	SHADER_VIEW_MATRIX                = "viewMatrix\x00"
+	SHADER_PROJECTION_MATRIX          = "projectionMatrix\x00"
+	SHADER_CAMERA_POSITION            = "cameraPosition\x00"
+	SHADER_LIGHT_DIRECTION            = "lightDirection\x00"
+	SHADER_DIFFUSE                    = "diffuse\x00"
+	SHADER_AMBIENT                    = "ambient\x00"
+	SHADER_SPECULAR                   = "specular\x00"
+	SHADER_TEXTURE_SAMPLER            = "textureSampler\x00"
+	SHADER_TOON_SAMPLER               = "toonSampler\x00"
+	SHADER_SPHERE_SAMPLER             = "sphereSampler\x00"
+	SHADER_USE_TEXTURE                = "useTexture\x00"
+	SHADER_USE_TOON                   = "useToon\x00"
+	SHADER_USE_SPHERE                 = "useSphere\x00"
+	SHADER_SPHERE_MODE                = "sphereMode\x00"
+	SHADER_MORPH_TEXTURE_FACTOR       = "textureFactor\x00"
+	SHADER_MORPH_TOON_FACTOR          = "toonFactor\x00"
+	SHADER_MORPH_SPHERE_FACTOR        = "sphereFactor\x00"
+	SHADER_COLOR                      = "color\x00"
+	SHADER_ALPHA                      = "alpha\x00"
+	SHADER_EDGE_COLOR                 = "edgeColor\x00"
+	SHADER_EDGE_SIZE                  = "edgeSize\x00"
+	SHADER_CURSOR_START_POSITION      = "cursorStartPosition\x00"
+	SHADER_CURSOR_END_POSITION        = "cursorEndPosition\x00"
 )
 
 const (
@@ -324,7 +323,7 @@ func (shader *MShader) initialize(program uint32) {
 	projection := mgl32.Perspective(
 		mgl32.DegToRad(shader.FieldOfViewAngle), float32(shader.Width)/float32(shader.Height),
 		shader.NearPlane, shader.FarPlane)
-	projectionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_PROJECTION_MATRIX))
+	projectionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_PROJECTION_MATRIX))
 	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
 	// カメラの位置
@@ -343,7 +342,7 @@ func (shader *MShader) initialize(program uint32) {
 	// カメラ中心
 	lookAtCenter := NewGlVec3(shader.LookAtCenterPosition)
 	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, cameraUp)
-	cameraUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_MATRIX))
+	cameraUniform := gl.GetUniformLocation(program, gl.Str(SHADER_VIEW_MATRIX))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
 	// ボーン行列用テクスチャ生成

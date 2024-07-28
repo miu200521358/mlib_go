@@ -1,7 +1,7 @@
 #version 440 core
 
-uniform mat4 modelViewProjectionMatrix;
-uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
 
 // ボーン変形行列を格納するテクスチャ
 uniform sampler2D boneMatrixTexture;
@@ -266,7 +266,7 @@ void main() {
         vec4 vecPosition = rotatedPosition - rotatedC + correctedC;
 
         // 頂点位置
-        gl_Position = modelViewProjectionMatrix * modelViewMatrix * vec4(vecPosition.xyz, 1.0);
+        gl_Position = projectionMatrix * viewMatrix * vec4(vecPosition.xyz, 1.0);
 
         // SDEF結果頂点位置を格納
         vecGlobalPosition = vec4(vecPosition.xyz, 1.0);
@@ -283,7 +283,7 @@ void main() {
         }
 
         // 頂点位置
-        gl_Position = modelViewProjectionMatrix * modelViewMatrix * boneTransformMatrix * position4;
+        gl_Position = projectionMatrix * viewMatrix * boneTransformMatrix * position4;
 
         // ボーン変形行列を加味した頂点位置を格納
         vecGlobalPosition = boneTransformMatrix * position4;
