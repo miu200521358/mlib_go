@@ -38,6 +38,7 @@ type IAnimationState interface {
 	SetInvisibleMaterialIndexes(indexes []int)
 	SelectedVertexIndexes() []int
 	SetSelectedVertexIndexes(indexes []int)
+	NoSelectedVertexIndexes() []int
 }
 
 type IRenderModel interface {

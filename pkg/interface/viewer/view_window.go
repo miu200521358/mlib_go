@@ -30,27 +30,26 @@ const rightAngle = 89.9
 
 type ViewWindow struct {
 	*glfw.Window
-	windowIndex             int                // ウィンドウインデックス
-	title                   string             // ウィンドウタイトル
-	appConfig               *mconfig.AppConfig // アプリケーション設定
-	appState                state.IAppState    // アプリ状態
-	physics                 *mbt.MPhysics      // 物理
-	shader                  *mgl.MShader       // シェーダ
-	leftButtonDoubleClicked bool               // 左ボタンダブルクリックフラグ
-	leftButtonPressed       bool               // 左ボタン押下フラグ
-	middleButtonPressed     bool               // 中ボタン押下フラグ
-	rightButtonPressed      bool               // 右ボタン押下フラグ
-	shiftPressed            bool               // Shiftキー押下フラグ
-	ctrlPressed             bool               // Ctrlキー押下フラグ
-	updatedPrevCursor       bool               // 前回のカーソル位置更新フラグ
-	prevCursorPos           *mmath.MVec2       // 前回のカーソル位置
-	leftCursorRect          *mmath.MRect       // 前回の左クリック位置
-	leftCursorMinDepth      float32            // 前回の左クリック位置の深度
-	leftCursorStartPos      *mgl32.Vec3        // 前回の左クリック位置(始点)のワールド座標
-	leftCursorEndPos        *mgl32.Vec3        // 前回の左クリック位置(終点)のワールド座標
-	yaw                     float64            // カメラyaw
-	pitch                   float64            // カメラpitch
-	size                    *mmath.MVec2       // ウィンドウサイズ
+	windowIndex         int                // ウィンドウインデックス
+	title               string             // ウィンドウタイトル
+	appConfig           *mconfig.AppConfig // アプリケーション設定
+	appState            state.IAppState    // アプリ状態
+	physics             *mbt.MPhysics      // 物理
+	shader              *mgl.MShader       // シェーダー
+	leftButtonPressed   bool               // 左ボタン押下フラグ
+	middleButtonPressed bool               // 中ボタン押下フラグ
+	rightButtonPressed  bool               // 右ボタン押下フラグ
+	shiftPressed        bool               // Shiftキー押下フラグ
+	ctrlPressed         bool               // Ctrlキー押下フラグ
+	updatedPrevCursor   bool               // 前回のカーソル位置更新フラグ
+	prevCursorPos       *mmath.MVec2       // 前回のカーソル位置
+	leftCursorRect      *mmath.MRect       // 前回の左クリック位置
+	leftCursorMaxDepth  float32            // 前回の左クリック位置の最深深度
+	leftCursorStartPos  *mgl32.Vec3        // 前回の左クリック位置(始点)のワールド座標
+	leftCursorEndPos    *mgl32.Vec3        // 前回の左クリック位置(終点)のワールド座標
+	yaw                 float64            // カメラyaw
+	pitch               float64            // カメラpitch
+	size                *mmath.MVec2       // ウィンドウサイズ
 }
 
 func NewViewWindow(
@@ -93,7 +92,7 @@ func NewViewWindow(
 		leftCursorRect:     mmath.NewMRect(),
 		leftCursorStartPos: &mgl32.Vec3{},
 		leftCursorEndPos:   &mgl32.Vec3{},
-		leftCursorMinDepth: 1.0,
+		leftCursorMaxDepth: 0.0,
 		size: &mmath.MVec2{X: float64(appConfig.ViewWindowSize.Width),
 			Y: float64(appConfig.ViewWindowSize.Height)},
 	}
@@ -149,9 +148,9 @@ func (viewWindow *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float
 func (viewWindow *ViewWindow) updateDepthByCursor(xpos, ypos float64) {
 	// カーソル位置の深度を取得
 	depth := viewWindow.shader.Msaa.ReadDepthAt(int(xpos), int(ypos))
-	if depth <= viewWindow.leftCursorMinDepth {
-		// 深度が最小値より小さい場合は更新
-		viewWindow.leftCursorMinDepth = depth
+	if depth >= viewWindow.leftCursorMaxDepth && depth < 1.0 {
+		// 深度が最大値より大きい場合は更新
+		viewWindow.leftCursorMaxDepth = depth
 	}
 }
 
@@ -234,8 +233,7 @@ func (viewWindow *ViewWindow) mouseCallback(
 			viewWindow.leftCursorRect.Min.X, viewWindow.leftCursorRect.Min.Y = viewWindow.GetCursorPos()
 			viewWindow.leftCursorRect.Max.X, viewWindow.leftCursorRect.Max.Y = viewWindow.GetCursorPos()
 			if viewWindow.appState.IsShowSelectedVertex() {
-				viewWindow.leftCursorMinDepth = viewWindow.shader.Msaa.ReadDepthAt(
-					int(viewWindow.leftCursorRect.Min.X), int(viewWindow.leftCursorRect.Min.Y))
+				viewWindow.updateDepthByCursor(viewWindow.leftCursorRect.Min.X, viewWindow.leftCursorRect.Min.Y)
 			}
 		case glfw.MouseButtonMiddle:
 			viewWindow.middleButtonPressed = true
@@ -248,15 +246,15 @@ func (viewWindow *ViewWindow) mouseCallback(
 			viewWindow.leftCursorRect.Max.X, viewWindow.leftCursorRect.Max.Y = viewWindow.GetCursorPos()
 			viewWindow.leftButtonPressed = false
 			if viewWindow.appState.IsShowSelectedVertex() {
-				viewWindow.leftCursorMinDepth = viewWindow.shader.Msaa.ReadDepthAt(
-					int(viewWindow.leftCursorRect.Max.X), int(viewWindow.leftCursorRect.Max.Y))
+				viewWindow.updateDepthByCursor(viewWindow.leftCursorRect.Max.X, viewWindow.leftCursorRect.Max.Y)
 				// 最も浅い深度でカーソル位置をグローバル座標位置に変換
 				viewWindow.leftCursorStartPos = viewWindow.getWorldCoordinates(
 					float32(viewWindow.leftCursorRect.Min.X), float32(viewWindow.leftCursorRect.Min.Y),
-					viewWindow.leftCursorMinDepth)
+					viewWindow.leftCursorMaxDepth)
 				viewWindow.leftCursorEndPos = viewWindow.getWorldCoordinates(
 					float32(viewWindow.leftCursorRect.Max.X), float32(viewWindow.leftCursorRect.Max.Y),
-					viewWindow.leftCursorMinDepth)
+					viewWindow.leftCursorMaxDepth)
+				mlog.IL("左クリック位置: START=[%v], END=[%v] depth[%.3f]", viewWindow.leftCursorStartPos, viewWindow.leftCursorEndPos, viewWindow.leftCursorMaxDepth)
 			}
 		case glfw.MouseButtonMiddle:
 			viewWindow.middleButtonPressed = false

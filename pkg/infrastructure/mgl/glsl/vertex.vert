@@ -28,7 +28,7 @@ in layout(location = 13) vec4 uv1Delta; // 拡張UV1モーフ
 in layout(location = 14) vec3 afterVertexDelta; // ボーン変形後頂点モーフ
 
 layout(std430, binding = 0) buffer VertexBuffer {
-    int vertexIndexes[];
+    vec4 vertexPositions[];
 };
 
 out float totalBoneWeight;
@@ -209,10 +209,10 @@ mat4 inverse(mat4 m) {
 
 // 左上端と右下端の座標から、その矩形内に点が含まれるか判定する
 bool isInBoundingBox(vec4 position) {
-    vec3 minPos = min(cursorStartPosition.xyz, cursorEndPosition.xyz);
-    vec3 maxPos = max(cursorStartPosition.xyz, cursorEndPosition.xyz);
+    vec3 minPos = min(cursorStartPosition.xyz, cursorEndPosition.xyz) - vec3(0.1, 0.1, 0.3);
+    vec3 maxPos = max(cursorStartPosition.xyz, cursorEndPosition.xyz) + vec3(0.1, 0.1, 0.3);
 
-    return all(greaterThanEqual(position.xy, minPos.xy)) && all(lessThanEqual(position.xy, maxPos.xy));
+    return all(greaterThanEqual(position.xyz, minPos.xyz)) && all(lessThanEqual(position.xyz, maxPos.xyz));
 }
 
 void main() {
@@ -271,13 +271,12 @@ void main() {
         vecGlobalPosition = boneTransformMatrix * position4;
     }
 
-
     // カーソルの矩形範囲内にある場合のみ、頂点位置を格納する
     if (isInBoundingBox(vecGlobalPosition)) {
-        vertexIndexes[gl_VertexID] = gl_VertexID;
+        vertexPositions[gl_VertexID] = vecGlobalPosition;
     } else {
-        vertexIndexes[gl_VertexID] = -1;
+        vertexPositions[gl_VertexID] = vec4(-1);
     }
 
-    vertexUvX = uv.x * uvDelta.x;
+    vertexUvX = uv.x + uvDelta.x;
 }

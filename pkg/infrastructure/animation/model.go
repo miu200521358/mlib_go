@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
@@ -148,7 +147,7 @@ func (renderModel *RenderModel) initializeBuffer(
 		}
 	}()
 
-	// メッシュ情報の並列処理
+	// メッシュ情報
 	renderModel.meshes = make([]*Mesh, len(model.Materials.Data))
 	prevVerticesCount := 0
 
@@ -284,7 +283,7 @@ func (renderModel *RenderModel) initializeBuffer(
 	var ssbo uint32
 	gl.GenBuffers(1, &ssbo)
 	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, ssbo)
-	gl.BufferData(gl.SHADER_STORAGE_BUFFER, model.Vertices.Len()*4, nil, gl.DYNAMIC_DRAW)
+	gl.BufferData(gl.SHADER_STORAGE_BUFFER, model.Vertices.Len()*4*4, nil, gl.DYNAMIC_DRAW)
 	gl.BindBufferBase(gl.SHADER_STORAGE_BUFFER, 0, ssbo)
 
 	renderModel.ssbo = ssbo
@@ -344,10 +343,10 @@ func (renderModel *RenderModel) Render(
 	}
 
 	if appState.IsShowSelectedVertex() {
-		selectedVertexIndexes := renderModel.drawSelectedVertex(
-			animationState.WindowIndex(), animationState.SelectedVertexIndexes(),
+		renderModel.drawSelectedVertex(
+			animationState.WindowIndex(),
+			animationState.SelectedVertexIndexes(), animationState.NoSelectedVertexIndexes(),
 			shader, paddedMatrixes, matrixWidth, matrixHeight, leftCursorStartPos, leftCursorEndPos)
-		animationState.SetSelectedVertexIndexes(selectedVertexIndexes)
 	}
 }
 
@@ -389,11 +388,12 @@ func (renderModel *RenderModel) drawNormal(
 
 func (renderModel *RenderModel) drawSelectedVertex(
 	windowIndex int,
-	selectedVertexMorphIndexes []int,
+	nowSelectedVertexIndexes []int,
+	nowNoSelectedVertexIndexes []int,
 	shader mgl.IShader,
 	paddedMatrixes []float32, width, height int,
 	leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3,
-) []int {
+) map[int]*mgl32.Vec3 {
 	// モデルメッシュの前面に描画するために深度テストを無効化
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
@@ -401,29 +401,29 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	program := shader.Program(mgl.PROGRAM_TYPE_SELECTED_VERTEX)
 	gl.UseProgram(program)
 
-	selectedVertexDeltas := make([][]float32, renderModel.vertexCount)
-	for i := range renderModel.vertexCount {
-		if mmath.Contains(selectedVertexMorphIndexes, i) {
-			// 選択されている頂点の追加UVXを＋にして（フラグをたてて）表示する
-			selectedVertexDeltas[i] = []float32{
-				0, 0, 0,
-				1, 0, 0, 0,
-				0, 0, 0, 0,
-				0, 0, 0,
-			}
-		} else {
-			// 選択されていない頂点の追加UVXを０にして表示しない
-			selectedVertexDeltas[i] = []float32{
-				0, 0, 0,
-				0, 0, 0, 0,
-				0, 0, 0, 0,
-				0, 0, 0,
-			}
+	selectedVertexDeltas := make([][]float32, len(nowSelectedVertexIndexes)+len(nowNoSelectedVertexIndexes))
+	for i := range nowNoSelectedVertexIndexes {
+		// 選択されていない頂点の追加UVXを-1にして表示しない
+		selectedVertexDeltas[len(nowSelectedVertexIndexes)+i] = []float32{
+			0, 0, 0,
+			-1, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0,
+		}
+	}
+	for i := range nowSelectedVertexIndexes {
+		// 選択されている頂点の追加UVXを＋にして（フラグをたてて）表示する
+		selectedVertexDeltas[i] = []float32{
+			0, 0, 0,
+			1, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0,
 		}
 	}
 
+	nowSelectedVertexIndexes = append(nowSelectedVertexIndexes, nowNoSelectedVertexIndexes...)
 	renderModel.selectedVertexVao.Bind()
-	renderModel.selectedVertexVbo.BindVertex(selectedVertexMorphIndexes, selectedVertexDeltas)
+	renderModel.selectedVertexVbo.BindVertex(nowSelectedVertexIndexes, selectedVertexDeltas)
 	renderModel.selectedVertexIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
@@ -458,15 +458,19 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	// SSBOからデータを読み込む
 	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, renderModel.ssbo)
 	ptr := gl.MapBuffer(gl.SHADER_STORAGE_BUFFER, gl.READ_ONLY)
-	vertexIndexes := make([]int32, renderModel.vertexCount)
-	selectedVertexIndexes := make([]int, 0, renderModel.vertexCount)
+	nowTargetVertexPositions := make(map[int]*mgl32.Vec3)
 
 	if ptr != nil {
 		// SSBOから読み取り
-		for i := 0; i < renderModel.vertexCount; i++ {
-			vertexIndexes[i] = *(*int32)(unsafe.Pointer(uintptr(ptr) + uintptr(i*4)))
-			if vertexIndexes[i] >= 0 {
-				selectedVertexIndexes = append(selectedVertexIndexes, int(vertexIndexes[i]))
+		for i := range renderModel.vertexCount {
+			vertexPositions := make([]float32, 4)
+			for j := range 4 {
+				vertexPositions[j] = *(*float32)(unsafe.Pointer(uintptr(ptr) + uintptr((i*4+j)*4)))
+			}
+			if vertexPositions[0] != -1 || vertexPositions[1] != -1 ||
+				vertexPositions[2] != -1 || vertexPositions[3] != -1 {
+				// いずれが-1でない場合はマップに保持
+				nowTargetVertexPositions[i] = &mgl32.Vec3{vertexPositions[0], vertexPositions[1], vertexPositions[2]}
 			}
 		}
 	}
@@ -484,7 +488,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
 
-	return selectedVertexIndexes
+	return nowTargetVertexPositions
 }
 
 func (renderModel *RenderModel) drawBone(

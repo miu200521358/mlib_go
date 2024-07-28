@@ -25,6 +25,7 @@ type AnimationState struct {
 	motion                   *vmd.VmdMotion      // モーション
 	invisibleMaterialIndexes []int               // 非表示材質インデックス
 	selectedVertexIndexes    []int               // 選択頂点インデックス
+	noSelectedVertexIndexes  []int               // 非選択頂点インデックス
 	vmdDeltas                *delta.VmdDeltas    // モーション変化量
 	renderDeltas             *delta.RenderDeltas // 描画変化量
 }
@@ -103,6 +104,10 @@ func (animationState *AnimationState) SetInvisibleMaterialIndexes(indexes []int)
 
 func (animationState *AnimationState) SelectedVertexIndexes() []int {
 	return animationState.selectedVertexIndexes
+}
+
+func (animationState *AnimationState) NoSelectedVertexIndexes() []int {
+	return animationState.noSelectedVertexIndexes
 }
 
 func (animationState *AnimationState) SetSelectedVertexIndexes(indexes []int) {

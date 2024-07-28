@@ -74,7 +74,7 @@ func newSelectedVertexGl(v *pmx.Vertex) []float32 {
 	return []float32{
 		p[0], p[1], p[2], // 位置
 		n[0], n[1], n[2], // 法線
-		float32(-1), float32(0), // UV(Xは明示的に-1)
+		float32(-0.1), float32(0), // UV (Xは明示的にマイナスにしておく)
 		float32(0), float32(0), // 追加UV
 		float32(0),             // エッジ倍率
 		d[0], d[1], d[2], d[3], // デフォームボーンINDEX
@@ -84,7 +84,7 @@ func newSelectedVertexGl(v *pmx.Vertex) []float32 {
 		sdefR0[0], sdefR0[1], sdefR0[2], // SDEF-R0
 		sdefR1[0], sdefR1[1], sdefR1[2], // SDEF-R1
 		0.0, 0.0, 0.0, // 頂点モーフ
-		1.0, 0.0, 0.0, 0.0, // UVモーフ(Xは明示的に1にしてフラグを立てる（選択状態）)
+		0.0, 0.0, 0.0, 0.0, // UVモーフ
 		0.0, 0.0, 0.0, 0.0, // 追加UV1モーフ
 		0.0, 0.0, 0.0, // 変形後頂点モーフ
 	}

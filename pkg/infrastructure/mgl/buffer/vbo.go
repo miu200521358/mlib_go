@@ -59,9 +59,11 @@ func (v *VBO) BindVertex(vertexMorphIndexes []int, vertexMorphDeltas [][]float32
 		// モーフ分の変動量を設定
 		for i, vidx := range vertexMorphIndexes {
 			vd := vertexMorphDeltas[i]
-			offsetStride := (vidx*v.StrideSize + vboVertexSize) * 4
-			// 必要な場合にのみ部分更新
-			gl.BufferSubData(v.target, offsetStride, len(vd)*4, gl.Ptr(vd))
+			if vd != nil {
+				offsetStride := (vidx*v.StrideSize + vboVertexSize) * 4
+				// 必要な場合にのみ部分更新
+				gl.BufferSubData(v.target, offsetStride, len(vd)*4, gl.Ptr(vd))
+			}
 		}
 	} else {
 		gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
