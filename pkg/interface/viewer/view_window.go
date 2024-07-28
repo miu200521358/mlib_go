@@ -148,7 +148,8 @@ func (viewWindow *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float
 func (viewWindow *ViewWindow) updateDepthByCursor(xpos, ypos float64) {
 	// カーソル位置の深度を取得
 	depth := viewWindow.shader.Msaa.ReadDepthAt(int(xpos), int(ypos))
-	if depth >= viewWindow.leftCursorMaxDepth && depth < 1.0 {
+	mlog.I("depth: %.3f", depth)
+	if depth >= viewWindow.leftCursorMaxDepth && depth < 1.0 && depth > 0.0 {
 		// 深度が最大値より大きい場合は更新
 		viewWindow.leftCursorMaxDepth = depth
 	}
@@ -157,7 +158,7 @@ func (viewWindow *ViewWindow) updateDepthByCursor(xpos, ypos float64) {
 func (viewWindow *ViewWindow) updateCameraAngleByCursor(xpos, ypos float64) {
 	ratio := 0.1
 	if viewWindow.shiftPressed {
-		ratio *= 10
+		ratio *= 3
 	} else if viewWindow.ctrlPressed {
 		ratio *= 0.1
 	}
@@ -167,40 +168,40 @@ func (viewWindow *ViewWindow) updateCameraAngleByCursor(xpos, ypos float64) {
 	yOffset := (viewWindow.prevCursorPos.Y - ypos) * ratio
 
 	// 方位角と仰角を更新
-	viewWindow.yaw += xOffset
-	viewWindow.pitch += yOffset
-
-	// 仰角の制限（水平面より上下に行き過ぎないようにする）
-	viewWindow.pitch = mmath.ClampedFloat(viewWindow.pitch, -rightAngle, rightAngle)
-
-	// 方位角の制限（360度を超えないようにする）
-	if viewWindow.yaw > 360.0 {
-		viewWindow.yaw -= 360.0
-	} else if viewWindow.yaw < -360.0 {
-		viewWindow.yaw += 360.0
-	}
+	viewWindow.yaw -= xOffset
+	viewWindow.pitch -= yOffset
 
 	viewWindow.updateCameraAngle()
 }
 
 func (viewWindow *ViewWindow) updateCameraAngle() {
 	// 球面座標系をデカルト座標系に変換
-	radius := float64(mgl.INITIAL_CAMERA_POSITION_Z)
-	cameraX := radius * math.Cos(mgl64.DegToRad(viewWindow.pitch)) * math.Cos(mgl64.DegToRad(viewWindow.yaw))
-	cameraY := radius * math.Sin(mgl64.DegToRad(viewWindow.pitch))
-	cameraZ := radius * math.Cos(mgl64.DegToRad(viewWindow.pitch)) * math.Sin(mgl64.DegToRad(viewWindow.yaw))
+	radius := math.Abs(float64(mgl.INITIAL_CAMERA_POSITION_Z))
+
+	// 四元数を使ってカメラの方向を計算
+	yawRad := mgl64.DegToRad(viewWindow.yaw)
+	pitchRad := mgl64.DegToRad(viewWindow.pitch)
+	orientation := mmath.NewMQuaternionFromAxisAngles(mmath.MVec3UnitY, yawRad).Mul(
+		mmath.NewMQuaternionFromAxisAngles(mmath.MVec3UnitX, pitchRad))
+	forwardXYZ := orientation.Rotate(mmath.MVec3UnitZInv).MulScalar(radius)
+
+	mlog.I("yaw: %.3f, pitch: %.3f, forward: %s", viewWindow.yaw, viewWindow.pitch, forwardXYZ.String())
 
 	// カメラ位置を更新
-	viewWindow.shader.CameraPosition.X = cameraX
-	viewWindow.shader.CameraPosition.Y = mgl.INITIAL_CAMERA_POSITION_Y + cameraY
-	viewWindow.shader.CameraPosition.Z = cameraZ
+	viewWindow.shader.CameraPosition.X = forwardXYZ.X
+	viewWindow.shader.CameraPosition.Y = mgl.INITIAL_CAMERA_POSITION_Y + forwardXYZ.Y
+	viewWindow.shader.CameraPosition.Z = forwardXYZ.Z
+
+	forward := viewWindow.shader.LookAtCenterPosition.Subed(viewWindow.shader.CameraPosition).Normalize()
+	right := forward.Cross(viewWindow.shader.CameraUp).Normalize()
+	viewWindow.shader.CameraUp = right.Cross(forward).Normalize()
 }
 
 func (viewWindow *ViewWindow) updateCameraPositionByCursor(xpos float64, ypos float64) {
 	// 中ボタンが押された場合の処理
 	ratio := 0.07
 	if viewWindow.shiftPressed {
-		ratio *= 10
+		ratio *= 3
 	} else if viewWindow.ctrlPressed {
 		ratio *= 0.1
 	}
@@ -210,7 +211,7 @@ func (viewWindow *ViewWindow) updateCameraPositionByCursor(xpos float64, ypos fl
 
 	// カメラの向きに基づいて移動方向を計算
 	forward := viewWindow.shader.LookAtCenterPosition.Subed(viewWindow.shader.CameraPosition)
-	right := forward.Cross(mmath.MVec3UnitY).Normalize()
+	right := forward.Cross(viewWindow.shader.CameraUp).Normalize()
 	up := right.Cross(forward.Normalize()).Normalize()
 
 	// 上下移動のベクトルを計算
@@ -246,12 +247,17 @@ func (viewWindow *ViewWindow) mouseCallback(
 			viewWindow.leftCursorRect.Max.X, viewWindow.leftCursorRect.Max.Y = viewWindow.GetCursorPos()
 			viewWindow.leftButtonPressed = false
 			if viewWindow.appState.IsShowSelectedVertex() {
-				viewWindow.updateDepthByCursor(viewWindow.leftCursorRect.Max.X, viewWindow.leftCursorRect.Max.Y)
-				// 最も浅い深度でカーソル位置をグローバル座標位置に変換
-				viewWindow.leftCursorStartPos = viewWindow.getWorldCoordinates(
+				for range 20 {
+					viewWindow.updateDepthByCursor(viewWindow.leftCursorRect.Max.X, viewWindow.leftCursorRect.Max.Y)
+					if viewWindow.leftCursorMaxDepth > 0.0 {
+						break
+					}
+				}
+				// 最深度でカーソル位置をグローバル座標位置に変換
+				viewWindow.leftCursorStartPos = viewWindow.getWorldPosition(
 					float32(viewWindow.leftCursorRect.Min.X), float32(viewWindow.leftCursorRect.Min.Y),
 					viewWindow.leftCursorMaxDepth)
-				viewWindow.leftCursorEndPos = viewWindow.getWorldCoordinates(
+				viewWindow.leftCursorEndPos = viewWindow.getWorldPosition(
 					float32(viewWindow.leftCursorRect.Max.X), float32(viewWindow.leftCursorRect.Max.Y),
 					viewWindow.leftCursorMaxDepth)
 				mlog.IL("左クリック位置: START=[%v], END=[%v] depth[%.3f]", viewWindow.leftCursorStartPos, viewWindow.leftCursorEndPos, viewWindow.leftCursorMaxDepth)
@@ -264,8 +270,8 @@ func (viewWindow *ViewWindow) mouseCallback(
 	}
 }
 
-// getWorldCoordinates は、マウスクリック位置 (スクリーン座標) と深度値を基にワールド座標を計算します
-func (viewWindow *ViewWindow) getWorldCoordinates(mouseX, mouseY, depth float32) *mgl32.Vec3 {
+// getWorldPosition は、マウスクリック位置 (スクリーン座標) と深度値を基にワールド座標を計算します
+func (viewWindow *ViewWindow) getWorldPosition(mouseX, mouseY, depth float32) *mgl32.Vec3 {
 	width := float32(viewWindow.size.X)
 	height := float32(viewWindow.size.Y)
 
@@ -287,7 +293,8 @@ func (viewWindow *ViewWindow) getWorldCoordinates(mouseX, mouseY, depth float32)
 	if viewCoords.W() == 0.0 {
 		viewCoordPos = mgl32.Vec4{viewCoords.X(), viewCoords.Y(), viewCoords.Z(), 1.0}
 	} else {
-		viewCoordPos = mgl32.Vec4{viewCoords.X() / viewCoords.W(), viewCoords.Y() / viewCoords.W(), viewCoords.Z() / viewCoords.W(), 1.0}
+		viewCoordPos = mgl32.Vec4{viewCoords.X() / viewCoords.W(),
+			viewCoords.Y() / viewCoords.W(), viewCoords.Z() / viewCoords.W(), 1.0}
 	}
 
 	// ワールド座標系に変換
@@ -296,7 +303,8 @@ func (viewWindow *ViewWindow) getWorldCoordinates(mouseX, mouseY, depth float32)
 	if worldCoords.W() == 0.0 {
 		globalPos = &mgl32.Vec3{worldCoords.X(), worldCoords.Y(), worldCoords.Z()}
 	} else {
-		globalPos = &mgl32.Vec3{worldCoords.X() / worldCoords.W(), worldCoords.Y() / worldCoords.W(), worldCoords.Z() / worldCoords.W()}
+		globalPos = &mgl32.Vec3{worldCoords.X() / worldCoords.W(),
+			worldCoords.Y() / worldCoords.W(), worldCoords.Z() / worldCoords.W()}
 	}
 	return globalPos
 }
@@ -308,44 +316,56 @@ func (viewWindow *ViewWindow) keyCallback(
 		switch key {
 		case glfw.KeyLeftShift, glfw.KeyRightShift:
 			viewWindow.shiftPressed = true
+			return
 		case glfw.KeyLeftControl, glfw.KeyRightControl:
 			viewWindow.ctrlPressed = true
+			return
 		}
 	} else if action == glfw.Release {
 		switch key {
 		case glfw.KeyLeftShift, glfw.KeyRightShift:
 			viewWindow.shiftPressed = false
+			return
 		case glfw.KeyLeftControl, glfw.KeyRightControl:
 			viewWindow.ctrlPressed = false
+			return
 		}
 	}
 
-	viewWindow.resetView()
-
 	switch key {
-	case glfw.KeyKP0: // 下面から
-		viewWindow.yaw = rightAngle
-		viewWindow.pitch = rightAngle
-	case glfw.KeyKP2: // 正面から
-		viewWindow.yaw = rightAngle
-		viewWindow.pitch = 0
-	case glfw.KeyKP4: // 左面から
-		viewWindow.yaw = 180
-		viewWindow.pitch = 0
-	case glfw.KeyKP5: // 上面から
-		viewWindow.yaw = rightAngle
+	case glfw.KeyKP1: // 下面から
+		viewWindow.resetView()
+		viewWindow.yaw = 0
 		viewWindow.pitch = -rightAngle
-	case glfw.KeyKP6: // 右面から
+		viewWindow.updateCameraAngle()
+	case glfw.KeyKP2: // 正面から
+		viewWindow.resetView()
 		viewWindow.yaw = 0
 		viewWindow.pitch = 0
-	case glfw.KeyKP8: // 背面から
+		viewWindow.updateCameraAngle()
+	case glfw.KeyKP4: // 左面から
+		viewWindow.resetView()
 		viewWindow.yaw = -rightAngle
 		viewWindow.pitch = 0
+		viewWindow.updateCameraAngle()
+	case glfw.KeyKP5: // 上面から
+		viewWindow.resetView()
+		viewWindow.yaw = 0
+		viewWindow.pitch = rightAngle
+		viewWindow.updateCameraAngle()
+	case glfw.KeyKP6: // 右面から
+		viewWindow.resetView()
+		viewWindow.yaw = rightAngle
+		viewWindow.pitch = 0
+		viewWindow.updateCameraAngle()
+	case glfw.KeyKP8: // 背面から
+		viewWindow.resetView()
+		viewWindow.yaw = 180
+		viewWindow.pitch = 0
+		viewWindow.updateCameraAngle()
 	default:
 		return
 	}
-
-	viewWindow.updateCameraAngle()
 }
 
 func (viewWindow *ViewWindow) resetView() {
@@ -555,7 +575,8 @@ func (viewWindow *ViewWindow) getCameraParameter() (mgl32.Mat4, mgl32.Vec3, mgl3
 
 	// カメラの中心
 	lookAtCenter := mgl.NewGlVec3(viewWindow.shader.LookAtCenterPosition)
-	viewMatrix := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
+	up := mgl.NewGlVec3(viewWindow.shader.CameraUp)
+	viewMatrix := mgl32.LookAtV(cameraPosition, lookAtCenter, up)
 
 	return projectionMatrix, cameraPosition, viewMatrix
 }

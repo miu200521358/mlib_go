@@ -70,6 +70,7 @@ const (
 var (
 	initialCameraPosition = &mmath.MVec3{X: 0.0, Y: INITIAL_CAMERA_POSITION_Y, Z: INITIAL_CAMERA_POSITION_Z}
 	initialLookAtPosition = &mmath.MVec3{X: 0.0, Y: INITIAL_LOOK_AT_CENTER_Y, Z: 0.0}
+	initialCameraUp       = &mmath.MVec3{X: 0.0, Y: 1.0, Z: 0.0}
 )
 
 type IShader interface {
@@ -81,6 +82,7 @@ type IShader interface {
 type MShader struct {
 	CameraPosition        *mmath.MVec3
 	LookAtCenterPosition  *mmath.MVec3
+	CameraUp              *mmath.MVec3
 	FieldOfViewAngle      float32
 	Width                 int
 	Height                int
@@ -108,6 +110,7 @@ func NewMShader(width, height int) *MShader {
 	shader := &MShader{
 		CameraPosition:       initialCameraPosition.Copy(),
 		LookAtCenterPosition: initialLookAtPosition.Copy(),
+		CameraUp:             initialCameraUp.Copy(),
 		FieldOfViewAngle:     FIELD_OF_VIEW_ANGLE,
 		Width:                width,
 		Height:               height,
@@ -214,6 +217,7 @@ func NewMShader(width, height int) *MShader {
 func (shader *MShader) Reset() {
 	shader.CameraPosition = initialCameraPosition.Copy()
 	shader.LookAtCenterPosition = initialLookAtPosition.Copy()
+	shader.CameraUp = initialCameraUp.Copy()
 	shader.FieldOfViewAngle = FIELD_OF_VIEW_ANGLE
 	shader.Resize(int(shader.Width), int(shader.Height))
 }
@@ -317,9 +321,12 @@ func (shader *MShader) initialize(program uint32) {
 	lightDirectionUniform := gl.GetUniformLocation(program, gl.Str(SHADER_LIGHT_DIRECTION))
 	gl.Uniform3fv(lightDirectionUniform, 1, &lightDirection[0])
 
+	// カメラUP
+	cameraUp := NewGlVec3(shader.CameraUp)
+
 	// カメラ中心
 	lookAtCenter := NewGlVec3(shader.LookAtCenterPosition)
-	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, mgl32.Vec3{0, 1, 0})
+	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, cameraUp)
 	cameraUniform := gl.GetUniformLocation(program, gl.Str(SHADER_MODEL_VIEW_MATRIX))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 

@@ -554,6 +554,11 @@ func (quat *MQuaternion) MulVec3(v *MVec3) *MVec3 {
 	return &MVec3{mv.X(), mv.Y(), mv.Z()}
 }
 
+func (quat *MQuaternion) Rotate(v *MVec3) *MVec3 {
+	mv := mgl64.Quat{V: mgl64.Vec3{quat.X, quat.Y, quat.Z}, W: quat.W}.Rotate(mgl64.Vec3{v.X, v.Y, v.Z})
+	return &MVec3{mv.X(), mv.Y(), mv.Z()}
+}
+
 // VectorToDegreeは、与えられた2つのベクトルから角度に変換します。
 func VectorToDegree(a *MVec3, b *MVec3) float64 {
 	return RadToDeg(VectorToRadian(a, b))
