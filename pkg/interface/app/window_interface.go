@@ -33,8 +33,8 @@ type IViewWindow interface {
 	Title() string
 	OverrideTextureId() uint32
 	SetOverrideTextureId(id uint32)
-	GetViewerParameter() (float64, float64, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3)
-	UpdateViewerParameter(yaw, pitch float64, cameraPos, cameraUp, lookAtCenter *mmath.MVec3)
+	GetViewerParameter() (float64, float64, *mmath.MVec2, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3)
+	UpdateViewerParameter(yaw, pitch float64, size *mmath.MVec2, cameraPos, cameraUp, lookAtCenter *mmath.MVec3)
 }
 
 type IPlayer interface {

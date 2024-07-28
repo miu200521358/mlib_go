@@ -120,7 +120,6 @@ func (viewWindow *ViewWindow) Title() string {
 func (viewWindow *ViewWindow) resizeCallback(w *glfw.Window, width int, height int) {
 	viewWindow.size.X = float64(width)
 	viewWindow.size.Y = float64(height)
-	viewWindow.shader.Reset(true)
 }
 
 func (viewWindow *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
@@ -457,8 +456,6 @@ func (viewWindow *ViewWindow) ResetPhysics(animationStates []state.IAnimationSta
 func (viewWindow *ViewWindow) Animate(
 	animationStates []state.IAnimationState, nextStates []state.IAnimationState, timeStep float32,
 ) ([]state.IAnimationState, []state.IAnimationState) {
-	glfw.PollEvents()
-
 	if viewWindow.size.X == 0 || viewWindow.size.Y == 0 {
 		return animationStates, nextStates
 	}
@@ -546,17 +543,20 @@ func (viewWindow *ViewWindow) Animate(
 	viewWindow.shader.Msaa.Unbind()
 
 	viewWindow.SwapBuffers()
+	glfw.PollEvents()
 
 	return animationStates, nextStates
 }
 
-func (viewWindow *ViewWindow) GetViewerParameter() (float64, float64, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
-	return viewWindow.yaw, viewWindow.pitch, viewWindow.shader.CameraPosition, viewWindow.shader.CameraUp,
-		viewWindow.shader.LookAtCenterPosition
+func (viewWindow *ViewWindow) GetViewerParameter() (
+	float64, float64, *mmath.MVec2, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3,
+) {
+	return viewWindow.yaw, viewWindow.pitch, viewWindow.size,
+		viewWindow.shader.CameraPosition, viewWindow.shader.CameraUp, viewWindow.shader.LookAtCenterPosition
 }
 
 func (viewWindow *ViewWindow) UpdateViewerParameter(
-	yaw, pitch float64, cameraPos, cameraUp, lookAtCenter *mmath.MVec3,
+	yaw, pitch float64, size *mmath.MVec2, cameraPos, cameraUp, lookAtCenter *mmath.MVec3,
 ) {
 	viewWindow.yaw = yaw
 	viewWindow.pitch = pitch
@@ -566,6 +566,12 @@ func (viewWindow *ViewWindow) UpdateViewerParameter(
 	viewWindow.shader.LookAtCenterPosition = lookAtCenter.Copy()
 
 	viewWindow.updateCameraAngle()
+
+	isResize := !viewWindow.size.Equals(size)
+	if isResize {
+		viewWindow.Window.SetSize(int(size.X), int(size.Y))
+		viewWindow.size = size.Copy()
+	}
 }
 
 func (viewWindow *ViewWindow) getCameraParameter() (mgl32.Mat4, mgl32.Vec3, mgl32.Mat4) {
