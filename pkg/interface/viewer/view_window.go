@@ -57,6 +57,7 @@ func NewViewWindow(
 	appConfig *mconfig.AppConfig,
 	appState state.IAppState,
 	title string,
+	mainWindow *glfw.Window,
 ) *ViewWindow {
 	glfw.WindowHint(glfw.Resizable, glfw.True)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
@@ -66,7 +67,7 @@ func NewViewWindow(
 	glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
 
 	glWindow, err := glfw.CreateWindow(
-		appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height, title, nil, nil)
+		appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height, title, nil, mainWindow)
 	if err != nil {
 		widget.RaiseError(err)
 	}
@@ -549,6 +550,13 @@ func (viewWindow *ViewWindow) Animate(
 
 	// 深度解決
 	viewWindow.shader.Msaa.Resolve()
+	if viewWindow.appState.IsShowOverride() {
+		if viewWindow.windowIndex == 0 {
+			viewWindow.drawOverride()
+		} else {
+			viewWindow.shader.Msaa.ResolveOverride()
+		}
+	}
 	viewWindow.shader.Msaa.Unbind()
 
 	viewWindow.SwapBuffers()
@@ -597,4 +605,33 @@ func (viewWindow *ViewWindow) updateCamera() {
 
 		gl.UseProgram(0)
 	}
+}
+
+func (viewWindow *ViewWindow) SetOverrideTextureId(overrideTextureId uint32) {
+	viewWindow.shader.Msaa.SetOverrideTargetTexture(overrideTextureId)
+}
+
+func (viewWindow *ViewWindow) OverrideTextureId() uint32 {
+	return viewWindow.shader.Msaa.OverrideTextureId()
+}
+
+func (viewWindow *ViewWindow) drawOverride() {
+	// モデルメッシュの前面に描画するために深度テストを無効化
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.ALWAYS)
+
+	program := viewWindow.shader.Program(mgl.PROGRAM_TYPE_OVERRIDE)
+	gl.UseProgram(program)
+
+	viewWindow.shader.Msaa.BindOverrideTexture(viewWindow.windowIndex, program)
+
+	gl.DrawArrays(gl.TRIANGLES, 0, 6)
+
+	viewWindow.shader.Msaa.UnbindOverrideTexture()
+
+	gl.UseProgram(0)
+
+	// 深度テストを有効に戻す
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
 }

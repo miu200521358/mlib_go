@@ -22,6 +22,8 @@ type IAppState interface {
 	SetShowNormal(show bool)
 	IsShowWire() bool
 	SetShowWire(show bool)
+	IsShowOverride() bool
+	SetShowOverride(show bool)
 	IsShowSelectedVertex() bool
 	SetShowSelectedVertex(show bool)
 	IsShowBoneAll() bool

@@ -20,6 +20,7 @@ type appState struct {
 	isPhysicsReset       bool                      // 物理リセット
 	isShowNormal         bool                      // ボーンデバッグ表示
 	isShowWire           bool                      // ワイヤーフレームデバッグ表示
+	isShowOverride       bool                      // オーバーライドデバッグ表示
 	isShowSelectedVertex bool                      // 選択頂点デバッグ表示
 	isShowBoneAll        bool                      // 全ボーンデバッグ表示
 	isShowBoneIk         bool                      // IKボーンデバッグ表示
@@ -209,6 +210,14 @@ func (appState *appState) IsShowWire() bool {
 
 func (appState *appState) SetShowWire(show bool) {
 	appState.isShowWire = show
+}
+
+func (appState *appState) IsShowOverride() bool {
+	return appState.isShowOverride
+}
+
+func (appState *appState) SetShowOverride(show bool) {
+	appState.isShowOverride = show
 }
 
 func (appState *appState) IsShowSelectedVertex() bool {

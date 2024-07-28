@@ -110,6 +110,13 @@ func (app *MApp) ViewerRun() {
 			app.SetPhysicsReset(false)
 		}
 
+		// 重複描画
+		if app.IsShowOverride() {
+			for i := 1; i < len(app.viewWindows); i++ {
+				app.viewWindows[i].SetOverrideTextureId(app.viewWindows[0].OverrideTextureId())
+			}
+		}
+
 		for i, w := range app.viewWindows {
 			// アニメーション
 			if !app.IsShowSelectedVertex() {
@@ -159,6 +166,10 @@ func (app *MApp) showInfo(elapsedList []float64, prevShowTime float64, timeStep 
 
 func (app *MApp) ViewerCount() int {
 	return len(app.viewWindows)
+}
+
+func (app *MApp) MainViewWindow() IViewWindow {
+	return app.viewWindows[0]
 }
 
 func (app *MApp) Close() {

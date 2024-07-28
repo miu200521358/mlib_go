@@ -30,6 +30,8 @@ type IViewWindow interface {
 	ResetPhysics(animationStates []state.IAnimationState)
 	AppState() state.IAppState
 	Title() string
+	OverrideTextureId() uint32
+	SetOverrideTextureId(id uint32)
 }
 
 type IPlayer interface {

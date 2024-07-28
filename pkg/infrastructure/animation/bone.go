@@ -148,14 +148,14 @@ func bindBoneMatrixes(
 		unsafe.Pointer(&paddedMatrixes[0]),
 	)
 
-	modelUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE))
+	boneUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE))
 	switch windowIndex {
 	case 0:
-		gl.Uniform1i(modelUniform, 20)
+		gl.Uniform1i(boneUniform, 20)
 	case 1:
-		gl.Uniform1i(modelUniform, 21)
+		gl.Uniform1i(boneUniform, 21)
 	case 2:
-		gl.Uniform1i(modelUniform, 22)
+		gl.Uniform1i(boneUniform, 22)
 	}
 
 	modelWidthUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_BONE_MATRIX_TEXTURE_WIDTH))

@@ -22,6 +22,7 @@ type controlState struct {
 	isPhysicsResetChan       chan bool                      // 物理リセット
 	isShowNormalChan         chan bool                      // ボーンデバッグ表示
 	isShowWireChan           chan bool                      // ワイヤーフレームデバッグ表示
+	isShowOverrideChan       chan bool                      // オーバーライドデバッグ表示
 	isShowSelectedVertexChan chan bool                      // 選択頂点デバッグ表示
 	isShowBoneAllChan        chan bool                      // 全ボーンデバッグ表示
 	isShowBoneIkChan         chan bool                      // IKボーンデバッグ表示
@@ -253,6 +254,10 @@ func (contState *controlState) SetShowNormal(show bool) {
 
 func (contState *controlState) SetShowWire(show bool) {
 	contState.isShowWireChan <- show
+}
+
+func (contState *controlState) SetShowOverride(show bool) {
+	contState.isShowOverrideChan <- show
 }
 
 func (contState *controlState) SetShowSelectedVertex(show bool) {

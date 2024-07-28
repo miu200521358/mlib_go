@@ -49,6 +49,53 @@ func NewVBOForVertex(ptr unsafe.Pointer, count int) *VBO {
 	return vbo
 }
 
+// Creates a new VBO with given faceDtype.
+func NewVBOForOverride(ptr unsafe.Pointer, count int) *VBO {
+	var vboId uint32
+	gl.GenBuffers(1, &vboId)
+
+	vbo := &VBO{
+		id:     vboId,
+		target: gl.ARRAY_BUFFER,
+		ptr:    ptr,
+	}
+	// 頂点構造体のサイズ(全部floatとする)
+	// position(3), texCoords(2)
+	vbo.StrideSize = 3 + 2
+	vbo.stride = int32(4 * vbo.StrideSize)
+	vbo.size = count * 4
+
+	return vbo
+}
+
+// Binds VBO for rendering.
+func (v *VBO) BindOverride() {
+	gl.BindBuffer(v.target, v.id)
+	gl.BufferData(v.target, v.size, v.ptr, gl.STATIC_DRAW)
+
+	// 0: position
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(
+		0,        // 属性のインデックス
+		3,        // 属性のサイズ
+		gl.FLOAT, // データの型
+		false,    // 正規化するかどうか
+		v.stride, // ストライド
+		0,        // オフセット（構造体内の位置）
+	)
+
+	// 1: texCoords
+	gl.EnableVertexAttribArray(1)
+	gl.VertexAttribPointerWithOffset(
+		1,
+		2,
+		gl.FLOAT,
+		false,
+		v.stride,
+		3*4,
+	)
+}
+
 // Binds VBO for rendering.
 func (v *VBO) BindVertex(vertexMorphIndexes []int, vertexMorphDeltas [][]float32) {
 	gl.BindBuffer(v.target, v.id)

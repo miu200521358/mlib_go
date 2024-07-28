@@ -61,7 +61,7 @@ func main() {
 
 	go func() {
 		// 操作ウィンドウは別スレッドで起動
-		controlWindow := controller.NewControlWindow(appConfig, controlState, getMenuItems)
+		controlWindow := controller.NewControlWindow(appConfig, controlState, getMenuItems, []string{"No.1", "No.2"})
 		mApp.SetControlWindow(controlWindow)
 
 		controlWindow.InitTabWidget()
@@ -76,8 +76,8 @@ func main() {
 		mApp.ControllerRun()
 	}()
 
-	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.1 ビューワー"))
-	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.2 ビューワー"))
+	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.1 ビューワー", nil))
+	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.2 ビューワー", mApp.MainViewWindow().GetWindow()))
 
 	mApp.ExtendAnimationState(0, 0)
 	mApp.ExtendAnimationState(0, 1)

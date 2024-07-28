@@ -245,10 +245,6 @@ func (animationState *AnimationState) DeformAfterPhysics(physics mbt.IPhysics, a
 	// 物理後のデフォーム情報
 	animationState.vmdDeltas = deform.DeformBoneByPhysicsFlag(animationState.model,
 		animationState.motion, animationState.vmdDeltas, true, int(appState.Frame()), nil, true)
-
-	// // 選択頂点モーフの設定は常に更新する
-	// SelectedVertexIndexesDeltas, SelectedVertexGlDeltas := animation.SelectedVertexMorphDeltasGL(
-	// 	SelectedVertexDeltas, model, selectedVertexIndexes, nextSelectedVertexIndexes)
 }
 
 func Deform(

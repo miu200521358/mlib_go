@@ -65,6 +65,7 @@ const (
 	PROGRAM_TYPE_FLOOR           ProgramType = iota
 	PROGRAM_TYPE_WIRE            ProgramType = iota
 	PROGRAM_TYPE_SELECTED_VERTEX ProgramType = iota
+	PROGRAM_TYPE_OVERRIDE        ProgramType = iota
 )
 
 var (
@@ -76,6 +77,7 @@ var (
 type IShader interface {
 	Program(programType ProgramType) uint32
 	BoneTextureId() uint32
+	OverrideTextureId() uint32
 	Resize(width, height int)
 }
 
@@ -99,6 +101,7 @@ type MShader struct {
 	floorProgram          uint32
 	wireProgram           uint32
 	selectedVertexProgram uint32
+	overrideProgram       uint32
 	boneTextureId         uint32
 	floor                 *MFloor
 }
@@ -208,6 +211,17 @@ func NewMShader(width, height int) *MShader {
 		}
 		gl.UseProgram(shader.selectedVertexProgram)
 		shader.initialize(shader.selectedVertexProgram)
+		gl.UseProgram(0)
+	}
+
+	{
+		shader.overrideProgram, err = shader.newProgram("glsl/override.vert", "glsl/override.frag")
+		if err != nil {
+			mlog.E("Failed to create selected override program: %v", err)
+			return nil
+		}
+		gl.UseProgram(shader.overrideProgram)
+		shader.initialize(shader.overrideProgram)
 		gl.UseProgram(0)
 	}
 
@@ -342,6 +356,10 @@ func (shader *MShader) BoneTextureId() uint32 {
 	return shader.boneTextureId
 }
 
+func (shader *MShader) OverrideTextureId() uint32 {
+	return shader.Msaa.OverrideTextureId()
+}
+
 func (shader *MShader) Resize(width int, height int) {
 	shader.Width = width
 	shader.Height = height
@@ -374,6 +392,8 @@ func (shader *MShader) Program(programType ProgramType) uint32 {
 		return shader.wireProgram
 	case PROGRAM_TYPE_SELECTED_VERTEX:
 		return shader.selectedVertexProgram
+	case PROGRAM_TYPE_OVERRIDE:
+		return shader.overrideProgram
 	}
 	return 0
 }
@@ -392,5 +412,6 @@ func (shader *MShader) Delete() {
 	shader.DeleteProgram(shader.floorProgram)
 	shader.DeleteProgram(shader.wireProgram)
 	shader.DeleteProgram(shader.selectedVertexProgram)
+	shader.DeleteProgram(shader.overrideProgram)
 	shader.Msaa.Delete()
 }
