@@ -133,19 +133,19 @@ func (animationState *AnimationState) SetSelectedVertexIndexes(indexes []int) {
 }
 
 func (animationState *AnimationState) ClearSelectedVertexIndexes() {
+	animationState.noSelectedVertexIndexes = animationState.selectedVertexIndexes
 	animationState.selectedVertexIndexes = make(map[int]struct{})
-	animationState.noSelectedVertexIndexes = make(map[int]struct{})
 }
 
 func (animationState *AnimationState) UpdateSelectedVertexIndexes(indexes []int) {
 	for _, index := range indexes {
-		// 現在の選択頂点リストに含まれている場合は、NoSelectedVertexIndexesに追加
-		if _, ok := animationState.selectedVertexIndexes[index]; ok {
-			animationState.noSelectedVertexIndexes[index] = struct{}{}
-			delete(animationState.selectedVertexIndexes, index)
-		} else {
-			animationState.selectedVertexIndexes[index] = struct{}{}
-		}
+		// // 現在の選択頂点リストに含まれている場合は、NoSelectedVertexIndexesに追加
+		// if _, ok := animationState.selectedVertexIndexes[index]; ok {
+		// 	animationState.noSelectedVertexIndexes[index] = struct{}{}
+		// 	delete(animationState.selectedVertexIndexes, index)
+		// } else {
+		animationState.selectedVertexIndexes[index] = struct{}{}
+		// }
 	}
 }
 
@@ -160,11 +160,10 @@ func (animationState *AnimationState) Load(model *pmx.PmxModel) {
 }
 
 func (animationState *AnimationState) Render(
-	shader mgl.IShader, appState state.IAppState, leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3,
+	shader mgl.IShader, appState state.IAppState, leftCursorPositions []*mgl32.Vec3,
 ) {
 	if animationState.renderModel != nil && animationState.model != nil {
-		animationState.renderModel.Render(shader, appState, animationState,
-			leftCursorStartPos, leftCursorEndPos)
+		animationState.renderModel.Render(shader, appState, animationState, leftCursorPositions)
 	}
 }
 

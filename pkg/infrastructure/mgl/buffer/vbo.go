@@ -50,6 +50,43 @@ func NewVBOForVertex(ptr unsafe.Pointer, count int) *VBO {
 }
 
 // Creates a new VBO with given faceDtype.
+func NewVBOForCursorPosition() *VBO {
+	var vboId uint32
+	gl.GenBuffers(1, &vboId)
+
+	vbo := &VBO{
+		id:     vboId,
+		target: gl.ARRAY_BUFFER,
+		ptr:    nil,
+	}
+	// 剛体構造体のサイズ(全部floatとする)
+	// position(3)
+	vbo.stride = int32(4 * 3)
+
+	return vbo
+}
+
+// Binds VBO for rendering.
+func (v *VBO) BindCursorPosition(cursorLines []float32) {
+	// cursorLinesの要素数 * float32のサイズ
+	v.size = len(cursorLines) * 4
+
+	gl.BindBuffer(v.target, v.id)
+	gl.BufferData(v.target, v.size, gl.Ptr(&cursorLines[0]), gl.STATIC_DRAW)
+
+	// 0: position
+	gl.EnableVertexAttribArray(0)
+	gl.VertexAttribPointerWithOffset(
+		0,
+		3,
+		gl.FLOAT,
+		false,
+		v.stride,
+		0*4,
+	)
+}
+
+// Creates a new VBO with given faceDtype.
 func NewVBOForOverride(ptr unsafe.Pointer, count int) *VBO {
 	var vboId uint32
 	gl.GenBuffers(1, &vboId)
@@ -376,7 +413,7 @@ func NewVBOForDebug() *VBO {
 		ptr:    nil,
 	}
 	// 剛体構造体のサイズ(全部floatとする)
-	// position(3)
+	// position(3), color(4)
 	vbo.stride = int32(4 * (3 + 4))
 
 	return vbo

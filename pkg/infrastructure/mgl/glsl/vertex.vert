@@ -8,8 +8,7 @@ uniform sampler2D boneMatrixTexture;
 uniform int boneMatrixWidth;
 uniform int boneMatrixHeight;
 
-uniform vec3 cursorStartPosition;
-uniform vec3 cursorEndPosition;
+uniform vec3 cursorPositions[50];
 
 in layout(location = 0) vec3 position;
 in layout(location = 1) vec3 normal;
@@ -207,30 +206,19 @@ mat4 inverse(mat4 m) {
         a20 * b03 - a21 * b01 + a22 * b00) / det;
 }
 
-// 左上端と右下端の座標から、その矩形内に点が含まれるか判定する
-bool isInBoundingBox(vec4 position) {
-    vec3 minPos = min(cursorStartPosition.xyz, cursorEndPosition.xyz) - 0.05;
-    vec3 maxPos = max(cursorStartPosition.xyz, cursorEndPosition.xyz) + 0.05;
-
-    return all(greaterThanEqual(position.xyz, minPos.xyz)) && all(lessThanEqual(position.xyz, maxPos.xyz));
-}
-
-float distanceToVector(vec3 point, vec3 start, vec3 end) {
-    vec3 v = end - start;
-    vec3 w = point - start;
-
-    // ベクトルの長さを計算
-    float c1 = dot(v, w);
-    float c2 = dot(v, v);
-    float b = c1 / c2;
-
-    // 垂直なベクトルのポイントを計算
-    vec3 pb = start + v * b;
-
-    // 点と垂直なベクトルのポイント間の距離を計算
-    vec3 d = point - pb;
-
-    return length(d);
+float distanceToVectors(vec3 point) {
+    float minDistance = 1000000.0;
+    for(int i = 0; i < 50; i++) {
+        vec3 cursorPosition = cursorPositions[i-1];
+        if (cursorPosition.x == 0 && cursorPosition.y == 0 && cursorPosition.z == 0) {
+            continue;
+        }
+        float pointDistance = distance(point, cursorPosition);
+        if(pointDistance < minDistance) {
+            minDistance = pointDistance;
+        }
+    }
+    return minDistance;
 }
 
 void main() {
@@ -290,9 +278,9 @@ void main() {
     }
 
     // カーソルの矩形範囲内にある場合のみ、頂点位置を格納する
-    float vecDistance = distanceToVector(vecGlobalPosition.xyz, cursorStartPosition.xyz, cursorEndPosition.xyz);
-    if (isInBoundingBox(vecGlobalPosition) && vecDistance < 0.1) {
-        vertexPositions[gl_VertexID] = vec4(vecGlobalPosition.xyz, vecDistance);
+    float nearestDistance = distanceToVectors(vecGlobalPosition.xyz);
+    if (nearestDistance < 0.1) {
+        vertexPositions[gl_VertexID] = vec4(vecGlobalPosition.xyz, nearestDistance);
     } else {
         vertexPositions[gl_VertexID] = vec4(-1);
     }

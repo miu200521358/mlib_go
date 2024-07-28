@@ -32,7 +32,7 @@ type IAnimationState interface {
 	DeformAfterPhysics(physics mbt.IPhysics, appState IAppState)
 	RenderModel() IRenderModel
 	SetRenderModel(model IRenderModel)
-	Render(shader mgl.IShader, appState IAppState, leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3)
+	Render(shader mgl.IShader, appState IAppState, leftCursorPositions []*mgl32.Vec3)
 	Load(model *pmx.PmxModel)
 	InvisibleMaterialIndexes() []int
 	SetInvisibleMaterialIndexes(indexes []int)
@@ -45,7 +45,6 @@ type IAnimationState interface {
 
 type IRenderModel interface {
 	Delete()
-	Render(shader mgl.IShader, appState IAppState, animationState IAnimationState,
-		leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3)
+	Render(shader mgl.IShader, appState IAppState, animationState IAnimationState, leftCursorPositions []*mgl32.Vec3)
 	Hash() string
 }

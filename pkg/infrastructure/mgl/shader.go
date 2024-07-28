@@ -42,8 +42,7 @@ const (
 	SHADER_ALPHA                      = "alpha\x00"
 	SHADER_EDGE_COLOR                 = "edgeColor\x00"
 	SHADER_EDGE_SIZE                  = "edgeSize\x00"
-	SHADER_CURSOR_START_POSITION      = "cursorStartPosition\x00"
-	SHADER_CURSOR_END_POSITION        = "cursorEndPosition\x00"
+	SHADER_CURSOR_POSITIONS           = "cursorPositions\x00"
 )
 
 const (
@@ -65,6 +64,7 @@ const (
 	PROGRAM_TYPE_WIRE            ProgramType = iota
 	PROGRAM_TYPE_SELECTED_VERTEX ProgramType = iota
 	PROGRAM_TYPE_OVERRIDE        ProgramType = iota
+	PROGRAM_TYPE_CURSOR_LINE     ProgramType = iota
 )
 
 var (
@@ -101,6 +101,7 @@ type MShader struct {
 	wireProgram           uint32
 	selectedVertexProgram uint32
 	overrideProgram       uint32
+	cursorProgram         uint32
 	boneTextureId         uint32
 	floor                 *MFloor
 }
@@ -221,6 +222,17 @@ func NewMShader(width, height int) *MShader {
 		}
 		gl.UseProgram(shader.overrideProgram)
 		shader.initialize(shader.overrideProgram)
+		gl.UseProgram(0)
+	}
+
+	{
+		shader.cursorProgram, err = shader.newProgram("glsl/cursor.vert", "glsl/cursor.frag")
+		if err != nil {
+			mlog.E("Failed to create selected cursor program: %v", err)
+			return nil
+		}
+		gl.UseProgram(shader.cursorProgram)
+		shader.initialize(shader.cursorProgram)
 		gl.UseProgram(0)
 	}
 
@@ -395,13 +407,16 @@ func (shader *MShader) Program(programType ProgramType) uint32 {
 		return shader.selectedVertexProgram
 	case PROGRAM_TYPE_OVERRIDE:
 		return shader.overrideProgram
+	case PROGRAM_TYPE_CURSOR_LINE:
+		return shader.cursorProgram
 	}
 	return 0
 }
 
 func (shader *MShader) Programs() []uint32 {
 	return []uint32{shader.modelProgram, shader.edgeProgram, shader.boneProgram, shader.physicsProgram,
-		shader.normalProgram, shader.floorProgram, shader.wireProgram, shader.selectedVertexProgram}
+		shader.normalProgram, shader.floorProgram, shader.wireProgram, shader.selectedVertexProgram,
+		shader.overrideProgram, shader.cursorProgram}
 }
 
 func (shader *MShader) Delete() {
@@ -414,5 +429,6 @@ func (shader *MShader) Delete() {
 	shader.DeleteProgram(shader.wireProgram)
 	shader.DeleteProgram(shader.selectedVertexProgram)
 	shader.DeleteProgram(shader.overrideProgram)
+	shader.DeleteProgram(shader.cursorProgram)
 	shader.Msaa.Delete()
 }

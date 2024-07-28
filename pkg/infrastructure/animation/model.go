@@ -41,6 +41,8 @@ type RenderModel struct {
 	bonePointVbo      *buffer.VBO  // ボーンVBO
 	bonePointIbo      *buffer.IBO  // ボーンIBO
 	bonePointIndexes  []int        // ボーンインデックス
+	cursorPositionVao *buffer.VAO  // カーソルラインVAO
+	cursorPositionVbo *buffer.VBO  // カーソルラインVBO
 	ssbo              uint32       // SSBO
 	vertexCount       int          // 頂点数
 }
@@ -280,6 +282,14 @@ func (renderModel *RenderModel) initializeBuffer(
 	renderModel.selectedVertexVbo.Unbind()
 	renderModel.selectedVertexVao.Unbind()
 
+	cursorPositions := []float32{0, 0, 0}
+	renderModel.cursorPositionVao = buffer.NewVAO()
+	renderModel.cursorPositionVao.Bind()
+	renderModel.cursorPositionVbo = buffer.NewVBOForCursorPosition()
+	renderModel.cursorPositionVbo.BindCursorPosition(cursorPositions)
+	renderModel.cursorPositionVbo.Unbind()
+	renderModel.cursorPositionVao.Unbind()
+
 	// SSBOの作成
 	var ssbo uint32
 	gl.GenBuffers(1, &ssbo)
@@ -292,7 +302,7 @@ func (renderModel *RenderModel) initializeBuffer(
 
 func (renderModel *RenderModel) Render(
 	shader mgl.IShader, appState state.IAppState, animationState state.IAnimationState,
-	leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3,
+	leftCursorPositions []*mgl32.Vec3,
 ) {
 	deltas := animationState.VmdDeltas()
 
@@ -344,11 +354,30 @@ func (renderModel *RenderModel) Render(
 	}
 
 	if appState.IsShowSelectedVertex() {
+		var cursorPositions []float32
+
+		if len(leftCursorPositions) > 0 {
+			cursorPositions = make([]float32, len(leftCursorPositions)*3)
+			for i, pos := range leftCursorPositions {
+				cursorPositions[i*3] = pos[0]
+				cursorPositions[i*3+1] = pos[1]
+				cursorPositions[i*3+2] = pos[2]
+			}
+		}
+		for i := len(leftCursorPositions); i < 50; i++ {
+			// 固定で50個までのカーソル位置を確保
+			cursorPositions = append(cursorPositions, 0, 0, 0)
+		}
+
+		if len(leftCursorPositions) > 1 {
+			renderModel.drawCursorLine(shader, cursorPositions)
+		}
+
 		selectedVertexIndexes := renderModel.drawSelectedVertex(
 			animationState.WindowIndex(),
 			animationState.SelectedVertexIndexes(), animationState.NoSelectedVertexIndexes(),
-			shader, paddedMatrixes, matrixWidth, matrixHeight, leftCursorStartPos, leftCursorEndPos)
-		if leftCursorStartPos != nil && leftCursorEndPos != nil {
+			shader, paddedMatrixes, matrixWidth, matrixHeight, cursorPositions)
+		if len(leftCursorPositions) > 0 {
 			animationState.UpdateSelectedVertexIndexes(selectedVertexIndexes)
 		}
 	}
@@ -390,13 +419,44 @@ func (renderModel *RenderModel) drawNormal(
 	gl.UseProgram(0)
 }
 
+func (renderModel *RenderModel) drawCursorLine(
+	shader mgl.IShader, cursorPositions []float32,
+) {
+	// モデルメッシュの前面に描画するために深度テストを無効化
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.ALWAYS)
+
+	program := shader.Program(mgl.PROGRAM_TYPE_CURSOR_LINE)
+	gl.UseProgram(program)
+
+	vertexColor := mgl32.Vec4{1.0, 0.85, 0.46, 0.4}
+	colorUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
+	gl.Uniform4fv(colorUniform, 1, &vertexColor[0])
+	gl.PointSize(10.0) // ラインのサイズ
+
+	renderModel.cursorPositionVao.Bind()
+	renderModel.cursorPositionVbo.BindCursorPosition(cursorPositions)
+
+	// ライン描画
+	gl.DrawArrays(gl.LINES, 0, 2)
+
+	renderModel.cursorPositionVbo.Unbind()
+	renderModel.cursorPositionVao.Unbind()
+
+	gl.UseProgram(0)
+
+	// 深度テストを有効に戻す
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
+}
+
 func (renderModel *RenderModel) drawSelectedVertex(
 	windowIndex int,
 	nowSelectedVertexIndexes []int,
 	nowNoSelectedVertexIndexes []int,
 	shader mgl.IShader,
 	paddedMatrixes []float32, width, height int,
-	leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3,
+	cursorPositions []float32,
 ) []int {
 	// モデルメッシュの前面に描画するために深度テストを無効化
 	gl.Enable(gl.DEPTH_TEST)
@@ -434,22 +494,13 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
 	defer unbindBoneMatrixes()
 
-	// カーソルの始点位置
-	if leftCursorStartPos != nil {
-		cursorStartPositionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_CURSOR_START_POSITION))
-		gl.Uniform3f(cursorStartPositionUniform, leftCursorStartPos[0], leftCursorStartPos[1], leftCursorStartPos[2])
-	}
-
-	// カーソルの終点位置
-	if leftCursorEndPos != nil {
-		cursorEndPositionUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_CURSOR_END_POSITION))
-		gl.Uniform3f(cursorEndPositionUniform, leftCursorEndPos[0], leftCursorEndPos[1], leftCursorEndPos[2])
-	}
-
 	vertexColor := mgl32.Vec4{1.0, 0.4, 0.0, 0.7}
-	specularUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
-	gl.Uniform4fv(specularUniform, 1, &vertexColor[0])
+	colorUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
+	gl.Uniform4fv(colorUniform, 1, &vertexColor[0])
 	gl.PointSize(5.0) // 選択頂点のサイズ
+
+	cursorPositionsUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_CURSOR_POSITIONS))
+	gl.Uniform3fv(cursorPositionsUniform, int32(len(cursorPositions)), &cursorPositions[0])
 
 	// 点描画
 	gl.DrawElements(
@@ -495,13 +546,16 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
 
-	if leftCursorStartPos != nil && leftCursorEndPos != nil &&
-		leftCursorStartPos[0] != 0 && leftCursorStartPos[1] != 0 && leftCursorStartPos[2] != 0 &&
-		leftCursorStartPos[0] != leftCursorEndPos[0] && leftCursorStartPos[1] != leftCursorEndPos[1] &&
-		leftCursorStartPos[2] != leftCursorEndPos[2] {
-		mlog.IL("leftCursorStartPos: %v, leftCursorEndPos: %v", leftCursorStartPos, leftCursorEndPos)
+	if cursorPositions[0] != 0 {
+		mlog.L()
+		for i := 0; i < 50; i += 3 {
+			mlog.I("CURSOR index: %d, position: %v", i/3, cursorPositions[i:i+3])
+			if cursorPositions[i] == 0 {
+				break
+			}
+		}
 		for i, position := range selectedVertexPositions {
-			mlog.I("index: %d, position: %v", i, position)
+			mlog.I("VERTEX index: %d, position: %v", i, position)
 		}
 	}
 
