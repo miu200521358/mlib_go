@@ -146,6 +146,7 @@ func (animationState *AnimationState) UpdateSelectedVertexIndexes(indexes []int)
 func (animationState *AnimationState) UpdateNoSelectedVertexIndexes(indexes []int) {
 	for _, index := range indexes {
 		animationState.noSelectedVertexIndexes[index] = struct{}{}
+		delete(animationState.selectedVertexIndexes, index)
 	}
 }
 
@@ -160,13 +161,14 @@ func (animationState *AnimationState) Load(model *pmx.PmxModel) {
 }
 
 func (animationState *AnimationState) Render(
-	shader mgl.IShader, appState state.IAppState, leftCursorPositions []*mgl32.Vec3,
+	shader mgl.IShader, appState state.IAppState, leftCursorPositions, leftCursorRemovePositions []*mgl32.Vec3,
 ) {
 	if !appState.IsShowSelectedVertex() {
 		animationState.ClearSelectedVertexIndexes()
 	}
 	if animationState.renderModel != nil && animationState.model != nil {
-		animationState.renderModel.Render(shader, appState, animationState, leftCursorPositions)
+		animationState.renderModel.Render(shader, appState, animationState,
+			leftCursorPositions, leftCursorRemovePositions)
 	}
 }
 

@@ -302,7 +302,7 @@ func (renderModel *RenderModel) initializeBuffer(
 
 func (renderModel *RenderModel) Render(
 	shader mgl.IShader, appState state.IAppState, animationState state.IAnimationState,
-	leftCursorPositions []*mgl32.Vec3,
+	leftCursorPositions, leftCursorRemovePositions []*mgl32.Vec3,
 ) {
 	deltas := animationState.VmdDeltas()
 
@@ -355,6 +355,7 @@ func (renderModel *RenderModel) Render(
 
 	if appState.IsShowSelectedVertex() {
 		var cursorPositions []float32
+		var removeCursorPositions []float32
 
 		if len(leftCursorPositions) > 0 {
 			cursorPositions = make([]float32, len(leftCursorPositions)*3)
@@ -365,8 +366,20 @@ func (renderModel *RenderModel) Render(
 			}
 		}
 
+		if len(leftCursorRemovePositions) > 0 {
+			removeCursorPositions = make([]float32, len(leftCursorRemovePositions)*3)
+			for i, pos := range leftCursorRemovePositions {
+				removeCursorPositions[i*3] = pos[0]
+				removeCursorPositions[i*3+1] = pos[1]
+				removeCursorPositions[i*3+2] = pos[2]
+			}
+		}
+
 		if len(leftCursorPositions) > 1 {
-			renderModel.drawCursorLine(shader, cursorPositions)
+			renderModel.drawCursorLine(shader, cursorPositions, mgl32.Vec4{1, 0, 0, 1})
+		}
+		if len(leftCursorRemovePositions) > 1 {
+			renderModel.drawCursorLine(shader, removeCursorPositions, mgl32.Vec4{0, 0, 1, 1})
 		}
 
 		for i := len(leftCursorPositions); i < 100; i++ {
@@ -374,11 +387,20 @@ func (renderModel *RenderModel) Render(
 			cursorPositions = append(cursorPositions, 0, 0, 0)
 		}
 
+		if len(leftCursorRemovePositions) > 0 {
+			for i := len(leftCursorRemovePositions); i < 100; i++ {
+				// 追加固定で100個までのカーソル位置を確保
+				removeCursorPositions = append(removeCursorPositions, 0, 0, 0)
+			}
+		}
+
 		selectedVertexIndexes := renderModel.drawSelectedVertex(
 			animationState.WindowIndex(),
 			animationState.SelectedVertexIndexes(), animationState.NoSelectedVertexIndexes(),
-			shader, paddedMatrixes, matrixWidth, matrixHeight, cursorPositions)
-		if len(leftCursorPositions) > 0 {
+			shader, paddedMatrixes, matrixWidth, matrixHeight, cursorPositions, removeCursorPositions)
+		if len(removeCursorPositions) > 0 {
+			animationState.UpdateNoSelectedVertexIndexes(selectedVertexIndexes)
+		} else if len(leftCursorPositions) > 0 {
 			animationState.UpdateSelectedVertexIndexes(selectedVertexIndexes)
 		}
 	}
@@ -421,7 +443,7 @@ func (renderModel *RenderModel) drawNormal(
 }
 
 func (renderModel *RenderModel) drawCursorLine(
-	shader mgl.IShader, cursorPositions []float32,
+	shader mgl.IShader, cursorPositions []float32, vertexColor mgl32.Vec4,
 ) {
 	// モデルメッシュの前面に描画するために深度テストを無効化
 	gl.Enable(gl.DEPTH_TEST)
@@ -430,7 +452,6 @@ func (renderModel *RenderModel) drawCursorLine(
 	program := shader.Program(mgl.PROGRAM_TYPE_CURSOR)
 	gl.UseProgram(program)
 
-	vertexColor := mgl32.Vec4{1.0, 0, 0, 1.0}
 	colorUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_COLOR))
 	gl.Uniform4fv(colorUniform, 1, &vertexColor[0])
 
@@ -457,6 +478,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	shader mgl.IShader,
 	paddedMatrixes []float32, width, height int,
 	cursorPositions []float32,
+	removeCursorPositions []float32,
 ) []int {
 	// モデルメッシュの前面に描画するために深度テストを無効化
 	gl.Enable(gl.DEPTH_TEST)
@@ -500,7 +522,11 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	gl.PointSize(5.0) // 選択頂点のサイズ
 
 	cursorPositionsUniform := gl.GetUniformLocation(program, gl.Str(mgl.SHADER_CURSOR_POSITIONS))
-	gl.Uniform3fv(cursorPositionsUniform, int32(len(cursorPositions)), &cursorPositions[0])
+	if removeCursorPositions != nil {
+		gl.Uniform3fv(cursorPositionsUniform, int32(len(removeCursorPositions)), &removeCursorPositions[0])
+	} else {
+		gl.Uniform3fv(cursorPositionsUniform, int32(len(cursorPositions)), &cursorPositions[0])
+	}
 
 	// 点描画
 	gl.DrawElements(

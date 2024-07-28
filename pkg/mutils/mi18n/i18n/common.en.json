@@ -365,7 +365,7 @@
     },
     {
         "id": "頂点ライン選択使い方メッセージ",
-        "translation": "With Vertex Line Selection ON, you can select vertices by moving the cursor over them while holding down the left mouse button. Selected vertices are displayed in orange. Selecting the same vertex again will deselect it."
+        "translation": "With the vertex line selection turned ON, you can select vertices by moving the cursor over them while holding down the left mouse button. Selected vertices are displayed in orange. The cursor's path is displayed in red. You can deselect vertices by tracing over them again with the left mouse button while holding down the Ctrl key."
     },
     {
         "id": "ミップマップ生成エラー",
