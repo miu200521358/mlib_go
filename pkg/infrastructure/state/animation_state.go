@@ -39,6 +39,7 @@ type IAnimationState interface {
 	SelectedVertexIndexes() []int
 	SetSelectedVertexIndexes(indexes []int)
 	NoSelectedVertexIndexes() []int
+	ClearSelectedVertexIndexes()
 	UpdateSelectedVertexIndexes(indexes []int)
 }
 

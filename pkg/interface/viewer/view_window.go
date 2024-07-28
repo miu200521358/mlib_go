@@ -149,7 +149,7 @@ func (viewWindow *ViewWindow) updateDepthByCursor(xpos, ypos float64) {
 	// カーソル位置の深度を取得
 	depth := viewWindow.shader.Msaa.ReadDepthAt(int(xpos), int(ypos))
 	mlog.I("depth: %.3f", depth)
-	if depth >= viewWindow.leftCursorMaxDepth && depth < 1.0 && depth > 0.0 {
+	if depth < 1.0 && depth > 0.0 {
 		// 深度が最大値より大きい場合は更新
 		viewWindow.leftCursorMaxDepth = depth
 	}
@@ -164,12 +164,12 @@ func (viewWindow *ViewWindow) updateCameraAngleByCursor(xpos, ypos float64) {
 	}
 
 	// 右クリックはカメラ中心をそのままにカメラ位置を変える
-	xOffset := (viewWindow.prevCursorPos.X - xpos) * ratio
-	yOffset := (viewWindow.prevCursorPos.Y - ypos) * ratio
+	xOffset := (xpos - viewWindow.prevCursorPos.X) * ratio
+	yOffset := (ypos - viewWindow.prevCursorPos.Y) * ratio
 
 	// 方位角と仰角を更新
-	viewWindow.yaw -= xOffset
-	viewWindow.pitch -= yOffset
+	viewWindow.yaw += xOffset
+	viewWindow.pitch += yOffset
 
 	viewWindow.updateCameraAngle()
 }
@@ -184,8 +184,6 @@ func (viewWindow *ViewWindow) updateCameraAngle() {
 	orientation := mmath.NewMQuaternionFromAxisAngles(mmath.MVec3UnitY, yawRad).Mul(
 		mmath.NewMQuaternionFromAxisAngles(mmath.MVec3UnitX, pitchRad))
 	forwardXYZ := orientation.Rotate(mmath.MVec3UnitZInv).MulScalar(radius)
-
-	mlog.I("yaw: %.3f, pitch: %.3f, forward: %s", viewWindow.yaw, viewWindow.pitch, forwardXYZ.String())
 
 	// カメラ位置を更新
 	viewWindow.shader.CameraPosition.X = forwardXYZ.X
@@ -249,7 +247,7 @@ func (viewWindow *ViewWindow) mouseCallback(
 			if viewWindow.appState.IsShowSelectedVertex() {
 				for range 20 {
 					viewWindow.updateDepthByCursor(viewWindow.leftCursorRect.Max.X, viewWindow.leftCursorRect.Max.Y)
-					if viewWindow.leftCursorMaxDepth > 0.0 {
+					if viewWindow.leftCursorMaxDepth > 0.0 && viewWindow.leftCursorMaxDepth < 1.0 {
 						break
 					}
 				}
@@ -284,11 +282,8 @@ func (viewWindow *ViewWindow) getWorldPosition(mouseX, mouseY, depth float32) *m
 
 	projectionMatrix, _, viewMatrix := viewWindow.getCameraParameter()
 
-	invProj := projectionMatrix.Inv()
-	invView := viewMatrix.Inv()
-
 	// 視点座標系に変換
-	viewCoords := invProj.Mul4x1(clipCoords)
+	viewCoords := projectionMatrix.Inv().Mul4x1(clipCoords)
 	var viewCoordPos mgl32.Vec4
 	if viewCoords.W() == 0.0 {
 		viewCoordPos = mgl32.Vec4{viewCoords.X(), viewCoords.Y(), viewCoords.Z(), 1.0}
@@ -298,7 +293,7 @@ func (viewWindow *ViewWindow) getWorldPosition(mouseX, mouseY, depth float32) *m
 	}
 
 	// ワールド座標系に変換
-	worldCoords := invView.Mul4x1(viewCoordPos)
+	worldCoords := viewMatrix.Inv().Mul4x1(viewCoordPos)
 	var globalPos *mgl32.Vec3
 	if worldCoords.W() == 0.0 {
 		globalPos = &mgl32.Vec3{worldCoords.X(), worldCoords.Y(), worldCoords.Z()}
@@ -306,6 +301,7 @@ func (viewWindow *ViewWindow) getWorldPosition(mouseX, mouseY, depth float32) *m
 		globalPos = &mgl32.Vec3{worldCoords.X() / worldCoords.W(),
 			worldCoords.Y() / worldCoords.W(), worldCoords.Z() / worldCoords.W()}
 	}
+
 	return globalPos
 }
 
@@ -372,7 +368,7 @@ func (viewWindow *ViewWindow) resetView() {
 	// カメラとかリセット
 	viewWindow.shader.Reset()
 	viewWindow.prevCursorPos = mmath.NewMVec2()
-	viewWindow.yaw = rightAngle
+	viewWindow.yaw = 0.0
 	viewWindow.pitch = 0.0
 	viewWindow.leftButtonPressed = false
 	viewWindow.middleButtonPressed = false
@@ -382,7 +378,7 @@ func (viewWindow *ViewWindow) resetView() {
 func (viewWindow *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64) {
 	ratio := float32(1.0)
 	if viewWindow.shiftPressed {
-		ratio *= 10
+		ratio *= 5
 	} else if viewWindow.ctrlPressed {
 		ratio *= 0.1
 	}
@@ -537,10 +533,6 @@ func (viewWindow *ViewWindow) Animate(
 		// モデル描画
 		for _, animationState := range animationStates {
 			if animationState != nil {
-				if viewWindow.leftButtonPressed {
-					// 左クリッククリア時には一旦過去の頂点選択状態をクリア
-					animationState.SetSelectedVertexIndexes(make([]int, 0))
-				}
 				animationState.Render(viewWindow.shader, viewWindow.appState,
 					viewWindow.leftCursorStartPos, viewWindow.leftCursorEndPos)
 			}
@@ -550,6 +542,9 @@ func (viewWindow *ViewWindow) Animate(
 		viewWindow.physics.DrawDebugLines(viewWindow.shader,
 			viewWindow.appState.IsShowRigidBodyFront() || viewWindow.appState.IsShowRigidBodyBack(),
 			viewWindow.appState.IsShowJoint(), viewWindow.appState.IsShowRigidBodyFront())
+
+		viewWindow.leftCursorStartPos = nil
+		viewWindow.leftCursorEndPos = nil
 	}
 
 	// 深度解決

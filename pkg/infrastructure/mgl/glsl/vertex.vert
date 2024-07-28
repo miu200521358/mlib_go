@@ -209,10 +209,28 @@ mat4 inverse(mat4 m) {
 
 // 左上端と右下端の座標から、その矩形内に点が含まれるか判定する
 bool isInBoundingBox(vec4 position) {
-    vec3 minPos = min(cursorStartPosition.xyz, cursorEndPosition.xyz) - 0.3;
-    vec3 maxPos = max(cursorStartPosition.xyz, cursorEndPosition.xyz) + 0.3;
+    vec3 minPos = min(cursorStartPosition.xyz, cursorEndPosition.xyz) - 0.05;
+    vec3 maxPos = max(cursorStartPosition.xyz, cursorEndPosition.xyz) + 0.05;
 
     return all(greaterThanEqual(position.xyz, minPos.xyz)) && all(lessThanEqual(position.xyz, maxPos.xyz));
+}
+
+float distanceToVector(vec3 point, vec3 start, vec3 end) {
+    vec3 v = end - start;
+    vec3 w = point - start;
+
+    // ベクトルの長さを計算
+    float c1 = dot(v, w);
+    float c2 = dot(v, v);
+    float b = c1 / c2;
+
+    // 垂直なベクトルのポイントを計算
+    vec3 pb = start + v * b;
+
+    // 点と垂直なベクトルのポイント間の距離を計算
+    vec3 d = point - pb;
+
+    return length(d);
 }
 
 void main() {
@@ -272,8 +290,9 @@ void main() {
     }
 
     // カーソルの矩形範囲内にある場合のみ、頂点位置を格納する
-    if (isInBoundingBox(vecGlobalPosition)) {
-        vertexPositions[gl_VertexID] = vecGlobalPosition;
+    float vecDistance = distanceToVector(vecGlobalPosition.xyz, cursorStartPosition.xyz, cursorEndPosition.xyz);
+    if (isInBoundingBox(vecGlobalPosition) && vecDistance < 0.1) {
+        vertexPositions[gl_VertexID] = vec4(vecGlobalPosition.xyz, vecDistance);
     } else {
         vertexPositions[gl_VertexID] = vec4(-1);
     }

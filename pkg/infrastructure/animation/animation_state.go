@@ -23,9 +23,9 @@ type AnimationState struct {
 	renderModel              *RenderModel        // 描画モデル
 	model                    *pmx.PmxModel       // モデル
 	motion                   *vmd.VmdMotion      // モーション
-	invisibleMaterialIndexes []int               // 非表示材質インデックス
-	selectedVertexIndexes    []int               // 選択頂点インデックス
-	noSelectedVertexIndexes  []int               // 非選択頂点インデックス
+	invisibleMaterialIndexes map[int]struct{}    // 非表示材質インデックス
+	selectedVertexIndexes    map[int]struct{}    // 選択頂点インデックス
+	noSelectedVertexIndexes  map[int]struct{}    // 非選択頂点インデックス
 	vmdDeltas                *delta.VmdDeltas    // モーション変化量
 	renderDeltas             *delta.RenderDeltas // 描画変化量
 }
@@ -95,27 +95,58 @@ func (animationState *AnimationState) SetRenderDeltas(deltas *delta.RenderDeltas
 }
 
 func (animationState *AnimationState) InvisibleMaterialIndexes() []int {
-	return animationState.invisibleMaterialIndexes
+	indexes := make([]int, 0, len(animationState.invisibleMaterialIndexes))
+	for i := range animationState.invisibleMaterialIndexes {
+		indexes = append(indexes, i)
+	}
+	return indexes
 }
 
 func (animationState *AnimationState) SetInvisibleMaterialIndexes(indexes []int) {
-	animationState.invisibleMaterialIndexes = indexes
+	animationState.invisibleMaterialIndexes = make(map[int]struct{}, len(indexes))
+	for _, i := range indexes {
+		animationState.invisibleMaterialIndexes[i] = struct{}{}
+	}
 }
 
 func (animationState *AnimationState) SelectedVertexIndexes() []int {
-	return animationState.selectedVertexIndexes
+	indexes := make([]int, 0, len(animationState.selectedVertexIndexes))
+	for i := range animationState.selectedVertexIndexes {
+		indexes = append(indexes, i)
+	}
+	return indexes
 }
 
 func (animationState *AnimationState) NoSelectedVertexIndexes() []int {
-	return animationState.noSelectedVertexIndexes
+	indexes := make([]int, 0, len(animationState.noSelectedVertexIndexes))
+	for i := range animationState.noSelectedVertexIndexes {
+		indexes = append(indexes, i)
+	}
+	return indexes
 }
 
 func (animationState *AnimationState) SetSelectedVertexIndexes(indexes []int) {
-	animationState.selectedVertexIndexes = indexes
+	animationState.selectedVertexIndexes = make(map[int]struct{}, len(indexes))
+	for _, i := range indexes {
+		animationState.selectedVertexIndexes[i] = struct{}{}
+	}
+}
+
+func (animationState *AnimationState) ClearSelectedVertexIndexes() {
+	animationState.selectedVertexIndexes = make(map[int]struct{})
+	animationState.noSelectedVertexIndexes = make(map[int]struct{})
 }
 
 func (animationState *AnimationState) UpdateSelectedVertexIndexes(indexes []int) {
-	animationState.selectedVertexIndexes = indexes
+	for _, index := range indexes {
+		// 現在の選択頂点リストに含まれている場合は、NoSelectedVertexIndexesに追加
+		if _, ok := animationState.selectedVertexIndexes[index]; ok {
+			animationState.noSelectedVertexIndexes[index] = struct{}{}
+			delete(animationState.selectedVertexIndexes, index)
+		} else {
+			animationState.selectedVertexIndexes[index] = struct{}{}
+		}
+	}
 }
 
 func (animationState *AnimationState) Load(model *pmx.PmxModel) {
@@ -132,7 +163,8 @@ func (animationState *AnimationState) Render(
 	shader mgl.IShader, appState state.IAppState, leftCursorStartPos *mgl32.Vec3, leftCursorEndPos *mgl32.Vec3,
 ) {
 	if animationState.renderModel != nil && animationState.model != nil {
-		animationState.renderModel.Render(shader, appState, animationState, leftCursorStartPos, leftCursorEndPos)
+		animationState.renderModel.Render(shader, appState, animationState,
+			leftCursorStartPos, leftCursorEndPos)
 	}
 }
 
@@ -141,9 +173,9 @@ func NewAnimationState(windowIndex, modelIndex int) *AnimationState {
 		windowIndex:              windowIndex,
 		modelIndex:               modelIndex,
 		frame:                    -1,
-		invisibleMaterialIndexes: make([]int, 0),
-		selectedVertexIndexes:    make([]int, 0),
-		noSelectedVertexIndexes:  make([]int, 0),
+		invisibleMaterialIndexes: make(map[int]struct{}),
+		selectedVertexIndexes:    make(map[int]struct{}),
+		noSelectedVertexIndexes:  make(map[int]struct{}),
 		renderDeltas:             delta.NewRenderDeltas(),
 	}
 }

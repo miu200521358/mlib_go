@@ -112,6 +112,12 @@ func (app *MApp) ViewerRun() {
 
 		for i, w := range app.viewWindows {
 			// アニメーション
+			if !app.IsShowSelectedVertex() {
+				for j := range app.animationStates[i] {
+					app.animationStates[i][j].UpdateSelectedVertexIndexes(
+						app.animationStates[i][j].SelectedVertexIndexes())
+				}
+			}
 			app.animationStates[i], app.nextAnimationStates[i] =
 				w.Animate(app.animationStates[i], app.nextAnimationStates[i], timeStep)
 		}
