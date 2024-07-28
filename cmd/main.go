@@ -61,7 +61,7 @@ func main() {
 
 	go func() {
 		// 操作ウィンドウは別スレッドで起動
-		controlWindow := controller.NewControlWindow(appConfig, controlState, getMenuItems, []string{"No.1", "No.2"})
+		controlWindow := controller.NewControlWindow(appConfig, controlState, getMenuItems, 2)
 		mApp.SetControlWindow(controlWindow)
 
 		controlWindow.InitTabWidget()

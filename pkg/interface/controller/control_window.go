@@ -20,52 +20,48 @@ import (
 
 type ControlWindow struct {
 	*walk.MainWindow
-	*controlState                                   // 操作状態
-	tabWidget                *widget.MTabWidget     // タブウィジェット
-	appConfig                *mconfig.AppConfig     // アプリケーション設定
-	spfLimit                 float64                // FPS制限
-	enabledFrameDropAction   *walk.Action           // フレームドロップON/OFF
-	enabledPhysicsAction     *walk.Action           // 物理ON/OFF
-	physicsResetAction       *walk.Action           // 物理リセット
-	showNormalAction         *walk.Action           // ボーンデバッグ表示
-	showWireAction           *walk.Action           // ワイヤーフレームデバッグ表示
-	showOverrideAction       *walk.Action           // オーバーライドデバッグ表示
-	showSelectedVertexAction *walk.Action           // 選択頂点デバッグ表示
-	showBoneAllAction        *walk.Action           // 全ボーンデバッグ表示
-	showBoneIkAction         *walk.Action           // IKボーンデバッグ表示
-	showBoneEffectorAction   *walk.Action           // 付与親ボーンデバッグ表示
-	showBoneFixedAction      *walk.Action           // 軸制限ボーンデバッグ表示
-	showBoneRotateAction     *walk.Action           // 回転ボーンデバッグ表示
-	showBoneTranslateAction  *walk.Action           // 移動ボーンデバッグ表示
-	showBoneVisibleAction    *walk.Action           // 表示ボーンデバッグ表示
-	showRigidBodyFrontAction *walk.Action           // 剛体デバッグ表示(前面)
-	showRigidBodyBackAction  *walk.Action           // 剛体デバッグ表示(埋め込み)
-	showJointAction          *walk.Action           // ジョイントデバッグ表示
-	showInfoAction           *walk.Action           // 情報デバッグ表示
-	limitFps30Action         *walk.Action           // 30FPS制限
-	limitFps60Action         *walk.Action           // 60FPS制限
-	limitFpsUnLimitAction    *walk.Action           // FPS無制限
-	logLevelDebugAction      *walk.Action           // デバッグメッセージ表示
-	logLevelVerboseAction    *walk.Action           // 冗長メッセージ表示
-	logLevelIkVerboseAction  *walk.Action           // IK冗長メッセージ表示
-	windowOverrideActions    []*walk.Action         // ウィンドウ半透明
-	windowOverrideMenuItems  []declarative.MenuItem // ウィンドウ半透明メニュー
+	*controlState                               // 操作状態
+	tabWidget                *widget.MTabWidget // タブウィジェット
+	appConfig                *mconfig.AppConfig // アプリケーション設定
+	spfLimit                 float64            // FPS制限
+	enabledFrameDropAction   *walk.Action       // フレームドロップON/OFF
+	enabledPhysicsAction     *walk.Action       // 物理ON/OFF
+	physicsResetAction       *walk.Action       // 物理リセット
+	showNormalAction         *walk.Action       // ボーンデバッグ表示
+	showWireAction           *walk.Action       // ワイヤーフレームデバッグ表示
+	showOverrideAction       *walk.Action       // オーバーライドデバッグ表示
+	showSelectedVertexAction *walk.Action       // 選択頂点デバッグ表示
+	showBoneAllAction        *walk.Action       // 全ボーンデバッグ表示
+	showBoneIkAction         *walk.Action       // IKボーンデバッグ表示
+	showBoneEffectorAction   *walk.Action       // 付与親ボーンデバッグ表示
+	showBoneFixedAction      *walk.Action       // 軸制限ボーンデバッグ表示
+	showBoneRotateAction     *walk.Action       // 回転ボーンデバッグ表示
+	showBoneTranslateAction  *walk.Action       // 移動ボーンデバッグ表示
+	showBoneVisibleAction    *walk.Action       // 表示ボーンデバッグ表示
+	showRigidBodyFrontAction *walk.Action       // 剛体デバッグ表示(前面)
+	showRigidBodyBackAction  *walk.Action       // 剛体デバッグ表示(埋め込み)
+	showJointAction          *walk.Action       // ジョイントデバッグ表示
+	showInfoAction           *walk.Action       // 情報デバッグ表示
+	limitFps30Action         *walk.Action       // 30FPS制限
+	limitFps60Action         *walk.Action       // 60FPS制限
+	limitFpsUnLimitAction    *walk.Action       // FPS無制限
+	logLevelDebugAction      *walk.Action       // デバッグメッセージ表示
+	logLevelVerboseAction    *walk.Action       // 冗長メッセージ表示
+	logLevelIkVerboseAction  *walk.Action       // IK冗長メッセージ表示
 }
 
 func NewControlWindow(
 	appConfig *mconfig.AppConfig,
 	controlState *controlState,
 	helpMenuItemsFunc func() []declarative.MenuItem,
-	viewWindowTitles []string,
+	viewerCount int,
 ) *ControlWindow {
 	controlWindow := &ControlWindow{
-		controlState:            controlState,
-		appConfig:               appConfig,
-		spfLimit:                1 / 30.0,
-		windowOverrideMenuItems: []declarative.MenuItem{},
+		controlState: controlState,
+		appConfig:    appConfig,
+		spfLimit:     1 / 30.0,
 	}
 	controlState.SetControlWindow(controlWindow)
-	controlWindow.addOverrideActions(viewWindowTitles)
 
 	logMenuItems := []declarative.MenuItem{
 		declarative.Action{
@@ -103,27 +99,6 @@ func NewControlWindow(
 			})
 	}
 
-	fpsLImitMenuItems := []declarative.MenuItem{
-		declarative.Action{
-			Text:        mi18n.T("&30fps制限"),
-			Checkable:   true,
-			OnTriggered: controlWindow.onTriggerFps30Limit,
-			AssignTo:    &controlWindow.limitFps30Action,
-		},
-		declarative.Action{
-			Text:        mi18n.T("&60fps制限"),
-			Checkable:   true,
-			OnTriggered: controlWindow.onTriggerFps60Limit,
-			AssignTo:    &controlWindow.limitFps60Action,
-		},
-		declarative.Action{
-			Text:        mi18n.T("&fps無制限"),
-			Checkable:   true,
-			OnTriggered: controlWindow.onTriggerUnLimitFps,
-			AssignTo:    &controlWindow.limitFpsUnLimitAction,
-		},
-	}
-
 	if err := (declarative.MainWindow{
 		AssignTo: &controlWindow.MainWindow,
 		Title:    fmt.Sprintf("%s %s", appConfig.Name, appConfig.Version),
@@ -140,8 +115,27 @@ func NewControlWindow(
 						AssignTo:    &controlWindow.enabledFrameDropAction,
 					},
 					declarative.Menu{
-						Text:  mi18n.T("&fps制限"),
-						Items: fpsLImitMenuItems,
+						Text: mi18n.T("&fps制限"),
+						Items: []declarative.MenuItem{
+							declarative.Action{
+								Text:        mi18n.T("&30fps制限"),
+								Checkable:   true,
+								OnTriggered: controlWindow.onTriggerFps30Limit,
+								AssignTo:    &controlWindow.limitFps30Action,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&60fps制限"),
+								Checkable:   true,
+								OnTriggered: controlWindow.onTriggerFps60Limit,
+								AssignTo:    &controlWindow.limitFps60Action,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&fps無制限"),
+								Checkable:   true,
+								OnTriggered: controlWindow.onTriggerUnLimitFps,
+								AssignTo:    &controlWindow.limitFpsUnLimitAction,
+							},
+						},
 					},
 					declarative.Action{
 						Text:        mi18n.T("&情報表示"),
@@ -174,10 +168,6 @@ func NewControlWindow(
 						OnTriggered: controlWindow.onTriggerShowWire,
 						AssignTo:    &controlWindow.showWireAction,
 					},
-					declarative.Menu{
-						Text:  mi18n.T("&ウィンドウ透過描画"),
-						Items: controlWindow.windowOverrideMenuItems,
-					},
 					declarative.Separator{},
 					declarative.Action{
 						Text:        mi18n.T("&頂点ライン選択"),
@@ -192,6 +182,12 @@ func NewControlWindow(
 						},
 					},
 					declarative.Separator{},
+					declarative.Action{
+						Text:        mi18n.T("&サブビューワーオーバーレイ"),
+						Checkable:   true,
+						OnTriggered: controlWindow.onTriggerShowOverride,
+						AssignTo:    &controlWindow.showOverrideAction,
+					},
 					declarative.Menu{
 						Text: mi18n.T("&ボーン表示"),
 						Items: []declarative.MenuItem{
@@ -240,7 +236,6 @@ func NewControlWindow(
 							},
 						},
 					},
-					declarative.Separator{},
 					declarative.Menu{
 						Text: mi18n.T("&剛体表示"),
 						Items: []declarative.MenuItem{
@@ -815,31 +810,4 @@ func (controlWindow *ControlWindow) Enabled() bool {
 	}
 
 	return true
-}
-
-func (controlWindow *ControlWindow) addOverrideActions(titles []string) {
-	for i, title := range titles[1:] {
-		controlWindow.windowOverrideActions = append(controlWindow.windowOverrideActions, walk.NewAction())
-		controlWindow.windowOverrideMenuItems = append(controlWindow.windowOverrideMenuItems,
-			declarative.Action{
-				Text:        fmt.Sprintf("%s -> %s", title, titles[0]),
-				Checkable:   true,
-				OnTriggered: controlWindow.onTriggerOverride,
-				AssignTo:    &controlWindow.windowOverrideActions[i],
-			})
-	}
-}
-
-func (controlWindow *ControlWindow) onTriggerOverride() {
-	for i := range controlWindow.windowOverrideActions {
-		controlWindow.appState.SetShowOverride(controlWindow.windowOverrideActions[i].Checked())
-	}
-}
-
-func (controlWindow *ControlWindow) IsOverride(i int) bool {
-	return controlWindow.windowOverrideActions[i].Checked()
-}
-
-func (controlWindow *ControlWindow) SetOverride(i int, enabled bool) {
-	controlWindow.windowOverrideActions[i].SetChecked(enabled)
 }

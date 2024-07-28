@@ -60,6 +60,7 @@ func NewControlState(appState state.IAppState) *controlState {
 		isPhysicsResetChan:       make(chan bool),
 		isShowNormalChan:         make(chan bool),
 		isShowWireChan:           make(chan bool),
+		isShowOverrideChan:       make(chan bool),
 		isShowSelectedVertexChan: make(chan bool),
 		isShowBoneAllChan:        make(chan bool),
 		isShowBoneIkChan:         make(chan bool),
@@ -144,6 +145,8 @@ func (contState *controlState) Run() {
 				contState.appState.SetShowNormal(showNormal)
 			case showWire := <-contState.isShowWireChan:
 				contState.appState.SetShowWire(showWire)
+			case showOverride := <-contState.isShowOverrideChan:
+				contState.appState.SetShowOverride(showOverride)
 			case showSelectedVertex := <-contState.isShowSelectedVertexChan:
 				contState.appState.SetShowSelectedVertex(showSelectedVertex)
 			case showBoneAll := <-contState.isShowBoneAllChan:
