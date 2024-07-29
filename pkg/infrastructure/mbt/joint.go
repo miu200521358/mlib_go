@@ -94,7 +94,7 @@ func (physics *MPhysics) initJoint(
 	// デバッグ円の表示サイズ
 	constraint.SetDbgDrawSize(float32(1.5))
 
-	physics.world.AddConstraint(constraint, true)
+	physics.world.AddConstraint(constraint)
 	physics.joints[modelIndex][joint.Index()] = &jointValue{pmxJoint: joint, btJoint: constraint}
 }
 
