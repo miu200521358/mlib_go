@@ -185,9 +185,9 @@ func (viewWindow *ViewWindow) updateCameraAngle() {
 	viewWindow.shader.CameraPosition.Y = mgl.INITIAL_CAMERA_POSITION_Y + forwardXYZ.Y
 	viewWindow.shader.CameraPosition.Z = forwardXYZ.Z
 
-	forward := viewWindow.shader.LookAtCenterPosition.Subed(viewWindow.shader.CameraPosition).Normalize()
-	right := forward.Cross(viewWindow.shader.CameraUp).Normalize()
-	viewWindow.shader.CameraUp = right.Cross(forward).Normalize()
+	// forward := viewWindow.shader.LookAtCenterPosition.Subed(viewWindow.shader.CameraPosition).Normalize()
+	// right := forward.Cross(viewWindow.shader.CameraUp).Normalize()
+	// viewWindow.shader.CameraUp = right.Cross(forward).Normalize()
 }
 
 func (viewWindow *ViewWindow) updateCameraPositionByCursor(xpos float64, ypos float64) {
