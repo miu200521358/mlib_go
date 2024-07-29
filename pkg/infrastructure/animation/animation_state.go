@@ -109,6 +109,11 @@ func (animationState *AnimationState) SetInvisibleMaterialIndexes(indexes []int)
 	}
 }
 
+func (animationState *AnimationState) ExistInvisibleMaterialIndex(index int) bool {
+	_, ok := animationState.invisibleMaterialIndexes[index]
+	return ok
+}
+
 func (animationState *AnimationState) SelectedVertexIndexes() []int {
 	indexes := make([]int, 0, len(animationState.selectedVertexIndexes))
 	for i := range animationState.selectedVertexIndexes {
@@ -161,14 +166,15 @@ func (animationState *AnimationState) Load(model *pmx.PmxModel) {
 }
 
 func (animationState *AnimationState) Render(
-	shader mgl.IShader, appState state.IAppState, leftCursorPositions, leftCursorRemovePositions []*mgl32.Vec3,
+	shader mgl.IShader, appState state.IAppState, leftCursorPositions, leftCursorRemovePositions, leftCursorWorldHistoryPositions, leftCursorRemoveWorldHistoryPositions []*mgl32.Vec3,
 ) {
 	if !appState.IsShowSelectedVertex() {
 		animationState.ClearSelectedVertexIndexes()
 	}
 	if animationState.renderModel != nil && animationState.model != nil {
 		animationState.renderModel.Render(shader, appState, animationState,
-			leftCursorPositions, leftCursorRemovePositions)
+			leftCursorPositions, leftCursorRemovePositions,
+			leftCursorWorldHistoryPositions, leftCursorRemoveWorldHistoryPositions)
 	}
 }
 

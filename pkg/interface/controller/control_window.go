@@ -375,6 +375,10 @@ func (controlWindow *ControlWindow) AddTabPage(tabPage *walk.TabPage) {
 	}
 }
 
+func (controlWindow *ControlWindow) SetTabIndex(index int) {
+	controlWindow.tabWidget.SetCurrentIndex(index)
+}
+
 func (controlWindow *ControlWindow) SetPlayer(player app.IPlayer) {
 	controlWindow.controlState.SetPlayer(player)
 }

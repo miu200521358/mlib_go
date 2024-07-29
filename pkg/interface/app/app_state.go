@@ -109,6 +109,11 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 			appState.nextAnimationStates[windowIndex][modelIndex].SetRenderDeltas(renderDeltas)
 		}
 	}
+
+	if animationState.InvisibleMaterialIndexes() != nil {
+		appState.nextAnimationStates[windowIndex][modelIndex].SetInvisibleMaterialIndexes(
+			animationState.InvisibleMaterialIndexes())
+	}
 }
 
 func (appState *appState) Frame() float64 {
