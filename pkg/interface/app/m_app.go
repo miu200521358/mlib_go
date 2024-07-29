@@ -123,7 +123,9 @@ func (app *MApp) ViewerRun() {
 			}
 		}
 
-		for i, w := range app.viewWindows {
+		for i := app.ViewerCount() - 1; i >= 0; i-- {
+			// サブビューワーオーバーレイのため、逆順でレンダリング
+			w := app.viewWindows[i]
 			// アニメーション
 			if !app.IsShowSelectedVertex() {
 				for j := range app.animationStates[i] {
