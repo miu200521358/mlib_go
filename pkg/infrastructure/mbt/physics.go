@@ -98,8 +98,8 @@ func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
 }
 
 func (physics *MPhysics) DeleteModel(modelIndex int) {
-	physics.deleteRigidBodies(modelIndex)
 	physics.deleteJoints(modelIndex)
+	physics.deleteRigidBodies(modelIndex)
 }
 
 func (physics *MPhysics) StepSimulation(timeStep float32) {
