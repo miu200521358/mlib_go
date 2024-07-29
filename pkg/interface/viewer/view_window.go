@@ -30,26 +30,26 @@ const rightAngle = 89.9
 
 type ViewWindow struct {
 	*glfw.Window
-	windowIndex                     int                // ウィンドウインデックス
-	title                           string             // ウィンドウタイトル
-	appConfig                       *mconfig.AppConfig // アプリケーション設定
-	appState                        state.IAppState    // アプリ状態
-	physics                         *mbt.MPhysics      // 物理
-	shader                          *mgl.MShader       // シェーダー
-	leftButtonPressed               bool               // 左ボタン押下フラグ
-	middleButtonPressed             bool               // 中ボタン押下フラグ
-	rightButtonPressed              bool               // 右ボタン押下フラグ
-	shiftPressed                    bool               // Shiftキー押下フラグ
-	ctrlPressed                     bool               // Ctrlキー押下フラグ
-	updatedPrevCursor               bool               // 前回のカーソル位置更新フラグ
-	prevCursorPos                   *mmath.MVec2       // 前回のカーソル位置
-	leftCursorWindowPositions       []*mgl32.Vec3      // 左クリック位置ウィンドウ座標リスト
-	leftCursorWorldPositions        []*mgl32.Vec3      // 左クリック位置ワールド座標リスト
-	leftCursorRemoveWindowPositions []*mgl32.Vec3      // 左クリック位置ウィンドウ座標リスト(削除用)
-	leftCursorRemoveWorldPositions  []*mgl32.Vec3      // 左クリック位置ワールド座標リスト(削除用)
-	yaw                             float64            // カメラyaw
-	pitch                           float64            // カメラpitch
-	size                            *mmath.MVec2       // ウィンドウサイズ
+	windowIndex                           int                    // ウィンドウインデックス
+	title                                 string                 // ウィンドウタイトル
+	appConfig                             *mconfig.AppConfig     // アプリケーション設定
+	appState                              state.IAppState        // アプリ状態
+	physics                               *mbt.MPhysics          // 物理
+	shader                                *mgl.MShader           // シェーダー
+	leftButtonPressed                     bool                   // 左ボタン押下フラグ
+	middleButtonPressed                   bool                   // 中ボタン押下フラグ
+	rightButtonPressed                    bool                   // 右ボタン押下フラグ
+	shiftPressed                          bool                   // Shiftキー押下フラグ
+	ctrlPressed                           bool                   // Ctrlキー押下フラグ
+	updatedPrevCursor                     bool                   // 前回のカーソル位置更新フラグ
+	prevCursorPos                         *mmath.MVec2           // 前回のカーソル位置
+	leftCursorWindowPositions             map[mgl32.Vec2]float32 // 左クリック位置ウィンドウ座標リスト
+	leftCursorRemoveWindowPositions       map[mgl32.Vec2]float32 // 左クリック位置ウィンドウ座標リスト(削除用)
+	leftCursorWorldHistoryPositions       []*mgl32.Vec3          // 左クリック位置ワールド座標リスト
+	leftCursorRemoveWorldHistoryPositions []*mgl32.Vec3          // 左クリック位置ワールド座標リスト(削除用)
+	yaw                                   float64                // カメラyaw
+	pitch                                 float64                // カメラpitch
+	size                                  *mmath.MVec2           // ウィンドウサイズ
 }
 
 func NewViewWindow(
@@ -82,18 +82,18 @@ func NewViewWindow(
 	}
 
 	viewWindow := &ViewWindow{
-		Window:                          glWindow,
-		appState:                        appState,
-		windowIndex:                     windowIndex,
-		title:                           title,
-		appConfig:                       appConfig,
-		shader:                          mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height),
-		physics:                         mbt.NewMPhysics(),
-		prevCursorPos:                   mmath.NewMVec2(),
-		leftCursorWindowPositions:       make([]*mgl32.Vec3, 0),
-		leftCursorWorldPositions:        make([]*mgl32.Vec3, 0),
-		leftCursorRemoveWindowPositions: make([]*mgl32.Vec3, 0),
-		leftCursorRemoveWorldPositions:  make([]*mgl32.Vec3, 0),
+		Window:                                glWindow,
+		appState:                              appState,
+		windowIndex:                           windowIndex,
+		title:                                 title,
+		appConfig:                             appConfig,
+		shader:                                mgl.NewMShader(appConfig.ViewWindowSize.Width, appConfig.ViewWindowSize.Height),
+		physics:                               mbt.NewMPhysics(),
+		prevCursorPos:                         mmath.NewMVec2(),
+		leftCursorWindowPositions:             make(map[mgl32.Vec2]float32),
+		leftCursorRemoveWindowPositions:       make(map[mgl32.Vec2]float32),
+		leftCursorWorldHistoryPositions:       make([]*mgl32.Vec3, 0),
+		leftCursorRemoveWorldHistoryPositions: make([]*mgl32.Vec3, 0),
 		size: &mmath.MVec2{X: float64(appConfig.ViewWindowSize.Width),
 			Y: float64(appConfig.ViewWindowSize.Height)},
 	}
@@ -140,19 +140,9 @@ func (viewWindow *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float
 	} else if viewWindow.leftButtonPressed {
 		// 左クリックはカーソル位置を取得
 		if viewWindow.ctrlPressed {
-			if len(viewWindow.leftCursorRemoveWindowPositions) == 0 ||
-				(viewWindow.leftCursorRemoveWindowPositions[len(viewWindow.leftCursorRemoveWindowPositions)-1].X() != float32(xpos) &&
-					viewWindow.leftCursorRemoveWindowPositions[len(viewWindow.leftCursorRemoveWindowPositions)-1].Y() != float32(ypos)) {
-				viewWindow.leftCursorRemoveWindowPositions = append(viewWindow.leftCursorRemoveWindowPositions,
-					&mgl32.Vec3{float32(xpos), float32(ypos), 0.0})
-			}
+			viewWindow.leftCursorRemoveWindowPositions[mgl32.Vec2{float32(xpos), float32(ypos)}] = 0.0
 		} else {
-			if len(viewWindow.leftCursorWindowPositions) == 0 ||
-				(viewWindow.leftCursorWindowPositions[len(viewWindow.leftCursorWindowPositions)-1].X() != float32(xpos) &&
-					viewWindow.leftCursorWindowPositions[len(viewWindow.leftCursorWindowPositions)-1].Y() != float32(ypos)) {
-				viewWindow.leftCursorWindowPositions = append(viewWindow.leftCursorWindowPositions,
-					&mgl32.Vec3{float32(xpos), float32(ypos), 0.0})
-			}
+			viewWindow.leftCursorWindowPositions[mgl32.Vec2{float32(xpos), float32(ypos)}] = 0.0
 		}
 	}
 
@@ -235,10 +225,10 @@ func (viewWindow *ViewWindow) mouseCallback(
 		switch button {
 		case glfw.MouseButtonLeft:
 			if !viewWindow.leftButtonPressed {
-				viewWindow.leftCursorWindowPositions = make([]*mgl32.Vec3, 0)
-				viewWindow.leftCursorWorldPositions = make([]*mgl32.Vec3, 0)
-				viewWindow.leftCursorRemoveWindowPositions = make([]*mgl32.Vec3, 0)
-				viewWindow.leftCursorRemoveWorldPositions = make([]*mgl32.Vec3, 0)
+				viewWindow.leftCursorWindowPositions = make(map[mgl32.Vec2]float32)
+				viewWindow.leftCursorRemoveWindowPositions = make(map[mgl32.Vec2]float32)
+				viewWindow.leftCursorWorldHistoryPositions = make([]*mgl32.Vec3, 0)
+				viewWindow.leftCursorRemoveWorldHistoryPositions = make([]*mgl32.Vec3, 0)
 			}
 			viewWindow.leftButtonPressed = true
 		case glfw.MouseButtonMiddle:
@@ -457,27 +447,45 @@ func (viewWindow *ViewWindow) Animate(
 		viewWindow.shader.Resize(int(viewWindow.size.X), int(viewWindow.size.Y))
 	}
 
-	if viewWindow.appState.IsShowSelectedVertex() {
-		// 頂点選択ONの場合、深度が取れてないのを取得
-		for _, cursorPos := range viewWindow.leftCursorWindowPositions {
-			if cursorPos.Z() == 0 {
-				depth := viewWindow.shader.Msaa.ReadDepthAt(int(cursorPos.X()), int(cursorPos.Y()))
-				cursorPos[2] = depth
+	var leftCursorWorldPositions []*mgl32.Vec3       // 左クリック位置ワールド座標リスト
+	var leftCursorRemoveWorldPositions []*mgl32.Vec3 // 左クリック位置ワールド座標リスト(削除用)
 
-				if depth > 0.0 && depth < 1.0 {
-					worldPos := viewWindow.getWorldPosition(cursorPos.X(), cursorPos.Y(), depth)
-					viewWindow.leftCursorWorldPositions = append(viewWindow.leftCursorWorldPositions, worldPos)
+	if viewWindow.appState.IsShowSelectedVertex() {
+		leftCursorWorldPositions = make([]*mgl32.Vec3, 0)
+		leftCursorRemoveWorldPositions = make([]*mgl32.Vec3, 0)
+
+		// 頂点選択ONの場合、深度が取れてないのを取得
+		for screenPos, depth := range viewWindow.leftCursorWindowPositions {
+			if depth == 0 {
+				for range 20 {
+					depth := viewWindow.shader.Msaa.ReadDepthAt(int(screenPos.X()), int(screenPos.Y()))
+					if depth > 0.0 && depth < 1.0 {
+						viewWindow.leftCursorWindowPositions[screenPos] = depth
+
+						worldPos := viewWindow.getWorldPosition(screenPos.X(), screenPos.Y(), depth)
+						leftCursorWorldPositions = append(leftCursorWorldPositions, worldPos)
+						viewWindow.leftCursorWorldHistoryPositions = append(
+							viewWindow.leftCursorWorldHistoryPositions, worldPos)
+
+						break
+					}
 				}
 			}
 		}
-		for _, cursorPos := range viewWindow.leftCursorRemoveWindowPositions {
-			if cursorPos.Z() == 0 {
-				depth := viewWindow.shader.Msaa.ReadDepthAt(int(cursorPos.X()), int(cursorPos.Y()))
-				cursorPos[2] = depth
+		for screenPos, depth := range viewWindow.leftCursorRemoveWindowPositions {
+			if depth == 0 {
+				for range 20 {
+					depth := viewWindow.shader.Msaa.ReadDepthAt(int(screenPos.X()), int(screenPos.Y()))
+					if depth > 0.0 && depth < 1.0 {
+						viewWindow.leftCursorRemoveWindowPositions[screenPos] = depth
 
-				if depth > 0.0 && depth < 1.0 {
-					worldPos := viewWindow.getWorldPosition(cursorPos.X(), cursorPos.Y(), depth)
-					viewWindow.leftCursorRemoveWorldPositions = append(viewWindow.leftCursorRemoveWorldPositions, worldPos)
+						worldPos := viewWindow.getWorldPosition(screenPos.X(), screenPos.Y(), depth)
+						leftCursorRemoveWorldPositions = append(leftCursorRemoveWorldPositions, worldPos)
+						viewWindow.leftCursorRemoveWorldHistoryPositions = append(
+							viewWindow.leftCursorRemoveWorldHistoryPositions, worldPos)
+
+						break
+					}
 				}
 			}
 		}
@@ -529,6 +537,11 @@ func (viewWindow *ViewWindow) Animate(
 					animationStates[nextState.ModelIndex()].SetRenderDeltas(nextState.RenderDeltas())
 					nextState.SetRenderDeltas(nil)
 				}
+				if nextState.InvisibleMaterialIndexes() != nil {
+					animationStates[nextState.ModelIndex()].SetInvisibleMaterialIndexes(
+						nextState.InvisibleMaterialIndexes())
+					nextState.SetInvisibleMaterialIndexes(nil)
+				}
 			}
 		}
 
@@ -539,7 +552,8 @@ func (viewWindow *ViewWindow) Animate(
 		for _, animationState := range animationStates {
 			if animationState != nil {
 				animationState.Render(viewWindow.shader, viewWindow.appState,
-					viewWindow.leftCursorWorldPositions, viewWindow.leftCursorRemoveWorldPositions)
+					leftCursorWorldPositions, leftCursorRemoveWorldPositions,
+					viewWindow.leftCursorWorldHistoryPositions, viewWindow.leftCursorRemoveWorldHistoryPositions)
 			}
 		}
 
@@ -555,14 +569,6 @@ func (viewWindow *ViewWindow) Animate(
 		viewWindow.drawOverride()
 	}
 	viewWindow.shader.Msaa.Unbind()
-
-	if !viewWindow.leftButtonPressed {
-		viewWindow.leftCursorWindowPositions = make([]*mgl32.Vec3, 0)
-		viewWindow.leftCursorWorldPositions = make([]*mgl32.Vec3, 0)
-		viewWindow.leftCursorRemoveWindowPositions = make([]*mgl32.Vec3, 0)
-		viewWindow.leftCursorRemoveWorldPositions = make([]*mgl32.Vec3, 0)
-	}
-
 	viewWindow.SwapBuffers()
 
 	return animationStates, nextStates

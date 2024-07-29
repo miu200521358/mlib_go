@@ -107,7 +107,6 @@ func NewMsaa(width int, height int) *Msaa {
 
 func (msaa *Msaa) ReadDepthAt(x, y int) float32 {
 	// シングルサンプルFBOから読み取る
-	mlog.I("ReadDepthAt: %v, %v, resolveFBO: %v", x, y, msaa.resolveFBO)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, msaa.resolveFBO)
 	if status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); status != gl.FRAMEBUFFER_COMPLETE {
 		mlog.E("Framebuffer is not complete: %v", status)
@@ -130,6 +129,8 @@ func (msaa *Msaa) ReadDepthAt(x, y int) float32 {
 	// }
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
+	mlog.V("ReadDepthAt: %v, %v, depth: %.5f", x, y, depth)
 
 	return depth
 }

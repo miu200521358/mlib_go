@@ -9,6 +9,7 @@ uniform int boneMatrixWidth;
 uniform int boneMatrixHeight;
 
 uniform vec3 cursorPositions[100];
+uniform float cursorThreshold;
 
 in layout(location = 0) vec3 position;
 in layout(location = 1) vec3 normal;
@@ -279,7 +280,7 @@ void main() {
 
     // カーソルの矩形範囲内にある場合のみ、頂点位置を格納する
     float nearestDistance = distanceToVectors(vecGlobalPosition.xyz);
-    if (nearestDistance < 0.1) {
+    if (nearestDistance < cursorThreshold/100.0) {
         vertexPositions[gl_VertexID] = vec4(vecGlobalPosition.xyz, nearestDistance);
     } else {
         vertexPositions[gl_VertexID] = vec4(-1);

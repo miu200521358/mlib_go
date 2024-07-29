@@ -43,6 +43,7 @@ const (
 	SHADER_EDGE_COLOR                 = "edgeColor\x00"
 	SHADER_EDGE_SIZE                  = "edgeSize\x00"
 	SHADER_CURSOR_POSITIONS           = "cursorPositions\x00"
+	SHADER_CURSOR_THRESHOLD           = "cursorThreshold\x00"
 	SHADER_LINE_WIDTH                 = "lineWidth\x00"
 )
 
@@ -79,6 +80,7 @@ type IShader interface {
 	BoneTextureId() uint32
 	OverrideTextureId() uint32
 	Resize(width, height int)
+	ViewOfAngle() float32
 }
 
 type MShader struct {
@@ -450,4 +452,8 @@ func (shader *MShader) Delete() {
 	shader.DeleteProgram(shader.overrideProgram)
 	shader.DeleteProgram(shader.cursorProgram)
 	shader.Msaa.Delete()
+}
+
+func (shader *MShader) ViewOfAngle() float32 {
+	return shader.FieldOfViewAngle
 }
