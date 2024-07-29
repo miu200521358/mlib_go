@@ -571,6 +571,13 @@ func (viewWindow *ViewWindow) Animate(
 	viewWindow.shader.Msaa.Unbind()
 	viewWindow.SwapBuffers()
 
+	if !viewWindow.leftButtonPressed {
+		viewWindow.leftCursorWindowPositions = make(map[mgl32.Vec2]float32)
+		viewWindow.leftCursorRemoveWindowPositions = make(map[mgl32.Vec2]float32)
+		viewWindow.leftCursorWorldHistoryPositions = make([]*mgl32.Vec3, 0)
+		viewWindow.leftCursorRemoveWorldHistoryPositions = make([]*mgl32.Vec3, 0)
+	}
+
 	return animationStates, nextStates
 }
 
