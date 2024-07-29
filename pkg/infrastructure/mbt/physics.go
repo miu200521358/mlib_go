@@ -93,11 +93,13 @@ func (physics *MPhysics) ResetWorld() {
 }
 
 func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
+	// 根元から追加していく
 	physics.initRigidBodies(modelIndex, model.RigidBodies)
 	physics.initJoints(modelIndex, model.RigidBodies, model.Joints)
 }
 
 func (physics *MPhysics) DeleteModel(modelIndex int) {
+	// 末端から削除していく
 	physics.deleteJoints(modelIndex)
 	physics.deleteRigidBodies(modelIndex)
 }
