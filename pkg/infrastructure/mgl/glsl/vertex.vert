@@ -8,7 +8,7 @@ uniform sampler2D boneMatrixTexture;
 uniform int boneMatrixWidth;
 uniform int boneMatrixHeight;
 
-uniform vec3 cursorPositions[100];
+uniform vec3 cursorPositions[30];
 uniform float cursorThreshold;
 
 in layout(location = 0) vec3 position;

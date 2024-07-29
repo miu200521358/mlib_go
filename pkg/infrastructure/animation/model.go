@@ -376,14 +376,14 @@ func (renderModel *RenderModel) Render(
 			}
 		}
 
-		for i := len(leftCursorPositions); i < 100; i++ {
-			// 追加固定で100個までのカーソル位置を確保
+		for i := len(leftCursorPositions); i < 30; i++ {
+			// 追加固定で30個までのカーソル位置を確保
 			cursorPositions = append(cursorPositions, 0, 0, 0)
 		}
 
 		if len(leftCursorRemovePositions) > 0 {
-			for i := len(leftCursorRemovePositions); i < 100; i++ {
-				// 追加固定で100個までのカーソル位置を確保
+			for i := len(leftCursorRemovePositions); i < 30; i++ {
+				// 追加固定で30個までのカーソル位置を確保
 				removeCursorPositions = append(removeCursorPositions, 0, 0, 0)
 			}
 		}
@@ -593,7 +593,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	if mlog.IsDebug() {
 		if cursorPositions[0] != 0 {
 			mlog.L()
-			for i := 0; i < 300; i += 3 {
+			for i := 0; i < 90; i += 3 {
 				if cursorPositions[i] == 0 {
 					break
 				}
