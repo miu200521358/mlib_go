@@ -28,7 +28,6 @@ type AnimationState struct {
 	noSelectedVertexIndexes  map[int]struct{}    // 非選択頂点インデックス
 	vmdDeltas                *delta.VmdDeltas    // モーション変化量
 	renderDeltas             *delta.RenderDeltas // 描画変化量
-	elapsed                  float64             // 経過時間
 }
 
 func (animationState *AnimationState) WindowIndex() int {
@@ -96,6 +95,10 @@ func (animationState *AnimationState) SetRenderDeltas(deltas *delta.RenderDeltas
 }
 
 func (animationState *AnimationState) InvisibleMaterialIndexes() []int {
+	if animationState.invisibleMaterialIndexes == nil {
+		return nil
+	}
+
 	indexes := make([]int, 0, len(animationState.invisibleMaterialIndexes))
 	for i := range animationState.invisibleMaterialIndexes {
 		indexes = append(indexes, i)
@@ -104,6 +107,10 @@ func (animationState *AnimationState) InvisibleMaterialIndexes() []int {
 }
 
 func (animationState *AnimationState) SetInvisibleMaterialIndexes(indexes []int) {
+	if len(indexes) == 0 {
+		animationState.invisibleMaterialIndexes = nil
+		return
+	}
 	animationState.invisibleMaterialIndexes = make(map[int]struct{}, len(indexes))
 	for _, i := range indexes {
 		animationState.invisibleMaterialIndexes[i] = struct{}{}
@@ -184,9 +191,9 @@ func NewAnimationState(windowIndex, modelIndex int) *AnimationState {
 		windowIndex:              windowIndex,
 		modelIndex:               modelIndex,
 		frame:                    -1,
-		invisibleMaterialIndexes: make(map[int]struct{}),
-		selectedVertexIndexes:    make(map[int]struct{}),
-		noSelectedVertexIndexes:  make(map[int]struct{}),
+		invisibleMaterialIndexes: nil,
+		selectedVertexIndexes:    nil,
+		noSelectedVertexIndexes:  nil,
 		renderDeltas:             delta.NewRenderDeltas(),
 	}
 }

@@ -335,7 +335,7 @@ func (renderModel *RenderModel) Render(
 				matrixWidth, matrixHeight, animationState.RenderDeltas().MeshDeltas[i])
 		}
 
-		if appState.IsShowWire() {
+		if appState.IsShowWire() && !animationState.ExistInvisibleMaterialIndex(mesh.material.Index()) {
 			mesh.drawWire(animationState.WindowIndex(), shader, paddedMatrixes, matrixWidth, matrixHeight, false)
 		}
 
