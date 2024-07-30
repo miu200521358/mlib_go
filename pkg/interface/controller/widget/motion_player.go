@@ -48,7 +48,7 @@ func NewMotionPlayer(
 	layout := walk.NewHBoxLayout()
 	playerComposite.SetLayout(layout)
 
-	bg, err := walk.NewSystemColorBrush(walk.SysColor3DFace)
+	bg, err := walk.NewSystemColorBrush(walk.SysColorInactiveBorder)
 	if err != nil {
 		RaiseError(err)
 	}

@@ -230,6 +230,11 @@ func newFilePicker(
 		nameLineEdit.SetText(mi18n.T("未設定"))
 		nameLineEdit.SetToolTipText(tooltip)
 		nameLineEdit.SetReadOnly(true)
+		bg, err := walk.NewSystemColorBrush(walk.SysColorInactiveCaption)
+		if err != nil {
+			RaiseError(err)
+		}
+		nameLineEdit.SetBackground(bg)
 		picker.nameLineEdit = nameLineEdit
 
 		endBracketLabel, err := walk.NewTextLabel(titleComposite)

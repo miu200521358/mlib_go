@@ -37,7 +37,7 @@ func NewMTabPage(title string) *MTabPage {
 	}
 	tabPage.SetTitle(title)
 
-	bg, err := walk.NewSystemColorBrush(walk.SysColor3DFace)
+	bg, err := walk.NewSystemColorBrush(walk.SysColorInactiveCaption)
 	if err != nil {
 		RaiseError(err)
 	}
