@@ -39,6 +39,7 @@ type controlState struct {
 	isLimitFps60Chan         chan bool                      // 60FPS制限
 	isUnLimitFpsChan         chan bool                      // FPS無制限
 	isUnLimitFpsDeformChan   chan bool                      // デフォームFPS無制限
+	isCameraSyncChan         chan bool                      // レンダリング同期
 	isLogLevelDebugChan      chan bool                      // デバッグメッセージ表示
 	isLogLevelVerboseChan    chan bool                      // 冗長メッセージ表示
 	isLogLevelIkVerboseChan  chan bool                      // IK冗長メッセージ表示
@@ -173,6 +174,8 @@ func (contState *controlState) Run() {
 				contState.appState.SetShowInfo(showInfo)
 			case spfLimit := <-contState.spfLimitChan:
 				contState.appState.SetSpfLimit(spfLimit)
+			case cameraSync := <-contState.isCameraSyncChan:
+				contState.appState.SetCameraSync(cameraSync)
 			case closed := <-contState.isClosedChan:
 				contState.appState.SetClosed(closed)
 			case playing := <-contState.playingChan:
@@ -353,4 +356,12 @@ func (contState *controlState) TriggerPlay(p bool) {
 
 func (contState *controlState) SetSpfLimit(spf float64) {
 	contState.spfLimitChan <- spf
+}
+
+func (contState *controlState) IsCameraSync() bool {
+	return contState.appState.IsCameraSync()
+}
+
+func (contState *controlState) SetCameraSync(sync bool) {
+	contState.appState.SetCameraSync(sync)
 }

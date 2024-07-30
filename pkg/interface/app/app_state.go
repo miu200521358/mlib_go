@@ -37,6 +37,7 @@ type appState struct {
 	isLimitFps60         bool                      // 60FPS制限
 	isUnLimitFps         bool                      // FPS無制限
 	isUnLimitFpsDeform   bool                      // デフォームFPS無制限
+	isCameraSync         bool                      // レンダーシンク
 	isLogLevelDebug      bool                      // デバッグメッセージ表示
 	isLogLevelVerbose    bool                      // 冗長メッセージ表示
 	isLogLevelIkVerbose  bool                      // IK冗長メッセージ表示
@@ -399,4 +400,12 @@ func (appState *appState) SpfLimit() float64 {
 
 func (appState *appState) SetSpfLimit(spf float64) {
 	appState.spfLimit = spf
+}
+
+func (appState *appState) SetCameraSync(sync bool) {
+	appState.isCameraSync = sync
+}
+
+func (appState *appState) IsCameraSync() bool {
+	return appState.isCameraSync
 }

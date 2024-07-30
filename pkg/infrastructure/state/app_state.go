@@ -56,6 +56,8 @@ type IAppState interface {
 	SetUnLimitFps(limit bool)
 	IsUnLimitFpsDeform() bool
 	SetUnLimitFpsDeform(limit bool)
+	IsCameraSync() bool
+	SetCameraSync(sync bool)
 	IsLogLevelDebug() bool
 	SetLogLevelDebug(log bool)
 	IsLogLevelVerbose() bool

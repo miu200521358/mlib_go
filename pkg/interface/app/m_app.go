@@ -110,6 +110,13 @@ func (app *MApp) ViewerRun() {
 			app.SetPhysicsReset(false)
 		}
 
+		// カメラ同期(重複描画の場合はそっちで同期させる)
+		if app.IsCameraSync() && !app.IsShowOverride() {
+			for i := 1; i < len(app.viewWindows); i++ {
+				app.viewWindows[i].UpdateViewerParameter(app.viewWindows[0].GetViewerParameter())
+			}
+		}
+
 		// 重複描画
 		if app.IsShowOverride() {
 			for i := 1; i < len(app.viewWindows); i++ {

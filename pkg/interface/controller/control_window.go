@@ -45,6 +45,7 @@ type ControlWindow struct {
 	limitFps30Action         *walk.Action       // 30FPS制限
 	limitFps60Action         *walk.Action       // 60FPS制限
 	limitFpsUnLimitAction    *walk.Action       // FPS無制限
+	cameraSyncAction         *walk.Action       // カメラ同期
 	logLevelDebugAction      *walk.Action       // デバッグメッセージ表示
 	logLevelVerboseAction    *walk.Action       // 冗長メッセージ表示
 	logLevelIkVerboseAction  *walk.Action       // IK冗長メッセージ表示
@@ -182,6 +183,12 @@ func NewControlWindow(
 						},
 					},
 					declarative.Separator{},
+					declarative.Action{
+						Text:        mi18n.T("&カメラ同期"),
+						Checkable:   true,
+						OnTriggered: controlWindow.onTriggerCameraSync,
+						AssignTo:    &controlWindow.cameraSyncAction,
+					},
 					declarative.Action{
 						Text:        mi18n.T("&サブビューワーオーバーレイ"),
 						Checkable:   true,
@@ -430,6 +437,10 @@ func (controlWindow *ControlWindow) onTriggerShowWire() {
 
 func (controlWindow *ControlWindow) onTriggerShowOverride() {
 	controlWindow.controlState.SetShowOverride(controlWindow.showOverrideAction.Checked())
+}
+
+func (controlWindow *ControlWindow) onTriggerCameraSync() {
+	controlWindow.controlState.SetCameraSync(controlWindow.cameraSyncAction.Checked())
 }
 
 func (controlWindow *ControlWindow) onTriggerShowSelectedVertex() {
