@@ -108,8 +108,8 @@ func (contState *controlState) Run() {
 						// フレームドロップONの時、経過秒数分進める
 						contState.AddFrame(elapsed * 30)
 					} else {
-						// フレームドロップOFFもしくはデフォーム無制限の時、1だけ進める
-						contState.AddFrame(1)
+						// フレームドロップOFFの時、最大1だけ進める
+						contState.AddFrame(min(1, elapsed*30))
 					}
 
 					if contState.Frame() > float64(contState.MaxFrame()) {
