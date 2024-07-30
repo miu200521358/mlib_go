@@ -95,18 +95,6 @@ func (animationState *AnimationState) SetRenderDeltas(deltas *delta.RenderDeltas
 	animationState.renderDeltas = deltas
 }
 
-func (animationState *AnimationState) Elapsed() float64 {
-	return animationState.elapsed
-}
-
-func (animationState *AnimationState) SetElapsed(elapsed float64) {
-	animationState.elapsed = elapsed
-}
-
-func (animationState *AnimationState) AddElapsed(elapsed float64) {
-	animationState.elapsed += elapsed
-}
-
 func (animationState *AnimationState) InvisibleMaterialIndexes() []int {
 	indexes := make([]int, 0, len(animationState.invisibleMaterialIndexes))
 	for i := range animationState.invisibleMaterialIndexes {

@@ -23,7 +23,6 @@ import (
 )
 
 const physicsDefaultSpf = 1.0 / 60.0
-const deformDefaultSpf = 1.0 / 30.0
 
 type MApp struct {
 	*appState                        // アプリ状態
@@ -67,26 +66,22 @@ func (app *MApp) ViewerRun() {
 
 	for !app.IsClosed() {
 		frameTime := glfw.GetTime()
-		originalElapsed := frameTime - prevTime
-
-		var elapsed float64
-		var timeStep float32
-		if !app.appState.IsEnabledFrameDrop() {
-			// フレームドロップOFF
-			// 物理fpsは60fps固定
-			timeStep = physicsDefaultSpf
-			// デフォームfpsは30fps上限の経過時間
-			elapsed = mmath.ClampedFloat(originalElapsed, 0.0, deformDefaultSpf)
-		} else {
-			// 物理fpsは経過時間
-			timeStep = float32(originalElapsed)
-			elapsed = originalElapsed
-		}
+		elapsed := frameTime - prevTime
 
 		if elapsed < app.appState.SpfLimit() {
 			// 1フレームの時間が経過していない場合はスキップ
 			// fps制限は描画fpsにのみ依存
 			continue
+		}
+
+		var timeStep float32
+		if !app.appState.IsEnabledFrameDrop() {
+			// フレームドロップOFF
+			// 物理fpsは60fps固定
+			timeStep = physicsDefaultSpf
+		} else {
+			// 物理fpsは経過時間
+			timeStep = float32(elapsed)
 		}
 
 		// if app.IsEnabledPhysics() && app.IsPhysicsReset() {
@@ -147,11 +142,10 @@ func (app *MApp) ViewerRun() {
 		prevTime = frameTime
 
 		// 描画が終わったらフレーム番号を更新
-		app.SetPrevFrame(int(app.frame))
+		app.prevFrame = int(app.frame)
 
 		// 描画にかかった時間を計測
-		app.SetElapsed(elapsed)
-		elapsedList = append(elapsedList, app.ElapsedAvg())
+		elapsedList = append(elapsedList, app.deformElapsed+elapsed)
 
 		if app.IsShowInfo() {
 			prevShowTime, elapsedList = app.showInfo(elapsedList, prevShowTime, timeStep)

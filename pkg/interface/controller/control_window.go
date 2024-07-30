@@ -581,14 +581,6 @@ func (controlWindow *ControlWindow) SetMaxFrame(maxFrame int) {
 	controlWindow.controlState.SetMaxFrame(maxFrame)
 }
 
-func (controlWindow *ControlWindow) PrevFrame() int {
-	return controlWindow.controlState.motionPlayer.PrevFrame()
-}
-
-func (controlWindow *ControlWindow) SetPrevFrame(prevFrame int) {
-	controlWindow.controlState.SetPrevFrame(prevFrame)
-}
-
 func (controlWindow *ControlWindow) SetAnimationState(state state.IAnimationState) {
 	controlWindow.controlState.SetAnimationState(state)
 }
