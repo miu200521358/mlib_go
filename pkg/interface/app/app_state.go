@@ -122,6 +122,7 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 func (appState *appState) Frame() float64 {
 	return appState.frame
 }
+
 func (appState *appState) SetFrame(frame float64) {
 	if frame < 0 || int(appState.frame) == int(frame) {
 		// フレームが0未満または同じフレームの場合は何もしない

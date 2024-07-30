@@ -199,7 +199,7 @@ func (contState *controlState) AnimationState() *animation.AnimationState {
 }
 
 func (contState *controlState) Frame() float64 {
-	return contState.motionPlayer.Frame()
+	return contState.appState.Frame()
 }
 
 func (contState *controlState) SetFrame(frame float64) {
