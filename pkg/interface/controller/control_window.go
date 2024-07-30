@@ -112,7 +112,7 @@ func NewControlWindow(
 					declarative.Action{
 						Text:        mi18n.T("&フレームドロップON"),
 						Checkable:   true,
-						OnTriggered: controlWindow.onTriggerEnabledFrameDrop,
+						OnTriggered: controlWindow.TriggerEnabledFrameDrop,
 						AssignTo:    &controlWindow.enabledFrameDropAction,
 					},
 					declarative.Menu{
@@ -121,19 +121,19 @@ func NewControlWindow(
 							declarative.Action{
 								Text:        mi18n.T("&30fps制限"),
 								Checkable:   true,
-								OnTriggered: controlWindow.onTriggerFps30Limit,
+								OnTriggered: controlWindow.TriggerFps30Limit,
 								AssignTo:    &controlWindow.limitFps30Action,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&60fps制限"),
 								Checkable:   true,
-								OnTriggered: controlWindow.onTriggerFps60Limit,
+								OnTriggered: controlWindow.TriggerFps60Limit,
 								AssignTo:    &controlWindow.limitFps60Action,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&fps無制限"),
 								Checkable:   true,
-								OnTriggered: controlWindow.onTriggerUnLimitFps,
+								OnTriggered: controlWindow.TriggerUnLimitFps,
 								AssignTo:    &controlWindow.limitFpsUnLimitAction,
 							},
 						},
@@ -141,39 +141,39 @@ func NewControlWindow(
 					declarative.Action{
 						Text:        mi18n.T("&情報表示"),
 						Checkable:   true,
-						OnTriggered: controlWindow.onTriggerShowInfo,
+						OnTriggered: controlWindow.TriggerShowInfo,
 						AssignTo:    &controlWindow.showInfoAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
 						Text:        mi18n.T("&物理ON/OFF"),
 						Checkable:   true,
-						OnTriggered: controlWindow.onTriggerEnabledPhysics,
+						OnTriggered: controlWindow.TriggerEnabledPhysics,
 						AssignTo:    &controlWindow.enabledPhysicsAction,
 					},
 					declarative.Action{
 						Text:        mi18n.T("&物理リセット"),
-						OnTriggered: controlWindow.onTriggerPhysicsReset,
+						OnTriggered: controlWindow.TriggerPhysicsReset,
 						AssignTo:    &controlWindow.physicsResetAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
 						Text:        mi18n.T("&法線表示"),
 						Checkable:   true,
-						OnTriggered: controlWindow.onTriggerShowNormal,
+						OnTriggered: controlWindow.TriggerShowNormal,
 						AssignTo:    &controlWindow.showNormalAction,
 					},
 					declarative.Action{
 						Text:        mi18n.T("&ワイヤーフレーム表示"),
 						Checkable:   true,
-						OnTriggered: controlWindow.onTriggerShowWire,
+						OnTriggered: controlWindow.TriggerShowWire,
 						AssignTo:    &controlWindow.showWireAction,
 					},
 					declarative.Separator{},
 					declarative.Action{
 						Text:        mi18n.T("&頂点ライン選択"),
 						Checkable:   true,
-						OnTriggered: controlWindow.onTriggerShowSelectedVertex,
+						OnTriggered: controlWindow.TriggerShowSelectedVertex,
 						AssignTo:    &controlWindow.showSelectedVertexAction,
 					},
 					declarative.Action{
@@ -186,13 +186,13 @@ func NewControlWindow(
 					declarative.Action{
 						Text:        mi18n.T("&カメラ同期"),
 						Checkable:   true,
-						OnTriggered: controlWindow.onTriggerCameraSync,
+						OnTriggered: controlWindow.TriggerCameraSync,
 						AssignTo:    &controlWindow.cameraSyncAction,
 					},
 					declarative.Action{
 						Text:        mi18n.T("&サブビューワーオーバーレイ"),
 						Checkable:   true,
-						OnTriggered: controlWindow.onTriggerShowOverride,
+						OnTriggered: controlWindow.TriggerShowOverride,
 						AssignTo:    &controlWindow.showOverrideAction,
 					},
 					declarative.Action{
@@ -209,44 +209,44 @@ func NewControlWindow(
 							declarative.Action{
 								Text:        mi18n.T("&全ボーン"),
 								Checkable:   true,
-								OnTriggered: controlWindow.onTriggerShowBoneAll,
+								OnTriggered: controlWindow.TriggerShowBoneAll,
 								AssignTo:    &controlWindow.showBoneAllAction,
 							},
 							declarative.Separator{},
 							declarative.Action{
 								Text:        mi18n.T("&IKボーン"),
 								Checkable:   true,
-								OnTriggered: controlWindow.onTriggerShowBoneIk,
+								OnTriggered: controlWindow.TriggerShowBoneIk,
 								AssignTo:    &controlWindow.showBoneIkAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&付与親ボーン"),
 								Checkable:   true,
-								OnTriggered: controlWindow.onTriggerShowBoneEffector,
+								OnTriggered: controlWindow.TriggerShowBoneEffector,
 								AssignTo:    &controlWindow.showBoneEffectorAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&軸制限ボーン"),
 								Checkable:   true,
-								OnTriggered: controlWindow.onTriggerShowBoneFixed,
+								OnTriggered: controlWindow.TriggerShowBoneFixed,
 								AssignTo:    &controlWindow.showBoneFixedAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&回転ボーン"),
 								Checkable:   true,
-								OnTriggered: controlWindow.onTriggerShowBoneRotate,
+								OnTriggered: controlWindow.TriggerShowBoneRotate,
 								AssignTo:    &controlWindow.showBoneRotateAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&移動ボーン"),
 								Checkable:   true,
-								OnTriggered: controlWindow.onTriggerShowBoneTranslate,
+								OnTriggered: controlWindow.TriggerShowBoneTranslate,
 								AssignTo:    &controlWindow.showBoneTranslateAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&表示ボーン"),
 								Checkable:   true,
-								OnTriggered: controlWindow.onTriggerShowBoneVisible,
+								OnTriggered: controlWindow.TriggerShowBoneVisible,
 								AssignTo:    &controlWindow.showBoneVisibleAction,
 							},
 						},
@@ -257,13 +257,13 @@ func NewControlWindow(
 							declarative.Action{
 								Text:        mi18n.T("&前面表示"),
 								Checkable:   true,
-								OnTriggered: controlWindow.onTriggerShowRigidBodyFront,
+								OnTriggered: controlWindow.TriggerShowRigidBodyFront,
 								AssignTo:    &controlWindow.showRigidBodyFrontAction,
 							},
 							declarative.Action{
 								Text:        mi18n.T("&埋め込み表示"),
 								Checkable:   true,
-								OnTriggered: controlWindow.onTriggerShowRigidBodyBack,
+								OnTriggered: controlWindow.TriggerShowRigidBodyBack,
 								AssignTo:    &controlWindow.showRigidBodyBackAction,
 							},
 						},
@@ -271,7 +271,7 @@ func NewControlWindow(
 					declarative.Action{
 						Text:        mi18n.T("&ジョイント表示"),
 						Checkable:   true,
-						OnTriggered: controlWindow.onTriggerShowJoint,
+						OnTriggered: controlWindow.TriggerShowJoint,
 						AssignTo:    &controlWindow.showJointAction,
 					},
 					declarative.Separator{},
@@ -415,39 +415,39 @@ func (controlWindow *ControlWindow) logLevelTriggered() {
 	}
 }
 
-func (controlWindow *ControlWindow) onTriggerEnabledFrameDrop() {
+func (controlWindow *ControlWindow) TriggerEnabledFrameDrop() {
 	controlWindow.controlState.SetEnabledFrameDrop(controlWindow.enabledFrameDropAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerEnabledPhysics() {
+func (controlWindow *ControlWindow) TriggerEnabledPhysics() {
 	controlWindow.controlState.SetEnabledPhysics(controlWindow.enabledPhysicsAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerPhysicsReset() {
+func (controlWindow *ControlWindow) TriggerPhysicsReset() {
 	controlWindow.controlState.SetPhysicsReset(true)
 }
 
-func (controlWindow *ControlWindow) onTriggerShowNormal() {
+func (controlWindow *ControlWindow) TriggerShowNormal() {
 	controlWindow.controlState.SetShowNormal(controlWindow.showNormalAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowWire() {
+func (controlWindow *ControlWindow) TriggerShowWire() {
 	controlWindow.controlState.SetShowWire(controlWindow.showWireAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowOverride() {
+func (controlWindow *ControlWindow) TriggerShowOverride() {
 	controlWindow.controlState.SetShowOverride(controlWindow.showOverrideAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerCameraSync() {
+func (controlWindow *ControlWindow) TriggerCameraSync() {
 	controlWindow.controlState.SetCameraSync(controlWindow.cameraSyncAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowSelectedVertex() {
+func (controlWindow *ControlWindow) TriggerShowSelectedVertex() {
 	controlWindow.controlState.SetShowSelectedVertex(controlWindow.showSelectedVertexAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowBoneAll() {
+func (controlWindow *ControlWindow) TriggerShowBoneAll() {
 	if controlWindow.showBoneAllAction.Checked() {
 		controlWindow.showBoneIkAction.SetChecked(false)
 		controlWindow.showBoneEffectorAction.SetChecked(false)
@@ -466,7 +466,7 @@ func (controlWindow *ControlWindow) onTriggerShowBoneAll() {
 	controlWindow.controlState.SetShowBoneAll(controlWindow.showBoneAllAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowBoneIk() {
+func (controlWindow *ControlWindow) TriggerShowBoneIk() {
 	if controlWindow.showBoneIkAction.Checked() {
 		controlWindow.showBoneAllAction.SetChecked(false)
 		controlWindow.controlState.SetShowBoneAll(false)
@@ -474,7 +474,7 @@ func (controlWindow *ControlWindow) onTriggerShowBoneIk() {
 	controlWindow.controlState.SetShowBoneIk(controlWindow.showBoneIkAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowBoneEffector() {
+func (controlWindow *ControlWindow) TriggerShowBoneEffector() {
 	if controlWindow.showBoneEffectorAction.Checked() {
 		controlWindow.showBoneAllAction.SetChecked(false)
 		controlWindow.controlState.SetShowBoneAll(false)
@@ -482,7 +482,7 @@ func (controlWindow *ControlWindow) onTriggerShowBoneEffector() {
 	controlWindow.controlState.SetShowBoneEffector(controlWindow.showBoneEffectorAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowBoneFixed() {
+func (controlWindow *ControlWindow) TriggerShowBoneFixed() {
 	if controlWindow.showBoneFixedAction.Checked() {
 		controlWindow.showBoneAllAction.SetChecked(false)
 		controlWindow.controlState.SetShowBoneAll(false)
@@ -490,7 +490,7 @@ func (controlWindow *ControlWindow) onTriggerShowBoneFixed() {
 	controlWindow.controlState.SetShowBoneFixed(controlWindow.showBoneFixedAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowBoneRotate() {
+func (controlWindow *ControlWindow) TriggerShowBoneRotate() {
 	if controlWindow.showBoneRotateAction.Checked() {
 		controlWindow.showBoneAllAction.SetChecked(false)
 		controlWindow.controlState.SetShowBoneAll(false)
@@ -498,7 +498,7 @@ func (controlWindow *ControlWindow) onTriggerShowBoneRotate() {
 	controlWindow.controlState.SetShowBoneRotate(controlWindow.showBoneRotateAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowBoneTranslate() {
+func (controlWindow *ControlWindow) TriggerShowBoneTranslate() {
 	if controlWindow.showBoneTranslateAction.Checked() {
 		controlWindow.showBoneAllAction.SetChecked(false)
 		controlWindow.controlState.SetShowBoneAll(false)
@@ -506,7 +506,7 @@ func (controlWindow *ControlWindow) onTriggerShowBoneTranslate() {
 	controlWindow.controlState.SetShowBoneTranslate(controlWindow.showBoneTranslateAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowBoneVisible() {
+func (controlWindow *ControlWindow) TriggerShowBoneVisible() {
 	if controlWindow.showBoneVisibleAction.Checked() {
 		controlWindow.showBoneAllAction.SetChecked(false)
 		controlWindow.controlState.SetShowBoneAll(false)
@@ -514,23 +514,23 @@ func (controlWindow *ControlWindow) onTriggerShowBoneVisible() {
 	controlWindow.controlState.SetShowBoneVisible(controlWindow.showBoneVisibleAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowRigidBodyFront() {
+func (controlWindow *ControlWindow) TriggerShowRigidBodyFront() {
 	controlWindow.controlState.SetShowRigidBodyFront(controlWindow.showRigidBodyFrontAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowRigidBodyBack() {
+func (controlWindow *ControlWindow) TriggerShowRigidBodyBack() {
 	controlWindow.controlState.SetShowRigidBodyBack(controlWindow.showRigidBodyBackAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowJoint() {
+func (controlWindow *ControlWindow) TriggerShowJoint() {
 	controlWindow.controlState.SetShowJoint(controlWindow.showJointAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerShowInfo() {
+func (controlWindow *ControlWindow) TriggerShowInfo() {
 	controlWindow.controlState.SetShowInfo(controlWindow.showInfoAction.Checked())
 }
 
-func (controlWindow *ControlWindow) onTriggerFps30Limit() {
+func (controlWindow *ControlWindow) TriggerFps30Limit() {
 	controlWindow.limitFps30Action.SetChecked(true)
 	controlWindow.limitFps60Action.SetChecked(false)
 	controlWindow.limitFpsUnLimitAction.SetChecked(false)
@@ -538,7 +538,7 @@ func (controlWindow *ControlWindow) onTriggerFps30Limit() {
 	controlWindow.controlState.SetSpfLimit(controlWindow.SpfLimit())
 }
 
-func (controlWindow *ControlWindow) onTriggerFps60Limit() {
+func (controlWindow *ControlWindow) TriggerFps60Limit() {
 	controlWindow.limitFps30Action.SetChecked(false)
 	controlWindow.limitFps60Action.SetChecked(true)
 	controlWindow.limitFpsUnLimitAction.SetChecked(false)
@@ -546,7 +546,7 @@ func (controlWindow *ControlWindow) onTriggerFps60Limit() {
 	controlWindow.controlState.SetSpfLimit(controlWindow.SpfLimit())
 }
 
-func (controlWindow *ControlWindow) onTriggerUnLimitFps() {
+func (controlWindow *ControlWindow) TriggerUnLimitFps() {
 	controlWindow.limitFps30Action.SetChecked(false)
 	controlWindow.limitFps60Action.SetChecked(false)
 	controlWindow.limitFpsUnLimitAction.SetChecked(true)
