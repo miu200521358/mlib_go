@@ -123,6 +123,11 @@ func (appState *appState) Frame() float64 {
 	return appState.frame
 }
 func (appState *appState) SetFrame(frame float64) {
+	if frame < 0 || int(appState.frame) == int(frame) {
+		// フレームが0未満または同じフレームの場合は何もしない
+		return
+	}
+
 	if appState.Playing() && !appState.IsEnabledFrameDrop() && int(frame)-appState.prevFrame > 1 {
 		// 再生中でフレームドロップOFFだったらフレームを1Fしか進めない
 		frame = float64(appState.prevFrame) + 1
