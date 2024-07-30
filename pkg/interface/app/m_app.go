@@ -142,7 +142,7 @@ func (app *MApp) ViewerRun() {
 		prevTime = frameTime
 
 		// 描画が終わったらフレーム番号を更新
-		app.prevFrame = int(app.frame)
+		app.prevFrame = app.frame
 
 		// 描画にかかった時間を計測
 		elapsedList = append(elapsedList, app.deformElapsed+elapsed)

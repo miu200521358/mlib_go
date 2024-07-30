@@ -14,7 +14,7 @@ import (
 
 type appState struct {
 	frame                float64                   // フレーム
-	prevFrame            int                       // 前回のフレーム
+	prevFrame            float64                   // 前回のフレーム
 	maxFrame             int                       // 最大フレーム
 	isEnabledFrameDrop   bool                      // フレームドロップON/OFF
 	isEnabledPhysics     bool                      // 物理ON/OFF
@@ -57,8 +57,8 @@ func newAppState() *appState {
 		isEnabledFrameDrop:  true,       // フレームドロップON
 		isLimitFps30:        true,       // 30fps制限
 		spfLimit:            1.0 / 30.0, // 30fps
-		prevFrame:           -1,
-		frame:               0,
+		prevFrame:           0.0,
+		frame:               0.0,
 		maxFrame:            1,
 		animationStates:     make([][]state.IAnimationState, 0),
 		nextAnimationStates: make([][]state.IAnimationState, 0),
@@ -128,7 +128,7 @@ func (appState *appState) SetFrame(frame float64) {
 		return
 	}
 
-	if appState.Playing() && !appState.IsEnabledFrameDrop() && int(frame)-appState.prevFrame > 1 {
+	if appState.Playing() && !appState.IsEnabledFrameDrop() && frame-appState.prevFrame >= 1 {
 		// 再生中でフレームドロップOFFだったらフレームを1Fしか進めない
 		frame = float64(appState.prevFrame) + 1
 	}
@@ -190,11 +190,11 @@ func (appState *appState) SetMaxFrame(maxFrame int) {
 	appState.maxFrame = maxFrame
 }
 
-func (appState *appState) PrevFrame() int {
+func (appState *appState) PrevFrame() float64 {
 	return appState.prevFrame
 }
 
-func (appState *appState) SetPrevFrame(prevFrame int) {
+func (appState *appState) SetPrevFrame(prevFrame float64) {
 	appState.prevFrame = prevFrame
 }
 

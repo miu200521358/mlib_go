@@ -107,24 +107,12 @@ func (contState *controlState) Run() {
 
 			// 再生中はフレームを進める
 			// 経過秒数をキーフレームの進捗具合に合わせて調整
-			if elapsed >= contState.appState.SpfLimit() {
-				// デフォームFPS制限なしの場合、フレーム番号を常に進める
-				if contState.appState.IsEnabledFrameDrop() {
-					// フレームドロップONの時、経過秒数分進める
-					contState.AddFrame(elapsed * 30)
-				} else {
-					if contState.appState.PrevFrame() == contState.appState.MaxFrame() {
-						// 最後まで行ったら物理リセットフラグを立てて、最初に戻す
-						contState.appState.SetPhysicsReset(true)
-						contState.SetFrame(0)
-					} else {
-						// フレームドロップOFFの時、前フレームから1Fだけ進める
-						contState.SetFrame(float64(contState.appState.PrevFrame() + 1))
-					}
-				}
-
-				prevTime = frameTime
+			if elapsed < contState.appState.SpfLimit() {
+				continue
 			}
+
+			contState.AddFrame(elapsed * 30)
+			prevTime = frameTime
 
 			if contState.Frame() > float64(contState.MaxFrame()) {
 				// 最後まで行ったら物理リセットフラグを立てて、最初に戻す

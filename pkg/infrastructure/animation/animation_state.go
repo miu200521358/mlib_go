@@ -190,7 +190,7 @@ func NewAnimationState(windowIndex, modelIndex int) *AnimationState {
 	return &AnimationState{
 		windowIndex:              windowIndex,
 		modelIndex:               modelIndex,
-		frame:                    -1,
+		frame:                    0,
 		invisibleMaterialIndexes: nil,
 		selectedVertexIndexes:    nil,
 		noSelectedVertexIndexes:  nil,
