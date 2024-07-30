@@ -27,6 +27,9 @@ type IAnimationState interface {
 	SetRenderDeltas(deltas *delta.RenderDeltas)
 	Frame() float64
 	SetFrame(frame float64)
+	Elapsed() float64
+	SetElapsed(elapsed float64)
+	AddElapsed(elapsed float64)
 	DeformBeforePhysics(appState IAppState, model *pmx.PmxModel) (*delta.VmdDeltas, *delta.RenderDeltas)
 	DeformPhysics(physics mbt.IPhysics, appState IAppState)
 	DeformAfterPhysics(physics mbt.IPhysics, appState IAppState)

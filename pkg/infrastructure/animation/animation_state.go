@@ -28,6 +28,7 @@ type AnimationState struct {
 	noSelectedVertexIndexes  map[int]struct{}    // 非選択頂点インデックス
 	vmdDeltas                *delta.VmdDeltas    // モーション変化量
 	renderDeltas             *delta.RenderDeltas // 描画変化量
+	elapsed                  float64             // 経過時間
 }
 
 func (animationState *AnimationState) WindowIndex() int {
@@ -92,6 +93,18 @@ func (animationState *AnimationState) RenderDeltas() *delta.RenderDeltas {
 
 func (animationState *AnimationState) SetRenderDeltas(deltas *delta.RenderDeltas) {
 	animationState.renderDeltas = deltas
+}
+
+func (animationState *AnimationState) Elapsed() float64 {
+	return animationState.elapsed
+}
+
+func (animationState *AnimationState) SetElapsed(elapsed float64) {
+	animationState.elapsed = elapsed
+}
+
+func (animationState *AnimationState) AddElapsed(elapsed float64) {
+	animationState.elapsed += elapsed
 }
 
 func (animationState *AnimationState) InvisibleMaterialIndexes() []int {

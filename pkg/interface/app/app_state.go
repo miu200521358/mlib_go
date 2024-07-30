@@ -5,7 +5,9 @@ package app
 
 import (
 	"sync"
+	"time"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/animation"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
@@ -44,6 +46,7 @@ type appState struct {
 	isClosed             bool                      // ウィンドウクローズ
 	playing              bool                      // 再生中フラグ
 	spfLimit             float64                   // FPS制限
+	elapsed              float64                   // 経過時間
 	animationStates      [][]state.IAnimationState // アニメーションステート
 	nextAnimationStates  [][]state.IAnimationState // 次のアニメーションステート
 	mu                   sync.Mutex
@@ -121,6 +124,17 @@ func (appState *appState) Frame() float64 {
 	return appState.frame
 }
 func (appState *appState) SetFrame(frame float64) {
+	if int(appState.frame) == int(frame) {
+		// 同じフレーム番号だったらデフォームは不要
+		appState.frame = frame
+		return
+	}
+
+	if appState.Playing() && !appState.IsEnabledFrameDrop() {
+		// 再生中でフレームドロップOFFだったらフレームを1Fしか進めない
+		frame = appState.frame + 1
+	}
+
 	appState.frame = frame
 
 	var wg sync.WaitGroup
@@ -131,12 +145,19 @@ func (appState *appState) SetFrame(frame float64) {
 				go func(i, j int) {
 					defer wg.Done()
 
+					startTime := time.Now()
+
 					vmdDeltas, renderDeltas := appState.animationStates[i][j].DeformBeforePhysics(
 						appState, appState.animationStates[i][j].Model())
 
 					nextState := animation.NewAnimationState(i, j)
 					nextState.SetVmdDeltas(vmdDeltas)
 					nextState.SetRenderDeltas(renderDeltas)
+
+					defer func() {
+						// デフォーム所要時間を設定
+						nextState.SetElapsed(time.Since(startTime).Seconds() / 30.0)
+					}()
 
 					appState.mu.Lock()
 					defer appState.mu.Unlock()
@@ -148,6 +169,28 @@ func (appState *appState) SetFrame(frame float64) {
 
 	// すべてのGoroutineが終了するのを待つ
 	wg.Wait()
+}
+
+// 経過時間(デフォーム+物理+描画)の時間を返す
+func (appState *appState) ElapsedAvg() float64 {
+	elapsedList := make([]float64, 0)
+	elapsedList = append(elapsedList, appState.elapsed)
+	for i := range appState.animationStates {
+		for j := range appState.animationStates[i] {
+			if appState.animationStates[i][j] != nil && appState.animationStates[i][j].Elapsed() > 0 {
+				elapsedList = append(elapsedList, appState.animationStates[i][j].Elapsed())
+			}
+		}
+	}
+	return mmath.Avg(elapsedList)
+}
+
+func (appState *appState) Elapsed() float64 {
+	return appState.elapsed
+}
+
+func (appState *appState) SetElapsed(elapsed float64) {
+	appState.elapsed = elapsed
 }
 
 func (appState *appState) AddFrame(v float64) {

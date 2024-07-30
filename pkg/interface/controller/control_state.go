@@ -96,6 +96,8 @@ func (contState *controlState) Run() {
 		prevTime := glfw.GetTime()
 
 		for !contState.appState.IsClosed() {
+			contState.appState.TriggerPlay(contState.Playing())
+
 			frameTime := glfw.GetTime()
 			elapsed := frameTime - prevTime
 
@@ -108,7 +110,7 @@ func (contState *controlState) Run() {
 						// フレームドロップONの時、経過秒数分進める
 						contState.AddFrame(elapsed * 30)
 					} else {
-						// フレームドロップOFFの時、最大1だけ進める
+						// フレームドロップOFFの時、最大1Fだけ進める
 						contState.AddFrame(min(1, elapsed*30))
 					}
 

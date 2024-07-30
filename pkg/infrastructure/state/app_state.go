@@ -71,4 +71,6 @@ type IAppState interface {
 	SpfLimit() float64
 	SetSpfLimit(spf float64)
 	SetAnimationState(animationState IAnimationState)
+	ElapsedAvg() float64
+	Elapsed() float64
 }
