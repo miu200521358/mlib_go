@@ -338,19 +338,6 @@ func (picker *FilePicker) SetCache(data core.IHashModel) {
 	picker.pathLineEdit.SetText(data.Path())
 }
 
-func (picker *FilePicker) IsCached() bool {
-	if isExist, err := mutils.ExistsFile(picker.pathLineEdit.Text()); err != nil || !isExist {
-		return false
-	}
-
-	hash, err := picker.rep.LoadHash(picker.pathLineEdit.Text())
-	if err != nil {
-		return false
-	}
-
-	return picker.cacheData != nil && picker.cacheData.Hash() == hash
-}
-
 func (picker *FilePicker) SetPath(path string) {
 	picker.pathLineEdit.SetText(path)
 }

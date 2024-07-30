@@ -23,9 +23,7 @@ func NewVpdRepository() *VpdRepository {
 	return &VpdRepository{
 		baseRepository: &baseRepository[*vmd.VmdMotion]{
 			newFunc: func(path string) *vmd.VmdMotion {
-				return &vmd.VmdMotion{
-					HashModel: core.NewHashModel(path),
-				}
+				return vmd.NewVmdMotion(path)
 			},
 		},
 	}
@@ -40,15 +38,8 @@ func (rep *VpdRepository) Load(path string) (core.IHashModel, error) {
 	// モデルを新規作成
 	motion := rep.newFunc(path)
 
-	hash, err := rep.LoadHash(path)
-	if err != nil {
-		mlog.E("Load.LoadHash error: %v", err)
-		return motion, err
-	}
-	motion.SetHash(hash)
-
 	// ファイルを開く
-	err = rep.open(path)
+	err := rep.open(path)
 	if err != nil {
 		mlog.E("Load.Open error: %v", err)
 		return motion, err
@@ -72,6 +63,7 @@ func (rep *VpdRepository) Load(path string) (core.IHashModel, error) {
 		return motion, err
 	}
 
+	motion.UpdateHash()
 	rep.close()
 
 	return motion, nil
@@ -102,7 +94,7 @@ func (rep *VpdRepository) LoadName(path string) (string, error) {
 
 	rep.close()
 
-	return motion.ModelName, nil
+	return motion.Name(), nil
 }
 
 func (rep *VpdRepository) readLines() error {
@@ -148,7 +140,7 @@ func (rep *VpdRepository) loadHeader(motion *vmd.VmdMotion) error {
 	}
 
 	if len(matches) > 0 {
-		motion.ModelName = matches[1]
+		motion.SetName(matches[1])
 	}
 
 	return nil

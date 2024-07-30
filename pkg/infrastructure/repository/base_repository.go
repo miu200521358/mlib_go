@@ -3,9 +3,7 @@ package repository
 import (
 	"bufio"
 	"bytes"
-	"crypto/sha1"
 	"encoding/binary"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"math"
@@ -23,7 +21,6 @@ import (
 type IRepository interface {
 	LoadName(path string) (string, error)
 	Load(path string) (core.IHashModel, error)
-	LoadHash(path string) (string, error)
 	Save(overridePath string, data core.IHashModel, includeSystem bool) error
 }
 
@@ -57,25 +54,6 @@ func (rep *baseRepository[T]) LoadName(path string) (string, error) {
 
 func (rep *baseRepository[T]) Load(path string) (T, error) {
 	panic("not implemented")
-}
-
-func (rep *baseRepository[T]) LoadHash(path string) (string, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
-	sha1Hash := sha1.New()
-	if _, err := io.Copy(sha1Hash, file); err != nil {
-		return "", err
-	}
-
-	// ファイルパスをハッシュに含める
-	sha1Hash.Write([]byte(path))
-
-	return hex.EncodeToString(sha1Hash.Sum(nil)), nil
-
 }
 
 func (rep *baseRepository[T]) defineEncoding(encoding encoding.Encoding) {

@@ -1,13 +1,18 @@
 package pmx
 
 import (
+	"fmt"
+	"hash/fnv"
+
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 )
 
 type PmxModel struct {
-	*core.HashModel
+	name               string
+	path               string
+	hash               string
 	Signature          string
 	Version            float64
 	ExtendedUVCount    int
@@ -34,7 +39,9 @@ type PmxModel struct {
 
 func NewPmxModel(path string) *PmxModel {
 	model := &PmxModel{}
-	model.HashModel = core.NewHashModel(path)
+	model.name = ""
+	model.path = path
+	model.hash = ""
 
 	model.Vertices = NewVertices(0)
 	model.Faces = NewFaces(0)
@@ -47,6 +54,52 @@ func NewPmxModel(path string) *PmxModel {
 	model.Joints = NewJoints(0)
 
 	return model
+}
+
+func (model *PmxModel) Path() string {
+	return model.path
+}
+
+func (model *PmxModel) SetPath(path string) {
+	model.path = path
+}
+
+func (model *PmxModel) Name() string {
+	return model.name
+}
+
+func (model *PmxModel) SetName(name string) {
+	model.name = name
+}
+
+func (model *PmxModel) Hash() string {
+	return model.hash
+}
+
+func (model *PmxModel) SetHash(hash string) {
+	model.hash = hash
+}
+
+func (model *PmxModel) UpdateHash() {
+
+	h := fnv.New32a()
+	// 名前をハッシュに含める
+	h.Write([]byte(model.Name()))
+	// ファイルパスをハッシュに含める
+	h.Write([]byte(model.Path()))
+	// 各要素の数をハッシュに含める
+	h.Write([]byte(fmt.Sprintf("%d", model.Vertices.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", model.Faces.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", model.Textures.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", model.Materials.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", model.Bones.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", model.Morphs.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", model.DisplaySlots.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", model.RigidBodies.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", model.Joints.Len())))
+
+	// ハッシュ値を16進数文字列に変換
+	model.SetHash(fmt.Sprintf("%x", h.Sum(nil)))
 }
 
 func (model *PmxModel) InitializeDisplaySlots() {

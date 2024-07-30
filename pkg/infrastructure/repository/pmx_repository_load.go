@@ -16,15 +16,8 @@ func (rep *PmxRepository) Load(path string) (core.IHashModel, error) {
 	// モデルを新規作成
 	model := rep.newFunc(path)
 
-	hash, err := rep.LoadHash(path)
-	if err != nil {
-		mlog.E("ReadByFilepath.ReadHashByFilePath error: %v", err)
-		return nil, err
-	}
-	model.SetHash(hash)
-
 	// ファイルを開く
-	err = rep.open(path)
+	err := rep.open(path)
 	if err != nil {
 		mlog.E("ReadByFilepath.Open error: %v", err)
 		return model, err
@@ -44,6 +37,7 @@ func (rep *PmxRepository) Load(path string) (core.IHashModel, error) {
 
 	rep.close()
 	model.Setup()
+	model.UpdateHash()
 
 	return model, nil
 }

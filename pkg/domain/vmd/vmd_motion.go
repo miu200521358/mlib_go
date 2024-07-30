@@ -1,15 +1,19 @@
 package vmd
 
 import (
+	"fmt"
+	"hash/fnv"
+
 	"github.com/jinzhu/copier"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 )
 
 type VmdMotion struct {
-	*core.HashModel
+	name         string
+	path         string
+	hash         string
 	Signature    string // vmdバージョン
-	ModelName    string // モデル名
 	BoneFrames   *BoneFrames
 	MorphFrames  *MorphFrames
 	CameraFrames *CameraFrames
@@ -20,8 +24,9 @@ type VmdMotion struct {
 
 func NewVmdMotion(path string) *VmdMotion {
 	return &VmdMotion{
-		HashModel:    core.NewHashModel(path),
-		ModelName:    "",
+		name:         "",
+		path:         path,
+		hash:         "",
 		BoneFrames:   NewBoneFrames(),
 		MorphFrames:  NewMorphFrames(),
 		CameraFrames: NewCameraFrames(),
@@ -31,18 +36,53 @@ func NewVmdMotion(path string) *VmdMotion {
 	}
 }
 
+func (motion *VmdMotion) Path() string {
+	return motion.path
+}
+
+func (motion *VmdMotion) SetPath(path string) {
+	motion.path = path
+}
+
+func (motion *VmdMotion) Name() string {
+	return motion.name
+}
+
+func (motion *VmdMotion) SetName(name string) {
+	motion.name = name
+}
+
+func (motion *VmdMotion) Hash() string {
+	return motion.hash
+}
+
+func (motion *VmdMotion) SetHash(hash string) {
+	motion.hash = hash
+}
+
+func (motion *VmdMotion) UpdateHash() {
+
+	h := fnv.New32a()
+	// 名前をハッシュに含める
+	h.Write([]byte(motion.Name()))
+	// ファイルパスをハッシュに含める
+	h.Write([]byte(motion.Path()))
+	// 各要素の数をハッシュに含める
+	h.Write([]byte(fmt.Sprintf("%d", motion.BoneFrames.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", motion.MorphFrames.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", motion.CameraFrames.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", motion.LightFrames.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", motion.ShadowFrames.Len())))
+	h.Write([]byte(fmt.Sprintf("%d", motion.IkFrames.Len())))
+
+	// ハッシュ値を16進数文字列に変換
+	motion.SetHash(fmt.Sprintf("%x", h.Sum(nil)))
+}
+
 func (motion *VmdMotion) Copy() core.IHashModel {
 	copied := NewVmdMotion("")
 	copier.CopyWithOption(copied, motion, copier.Option{DeepCopy: true})
 	return copied
-}
-
-func (motion *VmdMotion) Name() string {
-	return motion.ModelName
-}
-
-func (motion *VmdMotion) SetName(name string) {
-	motion.ModelName = name
 }
 
 func (motion *VmdMotion) MaxFrame() int {
