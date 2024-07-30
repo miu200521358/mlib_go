@@ -113,8 +113,14 @@ func (contState *controlState) Run() {
 					// フレームドロップONの時、経過秒数分進める
 					contState.AddFrame(elapsed * 30)
 				} else {
-					// フレームドロップOFFの時、前フレームから1Fだけ進める
-					contState.SetFrame(float64(contState.appState.PrevFrame() + 1))
+					if contState.appState.PrevFrame() == contState.appState.MaxFrame() {
+						// 最後まで行ったら物理リセットフラグを立てて、最初に戻す
+						contState.appState.SetPhysicsReset(true)
+						contState.SetFrame(0)
+					} else {
+						// フレームドロップOFFの時、前フレームから1Fだけ進める
+						contState.SetFrame(float64(contState.appState.PrevFrame() + 1))
+					}
 				}
 
 				prevTime = frameTime
