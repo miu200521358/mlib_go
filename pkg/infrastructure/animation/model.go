@@ -4,6 +4,7 @@
 package animation
 
 import (
+	"slices"
 	"sync"
 	"unsafe"
 
@@ -17,38 +18,40 @@ import (
 )
 
 type RenderModel struct {
-	hash              string       // ハッシュ
-	meshes            []*Mesh      // メッシュ
-	textures          []*textureGl // テクスチャ
-	toonTextures      []*textureGl // トゥーンテクスチャ
-	vertices          []float32    // 頂点情報
-	vao               *buffer.VAO  // 頂点VAO
-	vbo               *buffer.VBO  // 頂点VBO
-	normalVertices    []float32    // 法線情報
-	normalVao         *buffer.VAO  // 法線VAO
-	normalVbo         *buffer.VBO  // 法線VBO
-	normalIbo         *buffer.IBO  // 法線IBO
-	selectedVertexVao *buffer.VAO  // 選択頂点VAO
-	selectedVertexVbo *buffer.VBO  // 選択頂点VBO
-	selectedVertexIbo *buffer.IBO  // 選択頂点IBO
-	boneLineCount     int          // ボーン情報
-	boneLineVao       *buffer.VAO  // ボーンVAO
-	boneLineVbo       *buffer.VBO  // ボーンVBO
-	boneLineIbo       *buffer.IBO  // ボーンIBO
-	boneLineIndexes   []int        // ボーンインデックス
-	bonePointCount    int          // ボーン情報
-	bonePointVao      *buffer.VAO  // ボーンVAO
-	bonePointVbo      *buffer.VBO  // ボーンVBO
-	bonePointIbo      *buffer.IBO  // ボーンIBO
-	bonePointIndexes  []int        // ボーンインデックス
-	cursorPositionVao *buffer.VAO  // カーソルラインVAO
-	cursorPositionVbo *buffer.VBO  // カーソルラインVBO
-	ssbo              uint32       // SSBO
-	vertexCount       int          // 頂点数
+	model             *pmx.PmxModel // 元モデル
+	hash              string        // ハッシュ
+	meshes            []*Mesh       // メッシュ
+	textures          []*textureGl  // テクスチャ
+	toonTextures      []*textureGl  // トゥーンテクスチャ
+	vertices          []float32     // 頂点情報
+	vao               *buffer.VAO   // 頂点VAO
+	vbo               *buffer.VBO   // 頂点VBO
+	normalVertices    []float32     // 法線情報
+	normalVao         *buffer.VAO   // 法線VAO
+	normalVbo         *buffer.VBO   // 法線VBO
+	normalIbo         *buffer.IBO   // 法線IBO
+	selectedVertexVao *buffer.VAO   // 選択頂点VAO
+	selectedVertexVbo *buffer.VBO   // 選択頂点VBO
+	selectedVertexIbo *buffer.IBO   // 選択頂点IBO
+	boneLineCount     int           // ボーン情報
+	boneLineVao       *buffer.VAO   // ボーンVAO
+	boneLineVbo       *buffer.VBO   // ボーンVBO
+	boneLineIbo       *buffer.IBO   // ボーンIBO
+	boneLineIndexes   []int         // ボーンインデックス
+	bonePointCount    int           // ボーン情報
+	bonePointVao      *buffer.VAO   // ボーンVAO
+	bonePointVbo      *buffer.VBO   // ボーンVBO
+	bonePointIbo      *buffer.IBO   // ボーンIBO
+	bonePointIndexes  []int         // ボーンインデックス
+	cursorPositionVao *buffer.VAO   // カーソルラインVAO
+	cursorPositionVbo *buffer.VBO   // カーソルラインVBO
+	ssbo              uint32        // SSBO
+	vertexCount       int           // 頂点数
 }
 
 func NewRenderModel(windowIndex int, model *pmx.PmxModel) *RenderModel {
 	m := &RenderModel{
+		model:       model,
 		vertexCount: model.Vertices.Len(),
 	}
 	m.initToonTexturesGl(windowIndex)
@@ -389,7 +392,7 @@ func (renderModel *RenderModel) Render(
 		}
 
 		selectedVertexIndexes := renderModel.drawSelectedVertex(
-			animationState.WindowIndex(),
+			animationState.WindowIndex(), animationState.InvisibleMaterialIndexes(),
 			animationState.SelectedVertexIndexes(), animationState.NoSelectedVertexIndexes(),
 			shader, paddedMatrixes, matrixWidth, matrixHeight, cursorPositions, removeCursorPositions)
 		if len(removeCursorPositions) > 0 {
@@ -487,6 +490,7 @@ func (renderModel *RenderModel) drawCursorLine(
 
 func (renderModel *RenderModel) drawSelectedVertex(
 	windowIndex int,
+	invisibleMaterialIndexes []int,
 	nowSelectedVertexIndexes []int,
 	nowNoSelectedVertexIndexes []int,
 	shader mgl.IShader,
@@ -567,9 +571,16 @@ func (renderModel *RenderModel) drawSelectedVertex(
 			for j := range 4 {
 				vertexPositions[j] = *(*float32)(unsafe.Pointer(uintptr(ptr) + uintptr((i*4+j)*4)))
 			}
-			if vertexPositions[0] != -1 || vertexPositions[1] != -1 ||
-				vertexPositions[2] != -1 || vertexPositions[3] != -1 {
-				// いずれが-1でない場合はマップに保持
+			isInvisible := false
+			for _, materialIndex := range renderModel.model.Vertices.Get(i).MaterialIndexes {
+				if slices.Contains(invisibleMaterialIndexes, materialIndex) {
+					isInvisible = true
+					break
+				}
+			}
+			if !isInvisible && (vertexPositions[0] != -1 || vertexPositions[1] != -1 ||
+				vertexPositions[2] != -1 || vertexPositions[3] != -1) {
+				// 表示対象でいずれが-1でない場合はマップに保持
 				selectedVertexIndexes = append(selectedVertexIndexes, i)
 				selectedVertexPositions[i] = mgl32.Vec4{
 					vertexPositions[0], vertexPositions[1], vertexPositions[2], vertexPositions[3]}
