@@ -145,6 +145,13 @@ func (animationState *AnimationState) SetSelectedVertexIndexes(indexes []int) {
 	}
 }
 
+func (animationState *AnimationState) SetNoSelectedVertexIndexes(indexes []int) {
+	animationState.noSelectedVertexIndexes = make(map[int]struct{}, len(indexes))
+	for _, i := range indexes {
+		animationState.noSelectedVertexIndexes[i] = struct{}{}
+	}
+}
+
 func (animationState *AnimationState) ClearSelectedVertexIndexes() {
 	animationState.UpdateNoSelectedVertexIndexes(animationState.SelectedVertexIndexes())
 	animationState.selectedVertexIndexes = make(map[int]struct{})

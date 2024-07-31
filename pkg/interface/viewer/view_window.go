@@ -542,6 +542,16 @@ func (viewWindow *ViewWindow) Animate(
 						nextState.InvisibleMaterialIndexes())
 					nextState.SetInvisibleMaterialIndexes(nil)
 				}
+				if nextState.SelectedVertexIndexes() != nil {
+					animationStates[nextState.ModelIndex()].UpdateSelectedVertexIndexes(
+						nextState.SelectedVertexIndexes())
+					nextState.SetSelectedVertexIndexes(nil)
+				}
+				if nextState.NoSelectedVertexIndexes() != nil {
+					animationStates[nextState.ModelIndex()].UpdateNoSelectedVertexIndexes(
+						nextState.NoSelectedVertexIndexes())
+					nextState.SetNoSelectedVertexIndexes(nil)
+				}
 			}
 		}
 

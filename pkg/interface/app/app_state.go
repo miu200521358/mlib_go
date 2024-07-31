@@ -117,6 +117,16 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 		appState.nextAnimationStates[windowIndex][modelIndex].SetInvisibleMaterialIndexes(
 			animationState.InvisibleMaterialIndexes())
 	}
+
+	if animationState.SelectedVertexIndexes() != nil {
+		appState.nextAnimationStates[windowIndex][modelIndex].SetSelectedVertexIndexes(
+			animationState.SelectedVertexIndexes())
+	}
+
+	if animationState.NoSelectedVertexIndexes() != nil {
+		appState.nextAnimationStates[windowIndex][modelIndex].SetNoSelectedVertexIndexes(
+			animationState.NoSelectedVertexIndexes())
+	}
 }
 
 func (appState *appState) Frame() float64 {

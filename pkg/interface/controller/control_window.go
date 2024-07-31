@@ -21,7 +21,7 @@ import (
 type ControlWindow struct {
 	*walk.MainWindow
 	*controlState                                      // 操作状態
-	tabWidget                       *widget.MTabWidget // タブウィジェット
+	TabWidget                       *widget.MTabWidget // タブウィジェット
 	appConfig                       *mconfig.AppConfig // アプリケーション設定
 	spfLimit                        float64            // FPS制限
 	enabledFrameDropAction          *walk.Action       // フレームドロップON/OFF
@@ -373,18 +373,18 @@ func (controlWindow *ControlWindow) GetMainWindow() *walk.MainWindow {
 }
 
 func (controlWindow *ControlWindow) InitTabWidget() {
-	controlWindow.tabWidget = widget.NewMTabWidget(controlWindow.MainWindow)
+	controlWindow.TabWidget = widget.NewMTabWidget(controlWindow.MainWindow)
 }
 
 func (controlWindow *ControlWindow) AddTabPage(tabPage *walk.TabPage) {
-	err := controlWindow.tabWidget.Pages().Add(tabPage)
+	err := controlWindow.TabWidget.Pages().Add(tabPage)
 	if err != nil {
 		widget.RaiseError(err)
 	}
 }
 
 func (controlWindow *ControlWindow) SetTabIndex(index int) {
-	controlWindow.tabWidget.SetCurrentIndex(index)
+	controlWindow.TabWidget.SetCurrentIndex(index)
 }
 
 func (controlWindow *ControlWindow) SetPlayer(player app.IPlayer) {
@@ -592,6 +592,7 @@ func (controlWindow *ControlWindow) IsEnabledFrameDrop() bool {
 
 func (controlWindow *ControlWindow) SetEnabledFrameDrop(enabled bool) {
 	controlWindow.enabledFrameDropAction.SetChecked(enabled)
+	controlWindow.TriggerEnabledFrameDrop()
 }
 
 func (controlWindow *ControlWindow) IsEnabledPhysics() bool {
@@ -600,6 +601,7 @@ func (controlWindow *ControlWindow) IsEnabledPhysics() bool {
 
 func (controlWindow *ControlWindow) SetEnabledPhysics(enabled bool) {
 	controlWindow.enabledPhysicsAction.SetChecked(enabled)
+	controlWindow.TriggerEnabledPhysics()
 }
 
 func (controlWindow *ControlWindow) IsPhysicsReset() bool {
@@ -608,6 +610,7 @@ func (controlWindow *ControlWindow) IsPhysicsReset() bool {
 
 func (controlWindow *ControlWindow) SetPhysicsReset(reset bool) {
 	controlWindow.physicsResetAction.SetChecked(reset)
+	controlWindow.TriggerPhysicsReset()
 }
 
 func (controlWindow *ControlWindow) IsShowNormal() bool {
@@ -616,6 +619,7 @@ func (controlWindow *ControlWindow) IsShowNormal() bool {
 
 func (controlWindow *ControlWindow) SetShowNormal(show bool) {
 	controlWindow.showNormalAction.SetChecked(show)
+	controlWindow.TriggerShowNormal()
 }
 
 func (controlWindow *ControlWindow) IsShowWire() bool {
@@ -624,6 +628,7 @@ func (controlWindow *ControlWindow) IsShowWire() bool {
 
 func (controlWindow *ControlWindow) SetShowWire(show bool) {
 	controlWindow.showWireAction.SetChecked(show)
+	controlWindow.TriggerShowWire()
 }
 
 func (controlWindow *ControlWindow) IsShowOverride() bool {
@@ -632,6 +637,7 @@ func (controlWindow *ControlWindow) IsShowOverride() bool {
 
 func (controlWindow *ControlWindow) SetShowOverride(show bool) {
 	controlWindow.showOverrideAction.SetChecked(show)
+	controlWindow.TriggerShowOverride()
 }
 
 func (controlWindow *ControlWindow) IsShowSelectedVertex() bool {
@@ -640,6 +646,7 @@ func (controlWindow *ControlWindow) IsShowSelectedVertex() bool {
 
 func (controlWindow *ControlWindow) SetShowSelectedVertex(show bool) {
 	controlWindow.showSelectedVertexAction.SetChecked(show)
+	controlWindow.TriggerShowSelectedVertex()
 }
 
 func (controlWindow *ControlWindow) IsShowBoneAll() bool {
@@ -803,10 +810,10 @@ func (controlWindow *ControlWindow) SetSpfLimit(spf float64) {
 }
 
 func (controlWindow *ControlWindow) SetEnabled(enabled bool) {
-	if controlWindow.tabWidget != nil {
-		for i := range controlWindow.tabWidget.Pages().Len() {
-			for j := range controlWindow.tabWidget.Pages().At(i).Children().Len() {
-				controlWindow.tabWidget.Pages().At(i).Children().At(j).SetEnabled(enabled)
+	if controlWindow.TabWidget != nil {
+		for i := range controlWindow.TabWidget.Pages().Len() {
+			for j := range controlWindow.TabWidget.Pages().At(i).Children().Len() {
+				controlWindow.TabWidget.Pages().At(i).Children().At(j).SetEnabled(enabled)
 			}
 		}
 		// controlWindow.tabWidget.SetEnabled(enabled)
@@ -817,9 +824,9 @@ func (controlWindow *ControlWindow) SetEnabled(enabled bool) {
 }
 
 func (controlWindow *ControlWindow) Enabled() bool {
-	if controlWindow.tabWidget != nil {
-		for i := range controlWindow.tabWidget.Pages().Len() {
-			if controlWindow.tabWidget.Pages().At(i) != nil && !controlWindow.tabWidget.Pages().At(i).Enabled() {
+	if controlWindow.TabWidget != nil {
+		for i := range controlWindow.TabWidget.Pages().Len() {
+			if controlWindow.TabWidget.Pages().At(i) != nil && !controlWindow.TabWidget.Pages().At(i).Enabled() {
 				return false
 			}
 		}
