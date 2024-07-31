@@ -157,6 +157,9 @@ func (animationState *AnimationState) UpdateSelectedVertexIndexes(indexes []int)
 }
 
 func (animationState *AnimationState) UpdateNoSelectedVertexIndexes(indexes []int) {
+	if animationState.noSelectedVertexIndexes == nil {
+		animationState.noSelectedVertexIndexes = make(map[int]struct{}, len(indexes))
+	}
 	for _, index := range indexes {
 		animationState.noSelectedVertexIndexes[index] = struct{}{}
 		delete(animationState.selectedVertexIndexes, index)

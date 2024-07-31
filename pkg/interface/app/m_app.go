@@ -25,10 +25,11 @@ import (
 const physicsDefaultSpf = 1.0 / 60.0
 
 type MApp struct {
-	*appState                        // アプリ状態
-	appConfig     *mconfig.AppConfig // アプリケーション設定
-	viewWindows   []IViewWindow      // 描画ウィンドウリスト
-	controlWindow IControlWindow     // 操作ウィンドウ
+	*appState                                    // アプリ状態
+	appConfig                 *mconfig.AppConfig // アプリケーション設定
+	viewWindows               []IViewWindow      // 描画ウィンドウリスト
+	controlWindow             IControlWindow     // 操作ウィンドウ
+	selectedVertexIndexesChan chan [][][]int     // 選択頂点インデックス
 }
 
 func NewMApp(appConfig *mconfig.AppConfig) *MApp {
@@ -39,9 +40,10 @@ func NewMApp(appConfig *mconfig.AppConfig) *MApp {
 	}
 
 	app := &MApp{
-		appState:    newAppState(),
-		appConfig:   appConfig,
-		viewWindows: make([]IViewWindow, 0),
+		appState:                  newAppState(),
+		appConfig:                 appConfig,
+		viewWindows:               make([]IViewWindow, 0),
+		selectedVertexIndexesChan: make(chan [][][]int, 1),
 	}
 
 	return app
@@ -63,6 +65,17 @@ func (app *MApp) ViewerRun() {
 	prevTime := glfw.GetTime()
 	prevShowTime := glfw.GetTime()
 	elapsedList := make([]float64, 0)
+
+	go func() {
+		for !app.IsClosed() {
+			select {
+			case selectedVertexIndexes := <-app.selectedVertexIndexesChan:
+				app.controlWindow.UpdateSelectedVertexIndexes(selectedVertexIndexes)
+			default:
+				continue
+			}
+		}
+	}()
 
 	for !app.IsClosed() {
 		frameTime := glfw.GetTime()
@@ -128,15 +141,27 @@ func (app *MApp) ViewerRun() {
 		for i := app.ViewerCount() - 1; i >= 0; i-- {
 			// サブビューワーオーバーレイのため、逆順でレンダリング
 			w := app.viewWindows[i]
+			// if !app.IsShowSelectedVertex() {
+			// 	for j := range app.animationStates[i] {
+			// 		app.animationStates[i][j].UpdateSelectedVertexIndexes(
+			// 			app.animationStates[i][j].SelectedVertexIndexes())
+			// 	}
+			// }
 			// アニメーション
-			if !app.IsShowSelectedVertex() {
-				for j := range app.animationStates[i] {
-					app.animationStates[i][j].UpdateSelectedVertexIndexes(
-						app.animationStates[i][j].SelectedVertexIndexes())
-				}
-			}
 			app.animationStates[i], app.nextAnimationStates[i] =
 				w.Animate(app.animationStates[i], app.nextAnimationStates[i], timeStep)
+		}
+
+		if app.IsShowSelectedVertex() {
+			// 頂点選択機能が有効の場合、選択頂点インデックスを更新
+			selectedVertexIndexes := make([][][]int, len(app.animationStates))
+			for i := range app.animationStates {
+				selectedVertexIndexes[i] = make([][]int, len(app.animationStates[i]))
+				for j := range app.animationStates[i] {
+					selectedVertexIndexes[i][j] = app.animationStates[i][j].SelectedVertexIndexes()
+				}
+			}
+			app.selectedVertexIndexesChan <- selectedVertexIndexes
 		}
 
 		prevTime = frameTime

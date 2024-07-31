@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"math"
+	"sort"
 
 	"github.com/go-gl/mathgl/mgl64"
 
@@ -642,4 +643,19 @@ func (vec1 *MVec3) Vec3Diff(vec2 *MVec3) *MQuaternion {
 
 	q := NewMQuaternionByValues(cr.X*oosr, cr.Y*oosr, cr.Z*oosr, sr*0.5)
 	return q.Normalize()
+}
+
+func SortVec3(vectors []MVec3) []MVec3 {
+	// X, Y, Zの順にソート
+	sort.Slice(vectors, func(i, j int) bool {
+		if vectors[i].X == vectors[j].X {
+			if vectors[i].Y == vectors[j].Y {
+				return vectors[i].Z < vectors[j].Z
+			}
+			return vectors[i].Y < vectors[j].Y
+		}
+		return vectors[i].X < vectors[j].X
+	})
+
+	return vectors
 }

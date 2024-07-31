@@ -20,35 +20,36 @@ import (
 
 type ControlWindow struct {
 	*walk.MainWindow
-	*controlState                               // 操作状態
-	tabWidget                *widget.MTabWidget // タブウィジェット
-	appConfig                *mconfig.AppConfig // アプリケーション設定
-	spfLimit                 float64            // FPS制限
-	enabledFrameDropAction   *walk.Action       // フレームドロップON/OFF
-	enabledPhysicsAction     *walk.Action       // 物理ON/OFF
-	physicsResetAction       *walk.Action       // 物理リセット
-	showNormalAction         *walk.Action       // ボーンデバッグ表示
-	showWireAction           *walk.Action       // ワイヤーフレームデバッグ表示
-	showOverrideAction       *walk.Action       // オーバーライドデバッグ表示
-	showSelectedVertexAction *walk.Action       // 選択頂点デバッグ表示
-	showBoneAllAction        *walk.Action       // 全ボーンデバッグ表示
-	showBoneIkAction         *walk.Action       // IKボーンデバッグ表示
-	showBoneEffectorAction   *walk.Action       // 付与親ボーンデバッグ表示
-	showBoneFixedAction      *walk.Action       // 軸制限ボーンデバッグ表示
-	showBoneRotateAction     *walk.Action       // 回転ボーンデバッグ表示
-	showBoneTranslateAction  *walk.Action       // 移動ボーンデバッグ表示
-	showBoneVisibleAction    *walk.Action       // 表示ボーンデバッグ表示
-	showRigidBodyFrontAction *walk.Action       // 剛体デバッグ表示(前面)
-	showRigidBodyBackAction  *walk.Action       // 剛体デバッグ表示(埋め込み)
-	showJointAction          *walk.Action       // ジョイントデバッグ表示
-	showInfoAction           *walk.Action       // 情報デバッグ表示
-	limitFps30Action         *walk.Action       // 30FPS制限
-	limitFps60Action         *walk.Action       // 60FPS制限
-	limitFpsUnLimitAction    *walk.Action       // FPS無制限
-	cameraSyncAction         *walk.Action       // カメラ同期
-	logLevelDebugAction      *walk.Action       // デバッグメッセージ表示
-	logLevelVerboseAction    *walk.Action       // 冗長メッセージ表示
-	logLevelIkVerboseAction  *walk.Action       // IK冗長メッセージ表示
+	*controlState                                      // 操作状態
+	tabWidget                       *widget.MTabWidget // タブウィジェット
+	appConfig                       *mconfig.AppConfig // アプリケーション設定
+	spfLimit                        float64            // FPS制限
+	enabledFrameDropAction          *walk.Action       // フレームドロップON/OFF
+	enabledPhysicsAction            *walk.Action       // 物理ON/OFF
+	physicsResetAction              *walk.Action       // 物理リセット
+	showNormalAction                *walk.Action       // ボーンデバッグ表示
+	showWireAction                  *walk.Action       // ワイヤーフレームデバッグ表示
+	showOverrideAction              *walk.Action       // オーバーライドデバッグ表示
+	showSelectedVertexAction        *walk.Action       // 選択頂点デバッグ表示
+	showBoneAllAction               *walk.Action       // 全ボーンデバッグ表示
+	showBoneIkAction                *walk.Action       // IKボーンデバッグ表示
+	showBoneEffectorAction          *walk.Action       // 付与親ボーンデバッグ表示
+	showBoneFixedAction             *walk.Action       // 軸制限ボーンデバッグ表示
+	showBoneRotateAction            *walk.Action       // 回転ボーンデバッグ表示
+	showBoneTranslateAction         *walk.Action       // 移動ボーンデバッグ表示
+	showBoneVisibleAction           *walk.Action       // 表示ボーンデバッグ表示
+	showRigidBodyFrontAction        *walk.Action       // 剛体デバッグ表示(前面)
+	showRigidBodyBackAction         *walk.Action       // 剛体デバッグ表示(埋め込み)
+	showJointAction                 *walk.Action       // ジョイントデバッグ表示
+	showInfoAction                  *walk.Action       // 情報デバッグ表示
+	limitFps30Action                *walk.Action       // 30FPS制限
+	limitFps60Action                *walk.Action       // 60FPS制限
+	limitFpsUnLimitAction           *walk.Action       // FPS無制限
+	cameraSyncAction                *walk.Action       // カメラ同期
+	logLevelDebugAction             *walk.Action       // デバッグメッセージ表示
+	logLevelVerboseAction           *walk.Action       // 冗長メッセージ表示
+	logLevelIkVerboseAction         *walk.Action       // IK冗長メッセージ表示
+	funcUpdateSelectedVertexIndexes func([][][]int)    // 選択頂点更新関数
 }
 
 func NewControlWindow(
@@ -825,4 +826,14 @@ func (controlWindow *ControlWindow) Enabled() bool {
 	}
 
 	return true
+}
+
+func (controlWindow *ControlWindow) SetUpdateSelectedVertexIndexesFunc(f func([][][]int)) {
+	controlWindow.funcUpdateSelectedVertexIndexes = f
+}
+
+func (controlWindow *ControlWindow) UpdateSelectedVertexIndexes(indexes [][][]int) {
+	if controlWindow.funcUpdateSelectedVertexIndexes != nil {
+		controlWindow.funcUpdateSelectedVertexIndexes(indexes)
+	}
 }

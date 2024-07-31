@@ -18,6 +18,8 @@ type IControlWindow interface {
 	Enabled() bool
 	SetEnabled(enabled bool)
 	SetFrame(frame float64)
+	UpdateSelectedVertexIndexes(indexes [][][]int)
+	SetUpdateSelectedVertexIndexesFunc(f func([][][]int))
 }
 
 type IViewWindow interface {
