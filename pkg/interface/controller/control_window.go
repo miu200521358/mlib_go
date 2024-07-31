@@ -798,7 +798,9 @@ func (controlWindow *ControlWindow) Playing() bool {
 }
 
 func (controlWindow *ControlWindow) TriggerPlay(p bool) {
-	controlWindow.controlState.TriggerPlay(p)
+	if controlWindow.controlState.motionPlayer != nil {
+		controlWindow.controlState.motionPlayer.TriggerPlay(p)
+	}
 }
 
 func (controlWindow *ControlWindow) SpfLimit() float64 {

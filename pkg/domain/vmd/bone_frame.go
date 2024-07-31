@@ -132,6 +132,23 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 
 	bf.Rotation = prevBf.Rotation.Slerp(nextBf.Rotation, ry)
 
+	ppx := 0.0
+	ppy := 0.0
+	ppz := 0.0
+	if prevBf.Position != nil {
+		ppx = prevBf.Position.X
+		ppy = prevBf.Position.Y
+		ppz = prevBf.Position.Z
+	}
+	npx := 0.0
+	npy := 0.0
+	npz := 0.0
+	if nextBf.Position != nil {
+		npx = nextBf.Position.X
+		npy = nextBf.Position.Y
+		npz = nextBf.Position.Z
+	}
+
 	plpx := 0.0
 	plpy := 0.0
 	plpz := 0.0
@@ -181,16 +198,16 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 		nlsz = nextBf.LocalScale.Z
 	}
 
-	prevX := &mmath.MVec4{X: prevBf.Position.X, Y: plpx, Z: psx, W: plsx}
-	nextX := &mmath.MVec4{X: nextBf.Position.X, Y: nlpx, Z: nsx, W: nlsx}
+	prevX := &mmath.MVec4{X: ppx, Y: plpx, Z: psx, W: plsx}
+	nextX := &mmath.MVec4{X: npx, Y: nlpx, Z: nsx, W: nlsx}
 	nowX := prevX.Lerp(nextX, xy)
 
-	prevY := &mmath.MVec4{X: prevBf.Position.Y, Y: plpy, Z: psy, W: plsy}
-	nextY := &mmath.MVec4{X: nextBf.Position.Y, Y: nlpy, Z: nsy, W: nlsy}
+	prevY := &mmath.MVec4{X: ppy, Y: plpy, Z: psy, W: plsy}
+	nextY := &mmath.MVec4{X: npy, Y: nlpy, Z: nsy, W: nlsy}
 	nowY := prevY.Lerp(nextY, yy)
 
-	prevZ := &mmath.MVec4{X: prevBf.Position.Z, Y: plpz, Z: psz, W: plsz}
-	nextZ := &mmath.MVec4{X: nextBf.Position.Z, Y: nlpz, Z: nsz, W: nlsz}
+	prevZ := &mmath.MVec4{X: ppz, Y: plpz, Z: psz, W: plsz}
+	nextZ := &mmath.MVec4{X: npz, Y: nlpz, Z: nsz, W: nlsz}
 	nowZ := prevZ.Lerp(nextZ, zy)
 
 	bf.Position = &mmath.MVec3{X: nowX.X, Y: nowY.X, Z: nowZ.X}

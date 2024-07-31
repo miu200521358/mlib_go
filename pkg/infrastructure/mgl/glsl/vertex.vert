@@ -280,7 +280,7 @@ void main() {
 
     // カーソルの矩形範囲内にある場合のみ、頂点位置を格納する
     float nearestDistance = distanceToVectors(vecGlobalPosition.xyz);
-    if (nearestDistance < cursorThreshold/100.0) {
+    if (nearestDistance < cursorThreshold/150.0) {
         vertexPositions[gl_VertexID] = vec4(vecGlobalPosition.xyz, nearestDistance);
     } else {
         vertexPositions[gl_VertexID] = vec4(-1);

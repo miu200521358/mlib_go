@@ -37,7 +37,6 @@ func (rep *PmxRepository) Load(path string) (core.IHashModel, error) {
 
 	rep.close()
 	model.Setup()
-	model.UpdateHash()
 
 	return model, nil
 }

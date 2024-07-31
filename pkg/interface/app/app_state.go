@@ -89,11 +89,13 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 		appState.nextAnimationStates[windowIndex][modelIndex] = animation.NewAnimationState(windowIndex, modelIndex)
 		appState.nextAnimationStates[windowIndex][modelIndex].SetModel(animationState.Model())
 
-		motion := appState.animationStates[windowIndex][modelIndex].Motion()
-		if motion == nil {
-			motion = vmd.NewVmdMotion("")
+		if animationState.Motion() == nil {
+			motion := appState.animationStates[windowIndex][modelIndex].Motion()
+			if motion == nil {
+				motion = vmd.NewVmdMotion("")
+			}
+			animationState.SetMotion(motion)
 		}
-		animationState.SetMotion(motion)
 
 		vmdDeltas, renderDeltas := animationState.DeformBeforePhysics(appState, animationState.Model())
 		appState.nextAnimationStates[windowIndex][modelIndex].SetMotion(animationState.Motion())

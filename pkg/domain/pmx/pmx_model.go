@@ -154,6 +154,8 @@ func (model *PmxModel) Setup() {
 	model.Bones.SetDirty(false)
 	model.RigidBodies.SetDirty(false)
 	model.Joints.SetDirty(false)
+
+	model.UpdateHash()
 }
 
 func (model *PmxModel) Copy() core.IHashModel {
