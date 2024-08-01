@@ -22,7 +22,7 @@ type ControlWindow struct {
 	*walk.MainWindow
 	*controlState                                      // 操作状態
 	TabWidget                       *widget.MTabWidget // タブウィジェット
-	appConfig                       *mconfig.AppConfig // アプリケーション設定
+	Config                          *mconfig.AppConfig // アプリケーション設定
 	spfLimit                        float64            // FPS制限
 	enabledFrameDropAction          *walk.Action       // フレームドロップON/OFF
 	enabledPhysicsAction            *walk.Action       // 物理ON/OFF
@@ -60,7 +60,7 @@ func NewControlWindow(
 ) *ControlWindow {
 	controlWindow := &ControlWindow{
 		controlState: controlState,
-		appConfig:    appConfig,
+		Config:       appConfig,
 		spfLimit:     1 / 30.0,
 	}
 	controlState.SetControlWindow(controlWindow)
