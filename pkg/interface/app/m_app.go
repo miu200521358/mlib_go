@@ -250,7 +250,9 @@ func (app *MApp) recoverFromPanic() {
 					Text: mi18n.T("予期せぬエラーヘッダー"),
 				},
 				declarative.TextEdit{
-					Text: fmt.Sprintf("GLError: %d", gl.GetError()) +
+					Text: fmt.Sprintf("ToolName: %s, Version: %s", app.appConfig.Name, app.appConfig.Version) +
+						string("\r\n------------\r\n") +
+						fmt.Sprintf("GLError: %d", gl.GetError()) +
 						string("\r\n------------\r\n") +
 						fmt.Sprintf("Error: %s", errMsg) +
 						string("\r\n------------\r\n") +
@@ -268,7 +270,7 @@ func (app *MApp) recoverFromPanic() {
 							walk.MsgBox(nil, mi18n.T("クリップボードコピー失敗"),
 								string(stackTrace), walk.MsgBoxIconError)
 						}
-						exec.Command("cmd", "/c", "start", "https://com.nicovideo.jp/community/co5387214").Start()
+						exec.Command("cmd", "/c", "start", "https://discord.gg/MW2Bn47aCN").Start()
 					},
 				},
 				declarative.PushButton{
