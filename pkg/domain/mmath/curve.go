@@ -131,6 +131,11 @@ func newton(x1, x2, x, t0, eps, err float64) float64 {
 		// 中心差分による微分値
 		funcDF := (newtonFuncF(x1, x2, x, t0+eps) - newtonFuncF(x1, x2, x, t0-eps)) / derivative
 
+		if math.Abs(funcDF) < eps {
+			// 微分値が小さすぎる場合、微分値を1に設定
+			funcDF = 1
+		}
+
 		// 次の解を計算
 		t1 := t0 - funcFValue/funcDF
 

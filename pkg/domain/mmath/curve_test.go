@@ -188,6 +188,34 @@ func TestSplitCurveOutOfRange(t *testing.T) {
 	}
 }
 
+func TestSplitCurveNan(t *testing.T) {
+	curve := &Curve{}
+	curve.Start = MVec2{127.0, 0.0}
+	curve.End = MVec2{0.0, 127.0}
+
+	startCurve, endCurve := SplitCurve(curve, 0, 2, 10)
+
+	expectedStartStart := MVec2{50, 0}
+	if !startCurve.Start.Equals(&expectedStartStart) {
+		t.Errorf("Expected startCurve.Start to be %v, but got %v", expectedStartStart, startCurve.Start)
+	}
+
+	expectedStartEnd := MVec2{92, 45}
+	if !startCurve.End.Equals(&expectedStartEnd) {
+		t.Errorf("Expected startCurve.End to be %v, but got %v", expectedStartEnd, startCurve.End)
+	}
+
+	expectedEndStart := MVec2{104, 17}
+	if !endCurve.Start.Equals(&expectedEndStart) {
+		t.Errorf("Expected endCurve.Start to be %v, but got %v", expectedEndStart, endCurve.Start)
+	}
+
+	expectedEndEnd := MVec2{0, 127}
+	if !endCurve.End.Equals(&expectedEndEnd) {
+		t.Errorf("Expected endCurve.End to be %v, but got %v", expectedEndEnd, endCurve.End)
+	}
+}
+
 func TestNewCurveFromValues(t *testing.T) {
 	// Test case 1: Empty values
 	values := []float64{}
