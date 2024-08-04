@@ -21,6 +21,7 @@ type MotionPlayer struct {
 	frameEdit     *walk.NumberEdit   // フレーム番号入力欄
 	frameSlider   *walk.Slider       // フレームスライダー
 	playButton    *walk.PushButton   // 一時停止ボタン
+	onTriggerPlay func(playing bool) // 再生トリガー
 }
 
 const MotionPlayerClass = "MotionPlayer Class"
@@ -181,13 +182,19 @@ func (player *MotionPlayer) TriggerPlay(playing bool) {
 
 	if playing {
 		player.playButton.SetText(mi18n.T("一時停止"))
-		player.controlWindow.SetEnabled(false)
 		player.SetEnabled(false)
 	} else {
 		player.playButton.SetText(mi18n.T("再生"))
-		player.controlWindow.SetEnabled(true)
 		player.SetEnabled(true)
 	}
+
+	if player.onTriggerPlay != nil {
+		player.onTriggerPlay(playing)
+	}
+}
+
+func (player *MotionPlayer) SetOnTriggerPlay(f func(playing bool)) {
+	player.onTriggerPlay = f
 }
 
 // --------------------------------
