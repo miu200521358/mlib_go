@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package animation
+package render
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"

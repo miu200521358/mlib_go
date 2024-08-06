@@ -13,6 +13,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/render"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 )
 
@@ -20,7 +21,7 @@ type AnimationState struct {
 	windowIndex              int                 // ウィンドウインデックス
 	modelIndex               int                 // モデルインデックス
 	frame                    float64             // フレーム
-	renderModel              *RenderModel        // 描画モデル
+	renderModel              *render.RenderModel // 描画モデル
 	model                    *pmx.PmxModel       // モデル
 	motion                   *vmd.VmdMotion      // モーション
 	invisibleMaterialIndexes map[int]struct{}    // 非表示材質インデックス
@@ -67,7 +68,7 @@ func (animationState *AnimationState) RenderModel() state.IRenderModel {
 }
 
 func (animationState *AnimationState) SetRenderModel(renderModel state.IRenderModel) {
-	animationState.renderModel = renderModel.(*RenderModel)
+	animationState.renderModel = renderModel.(*render.RenderModel)
 }
 
 func (animationState *AnimationState) Motion() *vmd.VmdMotion {
@@ -178,7 +179,7 @@ func (animationState *AnimationState) Load(model *pmx.PmxModel) {
 		if animationState.renderModel != nil {
 			animationState.renderModel.Delete()
 		}
-		animationState.renderModel = NewRenderModel(animationState.windowIndex, model)
+		animationState.renderModel = render.NewRenderModel(animationState.windowIndex, model)
 		animationState.model = model
 	}
 }

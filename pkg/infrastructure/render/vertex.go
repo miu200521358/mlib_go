@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package animation
+package render
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
