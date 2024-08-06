@@ -6,7 +6,7 @@ type IkEnabledFrame struct {
 	Enabled    bool   // IKON/OFF
 }
 
-func NewIkEnableFrame(index int) *IkEnabledFrame {
+func NewIkEnableFrame(index float64) *IkEnabledFrame {
 	return &IkEnabledFrame{
 		BaseFrame: NewFrame(index).(*BaseFrame),
 		BoneName:  "",
@@ -22,7 +22,7 @@ func (kf *IkEnabledFrame) Copy() *IkEnabledFrame {
 	return vv
 }
 
-func (nextKf *IkEnabledFrame) LerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
+func (nextKf *IkEnabledFrame) LerpFrame(prevFrame IBaseFrame, index float64) IBaseFrame {
 	// 補間なしで前のキーフレを引き継ぐ
 	return prevFrame
 }
@@ -33,7 +33,7 @@ type IkFrame struct {
 	IkList     []*IkEnabledFrame // IKリスト
 }
 
-func NewIkFrame(index int) *IkFrame {
+func NewIkFrame(index float64) *IkFrame {
 	return &IkFrame{
 		BaseFrame: NewFrame(index).(*BaseFrame),
 		Visible:   true,
@@ -57,7 +57,7 @@ func (ikf *IkFrame) Copy() IBaseFrame {
 	return vv
 }
 
-func (nextIkf *IkFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
+func (nextIkf *IkFrame) lerpFrame(prevFrame IBaseFrame, index float64) IBaseFrame {
 	prevIkf := prevFrame.(*IkFrame)
 	// 補間なしで前のキーフレを引き継ぐ
 	vv := &IkFrame{
@@ -70,7 +70,7 @@ func (nextIkf *IkFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
 	return vv
 }
 
-func (ikf *IkFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
+func (ikf *IkFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float64) {
 }
 
 func (ikf *IkFrame) IsEnable(boneName string) bool {

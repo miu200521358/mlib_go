@@ -9,7 +9,3 @@ func NewLightFrames() *LightFrames {
 		BaseFrames: NewBaseFrames[*LightFrame](NewLightFrame, NullLightFrame),
 	}
 }
-
-func (lightFrames *LightFrames) NewFrame(index int) *LightFrame {
-	return NewLightFrame(index)
-}

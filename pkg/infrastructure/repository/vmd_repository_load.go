@@ -163,7 +163,7 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 	bfValues := make([]float64, 7)
 	for i := 0; i < int(totalCount); i++ {
 		bf := &vmd.BoneFrame{
-			BaseFrame: vmd.NewFrame(i).(*vmd.BaseFrame),
+			BaseFrame: vmd.NewFrame(float64(i)).(*vmd.BaseFrame),
 		}
 		bf.Read = true
 
@@ -180,7 +180,7 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 			mlog.E("[%d] readBones.index error: %v", i, err)
 			return err
 		}
-		bf.SetIndex(int(index))
+		bf.SetIndex(float64(index))
 
 		// 位置X,Y,Z
 		// 回転X,Y,Z,W
@@ -232,7 +232,7 @@ func (rep *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
 			mlog.E("[%d] readMorphs.index error: %v", i, err)
 			return err
 		}
-		mf.SetIndex(int(index))
+		mf.SetIndex(float64(index))
 
 		// ratio
 		mf.Ratio, err = rep.unpackFloat()
@@ -265,7 +265,7 @@ func (rep *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 			mlog.E("[%d] readCameras.index error: %v", i, err)
 			return err
 		}
-		cf.SetIndex(int(index))
+		cf.SetIndex(float64(index))
 
 		// 距離
 		cf.Distance, err = rep.unpackFloat()
@@ -337,7 +337,7 @@ func (rep *VmdRepository) loadLights(motion *vmd.VmdMotion) error {
 			mlog.E("[%d] readLights.index error: %v", i, err)
 			return err
 		}
-		lf.SetIndex(int(index))
+		lf.SetIndex(float64(index))
 
 		// 照明色
 		lf.Color, err = rep.unpackVec3()
@@ -377,7 +377,7 @@ func (rep *VmdRepository) loadShadows(motion *vmd.VmdMotion) error {
 			mlog.E("[%d] readShadows.index error: %v", i, err)
 			return err
 		}
-		sf.SetIndex(int(index))
+		sf.SetIndex(float64(index))
 
 		// セルフ影タイプ
 		shadowMode, err := rep.unpackByte()
@@ -418,7 +418,7 @@ func (rep *VmdRepository) loadIks(motion *vmd.VmdMotion) error {
 			mlog.E("[%d] readIks.index error: %v", i, err)
 			return err
 		}
-		ikf.SetIndex(int(index))
+		ikf.SetIndex(float64(index))
 
 		// モデル表示
 		visible, err := rep.unpackByte()

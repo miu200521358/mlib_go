@@ -27,7 +27,7 @@ func DeformMorph(
 			continue
 		}
 
-		mf := mfs.Get(morphName).Get(frame)
+		mf := mfs.Get(morphName).Get(float64(frame))
 		if mf == nil {
 			continue
 		}

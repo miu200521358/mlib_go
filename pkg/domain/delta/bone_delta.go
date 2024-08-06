@@ -9,7 +9,7 @@ import (
 
 type BoneDelta struct {
 	Bone               *pmx.Bone          // ボーン
-	Frame              int                // キーフレーム
+	Frame              float64            // キーフレーム
 	GlobalMatrix       *mmath.MMat4       // グローバル行列
 	LocalMatrix        *mmath.MMat4       // ローカル行列
 	GlobalPosition     *mmath.MVec3       // グローバル位置
@@ -23,7 +23,7 @@ type BoneDelta struct {
 }
 
 func NewBoneDeltaByGlobalMatrix(
-	bone *pmx.Bone, frame int, globalMatrix *mmath.MMat4, parentDelta *BoneDelta,
+	bone *pmx.Bone, frame float64, globalMatrix *mmath.MMat4, parentDelta *BoneDelta,
 ) *BoneDelta {
 	var parentGlobalMatrix *mmath.MMat4
 	if parentDelta != nil {
@@ -191,7 +191,7 @@ func (boneDelta *BoneDelta) Copy() *BoneDelta {
 	}
 }
 
-func NewBoneDelta(bone *pmx.Bone, frame int) *BoneDelta {
+func NewBoneDelta(bone *pmx.Bone, frame float64) *BoneDelta {
 	return &BoneDelta{
 		Bone:  bone,
 		Frame: frame,

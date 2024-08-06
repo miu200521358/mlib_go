@@ -14,7 +14,7 @@ type CameraFrame struct {
 	Curves           *CameraCurves    // 補間曲線
 }
 
-func NewCameraFrame(index int) *CameraFrame {
+func NewCameraFrame(index float64) *CameraFrame {
 	return &CameraFrame{
 		BaseFrame:        NewFrame(index).(*BaseFrame),
 		Position:         mmath.NewMVec3(),
@@ -60,7 +60,7 @@ func (cf *CameraFrame) Copy() IBaseFrame {
 	return copied
 }
 
-func (nextCf *CameraFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
+func (nextCf *CameraFrame) lerpFrame(prevFrame IBaseFrame, index float64) IBaseFrame {
 	prevCf := prevFrame.(*CameraFrame)
 
 	if prevCf == nil || nextCf.Index() <= index {
@@ -92,7 +92,7 @@ func (nextCf *CameraFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame
 	return cf
 }
 
-func (cf *CameraFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
+func (cf *CameraFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float64) {
 	prevCf := prevFrame.(*CameraFrame)
 	nextCf := nextFrame.(*CameraFrame)
 

@@ -165,7 +165,7 @@ func NewBoneCurvesByValues(values []byte) *BoneCurves {
 }
 
 // 補間曲線の計算 (xy, yy, zy, ry)
-func (boneCurves *BoneCurves) Evaluate(prevIndex, nowIndex, nextIndex int) (float64, float64, float64, float64) {
+func (boneCurves *BoneCurves) Evaluate(prevIndex, nowIndex, nextIndex float64) (float64, float64, float64, float64) {
 	var xy, yy, zy, ry float64
 	_, xy, _ = mmath.Evaluate(boneCurves.TranslateX, prevIndex, nowIndex, nextIndex)
 	_, yy, _ = mmath.Evaluate(boneCurves.TranslateY, prevIndex, nowIndex, nextIndex)

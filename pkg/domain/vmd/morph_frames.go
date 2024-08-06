@@ -41,7 +41,7 @@ func (morphFrames *MorphFrames) Get(morphName string) *MorphNameFrames {
 func (morphFrames *MorphFrames) MaxFrame() int {
 	maxFno := int(0)
 	for _, mnfs := range morphFrames.Data {
-		fno := mnfs.MaxFrame()
+		fno := int(mnfs.MaxFrame())
 		if fno > maxFno {
 			maxFno = fno
 		}
@@ -52,7 +52,7 @@ func (morphFrames *MorphFrames) MaxFrame() int {
 func (morphFrames *MorphFrames) MinFrame() int {
 	minFno := math.MaxInt
 	for _, mnfs := range morphFrames.Data {
-		fno := mnfs.MinFrame()
+		fno := int(mnfs.MinFrame())
 		if fno < minFno {
 			minFno = fno
 		}

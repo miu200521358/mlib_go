@@ -9,7 +9,3 @@ func NewIkFrames() *IkFrames {
 		BaseFrames: NewBaseFrames[*IkFrame](NewIkFrame, NullNewIkFrame),
 	}
 }
-
-func (ikFrames *IkFrames) NewFrame(index int) *IkFrame {
-	return NewIkFrame(index)
-}

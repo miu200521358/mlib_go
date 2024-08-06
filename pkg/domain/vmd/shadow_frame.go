@@ -8,7 +8,7 @@ type ShadowFrame struct {
 	Distance   float64 // 影範囲距離
 }
 
-func NewShadowFrame(index int) *ShadowFrame {
+func NewShadowFrame(index float64) *ShadowFrame {
 	return &ShadowFrame{
 		BaseFrame:  NewFrame(index).(*BaseFrame),
 		ShadowMode: 0,
@@ -28,7 +28,7 @@ func (sf *ShadowFrame) Copy() IBaseFrame {
 	return vv
 }
 
-func (nextSf *ShadowFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
+func (nextSf *ShadowFrame) lerpFrame(prevFrame IBaseFrame, index float64) IBaseFrame {
 	prevSf := prevFrame.(*ShadowFrame)
 
 	prevIndex := prevSf.Index()
@@ -43,5 +43,5 @@ func (nextSf *ShadowFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame
 	return sf
 }
 
-func (sf *ShadowFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
+func (sf *ShadowFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float64) {
 }

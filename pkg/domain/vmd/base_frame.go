@@ -8,26 +8,26 @@ import (
 )
 
 type IBaseFrame interface {
-	Index() int
-	getIntIndex() core.Int
-	SetIndex(index int)
+	Index() float64
+	getIntIndex() core.Float
+	SetIndex(index float64)
 	IsRegistered() bool
 	IsRead() bool
 	Less(than llrb.Item) bool
-	lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame
-	splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int)
+	lerpFrame(prevFrame IBaseFrame, index float64) IBaseFrame
+	splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float64)
 	Copy() IBaseFrame
-	New(index int) IBaseFrame
+	New(index float64) IBaseFrame
 }
 
 type BaseFrame struct {
-	index      core.Int
+	index      core.Float
 	Registered bool // 登録対象のキーフレであるか
 	Read       bool // VMDファイルから読み込んだキーフレであるか
 }
 
 func (baseFrame *BaseFrame) Less(than llrb.Item) bool {
-	return baseFrame.Index() < int(than.(core.Int))
+	return baseFrame.Index() < float64(than.(core.Float))
 }
 
 func (baseFrame *BaseFrame) Copy() IBaseFrame {
@@ -38,37 +38,37 @@ func (baseFrame *BaseFrame) Copy() IBaseFrame {
 	}
 }
 
-func (baseFrame *BaseFrame) New(index int) IBaseFrame {
+func (baseFrame *BaseFrame) New(index float64) IBaseFrame {
 	return &BaseFrame{
-		index: core.Int(index),
+		index: core.Float(index),
 	}
 }
 
-func NewFrame(index int) IBaseFrame {
+func NewFrame(index float64) IBaseFrame {
 	return &BaseFrame{
-		index:      core.NewInt(index),
+		index:      core.NewFloat(index),
 		Registered: false,
 		Read:       false,
 	}
 }
 
-func (baseFrame *BaseFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
+func (baseFrame *BaseFrame) lerpFrame(prevFrame IBaseFrame, index float64) IBaseFrame {
 	return baseFrame.Copy()
 }
 
-func (baseFrame *BaseFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
+func (baseFrame *BaseFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float64) {
 }
 
-func (baseFrame *BaseFrame) getIntIndex() core.Int {
+func (baseFrame *BaseFrame) getIntIndex() core.Float {
 	return baseFrame.index
 }
 
-func (baseFrame *BaseFrame) Index() int {
-	return int(baseFrame.index)
+func (baseFrame *BaseFrame) Index() float64 {
+	return float64(baseFrame.index)
 }
 
-func (baseFrame *BaseFrame) SetIndex(index int) {
-	baseFrame.index = core.NewInt(index)
+func (baseFrame *BaseFrame) SetIndex(index float64) {
+	baseFrame.index = core.NewFloat(index)
 }
 
 func (baseFrame *BaseFrame) IsRegistered() bool {
@@ -80,35 +80,35 @@ func (baseFrame *BaseFrame) IsRead() bool {
 }
 
 type BaseFrames[T IBaseFrame] struct {
-	data              map[int]T         // キーフレリスト
-	Indexes           *core.IntIndexes  // 全キーフレリスト
-	RegisteredIndexes *core.IntIndexes  // 登録対象キーフレリスト
-	newFunc           func(index int) T // キーフレ生成関数
-	nullFunc          func() T          // 空キーフレ生成関数
-	lock              sync.RWMutex      // マップアクセス制御用
+	data              map[float64]T         // キーフレリスト
+	Indexes           *core.FloatIndexes    // 全キーフレリスト
+	RegisteredIndexes *core.FloatIndexes    // 登録対象キーフレリスト
+	newFunc           func(index float64) T // キーフレ生成関数
+	nullFunc          func() T              // 空キーフレ生成関数
+	lock              sync.RWMutex          // マップアクセス制御用
 }
 
-func NewBaseFrames[T IBaseFrame](newFunc func(index int) T, nullFunc func() T) *BaseFrames[T] {
+func NewBaseFrames[T IBaseFrame](newFunc func(index float64) T, nullFunc func() T) *BaseFrames[T] {
 	return &BaseFrames[T]{
-		data:              make(map[int]T),
-		Indexes:           core.NewIntIndexes(),
-		RegisteredIndexes: core.NewIntIndexes(),
+		data:              make(map[float64]T),
+		Indexes:           core.NewFloatIndexes(),
+		RegisteredIndexes: core.NewFloatIndexes(),
 		newFunc:           newFunc,
 		nullFunc:          nullFunc,
 		lock:              sync.RWMutex{},
 	}
 }
 
-func (baseFrames *BaseFrames[T]) NewFrame(index int) T {
+func (baseFrames *BaseFrames[T]) NewFrame(index float64) T {
 	return NewFrame(index).(T)
 }
 
-func (baseFrames *BaseFrames[T]) Get(index int) T {
+func (baseFrames *BaseFrames[T]) Get(index float64) T {
 	baseFrames.lock.RLock()
 	defer baseFrames.lock.RUnlock()
 
-	if _, ok := baseFrames.data[index]; ok {
-		return baseFrames.data[index]
+	if _, ok := baseFrames.data[float64(index)]; ok {
+		return baseFrames.data[float64(index)]
 	}
 
 	if len(baseFrames.data) == 0 {
@@ -135,22 +135,22 @@ func (baseFrames *BaseFrames[T]) Get(index int) T {
 	return nextF.lerpFrame(prevF, index).(T)
 }
 
-func (baseFrames *BaseFrames[T]) prevFrame(index int) int {
+func (baseFrames *BaseFrames[T]) prevFrame(index float64) float64 {
 	prevFrame := baseFrames.MinFrame()
 
-	baseFrames.RegisteredIndexes.DescendLessOrEqual(core.Int(index), func(i llrb.Item) bool {
-		prevFrame = int(i.(core.Int))
+	baseFrames.RegisteredIndexes.DescendLessOrEqual(core.Float(index), func(i llrb.Item) bool {
+		prevFrame = float64(i.(core.Float))
 		return false
 	})
 
 	return prevFrame
 }
 
-func (baseFrames *BaseFrames[T]) nextFrame(index int) int {
+func (baseFrames *BaseFrames[T]) nextFrame(index float64) float64 {
 	nextFrame := baseFrames.MaxFrame()
 
-	baseFrames.RegisteredIndexes.AscendGreaterOrEqual(core.Int(index), func(i llrb.Item) bool {
-		nextFrame = int(i.(core.Int))
+	baseFrames.RegisteredIndexes.AscendGreaterOrEqual(core.Float(index), func(i llrb.Item) bool {
+		nextFrame = float64(i.(core.Float))
 		return false
 	})
 
@@ -160,9 +160,9 @@ func (baseFrames *BaseFrames[T]) nextFrame(index int) int {
 func (baseFrames *BaseFrames[T]) List() []T {
 	list := make([]T, 0, baseFrames.RegisteredIndexes.Len())
 
-	baseFrames.RegisteredIndexes.AscendRange(core.Int(0), core.Int(baseFrames.RegisteredIndexes.Max()), func(i llrb.Item) bool {
-		if _, ok := baseFrames.data[int(i.(core.Int))]; !ok {
-			list = append(list, baseFrames.data[int(i.(core.Int))])
+	baseFrames.RegisteredIndexes.AscendRange(core.Float(0), core.Float(baseFrames.RegisteredIndexes.Max()), func(i llrb.Item) bool {
+		if _, ok := baseFrames.data[float64(i.(core.Float))]; !ok {
+			list = append(list, baseFrames.data[float64(i.(core.Float))])
 		}
 		return true
 	})
@@ -175,49 +175,49 @@ func (baseFrames *BaseFrames[T]) appendFrame(v T) {
 	defer baseFrames.lock.Unlock()
 
 	if v.IsRegistered() {
-		baseFrames.RegisteredIndexes.ReplaceOrInsert(core.Int(v.Index()))
+		baseFrames.RegisteredIndexes.ReplaceOrInsert(core.Float(v.Index()))
 	}
 
 	baseFrames.data[v.Index()] = v
-	baseFrames.Indexes.ReplaceOrInsert(core.Int(v.Index()))
+	baseFrames.Indexes.ReplaceOrInsert(core.Float(v.Index()))
 }
 
-func (baseFrames *BaseFrames[T]) MaxFrame() int {
+func (baseFrames *BaseFrames[T]) MaxFrame() float64 {
 	if baseFrames.RegisteredIndexes.Len() == 0 {
 		return 0
 	}
 	return baseFrames.RegisteredIndexes.Max()
 }
 
-func (baseFrames *BaseFrames[T]) MinFrame() int {
+func (baseFrames *BaseFrames[T]) MinFrame() float64 {
 	if baseFrames.RegisteredIndexes.Len() == 0 {
 		return 0
 	}
 	return baseFrames.RegisteredIndexes.Min()
 }
 
-func (baseFrames *BaseFrames[T]) ContainsRegistered(index int) bool {
+func (baseFrames *BaseFrames[T]) ContainsRegistered(index float64) bool {
 	return baseFrames.RegisteredIndexes.Has(index)
 }
 
-func (baseFrames *BaseFrames[T]) Contains(index int) bool {
+func (baseFrames *BaseFrames[T]) Contains(index float64) bool {
 	if _, ok := baseFrames.data[index]; ok {
 		return true
 	}
 	return false
 }
 
-func (baseFrames *BaseFrames[T]) Delete(index int) {
+func (baseFrames *BaseFrames[T]) Delete(index float64) {
 	baseFrames.lock.Lock()
 	defer baseFrames.lock.Unlock()
 
 	if _, ok := baseFrames.data[index]; ok {
 		delete(baseFrames.data, index)
-		baseFrames.Indexes.Delete(core.Int(index))
+		baseFrames.Indexes.Delete(core.Float(index))
 	}
 
 	if baseFrames.RegisteredIndexes.Has(index) {
-		baseFrames.RegisteredIndexes.Delete(core.Int(index))
+		baseFrames.RegisteredIndexes.Delete(core.Float(index))
 	}
 }
 

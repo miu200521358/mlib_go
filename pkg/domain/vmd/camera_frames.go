@@ -9,7 +9,3 @@ func NewCameraFrames() *CameraFrames {
 		BaseFrames: NewBaseFrames[*CameraFrame](NewCameraFrame, NullCameraFrame),
 	}
 }
-
-func (i *CameraFrames) NewFrame(index int) *CameraFrame {
-	return NewCameraFrame(index)
-}

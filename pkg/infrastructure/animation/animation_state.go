@@ -215,7 +215,7 @@ func (animationState *AnimationState) DeformBeforePhysics(
 
 	vmdDeltas := delta.NewVmdDeltas(model.Materials, model.Bones)
 	vmdDeltas.Morphs = deform.DeformMorph(model, animationState.motion.MorphFrames, frame, nil)
-	vmdDeltas = deform.DeformBoneByPhysicsFlag(model, animationState.motion, vmdDeltas, true, frame, nil, false)
+	vmdDeltas = deform.DeformBoneByPhysicsFlag(model, animationState.motion, vmdDeltas, true, float64(frame), nil, false)
 
 	renderDeltas := delta.NewRenderDeltas()
 	renderDeltas.MeshDeltas = make([]*delta.MeshDelta, len(model.Materials.Data))
@@ -262,7 +262,7 @@ func (animationState *AnimationState) DeformAfterPhysics(physics mbt.IPhysics, a
 				bonePhysicsGlobalMatrix := physics.GetRigidBodyBoneMatrix(
 					animationState.ModelIndex(), bone.Extend.RigidBody)
 				if animationState.vmdDeltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
-					bd := delta.NewBoneDeltaByGlobalMatrix(bone, int(appState.Frame()),
+					bd := delta.NewBoneDeltaByGlobalMatrix(bone, appState.Frame(),
 						bonePhysicsGlobalMatrix, animationState.vmdDeltas.Bones.Get(bone.ParentIndex))
 					animationState.vmdDeltas.Bones.Update(bd)
 				}
@@ -272,7 +272,7 @@ func (animationState *AnimationState) DeformAfterPhysics(physics mbt.IPhysics, a
 
 	// 物理後のデフォーム情報
 	animationState.vmdDeltas = deform.DeformBoneByPhysicsFlag(animationState.model,
-		animationState.motion, animationState.vmdDeltas, true, int(appState.Frame()), nil, true)
+		animationState.motion, animationState.vmdDeltas, true, appState.Frame(), nil, true)
 }
 
 func Deform(

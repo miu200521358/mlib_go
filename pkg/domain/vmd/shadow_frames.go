@@ -9,7 +9,3 @@ func NewShadowFrames() *ShadowFrames {
 		BaseFrames: NewBaseFrames[*ShadowFrame](NewShadowFrame, NullShadowFrame),
 	}
 }
-
-func (shadowFrames *ShadowFrames) NewFrame(index int) *ShadowFrame {
-	return NewShadowFrame(index)
-}

@@ -87,12 +87,12 @@ func (curve *Curve) Normalize(begin, finish *MVec2) {
 // https://edvakf.hatenadiary.org/entry/20111016/1318716097
 // Evaluate 補間曲線を求めます。
 // return x（計算キーフレ時点のX値）, y（計算キーフレ時点のY値）, t（計算キーフレまでの変化量）
-func Evaluate(curve *Curve, start, now, end int) (float64, float64, float64) {
+func Evaluate(curve *Curve, start, now, end float64) (float64, float64, float64) {
 	if (now-start) == 0.0 || (end-start) == 0.0 {
 		return 0.0, 0.0, 0.0
 	}
 
-	x := float64(now-start) / float64(end-start)
+	x := (now - start) / (end - start)
 
 	if x >= 1 {
 		return 1.0, 1.0, 1.0
@@ -152,7 +152,7 @@ func newton(x1, x2, x, t0, eps, err float64) float64 {
 }
 
 // SplitCurve 補間曲線を指定キーフレで前後に分割する
-func SplitCurve(curve *Curve, start, now, end int) (*Curve, *Curve) {
+func SplitCurve(curve *Curve, start, now, end float64) (*Curve, *Curve) {
 	if (now-start) == 0 || (end-start) == 0 {
 		return NewCurve(), NewCurve()
 	}

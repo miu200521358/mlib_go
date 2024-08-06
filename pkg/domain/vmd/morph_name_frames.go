@@ -11,7 +11,3 @@ func NewMorphNameFrames(name string) *MorphNameFrames {
 		Name:       name,
 	}
 }
-
-func (morphNameFrames *MorphNameFrames) NewFrame(index int) *MorphFrame {
-	return NewMorphFrame(index)
-}

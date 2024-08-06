@@ -10,7 +10,7 @@ type LightFrame struct {
 	Color      *mmath.MVec3 // 色
 }
 
-func NewLightFrame(index int) *LightFrame {
+func NewLightFrame(index float64) *LightFrame {
 	return &LightFrame{
 		BaseFrame: NewFrame(index).(*BaseFrame),
 		Position:  mmath.NewMVec3(),
@@ -44,7 +44,7 @@ func (lf *LightFrame) Copy() IBaseFrame {
 	return copied
 }
 
-func (nextLf *LightFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame {
+func (nextLf *LightFrame) lerpFrame(prevFrame IBaseFrame, index float64) IBaseFrame {
 	prevLf := prevFrame.(*LightFrame)
 	// 線形補間
 	t := float64(nextLf.Index()-index) / float64(nextLf.Index()-prevLf.Index())
@@ -55,5 +55,5 @@ func (nextLf *LightFrame) lerpFrame(prevFrame IBaseFrame, index int) IBaseFrame 
 	return vv
 }
 
-func (lf *LightFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index int) {
+func (lf *LightFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float64) {
 }
