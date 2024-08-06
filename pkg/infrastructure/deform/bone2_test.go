@@ -788,7 +788,7 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Left(t *testing.T) {
 
 	model := modelData.(*pmx.PmxModel)
 
-	boneDeltas := DeformBone(model, motion, true, 0, []string{pmx.LEG_IK.Right(), pmx.TOE.Right(), pmx.HEEL.Right()})
+	boneDeltas := DeformBone(model, motion, true, 0, []string{"左襟先"})
 
 	{
 		expectedPosition := &mmath.MVec3{X: -0.225006, Y: 9.705784, Z: 2.033072}

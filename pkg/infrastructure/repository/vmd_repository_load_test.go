@@ -65,7 +65,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float64(358)
 		if bf.Index() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
+			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
@@ -128,7 +128,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float64(689)
 		if bf.Index() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
+			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
@@ -191,7 +191,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float64(384)
 		if bf.Index() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
+			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
@@ -255,7 +255,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float64(384)
 		if bf.Index() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
+			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
@@ -278,7 +278,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float64(394)
 		if bf.Index() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
+			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
@@ -301,7 +301,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float64(412)
 		if bf.Index() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
+			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
@@ -324,7 +324,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		// フレーム番号
 		expectedFrameNo := float64(384)
 		if bf.Index() != expectedFrameNo {
-			t.Errorf("Expected FrameNo to be %d, got %d", expectedFrameNo, bf.Index())
+			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
 
 		// 位置
