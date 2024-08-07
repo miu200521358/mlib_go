@@ -11,7 +11,7 @@ func TestIterParallel(t *testing.T) {
 	serialFunc := func(i int) {
 		serialCount++
 	}
-	IterParallel(10, serialFunc)
+	IterParallel(10, 100, serialFunc)
 	if serialCount != 10 {
 		t.Errorf("Expected serialCount to be 10, got %d", serialCount)
 	}
@@ -21,7 +21,7 @@ func TestIterParallel(t *testing.T) {
 	parallelFunc := func(i int) {
 		parallelCount++
 	}
-	IterParallel(10, parallelFunc)
+	IterParallel(10, 100, parallelFunc)
 	if parallelCount != 10 {
 		t.Errorf("Expected parallelCount to be 10, got %d", parallelCount)
 	}
@@ -33,8 +33,7 @@ func TestIterParallel_BlockSize(t *testing.T) {
 	serialFunc := func(i int) {
 		serialCount++
 	}
-	blockSize = 1
-	IterParallel(10, serialFunc)
+	IterParallel(10, 1, serialFunc)
 	if serialCount != 10 {
 		t.Errorf("Expected serialCount to be 10, got %d", serialCount)
 	}
@@ -44,8 +43,7 @@ func TestIterParallel_BlockSize(t *testing.T) {
 	parallelFunc := func(i int) {
 		parallelCount++
 	}
-	blockSize = 2
-	IterParallel(10, parallelFunc)
+	IterParallel(10, 2, parallelFunc)
 	if parallelCount != 10 {
 		t.Errorf("Expected parallelCount to be 10, got %d", parallelCount)
 	}
@@ -57,8 +55,7 @@ func TestIterParallel_Concurrency(t *testing.T) {
 	concurrentFunc := func(i int) {
 		count++
 	}
-	blockSize = 2
-	IterParallel(10, concurrentFunc)
+	IterParallel(10, 2, concurrentFunc)
 	if count != 10 {
 		t.Errorf("Expected count to be 10, got %d", count)
 	}
@@ -69,7 +66,6 @@ func TestIterParallel_Concurrency(t *testing.T) {
 		defer wg.Done()
 		count++
 	}
-	blockSize = 2
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go concurrentFunc2(i)

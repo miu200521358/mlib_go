@@ -154,6 +154,34 @@ func (renderModel *RenderModel) initializeBuffer(
 		}
 	}()
 
+	// ボーン情報の並列処理
+	bones := make([]float32, 0)
+	boneFaces := make([]uint32, 0, len(model.Bones.Data)*2)
+	boneIndexes := make([]int, len(model.Bones.Data)*2)
+
+	bonePoints := make([]float32, 0)
+	bonePointFaces := make([]uint32, len(model.Bones.Data))
+	bonePointIndexes := make([]int, len(model.Bones.Data))
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		n := 0
+		for _, bone := range model.Bones.Data {
+			bones = append(bones, newBoneGl(bone)...)
+			bones = append(bones, newTailBoneGl(bone)...)
+			boneFaces = append(boneFaces, uint32(n), uint32(n+1))
+			boneIndexes[n] = bone.Index()
+			boneIndexes[n+1] = bone.Index()
+
+			bonePoints = append(bonePoints, newBoneGl(bone)...)
+			bonePointFaces[bone.Index()] = uint32(bone.Index())
+			bonePointIndexes[bone.Index()] = bone.Index()
+
+			n += 2
+		}
+	}()
+
 	// メッシュ情報
 	renderModel.meshes = make([]*Mesh, len(model.Materials.Data))
 	prevVerticesCount := 0
@@ -201,34 +229,6 @@ func (renderModel *RenderModel) initializeBuffer(
 		renderModel.meshes[i] = mesh
 		prevVerticesCount += m.VerticesCount
 	}
-
-	// ボーン情報の並列処理
-	bones := make([]float32, 0)
-	boneFaces := make([]uint32, 0, len(model.Bones.Data)*2)
-	boneIndexes := make([]int, len(model.Bones.Data)*2)
-
-	bonePoints := make([]float32, 0)
-	bonePointFaces := make([]uint32, len(model.Bones.Data))
-	bonePointIndexes := make([]int, len(model.Bones.Data))
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		n := 0
-		for _, bone := range model.Bones.Data {
-			bones = append(bones, newBoneGl(bone)...)
-			bones = append(bones, newTailBoneGl(bone)...)
-			boneFaces = append(boneFaces, uint32(n), uint32(n+1))
-			boneIndexes[n] = bone.Index()
-			boneIndexes[n+1] = bone.Index()
-
-			bonePoints = append(bonePoints, newBoneGl(bone)...)
-			bonePointFaces[bone.Index()] = uint32(bone.Index())
-			bonePointIndexes[bone.Index()] = bone.Index()
-
-			n += 2
-		}
-	}()
 
 	// WaitGroupの完了を待つ
 	wg.Wait()
