@@ -4,14 +4,10 @@
 package animation
 
 import (
-	"sync"
-
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/render"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
@@ -196,105 +192,5 @@ func NewAnimationState(windowIndex, modelIndex int) *AnimationState {
 		invisibleMaterialIndexes: nil,
 		selectedVertexIndexes:    nil,
 		noSelectedVertexIndexes:  nil,
-	}
-}
-
-func (animationState *AnimationState) DeformPhysics(physics mbt.IPhysics, appState state.IAppState) {
-	if animationState.model == nil || (!appState.IsEnabledPhysics() && !appState.IsPhysicsReset()) {
-		return
-	}
-
-	for _, rigidBody := range animationState.model.RigidBodies.Data {
-		// 現在のボーン変形情報を保持
-		rigidBodyBone := rigidBody.Bone
-		if rigidBodyBone == nil {
-			rigidBodyBone = rigidBody.JointedBone
-		}
-
-		if rigidBodyBone == nil || animationState.vmdDeltas.Bones.Get(rigidBodyBone.Index()) == nil {
-			continue
-		}
-
-		if (appState.IsEnabledPhysics() && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC) ||
-			appState.IsPhysicsReset() {
-			// 通常はボーン追従剛体・物理＋ボーン剛体だけ。物理リセット時は全部更新
-			physics.UpdateTransform(animationState.ModelIndex(), rigidBodyBone,
-				animationState.vmdDeltas.Bones.Get(rigidBodyBone.Index()).FilledGlobalMatrix(), rigidBody)
-		}
-	}
-}
-
-func (animationState *AnimationState) DeformAfterPhysics(physics mbt.IPhysics, appState state.IAppState) {
-	if animationState.model != nil && appState.IsEnabledPhysics() && !appState.IsPhysicsReset() {
-		// 物理剛体位置を更新
-		for _, isAfterPhysics := range []bool{false, true} {
-			for _, bone := range animationState.model.Bones.LayerSortedBones[isAfterPhysics] {
-				if bone.Extend.RigidBody == nil || bone.Extend.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
-					continue
-				}
-				bonePhysicsGlobalMatrix := physics.GetRigidBodyBoneMatrix(
-					animationState.ModelIndex(), bone.Extend.RigidBody)
-				if animationState.vmdDeltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
-					bd := delta.NewBoneDeltaByGlobalMatrix(bone, appState.Frame(),
-						bonePhysicsGlobalMatrix, animationState.vmdDeltas.Bones.Get(bone.ParentIndex))
-					animationState.vmdDeltas.Bones.Update(bd)
-				}
-			}
-		}
-	}
-
-	// 物理後のデフォーム情報
-	animationState.vmdDeltas = deform.DeformBoneByPhysicsFlag(animationState.model,
-		animationState.motion, animationState.vmdDeltas, true, appState.Frame(), nil, true)
-}
-
-func Deform(
-	physics mbt.IPhysics, animationStates []state.IAnimationState, appState state.IAppState, timeStep float32,
-) {
-	// 物理デフォーム
-	{
-		var wg sync.WaitGroup
-
-		for i := range animationStates {
-			if animationStates[i] == nil || animationStates[i].Model() == nil {
-				continue
-			}
-
-			wg.Add(1)
-			go func(ii int) {
-				defer wg.Done()
-				animationStates[ii].DeformPhysics(physics, appState)
-			}(i)
-		}
-
-		wg.Wait()
-	}
-
-	if appState.IsPhysicsReset() {
-		physics.UpdateFlags(true)
-	}
-
-	if appState.IsEnabledPhysics() || appState.IsPhysicsReset() {
-		// 物理更新
-		physics.StepSimulation(timeStep)
-	}
-
-	// 物理後デフォーム
-	{
-		var wg sync.WaitGroup
-
-		for i := range animationStates {
-			if animationStates[i] == nil || animationStates[i].Model() == nil {
-				continue
-			}
-
-			wg.Add(1)
-			go func(ii int) {
-				defer wg.Done()
-				animationStates[ii].DeformAfterPhysics(physics, appState)
-			}(i)
-		}
-
-		wg.Wait()
 	}
 }

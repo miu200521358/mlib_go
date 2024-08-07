@@ -10,6 +10,7 @@ import (
 )
 
 type PmxModel struct {
+	index              int
 	name               string
 	path               string
 	hash               string
@@ -39,6 +40,7 @@ type PmxModel struct {
 
 func NewPmxModel(path string) *PmxModel {
 	model := &PmxModel{}
+	model.index = 0
 	model.name = ""
 	model.path = path
 	model.hash = ""
@@ -54,6 +56,14 @@ func NewPmxModel(path string) *PmxModel {
 	model.Joints = NewJoints(0)
 
 	return model
+}
+
+func (model *PmxModel) Index() int {
+	return model.index
+}
+
+func (model *PmxModel) SetIndex(index int) {
+	model.index = index
 }
 
 func (model *PmxModel) Path() string {

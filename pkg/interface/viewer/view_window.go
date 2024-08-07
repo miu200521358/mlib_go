@@ -14,7 +14,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/animation"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
@@ -426,7 +426,7 @@ func (viewWindow *ViewWindow) GetWindow() *glfw.Window {
 
 func (viewWindow *ViewWindow) ResetPhysics(animationStates []state.IAnimationState) {
 	// デフォーム再設定
-	animation.Deform(viewWindow.physics, animationStates, viewWindow.appState, viewWindow.physics.PhysicsSpf)
+	deform.Deform(viewWindow.physics, animationStates, viewWindow.appState, viewWindow.physics.PhysicsSpf)
 
 	// リセットなしでフラグを更新
 	viewWindow.physics.UpdateFlags(false)
@@ -552,7 +552,7 @@ func (viewWindow *ViewWindow) Animate(
 		}
 
 		// デフォーム
-		animation.Deform(viewWindow.physics, animationStates, viewWindow.appState, timeStep)
+		deform.Deform(viewWindow.physics, animationStates, viewWindow.appState, timeStep)
 
 		// モデル描画
 		for _, animationState := range animationStates {

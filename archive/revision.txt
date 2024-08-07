@@ -686,5 +686,6 @@ MlibSample 1.0.0_beta_121
 ・描画をrenderパッケージに移動
 ・bufferパッケージをmglパッケージに統合
 ・renderDelta廃止
+・デフォーム処理をdeformパッケージに移動
 
 

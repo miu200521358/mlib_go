@@ -8,7 +8,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
@@ -25,8 +24,6 @@ type IAnimationState interface {
 	SetVmdDeltas(deltas *delta.VmdDeltas)
 	Frame() float64
 	SetFrame(frame float64)
-	DeformPhysics(physics mbt.IPhysics, appState IAppState)
-	DeformAfterPhysics(physics mbt.IPhysics, appState IAppState)
 	RenderModel() IRenderModel
 	SetRenderModel(model IRenderModel)
 	Render(shader mgl.IShader, appState IAppState, leftCursorPositions, leftCursorRemovePositions,
