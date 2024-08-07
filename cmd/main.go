@@ -13,7 +13,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/animation"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
@@ -113,7 +112,7 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 	pmx11ReadPicker.SetOnPathChanged(func(path string) {
 		if data, err := pmx11ReadPicker.Load(); err == nil {
 			model := data.(*pmx.PmxModel)
-			animationState := animation.NewAnimationState(0, 0)
+			animationState := app.NewAnimationState(0, 0)
 			animationState.SetModel(model)
 			controlWindow.SetAnimationState(animationState)
 		}
@@ -130,7 +129,7 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 	vmd11ReadPicker.SetOnPathChanged(func(path string) {
 		if data, err := vmd11ReadPicker.Load(); err == nil {
 			motion := data.(*vmd.VmdMotion)
-			animationState := animation.NewAnimationState(0, 0)
+			animationState := app.NewAnimationState(0, 0)
 			animationState.SetMotion(motion)
 			controlWindow.SetAnimationState(animationState)
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
@@ -150,7 +149,7 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 	pmx12ReadPicker.SetOnPathChanged(func(path string) {
 		if data, err := pmx12ReadPicker.Load(); err == nil {
 			model := data.(*pmx.PmxModel)
-			animationState := animation.NewAnimationState(0, 1)
+			animationState := app.NewAnimationState(0, 1)
 			animationState.SetModel(model)
 			controlWindow.SetAnimationState(animationState)
 		}
@@ -167,7 +166,7 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 	vmd12ReadPicker.SetOnPathChanged(func(path string) {
 		if data, err := vmd12ReadPicker.Load(); err == nil {
 			motion := data.(*vmd.VmdMotion)
-			animationState := animation.NewAnimationState(0, 1)
+			animationState := app.NewAnimationState(0, 1)
 			animationState.SetMotion(motion)
 			controlWindow.SetAnimationState(animationState)
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
@@ -187,7 +186,7 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 	pmx2ReadPicker.SetOnPathChanged(func(path string) {
 		if data, err := pmx2ReadPicker.Load(); err == nil {
 			model := data.(*pmx.PmxModel)
-			animationState := animation.NewAnimationState(1, 0)
+			animationState := app.NewAnimationState(1, 0)
 			animationState.SetModel(model)
 			controlWindow.SetAnimationState(animationState)
 		}
@@ -204,7 +203,7 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 	vmd2ReadPicker.SetOnPathChanged(func(path string) {
 		if data, err := vmd2ReadPicker.Load(); err == nil {
 			motion := data.(*vmd.VmdMotion)
-			animationState := animation.NewAnimationState(1, 0)
+			animationState := app.NewAnimationState(1, 0)
 			animationState.SetMotion(motion)
 			controlWindow.SetAnimationState(animationState)
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())

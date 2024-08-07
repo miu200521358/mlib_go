@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/animation"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 )
@@ -75,9 +74,9 @@ func (appState *appState) ExtendAnimationState(windowIndex, modelIndex int) {
 	}
 	for len(appState.animationStates[windowIndex]) <= modelIndex {
 		appState.animationStates[windowIndex] =
-			append(appState.animationStates[windowIndex], animation.NewAnimationState(windowIndex, modelIndex))
+			append(appState.animationStates[windowIndex], NewAnimationState(windowIndex, modelIndex))
 		appState.nextAnimationStates[windowIndex] =
-			append(appState.nextAnimationStates[windowIndex], animation.NewAnimationState(windowIndex, modelIndex))
+			append(appState.nextAnimationStates[windowIndex], NewAnimationState(windowIndex, modelIndex))
 	}
 }
 
@@ -87,7 +86,7 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 	appState.ExtendAnimationState(windowIndex, modelIndex)
 
 	if animationState.Model() != nil {
-		appState.nextAnimationStates[windowIndex][modelIndex] = animation.NewAnimationState(windowIndex, modelIndex)
+		appState.nextAnimationStates[windowIndex][modelIndex] = NewAnimationState(windowIndex, modelIndex)
 		appState.nextAnimationStates[windowIndex][modelIndex].SetModel(animationState.Model())
 
 		if animationState.Motion() == nil {
@@ -106,7 +105,7 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 		// モーションが指定されてたらセット
 		model := appState.animationStates[windowIndex][modelIndex].Model()
 		if model != nil {
-			appState.nextAnimationStates[windowIndex][modelIndex] = animation.NewAnimationState(windowIndex, modelIndex)
+			appState.nextAnimationStates[windowIndex][modelIndex] = NewAnimationState(windowIndex, modelIndex)
 
 			vmdDeltas := deform.DeformBeforePhysics(appState, model, animationState.Motion())
 			appState.nextAnimationStates[windowIndex][modelIndex].SetMotion(animationState.Motion())
@@ -159,7 +158,7 @@ func (appState *appState) SetFrame(frame float32) {
 					vmdDeltas := deform.DeformBeforePhysics(
 						appState, appState.animationStates[i][j].Model(), appState.animationStates[i][j].Motion())
 
-					nextState := animation.NewAnimationState(i, j)
+					nextState := NewAnimationState(i, j)
 					nextState.SetVmdDeltas(vmdDeltas)
 
 					appState.mu.Lock()

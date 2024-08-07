@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package animation
+package app
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
@@ -56,6 +56,9 @@ func (animationState *AnimationState) Model() *pmx.PmxModel {
 
 func (animationState *AnimationState) SetModel(model *pmx.PmxModel) {
 	animationState.model = model
+	if animationState.renderModel != nil {
+		animationState.model.SetIndex(animationState.modelIndex)
+	}
 }
 
 func (animationState *AnimationState) RenderModel() state.IRenderModel {
