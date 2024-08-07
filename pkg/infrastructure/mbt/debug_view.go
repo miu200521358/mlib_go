@@ -8,7 +8,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
 
 func newConstBtMDefaultColors() bt.BtMDefaultColors {
@@ -25,8 +24,8 @@ func newConstBtMDefaultColors() bt.BtMDefaultColors {
 
 type mDebugDrawLiner struct {
 	bt.BtMDebugDrawLiner
-	debugVao *buffer.VAO
-	debugVbo *buffer.VBO
+	debugVao *mgl.VAO
+	debugVbo *mgl.VBO
 	vertices []float32
 }
 
@@ -35,9 +34,9 @@ func newMDebugDrawLiner() *mDebugDrawLiner {
 		vertices: make([]float32, 0),
 	}
 
-	ddl.debugVao = buffer.NewVAO()
+	ddl.debugVao = mgl.NewVAO()
 	ddl.debugVao.Bind()
-	ddl.debugVbo = buffer.NewVBOForDebug()
+	ddl.debugVbo = mgl.NewVBOForDebug()
 	ddl.debugVbo.Unbind()
 	ddl.debugVao.Unbind()
 

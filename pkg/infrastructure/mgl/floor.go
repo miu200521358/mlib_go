@@ -5,21 +5,20 @@ package mgl
 
 import (
 	"github.com/go-gl/gl/v4.4-core/gl"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
 
 type MFloor struct {
-	vao   *buffer.VAO
-	vbo   *buffer.VBO
+	vao   *VAO
+	vbo   *VBO
 	count int32
 }
 
 func newMFloor() *MFloor {
 	mf := &MFloor{}
 
-	mf.vao = buffer.NewVAO()
+	mf.vao = NewVAO()
 	mf.vao.Bind()
-	mf.vbo, mf.count = buffer.NewVBOForFloor()
+	mf.vbo, mf.count = NewVBOForFloor()
 	mf.vbo.Unbind()
 	mf.vao.Unbind()
 

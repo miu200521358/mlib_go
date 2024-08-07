@@ -10,9 +10,10 @@ import (
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
@@ -24,27 +25,27 @@ type RenderModel struct {
 	textures          []*textureGl  // テクスチャ
 	toonTextures      []*textureGl  // トゥーンテクスチャ
 	vertices          []float32     // 頂点情報
-	vao               *buffer.VAO   // 頂点VAO
-	vbo               *buffer.VBO   // 頂点VBO
+	vao               *mgl.VAO      // 頂点VAO
+	vbo               *mgl.VBO      // 頂点VBO
 	normalVertices    []float32     // 法線情報
-	normalVao         *buffer.VAO   // 法線VAO
-	normalVbo         *buffer.VBO   // 法線VBO
-	normalIbo         *buffer.IBO   // 法線IBO
-	selectedVertexVao *buffer.VAO   // 選択頂点VAO
-	selectedVertexVbo *buffer.VBO   // 選択頂点VBO
-	selectedVertexIbo *buffer.IBO   // 選択頂点IBO
+	normalVao         *mgl.VAO      // 法線VAO
+	normalVbo         *mgl.VBO      // 法線VBO
+	normalIbo         *mgl.IBO      // 法線IBO
+	selectedVertexVao *mgl.VAO      // 選択頂点VAO
+	selectedVertexVbo *mgl.VBO      // 選択頂点VBO
+	selectedVertexIbo *mgl.IBO      // 選択頂点IBO
 	boneLineCount     int           // ボーン情報
-	boneLineVao       *buffer.VAO   // ボーンVAO
-	boneLineVbo       *buffer.VBO   // ボーンVBO
-	boneLineIbo       *buffer.IBO   // ボーンIBO
+	boneLineVao       *mgl.VAO      // ボーンVAO
+	boneLineVbo       *mgl.VBO      // ボーンVBO
+	boneLineIbo       *mgl.IBO      // ボーンIBO
 	boneLineIndexes   []int         // ボーンインデックス
 	bonePointCount    int           // ボーン情報
-	bonePointVao      *buffer.VAO   // ボーンVAO
-	bonePointVbo      *buffer.VBO   // ボーンVBO
-	bonePointIbo      *buffer.IBO   // ボーンIBO
+	bonePointVao      *mgl.VAO      // ボーンVAO
+	bonePointVbo      *mgl.VBO      // ボーンVBO
+	bonePointIbo      *mgl.IBO      // ボーンIBO
 	bonePointIndexes  []int         // ボーンインデックス
-	cursorPositionVao *buffer.VAO   // カーソルラインVAO
-	cursorPositionVbo *buffer.VBO   // カーソルラインVBO
+	cursorPositionVao *mgl.VAO      // カーソルラインVAO
+	cursorPositionVbo *mgl.VBO      // カーソルラインVBO
 	ssbo              uint32        // SSBO
 	vertexCount       int           // 頂点数
 }
@@ -233,19 +234,19 @@ func (renderModel *RenderModel) initializeBuffer(
 	wg.Wait()
 
 	// GLオブジェクトの生成は並列化しない
-	renderModel.vao = buffer.NewVAO()
+	renderModel.vao = mgl.NewVAO()
 	renderModel.vao.Bind()
 
-	renderModel.vbo = buffer.NewVBOForVertex(gl.Ptr(renderModel.vertices), len(renderModel.vertices))
-	renderModel.vbo.BindVertex(nil, nil)
+	renderModel.vbo = mgl.NewVBOForVertex(gl.Ptr(renderModel.vertices), len(renderModel.vertices))
+	renderModel.vbo.BindVertex(nil)
 	renderModel.vbo.Unbind()
 	renderModel.vao.Unbind()
 
-	renderModel.normalVao = buffer.NewVAO()
+	renderModel.normalVao = mgl.NewVAO()
 	renderModel.normalVao.Bind()
-	renderModel.normalVbo = buffer.NewVBOForVertex(gl.Ptr(renderModel.normalVertices), len(renderModel.normalVertices))
-	renderModel.normalVbo.BindVertex(nil, nil)
-	renderModel.normalIbo = buffer.NewIBO(gl.Ptr(normalFaces), len(normalFaces))
+	renderModel.normalVbo = mgl.NewVBOForVertex(gl.Ptr(renderModel.normalVertices), len(renderModel.normalVertices))
+	renderModel.normalVbo.BindVertex(nil)
+	renderModel.normalIbo = mgl.NewIBO(gl.Ptr(normalFaces), len(normalFaces))
 	renderModel.normalIbo.Bind()
 	renderModel.normalIbo.Unbind()
 	renderModel.normalVbo.Unbind()
@@ -253,11 +254,11 @@ func (renderModel *RenderModel) initializeBuffer(
 
 	renderModel.boneLineCount = len(bones)
 	renderModel.boneLineIndexes = boneIndexes
-	renderModel.boneLineVao = buffer.NewVAO()
+	renderModel.boneLineVao = mgl.NewVAO()
 	renderModel.boneLineVao.Bind()
-	renderModel.boneLineVbo = buffer.NewVBOForBone(gl.Ptr(bones), len(bones))
+	renderModel.boneLineVbo = mgl.NewVBOForBone(gl.Ptr(bones), len(bones))
 	renderModel.boneLineVbo.BindBone(nil, nil)
-	renderModel.boneLineIbo = buffer.NewIBO(gl.Ptr(boneFaces), len(boneFaces))
+	renderModel.boneLineIbo = mgl.NewIBO(gl.Ptr(boneFaces), len(boneFaces))
 	renderModel.boneLineIbo.Bind()
 	renderModel.boneLineIbo.Unbind()
 	renderModel.boneLineVbo.Unbind()
@@ -265,30 +266,30 @@ func (renderModel *RenderModel) initializeBuffer(
 
 	renderModel.bonePointCount = len(bonePoints)
 	renderModel.bonePointIndexes = bonePointIndexes
-	renderModel.bonePointVao = buffer.NewVAO()
+	renderModel.bonePointVao = mgl.NewVAO()
 	renderModel.bonePointVao.Bind()
-	renderModel.bonePointVbo = buffer.NewVBOForBone(gl.Ptr(bonePoints), len(bonePoints))
+	renderModel.bonePointVbo = mgl.NewVBOForBone(gl.Ptr(bonePoints), len(bonePoints))
 	renderModel.bonePointVbo.BindBone(nil, nil)
-	renderModel.bonePointIbo = buffer.NewIBO(gl.Ptr(bonePointFaces), len(bonePointFaces))
+	renderModel.bonePointIbo = mgl.NewIBO(gl.Ptr(bonePointFaces), len(bonePointFaces))
 	renderModel.bonePointIbo.Bind()
 	renderModel.bonePointIbo.Unbind()
 	renderModel.bonePointVbo.Unbind()
 	renderModel.bonePointVao.Unbind()
 
-	renderModel.selectedVertexVao = buffer.NewVAO()
+	renderModel.selectedVertexVao = mgl.NewVAO()
 	renderModel.selectedVertexVao.Bind()
-	renderModel.selectedVertexVbo = buffer.NewVBOForVertex(gl.Ptr(selectedVertices), len(selectedVertices))
-	renderModel.selectedVertexVbo.BindVertex(nil, nil)
-	renderModel.selectedVertexIbo = buffer.NewIBO(gl.Ptr(selectedVertexFaces), len(selectedVertexFaces))
+	renderModel.selectedVertexVbo = mgl.NewVBOForVertex(gl.Ptr(selectedVertices), len(selectedVertices))
+	renderModel.selectedVertexVbo.BindVertex(nil)
+	renderModel.selectedVertexIbo = mgl.NewIBO(gl.Ptr(selectedVertexFaces), len(selectedVertexFaces))
 	renderModel.selectedVertexIbo.Bind()
 	renderModel.selectedVertexIbo.Unbind()
 	renderModel.selectedVertexVbo.Unbind()
 	renderModel.selectedVertexVao.Unbind()
 
 	cursorPositions := []float32{0, 0, 0}
-	renderModel.cursorPositionVao = buffer.NewVAO()
+	renderModel.cursorPositionVao = mgl.NewVAO()
 	renderModel.cursorPositionVao.Bind()
-	renderModel.cursorPositionVbo = buffer.NewVBOForCursorPosition()
+	renderModel.cursorPositionVbo = mgl.NewVBOForCursorPosition()
 	renderModel.cursorPositionVbo.BindCursorPosition(cursorPositions)
 	renderModel.cursorPositionVbo.Unbind()
 	renderModel.cursorPositionVao.Unbind()
@@ -313,8 +314,7 @@ func (renderModel *RenderModel) Render(
 	renderModel.vao.Bind()
 	defer renderModel.vao.Unbind()
 
-	renderModel.vbo.BindVertex(
-		animationState.RenderDeltas().VertexMorphDeltaIndexes, animationState.RenderDeltas().VertexMorphDeltas)
+	renderModel.vbo.BindVertex(animationState.VmdDeltas().Morphs.Vertices)
 	defer renderModel.vbo.Unbind()
 
 	paddedMatrixes, matrixWidth, matrixHeight, err := createBoneMatrixes(deltas.Bones)
@@ -433,7 +433,7 @@ func (renderModel *RenderModel) drawNormal(
 	gl.UseProgram(program)
 
 	renderModel.normalVao.Bind()
-	renderModel.normalVbo.BindVertex(nil, nil)
+	renderModel.normalVbo.BindVertex(nil)
 	renderModel.normalIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定
@@ -505,29 +505,22 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	program := shader.Program(mgl.PROGRAM_TYPE_SELECTED_VERTEX)
 	gl.UseProgram(program)
 
-	selectedVertexDeltas := make([][]float32, len(nowNoSelectedVertexIndexes)+len(nowSelectedVertexIndexes))
-	for i := range nowNoSelectedVertexIndexes {
-		// 選択されていない頂点の追加UVXを-1にして表示しない
-		selectedVertexDeltas[i] = []float32{
-			0, 0, 0,
-			-1, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0,
-		}
+	selectedVertexDeltas := delta.NewVertexMorphDeltas()
+	for _, index := range nowNoSelectedVertexIndexes {
+		// 選択されていない頂点のUVXを-1にして表示しない
+		vd := delta.NewVertexMorphDelta(index)
+		vd.Uv = &mmath.MVec2{X: -1, Y: 0}
+		selectedVertexDeltas.Update(vd)
 	}
-	for i := range nowSelectedVertexIndexes {
-		// 選択されている頂点の追加UVXを＋にして（フラグをたてて）表示する
-		selectedVertexDeltas[i+len(nowNoSelectedVertexIndexes)] = []float32{
-			0, 0, 0,
-			1, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0,
-		}
+	for _, index := range nowSelectedVertexIndexes {
+		// 選択されている頂点のUVXを＋にして（フラグをたてて）表示する
+		vd := delta.NewVertexMorphDelta(index)
+		vd.Uv = &mmath.MVec2{X: 1, Y: 0}
+		selectedVertexDeltas.Update(vd)
 	}
 
-	indexes := append(nowNoSelectedVertexIndexes, nowSelectedVertexIndexes...)
 	renderModel.selectedVertexVao.Bind()
-	renderModel.selectedVertexVbo.BindVertex(indexes, selectedVertexDeltas)
+	renderModel.selectedVertexVbo.BindVertex(selectedVertexDeltas)
 	renderModel.selectedVertexIbo.Bind()
 
 	// ボーンデフォームテクスチャ設定

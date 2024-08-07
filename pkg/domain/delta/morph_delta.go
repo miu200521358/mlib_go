@@ -43,6 +43,14 @@ func NewWireVertexMorphDeltas() *WireVertexMorphDeltas {
 	}
 }
 
+func (vertexMorphDeltas *VertexMorphDeltas) Get(index int) *VertexMorphDelta {
+	return vertexMorphDeltas.Data[index]
+}
+
+func (vertexMorphDeltas *VertexMorphDeltas) Update(v *VertexMorphDelta) {
+	vertexMorphDeltas.Data[v.Index] = v
+}
+
 type BoneMorphDelta struct {
 	BoneIndex     int
 	FramePosition *mmath.MVec3       // キーフレ位置の変動量

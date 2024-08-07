@@ -12,16 +12,12 @@ const (
 )
 
 type RenderDeltas struct {
-	VertexMorphDeltaIndexes []int        // 選択頂点インデックス
-	VertexMorphDeltas       [][]float32  // 選択頂点デルタ
-	MeshDeltas              []*MeshDelta // メッシュデルタ
+	MeshDeltas []*MeshDelta // メッシュデルタ
 }
 
 func NewRenderDeltas() *RenderDeltas {
 	return &RenderDeltas{
-		VertexMorphDeltaIndexes: make([]int, 0),
-		VertexMorphDeltas:       make([][]float32, 0),
-		MeshDeltas:              make([]*MeshDelta, 0),
+		MeshDeltas: make([]*MeshDelta, 0),
 	}
 }
 

@@ -13,7 +13,6 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
@@ -94,7 +93,7 @@ type MShader struct {
 	FarPlane              float32
 	lightPosition         *mmath.MVec3
 	lightDirection        *mmath.MVec3
-	Msaa                  *buffer.Msaa
+	Msaa                  *Msaa
 	modelProgram          uint32
 	edgeProgram           uint32
 	boneProgram           uint32
@@ -123,7 +122,7 @@ func NewMShader(width, height int) *MShader {
 		NearPlane:            0.1,
 		FarPlane:             1000.0,
 		lightPosition:        &mmath.MVec3{X: -0.5, Y: -1.0, Z: 0.5},
-		Msaa:                 buffer.NewMsaa(width, height),
+		Msaa:                 NewMsaa(width, height),
 		floor:                newMFloor(),
 	}
 	shader.lightDirection = shader.lightPosition.Normalized()
@@ -404,7 +403,7 @@ func (shader *MShader) Resize(width int, height int) {
 	if width != 0 && height != 0 {
 		// MSAAも作り直し
 		shader.Msaa.Delete()
-		shader.Msaa = buffer.NewMsaa(shader.Width, shader.Height)
+		shader.Msaa = NewMsaa(shader.Width, shader.Height)
 	}
 }
 

@@ -10,13 +10,12 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl/buffer"
 )
 
 type Mesh struct {
-	material          materialGL  // 描画用材質
-	prevVerticesCount int         // 前の頂点数
-	ibo               *buffer.IBO // 頂点インデックスバッファ
+	material          materialGL // 描画用材質
+	prevVerticesCount int        // 前の頂点数
+	ibo               *mgl.IBO   // 頂点インデックスバッファ
 }
 
 func newMesh(
@@ -25,7 +24,7 @@ func newMesh(
 	prevVerticesCount int,
 ) *Mesh {
 	faces := allFaces[prevVerticesCount:(prevVerticesCount + material.VerticesCount)]
-	ibo := buffer.NewIBO(gl.Ptr(faces), len(faces))
+	ibo := mgl.NewIBO(gl.Ptr(faces), len(faces))
 
 	return &Mesh{
 		material:          *material,

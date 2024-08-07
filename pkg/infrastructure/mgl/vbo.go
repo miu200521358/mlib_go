@@ -1,12 +1,13 @@
 //go:build windows
 // +build windows
 
-package buffer
+package mgl
 
 import (
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 )
 
 // Vertex Buffer Object.
@@ -133,16 +134,45 @@ func (v *VBO) BindOverride() {
 	)
 }
 
+func newVertexMorphDeltaGl(md *delta.VertexMorphDelta) []float32 {
+	var p0, p1, p2 float32
+	if md.Position != nil {
+		p := NewGlVec3(md.Position)
+		p0, p1, p2 = p[0], p[1], p[2]
+	}
+	var ap0, ap1, ap2 float32
+	if md.AfterPosition != nil {
+		ap := NewGlVec3(md.AfterPosition)
+		ap0, ap1, ap2 = ap[0], ap[1], ap[2]
+	}
+	// UVは符号関係ないのでそのまま取得する
+	var u0x, u0y, u1x, u1y float32
+	if md.Uv != nil {
+		u0x = float32(md.Uv.X)
+		u0y = float32(md.Uv.Y)
+	}
+	if md.Uv1 != nil {
+		u1x = float32(md.Uv1.X)
+		u1y = float32(md.Uv1.Y)
+	}
+	return []float32{
+		p0, p1, p2,
+		u0x, u0y, 0, 0,
+		u1x, u1y, 0, 0,
+		ap0, ap1, ap2,
+	}
+}
+
 // Binds VBO for rendering.
-func (v *VBO) BindVertex(vertexMorphIndexes []int, vertexMorphDeltas [][]float32) {
+func (v *VBO) BindVertex(vertices *delta.VertexMorphDeltas) {
 	gl.BindBuffer(v.target, v.id)
 
-	if vertexMorphIndexes != nil {
+	if vertices != nil && len(vertices.Data) > 0 {
 		vboVertexSize := (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3)
 
 		// モーフ分の変動量を設定
-		for i, vidx := range vertexMorphIndexes {
-			vd := vertexMorphDeltas[i]
+		for vidx, vertexDelta := range vertices.Data {
+			vd := newVertexMorphDeltaGl(vertexDelta)
 			if vd != nil {
 				offsetStride := (vidx*v.StrideSize + vboVertexSize) * 4
 				// 必要な場合にのみ部分更新
