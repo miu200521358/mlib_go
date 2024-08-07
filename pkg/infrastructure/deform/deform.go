@@ -13,8 +13,8 @@ func DeformBeforePhysics(
 	frame := int(appState.Frame())
 
 	vmdDeltas := delta.NewVmdDeltas(model.Materials, model.Bones)
-	vmdDeltas.Morphs = DeformMorph(model, motion.MorphFrames, frame, nil)
-	vmdDeltas = DeformBoneByPhysicsFlag(model, motion, vmdDeltas, true, float64(frame), nil, false)
+	vmdDeltas.Morphs = DeformMorph(model, motion.MorphFrames, float32(frame), nil)
+	vmdDeltas = DeformBoneByPhysicsFlag(model, motion, vmdDeltas, true, float32(frame), nil, false)
 
 	renderDeltas := delta.NewRenderDeltas()
 	renderDeltas.MeshDeltas = make([]*delta.MeshDelta, len(model.Materials.Data))

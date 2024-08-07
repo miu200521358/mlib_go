@@ -8,16 +8,16 @@ import (
 )
 
 type IBaseFrame interface {
-	Index() float64
+	Index() float32
 	getIntIndex() core.Float
-	SetIndex(index float64)
+	SetIndex(index float32)
 	IsRegistered() bool
 	IsRead() bool
 	Less(than llrb.Item) bool
-	lerpFrame(prevFrame IBaseFrame, index float64) IBaseFrame
-	splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float64)
+	lerpFrame(prevFrame IBaseFrame, index float32) IBaseFrame
+	splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float32)
 	Copy() IBaseFrame
-	New(index float64) IBaseFrame
+	New(index float32) IBaseFrame
 }
 
 type BaseFrame struct {
@@ -27,7 +27,7 @@ type BaseFrame struct {
 }
 
 func (baseFrame *BaseFrame) Less(than llrb.Item) bool {
-	return baseFrame.Index() < float64(than.(core.Float))
+	return baseFrame.Index() < float32(than.(core.Float))
 }
 
 func (baseFrame *BaseFrame) Copy() IBaseFrame {
@@ -38,13 +38,13 @@ func (baseFrame *BaseFrame) Copy() IBaseFrame {
 	}
 }
 
-func (baseFrame *BaseFrame) New(index float64) IBaseFrame {
+func (baseFrame *BaseFrame) New(index float32) IBaseFrame {
 	return &BaseFrame{
 		index: core.Float(index),
 	}
 }
 
-func NewFrame(index float64) IBaseFrame {
+func NewFrame(index float32) IBaseFrame {
 	return &BaseFrame{
 		index:      core.NewFloat(index),
 		Registered: false,
@@ -52,22 +52,22 @@ func NewFrame(index float64) IBaseFrame {
 	}
 }
 
-func (baseFrame *BaseFrame) lerpFrame(prevFrame IBaseFrame, index float64) IBaseFrame {
+func (baseFrame *BaseFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFrame {
 	return baseFrame.Copy()
 }
 
-func (baseFrame *BaseFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float64) {
+func (baseFrame *BaseFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float32) {
 }
 
 func (baseFrame *BaseFrame) getIntIndex() core.Float {
 	return baseFrame.index
 }
 
-func (baseFrame *BaseFrame) Index() float64 {
-	return float64(baseFrame.index)
+func (baseFrame *BaseFrame) Index() float32 {
+	return float32(baseFrame.index)
 }
 
-func (baseFrame *BaseFrame) SetIndex(index float64) {
+func (baseFrame *BaseFrame) SetIndex(index float32) {
 	baseFrame.index = core.NewFloat(index)
 }
 
@@ -80,17 +80,17 @@ func (baseFrame *BaseFrame) IsRead() bool {
 }
 
 type BaseFrames[T IBaseFrame] struct {
-	data              map[float64]T         // キーフレリスト
+	data              map[float32]T         // キーフレリスト
 	Indexes           *core.FloatIndexes    // 全キーフレリスト
 	RegisteredIndexes *core.FloatIndexes    // 登録対象キーフレリスト
-	newFunc           func(index float64) T // キーフレ生成関数
+	newFunc           func(index float32) T // キーフレ生成関数
 	nullFunc          func() T              // 空キーフレ生成関数
 	lock              sync.RWMutex          // マップアクセス制御用
 }
 
-func NewBaseFrames[T IBaseFrame](newFunc func(index float64) T, nullFunc func() T) *BaseFrames[T] {
+func NewBaseFrames[T IBaseFrame](newFunc func(index float32) T, nullFunc func() T) *BaseFrames[T] {
 	return &BaseFrames[T]{
-		data:              make(map[float64]T),
+		data:              make(map[float32]T),
 		Indexes:           core.NewFloatIndexes(),
 		RegisteredIndexes: core.NewFloatIndexes(),
 		newFunc:           newFunc,
@@ -99,16 +99,16 @@ func NewBaseFrames[T IBaseFrame](newFunc func(index float64) T, nullFunc func() 
 	}
 }
 
-func (baseFrames *BaseFrames[T]) NewFrame(index float64) T {
+func (baseFrames *BaseFrames[T]) NewFrame(index float32) T {
 	return NewFrame(index).(T)
 }
 
-func (baseFrames *BaseFrames[T]) Get(index float64) T {
+func (baseFrames *BaseFrames[T]) Get(index float32) T {
 	baseFrames.lock.RLock()
 	defer baseFrames.lock.RUnlock()
 
-	if _, ok := baseFrames.data[float64(index)]; ok {
-		return baseFrames.data[float64(index)]
+	if _, ok := baseFrames.data[float32(index)]; ok {
+		return baseFrames.data[float32(index)]
 	}
 
 	if len(baseFrames.data) == 0 {
@@ -135,22 +135,22 @@ func (baseFrames *BaseFrames[T]) Get(index float64) T {
 	return nextF.lerpFrame(prevF, index).(T)
 }
 
-func (baseFrames *BaseFrames[T]) prevFrame(index float64) float64 {
+func (baseFrames *BaseFrames[T]) prevFrame(index float32) float32 {
 	prevFrame := baseFrames.MinFrame()
 
 	baseFrames.RegisteredIndexes.DescendLessOrEqual(core.Float(index), func(i llrb.Item) bool {
-		prevFrame = float64(i.(core.Float))
+		prevFrame = float32(i.(core.Float))
 		return false
 	})
 
 	return prevFrame
 }
 
-func (baseFrames *BaseFrames[T]) nextFrame(index float64) float64 {
+func (baseFrames *BaseFrames[T]) nextFrame(index float32) float32 {
 	nextFrame := baseFrames.MaxFrame()
 
 	baseFrames.RegisteredIndexes.AscendGreaterOrEqual(core.Float(index), func(i llrb.Item) bool {
-		nextFrame = float64(i.(core.Float))
+		nextFrame = float32(i.(core.Float))
 		return false
 	})
 
@@ -161,8 +161,8 @@ func (baseFrames *BaseFrames[T]) List() []T {
 	list := make([]T, 0, baseFrames.RegisteredIndexes.Len())
 
 	baseFrames.RegisteredIndexes.AscendRange(core.Float(0), core.Float(baseFrames.RegisteredIndexes.Max()), func(i llrb.Item) bool {
-		if _, ok := baseFrames.data[float64(i.(core.Float))]; !ok {
-			list = append(list, baseFrames.data[float64(i.(core.Float))])
+		if _, ok := baseFrames.data[float32(i.(core.Float))]; !ok {
+			list = append(list, baseFrames.data[float32(i.(core.Float))])
 		}
 		return true
 	})
@@ -182,32 +182,32 @@ func (baseFrames *BaseFrames[T]) appendFrame(v T) {
 	baseFrames.Indexes.ReplaceOrInsert(core.Float(v.Index()))
 }
 
-func (baseFrames *BaseFrames[T]) MaxFrame() float64 {
+func (baseFrames *BaseFrames[T]) MaxFrame() float32 {
 	if baseFrames.RegisteredIndexes.Len() == 0 {
 		return 0
 	}
 	return baseFrames.RegisteredIndexes.Max()
 }
 
-func (baseFrames *BaseFrames[T]) MinFrame() float64 {
+func (baseFrames *BaseFrames[T]) MinFrame() float32 {
 	if baseFrames.RegisteredIndexes.Len() == 0 {
 		return 0
 	}
 	return baseFrames.RegisteredIndexes.Min()
 }
 
-func (baseFrames *BaseFrames[T]) ContainsRegistered(index float64) bool {
+func (baseFrames *BaseFrames[T]) ContainsRegistered(index float32) bool {
 	return baseFrames.RegisteredIndexes.Has(index)
 }
 
-func (baseFrames *BaseFrames[T]) Contains(index float64) bool {
+func (baseFrames *BaseFrames[T]) Contains(index float32) bool {
 	if _, ok := baseFrames.data[index]; ok {
 		return true
 	}
 	return false
 }
 
-func (baseFrames *BaseFrames[T]) Delete(index float64) {
+func (baseFrames *BaseFrames[T]) Delete(index float32) {
 	baseFrames.lock.Lock()
 	defer baseFrames.lock.Unlock()
 

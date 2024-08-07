@@ -682,9 +682,8 @@ MlibSample 1.0.0_beta_120
 ・panic発生時のメッセージにアプリ名とバージョン追加
 
 MlibSample 1.0.0_beta_121
-・フレームINDEXをfloat64で取れるよう変更
-  → 計算に使わないのでfloat32にすることも考えたけど、毎回キャストするの面倒…
+・フレームINDEXをfloat32で取れるよう変更
 ・描画をrenderパッケージに移動
-
+・bufferパッケージをmglパッケージに統合
 
 

@@ -212,11 +212,11 @@ func NewAnimationState(windowIndex, modelIndex int) *AnimationState {
 func (animationState *AnimationState) DeformBeforePhysics(
 	appState state.IAppState, model *pmx.PmxModel,
 ) (*delta.VmdDeltas, *delta.RenderDeltas) {
-	frame := int(appState.Frame())
+	frame := appState.Frame()
 
 	vmdDeltas := delta.NewVmdDeltas(model.Materials, model.Bones)
 	vmdDeltas.Morphs = deform.DeformMorph(model, animationState.motion.MorphFrames, frame, nil)
-	vmdDeltas = deform.DeformBoneByPhysicsFlag(model, animationState.motion, vmdDeltas, true, float64(frame), nil, false)
+	vmdDeltas = deform.DeformBoneByPhysicsFlag(model, animationState.motion, vmdDeltas, true, frame, nil, false)
 
 	renderDeltas := delta.NewRenderDeltas()
 	renderDeltas.MeshDeltas = make([]*delta.MeshDelta, len(model.Materials.Data))

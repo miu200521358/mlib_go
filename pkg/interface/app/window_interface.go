@@ -17,7 +17,7 @@ type IControlWindow interface {
 	SetPosition(x, y int)
 	Enabled() bool
 	SetEnabled(enabled bool)
-	SetFrame(frame float64)
+	SetFrame(frame float32)
 	UpdateSelectedVertexIndexes(indexes [][][]int)
 	SetUpdateSelectedVertexIndexesFunc(f func([][][]int))
 }
@@ -42,13 +42,13 @@ type IViewWindow interface {
 type IPlayer interface {
 	Playing() bool
 	TriggerPlay(playing bool)
-	PrevFrame() int
-	SetPrevFrame(v int)
-	Frame() float64
-	SetFrame(v float64)
-	MaxFrame() int
-	SetMaxFrame(max int)
-	UpdateMaxFrame(max int)
+	PrevFrame() float32
+	SetPrevFrame(v float32)
+	Frame() float32
+	SetFrame(v float32)
+	MaxFrame() float32
+	SetMaxFrame(max float32)
+	UpdateMaxFrame(max float32)
 	SetRange(min, max int)
 	SetEnabled(enabled bool)
 	SetEnabledOnlyButton(enabled bool)

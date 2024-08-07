@@ -5,7 +5,7 @@ type MorphFrame struct {
 	Ratio      float64 // モーフの割合
 }
 
-func NewMorphFrame(index float64) *MorphFrame {
+func NewMorphFrame(index float32) *MorphFrame {
 	return &MorphFrame{
 		BaseFrame: NewFrame(index).(*BaseFrame),
 		Ratio:     0.0,
@@ -32,7 +32,7 @@ func (mf *MorphFrame) Copy() IBaseFrame {
 	return copied
 }
 
-func (nextMf *MorphFrame) lerpFrame(prevFrame IBaseFrame, index float64) IBaseFrame {
+func (nextMf *MorphFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFrame {
 	prevMf := prevFrame.(*MorphFrame)
 
 	prevIndex := prevMf.Index()
@@ -46,5 +46,5 @@ func (nextMf *MorphFrame) lerpFrame(prevFrame IBaseFrame, index float64) IBaseFr
 	return mf
 }
 
-func (mf *MorphFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float64) {
+func (mf *MorphFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float32) {
 }

@@ -4,14 +4,14 @@
 package state
 
 type IAppState interface {
-	Frame() float64
-	SetFrame(frame float64)
-	AddFrame(v float64)
-	MaxFrame() int
-	SetMaxFrame(maxFrame int)
-	UpdateMaxFrame(maxFrame int)
-	PrevFrame() float64
-	SetPrevFrame(prevFrame float64)
+	Frame() float32
+	SetFrame(frame float32)
+	AddFrame(v float32)
+	MaxFrame() float32
+	SetMaxFrame(maxFrame float32)
+	UpdateMaxFrame(maxFrame float32)
+	PrevFrame() float32
+	SetPrevFrame(prevFrame float32)
 	IsEnabledFrameDrop() bool
 	SetEnabledFrameDrop(enabled bool)
 	IsEnabledPhysics() bool

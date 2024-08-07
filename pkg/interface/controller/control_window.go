@@ -555,30 +555,30 @@ func (controlWindow *ControlWindow) TriggerUnLimitFps() {
 	controlWindow.controlState.SetSpfLimit(controlWindow.SpfLimit())
 }
 
-func (controlWindow *ControlWindow) Frame() float64 {
+func (controlWindow *ControlWindow) Frame() float32 {
 	return controlWindow.controlState.motionPlayer.Frame()
 }
 
-func (controlWindow *ControlWindow) SetFrame(frame float64) {
+func (controlWindow *ControlWindow) SetFrame(frame float32) {
 	controlWindow.controlState.SetFrame(frame)
 }
 
-func (controlWindow *ControlWindow) AddFrame(v float64) {
+func (controlWindow *ControlWindow) AddFrame(v float32) {
 	f := controlWindow.Frame() + v
 	controlWindow.controlState.SetFrame(f)
 }
 
-func (controlWindow *ControlWindow) MaxFrame() int {
+func (controlWindow *ControlWindow) MaxFrame() float32 {
 	return controlWindow.controlState.motionPlayer.MaxFrame()
 }
 
-func (controlWindow *ControlWindow) UpdateMaxFrame(maxFrame int) {
+func (controlWindow *ControlWindow) UpdateMaxFrame(maxFrame float32) {
 	if controlWindow.MaxFrame() < maxFrame {
 		controlWindow.controlState.SetMaxFrame(maxFrame)
 	}
 }
 
-func (controlWindow *ControlWindow) SetMaxFrame(maxFrame int) {
+func (controlWindow *ControlWindow) SetMaxFrame(maxFrame float32) {
 	controlWindow.controlState.SetMaxFrame(maxFrame)
 }
 

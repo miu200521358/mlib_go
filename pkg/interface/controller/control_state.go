@@ -14,8 +14,8 @@ type controlState struct {
 	appState                 state.IAppState                // アプリ状態
 	motionPlayer             app.IPlayer                    // モーションプレイヤー
 	controlWindow            app.IControlWindow             // コントロールウィンドウ
-	frameChan                chan float64                   // フレーム
-	maxFrameChan             chan int                       // 最大フレーム
+	frameChan                chan float32                   // フレーム
+	maxFrameChan             chan float32                   // 最大フレーム
 	isEnabledFrameDropChan   chan bool                      // フレームドロップON/OFF
 	isEnabledPhysicsChan     chan bool                      // 物理ON/OFF
 	isPhysicsResetChan       chan bool                      // 物理リセット
@@ -52,8 +52,8 @@ type controlState struct {
 func NewControlState(appState state.IAppState) *controlState {
 	u := &controlState{
 		appState:                 appState,
-		frameChan:                make(chan float64),
-		maxFrameChan:             make(chan int),
+		frameChan:                make(chan float32),
+		maxFrameChan:             make(chan float32),
 		isEnabledFrameDropChan:   make(chan bool),
 		isEnabledPhysicsChan:     make(chan bool),
 		isPhysicsResetChan:       make(chan bool),
@@ -111,10 +111,10 @@ func (contState *controlState) Run() {
 				continue
 			}
 
-			contState.AddFrame(elapsed * 30)
+			contState.AddFrame(float32(elapsed * 30))
 			prevTime = frameTime
 
-			if contState.Frame() > float64(contState.MaxFrame()) {
+			if contState.Frame() > contState.MaxFrame() {
 				// 最後まで行ったら物理リセットフラグを立てて、最初に戻す
 				contState.appState.SetPhysicsReset(true)
 				contState.appState.SetFrame(0)
@@ -198,30 +198,30 @@ func (contState *controlState) AnimationState() *animation.AnimationState {
 	return <-contState.animationState
 }
 
-func (contState *controlState) Frame() float64 {
+func (contState *controlState) Frame() float32 {
 	return contState.appState.Frame()
 }
 
-func (contState *controlState) SetFrame(frame float64) {
+func (contState *controlState) SetFrame(frame float32) {
 	contState.motionPlayer.SetFrame(frame)
 	contState.frameChan <- frame
 }
 
-func (contState *controlState) AddFrame(v float64) {
+func (contState *controlState) AddFrame(v float32) {
 	f := contState.Frame()
 	contState.SetFrame(f + v)
 }
 
-func (contState *controlState) MaxFrame() int {
+func (contState *controlState) MaxFrame() float32 {
 	return contState.motionPlayer.MaxFrame()
 }
 
-func (contState *controlState) SetMaxFrame(maxFrame int) {
+func (contState *controlState) SetMaxFrame(maxFrame float32) {
 	contState.motionPlayer.SetMaxFrame(maxFrame)
 	contState.maxFrameChan <- maxFrame
 }
 
-func (contState *controlState) UpdateMaxFrame(maxFrame int) {
+func (contState *controlState) UpdateMaxFrame(maxFrame float32) {
 	contState.motionPlayer.UpdateMaxFrame(maxFrame)
 	contState.maxFrameChan <- maxFrame
 }

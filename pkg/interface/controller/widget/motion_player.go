@@ -16,7 +16,7 @@ import (
 type MotionPlayer struct {
 	walk.WidgetBase
 	controlWindow app.IControlWindow // アプリ状態
-	prevFrame     int                // 前回フレーム
+	prevFrame     float32            // 前回フレーム
 	playing       bool               // 再生中かどうか
 	frameEdit     *walk.NumberEdit   // フレーム番号入力欄
 	frameSlider   *walk.Slider       // フレームスライダー
@@ -77,7 +77,7 @@ func NewMotionPlayer(
 	player.frameEdit.SetSpinButtonsVisible(true)
 	player.frameEdit.ValueChanged().Attach(func() {
 		if !player.Playing() {
-			player.controlWindow.SetFrame(player.frameEdit.Value())
+			player.controlWindow.SetFrame(float32(player.frameEdit.Value()))
 		}
 	})
 
@@ -90,7 +90,7 @@ func NewMotionPlayer(
 	player.frameSlider.SetValue(0)
 	player.frameSlider.ValueChanged().Attach(func() {
 		if !player.Playing() {
-			player.controlWindow.SetFrame(float64(player.frameSlider.Value()))
+			player.controlWindow.SetFrame(float32(player.frameSlider.Value()))
 		}
 	})
 
@@ -118,38 +118,38 @@ func (player *MotionPlayer) Dispose() {
 	player.playButton.Dispose()
 }
 
-func (player *MotionPlayer) PrevFrame() int {
+func (player *MotionPlayer) PrevFrame() float32 {
 	return player.prevFrame
 }
 
-func (player *MotionPlayer) SetPrevFrame(v int) {
+func (player *MotionPlayer) SetPrevFrame(v float32) {
 	player.prevFrame = v
 }
 
-func (player *MotionPlayer) Frame() float64 {
-	return player.frameEdit.Value()
+func (player *MotionPlayer) Frame() float32 {
+	return float32(player.frameEdit.Value())
 }
 
-func (player *MotionPlayer) SetFrame(v float64) {
-	if player.playing && v > player.frameEdit.MaxValue() {
+func (player *MotionPlayer) SetFrame(v float32) {
+	if player.playing && v > float32(player.frameEdit.MaxValue()) {
 		v = 0
 	}
-	value := mmath.ClampedFloat(v, player.frameEdit.MinValue(), player.frameEdit.MaxValue())
+	value := mmath.ClampedFloat(float64(v), player.frameEdit.MinValue(), player.frameEdit.MaxValue())
 	player.frameEdit.ChangeValue(value)
 	player.frameSlider.ChangeValue(int(value))
 }
 
-func (player *MotionPlayer) MaxFrame() int {
-	return player.frameSlider.MaxValue()
+func (player *MotionPlayer) MaxFrame() float32 {
+	return float32(player.frameSlider.MaxValue())
 }
 
-func (player *MotionPlayer) SetMaxFrame(max int) {
+func (player *MotionPlayer) SetMaxFrame(max float32) {
 	player.frameEdit.SetRange(player.frameEdit.MinValue(), float64(max))
-	player.frameSlider.SetRange(int(player.frameEdit.MinValue()), max)
+	player.frameSlider.SetRange(int(player.frameEdit.MinValue()), int(max))
 }
 
-func (player *MotionPlayer) UpdateMaxFrame(max int) {
-	nowMax := player.frameSlider.MaxValue()
+func (player *MotionPlayer) UpdateMaxFrame(max float32) {
+	nowMax := float32(player.frameSlider.MaxValue())
 	if nowMax < max {
 		player.SetMaxFrame(max)
 	}

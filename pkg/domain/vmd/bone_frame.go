@@ -15,7 +15,7 @@ type BoneFrame struct {
 	Curves        *BoneCurves        // 補間曲線
 }
 
-func NewBoneFrame(index float64) *BoneFrame {
+func NewBoneFrame(index float32) *BoneFrame {
 	return &BoneFrame{
 		BaseFrame: NewFrame(index).(*BaseFrame),
 	}
@@ -110,7 +110,7 @@ func (bf *BoneFrame) Copy() IBaseFrame {
 	return copied
 }
 
-func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index float64) IBaseFrame {
+func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFrame {
 	prevBf := prevFrame.(*BoneFrame)
 
 	if prevBf == nil || nextBf.Index() <= index {
@@ -218,7 +218,7 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index float64) IBaseFra
 	return bf
 }
 
-func (bf *BoneFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float64) {
+func (bf *BoneFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float32) {
 	nextBf := nextFrame.(*BoneFrame)
 	prevBf := prevFrame.(*BoneFrame)
 

@@ -2,9 +2,9 @@ package core
 
 import "github.com/petar/GoLLRB/llrb"
 
-type Float float64
+type Float float32
 
-func NewFloat(v float64) Float {
+func NewFloat(v float32) Float {
 	return Float(v)
 }
 
@@ -25,7 +25,7 @@ func NewFloatIndexes() *FloatIndexes {
 	}
 }
 
-func (vFloats FloatIndexes) Prev(index float64) float64 {
+func (vFloats FloatIndexes) Prev(index float32) float32 {
 	prevIndex := Float(0)
 
 	vFloats.DescendLessOrEqual(Float(index), func(i llrb.Item) bool {
@@ -33,10 +33,10 @@ func (vFloats FloatIndexes) Prev(index float64) float64 {
 		return false
 	})
 
-	return float64(prevIndex)
+	return float32(prevIndex)
 }
 
-func (vFloats FloatIndexes) Next(index float64) float64 {
+func (vFloats FloatIndexes) Next(index float32) float32 {
 	nextIndex := Float(index)
 
 	vFloats.AscendGreaterOrEqual(Float(index), func(i llrb.Item) bool {
@@ -44,36 +44,36 @@ func (vFloats FloatIndexes) Next(index float64) float64 {
 		return false
 	})
 
-	return float64(nextIndex)
+	return float32(nextIndex)
 }
 
-func (vFloats FloatIndexes) Has(index float64) bool {
+func (vFloats FloatIndexes) Has(index float32) bool {
 	return vFloats.LLRB.Has(Float(index))
 }
 
-func (vFloats FloatIndexes) Max() float64 {
+func (vFloats FloatIndexes) Max() float32 {
 	if vFloats.LLRB.Len() == 0 {
 		return 0
 	}
-	return float64(vFloats.LLRB.Max().(Float))
+	return float32(vFloats.LLRB.Max().(Float))
 }
 
-func (vFloats FloatIndexes) Min() float64 {
+func (vFloats FloatIndexes) Min() float32 {
 	if vFloats.LLRB.Len() == 0 {
 		return 0
 	}
-	return float64(vFloats.LLRB.Min().(Float))
+	return float32(vFloats.LLRB.Min().(Float))
 }
 
 func (vFloats FloatIndexes) Len() int {
 	return vFloats.LLRB.Len()
 }
 
-func (vFloats FloatIndexes) List() []float64 {
-	values := make([]float64, 0, vFloats.LLRB.Len())
+func (vFloats FloatIndexes) List() []float32 {
+	values := make([]float32, 0, vFloats.LLRB.Len())
 	vFloats.LLRB.AscendGreaterOrEqual(vFloats.LLRB.Min(), func(item llrb.Item) bool {
-		if float64(item.(Float)) >= 0 {
-			values = append(values, float64(item.(Float)))
+		if float32(item.(Float)) >= 0 {
+			values = append(values, float32(item.(Float)))
 		}
 		return true
 	})

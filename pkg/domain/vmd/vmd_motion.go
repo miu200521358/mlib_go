@@ -85,11 +85,11 @@ func (motion *VmdMotion) Copy() core.IHashModel {
 	return copied
 }
 
-func (motion *VmdMotion) MaxFrame() int {
+func (motion *VmdMotion) MaxFrame() float32 {
 	return max(motion.BoneFrames.MaxFrame(), motion.MorphFrames.MaxFrame())
 }
 
-func (motion *VmdMotion) MinFrame() int {
+func (motion *VmdMotion) MinFrame() float32 {
 	return min(motion.BoneFrames.MinFrame(), motion.MorphFrames.MinFrame())
 }
 

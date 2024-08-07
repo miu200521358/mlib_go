@@ -668,11 +668,11 @@ func TestVmdMotion_DeformLegIk6_KoshiIkOn(t *testing.T) {
 	// IK ON
 	fno := int(0)
 
-	ikEnabledFrame := vmd.NewIkEnableFrame(float64(fno))
+	ikEnabledFrame := vmd.NewIkEnableFrame(float32(fno))
 	ikEnabledFrame.Enabled = true
 	ikEnabledFrame.BoneName = pmx.LEG_IK.Left()
 
-	ikFrame := vmd.NewIkFrame(float64(fno))
+	ikFrame := vmd.NewIkFrame(float32(fno))
 	ikFrame.IkList = append(ikFrame.IkList, ikEnabledFrame)
 
 	boneDeltas := DeformBone(model, motion, true, 0, nil)
@@ -715,11 +715,11 @@ func TestVmdMotion_DeformLegIk6_KoshiIkOff(t *testing.T) {
 
 	fno := int(0)
 
-	ikEnabledFrame := vmd.NewIkEnableFrame(float64(fno))
+	ikEnabledFrame := vmd.NewIkEnableFrame(float32(fno))
 	ikEnabledFrame.Enabled = false
 	ikEnabledFrame.BoneName = pmx.LEG_IK.Left()
 
-	ikFrame := vmd.NewIkFrame(float64(fno))
+	ikFrame := vmd.NewIkFrame(float32(fno))
 	ikFrame.IkList = append(ikFrame.IkList, ikEnabledFrame)
 
 	boneDeltas := DeformBone(model, motion, false, 0, nil)

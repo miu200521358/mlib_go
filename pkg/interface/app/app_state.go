@@ -13,9 +13,9 @@ import (
 )
 
 type appState struct {
-	frame                float64                   // フレーム
-	prevFrame            float64                   // 前回のフレーム
-	maxFrame             int                       // 最大フレーム
+	frame                float32                   // フレーム
+	prevFrame            float32                   // 前回のフレーム
+	maxFrame             float32                   // 最大フレーム
 	isEnabledFrameDrop   bool                      // フレームドロップON/OFF
 	isEnabledPhysics     bool                      // 物理ON/OFF
 	isPhysicsReset       bool                      // 物理リセット
@@ -131,14 +131,14 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 	}
 }
 
-func (appState *appState) Frame() float64 {
+func (appState *appState) Frame() float32 {
 	return appState.frame
 }
 
-func (appState *appState) SetFrame(frame float64) {
+func (appState *appState) SetFrame(frame float32) {
 	if appState.Playing() && !appState.IsEnabledFrameDrop() && frame-appState.prevFrame >= 1 {
 		// 再生中でフレームドロップOFFだったらフレームを1Fしか進めない
-		frame = float64(appState.prevFrame) + 1
+		frame = float32(appState.prevFrame) + 1
 	}
 
 	appState.frame = frame
@@ -180,29 +180,29 @@ func (appState *appState) DeformElapsed() float64 {
 	return appState.deformElapsed
 }
 
-func (appState *appState) AddFrame(v float64) {
+func (appState *appState) AddFrame(v float32) {
 	appState.SetFrame(appState.frame + v)
 }
 
-func (appState *appState) MaxFrame() int {
+func (appState *appState) MaxFrame() float32 {
 	return appState.maxFrame
 }
 
-func (appState *appState) UpdateMaxFrame(maxFrame int) {
+func (appState *appState) UpdateMaxFrame(maxFrame float32) {
 	if appState.maxFrame < maxFrame {
 		appState.maxFrame = maxFrame
 	}
 }
 
-func (appState *appState) SetMaxFrame(maxFrame int) {
+func (appState *appState) SetMaxFrame(maxFrame float32) {
 	appState.maxFrame = maxFrame
 }
 
-func (appState *appState) PrevFrame() float64 {
+func (appState *appState) PrevFrame() float32 {
 	return appState.prevFrame
 }
 
-func (appState *appState) SetPrevFrame(prevFrame float64) {
+func (appState *appState) SetPrevFrame(prevFrame float32) {
 	appState.prevFrame = prevFrame
 }
 

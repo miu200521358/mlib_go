@@ -63,7 +63,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		bf := motion.BoneFrames.Get(pmx.CENTER.String()).Get(358)
 
 		// フレーム番号
-		expectedFrameNo := float64(358)
+		expectedFrameNo := float32(358)
 		if bf.Index() != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
@@ -126,7 +126,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		bf := motion.BoneFrames.Get(pmx.UPPER.String()).Get(689)
 
 		// フレーム番号
-		expectedFrameNo := float64(689)
+		expectedFrameNo := float32(689)
 		if bf.Index() != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
@@ -189,7 +189,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		bf := motion.BoneFrames.Get(pmx.LEG_IK.Right()).Get(384)
 
 		// フレーム番号
-		expectedFrameNo := float64(384)
+		expectedFrameNo := float32(384)
 		if bf.Index() != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
@@ -253,7 +253,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		bf := motion.BoneFrames.Get(pmx.LEG_IK.Left()).Get(384)
 
 		// フレーム番号
-		expectedFrameNo := float64(384)
+		expectedFrameNo := float32(384)
 		if bf.Index() != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
@@ -276,7 +276,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		bf := motion.BoneFrames.Get(pmx.LEG_IK.Left()).Get(394)
 
 		// フレーム番号
-		expectedFrameNo := float64(394)
+		expectedFrameNo := float32(394)
 		if bf.Index() != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
@@ -299,7 +299,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		bf := motion.BoneFrames.Get(pmx.LEG_IK.Left()).Get(412)
 
 		// フレーム番号
-		expectedFrameNo := float64(412)
+		expectedFrameNo := float32(412)
 		if bf.Index() != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}
@@ -322,7 +322,7 @@ func TestVmdMotionReader_Load(t *testing.T) {
 		bf := motion.BoneFrames.Get(pmx.ARM.Right()).Get(384)
 
 		// フレーム番号
-		expectedFrameNo := float64(384)
+		expectedFrameNo := float32(384)
 		if bf.Index() != expectedFrameNo {
 			t.Errorf("Expected FrameNo to be %.4f, got %.4f", expectedFrameNo, bf.Index())
 		}

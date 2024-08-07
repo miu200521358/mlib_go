@@ -25,7 +25,7 @@ func DeformBone(
 	frame int,
 	boneNames []string,
 ) *delta.BoneDeltas {
-	return DeformBoneByPhysicsFlag(model, motion, nil, isCalcIk, float64(frame), boneNames, false).Bones
+	return DeformBoneByPhysicsFlag(model, motion, nil, isCalcIk, float32(frame), boneNames, false).Bones
 }
 
 // DeformBoneByPhysicsFlag ボーンデフォーム処理を実行する
@@ -34,7 +34,7 @@ func DeformBoneByPhysicsFlag(
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
 	isCalcIk bool,
-	frame float64,
+	frame float32,
 	boneNames []string,
 	isAfterPhysics bool,
 ) *delta.VmdDeltas {
@@ -51,7 +51,7 @@ func prepareDeltas(
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
 	isCalcIk bool,
-	frame float64,
+	frame float32,
 	boneNames []string,
 	isAfterPhysics bool,
 ) ([]int, *delta.VmdDeltas) {
@@ -74,7 +74,7 @@ func prepareIk(
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
-	frame float64,
+	frame float32,
 	isAfterPhysics bool,
 	deformBoneIndexes []int,
 ) *delta.BoneDeltas {
@@ -117,7 +117,7 @@ func calcIk(
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
-	frame float64,
+	frame float32,
 	isAfterPhysics bool,
 	ikBone *pmx.Bone,
 	prefixPath string,
@@ -279,7 +279,7 @@ ikLoop:
 			}
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				bf := vmd.NewBoneFrame(float64(count))
+				bf := vmd.NewBoneFrame(float32(count))
 				bf.Position = ikDeltas.Bones.Get(ikBone.Index()).FilledFramePosition()
 				bf.Rotation = ikDeltas.Bones.Get(ikBone.Index()).FilledLocalRotation()
 				ikMotion.AppendRegisteredBoneFrame(ikBone.Name(), bf)
@@ -300,7 +300,7 @@ ikLoop:
 			linkQuat := linkDelta.FilledLocalRotation()
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				bf := vmd.NewBoneFrame(float64(count))
+				bf := vmd.NewBoneFrame(float32(count))
 				bf.Rotation = linkQuat.Copy()
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 				count++
@@ -452,7 +452,7 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				{
-					bf := vmd.NewBoneFrame(float64(count))
+					bf := vmd.NewBoneFrame(float32(count))
 					bf.Rotation = originalTotalIkQuat.Copy()
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 					count++
@@ -466,7 +466,7 @@ ikLoop:
 						frame, loop, linkBone.Name(), count-1, originalIkQuat.String(), originalIkQuat.ToMMDDegrees().String())
 				}
 				{
-					bf := vmd.NewBoneFrame(float64(count))
+					bf := vmd.NewBoneFrame(float32(count))
 					bf.Rotation = totalIkQuat.Copy()
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 					count++
@@ -494,7 +494,7 @@ ikLoop:
 				)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					bf := vmd.NewBoneFrame(float64(count))
+					bf := vmd.NewBoneFrame(float32(count))
 					bf.Rotation = resultIkQuat.Copy()
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 					count++
@@ -519,7 +519,7 @@ ikLoop:
 				)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					bf := vmd.NewBoneFrame(float64(count))
+					bf := vmd.NewBoneFrame(float32(count))
 					bf.Rotation = resultIkQuat.Copy()
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 					count++
@@ -547,7 +547,7 @@ ikLoop:
 				resultIkQuat = resultIkQuat.ToFixedAxisRotation(linkBone.FixedAxis)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					bf := vmd.NewBoneFrame(float64(count))
+					bf := vmd.NewBoneFrame(float32(count))
 					bf.Rotation = resultIkQuat.Copy()
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 					count++
@@ -563,7 +563,7 @@ ikLoop:
 			deltas.Bones.Update(linkDelta)
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-				bf := vmd.NewBoneFrame(float64(count))
+				bf := vmd.NewBoneFrame(float32(count))
 				bf.Rotation = linkDelta.FilledLocalRotation().Copy()
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 				count++
@@ -582,7 +582,7 @@ func getLinkAxis(
 	minAngleLimitRadians *mmath.MVec3,
 	maxAngleLimitRadians *mmath.MVec3,
 	effectorLocalPosition, ikLocalPosition *mmath.MVec3,
-	frame float64,
+	frame float32,
 	count int,
 	loop int,
 	linkBoneName string,
@@ -662,7 +662,7 @@ func calcIkLimitQuaternion(
 	zAxisVector *mmath.MVec3, // Z軸ベクトル
 	loop int, // ループ回数
 	loopCount int, // ループ総回数
-	frame float64, // キーフレーム
+	frame float32, // キーフレーム
 	count int, // デバッグ用: キーフレ位置
 	linkBoneName string, // デバッグ用: リンクボーン名
 	ikMotion *vmd.VmdMotion, // デバッグ用: IKモーション
@@ -907,7 +907,7 @@ func calcIkLimitQuaternion(
 func getIkAxisValue(
 	fV, minAngleLimit, maxAngleLimit float64,
 	loop, loopCount int,
-	frame float64,
+	frame float32,
 	count int,
 	axisName, linkBoneName string,
 	ikMotion *vmd.VmdMotion,
@@ -962,7 +962,7 @@ func getIkAxisValue(
 }
 
 func calcBoneDeltas(
-	frame float64,
+	frame float32,
 	model *pmx.PmxModel,
 	deformBoneIndexes []int,
 	boneDeltas *delta.BoneDeltas,
@@ -1026,7 +1026,7 @@ func calcBoneDeltas(
 func newVmdDeltas(
 	model *pmx.PmxModel,
 	deltas *delta.VmdDeltas,
-	frame float64,
+	frame float32,
 	boneNames []string,
 	isAfterPhysics bool,
 ) ([]int, *delta.VmdDeltas) {
@@ -1103,7 +1103,7 @@ func fillBoneDeform(
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
-	frame float64,
+	frame float32,
 	deformBoneIndexes []int,
 ) *delta.BoneDeltas {
 	for _, boneIndex := range deformBoneIndexes {

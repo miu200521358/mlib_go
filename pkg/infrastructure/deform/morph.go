@@ -10,7 +10,7 @@ import (
 func DeformMorph(
 	model *pmx.PmxModel,
 	mfs *vmd.MorphFrames,
-	frame int,
+	frame float32,
 	morphNames []string,
 ) *delta.MorphDeltas {
 	if morphNames == nil {
@@ -27,7 +27,7 @@ func DeformMorph(
 			continue
 		}
 
-		mf := mfs.Get(morphName).Get(float64(frame))
+		mf := mfs.Get(morphName).Get(frame)
 		if mf == nil {
 			continue
 		}

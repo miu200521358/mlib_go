@@ -115,7 +115,7 @@ func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) e
 
 		if boneFrames.Len() > 0 {
 			// 各ボーンの最大キーフレを先に出力する
-			bf := motion.BoneFrames.Data[name].Get(float64(boneFrames.RegisteredIndexes.Max()))
+			bf := motion.BoneFrames.Data[name].Get(boneFrames.RegisteredIndexes.Max())
 			err := rep.saveBoneFrame(fout, name, bf)
 			if err != nil {
 				return err

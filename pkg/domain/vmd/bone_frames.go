@@ -88,10 +88,10 @@ func (boneFrames *BoneFrames) Len() int {
 	return count
 }
 
-func (boneFrames *BoneFrames) MaxFrame() int {
-	maxFno := int(0)
+func (boneFrames *BoneFrames) MaxFrame() float32 {
+	maxFno := float32(0)
 	for _, boneFrames := range boneFrames.Data {
-		fno := int(boneFrames.MaxFrame())
+		fno := float32(boneFrames.MaxFrame())
 		if fno > maxFno {
 			maxFno = fno
 		}
@@ -99,10 +99,10 @@ func (boneFrames *BoneFrames) MaxFrame() int {
 	return maxFno
 }
 
-func (boneFrames *BoneFrames) MinFrame() int {
-	minFno := math.MaxInt
+func (boneFrames *BoneFrames) MinFrame() float32 {
+	minFno := float32(math.MaxFloat32)
 	for _, boneFrames := range boneFrames.Data {
-		fno := int(boneFrames.MinFrame())
+		fno := float32(boneFrames.MinFrame())
 		if fno < minFno {
 			minFno = fno
 		}

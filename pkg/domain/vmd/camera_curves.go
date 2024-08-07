@@ -90,7 +90,7 @@ func NewCameraCurvesByValues(values []byte) *CameraCurves {
 }
 
 // 補間曲線の計算
-func (cameraCurves *CameraCurves) Evaluate(prevIndex, nowIndex, nextIndex float64) (float64, float64, float64, float64, float64, float64) {
+func (cameraCurves *CameraCurves) Evaluate(prevIndex, nowIndex, nextIndex float32) (float64, float64, float64, float64, float64, float64) {
 	var xy, yy, zy, ry, dy, vy float64
 	_, xy, _ = mmath.Evaluate(cameraCurves.TranslateX, prevIndex, nowIndex, nextIndex)
 	_, yy, _ = mmath.Evaluate(cameraCurves.TranslateY, prevIndex, nowIndex, nextIndex)
