@@ -9,18 +9,12 @@ import (
 
 func DeformBeforePhysics(
 	appState state.IAppState, model *pmx.PmxModel, motion *vmd.VmdMotion,
-) (*delta.VmdDeltas, *delta.RenderDeltas) {
+) *delta.VmdDeltas {
 	frame := int(appState.Frame())
 
 	vmdDeltas := delta.NewVmdDeltas(model.Materials, model.Bones)
 	vmdDeltas.Morphs = DeformMorph(model, motion.MorphFrames, float32(frame), nil)
 	vmdDeltas = DeformBoneByPhysicsFlag(model, motion, vmdDeltas, true, float32(frame), nil, false)
 
-	renderDeltas := delta.NewRenderDeltas()
-	renderDeltas.MeshDeltas = make([]*delta.MeshDelta, len(model.Materials.Data))
-	for i, md := range vmdDeltas.Morphs.Materials.Data {
-		renderDeltas.MeshDeltas[i] = delta.NewMeshDelta(md)
-	}
-
-	return vmdDeltas, renderDeltas
+	return vmdDeltas
 }

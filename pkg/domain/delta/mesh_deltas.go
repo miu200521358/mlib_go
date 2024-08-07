@@ -11,16 +11,6 @@ const (
 	LIGHT_AMBIENT float64 = 154.0 / 255.0
 )
 
-type RenderDeltas struct {
-	MeshDeltas []*MeshDelta // メッシュデルタ
-}
-
-func NewRenderDeltas() *RenderDeltas {
-	return &RenderDeltas{
-		MeshDeltas: make([]*MeshDelta, 0),
-	}
-}
-
 type MeshDelta struct {
 	Diffuse  mgl32.Vec4
 	Specular mgl32.Vec4

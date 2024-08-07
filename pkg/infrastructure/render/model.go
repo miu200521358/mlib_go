@@ -323,19 +323,14 @@ func (renderModel *RenderModel) Render(
 	}
 
 	for i, mesh := range renderModel.meshes {
-		if mesh == nil || animationState.RenderDeltas() == nil || len(animationState.RenderDeltas().MeshDeltas) <= i {
-			continue
-		}
-
 		mesh.ibo.Bind()
 
-		mesh.drawModel(animationState.WindowIndex(), shader, paddedMatrixes, matrixWidth, matrixHeight,
-			animationState.RenderDeltas().MeshDeltas[i])
+		md := delta.NewMeshDelta(animationState.VmdDeltas().Morphs.Materials.Get(i))
+		mesh.drawModel(animationState.WindowIndex(), shader, paddedMatrixes, matrixWidth, matrixHeight, md)
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
-			mesh.drawEdge(animationState.WindowIndex(), shader, paddedMatrixes,
-				matrixWidth, matrixHeight, animationState.RenderDeltas().MeshDeltas[i])
+			mesh.drawEdge(animationState.WindowIndex(), shader, paddedMatrixes, matrixWidth, matrixHeight, md)
 		}
 
 		if appState.IsShowWire() && !animationState.ExistInvisibleMaterialIndex(mesh.material.Index()) {

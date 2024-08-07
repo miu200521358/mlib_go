@@ -9,6 +9,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/animation"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 )
 
@@ -97,10 +98,9 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 			animationState.SetMotion(motion)
 		}
 
-		vmdDeltas, renderDeltas := animationState.DeformBeforePhysics(appState, animationState.Model())
+		vmdDeltas := deform.DeformBeforePhysics(appState, animationState.Model(), animationState.Motion())
 		appState.nextAnimationStates[windowIndex][modelIndex].SetMotion(animationState.Motion())
 		appState.nextAnimationStates[windowIndex][modelIndex].SetVmdDeltas(vmdDeltas)
-		appState.nextAnimationStates[windowIndex][modelIndex].SetRenderDeltas(renderDeltas)
 
 	} else if animationState.Motion() != nil {
 		// モーションが指定されてたらセット
@@ -108,10 +108,9 @@ func (appState *appState) SetAnimationState(animationState state.IAnimationState
 		if model != nil {
 			appState.nextAnimationStates[windowIndex][modelIndex] = animation.NewAnimationState(windowIndex, modelIndex)
 
-			vmdDeltas, renderDeltas := animationState.DeformBeforePhysics(appState, model)
+			vmdDeltas := deform.DeformBeforePhysics(appState, model, animationState.Motion())
 			appState.nextAnimationStates[windowIndex][modelIndex].SetMotion(animationState.Motion())
 			appState.nextAnimationStates[windowIndex][modelIndex].SetVmdDeltas(vmdDeltas)
-			appState.nextAnimationStates[windowIndex][modelIndex].SetRenderDeltas(renderDeltas)
 		}
 	}
 
@@ -157,12 +156,11 @@ func (appState *appState) SetFrame(frame float32) {
 				go func(i, j int) {
 					defer wg.Done()
 
-					vmdDeltas, renderDeltas := appState.animationStates[i][j].DeformBeforePhysics(
-						appState, appState.animationStates[i][j].Model())
+					vmdDeltas := deform.DeformBeforePhysics(
+						appState, appState.animationStates[i][j].Model(), appState.animationStates[i][j].Motion())
 
 					nextState := animation.NewAnimationState(i, j)
 					nextState.SetVmdDeltas(vmdDeltas)
-					nextState.SetRenderDeltas(renderDeltas)
 
 					appState.mu.Lock()
 					defer appState.mu.Unlock()

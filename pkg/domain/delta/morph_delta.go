@@ -33,6 +33,14 @@ func NewVertexMorphDeltas() *VertexMorphDeltas {
 	}
 }
 
+func (vertexMorphDeltas *VertexMorphDeltas) Get(index int) *VertexMorphDelta {
+	return vertexMorphDeltas.Data[index]
+}
+
+func (vertexMorphDeltas *VertexMorphDeltas) Update(v *VertexMorphDelta) {
+	vertexMorphDeltas.Data[v.Index] = v
+}
+
 type WireVertexMorphDeltas struct {
 	*VertexMorphDeltas
 }
@@ -41,14 +49,6 @@ func NewWireVertexMorphDeltas() *WireVertexMorphDeltas {
 	return &WireVertexMorphDeltas{
 		VertexMorphDeltas: NewVertexMorphDeltas(),
 	}
-}
-
-func (vertexMorphDeltas *VertexMorphDeltas) Get(index int) *VertexMorphDelta {
-	return vertexMorphDeltas.Data[index]
-}
-
-func (vertexMorphDeltas *VertexMorphDeltas) Update(v *VertexMorphDelta) {
-	vertexMorphDeltas.Data[v.Index] = v
 }
 
 type BoneMorphDelta struct {
@@ -62,6 +62,10 @@ func NewBoneMorphDelta(boneIndex int) *BoneMorphDelta {
 	return &BoneMorphDelta{
 		BoneIndex: boneIndex,
 	}
+}
+
+func (boneMorphDelta *BoneMorphDelta) Get(boneIndex int) *BoneMorphDelta {
+	return boneMorphDelta
 }
 
 func (boneMorphDelta *BoneMorphDelta) FilledMorphPosition() *mmath.MVec3 {
@@ -296,6 +300,18 @@ func NewMaterialMorphDeltas(materials *pmx.Materials) *MaterialMorphDeltas {
 	return &MaterialMorphDeltas{
 		Data: deltas,
 	}
+}
+
+func (materialMorphDeltas *MaterialMorphDeltas) Get(index int) *MaterialMorphDelta {
+	if index < 0 || index >= len(materialMorphDeltas.Data) {
+		return nil
+	}
+
+	return materialMorphDeltas.Data[index]
+}
+
+func (materialMorphDeltas *MaterialMorphDeltas) Update(m *MaterialMorphDelta) {
+	materialMorphDeltas.Data[m.Index()] = m
 }
 
 type MorphDeltas struct {

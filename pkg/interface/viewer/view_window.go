@@ -533,10 +533,6 @@ func (viewWindow *ViewWindow) Animate(
 					animationStates[nextState.ModelIndex()].SetVmdDeltas(nextState.VmdDeltas())
 					nextState.SetVmdDeltas(nil)
 				}
-				if nextState.RenderDeltas() != nil {
-					animationStates[nextState.ModelIndex()].SetRenderDeltas(nextState.RenderDeltas())
-					nextState.SetRenderDeltas(nil)
-				}
 				if nextState.InvisibleMaterialIndexes() != nil {
 					animationStates[nextState.ModelIndex()].SetInvisibleMaterialIndexes(
 						nextState.InvisibleMaterialIndexes())

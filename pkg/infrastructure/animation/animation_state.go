@@ -28,7 +28,6 @@ type AnimationState struct {
 	selectedVertexIndexes    map[int]struct{}    // 選択頂点インデックス
 	noSelectedVertexIndexes  map[int]struct{}    // 非選択頂点インデックス
 	vmdDeltas                *delta.VmdDeltas    // モーション変化量
-	renderDeltas             *delta.RenderDeltas // 描画変化量
 }
 
 func (animationState *AnimationState) WindowIndex() int {
@@ -85,14 +84,6 @@ func (animationState *AnimationState) VmdDeltas() *delta.VmdDeltas {
 
 func (animationState *AnimationState) SetVmdDeltas(deltas *delta.VmdDeltas) {
 	animationState.vmdDeltas = deltas
-}
-
-func (animationState *AnimationState) RenderDeltas() *delta.RenderDeltas {
-	return animationState.renderDeltas
-}
-
-func (animationState *AnimationState) SetRenderDeltas(deltas *delta.RenderDeltas) {
-	animationState.renderDeltas = deltas
 }
 
 func (animationState *AnimationState) InvisibleMaterialIndexes() []int {
@@ -205,26 +196,7 @@ func NewAnimationState(windowIndex, modelIndex int) *AnimationState {
 		invisibleMaterialIndexes: nil,
 		selectedVertexIndexes:    nil,
 		noSelectedVertexIndexes:  nil,
-		renderDeltas:             delta.NewRenderDeltas(),
 	}
-}
-
-func (animationState *AnimationState) DeformBeforePhysics(
-	appState state.IAppState, model *pmx.PmxModel,
-) (*delta.VmdDeltas, *delta.RenderDeltas) {
-	frame := appState.Frame()
-
-	vmdDeltas := delta.NewVmdDeltas(model.Materials, model.Bones)
-	vmdDeltas.Morphs = deform.DeformMorph(model, animationState.motion.MorphFrames, frame, nil)
-	vmdDeltas = deform.DeformBoneByPhysicsFlag(model, animationState.motion, vmdDeltas, true, frame, nil, false)
-
-	renderDeltas := delta.NewRenderDeltas()
-	renderDeltas.MeshDeltas = make([]*delta.MeshDelta, len(model.Materials.Data))
-	for i, md := range vmdDeltas.Morphs.Materials.Data {
-		renderDeltas.MeshDeltas[i] = delta.NewMeshDelta(md)
-	}
-
-	return vmdDeltas, renderDeltas
 }
 
 func (animationState *AnimationState) DeformPhysics(physics mbt.IPhysics, appState state.IAppState) {
