@@ -685,5 +685,6 @@ MlibSample 1.0.0_beta_121
 ・フレームINDEXをfloat32で扱えるよう変更
 ・描画をrenderパッケージに移動
 ・bufferパッケージをmglパッケージに統合
+・renderDelta廃止
 
 
