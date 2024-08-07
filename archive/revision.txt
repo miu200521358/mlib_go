@@ -687,5 +687,5 @@ MlibSample 1.0.0_beta_121
 ・bufferパッケージをmglパッケージに統合
 ・renderDelta廃止
 ・デフォーム処理をdeformパッケージに移動
-
+・剛体更新処理を並列化
 

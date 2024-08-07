@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/miter"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
@@ -23,7 +24,10 @@ func DeformBeforePhysics(
 }
 
 func DeformPhysics(appState state.IAppState, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas, physics mbt.IPhysics) {
-	for _, rigidBody := range model.RigidBodies.Data {
+	// 物理剛体位置を更新
+	processFunc := func(i int) {
+		rigidBody := model.RigidBodies.Get(i)
+
 		// 現在のボーン変形情報を保持
 		rigidBodyBone := rigidBody.Bone
 		if rigidBodyBone == nil {
@@ -31,7 +35,7 @@ func DeformPhysics(appState state.IAppState, model *pmx.PmxModel, vmdDeltas *del
 		}
 
 		if rigidBodyBone == nil || vmdDeltas.Bones.Get(rigidBodyBone.Index()) == nil {
-			continue
+			return
 		}
 
 		if (appState.IsEnabledPhysics() && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC) ||
@@ -41,6 +45,9 @@ func DeformPhysics(appState state.IAppState, model *pmx.PmxModel, vmdDeltas *del
 				vmdDeltas.Bones.Get(rigidBodyBone.Index()).FilledGlobalMatrix(), rigidBody)
 		}
 	}
+
+	// 100件ずつ処理
+	miter.IterParallelByCount(model.RigidBodies.Len(), 100, processFunc)
 }
 
 func DeformAfterPhysics(
@@ -49,19 +56,21 @@ func DeformAfterPhysics(
 ) *delta.VmdDeltas {
 	if model != nil && appState.IsEnabledPhysics() && !appState.IsPhysicsReset() {
 		// 物理剛体位置を更新
-		for _, isAfterPhysics := range []bool{false, true} {
-			for _, bone := range model.Bones.LayerSortedBones[isAfterPhysics] {
-				if bone.Extend.RigidBody == nil || bone.Extend.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
-					continue
-				}
-				bonePhysicsGlobalMatrix := physics.GetRigidBodyBoneMatrix(model.Index(), bone.Extend.RigidBody)
-				if vmdDeltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
-					bd := delta.NewBoneDeltaByGlobalMatrix(bone, appState.Frame(),
-						bonePhysicsGlobalMatrix, vmdDeltas.Bones.Get(bone.ParentIndex))
-					vmdDeltas.Bones.Update(bd)
-				}
+		processFunc := func(i int) {
+			bone := model.Bones.Get(i)
+			if bone.Extend.RigidBody == nil || bone.Extend.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
+				return
+			}
+			bonePhysicsGlobalMatrix := physics.GetRigidBodyBoneMatrix(model.Index(), bone.Extend.RigidBody)
+			if vmdDeltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
+				bd := delta.NewBoneDeltaByGlobalMatrix(bone, appState.Frame(),
+					bonePhysicsGlobalMatrix, vmdDeltas.Bones.Get(bone.ParentIndex))
+				vmdDeltas.Bones.Update(bd)
 			}
 		}
+
+		// 100件ずつ処理
+		miter.IterParallelByList(model.Bones.LayerSortedIndexes, 100, processFunc)
 	}
 
 	// 物理後のデフォーム情報

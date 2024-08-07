@@ -697,6 +697,7 @@ func (bones *Bones) createLayerIndexesBeforePhysics() {
 		bone := bones.Get(boneIndex)
 		bones.LayerSortedNames[false][bone.Name()] = i
 		bones.LayerSortedBones[false] = append(bones.LayerSortedBones[false], bone)
+		bones.LayerSortedIndexes = append(bones.LayerSortedIndexes, bone.Index())
 	}
 }
 
@@ -727,6 +728,7 @@ func (bones *Bones) createLayerIndexesAfterPhysics() {
 		bone := bones.Get(boneIndex)
 		bones.LayerSortedNames[true][bone.Name()] = n
 		bones.LayerSortedBones[true] = append(bones.LayerSortedBones[true], bone)
+		bones.LayerSortedIndexes = append(bones.LayerSortedIndexes, bone.Index())
 		n++
 	}
 }
@@ -761,17 +763,19 @@ func (li layerIndexes) Contains(index int) bool {
 // ボーンリスト
 type Bones struct {
 	*core.IndexNameModels[*Bone]
-	IkTreeIndexes     map[int][]int
-	LayerSortedBones  map[bool][]*Bone
-	LayerSortedNames  map[bool]map[string]int
-	DeformBoneIndexes map[int][]int
+	IkTreeIndexes      map[int][]int
+	LayerSortedBones   map[bool][]*Bone
+	LayerSortedNames   map[bool]map[string]int
+	DeformBoneIndexes  map[int][]int
+	LayerSortedIndexes []int
 }
 
 func NewBones(count int) *Bones {
 	return &Bones{
-		IndexNameModels:  core.NewIndexNameModels[*Bone](count, func() *Bone { return nil }),
-		IkTreeIndexes:    make(map[int][]int),
-		LayerSortedBones: make(map[bool][]*Bone),
-		LayerSortedNames: make(map[bool]map[string]int),
+		IndexNameModels:    core.NewIndexNameModels[*Bone](count, func() *Bone { return nil }),
+		IkTreeIndexes:      make(map[int][]int),
+		LayerSortedBones:   make(map[bool][]*Bone),
+		LayerSortedNames:   make(map[bool]map[string]int),
+		LayerSortedIndexes: make([]int, 0),
 	}
 }
