@@ -68,6 +68,9 @@ type IAppState interface {
 	SetFuncGetMotions(f func() [][]*vmd.VmdMotion)
 	GetModels() [][]*pmx.PmxModel
 	GetMotions() [][]*vmd.VmdMotion
+}
+
+type IChannelState interface {
 	SetFrameChannel(v float32)
 	SetMaxFrameChannel(v float32)
 	SetEnabledFrameDropChannel(v bool)

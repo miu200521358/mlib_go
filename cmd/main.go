@@ -54,11 +54,12 @@ func main() {
 	mi18n.Initialize(appI18nFiles)
 
 	mApp := app.NewMApp(appConfig)
-	mApp.RunChannel()
+	mApp.RunViewerToControlChannel()
+	mApp.RunControlToViewerChannel()
 
 	go func() {
 		// 操作ウィンドウは別スレッドで起動
-		controlWindow := controller.NewControlWindow(mApp, appConfig, getMenuItems, 2)
+		controlWindow := controller.NewControlWindow(appConfig, mApp.ControlToViewerChannel(), getMenuItems, 2)
 		mApp.SetControlWindow(controlWindow)
 
 		controlWindow.InitTabWidget()

@@ -19,11 +19,14 @@ type IControlWindow interface {
 	Close()
 	Size() (int, int)
 	SetPosition(x, y int)
+	Frame() float32
 	SetFrame(frame float32)
+	SetFrameChannel(frame float32)
 	UpdateMaxFrame(frame float32)
+	UpdateMaxFrameChannel(frame float32)
 	UpdateSelectedVertexIndexes(indexes [][][]int)
 	SetUpdateSelectedVertexIndexesFunc(f func([][][]int))
-	SetPlaying(playing bool)
+	SetPlayingChannel(playing bool)
 	SetClosed(closed bool)
 }
 

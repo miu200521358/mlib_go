@@ -29,10 +29,12 @@ const deform_default_spf = 1.0 / 30.0
 const deform_default_fps = 30.0
 
 type MApp struct {
-	*appState                          // アプリ状態
-	appConfig     *mconfig.AppConfig   // アプリケーション設定
-	viewWindows   []state.IViewWindow  // 描画ウィンドウリスト
-	controlWindow state.IControlWindow // 操作ウィンドウ
+	*appState                                   // アプリ状態
+	viewerToControlChannel *channelState        // ビューアからコントロールへのチャンネル
+	controlToViewerChannel *channelState        // コントロールからビューアへのチャンネル
+	appConfig              *mconfig.AppConfig   // アプリケーション設定
+	viewWindows            []state.IViewWindow  // 描画ウィンドウリスト
+	controlWindow          state.IControlWindow // 操作ウィンドウ
 }
 
 func NewMApp(appConfig *mconfig.AppConfig) *MApp {
@@ -43,12 +45,26 @@ func NewMApp(appConfig *mconfig.AppConfig) *MApp {
 	}
 
 	app := &MApp{
-		appState:    newAppState(),
-		appConfig:   appConfig,
-		viewWindows: make([]state.IViewWindow, 0),
+		appState:               newAppState(),
+		viewerToControlChannel: newChannelState(),
+		controlToViewerChannel: newChannelState(),
+		appConfig:              appConfig,
+		viewWindows:            make([]state.IViewWindow, 0),
 	}
 
 	return app
+}
+
+func (app *MApp) AppState() state.IAppState {
+	return app.appState
+}
+
+func (app *MApp) ViewerToControlChannel() state.IChannelState {
+	return app.viewerToControlChannel
+}
+
+func (app *MApp) ControlToViewerChannel() state.IChannelState {
+	return app.controlToViewerChannel
 }
 
 func (app *MApp) RunController() {
@@ -59,63 +75,77 @@ func (app *MApp) RunController() {
 	app.controlWindow.Run()
 }
 
-func (app *MApp) RunChannel() {
+func (app *MApp) RunViewerToControlChannel() {
 	go func() {
 		for !app.IsClosed() {
 			select {
-			case frame := <-app.frameChannel:
-				app.SetFrame(frame)
+			case frame := <-app.viewerToControlChannel.frameChannel:
 				app.controlWindow.SetFrame(frame)
-			case maxFrame := <-app.maxFrameChannel:
-				app.UpdateMaxFrame(maxFrame)
-			case enabledFrameDrop := <-app.isEnabledFrameDropChannel:
-				app.SetEnabledFrameDrop(enabledFrameDrop)
-			case enabledPhysics := <-app.isEnabledPhysicsChannel:
-				app.SetEnabledPhysics(enabledPhysics)
-			case resetPhysics := <-app.physicsResetChannel:
-				app.SetPhysicsReset(resetPhysics)
-			case showNormal := <-app.isShowNormalChannel:
-				app.SetShowNormal(showNormal)
-			case showWire := <-app.isShowWireChannel:
-				app.SetShowWire(showWire)
-			case showOverride := <-app.isShowOverrideChannel:
-				app.SetShowOverride(showOverride)
-			case showSelectedVertex := <-app.isShowSelectedVertexChannel:
-				app.SetShowSelectedVertex(showSelectedVertex)
-			case showBoneAll := <-app.isShowBoneAllChannel:
-				app.SetShowBoneAll(showBoneAll)
-			case showBoneIk := <-app.isShowBoneIkChannel:
-				app.SetShowBoneIk(showBoneIk)
-			case showBoneEffector := <-app.isShowBoneEffectorChannel:
-				app.SetShowBoneEffector(showBoneEffector)
-			case showBoneFixed := <-app.isShowBoneFixedChannel:
-				app.SetShowBoneFixed(showBoneFixed)
-			case showBoneRotate := <-app.isShowBoneRotateChannel:
-				app.SetShowBoneRotate(showBoneRotate)
-			case showBoneTranslate := <-app.isShowBoneTranslateChannel:
-				app.SetShowBoneTranslate(showBoneTranslate)
-			case showBoneVisible := <-app.isShowBoneVisibleChannel:
-				app.SetShowBoneVisible(showBoneVisible)
-			case showRigidBodyFront := <-app.isShowRigidBodyFrontChannel:
-				app.SetShowRigidBodyFront(showRigidBodyFront)
-			case showRigidBodyBack := <-app.isShowRigidBodyBackChannel:
-				app.SetShowRigidBodyBack(showRigidBodyBack)
-			case showJoint := <-app.isShowJointChannel:
-				app.SetShowJoint(showJoint)
-			case showInfo := <-app.isShowInfoChannel:
-				app.SetShowInfo(showInfo)
-			case frameInterval := <-app.frameIntervalChanel:
-				app.SetFrameInterval(frameInterval)
-			case cameraSync := <-app.isCameraSyncChannel:
-				app.SetCameraSync(cameraSync)
-			case closed := <-app.isClosedChannel:
-				app.SetClosed(closed)
-			case playing := <-app.playingChannel:
-				app.SetPlaying(playing)
-			case frameInterval := <-app.frameIntervalChanel:
-				app.SetFrameInterval(frameInterval)
-			case selectedVertexIndexes := <-app.selectedVertexIndexesChannel:
+			case selectedVertexIndexes := <-app.viewerToControlChannel.selectedVertexIndexesChannel:
 				app.controlWindow.UpdateSelectedVertexIndexes(selectedVertexIndexes)
+			case closed := <-app.viewerToControlChannel.isClosedChannel:
+				app.controlWindow.SetClosed(closed)
+			default:
+				continue
+			}
+		}
+	}()
+}
+
+func (app *MApp) RunControlToViewerChannel() {
+	go func() {
+		for !app.IsClosed() {
+			select {
+			case frame := <-app.controlToViewerChannel.frameChannel:
+				app.SetFrame(frame)
+			case maxFrame := <-app.controlToViewerChannel.maxFrameChannel:
+				app.UpdateMaxFrame(maxFrame)
+			case enabledFrameDrop := <-app.controlToViewerChannel.isEnabledFrameDropChannel:
+				app.SetEnabledFrameDrop(enabledFrameDrop)
+			case enabledPhysics := <-app.controlToViewerChannel.isEnabledPhysicsChannel:
+				app.SetEnabledPhysics(enabledPhysics)
+			case resetPhysics := <-app.controlToViewerChannel.physicsResetChannel:
+				app.SetPhysicsReset(resetPhysics)
+			case showNormal := <-app.controlToViewerChannel.isShowNormalChannel:
+				app.SetShowNormal(showNormal)
+			case showWire := <-app.controlToViewerChannel.isShowWireChannel:
+				app.SetShowWire(showWire)
+			case showOverride := <-app.controlToViewerChannel.isShowOverrideChannel:
+				app.SetShowOverride(showOverride)
+			case showSelectedVertex := <-app.controlToViewerChannel.isShowSelectedVertexChannel:
+				app.SetShowSelectedVertex(showSelectedVertex)
+			case showBoneAll := <-app.controlToViewerChannel.isShowBoneAllChannel:
+				app.SetShowBoneAll(showBoneAll)
+			case showBoneIk := <-app.controlToViewerChannel.isShowBoneIkChannel:
+				app.SetShowBoneIk(showBoneIk)
+			case showBoneEffector := <-app.controlToViewerChannel.isShowBoneEffectorChannel:
+				app.SetShowBoneEffector(showBoneEffector)
+			case showBoneFixed := <-app.controlToViewerChannel.isShowBoneFixedChannel:
+				app.SetShowBoneFixed(showBoneFixed)
+			case showBoneRotate := <-app.controlToViewerChannel.isShowBoneRotateChannel:
+				app.SetShowBoneRotate(showBoneRotate)
+			case showBoneTranslate := <-app.controlToViewerChannel.isShowBoneTranslateChannel:
+				app.SetShowBoneTranslate(showBoneTranslate)
+			case showBoneVisible := <-app.controlToViewerChannel.isShowBoneVisibleChannel:
+				app.SetShowBoneVisible(showBoneVisible)
+			case showRigidBodyFront := <-app.controlToViewerChannel.isShowRigidBodyFrontChannel:
+				app.SetShowRigidBodyFront(showRigidBodyFront)
+			case showRigidBodyBack := <-app.controlToViewerChannel.isShowRigidBodyBackChannel:
+				app.SetShowRigidBodyBack(showRigidBodyBack)
+			case showJoint := <-app.controlToViewerChannel.isShowJointChannel:
+				app.SetShowJoint(showJoint)
+			case showInfo := <-app.controlToViewerChannel.isShowInfoChannel:
+				app.SetShowInfo(showInfo)
+			case frameInterval := <-app.controlToViewerChannel.frameIntervalChanel:
+				app.SetFrameInterval(frameInterval)
+			case cameraSync := <-app.controlToViewerChannel.isCameraSyncChannel:
+				app.SetCameraSync(cameraSync)
+			case closed := <-app.controlToViewerChannel.isClosedChannel:
+				app.SetClosed(closed)
+			case playing := <-app.controlToViewerChannel.playingChannel:
+				app.SetPlaying(playing)
+			case frameInterval := <-app.controlToViewerChannel.frameIntervalChanel:
+				app.SetFrameInterval(frameInterval)
 			default:
 				continue
 			}
@@ -224,17 +254,17 @@ func (app *MApp) RunViewer() {
 		if app.Playing() {
 			// 再生中はフレームを進める
 			f := app.Frame() + float32(elapsed*deform_default_fps)
-			if f < app.MaxFrame() {
-				app.SetFrameChannel(0)
-			} else {
-				app.SetFrameChannel(f)
+			if f >= app.MaxFrame() {
+				f = 0
 			}
+			app.viewerToControlChannel.SetFrameChannel(f)
+			app.frame = f
 		}
 
 		prevTime = frameTime
 
 		// 描画にかかった時間を計測
-		elapsedList = append(elapsedList, elapsed)
+		elapsedList = append(elapsedList, originalElapsed)
 
 		if app.IsShowInfo() {
 			prevShowTime, elapsedList = app.showInfo(elapsedList, prevShowTime, timeStep)

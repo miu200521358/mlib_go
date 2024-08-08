@@ -122,12 +122,10 @@ func (player *MotionPlayer) Frame() float32 {
 }
 
 func (player *MotionPlayer) SetFrame(frame float32) {
-	if player.playing && frame > float32(player.frameEdit.MaxValue()) {
-		frame = 0
-	}
 	value := mmath.ClampedFloat(float64(frame), player.frameEdit.MinValue(), player.frameEdit.MaxValue())
 	player.frameEdit.ChangeValue(value)
 	player.frameSlider.ChangeValue(int(value))
+	player.controlWindow.SetFrameChannel(float32(value))
 }
 
 func (player *MotionPlayer) MaxFrame() float32 {
@@ -179,7 +177,7 @@ func (player *MotionPlayer) SetPlaying(playing bool) {
 		player.SetEnabled(true)
 	}
 
-	player.controlWindow.SetPlaying(playing)
+	player.controlWindow.SetPlayingChannel(playing)
 
 	if player.onTriggerPlay != nil {
 		player.onTriggerPlay(playing)

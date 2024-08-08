@@ -20,47 +20,48 @@ import (
 
 type ControlWindow struct {
 	*walk.MainWindow
-	appState                        state.IAppState    // 操作状態
-	motionPlayer                    state.IPlayer      // モーションプレイヤー
-	TabWidget                       *widget.MTabWidget // タブウィジェット
-	Config                          *mconfig.AppConfig // アプリケーション設定
-	enabledFrameDropAction          *walk.Action       // フレームドロップON/OFF
-	enabledPhysicsAction            *walk.Action       // 物理ON/OFF
-	physicsResetAction              *walk.Action       // 物理リセット
-	showNormalAction                *walk.Action       // ボーンデバッグ表示
-	showWireAction                  *walk.Action       // ワイヤーフレームデバッグ表示
-	showOverrideAction              *walk.Action       // オーバーライドデバッグ表示
-	showSelectedVertexAction        *walk.Action       // 選択頂点デバッグ表示
-	showBoneAllAction               *walk.Action       // 全ボーンデバッグ表示
-	showBoneIkAction                *walk.Action       // IKボーンデバッグ表示
-	showBoneEffectorAction          *walk.Action       // 付与親ボーンデバッグ表示
-	showBoneFixedAction             *walk.Action       // 軸制限ボーンデバッグ表示
-	showBoneRotateAction            *walk.Action       // 回転ボーンデバッグ表示
-	showBoneTranslateAction         *walk.Action       // 移動ボーンデバッグ表示
-	showBoneVisibleAction           *walk.Action       // 表示ボーンデバッグ表示
-	showRigidBodyFrontAction        *walk.Action       // 剛体デバッグ表示(前面)
-	showRigidBodyBackAction         *walk.Action       // 剛体デバッグ表示(埋め込み)
-	showJointAction                 *walk.Action       // ジョイントデバッグ表示
-	showInfoAction                  *walk.Action       // 情報デバッグ表示
-	limitFps30Action                *walk.Action       // 30FPS制限
-	limitFps60Action                *walk.Action       // 60FPS制限
-	limitFpsUnLimitAction           *walk.Action       // FPS無制限
-	cameraSyncAction                *walk.Action       // カメラ同期
-	logLevelDebugAction             *walk.Action       // デバッグメッセージ表示
-	logLevelVerboseAction           *walk.Action       // 冗長メッセージ表示
-	logLevelIkVerboseAction         *walk.Action       // IK冗長メッセージ表示
-	funcUpdateSelectedVertexIndexes func([][][]int)    // 選択頂点更新関数
+	isClosed                        bool                // ウィンドウクローズ
+	channelState                    state.IChannelState // チャンネル状態
+	motionPlayer                    state.IPlayer       // モーションプレイヤー
+	TabWidget                       *widget.MTabWidget  // タブウィジェット
+	Config                          *mconfig.AppConfig  // アプリケーション設定
+	enabledFrameDropAction          *walk.Action        // フレームドロップON/OFF
+	enabledPhysicsAction            *walk.Action        // 物理ON/OFF
+	physicsResetAction              *walk.Action        // 物理リセット
+	showNormalAction                *walk.Action        // ボーンデバッグ表示
+	showWireAction                  *walk.Action        // ワイヤーフレームデバッグ表示
+	showOverrideAction              *walk.Action        // オーバーライドデバッグ表示
+	showSelectedVertexAction        *walk.Action        // 選択頂点デバッグ表示
+	showBoneAllAction               *walk.Action        // 全ボーンデバッグ表示
+	showBoneIkAction                *walk.Action        // IKボーンデバッグ表示
+	showBoneEffectorAction          *walk.Action        // 付与親ボーンデバッグ表示
+	showBoneFixedAction             *walk.Action        // 軸制限ボーンデバッグ表示
+	showBoneRotateAction            *walk.Action        // 回転ボーンデバッグ表示
+	showBoneTranslateAction         *walk.Action        // 移動ボーンデバッグ表示
+	showBoneVisibleAction           *walk.Action        // 表示ボーンデバッグ表示
+	showRigidBodyFrontAction        *walk.Action        // 剛体デバッグ表示(前面)
+	showRigidBodyBackAction         *walk.Action        // 剛体デバッグ表示(埋め込み)
+	showJointAction                 *walk.Action        // ジョイントデバッグ表示
+	showInfoAction                  *walk.Action        // 情報デバッグ表示
+	limitFps30Action                *walk.Action        // 30FPS制限
+	limitFps60Action                *walk.Action        // 60FPS制限
+	limitFpsUnLimitAction           *walk.Action        // FPS無制限
+	cameraSyncAction                *walk.Action        // カメラ同期
+	logLevelDebugAction             *walk.Action        // デバッグメッセージ表示
+	logLevelVerboseAction           *walk.Action        // 冗長メッセージ表示
+	logLevelIkVerboseAction         *walk.Action        // IK冗長メッセージ表示
+	funcUpdateSelectedVertexIndexes func([][][]int)     // 選択頂点更新関数
 }
 
 func NewControlWindow(
-	appState state.IAppState,
 	appConfig *mconfig.AppConfig,
+	channelState state.IChannelState,
 	helpMenuItemsFunc func() []declarative.MenuItem,
 	viewerCount int,
 ) *ControlWindow {
 	controlWindow := &ControlWindow{
-		Config:   appConfig,
-		appState: appState,
+		Config:       appConfig,
+		channelState: channelState,
 	}
 
 	logMenuItems := []declarative.MenuItem{
@@ -317,7 +318,7 @@ func NewControlWindow(
 	}
 
 	controlWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
-		if !controlWindow.appState.IsClosed() {
+		if !controlWindow.isClosed {
 			if result := walk.MsgBox(nil, mi18n.T("終了確認"), mi18n.T("終了確認メッセージ"),
 				walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel); result == walk.DlgCmdOK {
 				controlWindow.SetClosed(true)
@@ -415,35 +416,35 @@ func (controlWindow *ControlWindow) TriggerLogLevel() {
 }
 
 func (controlWindow *ControlWindow) TriggerEnabledFrameDrop() {
-	controlWindow.appState.SetEnabledFrameDropChannel(controlWindow.enabledFrameDropAction.Checked())
+	controlWindow.channelState.SetEnabledFrameDropChannel(controlWindow.enabledFrameDropAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerEnabledPhysics() {
-	controlWindow.appState.SetEnabledPhysicsChannel(controlWindow.enabledPhysicsAction.Checked())
+	controlWindow.channelState.SetEnabledPhysicsChannel(controlWindow.enabledPhysicsAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerPhysicsReset() {
-	controlWindow.appState.SetPhysicsResetChannel(true)
+	controlWindow.channelState.SetPhysicsResetChannel(true)
 }
 
 func (controlWindow *ControlWindow) TriggerShowNormal() {
-	controlWindow.appState.SetShowNormalChannel(controlWindow.showNormalAction.Checked())
+	controlWindow.channelState.SetShowNormalChannel(controlWindow.showNormalAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowWire() {
-	controlWindow.appState.SetShowWireChannel(controlWindow.showWireAction.Checked())
+	controlWindow.channelState.SetShowWireChannel(controlWindow.showWireAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowOverride() {
-	controlWindow.appState.SetShowOverrideChannel(controlWindow.showOverrideAction.Checked())
+	controlWindow.channelState.SetShowOverrideChannel(controlWindow.showOverrideAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerCameraSync() {
-	controlWindow.appState.SetCameraSyncChannel(controlWindow.cameraSyncAction.Checked())
+	controlWindow.channelState.SetCameraSyncChannel(controlWindow.cameraSyncAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowSelectedVertex() {
-	controlWindow.appState.SetShowSelectedVertexChannel(controlWindow.showSelectedVertexAction.Checked())
+	controlWindow.channelState.SetShowSelectedVertexChannel(controlWindow.showSelectedVertexAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneAll() {
@@ -455,7 +456,7 @@ func (controlWindow *ControlWindow) TriggerShowBoneAll() {
 		controlWindow.SetShowBoneTranslate(false)
 		controlWindow.SetShowBoneVisible(false)
 	}
-	controlWindow.appState.SetShowBoneAllChannel(controlWindow.showBoneAllAction.Checked())
+	controlWindow.channelState.SetShowBoneAllChannel(controlWindow.showBoneAllAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneIk() {
@@ -463,7 +464,7 @@ func (controlWindow *ControlWindow) TriggerShowBoneIk() {
 		controlWindow.showBoneAllAction.SetChecked(false)
 		controlWindow.SetShowBoneAll(false)
 	}
-	controlWindow.appState.SetShowBoneIkChannel(controlWindow.showBoneIkAction.Checked())
+	controlWindow.channelState.SetShowBoneIkChannel(controlWindow.showBoneIkAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneEffector() {
@@ -471,7 +472,7 @@ func (controlWindow *ControlWindow) TriggerShowBoneEffector() {
 		controlWindow.showBoneAllAction.SetChecked(false)
 		controlWindow.SetShowBoneAll(false)
 	}
-	controlWindow.appState.SetShowBoneEffectorChannel(controlWindow.showBoneEffectorAction.Checked())
+	controlWindow.channelState.SetShowBoneEffectorChannel(controlWindow.showBoneEffectorAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneFixed() {
@@ -479,7 +480,7 @@ func (controlWindow *ControlWindow) TriggerShowBoneFixed() {
 		controlWindow.showBoneAllAction.SetChecked(false)
 		controlWindow.SetShowBoneAll(false)
 	}
-	controlWindow.appState.SetShowBoneFixedChannel(controlWindow.showBoneFixedAction.Checked())
+	controlWindow.channelState.SetShowBoneFixedChannel(controlWindow.showBoneFixedAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneRotate() {
@@ -487,7 +488,7 @@ func (controlWindow *ControlWindow) TriggerShowBoneRotate() {
 		controlWindow.showBoneAllAction.SetChecked(false)
 		controlWindow.SetShowBoneAll(false)
 	}
-	controlWindow.appState.SetShowBoneRotateChannel(controlWindow.showBoneRotateAction.Checked())
+	controlWindow.channelState.SetShowBoneRotateChannel(controlWindow.showBoneRotateAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneTranslate() {
@@ -495,7 +496,7 @@ func (controlWindow *ControlWindow) TriggerShowBoneTranslate() {
 		controlWindow.showBoneAllAction.SetChecked(false)
 		controlWindow.SetShowBoneAll(false)
 	}
-	controlWindow.appState.SetShowBoneTranslateChannel(controlWindow.showBoneTranslateAction.Checked())
+	controlWindow.channelState.SetShowBoneTranslateChannel(controlWindow.showBoneTranslateAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneVisible() {
@@ -503,51 +504,55 @@ func (controlWindow *ControlWindow) TriggerShowBoneVisible() {
 		controlWindow.showBoneAllAction.SetChecked(false)
 		controlWindow.SetShowBoneAll(false)
 	}
-	controlWindow.appState.SetShowBoneVisibleChannel(controlWindow.showBoneVisibleAction.Checked())
+	controlWindow.channelState.SetShowBoneVisibleChannel(controlWindow.showBoneVisibleAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowRigidBodyFront() {
-	controlWindow.appState.SetShowRigidBodyFrontChannel(controlWindow.showRigidBodyFrontAction.Checked())
+	controlWindow.channelState.SetShowRigidBodyFrontChannel(controlWindow.showRigidBodyFrontAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowRigidBodyBack() {
-	controlWindow.appState.SetShowRigidBodyBackChannel(controlWindow.showRigidBodyBackAction.Checked())
+	controlWindow.channelState.SetShowRigidBodyBackChannel(controlWindow.showRigidBodyBackAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowJoint() {
-	controlWindow.appState.SetShowJointChannel(controlWindow.showJointAction.Checked())
+	controlWindow.channelState.SetShowJointChannel(controlWindow.showJointAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowInfo() {
-	controlWindow.appState.SetShowInfoChannel(controlWindow.showInfoAction.Checked())
+	controlWindow.channelState.SetShowInfoChannel(controlWindow.showInfoAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerFps30Limit() {
 	controlWindow.limitFps30Action.SetChecked(true)
 	controlWindow.limitFps60Action.SetChecked(false)
 	controlWindow.limitFpsUnLimitAction.SetChecked(false)
-	controlWindow.appState.SetFrameIntervalChannel(1 / 30.0)
+	controlWindow.channelState.SetFrameIntervalChannel(1 / 30.0)
 }
 
 func (controlWindow *ControlWindow) TriggerFps60Limit() {
 	controlWindow.limitFps30Action.SetChecked(false)
 	controlWindow.limitFps60Action.SetChecked(true)
 	controlWindow.limitFpsUnLimitAction.SetChecked(false)
-	controlWindow.appState.SetFrameIntervalChannel(1 / 60.0)
+	controlWindow.channelState.SetFrameIntervalChannel(1 / 60.0)
 }
 
 func (controlWindow *ControlWindow) TriggerUnLimitFps() {
 	controlWindow.limitFps30Action.SetChecked(false)
 	controlWindow.limitFps60Action.SetChecked(false)
 	controlWindow.limitFpsUnLimitAction.SetChecked(true)
-	controlWindow.appState.SetFrameIntervalChannel(-1)
+	controlWindow.channelState.SetFrameIntervalChannel(-1)
 }
 
 func (controlWindow *ControlWindow) TriggerUnLimitDeformFps() {
 	controlWindow.limitFps30Action.SetChecked(false)
 	controlWindow.limitFps60Action.SetChecked(false)
 	controlWindow.limitFpsUnLimitAction.SetChecked(true)
-	controlWindow.appState.SetFrameIntervalChannel(-2)
+	controlWindow.channelState.SetFrameIntervalChannel(-2)
+}
+
+func (controlWindow *ControlWindow) Frame() float32 {
+	return controlWindow.motionPlayer.Frame()
 }
 
 func (controlWindow *ControlWindow) SetFrame(frame float32) {
@@ -556,6 +561,15 @@ func (controlWindow *ControlWindow) SetFrame(frame float32) {
 
 func (controlWindow *ControlWindow) UpdateMaxFrame(frame float32) {
 	controlWindow.motionPlayer.UpdateMaxFrame(frame)
+	controlWindow.channelState.SetMaxFrameChannel(controlWindow.motionPlayer.MaxFrame())
+}
+
+func (controlWindow *ControlWindow) SetFrameChannel(frame float32) {
+	controlWindow.channelState.SetFrameChannel(frame)
+}
+
+func (controlWindow *ControlWindow) UpdateMaxFrameChannel(frame float32) {
+	controlWindow.channelState.SetMaxFrameChannel(frame)
 }
 
 func (controlWindow *ControlWindow) IsEnabledFrameDrop() bool {
@@ -767,11 +781,11 @@ func (controlWindow *ControlWindow) SetLogLevelIkVerbose(log bool) {
 }
 
 func (controlWindow *ControlWindow) SetClosed(closed bool) {
-	controlWindow.appState.SetClosedChannel(closed)
+	controlWindow.isClosed = closed
 }
 
-func (controlWindow *ControlWindow) SetPlaying(p bool) {
-	controlWindow.appState.SetPlayingChannel(p)
+func (controlWindow *ControlWindow) SetPlayingChannel(p bool) {
+	controlWindow.channelState.SetPlayingChannel(p)
 }
 
 func (controlWindow *ControlWindow) SetEnabled(enabled bool) {
