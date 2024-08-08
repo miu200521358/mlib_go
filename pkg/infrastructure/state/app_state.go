@@ -62,10 +62,10 @@ type IAppState interface {
 	SetClosed(closed bool)
 	Playing() bool
 	SetPlaying(p bool)
-	SpfLimit() float64
-	SetSpfLimit(spf float64)
-	SetGetModels(f func() [][]*pmx.PmxModel)
-	SetGetMotions(f func() [][]*vmd.VmdMotion)
+	FrameInterval() float64
+	SetFrameInterval(spf float64)
+	SetFuncGetModels(f func() [][]*pmx.PmxModel)
+	SetFuncGetMotions(f func() [][]*vmd.VmdMotion)
 	GetModels() [][]*pmx.PmxModel
 	GetMotions() [][]*vmd.VmdMotion
 	SetFrameChannel(v float32)
@@ -95,6 +95,6 @@ type IAppState interface {
 	SetCameraSyncChannel(v bool)
 	SetClosedChannel(v bool)
 	SetPlayingChannel(v bool)
-	SetSpfLimitChannel(v float64)
+	SetFrameIntervalChannel(v float64)
 	SetSelectedVertexIndexesChannel(v [][][]int)
 }

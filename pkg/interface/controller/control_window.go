@@ -24,7 +24,6 @@ type ControlWindow struct {
 	motionPlayer                    state.IPlayer      // モーションプレイヤー
 	TabWidget                       *widget.MTabWidget // タブウィジェット
 	Config                          *mconfig.AppConfig // アプリケーション設定
-	spfLimit                        float64            // FPS制限
 	enabledFrameDropAction          *walk.Action       // フレームドロップON/OFF
 	enabledPhysicsAction            *walk.Action       // 物理ON/OFF
 	physicsResetAction              *walk.Action       // 物理リセット
@@ -62,7 +61,6 @@ func NewControlWindow(
 	controlWindow := &ControlWindow{
 		Config:   appConfig,
 		appState: appState,
-		spfLimit: 1 / 30.0,
 	}
 
 	logMenuItems := []declarative.MenuItem{
@@ -528,24 +526,28 @@ func (controlWindow *ControlWindow) TriggerFps30Limit() {
 	controlWindow.limitFps30Action.SetChecked(true)
 	controlWindow.limitFps60Action.SetChecked(false)
 	controlWindow.limitFpsUnLimitAction.SetChecked(false)
-	controlWindow.SetSpfLimit(1 / 30.0)
-	controlWindow.appState.SetSpfLimitChannel(controlWindow.SpfLimit())
+	controlWindow.appState.SetFrameIntervalChannel(1 / 30.0)
 }
 
 func (controlWindow *ControlWindow) TriggerFps60Limit() {
 	controlWindow.limitFps30Action.SetChecked(false)
 	controlWindow.limitFps60Action.SetChecked(true)
 	controlWindow.limitFpsUnLimitAction.SetChecked(false)
-	controlWindow.SetSpfLimit(1 / 60.0)
-	controlWindow.appState.SetSpfLimitChannel(controlWindow.SpfLimit())
+	controlWindow.appState.SetFrameIntervalChannel(1 / 60.0)
 }
 
 func (controlWindow *ControlWindow) TriggerUnLimitFps() {
 	controlWindow.limitFps30Action.SetChecked(false)
 	controlWindow.limitFps60Action.SetChecked(false)
 	controlWindow.limitFpsUnLimitAction.SetChecked(true)
-	controlWindow.SetSpfLimit(-1.0)
-	controlWindow.appState.SetSpfLimitChannel(controlWindow.SpfLimit())
+	controlWindow.appState.SetFrameIntervalChannel(-1)
+}
+
+func (controlWindow *ControlWindow) TriggerUnLimitDeformFps() {
+	controlWindow.limitFps30Action.SetChecked(false)
+	controlWindow.limitFps60Action.SetChecked(false)
+	controlWindow.limitFpsUnLimitAction.SetChecked(true)
+	controlWindow.appState.SetFrameIntervalChannel(-2)
 }
 
 func (controlWindow *ControlWindow) SetFrame(frame float32) {
@@ -764,28 +766,12 @@ func (controlWindow *ControlWindow) SetLogLevelIkVerbose(log bool) {
 	controlWindow.logLevelIkVerboseAction.SetChecked(log)
 }
 
-func (controlWindow *ControlWindow) IsClosed() bool {
-	return false
-}
-
 func (controlWindow *ControlWindow) SetClosed(closed bool) {
-	controlWindow.appState.SetClosed(closed)
-}
-
-func (controlWindow *ControlWindow) Playing() bool {
-	return controlWindow.appState.Playing()
+	controlWindow.appState.SetClosedChannel(closed)
 }
 
 func (controlWindow *ControlWindow) SetPlaying(p bool) {
 	controlWindow.appState.SetPlayingChannel(p)
-}
-
-func (controlWindow *ControlWindow) SpfLimit() float64 {
-	return controlWindow.spfLimit
-}
-
-func (controlWindow *ControlWindow) SetSpfLimit(spf float64) {
-	controlWindow.appState.SetSpfLimitChannel(spf)
 }
 
 func (controlWindow *ControlWindow) SetEnabled(enabled bool) {
@@ -822,8 +808,4 @@ func (controlWindow *ControlWindow) UpdateSelectedVertexIndexes(indexes [][][]in
 	if controlWindow.funcUpdateSelectedVertexIndexes != nil {
 		controlWindow.funcUpdateSelectedVertexIndexes(indexes)
 	}
-}
-
-func (controlWindow *ControlWindow) AppState() state.IAppState {
-	return controlWindow.appState
 }

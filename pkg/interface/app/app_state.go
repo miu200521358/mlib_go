@@ -36,7 +36,7 @@ type appState struct {
 	isCameraSync                 bool                      // レンダーシンク
 	isClosed                     bool                      // ウィンドウクローズ
 	playing                      bool                      // 再生中フラグ
-	spfLimit                     float64                   // FPS制限
+	frameInterval                float64                   // FPS制限
 	frameChannel                 chan float32              // フレーム
 	maxFrameChannel              chan float32              // 最大フレーム
 	isEnabledFrameDropChannel    chan bool                 // フレームドロップON/OFF
@@ -65,18 +65,18 @@ type appState struct {
 	isClosedChannel              chan bool                 // ウィンドウクローズ
 	playingChannel               chan bool                 // 再生中フラグ
 	physicsResetChannel          chan bool                 // 物理リセット
-	spfLimitChanel               chan float64              // FPS制限
+	frameIntervalChanel          chan float64              // FPS制限
 	selectedVertexIndexesChannel chan [][][]int            // 選択頂点インデックス
 	funcGetModels                func() [][]*pmx.PmxModel  // モデル取得関数
 	funcGetMotions               func() [][]*vmd.VmdMotion // モーション取得関数
 }
 
 func newAppState() *appState {
-	u := &appState{
+	return &appState{
 		isEnabledPhysics:             true,       // 物理ON
 		isEnabledFrameDrop:           true,       // フレームドロップON
 		isLimitFps30:                 true,       // 30fps制限
-		spfLimit:                     1.0 / 30.0, // 30fps
+		frameInterval:                1.0 / 30.0, // 30fps
 		frame:                        0.0,
 		maxFrame:                     1,
 		frameChannel:                 make(chan float32),
@@ -106,11 +106,9 @@ func newAppState() *appState {
 		isClosedChannel:              make(chan bool),
 		playingChannel:               make(chan bool),
 		physicsResetChannel:          make(chan bool),
-		spfLimitChanel:               make(chan float64),
+		frameIntervalChanel:          make(chan float64),
 		selectedVertexIndexesChannel: make(chan [][][]int, 1),
 	}
-
-	return u
 }
 
 func (appState *appState) Frame() float32 {
@@ -329,12 +327,12 @@ func (appState *appState) SetPlaying(p bool) {
 	appState.playing = p
 }
 
-func (appState *appState) SpfLimit() float64 {
-	return appState.spfLimit
+func (appState *appState) FrameInterval() float64 {
+	return appState.frameInterval
 }
 
-func (appState *appState) SetSpfLimit(spf float64) {
-	appState.spfLimit = spf
+func (appState *appState) SetFrameInterval(spf float64) {
+	appState.frameInterval = spf
 }
 
 func (appState *appState) SetCameraSync(sync bool) {
@@ -453,19 +451,19 @@ func (appState *appState) SetPlayingChannel(v bool) {
 	appState.playingChannel <- v
 }
 
-func (appState *appState) SetSpfLimitChannel(v float64) {
-	appState.spfLimitChanel <- v
+func (appState *appState) SetFrameIntervalChannel(v float64) {
+	appState.frameIntervalChanel <- v
 }
 
 func (appState *appState) SetSelectedVertexIndexesChannel(v [][][]int) {
 	appState.selectedVertexIndexesChannel <- v
 }
 
-func (appState *appState) SetGetModels(f func() [][]*pmx.PmxModel) {
+func (appState *appState) SetFuncGetModels(f func() [][]*pmx.PmxModel) {
 	appState.funcGetModels = f
 }
 
-func (appState *appState) SetGetMotions(f func() [][]*vmd.VmdMotion) {
+func (appState *appState) SetFuncGetMotions(f func() [][]*vmd.VmdMotion) {
 	appState.funcGetMotions = f
 }
 

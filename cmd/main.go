@@ -62,7 +62,7 @@ func main() {
 		mApp.SetControlWindow(controlWindow)
 
 		controlWindow.InitTabWidget()
-		newFilePage(controlWindow)
+		newFilePage(mApp, controlWindow)
 
 		player := widget.NewMotionPlayer(controlWindow.MainWindow, controlWindow)
 		controlWindow.SetPlayer(player)
@@ -89,7 +89,7 @@ func getMenuItems() []declarative.MenuItem {
 	}
 }
 
-func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
+func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widget.MTabPage {
 	tabPage := widget.NewMTabPage("ファイル")
 	controlWindow.AddTabPage(tabPage.TabPage)
 
@@ -203,7 +203,7 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 
 	walk.NewVSpacer(tabPage)
 
-	controlWindow.AppState().SetGetModels(
+	mApp.SetFuncGetModels(
 		func() [][]*pmx.PmxModel {
 			models := make([][]*pmx.PmxModel, 2)
 			models[0] = make([]*pmx.PmxModel, 2)
@@ -223,7 +223,7 @@ func newFilePage(controlWindow *controller.ControlWindow) *widget.MTabPage {
 		},
 	)
 
-	controlWindow.AppState().SetGetMotions(
+	mApp.SetFuncGetMotions(
 		func() [][]*vmd.VmdMotion {
 			motions := make([][]*vmd.VmdMotion, 2)
 			motions[0] = make([]*vmd.VmdMotion, 2)

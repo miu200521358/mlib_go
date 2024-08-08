@@ -23,8 +23,8 @@ type IControlWindow interface {
 	UpdateMaxFrame(frame float32)
 	UpdateSelectedVertexIndexes(indexes [][][]int)
 	SetUpdateSelectedVertexIndexesFunc(f func([][][]int))
-	Playing() bool
 	SetPlaying(playing bool)
+	SetClosed(closed bool)
 }
 
 type IViewWindow interface {
