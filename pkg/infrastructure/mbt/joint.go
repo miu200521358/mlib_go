@@ -4,8 +4,10 @@
 package mbt
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 type jointValue struct {
@@ -18,17 +20,59 @@ func (physics *MPhysics) initJoints(modelIndex int, rigidBodies *pmx.RigidBodies
 	physics.joints[modelIndex] = make([]*jointValue, len(j.Data))
 	for _, joint := range j.Data {
 		if rigidBodies.Contains(joint.RigidbodyIndexA) && rigidBodies.Contains(joint.RigidbodyIndexB) {
-			physics.initJoint(modelIndex, joint)
+			// ジョイントの位置と向き
+			jointTransform := bt.NewBtTransform(MRotationBullet(joint.Rotation), MVec3Bullet(joint.Position))
+
+			physics.initJoint(modelIndex, joint, jointTransform)
+		}
+	}
+}
+
+func (physics *MPhysics) initJointsByVmdDeltas(
+	modelIndex int, rigidBodies *pmx.RigidBodies, j *pmx.Joints, vmdDeltas *delta.VmdDeltas,
+) {
+	// ジョイントを順番に剛体と紐付けていく
+	physics.joints[modelIndex] = make([]*jointValue, len(j.Data))
+	for _, joint := range j.Data {
+		if rigidBodies.Contains(joint.RigidbodyIndexA) && rigidBodies.Contains(joint.RigidbodyIndexB) {
+			// ジョイントの位置と向き
+			jointTransform := bt.NewBtTransform()
+
+			var bone *pmx.Bone
+			if rigidBodies.Get(joint.RigidbodyIndexA).Bone != nil {
+				bone = rigidBodies.Get(joint.RigidbodyIndexA).Bone
+			} else if rigidBodies.Get(joint.RigidbodyIndexB).Bone != nil {
+				bone = rigidBodies.Get(joint.RigidbodyIndexB).Bone
+			} else if rigidBodies.Get(joint.RigidbodyIndexA).JointedBone != nil {
+				bone = rigidBodies.Get(joint.RigidbodyIndexA).JointedBone
+			} else if rigidBodies.Get(joint.RigidbodyIndexB).JointedBone != nil {
+				bone = rigidBodies.Get(joint.RigidbodyIndexB).JointedBone
+			}
+
+			if bone == nil {
+				continue
+			}
+
+			boneTransform := bt.NewBtTransform()
+			defer bt.DeleteBtTransform(boneTransform)
+
+			mat := mgl.NewGlMat4(vmdDeltas.Bones.Get(bone.Index()).FilledGlobalMatrix())
+			boneTransform.SetFromOpenGLMatrix(&mat[0])
+
+			jointLocalPos := joint.Position.Subed(bone.Position)
+			btJointLocalTransform := bt.NewBtTransform(MRotationBullet(joint.Rotation),
+				MVec3Bullet(jointLocalPos))
+
+			jointTransform.Mult(boneTransform, btJointLocalTransform)
+
+			physics.initJoint(modelIndex, joint, jointTransform)
 		}
 	}
 }
 
 func (physics *MPhysics) initJoint(
-	modelIndex int, joint *pmx.Joint,
+	modelIndex int, joint *pmx.Joint, jointTransform bt.BtTransform,
 ) {
-	// ジョイントの位置と向き
-	jointTransform := bt.NewBtTransform(MRotationBullet(joint.Rotation), MVec3Bullet(joint.Position))
-
 	rigidBodyB := physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody
 	btRigidBodyA := physics.rigidBodies[modelIndex][joint.RigidbodyIndexA].btRigidBody
 	btRigidBodyB := physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].btRigidBody

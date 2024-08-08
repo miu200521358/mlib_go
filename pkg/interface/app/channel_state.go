@@ -31,7 +31,6 @@ type channelState struct {
 	isCameraSyncChannel          chan bool      // レンダリング同期
 	isClosedChannel              chan bool      // ウィンドウクローズ
 	playingChannel               chan bool      // 再生中フラグ
-	physicsResetChannel          chan bool      // 物理リセット
 	frameIntervalChanel          chan float64   // FPS制限
 	selectedVertexIndexesChannel chan [][][]int // 選択頂点インデックス
 }
@@ -64,7 +63,6 @@ func newChannelState() *channelState {
 		isUnLimitFpsDeformChannel:    make(chan bool),
 		isClosedChannel:              make(chan bool),
 		playingChannel:               make(chan bool),
-		physicsResetChannel:          make(chan bool),
 		frameIntervalChanel:          make(chan float64),
 		selectedVertexIndexesChannel: make(chan [][][]int, 1),
 	}

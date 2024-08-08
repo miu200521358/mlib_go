@@ -21,7 +21,7 @@ func deformBeforePhysics(
 	return vmdDeltas
 }
 
-func deformPhysics(appState state.IAppState, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas, physics mbt.IPhysics) {
+func DeformPhysicsByBone(appState state.IAppState, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas, physics mbt.IPhysics) {
 	// 物理剛体位置を更新
 	processFunc := func(i int) {
 		rigidBody := model.RigidBodies.Get(i)
@@ -48,7 +48,7 @@ func deformPhysics(appState state.IAppState, model *pmx.PmxModel, vmdDeltas *del
 	miter.IterParallelByCount(model.RigidBodies.Len(), 100, processFunc)
 }
 
-func deformAfterPhysics(
+func DeformBonePyPhysics(
 	appState state.IAppState, model *pmx.PmxModel, motion *vmd.VmdMotion,
 	vmdDeltas *delta.VmdDeltas, physics mbt.IPhysics,
 ) *delta.VmdDeltas {
@@ -79,7 +79,6 @@ func Deform(
 	physics mbt.IPhysics, appState state.IAppState, timeStep float32,
 	models []*pmx.PmxModel, motions []*vmd.VmdMotion,
 ) []*delta.VmdDeltas {
-
 	// 物理後デフォーム
 	vmdDeltas := make([]*delta.VmdDeltas, len(models))
 
@@ -91,16 +90,19 @@ func Deform(
 		vmdDeltas[i] = deformBeforePhysics(appState, models[i], motions[i])
 	}
 
+	return vmdDeltas
+}
+
+func DeformPhysics(
+	physics mbt.IPhysics, appState state.IAppState, timeStep float32,
+	models []*pmx.PmxModel, motions []*vmd.VmdMotion, vmdDeltas []*delta.VmdDeltas,
+) []*delta.VmdDeltas {
 	// 物理デフォーム
 	for i := range models {
 		if models[i] == nil || vmdDeltas[i] == nil {
 			continue
 		}
-		deformPhysics(appState, models[i], vmdDeltas[i], physics)
-	}
-
-	if appState.IsPhysicsReset() {
-		physics.UpdateFlags(true)
+		DeformPhysicsByBone(appState, models[i], vmdDeltas[i], physics)
 	}
 
 	if appState.IsEnabledPhysics() || appState.IsPhysicsReset() {
@@ -112,7 +114,7 @@ func Deform(
 		if models[i] == nil || motions[i] == nil || vmdDeltas[i] == nil {
 			continue
 		}
-		vmdDeltas[i] = deformAfterPhysics(appState, models[i], motions[i], vmdDeltas[i], physics)
+		vmdDeltas[i] = DeformBonePyPhysics(appState, models[i], motions[i], vmdDeltas[i], physics)
 	}
 
 	return vmdDeltas

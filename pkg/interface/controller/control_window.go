@@ -782,6 +782,7 @@ func (controlWindow *ControlWindow) SetLogLevelIkVerbose(log bool) {
 
 func (controlWindow *ControlWindow) SetClosed(closed bool) {
 	controlWindow.isClosed = closed
+	controlWindow.channelState.SetClosedChannel(closed)
 }
 
 func (controlWindow *ControlWindow) SetPlayingChannel(p bool) {

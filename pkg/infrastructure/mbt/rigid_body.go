@@ -7,6 +7,7 @@ import (
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
@@ -25,12 +26,75 @@ func (physics *MPhysics) initRigidBodies(modelIndex int, rigidBodies *pmx.RigidB
 	// 剛体を順番にボーンと紐付けていく
 	physics.rigidBodies[modelIndex] = make([]*rigidbodyValue, len(rigidBodies.Data))
 	for _, rigidBody := range rigidBodies.Data {
+		// 剛体の初期位置と回転
+		btRigidBodyTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation), MVec3Bullet(rigidBody.Position))
+
+		// ボーンから見た剛体の初期位置
+		var bonePos *mmath.MVec3
+		if rigidBody.Bone != nil {
+			bonePos = rigidBody.Bone.Position
+		} else if rigidBody.JointedBone != nil {
+			bonePos = rigidBody.JointedBone.Position
+		} else {
+			bonePos = mmath.NewMVec3()
+		}
+
 		// 物理設定の初期化
-		physics.initRigidBody(modelIndex, rigidBody)
+		physics.initRigidBody(modelIndex, rigidBody, bonePos, btRigidBodyTransform)
 	}
 }
 
-func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody) {
+func (physics *MPhysics) initRigidBodiesByVmdDeltas(
+	modelIndex int, rigidBodies *pmx.RigidBodies, vmdDeltas *delta.VmdDeltas,
+) {
+	// 剛体を順番にボーンと紐付けていく
+	physics.rigidBodies[modelIndex] = make([]*rigidbodyValue, len(rigidBodies.Data))
+	for _, rigidBody := range rigidBodies.Data {
+		// 剛体の初期位置と回転
+		btRigidBodyTransform := bt.NewBtTransform()
+
+		// ボーンから見た剛体の初期位置
+		var bonePos *mmath.MVec3
+		if rigidBody.Bone != nil {
+			bonePos = vmdDeltas.Bones.Get(rigidBody.Bone.Index()).FilledGlobalPosition()
+
+			boneTransform := bt.NewBtTransform()
+			defer bt.DeleteBtTransform(boneTransform)
+
+			mat := mgl.NewGlMat4(vmdDeltas.Bones.Get(rigidBody.Bone.Index()).FilledGlobalMatrix())
+			boneTransform.SetFromOpenGLMatrix(&mat[0])
+
+			rigidBodyLocalPos := rigidBody.Position.Subed(rigidBody.Bone.Position)
+			btRigidBodyLocalTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation),
+				MVec3Bullet(rigidBodyLocalPos))
+
+			btRigidBodyTransform.Mult(boneTransform, btRigidBodyLocalTransform)
+		} else if rigidBody.JointedBone != nil {
+			bonePos = vmdDeltas.Bones.Get(rigidBody.JointedBone.Index()).FilledGlobalPosition()
+
+			boneTransform := bt.NewBtTransform()
+			defer bt.DeleteBtTransform(boneTransform)
+
+			mat := mgl.NewGlMat4(vmdDeltas.Bones.Get(rigidBody.JointedBone.Index()).FilledGlobalMatrix())
+			boneTransform.SetFromOpenGLMatrix(&mat[0])
+
+			rigidBodyLocalPos := rigidBody.Position.Subed(rigidBody.JointedBone.Position)
+			btRigidBodyLocalTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation),
+				MVec3Bullet(rigidBodyLocalPos))
+
+			btRigidBodyTransform.Mult(boneTransform, btRigidBodyLocalTransform)
+		} else {
+			bonePos = mmath.NewMVec3()
+		}
+
+		// 物理設定の初期化
+		physics.initRigidBody(modelIndex, rigidBody, bonePos, btRigidBodyTransform)
+	}
+}
+
+func (physics *MPhysics) initRigidBody(
+	modelIndex int, rigidBody *pmx.RigidBody, bonePos *mmath.MVec3, btRigidBodyTransform bt.BtTransform,
+) {
 	var btCollisionShape bt.BtCollisionShape
 
 	// マイナスサイズは許容しない
@@ -61,18 +125,6 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 		btCollisionShape.CalculateLocalInertia(mass, localInertia)
 	}
 
-	// 剛体の初期位置と回転
-	btRigidBodyTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation), MVec3Bullet(rigidBody.Position))
-
-	// ボーンから見た剛体の初期位置
-	var bonePos *mmath.MVec3
-	if rigidBody.Bone != nil {
-		bonePos = rigidBody.Bone.Position
-	} else if rigidBody.JointedBone != nil {
-		bonePos = rigidBody.JointedBone.Position
-	} else {
-		bonePos = mmath.NewMVec3()
-	}
 	rigidBodyLocalPos := rigidBody.Position.Subed(bonePos)
 	btRigidBodyLocalTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation), MVec3Bullet(rigidBodyLocalPos))
 
@@ -80,7 +132,8 @@ func (physics *MPhysics) initRigidBody(modelIndex int, rigidBody *pmx.RigidBody)
 	motionState := bt.NewBtDefaultMotionState(btRigidBodyTransform)
 
 	btRigidBody := bt.NewBtRigidBody(mass, motionState, btCollisionShape, localInertia)
-	btRigidBody.SetDamping(float32(rigidBody.RigidBodyParam.LinearDamping), float32(rigidBody.RigidBodyParam.AngularDamping))
+	btRigidBody.SetDamping(float32(rigidBody.RigidBodyParam.LinearDamping),
+		float32(rigidBody.RigidBodyParam.AngularDamping))
 	btRigidBody.SetRestitution(float32(rigidBody.RigidBodyParam.Restitution))
 	btRigidBody.SetFriction(float32(rigidBody.RigidBodyParam.Friction))
 	btRigidBody.SetUserIndex(rigidBody.Index())
@@ -101,14 +154,6 @@ func (physics *MPhysics) deleteRigidBodies(modelIndex int) {
 		bt.DeleteBtRigidBody(r.btRigidBody)
 	}
 	physics.rigidBodies[modelIndex] = nil
-}
-
-func (physics *MPhysics) UpdateFlags(isReset bool) {
-	for modelIndex := range physics.rigidBodies {
-		for _, rigidBody := range physics.rigidBodies[modelIndex] {
-			physics.updateFlag(modelIndex, rigidBody.pmxRigidBody, isReset)
-		}
-	}
 }
 
 func (physics *MPhysics) updateFlag(modelIndex int, rigidBody *pmx.RigidBody, isReset bool) {

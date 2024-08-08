@@ -432,11 +432,6 @@ func (viewWindow *ViewWindow) GetWindow() *glfw.Window {
 	return viewWindow.Window
 }
 
-func (viewWindow *ViewWindow) ResetPhysics() {
-	// リセットなしでフラグを更新
-	viewWindow.physics.UpdateFlags(false)
-}
-
 func (viewWindow *ViewWindow) Render(models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas) {
 	glfw.PollEvents()
 

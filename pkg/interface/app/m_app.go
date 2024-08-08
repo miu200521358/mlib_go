@@ -104,7 +104,7 @@ func (app *MApp) RunControlToViewerChannel() {
 				app.SetEnabledFrameDrop(enabledFrameDrop)
 			case enabledPhysics := <-app.controlToViewerChannel.isEnabledPhysicsChannel:
 				app.SetEnabledPhysics(enabledPhysics)
-			case resetPhysics := <-app.controlToViewerChannel.physicsResetChannel:
+			case resetPhysics := <-app.controlToViewerChannel.isPhysicsResetChannel:
 				app.SetPhysicsReset(resetPhysics)
 			case showNormal := <-app.controlToViewerChannel.isShowNormalChannel:
 				app.SetShowNormal(showNormal)
@@ -196,22 +196,8 @@ func (app *MApp) RunViewer() {
 
 		for i, w := range app.viewWindows {
 			vmdDeltas[i] = deform.Deform(w.Physics(), app, timeStep, models[i], motions[i])
+			vmdDeltas[i] = deform.DeformPhysics(w.Physics(), app, timeStep, models[i], motions[i], vmdDeltas[i])
 		}
-
-		// if app.IsPhysicsReset() {
-		// 	for i, w := range app.viewWindows {
-		// 		// 一旦アニメーション
-		// 		app.animationStates[i], app.nextAnimationStates[i] =
-		// 			w.Animate(app.animationStates[i], app.nextAnimationStates[i], timeStep)
-		// 	}
-
-		// 	for i, w := range app.viewWindows {
-		// 		w.ResetPhysics(app.animationStates[i])
-		// 	}
-
-		// 	// リセットが終わったらフラグを落とす
-		// 	app.SetPhysicsReset(false)
-		// }
 
 		// カメラ同期(重複描画の場合はそっちで同期させる)
 		if app.IsCameraSync() && !app.IsShowOverride() {
@@ -250,6 +236,44 @@ func (app *MApp) RunViewer() {
 		// 	}
 		// 	app.selectedVertexIndexesChan <- selectedVertexIndexes
 		// }
+
+		if app.IsPhysicsReset() {
+			// 物理リセット
+			for i, w := range app.viewWindows {
+				// リセット用のフラグを立てる
+				w.Physics().UpdateFlags(true)
+				vmdDeltas[i] = deform.Deform(w.Physics(), app, timeStep, models[i], motions[i])
+				w.Render(models[i], vmdDeltas[i])
+
+				// 物理削除
+				for _, m := range models[i] {
+					if m == nil {
+						continue
+					}
+					w.Physics().DeleteModel(m.Index())
+				}
+				// ワールド作り直し
+				w.Physics().ResetWorld()
+				// 物理追加
+				for j, m := range models[i] {
+					if m == nil || vmdDeltas[i][j] == nil {
+						continue
+					}
+					w.Physics().AddModelByVmdDeltas(m.Index(), m, vmdDeltas[i][j])
+				}
+				w.Render(models[i], vmdDeltas[i])
+
+				// 物理再設定
+				for j, m := range models[i] {
+					if m == nil || vmdDeltas[i][j] == nil {
+						continue
+					}
+					deform.DeformPhysicsByBone(app, models[i][j], vmdDeltas[i][j], w.Physics())
+				}
+				w.Render(models[i], vmdDeltas[i])
+			}
+			app.SetPhysicsReset(false)
+		}
 
 		if app.Playing() {
 			// 再生中はフレームを進める

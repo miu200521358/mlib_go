@@ -147,17 +147,19 @@ func (model *PmxModel) Setup() {
 	// ジョイント
 	for _, joint := range model.Joints.Data {
 		if joint.RigidbodyIndexA >= 0 && model.RigidBodies.Contains(joint.RigidbodyIndexA) &&
-			joint.RigidbodyIndexB >= 0 && model.RigidBodies.Contains(joint.RigidbodyIndexB) &&
-			model.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex >= 0 &&
-			model.Bones.Contains(model.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex) &&
-			model.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex >= 0 &&
-			model.Bones.Contains(model.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex) {
+			joint.RigidbodyIndexB >= 0 && model.RigidBodies.Contains(joint.RigidbodyIndexB) {
 
 			// 剛体AもBも存在する場合、剛体Aと剛体Bを関連付ける
-			model.RigidBodies.Data[joint.RigidbodyIndexA].JointedBone =
-				model.Bones.Get(model.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex)
-			model.RigidBodies.Data[joint.RigidbodyIndexB].JointedBone =
-				model.Bones.Get(model.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex)
+			if model.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex >= 0 &&
+				model.Bones.Contains(model.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex) {
+				model.RigidBodies.Data[joint.RigidbodyIndexA].JointedBone =
+					model.Bones.Get(model.RigidBodies.Get(joint.RigidbodyIndexB).BoneIndex)
+			}
+			if model.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex >= 0 &&
+				model.Bones.Contains(model.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex) {
+				model.RigidBodies.Data[joint.RigidbodyIndexB].JointedBone =
+					model.Bones.Get(model.RigidBodies.Get(joint.RigidbodyIndexA).BoneIndex)
+			}
 		}
 	}
 

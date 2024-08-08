@@ -4,6 +4,7 @@
 package mbt
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
@@ -12,6 +13,7 @@ import (
 type IPhysics interface {
 	ResetWorld()
 	AddModel(modelIndex int, model *pmx.PmxModel)
+	AddModelByVmdDeltas(modelIndex int, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas)
 	DeleteModel(modelIndex int)
 	StepSimulation(timeStep float32)
 	UpdateFlags(isReset bool)
@@ -87,6 +89,9 @@ func createWorld() bt.BtDiscreteDynamicsWorld {
 }
 
 func (physics *MPhysics) ResetWorld() {
+	// ワールド削除
+	bt.DeleteBtDynamicsWorld(physics.world)
+	// ワールド作成
 	world := createWorld()
 	world.SetDebugDrawer(physics.drawer)
 	physics.world = world
@@ -96,6 +101,12 @@ func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
 	// 根元から追加していく
 	physics.initRigidBodies(modelIndex, model.RigidBodies)
 	physics.initJoints(modelIndex, model.RigidBodies, model.Joints)
+}
+
+func (physics *MPhysics) AddModelByVmdDeltas(modelIndex int, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas) {
+	// 根元から追加していく
+	physics.initRigidBodiesByVmdDeltas(modelIndex, model.RigidBodies, vmdDeltas)
+	physics.initJointsByVmdDeltas(modelIndex, model.RigidBodies, model.Joints, vmdDeltas)
 }
 
 func (physics *MPhysics) DeleteModel(modelIndex int) {
@@ -111,4 +122,12 @@ func (physics *MPhysics) StepSimulation(timeStep float32) {
 func (physics *MPhysics) Exists(modelIndex int) bool {
 	_, ok := physics.rigidBodies[modelIndex]
 	return ok
+}
+
+func (physics *MPhysics) UpdateFlags(isReset bool) {
+	for modelIndex := range physics.rigidBodies {
+		for _, rigidBody := range physics.rigidBodies[modelIndex] {
+			physics.updateFlag(modelIndex, rigidBody.pmxRigidBody, isReset)
+		}
+	}
 }
