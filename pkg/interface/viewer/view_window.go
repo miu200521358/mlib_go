@@ -13,10 +13,12 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/mathgl/mgl64"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/render"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
@@ -50,6 +52,7 @@ type ViewWindow struct {
 	yaw                                   float64                // カメラyaw
 	pitch                                 float64                // カメラpitch
 	size                                  *mmath.MVec2           // ウィンドウサイズ
+	renderModels                          []*render.RenderModel  // レンダリングモデルリスト
 }
 
 func NewViewWindow(
@@ -96,6 +99,7 @@ func NewViewWindow(
 		leftCursorRemoveWorldHistoryPositions: make([]*mgl32.Vec3, 0),
 		size: &mmath.MVec2{X: float64(appConfig.ViewWindowSize.Width),
 			Y: float64(appConfig.ViewWindowSize.Height)},
+		renderModels: make([]*render.RenderModel, 0),
 	}
 
 	glWindow.SetCloseCallback(viewWindow.closeCallback)
@@ -111,6 +115,10 @@ func NewViewWindow(
 	gl.DebugMessageCallback(viewWindow.debugMessageCallback, nil) // デバッグコールバック
 
 	return viewWindow
+}
+
+func (viewWindow *ViewWindow) Physics() mbt.IPhysics {
+	return viewWindow.physics
 }
 
 func (viewWindow *ViewWindow) Title() string {
@@ -424,21 +432,16 @@ func (viewWindow *ViewWindow) GetWindow() *glfw.Window {
 	return viewWindow.Window
 }
 
-func (viewWindow *ViewWindow) ResetPhysics(animationStates []state.IAnimationState) {
-	// デフォーム再設定
-	deform.Deform(viewWindow.physics, animationStates, viewWindow.appState, viewWindow.physics.PhysicsSpf)
-
+func (viewWindow *ViewWindow) ResetPhysics() {
 	// リセットなしでフラグを更新
 	viewWindow.physics.UpdateFlags(false)
 }
 
-func (viewWindow *ViewWindow) Animate(
-	animationStates []state.IAnimationState, nextStates []state.IAnimationState, timeStep float32,
-) ([]state.IAnimationState, []state.IAnimationState) {
+func (viewWindow *ViewWindow) Render(models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas) {
 	glfw.PollEvents()
 
 	if viewWindow.size.X == 0 || viewWindow.size.Y == 0 {
-		return animationStates, nextStates
+		return
 	}
 
 	viewWindow.MakeContextCurrent()
@@ -512,62 +515,19 @@ func (viewWindow *ViewWindow) Animate(
 	// 床描画
 	viewWindow.shader.DrawFloor()
 
-	if animationStates != nil {
-		// 何かしら描画対象情報がある場合の処理
-		for _, nextState := range nextStates {
-			if nextState != nil {
-				// モデルが指定されてたら初期化してセット
-				if nextState.Model() != nil {
-					modelIndex := nextState.ModelIndex()
-					viewWindow.physics.DeleteModel(modelIndex)
-					animationStates[nextState.ModelIndex()].Load(nextState.Model())
-					viewWindow.physics.AddModel(modelIndex, nextState.Model())
-					nextState.SetModel(nil)
-				}
-				// モーションが指定されてたらセット
-				if nextState.Motion() != nil {
-					animationStates[nextState.ModelIndex()].SetMotion(nextState.Motion())
-					nextState.SetMotion(nil)
-				}
-				if nextState.VmdDeltas() != nil {
-					animationStates[nextState.ModelIndex()].SetVmdDeltas(nextState.VmdDeltas())
-					nextState.SetVmdDeltas(nil)
-				}
-				if nextState.InvisibleMaterialIndexes() != nil {
-					animationStates[nextState.ModelIndex()].SetInvisibleMaterialIndexes(
-						nextState.InvisibleMaterialIndexes())
-					nextState.SetInvisibleMaterialIndexes(nil)
-				}
-				if nextState.SelectedVertexIndexes() != nil {
-					animationStates[nextState.ModelIndex()].UpdateSelectedVertexIndexes(
-						nextState.SelectedVertexIndexes())
-					nextState.SetSelectedVertexIndexes(nil)
-				}
-				if nextState.NoSelectedVertexIndexes() != nil {
-					animationStates[nextState.ModelIndex()].UpdateNoSelectedVertexIndexes(
-						nextState.NoSelectedVertexIndexes())
-					nextState.SetNoSelectedVertexIndexes(nil)
-				}
-			}
+	// モデル描画
+	for i, renderModel := range viewWindow.renderModels {
+		if renderModel != nil && vmdDeltas[i] != nil {
+			renderModel.Render(viewWindow.shader, viewWindow.appState, vmdDeltas[i],
+				leftCursorWorldPositions, leftCursorRemoveWorldPositions,
+				viewWindow.leftCursorWorldHistoryPositions, viewWindow.leftCursorRemoveWorldHistoryPositions)
 		}
-
-		// デフォーム
-		deform.Deform(viewWindow.physics, animationStates, viewWindow.appState, timeStep)
-
-		// モデル描画
-		for _, animationState := range animationStates {
-			if animationState != nil {
-				animationState.Render(viewWindow.shader, viewWindow.appState,
-					leftCursorWorldPositions, leftCursorRemoveWorldPositions,
-					viewWindow.leftCursorWorldHistoryPositions, viewWindow.leftCursorRemoveWorldHistoryPositions)
-			}
-		}
-
-		// 物理デバッグ描画
-		viewWindow.physics.DrawDebugLines(viewWindow.shader,
-			viewWindow.appState.IsShowRigidBodyFront() || viewWindow.appState.IsShowRigidBodyBack(),
-			viewWindow.appState.IsShowJoint(), viewWindow.appState.IsShowRigidBodyFront())
 	}
+
+	// 物理デバッグ描画
+	viewWindow.physics.DrawDebugLines(viewWindow.shader,
+		viewWindow.appState.IsShowRigidBodyFront() || viewWindow.appState.IsShowRigidBodyBack(),
+		viewWindow.appState.IsShowJoint(), viewWindow.appState.IsShowRigidBodyFront())
 
 	// 深度解決
 	viewWindow.shader.Msaa.Resolve()
@@ -583,8 +543,28 @@ func (viewWindow *ViewWindow) Animate(
 		viewWindow.leftCursorWorldHistoryPositions = make([]*mgl32.Vec3, 0)
 		viewWindow.leftCursorRemoveWorldHistoryPositions = make([]*mgl32.Vec3, 0)
 	}
+}
 
-	return animationStates, nextStates
+func (viewWindow *ViewWindow) LoadModels(models []*pmx.PmxModel) {
+	for i, model := range models {
+		if model == nil {
+			continue
+		}
+
+		if i >= len(viewWindow.renderModels) {
+			viewWindow.renderModels = append(viewWindow.renderModels, nil)
+		}
+		if viewWindow.renderModels[i] != nil && viewWindow.renderModels[i].Hash() != model.Hash() {
+			// 既存モデルがいる場合、削除
+			viewWindow.physics.DeleteModel(i)
+			viewWindow.renderModels[i].Delete()
+			viewWindow.renderModels[i] = nil
+		}
+		if viewWindow.renderModels[i] == nil {
+			viewWindow.renderModels[i] = render.NewRenderModel(viewWindow.windowIndex, model)
+			viewWindow.physics.AddModel(i, model)
+		}
+	}
 }
 
 func (viewWindow *ViewWindow) GetViewerParameter() (

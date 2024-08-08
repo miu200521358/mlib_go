@@ -8,27 +8,26 @@ import (
 	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/interface/app"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 type MotionPlayer struct {
 	walk.WidgetBase
-	controlWindow app.IControlWindow // アプリ状態
-	prevFrame     float32            // 前回フレーム
-	playing       bool               // 再生中かどうか
-	frameEdit     *walk.NumberEdit   // フレーム番号入力欄
-	frameSlider   *walk.Slider       // フレームスライダー
-	playButton    *walk.PushButton   // 一時停止ボタン
-	onTriggerPlay func(playing bool) // 再生トリガー
+	controlWindow state.IControlWindow // コントローラー画面
+	playing       bool                 // 再生中かどうか
+	frameEdit     *walk.NumberEdit     // フレーム番号入力欄
+	frameSlider   *walk.Slider         // フレームスライダー
+	playButton    *walk.PushButton     // 一時停止ボタン
+	onTriggerPlay func(playing bool)   // 再生トリガー
 }
 
 const MotionPlayerClass = "MotionPlayer Class"
 
 func NewMotionPlayer(
 	parent walk.Container,
-	controlWindow app.IControlWindow,
+	controlWindow state.IControlWindow,
 ) *MotionPlayer {
 	player := new(MotionPlayer)
 	player.controlWindow = controlWindow
@@ -100,7 +99,7 @@ func NewMotionPlayer(
 	}
 	player.playButton.SetText(mi18n.T("再生"))
 	player.playButton.Clicked().Attach(func() {
-		player.TriggerPlay(!player.Playing())
+		player.SetPlaying(!player.Playing())
 	})
 
 	// レイアウト
@@ -118,23 +117,15 @@ func (player *MotionPlayer) Dispose() {
 	player.playButton.Dispose()
 }
 
-func (player *MotionPlayer) PrevFrame() float32 {
-	return player.prevFrame
-}
-
-func (player *MotionPlayer) SetPrevFrame(v float32) {
-	player.prevFrame = v
-}
-
 func (player *MotionPlayer) Frame() float32 {
 	return float32(player.frameEdit.Value())
 }
 
-func (player *MotionPlayer) SetFrame(v float32) {
-	if player.playing && v > float32(player.frameEdit.MaxValue()) {
-		v = 0
+func (player *MotionPlayer) SetFrame(frame float32) {
+	if player.playing && frame > float32(player.frameEdit.MaxValue()) {
+		frame = 0
 	}
-	value := mmath.ClampedFloat(float64(v), player.frameEdit.MinValue(), player.frameEdit.MaxValue())
+	value := mmath.ClampedFloat(float64(frame), player.frameEdit.MinValue(), player.frameEdit.MaxValue())
 	player.frameEdit.ChangeValue(value)
 	player.frameSlider.ChangeValue(int(value))
 }
@@ -169,7 +160,7 @@ func (player *MotionPlayer) SetEnabled(enabled bool) {
 	player.frameSlider.SetEnabled(enabled)
 }
 
-func (player *MotionPlayer) SetEnabledOnlyButton(enabled bool) {
+func (player *MotionPlayer) SetEnabledPlayButton(enabled bool) {
 	player.playButton.SetEnabled(enabled)
 }
 
@@ -177,7 +168,7 @@ func (player *MotionPlayer) Playing() bool {
 	return player.playing
 }
 
-func (player *MotionPlayer) TriggerPlay(playing bool) {
+func (player *MotionPlayer) SetPlaying(playing bool) {
 	player.playing = playing
 
 	if playing {
@@ -187,6 +178,8 @@ func (player *MotionPlayer) TriggerPlay(playing bool) {
 		player.playButton.SetText(mi18n.T("再生"))
 		player.SetEnabled(true)
 	}
+
+	player.controlWindow.SetPlaying(playing)
 
 	if player.onTriggerPlay != nil {
 		player.onTriggerPlay(playing)

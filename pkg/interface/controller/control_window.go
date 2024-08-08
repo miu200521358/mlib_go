@@ -20,7 +20,8 @@ import (
 
 type ControlWindow struct {
 	*walk.MainWindow
-	*controlState                                      // 操作状態
+	appState                        state.IAppState    // 操作状態
+	motionPlayer                    state.IPlayer      // モーションプレイヤー
 	TabWidget                       *widget.MTabWidget // タブウィジェット
 	Config                          *mconfig.AppConfig // アプリケーション設定
 	spfLimit                        float64            // FPS制限
@@ -53,17 +54,16 @@ type ControlWindow struct {
 }
 
 func NewControlWindow(
+	appState state.IAppState,
 	appConfig *mconfig.AppConfig,
-	controlState *controlState,
 	helpMenuItemsFunc func() []declarative.MenuItem,
 	viewerCount int,
 ) *ControlWindow {
 	controlWindow := &ControlWindow{
-		controlState: controlState,
-		Config:       appConfig,
-		spfLimit:     1 / 30.0,
+		Config:   appConfig,
+		appState: appState,
+		spfLimit: 1 / 30.0,
 	}
-	controlState.SetControlWindow(controlWindow)
 
 	logMenuItems := []declarative.MenuItem{
 		declarative.Action{
@@ -76,7 +76,7 @@ func NewControlWindow(
 		declarative.Action{
 			Text:        mi18n.T("&デバッグログ表示"),
 			Checkable:   true,
-			OnTriggered: controlWindow.logLevelTriggered,
+			OnTriggered: controlWindow.TriggerLogLevel,
 			AssignTo:    &controlWindow.logLevelDebugAction,
 		},
 	}
@@ -89,14 +89,14 @@ func NewControlWindow(
 			declarative.Action{
 				Text:        mi18n.T("&冗長ログ表示"),
 				Checkable:   true,
-				OnTriggered: controlWindow.logLevelTriggered,
+				OnTriggered: controlWindow.TriggerLogLevel,
 				AssignTo:    &controlWindow.logLevelVerboseAction,
 			})
 		logMenuItems = append(logMenuItems,
 			declarative.Action{
 				Text:        mi18n.T("&IK冗長ログ表示"),
 				Checkable:   true,
-				OnTriggered: controlWindow.logLevelTriggered,
+				OnTriggered: controlWindow.TriggerLogLevel,
 				AssignTo:    &controlWindow.logLevelIkVerboseAction,
 			})
 	}
@@ -387,8 +387,8 @@ func (controlWindow *ControlWindow) SetTabIndex(index int) {
 	controlWindow.TabWidget.SetCurrentIndex(index)
 }
 
-func (controlWindow *ControlWindow) SetPlayer(player app.IPlayer) {
-	controlWindow.controlState.SetPlayer(player)
+func (controlWindow *ControlWindow) SetPlayer(player state.IPlayer) {
+	controlWindow.motionPlayer = player
 }
 
 func (controlWindow *ControlWindow) onChangeLanguage(lang string) {
@@ -399,11 +399,11 @@ func (controlWindow *ControlWindow) onChangeLanguage(lang string) {
 		walk.MsgBoxOKCancel|walk.MsgBoxIconInformation,
 	); result == walk.DlgCmdOK {
 		mi18n.SetLang(lang)
-		controlWindow.controlState.SetClosed(true)
+		controlWindow.SetClosed(true)
 	}
 }
 
-func (controlWindow *ControlWindow) logLevelTriggered() {
+func (controlWindow *ControlWindow) TriggerLogLevel() {
 	mlog.SetLevel(mlog.INFO)
 	if controlWindow.logLevelDebugAction.Checked() {
 		mlog.SetLevel(mlog.DEBUG)
@@ -417,118 +417,111 @@ func (controlWindow *ControlWindow) logLevelTriggered() {
 }
 
 func (controlWindow *ControlWindow) TriggerEnabledFrameDrop() {
-	controlWindow.controlState.SetEnabledFrameDrop(controlWindow.enabledFrameDropAction.Checked())
+	controlWindow.appState.SetEnabledFrameDropChannel(controlWindow.enabledFrameDropAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerEnabledPhysics() {
-	controlWindow.controlState.SetEnabledPhysics(controlWindow.enabledPhysicsAction.Checked())
+	controlWindow.appState.SetEnabledPhysicsChannel(controlWindow.enabledPhysicsAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerPhysicsReset() {
-	controlWindow.controlState.SetPhysicsReset(true)
+	controlWindow.appState.SetPhysicsResetChannel(true)
 }
 
 func (controlWindow *ControlWindow) TriggerShowNormal() {
-	controlWindow.controlState.SetShowNormal(controlWindow.showNormalAction.Checked())
+	controlWindow.appState.SetShowNormalChannel(controlWindow.showNormalAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowWire() {
-	controlWindow.controlState.SetShowWire(controlWindow.showWireAction.Checked())
+	controlWindow.appState.SetShowWireChannel(controlWindow.showWireAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowOverride() {
-	controlWindow.controlState.SetShowOverride(controlWindow.showOverrideAction.Checked())
+	controlWindow.appState.SetShowOverrideChannel(controlWindow.showOverrideAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerCameraSync() {
-	controlWindow.controlState.SetCameraSync(controlWindow.cameraSyncAction.Checked())
+	controlWindow.appState.SetCameraSyncChannel(controlWindow.cameraSyncAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowSelectedVertex() {
-	controlWindow.controlState.SetShowSelectedVertex(controlWindow.showSelectedVertexAction.Checked())
+	controlWindow.appState.SetShowSelectedVertexChannel(controlWindow.showSelectedVertexAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneAll() {
 	if controlWindow.showBoneAllAction.Checked() {
-		controlWindow.showBoneIkAction.SetChecked(false)
-		controlWindow.showBoneEffectorAction.SetChecked(false)
-		controlWindow.showBoneFixedAction.SetChecked(false)
-		controlWindow.showBoneRotateAction.SetChecked(false)
-		controlWindow.showBoneTranslateAction.SetChecked(false)
-		controlWindow.showBoneVisibleAction.SetChecked(false)
-
-		controlWindow.controlState.SetShowBoneIk(false)
-		controlWindow.controlState.SetShowBoneEffector(false)
-		controlWindow.controlState.SetShowBoneFixed(false)
-		controlWindow.controlState.SetShowBoneRotate(false)
-		controlWindow.controlState.SetShowBoneTranslate(false)
-		controlWindow.controlState.SetShowBoneVisible(false)
+		controlWindow.SetShowBoneIk(false)
+		controlWindow.SetShowBoneEffector(false)
+		controlWindow.SetShowBoneFixed(false)
+		controlWindow.SetShowBoneRotate(false)
+		controlWindow.SetShowBoneTranslate(false)
+		controlWindow.SetShowBoneVisible(false)
 	}
-	controlWindow.controlState.SetShowBoneAll(controlWindow.showBoneAllAction.Checked())
+	controlWindow.appState.SetShowBoneAllChannel(controlWindow.showBoneAllAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneIk() {
 	if controlWindow.showBoneIkAction.Checked() {
 		controlWindow.showBoneAllAction.SetChecked(false)
-		controlWindow.controlState.SetShowBoneAll(false)
+		controlWindow.SetShowBoneAll(false)
 	}
-	controlWindow.controlState.SetShowBoneIk(controlWindow.showBoneIkAction.Checked())
+	controlWindow.appState.SetShowBoneIkChannel(controlWindow.showBoneIkAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneEffector() {
 	if controlWindow.showBoneEffectorAction.Checked() {
 		controlWindow.showBoneAllAction.SetChecked(false)
-		controlWindow.controlState.SetShowBoneAll(false)
+		controlWindow.SetShowBoneAll(false)
 	}
-	controlWindow.controlState.SetShowBoneEffector(controlWindow.showBoneEffectorAction.Checked())
+	controlWindow.appState.SetShowBoneEffectorChannel(controlWindow.showBoneEffectorAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneFixed() {
 	if controlWindow.showBoneFixedAction.Checked() {
 		controlWindow.showBoneAllAction.SetChecked(false)
-		controlWindow.controlState.SetShowBoneAll(false)
+		controlWindow.SetShowBoneAll(false)
 	}
-	controlWindow.controlState.SetShowBoneFixed(controlWindow.showBoneFixedAction.Checked())
+	controlWindow.appState.SetShowBoneFixedChannel(controlWindow.showBoneFixedAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneRotate() {
 	if controlWindow.showBoneRotateAction.Checked() {
 		controlWindow.showBoneAllAction.SetChecked(false)
-		controlWindow.controlState.SetShowBoneAll(false)
+		controlWindow.SetShowBoneAll(false)
 	}
-	controlWindow.controlState.SetShowBoneRotate(controlWindow.showBoneRotateAction.Checked())
+	controlWindow.appState.SetShowBoneRotateChannel(controlWindow.showBoneRotateAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneTranslate() {
 	if controlWindow.showBoneTranslateAction.Checked() {
 		controlWindow.showBoneAllAction.SetChecked(false)
-		controlWindow.controlState.SetShowBoneAll(false)
+		controlWindow.SetShowBoneAll(false)
 	}
-	controlWindow.controlState.SetShowBoneTranslate(controlWindow.showBoneTranslateAction.Checked())
+	controlWindow.appState.SetShowBoneTranslateChannel(controlWindow.showBoneTranslateAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowBoneVisible() {
 	if controlWindow.showBoneVisibleAction.Checked() {
 		controlWindow.showBoneAllAction.SetChecked(false)
-		controlWindow.controlState.SetShowBoneAll(false)
+		controlWindow.SetShowBoneAll(false)
 	}
-	controlWindow.controlState.SetShowBoneVisible(controlWindow.showBoneVisibleAction.Checked())
+	controlWindow.appState.SetShowBoneVisibleChannel(controlWindow.showBoneVisibleAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowRigidBodyFront() {
-	controlWindow.controlState.SetShowRigidBodyFront(controlWindow.showRigidBodyFrontAction.Checked())
+	controlWindow.appState.SetShowRigidBodyFrontChannel(controlWindow.showRigidBodyFrontAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowRigidBodyBack() {
-	controlWindow.controlState.SetShowRigidBodyBack(controlWindow.showRigidBodyBackAction.Checked())
+	controlWindow.appState.SetShowRigidBodyBackChannel(controlWindow.showRigidBodyBackAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowJoint() {
-	controlWindow.controlState.SetShowJoint(controlWindow.showJointAction.Checked())
+	controlWindow.appState.SetShowJointChannel(controlWindow.showJointAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerShowInfo() {
-	controlWindow.controlState.SetShowInfo(controlWindow.showInfoAction.Checked())
+	controlWindow.appState.SetShowInfoChannel(controlWindow.showInfoAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerFps30Limit() {
@@ -536,7 +529,7 @@ func (controlWindow *ControlWindow) TriggerFps30Limit() {
 	controlWindow.limitFps60Action.SetChecked(false)
 	controlWindow.limitFpsUnLimitAction.SetChecked(false)
 	controlWindow.SetSpfLimit(1 / 30.0)
-	controlWindow.controlState.SetSpfLimit(controlWindow.SpfLimit())
+	controlWindow.appState.SetSpfLimitChannel(controlWindow.SpfLimit())
 }
 
 func (controlWindow *ControlWindow) TriggerFps60Limit() {
@@ -544,7 +537,7 @@ func (controlWindow *ControlWindow) TriggerFps60Limit() {
 	controlWindow.limitFps60Action.SetChecked(true)
 	controlWindow.limitFpsUnLimitAction.SetChecked(false)
 	controlWindow.SetSpfLimit(1 / 60.0)
-	controlWindow.controlState.SetSpfLimit(controlWindow.SpfLimit())
+	controlWindow.appState.SetSpfLimitChannel(controlWindow.SpfLimit())
 }
 
 func (controlWindow *ControlWindow) TriggerUnLimitFps() {
@@ -552,38 +545,15 @@ func (controlWindow *ControlWindow) TriggerUnLimitFps() {
 	controlWindow.limitFps60Action.SetChecked(false)
 	controlWindow.limitFpsUnLimitAction.SetChecked(true)
 	controlWindow.SetSpfLimit(-1.0)
-	controlWindow.controlState.SetSpfLimit(controlWindow.SpfLimit())
-}
-
-func (controlWindow *ControlWindow) Frame() float32 {
-	return controlWindow.controlState.motionPlayer.Frame()
+	controlWindow.appState.SetSpfLimitChannel(controlWindow.SpfLimit())
 }
 
 func (controlWindow *ControlWindow) SetFrame(frame float32) {
-	controlWindow.controlState.SetFrame(frame)
+	controlWindow.motionPlayer.SetFrame(frame)
 }
 
-func (controlWindow *ControlWindow) AddFrame(v float32) {
-	f := controlWindow.Frame() + v
-	controlWindow.controlState.SetFrame(f)
-}
-
-func (controlWindow *ControlWindow) MaxFrame() float32 {
-	return controlWindow.controlState.motionPlayer.MaxFrame()
-}
-
-func (controlWindow *ControlWindow) UpdateMaxFrame(maxFrame float32) {
-	if controlWindow.MaxFrame() < maxFrame {
-		controlWindow.controlState.SetMaxFrame(maxFrame)
-	}
-}
-
-func (controlWindow *ControlWindow) SetMaxFrame(maxFrame float32) {
-	controlWindow.controlState.SetMaxFrame(maxFrame)
-}
-
-func (controlWindow *ControlWindow) SetAnimationState(state state.IAnimationState) {
-	controlWindow.controlState.SetAnimationState(state)
+func (controlWindow *ControlWindow) UpdateMaxFrame(frame float32) {
+	controlWindow.motionPlayer.UpdateMaxFrame(frame)
 }
 
 func (controlWindow *ControlWindow) IsEnabledFrameDrop() bool {
@@ -638,6 +608,15 @@ func (controlWindow *ControlWindow) IsShowOverride() bool {
 func (controlWindow *ControlWindow) SetShowOverride(show bool) {
 	controlWindow.showOverrideAction.SetChecked(show)
 	controlWindow.TriggerShowOverride()
+}
+
+func (controlWindow *ControlWindow) IsCameraSync() bool {
+	return controlWindow.cameraSyncAction.Checked()
+}
+
+func (controlWindow *ControlWindow) SetCameraSync(sync bool) {
+	controlWindow.cameraSyncAction.SetChecked(sync)
+	controlWindow.TriggerCameraSync()
 }
 
 func (controlWindow *ControlWindow) IsShowSelectedVertex() bool {
@@ -790,17 +769,15 @@ func (controlWindow *ControlWindow) IsClosed() bool {
 }
 
 func (controlWindow *ControlWindow) SetClosed(closed bool) {
-	controlWindow.controlState.SetClosed(closed)
+	controlWindow.appState.SetClosed(closed)
 }
 
 func (controlWindow *ControlWindow) Playing() bool {
-	return controlWindow.controlState.motionPlayer != nil && controlWindow.controlState.motionPlayer.Playing()
+	return controlWindow.appState.Playing()
 }
 
-func (controlWindow *ControlWindow) TriggerPlay(p bool) {
-	if controlWindow.controlState.motionPlayer != nil {
-		controlWindow.controlState.motionPlayer.TriggerPlay(p)
-	}
+func (controlWindow *ControlWindow) SetPlaying(p bool) {
+	controlWindow.appState.SetPlayingChannel(p)
 }
 
 func (controlWindow *ControlWindow) SpfLimit() float64 {
@@ -808,7 +785,7 @@ func (controlWindow *ControlWindow) SpfLimit() float64 {
 }
 
 func (controlWindow *ControlWindow) SetSpfLimit(spf float64) {
-	controlWindow.spfLimit = spf
+	controlWindow.appState.SetSpfLimitChannel(spf)
 }
 
 func (controlWindow *ControlWindow) SetEnabled(enabled bool) {
@@ -818,10 +795,10 @@ func (controlWindow *ControlWindow) SetEnabled(enabled bool) {
 				controlWindow.TabWidget.Pages().At(i).Children().At(j).SetEnabled(enabled)
 			}
 		}
-		// controlWindow.tabWidget.SetEnabled(enabled)
+		controlWindow.TabWidget.SetEnabled(enabled)
 	}
-	if controlWindow.controlState.motionPlayer != nil {
-		controlWindow.controlState.motionPlayer.SetEnabled(enabled)
+	if controlWindow.motionPlayer != nil {
+		controlWindow.motionPlayer.SetEnabled(enabled)
 	}
 }
 
@@ -845,4 +822,8 @@ func (controlWindow *ControlWindow) UpdateSelectedVertexIndexes(indexes [][][]in
 	if controlWindow.funcUpdateSelectedVertexIndexes != nil {
 		controlWindow.funcUpdateSelectedVertexIndexes(indexes)
 	}
+}
+
+func (controlWindow *ControlWindow) AppState() state.IAppState {
+	return controlWindow.appState
 }

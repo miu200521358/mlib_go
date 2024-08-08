@@ -19,39 +19,44 @@ import (
 )
 
 type RenderModel struct {
-	model             *pmx.PmxModel // 元モデル
-	hash              string        // ハッシュ
-	meshes            []*Mesh       // メッシュ
-	textures          []*textureGl  // テクスチャ
-	toonTextures      []*textureGl  // トゥーンテクスチャ
-	vertices          []float32     // 頂点情報
-	vao               *mgl.VAO      // 頂点VAO
-	vbo               *mgl.VBO      // 頂点VBO
-	normalVertices    []float32     // 法線情報
-	normalVao         *mgl.VAO      // 法線VAO
-	normalVbo         *mgl.VBO      // 法線VBO
-	normalIbo         *mgl.IBO      // 法線IBO
-	selectedVertexVao *mgl.VAO      // 選択頂点VAO
-	selectedVertexVbo *mgl.VBO      // 選択頂点VBO
-	selectedVertexIbo *mgl.IBO      // 選択頂点IBO
-	boneLineCount     int           // ボーン情報
-	boneLineVao       *mgl.VAO      // ボーンVAO
-	boneLineVbo       *mgl.VBO      // ボーンVBO
-	boneLineIbo       *mgl.IBO      // ボーンIBO
-	boneLineIndexes   []int         // ボーンインデックス
-	bonePointCount    int           // ボーン情報
-	bonePointVao      *mgl.VAO      // ボーンVAO
-	bonePointVbo      *mgl.VBO      // ボーンVBO
-	bonePointIbo      *mgl.IBO      // ボーンIBO
-	bonePointIndexes  []int         // ボーンインデックス
-	cursorPositionVao *mgl.VAO      // カーソルラインVAO
-	cursorPositionVbo *mgl.VBO      // カーソルラインVBO
-	ssbo              uint32        // SSBO
-	vertexCount       int           // 頂点数
+	windowIndex              int              // ウィンドウインデックス
+	invisibleMaterialIndexes map[int]struct{} // 非表示材質インデックス
+	selectedVertexIndexes    map[int]struct{} // 選択頂点インデックス
+	noSelectedVertexIndexes  map[int]struct{} // 非選択頂点インデックス
+	model                    *pmx.PmxModel    // 元モデル
+	hash                     string           // ハッシュ
+	meshes                   []*Mesh          // メッシュ
+	textures                 []*textureGl     // テクスチャ
+	toonTextures             []*textureGl     // トゥーンテクスチャ
+	vertices                 []float32        // 頂点情報
+	vao                      *mgl.VAO         // 頂点VAO
+	vbo                      *mgl.VBO         // 頂点VBO
+	normalVertices           []float32        // 法線情報
+	normalVao                *mgl.VAO         // 法線VAO
+	normalVbo                *mgl.VBO         // 法線VBO
+	normalIbo                *mgl.IBO         // 法線IBO
+	selectedVertexVao        *mgl.VAO         // 選択頂点VAO
+	selectedVertexVbo        *mgl.VBO         // 選択頂点VBO
+	selectedVertexIbo        *mgl.IBO         // 選択頂点IBO
+	boneLineCount            int              // ボーン情報
+	boneLineVao              *mgl.VAO         // ボーンVAO
+	boneLineVbo              *mgl.VBO         // ボーンVBO
+	boneLineIbo              *mgl.IBO         // ボーンIBO
+	boneLineIndexes          []int            // ボーンインデックス
+	bonePointCount           int              // ボーン情報
+	bonePointVao             *mgl.VAO         // ボーンVAO
+	bonePointVbo             *mgl.VBO         // ボーンVBO
+	bonePointIbo             *mgl.IBO         // ボーンIBO
+	bonePointIndexes         []int            // ボーンインデックス
+	cursorPositionVao        *mgl.VAO         // カーソルラインVAO
+	cursorPositionVbo        *mgl.VBO         // カーソルラインVBO
+	ssbo                     uint32           // SSBO
+	vertexCount              int              // 頂点数
 }
 
 func NewRenderModel(windowIndex int, model *pmx.PmxModel) *RenderModel {
 	m := &RenderModel{
+		windowIndex: windowIndex,
 		model:       model,
 		vertexCount: model.Vertices.Len(),
 	}
@@ -62,6 +67,10 @@ func NewRenderModel(windowIndex int, model *pmx.PmxModel) *RenderModel {
 	m.hash = model.Hash()
 
 	return m
+}
+
+func (renderModel *RenderModel) Model() *pmx.PmxModel {
+	return renderModel.model
 }
 
 func (renderModel *RenderModel) Hash() string {
@@ -305,19 +314,17 @@ func (renderModel *RenderModel) initializeBuffer(
 }
 
 func (renderModel *RenderModel) Render(
-	shader mgl.IShader, appState state.IAppState, animationState state.IAnimationState,
+	shader mgl.IShader, appState state.IAppState, vmdDeltas *delta.VmdDeltas,
 	leftCursorPositions, leftCursorRemovePositions, leftCursorWorldHistoryPositions,
 	leftCursorRemoveWorldHistoryPositions []*mgl32.Vec3,
 ) {
-	deltas := animationState.VmdDeltas()
-
 	renderModel.vao.Bind()
 	defer renderModel.vao.Unbind()
 
-	renderModel.vbo.BindVertex(animationState.VmdDeltas().Morphs.Vertices)
+	renderModel.vbo.BindVertex(vmdDeltas.Morphs.Vertices)
 	defer renderModel.vbo.Unbind()
 
-	paddedMatrixes, matrixWidth, matrixHeight, err := createBoneMatrixes(deltas.Bones)
+	paddedMatrixes, matrixWidth, matrixHeight, err := createBoneMatrixes(vmdDeltas.Bones)
 	if err != nil {
 		return
 	}
@@ -325,30 +332,30 @@ func (renderModel *RenderModel) Render(
 	for i, mesh := range renderModel.meshes {
 		mesh.ibo.Bind()
 
-		md := delta.NewMeshDelta(animationState.VmdDeltas().Morphs.Materials.Get(i))
-		mesh.drawModel(animationState.WindowIndex(), shader, paddedMatrixes, matrixWidth, matrixHeight, md)
+		md := delta.NewMeshDelta(vmdDeltas.Morphs.Materials.Get(i))
+		mesh.drawModel(renderModel.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight, md)
 
 		if mesh.material.DrawFlag.IsDrawingEdge() {
 			// エッジ描画
-			mesh.drawEdge(animationState.WindowIndex(), shader, paddedMatrixes, matrixWidth, matrixHeight, md)
+			mesh.drawEdge(renderModel.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight, md)
 		}
 
-		if appState.IsShowWire() && !animationState.ExistInvisibleMaterialIndex(mesh.material.Index()) {
-			mesh.drawWire(animationState.WindowIndex(), shader, paddedMatrixes, matrixWidth, matrixHeight, false)
+		if appState.IsShowWire() && !renderModel.ExistInvisibleMaterialIndex(mesh.material.Index()) {
+			mesh.drawWire(renderModel.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight, false)
 		}
 
 		mesh.ibo.Unbind()
 	}
 
 	if appState.IsShowNormal() {
-		renderModel.drawNormal(animationState.WindowIndex(), shader, paddedMatrixes, matrixWidth, matrixHeight)
+		renderModel.drawNormal(renderModel.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
 	if appState.IsShowBoneAll() || appState.IsShowBoneEffector() || appState.IsShowBoneIk() ||
 		appState.IsShowBoneFixed() || appState.IsShowBoneRotate() ||
 		appState.IsShowBoneTranslate() || appState.IsShowBoneVisible() {
-		renderModel.drawBone(animationState.WindowIndex(),
-			shader, animationState.Model().Bones, appState,
+		renderModel.drawBone(renderModel.windowIndex,
+			shader, renderModel.model.Bones, appState,
 			paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
@@ -387,13 +394,13 @@ func (renderModel *RenderModel) Render(
 		}
 
 		selectedVertexIndexes := renderModel.drawSelectedVertex(
-			animationState.WindowIndex(), animationState.InvisibleMaterialIndexes(),
-			animationState.SelectedVertexIndexes(), animationState.NoSelectedVertexIndexes(),
+			renderModel.windowIndex, renderModel.InvisibleMaterialIndexes(),
+			renderModel.SelectedVertexIndexes(), renderModel.NoSelectedVertexIndexes(),
 			shader, paddedMatrixes, matrixWidth, matrixHeight, cursorPositions, removeCursorPositions)
 		if len(removeCursorPositions) > 0 {
-			animationState.UpdateNoSelectedVertexIndexes(selectedVertexIndexes)
+			renderModel.UpdateNoSelectedVertexIndexes(selectedVertexIndexes)
 		} else if len(leftCursorPositions) > 0 {
-			animationState.UpdateSelectedVertexIndexes(selectedVertexIndexes)
+			renderModel.UpdateSelectedVertexIndexes(selectedVertexIndexes)
 		}
 
 		// カーソルの軌跡
@@ -694,4 +701,83 @@ func (renderModel *RenderModel) fetchBonePointDeltas(
 	}
 
 	return indexes, deltas
+}
+
+func (renderModel *RenderModel) InvisibleMaterialIndexes() []int {
+	if renderModel.invisibleMaterialIndexes == nil {
+		return nil
+	}
+
+	indexes := make([]int, 0, len(renderModel.invisibleMaterialIndexes))
+	for i := range renderModel.invisibleMaterialIndexes {
+		indexes = append(indexes, i)
+	}
+	return indexes
+}
+
+func (renderModel *RenderModel) SetInvisibleMaterialIndexes(indexes []int) {
+	if len(indexes) == 0 {
+		renderModel.invisibleMaterialIndexes = nil
+		return
+	}
+	renderModel.invisibleMaterialIndexes = make(map[int]struct{}, len(indexes))
+	for _, i := range indexes {
+		renderModel.invisibleMaterialIndexes[i] = struct{}{}
+	}
+}
+
+func (renderModel *RenderModel) ExistInvisibleMaterialIndex(index int) bool {
+	_, ok := renderModel.invisibleMaterialIndexes[index]
+	return ok
+}
+
+func (renderModel *RenderModel) SelectedVertexIndexes() []int {
+	indexes := make([]int, 0, len(renderModel.selectedVertexIndexes))
+	for i := range renderModel.selectedVertexIndexes {
+		indexes = append(indexes, i)
+	}
+	return indexes
+}
+
+func (renderModel *RenderModel) NoSelectedVertexIndexes() []int {
+	indexes := make([]int, 0, len(renderModel.noSelectedVertexIndexes))
+	for i := range renderModel.noSelectedVertexIndexes {
+		indexes = append(indexes, i)
+	}
+	return indexes
+}
+
+func (renderModel *RenderModel) SetSelectedVertexIndexes(indexes []int) {
+	renderModel.selectedVertexIndexes = make(map[int]struct{}, len(indexes))
+	for _, i := range indexes {
+		renderModel.selectedVertexIndexes[i] = struct{}{}
+	}
+}
+
+func (renderModel *RenderModel) SetNoSelectedVertexIndexes(indexes []int) {
+	renderModel.noSelectedVertexIndexes = make(map[int]struct{}, len(indexes))
+	for _, i := range indexes {
+		renderModel.noSelectedVertexIndexes[i] = struct{}{}
+	}
+}
+
+func (renderModel *RenderModel) ClearSelectedVertexIndexes() {
+	renderModel.UpdateNoSelectedVertexIndexes(renderModel.SelectedVertexIndexes())
+	renderModel.selectedVertexIndexes = make(map[int]struct{})
+}
+
+func (renderModel *RenderModel) UpdateSelectedVertexIndexes(indexes []int) {
+	for _, index := range indexes {
+		renderModel.selectedVertexIndexes[index] = struct{}{}
+	}
+}
+
+func (renderModel *RenderModel) UpdateNoSelectedVertexIndexes(indexes []int) {
+	if renderModel.noSelectedVertexIndexes == nil {
+		renderModel.noSelectedVertexIndexes = make(map[int]struct{}, len(indexes))
+	}
+	for _, index := range indexes {
+		renderModel.noSelectedVertexIndexes[index] = struct{}{}
+		delete(renderModel.selectedVertexIndexes, index)
+	}
 }

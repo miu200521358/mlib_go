@@ -1,8 +1,6 @@
 package deform
 
 import (
-	"sync"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/miter"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
@@ -11,7 +9,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 )
 
-func DeformBeforePhysics(
+func deformBeforePhysics(
 	appState state.IAppState, model *pmx.PmxModel, motion *vmd.VmdMotion,
 ) *delta.VmdDeltas {
 	frame := int(appState.Frame())
@@ -23,7 +21,7 @@ func DeformBeforePhysics(
 	return vmdDeltas
 }
 
-func DeformPhysics(appState state.IAppState, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas, physics mbt.IPhysics) {
+func deformPhysics(appState state.IAppState, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas, physics mbt.IPhysics) {
 	// 物理剛体位置を更新
 	processFunc := func(i int) {
 		rigidBody := model.RigidBodies.Get(i)
@@ -50,7 +48,7 @@ func DeformPhysics(appState state.IAppState, model *pmx.PmxModel, vmdDeltas *del
 	miter.IterParallelByCount(model.RigidBodies.Len(), 100, processFunc)
 }
 
-func DeformAfterPhysics(
+func deformAfterPhysics(
 	appState state.IAppState, model *pmx.PmxModel, motion *vmd.VmdMotion,
 	vmdDeltas *delta.VmdDeltas, physics mbt.IPhysics,
 ) *delta.VmdDeltas {
@@ -78,25 +76,27 @@ func DeformAfterPhysics(
 }
 
 func Deform(
-	physics mbt.IPhysics, animationStates []state.IAnimationState, appState state.IAppState, timeStep float32,
-) {
-	// 物理デフォーム
-	{
-		var wg sync.WaitGroup
+	physics mbt.IPhysics, appState state.IAppState, timeStep float32,
+	models []*pmx.PmxModel, motions []*vmd.VmdMotion,
+) []*delta.VmdDeltas {
 
-		for i := range animationStates {
-			if animationStates[i] == nil || animationStates[i].Model() == nil {
-				continue
-			}
+	// 物理後デフォーム
+	vmdDeltas := make([]*delta.VmdDeltas, len(models))
 
-			wg.Add(1)
-			go func(ii int) {
-				defer wg.Done()
-				DeformPhysics(appState, animationStates[ii].Model(), animationStates[ii].VmdDeltas(), physics)
-			}(i)
+	// 物理前デフォーム
+	for i := range models {
+		if models[i] == nil || motions[i] == nil {
+			continue
 		}
+		vmdDeltas[i] = deformBeforePhysics(appState, models[i], motions[i])
+	}
 
-		wg.Wait()
+	// 物理デフォーム
+	for i := range models {
+		if models[i] == nil || vmdDeltas[i] == nil {
+			continue
+		}
+		deformPhysics(appState, models[i], vmdDeltas[i], physics)
 	}
 
 	if appState.IsPhysicsReset() {
@@ -108,24 +108,12 @@ func Deform(
 		physics.StepSimulation(timeStep)
 	}
 
-	// 物理後デフォーム
-	{
-		var wg sync.WaitGroup
-
-		for i := range animationStates {
-			if animationStates[i] == nil || animationStates[i].Model() == nil {
-				continue
-			}
-
-			wg.Add(1)
-			go func(ii int) {
-				defer wg.Done()
-				animationStates[ii].SetVmdDeltas(
-					DeformAfterPhysics(appState, animationStates[ii].Model(), animationStates[ii].Motion(),
-						animationStates[ii].VmdDeltas(), physics))
-			}(i)
+	for i := range models {
+		if models[i] == nil || motions[i] == nil || vmdDeltas[i] == nil {
+			continue
 		}
-
-		wg.Wait()
+		vmdDeltas[i] = deformAfterPhysics(appState, models[i], motions[i], vmdDeltas[i], physics)
 	}
+
+	return vmdDeltas
 }

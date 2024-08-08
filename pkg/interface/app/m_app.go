@@ -12,7 +12,9 @@ import (
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
@@ -22,14 +24,15 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-const physicsDefaultSpf = 1.0 / 60.0
+const physics_default_spf = 1.0 / 60.0
+const deform_default_spf = 1.0 / 30.0
+const deform_default_fps = 30.0
 
 type MApp struct {
-	*appState                                    // アプリ状態
-	appConfig                 *mconfig.AppConfig // アプリケーション設定
-	viewWindows               []IViewWindow      // 描画ウィンドウリスト
-	controlWindow             IControlWindow     // 操作ウィンドウ
-	selectedVertexIndexesChan chan [][][]int     // 選択頂点インデックス
+	*appState                          // アプリ状態
+	appConfig     *mconfig.AppConfig   // アプリケーション設定
+	viewWindows   []state.IViewWindow  // 描画ウィンドウリスト
+	controlWindow state.IControlWindow // 操作ウィンドウ
 }
 
 func NewMApp(appConfig *mconfig.AppConfig) *MApp {
@@ -40,83 +43,145 @@ func NewMApp(appConfig *mconfig.AppConfig) *MApp {
 	}
 
 	app := &MApp{
-		appState:                  newAppState(),
-		appConfig:                 appConfig,
-		viewWindows:               make([]IViewWindow, 0),
-		selectedVertexIndexesChan: make(chan [][][]int, 1),
+		appState:    newAppState(),
+		appConfig:   appConfig,
+		viewWindows: make([]state.IViewWindow, 0),
 	}
 
 	return app
 }
 
-func (app *MApp) ControllerRun() {
+func (app *MApp) RunController() {
 	// 操作ウィンドウは別スレッドで起動している前提
 	if app.appConfig.IsEnvProd() || app.appConfig.IsEnvDev() {
 		defer app.recoverFromPanic()
 	}
-	app.controlWindow.SetEnabled(true)
 	app.controlWindow.Run()
 }
 
-func (app *MApp) ViewerRun() {
-	// 描画ウィンドウはメインスレッドで起動して描画し続ける
-	app.appState.SetPrevFrame(0)
-	app.appState.SetFrame(0)
-	prevTime := glfw.GetTime()
-	prevShowTime := glfw.GetTime()
-	elapsedList := make([]float64, 0)
-
+func (app *MApp) RunChannel() {
 	go func() {
 		for !app.IsClosed() {
 			select {
-			case selectedVertexIndexes := <-app.selectedVertexIndexesChan:
+			case frame := <-app.appState.frameChannel:
+				app.appState.SetFrame(frame)
+				app.controlWindow.SetFrame(frame)
+			case maxFrame := <-app.appState.maxFrameChannel:
+				app.appState.UpdateMaxFrame(maxFrame)
+			case enabledFrameDrop := <-app.appState.isEnabledFrameDropChannel:
+				app.appState.SetEnabledFrameDrop(enabledFrameDrop)
+			case enabledPhysics := <-app.appState.isEnabledPhysicsChannel:
+				app.appState.SetEnabledPhysics(enabledPhysics)
+			case resetPhysics := <-app.appState.physicsResetChannel:
+				app.appState.SetPhysicsReset(resetPhysics)
+			case showNormal := <-app.appState.isShowNormalChannel:
+				app.appState.SetShowNormal(showNormal)
+			case showWire := <-app.appState.isShowWireChannel:
+				app.appState.SetShowWire(showWire)
+			case showOverride := <-app.appState.isShowOverrideChannel:
+				app.appState.SetShowOverride(showOverride)
+			case showSelectedVertex := <-app.appState.isShowSelectedVertexChannel:
+				app.appState.SetShowSelectedVertex(showSelectedVertex)
+			case showBoneAll := <-app.appState.isShowBoneAllChannel:
+				app.appState.SetShowBoneAll(showBoneAll)
+			case showBoneIk := <-app.appState.isShowBoneIkChannel:
+				app.appState.SetShowBoneIk(showBoneIk)
+			case showBoneEffector := <-app.appState.isShowBoneEffectorChannel:
+				app.appState.SetShowBoneEffector(showBoneEffector)
+			case showBoneFixed := <-app.appState.isShowBoneFixedChannel:
+				app.appState.SetShowBoneFixed(showBoneFixed)
+			case showBoneRotate := <-app.appState.isShowBoneRotateChannel:
+				app.appState.SetShowBoneRotate(showBoneRotate)
+			case showBoneTranslate := <-app.appState.isShowBoneTranslateChannel:
+				app.appState.SetShowBoneTranslate(showBoneTranslate)
+			case showBoneVisible := <-app.appState.isShowBoneVisibleChannel:
+				app.appState.SetShowBoneVisible(showBoneVisible)
+			case showRigidBodyFront := <-app.appState.isShowRigidBodyFrontChannel:
+				app.appState.SetShowRigidBodyFront(showRigidBodyFront)
+			case showRigidBodyBack := <-app.appState.isShowRigidBodyBackChannel:
+				app.appState.SetShowRigidBodyBack(showRigidBodyBack)
+			case showJoint := <-app.appState.isShowJointChannel:
+				app.appState.SetShowJoint(showJoint)
+			case showInfo := <-app.appState.isShowInfoChannel:
+				app.appState.SetShowInfo(showInfo)
+			case spfLimit := <-app.appState.spfLimitChanel:
+				app.appState.SetSpfLimit(spfLimit)
+			case cameraSync := <-app.appState.isCameraSyncChannel:
+				app.appState.SetCameraSync(cameraSync)
+			case closed := <-app.appState.isClosedChannel:
+				app.appState.SetClosed(closed)
+			case playing := <-app.appState.playingChannel:
+				app.appState.SetPlaying(playing)
+			case spfLimit := <-app.appState.spfLimitChanel:
+				app.appState.SetSpfLimit(spfLimit)
+			case selectedVertexIndexes := <-app.appState.selectedVertexIndexesChannel:
 				app.controlWindow.UpdateSelectedVertexIndexes(selectedVertexIndexes)
 			default:
 				continue
 			}
 		}
 	}()
+}
+
+func (app *MApp) RunViewer() {
+	// 描画ウィンドウはメインスレッドで起動して描画し続ける
+	app.appState.SetFrame(0)
+	prevTime := glfw.GetTime()
+	prevShowTime := glfw.GetTime()
+	elapsedList := make([]float64, 0)
 
 	for !app.IsClosed() {
-		frameTime := glfw.GetTime()
-		elapsed := frameTime - prevTime
 
-		if elapsed < app.appState.SpfLimit() {
+		frameTime := glfw.GetTime()
+		originalElapsed := frameTime - prevTime
+
+		var elapsed float64
+		var timeStep float32
+		if !app.IsEnabledFrameDrop() {
+			// フレームドロップOFF
+			// 物理fpsは60fps固定
+			timeStep = physics_default_spf
+			// デフォームfpsは30fps上限の経過時間
+			elapsed = mmath.ClampedFloat(originalElapsed, 0.0, deform_default_spf)
+		} else {
+			// 物理fpsは経過時間
+			timeStep = float32(originalElapsed)
+			elapsed = originalElapsed
+		}
+
+		if elapsed < app.SpfLimit() {
 			// 1フレームの時間が経過していない場合はスキップ
 			// fps制限は描画fpsにのみ依存
 			continue
 		}
 
-		var timeStep float32
-		if !app.appState.IsEnabledFrameDrop() {
-			// フレームドロップOFF
-			// 物理fpsは60fps固定
-			timeStep = physicsDefaultSpf
-		} else {
-			// 物理fpsは経過時間
-			timeStep = float32(elapsed)
+		// デフォーム
+		vmdDeltas := make([][]*delta.VmdDeltas, len(app.viewWindows))
+		models := app.appState.GetModels()
+		motions := app.appState.GetMotions()
+
+		for i, w := range app.viewWindows {
+			w.LoadModels(models[i])
 		}
 
-		// if app.IsEnabledPhysics() && app.IsPhysicsReset() {
+		for i, w := range app.viewWindows {
+			vmdDeltas[i] = deform.Deform(w.Physics(), app.appState, timeStep, models[i], motions[i])
+		}
 
-		// 	// リセットフラグOFF
+		// if app.IsPhysicsReset() {
+		// 	for i, w := range app.viewWindows {
+		// 		// 一旦アニメーション
+		// 		app.animationStates[i], app.nextAnimationStates[i] =
+		// 			w.Animate(app.animationStates[i], app.nextAnimationStates[i], timeStep)
+		// 	}
+
+		// 	for i, w := range app.viewWindows {
+		// 		w.ResetPhysics(app.animationStates[i])
+		// 	}
+
+		// 	// リセットが終わったらフラグを落とす
 		// 	app.SetPhysicsReset(false)
 		// }
-
-		if app.IsPhysicsReset() {
-			for i, w := range app.viewWindows {
-				// 一旦アニメーション
-				app.animationStates[i], app.nextAnimationStates[i] =
-					w.Animate(app.animationStates[i], app.nextAnimationStates[i], timeStep)
-			}
-
-			for i, w := range app.viewWindows {
-				w.ResetPhysics(app.animationStates[i])
-			}
-
-			// リセットが終わったらフラグを落とす
-			app.SetPhysicsReset(false)
-		}
 
 		// カメラ同期(重複描画の場合はそっちで同期させる)
 		if app.IsCameraSync() && !app.IsShowOverride() {
@@ -141,36 +206,35 @@ func (app *MApp) ViewerRun() {
 		for i := app.ViewerCount() - 1; i >= 0; i-- {
 			// サブビューワーオーバーレイのため、逆順でレンダリング
 			w := app.viewWindows[i]
-			// if !app.IsShowSelectedVertex() {
-			// 	for j := range app.animationStates[i] {
-			// 		app.animationStates[i][j].UpdateSelectedVertexIndexes(
-			// 			app.animationStates[i][j].SelectedVertexIndexes())
-			// 	}
-			// }
-			// アニメーション
-			app.animationStates[i], app.nextAnimationStates[i] =
-				w.Animate(app.animationStates[i], app.nextAnimationStates[i], timeStep)
+			w.Render(models[i], vmdDeltas[i])
 		}
 
-		if app.IsShowSelectedVertex() {
-			// 頂点選択機能が有効の場合、選択頂点インデックスを更新
-			selectedVertexIndexes := make([][][]int, len(app.animationStates))
-			for i := range app.animationStates {
-				selectedVertexIndexes[i] = make([][]int, len(app.animationStates[i]))
-				for j := range app.animationStates[i] {
-					selectedVertexIndexes[i][j] = app.animationStates[i][j].SelectedVertexIndexes()
-				}
+		// if app.IsShowSelectedVertex() {
+		// 	// 頂点選択機能が有効の場合、選択頂点インデックスを更新
+		// 	selectedVertexIndexes := make([][][]int, len(app.animationStates))
+		// 	for i := range app.animationStates {
+		// 		selectedVertexIndexes[i] = make([][]int, len(app.animationStates[i]))
+		// 		for j := range app.animationStates[i] {
+		// 			selectedVertexIndexes[i][j] = app.animationStates[i][j].SelectedVertexIndexes()
+		// 		}
+		// 	}
+		// 	app.selectedVertexIndexesChan <- selectedVertexIndexes
+		// }
+
+		if app.Playing() {
+			// 再生中はフレームを進める
+			f := app.Frame() + float32(elapsed*deform_default_fps)
+			if f < app.MaxFrame() {
+				app.SetFrameChannel(0)
+			} else {
+				app.SetFrameChannel(f)
 			}
-			app.selectedVertexIndexesChan <- selectedVertexIndexes
 		}
 
 		prevTime = frameTime
 
-		// 描画が終わったらフレーム番号を更新
-		app.prevFrame = app.frame
-
 		// 描画にかかった時間を計測
-		elapsedList = append(elapsedList, app.deformElapsed+elapsed)
+		elapsedList = append(elapsedList, elapsed)
 
 		if app.IsShowInfo() {
 			prevShowTime, elapsedList = app.showInfo(elapsedList, prevShowTime, timeStep)
@@ -208,7 +272,7 @@ func (app *MApp) ViewerCount() int {
 	return len(app.viewWindows)
 }
 
-func (app *MApp) MainViewWindow() IViewWindow {
+func (app *MApp) MainViewWindow() state.IViewWindow {
 	return app.viewWindows[0]
 }
 
@@ -289,14 +353,12 @@ func (app *MApp) recoverFromPanic() {
 	}
 }
 
-func (app *MApp) SetControlWindow(controlWindow IControlWindow) {
+func (app *MApp) SetControlWindow(controlWindow state.IControlWindow) {
 	app.controlWindow = controlWindow
 }
 
-func (app *MApp) AddViewWindow(viewWindow IViewWindow) {
+func (app *MApp) AddViewWindow(viewWindow state.IViewWindow) {
 	app.viewWindows = append(app.viewWindows, viewWindow)
-	app.animationStates = append(app.animationStates, make([]state.IAnimationState, 0))
-	app.nextAnimationStates = append(app.nextAnimationStates, make([]state.IAnimationState, 0))
 }
 
 func (app *MApp) Dispose() {
