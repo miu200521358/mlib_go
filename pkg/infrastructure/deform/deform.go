@@ -21,7 +21,7 @@ func deformBeforePhysics(
 	return vmdDeltas
 }
 
-func DeformPhysicsByBone(appState state.IAppState, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas, physics mbt.IPhysics) {
+func DeformPhysicsByBone(appState state.IAppState, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas, physics *mbt.MPhysics) {
 	// 物理剛体位置を更新
 	processFunc := func(i int) {
 		rigidBody := model.RigidBodies.Get(i)
@@ -50,7 +50,7 @@ func DeformPhysicsByBone(appState state.IAppState, model *pmx.PmxModel, vmdDelta
 
 func DeformBonePyPhysics(
 	appState state.IAppState, model *pmx.PmxModel, motion *vmd.VmdMotion,
-	vmdDeltas *delta.VmdDeltas, physics mbt.IPhysics,
+	vmdDeltas *delta.VmdDeltas, physics *mbt.MPhysics,
 ) *delta.VmdDeltas {
 	if model != nil && appState.IsEnabledPhysics() && !appState.IsPhysicsReset() {
 		// 物理剛体位置を更新
@@ -76,7 +76,7 @@ func DeformBonePyPhysics(
 }
 
 func Deform(
-	physics mbt.IPhysics, appState state.IAppState, timeStep float32,
+	physics *mbt.MPhysics, appState state.IAppState, timeStep float32,
 	models []*pmx.PmxModel, motions []*vmd.VmdMotion,
 ) []*delta.VmdDeltas {
 	// 物理後デフォーム
@@ -94,7 +94,7 @@ func Deform(
 }
 
 func DeformPhysics(
-	physics mbt.IPhysics, appState state.IAppState, timeStep float32,
+	physics *mbt.MPhysics, appState state.IAppState, timeStep float32,
 	models []*pmx.PmxModel, motions []*vmd.VmdMotion, vmdDeltas []*delta.VmdDeltas,
 ) []*delta.VmdDeltas {
 	// 物理デフォーム

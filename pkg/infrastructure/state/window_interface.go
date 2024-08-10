@@ -44,7 +44,7 @@ type IViewWindow interface {
 	GetViewerParameter() (float64, float64, *mmath.MVec2, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3)
 	UpdateViewerParameter(yaw, pitch float64, size *mmath.MVec2, cameraPos, cameraUp, lookAtCenter *mmath.MVec3)
 	Render(models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas)
-	Physics() mbt.IPhysics
+	Physics() *mbt.MPhysics
 	LoadModels(models []*pmx.PmxModel)
 }
 

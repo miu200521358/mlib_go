@@ -117,7 +117,7 @@ func NewViewWindow(
 	return viewWindow
 }
 
-func (viewWindow *ViewWindow) Physics() mbt.IPhysics {
+func (viewWindow *ViewWindow) Physics() *mbt.MPhysics {
 	return viewWindow.physics
 }
 

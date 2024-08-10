@@ -14,6 +14,8 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
@@ -239,46 +241,13 @@ func (app *MApp) RunViewer() {
 
 		if app.IsPhysicsReset() {
 			// 物理リセット
-			for i, w := range app.viewWindows {
-				// リセット用のフラグを立てる
-				w.Physics().UpdateFlags(true)
-				vmdDeltas[i] = deform.Deform(w.Physics(), app, timeStep, models[i], motions[i])
-				w.Render(models[i], vmdDeltas[i])
-
-				// 物理削除
-				for _, m := range models[i] {
-					if m == nil {
-						continue
-					}
-					w.Physics().DeleteModel(m.Index())
-				}
-				// ワールド作り直し
-				w.Physics().ResetWorld()
-				// 物理追加
-				for j, m := range models[i] {
-					if m == nil || vmdDeltas[i][j] == nil {
-						continue
-					}
-					w.Physics().AddModelByVmdDeltas(m.Index(), m, vmdDeltas[i][j])
-				}
-				w.Render(models[i], vmdDeltas[i])
-
-				// 物理再設定
-				for j, m := range models[i] {
-					if m == nil || vmdDeltas[i][j] == nil {
-						continue
-					}
-					deform.DeformPhysicsByBone(app, models[i][j], vmdDeltas[i][j], w.Physics())
-				}
-				w.Render(models[i], vmdDeltas[i])
-			}
-			app.SetPhysicsReset(false)
+			app.resetPhysics(models, motions, vmdDeltas, timeStep)
 		}
 
 		if app.Playing() {
 			// 再生中はフレームを進める
 			f := app.Frame() + float32(elapsed*deform_default_fps)
-			if f >= app.MaxFrame() {
+			if f > app.MaxFrame() {
 				f = 0
 			}
 			app.viewerToControlChannel.SetFrameChannel(f)
@@ -295,6 +264,44 @@ func (app *MApp) RunViewer() {
 		}
 	}
 	app.Close()
+}
+
+func (app *MApp) resetPhysics(
+	models [][]*pmx.PmxModel, motions [][]*vmd.VmdMotion, vmdDeltas [][]*delta.VmdDeltas, timeStep float32,
+) {
+	// 物理リセット
+	for i, w := range app.viewWindows {
+		vmdDeltas[i] = deform.Deform(w.Physics(), app, timeStep, models[i], motions[i])
+
+		// 物理削除
+		for _, m := range models[i] {
+			if m == nil {
+				continue
+			}
+			w.Physics().DeleteModel(m.Index())
+		}
+
+		// ワールド作り直し
+		w.Physics().ResetWorld()
+
+		// 物理追加
+		for j, m := range models[i] {
+			if m == nil || vmdDeltas[i][j] == nil {
+				continue
+			}
+			w.Physics().AddModelByBoneDeltas(m.Index(), m, vmdDeltas[i][j].Bones)
+		}
+
+		// 物理再設定
+		for j, m := range models[i] {
+			if m == nil || vmdDeltas[i][j] == nil {
+				continue
+			}
+			deform.DeformPhysicsByBone(app, models[i][j], vmdDeltas[i][j], w.Physics())
+		}
+	}
+	// リセット完了
+	app.SetPhysicsReset(false)
 }
 
 func (app *MApp) showInfo(elapsedList []float64, prevShowTime float64, timeStep float32) (float64, []float64) {

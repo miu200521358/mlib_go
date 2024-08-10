@@ -29,71 +29,49 @@ func (physics *MPhysics) initRigidBodies(modelIndex int, rigidBodies *pmx.RigidB
 		// 剛体の初期位置と回転
 		btRigidBodyTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation), MVec3Bullet(rigidBody.Position))
 
-		// ボーンから見た剛体の初期位置
-		var bonePos *mmath.MVec3
-		if rigidBody.Bone != nil {
-			bonePos = rigidBody.Bone.Position
-		} else if rigidBody.JointedBone != nil {
-			bonePos = rigidBody.JointedBone.Position
-		} else {
-			bonePos = mmath.NewMVec3()
-		}
-
 		// 物理設定の初期化
-		physics.initRigidBody(modelIndex, rigidBody, bonePos, btRigidBodyTransform)
+		physics.initRigidBody(modelIndex, rigidBody, btRigidBodyTransform)
 	}
 }
 
-func (physics *MPhysics) initRigidBodiesByVmdDeltas(
-	modelIndex int, rigidBodies *pmx.RigidBodies, vmdDeltas *delta.VmdDeltas,
+func (physics *MPhysics) initRigidBodiesByBoneDeltas(
+	modelIndex int, rigidBodies *pmx.RigidBodies, boneDeltas *delta.BoneDeltas,
 ) {
 	// 剛体を順番にボーンと紐付けていく
 	physics.rigidBodies[modelIndex] = make([]*rigidbodyValue, len(rigidBodies.Data))
 	for _, rigidBody := range rigidBodies.Data {
-		// 剛体の初期位置と回転
-		btRigidBodyTransform := bt.NewBtTransform()
 
 		// ボーンから見た剛体の初期位置
-		var bonePos *mmath.MVec3
+		var bone *pmx.Bone
 		if rigidBody.Bone != nil {
-			bonePos = vmdDeltas.Bones.Get(rigidBody.Bone.Index()).FilledGlobalPosition()
-
-			boneTransform := bt.NewBtTransform()
-			defer bt.DeleteBtTransform(boneTransform)
-
-			mat := mgl.NewGlMat4(vmdDeltas.Bones.Get(rigidBody.Bone.Index()).FilledGlobalMatrix())
-			boneTransform.SetFromOpenGLMatrix(&mat[0])
-
-			rigidBodyLocalPos := rigidBody.Position.Subed(rigidBody.Bone.Position)
-			btRigidBodyLocalTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation),
-				MVec3Bullet(rigidBodyLocalPos))
-
-			btRigidBodyTransform.Mult(boneTransform, btRigidBodyLocalTransform)
+			bone = rigidBody.Bone
 		} else if rigidBody.JointedBone != nil {
-			bonePos = vmdDeltas.Bones.Get(rigidBody.JointedBone.Index()).FilledGlobalPosition()
+			bone = rigidBody.JointedBone
+		}
 
+		// 剛体の初期位置と回転
+		btRigidBodyTransform := bt.NewBtTransform()
+		if bone != nil {
 			boneTransform := bt.NewBtTransform()
 			defer bt.DeleteBtTransform(boneTransform)
 
-			mat := mgl.NewGlMat4(vmdDeltas.Bones.Get(rigidBody.JointedBone.Index()).FilledGlobalMatrix())
+			mat := mgl.NewGlMat4(boneDeltas.Get(bone.Index()).FilledGlobalMatrix())
 			boneTransform.SetFromOpenGLMatrix(&mat[0])
 
-			rigidBodyLocalPos := rigidBody.Position.Subed(rigidBody.JointedBone.Position)
+			rigidBodyLocalPos := rigidBody.Position.Subed(bone.Position)
 			btRigidBodyLocalTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation),
 				MVec3Bullet(rigidBodyLocalPos))
 
 			btRigidBodyTransform.Mult(boneTransform, btRigidBodyLocalTransform)
-		} else {
-			bonePos = mmath.NewMVec3()
 		}
 
 		// 物理設定の初期化
-		physics.initRigidBody(modelIndex, rigidBody, bonePos, btRigidBodyTransform)
+		physics.initRigidBody(modelIndex, rigidBody, btRigidBodyTransform)
 	}
 }
 
 func (physics *MPhysics) initRigidBody(
-	modelIndex int, rigidBody *pmx.RigidBody, bonePos *mmath.MVec3, btRigidBodyTransform bt.BtTransform,
+	modelIndex int, rigidBody *pmx.RigidBody, btRigidBodyTransform bt.BtTransform,
 ) {
 	var btCollisionShape bt.BtCollisionShape
 
@@ -123,6 +101,16 @@ func (physics *MPhysics) initRigidBody(
 	if mass != 0 {
 		// 質量が設定されている場合、慣性を計算
 		btCollisionShape.CalculateLocalInertia(mass, localInertia)
+	}
+
+	// ボーンから見た剛体の初期位置
+	var bonePos *mmath.MVec3
+	if rigidBody.Bone != nil {
+		bonePos = rigidBody.Bone.Position
+	} else if rigidBody.JointedBone != nil {
+		bonePos = rigidBody.JointedBone.Position
+	} else {
+		bonePos = mmath.NewMVec3()
 	}
 
 	rigidBodyLocalPos := rigidBody.Position.Subed(bonePos)

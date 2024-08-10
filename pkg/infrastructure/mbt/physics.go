@@ -5,22 +5,9 @@ package mbt
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
-	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
-
-type IPhysics interface {
-	ResetWorld()
-	AddModel(modelIndex int, model *pmx.PmxModel)
-	AddModelByVmdDeltas(modelIndex int, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas)
-	DeleteModel(modelIndex int)
-	StepSimulation(timeStep float32)
-	UpdateFlags(isReset bool)
-	UpdateTransform(modelIndex int, rigidBodyBone *pmx.Bone, boneGlobalMatrix *mmath.MMat4, r *pmx.RigidBody)
-	GetRigidBodyBoneMatrix(modelIndex int, rigidBody *pmx.RigidBody) *mmath.MMat4
-	Exists(modelIndex int) bool
-}
 
 type MPhysics struct {
 	world         bt.BtDiscreteDynamicsWorld // ワールド
@@ -103,10 +90,10 @@ func (physics *MPhysics) AddModel(modelIndex int, model *pmx.PmxModel) {
 	physics.initJoints(modelIndex, model.RigidBodies, model.Joints)
 }
 
-func (physics *MPhysics) AddModelByVmdDeltas(modelIndex int, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas) {
+func (physics *MPhysics) AddModelByBoneDeltas(modelIndex int, model *pmx.PmxModel, boneDeltas *delta.BoneDeltas) {
 	// 根元から追加していく
-	physics.initRigidBodiesByVmdDeltas(modelIndex, model.RigidBodies, vmdDeltas)
-	physics.initJointsByVmdDeltas(modelIndex, model.RigidBodies, model.Joints, vmdDeltas)
+	physics.initRigidBodiesByBoneDeltas(modelIndex, model.RigidBodies, boneDeltas)
+	physics.initJointsByBoneDeltas(modelIndex, model.RigidBodies, model.Joints, boneDeltas)
 }
 
 func (physics *MPhysics) DeleteModel(modelIndex int) {

@@ -28,8 +28,8 @@ func (physics *MPhysics) initJoints(modelIndex int, rigidBodies *pmx.RigidBodies
 	}
 }
 
-func (physics *MPhysics) initJointsByVmdDeltas(
-	modelIndex int, rigidBodies *pmx.RigidBodies, j *pmx.Joints, vmdDeltas *delta.VmdDeltas,
+func (physics *MPhysics) initJointsByBoneDeltas(
+	modelIndex int, rigidBodies *pmx.RigidBodies, j *pmx.Joints, boneDeltas *delta.BoneDeltas,
 ) {
 	// ジョイントを順番に剛体と紐付けていく
 	physics.joints[modelIndex] = make([]*jointValue, len(j.Data))
@@ -56,7 +56,7 @@ func (physics *MPhysics) initJointsByVmdDeltas(
 			boneTransform := bt.NewBtTransform()
 			defer bt.DeleteBtTransform(boneTransform)
 
-			mat := mgl.NewGlMat4(vmdDeltas.Bones.Get(bone.Index()).FilledGlobalMatrix())
+			mat := mgl.NewGlMat4(boneDeltas.Get(bone.Index()).FilledGlobalMatrix())
 			boneTransform.SetFromOpenGLMatrix(&mat[0])
 
 			jointLocalPos := joint.Position.Subed(bone.Position)
