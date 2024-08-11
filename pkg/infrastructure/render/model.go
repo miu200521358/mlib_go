@@ -55,18 +55,19 @@ type RenderModel struct {
 }
 
 func NewRenderModel(windowIndex int, model *pmx.PmxModel) *RenderModel {
-	m := &RenderModel{
+	renderModel := &RenderModel{
 		windowIndex: windowIndex,
 		model:       model,
 		vertexCount: model.Vertices.Len(),
 	}
-	m.initToonTexturesGl(windowIndex)
-	m.initTexturesGl(windowIndex, model.Textures, model.Path())
+	renderModel.initToonTexturesGl(windowIndex)
+	renderModel.initTexturesGl(windowIndex, model.Textures, model.Path())
 
-	m.initializeBuffer(model)
-	m.hash = model.Hash()
+	renderModel.initializeBuffer(model)
+	renderModel.hash = model.Hash()
+	renderModel.selectedVertexIndexes = make(map[int]struct{})
 
-	return m
+	return renderModel
 }
 
 func (renderModel *RenderModel) Model() *pmx.PmxModel {

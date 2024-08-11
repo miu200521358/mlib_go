@@ -480,11 +480,11 @@ func (viewWindow *ViewWindow) updateCursorPositions() ([]*mgl32.Vec3, []*mgl32.V
 	return leftCursorWorldPositions, leftCursorRemoveWorldPositions
 }
 
-func (viewWindow *ViewWindow) Render(models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas) {
+func (viewWindow *ViewWindow) Render(models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas) [][]int {
 	glfw.PollEvents()
 
 	if viewWindow.size.X == 0 || viewWindow.size.Y == 0 {
-		return
+		return make([][]int, 0)
 	}
 
 	viewWindow.MakeContextCurrent()
@@ -518,11 +518,13 @@ func (viewWindow *ViewWindow) Render(models []*pmx.PmxModel, vmdDeltas []*delta.
 	viewWindow.shader.DrawFloor()
 
 	// モデル描画
+	selectedVertexIndexes := make([][]int, len(models))
 	for i, renderModel := range viewWindow.renderModels {
 		if renderModel != nil && vmdDeltas[i] != nil {
 			renderModel.Render(viewWindow.shader, viewWindow.appState, vmdDeltas[i],
 				leftCursorWorldPositions, leftCursorRemoveWorldPositions,
 				viewWindow.leftCursorWorldHistoryPositions, viewWindow.leftCursorRemoveWorldHistoryPositions)
+			selectedVertexIndexes[i] = renderModel.SelectedVertexIndexes()
 		}
 	}
 
@@ -545,6 +547,8 @@ func (viewWindow *ViewWindow) Render(models []*pmx.PmxModel, vmdDeltas []*delta.
 		viewWindow.leftCursorWorldHistoryPositions = make([]*mgl32.Vec3, 0)
 		viewWindow.leftCursorRemoveWorldHistoryPositions = make([]*mgl32.Vec3, 0)
 	}
+
+	return selectedVertexIndexes
 }
 
 func (viewWindow *ViewWindow) LoadModels(models []*pmx.PmxModel) {

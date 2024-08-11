@@ -225,22 +225,17 @@ func (app *MApp) RunViewer() {
 			}
 		}
 
+		selectedVertexIndexes := make([][][]int, app.ViewerCount())
+
 		for i := app.ViewerCount() - 1; i >= 0; i-- {
 			// サブビューワーオーバーレイのため、逆順でレンダリング
-			app.viewWindows[i].Render(models[i], vmdDeltas[i])
+			selectedVertexIndexes[i] = app.viewWindows[i].Render(models[i], vmdDeltas[i])
 		}
 
-		// if app.IsShowSelectedVertex() {
-		// 	// 頂点選択機能が有効の場合、選択頂点インデックスを更新
-		// 	selectedVertexIndexes := make([][][]int, len(app.animationStates))
-		// 	for i := range app.animationStates {
-		// 		selectedVertexIndexes[i] = make([][]int, len(app.animationStates[i]))
-		// 		for j := range app.animationStates[i] {
-		// 			selectedVertexIndexes[i][j] = app.animationStates[i][j].SelectedVertexIndexes()
-		// 		}
-		// 	}
-		// 	app.selectedVertexIndexesChan <- selectedVertexIndexes
-		// }
+		if app.IsShowSelectedVertex() {
+			// 頂点選択機能が有効の場合、選択頂点インデックスを更新
+			app.viewerToControlChannel.selectedVertexIndexesChannel <- selectedVertexIndexes
+		}
 
 		if app.IsPhysicsReset() {
 			// 物理リセット
