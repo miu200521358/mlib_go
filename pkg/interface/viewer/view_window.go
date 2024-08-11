@@ -432,19 +432,7 @@ func (viewWindow *ViewWindow) GetWindow() *glfw.Window {
 	return viewWindow.Window
 }
 
-func (viewWindow *ViewWindow) Render(models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas) {
-	glfw.PollEvents()
-
-	if viewWindow.size.X == 0 || viewWindow.size.Y == 0 {
-		return
-	}
-
-	viewWindow.MakeContextCurrent()
-
-	if viewWindow.size.X != float64(viewWindow.shader.Width) || viewWindow.size.Y != float64(viewWindow.shader.Height) {
-		viewWindow.shader.Resize(int(viewWindow.size.X), int(viewWindow.size.Y))
-	}
-
+func (viewWindow *ViewWindow) updateCursorPositions() ([]*mgl32.Vec3, []*mgl32.Vec3) {
 	var leftCursorWorldPositions []*mgl32.Vec3       // 左クリック位置ワールド座標リスト
 	var leftCursorRemoveWorldPositions []*mgl32.Vec3 // 左クリック位置ワールド座標リスト(削除用)
 
@@ -488,6 +476,25 @@ func (viewWindow *ViewWindow) Render(models []*pmx.PmxModel, vmdDeltas []*delta.
 			}
 		}
 	}
+
+	return leftCursorWorldPositions, leftCursorRemoveWorldPositions
+}
+
+func (viewWindow *ViewWindow) Render(models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas) {
+	glfw.PollEvents()
+
+	if viewWindow.size.X == 0 || viewWindow.size.Y == 0 {
+		return
+	}
+
+	viewWindow.MakeContextCurrent()
+
+	if viewWindow.size.X != float64(viewWindow.shader.Width) || viewWindow.size.Y != float64(viewWindow.shader.Height) {
+		viewWindow.shader.Resize(int(viewWindow.size.X), int(viewWindow.size.Y))
+	}
+
+	// カーソル位置の更新
+	leftCursorWorldPositions, leftCursorRemoveWorldPositions := viewWindow.updateCursorPositions()
 
 	// MSAAフレームバッファをバインド
 	viewWindow.shader.Msaa.Bind()
@@ -541,12 +548,14 @@ func (viewWindow *ViewWindow) Render(models []*pmx.PmxModel, vmdDeltas []*delta.
 }
 
 func (viewWindow *ViewWindow) LoadModels(models []*pmx.PmxModel) {
+	viewWindow.MakeContextCurrent()
+
 	for i, model := range models {
 		if model == nil {
 			continue
 		}
 
-		if i >= len(viewWindow.renderModels) {
+		for i >= len(viewWindow.renderModels) {
 			viewWindow.renderModels = append(viewWindow.renderModels, nil)
 		}
 		if viewWindow.renderModels[i] != nil && viewWindow.renderModels[i].Hash() != model.Hash() {

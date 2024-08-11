@@ -380,7 +380,8 @@ func (shader *MShader) initialize(program uint32) {
 	// ボーン行列用テクスチャ生成
 	gl.GenTextures(1, &shader.boneTextureId)
 
-	shader.Resize(int(shader.Width), int(shader.Height))
+	// ビューポートの設定
+	gl.Viewport(0, 0, int32(shader.Width), int32(shader.Height))
 
 	gl.UseProgram(0)
 }

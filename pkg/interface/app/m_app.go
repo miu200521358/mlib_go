@@ -88,6 +88,7 @@ func (app *MApp) RunViewerToControlChannel() {
 				app.controlWindow.UpdateSelectedVertexIndexes(selectedVertexIndexes)
 			case closed := <-app.viewerToControlChannel.isClosedChannel:
 				app.controlWindow.SetClosed(closed)
+				return
 			default:
 				continue
 			}
@@ -146,6 +147,7 @@ func (app *MApp) RunControlToViewerChannel() {
 				app.SetCameraSync(cameraSync)
 			case closed := <-app.controlToViewerChannel.isClosedChannel:
 				app.SetClosed(closed)
+				return
 			case playing := <-app.controlToViewerChannel.playingChannel:
 				app.SetPlaying(playing)
 			case frameInterval := <-app.controlToViewerChannel.frameIntervalChanel:

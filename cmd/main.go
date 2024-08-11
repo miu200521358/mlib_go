@@ -96,6 +96,26 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 
 	tabPage.SetLayout(walk.NewVBoxLayout())
 
+	models := make([][]*pmx.PmxModel, 2)
+	models[0] = make([]*pmx.PmxModel, 2)
+	models[1] = make([]*pmx.PmxModel, 1)
+
+	mApp.SetFuncGetModels(
+		func() [][]*pmx.PmxModel {
+			return models
+		},
+	)
+
+	motions := make([][]*vmd.VmdMotion, 2)
+	motions[0] = make([]*vmd.VmdMotion, 2)
+	motions[1] = make([]*vmd.VmdMotion, 1)
+
+	mApp.SetFuncGetMotions(
+		func() [][]*vmd.VmdMotion {
+			return motions
+		},
+	)
+
 	pmx11ReadPicker := widget.NewPmxReadFilePicker(
 		controlWindow,
 		tabPage,
@@ -108,6 +128,10 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		if data, err := pmx11ReadPicker.Load(); err == nil {
 			model := data.(*pmx.PmxModel)
 			model.SetIndex(0)
+			models[0][0] = model
+			if motions[0][0] == nil {
+				motions[0][0] = vmd.NewVmdMotion("")
+			}
 		} else {
 			mlog.E(mi18n.T("読み込み失敗"), err)
 		}
@@ -125,6 +149,7 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		if data, err := vmd11ReadPicker.Load(); err == nil {
 			motion := data.(*vmd.VmdMotion)
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
+			motions[0][0] = motion
 		} else {
 			mlog.E(mi18n.T("読み込み失敗"), err)
 		}
@@ -144,6 +169,10 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		if data, err := pmx12ReadPicker.Load(); err == nil {
 			model := data.(*pmx.PmxModel)
 			model.SetIndex(1)
+			models[0][1] = model
+			if motions[0][1] == nil {
+				motions[0][1] = vmd.NewVmdMotion("")
+			}
 		} else {
 			mlog.E(mi18n.T("読み込み失敗"), err)
 		}
@@ -161,6 +190,7 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		if data, err := vmd12ReadPicker.Load(); err == nil {
 			motion := data.(*vmd.VmdMotion)
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
+			motions[0][1] = motion
 		} else {
 			mlog.E(mi18n.T("読み込み失敗"), err)
 		}
@@ -180,6 +210,10 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		if data, err := pmx2ReadPicker.Load(); err == nil {
 			model := data.(*pmx.PmxModel)
 			model.SetIndex(0)
+			models[1][0] = model
+			if motions[1][0] == nil {
+				motions[1][0] = vmd.NewVmdMotion("")
+			}
 		} else {
 			mlog.E(mi18n.T("読み込み失敗"), err)
 		}
@@ -197,62 +231,13 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		if data, err := vmd2ReadPicker.Load(); err == nil {
 			motion := data.(*vmd.VmdMotion)
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
+			motions[1][0] = motion
 		} else {
 			mlog.E(mi18n.T("読み込み失敗"), err)
 		}
 	})
 
 	walk.NewVSpacer(tabPage)
-
-	mApp.SetFuncGetModels(
-		func() [][]*pmx.PmxModel {
-			models := make([][]*pmx.PmxModel, 2)
-			models[0] = make([]*pmx.PmxModel, 2)
-			if pmx11ReadPicker.GetCache() != nil {
-				models[0][0] = pmx11ReadPicker.GetCache().(*pmx.PmxModel)
-			}
-			if pmx12ReadPicker.GetCache() != nil {
-				models[0][1] = pmx12ReadPicker.GetCache().(*pmx.PmxModel)
-			}
-
-			models[1] = make([]*pmx.PmxModel, 1)
-			if pmx2ReadPicker.GetCache() != nil {
-				models[1][0] = pmx2ReadPicker.GetCache().(*pmx.PmxModel)
-			}
-
-			return models
-		},
-	)
-
-	mApp.SetFuncGetMotions(
-		func() [][]*vmd.VmdMotion {
-			motions := make([][]*vmd.VmdMotion, 2)
-			motions[0] = make([]*vmd.VmdMotion, 2)
-			if vmd11ReadPicker.GetCache() != nil {
-				motions[0][0] = vmd11ReadPicker.GetCache().(*vmd.VmdMotion)
-			} else if pmx11ReadPicker.GetCache() != nil {
-				motions[0][0] = vmd.NewVmdMotion("")
-				vmd11ReadPicker.SetCache(motions[0][0])
-			}
-
-			if vmd12ReadPicker.GetCache() != nil {
-				motions[0][1] = vmd12ReadPicker.GetCache().(*vmd.VmdMotion)
-			} else if pmx12ReadPicker.GetCache() != nil {
-				motions[0][1] = vmd.NewVmdMotion("")
-				vmd12ReadPicker.SetCache(motions[0][1])
-			}
-
-			motions[1] = make([]*vmd.VmdMotion, 1)
-			if vmd2ReadPicker.GetCache() != nil {
-				motions[1][0] = vmd2ReadPicker.GetCache().(*vmd.VmdMotion)
-			} else if pmx2ReadPicker.GetCache() != nil {
-				motions[1][0] = vmd.NewVmdMotion("")
-				vmd2ReadPicker.SetCache(motions[1][0])
-			}
-
-			return motions
-		},
-	)
 
 	return tabPage
 }
