@@ -232,9 +232,9 @@ func (app *MApp) RunViewer() {
 			selectedVertexIndexes[i] = app.viewWindows[i].Render(models[i], vmdDeltas[i])
 		}
 
-		if app.IsShowSelectedVertex() {
+		if app.IsShowSelectedVertex() && !app.IsClosed() {
 			// 頂点選択機能が有効の場合、選択頂点インデックスを更新
-			app.viewerToControlChannel.selectedVertexIndexesChannel <- selectedVertexIndexes
+			app.viewerToControlChannel.SetSelectedVertexIndexesChannel(selectedVertexIndexes)
 		}
 
 		if app.IsPhysicsReset() {
@@ -242,7 +242,7 @@ func (app *MApp) RunViewer() {
 			app.resetPhysics(models, motions, timeStep)
 		}
 
-		if app.Playing() {
+		if app.Playing() && !app.IsClosed() {
 			// 再生中はフレームを進める
 			frame := app.Frame() + float32(elapsed*deform_default_fps)
 			if frame > app.MaxFrame() {
