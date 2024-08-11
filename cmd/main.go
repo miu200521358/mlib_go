@@ -77,8 +77,11 @@ func main() {
 		mApp.RunController()
 	}()
 
-	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.1 ビューワー", nil))
-	mApp.AddViewWindow(viewer.NewViewWindow(mApp.ViewerCount(), appConfig, mApp, "No.2 ビューワー", mApp.MainViewWindow().GetWindow()))
+	mApp.AddViewWindow(viewer.NewViewWindow(
+		mApp.ViewerCount(), appConfig, mApp, mApp.ViewerToControlChannel(), "No.1 ビューワー", nil))
+	mApp.AddViewWindow(viewer.NewViewWindow(
+		mApp.ViewerCount(), appConfig, mApp, mApp.ViewerToControlChannel(), "No.2 ビューワー",
+		mApp.MainViewWindow().GetWindow()))
 
 	mApp.Center()
 	mApp.RunViewer()

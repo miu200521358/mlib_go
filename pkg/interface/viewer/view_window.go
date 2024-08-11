@@ -36,6 +36,7 @@ type ViewWindow struct {
 	title                                 string                 // ウィンドウタイトル
 	appConfig                             *mconfig.AppConfig     // アプリケーション設定
 	appState                              state.IAppState        // アプリ状態
+	channelState                          state.IChannelState    // ビューワー→コントローラーチャンネル
 	physics                               *mbt.MPhysics          // 物理
 	shader                                *mgl.MShader           // シェーダー
 	leftButtonPressed                     bool                   // 左ボタン押下フラグ
@@ -59,6 +60,7 @@ func NewViewWindow(
 	windowIndex int,
 	appConfig *mconfig.AppConfig,
 	appState state.IAppState,
+	channelState state.IChannelState,
 	title string,
 	mainWindow *glfw.Window,
 ) *ViewWindow {
@@ -87,6 +89,7 @@ func NewViewWindow(
 	viewWindow := &ViewWindow{
 		Window:                                glWindow,
 		appState:                              appState,
+		channelState:                          channelState,
 		windowIndex:                           windowIndex,
 		title:                                 title,
 		appConfig:                             appConfig,

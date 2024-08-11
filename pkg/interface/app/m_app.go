@@ -344,6 +344,7 @@ func (app *MApp) Close() {
 		window.Close()
 	}
 	if app.controlWindow != nil {
+		app.controlWindow.SetClosed(true)
 		app.controlWindow.Close()
 	}
 

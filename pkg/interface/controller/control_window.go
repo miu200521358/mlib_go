@@ -322,6 +322,7 @@ func NewControlWindow(
 			if result := walk.MsgBox(nil, mi18n.T("終了確認"), mi18n.T("終了確認メッセージ"),
 				walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel); result == walk.DlgCmdOK {
 				controlWindow.SetClosed(true)
+				controlWindow.channelState.SetClosedChannel(true)
 			} else {
 				// 閉じない場合はキャンセル
 				*canceled = true
@@ -399,6 +400,7 @@ func (controlWindow *ControlWindow) onChangeLanguage(lang string) {
 	); result == walk.DlgCmdOK {
 		mi18n.SetLang(lang)
 		controlWindow.SetClosed(true)
+		controlWindow.channelState.SetClosedChannel(true)
 	}
 }
 
@@ -782,7 +784,6 @@ func (controlWindow *ControlWindow) SetLogLevelIkVerbose(log bool) {
 
 func (controlWindow *ControlWindow) SetClosed(closed bool) {
 	controlWindow.isClosed = closed
-	controlWindow.channelState.SetClosedChannel(closed)
 }
 
 func (controlWindow *ControlWindow) SetPlayingChannel(p bool) {
