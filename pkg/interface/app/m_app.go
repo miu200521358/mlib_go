@@ -77,6 +77,7 @@ func (app *MApp) RunController() {
 	app.controlWindow.Run()
 }
 
+// RunViewerToControlChannel ビューアからコントロールへのチャンネルを監視
 func (app *MApp) RunViewerToControlChannel() {
 	go func() {
 		for !app.IsClosed() {
@@ -94,6 +95,7 @@ func (app *MApp) RunViewerToControlChannel() {
 	}()
 }
 
+// RunControlToViewerChannel コントロールからビューアへのチャンネルを監視
 func (app *MApp) RunControlToViewerChannel() {
 	go func() {
 		for !app.IsClosed() {
@@ -192,13 +194,13 @@ func (app *MApp) RunViewer() {
 		models := app.GetModels()
 		motions := app.GetMotions()
 
-		for i, w := range app.viewWindows {
-			w.LoadModels(models[i])
+		for i, window := range app.viewWindows {
+			window.LoadModels(models[i])
 		}
 
-		for i, w := range app.viewWindows {
-			vmdDeltas[i] = deform.Deform(w.Physics(), app, timeStep, models[i], motions[i])
-			vmdDeltas[i] = deform.DeformPhysics(w.Physics(), app, timeStep, models[i], motions[i], vmdDeltas[i])
+		for i, window := range app.viewWindows {
+			vmdDeltas[i] = deform.Deform(window.Physics(), app, timeStep, models[i], motions[i])
+			vmdDeltas[i] = deform.DeformPhysics(window.Physics(), app, timeStep, models[i], motions[i], vmdDeltas[i])
 		}
 
 		// カメラ同期(重複描画の場合はそっちで同期させる)
@@ -223,8 +225,7 @@ func (app *MApp) RunViewer() {
 
 		for i := app.ViewerCount() - 1; i >= 0; i-- {
 			// サブビューワーオーバーレイのため、逆順でレンダリング
-			w := app.viewWindows[i]
-			w.Render(models[i], vmdDeltas[i])
+			app.viewWindows[i].Render(models[i], vmdDeltas[i])
 		}
 
 		// if app.IsShowSelectedVertex() {
@@ -246,12 +247,12 @@ func (app *MApp) RunViewer() {
 
 		if app.Playing() {
 			// 再生中はフレームを進める
-			f := app.Frame() + float32(elapsed*deform_default_fps)
-			if f > app.MaxFrame() {
-				f = 0
+			frame := app.Frame() + float32(elapsed*deform_default_fps)
+			if frame > app.MaxFrame() {
+				frame = 0
 			}
-			app.viewerToControlChannel.SetFrameChannel(f)
-			app.frame = f
+			app.viewerToControlChannel.SetFrameChannel(frame)
+			app.frame = frame
 		}
 
 		prevTime = frameTime
@@ -270,34 +271,34 @@ func (app *MApp) resetPhysics(
 	models [][]*pmx.PmxModel, motions [][]*vmd.VmdMotion, vmdDeltas [][]*delta.VmdDeltas, timeStep float32,
 ) {
 	// 物理リセット
-	for i, w := range app.viewWindows {
-		vmdDeltas[i] = deform.Deform(w.Physics(), app, timeStep, models[i], motions[i])
+	for i, window := range app.viewWindows {
+		vmdDeltas[i] = deform.Deform(window.Physics(), app, timeStep, models[i], motions[i])
 
 		// 物理削除
-		for _, m := range models[i] {
-			if m == nil {
+		for _, model := range models[i] {
+			if model == nil {
 				continue
 			}
-			w.Physics().DeleteModel(m.Index())
+			window.Physics().DeleteModel(model.Index())
 		}
 
 		// ワールド作り直し
-		w.Physics().ResetWorld()
+		window.Physics().ResetWorld()
 
 		// 物理追加
-		for j, m := range models[i] {
-			if m == nil || vmdDeltas[i][j] == nil {
+		for j, model := range models[i] {
+			if model == nil || vmdDeltas[i][j] == nil {
 				continue
 			}
-			w.Physics().AddModelByBoneDeltas(m.Index(), m, vmdDeltas[i][j].Bones)
+			window.Physics().AddModelByBoneDeltas(model.Index(), model, vmdDeltas[i][j].Bones)
 		}
 
 		// 物理再設定
-		for j, m := range models[i] {
-			if m == nil || vmdDeltas[i][j] == nil {
+		for j, model := range models[i] {
+			if model == nil || vmdDeltas[i][j] == nil {
 				continue
 			}
-			deform.DeformPhysicsByBone(app, models[i][j], vmdDeltas[i][j], w.Physics())
+			deform.DeformPhysicsByBone(app, models[i][j], vmdDeltas[i][j], window.Physics())
 		}
 	}
 	// リセット完了
@@ -338,8 +339,8 @@ func (app *MApp) MainViewWindow() state.IViewWindow {
 }
 
 func (app *MApp) Close() {
-	for _, w := range app.viewWindows {
-		w.Close()
+	for _, window := range app.viewWindows {
+		window.Close()
 	}
 	if app.controlWindow != nil {
 		app.controlWindow.Close()

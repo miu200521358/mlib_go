@@ -105,16 +105,3 @@ func (physics *MPhysics) DeleteModel(modelIndex int) {
 func (physics *MPhysics) StepSimulation(timeStep float32) {
 	physics.world.StepSimulation(timeStep, physics.MaxSubSteps, physics.FixedTimeStep)
 }
-
-func (physics *MPhysics) Exists(modelIndex int) bool {
-	_, ok := physics.rigidBodies[modelIndex]
-	return ok
-}
-
-func (physics *MPhysics) UpdateFlags(isReset bool) {
-	for modelIndex := range physics.rigidBodies {
-		for _, rigidBody := range physics.rigidBodies[modelIndex] {
-			physics.updateFlag(modelIndex, rigidBody.pmxRigidBody, isReset)
-		}
-	}
-}
