@@ -55,7 +55,7 @@ func prepareDeltas(
 	boneNames []string,
 	isAfterPhysics bool,
 ) ([]int, *delta.VmdDeltas) {
-	deformBoneIndexes, deltas := newVmdDeltas(model, deltas, frame, boneNames, isAfterPhysics)
+	deformBoneIndexes, deltas := newVmdDeltas(model, motion, deltas, frame, boneNames, isAfterPhysics)
 
 	// IK事前計算
 	if isCalcIk {
@@ -1025,6 +1025,7 @@ func calcBoneDeltas(
 // デフォーム対象ボーン情報一覧生成
 func newVmdDeltas(
 	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
 	frame float32,
 	boneNames []string,
@@ -1034,7 +1035,7 @@ func newVmdDeltas(
 	targetSortedBones := model.Bones.LayerSortedBones[isAfterPhysics]
 
 	if deltas == nil {
-		deltas = delta.NewVmdDeltas(model.Materials, model.Bones)
+		deltas = delta.NewVmdDeltas(frame, model.Bones, model.Hash(), motion.Hash())
 	}
 
 	if len(boneNames) == 1 && model.Bones.ContainsByName(boneNames[0]) {

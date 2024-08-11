@@ -165,6 +165,7 @@ func (app *MApp) RunViewer() {
 	prevTime := glfw.GetTime()
 	prevShowTime := glfw.GetTime()
 	elapsedList := make([]float64, 0)
+	vmdDeltas := make([][]*delta.VmdDeltas, len(app.viewWindows))
 
 	for !app.IsClosed() {
 
@@ -192,7 +193,6 @@ func (app *MApp) RunViewer() {
 		}
 
 		// デフォーム
-		vmdDeltas := make([][]*delta.VmdDeltas, len(app.viewWindows))
 		models := app.GetModels()
 		motions := app.GetMotions()
 
@@ -201,7 +201,7 @@ func (app *MApp) RunViewer() {
 		}
 
 		for i, window := range app.viewWindows {
-			vmdDeltas[i] = deform.Deform(window.Physics(), app, timeStep, models[i], motions[i])
+			vmdDeltas[i] = deform.Deform(window.Physics(), app, timeStep, models[i], motions[i], vmdDeltas[i])
 			vmdDeltas[i] = deform.DeformPhysics(window.Physics(), app, timeStep, models[i], motions[i], vmdDeltas[i])
 		}
 
@@ -239,7 +239,7 @@ func (app *MApp) RunViewer() {
 
 		if app.IsPhysicsReset() {
 			// 物理リセット
-			app.resetPhysics(models, motions, vmdDeltas, timeStep)
+			app.resetPhysics(models, motions, timeStep)
 		}
 
 		if app.Playing() {
@@ -265,11 +265,14 @@ func (app *MApp) RunViewer() {
 }
 
 func (app *MApp) resetPhysics(
-	models [][]*pmx.PmxModel, motions [][]*vmd.VmdMotion, vmdDeltas [][]*delta.VmdDeltas, timeStep float32,
+	models [][]*pmx.PmxModel, motions [][]*vmd.VmdMotion, timeStep float32,
 ) {
+	vmdDeltas := make([][]*delta.VmdDeltas, len(app.viewWindows))
+
 	// 物理リセット
 	for i, window := range app.viewWindows {
-		vmdDeltas[i] = deform.Deform(window.Physics(), app, timeStep, models[i], motions[i])
+		// 物理無関係のデフォーム結果
+		vmdDeltas[i] = deform.Deform(window.Physics(), app, timeStep, models[i], motions[i], nil)
 
 		// 物理削除
 		for _, model := range models[i] {
@@ -298,6 +301,7 @@ func (app *MApp) resetPhysics(
 			deform.DeformPhysicsByBone(app, models[i][j], vmdDeltas[i][j], window.Physics())
 		}
 	}
+
 	// リセット完了
 	app.SetPhysicsReset(false)
 }

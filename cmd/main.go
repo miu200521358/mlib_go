@@ -66,6 +66,9 @@ func main() {
 		newFilePage(mApp, controlWindow)
 
 		player := widget.NewMotionPlayer(controlWindow.MainWindow, controlWindow)
+		player.SetOnTriggerPlay(func(v bool) {
+			controlWindow.TabWidget.SetEnabled(!v)
+		})
 		controlWindow.SetPlayer(player)
 
 		consoleView := widget.NewConsoleView(controlWindow.MainWindow, 256, 50)

@@ -791,11 +791,6 @@ func (controlWindow *ControlWindow) SetPlayingChannel(p bool) {
 
 func (controlWindow *ControlWindow) SetEnabled(enabled bool) {
 	if controlWindow.TabWidget != nil {
-		for i := range controlWindow.TabWidget.Pages().Len() {
-			for j := range controlWindow.TabWidget.Pages().At(i).Children().Len() {
-				controlWindow.TabWidget.Pages().At(i).Children().At(j).SetEnabled(enabled)
-			}
-		}
 		controlWindow.TabWidget.SetEnabled(enabled)
 	}
 	if controlWindow.motionPlayer != nil {

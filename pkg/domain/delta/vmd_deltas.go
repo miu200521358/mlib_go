@@ -5,12 +5,30 @@ import (
 )
 
 type VmdDeltas struct {
-	Bones  *BoneDeltas
-	Morphs *MorphDeltas
+	frame      float32
+	modelHash  string
+	motionHash string
+	Bones      *BoneDeltas
+	Morphs     *MorphDeltas
 }
 
-func NewVmdDeltas(materials *pmx.Materials, bones *pmx.Bones) *VmdDeltas {
+func NewVmdDeltas(frame float32, bones *pmx.Bones, modelHash, motionHash string) *VmdDeltas {
 	return &VmdDeltas{
-		Bones: NewBoneDeltas(bones),
+		frame:      frame,
+		modelHash:  modelHash,
+		motionHash: motionHash,
+		Bones:      NewBoneDeltas(bones),
 	}
+}
+
+func (vmdDeltas *VmdDeltas) Frame() float32 {
+	return vmdDeltas.frame
+}
+
+func (vmdDeltas *VmdDeltas) ModelHash() string {
+	return vmdDeltas.modelHash
+}
+
+func (vmdDeltas *VmdDeltas) MotionHash() string {
+	return vmdDeltas.motionHash
 }

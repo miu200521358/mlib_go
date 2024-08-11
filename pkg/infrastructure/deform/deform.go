@@ -10,18 +10,23 @@ import (
 )
 
 func deformBeforePhysics(
-	appState state.IAppState, model *pmx.PmxModel, motion *vmd.VmdMotion,
+	appState state.IAppState, model *pmx.PmxModel, motion *vmd.VmdMotion, vmdDeltas *delta.VmdDeltas,
 ) *delta.VmdDeltas {
-	frame := int(appState.Frame())
+	frame := appState.Frame()
 
-	vmdDeltas := delta.NewVmdDeltas(model.Materials, model.Bones)
-	vmdDeltas.Morphs = DeformMorph(model, motion.MorphFrames, float32(frame), nil)
-	vmdDeltas = DeformBoneByPhysicsFlag(model, motion, vmdDeltas, true, float32(frame), nil, false)
+	if vmdDeltas == nil || vmdDeltas.Frame() != frame ||
+		vmdDeltas.ModelHash() != model.Hash() || vmdDeltas.MotionHash() != motion.Hash() {
+		vmdDeltas = delta.NewVmdDeltas(frame, model.Bones, model.Hash(), motion.Hash())
+		vmdDeltas.Morphs = DeformMorph(model, motion.MorphFrames, frame, nil)
+		vmdDeltas = DeformBoneByPhysicsFlag(model, motion, vmdDeltas, true, frame, nil, false)
+	}
 
 	return vmdDeltas
 }
 
-func DeformPhysicsByBone(appState state.IAppState, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas, physics *mbt.MPhysics) {
+func DeformPhysicsByBone(
+	appState state.IAppState, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas, physics *mbt.MPhysics,
+) {
 	// 物理剛体位置を更新
 	processFunc := func(i int) {
 		rigidBody := model.RigidBodies.Get(i)
@@ -77,17 +82,17 @@ func DeformBonePyPhysics(
 
 func Deform(
 	physics *mbt.MPhysics, appState state.IAppState, timeStep float32,
-	models []*pmx.PmxModel, motions []*vmd.VmdMotion,
+	models []*pmx.PmxModel, motions []*vmd.VmdMotion, vmdDeltas []*delta.VmdDeltas,
 ) []*delta.VmdDeltas {
-	// 物理後デフォーム
-	vmdDeltas := make([]*delta.VmdDeltas, len(models))
-
 	// 物理前デフォーム
 	for i := range models {
 		if models[i] == nil || motions[i] == nil {
 			continue
 		}
-		vmdDeltas[i] = deformBeforePhysics(appState, models[i], motions[i])
+		for i >= len(vmdDeltas) {
+			vmdDeltas = append(vmdDeltas, nil)
+		}
+		vmdDeltas[i] = deformBeforePhysics(appState, models[i], motions[i], vmdDeltas[i])
 	}
 
 	return vmdDeltas

@@ -26,6 +26,14 @@ func NewMTabWidget(w *walk.MainWindow) *MTabWidget {
 	return &MTabWidget{TabWidget: tabWidget}
 }
 
+func (tabWidget *MTabWidget) Enabled(enabled bool) {
+	for i := range tabWidget.Pages().Len() {
+		for j := range tabWidget.Pages().At(i).Children().Len() {
+			tabWidget.Pages().At(i).Children().At(j).SetEnabled(enabled)
+		}
+	}
+}
+
 type MTabPage struct {
 	*walk.TabPage
 }
@@ -44,4 +52,10 @@ func NewMTabPage(title string) *MTabPage {
 	tabPage.SetBackground(bg)
 
 	return &MTabPage{TabPage: tabPage}
+}
+
+func (tabPage *MTabPage) SetEnabled(enabled bool) {
+	for i := range tabPage.Children().Len() {
+		tabPage.Children().At(i).SetEnabled(enabled)
+	}
 }
