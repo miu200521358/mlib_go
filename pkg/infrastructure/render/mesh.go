@@ -76,6 +76,18 @@ func (mesh *Mesh) drawModel(
 	specularUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_SPECULAR))
 	gl.Uniform4fv(specularUniform, 1, &meshDelta.Specular[0])
 
+	emissiveUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_EMISSIVE))
+	gl.Uniform3fv(emissiveUniform, 1, &meshDelta.Emissive[0])
+
+	lightDiffuseUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_LIGHT_DIFFUSE))
+	gl.Uniform3f(lightDiffuseUniform, delta.LIGHT_DIFFUSE, delta.LIGHT_DIFFUSE, delta.LIGHT_DIFFUSE)
+
+	lightSpecularUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_LIGHT_SPECULAR))
+	gl.Uniform3f(lightSpecularUniform, delta.LIGHT_SPECULAR, delta.LIGHT_SPECULAR, delta.LIGHT_SPECULAR)
+
+	lightAmbientUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_LIGHT_AMBIENT))
+	gl.Uniform3f(lightAmbientUniform, delta.LIGHT_AMBIENT, delta.LIGHT_AMBIENT, delta.LIGHT_AMBIENT)
+
 	// テクスチャ使用有無
 	useTextureUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.SHADER_USE_TEXTURE))
 	gl.Uniform1i(useTextureUniform, int32(mmath.BoolToInt(mesh.material.texture != nil)))

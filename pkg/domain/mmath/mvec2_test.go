@@ -11,7 +11,7 @@ func TestMVec2LerpVec2(t *testing.T) {
 	t1 := 0.5
 	expected := MVec2{2, 3}
 
-	result := LerpVec2(v1, v2, t1) // Use v2 as a pointer
+	result := v1.Lerp(v2, t1) // Use v2 as a pointer
 
 	if !result.NearEquals(&expected, 1e-8) {
 		t.Errorf("TestMVec2LerpVec2 failed. Expected %v, got %v", expected, result)

@@ -27,6 +27,10 @@ in layout(location = 14) vec3 afterVertexDelta; // ボーン変形後頂点モ�
 uniform vec4 diffuse;
 uniform vec3 ambient;
 uniform vec4 specular;
+uniform vec3 emissive;
+uniform vec3 lightDiffuse;
+uniform vec3 lightAmbient;
+uniform vec3 lightSpecular;
 
 uniform vec3 cameraPosition;
 uniform vec3 lightDirection;
@@ -174,6 +178,11 @@ vec4 calculateCorrectedC(mat4 boneMatrix0, mat4 boneMatrix1, float boneWeight0, 
 void main() {
     vec4 position4 = vec4(position + vertexDelta, 1.0);
 
+    vec4 DiffuseColor = diffuse * vec4(lightDiffuse, 1.0);
+    vec3 AmbientColor = ambient * lightAmbient + emissive;
+    vec3 SpecularColor = specular.rgb * lightSpecular;
+    float SpecularPower = specular.a;
+
     // 各頂点で使用されるボーン変形行列を計算する
     totalBoneWeight = 0;
     mat4 boneTransformMatrix = mat4(0.0);
@@ -231,15 +240,15 @@ void main() {
     vertexNormal = normalize(normalTransformMatrix * normalize(normal)).xyz;
 
     // 頂点色設定
-    vertexColor = diffuse;
+    vertexColor.rgb = AmbientColor;
 
     if(0 == useToon) {
         // ディフューズ色＋アンビエント色 計算
         float lightNormal = clamp(dot(vertexNormal, -lightDirection), 0.0, 1.0);
-        vertexColor.rgb += ambient * lightNormal;
+        vertexColor.rgb += DiffuseColor.rgb * lightNormal;
     }
 
-    vertexColor.a = diffuse.a;
+    vertexColor.a = DiffuseColor.a;
     vertexColor = clamp(vertexColor, 0.0, 1.0);
 
     // テクスチャ描画位置
@@ -264,5 +273,5 @@ void main() {
 
     // スペキュラ色計算
     vec3 HalfVector = normalize(normalize(eye) + -lightDirection);
-    vertexSpecular = pow(max(0, dot(HalfVector, vertexNormal)), max(0.000001, specular.w)) * specular.rgb;
+    vertexSpecular = pow(max(0, dot(HalfVector, vertexNormal)), max(0.000001, SpecularPower)) * SpecularColor.rgb;
 }
