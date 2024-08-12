@@ -61,6 +61,7 @@ func newChannelState() *channelState {
 		isLimitFps60Channel:          make(chan bool),
 		isUnLimitFpsChannel:          make(chan bool),
 		isUnLimitFpsDeformChannel:    make(chan bool),
+		isCameraSyncChannel:          make(chan bool),
 		isClosedChannel:              make(chan bool),
 		playingChannel:               make(chan bool),
 		frameIntervalChanel:          make(chan float64),
