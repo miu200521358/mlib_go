@@ -37,6 +37,7 @@ type appState struct {
 	isClosed             bool                      // ウィンドウクローズ
 	playing              bool                      // 再生中フラグ
 	frameInterval        float64                   // FPS制限
+	invisibleMaterials   [][][]int                 // 非表示材質
 	funcGetModels        func() [][]*pmx.PmxModel  // モデル取得関数
 	funcGetMotions       func() [][]*vmd.VmdMotion // モーション取得関数
 }
@@ -49,6 +50,7 @@ func newAppState() *appState {
 		frameInterval:      1.0 / 30.0, // 30fps
 		frame:              0.0,
 		maxFrame:           1,
+		invisibleMaterials: make([][][]int, 0),
 	}
 }
 
@@ -288,6 +290,10 @@ func (appState *appState) SetFuncGetModels(f func() [][]*pmx.PmxModel) {
 
 func (appState *appState) SetFuncGetMotions(f func() [][]*vmd.VmdMotion) {
 	appState.funcGetMotions = f
+}
+
+func (appState *appState) SetInvisibleMaterials(invisibleMaterials [][][]int) {
+	appState.invisibleMaterials = invisibleMaterials
 }
 
 func (appState *appState) GetModels() [][]*pmx.PmxModel {

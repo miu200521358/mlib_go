@@ -33,6 +33,7 @@ type channelState struct {
 	playingChannel               chan bool      // 再生中フラグ
 	frameIntervalChanel          chan float64   // FPS制限
 	selectedVertexIndexesChannel chan [][][]int // 選択頂点インデックス
+	invisibleMaterialsChannel    chan [][][]int // 非表示材質ON/OFF
 }
 
 func newChannelState() *channelState {
@@ -66,6 +67,7 @@ func newChannelState() *channelState {
 		playingChannel:               make(chan bool),
 		frameIntervalChanel:          make(chan float64),
 		selectedVertexIndexesChannel: make(chan [][][]int, 1),
+		invisibleMaterialsChannel:    make(chan [][][]int, 1),
 	}
 }
 
@@ -183,4 +185,8 @@ func (channelState *channelState) SetFrameIntervalChannel(v float64) {
 
 func (channelState *channelState) SetSelectedVertexIndexesChannel(v [][][]int) {
 	channelState.selectedVertexIndexesChannel <- v
+}
+
+func (channelState *channelState) SetInvisibleMaterialsChannel(v [][][]int) {
+	channelState.invisibleMaterialsChannel <- v
 }

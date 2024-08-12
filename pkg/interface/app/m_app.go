@@ -152,6 +152,8 @@ func (app *MApp) RunControlToViewerChannel() {
 				app.SetPlaying(playing)
 			case frameInterval := <-app.controlToViewerChannel.frameIntervalChanel:
 				app.SetFrameInterval(frameInterval)
+			case invisibleMaterials := <-app.controlToViewerChannel.invisibleMaterialsChannel:
+				app.SetInvisibleMaterials(invisibleMaterials)
 			default:
 				continue
 			}
@@ -229,7 +231,11 @@ func (app *MApp) RunViewer() {
 
 		for i := app.ViewerCount() - 1; i >= 0; i-- {
 			// サブビューワーオーバーレイのため、逆順でレンダリング
-			selectedVertexIndexes[i] = app.viewWindows[i].Render(models[i], vmdDeltas[i])
+			var invisibleMaterials [][]int
+			if i < len(app.invisibleMaterials) {
+				invisibleMaterials = app.invisibleMaterials[i]
+			}
+			selectedVertexIndexes[i] = app.viewWindows[i].Render(models[i], vmdDeltas[i], invisibleMaterials)
 		}
 
 		if app.IsShowSelectedVertex() && !app.IsClosed() {

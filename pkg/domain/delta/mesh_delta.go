@@ -40,7 +40,8 @@ func diffuse(materialMorphDelta *MaterialMorphDelta) mgl32.Vec4 {
 		float32(materialMorphDelta.Diffuse.X),
 		float32(materialMorphDelta.Diffuse.Y),
 		float32(materialMorphDelta.Diffuse.Z),
-		float32(materialMorphDelta.Diffuse.W),
+		float32(materialMorphDelta.Diffuse.W*materialMorphDelta.MulMaterial.Diffuse.W +
+			materialMorphDelta.AddMaterial.Diffuse.W),
 	}
 }
 
@@ -90,7 +91,7 @@ func edge(materialMorphDelta *MaterialMorphDelta) mgl32.Vec4 {
 		float32(e.X*em.X + ea.X),
 		float32(e.Y*em.Y + ea.Y),
 		float32(e.Z*em.Z + ea.Z),
-		float32(materialMorphDelta.Edge.W),
+		float32(materialMorphDelta.Edge.W*em.W + ea.W),
 	}
 }
 

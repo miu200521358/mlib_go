@@ -483,7 +483,9 @@ func (viewWindow *ViewWindow) updateCursorPositions() ([]*mgl32.Vec3, []*mgl32.V
 	return leftCursorWorldPositions, leftCursorRemoveWorldPositions
 }
 
-func (viewWindow *ViewWindow) Render(models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas) [][]int {
+func (viewWindow *ViewWindow) Render(
+	models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas, invisibleMaterials [][]int,
+) [][]int {
 	glfw.PollEvents()
 
 	if viewWindow.size.X == 0 || viewWindow.size.Y == 0 {
@@ -524,6 +526,9 @@ func (viewWindow *ViewWindow) Render(models []*pmx.PmxModel, vmdDeltas []*delta.
 	selectedVertexIndexes := make([][]int, len(models))
 	for i, renderModel := range viewWindow.renderModels {
 		if renderModel != nil && vmdDeltas[i] != nil {
+			if i < len(invisibleMaterials) {
+				renderModel.SetInvisibleMaterialIndexes(invisibleMaterials[i])
+			}
 			renderModel.Render(viewWindow.shader, viewWindow.appState, vmdDeltas[i],
 				leftCursorWorldPositions, leftCursorRemoveWorldPositions,
 				viewWindow.leftCursorWorldHistoryPositions, viewWindow.leftCursorRemoveWorldHistoryPositions)

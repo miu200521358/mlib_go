@@ -346,6 +346,10 @@ func NewControlWindow(
 	return controlWindow
 }
 
+func (controlWindow *ControlWindow) ChannelState() state.IChannelState {
+	return controlWindow.channelState
+}
+
 func (controlWindow *ControlWindow) Dispose() {
 	controlWindow.Close()
 }

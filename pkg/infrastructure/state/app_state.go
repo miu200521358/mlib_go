@@ -100,4 +100,5 @@ type IChannelState interface {
 	SetPlayingChannel(v bool)
 	SetFrameIntervalChannel(v float64)
 	SetSelectedVertexIndexesChannel(v [][][]int)
+	SetInvisibleMaterialsChannel(v [][][]int)
 }
