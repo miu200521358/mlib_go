@@ -33,7 +33,7 @@ type appState struct {
 	isLimitFps60         bool                      // 60FPS制限
 	isUnLimitFps         bool                      // FPS無制限
 	isUnLimitFpsDeform   bool                      // デフォームFPS無制限
-	isCameraSync         bool                      // レンダーシンク
+	isCameraSync         bool                      // カメラ同期
 	isClosed             bool                      // ウィンドウクローズ
 	playing              bool                      // 再生中フラグ
 	frameInterval        float64                   // FPS制限
