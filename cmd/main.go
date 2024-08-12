@@ -102,23 +102,29 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 
 	tabPage.SetLayout(walk.NewVBoxLayout())
 
-	models := make([][]*pmx.PmxModel, 2)
-	models[0] = make([]*pmx.PmxModel, 2)
-	models[1] = make([]*pmx.PmxModel, 1)
+	loadedModels := make([][]*pmx.PmxModel, 2)
+	loadedModels[0] = make([]*pmx.PmxModel, 2)
+	loadedModels[1] = make([]*pmx.PmxModel, 1)
 
 	mApp.SetFuncGetModels(
 		func() [][]*pmx.PmxModel {
-			return models
+			return [][]*pmx.PmxModel{
+				{loadedModels[0][0], loadedModels[0][1]},
+				{loadedModels[1][0]},
+			}
 		},
 	)
 
-	motions := make([][]*vmd.VmdMotion, 2)
-	motions[0] = make([]*vmd.VmdMotion, 2)
-	motions[1] = make([]*vmd.VmdMotion, 1)
+	loadedMotions := make([][]*vmd.VmdMotion, 2)
+	loadedMotions[0] = make([]*vmd.VmdMotion, 2)
+	loadedMotions[1] = make([]*vmd.VmdMotion, 1)
 
 	mApp.SetFuncGetMotions(
 		func() [][]*vmd.VmdMotion {
-			return motions
+			return [][]*vmd.VmdMotion{
+				{loadedMotions[0][0], loadedMotions[0][1]},
+				{loadedMotions[1][0]},
+			}
 		},
 	)
 
@@ -134,9 +140,9 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		if data, err := pmx11ReadPicker.Load(); err == nil {
 			model := data.(*pmx.PmxModel)
 			model.SetIndex(0)
-			models[0][0] = model
-			if motions[0][0] == nil {
-				motions[0][0] = vmd.NewVmdMotion("")
+			loadedModels[0][0] = model
+			if loadedMotions[0][0] == nil {
+				loadedMotions[0][0] = vmd.NewVmdMotion("")
 			}
 		} else {
 			mlog.E(mi18n.T("読み込み失敗"), err)
@@ -155,7 +161,7 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		if data, err := vmd11ReadPicker.Load(); err == nil {
 			motion := data.(*vmd.VmdMotion)
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
-			motions[0][0] = motion
+			loadedMotions[0][0] = motion
 		} else {
 			mlog.E(mi18n.T("読み込み失敗"), err)
 		}
@@ -175,9 +181,9 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		if data, err := pmx12ReadPicker.Load(); err == nil {
 			model := data.(*pmx.PmxModel)
 			model.SetIndex(1)
-			models[0][1] = model
-			if motions[0][1] == nil {
-				motions[0][1] = vmd.NewVmdMotion("")
+			loadedModels[0][1] = model
+			if loadedMotions[0][1] == nil {
+				loadedMotions[0][1] = vmd.NewVmdMotion("")
 			}
 		} else {
 			mlog.E(mi18n.T("読み込み失敗"), err)
@@ -196,7 +202,7 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		if data, err := vmd12ReadPicker.Load(); err == nil {
 			motion := data.(*vmd.VmdMotion)
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
-			motions[0][1] = motion
+			loadedMotions[0][1] = motion
 		} else {
 			mlog.E(mi18n.T("読み込み失敗"), err)
 		}
@@ -216,9 +222,9 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		if data, err := pmx2ReadPicker.Load(); err == nil {
 			model := data.(*pmx.PmxModel)
 			model.SetIndex(0)
-			models[1][0] = model
-			if motions[1][0] == nil {
-				motions[1][0] = vmd.NewVmdMotion("")
+			loadedModels[1][0] = model
+			if loadedMotions[1][0] == nil {
+				loadedMotions[1][0] = vmd.NewVmdMotion("")
 			}
 		} else {
 			mlog.E(mi18n.T("読み込み失敗"), err)
@@ -237,7 +243,7 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		if data, err := vmd2ReadPicker.Load(); err == nil {
 			motion := data.(*vmd.VmdMotion)
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
-			motions[1][0] = motion
+			loadedMotions[1][0] = motion
 		} else {
 			mlog.E(mi18n.T("読み込み失敗"), err)
 		}
