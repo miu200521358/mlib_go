@@ -735,7 +735,9 @@ func (renderModel *RenderModel) ExistInvisibleMaterial(index int) bool {
 func (renderModel *RenderModel) SelectedVertexes() []int {
 	indexes := make([]int, 0, len(renderModel.selectedVertexes))
 	for i := range renderModel.selectedVertexes {
-		indexes = append(indexes, i)
+		if _, ok := renderModel.noSelectedVertexes[i]; !ok {
+			indexes = append(indexes, i)
+		}
 	}
 	return indexes
 }
@@ -770,6 +772,7 @@ func (renderModel *RenderModel) ClearSelectedVertexes() {
 func (renderModel *RenderModel) UpdateSelectedVertexes(indexes []int) {
 	for _, index := range indexes {
 		renderModel.selectedVertexes[index] = struct{}{}
+		delete(renderModel.noSelectedVertexes, index)
 	}
 }
 

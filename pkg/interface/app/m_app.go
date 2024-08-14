@@ -85,7 +85,7 @@ func (app *MApp) RunViewerToControlChannel() {
 			case frame := <-app.viewerToControlChannel.frameChannel:
 				app.controlWindow.SetFrame(frame)
 			case selectedVertexes := <-app.viewerToControlChannel.selectedVertexesChannel:
-				app.controlWindow.UpdateSelectedVertexes(selectedVertexes)
+				app.controlWindow.SetSelectedVertexes(selectedVertexes)
 			case closed := <-app.viewerToControlChannel.isClosedChannel:
 				app.controlWindow.SetClosed(closed)
 				return
@@ -254,6 +254,7 @@ func (app *MApp) RunViewer() {
 		if app.IsShowSelectedVertex() && !app.IsClosed() {
 			// 頂点選択機能が有効の場合、選択頂点インデックスを更新
 			app.viewerToControlChannel.SetSelectedVertexesChannel(selectedVertexes)
+			app.selectedVertexes = selectedVertexes
 		}
 
 		if app.IsPhysicsReset() {

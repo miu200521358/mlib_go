@@ -530,11 +530,11 @@ func (viewWindow *ViewWindow) Render(
 			if i < len(invisibleMaterials) {
 				renderModel.SetInvisibleMaterials(invisibleMaterials[i])
 			}
-			if i < len(windowSelectedVertexes) {
-				renderModel.UpdateSelectedVertexes(windowSelectedVertexes[i])
-			}
 			if i < len(windowNoSelectedVertexes) {
 				renderModel.UpdateNoSelectedVertexes(windowNoSelectedVertexes[i])
+			}
+			if i < len(windowSelectedVertexes) {
+				renderModel.UpdateSelectedVertexes(windowSelectedVertexes[i])
 			}
 			renderModel.Render(viewWindow.shader, viewWindow.appState, vmdDeltas[i],
 				leftCursorWorldPositions, leftCursorRemoveWorldPositions,

@@ -24,10 +24,9 @@ type IControlWindow interface {
 	SetFrameChannel(frame float32)
 	UpdateMaxFrame(frame float32)
 	UpdateMaxFrameChannel(frame float32)
-	UpdateSelectedVertexes(indexes [][][]int)
-	SetUpdateSelectedVertexesFunc(f func([][][]int))
 	SetPlayingChannel(playing bool)
 	SetClosed(closed bool)
+	SetSelectedVertexes(indexes [][][]int)
 }
 
 type IViewWindow interface {
