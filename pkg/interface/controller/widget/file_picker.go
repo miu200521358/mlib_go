@@ -351,6 +351,20 @@ func (picker *FilePicker) GetPath() string {
 	return picker.pathLineEdit.Text()
 }
 
+func (picker *FilePicker) SetName(path string) {
+	if picker.nameLineEdit == nil {
+		return
+	}
+	picker.nameLineEdit.SetText(path)
+}
+
+func (picker *FilePicker) GetName() string {
+	if picker.nameLineEdit == nil {
+		return ""
+	}
+	return picker.nameLineEdit.Text()
+}
+
 func (picker *FilePicker) OnChanged(path string) {
 	picker.pathLineEdit.SetText(path)
 

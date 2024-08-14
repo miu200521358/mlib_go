@@ -50,20 +50,22 @@ func (physics *MPhysics) initRigidBodiesByBoneDeltas(
 		}
 
 		// 剛体の初期位置と回転
-		btRigidBodyTransform := bt.NewBtTransform()
-		if bone != nil {
-			boneTransform := bt.NewBtTransform()
-			defer bt.DeleteBtTransform(boneTransform)
-
-			mat := mgl.NewGlMat4(boneDeltas.Get(bone.Index()).FilledGlobalMatrix())
-			boneTransform.SetFromOpenGLMatrix(&mat[0])
-
-			rigidBodyLocalPos := rigidBody.Position.Subed(bone.Position)
-			btRigidBodyLocalTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation),
-				MVec3Bullet(rigidBodyLocalPos))
-
-			btRigidBodyTransform.Mult(boneTransform, btRigidBodyLocalTransform)
+		if bone == nil || !boneDeltas.Contains(bone.Index()) {
+			continue
 		}
+
+		btRigidBodyTransform := bt.NewBtTransform()
+		boneTransform := bt.NewBtTransform()
+		defer bt.DeleteBtTransform(boneTransform)
+
+		mat := mgl.NewGlMat4(boneDeltas.Get(bone.Index()).FilledGlobalMatrix())
+		boneTransform.SetFromOpenGLMatrix(&mat[0])
+
+		rigidBodyLocalPos := rigidBody.Position.Subed(bone.Position)
+		btRigidBodyLocalTransform := bt.NewBtTransform(MRotationBullet(rigidBody.Rotation),
+			MVec3Bullet(rigidBodyLocalPos))
+
+		btRigidBodyTransform.Mult(boneTransform, btRigidBodyLocalTransform)
 
 		// 物理設定の初期化
 		physics.initRigidBody(modelIndex, rigidBody, btRigidBodyTransform)

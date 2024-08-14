@@ -298,8 +298,8 @@ func (app *MApp) resetPhysics(
 
 	// 物理リセット
 	for i, window := range app.viewWindows {
-		// 物理無関係のデフォーム結果
-		vmdDeltas[i] = deform.Deform(window.Physics(), app, timeStep, models[i], motions[i], nil)
+		// リセット用デフォーム
+		vmdDeltas[i] = deform.DeformForReset(window.Physics(), app, timeStep, models[i], motions[i], nil)
 
 		// 物理削除
 		for _, model := range models[i] {
@@ -317,7 +317,7 @@ func (app *MApp) resetPhysics(
 			if model == nil || vmdDeltas[i][j] == nil {
 				continue
 			}
-			window.Physics().AddModelByBoneDeltas(model.Index(), model, vmdDeltas[i][j].Bones)
+			window.Physics().AddModelByBoneDeltas(j, model, vmdDeltas[i][j].Bones)
 		}
 
 		// 物理再設定

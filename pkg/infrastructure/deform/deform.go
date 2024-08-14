@@ -80,6 +80,27 @@ func DeformBonePyPhysics(
 	return DeformBoneByPhysicsFlag(model, motion, vmdDeltas, true, appState.Frame(), nil, true)
 }
 
+func DeformForReset(
+	physics *mbt.MPhysics, appState state.IAppState, timeStep float32,
+	models []*pmx.PmxModel, motions []*vmd.VmdMotion, vmdDeltas []*delta.VmdDeltas,
+) []*delta.VmdDeltas {
+	// 物理前デフォーム
+	for i := range models {
+		if models[i] == nil || motions[i] == nil {
+			continue
+		}
+		for i >= len(vmdDeltas) {
+			vmdDeltas = append(vmdDeltas, nil)
+		}
+		// 物理前
+		vmdDeltas[i] = DeformBoneByPhysicsFlag(models[i], motions[i], vmdDeltas[i], true, appState.Frame(), nil, false)
+		// 物理後
+		vmdDeltas[i] = DeformBoneByPhysicsFlag(models[i], motions[i], vmdDeltas[i], true, appState.Frame(), nil, true)
+	}
+
+	return vmdDeltas
+}
+
 func Deform(
 	physics *mbt.MPhysics, appState state.IAppState, timeStep float32,
 	models []*pmx.PmxModel, motions []*vmd.VmdMotion, vmdDeltas []*delta.VmdDeltas,

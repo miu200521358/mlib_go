@@ -49,7 +49,7 @@ func (physics *MPhysics) initJointsByBoneDeltas(
 				bone = rigidBodies.Get(joint.RigidbodyIndexB).JointedBone
 			}
 
-			if bone == nil {
+			if bone == nil || !boneDeltas.Contains(bone.Index()) {
 				continue
 			}
 
