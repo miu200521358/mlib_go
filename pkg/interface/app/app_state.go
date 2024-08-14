@@ -38,6 +38,8 @@ type appState struct {
 	playing              bool                      // 再生中フラグ
 	frameInterval        float64                   // FPS制限
 	invisibleMaterials   [][][]int                 // 非表示材質
+	selectedVertexes     [][][]int                 // 選択頂点
+	noSelectedVertexes   [][][]int                 // 非選択頂点
 	funcGetModels        func() [][]*pmx.PmxModel  // モデル取得関数
 	funcGetMotions       func() [][]*vmd.VmdMotion // モーション取得関数
 }
@@ -51,6 +53,8 @@ func newAppState() *appState {
 		frame:              0.0,
 		maxFrame:           1,
 		invisibleMaterials: make([][][]int, 0),
+		selectedVertexes:   make([][][]int, 0),
+		noSelectedVertexes: make([][][]int, 0),
 	}
 }
 
@@ -294,6 +298,26 @@ func (appState *appState) SetFuncGetMotions(f func() [][]*vmd.VmdMotion) {
 
 func (appState *appState) SetInvisibleMaterials(invisibleMaterials [][][]int) {
 	appState.invisibleMaterials = invisibleMaterials
+}
+
+func (appState *appState) InvisibleMaterials() [][][]int {
+	return appState.invisibleMaterials
+}
+
+func (appState *appState) SetSelectedVertexes(selectedVertexes [][][]int) {
+	appState.selectedVertexes = selectedVertexes
+}
+
+func (appState *appState) SelectedVertexes() [][][]int {
+	return appState.selectedVertexes
+}
+
+func (appState *appState) SetNoSelectedVertexes(noSelectedVertexes [][][]int) {
+	appState.noSelectedVertexes = noSelectedVertexes
+}
+
+func (appState *appState) NoSelectedVertexes() [][][]int {
+	return appState.noSelectedVertexes
 }
 
 func (appState *appState) GetModels() [][]*pmx.PmxModel {

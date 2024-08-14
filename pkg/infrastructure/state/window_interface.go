@@ -24,8 +24,8 @@ type IControlWindow interface {
 	SetFrameChannel(frame float32)
 	UpdateMaxFrame(frame float32)
 	UpdateMaxFrameChannel(frame float32)
-	UpdateSelectedVertexIndexes(indexes [][][]int)
-	SetUpdateSelectedVertexIndexesFunc(f func([][][]int))
+	UpdateSelectedVertexes(indexes [][][]int)
+	SetUpdateSelectedVertexesFunc(f func([][][]int))
 	SetPlayingChannel(playing bool)
 	SetClosed(closed bool)
 }
@@ -43,7 +43,8 @@ type IViewWindow interface {
 	SetOverrideTextureId(id uint32)
 	GetViewerParameter() (float64, float64, *mmath.MVec2, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3)
 	UpdateViewerParameter(yaw, pitch float64, size *mmath.MVec2, cameraPos, cameraUp, lookAtCenter *mmath.MVec3)
-	Render(models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas, invisibleMaterials [][]int) [][]int
+	Render(models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas, invisibleMaterials [][]int,
+		selectedVertexes [][]int, noSelectedVertexes [][]int) [][]int
 	Physics() *mbt.MPhysics
 	LoadModels(models []*pmx.PmxModel)
 }
@@ -73,11 +74,11 @@ type IRenderModel interface {
 	Model() *pmx.PmxModel
 	InvisibleMaterialIndexes() []int
 	ExistInvisibleMaterialIndex(index int) bool
-	SelectedVertexIndexes() []int
-	NoSelectedVertexIndexes() []int
-	SetSelectedVertexIndexes(indexes []int)
-	SetNoSelectedVertexIndexes(indexes []int)
-	ClearSelectedVertexIndexes()
-	UpdateSelectedVertexIndexes(indexes []int)
-	UpdateNoSelectedVertexIndexes(indexes []int)
+	SelectedVertexes() []int
+	NoSelectedVertexes() []int
+	SetSelectedVertexes(indexes []int)
+	SetNoSelectedVertexes(indexes []int)
+	ClearSelectedVertexes()
+	UpdateSelectedVertexes(indexes []int)
+	UpdateNoSelectedVertexes(indexes []int)
 }

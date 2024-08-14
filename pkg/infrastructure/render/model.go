@@ -21,8 +21,8 @@ import (
 type RenderModel struct {
 	windowIndex              int              // ウィンドウインデックス
 	invisibleMaterialIndexes map[int]struct{} // 非表示材質インデックス
-	selectedVertexIndexes    map[int]struct{} // 選択頂点インデックス
-	noSelectedVertexIndexes  map[int]struct{} // 非選択頂点インデックス
+	selectedVertexes         map[int]struct{} // 選択頂点インデックス
+	noSelectedVertexes       map[int]struct{} // 非選択頂点インデックス
 	model                    *pmx.PmxModel    // 元モデル
 	hash                     string           // ハッシュ
 	meshes                   []*Mesh          // メッシュ
@@ -65,7 +65,7 @@ func NewRenderModel(windowIndex int, model *pmx.PmxModel) *RenderModel {
 
 	renderModel.initializeBuffer(model)
 	renderModel.hash = model.Hash()
-	renderModel.selectedVertexIndexes = make(map[int]struct{})
+	renderModel.selectedVertexes = make(map[int]struct{})
 
 	return renderModel
 }
@@ -341,7 +341,7 @@ func (renderModel *RenderModel) Render(
 			mesh.drawEdge(renderModel.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight, md)
 		}
 
-		if appState.IsShowWire() && !renderModel.ExistInvisibleMaterialIndex(mesh.material.Index()) {
+		if appState.IsShowWire() && !renderModel.ExistInvisibleMaterial(mesh.material.Index()) {
 			mesh.drawWire(renderModel.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight, false)
 		}
 
@@ -394,14 +394,14 @@ func (renderModel *RenderModel) Render(
 			}
 		}
 
-		selectedVertexIndexes := renderModel.drawSelectedVertex(
-			renderModel.windowIndex, renderModel.InvisibleMaterialIndexes(),
-			renderModel.SelectedVertexIndexes(), renderModel.NoSelectedVertexIndexes(),
+		selectedVertexes := renderModel.drawSelectedVertex(
+			renderModel.windowIndex, renderModel.InvisibleMaterials(),
+			renderModel.SelectedVertexes(), renderModel.NoSelectedVertexes(),
 			shader, paddedMatrixes, matrixWidth, matrixHeight, cursorPositions, removeCursorPositions)
 		if len(removeCursorPositions) > 0 {
-			renderModel.UpdateNoSelectedVertexIndexes(selectedVertexIndexes)
+			renderModel.UpdateNoSelectedVertexes(selectedVertexes)
 		} else if len(leftCursorPositions) > 0 {
-			renderModel.UpdateSelectedVertexIndexes(selectedVertexIndexes)
+			renderModel.UpdateSelectedVertexes(selectedVertexes)
 		}
 
 		// カーソルの軌跡
@@ -494,8 +494,8 @@ func (renderModel *RenderModel) drawCursorLine(
 func (renderModel *RenderModel) drawSelectedVertex(
 	windowIndex int,
 	invisibleMaterialIndexes []int,
-	nowSelectedVertexIndexes []int,
-	nowNoSelectedVertexIndexes []int,
+	nowSelectedVertexes []int,
+	nowNoSelectedVertexes []int,
 	shader mgl.IShader,
 	paddedMatrixes []float32, width, height int,
 	cursorPositions []float32,
@@ -509,13 +509,13 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	gl.UseProgram(program)
 
 	selectedVertexDeltas := delta.NewVertexMorphDeltas()
-	for _, index := range nowNoSelectedVertexIndexes {
+	for _, index := range nowNoSelectedVertexes {
 		// 選択されていない頂点のUVXを-1にして表示しない
 		vd := delta.NewVertexMorphDelta(index)
 		vd.Uv = &mmath.MVec2{X: -1, Y: 0}
 		selectedVertexDeltas.Update(vd)
 	}
-	for _, index := range nowSelectedVertexIndexes {
+	for _, index := range nowSelectedVertexes {
 		// 選択されている頂点のUVXを＋にして（フラグをたてて）表示する
 		vd := delta.NewVertexMorphDelta(index)
 		vd.Uv = &mmath.MVec2{X: 1, Y: 0}
@@ -558,7 +558,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, renderModel.ssbo)
 	ptr := gl.MapBuffer(gl.SHADER_STORAGE_BUFFER, gl.READ_ONLY)
 	selectedVertexPositions := make(map[int]mgl32.Vec4)
-	selectedVertexIndexes := make([]int, 0, renderModel.vertexCount)
+	selectedVertexes := make([]int, 0, renderModel.vertexCount)
 
 	if ptr != nil {
 		// SSBOから読み取り
@@ -577,7 +577,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 			if !isInvisible && (vertexPositions[0] != -1 || vertexPositions[1] != -1 ||
 				vertexPositions[2] != -1 || vertexPositions[3] != -1) {
 				// 表示対象でいずれが-1でない場合はマップに保持
-				selectedVertexIndexes = append(selectedVertexIndexes, i)
+				selectedVertexes = append(selectedVertexes, i)
 				selectedVertexPositions[i] = mgl32.Vec4{
 					vertexPositions[0], vertexPositions[1], vertexPositions[2], vertexPositions[3]}
 			}
@@ -612,7 +612,7 @@ func (renderModel *RenderModel) drawSelectedVertex(
 		}
 	}
 
-	return selectedVertexIndexes
+	return selectedVertexes
 }
 
 func (renderModel *RenderModel) drawBone(
@@ -704,7 +704,7 @@ func (renderModel *RenderModel) fetchBonePointDeltas(
 	return indexes, deltas
 }
 
-func (renderModel *RenderModel) InvisibleMaterialIndexes() []int {
+func (renderModel *RenderModel) InvisibleMaterials() []int {
 	if renderModel.invisibleMaterialIndexes == nil {
 		return nil
 	}
@@ -716,7 +716,7 @@ func (renderModel *RenderModel) InvisibleMaterialIndexes() []int {
 	return indexes
 }
 
-func (renderModel *RenderModel) SetInvisibleMaterialIndexes(indexes []int) {
+func (renderModel *RenderModel) SetInvisibleMaterials(indexes []int) {
 	if len(indexes) == 0 {
 		renderModel.invisibleMaterialIndexes = nil
 		return
@@ -727,58 +727,58 @@ func (renderModel *RenderModel) SetInvisibleMaterialIndexes(indexes []int) {
 	}
 }
 
-func (renderModel *RenderModel) ExistInvisibleMaterialIndex(index int) bool {
+func (renderModel *RenderModel) ExistInvisibleMaterial(index int) bool {
 	_, ok := renderModel.invisibleMaterialIndexes[index]
 	return ok
 }
 
-func (renderModel *RenderModel) SelectedVertexIndexes() []int {
-	indexes := make([]int, 0, len(renderModel.selectedVertexIndexes))
-	for i := range renderModel.selectedVertexIndexes {
+func (renderModel *RenderModel) SelectedVertexes() []int {
+	indexes := make([]int, 0, len(renderModel.selectedVertexes))
+	for i := range renderModel.selectedVertexes {
 		indexes = append(indexes, i)
 	}
 	return indexes
 }
 
-func (renderModel *RenderModel) NoSelectedVertexIndexes() []int {
-	indexes := make([]int, 0, len(renderModel.noSelectedVertexIndexes))
-	for i := range renderModel.noSelectedVertexIndexes {
+func (renderModel *RenderModel) NoSelectedVertexes() []int {
+	indexes := make([]int, 0, len(renderModel.noSelectedVertexes))
+	for i := range renderModel.noSelectedVertexes {
 		indexes = append(indexes, i)
 	}
 	return indexes
 }
 
-func (renderModel *RenderModel) SetSelectedVertexIndexes(indexes []int) {
-	renderModel.selectedVertexIndexes = make(map[int]struct{}, len(indexes))
+func (renderModel *RenderModel) SetSelectedVertexes(indexes []int) {
+	renderModel.selectedVertexes = make(map[int]struct{}, len(indexes))
 	for _, i := range indexes {
-		renderModel.selectedVertexIndexes[i] = struct{}{}
+		renderModel.selectedVertexes[i] = struct{}{}
 	}
 }
 
-func (renderModel *RenderModel) SetNoSelectedVertexIndexes(indexes []int) {
-	renderModel.noSelectedVertexIndexes = make(map[int]struct{}, len(indexes))
+func (renderModel *RenderModel) SetNoSelectedVertexes(indexes []int) {
+	renderModel.noSelectedVertexes = make(map[int]struct{}, len(indexes))
 	for _, i := range indexes {
-		renderModel.noSelectedVertexIndexes[i] = struct{}{}
+		renderModel.noSelectedVertexes[i] = struct{}{}
 	}
 }
 
-func (renderModel *RenderModel) ClearSelectedVertexIndexes() {
-	renderModel.UpdateNoSelectedVertexIndexes(renderModel.SelectedVertexIndexes())
-	renderModel.selectedVertexIndexes = make(map[int]struct{})
+func (renderModel *RenderModel) ClearSelectedVertexes() {
+	renderModel.UpdateNoSelectedVertexes(renderModel.SelectedVertexes())
+	renderModel.selectedVertexes = make(map[int]struct{})
 }
 
-func (renderModel *RenderModel) UpdateSelectedVertexIndexes(indexes []int) {
+func (renderModel *RenderModel) UpdateSelectedVertexes(indexes []int) {
 	for _, index := range indexes {
-		renderModel.selectedVertexIndexes[index] = struct{}{}
+		renderModel.selectedVertexes[index] = struct{}{}
 	}
 }
 
-func (renderModel *RenderModel) UpdateNoSelectedVertexIndexes(indexes []int) {
-	if renderModel.noSelectedVertexIndexes == nil {
-		renderModel.noSelectedVertexIndexes = make(map[int]struct{}, len(indexes))
+func (renderModel *RenderModel) UpdateNoSelectedVertexes(indexes []int) {
+	if renderModel.noSelectedVertexes == nil {
+		renderModel.noSelectedVertexes = make(map[int]struct{}, len(indexes))
 	}
 	for _, index := range indexes {
-		renderModel.noSelectedVertexIndexes[index] = struct{}{}
-		delete(renderModel.selectedVertexIndexes, index)
+		renderModel.noSelectedVertexes[index] = struct{}{}
+		delete(renderModel.selectedVertexes, index)
 	}
 }

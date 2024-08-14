@@ -84,8 +84,8 @@ func (app *MApp) RunViewerToControlChannel() {
 			select {
 			case frame := <-app.viewerToControlChannel.frameChannel:
 				app.controlWindow.SetFrame(frame)
-			case selectedVertexIndexes := <-app.viewerToControlChannel.selectedVertexIndexesChannel:
-				app.controlWindow.UpdateSelectedVertexIndexes(selectedVertexIndexes)
+			case selectedVertexes := <-app.viewerToControlChannel.selectedVertexesChannel:
+				app.controlWindow.UpdateSelectedVertexes(selectedVertexes)
 			case closed := <-app.viewerToControlChannel.isClosedChannel:
 				app.controlWindow.SetClosed(closed)
 				return
@@ -154,6 +154,10 @@ func (app *MApp) RunControlToViewerChannel() {
 				app.SetFrameInterval(frameInterval)
 			case invisibleMaterials := <-app.controlToViewerChannel.invisibleMaterialsChannel:
 				app.SetInvisibleMaterials(invisibleMaterials)
+			case selectedVertexes := <-app.controlToViewerChannel.selectedVertexesChannel:
+				app.SetSelectedVertexes(selectedVertexes)
+			case noSelectedVertexes := <-app.controlToViewerChannel.noSelectedVertexesChannel:
+				app.SetNoSelectedVertexes(noSelectedVertexes)
 			default:
 				continue
 			}
@@ -227,7 +231,7 @@ func (app *MApp) RunViewer() {
 			}
 		}
 
-		selectedVertexIndexes := make([][][]int, app.ViewerCount())
+		selectedVertexes := make([][][]int, app.ViewerCount())
 
 		for i := app.ViewerCount() - 1; i >= 0; i-- {
 			// サブビューワーオーバーレイのため、逆順でレンダリング
@@ -235,12 +239,21 @@ func (app *MApp) RunViewer() {
 			if i < len(app.invisibleMaterials) {
 				invisibleMaterials = app.invisibleMaterials[i]
 			}
-			selectedVertexIndexes[i] = app.viewWindows[i].Render(models[i], vmdDeltas[i], invisibleMaterials)
+			var windowSelectedVertexes [][]int
+			if i < len(app.selectedVertexes) {
+				windowSelectedVertexes = app.selectedVertexes[i]
+			}
+			var windowNoSelectedVertexes [][]int
+			if i < len(app.noSelectedVertexes) {
+				windowNoSelectedVertexes = app.noSelectedVertexes[i]
+			}
+			selectedVertexes[i] = app.viewWindows[i].Render(
+				models[i], vmdDeltas[i], invisibleMaterials, windowSelectedVertexes, windowNoSelectedVertexes)
 		}
 
 		if app.IsShowSelectedVertex() && !app.IsClosed() {
 			// 頂点選択機能が有効の場合、選択頂点インデックスを更新
-			app.viewerToControlChannel.SetSelectedVertexIndexesChannel(selectedVertexIndexes)
+			app.viewerToControlChannel.SetSelectedVertexesChannel(selectedVertexes)
 		}
 
 		if app.IsPhysicsReset() {

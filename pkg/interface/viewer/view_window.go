@@ -485,6 +485,7 @@ func (viewWindow *ViewWindow) updateCursorPositions() ([]*mgl32.Vec3, []*mgl32.V
 
 func (viewWindow *ViewWindow) Render(
 	models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas, invisibleMaterials [][]int,
+	windowSelectedVertexes [][]int, windowNoSelectedVertexes [][]int,
 ) [][]int {
 	glfw.PollEvents()
 
@@ -523,16 +524,22 @@ func (viewWindow *ViewWindow) Render(
 	viewWindow.shader.DrawFloor()
 
 	// モデル描画
-	selectedVertexIndexes := make([][]int, len(models))
+	selectedVertexes := make([][]int, len(models))
 	for i, renderModel := range viewWindow.renderModels {
 		if renderModel != nil && vmdDeltas[i] != nil {
 			if i < len(invisibleMaterials) {
-				renderModel.SetInvisibleMaterialIndexes(invisibleMaterials[i])
+				renderModel.SetInvisibleMaterials(invisibleMaterials[i])
+			}
+			if i < len(windowSelectedVertexes) {
+				renderModel.UpdateSelectedVertexes(windowSelectedVertexes[i])
+			}
+			if i < len(windowNoSelectedVertexes) {
+				renderModel.UpdateNoSelectedVertexes(windowNoSelectedVertexes[i])
 			}
 			renderModel.Render(viewWindow.shader, viewWindow.appState, vmdDeltas[i],
 				leftCursorWorldPositions, leftCursorRemoveWorldPositions,
 				viewWindow.leftCursorWorldHistoryPositions, viewWindow.leftCursorRemoveWorldHistoryPositions)
-			selectedVertexIndexes[i] = renderModel.SelectedVertexIndexes()
+			selectedVertexes[i] = renderModel.SelectedVertexes()
 		}
 	}
 
@@ -556,7 +563,7 @@ func (viewWindow *ViewWindow) Render(
 		viewWindow.leftCursorRemoveWorldHistoryPositions = make([]*mgl32.Vec3, 0)
 	}
 
-	return selectedVertexIndexes
+	return selectedVertexes
 }
 
 func (viewWindow *ViewWindow) LoadModels(models []*pmx.PmxModel) {
