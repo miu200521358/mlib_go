@@ -202,6 +202,13 @@ func (app *MApp) RunViewer() {
 		models := app.GetModels()
 		motions := app.GetMotions()
 
+		for len(models) < len(app.viewWindows) {
+			models = append(models, make([]*pmx.PmxModel, 0))
+		}
+		for len(motions) < len(app.viewWindows) {
+			motions = append(motions, make([]*vmd.VmdMotion, 0))
+		}
+
 		for i, window := range app.viewWindows {
 			window.LoadModels(models[i])
 		}

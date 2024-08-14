@@ -321,9 +321,15 @@ func (appState *appState) NoSelectedVertexes() [][][]int {
 }
 
 func (appState *appState) GetModels() [][]*pmx.PmxModel {
+	if appState.funcGetModels == nil {
+		return make([][]*pmx.PmxModel, 0)
+	}
 	return appState.funcGetModels()
 }
 
 func (appState *appState) GetMotions() [][]*vmd.VmdMotion {
+	if appState.funcGetMotions == nil {
+		return make([][]*vmd.VmdMotion, 0)
+	}
 	return appState.funcGetMotions()
 }
