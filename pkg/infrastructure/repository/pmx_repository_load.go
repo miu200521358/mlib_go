@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"bufio"
 	"fmt"
+	"io/fs"
 	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
@@ -24,6 +26,33 @@ func (rep *PmxRepository) Load(path string) (core.IHashModel, error) {
 	}
 
 	err = rep.loadHeader(model)
+	if err != nil {
+		mlog.E("ReadByFilepath.loadHeader error: %v", err)
+		return model, err
+	}
+
+	err = rep.loadModel(model)
+	if err != nil {
+		mlog.E("ReadByFilepath.loadData error: %v", err)
+		return model, err
+	}
+
+	rep.close()
+	model.Setup()
+
+	return model, nil
+}
+
+// 指定されたファイルオブジェクトからデータを読み込む
+func (rep *PmxRepository) LoadByFile(file fs.File) (core.IHashModel, error) {
+	// モデルを新規作成
+	model := rep.newFunc("")
+
+	// ファイルを開く
+	rep.file = file
+	rep.reader = bufio.NewReader(rep.file)
+
+	err := rep.loadHeader(model)
 	if err != nil {
 		mlog.E("ReadByFilepath.loadHeader error: %v", err)
 		return model, err

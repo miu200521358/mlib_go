@@ -157,7 +157,6 @@ func (rep *PmxJsonRepository) Load(path string) (core.IHashModel, error) {
 	}
 
 	model.UpdateHash()
-	rep.close()
 
 	return model, nil
 }

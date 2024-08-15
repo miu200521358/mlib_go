@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"io/fs"
 	"math"
 	"os"
 
@@ -25,7 +26,7 @@ type IRepository interface {
 }
 
 type baseRepository[T core.IHashModel] struct {
-	file     *os.File
+	file     fs.File
 	reader   *bufio.Reader
 	encoding encoding.Encoding
 	readText func() string
