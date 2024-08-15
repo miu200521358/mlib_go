@@ -247,16 +247,29 @@ func (renderModel *RenderModel) initializeBuffer(
 	renderModel.vao = mgl.NewVAO()
 	renderModel.vao.Bind()
 
-	renderModel.vbo = mgl.NewVBOForVertex(gl.Ptr(renderModel.vertices), len(renderModel.vertices))
+	if len(renderModel.vertices) == 0 {
+		renderModel.vbo = mgl.NewVBOForVertex(nil, 0)
+	} else {
+		renderModel.vbo = mgl.NewVBOForVertex(gl.Ptr(renderModel.vertices), len(renderModel.vertices))
+	}
 	renderModel.vbo.BindVertex(nil)
 	renderModel.vbo.Unbind()
+
 	renderModel.vao.Unbind()
 
 	renderModel.normalVao = mgl.NewVAO()
 	renderModel.normalVao.Bind()
-	renderModel.normalVbo = mgl.NewVBOForVertex(gl.Ptr(renderModel.normalVertices), len(renderModel.normalVertices))
+	if len(renderModel.normalVertices) == 0 {
+		renderModel.normalVbo = mgl.NewVBOForVertex(nil, 0)
+	} else {
+		renderModel.normalVbo = mgl.NewVBOForVertex(gl.Ptr(renderModel.normalVertices), len(renderModel.normalVertices))
+	}
 	renderModel.normalVbo.BindVertex(nil)
-	renderModel.normalIbo = mgl.NewIBO(gl.Ptr(normalFaces), len(normalFaces))
+	if len(normalFaces) == 0 {
+		renderModel.normalIbo = mgl.NewIBO(nil, 0)
+	} else {
+		renderModel.normalIbo = mgl.NewIBO(gl.Ptr(normalFaces), len(normalFaces))
+	}
 	renderModel.normalIbo.Bind()
 	renderModel.normalIbo.Unbind()
 	renderModel.normalVbo.Unbind()
@@ -266,9 +279,18 @@ func (renderModel *RenderModel) initializeBuffer(
 	renderModel.boneLineIndexes = boneIndexes
 	renderModel.boneLineVao = mgl.NewVAO()
 	renderModel.boneLineVao.Bind()
-	renderModel.boneLineVbo = mgl.NewVBOForBone(gl.Ptr(bones), len(bones))
+	if len(bones) == 0 {
+		renderModel.boneLineVbo = mgl.NewVBOForBone(nil, 0)
+	} else {
+		renderModel.boneLineVbo = mgl.NewVBOForBone(gl.Ptr(bones), len(bones))
+	}
 	renderModel.boneLineVbo.BindBone(nil, nil)
-	renderModel.boneLineIbo = mgl.NewIBO(gl.Ptr(boneFaces), len(boneFaces))
+
+	if len(boneFaces) == 0 {
+		renderModel.boneLineIbo = mgl.NewIBO(nil, 0)
+	} else {
+		renderModel.boneLineIbo = mgl.NewIBO(gl.Ptr(boneFaces), len(boneFaces))
+	}
 	renderModel.boneLineIbo.Bind()
 	renderModel.boneLineIbo.Unbind()
 	renderModel.boneLineVbo.Unbind()
@@ -278,9 +300,17 @@ func (renderModel *RenderModel) initializeBuffer(
 	renderModel.bonePointIndexes = bonePointIndexes
 	renderModel.bonePointVao = mgl.NewVAO()
 	renderModel.bonePointVao.Bind()
-	renderModel.bonePointVbo = mgl.NewVBOForBone(gl.Ptr(bonePoints), len(bonePoints))
+	if len(bonePoints) == 0 {
+		renderModel.bonePointVbo = mgl.NewVBOForBone(nil, 0)
+	} else {
+		renderModel.bonePointVbo = mgl.NewVBOForBone(gl.Ptr(bonePoints), len(bonePoints))
+	}
 	renderModel.bonePointVbo.BindBone(nil, nil)
-	renderModel.bonePointIbo = mgl.NewIBO(gl.Ptr(bonePointFaces), len(bonePointFaces))
+	if len(bonePointFaces) == 0 {
+		renderModel.bonePointIbo = mgl.NewIBO(nil, 0)
+	} else {
+		renderModel.bonePointIbo = mgl.NewIBO(gl.Ptr(bonePointFaces), len(bonePointFaces))
+	}
 	renderModel.bonePointIbo.Bind()
 	renderModel.bonePointIbo.Unbind()
 	renderModel.bonePointVbo.Unbind()
@@ -288,9 +318,17 @@ func (renderModel *RenderModel) initializeBuffer(
 
 	renderModel.selectedVertexVao = mgl.NewVAO()
 	renderModel.selectedVertexVao.Bind()
-	renderModel.selectedVertexVbo = mgl.NewVBOForVertex(gl.Ptr(selectedVertices), len(selectedVertices))
+	if len(selectedVertices) == 0 {
+		renderModel.selectedVertexVbo = mgl.NewVBOForVertex(nil, 0)
+	} else {
+		renderModel.selectedVertexVbo = mgl.NewVBOForVertex(gl.Ptr(selectedVertices), len(selectedVertices))
+	}
 	renderModel.selectedVertexVbo.BindVertex(nil)
-	renderModel.selectedVertexIbo = mgl.NewIBO(gl.Ptr(selectedVertexFaces), len(selectedVertexFaces))
+	if len(selectedVertexFaces) == 0 {
+		renderModel.selectedVertexIbo = mgl.NewIBO(nil, 0)
+	} else {
+		renderModel.selectedVertexIbo = mgl.NewIBO(gl.Ptr(selectedVertexFaces), len(selectedVertexFaces))
+	}
 	renderModel.selectedVertexIbo.Bind()
 	renderModel.selectedVertexIbo.Unbind()
 	renderModel.selectedVertexVbo.Unbind()
@@ -659,7 +697,7 @@ func (renderModel *RenderModel) drawBone(
 	// 点描画
 	gl.DrawElements(
 		gl.POINTS,
-		int32(len(renderModel.vertices)),
+		int32(bones.Len()),
 		gl.UNSIGNED_INT,
 		nil,
 	)

@@ -26,7 +26,6 @@ type PmxModel struct {
 	englishName        string
 	Comment            string
 	EnglishComment     string
-	JsonData           map[string]interface{}
 	Vertices           *Vertices
 	Faces              *Faces
 	Textures           *Textures

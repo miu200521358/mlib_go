@@ -56,9 +56,33 @@ func NewPmxReadFilePicker(
 		tooltip,
 		description,
 		map[int]map[string]string{
-			0: {"*.pmx": "Pmx Files (*.pmx)"}, 2: {"*.*": "All Files (*.*)"}},
+			0: {"*.pmx": "Pmx Files (*.pmx)"}, 1: {"*.*": "All Files (*.*)"}},
 		50,
 		repository.NewPmxRepository(),
+	)
+}
+
+func NewPmxJsonReadFilePicker(
+	window state.IControlWindow,
+	parent walk.Container,
+	historyKey string,
+	title string,
+	tooltip string,
+	description string,
+) *FilePicker {
+	return newFilePicker(
+		window,
+		parent,
+		historyKey,
+		title,
+		tooltip,
+		description,
+		map[int]map[string]string{
+			0: {"*.pmx": "Pmx Files (*.pmx)"},
+			1: {"*.json": "Json Files (*.json)"},
+			2: {"*.*": "All Files (*.*)"}},
+		50,
+		repository.NewPmxPmxJsonRepository(),
 	)
 }
 

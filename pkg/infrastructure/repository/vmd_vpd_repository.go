@@ -4,12 +4,10 @@ import (
 	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
-	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 )
 
 // VMDリーダー
 type VmdVpdRepository struct {
-	baseRepository[*vmd.VmdMotion]
 	vmdRepository *VmdRepository
 	vpdRepository *VpdRepository
 }

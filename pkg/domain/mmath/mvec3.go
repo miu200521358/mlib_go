@@ -29,9 +29,9 @@ var (
 )
 
 type MVec3 struct {
-	X float64
-	Y float64
-	Z float64
+	X float64 `json:"x"` // X座標
+	Y float64 `json:"y"` // Y座標
+	Z float64 `json:"z"` // Z座標
 }
 
 func NewMVec3() *MVec3 {
