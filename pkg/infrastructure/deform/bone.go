@@ -281,7 +281,7 @@ ikLoop:
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := vmd.NewBoneFrame(float32(count))
 				bf.Position = ikDeltas.Bones.Get(ikBone.Index()).FilledFramePosition()
-				bf.Rotation = ikDeltas.Bones.Get(ikBone.Index()).FilledLocalRotation()
+				bf.Rotation = ikDeltas.Bones.Get(ikBone.Index()).FilledTotalRotation()
 				ikMotion.AppendRegisteredBoneFrame(ikBone.Name(), bf)
 				count++
 
@@ -297,7 +297,7 @@ ikLoop:
 			if linkDelta == nil {
 				linkDelta = &delta.BoneDelta{Bone: linkBone, Frame: frame}
 			}
-			linkQuat := linkDelta.FilledLocalRotation()
+			linkQuat := linkDelta.FilledTotalRotation()
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := vmd.NewBoneFrame(float32(count))
@@ -564,7 +564,7 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := vmd.NewBoneFrame(float32(count))
-				bf.Rotation = linkDelta.FilledLocalRotation().Copy()
+				bf.Rotation = linkDelta.FilledTotalRotation().Copy()
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
 				count++
 

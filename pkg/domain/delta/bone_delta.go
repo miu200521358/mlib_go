@@ -81,7 +81,7 @@ func (boneDelta *BoneDelta) FilledGlobalRotation() *mmath.MQuaternion {
 	return boneDelta.FilledGlobalMatrix().Quaternion()
 }
 
-func (boneDelta *BoneDelta) FilledLocalPosition() *mmath.MVec3 {
+func (boneDelta *BoneDelta) FilledTotalPosition() *mmath.MVec3 {
 	pos := boneDelta.FilledFramePosition().Copy()
 
 	if boneDelta.FrameMorphPosition != nil && !boneDelta.FrameMorphPosition.IsZero() {
@@ -130,7 +130,7 @@ func (boneDelta *BoneDelta) FilledFrameLocalMorphPosition() *mmath.MVec3 {
 	return boneDelta.FrameLocalMorphPosition
 }
 
-func (boneDelta *BoneDelta) FilledLocalRotation() *mmath.MQuaternion {
+func (boneDelta *BoneDelta) FilledTotalRotation() *mmath.MQuaternion {
 	rot := boneDelta.FilledFrameRotation().Copy()
 
 	if boneDelta.FrameMorphRotation != nil && !boneDelta.FrameMorphRotation.IsIdent() {
@@ -146,7 +146,7 @@ func (boneDelta *BoneDelta) FilledLocalRotation() *mmath.MQuaternion {
 }
 
 func (boneDelta *BoneDelta) FilledLocalEffectorRotation(effectorFactor float64) *mmath.MQuaternion {
-	return boneDelta.FilledLocalRotation().MuledScalar(effectorFactor)
+	return boneDelta.FilledTotalRotation().MuledScalar(effectorFactor)
 }
 
 func (boneDelta *BoneDelta) FilledFrameRotation() *mmath.MQuaternion {
@@ -170,7 +170,7 @@ func (boneDelta *BoneDelta) FilledFrameLocalMorphRotation() *mmath.MQuaternion {
 	return boneDelta.FrameLocalMorphRotation
 }
 
-func (boneDelta *BoneDelta) FilledLocalScale() *mmath.MVec3 {
+func (boneDelta *BoneDelta) FilledTotalScale() *mmath.MVec3 {
 	pos := boneDelta.FilledFrameScale().Copy()
 
 	if boneDelta.FrameMorphScale != nil && !boneDelta.FrameMorphScale.IsZero() {
@@ -313,7 +313,7 @@ func (boneDeltas *BoneDeltas) totalRotationLoop(boneIndex int, loop int, factor 
 	if boneDelta == nil || loop > 10 {
 		return mmath.NewMQuaternion()
 	}
-	rot := boneDelta.FilledLocalRotation()
+	rot := boneDelta.FilledTotalRotation()
 
 	if boneDelta.Bone.IsEffectorRotation() {
 		// 付与親回転がある場合、再帰で回転を取得する
@@ -333,7 +333,7 @@ func (boneDeltas *BoneDeltas) totalPositionLoop(boneIndex int, loop int) *mmath.
 	if boneDelta == nil || loop > 10 {
 		return mmath.NewMVec3()
 	}
-	pos := boneDelta.FilledLocalPosition()
+	pos := boneDelta.FilledTotalPosition()
 
 	if boneDelta.Bone.IsEffectorTranslation() {
 		// 付与親移動がある場合、再帰で回転を取得する
@@ -345,15 +345,15 @@ func (boneDeltas *BoneDeltas) totalPositionLoop(boneIndex int, loop int) *mmath.
 }
 
 func (boneDeltas *BoneDeltas) TotalScaleMat(boneIndex int) *mmath.MMat4 {
-	return boneDeltas.totalScaleMatLoop(boneIndex, 0)
+	return boneDeltas.totalScaleMatLoop(boneIndex, 0).ToScaleMat4()
 }
 
-func (boneDeltas *BoneDeltas) totalScaleMatLoop(boneIndex int, loop int) *mmath.MMat4 {
+func (boneDeltas *BoneDeltas) totalScaleMatLoop(boneIndex int, loop int) *mmath.MVec3 {
 	boneDelta := boneDeltas.Get(boneIndex)
 	if boneDelta == nil || loop > 10 {
-		return mmath.NewMMat4()
+		return mmath.NewMVec3()
 	}
-	scale := boneDelta.FilledLocalScale()
+	scale := boneDelta.FilledTotalScale()
 
-	return scale.ToScaleMat4()
+	return scale
 }
