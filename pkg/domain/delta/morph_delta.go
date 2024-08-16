@@ -52,10 +52,13 @@ func NewWireVertexMorphDeltas() *WireVertexMorphDeltas {
 }
 
 type BoneMorphDelta struct {
-	BoneIndex     int
-	FramePosition *mmath.MVec3       // キーフレ位置の変動量
-	FrameRotation *mmath.MQuaternion // キーフレ回転の変動量
-	FrameScale    *mmath.MVec3       // キーフレスケールの変動量
+	BoneIndex          int
+	FramePosition      *mmath.MVec3       // キーフレ位置の変動量
+	FrameRotation      *mmath.MQuaternion // キーフレ回転の変動量
+	FrameScale         *mmath.MVec3       // キーフレスケールの変動量
+	FrameLocalPosition *mmath.MVec3       // キーフレ位置のローカル変動量
+	FrameLocalRotation *mmath.MQuaternion // キーフレ回転のローカル変動量
+	FrameLocalScale    *mmath.MVec3       // キーフレスケールのローカル変動量
 }
 
 func NewBoneMorphDelta(boneIndex int) *BoneMorphDelta {
@@ -89,11 +92,35 @@ func (boneMorphDelta *BoneMorphDelta) FilledMorphScale() *mmath.MVec3 {
 	return boneMorphDelta.FrameScale
 }
 
+func (boneMorphDelta *BoneMorphDelta) FilledMorphLocalPosition() *mmath.MVec3 {
+	if boneMorphDelta.FrameLocalPosition == nil {
+		boneMorphDelta.FrameLocalPosition = mmath.NewMVec3()
+	}
+	return boneMorphDelta.FrameLocalPosition
+}
+
+func (boneMorphDelta *BoneMorphDelta) FilledMorphLocalRotation() *mmath.MQuaternion {
+	if boneMorphDelta.FrameLocalRotation == nil {
+		boneMorphDelta.FrameLocalRotation = mmath.NewMQuaternion()
+	}
+	return boneMorphDelta.FrameLocalRotation
+}
+
+func (boneMorphDelta *BoneMorphDelta) FilledMorphLocalScale() *mmath.MVec3 {
+	if boneMorphDelta.FrameLocalScale == nil {
+		boneMorphDelta.FrameLocalScale = mmath.NewMVec3()
+	}
+	return boneMorphDelta.FrameLocalScale
+}
+
 func (boneMorphDelta *BoneMorphDelta) Copy() *BoneMorphDelta {
 	return &BoneMorphDelta{
-		FramePosition: boneMorphDelta.FilledMorphPosition().Copy(),
-		FrameRotation: boneMorphDelta.FilledMorphRotation().Copy(),
-		FrameScale:    boneMorphDelta.FilledMorphScale().Copy(),
+		FramePosition:      boneMorphDelta.FilledMorphPosition().Copy(),
+		FrameRotation:      boneMorphDelta.FilledMorphRotation().Copy(),
+		FrameScale:         boneMorphDelta.FilledMorphScale().Copy(),
+		FrameLocalPosition: boneMorphDelta.FilledMorphLocalPosition().Copy(),
+		FrameLocalRotation: boneMorphDelta.FilledMorphLocalRotation().Copy(),
+		FrameLocalScale:    boneMorphDelta.FilledMorphLocalScale().Copy(),
 	}
 }
 

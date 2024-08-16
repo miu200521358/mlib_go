@@ -204,6 +204,9 @@ func deformBone(
 			offsetPos := offset.Position.MuledScalar(ratio)
 			offsetQuat := offset.Rotation.Quaternion().MuledScalar(ratio).Normalize()
 			offsetScale := offset.Extend.Scale.MuledScalar(ratio)
+			offsetLocalPos := offset.Extend.LocalPosition.MuledScalar(ratio)
+			offsetLocalQuat := offset.Extend.LocalRotation.Quaternion().MuledScalar(ratio).Normalize()
+			offsetLocalScale := offset.Extend.LocalScale.MuledScalar(ratio)
 
 			if d.FramePosition == nil {
 				d.FramePosition = offsetPos.Copy()
@@ -221,6 +224,24 @@ func deformBone(
 				d.FrameScale = offsetScale.Copy()
 			} else {
 				d.FrameScale.Add(offsetScale)
+			}
+
+			if d.FrameLocalPosition == nil {
+				d.FrameLocalPosition = offsetLocalPos.Copy()
+			} else {
+				d.FrameLocalPosition.Add(offsetLocalPos)
+			}
+
+			if d.FrameLocalRotation == nil {
+				d.FrameLocalRotation = offsetLocalQuat.Copy()
+			} else {
+				d.FrameLocalRotation = offsetLocalQuat.Muled(d.FrameLocalRotation)
+			}
+
+			if d.FrameLocalScale == nil {
+				d.FrameLocalScale = offsetLocalScale.Copy()
+			} else {
+				d.FrameLocalScale.Add(offsetLocalScale)
 			}
 
 			deltas.Update(d)
