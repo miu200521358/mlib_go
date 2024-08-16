@@ -986,9 +986,9 @@ func calcBoneDeltas(
 		}
 
 		// 回転
-		rot := boneDeltas.LocalRotation(bone.Index())
-		if rot != nil && !rot.IsIdent() {
-			d.UnitMatrix.Mul(rot.ToMat4())
+		rotMat := boneDeltas.LocalRotationMat(bone.Index())
+		if rotMat != nil && !rotMat.IsIdent() {
+			d.UnitMatrix.Mul(rotMat)
 		}
 
 		// 移動

@@ -301,8 +301,8 @@ func (boneDeltas *BoneDeltas) GetNearestBoneIndexes(worldPos *mmath.MVec3) []int
 	return boneIndexes
 }
 
-func (boneDeltas *BoneDeltas) LocalRotation(boneIndex int) *mmath.MQuaternion {
-	return boneDeltas.localRotationLoop(boneIndex, 0)
+func (boneDeltas *BoneDeltas) LocalRotationMat(boneIndex int) *mmath.MMat4 {
+	return boneDeltas.localRotationLoop(boneIndex, 0).ToMat4()
 }
 
 func (boneDeltas *BoneDeltas) localRotationLoop(boneIndex int, loop int) *mmath.MQuaternion {
