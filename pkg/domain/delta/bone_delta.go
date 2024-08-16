@@ -8,18 +8,21 @@ import (
 )
 
 type BoneDelta struct {
-	Bone               *pmx.Bone          // ボーン
-	Frame              float32            // キーフレーム
-	GlobalMatrix       *mmath.MMat4       // グローバル行列
-	LocalMatrix        *mmath.MMat4       // ローカル行列
-	GlobalPosition     *mmath.MVec3       // グローバル位置
-	UnitMatrix         *mmath.MMat4       // 親ボーンからの変位行列
-	FramePosition      *mmath.MVec3       // キーフレ位置の変動量
-	FrameMorphPosition *mmath.MVec3       // モーフ位置の変動量
-	FrameRotation      *mmath.MQuaternion // キーフレ回転の変動量
-	FrameMorphRotation *mmath.MQuaternion // モーフ回転の変動量
-	FrameScale         *mmath.MVec3       // キーフレスケールの変動量
-	FrameMorphScale    *mmath.MVec3       // モーフスケールの変動量
+	Bone                    *pmx.Bone          // ボーン
+	Frame                   float32            // キーフレーム
+	GlobalMatrix            *mmath.MMat4       // グローバル行列
+	LocalMatrix             *mmath.MMat4       // ローカル行列
+	GlobalPosition          *mmath.MVec3       // グローバル位置
+	UnitMatrix              *mmath.MMat4       // 親ボーンからの変位行列
+	FramePosition           *mmath.MVec3       // キーフレ位置の変動量
+	FrameMorphPosition      *mmath.MVec3       // モーフ位置の変動量
+	FrameLocalMorphPosition *mmath.MVec3       // モーフ位置のローカル変動量
+	FrameRotation           *mmath.MQuaternion // キーフレ回転の変動量
+	FrameMorphRotation      *mmath.MQuaternion // モーフ回転の変動量
+	FrameLocalMorphRotation *mmath.MQuaternion // モーフ回転のローカル変動量
+	FrameScale              *mmath.MVec3       // キーフレスケールの変動量
+	FrameMorphScale         *mmath.MVec3       // モーフスケールの変動量
+	FrameLocalMorphScale    *mmath.MVec3       // モーフスケールのローカル変動量
 }
 
 func NewBoneDeltaByGlobalMatrix(
@@ -117,6 +120,13 @@ func (boneDelta *BoneDelta) FilledFrameMorphPosition() *mmath.MVec3 {
 	return boneDelta.FrameMorphPosition
 }
 
+func (boneDelta *BoneDelta) FilledFrameLocalMorphPosition() *mmath.MVec3 {
+	if boneDelta.FrameLocalMorphPosition == nil {
+		boneDelta.FrameLocalMorphPosition = mmath.NewMVec3()
+	}
+	return boneDelta.FrameLocalMorphPosition
+}
+
 func (boneDelta *BoneDelta) FilledLocalRotation() *mmath.MQuaternion {
 	rot := boneDelta.FilledFrameRotation().Copy()
 
@@ -150,6 +160,13 @@ func (boneDelta *BoneDelta) FilledFrameMorphRotation() *mmath.MQuaternion {
 	return boneDelta.FrameMorphRotation
 }
 
+func (boneDelta *BoneDelta) FilledFrameLocalMorphRotation() *mmath.MQuaternion {
+	if boneDelta.FrameLocalMorphRotation == nil {
+		boneDelta.FrameLocalMorphRotation = mmath.NewMQuaternion()
+	}
+	return boneDelta.FrameLocalMorphRotation
+}
+
 func (boneDelta *BoneDelta) FilledLocalScale() *mmath.MVec3 {
 	pos := boneDelta.FilledFrameScale().Copy()
 
@@ -174,20 +191,30 @@ func (boneDelta *BoneDelta) FilledFrameMorphScale() *mmath.MVec3 {
 	return boneDelta.FrameMorphScale
 }
 
+func (boneDelta *BoneDelta) FilledFrameLocalMorphScale() *mmath.MVec3 {
+	if boneDelta.FrameLocalMorphScale == nil {
+		boneDelta.FrameLocalMorphScale = mmath.NewMVec3()
+	}
+	return boneDelta.FrameLocalMorphScale
+}
+
 func (boneDelta *BoneDelta) Copy() *BoneDelta {
 	return &BoneDelta{
-		Bone:               boneDelta.Bone,
-		Frame:              boneDelta.Frame,
-		GlobalMatrix:       boneDelta.FilledGlobalMatrix().Copy(),
-		LocalMatrix:        boneDelta.FilledLocalMatrix().Copy(),
-		GlobalPosition:     boneDelta.FilledGlobalPosition().Copy(),
-		FramePosition:      boneDelta.FilledFramePosition().Copy(),
-		FrameMorphPosition: boneDelta.FilledFrameMorphPosition().Copy(),
-		FrameRotation:      boneDelta.FilledFrameRotation().Copy(),
-		FrameMorphRotation: boneDelta.FilledFrameMorphRotation().Copy(),
-		FrameScale:         boneDelta.FilledFrameScale().Copy(),
-		FrameMorphScale:    boneDelta.FilledFrameMorphScale().Copy(),
-		UnitMatrix:         boneDelta.UnitMatrix.Copy(),
+		Bone:                    boneDelta.Bone,
+		Frame:                   boneDelta.Frame,
+		GlobalMatrix:            boneDelta.FilledGlobalMatrix().Copy(),
+		LocalMatrix:             boneDelta.FilledLocalMatrix().Copy(),
+		GlobalPosition:          boneDelta.FilledGlobalPosition().Copy(),
+		FramePosition:           boneDelta.FilledFramePosition().Copy(),
+		FrameMorphPosition:      boneDelta.FilledFrameMorphPosition().Copy(),
+		FrameLocalMorphPosition: boneDelta.FilledFrameLocalMorphPosition().Copy(),
+		FrameRotation:           boneDelta.FilledFrameRotation().Copy(),
+		FrameMorphRotation:      boneDelta.FilledFrameMorphRotation().Copy(),
+		FrameLocalMorphRotation: boneDelta.FilledFrameLocalMorphRotation().Copy(),
+		FrameScale:              boneDelta.FilledFrameScale().Copy(),
+		FrameMorphScale:         boneDelta.FilledFrameMorphScale().Copy(),
+		FrameLocalMorphScale:    boneDelta.FilledFrameLocalMorphScale().Copy(),
+		UnitMatrix:              boneDelta.UnitMatrix.Copy(),
 	}
 }
 

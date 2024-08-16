@@ -1123,9 +1123,9 @@ func fillBoneDeform(
 		}
 
 		// ボーンの移動位置、回転角度、拡大率を取得
-		d.FramePosition, d.FrameMorphPosition, _ = getPosition(deltas, bone, bf)
-		d.FrameRotation, d.FrameMorphRotation, _ = getRotation(deltas, bone, bf)
-		d.FrameScale, d.FrameMorphScale, _ = getScale(deltas, bone, bf)
+		d.FramePosition, d.FrameMorphPosition, d.FrameLocalMorphPosition = getPosition(deltas, bone, bf)
+		d.FrameRotation, d.FrameMorphRotation, d.FrameLocalMorphRotation = getRotation(deltas, bone, bf)
+		d.FrameScale, d.FrameMorphScale, d.FrameLocalMorphScale = getScale(deltas, bone, bf)
 		deltas.Bones.Update(d)
 	}
 
