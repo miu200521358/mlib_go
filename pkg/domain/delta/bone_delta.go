@@ -340,3 +340,17 @@ func (boneDeltas *BoneDeltas) localPositionLoop(boneIndex int, loop int) *mmath.
 
 	return pos
 }
+
+func (boneDeltas *BoneDeltas) LocalScaleMat(boneIndex int) *mmath.MMat4 {
+	return boneDeltas.localScaleMatLoop(boneIndex, 0)
+}
+
+func (boneDeltas *BoneDeltas) localScaleMatLoop(boneIndex int, loop int) *mmath.MMat4 {
+	boneDelta := boneDeltas.Get(boneIndex)
+	if boneDelta == nil || loop > 10 {
+		return mmath.NewMMat4()
+	}
+	scale := boneDelta.FilledLocalScale()
+
+	return scale.ToScaleMat4()
+}

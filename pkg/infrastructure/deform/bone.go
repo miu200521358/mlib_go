@@ -980,8 +980,9 @@ func calcBoneDeltas(
 		d.GlobalPosition = nil
 
 		// スケール
-		if d.FrameScale != nil && !d.FrameScale.IsOne() {
-			d.UnitMatrix.Mul(d.FrameScale.ToScaleMat4())
+		scaleMat := boneDeltas.LocalScaleMat(bone.Index())
+		if scaleMat != nil && !scaleMat.IsIdent() {
+			d.UnitMatrix.Mul(scaleMat)
 		}
 
 		// 回転
