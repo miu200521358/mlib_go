@@ -321,8 +321,8 @@ func (boneDeltas *BoneDeltas) localRotationLoop(boneIndex int, loop int, factor 
 	return rot.MuledScalar(factor)
 }
 
-func (boneDeltas *BoneDeltas) LocalPosition(boneIndex int) *mmath.MVec3 {
-	return boneDeltas.localPositionLoop(boneIndex, 0)
+func (boneDeltas *BoneDeltas) LocalPositionMat(boneIndex int) *mmath.MMat4 {
+	return boneDeltas.localPositionLoop(boneIndex, 0).ToMat4()
 }
 
 func (boneDeltas *BoneDeltas) localPositionLoop(boneIndex int, loop int) *mmath.MVec3 {

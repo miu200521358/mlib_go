@@ -992,9 +992,9 @@ func calcBoneDeltas(
 		}
 
 		// 移動
-		pos := boneDeltas.LocalPosition(bone.Index())
-		if pos != nil && !pos.IsZero() {
-			d.UnitMatrix.Mul(pos.ToMat4())
+		posMat := boneDeltas.LocalPositionMat(bone.Index())
+		if posMat != nil && !posMat.IsIdent() {
+			d.UnitMatrix.Mul(posMat)
 		}
 
 		// x := math.Abs(rot.X)
