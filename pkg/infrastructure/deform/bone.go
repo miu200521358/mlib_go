@@ -980,19 +980,19 @@ func calcBoneDeltas(
 		d.GlobalPosition = nil
 
 		// スケール
-		scaleMat := boneDeltas.LocalScaleMat(bone.Index())
+		scaleMat := boneDeltas.TotalScaleMat(bone.Index())
 		if scaleMat != nil && !scaleMat.IsIdent() {
 			d.UnitMatrix.Mul(scaleMat)
 		}
 
 		// 回転
-		rotMat := boneDeltas.LocalRotationMat(bone.Index())
+		rotMat := boneDeltas.TotalRotationMat(bone.Index())
 		if rotMat != nil && !rotMat.IsIdent() {
 			d.UnitMatrix.Mul(rotMat)
 		}
 
 		// 移動
-		posMat := boneDeltas.LocalPositionMat(bone.Index())
+		posMat := boneDeltas.TotalPositionMat(bone.Index())
 		if posMat != nil && !posMat.IsIdent() {
 			d.UnitMatrix.Mul(posMat)
 		}

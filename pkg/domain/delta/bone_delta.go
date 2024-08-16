@@ -304,11 +304,11 @@ func (boneDeltas *BoneDeltas) GetNearestBoneIndexes(worldPos *mmath.MVec3) []int
 	return boneIndexes
 }
 
-func (boneDeltas *BoneDeltas) LocalRotationMat(boneIndex int) *mmath.MMat4 {
-	return boneDeltas.localRotationLoop(boneIndex, 0, 1.0).ToMat4()
+func (boneDeltas *BoneDeltas) TotalRotationMat(boneIndex int) *mmath.MMat4 {
+	return boneDeltas.totalRotationLoop(boneIndex, 0, 1.0).ToMat4()
 }
 
-func (boneDeltas *BoneDeltas) localRotationLoop(boneIndex int, loop int, factor float64) *mmath.MQuaternion {
+func (boneDeltas *BoneDeltas) totalRotationLoop(boneIndex int, loop int, factor float64) *mmath.MQuaternion {
 	boneDelta := boneDeltas.Get(boneIndex)
 	if boneDelta == nil || loop > 10 {
 		return mmath.NewMQuaternion()
@@ -317,18 +317,18 @@ func (boneDeltas *BoneDeltas) localRotationLoop(boneIndex int, loop int, factor 
 
 	if boneDelta.Bone.IsEffectorRotation() {
 		// 付与親回転がある場合、再帰で回転を取得する
-		effectorRot := boneDeltas.localRotationLoop(boneDelta.Bone.EffectIndex, loop+1, boneDelta.Bone.EffectFactor)
+		effectorRot := boneDeltas.totalRotationLoop(boneDelta.Bone.EffectIndex, loop+1, boneDelta.Bone.EffectFactor)
 		rot.Mul(effectorRot)
 	}
 
 	return rot.MuledScalar(factor)
 }
 
-func (boneDeltas *BoneDeltas) LocalPositionMat(boneIndex int) *mmath.MMat4 {
-	return boneDeltas.localPositionLoop(boneIndex, 0).ToMat4()
+func (boneDeltas *BoneDeltas) TotalPositionMat(boneIndex int) *mmath.MMat4 {
+	return boneDeltas.totalPositionLoop(boneIndex, 0).ToMat4()
 }
 
-func (boneDeltas *BoneDeltas) localPositionLoop(boneIndex int, loop int) *mmath.MVec3 {
+func (boneDeltas *BoneDeltas) totalPositionLoop(boneIndex int, loop int) *mmath.MVec3 {
 	boneDelta := boneDeltas.Get(boneIndex)
 	if boneDelta == nil || loop > 10 {
 		return mmath.NewMVec3()
@@ -337,18 +337,18 @@ func (boneDeltas *BoneDeltas) localPositionLoop(boneIndex int, loop int) *mmath.
 
 	if boneDelta.Bone.IsEffectorTranslation() {
 		// 付与親移動がある場合、再帰で回転を取得する
-		effectorPos := boneDeltas.localPositionLoop(boneDelta.Bone.EffectIndex, loop+1)
+		effectorPos := boneDeltas.totalPositionLoop(boneDelta.Bone.EffectIndex, loop+1)
 		pos.Mul(effectorPos.MuledScalar(boneDelta.Bone.EffectFactor))
 	}
 
 	return pos
 }
 
-func (boneDeltas *BoneDeltas) LocalScaleMat(boneIndex int) *mmath.MMat4 {
-	return boneDeltas.localScaleMatLoop(boneIndex, 0)
+func (boneDeltas *BoneDeltas) TotalScaleMat(boneIndex int) *mmath.MMat4 {
+	return boneDeltas.totalScaleMatLoop(boneIndex, 0)
 }
 
-func (boneDeltas *BoneDeltas) localScaleMatLoop(boneIndex int, loop int) *mmath.MMat4 {
+func (boneDeltas *BoneDeltas) totalScaleMatLoop(boneIndex int, loop int) *mmath.MMat4 {
 	boneDelta := boneDeltas.Get(boneIndex)
 	if boneDelta == nil || loop > 10 {
 		return mmath.NewMMat4()
