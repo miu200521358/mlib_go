@@ -15,12 +15,15 @@ type BoneDelta struct {
 	GlobalPosition          *mmath.MVec3       // グローバル位置
 	UnitMatrix              *mmath.MMat4       // 親ボーンからの変位行列
 	FramePosition           *mmath.MVec3       // キーフレ位置の変動量
+	FrameLocalPosition      *mmath.MVec3       // キーフレ位置のローカル変動量
 	FrameMorphPosition      *mmath.MVec3       // モーフ位置の変動量
 	FrameLocalMorphPosition *mmath.MVec3       // モーフ位置のローカル変動量
 	FrameRotation           *mmath.MQuaternion // キーフレ回転の変動量
+	FrameLocalRotation      *mmath.MQuaternion // キーフレ回転のローカル変動量
 	FrameMorphRotation      *mmath.MQuaternion // モーフ回転の変動量
 	FrameLocalMorphRotation *mmath.MQuaternion // モーフ回転のローカル変動量
 	FrameScale              *mmath.MVec3       // キーフレスケールの変動量
+	FrameLocalScale         *mmath.MVec3       // キーフレスケールのローカル変動量
 	FrameMorphScale         *mmath.MVec3       // モーフスケールの変動量
 	FrameLocalMorphScale    *mmath.MVec3       // モーフスケールのローカル変動量
 }
