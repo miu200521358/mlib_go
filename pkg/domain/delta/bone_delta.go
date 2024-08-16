@@ -88,25 +88,7 @@ func (boneDelta *BoneDelta) FilledTotalPosition() *mmath.MVec3 {
 		pos.Add(boneDelta.FrameMorphPosition)
 	}
 
-	// if boneDelta.FrameEffectPosition != nil && !boneDelta.FrameEffectPosition.IsZero() {
-	// 	pos.Add(boneDelta.FrameEffectPosition)
-	// }
-
 	return pos
-}
-
-func (boneDelta *BoneDelta) FilledLocalEffectorPosition(effectorFactor float64) *mmath.MVec3 {
-	pos := boneDelta.FilledFramePosition().Copy()
-
-	if boneDelta.FrameMorphPosition != nil && !boneDelta.FrameMorphPosition.IsZero() {
-		pos.Add(boneDelta.FrameMorphPosition)
-	}
-
-	// if boneDelta.FrameEffectPosition != nil && !boneDelta.FrameEffectPosition.IsZero() {
-	// 	pos.Add(boneDelta.FrameEffectPosition)
-	// }
-
-	return pos.MuledScalar(effectorFactor)
 }
 
 func (boneDelta *BoneDelta) FilledFramePosition() *mmath.MVec3 {
@@ -114,6 +96,13 @@ func (boneDelta *BoneDelta) FilledFramePosition() *mmath.MVec3 {
 		boneDelta.FramePosition = mmath.NewMVec3()
 	}
 	return boneDelta.FramePosition
+}
+
+func (boneDelta *BoneDelta) FilledFrameLocalPosition() *mmath.MVec3 {
+	if boneDelta.FrameLocalPosition == nil {
+		boneDelta.FrameLocalPosition = mmath.NewMVec3()
+	}
+	return boneDelta.FrameLocalPosition
 }
 
 func (boneDelta *BoneDelta) FilledFrameMorphPosition() *mmath.MVec3 {
@@ -145,15 +134,18 @@ func (boneDelta *BoneDelta) FilledTotalRotation() *mmath.MQuaternion {
 	return rot
 }
 
-func (boneDelta *BoneDelta) FilledLocalEffectorRotation(effectorFactor float64) *mmath.MQuaternion {
-	return boneDelta.FilledTotalRotation().MuledScalar(effectorFactor)
-}
-
 func (boneDelta *BoneDelta) FilledFrameRotation() *mmath.MQuaternion {
 	if boneDelta.FrameRotation == nil {
 		boneDelta.FrameRotation = mmath.NewMQuaternion()
 	}
 	return boneDelta.FrameRotation
+}
+
+func (boneDelta *BoneDelta) FilledFrameLocalRotation() *mmath.MQuaternion {
+	if boneDelta.FrameLocalRotation == nil {
+		boneDelta.FrameLocalRotation = mmath.NewMQuaternion()
+	}
+	return boneDelta.FrameLocalRotation
 }
 
 func (boneDelta *BoneDelta) FilledFrameMorphRotation() *mmath.MQuaternion {
@@ -171,13 +163,23 @@ func (boneDelta *BoneDelta) FilledFrameLocalMorphRotation() *mmath.MQuaternion {
 }
 
 func (boneDelta *BoneDelta) FilledTotalScale() *mmath.MVec3 {
-	pos := boneDelta.FilledFrameScale().Copy()
+	scale := boneDelta.FilledFrameScale().Copy()
 
 	if boneDelta.FrameMorphScale != nil && !boneDelta.FrameMorphScale.IsZero() {
-		pos.Add(boneDelta.FrameMorphScale)
+		scale.Mul(boneDelta.FrameMorphScale)
 	}
 
-	return pos
+	return scale
+}
+
+func (boneDelta *BoneDelta) FilledTotalLocalScale() *mmath.MVec3 {
+	scale := boneDelta.FilledFrameLocalScale().Copy()
+
+	if boneDelta.FrameLocalMorphScale != nil && !boneDelta.FrameLocalMorphScale.IsZero() {
+		scale.Mul(boneDelta.FrameLocalMorphScale)
+	}
+
+	return scale
 }
 
 func (boneDelta *BoneDelta) FilledFrameScale() *mmath.MVec3 {
@@ -185,6 +187,13 @@ func (boneDelta *BoneDelta) FilledFrameScale() *mmath.MVec3 {
 		boneDelta.FrameScale = &mmath.MVec3{X: 1, Y: 1, Z: 1}
 	}
 	return boneDelta.FrameScale
+}
+
+func (boneDelta *BoneDelta) FilledFrameLocalScale() *mmath.MVec3 {
+	if boneDelta.FrameLocalScale == nil {
+		boneDelta.FrameLocalScale = &mmath.MVec3{X: 1, Y: 1, Z: 1}
+	}
+	return boneDelta.FrameLocalScale
 }
 
 func (boneDelta *BoneDelta) FilledFrameMorphScale() *mmath.MVec3 {
@@ -351,9 +360,23 @@ func (boneDeltas *BoneDeltas) TotalScaleMat(boneIndex int) *mmath.MMat4 {
 func (boneDeltas *BoneDeltas) totalScaleMatLoop(boneIndex int, loop int) *mmath.MVec3 {
 	boneDelta := boneDeltas.Get(boneIndex)
 	if boneDelta == nil || loop > 10 {
-		return mmath.NewMVec3()
+		return &mmath.MVec3{X: 1, Y: 1, Z: 1}
 	}
 	scale := boneDelta.FilledTotalScale()
 
 	return scale
+}
+
+func (boneDeltas *BoneDeltas) TotalLocalScaleMat(boneIndex int) *mmath.MMat4 {
+	return boneDeltas.totalLocalScaleMatLoop(boneIndex, 0)
+}
+
+func (boneDeltas *BoneDeltas) totalLocalScaleMatLoop(boneIndex int, loop int) *mmath.MMat4 {
+	boneDelta := boneDeltas.Get(boneIndex)
+	if boneDelta == nil || loop > 10 {
+		return mmath.MVec3One.ToScaleMat4()
+	}
+	scale := boneDelta.FilledTotalLocalScale()
+
+	return scale.ToScaleMat4()
 }
