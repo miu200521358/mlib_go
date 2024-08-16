@@ -302,10 +302,10 @@ func (boneDeltas *BoneDeltas) GetNearestBoneIndexes(worldPos *mmath.MVec3) []int
 }
 
 func (boneDeltas *BoneDeltas) LocalRotationMat(boneIndex int) *mmath.MMat4 {
-	return boneDeltas.localRotationLoop(boneIndex, 0).ToMat4()
+	return boneDeltas.localRotationLoop(boneIndex, 0, 1.0).ToMat4()
 }
 
-func (boneDeltas *BoneDeltas) localRotationLoop(boneIndex int, loop int) *mmath.MQuaternion {
+func (boneDeltas *BoneDeltas) localRotationLoop(boneIndex int, loop int, factor float64) *mmath.MQuaternion {
 	boneDelta := boneDeltas.Get(boneIndex)
 	if boneDelta == nil || loop > 10 {
 		return mmath.NewMQuaternion()
@@ -314,11 +314,11 @@ func (boneDeltas *BoneDeltas) localRotationLoop(boneIndex int, loop int) *mmath.
 
 	if boneDelta.Bone.IsEffectorRotation() {
 		// 付与親回転がある場合、再帰で回転を取得する
-		effectorRot := boneDeltas.localRotationLoop(boneDelta.Bone.EffectIndex, loop+1)
-		rot.Mul(effectorRot.MuledScalar(boneDelta.Bone.EffectFactor))
+		effectorRot := boneDeltas.localRotationLoop(boneDelta.Bone.EffectIndex, loop+1, boneDelta.Bone.EffectFactor)
+		rot.Mul(effectorRot)
 	}
 
-	return rot
+	return rot.MuledScalar(factor)
 }
 
 func (boneDeltas *BoneDeltas) LocalPosition(boneIndex int) *mmath.MVec3 {
