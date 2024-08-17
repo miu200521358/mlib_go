@@ -37,13 +37,13 @@ func NewBoneDeltaByGlobalMatrix(
 	} else {
 		parentGlobalMatrix = mmath.NewMMat4()
 	}
-	unitMatrix := parentGlobalMatrix.Muled(globalMatrix.Inverted())
+	unitMatrix := globalMatrix.Inverted().Muled(parentGlobalMatrix)
 
 	return &BoneDelta{
 		Bone:         bone,
 		Frame:        frame,
 		GlobalMatrix: globalMatrix,
-		LocalMatrix:  bone.Extend.OffsetMatrix.Muled(globalMatrix),
+		LocalMatrix:  globalMatrix.Muled(bone.Extend.OffsetMatrix),
 		UnitMatrix:   unitMatrix,
 		// 物理演算後の移動を受け取ると逆オフセットかけても一部モデルで破綻するので一旦コメントアウト
 		// framePosition:   unitMatrix.Translation(),
@@ -61,7 +61,7 @@ func (boneDelta *BoneDelta) FilledGlobalMatrix() *mmath.MMat4 {
 func (boneDelta *BoneDelta) FilledLocalMatrix() *mmath.MMat4 {
 	if boneDelta.LocalMatrix == nil {
 		// BOf行列: 自身のボーンのボーンオフセット行列をかけてローカル行列
-		boneDelta.LocalMatrix = boneDelta.Bone.Extend.OffsetMatrix.Muled(boneDelta.FilledGlobalMatrix())
+		boneDelta.LocalMatrix = boneDelta.FilledGlobalMatrix().Muled(boneDelta.Bone.Extend.OffsetMatrix)
 	}
 	return boneDelta.LocalMatrix
 }

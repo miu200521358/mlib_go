@@ -23,10 +23,10 @@ func MRotationBullet(vec *mmath.MRotation) bt.BtQuaternion {
 // NewMMat4ByMgl OpenGL座標系からMMD座標系に変換された行列を返します
 func newMMat4ByMgl(mat *mgl32.Mat4) *mmath.MMat4 {
 	mm := mmath.NewMMat4ByValues(
-		float64(mat[0]), float64(mat[1]), float64(mat[2]), float64(mat[3]),
-		float64(mat[4]), float64(mat[5]), float64(mat[6]), float64(mat[7]),
-		float64(mat[8]), float64(mat[9]), float64(mat[10]), float64(mat[11]),
-		float64(mat[12]), float64(mat[13]), float64(mat[14]), float64(mat[15]),
+		float64(mat[0]), float64(-mat[1]), float64(-mat[2]), float64(mat[3]),
+		float64(-mat[4]), float64(mat[5]), float64(mat[6]), float64(mat[7]),
+		float64(-mat[8]), float64(mat[9]), float64(mat[10]), float64(mat[11]),
+		float64(-mat[12]), float64(mat[13]), float64(mat[14]), float64(mat[15]),
 	)
 	return mm
 }
