@@ -626,12 +626,11 @@ func (rep *PmxRepository) loadBones(model *pmx.PmxModel) error {
 			return err
 		}
 		// 4  : int	| 変形階層
-		layer, err := rep.unpackInt()
+		bone.Layer, err = rep.unpackInt()
 		if err != nil {
 			mlog.E("[%d] UnpackInt Layer error: %v", i, err)
 			return err
 		}
-		bone.Layer = float64(layer)
 		// 2  : bitFlag*2	| ボーンフラグ(16bit) 各bit 0:OFF 1:ON
 		boneFlag, err := rep.unpackBytes(2)
 		if err != nil {

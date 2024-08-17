@@ -45,7 +45,7 @@ func TestPmxJsonRepository_Save1(t *testing.T) {
 func TestPmxJsonRepository_Save2(t *testing.T) {
 	pmxRep := NewPmxRepository()
 
-	model, err := pmxRep.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/003_三日月宗近/三日月宗近 わち式 （刀ミュインナーβ）/わち式三日月宗近（刀ミュインナーβ）.pmx")
+	model, err := pmxRep.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式/カイト.pmx")
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
@@ -53,7 +53,7 @@ func TestPmxJsonRepository_Save2(t *testing.T) {
 	rep := NewPmxJsonRepository()
 
 	// Save the model
-	jsonPath := "D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/003_三日月宗近/三日月宗近 わち式 （刀ミュインナーβ）/わち式三日月宗近（刀ミュインナーβ）.json"
+	jsonPath := "D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式/カイト.json"
 	err = rep.Save(jsonPath, model, false)
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)

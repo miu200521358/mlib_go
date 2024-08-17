@@ -30,7 +30,7 @@ type boneJson struct {
 	EnglishName  string       `json:"english_name"`  // ボーン英名
 	Position     *mmath.MVec3 `json:"position"`      // 位置
 	ParentIndex  int          `json:"parent_index"`  // 親ボーンのボーンIndex(親がない場合は-1)
-	Layer        float64      `json:"layer"`         // 変形階層
+	Layer        int          `json:"layer"`         // 変形階層
 	BoneFlag     int          `json:"bone_flag"`     // ボーンフラグ(16bit) 各bit 0:OFF 1:ON
 	TailPosition *mmath.MVec3 `json:"tail_position"` // 接続先:0 の場合 座標オフセット, ボーン位置からの相対分
 	TailIndex    int          `json:"tail_index"`    // 接続先:1 の場合 接続先ボーンのボーンIndex

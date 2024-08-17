@@ -73,7 +73,7 @@ type Bone struct {
 	englishName  string       // ボーン英名
 	Position     *mmath.MVec3 // ボーン位置
 	ParentIndex  int          // 親ボーンのボーンIndex
-	Layer        float64      // 変形階層(pmxは整数だけど、間にシステムボーンを入れられるようにfloat64にしておく)
+	Layer        int          // 変形階層
 	BoneFlag     BoneFlag     // ボーンフラグ(16bit) 各bit 0:OFF 1:ON
 	TailPosition *mmath.MVec3 // 接続先:0 の場合 座標オフセット, ボーン位置からの相対分
 	TailIndex    int          // 接続先:1 の場合 接続先ボーンのボーンIndex
@@ -732,7 +732,7 @@ func (bones *Bones) createLayerIndexesAfterPhysics() {
 
 // 変形階層とINDEXのソート用構造体
 type layerIndex struct {
-	layer float64
+	layer int
 	index int
 }
 
