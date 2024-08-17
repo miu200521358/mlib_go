@@ -222,15 +222,3 @@ func (physics *MPhysics) GetRigidBodyBoneMatrix(
 
 	return newMMat4ByMgl(&boneGlobalMatrixGL)
 }
-
-// NewMMat4ByMgl OpenGL座標系からMMD座標系に変換された行列を返します
-func newMMat4ByMgl(mat *mgl32.Mat4) *mmath.MMat4 {
-	mm := mmath.NewMMat4ByValues(
-		float64(mat.Col(0).X()), float64(-mat.Col(1).X()), float64(-mat.Col(2).X()), float64(-mat.Col(3).X()),
-		float64(-mat.Col(0).Y()), float64(mat.Col(1).Y()), float64(mat.Col(2).Y()), float64(mat.Col(3).Y()),
-		float64(-mat.Col(0).Z()), float64(mat.Col(1).Z()), float64(mat.Col(2).Z()), float64(mat.Col(3).Z()),
-		float64(mat.Col(0).W()), float64(mat.Col(1).W()), float64(mat.Col(2).W()), float64(mat.Col(3).W()),
-	)
-	mat = nil
-	return mm
-}

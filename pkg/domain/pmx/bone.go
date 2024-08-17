@@ -97,7 +97,6 @@ type BoneExtend struct {
 	LocalAxis              *mmath.MVec3     // ローカル軸の方向ベクトル(CorrectedLocalXVectorの正規化ベクトル)
 	ParentRelativePosition *mmath.MVec3     // 親ボーンからの相対位置
 	ChildRelativePosition  *mmath.MVec3     // Tailボーンへの相対位置
-	LocalMatrix            *mmath.MMat4     // ローカル軸行列
 	RevertOffsetMatrix     *mmath.MMat4     // 逆オフセット行列(親ボーンからの相対位置分を戻す)
 	OffsetMatrix           *mmath.MMat4     // オフセット行列 (自身の位置を原点に戻す行列)
 	TreeBoneIndexes        []int            // 自分のボーンまでのボーンIndexのリスト
@@ -365,8 +364,6 @@ func (bone *Bone) containsCategory(category BoneCategory) bool {
 func (bone *Bone) setup() {
 	// 各ボーンのローカル軸
 	bone.Extend.LocalAxis = bone.Extend.ChildRelativePosition.Normalized()
-	// ローカル軸行列
-	bone.Extend.LocalMatrix = bone.Extend.LocalAxis.ToLocalMatrix4x4()
 
 	if bone.HasFixedAxis() {
 		bone.NormalizeFixedAxis(bone.FixedAxis)

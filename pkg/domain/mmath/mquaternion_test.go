@@ -369,9 +369,10 @@ func TestMQuaternionRotate(t *testing.T) {
 
 func TestMQuaternionToMatrix4x4(t *testing.T) {
 	expected := NewMMat4ByValues(
-		0.45487413, 0.87398231, -0.17101007, 0., -0.49240388, 0.08682409, -0.8660254, 0.,
-		-0.74204309, 0.47813857, 0.46984631, 0.,
-		0., 0., 0., 1.,
+		0.45487413, -0.49240388, -0.74204309, 0.0,
+		0.87398231, 0.08682409, 0.47813857, 0.0,
+		-0.17101007, -0.8660254, 0.46984631, 0.0,
+		0.0, 0.0, 0.0, 1.0,
 	)
 
 	qq1 := NewMQuaternionByValues(
@@ -379,14 +380,14 @@ func TestMQuaternionToMatrix4x4(t *testing.T) {
 	result1 := qq1.ToMat4()
 
 	if !result1.NearEquals(expected, 1e-5) {
-		t.Errorf("ToMatrix4x4 failed. Expected %v, got %v", expected, qq1)
+		t.Errorf("ToMatrix4x4 failed. Expected %v, got %v", expected, result1)
 	}
 
 	expected2 := NewMMat4ByValues(
-		-0.28213944, 0.48809647, 0.82592928, 0.,
-		0.69636424, 0.69636424, -0.17364818, 0.,
-		-0.65990468, 0.52615461, -0.53636474, 0.,
-		0., 0., 0., 1.,
+		-0.28213944, 0.69636424, -0.65990468, 0.0,
+		0.48809647, 0.69636424, 0.52615461, 0.0,
+		0.82592928, -0.17364818, -0.53636474, 0.0,
+		0.0, 0.0, 0.0, 1.0,
 	)
 
 	// np.array([10, 123, 45])
@@ -395,7 +396,7 @@ func TestMQuaternionToMatrix4x4(t *testing.T) {
 	result2 := qq2.ToMat4()
 
 	if !result2.NearEquals(expected2, 1e-5) {
-		t.Errorf("ToMatrix4x4 failed. Expected %v, got %v", expected, qq1)
+		t.Errorf("ToMatrix4x4 failed. Expected %v, got %v", expected, result2)
 	}
 }
 
@@ -501,10 +502,11 @@ func TestMQuaternion_ToMat4(t *testing.T) {
 	// Test case 2: Non-identity quaternion
 	quat = NewMQuaternionByValues(0.5, 0.5, 0.5, 0.5)
 	expectedMat = NewMMat4ByValues(
-		0., 0., 1., 0.,
-		1., 0., 0., 0.,
-		0., 1., 0., 0.,
-		0., 0., 0., 1.)
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		1.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 1.0,
+	)
 	actualMat = quat.ToMat4()
 
 	if !actualMat.NearEquals(expectedMat, 1e-10) {
@@ -514,10 +516,10 @@ func TestMQuaternion_ToMat4(t *testing.T) {
 	// Test case 3: Random quaternion
 	quat = NewMQuaternionByValues(0.1, 0.2, 0.3, 0.4)
 	expectedMat = NewMMat4ByValues(
-		0.13333333, -0.66666667, 0.73333333, 0.,
-		0.93333333, 0.33333333, 0.13333333, 0.,
-		-0.33333333, 0.66666667, 0.66666667, 0.,
-		0., 0., 0., 1.,
+		0.13333333, 0.93333333, -0.33333333, 0.0,
+		-0.66666667, 0.33333333, 0.66666667, 0.0,
+		0.73333333, 0.13333333, 0.66666667, 0.0,
+		0.0, 0.0, 0.0, 1.0,
 	)
 	actualMat = quat.Normalize().ToMat4()
 

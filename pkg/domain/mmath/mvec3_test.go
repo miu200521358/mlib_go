@@ -308,7 +308,7 @@ func TestMVec3Distance(t *testing.T) {
 
 func TestMVector3DGetLocalMatrix(t *testing.T) {
 	v1 := MVec3{0.8, 0.6, 1}
-	localMatrix := v1.ToLocalMatrix4x4()
+	localMatrix := v1.ToLocalMat()
 
 	expected1 := MMat4{
 		0.56568542, 0.6, 0.56568542, 0.,
@@ -338,7 +338,7 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 	}
 
 	v4 := MVec3{0, 0, -0.5}
-	localMatrix2 := v4.ToLocalMatrix4x4()
+	localMatrix2 := v4.ToLocalMat()
 
 	expected4 := MMat4{
 		1.0, 0.0, 0.0, 0.0,

@@ -35,12 +35,12 @@ func NewMMat4() *MMat4 {
 	}
 }
 
-func NewMMat4ByValues(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, mat1, mat2, mat3, mat4 float64) *MMat4 {
+func NewMMat4ByValues(m11, m21, m31, m41, m12, m22, m32, m42, m13, m23, m33, m43, m14, m24, m34, m44 float64) *MMat4 {
 	return &MMat4{
-		m11, m12, m13, m14,
-		m21, m22, m23, m24,
-		m31, m32, m33, m34,
-		mat1, mat2, mat3, mat4,
+		m11, m21, m31, m41,
+		m12, m22, m32, m42,
+		m13, m23, m33, m43,
+		m14, m24, m34, m44,
 	}
 }
 
@@ -94,7 +94,7 @@ func (mat *MMat4) Trace3() float64 {
 // MulVec3 multiplies v (converted to a vec4 as (v_1, v_2, v_3, 1))
 // with mat and divides the result by w. Returns a new vec3.
 func (mat *MMat4) MulVec3(other *MVec3) *MVec3 {
-	return other.ToMat4().Mul(mat.Copy()).Translation()
+	return mat.Muled(other.ToMat4()).Translation()
 }
 
 // Translate adds v to the translation part of the matrix.
@@ -109,7 +109,7 @@ func (mat *MMat4) Translated(v *MVec3) *MMat4 {
 
 // 行列の移動情報
 func (mat *MMat4) Translation() *MVec3 {
-	return &MVec3{mat[3], mat[7], mat[11]}
+	return &MVec3{mat[12], mat[13], mat[14]}
 }
 
 func (mat *MMat4) Scale(s *MVec3) *MMat4 {
@@ -176,12 +176,13 @@ func (mat *MMat4) Det() float64 {
 // 逆行列
 func (mat *MMat4) Inverse() *MMat4 {
 	im := mgl64.Mat4(*mat).Inv()
-	return (*MMat4)(&im)
+	*mat = MMat4(im)
+	return mat
 }
 
 func (mat *MMat4) Inverted() *MMat4 {
-	copied := mat.Copy()
-	return copied.Inverse()
+	im := mgl64.Mat4(*mat).Inv()
+	return (*MMat4)(&im)
 }
 
 // ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
@@ -196,16 +197,16 @@ func (mat *MMat4) ClampIfVerySmall() *MMat4 {
 }
 
 func (mat *MMat4) AxisX() *MVec3 {
-	v := mgl64.Mat4(*mat).Row(0)
+	v := mgl64.Mat4(*mat).Col(0)
 	return &MVec3{v.X(), v.Y(), v.Z()}
 }
 
 func (mat *MMat4) AxisY() *MVec3 {
-	v := mgl64.Mat4(*mat).Row(1)
+	v := mgl64.Mat4(*mat).Col(1)
 	return &MVec3{v.X(), v.Y(), v.Z()}
 }
 
 func (mat *MMat4) AxisZ() *MVec3 {
-	v := mgl64.Mat4(*mat).Row(2)
+	v := mgl64.Mat4(*mat).Col(2)
 	return &MVec3{v.X(), v.Y(), v.Z()}
 }

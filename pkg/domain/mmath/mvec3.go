@@ -380,9 +380,9 @@ func (vec3 *MVec3) Vector() []float64 {
 
 func (vec3 *MVec3) ToMat4() *MMat4 {
 	mat := NewMMat4()
-	mat[3] = vec3.X
-	mat[7] = vec3.Y
-	mat[11] = vec3.Z
+	mat[12] = vec3.X
+	mat[13] = vec3.Y
+	mat[14] = vec3.Z
 	return mat
 }
 
@@ -422,56 +422,69 @@ func (v *MVec3) Round() *MVec3 {
 	}
 }
 
-// ToLocalMatrix4x4 自身をローカル軸とした場合の回転行列を取得します
-func (vec3 *MVec3) ToLocalMatrix4x4() *MMat4 {
+// ToLocalMat 自身をローカル軸とした場合の回転行列を取得します
+func (vec3 *MVec3) ToLocalMat() *MMat4 {
 	if vec3.IsZero() {
 		return NewMMat4()
 	}
 
-	// ローカルX軸の方向ベクトル
-	xAxis := vec3.Copy()
-	normXAxis := xAxis.Length()
-	if normXAxis == 0 {
-		return NewMMat4()
-	}
-	xAxis.DivScalar(normXAxis)
+	// 正規化されたローカルX軸ベクトルを取得
+	localX := vec3.Normalized()
 
-	if math.IsNaN(xAxis.X) || math.IsNaN(xAxis.Y) || math.IsNaN(xAxis.Z) {
-		return NewMMat4()
-	}
-
-	// ローカルZ軸の方向ベクトル
-	zAxis := &MVec3{0.0, 0.0, -1.0}
-	if zAxis.Equals(vec3) {
-		// 自身がほぼZ軸ベクトルの場合、別ベクトルを与える
-		zAxis = &MVec3{0.0, 1.0, 0.0}
+	// ローカルY軸を計算
+	var up *MVec3
+	if math.Abs(localX.Y) < 0.99999 {
+		up = MVec3UnitY
+	} else {
+		up = MVec3UnitZ
 	}
 
-	// ローカルY軸の方向ベクトル
-	yAxis := zAxis.Cross(xAxis)
-	normYAxis := yAxis.Length()
-	if normYAxis == 0 {
-		return NewMMat4()
-	}
-	yAxis.DivScalar(normYAxis)
+	// ローカルZ軸を計算
+	localZ := localX.Cross(up).Normalized()
 
-	if math.IsNaN(yAxis.X) || math.IsNaN(yAxis.Y) || math.IsNaN(yAxis.Z) {
-		return NewMMat4()
-	}
+	// ローカルY軸を計算
+	localY := localX.Cross(localZ).Normalized()
 
-	zAxis = xAxis.Cross(yAxis)
-	normZAxis := zAxis.Length()
-	zAxis.DivScalar(normZAxis)
-
-	// ローカル軸に合わせた回転行列を作成する
+	// ローカル座標系の回転行列を構築
 	rotationMatrix := NewMMat4ByValues(
-		xAxis.X, yAxis.X, zAxis.X, 0,
-		xAxis.Y, yAxis.Y, zAxis.Y, 0,
-		xAxis.Z, yAxis.Z, zAxis.Z, 0,
+		localX.X, localY.X, localZ.X, 0,
+		localX.Y, localY.Y, localZ.Y, 0,
+		localX.Z, localY.Z, localZ.Z, 0,
 		0, 0, 0, 1,
 	)
 
 	return rotationMatrix
+}
+
+func (vec3 *MVec3) ToScaleLocalMat(scale *MVec3) *MMat4 {
+	if vec3.IsZero() {
+		return NewMMat4()
+	}
+
+	// 正規化された進行方向のベクトルを取得
+	v := vec3.Normalized() // ローカルX軸（進行方向）
+
+	// 任意の直交ベクトルを計算
+	var up *MVec3
+	if math.Abs(v.Z) < 0.99999 {
+		up = MVec3UnitZInv // Z軸方向を基準にする
+	} else {
+		up = MVec3UnitY // Y軸方向を基準にする
+	}
+
+	// 直交するベクトルを計算
+	u := v.Cross(up).Normalized() // ローカルY軸
+	w := v.Cross(u).Normalized()  // ローカルZ軸
+
+	// 進行方向に沿ったスケール行列を構築（行優先）
+	scaleMatrix := NewMMat4ByValues(
+		scale.X*v.X, scale.Y*u.X, scale.Z*w.X, 0, // 第一行: 進行方向のスケール (Y軸に適用)
+		scale.X*v.Y, scale.Y*u.Y, scale.Z*w.Y, 0, // 第二行: 上方向のスケール (X軸に適用)
+		scale.X*v.Z, scale.Y*u.Z, scale.Z*w.Z, 0, // 第三行: 奥行き方向のスケール (Z軸に適用)
+		0, 0, 0, 1,
+	)
+
+	return scaleMatrix
 }
 
 // One 0を1に変える

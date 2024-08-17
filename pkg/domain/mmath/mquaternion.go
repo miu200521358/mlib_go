@@ -517,12 +517,7 @@ func (quat *MQuaternion) Vector() []float64 {
 // ToMat4はクォータニオンを4x4行列に変換します。
 func (quat *MQuaternion) ToMat4() *MMat4 {
 	m := mgl64.Quat{V: mgl64.Vec3{quat.X, quat.Y, quat.Z}, W: quat.W}.Mat4()
-	return NewMMat4ByValues(
-		m[0], m[4], m[8], m[12],
-		m[1], m[5], m[9], m[13],
-		m[2], m[6], m[10], m[14],
-		m[3], m[7], m[11], m[15],
-	)
+	return (*MMat4)(&m)
 }
 
 // ToFixedAxisRotationは軸制限されたクォータニオンの回転を計算します。
@@ -533,8 +528,7 @@ func (quat *MQuaternion) ToFixedAxisRotation(fixedAxis *MVec3) *MQuaternion {
 	if normalizedFixedAxis.Dot(quatAxis) < 0 {
 		rad *= -1
 	}
-	result := NewMQuaternionFromAxisAngles(normalizedFixedAxis, rad)
-	return result
+	return NewMQuaternionFromAxisAngles(normalizedFixedAxis, rad)
 }
 
 func (quat *MQuaternion) IsIdent() bool {

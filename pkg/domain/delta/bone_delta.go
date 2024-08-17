@@ -374,9 +374,37 @@ func (boneDeltas *BoneDeltas) TotalLocalScaleMat(boneIndex int) *mmath.MMat4 {
 func (boneDeltas *BoneDeltas) totalLocalScaleMatLoop(boneIndex int, loop int) *mmath.MMat4 {
 	boneDelta := boneDeltas.Get(boneIndex)
 	if boneDelta == nil || loop > 10 {
-		return mmath.MVec3One.ToScaleMat4()
+		return mmath.NewMMat4()
 	}
-	scale := boneDelta.FilledTotalLocalScale()
 
-	return scale.ToScaleMat4()
+	var parentScaleMat *mmath.MMat4
+	if boneDelta.Bone.ParentIndex >= 0 {
+		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
+		parentScale := parentBoneDelta.FilledTotalLocalScale()
+
+		if !parentScale.IsOne() {
+			// 親のローカル軸に沿ったスケール行列
+			parentScaleMat = parentBoneDelta.Bone.Extend.LocalAxis.ToScaleLocalMat(parentScale)
+		}
+	}
+
+	scale := boneDelta.FilledTotalLocalScale()
+	if scale.IsOne() {
+		if parentScaleMat == nil {
+			// 親のスケールが定義されていない場合、単位行列を返す
+			return mmath.NewMMat4()
+		}
+		// 親のスケールが指定されている場合、キャンセルする
+		return parentScaleMat.Inverted()
+	}
+
+	// ローカル軸に沿ったスケール行列
+	scaleMat := boneDelta.Bone.Extend.LocalAxis.ToScaleLocalMat(scale)
+
+	if parentScaleMat == nil {
+		return scaleMat
+	}
+
+	// 親のスケールをキャンセルする
+	return parentScaleMat.Inverted().Mul(scaleMat)
 }

@@ -979,16 +979,10 @@ func calcBoneDeltas(
 		d.LocalMatrix = nil
 		d.GlobalPosition = nil
 
-		// スケール
-		scaleMat := boneDeltas.TotalScaleMat(bone.Index())
-		if scaleMat != nil && !scaleMat.IsIdent() {
-			d.UnitMatrix.Mul(scaleMat)
-		}
-
-		// ローカルスケール
-		localScaleMat := boneDeltas.TotalLocalScaleMat(bone.Index())
-		if localScaleMat != nil && !localScaleMat.IsIdent() {
-			d.UnitMatrix.Mul(localScaleMat)
+		// 移動
+		posMat := boneDeltas.TotalPositionMat(bone.Index())
+		if posMat != nil && !posMat.IsIdent() {
+			d.UnitMatrix.Mul(posMat)
 		}
 
 		// 回転
@@ -997,10 +991,16 @@ func calcBoneDeltas(
 			d.UnitMatrix.Mul(rotMat)
 		}
 
-		// 移動
-		posMat := boneDeltas.TotalPositionMat(bone.Index())
-		if posMat != nil && !posMat.IsIdent() {
-			d.UnitMatrix.Mul(posMat)
+		// ローカルスケール
+		localScaleMat := boneDeltas.TotalLocalScaleMat(bone.Index())
+		if localScaleMat != nil && !localScaleMat.IsIdent() {
+			d.UnitMatrix.Mul(localScaleMat)
+		}
+
+		// スケール
+		scaleMat := boneDeltas.TotalScaleMat(bone.Index())
+		if scaleMat != nil && !scaleMat.IsIdent() {
+			d.UnitMatrix.Mul(scaleMat)
 		}
 
 		// x := math.Abs(rot.X)
@@ -1010,14 +1010,14 @@ func calcBoneDeltas(
 		// }
 
 		// 逆BOf行列(初期姿勢行列)
-		d.UnitMatrix.Mul(d.Bone.Extend.RevertOffsetMatrix)
+		d.UnitMatrix = d.Bone.Extend.RevertOffsetMatrix.Muled(d.UnitMatrix)
 	}
 
 	for _, boneIndex := range deformBoneIndexes {
 		delta := boneDeltas.Get(boneIndex)
 		parentDelta := boneDeltas.Get(delta.Bone.ParentIndex)
 		if parentDelta != nil && parentDelta.GlobalMatrix != nil {
-			delta.GlobalMatrix = delta.UnitMatrix.Muled(parentDelta.GlobalMatrix)
+			delta.GlobalMatrix = parentDelta.GlobalMatrix.Muled(delta.UnitMatrix)
 		} else {
 			// 対象ボーン自身の行列をかける
 			delta.GlobalMatrix = delta.UnitMatrix.Copy()
