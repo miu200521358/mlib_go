@@ -429,27 +429,27 @@ func (vec3 *MVec3) ToLocalMat() *MMat4 {
 	}
 
 	// 正規化されたローカルX軸ベクトルを取得
-	localX := vec3.Normalized()
+	v := vec3.Normalized()
 
 	// ローカルY軸を計算
 	var up *MVec3
-	if math.Abs(localX.Y) < 0.99999 {
-		up = MVec3UnitY
+	if math.Abs(v.X) < 0.99999 {
+		up = MVec3UnitX
 	} else {
-		up = MVec3UnitZ
+		up = MVec3UnitY
 	}
 
 	// ローカルZ軸を計算
-	localZ := localX.Cross(up).Normalized()
+	u := up.Cross(v).Normalized()
 
 	// ローカルY軸を計算
-	localY := localX.Cross(localZ).Normalized()
+	w := v.Cross(u).Normalized()
 
 	// ローカル座標系の回転行列を構築
 	rotationMatrix := NewMMat4ByValues(
-		localX.X, localY.X, localZ.X, 0,
-		localX.Y, localY.Y, localZ.Y, 0,
-		localX.Z, localY.Z, localZ.Z, 0,
+		v.X, v.Y, v.Z, 0,
+		w.X, w.Y, w.Z, 0,
+		u.X, u.Y, u.Z, 0,
 		0, 0, 0, 1,
 	)
 
@@ -461,30 +461,11 @@ func (vec3 *MVec3) ToScaleLocalMat(scale *MVec3) *MMat4 {
 		return NewMMat4()
 	}
 
-	// 正規化された進行方向のベクトルを取得
-	v := vec3.Normalized() // ローカルX軸（進行方向）
+	// 軸方向の回転行列
+	rotationMatrix := vec3.ToLocalMat()
 
-	// 任意の直交ベクトルを計算
-	var up *MVec3
-	if math.Abs(v.Z) < 0.99999 {
-		up = MVec3UnitZInv // Z軸方向を基準にする
-	} else {
-		up = MVec3UnitY // Y軸方向を基準にする
-	}
-
-	// 直交するベクトルを計算
-	u := v.Cross(up).Normalized() // ローカルY軸
-	w := v.Cross(u).Normalized()  // ローカルZ軸
-
-	// 進行方向に沿ったスケール行列を構築（行優先）
-	scaleMatrix := NewMMat4ByValues(
-		scale.X*v.X, scale.Y*u.X, scale.Z*w.X, 0, // 第一行: 進行方向のスケール (Y軸に適用)
-		scale.X*v.Y, scale.Y*u.Y, scale.Z*w.Y, 0, // 第二行: 上方向のスケール (X軸に適用)
-		scale.X*v.Z, scale.Y*u.Z, scale.Z*w.Z, 0, // 第三行: 奥行き方向のスケール (Z軸に適用)
-		0, 0, 0, 1,
-	)
-
-	return scaleMatrix
+	mat := rotationMatrix.Muled(scale.ToScaleMat4()).Muled(rotationMatrix.Inverse())
+	return mat
 }
 
 // One 0を1に変える

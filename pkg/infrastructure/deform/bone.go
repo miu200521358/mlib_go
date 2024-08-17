@@ -991,16 +991,16 @@ func calcBoneDeltas(
 			d.UnitMatrix.Mul(rotMat)
 		}
 
-		// ローカルスケール
-		localScaleMat := boneDeltas.TotalLocalScaleMat(bone.Index())
-		if localScaleMat != nil && !localScaleMat.IsIdent() {
-			d.UnitMatrix.Mul(localScaleMat)
-		}
-
 		// スケール
 		scaleMat := boneDeltas.TotalScaleMat(bone.Index())
 		if scaleMat != nil && !scaleMat.IsIdent() {
 			d.UnitMatrix.Mul(scaleMat)
+		}
+
+		// ローカルスケール
+		localScaleMat := boneDeltas.TotalLocalScaleMat(bone.Index())
+		if localScaleMat != nil && !localScaleMat.IsIdent() {
+			d.UnitMatrix.Mul(localScaleMat)
 		}
 
 		// x := math.Abs(rot.X)

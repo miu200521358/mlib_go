@@ -406,5 +406,5 @@ func (boneDeltas *BoneDeltas) totalLocalScaleMatLoop(boneIndex int, loop int) *m
 	}
 
 	// 親のスケールをキャンセルする
-	return parentScaleMat.Inverted().Mul(scaleMat)
+	return scaleMat.Muled(parentScaleMat.Inverted())
 }
