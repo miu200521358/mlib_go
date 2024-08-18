@@ -337,14 +337,63 @@ func (bone *Bone) IsUpper() bool {
 	return bone.containsCategory(CATEGORY_UPPER)
 }
 
-// ローカル軸行列計算で親のキャンセルをさせないボーンであるか
-func (bone *Bone) IsNoLocalCancel() bool {
-	// 捩り分散ボーンも含む
-	if strings.Contains(bone.Name(), "捩") {
-		return true
-	}
+// フィッティングの時に移動可能であるか
+func (bone *Bone) CanFitMove() bool {
+	return bone.containsCategory(CATEGORY_FITTING_MOVE)
+}
 
-	return bone.containsCategory(CATEGORY_NO_LOCAL_CANCEL)
+// フィッティングの時に回転可能であるか
+func (bone *Bone) CanFitRotate() bool {
+	return bone.containsCategory(CATEGORY_FITTING_ROTATE)
+}
+
+// フィッティングの時にスケール可能であるか
+func (bone *Bone) CanFitScale() bool {
+	return bone.containsCategory(CATEGORY_FITTING_SCALE)
+}
+
+// 定義上の親ボーン名
+func (bone *Bone) ConfigParentBoneNames() []string {
+	for _, boneConfig := range GetStandardBoneConfigs() {
+		if boneConfig.Name.String() == bone.Name() ||
+			boneConfig.Name.Right() == bone.Name() ||
+			boneConfig.Name.Left() == bone.Name() {
+
+			boneNames := make([]string, 0)
+			for _, parentBoneName := range boneConfig.ParentBoneNames {
+				boneNames = append(boneNames, parentBoneName.String())
+				if boneConfig.Name.Right() == bone.Name() {
+					boneNames = append(boneNames, parentBoneName.Right())
+				} else if boneConfig.Name.Left() == bone.Name() {
+					boneNames = append(boneNames, parentBoneName.Left())
+				}
+			}
+			return boneNames
+		}
+	}
+	return []string{}
+}
+
+// 定義上の子ボーン名
+func (bone *Bone) ConfigChildBoneNames() []string {
+	for _, boneConfig := range GetStandardBoneConfigs() {
+		if boneConfig.Name.String() == bone.Name() ||
+			boneConfig.Name.Right() == bone.Name() ||
+			boneConfig.Name.Left() == bone.Name() {
+
+			boneNames := make([]string, 0)
+			for _, tailBoneName := range boneConfig.ChildBoneNames {
+				boneNames = append(boneNames, tailBoneName.String())
+				if boneConfig.Name.Right() == bone.Name() {
+					boneNames = append(boneNames, tailBoneName.Right())
+				} else if boneConfig.Name.Left() == bone.Name() {
+					boneNames = append(boneNames, tailBoneName.Left())
+				}
+			}
+			return boneNames
+		}
+	}
+	return []string{}
 }
 
 // 指定したカテゴリーに属するか

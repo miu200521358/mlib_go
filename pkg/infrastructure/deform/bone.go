@@ -979,6 +979,12 @@ func calcBoneDeltas(
 		d.LocalMatrix = nil
 		d.GlobalPosition = nil
 
+		// ローカル移動
+		localPosMat := boneDeltas.TotalLocalPositionMat(bone.Index())
+		if localPosMat != nil && !localPosMat.IsIdent() {
+			d.UnitMatrix.Mul(localPosMat)
+		}
+
 		// 移動
 		posMat := boneDeltas.TotalPositionMat(bone.Index())
 		if posMat != nil && !posMat.IsIdent() {
@@ -1169,10 +1175,14 @@ func getPosition(
 	}
 
 	var morphPos *mmath.MVec3
-	var morphLocalPos *mmath.MVec3
 	if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
 		deltas.Morphs.Bones.Get(bone.Index()).FramePosition != nil {
 		morphPos = deltas.Morphs.Bones.Get(bone.Index()).FramePosition.Copy()
+	}
+
+	var morphLocalPos *mmath.MVec3
+	if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
+		deltas.Morphs.Bones.Get(bone.Index()).FrameLocalPosition != nil {
 		morphLocalPos = deltas.Morphs.Bones.Get(bone.Index()).FrameLocalPosition.Copy()
 	}
 
@@ -1196,20 +1206,24 @@ func getRotation(
 			rot = bf.Rotation.Copy()
 		} else {
 			rot = mmath.NewMQuaternion()
+		}
 
-			if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil &&
-				deltas.Bones.Get(bone.Index()).FrameLocalRotation != nil {
-				localRot = deltas.Bones.Get(bone.Index()).FrameLocalRotation.Copy()
-			}
+		if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
+			deltas.Morphs.Bones.Get(bone.Index()).FrameRotation != nil {
+			// IKの場合はIK計算時に組み込まれているので、まだframeRotationが無い場合のみ加味
+			morphRot = deltas.Morphs.Bones.Get(bone.Index()).FrameRotation.Copy()
+			// mlog.I("[%s][%.3f][%d]: rot: %s(%s), morphRot: %s(%s)\n", bone.Name(), frame, loop,
+			// 	rot.String(), rot.ToMMDDegrees().String(), morphRot.String(), morphRot.ToMMDDegrees().String())
+		}
 
-			if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
-				deltas.Morphs.Bones.Get(bone.Index()).FrameRotation != nil {
-				// IKの場合はIK計算時に組み込まれているので、まだframeRotationが無い場合のみ加味
-				morphRot = deltas.Morphs.Bones.Get(bone.Index()).FrameRotation.Copy()
-				morphLocalRot = deltas.Morphs.Bones.Get(bone.Index()).FrameLocalRotation.Copy()
-				// mlog.I("[%s][%.3f][%d]: rot: %s(%s), morphRot: %s(%s)\n", bone.Name(), frame, loop,
-				// 	rot.String(), rot.ToMMDDegrees().String(), morphRot.String(), morphRot.ToMMDDegrees().String())
-			}
+		if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil &&
+			deltas.Bones.Get(bone.Index()).FrameLocalRotation != nil {
+			localRot = deltas.Bones.Get(bone.Index()).FrameLocalRotation.Copy()
+		}
+
+		if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
+			deltas.Morphs.Bones.Get(bone.Index()).FrameLocalRotation != nil {
+			morphLocalRot = deltas.Morphs.Bones.Get(bone.Index()).FrameLocalRotation.Copy()
 		}
 	}
 
@@ -1242,10 +1256,14 @@ func getScale(
 	}
 
 	var morphScale *mmath.MVec3
-	var morphLocalScale *mmath.MVec3
 	if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
 		deltas.Morphs.Bones.Get(bone.Index()).FrameScale != nil {
 		morphScale = deltas.Morphs.Bones.Get(bone.Index()).FrameScale.Copy()
+	}
+
+	var morphLocalScale *mmath.MVec3
+	if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
+		deltas.Morphs.Bones.Get(bone.Index()).FrameLocalScale != nil {
 		morphLocalScale = deltas.Morphs.Bones.Get(bone.Index()).FrameLocalScale.Copy()
 	}
 

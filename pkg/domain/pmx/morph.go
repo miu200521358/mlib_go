@@ -148,17 +148,10 @@ func (offset *BoneMorphOffset) Type() int {
 	return int(MORPH_TYPE_BONE)
 }
 
-func NewBoneMorphOffset(boneIndex int, position *mmath.MVec3, rotation *mmath.MQuaternion) *BoneMorphOffset {
+func NewBoneMorphOffset(boneIndex int) *BoneMorphOffset {
 	return &BoneMorphOffset{
 		BoneIndex: boneIndex,
-		Position:  position,
-		Rotation:  rotation,
-		Extend: &BoneMorphOffsetExtend{
-			Scale:         mmath.NewMVec3(),
-			LocalPosition: mmath.NewMVec3(),
-			LocalRotation: mmath.NewMQuaternion(),
-			LocalScale:    mmath.NewMVec3(),
-		},
+		Extend:    &BoneMorphOffsetExtend{},
 	}
 }
 

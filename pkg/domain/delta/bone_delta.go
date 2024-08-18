@@ -404,6 +404,49 @@ func (boneDeltas *BoneDeltas) totalPositionLoop(boneIndex int, loop int) *mmath.
 	return pos
 }
 
+func (boneDeltas *BoneDeltas) TotalLocalPositionMat(boneIndex int) *mmath.MMat4 {
+	return boneDeltas.totalLocalPositionLoop(boneIndex, 0)
+}
+
+func (boneDeltas *BoneDeltas) totalLocalPositionLoop(boneIndex int, loop int) *mmath.MMat4 {
+	boneDelta := boneDeltas.Get(boneIndex)
+	if boneDelta == nil || loop > 10 {
+		return mmath.NewMMat4()
+	}
+
+	var parentPosMat *mmath.MMat4
+	if boneDelta.Bone.ParentIndex >= 0 {
+		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
+		parentPos := parentBoneDelta.FilledTotalPosition()
+
+		if !parentPos.IsZero() {
+			// 親の位置行列
+			parentPosMat = parentPos.ToMat4()
+		}
+	}
+
+	pos := boneDelta.FilledTotalPosition()
+	if pos.IsZero() {
+		if parentPosMat == nil {
+			// 親の位置が定義されていない場合、単位行列を返す
+			return mmath.NewMMat4()
+		}
+
+		// 親の位置が指定されている場合、キャンセルする
+		return parentPosMat.Inverted()
+	}
+
+	// ローカル軸に沿った位置行列
+	posMat := pos.ToMat4()
+
+	if parentPosMat == nil {
+		return posMat
+	}
+
+	// 親の位置をキャンセルする
+	return posMat.Muled(parentPosMat.Inverted())
+}
+
 func (boneDeltas *BoneDeltas) TotalScaleMat(boneIndex int) *mmath.MMat4 {
 	return boneDeltas.totalScaleMatLoop(boneIndex, 0).ToScaleMat4()
 }

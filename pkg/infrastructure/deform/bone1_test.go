@@ -69,8 +69,8 @@ func TestVmdMotion_Deform_Exists(t *testing.T) {
 		}
 		{
 			expectedPosition := &mmath.MVec3{X: 0.044920, Y: 15.149180, Z: 0.044429}
-			if !boneDeltas.GetByName(pmx.UPPER3.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.UPPER3.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.UPPER3.String()).FilledGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("上半身3").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身3").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("上半身3").FilledGlobalPosition().MMD()))
 			}
 		}
 		{
@@ -195,8 +195,8 @@ func TestVmdMotion_Deform_Lerp(t *testing.T) {
 		}
 		{
 			expectedPosition := &mmath.MVec3{X: -0.552491, Y: 14.941880, Z: 0.528703}
-			if !boneDeltas.GetByName(pmx.UPPER3.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
-				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.UPPER3.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.UPPER3.String()).FilledGlobalPosition().MMD()))
+			if !boneDeltas.GetByName("上半身3").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+				t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身3").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("上半身3").FilledGlobalPosition().MMD()))
 			}
 		}
 		{

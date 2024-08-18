@@ -201,47 +201,68 @@ func deformBone(
 				d = delta.NewBoneMorphDelta(offset.BoneIndex)
 			}
 
-			offsetPos := offset.Position.MuledScalar(ratio)
-			offsetQuat := offset.Rotation.MuledScalar(ratio).Normalize()
-			offsetScale := offset.Extend.Scale.MuledScalar(ratio)
-			offsetLocalPos := offset.Extend.LocalPosition.MuledScalar(ratio)
-			offsetLocalQuat := offset.Extend.LocalRotation.MuledScalar(ratio).Normalize()
-			offsetLocalScale := offset.Extend.LocalScale.MuledScalar(ratio)
+			var offsetPos, offsetLocalPos *mmath.MVec3
+			var offsetQuat, offsetLocalQuat *mmath.MQuaternion
+			var offsetScale, offsetLocalScale *mmath.MVec3
 
-			if d.FramePosition == nil {
-				d.FramePosition = offsetPos.Copy()
-			} else {
-				d.FramePosition.Add(offsetPos)
+			if offset.Position != nil {
+				offsetPos = offset.Position.MuledScalar(ratio)
+
+				if d.FramePosition == nil {
+					d.FramePosition = offsetPos
+				} else {
+					d.FramePosition.Add(offsetPos)
+				}
 			}
 
-			if d.FrameRotation == nil {
-				d.FrameRotation = offsetQuat.Copy()
-			} else {
-				d.FrameRotation = offsetQuat.Muled(d.FrameRotation)
+			if offset.Rotation != nil {
+				offsetQuat = offset.Rotation.MuledScalar(ratio).Normalize()
+
+				if d.FrameRotation == nil {
+					d.FrameRotation = offsetQuat
+				} else {
+					d.FrameRotation = offsetQuat.Muled(d.FrameRotation)
+				}
 			}
 
-			if d.FrameScale == nil {
-				d.FrameScale = offsetScale.Copy()
-			} else {
-				d.FrameScale.Add(offsetScale)
+			if offset.Extend.Scale != nil {
+				offsetScale = offset.Extend.Scale.MuledScalar(ratio)
+
+				if d.FrameScale == nil {
+					d.FrameScale = offsetScale
+				} else {
+					d.FrameScale.Add(offsetScale)
+				}
 			}
 
-			if d.FrameLocalPosition == nil {
-				d.FrameLocalPosition = offsetLocalPos.Copy()
-			} else {
-				d.FrameLocalPosition.Add(offsetLocalPos)
+			if offset.Extend.LocalPosition != nil {
+				offsetLocalPos = offset.Extend.LocalPosition.MuledScalar(ratio)
+
+				if d.FrameLocalPosition == nil {
+					d.FrameLocalPosition = offsetLocalPos
+				} else {
+					d.FrameLocalPosition.Add(offsetLocalPos)
+				}
 			}
 
-			if d.FrameLocalRotation == nil {
-				d.FrameLocalRotation = offsetLocalQuat.Copy()
-			} else {
-				d.FrameLocalRotation = offsetLocalQuat.Muled(d.FrameLocalRotation)
+			if offset.Extend.LocalRotation != nil {
+				offsetLocalQuat = offset.Extend.LocalRotation.MuledScalar(ratio).Normalize()
+
+				if d.FrameLocalRotation == nil {
+					d.FrameLocalRotation = offsetLocalQuat
+				} else {
+					d.FrameLocalRotation = offsetLocalQuat.Muled(d.FrameLocalRotation)
+				}
 			}
 
-			if d.FrameLocalScale == nil {
-				d.FrameLocalScale = offsetLocalScale.Copy()
-			} else {
-				d.FrameLocalScale.Add(offsetLocalScale)
+			if offset.Extend.LocalScale != nil {
+				offsetLocalScale = offset.Extend.LocalScale.MuledScalar(ratio)
+
+				if d.FrameLocalScale == nil {
+					d.FrameLocalScale = offsetLocalScale
+				} else {
+					d.FrameLocalScale.Add(offsetLocalScale)
+				}
 			}
 
 			deltas.Update(d)

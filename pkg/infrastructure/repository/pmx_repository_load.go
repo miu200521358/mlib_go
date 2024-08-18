@@ -875,11 +875,11 @@ func (rep *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 					return err
 				}
 
-				morph.Offsets = append(morph.Offsets, pmx.NewBoneMorphOffset(boneIndex,
-					&mmath.MVec3{X: boneOffsetValues[0], Y: boneOffsetValues[1], Z: boneOffsetValues[2]},
-					mmath.NewMQuaternionByValues(
-						boneOffsetValues[3], boneOffsetValues[4], boneOffsetValues[5], boneOffsetValues[6]),
-				))
+				offset := pmx.NewBoneMorphOffset(boneIndex)
+				offset.Position = &mmath.MVec3{X: boneOffsetValues[0], Y: boneOffsetValues[1], Z: boneOffsetValues[2]}
+				offset.Rotation = mmath.NewMQuaternionByValues(
+					boneOffsetValues[3], boneOffsetValues[4], boneOffsetValues[5], boneOffsetValues[6])
+				morph.Offsets = append(morph.Offsets, offset)
 			case pmx.MORPH_TYPE_UV, pmx.MORPH_TYPE_EXTENDED_UV1, pmx.MORPH_TYPE_EXTENDED_UV2, pmx.MORPH_TYPE_EXTENDED_UV3, pmx.MORPH_TYPE_EXTENDED_UV4:
 				// n  : 頂点Indexサイズ  | 頂点Index
 				vertexIndex, err := rep.unpackVertexIndex(model)
