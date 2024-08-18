@@ -91,6 +91,16 @@ func (boneDelta *BoneDelta) FilledTotalPosition() *mmath.MVec3 {
 	return pos
 }
 
+func (boneDelta *BoneDelta) FilledTotalLocalPosition() *mmath.MVec3 {
+	pos := boneDelta.FilledFrameLocalPosition().Copy()
+
+	if boneDelta.FrameLocalMorphPosition != nil && !boneDelta.FrameLocalMorphPosition.IsZero() {
+		pos.Add(boneDelta.FrameLocalMorphPosition)
+	}
+
+	return pos
+}
+
 func (boneDelta *BoneDelta) FilledFramePosition() *mmath.MVec3 {
 	if boneDelta.FramePosition == nil {
 		boneDelta.FramePosition = mmath.NewMVec3()
@@ -417,7 +427,7 @@ func (boneDeltas *BoneDeltas) totalLocalPositionLoop(boneIndex int, loop int) *m
 	var parentPosMat *mmath.MMat4
 	if boneDelta.Bone.ParentIndex >= 0 {
 		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
-		parentPos := parentBoneDelta.FilledTotalPosition()
+		parentPos := parentBoneDelta.FilledTotalLocalPosition()
 
 		if !parentPos.IsZero() {
 			// 親の位置行列
@@ -425,7 +435,7 @@ func (boneDeltas *BoneDeltas) totalLocalPositionLoop(boneIndex int, loop int) *m
 		}
 	}
 
-	pos := boneDelta.FilledTotalPosition()
+	pos := boneDelta.FilledTotalLocalPosition()
 	if pos.IsZero() {
 		if parentPosMat == nil {
 			// 親の位置が定義されていない場合、単位行列を返す

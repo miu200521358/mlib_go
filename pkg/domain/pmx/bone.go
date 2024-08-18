@@ -202,6 +202,15 @@ func (bone *Bone) SetEnglishName(englishName string) {
 	bone.englishName = englishName
 }
 
+func (bone *Bone) Direction() string {
+	if strings.Contains(bone.name, "左") {
+		return "左"
+	} else if strings.Contains(bone.name, "右") {
+		return "右"
+	}
+	return ""
+}
+
 func (bone *Bone) IsValid() bool {
 	return bone != nil && bone.index >= 0
 }
@@ -342,14 +351,29 @@ func (bone *Bone) CanFitMove() bool {
 	return bone.containsCategory(CATEGORY_FITTING_MOVE)
 }
 
+// フィッティングの時にローカル移動可能であるか
+func (bone *Bone) CanFitLocalMove() bool {
+	return bone.containsCategory(CATEGORY_FITTING_LOCAL_MOVE)
+}
+
 // フィッティングの時に回転可能であるか
 func (bone *Bone) CanFitRotate() bool {
 	return bone.containsCategory(CATEGORY_FITTING_ROTATE)
 }
 
+// フィッティングの時にローカル回転可能であるか
+func (bone *Bone) CanFitLocalRotate() bool {
+	return bone.containsCategory(CATEGORY_FITTING_LOCAL_ROTATE)
+}
+
 // フィッティングの時にスケール可能であるか
 func (bone *Bone) CanFitScale() bool {
 	return bone.containsCategory(CATEGORY_FITTING_SCALE)
+}
+
+// フィッティングの時にローカルスケール可能であるか
+func (bone *Bone) CanFitLocalScale() bool {
+	return bone.containsCategory(CATEGORY_FITTING_LOCAL_SCALE)
 }
 
 // 定義上の親ボーン名
