@@ -167,7 +167,7 @@ func (rep *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.Bone
 	if bf.Rotation != nil {
 		quatMMD = bf.Rotation.Normalized()
 	} else {
-		quatMMD = &mmath.MQuaternionIdent
+		quatMMD = mmath.MQuaternionIdent
 	}
 	rep.writeNumber(fout, binaryType_float, quatMMD.Vec3().X, 0.0, false)
 	rep.writeNumber(fout, binaryType_float, quatMMD.Vec3().Y, 0.0, false)

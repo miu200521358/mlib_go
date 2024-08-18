@@ -131,24 +131,24 @@ func NewUvMorphOffset(vertexIndex int, uv *mmath.MVec4) *UvMorphOffset {
 
 // BoneMorphOffset represents a bone morph.
 type BoneMorphOffset struct {
-	BoneIndex int              // ボーンIndex
-	Position  *mmath.MVec3     // グローバル移動量(x,y,z)
-	Rotation  *mmath.MRotation // グローバル回転量-クォータニオン(x,y,z,w)
+	BoneIndex int                // ボーンIndex
+	Position  *mmath.MVec3       // グローバル移動量(x,y,z)
+	Rotation  *mmath.MQuaternion // グローバル回転量-クォータニオン(x,y,z,w)
 	Extend    *BoneMorphOffsetExtend
 }
 
 type BoneMorphOffsetExtend struct {
-	Scale         *mmath.MVec3     // グローバル縮尺量(x,y,z)
-	LocalPosition *mmath.MVec3     // ローカル軸に沿った移動量(x,y,z)
-	LocalRotation *mmath.MRotation // ローカル軸に沿った回転量-クォータニオン(x,y,z,w)
-	LocalScale    *mmath.MVec3     // ローカル軸に沿った縮尺量(x,y,z)
+	Scale         *mmath.MVec3       // グローバル縮尺量(x,y,z)
+	LocalPosition *mmath.MVec3       // ローカル軸に沿った移動量(x,y,z)
+	LocalRotation *mmath.MQuaternion // ローカル軸に沿った回転量-クォータニオン(x,y,z,w)
+	LocalScale    *mmath.MVec3       // ローカル軸に沿った縮尺量(x,y,z)
 }
 
 func (offset *BoneMorphOffset) Type() int {
 	return int(MORPH_TYPE_BONE)
 }
 
-func NewBoneMorphOffset(boneIndex int, position *mmath.MVec3, rotation *mmath.MRotation) *BoneMorphOffset {
+func NewBoneMorphOffset(boneIndex int, position *mmath.MVec3, rotation *mmath.MQuaternion) *BoneMorphOffset {
 	return &BoneMorphOffset{
 		BoneIndex: boneIndex,
 		Position:  position,
@@ -156,7 +156,7 @@ func NewBoneMorphOffset(boneIndex int, position *mmath.MVec3, rotation *mmath.MR
 		Extend: &BoneMorphOffsetExtend{
 			Scale:         mmath.NewMVec3(),
 			LocalPosition: mmath.NewMVec3(),
-			LocalRotation: mmath.NewMRotation(),
+			LocalRotation: mmath.NewMQuaternion(),
 			LocalScale:    mmath.NewMVec3(),
 		},
 	}

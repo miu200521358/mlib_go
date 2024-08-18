@@ -516,8 +516,8 @@ func TestPmxReader_Load(t *testing.T) {
 				t.Errorf("Expected BoneIndex to be %v, got %v", expectedBoneIndex, o.BoneIndex)
 			}
 			expectedRotation := &mmath.MVec3{X: -6.000048, Y: 3.952523e-14, Z: -3.308919e-14}
-			if !o.Rotation.DegreesMMD().NearEquals(expectedRotation, 1e-5) {
-				t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, o.Rotation.Degrees())
+			if !o.Rotation.ToDegrees().NearEquals(expectedRotation, 1e-5) {
+				t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, o.Rotation.ToDegrees())
 			}
 		}
 	}

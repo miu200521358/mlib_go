@@ -676,19 +676,19 @@ func (rep *PmxRepository) saveMorphs(
 				if err != nil {
 					return err
 				}
-				err = rep.writeNumber(fout, binaryType_float, off.Rotation.Quaternion().Vec3().X, 0.0, false)
+				err = rep.writeNumber(fout, binaryType_float, off.Rotation.Vec3().X, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = rep.writeNumber(fout, binaryType_float, off.Rotation.Quaternion().Vec3().Y, 0.0, false)
+				err = rep.writeNumber(fout, binaryType_float, off.Rotation.Vec3().Y, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = rep.writeNumber(fout, binaryType_float, off.Rotation.Quaternion().Vec3().Z, 0.0, false)
+				err = rep.writeNumber(fout, binaryType_float, off.Rotation.Vec3().Z, 0.0, false)
 				if err != nil {
 					return err
 				}
-				err = rep.writeNumber(fout, binaryType_float, off.Rotation.Quaternion().W, 0.0, false)
+				err = rep.writeNumber(fout, binaryType_float, off.Rotation.W, 0.0, false)
 				if err != nil {
 					return err
 				}

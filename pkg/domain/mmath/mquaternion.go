@@ -36,10 +36,10 @@ func NewMQuaternionByValues(x, y, z, w float64) *MQuaternion {
 
 var (
 	// Zero holds a zero quaternion.
-	MQuaternionZero = MQuaternion{}
+	MQuaternionZero = &MQuaternion{}
 
 	// Ident holds an ident quaternion.
-	MQuaternionIdent = MQuaternion{0, 0, 0, 1}
+	MQuaternionIdent = &MQuaternion{0, 0, 0, 1}
 )
 
 func (quat *MQuaternion) XYZ() *MVec3 {
@@ -532,7 +532,7 @@ func (quat *MQuaternion) ToFixedAxisRotation(fixedAxis *MVec3) *MQuaternion {
 }
 
 func (quat *MQuaternion) IsIdent() bool {
-	return quat.NearEquals(&MQuaternionIdent, 1e-6)
+	return quat.NearEquals(MQuaternionIdent, 1e-6)
 }
 
 // NearEqualsは2つのクォータニオンがほぼ等しいかどうかを判定します。
