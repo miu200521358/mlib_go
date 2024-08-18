@@ -9,7 +9,7 @@ import (
 func TestPmxJsonRepository_Save1(t *testing.T) {
 	pmxRep := NewPmxRepository()
 
-	model, err := pmxRep.Load("C:/MMD/vmd_sizing_t3/pkg/usecase/model/mannequin.pmx")
+	model, err := pmxRep.Load("C:/MMD/vmd_sizing_t3/pkg/usecase/base_model/model.pmx")
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
 	}
