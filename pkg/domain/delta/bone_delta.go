@@ -373,8 +373,8 @@ func (boneDeltas *BoneDeltas) totalLocalRotationLoop(boneIndex int, loop int) *m
 		return parentRotMat.Inverted()
 	}
 
-	// ローカル軸に沿った回転行列
-	rotMat := boneDelta.Bone.Extend.LocalAxis.ToLocalMat()
+	// 回転行列
+	rotMat := rot.ToMat4()
 
 	if parentRotMat == nil {
 		return rotMat
