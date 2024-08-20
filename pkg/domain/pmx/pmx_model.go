@@ -3,6 +3,7 @@ package pmx
 import (
 	"fmt"
 	"hash/fnv"
+	"math/rand"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 )
@@ -85,6 +86,10 @@ func (model *PmxModel) Hash() string {
 
 func (model *PmxModel) SetHash(hash string) {
 	model.hash = hash
+}
+
+func (model *PmxModel) SetRandHash() {
+	model.hash = fmt.Sprintf("%d", rand.Intn(10000))
 }
 
 func (model *PmxModel) UpdateHash() {

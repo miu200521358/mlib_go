@@ -3,6 +3,7 @@ package vmd
 import (
 	"fmt"
 	"hash/fnv"
+	"math/rand"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 )
@@ -56,6 +57,10 @@ func (motion *VmdMotion) Hash() string {
 
 func (motion *VmdMotion) SetHash(hash string) {
 	motion.hash = hash
+}
+
+func (motion *VmdMotion) SetRandHash() {
+	motion.hash = fmt.Sprintf("%d", rand.Intn(10000))
 }
 
 func (motion *VmdMotion) UpdateHash() {
