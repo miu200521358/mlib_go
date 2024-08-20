@@ -38,9 +38,13 @@ func newBoneGl(bone *pmx.Bone) []float32 {
 
 func newTailBoneGl(bone *pmx.Bone) []float32 {
 	p := mgl.NewGlVec3(bone.Position.Added(bone.Extend.ChildRelativePosition))
+	tailIndex := bone.Index()
+	if bone.IsTailBone() && bone.TailIndex > 0 {
+		tailIndex = bone.TailIndex
+	}
 	return []float32{
 		p[0], p[1], p[2], // 位置
-		float32(bone.Index()), 0, 0, 0, // デフォームボーンINDEX
+		float32(tailIndex), 0, 0, 0, // デフォームボーンINDEX
 		1, 0, 0, 0, // デフォームボーンウェイト
 		0.0, 0.0, 0.0, 0.0, // 色
 	}
