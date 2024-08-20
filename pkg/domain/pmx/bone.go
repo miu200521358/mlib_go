@@ -5,10 +5,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/jinzhu/copier"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type IkLink struct {
@@ -34,8 +33,15 @@ func NewIkLink() *IkLink {
 }
 
 func (ikLink *IkLink) Copy() *IkLink {
-	copied := NewIkLink()
-	copier.CopyWithOption(copied, ikLink, copier.Option{DeepCopy: true})
+	copied := &IkLink{
+		BoneIndex:          ikLink.BoneIndex,
+		AngleLimit:         ikLink.AngleLimit,
+		MinAngleLimit:      ikLink.MinAngleLimit.Copy(),
+		MaxAngleLimit:      ikLink.MaxAngleLimit.Copy(),
+		LocalAngleLimit:    ikLink.LocalAngleLimit,
+		LocalMinAngleLimit: ikLink.LocalMinAngleLimit.Copy(),
+		LocalMaxAngleLimit: ikLink.LocalMaxAngleLimit.Copy(),
+	}
 	return copied
 }
 
@@ -115,6 +121,57 @@ type BoneExtend struct {
 	LocalMaxAngleLimit     *mmath.MRotation // 自分がIKリンクボーンのローカル軸角度制限の上限
 	AxisSign               int              // ボーンの軸ベクトル(左は-1, 右は1)
 	RigidBody              *RigidBody       // 物理演算用剛体
+}
+
+func (boneExtend *BoneExtend) Copy() *BoneExtend {
+	var copiedNormalizedFixedAxis *mmath.MVec3
+	if boneExtend.NormalizedFixedAxis != nil {
+		copiedNormalizedFixedAxis = boneExtend.NormalizedFixedAxis.Copy()
+	}
+	var copiedMinAngleLimit *mmath.MRotation
+	if boneExtend.MinAngleLimit != nil {
+		copiedMinAngleLimit = boneExtend.MinAngleLimit.Copy()
+	}
+	var copiedMaxAngleLimit *mmath.MRotation
+	if boneExtend.MaxAngleLimit != nil {
+		copiedMaxAngleLimit = boneExtend.MaxAngleLimit.Copy()
+	}
+	var copiedLocalMinAngleLimit *mmath.MRotation
+	if boneExtend.LocalMinAngleLimit != nil {
+		copiedLocalMinAngleLimit = boneExtend.LocalMinAngleLimit.Copy()
+	}
+	var copiedLocalMaxAngleLimit *mmath.MRotation
+	if boneExtend.LocalMaxAngleLimit != nil {
+		copiedLocalMaxAngleLimit = boneExtend.LocalMaxAngleLimit.Copy()
+	}
+
+	return &BoneExtend{
+		NormalizedLocalAxisX:   boneExtend.NormalizedLocalAxisX.Copy(),
+		NormalizedLocalAxisY:   boneExtend.NormalizedLocalAxisY.Copy(),
+		NormalizedLocalAxisZ:   boneExtend.NormalizedLocalAxisZ.Copy(),
+		NormalizedFixedAxis:    copiedNormalizedFixedAxis,
+		LocalAxis:              boneExtend.LocalAxis.Copy(),
+		ParentRelativePosition: boneExtend.ParentRelativePosition.Copy(),
+		ChildRelativePosition:  boneExtend.ChildRelativePosition.Copy(),
+		RevertOffsetMatrix:     boneExtend.RevertOffsetMatrix.Copy(),
+		OffsetMatrix:           boneExtend.OffsetMatrix.Copy(),
+		TreeBoneIndexes:        mutils.DeepCopyIntSlice(boneExtend.TreeBoneIndexes),
+		ParentBoneIndexes:      mutils.DeepCopyIntSlice(boneExtend.ParentBoneIndexes),
+		ParentBoneNames:        mutils.DeepCopyStringSlice(boneExtend.ParentBoneNames),
+		RelativeBoneIndexes:    mutils.DeepCopyIntSlice(boneExtend.RelativeBoneIndexes),
+		ChildBoneIndexes:       mutils.DeepCopyIntSlice(boneExtend.ChildBoneIndexes),
+		EffectiveBoneIndexes:   mutils.DeepCopyIntSlice(boneExtend.EffectiveBoneIndexes),
+		IkLinkBoneIndexes:      mutils.DeepCopyIntSlice(boneExtend.IkLinkBoneIndexes),
+		IkTargetBoneIndexes:    mutils.DeepCopyIntSlice(boneExtend.IkTargetBoneIndexes),
+		AngleLimit:             boneExtend.AngleLimit,
+		MinAngleLimit:          copiedMinAngleLimit,
+		MaxAngleLimit:          copiedMaxAngleLimit,
+		LocalAngleLimit:        boneExtend.LocalAngleLimit,
+		LocalMinAngleLimit:     copiedLocalMinAngleLimit,
+		LocalMaxAngleLimit:     copiedLocalMaxAngleLimit,
+		AxisSign:               boneExtend.AxisSign,
+		RigidBody:              nil,
+	}
 }
 
 func NewBone() *Bone {
@@ -216,8 +273,32 @@ func (bone *Bone) IsValid() bool {
 }
 
 func (bone *Bone) Copy() core.IIndexNameModel {
-	copied := NewBone()
-	copier.CopyWithOption(copied, bone, copier.Option{DeepCopy: true})
+	var copiedIk *Ik
+	if bone.Ik != nil {
+		copiedIk = bone.Ik.Copy()
+	}
+
+	copied := &Bone{
+		index:        bone.index,
+		name:         bone.name,
+		englishName:  bone.englishName,
+		Position:     bone.Position.Copy(),
+		ParentIndex:  bone.ParentIndex,
+		Layer:        bone.Layer,
+		BoneFlag:     bone.BoneFlag,
+		TailPosition: bone.TailPosition.Copy(),
+		TailIndex:    bone.TailIndex,
+		EffectIndex:  bone.EffectIndex,
+		EffectFactor: bone.EffectFactor,
+		FixedAxis:    bone.FixedAxis.Copy(),
+		LocalAxisX:   bone.LocalAxisX.Copy(),
+		LocalAxisZ:   bone.LocalAxisZ.Copy(),
+		EffectorKey:  bone.EffectorKey,
+		Ik:           copiedIk,
+		DisplaySlot:  bone.DisplaySlot,
+		IsSystem:     bone.IsSystem,
+		Extend:       bone.Extend.Copy(),
+	}
 	return copied
 }
 
@@ -848,4 +929,12 @@ func NewBones(count int) *Bones {
 		LayerSortedNames:   make(map[bool]map[string]int),
 		LayerSortedIndexes: make([]int, 0),
 	}
+}
+
+func (bones *Bones) Copy() *Bones {
+	copied := NewBones(len(bones.Data))
+	for i, bone := range bones.Data {
+		copied.SetItem(i, bone.Copy().(*Bone))
+	}
+	return copied
 }

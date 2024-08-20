@@ -1,8 +1,6 @@
 package pmx
 
 import (
-	"github.com/jinzhu/copier"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
@@ -170,9 +168,28 @@ func (rigidBody *RigidBody) IsValid() bool {
 }
 
 func (rigidBody *RigidBody) Copy() core.IIndexNameModel {
-	copied := NewMorph()
-	copier.CopyWithOption(copied, rigidBody, copier.Option{DeepCopy: true})
-	return copied
+	return &RigidBody{
+		index:                   rigidBody.index,
+		name:                    rigidBody.name,
+		englishName:             rigidBody.englishName,
+		BoneIndex:               rigidBody.BoneIndex,
+		CollisionGroup:          rigidBody.CollisionGroup,
+		CollisionGroupMask:      rigidBody.CollisionGroupMask,
+		CollisionGroupMaskValue: rigidBody.CollisionGroupMaskValue,
+		ShapeType:               rigidBody.ShapeType,
+		Size:                    rigidBody.Size.Copy(),
+		Position:                rigidBody.Position.Copy(),
+		Rotation:                rigidBody.Rotation.Copy(),
+		RigidBodyParam:          rigidBody.RigidBodyParam,
+		PhysicsType:             rigidBody.PhysicsType,
+		XDirection:              rigidBody.XDirection.Copy(),
+		YDirection:              rigidBody.YDirection.Copy(),
+		ZDirection:              rigidBody.ZDirection.Copy(),
+		IsSystem:                rigidBody.IsSystem,
+		Matrix:                  rigidBody.Matrix.Copy(),
+		Bone:                    nil,
+		JointedBone:             nil,
+	}
 }
 
 // 剛体リスト
@@ -184,4 +201,12 @@ func NewRigidBodies(count int) *RigidBodies {
 	return &RigidBodies{
 		IndexNameModels: core.NewIndexNameModels[*RigidBody](count, func() *RigidBody { return nil }),
 	}
+}
+
+func (rigidBodies *RigidBodies) Copy() *RigidBodies {
+	copied := NewRigidBodies(len(rigidBodies.Data))
+	for i, rigidBody := range rigidBodies.Data {
+		copied.SetItem(i, rigidBody.Copy().(*RigidBody))
+	}
+	return copied
 }

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"hash/fnv"
 
-	"github.com/jinzhu/copier"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 )
 
@@ -80,9 +78,18 @@ func (motion *VmdMotion) UpdateHash() {
 }
 
 func (motion *VmdMotion) Copy() core.IHashModel {
-	copied := NewVmdMotion("")
-	copier.CopyWithOption(copied, motion, copier.Option{DeepCopy: true})
-	return copied
+	return &VmdMotion{
+		name:         motion.name,
+		path:         motion.path,
+		hash:         motion.hash,
+		Signature:    motion.Signature,
+		BoneFrames:   motion.BoneFrames.Copy(),
+		MorphFrames:  motion.MorphFrames.Copy(),
+		CameraFrames: motion.CameraFrames.Copy(),
+		LightFrames:  motion.LightFrames.Copy(),
+		ShadowFrames: motion.ShadowFrames.Copy(),
+		IkFrames:     motion.IkFrames.Copy(),
+	}
 }
 
 func (motion *VmdMotion) MaxFrame() float32 {

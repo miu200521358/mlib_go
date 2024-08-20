@@ -1,7 +1,6 @@
 package pmx
 
 import (
-	"github.com/jinzhu/copier"
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 )
 
@@ -82,9 +81,16 @@ func (displaySlot *DisplaySlot) IsValid() bool {
 
 // Copy
 func (displaySlot *DisplaySlot) Copy() core.IIndexModel {
-	copied := NewDisplaySlot()
-	copier.CopyWithOption(copied, displaySlot, copier.Option{DeepCopy: true})
-	return copied
+	copiedReference := make([]Reference, len(displaySlot.References))
+	copy(copiedReference, displaySlot.References)
+
+	return &DisplaySlot{
+		index:       displaySlot.index,
+		name:        displaySlot.name,
+		englishName: displaySlot.englishName,
+		SpecialFlag: displaySlot.SpecialFlag,
+		References:  copiedReference,
+	}
 }
 
 // 表示枠リスト
@@ -96,4 +102,12 @@ func NewDisplaySlots(count int) *DisplaySlots {
 	return &DisplaySlots{
 		IndexModels: core.NewIndexModels[*DisplaySlot](count, func() *DisplaySlot { return nil }),
 	}
+}
+
+func (displaySlots *DisplaySlots) Copy() *DisplaySlots {
+	copied := NewDisplaySlots(len(displaySlots.Data))
+	for i, displaySlot := range displaySlots.Data {
+		copied.SetItem(i, displaySlot.Copy().(*DisplaySlot))
+	}
+	return copied
 }

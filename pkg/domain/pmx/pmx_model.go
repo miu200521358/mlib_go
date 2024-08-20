@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"hash/fnv"
 
-	"github.com/jinzhu/copier"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 )
 
@@ -170,9 +168,33 @@ func (model *PmxModel) Setup() {
 }
 
 func (model *PmxModel) Copy() core.IHashModel {
-	copied := NewPmxModel("")
-	copier.CopyWithOption(copied, model, copier.Option{DeepCopy: true})
-	return copied
+	return &PmxModel{
+		index:              model.index,
+		name:               model.name,
+		englishName:        model.englishName,
+		path:               model.path,
+		hash:               model.hash,
+		Signature:          model.Signature,
+		Version:            model.Version,
+		ExtendedUVCount:    model.ExtendedUVCount,
+		VertexCountType:    model.VertexCountType,
+		TextureCountType:   model.TextureCountType,
+		MaterialCountType:  model.MaterialCountType,
+		BoneCountType:      model.BoneCountType,
+		MorphCountType:     model.MorphCountType,
+		RigidBodyCountType: model.RigidBodyCountType,
+		Comment:            model.Comment,
+		EnglishComment:     model.EnglishComment,
+		Vertices:           model.Vertices.Copy(),
+		Faces:              model.Faces.Copy(),
+		Textures:           model.Textures.Copy(),
+		Materials:          model.Materials.Copy(),
+		Bones:              model.Bones.Copy(),
+		Morphs:             model.Morphs.Copy(),
+		DisplaySlots:       model.DisplaySlots.Copy(),
+		RigidBodies:        model.RigidBodies.Copy(),
+		Joints:             model.Joints.Copy(),
+	}
 }
 
 func (model *PmxModel) EnglishName() string {

@@ -14,6 +14,14 @@ func NewMorphFrames() *MorphFrames {
 	}
 }
 
+func (morphFrames *MorphFrames) Copy() *MorphFrames {
+	copied := NewMorphFrames()
+	for _, morphNameFrames := range morphFrames.Data {
+		copied.Update(morphNameFrames.Copy())
+	}
+	return copied
+}
+
 func (morphFrames *MorphFrames) Contains(morphName string) bool {
 	_, ok := morphFrames.Data[morphName]
 	return ok

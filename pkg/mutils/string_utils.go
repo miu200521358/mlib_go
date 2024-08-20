@@ -47,3 +47,15 @@ func SplitCommaSeparatedInts(s string) ([]int, error) {
 	}
 	return ints, nil
 }
+
+func DeepCopyIntSlice(original []int) []int {
+	newSlice := make([]int, len(original))
+	copy(newSlice, original)
+	return newSlice
+}
+
+func DeepCopyStringSlice(original []string) []string {
+	newSlice := make([]string, len(original))
+	copy(newSlice, original)
+	return newSlice
+}

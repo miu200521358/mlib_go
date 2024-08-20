@@ -1,10 +1,9 @@
 package pmx
 
 import (
-	"github.com/jinzhu/copier"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 )
 
 type Vertex struct {
@@ -47,9 +46,22 @@ func (vertex *Vertex) IsValid() bool {
 }
 
 func (vertex *Vertex) Copy() core.IIndexModel {
-	copied := NewVertex()
-	copier.CopyWithOption(copied, vertex, copier.Option{DeepCopy: true})
-	return copied
+	var copiedExtendedUvs []*mmath.MVec4
+	for _, uv := range vertex.ExtendedUvs {
+		copiedExtendedUvs = append(copiedExtendedUvs, uv.Copy())
+	}
+
+	return &Vertex{
+		index:           vertex.index,
+		Position:        vertex.Position.Copy(),
+		Normal:          vertex.Normal.Copy(),
+		Uv:              vertex.Uv.Copy(),
+		ExtendedUvs:     copiedExtendedUvs,
+		DeformType:      vertex.DeformType,
+		Deform:          vertex.Deform,
+		EdgeFactor:      vertex.EdgeFactor,
+		MaterialIndexes: mutils.DeepCopyIntSlice(vertex.MaterialIndexes),
+	}
 }
 
 // 頂点リスト
@@ -61,4 +73,12 @@ func NewVertices(count int) *Vertices {
 	return &Vertices{
 		IndexModels: core.NewIndexModels[*Vertex](count, func() *Vertex { return nil }),
 	}
+}
+
+func (vertices *Vertices) Copy() *Vertices {
+	copied := NewVertices(vertices.Len())
+	for i := 0; i < vertices.Len(); i++ {
+		copied.SetItem(i, vertices.Get(i).Copy().(*Vertex))
+	}
+	return copied
 }

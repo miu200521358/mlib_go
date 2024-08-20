@@ -1,8 +1,6 @@
 package pmx
 
 import (
-	"github.com/jinzhu/copier"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
@@ -85,9 +83,18 @@ func (joint *Joint) IsValid() bool {
 }
 
 func (joint *Joint) Copy() core.IIndexNameModel {
-	copied := NewJoint()
-	copier.CopyWithOption(copied, joint, copier.Option{DeepCopy: true})
-	return copied
+	return &Joint{
+		index:           joint.index,
+		name:            joint.name,
+		englishName:     joint.englishName,
+		JointType:       joint.JointType,
+		RigidbodyIndexA: joint.RigidbodyIndexA,
+		RigidbodyIndexB: joint.RigidbodyIndexB,
+		Position:        joint.Position.Copy(),
+		Rotation:        joint.Rotation.Copy(),
+		JointParam:      joint.JointParam,
+		IsSystem:        joint.IsSystem,
+	}
 }
 
 func NewJointByName(name string) *Joint {
@@ -105,4 +112,12 @@ func NewJoints(count int) *Joints {
 	return &Joints{
 		IndexNameModels: core.NewIndexNameModels[*Joint](count, func() *Joint { return nil }),
 	}
+}
+
+func (joints *Joints) Copy() *Joints {
+	copied := NewJoints(len(joints.Data))
+	for i, joint := range joints.Data {
+		copied.SetItem(i, joint.Copy().(*Joint))
+	}
+	return copied
 }

@@ -19,6 +19,14 @@ func NewBoneFrames() *BoneFrames {
 	}
 }
 
+func (boneFrames *BoneFrames) Copy() *BoneFrames {
+	copied := NewBoneFrames()
+	for _, boneNameFrames := range boneFrames.Data {
+		copied.Append(boneNameFrames.Copy())
+	}
+	return copied
+}
+
 func (boneFrames *BoneFrames) Contains(boneName string) bool {
 	boneFrames.lock.RLock()
 	defer boneFrames.lock.RUnlock()

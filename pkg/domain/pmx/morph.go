@@ -1,8 +1,6 @@
 package pmx
 
 import (
-	"github.com/jinzhu/copier"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
@@ -239,9 +237,43 @@ func NewMorph() *Morph {
 }
 
 func (morph *Morph) Copy() core.IIndexNameModel {
-	copied := NewMorph()
-	copier.CopyWithOption(copied, morph, copier.Option{DeepCopy: true})
-	return copied
+	copiedOffsets := make([]IMorphOffset, len(morph.Offsets))
+	for i, offset := range morph.Offsets {
+		switch offset.Type() {
+		case int(MORPH_TYPE_VERTEX):
+			copiedOffsets[i] = NewVertexMorphOffset(offset.(*VertexMorphOffset).VertexIndex, offset.(*VertexMorphOffset).Position)
+		case int(MORPH_TYPE_UV), int(MORPH_TYPE_EXTENDED_UV1), int(MORPH_TYPE_EXTENDED_UV2), int(MORPH_TYPE_EXTENDED_UV3), int(MORPH_TYPE_EXTENDED_UV4):
+			copiedOffsets[i] = NewUvMorphOffset(offset.(*UvMorphOffset).VertexIndex, offset.(*UvMorphOffset).Uv)
+		case int(MORPH_TYPE_BONE):
+			copiedOffsets[i] = NewBoneMorphOffset(offset.(*BoneMorphOffset).BoneIndex)
+		case int(MORPH_TYPE_GROUP):
+			copiedOffsets[i] = NewGroupMorphOffset(offset.(*GroupMorphOffset).MorphIndex, offset.(*GroupMorphOffset).MorphFactor)
+		case int(MORPH_TYPE_MATERIAL):
+			copiedOffsets[i] = NewMaterialMorphOffset(
+				offset.(*MaterialMorphOffset).MaterialIndex,
+				offset.(*MaterialMorphOffset).CalcMode,
+				offset.(*MaterialMorphOffset).Diffuse.Copy(),
+				offset.(*MaterialMorphOffset).Specular.Copy(),
+				offset.(*MaterialMorphOffset).Ambient.Copy(),
+				offset.(*MaterialMorphOffset).Edge.Copy(),
+				offset.(*MaterialMorphOffset).EdgeSize,
+				offset.(*MaterialMorphOffset).TextureFactor.Copy(),
+				offset.(*MaterialMorphOffset).SphereTextureFactor.Copy(),
+				offset.(*MaterialMorphOffset).ToonTextureFactor.Copy(),
+			)
+		}
+	}
+
+	return &Morph{
+		index:       morph.index,
+		name:        morph.name,
+		englishName: morph.englishName,
+		Panel:       morph.Panel,
+		MorphType:   morph.MorphType,
+		Offsets:     copiedOffsets,
+		DisplaySlot: morph.DisplaySlot,
+		IsSystem:    morph.IsSystem,
+	}
 }
 
 // モーフリスト
@@ -253,4 +285,12 @@ func NewMorphs(count int) *Morphs {
 	return &Morphs{
 		IndexNameModels: core.NewIndexNameModels[*Morph](count, func() *Morph { return nil }),
 	}
+}
+
+func (morphs *Morphs) Copy() *Morphs {
+	copied := NewMorphs(len(morphs.Data))
+	for i, morph := range morphs.Data {
+		copied.Data[i] = morph.Copy().(*Morph)
+	}
+	return copied
 }

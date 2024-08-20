@@ -3,8 +3,6 @@ package pmx
 import (
 	"slices"
 
-	"github.com/jinzhu/copier"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
@@ -185,9 +183,24 @@ func (material *Material) IsValid() bool {
 }
 
 func (material *Material) Copy() core.IIndexNameModel {
-	copied := NewMaterial()
-	copier.CopyWithOption(copied, material, copier.Option{DeepCopy: true})
-	return copied
+	return &Material{
+		index:              material.index,
+		name:               material.name,
+		englishName:        material.englishName,
+		Diffuse:            material.Diffuse.Copy(),
+		Specular:           material.Specular.Copy(),
+		Ambient:            material.Ambient.Copy(),
+		DrawFlag:           material.DrawFlag,
+		Edge:               material.Edge.Copy(),
+		EdgeSize:           material.EdgeSize,
+		TextureIndex:       material.TextureIndex,
+		SphereTextureIndex: material.SphereTextureIndex,
+		SphereMode:         material.SphereMode,
+		ToonSharingFlag:    material.ToonSharingFlag,
+		ToonTextureIndex:   material.ToonTextureIndex,
+		Memo:               material.Memo,
+		VerticesCount:      material.VerticesCount,
+	}
 }
 
 // 材質リスト
@@ -203,6 +216,14 @@ func NewMaterials(count int) *Materials {
 		Vertices:        make(map[int][]int),
 		Faces:           make(map[int][]int),
 	}
+}
+
+func (materials *Materials) Copy() *Materials {
+	copied := NewMaterials(len(materials.Data))
+	for i, material := range materials.Data {
+		copied.SetItem(i, material.Copy().(*Material))
+	}
+	return copied
 }
 
 func (materials *Materials) setup(vertices *Vertices, faces *Faces, textures *Textures) {

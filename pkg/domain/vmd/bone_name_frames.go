@@ -11,3 +11,11 @@ func NewBoneNameFrames(name string) *BoneNameFrames {
 		Name:       name,
 	}
 }
+
+func (boneNameFrames *BoneNameFrames) Copy() *BoneNameFrames {
+	copied := NewBoneNameFrames(boneNameFrames.Name)
+	for _, frame := range boneNameFrames.List() {
+		copied.Append(frame.Copy().(*BoneFrame))
+	}
+	return copied
+}

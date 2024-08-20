@@ -9,3 +9,11 @@ func NewShadowFrames() *ShadowFrames {
 		BaseFrames: NewBaseFrames[*ShadowFrame](NewShadowFrame, NullShadowFrame),
 	}
 }
+
+func (shadowFrames *ShadowFrames) Copy() *ShadowFrames {
+	copied := NewShadowFrames()
+	for _, frame := range shadowFrames.List() {
+		copied.Append(frame.Copy().(*ShadowFrame))
+	}
+	return copied
+}

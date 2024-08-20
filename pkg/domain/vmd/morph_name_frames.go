@@ -11,3 +11,11 @@ func NewMorphNameFrames(name string) *MorphNameFrames {
 		Name:       name,
 	}
 }
+
+func (morphNameFrames *MorphNameFrames) Copy() *MorphNameFrames {
+	copied := NewMorphNameFrames(morphNameFrames.Name)
+	for _, frame := range morphNameFrames.List() {
+		copied.Append(frame.Copy().(*MorphFrame))
+	}
+	return copied
+}

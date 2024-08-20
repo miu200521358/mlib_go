@@ -1,7 +1,6 @@
 package pmx
 
 import (
-	"github.com/jinzhu/copier"
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 )
 
@@ -58,9 +57,12 @@ func (tex *Texture) IsValid() bool {
 }
 
 func (tex *Texture) Copy() core.IIndexModel {
-	copied := NewTexture()
-	copier.CopyWithOption(copied, tex, copier.Option{DeepCopy: true})
-	return copied
+	return &Texture{
+		index:       tex.index,
+		name:        tex.name,
+		englishName: tex.englishName,
+		TextureType: tex.TextureType,
+	}
 }
 
 // テクスチャリスト
@@ -72,6 +74,14 @@ func NewTextures(count int) *Textures {
 	return &Textures{
 		IndexModels: core.NewIndexModels[*Texture](count, func() *Texture { return nil }),
 	}
+}
+
+func (textures *Textures) Copy() *Textures {
+	copied := NewTextures(len(textures.Data))
+	for i, texture := range textures.Data {
+		copied.SetItem(i, texture.Copy().(*Texture))
+	}
+	return copied
 }
 
 // 共有テクスチャ辞書
