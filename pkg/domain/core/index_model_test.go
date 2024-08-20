@@ -2,8 +2,6 @@ package core
 
 import (
 	"testing"
-
-	"github.com/jinzhu/copier"
 )
 
 // INDEXを持つ基底クラス
@@ -29,7 +27,6 @@ func (iModel *IndexModel) IsValid() bool {
 
 func (iModel *IndexModel) Copy() IIndexModel {
 	copied := IndexModel{index: iModel.index}
-	copier.CopyWithOption(copied, iModel, copier.Option{DeepCopy: true})
 	return &copied
 }
 
