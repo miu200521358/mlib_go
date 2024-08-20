@@ -172,6 +172,7 @@ func (app *MApp) RunViewer() {
 	prevShowTime := glfw.GetTime()
 	elapsedList := make([]float64, 0)
 	vmdDeltas := make([][]*delta.VmdDeltas, len(app.viewWindows))
+	viewerParameters := make([]*state.ViewerParameter, len(app.viewWindows))
 
 	for !app.IsClosed() {
 
@@ -220,9 +221,7 @@ func (app *MApp) RunViewer() {
 
 		// カメラ同期(重複描画の場合はそっちで同期させる)
 		if app.IsCameraSync() && !app.IsShowOverride() {
-			for i := 1; i < len(app.viewWindows); i++ {
-				app.viewWindows[i].UpdateViewerParameter(app.viewWindows[0].GetViewerParameter())
-			}
+			app.syncViewer(viewerParameters)
 		}
 
 		// 重複描画
@@ -230,7 +229,7 @@ func (app *MApp) RunViewer() {
 			for i := 1; i < len(app.viewWindows); i++ {
 				app.viewWindows[i].SetOverrideTextureId(app.viewWindows[0].OverrideTextureId())
 				// カメラの向きとか同期させる
-				app.viewWindows[i].UpdateViewerParameter(app.viewWindows[0].GetViewerParameter())
+				app.syncViewer(viewerParameters)
 			}
 		} else {
 			for i := 1; i < len(app.viewWindows); i++ {
@@ -289,6 +288,37 @@ func (app *MApp) RunViewer() {
 		}
 	}
 	app.Close()
+}
+
+func (app *MApp) syncViewer(viewerParameters []*state.ViewerParameter) {
+	if viewerParameters[0] == nil {
+		// 初回は入ってないので、メインビューアのパラメータを採用
+		viewerParameters[0] = app.viewWindows[0].GetViewerParameter()
+		for i := 1; i < len(app.viewWindows); i++ {
+			app.viewWindows[i].UpdateViewerParameter(viewerParameters[0])
+			viewerParameters[i] = viewerParameters[0]
+		}
+	} else {
+		// 2回目以降は変更があったウィンドウのパラメーターを他に適用する
+		changedIndex := -1
+		for i, window := range app.viewWindows {
+			nowViewerParameter := window.GetViewerParameter()
+			if !viewerParameters[i].Equals(nowViewerParameter) {
+				changedIndex = i
+				break
+			}
+		}
+		if changedIndex >= 0 {
+			// 変更があったウィンドウのパラメータを他に適用する
+			viewerParameters[changedIndex] = app.viewWindows[changedIndex].GetViewerParameter()
+			for i := 0; i < len(app.viewWindows); i++ {
+				if i != changedIndex {
+					app.viewWindows[i].UpdateViewerParameter(viewerParameters[changedIndex])
+					viewerParameters[i] = viewerParameters[changedIndex]
+				}
+			}
+		}
+	}
 }
 
 func (app *MApp) resetPhysics(

@@ -7,7 +7,6 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
-	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
@@ -40,8 +39,8 @@ type IViewWindow interface {
 	Title() string
 	OverrideTextureId() uint32
 	SetOverrideTextureId(id uint32)
-	GetViewerParameter() (float64, float64, *mmath.MVec2, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3)
-	UpdateViewerParameter(yaw, pitch float64, size *mmath.MVec2, cameraPos, cameraUp, lookAtCenter *mmath.MVec3)
+	GetViewerParameter() *ViewerParameter
+	UpdateViewerParameter(viewerParameter *ViewerParameter)
 	Render(models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas, invisibleMaterials [][]int,
 		selectedVertexes [][]int, noSelectedVertexes [][]int) [][]int
 	Physics() *mbt.MPhysics

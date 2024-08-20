@@ -590,29 +590,36 @@ func (viewWindow *ViewWindow) LoadModels(models []*pmx.PmxModel) {
 	}
 }
 
-func (viewWindow *ViewWindow) GetViewerParameter() (
-	float64, float64, *mmath.MVec2, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3,
-) {
-	return viewWindow.yaw, viewWindow.pitch, viewWindow.size,
-		viewWindow.shader.CameraPosition, viewWindow.shader.CameraUp, viewWindow.shader.LookAtCenterPosition
+func (viewWindow *ViewWindow) GetViewerParameter() *state.ViewerParameter {
+	return &state.ViewerParameter{
+		viewWindow.yaw,
+		viewWindow.pitch,
+		viewWindow.shader.FieldOfViewAngle,
+		viewWindow.size,
+		viewWindow.shader.CameraPosition,
+		viewWindow.shader.CameraUp,
+		viewWindow.shader.LookAtCenterPosition,
+	}
 }
 
 func (viewWindow *ViewWindow) UpdateViewerParameter(
-	yaw, pitch float64, size *mmath.MVec2, cameraPos, cameraUp, lookAtCenter *mmath.MVec3,
+	viewerParameter *state.ViewerParameter,
 ) {
-	viewWindow.yaw = yaw
-	viewWindow.pitch = pitch
+	viewWindow.yaw = viewerParameter.Yaw
+	viewWindow.pitch = viewerParameter.Pitch
 
-	viewWindow.shader.CameraPosition = cameraPos.Copy()
-	viewWindow.shader.CameraUp = cameraUp.Copy()
-	viewWindow.shader.LookAtCenterPosition = lookAtCenter.Copy()
+	viewWindow.shader.FieldOfViewAngle = viewerParameter.FieldOfViewAngle
+	viewWindow.shader.CameraPosition = viewerParameter.CameraPos.Copy()
+	viewWindow.shader.CameraUp = viewerParameter.CameraUp.Copy()
+	viewWindow.shader.LookAtCenterPosition = viewerParameter.LookAtCenter.Copy()
 
 	viewWindow.updateCameraAngle()
 
-	isResize := !viewWindow.size.Equals(size)
+	copiedSize := viewerParameter.Size.Copy()
+	isResize := !viewWindow.size.Equals(copiedSize)
 	if isResize {
-		viewWindow.Window.SetSize(int(size.X), int(size.Y))
-		viewWindow.size = size.Copy()
+		viewWindow.Window.SetSize(int(copiedSize.X), int(copiedSize.Y))
+		viewWindow.size = copiedSize
 	}
 }
 
