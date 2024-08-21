@@ -1146,7 +1146,7 @@ func fillBoneDeform(
 			getPosition(deltas, bone, bf)
 		d.FrameRotation, d.FrameLocalRotation, d.FrameMorphRotation, d.FrameLocalMorphRotation =
 			getRotation(deltas, bone, bf)
-		d.FrameScale, d.FrameLocalScale, d.FrameMorphScale, d.FrameLocalMorphScale =
+		d.FrameScale, d.FrameLocalScaleMat, d.FrameMorphScale, d.FrameLocalMorphScaleMat =
 			getScale(deltas, bone, bf)
 		deltas.Bones.Update(d)
 	}
@@ -1239,7 +1239,7 @@ func getScale(
 	deltas *delta.VmdDeltas,
 	bone *pmx.Bone,
 	bf *vmd.BoneFrame,
-) (*mmath.MVec3, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
+) (*mmath.MVec3, *mmath.MMat4, *mmath.MVec3, *mmath.MMat4) {
 
 	scale := &mmath.MVec3{X: 1, Y: 1, Z: 1}
 	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil &&
@@ -1249,10 +1249,10 @@ func getScale(
 		scale.Add(bf.Scale)
 	}
 
-	var localScale *mmath.MVec3
+	var localScaleMat *mmath.MMat4
 	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil &&
-		deltas.Bones.Get(bone.Index()).FrameLocalScale != nil {
-		localScale = deltas.Bones.Get(bone.Index()).FrameLocalScale.Copy()
+		deltas.Bones.Get(bone.Index()).FrameLocalScaleMat != nil {
+		localScaleMat = deltas.Bones.Get(bone.Index()).FrameLocalScaleMat.Copy()
 	}
 
 	var morphScale *mmath.MVec3
@@ -1261,11 +1261,11 @@ func getScale(
 		morphScale = deltas.Morphs.Bones.Get(bone.Index()).FrameScale.Copy()
 	}
 
-	var morphLocalScale *mmath.MVec3
+	var morphLocalScaleMat *mmath.MMat4
 	if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
-		deltas.Morphs.Bones.Get(bone.Index()).FrameLocalScale != nil {
-		morphLocalScale = deltas.Morphs.Bones.Get(bone.Index()).FrameLocalScale.Copy()
+		deltas.Morphs.Bones.Get(bone.Index()).FrameLocalScaleMat != nil {
+		morphLocalScaleMat = deltas.Morphs.Bones.Get(bone.Index()).FrameLocalScaleMat.Copy()
 	}
 
-	return scale, localScale, morphScale, morphLocalScale
+	return scale, localScaleMat, morphScale, morphLocalScaleMat
 }

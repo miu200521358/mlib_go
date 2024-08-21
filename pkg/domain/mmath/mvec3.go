@@ -464,8 +464,7 @@ func (vec3 *MVec3) ToScaleLocalMat(scale *MVec3) *MMat4 {
 	// 軸方向の回転行列
 	rotationMatrix := vec3.ToLocalMat()
 
-	mat := rotationMatrix.Muled(scale.ToScaleMat4()).Muled(rotationMatrix.Inverse())
-	return mat
+	return rotationMatrix.Muled(scale.ToScaleMat4()).Muled(rotationMatrix.Inverted())
 }
 
 // One 0を1に変える

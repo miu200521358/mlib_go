@@ -58,7 +58,7 @@ type BoneMorphDelta struct {
 	FrameScale         *mmath.MVec3       // キーフレスケールの変動量
 	FrameLocalPosition *mmath.MVec3       // キーフレ位置のローカル変動量
 	FrameLocalRotation *mmath.MQuaternion // キーフレ回転のローカル変動量
-	FrameLocalScale    *mmath.MVec3       // キーフレスケールのローカル変動量
+	FrameLocalScaleMat *mmath.MMat4       // キーフレスケールのローカル変動量
 }
 
 func NewBoneMorphDelta(boneIndex int) *BoneMorphDelta {
@@ -106,11 +106,11 @@ func (boneMorphDelta *BoneMorphDelta) FilledMorphLocalRotation() *mmath.MQuatern
 	return boneMorphDelta.FrameLocalRotation
 }
 
-func (boneMorphDelta *BoneMorphDelta) FilledMorphLocalScale() *mmath.MVec3 {
-	if boneMorphDelta.FrameLocalScale == nil {
-		boneMorphDelta.FrameLocalScale = mmath.NewMVec3()
+func (boneMorphDelta *BoneMorphDelta) FilledMorphLocalScale() *mmath.MMat4 {
+	if boneMorphDelta.FrameLocalScaleMat == nil {
+		boneMorphDelta.FrameLocalScaleMat = mmath.NewMMat4()
 	}
-	return boneMorphDelta.FrameLocalScale
+	return boneMorphDelta.FrameLocalScaleMat
 }
 
 func (boneMorphDelta *BoneMorphDelta) Copy() *BoneMorphDelta {
@@ -120,7 +120,7 @@ func (boneMorphDelta *BoneMorphDelta) Copy() *BoneMorphDelta {
 		FrameScale:         boneMorphDelta.FilledMorphScale().Copy(),
 		FrameLocalPosition: boneMorphDelta.FilledMorphLocalPosition().Copy(),
 		FrameLocalRotation: boneMorphDelta.FilledMorphLocalRotation().Copy(),
-		FrameLocalScale:    boneMorphDelta.FilledMorphLocalScale().Copy(),
+		FrameLocalScaleMat: boneMorphDelta.FilledMorphLocalScale().Copy(),
 	}
 }
 

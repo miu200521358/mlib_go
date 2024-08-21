@@ -203,7 +203,8 @@ func deformBone(
 
 			var offsetPos, offsetLocalPos *mmath.MVec3
 			var offsetQuat, offsetLocalQuat *mmath.MQuaternion
-			var offsetScale, offsetLocalScale *mmath.MVec3
+			var offsetScale *mmath.MVec3
+			var offsetLocalScaleMat *mmath.MMat4
 
 			if offset.Position != nil {
 				offsetPos = offset.Position.MuledScalar(ratio)
@@ -255,13 +256,13 @@ func deformBone(
 				}
 			}
 
-			if offset.Extend.LocalScale != nil {
-				offsetLocalScale = offset.Extend.LocalScale.MuledScalar(ratio)
+			if offset.Extend.LocalScaleMat != nil {
+				offsetLocalScaleMat = offset.Extend.LocalScaleMat.MuledScalar(ratio)
 
-				if d.FrameLocalScale == nil {
-					d.FrameLocalScale = offsetLocalScale
+				if d.FrameLocalScaleMat == nil {
+					d.FrameLocalScaleMat = offsetLocalScaleMat
 				} else {
-					d.FrameLocalScale.Add(offsetLocalScale)
+					d.FrameLocalScaleMat.Mul(offsetLocalScaleMat)
 				}
 			}
 

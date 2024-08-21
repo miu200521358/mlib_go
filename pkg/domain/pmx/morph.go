@@ -139,7 +139,7 @@ type BoneMorphOffsetExtend struct {
 	Scale         *mmath.MVec3       // グローバル縮尺量(x,y,z)
 	LocalPosition *mmath.MVec3       // ローカル軸に沿った移動量(x,y,z)
 	LocalRotation *mmath.MQuaternion // ローカル軸に沿った回転量-クォータニオン(x,y,z,w)
-	LocalScale    *mmath.MVec3       // ローカル軸に沿った縮尺量(x,y,z)
+	LocalScaleMat *mmath.MMat4       // 指定軸に沿った縮尺量(x,y,z)
 }
 
 func (offset *BoneMorphOffset) Type() int {
