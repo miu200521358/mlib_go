@@ -397,6 +397,11 @@ func (bone *Bone) IsAnkle() bool {
 	return bone.containsCategory(CATEGORY_ANKLE)
 }
 
+// 靴底であるか
+func (bone *Bone) IsSole() bool {
+	return bone.containsCategory(CATEGORY_SOLE)
+}
+
 // 捩りボーンであるか
 func (bone *Bone) IsTwist() bool {
 	return bone.containsCategory(CATEGORY_TWIST)
@@ -466,11 +471,12 @@ func (bone *Bone) ConfigParentBoneNames() []string {
 
 			boneNames := make([]string, 0)
 			for _, parentBoneName := range boneConfig.ParentBoneNames {
-				boneNames = append(boneNames, parentBoneName.String())
 				if boneConfig.Name.Right() == bone.Name() {
 					boneNames = append(boneNames, parentBoneName.Right())
 				} else if boneConfig.Name.Left() == bone.Name() {
 					boneNames = append(boneNames, parentBoneName.Left())
+				} else {
+					boneNames = append(boneNames, parentBoneName.String())
 				}
 			}
 			return boneNames

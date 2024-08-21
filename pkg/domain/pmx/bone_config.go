@@ -66,6 +66,8 @@ const (
 	CATEGORY_LEG_FK BoneCategory = iota
 	// 足首
 	CATEGORY_ANKLE BoneCategory = iota
+	// 靴底
+	CATEGORY_SOLE BoneCategory = iota
 	// 捩
 	CATEGORY_TWIST BoneCategory = iota
 	// 頭
@@ -173,12 +175,13 @@ const (
 	LEG_ROOT      StandardBoneNames = "{d}足根元"
 	LEG           StandardBoneNames = "{d}足"
 	KNEE          StandardBoneNames = "{d}ひざ"
+	HEEL          StandardBoneNames = "{d}かかと"
 	ANKLE         StandardBoneNames = "{d}足首"
 	TOE           StandardBoneNames = "{d}つま先"
 	LEG_D         StandardBoneNames = "{d}足D"
 	KNEE_D        StandardBoneNames = "{d}ひざD"
+	HEEL_D        StandardBoneNames = "{d}かかとD"
 	ANKLE_D       StandardBoneNames = "{d}足首D"
-	HEEL          StandardBoneNames = "{d}かかと"
 	TOE_D         StandardBoneNames = "{d}つま先D"
 	TOE_EX        StandardBoneNames = "{d}足先EX"
 	LEG_IK_PARENT StandardBoneNames = "{d}足IK親"
@@ -515,7 +518,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				BoneFlag(BONE_FLAG_CAN_ROTATE|BONE_FLAG_IS_EXTERNAL_ROTATION),
 				[]BoneCategory{CATEGORY_LOWER}),
 			LEG: NewBoneConfig(LEG,
-				[]StandardBoneNames{LEG_CENTER, LOWER},
+				[]StandardBoneNames{WAIST_CANCEL, LEG_CENTER, LOWER},
 				&mmath.MVec3{X: 0, Y: -1, Z: 0},
 				[]StandardBoneNames{KNEE},
 				BoneFlag(BONE_FLAG_CAN_ROTATE|BONE_FLAG_CAN_MANIPULATE|BONE_FLAG_IS_VISIBLE|BONE_FLAG_TAIL_IS_BONE),
@@ -531,13 +534,19 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				&mmath.MVec3{X: 0, Y: -1, Z: 0},
 				[]StandardBoneNames{TOE},
 				BoneFlag(BONE_FLAG_CAN_ROTATE|BONE_FLAG_CAN_MANIPULATE|BONE_FLAG_IS_VISIBLE|BONE_FLAG_TAIL_IS_BONE),
-				[]BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_FK, CATEGORY_ANKLE, CATEGORY_FITTING_LOCAL_ROTATE, CATEGORY_FITTING_LOCAL_SCALE}),
+				[]BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_FK, CATEGORY_ANKLE, CATEGORY_FITTING_SCALE}),
+			HEEL: NewBoneConfig(HEEL,
+				[]StandardBoneNames{ANKLE_D},
+				&mmath.MVec3{X: 0, Y: -1, Z: 0},
+				[]StandardBoneNames{TOE_EX},
+				BoneFlag(BONE_FLAG_CAN_ROTATE|BONE_FLAG_CAN_MANIPULATE|BONE_FLAG_IS_VISIBLE|BONE_FLAG_TAIL_IS_BONE),
+				[]BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE, CATEGORY_SOLE, CATEGORY_FITTING_MOVE}),
 			TOE: NewBoneConfig(TOE,
 				[]StandardBoneNames{ANKLE},
 				&mmath.MVec3{X: 0, Y: -1, Z: 0},
 				[]StandardBoneNames{},
 				BoneFlag(BONE_FLAG_CAN_ROTATE|BONE_FLAG_CAN_MANIPULATE|BONE_FLAG_IS_VISIBLE),
-				[]BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_FK, CATEGORY_ANKLE}),
+				[]BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_FK, CATEGORY_ANKLE, CATEGORY_SOLE, CATEGORY_FITTING_MOVE}),
 			LEG_D: NewBoneConfig(LEG_D,
 				[]StandardBoneNames{LEG_CENTER, LOWER},
 				&mmath.MVec3{X: 0, Y: -1, Z: 0},
@@ -556,42 +565,42 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				[]StandardBoneNames{TOE_EX},
 				BoneFlag(BONE_FLAG_CAN_ROTATE|BONE_FLAG_CAN_MANIPULATE|BONE_FLAG_IS_VISIBLE|BONE_FLAG_TAIL_IS_BONE),
 				[]BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE, CATEGORY_FITTING_SCALE}),
-			HEEL: NewBoneConfig(HEEL,
+			HEEL_D: NewBoneConfig(HEEL_D,
 				[]StandardBoneNames{ANKLE_D},
 				&mmath.MVec3{X: 0, Y: -1, Z: 0},
 				[]StandardBoneNames{TOE_EX},
 				BoneFlag(BONE_FLAG_CAN_ROTATE|BONE_FLAG_CAN_MANIPULATE|BONE_FLAG_IS_VISIBLE|BONE_FLAG_TAIL_IS_BONE),
-				[]BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE, CATEGORY_FITTING_MOVE}),
+				[]BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE, CATEGORY_SOLE, CATEGORY_FITTING_MOVE}),
 			TOE_EX: NewBoneConfig(TOE_EX,
 				[]StandardBoneNames{ANKLE_D},
 				&mmath.MVec3{X: 0, Y: -1, Z: 0},
 				[]StandardBoneNames{},
 				BoneFlag(BONE_FLAG_CAN_ROTATE|BONE_FLAG_CAN_MANIPULATE|BONE_FLAG_IS_VISIBLE),
-				[]BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE}),
+				[]BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE, CATEGORY_SOLE}),
 			TOE_D: NewBoneConfig(TOE_D,
 				[]StandardBoneNames{TOE_EX},
 				&mmath.MVec3{X: 0, Y: -1, Z: 0},
 				[]StandardBoneNames{},
 				BoneFlag(BONE_FLAG_CAN_ROTATE|BONE_FLAG_CAN_MANIPULATE|BONE_FLAG_IS_VISIBLE),
-				[]BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE}),
+				[]BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE, CATEGORY_SOLE, CATEGORY_FITTING_MOVE}),
 			LEG_IK_PARENT: NewBoneConfig(LEG_IK_PARENT,
 				[]StandardBoneNames{ROOT},
 				mmath.MVec3UnitY,
 				[]StandardBoneNames{LEG_IK},
 				BoneFlag(BONE_FLAG_CAN_ROTATE|BONE_FLAG_CAN_TRANSLATE|BONE_FLAG_CAN_MANIPULATE|BONE_FLAG_IS_VISIBLE),
-				[]BoneCategory{CATEGORY_LOWER, CATEGORY_FITTING_LOCAL_MOVE}),
+				[]BoneCategory{CATEGORY_LOWER, CATEGORY_SOLE, CATEGORY_FITTING_LOCAL_MOVE}),
 			LEG_IK: NewBoneConfig(LEG_IK,
 				[]StandardBoneNames{LEG_IK_PARENT, ROOT},
 				mmath.MVec3UnitY,
 				[]StandardBoneNames{TOE_IK},
 				BoneFlag(BONE_FLAG_CAN_ROTATE|BONE_FLAG_CAN_TRANSLATE|BONE_FLAG_CAN_MANIPULATE|BONE_FLAG_IS_VISIBLE|BONE_FLAG_IS_IK|BONE_FLAG_TAIL_IS_BONE),
-				[]BoneCategory{CATEGORY_LOWER, CATEGORY_FITTING_LOCAL_MOVE}),
+				[]BoneCategory{CATEGORY_LOWER, CATEGORY_FITTING_MOVE}),
 			TOE_IK: NewBoneConfig(TOE_IK,
 				[]StandardBoneNames{LEG_IK},
 				&mmath.MVec3{X: 0, Y: -1, Z: 0},
 				[]StandardBoneNames{},
 				BoneFlag(BONE_FLAG_CAN_ROTATE|BONE_FLAG_CAN_TRANSLATE|BONE_FLAG_CAN_MANIPULATE|BONE_FLAG_IS_VISIBLE|BONE_FLAG_IS_IK),
-				[]BoneCategory{CATEGORY_LOWER, CATEGORY_FITTING_LOCAL_MOVE}),
+				[]BoneCategory{CATEGORY_LOWER, CATEGORY_SOLE}),
 		}
 	})
 	return standardBoneConfigs
