@@ -494,11 +494,12 @@ func (bone *Bone) ConfigChildBoneNames() []string {
 
 			boneNames := make([]string, 0)
 			for _, tailBoneName := range boneConfig.ChildBoneNames {
-				boneNames = append(boneNames, tailBoneName.String())
 				if boneConfig.Name.Right() == bone.Name() {
 					boneNames = append(boneNames, tailBoneName.Right())
 				} else if boneConfig.Name.Left() == bone.Name() {
 					boneNames = append(boneNames, tailBoneName.Left())
+				} else {
+					boneNames = append(boneNames, tailBoneName.String())
 				}
 			}
 			return boneNames
