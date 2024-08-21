@@ -457,6 +457,11 @@ func (bone *Bone) CanFitLocalScale() bool {
 	return bone.containsCategory(CATEGORY_FITTING_LOCAL_SCALE)
 }
 
+// ローカル変形時に親の回転を引き継ぐか
+func (bone *Bone) IsInheritParent() bool {
+	return bone.containsCategory(CATEGORY_INHERIT_PARENT)
+}
+
 // 定義上の親ボーン名
 func (bone *Bone) ConfigParentBoneNames() []string {
 	for _, boneConfig := range GetStandardBoneConfigs() {

@@ -368,15 +368,15 @@ func (boneDeltas *BoneDeltas) totalLocalRotationLoop(boneIndex int, loop int) *m
 	}
 
 	var parentRotMat *mmath.MMat4
-	if boneDelta.Bone.ParentIndex >= 0 {
+	if !boneDelta.Bone.IsInheritParent() && boneDelta.Bone.ParentIndex >= 0 {
 		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
 		parentRotMat = parentBoneDelta.FilledTotalLocalRot().ToMat4()
 	}
 
 	rot := boneDelta.FilledTotalLocalRot()
 	if rot.IsIdent() {
-		if parentRotMat == nil {
-			// 親の回転が定義されていない場合、単位行列を返す
+		if parentRotMat == nil || boneDelta.Bone.IsInheritParent() {
+			// 親の回転が定義されていない場合、もしくは親を引き継ぐ場合、単位行列を返す
 			return mmath.NewMMat4()
 		}
 		// 親の回転が指定されている場合、キャンセルする
