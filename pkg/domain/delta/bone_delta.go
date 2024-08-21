@@ -151,9 +151,9 @@ func (boneDelta *BoneDelta) FilledTotalLocalRot() *mmath.MQuaternion {
 		rot.Mul(boneDelta.FrameLocalMorphRotation)
 	}
 
-	if boneDelta.Bone.HasFixedAxis() {
-		rot = rot.ToFixedAxisRotation(boneDelta.Bone.Extend.NormalizedFixedAxis)
-	}
+	// if boneDelta.Bone.HasFixedAxis() {
+	// 	rot = rot.ToFixedAxisRotation(boneDelta.Bone.Extend.NormalizedFixedAxis)
+	// }
 
 	return rot
 }
@@ -368,14 +368,14 @@ func (boneDeltas *BoneDeltas) totalLocalRotationLoop(boneIndex int, loop int) *m
 	}
 
 	var parentRotMat *mmath.MMat4
-	if !boneDelta.Bone.IsInheritParent() && boneDelta.Bone.ParentIndex >= 0 {
+	if boneDelta.Bone.ParentIndex >= 0 {
 		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
 		parentRotMat = parentBoneDelta.FilledTotalLocalRot().ToMat4()
 	}
 
 	rot := boneDelta.FilledTotalLocalRot()
 	if rot.IsIdent() {
-		if parentRotMat == nil || boneDelta.Bone.IsInheritParent() {
+		if parentRotMat == nil {
 			// 親の回転が定義されていない場合、もしくは親を引き継ぐ場合、単位行列を返す
 			return mmath.NewMMat4()
 		}
