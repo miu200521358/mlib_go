@@ -433,10 +433,10 @@ func (vec3 *MVec3) ToLocalMat() *MMat4 {
 
 	// ローカルY軸を計算
 	var up *MVec3
-	if math.Abs(v.X) < 0.99999 {
-		up = MVec3UnitX
-	} else {
+	if math.Abs(v.Y) < 0.99999 {
 		up = MVec3UnitY
+	} else {
+		up = MVec3UnitZ
 	}
 
 	// ローカルZ軸を計算
@@ -457,7 +457,7 @@ func (vec3 *MVec3) ToLocalMat() *MMat4 {
 }
 
 func (vec3 *MVec3) ToScaleLocalMat(scale *MVec3) *MMat4 {
-	if vec3.IsZero() {
+	if vec3.IsZero() || vec3.IsOne() {
 		return NewMMat4()
 	}
 
@@ -489,6 +489,13 @@ func (vec3 *MVec3) Distances(others []*MVec3) []float64 {
 		distances[i] = vec3.Distance(other)
 	}
 	return distances
+}
+
+func (vec3 *MVec3) Effective() *MVec3 {
+	vec3.X = Effective(vec3.X)
+	vec3.Y = Effective(vec3.Y)
+	vec3.Z = Effective(vec3.Z)
+	return vec3
 }
 
 // 2点間のベクトルと点Pの直交距離を計算

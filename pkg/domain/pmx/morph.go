@@ -130,16 +130,17 @@ func NewUvMorphOffset(vertexIndex int, uv *mmath.MVec4) *UvMorphOffset {
 // BoneMorphOffset represents a bone morph.
 type BoneMorphOffset struct {
 	BoneIndex int                // ボーンIndex
-	Position  *mmath.MVec3       // グローバル移動量(x,y,z)
-	Rotation  *mmath.MQuaternion // グローバル回転量-クォータニオン(x,y,z,w)
+	Position  *mmath.MVec3       // グローバル移動量
+	Rotation  *mmath.MQuaternion // グローバル回転量
 	Extend    *BoneMorphOffsetExtend
 }
 
 type BoneMorphOffsetExtend struct {
-	Scale         *mmath.MVec3       // グローバル縮尺量(x,y,z)
-	LocalPosition *mmath.MVec3       // ローカル軸に沿った移動量(x,y,z)
-	LocalRotation *mmath.MQuaternion // ローカル軸に沿った回転量-クォータニオン(x,y,z,w)
-	LocalScaleMat *mmath.MMat4       // 指定軸に沿った縮尺量(x,y,z)
+	Scale              *mmath.MVec3       // グローバル縮尺量
+	CancelablePosition *mmath.MVec3       // 親キャンセル付き移動量
+	CancelableRotation *mmath.MQuaternion // 親キャンセル付き回転量
+	CancelableScale    *mmath.MVec3       // 親キャンセル付き縮尺量
+	LocalMat           *mmath.MMat4       // ローカル変換行列
 }
 
 func (offset *BoneMorphOffset) Type() int {

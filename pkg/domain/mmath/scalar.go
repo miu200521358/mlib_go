@@ -213,3 +213,10 @@ func Mean2DHorizontal(nums [][]float64) []float64 {
 	}
 	return horizontal
 }
+
+func Effective(v float64) float64 {
+	if math.IsNaN(v) || math.IsInf(v, 0) {
+		return 0
+	}
+	return v
+}

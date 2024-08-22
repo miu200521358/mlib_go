@@ -52,13 +52,14 @@ func NewWireVertexMorphDeltas() *WireVertexMorphDeltas {
 }
 
 type BoneMorphDelta struct {
-	BoneIndex          int
-	FramePosition      *mmath.MVec3       // キーフレ位置の変動量
-	FrameRotation      *mmath.MQuaternion // キーフレ回転の変動量
-	FrameScale         *mmath.MVec3       // キーフレスケールの変動量
-	FrameLocalPosition *mmath.MVec3       // キーフレ位置のローカル変動量
-	FrameLocalRotation *mmath.MQuaternion // キーフレ回転のローカル変動量
-	FrameLocalScaleMat *mmath.MMat4       // キーフレスケールのローカル変動量
+	BoneIndex               int
+	FramePosition           *mmath.MVec3       // キーフレ位置の変動量
+	FrameRotation           *mmath.MQuaternion // キーフレ回転の変動量
+	FrameScale              *mmath.MVec3       // キーフレスケールの変動量
+	FrameCancelablePosition *mmath.MVec3       // キーフレ位置の親キャンセル付き変動量
+	FrameCancelableRotation *mmath.MQuaternion // キーフレ回転の親キャンセル付き変動量
+	FrameCancelableScale    *mmath.MVec3       // キーフレスケールの親キャンセル付き変動量
+	FrameLocalMat           *mmath.MMat4       // キーフレのローカル変動行列
 }
 
 func NewBoneMorphDelta(boneIndex int) *BoneMorphDelta {
@@ -93,34 +94,42 @@ func (boneMorphDelta *BoneMorphDelta) FilledMorphScale() *mmath.MVec3 {
 }
 
 func (boneMorphDelta *BoneMorphDelta) FilledMorphLocalPosition() *mmath.MVec3 {
-	if boneMorphDelta.FrameLocalPosition == nil {
-		boneMorphDelta.FrameLocalPosition = mmath.NewMVec3()
+	if boneMorphDelta.FrameCancelablePosition == nil {
+		boneMorphDelta.FrameCancelablePosition = mmath.NewMVec3()
 	}
-	return boneMorphDelta.FrameLocalPosition
+	return boneMorphDelta.FrameCancelablePosition
 }
 
 func (boneMorphDelta *BoneMorphDelta) FilledMorphLocalRotation() *mmath.MQuaternion {
-	if boneMorphDelta.FrameLocalRotation == nil {
-		boneMorphDelta.FrameLocalRotation = mmath.NewMQuaternion()
+	if boneMorphDelta.FrameCancelableRotation == nil {
+		boneMorphDelta.FrameCancelableRotation = mmath.NewMQuaternion()
 	}
-	return boneMorphDelta.FrameLocalRotation
+	return boneMorphDelta.FrameCancelableRotation
 }
 
-func (boneMorphDelta *BoneMorphDelta) FilledMorphLocalScale() *mmath.MMat4 {
-	if boneMorphDelta.FrameLocalScaleMat == nil {
-		boneMorphDelta.FrameLocalScaleMat = mmath.NewMMat4()
+func (boneMorphDelta *BoneMorphDelta) FilledMorphLocalScale() *mmath.MVec3 {
+	if boneMorphDelta.FrameCancelableScale == nil {
+		boneMorphDelta.FrameCancelableScale = mmath.NewMVec3()
 	}
-	return boneMorphDelta.FrameLocalScaleMat
+	return boneMorphDelta.FrameCancelableScale
+}
+
+func (boneMorphDelta *BoneMorphDelta) FilledMorphLocalMat() *mmath.MMat4 {
+	if boneMorphDelta.FrameLocalMat == nil {
+		boneMorphDelta.FrameLocalMat = mmath.NewMMat4()
+	}
+	return boneMorphDelta.FrameLocalMat
 }
 
 func (boneMorphDelta *BoneMorphDelta) Copy() *BoneMorphDelta {
 	return &BoneMorphDelta{
-		FramePosition:      boneMorphDelta.FilledMorphPosition().Copy(),
-		FrameRotation:      boneMorphDelta.FilledMorphRotation().Copy(),
-		FrameScale:         boneMorphDelta.FilledMorphScale().Copy(),
-		FrameLocalPosition: boneMorphDelta.FilledMorphLocalPosition().Copy(),
-		FrameLocalRotation: boneMorphDelta.FilledMorphLocalRotation().Copy(),
-		FrameLocalScaleMat: boneMorphDelta.FilledMorphLocalScale().Copy(),
+		FramePosition:           boneMorphDelta.FilledMorphPosition().Copy(),
+		FrameRotation:           boneMorphDelta.FilledMorphRotation().Copy(),
+		FrameScale:              boneMorphDelta.FilledMorphScale().Copy(),
+		FrameCancelablePosition: boneMorphDelta.FilledMorphLocalPosition().Copy(),
+		FrameCancelableRotation: boneMorphDelta.FilledMorphLocalRotation().Copy(),
+		FrameCancelableScale:    boneMorphDelta.FilledMorphLocalScale().Copy(),
+		FrameLocalMat:           boneMorphDelta.FilledMorphLocalMat().Copy(),
 	}
 }
 

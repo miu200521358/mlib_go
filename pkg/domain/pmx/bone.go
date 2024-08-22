@@ -437,9 +437,9 @@ func (bone *Bone) CanFitMove() bool {
 	return bone.containsCategory(CATEGORY_FITTING_MOVE)
 }
 
-// フィッティングの時にローカル移動可能であるか
-func (bone *Bone) CanFitLocalMove() bool {
-	return bone.containsCategory(CATEGORY_FITTING_LOCAL_MOVE)
+// フィッティングの時にキャンセル付き移動可能であるか
+func (bone *Bone) CanFitCancelableMove() bool {
+	return bone.containsCategory(CATEGORY_FITTING_CANCELABLE_MOVE)
 }
 
 // フィッティングの時に回転可能であるか
@@ -447,9 +447,9 @@ func (bone *Bone) CanFitRotate() bool {
 	return bone.containsCategory(CATEGORY_FITTING_ROTATE)
 }
 
-// フィッティングの時にローカル回転可能であるか
-func (bone *Bone) CanFitLocalRotate() bool {
-	return bone.containsCategory(CATEGORY_FITTING_LOCAL_ROTATE)
+// フィッティングの時にキャンセル付き回転可能であるか
+func (bone *Bone) CanFitCancelableRotate() bool {
+	return bone.containsCategory(CATEGORY_FITTING_CANCELABLE_ROTATE)
 }
 
 // フィッティングの時にスケール可能であるか
@@ -457,9 +457,24 @@ func (bone *Bone) CanFitScale() bool {
 	return bone.containsCategory(CATEGORY_FITTING_SCALE)
 }
 
-// フィッティングの時にローカルスケール可能であるか
-func (bone *Bone) CanFitLocalScale() bool {
-	return bone.containsCategory(CATEGORY_FITTING_LOCAL_SCALE)
+// フィッティングの時にキャンセル付きスケール可能であるか
+func (bone *Bone) CanFitCancelableScale() bool {
+	return bone.containsCategory(CATEGORY_FITTING_CANCELABLE_SCALE)
+}
+
+// フィッティングの時にローカル行列移動適用であるか
+func (bone *Bone) CanFitLocalMatrixTranslate() bool {
+	return bone.containsCategory(CATEGORY_FITTING_LOCAL_MATRIX_TRANSLATE)
+}
+
+// フィッティングの時にローカル行列回転適用であるか
+func (bone *Bone) CanFitLocalMatrixRotate() bool {
+	return bone.containsCategory(CATEGORY_FITTING_LOCAL_MATRIX_ROTATE)
+}
+
+// フィッティングの時にローカル行列スケール適用であるか
+func (bone *Bone) CanFitLocalMatrixScale() bool {
+	return bone.containsCategory(CATEGORY_FITTING_LOCAL_MATRIX_SCALE)
 }
 
 // 定義上の親ボーン名
@@ -555,15 +570,28 @@ func (bones *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 	fromPosition := bone.Position
 	var toPosition *mmath.MVec3
 
-	if bone.IsTailBone() && bone.TailIndex >= 0 && slices.Contains(bones.Indexes(), bone.TailIndex) {
-		toPosition = bones.Get(bone.TailIndex).Position
-	} else if !bone.IsTailBone() && bone.TailPosition.Length() > 0 {
-		toPosition = bone.TailPosition.Added(bone.Position)
-	} else if bone.ParentIndex < 0 || !bones.Contains(bone.ParentIndex) {
-		return mmath.NewMVec3()
-	} else {
-		fromPosition = bones.Get(bone.ParentIndex).Position
-		toPosition = bone.Position
+	configChildBoneNames := bone.ConfigChildBoneNames()
+	if len(configChildBoneNames) > 0 {
+		for _, childBoneName := range configChildBoneNames {
+			childBone := bones.GetByName(childBoneName)
+			if childBone != nil {
+				toPosition = childBone.Position
+				break
+			}
+		}
+	}
+
+	if toPosition == nil {
+		if bone.IsTailBone() && bone.TailIndex >= 0 && slices.Contains(bones.Indexes(), bone.TailIndex) {
+			toPosition = bones.Get(bone.TailIndex).Position
+		} else if !bone.IsTailBone() && bone.TailPosition.Length() > 0 {
+			toPosition = bone.TailPosition.Added(bone.Position)
+		} else if bone.ParentIndex < 0 || !bones.Contains(bone.ParentIndex) {
+			return mmath.NewMVec3()
+		} else {
+			fromPosition = bones.Get(bone.ParentIndex).Position
+			toPosition = bone.Position
+		}
 	}
 
 	v := toPosition.Subed(fromPosition)

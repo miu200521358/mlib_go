@@ -8,24 +8,26 @@ import (
 )
 
 type BoneDelta struct {
-	Bone                    *pmx.Bone          // ボーン
-	Frame                   float32            // キーフレーム
-	GlobalMatrix            *mmath.MMat4       // グローバル行列
-	LocalMatrix             *mmath.MMat4       // ローカル行列
-	GlobalPosition          *mmath.MVec3       // グローバル位置
-	UnitMatrix              *mmath.MMat4       // 親ボーンからの変位行列
-	FramePosition           *mmath.MVec3       // キーフレ位置の変動量
-	FrameLocalPosition      *mmath.MVec3       // キーフレ位置のローカル変動量
-	FrameMorphPosition      *mmath.MVec3       // モーフ位置の変動量
-	FrameLocalMorphPosition *mmath.MVec3       // モーフ位置のローカル変動量
-	FrameRotation           *mmath.MQuaternion // キーフレ回転の変動量
-	FrameLocalRotation      *mmath.MQuaternion // キーフレ回転のローカル変動量
-	FrameMorphRotation      *mmath.MQuaternion // モーフ回転の変動量
-	FrameLocalMorphRotation *mmath.MQuaternion // モーフ回転のローカル変動量
-	FrameScale              *mmath.MVec3       // キーフレスケールの変動量
-	FrameLocalScaleMat      *mmath.MMat4       // キーフレスケールのローカル変動量
-	FrameMorphScale         *mmath.MVec3       // モーフスケールの変動量
-	FrameLocalMorphScaleMat *mmath.MMat4       // モーフスケールのローカル変動量
+	Bone                         *pmx.Bone          // ボーン
+	Frame                        float32            // キーフレーム
+	GlobalMatrix                 *mmath.MMat4       // グローバル行列
+	LocalMatrix                  *mmath.MMat4       // ローカル行列
+	GlobalPosition               *mmath.MVec3       // グローバル位置
+	UnitMatrix                   *mmath.MMat4       // 親ボーンからの変位行列
+	FramePosition                *mmath.MVec3       // キーフレ位置の変動量
+	FrameCancelablePosition      *mmath.MVec3       // キーフレ位置のローカル変動量
+	FrameMorphPosition           *mmath.MVec3       // モーフ位置の変動量
+	FrameCancelableMorphPosition *mmath.MVec3       // モーフ位置のローカル変動量
+	FrameRotation                *mmath.MQuaternion // キーフレ回転の変動量
+	FrameCancelableRotation      *mmath.MQuaternion // キーフレ回転のローカル変動量
+	FrameMorphRotation           *mmath.MQuaternion // モーフ回転の変動量
+	FrameCancelableMorphRotation *mmath.MQuaternion // モーフ回転のローカル変動量
+	FrameScale                   *mmath.MVec3       // キーフレスケールの変動量
+	FrameCancelableScale         *mmath.MVec3       // キーフレスケールのローカル変動量
+	FrameMorphScale              *mmath.MVec3       // モーフスケールの変動量
+	FrameCancelableMorphScale    *mmath.MVec3       // モーフスケールのローカル変動量
+	FrameLocalMat                *mmath.MMat4       // キーフレのローカル変動行列
+	FrameLocalMorphMat           *mmath.MMat4       // モーフのローカル変動行列
 }
 
 func NewBoneDeltaByGlobalMatrix(
@@ -91,11 +93,11 @@ func (boneDelta *BoneDelta) FilledTotalPosition() *mmath.MVec3 {
 	return pos
 }
 
-func (boneDelta *BoneDelta) FilledTotalLocalPosition() *mmath.MVec3 {
-	pos := boneDelta.FilledFrameLocalPosition().Copy()
+func (boneDelta *BoneDelta) FilledTotalCancelablePosition() *mmath.MVec3 {
+	pos := boneDelta.FilledFrameCancelablePosition().Copy()
 
-	if boneDelta.FrameLocalMorphPosition != nil && !boneDelta.FrameLocalMorphPosition.IsZero() {
-		pos.Add(boneDelta.FrameLocalMorphPosition)
+	if boneDelta.FrameCancelableMorphPosition != nil && !boneDelta.FrameCancelableMorphPosition.IsZero() {
+		pos.Add(boneDelta.FrameCancelableMorphPosition)
 	}
 
 	return pos
@@ -108,11 +110,11 @@ func (boneDelta *BoneDelta) FilledFramePosition() *mmath.MVec3 {
 	return boneDelta.FramePosition
 }
 
-func (boneDelta *BoneDelta) FilledFrameLocalPosition() *mmath.MVec3 {
-	if boneDelta.FrameLocalPosition == nil {
-		boneDelta.FrameLocalPosition = mmath.NewMVec3()
+func (boneDelta *BoneDelta) FilledFrameCancelablePosition() *mmath.MVec3 {
+	if boneDelta.FrameCancelablePosition == nil {
+		boneDelta.FrameCancelablePosition = mmath.NewMVec3()
 	}
-	return boneDelta.FrameLocalPosition
+	return boneDelta.FrameCancelablePosition
 }
 
 func (boneDelta *BoneDelta) FilledFrameMorphPosition() *mmath.MVec3 {
@@ -122,11 +124,11 @@ func (boneDelta *BoneDelta) FilledFrameMorphPosition() *mmath.MVec3 {
 	return boneDelta.FrameMorphPosition
 }
 
-func (boneDelta *BoneDelta) FilledFrameLocalMorphPosition() *mmath.MVec3 {
-	if boneDelta.FrameLocalMorphPosition == nil {
-		boneDelta.FrameLocalMorphPosition = mmath.NewMVec3()
+func (boneDelta *BoneDelta) FilledFrameCancelableMorphPosition() *mmath.MVec3 {
+	if boneDelta.FrameCancelableMorphPosition == nil {
+		boneDelta.FrameCancelableMorphPosition = mmath.NewMVec3()
 	}
-	return boneDelta.FrameLocalMorphPosition
+	return boneDelta.FrameCancelableMorphPosition
 }
 
 func (boneDelta *BoneDelta) FilledTotalRotation() *mmath.MQuaternion {
@@ -144,11 +146,11 @@ func (boneDelta *BoneDelta) FilledTotalRotation() *mmath.MQuaternion {
 	return rot
 }
 
-func (boneDelta *BoneDelta) FilledTotalLocalRot() *mmath.MQuaternion {
-	rot := boneDelta.FilledFrameLocalRotation().Copy()
+func (boneDelta *BoneDelta) FilledTotalCancelableRotation() *mmath.MQuaternion {
+	rot := boneDelta.FilledFrameCancelableRotation().Copy()
 
-	if boneDelta.FrameLocalMorphRotation != nil && !boneDelta.FrameLocalMorphRotation.IsIdent() {
-		rot.Mul(boneDelta.FrameLocalMorphRotation)
+	if boneDelta.FrameCancelableMorphRotation != nil && !boneDelta.FrameCancelableMorphRotation.IsIdent() {
+		rot.Mul(boneDelta.FrameCancelableMorphRotation)
 	}
 
 	// if boneDelta.Bone.HasFixedAxis() {
@@ -165,11 +167,11 @@ func (boneDelta *BoneDelta) FilledFrameRotation() *mmath.MQuaternion {
 	return boneDelta.FrameRotation
 }
 
-func (boneDelta *BoneDelta) FilledFrameLocalRotation() *mmath.MQuaternion {
-	if boneDelta.FrameLocalRotation == nil {
-		boneDelta.FrameLocalRotation = mmath.NewMQuaternion()
+func (boneDelta *BoneDelta) FilledFrameCancelableRotation() *mmath.MQuaternion {
+	if boneDelta.FrameCancelableRotation == nil {
+		boneDelta.FrameCancelableRotation = mmath.NewMQuaternion()
 	}
-	return boneDelta.FrameLocalRotation
+	return boneDelta.FrameCancelableRotation
 }
 
 func (boneDelta *BoneDelta) FilledFrameMorphRotation() *mmath.MQuaternion {
@@ -179,11 +181,11 @@ func (boneDelta *BoneDelta) FilledFrameMorphRotation() *mmath.MQuaternion {
 	return boneDelta.FrameMorphRotation
 }
 
-func (boneDelta *BoneDelta) FilledFrameLocalMorphRotation() *mmath.MQuaternion {
-	if boneDelta.FrameLocalMorphRotation == nil {
-		boneDelta.FrameLocalMorphRotation = mmath.NewMQuaternion()
+func (boneDelta *BoneDelta) FilledFrameCancelableMorphRotation() *mmath.MQuaternion {
+	if boneDelta.FrameCancelableMorphRotation == nil {
+		boneDelta.FrameCancelableMorphRotation = mmath.NewMQuaternion()
 	}
-	return boneDelta.FrameLocalMorphRotation
+	return boneDelta.FrameCancelableMorphRotation
 }
 
 func (boneDelta *BoneDelta) FilledTotalScale() *mmath.MVec3 {
@@ -196,11 +198,11 @@ func (boneDelta *BoneDelta) FilledTotalScale() *mmath.MVec3 {
 	return scale
 }
 
-func (boneDelta *BoneDelta) FilledTotalLocalScaleMat() *mmath.MMat4 {
-	scale := boneDelta.FilledFrameLocalScaleMat().Copy()
+func (boneDelta *BoneDelta) FilledTotalCancelableScale() *mmath.MVec3 {
+	scale := boneDelta.FilledFrameCancelableScale().Copy()
 
-	if boneDelta.FrameLocalMorphScaleMat != nil && !boneDelta.FrameLocalMorphScaleMat.IsIdent() {
-		scale.Mul(boneDelta.FrameLocalMorphScaleMat)
+	if boneDelta.FrameCancelableMorphScale != nil && !boneDelta.FrameCancelableMorphScale.IsOne() {
+		scale.Mul(boneDelta.FrameCancelableMorphScale)
 	}
 
 	return scale
@@ -213,44 +215,70 @@ func (boneDelta *BoneDelta) FilledFrameScale() *mmath.MVec3 {
 	return boneDelta.FrameScale
 }
 
-func (boneDelta *BoneDelta) FilledFrameLocalScaleMat() *mmath.MMat4 {
-	if boneDelta.FrameLocalScaleMat == nil {
-		boneDelta.FrameLocalScaleMat = mmath.NewMMat4()
+func (boneDelta *BoneDelta) FilledFrameCancelableScale() *mmath.MVec3 {
+	if boneDelta.FrameCancelableScale == nil {
+		boneDelta.FrameCancelableScale = &mmath.MVec3{X: 1, Y: 1, Z: 1}
 	}
-	return boneDelta.FrameLocalScaleMat
+	return boneDelta.FrameCancelableScale
 }
 
 func (boneDelta *BoneDelta) FilledFrameMorphScale() *mmath.MVec3 {
 	if boneDelta.FrameMorphScale == nil {
-		boneDelta.FrameMorphScale = mmath.NewMVec3()
+		boneDelta.FrameMorphScale = &mmath.MVec3{X: 1, Y: 1, Z: 1}
 	}
 	return boneDelta.FrameMorphScale
 }
 
-func (boneDelta *BoneDelta) FilledFrameLocalMorphScale() *mmath.MMat4 {
-	if boneDelta.FrameLocalMorphScaleMat == nil {
-		boneDelta.FrameLocalMorphScaleMat = mmath.NewMMat4()
+func (boneDelta *BoneDelta) FilledFrameCancelableMorphScale() *mmath.MVec3 {
+	if boneDelta.FrameCancelableMorphScale == nil {
+		boneDelta.FrameCancelableMorphScale = &mmath.MVec3{X: 1, Y: 1, Z: 1}
 	}
-	return boneDelta.FrameLocalMorphScaleMat
+	return boneDelta.FrameCancelableMorphScale
+}
+
+func (boneDelta *BoneDelta) FilledTotalLocalMat() *mmath.MMat4 {
+	mat := boneDelta.FilledFrameLocalMat().Copy()
+
+	if boneDelta.FrameLocalMorphMat != nil && !boneDelta.FrameLocalMorphMat.IsIdent() {
+		mat.Mul(boneDelta.FrameLocalMorphMat)
+	}
+
+	return mat
+}
+
+func (boneDelta *BoneDelta) FilledFrameLocalMat() *mmath.MMat4 {
+	if boneDelta.FrameLocalMat == nil {
+		boneDelta.FrameLocalMat = mmath.NewMMat4()
+	}
+	return boneDelta.FrameLocalMat
+}
+
+func (boneDelta *BoneDelta) FilledFrameLocalMorphMat() *mmath.MMat4 {
+	if boneDelta.FrameLocalMorphMat == nil {
+		boneDelta.FrameLocalMorphMat = mmath.NewMMat4()
+	}
+	return boneDelta.FrameLocalMorphMat
 }
 
 func (boneDelta *BoneDelta) Copy() *BoneDelta {
 	return &BoneDelta{
-		Bone:                    boneDelta.Bone,
-		Frame:                   boneDelta.Frame,
-		GlobalMatrix:            boneDelta.FilledGlobalMatrix().Copy(),
-		LocalMatrix:             boneDelta.FilledLocalMatrix().Copy(),
-		GlobalPosition:          boneDelta.FilledGlobalPosition().Copy(),
-		FramePosition:           boneDelta.FilledFramePosition().Copy(),
-		FrameMorphPosition:      boneDelta.FilledFrameMorphPosition().Copy(),
-		FrameLocalMorphPosition: boneDelta.FilledFrameLocalMorphPosition().Copy(),
-		FrameRotation:           boneDelta.FilledFrameRotation().Copy(),
-		FrameMorphRotation:      boneDelta.FilledFrameMorphRotation().Copy(),
-		FrameLocalMorphRotation: boneDelta.FilledFrameLocalMorphRotation().Copy(),
-		FrameScale:              boneDelta.FilledFrameScale().Copy(),
-		FrameMorphScale:         boneDelta.FilledFrameMorphScale().Copy(),
-		FrameLocalMorphScaleMat: boneDelta.FilledFrameLocalMorphScale().Copy(),
-		UnitMatrix:              boneDelta.UnitMatrix.Copy(),
+		Bone:                         boneDelta.Bone,
+		Frame:                        boneDelta.Frame,
+		GlobalMatrix:                 boneDelta.FilledGlobalMatrix().Copy(),
+		LocalMatrix:                  boneDelta.FilledLocalMatrix().Copy(),
+		GlobalPosition:               boneDelta.FilledGlobalPosition().Copy(),
+		FramePosition:                boneDelta.FilledFramePosition().Copy(),
+		FrameMorphPosition:           boneDelta.FilledFrameMorphPosition().Copy(),
+		FrameCancelableMorphPosition: boneDelta.FilledFrameCancelableMorphPosition().Copy(),
+		FrameRotation:                boneDelta.FilledFrameRotation().Copy(),
+		FrameMorphRotation:           boneDelta.FilledFrameMorphRotation().Copy(),
+		FrameCancelableMorphRotation: boneDelta.FilledFrameCancelableMorphRotation().Copy(),
+		FrameScale:                   boneDelta.FilledFrameScale().Copy(),
+		FrameMorphScale:              boneDelta.FilledFrameMorphScale().Copy(),
+		FrameCancelableMorphScale:    boneDelta.FilledFrameCancelableMorphScale().Copy(),
+		FrameLocalMat:                boneDelta.FilledFrameLocalMat().Copy(),
+		FrameLocalMorphMat:           boneDelta.FilledFrameLocalMorphMat().Copy(),
+		UnitMatrix:                   boneDelta.UnitMatrix.Copy(),
 	}
 }
 
@@ -338,7 +366,37 @@ func (boneDeltas *BoneDeltas) GetNearestBoneIndexes(worldPos *mmath.MVec3) []int
 }
 
 func (boneDeltas *BoneDeltas) TotalRotationMat(boneIndex int) *mmath.MMat4 {
-	return boneDeltas.totalRotationLoop(boneIndex, 0, 1.0).ToMat4()
+	rotMat := boneDeltas.totalRotationLoop(boneIndex, 0, 1.0).ToMat4()
+
+	boneDelta := boneDeltas.Get(boneIndex)
+
+	// 親のキャンセル付き回転行列
+	var parentCancelableRotMat *mmath.MMat4
+	if boneDelta.Bone.ParentIndex >= 0 {
+		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
+		parentCancelableRotMat = parentBoneDelta.FilledTotalCancelableRotation().ToMat4()
+	}
+
+	// キャンセル付き回転
+	cancelableRot := boneDelta.FilledTotalCancelableRotation()
+	if cancelableRot.IsIdent() {
+		if parentCancelableRotMat == nil {
+			// 親の回転が定義されていない場合、回転行列をそのまま返す
+			return rotMat
+		}
+		// 親の回転が指定されている場合、キャンセルする
+		return rotMat.Muled(parentCancelableRotMat.Inverted())
+	}
+
+	// キャンセル付き回転行列
+	cancelableRotMat := cancelableRot.ToMat4()
+
+	if parentCancelableRotMat == nil {
+		return rotMat.Muled(cancelableRotMat)
+	}
+
+	// 親の回転をキャンセルする
+	return rotMat.Muled(cancelableRotMat).Muled(parentCancelableRotMat.Inverted())
 }
 
 func (boneDeltas *BoneDeltas) totalRotationLoop(boneIndex int, loop int, factor float64) *mmath.MQuaternion {
@@ -346,6 +404,7 @@ func (boneDeltas *BoneDeltas) totalRotationLoop(boneIndex int, loop int, factor 
 	if boneDelta == nil || loop > 10 {
 		return mmath.NewMQuaternion()
 	}
+
 	rot := boneDelta.FilledTotalRotation()
 
 	if boneDelta.Bone.IsEffectorRotation() {
@@ -357,45 +416,41 @@ func (boneDeltas *BoneDeltas) totalRotationLoop(boneIndex int, loop int, factor 
 	return rot.MuledScalar(factor)
 }
 
-func (boneDeltas *BoneDeltas) TotalLocalRotationMat(boneIndex int) *mmath.MMat4 {
-	return boneDeltas.totalLocalRotationLoop(boneIndex, 0)
-}
+func (boneDeltas *BoneDeltas) TotalPositionMat(boneIndex int) *mmath.MMat4 {
+	posMat := boneDeltas.totalPositionLoop(boneIndex, 0).ToMat4()
 
-func (boneDeltas *BoneDeltas) totalLocalRotationLoop(boneIndex int, loop int) *mmath.MMat4 {
 	boneDelta := boneDeltas.Get(boneIndex)
-	if boneDelta == nil || loop > 10 {
-		return mmath.NewMMat4()
-	}
 
-	var parentRotMat *mmath.MMat4
+	var cancelableParentPosMat *mmath.MMat4
 	if boneDelta.Bone.ParentIndex >= 0 {
 		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
-		parentRotMat = parentBoneDelta.FilledTotalLocalRot().ToMat4()
-	}
+		parentPos := parentBoneDelta.FilledTotalCancelablePosition()
 
-	rot := boneDelta.FilledTotalLocalRot()
-	if rot.IsIdent() {
-		if parentRotMat == nil {
-			// 親の回転が定義されていない場合、もしくは親を引き継ぐ場合、単位行列を返す
-			return mmath.NewMMat4()
+		if !parentPos.IsZero() {
+			// 親の位置行列
+			cancelableParentPosMat = parentPos.ToMat4()
 		}
-		// 親の回転が指定されている場合、キャンセルする
-		return parentRotMat.Inverted()
 	}
 
-	// 回転行列
-	rotMat := rot.ToMat4()
+	cancelablePos := boneDelta.FilledTotalCancelablePosition()
+	if cancelablePos.IsZero() {
+		if cancelableParentPosMat == nil {
+			// 親の位置が定義されていない場合、移動行列をそのまま返す
+			return posMat
+		}
 
-	if parentRotMat == nil {
-		return rotMat
+		// 親の位置が指定されている場合、キャンセルする
+		return posMat.Muled(cancelableParentPosMat.Inverted())
 	}
 
-	// 親の回転をキャンセルする
-	return rotMat.Muled(parentRotMat.Inverted())
-}
+	// ローカル軸に沿った位置行列
+	cancelablePosMat := cancelablePos.ToMat4()
+	if cancelableParentPosMat == nil {
+		return posMat.Muled(cancelablePosMat)
+	}
 
-func (boneDeltas *BoneDeltas) TotalPositionMat(boneIndex int) *mmath.MMat4 {
-	return boneDeltas.totalPositionLoop(boneIndex, 0).ToMat4()
+	// 親の位置をキャンセルする
+	return posMat.Muled(cancelablePosMat).Muled(cancelableParentPosMat.Inverted())
 }
 
 func (boneDeltas *BoneDeltas) totalPositionLoop(boneIndex int, loop int) *mmath.MVec3 {
@@ -414,51 +469,34 @@ func (boneDeltas *BoneDeltas) totalPositionLoop(boneIndex int, loop int) *mmath.
 	return pos
 }
 
-func (boneDeltas *BoneDeltas) TotalLocalPositionMat(boneIndex int) *mmath.MMat4 {
-	return boneDeltas.totalLocalPositionLoop(boneIndex, 0)
-}
+func (boneDeltas *BoneDeltas) TotalScaleMat(boneIndex int) *mmath.MMat4 {
+	scaleMat := boneDeltas.totalScaleMatLoop(boneIndex, 0).ToScaleMat4()
 
-func (boneDeltas *BoneDeltas) totalLocalPositionLoop(boneIndex int, loop int) *mmath.MMat4 {
 	boneDelta := boneDeltas.Get(boneIndex)
-	if boneDelta == nil || loop > 10 {
-		return mmath.NewMMat4()
-	}
 
-	var parentPosMat *mmath.MMat4
+	var cancelableParentScale *mmath.MVec3
 	if boneDelta.Bone.ParentIndex >= 0 {
 		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
-		parentPos := parentBoneDelta.FilledTotalLocalPosition()
+		cancelableParentScale = parentBoneDelta.FilledTotalCancelableScale()
+	}
 
-		if !parentPos.IsZero() {
-			// 親の位置行列
-			parentPosMat = parentPos.ToMat4()
+	// 指定軸に沿ったスケール行列
+	cancelableScale := boneDelta.FilledTotalCancelableScale()
+	if cancelableScale.IsOne() {
+		if cancelableParentScale == nil {
+			// 親のスケールが定義されていない場合、スケール行列をそのまま返す
+			return scaleMat
 		}
+		// 親のスケールが指定されている場合、キャンセルする
+		return scaleMat.Muled(cancelableParentScale.ToScaleMat4().Inverted())
 	}
 
-	pos := boneDelta.FilledTotalLocalPosition()
-	if pos.IsZero() {
-		if parentPosMat == nil {
-			// 親の位置が定義されていない場合、単位行列を返す
-			return mmath.NewMMat4()
-		}
-
-		// 親の位置が指定されている場合、キャンセルする
-		return parentPosMat.Inverted()
+	if cancelableParentScale == nil {
+		return scaleMat.Muled(cancelableScale.ToScaleMat4())
 	}
 
-	// ローカル軸に沿った位置行列
-	posMat := pos.ToMat4()
-
-	if parentPosMat == nil {
-		return posMat
-	}
-
-	// 親の位置をキャンセルする
-	return posMat.Muled(parentPosMat.Inverted())
-}
-
-func (boneDeltas *BoneDeltas) TotalScaleMat(boneIndex int) *mmath.MMat4 {
-	return boneDeltas.totalScaleMatLoop(boneIndex, 0).ToScaleMat4()
+	// 親のスケールをキャンセルする
+	return scaleMat.Muled(cancelableScale.ToScaleMat4()).Muled(cancelableParentScale.ToScaleMat4().Inverted())
 }
 
 func (boneDeltas *BoneDeltas) totalScaleMatLoop(boneIndex int, loop int) *mmath.MVec3 {
@@ -471,37 +509,38 @@ func (boneDeltas *BoneDeltas) totalScaleMatLoop(boneIndex int, loop int) *mmath.
 	return scale
 }
 
-func (boneDeltas *BoneDeltas) TotalLocalScaleMat(boneIndex int) *mmath.MMat4 {
-	return boneDeltas.totalLocalScaleMatLoop(boneIndex, 0)
+func (boneDeltas *BoneDeltas) TotalLocalMat(boneIndex int) *mmath.MMat4 {
+	return boneDeltas.totalLocalMatLoop(boneIndex, 0)
 }
 
-func (boneDeltas *BoneDeltas) totalLocalScaleMatLoop(boneIndex int, loop int) *mmath.MMat4 {
+func (boneDeltas *BoneDeltas) totalLocalMatLoop(boneIndex int, loop int) *mmath.MMat4 {
 	boneDelta := boneDeltas.Get(boneIndex)
 	if boneDelta == nil || loop > 10 {
 		return mmath.NewMMat4()
 	}
 
-	var parentScaleMat *mmath.MMat4
+	var parentMat *mmath.MMat4
 	if boneDelta.Bone.ParentIndex >= 0 {
 		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
-		parentScaleMat = parentBoneDelta.FilledTotalLocalScaleMat()
+		parentMat = parentBoneDelta.FilledTotalLocalMat()
 	}
 
-	// 指定軸に沿ったスケール行列
-	scaleMat := boneDelta.FilledTotalLocalScaleMat()
-	if scaleMat.IsIdent() {
-		if parentScaleMat == nil {
-			// 親のスケールが定義されていない場合、単位行列を返す
+	// ローカル変換行列
+	localMat := boneDelta.FilledTotalLocalMat()
+
+	if localMat.IsIdent() {
+		if parentMat == nil {
+			// 親の変換行列が定義されていない場合、単位行列を返す
 			return mmath.NewMMat4()
 		}
-		// 親のスケールが指定されている場合、キャンセルする
-		return parentScaleMat.Inverted()
+		// 親の変換行列が指定されている場合、キャンセルする
+		return parentMat.Inverted()
 	}
 
-	if parentScaleMat == nil {
-		return scaleMat
+	if parentMat == nil {
+		return localMat
 	}
 
-	// 親のスケールをキャンセルする
-	return scaleMat.Muled(parentScaleMat.Inverted())
+	// 親の変換行列をキャンセルする
+	return localMat.Muled(parentMat.Inverted())
 }

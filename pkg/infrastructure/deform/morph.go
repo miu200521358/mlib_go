@@ -201,10 +201,10 @@ func deformBone(
 				d = delta.NewBoneMorphDelta(offset.BoneIndex)
 			}
 
-			var offsetPos, offsetLocalPos *mmath.MVec3
-			var offsetQuat, offsetLocalQuat *mmath.MQuaternion
-			var offsetScale *mmath.MVec3
-			var offsetLocalScaleMat *mmath.MMat4
+			var offsetPos, offsetCancelablePos *mmath.MVec3
+			var offsetQuat, offsetCancelableQuat *mmath.MQuaternion
+			var offsetScale, offsetCancelableScale *mmath.MVec3
+			var offsetMat *mmath.MMat4
 
 			if offset.Position != nil {
 				offsetPos = offset.Position.MuledScalar(ratio)
@@ -236,33 +236,43 @@ func deformBone(
 				}
 			}
 
-			if offset.Extend.LocalPosition != nil {
-				offsetLocalPos = offset.Extend.LocalPosition.MuledScalar(ratio)
+			if offset.Extend.CancelablePosition != nil {
+				offsetCancelablePos = offset.Extend.CancelablePosition.MuledScalar(ratio)
 
-				if d.FrameLocalPosition == nil {
-					d.FrameLocalPosition = offsetLocalPos
+				if d.FrameCancelablePosition == nil {
+					d.FrameCancelablePosition = offsetCancelablePos
 				} else {
-					d.FrameLocalPosition.Add(offsetLocalPos)
+					d.FrameCancelablePosition.Add(offsetCancelablePos)
 				}
 			}
 
-			if offset.Extend.LocalRotation != nil {
-				offsetLocalQuat = offset.Extend.LocalRotation.MuledScalar(ratio).Normalize()
+			if offset.Extend.CancelableRotation != nil {
+				offsetCancelableQuat = offset.Extend.CancelableRotation.MuledScalar(ratio).Normalize()
 
-				if d.FrameLocalRotation == nil {
-					d.FrameLocalRotation = offsetLocalQuat
+				if d.FrameCancelableRotation == nil {
+					d.FrameCancelableRotation = offsetCancelableQuat
 				} else {
-					d.FrameLocalRotation = offsetLocalQuat.Muled(d.FrameLocalRotation)
+					d.FrameCancelableRotation = offsetCancelableQuat.Muled(d.FrameCancelableRotation)
 				}
 			}
 
-			if offset.Extend.LocalScaleMat != nil {
-				offsetLocalScaleMat = offset.Extend.LocalScaleMat.MuledScalar(ratio)
+			if offset.Extend.CancelableScale != nil {
+				offsetCancelableScale = offset.Extend.CancelableScale.MuledScalar(ratio)
 
-				if d.FrameLocalScaleMat == nil {
-					d.FrameLocalScaleMat = offsetLocalScaleMat
+				if d.FrameCancelableScale == nil {
+					d.FrameCancelableScale = offsetCancelableScale
 				} else {
-					d.FrameLocalScaleMat.Mul(offsetLocalScaleMat)
+					d.FrameCancelableScale.Mul(offsetCancelableScale)
+				}
+			}
+
+			if offset.Extend.LocalMat != nil {
+				offsetMat = offset.Extend.LocalMat.MuledScalar(ratio)
+
+				if d.FrameLocalMat == nil {
+					d.FrameLocalMat = offsetMat
+				} else {
+					d.FrameLocalMat.Mul(offsetMat)
 				}
 			}
 
