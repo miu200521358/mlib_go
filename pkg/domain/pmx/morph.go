@@ -150,6 +150,8 @@ func (offset *BoneMorphOffset) Type() int {
 func NewBoneMorphOffset(boneIndex int) *BoneMorphOffset {
 	return &BoneMorphOffset{
 		BoneIndex: boneIndex,
+		Position:  mmath.NewMVec3(),
+		Rotation:  mmath.NewMQuaternion(),
 		Extend:    &BoneMorphOffsetExtend{},
 	}
 }

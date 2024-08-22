@@ -545,6 +545,17 @@ func IntersectLinePlane(near, far, forward, right, up, point *MVec3) *MVec3 {
 	return intersection
 }
 
+// 2点間のベクトルと、点Pとの交点を計算
+func IntersectLinePoint(near, far, point *MVec3) *MVec3 {
+	// ステップ1: nearからfarへのベクトルを計算
+	direction := far.Subed(near)
+
+	// ステップ2: 直線と点の交点を計算
+	t := (point.X - near.X) / direction.X
+	intersection := near.Added(direction.MuledScalar(t))
+	return intersection
+}
+
 // DistanceLineToPoints 線分と点の距離を計算します
 func DistanceLineToPoints(worldPos *MVec3, points []*MVec3) []float64 {
 	distances := make([]float64, len(points))

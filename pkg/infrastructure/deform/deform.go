@@ -3,11 +3,84 @@ package deform
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/miter"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 )
+
+func DeformModel(
+	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
+	frame int,
+) *pmx.PmxModel {
+	vmdDeltas := delta.NewVmdDeltas(float32(frame), model.Bones, "", "")
+	vmdDeltas.Morphs = DeformMorph(model, motion.MorphFrames, float32(frame), nil)
+	vmdDeltas = DeformBoneByPhysicsFlag(model, motion, vmdDeltas, true, float32(frame), nil, false)
+
+	// 頂点にボーン変形を適用
+	for _, vertex := range model.Vertices.Data {
+		mat := &mmath.MMat4{}
+		for j := range vertex.Deform.AllIndexes() {
+			boneIndex := vertex.Deform.AllIndexes()[j]
+			weight := vertex.Deform.AllWeights()[j]
+			mat.Add(vmdDeltas.Bones.Get(boneIndex).FilledLocalMatrix().MuledScalar(weight))
+		}
+
+		var morphDelta *delta.VertexMorphDelta
+		if vmdDeltas.Morphs != nil && vmdDeltas.Morphs.Vertices != nil {
+			morphDelta = vmdDeltas.Morphs.Vertices.Get(vertex.Index())
+		}
+
+		// 頂点変形
+		if morphDelta == nil {
+			vertex.Position = mat.MulVec3(vertex.Position)
+		} else {
+			vertex.Position = mat.MulVec3(vertex.Position.Added(morphDelta.Position))
+		}
+
+		// 法線変形
+		vertex.Normal = mat.MulVec3(vertex.Normal)
+
+		// SDEFの場合、パラメーターを再計算
+		if vertex.Deform.GetType() == pmx.SDEF {
+			sdef := vertex.Deform.(*pmx.Sdef)
+			// SDEF-C: ボーンのベクトルと頂点の交点
+			sdef.SdefC = mmath.IntersectLinePoint(
+				vmdDeltas.Bones.Get(sdef.AllIndexes()[0]).GlobalPosition,
+				vmdDeltas.Bones.Get(sdef.AllIndexes()[1]).GlobalPosition,
+				vertex.Position,
+			)
+
+			// SDEF-R0: 0番目のボーンとSDEF-Cの中点
+			sdef.SdefR0 = vmdDeltas.Bones.Get(sdef.AllIndexes()[0]).GlobalPosition.Added(sdef.SdefC).MuledScalar(0.5)
+
+			// SDEF-R1: 1番目のボーンとSDEF-Cの中点
+			sdef.SdefR1 = vmdDeltas.Bones.Get(sdef.AllIndexes()[1]).GlobalPosition.Added(sdef.SdefC).MuledScalar(0.5)
+		}
+	}
+
+	// ボーンの位置を更新
+	for i, bone := range model.Bones.Data {
+		if vmdDeltas.Bones.Get(i) != nil {
+			bone.Position = vmdDeltas.Bones.Get(i).FilledGlobalPosition()
+		}
+	}
+
+	return model
+}
+
+// DeformBone 前回情報なしでボーンデフォーム処理を実行する
+func DeformBone(
+	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
+	isCalcIk bool,
+	frame int,
+	boneNames []string,
+) *delta.BoneDeltas {
+	return DeformBoneByPhysicsFlag(model, motion, nil, isCalcIk, float32(frame), boneNames, false).Bones
+}
 
 func deformBeforePhysics(
 	appState state.IAppState, model *pmx.PmxModel, motion *vmd.VmdMotion, vmdDeltas *delta.VmdDeltas,

@@ -17,17 +17,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
-// DeformBone 前回情報なしでボーンデフォーム処理を実行する
-func DeformBone(
-	model *pmx.PmxModel,
-	motion *vmd.VmdMotion,
-	isCalcIk bool,
-	frame int,
-	boneNames []string,
-) *delta.BoneDeltas {
-	return DeformBoneByPhysicsFlag(model, motion, nil, isCalcIk, float32(frame), boneNames, false).Bones
-}
-
 // DeformBoneByPhysicsFlag ボーンデフォーム処理を実行する
 func DeformBoneByPhysicsFlag(
 	model *pmx.PmxModel,

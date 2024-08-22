@@ -152,8 +152,19 @@ func (mat1 *MMat4) Mul(mat2 *MMat4) *MMat4 {
 	return mat1
 }
 
+func (mat1 *MMat4) Add(mat2 *MMat4) *MMat4 {
+	m := mgl64.Mat4(*mat1).Add(mgl64.Mat4(*mat2))
+	*mat1 = MMat4(m)
+	return mat1
+}
+
 func (mat1 *MMat4) Muled(mat2 *MMat4) *MMat4 {
 	m := MMat4(mgl64.Mat4(*mat1).Mul4(mgl64.Mat4(*mat2)))
+	return &m
+}
+
+func (mat1 *MMat4) Added(mat2 *MMat4) *MMat4 {
+	m := MMat4(mgl64.Mat4(*mat1).Add(mgl64.Mat4(*mat2)))
 	return &m
 }
 
