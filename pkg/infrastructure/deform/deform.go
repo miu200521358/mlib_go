@@ -17,7 +17,7 @@ func DeformModel(
 ) *pmx.PmxModel {
 	vmdDeltas := delta.NewVmdDeltas(float32(frame), model.Bones, "", "")
 	vmdDeltas.Morphs = DeformMorph(model, motion.MorphFrames, float32(frame), nil)
-	vmdDeltas = DeformBoneByPhysicsFlag(model, motion, vmdDeltas, true, float32(frame), nil, false)
+	vmdDeltas = DeformBoneByPhysicsFlag(model, motion, vmdDeltas, false, float32(frame), nil, false)
 
 	// 頂点にボーン変形を適用
 	for _, vertex := range model.Vertices.Data {
@@ -41,7 +41,7 @@ func DeformModel(
 		}
 
 		// 法線変形
-		vertex.Normal = mat.MulVec3(vertex.Normal)
+		vertex.Normal = mat.MulVec3(vertex.Normal).Normalized()
 
 		// SDEFの場合、パラメーターを再計算
 		if vertex.Deform.GetType() == pmx.SDEF {

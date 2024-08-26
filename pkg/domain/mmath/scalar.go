@@ -220,3 +220,13 @@ func Effective(v float64) float64 {
 	}
 	return v
 }
+
+// ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
+func ClampIfVerySmall(v float64) float64 {
+	epsilon := 1e-6
+	if math.Abs(v) < epsilon {
+		return 0
+	}
+
+	return v
+}

@@ -431,6 +431,9 @@ func NewMQuaternionFromDirection(direction *MVec3, up *MVec3) *MQuaternion {
 
 // NewMQuaternionRotateはfromベクトルからtoベクトルまでの回転量を計算します。
 func NewMQuaternionRotate(fromV, toV *MVec3) *MQuaternion {
+	if fromV.NearEquals(toV, 1e-6) || fromV.Length() == 0 || toV.Length() == 0 {
+		return NewMQuaternion()
+	}
 	v := mgl64.QuatBetweenVectors(mgl64.Vec3{fromV.X, fromV.Y, fromV.Z}, mgl64.Vec3{toV.X, toV.Y, toV.Z})
 	return NewMQuaternionByValues(v.V[0], v.V[1], v.V[2], v.W)
 }
@@ -544,11 +547,6 @@ func (quat *MQuaternion) NearEquals(other *MQuaternion, epsilon float64) bool {
 
 // MulVec3は、ベクトルvをクォータニオンで回転させた結果の新しいベクトルを返します。
 func (quat *MQuaternion) MulVec3(v *MVec3) *MVec3 {
-	mv := mgl64.Quat{V: mgl64.Vec3{quat.X, quat.Y, quat.Z}, W: quat.W}.Rotate(mgl64.Vec3{v.X, v.Y, v.Z})
-	return &MVec3{mv.X(), mv.Y(), mv.Z()}
-}
-
-func (quat *MQuaternion) Rotate(v *MVec3) *MVec3 {
 	mv := mgl64.Quat{V: mgl64.Vec3{quat.X, quat.Y, quat.Z}, W: quat.W}.Rotate(mgl64.Vec3{v.X, v.Y, v.Z})
 	return &MVec3{mv.X(), mv.Y(), mv.Z()}
 }

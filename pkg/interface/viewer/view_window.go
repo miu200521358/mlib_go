@@ -189,7 +189,7 @@ func (viewWindow *ViewWindow) updateCameraAngle() {
 	pitchRad := mgl64.DegToRad(viewWindow.pitch)
 	orientation := mmath.NewMQuaternionFromAxisAngles(mmath.MVec3UnitY, yawRad).Mul(
 		mmath.NewMQuaternionFromAxisAngles(mmath.MVec3UnitX, pitchRad))
-	forwardXYZ := orientation.Rotate(mmath.MVec3UnitZInv).MulScalar(radius)
+	forwardXYZ := orientation.MulVec3(mmath.MVec3UnitZInv).MulScalar(radius)
 
 	// カメラ位置を更新
 	viewWindow.shader.CameraPosition.X = forwardXYZ.X

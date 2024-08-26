@@ -456,7 +456,7 @@ func (vec3 *MVec3) ToLocalMat() *MMat4 {
 	return rotationMatrix
 }
 
-func (vec3 *MVec3) ToScaleLocalMat(scale *MVec3) *MMat4 {
+func (vec3 *MVec3) ToScaleLocalMat(scales *MVec3) *MMat4 {
 	if vec3.IsZero() || vec3.IsOne() {
 		return NewMMat4()
 	}
@@ -464,7 +464,7 @@ func (vec3 *MVec3) ToScaleLocalMat(scale *MVec3) *MMat4 {
 	// 軸方向の回転行列
 	rotationMatrix := vec3.ToLocalMat()
 
-	return rotationMatrix.Muled(scale.ToScaleMat4()).Muled(rotationMatrix.Inverted())
+	return rotationMatrix.Muled(scales.ToScaleMat4()).Muled(rotationMatrix.Inverted())
 }
 
 // One 0を1に変える
