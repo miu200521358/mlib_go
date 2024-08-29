@@ -437,34 +437,14 @@ func (bone *Bone) CanFitMove() bool {
 	return bone.containsCategory(CATEGORY_FITTING_MOVE)
 }
 
-// フィッティングの時にキャンセル付き移動可能であるか
-func (bone *Bone) CanFitCancelableMove() bool {
-	return bone.containsCategory(CATEGORY_FITTING_CANCELABLE_MOVE)
-}
-
 // フィッティングの時に回転可能であるか
 func (bone *Bone) CanFitRotate() bool {
 	return bone.containsCategory(CATEGORY_FITTING_ROTATE)
 }
 
-// フィッティングの時にキャンセル付き回転可能であるか
-func (bone *Bone) CanFitCancelableRotate() bool {
-	return bone.containsCategory(CATEGORY_FITTING_CANCELABLE_ROTATE)
-}
-
 // フィッティングの時にスケール可能であるか
 func (bone *Bone) CanFitScale() bool {
 	return bone.containsCategory(CATEGORY_FITTING_SCALE)
-}
-
-// フィッティングの時にキャンセル付きスケール可能であるか
-func (bone *Bone) CanFitCancelableScale() bool {
-	return bone.containsCategory(CATEGORY_FITTING_CANCELABLE_SCALE)
-}
-
-// フィッティングの時にローカル行列移動適用であるか
-func (bone *Bone) CanFitLocalMatrix() bool {
-	return bone.containsCategory(CATEGORY_FITTING_LOCAL_MATRIX)
 }
 
 func (bone *Bone) Config() *BoneConfig {

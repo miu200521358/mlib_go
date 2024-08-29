@@ -519,28 +519,6 @@ func (boneDeltas *BoneDeltas) totalLocalMatLoop(boneIndex int, loop int) *mmath.
 		return mmath.NewMMat4()
 	}
 
-	var parentMat *mmath.MMat4
-	if boneDelta.Bone.ParentIndex >= 0 {
-		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
-		parentMat = parentBoneDelta.FilledTotalLocalMat()
-	}
-
 	// ローカル変換行列
-	localMat := boneDelta.FilledTotalLocalMat()
-
-	if localMat.IsIdent() {
-		if parentMat == nil {
-			// 親の変換行列が定義されていない場合、単位行列を返す
-			return mmath.NewMMat4()
-		}
-		// 親の変換行列が指定されている場合、キャンセルする
-		return parentMat.Inverted()
-	}
-
-	if parentMat == nil {
-		return localMat
-	}
-
-	// 親の変換行列をキャンセルする
-	return localMat.Muled(parentMat.Inverted())
+	return boneDelta.FilledTotalLocalMat()
 }
