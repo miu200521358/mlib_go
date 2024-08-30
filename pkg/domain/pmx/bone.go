@@ -432,19 +432,9 @@ func (bone *Bone) IsUpper() bool {
 	return bone.containsCategory(CATEGORY_UPPER)
 }
 
-// フィッティングの時に移動可能であるか
-func (bone *Bone) CanFitMove() bool {
-	return bone.containsCategory(CATEGORY_FITTING_MOVE)
-}
-
-// フィッティングの時に回転可能であるか
-func (bone *Bone) CanFitRotate() bool {
-	return bone.containsCategory(CATEGORY_FITTING_ROTATE)
-}
-
-// フィッティングの時にスケール可能であるか
-func (bone *Bone) CanFitScale() bool {
-	return bone.containsCategory(CATEGORY_FITTING_SCALE)
+// フィッティングの時に移動だけ行うか
+func (bone *Bone) CanFitOnlyMove() bool {
+	return bone.containsCategory(CATEGORY_FITTING_ONLY_MOVE)
 }
 
 func (bone *Bone) Config() *BoneConfig {
