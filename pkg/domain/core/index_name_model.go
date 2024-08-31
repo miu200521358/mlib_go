@@ -127,3 +127,10 @@ func (iModels *IndexNameModels[T]) IsDirty() bool {
 func (iModels *IndexNameModels[T]) SetDirty(dirty bool) {
 	iModels.isDirty = dirty
 }
+
+func (iModels *IndexNameModels[T]) RemoveByName(name string) {
+	if index, ok := iModels.NameIndexes[name]; ok {
+		iModels.Data = append(iModels.Data[:index], iModels.Data[index+1:]...)
+		delete(iModels.NameIndexes, name)
+	}
+}
