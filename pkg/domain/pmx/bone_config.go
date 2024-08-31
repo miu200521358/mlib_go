@@ -216,7 +216,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				ChildBoneNames:  []StandardBoneNames{UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE}},
+				Categories:      []BoneCategory{CATEGORY_ROOT}},
 			LOWER_ROOT: {
 				ParentBoneNames: []StandardBoneNames{WAIST_CENTER, WAIST, GROOVE, CENTER},
 				ChildBoneNames:  []StandardBoneNames{LOWER},
