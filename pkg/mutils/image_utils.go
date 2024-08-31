@@ -82,7 +82,7 @@ func loadImage(path string, file io.Reader) (image.Image, error) {
 		return nil, fmt.Errorf("invalid file path: %s", path)
 	}
 
-	switch paths[len(paths)-1] {
+	switch strings.ToLower(paths[len(paths)-1]) {
 	case "png":
 		img, err := png.Decode(file)
 		if err != nil {
