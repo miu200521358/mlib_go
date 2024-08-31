@@ -132,15 +132,8 @@ type BoneMorphOffset struct {
 	BoneIndex int                // ボーンIndex
 	Position  *mmath.MVec3       // グローバル移動量
 	Rotation  *mmath.MQuaternion // グローバル回転量
-	Extend    *BoneMorphOffsetExtend
-}
-
-type BoneMorphOffsetExtend struct {
-	Scale              *mmath.MVec3       // グローバル縮尺量
-	CancelablePosition *mmath.MVec3       // 親キャンセル付き移動量
-	CancelableRotation *mmath.MQuaternion // 親キャンセル付き回転量
-	CancelableScale    *mmath.MVec3       // 親キャンセル付き縮尺量
-	LocalMat           *mmath.MMat4       // ローカル変換行列
+	Scale     *mmath.MVec3       // グローバル縮尺量
+	LocalMat  *mmath.MMat4       // ローカル変換行列
 }
 
 func (offset *BoneMorphOffset) Type() int {
@@ -152,7 +145,6 @@ func NewBoneMorphOffset(boneIndex int) *BoneMorphOffset {
 		BoneIndex: boneIndex,
 		Position:  mmath.NewMVec3(),
 		Rotation:  mmath.NewMQuaternion(),
-		Extend:    &BoneMorphOffsetExtend{},
 	}
 }
 

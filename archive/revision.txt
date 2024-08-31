@@ -709,7 +709,7 @@ MlibSample 1.0.0_beta_124
 
 MlibSample 1.0.0_beta_125
 ・テクスチャ拡張子が大文字の場合に対応できてなかったので修正
-
+・名前に該当するオブジェクトを削除する RemoveByName 追加
 
 
 

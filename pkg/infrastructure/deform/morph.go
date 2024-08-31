@@ -201,9 +201,9 @@ func deformBone(
 				d = delta.NewBoneMorphDelta(offset.BoneIndex)
 			}
 
-			var offsetPos, offsetCancelablePos *mmath.MVec3
-			var offsetQuat, offsetCancelableQuat *mmath.MQuaternion
-			var offsetScale, offsetCancelableScale *mmath.MVec3
+			var offsetPos *mmath.MVec3
+			var offsetQuat *mmath.MQuaternion
+			var offsetScale *mmath.MVec3
 			var offsetMat *mmath.MMat4
 
 			if offset.Position != nil {
@@ -226,8 +226,8 @@ func deformBone(
 				}
 			}
 
-			if offset.Extend.Scale != nil {
-				offsetScale = offset.Extend.Scale.MuledScalar(ratio)
+			if offset.Scale != nil {
+				offsetScale = offset.Scale.MuledScalar(ratio)
 
 				if d.FrameScale == nil {
 					d.FrameScale = offsetScale
@@ -236,38 +236,8 @@ func deformBone(
 				}
 			}
 
-			if offset.Extend.CancelablePosition != nil {
-				offsetCancelablePos = offset.Extend.CancelablePosition.MuledScalar(ratio)
-
-				if d.FrameCancelablePosition == nil {
-					d.FrameCancelablePosition = offsetCancelablePos
-				} else {
-					d.FrameCancelablePosition.Add(offsetCancelablePos)
-				}
-			}
-
-			if offset.Extend.CancelableRotation != nil {
-				offsetCancelableQuat = offset.Extend.CancelableRotation.MuledScalar(ratio).Normalize()
-
-				if d.FrameCancelableRotation == nil {
-					d.FrameCancelableRotation = offsetCancelableQuat
-				} else {
-					d.FrameCancelableRotation = offsetCancelableQuat.Muled(d.FrameCancelableRotation)
-				}
-			}
-
-			if offset.Extend.CancelableScale != nil {
-				offsetCancelableScale = offset.Extend.CancelableScale.MuledScalar(ratio)
-
-				if d.FrameCancelableScale == nil {
-					d.FrameCancelableScale = offsetCancelableScale
-				} else {
-					d.FrameCancelableScale.Mul(offsetCancelableScale)
-				}
-			}
-
-			if offset.Extend.LocalMat != nil {
-				offsetMat = offset.Extend.LocalMat.MuledScalar(ratio)
+			if offset.LocalMat != nil {
+				offsetMat = offset.LocalMat.MuledScalar(ratio)
 
 				if d.FrameLocalMat == nil {
 					d.FrameLocalMat = offsetMat
