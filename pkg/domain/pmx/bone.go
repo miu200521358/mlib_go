@@ -432,6 +432,11 @@ func (bone *Bone) IsUpper() bool {
 	return bone.containsCategory(CATEGORY_UPPER)
 }
 
+// 体幹系であるか
+func (bone *Bone) IsTrunk() bool {
+	return bone.containsCategory(CATEGORY_TRUNK)
+}
+
 // フィッティングの時に移動だけ行うか
 func (bone *Bone) CanFitOnlyMove() bool {
 	return bone.containsCategory(CATEGORY_FITTING_ONLY_MOVE)

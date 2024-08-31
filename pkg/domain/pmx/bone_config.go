@@ -46,6 +46,8 @@ type BoneCategory int
 const (
 	// ルート
 	CATEGORY_ROOT BoneCategory = iota
+	// 体幹
+	CATEGORY_TRUNK BoneCategory = iota
 	// 上半身
 	CATEGORY_UPPER BoneCategory = iota
 	// 下半身
@@ -222,31 +224,31 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				ChildBoneNames:  []StandardBoneNames{LOWER},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_LOWER}},
+				Categories:      []BoneCategory{CATEGORY_TRUNK, CATEGORY_LOWER}},
 			LOWER: {
 				ParentBoneNames: []StandardBoneNames{LOWER_ROOT, WAIST_CENTER, WAIST, GROOVE, CENTER},
 				ChildBoneNames:  []StandardBoneNames{LEG_CENTER, LEG_ROOT, WAIST_CANCEL, LEG},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_LOWER}},
+				Categories:      []BoneCategory{CATEGORY_TRUNK, CATEGORY_LOWER}},
 			UPPER_ROOT: {
 				ParentBoneNames: []StandardBoneNames{WAIST_CENTER, WAIST, GROOVE, CENTER},
 				ChildBoneNames:  []StandardBoneNames{UPPER},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_UPPER}},
+				Categories:      []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER}},
 			UPPER: {
 				ParentBoneNames: []StandardBoneNames{UPPER_ROOT, WAIST_CENTER, WAIST, GROOVE, CENTER},
 				ChildBoneNames:  []StandardBoneNames{UPPER2},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_UPPER}},
+				Categories:      []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER}},
 			UPPER2: {
 				ParentBoneNames: []StandardBoneNames{UPPER},
 				ChildBoneNames:  []StandardBoneNames{NECK_ROOT},
 				UpFromBoneNames: []StandardBoneNames{UPPER},
 				UpToBoneNames:   []StandardBoneNames{UPPER2},
-				Categories:      []BoneCategory{CATEGORY_UPPER}},
+				Categories:      []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER}},
 			NECK_ROOT: {
 				ParentBoneNames: []StandardBoneNames{UPPER2, UPPER},
 				ChildBoneNames:  []StandardBoneNames{NECK},
