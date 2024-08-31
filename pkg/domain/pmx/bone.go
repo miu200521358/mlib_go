@@ -412,6 +412,11 @@ func (bone *Bone) IsArm() bool {
 	return bone.containsCategory(CATEGORY_ARM)
 }
 
+// ひじ系ボーンであるか(指は含まない)
+func (bone *Bone) IsElbow() bool {
+	return bone.containsCategory(CATEGORY_ELBOW)
+}
+
 // 指系ボーンであるか
 func (bone *Bone) IsFinger() bool {
 	return bone.containsCategory(CATEGORY_FINGER)

@@ -52,8 +52,12 @@ const (
 	CATEGORY_UPPER BoneCategory = iota
 	// 下半身
 	CATEGORY_LOWER BoneCategory = iota
+	// 肩
+	CATEGORY_SHOULDER BoneCategory = iota
 	// 腕
 	CATEGORY_ARM BoneCategory = iota
+	// ひじ
+	CATEGORY_ELBOW BoneCategory = iota
 	// 足
 	CATEGORY_LEG BoneCategory = iota
 	// 指
@@ -284,25 +288,25 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				ChildBoneNames:  []StandardBoneNames{SHOULDER_P, SHOULDER},
 				UpFromBoneNames: []StandardBoneNames{NECK_ROOT, UPPER2},
 				UpToBoneNames:   []StandardBoneNames{SHOULDER_ROOT},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_SHOULDER}},
 			SHOULDER_P: {
 				ParentBoneNames: []StandardBoneNames{SHOULDER_ROOT, UPPER2, UPPER},
 				ChildBoneNames:  []StandardBoneNames{SHOULDER, SHOULDER_C, ARM},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_SHOULDER}},
 			SHOULDER: {
 				ParentBoneNames: []StandardBoneNames{SHOULDER_P, SHOULDER_ROOT, UPPER2, UPPER},
 				ChildBoneNames:  []StandardBoneNames{SHOULDER_C, ARM},
 				UpFromBoneNames: []StandardBoneNames{UPPER2},
 				UpToBoneNames:   []StandardBoneNames{NECK_ROOT},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_SHOULDER}},
 			SHOULDER_C: {
 				ParentBoneNames: []StandardBoneNames{SHOULDER, SHOULDER_P, SHOULDER_ROOT, UPPER2, UPPER},
 				ChildBoneNames:  []StandardBoneNames{ARM, ARM_TWIST, ELBOW},
 				UpFromBoneNames: []StandardBoneNames{SHOULDER},
 				UpToBoneNames:   []StandardBoneNames{ARM},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_SHOULDER}},
 			ARM: {
 				ParentBoneNames: []StandardBoneNames{SHOULDER_C, SHOULDER},
 				ChildBoneNames:  []StandardBoneNames{ARM_TWIST, ELBOW},
@@ -338,157 +342,157 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				ChildBoneNames:  []StandardBoneNames{WRIST_TWIST},
 				UpFromBoneNames: []StandardBoneNames{UPPER2},
 				UpToBoneNames:   []StandardBoneNames{NECK_ROOT},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW}},
 			WRIST_TWIST: {
 				ParentBoneNames: []StandardBoneNames{ELBOW},
 				ChildBoneNames:  []StandardBoneNames{WRIST},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_TWIST}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TWIST}},
 			WRIST_TWIST1: {
 				ParentBoneNames: []StandardBoneNames{ELBOW},
 				ChildBoneNames:  []StandardBoneNames{WRIST},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_TWIST}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TWIST}},
 			WRIST_TWIST2: {
 				ParentBoneNames: []StandardBoneNames{ELBOW},
 				ChildBoneNames:  []StandardBoneNames{WRIST},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_TWIST}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TWIST}},
 			WRIST_TWIST3: {
 				ParentBoneNames: []StandardBoneNames{ELBOW},
 				ChildBoneNames:  []StandardBoneNames{WRIST},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_TWIST}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TWIST}},
 			WRIST: {
 				ParentBoneNames: []StandardBoneNames{WRIST_TWIST, ELBOW},
 				ChildBoneNames:  []StandardBoneNames{MIDDLE1},
 				UpFromBoneNames: []StandardBoneNames{WRIST_TWIST, ELBOW},
 				UpToBoneNames:   []StandardBoneNames{WRIST},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW}},
 			THUMB0: {
 				ParentBoneNames: []StandardBoneNames{WRIST},
 				ChildBoneNames:  []StandardBoneNames{THUMB1},
 				UpFromBoneNames: []StandardBoneNames{WRIST},
 				UpToBoneNames:   []StandardBoneNames{THUMB0},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			THUMB1: {
 				ParentBoneNames: []StandardBoneNames{THUMB0},
 				ChildBoneNames:  []StandardBoneNames{THUMB2},
 				UpFromBoneNames: []StandardBoneNames{THUMB0},
 				UpToBoneNames:   []StandardBoneNames{THUMB1},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			THUMB2: {
 				ParentBoneNames: []StandardBoneNames{THUMB1},
 				ChildBoneNames:  []StandardBoneNames{THUMB_TAIL},
 				UpFromBoneNames: []StandardBoneNames{THUMB1},
 				UpToBoneNames:   []StandardBoneNames{THUMB2},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			THUMB_TAIL: {
 				ParentBoneNames: []StandardBoneNames{THUMB2},
 				ChildBoneNames:  []StandardBoneNames{},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			INDEX1: {
 				ParentBoneNames: []StandardBoneNames{WRIST},
 				ChildBoneNames:  []StandardBoneNames{INDEX2},
 				UpFromBoneNames: []StandardBoneNames{WRIST},
 				UpToBoneNames:   []StandardBoneNames{INDEX1},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			INDEX2: {
 				ParentBoneNames: []StandardBoneNames{INDEX1},
 				ChildBoneNames:  []StandardBoneNames{INDEX3},
 				UpFromBoneNames: []StandardBoneNames{INDEX1},
 				UpToBoneNames:   []StandardBoneNames{INDEX2},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			INDEX3: {
 				ParentBoneNames: []StandardBoneNames{INDEX2},
 				ChildBoneNames:  []StandardBoneNames{INDEX_TAIL},
 				UpFromBoneNames: []StandardBoneNames{INDEX2},
 				UpToBoneNames:   []StandardBoneNames{INDEX3},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			INDEX_TAIL: {
 				ParentBoneNames: []StandardBoneNames{INDEX3},
 				ChildBoneNames:  []StandardBoneNames{},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			MIDDLE1: {
 				ParentBoneNames: []StandardBoneNames{WRIST},
 				ChildBoneNames:  []StandardBoneNames{MIDDLE2},
 				UpFromBoneNames: []StandardBoneNames{WRIST},
 				UpToBoneNames:   []StandardBoneNames{MIDDLE1},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			MIDDLE2: {
 				ParentBoneNames: []StandardBoneNames{MIDDLE1},
 				ChildBoneNames:  []StandardBoneNames{MIDDLE3},
 				UpFromBoneNames: []StandardBoneNames{MIDDLE1},
 				UpToBoneNames:   []StandardBoneNames{MIDDLE2},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			MIDDLE3: {
 				ParentBoneNames: []StandardBoneNames{MIDDLE2},
 				ChildBoneNames:  []StandardBoneNames{MIDDLE_TAIL},
 				UpFromBoneNames: []StandardBoneNames{MIDDLE2},
 				UpToBoneNames:   []StandardBoneNames{MIDDLE3},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			MIDDLE_TAIL: {
 				ParentBoneNames: []StandardBoneNames{MIDDLE3},
 				ChildBoneNames:  []StandardBoneNames{},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			RING1: {
 				ParentBoneNames: []StandardBoneNames{WRIST},
 				ChildBoneNames:  []StandardBoneNames{RING2},
 				UpFromBoneNames: []StandardBoneNames{WRIST},
 				UpToBoneNames:   []StandardBoneNames{RING1},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			RING2: {
 				ParentBoneNames: []StandardBoneNames{RING1},
 				ChildBoneNames:  []StandardBoneNames{RING3},
 				UpFromBoneNames: []StandardBoneNames{RING1},
 				UpToBoneNames:   []StandardBoneNames{RING2},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			RING3: {
 				ParentBoneNames: []StandardBoneNames{RING2},
 				ChildBoneNames:  []StandardBoneNames{RING_TAIL},
 				UpFromBoneNames: []StandardBoneNames{RING2},
 				UpToBoneNames:   []StandardBoneNames{RING3},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			RING_TAIL: {
 				ParentBoneNames: []StandardBoneNames{RING3},
 				ChildBoneNames:  []StandardBoneNames{},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			PINKY1: {
 				ParentBoneNames: []StandardBoneNames{WRIST},
 				ChildBoneNames:  []StandardBoneNames{PINKY2},
 				UpFromBoneNames: []StandardBoneNames{WRIST},
 				UpToBoneNames:   []StandardBoneNames{PINKY1},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			PINKY2: {
 				ParentBoneNames: []StandardBoneNames{PINKY1},
 				ChildBoneNames:  []StandardBoneNames{PINKY3},
 				UpFromBoneNames: []StandardBoneNames{PINKY1},
 				UpToBoneNames:   []StandardBoneNames{PINKY2},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			PINKY3: {
 				ParentBoneNames: []StandardBoneNames{PINKY2},
 				ChildBoneNames:  []StandardBoneNames{PINKY_TAIL},
 				UpFromBoneNames: []StandardBoneNames{PINKY2},
 				UpToBoneNames:   []StandardBoneNames{PINKY3},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			PINKY_TAIL: {
 				ParentBoneNames: []StandardBoneNames{PINKY3},
 				ChildBoneNames:  []StandardBoneNames{},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
-				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_FINGER}},
+				Categories:      []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER}},
 			LEG_CENTER: {
 				ParentBoneNames: []StandardBoneNames{LOWER, LOWER_ROOT},
 				ChildBoneNames:  []StandardBoneNames{LEG_ROOT, WAIST_CANCEL, LEG},
