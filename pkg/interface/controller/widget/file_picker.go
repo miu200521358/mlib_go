@@ -306,9 +306,13 @@ func newFilePicker(
 			path := files[0]
 			// パスを入力欄に設定
 			picker.pathLineEdit.SetText(path)
-			// コールバックを呼び出し
-			picker.OnChanged(path)
+			// // コールバックを呼び出し
+			// picker.OnChanged(path)
 		}
+	})
+	picker.pathLineEdit.TextChanged().Attach(func() {
+		// コールバックを呼び出し
+		picker.OnChanged(picker.pathLineEdit.Text())
 	})
 
 	picker.openPushButton, err = walk.NewPushButton(inputComposite)
@@ -411,7 +415,7 @@ func (picker *FilePicker) GetName() string {
 }
 
 func (picker *FilePicker) OnChanged(path string) {
-	picker.pathLineEdit.SetText(path)
+	// picker.pathLineEdit.SetText(path)
 
 	if picker.rep != nil && picker.historyKey != "" {
 		if path == "" {
@@ -431,7 +435,7 @@ func (picker *FilePicker) OnChanged(path string) {
 		mconfig.SaveUserConfig(picker.historyKey, path, picker.limitHistory)
 	}
 
-	if path != "" && picker.onPathChanged != nil {
+	if picker.onPathChanged != nil {
 		picker.onPathChanged(path)
 	}
 }
@@ -444,8 +448,8 @@ func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 	return func() {
 		if dlg, err := picker.createHistoryDialog(); dlg != nil && err == nil {
 			if ok := dlg.Run(); ok == walk.DlgCmdOK {
-				// コールバックを呼び出し
-				picker.OnChanged(picker.pathLineEdit.Text())
+				// // コールバックを呼び出し
+				// picker.OnChanged(picker.pathLineEdit.Text())
 			}
 			dlg.Dispose()
 		}
@@ -563,8 +567,8 @@ func (picker *FilePicker) onClickOpenButton() walk.EventHandler {
 		} else if ok {
 			// パスを入力欄に設定
 			picker.pathLineEdit.SetText(dlg.FilePath)
-			// コールバックを呼び出し
-			picker.OnChanged(dlg.FilePath)
+			// // コールバックを呼び出し
+			// picker.OnChanged(dlg.FilePath)
 		}
 	}
 }

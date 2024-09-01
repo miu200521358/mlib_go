@@ -570,20 +570,24 @@ func (viewWindow *ViewWindow) LoadModels(models []*pmx.PmxModel) {
 	viewWindow.MakeContextCurrent()
 
 	for i, model := range models {
-		if model == nil {
+		if i < len(viewWindow.renderModels) && model == nil && viewWindow.renderModels[i] != nil {
+			// 既存モデルがいる場合、削除
+			viewWindow.physics.DeleteModel(i)
+			viewWindow.renderModels[i].Delete()
+			viewWindow.renderModels[i] = nil
 			continue
 		}
 
 		for i >= len(viewWindow.renderModels) {
 			viewWindow.renderModels = append(viewWindow.renderModels, nil)
 		}
-		if viewWindow.renderModels[i] != nil && viewWindow.renderModels[i].Hash() != model.Hash() {
+		if viewWindow.renderModels[i] != nil && model != nil && viewWindow.renderModels[i].Hash() != model.Hash() {
 			// 既存モデルがいる場合、削除
 			viewWindow.physics.DeleteModel(i)
 			viewWindow.renderModels[i].Delete()
 			viewWindow.renderModels[i] = nil
 		}
-		if viewWindow.renderModels[i] == nil {
+		if viewWindow.renderModels[i] == nil && model != nil {
 			viewWindow.renderModels[i] = render.NewRenderModel(viewWindow.windowIndex, model)
 			viewWindow.physics.AddModel(i, model)
 		}
@@ -592,13 +596,13 @@ func (viewWindow *ViewWindow) LoadModels(models []*pmx.PmxModel) {
 
 func (viewWindow *ViewWindow) GetViewerParameter() *state.ViewerParameter {
 	return &state.ViewerParameter{
-		viewWindow.yaw,
-		viewWindow.pitch,
-		viewWindow.shader.FieldOfViewAngle,
-		viewWindow.size,
-		viewWindow.shader.CameraPosition,
-		viewWindow.shader.CameraUp,
-		viewWindow.shader.LookAtCenterPosition,
+		Yaw:              viewWindow.yaw,
+		Pitch:            viewWindow.pitch,
+		FieldOfViewAngle: viewWindow.shader.FieldOfViewAngle,
+		Size:             viewWindow.size,
+		CameraPos:        viewWindow.shader.CameraPosition,
+		CameraUp:         viewWindow.shader.CameraUp,
+		LookAtCenter:     viewWindow.shader.LookAtCenterPosition,
 	}
 }
 
