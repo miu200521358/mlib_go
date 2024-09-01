@@ -319,20 +319,25 @@ func (boneDeltas *BoneDeltas) totalCancelRotation(boneIndex int, rotMat *mmath.M
 	boneDelta := boneDeltas.Get(boneIndex)
 
 	// 親のキャンセル付き回転行列
-	parentCancelableRotMat := mmath.NewMMat4()
-	for _, parentIndex := range boneDelta.Bone.Extend.ParentBoneIndexes {
-		parentBoneDelta := boneDeltas.Get(parentIndex)
-		if parentBoneDelta == nil || parentBoneDelta.FrameCancelableRotation == nil ||
-			parentBoneDelta.FrameCancelableRotation.IsIdent() {
-			continue
+	var parentCancelableRotMat *mmath.MMat4
+	if boneDeltas.Contains(boneDelta.Bone.ParentIndex) {
+		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
+		if parentBoneDelta.FrameCancelableRotation != nil && !parentBoneDelta.FrameCancelableRotation.IsIdent() {
+			parentCancelableRotMat = parentBoneDelta.FrameCancelableRotation.ToMat4()
 		}
-		parentCancelableRotMat.Mul(parentBoneDelta.FrameCancelableRotation.ToMat4())
 	}
 
 	// キャンセル付き回転
 	if boneDelta.FrameCancelableRotation == nil || boneDelta.FrameCancelableRotation.IsIdent() {
 		// 親の回転をキャンセルする
+		if parentCancelableRotMat == nil {
+			return rotMat
+		}
 		return rotMat.Muled(parentCancelableRotMat.Inverted())
+	}
+
+	if parentCancelableRotMat == nil {
+		return rotMat.Muled(boneDelta.FrameCancelableRotation.ToMat4())
 	}
 
 	// 親の回転をキャンセルする
@@ -433,7 +438,7 @@ func (boneDeltas *BoneDeltas) totalCancelScale(boneIndex int, posMat *mmath.MMat
 	if boneDeltas.Contains(boneDelta.Bone.ParentIndex) {
 		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
 		if parentBoneDelta.FrameCancelableScale != nil && !parentBoneDelta.FrameCancelableScale.IsZero() {
-			parentCancelableRotMat = parentBoneDelta.FrameCancelableScale.ToMat4()
+			parentCancelableRotMat = parentBoneDelta.FrameCancelableScale.ToScaleMat4()
 		}
 	}
 
@@ -447,11 +452,11 @@ func (boneDeltas *BoneDeltas) totalCancelScale(boneIndex int, posMat *mmath.MMat
 	}
 
 	if parentCancelableRotMat == nil {
-		return posMat.Muled(boneDelta.FrameCancelableScale.ToMat4())
+		return posMat.Muled(boneDelta.FrameCancelableScale.ToScaleMat4())
 	}
 
 	// 親のスケールをキャンセルする
-	return posMat.Muled(boneDelta.FrameCancelableScale.ToMat4()).Muled(parentCancelableRotMat.Inverted())
+	return posMat.Muled(boneDelta.FrameCancelableScale.ToScaleMat4()).Muled(parentCancelableRotMat.Inverted())
 }
 
 func (boneDeltas *BoneDeltas) totalLocalMatLoop(boneIndex int, loop int) *mmath.MMat4 {

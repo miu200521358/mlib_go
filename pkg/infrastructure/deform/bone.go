@@ -1120,9 +1120,9 @@ func fillBoneDeform(
 
 		// ボーンの移動位置、回転角度、拡大率を取得
 		d.FrameLocalMat, d.FrameLocalMorphMat = getLocalMat(deltas, bone)
-		d.FramePosition, d.FrameMorphPosition = getPosition(deltas, bone, bf)
-		d.FrameRotation, d.FrameMorphRotation = getRotation(deltas, bone, bf)
-		d.FrameScale, d.FrameMorphScale = getScale(deltas, bone, bf)
+		d.FramePosition, d.FrameCancelablePosition, d.FrameMorphPosition = getPosition(deltas, bone, bf)
+		d.FrameRotation, d.FrameCancelableRotation, d.FrameMorphRotation = getRotation(deltas, bone, bf)
+		d.FrameScale, d.FrameCancelableScale, d.FrameMorphScale = getScale(deltas, bone, bf)
 		deltas.Bones.Update(d)
 	}
 
@@ -1152,7 +1152,7 @@ func getPosition(
 	deltas *delta.VmdDeltas,
 	bone *pmx.Bone,
 	bf *vmd.BoneFrame,
-) (*mmath.MVec3, *mmath.MVec3) {
+) (*mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
 	var pos *mmath.MVec3
 	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil && deltas.Bones.Get(bone.Index()).FramePosition != nil {
 		pos = deltas.Bones.Get(bone.Index()).FramePosition.Copy()
@@ -1162,13 +1162,22 @@ func getPosition(
 		pos = mmath.NewMVec3()
 	}
 
+	var cancelablePos *mmath.MVec3
+	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil && deltas.Bones.Get(bone.Index()).FrameCancelablePosition != nil {
+		cancelablePos = deltas.Bones.Get(bone.Index()).FrameCancelablePosition.Copy()
+	} else if bf != nil && bf.CancelablePosition != nil && !bf.CancelablePosition.IsZero() {
+		cancelablePos = bf.CancelablePosition.Copy()
+	} else {
+		cancelablePos = mmath.NewMVec3()
+	}
+
 	var morphPos *mmath.MVec3
 	if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
 		deltas.Morphs.Bones.Get(bone.Index()).FramePosition != nil {
 		morphPos = deltas.Morphs.Bones.Get(bone.Index()).FramePosition.Copy()
 	}
 
-	return pos, morphPos
+	return pos, cancelablePos, morphPos
 }
 
 // 該当キーフレにおけるボーンの回転角度
@@ -1176,8 +1185,9 @@ func getRotation(
 	deltas *delta.VmdDeltas,
 	bone *pmx.Bone,
 	bf *vmd.BoneFrame,
-) (*mmath.MQuaternion, *mmath.MQuaternion) {
+) (*mmath.MQuaternion, *mmath.MQuaternion, *mmath.MQuaternion) {
 	var rot *mmath.MQuaternion
+	var cancelableRot *mmath.MQuaternion
 	var morphRot *mmath.MQuaternion
 	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil && deltas.Bones.Get(bone.Index()).FrameRotation != nil {
 		rot = deltas.Bones.Get(bone.Index()).FrameRotation.Copy()
@@ -1186,6 +1196,12 @@ func getRotation(
 			rot = bf.Rotation.Copy()
 		} else {
 			rot = mmath.NewMQuaternion()
+		}
+
+		if bf != nil && bf.CancelableRotation != nil && !bf.CancelableRotation.IsIdent() {
+			cancelableRot = bf.CancelableRotation.Copy()
+		} else {
+			cancelableRot = mmath.NewMQuaternion()
 		}
 
 		if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
@@ -1201,7 +1217,7 @@ func getRotation(
 		rot = rot.ToFixedAxisRotation(bone.Extend.NormalizedFixedAxis)
 	}
 
-	return rot, morphRot
+	return rot, cancelableRot, morphRot
 }
 
 // 該当キーフレにおけるボーンの拡大率
@@ -1209,7 +1225,7 @@ func getScale(
 	deltas *delta.VmdDeltas,
 	bone *pmx.Bone,
 	bf *vmd.BoneFrame,
-) (*mmath.MVec3, *mmath.MVec3) {
+) (*mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
 
 	var scale *mmath.MVec3
 	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil &&
@@ -1217,8 +1233,14 @@ func getScale(
 		scale = deltas.Bones.Get(bone.Index()).FrameScale
 	} else if bf != nil && bf.Scale != nil && !bf.Scale.IsOne() {
 		scale = bf.Scale
-	} else {
-		scale = &mmath.MVec3{X: 1, Y: 1, Z: 1}
+	}
+
+	var cancelableScale *mmath.MVec3
+	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil &&
+		deltas.Bones.Get(bone.Index()).FrameCancelableScale != nil {
+		cancelableScale = deltas.Bones.Get(bone.Index()).FrameScale
+	} else if bf != nil && bf.CancelableScale != nil && !bf.CancelableScale.IsOne() {
+		cancelableScale = bf.CancelableScale
 	}
 
 	var morphScale *mmath.MVec3
@@ -1227,5 +1249,5 @@ func getScale(
 		morphScale = deltas.Morphs.Bones.Get(bone.Index()).FrameScale.Copy()
 	}
 
-	return scale, morphScale
+	return scale, cancelableScale, morphScale
 }
