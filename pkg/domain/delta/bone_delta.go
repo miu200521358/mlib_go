@@ -133,7 +133,7 @@ func (boneDelta *BoneDelta) FilledFrameMorphRotation() *mmath.MQuaternion {
 func (boneDelta *BoneDelta) FilledTotalScale() *mmath.MVec3 {
 	scale := boneDelta.FilledFrameScale().Copy()
 
-	if boneDelta.FrameMorphScale != nil && !boneDelta.FrameMorphScale.IsZero() {
+	if boneDelta.FrameMorphScale != nil && !boneDelta.FrameMorphScale.IsOne() {
 		scale.Mul(boneDelta.FrameMorphScale)
 	}
 

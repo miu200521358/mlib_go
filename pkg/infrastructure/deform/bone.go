@@ -1211,12 +1211,12 @@ func getScale(
 	bf *vmd.BoneFrame,
 ) (*mmath.MVec3, *mmath.MVec3) {
 
-	scale := &mmath.MVec3{X: 1, Y: 1, Z: 1}
+	var scale *mmath.MVec3
 	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil &&
 		deltas.Bones.Get(bone.Index()).FrameScale != nil {
 		scale = deltas.Bones.Get(bone.Index()).FrameScale
-	} else if bf != nil && bf.Scale != nil && !bf.Scale.IsZero() {
-		scale.Add(bf.Scale)
+	} else if bf != nil && bf.Scale != nil && !bf.Scale.IsOne() {
+		scale = bf.Scale
 	}
 
 	var morphScale *mmath.MVec3
