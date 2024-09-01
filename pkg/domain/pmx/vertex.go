@@ -83,7 +83,7 @@ func (vertices *Vertices) Copy() *Vertices {
 	return copied
 }
 
-func (vertices *Vertices) GetMapByBoneIndex() map[int][]*Vertex {
+func (vertices *Vertices) GetMapByBoneIndex(weightThreshold float64) map[int][]*Vertex {
 	vertexMap := make(map[int][]*Vertex)
 	for _, vertex := range vertices.Data {
 		if vertex.Deform != nil {
@@ -91,7 +91,7 @@ func (vertices *Vertices) GetMapByBoneIndex() map[int][]*Vertex {
 				if _, ok := vertexMap[boneIndex]; !ok {
 					vertexMap[boneIndex] = make([]*Vertex, 0)
 				}
-				if vertex.Deform.AllWeights()[n] > 0 {
+				if vertex.Deform.AllWeights()[n] > weightThreshold {
 					vertexMap[boneIndex] = append(vertexMap[boneIndex], vertex)
 				}
 			}

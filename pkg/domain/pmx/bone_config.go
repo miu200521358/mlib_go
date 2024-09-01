@@ -243,7 +243,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				UpFromBoneNames:  []StandardBoneNames{},
 				UpToBoneNames:    []StandardBoneNames{},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_LOWER},
-				BoundingBoxShape: SHAPE_BOX},
+				BoundingBoxShape: SHAPE_CAPSULE},
 			UPPER_ROOT: {
 				ParentBoneNames:  []StandardBoneNames{TRUNK_ROOT, WAIST, GROOVE, CENTER},
 				ChildBoneNames:   []StandardBoneNames{UPPER},
@@ -257,14 +257,14 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				UpFromBoneNames:  []StandardBoneNames{},
 				UpToBoneNames:    []StandardBoneNames{},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER},
-				BoundingBoxShape: SHAPE_BOX},
+				BoundingBoxShape: SHAPE_CAPSULE},
 			UPPER2: {
 				ParentBoneNames:  []StandardBoneNames{UPPER},
 				ChildBoneNames:   []StandardBoneNames{NECK_ROOT},
 				UpFromBoneNames:  []StandardBoneNames{UPPER},
 				UpToBoneNames:    []StandardBoneNames{UPPER2},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER},
-				BoundingBoxShape: SHAPE_BOX},
+				BoundingBoxShape: SHAPE_CAPSULE},
 			NECK_ROOT: {
 				ParentBoneNames:  []StandardBoneNames{UPPER2, UPPER},
 				ChildBoneNames:   []StandardBoneNames{NECK},

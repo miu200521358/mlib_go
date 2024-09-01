@@ -584,32 +584,6 @@ func (vec3 *MVec3) Project(other *MVec3) *MVec3 {
 	return other.MuledScalar(vec3.Dot(other) / other.LengthSqr())
 }
 
-// 標準偏差を加味したmean処理
-func StdMeanVec3(values []MVec3, err float64) *MVec3 {
-	npStandardVectors := make([][]float64, len(values))
-	npStandardLengths := make([]float64, len(values))
-
-	for i, v := range values {
-		npStandardVectors[i] = v.Vector()
-		npStandardLengths[i] = v.Length()
-	}
-
-	medianStandardValues := Median(npStandardLengths)
-	stdStandardValues := Std(npStandardLengths)
-
-	// 中央値から標準偏差の一定範囲までの値を取得
-	var filteredStandardValues [][]float64
-	for i := 0; i < len(npStandardVectors); i++ {
-		if npStandardLengths[i] >= medianStandardValues-err*stdStandardValues &&
-			npStandardLengths[i] <= medianStandardValues+err*stdStandardValues {
-			filteredStandardValues = append(filteredStandardValues, npStandardVectors[i])
-		}
-	}
-
-	mean := Mean2DVertical(filteredStandardValues)
-	return &MVec3{mean[0], mean[1], mean[2]}
-}
-
 // 点が直方体内にあるかどうかを判定する関数
 func (vec3 *MVec3) IsPointInsideBox(min, max *MVec3) bool {
 	return vec3.X >= min.X && vec3.X <= max.X &&

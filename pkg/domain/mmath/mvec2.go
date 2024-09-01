@@ -349,32 +349,6 @@ func (vec2 *MVec2) Round() *MVec2 {
 	}
 }
 
-// 標準偏差を加味したmean処理
-func StdMeanVec2(values []MVec2, err float64) *MVec2 {
-	npStandardVectors := make([][]float64, len(values))
-	npStandardLengths := make([]float64, len(values))
-
-	for i, v := range values {
-		npStandardVectors[i] = v.Vector()
-		npStandardLengths[i] = v.Length()
-	}
-
-	medianStandardValues := Median(npStandardLengths)
-	stdStandardValues := Std(npStandardLengths)
-
-	// 中央値から標準偏差の一定範囲までの値を取得
-	var filteredStandardValues [][]float64
-	for i := 0; i < len(npStandardVectors); i++ {
-		if npStandardLengths[i] >= medianStandardValues-err*stdStandardValues &&
-			npStandardLengths[i] <= medianStandardValues+err*stdStandardValues {
-			filteredStandardValues = append(filteredStandardValues, npStandardVectors[i])
-		}
-	}
-
-	mean := Mean2DVertical(filteredStandardValues)
-	return &MVec2{mean[0], mean[1]}
-}
-
 // One 0を1に変える
 func (vec2 *MVec2) One() *MVec2 {
 	vec := vec2.Vector()

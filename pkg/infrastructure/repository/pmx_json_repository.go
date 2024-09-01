@@ -92,7 +92,7 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 	}
 
 	// 頂点をボーンINDEX別に纏める
-	allBoneVertices := model.Vertices.GetMapByBoneIndex()
+	allBoneVertices := model.Vertices.GetMapByBoneIndex(0.0)
 
 	for _, bone := range model.Bones.Data {
 		boneData := boneJson{
@@ -141,7 +141,7 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 			// 準標準ボーンではなく、物理剛体に紐付いていない場合、親の中で最も近い準標準ボーンに頂点INDEXリストを載せ替える
 			for _, parentIndex := range bone.Extend.ParentBoneIndexes {
 				parentBone := model.Bones.Get(parentIndex)
-				if parentBone.Config() != nil {
+				if parentBone.Config() != nil && !parentBone.IsHead() {
 					// 親が準標準ボーンの場合、頂点INDEXリストを載せ替える
 					allBoneVertices[parentIndex] = append(allBoneVertices[parentIndex], allBoneVertices[bone.Index()]...)
 					break
@@ -187,9 +187,14 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 		// バウンディングボックスを計算
 		if bone.Config().BoundingBoxShape == pmx.SHAPE_BOX {
 			rigidBody.ShapeType = int(pmx.SHAPE_BOX)
-			rigidBody.Size, rigidBody.Position, rigidBody.Rotation = mmath.CalculateBoundingBox(positions)
-			rigidBody.Position.X = 0
-			rigidBody.Rotation.X = 0
+			rigidBody.Size, rigidBody.Position, rigidBody.Rotation = mmath.CalculateBoundingBox(positions, 0.1)
+		} else if bone.Config().BoundingBoxShape == pmx.SHAPE_SPHERE {
+			rigidBody.ShapeType = int(pmx.SHAPE_SPHERE)
+			rigidBody.Rotation = mmath.NewMVec3()
+			rigidBody.Size, rigidBody.Position = mmath.CalculateBoundingSphere(positions, 0.1)
+		} else if bone.Config().BoundingBoxShape == pmx.SHAPE_CAPSULE {
+			rigidBody.ShapeType = int(pmx.SHAPE_CAPSULE)
+			rigidBody.Size, rigidBody.Position, rigidBody.Rotation = mmath.CalculateBoundingCapsule(positions, 0.1)
 		} else {
 			continue
 		}

@@ -193,24 +193,7 @@ func TestMVec3Degree(t *testing.T) {
 		t.Errorf("Degree failed. Expected %v, got %v", expected2, result2)
 	}
 }
-func TestStdMean(t *testing.T) {
-	values := []MVec3{
-		{1, 2, 3},
-		{1.5, 1.2, 20.3},
-		{1.8, 0.3, 1.3},
-		{15, 0.2, 1.3},
-		{1.3, 2.2, 2.3},
-	}
 
-	err := 1.5
-	expected := MVec3{1.36666667, 1.5, 2.2}
-
-	result := StdMeanVec3(values, err)
-
-	if !result.NearEquals(&expected, 1e-8) {
-		t.Errorf("StdMean failed. Expected %v, got %v", expected, result)
-	}
-}
 func TestMVec3One(t *testing.T) {
 	v1 := MVec3{1, 2, 3.2}
 	expected1 := MVec3{1, 2, 3.2}

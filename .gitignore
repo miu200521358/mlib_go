@@ -33,3 +33,4 @@ cmd/user_config.json
 *.log
 framebuffer_output.png
 mlib.json
+test_resources/
