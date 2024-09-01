@@ -1217,6 +1217,8 @@ func getScale(
 		scale = deltas.Bones.Get(bone.Index()).FrameScale
 	} else if bf != nil && bf.Scale != nil && !bf.Scale.IsOne() {
 		scale = bf.Scale
+	} else {
+		scale = &mmath.MVec3{X: 1, Y: 1, Z: 1}
 	}
 
 	var morphScale *mmath.MVec3
