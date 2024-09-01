@@ -17,12 +17,17 @@ require (
 
 require (
 	github.com/felixge/fgprof v0.9.3 // indirect
+	github.com/gonum/blas v0.0.0-20181208220705-f22b278b28ac // indirect
+	github.com/gonum/floats v0.0.0-20181209220543-c233463c7e82 // indirect
+	github.com/gonum/internal v0.0.0-20181124074243-f884aa714029 // indirect
+	github.com/gonum/lapack v0.0.0-20181123203213-e4cdc5a0bff9 // indirect
 	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/tools v0.15.0 // indirect
 )
 
 require (
+	github.com/gonum/matrix v0.0.0-20181209220409-c518dec07be9
 	github.com/nicksnyder/go-i18n/v2 v2.4.0
 	github.com/petar/GoLLRB v0.0.0-20210522233825-ae3b015fd3e9
 	golang.org/x/sys v0.14.0

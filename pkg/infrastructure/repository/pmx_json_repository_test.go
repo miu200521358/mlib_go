@@ -46,8 +46,8 @@ func TestPmxJsonRepository_Save1(t *testing.T) {
 func TestPmxJsonRepository_Save2(t *testing.T) {
 	pmxRep := NewPmxRepository()
 
-	model, err := pmxRep.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/ゲーム/ウマ娘/ヨッシー式_メジロブライト/ヨッシー式メジロブライト.pmx")
-	// model, err := pmxRep.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式/カイト.pmx")
+	// model, err := pmxRep.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/ゲーム/ウマ娘/ヨッシー式_メジロブライト/ヨッシー式メジロブライト.pmx")
+	model, err := pmxRep.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式/カイト.pmx")
 	// model, err := pmxRep.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20240628/wa_129cm.pmx")
 	// model, err := pmxRep.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/055_鶯丸/鶯丸 さとく式 ver0.90/さとく式鶯丸ver0.90.pmx")
 	if err != nil {
@@ -80,4 +80,11 @@ func TestPmxJsonRepository_Save2(t *testing.T) {
 	if savedData.Name != model.Name() {
 		t.Errorf("Expected model name to be '%s', got '%s'", model.Name(), savedData.Name)
 	}
+
+	loadModel, err := rep.Load(jsonPath)
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	pmxRep.Save("C:/MMD/mlib_go/test_resources/json_pmx_loaded.pmx", loadModel, false)
 }

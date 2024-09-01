@@ -617,35 +617,6 @@ func (vec3 *MVec3) IsPointInsideBox(min, max *MVec3) bool {
 		vec3.Z >= min.Z && vec3.Z <= max.Z
 }
 
-// 直方体の境界を計算する関数
-func CalculateBoundingBox(points ...*MVec3) (minPos, maxPos *MVec3) {
-	minPos = &MVec3{math.Inf(1), math.Inf(1), math.Inf(1)}
-	maxPos = &MVec3{math.Inf(-1), math.Inf(-1), math.Inf(-1)}
-
-	for _, p := range points {
-		if p.X < minPos.X {
-			minPos.X = p.X
-		}
-		if p.Y < minPos.Y {
-			minPos.Y = p.Y
-		}
-		if p.Z < minPos.Z {
-			minPos.Z = p.Z
-		}
-		if p.X > maxPos.X {
-			maxPos.X = p.X
-		}
-		if p.Y > maxPos.Y {
-			maxPos.Y = p.Y
-		}
-		if p.Z > maxPos.Z {
-			maxPos.Z = p.Z
-		}
-	}
-
-	return minPos, maxPos
-}
-
 // Vec3Diffは、2つのベクトル間の回転四元数を返します。
 func (vec1 *MVec3) Vec3Diff(vec2 *MVec3) *MQuaternion {
 	cr := vec1.Cross(vec2)

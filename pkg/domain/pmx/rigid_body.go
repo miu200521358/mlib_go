@@ -27,9 +27,10 @@ func NewRigidBodyParam() *RigidBodyParam {
 type Shape int
 
 const (
-	SHAPE_SPHERE  Shape = 0 // 球
-	SHAPE_BOX     Shape = 1 // 箱
-	SHAPE_CAPSULE Shape = 2 // カプセル
+	SHAPE_NONE    Shape = -1 // なし
+	SHAPE_SPHERE  Shape = 0  // 球
+	SHAPE_BOX     Shape = 1  // 箱
+	SHAPE_CAPSULE Shape = 2  // カプセル
 )
 
 // 剛体物理の計算モード

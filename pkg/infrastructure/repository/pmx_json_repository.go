@@ -43,9 +43,29 @@ type boneJson struct {
 	Ik           *ikJson      `json:"ik"`            // IK:1 の場合 IKデータを格納
 }
 
+type rigidBodyJson struct {
+	Index              int          `json:"index"`                // 剛体INDEX
+	Name               string       `json:"name"`                 // 剛体名
+	EnglishName        string       `json:"english_name"`         // 剛体英名
+	BoneIndex          int          `json:"bone_index"`           // 関連ボーンIndex
+	CollisionGroup     int          `json:"collision_group"`      // グループ
+	CollisionGroupMask int          `json:"collision_group_mask"` // 非衝突グループフラグ
+	ShapeType          int          `json:"shape_type"`           // 形状
+	Size               *mmath.MVec3 `json:"size"`                 // サイズ(x,y,z)
+	Position           *mmath.MVec3 `json:"position"`             // 位置(x,y,z)
+	Rotation           *mmath.MVec3 `json:"rotation"`             // 回転(x,y,z) -> ラジアン角
+	Mass               float64      `json:"mass"`                 // 質量
+	LinearDamping      float64      `json:"linear_damping"`       // 移動減衰
+	AngularDamping     float64      `json:"angular_damping"`      // 回転減衰
+	Restitution        float64      `json:"restitution"`          // 反発力
+	Friction           float64      `json:"friction"`             // 摩擦力
+	PhysicsType        int          `json:"physics_type"`         // 剛体の物理演算
+}
+
 type pmxJson struct {
-	Name  string
-	Bones []*boneJson
+	Name        string
+	Bones       []*boneJson
+	RigidBodies []*rigidBodyJson
 }
 
 type PmxJsonRepository struct {
@@ -71,8 +91,10 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 		Bones: make([]*boneJson, 0),
 	}
 
-	for i := range model.Bones.Len() {
-		bone := model.Bones.Get(i)
+	// 頂点をボーンINDEX別に纏める
+	allBoneVertices := model.Vertices.GetMapByBoneIndex()
+
+	for _, bone := range model.Bones.Data {
 		boneData := boneJson{
 			Index:        bone.Index(),
 			Name:         bone.Name(),
@@ -113,6 +135,66 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 		}
 
 		jsonData.Bones = append(jsonData.Bones, &boneData)
+
+		if bone.Config() == nil &&
+			(bone.Extend.RigidBody == nil || bone.Extend.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC) {
+			// 準標準ボーンではなく、物理剛体に紐付いていない場合、親の中で最も近い準標準ボーンに頂点INDEXリストを載せ替える
+			for _, parentIndex := range bone.Extend.ParentBoneIndexes {
+				parentBone := model.Bones.Get(parentIndex)
+				if parentBone.Config() != nil {
+					// 親が準標準ボーンの場合、頂点INDEXリストを載せ替える
+					allBoneVertices[parentIndex] = append(allBoneVertices[parentIndex], allBoneVertices[bone.Index()]...)
+					break
+				}
+			}
+		}
+	}
+
+	// 準標準ボーンINDEX別に頂点を覆うバウンディングボックスを計算
+	for _, bone := range model.Bones.Data {
+		if bone.Config() == nil || bone.Config().BoundingBoxShape == pmx.SHAPE_NONE {
+			continue
+		}
+		if _, ok := allBoneVertices[bone.Index()]; !ok {
+			continue
+		}
+
+		boneVertices := allBoneVertices[bone.Index()]
+		if len(boneVertices) == 0 {
+			continue
+		}
+
+		rigidBody := &rigidBodyJson{
+			Index:              len(jsonData.RigidBodies),
+			Name:               bone.Name(),
+			EnglishName:        bone.EnglishName(),
+			BoneIndex:          bone.Index(),
+			CollisionGroup:     0,
+			CollisionGroupMask: 0,
+			Mass:               0.0,
+			LinearDamping:      0.0,
+			AngularDamping:     0.0,
+			Restitution:        0.0,
+			Friction:           0.0,
+			PhysicsType:        int(pmx.PHYSICS_TYPE_STATIC),
+		}
+
+		positions := make([]*mmath.MVec3, len(boneVertices))
+		for i, vertex := range boneVertices {
+			positions[i] = vertex.Position
+		}
+
+		// バウンディングボックスを計算
+		if bone.Config().BoundingBoxShape == pmx.SHAPE_BOX {
+			rigidBody.ShapeType = int(pmx.SHAPE_BOX)
+			rigidBody.Size, rigidBody.Position, rigidBody.Rotation = mmath.CalculateBoundingBox(positions)
+			rigidBody.Position.X = 0
+			rigidBody.Rotation.X = 0
+		} else {
+			continue
+		}
+
+		jsonData.RigidBodies = append(jsonData.RigidBodies, rigidBody)
 	}
 
 	// JSONに変換
@@ -182,7 +264,7 @@ func (rep *PmxJsonRepository) LoadName(path string) (string, error) {
 func (rep *PmxJsonRepository) loadModel(model *pmx.PmxModel, jsonData *pmxJson) (*pmx.PmxModel, error) {
 
 	for _, boneData := range jsonData.Bones {
-		bone := pmx.NewBone()
+		bone := &pmx.Bone{}
 		bone.SetIndex(boneData.Index)
 		bone.SetName(boneData.Name)
 		bone.SetEnglishName(boneData.EnglishName)
@@ -198,6 +280,7 @@ func (rep *PmxJsonRepository) loadModel(model *pmx.PmxModel, jsonData *pmxJson) 
 		bone.LocalAxisX = boneData.LocalAxisX
 		bone.LocalAxisZ = boneData.LocalAxisZ
 		bone.EffectorKey = boneData.EffectorKey
+		bone.Extend = &pmx.BoneExtend{}
 
 		if boneData.Ik != nil {
 			ik := pmx.NewIk()
@@ -216,6 +299,28 @@ func (rep *PmxJsonRepository) loadModel(model *pmx.PmxModel, jsonData *pmxJson) 
 		}
 
 		model.Bones.Append(bone)
+	}
+
+	for _, rigidBodyData := range jsonData.RigidBodies {
+		rigidBody := &pmx.RigidBody{}
+		rigidBody.SetIndex(rigidBodyData.Index)
+		rigidBody.SetName(rigidBodyData.Name)
+		rigidBody.SetEnglishName(rigidBodyData.EnglishName)
+		rigidBody.BoneIndex = rigidBodyData.BoneIndex
+		rigidBody.CollisionGroup = byte(rigidBodyData.CollisionGroup)
+		rigidBody.CollisionGroupMaskValue = int(rigidBodyData.CollisionGroupMask)
+		rigidBody.CollisionGroupMask.IsCollisions = pmx.NewCollisionGroup(uint16(rigidBodyData.CollisionGroupMask))
+		rigidBody.ShapeType = pmx.Shape(rigidBodyData.ShapeType)
+		rigidBody.Size = rigidBodyData.Size
+		rigidBody.Position = rigidBodyData.Position
+		rigidBody.Rotation = mmath.NewMRotationFromRadians(rigidBodyData.Rotation)
+		rigidBody.RigidBodyParam = pmx.NewRigidBodyParam()
+		rigidBody.RigidBodyParam.Mass = rigidBodyData.Mass
+		rigidBody.RigidBodyParam.LinearDamping = rigidBodyData.LinearDamping
+		rigidBody.RigidBodyParam.AngularDamping = rigidBodyData.AngularDamping
+		rigidBody.RigidBodyParam.Restitution = rigidBodyData.Restitution
+
+		model.RigidBodies.Append(rigidBody)
 	}
 
 	model.Setup()
