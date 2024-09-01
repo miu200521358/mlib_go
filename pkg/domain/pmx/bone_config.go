@@ -102,7 +102,7 @@ const (
 	CENTER        StandardBoneNames = "センター"
 	GROOVE        StandardBoneNames = "グルーブ"
 	WAIST         StandardBoneNames = "腰"
-	WAIST_CENTER  StandardBoneNames = "体幹中心"
+	TRUNK_ROOT    StandardBoneNames = "体幹中心"
 	LOWER_ROOT    StandardBoneNames = "下半身根元"
 	LOWER         StandardBoneNames = "下半身"
 	LEG_CENTER    StandardBoneNames = "足中心"
@@ -201,48 +201,48 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				Categories:      []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE}},
 			CENTER: {
 				ParentBoneNames: []StandardBoneNames{ROOT},
-				ChildBoneNames:  []StandardBoneNames{GROOVE, WAIST, WAIST_CENTER, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
+				ChildBoneNames:  []StandardBoneNames{GROOVE, WAIST, TRUNK_ROOT, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
 				Categories:      []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE}},
 			GROOVE: {
 				ParentBoneNames: []StandardBoneNames{CENTER},
-				ChildBoneNames:  []StandardBoneNames{WAIST, WAIST_CENTER, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
+				ChildBoneNames:  []StandardBoneNames{WAIST, TRUNK_ROOT, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
 				Categories:      []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE}},
 			WAIST: {
 				ParentBoneNames: []StandardBoneNames{GROOVE, CENTER},
-				ChildBoneNames:  []StandardBoneNames{WAIST_CENTER, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
+				ChildBoneNames:  []StandardBoneNames{TRUNK_ROOT, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
 				Categories:      []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE}},
-			WAIST_CENTER: {
+			TRUNK_ROOT: {
 				ParentBoneNames: []StandardBoneNames{WAIST, GROOVE, CENTER},
 				ChildBoneNames:  []StandardBoneNames{UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
 				Categories:      []BoneCategory{CATEGORY_ROOT}},
 			LOWER_ROOT: {
-				ParentBoneNames: []StandardBoneNames{WAIST_CENTER, WAIST, GROOVE, CENTER},
+				ParentBoneNames: []StandardBoneNames{TRUNK_ROOT, WAIST, GROOVE, CENTER},
 				ChildBoneNames:  []StandardBoneNames{LOWER},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
 				Categories:      []BoneCategory{CATEGORY_TRUNK, CATEGORY_LOWER}},
 			LOWER: {
-				ParentBoneNames: []StandardBoneNames{LOWER_ROOT, WAIST_CENTER, WAIST, GROOVE, CENTER},
+				ParentBoneNames: []StandardBoneNames{LOWER_ROOT, TRUNK_ROOT, WAIST, GROOVE, CENTER},
 				ChildBoneNames:  []StandardBoneNames{LEG_CENTER, LEG_ROOT, WAIST_CANCEL, LEG},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
 				Categories:      []BoneCategory{CATEGORY_TRUNK, CATEGORY_LOWER}},
 			UPPER_ROOT: {
-				ParentBoneNames: []StandardBoneNames{WAIST_CENTER, WAIST, GROOVE, CENTER},
+				ParentBoneNames: []StandardBoneNames{TRUNK_ROOT, WAIST, GROOVE, CENTER},
 				ChildBoneNames:  []StandardBoneNames{UPPER},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
 				Categories:      []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER}},
 			UPPER: {
-				ParentBoneNames: []StandardBoneNames{UPPER_ROOT, WAIST_CENTER, WAIST, GROOVE, CENTER},
+				ParentBoneNames: []StandardBoneNames{UPPER_ROOT, TRUNK_ROOT, WAIST, GROOVE, CENTER},
 				ChildBoneNames:  []StandardBoneNames{UPPER2},
 				UpFromBoneNames: []StandardBoneNames{},
 				UpToBoneNames:   []StandardBoneNames{},
