@@ -6,6 +6,7 @@ import (
 	"math/rand"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 type VmdMotion struct {
@@ -103,6 +104,22 @@ func (motion *VmdMotion) MaxFrame() float32 {
 
 func (motion *VmdMotion) MinFrame() float32 {
 	return min(motion.BoneFrames.MinFrame(), motion.MorphFrames.MinFrame())
+}
+
+func (motion *VmdMotion) RegisteredFrames(boneNames []string) []int {
+	boneFrames := motion.BoneFrames.registeredFramesMap(boneNames)
+	morphFrames := motion.MorphFrames.registeredFramesMap()
+
+	frames := make([]int, 0, len(boneFrames)+len(morphFrames))
+	for f := range boneFrames {
+		frames = append(frames, int(f))
+	}
+	for f := range morphFrames {
+		frames = append(frames, int(f))
+	}
+	mmath.SortInts(frames)
+
+	return frames
 }
 
 func (motion *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {

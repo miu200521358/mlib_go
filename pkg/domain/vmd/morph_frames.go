@@ -2,6 +2,8 @@ package vmd
 
 import (
 	"math"
+
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 type MorphFrames struct {
@@ -74,4 +76,26 @@ func (morphFrames *MorphFrames) Len() int {
 		count += fs.RegisteredIndexes.Len()
 	}
 	return count
+}
+
+func (morphFrames *MorphFrames) registeredFramesMap() map[float32]struct{} {
+	frames := make(map[float32]struct{}, 0)
+	for _, boneFrames := range morphFrames.Data {
+		for _, f := range boneFrames.Indexes.List() {
+			frames[f] = struct{}{}
+		}
+	}
+	return frames
+}
+
+func (morphFrames *MorphFrames) RegisteredFrames() []int {
+	mFrames := morphFrames.registeredFramesMap()
+
+	frames := make([]int, 0, len(mFrames))
+	for f := range mFrames {
+		frames = append(frames, int(f))
+	}
+	mmath.SortInts(frames)
+
+	return frames
 }

@@ -2,9 +2,11 @@ package vmd
 
 import (
 	"math"
+	"slices"
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 type BoneFrames struct {
@@ -116,4 +118,30 @@ func (boneFrames *BoneFrames) MinFrame() float32 {
 		}
 	}
 	return minFno
+}
+
+func (boneFrames *BoneFrames) registeredFramesMap(boneNames []string) map[float32]struct{} {
+
+	frames := make(map[float32]struct{}, 0)
+	for boneName, boneFrames := range boneFrames.Data {
+		if boneNames != nil && !slices.Contains(boneNames, boneName) {
+			continue
+		}
+		for _, f := range boneFrames.Indexes.List() {
+			frames[f] = struct{}{}
+		}
+	}
+	return frames
+}
+
+func (boneFrames *BoneFrames) RegisteredFrames(boneNames []string) []int {
+	bFrames := boneFrames.registeredFramesMap(boneNames)
+
+	frames := make([]int, 0, len(bFrames))
+	for f := range bFrames {
+		frames = append(frames, int(f))
+	}
+	mmath.SortInts(frames)
+
+	return frames
 }
