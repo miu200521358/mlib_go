@@ -109,3 +109,13 @@ func CreateOutputPath(originalPath, label string) string {
 	return filepath.Join(originalDir, fmt.Sprintf("%s_%s%s%s", fileName[:len(fileName)-len(ext)],
 		label, time.Now().Format("20060102_150405"), ext))
 }
+
+func SplitPath(path string) (dir, name, ext string) {
+	if path == "" {
+		return "", "", ""
+	}
+	dir, name = filepath.Split(path)
+	ext = filepath.Ext(name)
+	name = name[:len(name)-len(ext)]
+	return dir, name, ext
+}
