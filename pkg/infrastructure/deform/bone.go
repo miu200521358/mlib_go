@@ -1120,9 +1120,12 @@ func fillBoneDeform(
 
 		// ボーンの移動位置、回転角度、拡大率を取得
 		d.FrameLocalMat, d.FrameLocalMorphMat = getLocalMat(deltas, bone)
-		d.FramePosition, d.FrameCancelablePosition, d.FrameMorphPosition = getPosition(deltas, bone, bf)
-		d.FrameRotation, d.FrameCancelableRotation, d.FrameMorphRotation = getRotation(deltas, bone, bf)
-		d.FrameScale, d.FrameCancelableScale, d.FrameMorphScale = getScale(deltas, bone, bf)
+		d.FramePosition, d.FrameCancelablePosition, d.FrameMorphPosition, d.FrameMorphCancelablePosition =
+			getPosition(deltas, bone, bf)
+		d.FrameRotation, d.FrameCancelableRotation, d.FrameMorphRotation, d.FrameMorphCancelableRotation =
+			getRotation(deltas, bone, bf)
+		d.FrameScale, d.FrameCancelableScale, d.FrameMorphScale, d.FrameMorphCancelableScale =
+			getScale(deltas, bone, bf)
 		deltas.Bones.Update(d)
 	}
 
@@ -1152,7 +1155,7 @@ func getPosition(
 	deltas *delta.VmdDeltas,
 	bone *pmx.Bone,
 	bf *vmd.BoneFrame,
-) (*mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
+) (*mmath.MVec3, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
 	var pos *mmath.MVec3
 	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil && deltas.Bones.Get(bone.Index()).FramePosition != nil {
 		pos = deltas.Bones.Get(bone.Index()).FramePosition.Copy()
@@ -1177,7 +1180,13 @@ func getPosition(
 		morphPos = deltas.Morphs.Bones.Get(bone.Index()).FramePosition.Copy()
 	}
 
-	return pos, cancelablePos, morphPos
+	var morphCancelablePos *mmath.MVec3
+	if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
+		deltas.Morphs.Bones.Get(bone.Index()).FrameCancelablePosition != nil {
+		morphCancelablePos = deltas.Morphs.Bones.Get(bone.Index()).FrameCancelablePosition.Copy()
+	}
+
+	return pos, cancelablePos, morphPos, morphCancelablePos
 }
 
 // 該当キーフレにおけるボーンの回転角度
@@ -1185,11 +1194,13 @@ func getRotation(
 	deltas *delta.VmdDeltas,
 	bone *pmx.Bone,
 	bf *vmd.BoneFrame,
-) (*mmath.MQuaternion, *mmath.MQuaternion, *mmath.MQuaternion) {
+) (*mmath.MQuaternion, *mmath.MQuaternion, *mmath.MQuaternion, *mmath.MQuaternion) {
 	var rot *mmath.MQuaternion
 	var cancelableRot *mmath.MQuaternion
 	var morphRot *mmath.MQuaternion
+	var morphCancelableRot *mmath.MQuaternion
 	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil && deltas.Bones.Get(bone.Index()).FrameRotation != nil {
+		// 自分の回転が指定されている場合はIK計算時の回転を使用
 		rot = deltas.Bones.Get(bone.Index()).FrameRotation.Copy()
 	} else {
 		if bf != nil && bf.Rotation != nil && !bf.Rotation.IsIdent() {
@@ -1197,7 +1208,11 @@ func getRotation(
 		} else {
 			rot = mmath.NewMQuaternion()
 		}
+	}
 
+	if (len(bone.Extend.IkLinkBoneIndexes) == 0 && len(bone.Extend.IkTargetBoneIndexes) == 0) ||
+		!(deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil &&
+			deltas.Bones.Get(bone.Index()).FrameRotation != nil) {
 		if bf != nil && bf.CancelableRotation != nil && !bf.CancelableRotation.IsIdent() {
 			cancelableRot = bf.CancelableRotation.Copy()
 		} else {
@@ -1211,13 +1226,18 @@ func getRotation(
 			// mlog.I("[%s][%.3f][%d]: rot: %s(%s), morphRot: %s(%s)\n", bone.Name(), frame, loop,
 			// 	rot.String(), rot.ToMMDDegrees().String(), morphRot.String(), morphRot.ToMMDDegrees().String())
 		}
+
+		if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
+			deltas.Morphs.Bones.Get(bone.Index()).FrameCancelableRotation != nil {
+			morphCancelableRot = deltas.Morphs.Bones.Get(bone.Index()).FrameCancelableRotation.Copy()
+		}
 	}
 
 	if bone.HasFixedAxis() {
 		rot = rot.ToFixedAxisRotation(bone.Extend.NormalizedFixedAxis)
 	}
 
-	return rot, cancelableRot, morphRot
+	return rot, cancelableRot, morphRot, morphCancelableRot
 }
 
 // 該当キーフレにおけるボーンの拡大率
@@ -1225,7 +1245,7 @@ func getScale(
 	deltas *delta.VmdDeltas,
 	bone *pmx.Bone,
 	bf *vmd.BoneFrame,
-) (*mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
+) (*mmath.MVec3, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
 
 	var scale *mmath.MVec3
 	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil &&
@@ -1249,5 +1269,11 @@ func getScale(
 		morphScale = deltas.Morphs.Bones.Get(bone.Index()).FrameScale.Copy()
 	}
 
-	return scale, cancelableScale, morphScale
+	var morphCancelableScale *mmath.MVec3
+	if deltas.Morphs != nil && deltas.Morphs.Bones.Get(bone.Index()) != nil &&
+		deltas.Morphs.Bones.Get(bone.Index()).FrameCancelableScale != nil {
+		morphCancelableScale = deltas.Morphs.Bones.Get(bone.Index()).FrameCancelableScale.Copy()
+	}
+
+	return scale, cancelableScale, morphScale, morphCancelableScale
 }

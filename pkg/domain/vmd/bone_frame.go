@@ -7,11 +7,11 @@ import (
 type BoneFrame struct {
 	*BaseFrame                            // キーフレ
 	Position           *mmath.MVec3       // 位置
-	CancelablePosition *mmath.MVec3       // ローカル位置
+	CancelablePosition *mmath.MVec3       // 親キャンセル位置
 	Rotation           *mmath.MQuaternion // 回転
-	CancelableRotation *mmath.MQuaternion // ローカル回転
+	CancelableRotation *mmath.MQuaternion // 親キャンセル回転
 	Scale              *mmath.MVec3       // スケール
-	CancelableScale    *mmath.MVec3       // ローカルスケール
+	CancelableScale    *mmath.MVec3       // 親キャンセルスケール
 	Curves             *BoneCurves        // 補間曲線
 }
 

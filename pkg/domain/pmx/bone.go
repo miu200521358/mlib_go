@@ -111,8 +111,8 @@ type BoneExtend struct {
 	RelativeBoneIndexes    []int            // 関連ボーンINDEX一覧（付与親とかIKとか）
 	ChildBoneIndexes       []int            // 自分を親として登録しているボーンINDEX一覧
 	EffectiveBoneIndexes   []int            // 自分を付与親として登録しているボーンINDEX一覧
-	IkLinkBoneIndexes      []int            // IKリンクとして登録されているIKボーンのボーンIndex
-	IkTargetBoneIndexes    []int            // IKターゲットとして登録されているIKボーンのボーンIndex
+	IkLinkBoneIndexes      []int            // 自分をIKリンクとして登録されているIKボーンのボーンIndex
+	IkTargetBoneIndexes    []int            // 自分をIKターゲットとして登録されているIKボーンのボーンIndex
 	AngleLimit             bool             // 自分がIKリンクボーンの角度制限がある場合、true
 	MinAngleLimit          *mmath.MRotation // 自分がIKリンクボーンの角度制限の下限
 	MaxAngleLimit          *mmath.MRotation // 自分がIKリンクボーンの角度制限の上限
