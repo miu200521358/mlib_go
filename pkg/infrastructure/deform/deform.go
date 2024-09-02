@@ -132,8 +132,8 @@ func DeformBonePyPhysics(
 ) *delta.VmdDeltas {
 	if model != nil && appState.IsEnabledPhysics() && !appState.IsPhysicsReset() {
 		// 物理剛体位置を更新
-		processFunc := func(i int) {
-			bone := model.Bones.Get(i)
+		processFunc := func(data, index int) {
+			bone := model.Bones.Get(data)
 			if bone.Extend.RigidBody == nil || bone.Extend.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
 				return
 			}
