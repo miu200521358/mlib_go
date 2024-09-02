@@ -30,11 +30,11 @@ func IterParallelByCount(allCount int, blockSize int, processFunc func(int)) {
 }
 
 // IterParallelByList は指定された全リストに対して、引数で指定された処理を並列または直列で実行する関数です。
-func IterParallelByList(allData []int, blockSize int, processFunc func(int)) {
+func IterParallelByList(allData []int, blockSize int, processFunc func(data, index int)) {
 	if blockSize <= 1 || blockSize >= len(allData) {
 		// ブロックサイズが1以下、もしくは全件数より大きい場合は直列処理
 		for i := 0; i < len(allData); i++ {
-			processFunc(allData[i])
+			processFunc(allData[i], i)
 		}
 	} else {
 		// ブロックサイズが全件数より小さい場合は並列処理
@@ -48,7 +48,7 @@ func IterParallelByList(allData []int, blockSize int, processFunc func(int)) {
 					endIndex = len(allData)
 				}
 				for j := startIndex; j < endIndex; j++ {
-					processFunc(allData[j])
+					processFunc(allData[j], j)
 				}
 			}(i)
 		}
