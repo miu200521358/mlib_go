@@ -191,12 +191,6 @@ func (s StandardBoneNames) Left() string {
 
 var configOnce sync.Once
 var standardBoneConfigs map[StandardBoneNames]*BoneConfig
-var LEG_FK_BONE_NAMES = []string{
-	LEG.Left(), KNEE.Left(), HEEL.Left(), ANKLE.Left(), TOE.Left(), TOE_P.Left(), TOE_C.Left(), LEG_D.Left(), KNEE_D.Left(), HEEL_D.Left(), ANKLE_D.Left(), TOE_D.Left(), TOE_P_D.Left(), TOE_C_D.Left(), TOE_EX.Left(),
-	LEG.Right(), KNEE.Right(), HEEL.Right(), ANKLE.Right(), TOE.Right(), TOE_P.Right(), TOE_C.Right(), LEG_D.Right(), KNEE_D.Right(), HEEL_D.Right(), ANKLE_D.Right(), TOE_D.Right(), TOE_P_D.Right(), TOE_C_D.Right(), TOE_EX.Right(),
-}
-var LEG_IK_BONE_NAMES = []string{LEG_IK.Left(), LEG_IK.Right()}
-var LEG_ALL_BONE_NAMES = append(LEG_FK_BONE_NAMES, LEG_IK_BONE_NAMES...)
 
 func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 	configOnce.Do(func() {

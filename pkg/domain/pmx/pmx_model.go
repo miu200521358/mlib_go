@@ -135,7 +135,7 @@ func (model *PmxModel) Setup() {
 
 	// セットアップ
 	model.Materials.setup(model.Vertices, model.Faces, model.Textures)
-	model.Bones.setup()
+	model.Bones.Setup()
 
 	// 剛体
 	for i, rb := range model.RigidBodies.Data {

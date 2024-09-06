@@ -744,7 +744,7 @@ func (bones *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool, loop int) *B
 	return nil
 }
 
-func (bones *Bones) setup() {
+func (bones *Bones) Setup() {
 	bones.IkTreeIndexes = make(map[int][]int)
 	bones.LayerSortedBones = make(map[bool][]*Bone)
 	bones.LayerSortedNames = make(map[bool]map[string]int)
