@@ -221,6 +221,9 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFra
 func (bf *BoneFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float32) {
 	nextBf := nextFrame.(*BoneFrame)
 	prevBf := prevFrame.(*BoneFrame)
+	if bf.Curves == nil {
+		bf.Curves = NewBoneCurves()
+	}
 
 	bf.Curves.TranslateX, nextBf.Curves.TranslateX =
 		mmath.SplitCurve(nextBf.Curves.TranslateX, prevBf.Index(), bf.Index(), nextBf.Index())

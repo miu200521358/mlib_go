@@ -95,6 +95,9 @@ func (nextCf *CameraFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseF
 func (cf *CameraFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float32) {
 	prevCf := prevFrame.(*CameraFrame)
 	nextCf := nextFrame.(*CameraFrame)
+	if cf.Curves == nil {
+		cf.Curves = NewCameraCurves()
+	}
 
 	cf.Curves.TranslateX, nextCf.Curves.TranslateX =
 		mmath.SplitCurve(nextCf.Curves.TranslateX, prevCf.Index(), index, nextCf.Index())
