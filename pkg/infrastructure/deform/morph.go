@@ -195,7 +195,7 @@ func deformBone(
 	morph := model.Morphs.GetByName(morphName)
 	for _, o := range morph.Offsets {
 		offset := o.(*pmx.BoneMorphOffset)
-		if 0 < offset.BoneIndex {
+		if offset.BoneIndex >= 0 {
 			d := deltas.Get(offset.BoneIndex)
 			if d == nil {
 				d = delta.NewBoneMorphDelta(offset.BoneIndex)

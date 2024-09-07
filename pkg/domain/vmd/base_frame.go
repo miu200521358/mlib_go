@@ -231,6 +231,11 @@ func (baseFrames *BaseFrames[T]) Insert(f T) {
 	baseFrames.appendOrInsert(f, true)
 }
 
+// Update 登録済みのキーフレームを更新する
+func (baseFrames *BaseFrames[T]) Update(f T) {
+	baseFrames.data[f.Index()] = f
+}
+
 func (baseFrames *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {
 	if f.IsRegistered() {
 		if baseFrames.RegisteredIndexes.Len() == 0 {
