@@ -26,25 +26,39 @@ func NewFloatIndexes() *FloatIndexes {
 }
 
 func (vFloats FloatIndexes) Prev(index float32) float32 {
-	prevIndex := Float(0)
+	lIndex := Float(index)
 
+	ary := NewFloatIndexes()
 	vFloats.DescendLessOrEqual(Float(index), func(i llrb.Item) bool {
-		prevIndex = i.(Float)
-		return false
+		if i.(Float) != lIndex {
+			ary.InsertNoReplace(i)
+		}
+		return true
 	})
 
-	return float32(prevIndex)
+	if ary.Len() == 0 {
+		return vFloats.Min()
+	}
+
+	return ary.Max()
 }
 
 func (vFloats FloatIndexes) Next(index float32) float32 {
-	nextIndex := Float(index)
+	lIndex := Float(index)
 
+	ary := NewFloatIndexes()
 	vFloats.AscendGreaterOrEqual(Float(index), func(i llrb.Item) bool {
-		nextIndex = i.(Float)
-		return false
+		if i.(Float) != lIndex {
+			ary.InsertNoReplace(i)
+		}
+		return true
 	})
 
-	return float32(nextIndex)
+	if ary.Len() == 0 {
+		return index
+	}
+
+	return ary.Min()
 }
 
 func (vFloats FloatIndexes) Has(index float32) bool {

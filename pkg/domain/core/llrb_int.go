@@ -26,25 +26,39 @@ func NewIntIndexes() *IntIndexes {
 }
 
 func (vInts IntIndexes) Prev(index int) int {
-	prevIndex := Int(0)
+	lIndex := Int(index)
 
+	ary := NewIntIndexes()
 	vInts.DescendLessOrEqual(Int(index), func(i llrb.Item) bool {
-		prevIndex = i.(Int)
-		return false
+		if i.(Int) != lIndex {
+			ary.InsertNoReplace(i)
+		}
+		return true
 	})
 
-	return int(prevIndex)
+	if ary.Len() == 0 {
+		return vInts.Min()
+	}
+
+	return ary.Max()
 }
 
 func (vInts IntIndexes) Next(index int) int {
-	nextIndex := Int(index)
+	lIndex := Int(index)
 
+	ary := NewIntIndexes()
 	vInts.AscendGreaterOrEqual(Int(index), func(i llrb.Item) bool {
-		nextIndex = i.(Int)
-		return false
+		if i.(Int) != lIndex {
+			ary.InsertNoReplace(i)
+		}
+		return true
 	})
 
-	return int(nextIndex)
+	if ary.Len() == 0 {
+		return index
+	}
+
+	return ary.Min()
 }
 
 func (vInts IntIndexes) Has(index int) bool {

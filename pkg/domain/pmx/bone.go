@@ -392,6 +392,11 @@ func (bone *Bone) IsLegFK() bool {
 	return bone.containsCategory(CATEGORY_LEG_FK)
 }
 
+// 足IK系列であるか
+func (bone *Bone) IsLegIK() bool {
+	return bone.containsCategory(CATEGORY_LEG_IK)
+}
+
 // 足首から先であるか
 func (bone *Bone) IsAnkle() bool {
 	return bone.containsCategory(CATEGORY_ANKLE)

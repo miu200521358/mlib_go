@@ -126,7 +126,7 @@ func BoolToFlag(b bool) float64 {
 
 // slices.Contains の高速版
 func Contains[S ~[]E, E comparable](s S, v E) bool {
-	if len(s) <= 20 {
+	if len(s) <= 1000 {
 		return slices.Contains(s, v)
 	}
 

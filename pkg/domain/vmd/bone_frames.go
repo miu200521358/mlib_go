@@ -37,6 +37,47 @@ func (boneFrames *BoneFrames) Contains(boneName string) bool {
 	return ok
 }
 
+// ContainsActive 有効なキーフレが存在するか
+func (boneFrames *BoneFrames) ContainsActive(boneName string) bool {
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
+
+	if _, ok := boneFrames.Data[boneName]; !ok {
+		return false
+	}
+
+	if boneFrames.Data[boneName].Len() <= 1 {
+		return false
+	}
+
+	for i, f := range boneFrames.Data[boneName].Indexes.List() {
+		if i == 0 {
+			continue
+		}
+
+		bf := boneFrames.Data[boneName].Get(f)
+		if bf == nil {
+			return false
+		}
+
+		nextBf := boneFrames.Data[boneName].Get(boneFrames.Data[boneName].Indexes.Next(f))
+
+		if nextBf == nil {
+			return false
+		}
+
+		if bf.Position != nil && nextBf.Position != nil && !bf.Position.NearEquals(nextBf.Position, 1e-2) {
+			return true
+		}
+
+		if bf.Rotation != nil && nextBf.Rotation != nil && !bf.Rotation.NearEquals(nextBf.Rotation, 1e-2) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (boneFrames *BoneFrames) Append(boneNameFrames *BoneNameFrames) {
 	boneFrames.lock.Lock()
 	defer boneFrames.lock.Unlock()
