@@ -7,7 +7,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
-	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 func TestVmdMotion_Deform_Exists(t *testing.T) {
@@ -1302,7 +1301,7 @@ func TestVmdMotion_DeformLegIk11_Shining_Miku(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk11_Shining_Vroid(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/シャイニングミラクル_50F.vmd")
@@ -1717,7 +1716,7 @@ func TestVmdMotion_DeformLegIk16_Lamb(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk17_Snow(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/好き雪_1075.vmd")
@@ -2696,7 +2695,7 @@ func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk26_Far(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/足IK乖離.vmd")
@@ -3002,7 +3001,7 @@ func TestVmdMotion_DeformLegIk27_Addiction_Shoes(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk28_Gimme_Mitsu(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
@@ -3063,7 +3062,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Mitsu(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk28_Gimme_Mitsu_loop3(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
@@ -3124,7 +3123,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Mitsu_loop3(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk28_Gimme_Mitsu_toe_order(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
@@ -3185,7 +3184,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Mitsu_toe_order(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk28_Gimme_Miku(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
@@ -3252,7 +3251,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Miku(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk28_Gimme_Miku_toe_order(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
@@ -3319,7 +3318,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Miku_toe_order(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk28_Gimme_Tda(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
@@ -3381,7 +3380,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Tda(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk28_Gimme_Wa(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
@@ -3442,7 +3441,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Wa(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk28_Gimme_Rin(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
@@ -3503,7 +3502,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Rin(t *testing.T) {
 }
 
 func TestVmdMotion_DeformIk28_Simple(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/IKの挙動を見たい_020.vmd")
