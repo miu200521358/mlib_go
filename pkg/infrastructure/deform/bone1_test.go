@@ -7,6 +7,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 func TestVmdMotion_Deform_Exists(t *testing.T) {
@@ -1301,6 +1302,8 @@ func TestVmdMotion_DeformLegIk11_Shining_Miku(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk11_Shining_Vroid(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/シャイニングミラクル_50F.vmd")
 
@@ -1714,7 +1717,7 @@ func TestVmdMotion_DeformLegIk16_Lamb(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk17_Snow(t *testing.T) {
-	// mlog.SetLevel(mlog.IK_VERBOSE)
+	mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/好き雪_1075.vmd")
@@ -2693,7 +2696,7 @@ func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk26_Far(t *testing.T) {
-	// mlog.SetLevel(mlog.IK_VERBOSE)
+	mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/足IK乖離.vmd")
@@ -2994,6 +2997,1148 @@ func TestVmdMotion_DeformLegIk27_Addiction_Shoes(t *testing.T) {
 		expectedPosition := &mmath.MVec3{X: 0.231636, Y: 6.794109, Z: -0.557747}
 		if !boneDeltas.GetByName("左足捩先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
 			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足捩先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足捩先").FilledGlobalPosition().MMD()))
+		}
+	}
+}
+
+func TestVmdMotion_DeformLegIk28_Gimme_Mitsu(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/オリジナル/折岸みつ つみだんご/折岸みつ.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+
+	boneDeltas := DeformBone(model, motion, true, 0, []string{pmx.TOE.Right(), pmx.HEEL.Right(), pmx.TOE_EX.Right()})
+
+	{
+		expectedPosition := &mmath.MVec3{X: 0.704942, Y: 9.193451, Z: 0.070969}
+		if !boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.954316, Y: 7.572014, Z: 1.019005}
+		if !boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.545182, Y: 5.180062, Z: -2.267060}
+		if !boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.863384, Y: 1.755991, Z: 0.945758}
+		if !boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.374198, Y: 0.001257, Z: -0.396838}
+		if !boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.472255, Y: 0.627241, Z: -0.116600}
+		if !boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+}
+
+func TestVmdMotion_DeformLegIk28_Gimme_Mitsu_loop3(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/オリジナル/折岸みつ つみだんご/折岸みつ_つま先IKループ3.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+
+	boneDeltas := DeformBone(model, motion, true, 0, []string{pmx.TOE.Right(), pmx.HEEL.Right(), pmx.TOE_EX.Right()})
+
+	{
+		expectedPosition := &mmath.MVec3{X: 0.704942, Y: 9.193451, Z: 0.070969}
+		if !boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.954316, Y: 7.572014, Z: 1.019005}
+		if !boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.545182, Y: 5.180062, Z: -2.267060}
+		if !boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.863384, Y: 1.755991, Z: 0.945758}
+		if !boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.374198, Y: 0.001257, Z: -0.396838}
+		if !boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.472255, Y: 0.627241, Z: -0.116600}
+		if !boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+}
+
+func TestVmdMotion_DeformLegIk28_Gimme_Mitsu_toe_order(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/オリジナル/折岸みつ つみだんご/折岸みつ_つま先計算順前.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+
+	boneDeltas := DeformBone(model, motion, true, 0, []string{pmx.TOE.Right(), pmx.HEEL.Right(), pmx.TOE_EX.Right()})
+
+	{
+		expectedPosition := &mmath.MVec3{X: 0.704942, Y: 9.193451, Z: 0.070969}
+		if !boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.954316, Y: 7.572014, Z: 1.019005}
+		if !boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.545182, Y: 5.180062, Z: -2.267060}
+		if !boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.863384, Y: 1.755991, Z: 0.945758}
+		if !boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.374198, Y: 0.001257, Z: -0.396838}
+		if !boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.596727, Y: 0.597577, Z: -0.123183}
+		if !boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+}
+
+func TestVmdMotion_DeformLegIk28_Gimme_Miku(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式ミク準標準見せパン/初音ミクVer2 準標準 見せパン 3.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+
+	boneDeltas := DeformBone(model, motion, true, 0, []string{pmx.TOE.Right(), pmx.HEEL.Right(), pmx.TOE_EX.Right()})
+
+	{
+		expectedPosition := &mmath.MVec3{X: 0.704942, Y: 9.442580, Z: 0.420454}
+		if !boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.784250, Y: 7.438829, Z: 1.217240}
+		if !boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 1.200370, Y: 4.815614, Z: -2.325471}
+		if !boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.932342, Y: 1.342473, Z: 0.684434}
+		if !boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.039125, Y: -0.000434, Z: -1.610423}
+		if !boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.219215, Y: 0.218346, Z: 0.837373}
+		if !boneDeltas.GetByName(pmx.HEEL.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.HEEL.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.HEEL.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.336862, Y: 0.447203, Z: -0.845470}
+		if !boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+}
+
+func TestVmdMotion_DeformLegIk28_Gimme_Miku_toe_order(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式ミク準標準見せパン/初音ミクVer2 準標準 見せパン 3_つま先計算順後.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+
+	boneDeltas := DeformBone(model, motion, true, 0, []string{pmx.TOE.Right(), pmx.HEEL.Right(), pmx.TOE_EX.Right()})
+
+	{
+		expectedPosition := &mmath.MVec3{X: 0.704942, Y: 9.442580, Z: 0.420454}
+		if !boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.784250, Y: 7.438829, Z: 1.217240}
+		if !boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 1.200370, Y: 4.815614, Z: -2.325471}
+		if !boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.932342, Y: 1.342473, Z: 0.684434}
+		if !boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.039126, Y: -0.000434, Z: -1.610423}
+		if !boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 1.146487, Y: 0.023015, Z: 0.590759}
+		if !boneDeltas.GetByName(pmx.HEEL.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.HEEL.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.HEEL.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.336863, Y: 0.447203, Z: -0.845470}
+		if !boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+}
+
+func TestVmdMotion_DeformLegIk28_Gimme_Tda(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式初音ミク_盗賊つばき流Ｍトレースモデル配布 v1.07/Tda式初音ミク_盗賊つばき流Mトレースモデルv1.07_かかと.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+
+	toeName := "足首_R_"
+	boneDeltas := DeformBone(model, motion, true, 0, []string{pmx.TOE.Right(), pmx.HEEL.Right(), pmx.TOE_EX.Right(), toeName})
+
+	{
+		expectedPosition := &mmath.MVec3{X: 0.704941, Y: 9.353957, Z: 0.163552}
+		if !boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.561875, Y: 8.374916, Z: 0.596736}
+		if !boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 1.184561, Y: 5.035730, Z: -2.609931}
+		if !boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.794708, Y: 1.622819, Z: 1.368421}
+		if !boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.169612, Y: 0.002951, Z: -0.349215}
+		if !boneDeltas.GetByName(toeName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(toeName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(toeName).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.380133, Y: 0.546320, Z: 0.223149}
+		if !boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+}
+
+func TestVmdMotion_DeformLegIk28_Gimme_Wa(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+
+	boneDeltas := DeformBone(model, motion, true, 0, []string{pmx.TOE.Right(), pmx.HEEL.Right(), pmx.TOE_EX.Right()})
+
+	{
+		expectedPosition := &mmath.MVec3{X: 0.704942, Y: 6.099999, Z: 0.675723}
+		if !boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.258664, Y: 5.228151, Z: 1.304799}
+		if !boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 1.135185, Y: 4.090482, Z: -1.667520}
+		if !boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 1.208500, Y: 1.161467, Z: 1.085173}
+		if !boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.608805, Y: -0.000103, Z: -0.592631}
+		if !boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.031) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.857188, Y: 0.452834, Z: 0.290514}
+		if !boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+}
+
+func TestVmdMotion_DeformLegIk28_Gimme_Rin(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/鏡音リン/つみ式鏡音リン/つみ式鏡音リン.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+
+	boneDeltas := DeformBone(model, motion, true, 0, []string{pmx.TOE.Right(), pmx.HEEL.Right(), pmx.TOE_EX.Right()})
+
+	{
+		expectedPosition := &mmath.MVec3{X: 0.704942, Y: 8.031305, Z: 0.156231}
+		if !boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LOWER.String()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.745842, Y: 6.428913, Z: 0.657299}
+		if !boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.LEG.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.288399, Y: 4.507010, Z: -2.389454}
+		if !boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.KNEE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.899115, Y: 1.789909, Z: 0.907105}
+		if !boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ANKLE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.469594, Y: -0.000650, Z: -0.271858}
+		if !boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.622100, Y: 0.470730, Z: 0.124509}
+		if !boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.TOE_EX.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+}
+
+func TestVmdMotion_DeformIk28_Simple(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/IKの挙動を見たい_020.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/IKの挙動を見たい.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+	boneDeltas := DeformBone(model, motion, true, 0, nil)
+
+	{
+		expectedPosition := &mmath.MVec3{X: -9.433129, Y: 1.363848, Z: 1.867427}
+		if !boneDeltas.GetByName("A+tail").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("A+tail").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("A+tail").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -9.433129, Y: 1.363847, Z: 1.867427}
+		if !boneDeltas.GetByName("A+IK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("A+IK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("A+IK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 5.0, Y: 4.517528, Z: 2.142881}
+		if !boneDeltas.GetByName("B+tail").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("B+tail").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("B+tail").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.566871, Y: 1.363847, Z: 1.867427}
+		if !boneDeltas.GetByName("B+IK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("B+IK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("B+IK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 10.0, Y: 3.020634, Z: 3.984441}
+		if !boneDeltas.GetByName("C+tail").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("C+tail").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("C+tail").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 5.566871, Y: 1.363848, Z: 1.867427}
+		if !boneDeltas.GetByName("C+IK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("C+IK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("C+IK").FilledGlobalPosition().MMD()))
+		}
+	}
+}
+
+func TestVmdMotion_DeformIk29_Simple(t *testing.T) {
+	// mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/IKの挙動を見たい2_040.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("../../../test_resources/IKの挙動を見たい2.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+	boneDeltas := DeformBone(model, motion, true, 0, nil)
+	{
+		boneName := "A+2"
+		expectedPosition := &mmath.MVec3{X: -5.440584, Y: 2.324726, Z: 0.816799}
+		if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		boneName := "A+2tail"
+		expectedPosition := &mmath.MVec3{X: -4.671312, Y: 3.980981, Z: -0.895119}
+		if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		boneName := "B+2"
+		expectedPosition := &mmath.MVec3{X: 4.559244, Y: 2.324562, Z: 0.817174}
+		if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		boneName := "B+2tail"
+		expectedPosition := &mmath.MVec3{X: 5.328533, Y: 3.980770, Z: -0.894783}
+		if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		boneName := "C+2"
+		expectedPosition := &mmath.MVec3{X: 8.753987, Y: 2.042284, Z: -0.736314}
+		if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		boneName := "C+2tail"
+		expectedPosition := &mmath.MVec3{X: 10.328943, Y: 3.981413, Z: -0.894101}
+		if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
+		}
+	}
+}
+
+func TestVmdMotion_DeformArmIk2(t *testing.T) {
+	// mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("C:/MMD/mmd_base/tests/resources/唱(ダンスのみ)_0274F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4_準標準.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+	boneDeltas := DeformBone(model, motion, true, 0, nil)
+	{
+		expectedPosition := &mmath.MVec3{X: 0.04952335, Y: 9.0, Z: 1.72378033}
+		if !boneDeltas.GetByName(pmx.CENTER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.CENTER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.CENTER.String()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.04952335, Y: 7.97980869, Z: 1.72378033}
+		if !boneDeltas.GetByName(pmx.GROOVE.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.GROOVE.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.GROOVE.String()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.04952335, Y: 11.02838314, Z: 2.29172656}
+		if !boneDeltas.GetByName("腰").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("腰").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("腰").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.04952335, Y: 11.9671191, Z: 1.06765032}
+		if !boneDeltas.GetByName("上半身").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("上半身").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.26284261, Y: 13.14576297, Z: 0.84720008}
+		if !boneDeltas.GetByName("上半身2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("上半身2").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: 0.33636433, Y: 15.27729547, Z: 0.77435588}
+		if !boneDeltas.GetByName("右肩").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.63104276, Y: 15.44542768, Z: 0.8507726}
+		if !boneDeltas.GetByName("右肩C").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩C").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩C").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.63104276, Y: 15.44542768, Z: 0.8507726}
+		if !boneDeltas.GetByName("右腕").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.90326269, Y: 14.53727204, Z: 0.7925801}
+		if !boneDeltas.GetByName("右腕捩").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.50502977, Y: 12.52976106, Z: 0.66393998}
+		if !boneDeltas.GetByName("右ひじ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじ").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.46843236, Y: 12.88476121, Z: 0.12831076}
+		if !boneDeltas.GetByName("右手捩").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.36287259, Y: 13.90869981, Z: -1.41662258}
+		if !boneDeltas.GetByName("右手首").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.81521586, Y: 14.00661535, Z: -1.55616424}
+		if !boneDeltas.GetByName("右手先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手先").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.63104276, Y: 15.44542768, Z: 0.8507726}
+		if !boneDeltas.GetByName("右腕YZ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕YZ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕YZ").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.72589296, Y: 15.12898892, Z: 0.83049645}
+		if !boneDeltas.GetByName("右腕YZ先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕YZ先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕YZ先").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.72589374, Y: 15.12898632, Z: 0.83049628}
+		if !boneDeltas.GetByName("右腕YZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕YZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕YZIK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.63104276, Y: 15.44542768, Z: 0.8507726}
+		if !boneDeltas.GetByName("右腕X").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕X").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕X").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.125321, Y: 15.600293, Z: 0.746130}
+		if !boneDeltas.GetByName("右腕X先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕X先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕X先").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.1253241, Y: 15.60029489, Z: 0.7461294}
+		if !boneDeltas.GetByName("右腕XIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕XIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕XIK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.90325538, Y: 14.53727326, Z: 0.79258165}
+		if !boneDeltas.GetByName("右腕捩YZ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩YZ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩YZ").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.01247534, Y: 14.17289417, Z: 0.76923367}
+		if !boneDeltas.GetByName("右腕捩YZTgt").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩YZTgt").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩YZTgt").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.01248754, Y: 14.17289597, Z: 0.76923112}
+		if !boneDeltas.GetByName("右腕捩YZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩YZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩YZIK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.90325538, Y: 14.53727326, Z: 0.79258165}
+		if !boneDeltas.GetByName("右腕捩X").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩X").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩X").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.40656426, Y: 14.68386802, Z: 0.85919594}
+		if !boneDeltas.GetByName("右腕捩XTgt").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩XTgt").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩XTgt").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.40657579, Y: 14.68387899, Z: 0.8591982}
+		if !boneDeltas.GetByName("右腕捩XIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩XIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩XIK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.50499623, Y: 12.52974836, Z: 0.66394738}
+		if !boneDeltas.GetByName("右ひじYZ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじYZ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじYZ").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.48334366, Y: 12.74011791, Z: 0.34655051}
+		if !boneDeltas.GetByName("右ひじYZ先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじYZ先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじYZ先").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.48334297, Y: 12.74012453, Z: 0.34654052}
+		if !boneDeltas.GetByName("右ひじYZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじYZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじYZIK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.50499623, Y: 12.52974836, Z: 0.66394738}
+		if !boneDeltas.GetByName("右ひじX").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじX").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじX").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -2.01179616, Y: 12.66809052, Z: 0.72106658}
+		if !boneDeltas.GetByName("右ひじX先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじX先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじX先").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -2.00760407, Y: 12.67958516, Z: 0.7289003}
+		if !boneDeltas.GetByName("右ひじXIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじXIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじXIK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.50499623, Y: 12.52974836, Z: 0.66394738}
+		if !boneDeltas.GetByName("右ひじY").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじY").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじY").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+
+		expectedPosition := &mmath.MVec3{X: -1.485519, Y: 12.740760, Z: 0.346835}
+		if !boneDeltas.GetByName("右ひじY先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじY先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじY先").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.48334297, Y: 12.74012453, Z: 0.34654052}
+		if !boneDeltas.GetByName("右ひじYIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじYIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじYIK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.46845628, Y: 12.88475892, Z: 0.12832214}
+		if !boneDeltas.GetByName("右手捩YZ").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩YZ").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩YZ").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.41168478, Y: 13.4363328, Z: -0.7038697}
+		if !boneDeltas.GetByName("右手捩YZTgt").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩YZTgt").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩YZTgt").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.41156715, Y: 13.43632015, Z: -0.70389025}
+		if !boneDeltas.GetByName("右手捩YZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩YZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩YZIK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.46845628, Y: 12.88475892, Z: 0.12832214}
+		if !boneDeltas.GetByName("右手捩X").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩X").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩X").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.5965686, Y: 12.06213832, Z: -0.42564769}
+		if !boneDeltas.GetByName("右手捩XTgt").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩XTgt").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩XTgt").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.5965684, Y: 12.06214091, Z: -0.42565404}
+		if !boneDeltas.GetByName("右手捩XIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩XIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩XIK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.7198605, Y: 13.98597326, Z: -1.5267472}
+		if !boneDeltas.GetByName("右手YZ先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手YZ先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手YZ先").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.71969424, Y: 13.98593727, Z: -1.52669587}
+		if !boneDeltas.GetByName("右手YZIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手YZIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手YZIK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.36306295, Y: 13.90872698, Z: -1.41659848}
+		if !boneDeltas.GetByName("右手X").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手X").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手X").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.54727182, Y: 13.56147176, Z: -1.06342964}
+		if !boneDeltas.GetByName("右手X先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手X先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手X先").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.54700171, Y: 13.5614545, Z: -1.0633896}
+		if !boneDeltas.GetByName("右手XIK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手XIK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手XIK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.90581859, Y: 14.5370842, Z: 0.80752276}
+		if !boneDeltas.GetByName("右腕捩1").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩1").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩1").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.99954005, Y: 14.2243783, Z: 0.78748743}
+		if !boneDeltas.GetByName("右腕捩2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩2").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.10880907, Y: 13.85976329, Z: 0.76412793}
+		if !boneDeltas.GetByName("右腕捩3").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩3").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩3").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.21298069, Y: 13.51216081, Z: 0.74185819}
+		if !boneDeltas.GetByName("右腕捩4").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕捩4").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右腕捩4").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.5074743, Y: 12.52953348, Z: 0.67889319}
+		if !boneDeltas.GetByName("右ひじsub").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじsub").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじsub").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.617075, Y: 12.131149, Z: 0.786797}
+		if !boneDeltas.GetByName("右ひじsub先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじsub先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右ひじsub先").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.472866, Y: 12.872813, Z: 0.120103}
+		if !boneDeltas.GetByName("右手捩1").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩1").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩1").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.458749, Y: 13.009759, Z: -0.086526}
+		if !boneDeltas.GetByName("右手捩2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩2").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.440727, Y: 13.184620, Z: -0.350361}
+		if !boneDeltas.GetByName("右手捩3").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩3").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩3").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.42368773, Y: 13.34980879, Z: -0.59962077}
+		if !boneDeltas.GetByName("右手捩4").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩4").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩4").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.40457204, Y: 13.511055, Z: -0.84384039}
+		if !boneDeltas.GetByName("右手捩5").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩5").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩5").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.39275926, Y: 13.62582429, Z: -1.01699954}
+		if !boneDeltas.GetByName("右手捩6").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手捩6").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手捩6").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.36500465, Y: 13.89623575, Z: -1.42501008}
+		if !boneDeltas.GetByName("右手首R").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首R").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首R").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.36500465, Y: 13.89623575, Z: -1.42501008}
+		if !boneDeltas.GetByName("右手首1").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首1").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首1").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.472418, Y: 13.917203, Z: -1.529887}
+		if !boneDeltas.GetByName("右手首2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右手首2").FilledGlobalPosition().MMD()))
+		}
+	}
+}
+
+func TestVmdMotion_DeformLegIk25_Addiction_Wa_Right(t *testing.T) {
+	// mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/[A]ddiction_和洋_0126F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+	boneDeltas := DeformBone(model, motion, true, 0, []string{"右襟先"})
+
+	{
+		expectedPosition := &mmath.MVec3{X: -0.225006, Y: 9.705784, Z: 2.033072}
+		if !boneDeltas.GetByName(pmx.UPPER.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.UPPER.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.UPPER.String()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.237383, Y: 10.769137, Z: 2.039952}
+		if !boneDeltas.GetByName(pmx.UPPER2.String()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.UPPER2.String()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.UPPER2.String()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.630130, Y: 13.306682, Z: 2.752505}
+		if !boneDeltas.GetByName(pmx.SHOULDER_P.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.SHOULDER_P.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.SHOULDER_P.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.630131, Y: 13.306683, Z: 2.742505}
+		if !boneDeltas.GetByName(pmx.SHOULDER.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.SHOULDER.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.SHOULDER.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.948004, Y: 13.753115, Z: 2.690539}
+		if !boneDeltas.GetByName(pmx.ARM.Right()).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(pmx.ARM.Right()).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(pmx.ARM.Right()).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.611438, Y: 12.394744, Z: 2.353463}
+		if !boneDeltas.GetByName("右上半身C-A").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右上半身C-A").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右上半身C-A").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.664344, Y: 13.835273, Z: 2.403165}
+		if !boneDeltas.GetByName("右鎖骨IK").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右鎖骨IK").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右鎖骨IK").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.270636, Y: 13.350624, Z: 2.258960}
+		if !boneDeltas.GetByName("右鎖骨").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右鎖骨").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右鎖骨").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.963317, Y: 14.098928, Z: 2.497183}
+		if !boneDeltas.GetByName("右鎖骨先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右鎖骨先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右鎖骨先").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.235138, Y: 13.300934, Z: 2.666039}
+		if !boneDeltas.GetByName("右肩Rz検").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩Rz検").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩Rz検").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.847069, Y: 13.997178, Z: 2.886786}
+		if !boneDeltas.GetByName("右肩Rz検先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩Rz検先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩Rz検先").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.235138, Y: 13.300934, Z: 2.666039}
+		if !boneDeltas.GetByName("右肩Ry検").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩Ry検").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩Ry検").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -1.172100, Y: 13.315790, Z: 2.838742}
+		if !boneDeltas.GetByName("右肩Ry検先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右肩Ry検先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右肩Ry検先").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.591152, Y: 12.674325, Z: 2.391185}
+		if !boneDeltas.GetByName("右上半身C-B").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右上半身C-B").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右上半身C-B").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.588046, Y: 12.954157, Z: 2.432232}
+		if !boneDeltas.GetByName("右上半身C-C").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右上半身C-C").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右上半身C-C").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.672292, Y: 10.939227, Z: 2.148515}
+		if !boneDeltas.GetByName("右上半身2").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右上半身2").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右上半身2").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.520068, Y: 14.089510, Z: 2.812157}
+		if !boneDeltas.GetByName("右襟").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右襟").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右襟").FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		expectedPosition := &mmath.MVec3{X: -0.491354, Y: 14.225309, Z: 2.502640}
+		if !boneDeltas.GetByName("右襟先").FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右襟先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("右襟先").FilledGlobalPosition().MMD()))
 		}
 	}
 }
