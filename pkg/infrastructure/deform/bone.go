@@ -244,8 +244,6 @@ func calcIk(
 		loopCount += 1
 	}
 
-	// var startEffectorGlobalPosition *mmath.MVec3
-
 	// IK計算
 ikLoop:
 	for loop := 0; loop < loopCount; loop++ {
@@ -434,18 +432,6 @@ ikLoop:
 				)
 			}
 
-			// // 角度がほとんどない場合
-			// angleThreshold := math.Abs(linkAngle)
-			// if angleThreshold < 1e-5 {
-			// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-			// 		fmt.Fprintf(ikFile,
-			// 			"[%.3f][%03d][%s][%05d][Local] ***BREAK*** angleThreshold: %f\n",
-			// 			frame, loop, linkBone.Name(), count-1, angleThreshold)
-			// 	}
-
-			// 	break ikLoop
-			// }
-
 			// 回転軸
 			var originalLinkAxis, linkAxis *mmath.MVec3
 			// 一段IKでない場合、または一段IKでかつ回転角が88度以上の場合
@@ -579,11 +565,6 @@ ikLoop:
 				// モーフ変形がある場合、モーフ変形を追加適用
 				resultIkQuat = resultIkQuat.Muled(deltas.Morphs.Bones.Get(linkBone.Index()).FrameRotation)
 			}
-
-			// if lidx == 0 && loop == 0 && model.Bones.Get(ikBone.ParentIndex).IsIK() {
-			// 	// IKボーンの親がIKボーンの場合、親のIKの角度を取得
-			// 	resultIkQuat.Mul(deltas.Bones.Get(ikBone.ParentIndex).FilledFrameRotation())
-			// }
 
 			if linkBone.HasFixedAxis() {
 				// 軸制限ありの場合、軸にそった理想回転量とする
