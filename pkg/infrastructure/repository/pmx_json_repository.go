@@ -285,7 +285,10 @@ func (rep *PmxJsonRepository) loadModel(model *pmx.PmxModel, jsonData *pmxJson) 
 		bone.LocalAxisX = boneData.LocalAxisX
 		bone.LocalAxisZ = boneData.LocalAxisZ
 		bone.EffectorKey = boneData.EffectorKey
-		bone.Extend = &pmx.BoneExtend{}
+		// 変形階層を保持
+		bone.Extend = &pmx.BoneExtend{
+			OriginalLayer: bone.Layer,
+		}
 
 		if boneData.Ik != nil {
 			ik := pmx.NewIk()

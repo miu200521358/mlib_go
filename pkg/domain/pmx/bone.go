@@ -121,6 +121,7 @@ type BoneExtend struct {
 	LocalMaxAngleLimit     *mmath.MRotation // 自分がIKリンクボーンのローカル軸角度制限の上限
 	AxisSign               int              // ボーンの軸ベクトル(左は-1, 右は1)
 	RigidBody              *RigidBody       // 物理演算用剛体
+	OriginalLayer          int              // 元の変形階層
 }
 
 func (boneExtend *BoneExtend) Copy() *BoneExtend {
@@ -589,6 +590,10 @@ func (bone *Bone) setup() {
 
 func (bones *Bones) getParentRelativePosition(boneIndex int) *mmath.MVec3 {
 	bone := bones.Get(boneIndex)
+	if bone == nil {
+		return mmath.NewMVec3()
+	}
+
 	if bone.ParentIndex >= 0 && bones.Contains(bone.ParentIndex) {
 		return bone.Position.Subed(bones.Get(bone.ParentIndex).Position)
 	}
@@ -598,6 +603,9 @@ func (bones *Bones) getParentRelativePosition(boneIndex int) *mmath.MVec3 {
 
 func (bones *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 	bone := bones.Get(boneIndex)
+	if bone == nil {
+		return mmath.NewMVec3()
+	}
 
 	fromPosition := bone.Position
 	var toPosition *mmath.MVec3
@@ -751,20 +759,25 @@ func (bones *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool, loop int) *B
 
 func (bones *Bones) Setup() {
 	bones.IkTreeIndexes = make(map[int][]int)
+	bones.LayerSortedIndexes = make([]int, 0)
 	bones.LayerSortedBones = make(map[bool][]*Bone)
 	bones.LayerSortedNames = make(map[bool]map[string]int)
 	bones.DeformBoneIndexes = make(map[int][]int)
 
 	for _, bone := range bones.Data {
 		// 関係ボーンリストを一旦クリア
-		bone.Extend.IkLinkBoneIndexes = make([]int, 0)
-		bone.Extend.IkTargetBoneIndexes = make([]int, 0)
-		bone.Extend.EffectiveBoneIndexes = make([]int, 0)
-		bone.Extend.ChildBoneIndexes = make([]int, 0)
-		bone.Extend.RelativeBoneIndexes = make([]int, 0)
-		bone.Extend.ParentBoneIndexes = make([]int, 0)
-		bone.Extend.ParentBoneNames = make([]string, 0)
-		bone.Extend.TreeBoneIndexes = make([]int, 0)
+		if bone.Extend == nil {
+			bone.Extend = &BoneExtend{}
+		} else {
+			bone.Extend.IkLinkBoneIndexes = make([]int, 0)
+			bone.Extend.IkTargetBoneIndexes = make([]int, 0)
+			bone.Extend.EffectiveBoneIndexes = make([]int, 0)
+			bone.Extend.ChildBoneIndexes = make([]int, 0)
+			bone.Extend.RelativeBoneIndexes = make([]int, 0)
+			bone.Extend.ParentBoneIndexes = make([]int, 0)
+			bone.Extend.ParentBoneNames = make([]string, 0)
+			bone.Extend.TreeBoneIndexes = make([]int, 0)
+		}
 	}
 
 	// 関連ボーンINDEX情報を設定
@@ -1004,4 +1017,63 @@ func (bones *Bones) Copy() *Bones {
 		copied.SetItem(i, bone.Copy().(*Bone))
 	}
 	return copied
+}
+
+func (bones *Bones) Insert(bone *Bone, afterIndex int) {
+	// 挿入位置を探す
+	insertPos := -1
+	for i, boneIndex := range bones.LayerSortedIndexes {
+		if boneIndex == afterIndex {
+			insertPos = i + 1
+			break
+		}
+	}
+
+	if insertPos < 0 {
+		// 挿入場所が見つからない場合、最後に挿入
+		lastBone := bones.Get(bones.LayerSortedIndexes[len(bones.LayerSortedIndexes)-1])
+		bone.Layer = lastBone.Layer
+		bones.Append(bone)
+		bones.Setup()
+		return
+	}
+
+	// 新しい要素のLayerを決定
+	var newLayer int
+	if insertPos == len(bones.LayerSortedIndexes) {
+		// 挿入位置が最後の場合
+		boneAtPrevPos := bones.Get(bones.LayerSortedIndexes[insertPos-1])
+		newLayer = boneAtPrevPos.Layer
+	} else {
+		// 挿入位置が途中の場合
+		boneAtPrevPos := bones.Get(bones.LayerSortedIndexes[insertPos-1])
+		currentLayer := boneAtPrevPos.Layer
+		boneAtNextPos := bones.Get(bones.LayerSortedIndexes[insertPos])
+		nextLayer := boneAtNextPos.Layer
+
+		if currentLayer == nextLayer {
+			// 新しい要素のLayerをcurrentLayerに設定
+			newLayer = currentLayer
+			// 挿入位置以降の要素のLayerをインクリメント
+			for i := insertPos; i < len(bones.LayerSortedIndexes); i++ {
+				boneToAdjust := bones.Get(bones.LayerSortedIndexes[i])
+				boneToAdjust.Layer++
+			}
+		} else if currentLayer+1 < nextLayer {
+			// Layerの隙間がある場合
+			newLayer = currentLayer + 1
+		} else {
+			// 新しい要素のLayerをcurrentLayerに設定
+			newLayer = currentLayer
+			// 挿入位置以降の要素のLayerをインクリメント
+			for i := insertPos; i < len(bones.LayerSortedIndexes); i++ {
+				boneToAdjust := bones.Get(bones.LayerSortedIndexes[i])
+				boneToAdjust.Layer++
+			}
+		}
+	}
+
+	bone.Layer = newLayer
+	bones.Append(bone)
+	bones.Setup()
 }

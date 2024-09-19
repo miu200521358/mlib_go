@@ -631,6 +631,7 @@ func (rep *PmxRepository) loadBones(model *pmx.PmxModel) error {
 			mlog.E("[%d] UnpackInt Layer error: %v", i, err)
 			return err
 		}
+		bone.Extend.OriginalLayer = bone.Layer
 		// 2  : bitFlag*2	| ボーンフラグ(16bit) 各bit 0:OFF 1:ON
 		boneFlag, err := rep.unpackBytes(2)
 		if err != nil {
