@@ -387,3 +387,23 @@ func TestMMat4Mul(t *testing.T) {
 		t.Errorf("Expected matrix to be %v, got %v", expected3, mat1)
 	}
 }
+
+func TestMMat4_MulVec3(t *testing.T) {
+	mat := &MMat4{
+		-0.28213944, 0.69636424, -0.65990468, 0,
+		0.48809647, 0.69636424, 0.52615461, 0,
+		0.82592928, -0.17364818, -0.53636474, 0,
+		0., 0., 0., 1.,
+	}
+
+	v := &MVec3{10, 20, 30}
+
+	expectedVec := MVec3{31.7184134, 15.6814818, -12.166896800000002}
+
+	result := mat.MulVec3(v)
+
+	// Verify the vector values
+	if !result.NearEquals(&expectedVec, 1e-5) {
+		t.Errorf("Expected vector to be %v, got %v", expectedVec, result)
+	}
+}

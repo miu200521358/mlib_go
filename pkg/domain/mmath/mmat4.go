@@ -91,10 +91,10 @@ func (mat *MMat4) Trace3() float64 {
 	return mgl64.Mat4(*mat).Mat3().Trace()
 }
 
-// MulVec3 multiplies v (converted to a vec4 as (v_1, v_2, v_3, 1))
-// with mat and divides the result by w. Returns a new vec3.
+// MulVec3 はベクトルと行列の掛け算を行います
 func (mat *MMat4) MulVec3(other *MVec3) *MVec3 {
-	return mat.Muled(other.ToMat4()).Translation()
+	v := mgl64.Mat4(*mat).Mul4x1(mgl64.Vec4{other.X, other.Y, other.Z, 1})
+	return &MVec3{v.X() / v.W(), v.Y() / v.W(), v.Z() / v.W()}
 }
 
 // Translate adds v to the translation part of the matrix.

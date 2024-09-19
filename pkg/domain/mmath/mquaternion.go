@@ -452,7 +452,7 @@ func NewMQuaternionFromAxes(xAxis, yAxis, zAxis *MVec3) *MQuaternion {
 
 // SeparateByAxisは、グローバル軸に基づいてクォータニオンを2つのクォータニオン(捩りとそれ以外)に分割します。
 func (quat *MQuaternion) SeparateTwistByAxis(globalAxis *MVec3) (*MQuaternion, *MQuaternion) {
-	globalXAxis := globalAxis.Normalize()
+	globalXAxis := globalAxis.Normalized()
 
 	// X成分を抽出する ------------
 
@@ -545,10 +545,9 @@ func (quat *MQuaternion) NearEquals(other *MQuaternion, epsilon float64) bool {
 	return q1.ApproxEqualThreshold(q2, epsilon)
 }
 
-// MulVec3は、ベクトルvをクォータニオンで回転させた結果の新しいベクトルを返します。
+// MulVec3は、クォータニオン分ベクトルを回した結果を返します
 func (quat *MQuaternion) MulVec3(v *MVec3) *MVec3 {
-	mv := mgl64.Quat{V: mgl64.Vec3{quat.X, quat.Y, quat.Z}, W: quat.W}.Rotate(mgl64.Vec3{v.X, v.Y, v.Z})
-	return &MVec3{mv.X(), mv.Y(), mv.Z()}
+	return quat.ToMat4().MulVec3(v)
 }
 
 // VectorToDegreeは、与えられた2つのベクトルから角度に変換します。
