@@ -238,6 +238,27 @@ func NewPmxJsonSaveFilePicker(
 		repository.NewPmxJsonRepository())
 }
 
+func NewCsvSaveFilePicker(
+	window state.IControlWindow,
+	parent walk.Container,
+	title string,
+	tooltip string,
+	description string,
+) *FilePicker {
+	return newFilePicker(
+		window,
+		parent,
+		"",
+		title,
+		tooltip,
+		description,
+		map[int]map[string]string{
+			0: {"*.csv": "Csv Files (*.csv)"},
+			1: {"*.*": "All Files (*.*)"}},
+		0,
+		repository.NewCsvRepository())
+}
+
 func newFilePicker(
 	window state.IControlWindow,
 	parent walk.Container,
