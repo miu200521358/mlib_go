@@ -1,7 +1,7 @@
 package pmx
 
 import (
-	"sort"
+	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
@@ -17,28 +17,39 @@ const (
 )
 
 type IDeform interface {
-	GetType() DeformType
 	AllIndexes() []int
 	AllWeights() []float64
 	Indexes(weightThreshold float64) []int
 	Weights(weightThreshold float64) []float64
 	NormalizedDeform() [8]float32
+	Normalize(align bool)
+	Index(boneIndex int) int
+	IndexWeight(boneIndex int) float64
+	Add(boneIndex, separateIndex int, ratio float64)
 }
 
 // Deform デフォーム既定構造体
 type Deform struct {
-	indexes []int     // ボーンINDEXリスト
-	weights []float64 // ウェイトリスト
-	Count   int       // デフォームボーン個数
+	indexes    []int      // ボーンINDEXリスト
+	weights    []float64  // ウェイトリスト
+	deformType DeformType // デフォームタイプ
 }
 
-// NewDeform creates a new Deform instance.
-func NewDeform(indexes []int, weights []float64, count int) Deform {
-	return Deform{
-		indexes: indexes,
-		weights: weights,
-		Count:   count,
+func (deform *Deform) Index(boneIndex int) int {
+	for i, index := range deform.indexes {
+		if index == boneIndex {
+			return i
+		}
 	}
+	return -1
+}
+
+func (deform *Deform) IndexWeight(boneIndex int) float64 {
+	i := deform.Index(boneIndex)
+	if i == -1 {
+		return 0
+	}
+	return deform.weights[i]
 }
 
 func (deform *Deform) AllIndexes() []int {
@@ -71,6 +82,19 @@ func (deform *Deform) Weights(weightThreshold float64) []float64 {
 	return weights
 }
 
+// NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
+func (deform *Deform) NormalizedDeform() [8]float32 {
+	normalizedDeform := [8]float32{0, 0, 0, 0, 0, 0, 0, 0}
+	for i, index := range deform.indexes {
+		normalizedDeform[i] = float32(index)
+	}
+	for i, weight := range deform.weights {
+		normalizedDeform[i+4] = float32(weight)
+	}
+
+	return normalizedDeform
+}
+
 // Normalize ウェイト正規化
 func (deform *Deform) Normalize(align bool) {
 	if align {
@@ -90,8 +114,8 @@ func (deform *Deform) Normalize(align bool) {
 			ilist = append(ilist, index)
 			wlist = append(wlist, weight)
 		}
-		for i := len(indexWeights); i < deform.Count; i++ {
-			ilist = append(ilist, 0)
+		for i := len(indexWeights); i < 8; i++ {
+			ilist = append(ilist, -1)
 			wlist = append(wlist, 0)
 		}
 
@@ -118,36 +142,38 @@ func (deform *Deform) Normalize(align bool) {
 	}
 }
 
-// NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
-func (deform *Deform) NormalizedDeform() [8]float32 {
-	normalizedDeform := [8]float32{0, 0, 0, 0, 0, 0, 0, 0}
+// Add ウェイトを分割して追加する(separateIndexのウェイトをratioで分割して追加)
+func (deform *Deform) Add(boneIndex, separateIndex int, ratio float64) {
 	for i, index := range deform.indexes {
-		normalizedDeform[i] = float32(index)
-	}
-	for i, weight := range deform.weights {
-		normalizedDeform[i+4] = float32(weight)
+		if index == separateIndex {
+			deform.indexes = append(deform.indexes, boneIndex)
+			deform.weights = append(deform.weights, deform.weights[i]*ratio)
+			deform.weights[i] *= 1 - ratio
+			break
+		}
 	}
 
-	return normalizedDeform
+	deform.Normalize(true)
 }
 
-// sortIndexesByWeight ウェイトの大きい順に指定個数までを対象とする
+// sortIndexesByWeight ウェイトの大きい順に指定個数(1,2,4)までを対象とする
 func sortIndexesByWeight(indexes []int, weights []float64) ([]int, []float64) {
-	sort.SliceStable(weights, func(i, j int) bool {
-		return weights[i] > weights[j]
-	})
+	sortableWeights := mmath.Float64Slice(weights)
+	weightIndexes := mmath.ArgSort(sortableWeights)
+	// 降順にする
+	slices.Reverse(weightIndexes)
 
-	sortedIndexes := make([]int, len(indexes))
-	sortedWeights := make([]float64, len(weights))
+	// ウェイトの大きい順に指定個数までを対象とする
+	sortedIndexes := make([]int, 0)
+	sortedWeights := make([]float64, 0)
 
-	for i, weight := range weights {
-		for j, w := range weights {
-			if weight == w {
-				sortedIndexes[i] = indexes[j]
-				sortedWeights[i] = w
-				break
-			}
+	for i, weightIndex := range weightIndexes {
+		if weights[weightIndex] == 0 && ((i >= 4) || (i == 2) || (i == 1)) {
+			// 1, 2, 4個溜まったら抜ける
+			break
 		}
+		sortedIndexes = append(sortedIndexes, indexes[weightIndex])
+		sortedWeights = append(sortedWeights, weights[weightIndex])
 	}
 
 	return sortedIndexes, sortedWeights
@@ -162,16 +188,11 @@ type Bdef1 struct {
 func NewBdef1(index0 int) *Bdef1 {
 	return &Bdef1{
 		Deform: Deform{
-			indexes: []int{index0},
-			weights: []float64{1.0},
-			Count:   1,
+			indexes:    []int{index0},
+			weights:    []float64{1.0},
+			deformType: BDEF1,
 		},
 	}
-}
-
-// GetType returns the deformation type.
-func (bdef1 *Bdef1) GetType() DeformType {
-	return BDEF1
 }
 
 // NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
@@ -188,16 +209,11 @@ type Bdef2 struct {
 func NewBdef2(index0, index1 int, weight0 float64) *Bdef2 {
 	return &Bdef2{
 		Deform: Deform{
-			indexes: []int{index0, index1},
-			weights: []float64{weight0, 1 - weight0},
-			Count:   2,
+			indexes:    []int{index0, index1},
+			weights:    []float64{weight0, 1 - weight0},
+			deformType: BDEF2,
 		},
 	}
-}
-
-// GetType returns the deformation type.
-func (bdef2 *Bdef2) GetType() DeformType {
-	return BDEF2
 }
 
 // NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
@@ -216,16 +232,11 @@ type Bdef4 struct {
 func NewBdef4(index0, index1, index2, index3 int, weight0, weight1, weight2, weight3 float64) *Bdef4 {
 	return &Bdef4{
 		Deform: Deform{
-			indexes: []int{index0, index1, index2, index3},
-			weights: []float64{weight0, weight1, weight2, weight3},
-			Count:   4,
+			indexes:    []int{index0, index1, index2, index3},
+			weights:    []float64{weight0, weight1, weight2, weight3},
+			deformType: BDEF4,
 		},
 	}
-}
-
-// GetType returns the deformation type.
-func (bdef4 *Bdef4) GetType() DeformType {
-	return BDEF4
 }
 
 // NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
@@ -247,19 +258,14 @@ type Sdef struct {
 func NewSdef(index0, index1 int, weight0 float64, sdefC, sdefR0, sdefR1 *mmath.MVec3) *Sdef {
 	return &Sdef{
 		Deform: Deform{
-			indexes: []int{index0, index1},
-			weights: []float64{weight0, 1 - weight0},
-			Count:   2,
+			indexes:    []int{index0, index1},
+			weights:    []float64{weight0, 1 - weight0},
+			deformType: SDEF,
 		},
 		SdefC:  sdefC,
 		SdefR0: sdefR0,
 		SdefR1: sdefR1,
 	}
-}
-
-// GetType returns the deformation type.
-func (sdef *Sdef) GetType() DeformType {
-	return SDEF
 }
 
 // NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）

@@ -1022,10 +1022,17 @@ func (bones *Bones) Copy() *Bones {
 func (bones *Bones) Insert(bone *Bone, afterIndex int) {
 	// 挿入位置を探す
 	insertPos := -1
-	for i, boneIndex := range bones.LayerSortedIndexes {
-		if boneIndex == afterIndex {
-			insertPos = i + 1
-			break
+
+	if afterIndex < 0 {
+		// afterIndexが-1の場合、ルートに挿入
+		bone.Layer = 0
+		insertPos = len(bones.LayerSortedIndexes)
+	} else {
+		for i, boneIndex := range bones.LayerSortedIndexes {
+			if boneIndex == afterIndex {
+				insertPos = i + 1
+				break
+			}
 		}
 	}
 
@@ -1043,7 +1050,16 @@ func (bones *Bones) Insert(bone *Bone, afterIndex int) {
 	if insertPos == len(bones.LayerSortedIndexes) {
 		// 挿入位置が最後の場合
 		boneAtPrevPos := bones.Get(bones.LayerSortedIndexes[insertPos-1])
-		newLayer = boneAtPrevPos.Layer
+		if afterIndex >= 0 {
+			newLayer = boneAtPrevPos.Layer
+		} else {
+			// ルートに挿入の場合、全てのLayerをインクリメント
+			newLayer = 0
+			for _, boneIndex := range bones.LayerSortedIndexes {
+				boneToAdjust := bones.Get(boneIndex)
+				boneToAdjust.Layer++
+			}
+		}
 	} else {
 		// 挿入位置が途中の場合
 		boneAtPrevPos := bones.Get(bones.LayerSortedIndexes[insertPos-1])

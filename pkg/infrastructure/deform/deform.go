@@ -44,8 +44,8 @@ func DeformModel(
 		vertex.Normal = mat.MulVec3(vertex.Normal).Normalized()
 
 		// SDEFの場合、パラメーターを再計算
-		if vertex.Deform.GetType() == pmx.SDEF {
-			sdef := vertex.Deform.(*pmx.Sdef)
+		switch sdef := vertex.Deform.(type) {
+		case *pmx.Sdef:
 			// SDEF-C: ボーンのベクトルと頂点の交点
 			sdef.SdefC = mmath.IntersectLinePoint(
 				vmdDeltas.Bones.Get(sdef.AllIndexes()[0]).GlobalPosition,

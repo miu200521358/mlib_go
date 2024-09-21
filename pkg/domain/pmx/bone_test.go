@@ -506,4 +506,45 @@ func TestBones_Insert(t *testing.T) {
 		}
 	}
 
+	// Insert bone8 root
+	bone8 := NewBone()
+	bone8.index = 7
+	bone8.name = "Bone8"
+	bone8.Layer = 0
+	bones.Insert(bone8, -1)
+
+	{
+		tests := []struct {
+			name          string
+			expectedLayer int
+			expectedIndex int
+		}{
+			{"Bone8", 0, 7},
+			{"Bone1", 1, 0},
+			{"Bone3", 1, 2},
+			{"Bone6", 1, 5},
+			{"Bone2", 3, 1},
+			{"Bone4", 3, 3},
+			{"Bone7", 3, 6},
+			{"Bone5", 4, 4},
+		}
+
+		testGroup := "add8)"
+		for _, test := range tests {
+			t.Run(test.name, func(t *testing.T) {
+				bone := bones.GetByName(test.name)
+				if bone == nil {
+					t.Errorf("%s Expected %s to be found", testGroup, test.name)
+					return
+				}
+				if bone.Layer != test.expectedLayer {
+					t.Errorf("%s Expected %s Layer to be %d, got %d", testGroup, test.name, test.expectedLayer, bone.Layer)
+				}
+				if bone.Index() != test.expectedIndex {
+					t.Errorf("%s Expected %s Index to be %d, got %d", testGroup, test.name, test.expectedIndex, bone.Index())
+				}
+			})
+		}
+	}
+
 }
