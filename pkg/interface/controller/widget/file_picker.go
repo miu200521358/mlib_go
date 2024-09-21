@@ -86,6 +86,29 @@ func NewPmxJsonReadFilePicker(
 	)
 }
 
+func NewCsvReadFilePicker(
+	window state.IControlWindow,
+	parent walk.Container,
+	historyKey string,
+	title string,
+	tooltip string,
+	description string,
+) *FilePicker {
+	return newFilePicker(
+		window,
+		parent,
+		historyKey,
+		title,
+		tooltip,
+		description,
+		map[int]map[string]string{
+			0: {"*.csv": "Csv Files (*.csv)"},
+			2: {"*.*": "All Files (*.*)"}},
+		50,
+		repository.NewCsvRepository(),
+	)
+}
+
 func NewVpdReadFilePicker(
 	window state.IControlWindow,
 	parent walk.Container,
