@@ -375,11 +375,11 @@ func (rep *PmxRepository) saveMaterials(fout *os.File, model *pmx.PmxModel, text
 		if err != nil {
 			return err
 		}
-		err = rep.writeNumber(fout, textureIdxType, float64(material.TextureIndex), 0.0, true)
+		err = rep.writeNumber(fout, textureIdxType, float64(material.TextureIndex), 0.0, false)
 		if err != nil {
 			return err
 		}
-		err = rep.writeNumber(fout, textureIdxType, float64(material.SphereTextureIndex), 0.0, true)
+		err = rep.writeNumber(fout, textureIdxType, float64(material.SphereTextureIndex), 0.0, false)
 		if err != nil {
 			return err
 		}
@@ -392,7 +392,7 @@ func (rep *PmxRepository) saveMaterials(fout *os.File, model *pmx.PmxModel, text
 			return err
 		}
 		if material.ToonSharingFlag == pmx.TOON_SHARING_SHARING {
-			err = rep.writeNumber(fout, textureIdxType, float64(material.ToonTextureIndex), 0.0, true)
+			err = rep.writeNumber(fout, textureIdxType, float64(material.ToonTextureIndex), 0.0, false)
 		} else {
 			err = rep.writeByte(fout, int(material.ToonTextureIndex), true)
 		}
@@ -660,7 +660,7 @@ func (rep *PmxRepository) saveMorphs(
 					return err
 				}
 			case *pmx.BoneMorphOffset:
-				err = rep.writeNumber(fout, boneIdxType, float64(off.BoneIndex), 0.0, true)
+				err = rep.writeNumber(fout, boneIdxType, float64(off.BoneIndex), 0.0, false)
 				if err != nil {
 					return err
 				}
@@ -693,7 +693,7 @@ func (rep *PmxRepository) saveMorphs(
 					return err
 				}
 			case *pmx.MaterialMorphOffset:
-				err = rep.writeNumber(fout, materialIdxType, float64(off.MaterialIndex), 0.0, true)
+				err = rep.writeNumber(fout, materialIdxType, float64(off.MaterialIndex), 0.0, false)
 				if err != nil {
 					return err
 				}
@@ -814,7 +814,7 @@ func (rep *PmxRepository) saveMorphs(
 					return err
 				}
 			case *pmx.GroupMorphOffset:
-				err = rep.writeNumber(fout, morphIdxType, float64(off.MorphIndex), 0.0, true)
+				err = rep.writeNumber(fout, morphIdxType, float64(off.MorphIndex), 0.0, false)
 				if err != nil {
 					return err
 				}
@@ -862,9 +862,9 @@ func (rep *PmxRepository) saveDisplaySlots(fout *os.File, model *pmx.PmxModel, b
 				return err
 			}
 			if reference.DisplayType == pmx.DISPLAY_TYPE_BONE {
-				err = rep.writeNumber(fout, boneIdxType, float64(reference.DisplayIndex), 0.0, true)
+				err = rep.writeNumber(fout, boneIdxType, float64(reference.DisplayIndex), 0.0, false)
 			} else {
-				err = rep.writeNumber(fout, morphIdxType, float64(reference.DisplayIndex), 0.0, true)
+				err = rep.writeNumber(fout, morphIdxType, float64(reference.DisplayIndex), 0.0, false)
 			}
 			if err != nil {
 				return err
