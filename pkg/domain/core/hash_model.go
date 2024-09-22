@@ -16,9 +16,9 @@ type CsvModel struct {
 	path    string
 }
 
-func NewCsvModel(cells [][]string) *CsvModel {
+func NewCsvModel(records [][]string) *CsvModel {
 	return &CsvModel{
-		records: cells,
+		records: records,
 	}
 }
 
