@@ -115,7 +115,7 @@ func (deform *Deform) Normalize(align bool) {
 			wlist = append(wlist, weight)
 		}
 		for i := len(indexWeights); i < 8; i++ {
-			ilist = append(ilist, -1)
+			ilist = append(ilist, 0)
 			wlist = append(wlist, 0)
 		}
 
