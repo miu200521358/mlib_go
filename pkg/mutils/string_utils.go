@@ -7,6 +7,20 @@ import (
 	"strings"
 )
 
+func SplitAll(input string, separators []string) []string {
+	results := []string{input}
+
+	for _, sep := range separators {
+		var tempResult []string
+		for _, str := range results {
+			tempResult = append(tempResult, strings.Split(str, sep)...)
+		}
+		results = tempResult
+	}
+
+	return results
+}
+
 func JoinSlice(slice []interface{}) string {
 	// Convert each item in the slice to a string.
 	strSlice := make([]string, len(slice))
