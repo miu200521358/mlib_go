@@ -39,7 +39,7 @@ func TestSplit(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := Split(test.input, test.separators)
+		result := SplitAll(test.input, test.separators)
 		if !reflect.DeepEqual(result, test.expected) {
 			t.Errorf("Split(%q, %v) = %v; want %v", test.input, test.separators, result, test.expected)
 		}
