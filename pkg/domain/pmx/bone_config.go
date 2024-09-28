@@ -114,6 +114,7 @@ const (
 	NECK_ROOT     StandardBoneNames = "首根元"
 	NECK          StandardBoneNames = "首"
 	HEAD          StandardBoneNames = "頭"
+	HEAD_TAIL     StandardBoneNames = "頭先"
 	EYES          StandardBoneNames = "両目"
 	EYE           StandardBoneNames = "{d}目"
 	SHOULDER_ROOT StandardBoneNames = "{d}肩根元"
@@ -286,6 +287,13 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				UpToBoneNames:    []StandardBoneNames{HEAD},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD},
 				BoundingBoxShape: SHAPE_SPHERE},
+			HEAD_TAIL: {
+				ParentBoneNames:  []StandardBoneNames{HEAD},
+				ChildBoneNames:   []StandardBoneNames{},
+				UpFromBoneNames:  []StandardBoneNames{},
+				UpToBoneNames:    []StandardBoneNames{},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD},
+				BoundingBoxShape: SHAPE_NONE},
 			EYES: {
 				ParentBoneNames:  []StandardBoneNames{HEAD},
 				ChildBoneNames:   []StandardBoneNames{},
