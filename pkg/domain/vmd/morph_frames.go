@@ -25,8 +25,13 @@ func (morphFrames *MorphFrames) Copy() *MorphFrames {
 }
 
 func (morphFrames *MorphFrames) Contains(morphName string) bool {
-	_, ok := morphFrames.Data[morphName]
-	return ok
+	if _, ok := morphFrames.Data[morphName]; ok {
+		if morphFrames.Data[morphName] != nil && morphFrames.Data[morphName].Len() > 0 {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (morphFrames *MorphFrames) Update(morphNameFrames *MorphNameFrames) {

@@ -33,8 +33,13 @@ func (boneFrames *BoneFrames) Contains(boneName string) bool {
 	boneFrames.lock.RLock()
 	defer boneFrames.lock.RUnlock()
 
-	_, ok := boneFrames.Data[boneName]
-	return ok
+	if _, ok := boneFrames.Data[boneName]; ok {
+		if boneFrames.Data[boneName] != nil && boneFrames.Data[boneName].Len() > 0 {
+			return true
+		}
+	}
+
+	return false
 }
 
 // ContainsActive 有効なキーフレが存在するか
