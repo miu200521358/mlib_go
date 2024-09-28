@@ -230,3 +230,12 @@ func ClampIfVerySmall(v float64) float64 {
 
 	return v
 }
+
+func Round(v, threshold float64) float64 {
+	if math.IsNaN(v) || math.IsInf(v, 0) {
+		return 0
+	}
+
+	vv := v * (1 / threshold)
+	return math.Round(vv) * threshold
+}

@@ -414,14 +414,6 @@ func (vec3 *MVec3) Lerp(other *MVec3, t float64) *MVec3 {
 	return (other.Subed(vec3)).MulScalar(t).Add(vec3)
 }
 
-func (v *MVec3) Round() *MVec3 {
-	return &MVec3{
-		math.Round(v.X),
-		math.Round(v.Y),
-		math.Round(v.Z),
-	}
-}
-
 // ToLocalMat 自身をローカル軸とした場合の回転行列を取得します
 func (vec3 *MVec3) ToLocalMat() *MMat4 {
 	if vec3.IsZero() {
@@ -599,6 +591,14 @@ func (vec1 *MVec3) Vec3Diff(vec2 *MVec3) *MQuaternion {
 
 	q := NewMQuaternionByValues(cr.X*oosr, cr.Y*oosr, cr.Z*oosr, sr*0.5)
 	return q.Normalize()
+}
+
+func (v *MVec3) Round(threshold float64) *MVec3 {
+	return &MVec3{
+		Round(v.X, threshold),
+		Round(v.Y, threshold),
+		Round(v.Z, threshold),
+	}
 }
 
 func SortVec3(vectors []MVec3) []MVec3 {

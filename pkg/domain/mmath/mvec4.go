@@ -378,15 +378,6 @@ func (vec4 *MVec4) Lerp(other *MVec4, t float64) *MVec4 {
 	return (other.Subed(vec4)).MulScalar(t).Add(vec4)
 }
 
-func (vec4 *MVec4) Round() *MVec4 {
-	return &MVec4{
-		math.Round(vec4.X),
-		math.Round(vec4.Y),
-		math.Round(vec4.Z),
-		math.Round(vec4.W),
-	}
-}
-
 // Vec3DividedByW returns a vec3.T version of the vector by dividing the first three vector components (XYZ) by the last one (W).
 func (vec4 *MVec4) Vec3DividedByW() *MVec3 {
 	oow := 1 / vec4.W
@@ -442,4 +433,13 @@ func (vec4 *MVec4) ClampIfVerySmall() *MVec4 {
 		vec4.W = 0
 	}
 	return vec4
+}
+
+func (v *MVec4) Round(threshold float64) *MVec4 {
+	return &MVec4{
+		Round(v.X, threshold),
+		Round(v.Y, threshold),
+		Round(v.Z, threshold),
+		Round(v.W, threshold),
+	}
 }
