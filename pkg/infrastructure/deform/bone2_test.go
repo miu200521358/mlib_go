@@ -7,6 +7,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
@@ -761,4 +762,27 @@ func TestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
 			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足捩先").FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName("左足捩先").FilledGlobalPosition().MMD()))
 		}
 	}
+}
+
+func TestVmdMotion_DeformIk_Down(t *testing.T) {
+	mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/センター下げる.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式/MEIKO準標準_400.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+	DeformBone(model, motion, true, 0, nil)
 }

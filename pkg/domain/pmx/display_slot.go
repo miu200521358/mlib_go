@@ -33,11 +33,11 @@ const (
 )
 
 type DisplaySlot struct {
-	index       int         // 表示枠INDEX
-	name        string      // 表示枠名
-	englishName string      // 表示枠英名
-	SpecialFlag SpecialFlag // 特殊枠フラグ - 0:通常枠 1:特殊枠
-	References  []Reference // 表示枠要素
+	index       int          // 表示枠INDEX
+	name        string       // 表示枠名
+	englishName string       // 表示枠英名
+	SpecialFlag SpecialFlag  // 特殊枠フラグ - 0:通常枠 1:特殊枠
+	References  []*Reference // 表示枠要素
 }
 
 // NewDisplaySlot
@@ -47,7 +47,7 @@ func NewDisplaySlot() *DisplaySlot {
 		name:        "",
 		englishName: "",
 		SpecialFlag: SPECIAL_FLAG_OFF,
-		References:  make([]Reference, 0),
+		References:  make([]*Reference, 0),
 	}
 }
 
@@ -80,8 +80,8 @@ func (displaySlot *DisplaySlot) IsValid() bool {
 }
 
 // Copy
-func (displaySlot *DisplaySlot) Copy() core.IIndexModel {
-	copiedReference := make([]Reference, len(displaySlot.References))
+func (displaySlot *DisplaySlot) Copy() core.IIndexNameModel {
+	copiedReference := make([]*Reference, len(displaySlot.References))
 	copy(copiedReference, displaySlot.References)
 
 	return &DisplaySlot{
@@ -95,12 +95,12 @@ func (displaySlot *DisplaySlot) Copy() core.IIndexModel {
 
 // 表示枠リスト
 type DisplaySlots struct {
-	*core.IndexModels[*DisplaySlot]
+	*core.IndexNameModels[*DisplaySlot]
 }
 
 func NewDisplaySlots(count int) *DisplaySlots {
 	return &DisplaySlots{
-		IndexModels: core.NewIndexModels[*DisplaySlot](count, func() *DisplaySlot { return nil }),
+		IndexNameModels: core.NewIndexNameModels[*DisplaySlot](count, func() *DisplaySlot { return nil }),
 	}
 }
 

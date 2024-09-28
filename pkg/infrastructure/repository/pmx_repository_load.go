@@ -956,7 +956,7 @@ func (rep *PmxRepository) loadDisplaySlots(model *pmx.PmxModel) error {
 
 	for i := 0; i < totalDisplaySlotCount; i++ {
 		displaySlot := &pmx.DisplaySlot{
-			References: make([]pmx.Reference, 0),
+			References: make([]*pmx.Reference, 0),
 		}
 		displaySlot.SetIndex(i)
 		// 4 + n : TextBuf	| 枠名
@@ -1007,7 +1007,7 @@ func (rep *PmxRepository) loadDisplaySlots(model *pmx.PmxModel) error {
 				}
 			}
 
-			displaySlot.References = append(displaySlot.References, *reference)
+			displaySlot.References = append(displaySlot.References, reference)
 		}
 
 		displaySlots.Update(displaySlot)
