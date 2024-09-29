@@ -7,16 +7,23 @@
     {
       "name": "Launch",
       "type": "go",
-      "request": "launch",
-      "mode": "debug",
-      "program": "${workspaceFolder}/cmd/main.go",
-      "preLaunchTask": "go: mod tidy",
+      "request": "attach",
+      "mode": "remote",
+      "remotePath": "${workspaceFolder}",
+      "port": 2345,
+      "host": "127.0.0.1",
+      "apiVersion": 2,
+      "showLog": false,
+      "trace": "error",
+      "preLaunchTask": "go build and start dlv",
+      "cwd": "${workspaceFolder}",
     },
     {
       "name": "[dev] Build",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/.vscode/scripts/build_exe.py",
+      "cwd": "${workspaceFolder}/cmd",
       "env": {
         "WORKSPACE_FOLDER": "${workspaceFolder}",
         "ENV": "dev"
@@ -27,6 +34,7 @@
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/.vscode/scripts/build_exe.py",
+      "cwd": "${workspaceFolder}/cmd",
       "env": {
         "WORKSPACE_FOLDER": "${workspaceFolder}",
         "ENV": "prod"
