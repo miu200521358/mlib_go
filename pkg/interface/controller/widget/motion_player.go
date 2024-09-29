@@ -60,6 +60,7 @@ func NewMotionPlayer(
 		RaiseError(err)
 	}
 	titleLabel.SetText(mi18n.T("再生"))
+	titleLabel.SetToolTipText(mi18n.T("再生ウィジェットの使い方メッセージ"))
 	titleLabel.MouseDown().Attach(func(x, y int, button walk.MouseButton) {
 		mlog.IL(mi18n.T("再生ウィジェットの使い方メッセージ"))
 	})
@@ -80,6 +81,7 @@ func NewMotionPlayer(
 			player.controlWindow.SetFrame(float32(player.frameEdit.Value()))
 		}
 	})
+	player.frameEdit.SetToolTipText(mi18n.T("再生キーフレ説明"))
 
 	// フレームスライダー
 	player.frameSlider, err = walk.NewSlider(playerComposite)
@@ -93,6 +95,7 @@ func NewMotionPlayer(
 			player.controlWindow.SetFrame(float32(player.frameSlider.Value()))
 		}
 	})
+	player.frameSlider.SetToolTipText(mi18n.T("再生スライダー説明"))
 
 	player.playButton, err = walk.NewPushButton(playerComposite)
 	if err != nil {
@@ -103,6 +106,7 @@ func NewMotionPlayer(
 	player.playButton.Clicked().Attach(func() {
 		player.SetPlaying(!player.Playing())
 	})
+	player.playButton.SetToolTipText(mi18n.T("再生ボタン説明"))
 
 	// レイアウト
 	layout.SetStretchFactor(player.frameEdit, 3)

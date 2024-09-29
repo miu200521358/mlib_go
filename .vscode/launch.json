@@ -7,16 +7,14 @@
     {
       "name": "Launch",
       "type": "go",
-      "request": "attach",
-      "mode": "remote",
-      "remotePath": "${workspaceFolder}",
-      "port": 2345,
-      "host": "127.0.0.1",
-      "apiVersion": 2,
-      "showLog": false,
-      "trace": "error",
-      "preLaunchTask": "go build and start dlv",
-      "cwd": "${workspaceFolder}",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/main.go",
+      "preLaunchTask": "go: mod tidy",
+      "env": {
+        "WORKSPACE_FOLDER": "${workspaceFolder}",
+        "ENV": "debug"
+      },
     },
     {
       "name": "[dev] Build",

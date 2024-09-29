@@ -406,5 +406,29 @@
     {
         "id": "&カメラ同期",
         "translation": "&Camera Sync"
+    },
+    {
+        "id": "再生キーフレ説明",
+        "translation": "・The frame number field displays the currently rendered frame number.\n・You can increase or decrease the frame number by using the mouse wheel in the field or pressing the button to the right of the field."
+    },
+    {
+        "id": "再生スライダー説明",
+        "translation": "・The playback slider shows the corresponding position of the currently rendered frame number.\n・You can increase or decrease the frame number by using the mouse wheel over the slider."
+    },
+    {
+        "id": "再生ボタン説明",
+        "translation": "・Clicking the playback button allows you to play the motion.\n・Other buttons or operations cannot be used during playback."
+    },
+    {
+        "id": "再生キーフレ説明",
+        "translation": "・The frame number field displays the currently rendered frame number.\n・You can increase or decrease the frame number by using the mouse wheel in the field or pressing the button to the right of the field."
+    },
+    {
+        "id": "再生スライダー説明",
+        "translation": "・The playback slider shows the corresponding position of the currently rendered frame number.\n・You can increase or decrease the frame number by using the mouse wheel over the slider."
+    },
+    {
+        "id": "再生ボタン説明",
+        "translation": "・Clicking the playback button allows you to play the motion.\n・Other buttons or operations cannot be used during playback."
     }
 ]

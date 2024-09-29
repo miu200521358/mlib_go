@@ -299,7 +299,6 @@ func newFilePicker(
 		RaiseError(err)
 	}
 	titleLabel.SetText(title)
-	titleLabel.SetToolTipText(tooltip)
 	titleLabel.MouseDown().Attach(func(x, y int, button walk.MouseButton) {
 		mlog.IL(description)
 	})
@@ -317,7 +316,6 @@ func newFilePicker(
 			RaiseError(err)
 		}
 		nameLineEdit.SetText(mi18n.T("未設定"))
-		nameLineEdit.SetToolTipText(tooltip)
 		nameLineEdit.SetReadOnly(true)
 		bg, err := walk.NewSystemColorBrush(walk.SysColorInactiveCaption)
 		if err != nil {
