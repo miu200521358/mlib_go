@@ -365,6 +365,7 @@ func newFilePicker(
 	}
 	picker.openPushButton.SetToolTipText(tooltip)
 	picker.openPushButton.SetText(mi18n.T("開く"))
+	picker.openPushButton.SetMinMaxSize(walk.Size{Width: 70, Height: 20}, walk.Size{Width: 70, Height: 20})
 	picker.openPushButton.Clicked().Attach(picker.onClickOpenButton())
 
 	if historyKey != "" {
@@ -374,6 +375,7 @@ func newFilePicker(
 		}
 		picker.historyPushButton.SetToolTipText(tooltip)
 		picker.historyPushButton.SetText(mi18n.T("履歴"))
+		picker.historyPushButton.SetMinMaxSize(walk.Size{Width: 70, Height: 20}, walk.Size{Width: 70, Height: 20})
 		picker.historyDialog, err = picker.createHistoryDialog()
 		if err != nil {
 			RaiseError(err)

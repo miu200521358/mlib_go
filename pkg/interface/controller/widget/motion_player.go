@@ -74,6 +74,7 @@ func NewMotionPlayer(
 	player.frameEdit.SetValue(0)
 	player.frameEdit.SetIncrement(1)
 	player.frameEdit.SetSpinButtonsVisible(true)
+	player.frameEdit.SetMinMaxSize(walk.Size{Width: 60, Height: 20}, walk.Size{Width: 60, Height: 20})
 	player.frameEdit.ValueChanged().Attach(func() {
 		if !player.Playing() {
 			player.controlWindow.SetFrame(float32(player.frameEdit.Value()))
@@ -98,6 +99,7 @@ func NewMotionPlayer(
 		RaiseError(err)
 	}
 	player.playButton.SetText(mi18n.T("再生"))
+	player.playButton.SetMinMaxSize(walk.Size{Width: 90, Height: 20}, walk.Size{Width: 90, Height: 20})
 	player.playButton.Clicked().Attach(func() {
 		player.SetPlaying(!player.Playing())
 	})
