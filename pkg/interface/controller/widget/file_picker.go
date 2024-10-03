@@ -27,8 +27,8 @@ type FilePicker struct {
 	title             string                    // ファイルタイトル
 	historyKey        string                    // 履歴用キー(空欄の場合、保存用ファイルと見なす)
 	filterExtension   map[int]map[string]string // フィルタ拡張子
-	pathLineEdit      *walk.LineEdit            // ファイルパス入力欄
-	nameLineEdit      *walk.LineEdit            // ファイル名入力欄
+	pathEdit          *walk.LineEdit            // ファイルパス入力欄
+	nameEdit          *walk.LineEdit            // ファイル名入力欄
 	openPushButton    *walk.PushButton          // 開くボタン
 	historyPushButton *walk.PushButton          // 履歴ボタン
 	onPathChanged     func(string)              // パス変更時のコールバック
@@ -322,7 +322,7 @@ func newFilePicker(
 			RaiseError(err)
 		}
 		nameLineEdit.SetBackground(bg)
-		picker.nameLineEdit = nameLineEdit
+		picker.nameEdit = nameLineEdit
 
 		endBracketLabel, err := walk.NewTextLabel(titleComposite)
 		if err != nil {
@@ -338,19 +338,23 @@ func newFilePicker(
 	}
 	inputComposite.SetLayout(walk.NewHBoxLayout())
 
-	picker.pathLineEdit, err = walk.NewLineEdit(inputComposite)
+	picker.pathEdit, err = walk.NewLineEdit(inputComposite)
 	if err != nil {
 		RaiseError(err)
 	}
-	picker.pathLineEdit.SetToolTipText(tooltip)
-	picker.pathLineEdit.DropFiles().Attach(func(files []string) {
+	picker.pathEdit.SetToolTipText(tooltip)
+	picker.pathEdit.DropFiles().Attach(func(files []string) {
 		if len(files) > 0 {
 			path := files[0]
 			// パスを入力欄に設定
-			picker.pathLineEdit.SetText(path)
+			picker.pathEdit.ChangeText(path)
 			// コールバックを呼び出し
 			picker.OnChanged(path)
 		}
+	})
+	picker.pathEdit.TextChanged().Attach(func() {
+		// コールバックを呼び出し
+		picker.OnChanged(picker.pathEdit.Text())
 	})
 
 	picker.openPushButton, err = walk.NewPushButton(inputComposite)
@@ -382,16 +386,16 @@ func newFilePicker(
 }
 
 func (picker *FilePicker) Load() (core.IHashModel, error) {
-	if picker.pathLineEdit.Text() == "" || picker.rep == nil {
+	if picker.pathEdit.Text() == "" || picker.rep == nil {
 		return nil, nil
 	}
 
-	if isExist, err := mutils.ExistsFile(picker.pathLineEdit.Text()); err != nil || !isExist {
+	if isExist, err := mutils.ExistsFile(picker.pathEdit.Text()); err != nil || !isExist {
 		return nil, fmt.Errorf(mi18n.T("ファイルが存在しません"))
 	}
 
 	// キャッシュの有無は見ずに、必ず取得し直す
-	data, err := picker.rep.Load(picker.pathLineEdit.Text())
+	data, err := picker.rep.Load(picker.pathEdit.Text())
 	defer runtime.GC() // 読み込み時のメモリ解放
 
 	if err != nil {
@@ -404,7 +408,7 @@ func (picker *FilePicker) Load() (core.IHashModel, error) {
 
 // パスが正しいことが分かっている上でデータだけ取り直したい場合
 func (picker *FilePicker) LoadForce() core.IHashModel {
-	data, err := picker.rep.Load(picker.pathLineEdit.Text())
+	data, err := picker.rep.Load(picker.pathEdit.Text())
 	defer runtime.GC() // 読み込み時のメモリ解放
 
 	if err != nil {
@@ -424,41 +428,40 @@ func (picker *FilePicker) GetCache() core.IHashModel {
 
 func (picker *FilePicker) SetCache(data core.IHashModel) {
 	if data == nil {
-		picker.pathLineEdit.SetText("")
+		picker.pathEdit.ChangeText("")
 		return
 	}
 
 	picker.cacheData = data
-	picker.pathLineEdit.SetText(data.Path())
+	picker.pathEdit.ChangeText(data.Path())
 }
 
 func (picker *FilePicker) SetPath(path string) {
-	picker.pathLineEdit.SetText(path)
 	// コールバックを呼び出し
-	picker.OnChanged(picker.pathLineEdit.Text())
+	picker.pathEdit.SetText(path)
 }
 
 func (picker *FilePicker) ChangePath(path string) {
-	picker.pathLineEdit.SetText(path)
 	// コールバックを呼び出さない
+	picker.pathEdit.ChangeText(path)
 }
 
 func (picker *FilePicker) GetPath() string {
-	return picker.pathLineEdit.Text()
+	return picker.pathEdit.Text()
 }
 
 func (picker *FilePicker) SetName(path string) {
-	if picker.nameLineEdit == nil {
+	if picker.nameEdit == nil {
 		return
 	}
-	picker.nameLineEdit.SetText(path)
+	picker.nameEdit.SetText(path)
 }
 
 func (picker *FilePicker) GetName() string {
-	if picker.nameLineEdit == nil {
+	if picker.nameEdit == nil {
 		return ""
 	}
-	return picker.nameLineEdit.Text()
+	return picker.nameEdit.Text()
 }
 
 func (picker *FilePicker) OnChanged(path string) {
@@ -466,13 +469,13 @@ func (picker *FilePicker) OnChanged(path string) {
 
 	if picker.rep != nil && picker.historyKey != "" {
 		if path == "" {
-			picker.nameLineEdit.SetText(mi18n.T("未設定"))
+			picker.nameEdit.SetText(mi18n.T("未設定"))
 		} else {
 			modelName, err := picker.rep.LoadName(path)
 			if err != nil {
-				picker.nameLineEdit.SetText(mi18n.T("読み込み失敗"))
+				picker.nameEdit.SetText(mi18n.T("読み込み失敗"))
 			} else {
-				picker.nameLineEdit.SetText(modelName)
+				picker.nameEdit.SetText(modelName)
 			}
 		}
 	}
@@ -496,7 +499,7 @@ func (picker *FilePicker) onClickHistoryButton() walk.EventHandler {
 		if dlg, err := picker.createHistoryDialog(); dlg != nil && err == nil {
 			if ok := dlg.Run(); ok == walk.DlgCmdOK {
 				// コールバックを呼び出し
-				picker.OnChanged(picker.pathLineEdit.Text())
+				picker.OnChanged(picker.pathEdit.Text())
 			}
 			dlg.Dispose()
 		}
@@ -533,7 +536,7 @@ func (picker *FilePicker) createHistoryDialog() (*walk.Dialog, error) {
 		}
 		item := choices[index]
 		// パスを入力欄に設定
-		picker.pathLineEdit.SetText(item)
+		picker.pathEdit.ChangeText(item)
 	}
 
 	historyListBox.SetModel(choices)
@@ -584,9 +587,9 @@ func (picker *FilePicker) createHistoryDialog() (*walk.Dialog, error) {
 
 func (picker *FilePicker) onClickOpenButton() walk.EventHandler {
 	return func() {
-		if picker.pathLineEdit.Text() != "" {
+		if picker.pathEdit.Text() != "" {
 			// ファイルパスからディレクトリパスを取得
-			dirPath := filepath.Dir(picker.pathLineEdit.Text())
+			dirPath := filepath.Dir(picker.pathEdit.Text())
 			// ファイルパスのディレクトリを初期パスとして設定
 			picker.initialDirPath = dirPath
 		} else if picker.historyKey != "" {
@@ -613,7 +616,7 @@ func (picker *FilePicker) onClickOpenButton() walk.EventHandler {
 			walk.MsgBox(nil, mi18n.T("ファイル選択ダイアログ選択エラー"), err.Error(), walk.MsgBoxIconError)
 		} else if ok {
 			// パスを入力欄に設定
-			picker.pathLineEdit.SetText(dlg.FilePath)
+			picker.pathEdit.ChangeText(dlg.FilePath)
 			// コールバックを呼び出し
 			picker.OnChanged(dlg.FilePath)
 		}
@@ -639,10 +642,10 @@ func (picker *FilePicker) CreateLayoutItem(ctx *walk.LayoutContext) walk.LayoutI
 }
 
 func (picker *FilePicker) Exists() bool {
-	if picker.pathLineEdit.Text() == "" {
+	if picker.pathEdit.Text() == "" {
 		return false
 	}
-	isExist, err := mutils.ExistsFile(picker.pathLineEdit.Text())
+	isExist, err := mutils.ExistsFile(picker.pathEdit.Text())
 	if err != nil {
 		return false
 	}
@@ -650,10 +653,10 @@ func (picker *FilePicker) Exists() bool {
 }
 
 func (picker *FilePicker) ExistsOrEmpty() bool {
-	if picker.pathLineEdit.Text() == "" {
+	if picker.pathEdit.Text() == "" {
 		return true
 	}
-	isExist, err := mutils.ExistsFile(picker.pathLineEdit.Text())
+	isExist, err := mutils.ExistsFile(picker.pathEdit.Text())
 	if err != nil {
 		return false
 	}
@@ -661,7 +664,7 @@ func (picker *FilePicker) ExistsOrEmpty() bool {
 }
 
 func (picker *FilePicker) SetEnabled(enable bool) {
-	picker.pathLineEdit.SetEnabled(enable)
+	picker.pathEdit.SetEnabled(enable)
 	picker.openPushButton.SetEnabled(enable)
 	if picker.historyPushButton != nil {
 		picker.historyPushButton.SetEnabled(enable)
@@ -669,11 +672,11 @@ func (picker *FilePicker) SetEnabled(enable bool) {
 }
 
 func (picker *FilePicker) Enabled() bool {
-	return picker.pathLineEdit.Enabled()
+	return picker.pathEdit.Enabled()
 }
 
 func (picker *FilePicker) SetVisible(visible bool) {
-	picker.pathLineEdit.SetVisible(visible)
+	picker.pathEdit.SetVisible(visible)
 	picker.openPushButton.SetVisible(visible)
 	if picker.historyPushButton != nil {
 		picker.historyPushButton.SetVisible(visible)
@@ -681,7 +684,7 @@ func (picker *FilePicker) SetVisible(visible bool) {
 }
 
 func (picker *FilePicker) Dispose() {
-	picker.pathLineEdit.Dispose()
+	picker.pathEdit.Dispose()
 	picker.openPushButton.Dispose()
 	if picker.historyPushButton != nil {
 		picker.historyPushButton.Dispose()
