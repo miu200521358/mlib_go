@@ -448,6 +448,10 @@ func (bone *Bone) IsTrunk() bool {
 	return bone.containsCategory(CATEGORY_TRUNK)
 }
 
+func (bone *Bone) IsStandard() bool {
+	return bone.Config().IsStandard
+}
+
 // フィッティングの時に移動だけ行うか
 func (bone *Bone) CanFitOnlyMove() bool {
 	return bone.containsCategory(CATEGORY_FITTING_ONLY_MOVE)
