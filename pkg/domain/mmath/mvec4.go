@@ -375,6 +375,11 @@ func (vec4 *MVec4) Vector() []float64 {
 
 // 線形補間
 func (vec4 *MVec4) Lerp(other *MVec4, t float64) *MVec4 {
+	if t <= 0 {
+		return vec4
+	} else if t >= 1 {
+		return other
+	}
 	return (other.Subed(vec4)).MulScalar(t).Add(vec4)
 }
 

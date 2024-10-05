@@ -16,6 +16,11 @@ func Avg(vs []float64) float64 {
 
 // 線形補間
 func LerpFloat(v1, v2 float64, t float64) float64 {
+	if t <= 0 {
+		return v1
+	} else if t >= 1 {
+		return v2
+	}
 	return v1 + ((v2 - v1) * t)
 }
 

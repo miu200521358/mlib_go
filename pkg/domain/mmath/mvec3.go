@@ -411,6 +411,11 @@ func (vec3 *MVec3) ClampIfVerySmall() *MVec3 {
 
 // 線形補間
 func (vec3 *MVec3) Lerp(other *MVec3, t float64) *MVec3 {
+	if t <= 0 {
+		return vec3
+	} else if t >= 1 {
+		return other
+	}
 	return (other.Subed(vec3)).MulScalar(t).Add(vec3)
 }
 

@@ -339,6 +339,11 @@ func (vec2 *MVec2) Vector() []float64 {
 
 // 線形補間
 func (v1 *MVec2) Lerp(v2 *MVec2, t float64) *MVec2 {
+	if t <= 0 {
+		return v1
+	} else if t >= 1 {
+		return v2
+	}
 	return (v2.Sub(v1)).MulScalar(t).Added(v1)
 }
 
