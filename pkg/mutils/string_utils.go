@@ -21,7 +21,7 @@ func SplitAll(input string, separators []string) []string {
 	return results
 }
 
-func JoinSlice(slice []interface{}) string {
+func JoinSlice[T any](slice []T) string {
 	// Convert each item in the slice to a string.
 	strSlice := make([]string, len(slice))
 	for i, v := range slice {
