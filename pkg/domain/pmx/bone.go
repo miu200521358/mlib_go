@@ -449,6 +449,10 @@ func (bone *Bone) IsTrunk() bool {
 }
 
 func (bone *Bone) IsStandard() bool {
+	if bone.Config() == nil {
+		return false
+	}
+
 	return bone.Config().IsStandard
 }
 
@@ -1096,4 +1100,17 @@ func (bones *Bones) Insert(bone *Bone, afterIndex int) {
 	bone.Layer = newLayer
 	bones.Append(bone)
 	bones.Setup()
+}
+
+func (bones *Bones) GetIkTarget(ikBoneName string) *Bone {
+	if ikBoneName == "" || !bones.ContainsByName(ikBoneName) {
+		return nil
+	}
+
+	ikBone := bones.GetByName(ikBoneName)
+	if ikBone == nil || !ikBone.IsIK() || !bones.Contains(ikBone.Ik.BoneIndex) {
+		return nil
+	}
+
+	return bones.Get(ikBone.Ik.BoneIndex)
 }

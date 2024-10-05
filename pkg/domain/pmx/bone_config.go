@@ -160,14 +160,14 @@ const (
 	KNEE          StandardBoneNames = "{d}ひざ"
 	HEEL          StandardBoneNames = "{d}かかと"
 	ANKLE         StandardBoneNames = "{d}足首"
-	TOE           StandardBoneNames = "{d}つま先"
+	TOE_T         StandardBoneNames = "{d}つま先先"
 	TOE_P         StandardBoneNames = "{d}つま先親"
 	TOE_C         StandardBoneNames = "{d}つま先子"
 	LEG_D         StandardBoneNames = "{d}足D"
 	KNEE_D        StandardBoneNames = "{d}ひざD"
 	HEEL_D        StandardBoneNames = "{d}かかとD"
 	ANKLE_D       StandardBoneNames = "{d}足首D"
-	TOE_D         StandardBoneNames = "{d}つま先D"
+	TOE_T_D       StandardBoneNames = "{d}つま先先D"
 	TOE_P_D       StandardBoneNames = "{d}つま先親D"
 	TOE_C_D       StandardBoneNames = "{d}つま先子D"
 	TOE_EX        StandardBoneNames = "{d}足先EX"
@@ -648,7 +648,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				IsStandard:       true},
 			ANKLE: {
 				ParentBoneNames:  []StandardBoneNames{KNEE},
-				ChildBoneNames:   []StandardBoneNames{TOE},
+				ChildBoneNames:   []StandardBoneNames{TOE_T},
 				UpFromBoneNames:  []StandardBoneNames{KNEE},
 				UpToBoneNames:    []StandardBoneNames{ANKLE},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_FK, CATEGORY_ANKLE},
@@ -656,13 +656,13 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				IsStandard:       true},
 			HEEL: {
 				ParentBoneNames:  []StandardBoneNames{ANKLE},
-				ChildBoneNames:   []StandardBoneNames{TOE},
+				ChildBoneNames:   []StandardBoneNames{TOE_T},
 				UpFromBoneNames:  []StandardBoneNames{TOE_P},
 				UpToBoneNames:    []StandardBoneNames{TOE_C},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE, CATEGORY_SOLE},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
-			TOE: {
+			TOE_T: {
 				ParentBoneNames:  []StandardBoneNames{ANKLE},
 				ChildBoneNames:   []StandardBoneNames{TOE_P},
 				UpFromBoneNames:  []StandardBoneNames{},
@@ -671,7 +671,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
 			TOE_P: {
-				ParentBoneNames:  []StandardBoneNames{TOE},
+				ParentBoneNames:  []StandardBoneNames{TOE_T},
 				ChildBoneNames:   []StandardBoneNames{TOE_C},
 				UpFromBoneNames:  []StandardBoneNames{},
 				UpToBoneNames:    []StandardBoneNames{},
@@ -712,7 +712,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				IsStandard:       true},
 			HEEL_D: {
 				ParentBoneNames:  []StandardBoneNames{ANKLE_D},
-				ChildBoneNames:   []StandardBoneNames{TOE_D},
+				ChildBoneNames:   []StandardBoneNames{TOE_T_D},
 				UpFromBoneNames:  []StandardBoneNames{TOE_P_D},
 				UpToBoneNames:    []StandardBoneNames{TOE_C_D},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_SOLE},
@@ -726,16 +726,16 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE},
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
-			TOE_D: {
+			TOE_T_D: {
 				ParentBoneNames:  []StandardBoneNames{TOE_EX},
 				ChildBoneNames:   []StandardBoneNames{TOE_P_D},
 				UpFromBoneNames:  []StandardBoneNames{ANKLE_D},
-				UpToBoneNames:    []StandardBoneNames{TOE_D},
+				UpToBoneNames:    []StandardBoneNames{TOE_T_D},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_SOLE},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
 			TOE_P_D: {
-				ParentBoneNames:  []StandardBoneNames{TOE_D},
+				ParentBoneNames:  []StandardBoneNames{TOE_T_D},
 				ChildBoneNames:   []StandardBoneNames{TOE_C_D},
 				UpFromBoneNames:  []StandardBoneNames{},
 				UpToBoneNames:    []StandardBoneNames{},
