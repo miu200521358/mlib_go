@@ -878,13 +878,15 @@ func (bones *Bones) Setup() {
 				}
 
 				// 関連親がIKツリーに登録されていない場合、新規にIKツリーを作成
-				linkBone := bones.Get(bone.Ik.Links[len(bone.Ik.Links)-1].BoneIndex)
-				// b.IkTreeIndexes[linkBone.Index()] = []int{bone.Index()}
-				if linkBone.ParentIndex >= 0 && bones.Contains(linkBone.ParentIndex) {
-					parentBone := bones.Get(linkBone.ParentIndex)
-					bones.IkTreeIndexes[parentBone.Index()] = []int{bone.Index()}
-				} else {
-					bones.IkTreeIndexes[bone.Index()] = []int{bone.Index()}
+				if len(bone.Ik.Links) > 0 {
+					linkBone := bones.Get(bone.Ik.Links[len(bone.Ik.Links)-1].BoneIndex)
+					// b.IkTreeIndexes[linkBone.Index()] = []int{bone.Index()}
+					if linkBone.ParentIndex >= 0 && bones.Contains(linkBone.ParentIndex) {
+						parentBone := bones.Get(linkBone.ParentIndex)
+						bones.IkTreeIndexes[parentBone.Index()] = []int{bone.Index()}
+					} else {
+						bones.IkTreeIndexes[bone.Index()] = []int{bone.Index()}
+					}
 				}
 			}
 		}
