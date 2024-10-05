@@ -2,12 +2,14 @@ package vmd
 
 import (
 	"math"
+	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 type MorphFrames struct {
 	Data map[string]*MorphNameFrames
+	lock sync.RWMutex // マップアクセス制御用
 }
 
 func NewMorphFrames() *MorphFrames {
@@ -24,7 +26,17 @@ func (morphFrames *MorphFrames) Copy() *MorphFrames {
 	return copied
 }
 
+func (morphFrames *MorphFrames) Delete(morphName string) {
+	morphFrames.lock.Lock()
+	defer morphFrames.lock.Unlock()
+
+	delete(morphFrames.Data, morphName)
+}
+
 func (morphFrames *MorphFrames) Contains(morphName string) bool {
+	morphFrames.lock.Lock()
+	defer morphFrames.lock.Unlock()
+
 	if _, ok := morphFrames.Data[morphName]; ok {
 		if morphFrames.Data[morphName] != nil && morphFrames.Data[morphName].Len() > 0 {
 			return true
@@ -83,6 +95,43 @@ func (morphFrames *MorphFrames) Len() int {
 	return count
 }
 
+// ContainsActive 有効なキーフレが存在するか
+func (morphFrames *MorphFrames) ContainsActive(morphName string) bool {
+	morphFrames.lock.RLock()
+	defer morphFrames.lock.RUnlock()
+
+	if _, ok := morphFrames.Data[morphName]; !ok {
+		return false
+	}
+
+	if morphFrames.Data[morphName].Len() <= 1 {
+		return false
+	}
+
+	for i, f := range morphFrames.Data[morphName].Indexes.List() {
+		if i == 0 {
+			continue
+		}
+
+		bf := morphFrames.Data[morphName].Get(f)
+		if bf == nil {
+			return false
+		}
+
+		nextBf := morphFrames.Data[morphName].Get(morphFrames.Data[morphName].Indexes.Next(f))
+
+		if nextBf == nil {
+			return false
+		}
+
+		if !mmath.NearEquals(nextBf.Ratio, 0.0, 1e-2) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (morphFrames *MorphFrames) registeredFramesMap() map[float32]struct{} {
 	frames := make(map[float32]struct{}, 0)
 	for _, boneFrames := range morphFrames.Data {
@@ -103,4 +152,12 @@ func (morphFrames *MorphFrames) RegisteredFrames() []int {
 	mmath.SortInts(frames)
 
 	return frames
+}
+
+func (morphFrames *MorphFrames) Clean() {
+	for morphName := range morphFrames.Data {
+		if !morphFrames.ContainsActive(morphName) {
+			morphFrames.Delete(morphName)
+		}
+	}
 }

@@ -184,3 +184,12 @@ func (motion *VmdMotion) InsertShadowFrame(sf *ShadowFrame) {
 func (motion *VmdMotion) InsertIkFrame(ikf *IkFrame) {
 	motion.IkFrames.Insert(ikf)
 }
+
+func (motion *VmdMotion) Clean() {
+	motion.BoneFrames.Clean()
+	motion.MorphFrames.Clean()
+	motion.CameraFrames.Clean()
+	motion.LightFrames.Clean()
+	motion.ShadowFrames.Clean()
+	motion.IkFrames.Clean()
+}

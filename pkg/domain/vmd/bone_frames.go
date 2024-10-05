@@ -191,3 +191,11 @@ func (boneFrames *BoneFrames) RegisteredFrames(boneNames []string) []int {
 
 	return frames
 }
+
+func (boneFrames *BoneFrames) Clean() {
+	for boneName := range boneFrames.Data {
+		if !boneFrames.ContainsActive(boneName) {
+			boneFrames.Delete(boneName)
+		}
+	}
+}

@@ -17,3 +17,16 @@ func (lightFrames *LightFrames) Copy() *LightFrames {
 	}
 	return copied
 }
+
+func (lightFrames *LightFrames) Clean() {
+	if lightFrames.Len() > 1 {
+		return
+	} else {
+		cf := lightFrames.Get(lightFrames.Indexes.Min())
+		if !(cf.Position == nil || cf.Position.Length() == 0 ||
+			cf.Color == nil || cf.Color.Length() == 0) {
+			return
+		}
+		lightFrames.Delete(cf.Index())
+	}
+}

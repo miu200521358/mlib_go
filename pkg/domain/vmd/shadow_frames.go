@@ -17,3 +17,15 @@ func (shadowFrames *ShadowFrames) Copy() *ShadowFrames {
 	}
 	return copied
 }
+
+func (shadowFrames *ShadowFrames) Clean() {
+	if shadowFrames.Len() > 1 {
+		return
+	} else {
+		cf := shadowFrames.Get(shadowFrames.Indexes.Min())
+		if cf.Distance != 0 {
+			return
+		}
+		shadowFrames.Delete(cf.Index())
+	}
+}
