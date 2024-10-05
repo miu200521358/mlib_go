@@ -178,7 +178,7 @@ func (rep *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.Bone
 	if bf.Curves == nil {
 		curves = vmd.InitialBoneCurves
 	} else {
-		curves = make([]byte, len(bf.Curves.Values))
+		curves = make([]byte, len(vmd.InitialBoneCurves))
 		for i, x := range bf.Curves.Merge() {
 			curves[i] = byte(math.Min(255, math.Max(0, float64(x))))
 		}
