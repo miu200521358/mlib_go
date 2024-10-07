@@ -221,6 +221,16 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFra
 func (bf *BoneFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float32) {
 	nextBf := nextFrame.(*BoneFrame)
 	prevBf := prevFrame.(*BoneFrame)
+	if nextBf.Curves == nil {
+		// 次の補間曲線がない場合は線形補間
+		bf.Curves = &BoneCurves{
+			TranslateX: mmath.LINER_CURVE.Copy(),
+			TranslateY: mmath.LINER_CURVE.Copy(),
+			TranslateZ: mmath.LINER_CURVE.Copy(),
+			Rotate:     mmath.LINER_CURVE.Copy(),
+		}
+		return
+	}
 	if bf.Curves == nil {
 		bf.Curves = NewBoneCurves()
 	}
