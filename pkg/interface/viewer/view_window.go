@@ -483,12 +483,14 @@ func (viewWindow *ViewWindow) updateCursorPositions() ([]*mgl32.Vec3, []*mgl32.V
 	return leftCursorWorldPositions, leftCursorRemoveWorldPositions
 }
 
+func (viewWindow *ViewWindow) PollEvents() {
+	glfw.PollEvents()
+}
+
 func (viewWindow *ViewWindow) Render(
 	models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas, invisibleMaterials [][]int,
-	windowSelectedVertexes [][]int, windowNoSelectedVertexes [][]int,
+	windowSelectedVertexes [][]int, windowNoSelectedVertexes [][]int, viewerParameter *state.ViewerParameter,
 ) [][]int {
-	glfw.PollEvents()
-
 	if viewWindow.size.X == 0 || viewWindow.size.Y == 0 {
 		return make([][]int, 0)
 	}
@@ -516,6 +518,10 @@ func (viewWindow *ViewWindow) Render(
 	// ブレンディングを有効にする
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	if viewerParameter != nil {
+		viewWindow.UpdateViewerParameter(viewerParameter)
+	}
 
 	// カメラの再計算
 	viewWindow.updateCamera()

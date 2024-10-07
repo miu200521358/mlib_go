@@ -42,9 +42,10 @@ type IViewWindow interface {
 	GetViewerParameter() *ViewerParameter
 	UpdateViewerParameter(viewerParameter *ViewerParameter)
 	Render(models []*pmx.PmxModel, vmdDeltas []*delta.VmdDeltas, invisibleMaterials [][]int,
-		selectedVertexes [][]int, noSelectedVertexes [][]int) [][]int
+		selectedVertexes [][]int, noSelectedVertexes [][]int, viewerParameter *ViewerParameter) [][]int
 	Physics() *mbt.MPhysics
 	LoadModels(models []*pmx.PmxModel)
+	PollEvents()
 }
 
 type IPlayer interface {

@@ -171,8 +171,8 @@ func (app *MApp) RunViewer() {
 	prevTime := glfw.GetTime()
 	prevShowTime := glfw.GetTime()
 	elapsedList := make([]float64, 0)
-	vmdDeltas := make([][]*delta.VmdDeltas, len(app.viewWindows))
-	viewerParameters := make([]*state.ViewerParameter, len(app.viewWindows))
+	vmdDeltas := make([][]*delta.VmdDeltas, app.ViewerCount())
+	viewerParameters := make([]*state.ViewerParameter, app.ViewerCount())
 
 	for !app.IsClosed() {
 
@@ -203,10 +203,10 @@ func (app *MApp) RunViewer() {
 		models := app.GetModels()
 		motions := app.GetMotions()
 
-		for len(models) < len(app.viewWindows) {
+		for len(models) < app.ViewerCount() {
 			models = append(models, make([]*pmx.PmxModel, 0))
 		}
-		for len(motions) < len(app.viewWindows) {
+		for len(motions) < app.ViewerCount() {
 			motions = append(motions, make([]*vmd.VmdMotion, 0))
 		}
 
@@ -219,23 +219,23 @@ func (app *MApp) RunViewer() {
 			vmdDeltas[i] = deform.DeformPhysics(window.Physics(), app, timeStep, models[i], motions[i], vmdDeltas[i])
 		}
 
-		// カメラ同期(重複描画の場合はそっちで同期させる)
-		if app.IsCameraSync() && !app.IsShowOverride() {
-			app.syncViewer(viewerParameters)
-		}
-
 		// 重複描画
 		if app.IsShowOverride() {
-			for i := 1; i < len(app.viewWindows); i++ {
+			for i := 1; i < app.ViewerCount(); i++ {
 				app.viewWindows[i].SetOverrideTextureId(app.viewWindows[0].OverrideTextureId())
-				// カメラの向きとか同期させる
-				app.syncViewer(viewerParameters)
 			}
 		} else {
-			for i := 1; i < len(app.viewWindows); i++ {
+			for i := 1; i < app.ViewerCount(); i++ {
 				app.viewWindows[i].SetOverrideTextureId(0)
 			}
 		}
+
+		for _, window := range app.viewWindows {
+			window.PollEvents()
+		}
+
+		// カメラの向きとか同期させる
+		app.syncViewer(viewerParameters)
 
 		selectedVertexes := make([][][]int, app.ViewerCount())
 
@@ -254,7 +254,8 @@ func (app *MApp) RunViewer() {
 				windowNoSelectedVertexes = app.noSelectedVertexes[i]
 			}
 			selectedVertexes[i] = app.viewWindows[i].Render(
-				models[i], vmdDeltas[i], invisibleMaterials, windowSelectedVertexes, windowNoSelectedVertexes)
+				models[i], vmdDeltas[i], invisibleMaterials, windowSelectedVertexes, windowNoSelectedVertexes,
+				viewerParameters[i])
 		}
 
 		if app.IsShowSelectedVertex() && !app.IsClosed() {
@@ -291,16 +292,22 @@ func (app *MApp) RunViewer() {
 }
 
 func (app *MApp) syncViewer(viewerParameters []*state.ViewerParameter) {
+	if !(app.IsCameraSync() || app.IsShowOverride()) {
+		for i := range app.ViewerCount() {
+			viewerParameters[i] = nil
+		}
+		return
+	}
+
 	if viewerParameters[0] == nil {
 		// 初回は入ってないので、メインビューアのパラメータを採用
 		viewerParameters[0] = app.viewWindows[0].GetViewerParameter()
-		for i := 1; i < len(app.viewWindows); i++ {
-			app.viewWindows[i].UpdateViewerParameter(viewerParameters[0])
+		for i := 1; i < app.ViewerCount(); i++ {
 			viewerParameters[i] = viewerParameters[0]
 		}
 	} else {
 		// 2回目以降は変更があったウィンドウのパラメーターを他に適用する
-		changedIndex := -1
+		changedIndex := 0
 		for i, window := range app.viewWindows {
 			nowViewerParameter := window.GetViewerParameter()
 			if !viewerParameters[i].Equals(nowViewerParameter) {
@@ -308,15 +315,10 @@ func (app *MApp) syncViewer(viewerParameters []*state.ViewerParameter) {
 				break
 			}
 		}
-		if changedIndex >= 0 {
-			// 変更があったウィンドウのパラメータを他に適用する
-			viewerParameters[changedIndex] = app.viewWindows[changedIndex].GetViewerParameter()
-			for i := 0; i < len(app.viewWindows); i++ {
-				if i != changedIndex {
-					app.viewWindows[i].UpdateViewerParameter(viewerParameters[changedIndex])
-					viewerParameters[i] = viewerParameters[changedIndex]
-				}
-			}
+		// 変更があったウィンドウのパラメータを他に適用する
+		nowViewerParam := app.viewWindows[changedIndex].GetViewerParameter()
+		for i := range app.ViewerCount() {
+			viewerParameters[i] = nowViewerParam
 		}
 	}
 }
@@ -324,7 +326,7 @@ func (app *MApp) syncViewer(viewerParameters []*state.ViewerParameter) {
 func (app *MApp) resetPhysics(
 	models [][]*pmx.PmxModel, motions [][]*vmd.VmdMotion, timeStep float32,
 ) {
-	vmdDeltas := make([][]*delta.VmdDeltas, len(app.viewWindows))
+	vmdDeltas := make([][]*delta.VmdDeltas, app.ViewerCount())
 
 	// 物理リセット
 	for i, window := range app.viewWindows {
@@ -523,7 +525,7 @@ func GetWindowSize(width int, height int) declarative.Size {
 func (app *MApp) Center() {
 	go func() {
 		for {
-			if app.controlWindow != nil && len(app.viewWindows) > 0 {
+			if app.controlWindow != nil && app.ViewerCount() > 0 {
 				break
 			}
 		}
