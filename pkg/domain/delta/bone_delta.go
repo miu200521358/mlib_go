@@ -79,6 +79,10 @@ func (boneDelta *BoneDelta) FilledGlobalPosition() *mmath.MVec3 {
 	return boneDelta.GlobalPosition
 }
 
+func (boneDelta *BoneDelta) FilledGlobalBoneRotation() *mmath.MQuaternion {
+	return boneDelta.FilledGlobalMatrix().Quaternion()
+}
+
 func (boneDelta *BoneDelta) FilledGlobalRotation() *mmath.MQuaternion {
 	return boneDelta.FilledGlobalMatrix().Quaternion()
 }
@@ -407,6 +411,71 @@ func (boneDeltas *BoneDeltas) totalRotationLoop(boneIndex int, loop int, factor 
 	}
 
 	return rot.MuledScalar(factor)
+}
+
+// 該当ボーンまでの親を加味した全ての回転（モーフは含まない）
+func (boneDeltas *BoneDeltas) TotalBoneRotation(boneIndex int) *mmath.MQuaternion {
+	rot := boneDeltas.totalBoneRotationLoop(boneIndex, 0, 1.0)
+	return boneDeltas.totalBoneCancelRotation(boneIndex, rot)
+}
+
+func (boneDeltas *BoneDeltas) totalBoneCancelRotation(boneIndex int, rot *mmath.MQuaternion) *mmath.MQuaternion {
+	boneDelta := boneDeltas.Get(boneIndex)
+
+	// 親のキャンセル付き回転行列
+	var parentCancelableRotMat *mmath.MMat4
+	if boneDeltas.Contains(boneDelta.Bone.ParentIndex) {
+		parentBoneDelta := boneDeltas.Get(boneDelta.Bone.ParentIndex)
+		if parentBoneDelta.FrameCancelableRotation != nil && !parentBoneDelta.FrameCancelableRotation.IsIdent() {
+			parentCancelableRotMat = parentBoneDelta.FrameCancelableRotation.ToMat4()
+		}
+	}
+
+	// キャンセル付き回転
+	if boneDelta.FrameCancelableRotation == nil || boneDelta.FrameCancelableRotation.IsIdent() {
+		// 親の回転をキャンセルする
+		if parentCancelableRotMat == nil {
+			return rot
+		}
+		return rot.ToMat4().Muled(parentCancelableRotMat.Inverted()).Quaternion()
+	}
+
+	if parentCancelableRotMat == nil {
+		if boneDelta.FrameCancelableRotation != nil && !boneDelta.FrameCancelableRotation.IsIdent() {
+			rot = rot.ToMat4().Muled(boneDelta.FrameCancelableRotation.ToMat4()).Quaternion()
+		}
+		return rot
+	}
+
+	if boneDelta.FrameCancelableRotation != nil && !boneDelta.FrameCancelableRotation.IsIdent() {
+		rot = rot.ToMat4().Muled(boneDelta.FrameCancelableRotation.ToMat4()).Quaternion()
+	}
+
+	// 親の回転をキャンセルする
+	return rot.ToMat4().Muled(parentCancelableRotMat.Inverted()).Quaternion()
+}
+
+func (boneDeltas *BoneDeltas) totalBoneRotationLoop(boneIndex int, loop int, factor float64) *mmath.MQuaternion {
+	boneDelta := boneDeltas.Get(boneIndex)
+	if boneDelta == nil || loop > 10 {
+		return mmath.NewMQuaternion()
+	}
+
+	rot := boneDelta.FilledFrameRotation().Copy()
+
+	if boneDelta.Bone.IsEffectorRotation() {
+		// 付与親回転がある場合、再帰で回転を取得する
+		effectorRot := boneDeltas.totalBoneRotationLoop(boneDelta.Bone.EffectIndex, loop+1, boneDelta.Bone.EffectFactor)
+		rot.Mul(effectorRot)
+	}
+
+	rot = rot.MuledScalar(factor)
+
+	if boneDelta.Bone.HasFixedAxis() {
+		rot = rot.ToFixedAxisRotation(boneDelta.Bone.Extend.NormalizedFixedAxis)
+	}
+
+	return rot
 }
 
 func (boneDeltas *BoneDeltas) TotalPositionMat(boneIndex int) *mmath.MMat4 {
