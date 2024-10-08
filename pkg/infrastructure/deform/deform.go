@@ -195,7 +195,7 @@ ikLoop:
 			}
 
 			// IK関連の行列を取得
-			deltas.Bones = calcBoneDeltas(frame, model, ikTargetDeformBoneIndexes, deltas.Bones)
+			deltas.Bones = calcBoneDeltas(frame, model, ikTargetDeformBoneIndexes, deltas.Bones, false)
 
 			// リンクボーンの変形情報を取得
 			linkDelta := deltas.Bones.Get(linkBone.Index())
@@ -474,7 +474,7 @@ ikLoop:
 
 	// ボーンデフォーム情報を埋める
 	deltas.Bones = fillBoneDeform(model, motion, deltas, frame, ikTargetDeformBoneIndexes)
-	deltas.Bones = calcBoneDeltas(frame, model, ikTargetDeformBoneIndexes, deltas.Bones)
+	deltas.Bones = calcBoneDeltas(frame, model, ikTargetDeformBoneIndexes, deltas.Bones, true)
 
 	return deltas
 }

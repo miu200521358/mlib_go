@@ -32,7 +32,7 @@ func DeformBoneByPhysicsFlag(
 		return deltas
 	}
 	deformBoneIndexes, deltas := prepareDeltas(model, motion, deltas, isCalcIk, frame, boneNames, isAfterPhysics)
-	deltas.Bones = calcBoneDeltas(frame, model, deformBoneIndexes, deltas.Bones)
+	deltas.Bones = calcBoneDeltas(frame, model, deformBoneIndexes, deltas.Bones, isCalcIk)
 	return deltas
 }
 
@@ -239,9 +239,27 @@ func calcIk(
 
 	ikTargetDeformIndex := slices.Index(ikTargetDeformBoneIndexes, ikTargetBone.Index())
 	ikDeformIndex := slices.Index(ikTargetDeformBoneIndexes, ikBone.Index())
-	if isToeIk && ikTargetDeformIndex < ikDeformIndex {
-		// つま先IKかつ初回IK OFF向きの場合、初回に足首位置に向けるのでループを余分に回す
+	if ikTargetDeformIndex < ikDeformIndex {
+		// 初回IK OFF向きの場合、初回に足首位置に向けるのでループを余分に回す
 		loopCount += 1
+	}
+
+	// IKボーンのグローバル位置
+	ikGlobalPosition := ikDeltas.Bones.Get(ikBone.Index()).FilledGlobalPosition()
+
+	// 初回にIK事前計算
+	if ikOffDeltas != nil && ikOffDeltas.Bones != nil && ikTargetDeformIndex < ikDeformIndex {
+		// IK OFF 時の IKターゲットボーンのグローバル位置を取得
+		ikGlobalPosition = ikOffDeltas.Bones.Get(ikTargetBone.Index()).FilledGlobalPosition()
+
+		if mlog.IsIkVerbose() && globalMotion != nil && ikFile != nil {
+			{
+				bf := vmd.NewBoneFrame(float32(count))
+				bf.Position = ikGlobalPosition
+				globalMotion.AppendRegisteredBoneFrame(ikBone.Name(), bf)
+			}
+			count++
+		}
 	}
 
 	// IK計算
@@ -293,7 +311,7 @@ ikLoop:
 			}
 
 			// IK関連の行列を取得
-			deltas.Bones = calcBoneDeltas(frame, model, ikTargetDeformBoneIndexes, deltas.Bones)
+			deltas.Bones = calcBoneDeltas(frame, model, ikTargetDeformBoneIndexes, deltas.Bones, false)
 
 			// リンクボーンの変形情報を取得
 			linkDelta := deltas.Bones.Get(linkBone.Index())
@@ -313,9 +331,6 @@ ikLoop:
 					frame, loop, linkBone.Name(), count-1, bf.Rotation.String(), bf.Rotation.ToMMDDegrees().String(),
 				)
 			}
-
-			// IKボーンのグローバル位置
-			ikGlobalPosition := ikDeltas.Bones.Get(ikBone.Index()).FilledGlobalPosition()
 
 			// 現在のIKターゲットボーンのグローバル位置を取得
 			ikTargetGlobalPosition := deltas.Bones.Get(ikTargetBone.Index()).FilledGlobalPosition()
@@ -338,11 +353,10 @@ ikLoop:
 				count++
 			}
 
-			// 初回にIK事前計算
-			if loop == 0 && lidx == 0 && isToeIk && ikOffDeltas != nil && ikOffDeltas.Bones != nil &&
+			// つま先IK(足首INDEXがつま先IKより前に計算される場合)とかは初回ループを超えたらIKグローバル位置を再計算
+			if loop == 1 && lidx == 0 && ikOffDeltas != nil && ikOffDeltas.Bones != nil &&
 				ikTargetDeformIndex < ikDeformIndex {
-				// IK OFF 時の IKターゲットボーンのグローバル位置を取得
-				ikGlobalPosition = ikOffDeltas.Bones.Get(ikTargetBone.Index()).FilledGlobalPosition()
+				ikGlobalPosition = ikDeltas.Bones.Get(ikBone.Index()).FilledGlobalPosition()
 
 				if mlog.IsIkVerbose() && globalMotion != nil && ikFile != nil {
 					{
@@ -568,7 +582,7 @@ ikLoop:
 
 			if linkBone.HasFixedAxis() {
 				// 軸制限ありの場合、軸にそった理想回転量とする
-				resultIkQuat = resultIkQuat.ToFixedAxisRotation(linkBone.FixedAxis)
+				resultIkQuat = resultIkQuat.ToFixedAxisRotation(linkBone.Extend.NormalizedFixedAxis)
 
 				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 					bf := vmd.NewBoneFrame(float32(count))
@@ -990,6 +1004,7 @@ func calcBoneDeltas(
 	model *pmx.PmxModel,
 	deformBoneIndexes []int,
 	boneDeltas *delta.BoneDeltas,
+	isCalcIk bool,
 ) *delta.BoneDeltas {
 	for _, boneIndex := range deformBoneIndexes {
 		d := boneDeltas.Get(boneIndex)
@@ -999,6 +1014,7 @@ func calcBoneDeltas(
 		}
 
 		d.UnitMatrix = mmath.NewMMat4()
+		d.UnitMatrixNoTranslate = mmath.NewMMat4()
 		d.GlobalMatrix = nil
 		d.LocalMatrix = nil
 		d.GlobalPosition = nil
@@ -1007,6 +1023,7 @@ func calcBoneDeltas(
 		localMat := boneDeltas.TotalLocalMat(bone.Index())
 		if localMat != nil && !localMat.IsIdent() {
 			d.UnitMatrix.Mul(localMat)
+			d.UnitMatrixNoTranslate.Mul(localMat)
 		}
 
 		// 移動
@@ -1019,12 +1036,14 @@ func calcBoneDeltas(
 		rotMat := boneDeltas.TotalRotationMat(bone.Index())
 		if rotMat != nil && !rotMat.IsIdent() {
 			d.UnitMatrix.Mul(rotMat)
+			d.UnitMatrixNoTranslate.Mul(rotMat)
 		}
 
 		// スケール
 		scaleMat := boneDeltas.TotalScaleMat(bone.Index())
 		if scaleMat != nil && !scaleMat.IsIdent() {
 			d.UnitMatrix.Mul(scaleMat)
+			d.UnitMatrixNoTranslate.Mul(scaleMat)
 		}
 
 		// x := math.Abs(rot.X)
@@ -1035,16 +1054,26 @@ func calcBoneDeltas(
 
 		// 逆BOf行列(初期姿勢行列)
 		d.UnitMatrix = d.Bone.Extend.RevertOffsetMatrix.Muled(d.UnitMatrix)
+		d.UnitMatrixNoTranslate = d.Bone.Extend.RevertOffsetMatrix.Muled(d.UnitMatrixNoTranslate)
 	}
 
 	for _, boneIndex := range deformBoneIndexes {
 		delta := boneDeltas.Get(boneIndex)
 		parentDelta := boneDeltas.Get(delta.Bone.ParentIndex)
 		if parentDelta != nil && parentDelta.GlobalMatrix != nil {
-			delta.GlobalMatrix = parentDelta.GlobalMatrix.Muled(delta.UnitMatrix)
+			if isCalcIk && !delta.Bone.IsIK() && parentDelta.GlobalMatrixParent != nil {
+				// IK計算時に自身がIKじゃない場合、IKは加味しない
+				delta.GlobalMatrix = parentDelta.GlobalMatrixParent.Muled(delta.UnitMatrix)
+			} else {
+				delta.GlobalMatrix = parentDelta.GlobalMatrix.Muled(delta.UnitMatrix)
+				if delta.Bone.IsIK() {
+					delta.GlobalMatrixParent = parentDelta.GlobalMatrix.Copy()
+				}
+			}
 		} else {
 			// 対象ボーン自身の行列をかける
 			delta.GlobalMatrix = delta.UnitMatrix.Copy()
+			delta.GlobalMatrixParent = delta.UnitMatrixNoTranslate.Copy()
 		}
 
 		boneDeltas.Update(delta)
