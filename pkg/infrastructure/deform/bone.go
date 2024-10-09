@@ -482,8 +482,21 @@ ikLoop:
 				)
 			}
 
-			originalIkQuat := mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, originalLinkAngle)
-			ikQuat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
+			var originalIkQuat, ikQuat *mmath.MQuaternion
+
+			if linkBone.HasFixedAxis() {
+				if linkAxis.Dot(linkBone.Extend.NormalizedFixedAxis) < 0 {
+					originalLinkAngle = -originalLinkAngle
+					linkAngle = -linkAngle
+				}
+				// 軸制限ありの場合、軸にそった理想回転量とする
+				originalIkQuat = mmath.NewMQuaternionFromAxisAnglesRotate(
+					linkBone.Extend.NormalizedFixedAxis, originalLinkAngle)
+				ikQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkBone.Extend.NormalizedFixedAxis, linkAngle)
+			} else {
+				originalIkQuat = mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, originalLinkAngle)
+				ikQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
+			}
 
 			originalTotalIkQuat := linkQuat.Muled(originalIkQuat)
 			totalIkQuat := linkQuat.Muled(ikQuat)
