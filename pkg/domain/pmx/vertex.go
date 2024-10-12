@@ -67,6 +67,7 @@ func (vertex *Vertex) Copy() core.IIndexModel {
 // 頂点リスト
 type Vertices struct {
 	*core.IndexModels[*Vertex]
+	vertexMap map[int][]*Vertex
 }
 
 func NewVertices(count int) *Vertices {
@@ -84,18 +85,31 @@ func (vertices *Vertices) Copy() *Vertices {
 }
 
 func (vertices *Vertices) GetMapByBoneIndex(weightThreshold float64) map[int][]*Vertex {
-	vertexMap := make(map[int][]*Vertex)
+	if vertices.vertexMap != nil {
+		return vertices.vertexMap
+	}
+
+	vertices.vertexMap = make(map[int][]*Vertex)
 	for _, vertex := range vertices.Data {
 		if vertex.Deform != nil {
 			for n, boneIndex := range vertex.Deform.AllIndexes() {
-				if _, ok := vertexMap[boneIndex]; !ok {
-					vertexMap[boneIndex] = make([]*Vertex, 0)
+				if _, ok := vertices.vertexMap[boneIndex]; !ok {
+					vertices.vertexMap[boneIndex] = make([]*Vertex, 0)
 				}
 				if vertex.Deform.AllWeights()[n] > weightThreshold {
-					vertexMap[boneIndex] = append(vertexMap[boneIndex], vertex)
+					vertices.vertexMap[boneIndex] = append(vertices.vertexMap[boneIndex], vertex)
 				}
 			}
 		}
 	}
-	return vertexMap
+	return vertices.vertexMap
+}
+
+func (vertices *Vertices) Append(value *Vertex) {
+	if value.Index() < 0 {
+		value.SetIndex(len(vertices.Data))
+	}
+	vertices.Data = append(vertices.Data, value)
+	vertices.SetDirty(true)
+	vertices.vertexMap = nil
 }
