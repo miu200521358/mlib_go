@@ -146,6 +146,9 @@ func (boneFrames *BoneFrames) Len() int {
 }
 
 func (boneFrames *BoneFrames) MaxFrame() float32 {
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
+
 	maxFno := float32(0)
 	for _, boneFrames := range boneFrames.Data {
 		fno := float32(boneFrames.MaxFrame())
@@ -157,6 +160,9 @@ func (boneFrames *BoneFrames) MaxFrame() float32 {
 }
 
 func (boneFrames *BoneFrames) MinFrame() float32 {
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
+
 	minFno := float32(math.MaxFloat32)
 	for _, boneFrames := range boneFrames.Data {
 		fno := float32(boneFrames.MinFrame())
@@ -168,6 +174,8 @@ func (boneFrames *BoneFrames) MinFrame() float32 {
 }
 
 func (boneFrames *BoneFrames) registeredFramesMap(boneNames []string) map[float32]struct{} {
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
 
 	frames := make(map[float32]struct{}, 0)
 	for boneName, boneFrames := range boneFrames.Data {
