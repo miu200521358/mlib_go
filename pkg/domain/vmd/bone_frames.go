@@ -51,18 +51,19 @@ func (boneFrames *BoneFrames) ContainsActive(boneName string) bool {
 		return false
 	}
 
-	if boneFrames.Data[boneName].Len() <= 1 {
+	if boneFrames.Data[boneName].Len() == 0 {
 		return false
 	}
 
-	for i, f := range boneFrames.Data[boneName].Indexes.List() {
-		if i == 0 {
-			continue
-		}
-
+	for _, f := range boneFrames.Data[boneName].Indexes.List() {
 		bf := boneFrames.Data[boneName].Get(f)
 		if bf == nil {
 			return false
+		}
+
+		if (bf.Position != nil && !bf.Position.NearEquals(mmath.MVec3Zero, 1e-2)) ||
+			(bf.Rotation != nil && !bf.Rotation.NearEquals(mmath.MQuaternionIdent, 1e-2)) {
+			return true
 		}
 
 		nextBf := boneFrames.Data[boneName].Get(boneFrames.Data[boneName].Indexes.Next(f))
