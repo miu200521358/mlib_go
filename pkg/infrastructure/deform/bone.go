@@ -502,19 +502,17 @@ ikLoop:
 			var originalIkQuat, ikQuat *mmath.MQuaternion
 
 			if linkBone.HasFixedAxis() {
-				if linkAxis.Dot(linkBone.Extend.NormalizedFixedAxis) < 0 {
-					originalLinkAngle = -originalLinkAngle
-					linkAngle = -linkAngle
-				}
 				originalIkQuat = mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, originalLinkAngle)
 
-				// 軸制限ありの場合、軸にそった理想回転量とする
 				if !(ikLink.AngleLimit || ikLink.LocalAngleLimit) {
-					// 軸制限なしの場合、軸にそった理想回転量とする
+					// 軸制限あり＆角度制限なしの場合、軸にそった理想回転量とする
 					totalIkQuat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
 					ikQuat, _ = totalIkQuat.SeparateTwistByAxis(linkBone.Extend.NormalizedFixedAxis)
 				} else {
-					// 軸制限ありの場合、calcIkLimitQuaternionで処理するのでこっちはそのまま
+					if linkAxis.Dot(linkBone.Extend.NormalizedFixedAxis) < 0 {
+						linkAngle = -linkAngle
+					}
+					// 軸制限あり＆角度制限ありの場合、calcIkLimitQuaternionで処理するのでこっちはそのまま
 					ikQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkBone.Extend.NormalizedFixedAxis, linkAngle)
 				}
 			} else {
@@ -642,9 +640,17 @@ ikLoop:
 			if targetDelta == nil {
 				targetDelta = &delta.BoneDelta{Bone: ikTargetBone, Frame: frame}
 			}
+
+			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+				targetBf := vmd.NewBoneFrame(float32(count))
+				targetBf.Rotation = targetDelta.FilledTotalRotation().Copy()
+				ikMotion.AppendRegisteredBoneFrame(ikTargetBone.Name(), targetBf)
+				count++
+			}
+
 			if !hasChildIk {
 				// 子IKが無い場合、IKターゲットボーンの回転を更新
-				targetQuat := targetDelta.FilledTotalRotation().Muled(ikQuat.Inverted())
+				targetQuat := ikQuat.Inverted().Muled(targetDelta.FilledTotalRotation())
 				targetDelta.FrameRotation = targetQuat
 				deltas.Bones.Update(targetDelta)
 			}
