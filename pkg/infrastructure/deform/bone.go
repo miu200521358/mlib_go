@@ -489,10 +489,17 @@ ikLoop:
 					originalLinkAngle = -originalLinkAngle
 					linkAngle = -linkAngle
 				}
+				originalIkQuat = mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, originalLinkAngle)
+
 				// 軸制限ありの場合、軸にそった理想回転量とする
-				originalIkQuat = mmath.NewMQuaternionFromAxisAnglesRotate(
-					linkBone.Extend.NormalizedFixedAxis, originalLinkAngle)
-				ikQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkBone.Extend.NormalizedFixedAxis, linkAngle)
+				if !(ikLink.AngleLimit || ikLink.LocalAngleLimit) {
+					// 軸制限なしの場合、軸にそった理想回転量とする
+					totalIkQuat := mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
+					ikQuat, _ = totalIkQuat.SeparateTwistByAxis(linkBone.Extend.NormalizedFixedAxis)
+				} else {
+					// 軸制限ありの場合、calcIkLimitQuaternionで処理するのでこっちはそのまま
+					ikQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkBone.Extend.NormalizedFixedAxis, linkAngle)
+				}
 			} else {
 				originalIkQuat = mmath.NewMQuaternionFromAxisAnglesRotate(originalLinkAxis, originalLinkAngle)
 				ikQuat = mmath.NewMQuaternionFromAxisAnglesRotate(linkAxis, linkAngle)
@@ -1075,12 +1082,12 @@ func calcBoneDeltas(
 		parentDelta := boneDeltas.Get(delta.Bone.ParentIndex)
 		if parentDelta != nil && parentDelta.GlobalMatrix != nil {
 			if isCalcIk && !delta.Bone.IsIK() && parentDelta.GlobalMatrixParent != nil {
-				// IK計算時に自身がIKじゃない場合、IKは加味しない
+				// IK計算時に自身がIKじゃない場合、IKの移動は加味しない
 				delta.GlobalMatrix = parentDelta.GlobalMatrixParent.Muled(delta.UnitMatrix)
 			} else {
 				delta.GlobalMatrix = parentDelta.GlobalMatrix.Muled(delta.UnitMatrix)
 				if delta.Bone.IsIK() {
-					delta.GlobalMatrixParent = parentDelta.GlobalMatrix.Copy()
+					delta.GlobalMatrixParent = parentDelta.GlobalMatrix.Muled(delta.UnitMatrixNoTranslate)
 				}
 			}
 		} else {

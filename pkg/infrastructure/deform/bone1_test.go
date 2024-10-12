@@ -7,7 +7,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
-	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 func TestVmdMotion_Deform_Exists(t *testing.T) {
@@ -2114,6 +2113,8 @@ func TestVmdMotion_DeformLegIk23_Addiction(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk24_Positive(t *testing.T) {
+	// mlog.SetLevel(mlog.IK_VERBOSE)
+
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/ポジティブパレード_0526.vmd")
 
@@ -4144,7 +4145,7 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Right(t *testing.T) {
 }
 
 func TestVmdMotion_DeformIk_Down(t *testing.T) {
-	mlog.SetLevel(mlog.IK_VERBOSE)
+	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vr := repository.NewVmdRepository()
 	motionData, err := vr.Load("../../../test_resources/センター下げる.vmd")
