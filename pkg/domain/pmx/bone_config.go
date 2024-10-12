@@ -379,7 +379,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				ChildBoneNames:   []StandardBoneNames{ELBOW},
 				UpFromBoneNames:  []StandardBoneNames{},
 				UpToBoneNames:    []StandardBoneNames{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_TWIST},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_TWIST},
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			ARM_TWIST2: {
@@ -387,7 +387,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				ChildBoneNames:   []StandardBoneNames{ELBOW},
 				UpFromBoneNames:  []StandardBoneNames{},
 				UpToBoneNames:    []StandardBoneNames{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_TWIST},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_TWIST},
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			ARM_TWIST3: {
@@ -395,7 +395,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				ChildBoneNames:   []StandardBoneNames{ELBOW},
 				UpFromBoneNames:  []StandardBoneNames{},
 				UpToBoneNames:    []StandardBoneNames{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_TWIST},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_TWIST},
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			ELBOW: {
@@ -403,7 +403,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				ChildBoneNames:   []StandardBoneNames{WRIST_TWIST},
 				UpFromBoneNames:  []StandardBoneNames{UPPER2},
 				UpToBoneNames:    []StandardBoneNames{NECK_ROOT},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_ARM},
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			WRIST_TWIST: {
@@ -411,7 +411,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				ChildBoneNames:   []StandardBoneNames{WRIST},
 				UpFromBoneNames:  []StandardBoneNames{},
 				UpToBoneNames:    []StandardBoneNames{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TWIST},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TWIST, CATEGORY_ARM},
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			WRIST_TWIST1: {
@@ -443,7 +443,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				ChildBoneNames:   []StandardBoneNames{MIDDLE1},
 				UpFromBoneNames:  []StandardBoneNames{WRIST_TWIST, ELBOW},
 				UpToBoneNames:    []StandardBoneNames{WRIST},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_ARM},
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			THUMB0: {
