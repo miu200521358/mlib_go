@@ -116,7 +116,7 @@ const (
 	NECK_ROOT     StandardBoneNames = "首根元"
 	NECK          StandardBoneNames = "首"
 	HEAD          StandardBoneNames = "頭"
-	HEAD_TAIL     StandardBoneNames = "頭先"
+	HEAD_TAIL     StandardBoneNames = "頭先先"
 	EYES          StandardBoneNames = "両目"
 	EYE           StandardBoneNames = "{d}目"
 	SHOULDER_ROOT StandardBoneNames = "{d}肩根元"
