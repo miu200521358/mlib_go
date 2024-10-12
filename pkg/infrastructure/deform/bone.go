@@ -1121,7 +1121,9 @@ func calcBoneDeltas(
 			} else {
 				delta.GlobalMatrix = parentDelta.GlobalMatrix.Muled(delta.UnitMatrix)
 				if delta.Bone.IsIK() {
-					delta.GlobalMatrixParent = parentDelta.GlobalMatrix.Muled(delta.UnitMatrixNoTranslate)
+					if slices.Contains(delta.Bone.Extend.ParentBoneIndexes, delta.Bone.Ik.BoneIndex) {
+						delta.GlobalMatrixParent = parentDelta.GlobalMatrix.Muled(delta.UnitMatrixNoTranslate)
+					}
 				}
 			}
 		} else {
