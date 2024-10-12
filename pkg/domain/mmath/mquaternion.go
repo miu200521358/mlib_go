@@ -451,7 +451,7 @@ func NewMQuaternionFromAxes(xAxis, yAxis, zAxis *MVec3) *MQuaternion {
 }
 
 // SeparateByAxisは、グローバル軸に基づいてクォータニオンを2つのクォータニオン(捩りとそれ以外)に分割します。
-func (quat *MQuaternion) SeparateTwistByAxis(globalAxis *MVec3) (*MQuaternion, *MQuaternion) {
+func (quat *MQuaternion) SeparateTwistByAxis(globalAxis *MVec3) (twistQQ *MQuaternion, yzQQ *MQuaternion) {
 	globalXAxis := globalAxis.Normalized()
 
 	// X成分を抽出する ------------
@@ -459,11 +459,11 @@ func (quat *MQuaternion) SeparateTwistByAxis(globalAxis *MVec3) (*MQuaternion, *
 	// グローバル軸方向に伸ばす
 	globalXVec := quat.MulVec3(globalXAxis)
 	// YZの回転量（自身のねじれを無視する）
-	yzQQ := NewMQuaternionRotate(globalXAxis, globalXVec.Normalize())
+	yzQQ = NewMQuaternionRotate(globalXAxis, globalXVec.Normalize())
 	// 元々の回転量 から YZ回転 を除去して、除去されたX成分を求める
-	xQQ := yzQQ.Inverted().Mul(quat)
+	twistQQ = yzQQ.Inverted().Mul(quat)
 
-	return xQQ, yzQQ
+	return twistQQ, yzQQ
 }
 
 // SeparateByAxisは、グローバル軸に基づいてクォータニオンを3つのクォータニオン(x, y, z)に分割します。
