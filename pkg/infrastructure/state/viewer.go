@@ -41,6 +41,18 @@ func (vp *ViewerParameter) Equals(other *ViewerParameter) bool {
 	return true
 }
 
+func (vp *ViewerParameter) Copy() *ViewerParameter {
+	return &ViewerParameter{
+		Yaw:              vp.Yaw,
+		Pitch:            vp.Pitch,
+		FieldOfViewAngle: vp.FieldOfViewAngle,
+		Size:             vp.Size.Copy(),
+		CameraPos:        vp.CameraPos.Copy(),
+		CameraUp:         vp.CameraUp.Copy(),
+		LookAtCenter:     vp.LookAtCenter.Copy(),
+	}
+}
+
 func (vp *ViewerParameter) String() string {
 	return fmt.Sprintf("Yaw: %.8f, Pitch: %.8f, FieldOfViewAngle: %.8f, Size: %s, CameraPos: %s, CameraUp: %s, LookAtCenter: %s", vp.Yaw, vp.Pitch, vp.FieldOfViewAngle, vp.Size, vp.CameraPos, vp.CameraUp, vp.LookAtCenter)
 }

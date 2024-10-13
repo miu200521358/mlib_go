@@ -301,9 +301,8 @@ func (app *MApp) syncViewer(viewerParameters []*state.ViewerParameter) {
 
 	if viewerParameters[0] == nil {
 		// 初回は入ってないので、メインビューアのパラメータを採用
-		viewerParameters[0] = app.viewWindows[0].GetViewerParameter()
-		for i := 1; i < app.ViewerCount(); i++ {
-			viewerParameters[i] = viewerParameters[0]
+		for i := range app.ViewerCount() {
+			viewerParameters[i] = app.viewWindows[0].GetViewerParameter()
 		}
 	} else {
 		// 2回目以降は変更があったウィンドウのパラメーターを他に適用する

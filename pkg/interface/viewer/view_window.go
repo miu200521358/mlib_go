@@ -605,10 +605,10 @@ func (viewWindow *ViewWindow) GetViewerParameter() *state.ViewerParameter {
 		Yaw:              viewWindow.yaw,
 		Pitch:            viewWindow.pitch,
 		FieldOfViewAngle: viewWindow.shader.FieldOfViewAngle,
-		Size:             viewWindow.size,
-		CameraPos:        viewWindow.shader.CameraPosition,
-		CameraUp:         viewWindow.shader.CameraUp,
-		LookAtCenter:     viewWindow.shader.LookAtCenterPosition,
+		Size:             viewWindow.size.Copy(),
+		CameraPos:        viewWindow.shader.CameraPosition.Copy(),
+		CameraUp:         viewWindow.shader.CameraUp.Copy(),
+		LookAtCenter:     viewWindow.shader.LookAtCenterPosition.Copy(),
 	}
 }
 
