@@ -736,6 +736,16 @@ func (bones *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool, loop int) *B
 		return nil
 	}
 
+	if bone.IsIK() && loop > 0 {
+		for _, link := range bone.Ik.Links {
+			linkBone := bones.Get(link.BoneIndex)
+			linkLayerBone := bones.getIkTreeIndex(linkBone, isAfterPhysics, 0)
+			if linkLayerBone != nil {
+				return linkLayerBone
+			}
+		}
+	}
+
 	parentBone := bones.Get(bone.ParentIndex)
 	if parentBone.Index() < 0 {
 		return nil
@@ -743,7 +753,9 @@ func (bones *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool, loop int) *B
 
 	if _, ok := bones.IkTreeIndexes[parentBone.Index()]; ok {
 		return parentBone
-	} else {
+	}
+
+	if parentBone.IsIK() {
 		parentLayerBone := bones.getIkTreeIndex(parentBone, isAfterPhysics, loop+1)
 		if parentLayerBone != nil {
 			return parentLayerBone
@@ -758,6 +770,30 @@ func (bones *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool, loop int) *B
 			effectorLayerBone := bones.getIkTreeIndex(effectBone, isAfterPhysics, loop+1)
 			if effectorLayerBone != nil {
 				return effectorLayerBone
+			}
+		}
+	}
+
+	for ikIndex := range bone.Extend.IkTargetBoneIndexes {
+		ikBone := bones.Get(ikIndex)
+		if _, ok := bones.IkTreeIndexes[ikBone.Index()]; ok {
+			return ikBone
+		} else {
+			ikLayerBone := bones.getIkTreeIndex(ikBone, isAfterPhysics, loop+1)
+			if ikLayerBone != nil {
+				return ikLayerBone
+			}
+		}
+	}
+
+	for ikIndex := range bone.Extend.IkLinkBoneIndexes {
+		ikBone := bones.Get(ikIndex)
+		if _, ok := bones.IkTreeIndexes[ikBone.Index()]; ok {
+			return ikBone
+		} else {
+			ikLayerBone := bones.getIkTreeIndex(ikBone, isAfterPhysics, loop+1)
+			if ikLayerBone != nil {
+				return ikLayerBone
 			}
 		}
 	}
