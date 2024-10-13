@@ -15,6 +15,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
@@ -105,8 +106,9 @@ func prepareIk(
 						log.Fatal(err)
 					}
 
+					_, motionFileName, _ := mutils.SplitPath(motion.Path())
 					date := time.Now().Format("20060102_150405")
-					prefixPath = fmt.Sprintf("%s/%.3f_%s_%03d_%03d", dirPath, frame, date, i, m)
+					prefixPath = fmt.Sprintf("%s/%s_%.2f_%s_%03d_%03d", dirPath, motionFileName, frame, date, i, m)
 				}
 
 				deltas.Bones = calcIk(model, motion, deltas, frame, isAfterPhysics, ikBone,
