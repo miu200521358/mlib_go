@@ -736,16 +736,6 @@ func (bones *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool, loop int) *B
 		return nil
 	}
 
-	if bone.IsIK() && loop > 0 {
-		for _, link := range bone.Ik.Links {
-			linkBone := bones.Get(link.BoneIndex)
-			linkLayerBone := bones.getIkTreeIndex(linkBone, isAfterPhysics, 0)
-			if linkLayerBone != nil {
-				return linkLayerBone
-			}
-		}
-	}
-
 	parentBone := bones.Get(bone.ParentIndex)
 	if parentBone.Index() < 0 {
 		return nil
@@ -774,26 +764,46 @@ func (bones *Bones) getIkTreeIndex(bone *Bone, isAfterPhysics bool, loop int) *B
 		}
 	}
 
-	for ikIndex := range bone.Extend.IkTargetBoneIndexes {
+	for _, ikIndex := range bone.Extend.IkTargetBoneIndexes {
 		ikBone := bones.Get(ikIndex)
-		if _, ok := bones.IkTreeIndexes[ikBone.Index()]; ok {
-			return ikBone
-		} else {
-			ikLayerBone := bones.getIkTreeIndex(ikBone, isAfterPhysics, loop+1)
-			if ikLayerBone != nil {
-				return ikLayerBone
+		for treeIndex, ikTree := range bones.IkTreeIndexes {
+			for _, treeIkIndex := range ikTree {
+				if ikBone.Index() == treeIkIndex {
+					return bones.Get(treeIndex)
+				}
 			}
 		}
 	}
 
-	for ikIndex := range bone.Extend.IkLinkBoneIndexes {
+	for _, ikIndex := range bone.Extend.IkLinkBoneIndexes {
 		ikBone := bones.Get(ikIndex)
-		if _, ok := bones.IkTreeIndexes[ikBone.Index()]; ok {
-			return ikBone
-		} else {
-			ikLayerBone := bones.getIkTreeIndex(ikBone, isAfterPhysics, loop+1)
-			if ikLayerBone != nil {
-				return ikLayerBone
+		for treeIndex, ikTree := range bones.IkTreeIndexes {
+			for _, treeIkIndex := range ikTree {
+				if ikBone.Index() == treeIkIndex {
+					return bones.Get(treeIndex)
+				}
+			}
+		}
+	}
+
+	for _, ikIndex := range parentBone.Extend.IkTargetBoneIndexes {
+		ikBone := bones.Get(ikIndex)
+		for treeIndex, ikTree := range bones.IkTreeIndexes {
+			for _, treeIkIndex := range ikTree {
+				if ikBone.Index() == treeIkIndex {
+					return bones.Get(treeIndex)
+				}
+			}
+		}
+	}
+
+	for _, ikIndex := range parentBone.Extend.IkLinkBoneIndexes {
+		ikBone := bones.Get(ikIndex)
+		for treeIndex, ikTree := range bones.IkTreeIndexes {
+			for _, treeIkIndex := range ikTree {
+				if ikBone.Index() == treeIkIndex {
+					return bones.Get(treeIndex)
+				}
 			}
 		}
 	}
