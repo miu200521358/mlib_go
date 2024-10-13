@@ -650,7 +650,7 @@ ikLoop:
 				}
 
 				// 子IKが無い場合、IKターゲットボーンの回転を更新
-				targetQuat := resultIkQuat.Muled(linkQuat.Inverted()).Inverted().Muled(targetDelta.FilledTotalRotation())
+				targetQuat := linkQuat.Muled(resultIkQuat.Inverted()).Muled(targetDelta.FilledTotalRotation())
 				targetDelta.FrameRotation = targetQuat
 				deltas.Bones.Update(targetDelta)
 
