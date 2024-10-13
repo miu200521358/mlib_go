@@ -55,7 +55,7 @@ func prepareDeltas(
 	}
 
 	// ボーンデフォーム情報を埋める
-	deltas.Bones = fillBoneDeform(model, motion, deltas, frame, deformBoneIndexes)
+	deltas.Bones = fillBoneDeform(model, motion, deltas, frame, deformBoneIndexes, isCalcIk)
 
 	return deformBoneIndexes, deltas
 }
@@ -215,15 +215,24 @@ func calcIk(
 		}
 
 		ikOffMotion.AppendIkFrame(bif)
+		boneNames := make(map[string]struct{})
 
 		for _, ikDelta := range ikDeltas.Bones.Data {
-			if ikDelta == nil {
+			if ikDelta == nil || (ikDelta.FramePosition == nil && ikDelta.FrameRotation == nil) {
 				continue
 			}
 			bf := vmd.NewBoneFrame(0)
 			bf.Position = ikDelta.FramePosition
 			bf.Rotation = ikDelta.FrameRotation
 			ikOffMotion.AppendRegisteredBoneFrame(ikDelta.Bone.Name(), bf)
+			boneNames[ikDelta.Bone.Name()] = struct{}{}
+		}
+
+		for _, bone := range model.Bones.Data {
+			if _, ok := boneNames[bone.Name()]; !ok {
+				bf := motion.BoneFrames.Get(bone.Name()).Get(frame)
+				ikOffMotion.AppendRegisteredBoneFrame(bone.Name(), bf)
+			}
 		}
 
 		r := repository.NewVmdRepository()
@@ -320,7 +329,7 @@ ikLoop:
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				bf := vmd.NewBoneFrame(float32(count))
-				// bf.Position = ikDeltas.Bones.Get(ikBone.Index()).FilledFramePosition()
+				bf.Position = ikDeltas.Bones.Get(ikBone.Index()).FilledFramePosition()
 				bf.Rotation = ikDeltas.Bones.Get(ikBone.Index()).FilledTotalRotation()
 				ikMotion.AppendRegisteredBoneFrame(ikBone.Name(), bf)
 				count++
@@ -637,36 +646,36 @@ ikLoop:
 			linkDelta.FrameRotation = resultIkQuat
 			deltas.Bones.Update(linkDelta)
 
-			if !hasChildIk {
-				// ターゲットは初期位置の方向を向く
-				targetDelta := deltas.Bones.Get(ikTargetBone.Index())
-				if targetDelta == nil {
-					targetDelta = &delta.BoneDelta{Bone: ikTargetBone, Frame: frame}
-				}
+			// if !hasChildIk {
+			// 	// IKは初期位置の方向を向く
+			// 	ikDelta := deltas.Bones.Get(ikBone.Index())
+			// 	if ikDelta == nil {
+			// 		ikDelta = &delta.BoneDelta{Bone: ikTargetBone, Frame: frame}
+			// 	}
 
-				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					targetBf := vmd.NewBoneFrame(float32(count))
-					targetBf.Rotation = targetDelta.FilledTotalRotation().Copy()
-					ikMotion.AppendRegisteredBoneFrame(ikTargetBone.Name(), targetBf)
-					count++
-				}
+			// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			// 		ikBf := vmd.NewBoneFrame(float32(count))
+			// 		ikBf.Rotation = ikDelta.FilledTotalRotation().Copy()
+			// 		ikMotion.AppendRegisteredBoneFrame(ikTargetBone.Name(), ikBf)
+			// 		count++
+			// 	}
 
-				// 子IKが無い場合、IKターゲットボーンの回転を更新
-				targetQuat := linkQuat.Muled(resultIkQuat.Inverted()).Muled(targetDelta.FilledTotalRotation())
-				targetDelta.FrameRotation = targetQuat
-				deltas.Bones.Update(targetDelta)
+			// 	// 子IKが無い場合、IKの回転を更新
+			// 	ikFixQuat := linkQuat.Muled(resultIkQuat.Inverted()).Muled(ikDelta.FilledTotalRotation())
+			// 	ikDelta.FrameRotation = ikFixQuat
+			// 	deltas.Bones.Update(ikDelta)
 
-				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
-					targetBf := vmd.NewBoneFrame(float32(count))
-					targetBf.Rotation = targetDelta.FilledTotalRotation().Copy()
-					ikMotion.AppendRegisteredBoneFrame(ikTargetBone.Name(), targetBf)
-					count++
+			// 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			// 		targetBf := vmd.NewBoneFrame(float32(count))
+			// 		targetBf.Rotation = ikDelta.FilledTotalRotation().Copy()
+			// 		ikMotion.AppendRegisteredBoneFrame(ikTargetBone.Name(), targetBf)
+			// 		count++
 
-					fmt.Fprintf(ikFile,
-						"[%.3f][%03d][%s][%05d][結果] targetBf.Rotation: %s(%s)\n",
-						frame, loop, linkBone.Name(), count-1, targetBf.Rotation.String(), targetBf.Rotation.ToMMDDegrees().String())
-				}
-			}
+			// 		fmt.Fprintf(ikFile,
+			// 			"[%.3f][%03d][%s][%05d][結果] targetBf.Rotation: %s(%s)\n",
+			// 			frame, loop, linkBone.Name(), count-1, targetBf.Rotation.String(), targetBf.Rotation.ToMMDDegrees().String())
+			// 	}
+			// }
 
 			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 				linkBf := vmd.NewBoneFrame(float32(count))
@@ -1082,7 +1091,6 @@ func calcBoneDeltas(
 		}
 
 		d.UnitMatrix = mmath.NewMMat4()
-		d.UnitMatrixNoTranslate = mmath.NewMMat4()
 		d.GlobalMatrix = nil
 		d.LocalMatrix = nil
 		d.GlobalPosition = nil
@@ -1091,7 +1099,6 @@ func calcBoneDeltas(
 		localMat := boneDeltas.TotalLocalMat(bone.Index())
 		if localMat != nil && !localMat.IsIdent() {
 			d.UnitMatrix.Mul(localMat)
-			d.UnitMatrixNoTranslate.Mul(localMat)
 		}
 
 		// 移動
@@ -1104,14 +1111,12 @@ func calcBoneDeltas(
 		rotMat := boneDeltas.TotalRotationMat(bone.Index())
 		if rotMat != nil && !rotMat.IsIdent() {
 			d.UnitMatrix.Mul(rotMat)
-			d.UnitMatrixNoTranslate.Mul(rotMat)
 		}
 
 		// スケール
 		scaleMat := boneDeltas.TotalScaleMat(bone.Index())
 		if scaleMat != nil && !scaleMat.IsIdent() {
 			d.UnitMatrix.Mul(scaleMat)
-			d.UnitMatrixNoTranslate.Mul(scaleMat)
 		}
 
 		// x := math.Abs(rot.X)
@@ -1122,28 +1127,16 @@ func calcBoneDeltas(
 
 		// 逆BOf行列(初期姿勢行列)
 		d.UnitMatrix = d.Bone.Extend.RevertOffsetMatrix.Muled(d.UnitMatrix)
-		d.UnitMatrixNoTranslate = d.Bone.Extend.RevertOffsetMatrix.Muled(d.UnitMatrixNoTranslate)
 	}
 
 	for _, boneIndex := range deformBoneIndexes {
 		delta := boneDeltas.Get(boneIndex)
 		parentDelta := boneDeltas.Get(delta.Bone.ParentIndex)
 		if parentDelta != nil && parentDelta.GlobalMatrix != nil {
-			if isCalcIk && !delta.Bone.IsIK() && parentDelta.GlobalMatrixParent != nil {
-				// IK計算時に自身がIKじゃない場合、IKの移動は加味しない
-				delta.GlobalMatrix = parentDelta.GlobalMatrixParent.Muled(delta.UnitMatrix)
-			} else {
-				delta.GlobalMatrix = parentDelta.GlobalMatrix.Muled(delta.UnitMatrix)
-				if delta.Bone.IsIK() {
-					if slices.Contains(delta.Bone.Extend.ParentBoneIndexes, delta.Bone.Ik.BoneIndex) {
-						delta.GlobalMatrixParent = parentDelta.GlobalMatrix.Muled(delta.UnitMatrixNoTranslate)
-					}
-				}
-			}
+			delta.GlobalMatrix = parentDelta.GlobalMatrix.Muled(delta.UnitMatrix)
 		} else {
 			// 対象ボーン自身の行列をかける
 			delta.GlobalMatrix = delta.UnitMatrix.Copy()
-			delta.GlobalMatrixParent = delta.UnitMatrixNoTranslate.Copy()
 		}
 
 		boneDeltas.Update(delta)
@@ -1236,7 +1229,11 @@ func fillBoneDeform(
 	deltas *delta.VmdDeltas,
 	frame float32,
 	deformBoneIndexes []int,
+	isCalcIk bool,
 ) *delta.BoneDeltas {
+	// IKのON/OFF
+	ikFrame := motion.IkFrames.Get(frame)
+
 	for _, boneIndex := range deformBoneIndexes {
 		bone := model.Bones.Get(boneIndex)
 		d := deltas.Bones.Get(boneIndex)
@@ -1252,10 +1249,12 @@ func fillBoneDeform(
 			bf = motion.BoneFrames.Get(bone.Name()).Get(frame)
 		}
 
+		ikEnabled := isCalcIk && bone.IsIK() && ikFrame.IsEnable(bone.Name()) && false
+
 		// ボーンの移動位置、回転角度、拡大率を取得
 		d.FrameLocalMat, d.FrameLocalMorphMat = getLocalMat(deltas, bone)
 		d.FramePosition, d.FrameCancelablePosition, d.FrameMorphPosition, d.FrameMorphCancelablePosition =
-			getPosition(deltas, bone, bf)
+			getPosition(deltas, bone, bf, ikEnabled)
 		d.FrameRotation, d.FrameCancelableRotation, d.FrameMorphRotation, d.FrameMorphCancelableRotation =
 			getRotation(deltas, bone, bf)
 		d.FrameScale, d.FrameCancelableScale, d.FrameMorphScale, d.FrameMorphCancelableScale =
@@ -1289,14 +1288,19 @@ func getPosition(
 	deltas *delta.VmdDeltas,
 	bone *pmx.Bone,
 	bf *vmd.BoneFrame,
+	ikEnabled bool,
 ) (*mmath.MVec3, *mmath.MVec3, *mmath.MVec3, *mmath.MVec3) {
 	var pos *mmath.MVec3
-	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil && deltas.Bones.Get(bone.Index()).FramePosition != nil {
-		pos = deltas.Bones.Get(bone.Index()).FramePosition.Copy()
-	} else if bf != nil && bf.Position != nil && !bf.Position.IsZero() {
-		pos = bf.Position.Copy()
-	} else {
+	if ikEnabled {
 		pos = mmath.NewMVec3()
+	} else {
+		if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil && deltas.Bones.Get(bone.Index()).FramePosition != nil {
+			pos = deltas.Bones.Get(bone.Index()).FramePosition.Copy()
+		} else if bf != nil && bf.Position != nil && !bf.Position.IsZero() {
+			pos = bf.Position.Copy()
+		} else {
+			pos = mmath.NewMVec3()
+		}
 	}
 
 	var cancelablePos *mmath.MVec3
@@ -1367,9 +1371,9 @@ func getRotation(
 		}
 	}
 
-	if bone.HasFixedAxis() {
-		rot = rot.ToFixedAxisRotation(bone.Extend.NormalizedFixedAxis)
-	}
+	// if bone.HasFixedAxis() {
+	// 	rot = rot.ToFixedAxisRotation(bone.Extend.NormalizedFixedAxis)
+	// }
 
 	return rot, cancelableRot, morphRot, morphCancelableRot
 }

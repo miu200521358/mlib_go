@@ -473,7 +473,7 @@ ikLoop:
 	}
 
 	// ボーンデフォーム情報を埋める
-	deltas.Bones = fillBoneDeform(model, motion, deltas, frame, ikTargetDeformBoneIndexes)
+	deltas.Bones = fillBoneDeform(model, motion, deltas, frame, ikTargetDeformBoneIndexes, true)
 	deltas.Bones = calcBoneDeltas(frame, model, ikTargetDeformBoneIndexes, deltas.Bones, true)
 
 	return deltas

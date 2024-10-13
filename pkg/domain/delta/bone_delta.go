@@ -12,10 +12,8 @@ type BoneDelta struct {
 	Frame                        float32            // キーフレーム
 	GlobalMatrix                 *mmath.MMat4       // グローバル行列
 	LocalMatrix                  *mmath.MMat4       // ローカル行列
-	GlobalMatrixParent           *mmath.MMat4       // グローバル行列（自身の平行移動なし）
 	GlobalPosition               *mmath.MVec3       // グローバル位置
 	UnitMatrix                   *mmath.MMat4       // 親ボーンからの変位行列
-	UnitMatrixNoTranslate        *mmath.MMat4       // 親ボーンからの変位行列（自身の平行移動なし）
 	FramePosition                *mmath.MVec3       // キーフレ位置の変動量
 	FrameMorphPosition           *mmath.MVec3       // モーフ位置の変動量
 	FrameCancelablePosition      *mmath.MVec3       // キャンセル位置の変動量
@@ -44,13 +42,11 @@ func NewBoneDeltaByGlobalMatrix(
 	unitMatrix := globalMatrix.Inverted().Muled(parentGlobalMatrix)
 
 	return &BoneDelta{
-		Bone:                  bone,
-		Frame:                 frame,
-		GlobalMatrix:          globalMatrix,
-		GlobalMatrixParent:    globalMatrix.Copy(),
-		LocalMatrix:           globalMatrix.Muled(bone.Extend.OffsetMatrix),
-		UnitMatrix:            unitMatrix,
-		UnitMatrixNoTranslate: unitMatrix.Copy(),
+		Bone:         bone,
+		Frame:        frame,
+		GlobalMatrix: globalMatrix,
+		LocalMatrix:  globalMatrix.Muled(bone.Extend.OffsetMatrix),
+		UnitMatrix:   unitMatrix,
 		// 物理演算後の移動を受け取ると逆オフセットかけても一部モデルで破綻するので一旦コメントアウト
 		// framePosition:   unitMatrix.Translation(),
 		FrameRotation: unitMatrix.Quaternion(),
