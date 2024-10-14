@@ -547,7 +547,23 @@ func fillBoneDeform(
 		updateBoneDelta(deltas.Bones, d, bone)
 
 		if isCalcIk && bone.IsIK() && ikFrame.IsEnable(bone.Name()) {
-			DeformIk(model, motion, deltas, frame, isAfterPhysics, bone, i)
+			// IKの変形リスト
+			ikTargetDeformBoneIndexes := model.Bones.DeformBoneIndexes[bone.Index()]
+
+			updateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
+
+			for _, boneIndex := range ikTargetDeformBoneIndexes {
+				d := deltas.Bones.Get(boneIndex)
+				if d == nil {
+					continue
+				}
+				d.GlobalIkOffMatrix = d.GlobalMatrix.Copy()
+				deltas.Bones.Update(d)
+			}
+
+			// IKボーンのグローバル位置
+			ikGlobalPosition := deltas.Bones.Get(bone.Index()).FilledGlobalPosition()
+			deformIk(model, motion, deltas, frame, isAfterPhysics, bone, ikGlobalPosition, ikTargetDeformBoneIndexes, i)
 			for _, l := range bone.Ik.Links {
 				calcIkRelativeBoneIndexes = append(calcIkRelativeBoneIndexes, l.BoneIndex)
 			}
@@ -631,13 +647,15 @@ func updateGlobalMatrix(
 }
 
 // IK計算
-func DeformIk(
+func deformIk(
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
 	frame float32,
 	isAfterPhysics bool,
 	ikBone *pmx.Bone,
+	ikGlobalPosition *mmath.MVec3,
+	ikTargetDeformBoneIndexes []int,
 	deformIndex int,
 ) *delta.BoneDeltas {
 	if len(ikBone.Ik.Links) < 1 {
@@ -753,23 +771,6 @@ func DeformIk(
 			mlog.E("[IK計算出力失敗][%.3f][%s] %s", frame, ikBone.Name(), err)
 		}
 	}
-
-	// IKの変形リスト
-	ikTargetDeformBoneIndexes := model.Bones.DeformBoneIndexes[ikBone.Index()]
-
-	updateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
-
-	for _, boneIndex := range ikTargetDeformBoneIndexes {
-		d := deltas.Bones.Get(boneIndex)
-		if d == nil {
-			continue
-		}
-		d.GlobalIkOffMatrix = d.GlobalMatrix.Copy()
-		deltas.Bones.Update(d)
-	}
-
-	// IKボーンのグローバル位置
-	ikGlobalPosition := deltas.Bones.Get(ikBone.Index()).FilledGlobalPosition()
 
 	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
 		bf := vmd.NewBoneFrame(float32(count))
