@@ -107,8 +107,8 @@ func (baseFrames *BaseFrames[T]) Get(index float32) T {
 	baseFrames.lock.RLock()
 	defer baseFrames.lock.RUnlock()
 
-	if _, ok := baseFrames.data[float32(index)]; ok {
-		return baseFrames.data[float32(index)]
+	if _, ok := baseFrames.data[index]; ok {
+		return baseFrames.data[index]
 	}
 
 	if len(baseFrames.data) == 0 {

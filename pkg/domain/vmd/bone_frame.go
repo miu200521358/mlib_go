@@ -130,7 +130,18 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFra
 		xy, yy, zy, ry = nextBf.Curves.Evaluate(prevBf.Index(), index, nextBf.Index())
 	}
 
-	bf.Rotation = prevBf.Rotation.Slerp(nextBf.Rotation, ry)
+	var prevRotation, nextRotation *mmath.MQuaternion
+	if prevBf.Rotation != nil {
+		prevRotation = prevBf.Rotation
+	} else {
+		prevRotation = mmath.MQuaternionIdent
+	}
+	if nextBf.Rotation != nil {
+		nextRotation = nextBf.Rotation
+	} else {
+		nextRotation = mmath.MQuaternionIdent
+	}
+	bf.Rotation = prevRotation.Slerp(nextRotation, ry)
 
 	ppx := 0.0
 	ppy := 0.0

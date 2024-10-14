@@ -414,7 +414,7 @@ func (boneDeltas *BoneDeltas) totalRotationLoop(boneIndex int, loop int, factor 
 	return rot.MuledScalar(factor)
 }
 
-// 該当ボーンまでの親を加味した全ての回転（モーフは含まない）
+// 該当ボーンまでの付与親を加味した全ての回転（モーフは含まない）
 func (boneDeltas *BoneDeltas) TotalBoneRotation(boneIndex int) *mmath.MQuaternion {
 	rot := boneDeltas.totalBoneRotationLoop(boneIndex, 0, 1.0)
 	return boneDeltas.totalBoneCancelRotation(boneIndex, rot)

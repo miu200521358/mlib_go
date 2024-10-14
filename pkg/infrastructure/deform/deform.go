@@ -80,6 +80,7 @@ func DeformIk(
 ) *delta.VmdDeltas {
 	ikTargetBone := model.Bones.Get(ikBone.Ik.BoneIndex)
 	ikTargetDeformBoneIndexes, deltas := newVmdDeltas(model, motion, nil, frame, []string{ikTargetBone.Name()}, false)
+	deltas.Bones = fillBoneDeform(model, motion, deltas, frame, ikTargetDeformBoneIndexes, false, false)
 	deformIk(model, motion, deltas, frame, false, ikBone, ikGlobalPosition, ikTargetDeformBoneIndexes, 0)
 
 	return deltas
