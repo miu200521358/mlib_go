@@ -10,6 +10,7 @@ import (
 type BoneDelta struct {
 	Bone                         *pmx.Bone          // ボーン
 	Frame                        float32            // キーフレーム
+	GlobalIkOffMatrix            *mmath.MMat4       // IKオフ時のグローバル行列
 	GlobalMatrix                 *mmath.MMat4       // グローバル行列
 	LocalMatrix                  *mmath.MMat4       // ローカル行列
 	GlobalPosition               *mmath.MVec3       // グローバル位置
