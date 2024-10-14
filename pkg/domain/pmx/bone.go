@@ -428,6 +428,11 @@ func (bone *Bone) IsFinger() bool {
 	return bone.containsCategory(CATEGORY_FINGER)
 }
 
+// 指先系ボーンであるか
+func (bone *Bone) IsFingerTail() bool {
+	return bone.containsCategory(CATEGORY_FINGER_TAIL)
+}
+
 // 頭系であるか
 func (bone *Bone) IsHead() bool {
 	return bone.containsCategory(CATEGORY_HEAD)
