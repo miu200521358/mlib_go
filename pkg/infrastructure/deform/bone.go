@@ -674,7 +674,7 @@ func deformIk(
 
 		_, motionFileName, _ := mutils.SplitPath(motion.Path())
 		date := time.Now().Format("20060102_150405")
-		prefixPath = fmt.Sprintf("%s/%s_%.2f_%03d_%s", dirPath, motionFileName, frame, deformIndex, date)
+		prefixPath = fmt.Sprintf("%s/%s_%.2f_%s_%03d", dirPath, motionFileName, frame, date, deformIndex)
 	}
 
 	var err error
@@ -706,11 +706,15 @@ func deformIk(
 
 		if ikMotion != nil {
 			r := repository.NewVmdRepository()
-			r.Save("", ikMotion, true)
+			if err := r.Save("", ikMotion, true); err != nil {
+				mlog.E("[IK計算出力失敗][%.3f][%s] %s", frame, ikBone.Name(), err)
+			}
 		}
 		if globalMotion != nil {
 			r := repository.NewVmdRepository()
-			r.Save("", globalMotion, true)
+			if err := r.Save("", globalMotion, true); err != nil {
+				mlog.E("[IK計算出力失敗][%.3f][%s] %s", frame, ikBone.Name(), err)
+			}
 		}
 		if ikFile != nil {
 			ikFile.Close()

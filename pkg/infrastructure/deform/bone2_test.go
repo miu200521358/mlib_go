@@ -359,3 +359,29 @@ func TestVmdMotion_DeformArmIk_Mahoujin_04(t *testing.T) {
 		}
 	}
 }
+
+func TestVmdMotion_DeformLegIk_Up(t *testing.T) {
+	// mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/左足あげ.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Costume/モノクロストリート風衣装 夜/ストリート風白_3.pmx")
+	// modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Costume/モノクロストリート風衣装 夜/ストリート風白.pmx")
+	// modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/紲星☆あかり20180430 お宮/お宮式紲星☆あかりv1.00.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+
+	DeformBone(model, motion, true, 0, nil)
+}
