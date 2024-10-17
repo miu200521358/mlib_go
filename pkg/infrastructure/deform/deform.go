@@ -74,14 +74,22 @@ func DeformModel(
 func DeformIk(
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
+	deltas *delta.VmdDeltas,
 	frame float32,
 	ikBone *pmx.Bone,
 	ikGlobalPosition *mmath.MVec3,
+	boneNames []string,
 ) *delta.VmdDeltas {
-	ikTargetBone := model.Bones.Get(ikBone.Ik.BoneIndex)
-	ikTargetDeformBoneIndexes, deltas := newVmdDeltas(model, motion, nil, frame, []string{ikTargetBone.Name()}, false)
-	deltas.Bones = fillBoneDeform(model, motion, deltas, frame, ikTargetDeformBoneIndexes, false, false)
-	deformIk(model, motion, deltas, frame, false, ikBone, ikGlobalPosition, ikTargetDeformBoneIndexes, 0)
+	boneNames = append(boneNames, model.Bones.Get(ikBone.Ik.BoneIndex).Name())
+	for _, link := range ikBone.Ik.Links {
+		boneNames = append(boneNames, model.Bones.Get(link.BoneIndex).Name())
+	}
+
+	deformBoneIndexes, deltas := newVmdDeltas(model, motion, deltas, frame, boneNames, false)
+
+	deformIk(model, motion, deltas, frame, false, ikBone, ikGlobalPosition, deformBoneIndexes, 0)
+
+	updateGlobalMatrix(deltas.Bones, deformBoneIndexes)
 
 	return deltas
 }
