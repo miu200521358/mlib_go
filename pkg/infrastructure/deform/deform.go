@@ -80,6 +80,9 @@ func DeformIk(
 	ikGlobalPosition *mmath.MVec3,
 	boneNames []string,
 ) *delta.VmdDeltas {
+	if boneNames == nil {
+		boneNames = make([]string, 0)
+	}
 	boneNames = append(boneNames, model.Bones.Get(ikBone.Ik.BoneIndex).Name())
 	for _, link := range ikBone.Ik.Links {
 		boneNames = append(boneNames, model.Bones.Get(link.BoneIndex).Name())
