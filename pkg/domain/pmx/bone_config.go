@@ -136,6 +136,7 @@ const (
 	WRIST_TWIST2  StandardBoneNames = "{d}手捩2"
 	WRIST_TWIST3  StandardBoneNames = "{d}手捩3"
 	WRIST         StandardBoneNames = "{d}手首"
+	WRIST_TAIL    StandardBoneNames = "{d}手首先"
 	THUMB0        StandardBoneNames = "{d}親指０"
 	THUMB1        StandardBoneNames = "{d}親指１"
 	THUMB2        StandardBoneNames = "{d}親指２"
@@ -442,12 +443,20 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				IsStandard:       true},
 			WRIST: {
 				ParentBoneNames:  []StandardBoneNames{WRIST_TWIST, ELBOW},
-				ChildBoneNames:   []StandardBoneNames{MIDDLE1},
+				ChildBoneNames:   []StandardBoneNames{WRIST_TAIL},
 				UpFromBoneNames:  []StandardBoneNames{WRIST_TWIST, ELBOW},
 				UpToBoneNames:    []StandardBoneNames{WRIST},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_ARM},
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
+			WRIST_TAIL: {
+				ParentBoneNames:  []StandardBoneNames{WRIST, WRIST_TWIST, ELBOW},
+				ChildBoneNames:   []StandardBoneNames{},
+				UpFromBoneNames:  []StandardBoneNames{WRIST, WRIST_TWIST, ELBOW},
+				UpToBoneNames:    []StandardBoneNames{WRIST},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_ARM},
+				BoundingBoxShape: SHAPE_NONE,
+				IsStandard:       false},
 			THUMB0: {
 				ParentBoneNames:  []StandardBoneNames{WRIST},
 				ChildBoneNames:   []StandardBoneNames{THUMB1},
