@@ -234,6 +234,9 @@ func DeformPhysics(
 ) []*delta.VmdDeltas {
 	// 物理デフォーム
 	for i := range models {
+		for i >= len(vmdDeltas) {
+			vmdDeltas = append(vmdDeltas, nil)
+		}
 		if models[i] == nil || vmdDeltas[i] == nil {
 			continue
 		}
