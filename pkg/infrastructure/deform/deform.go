@@ -115,9 +115,16 @@ func deformBeforePhysics(
 
 	if vmdDeltas == nil || vmdDeltas.Frame() != frame ||
 		vmdDeltas.ModelHash() != model.Hash() || vmdDeltas.MotionHash() != motion.Hash() {
-		vmdDeltas = delta.NewVmdDeltas(frame, model.Bones, model.Hash(), motion.Hash())
-		vmdDeltas.Morphs = DeformMorph(model, motion.MorphFrames, frame, nil)
-		vmdDeltas = DeformBoneByPhysicsFlag(model, motion, vmdDeltas, true, frame, nil, false)
+		deltas := delta.NewVmdDeltas(frame, model.Bones, model.Hash(), motion.Hash())
+		deltas.Morphs = DeformMorph(model, motion.MorphFrames, frame, nil)
+
+		// ボーンデフォーム情報を埋める(物理前後全部埋める)
+		deltas.Bones = fillBoneDeform(model, motion, deltas, frame, model.Bones.LayerSortedIndexes, true, false)
+
+		// ボーンデフォーム情報を更新する
+		updateGlobalMatrix(deltas.Bones, model.Bones.LayerSortedIndexes)
+
+		return deltas
 	}
 
 	return vmdDeltas
@@ -158,10 +165,10 @@ func DeformBonePyPhysics(
 ) *delta.VmdDeltas {
 	if model != nil && appState.IsEnabledPhysics() && !appState.IsPhysicsReset() {
 		// 物理剛体位置を更新
-		processFunc := func(data, index int) {
-			bone := model.Bones.Get(data)
+		for _, boneIndex := range model.Bones.LayerSortedIndexes {
+			bone := model.Bones.Get(boneIndex)
 			if bone.Extend.RigidBody == nil || bone.Extend.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
-				return
+				continue
 			}
 			bonePhysicsGlobalMatrix := physics.GetRigidBodyBoneMatrix(model.Index(), bone.Extend.RigidBody)
 			if vmdDeltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
@@ -170,13 +177,16 @@ func DeformBonePyPhysics(
 				vmdDeltas.Bones.Update(bd)
 			}
 		}
-
-		// 100件ずつ処理
-		miter.IterParallelByList(model.Bones.LayerSortedIndexes, 100, processFunc)
 	}
 
-	// 物理後のデフォーム情報
-	return DeformBoneByPhysicsFlag(model, motion, vmdDeltas, true, appState.Frame(), nil, true)
+	// ボーンデフォーム情報を埋める(物理後埋める)
+	vmdDeltas.Bones = fillBoneDeform(model, motion, vmdDeltas, appState.Frame(),
+		model.Bones.LayerSortedBoneIndexes[true], true, true)
+
+	// ボーンデフォーム情報を更新する
+	updateGlobalMatrix(vmdDeltas.Bones, model.Bones.LayerSortedBoneIndexes[true])
+
+	return vmdDeltas
 }
 
 func DeformForReset(

@@ -489,13 +489,12 @@ func newVmdDeltas(
 	}
 
 	// 変形階層・ボーンINDEXでソート
-	for _, ap := range []bool{false, true} {
-		for _, bone := range model.Bones.LayerSortedBones[ap] {
-			if _, ok := relativeBoneIndexes[bone.Index()]; ok {
-				deformBoneIndexes = append(deformBoneIndexes, bone.Index())
-				if !deltas.Bones.Contains(bone.Index()) {
-					deltas.Bones.Update(&delta.BoneDelta{Bone: bone, Frame: frame})
-				}
+	for _, boneIndex := range model.Bones.LayerSortedIndexes {
+		bone := model.Bones.Get(boneIndex)
+		if _, ok := relativeBoneIndexes[bone.Index()]; ok {
+			deformBoneIndexes = append(deformBoneIndexes, bone.Index())
+			if !deltas.Bones.Contains(bone.Index()) {
+				deltas.Bones.Update(&delta.BoneDelta{Bone: bone, Frame: frame})
 			}
 		}
 	}
@@ -550,6 +549,7 @@ func fillBoneDeform(
 			// IKの変形リスト
 			ikTargetDeformBoneIndexes := model.Bones.DeformBoneIndexes[bone.Index()]
 
+			deltas.Bones = fillBoneDeform(model, motion, deltas, frame, ikTargetDeformBoneIndexes, false, isAfterPhysics)
 			updateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
 
 			for _, boneIndex := range ikTargetDeformBoneIndexes {

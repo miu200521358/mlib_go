@@ -40,13 +40,14 @@ func NewBoneDeltaByGlobalMatrix(
 	} else {
 		parentGlobalMatrix = mmath.NewMMat4()
 	}
+	localMatrix := globalMatrix.Muled(bone.Extend.OffsetMatrix)
 	unitMatrix := parentGlobalMatrix.Inverted().Muled(globalMatrix)
 
 	return &BoneDelta{
 		Bone:          bone,
 		Frame:         frame,
 		GlobalMatrix:  globalMatrix,
-		LocalMatrix:   globalMatrix.Muled(bone.Extend.OffsetMatrix),
+		LocalMatrix:   localMatrix,
 		UnitMatrix:    unitMatrix,
 		FramePosition: unitMatrix.Translation(),
 		FrameRotation: unitMatrix.Quaternion(),

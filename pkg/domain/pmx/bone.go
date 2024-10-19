@@ -651,24 +651,6 @@ func (bones *Bones) getChildRelativePosition(boneIndex int) *mmath.MVec3 {
 	return v
 }
 
-func (bones *Bones) getLayerIndexes(isAfterPhysics bool) []int {
-	layerIndexes := make(layerIndexes, 0, len(bones.NameIndexes))
-	for _, bone := range bones.Data {
-		if (isAfterPhysics && bone.IsAfterPhysicsDeform()) || (!isAfterPhysics && !bone.IsAfterPhysicsDeform()) {
-			// 物理前後でフィルタリング
-			layerIndexes = append(layerIndexes, layerIndex{layer: bone.Layer, index: bone.Index()})
-		}
-	}
-	sort.Sort(layerIndexes)
-
-	indexes := make([]int, len(layerIndexes))
-	for i, layerIndex := range layerIndexes {
-		indexes[i] = layerIndex.index
-	}
-
-	return indexes
-}
-
 // 関連ボーンリストの取得
 func (bones *Bones) getRelativeBoneIndexes(boneIndex int, parentBoneIndexes, relativeBoneIndexes []int) ([]int, []int) {
 
@@ -739,6 +721,7 @@ func (bones *Bones) Setup() {
 	bones.LayerSortedIndexes = make([]int, 0)
 	bones.LayerSortedBones = make(map[bool][]*Bone)
 	bones.LayerSortedNames = make(map[bool]map[string]int)
+	bones.LayerSortedBoneIndexes = make(map[bool][]int)
 	bones.DeformBoneIndexes = make(map[int][]int)
 
 	for _, bone := range bones.Data {
@@ -819,8 +802,7 @@ func (bones *Bones) Setup() {
 	// 変形階層・ボーンINDEXでソート
 
 	// 変形前と変形後に分けてINDEXリストを生成
-	bones.createLayerIndexes(false)
-	bones.createLayerIndexes(true)
+	bones.createLayerIndexes()
 
 	for _, bone := range bones.Data {
 		// ボーンのデフォームINDEXリストを取得
@@ -829,40 +811,38 @@ func (bones *Bones) Setup() {
 }
 
 func (bones *Bones) createLayerSortedBones(bone *Bone) {
-	// 関連ボーンINDEXリスト（順不同）
-	relativeBoneIndexes := make(map[int]struct{})
-
-	// 対象のボーンは常に追加
-	relativeBoneIndexes[bone.Index()] = struct{}{}
-
-	// 関連するボーンの追加
-	for _, index := range bone.Extend.RelativeBoneIndexes {
-		if _, ok := relativeBoneIndexes[index]; !ok {
-			relativeBoneIndexes[index] = struct{}{}
-		}
-	}
-
 	deformBoneIndexes := make([]int, 0)
-	for _, ap := range []bool{false, true} {
-		for _, bone := range bones.LayerSortedBones[ap] {
-			if _, ok := relativeBoneIndexes[bone.Index()]; ok {
-				deformBoneIndexes = append(deformBoneIndexes, bone.Index())
-			}
+	for _, boneIndex := range bones.LayerSortedIndexes {
+		if slices.Contains(bone.Extend.RelativeBoneIndexes, boneIndex) || boneIndex == bone.Index() {
+			deformBoneIndexes = append(deformBoneIndexes, boneIndex)
 		}
 	}
 
 	bones.DeformBoneIndexes[bone.Index()] = deformBoneIndexes
 }
 
-func (bones *Bones) createLayerIndexes(isAfterPhysics bool) {
-	bones.LayerSortedBones[isAfterPhysics] = make([]*Bone, 0)
-	bones.LayerSortedNames[isAfterPhysics] = make(map[string]int)
-	layerIndexes := bones.getLayerIndexes(isAfterPhysics)
+func (bones *Bones) createLayerIndexes() {
+	bones.LayerSortedBones[false] = make([]*Bone, 0)
+	bones.LayerSortedNames[false] = make(map[string]int)
+	bones.LayerSortedBoneIndexes[false] = make([]int, 0)
 
-	for i, boneIndex := range layerIndexes {
-		bone := bones.Get(boneIndex)
-		bones.LayerSortedNames[isAfterPhysics][bone.Name()] = i
-		bones.LayerSortedBones[isAfterPhysics] = append(bones.LayerSortedBones[isAfterPhysics], bone)
+	bones.LayerSortedBones[true] = make([]*Bone, 0)
+	bones.LayerSortedNames[true] = make(map[string]int)
+	bones.LayerSortedBoneIndexes[true] = make([]int, 0)
+
+	layerIndexes := make(layerIndexes, 0, len(bones.NameIndexes))
+	for _, bone := range bones.Data {
+		layerIndexes = append(layerIndexes, layerIndex{isAfterPhysics: bone.IsAfterPhysicsDeform(), layer: bone.Layer, index: bone.Index()})
+	}
+	sort.Sort(layerIndexes)
+
+	for i, layerBone := range layerIndexes {
+		bone := bones.Get(layerBone.index)
+		bones.LayerSortedNames[layerBone.isAfterPhysics][bone.Name()] = i
+		bones.LayerSortedBones[layerBone.isAfterPhysics] =
+			append(bones.LayerSortedBones[layerBone.isAfterPhysics], bone)
+		bones.LayerSortedBoneIndexes[layerBone.isAfterPhysics] =
+			append(bones.LayerSortedBoneIndexes[layerBone.isAfterPhysics], layerBone.index)
 		bones.LayerSortedIndexes = append(bones.LayerSortedIndexes, bone.Index())
 		i++
 	}
@@ -870,8 +850,9 @@ func (bones *Bones) createLayerIndexes(isAfterPhysics bool) {
 
 // 変形階層とINDEXのソート用構造体
 type layerIndex struct {
-	layer int
-	index int
+	isAfterPhysics bool
+	layer          int
+	index          int
 }
 
 type layerIndexes []layerIndex
@@ -880,7 +861,17 @@ func (li layerIndexes) Len() int {
 	return len(li)
 }
 func (li layerIndexes) Less(i, j int) bool {
-	return li[i].layer < li[j].layer || (li[i].layer == li[j].layer && li[i].index < li[j].index)
+	ia := 0
+	if li[i].isAfterPhysics {
+		ia = 1
+	}
+	ib := 0
+	if li[j].isAfterPhysics {
+		ib = 1
+	}
+
+	return ia < ib || (ia == ib && li[i].layer < li[j].layer) ||
+		(ia == ib && li[i].layer == li[j].layer && li[i].index < li[j].index)
 }
 func (li layerIndexes) Swap(i, j int) {
 	li[i], li[j] = li[j], li[i]
@@ -898,18 +889,20 @@ func (li layerIndexes) Contains(index int) bool {
 // ボーンリスト
 type Bones struct {
 	*core.IndexNameModels[*Bone]
-	LayerSortedBones   map[bool][]*Bone
-	LayerSortedNames   map[bool]map[string]int
-	DeformBoneIndexes  map[int][]int
-	LayerSortedIndexes []int
+	LayerSortedBones       map[bool][]*Bone
+	LayerSortedNames       map[bool]map[string]int
+	LayerSortedBoneIndexes map[bool][]int
+	DeformBoneIndexes      map[int][]int
+	LayerSortedIndexes     []int
 }
 
 func NewBones(count int) *Bones {
 	return &Bones{
-		IndexNameModels:    core.NewIndexNameModels[*Bone](count, func() *Bone { return nil }),
-		LayerSortedBones:   make(map[bool][]*Bone),
-		LayerSortedNames:   make(map[bool]map[string]int),
-		LayerSortedIndexes: make([]int, 0),
+		IndexNameModels:        core.NewIndexNameModels[*Bone](count, func() *Bone { return nil }),
+		LayerSortedBones:       make(map[bool][]*Bone),
+		LayerSortedNames:       make(map[bool]map[string]int),
+		LayerSortedBoneIndexes: make(map[bool][]int),
+		LayerSortedIndexes:     make([]int, 0),
 	}
 }
 
