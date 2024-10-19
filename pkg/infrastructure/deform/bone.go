@@ -514,36 +514,34 @@ func fillBoneDeform(
 ) *delta.BoneDeltas {
 	// IKのON/OFF
 	ikFrame := motion.IkFrames.Get(frame)
-	calcIkRelativeBoneIndexes := make([]int, 0, len(deformBoneIndexes))
 
 	for i, boneIndex := range deformBoneIndexes {
 		bone := model.Bones.Get(boneIndex)
 		d := deltas.Bones.Get(boneIndex)
 		if d == nil {
 			d = &delta.BoneDelta{Bone: bone, Frame: frame}
-		} else if slices.Contains(calcIkRelativeBoneIndexes, boneIndex) {
-			// IK計算済みボーンはスキップ
-			continue
 		}
 
-		bf := motion.BoneFrames.Get(bone.Name()).Get(frame)
-		if bf.Position != nil {
-			d.FramePosition = bf.Position.Copy()
-		}
-		if bf.Rotation != nil {
-			d.FrameRotation = bf.Rotation.Copy()
-		}
+		if d.UnitMatrix == nil || d.UnitMatrix.IsIdent() || bone.IsEffectorRotation() || bone.IsEffectorTranslation() {
+			bf := motion.BoneFrames.Get(bone.Name()).Get(frame)
+			if bf.Position != nil {
+				d.FramePosition = bf.Position.Copy()
+			}
+			if bf.Rotation != nil {
+				d.FrameRotation = bf.Rotation.Copy()
+			}
 
-		// ボーンの移動位置、回転角度、拡大率を取得
-		d.FrameLocalMat, d.FrameLocalMorphMat = getLocalMat(deltas, bone)
-		d.FrameCancelablePosition, d.FrameMorphPosition, d.FrameMorphCancelablePosition =
-			getPosition(deltas, bone, bf)
-		d.FrameCancelableRotation, d.FrameMorphRotation, d.FrameMorphCancelableRotation =
-			getRotation(deltas, bone, bf)
-		d.FrameScale, d.FrameCancelableScale, d.FrameMorphScale, d.FrameMorphCancelableScale =
-			getScale(deltas, bone, bf)
+			// ボーンの移動位置、回転角度、拡大率を取得
+			d.FrameLocalMat, d.FrameLocalMorphMat = getLocalMat(deltas, bone)
+			d.FrameCancelablePosition, d.FrameMorphPosition, d.FrameMorphCancelablePosition =
+				getPosition(deltas, bone, bf)
+			d.FrameCancelableRotation, d.FrameMorphRotation, d.FrameMorphCancelableRotation =
+				getRotation(deltas, bone, bf)
+			d.FrameScale, d.FrameCancelableScale, d.FrameMorphScale, d.FrameMorphCancelableScale =
+				getScale(deltas, bone, bf)
 
-		updateBoneDelta(deltas.Bones, d, bone)
+			updateBoneDelta(deltas.Bones, d, bone)
+		}
 
 		if isCalcIk && bone.IsIK() && ikFrame.IsEnable(bone.Name()) {
 			// IKの変形リスト
@@ -564,10 +562,6 @@ func fillBoneDeform(
 			// IKボーンのグローバル位置
 			ikGlobalPosition := deltas.Bones.Get(bone.Index()).FilledGlobalPosition()
 			deformIk(model, motion, deltas, frame, isAfterPhysics, bone, ikGlobalPosition, ikTargetDeformBoneIndexes, i)
-			for _, l := range bone.Ik.Links {
-				calcIkRelativeBoneIndexes = append(calcIkRelativeBoneIndexes, l.BoneIndex)
-			}
-			calcIkRelativeBoneIndexes = append(calcIkRelativeBoneIndexes, boneIndex)
 		}
 	}
 
