@@ -523,52 +523,6 @@ func (bone *Bone) ConfigChildBoneNames() []string {
 	return []string{}
 }
 
-// 定義上のUP Fromボーン名
-func (bone *Bone) ConfigUpFromBoneNames() []string {
-	for boneConfigName, boneConfig := range GetStandardBoneConfigs() {
-		if boneConfigName.String() == bone.Name() ||
-			boneConfigName.Right() == bone.Name() ||
-			boneConfigName.Left() == bone.Name() {
-
-			boneNames := make([]string, 0)
-			for _, upFromBoneName := range boneConfig.UpFromBoneNames {
-				if boneConfigName.Right() == bone.Name() {
-					boneNames = append(boneNames, upFromBoneName.Right())
-				} else if boneConfigName.Left() == bone.Name() {
-					boneNames = append(boneNames, upFromBoneName.Left())
-				} else {
-					boneNames = append(boneNames, upFromBoneName.String())
-				}
-			}
-			return boneNames
-		}
-	}
-	return []string{}
-}
-
-// 定義上のUP Toボーン名
-func (bone *Bone) ConfigUpToBoneNames() []string {
-	for boneConfigName, boneConfig := range GetStandardBoneConfigs() {
-		if boneConfigName.String() == bone.Name() ||
-			boneConfigName.Right() == bone.Name() ||
-			boneConfigName.Left() == bone.Name() {
-
-			boneNames := make([]string, 0)
-			for _, upToBoneName := range boneConfig.UpToBoneNames {
-				if boneConfigName.Right() == bone.Name() {
-					boneNames = append(boneNames, upToBoneName.Right())
-				} else if boneConfigName.Left() == bone.Name() {
-					boneNames = append(boneNames, upToBoneName.Left())
-				} else {
-					boneNames = append(boneNames, upToBoneName.String())
-				}
-			}
-			return boneNames
-		}
-	}
-	return []string{}
-}
-
 // 指定したカテゴリーに属するか
 func (bone *Bone) containsCategory(category BoneCategory) bool {
 	for boneConfigName, boneConfig := range GetStandardBoneConfigs() {
