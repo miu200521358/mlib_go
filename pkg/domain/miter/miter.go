@@ -1,6 +1,9 @@
 package miter
 
-import "sync"
+import (
+	"runtime"
+	"sync"
+)
 
 // IterParallelByCount は指定された全件数に対して、引数で指定された処理を並列または直列で実行する関数です。
 func IterParallelByCount(allCount int, blockSize int, processFunc func(int)) {
@@ -54,4 +57,13 @@ func IterParallelByList(allData []int, blockSize int, processFunc func(data, ind
 		}
 		wg.Wait() // すべてのgoroutineが終了するまで待機
 	}
+}
+
+// CPUコア数を元に、ブロックサイズを計算
+func GetBlockSize(totalTasks int) int {
+	numCPU := runtime.NumCPU()
+	runtime.GOMAXPROCS(numCPU)
+
+	// ブロックサイズを切り上げで計算
+	return (totalTasks + numCPU - 1) / numCPU
 }
