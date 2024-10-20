@@ -136,7 +136,7 @@ const (
 	WRIST_TWIST2  StandardBoneNames = "{d}手捩2"
 	WRIST_TWIST3  StandardBoneNames = "{d}手捩3"
 	WRIST         StandardBoneNames = "{d}手首"
-	WRIST_TAIL    StandardBoneNames = "{d}手首先"
+	WRIST_TAIL    StandardBoneNames = "{d}手首先先"
 	THUMB0        StandardBoneNames = "{d}親指０"
 	THUMB1        StandardBoneNames = "{d}親指１"
 	THUMB2        StandardBoneNames = "{d}親指２"
