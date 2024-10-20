@@ -107,9 +107,17 @@ func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includ
 }
 
 func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) error {
-	names := motion.BoneFrames.Names()
+	names := make([]string, 0, len(motion.BoneFrames.Data))
+	count := 0
+	for name := range motion.BoneFrames.Data {
+		if !motion.BoneFrames.ContainsActive(name) {
+			continue
+		}
+		names = append(names, name)
+		count += motion.BoneFrames.Data[name].Len()
+	}
 
-	rep.writeNumber(fout, binaryType_unsignedInt, float64(motion.BoneFrames.Len()), 0.0, true)
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(count), 0.0, true)
 	for _, name := range names {
 		boneFrames := motion.BoneFrames.Data[name]
 
@@ -189,9 +197,17 @@ func (rep *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.Bone
 }
 
 func (rep *VmdRepository) saveMorphFrames(fout *os.File, motion *vmd.VmdMotion) error {
-	rep.writeNumber(fout, binaryType_unsignedInt, float64(motion.MorphFrames.Len()), 0.0, true)
+	names := make([]string, 0, len(motion.MorphFrames.Data))
+	count := 0
+	for name := range motion.MorphFrames.Data {
+		if !motion.MorphFrames.ContainsActive(name) {
+			continue
+		}
+		names = append(names, name)
+		count += motion.MorphFrames.Data[name].Len()
+	}
 
-	names := motion.MorphFrames.Names()
+	rep.writeNumber(fout, binaryType_unsignedInt, float64(count), 0.0, true)
 
 	for _, name := range names {
 		morphFrames := motion.MorphFrames.Data[name]

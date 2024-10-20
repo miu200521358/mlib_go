@@ -104,27 +104,27 @@ func (morphFrames *MorphFrames) ContainsActive(morphName string) bool {
 		return false
 	}
 
-	if morphFrames.Data[morphName].Len() <= 1 {
+	if morphFrames.Data[morphName].Len() == 0 {
 		return false
 	}
 
-	for i, f := range morphFrames.Data[morphName].Indexes.List() {
-		if i == 0 {
-			continue
-		}
-
-		bf := morphFrames.Data[morphName].Get(f)
-		if bf == nil {
+	for _, f := range morphFrames.Data[morphName].Indexes.List() {
+		mf := morphFrames.Data[morphName].Get(f)
+		if mf == nil {
 			return false
 		}
 
-		nextBf := morphFrames.Data[morphName].Get(morphFrames.Data[morphName].Indexes.Next(f))
+		if !mmath.NearEquals(mf.Ratio, 0.0, 1e-2) {
+			return true
+		}
 
-		if nextBf == nil {
+		nextMf := morphFrames.Data[morphName].Get(morphFrames.Data[morphName].Indexes.Next(f))
+
+		if nextMf == nil {
 			return false
 		}
 
-		if !mmath.NearEquals(nextBf.Ratio, 0.0, 1e-2) {
+		if !mmath.NearEquals(nextMf.Ratio, 0.0, 1e-2) {
 			return true
 		}
 	}
