@@ -62,8 +62,8 @@ const (
 	CATEGORY_LEG BoneCategory = iota
 	// 指
 	CATEGORY_FINGER BoneCategory = iota
-	// 指先
-	CATEGORY_FINGER_TAIL BoneCategory = iota
+	// 先
+	CATEGORY_TAIL BoneCategory = iota
 	// 足D
 	CATEGORY_LEG_D BoneCategory = iota
 	// 肩P
@@ -288,7 +288,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 			HEAD_TAIL: {
 				ParentBoneNames:  []StandardBoneNames{HEAD},
 				ChildBoneNames:   []StandardBoneNames{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD, CATEGORY_TAIL},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
 			EYES: {
@@ -400,7 +400,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 			WRIST_TAIL: {
 				ParentBoneNames:  []StandardBoneNames{WRIST},
 				ChildBoneNames:   []StandardBoneNames{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_ARM},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TAIL},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
 			THUMB0: {
@@ -424,7 +424,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 			THUMB_TAIL: {
 				ParentBoneNames:  []StandardBoneNames{THUMB2},
 				ChildBoneNames:   []StandardBoneNames{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_FINGER_TAIL},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_TAIL},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
 			INDEX1: {
@@ -448,7 +448,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 			INDEX_TAIL: {
 				ParentBoneNames:  []StandardBoneNames{INDEX3},
 				ChildBoneNames:   []StandardBoneNames{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_FINGER_TAIL},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_TAIL},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
 			MIDDLE1: {
@@ -472,7 +472,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 			MIDDLE_TAIL: {
 				ParentBoneNames:  []StandardBoneNames{MIDDLE3},
 				ChildBoneNames:   []StandardBoneNames{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_FINGER_TAIL},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_TAIL},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
 			RING1: {
@@ -496,7 +496,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 			RING_TAIL: {
 				ParentBoneNames:  []StandardBoneNames{RING3},
 				ChildBoneNames:   []StandardBoneNames{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_FINGER_TAIL},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_TAIL},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
 			PINKY1: {
@@ -520,7 +520,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 			PINKY_TAIL: {
 				ParentBoneNames:  []StandardBoneNames{PINKY3},
 				ChildBoneNames:   []StandardBoneNames{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_FINGER_TAIL},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_TAIL},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
 			LEG_CENTER: {
@@ -568,7 +568,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 			TOE_T: {
 				ParentBoneNames:  []StandardBoneNames{ANKLE},
 				ChildBoneNames:   []StandardBoneNames{TOE_P},
-				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_SOLE},
+				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_SOLE, CATEGORY_TAIL},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
 			TOE_P: {
