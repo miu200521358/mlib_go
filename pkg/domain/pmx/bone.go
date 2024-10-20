@@ -848,6 +848,30 @@ func (bones *Bones) createLayerIndexes() {
 	}
 }
 
+// 指定されたボーンのうち、もっとも変形階層が小さいINDEXを取得
+func (bones *Bones) MinBoneIndex(boneIndexes []int) int {
+	layerIndexes := make(layerIndexes, len(boneIndexes))
+	for i, boneIndex := range boneIndexes {
+		bone := bones.Get(boneIndex)
+		layerIndexes[i] = layerIndex{isAfterPhysics: bone.IsAfterPhysicsDeform(), layer: bone.Layer, index: boneIndex}
+	}
+	sort.Sort(layerIndexes)
+
+	return layerIndexes[0].index
+}
+
+// 指定されたボーンのうち、もっとも変形階層が大きいINDEXを取得
+func (bones *Bones) MaxBoneIndex(boneIndexes []int) int {
+	layerIndexes := make(layerIndexes, len(boneIndexes))
+	for i, boneIndex := range boneIndexes {
+		bone := bones.Get(boneIndex)
+		layerIndexes[i] = layerIndex{isAfterPhysics: bone.IsAfterPhysicsDeform(), layer: bone.Layer, index: boneIndex}
+	}
+	sort.Sort(layerIndexes)
+
+	return layerIndexes[len(boneIndexes)-1].index
+}
+
 // 変形階層とINDEXのソート用構造体
 type layerIndex struct {
 	isAfterPhysics bool

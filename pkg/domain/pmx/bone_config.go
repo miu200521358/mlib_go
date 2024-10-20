@@ -450,7 +450,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			WRIST_TAIL: {
-				ParentBoneNames:  []StandardBoneNames{WRIST, WRIST_TWIST, ELBOW},
+				ParentBoneNames:  []StandardBoneNames{WRIST},
 				ChildBoneNames:   []StandardBoneNames{},
 				UpFromBoneNames:  []StandardBoneNames{WRIST, WRIST_TWIST, ELBOW},
 				UpToBoneNames:    []StandardBoneNames{WRIST},
