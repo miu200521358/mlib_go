@@ -250,7 +250,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				ChildBoneNames:           []StandardBoneNames{UPPER},
 				Categories:               []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER},
 				BoundingBoxShape:         SHAPE_NONE,
-				CenterOfGravity:          0.24,
+				CenterOfGravity:          0.20,
 				CenterOfGravityBoneNames: []StandardBoneNames{NECK_ROOT},
 				IsStandard:               false},
 			UPPER: {
@@ -596,7 +596,7 @@ func GetStandardBoneConfigs() map[StandardBoneNames]*BoneConfig {
 				ChildBoneNames:           []StandardBoneNames{ANKLE_D},
 				Categories:               []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D},
 				BoundingBoxShape:         SHAPE_CAPSULE,
-				CenterOfGravity:          0.08,
+				CenterOfGravity:          0.10,
 				CenterOfGravityBoneNames: []StandardBoneNames{HEEL_D},
 				IsStandard:               true},
 			ANKLE_D: {
