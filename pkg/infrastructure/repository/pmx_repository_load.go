@@ -5,13 +5,29 @@ import (
 	"fmt"
 	"io/fs"
 	"slices"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"golang.org/x/text/encoding/unicode"
 )
+
+func (rep *PmxRepository) CanLoad(path string) (bool, error) {
+	if isExist, err := mutils.ExistsFile(path); err != nil || !isExist {
+		return false, fmt.Errorf(mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
+	}
+
+	_, _, ext := mutils.SplitPath(path)
+	if strings.ToLower(ext) != ".pmx" {
+		return false, fmt.Errorf(mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".pmx"}))
+	}
+
+	return true, nil
+}
 
 // 指定されたパスのファイルからデータを読み込む
 func (rep *PmxRepository) Load(path string) (core.IHashModel, error) {
@@ -70,26 +86,28 @@ func (rep *PmxRepository) LoadByFile(file fs.File) (core.IHashModel, error) {
 	return model, nil
 }
 
-func (rep *PmxRepository) LoadName(path string) (string, error) {
+func (rep *PmxRepository) LoadName(path string) string {
+	if ok, err := rep.CanLoad(path); !ok || err != nil {
+		return mi18n.T("読み込み失敗")
+	}
+
 	// モデルを新規作成
 	model := rep.newFunc(path)
 
 	// ファイルを開く
 	err := rep.open(path)
 	if err != nil {
-		mlog.E("LoadName.Open error: %v", err)
-		return "", err
+		return mi18n.T("読み込み失敗")
 	}
 
 	err = rep.loadHeader(model)
 	if err != nil {
-		mlog.E("LoadName.loadHeader error: %v", err)
-		return "", err
+		return mi18n.T("読み込み失敗")
 	}
 
 	rep.close()
 
-	return model.Name(), nil
+	return model.Name()
 }
 
 func (rep *PmxRepository) loadHeader(model *pmx.PmxModel) error {

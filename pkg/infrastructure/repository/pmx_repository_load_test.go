@@ -11,45 +11,35 @@ import (
 func TestPmxReader_LoadName(t *testing.T) {
 	r := NewPmxRepository()
 
-	modelName, err := r.LoadName("../../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
+	modelName := r.LoadName("../../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
 
 	expectedName := "v2配布用素体03"
 	if modelName != expectedName {
 		t.Errorf("Expected Name to be %q, got %q", expectedName, modelName)
 	}
 
-	if err != nil {
-		t.Errorf("Expected error to be nil, got %q", err)
-	}
 }
 
 func TestPmxReader_LoadName_2_1(t *testing.T) {
 	r := NewPmxRepository()
 
-	modelName, err := r.LoadName("../../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
+	modelName := r.LoadName("../../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
 
 	expectedName := "サンプルモデル迪卢克"
 	if modelName != expectedName {
 		t.Errorf("Expected Name to be %q, got %q", expectedName, modelName)
 	}
 
-	if err != nil {
-		t.Errorf("Expected error to be nil, got %q", err)
-	}
 }
 
 func TestPmxReader_LoadName_NotExist(t *testing.T) {
 	r := NewPmxRepository()
 
-	modelName, err := r.LoadName("../../../test_resources/サンプルモデル_Nothing.pmx")
+	modelName := r.LoadName("../../../test_resources/サンプルモデル_Nothing.pmx")
 
 	expectedName := ""
 	if modelName != expectedName {
 		t.Errorf("Expected Name to be %q, got %q", expectedName, modelName)
-	}
-
-	if err == nil {
-		t.Errorf("Expected error to be not nil, got %q", err)
 	}
 }
 

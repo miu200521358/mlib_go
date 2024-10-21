@@ -4,7 +4,6 @@
 package widget
 
 import (
-	"fmt"
 	"path/filepath"
 	"runtime"
 
@@ -390,8 +389,8 @@ func (picker *FilePicker) Load() (core.IHashModel, error) {
 		return nil, nil
 	}
 
-	if isExist, err := mutils.ExistsFile(picker.pathEdit.Text()); err != nil || !isExist {
-		return nil, fmt.Errorf(mi18n.T("ファイルが存在しません"))
+	if ok, err := picker.rep.CanLoad(picker.pathEdit.Text()); !ok || err != nil {
+		return nil, err
 	}
 
 	// キャッシュの有無は見ずに、必ず取得し直す
@@ -465,28 +464,24 @@ func (picker *FilePicker) GetName() string {
 }
 
 func (picker *FilePicker) OnChanged(path string) {
-	// picker.pathLineEdit.SetText(path)
-
 	if picker.rep != nil && picker.historyKey != "" {
 		if path == "" {
 			picker.nameEdit.SetText(mi18n.T("未設定"))
 		} else {
-			modelName, err := picker.rep.LoadName(path)
-			if err != nil {
-				picker.nameEdit.SetText(mi18n.T("読み込み失敗"))
+			picker.nameEdit.SetText(picker.rep.LoadName(path))
+
+			if picker.onPathChanged != nil {
+				picker.onPathChanged(path)
+			}
+
+			if ok, err := picker.rep.CanLoad(picker.pathEdit.Text()); ok && err == nil {
+				// ロード系のみ履歴用キーを指定して履歴リストを保存
+				mconfig.SaveUserConfig(picker.historyKey, path, picker.limitHistory)
 			} else {
-				picker.nameEdit.SetText(modelName)
+				// 読み込めない場合、拒否
+				picker.pathEdit.ChangeText("")
 			}
 		}
-	}
-
-	if picker.historyKey != "" {
-		// 履歴用キーを指定して履歴リストを保存
-		mconfig.SaveUserConfig(picker.historyKey, path, picker.limitHistory)
-	}
-
-	if picker.onPathChanged != nil {
-		picker.onPathChanged(path)
 	}
 }
 

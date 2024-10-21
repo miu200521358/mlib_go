@@ -20,7 +20,8 @@ import (
 )
 
 type IRepository interface {
-	LoadName(path string) (string, error)
+	LoadName(path string) string
+	CanLoad(path string) (bool, error)
 	Load(path string) (core.IHashModel, error)
 	Save(overridePath string, data core.IHashModel, includeSystem bool) error
 }
@@ -49,7 +50,11 @@ func (rep *baseRepository[T]) close() {
 	defer rep.file.Close()
 }
 
-func (rep *baseRepository[T]) LoadName(path string) (string, error) {
+func (rep *baseRepository[T]) LoadName(path string) string {
+	panic("not implemented")
+}
+
+func (rep *baseRepository[T]) CanLoad(path string) (bool, error) {
 	panic("not implemented")
 }
 

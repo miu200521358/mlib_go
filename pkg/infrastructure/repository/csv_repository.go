@@ -71,6 +71,6 @@ func (rep *CsvRepository) Load(path string) (core.IHashModel, error) {
 	return core.NewCsvModel(records), nil
 }
 
-func (rep *CsvRepository) LoadName(path string) (string, error) {
-	return "", nil
+func (rep *CsvRepository) LoadName(path string) string {
+	return ""
 }

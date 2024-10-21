@@ -1,9 +1,12 @@
 package repository
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 )
 
 // VMDリーダー
@@ -23,6 +26,19 @@ func (rep *VmdVpdRepository) Save(overridePath string, data core.IHashModel, inc
 	return nil
 }
 
+func (rep *VmdVpdRepository) CanLoad(path string) (bool, error) {
+	if isExist, err := mutils.ExistsFile(path); err != nil || !isExist {
+		return false, fmt.Errorf(mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
+	}
+
+	_, _, ext := mutils.SplitPath(path)
+	if strings.ToLower(ext) != ".vmd" && strings.ToLower(ext) != ".vpd" {
+		return false, fmt.Errorf(mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".vmd, .vpd"}))
+	}
+
+	return true, nil
+}
+
 // 指定されたパスのファイルからデータを読み込む
 func (rep *VmdVpdRepository) Load(path string) (core.IHashModel, error) {
 	if strings.HasSuffix(strings.ToLower(path), ".vpd") {
@@ -32,7 +48,7 @@ func (rep *VmdVpdRepository) Load(path string) (core.IHashModel, error) {
 	}
 }
 
-func (rep *VmdVpdRepository) LoadName(path string) (string, error) {
+func (rep *VmdVpdRepository) LoadName(path string) string {
 	if strings.HasSuffix(strings.ToLower(path), ".vpd") {
 		return rep.vpdRepository.LoadName(path)
 	} else {

@@ -13,11 +13,7 @@ func TestVmdMotionReader_LoadName(t *testing.T) {
 
 	// Test case 1: Successful read
 	path := "../../../test_resources/サンプルモーション_0046.vmd"
-	modelName, err := r.LoadName(path)
-
-	if err != nil {
-		t.Errorf("Expected error to be nil, got %q", err)
-	}
+	modelName := r.LoadName(path)
 
 	expectedModelName := "初音ミク準標準"
 	if modelName != expectedModelName {

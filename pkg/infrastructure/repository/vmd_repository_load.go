@@ -2,13 +2,30 @@ package repository
 
 import (
 	"bytes"
+	"fmt"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"golang.org/x/text/encoding/japanese"
 )
+
+func (rep *VmdRepository) CanLoad(path string) (bool, error) {
+	if isExist, err := mutils.ExistsFile(path); err != nil || !isExist {
+		return false, fmt.Errorf(mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
+	}
+
+	_, _, ext := mutils.SplitPath(path)
+	if strings.ToLower(ext) != ".vmd" {
+		return false, fmt.Errorf(mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".vmd"}))
+	}
+
+	return true, nil
+}
 
 // 指定されたパスのファイルからデータを読み込む
 func (rep *VmdRepository) Load(path string) (core.IHashModel, error) {
@@ -40,26 +57,28 @@ func (rep *VmdRepository) Load(path string) (core.IHashModel, error) {
 	return motion, nil
 }
 
-func (rep *VmdRepository) LoadName(path string) (string, error) {
+func (rep *VmdRepository) LoadName(path string) string {
+	if ok, err := rep.CanLoad(path); !ok || err != nil {
+		return mi18n.T("読み込み失敗")
+	}
+
 	// モデルを新規作成
 	motion := rep.newFunc(path)
 
 	// ファイルを開く
 	err := rep.open(path)
 	if err != nil {
-		mlog.E("LoadName.Open error: %v", err)
-		return "", err
+		return mi18n.T("読み込み失敗")
 	}
 
 	err = rep.readHeader(motion)
 	if err != nil {
-		mlog.E("LoadName.readHeader error: %v", err)
-		return "", err
+		return mi18n.T("読み込み失敗")
 	}
 
 	rep.close()
 
-	return motion.Name(), nil
+	return motion.Name()
 }
 
 func (rep *VmdRepository) decodeShiftJIS(fbytes []byte) (string, error) {
@@ -70,8 +89,9 @@ func (rep *VmdRepository) decodeShiftJIS(fbytes []byte) (string, error) {
 		return "", err
 	}
 
-	trimBytes := bytes.TrimRight(decodedBytes, "\xfd") // PMDで保存したVMDに入ってる
-	trimBytes = bytes.TrimRight(trimBytes, "\x00")
+	trimBytes := bytes.TrimRight(decodedBytes, "\xfd")                   // PMDで保存したVMDに入ってる
+	trimBytes = bytes.TrimRight(trimBytes, "\x00")                       // VMDの末尾空白を除去
+	trimBytes = bytes.ReplaceAll(trimBytes, []byte("\x00"), []byte(" ")) // 空白をスペースに変換
 
 	decodedText := string(trimBytes)
 

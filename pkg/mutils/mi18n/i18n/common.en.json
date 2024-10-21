@@ -430,5 +430,13 @@
     {
         "id": "再生ボタン説明",
         "translation": "・Clicking the playback button allows you to play the motion.\n・Other buttons or operations cannot be used during playback."
+    },
+    {
+        "id": "ファイル存在エラー",
+        "translation": "The file does not exist\nInput file path: {{.Path}}"
+    },
+    {
+        "id": "拡張子エラー",
+        "translation": "The input file path has an unsupported file extension\nInput file path: {{.Path}}, Allowed extensions: {{.Ext}}"
     }
 ]

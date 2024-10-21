@@ -2,11 +2,15 @@ package repository
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
@@ -80,6 +84,19 @@ func NewPmxJsonRepository() *PmxJsonRepository {
 			},
 		},
 	}
+}
+
+func (rep *PmxJsonRepository) CanLoad(path string) (bool, error) {
+	if isExist, err := mutils.ExistsFile(path); err != nil || !isExist {
+		return false, fmt.Errorf(mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
+	}
+
+	_, _, ext := mutils.SplitPath(path)
+	if strings.ToLower(ext) != ".json" && strings.ToLower(ext) != ".pmx" {
+		return false, fmt.Errorf(mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".json, .pmx"}))
+	}
+
+	return true, nil
 }
 
 func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
@@ -248,22 +265,26 @@ func (rep *PmxJsonRepository) Load(path string) (core.IHashModel, error) {
 	return model, nil
 }
 
-func (rep *PmxJsonRepository) LoadName(path string) (string, error) {
+func (rep *PmxJsonRepository) LoadName(path string) string {
+	if ok, err := rep.CanLoad(path); !ok || err != nil {
+		return mi18n.T("読み込み失敗")
+	}
+
 	// ファイルを開く
 	jsonText, err := os.ReadFile(path)
 	if err != nil {
-		mlog.E("Load.Load error: %v", err)
-		return "", err
+		// mlog.E("Load.Load error: %v", err)
+		return mi18n.T("読み込み失敗")
 	}
 
 	// JSON読み込み
 	var jsonData pmxJson
 	if err := json.Unmarshal(jsonText, &jsonData); err != nil {
-		mlog.E("Load.Load error: %v", err)
-		return "", err
+		// mlog.E("Load.Load error: %v", err)
+		return mi18n.T("読み込み失敗")
 	}
 
-	return jsonData.Name, nil
+	return jsonData.Name
 }
 
 func (rep *PmxJsonRepository) loadModel(model *pmx.PmxModel, jsonData *pmxJson) (*pmx.PmxModel, error) {

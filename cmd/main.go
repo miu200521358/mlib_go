@@ -163,7 +163,7 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
 			loadedMotions[0][0] = motion
 		} else {
-			mlog.E(mi18n.T("読み込み失敗"), err)
+			mlog.ET(mi18n.T("読み込み失敗"), err.Error())
 		}
 	})
 

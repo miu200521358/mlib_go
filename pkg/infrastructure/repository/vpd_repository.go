@@ -2,6 +2,7 @@ package repository
 
 import (
 	"bufio"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -9,6 +10,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
@@ -31,6 +34,19 @@ func NewVpdRepository() *VpdRepository {
 
 func (rep *VpdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
 	return nil
+}
+
+func (rep *VpdRepository) CanLoad(path string) (bool, error) {
+	if isExist, err := mutils.ExistsFile(path); err != nil || !isExist {
+		return false, fmt.Errorf(mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
+	}
+
+	_, _, ext := mutils.SplitPath(path)
+	if strings.ToLower(ext) != ".vpd" {
+		return false, fmt.Errorf(mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".vpd"}))
+	}
+
+	return true, nil
 }
 
 // 指定されたパスのファイルからデータを読み込む
@@ -69,32 +85,33 @@ func (rep *VpdRepository) Load(path string) (core.IHashModel, error) {
 	return motion, nil
 }
 
-func (rep *VpdRepository) LoadName(path string) (string, error) {
+func (rep *VpdRepository) LoadName(path string) string {
+	if ok, err := rep.CanLoad(path); !ok || err != nil {
+		return mi18n.T("読み込み失敗")
+	}
+
 	// モデルを新規作成
 	motion := rep.newFunc(path)
 
 	// ファイルを開く
 	err := rep.open(path)
 	if err != nil {
-		mlog.E("LoadName.Open error: %v", err)
-		return "", err
+		return mi18n.T("読み込み失敗")
 	}
 
 	err = rep.readLines()
 	if err != nil {
-		mlog.E("Load.readLines error: %v", err)
-		return "", err
+		return mi18n.T("読み込み失敗")
 	}
 
 	err = rep.loadHeader(motion)
 	if err != nil {
-		mlog.E("LoadName.readHeader error: %v", err)
-		return "", err
+		return mi18n.T("読み込み失敗")
 	}
 
 	rep.close()
 
-	return motion.Name(), nil
+	return motion.Name()
 }
 
 func (rep *VpdRepository) readLines() error {
