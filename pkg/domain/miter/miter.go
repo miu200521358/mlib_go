@@ -25,21 +25,7 @@ func IterParallelByCount(allCount int, blockSize int, processFunc func(int)) err
 			go func(startIndex int) {
 				defer wg.Done()
 				defer func() {
-					// recoverによるpanicキャッチ
-					if r := recover(); r != nil {
-						stackTrace := debug.Stack()
-
-						var errMsg string
-						// パニックの値がerror型である場合、エラーメッセージを取得
-						if err, ok := r.(error); ok {
-							errMsg = err.Error()
-						} else {
-							// それ以外の型の場合は、文字列に変換
-							errMsg = fmt.Sprintf("%v", r)
-						}
-
-						errorChan <- fmt.Errorf("panic: %s\n%s", errMsg, stackTrace)
-					}
+					errorChan <- GetError()
 				}()
 
 				endIndex := startIndex + blockSize
@@ -85,21 +71,7 @@ func IterParallelByList(allData []int, blockSize int, processFunc func(data, ind
 			go func(startIndex int) {
 				defer wg.Done()
 				defer func() {
-					// recoverによるpanicキャッチ
-					if r := recover(); r != nil {
-						stackTrace := debug.Stack()
-
-						var errMsg string
-						// パニックの値がerror型である場合、エラーメッセージを取得
-						if err, ok := r.(error); ok {
-							errMsg = err.Error()
-						} else {
-							// それ以外の型の場合は、文字列に変換
-							errMsg = fmt.Sprintf("%v", r)
-						}
-
-						errorChan <- fmt.Errorf("panic: %s\n%s", errMsg, stackTrace)
-					}
+					errorChan <- GetError()
 				}()
 
 				endIndex := startIndex + blockSize
@@ -134,4 +106,24 @@ func GetBlockSize(totalTasks int) int {
 
 	// ブロックサイズを切り上げで計算
 	return (totalTasks + numCPU - 1) / numCPU
+}
+
+func GetError() error {
+	// recoverによるpanicキャッチ
+	if r := recover(); r != nil {
+		stackTrace := debug.Stack()
+
+		var errMsg string
+		// パニックの値がerror型である場合、エラーメッセージを取得
+		if err, ok := r.(error); ok {
+			errMsg = err.Error()
+		} else {
+			// それ以外の型の場合は、文字列に変換
+			errMsg = fmt.Sprintf("%v", r)
+		}
+
+		return fmt.Errorf("panic: %s\n%s", errMsg, stackTrace)
+	}
+
+	return nil
 }
