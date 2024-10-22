@@ -154,6 +154,14 @@ func MaxInt(arr []int) int {
 	return max
 }
 
+func IntRanges(max int) []int {
+	ranges := make([]int, max)
+	for i := 0; i < max; i++ {
+		ranges[i] = i
+	}
+	return ranges
+}
+
 func MaxFloat(arr []float64) float64 {
 	max := math.SmallestNonzeroFloat64
 	for _, v := range arr {
