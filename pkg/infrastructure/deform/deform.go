@@ -111,6 +111,10 @@ func DeformBone(
 func deformBeforePhysics(
 	appState state.IAppState, model *pmx.PmxModel, motion *vmd.VmdMotion, vmdDeltas *delta.VmdDeltas,
 ) *delta.VmdDeltas {
+	if model == nil || motion == nil || (vmdDeltas != nil && motion.Processing) {
+		return vmdDeltas
+	}
+
 	frame := appState.Frame()
 
 	if vmdDeltas == nil || vmdDeltas.Frame() != frame ||
@@ -163,6 +167,10 @@ func DeformBonePyPhysics(
 	appState state.IAppState, model *pmx.PmxModel, motion *vmd.VmdMotion,
 	vmdDeltas *delta.VmdDeltas, physics *mbt.MPhysics,
 ) *delta.VmdDeltas {
+	if model == nil || motion == nil || (vmdDeltas != nil && motion.Processing) {
+		return vmdDeltas
+	}
+
 	if model != nil && appState.IsEnabledPhysics() && !appState.IsPhysicsReset() {
 		// 物理剛体位置を更新
 		for _, boneIndex := range model.Bones.LayerSortedIndexes {
@@ -234,11 +242,11 @@ func DeformPhysics(
 ) []*delta.VmdDeltas {
 	// 物理デフォーム
 	for i := range models {
-		for i >= len(vmdDeltas) {
-			vmdDeltas = append(vmdDeltas, nil)
-		}
 		if models[i] == nil || vmdDeltas[i] == nil {
 			continue
+		}
+		for i >= len(vmdDeltas) {
+			vmdDeltas = append(vmdDeltas, nil)
 		}
 		DeformPhysicsByBone(appState, models[i], vmdDeltas[i], physics)
 	}
