@@ -8,7 +8,7 @@ import (
 )
 
 // IterParallelByCount は指定された全件数に対して、引数で指定された処理を並列または直列で実行する関数です。
-func IterParallelByCount(allCount int, blockSize int, processFunc func(int)) error {
+func IterParallelByCount(allCount int, blockSize int, processFunc func(index int)) error {
 	if blockSize <= 1 || blockSize >= allCount {
 		// ブロックサイズが1以下、もしくは全件数より大きい場合は直列処理
 		for i := 0; i < allCount; i++ {
@@ -20,11 +20,11 @@ func IterParallelByCount(allCount int, blockSize int, processFunc func(int)) err
 
 		// ブロックサイズが全件数より小さい場合は並列処理
 		var wg sync.WaitGroup
-		for i := 0; i < allCount; i += blockSize {
+		for startIndex := 0; startIndex < allCount; startIndex += blockSize {
 			wg.Add(1)
 			go func(startIndex int) {
-				defer wg.Done()
 				defer func() {
+					wg.Done()
 					errorChan <- GetError()
 				}()
 
@@ -35,7 +35,7 @@ func IterParallelByCount(allCount int, blockSize int, processFunc func(int)) err
 				for j := startIndex; j < endIndex; j++ {
 					processFunc(j)
 				}
-			}(i)
+			}(startIndex)
 		}
 
 		// すべてのゴルーチンの完了を待つ
@@ -54,7 +54,8 @@ func IterParallelByCount(allCount int, blockSize int, processFunc func(int)) err
 }
 
 // IterParallelByList は指定された全リストに対して、引数で指定された処理を並列または直列で実行する関数です。
-func IterParallelByList(allData []int, blockSize int, processFunc func(data, index int)) error {
+func IterParallelByList(allData []int, blockSize int,
+	processFunc func(data, index int), logFunc func(iterIndex, allCount int)) error {
 	if blockSize <= 1 || blockSize >= len(allData) {
 		// ブロックサイズが1以下、もしくは全件数より大きい場合は直列処理
 		for i := 0; i < len(allData); i++ {
@@ -66,11 +67,16 @@ func IterParallelByList(allData []int, blockSize int, processFunc func(data, ind
 
 		// ブロックサイズが全件数より小さい場合は並列処理
 		var wg sync.WaitGroup
-		for i := 0; i < len(allData); i += blockSize {
+		iterIndex := 0
+		for startIndex := 0; startIndex < len(allData); startIndex += blockSize {
 			wg.Add(1)
 			go func(startIndex int) {
-				defer wg.Done()
 				defer func() {
+					iterIndex++
+					if logFunc != nil {
+						logFunc(iterIndex, numCPU)
+					}
+					wg.Done()
 					errorChan <- GetError()
 				}()
 
@@ -81,7 +87,7 @@ func IterParallelByList(allData []int, blockSize int, processFunc func(data, ind
 				for j := startIndex; j < endIndex; j++ {
 					processFunc(allData[j], j)
 				}
-			}(i)
+			}(startIndex)
 		}
 
 		// すべてのゴルーチンの完了を待つ
@@ -100,12 +106,14 @@ func IterParallelByList(allData []int, blockSize int, processFunc func(data, ind
 }
 
 // CPUコア数を元に、ブロックサイズを計算
-func GetBlockSize(totalTasks int) int {
-	numCPU := runtime.NumCPU()
-	runtime.GOMAXPROCS(numCPU)
+func GetBlockSize(totalTasks int) (blockSize int, blockCount int) {
+	blockCount = runtime.NumCPU()
+	runtime.GOMAXPROCS(blockCount)
 
 	// ブロックサイズを切り上げで計算
-	return (totalTasks + numCPU - 1) / numCPU
+	blockSize = (totalTasks + blockCount - 1) / blockCount
+
+	return blockSize, blockCount
 }
 
 func GetError() error {
