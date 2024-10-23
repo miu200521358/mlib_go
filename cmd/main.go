@@ -27,8 +27,8 @@ var env string
 func init() {
 	runtime.LockOSThread()
 
-	// システム上のすべての論理プロセッサを使用させる
-	runtime.GOMAXPROCS(runtime.NumCPU())
+	// システム上の半分の論理プロセッサを使用させる
+	runtime.GOMAXPROCS(int(runtime.NumCPU() / 2))
 
 	walk.AppendToWalkInit(func() {
 		walk.MustRegisterWindowClass(widget.FilePickerClass)

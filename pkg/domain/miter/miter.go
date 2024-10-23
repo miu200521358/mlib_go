@@ -68,6 +68,9 @@ func IterParallelByList(allData []int, blockSize int,
 		numCPU := runtime.NumCPU()
 		errorChan := make(chan error, numCPU)
 
+		// システム上の全論理プロセッサを使用させる
+		runtime.GOMAXPROCS(numCPU)
+
 		// ブロックサイズが全件数より小さい場合は並列処理
 		var wg sync.WaitGroup
 		iterIndex := 0

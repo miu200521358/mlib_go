@@ -5,9 +5,11 @@ package widget
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"runtime/debug"
+	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/walk/pkg/declarative"
@@ -23,6 +25,20 @@ var (
 
 func Beep() {
 	procMessageBeep.Call(uintptr(MB_ICONASTERISK))
+}
+
+// 処理時間をフォーマットして出力する関数
+func FormatDuration(d time.Duration) string {
+	seconds := int(d.Seconds())
+	hours := seconds / 3600
+	minutes := (seconds % 3600) / 60
+	secs := seconds % 60
+
+	// 時間がある場合は hh:mm:ss フォーマットで、無い場合は mm:ss フォーマット
+	if hours > 0 {
+		return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, secs)
+	}
+	return fmt.Sprintf("%02d:%02d", minutes, secs)
 }
 
 func RaiseError(err error) {
