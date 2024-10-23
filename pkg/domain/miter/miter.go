@@ -24,8 +24,10 @@ func IterParallelByCount(allCount int, blockSize int, processFunc func(index int
 			wg.Add(1)
 			go func(startIndex int) {
 				defer func() {
+					if err := GetError(); err != nil {
+						errorChan <- err
+					}
 					wg.Done()
-					errorChan <- GetError()
 				}()
 
 				endIndex := startIndex + blockSize
@@ -38,11 +40,12 @@ func IterParallelByCount(allCount int, blockSize int, processFunc func(index int
 			}(startIndex)
 		}
 
-		// すべてのゴルーチンの完了を待つ
-		wg.Wait()
-		close(errorChan) // 全てのゴルーチンが終了したらチャネルを閉じる
+		go func() {
+			wg.Wait()
+			close(errorChan)
+		}()
 
-		// チャネルからエラーを受け取る
+		// エラーを処理
 		for err := range errorChan {
 			if err != nil {
 				return err
@@ -76,8 +79,10 @@ func IterParallelByList(allData []int, blockSize int,
 					if logFunc != nil {
 						logFunc(iterIndex, numCPU)
 					}
+					if err := GetError(); err != nil {
+						errorChan <- err
+					}
 					wg.Done()
-					errorChan <- GetError()
 				}()
 
 				endIndex := startIndex + blockSize
@@ -90,9 +95,10 @@ func IterParallelByList(allData []int, blockSize int,
 			}(startIndex)
 		}
 
-		// すべてのゴルーチンの完了を待つ
-		wg.Wait()
-		close(errorChan) // 全てのゴルーチンが終了したらチャネルを閉じる
+		go func() {
+			wg.Wait()
+			close(errorChan)
+		}()
 
 		// チャネルからエラーを受け取る
 		for err := range errorChan {
