@@ -215,8 +215,12 @@ func (app *MApp) RunViewer() {
 		}
 
 		for i, window := range app.viewWindows {
+			var err error
 			vmdDeltas[i] = deform.Deform(window.Physics(), app, timeStep, models[i], motions[i], vmdDeltas[i])
-			vmdDeltas[i] = deform.DeformPhysics(window.Physics(), app, timeStep, models[i], motions[i], vmdDeltas[i])
+			vmdDeltas[i], err = deform.DeformPhysics(window.Physics(), app, timeStep, models[i], motions[i], vmdDeltas[i])
+			if err != nil {
+				mlog.V("DeformPhysics Error: %v", err)
+			}
 		}
 
 		// 重複描画
@@ -356,7 +360,9 @@ func (app *MApp) resetPhysics(
 			if model == nil || vmdDeltas[i][j] == nil {
 				continue
 			}
-			deform.DeformPhysicsByBone(app, models[i][j], vmdDeltas[i][j], window.Physics())
+			if err := deform.DeformPhysicsByBone(app, models[i][j], vmdDeltas[i][j], window.Physics()); err != nil {
+				mlog.V("DeformPhysicsByBone Error: %v", err)
+			}
 		}
 	}
 

@@ -136,9 +136,9 @@ func deformBeforePhysics(
 
 func DeformPhysicsByBone(
 	appState state.IAppState, model *pmx.PmxModel, vmdDeltas *delta.VmdDeltas, physics *mbt.MPhysics,
-) {
+) error {
 	// 物理剛体位置を更新
-	processFunc := func(i int) {
+	if err := miter.IterParallelByCount(model.RigidBodies.Len(), 100, func(i int) {
 		rigidBody := model.RigidBodies.Get(i)
 
 		// 現在のボーン変形情報を保持
@@ -157,10 +157,11 @@ func DeformPhysicsByBone(
 			physics.UpdateTransform(model.Index(), rigidBodyBone,
 				vmdDeltas.Bones.Get(rigidBodyBone.Index()).FilledGlobalMatrix(), rigidBody)
 		}
+	}); err != nil {
+		return err
 	}
 
-	// 100件ずつ処理
-	miter.IterParallelByCount(model.RigidBodies.Len(), 100, processFunc)
+	return nil
 }
 
 func DeformBonePyPhysics(
@@ -171,7 +172,7 @@ func DeformBonePyPhysics(
 		return vmdDeltas
 	}
 
-	if model != nil && appState.IsEnabledPhysics() && !appState.IsPhysicsReset() {
+	if appState.IsEnabledPhysics() && !appState.IsPhysicsReset() {
 		// 物理剛体位置を更新
 		for _, boneIndex := range model.Bones.LayerSortedIndexes {
 			bone := model.Bones.Get(boneIndex)
@@ -224,7 +225,7 @@ func Deform(
 ) []*delta.VmdDeltas {
 	// 物理前デフォーム
 	for i := range models {
-		if models[i] == nil || motions[i] == nil {
+		if models[i] == nil || motions[i] == nil || (vmdDeltas != nil && motions[i].Processing) {
 			continue
 		}
 		for i >= len(vmdDeltas) {
@@ -239,16 +240,18 @@ func Deform(
 func DeformPhysics(
 	physics *mbt.MPhysics, appState state.IAppState, timeStep float32,
 	models []*pmx.PmxModel, motions []*vmd.VmdMotion, vmdDeltas []*delta.VmdDeltas,
-) []*delta.VmdDeltas {
+) ([]*delta.VmdDeltas, error) {
 	// 物理デフォーム
 	for i := range models {
-		if models[i] == nil || vmdDeltas[i] == nil {
+		if models[i] == nil || vmdDeltas[i] == nil || (vmdDeltas != nil && motions[i].Processing) {
 			continue
 		}
 		for i >= len(vmdDeltas) {
 			vmdDeltas = append(vmdDeltas, nil)
 		}
-		DeformPhysicsByBone(appState, models[i], vmdDeltas[i], physics)
+		if err := DeformPhysicsByBone(appState, models[i], vmdDeltas[i], physics); err != nil {
+			return vmdDeltas, err
+		}
 	}
 
 	if appState.IsEnabledPhysics() || appState.IsPhysicsReset() {
@@ -263,5 +266,5 @@ func DeformPhysics(
 		vmdDeltas[i] = DeformBonePyPhysics(appState, models[i], motions[i], vmdDeltas[i], physics)
 	}
 
-	return vmdDeltas
+	return vmdDeltas, nil
 }
