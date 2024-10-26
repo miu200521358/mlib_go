@@ -438,5 +438,9 @@
     {
         "id": "拡張子エラー",
         "translation": "The input file path has an unsupported file extension\nInput file path: {{.Path}}, Allowed extensions: {{.Ext}}"
+    },
+    {
+        "id": "&ビューワー冗長ログ表示",
+        "translation": "&Viewer Verbose Log Display"
     }
 ]

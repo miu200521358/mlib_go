@@ -5,18 +5,19 @@ import (
 	"runtime"
 )
 
-var level = 20
+var level = 20.0
 
 const (
-	VERBOSE    = 0
-	IK_VERBOSE = 1
-	VERBOSE2   = 2
-	VERBOSE9   = 9
-	DEBUG      = 10
-	INFO       = 20
-	WARN       = 30
-	ERROR      = 40
-	FATAL      = 50
+	VERBOSE        = 0.0
+	IK_VERBOSE     = 1.0
+	VIEWER_VERBOSE = 1.1
+	VERBOSE2       = 2.0
+	VERBOSE9       = 9.0
+	DEBUG          = 10.0
+	INFO           = 20.0
+	WARN           = 30.0
+	ERROR          = 40.0
+	FATAL          = 50.0
 )
 
 func init() {
@@ -24,7 +25,7 @@ func init() {
 }
 
 func IsVerbose() bool {
-	return level < DEBUG
+	return level < DEBUG && level != IK_VERBOSE && level != VIEWER_VERBOSE
 }
 
 func IsVerbose2() bool {
@@ -33,6 +34,10 @@ func IsVerbose2() bool {
 
 func IsIkVerbose() bool {
 	return level == IK_VERBOSE
+}
+
+func IsViewerVerbose() bool {
+	return level == VIEWER_VERBOSE
 }
 
 func IsVerbose9() bool {
@@ -44,8 +49,8 @@ func IsDebug() bool {
 }
 
 // SetLevel ログレベルの設定
-func SetLevel(l int) {
-	level = l
+func SetLevel(l float64) {
+	level = float64(l)
 }
 
 // Verbose 冗長ログ
@@ -65,6 +70,13 @@ func V2(message string, param ...interface{}) {
 // Ik Verbose2 冗長ログ
 func IV(message string, param ...interface{}) {
 	if level == IK_VERBOSE {
+		log.Printf(message, param...)
+	}
+}
+
+// Viewer Verbose 冗長ログ
+func VV(message string, param ...interface{}) {
+	if level == VIEWER_VERBOSE {
 		log.Printf(message, param...)
 	}
 }

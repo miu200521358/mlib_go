@@ -17,6 +17,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/deform"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
@@ -296,7 +297,24 @@ func (app *MApp) RunViewer() {
 }
 
 func (app *MApp) syncViewer(viewerParameters []*state.ViewerParameter) {
-	if !(app.IsCameraSync() || app.IsShowOverride()) {
+	// ビューワー冗長ログ出力時は表示固定
+	if mlog.IsViewerVerbose() {
+		for i := range app.ViewerCount() {
+			if viewerParameters[i] == nil {
+				viewerParameters[i] = &state.ViewerParameter{}
+			}
+			viewerParameters[i].Yaw = 0.0
+			viewerParameters[i].Pitch = 0.0
+			viewerParameters[i].FieldOfViewAngle = 45.0
+			viewerParameters[i].Size = mgl.VIEWER_VERBOSE_WINDOW_SIZE
+			viewerParameters[i].CameraPos = mgl.VIEWER_VERBOSE_CAMERA_POSITION
+			viewerParameters[i].CameraUp = mgl.VIEWER_VERBOSE_CAMERA_UP
+			viewerParameters[i].LookAtCenter = mgl.VIEWER_VERBOSE_LOOK_AT_CENTER
+		}
+		return
+	}
+
+	if !(app.IsCameraSync() || app.IsShowOverride() || mlog.IsViewerVerbose()) {
 		for i := range app.ViewerCount() {
 			viewerParameters[i] = nil
 		}

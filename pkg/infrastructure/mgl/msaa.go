@@ -226,29 +226,3 @@ func (msaa *Msaa) UnbindOverrideTexture() {
 	msaa.overrideVbo.Unbind()
 	msaa.overrideVao.Unbind()
 }
-
-// func (msaa *Msaa) saveImage(filename string) error {
-// 	w := msaa.width
-// 	h := msaa.height
-
-// 	pixels := make([]byte, msaa.width*msaa.height*4) // RGBA形式で4バイト/ピクセル
-// 	gl.ReadPixels(0, 0, msaa.width, msaa.height, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pixels))
-
-// 	img := image.NewRGBA(image.Rect(0, 0, int(w), int(h)))
-// 	for y := int32(0); y < h; y++ {
-// 		for x := int32(0); x < w; x++ {
-// 			i := (y*w + x) * 4
-// 			r := pixels[i]
-// 			g := pixels[i+1]
-// 			b := pixels[i+2]
-// 			a := pixels[i+3]
-// 			img.SetRGBA(int(x), int(h-y-1), color.RGBA{r, g, b, a}) // 画像の上下を反転
-// 		}
-// 	}
-// 	file, err := os.Create(filename)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer file.Close()
-// 	return png.Encode(file, img)
-// }

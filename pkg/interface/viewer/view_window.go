@@ -6,7 +6,12 @@ package viewer
 import (
 	"fmt"
 	"image"
+	"image/color"
+	"image/png"
 	"math"
+	"os"
+	"path/filepath"
+	"time"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
@@ -21,6 +26,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/render"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
@@ -569,6 +575,15 @@ func (viewWindow *ViewWindow) Render(
 		viewWindow.leftCursorRemoveWorldHistoryPositions = make([]*mgl32.Vec3, 0)
 	}
 
+	if mlog.IsViewerVerbose() && viewWindow.windowIndex == 0 {
+		var frame float32
+		if len(vmdDeltas) > 0 {
+			frame = vmdDeltas[0].Frame()
+		}
+		viewWindow.saveImage(fmt.Sprintf("%s/viewerPng/%04.2f_%s.png", mutils.GetAppRootDir(),
+			frame, time.Now().Format("20060102_150405.000")))
+	}
+
 	return selectedVertexes
 }
 
@@ -703,4 +718,35 @@ func (viewWindow *ViewWindow) drawOverride() {
 	// 深度テストを有効に戻す
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
+}
+
+func (viewWindow *ViewWindow) saveImage(imgPath string) {
+	w := int32(viewWindow.shader.Width)
+	h := int32(viewWindow.shader.Height)
+
+	pixels := make([]byte, int(w*h)*4) // RGBA形式で4バイト/ピクセル
+	gl.ReadPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pixels))
+
+	img := image.NewRGBA(image.Rect(0, 0, int(w), int(h)))
+	for y := int32(0); y < h; y++ {
+		for x := int32(0); x < w; x++ {
+			i := (y*w + x) * 4
+			r := pixels[i]
+			g := pixels[i+1]
+			b := pixels[i+2]
+			a := pixels[i+3]
+			img.SetRGBA(int(x), int(h-y-1), color.RGBA{r, g, b, a}) // 画像の上下を反転
+		}
+	}
+	if err := os.MkdirAll(filepath.Dir(imgPath), os.ModePerm); err != nil {
+		mlog.VV("Failed to create directory: %v [%s]", err, imgPath)
+	}
+	if file, err := os.Create(imgPath); err != nil {
+		mlog.VV("Failed to create file: %v [%s]", err, imgPath)
+	} else {
+		if err := png.Encode(file, img); err != nil {
+			mlog.VV("Failed to encode PNG: %v [%s]", err, imgPath)
+		}
+		defer file.Close()
+	}
 }

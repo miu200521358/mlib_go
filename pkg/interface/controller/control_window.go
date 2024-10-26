@@ -20,37 +20,38 @@ import (
 
 type ControlWindow struct {
 	*walk.MainWindow
-	isClosed                 bool                // ウィンドウクローズ
-	channelState             state.IChannelState // チャンネル状態
-	motionPlayer             state.IPlayer       // モーションプレイヤー
-	TabWidget                *widget.MTabWidget  // タブウィジェット
-	Config                   *mconfig.AppConfig  // アプリケーション設定
-	enabledFrameDropAction   *walk.Action        // フレームドロップON/OFF
-	enabledPhysicsAction     *walk.Action        // 物理ON/OFF
-	physicsResetAction       *walk.Action        // 物理リセット
-	showNormalAction         *walk.Action        // ボーンデバッグ表示
-	showWireAction           *walk.Action        // ワイヤーフレームデバッグ表示
-	showOverrideAction       *walk.Action        // オーバーライドデバッグ表示
-	showSelectedVertexAction *walk.Action        // 選択頂点デバッグ表示
-	showBoneAllAction        *walk.Action        // 全ボーンデバッグ表示
-	showBoneIkAction         *walk.Action        // IKボーンデバッグ表示
-	showBoneEffectorAction   *walk.Action        // 付与親ボーンデバッグ表示
-	showBoneFixedAction      *walk.Action        // 軸制限ボーンデバッグ表示
-	showBoneRotateAction     *walk.Action        // 回転ボーンデバッグ表示
-	showBoneTranslateAction  *walk.Action        // 移動ボーンデバッグ表示
-	showBoneVisibleAction    *walk.Action        // 表示ボーンデバッグ表示
-	showRigidBodyFrontAction *walk.Action        // 剛体デバッグ表示(前面)
-	showRigidBodyBackAction  *walk.Action        // 剛体デバッグ表示(埋め込み)
-	showJointAction          *walk.Action        // ジョイントデバッグ表示
-	showInfoAction           *walk.Action        // 情報デバッグ表示
-	limitFps30Action         *walk.Action        // 30FPS制限
-	limitFps60Action         *walk.Action        // 60FPS制限
-	limitFpsUnLimitAction    *walk.Action        // FPS無制限
-	cameraSyncAction         *walk.Action        // カメラ同期
-	logLevelDebugAction      *walk.Action        // デバッグメッセージ表示
-	logLevelVerboseAction    *walk.Action        // 冗長メッセージ表示
-	logLevelIkVerboseAction  *walk.Action        // IK冗長メッセージ表示
-	funcSetSelectedVertexes  func([][][]int)     // 選択頂点設定関数
+	isClosed                    bool                // ウィンドウクローズ
+	channelState                state.IChannelState // チャンネル状態
+	motionPlayer                state.IPlayer       // モーションプレイヤー
+	TabWidget                   *widget.MTabWidget  // タブウィジェット
+	Config                      *mconfig.AppConfig  // アプリケーション設定
+	enabledFrameDropAction      *walk.Action        // フレームドロップON/OFF
+	enabledPhysicsAction        *walk.Action        // 物理ON/OFF
+	physicsResetAction          *walk.Action        // 物理リセット
+	showNormalAction            *walk.Action        // ボーンデバッグ表示
+	showWireAction              *walk.Action        // ワイヤーフレームデバッグ表示
+	showOverrideAction          *walk.Action        // オーバーライドデバッグ表示
+	showSelectedVertexAction    *walk.Action        // 選択頂点デバッグ表示
+	showBoneAllAction           *walk.Action        // 全ボーンデバッグ表示
+	showBoneIkAction            *walk.Action        // IKボーンデバッグ表示
+	showBoneEffectorAction      *walk.Action        // 付与親ボーンデバッグ表示
+	showBoneFixedAction         *walk.Action        // 軸制限ボーンデバッグ表示
+	showBoneRotateAction        *walk.Action        // 回転ボーンデバッグ表示
+	showBoneTranslateAction     *walk.Action        // 移動ボーンデバッグ表示
+	showBoneVisibleAction       *walk.Action        // 表示ボーンデバッグ表示
+	showRigidBodyFrontAction    *walk.Action        // 剛体デバッグ表示(前面)
+	showRigidBodyBackAction     *walk.Action        // 剛体デバッグ表示(埋め込み)
+	showJointAction             *walk.Action        // ジョイントデバッグ表示
+	showInfoAction              *walk.Action        // 情報デバッグ表示
+	limitFps30Action            *walk.Action        // 30FPS制限
+	limitFps60Action            *walk.Action        // 60FPS制限
+	limitFpsUnLimitAction       *walk.Action        // FPS無制限
+	cameraSyncAction            *walk.Action        // カメラ同期
+	logLevelDebugAction         *walk.Action        // デバッグメッセージ表示
+	logLevelVerboseAction       *walk.Action        // 冗長メッセージ表示
+	logLevelIkVerboseAction     *walk.Action        // IK冗長メッセージ表示
+	logLevelViewerVerboseAction *walk.Action        // ビューワー冗長メッセージ表示
+	funcSetSelectedVertexes     func([][][]int)     // 選択頂点設定関数
 }
 
 func NewControlWindow(
@@ -97,6 +98,13 @@ func NewControlWindow(
 				Checkable:   true,
 				OnTriggered: controlWindow.TriggerLogLevel,
 				AssignTo:    &controlWindow.logLevelIkVerboseAction,
+			})
+		logMenuItems = append(logMenuItems,
+			declarative.Action{
+				Text:        mi18n.T("&ビューワー冗長ログ表示"),
+				Checkable:   true,
+				OnTriggered: controlWindow.TriggerLogLevel,
+				AssignTo:    &controlWindow.logLevelViewerVerboseAction,
 			})
 	}
 
@@ -412,6 +420,10 @@ func (controlWindow *ControlWindow) TriggerLogLevel() {
 	mlog.SetLevel(mlog.INFO)
 	if controlWindow.logLevelDebugAction.Checked() {
 		mlog.SetLevel(mlog.DEBUG)
+	}
+	if controlWindow.logLevelViewerVerboseAction.Checked() {
+		mlog.I("exe階層に「viewerPng」フォルダを作成し、画面描画中の連番pngを出力し続けます\n画面サイズ: 1920x1080、視野角: 45.0、カメラ位置: (0, 10, 45)、カメラ角度: (0, 0, 0) ")
+		mlog.SetLevel(mlog.VIEWER_VERBOSE)
 	}
 	if controlWindow.logLevelIkVerboseAction.Checked() {
 		mlog.SetLevel(mlog.IK_VERBOSE)
