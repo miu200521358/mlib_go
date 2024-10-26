@@ -422,7 +422,7 @@ func (controlWindow *ControlWindow) TriggerLogLevel() {
 		mlog.SetLevel(mlog.DEBUG)
 	}
 	if controlWindow.logLevelViewerVerboseAction.Checked() {
-		mlog.I("exe階層に「viewerPng」フォルダを作成し、画面描画中の連番pngを出力し続けます\n画面サイズ: 1920x1080、視野角: 45.0、カメラ位置: (0, 10, 45)、カメラ角度: (0, 0, 0) ")
+		mlog.I("exe階層に「viewerPng」フォルダを作成し、画面描画中の連番pngを出力し続けます\n画面サイズ: 1920x1080、視野角: 40.0、カメラ位置: (0, 10, 45)、カメラ角度: (0, 0, 0) ")
 		mlog.SetLevel(mlog.VIEWER_VERBOSE)
 	}
 	if controlWindow.logLevelIkVerboseAction.Checked() {

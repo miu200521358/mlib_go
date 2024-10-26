@@ -115,8 +115,8 @@ func (baseFrames *BaseFrames[T]) Get(index float32) T {
 		return baseFrames.newFunc(index)
 	}
 
-	prevFrame := baseFrames.prevFrame(index)
-	nextFrame := baseFrames.nextFrame(index)
+	prevFrame := baseFrames.prevFrame(index - 1)
+	nextFrame := baseFrames.nextFrame(index + 1)
 	if nextFrame == prevFrame {
 		// 次のキーフレが無い場合、最大キーフレのコピーを返す
 		if baseFrames.Indexes.Len() == 0 {
@@ -246,8 +246,8 @@ func (baseFrames *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {
 
 		if isSplitCurve {
 			// 補間曲線を分割する
-			prevF := baseFrames.Get(baseFrames.prevFrame(f.Index()))
-			nextF := baseFrames.Get(baseFrames.nextFrame(f.Index()))
+			prevF := baseFrames.Get(baseFrames.prevFrame(f.Index() - 1))
+			nextF := baseFrames.Get(baseFrames.nextFrame(f.Index() + 1))
 
 			// 補間曲線を分割する
 			if nextF.Index() > f.Index() && prevF.Index() < f.Index() {

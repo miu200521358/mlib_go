@@ -77,10 +77,13 @@ var (
 	initialLookAtPosition = &mmath.MVec3{X: 0.0, Y: INITIAL_LOOK_AT_CENTER_Y, Z: 0.0}
 	initialCameraUp       = &mmath.MVec3{X: 0.0, Y: 1.0, Z: 0.0}
 
-	VIEWER_VERBOSE_WINDOW_SIZE     = &mmath.MVec2{X: 1920, Y: 1080}
-	VIEWER_VERBOSE_CAMERA_POSITION = &mmath.MVec3{X: 0.0, Y: 10.0, Z: -45.0}
-	VIEWER_VERBOSE_CAMERA_UP       = &mmath.MVec3{X: 0.0, Y: 1.0, Z: 0.0}
-	VIEWER_VERBOSE_LOOK_AT_CENTER  = &mmath.MVec3{X: 0.0, Y: 10.0, Z: 0.0}
+	VIEWER_VERBOSE_YAW                 = 0.0
+	VIEWER_VERBOSE_PITCH               = -1.5
+	VIEWER_VERBOSE_FIELD_OF_VIEW_ANGLE = float32(44.7)
+	VIEWER_VERBOSE_WINDOW_SIZE         = &mmath.MVec2{X: 1920, Y: 1080}
+	VIEWER_VERBOSE_CAMERA_POSITION     = &mmath.MVec3{X: 0.0, Y: 10.1, Z: -45.0}
+	VIEWER_VERBOSE_CAMERA_UP           = &mmath.MVec3{X: 0.0, Y: 1.0, Z: 0.0}
+	VIEWER_VERBOSE_LOOK_AT_CENTER      = &mmath.MVec3{X: 0.0, Y: 10.1, Z: 0.0}
 )
 
 type IShader interface {

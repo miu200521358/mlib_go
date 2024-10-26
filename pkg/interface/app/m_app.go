@@ -303,9 +303,9 @@ func (app *MApp) syncViewer(viewerParameters []*state.ViewerParameter) {
 			if viewerParameters[i] == nil {
 				viewerParameters[i] = &state.ViewerParameter{}
 			}
-			viewerParameters[i].Yaw = 0.0
-			viewerParameters[i].Pitch = 0.0
-			viewerParameters[i].FieldOfViewAngle = 45.0
+			viewerParameters[i].Yaw = mgl.VIEWER_VERBOSE_YAW
+			viewerParameters[i].Pitch = mgl.VIEWER_VERBOSE_PITCH
+			viewerParameters[i].FieldOfViewAngle = mgl.VIEWER_VERBOSE_FIELD_OF_VIEW_ANGLE
 			viewerParameters[i].Size = mgl.VIEWER_VERBOSE_WINDOW_SIZE
 			viewerParameters[i].CameraPos = mgl.VIEWER_VERBOSE_CAMERA_POSITION
 			viewerParameters[i].CameraUp = mgl.VIEWER_VERBOSE_CAMERA_UP

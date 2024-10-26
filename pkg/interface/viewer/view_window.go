@@ -721,8 +721,8 @@ func (viewWindow *ViewWindow) drawOverride() {
 }
 
 func (viewWindow *ViewWindow) saveImage(imgPath string) {
-	w := int32(viewWindow.shader.Width)
-	h := int32(viewWindow.shader.Height)
+	w := int32(viewWindow.size.X)
+	h := int32(viewWindow.size.Y)
 
 	pixels := make([]byte, int(w*h)*4) // RGBA形式で4バイト/ピクセル
 	gl.ReadPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pixels))
@@ -738,6 +738,7 @@ func (viewWindow *ViewWindow) saveImage(imgPath string) {
 			img.SetRGBA(int(x), int(h-y-1), color.RGBA{r, g, b, a}) // 画像の上下を反転
 		}
 	}
+
 	if err := os.MkdirAll(filepath.Dir(imgPath), os.ModePerm); err != nil {
 		mlog.VV("Failed to create directory: %v [%s]", err, imgPath)
 	}
