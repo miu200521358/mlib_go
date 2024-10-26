@@ -87,3 +87,19 @@ func RaiseError(err error) {
 		walk.MsgBox(nil, mi18n.T("エラーダイアログ起動失敗"), string(stackTrace), walk.MsgBoxIconError)
 	}
 }
+func SafeExecute(f func() error) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			stackTrace := debug.Stack()
+			var errMsg string
+			if recoveredErr, ok := r.(error); ok {
+				errMsg = recoveredErr.Error()
+			} else {
+				errMsg = fmt.Sprintf("%v", r)
+			}
+			err = fmt.Errorf("panic: %s\n%s", errMsg, stackTrace)
+		}
+	}()
+
+	return f()
+}
