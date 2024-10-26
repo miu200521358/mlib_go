@@ -5,16 +5,24 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"runtime"
 	"unicode/utf16"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
 func (rep *PmxRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
+	runtime.GOMAXPROCS(int(runtime.NumCPU()))
+	defer runtime.GOMAXPROCS(int(runtime.NumCPU() / 4))
+
+	mlog.IL(mi18n.T("保存開始", map[string]interface{}{"Type": "Pmx", "Path": overridePath}))
+	defer mlog.I(mi18n.T("保存終了", map[string]interface{}{"Type": "Pmx"}))
+
 	model := data.(*pmx.PmxModel)
 
 	path := model.Path()
@@ -177,6 +185,8 @@ func (rep *PmxRepository) Save(overridePath string, data core.IHashModel, includ
 
 // saveVertices 頂点データの書き込み
 func (rep *PmxRepository) saveVertices(fout *os.File, model *pmx.PmxModel, boneIdxType binaryType) error {
+	defer mlog.I(mi18n.T("保存途中完了", map[string]interface{}{"Type": mi18n.T("頂点")}))
+
 	err := rep.writeNumber(fout, binaryType_int, float64(model.Vertices.Len()), 0.0, true)
 	if err != nil {
 		return err
@@ -253,6 +263,8 @@ func (rep *PmxRepository) saveVertices(fout *os.File, model *pmx.PmxModel, boneI
 
 // saveFaces 面データの書き込み
 func (rep *PmxRepository) saveFaces(fout *os.File, model *pmx.PmxModel, vertexIdxType binaryType) error {
+	defer mlog.I(mi18n.T("保存途中完了", map[string]interface{}{"Type": mi18n.T("面")}))
+
 	err := rep.writeNumber(fout, binaryType_int, float64(model.Faces.Len()*3), 0.0, true)
 	if err != nil {
 		return err
@@ -292,6 +304,8 @@ func (rep *PmxRepository) saveTextures(fout *os.File, model *pmx.PmxModel) error
 
 // saveMaterials 材質データの書き込み
 func (rep *PmxRepository) saveMaterials(fout *os.File, model *pmx.PmxModel, textureIdxType binaryType) error {
+	defer mlog.I(mi18n.T("保存途中完了", map[string]interface{}{"Type": mi18n.T("材質")}))
+
 	err := rep.writeNumber(fout, binaryType_int, float64(model.Materials.Len()), 0.0, true)
 	if err != nil {
 		return err
@@ -414,6 +428,8 @@ func (rep *PmxRepository) saveMaterials(fout *os.File, model *pmx.PmxModel, text
 
 // saveBones ボーンデータの書き込み
 func (rep *PmxRepository) saveBones(fout *os.File, targetBones []*pmx.Bone, boneIdxType binaryType) error {
+	defer mlog.I(mi18n.T("保存途中完了", map[string]interface{}{"Type": mi18n.T("ボーン")}))
+
 	err := rep.writeNumber(fout, binaryType_int, float64(len(targetBones)), 0.0, true)
 	if err != nil {
 		return err
@@ -592,6 +608,8 @@ func (rep *PmxRepository) saveBones(fout *os.File, targetBones []*pmx.Bone, bone
 func (rep *PmxRepository) saveMorphs(
 	fout *os.File, targetMorphs []*pmx.Morph, vertexIdxType, boneIdxType, materialIdxType, morphIdxType binaryType,
 ) error {
+	defer mlog.I(mi18n.T("保存途中完了", map[string]interface{}{"Type": mi18n.T("モーフ")}))
+
 	err := rep.writeNumber(fout, binaryType_int, float64(len(targetMorphs)), 0.0, true)
 	if err != nil {
 		return err
@@ -831,6 +849,8 @@ func (rep *PmxRepository) saveMorphs(
 
 // saveDisplaySlots 表示枠データの書き込み
 func (rep *PmxRepository) saveDisplaySlots(fout *os.File, model *pmx.PmxModel, boneIdxType, morphIdxType binaryType) error {
+	defer mlog.I(mi18n.T("保存途中完了", map[string]interface{}{"Type": mi18n.T("表示枠")}))
+
 	err := rep.writeNumber(fout, binaryType_int, float64(model.DisplaySlots.Len()), 0.0, true)
 	if err != nil {
 		return err
@@ -877,6 +897,8 @@ func (rep *PmxRepository) saveDisplaySlots(fout *os.File, model *pmx.PmxModel, b
 
 // saveRigidBodies 剛体データの書き込み
 func (rep *PmxRepository) saveRigidBodies(fout *os.File, model *pmx.PmxModel, boneIdxType binaryType) error {
+	defer mlog.I(mi18n.T("保存途中完了", map[string]interface{}{"Type": mi18n.T("剛体")}))
+
 	err := rep.writeNumber(fout, binaryType_int, float64(model.RigidBodies.Len()), 0.0, true)
 	if err != nil {
 		return err
@@ -975,6 +997,8 @@ func (rep *PmxRepository) saveRigidBodies(fout *os.File, model *pmx.PmxModel, bo
 
 // saveJoints ジョイントデータの書き込み
 func (rep *PmxRepository) saveJoints(fout *os.File, model *pmx.PmxModel, rigidbodyIdxType binaryType) error {
+	defer mlog.I(mi18n.T("保存途中完了", map[string]interface{}{"Type": mi18n.T("ジョイント")}))
+
 	err := rep.writeNumber(fout, binaryType_int, float64(model.Joints.Len()), 0.0, true)
 	if err != nil {
 		return err

@@ -26,6 +26,8 @@ type IControlWindow interface {
 	SetPlayingChannel(playing bool)
 	SetClosed(closed bool)
 	SetSelectedVertexes(indexes [][][]int)
+	SetEnabled(enabled bool)
+	Enabled() bool
 }
 
 type IViewWindow interface {

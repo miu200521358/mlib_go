@@ -28,7 +28,7 @@ func init() {
 	runtime.LockOSThread()
 
 	// システム上の半分の論理プロセッサを使用させる
-	runtime.GOMAXPROCS(int(runtime.NumCPU() / 2))
+	runtime.GOMAXPROCS(int(runtime.NumCPU() / 4))
 
 	walk.AppendToWalkInit(func() {
 		walk.MustRegisterWindowClass(widget.FilePickerClass)

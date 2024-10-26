@@ -7,6 +7,7 @@ import (
 	"io"
 	"math"
 	"os"
+	"runtime"
 
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
@@ -20,6 +21,12 @@ import (
 )
 
 func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
+	runtime.GOMAXPROCS(int(runtime.NumCPU()))
+	defer runtime.GOMAXPROCS(int(runtime.NumCPU() / 4))
+
+	mlog.IL(mi18n.T("読み込み開始", map[string]interface{}{"Type": "Vmd", "Path": overridePath}))
+	defer mlog.I(mi18n.T("読み込み終了", map[string]interface{}{"Type": "Vmd"}))
+
 	motion := data.(*vmd.VmdMotion)
 
 	path := motion.Path()
@@ -118,6 +125,7 @@ func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) e
 	}
 
 	rep.writeNumber(fout, binaryType_unsignedInt, float64(count), 0.0, true)
+	n := 0
 	for _, name := range names {
 		boneFrames := motion.BoneFrames.Data[name]
 
@@ -129,6 +137,11 @@ func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) e
 				return err
 			}
 		}
+
+		if n%10000 == 0 && n > 0 {
+			mlog.I(mi18n.T("保存途中", map[string]interface{}{"Type": mi18n.T("ボーン"), "Index": n, "Total": count}))
+		}
+		n++
 	}
 
 	for _, name := range names {
@@ -208,7 +221,7 @@ func (rep *VmdRepository) saveMorphFrames(fout *os.File, motion *vmd.VmdMotion) 
 	}
 
 	rep.writeNumber(fout, binaryType_unsignedInt, float64(count), 0.0, true)
-
+	n := 0
 	for _, name := range names {
 		morphFrames := motion.MorphFrames.Data[name]
 		if morphFrames.RegisteredIndexes.Len() > 0 {
@@ -221,6 +234,11 @@ func (rep *VmdRepository) saveMorphFrames(fout *os.File, motion *vmd.VmdMotion) 
 				}
 			}
 		}
+
+		if n%10000 == 0 && n > 0 {
+			mlog.I(mi18n.T("保存途中", map[string]interface{}{"Type": mi18n.T("モーフ"), "Index": n, "Total": count}))
+		}
+		n++
 	}
 
 	return nil

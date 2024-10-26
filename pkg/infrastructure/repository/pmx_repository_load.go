@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io/fs"
+	"runtime"
 	"slices"
 	"strings"
 
@@ -31,6 +32,12 @@ func (rep *PmxRepository) CanLoad(path string) (bool, error) {
 
 // 指定されたパスのファイルからデータを読み込む
 func (rep *PmxRepository) Load(path string) (core.IHashModel, error) {
+	runtime.GOMAXPROCS(int(runtime.NumCPU()))
+	defer runtime.GOMAXPROCS(int(runtime.NumCPU() / 4))
+
+	mlog.IL(mi18n.T("読み込み開始", map[string]interface{}{"Type": "Pmx", "Path": path}))
+	defer mlog.I(mi18n.T("読み込み終了", map[string]interface{}{"Type": "Pmx"}))
+
 	// モデルを新規作成
 	model := rep.newFunc(path)
 
@@ -270,6 +277,8 @@ func (rep *PmxRepository) loadModel(model *pmx.PmxModel) error {
 }
 
 func (rep *PmxRepository) loadVertices(model *pmx.PmxModel) error {
+	defer mlog.I(mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("頂点")}))
+
 	totalVertexCount, err := rep.unpackInt()
 	if err != nil {
 		mlog.E("loadVertices UnpackInt totalVertexCount error: %v", err)
@@ -283,6 +292,10 @@ func (rep *PmxRepository) loadVertices(model *pmx.PmxModel) error {
 	bdef4Weights := make([]float64, 4)
 	sdefWeights := make([]float64, 10)
 	for i := 0; i < totalVertexCount; i++ {
+		if i%10000 == 0 && i > 0 {
+			mlog.I(mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("頂点"), "Index": i, "Total": totalVertexCount}))
+		}
+
 		// 12 : float3  | 位置(x,y,z)
 		// 12 : float3  | 法線(x,y,z)
 		// 8  : float2  | UV(u,v)
@@ -434,6 +447,8 @@ func (rep *PmxRepository) loadVertices(model *pmx.PmxModel) error {
 }
 
 func (rep *PmxRepository) loadFaces(model *pmx.PmxModel) error {
+	defer mlog.I(mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("面")}))
+
 	totalFaceCount, err := rep.unpackInt()
 	if err != nil {
 		mlog.E("loadFaces UnpackInt totalFaceCount error: %v", err)
@@ -449,6 +464,10 @@ func (rep *PmxRepository) loadFaces(model *pmx.PmxModel) error {
 	}
 
 	for i := 0; i < totalFaceCount; i += 3 {
+		if i%10000 == 0 && i > 0 {
+			mlog.I(mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("面"), "Index": i, "Total": totalFaceCount}))
+		}
+
 		// n : 頂点Indexサイズ     | 頂点の参照Index
 		// n : 頂点Indexサイズ     | 頂点の参照Index
 		// n : 頂点Indexサイズ     | 頂点の参照Index
@@ -492,6 +511,8 @@ func (rep *PmxRepository) loadTextures(model *pmx.PmxModel) error {
 }
 
 func (rep *PmxRepository) loadMaterials(model *pmx.PmxModel) error {
+	defer mlog.I(mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("材質")}))
+
 	totalMaterialCount, err := rep.unpackInt()
 	if err != nil {
 		mlog.E("loadMaterials UnpackInt totalMaterialCount error: %v", err)
@@ -613,6 +634,8 @@ func (rep *PmxRepository) loadMaterials(model *pmx.PmxModel) error {
 }
 
 func (rep *PmxRepository) loadBones(model *pmx.PmxModel) error {
+	defer mlog.I(mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("ボーン")}))
+
 	totalBoneCount, err := rep.unpackInt()
 	if err != nil {
 		mlog.E("loadBones UnpackInt totalBoneCount error: %v", err)
@@ -812,6 +835,8 @@ func (rep *PmxRepository) loadBones(model *pmx.PmxModel) error {
 }
 
 func (rep *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
+	defer mlog.I(mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("モーフ")}))
+
 	totalMorphCount, err := rep.unpackInt()
 	if err != nil {
 		mlog.E("loadMorphs UnpackInt totalMorphCount error: %v", err)
@@ -964,6 +989,8 @@ func (rep *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 }
 
 func (rep *PmxRepository) loadDisplaySlots(model *pmx.PmxModel) error {
+	defer mlog.I(mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("表示枠")}))
+
 	totalDisplaySlotCount, err := rep.unpackInt()
 	if err != nil {
 		mlog.E("loadDisplaySlots UnpackInt totalDisplaySlotCount error: %v", err)
@@ -1037,6 +1064,8 @@ func (rep *PmxRepository) loadDisplaySlots(model *pmx.PmxModel) error {
 }
 
 func (rep *PmxRepository) loadRigidBodies(model *pmx.PmxModel) error {
+	defer mlog.I(mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("剛体")}))
+
 	totalRigidBodyCount, err := rep.unpackInt()
 	if err != nil {
 		mlog.E("loadRigidBodies UnpackInt totalRigidBodyCount error: %v", err)
@@ -1126,6 +1155,8 @@ func (rep *PmxRepository) loadRigidBodies(model *pmx.PmxModel) error {
 }
 
 func (rep *PmxRepository) loadJoints(model *pmx.PmxModel) error {
+	defer mlog.I(mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("ジョイント")}))
+
 	totalJointCount, err := rep.unpackInt()
 	if err != nil {
 		mlog.E("loadJoints UnpackInt totalJointCount error: %v", err)

@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
@@ -27,6 +28,12 @@ func NewCsvRepository() *CsvRepository {
 }
 
 func (rep *CsvRepository) Save(path string, model core.IHashModel, includeSystem bool) error {
+	runtime.GOMAXPROCS(int(runtime.NumCPU()))
+	defer runtime.GOMAXPROCS(int(runtime.NumCPU() / 4))
+
+	mlog.IL(mi18n.T("保存開始", map[string]interface{}{"Type": "Csv", "Path": path}))
+	defer mlog.I(mi18n.T("保存終了", map[string]interface{}{"Type": "Csv"}))
+
 	// CSVファイルを開く
 	file, err := os.Create(path)
 	if err != nil {
@@ -54,6 +61,12 @@ func (rep *CsvRepository) Save(path string, model core.IHashModel, includeSystem
 
 // 指定されたパスのファイルからデータを読み込む
 func (rep *CsvRepository) Load(path string) (core.IHashModel, error) {
+	runtime.GOMAXPROCS(int(runtime.NumCPU()))
+	defer runtime.GOMAXPROCS(int(runtime.NumCPU() / 4))
+
+	mlog.IL(mi18n.T("読み込み開始", map[string]interface{}{"Type": "Csv", "Path": path}))
+	defer mlog.I(mi18n.T("読み込み終了", map[string]interface{}{"Type": "Csv"}))
+
 	// CSVファイルを開く
 	file, err := os.Open(path)
 	if err != nil {

@@ -422,5 +422,69 @@
     {
         "id": "&ビューワー冗長ログ表示",
         "translation": "&ビューワー冗長ログ表示"
+    },
+    {
+        "id": "保存開始",
+        "translation": "{{.Type}}保存開始\n出力ファイルパス: {{.Path}}"
+    },
+    {
+        "id": "保存終了",
+        "translation": "{{.Type}}保存終了"
+    },
+    {
+        "id": "読み込み開始",
+        "translation": "{{.Type}}読み込み開始\n入力ファイルパス: {{.Path}}"
+    },
+    {
+        "id": "読み込み終了",
+        "translation": "{{.Type}}読み込み終了"
+    },
+    {
+        "id": "読み込み途中完了",
+        "translation": "-- 【{{.Type}}】読み込み完了"
+    },
+    {
+        "id": "読み込み途中",
+        "translation": "---- 【{{.Type}}】読み込み [{{.Index}}/{{.Total}}]"
+    },
+    {
+        "id": "保存途中完了",
+        "translation": "-- 【{{.Type}}】保存完了"
+    },
+    {
+        "id": "保存途中",
+        "translation": "---- 【{{.Type}}】保存 [{{.Index}}/{{.Total}}]"
+    },
+    {
+        "id": "頂点",
+        "translation": "頂点"
+    },
+    {
+        "id": "面",
+        "translation": "面"
+    },
+    {
+        "id": "材質",
+        "translation": "材質"
+    },
+    {
+        "id": "ボーン",
+        "translation": "ボーン"
+    },
+    {
+        "id": "モーフ",
+        "translation": "モーフ"
+    },
+    {
+        "id": "表示枠",
+        "translation": "表示枠"
+    },
+    {
+        "id": "剛体",
+        "translation": "剛体"
+    },
+    {
+        "id": "ジョイント",
+        "translation": "ジョイント"
     }
 ]

@@ -61,8 +61,8 @@ func IterParallelByList(allData []int, blockSize int,
 	processFunc func(data, index int), logFunc func(iterIndex, allCount int)) error {
 	numCPU := runtime.NumCPU()
 
-	// システム上の全論理プロセッサを使用させる
 	runtime.GOMAXPROCS(numCPU)
+	defer runtime.GOMAXPROCS(int(numCPU / 4))
 
 	if blockSize <= 1 || blockSize >= len(allData) {
 		// ブロックサイズが1以下、もしくは全件数より大きい場合は直列処理
@@ -107,17 +107,10 @@ func IterParallelByList(allData []int, blockSize int,
 		// チャネルからエラーを受け取る
 		for err := range errorChan {
 			if err != nil {
-
-				// 終わったらシステム上の25%の論理プロセッサを使用する
-				runtime.GOMAXPROCS(int(numCPU / 4))
-
 				return err
 			}
 		}
 	}
-
-	// 終わったらシステム上の25%の論理プロセッサを使用する
-	runtime.GOMAXPROCS(int(numCPU / 4))
 
 	return nil
 }
