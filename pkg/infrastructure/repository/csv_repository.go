@@ -2,9 +2,13 @@ package repository
 
 import (
 	"encoding/csv"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
+	"github.com/miu200521358/mlib_go/pkg/mutils"
+	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
 
@@ -69,6 +73,19 @@ func (rep *CsvRepository) Load(path string) (core.IHashModel, error) {
 	}
 
 	return core.NewCsvModel(records), nil
+}
+
+func (rep *CsvRepository) CanLoad(path string) (bool, error) {
+	if isExist, err := mutils.ExistsFile(path); err != nil || !isExist {
+		return false, fmt.Errorf(mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
+	}
+
+	_, _, ext := mutils.SplitPath(path)
+	if strings.ToLower(ext) != ".csv" {
+		return false, fmt.Errorf(mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".csv"}))
+	}
+
+	return true, nil
 }
 
 func (rep *CsvRepository) LoadName(path string) string {
