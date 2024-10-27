@@ -31,8 +31,6 @@ func init() {
 	runtime.GOMAXPROCS(int(runtime.NumCPU() / 4))
 
 	walk.AppendToWalkInit(func() {
-		walk.MustRegisterWindowClass(widget.FilePickerClass)
-		walk.MustRegisterWindowClass(widget.MotionPlayerClass)
 		walk.MustRegisterWindowClass(widget.ConsoleViewClass)
 	})
 }

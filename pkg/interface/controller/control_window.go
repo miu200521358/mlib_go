@@ -366,11 +366,11 @@ func (controlWindow *ControlWindow) Close() {
 	controlWindow.MainWindow.Close()
 }
 
-func (controlWindow *ControlWindow) Run() {
+func (controlWindow *ControlWindow) WindowRun() {
 	controlWindow.MainWindow.Run()
 }
 
-func (controlWindow *ControlWindow) Size() (int, int) {
+func (controlWindow *ControlWindow) WindowSize() (int, int) {
 	size := controlWindow.MainWindow.Size()
 	return size.Width, size.Height
 }

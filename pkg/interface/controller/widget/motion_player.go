@@ -5,7 +5,6 @@ package widget
 
 import (
 	"github.com/miu200521358/walk/pkg/walk"
-	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/state"
@@ -23,23 +22,12 @@ type MotionPlayer struct {
 	onTriggerPlay func(playing bool)   // 再生トリガー
 }
 
-const MotionPlayerClass = "MotionPlayer Class"
-
 func NewMotionPlayer(
 	parent walk.Container,
 	controlWindow state.IControlWindow,
 ) *MotionPlayer {
 	player := new(MotionPlayer)
 	player.controlWindow = controlWindow
-
-	if err := walk.InitWidget(
-		player,
-		parent,
-		MotionPlayerClass,
-		win.WS_DISABLED,
-		0); err != nil {
-		RaiseError(err)
-	}
 
 	playerComposite, err := walk.NewComposite(parent)
 	if err != nil {

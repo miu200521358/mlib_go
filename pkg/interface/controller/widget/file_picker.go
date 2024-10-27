@@ -8,7 +8,6 @@ import (
 	"runtime"
 
 	"github.com/miu200521358/walk/pkg/walk"
-	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
@@ -18,8 +17,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/mutils/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/mutils/mlog"
 )
-
-const FilePickerClass = "FilePicker Class"
 
 type FilePicker struct {
 	walk.WidgetBase
@@ -277,15 +274,6 @@ func newFilePicker(
 	picker.rep = rep
 	picker.window = window
 
-	if err := walk.InitWidget(
-		picker,
-		parent,
-		FilePickerClass,
-		win.WS_DISABLED,
-		0); err != nil {
-		RaiseError(err)
-	}
-
 	// タイトル
 	titleComposite, err := walk.NewComposite(parent)
 	if err != nil {
@@ -506,7 +494,7 @@ func (picker *FilePicker) createHistoryDialog() (*walk.Dialog, error) {
 	choices := mconfig.LoadUserConfig(picker.historyKey)
 
 	// 履歴ダイアログを開く
-	dlg, err := walk.NewDialog(picker.Form())
+	dlg, err := walk.NewDialog(picker.window)
 	if err != nil {
 		walk.MsgBox(nil, mi18n.T("履歴ダイアログ生成エラー"), err.Error(), walk.MsgBoxIconError)
 		RaiseError(err)

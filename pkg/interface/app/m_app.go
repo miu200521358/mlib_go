@@ -558,7 +558,7 @@ func (app *MApp) Center() {
 		screenHeight := getSystemMetrics(SM_CYSCREEN)
 
 		// ウィンドウのサイズを取得
-		mWidth, mHeight := app.controlWindow.Size()
+		mWidth, mHeight := app.controlWindow.WindowSize()
 
 		viewWindowWidth := 0
 		viewWindowHeight := 0

@@ -10,13 +10,15 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+	"github.com/miu200521358/walk/pkg/walk"
 )
 
 type IControlWindow interface {
-	Run()
+	walk.Form
+	WindowRun()
 	Dispose()
 	Close()
-	Size() (int, int)
+	WindowSize() (int, int)
 	SetPosition(x, y int)
 	Frame() float32
 	SetFrame(frame float32)
