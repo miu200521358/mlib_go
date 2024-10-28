@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
@@ -274,62 +275,91 @@ func newFilePicker(
 	picker.rep = rep
 	picker.window = window
 
-	// タイトル
-	titleComposite, err := walk.NewComposite(parent)
+	nameBg, err := walk.NewSystemColorBrush(walk.SysColorInactiveCaption)
 	if err != nil {
 		RaiseError(err)
 	}
-	titleComposite.SetLayout(walk.NewHBoxLayout())
 
-	titleLabel, err := walk.NewTextLabel(titleComposite)
-	if err != nil {
-		RaiseError(err)
+	titleWidgets := []declarative.Widget{
+		declarative.TextLabel{
+			Text:        title,
+			ToolTipText: description,
+			OnMouseDown: func(x, y int, button walk.MouseButton) { mlog.IL(description) },
+		},
 	}
-	titleLabel.SetText(title)
-	titleLabel.MouseDown().Attach(func(x, y int, button walk.MouseButton) {
-		mlog.IL(description)
-	})
 
 	if historyKey != "" {
-		startBracketLabel, err := walk.NewTextLabel(titleComposite)
-		if err != nil {
-			RaiseError(err)
-		}
-		startBracketLabel.SetText("  (")
-		startBracketLabel.SetToolTipText(tooltip)
-
-		nameLineEdit, err := walk.NewLineEditStaticEdge(titleComposite)
-		if err != nil {
-			RaiseError(err)
-		}
-		nameLineEdit.SetText(mi18n.T("未設定"))
-		nameLineEdit.SetReadOnly(true)
-		bg, err := walk.NewSystemColorBrush(walk.SysColorInactiveCaption)
-		if err != nil {
-			RaiseError(err)
-		}
-		nameLineEdit.SetBackground(bg)
-		picker.nameEdit = nameLineEdit
-
-		endBracketLabel, err := walk.NewTextLabel(titleComposite)
-		if err != nil {
-			RaiseError(err)
-		}
-		endBracketLabel.SetText(")")
+		titleWidgets = append(titleWidgets, declarative.Composite{
+			Layout: declarative.HBox{},
+			Children: []declarative.Widget{
+				declarative.TextLabel{
+					Text:        "  (",
+					ToolTipText: tooltip,
+				},
+				declarative.LineEdit{
+					ReadOnly: true,
+					Background: declarative.SolidColorBrush{
+						Color: nameBg.Color(),
+					},
+					Text:        mi18n.T("未設定"),
+					ToolTipText: tooltip,
+					AssignTo:    &picker.nameEdit,
+				},
+				declarative.TextLabel{
+					Text:        ") ",
+					ToolTipText: tooltip,
+				},
+			},
+		})
 	}
 
-	// パス入力欄
-	inputComposite, err := walk.NewComposite(parent)
-	if err != nil {
+	inputWidgets := []declarative.Widget{
+		declarative.LineEdit{
+			AssignTo:    &picker.pathEdit,
+			ToolTipText: tooltip,
+			OnTextChanged: func() {
+				picker.OnChanged(picker.pathEdit.Text())
+			},
+		},
+		declarative.PushButton{
+			AssignTo:    &picker.openPushButton,
+			Text:        mi18n.T("開く"),
+			ToolTipText: tooltip,
+			OnClicked:   picker.onClickOpenButton(),
+			MinSize:     declarative.Size{Width: 70, Height: 20},
+			MaxSize:     declarative.Size{Width: 70, Height: 20},
+		},
+	}
+
+	if historyKey != "" {
+		inputWidgets = append(inputWidgets, declarative.PushButton{
+			AssignTo:    &picker.historyPushButton,
+			Text:        mi18n.T("履歴"),
+			ToolTipText: tooltip,
+			OnClicked:   picker.onClickHistoryButton(),
+			MinSize:     declarative.Size{Width: 70, Height: 20},
+			MaxSize:     declarative.Size{Width: 70, Height: 20},
+		})
+	}
+
+	composite := &declarative.Composite{
+		Layout: declarative.VBox{},
+		Children: []declarative.Widget{
+			declarative.Composite{
+				Layout:   declarative.HBox{},
+				Children: titleWidgets,
+			},
+			declarative.Composite{
+				Layout:   declarative.HBox{},
+				Children: inputWidgets,
+			},
+		},
+	}
+
+	if err := composite.Create(declarative.NewBuilder(parent)); err != nil {
 		RaiseError(err)
 	}
-	inputComposite.SetLayout(walk.NewHBoxLayout())
 
-	picker.pathEdit, err = walk.NewLineEdit(inputComposite)
-	if err != nil {
-		RaiseError(err)
-	}
-	picker.pathEdit.SetToolTipText(tooltip)
 	picker.pathEdit.DropFiles().Attach(func(files []string) {
 		if len(files) > 0 {
 			path := files[0]
@@ -339,34 +369,12 @@ func newFilePicker(
 			picker.OnChanged(path)
 		}
 	})
-	picker.pathEdit.TextChanged().Attach(func() {
-		// コールバックを呼び出し
-		picker.OnChanged(picker.pathEdit.Text())
-	})
-
-	picker.openPushButton, err = walk.NewPushButton(inputComposite)
-	if err != nil {
-		RaiseError(err)
-	}
-	picker.openPushButton.SetToolTipText(tooltip)
-	picker.openPushButton.SetText(mi18n.T("開く"))
-	picker.openPushButton.SetMinMaxSize(walk.Size{Width: 70, Height: 20}, walk.Size{Width: 70, Height: 20})
-	picker.openPushButton.Clicked().Attach(picker.onClickOpenButton())
 
 	if historyKey != "" {
-		picker.historyPushButton, err = walk.NewPushButton(inputComposite)
-		if err != nil {
-			RaiseError(err)
-		}
-		picker.historyPushButton.SetToolTipText(tooltip)
-		picker.historyPushButton.SetText(mi18n.T("履歴"))
-		picker.historyPushButton.SetMinMaxSize(walk.Size{Width: 70, Height: 20}, walk.Size{Width: 70, Height: 20})
 		picker.historyDialog, err = picker.createHistoryDialog()
 		if err != nil {
 			RaiseError(err)
 		}
-
-		picker.historyPushButton.Clicked().Attach(picker.onClickHistoryButton())
 	}
 
 	return picker
