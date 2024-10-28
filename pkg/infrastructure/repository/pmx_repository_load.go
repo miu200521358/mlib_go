@@ -33,7 +33,7 @@ func (rep *PmxRepository) CanLoad(path string) (bool, error) {
 // 指定されたパスのファイルからデータを読み込む
 func (rep *PmxRepository) Load(path string) (core.IHashModel, error) {
 	runtime.GOMAXPROCS(int(runtime.NumCPU()))
-	defer runtime.GOMAXPROCS(int(runtime.NumCPU() / 4))
+	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
 	mlog.IL(mi18n.T("読み込み開始", map[string]interface{}{"Type": "Pmx", "Path": path}))
 	defer mlog.I(mi18n.T("読み込み終了", map[string]interface{}{"Type": "Pmx"}))

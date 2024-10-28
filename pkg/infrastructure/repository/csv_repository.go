@@ -29,7 +29,7 @@ func NewCsvRepository() *CsvRepository {
 
 func (rep *CsvRepository) Save(path string, model core.IHashModel, includeSystem bool) error {
 	runtime.GOMAXPROCS(int(runtime.NumCPU()))
-	defer runtime.GOMAXPROCS(int(runtime.NumCPU() / 4))
+	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
 	mlog.IL(mi18n.T("保存開始", map[string]interface{}{"Type": "Csv", "Path": path}))
 	defer mlog.I(mi18n.T("保存終了", map[string]interface{}{"Type": "Csv"}))
@@ -62,7 +62,7 @@ func (rep *CsvRepository) Save(path string, model core.IHashModel, includeSystem
 // 指定されたパスのファイルからデータを読み込む
 func (rep *CsvRepository) Load(path string) (core.IHashModel, error) {
 	runtime.GOMAXPROCS(int(runtime.NumCPU()))
-	defer runtime.GOMAXPROCS(int(runtime.NumCPU() / 4))
+	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
 	mlog.IL(mi18n.T("読み込み開始", map[string]interface{}{"Type": "Csv", "Path": path}))
 	defer mlog.I(mi18n.T("読み込み終了", map[string]interface{}{"Type": "Csv"}))

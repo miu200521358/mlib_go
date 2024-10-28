@@ -28,7 +28,7 @@ func init() {
 	runtime.LockOSThread()
 
 	// システム上の半分の論理プロセッサを使用させる
-	runtime.GOMAXPROCS(int(runtime.NumCPU() / 4))
+	runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
 	walk.AppendToWalkInit(func() {
 		walk.MustRegisterWindowClass(widget.ConsoleViewClass)

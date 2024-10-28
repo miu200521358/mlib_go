@@ -18,7 +18,7 @@ import (
 
 func (rep *PmxRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
 	runtime.GOMAXPROCS(int(runtime.NumCPU()))
-	defer runtime.GOMAXPROCS(int(runtime.NumCPU() / 4))
+	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
 	mlog.IL(mi18n.T("保存開始", map[string]interface{}{"Type": "Pmx", "Path": overridePath}))
 	defer mlog.I(mi18n.T("保存終了", map[string]interface{}{"Type": "Pmx"}))
