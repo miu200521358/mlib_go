@@ -4,6 +4,7 @@
 package widget
 
 import (
+	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -29,77 +30,68 @@ func NewMotionPlayer(
 	player := new(MotionPlayer)
 	player.controlWindow = controlWindow
 
-	playerComposite, err := walk.NewComposite(parent)
-	if err != nil {
+	composite := &declarative.Composite{
+		Layout: declarative.HBox{},
+		Children: []declarative.Widget{
+			// 再生エリア
+			declarative.TextLabel{
+				Text:        mi18n.T("再生"),
+				ToolTipText: mi18n.T("再生ウィジェットの使い方メッセージ"),
+				OnMouseDown: func(x, y int, button walk.MouseButton) {
+					mlog.IL(mi18n.T("再生ウィジェットの使い方メッセージ"))
+				},
+			},
+			// キーフレ番号
+			declarative.NumberEdit{
+				AssignTo:           &player.frameEdit,
+				Decimals:           0,
+				MinValue:           0,
+				MaxValue:           1,
+				Increment:          1,
+				SpinButtonsVisible: true,
+				MinSize:            declarative.Size{Width: 60, Height: 20},
+				MaxSize:            declarative.Size{Width: 60, Height: 20},
+				OnValueChanged: func() {
+					if !player.Playing() {
+						player.controlWindow.SetFrame(float32(player.frameEdit.Value()))
+					}
+				},
+				ToolTipText:   mi18n.T("再生キーフレ説明"),
+				StretchFactor: 3,
+			},
+			// フレームスライダー
+			declarative.Slider{
+				AssignTo:    &player.frameSlider,
+				MinValue:    0,
+				MaxValue:    1,
+				Orientation: walk.Horizontal,
+				OnValueChanged: func() {
+					if !player.Playing() {
+						player.controlWindow.SetFrameChannel(float32(player.frameSlider.Value()))
+					}
+				},
+				ToolTipText:   mi18n.T("再生スライダー説明"),
+				Value:         0,
+				StretchFactor: 20,
+			},
+			// 再生ボタン
+			declarative.PushButton{
+				AssignTo: &player.playButton,
+				Text:     mi18n.T("再生"),
+				MinSize:  declarative.Size{Width: 90, Height: 20},
+				MaxSize:  declarative.Size{Width: 90, Height: 20},
+				OnClicked: func() {
+					player.SetPlaying(!player.Playing())
+				},
+				ToolTipText:   mi18n.T("再生ボタン説明"),
+				StretchFactor: 2,
+			},
+		},
+	}
+
+	if err := composite.Create(declarative.NewBuilder(parent)); err != nil {
 		RaiseError(err)
 	}
-	layout := walk.NewHBoxLayout()
-	playerComposite.SetLayout(layout)
-
-	bg, err := walk.NewSystemColorBrush(walk.SysColorInactiveCaption)
-	if err != nil {
-		RaiseError(err)
-	}
-	playerComposite.SetBackground(bg)
-
-	// 再生エリア
-	titleLabel, err := walk.NewTextLabel(playerComposite)
-	if err != nil {
-		RaiseError(err)
-	}
-	titleLabel.SetText(mi18n.T("再生"))
-	titleLabel.SetToolTipText(mi18n.T("再生ウィジェットの使い方メッセージ"))
-	titleLabel.MouseDown().Attach(func(x, y int, button walk.MouseButton) {
-		mlog.IL(mi18n.T("再生ウィジェットの使い方メッセージ"))
-	})
-
-	// キーフレ番号
-	player.frameEdit, err = walk.NewNumberEdit(playerComposite)
-	if err != nil {
-		RaiseError(err)
-	}
-	player.frameEdit.SetDecimals(0)
-	player.frameEdit.SetRange(0, 1)
-	player.frameEdit.SetValue(0)
-	player.frameEdit.SetIncrement(1)
-	player.frameEdit.SetSpinButtonsVisible(true)
-	player.frameEdit.SetMinMaxSize(walk.Size{Width: 60, Height: 20}, walk.Size{Width: 60, Height: 20})
-	player.frameEdit.ValueChanged().Attach(func() {
-		if !player.Playing() {
-			player.controlWindow.SetFrame(float32(player.frameEdit.Value()))
-		}
-	})
-	player.frameEdit.SetToolTipText(mi18n.T("再生キーフレ説明"))
-
-	// フレームスライダー
-	player.frameSlider, err = walk.NewSlider(playerComposite)
-	if err != nil {
-		RaiseError(err)
-	}
-	player.frameSlider.SetRange(0, 1)
-	player.frameSlider.SetValue(0)
-	player.frameSlider.ValueChanged().Attach(func() {
-		if !player.Playing() {
-			player.controlWindow.SetFrame(float32(player.frameSlider.Value()))
-		}
-	})
-	player.frameSlider.SetToolTipText(mi18n.T("再生スライダー説明"))
-
-	player.playButton, err = walk.NewPushButton(playerComposite)
-	if err != nil {
-		RaiseError(err)
-	}
-	player.playButton.SetText(mi18n.T("再生"))
-	player.playButton.SetMinMaxSize(walk.Size{Width: 90, Height: 20}, walk.Size{Width: 90, Height: 20})
-	player.playButton.Clicked().Attach(func() {
-		player.SetPlaying(!player.Playing())
-	})
-	player.playButton.SetToolTipText(mi18n.T("再生ボタン説明"))
-
-	// レイアウト
-	layout.SetStretchFactor(player.frameEdit, 3)
-	layout.SetStretchFactor(player.frameSlider, 20)
-	layout.SetStretchFactor(player.playButton, 2)
 
 	return player
 }
