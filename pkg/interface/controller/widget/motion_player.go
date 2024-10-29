@@ -67,7 +67,7 @@ func NewMotionPlayer(
 				Orientation: walk.Horizontal,
 				OnValueChanged: func() {
 					if !player.Playing() {
-						player.controlWindow.SetFrameChannel(float32(player.frameSlider.Value()))
+						player.controlWindow.SetFrame(float32(player.frameSlider.Value()))
 					}
 				},
 				ToolTipText:   mi18n.T("再生スライダー説明"),
