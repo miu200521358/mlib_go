@@ -34,6 +34,11 @@ type baseRepository[T core.IHashModel] struct {
 	newFunc  func(path string) T
 }
 
+type LoadResult struct {
+	Data core.IHashModel
+	Err  error
+}
+
 func (rep *baseRepository[T]) open(path string) error {
 
 	file, err := mutils.Open(path)
