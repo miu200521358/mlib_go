@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime/debug"
+	"time"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -195,8 +196,17 @@ func (app *MApp) RunViewer() {
 		}
 
 		if elapsed < app.FrameInterval() {
-			// 1フレームの時間が経過していない場合はスキップ
 			// fps制限は描画fpsにのみ依存
+
+			// 待機時間(残り時間の9割)
+			waitDuration := (app.FrameInterval() - elapsed) * 0.9
+
+			// waitDurationがapp.FrameIntervalの9割以下ならsleep
+			if waitDuration <= app.FrameInterval()*0.9 {
+				time.Sleep(time.Duration(waitDuration * float64(time.Second)))
+			}
+
+			// 経過時間が1フレームの時間未満の場合はもう少し待つ
 			continue
 		}
 
