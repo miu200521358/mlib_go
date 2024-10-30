@@ -140,6 +140,9 @@ func (physics *MPhysics) initRigidBody(
 
 func (physics *MPhysics) deleteRigidBodies(modelIndex int) {
 	for _, r := range physics.rigidBodies[modelIndex] {
+		if r == nil || r.btRigidBody == nil {
+			continue
+		}
 		physics.world.RemoveRigidBody(r.btRigidBody)
 		bt.DeleteBtRigidBody(r.btRigidBody)
 	}

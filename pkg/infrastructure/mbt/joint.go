@@ -73,6 +73,13 @@ func (physics *MPhysics) initJointsByBoneDeltas(
 func (physics *MPhysics) initJoint(
 	modelIndex int, joint *pmx.Joint, jointTransform bt.BtTransform,
 ) {
+	if physics.rigidBodies[modelIndex][joint.RigidbodyIndexB] == nil ||
+		physics.rigidBodies[modelIndex][joint.RigidbodyIndexA] == nil ||
+		physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody == nil ||
+		physics.rigidBodies[modelIndex][joint.RigidbodyIndexA].pmxRigidBody == nil {
+		return
+	}
+
 	rigidBodyB := physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody
 	btRigidBodyA := physics.rigidBodies[modelIndex][joint.RigidbodyIndexA].btRigidBody
 	btRigidBodyB := physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].btRigidBody
@@ -144,6 +151,9 @@ func (physics *MPhysics) initJoint(
 
 func (physics *MPhysics) deleteJoints(modelIndex int) {
 	for _, j := range physics.joints[modelIndex] {
+		if j == nil || j.btJoint == nil {
+			continue
+		}
 		physics.world.RemoveConstraint(j.btJoint)
 		bt.DeleteBtTypedConstraint(j.btJoint)
 	}
