@@ -57,7 +57,7 @@ func IterParallelByCount(allCount int, blockSize int, processFunc func(index int
 }
 
 // IterParallelByList は指定された全リストに対して、引数で指定された処理を並列または直列で実行する関数です。
-func IterParallelByList(allData []int, blockSize int,
+func IterParallelByList(allData []int, blockSize int, logBlockSize int,
 	processFunc func(data, index int), logFunc func(iterIndex, allCount int)) error {
 	numCPU := runtime.NumCPU()
 
@@ -74,15 +74,13 @@ func IterParallelByList(allData []int, blockSize int,
 
 		// ブロックサイズが全件数より小さい場合は並列処理
 		var wg sync.WaitGroup
+		var mu sync.Mutex
+
 		iterIndex := 0
 		for startIndex := 0; startIndex < len(allData); startIndex += blockSize {
 			wg.Add(1)
 			go func(startIndex int) {
 				defer func() {
-					iterIndex++
-					if logFunc != nil {
-						logFunc(iterIndex, numCPU)
-					}
 					if err := GetError(); err != nil {
 						errorChan <- err
 					}
@@ -95,6 +93,15 @@ func IterParallelByList(allData []int, blockSize int,
 				}
 				for j := startIndex; j < endIndex; j++ {
 					processFunc(allData[j], j)
+
+					if logFunc != nil && logBlockSize > 0 {
+						mu.Lock()
+						if iterIndex%logBlockSize == 0 {
+							logFunc(iterIndex, len(allData))
+						}
+						iterIndex++
+						mu.Unlock()
+					}
 				}
 			}(startIndex)
 		}
