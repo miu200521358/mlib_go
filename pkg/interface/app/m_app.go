@@ -168,6 +168,10 @@ func (app *MApp) RunControlToViewerChannel() {
 }
 
 func (app *MApp) RunViewer() {
+	if app.appConfig.IsEnvProd() || app.appConfig.IsEnvDev() {
+		defer app.recoverFromPanic()
+	}
+
 	// 描画ウィンドウはメインスレッドで起動して描画し続ける
 	app.SetFrame(0)
 	prevTime := glfw.GetTime()
