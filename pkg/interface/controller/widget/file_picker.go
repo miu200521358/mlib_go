@@ -380,35 +380,40 @@ func newFilePicker(
 	return picker
 }
 
-func (picker *FilePicker) Load() (core.IHashModel, error) {
+func (picker *FilePicker) CanLoad() (bool, error) {
 	if picker.pathEdit.Text() == "" || picker.rep == nil {
-		return nil, nil
+		return false, nil
 	}
 
-	if ok, err := picker.rep.CanLoad(picker.pathEdit.Text()); !ok || err != nil {
+	return picker.rep.CanLoad(picker.pathEdit.Text())
+}
+
+func (picker *FilePicker) Load(path string) (core.IHashModel, error) {
+	// キャッシュの有無は見ずに、必ず取得し直す
+	data, err := picker.rep.Load(path)
+	if err != nil {
 		return nil, err
 	}
-
-	// キャッシュの有無は見ずに、必ず取得し直す
-	data, err := picker.rep.Load(picker.pathEdit.Text())
-	defer runtime.GC() // 読み込み時のメモリ解放
-
-	if err != nil {
-		RaiseError(err)
-	}
 	picker.cacheData = data
+
+	go func() {
+		runtime.GC() // 読み込み時のメモリ解放
+	}()
 
 	return data, nil
 }
 
 // パスが正しいことが分かっている上でデータだけ取り直したい場合
-func (picker *FilePicker) LoadForce() core.IHashModel {
-	data, err := picker.rep.Load(picker.pathEdit.Text())
-	defer runtime.GC() // 読み込み時のメモリ解放
+func (picker *FilePicker) LoadForce(path string) core.IHashModel {
+	data, err := picker.rep.Load(path)
 
 	if err != nil {
 		return nil
 	}
+
+	go func() {
+		runtime.GC() // 読み込み時のメモリ解放
+	}()
 
 	return data
 }

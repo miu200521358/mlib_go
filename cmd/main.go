@@ -135,7 +135,7 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		"Pmxファイルの使い方")
 
 	pmx11ReadPicker.SetOnPathChanged(func(path string) {
-		if data, err := pmx11ReadPicker.Load(); err == nil {
+		if data, err := pmx11ReadPicker.Load(path); err == nil {
 			model := data.(*pmx.PmxModel)
 			model.SetIndex(0)
 			loadedModels[0][0] = model
@@ -156,7 +156,7 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		"Vmdファイルの使い方")
 
 	vmd11ReadPicker.SetOnPathChanged(func(path string) {
-		if data, err := vmd11ReadPicker.Load(); err == nil {
+		if data, err := vmd11ReadPicker.Load(path); err == nil {
 			motion := data.(*vmd.VmdMotion)
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
 			loadedMotions[0][0] = motion
@@ -176,7 +176,7 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		"Pmxファイルの使い方")
 
 	pmx12ReadPicker.SetOnPathChanged(func(path string) {
-		if data, err := pmx12ReadPicker.Load(); err == nil {
+		if data, err := pmx12ReadPicker.Load(path); err == nil {
 			model := data.(*pmx.PmxModel)
 			model.SetIndex(1)
 			loadedModels[0][1] = model
@@ -197,7 +197,7 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		"Vmdファイルの使い方")
 
 	vmd12ReadPicker.SetOnPathChanged(func(path string) {
-		if data, err := vmd12ReadPicker.Load(); err == nil {
+		if data, err := vmd12ReadPicker.Load(path); err == nil {
 			motion := data.(*vmd.VmdMotion)
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
 			loadedMotions[0][1] = motion
@@ -217,7 +217,7 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		"Pmxファイルの使い方")
 
 	pmx2ReadPicker.SetOnPathChanged(func(path string) {
-		if data, err := pmx2ReadPicker.Load(); err == nil {
+		if data, err := pmx2ReadPicker.Load(path); err == nil {
 			model := data.(*pmx.PmxModel)
 			model.SetIndex(0)
 			loadedModels[1][0] = model
@@ -238,7 +238,7 @@ func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widge
 		"Vmdファイルの使い方")
 
 	vmd2ReadPicker.SetOnPathChanged(func(path string) {
-		if data, err := vmd2ReadPicker.Load(); err == nil {
+		if data, err := vmd2ReadPicker.Load(path); err == nil {
 			motion := data.(*vmd.VmdMotion)
 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
 			loadedMotions[1][0] = motion

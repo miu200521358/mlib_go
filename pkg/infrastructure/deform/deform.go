@@ -243,11 +243,11 @@ func DeformPhysics(
 ) ([]*delta.VmdDeltas, error) {
 	// 物理デフォーム
 	for i := range models {
-		if models[i] == nil || vmdDeltas[i] == nil || (vmdDeltas != nil && motions[i].Processing) {
-			continue
-		}
 		for i >= len(vmdDeltas) {
 			vmdDeltas = append(vmdDeltas, nil)
+		}
+		if models[i] == nil || vmdDeltas[i] == nil || (vmdDeltas != nil && motions[i].Processing) {
+			continue
 		}
 		if err := DeformPhysicsByBone(appState, models[i], vmdDeltas[i], physics); err != nil {
 			return vmdDeltas, err
