@@ -205,9 +205,10 @@ func (app *MApp) RunViewer() {
 			// 待機時間(残り時間の9割)
 			waitDuration := (app.FrameInterval() - elapsed) * 0.9
 
-			// waitDurationがapp.FrameIntervalの9割以下ならsleep
-			if waitDuration <= app.FrameInterval()*0.9 {
-				time.Sleep(time.Duration(waitDuration * float64(time.Second)))
+			// waitDurationが1ms以上なら、1ms未満になるまで待つ
+			if waitDuration >= 0.001 {
+				// あえて1000倍にしないで900倍にしているのは、time.Durationの最大値を超えないため
+				time.Sleep(time.Duration(waitDuration*900) * time.Millisecond)
 			}
 
 			// 経過時間が1フレームの時間未満の場合はもう少し待つ
