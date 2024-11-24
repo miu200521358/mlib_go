@@ -249,7 +249,7 @@ func TestNewCurveFromValues(t *testing.T) {
 		t.Errorf("Expected %v, but got %v", expected, result)
 	}
 
-	// Test case 5: Four values
+	// Test case 5: Many values
 	values = []float64{
 		0.5979851484298706,
 		0.521004855632782,

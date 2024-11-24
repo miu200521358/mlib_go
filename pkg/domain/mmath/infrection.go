@@ -1,9 +1,5 @@
 package mmath
 
-import (
-	"math"
-)
-
 func gradient(values []float64) []float64 {
 	result := make([]float64, len(values))
 	for i := 1; i < len(values)-1; i++ {
@@ -14,71 +10,75 @@ func gradient(values []float64) []float64 {
 	return result
 }
 
-func FindInflectionPoints(values []float64, tolerance float64, space int) map[int]int {
-	ysPrime := gradient(values)
+// FindInflectionFrames は、与えられた値の変曲点を探す
+// frames は、フレーム番号の配列
+// values は、値の配列 (framesと同じ長さ)
+// tolerance は、許容値
+func FindInflectionFrames(frames []int, values []float64, tolerance float64) []int {
+	// framesの間が空いている所は停止区域として扱う
+	inflectionFrames := make([]int, 0, len(frames))
+	rangeFrames := make([]int, 0, len(frames))
+	rangeValues := make([]float64, 0, len(frames))
 
-	primePoints := make(map[int]int)
-	prevInflectionPoint := 0
-	for i, v := range ysPrime {
-		if i > 0 && math.Abs(v) > tolerance && ysPrime[i-1]*v < 0 && i-prevInflectionPoint > space {
-			// ゼロに近しい許容値範囲外で前回と符号が変わっている場合、変曲点と見なす
-			primePoints[prevInflectionPoint] = i
-			prevInflectionPoint = i
+	for i, f := range frames {
+		if i > 0 && f-frames[i-1] > 1 {
+			// 前回のフレームとの間に空白がある場合、停止区域もしくは単調増加区域として扱う
+			inflectionFrames = append(inflectionFrames, frames[i-1], f)
+			inflectionFrames = appendInflections(rangeFrames, rangeValues, inflectionFrames)
+
+			// 空白がある場合、区間値リストを初期化
+			rangeFrames = make([]int, 0, len(frames))
+			rangeValues = make([]float64, 0, len(frames))
 		}
+
+		rangeFrames = append(rangeFrames, f)
+		rangeValues = append(rangeValues, values[i])
 	}
 
-	nonMovingPoints := make(map[int]int)
-	startIdx := -1
-	for i, v := range ysPrime {
-		if math.Abs(v) <= tolerance {
-			// ゼロに近しい許容範囲内
-			if startIdx < 0 {
-				// 開始INDEXが未設定の場合、設定
-				startIdx = i
-			} else {
-				continue
-			}
-		} else {
-			// 許容範囲外になった場合
-			if startIdx >= 0 && i-startIdx > space {
-				// 開始地点と終了地点を記録
-				nonMovingPoints[startIdx] = i
-				startIdx = -1
-			}
-		}
-	}
+	inflectionFrames = appendInflections(rangeFrames, rangeValues, inflectionFrames)
 
-	if startIdx > 0 && (len(ysPrime)-1)-startIdx > space {
-		// 最後に停止があった場合、最後のキーフレを保持
-		nonMovingPoints[startIdx] = len(ysPrime) - 1
-	}
+	inflectionFrames = append(inflectionFrames, frames[0], frames[len(frames)-1])
 
-	return MergeInflectionPoints(values, []map[int]int{primePoints, nonMovingPoints}, space)
+	// 重複を削除
+	inflectionFrames = UniqueInts(inflectionFrames)
+
+	SortInts(inflectionFrames)
+
+	return inflectionFrames
 }
 
-func MergeInflectionPoints(values []float64, inflectionPointsList []map[int]int, space int) map[int]int {
-	inflectionAllIndexes := make([]int, 0)
-	for _, iPoints := range inflectionPointsList {
-		for i, j := range iPoints {
-			inflectionAllIndexes = append(inflectionAllIndexes, i)
-			inflectionAllIndexes = append(inflectionAllIndexes, j)
+func UniqueInts(ints []int) []int {
+	encountered := map[int]bool{}
+	result := []int{}
+
+	for _, v := range ints {
+		if !encountered[v] {
+			encountered[v] = true
+			result = append(result, v)
 		}
 	}
 
-	SortInts(inflectionAllIndexes)
+	return result
+}
 
-	inflectionPoints := make(map[int]int)
-	prevIdx := 0
-	for i, iIdx := range inflectionAllIndexes {
-		if i == 0 {
-			prevIdx = iIdx
-			continue
-		}
-		if iIdx-prevIdx > space {
-			inflectionPoints[prevIdx] = iIdx
-			prevIdx = iIdx
+func appendInflections(rangeFrames []int, rangeValues []float64, inflectionFrames []int) []int {
+
+	if len(rangeValues) > 1 {
+		// 2つ以上ある場合、区間値の変曲点を探す
+		ysPrime := gradient(rangeValues)
+
+		for j, v := range ysPrime {
+			if j > 0 && ysPrime[j-1]*v < 0 {
+				// 前回と符号が変わっている場合、変曲点と見なす
+				inflectionFrames = append(inflectionFrames, rangeFrames[j])
+			}
 		}
 	}
 
-	return inflectionPoints
+	// 区間の最初と最後もなければ追加
+	if len(rangeFrames) > 0 {
+		inflectionFrames = append(inflectionFrames, rangeFrames[0], rangeFrames[len(rangeFrames)-1])
+	}
+
+	return inflectionFrames
 }

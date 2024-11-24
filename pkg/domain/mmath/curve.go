@@ -293,9 +293,11 @@ func NewCurveFromValues(values []float64) *Curve {
 		Start: MVec2{result.X[0], result.X[1]},
 		End:   MVec2{result.X[2], result.X[3]},
 	}
-	c.Normalize(p0, p3)
 
-	if c.Start.X/c.Start.Y == 1.0 && c.End.X/c.End.Y == 1.0 {
+	// MMDの補間曲線に収まるような正規化は一旦ここでは行わない
+	// c.Normalize(p0, p3)
+
+	if NearEquals(c.Start.X/c.Start.Y, 1.0, 1e-6) && NearEquals(c.End.X/c.End.Y, 1.0, 1e-6) {
 		// 線形の場合初期化
 		c = NewCurve()
 	}
