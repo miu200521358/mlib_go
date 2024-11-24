@@ -7,43 +7,38 @@ import (
 
 func TestFindInflectionFrames(t *testing.T) {
 	tests := []struct {
-		name      string
-		frames    []int
-		values    []float64
-		tolerance float64
-		want      []int
+		name   string
+		frames []float32
+		values []float64
+		want   []float32
 	}{
 		{
-			name:      "単調増加（変曲点なし）",
-			frames:    []int{1, 2, 3, 4, 5},
-			values:    []float64{1, 2, 3, 4, 5},
-			tolerance: 0.1,
-			want:      []int{1, 5},
+			name:   "単調増加（変曲点なし）",
+			frames: []float32{1, 2, 3, 4, 5},
+			values: []float64{1, 2, 3, 4, 5},
+			want:   []float32{1, 5},
 		},
 		{
-			name:      "同一値（キーフレ間隔なし）",
-			frames:    []int{1, 2, 3, 4, 5},
-			values:    []float64{1, 1, 1, 1, 1},
-			tolerance: 0.1,
-			want:      []int{1, 5},
+			name:   "同一値（キーフレ間隔なし）",
+			frames: []float32{1, 2, 3, 4, 5},
+			values: []float64{1, 1, 1, 1, 1},
+			want:   []float32{1, 5},
 		},
 		{
-			name:      "同一値（キーフレ間隔あり）",
-			frames:    []int{1, 5},
-			values:    []float64{1, 1},
-			tolerance: 0.1,
-			want:      []int{1, 5},
+			name:   "同一値（キーフレ間隔あり）",
+			frames: []float32{1, 5},
+			values: []float64{1, 1},
+			want:   []float32{1, 5},
 		},
 		{
-			name:      "連続キーフレで変曲点あり",
-			frames:    []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-			values:    []float64{1, 1, 1, 2, 2, 3, 3, 4, 2, 1},
-			tolerance: 0.1,
-			want:      []int{1, 8, 10},
+			name:   "連続キーフレで変曲点あり",
+			frames: []float32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+			values: []float64{1, 1, 1, 2, 2, 3, 3, 4, 2, 1},
+			want:   []float32{1, 8, 10},
 		},
 		{
 			name:   "連続キーフレで変曲点あり(実値)",
-			frames: []int{0, 66, 76, 80, 82, 84, 85, 86, 87, 88, 89, 90, 91, 92, 95, 96, 97, 99},
+			frames: []float32{0, 66, 76, 80, 82, 84, 85, 86, 87, 88, 89, 90, 91, 92, 95, 96, 97, 99},
 			values: []float64{
 				1.11178779602051,
 				1.06133091449738,
@@ -63,12 +58,11 @@ func TestFindInflectionFrames(t *testing.T) {
 				1.41553795337677,
 				1.42356109619141,
 				1.38061332702637},
-			tolerance: 1e-6,
-			want:      []int{0, 66, 76, 80, 82, 84, 92, 95, 97, 99},
+			want: []float32{0, 66, 76, 80, 82, 84, 92, 95, 97, 99},
 		},
 		{
 			name:   "連続キーフレで変曲点あり(実値2)",
-			frames: []int{221, 223, 224, 226, 227, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240},
+			frames: []float32{221, 223, 224, 226, 227, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240},
 			values: []float64{
 				0.590624630451202,
 				0.72147411108017,
@@ -87,12 +81,11 @@ func TestFindInflectionFrames(t *testing.T) {
 				-0.391499549150467,
 				-0.711163222789764,
 				-0.97290176153183},
-			tolerance: 1e-6,
-			want:      []int{221, 223, 224, 226, 227, 229, 240},
+			want: []float32{221, 223, 224, 226, 227, 229, 240},
 		},
 		{
 			name:   "連続キーフレで変曲点あり(実値3)",
-			frames: []int{383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411},
+			frames: []float32{383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411},
 			values: []float64{
 				0.927715480327606,
 				0.850480079650879,
@@ -122,14 +115,13 @@ func TestFindInflectionFrames(t *testing.T) {
 				0.908132076263428,
 				0.928150951862335,
 				0.941401958465576},
-			tolerance: 1e-6,
-			want:      []int{383, 389, 392, 394, 398, 400, 411},
+			want: []float32{383, 389, 392, 394, 398, 400, 411},
 		},
 	}
 
 	for n, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := FindInflectionFrames(tt.frames, tt.values, tt.tolerance); !reflect.DeepEqual(got, tt.want) {
+			if got := FindInflectionFrames(tt.frames, tt.values); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("[%d] FindInflectionFrames() = %v, want %v", n, got, tt.want)
 			}
 		})

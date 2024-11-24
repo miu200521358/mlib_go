@@ -142,3 +142,33 @@ func (x IntSlice) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
 
 // Sort is a convenience method: x.Sort() calls Sort(x).
 func (x IntSlice) Sort() { sort.Sort(x) }
+
+// ------------------
+
+func UniqueFloat32s(floats []float32) []float32 {
+	encountered := map[float32]bool{}
+	result := []float32{}
+
+	for _, v := range floats {
+		if !encountered[v] {
+			encountered[v] = true
+			result = append(result, v)
+		}
+	}
+
+	return result
+}
+
+func UniqueInts(ints []int) []int {
+	encountered := map[int]bool{}
+	result := []int{}
+
+	for _, v := range ints {
+		if !encountered[v] {
+			encountered[v] = true
+			result = append(result, v)
+		}
+	}
+
+	return result
+}

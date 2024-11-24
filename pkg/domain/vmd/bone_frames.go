@@ -208,3 +208,17 @@ func (boneFrames *BoneFrames) Clean() {
 		}
 	}
 }
+
+func (boneFrames *BoneFrames) Reduce() *BoneFrames {
+	reduced := NewBoneFrames()
+	var wg sync.WaitGroup
+	for _, boneNameFrames := range boneFrames.Data {
+		wg.Add(1)
+		go func(bnf *BoneNameFrames) {
+			defer wg.Done()
+			reduced.Append(bnf.Reduce())
+		}(boneNameFrames)
+	}
+	wg.Wait()
+	return reduced
+}

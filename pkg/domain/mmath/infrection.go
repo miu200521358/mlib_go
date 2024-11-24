@@ -14,10 +14,10 @@ func gradient(values []float64) []float64 {
 // frames は、フレーム番号の配列
 // values は、値の配列 (framesと同じ長さ)
 // tolerance は、許容値
-func FindInflectionFrames(frames []int, values []float64, tolerance float64) []int {
+func FindInflectionFrames(frames []float32, values []float64) []float32 {
 	// framesの間が空いている所は停止区域として扱う
-	inflectionFrames := make([]int, 0, len(frames))
-	rangeFrames := make([]int, 0, len(frames))
+	inflectionFrames := make([]float32, 0, len(frames))
+	rangeFrames := make([]float32, 0, len(frames))
 	rangeValues := make([]float64, 0, len(frames))
 
 	for i, f := range frames {
@@ -27,7 +27,7 @@ func FindInflectionFrames(frames []int, values []float64, tolerance float64) []i
 			inflectionFrames = appendInflections(rangeFrames, rangeValues, inflectionFrames)
 
 			// 空白がある場合、区間値リストを初期化
-			rangeFrames = make([]int, 0, len(frames))
+			rangeFrames = make([]float32, 0, len(frames))
 			rangeValues = make([]float64, 0, len(frames))
 		}
 
@@ -37,31 +37,19 @@ func FindInflectionFrames(frames []int, values []float64, tolerance float64) []i
 
 	inflectionFrames = appendInflections(rangeFrames, rangeValues, inflectionFrames)
 
-	inflectionFrames = append(inflectionFrames, frames[0], frames[len(frames)-1])
+	if len(frames) > 0 {
+		inflectionFrames = append(inflectionFrames, frames[0], frames[len(frames)-1])
+	}
 
 	// 重複を削除
-	inflectionFrames = UniqueInts(inflectionFrames)
+	inflectionFrames = UniqueFloat32s(inflectionFrames)
 
-	SortInts(inflectionFrames)
+	SortFloat32s(inflectionFrames)
 
 	return inflectionFrames
 }
 
-func UniqueInts(ints []int) []int {
-	encountered := map[int]bool{}
-	result := []int{}
-
-	for _, v := range ints {
-		if !encountered[v] {
-			encountered[v] = true
-			result = append(result, v)
-		}
-	}
-
-	return result
-}
-
-func appendInflections(rangeFrames []int, rangeValues []float64, inflectionFrames []int) []int {
+func appendInflections(rangeFrames []float32, rangeValues []float64, inflectionFrames []float32) []float32 {
 
 	if len(rangeValues) > 1 {
 		// 2つ以上ある場合、区間値の変曲点を探す
