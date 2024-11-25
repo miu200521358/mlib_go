@@ -7,8 +7,8 @@ import (
 )
 
 type Curve struct {
-	Start MVec2
-	End   MVec2
+	Start MVec2 // 三次ベジェ曲線のP1に相当
+	End   MVec2 // 三次ベジェ曲線のP2に相当
 }
 
 const (
@@ -87,12 +87,12 @@ func (curve *Curve) Normalize(begin, finish *MVec2) {
 // https://edvakf.hatenadiary.org/entry/20111016/1318716097
 // Evaluate 補間曲線を求めます。
 // return x（計算キーフレ時点のX値）, y（計算キーフレ時点のY値）, t（計算キーフレまでの変化量）
-func Evaluate(curve *Curve, start, now, end float32) (float64, float64, float64) {
+func Evaluate(curve *Curve, start, now, end float32) (x, y, t float64) {
 	if (now-start) == 0.0 || (end-start) == 0.0 {
 		return 0.0, 0.0, 0.0
 	}
 
-	x := float64(now-start) / float64(end-start)
+	x = float64(now-start) / float64(end-start)
 
 	if x >= 1 {
 		return 1.0, 1.0, 1.0
@@ -108,10 +108,10 @@ func Evaluate(curve *Curve, start, now, end float32) (float64, float64, float64)
 	x2 := curve.End.X / CURVE_MAX
 	y2 := curve.End.Y / CURVE_MAX
 
-	t := newton(x1, x2, x, 0.5, 1e-15, 1e-20)
+	t = newton(x1, x2, x, 0.5, 1e-15, 1e-20)
 	s := 1.0 - t
 
-	y := (3.0 * (math.Pow(s, 2.0)) * t * y1) + (3.0 * s * (math.Pow(t, 2.0)) * y2) + math.Pow(t, 3.0)
+	y = (3.0 * (math.Pow(s, 2.0)) * t * y1) + (3.0 * s * (math.Pow(t, 2.0)) * y2) + math.Pow(t, 3.0)
 
 	return x, y, t
 }
@@ -297,9 +297,9 @@ func NewCurveFromValues(values []float64) *Curve {
 	// MMDの補間曲線に収まるような正規化は一旦ここでは行わない
 	// c.Normalize(p0, p3)
 
-	if NearEquals(c.Start.X/c.Start.Y, 1.0, 1e-6) && NearEquals(c.End.X/c.End.Y, 1.0, 1e-6) {
+	if NearEquals(c.Start.X, c.Start.Y, 1e-6) && NearEquals(c.End.X, c.End.Y, 1e-6) {
 		// 線形の場合初期化
-		c = NewCurve()
+		return NewCurve()
 	}
 
 	return c

@@ -313,3 +313,92 @@ func TestNewCurveFromValues(t *testing.T) {
 		t.Errorf("Expected %v, but got %v", expected, result)
 	}
 }
+
+func TestMergeCurves(t *testing.T) {
+	tests := []struct {
+		name           string
+		frames         []float32
+		values         []float64
+		curves         []*Curve
+		expectedFrames []float32
+		expectedCurves []*Curve
+	}{
+		{
+			name:   "線形補間",
+			frames: []float32{0, 5, 10},
+			values: []float64{10, 20, 30},
+			curves: []*Curve{
+				{
+					Start: MVec2{20, 20},
+					End:   MVec2{107, 107},
+				},
+				{
+					Start: MVec2{20, 20},
+					End:   MVec2{107, 107},
+				},
+				{
+					Start: MVec2{20, 20},
+					End:   MVec2{107, 107},
+				},
+			},
+			expectedFrames: []float32{0, 10},
+			expectedCurves: []*Curve{
+				{
+					Start: MVec2{20, 20},
+					End:   MVec2{107, 107},
+				},
+				{
+					Start: MVec2{20, 20},
+					End:   MVec2{107, 107},
+				},
+			},
+		},
+		{
+			name:   "単調増加",
+			frames: []float32{0, 5, 10},
+			values: []float64{10, 20, 30},
+			curves: []*Curve{
+				{
+					Start: MVec2{20, 20},
+					End:   MVec2{107, 107},
+				},
+				{
+					Start: MVec2{10, 100},
+					End:   MVec2{69, 113},
+				},
+				{
+					Start: MVec2{59, 13},
+					End:   MVec2{117, 27},
+				},
+			},
+			expectedFrames: []float32{0, 10},
+			expectedCurves: []*Curve{
+				{
+					Start: MVec2{20, 20},
+					End:   MVec2{107, 107},
+				},
+				{
+					Start: MVec2{10, 100},
+					End:   MVec2{117, 27},
+				},
+			},
+		},
+	}
+
+	for n, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			combineFrames, combineCurves := CombineCurves(tt.frames, tt.values, tt.curves)
+			if !reflect.DeepEqual(combineFrames, tt.expectedFrames) {
+				t.Errorf("[%02d: %s] Expected frames to be %v, but got %v", n, tt.name, tt.expectedFrames, combineFrames)
+			}
+			for i, c := range combineCurves {
+				if !c.Start.NearEquals(&tt.expectedCurves[i].Start, 1e-6) {
+					t.Errorf("[%02d: %s] Expected curve[%d].Start to be %v, but got %v", n, tt.name, i, tt.expectedCurves[i].Start, c.Start)
+				}
+				if !c.End.NearEquals(&tt.expectedCurves[i].End, 1e-6) {
+					t.Errorf("[%02d: %s] Expected curve[%d].End to be %v, but got %v", n, tt.name, i, tt.expectedCurves[i].End, c.End)
+				}
+			}
+		})
+	}
+}
