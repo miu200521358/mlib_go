@@ -336,12 +336,12 @@ func NewCurveFromValues(values []float64) *Curve {
 	// y座標の解を求める
 	var cholY mat.Cholesky
 	if ok := cholY.Factorize(AtASym); !ok {
-		panic("Cholesky分解に失敗しました (y座標)")
+		return nil
 	}
 	pyVec := mat.NewVecDense(2, nil)
 	err = cholY.SolveVecTo(pyVec, AtbY)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 	py := pyVec.RawVector().Data
 
