@@ -1,13 +1,24 @@
 package mmath
 
-func gradient(values []float64) []float64 {
-	result := make([]float64, len(values))
-	for i := 1; i < len(values)-1; i++ {
-		result[i] = (values[i+1] - values[i-1]) / 2.0
+import "math"
+
+// Gradient computes the numerical gradient of a 1D array.
+func Gradient(data []float64, dx float64) []float64 {
+	n := len(data)
+	grad := make([]float64, n)
+
+	// Forward difference for the first element
+	grad[0] = (data[1] - data[0]) / dx
+
+	// Central difference for the middle elements
+	for i := 1; i < n-1; i++ {
+		grad[i] = (data[i+1] - data[i-1]) / (2 * dx)
 	}
-	result[0] = values[1] - values[0]
-	result[len(values)-1] = values[len(values)-1] - values[len(values)-2]
-	return result
+
+	// Backward difference for the last element
+	grad[n-1] = (data[n-1] - data[n-2]) / dx
+
+	return grad
 }
 
 // FindInflectionFrames は、与えられた値の変曲点を探す(重複あり、順不同)
@@ -19,19 +30,20 @@ func FindInflectionFrames(frames []float32, values []float64) []float32 {
 	}
 
 	inflectionFrames := make([]float32, 0, len(frames))
+	inflectionFrames = append(inflectionFrames, frames[0], frames[len(frames)-1])
 
 	// 2つ以上ある場合、区間値の変曲点を探す
-	ysPrime := gradient(values)
+	grad := Gradient(values, 1)
 
-	for j, v := range ysPrime {
-		if j > 0 && ysPrime[j-1]*v < 0 {
-			// 前回と符号が変わっている場合、変曲点と見なす
-			inflectionFrames = append(inflectionFrames, frames[j])
+	// 変曲点を見つける
+	deltaThreshold := 10.0
+	for i := range len(grad) {
+		if i > 0 && (grad[i-1]*grad[i] < 0 ||
+			(values[i-1] == 0 && math.Abs(values[i]) > deltaThreshold) ||
+			(values[i-1] != 0 && math.Abs(values[i]/values[i-1]) > deltaThreshold)) {
+			inflectionFrames = append(inflectionFrames, frames[i])
 		}
 	}
-
-	// 区間の最初と最後もなければ追加
-	inflectionFrames = append(inflectionFrames, frames[0], frames[len(frames)-1])
 
 	return inflectionFrames
 }

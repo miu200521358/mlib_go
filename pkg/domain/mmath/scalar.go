@@ -154,6 +154,36 @@ func MaxInt(arr []int) int {
 	return max
 }
 
+func MinInt(arr []int) int {
+	min := math.MaxInt64
+	for _, v := range arr {
+		if v < min {
+			min = v
+		}
+	}
+	return min
+}
+
+func MaxFloat64(arr []float64) float64 {
+	max := math.SmallestNonzeroFloat64
+	for _, v := range arr {
+		if v > max {
+			max = v
+		}
+	}
+	return max
+}
+
+func MinFloat(arr []float64) float64 {
+	min := math.MaxFloat64
+	for _, v := range arr {
+		if v < min {
+			min = v
+		}
+	}
+	return min
+}
+
 func IntRanges(max int) []int {
 	ranges := make([]int, max)
 	for i := 0; i < max; i++ {
@@ -251,4 +281,17 @@ func Round(v, threshold float64) float64 {
 
 	vv := v * (1 / threshold)
 	return math.Round(vv) * threshold
+}
+
+func IsAllSameValues(values []float64) bool {
+	// すべて同じ値の場合、線形補間になる
+	isAllSame := true
+	for n := range values {
+		if values[0] != values[n] {
+			// 厳密にイコールであることをチェックする
+			isAllSame = false
+			break
+		}
+	}
+	return isAllSame
 }

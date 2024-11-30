@@ -1,7 +1,9 @@
 package vmd
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/petar/GoLLRB/llrb"
 )
 
 type BoneNameFrames struct {
@@ -57,10 +59,25 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 	}
 
 	inflectionFrames := make([]float32, 0, boneNameFrames.Len())
-	inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, xs)...)
-	inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, ys)...)
-	inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, zs)...)
-	inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, rs)...)
+	if !mmath.IsAllSameValues(xs) {
+		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, xs)...)
+	}
+	if !mmath.IsAllSameValues(ys) {
+		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, ys)...)
+	}
+	if !mmath.IsAllSameValues(zs) {
+		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, zs)...)
+	}
+	if !mmath.IsAllSameValues(rs) {
+		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, rs)...)
+	}
+
+	boneNameFrames.RegisteredIndexes.AscendRange(core.Float(0), core.Float(boneNameFrames.RegisteredIndexes.Max()), func(i llrb.Item) bool {
+		if v, ok := boneNameFrames.data[float32(i.(core.Float))]; ok && v.Read {
+			inflectionFrames = append(inflectionFrames, float32(i.(core.Float)))
+		}
+		return true
+	})
 
 	inflectionFrames = mmath.UniqueFloat32s(inflectionFrames)
 	mmath.SortFloat32s(inflectionFrames)

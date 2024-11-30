@@ -3,7 +3,7 @@ package mmath
 import (
 	"math"
 
-	"gonum.org/v1/gonum/optimize"
+	"gonum.org/v1/gonum/mat"
 )
 
 type Curve struct {
@@ -262,90 +262,93 @@ func SplitCurve(curve *Curve, start, now, end float32) (*Curve, *Curve) {
 	return startCurve, endCurve
 }
 
-func bezier(t float64, p0, p1, p2, p3 *MVec2) *MVec2 {
-	t2 := t * t
-	t3 := t2 * t
-	mt := 1 - t
-	mt2 := mt * mt
-	mt3 := mt2 * mt
-
-	bx := mt3*p0.X + 3*mt2*t*p1.X + 3*mt*t2*p2.X + t3*p3.X
-	by := mt3*p0.Y + 3*mt2*t*p1.Y + 3*mt*t2*p2.Y + t3*p3.Y
-
-	return &MVec2{bx, by}
-}
-
-// NewCurveFromValues calculates the control points of a cubic Bezier curve
-// that best fits a given set of y-values.
+// NewCurveFromValues 関数は、与えられた値から補間曲線を生成します。
 func NewCurveFromValues(values []float64) *Curve {
 	n := len(values)
-	if n <= 2 {
+	if n < 3 {
 		return NewCurve()
 	}
 
-	// すべて同じ値の場合、線形補間になる
-	isAllSame := true
-	for n := range values {
-		if !NearEquals(values[0], values[n], 1e-6) {
-			isAllSame = false
-			break
-		}
-	}
-	if isAllSame {
+	if IsAllSameValues(values) {
 		return NewCurve()
 	}
 
-	// Set start and end points
-	p0 := &MVec2{0, values[0]}
-	p1 := &MVec2{1, values[1]}
-	p2 := &MVec2{float64(n - 2), values[n-2]}
-	p3 := &MVec2{float64(n - 1), values[n-1]}
+	// P0とP3の定義
+	P0 := MVec2{X: 0, Y: values[0]}
+	P3 := MVec2{X: float64(n - 1), Y: values[n-1]}
 
-	funcEval := func(x []float64) float64 {
-		p1 := &MVec2{x[0], x[1]}
-		p2 := &MVec2{x[2], x[3]}
-		sumSq := 0.0
-		for i, y := range values {
-			t := float64(i) / float64(n-1)
-			bp := bezier(t, p0, p1, p2, p3)
-			diff := bp.Y - y
-			sumSq += diff * diff
-		}
-		return sumSq
+	// 最初と最後のポイントを除外
+	m := n - 2
+	A := mat.NewDense(m, 2, nil)
+	bx := make([]float64, m)
+	by := make([]float64, m)
+
+	for i := 1; i < n-1; i++ {
+		t := float64(i) / float64(n-1)
+		B0 := (1 - t) * (1 - t) * (1 - t)
+		B1 := 3 * (1 - t) * (1 - t) * t
+		B2 := 3 * (1 - t) * t * t
+		B3 := t * t * t
+
+		// x座標用
+		x := float64(i)
+		Cx := B0*P0.X + B3*P3.X
+		dx := x - Cx
+		A.Set(i-1, 0, B1)
+		A.Set(i-1, 1, B2)
+		bx[i-1] = dx
+
+		// y座標用
+		y := values[i]
+		Cy := B0*P0.Y + B3*P3.Y
+		dy := y - Cy
+		by[i-1] = dy
 	}
 
-	// Define the optimization problem
-	problem := optimize.Problem{
-		Func: funcEval,
-		Grad: func(grad, x []float64) {
-			h := 1e-8
-			fx := funcEval(x)
-			for i := range x {
-				orig := x[i]
-				x[i] += h
-				fxh := funcEval(x)
-				x[i] = orig
-				grad[i] = (fxh - fx) / h
-			}
-		},
+	// 正則化パラメータの設定
+	lambda := 1e-2
+
+	// x座標用の正則化
+	AtA := mat.NewDense(2, 2, nil)
+	AtA.Mul(A.T(), A)
+	lambdaI := mat.NewDiagDense(2, []float64{lambda, lambda})
+	AtA.Add(AtA, lambdaI)
+	AtASym := mat.NewSymDense(2, AtA.RawMatrix().Data)
+	AtbX := mat.NewVecDense(2, nil)
+	AtbX.MulVec(A.T(), mat.NewVecDense(m, bx))
+
+	// x座標の解を求める
+	var cholX mat.Cholesky
+	if ok := cholX.Factorize(AtASym); !ok {
+		return nil
 	}
-
-	// Optimization settings
-	settings := &optimize.Settings{
-		MajorIterations:   1000,  // 最大イテレーション数を増やす
-		FuncEvaluations:   10000, // 関数評価の最大数を増やす
-		GradientThreshold: 1e-6,  // 勾配の閾値を変更する
-	}
-	method := &optimize.LBFGS{}
-
-	// Initial control points vector
-	initial := []float64{p1.X, p1.Y, p2.X, p2.Y}
-
-	// Perform optimization
-	result, err := optimize.Minimize(problem, initial, settings, method)
+	pxVec := mat.NewVecDense(2, nil)
+	err := cholX.SolveVecTo(pxVec, AtbX)
 	if err != nil {
 		return nil
 	}
+	px := pxVec.RawVector().Data
 
-	return tryCurveNormalize(p0, &MVec2{result.X[0], result.X[1]}, &MVec2{result.X[2], result.X[3]}, p3)
+	// y座標用の正則化
+	AtbY := mat.NewVecDense(2, nil)
+	AtbY.MulVec(A.T(), mat.NewVecDense(m, by))
+
+	// y座標の解を求める
+	var cholY mat.Cholesky
+	if ok := cholY.Factorize(AtASym); !ok {
+		panic("Cholesky分解に失敗しました (y座標)")
+	}
+	pyVec := mat.NewVecDense(2, nil)
+	err = cholY.SolveVecTo(pyVec, AtbY)
+	if err != nil {
+		panic(err)
+	}
+	py := pyVec.RawVector().Data
+
+	// 計算された制御点を割り当て
+	P1 := MVec2{X: px[0], Y: py[0]}
+	P2 := MVec2{X: px[1], Y: py[1]}
+
+	// 最適化された制御点
+	return tryCurveNormalize(&P0, &P1, &P2, &P3)
 }
