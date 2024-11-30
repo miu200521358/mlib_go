@@ -1,9 +1,7 @@
 package vmd
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/petar/GoLLRB/llrb"
 )
 
 type BoneNameFrames struct {
@@ -27,26 +25,36 @@ func (boneNameFrames *BoneNameFrames) Copy() *BoneNameFrames {
 }
 
 func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
-	frames := make([]float32, 0, boneNameFrames.Len())
-	xs := make([]float64, 0, boneNameFrames.Len())
-	ys := make([]float64, 0, boneNameFrames.Len())
-	zs := make([]float64, 0, boneNameFrames.Len())
-	rs := make([]float64, 0, boneNameFrames.Len())
+	maxFrame := int(boneNameFrames.Indexes.Max() + 1)
 
-	boneNameFrames.Indexes.LLRB.AscendGreaterOrEqual(boneNameFrames.Indexes.LLRB.Min(), func(item llrb.Item) bool {
-		if float32(item.(core.Float)) >= 0 {
-			f := float32(item.(core.Float))
+	frames := make([]float32, 0, maxFrame)
+	xs := make([]float64, 0, maxFrame)
+	ys := make([]float64, 0, maxFrame)
+	zs := make([]float64, 0, maxFrame)
+	rs := make([]float64, 0, maxFrame)
 
-			frames = append(frames, f)
-			bf := boneNameFrames.data[f]
+	for iF := range maxFrame {
+		f := float32(iF)
 
+		frames = append(frames, f)
+		bf := boneNameFrames.Get(f)
+
+		if bf.Position != nil {
 			xs = append(xs, bf.Position.X)
 			ys = append(ys, bf.Position.Y)
 			zs = append(zs, bf.Position.Z)
-			rs = append(rs, mmath.MQuaternionIdent.Dot(bf.Rotation))
+		} else {
+			xs = append(xs, 0)
+			ys = append(ys, 0)
+			zs = append(zs, 0)
 		}
-		return true
-	})
+
+		if bf.Rotation != nil {
+			rs = append(rs, mmath.FindSlerpT(mmath.MQuaternionIdent, mmath.MQuaternionUnitX, bf.Rotation))
+		} else {
+			rs = append(rs, 0)
+		}
+	}
 
 	inflectionFrames := make([]float32, 0, boneNameFrames.Len())
 	inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, xs)...)
@@ -58,53 +66,96 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 	mmath.SortFloat32s(inflectionFrames)
 
 	reduceBfs := NewBoneNameFrames(boneNameFrames.Name)
-	for i, endFrame := range inflectionFrames {
+	for i := 0; i < len(inflectionFrames); i += 2 {
 		if i == 0 {
-			continue
-		}
-		startFrame := inflectionFrames[i-1]
+			bf := boneNameFrames.Get(inflectionFrames[i])
 
-		if i == 1 {
-			bf := boneNameFrames.data[startFrame]
-			reduceBf := NewBoneFrame(startFrame)
-			reduceBf.Registered = bf.Registered
+			reduceBf := NewBoneFrame(inflectionFrames[i])
+			reduceBf.Registered = true
 			reduceBf.Position = bf.Position.Copy()
 			reduceBf.Rotation = bf.Rotation.Copy()
 			reduceBf.Curves = bf.Curves.Copy()
 			reduceBfs.Append(reduceBf)
+
+			continue
 		}
 
-		rangeXs := make([]float64, 0, int(endFrame-startFrame))
-		rangeYs := make([]float64, 0, int(endFrame-startFrame))
-		rangeZs := make([]float64, 0, int(endFrame-startFrame))
-		rangeRs := make([]float64, 0, int(endFrame-startFrame))
-		for f := startFrame; f <= endFrame; f++ {
-			if _, ok := boneNameFrames.data[f]; ok {
-				rangeXs = append(rangeXs, boneNameFrames.data[f].Position.X)
-				rangeYs = append(rangeYs, boneNameFrames.data[f].Position.Y)
-				rangeZs = append(rangeZs, boneNameFrames.data[f].Position.Z)
-				rangeRs = append(rangeRs, mmath.MQuaternionIdent.Dot(boneNameFrames.data[f].Rotation))
-			}
-		}
+		startFrame := inflectionFrames[i-2]
+		midFrame := inflectionFrames[i-1]
+		endFrame := inflectionFrames[i]
 
-		bf := boneNameFrames.data[endFrame]
-		reduceBf := NewBoneFrame(endFrame)
-		reduceBf.Registered = bf.Registered
-		reduceBf.Position = bf.Position.Copy()
-		reduceBf.Rotation = bf.Rotation.Copy()
-		if len(rangeXs) > 2 {
-			reduceBf.Curves = &BoneCurves{
-				TranslateX: mmath.NewCurveFromValues(rangeXs),
-				TranslateY: mmath.NewCurveFromValues(rangeYs),
-				TranslateZ: mmath.NewCurveFromValues(rangeZs),
-				Rotate:     mmath.NewCurveFromValues(rangeRs),
-			}
-		} else {
-			reduceBf.Curves = bf.Curves.Copy()
-		}
-
-		reduceBfs.Append(reduceBf)
+		boneNameFrames.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, rs, reduceBfs)
 	}
 
 	return reduceBfs
+}
+
+func (boneNameFrames *BoneNameFrames) reduceRange(
+	startFrame, midFrame, endFrame float32, xs, ys, zs, rs []float64, reduceBfs *BoneNameFrames,
+) {
+	startIFrame := int(startFrame)
+	endIFrame := int(endFrame)
+
+	rangeXs := xs[startIFrame:endIFrame]
+	rangeYs := ys[startIFrame:endIFrame]
+	rangeZs := zs[startIFrame:endIFrame]
+	rangeRs := rs[startIFrame:endIFrame]
+
+	xCurve := mmath.NewCurveFromValues(rangeXs)
+	yCurve := mmath.NewCurveFromValues(rangeYs)
+	zCurve := mmath.NewCurveFromValues(rangeZs)
+	rCurve := mmath.NewCurveFromValues(rangeRs)
+
+	if xCurve != nil && yCurve != nil && zCurve != nil && rCurve != nil {
+		// 全ての曲線が正常に生成された場合
+		bf := boneNameFrames.Get(endFrame)
+
+		reduceBf := NewBoneFrame(endFrame)
+		reduceBf.Registered = true
+		reduceBf.Position = bf.Position.Copy()
+		reduceBf.Rotation = bf.Rotation.Copy()
+		reduceBf.Curves = &BoneCurves{
+			TranslateX: xCurve,
+			TranslateY: yCurve,
+			TranslateZ: zCurve,
+			Rotate:     rCurve,
+		}
+
+		reduceBfs.Append(reduceBf)
+	} else {
+		// 生成できなかった場合、半分に分割する
+		midIFrame := int(midFrame)
+		if midIFrame == startIFrame || midIFrame == endIFrame {
+			// 半分に出来なかった場合、そのまま全打ち状態で終了
+			{
+				bf := boneNameFrames.Get(startFrame)
+
+				reduceBf := NewBoneFrame(startFrame)
+				reduceBf.Registered = true
+				reduceBf.Position = bf.Position.Copy()
+				reduceBf.Rotation = bf.Rotation.Copy()
+				if bf.Curves != nil {
+					reduceBf.Curves = bf.Curves.Copy()
+				} else {
+					reduceBf.Curves = NewBoneCurves()
+				}
+			}
+			{
+				bf := boneNameFrames.Get(endFrame)
+
+				reduceBf := NewBoneFrame(endFrame)
+				reduceBf.Registered = true
+				reduceBf.Position = bf.Position.Copy()
+				reduceBf.Rotation = bf.Rotation.Copy()
+				if bf.Curves != nil {
+					reduceBf.Curves = bf.Curves.Copy()
+				} else {
+					reduceBf.Curves = NewBoneCurves()
+				}
+			}
+		}
+
+		boneNameFrames.reduceRange(startFrame, float32(int(midFrame+startFrame)/2), midFrame, xs, ys, zs, rs, reduceBfs)
+		boneNameFrames.reduceRange(midFrame, float32(int(endFrame+midFrame)/2), endFrame, xs, ys, zs, rs, reduceBfs)
+	}
 }

@@ -217,187 +217,99 @@ func TestSplitCurveNan(t *testing.T) {
 }
 
 func TestNewCurveFromValues(t *testing.T) {
-	// Test case 1: Empty values
-	values := []float64{}
-	expected := NewCurve()
-	result := NewCurveFromValues(values)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, but got %v", expected, result)
-	}
-
-	// Test case 2: Single value
-	values = []float64{1.0}
-	expected = NewCurve()
-	result = NewCurveFromValues(values)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, but got %v", expected, result)
-	}
-
-	// Test case 3: Two values
-	values = []float64{1.0, 2.0}
-	expected = NewCurve()
-	result = NewCurveFromValues(values)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, but got %v", expected, result)
-	}
-
-	// Test case 4: Three values
-	values = []float64{1.0, 2.0, 3.0}
-	expected = NewCurve()
-	result = NewCurveFromValues(values)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, but got %v", expected, result)
-	}
-
-	// Test case 5: Many values
-	values = []float64{
-		0.5979851484298706,
-		0.521004855632782,
-		0.37936708331108093,
-		0.3069007694721222,
-		0.30701854825019836,
-		0.243390291929245,
-		0.28262293338775635,
-		0.2678329348564148,
-		0.27642160654067993,
-		0.276456743478775,
-		0.3345196545124054,
-		0.3592238426208496,
-		0.34113433957099915,
-		0.32507243752479553,
-		0.32527124881744385,
-		0.28771495819091797,
-		0.16925211250782013,
-		0.07562929391860962,
-		-0.01844712160527706,
-		-0.01857336051762104,
-		-0.10410086810588837,
-		-0.1692115068435669,
-		-0.22358137369155884,
-		-0.28167492151260376,
-		-0.2816798686981201,
-		-0.2936137318611145,
-		-0.35715776681900024,
-		-0.3935558795928955,
-		-0.43389225006103516,
-		-0.4339143633842468,
-		-0.4917398691177368,
-		-0.5314293503761292,
-		-0.5342316031455994,
-		-0.5640663504600525,
-		-0.5642469525337219,
-		-0.5541977882385254,
-		-0.5907184481620789,
-		-0.6129558682441711,
-		-0.7112897038459778,
-		-0.7110443711280823,
-		-0.7198588848114014,
-		-0.7699093818664551,
-		-0.8582518100738525,
-		-0.9080440998077393,
-		-0.907961368560791,
-		-0.9225611090660095,
-		-1.009341835975647,
-		-1.0600273609161377,
-		-1.1095038652420044,
-		-1.1092925071716309,
-		-1.1037554740905762,
-		-1.1115431785583496,
-	}
-	expected = &Curve{
-		Start: MVec2{2, 37},
-		End:   MVec2{125, 94},
-	}
-	result = NewCurveFromValues(values)
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, but got %v", expected, result)
-	}
-}
-
-func TestMergeCurves(t *testing.T) {
 	tests := []struct {
-		name           string
-		frames         []float32
-		values         []float64
-		curves         []*Curve
-		expectedFrames []float32
-		expectedCurves []*Curve
+		name     string
+		values   []float64
+		expected *Curve
 	}{
 		{
-			name:   "線形補間",
-			frames: []float32{0, 5, 10},
-			values: []float64{10, 20, 30},
-			curves: []*Curve{
-				{
-					Start: MVec2{20, 20},
-					End:   MVec2{107, 107},
-				},
-				{
-					Start: MVec2{20, 20},
-					End:   MVec2{107, 107},
-				},
-				{
-					Start: MVec2{20, 20},
-					End:   MVec2{107, 107},
-				},
-			},
-			expectedFrames: []float32{0, 10},
-			expectedCurves: []*Curve{
-				{
-					Start: MVec2{20, 20},
-					End:   MVec2{107, 107},
-				},
-				{
-					Start: MVec2{20, 20},
-					End:   MVec2{107, 107},
-				},
-			},
+			name:     "Empty values",
+			values:   []float64{},
+			expected: NewCurve(),
 		},
 		{
-			name:   "単調増加",
-			frames: []float32{0, 5, 10},
-			values: []float64{10, 20, 30},
-			curves: []*Curve{
-				{
-					Start: MVec2{20, 20},
-					End:   MVec2{107, 107},
-				},
-				{
-					Start: MVec2{10, 100},
-					End:   MVec2{69, 113},
-				},
-				{
-					Start: MVec2{59, 13},
-					End:   MVec2{117, 27},
-				},
+			name:     "Single value",
+			values:   []float64{1.0},
+			expected: NewCurve(),
+		},
+		{
+			name:     "Two values",
+			values:   []float64{1.0, 2.0},
+			expected: NewCurve(),
+		},
+		{
+			name:     "Three values",
+			values:   []float64{1.0, 2.0, 3.0},
+			expected: NewCurve(),
+		},
+		{
+			name: "Many values",
+			values: []float64{
+				0.5979851484298706,
+				0.521004855632782,
+				0.37936708331108093,
+				0.3069007694721222,
+				0.30701854825019836,
+				0.243390291929245,
+				0.28262293338775635,
+				0.2678329348564148,
+				0.27642160654067993,
+				0.276456743478775,
+				0.3345196545124054,
+				0.3592238426208496,
+				0.34113433957099915,
+				0.32507243752479553,
+				0.32527124881744385,
+				0.28771495819091797,
+				0.16925211250782013,
+				0.07562929391860962,
+				-0.01844712160527706,
+				-0.01857336051762104,
+				-0.10410086810588837,
+				-0.1692115068435669,
+				-0.22358137369155884,
+				-0.28167492151260376,
+				-0.2816798686981201,
+				-0.2936137318611145,
+				-0.35715776681900024,
+				-0.3935558795928955,
+				-0.43389225006103516,
+				-0.4339143633842468,
+				-0.4917398691177368,
+				-0.5314293503761292,
+				-0.5342316031455994,
+				-0.5640663504600525,
+				-0.5642469525337219,
+				-0.5541977882385254,
+				-0.5907184481620789,
+				-0.6129558682441711,
+				-0.7112897038459778,
+				-0.7110443711280823,
+				-0.7198588848114014,
+				-0.7699093818664551,
+				-0.8582518100738525,
+				-0.9080440998077393,
+				-0.907961368560791,
+				-0.9225611090660095,
+				-1.009341835975647,
+				-1.0600273609161377,
+				-1.1095038652420044,
+				-1.1092925071716309,
+				-1.1037554740905762,
+				-1.1115431785583496,
 			},
-			expectedFrames: []float32{0, 10},
-			expectedCurves: []*Curve{
-				{
-					Start: MVec2{20, 20},
-					End:   MVec2{107, 107},
-				},
-				{
-					Start: MVec2{10, 100},
-					End:   MVec2{117, 27},
-				},
+			expected: &Curve{
+				Start: MVec2{2, 37},
+				End:   MVec2{125, 94},
 			},
 		},
 	}
 
 	for n, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			combineFrames, combineCurves := CombineCurves(tt.frames, tt.values, tt.curves)
-			if !reflect.DeepEqual(combineFrames, tt.expectedFrames) {
-				t.Errorf("[%02d: %s] Expected frames to be %v, but got %v", n, tt.name, tt.expectedFrames, combineFrames)
-			}
-			for i, c := range combineCurves {
-				if !c.Start.NearEquals(&tt.expectedCurves[i].Start, 1e-6) {
-					t.Errorf("[%02d: %s] Expected curve[%d].Start to be %v, but got %v", n, tt.name, i, tt.expectedCurves[i].Start, c.Start)
-				}
-				if !c.End.NearEquals(&tt.expectedCurves[i].End, 1e-6) {
-					t.Errorf("[%02d: %s] Expected curve[%d].End to be %v, but got %v", n, tt.name, i, tt.expectedCurves[i].End, c.End)
-				}
+			result := NewCurveFromValues(tt.values)
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("[%d: %s] Expected %v, but got %v", n, tt.name, tt.expected, result)
 			}
 		})
 	}

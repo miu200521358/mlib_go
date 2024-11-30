@@ -16,6 +16,9 @@ const (
 	CURVE_MAX = 127.0
 )
 
+var CurveMin = &MVec2{0.0, 0.0}
+var CurveMax = &MVec2{CURVE_MAX, CURVE_MAX}
+
 var LINER_CURVE = &Curve{
 	Start: MVec2{20.0, 20.0},
 	End:   MVec2{107.0, 107.0},
@@ -52,33 +55,79 @@ func (curve *Curve) Copy() *Curve {
 func (curve *Curve) Normalize(begin, finish *MVec2) {
 	diff := finish.Subed(begin)
 
-	curve.Start = *curve.Start.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
+	curve.Start = *curve.Start.Sub(begin).Div(diff)
 
 	if curve.Start.X < 0 {
 		curve.Start.X = 0
-	} else if curve.Start.X > CURVE_MAX {
-		curve.Start.X = CURVE_MAX
+	} else if curve.Start.X > 1 {
+		curve.Start.X = 1
 	}
 
 	if curve.Start.Y < 0 {
 		curve.Start.Y = 0
-	} else if curve.Start.Y > CURVE_MAX {
-		curve.Start.Y = CURVE_MAX
+	} else if curve.Start.Y > 1 {
+		curve.Start.Y = 1
 	}
 
-	curve.End = *curve.End.Sub(begin).Div(diff).MulScalar(CURVE_MAX).Round()
+	curve.End = *curve.End.Sub(begin).Div(diff)
 
 	if curve.End.X < 0 {
 		curve.End.X = 0
-	} else if curve.End.X > CURVE_MAX {
-		curve.End.X = CURVE_MAX
+	} else if curve.End.X > 1 {
+		curve.End.X = 1
 	}
 
 	if curve.End.Y < 0 {
 		curve.End.Y = 0
-	} else if curve.End.Y > CURVE_MAX {
-		curve.End.Y = CURVE_MAX
+	} else if curve.End.Y > 1 {
+		curve.End.Y = 1
 	}
+
+	if NearEquals(curve.Start.X, curve.Start.Y, 1e-6) && NearEquals(curve.End.X, curve.End.Y, 1e-6) {
+		curve.Start = MVec2{20.0 / 127.0, 20.0 / 127.0}
+		curve.End = MVec2{107.0 / 127.0, 107.0 / 127.0}
+	}
+
+	curve.Start.MulScalar(CURVE_MAX).Round()
+	curve.End.MulScalar(CURVE_MAX).Round()
+}
+
+func tryCurveNormalize(c0, c1, c2, c3 *MVec2) *Curve {
+	p0 := c0
+	p3 := c3
+
+	diff := p3.Subed(p0)
+	if diff.X == 0 {
+		// 割算用なので1にしておく
+		diff.X = 1
+	}
+	if diff.Y == 0 {
+		// 割算用なので1にしておく
+		diff.Y = 1
+	}
+
+	p1 := *c1.Subed(p0).Dived(diff)
+
+	if p1.X < 0 || p1.X > 1 || p1.Y < 0 || p1.Y > 1 {
+		return nil
+	}
+
+	p2 := *c2.Subed(p0).Dived(diff)
+
+	if p2.X < 0 || p2.X > 1 || p2.Y < 0 || p2.Y > 1 {
+		return nil
+	}
+
+	if NearEquals(p1.X, p1.Y, 1e-6) && NearEquals(p2.X, p2.Y, 1e-6) {
+		return NewCurve()
+	}
+
+	curve := &Curve{
+		Start: *p1.MuledScalar(CURVE_MAX).Round(),
+		End:   *p2.MuledScalar(CURVE_MAX).Round(),
+	}
+
+	return curve
 }
 
 // https://pomax.github.io/bezierinfo
@@ -234,17 +283,27 @@ func NewCurveFromValues(values []float64) *Curve {
 		return NewCurve()
 	}
 
+	// すべて同じ値の場合、線形補間になる
+	isAllSame := true
+	for n := range values {
+		if !NearEquals(values[0], values[n], 1e-6) {
+			isAllSame = false
+			break
+		}
+	}
+	if isAllSame {
+		return NewCurve()
+	}
+
 	// Set start and end points
 	p0 := &MVec2{0, values[0]}
-	p3 := &MVec2{float64(n - 1), values[n-1]}
-
-	// Initial guesses for control points
 	p1 := &MVec2{1, values[1]}
 	p2 := &MVec2{float64(n - 2), values[n-2]}
+	p3 := &MVec2{float64(n - 1), values[n-1]}
 
 	funcEval := func(x []float64) float64 {
-		p1 = &MVec2{x[0], x[1]}
-		p2 = &MVec2{x[2], x[3]}
+		p1 := &MVec2{x[0], x[1]}
+		p2 := &MVec2{x[2], x[3]}
 		sumSq := 0.0
 		for i, y := range values {
 			t := float64(i) / float64(n-1)
@@ -259,7 +318,7 @@ func NewCurveFromValues(values []float64) *Curve {
 	problem := optimize.Problem{
 		Func: funcEval,
 		Grad: func(grad, x []float64) {
-			h := 1e-6
+			h := 1e-8
 			fx := funcEval(x)
 			for i := range x {
 				orig := x[i]
@@ -285,22 +344,8 @@ func NewCurveFromValues(values []float64) *Curve {
 	// Perform optimization
 	result, err := optimize.Minimize(problem, initial, settings, method)
 	if err != nil {
-		return NewCurve()
+		return nil
 	}
 
-	// Update p1 and p2 with optimized values
-	c := &Curve{
-		Start: MVec2{result.X[0], result.X[1]},
-		End:   MVec2{result.X[2], result.X[3]},
-	}
-
-	// MMDの補間曲線に収まるような正規化は一旦ここでは行わない
-	// c.Normalize(p0, p3)
-
-	if NearEquals(c.Start.X, c.Start.Y, 1e-6) && NearEquals(c.End.X, c.End.Y, 1e-6) {
-		// 線形の場合初期化
-		return NewCurve()
-	}
-
-	return c
+	return tryCurveNormalize(p0, &MVec2{result.X[0], result.X[1]}, &MVec2{result.X[2], result.X[3]}, p3)
 }

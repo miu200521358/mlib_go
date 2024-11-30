@@ -40,6 +40,10 @@ var (
 
 	// Ident holds an ident quaternion.
 	MQuaternionIdent = &MQuaternion{0, 0, 0, 1}
+
+	MQuaternionUnitX = &MQuaternion{1, 0, 0, 0}
+	MQuaternionUnitY = &MQuaternion{0, 1, 0, 0}
+	MQuaternionUnitZ = &MQuaternion{0, 0, 1, 0}
 )
 
 func (quat *MQuaternion) XYZ() *MVec3 {
