@@ -572,7 +572,7 @@ func VectorToRadian(a *MVec3, b *MVec3) float64 {
 	return rad
 }
 
-// FindSlerpTは始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q1, Q2, t) ? Qtとなるtを見つけます。
+// FindSlerpTは始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q1, Q2, t) = Qtとなるtを見つけます。
 func FindSlerpT(Q1, Q2, Qt *MQuaternion) float64 {
 	tol := 1e-15
 	return findSlerpTGoldenSection(Q1, Q2, Qt, tol)
@@ -629,7 +629,7 @@ func findSlerpTGoldenSection(Q1, Q2, Qt *MQuaternion, tol float64) float64 {
 	return (a + b) / 2
 }
 
-// FindSlerpTBisectionは始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q1, Q2, t) ? Qtとなるtを二分法で見つけます。
+// FindSlerpTBisectionは始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q1, Q2, t) = Qtとなるtを二分法で見つけます。
 func FindSlerpTBisection(Q1, Q2, Qt *MQuaternion, tol float64) float64 {
 	low := 0.00001
 	high := 0.99999

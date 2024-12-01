@@ -264,7 +264,7 @@ func SplitCurve(curve *Curve, start, now, end float32) (*Curve, *Curve) {
 
 // NewCurveFromValues 関数は、与えられた値から補間曲線を生成します。
 func NewCurveFromValues(values []float64) *Curve {
-	n := len(values)
+	n := len(values) - 1
 	if n < 3 {
 		return NewCurve()
 	}
@@ -273,81 +273,62 @@ func NewCurveFromValues(values []float64) *Curve {
 		return NewCurve()
 	}
 
-	// P0とP3の定義
-	P0 := MVec2{X: 0, Y: values[0]}
-	P3 := MVec2{X: float64(n - 1), Y: values[n-1]}
-
-	// 最初と最後のポイントを除外
-	m := n - 2
-	A := mat.NewDense(m, 2, nil)
-	bx := make([]float64, m)
-	by := make([]float64, m)
-
-	for i := 1; i < n-1; i++ {
-		t := float64(i) / float64(n-1)
-		B0 := (1 - t) * (1 - t) * (1 - t)
-		B1 := 3 * (1 - t) * (1 - t) * t
-		B2 := 3 * (1 - t) * t * t
-		B3 := t * t * t
-
-		// x座標用
-		x := float64(i)
-		Cx := B0*P0.X + B3*P3.X
-		dx := x - Cx
-		A.Set(i-1, 0, B1)
-		A.Set(i-1, 1, B2)
-		bx[i-1] = dx
-
-		// y座標用
-		y := values[i]
-		Cy := B0*P0.Y + B3*P3.Y
-		dy := y - Cy
-		by[i-1] = dy
+	// ステップ1: t パラメータの計算（0から1に正規化）
+	t := make([]float64, n+1)
+	for i := 0; i <= n; i++ {
+		t[i] = float64(i) / float64(n)
 	}
 
-	// 正則化パラメータの設定
-	lambda := 1e-2
-
-	// x座標用の正則化
-	AtA := mat.NewDense(2, 2, nil)
-	AtA.Mul(A.T(), A)
-	lambdaI := mat.NewDiagDense(2, []float64{lambda, lambda})
-	AtA.Add(AtA, lambdaI)
-	AtASym := mat.NewSymDense(2, AtA.RawMatrix().Data)
-	AtbX := mat.NewVecDense(2, nil)
-	AtbX.MulVec(A.T(), mat.NewVecDense(m, bx))
-
-	// x座標の解を求める
-	var cholX mat.Cholesky
-	if ok := cholX.Factorize(AtASym); !ok {
-		return nil
+	// ステップ2: 基底関数の計算
+	b0 := make([]float64, n+1)
+	b1 := make([]float64, n+1)
+	b2 := make([]float64, n+1)
+	b3 := make([]float64, n+1)
+	for i := 0; i <= n; i++ {
+		ti := t[i]
+		oneMinusT := 1 - ti
+		b0[i] = oneMinusT * oneMinusT * oneMinusT
+		b1[i] = 3 * oneMinusT * oneMinusT * ti
+		b2[i] = 3 * oneMinusT * ti * ti
+		b3[i] = ti * ti * ti
 	}
-	pxVec := mat.NewVecDense(2, nil)
-	err := cholX.SolveVecTo(pxVec, AtbX)
+
+	// ステップ3: 始点 P0 と 終点 P3 の設定
+	P0 := MVec2{X: t[0], Y: values[0]}
+	P3 := MVec2{X: t[n], Y: values[n]}
+
+	// ステップ4: 行列 A とベクトル Y の構築（Y は Y 成分のみ）
+	AData := make([]float64, 2*(n+1))
+	YData := make([]float64, n+1)
+	for i := 0; i <= n; i++ {
+		// 行列 A の要素（b1 と b2）
+		AData[i*2] = b1[i]
+		AData[i*2+1] = b2[i]
+		// ベクトル Y の要素（Y 成分のみ）
+		YData[i] = values[i] - (b0[i]*P0.Y + b3[i]*P3.Y)
+	}
+
+	A := mat.NewDense(n+1, 2, AData)
+	Y := mat.NewVecDense(n+1, YData)
+
+	// ステップ5: 正規方程式の構築と解法
+	// AT = A^T * A
+	var AT mat.Dense
+	AT.Mul(A.T(), A)
+	// ATY = A^T * Y
+	var ATY mat.VecDense
+	ATY.MulVec(A.T(), Y)
+
+	// 制御点 P1 と P2 の Y 値の計算
+	PY := mat.NewVecDense(2, nil)
+	err := PY.SolveVec(&AT, &ATY)
 	if err != nil {
 		return nil
 	}
-	px := pxVec.RawVector().Data
 
-	// y座標用の正則化
-	AtbY := mat.NewVecDense(2, nil)
-	AtbY.MulVec(A.T(), mat.NewVecDense(m, by))
-
-	// y座標の解を求める
-	var cholY mat.Cholesky
-	if ok := cholY.Factorize(AtASym); !ok {
-		return nil
-	}
-	pyVec := mat.NewVecDense(2, nil)
-	err = cholY.SolveVecTo(pyVec, AtbY)
-	if err != nil {
-		return nil
-	}
-	py := pyVec.RawVector().Data
-
-	// 計算された制御点を割り当て
-	P1 := MVec2{X: px[0], Y: py[0]}
-	P2 := MVec2{X: px[1], Y: py[1]}
+	// 制御点の設定（X 値は t パラメータに基づく）
+	P1 := MVec2{X: t[1], Y: PY.AtVec(0)}
+	P2 := MVec2{X: t[n-1], Y: PY.AtVec(1)}
 
 	// 最適化された制御点
 	return tryCurveNormalize(&P0, &P1, &P2, &P3)
