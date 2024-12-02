@@ -1,9 +1,7 @@
 package vmd
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/petar/GoLLRB/llrb"
 )
 
 type BoneNameFrames struct {
@@ -27,15 +25,17 @@ func (boneNameFrames *BoneNameFrames) Copy() *BoneNameFrames {
 }
 
 func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
-	maxFrame := int(boneNameFrames.Indexes.Max() + 1)
+	maxFrame := boneNameFrames.Indexes.Max() + 1
+	maxIFrame := int(maxFrame)
 
-	frames := make([]float32, 0, maxFrame)
-	xs := make([]float64, 0, maxFrame)
-	ys := make([]float64, 0, maxFrame)
-	zs := make([]float64, 0, maxFrame)
-	rs := make([]float64, 0, maxFrame)
+	frames := make([]float32, 0, maxIFrame)
+	xs := make([]float64, 0, maxIFrame)
+	ys := make([]float64, 0, maxIFrame)
+	zs := make([]float64, 0, maxIFrame)
+	rs := make([]float64, 0, maxIFrame)
+	fixRs := make([]float64, 0, maxIFrame)
 
-	for iF := range maxFrame {
+	for iF := range maxIFrame {
 		f := float32(iF)
 
 		frames = append(frames, f)
@@ -52,9 +52,9 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 		}
 
 		if bf.Rotation != nil {
-			rs = append(rs, mmath.FindSlerpT(mmath.MQuaternionIdent, mmath.MQuaternionUnitX, bf.Rotation))
+			fixRs = append(fixRs, mmath.FindSlerpT(mmath.MQuaternionIdent, mmath.MQuaternionUnitX, bf.Rotation))
 		} else {
-			rs = append(rs, 0)
+			fixRs = append(fixRs, 0)
 		}
 	}
 
@@ -68,19 +68,104 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 	if !mmath.IsAllSameValues(zs) {
 		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, zs)...)
 	}
-	if !mmath.IsAllSameValues(rs) {
-		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, rs)...)
-	}
+	isAllSameRs := mmath.IsAllSameValues(fixRs)
+	if !isAllSameRs {
+		inflectionQuatFrames := make([]float32, 0, boneNameFrames.Len())
 
-	boneNameFrames.RegisteredIndexes.AscendRange(core.Float(0), core.Float(boneNameFrames.RegisteredIndexes.Max()), func(i llrb.Item) bool {
-		if v, ok := boneNameFrames.data[float32(i.(core.Float))]; ok && v.Read {
-			inflectionFrames = append(inflectionFrames, float32(i.(core.Float)))
+		// 一旦固定q0, q1を元に算出したtから変曲点を求める
+		inflectionFixQuatFrames := mmath.FindInflectionFrames(frames, fixRs)
+		inflectionQuatFrames = append(inflectionQuatFrames, inflectionFixQuatFrames...)
+
+		for i, endFrame := range inflectionFixQuatFrames {
+			if i == 0 {
+				continue
+			}
+
+			startFrame := inflectionFixQuatFrames[i-1]
+			startIFrame := int(startFrame)
+			endIFrame := int(endFrame)
+			frameCnt := endIFrame - startIFrame + 1
+
+			rangeFrames := make([]float32, frameCnt)
+			rangeFrames[0] = startFrame
+			rangeRs := make([]float64, frameCnt)
+			startQuat := boneNameFrames.Get(startFrame).Rotation
+			endQuat := boneNameFrames.Get(endFrame).Rotation
+			for i := 1; i <= endIFrame-startIFrame; i++ {
+				rangeFrames[i] = float32(i + startIFrame)
+				rangeRs[i] = mmath.FindSlerpT(startQuat, endQuat, boneNameFrames.Get(float32(i+startIFrame)).Rotation)
+			}
+
+			inflectionQuatRangeFrames := mmath.FindInflectionFrames(rangeFrames, rangeRs)
+
+			// 見つかった最初の変曲点を対象とする(始点と終点は必ずある)
+			inflectionQuatFrames = append(inflectionQuatFrames, inflectionQuatRangeFrames...)
 		}
-		return true
-	})
+
+		inflectionQuatFrames = mmath.UniqueFloat32s(inflectionQuatFrames)
+		mmath.SortFloat32s(inflectionQuatFrames)
+
+		// 変曲点候補の中から、実際に変曲点として採用するフレームを選ぶ
+		startFrame := inflectionQuatFrames[0]
+		inflectionFrames = append(inflectionFrames, startFrame, maxFrame)
+
+		i := 0
+		for {
+			startIFrame := int(startFrame)
+			if startIFrame >= int(inflectionQuatFrames[len(inflectionQuatFrames)-3]) {
+				inflectionFrames = append(inflectionFrames, inflectionQuatFrames[len(inflectionQuatFrames)-2])
+				break
+			}
+
+			for j := i + 2; j < len(inflectionQuatFrames); j++ {
+				endFrame := inflectionQuatFrames[j]
+
+				endIFrame := int(endFrame)
+				frameCnt := endIFrame - startIFrame + 1
+
+				rangeFrames := make([]float32, frameCnt)
+				rangeFrames[0] = startFrame
+				rangeRs := make([]float64, frameCnt)
+				startQuat := boneNameFrames.Get(startFrame).Rotation
+				endQuat := boneNameFrames.Get(endFrame).Rotation
+				for k := 1; k <= endIFrame-startIFrame; k++ {
+					rangeFrames[k] = float32(k + startIFrame)
+					rangeRs[k] = mmath.FindSlerpT(startQuat, endQuat, boneNameFrames.Get(float32(k+startIFrame)).Rotation)
+				}
+
+				inflectionQuatRangeFrames := mmath.FindInflectionFrames(rangeFrames, rangeRs)
+				if len(inflectionQuatRangeFrames) > 2 {
+					// 中に変曲点がある場合、そのendFrameを変曲点として登録
+					inflectionFrames = append(inflectionFrames, inflectionQuatRangeFrames[1])
+					startFrame = inflectionQuatRangeFrames[1]
+					i = j - 1
+					break
+				}
+				// 中に変曲点がない場合、次のendFrameを探す
+			}
+		}
+	}
 
 	inflectionFrames = mmath.UniqueFloat32s(inflectionFrames)
 	mmath.SortFloat32s(inflectionFrames)
+
+	if !isAllSameRs {
+		// 最終的に求まった変曲点リストからtを求める
+		for i, endFrame := range inflectionFrames {
+			if i == 0 {
+				continue
+			}
+
+			startFrame := inflectionFrames[i-1]
+			startQuat := boneNameFrames.Get(startFrame).Rotation
+			endQuat := boneNameFrames.Get(endFrame).Rotation
+			for i := startFrame + 1; i <= endFrame; i++ {
+				rs = append(rs, mmath.FindSlerpT(startQuat, endQuat, boneNameFrames.Get(i).Rotation))
+			}
+		}
+	} else {
+		rs = make([]float64, len(xs))
+	}
 
 	reduceBfs := NewBoneNameFrames(boneNameFrames.Name)
 	for i := 0; i < len(inflectionFrames); i += 2 {

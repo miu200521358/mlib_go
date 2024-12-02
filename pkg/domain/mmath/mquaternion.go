@@ -1,6 +1,7 @@
 package mmath
 
 import (
+	"errors"
 	"fmt"
 	"math"
 
@@ -75,8 +76,8 @@ func NewMQuaternionFromAxisAngles(axis *MVec3, angle float64) *MQuaternion {
 
 // NewMQuaternionFromAxisAnglesRotate は、軸周りの回転を表す四元数を返します。
 func NewMQuaternionFromAxisAnglesRotate(axis *MVec3, angle float64) *MQuaternion {
-	axis.Normalize()
-	m := mgl64.QuatRotate(angle, mgl64.Vec3{axis.X, axis.Y, axis.Z}).Normalize()
+	x := axis.Normalized()
+	m := mgl64.QuatRotate(angle, mgl64.Vec3{x.X, x.Y, x.Z}).Normalize()
 	return &MQuaternion{m.X(), m.Y(), m.Z(), m.W}
 }
 
@@ -572,92 +573,59 @@ func VectorToRadian(a *MVec3, b *MVec3) float64 {
 	return rad
 }
 
-// FindSlerpTは始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q1, Q2, t) = Qtとなるtを見つけます。
-func FindSlerpT(Q1, Q2, Qt *MQuaternion) float64 {
-	tol := 1e-15
-	return findSlerpTGoldenSection(Q1, Q2, Qt, tol)
+func (q MQuaternion) Log() (MQuaternion, error) {
+	if math.Abs(q.W) > 1.0 {
+		return MQuaternion{}, errors.New("invalid quaternion scalar part: must be within [-1, 1]")
+	}
+
+	vNorm := q.Norm()
+	if vNorm == 0 {
+		return MQuaternion{W: 1, X: 0, Y: 0, Z: 0}, nil // Logarithm of a pure scalar quaternion
+	}
+
+	angle := math.Acos(q.W)
+	scale := angle / vNorm
+
+	return MQuaternion{
+		W: 0,
+		X: scale * q.X,
+		Y: scale * q.Y,
+		Z: scale * q.Z,
+	}, nil
 }
 
-// findSlerpTGoldenSectionは一貫したクォータニオンサインを確保した上でtを見つけます。
-func findSlerpTGoldenSection(Q1, Q2, Qt *MQuaternion, tol float64) float64 {
-	phi := (1 + math.Sqrt(5)) / 2
-	maxIterations := 100
+// FindSlerpTは始点q0、終点q1、中間点qtが与えられたとき、Slerp(q0, q1, t) = qtとなるtを見つけます。
+func FindSlerpT(q0, q1, qt *MQuaternion) float64 {
+	// Step 1: Compute q0⁻¹ ∘ q
+	q0Inv := q0.Inverted()
+	q0InvQ := q0Inv.Muled(qt)
 
-	// 初期範囲の設定
-	a := 0.0
-	b := 1.0
-	c := b - (b-a)/phi
-	d := a + (b-a)/phi
+	// Step 2: Compute q0⁻¹ ∘ q1
+	q0InvQ1 := q0Inv.Muled(q1)
 
-	q2 := Q2
-	if Q1.Dot(Q2) < 0 {
-		q2 = Q2.Negated()
-	}
-	Q2 = q2
-
-	// 誤差の計算関数
-	errorFunc := func(t float64) float64 {
-		tQuat := Q1.Slerp(Q2, t)
-		dot := math.Abs(tQuat.Dot(Qt))
-		return 1 - dot
+	// Step 3: Compute logarithms
+	logQ, err1 := q0InvQ.Log()
+	if err1 != nil {
+		return 0
 	}
 
-	// 初期の誤差計算
-	fc := errorFunc(c)
-	fd := errorFunc(d)
-
-	for i := 0; i < maxIterations; i++ {
-		if math.Abs(b-a) < tol {
-			return (a + b) / 2
-		}
-		if fc < fd {
-			b = d
-			d = c
-			fd = fc
-			c = b - (b-a)/phi
-			fc = errorFunc(c)
-		} else {
-			a = c
-			c = d
-			fc = fd
-			d = a + (b-a)/phi
-			fd = errorFunc(d)
-		}
+	logQ1, err2 := q0InvQ1.Log()
+	if err2 != nil {
+		return 0
 	}
 
-	// 終了条件に達したら範囲の中間点を返す
-	return (a + b) / 2
-}
-
-// FindSlerpTBisectionは始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q1, Q2, t) = Qtとなるtを二分法で見つけます。
-func FindSlerpTBisection(Q1, Q2, Qt *MQuaternion, tol float64) float64 {
-	low := 0.00001
-	high := 0.99999
-	mid := (low + high) / 2
-
-	maxIterations := 50
-
-	for i := 0; i < maxIterations; i++ {
-		// Slerpで中間のクオータニオンを計算し、誤差を測定
-		midQuat := Q1.Slerp(Q2, mid)
-		dot := math.Abs(midQuat.Dot(Qt))
-		err := 1 - dot
-
-		// 誤差が許容範囲内であれば終了
-		if err < tol {
-			return mid
-		}
-
-		// 中間点の誤差に基づいて範囲を狭める
-		lowQuat := Q1.Slerp(Q2, low)
-		if lowQuat.Dot(Qt) < midQuat.Dot(Qt) {
-			low = mid
-		} else {
-			high = mid
-		}
-
-		mid = (low + high) / 2
+	// Step 4: Calculate t = log(q0⁻¹ ∘ q) / log(q0⁻¹ ∘ q1)
+	// This is performed for the vector parts only
+	var t float64
+	if logQ1.X != 0 {
+		t = logQ.X / logQ1.X
+	}
+	if logQ1.Y != 0 {
+		t = logQ.Y / logQ1.Y
+	}
+	if logQ1.Z != 0 {
+		t = logQ.Z / logQ1.Z
 	}
 
-	return mid
+	return math.Min(1, t)
 }

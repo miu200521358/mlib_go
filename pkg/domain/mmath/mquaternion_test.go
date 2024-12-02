@@ -528,3 +528,42 @@ func TestMQuaternion_ToMat4(t *testing.T) {
 	}
 
 }
+
+func TestFindSlerpT(t *testing.T) {
+	tests := []struct {
+		q0, q1, q *MQuaternion
+		expected  float64
+	}{
+		{
+			q0:       NewMQuaternionByValues(1, 0, 0, 0),
+			q1:       NewMQuaternionByValues(0, 1, 0, 0),
+			q:        NewMQuaternionByValues(0.5, 0.5, 0.0, 0.7071067811865476),
+			expected: 0.3333333333333333,
+		},
+		{
+			q0:       NewMQuaternionByValues(1, 0, 0, 0),
+			q1:       NewMQuaternionByValues(0, 1, 0, 0),
+			q:        NewMQuaternionByValues(0.0, 0.3826834323650898, 0.0, 0.9238795325112867),
+			expected: 0.38268343236508984,
+		},
+		{
+			q0:       NewMQuaternionByValues(1, 0, 0, 0),
+			q1:       NewMQuaternionByValues(0, 1, 0, 0),
+			q:        NewMQuaternionByValues(0.0, 0.9238795325112867, 0.0, 0.3826834323650898),
+			expected: 0.9238795325112867,
+		},
+		{
+			q0:       NewMQuaternionByValues(1, 0, 0, 0),
+			q1:       NewMQuaternionByValues(0, 1, 0, 0),
+			q:        NewMQuaternionByValues(0.0, 0.0, 0.0, 1.0),
+			expected: 0.0,
+		},
+	}
+
+	for _, test := range tests {
+		result := FindSlerpT(test.q0, test.q1, test.q)
+		if math.Abs(result-test.expected) > 1e-10 {
+			t.Errorf("FindSlerpT failed. Expected %v, got %v", test.expected, result)
+		}
+	}
+}

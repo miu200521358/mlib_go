@@ -30,7 +30,7 @@ func FindInflectionFrames(frames []float32, values []float64) []float32 {
 	}
 
 	inflectionFrames := make([]float32, 0, len(frames))
-	inflectionFrames = append(inflectionFrames, frames[0], frames[len(frames)-1])
+	inflectionFrames = append(inflectionFrames, frames[0])
 
 	// 2つ以上ある場合、区間値の変曲点を探す
 	grad := Gradient(values, 1)
@@ -43,6 +43,10 @@ func FindInflectionFrames(frames []float32, values []float64) []float32 {
 			(values[i-1] != 0 && math.Abs(values[i]/values[i-1]) > deltaThreshold)) {
 			inflectionFrames = append(inflectionFrames, frames[i])
 		}
+	}
+
+	if !Contains(inflectionFrames, frames[len(frames)-1]) {
+		inflectionFrames = append(inflectionFrames, frames[len(frames)-1])
 	}
 
 	return inflectionFrames
