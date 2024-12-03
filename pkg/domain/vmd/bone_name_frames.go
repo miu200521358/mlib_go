@@ -32,8 +32,8 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 	xs := make([]float64, 0, maxIFrame)
 	ys := make([]float64, 0, maxIFrame)
 	zs := make([]float64, 0, maxIFrame)
-	rs := make([]float64, 0, maxIFrame)
 	fixRs := make([]float64, 0, maxIFrame)
+	quats := make([]*mmath.MQuaternion, 0, maxIFrame)
 
 	for iF := range maxIFrame {
 		f := float32(iF)
@@ -52,8 +52,11 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 		}
 
 		if bf.Rotation != nil {
-			fixRs = append(fixRs, mmath.FindSlerpT(mmath.MQuaternionIdent, mmath.MQuaternionUnitX, bf.Rotation))
+			initialT := float64(iF) / float64(maxIFrame)
+			quats = append(quats, bf.Rotation)
+			fixRs = append(fixRs, mmath.FindSlerpT(mmath.MQuaternionIdent, mmath.MQuaternionUnitX, bf.Rotation, initialT))
 		} else {
+			quats = append(quats, mmath.MQuaternionIdent)
 			fixRs = append(fixRs, 0)
 		}
 	}
@@ -89,11 +92,13 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 			rangeFrames := make([]float32, frameCnt)
 			rangeFrames[0] = startFrame
 			rangeRs := make([]float64, frameCnt)
-			startQuat := boneNameFrames.Get(startFrame).Rotation
-			endQuat := boneNameFrames.Get(endFrame).Rotation
+			startQuat := quats[startIFrame]
+			endQuat := quats[endIFrame]
 			for i := 1; i <= endIFrame-startIFrame; i++ {
 				rangeFrames[i] = float32(i + startIFrame)
-				rangeRs[i] = mmath.FindSlerpT(startQuat, endQuat, boneNameFrames.Get(float32(i+startIFrame)).Rotation)
+				initialT := float64(i) / float64(endIFrame-startIFrame)
+				quat := quats[i+startIFrame]
+				rangeRs[i] = mmath.FindSlerpT(startQuat, endQuat, quat, initialT)
 			}
 
 			inflectionQuatRangeFrames := mmath.FindInflectionFrames(rangeFrames, rangeRs)
@@ -107,14 +112,16 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 
 		// 変曲点候補の中から、実際に変曲点として採用するフレームを選ぶ
 		startFrame := inflectionQuatFrames[0]
-		inflectionFrames = append(inflectionFrames, startFrame, maxFrame)
+		inflectionFrames = append(inflectionFrames, startFrame, inflectionQuatFrames[len(inflectionQuatFrames)-1])
 
 		i := 0
+	quatInflection:
 		for {
 			startIFrame := int(startFrame)
-			if startIFrame >= int(inflectionQuatFrames[len(inflectionQuatFrames)-3]) {
-				inflectionFrames = append(inflectionFrames, inflectionQuatFrames[len(inflectionQuatFrames)-2])
-				break
+			if i+2 >= len(inflectionQuatFrames) {
+				// 最後まで探しても見つからなかった場合、最後のendFrameを変曲点として登録
+				inflectionFrames = append(inflectionFrames, inflectionQuatFrames[len(inflectionQuatFrames)-1])
+				break quatInflection
 			}
 
 			for j := i + 2; j < len(inflectionQuatFrames); j++ {
@@ -126,11 +133,13 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 				rangeFrames := make([]float32, frameCnt)
 				rangeFrames[0] = startFrame
 				rangeRs := make([]float64, frameCnt)
-				startQuat := boneNameFrames.Get(startFrame).Rotation
-				endQuat := boneNameFrames.Get(endFrame).Rotation
+				startQuat := quats[startIFrame]
+				endQuat := quats[endIFrame]
 				for k := 1; k <= endIFrame-startIFrame; k++ {
 					rangeFrames[k] = float32(k + startIFrame)
-					rangeRs[k] = mmath.FindSlerpT(startQuat, endQuat, boneNameFrames.Get(float32(k+startIFrame)).Rotation)
+					initialT := float64(k) / float64(endIFrame-startIFrame)
+					quat := quats[k+startIFrame]
+					rangeRs[k] = mmath.FindSlerpT(startQuat, endQuat, quat, initialT)
 				}
 
 				inflectionQuatRangeFrames := mmath.FindInflectionFrames(rangeFrames, rangeRs)
@@ -140,6 +149,10 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 					startFrame = inflectionQuatRangeFrames[1]
 					i = j - 1
 					break
+				} else if endFrame == inflectionQuatFrames[len(inflectionQuatFrames)-1] {
+					// 最後まで探しても見つからなかった場合、最後のendFrameを変曲点として登録
+					inflectionFrames = append(inflectionFrames, endFrame)
+					break quatInflection
 				}
 				// 中に変曲点がない場合、次のendFrameを探す
 			}
@@ -148,24 +161,6 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 
 	inflectionFrames = mmath.UniqueFloat32s(inflectionFrames)
 	mmath.SortFloat32s(inflectionFrames)
-
-	if !isAllSameRs {
-		// 最終的に求まった変曲点リストからtを求める
-		for i, endFrame := range inflectionFrames {
-			if i == 0 {
-				continue
-			}
-
-			startFrame := inflectionFrames[i-1]
-			startQuat := boneNameFrames.Get(startFrame).Rotation
-			endQuat := boneNameFrames.Get(endFrame).Rotation
-			for i := startFrame + 1; i <= endFrame; i++ {
-				rs = append(rs, mmath.FindSlerpT(startQuat, endQuat, boneNameFrames.Get(i).Rotation))
-			}
-		}
-	} else {
-		rs = make([]float64, len(xs))
-	}
 
 	reduceBfs := NewBoneNameFrames(boneNameFrames.Name)
 	for i := 0; i < len(inflectionFrames); i += 2 {
@@ -186,22 +181,37 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 		midFrame := inflectionFrames[i-1]
 		endFrame := inflectionFrames[i]
 
-		boneNameFrames.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, rs, reduceBfs)
+		boneNameFrames.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, quats, reduceBfs)
 	}
 
 	return reduceBfs
 }
 
 func (boneNameFrames *BoneNameFrames) reduceRange(
-	startFrame, midFrame, endFrame float32, xs, ys, zs, rs []float64, reduceBfs *BoneNameFrames,
+	startFrame, midFrame, endFrame float32, xs, ys, zs []float64, quats []*mmath.MQuaternion, reduceBfs *BoneNameFrames,
 ) {
 	startIFrame := int(startFrame)
 	endIFrame := int(endFrame)
 
-	rangeXs := xs[startIFrame:endIFrame]
-	rangeYs := ys[startIFrame:endIFrame]
-	rangeZs := zs[startIFrame:endIFrame]
-	rangeRs := rs[startIFrame:endIFrame]
+	var rangeXs, rangeYs, rangeZs []float64
+	if len(xs) <= endIFrame {
+		rangeXs = xs[startIFrame:]
+		rangeYs = ys[startIFrame:]
+		rangeZs = zs[startIFrame:]
+	} else {
+		rangeXs = xs[startIFrame : endIFrame+1]
+		rangeYs = ys[startIFrame : endIFrame+1]
+		rangeZs = zs[startIFrame : endIFrame+1]
+	}
+
+	rangeRs := make([]float64, 0, len(rangeXs))
+	startQuat := quats[startIFrame]
+	endQuat := quats[endIFrame]
+	for i := startFrame; i <= endFrame; i++ {
+		initialT := float64(i-startFrame) / float64(endFrame-startFrame)
+		quat := quats[int(i)]
+		rangeRs = append(rangeRs, mmath.FindSlerpT(startQuat, endQuat, quat, initialT))
+	}
 
 	xCurve := mmath.NewCurveFromValues(rangeXs)
 	yCurve := mmath.NewCurveFromValues(rangeYs)
@@ -257,7 +267,7 @@ func (boneNameFrames *BoneNameFrames) reduceRange(
 			}
 		}
 
-		boneNameFrames.reduceRange(startFrame, float32(int(midFrame+startFrame)/2), midFrame, xs, ys, zs, rs, reduceBfs)
-		boneNameFrames.reduceRange(midFrame, float32(int(endFrame+midFrame)/2), endFrame, xs, ys, zs, rs, reduceBfs)
+		boneNameFrames.reduceRange(startFrame, float32(int(midFrame+startFrame)/2), midFrame, xs, ys, zs, quats, reduceBfs)
+		boneNameFrames.reduceRange(midFrame, float32(int(endFrame+midFrame)/2), endFrame, xs, ys, zs, quats, reduceBfs)
 	}
 }

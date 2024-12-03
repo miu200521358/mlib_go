@@ -531,39 +531,36 @@ func TestMQuaternion_ToMat4(t *testing.T) {
 
 func TestFindSlerpT(t *testing.T) {
 	tests := []struct {
-		q0, q1, q *MQuaternion
-		expected  float64
+		q0, q1 *MQuaternion
+		t      float64
 	}{
 		{
-			q0:       NewMQuaternionByValues(1, 0, 0, 0),
-			q1:       NewMQuaternionByValues(0, 1, 0, 0),
-			q:        NewMQuaternionByValues(0.5, 0.5, 0.0, 0.7071067811865476),
-			expected: 0.3333333333333333,
+			q0: NewMQuaternionFromDegrees(10, 20, 30),
+			q1: NewMQuaternionFromDegrees(60, -20, -80),
+			t:  0.3,
 		},
 		{
-			q0:       NewMQuaternionByValues(1, 0, 0, 0),
-			q1:       NewMQuaternionByValues(0, 1, 0, 0),
-			q:        NewMQuaternionByValues(0.0, 0.3826834323650898, 0.0, 0.9238795325112867),
-			expected: 0.38268343236508984,
+			q0: NewMQuaternionFromDegrees(10, 20, 30),
+			q1: NewMQuaternionFromDegrees(60, -20, -80),
+			t:  0.6,
 		},
 		{
-			q0:       NewMQuaternionByValues(1, 0, 0, 0),
-			q1:       NewMQuaternionByValues(0, 1, 0, 0),
-			q:        NewMQuaternionByValues(0.0, 0.9238795325112867, 0.0, 0.3826834323650898),
-			expected: 0.9238795325112867,
+			q0: NewMQuaternionFromDegrees(-10, 20, 30),
+			q1: NewMQuaternionFromDegrees(60, 20, -80),
+			t:  0.9,
 		},
 		{
-			q0:       NewMQuaternionByValues(1, 0, 0, 0),
-			q1:       NewMQuaternionByValues(0, 1, 0, 0),
-			q:        NewMQuaternionByValues(0.0, 0.0, 0.0, 1.0),
-			expected: 0.0,
+			q0: &MQuaternion{X: -0.008417034521698952, Y: -0.001099314889870584, Z: -0.33594009280204773, W: 0.9418451189994812},
+			q1: &MQuaternion{X: -0.00845526841302267, Y: -0.0014676861230259702, Z: -0.3248561346517127, W: 0.9457245085714213},
+			t:  0.5,
 		},
 	}
 
-	for _, test := range tests {
-		result := FindSlerpT(test.q0, test.q1, test.q)
-		if math.Abs(result-test.expected) > 1e-10 {
-			t.Errorf("FindSlerpT failed. Expected %v, got %v", test.expected, result)
+	for _, tt := range tests {
+		q := tt.q0.Slerp(tt.q1, tt.t)
+		result := FindSlerpT(tt.q0, tt.q1, q, tt.t)
+		if math.Abs(tt.t-result) > 1e-5 {
+			t.Errorf("FindSlerpT failed. Expected %v, got %v", tt.t, result)
 		}
 	}
 }

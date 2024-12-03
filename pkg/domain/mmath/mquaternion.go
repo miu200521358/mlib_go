@@ -594,38 +594,149 @@ func (q MQuaternion) Log() (MQuaternion, error) {
 	}, nil
 }
 
-// FindSlerpTは始点q0、終点q1、中間点qtが与えられたとき、Slerp(q0, q1, t) = qtとなるtを見つけます。
-func FindSlerpT(q0, q1, qt *MQuaternion) float64 {
-	// Step 1: Compute q0⁻¹ ∘ q
-	q0Inv := q0.Inverted()
-	q0InvQ := q0Inv.Muled(qt)
+// FindSlerpTは始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q0, Q1, t) = Qtとなるtを見つけます。
+func FindSlerpT(Q1, Q2, Qt *MQuaternion, initialT float64) float64 {
+	// tol := 1e-8
+	// phi := (1 + math.Sqrt(5)) / 2
+	// maxIterations := 100
 
-	// Step 2: Compute q0⁻¹ ∘ q1
-	q0InvQ1 := q0Inv.Muled(q1)
+	// // 初期範囲の設定
+	// a := 0.0
+	// b := 1.0
+	// c := b - (b-a)/phi
+	// d := a + (b-a)/phi
 
-	// Step 3: Compute logarithms
-	logQ, err1 := q0InvQ.Log()
-	if err1 != nil {
-		return 0
+	// q2 := Q2
+	// if Q1.Dot(Q2) < 0 {
+	// 	q2 = Q2.Negated()
+	// }
+	// Q2 = q2
+
+	// // 誤差の計算関数
+	// errorFunc := func(t float64) float64 {
+	// 	tQuat := Q1.Slerp(Q2, t)
+	// 	dot := math.Abs(tQuat.Dot(Qt))
+	// 	return 1 - dot
+	// }
+
+	// // 初期の誤差計算
+	// fc := errorFunc(c)
+	// fd := errorFunc(d)
+
+	// for i := 0; i < maxIterations; i++ {
+	// 	if math.Abs(b-a) < tol {
+	// 		return (a + b) / 2
+	// 	}
+	// 	if fc < fd {
+	// 		b = d
+	// 		d = c
+	// 		fd = fc
+	// 		c = b - (b-a)/phi
+	// 		fc = errorFunc(c)
+	// 	} else {
+	// 		a = c
+	// 		c = d
+	// 		fc = fd
+	// 		d = a + (b-a)/phi
+	// 		fd = errorFunc(d)
+	// 	}
+	// }
+
+	// // 終了条件に達したら範囲の中間点を返す
+	// return (a + b) / 2
+	tol := 1e-8
+	phi := (1 + math.Sqrt(5)) / 2
+	maxIterations := 100
+
+	if math.Abs(Q1.Dot(Q2)) > 0.999 {
+		return initialT
 	}
 
-	logQ1, err2 := q0InvQ1.Log()
-	if err2 != nil {
-		return 0
+	a := 0.0
+	b := 1.0
+	c := b - (b-a)/phi
+	d := a + (b-a)/phi
+
+	q2 := Q2
+	if Q1.Dot(Q2) < 0 {
+		q2 = Q2.Negated()
 	}
 
-	// Step 4: Calculate t = log(q0⁻¹ ∘ q) / log(q0⁻¹ ∘ q1)
-	// This is performed for the vector parts only
-	var t float64
-	if logQ1.X != 0 {
-		t = logQ.X / logQ1.X
-	}
-	if logQ1.Y != 0 {
-		t = logQ.Y / logQ1.Y
-	}
-	if logQ1.Z != 0 {
-		t = logQ.Z / logQ1.Z
+	errorFunc := func(t float64) float64 {
+		tQuat := Q1.Slerp(q2, t)
+		theta := math.Acos(tQuat.Dot(Qt))
+		return theta
 	}
 
-	return math.Min(1, t)
+	fc := errorFunc(c)
+	fd := errorFunc(d)
+
+	for i := 0; i < maxIterations; i++ {
+		if math.Abs(b-a) < tol || math.Min(fc, fd) < tol {
+			break
+		}
+
+		if fc < fd {
+			b = d
+			d = c
+			fd = fc
+			c = b - (b-a)/phi
+			fc = errorFunc(c)
+		} else {
+			a = c
+			c = d
+			fc = fd
+			d = a + (b-a)/phi
+			fd = errorFunc(d)
+		}
+	}
+
+	return (a + b) / 2
+}
+
+func FindLerpT(Q1, Q2, Qt *MQuaternion) float64 {
+	tol := 1e-8
+	phi := (1 + math.Sqrt(5)) / 2
+	maxIterations := 100
+
+	a := 0.0
+	b := 1.0
+	c := b - (b-a)/phi
+	d := a + (b-a)/phi
+
+	q2 := Q2
+	if Q1.Dot(Q2) < 0 {
+		q2 = Q2.Negated()
+	}
+
+	errorFunc := func(t float64) float64 {
+		tQuat := Q1.Lerp(q2, t)
+		theta := math.Acos(tQuat.Dot(Qt))
+		return theta
+	}
+
+	fc := errorFunc(c)
+	fd := errorFunc(d)
+
+	for i := 0; i < maxIterations; i++ {
+		if math.Abs(b-a) < tol || math.Min(fc, fd) < tol {
+			break
+		}
+
+		if fc < fd {
+			b = d
+			d = c
+			fd = fc
+			c = b - (b-a)/phi
+			fc = errorFunc(c)
+		} else {
+			a = c
+			c = d
+			fc = fd
+			d = a + (b-a)/phi
+			fd = errorFunc(d)
+		}
+	}
+
+	return (a + b) / 2
 }

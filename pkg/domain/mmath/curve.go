@@ -262,8 +262,82 @@ func SplitCurve(curve *Curve, start, now, end float32) (*Curve, *Curve) {
 	return startCurve, endCurve
 }
 
+func bezier(t float64, p0, p1, p2, p3 *MVec2) *MVec2 {
+	t2 := t * t
+	t3 := t2 * t
+	mt := 1 - t
+	mt2 := mt * mt
+	mt3 := mt2 * mt
+
+	bx := mt3*p0.X + 3*mt2*t*p1.X + 3*mt*t2*p2.X + t3*p3.X
+	by := mt3*p0.Y + 3*mt2*t*p1.Y + 3*mt*t2*p2.Y + t3*p3.Y
+
+	return &MVec2{bx, by}
+}
+
 // NewCurveFromValues 関数は、与えられた値から補間曲線を生成します。
 func NewCurveFromValues(values []float64) *Curve {
+	// n := len(values)
+	// if n <= 2 {
+	// 	return NewCurve()
+	// }
+
+	// // Set start and end points
+	// p0 := &MVec2{0, values[0]}
+	// p3 := &MVec2{float64(n - 1), values[n-1]}
+
+	// // Initial guesses for control points
+	// p1 := &MVec2{1, values[1]}
+	// p2 := &MVec2{float64(n - 2), values[n-2]}
+
+	// funcEval := func(x []float64) float64 {
+	// 	p1 = &MVec2{x[0], x[1]}
+	// 	p2 = &MVec2{x[2], x[3]}
+	// 	sumSq := 0.0
+	// 	for i, y := range values {
+	// 		t := float64(i) / float64(n-1)
+	// 		bp := bezier(t, p0, p1, p2, p3)
+	// 		diff := bp.Y - y
+	// 		sumSq += diff * diff
+	// 	}
+	// 	return sumSq
+	// }
+
+	// // Define the optimization problem
+	// problem := optimize.Problem{
+	// 	Func: funcEval,
+	// 	Grad: func(grad, x []float64) {
+	// 		h := 1e-6
+	// 		fx := funcEval(x)
+	// 		for i := range x {
+	// 			orig := x[i]
+	// 			x[i] += h
+	// 			fxh := funcEval(x)
+	// 			x[i] = orig
+	// 			grad[i] = (fxh - fx) / h
+	// 		}
+	// 	},
+	// }
+
+	// // Optimization settings
+	// settings := &optimize.Settings{
+	// 	MajorIterations:   1000,  // 最大イテレーション数を増やす
+	// 	FuncEvaluations:   10000, // 関数評価の最大数を増やす
+	// 	GradientThreshold: 1e-6,  // 勾配の閾値を変更する
+	// }
+	// method := &optimize.LBFGS{}
+
+	// // Initial control points vector
+	// initial := []float64{p1.X, p1.Y, p2.X, p2.Y}
+
+	// // Perform optimization
+	// result, err := optimize.Minimize(problem, initial, settings, method)
+	// if err != nil {
+	// 	return NewCurve()
+	// }
+
+	// return tryCurveNormalize(p0, &MVec2{result.X[0], result.X[1]}, &MVec2{result.X[2], result.X[3]}, p3)
+
 	n := len(values) - 1
 
 	// 特殊ケース処理
