@@ -596,59 +596,11 @@ func (q MQuaternion) Log() (MQuaternion, error) {
 
 // FindSlerpTは始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q0, Q1, t) = Qtとなるtを見つけます。
 func FindSlerpT(Q1, Q2, Qt *MQuaternion, initialT float64) float64 {
-	// tol := 1e-8
-	// phi := (1 + math.Sqrt(5)) / 2
-	// maxIterations := 100
-
-	// // 初期範囲の設定
-	// a := 0.0
-	// b := 1.0
-	// c := b - (b-a)/phi
-	// d := a + (b-a)/phi
-
-	// q2 := Q2
-	// if Q1.Dot(Q2) < 0 {
-	// 	q2 = Q2.Negated()
-	// }
-	// Q2 = q2
-
-	// // 誤差の計算関数
-	// errorFunc := func(t float64) float64 {
-	// 	tQuat := Q1.Slerp(Q2, t)
-	// 	dot := math.Abs(tQuat.Dot(Qt))
-	// 	return 1 - dot
-	// }
-
-	// // 初期の誤差計算
-	// fc := errorFunc(c)
-	// fd := errorFunc(d)
-
-	// for i := 0; i < maxIterations; i++ {
-	// 	if math.Abs(b-a) < tol {
-	// 		return (a + b) / 2
-	// 	}
-	// 	if fc < fd {
-	// 		b = d
-	// 		d = c
-	// 		fd = fc
-	// 		c = b - (b-a)/phi
-	// 		fc = errorFunc(c)
-	// 	} else {
-	// 		a = c
-	// 		c = d
-	// 		fc = fd
-	// 		d = a + (b-a)/phi
-	// 		fd = errorFunc(d)
-	// 	}
-	// }
-
-	// // 終了条件に達したら範囲の中間点を返す
-	// return (a + b) / 2
 	tol := 1e-8
 	phi := (1 + math.Sqrt(5)) / 2
 	maxIterations := 100
 
-	if math.Abs(Q1.Dot(Q2)) > 0.999 {
+	if math.Abs(Q1.Dot(Q2)) > 0.9999 {
 		return initialT
 	}
 
