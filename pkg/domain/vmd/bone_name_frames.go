@@ -34,7 +34,6 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 	zs := make([]float64, 0, maxIFrame)
 	fixRs := make([]float64, 0, maxIFrame)
 	quats := make([]*mmath.MQuaternion, 0, maxIFrame)
-	testQuat := mmath.NewMQuaternionFromDegrees(90, 90, 90)
 
 	for iF := range maxIFrame {
 		f := float32(iF)
@@ -54,7 +53,7 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 
 		if bf.Rotation != nil {
 			quats = append(quats, bf.Rotation)
-			fixRs = append(fixRs, testQuat.Dot(bf.Rotation))
+			fixRs = append(fixRs, mmath.MQuaternionIdent.Dot(bf.Rotation))
 		} else {
 			quats = append(quats, mmath.MQuaternionIdent)
 			fixRs = append(fixRs, 0)
@@ -63,16 +62,16 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 
 	inflectionFrames := make([]float32, 0, boneNameFrames.Len())
 	if !mmath.IsAllSameValues(xs) {
-		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, xs, 1e-5)...)
+		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, xs, 1e-5, 1)...)
 	}
 	if !mmath.IsAllSameValues(ys) {
-		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, ys, 1e-5)...)
+		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, ys, 1e-5, 1)...)
 	}
 	if !mmath.IsAllSameValues(zs) {
-		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, zs, 1e-5)...)
+		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, zs, 1e-5, 1)...)
 	}
 	if !mmath.IsAllSameValues(fixRs) {
-		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, fixRs, 1e-5)...)
+		inflectionFrames = append(inflectionFrames, mmath.FindInflectionFrames(frames, fixRs, 1e-5, 0.1)...)
 
 		inflectionFrames = mmath.UniqueFloat32s(inflectionFrames)
 		mmath.SortFloat32s(inflectionFrames)
@@ -103,7 +102,8 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 			}
 
 			// 変曲点を追加する
-			inflectionQuatFrames = append(inflectionQuatFrames, mmath.FindInflectionFrames(rangeFrames, qs, 1e-5)...)
+			inflectionQuatFrames = append(inflectionQuatFrames,
+				mmath.FindInflectionFrames(rangeFrames, qs, 1e-5, 0.1)...)
 
 			if j <= len(inflectionFrames)-2 {
 				// 残りが2つ以上ある場合、次の次に進む
@@ -138,6 +138,7 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 		reduceBfs.Append(reduceBf)
 	}
 
+	exactEndFrame := float32(0)
 	i := 2
 	for {
 		if i >= len(inflectionFrames)-1 {
@@ -148,14 +149,34 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 		midFrame := inflectionFrames[i-1]
 		endFrame := inflectionFrames[i]
 
-		isEnd := boneNameFrames.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, quats, reduceBfs)
+		exactEndFrame = boneNameFrames.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, quats, reduceBfs)
 
-		if isEnd {
-			// endまで繋げられた場合、次の次に進む
-			i++
+		for exactEndFrame < endFrame {
+			// 途中までしか繋げなかった場合、そこから次を探す
+			startFrame = exactEndFrame
+			midFrame = (exactEndFrame + endFrame) / 2
+
+			exactEndFrame = boneNameFrames.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, quats, reduceBfs)
 		}
 
-		i++
+		i += 2
+	}
+
+	// 最後のフレームを登録
+	{
+		startFrame := exactEndFrame
+		endFrame := inflectionFrames[len(inflectionFrames)-1]
+		midFrame := (startFrame + endFrame) / 2
+
+		exactEndFrame = boneNameFrames.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, quats, reduceBfs)
+
+		for exactEndFrame < endFrame {
+			// 途中までしか繋げなかった場合、そこから次を探す
+			startFrame = exactEndFrame
+			midFrame = (exactEndFrame + endFrame) / 2
+
+			exactEndFrame = boneNameFrames.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, quats, reduceBfs)
+		}
 	}
 
 	return reduceBfs
@@ -163,7 +184,7 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 
 func (boneNameFrames *BoneNameFrames) reduceRange(
 	startFrame, midFrame, endFrame float32, xs, ys, zs []float64, quats []*mmath.MQuaternion, reduceBfs *BoneNameFrames,
-) bool {
+) float32 {
 	startIFrame := int(startFrame)
 	endIFrame := int(endFrame)
 
@@ -207,9 +228,9 @@ func (boneNameFrames *BoneNameFrames) reduceRange(
 	// }
 
 	for i := startFrame; i <= endFrame; i++ {
-		initialT := float64(i-startFrame) / float64(endFrame-startFrame)
+		// initialT := float64(i-startFrame) / float64(endFrame-startFrame)
 		quat := quats[int(i)]
-		rangeRs = append(rangeRs, mmath.FindSlerpT(startQuat, endQuat, quat, initialT))
+		rangeRs = append(rangeRs, mmath.FindSlerpT(startQuat, endQuat, quat, 0))
 	}
 
 	xCurve := mmath.NewCurveFromValues(rangeXs)
@@ -250,8 +271,8 @@ func (boneNameFrames *BoneNameFrames) reduceRange(
 
 			reduceBfs.Append(reduceBf)
 
-			// endまで繋げられた場合、trueを返す
-			return true
+			// endまで繋げられた場合
+			return endFrame
 		}
 	}
 
@@ -268,19 +289,16 @@ func (boneNameFrames *BoneNameFrames) reduceRange(
 			reduceBf.Rotation = bf.Rotation.Copy()
 			if bf.Curves != nil {
 				reduceBf.Curves = bf.Curves.Copy()
-			} else {
-				reduceBf.Curves = NewBoneCurves()
 			}
+
+			reduceBfs.Append(reduceBf)
 		}
 
-		// endまで繋げられなかった場合、falseを返す
-		return false
+		// endまで繋げられなかった場合
+		return midFrame
 	}
 
-	boneNameFrames.reduceRange(startFrame, float32(int(midFrame+startFrame)/2), midFrame, xs, ys, zs, quats, reduceBfs)
-
-	// endまで繋げられなかった場合、falseを返す
-	return false
+	return boneNameFrames.reduceRange(startFrame, float32(int(midFrame+startFrame)/2), midFrame, xs, ys, zs, quats, reduceBfs)
 }
 
 // 検算
@@ -294,20 +312,20 @@ func (boneNameFrames *BoneNameFrames) checkCurve(
 	_, ry, _ := mmath.Evaluate(rCurve, startFrame, nowFrame, endFrame)
 
 	checkNowQuat := startQuat.Slerp(endQuat, ry)
-	if !checkNowQuat.NearEquals(nowQuat, 1e-3) {
+	if !checkNowQuat.NearEquals(nowQuat, 1e-1) {
 		return false
 	}
 
 	checkNowX := mmath.LerpFloat(startX, endX, xy)
-	if !mmath.NearEquals(checkNowX, nowX, 1e-3) {
+	if !mmath.NearEquals(checkNowX, nowX, 1e-1) {
 		return false
 	}
 
 	checkNowY := mmath.LerpFloat(startY, endY, yy)
-	if !mmath.NearEquals(checkNowY, nowY, 1e-3) {
+	if !mmath.NearEquals(checkNowY, nowY, 1e-1) {
 		return false
 	}
 
 	checkNowZ := mmath.LerpFloat(startZ, endZ, zy)
-	return !mmath.NearEquals(checkNowZ, nowZ, 1e-3)
+	return !mmath.NearEquals(checkNowZ, nowZ, 1e-1)
 }
