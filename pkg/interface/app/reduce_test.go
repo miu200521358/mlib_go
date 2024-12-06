@@ -15,9 +15,9 @@ func TestReduce_Gimme(t *testing.T) {
 		maxFrame float32
 	}{
 		{
-			name:     "左腕",
-			minFrame: 140,
-			maxFrame: 160,
+			name:     "上半身",
+			minFrame: 86,
+			maxFrame: 110,
 		},
 	}
 

@@ -67,7 +67,7 @@ func TestFindInflectionFrames(t *testing.T) {
 
 	for n, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := FindInflectionFrames(tt.frames, tt.values)
+			got := FindInflectionFrames(tt.frames, tt.values, 1e-6)
 			got = UniqueFloat32s(got)
 			SortFloat32s(got)
 

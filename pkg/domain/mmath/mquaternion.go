@@ -596,7 +596,7 @@ func (q MQuaternion) Log() (MQuaternion, error) {
 
 // FindSlerpTは始点Q1、終点Q2、中間点Qtが与えられたとき、Slerp(Q0, Q1, t) = Qtとなるtを見つけます。
 func FindSlerpT(Q1, Q2, Qt *MQuaternion, initialT float64) float64 {
-	tol := 1e-8
+	tol := 1e-10
 	phi := (1 + math.Sqrt(5)) / 2
 	maxIterations := 100
 
