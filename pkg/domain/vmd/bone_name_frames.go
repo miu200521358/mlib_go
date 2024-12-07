@@ -118,13 +118,13 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 		// inflectionFrames = append(inflectionFrames, inflectionQuatFrames...)
 	}
 
+	inflectionFrames = mmath.UniqueFloat32s(inflectionFrames)
+	mmath.SortFloat32s(inflectionFrames)
+
 	if len(inflectionFrames) <= 2 {
 		// 変曲点がない場合、そのまま終了
 		return boneNameFrames
 	}
-
-	inflectionFrames = mmath.UniqueFloat32s(inflectionFrames)
-	mmath.SortFloat32s(inflectionFrames)
 
 	reduceBfs := NewBoneNameFrames(boneNameFrames.Name)
 	{
