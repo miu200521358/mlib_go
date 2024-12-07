@@ -13,7 +13,6 @@ type VmdMotion struct {
 	name         string
 	path         string
 	hash         string
-	Processing   bool   // 処理中フラグ
 	Signature    string // vmdバージョン
 	BoneFrames   *BoneFrames
 	MorphFrames  *MorphFrames
@@ -28,7 +27,6 @@ func NewVmdMotion(path string) *VmdMotion {
 		name:         "",
 		path:         path,
 		hash:         "",
-		Processing:   false,
 		BoneFrames:   NewBoneFrames(),
 		MorphFrames:  NewMorphFrames(),
 		CameraFrames: NewCameraFrames(),

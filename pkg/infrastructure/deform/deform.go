@@ -111,7 +111,7 @@ func DeformBone(
 func deformBeforePhysics(
 	appState state.IAppState, model *pmx.PmxModel, motion *vmd.VmdMotion, vmdDeltas *delta.VmdDeltas,
 ) *delta.VmdDeltas {
-	if model == nil || motion == nil || (vmdDeltas != nil && motion.Processing) {
+	if model == nil || motion == nil || vmdDeltas == nil {
 		return vmdDeltas
 	}
 
@@ -168,7 +168,7 @@ func DeformBonePyPhysics(
 	appState state.IAppState, model *pmx.PmxModel, motion *vmd.VmdMotion,
 	vmdDeltas *delta.VmdDeltas, physics *mbt.MPhysics,
 ) *delta.VmdDeltas {
-	if model == nil || motion == nil || (vmdDeltas != nil && motion.Processing) {
+	if model == nil || motion == nil || vmdDeltas == nil {
 		return vmdDeltas
 	}
 
@@ -225,7 +225,7 @@ func Deform(
 ) []*delta.VmdDeltas {
 	// 物理前デフォーム
 	for i := range models {
-		if models[i] == nil || motions[i] == nil || (vmdDeltas != nil && motions[i].Processing) {
+		if models[i] == nil || motions[i] == nil || vmdDeltas == nil {
 			continue
 		}
 		for i >= len(vmdDeltas) {
@@ -246,7 +246,7 @@ func DeformPhysics(
 		for i >= len(vmdDeltas) {
 			vmdDeltas = append(vmdDeltas, nil)
 		}
-		if models[i] == nil || vmdDeltas[i] == nil || (vmdDeltas != nil && motions[i].Processing) {
+		if models[i] == nil || vmdDeltas[i] == nil || vmdDeltas == nil {
 			continue
 		}
 		if err := DeformPhysicsByBone(appState, models[i], vmdDeltas[i], physics); err != nil {
