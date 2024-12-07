@@ -333,30 +333,26 @@ func (boneNameFrames *BoneNameFrames) checkCurve(
 	xCurve, yCurve, zCurve, rCurve *mmath.Curve, startX, nowX, endX, startY, nowY, endY, startZ, nowZ, endZ float64,
 	startQuat, nowQuat, endQuat *mmath.MQuaternion, startFrame, nowFrame, endFrame float32,
 ) bool {
-	_, _, xt := mmath.Evaluate(xCurve, startFrame, nowFrame, endFrame)
-	_, _, yt := mmath.Evaluate(yCurve, startFrame, nowFrame, endFrame)
-	_, _, zt := mmath.Evaluate(zCurve, startFrame, nowFrame, endFrame)
-	_, _, rt := mmath.Evaluate(rCurve, startFrame, nowFrame, endFrame)
+	_, xy, _ := mmath.Evaluate(xCurve, startFrame, nowFrame, endFrame)
+	_, yy, _ := mmath.Evaluate(yCurve, startFrame, nowFrame, endFrame)
+	_, zy, _ := mmath.Evaluate(zCurve, startFrame, nowFrame, endFrame)
+	_, ry, _ := mmath.Evaluate(rCurve, startFrame, nowFrame, endFrame)
 
-	checkNowQuat := startQuat.Slerp(endQuat, rt)
+	checkNowQuat := startQuat.Slerp(endQuat, ry)
 	if !checkNowQuat.NearEquals(nowQuat, 1e-1) {
 		return false
 	}
 
-	checkNowX := mmath.LerpFloat(startX, endX, xt)
+	checkNowX := mmath.LerpFloat(startX, endX, xy)
 	if !mmath.NearEquals(checkNowX, nowX, 1e-1) {
 		return false
 	}
 
-	checkNowY := mmath.LerpFloat(startY, endY, yt)
+	checkNowY := mmath.LerpFloat(startY, endY, yy)
 	if !mmath.NearEquals(checkNowY, nowY, 1e-1) {
 		return false
 	}
 
-	checkNowZ := mmath.LerpFloat(startZ, endZ, zt)
-	if !mmath.NearEquals(checkNowZ, nowZ, 1e-1) {
-		return false
-	}
-
-	return true
+	checkNowZ := mmath.LerpFloat(startZ, endZ, zy)
+	return mmath.NearEquals(checkNowZ, nowZ, 1e-1)
 }
