@@ -267,6 +267,7 @@ func (boneNameFrames *BoneNameFrames) reduceRange(
 	if xCurve != nil && yCurve != nil && zCurve != nil && rCurve != nil {
 		isSuccess := true
 		for i := startIFrame + 1; i < endIFrame; i++ {
+			// 全ての曲線が正常に生成された場合、検算する
 			if !boneNameFrames.checkCurve(
 				xCurve, yCurve, zCurve, rCurve,
 				xs[startIFrame], xs[i], xs[endIFrame],
@@ -281,7 +282,7 @@ func (boneNameFrames *BoneNameFrames) reduceRange(
 		}
 
 		if isSuccess {
-			// 全ての曲線が正常に生成された場合、検算する
+			// 検算が成功した場合、最終フレームを登録して終了
 			bf := boneNameFrames.Get(endFrame)
 
 			reduceBf := NewBoneFrame(endFrame)
