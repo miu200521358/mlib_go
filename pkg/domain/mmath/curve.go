@@ -270,7 +270,7 @@ type controlPoints struct {
 }
 
 // 指定された float 値のリストに基づいてベジェ曲線を近似する関数
-func NewCurveFromValues(values []float64) *Curve {
+func NewCurveFromValues(values []float64, threshold float64) *Curve {
 	// 少なくとも2つの点が必要であることを確認
 	if len(values) <= 2 {
 		return NewCurve()
@@ -294,13 +294,17 @@ func NewCurveFromValues(values []float64) *Curve {
 	// yの値を正規化(0-1)
 	yMin := MinFloat(values)
 	yMax := MaxFloat(values)
+	if yMin == yMax {
+		return NewCurve()
+	}
+
 	yCoords := make([]float64, len(values))
 	for i, v := range values {
 		yCoords[i] = (v - yMin) / (yMax - yMin)
 	}
 
 	// 正規化した分布が線形補間である場合、線形補間を返す
-	if isLinearInterpolation(xCoords, yCoords) {
+	if isLinearInterpolation(yCoords, threshold) {
 		return NewCurve()
 	}
 
@@ -356,14 +360,20 @@ func NewCurveFromValues(values []float64) *Curve {
 	// }
 }
 
-func isLinearInterpolation(xCoords, yCoords []float64) bool {
+func isLinearInterpolation(yCoords []float64, threshold float64) bool {
 	// yの値がxの値に比例する場合、線形補間と見なす
-	for i, x := range xCoords {
-		if yCoords[i] != x {
-			return false
-		}
+	// もしくはYの値が全て同じ場合も線形補間と見なす
+	if IsAlmostAllSameValues(yCoords, threshold) {
+		return true
 	}
-	return true
+
+	// yの値がほぼ同一間隔で増加または減少している場合、線形補間と見なす
+	diffs := make([]float64, len(yCoords)-1)
+	for i := 1; i < len(yCoords); i++ {
+		diffs[i-1] = yCoords[i] - yCoords[i-1]
+	}
+
+	return IsAlmostAllSameValues(diffs, threshold)
 }
 
 // ベジェ曲線とターゲットの点との誤差を最小にするようにP1とP2を最適化する関数

@@ -145,7 +145,11 @@ func Contains[S ~[]E, E comparable](s S, v E) bool {
 }
 
 func MaxInt(arr []int) int {
-	max := math.MinInt64
+	if len(arr) == 0 {
+		return 0
+	}
+
+	max := arr[0]
 	for _, v := range arr {
 		if v > max {
 			max = v
@@ -155,27 +159,11 @@ func MaxInt(arr []int) int {
 }
 
 func MinInt(arr []int) int {
-	min := math.MaxInt64
-	for _, v := range arr {
-		if v < min {
-			min = v
-		}
+	if len(arr) == 0 {
+		return 0
 	}
-	return min
-}
 
-func MaxFloat64(arr []float64) float64 {
-	max := math.SmallestNonzeroFloat64
-	for _, v := range arr {
-		if v > max {
-			max = v
-		}
-	}
-	return max
-}
-
-func MinFloat(arr []float64) float64 {
-	min := math.MaxFloat64
+	min := arr[0]
 	for _, v := range arr {
 		if v < min {
 			min = v
@@ -192,8 +180,26 @@ func IntRanges(max int) []int {
 	return ranges
 }
 
+func MinFloat(arr []float64) float64 {
+	if len(arr) == 0 {
+		return 0
+	}
+
+	min := arr[0]
+	for _, v := range arr {
+		if v < min {
+			min = v
+		}
+	}
+	return min
+}
+
 func MaxFloat(arr []float64) float64 {
-	max := math.SmallestNonzeroFloat64
+	if len(arr) == 0 {
+		return 0
+	}
+
+	max := arr[0]
 	for _, v := range arr {
 		if v > max {
 			max = v
@@ -285,13 +291,22 @@ func Round(v, threshold float64) float64 {
 
 func IsAllSameValues(values []float64) bool {
 	// すべて同じ値の場合、線形補間になる
-	isAllSame := true
 	for n := range values {
 		if values[0] != values[n] {
 			// 厳密にイコールであることをチェックする
-			isAllSame = false
-			break
+			return false
 		}
 	}
-	return isAllSame
+	return true
+}
+
+func IsAlmostAllSameValues(values []float64, threshold float64) bool {
+	// すべて同じ値の場合、線形補間になる
+	for n := range values {
+		if !NearEquals(values[0], values[n], threshold) {
+			// 大体イコールであることをチェックする
+			return false
+		}
+	}
+	return true
 }
