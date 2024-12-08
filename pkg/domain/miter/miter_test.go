@@ -8,8 +8,9 @@ import (
 func TestIterParallel(t *testing.T) {
 	// Test case 1: Serial processing
 	var serialCount int
-	serialFunc := func(d, i int) {
+	serialFunc := func(d, i int) error {
 		serialCount++
+		return nil
 	}
 	IterParallelByList([]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, 100, 1, serialFunc, nil)
 	if serialCount != 10 {
@@ -18,8 +19,9 @@ func TestIterParallel(t *testing.T) {
 
 	// Test case 2: Parallel processing
 	var parallelCount int
-	parallelFunc := func(d, i int) {
+	parallelFunc := func(d, i int) error {
 		parallelCount++
+		return nil
 	}
 	IterParallelByList([]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, 100, 0, parallelFunc, nil)
 	if parallelCount != 10 {
@@ -30,8 +32,9 @@ func TestIterParallel(t *testing.T) {
 func TestIterParallel_BlockSize(t *testing.T) {
 	// Test case 1: Serial processing with block size 1
 	var serialCount int
-	serialFunc := func(d, i int) {
+	serialFunc := func(d, i int) error {
 		serialCount++
+		return nil
 	}
 	IterParallelByList([]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, 1, 0, serialFunc, nil)
 	if serialCount != 10 {
@@ -40,8 +43,9 @@ func TestIterParallel_BlockSize(t *testing.T) {
 
 	// Test case 2: Parallel processing with block size 2
 	var parallelCount int
-	parallelFunc := func(d, i int) {
+	parallelFunc := func(d, i int) error {
 		parallelCount++
+		return nil
 	}
 	IterParallelByList([]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, 2, 0, parallelFunc, nil)
 	if parallelCount != 10 {
@@ -52,8 +56,9 @@ func TestIterParallel_BlockSize(t *testing.T) {
 func TestIterParallel_Concurrency(t *testing.T) {
 	// Test case 1: Verify concurrency
 	var count int
-	concurrentFunc := func(d, i int) {
+	concurrentFunc := func(d, i int) error {
 		count++
+		return nil
 	}
 	IterParallelByList([]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, 2, 0, concurrentFunc, nil)
 	if count != 10 {

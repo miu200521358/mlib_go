@@ -1,6 +1,7 @@
 package miter
 
 import (
+	"context"
 	"fmt"
 	"runtime"
 	"runtime/debug"
@@ -58,7 +59,7 @@ func IterParallelByCount(allCount int, blockSize int, processFunc func(index int
 
 // IterParallelByList は指定された全リストに対して、引数で指定された処理を並列または直列で実行する関数です。
 func IterParallelByList(allData []int, blockSize int, logBlockSize int,
-	processFunc func(data, index int), logFunc func(iterIndex, allCount int)) error {
+	processFunc func(data, index int) error, logFunc func(iterIndex, allCount int)) error {
 	numCPU := runtime.NumCPU()
 
 	runtime.GOMAXPROCS(numCPU)
@@ -67,10 +68,14 @@ func IterParallelByList(allData []int, blockSize int, logBlockSize int,
 	if blockSize <= 1 || blockSize >= len(allData) {
 		// ブロックサイズが1以下、もしくは全件数より大きい場合は直列処理
 		for i := 0; i < len(allData); i++ {
-			processFunc(allData[i], i)
+			if err := processFunc(allData[i], i); err != nil {
+				return err
+			}
 		}
 	} else {
 		errorChan := make(chan error, numCPU)
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel() // 最終的なクリーンアップ
 
 		// ブロックサイズが全件数より小さい場合は並列処理
 		var wg sync.WaitGroup
@@ -79,7 +84,7 @@ func IterParallelByList(allData []int, blockSize int, logBlockSize int,
 		iterIndex := 0
 		for startIndex := 0; startIndex < len(allData); startIndex += blockSize {
 			wg.Add(1)
-			go func(startIndex int) {
+			go func(startIndex int) error {
 				defer func() {
 					if err := GetError(); err != nil {
 						errorChan <- err
@@ -87,12 +92,25 @@ func IterParallelByList(allData []int, blockSize int, logBlockSize int,
 					wg.Done()
 				}()
 
+				// コンテキストが既にキャンセルされていないかチェック
+				select {
+				case <-ctx.Done():
+					// 他のゴルーチンでエラーが出たので終了
+					return nil
+				default:
+				}
+
 				endIndex := startIndex + blockSize
 				if endIndex > len(allData) {
 					endIndex = len(allData)
 				}
 				for j := startIndex; j < endIndex; j++ {
-					processFunc(allData[j], j)
+					if err := processFunc(allData[j], j); err != nil {
+						// エラー発生時にキャンセルをかける
+						cancel()
+						errorChan <- err
+						return err
+					}
 
 					if logFunc != nil && logBlockSize > 0 {
 						mu.Lock()
@@ -103,6 +121,8 @@ func IterParallelByList(allData []int, blockSize int, logBlockSize int,
 						mu.Unlock()
 					}
 				}
+
+				return nil
 			}(startIndex)
 		}
 
