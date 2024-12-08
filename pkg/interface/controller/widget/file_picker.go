@@ -53,7 +53,8 @@ func NewPmxReadFilePicker(
 		tooltip,
 		description,
 		map[int]map[string]string{
-			0: {"*.pmx": "Pmx Files (*.pmx)"}, 1: {"*.*": "All Files (*.*)"}},
+			0: {"*.pmx": "Pmx Files (*.pmx)"},
+			1: {"*.*": "All Files (*.*)"}},
 		50,
 		repository.NewPmxRepository(),
 	)
@@ -75,9 +76,8 @@ func NewPmxJsonReadFilePicker(
 		tooltip,
 		description,
 		map[int]map[string]string{
-			0: {"*.pmx": "Pmx Files (*.pmx)"},
-			1: {"*.json": "Json Files (*.json)"},
-			2: {"*.*": "All Files (*.*)"}},
+			0: {"*.pmx;*.json": "Pmx/Json Files (*.pmx;*.json)"},
+			1: {"*.*": "All Files (*.*)"}},
 		50,
 		repository.NewPmxPmxJsonRepository(),
 	)
@@ -122,7 +122,8 @@ func NewVpdReadFilePicker(
 		tooltip,
 		description,
 		map[int]map[string]string{
-			0: {"*.vpd": "Vpd Files (*.vpd)"}, 1: {"*.*": "All Files (*.*)"}},
+			0: {"*.vpd": "Vpd Files (*.vpd)"},
+			1: {"*.*": "All Files (*.*)"}},
 		50,
 		repository.NewVpdRepository())
 }
@@ -143,9 +144,8 @@ func NewVmdVpdReadFilePicker(
 		tooltip,
 		description,
 		map[int]map[string]string{
-			0: {"*.vmd": "Vmd Files (*.vmd)"},
-			1: {"*.vpd": "Vpd Files (*.vpd)"},
-			2: {"*.*": "All Files (*.*)"}},
+			0: {"*.vmd;*.vpd": "Vmd/Vpd Files (*.vmd;*.vpd)"},
+			1: {"*.*": "All Files (*.*)"}},
 		50,
 		repository.NewVmdVpdRepository())
 }
