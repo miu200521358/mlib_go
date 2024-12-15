@@ -24,7 +24,12 @@ func newMesh(
 	prevVerticesCount int,
 ) *Mesh {
 	faces := allFaces[prevVerticesCount:(prevVerticesCount + material.VerticesCount)]
-	ibo := mgl.NewIBO(gl.Ptr(faces), len(faces))
+	var ibo *mgl.IBO
+	if len(faces) == 0 {
+		ibo = mgl.NewIBO(nil, 0)
+	} else {
+		ibo = mgl.NewIBO(gl.Ptr(faces), len(faces))
+	}
 
 	return &Mesh{
 		material:          *material,
