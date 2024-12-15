@@ -702,15 +702,22 @@ func (rep *XRepository) parseMaterial(model *pmx.PmxModel) error {
 	// Optional TextureFilename
 	for rep.peek().typ == tokIdentifier && rep.peek().val == "TextureFilename" {
 		rep.next()
-		tf, err := rep.parseTextureFilename()
+		texturePath, spherePath, err := rep.parseTextureFilename()
 		if err != nil {
 			return err
 		}
 
 		tex := pmx.NewTexture()
-		tex.SetName(tf)
+		tex.SetName(texturePath)
 		model.Textures.Append(tex)
 		mat.TextureIndex = tex.Index()
+
+		if spherePath != "" {
+			sphere := pmx.NewTexture()
+			sphere.SetName(spherePath)
+			model.Textures.Append(sphere)
+			mat.SphereTextureIndex = sphere.Index()
+		}
 	}
 	if _, err := rep.expect(tokRCurly); err != nil {
 		return err
@@ -719,11 +726,11 @@ func (rep *XRepository) parseMaterial(model *pmx.PmxModel) error {
 	mat.SetName(fmt.Sprintf("材質%02d", model.Materials.Len()+1))
 	mat.Edge.W = 1.0
 	mat.EdgeSize = 10.0
-	if mat.TextureIndex >= 0 {
-		// テクスチャがある場合、スフィアモードを無効にする
+	if mat.TextureIndex >= 0 && mat.SphereTextureIndex < 0 {
+		// テクスチャがあり、スフィアがない場合、スフィアモードを無効にする
 		mat.SphereMode = pmx.SPHERE_MODE_INVALID
 	} else {
-		// テクスチャがない場合、スフィアモードを乗算にする
+		// テクスチャがない、もしくはスフィアがある場合、スフィアモードを乗算にする
 		mat.SphereMode = pmx.SPHERE_MODE_MULTIPLICATION
 	}
 	model.Materials.Append(mat)
@@ -731,21 +738,26 @@ func (rep *XRepository) parseMaterial(model *pmx.PmxModel) error {
 	return nil
 }
 
-func (rep *XRepository) parseTextureFilename() (string, error) {
+func (rep *XRepository) parseTextureFilename() (texturePath, spherePath string, err error) {
 	if _, err := rep.expect(tokLCurly); err != nil {
-		return "", err
+		return "", "", err
 	}
 	tf, err := rep.parseString()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	if _, err := rep.expect(tokSemicolon); err != nil {
-		return "", err
+		return "", "", err
 	}
 	if _, err := rep.expect(tokRCurly); err != nil {
-		return "", err
+		return "", "", err
 	}
-	return tf, nil
+	// * で区切る
+	tfs := strings.Split(tf, "*")
+	if len(tfs) > 1 {
+		return tfs[0], tfs[1], nil
+	}
+	return tfs[0], "", nil
 }
 
 func (rep *XRepository) parseMeshFace() (fs []*pmx.Face, err error) {
