@@ -2,6 +2,7 @@ package mutils
 
 import (
 	"fmt"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -72,4 +73,10 @@ func DeepCopyStringSlice(original []string) []string {
 	newSlice := make([]string, len(original))
 	copy(newSlice, original)
 	return newSlice
+}
+
+func GetStackTrace() string {
+	buf := make([]byte, 1024)
+	n := runtime.Stack(buf, true)
+	return string(buf[:n])
 }

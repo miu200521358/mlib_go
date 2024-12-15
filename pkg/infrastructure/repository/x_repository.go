@@ -67,13 +67,13 @@ func (rep *XRepository) Load(path string) (core.IHashModel, error) {
 	// ファイルを開く
 	err := rep.open(path)
 	if err != nil {
-		mlog.E("ReadByFilepath.Open error: %v", err)
+		mlog.E("loadData.Open error: %v", err)
 		return model, err
 	}
 
 	err = rep.loadModel(model)
 	if err != nil {
-		mlog.E("ReadByFilepath.loadData error: %v", err)
+		mlog.E("loadData.loadModel error: %v", err)
 		return model, err
 	}
 
@@ -94,7 +94,7 @@ func (rep *XRepository) LoadByFile(file fs.File) (core.IHashModel, error) {
 
 	err := rep.loadModel(model)
 	if err != nil {
-		mlog.E("ReadByFilepath.loadData error: %v", err)
+		mlog.E("loadData.LoadByFile error: %v", err)
 		return model, err
 	}
 
@@ -122,7 +122,7 @@ func (rep *XRepository) loadModel(model *pmx.PmxModel) error {
 
 	err := rep.parseXFile(model)
 	if err != nil {
-		mlog.E("loadData.parseXFile error: %v", err)
+		// エラーメッセージとスタックトレースを出力
 		return err
 	}
 
@@ -315,12 +315,12 @@ func (rep *XRepository) next() token {
 	return t
 }
 
-func (rep *XRepository) expect(typ tokenType) token {
+func (rep *XRepository) expect(typ tokenType) (token, error) {
 	t := rep.next()
 	if t.typ != typ {
-		panic(fmt.Sprintf("expected %v got %v (%s)", typ, t.typ, t.val))
+		return t, fmt.Errorf("expected %v got %v (%s)\n\n%v", typ, t.typ, t.val, mutils.GetStackTrace())
 	}
-	return t
+	return t, nil
 }
 
 // func (rep *XRepository) expectIdentifier(val string) {
@@ -338,26 +338,34 @@ func (rep *XRepository) parseXFile(model *pmx.PmxModel) error {
 		if t.typ == tokIdentifier && t.val == "template" {
 			// We are encountering a template definition
 			rep.next() // consume 'template'
-			rep.parseTemplateDefinition()
+			if err := rep.parseTemplateDefinition(); err != nil {
+				return err
+			}
 		} else if t.typ == tokIdentifier && t.val == "Header" {
 			rep.next()
-			rep.parseHeader(model)
+			if err := rep.parseHeader(model); err != nil {
+				return err
+			}
 		} else if t.typ == tokIdentifier && t.val == "Mesh" {
 			rep.next()
-			rep.parseMesh(model)
+			if err := rep.parseMesh(model); err != nil {
+				return err
+			}
 		} else if t.typ == tokIdentifier {
-			// Could be a template instance block
-			templateName := t.val
 			// Look ahead to see if next token is '{'
 			rep.next() // consume the identifier
 			if rep.peek().typ == tokLCurly {
 				// Known template name followed by '{' means instance block
 				// Parse as an instance of that template
-				rep.parseTemplateInstance(templateName)
+				if err := rep.parseTemplateInstance(); err != nil {
+					return err
+				}
 			} else {
 				// If not '{', it's not a valid instance block,
 				// possibly skip or handle error.
-				rep.skipUnknownTemplate()
+				if err := rep.skipUnknownTemplate(); err != nil {
+					return err
+				}
 			}
 		} else {
 			// Not template keyword or known template name, skip or consume token
@@ -374,18 +382,24 @@ func (rep *XRepository) parseXFile(model *pmx.PmxModel) error {
 //	   DWORD nVertices;
 //	   ...
 //	}
-func (rep *XRepository) parseTemplateDefinition() {
+func (rep *XRepository) parseTemplateDefinition() error {
 	// expect template name
-	nameTok := rep.expect(tokIdentifier)
+	nameTok, err := rep.expect(tokIdentifier)
+	if err != nil {
+		return err
+	}
+
 	_ = nameTok.val
 
 	// Expect '{'
-	rep.expect(tokLCurly)
+	if _, err := rep.expect(tokLCurly); err != nil {
+		return err
+	}
 
 	// Expect GUID line: <...>
 	guidTok := rep.next()
 	if guidTok.typ != tokAngleBracketed || !strings.HasPrefix(guidTok.val, "<") || !strings.HasSuffix(guidTok.val, ">") {
-		panic("Expected GUID in angle brackets in template definition")
+		return fmt.Errorf("expected GUID in angle brackets in template definition\n\n%v", mutils.GetStackTrace())
 	}
 
 	// Now parse the fields until '}' is found
@@ -403,19 +417,23 @@ func (rep *XRepository) parseTemplateDefinition() {
 		case tokRCurly:
 			braceCount--
 		case tokEOF:
-			panic("Unexpected EOF in template definition")
+			return fmt.Errorf("unexpected EOF in template instance\n\n%v", mutils.GetStackTrace())
 		}
 	}
 
 	// At this point, we have the template defined. In a real parser,
 	// you would store the template definition schema somewhere.
+
+	return nil
 }
 
 // parseTemplateInstance parses an instance of a previously defined template:
 // e.g. Mesh { ... actual data ... }
-func (rep *XRepository) parseTemplateInstance(templateName string) {
+func (rep *XRepository) parseTemplateInstance() error {
 	// We already consumed the templateName and peeked '{'
-	rep.expect(tokLCurly)
+	if _, err := rep.expect(tokLCurly); err != nil {
+		return err
+	}
 
 	// Here you would parse the template instance data according to the known schema
 	// For demonstration, we'll just skip until the closing '}':
@@ -428,11 +446,12 @@ func (rep *XRepository) parseTemplateInstance(templateName string) {
 		case tokRCurly:
 			braceCount--
 		case tokEOF:
-			panic("Unexpected EOF in template instance")
+			return fmt.Errorf("unexpected EOF in template instance\n\n%v", mutils.GetStackTrace())
 		}
 	}
 
 	// After this, the instance block is fully parsed.
+	return nil
 }
 
 // // This function just shows how you might skip unknown templates if encountered
@@ -458,58 +477,101 @@ func (rep *XRepository) parseTemplateInstance(templateName string) {
 // 	}
 // }
 
-func (rep *XRepository) parseHeader(model *pmx.PmxModel) {
-	rep.expect(tokLCurly)
-	majorVersion := uint16(rep.parseNumberAsFloat())
-	rep.expect(tokSemicolon)
-	minorVersion := uint16(rep.parseNumberAsFloat())
-	rep.expect(tokSemicolon)
-	flags := uint32(rep.parseNumberAsFloat())
-	rep.expect(tokSemicolon)
-	rep.expect(tokRCurly)
+func (rep *XRepository) parseHeader(model *pmx.PmxModel) error {
+	if _, err := rep.expect(tokLCurly); err != nil {
+		return err
+	}
+	majorVersion, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
+	minorVersion, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return err
+	}
 
-	model.Comment = fmt.Sprintf("X File Version %d.%d, flags: %d", majorVersion, minorVersion, flags)
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
+	flags, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
+	if _, err := rep.expect(tokRCurly); err != nil {
+		return err
+	}
+
+	model.Comment = fmt.Sprintf("X File Version %.0f.%.0f, flags: %.0f", majorVersion, minorVersion, flags)
+
+	return nil
 }
 
-func (rep *XRepository) parseNumberAsFloat() float64 {
-	t := rep.expect(tokNumber)
+func (rep *XRepository) parseNumberAsFloat() (float64, error) {
+	t, err := rep.expect(tokNumber)
+	if err != nil {
+		return 0, err
+	}
 	f, err := strconv.ParseFloat(t.val, 32)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
-	return f
+	return f, nil
 }
 
-func (rep *XRepository) parseNumberAsInt() int {
-	t := rep.expect(tokNumber)
+func (rep *XRepository) parseNumberAsInt() (int, error) {
+	t, err := rep.expect(tokNumber)
+	if err != nil {
+		return 0, err
+	}
 	val, err := strconv.ParseUint(t.val, 10, 32)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
-	return int(val)
+	return int(val), nil
 }
 
-func (rep *XRepository) parseString() string {
+func (rep *XRepository) parseString() (string, error) {
 	t := rep.next()
 	if t.typ == tokString {
-		return t.val
+		return t.val, nil
 	}
 	// In .x files, strings can sometimes appear without quotes as identifiers.
 	if t.typ == tokIdentifier {
-		return t.val
+		return t.val, nil
 	}
-	panic("expected string")
+	return "", fmt.Errorf("expected string\n\n%v", mutils.GetStackTrace())
 }
 
-func (rep *XRepository) parseVector() (v *mmath.MVec3) {
-	x := rep.parseNumberAsFloat()
-	rep.expect(tokSemicolon)
-	y := rep.parseNumberAsFloat()
-	rep.expect(tokSemicolon)
-	z := rep.parseNumberAsFloat()
-	rep.expect(tokSemicolon)
+func (rep *XRepository) parseVector() (*mmath.MVec3, error) {
+	x, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return nil, err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
+	y, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return nil, err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
+	z, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return nil, err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
 
-	return &mmath.MVec3{X: x, Y: y, Z: z}
+	return &mmath.MVec3{X: x, Y: y, Z: z}, nil
 }
 
 // func (rep *XRepository) parseCoords2d() *mmath.MVec2 {
@@ -522,62 +584,137 @@ func (rep *XRepository) parseVector() (v *mmath.MVec3) {
 // 	return &mmath.MVec2{X: u, Y: v}
 // }
 
-func (rep *XRepository) parseColorRGBA() *mmath.MVec4 {
-	r := rep.parseNumberAsFloat()
-	rep.expect(tokSemicolon)
-	g := rep.parseNumberAsFloat()
-	rep.expect(tokSemicolon)
-	b := rep.parseNumberAsFloat()
-	rep.expect(tokSemicolon)
-	a := rep.parseNumberAsFloat()
-	rep.expect(tokSemicolon)
-	return &mmath.MVec4{X: r, Y: g, Z: b, W: a}
+func (rep *XRepository) parseColorRGBA() (*mmath.MVec4, error) {
+	r, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
+	g, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
+	b, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
+	a, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
+	return &mmath.MVec4{X: r, Y: g, Z: b, W: a}, nil
 }
 
-func (rep *XRepository) parseColorRGB() *mmath.MVec3 {
-	r := rep.parseNumberAsFloat()
-	rep.expect(tokSemicolon)
-	g := rep.parseNumberAsFloat()
-	rep.expect(tokSemicolon)
-	b := rep.parseNumberAsFloat()
-	rep.expect(tokSemicolon)
-	return &mmath.MVec3{X: r, Y: g, Z: b}
+func (rep *XRepository) parseColorRGB() (*mmath.MVec3, error) {
+	r, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
+	g, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
+	b, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
+	return &mmath.MVec3{X: r, Y: g, Z: b}, nil
 }
 
-func (rep *XRepository) parseMaterial(model *pmx.PmxModel) {
-	rep.expect(tokLCurly)
+func (rep *XRepository) parseMaterial(model *pmx.PmxModel) error {
+	var err error
+
+	// Material定義の中に文字列（材質名）がある場合があるが、スルー
+	if _, err := rep.parseString(); err == nil {
+		if _, err := rep.expect(tokLCurly); err != nil {
+			return err
+		}
+	}
+
 	mat := pmx.NewMaterial()
 
-	mat.Diffuse = rep.parseColorRGBA()
-	rep.expect(tokSemicolon)
+	mat.Diffuse, err = rep.parseColorRGBA()
+	if err != nil {
+		return err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
 
 	// power
-	power := rep.parseNumberAsFloat()
-	rep.expect(tokSemicolon)
+	power, err := rep.parseNumberAsFloat()
+	if err != nil {
+		return err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
 
-	specular := rep.parseColorRGB()
+	specular, err := rep.parseColorRGB()
+	if err != nil {
+		return err
+	}
 	mat.Specular = &mmath.MVec4{
 		X: specular.X,
 		Y: specular.Y,
 		Z: specular.Z,
 		W: power,
 	}
-	rep.expect(tokSemicolon)
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
 
-	mat.Ambient = rep.parseColorRGB()
-	rep.expect(tokSemicolon)
+	mat.Ambient, err = rep.parseColorRGB()
+	if err != nil {
+		return err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
 
 	// Optional TextureFilename
 	for rep.peek().typ == tokIdentifier && rep.peek().val == "TextureFilename" {
 		rep.next()
-		tf := rep.parseTextureFilename()
+		tf, err := rep.parseTextureFilename()
+		if err != nil {
+			return err
+		}
 
 		tex := pmx.NewTexture()
 		tex.SetName(tf)
 		model.Textures.Append(tex)
 		mat.TextureIndex = tex.Index()
 	}
-	rep.expect(tokRCurly)
+	if _, err := rep.expect(tokRCurly); err != nil {
+		return err
+	}
 
 	mat.SetName(fmt.Sprintf("材質%02d", model.Materials.Len()+1))
 	mat.Edge.W = 1.0
@@ -590,24 +727,44 @@ func (rep *XRepository) parseMaterial(model *pmx.PmxModel) {
 		mat.SphereMode = pmx.SPHERE_MODE_MULTIPLICATION
 	}
 	model.Materials.Append(mat)
+
+	return nil
 }
 
-func (rep *XRepository) parseTextureFilename() string {
-	rep.expect(tokLCurly)
-	tf := rep.parseString()
-	rep.expect(tokSemicolon)
-	rep.expect(tokRCurly)
-	return tf
+func (rep *XRepository) parseTextureFilename() (string, error) {
+	if _, err := rep.expect(tokLCurly); err != nil {
+		return "", err
+	}
+	tf, err := rep.parseString()
+	if err != nil {
+		return "", err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return "", err
+	}
+	if _, err := rep.expect(tokRCurly); err != nil {
+		return "", err
+	}
+	return tf, nil
 }
 
-func (rep *XRepository) parseMeshFace() (fs []*pmx.Face) {
-	count := rep.parseNumberAsInt()
-	rep.expect(tokSemicolon)
+func (rep *XRepository) parseMeshFace() (fs []*pmx.Face, err error) {
+	count, err := rep.parseNumberAsInt()
+	if err != nil {
+		return nil, err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
 	vertexIndexes := make([]int, 0, 4)
 	for i := 0; i < count; i++ {
-		idx := rep.parseNumberAsInt()
+		idx, err := rep.parseNumberAsInt()
+		if err != nil {
+			return nil, err
+		}
 		vertexIndexes = append(vertexIndexes, idx)
 	}
+	// これはなかったりする
 	rep.expect(tokSemicolon)
 
 	// 4つの頂点を持つ場合、三角面2つに分解する
@@ -631,30 +788,67 @@ func (rep *XRepository) parseMeshFace() (fs []*pmx.Face) {
 		fs = append(fs, f)
 	}
 
-	return fs
+	return fs, nil
 }
 
-func (rep *XRepository) parseMeshTextureCoords(model *pmx.PmxModel) {
-	rep.expect(tokLCurly)
-	count := rep.parseNumberAsInt()
-	rep.expect(tokSemicolon)
+func (rep *XRepository) parseMeshTextureCoords(model *pmx.PmxModel) error {
+	if _, err := rep.expect(tokLCurly); err != nil {
+		return err
+	}
+	count, err := rep.parseNumberAsInt()
+	if err != nil {
+		return err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
 	for i := 0; i < count; i++ {
-		u := rep.parseNumberAsFloat()
-		rep.expect(tokSemicolon)
-		v := rep.parseNumberAsFloat()
-		rep.expect(tokSemicolon)
+		u, err := rep.parseNumberAsFloat()
+		if err != nil {
+			return err
+		}
+		if _, err := rep.expect(tokSemicolon); err != nil {
+			return err
+		}
+		v, err := rep.parseNumberAsFloat()
+		if err != nil {
+			return err
+		}
+		if _, err := rep.expect(tokSemicolon); err != nil {
+			return err
+		}
 		model.Vertices.Get(i).Uv = &mmath.MVec2{X: u, Y: v}
 	}
-	rep.expect(tokSemicolon)
-	rep.expect(tokRCurly)
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
+	if _, err := rep.expect(tokRCurly); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (rep *XRepository) parseMeshMaterialList(model *pmx.PmxModel, facesList [][]*pmx.Face) (faceMap map[int][]int) {
-	rep.expect(tokLCurly)
-	nMat := rep.parseNumberAsInt()
-	rep.expect(tokSemicolon)
-	nFaceIdx := rep.parseNumberAsInt()
-	rep.expect(tokSemicolon)
+func (rep *XRepository) parseMeshMaterialList(
+	model *pmx.PmxModel, facesList [][]*pmx.Face,
+) (faceMap map[int][]int, err error) {
+	if _, err := rep.expect(tokLCurly); err != nil {
+		return nil, err
+	}
+	nMat, err := rep.parseNumberAsInt()
+	if err != nil {
+		return nil, err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
+	nFaceIdx, err := rep.parseNumberAsInt()
+	if err != nil {
+		return nil, err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
 
 	facesByMaterials := make(map[int][][]*pmx.Face)
 	for i := 0; i < nMat; i++ {
@@ -668,12 +862,19 @@ func (rep *XRepository) parseMeshMaterialList(model *pmx.PmxModel, facesList [][
 	}
 
 	for i := 0; i < nFaceIdx; i++ {
-		matIdx := rep.parseNumberAsInt()
+		matIdx, err := rep.parseNumberAsInt()
+		if err != nil {
+			return nil, err
+		}
 		facesByMaterials[matIdx] = append(facesByMaterials[matIdx], facesList[i])
 		faceIndicesByMaterials[matIdx] = append(faceIndicesByMaterials[matIdx], i)
 	}
-	rep.expect(tokSemicolon)
-	rep.expect(tokSemicolon)
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return nil, err
+	}
 
 	faceMap = make(map[int][]int)
 
@@ -702,32 +903,61 @@ func (rep *XRepository) parseMeshMaterialList(model *pmx.PmxModel, facesList [][
 		}
 	}
 
-	rep.expect(tokRCurly)
-	return faceMap
+	if _, err := rep.expect(tokRCurly); err != nil {
+		return nil, err
+	}
+
+	return faceMap, nil
 }
 
-func (rep *XRepository) parseMeshNormals(model *pmx.PmxModel) {
-	rep.expect(tokLCurly)
-	nNorm := rep.parseNumberAsInt()
-	rep.expect(tokSemicolon)
-	for i := 0; i < nNorm; i++ {
-		model.Vertices.Get(i).Normal = rep.parseVector()
-	}
-	nFaceNorm := rep.parseNumberAsInt()
-	rep.expect(tokSemicolon)
-	for i := 0; i < nFaceNorm; i++ {
-		_ = rep.parseMeshFace()
-	}
-	rep.expect(tokRCurly)
-}
+// func (rep *XRepository) parseMeshNormals(model *pmx.PmxModel) error {
+// 	rep.expect(tokLCurly)
+// 	nNorm, err := rep.parseNumberAsInt()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	rep.expect(tokSemicolon)
+// 	for i := 0; i < nNorm; i++ {
+// 		model.Vertices.Get(i).Normal, err = rep.parseVector()
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
+// 	nFaceNorm, err := rep.parseNumberAsInt()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	rep.expect(tokSemicolon)
+// 	for i := 0; i < nFaceNorm; i++ {
+// 		_, _ = rep.parseMeshFace()
+// 	}
+// 	rep.expect(tokRCurly)
 
-func (rep *XRepository) parseMesh(model *pmx.PmxModel) {
-	rep.expect(tokLCurly)
-	nVertices := rep.parseNumberAsInt()
-	rep.expect(tokSemicolon)
+// 	return nil
+// }
+
+func (rep *XRepository) parseMesh(model *pmx.PmxModel) error {
+
+	// 定義の中に文字列（メッシュ名）がある場合があるが、スルー
+	if _, err := rep.parseString(); err == nil {
+		if _, err := rep.expect(tokLCurly); err != nil {
+			return err
+		}
+	}
+
+	nVertices, err := rep.parseNumberAsInt()
+	if err != nil {
+		return err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
 	for i := 0; i < nVertices; i++ {
 		v := pmx.NewVertex()
-		v.Position = rep.parseVector()
+		v.Position, err = rep.parseVector()
+		if err != nil {
+			return err
+		}
 		// 頂点位置を10倍にする
 		v.Position.MulScalar(10)
 		// BDEF1
@@ -738,18 +968,30 @@ func (rep *XRepository) parseMesh(model *pmx.PmxModel) {
 		v.Normal = &mmath.MVec3{X: 0, Y: 1, Z: 0}
 		model.Vertices.Append(v)
 	}
-	rep.expect(tokSemicolon)
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
 
-	nFaces := rep.parseNumberAsInt()
-	rep.expect(tokSemicolon)
+	nFaces, err := rep.parseNumberAsInt()
+	if err != nil {
+		return err
+	}
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
 	facesList := make([][]*pmx.Face, 0, nFaces)
 	faceTotalCount := 0
 	for i := 0; i < nFaces; i++ {
-		fs := rep.parseMeshFace()
+		fs, err := rep.parseMeshFace()
+		if err != nil {
+			return err
+		}
 		facesList = append(facesList, fs)
 		faceTotalCount += len(fs)
 	}
-	rep.expect(tokSemicolon)
+	if _, err := rep.expect(tokSemicolon); err != nil {
+		return err
+	}
 
 	// Optional sub-templates
 	for rep.peek().typ == tokIdentifier {
@@ -770,16 +1012,20 @@ func (rep *XRepository) parseMesh(model *pmx.PmxModel) {
 		}
 	}
 
-	rep.expect(tokRCurly)
+	if _, err := rep.expect(tokRCurly); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (rep *XRepository) skipUnknownTemplate() {
+func (rep *XRepository) skipUnknownTemplate() error {
 	// すでに "templateName" のような識別子を読んだあとで呼び出されることを想定
 	// 次のトークンは "{" のはず
 	t := rep.next()
 	if t.typ != tokLCurly {
 		// もし "{" がなければスキップ対象はないので return
-		return
+		return nil
 	}
 
 	braceCount := 1
@@ -792,9 +1038,10 @@ func (rep *XRepository) skipUnknownTemplate() {
 			braceCount--
 		case tokEOF:
 			// ファイル終端まで来てしまった場合、テンプレートが不正である可能性あり
-			// 適宜エラー処理
-			return
+			return fmt.Errorf("unexpected EOF in template instance\n\n%v", mutils.GetStackTrace())
 		}
 	}
 	// braceCount が0になったので対応する "}" に到達し、スキップ完了
+
+	return nil
 }

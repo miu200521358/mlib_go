@@ -108,8 +108,7 @@ func (rep *VmdRepository) decodeShiftJIS(fbytes []byte) (string, error) {
 func (rep *VmdRepository) readText(size int) (string, error) {
 	fbytes, err := rep.unpackBytes(size)
 	if err != nil {
-		mlog.E("ReadText error: %v", err)
-		return "", err
+		return "", fmt.Errorf("ReadText error: %v\n\n%v", err, mutils.GetStackTrace())
 	}
 	return rep.decodeShiftJIS(fbytes)
 }
@@ -120,16 +119,14 @@ func (rep *VmdRepository) readHeader(motion *vmd.VmdMotion) error {
 	// vmdバージョン
 	signature, err := rep.readText(30)
 	if err != nil {
-		mlog.E("readHeader.ReadText error: %v", err)
-		return err
+		return fmt.Errorf("ReadHeader error: %v\n\n%v", err, mutils.GetStackTrace())
 	}
 	motion.Signature = signature
 
 	// モデル名
 	name, err := rep.readText(20)
 	if err != nil {
-		mlog.E("readHeader.ReadText error: %v", err)
-		return err
+		return fmt.Errorf("ReadHeader error: %v\n\n%v", err, mutils.GetStackTrace())
 	}
 	motion.SetName(name)
 

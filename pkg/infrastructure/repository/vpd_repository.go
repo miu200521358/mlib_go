@@ -157,16 +157,14 @@ func (rep *VpdRepository) loadHeader(motion *vmd.VmdMotion) error {
 	{
 		matches, err := rep.readText(rep.lines[0], signaturePattern)
 		if err != nil || len(matches) == 0 {
-			mlog.E("readHeader.readText error: %v", err)
-			return err
+			return fmt.Errorf("readHeader.readText error: %v\n\n%v", err, mutils.GetStackTrace())
 		}
 	}
 
 	// モデル名
 	matches, err := rep.readText(rep.lines[2], modelNamePattern)
 	if err != nil {
-		mlog.E("readHeader.readText error: %v", err)
-		return err
+		return fmt.Errorf("readHeader.readText error: %v\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	if len(matches) > 0 {

@@ -117,7 +117,7 @@ func (rep *baseRepository[T]) decodeText(mainEncoding encoding.Encoding, fbytes 
 func (rep *baseRepository[T]) decodeShiftJIS(fbytes []byte) (string, error) {
 	decodedText, err := japanese.ShiftJIS.NewDecoder().Bytes(fbytes)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 	return string(decodedText), nil
 }
@@ -125,7 +125,7 @@ func (rep *baseRepository[T]) decodeShiftJIS(fbytes []byte) (string, error) {
 func (rep *baseRepository[T]) decodeBytes(fbytes []byte, encoding encoding.Encoding) (string, error) {
 	decodedText, err := encoding.NewDecoder().Bytes(fbytes)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 	return string(decodedText), nil
 }
@@ -134,7 +134,7 @@ func (rep *baseRepository[T]) decodeBytes(fbytes []byte, encoding encoding.Encod
 func (rep *baseRepository[T]) unpackBytes(size int) ([]byte, error) {
 	chunk, err := rep.unpack(size)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	return chunk, nil
@@ -144,7 +144,7 @@ func (rep *baseRepository[T]) unpackBytes(size int) ([]byte, error) {
 func (rep *baseRepository[T]) unpackByte() (byte, error) {
 	chunk, err := rep.unpack(1)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	return chunk[0], nil
@@ -154,7 +154,7 @@ func (rep *baseRepository[T]) unpackByte() (byte, error) {
 func (rep *baseRepository[T]) unpackSByte() (int8, error) {
 	chunk, err := rep.unpack(1)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	return int8(chunk[0]), nil
@@ -165,7 +165,7 @@ func (rep *baseRepository[T]) unpackSBytes(count int) ([]int8, error) {
 	values := make([]int8, count)
 	chunk, err := rep.unpack(count)
 	if err != nil {
-		return values, err
+		return nil, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	for i := 0; i < count; i++ {
@@ -179,7 +179,7 @@ func (rep *baseRepository[T]) unpackSBytes(count int) ([]int8, error) {
 func (rep *baseRepository[T]) unpackShort() (int16, error) {
 	chunk, err := rep.unpack(2)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	return int16(binary.LittleEndian.Uint16(chunk)), nil
@@ -190,7 +190,7 @@ func (rep *baseRepository[T]) unpackShorts(count int) ([]int16, error) {
 	values := make([]int16, count)
 	chunk, err := rep.unpack(2 * count)
 	if err != nil {
-		return values, err
+		return nil, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	for i := 0; i < count; i++ {
@@ -204,7 +204,7 @@ func (rep *baseRepository[T]) unpackShorts(count int) ([]int16, error) {
 func (rep *baseRepository[T]) unpackUShort() (uint16, error) {
 	chunk, err := rep.unpack(2)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	return binary.LittleEndian.Uint16(chunk), nil
@@ -215,7 +215,7 @@ func (rep *baseRepository[T]) unpackUShorts(count int) ([]uint16, error) {
 	values := make([]uint16, count)
 	chunk, err := rep.unpack(2 * count)
 	if err != nil {
-		return values, err
+		return nil, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	for i := 0; i < count; i++ {
@@ -229,7 +229,7 @@ func (rep *baseRepository[T]) unpackUShorts(count int) ([]uint16, error) {
 func (rep *baseRepository[T]) unpackUInt() (uint, error) {
 	chunk, err := rep.unpack(4)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	return uint(binary.LittleEndian.Uint32(chunk)), nil
@@ -240,7 +240,7 @@ func (rep *baseRepository[T]) unpackUInts(count int) ([]uint, error) {
 	values := make([]uint, count)
 	chunk, err := rep.unpack(4 * count)
 	if err != nil {
-		return values, err
+		return nil, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	for i := 0; i < count; i++ {
@@ -254,7 +254,7 @@ func (rep *baseRepository[T]) unpackUInts(count int) ([]uint, error) {
 func (rep *baseRepository[T]) unpackInt() (int, error) {
 	chunk, err := rep.unpack(4)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	return int(binary.LittleEndian.Uint32(chunk)), nil
@@ -265,7 +265,7 @@ func (rep *baseRepository[T]) unpackInts(count int) ([]int, error) {
 	values := make([]int, count)
 	chunk, err := rep.unpack(4 * count)
 	if err != nil {
-		return values, err
+		return values, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	for i := 0; i < count; i++ {
@@ -280,7 +280,7 @@ func (rep *baseRepository[T]) unpackFloat() (float64, error) {
 	// 単精度実数(4byte)なので、一旦uint32にしてからfloat32に変換する
 	chunk, err := rep.unpack(4)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	return float64(math.Float32frombits(binary.LittleEndian.Uint32(chunk))), nil
@@ -291,7 +291,7 @@ func (rep *baseRepository[T]) unpackFloats(values []float64, count int) ([]float
 	// 単精度実数(4byte)なので、一旦uint32にしてからfloat32に変換する
 	chunk, err := rep.unpack(4 * count)
 	if err != nil {
-		return values, err
+		return values, fmt.Errorf("failed to read: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	for i := 0; i < count; i++ {
@@ -460,7 +460,7 @@ func (rep *baseRepository[T]) writeDefaultNumber(fout *os.File, valType binaryTy
 		err = binary.Write(&buf, binary.LittleEndian, int32(defaultValue))
 	}
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to write: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 	_, err = fout.Write(buf.Bytes())
 	return err
@@ -473,7 +473,7 @@ func (rep *baseRepository[T]) writeBool(fout *os.File, val bool) error {
 	err = binary.Write(&buf, binary.LittleEndian, byte(mmath.BoolToInt(val)))
 
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to write: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	_, err = fout.Write(buf.Bytes())
@@ -491,7 +491,7 @@ func (rep *baseRepository[T]) writeByte(fout *os.File, val int, isUnsigned bool)
 	}
 
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to write: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 
 	_, err = fout.Write(buf.Bytes())
@@ -502,7 +502,7 @@ func (rep *baseRepository[T]) writeShort(fout *os.File, val uint16) error {
 	var buf bytes.Buffer
 	err := binary.Write(&buf, binary.LittleEndian, val)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to write: %w\n\n%v", err, mutils.GetStackTrace())
 	}
 	_, err = fout.Write(buf.Bytes())
 	return err

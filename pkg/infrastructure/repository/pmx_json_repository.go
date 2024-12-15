@@ -256,20 +256,20 @@ func (rep *PmxJsonRepository) Load(path string) (core.IHashModel, error) {
 	// ファイルを開く
 	jsonText, err := os.ReadFile(path)
 	if err != nil {
-		mlog.E("Load.Load error: %v", err)
+		mlog.E("Load.ReadFile error: %v", err)
 		return model, err
 	}
 
 	// JSON読み込み
 	var jsonData pmxJson
 	if err := json.Unmarshal(jsonText, &jsonData); err != nil {
-		mlog.E("Load.Load error: %v", err)
+		mlog.E("Load.Unmarshal error: %v", err)
 		return model, err
 	}
 
 	model, err = rep.loadModel(model, &jsonData)
 	if err != nil {
-		mlog.E("Load.readData error: %v", err)
+		mlog.E("Load.loadModel error: %v", err)
 		return model, err
 	}
 

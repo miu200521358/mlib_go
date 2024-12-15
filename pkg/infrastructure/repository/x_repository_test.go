@@ -174,3 +174,18 @@ func TestXRepository_Load2(t *testing.T) {
 	}
 
 }
+
+func TestXRepository_Load3(t *testing.T) {
+	rep := NewXRepository()
+
+	// Test case 1: Successful read
+	path := "D:/MMD/MikuMikuDance_v926x64/UserFile/Effect/_色調補正/ikClut ikeno/ikClut.x"
+	data, err := rep.Load(path)
+
+	if err != nil {
+		t.Errorf("Expected err to be nil, got %v", err)
+	}
+	if data == nil {
+		t.Errorf("Expected model to be not nil, got nil")
+	}
+}
