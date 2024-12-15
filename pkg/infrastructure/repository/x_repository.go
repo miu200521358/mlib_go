@@ -831,23 +831,23 @@ func (rep *XRepository) parseMeshTextureCoords(model *pmx.PmxModel) error {
 
 func (rep *XRepository) parseMeshMaterialList(
 	model *pmx.PmxModel, facesList [][]*pmx.Face,
-) (faceMap map[int][]int, err error) {
+) error {
 	if _, err := rep.expect(tokLCurly); err != nil {
-		return nil, err
+		return err
 	}
 	nMat, err := rep.parseNumberAsInt()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if _, err := rep.expect(tokSemicolon); err != nil {
-		return nil, err
+		return err
 	}
 	nFaceIdx, err := rep.parseNumberAsInt()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if _, err := rep.expect(tokSemicolon); err != nil {
-		return nil, err
+		return err
 	}
 
 	facesByMaterials := make(map[int][][]*pmx.Face)
@@ -864,19 +864,19 @@ func (rep *XRepository) parseMeshMaterialList(
 	for i := 0; i < nFaceIdx; i++ {
 		matIdx, err := rep.parseNumberAsInt()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		facesByMaterials[matIdx] = append(facesByMaterials[matIdx], facesList[i])
 		faceIndicesByMaterials[matIdx] = append(faceIndicesByMaterials[matIdx], i)
 	}
 	if _, err := rep.expect(tokSemicolon); err != nil {
-		return nil, err
+		return err
 	}
-	if _, err := rep.expect(tokSemicolon); err != nil {
-		return nil, err
+	if rep.peek().typ == tokSemicolon {
+		rep.expect(tokSemicolon)
 	}
 
-	faceMap = make(map[int][]int)
+	faceMap := make(map[int][]int)
 
 	// Materials
 	// After this, we might have that many Material references or full Material templates
@@ -888,6 +888,7 @@ func (rep *XRepository) parseMeshMaterialList(
 			// could be a reference (string) or skip
 			// Just skip if unknown
 			rep.skipUnknownTemplate()
+			continue
 		}
 
 		// 面を割り当てる
@@ -904,10 +905,10 @@ func (rep *XRepository) parseMeshMaterialList(
 	}
 
 	if _, err := rep.expect(tokRCurly); err != nil {
-		return nil, err
+		return err
 	}
 
-	return faceMap, nil
+	return nil
 }
 
 // func (rep *XRepository) parseMeshNormals(model *pmx.PmxModel) error {
@@ -1001,7 +1002,9 @@ func (rep *XRepository) parseMesh(model *pmx.PmxModel) error {
 		// 	rep.parseMeshNormals(model)
 		case "MeshMaterialList":
 			rep.next()
-			rep.parseMeshMaterialList(model, facesList)
+			if err := rep.parseMeshMaterialList(model, facesList); err != nil {
+				return err
+			}
 		case "MeshTextureCoords":
 			rep.next()
 			rep.parseMeshTextureCoords(model)
