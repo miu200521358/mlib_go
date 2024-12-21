@@ -98,6 +98,17 @@ const (
 	CATEGORY_FITTING_ONLY_MOVE BoneCategory = iota
 )
 
+type DisplaySlotName string
+
+const (
+	DISPLAY_SLOT_CENTER DisplaySlotName = "センター"
+	DISPLAY_SLOT_TRUNK  DisplaySlotName = "体幹"
+	DISPLAY_SLOT_HEAD   DisplaySlotName = "頭"
+	DISPLAY_SLOT_HAND   DisplaySlotName = "{d}手"
+	DISPLAY_SLOT_FINGER DisplaySlotName = "{d}指"
+	DISPLAY_SLOT_LEG    DisplaySlotName = "{d}足"
+)
+
 type BoneConfig struct {
 	// 親ボーン名候補リスト
 	ParentBoneNames []StandardBoneName
@@ -105,6 +116,8 @@ type BoneConfig struct {
 	ChildBoneNames []StandardBoneName
 	// ボーンカテゴリ
 	Categories []BoneCategory
+	// 表示枠
+	DisplaySlot DisplaySlotName
 	// バウンディングボックスの形
 	BoundingBoxShape Shape
 	// 準標準までのボーンか
@@ -229,18 +242,21 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{ROOT},
 				ChildBoneNames:   []StandardBoneName{GROOVE, WAIST, TRUNK_ROOT, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
+				DisplaySlot:      DISPLAY_SLOT_CENTER,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
 			GROOVE: {
 				ParentBoneNames:  []StandardBoneName{CENTER},
 				ChildBoneNames:   []StandardBoneName{WAIST, TRUNK_ROOT, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
+				DisplaySlot:      DISPLAY_SLOT_CENTER,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
 			WAIST: {
 				ParentBoneNames:  []StandardBoneName{GROOVE, CENTER},
 				ChildBoneNames:   []StandardBoneName{TRUNK_ROOT, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
+				DisplaySlot:      DISPLAY_SLOT_TRUNK,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
 			TRUNK_ROOT: {
@@ -261,6 +277,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{LOWER_ROOT, TRUNK_ROOT, WAIST, GROOVE, CENTER},
 				ChildBoneNames:   []StandardBoneName{LEG_CENTER, LEG_ROOT, WAIST_CANCEL, LEG},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_LOWER},
+				DisplaySlot:      DISPLAY_SLOT_TRUNK,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			UPPER_ROOT: {
@@ -275,12 +292,14 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{UPPER_ROOT, TRUNK_ROOT, WAIST, GROOVE, CENTER},
 				ChildBoneNames:   []StandardBoneName{UPPER2},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER},
+				DisplaySlot:      DISPLAY_SLOT_TRUNK,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			UPPER2: {
 				ParentBoneNames:  []StandardBoneName{UPPER},
 				ChildBoneNames:   []StandardBoneName{NECK_ROOT},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER},
+				DisplaySlot:      DISPLAY_SLOT_TRUNK,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			NECK_ROOT: {
@@ -295,12 +314,14 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{NECK_ROOT, UPPER2, UPPER},
 				ChildBoneNames:   []StandardBoneName{HEAD},
 				Categories:       []BoneCategory{CATEGORY_UPPER},
+				DisplaySlot:      DISPLAY_SLOT_TRUNK,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			HEAD: {
 				ParentBoneNames:  []StandardBoneName{NECK},
 				ChildBoneNames:   []StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD},
+				DisplaySlot:      DISPLAY_SLOT_TRUNK,
 				BoundingBoxShape: SHAPE_SPHERE,
 				IsStandard:       true},
 			HEAD_TAIL: {
@@ -313,12 +334,14 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{HEAD},
 				ChildBoneNames:   []StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD},
+				DisplaySlot:      DISPLAY_SLOT_HEAD,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
 			EYE: {
 				ParentBoneNames:  []StandardBoneName{HEAD},
 				ChildBoneNames:   []StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD},
+				DisplaySlot:      DISPLAY_SLOT_HEAD,
 				BoundingBoxShape: SHAPE_SPHERE,
 				IsStandard:       true},
 			SHOULDER_ROOT: {
@@ -331,12 +354,14 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{SHOULDER_ROOT, UPPER2, UPPER},
 				ChildBoneNames:   []StandardBoneName{SHOULDER, SHOULDER_C, ARM},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_SHOULDER},
+				DisplaySlot:      DISPLAY_SLOT_HAND,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
 			SHOULDER: {
 				ParentBoneNames:  []StandardBoneName{SHOULDER_P, SHOULDER_ROOT, UPPER2, UPPER},
 				ChildBoneNames:   []StandardBoneName{SHOULDER_C, ARM},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_SHOULDER},
+				DisplaySlot:      DISPLAY_SLOT_HAND,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			SHOULDER_C: {
@@ -349,6 +374,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:          []StandardBoneName{SHOULDER_C, SHOULDER},
 				ChildBoneNames:           []StandardBoneName{ARM_TWIST, ELBOW},
 				Categories:               []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM},
+				DisplaySlot:              DISPLAY_SLOT_HAND,
 				BoundingBoxShape:         SHAPE_CAPSULE,
 				CenterOfGravity:          0.03,
 				CenterOfGravityBoneNames: []StandardBoneName{ELBOW},
@@ -357,6 +383,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{ARM},
 				ChildBoneNames:   []StandardBoneName{ELBOW},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_TWIST},
+				DisplaySlot:      DISPLAY_SLOT_HAND,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			ARM_TWIST1: {
@@ -381,6 +408,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:          []StandardBoneName{ARM_TWIST, ARM},
 				ChildBoneNames:           []StandardBoneName{WRIST_TWIST},
 				Categories:               []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_ARM},
+				DisplaySlot:              DISPLAY_SLOT_HAND,
 				BoundingBoxShape:         SHAPE_CAPSULE,
 				CenterOfGravity:          0.03,
 				CenterOfGravityBoneNames: []StandardBoneName{WRIST},
@@ -389,6 +417,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{ELBOW},
 				ChildBoneNames:   []StandardBoneName{WRIST},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TWIST, CATEGORY_ARM},
+				DisplaySlot:      DISPLAY_SLOT_HAND,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			WRIST_TWIST1: {
@@ -413,6 +442,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{WRIST_TWIST, ELBOW},
 				ChildBoneNames:   []StandardBoneName{WRIST_TAIL},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_ARM},
+				DisplaySlot:      DISPLAY_SLOT_HAND,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			WRIST_TAIL: {
@@ -425,18 +455,21 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{WRIST},
 				ChildBoneNames:   []StandardBoneName{THUMB1},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			THUMB1: {
 				ParentBoneNames:  []StandardBoneName{THUMB0},
 				ChildBoneNames:   []StandardBoneName{THUMB2},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			THUMB2: {
 				ParentBoneNames:  []StandardBoneName{THUMB1},
 				ChildBoneNames:   []StandardBoneName{THUMB_TAIL},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			THUMB_TAIL: {
@@ -449,18 +482,21 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{WRIST},
 				ChildBoneNames:   []StandardBoneName{INDEX2},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			INDEX2: {
 				ParentBoneNames:  []StandardBoneName{INDEX1},
 				ChildBoneNames:   []StandardBoneName{INDEX3},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			INDEX3: {
 				ParentBoneNames:  []StandardBoneName{INDEX2},
 				ChildBoneNames:   []StandardBoneName{INDEX_TAIL},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			INDEX_TAIL: {
@@ -473,18 +509,21 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{WRIST},
 				ChildBoneNames:   []StandardBoneName{MIDDLE2},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			MIDDLE2: {
 				ParentBoneNames:  []StandardBoneName{MIDDLE1},
 				ChildBoneNames:   []StandardBoneName{MIDDLE3},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			MIDDLE3: {
 				ParentBoneNames:  []StandardBoneName{MIDDLE2},
 				ChildBoneNames:   []StandardBoneName{MIDDLE_TAIL},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			MIDDLE_TAIL: {
@@ -497,18 +536,21 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{WRIST},
 				ChildBoneNames:   []StandardBoneName{RING2},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			RING2: {
 				ParentBoneNames:  []StandardBoneName{RING1},
 				ChildBoneNames:   []StandardBoneName{RING3},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			RING3: {
 				ParentBoneNames:  []StandardBoneName{RING2},
 				ChildBoneNames:   []StandardBoneName{RING_TAIL},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			RING_TAIL: {
@@ -521,18 +563,21 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{WRIST},
 				ChildBoneNames:   []StandardBoneName{PINKY2},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			PINKY2: {
 				ParentBoneNames:  []StandardBoneName{PINKY1},
 				ChildBoneNames:   []StandardBoneName{PINKY3},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			PINKY3: {
 				ParentBoneNames:  []StandardBoneName{PINKY2},
 				ChildBoneNames:   []StandardBoneName{PINKY_TAIL},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
+				DisplaySlot:      DISPLAY_SLOT_FINGER,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			PINKY_TAIL: {
@@ -563,18 +608,21 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{WAIST_CANCEL, LEG_ROOT, LEG_CENTER, LOWER},
 				ChildBoneNames:   []StandardBoneName{KNEE},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_FK},
+				DisplaySlot:      DISPLAY_SLOT_LEG,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			KNEE: {
 				ParentBoneNames:  []StandardBoneName{LEG},
 				ChildBoneNames:   []StandardBoneName{ANKLE},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_FK},
+				DisplaySlot:      DISPLAY_SLOT_LEG,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			ANKLE: {
 				ParentBoneNames:  []StandardBoneName{KNEE},
 				ChildBoneNames:   []StandardBoneName{TOE_T},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_FK, CATEGORY_ANKLE},
+				DisplaySlot:      DISPLAY_SLOT_LEG,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			HEEL: {
@@ -605,6 +653,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:          []StandardBoneName{WAIST_CANCEL, LEG_ROOT, LEG_CENTER, LOWER},
 				ChildBoneNames:           []StandardBoneName{KNEE_D},
 				Categories:               []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D},
+				DisplaySlot:              DISPLAY_SLOT_LEG,
 				BoundingBoxShape:         SHAPE_CAPSULE,
 				CenterOfGravity:          0.12,
 				CenterOfGravityBoneNames: []StandardBoneName{KNEE_D},
@@ -613,6 +662,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:          []StandardBoneName{LEG},
 				ChildBoneNames:           []StandardBoneName{ANKLE_D},
 				Categories:               []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D},
+				DisplaySlot:              DISPLAY_SLOT_LEG,
 				BoundingBoxShape:         SHAPE_CAPSULE,
 				CenterOfGravity:          0.10,
 				CenterOfGravityBoneNames: []StandardBoneName{HEEL_D},
@@ -621,6 +671,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{KNEE_D},
 				ChildBoneNames:   []StandardBoneName{TOE_EX},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE},
+				DisplaySlot:      DISPLAY_SLOT_LEG,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			HEEL_D: {
@@ -633,6 +684,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{ANKLE_D},
 				ChildBoneNames:   []StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE},
+				DisplaySlot:      DISPLAY_SLOT_LEG,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			TOE_T_D: {
@@ -657,18 +709,21 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ParentBoneNames:  []StandardBoneName{ROOT},
 				ChildBoneNames:   []StandardBoneName{LEG_IK},
 				Categories:       []BoneCategory{CATEGORY_LEG_IK, CATEGORY_SOLE, CATEGORY_FITTING_ONLY_MOVE},
+				DisplaySlot:      DISPLAY_SLOT_LEG,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
 			LEG_IK: {
 				ParentBoneNames:  []StandardBoneName{LEG_IK_PARENT, ROOT},
 				ChildBoneNames:   []StandardBoneName{TOE_IK},
 				Categories:       []BoneCategory{CATEGORY_LEG_IK, CATEGORY_FITTING_ONLY_MOVE},
+				DisplaySlot:      DISPLAY_SLOT_LEG,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
 			TOE_IK: {
 				ParentBoneNames:  []StandardBoneName{LEG_IK},
 				ChildBoneNames:   []StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_LEG_IK, CATEGORY_FITTING_ONLY_MOVE},
+				DisplaySlot:      DISPLAY_SLOT_LEG,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
 		}
