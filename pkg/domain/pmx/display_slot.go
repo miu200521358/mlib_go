@@ -24,6 +24,13 @@ func NewDisplaySlotReference() *Reference {
 	}
 }
 
+func NewDisplaySlotReferenceByValues(displayType DisplayType, displayIndex int) *Reference {
+	return &Reference{
+		DisplayType:  displayType,
+		DisplayIndex: displayIndex,
+	}
+}
+
 // 特殊枠フラグ - 0:通常枠 1:特殊枠
 type SpecialFlag int
 
@@ -47,6 +54,26 @@ func NewDisplaySlot() *DisplaySlot {
 		name:        "",
 		englishName: "",
 		SpecialFlag: SPECIAL_FLAG_OFF,
+		References:  make([]*Reference, 0),
+	}
+}
+
+func NewRootDisplaySlot() *DisplaySlot {
+	return &DisplaySlot{
+		index:       0,
+		name:        "Root",
+		englishName: "Root",
+		SpecialFlag: SPECIAL_FLAG_ON,
+		References:  make([]*Reference, 0),
+	}
+}
+
+func NewMorphDisplaySlot() *DisplaySlot {
+	return &DisplaySlot{
+		index:       1,
+		name:        "表情",
+		englishName: "Exp",
+		SpecialFlag: SPECIAL_FLAG_ON,
 		References:  make([]*Reference, 0),
 	}
 }
@@ -110,4 +137,23 @@ func (displaySlots *DisplaySlots) Copy() *DisplaySlots {
 		copied.SetItem(i, displaySlot.Copy().(*DisplaySlot))
 	}
 	return copied
+}
+
+func (displaySlots *DisplaySlots) GetByBoneIndex(boneIndex int) *DisplaySlot {
+	for _, displaySlot := range displaySlots.Data {
+		for _, reference := range displaySlot.References {
+			if reference.DisplayType == DISPLAY_TYPE_BONE && reference.DisplayIndex == boneIndex {
+				return displaySlot
+			}
+		}
+	}
+	return nil
+}
+
+func (displaySlots *DisplaySlots) GetRootDisplaySlot() *DisplaySlot {
+	return displaySlots.GetByName("Root")
+}
+
+func (displaySlots *DisplaySlots) GetMorphDisplaySlot() *DisplaySlot {
+	return displaySlots.GetByName("表情")
 }
