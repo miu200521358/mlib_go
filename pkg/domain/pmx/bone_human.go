@@ -589,9 +589,9 @@ func (bones *Bones) CreateArmTwistChild(direction BoneDirection, idx int) *Bone 
 	elbow := bones.GetElbow(direction)
 	if arm != nil && elbow != nil {
 		bone.Position = &mmath.MVec3{
-			X: (arm.Position.X + elbow.Position.X) * ratio,
-			Y: (arm.Position.Y + elbow.Position.Y) * ratio,
-			Z: (arm.Position.Z + elbow.Position.Z) * ratio,
+			X: arm.Position.X + ((elbow.Position.X - arm.Position.X) * ratio),
+			Y: arm.Position.Y + ((elbow.Position.Y - arm.Position.Y) * ratio),
+			Z: arm.Position.Z + ((elbow.Position.Z - arm.Position.Z) * ratio),
 		}
 	}
 
@@ -679,9 +679,9 @@ func (bones *Bones) CreateWristTwistChild(direction BoneDirection, idx int) *Bon
 	wrist := bones.GetWrist(direction)
 	if elbow != nil && wrist != nil {
 		bone.Position = &mmath.MVec3{
-			X: (elbow.Position.X + wrist.Position.X) * ratio,
-			Y: (elbow.Position.Y + wrist.Position.Y) * ratio,
-			Z: (elbow.Position.Z + wrist.Position.Z) * ratio,
+			X: elbow.Position.X + ((wrist.Position.X - elbow.Position.X) * ratio),
+			Y: elbow.Position.Y + ((wrist.Position.Y - elbow.Position.Y) * ratio),
+			Z: elbow.Position.Z + ((wrist.Position.Z - elbow.Position.Z) * ratio),
 		}
 	}
 
@@ -1010,7 +1010,6 @@ func (bones *Bones) GetWaistCancel(direction BoneDirection) *Bone {
 // CreateWaistCancel 腰キャンセル取得or作成
 func (bones *Bones) CreateWaistCancel(direction BoneDirection) *Bone {
 	bone := NewBoneByName(WAIST_CANCEL.StringFromDirection(direction.String()))
-	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE
 
 	// 位置
 	if leg := bones.GetLeg(direction); leg != nil {
