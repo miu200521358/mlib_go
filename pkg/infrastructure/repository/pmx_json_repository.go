@@ -211,25 +211,17 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 		jsonData.DisplaySlots = append(jsonData.DisplaySlots, &displaySlotData)
 	}
 
-	// 準標準ボーンINDEX別に頂点を覆うバウンディングボックスを計算
-	for _, bone := range model.Bones.Data {
-		if bone.Config() == nil || bone.Config().BoundingBoxShape == pmx.SHAPE_NONE {
-			continue
-		}
-		if _, ok := allBoneVertices[bone.Index()]; !ok {
-			continue
-		}
-
-		boneVertices := allBoneVertices[bone.Index()]
-		if len(boneVertices) == 0 {
+	// システム用剛体をJSONに変換
+	for _, rigidBody := range model.RigidBodies.Data {
+		if !strings.Contains(rigidBody.Name(), pmx.MLIB_PREFIX) {
 			continue
 		}
 
 		rigidBody := &rigidBodyJson{
 			Index:              len(jsonData.RigidBodies),
-			Name:               bone.Name(),
-			EnglishName:        bone.EnglishName(),
-			BoneIndex:          bone.Index(),
+			Name:               rigidBody.Name(),
+			EnglishName:        rigidBody.EnglishName(),
+			BoneIndex:          rigidBody.Index(),
 			CollisionGroup:     0,
 			CollisionGroupMask: 0,
 			Mass:               0.0,
@@ -238,26 +230,10 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 			Restitution:        0.0,
 			Friction:           0.0,
 			PhysicsType:        int(pmx.PHYSICS_TYPE_STATIC),
-		}
-
-		positions := make([]*mmath.MVec3, len(boneVertices))
-		for i, vertex := range boneVertices {
-			positions[i] = vertex.Position
-		}
-
-		// バウンディングボックスを計算
-		if bone.Config().BoundingBoxShape == pmx.SHAPE_BOX {
-			rigidBody.ShapeType = int(pmx.SHAPE_BOX)
-			rigidBody.Size, rigidBody.Position, rigidBody.Rotation = mmath.CalculateBoundingBox(positions, 0.1)
-		} else if bone.Config().BoundingBoxShape == pmx.SHAPE_SPHERE {
-			rigidBody.ShapeType = int(pmx.SHAPE_SPHERE)
-			rigidBody.Rotation = mmath.NewMVec3()
-			rigidBody.Size, rigidBody.Position = mmath.CalculateBoundingSphere(positions, 0.1)
-		} else if bone.Config().BoundingBoxShape == pmx.SHAPE_CAPSULE {
-			rigidBody.ShapeType = int(pmx.SHAPE_CAPSULE)
-			rigidBody.Size, rigidBody.Position, rigidBody.Rotation = mmath.CalculateBoundingCapsule(positions, 0.1)
-		} else {
-			continue
+			ShapeType:          int(pmx.SHAPE_SPHERE),
+			Size:               rigidBody.Size,
+			Position:           rigidBody.Position,
+			Rotation:           rigidBody.Rotation.Radians(),
 		}
 
 		jsonData.RigidBodies = append(jsonData.RigidBodies, rigidBody)
@@ -378,6 +354,21 @@ func (rep *PmxJsonRepository) loadModel(model *pmx.PmxModel, jsonData *pmxJson) 
 		}
 
 		model.Bones.Append(bone)
+	}
+
+	for _, displaySlotData := range jsonData.DisplaySlots {
+		displaySlot := &pmx.DisplaySlot{}
+		displaySlot.SetIndex(displaySlotData.Index)
+		displaySlot.SetName(displaySlotData.Name)
+		displaySlot.SetEnglishName(displaySlotData.EnglishName)
+		displaySlot.SpecialFlag = pmx.SpecialFlag(displaySlotData.SpecialFlag)
+		displaySlot.References = make([]*pmx.Reference, 0)
+		for _, referenceData := range displaySlotData.References {
+			reference := pmx.NewDisplaySlotReferenceByValues(
+				pmx.DisplayType(referenceData.DisplayType), referenceData.DisplayIndex)
+			displaySlot.References = append(displaySlot.References, reference)
+		}
+		model.DisplaySlots.Append(displaySlot)
 	}
 
 	for _, rigidBodyData := range jsonData.RigidBodies {

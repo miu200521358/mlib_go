@@ -2,7 +2,9 @@ package mmath
 
 import (
 	"math"
+	"math/rand"
 	"sort"
+	"time"
 
 	"github.com/gonum/matrix/mat64"
 )
@@ -243,4 +245,146 @@ func filterOutliers(vectors []*MVec3, weights []float64, threshold float64) []*M
 		}
 	}
 	return filteredVectors
+}
+
+// ---------------------------------------
+
+// Sphere represents a Sphere with a center and a radius.
+type Sphere struct {
+	Center *MVec3
+	Radius float64
+}
+
+// average computes the centroid of a slice of Vector3.
+func average(points []*MVec3) *MVec3 {
+	if len(points) == 0 {
+		return NewMVec3()
+	}
+	sum := NewMVec3()
+	for _, p := range points {
+		sum.Add(p)
+	}
+	return sum.MulScalar(1.0 / float64(len(points)))
+}
+
+// computeBoundingSphere computes a simple bounding sphere
+// by taking the centroid as the center and the max distance
+// to any point as the radius.
+func computeBoundingSphere(points []*MVec3) *Sphere {
+	if len(points) == 0 {
+		return &Sphere{Center: NewMVec3(), Radius: 0}
+	}
+
+	c := average(points)
+	maxR := 0.0
+	for _, p := range points {
+		d := p.Distance(c)
+		if d > maxR {
+			maxR = d
+		}
+	}
+	return &Sphere{Center: c, Radius: maxR}
+}
+
+// kMeans2Partitions splits points into 2 clusters using a simple k-means(k=2).
+// Returns two sets of points as sub clusters.
+func kMeans2Partitions(points []*MVec3, maxIter int) ([]*MVec3, []*MVec3) {
+	if len(points) < 2 {
+		// Not enough points to split meaningfully
+		return points, nil
+	}
+
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	// Initialize two centers randomly from the dataset
+	idx1 := rand.Intn(len(points))
+	idx2 := rand.Intn(len(points))
+	for idx2 == idx1 {
+		idx2 = rand.Intn(len(points))
+	}
+	center1 := points[idx1]
+	center2 := points[idx2]
+
+	for iter := 0; iter < maxIter; iter++ {
+		cluster1 := []*MVec3{}
+		cluster2 := []*MVec3{}
+
+		// Assign each point to the nearest center
+		for _, p := range points {
+			d1 := p.Distance(center1)
+			d2 := p.Distance(center2)
+			if d1 <= d2 {
+				cluster1 = append(cluster1, p)
+			} else {
+				cluster2 = append(cluster2, p)
+			}
+		}
+
+		// Recompute centers
+		newCenter1 := average(cluster1)
+		newCenter2 := average(cluster2)
+
+		// Check convergence
+		move1 := center1.Distance(newCenter1)
+		move2 := center2.Distance(newCenter2)
+		center1 = newCenter1
+		center2 = newCenter2
+
+		if move1 < 1e-6 && move2 < 1e-6 {
+			break
+		}
+	}
+
+	// Final clustering
+	cluster1 := []*MVec3{}
+	cluster2 := []*MVec3{}
+	for _, p := range points {
+		d1 := p.Distance(center1)
+		d2 := p.Distance(center2)
+		if d1 <= d2 {
+			cluster1 = append(cluster1, p)
+		} else {
+			cluster2 = append(cluster2, p)
+		}
+	}
+
+	return cluster1, cluster2
+}
+
+// AdaptiveCoverPointsWithSpheres recursively splits the point set
+// until each bounding sphere is smaller than the given threshold.
+func AdaptiveCoverPointsWithSpheres(points []*MVec3, radiusThreshold float64, maxIter int) []*Sphere {
+	if len(points) == 0 {
+		return nil
+	}
+
+	// Compute bounding sphere
+	bounding := computeBoundingSphere(points)
+
+	// If the radius is smaller than threshold or we have too few points, stop splitting
+	if bounding.Radius <= radiusThreshold || len(points) < 2 {
+		return []*Sphere{bounding}
+	}
+
+	// Otherwise, split the points into two clusters
+	c1, c2 := kMeans2Partitions(points, maxIter)
+
+	// Recursively cover each sub cluster
+	spheres := []*Sphere{}
+	if len(c1) > 0 {
+		for _, s := range AdaptiveCoverPointsWithSpheres(c1, radiusThreshold, maxIter) {
+			if s.Radius > 0.0 {
+				spheres = append(spheres, s)
+			}
+		}
+	}
+	if len(c2) > 0 {
+		for _, s := range AdaptiveCoverPointsWithSpheres(c2, radiusThreshold, maxIter) {
+			if s.Radius > 0.0 {
+				spheres = append(spheres, s)
+			}
+		}
+	}
+
+	return spheres
 }
