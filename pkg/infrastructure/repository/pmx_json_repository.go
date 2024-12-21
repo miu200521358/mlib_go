@@ -48,6 +48,19 @@ type boneJson struct {
 	Ik           *ikJson      `json:"ik"`            // IK:1 の場合 IKデータを格納
 }
 
+type referenceJson struct {
+	DisplayType  int `json:"display_type"`  // 要素対象 0:ボーン 1:モーフ
+	DisplayIndex int `json:"display_index"` // ボーンIndex or モーフIndex
+}
+
+type displaySlotJson struct {
+	Index       int              `json:"index"`        // 表示枠INDEX
+	Name        string           `json:"name"`         // 表示枠名
+	EnglishName string           `json:"english_name"` // 表示枠英名
+	SpecialFlag int              `json:"special_flag"` // 特殊枠フラグ - 0:通常枠 1:特殊枠
+	References  []*referenceJson `json:"references"`   // 表示枠要素
+}
+
 type rigidBodyJson struct {
 	Index              int          `json:"index"`                // 剛体INDEX
 	Name               string       `json:"name"`                 // 剛体名
@@ -68,9 +81,11 @@ type rigidBodyJson struct {
 }
 
 type pmxJson struct {
-	Name        string
-	Bones       []*boneJson
-	RigidBodies []*rigidBodyJson
+	Name         string
+	Bones        []*boneJson
+	DisplaySlots []*displaySlotJson
+	RigidBodies  []*rigidBodyJson
+	// TODO モーフ
 }
 
 type PmxJsonRepository struct {
@@ -111,8 +126,9 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 
 	// モデルをJSONに変換
 	jsonData := pmxJson{
-		Name:  model.Name(),
-		Bones: make([]*boneJson, 0),
+		Name:         model.Name(),
+		Bones:        make([]*boneJson, 0),
+		DisplaySlots: make([]*displaySlotJson, 0),
 	}
 
 	// 頂点をボーンINDEX別に纏める
@@ -172,6 +188,27 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 				}
 			}
 		}
+	}
+
+	// 表示枠をJSONに変換
+	for _, displaySlot := range model.DisplaySlots.Data {
+		displaySlotData := displaySlotJson{
+			Index:       displaySlot.Index(),
+			Name:        displaySlot.Name(),
+			EnglishName: displaySlot.EnglishName(),
+			SpecialFlag: int(displaySlot.SpecialFlag),
+			References:  make([]*referenceJson, 0),
+		}
+
+		for _, reference := range displaySlot.References {
+			referenceData := referenceJson{
+				DisplayType:  int(reference.DisplayType),
+				DisplayIndex: reference.DisplayIndex,
+			}
+			displaySlotData.References = append(displaySlotData.References, &referenceData)
+		}
+
+		jsonData.DisplaySlots = append(jsonData.DisplaySlots, &displaySlotData)
 	}
 
 	// 準標準ボーンINDEX別に頂点を覆うバウンディングボックスを計算
