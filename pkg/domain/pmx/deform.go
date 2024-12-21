@@ -28,14 +28,14 @@ type IDeform interface {
 	Add(boneIndex, separateIndex int, ratio float64)
 }
 
-// Deform デフォーム既定構造体
-type Deform struct {
+// deform デフォーム既定構造体
+type deform struct {
 	indexes    []int      // ボーンINDEXリスト
 	weights    []float64  // ウェイトリスト
 	deformType DeformType // デフォームタイプ
 }
 
-func (deform *Deform) Index(boneIndex int) int {
+func (deform *deform) Index(boneIndex int) int {
 	for i, index := range deform.indexes {
 		if index == boneIndex {
 			return i
@@ -44,7 +44,7 @@ func (deform *Deform) Index(boneIndex int) int {
 	return -1
 }
 
-func (deform *Deform) IndexWeight(boneIndex int) float64 {
+func (deform *deform) IndexWeight(boneIndex int) float64 {
 	i := deform.Index(boneIndex)
 	if i == -1 {
 		return 0
@@ -52,16 +52,16 @@ func (deform *Deform) IndexWeight(boneIndex int) float64 {
 	return deform.weights[i]
 }
 
-func (deform *Deform) AllIndexes() []int {
+func (deform *deform) AllIndexes() []int {
 	return deform.indexes
 }
 
-func (deform *Deform) AllWeights() []float64 {
+func (deform *deform) AllWeights() []float64 {
 	return deform.weights
 }
 
 // Indexes ウェイト閾値以上のウェイトを持っているINDEXのみを取得する
-func (deform *Deform) Indexes(weightThreshold float64) []int {
+func (deform *deform) Indexes(weightThreshold float64) []int {
 	var indexes []int
 	for i, weight := range deform.weights {
 		if weight >= weightThreshold {
@@ -72,7 +72,7 @@ func (deform *Deform) Indexes(weightThreshold float64) []int {
 }
 
 // Weights ウェイト閾値以上のウェイトを持っているウェイトのみを取得する
-func (deform *Deform) Weights(weightThreshold float64) []float64 {
+func (deform *deform) Weights(weightThreshold float64) []float64 {
 	var weights []float64
 	for _, weight := range deform.weights {
 		if weight >= weightThreshold {
@@ -83,7 +83,7 @@ func (deform *Deform) Weights(weightThreshold float64) []float64 {
 }
 
 // NormalizedDeform 4つのボーンINDEXとウェイトを返す（合計8個）
-func (deform *Deform) NormalizedDeform() [8]float32 {
+func (deform *deform) NormalizedDeform() [8]float32 {
 	normalizedDeform := [8]float32{0, 0, 0, 0, 0, 0, 0, 0}
 	for i, index := range deform.indexes {
 		normalizedDeform[i] = float32(index)
@@ -96,7 +96,7 @@ func (deform *Deform) NormalizedDeform() [8]float32 {
 }
 
 // Normalize ウェイト正規化
-func (deform *Deform) Normalize(align bool) {
+func (deform *deform) Normalize(align bool) {
 	if align {
 		// ウェイトを統合する
 		indexWeights := make(map[int]float64)
@@ -143,7 +143,7 @@ func (deform *Deform) Normalize(align bool) {
 }
 
 // Add ウェイトを分割して追加する(separateIndexのウェイトをratioで分割して追加)
-func (deform *Deform) Add(boneIndex, separateIndex int, ratio float64) {
+func (deform *deform) Add(boneIndex, separateIndex int, ratio float64) {
 	for i, index := range deform.indexes {
 		if index == separateIndex {
 			deform.indexes = append(deform.indexes, boneIndex)
@@ -181,13 +181,13 @@ func sortIndexesByWeight(indexes []int, weights []float64) ([]int, []float64) {
 
 // Bdef1 represents the BDEF1 deformation.
 type Bdef1 struct {
-	Deform
+	deform
 }
 
 // NewBdef1 creates a new Bdef1 instance.
 func NewBdef1(index0 int) *Bdef1 {
 	return &Bdef1{
-		Deform: Deform{
+		deform: deform{
 			indexes:    []int{index0},
 			weights:    []float64{1.0},
 			deformType: BDEF1,
@@ -202,13 +202,13 @@ func (bdef1 *Bdef1) NormalizedDeform() [8]float32 {
 
 // Bdef2 represents the BDEF2 deformation.
 type Bdef2 struct {
-	Deform
+	deform
 }
 
 // NewBdef2 creates a new Bdef2 instance.
 func NewBdef2(index0, index1 int, weight0 float64) *Bdef2 {
 	return &Bdef2{
-		Deform: Deform{
+		deform: deform{
 			indexes:    []int{index0, index1},
 			weights:    []float64{weight0, 1 - weight0},
 			deformType: BDEF2,
@@ -225,13 +225,13 @@ func (bdef2 *Bdef2) NormalizedDeform() [8]float32 {
 
 // Bdef4 represents the BDEF4 deformation.
 type Bdef4 struct {
-	Deform
+	deform
 }
 
 // NewBdef4 creates a new Bdef4 instance.
 func NewBdef4(index0, index1, index2, index3 int, weight0, weight1, weight2, weight3 float64) *Bdef4 {
 	return &Bdef4{
-		Deform: Deform{
+		deform: deform{
 			indexes:    []int{index0, index1, index2, index3},
 			weights:    []float64{weight0, weight1, weight2, weight3},
 			deformType: BDEF4,
@@ -248,7 +248,7 @@ func (bdef4 *Bdef4) NormalizedDeform() [8]float32 {
 
 // Sdef represents the SDEF deformation.
 type Sdef struct {
-	Deform
+	deform
 	SdefC  *mmath.MVec3
 	SdefR0 *mmath.MVec3
 	SdefR1 *mmath.MVec3
@@ -257,7 +257,7 @@ type Sdef struct {
 // NewSdef creates a new Sdef instance.
 func NewSdef(index0, index1 int, weight0 float64, sdefC, sdefR0, sdefR1 *mmath.MVec3) *Sdef {
 	return &Sdef{
-		Deform: Deform{
+		deform: deform{
 			indexes:    []int{index0, index1},
 			weights:    []float64{weight0, 1 - weight0},
 			deformType: SDEF,

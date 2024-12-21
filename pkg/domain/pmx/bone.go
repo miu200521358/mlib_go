@@ -188,23 +188,23 @@ func NewBone() *Bone {
 		TailIndex:    -1,
 		EffectIndex:  -1,
 		EffectFactor: 0.0,
-		FixedAxis:    mmath.NewMVec3(),
-		LocalAxisX:   mmath.NewMVec3(),
-		LocalAxisZ:   mmath.NewMVec3(),
+		FixedAxis:    nil,
+		LocalAxisX:   nil,
+		LocalAxisZ:   nil,
 		EffectorKey:  -1,
-		Ik:           NewIk(),
+		Ik:           nil,
 		DisplaySlot:  -1,
 		IsSystem:     true,
 		Extend: &BoneExtend{
-			NormalizedLocalAxisX:   mmath.NewMVec3(),
-			NormalizedLocalAxisY:   mmath.NewMVec3(),
-			NormalizedLocalAxisZ:   mmath.NewMVec3(),
+			NormalizedLocalAxisX:   &mmath.MVec3{X: 1, Y: 0, Z: 0},
+			NormalizedLocalAxisY:   &mmath.MVec3{X: 0, Y: 1, Z: 0},
+			NormalizedLocalAxisZ:   &mmath.MVec3{X: 0, Y: 0, Z: -1},
 			LocalAxis:              &mmath.MVec3{X: 1, Y: 0, Z: 0},
 			IkLinkBoneIndexes:      make([]int, 0),
 			IkTargetBoneIndexes:    make([]int, 0),
 			ParentRelativePosition: mmath.NewMVec3(),
 			ChildRelativePosition:  mmath.NewMVec3(),
-			NormalizedFixedAxis:    mmath.NewMVec3(),
+			NormalizedFixedAxis:    nil,
 			TreeBoneIndexes:        make([]int, 0),
 			RevertOffsetMatrix:     mmath.NewMMat4(),
 			OffsetMatrix:           mmath.NewMMat4(),
@@ -214,19 +214,15 @@ func NewBone() *Bone {
 			ChildBoneIndexes:       make([]int, 0),
 			EffectiveBoneIndexes:   make([]int, 0),
 			AngleLimit:             false,
-			MinAngleLimit:          mmath.NewMRotation(),
-			MaxAngleLimit:          mmath.NewMRotation(),
+			MinAngleLimit:          nil,
+			MaxAngleLimit:          nil,
 			LocalAngleLimit:        false,
-			LocalMinAngleLimit:     mmath.NewMRotation(),
-			LocalMaxAngleLimit:     mmath.NewMRotation(),
+			LocalMinAngleLimit:     nil,
+			LocalMaxAngleLimit:     nil,
 			AxisSign:               1,
 			RigidBody:              nil,
 		},
 	}
-	bone.Extend.NormalizedLocalAxisX = bone.LocalAxisX.Copy()
-	bone.Extend.NormalizedLocalAxisZ = bone.LocalAxisZ.Copy()
-	bone.Extend.NormalizedLocalAxisY = bone.Extend.NormalizedLocalAxisZ.Cross(bone.Extend.NormalizedLocalAxisX)
-	bone.Extend.NormalizedFixedAxis = bone.FixedAxis.Copy()
 	return bone
 }
 
@@ -964,7 +960,7 @@ func (bones *Bones) Insert(bone *Bone, afterIndex int) {
 
 	bone.Layer = newLayer
 	bones.Append(bone)
-	bones.Setup()
+	// bones.Setup()
 }
 
 func (bones *Bones) GetIkTarget(ikBoneName string) *Bone {

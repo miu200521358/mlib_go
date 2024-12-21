@@ -1,6 +1,7 @@
 package pmx
 
 import (
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -39,6 +40,15 @@ const (
 	BONE_FLAG_IS_AFTER_PHYSICS_DEFORM BoneFlag = 0x1000
 	// 外部親変形
 	BONE_FLAG_IS_EXTERNAL_PARENT_DEFORM BoneFlag = 0x2000
+)
+
+type BoneDirection string
+
+const (
+	// 右
+	BONE_DIRECTION_RIGHT BoneDirection = "右"
+	// 左
+	BONE_DIRECTION_LEFT BoneDirection = "左"
 )
 
 type BoneCategory int
@@ -161,8 +171,8 @@ const (
 	LEG_ROOT      StandardBoneNames = "{d}足根元"
 	LEG           StandardBoneNames = "{d}足"
 	KNEE          StandardBoneNames = "{d}ひざ"
-	HEEL          StandardBoneNames = "{d}かかと"
 	ANKLE         StandardBoneNames = "{d}足首"
+	HEEL          StandardBoneNames = "{d}かかと"
 	TOE_T         StandardBoneNames = "{d}つま先先"
 	TOE_P         StandardBoneNames = "{d}つま先親"
 	TOE_C         StandardBoneNames = "{d}つま先子"
@@ -185,6 +195,14 @@ func (s StandardBoneNames) String() string {
 
 func (s StandardBoneNames) StringFromDirection(direction string) string {
 	return strings.ReplaceAll(string(s), "{d}", direction)
+}
+
+func (s StandardBoneNames) StringFromDirectionAndIdx(direction string, idx int) string {
+	return strings.ReplaceAll(string(s), "{d}", direction) + strconv.Itoa(idx)
+}
+
+func (s StandardBoneNames) StringFromDirectionTail(direction string) string {
+	return strings.ReplaceAll(string(s), "{d}", direction) + "先先"
 }
 
 func (s StandardBoneNames) Right() string {
