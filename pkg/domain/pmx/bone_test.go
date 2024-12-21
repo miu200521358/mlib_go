@@ -320,8 +320,10 @@ func TestBones_Insert(t *testing.T) {
 	bones.Append(bone2)
 	bones.Setup()
 
+	bone3.ParentIndex = bone1.Index()
+
 	// Insert bone3 after bone1
-	bones.Insert(bone3, bone1.Index())
+	bones.Insert(bone3)
 
 	{
 		tests := []struct {
@@ -357,7 +359,10 @@ func TestBones_Insert(t *testing.T) {
 	bone4.index = 3
 	bone4.name = "Bone4"
 	bone4.Layer = 0
-	bones.Insert(bone4, bone2.Index())
+
+	bone4.ParentIndex = bone2.Index()
+
+	bones.Insert(bone4)
 
 	{
 		tests := []struct {
@@ -394,7 +399,10 @@ func TestBones_Insert(t *testing.T) {
 	bone5.index = 4
 	bone5.name = "Bone5"
 	bone5.Layer = 0
-	bones.Insert(bone5, bone4.Index())
+
+	bone5.ParentIndex = bone4.Index()
+
+	bones.Insert(bone5)
 
 	{
 		tests := []struct {
@@ -432,7 +440,10 @@ func TestBones_Insert(t *testing.T) {
 	bone6.index = 5
 	bone6.name = "Bone6"
 	bone6.Layer = 0
-	bones.Insert(bone6, bone3.Index())
+
+	bone6.ParentIndex = bone3.Index()
+
+	bones.Insert(bone6)
 
 	{
 		tests := []struct {
@@ -442,10 +453,10 @@ func TestBones_Insert(t *testing.T) {
 		}{
 			{"Bone1", 0, 0},
 			{"Bone3", 0, 2},
-			{"Bone6", 0, 5},
-			{"Bone2", 2, 1},
-			{"Bone4", 2, 3},
-			{"Bone5", 2, 4},
+			{"Bone6", 1, 5},
+			{"Bone2", 1, 1},
+			{"Bone4", 1, 3},
+			{"Bone5", 1, 4},
 		}
 
 		testGroup := "add6)"
@@ -471,7 +482,9 @@ func TestBones_Insert(t *testing.T) {
 	bone7.index = 6
 	bone7.name = "Bone7"
 	bone7.Layer = 0
-	bones.Insert(bone7, bone4.Index())
+
+	bone7.ParentIndex = bone4.Index()
+	bones.Insert(bone7)
 
 	{
 		tests := []struct {
@@ -481,11 +494,11 @@ func TestBones_Insert(t *testing.T) {
 		}{
 			{"Bone1", 0, 0},
 			{"Bone3", 0, 2},
-			{"Bone6", 0, 5},
-			{"Bone2", 2, 1},
-			{"Bone4", 2, 3},
-			{"Bone7", 2, 6},
-			{"Bone5", 3, 4},
+			{"Bone6", 1, 5},
+			{"Bone2", 1, 1},
+			{"Bone4", 1, 3},
+			{"Bone7", 1, 6},
+			{"Bone5", 1, 4},
 		}
 
 		testGroup := "add7)"
@@ -511,7 +524,8 @@ func TestBones_Insert(t *testing.T) {
 	bone8.index = 7
 	bone8.name = "Bone8"
 	bone8.Layer = 0
-	bones.Insert(bone8, -1)
+
+	bones.Insert(bone8)
 
 	{
 		tests := []struct {
@@ -521,12 +535,12 @@ func TestBones_Insert(t *testing.T) {
 		}{
 			{"Bone8", 0, 7},
 			{"Bone1", 1, 0},
-			{"Bone3", 1, 2},
+			{"Bone3", 0, 2},
 			{"Bone6", 1, 5},
-			{"Bone2", 3, 1},
-			{"Bone4", 3, 3},
-			{"Bone7", 3, 6},
-			{"Bone5", 4, 4},
+			{"Bone2", 2, 1},
+			{"Bone4", 1, 3},
+			{"Bone7", 1, 6},
+			{"Bone5", 1, 4},
 		}
 
 		testGroup := "add8)"

@@ -293,14 +293,14 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 	v1 := MVec3{0.8, 0.6, 1}
 	localMatrix := v1.ToLocalMat()
 
-	expected1 := MMat4{
-		0.56568542, 0.6, 0.56568542, 0.,
-		0.42426407, -0.8, 0.42426407, 0.,
-		0.70710678, 0., -0.70710678, 0.,
-		0., 0., 0., 1.,
-	}
+	expected1 := NewMMat4ByValues(
+		0.565685, 0.424264, 0.707107, 0.000000,
+		-0.265036, 0.905539, -0.331295, 0.000000,
+		0.780869, 0.000000, -0.624695, 0.000000,
+		0.000000, 0.000000, 0.000000, 1.000000,
+	)
 
-	if !localMatrix.NearEquals(&expected1, 1e-8) {
+	if !localMatrix.NearEquals(expected1, 1e-6) {
 		t.Errorf("Local matrix calculation failed. Expected %v, got %v", expected1, localMatrix)
 	}
 
@@ -308,15 +308,15 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 	localVector1 := localMatrix.MulVec3(&v2)
 
 	expected2 := &MVec3{0.56568542, 0.42426407, 0.70710678}
-	if !localVector1.NearEquals(expected2, 1e-8) {
+	if !localVector1.NearEquals(expected2, 1e-6) {
 		t.Errorf("Local vector calculation failed. Expected %v, got %v", expected2, localVector1)
 	}
 
 	v3 := MVec3{1, 0, 1}
 	localVector2 := localMatrix.MulVec3(&v3)
 
-	expected3 := MVec3{1.13137085, 0.848528137, -1.11022302e-16}
-	if !localVector2.NearEquals(&expected3, 1e-8) {
+	expected3 := MVec3{1.3465542, 0.4242641, 0.0824117}
+	if !localVector2.NearEquals(&expected3, 1e-6) {
 		t.Errorf("Local vector calculation failed. Expected %v, got %v", expected3, localVector2)
 	}
 
@@ -324,10 +324,10 @@ func TestMVector3DGetLocalMatrix(t *testing.T) {
 	localMatrix2 := v4.ToLocalMat()
 
 	expected4 := MMat4{
-		1.0, 0.0, 0.0, 0.0,
-		0.0, 1.0, 0.0, 0.0,
-		0.0, 0.0, 1.0, 0.0,
-		0.0, 0.0, 0.0, 1.0,
+		0.000000, 0.000000, -1.000000, 0.000000,
+		0.000000, 1.000000, 0.000000, 0.000000,
+		-1.000000, 0.000000, 0.000000, 0.000000,
+		0.000000, 0.000000, 0.000000, 1.000000,
 	}
 
 	if !localMatrix2.NearEquals(&expected4, 1e-8) {

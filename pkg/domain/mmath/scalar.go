@@ -4,6 +4,8 @@ import (
 	"math"
 	"slices"
 	"sort"
+
+	"golang.org/x/exp/constraints"
 )
 
 func Avg(vs []float64) float64 {
@@ -96,15 +98,21 @@ func ArgMin(distances []float64) int {
 	return minIndex
 }
 
-func ArgMax(distances []float64) int {
-	maxValue := -math.MaxFloat64
-	maxIndex := -1
-	for i, d := range distances {
-		if d > maxValue {
-			maxValue = d
+func ArgMax[E constraints.Ordered](values []E) int {
+	if len(values) == 0 {
+		return -1
+	}
+
+	maxValue := values[0]
+	maxIndex := 0
+
+	for i, v := range values {
+		if v > maxValue {
+			maxValue = v
 			maxIndex = i
 		}
 	}
+
 	return maxIndex
 }
 

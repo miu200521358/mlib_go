@@ -194,7 +194,7 @@ func NewBone() *Bone {
 		EffectorKey:  -1,
 		Ik:           nil,
 		DisplaySlot:  -1,
-		IsSystem:     true,
+		IsSystem:     false,
 		Extend: &BoneExtend{
 			NormalizedLocalAxisX:   &mmath.MVec3{X: 1, Y: 0, Z: 0},
 			NormalizedLocalAxisY:   &mmath.MVec3{X: 0, Y: 1, Z: 0},
@@ -888,7 +888,44 @@ func (bones *Bones) Copy() *Bones {
 	return copied
 }
 
-func (bones *Bones) Insert(bone *Bone, afterIndex int) {
+func (bones *Bones) getInsertAfterIndex(bone *Bone) int {
+	parentLayerIndex := slices.Index(bones.LayerSortedIndexes, bone.ParentIndex)
+	ikBoneIndex := -1
+	if bone.IsIK() && bone.Ik != nil {
+		ikBoneIndex = slices.Index(bones.LayerSortedIndexes, bone.Ik.BoneIndex)
+	}
+	effectIndex := -1
+	effectIkIndex := -1
+	effectLayerIndex := -1
+	effectIkLayerIndex := -1
+	if bone.EffectIndex != -1 {
+		effectBone := bones.Get(bone.EffectIndex)
+		effectIndex = effectBone.Index()
+		effectLayerIndex = slices.Index(bones.LayerSortedIndexes, effectIndex)
+		if len(effectBone.Extend.IkLinkBoneIndexes) > 0 {
+			ikBone := bones.Get(effectBone.Extend.IkLinkBoneIndexes[0])
+			effectIkIndex = ikBone.Index()
+			effectIkLayerIndex = slices.Index(bones.LayerSortedIndexes, ikBoneIndex)
+		}
+	}
+
+	switch mmath.ArgMax([]int{parentLayerIndex, ikBoneIndex, effectLayerIndex, effectIkLayerIndex}) {
+	case 0:
+		return bone.ParentIndex
+	case 1:
+		return bone.Ik.BoneIndex
+	case 2:
+		return effectIndex
+	case 3:
+		return effectIkIndex
+	}
+
+	return -1
+}
+
+func (bones *Bones) Insert(bone *Bone) {
+	afterIndex := bones.getInsertAfterIndex(bone)
+
 	// 挿入位置を探す
 	insertPos := -1
 
@@ -910,7 +947,6 @@ func (bones *Bones) Insert(bone *Bone, afterIndex int) {
 		lastBone := bones.Get(bones.LayerSortedIndexes[len(bones.LayerSortedIndexes)-1])
 		bone.Layer = lastBone.Layer
 		bones.Append(bone)
-		bones.Setup()
 		return
 	}
 
@@ -960,7 +996,6 @@ func (bones *Bones) Insert(bone *Bone, afterIndex int) {
 
 	bone.Layer = newLayer
 	bones.Append(bone)
-	// bones.Setup()
 }
 
 func (bones *Bones) GetIkTarget(ikBoneName string) *Bone {
