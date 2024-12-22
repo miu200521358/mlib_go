@@ -10,7 +10,7 @@ type MMat4 mgl64.Mat4
 
 var (
 	// Zero holds a zero matrix.
-	MMat4Zero = MMat4{
+	MMat4Zero = &MMat4{
 		0, 0, 0, 0,
 		0, 0, 0, 0,
 		0, 0, 0, 0,
@@ -18,7 +18,7 @@ var (
 	}
 
 	// Ident holds an ident matrix.
-	MMat4Ident = MMat4{
+	MMat4Ident = &MMat4{
 		1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
@@ -57,12 +57,12 @@ func NewMMat4FromLookAt(eye, center, up *MVec3) *MMat4 {
 
 // IsZero
 func (mat *MMat4) IsZero() bool {
-	return *mat == MMat4Zero
+	return *mat == *MMat4Zero
 }
 
 // IsIdent
 func (mat *MMat4) IsIdent() bool {
-	return mat.NearEquals(&MMat4Ident, 1e-10)
+	return mat.NearEquals(MMat4Ident, 1e-10)
 }
 
 // String
