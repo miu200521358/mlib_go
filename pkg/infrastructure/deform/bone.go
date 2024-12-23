@@ -1261,7 +1261,7 @@ func getScale(
 	var cancelableScale *mmath.MVec3
 	if deltas.Bones != nil && deltas.Bones.Get(bone.Index()) != nil &&
 		deltas.Bones.Get(bone.Index()).FrameCancelableScale != nil {
-		cancelableScale = deltas.Bones.Get(bone.Index()).FrameScale
+		cancelableScale = deltas.Bones.Get(bone.Index()).FrameCancelableScale
 	} else if bf != nil && bf.CancelableScale != nil && !bf.CancelableScale.IsOne() {
 		cancelableScale = bf.CancelableScale
 	}

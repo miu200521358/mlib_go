@@ -26,6 +26,7 @@ type IDeform interface {
 	Index(boneIndex int) int
 	IndexWeight(boneIndex int) float64
 	Add(boneIndex, separateIndex int, ratio float64)
+	SetIndexes(indexes []int)
 }
 
 // deform デフォーム既定構造体
@@ -69,6 +70,10 @@ func (deform *deform) Indexes(weightThreshold float64) []int {
 		}
 	}
 	return indexes
+}
+
+func (deform *deform) SetIndexes(indexes []int) {
+	deform.indexes = indexes
 }
 
 // Weights ウェイト閾値以上のウェイトを持っているウェイトのみを取得する

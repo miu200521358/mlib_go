@@ -24,6 +24,14 @@ var (
 		0, 0, 1, 0,
 		0, 0, 0, 1,
 	}
+
+	// Ident holds an ident matrix.
+	MMat4ScaleIdent = &MMat4{
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 0,
+	}
 )
 
 func NewMMat4() *MMat4 {
@@ -118,7 +126,7 @@ func (mat *MMat4) Scale(s *MVec3) *MMat4 {
 }
 
 func (mat *MMat4) Scaled(s *MVec3) *MMat4 {
-	return s.ToScaleMat4().Mul(mat)
+	return s.ToScaleMat4().Muled(mat)
 }
 
 func (mat *MMat4) Scaling() *MVec3 {
