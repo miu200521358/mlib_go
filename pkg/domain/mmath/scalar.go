@@ -237,3 +237,9 @@ func IsAlmostAllSameValues(values []float64, threshold float64) bool {
 	}
 	return true
 }
+
+func DeepCopy[T Number](values []T) []T {
+	copied := make([]T, len(values))
+	copy(copied, values)
+	return copied
+}

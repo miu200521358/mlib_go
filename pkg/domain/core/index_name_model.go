@@ -3,6 +3,7 @@ package core
 import (
 	"errors"
 	"reflect"
+	"sort"
 )
 
 type IIndexNameModel interface {
@@ -58,6 +59,17 @@ func (im *IndexNameModels[T]) Append(value T) error {
 		im.nameIndexes[value.Name()] = value.Index()
 	}
 	return nil
+}
+
+func (im *IndexNameModels[T]) Indexes() []int {
+	indexes := make([]int, len(im.nameIndexes))
+	i := 0
+	for _, index := range im.nameIndexes {
+		indexes[i] = index
+		i++
+	}
+	sort.Ints(indexes)
+	return indexes
 }
 
 func (im *IndexNameModels[T]) Names() []string {
@@ -117,4 +129,16 @@ func (im *IndexNameModels[T]) RemoveByName(name string) error {
 		return nil
 	}
 	return errors.New("name not found")
+}
+
+// Iterator はコレクションのイテレータを提供します
+func (im *IndexNameModels[T]) Iterator() <-chan T {
+	ch := make(chan T)
+	go func() {
+		for _, value := range im.values {
+			ch <- value
+		}
+		close(ch)
+	}()
+	return ch
 }

@@ -36,29 +36,21 @@ func (x Slices[T]) Sort() { sort.Sort(x) }
 
 // ------------------
 
-// ArgSort returns the indices that would sort s.
-func ArgSort(s sort.Interface) []int {
-	indices := make([]int, s.Len())
-	sortInto(s, indices)
-	return indices
-}
-
-// sortInto sorts s and populates the indices slice with the indices that would sort the input slice.
-func sortInto(s sort.Interface, indices []int) {
-	for i := 0; i < s.Len(); i++ {
+// ArgSort 関数
+func ArgSort[T Number](slice []T) []int {
+	n := len(slice)
+	indices := make([]int, n)
+	for i := range indices {
 		indices[i] = i
 	}
-	sort.Stable(argsorter{s: s, m: indices})
-}
 
-type argsorter struct {
-	s sort.Interface
-	m []int
-}
+	// インデックスを slice の値に基づいてソート
+	sort.Slice(indices, func(i, j int) bool {
+		return slice[indices[i]] < slice[indices[j]]
+	})
 
-func (a argsorter) Less(i, j int) bool { return a.s.Less(a.m[i], a.m[j]) }
-func (a argsorter) Len() int           { return a.s.Len() }
-func (a argsorter) Swap(i, j int)      { a.m[i], a.m[j] = a.m[j], a.m[i] }
+	return indices
+}
 
 func ArgMin[T Number](values []T) int {
 	if len(values) == 0 {
