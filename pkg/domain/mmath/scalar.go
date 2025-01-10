@@ -84,14 +84,17 @@ func NearEquals[T Number](v T, other T, epsilon float64) bool {
 	return math.Abs(float64(v)-float64(other)) <= epsilon
 }
 
-// ToRadian 度をラジアンに変換します
-func ToRadian(degree float64) float64 {
-	return degree * math.Pi / 180
+// Utility functions to convert between degrees and radians
+func DegToRad(deg float64) float64 {
+	return deg * math.Pi / 180
 }
 
-// ToDegree ラジアンを度に変換します
-func ToDegree(radian float64) float64 {
-	return radian * 180 / math.Pi
+func RadToDeg(rad float64) float64 {
+	return rad * 180 / math.Pi
+}
+
+func ThetaToRad(theta float64) float64 {
+	return math.Asin(math.Max(-1.0, math.Min(1.0, theta)))
 }
 
 // Clamped ベクトルの各要素をmin～maxの範囲内にクランプします
