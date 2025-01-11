@@ -6,8 +6,12 @@ type LightFrames struct {
 
 func NewLightFrames() *LightFrames {
 	return &LightFrames{
-		BaseFrames: NewBaseFrames[*LightFrame](),
+		BaseFrames: NewBaseFrames[*LightFrame](NewLightFrame, nilLightFrame),
 	}
+}
+
+func nilLightFrame() *LightFrame {
+	return nil
 }
 
 func (lightFrames *LightFrames) Clean() {

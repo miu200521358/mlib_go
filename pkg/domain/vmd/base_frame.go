@@ -75,14 +75,18 @@ type BaseFrames[T IBaseFrame] struct {
 	values            map[float32]T               // キーフレリスト
 	Indexes           *mmath.LlrbIndexes[float32] // 全キーフレリスト
 	RegisteredIndexes *mmath.LlrbIndexes[float32] // 登録対象キーフレリスト
+	newFunc           func(index float32) T       // キーフレ生成関数
+	nullFunc          func() T                    // 空キーフレ生成関数
 	lock              sync.RWMutex                // マップアクセス制御用
 }
 
-func NewBaseFrames[T IBaseFrame]() *BaseFrames[T] {
+func NewBaseFrames[T IBaseFrame](newFunc func(index float32) T, nullFunc func() T) *BaseFrames[T] {
 	return &BaseFrames[T]{
 		values:            make(map[float32]T),
 		Indexes:           &mmath.LlrbIndexes[float32]{LLRB: llrb.New()},
 		RegisteredIndexes: &mmath.LlrbIndexes[float32]{LLRB: llrb.New()},
+		newFunc:           newFunc,
+		nullFunc:          nullFunc,
 		lock:              sync.RWMutex{},
 	}
 }
@@ -99,18 +103,18 @@ func (baseFrames *BaseFrames[T]) Get(index float32) T {
 		return baseFrames.values[index]
 	}
 
-	if len(baseFrames.values) == 0 {
+	if len(baseFrames.values) <= 1 {
 		// 指定INDEXで新フレームを作成
-		return baseFrames.NewFrame(index)
+		return baseFrames.newFunc(index)
 	}
 
 	prevFrame := baseFrames.PrevFrame(index)
 	nextFrame := baseFrames.NextFrame(index)
-	if nextFrame == prevFrame {
+	if nextFrame == index {
 		// 次のキーフレが無い場合、最大キーフレのコピーを返す
 		if baseFrames.Indexes.Len() == 0 {
-			// 存在しない場合新フレームを作成
-			return baseFrames.NewFrame(index)
+			// 存在しない場合nilを返す
+			return baseFrames.nullFunc()
 		}
 		copied := baseFrames.values[baseFrames.Indexes.Max()].Copy()
 		copied.SetIndex(index)

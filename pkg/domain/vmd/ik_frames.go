@@ -6,8 +6,12 @@ type IkFrames struct {
 
 func NewIkFrames() *IkFrames {
 	return &IkFrames{
-		BaseFrames: NewBaseFrames[*IkFrame](),
+		BaseFrames: NewBaseFrames[*IkFrame](NewIkFrame, nilIkFrame),
 	}
+}
+
+func nilIkFrame() *IkFrame {
+	return nil
 }
 
 func (ikFrames *IkFrames) Clean() {

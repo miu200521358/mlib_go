@@ -27,7 +27,7 @@ func NewLlrbItem[T Number](v T) *LlrbItem[T] {
 
 // Less メソッドを実装
 func (g LlrbItem[T]) Less(than llrb.Item) bool {
-	other, ok := than.(LlrbItem[T])
+	other, ok := than.(*LlrbItem[T])
 	if !ok {
 		return false
 	}
@@ -55,8 +55,8 @@ func (li *LlrbIndexes[T]) Prev(index T) T {
 
 	ary := NewLlrbIndexes[T]()
 	li.DescendLessOrEqual(lindex, func(i llrb.Item) bool {
-		item := i.(LlrbItem[T])
-		if item.value != lindex.value {
+		item := i.(*LlrbItem[T])
+		if item.value < lindex.value {
 			ary.InsertNoReplace(item)
 		}
 		return true
@@ -74,8 +74,8 @@ func (li *LlrbIndexes[T]) Next(index T) T {
 
 	ary := NewLlrbIndexes[T]()
 	li.AscendGreaterOrEqual(lindex, func(i llrb.Item) bool {
-		item := i.(LlrbItem[T])
-		if item.value != lindex.value {
+		item := i.(*LlrbItem[T])
+		if item.value > lindex.value {
 			ary.InsertNoReplace(item)
 		}
 		return true
@@ -96,14 +96,14 @@ func (li *LlrbIndexes[T]) Max() T {
 	if li.LLRB.Len() == 0 {
 		return 0
 	}
-	return li.LLRB.Max().(LlrbItem[T]).value
+	return li.LLRB.Max().(*LlrbItem[T]).value
 }
 
 func (li *LlrbIndexes[T]) Min() T {
 	if li.LLRB.Len() == 0 {
 		return 0
 	}
-	return li.LLRB.Min().(LlrbItem[T]).value
+	return li.LLRB.Min().(*LlrbItem[T]).value
 }
 
 func (li *LlrbIndexes[T]) Length() int {
@@ -115,7 +115,7 @@ func (li *LlrbIndexes[T]) Iterator() <-chan T {
 	ch := make(chan T)
 	go func() {
 		li.LLRB.AscendGreaterOrEqual(li.LLRB.Min(), func(item llrb.Item) bool {
-			ch <- item.(LlrbItem[T]).Value()
+			ch <- item.(*LlrbItem[T]).Value()
 			return true
 		})
 		close(ch)

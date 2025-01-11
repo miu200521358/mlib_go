@@ -9,9 +9,13 @@ type MorphNameFrames struct {
 
 func NewMorphNameFrames(name string) *MorphNameFrames {
 	return &MorphNameFrames{
-		BaseFrames: NewBaseFrames[*MorphFrame](),
+		BaseFrames: NewBaseFrames[*MorphFrame](NewMorphFrame, nilMorphFrame),
 		Name:       name,
 	}
+}
+
+func nilMorphFrame() *MorphFrame {
+	return nil
 }
 
 // ContainsActive 有効なキーフレが存在するか

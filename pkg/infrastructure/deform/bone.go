@@ -18,31 +18,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
 )
 
-// DeformBoneByPhysicsFlag ボーンデフォーム処理を実行する
-func DeformBoneByPhysicsFlag(
-	model *pmx.PmxModel,
-	motion *vmd.VmdMotion,
-	deltas *delta.VmdDeltas,
-	isCalcIk bool,
-	frame float32,
-	boneNames []string,
-	isAfterPhysics bool,
-) *delta.VmdDeltas {
-	if model == nil || motion == nil {
-		return deltas
-	}
-
-	deformBoneIndexes, deltas := newVmdDeltas(model, motion, deltas, frame, boneNames, isAfterPhysics)
-
-	// ボーンデフォーム情報を埋める
-	deltas.Bones = fillBoneDeform(model, motion, deltas, frame, deformBoneIndexes, isCalcIk, isAfterPhysics)
-
-	// ボーンデフォーム情報を更新する
-	updateGlobalMatrix(deltas.Bones, deformBoneIndexes)
-
-	return deltas
-}
-
 func getLinkAxis(
 	minAngleLimitRadians *mmath.MVec3,
 	maxAngleLimitRadians *mmath.MVec3,
@@ -581,27 +556,27 @@ func updateBoneDelta(
 	boneDeltas.Update(d)
 
 	// ローカル行列
-	localMat := TotalLocalMat(boneDeltas, bone.Index())
+	localMat := CalculateTotalLocalMat(boneDeltas, bone.Index())
 	if localMat != nil && !localMat.IsIdent() {
 		d.UnitMatrix.Mul(localMat)
 	}
 
+	// スケール(回転が変わるため、先にスケールを計算する)
+	scaleMat := CalculateTotalScaleMat(boneDeltas, bone.Index())
+	if scaleMat != nil && !scaleMat.IsIdent() {
+		d.UnitMatrix.Mul(scaleMat)
+	}
+
 	// 移動
-	posMat := TotalPositionMat(boneDeltas, bone.Index())
+	posMat := CalculateTotalPositionMat(boneDeltas, bone.Index())
 	if posMat != nil && !posMat.IsIdent() {
 		d.UnitMatrix.Mul(posMat)
 	}
 
 	// 回転
-	rotMat := TotalRotationMat(boneDeltas, bone.Index())
+	rotMat := CalculateTotalRotationMat(boneDeltas, bone.Index())
 	if rotMat != nil && !rotMat.IsIdent() {
 		d.UnitMatrix.Mul(rotMat)
-	}
-
-	// スケール
-	scaleMat := TotalScaleMat(boneDeltas, bone.Index())
-	if scaleMat != nil && !scaleMat.IsIdent() {
-		d.UnitMatrix.Mul(scaleMat)
 	}
 
 	// 逆BOf行列(初期姿勢行列)

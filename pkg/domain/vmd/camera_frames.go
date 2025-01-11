@@ -6,8 +6,12 @@ type CameraFrames struct {
 
 func NewCameraFrames() *CameraFrames {
 	return &CameraFrames{
-		BaseFrames: NewBaseFrames[*CameraFrame](),
+		BaseFrames: NewBaseFrames[*CameraFrame](NewCameraFrame, nilCameraFrame),
 	}
+}
+
+func nilCameraFrame() *CameraFrame {
+	return nil
 }
 
 func (cameraFrames *CameraFrames) Clean() {

@@ -13,9 +13,13 @@ type BoneNameFrames struct {
 
 func NewBoneNameFrames(name string) *BoneNameFrames {
 	return &BoneNameFrames{
-		BaseFrames: NewBaseFrames[*BoneFrame](),
+		BaseFrames: NewBaseFrames[*BoneFrame](NewBoneFrame, nilBoneFrame),
 		Name:       name,
 	}
+}
+
+func nilBoneFrame() *BoneFrame {
+	return nil
 }
 
 func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {

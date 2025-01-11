@@ -6,8 +6,12 @@ type ShadowFrames struct {
 
 func NewShadowFrames() *ShadowFrames {
 	return &ShadowFrames{
-		BaseFrames: NewBaseFrames[*ShadowFrame](),
+		BaseFrames: NewBaseFrames[*ShadowFrame](NewShadowFrame, nilShadowFrame),
 	}
+}
+
+func nilShadowFrame() *ShadowFrame {
+	return nil
 }
 
 func (shadowFrames *ShadowFrames) Clean() {
