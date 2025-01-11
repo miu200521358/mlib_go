@@ -92,7 +92,7 @@ func TestBone_NormalizeFixedAxis(t *testing.T) {
 	correctedFixedAxis := mmath.MVec3{X: 1, Y: 0, Z: 0}
 	b.NormalizeFixedAxis(&correctedFixedAxis)
 
-	if !b.NormalizedFixedAxis.Equals(correctedFixedAxis.Normalize()) {
+	if !b.Extend.NormalizedFixedAxis.Equals(correctedFixedAxis.Normalize()) {
 		t.Errorf("Expected NormalizedFixedAxis to be normalized")
 	}
 }
@@ -109,37 +109,51 @@ func TestBone_IsTailBone(t *testing.T) {
 	}
 }
 
+func TestBone_IsLegD(t *testing.T) {
+	b1 := NewBoneByName("左足D")
+	if !b1.IsLegD() {
+		t.Errorf("Expected IsLegD to return true")
+	}
+
+	b2 := NewBoneByName("右腕")
+	if b2.IsLegD() {
+		t.Errorf("Expected IsLegD to return false")
+	}
+}
+
 func TestBone_Copy(t *testing.T) {
 	t.Run("Test Copy", func(t *testing.T) {
 		b := &Bone{
-			index:                  0,
-			name:                   "Bone",
-			englishName:            "Bone",
-			Ik:                     NewIk(),
-			Position:               &mmath.MVec3{X: 1, Y: 2, Z: 3},
-			TailPosition:           &mmath.MVec3{X: 4, Y: 5, Z: 6},
-			FixedAxis:              &mmath.MVec3{X: 7, Y: 8, Z: 9},
-			LocalAxisX:             &mmath.MVec3{X: 10, Y: 11, Z: 12},
-			LocalAxisZ:             &mmath.MVec3{X: 13, Y: 14, Z: 15},
-			NormalizedLocalAxisZ:   &mmath.MVec3{X: 16, Y: 17, Z: 18},
-			NormalizedLocalAxisX:   &mmath.MVec3{X: 19, Y: 20, Z: 21},
-			NormalizedLocalAxisY:   &mmath.MVec3{X: 22, Y: 23, Z: 24},
-			LocalAxis:              &mmath.MVec3{X: 25, Y: 26, Z: 27},
-			ParentRelativePosition: &mmath.MVec3{X: 28, Y: 29, Z: 30},
-			ChildRelativePosition:  &mmath.MVec3{X: 31, Y: 32, Z: 33},
-			NormalizedFixedAxis:    &mmath.MVec3{X: 34, Y: 35, Z: 36},
-			IkLinkBoneIndexes:      []int{1, 3, 5},
-			IkTargetBoneIndexes:    []int{2, 4, 6},
-			TreeBoneIndexes:        []int{3, 5, 7},
-			RevertOffsetMatrix:     &mmath.MMat4{},
-			OffsetMatrix:           &mmath.MMat4{},
-			RelativeBoneIndexes:    []int{8, 9, 10},
-			ChildBoneIndexes:       []int{10, 11, 12},
-			EffectiveBoneIndexes:   []int{16, 17, 18},
-			MinAngleLimit:          &mmath.MVec3{X: 1, Y: 2, Z: 3},
-			MaxAngleLimit:          &mmath.MVec3{X: 5, Y: 6, Z: 7},
-			LocalMinAngleLimit:     &mmath.MVec3{X: 10, Y: 11, Z: 12},
-			LocalMaxAngleLimit:     &mmath.MVec3{X: 16, Y: 17, Z: 18},
+			index:        0,
+			name:         "Bone",
+			englishName:  "Bone",
+			Ik:           NewIk(),
+			Position:     &mmath.MVec3{X: 1, Y: 2, Z: 3},
+			TailPosition: &mmath.MVec3{X: 4, Y: 5, Z: 6},
+			FixedAxis:    &mmath.MVec3{X: 7, Y: 8, Z: 9},
+			LocalAxisX:   &mmath.MVec3{X: 10, Y: 11, Z: 12},
+			LocalAxisZ:   &mmath.MVec3{X: 13, Y: 14, Z: 15},
+			Extend: &BoneExtend{
+				NormalizedLocalAxisZ:   &mmath.MVec3{X: 16, Y: 17, Z: 18},
+				NormalizedLocalAxisX:   &mmath.MVec3{X: 19, Y: 20, Z: 21},
+				NormalizedLocalAxisY:   &mmath.MVec3{X: 22, Y: 23, Z: 24},
+				LocalAxis:              &mmath.MVec3{X: 25, Y: 26, Z: 27},
+				ParentRelativePosition: &mmath.MVec3{X: 28, Y: 29, Z: 30},
+				ChildRelativePosition:  &mmath.MVec3{X: 31, Y: 32, Z: 33},
+				NormalizedFixedAxis:    &mmath.MVec3{X: 34, Y: 35, Z: 36},
+				IkLinkBoneIndexes:      []int{1, 3, 5},
+				IkTargetBoneIndexes:    []int{2, 4, 6},
+				TreeBoneIndexes:        []int{3, 5, 7},
+				RevertOffsetMatrix:     &mmath.MMat4{},
+				OffsetMatrix:           &mmath.MMat4{},
+				RelativeBoneIndexes:    []int{8, 9, 10},
+				ChildBoneIndexes:       []int{10, 11, 12},
+				EffectiveBoneIndexes:   []int{16, 17, 18},
+				MinAngleLimit:          &mmath.MVec3{X: 1, Y: 2, Z: 3},
+				MaxAngleLimit:          &mmath.MVec3{X: 5, Y: 6, Z: 7},
+				LocalMinAngleLimit:     &mmath.MVec3{X: 10, Y: 11, Z: 12},
+				LocalMaxAngleLimit:     &mmath.MVec3{X: 16, Y: 17, Z: 18},
+			},
 		}
 
 		copied := b.Copy().(*Bone)
@@ -183,100 +197,100 @@ func TestBone_Copy(t *testing.T) {
 		if &copied.LocalAxisZ == &b.LocalAxisZ {
 			t.Errorf("Expected copied LocalZVector to be a deep copy of original LocalZVector %s %s", copied.LocalAxisZ.String(), b.LocalAxisZ.String())
 		}
-		if !copied.NormalizedLocalAxisZ.NearEquals(b.NormalizedLocalAxisZ, 1e-10) {
-			t.Errorf("Expected copied NormalizedLocalXVector to be a deep copy of original NormalizedLocalXVector %s %s", copied.NormalizedLocalAxisZ.String(), b.NormalizedLocalAxisZ.String())
+		if !copied.Extend.NormalizedLocalAxisZ.NearEquals(b.Extend.NormalizedLocalAxisZ, 1e-10) {
+			t.Errorf("Expected copied NormalizedLocalXVector to be a deep copy of original NormalizedLocalXVector %s %s", copied.Extend.NormalizedLocalAxisZ.String(), b.Extend.NormalizedLocalAxisZ.String())
 		}
-		if &copied.NormalizedLocalAxisZ == &b.NormalizedLocalAxisZ {
-			t.Errorf("Expected copied NormalizedLocalXVector to be a deep copy of original NormalizedLocalXVector %s %s", copied.NormalizedLocalAxisZ.String(), b.NormalizedLocalAxisZ.String())
+		if &copied.Extend.NormalizedLocalAxisZ == &b.Extend.NormalizedLocalAxisZ {
+			t.Errorf("Expected copied NormalizedLocalXVector to be a deep copy of original NormalizedLocalXVector %s %s", copied.Extend.NormalizedLocalAxisZ.String(), b.Extend.NormalizedLocalAxisZ.String())
 		}
-		if !copied.NormalizedLocalAxisX.NearEquals(b.NormalizedLocalAxisX, 1e-10) {
-			t.Errorf("Expected copied NormalizedLocalYVector to be a deep copy of original NormalizedLocalYVector %s %s", copied.NormalizedLocalAxisX.String(), b.NormalizedLocalAxisX.String())
+		if !copied.Extend.NormalizedLocalAxisX.NearEquals(b.Extend.NormalizedLocalAxisX, 1e-10) {
+			t.Errorf("Expected copied NormalizedLocalYVector to be a deep copy of original NormalizedLocalYVector %s %s", copied.Extend.NormalizedLocalAxisX.String(), b.Extend.NormalizedLocalAxisX.String())
 		}
-		if &copied.NormalizedLocalAxisX == &b.NormalizedLocalAxisX {
-			t.Errorf("Expected copied NormalizedLocalYVector to be a deep copy of original NormalizedLocalYVector %s %s", copied.NormalizedLocalAxisX.String(), b.NormalizedLocalAxisX.String())
+		if &copied.Extend.NormalizedLocalAxisX == &b.Extend.NormalizedLocalAxisX {
+			t.Errorf("Expected copied NormalizedLocalYVector to be a deep copy of original NormalizedLocalYVector %s %s", copied.Extend.NormalizedLocalAxisX.String(), b.Extend.NormalizedLocalAxisX.String())
 		}
-		if !copied.NormalizedLocalAxisY.NearEquals(b.NormalizedLocalAxisY, 1e-10) {
-			t.Errorf("Expected copied NormalizedLocalZVector to be a deep copy of original NormalizedLocalZVector %s %s", copied.NormalizedLocalAxisY.String(), b.NormalizedLocalAxisY.String())
+		if !copied.Extend.NormalizedLocalAxisY.NearEquals(b.Extend.NormalizedLocalAxisY, 1e-10) {
+			t.Errorf("Expected copied NormalizedLocalZVector to be a deep copy of original NormalizedLocalZVector %s %s", copied.Extend.NormalizedLocalAxisY.String(), b.Extend.NormalizedLocalAxisY.String())
 		}
-		if &copied.NormalizedLocalAxisY == &b.NormalizedLocalAxisY {
-			t.Errorf("Expected copied NormalizedLocalZVector to be a deep copy of original NormalizedLocalZVector %s %s", copied.NormalizedLocalAxisY.String(), b.NormalizedLocalAxisY.String())
+		if &copied.Extend.NormalizedLocalAxisY == &b.Extend.NormalizedLocalAxisY {
+			t.Errorf("Expected copied NormalizedLocalZVector to be a deep copy of original NormalizedLocalZVector %s %s", copied.Extend.NormalizedLocalAxisY.String(), b.Extend.NormalizedLocalAxisY.String())
 		}
-		if !copied.LocalAxis.NearEquals(b.LocalAxis, 1e-10) {
-			t.Errorf("Expected copied LocalAxis to be a deep copy of original LocalAxis %s %s", copied.LocalAxis.String(), b.LocalAxis.String())
+		if !copied.Extend.LocalAxis.NearEquals(b.Extend.LocalAxis, 1e-10) {
+			t.Errorf("Expected copied LocalAxis to be a deep copy of original LocalAxis %s %s", copied.Extend.LocalAxis.String(), b.Extend.LocalAxis.String())
 		}
-		if &copied.LocalAxis == &b.LocalAxis {
-			t.Errorf("Expected copied LocalAxis to be a deep copy of original LocalAxis %s %s", copied.LocalAxis.String(), b.LocalAxis.String())
+		if &copied.Extend.LocalAxis == &b.Extend.LocalAxis {
+			t.Errorf("Expected copied LocalAxis to be a deep copy of original LocalAxis %s %s", copied.Extend.LocalAxis.String(), b.Extend.LocalAxis.String())
 		}
-		if !copied.ParentRelativePosition.NearEquals(b.ParentRelativePosition, 1e-10) {
-			t.Errorf("Expected copied ParentRelativePosition to be a deep copy of original ParentRelativePosition %s %s", copied.ParentRelativePosition.String(), b.ParentRelativePosition.String())
+		if !copied.Extend.ParentRelativePosition.NearEquals(b.Extend.ParentRelativePosition, 1e-10) {
+			t.Errorf("Expected copied ParentRelativePosition to be a deep copy of original ParentRelativePosition %s %s", copied.Extend.ParentRelativePosition.String(), b.Extend.ParentRelativePosition.String())
 		}
-		if &copied.ParentRelativePosition == &b.ParentRelativePosition {
-			t.Errorf("Expected copied ParentRelativePosition to be a deep copy of original ParentRelativePosition %s %s", copied.ParentRelativePosition.String(), b.ParentRelativePosition.String())
+		if &copied.Extend.ParentRelativePosition == &b.Extend.ParentRelativePosition {
+			t.Errorf("Expected copied ParentRelativePosition to be a deep copy of original ParentRelativePosition %s %s", copied.Extend.ParentRelativePosition.String(), b.Extend.ParentRelativePosition.String())
 		}
-		if !copied.ChildRelativePosition.NearEquals(b.ChildRelativePosition, 1e-10) {
-			t.Errorf("Expected copied TailRelativePosition to be a deep copy of original TailRelativePosition %s %s", copied.ChildRelativePosition.String(), b.ChildRelativePosition.String())
+		if !copied.Extend.ChildRelativePosition.NearEquals(b.Extend.ChildRelativePosition, 1e-10) {
+			t.Errorf("Expected copied TailRelativePosition to be a deep copy of original TailRelativePosition %s %s", copied.Extend.ChildRelativePosition.String(), b.Extend.ChildRelativePosition.String())
 		}
-		if &copied.ChildRelativePosition == &b.ChildRelativePosition {
-			t.Errorf("Expected copied TailRelativePosition to be a deep copy of original TailRelativePosition %s %s", copied.ChildRelativePosition.String(), b.ChildRelativePosition.String())
+		if &copied.Extend.ChildRelativePosition == &b.Extend.ChildRelativePosition {
+			t.Errorf("Expected copied TailRelativePosition to be a deep copy of original TailRelativePosition %s %s", copied.Extend.ChildRelativePosition.String(), b.Extend.ChildRelativePosition.String())
 		}
-		if !copied.NormalizedFixedAxis.NearEquals(b.NormalizedFixedAxis, 1e-10) {
-			t.Errorf("Expected copied NormalizedFixedAxis to be a deep copy of original NormalizedFixedAxis %s %s", copied.NormalizedFixedAxis.String(), b.NormalizedFixedAxis.String())
+		if !copied.Extend.NormalizedFixedAxis.NearEquals(b.Extend.NormalizedFixedAxis, 1e-10) {
+			t.Errorf("Expected copied NormalizedFixedAxis to be a deep copy of original NormalizedFixedAxis %s %s", copied.Extend.NormalizedFixedAxis.String(), b.Extend.NormalizedFixedAxis.String())
 		}
-		if &copied.NormalizedFixedAxis == &b.NormalizedFixedAxis {
-			t.Errorf("Expected copied NormalizedFixedAxis to be a deep copy of original NormalizedFixedAxis %s %s", copied.NormalizedFixedAxis.String(), b.NormalizedFixedAxis.String())
+		if &copied.Extend.NormalizedFixedAxis == &b.Extend.NormalizedFixedAxis {
+			t.Errorf("Expected copied NormalizedFixedAxis to be a deep copy of original NormalizedFixedAxis %s %s", copied.Extend.NormalizedFixedAxis.String(), b.Extend.NormalizedFixedAxis.String())
 		}
-		if len(copied.IkLinkBoneIndexes) != len(b.IkLinkBoneIndexes) {
+		if len(copied.Extend.IkLinkBoneIndexes) != len(b.Extend.IkLinkBoneIndexes) {
 			t.Errorf("Expected copied IkLinkIndexes to have the same length as original")
 		}
-		if len(copied.IkTargetBoneIndexes) != len(b.IkTargetBoneIndexes) {
+		if len(copied.Extend.IkTargetBoneIndexes) != len(b.Extend.IkTargetBoneIndexes) {
 			t.Errorf("Expected copied IkTargetIndexes to have the same length as original")
 		}
-		if len(copied.TreeBoneIndexes) != len(b.TreeBoneIndexes) {
+		if len(copied.Extend.TreeBoneIndexes) != len(b.Extend.TreeBoneIndexes) {
 			t.Errorf("Expected copied TreeIndexes to have the same length as original")
 		}
-		if !copied.RevertOffsetMatrix.NearEquals(b.RevertOffsetMatrix, 1e-10) {
-			t.Errorf("Expected copied ParentRevertMatrix to be a deep copy %s %s", copied.RevertOffsetMatrix.String(), b.RevertOffsetMatrix.String())
+		if !copied.Extend.RevertOffsetMatrix.NearEquals(b.Extend.RevertOffsetMatrix, 1e-10) {
+			t.Errorf("Expected copied ParentRevertMatrix to be a deep copy %s %s", copied.Extend.RevertOffsetMatrix.String(), b.Extend.RevertOffsetMatrix.String())
 		}
-		if &copied.RevertOffsetMatrix == &b.RevertOffsetMatrix {
+		if &copied.Extend.RevertOffsetMatrix == &b.Extend.RevertOffsetMatrix {
 			t.Errorf("Expected copied ParentRevertMatrix to be a deep copy")
 		}
-		if !copied.OffsetMatrix.NearEquals(b.OffsetMatrix, 1e-10) {
-			t.Errorf("Expected copied OffsetMatrix to be a deep copy %s %s", copied.OffsetMatrix.String(), b.OffsetMatrix.String())
+		if !copied.Extend.OffsetMatrix.NearEquals(b.Extend.OffsetMatrix, 1e-10) {
+			t.Errorf("Expected copied OffsetMatrix to be a deep copy %s %s", copied.Extend.OffsetMatrix.String(), b.Extend.OffsetMatrix.String())
 		}
-		if &copied.OffsetMatrix == &b.OffsetMatrix {
+		if &copied.Extend.OffsetMatrix == &b.Extend.OffsetMatrix {
 			t.Errorf("Expected copied OffsetMatrix to be a deep copy")
 		}
-		if len(copied.RelativeBoneIndexes) != len(b.RelativeBoneIndexes) {
+		if len(copied.Extend.RelativeBoneIndexes) != len(b.Extend.RelativeBoneIndexes) {
 			t.Errorf("Expected copied RelativeBoneIndexes to have the same length as original")
 		}
-		if len(copied.ChildBoneIndexes) != len(b.ChildBoneIndexes) {
+		if len(copied.Extend.ChildBoneIndexes) != len(b.Extend.ChildBoneIndexes) {
 			t.Errorf("Expected copied ChildBoneIndexes to have the same length as original")
 		}
-		if len(copied.EffectiveBoneIndexes) != len(b.EffectiveBoneIndexes) {
+		if len(copied.Extend.EffectiveBoneIndexes) != len(b.Extend.EffectiveBoneIndexes) {
 			t.Errorf("Expected copied EffectiveBoneIndexes to have the same length as original")
 		}
-		if !copied.MinAngleLimit.NearEquals(b.MinAngleLimit, 1e-10) {
-			t.Errorf("Expected copied MinAngleLimit to be a deep copy %s %s", copied.MinAngleLimit.String(), b.MinAngleLimit.String())
+		if !copied.Extend.MinAngleLimit.NearEquals(b.Extend.MinAngleLimit, 1e-10) {
+			t.Errorf("Expected copied MinAngleLimit to be a deep copy %s %s", copied.Extend.MinAngleLimit.String(), b.Extend.MinAngleLimit.String())
 		}
-		if &copied.MinAngleLimit == &b.MinAngleLimit {
+		if &copied.Extend.MinAngleLimit == &b.Extend.MinAngleLimit {
 			t.Errorf("Expected copied MinAngleLimit to be a deep copy")
 		}
-		if !copied.MaxAngleLimit.NearEquals(b.MaxAngleLimit, 1e-10) {
-			t.Errorf("Expected copied MaxAngleLimit to be a deep copy %s %s", copied.MaxAngleLimit.String(), b.MaxAngleLimit.String())
+		if !copied.Extend.MaxAngleLimit.NearEquals(b.Extend.MaxAngleLimit, 1e-10) {
+			t.Errorf("Expected copied MaxAngleLimit to be a deep copy %s %s", copied.Extend.MaxAngleLimit.String(), b.Extend.MaxAngleLimit.String())
 		}
-		if &copied.MaxAngleLimit == &b.MaxAngleLimit {
+		if &copied.Extend.MaxAngleLimit == &b.Extend.MaxAngleLimit {
 			t.Errorf("Expected copied MaxAngleLimit to be a deep copy")
 		}
-		if !copied.LocalMinAngleLimit.NearEquals(b.LocalMinAngleLimit, 1e-10) {
-			t.Errorf("Expected copied LocalMinAngleLimit to be a deep copy %s %s", copied.LocalMinAngleLimit.String(), b.LocalMinAngleLimit.String())
+		if !copied.Extend.LocalMinAngleLimit.NearEquals(b.Extend.LocalMinAngleLimit, 1e-10) {
+			t.Errorf("Expected copied LocalMinAngleLimit to be a deep copy %s %s", copied.Extend.LocalMinAngleLimit.String(), b.Extend.LocalMinAngleLimit.String())
 		}
-		if &copied.LocalMinAngleLimit == &b.LocalMinAngleLimit {
+		if &copied.Extend.LocalMinAngleLimit == &b.Extend.LocalMinAngleLimit {
 			t.Errorf("Expected copied LocalMinAngleLimit to be a deep copy")
 		}
-		if !copied.LocalMaxAngleLimit.NearEquals(b.LocalMaxAngleLimit, 1e-10) {
-			t.Errorf("Expected copied LocalMaxAngleLimit to be a deep copy %s %s", copied.LocalMaxAngleLimit.String(), b.LocalMaxAngleLimit.String())
+		if !copied.Extend.LocalMaxAngleLimit.NearEquals(b.Extend.LocalMaxAngleLimit, 1e-10) {
+			t.Errorf("Expected copied LocalMaxAngleLimit to be a deep copy %s %s", copied.Extend.LocalMaxAngleLimit.String(), b.Extend.LocalMaxAngleLimit.String())
 		}
-		if &copied.LocalMaxAngleLimit == &b.LocalMaxAngleLimit {
+		if &copied.Extend.LocalMaxAngleLimit == &b.Extend.LocalMaxAngleLimit {
 			t.Errorf("Expected copied LocalMaxAngleLimit to be a deep copy")
 		}
 	})
