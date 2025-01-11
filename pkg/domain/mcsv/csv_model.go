@@ -1,4 +1,4 @@
-package csv
+package mcsv
 
 type CsvModel struct {
 	records [][]string

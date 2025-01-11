@@ -7,7 +7,7 @@ import (
 type CameraFrame struct {
 	*BaseFrame                          // キーフレ
 	Position         *mmath.MVec3       // 位置
-	Radians          *mmath.MVec3       // 回転(ラジアン)
+	Degrees          *mmath.MVec3       // 回転(オイラー角)
 	Quaternion       *mmath.MQuaternion // 回転(クォータニオン)
 	Distance         float64            // 距離
 	ViewOfAngle      int                // 視野角
@@ -19,7 +19,7 @@ func NewCameraFrame(index float32) *CameraFrame {
 	return &CameraFrame{
 		BaseFrame:        NewFrame(index).(*BaseFrame),
 		Position:         mmath.NewMVec3(),
-		Radians:          mmath.NewMVec3(),
+		Degrees:          mmath.NewMVec3(),
 		Distance:         0.0,
 		ViewOfAngle:      0,
 		IsPerspectiveOff: true,
@@ -29,7 +29,7 @@ func NewCameraFrame(index float32) *CameraFrame {
 
 func (cf *CameraFrame) Add(v *CameraFrame) {
 	cf.Position.Add(v.Position)
-	cf.Radians.Mul(v.Radians)
+	cf.Degrees.Mul(v.Degrees)
 	cf.Distance += v.Distance
 	cf.ViewOfAngle += v.ViewOfAngle
 }
@@ -38,7 +38,7 @@ func (cf *CameraFrame) Added(v *CameraFrame) *CameraFrame {
 	copied := cf.Copy().(*CameraFrame)
 
 	copied.Position.Add(v.Position)
-	copied.Radians.Mul(v.Radians)
+	copied.Degrees.Mul(v.Degrees)
 	copied.Distance += v.Distance
 	copied.ViewOfAngle += v.ViewOfAngle
 
@@ -48,7 +48,7 @@ func (cf *CameraFrame) Added(v *CameraFrame) *CameraFrame {
 func (cf *CameraFrame) Copy() IBaseFrame {
 	copied := NewCameraFrame(cf.Index())
 	copied.Position = cf.Position
-	copied.Radians = cf.Radians.Copy()
+	copied.Degrees = cf.Degrees.Copy()
 	copied.Distance = cf.Distance
 	copied.ViewOfAngle = cf.ViewOfAngle
 	copied.IsPerspectiveOff = cf.IsPerspectiveOff
@@ -75,8 +75,8 @@ func (nextCf *CameraFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseF
 
 	xy, yy, zy, ry, dy, vy := nextCf.Curves.Evaluate(prevCf.Index(), index, nextCf.Index())
 
-	q1 := mmath.NewMQuaternionFromRadians(prevCf.Radians.X, prevCf.Radians.Y, prevCf.Radians.Z)
-	q2 := mmath.NewMQuaternionFromRadians(nextCf.Radians.X, nextCf.Radians.Y, nextCf.Radians.Z)
+	q1 := mmath.NewMQuaternionFromRadians(prevCf.Degrees.X, prevCf.Degrees.Y, prevCf.Degrees.Z)
+	q2 := mmath.NewMQuaternionFromRadians(nextCf.Degrees.X, nextCf.Degrees.Y, nextCf.Degrees.Z)
 
 	cf.Quaternion = q1.Slerp(q2, ry)
 

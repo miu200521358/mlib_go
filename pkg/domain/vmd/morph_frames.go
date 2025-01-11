@@ -87,45 +87,9 @@ func (morphFrames *MorphFrames) Length() int {
 	return count
 }
 
-// ContainsActive 有効なキーフレが存在するか
-func (morphFrames *MorphFrames) ContainsActive(morphName string) bool {
-	morphFrames.lock.RLock()
-	defer morphFrames.lock.RUnlock()
-
-	if _, ok := morphFrames.data[morphName]; !ok {
-		return false
-	}
-
-	if morphFrames.data[morphName].Length() == 0 {
-		return false
-	}
-
-	for mf := range morphFrames.data[morphName].Iterator() {
-		if mf == nil {
-			return false
-		}
-
-		if !mmath.NearEquals(mf.Ratio, 0.0, 1e-2) {
-			return true
-		}
-
-		nextMf := morphFrames.data[morphName].Get(morphFrames.data[morphName].NextFrame(mf.Index()))
-
-		if nextMf == nil {
-			return false
-		}
-
-		if !mmath.NearEquals(nextMf.Ratio, 0.0, 1e-2) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func (morphFrames *MorphFrames) Clean() {
 	for morphName := range morphFrames.data {
-		if !morphFrames.ContainsActive(morphName) {
+		if !morphFrames.Get(morphName).ContainsActive() {
 			morphFrames.Delete(morphName)
 		}
 	}
@@ -153,4 +117,17 @@ func (morphFrames *MorphFrames) RegisteredIndexes() []int {
 	mmath.Unique(indexes)
 	mmath.Sort(indexes)
 	return indexes
+}
+
+func (morphFrames *MorphFrames) Iterator() <-chan *MorphNameFrames {
+	ch := make(chan *MorphNameFrames)
+	go func() {
+		morphFrames.lock.RLock()
+		defer morphFrames.lock.RUnlock()
+		for _, morphNameFrames := range morphFrames.data {
+			ch <- morphNameFrames
+		}
+		close(ch)
+	}()
+	return ch
 }

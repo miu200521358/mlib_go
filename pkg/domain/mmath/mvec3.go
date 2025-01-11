@@ -397,6 +397,22 @@ func (vec3 *MVec3) ClampIfVerySmall() *MVec3 {
 	return vec3
 }
 
+func (vec3 *MVec3) RadToDeg() *MVec3 {
+	return &MVec3{RadToDeg(vec3.X), RadToDeg(vec3.Y), RadToDeg(vec3.Z)}
+}
+
+func (vec3 *MVec3) DegToRad() *MVec3 {
+	return &MVec3{DegToRad(vec3.X), DegToRad(vec3.Y), DegToRad(vec3.Z)}
+}
+
+func (vec3 *MVec3) RadToQuaternion() *MQuaternion {
+	return NewMQuaternionFromRadians(vec3.X, vec3.Y, vec3.Z)
+}
+
+func (vec3 *MVec3) DegToQuaternion() *MQuaternion {
+	return NewMQuaternionFromDegrees(vec3.X, vec3.Y, vec3.Z)
+}
+
 // 線形補間
 func (vec3 *MVec3) Lerp(other *MVec3, t float64) *MVec3 {
 	switch {

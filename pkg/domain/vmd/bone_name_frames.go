@@ -283,3 +283,40 @@ func (boneNameFrames *BoneNameFrames) checkCurve(
 	checkNowZ := mmath.Lerp(startZ, endZ, zy)
 	return mmath.NearEquals(checkNowZ, nowZ, 1e-1)
 }
+
+// ContainsActive 有効なキーフレが存在するか
+func (boneNameFrames *BoneNameFrames) ContainsActive() bool {
+	boneNameFrames.lock.RLock()
+	defer boneNameFrames.lock.RUnlock()
+
+	if boneNameFrames.Length() == 0 {
+		return false
+	}
+
+	for bf := range boneNameFrames.Iterator() {
+		if bf == nil {
+			return false
+		}
+
+		if (bf.Position != nil && !bf.Position.NearEquals(mmath.MVec3Zero, 1e-2)) ||
+			(bf.Rotation != nil && !bf.Rotation.NearEquals(mmath.MQuaternionIdent, 1e-2)) {
+			return true
+		}
+
+		nextBf := boneNameFrames.Get(boneNameFrames.NextFrame(bf.Index()))
+
+		if nextBf == nil {
+			return false
+		}
+
+		if bf.Position != nil && nextBf.Position != nil && !bf.Position.NearEquals(nextBf.Position, 1e-2) {
+			return true
+		}
+
+		if bf.Rotation != nil && nextBf.Rotation != nil && !bf.Rotation.NearEquals(nextBf.Rotation, 1e-2) {
+			return true
+		}
+	}
+
+	return false
+}

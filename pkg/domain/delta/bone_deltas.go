@@ -54,19 +54,19 @@ func (bds *BoneDeltas) Contains(boneIndex int) bool {
 }
 func (bds *BoneDeltas) Iterator() <-chan struct {
 	Index int
-	Delta *BoneDelta
+	Value *BoneDelta
 } {
 	ch := make(chan struct {
 		Index int
-		Delta *BoneDelta
+		Value *BoneDelta
 	})
 	go func() {
 		for i, bd := range bds.data {
 			if bd != nil {
 				ch <- struct {
 					Index int
-					Delta *BoneDelta
-				}{Index: i, Delta: bd}
+					Value *BoneDelta
+				}{Index: i, Value: bd}
 			}
 		}
 		close(ch)

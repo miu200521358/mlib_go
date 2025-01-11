@@ -137,18 +137,18 @@ func (materialMorphDeltas *MaterialMorphDeltas) Update(m *MaterialMorphDelta) {
 
 func (materialMorphDeltas *MaterialMorphDeltas) Iterator() <-chan struct {
 	Index int
-	Delta *MaterialMorphDelta
+	Value *MaterialMorphDelta
 } {
 	ch := make(chan struct {
 		Index int
-		Delta *MaterialMorphDelta
+		Value *MaterialMorphDelta
 	})
 	go func() {
 		for i, m := range materialMorphDeltas.data {
 			ch <- struct {
 				Index int
-				Delta *MaterialMorphDelta
-			}{Index: i, Delta: m}
+				Value *MaterialMorphDelta
+			}{Index: i, Value: m}
 		}
 		close(ch)
 	}()

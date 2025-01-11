@@ -32,47 +32,6 @@ func (boneFrames *BoneFrames) Contains(boneName string) bool {
 	return false
 }
 
-// ContainsActive 有効なキーフレが存在するか
-func (boneFrames *BoneFrames) ContainsActive(boneName string) bool {
-	boneFrames.lock.RLock()
-	defer boneFrames.lock.RUnlock()
-
-	if _, ok := boneFrames.data[boneName]; !ok {
-		return false
-	}
-
-	if boneFrames.data[boneName].Length() == 0 {
-		return false
-	}
-
-	for bf := range boneFrames.data[boneName].Iterator() {
-		if bf == nil {
-			return false
-		}
-
-		if (bf.Position != nil && !bf.Position.NearEquals(mmath.MVec3Zero, 1e-2)) ||
-			(bf.Rotation != nil && !bf.Rotation.NearEquals(mmath.MQuaternionIdent, 1e-2)) {
-			return true
-		}
-
-		nextBf := boneFrames.data[boneName].Get(boneFrames.data[boneName].NextFrame(bf.Index()))
-
-		if nextBf == nil {
-			return false
-		}
-
-		if bf.Position != nil && nextBf.Position != nil && !bf.Position.NearEquals(nextBf.Position, 1e-2) {
-			return true
-		}
-
-		if bf.Rotation != nil && nextBf.Rotation != nil && !bf.Rotation.NearEquals(nextBf.Rotation, 1e-2) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func (boneFrames *BoneFrames) Append(boneNameFrames *BoneNameFrames) {
 	boneFrames.lock.Lock()
 	defer boneFrames.lock.Unlock()
@@ -167,8 +126,8 @@ func (boneFrames *BoneFrames) MinFrame() float32 {
 }
 
 func (boneFrames *BoneFrames) Clean() {
-	for boneName := range boneFrames.data {
-		if !boneFrames.ContainsActive(boneName) {
+	for boneName, boneNameFrames := range boneFrames.data {
+		if !boneNameFrames.ContainsActive() {
 			boneFrames.Delete(boneName)
 		}
 	}
@@ -186,4 +145,17 @@ func (boneFrames *BoneFrames) Reduce() *BoneFrames {
 	}
 	wg.Wait()
 	return reduced
+}
+
+func (boneFrames *BoneFrames) Iterator() <-chan *BoneNameFrames {
+	ch := make(chan *BoneNameFrames)
+	go func() {
+		boneFrames.lock.RLock()
+		defer boneFrames.lock.RUnlock()
+		for _, boneNameFrames := range boneFrames.data {
+			ch <- boneNameFrames
+		}
+		close(ch)
+	}()
+	return ch
 }

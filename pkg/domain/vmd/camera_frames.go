@@ -16,7 +16,7 @@ func (cameraFrames *CameraFrames) Clean() {
 	} else {
 		cf := cameraFrames.Get(cameraFrames.Indexes.Min())
 		if !(cf.Position == nil || cf.Position.Length() == 0 ||
-			cf.Radians == nil || cf.Radians.Length() == 0 ||
+			cf.Degrees == nil || cf.Degrees.Length() == 0 ||
 			cf.Distance == 0 || cf.ViewOfAngle == 0 || cf.IsPerspectiveOff) {
 			return
 		}
