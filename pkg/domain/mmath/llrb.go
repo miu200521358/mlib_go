@@ -21,8 +21,8 @@ type LlrbItem[T Number] struct {
 	value T
 }
 
-func NewLlrbItem[T Number](v T) LlrbItem[T] {
-	return LlrbItem[T]{value: v}
+func NewLlrbItem[T Number](v T) *LlrbItem[T] {
+	return &LlrbItem[T]{value: v}
 }
 
 // Less メソッドを実装
@@ -32,6 +32,10 @@ func (g LlrbItem[T]) Less(than llrb.Item) bool {
 		return false
 	}
 	return g.value < other.value
+}
+
+func (g LlrbItem[T]) Value() T {
+	return g.value
 }
 
 // ---------------------------------------------------------
@@ -106,8 +110,15 @@ func (li *LlrbIndexes[T]) Length() int {
 	return li.LLRB.Len()
 }
 
-func (li *LlrbIndexes[T]) Iter(itemFunc func(item llrb.Item) bool) {
-	li.LLRB.AscendGreaterOrEqual(li.LLRB.Min(), func(item llrb.Item) bool {
-		return itemFunc(item)
-	})
+// Iterator はコレクションのイテレータを提供します
+func (li *LlrbIndexes[T]) Iterator() <-chan T {
+	ch := make(chan T)
+	go func() {
+		li.LLRB.AscendGreaterOrEqual(li.LLRB.Min(), func(item llrb.Item) bool {
+			ch <- item.(LlrbItem[T]).Value()
+			return true
+		})
+		close(ch)
+	}()
+	return ch
 }
