@@ -1,0 +1,23 @@
+package vmd
+
+type IkFrames struct {
+	*BaseFrames[*IkFrame]
+}
+
+func NewIkFrames() *IkFrames {
+	return &IkFrames{
+		BaseFrames: NewBaseFrames[*IkFrame](),
+	}
+}
+
+func (ikFrames *IkFrames) Clean() {
+	if ikFrames.Length() > 1 {
+		return
+	} else {
+		cf := ikFrames.Get(ikFrames.Indexes.Min())
+		if !(cf.IkList == nil || len(cf.IkList) == 0) {
+			return
+		}
+		ikFrames.Delete(cf.Index())
+	}
+}
