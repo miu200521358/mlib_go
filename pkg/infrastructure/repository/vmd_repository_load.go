@@ -18,12 +18,12 @@ import (
 
 func (rep *VmdRepository) CanLoad(path string) (bool, error) {
 	if isExist, err := mfile.ExistsFile(path); err != nil || !isExist {
-		return false, fmt.Errorf(mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
+		return false, fmt.Errorf("%s", mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
 	}
 
 	_, _, ext := mfile.SplitPath(path)
 	if strings.ToLower(ext) != ".vmd" {
-		return false, fmt.Errorf(mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".vmd"}))
+		return false, fmt.Errorf("%s", mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".vmd"}))
 	}
 
 	return true, nil
@@ -34,8 +34,8 @@ func (rep *VmdRepository) Load(path string) (core.IHashModel, error) {
 	runtime.GOMAXPROCS(int(runtime.NumCPU()))
 	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
-	mlog.IL(mi18n.T("読み込み開始", map[string]interface{}{"Type": "Vmd", "Path": path}))
-	defer mlog.I(mi18n.T("読み込み終了", map[string]interface{}{"Type": "Vmd"}))
+	mlog.IL("%s", mi18n.T("読み込み開始", map[string]interface{}{"Type": "Vmd", "Path": path}))
+	defer mlog.I("%s", mi18n.T("読み込み終了", map[string]interface{}{"Type": "Vmd"}))
 
 	// モデルを新規作成
 	motion := rep.newFunc(path)
@@ -179,7 +179,7 @@ func (rep *VmdRepository) loadModel(motion *vmd.VmdMotion) error {
 }
 
 func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
-	defer mlog.I(mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("ボーン")}))
+	defer mlog.I("%s", mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("ボーン")}))
 
 	totalCount, err := rep.unpackUInt()
 	if err != nil {
@@ -190,7 +190,7 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 	bfValues := make([]float64, 7)
 	for i := 0; i < int(totalCount); i++ {
 		if i%10000 == 0 && i > 0 {
-			mlog.I(mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("ボーン"), "Index": i, "Total": totalCount}))
+			mlog.I("%s", mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("ボーン"), "Index": i, "Total": totalCount}))
 		}
 
 		bf := &vmd.BoneFrame{
@@ -239,7 +239,7 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 }
 
 func (rep *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
-	defer mlog.I(mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("モーフ")}))
+	defer mlog.I("%s", mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("モーフ")}))
 
 	totalCount, err := rep.unpackUInt()
 	if err != nil {
@@ -249,7 +249,7 @@ func (rep *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
 
 	for i := 0; i < int(totalCount); i++ {
 		if i%10000 == 0 && i > 0 {
-			mlog.I(mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("モーフ"), "Index": i, "Total": totalCount}))
+			mlog.I("%s", mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("モーフ"), "Index": i, "Total": totalCount}))
 		}
 
 		mf := vmd.NewMorphFrame(0)

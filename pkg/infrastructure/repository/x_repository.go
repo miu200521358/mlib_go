@@ -43,12 +43,12 @@ func (rep *XRepository) Save(overridePath string, data core.IHashModel, includeS
 
 func (rep *XRepository) CanLoad(path string) (bool, error) {
 	if isExist, err := mfile.ExistsFile(path); err != nil || !isExist {
-		return false, fmt.Errorf(mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
+		return false, fmt.Errorf("%s", mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
 	}
 
 	_, _, ext := mfile.SplitPath(path)
 	if strings.ToLower(ext) != ".x" {
-		return false, fmt.Errorf(mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".x"}))
+		return false, fmt.Errorf("%s", mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".x"}))
 	}
 
 	return true, nil
@@ -59,8 +59,8 @@ func (rep *XRepository) Load(path string) (core.IHashModel, error) {
 	runtime.GOMAXPROCS(int(runtime.NumCPU()))
 	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
-	mlog.IL(mi18n.T("読み込み開始", map[string]interface{}{"Type": "Pmx", "Path": path}))
-	defer mlog.I(mi18n.T("読み込み終了", map[string]interface{}{"Type": "X"}))
+	mlog.IL("%s", mi18n.T("読み込み開始", map[string]interface{}{"Type": "Pmx", "Path": path}))
+	defer mlog.I("%s", mi18n.T("読み込み終了", map[string]interface{}{"Type": "X"}))
 
 	// モデルを新規作成
 	model := rep.newFunc(path)

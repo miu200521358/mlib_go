@@ -32,8 +32,8 @@ func (rep *CsvRepository) Save(path string, model core.IHashModel, includeSystem
 	runtime.GOMAXPROCS(int(runtime.NumCPU()))
 	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
-	mlog.IL(mi18n.T("保存開始", map[string]interface{}{"Type": "Csv", "Path": path}))
-	defer mlog.I(mi18n.T("保存終了", map[string]interface{}{"Type": "Csv"}))
+	mlog.IL("%s", mi18n.T("保存開始", map[string]interface{}{"Type": "Csv", "Path": path}))
+	defer mlog.I("%s", mi18n.T("保存終了", map[string]interface{}{"Type": "Csv"}))
 
 	// CSVファイルを開く
 	file, err := os.Create(path)
@@ -65,8 +65,8 @@ func (rep *CsvRepository) Load(path string) (core.IHashModel, error) {
 	runtime.GOMAXPROCS(int(runtime.NumCPU()))
 	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
-	mlog.IL(mi18n.T("読み込み開始", map[string]interface{}{"Type": "Csv", "Path": path}))
-	defer mlog.I(mi18n.T("読み込み終了", map[string]interface{}{"Type": "Csv"}))
+	mlog.IL("%s", mi18n.T("読み込み開始", map[string]interface{}{"Type": "Csv", "Path": path}))
+	defer mlog.I("%s", mi18n.T("読み込み終了", map[string]interface{}{"Type": "Csv"}))
 
 	// CSVファイルを開く
 	file, err := os.Open(path)
@@ -91,12 +91,12 @@ func (rep *CsvRepository) Load(path string) (core.IHashModel, error) {
 
 func (rep *CsvRepository) CanLoad(path string) (bool, error) {
 	if isExist, err := mfile.ExistsFile(path); err != nil || !isExist {
-		return false, fmt.Errorf(mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
+		return false, fmt.Errorf("%s", mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
 	}
 
 	_, _, ext := mfile.SplitPath(path)
 	if strings.ToLower(ext) != ".csv" {
-		return false, fmt.Errorf(mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".csv"}))
+		return false, fmt.Errorf("%s", mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".csv"}))
 	}
 
 	return true, nil

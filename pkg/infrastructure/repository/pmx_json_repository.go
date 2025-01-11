@@ -104,12 +104,12 @@ func NewPmxJsonRepository() *PmxJsonRepository {
 
 func (rep *PmxJsonRepository) CanLoad(path string) (bool, error) {
 	if isExist, err := mfile.ExistsFile(path); err != nil || !isExist {
-		return false, fmt.Errorf(mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
+		return false, fmt.Errorf("%s", mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
 	}
 
 	_, _, ext := mfile.SplitPath(path)
 	if strings.ToLower(ext) != ".json" && strings.ToLower(ext) != ".pmx" {
-		return false, fmt.Errorf(mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".json, .pmx"}))
+		return false, fmt.Errorf("%s", mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".json, .pmx"}))
 	}
 
 	return true, nil
@@ -119,8 +119,8 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 	runtime.GOMAXPROCS(int(runtime.NumCPU()))
 	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
-	mlog.IL(mi18n.T("保存開始", map[string]interface{}{"Type": "Json", "Path": overridePath}))
-	defer mlog.I(mi18n.T("保存終了", map[string]interface{}{"Type": "Json"}))
+	mlog.IL("%s", mi18n.T("保存開始", map[string]interface{}{"Type": "Json", "Path": overridePath}))
+	defer mlog.I("%s", mi18n.T("保存終了", map[string]interface{}{"Type": "Json"}))
 
 	model := data.(*pmx.PmxModel)
 
@@ -263,8 +263,8 @@ func (rep *PmxJsonRepository) Load(path string) (core.IHashModel, error) {
 	runtime.GOMAXPROCS(int(runtime.NumCPU()))
 	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
-	mlog.IL(mi18n.T("読み込み開始", map[string]interface{}{"Type": "Json", "Path": path}))
-	defer mlog.I(mi18n.T("読み込み終了", map[string]interface{}{"Type": "Json"}))
+	mlog.IL("%s", mi18n.T("読み込み開始", map[string]interface{}{"Type": "Json", "Path": path}))
+	defer mlog.I("%s", mi18n.T("読み込み終了", map[string]interface{}{"Type": "Json"}))
 
 	// モデルを新規作成
 	model := rep.newFunc(path)

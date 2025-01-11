@@ -28,12 +28,12 @@ func (rep *PmxXRepository) Save(overridePath string, data core.IHashModel, inclu
 
 func (rep *PmxXRepository) CanLoad(path string) (bool, error) {
 	if isExist, err := mfile.ExistsFile(path); err != nil || !isExist {
-		return false, fmt.Errorf(mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
+		return false, fmt.Errorf("%s", mi18n.T("ファイル存在エラー", map[string]interface{}{"Path": path}))
 	}
 
 	_, _, ext := mfile.SplitPath(path)
 	if strings.ToLower(ext) != ".x" && strings.ToLower(ext) != ".pmx" {
-		return false, fmt.Errorf(mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".x, .pmx"}))
+		return false, fmt.Errorf("%s", mi18n.T("拡張子エラー", map[string]interface{}{"Path": path, "Ext": ".x, .pmx"}))
 	}
 
 	return true, nil

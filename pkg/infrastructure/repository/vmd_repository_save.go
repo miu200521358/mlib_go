@@ -24,8 +24,8 @@ func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includ
 	runtime.GOMAXPROCS(int(runtime.NumCPU()))
 	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
-	mlog.IL(mi18n.T("読み込み開始", map[string]interface{}{"Type": "Vmd", "Path": overridePath}))
-	defer mlog.I(mi18n.T("読み込み終了", map[string]interface{}{"Type": "Vmd"}))
+	mlog.IL("%s", mi18n.T("読み込み開始", map[string]interface{}{"Type": "Vmd", "Path": overridePath}))
+	defer mlog.I("%s", mi18n.T("読み込み終了", map[string]interface{}{"Type": "Vmd"}))
 
 	motion := data.(*vmd.VmdMotion)
 
@@ -51,7 +51,7 @@ func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includ
 	// Convert model name to shift_jis encoding
 	modelBName, err := rep.encodeName(motion.Name(), 20)
 	if err != nil {
-		mlog.W(mi18n.T("モデル名エンコードエラー", map[string]interface{}{"Name": motion.Name()}))
+		mlog.W("%s", mi18n.T("モデル名エンコードエラー", map[string]interface{}{"Name": motion.Name()}))
 		modelBName = []byte("Vmd Model")
 	}
 
@@ -64,49 +64,49 @@ func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includ
 	// Write the bone frames
 	err = rep.saveBoneFrames(fout, motion)
 	if err != nil {
-		mlog.E(mi18n.T("ボーンフレーム書き込みエラー"))
+		mlog.E("%s", mi18n.T("ボーンフレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the morph frames
 	err = rep.saveMorphFrames(fout, motion)
 	if err != nil {
-		mlog.E(mi18n.T("モーフフレーム書き込みエラー"))
+		mlog.E("%s", mi18n.T("モーフフレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the camera frames
 	err = rep.saveCameraFrames(fout, motion)
 	if err != nil {
-		mlog.E(mi18n.T("カメラフレーム書き込みエラー"))
+		mlog.E("%s", mi18n.T("カメラフレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the Light frames
 	err = rep.saveLightFrames(fout, motion)
 	if err != nil {
-		mlog.E(mi18n.T("照明フレーム書き込みエラー"))
+		mlog.E("%s", mi18n.T("照明フレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the Shadow frames
 	err = rep.saveShadowFrames(fout, motion)
 	if err != nil {
-		mlog.E(mi18n.T("照明フレーム書き込みエラー"))
+		mlog.E("%s", mi18n.T("照明フレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the IK frames
 	err = rep.saveIkFrames(fout, motion)
 	if err != nil {
-		mlog.E(mi18n.T("IKフレーム書き込みエラー"))
+		mlog.E("%s", mi18n.T("IKフレーム書き込みエラー"))
 		return err
 	}
 
 	// foutを書き込んで終了する
 	err = fout.Close()
 	if err != nil {
-		mlog.E(mi18n.T("ファイルクローズエラー", map[string]interface{}{"Path": motion.Path()}))
+		mlog.E("%s", mi18n.T("ファイルクローズエラー", map[string]interface{}{"Path": motion.Path()}))
 		return err
 	}
 
@@ -139,7 +139,7 @@ func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) e
 		}
 
 		if n%10000 == 0 && n > 0 {
-			mlog.I(mi18n.T("保存途中", map[string]interface{}{"Type": mi18n.T("ボーン"), "Index": n, "Total": count}))
+			mlog.I("%s", mi18n.T("保存途中", map[string]interface{}{"Type": mi18n.T("ボーン"), "Index": n, "Total": count}))
 		}
 		n++
 	}
@@ -168,7 +168,7 @@ func (rep *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.Bone
 
 	encodedName, err := rep.encodeName(name, 15)
 	if err != nil {
-		mlog.W(mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": name}))
+		mlog.W("%s", mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": name}))
 		return err
 	}
 
@@ -236,7 +236,7 @@ func (rep *VmdRepository) saveMorphFrames(fout *os.File, motion *vmd.VmdMotion) 
 		}
 
 		if n%10000 == 0 && n > 0 {
-			mlog.I(mi18n.T("保存途中", map[string]interface{}{"Type": mi18n.T("モーフ"), "Index": n, "Total": count}))
+			mlog.I("%s", mi18n.T("保存途中", map[string]interface{}{"Type": mi18n.T("モーフ"), "Index": n, "Total": count}))
 		}
 		n++
 	}
@@ -251,7 +251,7 @@ func (rep *VmdRepository) saveMorphFrame(fout *os.File, name string, mf *vmd.Mor
 
 	encodedName, err := rep.encodeName(name, 15)
 	if err != nil {
-		mlog.W(mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": name}))
+		mlog.W("%s", mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": name}))
 		return err
 	}
 
@@ -435,7 +435,7 @@ func (rep *VmdRepository) saveIkFrame(fout *os.File, ikf *vmd.IkFrame) error {
 		for _, ik := range fs {
 			encodedName, err := rep.encodeName(ik.BoneName, 20)
 			if err != nil {
-				mlog.W(mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": ik.BoneName}))
+				mlog.W("%s", mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": ik.BoneName}))
 				return err
 			}
 
