@@ -16,7 +16,8 @@ func DeformMorph(
 	if morphNames == nil {
 		// モーフの指定がなければ全モーフチェック
 		morphNames = make([]string, 0)
-		for morph := range model.Morphs.Iterator() {
+		for m := range model.Morphs.Iterator() {
+			morph := m.Value
 			morphNames = append(morphNames, morph.Name())
 		}
 	}

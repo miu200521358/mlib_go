@@ -191,8 +191,8 @@ func (rep *PmxRepository) saveVertices(fout *os.File, model *pmx.PmxModel, boneI
 		return err
 	}
 
-	for vertex := range model.Vertices.Iterator() {
-
+	for v := range model.Vertices.Iterator() {
+		vertex := v.Value
 		rep.writeNumber(fout, binaryType_float, vertex.Position.X, 0.0, false)
 		rep.writeNumber(fout, binaryType_float, vertex.Position.Y, 0.0, false)
 		rep.writeNumber(fout, binaryType_float, vertex.Position.Z, 0.0, false)
@@ -268,7 +268,8 @@ func (rep *PmxRepository) saveFaces(fout *os.File, model *pmx.PmxModel, vertexId
 		return err
 	}
 
-	for face := range model.Faces.Iterator() {
+	for f := range model.Faces.Iterator() {
+		face := f.Value
 		for _, vidx := range face.VertexIndexes {
 			err = rep.writeNumber(fout, vertexIdxType, float64(vidx), 0.0, true)
 			if err != nil {
@@ -287,7 +288,8 @@ func (rep *PmxRepository) saveTextures(fout *os.File, model *pmx.PmxModel) error
 		return err
 	}
 
-	for texture := range model.Textures.Iterator() {
+	for t := range model.Textures.Iterator() {
+		texture := t.Value
 		err = rep.writeText(fout, texture.Name(), "")
 		if err != nil {
 			return err
@@ -306,7 +308,8 @@ func (rep *PmxRepository) saveMaterials(fout *os.File, model *pmx.PmxModel, text
 		return err
 	}
 
-	for material := range model.Materials.Iterator() {
+	for m := range model.Materials.Iterator() {
+		material := m.Value
 		err = rep.writeText(fout, material.Name(), fmt.Sprintf("Material %d", material.Index()))
 		if err != nil {
 			return err
@@ -850,7 +853,8 @@ func (rep *PmxRepository) saveDisplaySlots(fout *os.File, model *pmx.PmxModel, b
 		return err
 	}
 
-	for displaySlot := range model.DisplaySlots.Iterator() {
+	for d := range model.DisplaySlots.Iterator() {
+		displaySlot := d.Value
 		err = rep.writeText(fout, displaySlot.Name(), fmt.Sprintf("Display %d", displaySlot.Index()))
 		if err != nil {
 			return err
@@ -896,7 +900,8 @@ func (rep *PmxRepository) saveRigidBodies(fout *os.File, model *pmx.PmxModel, bo
 		return err
 	}
 
-	for rigidbody := range model.RigidBodies.Iterator() {
+	for r := range model.RigidBodies.Iterator() {
+		rigidbody := r.Value
 		err = rep.writeText(fout, rigidbody.Name(), fmt.Sprintf("Rigidbody %d", rigidbody.Index()))
 		if err != nil {
 			return err
@@ -995,7 +1000,8 @@ func (rep *PmxRepository) saveJoints(fout *os.File, model *pmx.PmxModel, rigidbo
 		return err
 	}
 
-	for joint := range model.Joints.Iterator() {
+	for j := range model.Joints.Iterator() {
+		joint := j.Value
 		err = rep.writeText(fout, joint.Name(), fmt.Sprintf("Joint %d", joint.Index()))
 		if err != nil {
 			return err

@@ -732,7 +732,8 @@ func deformIk(
 		bif := vmd.NewIkFrame(0)
 		bif.Registered = true
 
-		for bone := range model.Bones.Iterator() {
+		for b := range model.Bones.Iterator() {
+			bone := b.Value
 			if bone.IsIK() {
 				ef := vmd.NewIkEnableFrame(0)
 				ef.Registered = true
@@ -757,7 +758,8 @@ func deformIk(
 			boneNames[delta.Value.Bone.Name()] = struct{}{}
 		}
 
-		for bone := range model.Bones.Iterator() {
+		for b := range model.Bones.Iterator() {
+			bone := b.Value
 			if _, ok := boneNames[bone.Name()]; !ok {
 				bf := motion.BoneFrames.Get(bone.Name()).Get(frame)
 				ikOffMotion.AppendRegisteredBoneFrame(bone.Name(), bf)

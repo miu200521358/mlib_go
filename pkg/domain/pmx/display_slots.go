@@ -16,10 +16,10 @@ func NewDisplaySlots(capacity int) *DisplaySlots {
 }
 
 func (displaySlots *DisplaySlots) GetByBoneIndex(boneIndex int) *DisplaySlot {
-	for displaySlot := range displaySlots.Iterator() {
-		for _, reference := range displaySlot.References {
+	for d := range displaySlots.Iterator() {
+		for _, reference := range d.Value.References {
 			if reference.DisplayType == DISPLAY_TYPE_BONE && reference.DisplayIndex == boneIndex {
-				return displaySlot
+				return d.Value
 			}
 		}
 	}

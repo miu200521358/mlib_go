@@ -42,21 +42,24 @@ func TestXRepository_Load1(t *testing.T) {
 	expectedData, _ := pmxRep.Load(pmxPath)
 	expectedModel := expectedData.(*pmx.PmxModel)
 
-	for v := range model.Vertices.Iterator() {
+	for vt := range model.Vertices.Iterator() {
+		v := vt.Value
 		expectedV, _ := expectedModel.Vertices.Get(v.Index())
 		if !v.Position.NearEquals(expectedV.Position, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, v.Position)
 		}
 	}
 
-	for f := range model.Faces.Iterator() {
+	for ft := range model.Faces.Iterator() {
+		f := ft.Value
 		expectedF, _ := expectedModel.Faces.Get(f.Index())
 		if f.VertexIndexes[0] != expectedF.VertexIndexes[0] || f.VertexIndexes[1] != expectedF.VertexIndexes[1] || f.VertexIndexes[2] != expectedF.VertexIndexes[2] {
 			t.Errorf("Expected VertexIndexes to be %v, got %v", expectedF.VertexIndexes, f.VertexIndexes)
 		}
 	}
 
-	for m := range model.Materials.Iterator() {
+	for mt := range model.Materials.Iterator() {
+		m := mt.Value
 		expectedT, _ := expectedModel.Materials.Get(m.Index())
 		if !m.Diffuse.NearEquals(expectedT.Diffuse, 1e-5) {
 			t.Errorf("Expected Diffuse to be %v, got %v", expectedT.Diffuse, m.Diffuse)
@@ -120,14 +123,16 @@ func TestXRepository_Load2(t *testing.T) {
 	expectedData, _ := pmxRep.Load(pmxPath)
 	expectedModel := expectedData.(*pmx.PmxModel)
 
-	for v := range model.Vertices.Iterator() {
+	for vt := range model.Vertices.Iterator() {
+		v := vt.Value
 		expectedV, _ := expectedModel.Vertices.Get(v.Index())
 		if !v.Position.NearEquals(expectedV.Position, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, v.Position)
 		}
 	}
 
-	for f := range model.Faces.Iterator() {
+	for ft := range model.Faces.Iterator() {
+		f := ft.Value
 		expectedF, _ := expectedModel.Faces.Get(f.Index())
 		if f.VertexIndexes[0] != expectedF.VertexIndexes[0] || f.VertexIndexes[1] != expectedF.VertexIndexes[1] || f.VertexIndexes[2] != expectedF.VertexIndexes[2] {
 			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", f.Index(), expectedF.VertexIndexes, f.VertexIndexes)
@@ -212,21 +217,24 @@ func TestXRepository_Load4(t *testing.T) {
 	expectedData, _ := pmxRep.Load(pmxPath)
 	expectedModel := expectedData.(*pmx.PmxModel)
 
-	for v := range model.Vertices.Iterator() {
+	for vt := range model.Vertices.Iterator() {
+		v := vt.Value
 		expectedV, _ := expectedModel.Vertices.Get(v.Index())
 		if !v.Position.NearEquals(expectedV.Position, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, v.Position)
 		}
 	}
 
-	for f := range model.Faces.Iterator() {
+	for ft := range model.Faces.Iterator() {
+		f := ft.Value
 		expectedF, _ := expectedModel.Faces.Get(f.Index())
 		if f.VertexIndexes[0] != expectedF.VertexIndexes[0] || f.VertexIndexes[1] != expectedF.VertexIndexes[1] || f.VertexIndexes[2] != expectedF.VertexIndexes[2] {
 			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", f.Index(), expectedF.VertexIndexes, f.VertexIndexes)
 		}
 	}
 
-	for m := range model.Materials.Iterator() {
+	for mt := range model.Materials.Iterator() {
+		m := mt.Value
 		expectedT, _ := expectedModel.Materials.Get(m.Index())
 		if !m.Diffuse.NearEquals(expectedT.Diffuse, 1e-5) {
 			t.Errorf("Expected Diffuse to be %v, got %v", expectedT.Diffuse, m.Diffuse)
@@ -290,21 +298,24 @@ func TestXRepository_Load5(t *testing.T) {
 	expectedData, _ := pmxRep.Load(pmxPath)
 	expectedModel := expectedData.(*pmx.PmxModel)
 
-	for v := range model.Vertices.Iterator() {
+	for vt := range model.Vertices.Iterator() {
+		v := vt.Value
 		expectedV, _ := expectedModel.Vertices.Get(v.Index())
 		if !v.Position.NearEquals(expectedV.Position, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, v.Position)
 		}
 	}
 
-	for f := range model.Faces.Iterator() {
+	for ft := range model.Faces.Iterator() {
+		f := ft.Value
 		expectedF, _ := expectedModel.Faces.Get(f.Index())
 		if f.VertexIndexes[0] != expectedF.VertexIndexes[0] || f.VertexIndexes[1] != expectedF.VertexIndexes[1] || f.VertexIndexes[2] != expectedF.VertexIndexes[2] {
 			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", f.Index(), expectedF.VertexIndexes, f.VertexIndexes)
 		}
 	}
 
-	for m := range model.Materials.Iterator() {
+	for mt := range model.Materials.Iterator() {
+		m := mt.Value
 		expectedT, _ := expectedModel.Materials.Get(m.Index())
 		if !m.Diffuse.NearEquals(expectedT.Diffuse, 1e-5) {
 			t.Errorf("Expected Diffuse to be %v, got %v", expectedT.Diffuse, m.Diffuse)
@@ -368,21 +379,24 @@ func TestXRepository_Load6(t *testing.T) {
 	expectedData, _ := pmxRep.Load(pmxPath)
 	expectedModel := expectedData.(*pmx.PmxModel)
 
-	for v := range model.Vertices.Iterator() {
+	for vt := range model.Vertices.Iterator() {
+		v := vt.Value
 		expectedV, _ := expectedModel.Vertices.Get(v.Index())
 		if !v.Position.NearEquals(expectedV.Position, 1e-5) {
 			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, v.Position)
 		}
 	}
 
-	for f := range model.Faces.Iterator() {
+	for ft := range model.Faces.Iterator() {
+		f := ft.Value
 		expectedF, _ := expectedModel.Faces.Get(f.Index())
 		if f.VertexIndexes[0] != expectedF.VertexIndexes[0] || f.VertexIndexes[1] != expectedF.VertexIndexes[1] || f.VertexIndexes[2] != expectedF.VertexIndexes[2] {
 			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", f.Index(), expectedF.VertexIndexes, f.VertexIndexes)
 		}
 	}
 
-	for m := range model.Materials.Iterator() {
+	for mt := range model.Materials.Iterator() {
+		m := mt.Value
 		expectedT, _ := expectedModel.Materials.Get(m.Index())
 		if !m.Diffuse.NearEquals(expectedT.Diffuse, 1e-5) {
 			t.Errorf("Expected Diffuse to be %v, got %v", expectedT.Diffuse, m.Diffuse)

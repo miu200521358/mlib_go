@@ -134,7 +134,8 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 	// 頂点をボーンINDEX別に纏める
 	allBoneVertices := model.Vertices.GetMapByBoneIndex(0.0)
 
-	for bone := range model.Bones.Iterator() {
+	for b := range model.Bones.Iterator() {
+		bone := b.Value
 		boneData := boneJson{
 			Index:        bone.Index(),
 			Name:         bone.Name(),
@@ -191,7 +192,8 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 	}
 
 	// 表示枠をJSONに変換
-	for displaySlot := range model.DisplaySlots.Iterator() {
+	for d := range model.DisplaySlots.Iterator() {
+		displaySlot := d.Value
 		displaySlotData := displaySlotJson{
 			Index:       displaySlot.Index(),
 			Name:        displaySlot.Name(),
@@ -212,16 +214,17 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 	}
 
 	// システム用剛体をJSONに変換
-	for rigidBody := range model.RigidBodies.Iterator() {
-		if !strings.Contains(rigidBody.Name(), pmx.MLIB_PREFIX) {
+	for r := range model.RigidBodies.Iterator() {
+		rb := r.Value
+		if !strings.Contains(rb.Name(), pmx.MLIB_PREFIX) {
 			continue
 		}
 
 		rigidBody := &rigidBodyJson{
 			Index:              len(jsonData.RigidBodies),
-			Name:               rigidBody.Name(),
-			EnglishName:        rigidBody.EnglishName(),
-			BoneIndex:          rigidBody.Index(),
+			Name:               rb.Name(),
+			EnglishName:        rb.EnglishName(),
+			BoneIndex:          rb.Index(),
 			CollisionGroup:     0,
 			CollisionGroupMask: 0,
 			Mass:               0.0,
@@ -231,9 +234,9 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 			Friction:           0.0,
 			PhysicsType:        int(pmx.PHYSICS_TYPE_STATIC),
 			ShapeType:          int(pmx.SHAPE_SPHERE),
-			Size:               rigidBody.Size,
-			Position:           rigidBody.Position,
-			Rotation:           rigidBody.Rotation,
+			Size:               rb.Size,
+			Position:           rb.Position,
+			Rotation:           rb.Rotation,
 		}
 
 		jsonData.RigidBodies = append(jsonData.RigidBodies, rigidBody)

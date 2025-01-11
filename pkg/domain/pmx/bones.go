@@ -174,7 +174,8 @@ func (bones *Bones) Setup() {
 	bones.LayerSortedBoneIndexes = make(map[bool][]int)
 	bones.DeformBoneIndexes = make(map[int][]int)
 
-	for bone := range bones.Iterator() {
+	for b := range bones.Iterator() {
+		bone := b.Value
 		// 関係ボーンリストを一旦クリア
 		bone.IkLinkBoneIndexes = make([]int, 0)
 		bone.IkTargetBoneIndexes = make([]int, 0)
@@ -257,9 +258,9 @@ func (bones *Bones) Setup() {
 	// 変形前と変形後に分けてINDEXリストを生成
 	bones.createLayerIndexes()
 
-	for bone := range bones.Iterator() {
+	for b := range bones.Iterator() {
 		// ボーンのデフォームINDEXリストを取得
-		bones.createLayerSortedBones(bone)
+		bones.createLayerSortedBones(b.Value)
 	}
 }
 
@@ -284,8 +285,9 @@ func (bones *Bones) createLayerIndexes() {
 	bones.LayerSortedBoneIndexes[true] = make([]int, 0)
 
 	layerIndexes := make(layerIndexes, 0, bones.Length())
-	for bone := range bones.Iterator() {
-		layerIndexes = append(layerIndexes, layerIndex{isAfterPhysics: bone.IsAfterPhysicsDeform(), layer: bone.Layer, index: bone.Index()})
+	for b := range bones.Iterator() {
+		layerIndexes = append(layerIndexes,
+			layerIndex{isAfterPhysics: b.Value.IsAfterPhysicsDeform(), layer: b.Value.Layer, index: b.Index})
 	}
 	sort.Sort(layerIndexes)
 

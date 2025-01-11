@@ -111,7 +111,7 @@ type MaterialMorphDeltas struct {
 func NewMaterialMorphDeltas(materials *pmx.Materials) *MaterialMorphDeltas {
 	deltas := make([]*MaterialMorphDelta, materials.Length())
 	for m := range materials.Iterator() {
-		deltas[m.Index()] = NewMaterialMorphDelta(m)
+		deltas[m.Index] = NewMaterialMorphDelta(m.Value)
 	}
 
 	return &MaterialMorphDeltas{

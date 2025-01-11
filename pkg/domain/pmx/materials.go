@@ -25,11 +25,12 @@ func (materials *Materials) Setup(vertices *Vertices, faces *Faces, textures *Te
 	prevVertexCount := 0
 
 	for v := range vertices.Iterator() {
-		v.MaterialIndexes = make([]int, 0)
+		v.Value.MaterialIndexes = make([]int, 0)
 	}
 
 	for m := range materials.Iterator() {
-		for j := prevVertexCount; j < prevVertexCount+int(m.VerticesCount/3); j++ {
+		material := m.Value
+		for j := prevVertexCount; j < prevVertexCount+int(material.VerticesCount/3); j++ {
 			face, err := faces.Get(j)
 			if err != nil {
 				continue
@@ -39,29 +40,29 @@ func (materials *Materials) Setup(vertices *Vertices, faces *Faces, textures *Te
 				if err != nil {
 					continue
 				}
-				if !slices.Contains(vertex.MaterialIndexes, m.Index()) {
-					vertex.MaterialIndexes = append(vertex.MaterialIndexes, m.Index())
+				if !slices.Contains(vertex.MaterialIndexes, material.Index()) {
+					vertex.MaterialIndexes = append(vertex.MaterialIndexes, material.Index())
 				}
 			}
 		}
 
-		prevVertexCount += int(m.VerticesCount / 3)
+		prevVertexCount += int(material.VerticesCount / 3)
 
-		if m.TextureIndex != -1 && textures.Contains(m.TextureIndex) {
-			texture, err := textures.Get(m.TextureIndex)
+		if material.TextureIndex != -1 && textures.Contains(material.TextureIndex) {
+			texture, err := textures.Get(material.TextureIndex)
 			if err == nil {
 				texture.TextureType = TEXTURE_TYPE_TEXTURE
 			}
 		}
-		if m.ToonTextureIndex != -1 && m.ToonSharingFlag == TOON_SHARING_INDIVIDUAL &&
-			textures.Contains(m.ToonTextureIndex) {
-			texture, err := textures.Get(m.ToonTextureIndex)
+		if material.ToonTextureIndex != -1 && material.ToonSharingFlag == TOON_SHARING_INDIVIDUAL &&
+			textures.Contains(material.ToonTextureIndex) {
+			texture, err := textures.Get(material.ToonTextureIndex)
 			if err == nil {
 				texture.TextureType = TEXTURE_TYPE_TOON
 			}
 		}
-		if m.SphereTextureIndex != -1 && textures.Contains(m.SphereTextureIndex) {
-			texture, err := textures.Get(m.SphereTextureIndex)
+		if material.SphereTextureIndex != -1 && textures.Contains(material.SphereTextureIndex) {
+			texture, err := textures.Get(material.SphereTextureIndex)
 			if err == nil {
 				texture.TextureType = TEXTURE_TYPE_SPHERE
 			}

@@ -131,12 +131,21 @@ func (im *IndexNameModels[T]) RemoveByName(name string) error {
 	return errors.New("name not found")
 }
 
-// Iterator はコレクションのイテレータを提供します
-func (im *IndexNameModels[T]) Iterator() <-chan T {
-	ch := make(chan T)
+// Iterator はコレクションの添字と値をペアで提供するイテレータを提供します
+func (im *IndexNameModels[T]) Iterator() <-chan struct {
+	Index int
+	Value T
+} {
+	ch := make(chan struct {
+		Index int
+		Value T
+	})
 	go func() {
-		for _, value := range im.values {
-			ch <- value
+		for i, value := range im.values {
+			ch <- struct {
+				Index int
+				Value T
+			}{Index: i, Value: value}
 		}
 		close(ch)
 	}()

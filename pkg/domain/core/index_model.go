@@ -74,12 +74,21 @@ func (im *IndexModels[T]) Contains(index int) bool {
 	return !reflect.ValueOf(im.values[index]).IsNil()
 }
 
-// Iterator はコレクションのイテレータを提供します
-func (im *IndexModels[T]) Iterator() <-chan T {
-	ch := make(chan T)
+// Iterator はコレクションの添字と値をペアで提供するイテレータを提供します
+func (im *IndexModels[T]) Iterator() <-chan struct {
+	Index int
+	Value T
+} {
+	ch := make(chan struct {
+		Index int
+		Value T
+	})
 	go func() {
-		for _, value := range im.values {
-			ch <- value
+		for i, value := range im.values {
+			ch <- struct {
+				Index int
+				Value T
+			}{Index: i, Value: value}
 		}
 		close(ch)
 	}()
