@@ -12,12 +12,36 @@ func NewVertexMorphDeltas() *VertexMorphDeltas {
 	}
 }
 
+func (vertexMorphDeltas *VertexMorphDeltas) Length() int {
+	return len(vertexMorphDeltas.data)
+}
+
 func (vertexMorphDeltas *VertexMorphDeltas) Get(index int) *VertexMorphDelta {
 	return vertexMorphDeltas.data[index]
 }
 
 func (vertexMorphDeltas *VertexMorphDeltas) Update(v *VertexMorphDelta) {
 	vertexMorphDeltas.data[v.Index] = v
+}
+
+func (vertexMorphDeltas *VertexMorphDeltas) Iterator() <-chan struct {
+	Index int
+	Value *VertexMorphDelta
+} {
+	ch := make(chan struct {
+		Index int
+		Value *VertexMorphDelta
+	})
+	go func() {
+		for i, v := range vertexMorphDeltas.data {
+			ch <- struct {
+				Index int
+				Value *VertexMorphDelta
+			}{Index: i, Value: v}
+		}
+		close(ch)
+	}()
+	return ch
 }
 
 type WireVertexMorphDeltas struct {
@@ -42,6 +66,10 @@ func NewBoneMorphDeltas(bones *pmx.Bones) *BoneMorphDeltas {
 	}
 }
 
+func (boneMorphDeltas *BoneMorphDeltas) Length() int {
+	return len(boneMorphDeltas.data)
+}
+
 func (boneMorphDeltas *BoneMorphDeltas) Get(boneIndex int) *BoneMorphDelta {
 	if boneIndex < 0 || boneIndex >= len(boneMorphDeltas.data) {
 		return nil
@@ -52,6 +80,26 @@ func (boneMorphDeltas *BoneMorphDeltas) Get(boneIndex int) *BoneMorphDelta {
 
 func (boneMorphDeltas *BoneMorphDeltas) Update(b *BoneMorphDelta) {
 	boneMorphDeltas.data[b.BoneIndex] = b
+}
+
+func (boneMorphDeltas *BoneMorphDeltas) Iterator() <-chan struct {
+	Index int
+	Delta *BoneMorphDelta
+} {
+	ch := make(chan struct {
+		Index int
+		Delta *BoneMorphDelta
+	})
+	go func() {
+		for i, b := range boneMorphDeltas.data {
+			ch <- struct {
+				Index int
+				Delta *BoneMorphDelta
+			}{Index: i, Delta: b}
+		}
+		close(ch)
+	}()
+	return ch
 }
 
 // ----------------------------
@@ -71,6 +119,10 @@ func NewMaterialMorphDeltas(materials *pmx.Materials) *MaterialMorphDeltas {
 	}
 }
 
+func (materialMorphDeltas *MaterialMorphDeltas) Length() int {
+	return len(materialMorphDeltas.data)
+}
+
 func (materialMorphDeltas *MaterialMorphDeltas) Get(index int) *MaterialMorphDelta {
 	if index < 0 || index >= len(materialMorphDeltas.data) {
 		return nil
@@ -81,6 +133,26 @@ func (materialMorphDeltas *MaterialMorphDeltas) Get(index int) *MaterialMorphDel
 
 func (materialMorphDeltas *MaterialMorphDeltas) Update(m *MaterialMorphDelta) {
 	materialMorphDeltas.data[m.Index()] = m
+}
+
+func (materialMorphDeltas *MaterialMorphDeltas) Iterator() <-chan struct {
+	Index int
+	Delta *MaterialMorphDelta
+} {
+	ch := make(chan struct {
+		Index int
+		Delta *MaterialMorphDelta
+	})
+	go func() {
+		for i, m := range materialMorphDeltas.data {
+			ch <- struct {
+				Index int
+				Delta *MaterialMorphDelta
+			}{Index: i, Delta: m}
+		}
+		close(ch)
+	}()
+	return ch
 }
 
 type MorphDeltas struct {
