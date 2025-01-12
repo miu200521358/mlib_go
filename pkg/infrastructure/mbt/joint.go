@@ -56,7 +56,6 @@ func (physics *MPhysics) initJointsByBoneDeltas(
 			}
 
 			boneTransform := bt.NewBtTransform()
-			defer bt.DeleteBtTransform(boneTransform)
 
 			mat := mgl.NewGlMat4(boneDeltas.Get(bone.Index()).FilledGlobalMatrix())
 			boneTransform.SetFromOpenGLMatrix(&mat[0])
@@ -68,6 +67,9 @@ func (physics *MPhysics) initJointsByBoneDeltas(
 			jointTransform.Mult(boneTransform, btJointLocalTransform)
 
 			physics.initJoint(modelIndex, joint, jointTransform)
+
+			bt.DeleteBtTransform(boneTransform)
+			bt.DeleteBtTransform(btJointLocalTransform)
 		}
 	}
 }

@@ -58,7 +58,6 @@ func (physics *MPhysics) initRigidBodiesByBoneDeltas(
 
 		btRigidBodyTransform := bt.NewBtTransform()
 		boneTransform := bt.NewBtTransform()
-		defer bt.DeleteBtTransform(boneTransform)
 
 		mat := mgl.NewGlMat4(boneDeltas.Get(bone.Index()).FilledGlobalMatrix())
 		boneTransform.SetFromOpenGLMatrix(&mat[0])
@@ -71,6 +70,9 @@ func (physics *MPhysics) initRigidBodiesByBoneDeltas(
 
 		// 物理設定の初期化
 		physics.initRigidBody(modelIndex, rigidBody, btRigidBodyTransform)
+
+		bt.DeleteBtTransform(boneTransform)
+		bt.DeleteBtTransform(btRigidBodyLocalTransform)
 	}
 }
 
