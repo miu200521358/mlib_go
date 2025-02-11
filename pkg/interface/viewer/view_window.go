@@ -81,6 +81,10 @@ func NewViewWindow(
 
 func (viewWindow *ViewWindow) closeCallback(w *glfw.Window) {
 	// controllerStateを読み取り
+	if !viewWindow.appConfig.IsCloseConfirm() {
+		viewWindow.shared.SetClosed(true)
+		return
+	}
 	if !viewWindow.shared.IsClosed() {
 		// ビューワーがまだ閉じていない場合のみ、確認ダイアログを表示
 		if result := walk.MsgBox(

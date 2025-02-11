@@ -13,7 +13,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
-	"github.com/miu200521358/mlib_go/pkg/interface/controller"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/viewer"
@@ -50,15 +49,15 @@ func main() {
 
 	shared := state.NewSharedState()
 
-	go func() {
-		// 操作ウィンドウは別スレッドで起動
-		if controlWindow, err := controller.NewControlWindow(shared, appConfig, getMenuItems); err != nil {
-			widget.ShowErrorDialog(err)
-			return
-		} else {
-			controlWindow.Run()
-		}
-	}()
+	// go func() {
+	// 	// 操作ウィンドウは別スレッドで起動
+	// 	if controlWindow, err := controller.NewControlWindow(shared, appConfig, getMenuItems); err != nil {
+	// 		widget.ShowErrorDialog(err)
+	// 		return
+	// 	} else {
+	// 		controlWindow.Run()
+	// 	}
+	// }()
 
 	// GL初期化
 	if err := glfw.Init(); err != nil {

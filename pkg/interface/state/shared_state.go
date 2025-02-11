@@ -40,9 +40,6 @@ const (
 	flagShowRigidBodyBack  = 1 << iota // 剛体デバッグ表示(埋め込み)
 	flagShowJoint          = 1 << iota // ジョイントデバッグ表示
 	flagShowInfo           = 1 << iota // 情報デバッグ表示
-	flagLimitFps30         = 1 << iota // 30FPS制限
-	flagLimitFps60         = 1 << iota // 60FPS制限
-	flagUnLimitFps         = 1 << iota // FPS無制限
 	flagCameraSync         = 1 << iota // カメラ同期
 	flagPlaying            = 1 << iota // 再生中フラグ
 	flagClosed             = 1 << iota // 描画ウィンドウクローズ
@@ -228,30 +225,6 @@ func (ss *SharedState) IsShowInfo() bool {
 
 func (ss *SharedState) SetShowInfo(show bool) {
 	ss.setBit(flagShowInfo, show)
-}
-
-func (ss *SharedState) IsLimitFps30() bool {
-	return ss.isBitSet(flagLimitFps30)
-}
-
-func (ss *SharedState) SetLimitFps30(limit bool) {
-	ss.setBit(flagLimitFps30, limit)
-}
-
-func (ss *SharedState) IsLimitFps60() bool {
-	return ss.isBitSet(flagLimitFps60)
-}
-
-func (ss *SharedState) SetLimitFps60(limit bool) {
-	ss.setBit(flagLimitFps60, limit)
-}
-
-func (ss *SharedState) IsUnLimitFps() bool {
-	return ss.isBitSet(flagUnLimitFps)
-}
-
-func (ss *SharedState) SetUnLimitFps(limit bool) {
-	ss.setBit(flagUnLimitFps, limit)
 }
 
 func (ss *SharedState) IsCameraSync() bool {

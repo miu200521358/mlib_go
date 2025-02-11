@@ -1,6 +1,6 @@
 {
     "Name": "MlibSample",
-    "Version": "1.0.0_beta_129",
+    "Version": "1.0.0_beta_130",
     "Horizontal": true,
     "ControlWindowSize": {
         "Width": 512,
@@ -9,5 +9,6 @@
     "ViewWindowSize": {
         "Width": 512,
         "Height": 768
-    }
+    },
+    "CloseConfirm": true
 }

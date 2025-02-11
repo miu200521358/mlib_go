@@ -23,6 +23,7 @@ type AppConfig struct {
 	Horizontal        bool   `json:"Horizontal"`
 	ControlWindowSize Size   `json:"ControlWindowSize"`
 	ViewWindowSize    Size   `json:"ViewWindowSize"`
+	CloseConfirm      bool   `json:"CloseConfirm"`
 	Env               string
 	Icon              *walk.Icon
 	IconImage         image.Image
@@ -40,6 +41,13 @@ func (ac *AppConfig) IsEnvDev() bool {
 		return false
 	}
 	return ac.Env == "dev"
+}
+
+func (ac *AppConfig) IsCloseConfirm() bool {
+	if ac == nil {
+		return false
+	}
+	return ac.CloseConfirm
 }
 
 // LoadAppConfig アプリ設定ファイルの読み込み

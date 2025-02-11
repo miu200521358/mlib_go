@@ -321,6 +321,10 @@ func NewControlWindow(
 
 	controlWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
 		// controllerStateを読み取り、ビューワーが閉じていない場合は確認ダイアログを表示
+		if !controlWindow.appConfig.IsCloseConfirm() {
+			controlWindow.shared.SetClosed(true)
+			return
+		}
 		if !controlWindow.shared.IsClosed() {
 			if result := walk.MsgBox(
 				nil,
