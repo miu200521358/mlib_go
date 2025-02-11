@@ -218,28 +218,3 @@ func (bd *BoneDelta) FilledTotalLocalMat() *mmath.MMat4 {
 	}
 	return mat
 }
-
-// Copy は BoneDelta をディープコピーする
-func (bd *BoneDelta) Copy() *BoneDelta {
-	return &BoneDelta{
-		Bone:                         bd.Bone,
-		Frame:                        bd.Frame,
-		GlobalMatrix:                 bd.FilledGlobalMatrix().Copy(),
-		LocalMatrix:                  bd.FilledLocalMatrix().Copy(),
-		GlobalPosition:               bd.FilledGlobalPosition().Copy(),
-		FramePosition:                bd.FilledFramePosition().Copy(),
-		FrameMorphPosition:           bd.FilledFrameMorphPosition().Copy(),
-		FrameCancelablePosition:      bd.FilledFrameCancelablePosition().Copy(),
-		FrameMorphCancelablePosition: bd.FilledFrameMorphCancelablePosition().Copy(),
-		FrameRotation:                bd.FilledFrameRotation().Copy(),
-		FrameMorphRotation:           bd.FilledFrameMorphRotation().Copy(),
-		FrameCancelableRotation:      bd.FilledFrameCancelableRotation().Copy(),
-		FrameMorphCancelableRotation: bd.FilledFrameMorphCancelableRotation().Copy(),
-		FrameScale:                   bd.FilledFrameScale().Copy(),
-		FrameMorphScale:              bd.FilledFrameMorphScale().Copy(),
-		FrameCancelableScale:         bd.FilledFrameCancelableScale().Copy(),
-		FrameMorphCancelableScale:    bd.FilledFrameMorphCancelableScale().Copy(),
-		FrameLocalMat:                bd.FilledFrameLocalMat().Copy(),
-		FrameLocalMorphMat:           bd.FilledFrameLocalMorphMat().Copy(),
-	}
-}

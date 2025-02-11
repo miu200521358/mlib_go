@@ -49,7 +49,10 @@ func LoadAppConfig(appFiles embed.FS) *AppConfig {
 		return &AppConfig{}
 	}
 	var appConfigData AppConfig
-	json.Unmarshal(fileData, &appConfigData)
+	err = json.Unmarshal(fileData, &appConfigData)
+	if err != nil {
+		return &AppConfig{}
+	}
 
 	err = appConfigData.loadImageFile(appFiles)
 	if err != nil {

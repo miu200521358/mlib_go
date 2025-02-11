@@ -5,18 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/miu200521358/mlib_go/pkg/config/mfile"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 )
 
 const USER_CONFIG_FILE_NAME = "user_config.json"
 const USER_CONFIG_OLD_FILE_NAME = "history.json"
-
-const (
-	FRAME_DROP     = "FrameDrop"
-	HIGH_SPEC_MODE = "HighSpecMode"
-	PHYSICS        = "Physics"
-)
 
 // 設定の保存
 func SaveUserConfig(key string, value string, limit int) error {
@@ -56,7 +49,7 @@ func SaveUserConfig(key string, value string, limit int) error {
 	}
 
 	// ファイルのフルパスを取得
-	configFilePath := filepath.Join(mfile.GetAppRootDir(), USER_CONFIG_FILE_NAME)
+	configFilePath := filepath.Join(GetAppRootDir(), USER_CONFIG_FILE_NAME)
 
 	// Overwrite the config.json file with the updated JSON data
 	err = os.WriteFile(configFilePath, updatedData, 0644)
@@ -75,14 +68,14 @@ func LoadUserConfig(key string) []string {
 // 設定の読み込み
 func LoadUserConfigAll(key string) ([]string, map[string]interface{}) {
 	// Configファイルのフルパスを取得
-	configFilePath := filepath.Join(mfile.GetAppRootDir(), USER_CONFIG_FILE_NAME)
+	configFilePath := filepath.Join(GetAppRootDir(), USER_CONFIG_FILE_NAME)
 	mlog.D("LoadConfig: %s: %s", key, configFilePath)
 
 	// Read the config.json file
 	data, err := os.ReadFile(configFilePath)
 	if err != nil {
 		// user_config.jsonがない場合、history.jsonを読み込む(次回以降はuser_config.jsonに保存される)
-		configFilePath = filepath.Join(mfile.GetAppRootDir(), USER_CONFIG_OLD_FILE_NAME)
+		configFilePath = filepath.Join(GetAppRootDir(), USER_CONFIG_OLD_FILE_NAME)
 		data, err = os.ReadFile(configFilePath)
 		if err != nil {
 			data = []byte("{}")
@@ -118,4 +111,14 @@ func LoadUserConfigAll(key string) ([]string, map[string]interface{}) {
 	}
 
 	return result, config
+}
+
+// アプリのルートディレクトリを取得
+func GetAppRootDir() string {
+	// ファイルのフルパスを取得
+	exePath, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	return filepath.Dir(exePath)
 }

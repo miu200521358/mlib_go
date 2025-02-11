@@ -12,12 +12,12 @@ import (
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
 
-	"github.com/miu200521358/mlib_go/pkg/config/mfile"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mfile"
 )
 
 func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
@@ -146,13 +146,16 @@ func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) e
 
 	for _, name := range names {
 		fs := motion.BoneFrames.Get(name)
+		maxFno := fs.RegisteredIndexes.Max()
 		if fs.Length() > 1 {
 			// 普通のキーフレをそのまま出力する
 			for fno := range fs.RegisteredIndexes.Iterator() {
-				bf := fs.Get(fno)
-				err := rep.saveBoneFrame(fout, name, bf)
-				if err != nil {
-					return err
+				if fno < maxFno {
+					bf := fs.Get(fno)
+					err := rep.saveBoneFrame(fout, name, bf)
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -251,7 +254,7 @@ func (rep *VmdRepository) saveMorphFrame(fout *os.File, name string, mf *vmd.Mor
 
 	encodedName, err := rep.encodeName(name, 15)
 	if err != nil {
-		mlog.W("%s", mi18n.T("ボーン名エンコードエラー", map[string]interface{}{"Name": name}))
+		mlog.W("%s", mi18n.T("モーフ名エンコードエラー", map[string]interface{}{"Name": name}))
 		return err
 	}
 

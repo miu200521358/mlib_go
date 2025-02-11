@@ -9,12 +9,12 @@ import (
 	"slices"
 	"time"
 
-	"github.com/miu200521358/mlib_go/pkg/config/mfile"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mfile"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
 )
 
@@ -556,25 +556,25 @@ func updateBoneDelta(
 	boneDeltas.Update(d)
 
 	// ローカル行列
-	localMat := CalculateTotalLocalMat(boneDeltas, bone.Index())
+	localMat := calculateTotalLocalMat(boneDeltas, bone.Index())
 	if localMat != nil && !localMat.IsIdent() {
 		d.UnitMatrix.Mul(localMat)
 	}
 
 	// スケール(回転が変わるため、先にスケールを計算する)
-	scaleMat := CalculateTotalScaleMat(boneDeltas, bone.Index())
+	scaleMat := calculateTotalScaleMat(boneDeltas, bone.Index())
 	if scaleMat != nil && !scaleMat.IsIdent() {
 		d.UnitMatrix.Mul(scaleMat)
 	}
 
 	// 移動
-	posMat := CalculateTotalPositionMat(boneDeltas, bone.Index())
+	posMat := calculateTotalPositionMat(boneDeltas, bone.Index())
 	if posMat != nil && !posMat.IsIdent() {
 		d.UnitMatrix.Mul(posMat)
 	}
 
 	// 回転
-	rotMat := CalculateTotalRotationMat(boneDeltas, bone.Index())
+	rotMat := calculateTotalRotationMat(boneDeltas, bone.Index())
 	if rotMat != nil && !rotMat.IsIdent() {
 		d.UnitMatrix.Mul(rotMat)
 	}

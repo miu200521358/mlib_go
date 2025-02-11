@@ -8,13 +8,13 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/miu200521358/mlib_go/pkg/config/mfile"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
-	"github.com/miu200521358/mlib_go/pkg/config/mstring"
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mfile"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mstring"
 	"golang.org/x/text/encoding/unicode"
 )
 

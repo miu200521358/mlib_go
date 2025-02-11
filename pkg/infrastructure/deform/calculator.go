@@ -11,8 +11,8 @@ const maxEffectorRecursion = 10
 // 公開メソッド (回転系)
 // ----------------------------------------------------------------------------
 
-// CalculateTotalRotationMat ボーンの「回転」(モーフ含む) を再帰的に合成したマトリックスを求める
-func CalculateTotalRotationMat(
+// calculateTotalRotationMat ボーンの「回転」(モーフ含む) を再帰的に合成したマトリックスを求める
+func calculateTotalRotationMat(
 	deltas *delta.BoneDeltas, boneIndex int,
 ) *mmath.MMat4 {
 	rotMat := accumulateTotalRotation(deltas, boneIndex, 0, 1.0).ToMat4()
@@ -31,8 +31,8 @@ func CalculateBoneRotation(
 // 公開メソッド (位置系)
 // ----------------------------------------------------------------------------
 
-// CalculateTotalPositionMat ボーンの「位置」を再帰的に合成したマトリックスを求める
-func CalculateTotalPositionMat(
+// calculateTotalPositionMat ボーンの「位置」を再帰的に合成したマトリックスを求める
+func calculateTotalPositionMat(
 	deltas *delta.BoneDeltas, boneIndex int,
 ) *mmath.MMat4 {
 	posMat := accumulateTotalPosition(deltas, boneIndex, 0).ToMat4()
@@ -43,8 +43,8 @@ func CalculateTotalPositionMat(
 // 公開メソッド (スケール系)
 // ----------------------------------------------------------------------------
 
-// CalculateTotalScaleMat ボーンの「スケール」を再帰的に合成したマトリックスを求める
-func CalculateTotalScaleMat(
+// calculateTotalScaleMat ボーンの「スケール」を再帰的に合成したマトリックスを求める
+func calculateTotalScaleMat(
 	deltas *delta.BoneDeltas, boneIndex int,
 ) *mmath.MMat4 {
 	scaleMat := accumulateTotalScale(deltas, boneIndex, 0).ToScaleMat4()
@@ -55,8 +55,8 @@ func CalculateTotalScaleMat(
 // 公開メソッド (ローカル行列)
 // ----------------------------------------------------------------------------
 
-// CalculateTotalLocalMat ボーンの「ローカル行列」を求める
-func CalculateTotalLocalMat(
+// calculateTotalLocalMat ボーンの「ローカル行列」を求める
+func calculateTotalLocalMat(
 	deltas *delta.BoneDeltas, boneIndex int,
 ) *mmath.MMat4 {
 	bd := deltas.Get(boneIndex)
