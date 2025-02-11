@@ -14,10 +14,10 @@ import (
 
 // ControlWindow は操作画面(コントローラウィンドウ)を管理する
 type ControlWindow struct {
-	mainWindow *walk.MainWindow
+	*walk.MainWindow
 
-	// SharedState への参照
-	shared *state.SharedState
+	shared    *state.SharedState // SharedState への参照
+	appConfig *mconfig.AppConfig // アプリケーション設定
 
 	// UI要素 (メニューアクションなど)
 	// enabledFrameDropAction      *walk.Action // フレームドロップON/OFF
@@ -55,7 +55,8 @@ func NewControlWindow(
 	helpMenuItemsFunc func() []declarative.MenuItem,
 ) (*ControlWindow, error) {
 	controlWindow := &ControlWindow{
-		shared: shared,
+		shared:    shared,
+		appConfig: appConfig,
 	}
 
 	logMenuItems := []declarative.MenuItem{
@@ -102,7 +103,7 @@ func NewControlWindow(
 	}
 
 	if err := (declarative.MainWindow{
-		AssignTo: &controlWindow.mainWindow,
+		AssignTo: &controlWindow.MainWindow,
 		Title:    fmt.Sprintf("%s %s", appConfig.Name, appConfig.Version),
 		Size:     GetWindowSize(appConfig.ControlWindowSize.Width, appConfig.ControlWindowSize.Height),
 		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear, MarginsZero: true, SpacingZero: true},
@@ -318,35 +319,30 @@ func NewControlWindow(
 		return nil, err
 	}
 
-	controlWindow.mainWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
-		// controllerStateを読み取り
-		controlWindow.shared.ReadViewerState(func(vs state.IViewerState) {
-			// ビューワーがまだ閉じていない場合のみ、確認ダイアログを表示
-			if !vs.IsClosed() {
-				if result := walk.MsgBox(
-					nil,
-					mi18n.T("終了確認"),
-					mi18n.T("終了確認メッセージ"),
-					walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel,
-				); result == walk.DlgCmdOK {
-					// ユーザーがOKを選んだ場合、controllerState の isClosed を true にする
-					controlWindow.shared.UpdateControllerState(func(cs state.IControllerState) {
-						cs.SetClosed(true)
-					})
-				} else {
-					// 閉じない場合はキャンセル
-					*canceled = true
-				}
+	controlWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
+		// controllerStateを読み取り、ビューワーが閉じていない場合は確認ダイアログを表示
+		if !controlWindow.shared.IsClosed() {
+			if result := walk.MsgBox(
+				nil,
+				mi18n.T("終了確認"),
+				mi18n.T("終了確認メッセージ"),
+				walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel,
+			); result == walk.DlgCmdOK {
+				// ユーザーがOKを選んだ場合、 viewerState の isClosed を true にする
+				controlWindow.shared.SetClosed(true)
+			} else {
+				// 閉じない場合はキャンセル
+				*canceled = true
 			}
-		})
+		}
 	})
 
-	controlWindow.mainWindow.SetIcon(appConfig.Icon)
+	controlWindow.SetIcon(appConfig.Icon)
 
 	if bg, err := walk.NewSystemColorBrush(walk.SysColor3DShadow); err != nil {
 		return nil, err
 	} else {
-		controlWindow.mainWindow.SetBackground(bg)
+		controlWindow.SetBackground(bg)
 	}
 
 	// 初期設定
@@ -358,43 +354,39 @@ func NewControlWindow(
 }
 
 // OnClose はウィンドウを閉じるときの処理
-func (cw *ControlWindow) OnClose() {
+func (controlWindow *ControlWindow) OnClose() {
 	// コントローラStateのisClosedをtrueにする
-	cw.shared.UpdateControllerState(func(cs state.IControllerState) {
-		cs.SetClosed(true)
-	})
+	controlWindow.shared.SetClosed(true)
 }
 
 // Run はメインウィンドウを起動する
-func (cw *ControlWindow) Run() {
-	cw.mainWindow.Run()
+func (controlWindow *ControlWindow) Run() {
+	controlWindow.MainWindow.Run()
 }
 
 func (controlWindow *ControlWindow) Dispose() {
-	controlWindow.mainWindow.Close()
+	controlWindow.Close()
 }
 
 func (controlWindow *ControlWindow) WindowSize() (int, int) {
-	size := controlWindow.mainWindow.Size()
+	size := controlWindow.Size()
 	return size.Width, size.Height
 }
 
 func (controlWindow *ControlWindow) SetPosition(x, y int) {
-	controlWindow.mainWindow.SetX(x)
-	controlWindow.mainWindow.SetY(y)
+	controlWindow.SetX(x)
+	controlWindow.SetY(y)
 }
 
 func (controlWindow *ControlWindow) onChangeLanguage(lang string) {
 	if result := walk.MsgBox(
-		controlWindow.mainWindow,
+		controlWindow.MainWindow,
 		mi18n.TWithLocale(lang, "言語変更"),
 		mi18n.TWithLocale(lang, "言語変更メッセージ"),
 		walk.MsgBoxOKCancel|walk.MsgBoxIconInformation,
 	); result == walk.DlgCmdOK {
 		mi18n.SetLang(lang)
-		controlWindow.shared.UpdateControllerState(func(cs state.IControllerState) {
-			cs.SetClosed(true)
-		})
+		controlWindow.shared.SetClosed(true)
 	}
 }
 
@@ -418,15 +410,11 @@ func (controlWindow *ControlWindow) triggerLogLevel() {
 // ------- 以下、メニューから呼ばれるトリガーメソッド -------
 
 func (controlWindow *ControlWindow) TriggerEnabledPhysics() {
-	controlWindow.shared.UpdateControllerState(func(cs state.IControllerState) {
-		cs.SetEnabledPhysics(controlWindow.enabledPhysicsAction.Checked())
-	})
+	controlWindow.shared.SetEnabledPhysics(controlWindow.enabledPhysicsAction.Checked())
 }
 
 func (controlWindow *ControlWindow) TriggerPhysicsReset() {
-	controlWindow.shared.UpdateControllerState(func(cs state.IControllerState) {
-		cs.SetPhysicsReset(true)
-	})
+	controlWindow.shared.SetPhysicsReset(true)
 }
 
 // ----------------------

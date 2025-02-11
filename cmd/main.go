@@ -7,6 +7,7 @@ import (
 	"embed"
 	"runtime"
 
+	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/walk/pkg/declarative"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
@@ -15,6 +16,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
+	"github.com/miu200521358/mlib_go/pkg/interface/viewer"
 )
 
 var env string
@@ -46,19 +48,30 @@ func main() {
 	appConfig.Env = env
 	mi18n.Initialize(appI18nFiles)
 
-	cs := state.NewControllerState()
-	vs := state.NewViewerState()
-	shared := state.NewSharedState(cs, vs)
+	shared := state.NewSharedState()
 
-	// go func() {
-	// 操作ウィンドウは別スレッドで起動
-	if controlWindow, err := controller.NewControlWindow(shared, appConfig, getMenuItems); err != nil {
-		widget.ShowErrorDialog(err)
-	} else {
-		controlWindow.Run()
+	go func() {
+		// 操作ウィンドウは別スレッドで起動
+		if controlWindow, err := controller.NewControlWindow(shared, appConfig, getMenuItems); err != nil {
+			widget.ShowErrorDialog(err)
+			return
+		} else {
+			controlWindow.Run()
+		}
+	}()
+
+	// GL初期化
+	if err := glfw.Init(); err != nil {
+		mlog.F("Failed to initialize GLFW: %v", err)
+		return
 	}
-	// }()
 
+	if viewWindow, err := viewer.NewViewWindow(0, "Viewer", shared, appConfig, nil); err != nil {
+		widget.ShowErrorDialog(err)
+		return
+	} else {
+		viewWindow.Run()
+	}
 }
 
 func getMenuItems() []declarative.MenuItem {
