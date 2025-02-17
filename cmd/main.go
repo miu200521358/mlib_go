@@ -5,14 +5,17 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"runtime"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/walk/pkg/declarative"
+	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/interface/controller"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/viewer"
@@ -47,37 +50,67 @@ func main() {
 	appConfig.Env = env
 	mi18n.Initialize(appI18nFiles)
 
+	// ビルド時はエラーダイアログを表示し、開発時は直接エラーを出力する
+	var raiseErrorFunc func(err error)
+	if appConfig.IsEnvProd() || appConfig.IsEnvDev() {
+		raiseErrorFunc = widget.ShowErrorDialog
+	} else {
+		raiseErrorFunc = func(err error) {
+			panic(err)
+		}
+	}
+
 	shared := state.NewSharedState()
 
-	// go func() {
-	// 	// 操作ウィンドウは別スレッドで起動
-	// 	if controlWindow, err := controller.NewControlWindow(shared, appConfig, getMenuItems); err != nil {
-	// 		widget.ShowErrorDialog(err)
-	// 		return
-	// 	} else {
-	// 		controlWindow.Run()
-	// 	}
-	// }()
+	go func() {
+		// 操作ウィンドウは別スレッドで起動
+		if err := controller.Run(shared, appConfig, newMenuItems(), newTabPages()); err != nil {
+			raiseErrorFunc(err)
+			return
+		}
+	}()
 
 	// GL初期化
 	if err := glfw.Init(); err != nil {
-		mlog.F("Failed to initialize GLFW: %v", err)
+		raiseErrorFunc(fmt.Errorf("failed to initialize GLFW: %v", err))
 		return
 	}
 
-	if viewWindow, err := viewer.NewViewWindow(0, "Viewer", shared, appConfig, nil); err != nil {
-		widget.ShowErrorDialog(err)
+	viewMainWindow, err := viewer.NewViewWindow(0, "Viewer", shared, appConfig, nil)
+	if err != nil {
+		raiseErrorFunc(err)
 		return
-	} else {
-		viewWindow.Run()
 	}
+
+	viewMainWindow.Run()
 }
 
-func getMenuItems() []declarative.MenuItem {
+func newMenuItems() []declarative.MenuItem {
 	return []declarative.MenuItem{
 		declarative.Action{
 			Text:        mi18n.T("&サンプルメニュー"),
 			OnTriggered: func() { mlog.IL("%s", mi18n.T("サンプルヘルプ")) },
+		},
+	}
+}
+
+func newTabPages() []declarative.TabPage {
+	var fileTab *walk.TabPage
+	return []declarative.TabPage{
+		{
+			Title:    "ファイル",
+			AssignTo: &fileTab,
+			Layout:   declarative.VBox{},
+			Children: []declarative.Widget{
+				declarative.Composite{
+					Layout: declarative.VBox{},
+					Children: []declarative.Widget{
+						declarative.TextLabel{
+							Text: "表示用モデル設定説明",
+						},
+					},
+				},
+			},
 		},
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
@@ -18,6 +19,8 @@ type ControlWindow struct {
 
 	shared    *state.SharedState // SharedState への参照
 	appConfig *mconfig.AppConfig // アプリケーション設定
+
+	TabWidget *widget.MTabWidget // タブウィジェット
 
 	// UI要素 (メニューアクションなど)
 	// enabledFrameDropAction      *walk.Action // フレームドロップON/OFF
@@ -48,15 +51,17 @@ type ControlWindow struct {
 	logLevelViewerVerboseAction *walk.Action // ビューワー冗長メッセージ表示
 }
 
-// NewControlWindow はコントローラウィンドウを生成する
-func NewControlWindow(
+// Run はコントローラウィンドウを実行する
+func Run(
 	shared *state.SharedState,
 	appConfig *mconfig.AppConfig,
-	helpMenuItemsFunc func() []declarative.MenuItem,
-) (*ControlWindow, error) {
+	helpMenuItems []declarative.MenuItem,
+	tabPages []declarative.TabPage,
+) error {
 	controlWindow := &ControlWindow{
 		shared:    shared,
 		appConfig: appConfig,
+		TabWidget: &widget.MTabWidget{},
 	}
 
 	logMenuItems := []declarative.MenuItem{
@@ -102,11 +107,15 @@ func NewControlWindow(
 			})
 	}
 
-	if err := (declarative.MainWindow{
+	if _, err := (declarative.MainWindow{
 		AssignTo: &controlWindow.MainWindow,
 		Title:    fmt.Sprintf("%s %s", appConfig.Name, appConfig.Version),
 		Size:     GetWindowSize(appConfig.ControlWindowSize.Width, appConfig.ControlWindowSize.Height),
 		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear, MarginsZero: true, SpacingZero: true},
+		Background: declarative.SystemColorBrush{
+			Color: walk.SysColor3DShadow,
+		},
+		Icon: appConfig.Icon,
 		MenuItems: []declarative.MenuItem{
 			declarative.Menu{
 				Text: mi18n.T("&ビューワー"),
@@ -291,7 +300,7 @@ func NewControlWindow(
 			},
 			declarative.Menu{
 				Text:  mi18n.T("&使い方"),
-				Items: helpMenuItemsFunc(),
+				Items: helpMenuItems,
 			},
 			declarative.Menu{
 				Text: mi18n.T("&言語"),
@@ -315,46 +324,43 @@ func NewControlWindow(
 				},
 			},
 		},
-	}).Create(); err != nil {
-		return nil, err
-	}
-
-	controlWindow.Closing().Attach(func(canceled *bool, reason walk.CloseReason) {
-		// controllerStateを読み取り、ビューワーが閉じていない場合は確認ダイアログを表示
-		if !controlWindow.appConfig.IsCloseConfirm() {
-			controlWindow.shared.SetClosed(true)
-			return
-		}
-		if !controlWindow.shared.IsClosed() {
-			if result := walk.MsgBox(
-				nil,
-				mi18n.T("終了確認"),
-				mi18n.T("終了確認メッセージ"),
-				walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel,
-			); result == walk.DlgCmdOK {
-				// ユーザーがOKを選んだ場合、 viewerState の isClosed を true にする
+		Children: []declarative.Widget{
+			declarative.TabWidget{
+				AssignTo: &controlWindow.TabWidget.TabWidget,
+				Pages:    tabPages,
+			},
+		},
+		OnClosing: func(canceled *bool, reason walk.CloseReason) {
+			// controllerStateを読み取り、ビューワーが閉じていない場合は確認ダイアログを表示
+			if !controlWindow.appConfig.IsCloseConfirm() {
 				controlWindow.shared.SetClosed(true)
-			} else {
-				// 閉じない場合はキャンセル
-				*canceled = true
+				return
 			}
-		}
-	})
-
-	controlWindow.SetIcon(appConfig.Icon)
-
-	if bg, err := walk.NewSystemColorBrush(walk.SysColor3DShadow); err != nil {
-		return nil, err
-	} else {
-		controlWindow.SetBackground(bg)
+			if !controlWindow.shared.IsClosed() {
+				if result := walk.MsgBox(
+					nil,
+					mi18n.T("終了確認"),
+					mi18n.T("終了確認メッセージ"),
+					walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel,
+				); result == walk.DlgCmdOK {
+					// ユーザーがOKを選んだ場合、 viewerState の isClosed を true にする
+					controlWindow.shared.SetClosed(true)
+				} else {
+					// 閉じない場合はキャンセル
+					*canceled = true
+				}
+			}
+		},
+	}).Run(); err != nil {
+		return err
 	}
 
-	// 初期設定
-	// controlWindow.limitFps30Action.SetChecked(true)       // 物理ON
-	controlWindow.enabledPhysicsAction.SetChecked(true) // フレームドロップON
-	// controlWindow.enabledFrameDropAction.SetChecked(true) // 30fps制限
+	// // 初期設定
+	// // controlWindow.limitFps30Action.SetChecked(true)       // 物理ON
+	// controlWindow.enabledPhysicsAction.SetChecked(true) // フレームドロップON
+	// // controlWindow.enabledFrameDropAction.SetChecked(true) // 30fps制限
 
-	return controlWindow, nil
+	return nil
 }
 
 // OnClose はウィンドウを閉じるときの処理
