@@ -151,15 +151,14 @@ func accumulateTotalPosition(
 		return mmath.NewMVec3()
 	}
 
-	pos := bd.FilledTotalPosition().Copy()
-
 	// 移動付与があれば再帰的に合成
 	if bd.Bone.IsEffectorTranslation() {
 		effectorPos := accumulateTotalPosition(deltas, bd.Bone.EffectIndex, recursion+1)
-		pos.Mul(effectorPos.MuledScalar(bd.Bone.EffectFactor))
+		return bd.FilledTotalPosition().ToMat4().Muled(
+			effectorPos.MuledScalar(bd.Bone.EffectFactor).ToMat4()).Translation()
 	}
 
-	return pos
+	return bd.FilledTotalPosition().Copy()
 }
 
 // スケール合成
