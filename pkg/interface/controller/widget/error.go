@@ -46,9 +46,11 @@ func ShowErrorDialog(isSetEnv bool, err error) {
 				Text: mi18n.T("予期せぬエラーヘッダー"),
 			},
 			declarative.TextEdit{
-				Text: string(bytes.ReplaceAll([]byte(errMsg), []byte("\n"), []byte("\r\n"))) +
+				Text: string("```") +
+					string(bytes.ReplaceAll([]byte(errMsg), []byte("\n"), []byte("\r\n"))) +
 					string("\r\n------------\r\n") +
-					string(bytes.ReplaceAll(stackTrace, []byte("\n"), []byte("\r\n"))),
+					string(bytes.ReplaceAll(stackTrace, []byte("\n"), []byte("\r\n"))) +
+					string("```"),
 				ReadOnly: true,
 				AssignTo: &errT,
 				VScroll:  true,
@@ -62,7 +64,7 @@ func ShowErrorDialog(isSetEnv bool, err error) {
 						walk.MsgBox(nil, mi18n.T("クリップボードコピー失敗"),
 							string(stackTrace), walk.MsgBoxIconError)
 					}
-					exec.Command("cmd", "/c", "start", "https://com.nicovideo.jp/community/co5387214").Start()
+					exec.Command("cmd", "/c", "start", "https://discord.gg/MW2Bn47aCN").Start()
 				},
 			},
 			declarative.PushButton{
@@ -77,7 +79,8 @@ func ShowErrorDialog(isSetEnv bool, err error) {
 	}
 }
 
-func SafeExecute(isSetEnv bool) {
+// SafeExecute は関数でpanicが発生した場合にダイアログを表示する
+func SafeExecute(isSetEnv bool, f func()) {
 	defer func() {
 		if r := recover(); r != nil {
 			stackTrace := debug.Stack()
@@ -91,4 +94,6 @@ func SafeExecute(isSetEnv bool) {
 			ShowErrorDialog(isSetEnv, err)
 		}
 	}()
+
+	f()
 }

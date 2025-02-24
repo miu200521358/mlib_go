@@ -49,19 +49,20 @@ func main() {
 	appConfig := mconfig.LoadAppConfig(appFiles)
 	appConfig.Env = env
 	mi18n.Initialize(appI18nFiles)
-	defer widget.SafeExecute(appConfig.IsSetEnv())
-
+	// defer widget.SafeExecute(appConfig.IsSetEnv())
 	shared := state.NewSharedState()
 
 	go func() {
 		// 操作ウィンドウは別スレッドで起動
-		controlWIndow, err := controller.NewControlWindow(shared, appConfig, newMenuItems(), newTabPages())
-		if err != nil {
-			widget.ShowErrorDialog(appConfig.IsSetEnv(), err)
-			return
-		}
+		defer widget.SafeExecute(appConfig.IsSetEnv(), func() {
+			controlWIndow, err := controller.NewControlWindow(shared, appConfig, newMenuItems(), newTabPages())
+			if err != nil {
+				widget.ShowErrorDialog(appConfig.IsSetEnv(), err)
+				return
+			}
 
-		controlWIndow.Run()
+			controlWIndow.Run()
+		})
 	}()
 
 	// GL初期化
@@ -70,13 +71,16 @@ func main() {
 		return
 	}
 
-	viewMainWindow, err := viewer.NewViewWindow(0, "Viewer", shared, appConfig, nil)
-	if err != nil {
-		widget.ShowErrorDialog(appConfig.IsSetEnv(), err)
-		return
-	}
+	// 描画ウィンドウはメインスレッドで起動
+	defer widget.SafeExecute(appConfig.IsSetEnv(), func() {
+		viewMainWindow, err := viewer.NewViewWindow(0, "Viewer", shared, appConfig, nil)
+		if err != nil {
+			widget.ShowErrorDialog(appConfig.IsSetEnv(), err)
+			return
+		}
 
-	viewMainWindow.Run()
+		viewMainWindow.Run()
+	})
 }
 
 func newMenuItems() []declarative.MenuItem {

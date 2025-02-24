@@ -353,29 +353,6 @@ func NewControlWindow(
 		return nil, err
 	}
 
-	// var err error
-	// if controlWindow.tabWidget, err = walk.NewTabWidget(controlWindow.MainWindow); err != nil {
-	// 	return nil, err
-	// }
-	// controlWindow.MainWindow.Children().Add(controlWindow.tabWidget)
-
-	// page, err := walk.NewTabPage()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// page.SetLayout(walk.NewHBoxLayout())
-	// controlWindow.tabWidget.Pages().Add(page)
-
-	// builder := declarative.NewBuilder(controlWindow.MainWindow)
-	// for _, tp := range tabPages {
-	// 	if err := tp.Create(builder); err != nil {
-	// 		return nil, err
-	// 	}
-	// 	if err := controlWindow.tabWidget.Pages().Add(*tp.AssignTo); err != nil {
-	// 		return nil, err
-	// 	}
-	// }
-
 	// // 初期設定
 	// // controlWindow.limitFps30Action.SetChecked(true)       // 物理ON
 	// controlWindow.enabledPhysicsAction.SetChecked(true) // フレームドロップON
