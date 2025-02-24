@@ -49,36 +49,30 @@ func main() {
 	appConfig := mconfig.LoadAppConfig(appFiles)
 	appConfig.Env = env
 	mi18n.Initialize(appI18nFiles)
-
-	// ビルド時はエラーダイアログを表示し、開発時は直接エラーを出力する
-	var raiseErrorFunc func(err error)
-	if appConfig.IsEnvProd() || appConfig.IsEnvDev() {
-		raiseErrorFunc = widget.ShowErrorDialog
-	} else {
-		raiseErrorFunc = func(err error) {
-			panic(err)
-		}
-	}
+	defer widget.SafeExecute(appConfig.IsSetEnv())
 
 	shared := state.NewSharedState()
 
 	go func() {
 		// 操作ウィンドウは別スレッドで起動
-		if err := controller.Run(shared, appConfig, newMenuItems(), newTabPages()); err != nil {
-			raiseErrorFunc(err)
+		controlWIndow, err := controller.NewControlWindow(shared, appConfig, newMenuItems(), newTabPages())
+		if err != nil {
+			widget.ShowErrorDialog(appConfig.IsSetEnv(), err)
 			return
 		}
+
+		controlWIndow.Run()
 	}()
 
 	// GL初期化
 	if err := glfw.Init(); err != nil {
-		raiseErrorFunc(fmt.Errorf("failed to initialize GLFW: %v", err))
+		widget.ShowErrorDialog(appConfig.IsSetEnv(), fmt.Errorf("failed to initialize GLFW: %v", err))
 		return
 	}
 
 	viewMainWindow, err := viewer.NewViewWindow(0, "Viewer", shared, appConfig, nil)
 	if err != nil {
-		raiseErrorFunc(err)
+		widget.ShowErrorDialog(appConfig.IsSetEnv(), err)
 		return
 	}
 
@@ -96,17 +90,25 @@ func newMenuItems() []declarative.MenuItem {
 
 func newTabPages() []declarative.TabPage {
 	var fileTab *walk.TabPage
+	var textEdit *walk.TextEdit
 	return []declarative.TabPage{
 		{
 			Title:    "ファイル",
 			AssignTo: &fileTab,
 			Layout:   declarative.VBox{},
+			Background: declarative.SystemColorBrush{
+				Color: walk.SysColorInactiveCaption,
+			},
 			Children: []declarative.Widget{
 				declarative.Composite{
 					Layout: declarative.VBox{},
 					Children: []declarative.Widget{
 						declarative.TextLabel{
 							Text: "表示用モデル設定説明",
+						},
+						declarative.TextEdit{
+							AssignTo: &textEdit,
+							Text:     "表示用モデル設定説明",
 						},
 					},
 				},

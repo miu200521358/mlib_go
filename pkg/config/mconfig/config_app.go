@@ -29,6 +29,13 @@ type AppConfig struct {
 	IconImage         image.Image
 }
 
+func (ac *AppConfig) IsSetEnv() bool {
+	if ac == nil {
+		return false
+	}
+	return ac.Env != ""
+}
+
 func (ac *AppConfig) IsEnvProd() bool {
 	if ac == nil {
 		return false

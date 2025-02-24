@@ -26,9 +26,13 @@ func Beep() {
 	procMessageBeep.Call(uintptr(MB_ICONASTERISK))
 }
 
-func ShowErrorDialog(err error) {
+func ShowErrorDialog(isSetEnv bool, err error) {
 	errMsg := err.Error()
 	stackTrace := debug.Stack()
+
+	if !isSetEnv {
+		panic(err)
+	}
 
 	var errT *walk.TextEdit
 	if _, err := (declarative.MainWindow{
@@ -73,7 +77,7 @@ func ShowErrorDialog(err error) {
 	}
 }
 
-func SafeExecute(f func() error) (err error) {
+func SafeExecute(isSetEnv bool) {
 	defer func() {
 		if r := recover(); r != nil {
 			stackTrace := debug.Stack()
@@ -83,9 +87,8 @@ func SafeExecute(f func() error) (err error) {
 			} else {
 				errMsg = fmt.Sprintf("%v", r)
 			}
-			err = fmt.Errorf("panic: %s\n%s", errMsg, stackTrace)
+			err := fmt.Errorf("panic: %s\n%s", errMsg, stackTrace)
+			ShowErrorDialog(isSetEnv, err)
 		}
 	}()
-
-	return f()
 }
