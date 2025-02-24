@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package widget
+package app
 
 import (
 	"bytes"

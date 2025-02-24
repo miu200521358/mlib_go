@@ -15,8 +15,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
-	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/viewer"
 )
@@ -49,37 +49,46 @@ func main() {
 	appConfig := mconfig.LoadAppConfig(appFiles)
 	appConfig.Env = env
 	mi18n.Initialize(appI18nFiles)
-	// defer widget.SafeExecute(appConfig.IsSetEnv())
 	shared := state.NewSharedState()
+
+	widths, heights, positionXs, positionYs := app.GetCenterSizeAndWidth(appConfig, 2)
+
+	var controlWindow *controller.ControlWindow
+	viewerWindowList := viewer.NewViewerList(shared, appConfig)
+	var err error
 
 	go func() {
 		// 操作ウィンドウは別スレッドで起動
-		defer widget.SafeExecute(appConfig.IsSetEnv(), func() {
-			controlWIndow, err := controller.NewControlWindow(shared, appConfig, newMenuItems(), newTabPages())
+		defer app.SafeExecute(appConfig.IsSetEnv(), func() {
+			controlWindow, err = controller.NewControlWindow(shared, appConfig, newMenuItems(), newTabPages(),
+				widths[0], heights[0], positionXs[0], positionYs[0])
 			if err != nil {
-				widget.ShowErrorDialog(appConfig.IsSetEnv(), err)
+				app.ShowErrorDialog(appConfig.IsSetEnv(), err)
 				return
 			}
-
-			controlWIndow.Run()
+			controlWindow.Run()
 		})
 	}()
 
 	// GL初期化
 	if err := glfw.Init(); err != nil {
-		widget.ShowErrorDialog(appConfig.IsSetEnv(), fmt.Errorf("failed to initialize GLFW: %v", err))
+		app.ShowErrorDialog(appConfig.IsSetEnv(), fmt.Errorf("failed to initialize GLFW: %v", err))
 		return
 	}
 
 	// 描画ウィンドウはメインスレッドで起動
-	defer widget.SafeExecute(appConfig.IsSetEnv(), func() {
-		viewMainWindow, err := viewer.NewViewWindow(0, "Viewer", shared, appConfig, nil)
-		if err != nil {
-			widget.ShowErrorDialog(appConfig.IsSetEnv(), err)
+	defer app.SafeExecute(appConfig.IsSetEnv(), func() {
+		if err := viewerWindowList.Add("Viewer1", widths[1], heights[1], positionXs[1], positionYs[1]); err != nil {
+			app.ShowErrorDialog(appConfig.IsSetEnv(), err)
 			return
 		}
 
-		viewMainWindow.Run()
+		if err := viewerWindowList.Add("Viewer2", widths[2], heights[2], positionXs[2], positionYs[2]); err != nil {
+			app.ShowErrorDialog(appConfig.IsSetEnv(), err)
+			return
+		}
+
+		viewerWindowList.Run()
 	})
 }
 
@@ -121,7 +130,7 @@ func newTabPages() []declarative.TabPage {
 	}
 }
 
-// func newFilePage(mApp *app.MApp, controlWindow *controller.ControlWindow) *widget.MTabPage {
+// func newFilePage(app *app.app, controlWindow *controller.ControlWindow) *widget.MTabPage {
 // 	tabPage := widget.NewMTabPage("ファイル")
 // 	controlWindow.AddTabPage(tabPage.TabPage)
 
@@ -131,7 +140,7 @@ func newTabPages() []declarative.TabPage {
 // 	loadedModels[0] = make([]*pmx.PmxModel, 2)
 // 	loadedModels[1] = make([]*pmx.PmxModel, 1)
 
-// 	mApp.SetFuncGetModels(
+// 	app.SetFuncGetModels(
 // 		func() [][]*pmx.PmxModel {
 // 			return [][]*pmx.PmxModel{
 // 				{loadedModels[0][0], loadedModels[0][1]},
@@ -144,7 +153,7 @@ func newTabPages() []declarative.TabPage {
 // 	loadedMotions[0] = make([]*vmd.VmdMotion, 2)
 // 	loadedMotions[1] = make([]*vmd.VmdMotion, 1)
 
-// 	mApp.SetFuncGetMotions(
+// 	app.SetFuncGetMotions(
 // 		func() [][]*vmd.VmdMotion {
 // 			return [][]*vmd.VmdMotion{
 // 				{loadedMotions[0][0], loadedMotions[0][1]},

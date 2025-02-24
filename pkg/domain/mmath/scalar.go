@@ -5,6 +5,24 @@ import (
 	"slices"
 )
 
+// Sum 合計値を返します
+func Sum[T Number](values []T) T {
+	sum := 0.0
+	for _, v := range values {
+		sum += float64(v)
+	}
+	return T(sum)
+}
+
+// Ratio 割合を返します
+func Ratio[T Number](total T, values []T) []float64 {
+	ratios := make([]float64, len(values))
+	for i, v := range values {
+		ratios[i] = float64(v) / float64(total)
+	}
+	return ratios
+}
+
 // Effective 有効数字を返します
 func Effective[T Number](v T) T {
 	if math.IsNaN(float64(v)) || math.IsInf(float64(v), 0) {

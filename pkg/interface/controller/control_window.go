@@ -1,3 +1,6 @@
+//go:build windows
+// +build windows
+
 package controller
 
 import (
@@ -9,7 +12,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
-	"golang.org/x/sys/windows"
 )
 
 // ControlWindow は操作画面(コントローラウィンドウ)を管理する
@@ -56,6 +58,7 @@ func NewControlWindow(
 	appConfig *mconfig.AppConfig,
 	helpMenuItems []declarative.MenuItem,
 	tabPages []declarative.TabPage,
+	width, height, positionX, positionY int,
 ) (*ControlWindow, error) {
 	controlWindow := &ControlWindow{
 		shared:    shared,
@@ -108,7 +111,7 @@ func NewControlWindow(
 	if err := (declarative.MainWindow{
 		AssignTo: &controlWindow.MainWindow,
 		Title:    fmt.Sprintf("%s %s", appConfig.Name, appConfig.Version),
-		Size:     GetWindowSize(appConfig.ControlWindowSize.Width, appConfig.ControlWindowSize.Height),
+		Size:     declarative.Size{Width: width, Height: height},
 		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear, MarginsZero: true, SpacingZero: true},
 		Background: declarative.SystemColorBrush{
 			Color: walk.SysColor3DShadow,
@@ -358,6 +361,8 @@ func NewControlWindow(
 	// controlWindow.enabledPhysicsAction.SetChecked(true) // フレームドロップON
 	// // controlWindow.enabledFrameDropAction.SetChecked(true) // 30fps制限
 
+	controlWindow.SetPosition(positionX, positionY)
+
 	return controlWindow, nil
 }
 
@@ -423,35 +428,4 @@ func (controlWindow *ControlWindow) TriggerEnabledPhysics() {
 
 func (controlWindow *ControlWindow) TriggerPhysicsReset() {
 	controlWindow.shared.SetPhysicsReset(true)
-}
-
-// ----------------------
-
-var (
-	user32               = windows.NewLazySystemDLL("user32.dll")
-	procGetSystemMetrics = user32.NewProc("GetSystemMetrics")
-)
-
-const (
-	SM_CXSCREEN = 0
-	SM_CYSCREEN = 1
-)
-
-func getSystemMetrics(nIndex int) int {
-	ret, _, _ := procGetSystemMetrics.Call(uintptr(nIndex))
-	return int(ret)
-}
-
-func GetWindowSize(width int, height int) declarative.Size {
-	screenWidth := getSystemMetrics(SM_CXSCREEN)
-	screenHeight := getSystemMetrics(SM_CYSCREEN)
-
-	if width > screenWidth-50 {
-		width = screenWidth - 50
-	}
-	if height > screenHeight-50 {
-		height = screenHeight - 50
-	}
-
-	return declarative.Size{Width: width, Height: height}
 }
