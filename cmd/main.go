@@ -17,6 +17,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
+	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/viewer"
 )
@@ -60,7 +61,7 @@ func main() {
 	go func() {
 		// 操作ウィンドウは別スレッドで起動
 		defer app.SafeExecute(appConfig.IsSetEnv(), func() {
-			controlWindow, err = controller.NewControlWindow(shared, appConfig, newMenuItems(), newTabPages(),
+			controlWindow, err = controller.NewControlWindow(shared, appConfig, newMenuItems(), newTabPages(controlWindow),
 				widths[0], heights[0], positionXs[0], positionYs[0])
 			if err != nil {
 				app.ShowErrorDialog(appConfig.IsSetEnv(), err)
@@ -101,9 +102,19 @@ func newMenuItems() []declarative.MenuItem {
 	}
 }
 
-func newTabPages() []declarative.TabPage {
+func newTabPages(controlWindow *controller.ControlWindow) []declarative.TabPage {
 	var fileTab *walk.TabPage
-	var textEdit *walk.TextEdit
+
+	pmxLoadPicker := widget.NewPmxLoadFilePicker(
+		controlWindow,
+		"Pmx",
+		"モデルファイル",
+		"モデルファイルを選択してください",
+		func(path string) {
+			mlog.IL("PmxLoadPicker: %s", path)
+		},
+	)
+
 	return []declarative.TabPage{
 		{
 			Title:    "ファイル",
@@ -119,10 +130,8 @@ func newTabPages() []declarative.TabPage {
 						declarative.TextLabel{
 							Text: "表示用モデル設定説明",
 						},
-						declarative.TextEdit{
-							AssignTo: &textEdit,
-							Text:     "表示用モデル設定説明",
-						},
+						pmxLoadPicker.Widgets(),
+						declarative.VSpacer{},
 					},
 				},
 			},
