@@ -55,6 +55,27 @@ func NewPmxLoadFilePicker(
 	)
 }
 
+func NewVmdVpdLoadFilePicker(
+	window *controller.ControlWindow,
+	historyKey string,
+	title string,
+	tooltip string,
+	onPathChanged func(string),
+) *FilePicker {
+	return newFilePicker(
+		window,
+		historyKey,
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.vmd;*.vpd", description: "Vmd/Vpd Files (*.vmd;*.vpd)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		repository.NewPmxRepository(),
+	)
+}
+
 func newFilePicker(
 	window *controller.ControlWindow,
 	historyKey string,

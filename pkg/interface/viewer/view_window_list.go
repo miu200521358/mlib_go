@@ -54,26 +54,26 @@ func (vl *ViewerList) Run() {
 
 mainLoop:
 	for {
-		for _, viewWindow := range vl.viewerList {
-			if vl.shared.IsClosed() {
-				break mainLoop
-			}
+		if vl.shared.IsClosed() {
+			break mainLoop
+		}
 
+		for _, viewWindow := range vl.viewerList {
 			glfw.PollEvents()
 			viewWindow.MakeContextCurrent()
-
-			// 深度バッファのクリア
-			gl.ClearColor(0.7, 0.7, 0.7, 1.0)
-			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-			// 隠面消去
-			gl.Enable(gl.DEPTH_TEST)
-			gl.DepthFunc(gl.LEQUAL)
-
-			// ブレンディングを有効にする
-			gl.Enable(gl.BLEND)
-			gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 		}
+
+		// 深度バッファのクリア
+		gl.ClearColor(0.7, 0.7, 0.7, 1.0)
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+		// 隠面消去
+		gl.Enable(gl.DEPTH_TEST)
+		gl.DepthFunc(gl.LEQUAL)
+
+		// ブレンディングを有効にする
+		gl.Enable(gl.BLEND)
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	}
 
 	for _, viewWindow := range vl.viewerList {

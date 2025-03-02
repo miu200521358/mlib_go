@@ -105,13 +105,23 @@ func newMenuItems() []declarative.MenuItem {
 func newTabPages(controlWindow *controller.ControlWindow) []declarative.TabPage {
 	var fileTab *walk.TabPage
 
-	pmxLoadPicker := widget.NewPmxLoadFilePicker(
+	pmxLoad1Picker := widget.NewPmxLoadFilePicker(
 		controlWindow,
-		"Pmx",
-		"モデルファイル",
+		"pmx",
+		"モデルファイル1",
 		"モデルファイルを選択してください",
 		func(path string) {
 			mlog.IL("PmxLoadPicker: %s", path)
+		},
+	)
+
+	vmdLoader1Picker := widget.NewVmdVpdLoadFilePicker(
+		controlWindow,
+		"vmd",
+		"モーションファイル1",
+		"モーションファイルを選択してください",
+		func(path string) {
+			mlog.IL("VmdLoadPicker: %s", path)
 		},
 	)
 
@@ -130,7 +140,8 @@ func newTabPages(controlWindow *controller.ControlWindow) []declarative.TabPage 
 						declarative.TextLabel{
 							Text: "表示用モデル設定説明",
 						},
-						pmxLoadPicker.Widgets(),
+						pmxLoad1Picker.Widgets(),
+						vmdLoader1Picker.Widgets(),
 						declarative.VSpacer{},
 					},
 				},
