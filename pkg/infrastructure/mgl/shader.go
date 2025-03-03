@@ -20,7 +20,7 @@ type MShader struct {
 	lightPosition  *mmath.MVec3
 	lightDirection *mmath.MVec3
 	// msaa           *Msaa
-	// floor          *MFloor
+	floor         *FloorRenderer // 床レンダラー
 	programs      map[rendering.ProgramType]uint32
 	boneTextureId uint32
 	shaderLoader  *ShaderLoader
@@ -44,7 +44,7 @@ func (f *MShaderFactory) CreateShader(width, height int) (rendering.IShader, err
 		height:        height,
 		lightPosition: &mmath.MVec3{X: -0.5, Y: -1.0, Z: 0.5},
 		// msaa:          NewMsaa(width, height),
-		// floor:         newMFloor(),
+		floor:        NewFloorRenderer(),
 		programs:     make(map[rendering.ProgramType]uint32),
 		shaderLoader: NewShaderLoader(),
 	}
@@ -218,6 +218,17 @@ func (s *MShader) cleanupPrograms() {
 func (s *MShader) Cleanup() {
 	s.cleanupPrograms()
 
+	// 床のリソース解放
+	if s.floor != nil {
+		s.floor.Delete()
+	}
+
+	// シェーダープログラム解放
+	for _, program := range s.programs {
+		gl.DeleteProgram(program)
+	}
+
+	// ボーンテクスチャ解放
 	if s.boneTextureId != 0 {
 		gl.DeleteTextures(1, &s.boneTextureId)
 	}
@@ -234,4 +245,15 @@ func (s *MShader) BoneTextureId() uint32 {
 func (s *MShader) OverrideTextureId() uint32 {
 	return 0
 	// return s.msaa.OverrideTextureId()
+}
+
+// DrawFloor は床を描画する
+func (s *MShader) DrawFloor() {
+	// 床描画用のプログラム取得
+	program := s.programs[rendering.ProgramTypeFloor]
+
+	// 床レンダラーを使用して描画
+	if s.floor != nil {
+		s.floor.Render(program)
+	}
 }

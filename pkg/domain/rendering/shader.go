@@ -21,6 +21,9 @@ type IShader interface {
 	// カメラ設定
 	UpdateCameraSettings(camera *Camera)
 	GetFieldOfView() float32
+
+	// 床描画機能
+	DrawFloor()
 }
 
 // IShaderFactory はシェーダー生成の抽象ファクトリー

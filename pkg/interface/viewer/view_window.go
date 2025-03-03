@@ -115,5 +115,8 @@ func (vw *ViewWindow) Render(shared *state.SharedState) {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
+	// 床描画
+	vw.shader.DrawFloor()
+
 	vw.SwapBuffers()
 }
