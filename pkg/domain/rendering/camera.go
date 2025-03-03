@@ -21,27 +21,36 @@ type Camera struct {
 	LookAtCenter *mmath.MVec3
 	Up           *mmath.MVec3
 	FieldOfView  float32
+	AspectRatio  float32
 	NearPlane    float32
 	FarPlane     float32
 }
 
 // NewDefaultCamera はデフォルト設定のカメラを作成する
-func NewDefaultCamera() *Camera {
-	return &Camera{
+func NewDefaultCamera(width, height int) *Camera {
+	defaultCam := &Camera{
 		Position:     &mmath.MVec3{X: 0.0, Y: InitialCameraPositionY, Z: InitialCameraPositionZ},
 		LookAtCenter: &mmath.MVec3{X: 0.0, Y: InitialCameraPositionY, Z: 0.0},
 		Up:           &mmath.MVec3{X: 0.0, Y: 1.0, Z: 0.0},
 		FieldOfView:  FieldOfViewAngle,
+		AspectRatio:  float32(width) / float32(height),
 		NearPlane:    0.1,
 		FarPlane:     1000.0,
 	}
+	return defaultCam
+}
+
+// UpdateAspectRatio はアスペクト比を更新する
+func (c *Camera) UpdateAspectRatio(width, height int) {
+	c.AspectRatio = float32(width) / float32(height)
 }
 
 // Reset はカメラをデフォルト設定にリセットする
-func (c *Camera) Reset() {
-	defaultCam := NewDefaultCamera()
+func (c *Camera) Reset(width, height int) {
+	defaultCam := NewDefaultCamera(width, height)
 	c.Position = defaultCam.Position
 	c.LookAtCenter = defaultCam.LookAtCenter
 	c.Up = defaultCam.Up
 	c.FieldOfView = defaultCam.FieldOfView
+	c.AspectRatio = defaultCam.AspectRatio
 }

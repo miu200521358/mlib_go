@@ -6,7 +6,6 @@ package rendering
 // IShader はシェーダー機能の抽象インターフェース
 type IShader interface {
 	// 基本操作
-	Initialize(width, height int) error
 	Resize(width, height int)
 	Cleanup()
 

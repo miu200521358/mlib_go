@@ -79,14 +79,13 @@ func main() {
 
 	// 描画ウィンドウはメインスレッドで起動
 	defer app.SafeExecute(appConfig.IsSetEnv(), func() {
-		if err := viewerWindowList.Add("Viewer1", widths[1], heights[1], positionXs[1], positionYs[1]); err != nil {
-			app.ShowErrorDialog(appConfig.IsSetEnv(), err)
-			return
-		}
-
-		if err := viewerWindowList.Add("Viewer2", widths[2], heights[2], positionXs[2], positionYs[2]); err != nil {
-			app.ShowErrorDialog(appConfig.IsSetEnv(), err)
-			return
+		for n := range 2 {
+			nIdx := n + 1
+			if err := viewerWindowList.Add(fmt.Sprintf("Viewer%d", nIdx),
+				widths[nIdx], heights[nIdx], positionXs[nIdx], positionYs[nIdx]); err != nil {
+				app.ShowErrorDialog(appConfig.IsSetEnv(), err)
+				return
+			}
 		}
 
 		viewerWindowList.Run()
