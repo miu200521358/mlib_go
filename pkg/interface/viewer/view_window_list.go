@@ -1,7 +1,6 @@
 package viewer
 
 import (
-	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
@@ -52,28 +51,12 @@ func (vl *ViewerList) Add(title string, width, height, positionX, positionY int)
 
 func (vl *ViewerList) Run() {
 
-mainLoop:
-	for {
-		if vl.shared.IsClosed() {
-			break mainLoop
-		}
+	for !vl.shared.IsClosed() {
+		glfw.PollEvents()
 
 		for _, viewWindow := range vl.viewerList {
-			glfw.PollEvents()
-			viewWindow.MakeContextCurrent()
+			viewWindow.Render(vl.shared)
 		}
-
-		// 深度バッファのクリア
-		gl.ClearColor(0.7, 0.7, 0.7, 1.0)
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-		// 隠面消去
-		gl.Enable(gl.DEPTH_TEST)
-		gl.DepthFunc(gl.LEQUAL)
-
-		// ブレンディングを有効にする
-		gl.Enable(gl.BLEND)
-		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	}
 
 	for _, viewWindow := range vl.viewerList {

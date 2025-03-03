@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-gl/gl/v2.1/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/miu200521358/mlib_go/pkg/interface/state"
 )
 
 type ViewWindow struct {
@@ -71,4 +72,28 @@ func newViewWindow(
 	viewWindow.SetPos(positionX, positionY)
 
 	return viewWindow, nil
+}
+
+func (viewWindow *ViewWindow) Render(shared *state.SharedState) {
+	w, h := viewWindow.GetSize()
+	if w == 0 && h == 0 {
+		// ウィンドウが最小化されている場合は描画しない
+		return
+	}
+
+	viewWindow.MakeContextCurrent()
+
+	// 深度バッファのクリア
+	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+	// 隠面消去
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
+
+	// ブレンディングを有効にする
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	viewWindow.SwapBuffers()
 }
