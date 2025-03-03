@@ -78,15 +78,10 @@ func generateFloorVertices() []float32 {
 		vertices = append(vertices, r, g, b, a) // 色
 	}
 
-	// グリッド線の通常色（グレー）
-	normalColor := [4]float32{0.9, 0.9, 0.9, 0.7}
-
-	// 座標軸の色
-	axisColors := map[string][4]float32{
-		"x": {1.0, 0.0, 0.0, 1.0}, // X軸: 赤
-		"y": {0.0, 1.0, 0.0, 1.0}, // Y軸: 緑
-		"z": {0.0, 0.0, 1.0, 1.0}, // Z軸: 青
-	}
+	normalColor := [4]float32{0.9, 0.9, 0.9, 0.7} // グリッド線の通常色（グレー）
+	xColor := [4]float32{1.0, 0.0, 0.0, 1.0}      // X軸: 赤
+	yColor := [4]float32{0.0, 1.0, 0.0, 1.0}      // Y軸: 緑
+	zColor := [4]float32{0.0, 0.0, 1.0, 1.0}      // Z軸: 青
 
 	// X座標固定のグリッド線（Z方向に伸びる線）
 	for x := -gridSize; x <= gridSize; x += step {
@@ -95,7 +90,7 @@ func generateFloorVertices() []float32 {
 
 			// Z軸負方向（青色）
 			addLine(0, 0, float32(-gridSize), 0, 0, 0,
-				axisColors["z"][0], axisColors["z"][1], axisColors["z"][2], axisColors["z"][3])
+				zColor[0], zColor[1], zColor[2], zColor[3])
 
 			// Z軸正方向（グレー）
 			addLine(0, 0, 0, 0, 0, float32(gridSize),
@@ -118,7 +113,7 @@ func generateFloorVertices() []float32 {
 
 			// X軸正方向（赤色）
 			addLine(float32(-gridSize), 0, 0, 0, 0, 0,
-				axisColors["x"][0], axisColors["x"][1], axisColors["x"][2], axisColors["x"][3])
+				xColor[0], xColor[1], xColor[2], xColor[3])
 		} else {
 			// 通常の水平グリッド線
 			addLine(float32(-gridSize), 0, float32(z), float32(gridSize), 0, float32(z),
@@ -126,9 +121,8 @@ func generateFloorVertices() []float32 {
 		}
 	}
 
-	// Y軸線（垂直方向）- 常に緑色
-	color := axisColors["y"]
-	addLine(0, 0, 0, 0, float32(gridSize), 0, color[0], color[1], color[2], color[3])
+	// Y軸線（垂直正方向）- 常に緑色
+	addLine(0, 0, 0, 0, float32(gridSize), 0, yColor[0], yColor[1], yColor[2], yColor[3])
 
 	return vertices
 }
