@@ -7,7 +7,6 @@ import (
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 )
 
@@ -41,7 +40,7 @@ func (f *BufferFactory) CreateBoneBuffer(ptr unsafe.Pointer, count int) *VertexB
 func (f *BufferFactory) CreateDebugBuffer() *VertexBufferHandle {
 	builder := NewVertexBufferBuilder()
 	return builder.
-		AddDebugAttributes().
+		AddPositionColorAttributes().
 		Build()
 }
 
@@ -81,37 +80,10 @@ func (f *BufferFactory) CreateElementBuffer(ptr unsafe.Pointer, count int) *Elem
 }
 
 // CreateFloorBuffer は床表示用バッファを作成
-func (f *BufferFactory) CreateFloorBuffer() (*VertexBufferHandle, int32) {
-	// 床のラインの頂点データ
-	floorVertices := generateFloorVertices()
-
-	// デバッグログ
-	vertexCount := len(floorVertices) / 7 // position(3) + color(4)
-	mlog.D("Created floor grid with %d vertices (%d lines)",
-		vertexCount, vertexCount/2)
-
+func (f *BufferFactory) CreateFloorBuffer(floorVertices []float32) *VertexBufferHandle {
 	builder := NewVertexBufferBuilder()
-	handle := builder.AddDebugAttributes().Build()
-
-	handle.VAO.Bind()
-	handle.VBO.Bind()
-
-	size := len(floorVertices) * 4 // float32のサイズ
-	handle.VBO.BufferData(size, gl.Ptr(floorVertices), rendering.BufferUsageStatic)
-
-	// 属性の設定を確実に行う
-	stride := int32((3 + 4) * 4) // position(3) + color(4) * sizeof(float)
-
-	// position属性
-	gl.EnableVertexAttribArray(0)
-	gl.VertexAttribPointerWithOffset(0, 3, gl.FLOAT, false, stride, 0)
-
-	// color属性
-	gl.EnableVertexAttribArray(1)
-	gl.VertexAttribPointerWithOffset(1, 4, gl.FLOAT, false, stride, 3*4)
-
-	handle.VBO.Unbind()
-	handle.VAO.Unbind()
-
-	return handle, int32(vertexCount)
+	return builder.
+		AddPositionColorAttributes().
+		SetData(unsafe.Pointer(&floorVertices[0]), len(floorVertices)/7).
+		Build()
 }

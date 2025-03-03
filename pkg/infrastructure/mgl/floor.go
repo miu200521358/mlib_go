@@ -5,7 +5,6 @@ package mgl
 
 import (
 	"github.com/go-gl/gl/v4.4-core/gl"
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 )
 
 // FloorRenderer は床描画を担当するレンダラー
@@ -16,12 +15,15 @@ type FloorRenderer struct {
 
 // NewFloorRenderer は新しい床レンダラーを作成
 func NewFloorRenderer() *FloorRenderer {
+	// 床のラインの頂点データ
+	floorVertices := generateFloorVertices()
+
 	factory := NewBufferFactory()
-	bufferHandle, vertexCount := factory.CreateFloorBuffer()
+	bufferHandle := factory.CreateFloorBuffer(floorVertices)
 
 	return &FloorRenderer{
 		bufferHandle: bufferHandle,
-		vertexCount:  vertexCount,
+		vertexCount:  int32(len(floorVertices) / bufferHandle.StrideSize),
 	}
 }
 
@@ -29,23 +31,10 @@ func NewFloorRenderer() *FloorRenderer {
 func (f *FloorRenderer) Render(programID uint32) {
 	gl.UseProgram(programID)
 
-	// OpenGLエラーチェック
-	if err := gl.GetError(); err != gl.NO_ERROR {
-		mlog.E("OpenGL error before floor rendering: %v", err)
-	}
-
 	f.bufferHandle.Bind()
-
-	// レンダリング状態の確認
-	mlog.D("Floor rendering: vertices=%d", f.vertexCount)
 
 	// LINESモードで描画
 	gl.DrawArrays(gl.LINES, 0, f.vertexCount)
-
-	// 描画後のエラーチェック
-	if err := gl.GetError(); err != gl.NO_ERROR {
-		mlog.E("OpenGL error after floor rendering: %v", err)
-	}
 
 	f.bufferHandle.Unbind()
 	gl.UseProgram(0)

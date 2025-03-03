@@ -103,8 +103,8 @@ func (b *VertexBufferBuilder) AddStandardVertexAttributes() *VertexBufferBuilder
 		AddAttribute(AttributeAfterVertexDelta, 3)
 }
 
-// AddDebugAttributes は位置と色の属性を追加
-func (b *VertexBufferBuilder) AddDebugAttributes() *VertexBufferBuilder {
+// AddPositionColorAttributes は位置と色の属性を追加
+func (b *VertexBufferBuilder) AddPositionColorAttributes() *VertexBufferBuilder {
 	return b.
 		AddAttribute(AttributePosition, 3).
 		AddAttribute(AttributeColor, 4)
