@@ -80,10 +80,10 @@ func (f *BufferFactory) CreateElementBuffer(ptr unsafe.Pointer, count int) *Elem
 }
 
 // CreateFloorBuffer は床表示用バッファを作成
-func (f *BufferFactory) CreateFloorBuffer(floorVertices []float32) *VertexBufferHandle {
+func (f *BufferFactory) CreateFloorBuffer(floorVertices []float32, size int) *VertexBufferHandle {
 	builder := NewVertexBufferBuilder()
 	return builder.
 		AddPositionColorAttributes().
-		SetData(unsafe.Pointer(&floorVertices[0]), len(floorVertices)/7).
+		SetData(unsafe.Pointer(&floorVertices[0]), size).
 		Build()
 }

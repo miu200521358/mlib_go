@@ -1,3 +1,4 @@
+///go:build windows
 //go:build windows
 // +build windows
 
@@ -10,14 +11,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 )
-
-// VertexBufferConfig は頂点バッファの設定
-type VertexBufferConfig struct {
-	Attributes []rendering.VertexAttribute
-	Data       unsafe.Pointer
-	Count      int
-	FloatSize  int
-}
 
 // AttributeType は標準頂点属性タイプ
 type AttributeType int
@@ -42,6 +35,35 @@ const (
 	AttributeTexCoords                             // テクスチャ座標
 )
 
+// AttributeInfo は頂点属性の情報
+type AttributeInfo struct {
+	Size      int    // 要素数（例：Position は3要素）
+	Type      uint32 // データ型
+	Normalize bool   // 正規化フラグ
+	Name      string // シェーダーでの変数名（ドキュメント目的）
+}
+
+// 頂点属性タイプに対応する情報のマッピング
+var attributeInfoMap = map[AttributeType]AttributeInfo{
+	AttributePosition:         {Size: 3, Type: gl.FLOAT, Normalize: false, Name: "position"},
+	AttributeNormal:           {Size: 3, Type: gl.FLOAT, Normalize: false, Name: "normal"},
+	AttributeUV:               {Size: 2, Type: gl.FLOAT, Normalize: false, Name: "texCoord"},
+	AttributeExtendedUV:       {Size: 2, Type: gl.FLOAT, Normalize: false, Name: "extendedUV"},
+	AttributeEdgeFactor:       {Size: 1, Type: gl.FLOAT, Normalize: false, Name: "edgeFactor"},
+	AttributeDeformBoneIndex:  {Size: 4, Type: gl.FLOAT, Normalize: false, Name: "deformBoneIndex"},
+	AttributeDeformBoneWeight: {Size: 4, Type: gl.FLOAT, Normalize: false, Name: "deformBoneWeight"},
+	AttributeIsSdef:           {Size: 1, Type: gl.FLOAT, Normalize: false, Name: "isSdef"},
+	AttributeSdefC:            {Size: 3, Type: gl.FLOAT, Normalize: false, Name: "sdefC"},
+	AttributeSdefR0:           {Size: 3, Type: gl.FLOAT, Normalize: false, Name: "sdefR0"},
+	AttributeSdefR1:           {Size: 3, Type: gl.FLOAT, Normalize: false, Name: "sdefR1"},
+	AttributeVertexDelta:      {Size: 3, Type: gl.FLOAT, Normalize: false, Name: "vertexDelta"},
+	AttributeUVDelta:          {Size: 4, Type: gl.FLOAT, Normalize: false, Name: "uvDelta"},
+	AttributeUV1Delta:         {Size: 4, Type: gl.FLOAT, Normalize: false, Name: "uv1Delta"},
+	AttributeAfterVertexDelta: {Size: 3, Type: gl.FLOAT, Normalize: false, Name: "afterVertexDelta"},
+	AttributeColor:            {Size: 4, Type: gl.FLOAT, Normalize: false, Name: "color"},
+	AttributeTexCoords:        {Size: 2, Type: gl.FLOAT, Normalize: false, Name: "texCoords"},
+}
+
 // VertexBufferBuilder は頂点バッファビルダー
 type VertexBufferBuilder struct {
 	vao         *VertexArray
@@ -64,8 +86,34 @@ func NewVertexBufferBuilder() *VertexBufferBuilder {
 	}
 }
 
-// AddAttribute は頂点属性を追加
-func (b *VertexBufferBuilder) AddAttribute(attrType AttributeType, size int) *VertexBufferBuilder {
+// AddAttribute は頂点属性を追加（属性タイプから自動的にサイズを取得）
+func (b *VertexBufferBuilder) AddAttribute(attrType AttributeType) *VertexBufferBuilder {
+	info, exists := attributeInfoMap[attrType]
+	if !exists {
+		// 未定義の属性タイプの場合のエラー処理
+		// ログ出力するか、パニックを起こすかは要件による
+		return b
+	}
+
+	offset := b.strideSize * b.floatSize
+
+	attr := rendering.VertexAttribute{
+		Index:     uint32(len(b.attributes)),
+		Size:      info.Size,
+		Type:      info.Type,
+		Normalize: info.Normalize,
+		Offset:    offset,
+	}
+
+	b.attributes = append(b.attributes, attr)
+	b.strideSize += info.Size
+	b.elementSize++
+
+	return b
+}
+
+// AddAttributeWithSize は頂点属性をカスタムサイズで追加（後方互換性用）
+func (b *VertexBufferBuilder) AddAttributeWithSize(attrType AttributeType, size int) *VertexBufferBuilder {
 	offset := b.strideSize * b.floatSize
 
 	attr := rendering.VertexAttribute{
@@ -86,44 +134,44 @@ func (b *VertexBufferBuilder) AddAttribute(attrType AttributeType, size int) *Ve
 // AddStandardVertexAttributes は標準的な頂点属性を追加
 func (b *VertexBufferBuilder) AddStandardVertexAttributes() *VertexBufferBuilder {
 	return b.
-		AddAttribute(AttributePosition, 3).
-		AddAttribute(AttributeNormal, 3).
-		AddAttribute(AttributeUV, 2).
-		AddAttribute(AttributeExtendedUV, 2).
-		AddAttribute(AttributeEdgeFactor, 1).
-		AddAttribute(AttributeDeformBoneIndex, 4).
-		AddAttribute(AttributeDeformBoneWeight, 4).
-		AddAttribute(AttributeIsSdef, 1).
-		AddAttribute(AttributeSdefC, 3).
-		AddAttribute(AttributeSdefR0, 3).
-		AddAttribute(AttributeSdefR1, 3).
-		AddAttribute(AttributeVertexDelta, 3).
-		AddAttribute(AttributeUVDelta, 4).
-		AddAttribute(AttributeUV1Delta, 4).
-		AddAttribute(AttributeAfterVertexDelta, 3)
+		AddAttribute(AttributePosition).
+		AddAttribute(AttributeNormal).
+		AddAttribute(AttributeUV).
+		AddAttribute(AttributeExtendedUV).
+		AddAttribute(AttributeEdgeFactor).
+		AddAttribute(AttributeDeformBoneIndex).
+		AddAttribute(AttributeDeformBoneWeight).
+		AddAttribute(AttributeIsSdef).
+		AddAttribute(AttributeSdefC).
+		AddAttribute(AttributeSdefR0).
+		AddAttribute(AttributeSdefR1).
+		AddAttribute(AttributeVertexDelta).
+		AddAttribute(AttributeUVDelta).
+		AddAttribute(AttributeUV1Delta).
+		AddAttribute(AttributeAfterVertexDelta)
 }
 
 // AddPositionColorAttributes は位置と色の属性を追加
 func (b *VertexBufferBuilder) AddPositionColorAttributes() *VertexBufferBuilder {
 	return b.
-		AddAttribute(AttributePosition, 3).
-		AddAttribute(AttributeColor, 4)
+		AddAttribute(AttributePosition).
+		AddAttribute(AttributeColor)
 }
 
 // AddBoneAttributes はボーンの属性を追加
 func (b *VertexBufferBuilder) AddBoneAttributes() *VertexBufferBuilder {
 	return b.
-		AddAttribute(AttributePosition, 3).
-		AddAttribute(AttributeDeformBoneIndex, 4).
-		AddAttribute(AttributeDeformBoneWeight, 4).
-		AddAttribute(AttributeColor, 4)
+		AddAttribute(AttributePosition).
+		AddAttribute(AttributeDeformBoneIndex).
+		AddAttribute(AttributeDeformBoneWeight).
+		AddAttribute(AttributeColor)
 }
 
 // AddOverrideAttributes はオーバーライドの属性を追加
 func (b *VertexBufferBuilder) AddOverrideAttributes() *VertexBufferBuilder {
 	return b.
-		AddAttribute(AttributePosition, 3).
-		AddAttribute(AttributeTexCoords, 2)
+		AddAttribute(AttributePosition).
+		AddAttribute(AttributeTexCoords)
 }
 
 // SetData はデータを設定
