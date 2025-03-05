@@ -90,7 +90,7 @@ func (s *MShader) initializePrograms() error {
 func (s *MShader) setupProgramUniforms(program uint32) {
 	gl.UseProgram(program)
 
-	cam := s.GetCamera()
+	cam := s.Camera()
 
 	// 射影行列
 	projection := cam.GetProjectionMatrix(s.width, s.height)
@@ -131,13 +131,13 @@ func (s *MShader) Resize(width, height int) {
 		// MSAAのリサイズ
 		s.msaa.Resize(width, height)
 
-		cam := s.GetCamera()
+		cam := s.Camera()
 		cam.UpdateAspectRatio(width, height)
 		s.SetCamera(cam)
 	}
 }
 
-func (s *MShader) GetProgram(programType rendering.ProgramType) uint32 {
+func (s *MShader) Program(programType rendering.ProgramType) uint32 {
 	return s.programs[programType]
 }
 
@@ -152,25 +152,24 @@ func (s *MShader) ResetProgram() {
 	gl.UseProgram(0)
 }
 
-func (s *MShader) GetBoneTextureID() uint32 {
+func (s *MShader) BoneTextureID() uint32 {
 	return s.boneTextureId
 }
 
-func (s *MShader) GetOverrideTextureID() uint32 {
-	return 0
-	// return s.msaa.OverrideTextureId()
+func (s *MShader) OverrideTextureID() uint32 {
+	return s.msaa.OverrideTargetTexture()
 }
 
 func (s *MShader) SetCamera(cam *rendering.Camera) {
 	s.camera.Store(cam)
 }
 
-func (s *MShader) GetCamera() *rendering.Camera {
+func (s *MShader) Camera() *rendering.Camera {
 	return s.camera.Load().(*rendering.Camera)
 }
 
 func (s *MShader) UpdateCamera() {
-	cam := s.GetCamera()
+	cam := s.Camera()
 
 	for _, program := range s.programs {
 		gl.UseProgram(program)
@@ -231,8 +230,7 @@ func (s *MShader) BoneTextureId() uint32 {
 }
 
 func (s *MShader) OverrideTextureId() uint32 {
-	return 0
-	// return s.msaa.OverrideTextureId()
+	return s.msaa.OverrideTargetTexture()
 }
 
 // DrawFloor は床を描画する

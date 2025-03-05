@@ -69,9 +69,8 @@ func newViewWindow(
 		return nil, fmt.Errorf("OpenGL error before shader compilation: %v", err)
 	}
 
-	shaderFactory := mgl.NewMShaderFactory()
-
 	// シェーダー初期化
+	shaderFactory := mgl.NewMShaderFactory()
 	shader, err := shaderFactory.CreateShader(width, height)
 	if err != nil {
 		return nil, err
@@ -100,6 +99,7 @@ func newViewWindow(
 		gl.DebugMessageCallback(vw.debugMessageCallback, nil) // デバッグコールバック
 	}
 
+	// ウィンドウの位置を設定
 	vw.SetPos(positionX, positionY)
 
 	return vw, nil
@@ -162,6 +162,7 @@ func (vw *ViewWindow) Render(shared *state.SharedState) {
 
 	// 深度解決
 	vw.shader.GetMsaa().Resolve()
+	// TODO
 	// if vw.appState.IsShowOverride() && vw.windowIndex == 0 {
 	// 	vw.drawOverride()
 	// }

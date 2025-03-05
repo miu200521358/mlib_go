@@ -10,16 +10,16 @@ type IShader interface {
 	Cleanup()
 
 	// プログラム関連
-	GetProgram(programType ProgramType) uint32
+	Program(programType ProgramType) uint32
 	UseProgram(programType ProgramType)
 	ResetProgram()
 
 	// テクスチャ関連
-	GetBoneTextureID() uint32
-	GetOverrideTextureID() uint32
+	BoneTextureID() uint32
+	OverrideTextureID() uint32
 
 	// カメラ設定
-	GetCamera() *Camera
+	Camera() *Camera
 	SetCamera(*Camera)
 	UpdateCamera()
 

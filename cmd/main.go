@@ -47,12 +47,14 @@ func main() {
 	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(fmt.Sprintf("cpu_%s", time.Now().Format("20060102_150405")))).Stop()
 	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(fmt.Sprintf("cpu_%s", time.Now().Format("20060102_150405")))).Stop()
 
+	viewerCount := 2
+
 	appConfig := mconfig.LoadAppConfig(appFiles)
 	appConfig.Env = env
 	mi18n.Initialize(appI18nFiles)
-	shared := state.NewSharedState()
+	shared := state.NewSharedState(viewerCount)
 
-	widths, heights, positionXs, positionYs := app.GetCenterSizeAndWidth(appConfig, 2)
+	widths, heights, positionXs, positionYs := app.GetCenterSizeAndWidth(appConfig, viewerCount)
 
 	var controlWindow *controller.ControlWindow
 	viewerWindowList := viewer.NewViewerList(shared, appConfig)
@@ -79,7 +81,7 @@ func main() {
 
 	// 描画ウィンドウはメインスレッドで起動
 	defer app.SafeExecute(appConfig.IsSetEnv(), func() {
-		for n := range 2 {
+		for n := range viewerCount {
 			nIdx := n + 1
 			if err := viewerWindowList.Add(fmt.Sprintf("Viewer%d", nIdx),
 				widths[nIdx], heights[nIdx], positionXs[nIdx], positionYs[nIdx]); err != nil {

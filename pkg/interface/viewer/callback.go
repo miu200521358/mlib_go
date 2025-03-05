@@ -169,7 +169,7 @@ func (vw *ViewWindow) updateCameraPositionByCursor(xpos float64, ypos float64) {
 	xOffset := (vw.prevCursorPos.X - xpos) * ratio
 	yOffset := (vw.prevCursorPos.Y - ypos) * ratio
 
-	cam := vw.shader.GetCamera()
+	cam := vw.shader.Camera()
 
 	// カメラの向きに基づいて移動方向を計算
 	forward := cam.LookAtCenter.Subed(cam.Position)
@@ -198,7 +198,7 @@ func (vw *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64)
 		step *= 0.1
 	}
 
-	cam := vw.shader.GetCamera()
+	cam := vw.shader.Camera()
 
 	if yoff > 0 {
 		cam.FieldOfView -= step

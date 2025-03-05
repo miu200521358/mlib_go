@@ -6,10 +6,12 @@ package state
 import "sync/atomic"
 
 type SharedState struct {
-	flags              uint32       // 32ビット分のフラグを格納
-	frameValue         atomic.Value // 現在フレーム
-	maxFrameValue      atomic.Value // 最大フレーム
-	frameIntervalValue atomic.Value // FPS制限
+	flags              uint32           // 32ビット分のフラグを格納
+	frameValue         atomic.Value     // 現在フレーム
+	maxFrameValue      atomic.Value     // 最大フレーム
+	frameIntervalValue atomic.Value     // FPS制限
+	models             [][]atomic.Value // モデルデータ(ウィンドウ/モデルインデックス)
+	motions            [][]atomic.Value // モーションデータ(ウィンドウ/モデルインデックス)
 }
 
 type frameState struct {
@@ -26,49 +28,46 @@ type frameIntervalState struct {
 
 const (
 	flagEnabledFrameDrop   = 1 << iota // フレームドロップON/OFF
-	flagEnabledPhysics     = 1 << iota // 物理ON/OFF
-	flagPhysicsReset       = 1 << iota // 物理リセット
-	flagShowNormal         = 1 << iota // ボーンデバッグ表示
-	flagShowWire           = 1 << iota // ワイヤーフレームデバッグ表示
-	flagShowOverride       = 1 << iota // オーバーライドデバッグ表示
-	flagShowSelectedVertex = 1 << iota // 選択頂点デバッグ表示
-	flagShowBoneAll        = 1 << iota // 全ボーンデバッグ表示
-	flagShowBoneIk         = 1 << iota // IKボーンデバッグ表示
-	flagShowBoneEffector   = 1 << iota // 付与親ボーンデバッグ表示
-	flagShowBoneFixed      = 1 << iota // 軸制限ボーンデバッグ表示
-	flagShowBoneRotate     = 1 << iota // 回転ボーンデバッグ表示
-	flagShowBoneTranslate  = 1 << iota // 移動ボーンデバッグ表示
-	flagShowBoneVisible    = 1 << iota // 表示ボーンデバッグ表示
-	flagShowRigidBodyFront = 1 << iota // 剛体デバッグ表示(前面)
-	flagShowRigidBodyBack  = 1 << iota // 剛体デバッグ表示(埋め込み)
-	flagShowJoint          = 1 << iota // ジョイントデバッグ表示
-	flagShowInfo           = 1 << iota // 情報デバッグ表示
-	flagCameraSync         = 1 << iota // カメラ同期
-	flagPlaying            = 1 << iota // 再生中フラグ
-	flagClosed             = 1 << iota // 描画ウィンドウクローズ
+	flagEnabledPhysics                 // 物理ON/OFF
+	flagPhysicsReset                   // 物理リセット
+	flagShowNormal                     // ボーンデバッグ表示
+	flagShowWire                       // ワイヤーフレームデバッグ表示
+	flagShowOverride                   // オーバーライドデバッグ表示
+	flagShowSelectedVertex             // 選択頂点デバッグ表示
+	flagShowBoneAll                    // 全ボーンデバッグ表示
+	flagShowBoneIk                     // IKボーンデバッグ表示
+	flagShowBoneEffector               // 付与親ボーンデバッグ表示
+	flagShowBoneFixed                  // 軸制限ボーンデバッグ表示
+	flagShowBoneRotate                 // 回転ボーンデバッグ表示
+	flagShowBoneTranslate              // 移動ボーンデバッグ表示
+	flagShowBoneVisible                // 表示ボーンデバッグ表示
+	flagShowRigidBodyFront             // 剛体デバッグ表示(前面)
+	flagShowRigidBodyBack              // 剛体デバッグ表示(埋め込み)
+	flagShowJoint                      // ジョイントデバッグ表示
+	flagShowInfo                       // 情報デバッグ表示
+	flagCameraSync                     // カメラ同期
+	flagPlaying                        // 再生中フラグ
+	flagClosed                         // 描画ウィンドウクローズ
 )
 
 // NewSharedState は2つのStateを注入して生成するコンストラクタ
-func NewSharedState() *SharedState {
+func NewSharedState(viewerCount int) *SharedState {
 	return &SharedState{
-		flags: 0,
+		flags:   0,
+		models:  make([][]atomic.Value, viewerCount),
+		motions: make([][]atomic.Value, viewerCount),
 	}
 }
 
 // アトミックに取得
-func (ss *SharedState) Load() uint32 {
+func (ss *SharedState) loadFlag() uint32 {
 	return atomic.LoadUint32(&ss.flags)
-}
-
-// アトミックに書き込み (全体をswap)
-func (ss *SharedState) Store(newVal uint32) {
-	atomic.StoreUint32(&ss.flags, newVal)
 }
 
 // 特定ビットをON/OFFにする
 func (ss *SharedState) setBit(bitMask uint32, enable bool) {
 	for {
-		oldVal := ss.Load()
+		oldVal := ss.loadFlag()
 		newVal := oldVal
 		if enable {
 			newVal |= bitMask
@@ -83,7 +82,7 @@ func (ss *SharedState) setBit(bitMask uint32, enable bool) {
 
 // ビットが立っているかどうか
 func (ss *SharedState) isBitSet(bitMask uint32) bool {
-	return (ss.Load() & bitMask) != 0
+	return (ss.loadFlag() & bitMask) != 0
 }
 
 func (ss *SharedState) IsEnabledFrameDrop() bool {
