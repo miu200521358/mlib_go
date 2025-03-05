@@ -103,6 +103,9 @@ func (vw *ViewWindow) Render(shared *state.SharedState) {
 
 	vw.MakeContextCurrent()
 
+	// MSAAフレームバッファをバインド
+	vw.shader.GetMsaa().Bind()
+
 	// 深度バッファのクリア
 	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -117,6 +120,13 @@ func (vw *ViewWindow) Render(shared *state.SharedState) {
 
 	// 床描画
 	vw.shader.DrawFloor()
+
+	// 深度解決
+	vw.shader.GetMsaa().Resolve()
+	// if viewWindow.appState.IsShowOverride() && viewWindow.windowIndex == 0 {
+	// 	viewWindow.drawOverride()
+	// }
+	vw.shader.GetMsaa().Unbind()
 
 	vw.SwapBuffers()
 }

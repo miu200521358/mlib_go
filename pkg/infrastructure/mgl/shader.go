@@ -19,11 +19,11 @@ type MShader struct {
 	height         int
 	lightPosition  *mmath.MVec3
 	lightDirection *mmath.MVec3
-	// msaa           *Msaa
-	floor         *FloorRenderer // 床レンダラー
-	programs      map[rendering.ProgramType]uint32
-	boneTextureId uint32
-	shaderLoader  *ShaderLoader
+	msaa           rendering.IMsaa
+	floor          *FloorRenderer // 床レンダラー
+	programs       map[rendering.ProgramType]uint32
+	boneTextureId  uint32
+	shaderLoader   *ShaderLoader
 }
 
 // MShaderFactory はOpenGLシェーダーのファクトリー
@@ -38,15 +38,19 @@ func NewMShaderFactory() *MShaderFactory {
 func (f *MShaderFactory) CreateShader(width, height int) (rendering.IShader, error) {
 	cam := rendering.NewDefaultCamera(width, height)
 
+	// MSAAの作成
+	msaaFactory := NewMsaaFactory()
+	msaa := msaaFactory.CreateMsaa(width, height)
+
 	shader := &MShader{
 		camera:        cam,
 		width:         width,
 		height:        height,
 		lightPosition: &mmath.MVec3{X: -0.5, Y: -1.0, Z: 0.5},
-		// msaa:          NewMsaa(width, height),
-		floor:        NewFloorRenderer(),
-		programs:     make(map[rendering.ProgramType]uint32),
-		shaderLoader: NewShaderLoader(),
+		msaa:          msaa,
+		floor:         NewFloorRenderer(),
+		programs:      make(map[rendering.ProgramType]uint32),
+		shaderLoader:  NewShaderLoader(),
 	}
 	shader.lightDirection = shader.lightPosition.Normalized()
 
@@ -123,8 +127,9 @@ func (s *MShader) Resize(width, height int) {
 	gl.Viewport(0, 0, int32(width), int32(height))
 
 	if width != 0 && height != 0 {
-		// s.msaa.Delete()
-		// s.msaa = NewMsaa(width, height)
+		// MSAAのリサイズ
+		s.msaa.Resize(width, height)
+
 		s.camera.UpdateAspectRatio(width, height)
 
 		// 全プログラムを更新
@@ -223,6 +228,11 @@ func (s *MShader) Cleanup() {
 		s.floor.Delete()
 	}
 
+	// MSAAリソースの解放
+	if s.msaa != nil {
+		s.msaa.Delete()
+	}
+
 	// シェーダープログラム解放
 	for _, program := range s.programs {
 		gl.DeleteProgram(program)
@@ -232,10 +242,6 @@ func (s *MShader) Cleanup() {
 	if s.boneTextureId != 0 {
 		gl.DeleteTextures(1, &s.boneTextureId)
 	}
-
-	// if s.msaa != nil {
-	// 	s.msaa.Delete()
-	// }
 }
 
 func (s *MShader) BoneTextureId() uint32 {
@@ -256,4 +262,9 @@ func (s *MShader) DrawFloor() {
 	if s.floor != nil {
 		s.floor.Render(program)
 	}
+}
+
+// GetMsaa はMSAA機能を取得
+func (s *MShader) GetMsaa() rendering.IMsaa {
+	return s.msaa
 }

@@ -24,6 +24,9 @@ type IShader interface {
 
 	// 床描画機能
 	DrawFloor()
+
+	// MSAA関連
+	GetMsaa() IMsaa
 }
 
 // IShaderFactory はシェーダー生成の抽象ファクトリー
