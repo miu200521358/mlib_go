@@ -85,8 +85,6 @@ func newViewWindow(
 	glWindow.SetKeyCallback(vw.keyCallback)
 	// glWindow.SetMouseButtonCallback(vw.mouseCallback)
 	// glWindow.SetCursorPosCallback(vw.cursorPosCallback)
-	// glWindow.SetSizeCallback(vw.resizeCallback)
-	// glWindow.SetFramebufferSizeCallback(vw.resizeCallback)
 
 	if !isProd {
 		gl.Enable(gl.DEBUG_OUTPUT)
@@ -126,6 +124,9 @@ func (vw *ViewWindow) Render(shared *state.SharedState) {
 	}
 
 	vw.MakeContextCurrent()
+
+	// リサイズ（サイズが変わってなければ何もしない）
+	vw.shader.Resize(w, h)
 
 	// MSAAフレームバッファをバインド
 	vw.shader.GetMsaa().Bind()

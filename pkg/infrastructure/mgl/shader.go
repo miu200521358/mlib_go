@@ -118,6 +118,10 @@ func (s *MShader) setupProgramUniforms(program uint32) {
 // IShaderインターフェースの実装
 
 func (s *MShader) Resize(width, height int) {
+	if s.width == width && s.height == height {
+		return
+	}
+
 	s.width = width
 	s.height = height
 
@@ -130,9 +134,6 @@ func (s *MShader) Resize(width, height int) {
 		cam := s.GetCamera()
 		cam.UpdateAspectRatio(width, height)
 		s.SetCamera(cam)
-
-		// 全プログラムを更新
-		s.UpdateCamera()
 	}
 }
 
