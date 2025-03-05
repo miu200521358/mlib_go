@@ -83,6 +83,28 @@ func (vw *ViewWindow) keyCallback(
 	}
 }
 
+func (vw *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64) {
+	step := float32(1.0)
+	if vw.shiftPressed {
+		step *= 5
+	} else if vw.ctrlPressed {
+		step *= 0.1
+	}
+
+	cam := vw.shader.GetCamera()
+
+	if yoff > 0 {
+		cam.FieldOfView -= step
+		if cam.FieldOfView < 1.0 {
+			cam.FieldOfView = 1.0
+		}
+	} else if yoff < 0 {
+		cam.FieldOfView += step
+	}
+
+	vw.shader.SetCamera(cam)
+}
+
 func (vw *ViewWindow) debugMessageCallback(
 	source uint32,
 	glType uint32,

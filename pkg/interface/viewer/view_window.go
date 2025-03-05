@@ -81,7 +81,7 @@ func newViewWindow(
 	}
 
 	glWindow.SetCloseCallback(vw.closeCallback)
-	// glWindow.SetScrollCallback(vw.scrollCallback)
+	glWindow.SetScrollCallback(vw.scrollCallback)
 	glWindow.SetKeyCallback(vw.keyCallback)
 	// glWindow.SetMouseButtonCallback(vw.mouseCallback)
 	// glWindow.SetCursorPosCallback(vw.cursorPosCallback)
