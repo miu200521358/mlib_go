@@ -17,6 +17,7 @@ import (
 // 直角の定数値
 const rightAngle = 89.9
 
+// closeCallback はウィンドウのクローズイベントを処理する
 func (vw *ViewWindow) closeCallback(w *glfw.Window) {
 	// controllerStateを読み取り
 	if !vw.list.appConfig.IsCloseConfirm() {
@@ -53,6 +54,7 @@ var cameraPresets = map[glfw.Key]CameraPreset{
 	glfw.KeyKP8: {"Back", 180, 0},           // 背面から
 }
 
+// keyCallback はキーボードのイベントを処理する
 func (vw *ViewWindow) keyCallback(
 	w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey,
 ) {
@@ -83,6 +85,111 @@ func (vw *ViewWindow) keyCallback(
 	}
 }
 
+// mouseCallback はマウスボタンのイベントを処理する
+func (vw *ViewWindow) mouseCallback(
+	w *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey,
+) {
+	if action == glfw.Press {
+		switch button {
+		case glfw.MouseButtonLeft:
+			vw.leftButtonPressed = true
+		case glfw.MouseButtonMiddle:
+			vw.middleButtonPressed = true
+		case glfw.MouseButtonRight:
+			vw.rightButtonPressed = true
+		}
+	} else if action == glfw.Release {
+		switch button {
+		case glfw.MouseButtonLeft:
+			vw.leftButtonPressed = false
+		case glfw.MouseButtonMiddle:
+			vw.middleButtonPressed = false
+		case glfw.MouseButtonRight:
+			vw.rightButtonPressed = false
+		}
+	}
+}
+
+// cursorPosCallback はカーソル位置のイベントを処理する
+func (vw *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
+
+	if !vw.updatedPrevCursor {
+		vw.prevCursorPos.X = xpos
+		vw.prevCursorPos.Y = ypos
+		vw.updatedPrevCursor = true
+		return
+	}
+
+	if vw.rightButtonPressed {
+		// 右クリックはカメラの角度を更新
+		vw.updateCameraAngleByCursor(xpos, ypos)
+	} else if vw.middleButtonPressed {
+		// 中クリックはカメラ位置と中心を移動
+		vw.updateCameraPositionByCursor(xpos, ypos)
+	} else if vw.leftButtonPressed {
+		// 左クリックはカーソル位置を取得
+		// if vw.ctrlPressed {
+		// 	vw.leftCursorRemoveWindowPositions[mgl32.Vec2{float32(xpos), float32(ypos)}] = 0.0
+		// } else {
+		// 	vw.leftCursorWindowPositions[mgl32.Vec2{float32(xpos), float32(ypos)}] = 0.0
+		// }
+	}
+
+	vw.prevCursorPos.X = xpos
+	vw.prevCursorPos.Y = ypos
+}
+
+// updateCameraAngleByCursor はカメラの角度をカーソル位置に基づいて更新する
+func (vw *ViewWindow) updateCameraAngleByCursor(xpos, ypos float64) {
+	ratio := 0.1
+	if vw.shiftPressed {
+		ratio *= 3
+	} else if vw.ctrlPressed {
+		ratio *= 0.1
+	}
+
+	// 右クリックはカメラ中心をそのままにカメラ位置を変える
+	xOffset := (xpos - vw.prevCursorPos.X) * ratio
+	yOffset := (ypos - vw.prevCursorPos.Y) * ratio
+
+	// 方位角と仰角を更新
+	vw.resetCameraPosition(vw.yaw+xOffset, vw.pitch+yOffset)
+}
+
+// updateCameraPositionByCursor はカメラ位置と中心をカーソル位置に基づいて更新する
+func (vw *ViewWindow) updateCameraPositionByCursor(xpos float64, ypos float64) {
+	// 中ボタンが押された場合の処理
+	ratio := 0.07
+	if vw.shiftPressed {
+		ratio *= 3
+	} else if vw.ctrlPressed {
+		ratio *= 0.1
+	}
+
+	xOffset := (vw.prevCursorPos.X - xpos) * ratio
+	yOffset := (vw.prevCursorPos.Y - ypos) * ratio
+
+	cam := vw.shader.GetCamera()
+
+	// カメラの向きに基づいて移動方向を計算
+	forward := cam.LookAtCenter.Subed(cam.Position)
+	right := forward.Cross(cam.Up).Normalize()
+	up := right.Cross(forward.Normalize()).Normalize()
+
+	// 上下移動のベクトルを計算
+	upMovement := up.MulScalar(-yOffset)
+	// 左右移動のベクトルを計算
+	rightMovement := right.MulScalar(-xOffset)
+
+	// 移動ベクトルを合成してカメラ位置と中心を更新
+	movement := upMovement.Add(rightMovement)
+	cam.Position.Add(movement)
+	cam.LookAtCenter.Add(movement)
+
+	vw.shader.SetCamera(cam)
+}
+
+// scrollCallback はマウスホイールのスクロールイベントを処理する
 func (vw *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64) {
 	step := float32(1.0)
 	if vw.shiftPressed {
@@ -105,6 +212,7 @@ func (vw *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64)
 	vw.shader.SetCamera(cam)
 }
 
+// debugMessageCallback はOpenGLのデバッグメッセージを処理する
 func (vw *ViewWindow) debugMessageCallback(
 	source uint32,
 	glType uint32,

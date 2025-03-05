@@ -19,12 +19,19 @@ import (
 
 type ViewWindow struct {
 	*glfw.Window
-	windowIndex  int               // ウィンドウインデックス
-	title        string            // ウィンドウタイトル
-	shiftPressed bool              // Shiftキー押下フラグ
-	ctrlPressed  bool              // Ctrlキー押下フラグ
-	list         *ViewerList       // ビューワーリスト
-	shader       rendering.IShader // シェーダー
+	windowIndex         int               // ウィンドウインデックス
+	title               string            // ウィンドウタイトル
+	leftButtonPressed   bool              // 左ボタン押下フラグ
+	middleButtonPressed bool              // 中ボタン押下フラグ
+	rightButtonPressed  bool              // 右ボタン押下フラグ
+	shiftPressed        bool              // Shiftキー押下フラグ
+	ctrlPressed         bool              // Ctrlキー押下フラグ
+	updatedPrevCursor   bool              // 前回のカーソル位置更新フラグ
+	prevCursorPos       *mmath.MVec2      // 前回のカーソル位置
+	yaw                 float64           // カメラyaw
+	pitch               float64           // カメラpitch
+	list                *ViewerList       // ビューワーリスト
+	shader              rendering.IShader // シェーダー
 }
 
 func newViewWindow(
@@ -73,18 +80,19 @@ func newViewWindow(
 	gl.Viewport(0, 0, int32(width), int32(height))
 
 	vw := &ViewWindow{
-		Window:      glWindow,
-		windowIndex: windowIndex,
-		title:       title,
-		list:        list,
-		shader:      shader,
+		Window:        glWindow,
+		windowIndex:   windowIndex,
+		title:         title,
+		list:          list,
+		shader:        shader,
+		prevCursorPos: mmath.NewMVec2(),
 	}
 
 	glWindow.SetCloseCallback(vw.closeCallback)
 	glWindow.SetScrollCallback(vw.scrollCallback)
 	glWindow.SetKeyCallback(vw.keyCallback)
-	// glWindow.SetMouseButtonCallback(vw.mouseCallback)
-	// glWindow.SetCursorPosCallback(vw.cursorPosCallback)
+	glWindow.SetMouseButtonCallback(vw.mouseCallback)
+	glWindow.SetCursorPosCallback(vw.cursorPosCallback)
 
 	if !isProd {
 		gl.Enable(gl.DEBUG_OUTPUT)
@@ -98,6 +106,9 @@ func newViewWindow(
 }
 
 func (vw *ViewWindow) resetCameraPosition(yaw, pitch float64) {
+	vw.yaw = yaw
+	vw.pitch = pitch
+
 	// 球面座標系をデカルト座標系に変換
 	radius := math.Abs(float64(rendering.InitialCameraPositionZ))
 
