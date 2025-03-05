@@ -129,9 +129,10 @@ func (s *MShader) Resize(width, height int) {
 
 		cam := s.GetCamera()
 		cam.UpdateAspectRatio(width, height)
+		s.SetCamera(cam)
 
 		// 全プログラムを更新
-		s.UpdateCamera(cam)
+		s.UpdateCamera()
 	}
 }
 
@@ -167,8 +168,8 @@ func (s *MShader) GetCamera() *rendering.Camera {
 	return s.camera.Load().(*rendering.Camera)
 }
 
-func (s *MShader) UpdateCamera(cam *rendering.Camera) {
-	s.SetCamera(cam)
+func (s *MShader) UpdateCamera() {
+	cam := s.GetCamera()
 
 	for _, program := range s.programs {
 		gl.UseProgram(program)

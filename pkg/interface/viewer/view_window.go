@@ -143,7 +143,7 @@ func (vw *ViewWindow) Render(shared *state.SharedState) {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	// シェーダーのカメラ設定更新
-	vw.shader.UpdateCamera(vw.shader.GetCamera())
+	vw.shader.UpdateCamera()
 
 	// 床描画
 	vw.shader.DrawFloor()

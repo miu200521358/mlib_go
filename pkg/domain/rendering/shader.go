@@ -19,9 +19,9 @@ type IShader interface {
 	GetOverrideTextureID() uint32
 
 	// カメラ設定
-	UpdateCamera(camera *Camera)
 	GetCamera() *Camera
 	SetCamera(*Camera)
+	UpdateCamera()
 
 	// 床描画機能
 	DrawFloor()
