@@ -3,7 +3,12 @@
 
 package state
 
-import "sync/atomic"
+import (
+	"sync/atomic"
+
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+)
 
 type SharedState struct {
 	flags              uint32           // 32ビット分のフラグを格納
@@ -57,6 +62,54 @@ func NewSharedState(viewerCount int) *SharedState {
 		models:  make([][]atomic.Value, viewerCount),
 		motions: make([][]atomic.Value, viewerCount),
 	}
+}
+
+// StoreModel は指定されたウィンドウとモデルインデックスにモデルを格納
+func (ss *SharedState) StoreModel(windowIndex, modelIndex int, model *pmx.PmxModel) {
+	if len(ss.models) <= windowIndex {
+		return
+	}
+	if len(ss.models[windowIndex]) <= modelIndex {
+		for i := len(ss.models[windowIndex]); i <= modelIndex; i++ {
+			ss.models[windowIndex] = append(ss.models[windowIndex], atomic.Value{})
+		}
+	}
+	ss.models[windowIndex][modelIndex].Store(model)
+}
+
+// LoadModel は指定されたウィンドウとモデルインデックスのモデルを取得
+func (ss *SharedState) LoadModel(windowIndex, modelIndex int) *pmx.PmxModel {
+	if len(ss.models) <= windowIndex {
+		return nil
+	}
+	if len(ss.models[windowIndex]) <= modelIndex {
+		return nil
+	}
+	return ss.models[windowIndex][modelIndex].Load().(*pmx.PmxModel)
+}
+
+// StoreMotion は指定されたウィンドウとモデルインデックスにモーションを格納
+func (ss *SharedState) StoreMotion(windowIndex, modelIndex int, motion *vmd.VmdMotion) {
+	if len(ss.motions) <= windowIndex {
+		return
+	}
+	if len(ss.motions[windowIndex]) <= modelIndex {
+		for i := len(ss.motions[windowIndex]); i <= modelIndex; i++ {
+			ss.motions[windowIndex] = append(ss.motions[windowIndex], atomic.Value{})
+		}
+	}
+	ss.motions[windowIndex][modelIndex].Store(motion)
+}
+
+// LoadMotion は指定されたウィンドウとモデルインデックスのモーションを取得
+func (ss *SharedState) LoadMotion(windowIndex, modelIndex int) *vmd.VmdMotion {
+	if len(ss.motions) <= windowIndex {
+		return nil
+	}
+	if len(ss.motions[windowIndex]) <= modelIndex {
+		return nil
+	}
+	return ss.motions[windowIndex][modelIndex].Load().(*vmd.VmdMotion)
 }
 
 // アトミックに取得

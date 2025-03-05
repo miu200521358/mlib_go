@@ -15,6 +15,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller/widget"
@@ -112,7 +114,12 @@ func newTabPages(controlWindow *controller.ControlWindow) []declarative.TabPage 
 		"モデルファイル1",
 		"モデルファイルを選択してください",
 		func(path string) {
-			mlog.IL("PmxLoadPicker: %s", path)
+			pmxRep := repository.NewPmxRepository()
+			if model, err := pmxRep.Load(path); err == nil {
+				controlWindow.StoreModel(0, 0, model.(*pmx.PmxModel))
+			} else {
+				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
+			}
 		},
 	)
 

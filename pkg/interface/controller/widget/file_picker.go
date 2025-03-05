@@ -195,24 +195,28 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 }
 
 func (fp *FilePicker) onChanged(path string) {
-	if fp.repository != nil && fp.historyKey != "" {
-		if path == "" {
-			fp.nameEdit.SetText(mi18n.T("未設定"))
-		} else {
-			fp.nameEdit.SetText(fp.repository.LoadName(path))
+	if fp.repository == nil || fp.historyKey == "" {
+		return
+	}
 
-			if fp.onPathChanged != nil {
-				fp.onPathChanged(path)
-			}
+	if path == "" {
+		fp.nameEdit.SetText(mi18n.T("未設定"))
+		return
+	}
 
-			if ok, err := fp.repository.CanLoad(fp.pathEdit.Text()); ok && err == nil {
-				// ロード系のみ履歴用キーを指定して履歴リストを保存
-				mconfig.SaveUserConfig(fp.historyKey, path, 50)
-			} else {
-				// 読み込めない場合、拒否
-				fp.pathEdit.ChangeText("")
-			}
+	fp.nameEdit.SetText(fp.repository.LoadName(path))
+
+	if ok, err := fp.repository.CanLoad(fp.pathEdit.Text()); ok && err == nil {
+		// ロード系のみ履歴用キーを指定して履歴リストを保存
+		mconfig.SaveUserConfig(fp.historyKey, path, 50)
+
+		if fp.onPathChanged != nil {
+			// コールバックを呼び出し
+			fp.onPathChanged(path)
 		}
+	} else {
+		// 読み込めない場合、拒否
+		fp.pathEdit.ChangeText("")
 	}
 }
 

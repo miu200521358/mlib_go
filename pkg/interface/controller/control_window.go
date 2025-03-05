@@ -9,6 +9,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
@@ -60,7 +62,7 @@ func NewControlWindow(
 	tabPages []declarative.TabPage,
 	width, height, positionX, positionY int,
 ) (*ControlWindow, error) {
-	controlWindow := &ControlWindow{
+	cw := &ControlWindow{
 		shared:    shared,
 		appConfig: appConfig,
 	}
@@ -82,34 +84,34 @@ func NewControlWindow(
 			declarative.Action{
 				Text:        mi18n.T("&デバッグログ表示"),
 				Checkable:   true,
-				OnTriggered: controlWindow.triggerLogLevel,
-				AssignTo:    &controlWindow.logLevelDebugAction,
+				OnTriggered: cw.triggerLogLevel,
+				AssignTo:    &cw.logLevelDebugAction,
 			})
 		logMenuItems = append(logMenuItems,
 			declarative.Action{
 				Text:        mi18n.T("&冗長ログ表示"),
 				Checkable:   true,
-				OnTriggered: controlWindow.triggerLogLevel,
-				AssignTo:    &controlWindow.logLevelVerboseAction,
+				OnTriggered: cw.triggerLogLevel,
+				AssignTo:    &cw.logLevelVerboseAction,
 			})
 		logMenuItems = append(logMenuItems,
 			declarative.Action{
 				Text:        mi18n.T("&IK冗長ログ表示"),
 				Checkable:   true,
-				OnTriggered: controlWindow.triggerLogLevel,
-				AssignTo:    &controlWindow.logLevelIkVerboseAction,
+				OnTriggered: cw.triggerLogLevel,
+				AssignTo:    &cw.logLevelIkVerboseAction,
 			})
 		logMenuItems = append(logMenuItems,
 			declarative.Action{
 				Text:        mi18n.T("&ビューワー冗長ログ表示"),
 				Checkable:   true,
-				OnTriggered: controlWindow.triggerLogLevel,
-				AssignTo:    &controlWindow.logLevelViewerVerboseAction,
+				OnTriggered: cw.triggerLogLevel,
+				AssignTo:    &cw.logLevelViewerVerboseAction,
 			})
 	}
 
 	if err := (declarative.MainWindow{
-		AssignTo: &controlWindow.MainWindow,
+		AssignTo: &cw.MainWindow,
 		Title:    fmt.Sprintf("%s %s", appConfig.Name, appConfig.Version),
 		Size:     declarative.Size{Width: width, Height: height},
 		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear, MarginsZero: true, SpacingZero: true},
@@ -124,8 +126,8 @@ func NewControlWindow(
 					// declarative.Action{
 					// 	Text:        mi18n.T("&フレームドロップON"),
 					// 	Checkable:   true,
-					// 	OnTriggered: controlWindow.TriggerEnabledFrameDrop,
-					// 	AssignTo:    &controlWindow.enabledFrameDropAction,
+					// 	OnTriggered: cw.TriggerEnabledFrameDrop,
+					// 	AssignTo:    &cw.enabledFrameDropAction,
 					// },
 					// declarative.Menu{
 					// 	Text: mi18n.T("&fps制限"),
@@ -133,60 +135,60 @@ func NewControlWindow(
 					// 		declarative.Action{
 					// 			Text:        mi18n.T("&30fps制限"),
 					// 			Checkable:   true,
-					// 			OnTriggered: controlWindow.TriggerFps30Limit,
-					// 			AssignTo:    &controlWindow.limitFps30Action,
+					// 			OnTriggered: cw.TriggerFps30Limit,
+					// 			AssignTo:    &cw.limitFps30Action,
 					// 		},
 					// 		declarative.Action{
 					// 			Text:        mi18n.T("&60fps制限"),
 					// 			Checkable:   true,
-					// 			OnTriggered: controlWindow.TriggerFps60Limit,
-					// 			AssignTo:    &controlWindow.limitFps60Action,
+					// 			OnTriggered: cw.TriggerFps60Limit,
+					// 			AssignTo:    &cw.limitFps60Action,
 					// 		},
 					// 		declarative.Action{
 					// 			Text:        mi18n.T("&fps無制限"),
 					// 			Checkable:   true,
-					// 			OnTriggered: controlWindow.TriggerUnLimitFps,
-					// 			AssignTo:    &controlWindow.limitFpsUnLimitAction,
+					// 			OnTriggered: cw.TriggerUnLimitFps,
+					// 			AssignTo:    &cw.limitFpsUnLimitAction,
 					// 		},
 					// 	},
 					// },
 					// declarative.Action{
 					// 	Text:        mi18n.T("&情報表示"),
 					// 	Checkable:   true,
-					// 	OnTriggered: controlWindow.TriggerShowInfo,
-					// 	AssignTo:    &controlWindow.showInfoAction,
+					// 	OnTriggered: cw.TriggerShowInfo,
+					// 	AssignTo:    &cw.showInfoAction,
 					// },
 					// declarative.Separator{},
 					declarative.Action{
 						Text:        mi18n.T("&物理ON/OFF"),
 						Checkable:   true,
-						OnTriggered: controlWindow.TriggerEnabledPhysics,
-						AssignTo:    &controlWindow.enabledPhysicsAction,
+						OnTriggered: cw.TriggerEnabledPhysics,
+						AssignTo:    &cw.enabledPhysicsAction,
 					},
 					declarative.Action{
 						Text:        mi18n.T("&物理リセット"),
-						OnTriggered: controlWindow.TriggerPhysicsReset,
-						AssignTo:    &controlWindow.physicsResetAction,
+						OnTriggered: cw.TriggerPhysicsReset,
+						AssignTo:    &cw.physicsResetAction,
 					},
 					// declarative.Separator{},
 					// declarative.Action{
 					// 	Text:        mi18n.T("&法線表示"),
 					// 	Checkable:   true,
-					// 	OnTriggered: controlWindow.TriggerShowNormal,
-					// 	AssignTo:    &controlWindow.showNormalAction,
+					// 	OnTriggered: cw.TriggerShowNormal,
+					// 	AssignTo:    &cw.showNormalAction,
 					// },
 					// declarative.Action{
 					// 	Text:        mi18n.T("&ワイヤーフレーム表示"),
 					// 	Checkable:   true,
-					// 	OnTriggered: controlWindow.TriggerShowWire,
-					// 	AssignTo:    &controlWindow.showWireAction,
+					// 	OnTriggered: cw.TriggerShowWire,
+					// 	AssignTo:    &cw.showWireAction,
 					// },
 					// declarative.Separator{},
 					// declarative.Action{
 					// 	Text:        mi18n.T("&頂点ライン選択"),
 					// 	Checkable:   true,
-					// 	OnTriggered: controlWindow.TriggerShowSelectedVertex,
-					// 	AssignTo:    &controlWindow.showSelectedVertexAction,
+					// 	OnTriggered: cw.TriggerShowSelectedVertex,
+					// 	AssignTo:    &cw.showSelectedVertexAction,
 					// },
 					// declarative.Action{
 					// 	Text: mi18n.T("&頂点ライン選択使い方"),
@@ -198,14 +200,14 @@ func NewControlWindow(
 					// declarative.Action{
 					// 	Text:        mi18n.T("&カメラ同期"),
 					// 	Checkable:   true,
-					// 	OnTriggered: controlWindow.TriggerCameraSync,
-					// 	AssignTo:    &controlWindow.cameraSyncAction,
+					// 	OnTriggered: cw.TriggerCameraSync,
+					// 	AssignTo:    &cw.cameraSyncAction,
 					// },
 					// declarative.Action{
 					// 	Text:        mi18n.T("&サブビューワーオーバーレイ"),
 					// 	Checkable:   true,
-					// 	OnTriggered: controlWindow.TriggerShowOverride,
-					// 	AssignTo:    &controlWindow.showOverrideAction,
+					// 	OnTriggered: cw.TriggerShowOverride,
+					// 	AssignTo:    &cw.showOverrideAction,
 					// },
 					// declarative.Action{
 					// 	Text: mi18n.T("&サブビューワーオーバーレイの使い方"),
@@ -221,45 +223,45 @@ func NewControlWindow(
 					// 		declarative.Action{
 					// 			Text:        mi18n.T("&全ボーン"),
 					// 			Checkable:   true,
-					// 			OnTriggered: controlWindow.TriggerShowBoneAll,
-					// 			AssignTo:    &controlWindow.showBoneAllAction,
+					// 			OnTriggered: cw.TriggerShowBoneAll,
+					// 			AssignTo:    &cw.showBoneAllAction,
 					// 		},
 					// 		declarative.Separator{},
 					// 		declarative.Action{
 					// 			Text:        mi18n.T("&IKボーン"),
 					// 			Checkable:   true,
-					// 			OnTriggered: controlWindow.TriggerShowBoneIk,
-					// 			AssignTo:    &controlWindow.showBoneIkAction,
+					// 			OnTriggered: cw.TriggerShowBoneIk,
+					// 			AssignTo:    &cw.showBoneIkAction,
 					// 		},
 					// 		declarative.Action{
 					// 			Text:        mi18n.T("&付与親ボーン"),
 					// 			Checkable:   true,
-					// 			OnTriggered: controlWindow.TriggerShowBoneEffector,
-					// 			AssignTo:    &controlWindow.showBoneEffectorAction,
+					// 			OnTriggered: cw.TriggerShowBoneEffector,
+					// 			AssignTo:    &cw.showBoneEffectorAction,
 					// 		},
 					// 		declarative.Action{
 					// 			Text:        mi18n.T("&軸制限ボーン"),
 					// 			Checkable:   true,
-					// 			OnTriggered: controlWindow.TriggerShowBoneFixed,
-					// 			AssignTo:    &controlWindow.showBoneFixedAction,
+					// 			OnTriggered: cw.TriggerShowBoneFixed,
+					// 			AssignTo:    &cw.showBoneFixedAction,
 					// 		},
 					// 		declarative.Action{
 					// 			Text:        mi18n.T("&回転ボーン"),
 					// 			Checkable:   true,
-					// 			OnTriggered: controlWindow.TriggerShowBoneRotate,
-					// 			AssignTo:    &controlWindow.showBoneRotateAction,
+					// 			OnTriggered: cw.TriggerShowBoneRotate,
+					// 			AssignTo:    &cw.showBoneRotateAction,
 					// 		},
 					// 		declarative.Action{
 					// 			Text:        mi18n.T("&移動ボーン"),
 					// 			Checkable:   true,
-					// 			OnTriggered: controlWindow.TriggerShowBoneTranslate,
-					// 			AssignTo:    &controlWindow.showBoneTranslateAction,
+					// 			OnTriggered: cw.TriggerShowBoneTranslate,
+					// 			AssignTo:    &cw.showBoneTranslateAction,
 					// 		},
 					// 		declarative.Action{
 					// 			Text:        mi18n.T("&表示ボーン"),
 					// 			Checkable:   true,
-					// 			OnTriggered: controlWindow.TriggerShowBoneVisible,
-					// 			AssignTo:    &controlWindow.showBoneVisibleAction,
+					// 			OnTriggered: cw.TriggerShowBoneVisible,
+					// 			AssignTo:    &cw.showBoneVisibleAction,
 					// 		},
 					// 	},
 					// },
@@ -269,22 +271,22 @@ func NewControlWindow(
 					// 		declarative.Action{
 					// 			Text:        mi18n.T("&前面表示"),
 					// 			Checkable:   true,
-					// 			OnTriggered: controlWindow.TriggerShowRigidBodyFront,
-					// 			AssignTo:    &controlWindow.showRigidBodyFrontAction,
+					// 			OnTriggered: cw.TriggerShowRigidBodyFront,
+					// 			AssignTo:    &cw.showRigidBodyFrontAction,
 					// 		},
 					// 		declarative.Action{
 					// 			Text:        mi18n.T("&埋め込み表示"),
 					// 			Checkable:   true,
-					// 			OnTriggered: controlWindow.TriggerShowRigidBodyBack,
-					// 			AssignTo:    &controlWindow.showRigidBodyBackAction,
+					// 			OnTriggered: cw.TriggerShowRigidBodyBack,
+					// 			AssignTo:    &cw.showRigidBodyBackAction,
 					// 		},
 					// 	},
 					// },
 					// declarative.Action{
 					// 	Text:        mi18n.T("&ジョイント表示"),
 					// 	Checkable:   true,
-					// 	OnTriggered: controlWindow.TriggerShowJoint,
-					// 	AssignTo:    &controlWindow.showJointAction,
+					// 	OnTriggered: cw.TriggerShowJoint,
+					// 	AssignTo:    &cw.showJointAction,
 					// },
 					// declarative.Separator{},
 					declarative.Action{
@@ -308,36 +310,36 @@ func NewControlWindow(
 				Items: []declarative.MenuItem{
 					declarative.Action{
 						Text:        "日本語",
-						OnTriggered: func() { controlWindow.onChangeLanguage("ja") },
+						OnTriggered: func() { cw.onChangeLanguage("ja") },
 					},
 					declarative.Action{
 						Text:        "English",
-						OnTriggered: func() { controlWindow.onChangeLanguage("en") },
+						OnTriggered: func() { cw.onChangeLanguage("en") },
 					},
 					declarative.Action{
 						Text:        "中文",
-						OnTriggered: func() { controlWindow.onChangeLanguage("zh") },
+						OnTriggered: func() { cw.onChangeLanguage("zh") },
 					},
 					declarative.Action{
 						Text:        "한국어",
-						OnTriggered: func() { controlWindow.onChangeLanguage("ko") },
+						OnTriggered: func() { cw.onChangeLanguage("ko") },
 					},
 				},
 			},
 		},
 		Children: []declarative.Widget{
 			declarative.TabWidget{
-				AssignTo: &controlWindow.tabWidget,
+				AssignTo: &cw.tabWidget,
 				Pages:    tabPages,
 			},
 		},
 		OnClosing: func(canceled *bool, reason walk.CloseReason) {
 			// controllerStateを読み取り、ビューワーが閉じていない場合は確認ダイアログを表示
-			if !controlWindow.appConfig.IsCloseConfirm() {
-				controlWindow.shared.SetClosed(true)
+			if !cw.appConfig.IsCloseConfirm() {
+				cw.shared.SetClosed(true)
 				return
 			}
-			if !controlWindow.shared.IsClosed() {
+			if !cw.shared.IsClosed() {
 				if result := walk.MsgBox(
 					nil,
 					mi18n.T("終了確認"),
@@ -345,7 +347,7 @@ func NewControlWindow(
 					walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel,
 				); result == walk.DlgCmdOK {
 					// ユーザーがOKを選んだ場合、 viewerState の isClosed を true にする
-					controlWindow.shared.SetClosed(true)
+					cw.shared.SetClosed(true)
 				} else {
 					// 閉じない場合はキャンセル
 					*canceled = true
@@ -357,75 +359,93 @@ func NewControlWindow(
 	}
 
 	// // 初期設定
-	// // controlWindow.limitFps30Action.SetChecked(true)       // 物理ON
-	// controlWindow.enabledPhysicsAction.SetChecked(true) // フレームドロップON
-	// // controlWindow.enabledFrameDropAction.SetChecked(true) // 30fps制限
+	// // cw.limitFps30Action.SetChecked(true)       // 物理ON
+	// cw.enabledPhysicsAction.SetChecked(true) // フレームドロップON
+	// // cw.enabledFrameDropAction.SetChecked(true) // 30fps制限
 
-	controlWindow.SetPosition(positionX, positionY)
+	cw.SetPosition(positionX, positionY)
 
-	return controlWindow, nil
+	return cw, nil
 }
 
 // OnClose はウィンドウを閉じるときの処理
-func (controlWindow *ControlWindow) OnClose() {
+func (cw *ControlWindow) OnClose() {
 	// コントローラStateのisClosedをtrueにする
-	controlWindow.shared.SetClosed(true)
+	cw.shared.SetClosed(true)
 }
 
 // Run はメインウィンドウを起動する
-func (controlWindow *ControlWindow) Run() {
-	controlWindow.MainWindow.Run()
+func (cw *ControlWindow) Run() {
+	cw.MainWindow.Run()
 }
 
-func (controlWindow *ControlWindow) Dispose() {
-	controlWindow.Close()
+func (cw *ControlWindow) Dispose() {
+	cw.Close()
 }
 
-func (controlWindow *ControlWindow) WindowSize() (int, int) {
-	size := controlWindow.Size()
+func (cw *ControlWindow) WindowSize() (int, int) {
+	size := cw.Size()
 	return size.Width, size.Height
 }
 
-func (controlWindow *ControlWindow) SetPosition(x, y int) {
-	controlWindow.SetX(x)
-	controlWindow.SetY(y)
+func (cw *ControlWindow) SetPosition(x, y int) {
+	cw.SetX(x)
+	cw.SetY(y)
 }
 
-func (controlWindow *ControlWindow) onChangeLanguage(lang string) {
+func (cw *ControlWindow) onChangeLanguage(lang string) {
 	if result := walk.MsgBox(
-		controlWindow.MainWindow,
+		cw.MainWindow,
 		mi18n.TWithLocale(lang, "言語変更"),
 		mi18n.TWithLocale(lang, "言語変更メッセージ"),
 		walk.MsgBoxOKCancel|walk.MsgBoxIconInformation,
 	); result == walk.DlgCmdOK {
 		mi18n.SetLang(lang)
-		controlWindow.shared.SetClosed(true)
+		cw.shared.SetClosed(true)
 	}
 }
 
-func (controlWindow *ControlWindow) triggerLogLevel() {
+func (cw *ControlWindow) triggerLogLevel() {
 	mlog.SetLevel(mlog.INFO)
-	if controlWindow.logLevelDebugAction.Checked() {
+	if cw.logLevelDebugAction.Checked() {
 		mlog.SetLevel(mlog.DEBUG)
 	}
-	if controlWindow.logLevelViewerVerboseAction.Checked() {
+	if cw.logLevelViewerVerboseAction.Checked() {
 		mlog.I("exe階層に「viewerPng」フォルダを作成し、画面描画中の連番pngを出力し続けます\n画面サイズ: 1920x1080、視野角: 40.0、カメラ位置: (0, 10, 45)、カメラ角度: (0, 0, 0) ")
 		mlog.SetLevel(mlog.VIEWER_VERBOSE)
 	}
-	if controlWindow.logLevelIkVerboseAction.Checked() {
+	if cw.logLevelIkVerboseAction.Checked() {
 		mlog.SetLevel(mlog.IK_VERBOSE)
 	}
-	if controlWindow.logLevelVerboseAction.Checked() {
+	if cw.logLevelVerboseAction.Checked() {
 		mlog.SetLevel(mlog.VERBOSE)
 	}
 }
 
-// ------- 以下、メニューから呼ばれるトリガーメソッド -------
+// ------- 以下、モデルやモーションの格納・取得メソッド -------
 
-func (controlWindow *ControlWindow) TriggerEnabledPhysics() {
-	controlWindow.shared.SetEnabledPhysics(controlWindow.enabledPhysicsAction.Checked())
+func (cw *ControlWindow) StoreModel(windowIndex int, modelIndex int, model *pmx.PmxModel) {
+	cw.shared.StoreModel(windowIndex, modelIndex, model)
 }
 
-func (controlWindow *ControlWindow) TriggerPhysicsReset() {
-	controlWindow.shared.SetPhysicsReset(true)
+func (cw *ControlWindow) LoadModel(windowIndex int, modelIndex int) *pmx.PmxModel {
+	return cw.shared.LoadModel(windowIndex, modelIndex)
+}
+
+func (cw *ControlWindow) StoreMotion(windowIndex int, modelIndex int, motion *vmd.VmdMotion) {
+	cw.shared.StoreMotion(windowIndex, modelIndex, motion)
+}
+
+func (cw *ControlWindow) LoadMotion(windowIndex int, modelIndex int) *vmd.VmdMotion {
+	return cw.shared.LoadMotion(windowIndex, modelIndex)
+}
+
+// ------- 以下、メニューから呼ばれるトリガーメソッド -------
+
+func (cw *ControlWindow) TriggerEnabledPhysics() {
+	cw.shared.SetEnabledPhysics(cw.enabledPhysicsAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerPhysicsReset() {
+	cw.shared.SetPhysicsReset(true)
 }
