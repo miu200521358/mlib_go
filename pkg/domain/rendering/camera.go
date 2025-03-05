@@ -4,6 +4,7 @@
 package rendering
 
 import (
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
@@ -53,4 +54,22 @@ func (c *Camera) Reset(width, height int) {
 	c.Up = defaultCam.Up
 	c.FieldOfView = defaultCam.FieldOfView
 	c.AspectRatio = defaultCam.AspectRatio
+}
+
+// プロジェクション行列を取得
+func (c *Camera) GetProjectionMatrix(width, height int) mgl32.Mat4 {
+	return mgl32.Perspective(
+		mgl32.DegToRad(c.FieldOfView),
+		float32(width)/float32(height),
+		c.NearPlane,
+		c.FarPlane,
+	)
+}
+
+// ビュー行列を取得
+func (c *Camera) GetViewMatrix() mgl32.Mat4 {
+	cameraPosition := mmath.NewGlVec3(c.Position)
+	lookAtCenter := mmath.NewGlVec3(c.LookAtCenter)
+	up := mmath.NewGlVec3(c.Up)
+	return mgl32.LookAtV(cameraPosition, lookAtCenter, up)
 }

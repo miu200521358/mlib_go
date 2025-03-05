@@ -4,8 +4,9 @@
 package mgl
 
 import (
+	"sync/atomic"
+
 	"github.com/go-gl/gl/v4.4-core/gl"
-	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -14,7 +15,7 @@ import (
 
 // MShader はOpenGLを使用したシェーダー実装
 type MShader struct {
-	camera         *rendering.Camera
+	camera         atomic.Value
 	width          int
 	height         int
 	lightPosition  *mmath.MVec3
@@ -43,7 +44,6 @@ func (f *MShaderFactory) CreateShader(width, height int) (rendering.IShader, err
 	msaa := msaaFactory.CreateMsaa(width, height)
 
 	shader := &MShader{
-		camera:        cam,
 		width:         width,
 		height:        height,
 		lightPosition: &mmath.MVec3{X: -0.5, Y: -1.0, Z: 0.5},
@@ -52,6 +52,8 @@ func (f *MShaderFactory) CreateShader(width, height int) (rendering.IShader, err
 		programs:      make(map[rendering.ProgramType]uint32),
 		shaderLoader:  NewShaderLoader(),
 	}
+
+	shader.camera.Store(cam)
 	shader.lightDirection = shader.lightPosition.Normalized()
 
 	err := shader.initializePrograms()
@@ -88,32 +90,27 @@ func (s *MShader) initializePrograms() error {
 func (s *MShader) setupProgramUniforms(program uint32) {
 	gl.UseProgram(program)
 
+	cam := s.GetCamera()
+
 	// 射影行列
-	projection := mgl32.Perspective(
-		mgl32.DegToRad(s.camera.FieldOfView),
-		s.camera.AspectRatio,
-		s.camera.NearPlane,
-		s.camera.FarPlane,
-	)
+	projection := cam.GetProjectionMatrix(s.width, s.height)
 	projectionUniform := gl.GetUniformLocation(program, gl.Str(ShaderProjectionMatrix))
 	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
 	// カメラ位置
-	cameraPosition := NewGlVec3(s.camera.Position)
+	cameraPosition := mmath.NewGlVec3(cam.Position)
 	cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(ShaderCameraPosition))
 	gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
-	// ライト方向
-	lightDirection := NewGlVec3(s.lightDirection)
-	lightDirectionUniform := gl.GetUniformLocation(program, gl.Str(ShaderLightDirection))
-	gl.Uniform3fv(lightDirectionUniform, 1, &lightDirection[0])
-
 	// カメラビュー行列
-	cameraUp := NewGlVec3(s.camera.Up)
-	lookAtCenter := NewGlVec3(s.camera.LookAtCenter)
-	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, cameraUp)
+	camera := cam.GetViewMatrix()
 	cameraUniform := gl.GetUniformLocation(program, gl.Str(ShaderViewMatrix))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
+
+	// ライト方向
+	lightDirection := mmath.NewGlVec3(s.lightDirection)
+	lightDirectionUniform := gl.GetUniformLocation(program, gl.Str(ShaderLightDirection))
+	gl.Uniform3fv(lightDirectionUniform, 1, &lightDirection[0])
 
 	gl.UseProgram(0)
 }
@@ -130,26 +127,12 @@ func (s *MShader) Resize(width, height int) {
 		// MSAAのリサイズ
 		s.msaa.Resize(width, height)
 
-		s.camera.UpdateAspectRatio(width, height)
+		cam := s.GetCamera()
+		cam.UpdateAspectRatio(width, height)
 
 		// 全プログラムを更新
-		for _, program := range s.programs {
-			s.updateProgramProjection(program)
-		}
+		s.UpdateCamera(cam)
 	}
-}
-
-func (s *MShader) updateProgramProjection(program uint32) {
-	gl.UseProgram(program)
-	projection := mgl32.Perspective(
-		mgl32.DegToRad(s.camera.FieldOfView),
-		s.camera.AspectRatio,
-		s.camera.NearPlane,
-		s.camera.FarPlane,
-	)
-	projectionUniform := gl.GetUniformLocation(program, gl.Str(ShaderProjectionMatrix))
-	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
-	gl.UseProgram(0)
 }
 
 func (s *MShader) GetProgram(programType rendering.ProgramType) uint32 {
@@ -176,40 +159,37 @@ func (s *MShader) GetOverrideTextureID() uint32 {
 	// return s.msaa.OverrideTextureId()
 }
 
-func (s *MShader) UpdateCameraSettings(cam *rendering.Camera) {
-	s.camera = cam
+func (s *MShader) SetCamera(cam *rendering.Camera) {
+	s.camera.Store(cam)
+}
+
+func (s *MShader) GetCamera() *rendering.Camera {
+	return s.camera.Load().(*rendering.Camera)
+}
+
+func (s *MShader) UpdateCamera(cam *rendering.Camera) {
+	s.SetCamera(cam)
 
 	for _, program := range s.programs {
 		gl.UseProgram(program)
 
 		// カメラ位置
-		cameraPosition := NewGlVec3(s.camera.Position)
+		cameraPosition := mmath.NewGlVec3(cam.Position)
 		cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(ShaderCameraPosition))
 		gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
 		// カメラビュー行列
-		cameraUp := NewGlVec3(s.camera.Up)
-		lookAtCenter := NewGlVec3(s.camera.LookAtCenter)
-		viewMatrix := mgl32.LookAtV(cameraPosition, lookAtCenter, cameraUp)
+		viewMatrix := cam.GetViewMatrix()
 		viewMatrixUniform := gl.GetUniformLocation(program, gl.Str(ShaderViewMatrix))
 		gl.UniformMatrix4fv(viewMatrixUniform, 1, false, &viewMatrix[0])
 
 		// 射影行列
-		projection := mgl32.Perspective(
-			mgl32.DegToRad(s.camera.FieldOfView),
-			s.camera.AspectRatio,
-			s.camera.NearPlane,
-			s.camera.FarPlane,
-		)
+		projection := cam.GetProjectionMatrix(s.width, s.height)
 		projectionUniform := gl.GetUniformLocation(program, gl.Str(ShaderProjectionMatrix))
 		gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 	}
 
 	gl.UseProgram(0)
-}
-
-func (s *MShader) GetFieldOfView() float32 {
-	return s.camera.FieldOfView
 }
 
 func (s *MShader) cleanupPrograms() {

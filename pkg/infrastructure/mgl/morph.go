@@ -5,18 +5,19 @@ package mgl
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 // newVertexMorphDeltasGl は頂点モーフ変形情報をOpenGL用に変換
 func newVertexMorphDeltaGl(md *delta.VertexMorphDelta) []float32 {
 	var p0, p1, p2 float32
 	if md.Position != nil {
-		p := NewGlVec3(md.Position)
+		p := mmath.NewGlVec3(md.Position)
 		p0, p1, p2 = p[0], p[1], p[2]
 	}
 	var ap0, ap1, ap2 float32
 	if md.AfterPosition != nil {
-		ap := NewGlVec3(md.AfterPosition)
+		ap := mmath.NewGlVec3(md.AfterPosition)
 		ap0, ap1, ap2 = ap[0], ap[1], ap[2]
 	}
 	// UVは符号関係ないのでそのまま取得する

@@ -17,13 +17,13 @@ import (
 // 直角の定数値
 const rightAngle = 89.9
 
-func (viewWindow *ViewWindow) closeCallback(w *glfw.Window) {
+func (vw *ViewWindow) closeCallback(w *glfw.Window) {
 	// controllerStateを読み取り
-	if !viewWindow.list.appConfig.IsCloseConfirm() {
-		viewWindow.list.shared.SetClosed(true)
+	if !vw.list.appConfig.IsCloseConfirm() {
+		vw.list.shared.SetClosed(true)
 		return
 	}
-	if !viewWindow.list.shared.IsClosed() {
+	if !vw.list.shared.IsClosed() {
 		// ビューワーがまだ閉じていない場合のみ、確認ダイアログを表示
 		if result := walk.MsgBox(
 			nil,
@@ -31,12 +31,59 @@ func (viewWindow *ViewWindow) closeCallback(w *glfw.Window) {
 			mi18n.T("終了確認メッセージ"),
 			walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel,
 		); result == walk.DlgCmdOK {
-			viewWindow.list.shared.SetClosed(true)
+			vw.list.shared.SetClosed(true)
 		}
 	}
 }
 
-func (viewWindow *ViewWindow) debugMessageCallback(
+// CameraPreset はカメラの視点プリセットを定義
+type CameraPreset struct {
+	Name  string  // プリセット名（デバッグ用）
+	Yaw   float64 // 水平方向の角度
+	Pitch float64 // 垂直方向の角度
+}
+
+// カメラの視点プリセット定義
+var cameraPresets = map[glfw.Key]CameraPreset{
+	glfw.KeyKP1: {"Bottom", 0, -rightAngle}, // 下面から
+	glfw.KeyKP2: {"Front", 0, 0},            // 正面から
+	glfw.KeyKP4: {"Left", -rightAngle, 0},   // 左面から
+	glfw.KeyKP5: {"Top", 0, rightAngle},     // 上面から
+	glfw.KeyKP6: {"Right", rightAngle, 0},   // 右面から
+	glfw.KeyKP8: {"Back", 180, 0},           // 背面から
+}
+
+func (vw *ViewWindow) keyCallback(
+	w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey,
+) {
+	// 修飾キーの処理
+	if action == glfw.Press {
+		switch key {
+		case glfw.KeyLeftShift, glfw.KeyRightShift:
+			vw.shiftPressed = true
+			return
+		case glfw.KeyLeftControl, glfw.KeyRightControl:
+			vw.ctrlPressed = true
+			return
+		}
+	} else if action == glfw.Release {
+		switch key {
+		case glfw.KeyLeftShift, glfw.KeyRightShift:
+			vw.shiftPressed = false
+			return
+		case glfw.KeyLeftControl, glfw.KeyRightControl:
+			vw.ctrlPressed = false
+			return
+		}
+	}
+
+	// カメラプリセットの適用
+	if preset, exists := cameraPresets[key]; exists {
+		vw.resetCameraPosition(preset.Yaw, preset.Pitch)
+	}
+}
+
+func (vw *ViewWindow) debugMessageCallback(
 	source uint32,
 	glType uint32,
 	id uint32,

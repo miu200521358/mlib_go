@@ -6,9 +6,12 @@ package viewer
 import (
 	"fmt"
 	"image"
+	"math"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/mathgl/mgl64"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
@@ -16,10 +19,12 @@ import (
 
 type ViewWindow struct {
 	*glfw.Window
-	windowIndex int    // ウィンドウインデックス
-	title       string // ウィンドウタイトル
-	list        *ViewerList
-	shader      rendering.IShader
+	windowIndex  int               // ウィンドウインデックス
+	title        string            // ウィンドウタイトル
+	shiftPressed bool              // Shiftキー押下フラグ
+	ctrlPressed  bool              // Ctrlキー押下フラグ
+	list         *ViewerList       // ビューワーリスト
+	shader       rendering.IShader // シェーダー
 }
 
 func newViewWindow(
@@ -77,7 +82,7 @@ func newViewWindow(
 
 	glWindow.SetCloseCallback(vw.closeCallback)
 	// glWindow.SetScrollCallback(vw.scrollCallback)
-	// glWindow.SetKeyCallback(vw.keyCallback)
+	glWindow.SetKeyCallback(vw.keyCallback)
 	// glWindow.SetMouseButtonCallback(vw.mouseCallback)
 	// glWindow.SetCursorPosCallback(vw.cursorPosCallback)
 	// glWindow.SetSizeCallback(vw.resizeCallback)
@@ -92,6 +97,25 @@ func newViewWindow(
 	vw.SetPos(positionX, positionY)
 
 	return vw, nil
+}
+
+func (vw *ViewWindow) resetCameraPosition(yaw, pitch float64) {
+	// 球面座標系をデカルト座標系に変換
+	radius := math.Abs(float64(rendering.InitialCameraPositionZ))
+
+	// 四元数を使ってカメラの方向を計算
+	yawRad := mgl64.DegToRad(yaw)
+	pitchRad := mgl64.DegToRad(pitch)
+	orientation := mmath.NewMQuaternionFromAxisAngles(mmath.MVec3UnitY, yawRad).Mul(
+		mmath.NewMQuaternionFromAxisAngles(mmath.MVec3UnitX, pitchRad))
+	forwardXYZ := orientation.MulVec3(mmath.MVec3UnitZNeg).MulScalar(radius)
+
+	// カメラ位置を更新
+	cam := rendering.NewDefaultCamera(vw.GetSize())
+	cam.Position.X = forwardXYZ.X
+	cam.Position.Y = rendering.InitialCameraPositionY + forwardXYZ.Y
+	cam.Position.Z = forwardXYZ.Z
+	vw.shader.SetCamera(cam)
 }
 
 func (vw *ViewWindow) Render(shared *state.SharedState) {
@@ -118,13 +142,16 @@ func (vw *ViewWindow) Render(shared *state.SharedState) {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
+	// シェーダーのカメラ設定更新
+	vw.shader.UpdateCamera(vw.shader.GetCamera())
+
 	// 床描画
 	vw.shader.DrawFloor()
 
 	// 深度解決
 	vw.shader.GetMsaa().Resolve()
-	// if viewWindow.appState.IsShowOverride() && viewWindow.windowIndex == 0 {
-	// 	viewWindow.drawOverride()
+	// if vw.appState.IsShowOverride() && vw.windowIndex == 0 {
+	// 	vw.drawOverride()
 	// }
 	vw.shader.GetMsaa().Unbind()
 
