@@ -261,3 +261,24 @@ func DeepCopy[T Number](values []T) []T {
 	copy(copied, values)
 	return copied
 }
+
+func IsPowerOfTwo(n int) bool {
+	if n <= 0 {
+		return false
+	}
+	return (n & (n - 1)) == 0
+}
+
+func BoolToInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func BoolToFlag(b bool) float64 {
+	if b {
+		return 1.0
+	}
+	return -1.0
+}
