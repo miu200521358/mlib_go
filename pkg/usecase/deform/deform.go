@@ -5,6 +5,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
+	"github.com/miu200521358/mlib_go/pkg/interface/state"
 )
 
 func DeformModel(
@@ -135,12 +137,13 @@ func DeformBoneByPhysicsFlag(
 }
 
 func Deform(
+	shared *state.SharedState,
+	physics *mbt.MPhysics,
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
-	frame float32,
 ) *delta.VmdDeltas {
-	deltas = deformBeforePhysics(model, motion, deltas, frame)
+	deltas = deformBeforePhysics(model, motion, deltas, shared.Frame())
 	return deltas
 }
 

@@ -15,6 +15,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/render"
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
@@ -36,6 +37,7 @@ type ViewWindow struct {
 	pitch               float64                 // カメラpitch
 	list                *ViewerList             // ビューワーリスト
 	shader              rendering.IShader       // シェーダー
+	physics             *mbt.MPhysics           // 物理エンジン
 	modelRenderers      []*render.ModelRenderer // モデル描画オブジェクト
 	motions             []*vmd.VmdMotion        // モーションデータ
 	vmdDeltas           []*delta.VmdDeltas      // 変形情報
@@ -91,6 +93,7 @@ func newViewWindow(
 		title:         title,
 		list:          list,
 		shader:        shader,
+		physics:       mbt.NewMPhysics(),
 		prevCursorPos: mmath.NewMVec2(),
 	}
 
@@ -175,7 +178,7 @@ func (vw *ViewWindow) Render(shared *state.SharedState, timeStep float32) {
 	vw.loadMotions(shared)
 
 	for i, modelRenderer := range vw.modelRenderers {
-		vw.vmdDeltas[i] = deform.Deform(modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], shared.Frame())
+		vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i])
 		modelRenderer.Render(vw.shader, shared, vw.vmdDeltas[i])
 	}
 

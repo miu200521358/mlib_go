@@ -12,11 +12,13 @@ func (vw *ViewWindow) loadModelRenderers(shared *state.SharedState) {
 		}
 		model := shared.LoadModel(vw.windowIndex, i)
 		if vw.modelRenderers[i] != nil && vw.modelRenderers[i].Hash() != model.Hash() {
+			vw.physics.DeleteModel(i)
 			vw.modelRenderers[i].Delete()
 			vw.modelRenderers[i] = nil
 		}
 		if vw.modelRenderers[i] == nil {
 			vw.modelRenderers[i] = render.NewModelRenderer(vw.windowIndex, model)
+			vw.physics.AddModel(i, model)
 		}
 	}
 }

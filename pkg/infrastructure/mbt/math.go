@@ -10,12 +10,12 @@ import (
 )
 
 // Bullet+OpenGL座標系に変換された3次元ベクトルを返します
-func vecToBullet(vec *mmath.MVec3) bt.BtVector3 {
+func newBulletFromVec(vec *mmath.MVec3) bt.BtVector3 {
 	return bt.NewBtVector3(float32(-vec.X), float32(vec.Y), float32(vec.Z))
 }
 
 // Bullet+OpenGL座標系に変換されたラジアン→クォータニオンベクトルを返します
-func radToBullet(rad *mmath.MVec3) bt.BtQuaternion {
+func newBulletFromRad(rad *mmath.MVec3) bt.BtQuaternion {
 	return bt.NewBtQuaternion(float32(-rad.Y), float32(rad.X), float32(-rad.Z))
 }
 
