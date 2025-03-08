@@ -58,7 +58,7 @@ func NewBoneDeltaByGlobalMatrix(bone *pmx.Bone, frame float32, globalMatrix *mma
 		LocalMatrix:  localMat,
 		UnitMatrix:   unitMat,
 		// 位置と回転を抜き出して保持
-		FramePosition: unitMat.Translation(),
+		// FramePosition: unitMat.Translation(),	// ちゃむちかの左袖白が落ちる
 		FrameRotation: unitMat.Quaternion(),
 	}
 }
