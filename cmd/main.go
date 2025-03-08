@@ -69,7 +69,7 @@ func main() {
 			pageWidgets := &pageWidgets{}
 
 			controlWindow, err = controller.NewControlWindow(shared, appConfig,
-				newMenuItems(), newTabPages(pageWidgets),
+				newMenuItems(), newTabPages(pageWidgets), pageWidgets.EnabledInPlaying,
 				widths[0], heights[0], positionXs[0], positionYs[0])
 			if err != nil {
 				app.ShowErrorDialog(appConfig.IsSetEnv(), err)
@@ -121,6 +121,12 @@ func (pw *pageWidgets) SetWindow(window *controller.ControlWindow) {
 	pw.pmxLoad1Picker.SetWindow(window)
 	pw.vmdLoader1Picker.SetWindow(window)
 	pw.player.SetWindow(window)
+}
+
+func (pw *pageWidgets) EnabledInPlaying(enable bool) {
+	pw.pmxLoad1Picker.Enabled(enable)
+	pw.vmdLoader1Picker.Enabled(enable)
+	pw.player.Enabled(enable)
 }
 
 func newTabPages(pageWidgets *pageWidgets) []declarative.TabPage {

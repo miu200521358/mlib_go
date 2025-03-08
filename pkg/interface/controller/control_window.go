@@ -23,7 +23,8 @@ type ControlWindow struct {
 	shared    *state.SharedState // SharedState への参照
 	appConfig *mconfig.AppConfig // アプリケーション設定
 
-	tabWidget *walk.TabWidget // タブウィジェット
+	tabWidget        *walk.TabWidget    // タブウィジェット
+	enabledInPlaying func(enabled bool) // 再生中に無効化するウィジェット
 
 	// UI要素 (メニューアクションなど)
 	// enabledFrameDropAction      *walk.Action // フレームドロップON/OFF
@@ -60,11 +61,13 @@ func NewControlWindow(
 	appConfig *mconfig.AppConfig,
 	helpMenuItems []declarative.MenuItem,
 	tabPages []declarative.TabPage,
+	enabledInPlaying func(enabled bool),
 	width, height, positionX, positionY int,
 ) (*ControlWindow, error) {
 	cw := &ControlWindow{
-		shared:    shared,
-		appConfig: appConfig,
+		shared:           shared,
+		appConfig:        appConfig,
+		enabledInPlaying: enabledInPlaying,
 	}
 
 	logMenuItems := []declarative.MenuItem{
@@ -359,8 +362,9 @@ func NewControlWindow(
 	}
 
 	// 初期設定
-	cw.shared.SetFrame(0.0) // フレーム初期化
-	cw.TriggerFps30Limit()  // 30fps物理ON
+	cw.shared.SetFrame(0.0)    // フレーム初期化
+	cw.shared.SetMaxFrame(1.0) // 最大フレーム初期化
+	cw.TriggerFps30Limit()     // 30fps物理ON
 
 	// cw.enabledPhysicsAction.SetChecked(true) // フレームドロップON
 	// // cw.enabledFrameDropAction.SetChecked(true) // 30fps制限
@@ -448,6 +452,10 @@ func (cw *ControlWindow) SetMaxFrame(frame float32) {
 
 func (cw *ControlWindow) MaxFrame() float32 {
 	return cw.shared.MaxFrame()
+}
+
+func (cw *ControlWindow) EnabledInPlaying(enabled bool) {
+	cw.enabledInPlaying(enabled)
 }
 
 // ------- 以下、モデルやモーションの格納・取得メソッド -------

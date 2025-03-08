@@ -1,6 +1,8 @@
 package widget
 
 import (
+	"time"
+
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
@@ -80,7 +82,26 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 				MinSize:  declarative.Size{Width: 90, Height: 20},
 				MaxSize:  declarative.Size{Width: 90, Height: 20},
 				OnClicked: func() {
-					mp.window.SetPlaying(!mp.window.Playing())
+					playing := !mp.window.Playing()
+					mp.window.SetPlaying(playing)
+					mp.window.EnabledInPlaying(!playing)
+
+					// 共有ステータスからフレーム情報を監視して更新する
+					go func() {
+						prev := time.Now()
+						for mp.window.Playing() {
+							now := time.Now()
+							duration := now.Sub(prev)
+							if duration.Seconds() >= 1.0/60.0 {
+								mp.ChangeValue(mp.window.Frame())
+								prev = now
+							}
+						}
+					}()
+
+					if mp.onTriggerPlay != nil {
+						mp.onTriggerPlay(playing)
+					}
 				},
 				ToolTipText:   mi18n.T("再生ボタン説明"),
 				StretchFactor: 2,
@@ -90,10 +111,26 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 }
 
 func (mp *MotionPlayer) Reset(maxFrame float32) {
-	mp.frameEdit.SetValue(0)
-	mp.frameSlider.SetValue(0)
+	mp.ChangeValue(0)
 	mp.frameEdit.SetRange(0, float64(maxFrame))
 	mp.frameSlider.SetRange(0, int(maxFrame))
 	mp.window.SetFrame(0)
 	mp.window.SetMaxFrame(maxFrame)
+}
+
+func (mp *MotionPlayer) Enabled(enable bool) {
+	mp.frameEdit.SetEnabled(enable)
+	mp.frameSlider.SetEnabled(enable)
+	// 再生ボタンは常に有効
+	mp.playButton.SetEnabled(true)
+}
+
+func (mp *MotionPlayer) SetValue(frame float32) {
+	mp.frameEdit.SetValue(float64(frame))
+	mp.frameSlider.SetValue(int(frame))
+}
+
+func (mp *MotionPlayer) ChangeValue(frame float32) {
+	mp.frameEdit.ChangeValue(float64(frame))
+	mp.frameSlider.ChangeValue(int(frame))
 }

@@ -330,3 +330,11 @@ func (fp *FilePicker) newHistoryDialog() (*walk.Dialog, error) {
 func (fp *FilePicker) SetWindow(window *controller.ControlWindow) {
 	fp.window = window
 }
+
+func (fp *FilePicker) Enabled(enable bool) {
+	fp.pathEdit.SetEnabled(enable)
+	fp.openPushButton.SetEnabled(enable)
+	if fp.historyKey != "" {
+		fp.historyPushButton.SetEnabled(enable)
+	}
+}
