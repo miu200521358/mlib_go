@@ -11,27 +11,30 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl64"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/render"
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
 )
 
 type ViewWindow struct {
 	*glfw.Window
-	windowIndex         int               // ウィンドウインデックス
-	title               string            // ウィンドウタイトル
-	leftButtonPressed   bool              // 左ボタン押下フラグ
-	middleButtonPressed bool              // 中ボタン押下フラグ
-	rightButtonPressed  bool              // 右ボタン押下フラグ
-	shiftPressed        bool              // Shiftキー押下フラグ
-	ctrlPressed         bool              // Ctrlキー押下フラグ
-	updatedPrevCursor   bool              // 前回のカーソル位置更新フラグ
-	prevCursorPos       *mmath.MVec2      // 前回のカーソル位置
-	yaw                 float64           // カメラyaw
-	pitch               float64           // カメラpitch
-	list                *ViewerList       // ビューワーリスト
-	shader              rendering.IShader // シェーダー
+	windowIndex         int                     // ウィンドウインデックス
+	title               string                  // ウィンドウタイトル
+	leftButtonPressed   bool                    // 左ボタン押下フラグ
+	middleButtonPressed bool                    // 中ボタン押下フラグ
+	rightButtonPressed  bool                    // 右ボタン押下フラグ
+	shiftPressed        bool                    // Shiftキー押下フラグ
+	ctrlPressed         bool                    // Ctrlキー押下フラグ
+	updatedPrevCursor   bool                    // 前回のカーソル位置更新フラグ
+	prevCursorPos       *mmath.MVec2            // 前回のカーソル位置
+	yaw                 float64                 // カメラyaw
+	pitch               float64                 // カメラpitch
+	list                *ViewerList             // ビューワーリスト
+	shader              rendering.IShader       // シェーダー
+	modelRenderers      []*render.ModelRenderer // モデル描画オブジェクト
 }
 
 func newViewWindow(
@@ -159,6 +162,12 @@ func (vw *ViewWindow) Render(shared *state.SharedState) {
 
 	// 床描画
 	vw.shader.DrawFloor()
+
+	vw.loadModelRenderers(shared)
+	for _, modelRenderer := range vw.modelRenderers {
+		vmdDeltas := delta.NewVmdDeltas(0, modelRenderer.Model.Bones, modelRenderer.Hash, "")
+		modelRenderer.Render(vw.shader, shared, vmdDeltas)
+	}
 
 	// 深度解決
 	vw.shader.GetMsaa().Resolve()

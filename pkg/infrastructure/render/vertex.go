@@ -9,6 +9,25 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 )
 
+// 頂点データのサイズ定数
+//
+//	位置 (position): 3要素
+//	法線 (normal): 3要素
+//	UV: 2要素
+//	追加UV: 2要素
+//	エッジ倍率: 1要素
+//	デフォームボーンINDEX: 4要素
+//	デフォームボーンウェイト: 4要素
+//	SDEFフラグ: 1要素
+//	SDEF-C: 3要素
+//	SDEF-R0: 3要素
+//	SDEF-R1: 3要素
+//	頂点モーフ: 3要素
+//	UVモーフ: 4要素
+//	追加UV1モーフ: 4要素
+//	変形後頂点モーフ: 3要素
+const vertexDataSize = 43
+
 func newVertexGl(v *pmx.Vertex) []float32 {
 	p := mmath.NewGlVec3(v.Position)
 	n := mmath.NewGlVec3(v.Normal)

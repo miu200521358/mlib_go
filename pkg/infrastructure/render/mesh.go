@@ -33,6 +33,7 @@ type MeshRenderer struct {
 // material : 対象材質の描画用情報（materialGL）
 // prevVerticesCount : 前材質までの頂点数（オフセット）
 func NewMeshRenderer(
+	factory *mgl.BufferFactory,
 	allFaces []uint32,
 	material *materialGL,
 	prevVerticesCount int,
@@ -41,14 +42,7 @@ func NewMeshRenderer(
 	faces := allFaces[prevVerticesCount : prevVerticesCount+material.VerticesCount]
 
 	// ElementBuffer を生成して、faces のデータを転送する
-	elemBuf := mgl.NewElementBuffer()
-	if len(faces) > 0 {
-		elemBuf.Bind()
-		// 各インデックスは uint32 (4バイト)
-		size := len(faces) * 4
-		elemBuf.BufferData(size, gl.Ptr(faces), rendering.BufferUsageStatic)
-		elemBuf.Unbind()
-	}
+	elemBuf := factory.CreateElementBuffer(gl.Ptr(faces), len(faces))
 
 	return &MeshRenderer{
 		material:          *material,

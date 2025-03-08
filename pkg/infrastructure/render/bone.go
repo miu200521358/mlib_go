@@ -66,7 +66,7 @@ func newTailBoneGl(bone *pmx.Bone) []float32 {
 }
 
 // getBoneDebugColor はボーンの種類(IK, 付与親, 固定軸, etc.)を見てカラーを返す (旧 getBoneDebugColor)
-func getBoneDebugColor(bone *pmx.Bone, shared state.SharedState) []float32 {
+func getBoneDebugColor(bone *pmx.Bone, shared *state.SharedState) []float32 {
 	// IK系
 	if (shared.IsShowBoneAll() || shared.IsShowBoneVisible() || shared.IsShowBoneIk()) && bone.IsIK() {
 		return boneColorsIK

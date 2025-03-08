@@ -23,8 +23,8 @@ type VertexBuffer struct {
 	target uint32
 }
 
-// NewVertexBuffer は新しい頂点バッファを作成
-func NewVertexBuffer() *VertexBuffer {
+// newVertexBuffer は新しい頂点バッファを作成
+func newVertexBuffer() *VertexBuffer {
 	var id uint32
 	gl.GenBuffers(1, &id)
 	return &VertexBuffer{
@@ -75,8 +75,8 @@ type ElementBuffer struct {
 	target uint32
 }
 
-// NewElementBuffer は新しいインデックスバッファを作成
-func NewElementBuffer() *ElementBuffer {
+// newElementBuffer は新しいインデックスバッファを作成
+func newElementBuffer() *ElementBuffer {
 	var id uint32
 	gl.GenBuffers(1, &id)
 	return &ElementBuffer{
@@ -110,8 +110,8 @@ type VertexArray struct {
 	id uint32
 }
 
-// NewVertexArray は新しい頂点配列を作成
-func NewVertexArray() *VertexArray {
+// newVertexArray は新しい頂点配列を作成
+func newVertexArray() *VertexArray {
 	var id uint32
 	gl.GenVertexArrays(1, &id)
 	return &VertexArray{id: id}

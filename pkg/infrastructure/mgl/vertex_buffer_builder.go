@@ -77,8 +77,8 @@ type VertexBufferBuilder struct {
 // NewVertexBufferBuilder は新しい頂点バッファビルダーを作成
 func NewVertexBufferBuilder() *VertexBufferBuilder {
 	return &VertexBufferBuilder{
-		vao:         NewVertexArray(),
-		vbo:         NewVertexBuffer(),
+		vao:         newVertexArray(),
+		vbo:         newVertexBuffer(),
 		attributes:  []rendering.VertexAttribute{},
 		strideSize:  0,
 		floatSize:   4, // float32のサイズ

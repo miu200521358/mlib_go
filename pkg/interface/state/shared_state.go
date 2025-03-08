@@ -64,6 +64,20 @@ func NewSharedState(viewerCount int) *SharedState {
 	}
 }
 
+func (ss *SharedState) ModelCount(windowIndex int) int {
+	if len(ss.models) <= windowIndex {
+		return 0
+	}
+	return len(ss.models[windowIndex])
+}
+
+func (ss *SharedState) MotionCount(windowIndex int) int {
+	if len(ss.motions) <= windowIndex {
+		return 0
+	}
+	return len(ss.motions[windowIndex])
+}
+
 // StoreModel は指定されたウィンドウとモデルインデックスにモデルを格納
 func (ss *SharedState) StoreModel(windowIndex, modelIndex int, model *pmx.PmxModel) {
 	if len(ss.models) <= windowIndex {

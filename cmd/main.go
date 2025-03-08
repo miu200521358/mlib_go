@@ -65,12 +65,19 @@ func main() {
 	go func() {
 		// 操作ウィンドウは別スレッドで起動
 		defer app.SafeExecute(appConfig.IsSetEnv(), func() {
-			controlWindow, err = controller.NewControlWindow(shared, appConfig, newMenuItems(), newTabPages(controlWindow),
+			pageWidgets := &pageWidgets{}
+
+			controlWindow, err = controller.NewControlWindow(shared, appConfig,
+				newMenuItems(), newTabPages(pageWidgets),
 				widths[0], heights[0], positionXs[0], positionYs[0])
 			if err != nil {
 				app.ShowErrorDialog(appConfig.IsSetEnv(), err)
 				return
 			}
+
+			pageWidgets.pmxLoad1Picker.SetWindow(controlWindow)
+			pageWidgets.vmdLoader1Picker.SetWindow(controlWindow)
+
 			controlWindow.Run()
 		})
 	}()
@@ -105,30 +112,33 @@ func newMenuItems() []declarative.MenuItem {
 	}
 }
 
-func newTabPages(controlWindow *controller.ControlWindow) []declarative.TabPage {
+type pageWidgets struct {
+	pmxLoad1Picker   *widget.FilePicker
+	vmdLoader1Picker *widget.FilePicker
+}
+
+func newTabPages(pageWidgets *pageWidgets) []declarative.TabPage {
 	var fileTab *walk.TabPage
 
-	pmxLoad1Picker := widget.NewPmxLoadFilePicker(
-		controlWindow,
+	pageWidgets.pmxLoad1Picker = widget.NewPmxLoadFilePicker(
 		"pmx",
 		"モデルファイル1",
 		"モデルファイルを選択してください",
-		func(path string) {
+		func(cw *controller.ControlWindow, path string) {
 			pmxRep := repository.NewPmxRepository()
 			if model, err := pmxRep.Load(path); err == nil {
-				controlWindow.StoreModel(0, 0, model.(*pmx.PmxModel))
+				cw.StoreModel(0, 0, model.(*pmx.PmxModel))
 			} else {
 				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
 			}
 		},
 	)
 
-	vmdLoader1Picker := widget.NewVmdVpdLoadFilePicker(
-		controlWindow,
+	pageWidgets.vmdLoader1Picker = widget.NewVmdVpdLoadFilePicker(
 		"vmd",
 		"モーションファイル1",
 		"モーションファイルを選択してください",
-		func(path string) {
+		func(cw *controller.ControlWindow, path string) {
 			mlog.IL("VmdLoadPicker: %s", path)
 		},
 	)
@@ -148,8 +158,8 @@ func newTabPages(controlWindow *controller.ControlWindow) []declarative.TabPage 
 						declarative.TextLabel{
 							Text: "表示用モデル設定説明",
 						},
-						pmxLoad1Picker.Widgets(),
-						vmdLoader1Picker.Widgets(),
+						pageWidgets.pmxLoad1Picker.Widgets(),
+						pageWidgets.vmdLoader1Picker.Widgets(),
 						declarative.VSpacer{},
 					},
 				},

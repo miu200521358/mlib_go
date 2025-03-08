@@ -18,31 +18,29 @@ type filterExtension struct {
 }
 
 type FilePicker struct {
-	window            *controller.ControlWindow // メインウィンドウ
-	title             string                    // タイトル
-	tooltip           string                    // ツールチップ
-	historyKey        string                    // 履歴を保存するキー
-	initialDirPath    string                    // 初期ディレクトリパス
-	filterExtensions  []filterExtension         // フィルター拡張子
-	repository        repository.IRepository    // リポジトリ
-	pathEdit          *walk.LineEdit            // パス入力欄
-	nameEdit          *walk.LineEdit            // 名前欄(read-only)
-	openPushButton    *walk.PushButton          // 開くボタン
-	historyPushButton *walk.PushButton          // 履歴ボタン
-	historyDialog     *walk.Dialog              // 履歴ダイアログ
-	historyListBox    *walk.ListBox             // 履歴リスト
-	onPathChanged     func(string)              // パス変更時のコールバック
+	window            *controller.ControlWindow               // メインウィンドウ
+	title             string                                  // タイトル
+	tooltip           string                                  // ツールチップ
+	historyKey        string                                  // 履歴を保存するキー
+	initialDirPath    string                                  // 初期ディレクトリパス
+	filterExtensions  []filterExtension                       // フィルター拡張子
+	repository        repository.IRepository                  // リポジトリ
+	pathEdit          *walk.LineEdit                          // パス入力欄
+	nameEdit          *walk.LineEdit                          // 名前欄(read-only)
+	openPushButton    *walk.PushButton                        // 開くボタン
+	historyPushButton *walk.PushButton                        // 履歴ボタン
+	historyDialog     *walk.Dialog                            // 履歴ダイアログ
+	historyListBox    *walk.ListBox                           // 履歴リスト
+	onPathChanged     func(*controller.ControlWindow, string) // パス変更時のコールバック
 }
 
 func NewPmxLoadFilePicker(
-	window *controller.ControlWindow,
 	historyKey string,
 	title string,
 	tooltip string,
-	onPathChanged func(string),
+	onPathChanged func(*controller.ControlWindow, string),
 ) *FilePicker {
 	return newFilePicker(
-		window,
 		historyKey,
 		title,
 		tooltip,
@@ -56,14 +54,12 @@ func NewPmxLoadFilePicker(
 }
 
 func NewVmdVpdLoadFilePicker(
-	window *controller.ControlWindow,
 	historyKey string,
 	title string,
 	tooltip string,
-	onPathChanged func(string),
+	onPathChanged func(*controller.ControlWindow, string),
 ) *FilePicker {
 	return newFilePicker(
-		window,
 		historyKey,
 		title,
 		tooltip,
@@ -77,11 +73,10 @@ func NewVmdVpdLoadFilePicker(
 }
 
 func newFilePicker(
-	window *controller.ControlWindow,
 	historyKey string,
 	title string,
 	tooltip string,
-	onPathChanged func(string),
+	onPathChanged func(*controller.ControlWindow, string),
 	filterExtension []filterExtension,
 	repository repository.IRepository,
 ) *FilePicker {
@@ -92,7 +87,6 @@ func newFilePicker(
 	picker.initialDirPath = ""
 	picker.filterExtensions = filterExtension
 	picker.repository = repository
-	picker.window = window
 	picker.onPathChanged = onPathChanged
 
 	return picker
@@ -212,7 +206,7 @@ func (fp *FilePicker) onChanged(path string) {
 
 		if fp.onPathChanged != nil {
 			// コールバックを呼び出し
-			fp.onPathChanged(path)
+			fp.onPathChanged(fp.window, path)
 		}
 	} else {
 		// 読み込めない場合、拒否
@@ -331,4 +325,8 @@ func (fp *FilePicker) newHistoryDialog() (*walk.Dialog, error) {
 	}
 
 	return dlg, nil
+}
+
+func (fp *FilePicker) SetWindow(window *controller.ControlWindow) {
+	fp.window = window
 }

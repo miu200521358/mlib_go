@@ -23,17 +23,13 @@ type ModelRenderer struct {
 	windowIndex int
 
 	// 描画対象のモデル（ドメイン層）
-	model *pmx.PmxModel
+	Model *pmx.PmxModel
 
 	// モデルのハッシュ値（モデル更新検出などに使用）
-	hash string
+	Hash string
 
 	// 各材質ごとのメッシュ描画オブジェクト
 	meshes []*MeshRenderer
-
-	// 描画用リソース（VAO, VBO, SSBO など）のハンドル
-	vao *mgl.VertexArray
-	vbo *mgl.VertexBuffer
 
 	// UI・選択情報管理（非表示材質、選択頂点など）
 	invisibleMaterialIndexes map[int]struct{}
@@ -45,15 +41,19 @@ type ModelRenderer struct {
 // ここでは、モデルのバッファ初期化や各材質ごとの MeshRenderer の生成も行います。
 func NewModelRenderer(windowIndex int, model *pmx.PmxModel) *ModelRenderer {
 	mr := &ModelRenderer{
+		ModelDrawer:              &ModelDrawer{},
 		windowIndex:              windowIndex,
-		model:                    model,
+		Model:                    model,
 		invisibleMaterialIndexes: make(map[int]struct{}),
 		selectedVertexes:         make(map[int]struct{}),
 		noSelectedVertexes:       make(map[int]struct{}),
 	}
 
+	// メインのモデル描画用頂点バッファを初期化
+	factory := mgl.NewBufferFactory()
+
 	// バッファの初期化 (実装は model_renderer_buffer.go に記述)
-	mr.initializeBuffers(model)
+	mr.initializeBuffers(factory, model)
 
 	// 各材質ごとに MeshRenderer を生成
 	mr.meshes = make([]*MeshRenderer, model.Materials.Length())
@@ -64,35 +64,33 @@ func NewModelRenderer(windowIndex int, model *pmx.PmxModel) *ModelRenderer {
 		// newMaterialGL は、pmx.Material から描画用拡張情報 materialGL を生成する関数
 		materialExt := newMaterialGL(m, prevVerticesCount)
 		// MeshRenderer の生成 (実装は mesh_renderer.go)
-		mr.meshes[i] = NewMeshRenderer(mr.faces, materialExt, prevVerticesCount)
+		mr.meshes[i] = NewMeshRenderer(factory, mr.faces, materialExt, prevVerticesCount)
 		prevVerticesCount += m.VerticesCount
 	}
 
 	// モデルのハッシュ値を設定
-	mr.hash = model.Hash()
+	mr.Hash = model.Hash()
 
 	return mr
 }
 
 // Delete は、ModelRenderer によって生成されたすべての OpenGL リソースを解放します。
 func (mr *ModelRenderer) Delete() {
-	if mr.vao != nil {
-		mr.vao.Delete()
-	}
-	if mr.vbo != nil {
-		mr.vbo.Delete()
+	if mr.bufferHandle != nil {
+		mr.bufferHandle.Delete()
 	}
 	for _, mesh := range mr.meshes {
 		if mesh != nil {
 			mesh.Delete()
 		}
 	}
-	// 必要に応じて SSBO やその他テクスチャも解放
+	// ModelDrawerのリソースも解放
+	mr.ModelDrawer.Delete()
 }
 
 // Render は、最新の変形情報 vmdDeltas とアプリケーション状態 appState に基づいてモデルを描画します。
 // 描画前にバッファの更新処理を行い、その後各描画パス（メッシュ描画、法線、ボーン、選択頂点など）を呼び出します。
-func (mr *ModelRenderer) Render(shader rendering.IShader, shared state.SharedState, vmdDeltas *delta.VmdDeltas) {
+func (mr *ModelRenderer) Render(shader rendering.IShader, shared *state.SharedState, vmdDeltas *delta.VmdDeltas) {
 
 	// バッファの更新（実装は model_renderer_buffer.go に記述）
 	mr.updateBuffers(vmdDeltas)
@@ -132,7 +130,7 @@ func (mr *ModelRenderer) Render(shader rendering.IShader, shared state.SharedSta
 	if shared.IsShowBoneAll() || shared.IsShowBoneEffector() || shared.IsShowBoneIk() ||
 		shared.IsShowBoneFixed() || shared.IsShowBoneRotate() || shared.IsShowBoneTranslate() ||
 		shared.IsShowBoneVisible() {
-		mr.DrawBone(mr.windowIndex, shader, mr.model.Bones, shared, paddedMatrixes, matrixWidth, matrixHeight)
+		mr.DrawBone(mr.windowIndex, shader, mr.Model.Bones, shared, paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
 	// 選択頂点描画・カーソルライン描画は model_renderer_draw.go 内で実装済み
@@ -146,15 +144,15 @@ func (mr *ModelRenderer) Render(shader rendering.IShader, shared state.SharedSta
 func (mr *ModelRenderer) updateBuffers(vmdDeltas *delta.VmdDeltas) {
 	vertexIndexes, vertexData := newVertexMorphDeltasGl(vmdDeltas.Morphs.Vertices)
 
-	// 例: 頂点 VBO の更新
-	mr.vao.Bind()
-	mr.vbo.Bind()
+	// 頂点 VBO の更新
+	mr.bufferHandle.Bind()
 	if vmdDeltas.Morphs.Vertices != nil {
 		// vmdDeltas.Morphs.Vertices が []float32 として頂点情報を保持していると仮定
-		mr.vbo.BufferData(len(vertexIndexes)*4, unsafe.Pointer(&vertexData[0]), gl.DYNAMIC_DRAW)
+		mr.bufferHandle.VBO.Bind()
+		mr.bufferHandle.VBO.BufferData(len(vertexIndexes)*4, unsafe.Pointer(&vertexData[0]), gl.DYNAMIC_DRAW)
+		mr.bufferHandle.VBO.Unbind()
 	}
-	mr.vbo.Unbind()
-	mr.vao.Unbind()
+	mr.bufferHandle.Unbind()
 }
 
 // ExistInvisibleMaterial は、指定された材質インデックスが非表示設定になっているかを返します。

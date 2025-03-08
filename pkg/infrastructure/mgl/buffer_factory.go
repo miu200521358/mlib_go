@@ -67,7 +67,7 @@ func (f *BufferFactory) CreateOverrideBuffer(ptr unsafe.Pointer, count int) *Ver
 
 // CreateElementBuffer はインデックスバッファを作成
 func (f *BufferFactory) CreateElementBuffer(ptr unsafe.Pointer, count int) *ElementBuffer {
-	ebo := NewElementBuffer()
+	ebo := newElementBuffer()
 
 	ebo.Bind()
 
