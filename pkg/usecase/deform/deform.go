@@ -148,14 +148,14 @@ func Deform(
 	// 物理前変形
 	deltas = deformBeforePhysics(model, motion, deltas, shared.Frame())
 
-	if shared.IsEnabledPhysics() || shared.IsPhysicsReset() {
-		// 物理更新
-		physics.StepSimulation(timeStep)
-	}
-
 	// 物理変形
 	if err := deformPhysics(shared, physics, model, deltas); err != nil {
 		return deltas
+	}
+
+	if shared.IsEnabledPhysics() || shared.IsPhysicsReset() {
+		// 物理更新
+		physics.StepSimulation(timeStep)
 	}
 
 	// 物理後変形
@@ -255,7 +255,7 @@ func deformAfterPhysics(
 		}
 	}
 
-	// ボーンデフォーム情報を埋める(物理後埋める)
+	// ボーンデフォーム情報を埋める(物理後のみ埋める)
 	vmdDeltas.Bones = fillBoneDeform(model, motion, vmdDeltas, shared.Frame(),
 		model.Bones.LayerSortedBoneIndexes[true], true, true)
 
