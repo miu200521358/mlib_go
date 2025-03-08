@@ -107,11 +107,14 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 }
 
 func (mp *MotionPlayer) Reset(maxFrame float32) {
+	oldMaxFrame := mp.window.MaxFrame()
+	newMaxFrame := max(oldMaxFrame, maxFrame)
+
 	mp.ChangeValue(0)
-	mp.frameEdit.SetRange(0, float64(maxFrame))
-	mp.frameSlider.SetRange(0, int(maxFrame))
+	mp.frameEdit.SetRange(0, float64(newMaxFrame))
+	mp.frameSlider.SetRange(0, int(newMaxFrame))
 	mp.window.SetFrame(0)
-	mp.window.SetMaxFrame(maxFrame)
+	mp.window.SetMaxFrame(newMaxFrame)
 }
 
 func (mp *MotionPlayer) SetValue(frame float32) {
