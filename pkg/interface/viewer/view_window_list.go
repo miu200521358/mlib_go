@@ -10,7 +10,7 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/interface/state"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 )
 
 type ViewerList struct {

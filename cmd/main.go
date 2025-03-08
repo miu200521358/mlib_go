@@ -14,9 +14,9 @@ import (
 	"github.com/miu200521358/mlib_go/cmd/ui"
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
+	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
-	"github.com/miu200521358/mlib_go/pkg/interface/state"
 	"github.com/miu200521358/mlib_go/pkg/interface/viewer"
 )
 
