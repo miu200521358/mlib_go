@@ -127,7 +127,7 @@ func (vw *ViewWindow) resetCameraPosition(yaw, pitch float64) {
 	forwardXYZ := orientation.MulVec3(mmath.MVec3UnitZNeg).MulScalar(radius)
 
 	// カメラ位置を更新
-	cam := rendering.NewDefaultCamera(vw.GetSize())
+	cam := vw.shader.Camera()
 	cam.Position.X = forwardXYZ.X
 	cam.Position.Y = rendering.InitialCameraPositionY + forwardXYZ.Y
 	cam.Position.Z = forwardXYZ.Z
