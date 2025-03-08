@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
@@ -36,9 +35,6 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 			declarative.TextLabel{
 				Text:        mi18n.T("再生"),
 				ToolTipText: mi18n.T("再生ウィジェットの使い方メッセージ"),
-				OnMouseDown: func(x, y int, button walk.MouseButton) {
-					mlog.IL(mi18n.T("再生ウィジェットの使い方メッセージ"))
-				},
 			},
 			// キーフレ番号
 			declarative.NumberEdit{

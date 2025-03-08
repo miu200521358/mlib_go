@@ -26,29 +26,29 @@ type ControlWindow struct {
 	tabWidget        *walk.TabWidget    // タブウィジェット
 	enabledInPlaying func(enabled bool) // 再生中に無効化するウィジェット
 
-	// UI要素 (メニューアクションなど)
-	// enabledFrameDropAction      *walk.Action // フレームドロップON/OFF
-	enabledPhysicsAction *walk.Action // 物理ON/OFF
-	physicsResetAction   *walk.Action // 物理リセット
-	// showNormalAction            *walk.Action // ボーンデバッグ表示
-	// showWireAction              *walk.Action // ワイヤーフレームデバッグ表示
-	// showOverrideAction          *walk.Action // オーバーライドデバッグ表示
-	// showSelectedVertexAction    *walk.Action // 選択頂点デバッグ表示
-	// showBoneAllAction           *walk.Action // 全ボーンデバッグ表示
-	// showBoneIkAction            *walk.Action // IKボーンデバッグ表示
-	// showBoneEffectorAction      *walk.Action // 付与親ボーンデバッグ表示
-	// showBoneFixedAction         *walk.Action // 軸制限ボーンデバッグ表示
-	// showBoneRotateAction        *walk.Action // 回転ボーンデバッグ表示
-	// showBoneTranslateAction     *walk.Action // 移動ボーンデバッグ表示
-	// showBoneVisibleAction       *walk.Action // 表示ボーンデバッグ表示
-	// showRigidBodyFrontAction    *walk.Action // 剛体デバッグ表示(前面)
-	// showRigidBodyBackAction     *walk.Action // 剛体デバッグ表示(埋め込み)
-	// showJointAction             *walk.Action // ジョイントデバッグ表示
-	// showInfoAction              *walk.Action // 情報デバッグ表示
-	limitFps30Action      *walk.Action // 30FPS制限
-	limitFps60Action      *walk.Action // 60FPS制限
-	limitFpsUnLimitAction *walk.Action // FPS無制限
-	// cameraSyncAction            *walk.Action // カメラ同期
+	// メニューアクション
+	enabledFrameDropAction      *walk.Action // フレームドロップON/OFF
+	enabledPhysicsAction        *walk.Action // 物理ON/OFF
+	physicsResetAction          *walk.Action // 物理リセット
+	showNormalAction            *walk.Action // ボーンデバッグ表示
+	showWireAction              *walk.Action // ワイヤーフレームデバッグ表示
+	showOverrideAction          *walk.Action // オーバーライドデバッグ表示
+	showSelectedVertexAction    *walk.Action // 選択頂点デバッグ表示
+	showBoneAllAction           *walk.Action // 全ボーンデバッグ表示
+	showBoneIkAction            *walk.Action // IKボーンデバッグ表示
+	showBoneEffectorAction      *walk.Action // 付与親ボーンデバッグ表示
+	showBoneFixedAction         *walk.Action // 軸制限ボーンデバッグ表示
+	showBoneRotateAction        *walk.Action // 回転ボーンデバッグ表示
+	showBoneTranslateAction     *walk.Action // 移動ボーンデバッグ表示
+	showBoneVisibleAction       *walk.Action // 表示ボーンデバッグ表示
+	showRigidBodyFrontAction    *walk.Action // 剛体デバッグ表示(前面)
+	showRigidBodyBackAction     *walk.Action // 剛体デバッグ表示(埋め込み)
+	showJointAction             *walk.Action // ジョイントデバッグ表示
+	showInfoAction              *walk.Action // 情報デバッグ表示
+	limitFps30Action            *walk.Action // 30FPS制限
+	limitFps60Action            *walk.Action // 60FPS制限
+	limitFpsUnLimitAction       *walk.Action // FPS無制限
+	cameraSyncAction            *walk.Action // カメラ同期
 	logLevelDebugAction         *walk.Action // デバッグメッセージ表示
 	logLevelVerboseAction       *walk.Action // 冗長メッセージ表示
 	logLevelIkVerboseAction     *walk.Action // IK冗長メッセージ表示
@@ -77,19 +77,17 @@ func NewControlWindow(
 				mlog.ILT(mi18n.T("メイン画面の使い方"), "%s", mi18n.T("メイン画面の使い方メッセージ"))
 			},
 		},
+		declarative.Separator{},
+		declarative.Action{
+			Text:        mi18n.T("&デバッグログ表示"),
+			Checkable:   true,
+			OnTriggered: cw.triggerLogLevel,
+			AssignTo:    &cw.logLevelDebugAction,
+		},
 	}
 
 	if !appConfig.IsEnvProd() {
 		// 開発時のみ冗長ログ表示を追加
-		logMenuItems = append(logMenuItems,
-			declarative.Separator{})
-		logMenuItems = append(logMenuItems,
-			declarative.Action{
-				Text:        mi18n.T("&デバッグログ表示"),
-				Checkable:   true,
-				OnTriggered: cw.triggerLogLevel,
-				AssignTo:    &cw.logLevelDebugAction,
-			})
 		logMenuItems = append(logMenuItems,
 			declarative.Action{
 				Text:        mi18n.T("&冗長ログ表示"),
@@ -126,12 +124,12 @@ func NewControlWindow(
 			declarative.Menu{
 				Text: mi18n.T("&ビューワー"),
 				Items: []declarative.MenuItem{
-					// declarative.Action{
-					// 	Text:        mi18n.T("&フレームドロップON"),
-					// 	Checkable:   true,
-					// 	OnTriggered: cw.TriggerEnabledFrameDrop,
-					// 	AssignTo:    &cw.enabledFrameDropAction,
-					// },
+					declarative.Action{
+						Text:        mi18n.T("&フレームドロップON"),
+						Checkable:   true,
+						OnTriggered: cw.TriggerEnabledFrameDrop,
+						AssignTo:    &cw.enabledFrameDropAction,
+					},
 					declarative.Menu{
 						Text: mi18n.T("&fps制限"),
 						Items: []declarative.MenuItem{
@@ -155,13 +153,13 @@ func NewControlWindow(
 							},
 						},
 					},
-					// declarative.Action{
-					// 	Text:        mi18n.T("&情報表示"),
-					// 	Checkable:   true,
-					// 	OnTriggered: cw.TriggerShowInfo,
-					// 	AssignTo:    &cw.showInfoAction,
-					// },
-					// declarative.Separator{},
+					declarative.Action{
+						Text:        mi18n.T("&情報表示"),
+						Checkable:   true,
+						OnTriggered: cw.TriggerShowInfo,
+						AssignTo:    &cw.showInfoAction,
+					},
+					declarative.Separator{},
 					declarative.Action{
 						Text:        mi18n.T("&物理ON/OFF"),
 						Checkable:   true,
@@ -173,125 +171,125 @@ func NewControlWindow(
 						OnTriggered: cw.TriggerPhysicsReset,
 						AssignTo:    &cw.physicsResetAction,
 					},
-					// declarative.Separator{},
-					// declarative.Action{
-					// 	Text:        mi18n.T("&法線表示"),
-					// 	Checkable:   true,
-					// 	OnTriggered: cw.TriggerShowNormal,
-					// 	AssignTo:    &cw.showNormalAction,
-					// },
-					// declarative.Action{
-					// 	Text:        mi18n.T("&ワイヤーフレーム表示"),
-					// 	Checkable:   true,
-					// 	OnTriggered: cw.TriggerShowWire,
-					// 	AssignTo:    &cw.showWireAction,
-					// },
-					// declarative.Separator{},
-					// declarative.Action{
-					// 	Text:        mi18n.T("&頂点ライン選択"),
-					// 	Checkable:   true,
-					// 	OnTriggered: cw.TriggerShowSelectedVertex,
-					// 	AssignTo:    &cw.showSelectedVertexAction,
-					// },
-					// declarative.Action{
-					// 	Text: mi18n.T("&頂点ライン選択使い方"),
-					// 	OnTriggered: func() {
-					// 		mlog.ILT(mi18n.T("&頂点ライン選択使い方"), mi18n.T("頂点ライン選択使い方メッセージ"))
-					// 	},
-					// },
-					// declarative.Separator{},
-					// declarative.Action{
-					// 	Text:        mi18n.T("&カメラ同期"),
-					// 	Checkable:   true,
-					// 	OnTriggered: cw.TriggerCameraSync,
-					// 	AssignTo:    &cw.cameraSyncAction,
-					// },
-					// declarative.Action{
-					// 	Text:        mi18n.T("&サブビューワーオーバーレイ"),
-					// 	Checkable:   true,
-					// 	OnTriggered: cw.TriggerShowOverride,
-					// 	AssignTo:    &cw.showOverrideAction,
-					// },
-					// declarative.Action{
-					// 	Text: mi18n.T("&サブビューワーオーバーレイの使い方"),
-					// 	OnTriggered: func() {
-					// 		mlog.ILT(mi18n.T("&サブビューワーオーバーレイの使い方"),
-					// 			mi18n.T("サブビューワーオーバーレイの使い方メッセージ"))
-					// 	},
-					// },
-					// declarative.Separator{},
-					// declarative.Menu{
-					// 	Text: mi18n.T("&ボーン表示"),
-					// 	Items: []declarative.MenuItem{
-					// 		declarative.Action{
-					// 			Text:        mi18n.T("&全ボーン"),
-					// 			Checkable:   true,
-					// 			OnTriggered: cw.TriggerShowBoneAll,
-					// 			AssignTo:    &cw.showBoneAllAction,
-					// 		},
-					// 		declarative.Separator{},
-					// 		declarative.Action{
-					// 			Text:        mi18n.T("&IKボーン"),
-					// 			Checkable:   true,
-					// 			OnTriggered: cw.TriggerShowBoneIk,
-					// 			AssignTo:    &cw.showBoneIkAction,
-					// 		},
-					// 		declarative.Action{
-					// 			Text:        mi18n.T("&付与親ボーン"),
-					// 			Checkable:   true,
-					// 			OnTriggered: cw.TriggerShowBoneEffector,
-					// 			AssignTo:    &cw.showBoneEffectorAction,
-					// 		},
-					// 		declarative.Action{
-					// 			Text:        mi18n.T("&軸制限ボーン"),
-					// 			Checkable:   true,
-					// 			OnTriggered: cw.TriggerShowBoneFixed,
-					// 			AssignTo:    &cw.showBoneFixedAction,
-					// 		},
-					// 		declarative.Action{
-					// 			Text:        mi18n.T("&回転ボーン"),
-					// 			Checkable:   true,
-					// 			OnTriggered: cw.TriggerShowBoneRotate,
-					// 			AssignTo:    &cw.showBoneRotateAction,
-					// 		},
-					// 		declarative.Action{
-					// 			Text:        mi18n.T("&移動ボーン"),
-					// 			Checkable:   true,
-					// 			OnTriggered: cw.TriggerShowBoneTranslate,
-					// 			AssignTo:    &cw.showBoneTranslateAction,
-					// 		},
-					// 		declarative.Action{
-					// 			Text:        mi18n.T("&表示ボーン"),
-					// 			Checkable:   true,
-					// 			OnTriggered: cw.TriggerShowBoneVisible,
-					// 			AssignTo:    &cw.showBoneVisibleAction,
-					// 		},
-					// 	},
-					// },
-					// declarative.Menu{
-					// 	Text: mi18n.T("&剛体表示"),
-					// 	Items: []declarative.MenuItem{
-					// 		declarative.Action{
-					// 			Text:        mi18n.T("&前面表示"),
-					// 			Checkable:   true,
-					// 			OnTriggered: cw.TriggerShowRigidBodyFront,
-					// 			AssignTo:    &cw.showRigidBodyFrontAction,
-					// 		},
-					// 		declarative.Action{
-					// 			Text:        mi18n.T("&埋め込み表示"),
-					// 			Checkable:   true,
-					// 			OnTriggered: cw.TriggerShowRigidBodyBack,
-					// 			AssignTo:    &cw.showRigidBodyBackAction,
-					// 		},
-					// 	},
-					// },
-					// declarative.Action{
-					// 	Text:        mi18n.T("&ジョイント表示"),
-					// 	Checkable:   true,
-					// 	OnTriggered: cw.TriggerShowJoint,
-					// 	AssignTo:    &cw.showJointAction,
-					// },
-					// declarative.Separator{},
+					declarative.Separator{},
+					declarative.Action{
+						Text:        mi18n.T("&法線表示"),
+						Checkable:   true,
+						OnTriggered: cw.TriggerShowNormal,
+						AssignTo:    &cw.showNormalAction,
+					},
+					declarative.Action{
+						Text:        mi18n.T("&ワイヤーフレーム表示"),
+						Checkable:   true,
+						OnTriggered: cw.TriggerShowWire,
+						AssignTo:    &cw.showWireAction,
+					},
+					declarative.Separator{},
+					declarative.Action{
+						Text:        mi18n.T("&頂点ライン選択"),
+						Checkable:   true,
+						OnTriggered: cw.TriggerShowSelectedVertex,
+						AssignTo:    &cw.showSelectedVertexAction,
+					},
+					declarative.Action{
+						Text: mi18n.T("&頂点ライン選択使い方"),
+						OnTriggered: func() {
+							mlog.ILT(mi18n.T("&頂点ライン選択使い方"), mi18n.T("頂点ライン選択使い方メッセージ"))
+						},
+					},
+					declarative.Separator{},
+					declarative.Action{
+						Text:        mi18n.T("&カメラ同期"),
+						Checkable:   true,
+						OnTriggered: cw.TriggerCameraSync,
+						AssignTo:    &cw.cameraSyncAction,
+					},
+					declarative.Action{
+						Text:        mi18n.T("&サブビューワーオーバーレイ"),
+						Checkable:   true,
+						OnTriggered: cw.TriggerShowOverride,
+						AssignTo:    &cw.showOverrideAction,
+					},
+					declarative.Action{
+						Text: mi18n.T("&サブビューワーオーバーレイの使い方"),
+						OnTriggered: func() {
+							mlog.ILT(mi18n.T("&サブビューワーオーバーレイの使い方"),
+								mi18n.T("サブビューワーオーバーレイの使い方メッセージ"))
+						},
+					},
+					declarative.Separator{},
+					declarative.Menu{
+						Text: mi18n.T("&ボーン表示"),
+						Items: []declarative.MenuItem{
+							declarative.Action{
+								Text:        mi18n.T("&全ボーン"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerShowBoneAll,
+								AssignTo:    &cw.showBoneAllAction,
+							},
+							declarative.Separator{},
+							declarative.Action{
+								Text:        mi18n.T("&IKボーン"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerShowBoneIk,
+								AssignTo:    &cw.showBoneIkAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&付与親ボーン"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerShowBoneEffector,
+								AssignTo:    &cw.showBoneEffectorAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&軸制限ボーン"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerShowBoneFixed,
+								AssignTo:    &cw.showBoneFixedAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&回転ボーン"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerShowBoneRotate,
+								AssignTo:    &cw.showBoneRotateAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&移動ボーン"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerShowBoneTranslate,
+								AssignTo:    &cw.showBoneTranslateAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&表示ボーン"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerShowBoneVisible,
+								AssignTo:    &cw.showBoneVisibleAction,
+							},
+						},
+					},
+					declarative.Menu{
+						Text: mi18n.T("&剛体表示"),
+						Items: []declarative.MenuItem{
+							declarative.Action{
+								Text:        mi18n.T("&前面表示"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerShowRigidBodyFront,
+								AssignTo:    &cw.showRigidBodyFrontAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&埋め込み表示"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerShowRigidBodyBack,
+								AssignTo:    &cw.showRigidBodyBackAction,
+							},
+						},
+					},
+					declarative.Action{
+						Text:        mi18n.T("&ジョイント表示"),
+						Checkable:   true,
+						OnTriggered: cw.TriggerShowJoint,
+						AssignTo:    &cw.showJointAction,
+					},
+					declarative.Separator{},
 					declarative.Action{
 						Text: mi18n.T("&ビューワーの使い方"),
 						OnTriggered: func() {
@@ -362,12 +360,11 @@ func NewControlWindow(
 	}
 
 	// 初期設定
-	cw.shared.SetFrame(0.0)    // フレーム初期化
-	cw.shared.SetMaxFrame(1.0) // 最大フレーム初期化
-	cw.TriggerFps30Limit()     // 30fps物理ON
-
-	// cw.enabledPhysicsAction.SetChecked(true) // フレームドロップON
-	// // cw.enabledFrameDropAction.SetChecked(true) // 30fps制限
+	cw.shared.SetFrame(0.0)                  // フレーム初期化
+	cw.shared.SetMaxFrame(1.0)               // 最大フレーム初期化
+	cw.TriggerFps30Limit()                   // 30fps物理ON
+	cw.enabledPhysicsAction.SetChecked(true) // フレームドロップON
+	cw.TriggerEnabledFrameDrop()
 
 	cw.SetPosition(positionX, positionY)
 
@@ -505,4 +502,72 @@ func (cw *ControlWindow) TriggerUnLimitFps() {
 	cw.limitFps60Action.SetChecked(false)
 	cw.limitFpsUnLimitAction.SetChecked(true)
 	cw.shared.SetFrameInterval(0)
+}
+
+func (cw *ControlWindow) TriggerEnabledFrameDrop() {
+	cw.shared.SetEnabledFrameDrop(cw.enabledFrameDropAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowNormal() {
+	cw.shared.SetShowNormal(cw.showNormalAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowWire() {
+	cw.shared.SetShowWire(cw.showWireAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowOverride() {
+	cw.shared.SetShowOverride(cw.showOverrideAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowSelectedVertex() {
+	cw.shared.SetShowSelectedVertex(cw.showSelectedVertexAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowBoneAll() {
+	cw.shared.SetShowBoneAll(cw.showBoneAllAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowBoneIk() {
+	cw.shared.SetShowBoneIk(cw.showBoneIkAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowBoneEffector() {
+	cw.shared.SetShowBoneEffector(cw.showBoneEffectorAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowBoneFixed() {
+	cw.shared.SetShowBoneFixed(cw.showBoneFixedAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowBoneRotate() {
+	cw.shared.SetShowBoneRotate(cw.showBoneRotateAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowBoneTranslate() {
+	cw.shared.SetShowBoneTranslate(cw.showBoneTranslateAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowBoneVisible() {
+	cw.shared.SetShowBoneVisible(cw.showBoneVisibleAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowRigidBodyFront() {
+	cw.shared.SetShowRigidBodyFront(cw.showRigidBodyFrontAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowRigidBodyBack() {
+	cw.shared.SetShowRigidBodyBack(cw.showRigidBodyBackAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowJoint() {
+	cw.shared.SetShowJoint(cw.showJointAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowInfo() {
+	cw.shared.SetShowInfo(cw.showInfoAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerCameraSync() {
+	cw.shared.SetCameraSync(cw.cameraSyncAction.Checked())
 }
