@@ -5,6 +5,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
@@ -24,6 +25,7 @@ type ControlWindow struct {
 	appConfig *mconfig.AppConfig // アプリケーション設定
 
 	tabWidget        *walk.TabWidget    // タブウィジェット
+	consoleView      *ConsoleView       // コンソールビュー
 	enabledInPlaying func(enabled bool) // 再生中に無効化するウィジェット
 
 	// メニューアクション
@@ -365,6 +367,15 @@ func NewControlWindow(
 	cw.TriggerFps30Limit()                   // 30fps物理ON
 	cw.enabledPhysicsAction.SetChecked(true) // フレームドロップON
 	cw.TriggerEnabledFrameDrop()
+
+	// コンソールを追加で作成
+	if cv, err := NewConsoleView(cw, width/10, height/10); err != nil {
+		return nil, err
+	} else {
+		cw.consoleView = cv
+	}
+	// ログ出力先をコンソールビューに設定
+	log.SetOutput(cw.consoleView)
 
 	cw.SetPosition(positionX, positionY)
 

@@ -33,9 +33,9 @@ func init() {
 	// システム上の半分の論理プロセッサを使用させる
 	runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
-	// walk.AppendToWalkInit(func() {
-	// 	walk.MustRegisterWindowClass(widget.ConsoleViewClass)
-	// })
+	walk.AppendToWalkInit(func() {
+		walk.MustRegisterWindowClass(controller.ConsoleViewClass)
+	})
 }
 
 //go:embed app/*
