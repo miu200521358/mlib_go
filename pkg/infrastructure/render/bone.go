@@ -45,10 +45,6 @@ func newBoneGl(bone *pmx.Bone) []float32 {
 
 // newTailBoneGl はボーンの Tail 部分の位置をGPU頂点用に詰める
 func newTailBoneGl(bone *pmx.Bone) []float32 {
-	// ボーンが TailPosition か TailIndex を持つ場合に応じて座標を決定
-	// 旧コードでは bone.Extend.ChildRelativePosition を使うが、
-	//  ここでは bone.TailPosition に加算する想定に変更しています(本来の設計に合わせ微調整してください)
-
 	// ボーン末端位置
 	tailIndex := bone.Index()
 	if bone.IsTailBone() && bone.TailIndex > 0 {
@@ -58,10 +54,10 @@ func newTailBoneGl(bone *pmx.Bone) []float32 {
 
 	p := mmath.NewGlVec3(tailPos)
 	return []float32{
-		p[0], p[1], p[2],
-		float32(tailIndex), 0, 0, 0,
-		1, 0, 0, 0,
-		0.0, 0.0, 0.0, 0.0,
+		p[0], p[1], p[2], // 位置
+		float32(tailIndex), 0, 0, 0, // デフォームボーンINDEX
+		1, 0, 0, 0, // デフォームボーンウェイト
+		0.0, 0.0, 0.0, 0.0, // 色
 	}
 }
 

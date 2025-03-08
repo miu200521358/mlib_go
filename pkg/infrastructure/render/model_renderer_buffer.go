@@ -38,18 +38,15 @@ func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, model *pm
 		md.faces = createIndexesData(model)
 	}()
 
-	// ボーン関連バッファを一括で初期化
-	var boneLines []float32
-	var boneLineFaces []uint32
-	var boneLineIndexes []int
-	var bonePoints []float32
-	var bonePointFaces []uint32
-	var bonePointIndexes []int
+	// ボーンデバッグ関連バッファを一括で初期化
+	var boneLines, bonePoints []float32
+	var boneLineFaces, bonePointFaces []uint32
+	var boneLineIndexes, bonePointIndexes []int
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		boneLines, boneLineFaces, boneLineIndexes,
-			bonePoints, bonePointFaces, bonePointIndexes = createAllBoneData(model)
+			bonePoints, bonePointFaces, bonePointIndexes = createAllBoneDebugData(model)
 	}()
 
 	// WaitGroupの完了を待つ
@@ -70,14 +67,22 @@ func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, model *pm
 	// ボーンラインバッファの設定
 	md.boneLineIndexes = boneLineIndexes
 	md.boneLineCount = len(boneLineIndexes)
-	md.boneLineBufferHandle = factory.CreateVertexBuffer(gl.Ptr(boneLines), len(boneLines))
-	md.boneLineIbo = factory.CreateElementBuffer(gl.Ptr(boneLineFaces), len(boneLineFaces))
+	if len(boneLines) > 0 {
+		md.boneLineBufferHandle = factory.CreateBoneBuffer(gl.Ptr(boneLines), len(boneLines))
+	}
+	if len(boneLineFaces) > 0 {
+		md.boneLineIbo = factory.CreateElementBuffer(gl.Ptr(boneLineFaces), len(boneLineFaces))
+	}
 
 	// ボーンポイントバッファの設定
 	md.bonePointIndexes = bonePointIndexes
 	md.bonePointCount = len(bonePointIndexes)
-	md.bonePointBufferHandle = factory.CreateBoneBuffer(gl.Ptr(bonePoints), len(bonePoints))
-	md.bonePointIbo = factory.CreateElementBuffer(gl.Ptr(bonePointFaces), len(bonePointFaces))
+	if len(bonePoints) > 0 {
+		md.bonePointBufferHandle = factory.CreateBoneBuffer(gl.Ptr(bonePoints), len(bonePoints))
+	}
+	if len(bonePointFaces) > 0 {
+		md.bonePointIbo = factory.CreateElementBuffer(gl.Ptr(bonePointFaces), len(bonePointFaces))
+	}
 
 	// 選択頂点バッファの設定
 	md.selectedVertexBufferHandle = factory.CreateVertexBuffer(gl.Ptr(selectedVertexVertices), len(selectedVertexVertices))
@@ -160,11 +165,14 @@ func createAllVertexData(model *pmx.PmxModel) ([]float32, []float32, []float32) 
 	return vertices, normalVertices, selectedVertices
 }
 
-// createAllBoneData はボーンライン・ポイントデータを一括生成します
-func createAllBoneData(model *pmx.PmxModel) ([]float32, []uint32, []int, []float32, []uint32, []int) {
+// createAllBoneDebugData はボーンライン・ポイントデータを一括生成します
+func createAllBoneDebugData(model *pmx.PmxModel) ([]float32, []uint32, []int, []float32, []uint32, []int) {
+	// ボーン情報の要素数
+	boneElementCount := 3 + 4 + 4 + 4 // 位置 + デフォーム + ウェイト + 色
+
 	boneCount := model.Bones.Length()
-	boneLines := make([]float32, boneCount*2*7) // 線の始点と終点
-	bonePoints := make([]float32, boneCount*7)  // ボーン位置のみ
+	boneLines := make([]float32, boneCount*boneElementCount*2) // 線の始点と終点
+	bonePoints := make([]float32, boneCount*boneElementCount)  // ボーン位置のみ
 	boneLineFaces := make([]uint32, boneCount*2)
 	bonePointFaces := make([]uint32, boneCount)
 	boneLineIndexes := make([]int, boneCount*2)
@@ -184,9 +192,9 @@ func createAllBoneData(model *pmx.PmxModel) ([]float32, []uint32, []int, []float
 			end := min(start+batchSize, boneCount)
 
 			// 各バッチが担当する位置を計算
-			lineOffset := start * 2 * 7 // 始点と終点で2頂点分
-			pointOffset := start * 7    // ボーン位置1点分
-			lineFaceOffset := start * 2 // 線の2頂点分
+			lineOffset := start * boneElementCount * 2 // 始点と終点で2頂点分
+			pointOffset := start * boneElementCount    // ボーン位置1点分
+			lineFaceOffset := start * 2                // 線の2頂点分
 
 			for i := start; i < end; i++ {
 				var bone *pmx.Bone
@@ -198,8 +206,8 @@ func createAllBoneData(model *pmx.PmxModel) ([]float32, []uint32, []int, []float
 
 				// バッチ内でのインデックス計算
 				localIdx := i - start
-				lineLocalOffset := localIdx * 2 * 7
-				pointLocalOffset := localIdx * 7
+				lineLocalOffset := localIdx * boneElementCount * 2
+				pointLocalOffset := localIdx * boneElementCount
 				lineFaceLocalOffset := localIdx * 2
 
 				n := i * 2 // 元のボーンインデックス計算
@@ -209,7 +217,7 @@ func createAllBoneData(model *pmx.PmxModel) ([]float32, []uint32, []int, []float
 				copy(boneLines[lineOffset+lineLocalOffset:], boneStartGL)
 
 				boneEndGL := newTailBoneGl(bone)
-				copy(boneLines[lineOffset+lineLocalOffset+7:], boneEndGL)
+				copy(boneLines[lineOffset+lineLocalOffset+boneElementCount:], boneEndGL)
 
 				// ボーンラインフェイスデータ
 				boneLineFaces[lineFaceOffset+lineFaceLocalOffset] = uint32(n)

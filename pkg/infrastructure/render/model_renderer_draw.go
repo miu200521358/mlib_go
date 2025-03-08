@@ -128,31 +128,31 @@ func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bon
 
 	// --- ボーンライン描画 ---
 	mr.boneLineBufferHandle.Bind()
-	// 取得したデバッグカラー情報
-	_, deltas := mr.fetchBoneLineDeltas(bones, shared)
-	// 平坦化して VBO を更新
-	boneLineData := flattenFloat32Matrix(deltas)
-	mr.boneLineBufferHandle.VBO.Bind()
-	mr.boneLineBufferHandle.VBO.BufferData(len(boneLineData)*4, gl.Ptr(boneLineData), rendering.BufferUsageStatic)
-	mr.boneLineBufferHandle.VBO.Unbind()
+	// 取得したデバッグカラー情報で更新
+	boneLineIndexes, boneLineDeltas := mr.fetchBoneLineDeltas(bones, shared)
+	mr.boneLineBufferHandle.UpdateBoneDeltas(boneLineIndexes, boneLineDeltas)
+
 	mr.boneLineIbo.Bind()
+
 	gl.DrawElements(
 		gl.LINES,
 		int32(mr.boneLineCount),
 		gl.UNSIGNED_INT,
 		nil,
 	)
+
 	mr.boneLineIbo.Unbind()
 	mr.boneLineBufferHandle.Unbind()
 
 	// --- ボーンポイント描画 ---
 	mr.bonePointBufferHandle.Bind()
-	_, bonePointDeltas := mr.fetchBonePointDeltas(bones, shared)
-	bonePointData := flattenFloat32Matrix(bonePointDeltas)
-	mr.bonePointBufferHandle.VBO.Bind()
-	mr.bonePointBufferHandle.VBO.BufferData(len(bonePointData)*4, gl.Ptr(bonePointData), rendering.BufferUsageStatic)
-	mr.bonePointBufferHandle.VBO.Unbind()
+	// 取得したデバッグカラー情報で更新
+	bonePointIndexes, bonePointDeltas := mr.fetchBonePointDeltas(bones, shared)
+	mr.boneLineBufferHandle.UpdateBoneDeltas(bonePointIndexes, bonePointDeltas)
+
 	mr.bonePointIbo.Bind()
+
+	// ボーンポイントの描画
 	gl.PointSize(5.0)
 	gl.DrawElements(
 		gl.POINTS,
@@ -160,6 +160,7 @@ func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bon
 		gl.UNSIGNED_INT,
 		nil,
 	)
+
 	mr.bonePointIbo.Unbind()
 	mr.bonePointBufferHandle.Unbind()
 

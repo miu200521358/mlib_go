@@ -537,32 +537,68 @@ func (cw *ControlWindow) TriggerShowSelectedVertex() {
 	cw.shared.SetShowSelectedVertex(cw.showSelectedVertexAction.Checked())
 }
 
-func (cw *ControlWindow) TriggerShowBoneAll() {
+func (cw *ControlWindow) updateShowBoneFlag() {
 	cw.shared.SetShowBoneAll(cw.showBoneAllAction.Checked())
+	cw.shared.SetShowBoneIk(cw.showBoneIkAction.Checked())
+	cw.shared.SetShowBoneEffector(cw.showBoneEffectorAction.Checked())
+	cw.shared.SetShowBoneFixed(cw.showBoneFixedAction.Checked())
+	cw.shared.SetShowBoneRotate(cw.showBoneRotateAction.Checked())
+	cw.shared.SetShowBoneTranslate(cw.showBoneTranslateAction.Checked())
+	cw.shared.SetShowBoneVisible(cw.showBoneVisibleAction.Checked())
+}
+
+func (cw *ControlWindow) TriggerShowBoneAll() {
+	if cw.showBoneAllAction.Checked() {
+		cw.showBoneIkAction.SetChecked(false)
+		cw.showBoneEffectorAction.SetChecked(false)
+		cw.showBoneFixedAction.SetChecked(false)
+		cw.showBoneRotateAction.SetChecked(false)
+		cw.showBoneTranslateAction.SetChecked(false)
+		cw.showBoneVisibleAction.SetChecked(false)
+	}
+	cw.updateShowBoneFlag()
 }
 
 func (cw *ControlWindow) TriggerShowBoneIk() {
-	cw.shared.SetShowBoneIk(cw.showBoneIkAction.Checked())
+	if cw.showBoneIkAction.Checked() {
+		cw.showBoneAllAction.SetChecked(false)
+	}
+	cw.updateShowBoneFlag()
 }
 
 func (cw *ControlWindow) TriggerShowBoneEffector() {
-	cw.shared.SetShowBoneEffector(cw.showBoneEffectorAction.Checked())
+	if cw.showBoneEffectorAction.Checked() {
+		cw.showBoneAllAction.SetChecked(false)
+	}
+	cw.updateShowBoneFlag()
 }
 
 func (cw *ControlWindow) TriggerShowBoneFixed() {
-	cw.shared.SetShowBoneFixed(cw.showBoneFixedAction.Checked())
+	if cw.showBoneFixedAction.Checked() {
+		cw.showBoneAllAction.SetChecked(false)
+	}
+	cw.updateShowBoneFlag()
 }
 
 func (cw *ControlWindow) TriggerShowBoneRotate() {
-	cw.shared.SetShowBoneRotate(cw.showBoneRotateAction.Checked())
+	if cw.showBoneRotateAction.Checked() {
+		cw.showBoneAllAction.SetChecked(false)
+	}
+	cw.updateShowBoneFlag()
 }
 
 func (cw *ControlWindow) TriggerShowBoneTranslate() {
-	cw.shared.SetShowBoneTranslate(cw.showBoneTranslateAction.Checked())
+	if cw.showBoneTranslateAction.Checked() {
+		cw.showBoneAllAction.SetChecked(false)
+	}
+	cw.updateShowBoneFlag()
 }
 
 func (cw *ControlWindow) TriggerShowBoneVisible() {
-	cw.shared.SetShowBoneVisible(cw.showBoneVisibleAction.Checked())
+	if cw.showBoneVisibleAction.Checked() {
+		cw.showBoneAllAction.SetChecked(false)
+	}
+	cw.updateShowBoneFlag()
 }
 
 func (cw *ControlWindow) TriggerShowRigidBodyFront() {

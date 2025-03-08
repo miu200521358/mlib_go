@@ -255,9 +255,19 @@ func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDelta
 		offsetStride := (vidx*h.StrideSize + vboVertexSize) * h.FloatSize
 		h.VBO.BufferSubData(offsetStride, len(vd)*h.FloatSize, gl.Ptr(vd))
 	}
+}
 
-	// // 属性の設定
-	// for _, attr := range h.Attributes {
-	// 	h.VBO.SetAttribute(attr)
-	// }
+func (h *VertexBufferHandle) UpdateBoneDeltas(boneIndexes []int, boneDeltas [][]float32) {
+	if boneIndexes == nil || boneDeltas == nil {
+		return
+	}
+
+	vboVertexSize := (3 + 4 + 4)
+
+	// ボーン変形分の変動量を設定
+	for i, vidx := range boneIndexes {
+		vd := boneDeltas[i]
+		offsetStride := (vidx*h.StrideSize + vboVertexSize) * h.FloatSize
+		h.VBO.BufferSubData(offsetStride, len(vd)*h.FloatSize, gl.Ptr(vd))
+	}
 }
