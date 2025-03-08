@@ -5,22 +5,17 @@ package mbt
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
-
-// PhysicsConfig 物理エンジンの設定パラメータ
-type PhysicsConfig struct {
-	MaxSubSteps   int     // 最大ステップ数
-	FixedTimeStep float32 // 固定タイムステップ
-}
 
 // MPhysics 物理エンジンの実装
 type MPhysics struct {
 	world       bt.BtDiscreteDynamicsWorld // ワールド
 	drawer      bt.BtMDebugDraw            // デバッグビューワー
 	liner       *mDebugDrawLiner           // ライナー
-	config      PhysicsConfig              // 設定パラメータ
+	config      physics.PhysicsConfig      // 設定パラメータ
 	DeformSpf   float32                    // デフォームspf
 	PhysicsSpf  float32                    // 物理spf
 	joints      map[int][]*jointValue      // ジョイント
@@ -28,11 +23,11 @@ type MPhysics struct {
 }
 
 // NewMPhysics は物理エンジンのインスタンスを生成します
-func NewMPhysics() *MPhysics {
+func NewMPhysics() physics.IPhysics {
 	world := createWorld()
 
 	// デフォルト設定
-	config := PhysicsConfig{
+	config := physics.PhysicsConfig{
 		MaxSubSteps:   2,
 		FixedTimeStep: 1 / 60.0,
 	}

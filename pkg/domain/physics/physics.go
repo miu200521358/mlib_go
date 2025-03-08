@@ -1,0 +1,33 @@
+package physics
+
+import (
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
+)
+
+// PhysicsConfig 物理エンジンの設定パラメータ
+type PhysicsConfig struct {
+	MaxSubSteps   int     // 最大ステップ数
+	FixedTimeStep float32 // 固定タイムステップ
+}
+
+// IPhysics 物理エンジンのインターフェース
+type IPhysics interface {
+	// シミュレーション関連
+	StepSimulation(timeStep float32)
+	ResetWorld()
+
+	// モデル管理
+	AddModel(modelIndex int, model *pmx.PmxModel)
+	AddModelByBoneDeltas(modelIndex int, model *pmx.PmxModel, boneDeltas *delta.BoneDeltas)
+	DeleteModel(modelIndex int)
+
+	// トランスフォーム関連
+	UpdateTransform(modelIndex int, rigidBodyBone *pmx.Bone, boneGlobalMatrix *mmath.MMat4, rigidBody *pmx.RigidBody)
+	GetRigidBodyBoneMatrix(modelIndex int, rigidBody *pmx.RigidBody) *mmath.MMat4
+
+	// デバッグ表示
+	DrawDebugLines(shader rendering.IShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool)
+}

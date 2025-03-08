@@ -13,6 +13,7 @@ import (
 	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
@@ -37,7 +38,7 @@ type ViewWindow struct {
 	pitch               float64                 // カメラpitch
 	list                *ViewerList             // ビューワーリスト
 	shader              rendering.IShader       // シェーダー
-	physics             *mbt.MPhysics           // 物理エンジン
+	physics             physics.IPhysics        // 物理エンジン
 	modelRenderers      []*render.ModelRenderer // モデル描画オブジェクト
 	motions             []*vmd.VmdMotion        // モーションデータ
 	vmdDeltas           []*delta.VmdDeltas      // 変形情報

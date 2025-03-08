@@ -3,10 +3,10 @@ package deform
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/miter"
 )
 
@@ -139,7 +139,7 @@ func DeformBoneByPhysicsFlag(
 
 func Deform(
 	shared *state.SharedState,
-	physics *mbt.MPhysics,
+	physics physics.IPhysics,
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
@@ -194,7 +194,7 @@ func deformBeforePhysics(
 
 func deformPhysics(
 	shared *state.SharedState,
-	physics *mbt.MPhysics,
+	physics physics.IPhysics,
 	model *pmx.PmxModel,
 	vmdDeltas *delta.VmdDeltas,
 ) error {
@@ -230,7 +230,7 @@ func deformPhysics(
 
 func deformAfterPhysics(
 	shared *state.SharedState,
-	physics *mbt.MPhysics,
+	physics physics.IPhysics,
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	vmdDeltas *delta.VmdDeltas,
