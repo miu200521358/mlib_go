@@ -146,7 +146,18 @@ func (tm *TextureManager) LoadToonTextures(windowIndex int) error {
 
 		// OpenGLテクスチャ生成
 		gl.GenTextures(1, &toonGl.Id)
-		toonGl.setTextureUnit(windowIndex) // 下記メソッドでTextureUnitId, TextureUnitNoを設定
+
+		// Toon用テクスチャユニットを設定
+		if windowIndex == 0 {
+			toonGl.TextureUnitId = gl.TEXTURE10
+			toonGl.TextureUnitNo = 10
+		} else if windowIndex == 1 {
+			toonGl.TextureUnitId = gl.TEXTURE11
+			toonGl.TextureUnitNo = 11
+		} else if windowIndex == 2 {
+			toonGl.TextureUnitId = gl.TEXTURE12
+			toonGl.TextureUnitNo = 12
+		}
 
 		// ファイルを埋め込みリソースからロード
 		img, err := mfile.LoadImageFromResources(toonFiles, filePath)
@@ -281,9 +292,6 @@ func (texGl *textureGl) setTextureUnit(windowIndex int) {
 		baseUnit = gl.TEXTURE3
 	case 2:
 		baseUnit = gl.TEXTURE6
-	default:
-		// 必要に応じて増やす
-		baseUnit = gl.TEXTURE0
 	}
 
 	var offsetUnit uint32
@@ -294,8 +302,6 @@ func (texGl *textureGl) setTextureUnit(windowIndex int) {
 		offsetUnit = 1
 	case pmx.TEXTURE_TYPE_SPHERE:
 		offsetUnit = 2
-	default:
-		offsetUnit = 0
 	}
 
 	// 実際のユニットIDを決定

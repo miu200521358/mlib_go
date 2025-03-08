@@ -18,13 +18,21 @@ type materialGL struct {
 // newMaterialGL は、pmx.Material をもとに描画用の materialGL を生成します。
 // 引数 m にはドメイン側の pmx.Material、prevVerticesCount には前の材質までの頂点数を指定します。
 // 戻り値は、OpenGL描画に必要な拡張情報を保持する materialGL となります。
-func newMaterialGL(m *pmx.Material, prevVerticesCount int) *materialGL {
+func newMaterialGL(m *pmx.Material, prevVerticesCount int, tm *TextureManager) *materialGL {
+	var toonTexGl *textureGl
+	if m.ToonSharingFlag == pmx.TOON_SHARING_INDIVIDUAL && m.ToonTextureIndex != -1 {
+		// 個別Toon
+		toonTexGl = tm.Texture(m.ToonTextureIndex)
+	} else if m.ToonSharingFlag == pmx.TOON_SHARING_SHARING && m.ToonTextureIndex != -1 {
+		// 共有Toon
+		toonTexGl = tm.ToonTexture(m.ToonTextureIndex)
+	}
+
 	return &materialGL{
 		Material:          m,
 		prevVerticesCount: prevVerticesCount,
-		// 後からテクスチャは texture manager などで初期化されるため、初期状態は nil
-		texture:       nil,
-		sphereTexture: nil,
-		toonTexture:   nil,
+		texture:           tm.Texture(m.TextureIndex),
+		sphereTexture:     tm.Texture(m.SphereTextureIndex),
+		toonTexture:       toonTexGl,
 	}
 }

@@ -46,6 +46,10 @@ func NewModelRenderer(windowIndex int, model *pmx.PmxModel) *ModelRenderer {
 		noSelectedVertexes:       make(map[int]struct{}),
 	}
 
+	tm := NewTextureManager()
+	tm.LoadToonTextures(windowIndex)
+	tm.LoadAllTextures(windowIndex, model.Textures, model.Path())
+
 	// メインのモデル描画用頂点バッファを初期化
 	factory := mgl.NewBufferFactory()
 
@@ -59,7 +63,7 @@ func NewModelRenderer(windowIndex int, model *pmx.PmxModel) *ModelRenderer {
 		i := v.Index
 		m := v.Value
 		// newMaterialGL は、pmx.Material から描画用拡張情報 materialGL を生成する関数
-		materialExt := newMaterialGL(m, prevVerticesCount)
+		materialExt := newMaterialGL(m, prevVerticesCount, tm)
 		// MeshRenderer の生成 (実装は mesh_renderer.go)
 		mr.meshes[i] = NewMeshRenderer(factory, mr.faces, materialExt, prevVerticesCount)
 		prevVerticesCount += m.VerticesCount
