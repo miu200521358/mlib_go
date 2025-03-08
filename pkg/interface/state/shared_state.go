@@ -75,7 +75,8 @@ func (ss *SharedState) MotionCount(windowIndex int) int {
 	if len(ss.motions) <= windowIndex {
 		return 0
 	}
-	return len(ss.motions[windowIndex])
+	// モデルが読み込まれていたらモーションは必須
+	return max(len(ss.motions[windowIndex]), len(ss.models[windowIndex]))
 }
 
 // StoreModel は指定されたウィンドウとモデルインデックスにモデルを格納
@@ -121,7 +122,7 @@ func (ss *SharedState) LoadMotion(windowIndex, modelIndex int) *vmd.VmdMotion {
 		return nil
 	}
 	if len(ss.motions[windowIndex]) <= modelIndex {
-		return nil
+		return vmd.NewVmdMotion("")
 	}
 	return ss.motions[windowIndex][modelIndex].Load().(*vmd.VmdMotion)
 }

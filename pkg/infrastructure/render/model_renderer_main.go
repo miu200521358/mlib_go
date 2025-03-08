@@ -4,9 +4,6 @@
 package render
 
 import (
-	"unsafe"
-
-	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
@@ -91,9 +88,11 @@ func (mr *ModelRenderer) Delete() {
 // Render は、最新の変形情報 vmdDeltas とアプリケーション状態 appState に基づいてモデルを描画します。
 // 描画前にバッファの更新処理を行い、その後各描画パス（メッシュ描画、法線、ボーン、選択頂点など）を呼び出します。
 func (mr *ModelRenderer) Render(shader rendering.IShader, shared *state.SharedState, vmdDeltas *delta.VmdDeltas) {
+	mr.bufferHandle.Bind()
+	defer mr.bufferHandle.Unbind()
 
-	// バッファの更新（実装は model_renderer_buffer.go に記述）
-	mr.updateBuffers(vmdDeltas)
+	// // モーフの変更情報をもとに、頂点バッファを更新
+	// mr.bufferHandle.UpdateVertexDeltas(vmdDeltas.Morphs.Vertices)
 
 	paddedMatrixes, matrixWidth, matrixHeight, err := createBoneMatrixes(vmdDeltas.Bones)
 	if err != nil {
@@ -136,23 +135,6 @@ func (mr *ModelRenderer) Render(shader rendering.IShader, shared *state.SharedSt
 	// 選択頂点描画・カーソルライン描画は model_renderer_draw.go 内で実装済み
 	// 例: selected := mr.drawSelectedVertex(...)
 
-	// バッファのスワップ等、UI側への反映処理は UI 層 (view_window.go) に任せる
-}
-
-// updateBuffers は、vmdDeltas に基づき各種 VBO の内容を更新します。
-// 詳細な実装は model_renderer_buffer.go に分割されていますが、ここではその呼び出しのみ行います。
-func (mr *ModelRenderer) updateBuffers(vmdDeltas *delta.VmdDeltas) {
-	vertexIndexes, vertexData := newVertexMorphDeltasGl(vmdDeltas.Morphs.Vertices)
-
-	// 頂点 VBO の更新
-	mr.bufferHandle.Bind()
-	if vmdDeltas.Morphs.Vertices != nil {
-		// vmdDeltas.Morphs.Vertices が []float32 として頂点情報を保持していると仮定
-		mr.bufferHandle.VBO.Bind()
-		mr.bufferHandle.VBO.BufferData(len(vertexIndexes)*4, unsafe.Pointer(&vertexData[0]), gl.DYNAMIC_DRAW)
-		mr.bufferHandle.VBO.Unbind()
-	}
-	mr.bufferHandle.Unbind()
 }
 
 // ExistInvisibleMaterial は、指定された材質インデックスが非表示設定になっているかを返します。

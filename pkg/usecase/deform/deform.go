@@ -133,3 +133,41 @@ func DeformBoneByPhysicsFlag(
 
 	return deltas
 }
+
+func Deform(
+	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
+	deltas *delta.VmdDeltas,
+	frame float32,
+) *delta.VmdDeltas {
+	deltas = deformBeforePhysics(model, motion, deltas, frame)
+	return deltas
+}
+
+// deformBeforePhysics 物理演算前のボーンデフォーム処理を実行する
+func deformBeforePhysics(
+	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
+	vmdDeltas *delta.VmdDeltas,
+	frame float32,
+) *delta.VmdDeltas {
+	if model == nil || motion == nil {
+		return vmdDeltas
+	}
+
+	if vmdDeltas == nil || vmdDeltas.Frame() != frame ||
+		vmdDeltas.ModelHash() != model.Hash() || vmdDeltas.MotionHash() != motion.Hash() {
+		deltas := delta.NewVmdDeltas(frame, model.Bones, model.Hash(), motion.Hash())
+		deltas.Morphs = DeformMorph(model, motion.MorphFrames, frame, nil)
+
+		// ボーンデフォーム情報を埋める(物理前後全部埋める)
+		deltas.Bones = fillBoneDeform(model, motion, deltas, frame, model.Bones.LayerSortedIndexes, true, false)
+
+		// ボーンデフォーム情報を更新する
+		updateGlobalMatrix(deltas.Bones, model.Bones.LayerSortedIndexes)
+
+		return deltas
+	}
+
+	return vmdDeltas
+}

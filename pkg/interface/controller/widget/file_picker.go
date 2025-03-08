@@ -287,7 +287,7 @@ func (fp *FilePicker) newHistoryDialog() (*walk.Dialog, error) {
 					}
 					item := choices[index]
 					// パスを入力欄に設定
-					fp.pathEdit.SetText(item)
+					fp.pathEdit.ChangeText(item)
 					fp.historyDialog.Accept()
 				},
 			},
@@ -304,7 +304,7 @@ func (fp *FilePicker) newHistoryDialog() (*walk.Dialog, error) {
 							}
 							item := choices[index]
 							// パスを入力欄に設定
-							fp.pathEdit.SetText(item)
+							fp.pathEdit.ChangeText(item)
 							fp.historyDialog.Accept()
 						},
 					},

@@ -14,9 +14,11 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/render"
 	"github.com/miu200521358/mlib_go/pkg/interface/state"
+	"github.com/miu200521358/mlib_go/pkg/usecase/deform"
 )
 
 type ViewWindow struct {
@@ -35,6 +37,8 @@ type ViewWindow struct {
 	list                *ViewerList             // ビューワーリスト
 	shader              rendering.IShader       // シェーダー
 	modelRenderers      []*render.ModelRenderer // モデル描画オブジェクト
+	motions             []*vmd.VmdMotion        // モーションデータ
+	vmdDeltas           []*delta.VmdDeltas      // 変形情報
 }
 
 func newViewWindow(
@@ -164,9 +168,11 @@ func (vw *ViewWindow) Render(shared *state.SharedState) {
 	vw.shader.DrawFloor()
 
 	vw.loadModelRenderers(shared)
-	for _, modelRenderer := range vw.modelRenderers {
-		vmdDeltas := delta.NewVmdDeltas(0, modelRenderer.Model.Bones, modelRenderer.Hash, "")
-		modelRenderer.Render(vw.shader, shared, vmdDeltas)
+	vw.loadMotions(shared)
+
+	for i, modelRenderer := range vw.modelRenderers {
+		vw.vmdDeltas[i] = deform.Deform(modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], 0)
+		modelRenderer.Render(vw.shader, shared, vw.vmdDeltas[i])
 	}
 
 	// 深度解決

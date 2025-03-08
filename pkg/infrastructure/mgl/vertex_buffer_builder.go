@@ -186,7 +186,7 @@ func (b *VertexBufferBuilder) SetData(data unsafe.Pointer, count int) *VertexBuf
 	}
 
 	// データのバッファリング
-	size := count * b.strideSize * b.floatSize
+	size := count * b.floatSize
 	b.vbo.BufferData(size, data, rendering.BufferUsageStatic)
 
 	// 属性の設定
@@ -220,13 +220,15 @@ type VertexBufferHandle struct {
 	Attributes []rendering.VertexAttribute
 }
 
-// Bind はVAOをバインド
+// Bind はVAO, VBOをバインド
 func (h *VertexBufferHandle) Bind() {
 	h.VAO.Bind()
+	h.VBO.Bind()
 }
 
-// Unbind はVAOをアンバインド
+// Unbind はVAO, VBOをアンバインド
 func (h *VertexBufferHandle) Unbind() {
+	h.VBO.Unbind()
 	h.VAO.Unbind()
 }
 

@@ -139,10 +139,6 @@ func (mr *MeshRenderer) DrawModel(
 	sphereModeUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderSphereMode))
 	gl.Uniform1i(sphereModeUniform, int32(mr.material.SphereMode))
 
-	// 描画：インデックスバッファをバインドして描画
-	mr.elemBuffer.Bind()
-	defer mr.elemBuffer.Unbind()
-
 	gl.DrawElements(
 		gl.TRIANGLES,
 		int32(mr.material.VerticesCount),

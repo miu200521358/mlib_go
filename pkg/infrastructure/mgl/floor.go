@@ -114,5 +114,5 @@ func generateFloorVertices() ([]float32, int) {
 	addLine(0, 0, 0, 0, float32(gridSize), 0, yColor[0], yColor[1], yColor[2], yColor[3])
 
 	// 1要素の構成は位置(3) + 色(4) = 7
-	return vertices, len(vertices) / 7
+	return vertices, len(vertices)
 }

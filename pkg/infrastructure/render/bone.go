@@ -9,6 +9,7 @@ import (
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -31,7 +32,7 @@ var (
 	boneColorsInvisible      = []float32{0.82, 0.82, 0.82, 1.0}
 )
 
-// newBoneGl はボーンの先端位置データをGPU頂点用に詰める (旧 newBoneGl)
+// newBoneGl はボーンの先端位置データをGPU頂点用に詰める
 func newBoneGl(bone *pmx.Bone) []float32 {
 	// bone.Position は pmx.Bone の位置ベクトル
 	p := mmath.NewGlVec3(bone.Position)
@@ -43,7 +44,7 @@ func newBoneGl(bone *pmx.Bone) []float32 {
 	}
 }
 
-// newTailBoneGl はボーンの Tail 部分の位置をGPU頂点用に詰める (旧 newTailBoneGl)
+// newTailBoneGl はボーンの Tail 部分の位置をGPU頂点用に詰める
 func newTailBoneGl(bone *pmx.Bone) []float32 {
 	// ボーンが TailPosition か TailIndex を持つ場合に応じて座標を決定
 	// 旧コードでは bone.Extend.ChildRelativePosition を使うが、
@@ -65,7 +66,7 @@ func newTailBoneGl(bone *pmx.Bone) []float32 {
 	}
 }
 
-// getBoneDebugColor はボーンの種類(IK, 付与親, 固定軸, etc.)を見てカラーを返す (旧 getBoneDebugColor)
+// getBoneDebugColor はボーンの種類(IK, 付与親, 固定軸, etc.)を見てカラーを返す
 func getBoneDebugColor(bone *pmx.Bone, shared *state.SharedState) []float32 {
 	// IK系
 	if (shared.IsShowBoneAll() || shared.IsShowBoneVisible() || shared.IsShowBoneIk()) && bone.IsIK() {
@@ -110,35 +111,32 @@ func getBoneDebugColor(bone *pmx.Bone, shared *state.SharedState) []float32 {
 	return []float32{0.0, 0.0, 0.0, 0.0}
 }
 
-// createBoneMatrixes は boneDeltas から ボーン行列テクスチャ用の float32配列を生成 (旧 createBoneMatrixes)
+// createBoneMatrixes は boneDeltas から ボーン行列テクスチャ用の float32配列を生成
 func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int, error) {
 	numBones := boneDeltas.Length()
 	// テクスチャサイズを計算
 	texSize := int(math.Ceil(math.Sqrt(float64(numBones))))
-
-	// RGBA32Fとしてwidth*height*4ピクセルになる計算式
-	// (同じやり方であれば旧コードの通り)
 	width := int(math.Ceil(float64(texSize)/4) * 4 * 4)
-	height := int(math.Ceil(float64(numBones)*4) / float64(width))
+	height := int(math.Ceil((float64(numBones) * 4) / float64(width)))
 
 	paddedMatrixes := make([]float32, height*width*4)
-
 	for v := range boneDeltas.Iterator() {
 		i := v.Index
 		d := v.Value
+		var m mgl32.Mat4
 		if d == nil {
 			return nil, 0, 0, fmt.Errorf("boneDeltas[%d] is nil", i)
+		} else {
+			m = mmath.NewGlMat4(d.FilledLocalMatrix())
 		}
-		// ボーンの行列を mgl32.Mat4 で取得 (FilledLocalMatrix or GlobalMatrixなど)
-		m := mmath.NewGlMat4(d.FilledLocalMatrix())
-		// i*16 の位置にMat4(16要素)を書き込む
 		copy(paddedMatrixes[i*16:], m[:])
 	}
+
 	return paddedMatrixes, width, height, nil
 }
 
 // bindBoneMatrixes : ボーン行列テクスチャをシェーダーに転送し、
-// BoneMatrixTexture/BoneMatrixTextureWidth/BoneMatrixTextureHeight のユニフォームをセット (旧 bindBoneMatrixes)
+// BoneMatrixTexture/BoneMatrixTextureWidth/BoneMatrixTextureHeight のユニフォームをセット
 func bindBoneMatrixes(
 	windowIndex int,
 	paddedMatrixes []float32,
@@ -197,7 +195,7 @@ func bindBoneMatrixes(
 	gl.Uniform1i(modelHeightUniform, int32(height))
 }
 
-// unbindBoneMatrixes : ボーンテクスチャのバインド解除 (旧 unbindBoneMatrixes)
+// unbindBoneMatrixes : ボーンテクスチャのバインド解除
 func unbindBoneMatrixes() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
