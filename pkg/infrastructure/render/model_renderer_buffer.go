@@ -102,12 +102,11 @@ func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, model *pm
 // createAllVertexData は頂点データ、法線データ、選択頂点データを一括で生成します
 func createAllVertexData(model *pmx.PmxModel) ([]float32, []float32, []float32) {
 	vertexCount := model.Vertices.Length()
-	vertices := make([]float32, 0, vertexCount*vertexDataSize)
-	normalVertices := make([]float32, 0, vertexCount*2*vertexDataSize)
-	selectedVertices := make([]float32, 0, vertexCount*vertexDataSize)
+	vertices := make([]float32, vertexCount*vertexDataSize)
+	normalVertices := make([]float32, vertexCount*2*vertexDataSize)
+	selectedVertices := make([]float32, vertexCount*vertexDataSize)
 
 	var wg sync.WaitGroup
-	var muVert, muNormal, muSelected sync.Mutex
 
 	// 並列処理のためのバッチサイズ
 	batchSize := 1000
@@ -120,46 +119,40 @@ func createAllVertexData(model *pmx.PmxModel) ([]float32, []float32, []float32) 
 			start := batchIndex * batchSize
 			end := min(start+batchSize, vertexCount)
 
-			batchVertices := make([]float32, 0, (end-start)*vertexDataSize)
-			batchNormalVertices := make([]float32, 0, (end-start)*2*vertexDataSize)
-			batchSelectedVertices := make([]float32, 0, (end-start)*vertexDataSize)
+			// 各バッチが担当する位置を計算
+			vertexOffset := start * vertexDataSize
+			normalOffset := start * 2 * vertexDataSize
+			selectedOffset := start * vertexDataSize
 
 			for i := start; i < end; i++ {
+				localIdx := i - start
+				vertexLocalOffset := localIdx * vertexDataSize
+				normalLocalOffset := localIdx * 2 * vertexDataSize
+				selectedLocalOffset := localIdx * vertexDataSize
+
 				if vertex, err := model.Vertices.Get(i); err == nil {
 					// 通常の頂点データ
 					vgl := newVertexGl(vertex)
-					batchVertices = append(batchVertices, vgl...)
+					copy(vertices[vertexOffset+vertexLocalOffset:], vgl)
 
 					// 法線データ
 					normalVgl := newVertexNormalGl(vertex)
-					batchNormalVertices = append(batchNormalVertices, vgl...)       // 頂点位置
-					batchNormalVertices = append(batchNormalVertices, normalVgl...) // 法線方向の終点
+					copy(normalVertices[normalOffset+normalLocalOffset:], vgl)                      // 頂点位置
+					copy(normalVertices[normalOffset+normalLocalOffset+vertexDataSize:], normalVgl) // 法線方向の終点
 
 					// 選択頂点データ（頂点データと同じ）
-					batchSelectedVertices = append(batchSelectedVertices, vgl...)
+					copy(selectedVertices[selectedOffset+selectedLocalOffset:], vgl)
 				} else {
+					// 空データの場合
 					emptyVgl := make([]float32, vertexDataSize)
-					batchVertices = append(batchVertices, emptyVgl...)
+					copy(vertices[vertexOffset+vertexLocalOffset:], emptyVgl)
 
-					batchNormalVertices = append(batchNormalVertices, emptyVgl...)
-					batchNormalVertices = append(batchNormalVertices, emptyVgl...)
+					copy(normalVertices[normalOffset+normalLocalOffset:], emptyVgl)
+					copy(normalVertices[normalOffset+normalLocalOffset+vertexDataSize:], emptyVgl)
 
-					batchSelectedVertices = append(batchSelectedVertices, emptyVgl...)
+					copy(selectedVertices[selectedOffset+selectedLocalOffset:], emptyVgl)
 				}
 			}
-
-			// スレッドセーフにスライスを更新
-			muVert.Lock()
-			vertices = append(vertices, batchVertices...)
-			muVert.Unlock()
-
-			muNormal.Lock()
-			normalVertices = append(normalVertices, batchNormalVertices...)
-			muNormal.Unlock()
-
-			muSelected.Lock()
-			selectedVertices = append(selectedVertices, batchSelectedVertices...)
-			muSelected.Unlock()
 		}(b)
 	}
 
@@ -170,15 +163,14 @@ func createAllVertexData(model *pmx.PmxModel) ([]float32, []float32, []float32) 
 // createAllBoneData はボーンライン・ポイントデータを一括生成します
 func createAllBoneData(model *pmx.PmxModel) ([]float32, []uint32, []int, []float32, []uint32, []int) {
 	boneCount := model.Bones.Length()
-	boneLines := make([]float32, 0, boneCount*2*7) // 線の始点と終点
-	bonePoints := make([]float32, 0, boneCount*7)  // ボーン位置のみ
-	boneLineFaces := make([]uint32, 0, boneCount*2)
+	boneLines := make([]float32, boneCount*2*7) // 線の始点と終点
+	bonePoints := make([]float32, boneCount*7)  // ボーン位置のみ
+	boneLineFaces := make([]uint32, boneCount*2)
 	bonePointFaces := make([]uint32, boneCount)
 	boneLineIndexes := make([]int, boneCount*2)
 	bonePointIndexes := make([]int, boneCount)
 
 	var wg sync.WaitGroup
-	var muLine, muPoint sync.Mutex
 
 	// 並列処理のためのバッチサイズ
 	batchSize := 500
@@ -191,12 +183,10 @@ func createAllBoneData(model *pmx.PmxModel) ([]float32, []uint32, []int, []float
 			start := batchIndex * batchSize
 			end := min(start+batchSize, boneCount)
 
-			batchLines := make([]float32, 0, (end-start)*2*7)
-			batchPoints := make([]float32, 0, (end-start)*7)
-			batchLineFaces := make([]uint32, 0, (end-start)*2)
-			batchPointFaces := make([]uint32, end-start)
-			batchLineIndexes := make(map[int]int, (end-start)*2)
-			batchPointIndexes := make([]int, end-start)
+			// 各バッチが担当する位置を計算
+			lineOffset := start * 2 * 7 // 始点と終点で2頂点分
+			pointOffset := start * 7    // ボーン位置1点分
+			lineFaceOffset := start * 2 // 線の2頂点分
 
 			for i := start; i < end; i++ {
 				var bone *pmx.Bone
@@ -205,49 +195,37 @@ func createAllBoneData(model *pmx.PmxModel) ([]float32, []uint32, []int, []float
 				} else {
 					bone = pmx.NewBone()
 				}
-				n := i * 2
+
+				// バッチ内でのインデックス計算
+				localIdx := i - start
+				lineLocalOffset := localIdx * 2 * 7
+				pointLocalOffset := localIdx * 7
+				lineFaceLocalOffset := localIdx * 2
+
+				n := i * 2 // 元のボーンインデックス計算
 
 				// ボーンラインデータ
 				boneStartGL := newBoneGl(bone)
-				batchLines = append(batchLines, boneStartGL...)
+				copy(boneLines[lineOffset+lineLocalOffset:], boneStartGL)
 
 				boneEndGL := newTailBoneGl(bone)
-				batchLines = append(batchLines, boneEndGL...)
+				copy(boneLines[lineOffset+lineLocalOffset+7:], boneEndGL)
 
-				batchLineFaces = append(batchLineFaces, uint32(n), uint32(n+1))
+				// ボーンラインフェイスデータ
+				boneLineFaces[lineFaceOffset+lineFaceLocalOffset] = uint32(n)
+				boneLineFaces[lineFaceOffset+lineFaceLocalOffset+1] = uint32(n + 1)
 
-				batchLineIndexes[n] = bone.Index()
-				batchLineIndexes[n+1] = bone.Index()
+				// ボーンラインインデックスデータ
+				boneLineIndexes[n] = bone.Index()
+				boneLineIndexes[n+1] = bone.Index()
 
 				// ボーンポイントデータ (始点のみ)
-				batchPoints = append(batchPoints, boneStartGL...)
+				copy(bonePoints[pointOffset+pointLocalOffset:], boneStartGL)
 
-				localIdx := i - start
-				batchPointFaces[localIdx] = uint32(bone.Index())
-				batchPointIndexes[localIdx] = bone.Index()
+				// ボーンポイントフェイスとインデックスデータ
+				bonePointFaces[i] = uint32(bone.Index())
+				bonePointIndexes[i] = bone.Index()
 			}
-
-			// スレッドセーフにデータを統合
-			muLine.Lock()
-			boneLines = append(boneLines, batchLines...)
-			boneLineFaces = append(boneLineFaces, batchLineFaces...)
-
-			// ラインインデックスの更新
-			for idx, boneIdx := range batchLineIndexes {
-				boneLineIndexes[idx] = boneIdx
-			}
-			muLine.Unlock()
-
-			muPoint.Lock()
-			bonePoints = append(bonePoints, batchPoints...)
-
-			// ポイントインデックスの更新
-			for i := start; i < end; i++ {
-				localIdx := i - start
-				bonePointFaces[i] = batchPointFaces[localIdx]
-				bonePointIndexes[i] = batchPointIndexes[localIdx]
-			}
-			muPoint.Unlock()
 		}(b)
 	}
 
@@ -257,13 +235,12 @@ func createAllBoneData(model *pmx.PmxModel) ([]float32, []uint32, []int, []float
 
 // createIndexesData はインデックスデータを生成します
 func createIndexesData(model *pmx.PmxModel) []uint32 {
-	faces := make([]uint32, 0, model.Faces.Length()*3)
+	faceCount := model.Faces.Length()
+	faces := make([]uint32, faceCount*3)
 	var wg sync.WaitGroup
-	var mu sync.Mutex
 
 	// 面情報の並列処理
 	batchSize := 1000 // 一度に処理する面数
-	faceCount := model.Faces.Length()
 	batches := (faceCount + batchSize - 1) / batchSize
 
 	for b := range batches {
@@ -272,8 +249,7 @@ func createIndexesData(model *pmx.PmxModel) []uint32 {
 			defer wg.Done()
 			start := batchIndex * batchSize
 			end := min(start+batchSize, faceCount)
-
-			batchFaces := make([]uint32, 0, batchSize*3)
+			offset := start * 3
 
 			for i := start; i < end; i++ {
 				var vertices [3]int
@@ -282,13 +258,13 @@ func createIndexesData(model *pmx.PmxModel) []uint32 {
 				} else {
 					vertices = [3]int{0, 0, 0}
 				}
-				// 頂点の順序を反転（OpenGL用）
-				batchFaces = append(batchFaces, uint32(vertices[2]), uint32(vertices[1]), uint32(vertices[0]))
-			}
 
-			mu.Lock()
-			faces = append(faces, batchFaces...)
-			mu.Unlock()
+				localIdx := (i - start) * 3
+				// 頂点の順序を反転（OpenGL用）
+				faces[offset+localIdx] = uint32(vertices[2])
+				faces[offset+localIdx+1] = uint32(vertices[1])
+				faces[offset+localIdx+2] = uint32(vertices[0])
+			}
 		}(b)
 	}
 
