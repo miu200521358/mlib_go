@@ -35,21 +35,21 @@ func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, model *pm
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		md.faces = createIndicesData(model)
+		md.faces = createIndexesData(model)
 	}()
 
 	// ボーン関連バッファを一括で初期化
-	var boneLineVertices []float32
-	var boneLineIndices []uint32
+	var boneLines []float32
+	var boneLineFaces []uint32
 	var boneLineIndexes []int
-	var bonePointVertices []float32
-	var bonePointIndices []uint32
+	var bonePoints []float32
+	var bonePointFaces []uint32
 	var bonePointIndexes []int
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		boneLineVertices, boneLineIndices, boneLineIndexes,
-			bonePointVertices, bonePointIndices, bonePointIndexes = createAllBoneData(model)
+		boneLines, boneLineFaces, boneLineIndexes,
+			bonePoints, bonePointFaces, bonePointIndexes = createAllBoneData(model)
 	}()
 
 	// WaitGroupの完了を待つ
@@ -64,27 +64,27 @@ func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, model *pm
 	md.normalBufferHandle = factory.CreateVertexBuffer(gl.Ptr(md.normalVertices), len(md.normalVertices))
 
 	// 法線表示用のインデックスバッファ
-	normalIndices := createNormalIndicesData(model)
-	md.normalIbo = factory.CreateElementBuffer(gl.Ptr(normalIndices), len(normalIndices))
+	normalIndexes := createNormalIndexesData(model)
+	md.normalIbo = factory.CreateElementBuffer(gl.Ptr(normalIndexes), len(normalIndexes))
 
 	// ボーンラインバッファの設定
 	md.boneLineIndexes = boneLineIndexes
-	md.boneLineCount = len(boneLineIndices)
-	md.boneLineBufferHandle = factory.CreateVertexBuffer(gl.Ptr(boneLineVertices), len(boneLineVertices)/7)
-	md.boneLineIbo = factory.CreateElementBuffer(gl.Ptr(boneLineIndices), len(boneLineIndices))
+	md.boneLineCount = len(boneLineIndexes)
+	md.boneLineBufferHandle = factory.CreateVertexBuffer(gl.Ptr(boneLines), len(boneLines))
+	md.boneLineIbo = factory.CreateElementBuffer(gl.Ptr(boneLineFaces), len(boneLineFaces))
 
 	// ボーンポイントバッファの設定
 	md.bonePointIndexes = bonePointIndexes
-	md.bonePointCount = len(bonePointIndices)
-	md.bonePointBufferHandle = factory.CreateBoneBuffer(gl.Ptr(bonePointVertices), len(bonePointVertices)/7)
-	md.bonePointIbo = factory.CreateElementBuffer(gl.Ptr(bonePointIndices), len(bonePointIndices))
+	md.bonePointCount = len(bonePointIndexes)
+	md.bonePointBufferHandle = factory.CreateBoneBuffer(gl.Ptr(bonePoints), len(bonePoints))
+	md.bonePointIbo = factory.CreateElementBuffer(gl.Ptr(bonePointFaces), len(bonePointFaces))
 
 	// 選択頂点バッファの設定
 	md.selectedVertexBufferHandle = factory.CreateVertexBuffer(gl.Ptr(selectedVertexVertices), len(selectedVertexVertices))
 
 	// 選択頂点用のインデックスバッファ（すべての頂点のインデックス）
-	indices := createAllVertexIndicesData(model)
-	md.selectedVertexIbo = factory.CreateElementBuffer(gl.Ptr(indices), len(indices))
+	indexes := createAllVertexIndexesData(model)
+	md.selectedVertexIbo = factory.CreateElementBuffer(gl.Ptr(indexes), len(indexes))
 
 	// カーソル位置表示用バッファの初期化
 	md.cursorPositionBufferHandle = factory.CreateDebugBuffer()
@@ -113,7 +113,7 @@ func createAllVertexData(model *pmx.PmxModel) ([]float32, []float32, []float32) 
 	batchSize := 1000
 	batches := (vertexCount + batchSize - 1) / batchSize
 
-	for b := 0; b < batches; b++ {
+	for b := range batches {
 		wg.Add(1)
 		go func(batchIndex int) {
 			defer wg.Done()
@@ -184,7 +184,7 @@ func createAllBoneData(model *pmx.PmxModel) ([]float32, []uint32, []int, []float
 	batchSize := 500
 	batches := (boneCount + batchSize - 1) / batchSize
 
-	for b := 0; b < batches; b++ {
+	for b := range batches {
 		wg.Add(1)
 		go func(batchIndex int) {
 			defer wg.Done()
@@ -255,8 +255,8 @@ func createAllBoneData(model *pmx.PmxModel) ([]float32, []uint32, []int, []float
 	return boneLines, boneLineFaces, boneLineIndexes, bonePoints, bonePointFaces, bonePointIndexes
 }
 
-// createIndicesData はインデックスデータを生成します
-func createIndicesData(model *pmx.PmxModel) []uint32 {
+// createIndexesData はインデックスデータを生成します
+func createIndexesData(model *pmx.PmxModel) []uint32 {
 	faces := make([]uint32, 0, model.Faces.Length()*3)
 	var wg sync.WaitGroup
 	var mu sync.Mutex
@@ -266,7 +266,7 @@ func createIndicesData(model *pmx.PmxModel) []uint32 {
 	faceCount := model.Faces.Length()
 	batches := (faceCount + batchSize - 1) / batchSize
 
-	for b := 0; b < batches; b++ {
+	for b := range batches {
 		wg.Add(1)
 		go func(batchIndex int) {
 			defer wg.Done()
@@ -296,12 +296,12 @@ func createIndicesData(model *pmx.PmxModel) []uint32 {
 	return faces
 }
 
-// createNormalIndicesData は法線インデックスデータを生成します
-func createNormalIndicesData(model *pmx.PmxModel) []uint32 {
+// createNormalIndexesData は法線インデックスデータを生成します
+func createNormalIndexesData(model *pmx.PmxModel) []uint32 {
 	normalFaces := make([]uint32, 0, model.Vertices.Length()*2)
 
 	// 各頂点の開始位置と対応する法線位置を結ぶインデックスを生成
-	for i := 0; i < model.Vertices.Length(); i++ {
+	for i := range model.Vertices.Length() {
 		n := i * 2
 		normalFaces = append(normalFaces, uint32(n), uint32(n+1))
 	}
@@ -309,13 +309,13 @@ func createNormalIndicesData(model *pmx.PmxModel) []uint32 {
 	return normalFaces
 }
 
-// createAllVertexIndicesData はすべての頂点インデックスデータを生成します
-func createAllVertexIndicesData(model *pmx.PmxModel) []uint32 {
-	indices := make([]uint32, model.Vertices.Length())
+// createAllVertexIndexesData はすべての頂点インデックスデータを生成します
+func createAllVertexIndexesData(model *pmx.PmxModel) []uint32 {
+	indexes := make([]uint32, model.Vertices.Length())
 	for i := range model.Vertices.Length() {
-		indices[i] = uint32(i)
+		indexes[i] = uint32(i)
 	}
-	return indices
+	return indexes
 }
 
 func min(a, b int) int {

@@ -872,10 +872,10 @@ func (rep *XRepository) parseMeshMaterialList(
 		facesByMaterials[i] = make([][]*pmx.Face, 0, nFaceIdx)
 	}
 
-	// faceIndices
-	faceIndicesByMaterials := make(map[int][]int)
+	// faceIndexes
+	faceIndexesByMaterials := make(map[int][]int)
 	for i := 0; i < nMat; i++ {
-		faceIndicesByMaterials[i] = make([]int, 0, nFaceIdx)
+		faceIndexesByMaterials[i] = make([]int, 0, nFaceIdx)
 	}
 
 	for i := 0; i < nFaceIdx; i++ {
@@ -884,7 +884,7 @@ func (rep *XRepository) parseMeshMaterialList(
 			return err
 		}
 		facesByMaterials[matIdx] = append(facesByMaterials[matIdx], facesList[i])
-		faceIndicesByMaterials[matIdx] = append(faceIndicesByMaterials[matIdx], i)
+		faceIndexesByMaterials[matIdx] = append(faceIndexesByMaterials[matIdx], i)
 	}
 	if _, err := rep.expect(tokSemicolon); err != nil {
 		return err
@@ -921,7 +921,7 @@ func (rep *XRepository) parseMeshMaterialList(
 				}
 				m.VerticesCount += 3
 			}
-			faceMap[faceIndicesByMaterials[i][j]] = fis
+			faceMap[faceIndexesByMaterials[i][j]] = fis
 		}
 	}
 

@@ -10,14 +10,14 @@ import (
 
 func newVertexMorphDeltasGl(mds *delta.VertexMorphDeltas) ([]int, [][]float32) {
 	vertices := make([][]float32, 0)
-	indices := make([]int, 0)
+	indexes := make([]int, 0)
 	for v := range mds.Iterator() {
 		i := v.Index
 		md := v.Value
 		vertices = append(vertices, newVertexMorphDeltaGl(md))
-		indices = append(indices, i)
+		indexes = append(indexes, i)
 	}
-	return indices, vertices
+	return indexes, vertices
 }
 
 func newVertexMorphDeltaGl(md *delta.VertexMorphDelta) []float32 {

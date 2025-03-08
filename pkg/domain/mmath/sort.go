@@ -39,17 +39,17 @@ func (x Slices[T]) Sort() { sort.Sort(x) }
 // ArgSort 関数
 func ArgSort[T Number](slice []T) []int {
 	n := len(slice)
-	indices := make([]int, n)
-	for i := range indices {
-		indices[i] = i
+	indexes := make([]int, n)
+	for i := range indexes {
+		indexes[i] = i
 	}
 
 	// インデックスを slice の値に基づいてソート
-	sort.Slice(indices, func(i, j int) bool {
-		return slice[indices[i]] < slice[indices[j]]
+	sort.Slice(indexes, func(i, j int) bool {
+		return slice[indexes[i]] < slice[indexes[j]]
 	})
 
-	return indices
+	return indexes
 }
 
 func ArgMin[T Number](values []T) int {

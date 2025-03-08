@@ -4,8 +4,6 @@
 package render
 
 import (
-	"unsafe"
-
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
@@ -304,17 +302,6 @@ func flattenFloat32Matrix(data [][]float32) []float32 {
 		flat = append(flat, row...)
 	}
 	return flat
-}
-
-// updateVertexBuffer は、vbo に data の内容を BufferData を用いて更新します。
-func updateVertexBuffer(vbo *mgl.VertexBuffer, data []float32) {
-	vbo.Bind()
-	if data != nil && len(data) > 0 {
-		// float32は4バイト
-		size := len(data) * 4
-		vbo.BufferData(size, unsafe.Pointer(&data[0]), rendering.BufferUsageStatic)
-	}
-	vbo.Unbind()
 }
 
 // convertVertexMorphDeltasToFloat32 は、delta.VertexMorphDeltas から []float32 を生成します。
