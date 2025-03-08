@@ -424,6 +424,32 @@ func (cw *ControlWindow) triggerLogLevel() {
 	}
 }
 
+// ------- 以下、再生状態の取得・設定メソッド -------
+
+func (cw *ControlWindow) SetPlaying(playing bool) {
+	cw.shared.SetPlaying(playing)
+}
+
+func (cw *ControlWindow) Playing() bool {
+	return cw.shared.Playing()
+}
+
+func (cw *ControlWindow) SetFrame(frame float32) {
+	cw.shared.SetFrame(frame)
+}
+
+func (cw *ControlWindow) Frame() float32 {
+	return cw.shared.Frame()
+}
+
+func (cw *ControlWindow) SetMaxFrame(frame float32) {
+	cw.shared.SetMaxFrame(frame)
+}
+
+func (cw *ControlWindow) MaxFrame() float32 {
+	return cw.shared.MaxFrame()
+}
+
 // ------- 以下、モデルやモーションの格納・取得メソッド -------
 
 func (cw *ControlWindow) StoreModel(windowIndex int, modelIndex int, model *pmx.PmxModel) {

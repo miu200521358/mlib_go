@@ -76,9 +76,7 @@ func main() {
 				return
 			}
 
-			pageWidgets.pmxLoad1Picker.SetWindow(controlWindow)
-			pageWidgets.vmdLoader1Picker.SetWindow(controlWindow)
-
+			pageWidgets.SetWindow(controlWindow)
 			controlWindow.Run()
 		})
 	}()
@@ -116,6 +114,13 @@ func newMenuItems() []declarative.MenuItem {
 type pageWidgets struct {
 	pmxLoad1Picker   *widget.FilePicker
 	vmdLoader1Picker *widget.FilePicker
+	player           *widget.MotionPlayer
+}
+
+func (pw *pageWidgets) SetWindow(window *controller.ControlWindow) {
+	pw.pmxLoad1Picker.SetWindow(window)
+	pw.vmdLoader1Picker.SetWindow(window)
+	pw.player.SetWindow(window)
 }
 
 func newTabPages(pageWidgets *pageWidgets) []declarative.TabPage {
@@ -140,12 +145,16 @@ func newTabPages(pageWidgets *pageWidgets) []declarative.TabPage {
 		"モーションファイルを選択してください",
 		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
 			if data, err := rep.Load(path); err == nil {
-				cw.StoreMotion(0, 0, data.(*vmd.VmdMotion))
+				motion := data.(*vmd.VmdMotion)
+				pageWidgets.player.Reset(motion.MaxFrame())
+				cw.StoreMotion(0, 0, motion)
 			} else {
 				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
 			}
 		},
 	)
+
+	pageWidgets.player = widget.NewMotionPlayer()
 
 	return []declarative.TabPage{
 		{
@@ -164,6 +173,7 @@ func newTabPages(pageWidgets *pageWidgets) []declarative.TabPage {
 						},
 						pageWidgets.pmxLoad1Picker.Widgets(),
 						pageWidgets.vmdLoader1Picker.Widgets(),
+						pageWidgets.player.Widgets(),
 						declarative.VSpacer{},
 					},
 				},
