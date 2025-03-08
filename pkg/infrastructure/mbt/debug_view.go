@@ -11,13 +11,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
-// DebugDrawOptions デバッグ描画のオプション
-type DebugDrawOptions struct {
-	VisibleRigidBody     bool
-	VisibleJoint         bool
-	DrawRigidBodyInFront bool
-}
-
 // newConstBtMDefaultColors はデバッグ描画の色を定義します
 func newConstBtMDefaultColors() bt.BtMDefaultColors {
 	return bt.NewBtMDefaultColors(
@@ -34,8 +27,7 @@ func newConstBtMDefaultColors() bt.BtMDefaultColors {
 // mDebugDrawLiner はデバッグ描画のためのラインレンダラーです
 type mDebugDrawLiner struct {
 	bt.BtMDebugDrawLiner
-	debugBufferHandle *mgl.VertexBufferHandle
-	vertices          []float32
+	vertices []float32
 }
 
 // newMDebugDrawLiner は新しいデバッグドローラインを作成します
@@ -43,9 +35,6 @@ func newMDebugDrawLiner() *mDebugDrawLiner {
 	ddl := &mDebugDrawLiner{
 		vertices: make([]float32, 0),
 	}
-
-	// OpenGLのバッファを初期化
-	ddl.debugBufferHandle = mgl.NewBufferFactory().CreateDebugBuffer()
 
 	// Bulletのドローラインインターフェースを実装
 	ddl.BtMDebugDrawLiner = bt.NewDirectorBtMDebugDrawLiner(ddl)
@@ -65,7 +54,7 @@ func (ddl *mDebugDrawLiner) DrawLine(from bt.BtVector3, to bt.BtVector3, color b
 }
 
 // drawDebugLines はデバッグ線を描画します
-func (ddl *mDebugDrawLiner) drawDebugLines(shader *mgl.MShader, isDrawRigidBodyFront bool) {
+func (ddl *mDebugDrawLiner) drawDebugLines(shader rendering.IShader, isDrawRigidBodyFront bool) {
 	if len(ddl.vertices) == 0 {
 		return
 	}
@@ -109,44 +98,45 @@ func (ddl *mDebugDrawLiner) restoreDepthTest(isDrawRigidBodyFront bool) {
 
 // renderLines は線を描画します
 func (ddl *mDebugDrawLiner) renderLines() {
-	ddl.debugBufferHandle.Bind()
-	ddl.debugBufferHandle.VBO.BufferData(len(ddl.vertices)*4, gl.Ptr(ddl.vertices), rendering.BufferUsageStatic)
+	// OpenGLのバッファを初期化
+	debugBufferHandle := mgl.NewBufferFactory().CreateDebugBuffer(gl.Ptr(&ddl.vertices[0]), len(ddl.vertices))
+	debugBufferHandle.Bind()
 
 	// ライン描画
 	gl.DrawArrays(gl.LINES, 0, int32(len(ddl.vertices)/7))
 
-	ddl.debugBufferHandle.Unbind()
+	debugBufferHandle.Unbind()
 }
 
 // DrawDebugLines は物理デバッグ情報を描画します
 func (physics *MPhysics) DrawDebugLines(
-	shader *mgl.MShader, options DebugDrawOptions,
+	shader rendering.IShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool,
 ) {
-	if !(options.VisibleRigidBody || options.VisibleJoint) {
+	if !(visibleRigidBody || visibleJoint) {
 		return
 	}
 
 	// デバッグモードの設定
-	physics.configureDebugDrawMode(options)
+	physics.configureDebugDrawMode(visibleRigidBody, visibleJoint)
 
 	// デバッグ情報取得
 	physics.world.DebugDrawWorld()
 
 	// デバッグ描画
-	physics.liner.drawDebugLines(shader, options.DrawRigidBodyInFront)
+	physics.liner.drawDebugLines(shader, isDrawRigidBodyFront)
 }
 
 // configureDebugDrawMode はデバッグ描画モードを設定します
-func (physics *MPhysics) configureDebugDrawMode(options DebugDrawOptions) {
-	debugMode := 0
+func (physics *MPhysics) configureDebugDrawMode(visibleRigidBody, visibleJoint bool) {
+	debugMode := physics.world.GetDebugDrawer().GetDebugMode()
 
-	if options.VisibleRigidBody {
+	if visibleRigidBody {
 		debugMode |= int(bt.BtIDebugDrawDBG_DrawWireframe | bt.BtIDebugDrawDBG_DrawContactPoints)
 	} else {
 		debugMode &= ^int(bt.BtIDebugDrawDBG_DrawWireframe | bt.BtIDebugDrawDBG_DrawContactPoints)
 	}
 
-	if options.VisibleJoint {
+	if visibleJoint {
 		debugMode |= int(bt.BtIDebugDrawDBG_DrawConstraints | bt.BtIDebugDrawDBG_DrawConstraintLimits)
 	} else {
 		debugMode &= ^int(bt.BtIDebugDrawDBG_DrawConstraints | bt.BtIDebugDrawDBG_DrawConstraintLimits)

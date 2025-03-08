@@ -7,6 +7,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/miter"
 )
 
 func DeformModel(
@@ -142,8 +143,24 @@ func Deform(
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
+	timeStep float32,
 ) *delta.VmdDeltas {
+	// 物理前変形
 	deltas = deformBeforePhysics(model, motion, deltas, shared.Frame())
+
+	if shared.IsEnabledPhysics() || shared.IsPhysicsReset() {
+		// 物理更新
+		physics.StepSimulation(timeStep)
+	}
+
+	// 物理変形
+	if err := deformPhysics(shared, physics, model, deltas); err != nil {
+		return deltas
+	}
+
+	// 物理後変形
+	deltas = deformAfterPhysics(shared, physics, model, motion, deltas)
+
 	return deltas
 }
 
@@ -171,6 +188,79 @@ func deformBeforePhysics(
 
 		return deltas
 	}
+
+	return vmdDeltas
+}
+
+func deformPhysics(
+	shared *state.SharedState,
+	physics *mbt.MPhysics,
+	model *pmx.PmxModel,
+	vmdDeltas *delta.VmdDeltas,
+) error {
+	// 物理剛体位置を更新
+	if err := miter.IterParallelByCount(model.RigidBodies.Length(), 100, func(i int) {
+		rigidBody, err := model.RigidBodies.Get(i)
+		if err != nil {
+			return
+		}
+
+		// 現在のボーン変形情報を保持
+		rigidBodyBone := rigidBody.Bone
+		if rigidBodyBone == nil {
+			rigidBodyBone = rigidBody.JointedBone
+		}
+
+		if rigidBodyBone == nil || vmdDeltas.Bones.Get(rigidBodyBone.Index()) == nil {
+			return
+		}
+
+		if (shared.IsEnabledPhysics() && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC) ||
+			shared.IsPhysicsReset() {
+			// 通常はボーン追従剛体・物理＋ボーン剛体だけ。物理リセット時は全部更新
+			physics.UpdateTransform(model.Index(), rigidBodyBone,
+				vmdDeltas.Bones.Get(rigidBodyBone.Index()).FilledGlobalMatrix(), rigidBody)
+		}
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func deformAfterPhysics(
+	shared *state.SharedState,
+	physics *mbt.MPhysics,
+	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
+	vmdDeltas *delta.VmdDeltas,
+) *delta.VmdDeltas {
+	if model == nil || motion == nil {
+		return vmdDeltas
+	}
+
+	if shared.IsEnabledPhysics() && !shared.IsPhysicsReset() {
+		// 物理剛体位置を更新
+		for _, boneIndex := range model.Bones.LayerSortedIndexes {
+			bone, err := model.Bones.Get(boneIndex)
+			if err != nil || bone == nil || bone.RigidBody == nil || bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
+				continue
+			}
+			bonePhysicsGlobalMatrix := physics.GetRigidBodyBoneMatrix(model.Index(), bone.RigidBody)
+			if vmdDeltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
+				bd := delta.NewBoneDeltaByGlobalMatrix(bone, shared.Frame(),
+					bonePhysicsGlobalMatrix, vmdDeltas.Bones.Get(bone.ParentIndex))
+				vmdDeltas.Bones.Update(bd)
+			}
+		}
+	}
+
+	// ボーンデフォーム情報を埋める(物理後埋める)
+	vmdDeltas.Bones = fillBoneDeform(model, motion, vmdDeltas, shared.Frame(),
+		model.Bones.LayerSortedBoneIndexes[true], true, true)
+
+	// ボーンデフォーム情報を更新する
+	updateGlobalMatrix(vmdDeltas.Bones, model.Bones.LayerSortedBoneIndexes[true])
 
 	return vmdDeltas
 }

@@ -37,10 +37,11 @@ func (f *BufferFactory) CreateBoneBuffer(ptr unsafe.Pointer, count int) *VertexB
 }
 
 // CreateDebugBuffer はデバッグ表示用バッファを作成
-func (f *BufferFactory) CreateDebugBuffer() *VertexBufferHandle {
+func (f *BufferFactory) CreateDebugBuffer(ptr unsafe.Pointer, count int) *VertexBufferHandle {
 	builder := NewVertexBufferBuilder()
 	return builder.
 		AddPositionColorAttributes().
+		SetData(ptr, count).
 		Build()
 }
 

@@ -365,7 +365,9 @@ func NewControlWindow(
 	cw.shared.SetFrame(0.0)                  // フレーム初期化
 	cw.shared.SetMaxFrame(1.0)               // 最大フレーム初期化
 	cw.TriggerFps30Limit()                   // 30fps物理ON
-	cw.enabledPhysicsAction.SetChecked(true) // フレームドロップON
+	cw.enabledPhysicsAction.SetChecked(true) // 物理ON
+	cw.TriggerEnabledPhysics()
+	cw.enabledFrameDropAction.SetChecked(true) // フレームドロップON
 	cw.TriggerEnabledFrameDrop()
 
 	// コンソールを追加で作成

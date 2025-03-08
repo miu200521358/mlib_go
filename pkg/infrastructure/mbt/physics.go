@@ -12,8 +12,6 @@ import (
 // PhysicsConfig 物理エンジンの設定パラメータ
 type PhysicsConfig struct {
 	MaxSubSteps   int     // 最大ステップ数
-	DeformFps     float32 // デフォームfps
-	PhysicsFps    float32 // 物理fps
 	FixedTimeStep float32 // 固定タイムステップ
 }
 
@@ -36,8 +34,6 @@ func NewMPhysics() *MPhysics {
 	// デフォルト設定
 	config := PhysicsConfig{
 		MaxSubSteps:   2,
-		DeformFps:     30.0,
-		PhysicsFps:    60.0,
 		FixedTimeStep: 1 / 60.0,
 	}
 
@@ -50,9 +46,6 @@ func NewMPhysics() *MPhysics {
 
 	// デバッグビューワーの初期化
 	physics.initDebugDrawer()
-
-	// フレームレート関連の設定を計算
-	physics.updateTimingParameters()
 
 	return physics
 }
@@ -67,23 +60,6 @@ func (physics *MPhysics) initDebugDrawer() {
 
 	physics.drawer = drawer
 	physics.liner = liner
-}
-
-// updateTimingParameters はフレームレート関連のパラメータを更新します
-func (physics *MPhysics) updateTimingParameters() {
-	physics.DeformSpf = 1.0 / physics.config.DeformFps
-	physics.PhysicsSpf = 1.0 / physics.config.PhysicsFps
-}
-
-// SetConfig は物理エンジンの設定を更新します
-func (physics *MPhysics) SetConfig(config PhysicsConfig) {
-	physics.config = config
-	physics.updateTimingParameters()
-}
-
-// GetConfig は現在の設定を取得します
-func (physics *MPhysics) GetConfig() PhysicsConfig {
-	return physics.config
 }
 
 // ResetWorld はワールドをリセットします

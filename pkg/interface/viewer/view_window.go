@@ -178,9 +178,13 @@ func (vw *ViewWindow) Render(shared *state.SharedState, timeStep float32) {
 	vw.loadMotions(shared)
 
 	for i, modelRenderer := range vw.modelRenderers {
-		vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i])
+		vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
 		modelRenderer.Render(vw.shader, shared, vw.vmdDeltas[i])
 	}
+
+	// 物理デバッグ描画
+	vw.physics.DrawDebugLines(vw.shader, shared.IsShowRigidBodyFront() || shared.IsShowRigidBodyBack(),
+		shared.IsShowJoint(), shared.IsShowRigidBodyFront())
 
 	// 深度解決
 	vw.shader.GetMsaa().Resolve()
