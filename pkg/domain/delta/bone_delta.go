@@ -44,9 +44,11 @@ func NewBoneDelta(bone *pmx.Bone, frame float32) *BoneDelta {
 
 // NewBoneDeltaByGlobalMatrix はグローバル行列をもとにボーンデルタを生成する
 func NewBoneDeltaByGlobalMatrix(bone *pmx.Bone, frame float32, globalMatrix *mmath.MMat4, parent *BoneDelta) *BoneDelta {
-	parentGlobal := mmath.NewMMat4()
+	var parentGlobal *mmath.MMat4
 	if parent != nil {
 		parentGlobal = parent.FilledGlobalMatrix()
+	} else {
+		parentGlobal = mmath.NewMMat4()
 	}
 	localMat := globalMatrix.Muled(bone.OffsetMatrix)
 	unitMat := parentGlobal.Inverted().Muled(globalMatrix)
