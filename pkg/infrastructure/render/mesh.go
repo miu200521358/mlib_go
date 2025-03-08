@@ -51,13 +51,13 @@ func NewMeshRenderer(
 	}
 }
 
-// Delete はメッシュに紐づく ElementBuffer を解放します。
-func (mr *MeshRenderer) Delete() {
+// delete はメッシュに紐づく ElementBuffer を解放します。
+func (mr *MeshRenderer) delete() {
 	mr.elemBuffer.Delete()
 }
 
-// DrawModel は通常描画（テクスチャ・ライティングあり）を行います。
-func (mr *MeshRenderer) DrawModel(
+// drawModel は通常描画（テクスチャ・ライティングあり）を行います。
+func (mr *MeshRenderer) drawModel(
 	windowIndex int,
 	shader rendering.IShader,
 	paddedMatrixes []float32, // ボーン行列データ
@@ -149,8 +149,8 @@ func (mr *MeshRenderer) DrawModel(
 	gl.UseProgram(0)
 }
 
-// DrawEdge はエッジ（輪郭）描画を行います。
-func (mr *MeshRenderer) DrawEdge(
+// drawEdge はエッジ（輪郭）描画を行います。
+func (mr *MeshRenderer) drawEdge(
 	windowIndex int,
 	shader rendering.IShader,
 	paddedMatrixes []float32,
@@ -186,8 +186,8 @@ func (mr *MeshRenderer) DrawEdge(
 	gl.UseProgram(0)
 }
 
-// DrawWire はワイヤーフレーム描画を行います。
-func (mr *MeshRenderer) DrawWire(
+// drawWire はワイヤーフレーム描画を行います。
+func (mr *MeshRenderer) drawWire(
 	windowIndex int,
 	shader rendering.IShader,
 	paddedMatrixes []float32,

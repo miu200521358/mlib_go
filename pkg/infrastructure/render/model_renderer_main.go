@@ -86,11 +86,11 @@ func (mr *ModelRenderer) Delete() {
 	}
 	for _, mesh := range mr.meshes {
 		if mesh != nil {
-			mesh.Delete()
+			mesh.delete()
 		}
 	}
 	// ModelDrawerのリソースも解放
-	mr.ModelDrawer.Delete()
+	mr.ModelDrawer.delete()
 }
 
 // Render は、最新の変形情報 vmdDeltas とアプリケーション状態 appState に基づいてモデルを描画します。
@@ -113,16 +113,16 @@ func (mr *ModelRenderer) Render(shader rendering.IShader, shared *state.SharedSt
 
 		// ここで、delta.NewMeshDelta を用いて材質ごとの変形情報を生成
 		meshDelta := delta.NewMeshDelta(vmdDeltas.Morphs.Materials.Get(i))
-		mesh.DrawModel(mr.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight, meshDelta)
+		mesh.drawModel(mr.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight, meshDelta)
 
 		// エッジ描画（条件に応じて）
 		if mesh.material.DrawFlag.IsDrawingEdge() {
-			mesh.DrawEdge(mr.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight, meshDelta)
+			mesh.drawEdge(mr.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight, meshDelta)
 		}
 
 		// ワイヤーフレーム描画（UI状態に応じて）
-		if shared.IsShowWire() && !mr.ExistInvisibleMaterial(mesh.material.Index()) {
-			mesh.DrawWire(mr.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight, false)
+		if shared.IsShowWire() && !mr.existInvisibleMaterial(mesh.material.Index()) {
+			mesh.drawWire(mr.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight, false)
 		}
 
 		mesh.elemBuffer.Unbind()
@@ -130,23 +130,19 @@ func (mr *ModelRenderer) Render(shader rendering.IShader, shared *state.SharedSt
 
 	// 法線描画
 	if shared.IsShowNormal() {
-		mr.DrawNormal(mr.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight)
+		mr.drawNormal(mr.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight)
 	}
 
 	// ボーン描画
 	if shared.IsShowBoneAll() || shared.IsShowBoneEffector() || shared.IsShowBoneIk() ||
 		shared.IsShowBoneFixed() || shared.IsShowBoneRotate() || shared.IsShowBoneTranslate() ||
 		shared.IsShowBoneVisible() {
-		mr.DrawBone(mr.windowIndex, shader, mr.Model.Bones, shared, paddedMatrixes, matrixWidth, matrixHeight)
+		mr.drawBone(mr.windowIndex, shader, mr.Model.Bones, shared, paddedMatrixes, matrixWidth, matrixHeight)
 	}
-
-	// 選択頂点描画・カーソルライン描画は model_renderer_draw.go 内で実装済み
-	// 例: selected := mr.drawSelectedVertex(...)
-
 }
 
-// ExistInvisibleMaterial は、指定された材質インデックスが非表示設定になっているかを返します。
-func (mr *ModelRenderer) ExistInvisibleMaterial(index int) bool {
+// existInvisibleMaterial は、指定された材質インデックスが非表示設定になっているかを返します。
+func (mr *ModelRenderer) existInvisibleMaterial(index int) bool {
 	_, ok := mr.invisibleMaterialIndexes[index]
 	return ok
 }

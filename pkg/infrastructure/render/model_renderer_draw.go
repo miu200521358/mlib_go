@@ -49,8 +49,8 @@ type ModelDrawer struct {
 	ssbo uint32
 }
 
-// Delete はModelDrawerが保持するリソースを解放します
-func (md *ModelDrawer) Delete() {
+// delete はModelDrawerが保持するリソースを解放します
+func (md *ModelDrawer) delete() {
 	if md.normalBufferHandle != nil {
 		md.normalBufferHandle.Delete()
 	}
@@ -84,8 +84,8 @@ func (md *ModelDrawer) Delete() {
 	}
 }
 
-// DrawNormal 描画処理：法線表示
-func (mr *ModelRenderer) DrawNormal(windowIndex int, shader rendering.IShader, paddedMatrixes []float32, width, height int) {
+// drawNormal 描画処理：法線表示
+func (mr *ModelRenderer) drawNormal(windowIndex int, shader rendering.IShader, paddedMatrixes []float32, width, height int) {
 	program := shader.Program(rendering.ProgramTypeModel)
 	gl.UseProgram(program)
 
@@ -113,8 +113,8 @@ func (mr *ModelRenderer) DrawNormal(windowIndex int, shader rendering.IShader, p
 	gl.UseProgram(0)
 }
 
-// DrawBone は、ボーン表示（ラインとポイント）の描画処理を行います。
-func (mr *ModelRenderer) DrawBone(windowIndex int, shader rendering.IShader, bones *pmx.Bones, shared *state.SharedState, paddedMatrixes []float32, width, height int) {
+// drawBone は、ボーン表示（ラインとポイント）の描画処理を行います。
+func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bones *pmx.Bones, shared *state.SharedState, paddedMatrixes []float32, width, height int) {
 	// モデルの前面にボーンを描画するため、深度テストの設定を変更
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
@@ -168,8 +168,8 @@ func (mr *ModelRenderer) DrawBone(windowIndex int, shader rendering.IShader, bon
 	gl.DepthFunc(gl.LEQUAL)
 }
 
-// DrawCursorLine は、カーソルの軌跡をラインで描画する処理です。
-func (mr *ModelRenderer) DrawCursorLine(shader rendering.IShader, cursorPositions []float32, vertexColor mgl32.Vec4) {
+// drawCursorLine は、カーソルの軌跡をラインで描画する処理です。
+func (mr *ModelRenderer) drawCursorLine(shader rendering.IShader, cursorPositions []float32, vertexColor mgl32.Vec4) {
 	// モデルの前面に描画するため深度テストを一時無効化
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
@@ -189,9 +189,9 @@ func (mr *ModelRenderer) DrawCursorLine(shader rendering.IShader, cursorPosition
 	gl.DepthFunc(gl.LEQUAL)
 }
 
-// DrawSelectedVertex は、選択頂点およびカーソルによる頂点選択の描画処理を行い、
+// drawSelectedVertex は、選択頂点およびカーソルによる頂点選択の描画処理を行い、
 // 更新後の選択頂点インデックスを返します。
-func (mr *ModelRenderer) DrawSelectedVertex(
+func (mr *ModelRenderer) drawSelectedVertex(
 	windowIndex int,
 	invisibleMaterialIndexes []int,
 	nowSelectedVertexes []int,
