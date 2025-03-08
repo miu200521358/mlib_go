@@ -66,17 +66,17 @@ func main() {
 	go func() {
 		// 操作ウィンドウは別スレッドで起動
 		defer app.SafeExecute(appConfig.IsSetEnv(), func() {
-			pageWidgets := &pageWidgets{}
+			widgets := &controller.MWidgets{}
 
 			controlWindow, err = controller.NewControlWindow(shared, appConfig,
-				newMenuItems(), newTabPages(pageWidgets), pageWidgets.EnabledInPlaying,
+				newMenuItems(), newTabPages(widgets), widgets.EnabledInPlaying,
 				widths[0], heights[0], positionXs[0], positionYs[0])
 			if err != nil {
 				app.ShowErrorDialog(appConfig.IsSetEnv(), err)
 				return
 			}
 
-			pageWidgets.SetWindow(controlWindow)
+			widgets.SetWindow(controlWindow)
 			controlWindow.Run()
 		})
 	}()
@@ -111,30 +111,14 @@ func newMenuItems() []declarative.MenuItem {
 	}
 }
 
-type pageWidgets struct {
-	pmxLoad1Picker   *widget.FilePicker
-	vmdLoader1Picker *widget.FilePicker
-	player           *widget.MotionPlayer
-}
-
-func (pw *pageWidgets) SetWindow(window *controller.ControlWindow) {
-	pw.pmxLoad1Picker.SetWindow(window)
-	pw.vmdLoader1Picker.SetWindow(window)
-	pw.player.SetWindow(window)
-}
-
-func (pw *pageWidgets) EnabledInPlaying(enable bool) {
-	pw.pmxLoad1Picker.Enabled(enable)
-	pw.vmdLoader1Picker.Enabled(enable)
-	pw.player.Enabled(enable)
-}
-
-func newTabPages(pageWidgets *pageWidgets) []declarative.TabPage {
+func newTabPages(mWidgets *controller.MWidgets) []declarative.TabPage {
 	var fileTab *walk.TabPage
 
-	pageWidgets.pmxLoad1Picker = widget.NewPmxLoadFilePicker(
+	player := widget.NewMotionPlayer()
+
+	pmxLoad11Picker := widget.NewPmxLoadFilePicker(
 		"pmx",
-		"モデルファイル1",
+		"モデルファイル1-1",
 		"モデルファイルを選択してください",
 		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
 			if data, err := rep.Load(path); err == nil {
@@ -145,14 +129,14 @@ func newTabPages(pageWidgets *pageWidgets) []declarative.TabPage {
 		},
 	)
 
-	pageWidgets.vmdLoader1Picker = widget.NewVmdVpdLoadFilePicker(
+	vmdLoader11Picker := widget.NewVmdVpdLoadFilePicker(
 		"vmd",
-		"モーションファイル1",
+		"モーションファイル1-1",
 		"モーションファイルを選択してください",
 		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
 			if data, err := rep.Load(path); err == nil {
 				motion := data.(*vmd.VmdMotion)
-				pageWidgets.player.Reset(motion.MaxFrame())
+				player.Reset(motion.MaxFrame())
 				cw.StoreMotion(0, 0, motion)
 			} else {
 				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
@@ -160,7 +144,36 @@ func newTabPages(pageWidgets *pageWidgets) []declarative.TabPage {
 		},
 	)
 
-	pageWidgets.player = widget.NewMotionPlayer()
+	pmxLoad21Picker := widget.NewPmxLoadFilePicker(
+		"pmx",
+		"モデルファイル2-1",
+		"モデルファイルを選択してください",
+		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
+			if data, err := rep.Load(path); err == nil {
+				cw.StoreModel(1, 0, data.(*pmx.PmxModel))
+			} else {
+				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
+			}
+		},
+	)
+
+	vmdLoader21Picker := widget.NewVmdVpdLoadFilePicker(
+		"vmd",
+		"モーションファイル2-1",
+		"モーションファイルを選択してください",
+		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
+			if data, err := rep.Load(path); err == nil {
+				motion := data.(*vmd.VmdMotion)
+				player.Reset(motion.MaxFrame())
+				cw.StoreMotion(1, 0, motion)
+			} else {
+				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
+			}
+		},
+	)
+
+	mWidgets.Widgets = append(mWidgets.Widgets, player, pmxLoad11Picker, vmdLoader11Picker,
+		pmxLoad21Picker, vmdLoader21Picker)
 
 	return []declarative.TabPage{
 		{
@@ -177,9 +190,13 @@ func newTabPages(pageWidgets *pageWidgets) []declarative.TabPage {
 						declarative.TextLabel{
 							Text: "表示用モデル設定説明",
 						},
-						pageWidgets.pmxLoad1Picker.Widgets(),
-						pageWidgets.vmdLoader1Picker.Widgets(),
-						pageWidgets.player.Widgets(),
+						pmxLoad11Picker.Widgets(),
+						vmdLoader11Picker.Widgets(),
+						declarative.VSeparator{},
+						pmxLoad21Picker.Widgets(),
+						vmdLoader21Picker.Widgets(),
+						declarative.VSeparator{},
+						player.Widgets(),
 						declarative.VSpacer{},
 					},
 				},
@@ -187,161 +204,3 @@ func newTabPages(pageWidgets *pageWidgets) []declarative.TabPage {
 		},
 	}
 }
-
-// func newFilePage(app *app.app, controlWindow *controller.ControlWindow) *widget.MTabPage {
-// 	tabPage := widget.NewMTabPage("ファイル")
-// 	controlWindow.AddTabPage(tabPage.TabPage)
-
-// 	tabPage.SetLayout(walk.NewVBoxLayout())
-
-// 	loadedModels := make([][]*pmx.PmxModel, 2)
-// 	loadedModels[0] = make([]*pmx.PmxModel, 2)
-// 	loadedModels[1] = make([]*pmx.PmxModel, 1)
-
-// 	app.SetFuncGetModels(
-// 		func() [][]*pmx.PmxModel {
-// 			return [][]*pmx.PmxModel{
-// 				{loadedModels[0][0], loadedModels[0][1]},
-// 				{loadedModels[1][0]},
-// 			}
-// 		},
-// 	)
-
-// 	loadedMotions := make([][]*vmd.VmdMotion, 2)
-// 	loadedMotions[0] = make([]*vmd.VmdMotion, 2)
-// 	loadedMotions[1] = make([]*vmd.VmdMotion, 1)
-
-// 	app.SetFuncGetMotions(
-// 		func() [][]*vmd.VmdMotion {
-// 			return [][]*vmd.VmdMotion{
-// 				{loadedMotions[0][0], loadedMotions[0][1]},
-// 				{loadedMotions[1][0]},
-// 			}
-// 		},
-// 	)
-
-// 	pmx11ReadPicker := widget.NewPmxReadFilePicker(
-// 		controlWindow,
-// 		tabPage,
-// 		"PmxPath",
-// 		"No.1-1 Pmxファイル",
-// 		"Pmxファイルを選択してください",
-// 		"Pmxファイルの使い方")
-
-// 	pmx11ReadPicker.SetOnPathChanged(func(path string) {
-// 		if data, err := pmx11ReadPicker.Load(path); err == nil {
-// 			model := data.(*pmx.PmxModel)
-// 			model.SetIndex(0)
-// 			loadedModels[0][0] = model
-// 			if loadedMotions[0][0] == nil {
-// 				loadedMotions[0][0] = vmd.NewVmdMotion("")
-// 			}
-// 		} else {
-// 			mlog.E(mi18n.T("読み込み失敗"), err)
-// 		}
-// 	})
-
-// 	vmd11ReadPicker := widget.NewVmdVpdReadFilePicker(
-// 		controlWindow,
-// 		tabPage,
-// 		"VmdPath",
-// 		"No.1-1 Vmdファイル",
-// 		"Vmdファイルを選択してください",
-// 		"Vmdファイルの使い方")
-
-// 	vmd11ReadPicker.SetOnPathChanged(func(path string) {
-// 		if data, err := vmd11ReadPicker.Load(path); err == nil {
-// 			motion := data.(*vmd.VmdMotion)
-// 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
-// 			loadedMotions[0][0] = motion
-// 		} else {
-// 			mlog.ET(mi18n.T("読み込み失敗"), err.Error())
-// 		}
-// 	})
-
-// 	walk.NewVSeparator(tabPage)
-
-// 	pmx12ReadPicker := widget.NewPmxReadFilePicker(
-// 		controlWindow,
-// 		tabPage,
-// 		"PmxPath",
-// 		"No.1-2 Pmxファイル",
-// 		"Pmxファイルを選択してください",
-// 		"Pmxファイルの使い方")
-
-// 	pmx12ReadPicker.SetOnPathChanged(func(path string) {
-// 		if data, err := pmx12ReadPicker.Load(path); err == nil {
-// 			model := data.(*pmx.PmxModel)
-// 			model.SetIndex(1)
-// 			loadedModels[0][1] = model
-// 			if loadedMotions[0][1] == nil {
-// 				loadedMotions[0][1] = vmd.NewVmdMotion("")
-// 			}
-// 		} else {
-// 			mlog.E(mi18n.T("読み込み失敗"), err)
-// 		}
-// 	})
-
-// 	vmd12ReadPicker := widget.NewVmdVpdReadFilePicker(
-// 		controlWindow,
-// 		tabPage,
-// 		"VmdPath",
-// 		"No.1-2 Vmdファイル",
-// 		"Vmdファイルを選択してください",
-// 		"Vmdファイルの使い方")
-
-// 	vmd12ReadPicker.SetOnPathChanged(func(path string) {
-// 		if data, err := vmd12ReadPicker.Load(path); err == nil {
-// 			motion := data.(*vmd.VmdMotion)
-// 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
-// 			loadedMotions[0][1] = motion
-// 		} else {
-// 			mlog.E(mi18n.T("読み込み失敗"), err)
-// 		}
-// 	})
-
-// 	walk.NewVSeparator(tabPage)
-
-// 	pmx2ReadPicker := widget.NewPmxReadFilePicker(
-// 		controlWindow,
-// 		tabPage,
-// 		"PmxPath",
-// 		"No.2 Pmxファイル",
-// 		"Pmxファイルを選択してください",
-// 		"Pmxファイルの使い方")
-
-// 	pmx2ReadPicker.SetOnPathChanged(func(path string) {
-// 		if data, err := pmx2ReadPicker.Load(path); err == nil {
-// 			model := data.(*pmx.PmxModel)
-// 			model.SetIndex(0)
-// 			loadedModels[1][0] = model
-// 			if loadedMotions[1][0] == nil {
-// 				loadedMotions[1][0] = vmd.NewVmdMotion("")
-// 			}
-// 		} else {
-// 			mlog.E(mi18n.T("読み込み失敗"), err)
-// 		}
-// 	})
-
-// 	vmd2ReadPicker := widget.NewVmdVpdReadFilePicker(
-// 		controlWindow,
-// 		tabPage,
-// 		"VmdPath",
-// 		"No.2 Vmdファイル",
-// 		"Vmdファイルを選択してください",
-// 		"Vmdファイルの使い方")
-
-// 	vmd2ReadPicker.SetOnPathChanged(func(path string) {
-// 		if data, err := vmd2ReadPicker.Load(path); err == nil {
-// 			motion := data.(*vmd.VmdMotion)
-// 			controlWindow.UpdateMaxFrame(motion.MaxFrame())
-// 			loadedMotions[1][0] = motion
-// 		} else {
-// 			mlog.E(mi18n.T("読み込み失敗"), err)
-// 		}
-// 	})
-
-// 	walk.NewVSpacer(tabPage)
-
-// 	return tabPage
-// }

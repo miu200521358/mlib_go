@@ -114,13 +114,6 @@ func (mp *MotionPlayer) Reset(maxFrame float32) {
 	mp.window.SetMaxFrame(maxFrame)
 }
 
-func (mp *MotionPlayer) Enabled(enable bool) {
-	mp.frameEdit.SetEnabled(enable)
-	mp.frameSlider.SetEnabled(enable)
-	// 再生ボタンは常に有効
-	mp.playButton.SetEnabled(true)
-}
-
 func (mp *MotionPlayer) SetValue(frame float32) {
 	mp.frameEdit.SetValue(float64(frame))
 	mp.frameSlider.SetValue(int(frame))
@@ -129,4 +122,11 @@ func (mp *MotionPlayer) SetValue(frame float32) {
 func (mp *MotionPlayer) ChangeValue(frame float32) {
 	mp.frameEdit.ChangeValue(float64(frame))
 	mp.frameSlider.ChangeValue(int(frame))
+}
+
+func (mp *MotionPlayer) EnabledInPlaying(enable bool) {
+	mp.frameEdit.SetEnabled(enable)
+	mp.frameSlider.SetEnabled(enable)
+	// 再生ボタンは常に有効
+	mp.playButton.SetEnabled(true)
 }

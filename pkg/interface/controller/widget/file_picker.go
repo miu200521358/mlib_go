@@ -331,7 +331,7 @@ func (fp *FilePicker) SetWindow(window *controller.ControlWindow) {
 	fp.window = window
 }
 
-func (fp *FilePicker) Enabled(enable bool) {
+func (fp *FilePicker) EnabledInPlaying(enable bool) {
 	fp.pathEdit.SetEnabled(enable)
 	fp.openPushButton.SetEnabled(enable)
 	if fp.historyKey != "" {
