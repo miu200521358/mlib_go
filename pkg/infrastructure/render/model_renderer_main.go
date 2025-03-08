@@ -23,7 +23,7 @@ type ModelRenderer struct {
 	Model *pmx.PmxModel
 
 	// モデルのハッシュ値（モデル更新検出などに使用）
-	Hash string
+	hash string
 
 	// 各材質ごとのメッシュ描画オブジェクト
 	meshes []*MeshRenderer
@@ -70,9 +70,13 @@ func NewModelRenderer(windowIndex int, model *pmx.PmxModel) *ModelRenderer {
 	}
 
 	// モデルのハッシュ値を設定
-	mr.Hash = model.Hash()
+	mr.hash = model.Hash()
 
 	return mr
+}
+
+func (mr *ModelRenderer) Hash() string {
+	return mr.hash
 }
 
 // Delete は、ModelRenderer によって生成されたすべての OpenGL リソースを解放します。

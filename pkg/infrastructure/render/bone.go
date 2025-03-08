@@ -4,7 +4,6 @@
 package render
 
 import (
-	"fmt"
 	"math"
 	"unsafe"
 
@@ -125,7 +124,7 @@ func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int, erro
 		d := v.Value
 		var m mgl32.Mat4
 		if d == nil {
-			return nil, 0, 0, fmt.Errorf("boneDeltas[%d] is nil", i)
+			m = mgl32.Ident4()
 		} else {
 			m = mmath.NewGlMat4(d.FilledLocalMatrix())
 		}

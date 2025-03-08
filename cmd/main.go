@@ -16,6 +16,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/repository"
 	"github.com/miu200521358/mlib_go/pkg/interface/app"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
@@ -124,10 +125,9 @@ func newTabPages(pageWidgets *pageWidgets) []declarative.TabPage {
 		"pmx",
 		"モデルファイル1",
 		"モデルファイルを選択してください",
-		func(cw *controller.ControlWindow, path string) {
-			pmxRep := repository.NewPmxRepository()
-			if model, err := pmxRep.Load(path); err == nil {
-				cw.StoreModel(0, 0, model.(*pmx.PmxModel))
+		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
+			if data, err := rep.Load(path); err == nil {
+				cw.StoreModel(0, 0, data.(*pmx.PmxModel))
 			} else {
 				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
 			}
@@ -138,8 +138,12 @@ func newTabPages(pageWidgets *pageWidgets) []declarative.TabPage {
 		"vmd",
 		"モーションファイル1",
 		"モーションファイルを選択してください",
-		func(cw *controller.ControlWindow, path string) {
-			mlog.IL("VmdLoadPicker: %s", path)
+		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
+			if data, err := rep.Load(path); err == nil {
+				cw.StoreMotion(0, 0, data.(*vmd.VmdMotion))
+			} else {
+				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
+			}
 		},
 	)
 

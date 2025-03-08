@@ -44,9 +44,9 @@ type ControlWindow struct {
 	// showRigidBodyBackAction     *walk.Action // 剛体デバッグ表示(埋め込み)
 	// showJointAction             *walk.Action // ジョイントデバッグ表示
 	// showInfoAction              *walk.Action // 情報デバッグ表示
-	// limitFps30Action            *walk.Action // 30FPS制限
-	// limitFps60Action            *walk.Action // 60FPS制限
-	// limitFpsUnLimitAction       *walk.Action // FPS無制限
+	limitFps30Action      *walk.Action // 30FPS制限
+	limitFps60Action      *walk.Action // 60FPS制限
+	limitFpsUnLimitAction *walk.Action // FPS無制限
 	// cameraSyncAction            *walk.Action // カメラ同期
 	logLevelDebugAction         *walk.Action // デバッグメッセージ表示
 	logLevelVerboseAction       *walk.Action // 冗長メッセージ表示
@@ -129,29 +129,29 @@ func NewControlWindow(
 					// 	OnTriggered: cw.TriggerEnabledFrameDrop,
 					// 	AssignTo:    &cw.enabledFrameDropAction,
 					// },
-					// declarative.Menu{
-					// 	Text: mi18n.T("&fps制限"),
-					// 	Items: []declarative.MenuItem{
-					// 		declarative.Action{
-					// 			Text:        mi18n.T("&30fps制限"),
-					// 			Checkable:   true,
-					// 			OnTriggered: cw.TriggerFps30Limit,
-					// 			AssignTo:    &cw.limitFps30Action,
-					// 		},
-					// 		declarative.Action{
-					// 			Text:        mi18n.T("&60fps制限"),
-					// 			Checkable:   true,
-					// 			OnTriggered: cw.TriggerFps60Limit,
-					// 			AssignTo:    &cw.limitFps60Action,
-					// 		},
-					// 		declarative.Action{
-					// 			Text:        mi18n.T("&fps無制限"),
-					// 			Checkable:   true,
-					// 			OnTriggered: cw.TriggerUnLimitFps,
-					// 			AssignTo:    &cw.limitFpsUnLimitAction,
-					// 		},
-					// 	},
-					// },
+					declarative.Menu{
+						Text: mi18n.T("&fps制限"),
+						Items: []declarative.MenuItem{
+							declarative.Action{
+								Text:        mi18n.T("&30fps制限"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerFps30Limit,
+								AssignTo:    &cw.limitFps30Action,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&60fps制限"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerFps60Limit,
+								AssignTo:    &cw.limitFps60Action,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&fps無制限"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerUnLimitFps,
+								AssignTo:    &cw.limitFpsUnLimitAction,
+							},
+						},
+					},
 					// declarative.Action{
 					// 	Text:        mi18n.T("&情報表示"),
 					// 	Checkable:   true,
@@ -358,8 +358,10 @@ func NewControlWindow(
 		return nil, err
 	}
 
-	// // 初期設定
-	// // cw.limitFps30Action.SetChecked(true)       // 物理ON
+	// 初期設定
+	cw.shared.SetFrame(0.0) // フレーム初期化
+	cw.TriggerFps30Limit()  // 30fps物理ON
+
 	// cw.enabledPhysicsAction.SetChecked(true) // フレームドロップON
 	// // cw.enabledFrameDropAction.SetChecked(true) // 30fps制限
 
@@ -448,4 +450,25 @@ func (cw *ControlWindow) TriggerEnabledPhysics() {
 
 func (cw *ControlWindow) TriggerPhysicsReset() {
 	cw.shared.SetPhysicsReset(true)
+}
+
+func (cw *ControlWindow) TriggerFps30Limit() {
+	cw.limitFps30Action.SetChecked(true)
+	cw.limitFps60Action.SetChecked(false)
+	cw.limitFpsUnLimitAction.SetChecked(false)
+	cw.shared.SetFrameInterval(1.0 / 30.0)
+}
+
+func (cw *ControlWindow) TriggerFps60Limit() {
+	cw.limitFps30Action.SetChecked(false)
+	cw.limitFps60Action.SetChecked(true)
+	cw.limitFpsUnLimitAction.SetChecked(false)
+	cw.shared.SetFrameInterval(1.0 / 60.0)
+}
+
+func (cw *ControlWindow) TriggerUnLimitFps() {
+	cw.limitFps30Action.SetChecked(false)
+	cw.limitFps60Action.SetChecked(false)
+	cw.limitFpsUnLimitAction.SetChecked(true)
+	cw.shared.SetFrameInterval(0)
 }

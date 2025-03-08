@@ -18,27 +18,27 @@ type filterExtension struct {
 }
 
 type FilePicker struct {
-	window            *controller.ControlWindow               // メインウィンドウ
-	title             string                                  // タイトル
-	tooltip           string                                  // ツールチップ
-	historyKey        string                                  // 履歴を保存するキー
-	initialDirPath    string                                  // 初期ディレクトリパス
-	filterExtensions  []filterExtension                       // フィルター拡張子
-	repository        repository.IRepository                  // リポジトリ
-	pathEdit          *walk.LineEdit                          // パス入力欄
-	nameEdit          *walk.LineEdit                          // 名前欄(read-only)
-	openPushButton    *walk.PushButton                        // 開くボタン
-	historyPushButton *walk.PushButton                        // 履歴ボタン
-	historyDialog     *walk.Dialog                            // 履歴ダイアログ
-	historyListBox    *walk.ListBox                           // 履歴リスト
-	onPathChanged     func(*controller.ControlWindow, string) // パス変更時のコールバック
+	window            *controller.ControlWindow                                       // メインウィンドウ
+	title             string                                                          // タイトル
+	tooltip           string                                                          // ツールチップ
+	historyKey        string                                                          // 履歴を保存するキー
+	initialDirPath    string                                                          // 初期ディレクトリパス
+	filterExtensions  []filterExtension                                               // フィルター拡張子
+	repository        repository.IRepository                                          // リポジトリ
+	pathEdit          *walk.LineEdit                                                  // パス入力欄
+	nameEdit          *walk.LineEdit                                                  // 名前欄(read-only)
+	openPushButton    *walk.PushButton                                                // 開くボタン
+	historyPushButton *walk.PushButton                                                // 履歴ボタン
+	historyDialog     *walk.Dialog                                                    // 履歴ダイアログ
+	historyListBox    *walk.ListBox                                                   // 履歴リスト
+	onPathChanged     func(*controller.ControlWindow, repository.IRepository, string) // パス変更時のコールバック
 }
 
 func NewPmxLoadFilePicker(
 	historyKey string,
 	title string,
 	tooltip string,
-	onPathChanged func(*controller.ControlWindow, string),
+	onPathChanged func(*controller.ControlWindow, repository.IRepository, string),
 ) *FilePicker {
 	return newFilePicker(
 		historyKey,
@@ -57,7 +57,7 @@ func NewVmdVpdLoadFilePicker(
 	historyKey string,
 	title string,
 	tooltip string,
-	onPathChanged func(*controller.ControlWindow, string),
+	onPathChanged func(*controller.ControlWindow, repository.IRepository, string),
 ) *FilePicker {
 	return newFilePicker(
 		historyKey,
@@ -68,7 +68,7 @@ func NewVmdVpdLoadFilePicker(
 			{extension: "*.vmd;*.vpd", description: "Vmd/Vpd Files (*.vmd;*.vpd)"},
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
-		repository.NewPmxRepository(),
+		repository.NewVmdVpdRepository(),
 	)
 }
 
@@ -76,7 +76,7 @@ func newFilePicker(
 	historyKey string,
 	title string,
 	tooltip string,
-	onPathChanged func(*controller.ControlWindow, string),
+	onPathChanged func(*controller.ControlWindow, repository.IRepository, string),
 	filterExtension []filterExtension,
 	repository repository.IRepository,
 ) *FilePicker {
@@ -206,7 +206,7 @@ func (fp *FilePicker) onChanged(path string) {
 
 		if fp.onPathChanged != nil {
 			// コールバックを呼び出し
-			fp.onPathChanged(fp.window, path)
+			fp.onPathChanged(fp.window, fp.repository, path)
 		}
 	} else {
 		// 読み込めない場合、拒否

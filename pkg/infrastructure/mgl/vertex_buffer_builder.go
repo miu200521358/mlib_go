@@ -244,8 +244,7 @@ func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDelta
 		return
 	}
 
-	h.VAO.Bind()
-	h.VBO.Bind()
+	gl.BindBuffer(h.VBO.target, h.VBO.id)
 
 	// 頂点モーフのVBOサイズ
 	vboVertexSize := (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3)
@@ -261,7 +260,4 @@ func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDelta
 			h.VBO.BufferSubData(offsetStride, len(vd)*h.FloatSize, gl.Ptr(vd))
 		}
 	}
-
-	h.VBO.Unbind()
-	h.VAO.Unbind()
 }

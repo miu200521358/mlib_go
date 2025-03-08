@@ -112,6 +112,10 @@ func newViewWindow(
 	return vw, nil
 }
 
+func (vw *ViewWindow) Title() string {
+	return vw.title
+}
+
 func (vw *ViewWindow) resetCameraPosition(yaw, pitch float64) {
 	vw.yaw = yaw
 	vw.pitch = pitch
@@ -134,7 +138,7 @@ func (vw *ViewWindow) resetCameraPosition(yaw, pitch float64) {
 	vw.shader.SetCamera(cam)
 }
 
-func (vw *ViewWindow) Render(shared *state.SharedState) {
+func (vw *ViewWindow) Render(shared *state.SharedState, timeStep float32) {
 	w, h := vw.GetSize()
 	if w == 0 && h == 0 {
 		// ウィンドウが最小化されている場合は描画しない
@@ -171,7 +175,7 @@ func (vw *ViewWindow) Render(shared *state.SharedState) {
 	vw.loadMotions(shared)
 
 	for i, modelRenderer := range vw.modelRenderers {
-		vw.vmdDeltas[i] = deform.Deform(modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], 0)
+		vw.vmdDeltas[i] = deform.Deform(modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], shared.Frame())
 		modelRenderer.Render(vw.shader, shared, vw.vmdDeltas[i])
 	}
 
