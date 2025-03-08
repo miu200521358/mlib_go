@@ -10,6 +10,10 @@ import (
 
 // newVertexMorphDeltasGl は頂点モーフ変形情報をOpenGL用に変換
 func newVertexMorphDeltaGl(md *delta.VertexMorphDelta) []float32 {
+	if md == nil {
+		return nil
+	}
+
 	var p0, p1, p2 float32
 	if md.Position != nil {
 		p := mmath.NewGlVec3(md.Position)

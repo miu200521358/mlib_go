@@ -1,5 +1,7 @@
 package vmd
 
+import "github.com/miu200521358/mlib_go/pkg/domain/mmath"
+
 type MorphFrame struct {
 	*BaseFrame         // キーフレ
 	Ratio      float64 // モーフの割合
@@ -37,7 +39,7 @@ func (nextMf *MorphFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFr
 	mf := NewMorphFrame(index)
 
 	ry := float64(index-prevIndex) / float64(nextIndex-prevIndex)
-	mf.Ratio = prevMf.Ratio + (nextMf.Ratio-prevMf.Ratio)*ry
+	mf.Ratio = mmath.Effective(prevMf.Ratio + (nextMf.Ratio-prevMf.Ratio)*ry)
 
 	return mf
 }

@@ -193,6 +193,7 @@ func (mr *ModelRenderer) drawCursorLine(shader rendering.IShader, cursorPosition
 // 更新後の選択頂点インデックスを返します。
 func (mr *ModelRenderer) drawSelectedVertex(
 	windowIndex int,
+	vertices *pmx.Vertices,
 	invisibleMaterialIndexes []int,
 	nowSelectedVertexes []int,
 	nowNoSelectedVertexes []int,
@@ -209,7 +210,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	gl.UseProgram(program)
 
 	// 選択頂点のモーフデルタ情報を生成
-	selectedVertexDeltas := delta.NewVertexMorphDeltas()
+	selectedVertexDeltas := delta.NewVertexMorphDeltas(vertices)
 	for _, index := range nowNoSelectedVertexes {
 		vd := delta.NewVertexMorphDelta(index)
 		vd.Uv = &mmath.MVec2{X: -1, Y: 0}

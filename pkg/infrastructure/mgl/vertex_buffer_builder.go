@@ -240,12 +240,6 @@ func (h *VertexBufferHandle) Delete() {
 
 // UpdateVertexDeltas はバッファに頂点デルタを適用
 func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDeltas) {
-	if vertices == nil || vertices.Length() == 0 {
-		return
-	}
-
-	gl.BindBuffer(h.VBO.target, h.VBO.id)
-
 	// 頂点モーフのVBOサイズ
 	vboVertexSize := (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3)
 
@@ -255,9 +249,15 @@ func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDelta
 		vertexDelta := v.Value
 
 		vd := newVertexMorphDeltaGl(vertexDelta)
-		if vd != nil {
-			offsetStride := (vidx*h.StrideSize + vboVertexSize) * h.FloatSize
-			h.VBO.BufferSubData(offsetStride, len(vd)*h.FloatSize, gl.Ptr(vd))
+		if vd == nil {
+			continue
 		}
+		offsetStride := (vidx*h.StrideSize + vboVertexSize) * h.FloatSize
+		h.VBO.BufferSubData(offsetStride, len(vd)*h.FloatSize, gl.Ptr(vd))
 	}
+
+	// // 属性の設定
+	// for _, attr := range h.Attributes {
+	// 	h.VBO.SetAttribute(attr)
+	// }
 }

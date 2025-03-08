@@ -3,12 +3,13 @@ package delta
 import "github.com/miu200521358/mlib_go/pkg/domain/pmx"
 
 type VertexMorphDeltas struct {
-	data map[int]*VertexMorphDelta
+	data     []*VertexMorphDelta
+	vertices *pmx.Vertices
 }
 
-func NewVertexMorphDeltas() *VertexMorphDeltas {
+func NewVertexMorphDeltas(vertices *pmx.Vertices) *VertexMorphDeltas {
 	return &VertexMorphDeltas{
-		data: make(map[int]*VertexMorphDelta),
+		data: make([]*VertexMorphDelta, vertices.Length()),
 	}
 }
 
@@ -48,9 +49,9 @@ type WireVertexMorphDeltas struct {
 	*VertexMorphDeltas
 }
 
-func NewWireVertexMorphDeltas() *WireVertexMorphDeltas {
+func NewWireVertexMorphDeltas(vertices *pmx.Vertices) *WireVertexMorphDeltas {
 	return &WireVertexMorphDeltas{
-		VertexMorphDeltas: NewVertexMorphDeltas(),
+		VertexMorphDeltas: NewVertexMorphDeltas(vertices),
 	}
 }
 
@@ -161,9 +162,9 @@ type MorphDeltas struct {
 	Materials *MaterialMorphDeltas
 }
 
-func NewMorphDeltas(materials *pmx.Materials, bones *pmx.Bones) *MorphDeltas {
+func NewMorphDeltas(vertices *pmx.Vertices, materials *pmx.Materials, bones *pmx.Bones) *MorphDeltas {
 	return &MorphDeltas{
-		Vertices:  NewVertexMorphDeltas(),
+		Vertices:  NewVertexMorphDeltas(vertices),
 		Bones:     NewBoneMorphDeltas(bones),
 		Materials: NewMaterialMorphDeltas(materials),
 	}

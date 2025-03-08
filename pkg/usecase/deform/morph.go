@@ -22,7 +22,7 @@ func DeformMorph(
 		}
 	}
 
-	mds := delta.NewMorphDeltas(model.Materials, model.Bones)
+	mds := delta.NewMorphDeltas(model.Vertices, model.Materials, model.Bones)
 	for _, morphName := range morphNames {
 		if !mfs.Contains(morphName) || !model.Morphs.ContainsByName(morphName) {
 			continue
