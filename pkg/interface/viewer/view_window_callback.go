@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/go-gl/gl/v2.1/gl"
+	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
