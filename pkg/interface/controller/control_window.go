@@ -5,6 +5,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
@@ -411,8 +412,8 @@ func NewControlWindow(
 	} else {
 		cw.consoleView = cv
 	}
-	// // ログ出力先をコンソールビューに設定
-	// log.SetOutput(cw.consoleView)
+	// ログ出力先をコンソールビューに設定
+	log.SetOutput(cw.consoleView)
 
 	cw.SetPosition(positionX, positionY)
 
