@@ -213,10 +213,15 @@ func (vw *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64)
 }
 
 func (vw *ViewWindow) focusCallback(w *glfw.Window, focused bool) {
-	if focused && vw.list.shared.IsInactiveAllWindows() {
+	// mlog.IS("4) [%d] focusCallback: SetActivateViewWindow (%v)", vw.windowIndex, focused)
+	vw.list.shared.SetActivateViewWindow(vw.windowIndex, focused)
+
+	// mlog.IS("5) [%d] focusCallback: focused[%v] inactive[%v] forceFocus[%v]",
+	// 	vw.windowIndex, focused, vw.list.shared.IsInactiveAllWindows(), vw.list.shared.IsFocusViewWindow())
+	if focused && vw.list.shared.IsInactiveAllWindows() && !vw.list.shared.IsFocusViewWindow() {
+		// mlog.IS("6) [%d] focusCallback: SetFocusControlWindow(true)", vw.windowIndex)
 		vw.list.shared.SetFocusControlWindow(true)
 	}
-	vw.list.shared.SetActivateViewWindow(focused)
 }
 
 // debugMessageCallback はOpenGLのデバッグメッセージを処理する

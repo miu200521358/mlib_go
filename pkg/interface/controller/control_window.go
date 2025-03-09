@@ -6,6 +6,7 @@ package controller
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
@@ -84,7 +85,7 @@ func NewControlWindow(
 		},
 		declarative.Separator{},
 		declarative.Action{
-			Text:        mi18n.T("&画面連結"),
+			Text:        mi18n.T("&画面移動連結"),
 			Checkable:   true,
 			OnTriggered: cw.triggerLinkWindow,
 			AssignTo:    &cw.linkWindowAction,
@@ -368,33 +369,43 @@ func NewControlWindow(
 			}
 		},
 		OnActivate: func() {
-			if cw.shared.IsInactiveAllWindows() {
+			// コントローラウィンドウがアクティブ状態
+			if cw.shared.IsInitializedAllWindows() && cw.shared.IsInactiveAllWindows() {
 				// 全背面からのアクティブ化の場合、全ウィンドウをアクティブ化
+				// mlog.IS("1) ControlWindow activate: all windows")
 				cw.shared.SetFocusViewWindow(true)
 			}
+			// mlog.IS("2) ControlWindow activate: control window")
 			cw.shared.SetActiveControlWindow(true)
 		},
 		OnDeactivate: func() {
+			// コントローラウィンドウが非アクティブ状態
+			// mlog.IS("3) ControlWindow deactivate")
 			cw.shared.SetActiveControlWindow(false)
 		},
-		OnMouseDown: func(x, y int, button walk.MouseButton) {
-			if button == walk.LeftButton {
-				cw.leftButtonPressed = true
-				mlog.I("左ボタン押下")
+		OnEnterSizeMove: func() {
+			// 移動サイズ変更開始
+			if cw.shared.IsWindowLinkage() {
+				x, y := cw.GetPosition()
+				cw.shared.SetControlWindowPosition(x, y, 0, 0)
 			}
 		},
-		OnMouseUp: func(x, y int, button walk.MouseButton) {
-			if button == walk.LeftButton {
-				cw.leftButtonPressed = false
+		OnExitSizeMove: func() {
+			// 移動サイズ変更終了
+			if cw.shared.IsWindowLinkage() {
+				cw.shared.SetMovedControlWindow(true)
+				x, y := cw.GetPosition()
+				prevPosX, prevPosY, _, _ := cw.shared.ControlWindowPosition()
+				diffX := x - prevPosX
+				diffY := y - prevPosY
+				cw.shared.SetControlWindowPosition(x, y, diffX, diffY)
 			}
 		},
 	}).Create(); err != nil {
 		return nil, err
 	}
 
-	go func() {
-		cw.checkFocus()
-	}()
+	cw.checkFocus()
 
 	// 初期設定
 	cw.shared.SetFrame(0.0)                  // フレーム初期化
@@ -405,6 +416,7 @@ func NewControlWindow(
 	cw.enabledFrameDropAction.SetChecked(true) // フレームドロップON
 	cw.TriggerEnabledFrameDrop()
 	cw.shared.SetActiveControlWindow(true) // コントローラウィンドウがアクティブ状態
+	cw.shared.SetControlWindowPosition(positionX, positionY, 0, 0)
 
 	// コンソールを追加で作成
 	if cv, err := NewConsoleView(cw, width/10, height/10); err != nil {
@@ -416,22 +428,26 @@ func NewControlWindow(
 	log.SetOutput(cw.consoleView)
 
 	cw.SetPosition(positionX, positionY)
+	cw.shared.SetInitializedControlWindow(true)
 
 	return cw, nil
 }
 
 func (cw *ControlWindow) checkFocus() {
-	for {
-		// ビューワーがまだアクティブな場合、コントローラウィンドウをアクティブにする
-		if cw.shared.IsFocusControlWindow() {
-			cw.Synchronize(func() {
-				// スレッドセーフ
-				cw.SetForegroundWindow()
-			})
-			cw.shared.SetFocusControlWindow(false)
-			cw.shared.SetFocusViewWindow(true)
+	go func() {
+		for {
+			// ビューワーがまだアクティブな場合、コントローラウィンドウをアクティブにする
+			if cw.shared.IsFocusControlWindow() {
+				cw.Synchronize(func() {
+					// スレッドセーフ
+					cw.SetForegroundWindow()
+				})
+				cw.shared.SetFocusControlWindow(false)
+			}
+
+			time.Sleep(100 * time.Millisecond)
 		}
-	}
+	}()
 }
 
 // OnClose はウィンドウを閉じるときの処理
@@ -457,6 +473,10 @@ func (cw *ControlWindow) WindowSize() (int, int) {
 func (cw *ControlWindow) SetPosition(x, y int) {
 	cw.SetX(x)
 	cw.SetY(y)
+}
+
+func (cw *ControlWindow) GetPosition() (int, int) {
+	return cw.X(), cw.Y()
 }
 
 func (cw *ControlWindow) onChangeLanguage(lang string) {
@@ -489,7 +509,7 @@ func (cw *ControlWindow) triggerLogLevel() {
 }
 
 func (cw *ControlWindow) triggerLinkWindow() {
-	cw.shared.SetLinkWindow(cw.linkWindowAction.Checked())
+	cw.shared.SetWindowLinkage(cw.linkWindowAction.Checked())
 }
 
 // ------- 以下、再生状態の取得・設定メソッド -------

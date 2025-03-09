@@ -113,7 +113,8 @@ func newViewWindow(
 
 	// ウィンドウの位置を設定
 	vw.SetPos(positionX, positionY)
-	vw.list.shared.SetActivateViewWindow(true)
+	vw.list.shared.SetActivateViewWindow(windowIndex, true)
+	vw.list.shared.SetInitializedViewWindow(windowIndex, true)
 
 	return vw, nil
 }

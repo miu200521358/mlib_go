@@ -70,11 +70,25 @@ func (vl *ViewerList) Run() {
 	for !vl.shared.IsClosed() {
 		glfw.PollEvents()
 
+		if vl.shared.IsWindowLinkage() && vl.shared.IsMovedControlWindow() {
+			_, _, diffX, diffY := vl.shared.ControlWindowPosition()
+			// mlog.IS("ViewerWindow linkage moving: diffX=%d, diffY=%d", diffX, diffY)
+			// すべてのビューワーウィンドウの位置更新をメインスレッドで行う
+			for _, viewWindow := range vl.viewerList {
+				x, y := viewWindow.GetPos()
+				viewWindow.SetPos(x+diffX, y+diffY)
+			}
+			vl.shared.SetMovedControlWindow(false)
+		}
+
 		if vl.shared.IsFocusViewWindow() {
+			// mlog.IS("7) Run: SetFocusViewWindow(false)")
 			// ビューワーのフォーカスが指示されている場合、全ビューワーを一旦フォーカスにする
 			for _, viewWindow := range vl.viewerList {
+				// mlog.IS("8) Run: SetFocusViewWindow[%d] (true)", viewWindow.windowIndex)
 				viewWindow.Focus()
 			}
+			// mlog.IS("9) Run: SetFocusViewWindow(false)")
 			vl.shared.SetFocusViewWindow(false)
 		}
 

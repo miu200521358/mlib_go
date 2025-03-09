@@ -6,17 +6,37 @@ package state
 import (
 	"sync/atomic"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 )
 
 type SharedState struct {
-	flags              uint32           // 32ビット分のフラグを格納
-	frameValue         atomic.Value     // 現在フレーム
-	maxFrameValue      atomic.Value     // 最大フレーム
-	frameIntervalValue atomic.Value     // FPS制限
-	models             [][]atomic.Value // モデルデータ(ウィンドウ/モデルインデックス)
-	motions            [][]atomic.Value // モーションデータ(ウィンドウ/モデルインデックス)
+	flags                      uint32           // 32ビット分のフラグを格納
+	frameValue                 atomic.Value     // 現在フレーム
+	maxFrameValue              atomic.Value     // 最大フレーム
+	frameIntervalValue         atomic.Value     // FPS制限
+	controlWindowPosition      atomic.Value     // コントロールウィンドウの位置
+	isActiveControlWindow      atomic.Bool      // コントロールウィンドウのアクティブ状態
+	isActiveViewWindow         []atomic.Bool    // ビューウィンドウのアクティブ状態
+	isInitializedControlWindow atomic.Bool      // コントロールウィンドウの初期化状態
+	isInitializedViewWindow    []atomic.Bool    // ビューウィンドウの初期化状態
+	focusControlWindow         atomic.Bool      // コントロールウィンドウのフォーカス状態
+	focusViewWindow            atomic.Bool      // ビューウィンドウのフォーカス状態
+	movedControlWindow         atomic.Bool      // コントロールウィンドウの移動状態
+	models                     [][]atomic.Value // モデルデータ(ウィンドウ/モデルインデックス)
+	motions                    [][]atomic.Value // モーションデータ(ウィンドウ/モデルインデックス)
+}
+
+// NewSharedState は2つのStateを注入して生成するコンストラクタ
+func NewSharedState(viewerCount int) *SharedState {
+	return &SharedState{
+		flags:                   0,
+		isActiveViewWindow:      make([]atomic.Bool, viewerCount),
+		isInitializedViewWindow: make([]atomic.Bool, viewerCount),
+		models:                  make([][]atomic.Value, viewerCount),
+		motions:                 make([][]atomic.Value, viewerCount),
+	}
 }
 
 type frameState struct {
@@ -32,42 +52,29 @@ type frameIntervalState struct {
 }
 
 const (
-	flagEnabledFrameDrop    = 1 << iota // フレームドロップON/OFF
-	flagEnabledPhysics                  // 物理ON/OFF
-	flagPhysicsReset                    // 物理リセット
-	flagShowNormal                      // ボーンデバッグ表示
-	flagShowWire                        // ワイヤーフレームデバッグ表示
-	flagShowOverride                    // オーバーライドデバッグ表示
-	flagShowSelectedVertex              // 選択頂点デバッグ表示
-	flagShowBoneAll                     // 全ボーンデバッグ表示
-	flagShowBoneIk                      // IKボーンデバッグ表示
-	flagShowBoneEffector                // 付与親ボーンデバッグ表示
-	flagShowBoneFixed                   // 軸制限ボーンデバッグ表示
-	flagShowBoneRotate                  // 回転ボーンデバッグ表示
-	flagShowBoneTranslate               // 移動ボーンデバッグ表示
-	flagShowBoneVisible                 // 表示ボーンデバッグ表示
-	flagShowRigidBodyFront              // 剛体デバッグ表示(前面)
-	flagShowRigidBodyBack               // 剛体デバッグ表示(埋め込み)
-	flagShowJoint                       // ジョイントデバッグ表示
-	flagShowInfo                        // 情報デバッグ表示
-	flagCameraSync                      // カメラ同期
-	flagPlaying                         // 再生中フラグ
-	flagClosed                          // 描画ウィンドウクローズ
-	flagLinkWindow                      // ウィンドウリンクフラグ
-	flagActiveControlWindow             // コントローラーウィンドウのアクティブフラグ
-	flagActivateViewWindow              // ビューウィンドウのアクティブフラグ
-	flagFocusControlWindow              // コントローラーウィンドウのフォーカス発火フラグ
-	flagFocusViewWindow                 // ビューウィンドウのフォーカス発火フラグ
+	flagEnabledFrameDrop   = 1 << iota // フレームドロップON/OFF
+	flagEnabledPhysics                 // 物理ON/OFF
+	flagPhysicsReset                   // 物理リセット
+	flagShowNormal                     // ボーンデバッグ表示
+	flagShowWire                       // ワイヤーフレームデバッグ表示
+	flagShowOverride                   // オーバーライドデバッグ表示
+	flagShowSelectedVertex             // 選択頂点デバッグ表示
+	flagShowBoneAll                    // 全ボーンデバッグ表示
+	flagShowBoneIk                     // IKボーンデバッグ表示
+	flagShowBoneEffector               // 付与親ボーンデバッグ表示
+	flagShowBoneFixed                  // 軸制限ボーンデバッグ表示
+	flagShowBoneRotate                 // 回転ボーンデバッグ表示
+	flagShowBoneTranslate              // 移動ボーンデバッグ表示
+	flagShowBoneVisible                // 表示ボーンデバッグ表示
+	flagShowRigidBodyFront             // 剛体デバッグ表示(前面)
+	flagShowRigidBodyBack              // 剛体デバッグ表示(埋め込み)
+	flagShowJoint                      // ジョイントデバッグ表示
+	flagShowInfo                       // 情報デバッグ表示
+	flagCameraSync                     // カメラ同期
+	flagPlaying                        // 再生中フラグ
+	flagClosed                         // 描画ウィンドウクローズ
+	flagWindowLinkage                  // ウィンドウリンクフラグ
 )
-
-// NewSharedState は2つのStateを注入して生成するコンストラクタ
-func NewSharedState(viewerCount int) *SharedState {
-	return &SharedState{
-		flags:   0,
-		models:  make([][]atomic.Value, viewerCount),
-		motions: make([][]atomic.Value, viewerCount),
-	}
-}
 
 func (ss *SharedState) ModelCount(windowIndex int) int {
 	if len(ss.models) <= windowIndex {
@@ -326,48 +333,12 @@ func (ss *SharedState) SetClosed(closed bool) {
 	ss.setBit(flagClosed, closed)
 }
 
-func (ss *SharedState) IsLinkWindow() bool {
-	return ss.isBitSet(flagLinkWindow)
+func (ss *SharedState) IsWindowLinkage() bool {
+	return ss.isBitSet(flagWindowLinkage)
 }
 
-func (ss *SharedState) SetLinkWindow(link bool) {
-	ss.setBit(flagLinkWindow, link)
-}
-
-func (ss *SharedState) IsActiveControlWindow() bool {
-	return ss.isBitSet(flagActiveControlWindow)
-}
-
-func (ss *SharedState) SetActiveControlWindow(active bool) {
-	ss.setBit(flagActiveControlWindow, active)
-}
-
-func (ss *SharedState) IsActivateViewWindow() bool {
-	return ss.isBitSet(flagActivateViewWindow)
-}
-
-func (ss *SharedState) SetActivateViewWindow(active bool) {
-	ss.setBit(flagActivateViewWindow, active)
-}
-
-func (ss *SharedState) IsFocusControlWindow() bool {
-	return ss.isBitSet(flagFocusControlWindow)
-}
-
-func (ss *SharedState) SetFocusControlWindow(focus bool) {
-	ss.setBit(flagFocusControlWindow, focus)
-}
-
-func (ss *SharedState) IsFocusViewWindow() bool {
-	return ss.isBitSet(flagFocusViewWindow)
-}
-
-func (ss *SharedState) SetFocusViewWindow(focus bool) {
-	ss.setBit(flagFocusViewWindow, focus)
-}
-
-func (ss *SharedState) IsInactiveAllWindows() bool {
-	return !ss.IsActiveControlWindow() && !ss.IsActivateViewWindow()
+func (ss *SharedState) SetWindowLinkage(link bool) {
+	ss.setBit(flagWindowLinkage, link)
 }
 
 func (ss *SharedState) Frame() float32 {
@@ -398,4 +369,95 @@ func (ss *SharedState) FrameInterval() float32 {
 
 func (ss *SharedState) SetFrameInterval(spf float32) {
 	ss.frameIntervalValue.Store(frameIntervalState{frameInterval: spf})
+}
+
+func (ss *SharedState) ControlWindowPosition() (x, y, diffX, diffY int) {
+	diff := ss.controlWindowPosition.Load().(mmath.MVec4)
+	return int(diff.X), int(diff.Y), int(diff.Z), int(diff.W)
+}
+
+func (ss *SharedState) SetControlWindowPosition(x, y, diffX, diffY int) {
+	ss.controlWindowPosition.Store(mmath.MVec4{X: float64(x), Y: float64(y), Z: float64(diffX), W: float64(diffY)})
+}
+
+func (ss *SharedState) IsActiveControlWindow() bool {
+	return ss.isActiveControlWindow.Load()
+}
+
+func (ss *SharedState) SetActiveControlWindow(active bool) {
+	ss.isActiveControlWindow.Store(active)
+}
+
+func (ss *SharedState) IsActivateViewWindow(windowIndex int) bool {
+	return ss.isActiveViewWindow[windowIndex].Load()
+}
+
+func (ss *SharedState) SetActivateViewWindow(windowIndex int, active bool) {
+	ss.isActiveViewWindow[windowIndex].Store(active)
+}
+
+func (ss *SharedState) IsInactiveALlViewWindows() bool {
+	for i := range ss.isActiveViewWindow {
+		if ss.isActiveViewWindow[i].Load() {
+			return false
+		}
+	}
+	return true
+}
+
+func (ss *SharedState) IsInactiveAllWindows() bool {
+	return !ss.IsActiveControlWindow() && ss.IsInactiveALlViewWindows()
+}
+
+func (ss *SharedState) IsInitializedControlWindow() bool {
+	return ss.isInitializedControlWindow.Load()
+}
+
+func (ss *SharedState) SetInitializedControlWindow(initialized bool) {
+	ss.isInitializedControlWindow.Store(initialized)
+}
+
+func (ss *SharedState) IsInitializedViewWindow(windowIndex int) bool {
+	return ss.isInitializedViewWindow[windowIndex].Load()
+}
+
+func (ss *SharedState) SetInitializedViewWindow(windowIndex int, initialized bool) {
+	ss.isInitializedViewWindow[windowIndex].Store(initialized)
+}
+
+func (ss *SharedState) IsInitializedAllViewWindows() bool {
+	for i := range ss.isInitializedViewWindow {
+		if !ss.isInitializedViewWindow[i].Load() {
+			return false
+		}
+	}
+	return true
+}
+
+func (ss *SharedState) IsInitializedAllWindows() bool {
+	return ss.IsInitializedControlWindow() && ss.IsInitializedAllViewWindows()
+}
+
+func (ss *SharedState) IsFocusControlWindow() bool {
+	return ss.focusControlWindow.Load()
+}
+
+func (ss *SharedState) SetFocusControlWindow(focus bool) {
+	ss.focusControlWindow.Store(focus)
+}
+
+func (ss *SharedState) IsFocusViewWindow() bool {
+	return ss.focusViewWindow.Load()
+}
+
+func (ss *SharedState) SetFocusViewWindow(focus bool) {
+	ss.focusViewWindow.Store(focus)
+}
+
+func (ss *SharedState) IsMovedControlWindow() bool {
+	return ss.movedControlWindow.Load()
+}
+
+func (ss *SharedState) SetMovedControlWindow(moving bool) {
+	ss.movedControlWindow.Store(moving)
 }

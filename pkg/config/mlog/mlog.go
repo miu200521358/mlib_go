@@ -3,6 +3,7 @@ package mlog
 import (
 	"log"
 	"runtime"
+	"time"
 )
 
 var level = 20.0
@@ -102,6 +103,11 @@ func I(message string, param ...interface{}) {
 func IL(message string, param ...interface{}) {
 	L()
 	I(message, param...)
+}
+
+// IS 情報ログ（タイムスタンプ付き）
+func IS(message string, param ...interface{}) {
+	I("[%s]"+message, append([]interface{}{time.Now().Format("15:04:05.000")}, param...)...)
 }
 
 // IT 情報ログ（タイトル付き）

@@ -444,7 +444,7 @@
         "translation": "&Viewer Verbose Log Display"
     },
     {
-        "id": "&画面連結",
-        "translation": "&Screen Link"
+        "id": "&画面移動連結",
+        "translation": "&Screen transition link"
     }
 ]
