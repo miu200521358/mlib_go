@@ -70,6 +70,14 @@ func (vl *ViewerList) Run() {
 	for !vl.shared.IsClosed() {
 		glfw.PollEvents()
 
+		if vl.shared.IsFocusViewWindow() {
+			// ビューワーのフォーカスが指示されている場合、全ビューワーを一旦フォーカスにする
+			for _, viewWindow := range vl.viewerList {
+				viewWindow.Focus()
+			}
+			vl.shared.SetFocusViewWindow(false)
+		}
+
 		frameTime := glfw.GetTime()
 		originalElapsed := frameTime - prevTime
 

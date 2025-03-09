@@ -212,6 +212,19 @@ func (vw *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64)
 	vw.shader.SetCamera(cam)
 }
 
+func (vw *ViewWindow) focusCallback(w *glfw.Window, focused bool) {
+	if focused {
+		mlog.I("ViewWindow[%d] focused", vw.windowIndex)
+		if vw.list.shared.IsInactiveAllWindows() {
+			mlog.I("*** SetFocusControlWindow")
+			vw.list.shared.SetFocusControlWindow(true)
+		}
+	} else {
+		mlog.I("ViewWindow[%d] unfocused", vw.windowIndex)
+	}
+	vw.list.shared.SetActivateViewWindow(focused)
+}
+
 // debugMessageCallback はOpenGLのデバッグメッセージを処理する
 func (vw *ViewWindow) debugMessageCallback(
 	source uint32,

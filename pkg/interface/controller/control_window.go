@@ -5,7 +5,6 @@ package controller
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
@@ -27,6 +26,8 @@ type ControlWindow struct {
 	tabWidget        *walk.TabWidget    // タブウィジェット
 	consoleView      *ConsoleView       // コンソールビュー
 	enabledInPlaying func(enabled bool) // 再生中に無効化するウィジェット
+
+	leftButtonPressed bool // 左ボタン押下フラグ
 
 	// メニューアクション
 	enabledFrameDropAction      *walk.Action // フレームドロップON/OFF
@@ -55,6 +56,7 @@ type ControlWindow struct {
 	logLevelVerboseAction       *walk.Action // 冗長メッセージ表示
 	logLevelIkVerboseAction     *walk.Action // IK冗長メッセージ表示
 	logLevelViewerVerboseAction *walk.Action // ビューワー冗長メッセージ表示
+	linkWindowAction            *walk.Action // ウィンドウ同期
 }
 
 // Run はコントローラウィンドウを実行する
@@ -78,6 +80,13 @@ func NewControlWindow(
 			OnTriggered: func() {
 				mlog.ILT(mi18n.T("メイン画面の使い方"), "%s", mi18n.T("メイン画面の使い方メッセージ"))
 			},
+		},
+		declarative.Separator{},
+		declarative.Action{
+			Text:        mi18n.T("&画面連結"),
+			Checkable:   true,
+			OnTriggered: cw.triggerLinkWindow,
+			AssignTo:    &cw.linkWindowAction,
 		},
 		declarative.Separator{},
 		declarative.Action{
@@ -357,9 +366,34 @@ func NewControlWindow(
 				}
 			}
 		},
+		OnActivate: func() {
+			if cw.shared.IsInactiveAllWindows() {
+				// 全背面からのアクティブ化の場合、全ウィンドウをアクティブ化
+				cw.shared.SetFocusViewWindow(true)
+			}
+			cw.shared.SetActiveControlWindow(true)
+		},
+		OnDeactivate: func() {
+			cw.shared.SetActiveControlWindow(false)
+		},
+		OnMouseDown: func(x, y int, button walk.MouseButton) {
+			if button == walk.LeftButton {
+				cw.leftButtonPressed = true
+				mlog.I("左ボタン押下")
+			}
+		},
+		OnMouseUp: func(x, y int, button walk.MouseButton) {
+			if button == walk.LeftButton {
+				cw.leftButtonPressed = false
+			}
+		},
 	}).Create(); err != nil {
 		return nil, err
 	}
+
+	go func() {
+		cw.checkFocus()
+	}()
 
 	// 初期設定
 	cw.shared.SetFrame(0.0)                  // フレーム初期化
@@ -369,6 +403,7 @@ func NewControlWindow(
 	cw.TriggerEnabledPhysics()
 	cw.enabledFrameDropAction.SetChecked(true) // フレームドロップON
 	cw.TriggerEnabledFrameDrop()
+	cw.shared.SetActiveControlWindow(true) // コントローラウィンドウがアクティブ状態
 
 	// コンソールを追加で作成
 	if cv, err := NewConsoleView(cw, width/10, height/10); err != nil {
@@ -376,12 +411,26 @@ func NewControlWindow(
 	} else {
 		cw.consoleView = cv
 	}
-	// ログ出力先をコンソールビューに設定
-	log.SetOutput(cw.consoleView)
+	// // ログ出力先をコンソールビューに設定
+	// log.SetOutput(cw.consoleView)
 
 	cw.SetPosition(positionX, positionY)
 
 	return cw, nil
+}
+
+func (cw *ControlWindow) checkFocus() {
+	for {
+		// ビューワーがまだアクティブな場合、コントローラウィンドウをアクティブにする
+		if cw.shared.IsFocusControlWindow() {
+			cw.Synchronize(func() {
+				// スレッドセーフ
+				cw.SetForegroundWindow()
+			})
+			cw.shared.SetFocusControlWindow(false)
+			cw.shared.SetFocusViewWindow(true)
+		}
+	}
 }
 
 // OnClose はウィンドウを閉じるときの処理
@@ -436,6 +485,10 @@ func (cw *ControlWindow) triggerLogLevel() {
 	if cw.logLevelVerboseAction.Checked() {
 		mlog.SetLevel(mlog.VERBOSE)
 	}
+}
+
+func (cw *ControlWindow) triggerLinkWindow() {
+	cw.shared.SetLinkWindow(cw.linkWindowAction.Checked())
 }
 
 // ------- 以下、再生状態の取得・設定メソッド -------

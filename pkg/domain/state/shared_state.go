@@ -32,27 +32,32 @@ type frameIntervalState struct {
 }
 
 const (
-	flagEnabledFrameDrop   = 1 << iota // フレームドロップON/OFF
-	flagEnabledPhysics                 // 物理ON/OFF
-	flagPhysicsReset                   // 物理リセット
-	flagShowNormal                     // ボーンデバッグ表示
-	flagShowWire                       // ワイヤーフレームデバッグ表示
-	flagShowOverride                   // オーバーライドデバッグ表示
-	flagShowSelectedVertex             // 選択頂点デバッグ表示
-	flagShowBoneAll                    // 全ボーンデバッグ表示
-	flagShowBoneIk                     // IKボーンデバッグ表示
-	flagShowBoneEffector               // 付与親ボーンデバッグ表示
-	flagShowBoneFixed                  // 軸制限ボーンデバッグ表示
-	flagShowBoneRotate                 // 回転ボーンデバッグ表示
-	flagShowBoneTranslate              // 移動ボーンデバッグ表示
-	flagShowBoneVisible                // 表示ボーンデバッグ表示
-	flagShowRigidBodyFront             // 剛体デバッグ表示(前面)
-	flagShowRigidBodyBack              // 剛体デバッグ表示(埋め込み)
-	flagShowJoint                      // ジョイントデバッグ表示
-	flagShowInfo                       // 情報デバッグ表示
-	flagCameraSync                     // カメラ同期
-	flagPlaying                        // 再生中フラグ
-	flagClosed                         // 描画ウィンドウクローズ
+	flagEnabledFrameDrop    = 1 << iota // フレームドロップON/OFF
+	flagEnabledPhysics                  // 物理ON/OFF
+	flagPhysicsReset                    // 物理リセット
+	flagShowNormal                      // ボーンデバッグ表示
+	flagShowWire                        // ワイヤーフレームデバッグ表示
+	flagShowOverride                    // オーバーライドデバッグ表示
+	flagShowSelectedVertex              // 選択頂点デバッグ表示
+	flagShowBoneAll                     // 全ボーンデバッグ表示
+	flagShowBoneIk                      // IKボーンデバッグ表示
+	flagShowBoneEffector                // 付与親ボーンデバッグ表示
+	flagShowBoneFixed                   // 軸制限ボーンデバッグ表示
+	flagShowBoneRotate                  // 回転ボーンデバッグ表示
+	flagShowBoneTranslate               // 移動ボーンデバッグ表示
+	flagShowBoneVisible                 // 表示ボーンデバッグ表示
+	flagShowRigidBodyFront              // 剛体デバッグ表示(前面)
+	flagShowRigidBodyBack               // 剛体デバッグ表示(埋め込み)
+	flagShowJoint                       // ジョイントデバッグ表示
+	flagShowInfo                        // 情報デバッグ表示
+	flagCameraSync                      // カメラ同期
+	flagPlaying                         // 再生中フラグ
+	flagClosed                          // 描画ウィンドウクローズ
+	flagLinkWindow                      // ウィンドウリンクフラグ
+	flagActiveControlWindow             // コントローラーウィンドウのアクティブフラグ
+	flagActivateViewWindow              // ビューウィンドウのアクティブフラグ
+	flagFocusControlWindow              // コントローラーウィンドウのフォーカス発火フラグ
+	flagFocusViewWindow                 // ビューウィンドウのフォーカス発火フラグ
 )
 
 // NewSharedState は2つのStateを注入して生成するコンストラクタ
@@ -319,6 +324,50 @@ func (ss *SharedState) IsClosed() bool {
 
 func (ss *SharedState) SetClosed(closed bool) {
 	ss.setBit(flagClosed, closed)
+}
+
+func (ss *SharedState) IsLinkWindow() bool {
+	return ss.isBitSet(flagLinkWindow)
+}
+
+func (ss *SharedState) SetLinkWindow(link bool) {
+	ss.setBit(flagLinkWindow, link)
+}
+
+func (ss *SharedState) IsActiveControlWindow() bool {
+	return ss.isBitSet(flagActiveControlWindow)
+}
+
+func (ss *SharedState) SetActiveControlWindow(active bool) {
+	ss.setBit(flagActiveControlWindow, active)
+}
+
+func (ss *SharedState) IsActivateViewWindow() bool {
+	return ss.isBitSet(flagActivateViewWindow)
+}
+
+func (ss *SharedState) SetActivateViewWindow(active bool) {
+	ss.setBit(flagActivateViewWindow, active)
+}
+
+func (ss *SharedState) IsFocusControlWindow() bool {
+	return ss.isBitSet(flagFocusControlWindow)
+}
+
+func (ss *SharedState) SetFocusControlWindow(focus bool) {
+	ss.setBit(flagFocusControlWindow, focus)
+}
+
+func (ss *SharedState) IsFocusViewWindow() bool {
+	return ss.isBitSet(flagFocusViewWindow)
+}
+
+func (ss *SharedState) SetFocusViewWindow(focus bool) {
+	ss.setBit(flagFocusViewWindow, focus)
+}
+
+func (ss *SharedState) IsInactiveAllWindows() bool {
+	return !ss.IsActiveControlWindow() && !ss.IsActivateViewWindow()
 }
 
 func (ss *SharedState) Frame() float32 {

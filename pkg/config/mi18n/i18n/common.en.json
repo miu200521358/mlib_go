@@ -442,5 +442,9 @@
     {
         "id": "&ビューワー冗長ログ表示",
         "translation": "&Viewer Verbose Log Display"
+    },
+    {
+        "id": "&画面連結",
+        "translation": "&Screen Link"
     }
 ]

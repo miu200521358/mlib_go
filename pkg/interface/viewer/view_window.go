@@ -103,6 +103,7 @@ func newViewWindow(
 	glWindow.SetKeyCallback(vw.keyCallback)
 	glWindow.SetMouseButtonCallback(vw.mouseCallback)
 	glWindow.SetCursorPosCallback(vw.cursorPosCallback)
+	glWindow.SetFocusCallback(vw.focusCallback)
 
 	if !isProd {
 		gl.Enable(gl.DEBUG_OUTPUT)
@@ -112,6 +113,7 @@ func newViewWindow(
 
 	// ウィンドウの位置を設定
 	vw.SetPos(positionX, positionY)
+	vw.list.shared.SetActivateViewWindow(true)
 
 	return vw, nil
 }
