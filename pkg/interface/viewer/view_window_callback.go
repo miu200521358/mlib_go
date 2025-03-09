@@ -213,14 +213,8 @@ func (vw *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64)
 }
 
 func (vw *ViewWindow) focusCallback(w *glfw.Window, focused bool) {
-	if focused {
-		mlog.I("ViewWindow[%d] focused", vw.windowIndex)
-		if vw.list.shared.IsInactiveAllWindows() {
-			mlog.I("*** SetFocusControlWindow")
-			vw.list.shared.SetFocusControlWindow(true)
-		}
-	} else {
-		mlog.I("ViewWindow[%d] unfocused", vw.windowIndex)
+	if focused && vw.list.shared.IsInactiveAllWindows() {
+		vw.list.shared.SetFocusControlWindow(true)
 	}
 	vw.list.shared.SetActivateViewWindow(focused)
 }
