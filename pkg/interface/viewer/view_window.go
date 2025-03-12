@@ -186,6 +186,16 @@ func (vw *ViewWindow) Render(timeStep float32) {
 	vw.loadModelRenderers(vw.list.shared)
 	vw.loadMotions(vw.list.shared)
 
+	for i := range vw.modelRenderers {
+		if vw.list.shared.IsChangedEnableDropFrame() {
+			// ドロップフレーム設定が変わったらキャッシュもリセット
+			vw.speculativeCaches[i].Reset()
+			vw.list.shared.SetChangedEnableDropFrame(false)
+			vw.avgElapsedTime = 1.0 / 30.0
+			vw.elapsedSamples = 0
+		}
+	}
+
 	// 経過時間の平均計算を更新
 	vw.updateAverageElapsedTime(float32(timeStep))
 
@@ -203,21 +213,20 @@ func (vw *ViewWindow) Render(timeStep float32) {
 		if i >= len(vw.speculativeCaches) || vw.speculativeCaches[i] == nil {
 			// 通常通り計算
 			vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
-			continue
-		}
-
-		// キャッシュから結果を取得を試みる
-		modelHash := modelRenderer.Model.Hash()
-		motionHash := vw.motions[i].Hash()
-		cachedDeltas := vw.speculativeCaches[i].GetResult(currentFrame, modelHash, motionHash)
-
-		if cachedDeltas != nil {
-			// キャッシュヒット - キャッシュされた結果を使用
-			vw.vmdDeltas[i] = cachedDeltas
-			vw.vmdDeltas[i] = deform.DeformPhysics(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
 		} else {
-			// キャッシュミス - 通常通り計算
-			vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
+			// キャッシュから結果を取得を試みる
+			modelHash := modelRenderer.Model.Hash()
+			motionHash := vw.motions[i].Hash()
+			cachedDeltas := vw.speculativeCaches[i].GetResult(currentFrame, modelHash, motionHash)
+
+			if cachedDeltas != nil {
+				// キャッシュヒット - キャッシュされた結果を使用
+				vw.vmdDeltas[i] = cachedDeltas
+				vw.vmdDeltas[i] = deform.DeformPhysics(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
+			} else {
+				// キャッシュミス - 通常通り計算
+				vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
+			}
 		}
 
 		// モデルをレンダリング

@@ -52,28 +52,29 @@ type frameIntervalState struct {
 }
 
 const (
-	flagEnabledFrameDrop   = 1 << iota // フレームドロップON/OFF
-	flagEnabledPhysics                 // 物理ON/OFF
-	flagPhysicsReset                   // 物理リセット
-	flagShowNormal                     // ボーンデバッグ表示
-	flagShowWire                       // ワイヤーフレームデバッグ表示
-	flagShowOverride                   // オーバーライドデバッグ表示
-	flagShowSelectedVertex             // 選択頂点デバッグ表示
-	flagShowBoneAll                    // 全ボーンデバッグ表示
-	flagShowBoneIk                     // IKボーンデバッグ表示
-	flagShowBoneEffector               // 付与親ボーンデバッグ表示
-	flagShowBoneFixed                  // 軸制限ボーンデバッグ表示
-	flagShowBoneRotate                 // 回転ボーンデバッグ表示
-	flagShowBoneTranslate              // 移動ボーンデバッグ表示
-	flagShowBoneVisible                // 表示ボーンデバッグ表示
-	flagShowRigidBodyFront             // 剛体デバッグ表示(前面)
-	flagShowRigidBodyBack              // 剛体デバッグ表示(埋め込み)
-	flagShowJoint                      // ジョイントデバッグ表示
-	flagShowInfo                       // 情報デバッグ表示
-	flagCameraSync                     // カメラ同期
-	flagPlaying                        // 再生中フラグ
-	flagClosed                         // 描画ウィンドウクローズ
-	flagWindowLinkage                  // ウィンドウリンクフラグ
+	flagEnabledFrameDrop         = 1 << iota // フレームドロップON/OFF
+	flagEnabledPhysics                       // 物理ON/OFF
+	flagPhysicsReset                         // 物理リセット
+	flagShowNormal                           // ボーンデバッグ表示
+	flagShowWire                             // ワイヤーフレームデバッグ表示
+	flagShowOverride                         // オーバーライドデバッグ表示
+	flagShowSelectedVertex                   // 選択頂点デバッグ表示
+	flagShowBoneAll                          // 全ボーンデバッグ表示
+	flagShowBoneIk                           // IKボーンデバッグ表示
+	flagShowBoneEffector                     // 付与親ボーンデバッグ表示
+	flagShowBoneFixed                        // 軸制限ボーンデバッグ表示
+	flagShowBoneRotate                       // 回転ボーンデバッグ表示
+	flagShowBoneTranslate                    // 移動ボーンデバッグ表示
+	flagShowBoneVisible                      // 表示ボーンデバッグ表示
+	flagShowRigidBodyFront                   // 剛体デバッグ表示(前面)
+	flagShowRigidBodyBack                    // 剛体デバッグ表示(埋め込み)
+	flagShowJoint                            // ジョイントデバッグ表示
+	flagShowInfo                             // 情報デバッグ表示
+	flagCameraSync                           // カメラ同期
+	flagPlaying                              // 再生中フラグ
+	flagClosed                               // 描画ウィンドウクローズ
+	flagWindowLinkage                        // ウィンドウリンクフラグ
+	flagIsChangedEnableDropFrame             // フレームドロップON/OFF変更フラグ
 )
 
 func (ss *SharedState) ModelCount(windowIndex int) int {
@@ -163,6 +164,14 @@ func (ss *SharedState) setBit(bitMask uint32, enable bool) {
 // ビットが立っているかどうか
 func (ss *SharedState) isBitSet(bitMask uint32) bool {
 	return (ss.loadFlag() & bitMask) != 0
+}
+
+func (ss *SharedState) IsChangedEnableDropFrame() bool {
+	return ss.isBitSet(flagIsChangedEnableDropFrame)
+}
+
+func (ss *SharedState) SetChangedEnableDropFrame(changed bool) {
+	ss.setBit(flagIsChangedEnableDropFrame, changed)
 }
 
 func (ss *SharedState) IsEnabledFrameDrop() bool {

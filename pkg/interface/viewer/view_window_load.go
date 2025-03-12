@@ -7,7 +7,6 @@ import (
 )
 
 // loadModelRenderersメソッドを拡張
-
 func (vw *ViewWindow) loadModelRenderers(shared *state.SharedState) {
 	for i := range shared.ModelCount(vw.windowIndex) {
 		for i >= len(vw.modelRenderers) {

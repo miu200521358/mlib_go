@@ -597,6 +597,7 @@ func (cw *ControlWindow) TriggerUnLimitFps() {
 
 func (cw *ControlWindow) TriggerEnabledFrameDrop() {
 	cw.shared.SetEnabledFrameDrop(cw.enabledFrameDropAction.Checked())
+	cw.shared.SetChangedEnableDropFrame(true)
 }
 
 func (cw *ControlWindow) TriggerShowNormal() {

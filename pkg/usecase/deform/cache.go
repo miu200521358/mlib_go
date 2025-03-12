@@ -4,7 +4,6 @@ import (
 	"math"
 	"sync"
 
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
@@ -52,30 +51,19 @@ func (c *SpeculativeDeformCache) GetResult(frame float32, modelHash, motionHash 
 
 	// キャッシュが存在しない場合はnil
 	if c.result == nil {
-		mlog.IS("[%v] SpeculativeDeformCache.GetResult: cache is nil", frame)
 		return nil
 	}
 
 	// モデルやモーションが変わっていたらキャッシュ無効
 	if c.modelHash != modelHash || c.motionHash != motionHash {
-		mlog.IS("[%v] SpeculativeDeformCache.GetResult: cache is invalid", frame)
 		return nil
 	}
 
-	// フレームの整数部分が一致していて、小数部分の差が許容範囲内かチェック
-	frameInt := float32(int(frame))
-	predictedInt := float32(int(c.predictedFrame))
-
-	// 整数部分が同じで、小数部分の差が0.1以内なら採用
-	if frameInt == predictedInt {
-		fracDiff := math.Abs(float64(frame-frameInt) - float64(c.predictedFrame-predictedInt))
-		if fracDiff <= 0.1 {
-			mlog.IS("[%v] SpeculativeDeformCache.GetResult: cache hit, diff=%.4f", frame, fracDiff)
-			return c.result
-		}
+	// フレームが許容範囲内なら結果を返す
+	frameDiff := float32(math.Abs(float64(c.predictedFrame - frame)))
+	if frameDiff <= 0.3 {
+		return c.result
 	}
-
-	mlog.IS("[%v] SpeculativeDeformCache.GetResult: cache is invalid", frame)
 
 	return nil
 }
@@ -93,6 +81,7 @@ func (c *SpeculativeDeformCache) Reset() {
 	defer c.mutex.Unlock()
 	c.result = nil
 	c.computing = false
+	c.predictedFrame = 0
 }
 
 // --------------------------------------------------
@@ -108,6 +97,11 @@ func SpeculativeDeform(
 	timeStep float32,
 	nextFrame float32,
 ) {
+	// フレームドロップONの場合は何もしない
+	if shared.IsEnabledFrameDrop() {
+		return
+	}
+
 	// キャッシュがnilの場合は何もしない
 	if cache == nil {
 		return
