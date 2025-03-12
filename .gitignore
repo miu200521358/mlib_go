@@ -35,3 +35,4 @@ framebuffer_output.png
 mlib.json
 test_resources/
 cmd/viewerPng/
+cmd/log_*.txt

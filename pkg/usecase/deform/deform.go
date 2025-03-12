@@ -145,8 +145,18 @@ func Deform(
 	deltas *delta.VmdDeltas,
 	timeStep float32,
 ) *delta.VmdDeltas {
+	if model == nil || motion == nil {
+		return deltas
+	}
+
 	// 物理前変形
-	deltas = deformBeforePhysics(model, motion, deltas, shared.Frame())
+	frame := shared.Frame()
+
+	if deltas == nil || deltas.Frame() != frame ||
+		deltas.ModelHash() != model.Hash() || deltas.MotionHash() != motion.Hash() {
+		// 前とは条件が違う場合のみ再計算
+		deltas = deformBeforePhysics(model, motion, deltas, shared.Frame())
+	}
 
 	// 物理変形
 	if err := deformPhysics(shared, physics, model, deltas); err != nil {

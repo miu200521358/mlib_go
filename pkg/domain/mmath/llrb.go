@@ -52,40 +52,48 @@ func NewLlrbIndexes[T Number]() *LlrbIndexes[T] {
 
 func (li *LlrbIndexes[T]) Prev(index T) T {
 	lindex := NewLlrbItem(index)
+	var prevValue T = li.Min()
+	found := false
 
-	ary := NewLlrbIndexes[T]()
+	// indexより小さい最大の値を探す
 	li.DescendLessOrEqual(lindex, func(i llrb.Item) bool {
 		item := i.(*LlrbItem[T])
-		if item.value < lindex.value {
-			ary.InsertNoReplace(item)
+		if item.value != lindex.value {
+			prevValue = item.value
+			found = true
+			return false // 走査を停止
 		}
 		return true
 	})
 
-	if ary.Len() == 0 {
+	if !found {
 		return li.Min()
 	}
 
-	return ary.Max()
+	return prevValue
 }
 
 func (li *LlrbIndexes[T]) Next(index T) T {
 	lindex := NewLlrbItem(index)
+	var nextValue T = index
+	found := false
 
-	ary := NewLlrbIndexes[T]()
+	// indexより大きい最初の値を見つけたら即座に終了
 	li.AscendGreaterOrEqual(lindex, func(i llrb.Item) bool {
 		item := i.(*LlrbItem[T])
-		if item.value > lindex.value {
-			ary.InsertNoReplace(item)
+		if item.value != lindex.value {
+			nextValue = item.value
+			found = true
+			return false // 走査を停止
 		}
 		return true
 	})
 
-	if ary.Len() == 0 {
+	if !found {
 		return index
 	}
 
-	return ary.Min()
+	return nextValue
 }
 
 func (li *LlrbIndexes[T]) Has(index T) bool {

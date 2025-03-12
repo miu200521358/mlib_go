@@ -82,18 +82,27 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 					mp.window.SetPlaying(playing)
 					mp.window.EnabledInPlaying(!playing)
 
-					// 共有ステータスからフレーム情報を監視して更新する
-					go func() {
-						prev := time.Now()
-						for mp.window.Playing() {
-							now := time.Now()
-							duration := now.Sub(prev)
-							if duration.Seconds() >= 1.0/60.0 {
-								mp.ChangeValue(mp.window.Frame())
-								prev = now
+					// 再生中のみ、Ticker で定期的にフレーム情報を監視・更新する
+					if playing {
+						go func() {
+							ticker := time.NewTicker(time.Second / 60)
+							defer ticker.Stop()
+
+							var prevFrame float32
+							for range ticker.C {
+								// 再生が停止されたらループを抜ける
+								if !mp.window.Playing() {
+									break
+								}
+								currentFrame := mp.window.Frame()
+								// 前回のフレームと異なる場合に更新する
+								if currentFrame != prevFrame {
+									mp.ChangeValue(currentFrame)
+									prevFrame = currentFrame
+								}
 							}
-						}
-					}()
+						}()
+					}
 
 					if mp.onTriggerPlay != nil {
 						mp.onTriggerPlay(playing)

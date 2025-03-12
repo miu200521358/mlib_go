@@ -6,6 +6,7 @@ package controller
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
@@ -348,6 +349,10 @@ func NewControlWindow(
 			},
 		},
 		OnClosing: func(canceled *bool, reason walk.CloseReason) {
+			// ユーザーがOKを選んだ場合、 viewerState の isClosed を true にする
+			os.WriteFile(fmt.Sprintf("log_%s.txt", time.Now().Format("20060102_150405")),
+				[]byte(cw.consoleView.Console.Text()), 0644)
+
 			// controllerStateを読み取り、ビューワーが閉じていない場合は確認ダイアログを表示
 			if !cw.appConfig.IsCloseConfirm() {
 				cw.shared.SetClosed(true)
@@ -360,7 +365,6 @@ func NewControlWindow(
 					mi18n.T("終了確認メッセージ"),
 					walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel,
 				); result == walk.DlgCmdOK {
-					// ユーザーがOKを選んだ場合、 viewerState の isClosed を true にする
 					cw.shared.SetClosed(true)
 				} else {
 					// 閉じない場合はキャンセル
@@ -405,7 +409,7 @@ func NewControlWindow(
 		return nil, err
 	}
 
-	cw.checkFocus()
+	// cw.checkFocus()
 
 	// 初期設定
 	cw.shared.SetFrame(0.0)                  // フレーム初期化

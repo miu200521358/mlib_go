@@ -103,7 +103,7 @@ func newViewWindow(
 	glWindow.SetKeyCallback(vw.keyCallback)
 	glWindow.SetMouseButtonCallback(vw.mouseCallback)
 	glWindow.SetCursorPosCallback(vw.cursorPosCallback)
-	glWindow.SetFocusCallback(vw.focusCallback)
+	// glWindow.SetFocusCallback(vw.focusCallback)
 
 	if !isProd {
 		gl.Enable(gl.DEBUG_OUTPUT)
@@ -179,11 +179,14 @@ func (vw *ViewWindow) Render(shared *state.SharedState, timeStep float32) {
 	vw.shader.DrawFloor()
 
 	vw.loadModelRenderers(shared)
+
 	vw.loadMotions(shared)
 
 	for i, modelRenderer := range vw.modelRenderers {
 		vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
+
 		modelRenderer.Render(vw.shader, shared, vw.vmdDeltas[i])
+
 	}
 
 	// 物理デバッグ描画

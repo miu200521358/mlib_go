@@ -64,116 +64,126 @@ const (
 
 func (vl *ViewerList) Run() {
 	prevTime := glfw.GetTime()
-	prevShowTime := glfw.GetTime()
-	elapsedList := make([]float64, 0)
+	prevShowTime := prevTime
+
+	elapsedList := make([]float32, 0, 120)
 
 	for !vl.shared.IsClosed() {
+		// イベント処理
 		glfw.PollEvents()
 
-		if vl.shared.IsWindowLinkage() && vl.shared.IsMovedControlWindow() {
-			_, _, diffX, diffY := vl.shared.ControlWindowPosition()
-			// mlog.IS("ViewerWindow linkage moving: diffX=%d, diffY=%d", diffX, diffY)
-			// すべてのビューワーウィンドウの位置更新をメインスレッドで行う
-			for _, viewWindow := range vl.viewerList {
-				x, y := viewWindow.GetPos()
-				viewWindow.SetPos(x+diffX, y+diffY)
-			}
-			vl.shared.SetMovedControlWindow(false)
-		}
+		// ウィンドウリンケージ処理
+		vl.handleWindowLinkage()
 
-		if vl.shared.IsFocusViewWindow() {
-			// mlog.IS("7) Run: SetFocusViewWindow(false)")
-			// ビューワーのフォーカスが指示されている場合、全ビューワーを一旦フォーカスにする
-			for _, viewWindow := range vl.viewerList {
-				// mlog.IS("8) Run: SetFocusViewWindow[%d] (true)", viewWindow.windowIndex)
-				viewWindow.Focus()
-			}
-			// mlog.IS("9) Run: SetFocusViewWindow(false)")
-			vl.shared.SetFocusViewWindow(false)
-		}
+		// ウィンドウフォーカス処理
+		vl.handleWindowFocus()
 
+		// フレームタイミング計算
 		frameTime := glfw.GetTime()
 		originalElapsed := frameTime - prevTime
 
-		var elapsed float32
-		var timeStep float32
-		if !vl.shared.IsEnabledFrameDrop() {
-			// フレームドロップOFF
-			// 物理fpsは60fps固定
-			timeStep = physicsDefaultSpf
-			// デフォームfpsはspf上限の経過時間
-			elapsed = float32(mmath.Clamped(originalElapsed, 0.0, deformDefaultSpf))
-		} else {
-			// 物理fpsは経過時間
-			timeStep = float32(originalElapsed)
-			elapsed = float32(originalElapsed)
-		}
+		// フレームレート制御と描画処理
+		if isRendered, elapsed, timeStep := vl.processFrame(originalElapsed); isRendered {
+			// 描画にかかった時間を計測
+			elapsedList = append(elapsedList, elapsed)
 
-		if elapsed < vl.shared.FrameInterval() {
-			// fps制限は描画fpsにのみ依存
-
-			// 待機時間(残り時間の9割)
-			waitDuration := (vl.shared.FrameInterval() - elapsed) * 0.9
-
-			// waitDurationが1ms以上なら、1ms未満になるまで待つ
-			if waitDuration >= 0.001 {
-				// あえて1000倍にしないで900倍にしているのは、time.Durationの最大値を超えないため
-				time.Sleep(time.Duration(waitDuration*900) * time.Millisecond)
+			// 情報表示処理
+			if vl.shared.IsShowInfo() {
+				currentTime := glfw.GetTime()
+				if currentTime-prevShowTime >= 1.0 {
+					vl.updateFpsDisplay(float32(mmath.Mean(elapsedList)), timeStep)
+					prevShowTime = currentTime
+					elapsedList = elapsedList[:0]
+				}
 			}
 
-			// 経過時間が1フレームの時間未満の場合はもう少し待つ
-			continue
+			prevTime = frameTime
 		}
 
-		for _, viewWindow := range vl.viewerList {
-			viewWindow.Render(vl.shared, timeStep)
-		}
-
-		if vl.shared.Playing() && !vl.shared.IsClosed() {
-			// 再生中はフレームを進める
-			frame := vl.shared.Frame() + float32(elapsed*deformDefaultFps)
-			if frame > vl.shared.MaxFrame() {
-				frame = 0
-			}
-			vl.shared.SetFrame(frame)
-		}
-
-		prevTime = frameTime
-
-		// 描画にかかった時間を計測
-		elapsedList = append(elapsedList, originalElapsed)
-
-		if vl.shared.IsShowInfo() {
-			prevShowTime, elapsedList = vl.showInfo(elapsedList, prevShowTime, timeStep)
-		}
 	}
 
+	// クリーンアップ
 	for _, viewWindow := range vl.viewerList {
 		viewWindow.Destroy()
 	}
 }
 
-func (vl *ViewerList) showInfo(elapsedList []float64, prevShowTime float64, timeStep float32) (float64, []float64) {
-	nowShowTime := glfw.GetTime()
-
-	// 1秒ごとにオリジナルの経過時間からFPSを表示
-	if nowShowTime-prevShowTime >= 1.0 {
-		elapsed := mmath.Mean(elapsedList)
-		var suffixFps string
-		if vl.appConfig.IsEnvProd() {
-			// リリース版の場合、FPSの表示を簡略化
-			suffixFps = fmt.Sprintf("%.2f fps", 1.0/elapsed)
-		} else {
-			// 開発版の場合、FPSの表示を詳細化
-			suffixFps = fmt.Sprintf("d) %.2f / p) %.2f fps", 1.0/elapsed, 1.0/timeStep)
-		}
-
+// ウィンドウリンケージ処理を分離
+func (vl *ViewerList) handleWindowLinkage() {
+	if vl.shared.IsWindowLinkage() && vl.shared.IsMovedControlWindow() {
+		_, _, diffX, diffY := vl.shared.ControlWindowPosition()
 		for _, viewWindow := range vl.viewerList {
-			viewWindow.SetTitle(fmt.Sprintf("%s - %s", viewWindow.Title(), suffixFps))
+			x, y := viewWindow.GetPos()
+			viewWindow.SetPos(x+diffX, y+diffY)
 		}
+		vl.shared.SetMovedControlWindow(false)
+	}
+}
 
-		return nowShowTime, make([]float64, 0)
+// ウィンドウフォーカス処理を分離
+func (vl *ViewerList) handleWindowFocus() {
+	if vl.shared.IsFocusViewWindow() {
+		for _, viewWindow := range vl.viewerList {
+			viewWindow.Focus()
+		}
+		vl.shared.SetFocusViewWindow(false)
+	}
+}
+
+// processFrame フレーム処理ロジック
+func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, elapsed float32, timeStep float32) {
+
+	if !vl.shared.IsEnabledFrameDrop() {
+		timeStep = physicsDefaultSpf
+		elapsed = float32(mmath.Clamped(originalElapsed, 0.0, deformDefaultSpf))
+	} else {
+		timeStep = float32(originalElapsed)
+		elapsed = float32(originalElapsed)
 	}
 
-	return prevShowTime, elapsedList
+	// FPS制限処理
+	if elapsed < vl.shared.FrameInterval() {
+		waitDuration := (vl.shared.FrameInterval() - elapsed) * 0.9
+		if waitDuration >= 0.001 {
+			// あえて1000倍にしないで900倍にしているのは、time.Durationの最大値を超えないため
+			sleepDur := time.Duration(waitDuration*900) * time.Millisecond
+			// 経過時間が1フレームの時間未満の場合はもう少し待つ
+			time.Sleep(sleepDur)
+		}
+		return false, 0, 0
+	}
+
+	// レンダリング処理
+	for _, viewWindow := range vl.viewerList {
+		viewWindow.Render(vl.shared, timeStep)
+	}
+
+	// フレーム更新
+	if vl.shared.Playing() && !vl.shared.IsClosed() {
+		frame := vl.shared.Frame() + float32(elapsed*deformDefaultFps)
+		if frame > vl.shared.MaxFrame() {
+			frame = 0
+		}
+		vl.shared.SetFrame(frame)
+	}
+
+	return true, float32(originalElapsed), timeStep
+}
+
+// updateFpsDisplay FPS表示を更新する処理
+func (vl *ViewerList) updateFpsDisplay(avgElapsed, timeStep float32) {
+	fps := 1.0 / avgElapsed
+	var suffixFps string
+
+	if vl.appConfig.IsEnvProd() {
+		// リリース版の場合、FPSの表示を簡略化
+		suffixFps = fmt.Sprintf("%.2f fps", fps)
+	} else {
+		// 開発版の場合、FPSの表示を詳細化
+		suffixFps = fmt.Sprintf("d) %.2f / p) %.2f fps", fps, 1.0/timeStep)
+	}
+
+	for _, viewWindow := range vl.viewerList {
+		viewWindow.SetTitle(fmt.Sprintf("%s - %s", viewWindow.Title(), suffixFps))
+	}
 }
