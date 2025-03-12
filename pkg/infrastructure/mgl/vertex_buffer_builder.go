@@ -238,10 +238,21 @@ func (h *VertexBufferHandle) Delete() {
 	h.VAO.Delete()
 }
 
+// バッチ処理に必要な情報を収集
+type updateInfo struct {
+	offset int
+	data   []float32
+}
+
 // UpdateVertexDeltas はバッファに頂点デルタを適用
 func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDeltas) {
 	// 頂点モーフのVBOサイズ
 	vboVertexSize := (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3)
+
+	// バッチサイズ (調整可能)
+	const batchSize = 100
+	updates := make([]updateInfo, 0, batchSize)
+	batchDataSize := 0
 
 	// モーフ分の変動量を設定
 	for v := range vertices.Iterator() {
@@ -253,7 +264,64 @@ func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDelta
 			continue
 		}
 		offsetStride := (vidx*h.StrideSize + vboVertexSize) * h.FloatSize
-		h.VBO.BufferSubData(offsetStride, len(vd)*h.FloatSize, gl.Ptr(vd))
+
+		updates = append(updates, updateInfo{
+			offset: offsetStride,
+			data:   vd,
+		})
+
+		batchDataSize += len(vd) * h.FloatSize
+
+		// バッチサイズに達したらまとめて更新
+		if len(updates) >= batchSize {
+			h.updateBatch(updates)
+			updates = updates[:0] // スライスをクリア
+			batchDataSize = 0
+		}
+	}
+
+	// 残りのデータを更新
+	if len(updates) > 0 {
+		h.updateBatch(updates)
+	}
+}
+
+// バッチ更新を行うヘルパーメソッド
+func (h *VertexBufferHandle) updateBatch(updates []updateInfo) {
+	// 連続した更新が可能かチェック
+	if len(updates) == 1 {
+		// 単一更新の場合はそのまま更新
+		h.VBO.BufferSubData(updates[0].offset, len(updates[0].data)*h.FloatSize, gl.Ptr(updates[0].data))
+		return
+	}
+
+	// 複数の頂点が連続しているかをチェック
+	continuous := true
+	startOffset := updates[0].offset
+	totalSize := len(updates[0].data) * h.FloatSize
+
+	for i := 1; i < len(updates); i++ {
+		expectedOffset := updates[i-1].offset + len(updates[i-1].data)*h.FloatSize
+		if updates[i].offset != expectedOffset {
+			continuous = false
+			break
+		}
+		totalSize += len(updates[i].data) * h.FloatSize
+	}
+
+	if continuous {
+		// 連続したデータの場合、一つの大きなバッファを作成して一度に更新
+		buffer := make([]float32, 0, totalSize/h.FloatSize)
+		for _, update := range updates {
+			buffer = append(buffer, update.data...)
+		}
+		h.VBO.BufferSubData(startOffset, totalSize, gl.Ptr(buffer))
+	} else {
+		// 連続していない場合は、バッチ単位でまとめて処理
+		// OpenGLのDSAやPersistent Mappingが使えるなら、それらを検討
+		for _, update := range updates {
+			h.VBO.BufferSubData(update.offset, len(update.data)*h.FloatSize, gl.Ptr(update.data))
+		}
 	}
 }
 

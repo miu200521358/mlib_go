@@ -15,7 +15,11 @@ const maxEffectorRecursion = 10
 func calculateTotalRotationMat(
 	deltas *delta.BoneDeltas, boneIndex int,
 ) *mmath.MMat4 {
-	rotMat := accumulateTotalRotation(deltas, boneIndex, 0, 1.0).ToMat4()
+	rot := accumulateTotalRotation(deltas, boneIndex, 0, 1.0)
+	var rotMat *mmath.MMat4
+	if rot != nil {
+		rotMat = rot.ToMat4()
+	}
 	return applyCancelableRotation(deltas, boneIndex, rotMat)
 }
 
@@ -35,7 +39,11 @@ func CalculateBoneRotation(
 func calculateTotalPositionMat(
 	deltas *delta.BoneDeltas, boneIndex int,
 ) *mmath.MMat4 {
-	posMat := accumulateTotalPosition(deltas, boneIndex, 0).ToMat4()
+	pos := accumulateTotalPosition(deltas, boneIndex, 0)
+	var posMat *mmath.MMat4
+	if pos != nil {
+		posMat = pos.ToMat4()
+	}
 	return applyCancelablePosition(deltas, boneIndex, posMat)
 }
 
@@ -47,7 +55,11 @@ func calculateTotalPositionMat(
 func calculateTotalScaleMat(
 	deltas *delta.BoneDeltas, boneIndex int,
 ) *mmath.MMat4 {
-	scaleMat := accumulateTotalScale(deltas, boneIndex, 0).ToScaleMat4()
+	scale := accumulateTotalScale(deltas, boneIndex, 0)
+	var scaleMat *mmath.MMat4
+	if scale != nil {
+		scaleMat = scale.ToScaleMat4()
+	}
 	return applyCancelableScale(deltas, boneIndex, scaleMat)
 }
 
@@ -60,8 +72,8 @@ func calculateTotalLocalMat(
 	deltas *delta.BoneDeltas, boneIndex int,
 ) *mmath.MMat4 {
 	bd := deltas.Get(boneIndex)
-	if bd == nil {
-		return mmath.NewMMat4()
+	if bd == nil || bd.LocalMatrix == nil {
+		return nil
 	}
 	return bd.FilledTotalLocalMat()
 }
@@ -78,24 +90,24 @@ func accumulateTotalRotation(
 	factor float64,
 ) *mmath.MQuaternion {
 	if recursion > maxEffectorRecursion {
-		return mmath.NewMQuaternion()
+		return nil
 	}
 	bd := deltas.Get(boneIndex)
 	if bd == nil {
-		return mmath.NewMQuaternion()
+		return nil
 	}
 
 	// すでに合成済みのトータル回転を前提として使う場合
 	rot := bd.FilledTotalRotation()
-	if rot == nil {
-		// 未計算 or 取得不可なら単位回転
-		rot = mmath.NewMQuaternion()
-	}
 
 	// ボーンが回転付与を持つ場合、エフェクタ先の回転を再帰合成
 	if bd.Bone.IsEffectorRotation() {
 		effectorRot := accumulateTotalRotation(deltas, bd.Bone.EffectIndex, recursion+1, bd.Bone.EffectFactor)
-		rot.Mul(effectorRot)
+		if rot != nil && effectorRot != nil {
+			rot.Mul(effectorRot)
+		} else if effectorRot != nil {
+			rot = effectorRot
+		}
 	}
 
 	return rot.MuledScalar(factor)
@@ -144,18 +156,22 @@ func accumulateTotalPosition(
 	recursion int,
 ) *mmath.MVec3 {
 	if recursion > maxEffectorRecursion {
-		return mmath.NewMVec3()
+		return nil
 	}
 	bd := deltas.Get(boneIndex)
 	if bd == nil {
-		return mmath.NewMVec3()
+		return nil
 	}
 
 	// 移動付与があれば再帰的に合成
 	if bd.Bone.IsEffectorTranslation() {
 		effectorPos := accumulateTotalPosition(deltas, bd.Bone.EffectIndex, recursion+1)
-		return bd.FilledTotalPosition().ToMat4().Muled(
-			effectorPos.MuledScalar(bd.Bone.EffectFactor).ToMat4()).Translation()
+		if effectorPos == nil {
+			return effectorPos.MuledScalar(bd.Bone.EffectFactor).ToMat4().Translation()
+		} else {
+			return bd.FilledTotalPosition().ToMat4().Muled(
+				effectorPos.MuledScalar(bd.Bone.EffectFactor).ToMat4()).Translation()
+		}
 	}
 
 	return bd.FilledTotalPosition().Copy()
@@ -169,11 +185,11 @@ func accumulateTotalScale(
 ) *mmath.MVec3 {
 	if recursion > maxEffectorRecursion {
 		// デフォルトスケール = (1, 1, 1)
-		return &mmath.MVec3{X: 1, Y: 1, Z: 1}
+		return nil
 	}
 	bd := deltas.Get(boneIndex)
 	if bd == nil {
-		return &mmath.MVec3{X: 1, Y: 1, Z: 1}
+		return nil
 	}
 
 	return bd.FilledTotalScale()
@@ -204,20 +220,34 @@ func applyCancelableRotation(
 		if parentMat == nil {
 			return rotMat
 		}
+		if rotMat == nil {
+			return parentMat.Inverted()
+		}
 		return rotMat.Muled(parentMat.Inverted())
 	}
 
 	// 自身のキャンセル行列を適用
 	if bd.FrameCancelableRotation != nil && !bd.FrameCancelableRotation.IsIdent() {
-		rotMat = rotMat.Muled(bd.FrameCancelableRotation.ToMat4())
+		if rotMat == nil {
+			rotMat = bd.FrameCancelableRotation.ToMat4()
+		} else {
+			rotMat = rotMat.Muled(bd.FrameCancelableRotation.ToMat4())
+		}
 	}
 	if bd.FrameMorphCancelableRotation != nil && !bd.FrameMorphCancelableRotation.IsIdent() {
-		rotMat = rotMat.Muled(bd.FrameMorphCancelableRotation.ToMat4())
+		if rotMat == nil {
+			rotMat = bd.FrameMorphCancelableRotation.ToMat4()
+		} else {
+			rotMat = rotMat.Muled(bd.FrameMorphCancelableRotation.ToMat4())
+		}
 	}
 
 	// 親のキャンセル
 	if parentMat == nil {
 		return rotMat
+	}
+	if rotMat == nil {
+		return parentMat.Inverted()
 	}
 	return rotMat.Muled(parentMat.Inverted())
 }
@@ -272,18 +302,32 @@ func applyCancelablePosition(
 		if parentMat == nil {
 			return posMat
 		}
+		if posMat == nil {
+			return parentMat.Inverted()
+		}
 		return posMat.Muled(parentMat.Inverted())
 	}
 
 	if bd.FrameCancelablePosition != nil && !bd.FrameCancelablePosition.IsZero() {
-		posMat = posMat.Muled(bd.FrameCancelablePosition.ToMat4())
+		if posMat == nil {
+			posMat = bd.FrameCancelablePosition.ToMat4()
+		} else {
+			posMat = posMat.Muled(bd.FrameCancelablePosition.ToMat4())
+		}
 	}
 	if bd.FrameMorphCancelablePosition != nil && !bd.FrameMorphCancelablePosition.IsZero() {
-		posMat = posMat.Muled(bd.FrameMorphCancelablePosition.ToMat4())
+		if posMat == nil {
+			posMat = bd.FrameMorphCancelablePosition.ToMat4()
+		} else {
+			posMat = posMat.Muled(bd.FrameMorphCancelablePosition.ToMat4())
+		}
 	}
 
 	if parentMat == nil {
 		return posMat
+	}
+	if posMat == nil {
+		return parentMat.Inverted()
 	}
 	return posMat.Muled(parentMat.Inverted())
 }
@@ -308,20 +352,35 @@ func applyCancelableScale(
 		if parentMat == nil {
 			return scaleMat
 		}
+		if scaleMat == nil {
+			return parentMat.Inverted()
+		}
 		return scaleMat.Muled(parentMat.Inverted())
 	}
 
 	// 自分のスケールキャンセル適用
 	if bd.FrameCancelableScale != nil && !bd.FrameCancelableScale.IsZero() {
-		scaleMat = scaleMat.Muled(bd.FrameCancelableScale.ToScaleMat4())
+		if scaleMat == nil {
+			scaleMat = bd.FrameCancelableScale.ToScaleMat4()
+		} else {
+			scaleMat = scaleMat.Muled(bd.FrameCancelableScale.ToScaleMat4())
+		}
 	}
 	if bd.FrameMorphCancelableScale != nil && !bd.FrameMorphCancelableScale.IsZero() {
-		scaleMat = scaleMat.Muled(bd.FrameMorphCancelableScale.ToScaleMat4())
+		if scaleMat == nil {
+			scaleMat = bd.FrameMorphCancelableScale.ToScaleMat4()
+		} else {
+			scaleMat = scaleMat.Muled(bd.FrameMorphCancelableScale.ToScaleMat4())
+		}
 	}
 
 	if parentMat == nil {
 		return scaleMat
 	}
+	if scaleMat == nil {
+		return parentMat.Inverted()
+	}
+
 	return scaleMat.Muled(parentMat.Inverted())
 }
 
