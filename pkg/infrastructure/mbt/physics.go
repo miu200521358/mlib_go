@@ -27,14 +27,12 @@ func NewMPhysics() physics.IPhysics {
 	world := createWorld()
 
 	// デフォルト設定
-	config := physics.PhysicsConfig{
-		MaxSubSteps:   2,
-		FixedTimeStep: 1 / 60.0,
-	}
-
 	physics := &MPhysics{
-		world:       world,
-		config:      config,
+		world: world,
+		config: physics.PhysicsConfig{
+			MaxSubSteps:   2,
+			FixedTimeStep: 1 / 60.0,
+		},
 		rigidBodies: make(map[int][]*rigidbodyValue),
 		joints:      make(map[int][]*jointValue),
 	}

@@ -32,7 +32,7 @@ print(f"app_version: {app_version}")
 # -linkmode external -extldflags '-static -Wl,cmd/app/app.res' リソースを埋め込む
 if os.environ.get('ENV') == 'dev':
     build_command = f"go build -o {workspace_folder}/build/{app_name}_{app_version}.exe " \
-                    f"-v -buildmode=exe -ldflags \"-s -w -H=windowsgui -X main.env=dev " \
+                    f"-v -buildmode=exe -ldflags \"-H=windowsgui -X main.env=dev " \
                     f"-linkmode external -extldflags '-static -Wl,{workspace_folder}/cmd/app/app.res'\" "
 else:
     build_command = f"go build -o {workspace_folder}/build/{app_name}_{app_version}.exe -trimpath " \
