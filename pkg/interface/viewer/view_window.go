@@ -24,23 +24,26 @@ import (
 
 type ViewWindow struct {
 	*glfw.Window
-	windowIndex         int                     // ウィンドウインデックス
-	title               string                  // ウィンドウタイトル
-	leftButtonPressed   bool                    // 左ボタン押下フラグ
-	middleButtonPressed bool                    // 中ボタン押下フラグ
-	rightButtonPressed  bool                    // 右ボタン押下フラグ
-	shiftPressed        bool                    // Shiftキー押下フラグ
-	ctrlPressed         bool                    // Ctrlキー押下フラグ
-	updatedPrevCursor   bool                    // 前回のカーソル位置更新フラグ
-	prevCursorPos       *mmath.MVec2            // 前回のカーソル位置
-	yaw                 float64                 // カメラyaw
-	pitch               float64                 // カメラpitch
-	list                *ViewerList             // ビューワーリスト
-	shader              rendering.IShader       // シェーダー
-	physics             physics.IPhysics        // 物理エンジン
-	modelRenderers      []*render.ModelRenderer // モデル描画オブジェクト
-	motions             []*vmd.VmdMotion        // モーションデータ
-	vmdDeltas           []*delta.VmdDeltas      // 変形情報
+	windowIndex         int                              // ウィンドウインデックス
+	title               string                           // ウィンドウタイトル
+	leftButtonPressed   bool                             // 左ボタン押下フラグ
+	middleButtonPressed bool                             // 中ボタン押下フラグ
+	rightButtonPressed  bool                             // 右ボタン押下フラグ
+	shiftPressed        bool                             // Shiftキー押下フラグ
+	ctrlPressed         bool                             // Ctrlキー押下フラグ
+	updatedPrevCursor   bool                             // 前回のカーソル位置更新フラグ
+	prevCursorPos       *mmath.MVec2                     // 前回のカーソル位置
+	yaw                 float64                          // カメラyaw
+	pitch               float64                          // カメラpitch
+	list                *ViewerList                      // ビューワーリスト
+	shader              rendering.IShader                // シェーダー
+	physics             physics.IPhysics                 // 物理エンジン
+	modelRenderers      []*render.ModelRenderer          // モデル描画オブジェクト
+	motions             []*vmd.VmdMotion                 // モーションデータ
+	vmdDeltas           []*delta.VmdDeltas               // 変形情報
+	speculativeCaches   []*deform.SpeculativeDeformCache // 追加: 投機実行キャッシュ
+	avgElapsedTime      float32                          // 追加: 平均経過時間
+	elapsedSamples      int                              // 追加: 経過時間サンプル数
 }
 
 func newViewWindow(
@@ -88,13 +91,16 @@ func newViewWindow(
 	gl.Viewport(0, 0, int32(width), int32(height))
 
 	vw := &ViewWindow{
-		Window:        glWindow,
-		windowIndex:   windowIndex,
-		title:         title,
-		list:          list,
-		shader:        shader,
-		physics:       mbt.NewMPhysics(),
-		prevCursorPos: mmath.NewMVec2(),
+		Window:            glWindow,
+		windowIndex:       windowIndex,
+		title:             title,
+		list:              list,
+		shader:            shader,
+		physics:           mbt.NewMPhysics(),
+		prevCursorPos:     mmath.NewMVec2(),
+		speculativeCaches: make([]*deform.SpeculativeDeformCache, 0), // 投機実行キャッシュの初期化
+		avgElapsedTime:    1.0 / 30.0,                                // デフォルトは30FPS想定
+		elapsedSamples:    0,
 	}
 
 	glWindow.SetCloseCallback(vw.closeCallback)
@@ -178,17 +184,56 @@ func (vw *ViewWindow) Render(timeStep float32) {
 	vw.shader.DrawFloor()
 
 	vw.loadModelRenderers(vw.list.shared)
-
 	vw.loadMotions(vw.list.shared)
 
+	// 経過時間の平均計算を更新
+	vw.updateAverageElapsedTime(float32(timeStep))
+
+	currentFrame := vw.list.shared.Frame()
+
+	// 改良された予測関数を使用
+	nextFrame := vw.predictNextFrame(currentFrame, timeStep)
+
 	for i, modelRenderer := range vw.modelRenderers {
-		vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
+		if modelRenderer == nil || vw.motions[i] == nil {
+			continue
+		}
 
-		// mlog.IS("[%d][%d] Deform [%f]", vw.windowIndex, i, vw.list.shared.Frame())
+		// スキップ条件を先に確認
+		if i >= len(vw.speculativeCaches) || vw.speculativeCaches[i] == nil {
+			// 通常通り計算
+			vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
+			continue
+		}
 
+		// キャッシュから結果を取得を試みる
+		modelHash := modelRenderer.Model.Hash()
+		motionHash := vw.motions[i].Hash()
+		cachedDeltas := vw.speculativeCaches[i].GetResult(currentFrame, modelHash, motionHash)
+
+		if cachedDeltas != nil {
+			// キャッシュヒット - キャッシュされた結果を使用
+			vw.vmdDeltas[i] = cachedDeltas
+			vw.vmdDeltas[i] = deform.DeformPhysics(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
+		} else {
+			// キャッシュミス - 通常通り計算
+			vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
+		}
+
+		// モデルをレンダリング
 		modelRenderer.Render(vw.shader, vw.list.shared, vw.vmdDeltas[i])
 
-		// mlog.IS("[%d][%d] Render [%f]", vw.windowIndex, i, vw.list.shared.Frame())
+		// 次のフレームの投機的計算を開始
+		deform.SpeculativeDeform(
+			vw.list.shared,
+			vw.physics,
+			modelRenderer.Model,
+			vw.motions[i],
+			vw.vmdDeltas[i],
+			vw.speculativeCaches[i],
+			timeStep,
+			nextFrame,
+		)
 	}
 
 	// 物理デバッグ描画
@@ -204,4 +249,68 @@ func (vw *ViewWindow) Render(timeStep float32) {
 	vw.shader.GetMsaa().Unbind()
 
 	vw.SwapBuffers()
+}
+
+// predictNextFrame フレーム予測部分を修正
+func (vw *ViewWindow) predictNextFrame(currentFrame, timeStep float32) float32 {
+	if !vw.list.shared.Playing() {
+		return currentFrame // 停止中は同じフレーム
+	}
+
+	// 直近のフレーム間隔を使用して次のフレームを予測
+	frameAdvanceRate := float32(30.0) // 基準フレームレート
+
+	// 実際のフレームレートに対する適応処理
+	actualFrameRate := 1.0 / vw.avgElapsedTime
+	frameRateRatio := actualFrameRate / 30.0
+
+	// フレームレート比に基づいて調整（より正確なフレーム進行を実現）
+	adjustedAdvance := (timeStep * frameAdvanceRate) * frameRateRatio
+
+	// 整数フレームに合わせる補正（オプション）
+	nextFrameRaw := currentFrame + adjustedAdvance
+	nextFrameInt := float32(int(nextFrameRaw))
+	nextFrameFrac := nextFrameRaw - nextFrameInt
+
+	// 端数が0.5に近づかないように補正
+	var nextFrame float32
+	if nextFrameFrac < 0.3 {
+		nextFrame = nextFrameInt
+	} else if nextFrameFrac > 0.7 {
+		nextFrame = nextFrameInt + 1.0
+	} else {
+		nextFrame = nextFrameRaw
+	}
+
+	// 最大フレームを超えないようにする
+	if nextFrame > vw.list.shared.MaxFrame() {
+		nextFrame = 0.0
+	}
+
+	return nextFrame
+}
+
+// 平均経過時間を更新するヘルパーメソッド
+// 平均経過時間更新メソッドを改良
+
+func (vw *ViewWindow) updateAverageElapsedTime(elapsed float32) {
+	const maxSamples = 30          // サンプル数を減らしてより最近の値に重みを
+	const minElapsed = 1.0 / 120.0 // 最小値制限（異常な値を除外）
+	const maxElapsed = 1.0 / 15.0  // 最大値制限（極端な遅延を除外）
+
+	// 異常値のフィルタリング
+	if elapsed < minElapsed || elapsed > maxElapsed {
+		// 極端な値は平均計算から除外
+		return
+	}
+
+	if vw.elapsedSamples < maxSamples {
+		// 初期サンプル集計
+		vw.avgElapsedTime = ((vw.avgElapsedTime * float32(vw.elapsedSamples)) + elapsed) / float32(vw.elapsedSamples+1)
+		vw.elapsedSamples++
+	} else {
+		// 動的な重み係数を使用（より迅速に変化に対応）
+		alpha := float32(0.2) // 新しいサンプルの重み（大きくすると反応が早く、小さくすると安定）
+		vw.avgElapsedTime = (alpha * elapsed) + ((1.0 - alpha) * vw.avgElapsedTime)
+	}
 }

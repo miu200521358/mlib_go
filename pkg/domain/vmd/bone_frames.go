@@ -19,9 +19,7 @@ func NewBoneFrames() *BoneFrames {
 
 func (boneFrames *BoneFrames) Contains(boneName string) bool {
 	if _, ok := boneFrames.data[boneName]; ok {
-		if boneFrames.data[boneName] != nil && boneFrames.data[boneName].Length() > 0 {
-			return true
-		}
+		return true
 	}
 
 	return false
