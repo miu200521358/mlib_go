@@ -787,7 +787,7 @@ func deformIk(
 		ikOnGlobalPosition = ikGlobalPosition.Copy()
 
 		// IK OFF時のグローバル位置を取得して一旦IK目標にする
-		ikOffDeltas := DeformBoneByPhysicsFlag(
+		ikOffDeltas := deformBoneByPhysicsFlag(
 			model, motion, nil,
 			false, frame,
 			[]string{ikTargetBone.Name()},

@@ -17,7 +17,7 @@ func DeformModel(
 ) *pmx.PmxModel {
 	vmdDeltas := delta.NewVmdDeltas(float32(frame), model.Bones, "", "")
 	vmdDeltas.Morphs = DeformMorph(model, motion.MorphFrames, float32(frame), nil)
-	vmdDeltas = DeformBoneByPhysicsFlag(model, motion, vmdDeltas, false, float32(frame), nil, false)
+	vmdDeltas = deformBoneByPhysicsFlag(model, motion, vmdDeltas, false, float32(frame), nil, false)
 
 	// 頂点にボーン変形を適用
 	for v := range model.Vertices.Iterator() {
@@ -109,11 +109,11 @@ func DeformBone(
 	frame int,
 	boneNames []string,
 ) *delta.BoneDeltas {
-	return DeformBoneByPhysicsFlag(model, motion, nil, isCalcIk, float32(frame), boneNames, false).Bones
+	return deformBoneByPhysicsFlag(model, motion, nil, isCalcIk, float32(frame), boneNames, false).Bones
 }
 
-// DeformBoneByPhysicsFlag ボーンデフォーム処理を実行する
-func DeformBoneByPhysicsFlag(
+// deformBoneByPhysicsFlag ボーンデフォーム処理を実行する
+func deformBoneByPhysicsFlag(
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
@@ -137,6 +137,7 @@ func DeformBoneByPhysicsFlag(
 	return deltas
 }
 
+// Deform すべてのボーンデフォーム処理を実行する
 func Deform(
 	shared *state.SharedState,
 	physics physics.IPhysics,
@@ -158,6 +159,21 @@ func Deform(
 		deltas = deformBeforePhysics(model, motion, deltas, shared.Frame())
 	}
 
+	// 物理変形
+	deltas = DeformPhysics(shared, physics, model, motion, deltas, timeStep)
+
+	return deltas
+}
+
+// DeformPhysics 物理演算を含めたボーンデフォーム処理を実行する
+func DeformPhysics(
+	shared *state.SharedState,
+	physics physics.IPhysics,
+	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
+	deltas *delta.VmdDeltas,
+	timeStep float32,
+) *delta.VmdDeltas {
 	// 物理変形
 	if err := deformPhysics(shared, physics, model, deltas); err != nil {
 		return deltas
