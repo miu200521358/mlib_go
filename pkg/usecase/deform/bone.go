@@ -644,28 +644,42 @@ func updateGlobalMatrix(
 	deformBoneIndexes []int,
 ) {
 	for _, boneIndex := range deformBoneIndexes {
-		delta := boneDeltas.Get(boneIndex)
-		if delta == nil {
-			break
-		}
-		if delta.UnitMatrix == nil {
-			updateBoneDelta(boneDeltas, delta, delta.Bone)
-		}
-		delta.GlobalMatrix = nil
-		delta.LocalMatrix = nil
-		delta.GlobalPosition = nil
-
-		parentDelta := boneDeltas.Get(delta.Bone.ParentIndex)
-		if parentDelta != nil && parentDelta.GlobalIkOffMatrix != nil && parentDelta.Bone.IsIK() {
-			delta.GlobalMatrix = parentDelta.GlobalIkOffMatrix.Muled(delta.UnitMatrix)
-		} else if parentDelta != nil && parentDelta.GlobalMatrix != nil {
-			delta.GlobalMatrix = parentDelta.GlobalMatrix.Muled(delta.UnitMatrix)
-		} else {
-			// 対象ボーン自身の行列をかける
-			delta.GlobalMatrix = delta.UnitMatrix.Copy()
+		// 現在のボーンのDeltaを取得
+		d := boneDeltas.Get(boneIndex)
+		if d == nil {
+			// 該当しない場合はループを続行（breakではなくcontinueに変更）
+			continue
 		}
 
-		boneDeltas.Update(delta)
+		// UnitMatrixが未初期化の場合は先に更新
+		// （骨のローカル行列などをまだ計算していない可能性があるため）
+		if d.UnitMatrix == nil {
+			updateBoneDelta(boneDeltas, d, d.Bone)
+		}
+
+		// グローバル・ローカル位置情報をクリアし再計算する
+		d.GlobalMatrix = nil
+		d.LocalMatrix = nil
+		d.GlobalPosition = nil
+
+		// 親ボーン側のGlobalMatrixを考慮
+		parentDelta := boneDeltas.Get(d.Bone.ParentIndex)
+		switch {
+		// 親がIKボーンで、そのGlobalIkOffMatrixがあればそちらを優先
+		case parentDelta != nil && parentDelta.GlobalIkOffMatrix != nil && parentDelta.Bone.IsIK():
+			d.GlobalMatrix = parentDelta.GlobalIkOffMatrix.Muled(d.UnitMatrix)
+
+		// 通常の親グローバル行列がある場合
+		case parentDelta != nil && parentDelta.GlobalMatrix != nil:
+			d.GlobalMatrix = parentDelta.GlobalMatrix.Muled(d.UnitMatrix)
+
+		// 親がいない、または親のグローバル行列が未確定
+		default:
+			d.GlobalMatrix = d.UnitMatrix.Copy()
+		}
+
+		// 更新内容を反映
+		boneDeltas.Update(d)
 	}
 }
 
