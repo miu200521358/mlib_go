@@ -58,8 +58,8 @@ func IterParallelByCount(allCount int, blockSize int, processFunc func(index int
 }
 
 // IterParallelByList は指定された全リストに対して、引数で指定された処理を並列または直列で実行する関数です。
-func IterParallelByList(allData []int, blockSize int, logBlockSize int,
-	processFunc func(data, index int) error, logFunc func(iterIndex, allCount int)) error {
+func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
+	processFunc func(data T, index int) error, logFunc func(iterIndex, allCount int)) error {
 	numCPU := runtime.NumCPU()
 
 	runtime.GOMAXPROCS(numCPU)
