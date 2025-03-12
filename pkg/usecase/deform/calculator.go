@@ -75,7 +75,7 @@ func calculateTotalLocalMat(
 	if bd == nil || bd.LocalMatrix == nil {
 		return nil
 	}
-	return bd.FilledTotalLocalMat()
+	return bd.TotalLocalMat()
 }
 
 // ----------------------------------------------------------------------------
@@ -98,16 +98,20 @@ func accumulateTotalRotation(
 	}
 
 	// すでに合成済みのトータル回転を前提として使う場合
-	rot := bd.FilledTotalRotation()
+	rot := bd.TotalRotation()
 
 	// ボーンが回転付与を持つ場合、エフェクタ先の回転を再帰合成
 	if bd.Bone.IsEffectorRotation() {
 		effectorRot := accumulateTotalRotation(deltas, bd.Bone.EffectIndex, recursion+1, bd.Bone.EffectFactor)
 		if rot != nil && effectorRot != nil {
-			rot.Mul(effectorRot)
+			rot = rot.Muled(effectorRot)
 		} else if effectorRot != nil {
 			rot = effectorRot
 		}
+	}
+
+	if rot == nil {
+		return nil
 	}
 
 	return rot.MuledScalar(factor)
@@ -121,16 +125,16 @@ func accumulateBoneRotation(
 	factor float64,
 ) *mmath.MQuaternion {
 	if recursion > maxEffectorRecursion {
-		return mmath.NewMQuaternion()
+		return nil
 	}
 
 	bd := deltas.Get(boneIndex)
 	if bd == nil {
-		return mmath.NewMQuaternion()
+		return nil
 	}
 
 	// フレーム上の回転
-	rot := mmath.NewMQuaternion()
+	var rot *mmath.MQuaternion
 	if bd.FrameRotation != nil {
 		rot = bd.FrameRotation.Copy()
 	}
@@ -138,12 +142,22 @@ func accumulateBoneRotation(
 	// エフェクタ回転がある場合のみ再帰
 	if bd.Bone.IsEffectorRotation() {
 		effectorRot := accumulateBoneRotation(deltas, bd.Bone.EffectIndex, recursion+1, bd.Bone.EffectFactor)
-		rot.Mul(effectorRot)
+		if rot != nil && effectorRot != nil {
+			rot = rot.Muled(effectorRot)
+		} else if effectorRot != nil {
+			rot = effectorRot
+		} else if rot != nil {
+			rot = rot.Muled(effectorRot)
+		}
 	}
 
 	// 固定軸などがあればここで適用
-	if bd.Bone.HasFixedAxis() && bd.Bone.NormalizedFixedAxis != nil {
+	if rot != nil && bd.Bone.HasFixedAxis() && bd.Bone.NormalizedFixedAxis != nil {
 		rot = rot.ToFixedAxisRotation(bd.Bone.NormalizedFixedAxis)
+	}
+
+	if rot == nil {
+		return nil
 	}
 
 	return rot.MuledScalar(factor)
@@ -163,18 +177,24 @@ func accumulateTotalPosition(
 		return nil
 	}
 
+	totalPos := bd.TotalPosition()
+
 	// 移動付与があれば再帰的に合成
 	if bd.Bone.IsEffectorTranslation() {
 		effectorPos := accumulateTotalPosition(deltas, bd.Bone.EffectIndex, recursion+1)
-		if effectorPos == nil {
-			return effectorPos.MuledScalar(bd.Bone.EffectFactor).ToMat4().Translation()
-		} else {
-			return bd.FilledTotalPosition().ToMat4().Muled(
+		if totalPos != nil && effectorPos != nil {
+			return totalPos.ToMat4().Muled(
 				effectorPos.MuledScalar(bd.Bone.EffectFactor).ToMat4()).Translation()
+		} else if effectorPos != nil {
+			return effectorPos.MuledScalar(bd.Bone.EffectFactor).ToMat4().Translation()
 		}
 	}
 
-	return bd.FilledTotalPosition().Copy()
+	if totalPos == nil {
+		return nil
+	}
+
+	return bd.TotalPosition()
 }
 
 // スケール合成
@@ -192,7 +212,7 @@ func accumulateTotalScale(
 		return nil
 	}
 
-	return bd.FilledTotalScale()
+	return bd.TotalScale()
 }
 
 // ----------------------------------------------------------------------------
@@ -219,8 +239,7 @@ func applyCancelableRotation(
 	if !hasSelfCancel {
 		if parentMat == nil {
 			return rotMat
-		}
-		if rotMat == nil {
+		} else if rotMat == nil {
 			return parentMat.Inverted()
 		}
 		return rotMat.Muled(parentMat.Inverted())
@@ -269,16 +288,24 @@ func cancelBoneRotation(
 	if bd.FrameCancelableRotation == nil || bd.FrameCancelableRotation.IsIdent() {
 		if parentMat == nil {
 			return rot
+		} else if rot == nil {
+			return parentMat.Inverted().Quaternion()
 		}
 		return rot.ToMat4().Muled(parentMat.Inverted()).Quaternion()
 	}
 
 	// 自身のキャンセル適用
-	newMat := rot.ToMat4().Muled(bd.FrameCancelableRotation.ToMat4())
+	var newMat *mmath.MMat4
+	if rot != nil {
+		newMat = rot.ToMat4().Muled(bd.FrameCancelableRotation.ToMat4())
+	}
 
-	if parentMat == nil {
+	if parentMat == nil && newMat == nil {
+		return rot
+	} else if parentMat == nil {
 		return newMat.Quaternion()
 	}
+
 	return newMat.Muled(parentMat.Inverted()).Quaternion()
 }
 
@@ -301,8 +328,7 @@ func applyCancelablePosition(
 	if !hasSelfCancel {
 		if parentMat == nil {
 			return posMat
-		}
-		if posMat == nil {
+		} else if posMat == nil {
 			return parentMat.Inverted()
 		}
 		return posMat.Muled(parentMat.Inverted())
@@ -325,8 +351,7 @@ func applyCancelablePosition(
 
 	if parentMat == nil {
 		return posMat
-	}
-	if posMat == nil {
+	} else if posMat == nil {
 		return parentMat.Inverted()
 	}
 	return posMat.Muled(parentMat.Inverted())
@@ -376,8 +401,7 @@ func applyCancelableScale(
 
 	if parentMat == nil {
 		return scaleMat
-	}
-	if scaleMat == nil {
+	} else if scaleMat == nil {
 		return parentMat.Inverted()
 	}
 

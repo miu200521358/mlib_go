@@ -113,17 +113,32 @@ func (bd *BoneDelta) FilledFrameMorphCancelableRotation() *mmath.MQuaternion {
 	return bd.FrameMorphCancelableRotation
 }
 
-// トータルの回転(モーフ含む)を返す
+// トータルの回転(モーフ含む)を返す(なかった場合、Identを返す)
 func (bd *BoneDelta) FilledTotalRotation() *mmath.MQuaternion {
-	rot := bd.FilledFrameRotation().Copy()
-	morphRot := bd.FilledFrameMorphRotation()
-	if !morphRot.IsIdent() {
-		rot.Mul(morphRot)
+	rot := bd.TotalRotation()
+	if rot == nil {
+		rot = mmath.MQuaternionIdent
 	}
+	return rot
+}
+
+// トータルの回転(モーフ含む)を返す(なかった場合、nilを返す)
+func (bd *BoneDelta) TotalRotation() *mmath.MQuaternion {
+	rot := bd.FrameRotation
+	morphRot := bd.FrameMorphRotation
+	if morphRot != nil && !morphRot.IsIdent() {
+		if rot == nil {
+			rot = morphRot.Copy()
+		} else {
+			rot = rot.Muled(morphRot)
+		}
+	}
+
 	// ボーンが固定軸を持っている場合の最終調整
-	if bd.Bone.HasFixedAxis() {
+	if rot != nil && bd.Bone.HasFixedAxis() {
 		rot = rot.ToFixedAxisRotation(bd.Bone.NormalizedFixedAxis)
 	}
+
 	return rot
 }
 
@@ -152,13 +167,27 @@ func (bd *BoneDelta) FilledFrameMorphCancelablePosition() *mmath.MVec3 {
 	return bd.FrameMorphCancelablePosition
 }
 
-// トータルの位置(モーフ含む)を返す
+// トータルの位置(モーフ含む)を返す(なかった場合、Zeroを返す)
 func (bd *BoneDelta) FilledTotalPosition() *mmath.MVec3 {
-	p := bd.FilledFramePosition().Copy()
-	if !bd.FilledFrameMorphPosition().IsZero() {
-		p.Add(bd.FrameMorphPosition)
+	pos := bd.TotalPosition()
+	if pos == nil {
+		return mmath.MVec3Zero
 	}
-	return p
+	return pos
+}
+
+// トータルの位置(モーフ含む)を返す(なかった場合、nilを返す)
+func (bd *BoneDelta) TotalPosition() *mmath.MVec3 {
+	pos := bd.FramePosition
+	morphPos := bd.FrameMorphPosition
+	if morphPos != nil && !morphPos.IsZero() {
+		if pos == nil {
+			pos = morphPos
+		} else {
+			pos = pos.Added(morphPos)
+		}
+	}
+	return pos
 }
 
 // スケール系
@@ -187,14 +216,27 @@ func (bd *BoneDelta) FilledFrameMorphCancelableScale() *mmath.MVec3 {
 	return bd.FrameMorphCancelableScale
 }
 
-// トータルのスケール(モーフ含む)を返す
+// トータルのスケール(モーフ含む)を返す(なかった場合、Oneを返す)
 func (bd *BoneDelta) FilledTotalScale() *mmath.MVec3 {
-	s := bd.FilledFrameScale().Copy()
-	morphS := bd.FilledFrameMorphScale()
-	if !morphS.IsOne() {
-		s.Mul(morphS)
+	scale := bd.TotalScale()
+	if scale == nil {
+		return mmath.MVec3One
 	}
-	return s
+	return scale
+}
+
+// トータルのスケール(モーフ含む)を返す(なかった場合、nilを返す)
+func (bd *BoneDelta) TotalScale() *mmath.MVec3 {
+	scale := bd.FrameScale
+	morphScale := bd.FrameMorphScale
+	if morphScale != nil && !morphScale.IsOne() {
+		if scale == nil {
+			scale = morphScale
+		} else {
+			scale = scale.Muled(morphScale)
+		}
+	}
+	return scale
 }
 
 // ローカル行列
@@ -211,12 +253,25 @@ func (bd *BoneDelta) FilledFrameLocalMorphMat() *mmath.MMat4 {
 	return bd.FrameLocalMorphMat
 }
 
-// トータルのローカル行列(モーフ含む)
+// トータルのローカル行列(モーフ含む)(なかった場合、Identを返す)
 func (bd *BoneDelta) FilledTotalLocalMat() *mmath.MMat4 {
-	mat := bd.FilledFrameLocalMat().Copy()
-	morphMat := bd.FilledFrameLocalMorphMat()
-	if !morphMat.IsIdent() {
-		mat.Mul(morphMat)
+	mat := bd.TotalLocalMat()
+	if mat == nil {
+		return mmath.MMat4Ident
+	}
+	return mat
+}
+
+// トータルのローカル行列(モーフ含む)(なかった場合、nilを返す)
+func (bd *BoneDelta) TotalLocalMat() *mmath.MMat4 {
+	mat := bd.FrameLocalMat
+	morphMat := bd.FrameLocalMorphMat
+	if morphMat != nil && !morphMat.IsIdent() {
+		if mat == nil {
+			mat = morphMat
+		} else {
+			mat = mat.Muled(morphMat)
+		}
 	}
 	return mat
 }
