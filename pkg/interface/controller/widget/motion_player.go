@@ -119,10 +119,10 @@ func (mp *MotionPlayer) Reset(maxFrame float32) {
 	oldMaxFrame := mp.window.MaxFrame()
 	newMaxFrame := max(oldMaxFrame, maxFrame)
 
-	mp.ChangeValue(0)
+	mp.ChangeValue(0.0)
 	mp.frameEdit.SetRange(0, float64(newMaxFrame))
 	mp.frameSlider.SetRange(0, int(newMaxFrame))
-	mp.window.SetFrame(0)
+	mp.window.SetFrame(0.0)
 	mp.window.SetMaxFrame(newMaxFrame)
 }
 

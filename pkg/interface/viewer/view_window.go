@@ -15,7 +15,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
-	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
@@ -145,7 +144,7 @@ func (vw *ViewWindow) resetCameraPosition(yaw, pitch float64) {
 	vw.shader.SetCamera(cam)
 }
 
-func (vw *ViewWindow) Render(shared *state.SharedState, timeStep float32) {
+func (vw *ViewWindow) Render(timeStep float32) {
 	w, h := vw.GetSize()
 	if w == 0 && h == 0 {
 		// ウィンドウが最小化されている場合は描画しない
@@ -178,19 +177,23 @@ func (vw *ViewWindow) Render(shared *state.SharedState, timeStep float32) {
 	// 床描画
 	vw.shader.DrawFloor()
 
-	vw.loadModelRenderers(shared)
+	vw.loadModelRenderers(vw.list.shared)
 
-	vw.loadMotions(shared)
+	vw.loadMotions(vw.list.shared)
 
 	for i, modelRenderer := range vw.modelRenderers {
 		vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
 
-		modelRenderer.Render(vw.shader, shared, vw.vmdDeltas[i])
+		// mlog.IS("[%d][%d] Deform [%f]", vw.windowIndex, i, vw.list.shared.Frame())
+
+		modelRenderer.Render(vw.shader, vw.list.shared, vw.vmdDeltas[i])
+
+		// mlog.IS("[%d][%d] Render [%f]", vw.windowIndex, i, vw.list.shared.Frame())
 	}
 
 	// 物理デバッグ描画
-	vw.physics.DrawDebugLines(vw.shader, shared.IsShowRigidBodyFront() || shared.IsShowRigidBodyBack(),
-		shared.IsShowJoint(), shared.IsShowRigidBodyFront())
+	vw.physics.DrawDebugLines(vw.shader, vw.list.shared.IsShowRigidBodyFront() || vw.list.shared.IsShowRigidBodyBack(),
+		vw.list.shared.IsShowJoint(), vw.list.shared.IsShowRigidBodyFront())
 
 	// 深度解決
 	vw.shader.GetMsaa().Resolve()

@@ -57,16 +57,16 @@ func (vl *ViewerList) Add(title string, width, height, positionX, positionY int)
 }
 
 const (
-	physicsDefaultSpf = 1.0 / 60.0 // デフォルトの物理spf
-	deformDefaultSpf  = 1.0 / 30.0 // デフォルトのデフォームspf
-	deformDefaultFps  = 30.0       // デフォルトのデフォームfps
+	physicsDefaultSpf = float32(1.0 / 60.0) // デフォルトの物理spf
+	deformDefaultSpf  = 1.0 / 30.0          // デフォルトのデフォームspf
+	deformDefaultFps  = float32(30.0)       // デフォルトのデフォームfps
 )
 
 func (vl *ViewerList) Run() {
 	prevTime := glfw.GetTime()
 	prevShowTime := prevTime
 
-	elapsedList := make([]float32, 0, 120)
+	elapsedList := make([]float64, 0, 120)
 
 	for !vl.shared.IsClosed() {
 		// イベント処理
@@ -83,15 +83,15 @@ func (vl *ViewerList) Run() {
 		originalElapsed := frameTime - prevTime
 
 		// フレームレート制御と描画処理
-		if isRendered, elapsed, timeStep := vl.processFrame(originalElapsed); isRendered {
+		if isRendered, timeStep := vl.processFrame(originalElapsed); isRendered {
 			// 描画にかかった時間を計測
-			elapsedList = append(elapsedList, elapsed)
+			elapsedList = append(elapsedList, originalElapsed)
 
 			// 情報表示処理
 			if vl.shared.IsShowInfo() {
 				currentTime := glfw.GetTime()
 				if currentTime-prevShowTime >= 1.0 {
-					vl.updateFpsDisplay(float32(mmath.Mean(elapsedList)), timeStep)
+					vl.updateFpsDisplay(mmath.Mean(elapsedList), timeStep)
 					prevShowTime = currentTime
 					elapsedList = elapsedList[:0]
 				}
@@ -99,7 +99,6 @@ func (vl *ViewerList) Run() {
 
 			prevTime = frameTime
 		}
-
 	}
 
 	// クリーンアップ
@@ -131,7 +130,8 @@ func (vl *ViewerList) handleWindowFocus() {
 }
 
 // processFrame フレーム処理ロジック
-func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, elapsed float32, timeStep float32) {
+func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, timeStep float32) {
+	var elapsed float32
 
 	if !vl.shared.IsEnabledFrameDrop() {
 		timeStep = physicsDefaultSpf
@@ -150,38 +150,40 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, el
 			// 経過時間が1フレームの時間未満の場合はもう少し待つ
 			time.Sleep(sleepDur)
 		}
-		return false, 0, 0
+		return false, 0.0
 	}
 
 	// レンダリング処理
 	for _, viewWindow := range vl.viewerList {
-		viewWindow.Render(vl.shared, timeStep)
+		viewWindow.Render(timeStep)
 	}
 
 	// フレーム更新
 	if vl.shared.Playing() && !vl.shared.IsClosed() {
-		frame := vl.shared.Frame() + float32(elapsed*deformDefaultFps)
+		frame := vl.shared.Frame() + (elapsed * deformDefaultFps)
+		// mlog.IS("Playing Frame: %f", frame)
 		if frame > vl.shared.MaxFrame() {
-			frame = 0
+			frame = 0.0
 			vl.shared.SetClosed(true)
 		}
 		vl.shared.SetFrame(frame)
 	}
 
-	return true, float32(originalElapsed), timeStep
+	return true, timeStep
 }
 
 // updateFpsDisplay FPS表示を更新する処理
-func (vl *ViewerList) updateFpsDisplay(avgElapsed, timeStep float32) {
-	fps := 1.0 / avgElapsed
+func (vl *ViewerList) updateFpsDisplay(meanElapsed float64, timeStep float32) {
+	deformFps := 1.0 / meanElapsed
 	var suffixFps string
 
 	if vl.appConfig.IsEnvProd() {
 		// リリース版の場合、FPSの表示を簡略化
-		suffixFps = fmt.Sprintf("%.2f fps", fps)
+		suffixFps = fmt.Sprintf("%.2f fps", deformFps)
 	} else {
 		// 開発版の場合、FPSの表示を詳細化
-		suffixFps = fmt.Sprintf("d) %.2f / p) %.2f fps", fps, 1.0/timeStep)
+		physicsFps := 1.0 / timeStep
+		suffixFps = fmt.Sprintf("d) %.2f / p) %.2f fps", deformFps, physicsFps)
 	}
 
 	for _, viewWindow := range vl.viewerList {
