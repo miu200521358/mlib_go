@@ -29,10 +29,13 @@ func getLinkAxis(
 	ikMotion *vmd.VmdMotion,
 	ikFile *os.File,
 ) (*mmath.MVec3, *mmath.MVec3) {
+	// デバッグ出力条件を1回だけ評価
+	isDebug := mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil
+
 	// 回転軸
 	linkAxis := ikTargetLocalPosition.Cross(ikLocalPosition).Normalize()
 
-	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+	if isDebug {
 		fmt.Fprintf(ikFile,
 			"[%.3f][%03d][%s][%05d][linkAxis] %s\n",
 			frame, loop, linkBoneName, count-1, linkAxis.MMD().String(),
@@ -40,7 +43,7 @@ func getLinkAxis(
 	}
 
 	// linkMat := linkQuat.ToMat4()
-	// if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+	// if isDebug {
 	// 	fmt.Fprintf(ikFile,
 	// 		"[%.3f][%03d][%s][%05d][linkMat] %s (x: %s, y: %s, z: %s)\n",
 	// 		frame, loop, linkBoneName, count-1, linkMat.String(), linkMat.AxisX().String(), linkMat.AxisY().String(), linkMat.AxisZ().String())
@@ -50,7 +53,7 @@ func getLinkAxis(
 		// X軸のみの制限の場合
 		vv := linkAxis.X
 
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile,
 				"[%.3f][%03d][%s][%05d][linkAxis(X軸制限)] vv: %.8f\n",
 				frame, loop, linkBoneName, count-1, vv)
@@ -64,7 +67,7 @@ func getLinkAxis(
 		// Y軸のみの制限の場合
 		vv := linkAxis.Y
 
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile,
 				"[%.3f][%03d][%s][%05d][linkAxis(Y軸制限)] vv: %.8f\n",
 				frame, loop, linkBoneName, count-1, vv)
@@ -78,7 +81,7 @@ func getLinkAxis(
 		// Z軸のみの制限の場合
 		vv := linkAxis.Z
 
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile,
 				"[%.3f][%03d][%s][%05d][linkAxis(Z軸制限)] vv: %.8f\n",
 				frame, loop, linkBoneName, count-1, vv)
@@ -358,9 +361,12 @@ func getIkAxisValue(
 	ikMotion *vmd.VmdMotion,
 	ikFile *os.File,
 ) float64 {
+	// デバッグ出力条件を1回だけ評価
+	isDebug := mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil
+
 	isInLoop := float64(loop) < float64(loopCount)/2.0
 
-	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+	if isDebug {
 		fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][%s-getIkAxisValue] loop: %d, isInLoop: %v\n",
 			frame, loop, linkBoneName, count-1, axisName, loop, isInLoop)
 	}
@@ -368,14 +374,14 @@ func getIkAxisValue(
 	if fV < minAngleLimit {
 		tf := 2*minAngleLimit - fV
 		if tf <= maxAngleLimit && isInLoop {
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isDebug {
 				fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][%s-最小角度(loop内)] minAngleLimit: %f, fV: %f, tf: %f\n",
 					frame, loop, linkBoneName, count-1, axisName, minAngleLimit, fV, tf)
 			}
 
 			fV = tf
 		} else {
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isDebug {
 				fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][%s-最小角度(loop外)] minAngleLimit: %f, fV: %f, tf: %f\n",
 					frame, loop, linkBoneName, count-1, axisName, minAngleLimit, fV, tf)
 			}
@@ -387,14 +393,14 @@ func getIkAxisValue(
 	if fV > maxAngleLimit {
 		tf := 2*maxAngleLimit - fV
 		if tf >= minAngleLimit && isInLoop {
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isDebug {
 				fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][%s-最大角度(loop内)] maxAngleLimit: %f, fV: %f, tf: %f\n",
 					frame, loop, linkBoneName, count-1, axisName, maxAngleLimit, fV, tf)
 			}
 
 			fV = tf
 		} else {
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isDebug {
 				fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][%s-最大角度(loop外)] maxAngleLimit: %f, fV: %f, tf: %f\n",
 					frame, loop, linkBoneName, count-1, axisName, maxAngleLimit, fV, tf)
 			}
@@ -637,8 +643,11 @@ func deformIk(
 		return deltas.Bones
 	}
 
+	// デバッグ出力条件を1回だけ評価
+	isDebug := mlog.IsIkVerbose()
+
 	var prefixPath string
-	if mlog.IsIkVerbose() {
+	if isDebug {
 		// IK計算デバッグ用モーション
 		dirPath := fmt.Sprintf("%s/IK_step", filepath.Dir(model.Path()))
 		err := os.MkdirAll(dirPath, 0755)
@@ -657,7 +666,7 @@ func deformIk(
 	var globalMotion *vmd.VmdMotion
 	count := 1
 
-	if mlog.IsIkVerbose() {
+	if isDebug {
 		// IK計算デバッグ用モーション
 		ikMotionPath := fmt.Sprintf("%s_%s.vmd", prefixPath, ikBone.Name())
 		ikMotion = vmd.NewVmdMotion(ikMotionPath)
@@ -675,6 +684,11 @@ func deformIk(
 		fmt.Println(ikFile, "----------------------------------------")
 		fmt.Println(ikFile, "[IK計算出力先][%.3f][%s] %s", frame, ikMotionPath)
 	}
+
+	// ikFile、ikMotion、globalMotionが初期化されていることを確認
+	isFullDebug := isDebug && ikMotion != nil && ikFile != nil
+	isGlobalDebug := isDebug && globalMotion != nil && ikFile != nil
+
 	defer func() {
 		mlog.IV("[IK計算終了][%.3f][%s]", frame, ikBone.Name())
 
@@ -706,7 +720,7 @@ func deformIk(
 	// IKターゲットボーン
 	ikTargetBone, _ := model.Bones.Get(ikBone.Ik.BoneIndex)
 
-	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+	if isFullDebug {
 		ikOffMotion := vmd.NewVmdMotion(fmt.Sprintf("%s_0_%s.vmd", prefixPath, ikBone.Name()))
 
 		bif := vmd.NewIkFrame(0)
@@ -752,7 +766,7 @@ func deformIk(
 		}
 	}
 
-	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+	if isFullDebug {
 		bf := vmd.NewBoneFrame(float32(count))
 		bf.Position = deltas.Bones.Get(ikBone.Index()).FilledFramePosition()
 		bf.Rotation = deltas.Bones.Get(ikBone.Index()).FilledTotalRotation()
@@ -784,7 +798,7 @@ func deformIk(
 		// IK OFF 時の IKターゲットボーンのグローバル位置を取得
 		ikGlobalPosition = ikOffDeltas.Bones.Get(ikTargetBone.Index()).FilledGlobalPosition()
 
-		if mlog.IsIkVerbose() && globalMotion != nil && ikFile != nil {
+		if isGlobalDebug {
 			{
 				bf := vmd.NewBoneFrame(float32(count))
 				bf.Position = ikGlobalPosition
@@ -816,7 +830,7 @@ ikLoop:
 				continue
 			}
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isFullDebug {
 				fmt.Fprintf(ikFile,
 					"[%.3f][%03d][%s][%05d] -------------------------------------------- \n",
 					frame, loop, linkBone.Name(), count-1)
@@ -829,7 +843,7 @@ ikLoop:
 			}
 			linkQuat := linkDelta.FilledTotalRotation()
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isFullDebug {
 				bf := vmd.NewBoneFrame(float32(count))
 				bf.Rotation = linkQuat.Copy()
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
@@ -848,7 +862,7 @@ ikLoop:
 			// ワールド座標系から注目ノードの局所座標系への変換
 			linkInvMatrix := deltas.Bones.Get(linkBone.Index()).FilledGlobalMatrix().Inverted()
 
-			if mlog.IsIkVerbose() && globalMotion != nil && ikFile != nil {
+			if isGlobalDebug {
 				{
 					bf := vmd.NewBoneFrame(float32(count))
 					bf.Position = ikGlobalPosition
@@ -866,7 +880,7 @@ ikLoop:
 			if loop == 1 && lidx == 0 && ikTargetDeformIndex < ikDeformIndex && ikOnGlobalPosition != nil {
 				ikGlobalPosition = ikOnGlobalPosition
 
-				if mlog.IsIkVerbose() && globalMotion != nil && ikFile != nil {
+				if isGlobalDebug {
 					{
 						bf := vmd.NewBoneFrame(float32(count))
 						bf.Position = deltas.Bones.Get(linkBone.Index()).FilledGlobalPosition()
@@ -886,7 +900,7 @@ ikLoop:
 				}
 			}
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isFullDebug {
 				fmt.Fprintf(ikFile,
 					"[%.3f][%03d][%s][%05d][Global] [%s]ikGlobalPosition: %s, "+
 						"[%s]ikTargetGlobalPosition: %s, [%s]linkGlobalPosition: %s\n",
@@ -901,7 +915,7 @@ ikLoop:
 			// 注目ノードを起点とした、IK目標のローカル位置
 			ikLocalPosition := linkInvMatrix.MulVec3(ikGlobalPosition)
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isFullDebug {
 				fmt.Fprintf(ikFile,
 					"[%.3f][%03d][%s][%05d][Local] ikTargetLocalPosition: %s, ikLocalPosition: %s (%f)\n",
 					frame, loop, linkBone.Name(), count-1,
@@ -914,7 +928,7 @@ ikLoop:
 
 			distanceThreshold := ikTargetLocalPosition.Distance(ikLocalPosition)
 			if distanceThreshold < 1e-5 {
-				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+				if isFullDebug {
 					fmt.Fprintf(ikFile,
 						"[%.3f][%03d][%s][%05d][Local] ***BREAK*** distanceThreshold: %f\n",
 						frame, loop, linkBone.Name(), count-1, distanceThreshold)
@@ -923,7 +937,7 @@ ikLoop:
 				break ikLoop
 			}
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isFullDebug {
 				fmt.Fprintf(ikFile,
 					"[%.3f][%03d][%s][%05d][Local] ikTargetLocalPositionNorm: %s, ikLocalPositionNorm: %s\n",
 					frame, loop, linkBone.Name(), count-1,
@@ -934,7 +948,7 @@ ikLoop:
 			unitRad := ikBone.Ik.UnitRotation.X * float64(lidx+1)
 			linkDot := ikLocalPosition.Dot(ikTargetLocalPosition)
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isFullDebug {
 				fmt.Fprintf(ikFile,
 					"[%.3f][%03d][%s][%05d][回転角度] unitRad: %.8f (%.5f), linkDot: %.8f\n",
 					frame, loop, linkBone.Name(), count-1, unitRad, mmath.RadToDeg(unitRad), linkDot,
@@ -946,7 +960,7 @@ ikLoop:
 			originalLinkAngle := math.Acos(mmath.Clamped(linkDot, -1, 1))
 			linkAngle := mmath.Clamped(originalLinkAngle, -unitRad, unitRad)
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isFullDebug {
 				fmt.Fprintf(ikFile,
 					"[%.3f][%03d][%s][%05d][単位角制限] linkAngle: %.8f(%.5f), originalLinkAngle: %.8f(%.5f)\n",
 					frame, loop, linkBone.Name(), count-1, linkAngle, mmath.RadToDeg(linkAngle),
@@ -983,7 +997,7 @@ ikLoop:
 				)
 			}
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isFullDebug {
 				fmt.Fprintf(ikFile,
 					"[%.3f][%03d][%s][%05d][回転軸] linkAxis: %s, originalLinkAxis: %s\n",
 					frame, loop, linkBone.Name(), count-1, linkAxis.String(), originalLinkAxis.String(),
@@ -1014,7 +1028,7 @@ ikLoop:
 			originalTotalIkQuat := linkQuat.Muled(originalIkQuat)
 			totalIkQuat := linkQuat.Muled(ikQuat)
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isFullDebug {
 				{
 					bf := vmd.NewBoneFrame(float32(count))
 					bf.Rotation = originalTotalIkQuat.Copy()
@@ -1057,7 +1071,7 @@ ikLoop:
 					frame, count, linkBone.Name(), ikMotion, ikFile,
 				)
 
-				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+				if isFullDebug {
 					bf := vmd.NewBoneFrame(float32(count))
 					bf.Rotation = resultIkQuat.Copy()
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
@@ -1082,7 +1096,7 @@ ikLoop:
 					frame, count, linkBone.Name(), ikMotion, ikFile,
 				)
 
-				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+				if isFullDebug {
 					bf := vmd.NewBoneFrame(float32(count))
 					bf.Rotation = resultIkQuat.Copy()
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
@@ -1110,7 +1124,7 @@ ikLoop:
 				// 軸制限ありの場合、軸にそった理想回転量とする
 				resultIkQuat = resultIkQuat.ToFixedAxisRotation(linkBone.NormalizedFixedAxis)
 
-				if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+				if isFullDebug {
 					bf := vmd.NewBoneFrame(float32(count))
 					bf.Rotation = resultIkQuat.Copy()
 					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
@@ -1128,7 +1142,7 @@ ikLoop:
 			updateBoneDelta(deltas.Bones, linkDelta, linkBone)
 			updateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isFullDebug {
 				linkBf := vmd.NewBoneFrame(float32(count))
 				linkBf.Rotation = linkDelta.FilledTotalRotation().Copy()
 				ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), linkBf)
