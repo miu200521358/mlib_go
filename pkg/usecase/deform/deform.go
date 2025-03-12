@@ -152,10 +152,55 @@ func Deform(
 	// 物理前変形
 	frame := shared.Frame()
 
-	if deltas == nil || deltas.Frame() != frame ||
-		deltas.ModelHash() != model.Hash() || deltas.MotionHash() != motion.Hash() {
-		// 前とは条件が違う場合のみ再計算
-		deltas = deformBeforePhysics(model, motion, deltas, shared.Frame())
+	// 以前のデルタが利用可能かどうかチェック
+	shouldRecalculate := deltas == nil ||
+		deltas.Frame() != frame ||
+		deltas.ModelHash() != model.Hash() ||
+		deltas.MotionHash() != motion.Hash()
+
+	// 変更がない場合は物理のみ計算
+	if !shouldRecalculate {
+		return DeformPhysics(shared, physics, model, motion, deltas, timeStep)
+	}
+
+	// 前とは条件が違う場合のみ再計算
+	deltas = deformBeforePhysics(model, motion, deltas, shared.Frame())
+
+	// 物理変形
+	return DeformPhysics(shared, physics, model, motion, deltas, timeStep)
+}
+
+// DeformBeforePhysics は物理演算前のボーンデフォーム処理を実行する公開関数
+func DeformBeforePhysics(
+	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
+	vmdDeltas *delta.VmdDeltas,
+	frame float32,
+) *delta.VmdDeltas {
+	// すでに計算済みでフレームも同じなら再利用
+	if vmdDeltas != nil &&
+		vmdDeltas.Frame() == frame &&
+		vmdDeltas.ModelHash() == model.Hash() &&
+		vmdDeltas.MotionHash() == motion.Hash() &&
+		vmdDeltas.Bones != nil {
+		return vmdDeltas
+	}
+
+	return deformBeforePhysics(model, motion, vmdDeltas, frame)
+}
+
+// DeformPhysics は物理変形処理
+func DeformPhysics(
+	shared *state.SharedState,
+	physics physics.IPhysics,
+	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
+	deltas *delta.VmdDeltas,
+	timeStep float32,
+) *delta.VmdDeltas {
+	// 物理が無効で物理リセットでもない場合は計算をスキップ
+	if !shared.IsEnabledPhysics() && !shared.IsPhysicsReset() {
+		return deltas
 	}
 
 	// 物理変形
@@ -163,16 +208,18 @@ func Deform(
 		return deltas
 	}
 
+	// 物理シミュレーション更新（物理有効時または物理リセット時のみ）
 	if shared.IsEnabledPhysics() || shared.IsPhysicsReset() {
-		// 物理更新
+		// 物理エンジンのステップ実行
 		physics.StepSimulation(timeStep)
 	}
 
 	// 物理後変形
-	deltas = deformAfterPhysics(shared, physics, model, motion, deltas)
-
-	return deltas
+	return deformAfterPhysics(shared, physics, model, motion, deltas)
 }
+
+// 固定タイムステップの定義
+const physicsDefaultTimeStep = 1.0 / 60.0
 
 // deformBeforePhysics 物理演算前のボーンデフォーム処理を実行する
 func deformBeforePhysics(
