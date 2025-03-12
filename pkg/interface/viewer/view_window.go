@@ -7,12 +7,10 @@ import (
 	"fmt"
 	"image"
 	"math"
-	"sync"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl64"
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
@@ -44,10 +42,6 @@ type ViewWindow struct {
 	modelRenderers      []*render.ModelRenderer // モデル描画オブジェクト
 	motions             []*vmd.VmdMotion        // モーションデータ
 	vmdDeltas           []*delta.VmdDeltas      // 変形情報
-	nextVmdDeltas       []*delta.VmdDeltas      // 次フレーム用の変形情報
-	calcMutex           sync.Mutex              // 並列計算用のミューテックス
-	isCalculating       bool                    // 計算中フラグ
-	nextFrame           float32                 // 次フレーム
 }
 
 func newViewWindow(
@@ -151,104 +145,12 @@ func (vw *ViewWindow) resetCameraPosition(yaw, pitch float64) {
 	vw.shader.SetCamera(cam)
 }
 
-// キュー状態で次フレームの計算を開始する
-func (vw *ViewWindow) startNextFrameCalculation(nextFrame float32) {
-	vw.calcMutex.Lock()
-
-	// すでに計算中または同じフレームの計算がキューにある場合はスキップ
-	if vw.isCalculating || (vw.nextVmdDeltas != nil && vw.nextFrame == nextFrame) {
-		vw.calcMutex.Unlock()
-		return
-	}
-
-	vw.isCalculating = true
-	vw.nextFrame = nextFrame
-	vw.calcMutex.Unlock()
-
-	go func() {
-		// モデルが読み込まれていない場合は何もしない
-		if len(vw.modelRenderers) == 0 || len(vw.motions) == 0 {
-			vw.calcMutex.Lock()
-			vw.isCalculating = false
-			vw.calcMutex.Unlock()
-			return
-		}
-
-		// 各モデルの次フレームのdeformBeforePhysicsを計算
-		nextDeltas := make([]*delta.VmdDeltas, len(vw.modelRenderers))
-		for i, modelRenderer := range vw.modelRenderers {
-			if i < len(vw.motions) && vw.motions[i] != nil {
-				// 現在のデルタが有効で、モデルとモーションのハッシュが一致する場合は再利用
-				if i < len(vw.vmdDeltas) && vw.vmdDeltas[i] != nil &&
-					vw.vmdDeltas[i].ModelHash() == modelRenderer.Model.Hash() &&
-					vw.vmdDeltas[i].MotionHash() == vw.motions[i].Hash() {
-					// deformBeforePhysicsのみ並列処理で行う
-					nextDeltas[i] = deform.DeformBeforePhysics(
-						modelRenderer.Model,
-						vw.motions[i],
-						vw.vmdDeltas[i],
-						nextFrame,
-					)
-				} else {
-					// 完全に新規計算が必要な場合
-					nextDeltas[i] = deform.DeformBeforePhysics(
-						modelRenderer.Model,
-						vw.motions[i],
-						nil,
-						nextFrame,
-					)
-				}
-			}
-		}
-
-		// 結果を保存
-		vw.calcMutex.Lock()
-		vw.nextVmdDeltas = nextDeltas
-		vw.isCalculating = false
-		vw.calcMutex.Unlock()
-	}()
-}
-
-// 初期フレームの計算を実行
-func (vw *ViewWindow) initializeFrameCalculation(frame float32) {
-	if len(vw.modelRenderers) == 0 || len(vw.motions) == 0 {
-		return
-	}
-
-	// 初期計算用に次フレーム予測を別途行う
-	vw.calcMutex.Lock()
-	vw.isCalculating = false // 進行中の計算があれば中止
-	vw.calcMutex.Unlock()
-
-	// 現在のフレームで同期計算を実行
-	nextDeltas := make([]*delta.VmdDeltas, len(vw.modelRenderers))
-	for i, modelRenderer := range vw.modelRenderers {
-		if i < len(vw.motions) && vw.motions[i] != nil {
-			// 現在のフレームで計算 (並列ではなく同期的に実行)
-			nextDeltas[i] = deform.DeformBeforePhysics(
-				modelRenderer.Model,
-				vw.motions[i],
-				vw.vmdDeltas[i],
-				frame,
-			)
-		}
-	}
-
-	// 結果を即時反映
-	vw.calcMutex.Lock()
-	vw.nextVmdDeltas = nextDeltas
-	vw.nextFrame = frame
-	vw.calcMutex.Unlock()
-}
-
 func (vw *ViewWindow) Render(shared *state.SharedState, timeStep float32) {
 	w, h := vw.GetSize()
 	if w == 0 && h == 0 {
 		// ウィンドウが最小化されている場合は描画しない
 		return
 	}
-
-	mlog.IS("[%d] Start", vw.windowIndex)
 
 	vw.MakeContextCurrent()
 
@@ -276,66 +178,15 @@ func (vw *ViewWindow) Render(shared *state.SharedState, timeStep float32) {
 	// 床描画
 	vw.shader.DrawFloor()
 
-	// 前のフレームから変化がある場合にのみモデルとモーションを更新
-	prevModelCount := len(vw.modelRenderers)
-	prevMotionCount := len(vw.motions)
-
 	vw.loadModelRenderers(shared)
+
 	vw.loadMotions(shared)
 
-	// モデル数かモーション数が変わった場合にのみ初期化
-	modelMotionCountChanged := prevModelCount != len(vw.modelRenderers) || prevMotionCount != len(vw.motions)
-
-	// 現在のフレームのデータがない場合か、モデル/モーション構成が変わった場合に初期化計算を実行
-	needsInitCalculation := modelMotionCountChanged ||
-		len(vw.vmdDeltas) != len(vw.modelRenderers) ||
-		(len(vw.modelRenderers) > 0 && (vw.vmdDeltas[0] == nil || vw.vmdDeltas[0].Frame() != shared.Frame()))
-
-	if needsInitCalculation {
-		vw.initializeFrameCalculation(shared.Frame())
-	}
-
-	// 再生中かつ次フレームの予測計算が必要な場合のみ計算
-	if shared.Playing() && !needsInitCalculation {
-		nextFrame := shared.Frame() + 1
-		if nextFrame < shared.MaxFrame() {
-			vw.startNextFrameCalculation(nextFrame)
-		}
-	}
-
-	// 事前計算された次フレームデータがあれば利用する
-	vw.calcMutex.Lock()
-	if vw.nextVmdDeltas != nil && len(vw.nextVmdDeltas) == len(vw.modelRenderers) &&
-		vw.nextFrame == shared.Frame() {
-		// 次フレームデータが現在のフレームと一致する場合は利用
-		for i := range vw.nextVmdDeltas {
-			if vw.nextVmdDeltas[i] != nil {
-				vw.vmdDeltas[i] = vw.nextVmdDeltas[i]
-			}
-		}
-		vw.nextVmdDeltas = nil
-	}
-	vw.calcMutex.Unlock()
-
 	for i, modelRenderer := range vw.modelRenderers {
-		// インデックスのチェックも追加
-		if i >= len(vw.vmdDeltas) || vw.vmdDeltas[i] == nil || vw.vmdDeltas[i].Frame() != shared.Frame() ||
-			vw.vmdDeltas[i].ModelHash() != modelRenderer.Model.Hash() ||
-			(i < len(vw.motions) && vw.motions[i] != nil && vw.vmdDeltas[i].MotionHash() != vw.motions[i].Hash()) {
-			// 計算されていないか、ハッシュが一致しない場合は再計算
-			if i < len(vw.motions) && vw.motions[i] != nil {
-				vw.vmdDeltas[i] = deform.Deform(shared, vw.physics, modelRenderer.Model, vw.motions[i], nil, timeStep)
-			}
-		} else {
-			// 物理計算のみ実行
-			vw.vmdDeltas[i] = deform.DeformPhysics(shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
-		}
-
-		mlog.IS("[%d][%d] Deform Model", vw.windowIndex, i)
+		vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
 
 		modelRenderer.Render(vw.shader, shared, vw.vmdDeltas[i])
 
-		mlog.IS("[%d][%d] Render Model", vw.windowIndex, i)
 	}
 
 	// 物理デバッグ描画

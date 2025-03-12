@@ -162,7 +162,6 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, el
 	if vl.shared.Playing() && !vl.shared.IsClosed() {
 		frame := vl.shared.Frame() + float32(elapsed*deformDefaultFps)
 		if frame > vl.shared.MaxFrame() {
-			vl.shared.SetClosed(true)
 			frame = 0
 		}
 		vl.shared.SetFrame(frame)

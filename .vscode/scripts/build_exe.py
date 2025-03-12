@@ -27,7 +27,7 @@ print(f"app_version: {app_version}")
 # -v ビルドログを出力
 # -a 全ての依存関係を再ビルド
 # -buildmode=exe 実行可能ファイルを生成
-# -ldflags "-s -w" バイナリサイズを小さくする (プロファイル時はコメントアウト)
+# -ldflags "-s -w" バイナリサイズを小さくする
 # -H=windowsgui コンソールを表示しない
 # -linkmode external -extldflags '-static -Wl,cmd/app/app.res' リソースを埋め込む
 if os.environ.get('ENV') == 'dev':
