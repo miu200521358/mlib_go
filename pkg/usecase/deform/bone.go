@@ -498,17 +498,28 @@ func fillBoneDeform(
 	isCalcIk bool,
 	isAfterPhysics bool,
 ) *delta.BoneDeltas {
-	// IKのON/OFF
+
+	// IKのON/OFFフレームを取得
 	ikFrame := motion.IkFrames.Get(frame)
 
+	// deformBoneIndexes はすでに「変形対象ボーンのインデックス」のリスト
+	// ループで対象ボーンごとにデフォーム情報を更新する
 	for i, boneIndex := range deformBoneIndexes {
+		// ボーンと対応する BoneDelta をローカル変数にキャッシュ
 		bone, _ := model.Bones.Get(boneIndex)
 		d := deltas.Bones.Get(boneIndex)
 		if d == nil {
 			d = &delta.BoneDelta{Bone: bone, Frame: frame}
 		}
 
-		if d.UnitMatrix == nil || d.UnitMatrix.IsIdent() || bone.IsEffectorRotation() || bone.IsEffectorTranslation() {
+		// 1. ボーンがEffector系 (子がIKエフェクタなど) でなければ、または計算が必要な場合のみ処理
+		//    ただし、通常のローカル行列を更新する必要があるのでそこは常に更新。
+		isEffectorRotation := bone.IsEffectorRotation()
+		isEffectorTranslation := bone.IsEffectorTranslation()
+
+		// 2. ボーンのUnitMatrix が未初期化（nil）か、あるいはEffector指定のときはフレーム値を再取得する
+		if d.UnitMatrix == nil || d.UnitMatrix.IsIdent() || isEffectorRotation || isEffectorTranslation {
+			// 該当するキー情報を取得
 			bf := motion.BoneFrames.Get(bone.Name()).Get(frame)
 			if bf.Position != nil {
 				d.FramePosition = bf.Position.Copy()
@@ -517,7 +528,8 @@ func fillBoneDeform(
 				d.FrameRotation = bf.Rotation.Copy()
 			}
 
-			// ボーンの移動位置、回転角度、拡大率を取得
+			// ボーンの移動位置・回転角度・スケールなどを取得
+			// (getLocalMat / getPosition / getRotation / getScale の呼び出し)
 			d.FrameLocalMat, d.FrameLocalMorphMat = getLocalMat(deltas, bone)
 			d.FrameCancelablePosition, d.FrameMorphPosition, d.FrameMorphCancelablePosition =
 				getPosition(deltas, bone, bf)
@@ -526,28 +538,59 @@ func fillBoneDeform(
 			d.FrameScale, d.FrameCancelableScale, d.FrameMorphScale, d.FrameMorphCancelableScale =
 				getScale(deltas, bone, bf)
 
+			// BoneDelta更新（ローカル行列や拡大行列などを組み合わせる）
 			updateBoneDelta(deltas.Bones, d, bone)
 		}
 
+		// 3. IK対象ボーンならIK計算を実行
+		//    IKが有効であり、かつ isCalcIk が true のときだけ
 		if isCalcIk && bone.IsIK() && ikFrame.IsEnable(bone.Name()) {
-			// IKの変形リスト
+			// IK変形リスト（IKボーンの子孫にあたるボーンインデックス一覧）
 			ikTargetDeformBoneIndexes := model.Bones.DeformBoneIndexes[bone.Index()]
 
-			deltas.Bones = fillBoneDeform(model, motion, deltas, frame, ikTargetDeformBoneIndexes, false, isAfterPhysics)
+			// 変形リストを再帰的に更新 (IKの前に対象ボーンを先に最新化)
+			// IK対象ボーンの子階層がまだ最新でない場合、先に更新する
+			deltas.Bones = fillBoneDeform(
+				model,
+				motion,
+				deltas,
+				frame,
+				ikTargetDeformBoneIndexes,
+				false, // IK再帰呼び出ししない
+				isAfterPhysics,
+			)
+
+			// 親→子の順にグローバル行列を再更新
 			updateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
 
-			for _, boneIndex := range ikTargetDeformBoneIndexes {
-				d := deltas.Bones.Get(boneIndex)
-				if d == nil {
-					continue
+			// IK適用前のグローバル行列を保存
+			for _, idx := range ikTargetDeformBoneIndexes {
+				linkD := deltas.Bones.Get(idx)
+				if linkD != nil {
+					linkD.GlobalIkOffMatrix = linkD.GlobalMatrix.Copy()
+					deltas.Bones.Update(linkD)
 				}
-				d.GlobalIkOffMatrix = d.GlobalMatrix.Copy()
-				deltas.Bones.Update(d)
 			}
 
 			// IKボーンのグローバル位置
-			ikGlobalPosition := deltas.Bones.Get(bone.Index()).FilledGlobalPosition()
-			deformIk(model, motion, deltas, frame, isAfterPhysics, bone, ikGlobalPosition, ikTargetDeformBoneIndexes, i)
+			ikBoneDelta := deltas.Bones.Get(bone.Index())
+			if ikBoneDelta == nil {
+				continue
+			}
+			ikGlobalPosition := ikBoneDelta.FilledGlobalPosition()
+
+			// IK計算実行
+			deformIk(
+				model,
+				motion,
+				deltas,
+				frame,
+				isAfterPhysics,
+				bone,
+				ikGlobalPosition,
+				ikTargetDeformBoneIndexes,
+				i, // deformIndex
+			)
 		}
 	}
 
