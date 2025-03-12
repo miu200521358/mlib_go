@@ -336,6 +336,10 @@ func (quat *MQuaternion) ToAxisAngle() (*MVec3, float64) {
 // Slerpはt (0,1)におけるaとbの間の球面線形補間クォータニオンを返します。
 // See http://en.wikipedia.org/wiki/Slerp
 func (quat *MQuaternion) Slerp(other *MQuaternion, t float64) *MQuaternion {
+	if quat.NearEquals(other, 1e-8) {
+		return quat.Copy()
+	}
+
 	q1 := mgl64.Quat{V: mgl64.Vec3{quat.X, quat.Y, quat.Z}, W: quat.W}
 	q2 := mgl64.Quat{V: mgl64.Vec3{other.X, other.Y, other.Z}, W: other.W}
 	qq := mgl64.QuatSlerp(q1, q2, t)
@@ -343,6 +347,10 @@ func (quat *MQuaternion) Slerp(other *MQuaternion, t float64) *MQuaternion {
 }
 
 func (quat *MQuaternion) Lerp(other *MQuaternion, t float64) *MQuaternion {
+	if quat.NearEquals(other, 1e-8) {
+		return quat.Copy()
+	}
+
 	q1 := mgl64.Quat{V: mgl64.Vec3{quat.X, quat.Y, quat.Z}, W: quat.W}
 	q2 := mgl64.Quat{V: mgl64.Vec3{other.X, other.Y, other.Z}, W: other.W}
 	qq := mgl64.QuatLerp(q1, q2, t)

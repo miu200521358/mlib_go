@@ -9,20 +9,15 @@ import (
 
 type BoneFrames struct {
 	data map[string]*BoneNameFrames
-	lock sync.RWMutex // マップアクセス制御用
 }
 
 func NewBoneFrames() *BoneFrames {
 	return &BoneFrames{
 		data: make(map[string]*BoneNameFrames, 0),
-		lock: sync.RWMutex{},
 	}
 }
 
 func (boneFrames *BoneFrames) Contains(boneName string) bool {
-	boneFrames.lock.RLock()
-	defer boneFrames.lock.RUnlock()
-
 	if _, ok := boneFrames.data[boneName]; ok {
 		if boneFrames.data[boneName] != nil && boneFrames.data[boneName].Length() > 0 {
 			return true
@@ -33,16 +28,10 @@ func (boneFrames *BoneFrames) Contains(boneName string) bool {
 }
 
 func (boneFrames *BoneFrames) Append(boneNameFrames *BoneNameFrames) {
-	boneFrames.lock.Lock()
-	defer boneFrames.lock.Unlock()
-
 	boneFrames.data[boneNameFrames.Name] = boneNameFrames
 }
 
 func (boneFrames *BoneFrames) Delete(boneName string) {
-	boneFrames.lock.Lock()
-	defer boneFrames.lock.Unlock()
-
 	delete(boneFrames.data, boneName)
 }
 
@@ -50,9 +39,6 @@ func (boneFrames *BoneFrames) Get(boneName string) *BoneNameFrames {
 	if !boneFrames.Contains(boneName) {
 		boneFrames.Append(NewBoneNameFrames(boneName))
 	}
-
-	boneFrames.lock.RLock()
-	defer boneFrames.lock.RUnlock()
 
 	return boneFrames.data[boneName]
 }
@@ -98,9 +84,6 @@ func (boneFrames *BoneFrames) Length() int {
 }
 
 func (boneFrames *BoneFrames) MaxFrame() float32 {
-	boneFrames.lock.RLock()
-	defer boneFrames.lock.RUnlock()
-
 	maxFno := float32(0)
 	for _, boneFrames := range boneFrames.data {
 		fno := float32(boneFrames.MaxFrame())
@@ -112,9 +95,6 @@ func (boneFrames *BoneFrames) MaxFrame() float32 {
 }
 
 func (boneFrames *BoneFrames) MinFrame() float32 {
-	boneFrames.lock.RLock()
-	defer boneFrames.lock.RUnlock()
-
 	minFno := float32(math.MaxFloat32)
 	for _, boneFrames := range boneFrames.data {
 		fno := float32(boneFrames.MinFrame())
@@ -150,8 +130,6 @@ func (boneFrames *BoneFrames) Reduce() *BoneFrames {
 func (boneFrames *BoneFrames) Iterator() <-chan *BoneNameFrames {
 	ch := make(chan *BoneNameFrames)
 	go func() {
-		boneFrames.lock.RLock()
-		defer boneFrames.lock.RUnlock()
 		for _, boneNameFrames := range boneFrames.data {
 			ch <- boneNameFrames
 		}

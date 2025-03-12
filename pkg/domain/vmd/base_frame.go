@@ -1,8 +1,6 @@
 package vmd
 
 import (
-	"sync"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/petar/GoLLRB/llrb"
 )
@@ -77,7 +75,6 @@ type BaseFrames[T IBaseFrame] struct {
 	RegisteredIndexes *mmath.LlrbIndexes[float32] // 登録対象キーフレリスト
 	newFunc           func(index float32) T       // キーフレ生成関数
 	nullFunc          func() T                    // 空キーフレ生成関数
-	lock              sync.RWMutex                // マップアクセス制御用
 }
 
 func NewBaseFrames[T IBaseFrame](newFunc func(index float32) T, nullFunc func() T) *BaseFrames[T] {
@@ -87,7 +84,6 @@ func NewBaseFrames[T IBaseFrame](newFunc func(index float32) T, nullFunc func() 
 		RegisteredIndexes: &mmath.LlrbIndexes[float32]{LLRB: llrb.New()},
 		newFunc:           newFunc,
 		nullFunc:          nullFunc,
-		lock:              sync.RWMutex{},
 	}
 }
 
@@ -96,9 +92,6 @@ func (baseFrames *BaseFrames[T]) NewFrame(index float32) T {
 }
 
 func (baseFrames *BaseFrames[T]) Get(index float32) T {
-	baseFrames.lock.RLock()
-	defer baseFrames.lock.RUnlock()
-
 	if _, ok := baseFrames.values[index]; ok {
 		return baseFrames.values[index]
 	}
@@ -148,9 +141,6 @@ func (baseFrames *BaseFrames[T]) Iterator() <-chan T {
 }
 
 func (baseFrames *BaseFrames[T]) appendFrame(v T) {
-	baseFrames.lock.Lock()
-	defer baseFrames.lock.Unlock()
-
 	if v.IsRegistered() {
 		baseFrames.RegisteredIndexes.ReplaceOrInsert(mmath.NewLlrbItem(v.Index()))
 	}
@@ -183,9 +173,6 @@ func (baseFrames *BaseFrames[T]) Contains(index float32) bool {
 }
 
 func (baseFrames *BaseFrames[T]) Delete(index float32) {
-	baseFrames.lock.Lock()
-	defer baseFrames.lock.Unlock()
-
 	if _, ok := baseFrames.values[index]; ok {
 		delete(baseFrames.values, index)
 		baseFrames.Indexes.Delete(mmath.NewLlrbItem(index))

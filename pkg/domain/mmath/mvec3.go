@@ -421,6 +421,10 @@ func (vec3 *MVec3) Lerp(other *MVec3, t float64) *MVec3 {
 	case t >= 1:
 		return other
 	default:
+		if vec3.NearEquals(other, 1e-8) {
+			return vec3.Copy()
+		}
+
 		return vec3.Add((other.Subed(vec3)).MulScalar(t))
 	}
 }

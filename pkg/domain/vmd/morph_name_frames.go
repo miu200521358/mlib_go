@@ -20,9 +20,6 @@ func nilMorphFrame() *MorphFrame {
 
 // ContainsActive 有効なキーフレが存在するか
 func (morphNameFrames *MorphNameFrames) ContainsActive() bool {
-	morphNameFrames.lock.RLock()
-	defer morphNameFrames.lock.RUnlock()
-
 	if morphNameFrames.Length() == 0 {
 		return false
 	}

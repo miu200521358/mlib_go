@@ -129,15 +129,19 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFra
 	var prevRotation, nextRotation *mmath.MQuaternion
 	if prevBf.Rotation != nil {
 		prevRotation = prevBf.Rotation
-	} else {
-		prevRotation = mmath.MQuaternionIdent
 	}
 	if nextBf.Rotation != nil {
 		nextRotation = nextBf.Rotation
-	} else {
-		nextRotation = mmath.MQuaternionIdent
 	}
-	bf.Rotation = prevRotation.Slerp(nextRotation, ry)
+	if prevRotation == nil && nextRotation == nil {
+		bf.Rotation = mmath.NewMQuaternion()
+	} else if prevRotation == nil {
+		bf.Rotation = nextRotation.Copy()
+	} else if nextRotation == nil {
+		bf.Rotation = prevRotation.Copy()
+	} else {
+		bf.Rotation = prevRotation.Slerp(nextRotation, ry)
+	}
 
 	ppx := 0.0
 	ppy := 0.0

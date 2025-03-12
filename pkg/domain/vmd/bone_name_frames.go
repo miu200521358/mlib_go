@@ -290,9 +290,6 @@ func (boneNameFrames *BoneNameFrames) checkCurve(
 
 // ContainsActive 有効なキーフレが存在するか
 func (boneNameFrames *BoneNameFrames) ContainsActive() bool {
-	boneNameFrames.lock.RLock()
-	defer boneNameFrames.lock.RUnlock()
-
 	if boneNameFrames.Length() == 0 {
 		return false
 	}

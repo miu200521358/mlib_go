@@ -2,14 +2,12 @@ package vmd
 
 import (
 	"math"
-	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 type MorphFrames struct {
 	data map[string]*MorphNameFrames
-	lock sync.RWMutex // マップアクセス制御用
 }
 
 func NewMorphFrames() *MorphFrames {
@@ -19,16 +17,10 @@ func NewMorphFrames() *MorphFrames {
 }
 
 func (morphFrames *MorphFrames) Delete(morphName string) {
-	morphFrames.lock.Lock()
-	defer morphFrames.lock.Unlock()
-
 	delete(morphFrames.data, morphName)
 }
 
 func (morphFrames *MorphFrames) Contains(morphName string) bool {
-	morphFrames.lock.Lock()
-	defer morphFrames.lock.Unlock()
-
 	if _, ok := morphFrames.data[morphName]; ok {
 		if morphFrames.data[morphName] != nil && morphFrames.data[morphName].Length() > 0 {
 			return true
@@ -122,8 +114,6 @@ func (morphFrames *MorphFrames) RegisteredIndexes() []int {
 func (morphFrames *MorphFrames) Iterator() <-chan *MorphNameFrames {
 	ch := make(chan *MorphNameFrames)
 	go func() {
-		morphFrames.lock.RLock()
-		defer morphFrames.lock.RUnlock()
 		for _, morphNameFrames := range morphFrames.data {
 			ch <- morphNameFrames
 		}
