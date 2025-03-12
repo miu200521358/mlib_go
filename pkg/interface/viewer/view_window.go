@@ -186,7 +186,6 @@ func (vw *ViewWindow) Render(shared *state.SharedState, timeStep float32) {
 		vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
 
 		modelRenderer.Render(vw.shader, shared, vw.vmdDeltas[i])
-
 	}
 
 	// 物理デバッグ描画

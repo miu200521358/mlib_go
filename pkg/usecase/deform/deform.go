@@ -178,28 +178,31 @@ func Deform(
 func deformBeforePhysics(
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
-	vmdDeltas *delta.VmdDeltas,
+	deltas *delta.VmdDeltas,
 	frame float32,
 ) *delta.VmdDeltas {
-	if model == nil || motion == nil {
-		return vmdDeltas
+	if deltas == nil {
+		deltas = delta.NewVmdDeltas(frame, model.Bones, model.Hash(), motion.Hash())
+	} else {
+		deltas.SetFrame(frame)
+		deltas.SetModelHash(model.Hash())
+		deltas.SetMotionHash(motion.Hash())
+		deltas.Bones = delta.NewBoneDeltas(model.Bones)
 	}
 
-	if vmdDeltas == nil || vmdDeltas.Frame() != frame ||
-		vmdDeltas.ModelHash() != model.Hash() || vmdDeltas.MotionHash() != motion.Hash() {
-		deltas := delta.NewVmdDeltas(frame, model.Bones, model.Hash(), motion.Hash())
-		deltas.Morphs = DeformMorph(model, motion.MorphFrames, frame, nil)
-
-		// ボーンデフォーム情報を埋める(物理前後全部埋める)
-		deltas.Bones = fillBoneDeform(model, motion, deltas, frame, model.Bones.LayerSortedIndexes, true, false)
-
-		// ボーンデフォーム情報を更新する
-		updateGlobalMatrix(deltas.Bones, model.Bones.LayerSortedIndexes)
-
+	if model == nil || motion == nil {
 		return deltas
 	}
 
-	return vmdDeltas
+	deltas.Morphs = DeformMorph(model, motion.MorphFrames, frame, nil)
+
+	// ボーンデフォーム情報を埋める(物理前後全部埋める)
+	deltas.Bones = fillBoneDeform(model, motion, deltas, frame, model.Bones.LayerSortedIndexes, true, false)
+
+	// ボーンデフォーム情報を更新する
+	updateGlobalMatrix(deltas.Bones, model.Bones.LayerSortedIndexes)
+
+	return deltas
 }
 
 func deformPhysics(
