@@ -108,8 +108,11 @@ func calcIkLimitQuaternion(
 	ikMotion *vmd.VmdMotion, // デバッグ用: IKモーション
 	ikFile *os.File, // デバッグ用: IKファイル
 ) (*mmath.MQuaternion, int) {
+	// デバッグ出力条件を1回だけ評価
+	isDebug := mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil
+
 	ikMat := totalIkQuat.ToMat4()
-	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+	if isDebug {
 		fmt.Fprintf(ikFile,
 			"[%.3f][%03d][%s][%05d][ikMat] %s (x: %s, y: %s, z: %s)\n",
 			frame, loop, linkBoneName, count-1, ikMat.String(), ikMat.AxisX().String(), ikMat.AxisY().String(), ikMat.AxisZ().String())
@@ -123,7 +126,7 @@ func calcIkLimitQuaternion(
 		fX := math.Asin(fSX)    // X軸回り決定
 		fCX := math.Cos(fX)     // cos(θx)
 
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][X軸制限] fSX: %f, fX: %f, fCX: %f\n",
 				frame, loop, linkBoneName, count-1, fSX, fX, fCX)
 		}
@@ -137,28 +140,29 @@ func calcIkLimitQuaternion(
 			}
 			fCX = math.Cos(fX)
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isDebug {
 				fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][X軸制限-ジンバル] fSX: %f, fX: %f, fCX: %f\n",
 					frame, loop, linkBoneName, count-1, fSX, fX, fCX)
 			}
 		}
 
-		// Y軸回り
-		fSY := ikMat.AxisZ().X / fCX // sin(θy) = m31 / cos(θx)
-		fCY := ikMat.AxisZ().Z / fCX // cos(θy) = m33 / cos(θx)
-		fY := math.Atan2(fSY, fCY)   // Y軸回り決定
+		// Y軸回り - fCXで割る計算が2回あるので、逆数を一度だけ計算して再利用
+		fCXInv := 1.0 / fCX
+		fSY := ikMat.AxisZ().X * fCXInv // sin(θy) = m31 / cos(θx)
+		fCY := ikMat.AxisZ().Z * fCXInv // cos(θy) = m33 / cos(θx)
+		fY := math.Atan2(fSY, fCY)      // Y軸回り決定
 
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][X軸制限-Y軸回り] fSY: %f, fCY: %f, fY: %f\n",
 				frame, loop, linkBoneName, count-1, fSY, fCY, fY)
 		}
 
-		// Z軸周り
-		fSZ := ikMat.AxisX().Y / fCX // sin(θz) = m12 / cos(θx)
-		fCZ := ikMat.AxisY().Y / fCX // cos(θz) = m22 / cos(θx)
-		fZ := math.Atan2(fSZ, fCZ)   // Z軸回り決定
+		// Z軸周り - 同様にfCXの逆数を再利用
+		fSZ := ikMat.AxisX().Y * fCXInv // sin(θz) = m12 / cos(θx)
+		fCZ := ikMat.AxisY().Y * fCXInv // cos(θz) = m22 / cos(θx)
+		fZ := math.Atan2(fSZ, fCZ)      // Z軸回り決定
 
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][X軸制限-Z軸回り] fSZ: %f, fCZ: %f, fZ: %f\n",
 				frame, loop, linkBoneName, count-1, fSZ, fCZ, fZ)
 		}
@@ -173,19 +177,19 @@ func calcIkLimitQuaternion(
 
 		// 決定した角度でベクトルを回転
 		xQuat := mmath.NewMQuaternionFromAxisAnglesRotate(xAxisVector, fX)
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][X軸制限-xQuat] xAxisVector: %s, fX: %f, xQuat: %s(%s)\n",
 				frame, loop, linkBoneName, count-1, xAxisVector.String(), fX, xQuat.String(), xQuat.ToMMDDegrees().String())
 		}
 
 		yQuat := mmath.NewMQuaternionFromAxisAnglesRotate(yAxisVector, fY)
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][X軸制限-yQuat] yAxisVector: %s, fY: %f, yQuat: %s(%s)\n",
 				frame, loop, linkBoneName, count-1, yAxisVector.String(), fY, yQuat.String(), yQuat.ToMMDDegrees().String())
 		}
 
 		zQuat := mmath.NewMQuaternionFromAxisAnglesRotate(zAxisVector, fZ)
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][X軸制限-zQuat] zAxisVector: %s, fZ: %f, zQuat: %s(%s)\n",
 				frame, loop, linkBoneName, count-1, zAxisVector.String(), fZ, zQuat.String(), zQuat.ToMMDDegrees().String())
 		}
@@ -198,7 +202,7 @@ func calcIkLimitQuaternion(
 		fY := math.Asin(fSY)    // Y軸回り決定
 		fCY := math.Cos(fY)     // cos(θy)
 
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Y軸制限] fSY: %f, fY: %f, fCY: %f\n",
 				frame, loop, linkBoneName, count-1, fSY, fY, fCY)
 		}
@@ -212,28 +216,29 @@ func calcIkLimitQuaternion(
 			}
 			fCY = math.Cos(fY)
 
-			if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+			if isDebug {
 				fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Y軸制限-ジンバル] fSY: %f, fY: %f, fCY: %f\n",
 					frame, loop, linkBoneName, count-1, fSY, fY, fCY)
 			}
 		}
 
-		// X軸回り
-		fSX := ikMat.AxisY().Z / fCY // sin(θx) = m23 / cos(θy)
-		fCX := ikMat.AxisZ().Z / fCY // cos(θx) = m33 / cos(θy)
-		fX := math.Atan2(fSX, fCX)   // X軸回り決定
+		// X軸回り - fCYで割る計算が2回あるので、逆数を一度だけ計算して再利用
+		fCYInv := 1.0 / fCY
+		fSX := ikMat.AxisY().Z * fCYInv // sin(θx) = m23 / cos(θy)
+		fCX := ikMat.AxisZ().Z * fCYInv // cos(θx) = m33 / cos(θy)
+		fX := math.Atan2(fSX, fCX)      // X軸回り決定
 
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Y軸制限-X軸回り] fSX: %f, fCX: %f, fX: %f\n",
 				frame, loop, linkBoneName, count-1, fSX, fCX, fX)
 		}
 
-		// Z軸周り
-		fSZ := ikMat.AxisX().Y / fCY // sin(θz) = m12 / cos(θy)
-		fCZ := ikMat.AxisX().X / fCY // cos(θz) = m11 / cos(θy)
-		fZ := math.Atan2(fSZ, fCZ)   // Z軸回り決定
+		// Z軸周り - 同様にfCYの逆数を再利用
+		fSZ := ikMat.AxisX().Y * fCYInv // sin(θz) = m12 / cos(θy)
+		fCZ := ikMat.AxisX().X * fCYInv // cos(θz) = m11 / cos(θy)
+		fZ := math.Atan2(fSZ, fCZ)      // Z軸回り決定
 
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Y軸制限-Z軸回り] fSZ: %f, fCZ: %f, fZ: %f\n",
 				frame, loop, linkBoneName, count-1, fSZ, fCZ, fZ)
 		}
@@ -248,19 +253,19 @@ func calcIkLimitQuaternion(
 
 		// 決定した角度でベクトルを回転
 		xQuat := mmath.NewMQuaternionFromAxisAnglesRotate(xAxisVector, fX)
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Y軸制限-xQuat] xAxisVector: %s, fX: %f, xQuat: %s(%s)\n",
 				frame, loop, linkBoneName, count-1, xAxisVector.String(), fX, xQuat.String(), xQuat.ToMMDDegrees().String())
 		}
 
 		yQuat := mmath.NewMQuaternionFromAxisAnglesRotate(yAxisVector, fY)
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Y軸制限-yQuat] yAxisVector: %s, fY: %f, yQuat: %s(%s)\n",
 				frame, loop, linkBoneName, count-1, yAxisVector.String(), fY, yQuat.String(), yQuat.ToMMDDegrees().String())
 		}
 
 		zQuat := mmath.NewMQuaternionFromAxisAnglesRotate(zAxisVector, fZ)
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Y軸制限-zQuat] zAxisVector: %s, fZ: %f, zQuat: %s(%s)\n",
 				frame, loop, linkBoneName, count-1, zAxisVector.String(), fZ, zQuat.String(), zQuat.ToMMDDegrees().String())
 		}
@@ -274,7 +279,7 @@ func calcIkLimitQuaternion(
 	fZ := math.Asin(fSZ)    // Z軸回り決定
 	fCZ := math.Cos(fZ)     // cos(θz)
 
-	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+	if isDebug {
 		fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Z軸制限] fSZ: %f, fZ: %f, fCZ: %f\n",
 			frame, loop, linkBoneName, count-1, fSZ, fZ, fCZ)
 	}
@@ -288,7 +293,7 @@ func calcIkLimitQuaternion(
 		}
 		fCZ = math.Cos(fZ)
 
-		if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+		if isDebug {
 			fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Z軸制限-ジンバル] fSZ: %f, fZ: %f, fCZ: %f\n",
 				frame, loop, linkBoneName, count-1, fSZ, fZ, fCZ)
 		}
@@ -299,7 +304,7 @@ func calcIkLimitQuaternion(
 	fCX := ikMat.AxisY().Y / fCZ // cos(θx) = m22 / cos(θz)
 	fX := math.Atan2(fSX, fCX)   // X軸回り決定
 
-	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+	if isDebug {
 		fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Z軸制限-X軸回り] fSX: %f, fCX: %f, fX: %f\n",
 			frame, loop, linkBoneName, count-1, fSX, fCX, fX)
 	}
@@ -309,7 +314,7 @@ func calcIkLimitQuaternion(
 	fCY := ikMat.AxisX().X / fCZ // cos(θy) = m11 / cos(θz)
 	fY := math.Atan2(fSY, fCY)   // Y軸回り決定
 
-	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+	if isDebug {
 		fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Z軸制限-Y軸回り] fSY: %f, fCY: %f, fY: %f\n",
 			frame, loop, linkBoneName, count-1, fSY, fCY, fY)
 	}
@@ -324,19 +329,19 @@ func calcIkLimitQuaternion(
 
 	// 決定した角度でベクトルを回転
 	xQuat := mmath.NewMQuaternionFromAxisAnglesRotate(xAxisVector, fX)
-	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+	if isDebug {
 		fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Z軸制限-xQuat] xAxisVector: %s, fX: %f, xQuat: %s(%s)\n",
 			frame, loop, linkBoneName, count-1, xAxisVector.String(), fX, xQuat.String(), xQuat.ToMMDDegrees().String())
 	}
 
 	yQuat := mmath.NewMQuaternionFromAxisAnglesRotate(yAxisVector, fY)
-	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+	if isDebug {
 		fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Z軸制限-yQuat] yAxisVector: %s, fY: %f, yQuat: %s(%s)\n",
 			frame, loop, linkBoneName, count-1, yAxisVector.String(), fY, yQuat.String(), yQuat.ToMMDDegrees().String())
 	}
 
 	zQuat := mmath.NewMQuaternionFromAxisAnglesRotate(zAxisVector, fZ)
-	if mlog.IsIkVerbose() && ikMotion != nil && ikFile != nil {
+	if isDebug {
 		fmt.Fprintf(ikFile, "[%.3f][%03d][%s][%05d][Z軸制限-zQuat] zAxisVector: %s, fZ: %f, zQuat: %s(%s)\n",
 			frame, loop, linkBoneName, count-1, zAxisVector.String(), fZ, zQuat.String(), zQuat.ToMMDDegrees().String())
 	}
