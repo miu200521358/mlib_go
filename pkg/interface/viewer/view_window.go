@@ -146,7 +146,7 @@ func (vw *ViewWindow) resetCameraPosition(yaw, pitch float64) {
 	vw.shader.SetCamera(cam)
 }
 
-func (vw *ViewWindow) Render(timeStep float32) {
+func (vw *ViewWindow) render() {
 	w, h := vw.GetSize()
 	if w == 0 && h == 0 {
 		// ウィンドウが最小化されている場合は描画しない

@@ -137,6 +137,7 @@ func deformBoneByPhysicsFlag(
 	return deltas
 }
 
+// DeformBeforePhysics 物理前のボーンデフォーム処理を実行する
 func DeformBeforePhysics(
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
@@ -173,6 +174,7 @@ func DeformBeforePhysics(
 	return deltas
 }
 
+// DeformForPhysics 物理剛体位置を更新する
 func DeformForPhysics(
 	shared *state.SharedState,
 	physics physics.IPhysics,
@@ -209,12 +211,14 @@ func DeformForPhysics(
 	return deltas
 }
 
+// DeformAfterPhysics 物理後のボーンデフォーム処理を実行する
 func DeformAfterPhysics(
 	shared *state.SharedState,
 	physics physics.IPhysics,
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	vmdDeltas *delta.VmdDeltas,
+	frame float32,
 ) *delta.VmdDeltas {
 	if model == nil || motion == nil {
 		return vmdDeltas
@@ -229,7 +233,7 @@ func DeformAfterPhysics(
 			}
 			bonePhysicsGlobalMatrix := physics.GetRigidBodyBoneMatrix(model.Index(), bone.RigidBody)
 			if vmdDeltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
-				bd := delta.NewBoneDeltaByGlobalMatrix(bone, shared.Frame(),
+				bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame,
 					bonePhysicsGlobalMatrix, vmdDeltas.Bones.Get(bone.ParentIndex))
 				vmdDeltas.Bones.Update(bd)
 			}
@@ -237,7 +241,7 @@ func DeformAfterPhysics(
 	}
 
 	// ボーンデフォーム情報を埋める(物理後のみ埋める)
-	vmdDeltas.Bones = fillBoneDeform(model, motion, vmdDeltas, shared.Frame(),
+	vmdDeltas.Bones = fillBoneDeform(model, motion, vmdDeltas, frame,
 		model.Bones.LayerSortedBoneIndexes[true], true, true)
 
 	// ボーンデフォーム情報を更新する

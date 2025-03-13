@@ -16,26 +16,26 @@ import (
 type ViewerList struct {
 	shared     *state.SharedState // SharedState への参照
 	appConfig  *mconfig.AppConfig // アプリケーション設定
-	viewerList []*ViewWindow
+	windowList []*ViewWindow
 }
 
 func NewViewerList(shared *state.SharedState, appConfig *mconfig.AppConfig) *ViewerList {
 	return &ViewerList{
 		shared:     shared,
 		appConfig:  appConfig,
-		viewerList: make([]*ViewWindow, 0),
+		windowList: make([]*ViewWindow, 0),
 	}
 }
 
 // Add は ViewerList に ViewerWindow を追加します。
 func (vl *ViewerList) Add(title string, width, height, positionX, positionY int) error {
 	var mainViewerWindow *glfw.Window
-	if len(vl.viewerList) > 0 {
-		mainViewerWindow = vl.viewerList[0].Window
+	if len(vl.windowList) > 0 {
+		mainViewerWindow = vl.windowList[0].Window
 	}
 
-	viewWindow, err := newViewWindow(
-		len(vl.viewerList),
+	vw, err := newViewWindow(
+		len(vl.windowList),
 		title,
 		width,
 		height,
@@ -51,7 +51,7 @@ func (vl *ViewerList) Add(title string, width, height, positionX, positionY int)
 		return err
 	}
 
-	vl.viewerList = append(vl.viewerList, viewWindow)
+	vl.windowList = append(vl.windowList, vw)
 
 	return nil
 }
@@ -69,9 +69,6 @@ func (vl *ViewerList) Run() {
 	elapsedList := make([]float64, 0, 120)
 
 	for !vl.shared.IsClosed() {
-		// イベント処理
-		glfw.PollEvents()
-
 		// ウィンドウリンケージ処理
 		vl.handleWindowLinkage()
 
@@ -81,6 +78,9 @@ func (vl *ViewerList) Run() {
 		// フレームタイミング計算
 		frameTime := glfw.GetTime()
 		originalElapsed := frameTime - prevTime
+
+		// イベント処理
+		glfw.PollEvents()
 
 		// フレームレート制御と描画処理
 		if isRendered, timeStep := vl.processFrame(originalElapsed); isRendered {
@@ -102,8 +102,8 @@ func (vl *ViewerList) Run() {
 	}
 
 	// クリーンアップ
-	for _, viewWindow := range vl.viewerList {
-		viewWindow.Destroy()
+	for _, vw := range vl.windowList {
+		vw.Destroy()
 	}
 }
 
@@ -111,9 +111,9 @@ func (vl *ViewerList) Run() {
 func (vl *ViewerList) handleWindowLinkage() {
 	if vl.shared.IsWindowLinkage() && vl.shared.IsMovedControlWindow() {
 		_, _, diffX, diffY := vl.shared.ControlWindowPosition()
-		for _, viewWindow := range vl.viewerList {
-			x, y := viewWindow.GetPos()
-			viewWindow.SetPos(x+diffX, y+diffY)
+		for _, vw := range vl.windowList {
+			x, y := vw.GetPos()
+			vw.SetPos(x+diffX, y+diffY)
 		}
 		vl.shared.SetMovedControlWindow(false)
 	}
@@ -122,8 +122,8 @@ func (vl *ViewerList) handleWindowLinkage() {
 // ウィンドウフォーカス処理を分離
 func (vl *ViewerList) handleWindowFocus() {
 	if vl.shared.IsFocusViewWindow() {
-		for _, viewWindow := range vl.viewerList {
-			viewWindow.Focus()
+		for _, vw := range vl.windowList {
+			vw.Focus()
 		}
 		vl.shared.SetFocusViewWindow(false)
 	}
@@ -142,13 +142,13 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	}
 
 	// デフォーム処理
-	for _, viewWindow := range vl.viewerList {
-		vl.deform(viewWindow, timeStep)
+	for _, vw := range vl.windowList {
+		vl.deform(vw, timeStep)
 	}
 
 	// レンダリング処理
-	for _, viewWindow := range vl.viewerList {
-		viewWindow.Render(timeStep)
+	for _, vw := range vl.windowList {
+		vw.render()
 	}
 
 	// フレーム更新
@@ -165,55 +165,47 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	return true, timeStep
 }
 
-func (vl *ViewerList) deform(viewWindow *ViewWindow, timeStep float32) {
-	viewWindow.MakeContextCurrent()
+func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
+	vw.MakeContextCurrent()
 
-	viewWindow.loadModelRenderers(vl.shared)
-	viewWindow.loadMotions(vl.shared)
+	vw.loadModelRenderers(vl.shared)
+	vw.loadMotions(vl.shared)
 
 	frame := vl.shared.Frame()
 
 	// デフォーム処理
-	for n := range viewWindow.modelRenderers {
+	for n := range vw.modelRenderers {
 		// 物理前変形
-		viewWindow.vmdDeltas[n] = deform.DeformBeforePhysics(
-			viewWindow.modelRenderers[n].Model,
-			viewWindow.motions[n],
-			viewWindow.vmdDeltas[n],
+		vw.vmdDeltas[n] = deform.DeformBeforePhysics(
+			vw.modelRenderers[n].Model,
+			vw.motions[n],
+			vw.vmdDeltas[n],
 			frame,
 		)
 
 		// 物理変形のための事前処理
-		viewWindow.vmdDeltas[n] = deform.DeformForPhysics(
+		vw.vmdDeltas[n] = deform.DeformForPhysics(
 			vl.shared,
-			viewWindow.physics,
-			viewWindow.modelRenderers[n].Model,
-			viewWindow.vmdDeltas[n],
-		)
-
-		// 物理後変形
-		viewWindow.vmdDeltas[n] = deform.DeformAfterPhysics(
-			vl.shared,
-			viewWindow.physics,
-			viewWindow.modelRenderers[n].Model,
-			viewWindow.motions[n],
-			viewWindow.vmdDeltas[n],
+			vw.physics,
+			vw.modelRenderers[n].Model,
+			vw.vmdDeltas[n],
 		)
 	}
 
 	if vl.shared.IsEnabledPhysics() || vl.shared.IsPhysicsReset() {
 		// 物理更新
-		viewWindow.physics.StepSimulation(timeStep)
+		vw.physics.StepSimulation(timeStep)
 	}
 
-	for n := range viewWindow.modelRenderers {
+	for n := range vw.modelRenderers {
 		// 物理後変形
-		viewWindow.vmdDeltas[n] = deform.DeformAfterPhysics(
+		vw.vmdDeltas[n] = deform.DeformAfterPhysics(
 			vl.shared,
-			viewWindow.physics,
-			viewWindow.modelRenderers[n].Model,
-			viewWindow.motions[n],
-			viewWindow.vmdDeltas[n],
+			vw.physics,
+			vw.modelRenderers[n].Model,
+			vw.motions[n],
+			vw.vmdDeltas[n],
+			frame,
 		)
 	}
 }
@@ -232,7 +224,7 @@ func (vl *ViewerList) updateFpsDisplay(meanElapsed float64, timeStep float32) {
 		suffixFps = fmt.Sprintf("d) %.2f / p) %.2f fps", deformFps, physicsFps)
 	}
 
-	for _, viewWindow := range vl.viewerList {
-		viewWindow.SetTitle(fmt.Sprintf("%s - %s", viewWindow.Title(), suffixFps))
+	for _, vw := range vl.windowList {
+		vw.SetTitle(fmt.Sprintf("%s - %s", vw.Title(), suffixFps))
 	}
 }
