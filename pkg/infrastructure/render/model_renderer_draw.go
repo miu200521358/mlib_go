@@ -310,11 +310,10 @@ func flattenFloat32Matrix(data [][]float32) []float32 {
 // ここでは、各 VertexMorphDelta に対して newVertexMorphDeltaGl を呼び出し、その結果を連結します。
 func convertVertexMorphDeltasToFloat32(deltas *delta.VertexMorphDeltas) []float32 {
 	var result []float32
-	for v := range deltas.Iterator() {
-		vd := v.Value
+	deltas.ForEach(func(index int, vd *delta.VertexMorphDelta) {
 		// newVertexMorphDeltaGl は、1つの VertexMorphDelta を []float32 に変換する既存関数です。
 		data := newVertexMorphDeltaGl(vd)
 		result = append(result, data...)
-	}
+	})
 	return result
 }

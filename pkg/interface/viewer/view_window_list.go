@@ -75,12 +75,12 @@ func (vl *ViewerList) Run() {
 		// ウィンドウフォーカス処理
 		vl.handleWindowFocus()
 
+		// イベント処理
+		glfw.PollEvents()
+
 		// フレームタイミング計算
 		frameTime := glfw.GetTime()
 		originalElapsed := frameTime - prevTime
-
-		// イベント処理
-		glfw.PollEvents()
 
 		// フレームレート制御と描画処理
 		if isRendered, timeStep := vl.processFrame(originalElapsed); isRendered {
@@ -133,12 +133,17 @@ func (vl *ViewerList) handleWindowFocus() {
 func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, timeStep float32) {
 	var elapsed float32
 
-	if !vl.shared.IsEnabledFrameDrop() {
-		timeStep = physicsDefaultSpf
-		elapsed = float32(mmath.Clamped(originalElapsed, 0.0, deformDefaultSpf))
-	} else {
+	if vl.shared.IsEnabledFrameDrop() {
+		// フレームドロップON
+		// 物理fpsは経過時間
 		timeStep = float32(originalElapsed)
 		elapsed = float32(originalElapsed)
+	} else {
+		// フレームドロップOFF
+		// 物理fpsは60fps固定
+		timeStep = physicsDefaultSpf
+		// デフォームfpsはspf上限の経過時間
+		elapsed = float32(mmath.Clamped(originalElapsed, 0.0, deformDefaultSpf))
 	}
 
 	// デフォーム処理
@@ -154,7 +159,6 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	// フレーム更新
 	if vl.shared.Playing() && !vl.shared.IsClosed() {
 		frame := vl.shared.Frame() + (elapsed * deformDefaultFps)
-		// mlog.IS("Playing Frame: %f", frame)
 		if frame > vl.shared.MaxFrame() {
 			frame = 0.0
 			vl.shared.SetClosed(true)

@@ -23,6 +23,14 @@ func NewVertexMorphDelta(index int) *VertexMorphDelta {
 	}
 }
 
+func (vd *VertexMorphDelta) IsZero() bool {
+	return vd == nil ||
+		((vd.Position == nil || vd.Position.NearEquals(mmath.MVec3Zero, 1e-4)) &&
+			(vd.Uv == nil || vd.Uv.NearEquals(mmath.MVec2Zero, 1e-4)) &&
+			(vd.Uv1 == nil || vd.Uv1.NearEquals(mmath.MVec2Zero, 1e-4)) &&
+			(vd.AfterPosition == nil || vd.AfterPosition.NearEquals(mmath.MVec3Zero, 1e-4)))
+}
+
 type BoneMorphDelta struct {
 	BoneIndex               int
 	FramePosition           *mmath.MVec3       // キーフレ位置の変動量

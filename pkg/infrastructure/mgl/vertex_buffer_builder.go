@@ -281,20 +281,20 @@ func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDelta
 	// (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3) は頂点データの構造に合わせたサイズ
 	vboVertexSize := 3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3
 
-	for v := range vertices.Iterator() {
-		vidx := v.Index
-		vertexDelta := v.Value
+	// イテレーターの代わりにForEachを使用
+	vertices.ForEach(func(vidx int, vertexDelta *delta.VertexMorphDelta) {
+		if vertexDelta.IsZero() {
+			return
+		}
 
 		vd := newVertexMorphDeltaGl(vertexDelta)
 		if vd == nil {
-			continue
+			return
 		}
 
-		// offsetStride = 頂点の先頭オフセット + モーフ領域
 		offsetStride := (vidx*h.StrideSize + vboVertexSize)
-		// vd は []float32 の想定、コピー
 		copy(mappedSlice[offsetStride:offsetStride+len(vd)], vd)
-	}
+	})
 }
 
 // UpdateBoneDeltas は、ボーン変形のデルタを一括更新します。

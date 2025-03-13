@@ -29,24 +29,11 @@ func (vertexMorphDeltas *VertexMorphDeltas) Update(v *VertexMorphDelta) {
 	vertexMorphDeltas.data[v.Index] = v
 }
 
-func (vertexMorphDeltas *VertexMorphDeltas) Iterator() <-chan struct {
-	Index int
-	Value *VertexMorphDelta
-} {
-	ch := make(chan struct {
-		Index int
-		Value *VertexMorphDelta
-	})
-	go func() {
-		for i, v := range vertexMorphDeltas.data {
-			ch <- struct {
-				Index int
-				Value *VertexMorphDelta
-			}{Index: i, Value: v}
-		}
-		close(ch)
-	}()
-	return ch
+// VertexMorphDeltasにForEachメソッドを追加
+func (vertexMorphDeltas *VertexMorphDeltas) ForEach(callback func(index int, value *VertexMorphDelta)) {
+	for i, v := range vertexMorphDeltas.data {
+		callback(i, v)
+	}
 }
 
 type WireVertexMorphDeltas struct {
