@@ -244,7 +244,7 @@ func (s *MShader) DrawFloor() {
 	}
 }
 
-// GetMsaa はMSAA機能を取得
-func (s *MShader) GetMsaa() rendering.IMsaa {
+// Msaa はMSAA機能を取得
+func (s *MShader) Msaa() rendering.IMsaa {
 	return s.msaa
 }

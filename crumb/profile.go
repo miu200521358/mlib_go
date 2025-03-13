@@ -1,3 +1,4 @@
+// go run crumb/profile.go
 package main
 
 import (

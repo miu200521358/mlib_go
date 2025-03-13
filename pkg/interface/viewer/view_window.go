@@ -61,6 +61,7 @@ func newViewWindow(
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
+	glfw.WindowHint(glfw.DoubleBuffer, glfw.True)
 
 	glWindow, err := glfw.CreateWindow(width, height, title, nil, mainWindow)
 	if err != nil {
@@ -70,6 +71,7 @@ func newViewWindow(
 	glWindow.MakeContextCurrent()
 	glWindow.SetInputMode(glfw.StickyKeysMode, glfw.True)
 	glWindow.SetIcon([]image.Image{icon})
+	glfw.SwapInterval(0) // 0=VSync無効, 1=VSync有効
 
 	// OpenGL の初期化
 	if err := gl.Init(); err != nil {
@@ -163,7 +165,7 @@ func (vw *ViewWindow) Render(timeStep float32) {
 	vw.shader.Resize(w, h)
 
 	// MSAAフレームバッファをバインド
-	vw.shader.GetMsaa().Bind()
+	vw.shader.Msaa().Bind()
 
 	// 深度バッファのクリア
 	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
@@ -201,8 +203,8 @@ func (vw *ViewWindow) Render(timeStep float32) {
 
 	currentFrame := vw.list.shared.Frame()
 
-	// 改良された予測関数を使用
-	nextFrame := vw.predictNextFrame(currentFrame, timeStep)
+	// // 改良された予測関数を使用
+	// nextFrame := vw.predictNextFrame(currentFrame, timeStep)
 
 	for i, modelRenderer := range vw.modelRenderers {
 		if modelRenderer == nil || vw.motions[i] == nil {
@@ -232,17 +234,17 @@ func (vw *ViewWindow) Render(timeStep float32) {
 		// モデルをレンダリング
 		modelRenderer.Render(vw.shader, vw.list.shared, vw.vmdDeltas[i])
 
-		// 次のフレームの投機的計算を開始
-		deform.SpeculativeDeform(
-			vw.list.shared,
-			vw.physics,
-			modelRenderer.Model,
-			vw.motions[i],
-			vw.vmdDeltas[i],
-			vw.speculativeCaches[i],
-			timeStep,
-			nextFrame,
-		)
+		// // 次のフレームの投機的計算を開始
+		// deform.SpeculativeDeform(
+		// 	vw.list.shared,
+		// 	vw.physics,
+		// 	modelRenderer.Model,
+		// 	vw.motions[i],
+		// 	vw.vmdDeltas[i],
+		// 	vw.speculativeCaches[i],
+		// 	timeStep,
+		// 	nextFrame,
+		// )
 	}
 
 	// 物理デバッグ描画
@@ -250,12 +252,12 @@ func (vw *ViewWindow) Render(timeStep float32) {
 		vw.list.shared.IsShowJoint(), vw.list.shared.IsShowRigidBodyFront())
 
 	// 深度解決
-	vw.shader.GetMsaa().Resolve()
+	vw.shader.Msaa().Resolve()
 	// TODO
 	// if vw.appState.IsShowOverride() && vw.windowIndex == 0 {
 	// 	vw.drawOverride()
 	// }
-	vw.shader.GetMsaa().Unbind()
+	vw.shader.Msaa().Unbind()
 
 	vw.SwapBuffers()
 }

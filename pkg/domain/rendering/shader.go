@@ -42,7 +42,7 @@ type IShader interface {
 	DrawFloor()
 
 	// MSAA関連
-	GetMsaa() IMsaa
+	Msaa() IMsaa
 }
 
 // IShaderFactory はシェーダー生成の抽象ファクトリー
