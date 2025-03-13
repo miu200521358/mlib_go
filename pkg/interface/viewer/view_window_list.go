@@ -10,6 +10,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
+	"github.com/miu200521358/mlib_go/pkg/usecase/deform"
 )
 
 type ViewerList struct {
@@ -140,6 +141,11 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 		elapsed = float32(originalElapsed)
 	}
 
+	// デフォーム処理
+	for i, viewWindow := range vl.viewerList {
+		vl.deform(i, viewWindow, timeStep)
+	}
+
 	// レンダリング処理
 	for _, viewWindow := range vl.viewerList {
 		viewWindow.Render(timeStep)
@@ -157,6 +163,59 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	}
 
 	return true, timeStep
+}
+
+func (vl *ViewerList) deform(i int, viewWindow *ViewWindow, timeStep float32) {
+	viewWindow.MakeContextCurrent()
+
+	viewWindow.loadModelRenderers(vl.shared)
+	viewWindow.loadMotions(vl.shared)
+
+	frame := vl.shared.Frame()
+
+	// デフォーム処理
+	for n := range viewWindow.modelRenderers {
+		// 物理前変形
+		viewWindow.vmdDeltas[i] = deform.DeformBeforePhysics(
+			viewWindow.modelRenderers[n].Model,
+			viewWindow.motions[i],
+			viewWindow.vmdDeltas[i],
+			frame,
+		)
+
+		// 物理変形のための事前処理
+		viewWindow.vmdDeltas[i] = deform.DeformForPhysics(
+			vl.shared,
+			viewWindow.physics,
+			viewWindow.modelRenderers[n].Model,
+			viewWindow.vmdDeltas[i],
+		)
+
+		// 物理後変形
+		viewWindow.vmdDeltas[i] = deform.DeformAfterPhysics(
+			vl.shared,
+			viewWindow.physics,
+			viewWindow.modelRenderers[n].Model,
+			viewWindow.motions[i],
+			viewWindow.vmdDeltas[i],
+		)
+	}
+
+	if vl.shared.IsEnabledPhysics() || vl.shared.IsPhysicsReset() {
+		// 物理更新
+		viewWindow.physics.StepSimulation(timeStep)
+	}
+
+	for n := range viewWindow.modelRenderers {
+		// 物理後変形
+		viewWindow.vmdDeltas[i] = deform.DeformAfterPhysics(
+			vl.shared,
+			viewWindow.physics,
+			viewWindow.modelRenderers[n].Model,
+			viewWindow.motions[i],
+			viewWindow.vmdDeltas[i],
+		)
+	}
 }
 
 // updateFpsDisplay FPS表示を更新する処理

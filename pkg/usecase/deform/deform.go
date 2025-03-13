@@ -137,66 +137,22 @@ func deformBoneByPhysicsFlag(
 	return deltas
 }
 
-// Deform すべてのボーンデフォーム処理を実行する
-func Deform(
-	shared *state.SharedState,
-	physics physics.IPhysics,
-	model *pmx.PmxModel,
-	motion *vmd.VmdMotion,
-	deltas *delta.VmdDeltas,
-	timeStep float32,
-) *delta.VmdDeltas {
-	if model == nil || motion == nil {
-		return deltas
-	}
-
-	// 物理前変形
-	frame := shared.Frame()
-
-	if deltas == nil || deltas.Frame() != frame ||
-		deltas.ModelHash() != model.Hash() || deltas.MotionHash() != motion.Hash() {
-		// 前とは条件が違う場合のみ再計算
-		deltas = deformBeforePhysics(model, motion, deltas, shared.Frame())
-	}
-
-	// 物理変形
-	deltas = DeformPhysics(shared, physics, model, motion, deltas, timeStep)
-
-	return deltas
-}
-
-// DeformPhysics 物理演算を含めたボーンデフォーム処理を実行する
-func DeformPhysics(
-	shared *state.SharedState,
-	physics physics.IPhysics,
-	model *pmx.PmxModel,
-	motion *vmd.VmdMotion,
-	deltas *delta.VmdDeltas,
-	timeStep float32,
-) *delta.VmdDeltas {
-	// 物理変形
-	if err := deformPhysics(shared, physics, model, deltas); err != nil {
-		return deltas
-	}
-
-	if shared.IsEnabledPhysics() || shared.IsPhysicsReset() {
-		// 物理更新
-		physics.StepSimulation(timeStep)
-	}
-
-	// 物理後変形
-	deltas = deformAfterPhysics(shared, physics, model, motion, deltas)
-
-	return deltas
-}
-
-// deformBeforePhysics 物理演算前のボーンデフォーム処理を実行する
-func deformBeforePhysics(
+func DeformBeforePhysics(
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
 	frame float32,
 ) *delta.VmdDeltas {
+	if model == nil || motion == nil {
+		return deltas
+	}
+
+	if deltas != nil && deltas.Frame() == frame &&
+		deltas.ModelHash() == model.Hash() && deltas.MotionHash() == motion.Hash() {
+		return deltas
+	}
+
+	// 前とは条件が違う場合のみ再計算
 	if deltas == nil {
 		deltas = delta.NewVmdDeltas(frame, model.Bones, model.Hash(), motion.Hash())
 	} else {
@@ -204,10 +160,6 @@ func deformBeforePhysics(
 		deltas.SetModelHash(model.Hash())
 		deltas.SetMotionHash(motion.Hash())
 		deltas.Bones = delta.NewBoneDeltas(model.Bones)
-	}
-
-	if model == nil || motion == nil {
-		return deltas
 	}
 
 	deltas.Morphs = DeformMorph(model, motion.MorphFrames, frame, nil)
@@ -221,12 +173,12 @@ func deformBeforePhysics(
 	return deltas
 }
 
-func deformPhysics(
+func DeformForPhysics(
 	shared *state.SharedState,
 	physics physics.IPhysics,
 	model *pmx.PmxModel,
-	vmdDeltas *delta.VmdDeltas,
-) error {
+	deltas *delta.VmdDeltas,
+) *delta.VmdDeltas {
 	// 物理剛体位置を更新
 	if err := miter.IterParallelByCount(model.RigidBodies.Length(), 100, func(i int) {
 		rigidBody, err := model.RigidBodies.Get(i)
@@ -240,7 +192,7 @@ func deformPhysics(
 			rigidBodyBone = rigidBody.JointedBone
 		}
 
-		if rigidBodyBone == nil || vmdDeltas.Bones.Get(rigidBodyBone.Index()) == nil {
+		if rigidBodyBone == nil || deltas.Bones.Get(rigidBodyBone.Index()) == nil {
 			return
 		}
 
@@ -248,16 +200,16 @@ func deformPhysics(
 			shared.IsPhysicsReset() {
 			// 通常はボーン追従剛体・物理＋ボーン剛体だけ。物理リセット時は全部更新
 			physics.UpdateTransform(model.Index(), rigidBodyBone,
-				vmdDeltas.Bones.Get(rigidBodyBone.Index()).FilledGlobalMatrix(), rigidBody)
+				deltas.Bones.Get(rigidBodyBone.Index()).FilledGlobalMatrix(), rigidBody)
 		}
 	}); err != nil {
-		return err
+		return deltas
 	}
 
-	return nil
+	return deltas
 }
 
-func deformAfterPhysics(
+func DeformAfterPhysics(
 	shared *state.SharedState,
 	physics physics.IPhysics,
 	model *pmx.PmxModel,

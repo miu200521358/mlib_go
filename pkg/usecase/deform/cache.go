@@ -129,7 +129,7 @@ func SpeculativeDeform(
 		speculativeDeltas := delta.NewVmdDeltas(nextFrame, model.Bones, modelHash, motionHash)
 
 		// 次のフレームの変形を計算
-		result := deformBeforePhysics(model, motion, speculativeDeltas, nextFrame)
+		result := DeformBeforePhysics(model, motion, speculativeDeltas, nextFrame)
 
 		// 結果をキャッシュに保存
 		cache.StoreResult(result)

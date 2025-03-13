@@ -185,51 +185,53 @@ func (vw *ViewWindow) Render(timeStep float32) {
 	// 床描画
 	vw.shader.DrawFloor()
 
-	vw.loadModelRenderers(vw.list.shared)
-	vw.loadMotions(vw.list.shared)
+	// vw.loadModelRenderers(vw.list.shared)
+	// vw.loadMotions(vw.list.shared)
 
-	for i := range vw.modelRenderers {
-		if vw.list.shared.IsChangedEnableDropFrame() {
-			// ドロップフレーム設定が変わったらキャッシュもリセット
-			vw.speculativeCaches[i].Reset()
-			vw.list.shared.SetChangedEnableDropFrame(false)
-			vw.avgElapsedTime = 1.0 / 30.0
-			vw.elapsedSamples = 0
-		}
-	}
+	// for i := range vw.modelRenderers {
+	// 	if vw.list.shared.IsChangedEnableDropFrame() {
+	// 		// ドロップフレーム設定が変わったらキャッシュもリセット
+	// 		vw.speculativeCaches[i].Reset()
+	// 		vw.list.shared.SetChangedEnableDropFrame(false)
+	// 		vw.avgElapsedTime = 1.0 / 30.0
+	// 		vw.elapsedSamples = 0
+	// 	}
+	// }
 
-	// 経過時間の平均計算を更新
-	vw.updateAverageElapsedTime(float32(timeStep))
+	// // 経過時間の平均計算を更新
+	// vw.updateAverageElapsedTime(float32(timeStep))
 
-	currentFrame := vw.list.shared.Frame()
+	// currentFrame := vw.list.shared.Frame()
 
 	// // 改良された予測関数を使用
 	// nextFrame := vw.predictNextFrame(currentFrame, timeStep)
 
+	// vw.list.deform(vw.windowIndex, vw, timeStep)
+
 	for i, modelRenderer := range vw.modelRenderers {
-		if modelRenderer == nil || vw.motions[i] == nil {
+		if modelRenderer == nil || vw.vmdDeltas[i] == nil {
 			continue
 		}
 
-		// スキップ条件を先に確認
-		if i >= len(vw.speculativeCaches) || vw.speculativeCaches[i] == nil {
-			// 通常通り計算
-			vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
-		} else {
-			// キャッシュから結果を取得を試みる
-			modelHash := modelRenderer.Model.Hash()
-			motionHash := vw.motions[i].Hash()
-			cachedDeltas := vw.speculativeCaches[i].GetResult(currentFrame, modelHash, motionHash)
+		// // スキップ条件を先に確認
+		// if i >= len(vw.speculativeCaches) || vw.speculativeCaches[i] == nil {
+		// 	// 通常通り計算
+		// 	vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
+		// } else {
+		// 	// キャッシュから結果を取得を試みる
+		// 	modelHash := modelRenderer.Model.Hash()
+		// 	motionHash := vw.motions[i].Hash()
+		// 	cachedDeltas := vw.speculativeCaches[i].GetResult(currentFrame, modelHash, motionHash)
 
-			if cachedDeltas != nil {
-				// キャッシュヒット - キャッシュされた結果を使用
-				vw.vmdDeltas[i] = cachedDeltas
-				vw.vmdDeltas[i] = deform.DeformPhysics(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
-			} else {
-				// キャッシュミス - 通常通り計算
-				vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
-			}
-		}
+		// 	if cachedDeltas != nil {
+		// 		// キャッシュヒット - キャッシュされた結果を使用
+		// 		vw.vmdDeltas[i] = cachedDeltas
+		// 		vw.vmdDeltas[i] = deform.DeformPhysics(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
+		// 	} else {
+		// 		// キャッシュミス - 通常通り計算
+		// 		vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
+		// 	}
+		// }
 
 		// モデルをレンダリング
 		modelRenderer.Render(vw.shader, vw.list.shared, vw.vmdDeltas[i])
