@@ -142,8 +142,8 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	}
 
 	// デフォーム処理
-	for i, viewWindow := range vl.viewerList {
-		vl.deform(i, viewWindow, timeStep)
+	for _, viewWindow := range vl.viewerList {
+		vl.deform(viewWindow, timeStep)
 	}
 
 	// レンダリング処理
@@ -165,7 +165,7 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	return true, timeStep
 }
 
-func (vl *ViewerList) deform(i int, viewWindow *ViewWindow, timeStep float32) {
+func (vl *ViewerList) deform(viewWindow *ViewWindow, timeStep float32) {
 	viewWindow.MakeContextCurrent()
 
 	viewWindow.loadModelRenderers(vl.shared)
@@ -176,28 +176,28 @@ func (vl *ViewerList) deform(i int, viewWindow *ViewWindow, timeStep float32) {
 	// デフォーム処理
 	for n := range viewWindow.modelRenderers {
 		// 物理前変形
-		viewWindow.vmdDeltas[i] = deform.DeformBeforePhysics(
+		viewWindow.vmdDeltas[n] = deform.DeformBeforePhysics(
 			viewWindow.modelRenderers[n].Model,
-			viewWindow.motions[i],
-			viewWindow.vmdDeltas[i],
+			viewWindow.motions[n],
+			viewWindow.vmdDeltas[n],
 			frame,
 		)
 
 		// 物理変形のための事前処理
-		viewWindow.vmdDeltas[i] = deform.DeformForPhysics(
+		viewWindow.vmdDeltas[n] = deform.DeformForPhysics(
 			vl.shared,
 			viewWindow.physics,
 			viewWindow.modelRenderers[n].Model,
-			viewWindow.vmdDeltas[i],
+			viewWindow.vmdDeltas[n],
 		)
 
 		// 物理後変形
-		viewWindow.vmdDeltas[i] = deform.DeformAfterPhysics(
+		viewWindow.vmdDeltas[n] = deform.DeformAfterPhysics(
 			vl.shared,
 			viewWindow.physics,
 			viewWindow.modelRenderers[n].Model,
-			viewWindow.motions[i],
-			viewWindow.vmdDeltas[i],
+			viewWindow.motions[n],
+			viewWindow.vmdDeltas[n],
 		)
 	}
 
@@ -208,12 +208,12 @@ func (vl *ViewerList) deform(i int, viewWindow *ViewWindow, timeStep float32) {
 
 	for n := range viewWindow.modelRenderers {
 		// 物理後変形
-		viewWindow.vmdDeltas[i] = deform.DeformAfterPhysics(
+		viewWindow.vmdDeltas[n] = deform.DeformAfterPhysics(
 			vl.shared,
 			viewWindow.physics,
 			viewWindow.modelRenderers[n].Model,
-			viewWindow.motions[i],
-			viewWindow.vmdDeltas[i],
+			viewWindow.motions[n],
+			viewWindow.vmdDeltas[n],
 		)
 	}
 }
