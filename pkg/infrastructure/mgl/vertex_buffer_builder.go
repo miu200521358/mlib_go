@@ -247,15 +247,40 @@ type updateInfo struct {
 
 // UpdateVertexDeltas はバッファに頂点デルタを適用
 func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDeltas) {
+	// 頂点モーフ用の頂点数が 0 なら、元の頂点データを再設定するなどの処理
 	if vertices == nil || vertices.Length() == 0 {
+		h.VBO.Bind()
+		// 元のデータに戻すなら、BufferDataで再アップロード
 		gl.BufferData(h.VBO.target, h.VBO.size, h.VBO.ptr, gl.STATIC_DRAW)
 		return
 	}
 
-	// 頂点モーフのVBOサイズ
-	vboVertexSize := (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3)
+	// VBO をバインド
+	h.VBO.Bind()
 
-	// モーフ分の変動量を設定
+	// バッファ全体を一度にマップ (書き込み用)
+	// MAP_INVALIDATE_RANGE_BIT は、現在のデータを破棄して書き込む際に使用
+	mappedPtr := gl.MapBufferRange(h.VBO.target, 0, h.VBO.size,
+		gl.MAP_WRITE_BIT|gl.MAP_INVALIDATE_RANGE_BIT)
+	if mappedPtr == nil {
+		// マッピング失敗時のエラーハンドリング
+		return
+	}
+	defer gl.UnmapBuffer(h.VBO.target) // 関数終了時にアンマップ
+
+	// mappedPtr を []float32 に変換する
+	mappedSlice := unsafe.Slice((*float32)(mappedPtr), h.VBO.size/4)
+
+	// もし「元データをベースにして、その上にモーフの差分を適用する」場合は、
+	// まず mappedSlice に元の頂点配列 h.VBO.ptr をコピーしてから差分適用します。
+	// (h.VBO.ptr が []float32 であることを仮定した例)
+	baseSlice := unsafe.Slice((*float32)(h.VBO.ptr), h.VBO.size/4)
+	copy(mappedSlice, baseSlice)
+
+	// 以下、頂点モーフの差分を書き込む
+	// (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3) は頂点データの構造に合わせたサイズ
+	vboVertexSize := 3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3
+
 	for v := range vertices.Iterator() {
 		vidx := v.Index
 		vertexDelta := v.Value
@@ -264,23 +289,49 @@ func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDelta
 		if vd == nil {
 			continue
 		}
-		offsetStride := (vidx*h.StrideSize + vboVertexSize) * h.FloatSize
-		// 必要な場合にのみ部分更新
-		gl.BufferSubData(h.VBO.target, offsetStride, len(vd)*4, gl.Ptr(vd))
+
+		// offsetStride = 頂点の先頭オフセット + モーフ領域
+		offsetStride := (vidx*h.StrideSize + vboVertexSize)
+		// vd は []float32 の想定、コピー
+		copy(mappedSlice[offsetStride:offsetStride+len(vd)], vd)
 	}
 }
 
+// UpdateBoneDeltas は、ボーン変形のデルタを一括更新します。
 func (h *VertexBufferHandle) UpdateBoneDeltas(boneIndexes []int, boneDeltas [][]float32) {
 	if boneIndexes == nil || boneDeltas == nil {
 		return
 	}
 
+	// ボーン変形の領域開始位置 (float 要素数)
 	vboVertexSize := (3 + 4 + 4)
 
-	// ボーン変形分の変動量を設定
+	// 対象の VBO をバインド
+	h.VBO.Bind()
+
+	// バッファ全体を一括で書き込み用にマップする
+	mappedPtr := gl.MapBufferRange(h.VBO.target, 0, h.VBO.size,
+		gl.MAP_WRITE_BIT|gl.MAP_INVALIDATE_RANGE_BIT)
+	if mappedPtr == nil {
+		// マッピング失敗時はエラー処理
+		return
+	}
+	// 関数終了時にアンマップ
+	defer gl.UnmapBuffer(h.VBO.target)
+
+	// バッファサイズはバイト単位なので、float32 の要素数に換算
+	numFloats := int(h.VBO.size / h.FloatSize)
+
+	// マップしたメモリを []float32 に変換する
+	mappedSlice := unsafe.Slice((*float32)(mappedPtr), numFloats)
+
+	// 各ボーンごとに、対象の領域に boneDelta をコピーする
+	// ここで、各頂点の先頭から (vidx * StrideSize) の後に、さらにボーン変形用領域 vboVertexSize があると想定
 	for i, vidx := range boneIndexes {
 		vd := boneDeltas[i]
-		offsetStride := (vidx*h.StrideSize + vboVertexSize) * h.FloatSize
-		h.VBO.BufferSubData(offsetStride, len(vd)*h.FloatSize, gl.Ptr(vd))
+		// マッピングしたスライスは float32 の配列になっているので、バイト単位のオフセットではなく float 単位のオフセットで指定
+		offset := vidx*h.StrideSize + vboVertexSize
+		// 範囲外アクセスにならないよう、コピーする長さに注意
+		copy(mappedSlice[offset:offset+len(vd)], vd)
 	}
 }
