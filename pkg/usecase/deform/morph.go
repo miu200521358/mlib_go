@@ -16,10 +16,9 @@ func DeformMorph(
 	if morphNames == nil {
 		// モーフの指定がなければ全モーフチェック
 		morphNames = make([]string, 0)
-		for m := range model.Morphs.Iterator() {
-			morph := m.Value
+		model.Morphs.ForEach(func(index int, morph *pmx.Morph) {
 			morphNames = append(morphNames, morph.Name())
-		}
+		})
 	}
 
 	mds := delta.NewMorphDeltas(model.Vertices, model.Materials, model.Bones)
@@ -296,19 +295,18 @@ func deformMaterial(
 			}
 			if offset.MaterialIndex < 0 {
 				// 全材質対象の場合
-				for data := range deltas.Iterator() {
-					d := data.Value
-					if d == nil {
-						m, _ := model.Materials.Get(data.Index)
-						d = delta.NewMaterialMorphDelta(m)
+				deltas.ForEach(func(index int, data *delta.MaterialMorphDelta) {
+					if data == nil {
+						m, _ := model.Materials.Get(index)
+						data = delta.NewMaterialMorphDelta(m)
 					}
 					if calcMode == pmx.CALC_MODE_MULTIPLICATION {
-						d.Mul(offset, ratio)
+						data.Mul(offset, ratio)
 					} else {
-						d.Add(offset, ratio)
+						data.Add(offset, ratio)
 					}
-					deltas.Update(d)
-				}
+					deltas.Update(data)
+				})
 			} else if 0 <= offset.MaterialIndex && offset.MaterialIndex <= deltas.Length() {
 				// 特定材質のみの場合
 				d := deltas.Get(offset.MaterialIndex)

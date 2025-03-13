@@ -26,14 +26,13 @@ type rigidbodyValue struct {
 func (physics *MPhysics) initRigidBodies(modelIndex int, rigidBodies *pmx.RigidBodies) {
 	// 剛体を順番にボーンと紐付けていく
 	physics.rigidBodies[modelIndex] = make([]*rigidbodyValue, rigidBodies.Length())
-	for v := range rigidBodies.Iterator() {
-		rigidBody := v.Value
+	rigidBodies.ForEach(func(index int, rigidBody *pmx.RigidBody) {
 		// 剛体の初期位置と回転
 		btRigidBodyTransform := bt.NewBtTransform(newBulletFromRad(rigidBody.Rotation), newBulletFromVec(rigidBody.Position))
 
 		// 物理設定の初期化
 		physics.initRigidBody(modelIndex, rigidBody, btRigidBodyTransform)
-	}
+	})
 }
 
 // initRigidBodiesByBoneDeltas はボーンデルタ情報を使用して剛体を初期化します
@@ -42,9 +41,7 @@ func (physics *MPhysics) initRigidBodiesByBoneDeltas(
 ) {
 	// 剛体を順番にボーンと紐付けていく
 	physics.rigidBodies[modelIndex] = make([]*rigidbodyValue, rigidBodies.Length())
-	for v := range rigidBodies.Iterator() {
-		rigidBody := v.Value
-
+	rigidBodies.ForEach(func(index int, rigidBody *pmx.RigidBody) {
 		// ボーンから見た剛体の初期位置
 		var bone *pmx.Bone
 		if rigidBody.Bone != nil {
@@ -55,7 +52,7 @@ func (physics *MPhysics) initRigidBodiesByBoneDeltas(
 
 		// 剛体の初期位置と回転
 		if bone == nil || !boneDeltas.Contains(bone.Index()) {
-			continue
+			return
 		}
 
 		btRigidBodyTransform := bt.NewBtTransform()
@@ -73,7 +70,7 @@ func (physics *MPhysics) initRigidBodiesByBoneDeltas(
 
 		// 物理設定の初期化
 		physics.initRigidBody(modelIndex, rigidBody, btRigidBodyTransform)
-	}
+	})
 }
 
 // initRigidBody は個別の剛体を初期化します

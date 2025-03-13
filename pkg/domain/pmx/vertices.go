@@ -23,8 +23,7 @@ func (vertices *Vertices) GetMapByBoneIndex(weightThreshold float64) map[int][]*
 	}
 
 	vertices.vertexMap = make(map[int][]*Vertex)
-	for v := range vertices.Iterator() {
-		vertex := v.Value
+	vertices.ForEach(func(index int, vertex *Vertex) {
 		if vertex.Deform != nil {
 			for n, boneIndex := range vertex.Deform.Indexes() {
 				if _, ok := vertices.vertexMap[boneIndex]; !ok {
@@ -35,7 +34,7 @@ func (vertices *Vertices) GetMapByBoneIndex(weightThreshold float64) map[int][]*
 				}
 			}
 		}
-	}
+	})
 
 	return vertices.vertexMap
 }

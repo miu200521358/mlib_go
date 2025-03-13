@@ -29,9 +29,9 @@ func (vertexMorphDeltas *VertexMorphDeltas) Update(v *VertexMorphDelta) {
 	vertexMorphDeltas.data[v.Index] = v
 }
 
-// VertexMorphDeltasにForEachメソッドを追加
-func (vertexMorphDeltas *VertexMorphDeltas) ForEach(callback func(index int, value *VertexMorphDelta)) {
-	for i, v := range vertexMorphDeltas.data {
+// ForEach は全ての頂点モーフデルタをコールバック関数に渡します
+func (vd *VertexMorphDeltas) ForEach(callback func(index int, value *VertexMorphDelta)) {
+	for i, v := range vd.data {
 		callback(i, v)
 	}
 }
@@ -75,24 +75,11 @@ func (boneMorphDeltas *BoneMorphDeltas) Update(b *BoneMorphDelta) {
 	boneMorphDeltas.data[b.BoneIndex] = b
 }
 
-func (boneMorphDeltas *BoneMorphDeltas) Iterator() <-chan struct {
-	Index int
-	Delta *BoneMorphDelta
-} {
-	ch := make(chan struct {
-		Index int
-		Delta *BoneMorphDelta
-	})
-	go func() {
-		for i, b := range boneMorphDeltas.data {
-			ch <- struct {
-				Index int
-				Delta *BoneMorphDelta
-			}{Index: i, Delta: b}
-		}
-		close(ch)
-	}()
-	return ch
+// ForEach は全てのボーンモーフデルタをコールバック関数に渡します
+func (bd *BoneMorphDeltas) ForEach(callback func(index int, value *BoneMorphDelta)) {
+	for i, v := range bd.data {
+		callback(i, v)
+	}
 }
 
 // ----------------------------
@@ -104,9 +91,9 @@ type MaterialMorphDeltas struct {
 
 func NewMaterialMorphDeltas(materials *pmx.Materials) *MaterialMorphDeltas {
 	deltas := make(map[int]*MaterialMorphDelta)
-	for m := range materials.Iterator() {
-		deltas[m.Index] = NewMaterialMorphDelta(m.Value)
-	}
+	materials.ForEach(func(i int, m *pmx.Material) {
+		deltas[i] = NewMaterialMorphDelta(m)
+	})
 
 	return &MaterialMorphDeltas{
 		data:      deltas,
@@ -129,24 +116,11 @@ func (materialMorphDeltas *MaterialMorphDeltas) Update(m *MaterialMorphDelta) {
 	materialMorphDeltas.data[m.Index()] = m
 }
 
-func (materialMorphDeltas *MaterialMorphDeltas) Iterator() <-chan struct {
-	Index int
-	Value *MaterialMorphDelta
-} {
-	ch := make(chan struct {
-		Index int
-		Value *MaterialMorphDelta
-	})
-	go func() {
-		for i, m := range materialMorphDeltas.data {
-			ch <- struct {
-				Index int
-				Value *MaterialMorphDelta
-			}{Index: i, Value: m}
-		}
-		close(ch)
-	}()
-	return ch
+// ForEach は全ての材質モーフデルタをコールバック関数に渡します
+func (md *MaterialMorphDeltas) ForEach(callback func(index int, value *MaterialMorphDelta)) {
+	for i, v := range md.data {
+		callback(i, v)
+	}
 }
 
 type MorphDeltas struct {

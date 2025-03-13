@@ -131,23 +131,9 @@ func (im *IndexNameModels[T]) RemoveByName(name string) error {
 	return errors.New("name not found")
 }
 
-// Iterator はコレクションの添字と値をペアで提供するイテレータを提供します
-func (im *IndexNameModels[T]) Iterator() <-chan struct {
-	Index int
-	Value T
-} {
-	ch := make(chan struct {
-		Index int
-		Value T
-	})
-	go func() {
-		for i, value := range im.values {
-			ch <- struct {
-				Index int
-				Value T
-			}{Index: i, Value: value}
-		}
-		close(ch)
-	}()
-	return ch
+// ForEach は全ての値をコールバック関数に渡します
+func (im *IndexNameModels[T]) ForEach(callback func(index int, value T)) {
+	for i, v := range im.values {
+		callback(i, v)
+	}
 }

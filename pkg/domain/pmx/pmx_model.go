@@ -140,8 +140,7 @@ func (model *PmxModel) Setup() {
 	model.Bones.Setup()
 
 	// 剛体
-	for d := range model.RigidBodies.Iterator() {
-		rb := d.Value
+	model.RigidBodies.ForEach(func(index int, rb *RigidBody) {
 		if rb.BoneIndex >= 0 && model.Bones.Contains(rb.BoneIndex) {
 			// 剛体に関連付けられたボーンが存在する場合、剛体とボーンを関連付ける
 			if bone, err := model.Bones.Get(rb.BoneIndex); err == nil {
@@ -149,7 +148,7 @@ func (model *PmxModel) Setup() {
 				rb.Bone = bone
 			}
 		}
-	}
+	})
 
 	model.UpdateHash()
 }

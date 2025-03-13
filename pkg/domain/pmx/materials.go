@@ -24,12 +24,11 @@ func NewMaterials(capacity int) *Materials {
 func (materials *Materials) Setup(vertices *Vertices, faces *Faces, textures *Textures) {
 	prevVertexCount := 0
 
-	for v := range vertices.Iterator() {
-		v.Value.MaterialIndexes = make([]int, 0)
-	}
+	vertices.ForEach(func(index int, vertex *Vertex) {
+		vertex.MaterialIndexes = make([]int, 0)
+	})
 
-	for m := range materials.Iterator() {
-		material := m.Value
+	materials.ForEach(func(index int, material *Material) {
 		for j := prevVertexCount; j < prevVertexCount+int(material.VerticesCount/3); j++ {
 			face, err := faces.Get(j)
 			if err != nil {
@@ -67,5 +66,5 @@ func (materials *Materials) Setup(vertices *Vertices, faces *Faces, textures *Te
 				texture.TextureType = TEXTURE_TYPE_SPHERE
 			}
 		}
-	}
+	})
 }

@@ -115,17 +115,15 @@ func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int, erro
 	height := int(math.Ceil((float64(numBones) * 4) / float64(width)))
 
 	paddedMatrixes := make([]float32, height*width*4)
-	for v := range boneDeltas.Iterator() {
-		i := v.Index
-		d := v.Value
+	boneDeltas.ForEach(func(index int, d *delta.BoneDelta) {
 		var m mgl32.Mat4
 		if d == nil {
 			m = mgl32.Ident4()
 		} else {
 			m = mmath.NewGlMat4(d.FilledLocalMatrix())
 		}
-		copy(paddedMatrixes[i*16:], m[:])
-	}
+		copy(paddedMatrixes[index*16:], m[:])
+	})
 
 	return paddedMatrixes, width, height, nil
 }

@@ -42,62 +42,59 @@ func TestXRepository_Load1(t *testing.T) {
 	expectedData, _ := pmxRep.Load(pmxPath)
 	expectedModel := expectedData.(*pmx.PmxModel)
 
-	for vt := range model.Vertices.Iterator() {
-		v := vt.Value
-		expectedV, _ := expectedModel.Vertices.Get(v.Index())
-		if !v.Position.NearEquals(expectedV.Position, 1e-5) {
-			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, v.Position)
+	model.Vertices.ForEach(func(index int, vertex *pmx.Vertex) {
+		expectedV, _ := expectedModel.Vertices.Get(vertex.Index())
+		if !vertex.Position.NearEquals(expectedV.Position, 1e-5) {
+			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, vertex.Position)
 		}
-	}
+	})
 
-	for ft := range model.Faces.Iterator() {
-		f := ft.Value
-		expectedF, _ := expectedModel.Faces.Get(f.Index())
-		if f.VertexIndexes[0] != expectedF.VertexIndexes[0] || f.VertexIndexes[1] != expectedF.VertexIndexes[1] || f.VertexIndexes[2] != expectedF.VertexIndexes[2] {
-			t.Errorf("Expected VertexIndexes to be %v, got %v", expectedF.VertexIndexes, f.VertexIndexes)
+	model.Faces.ForEach(func(index int, face *pmx.Face) {
+		expectedF, _ := expectedModel.Faces.Get(face.Index())
+		if face.VertexIndexes[0] != expectedF.VertexIndexes[0] || face.VertexIndexes[1] != expectedF.VertexIndexes[1] || face.VertexIndexes[2] != expectedF.VertexIndexes[2] {
+			t.Errorf("Expected VertexIndexes to be %v, got %v", expectedF.VertexIndexes, face.VertexIndexes)
 		}
-	}
+	})
 
-	for mt := range model.Materials.Iterator() {
-		m := mt.Value
-		expectedT, _ := expectedModel.Materials.Get(m.Index())
-		if !m.Diffuse.NearEquals(expectedT.Diffuse, 1e-5) {
-			t.Errorf("Expected Diffuse to be %v, got %v", expectedT.Diffuse, m.Diffuse)
+	model.Materials.ForEach(func(index int, material *pmx.Material) {
+		expectedT, _ := expectedModel.Materials.Get(material.Index())
+		if !material.Diffuse.NearEquals(expectedT.Diffuse, 1e-5) {
+			t.Errorf("Expected Diffuse to be %v, got %v", expectedT.Diffuse, material.Diffuse)
 		}
-		if !m.Ambient.NearEquals(expectedT.Ambient, 1e-5) {
-			t.Errorf("Expected Ambient to be %v, got %v", expectedT.Ambient, m.Ambient)
+		if !material.Ambient.NearEquals(expectedT.Ambient, 1e-5) {
+			t.Errorf("Expected Ambient to be %v, got %v", expectedT.Ambient, material.Ambient)
 		}
-		if !m.Specular.NearEquals(expectedT.Specular, 1e-5) {
-			t.Errorf("Expected Specular to be %v, got %v", expectedT.Specular, m.Specular)
+		if !material.Specular.NearEquals(expectedT.Specular, 1e-5) {
+			t.Errorf("Expected Specular to be %v, got %v", expectedT.Specular, material.Specular)
 		}
-		if !m.Edge.NearEquals(expectedT.Edge, 1e-5) {
-			t.Errorf("Expected EdgeColor to be %v, got %v", expectedT.Edge, m.Edge)
+		if !material.Edge.NearEquals(expectedT.Edge, 1e-5) {
+			t.Errorf("Expected EdgeColor to be %v, got %v", expectedT.Edge, material.Edge)
 		}
-		if m.DrawFlag != expectedT.DrawFlag {
-			t.Errorf("Expected DrawFlag to be %v, got %v", expectedT.DrawFlag, m.DrawFlag)
+		if material.DrawFlag != expectedT.DrawFlag {
+			t.Errorf("Expected DrawFlag to be %v, got %v", expectedT.DrawFlag, material.DrawFlag)
 		}
-		if m.EdgeSize != expectedT.EdgeSize {
-			t.Errorf("Expected EdgeSize to be %v, got %v", expectedT.EdgeSize, m.EdgeSize)
+		if material.EdgeSize != expectedT.EdgeSize {
+			t.Errorf("Expected EdgeSize to be %v, got %v", expectedT.EdgeSize, material.EdgeSize)
 		}
-		if m.TextureIndex != expectedT.TextureIndex {
-			t.Errorf("Expected TextureIndex to be %v, got %v", expectedT.TextureIndex, m.TextureIndex)
+		if material.TextureIndex != expectedT.TextureIndex {
+			t.Errorf("Expected TextureIndex to be %v, got %v", expectedT.TextureIndex, material.TextureIndex)
 		}
-		if m.SphereTextureIndex != expectedT.SphereTextureIndex {
-			t.Errorf("Expected SphereTextureIndex to be %v, got %v", expectedT.SphereTextureIndex, m.SphereTextureIndex)
+		if material.SphereTextureIndex != expectedT.SphereTextureIndex {
+			t.Errorf("Expected SphereTextureIndex to be %v, got %v", expectedT.SphereTextureIndex, material.SphereTextureIndex)
 		}
-		if m.ToonTextureIndex != expectedT.ToonTextureIndex {
-			t.Errorf("Expected ToonTextureIndex to be %v, got %v", expectedT.ToonTextureIndex, m.ToonTextureIndex)
+		if material.ToonTextureIndex != expectedT.ToonTextureIndex {
+			t.Errorf("Expected ToonTextureIndex to be %v, got %v", expectedT.ToonTextureIndex, material.ToonTextureIndex)
 		}
-		if m.SphereMode != expectedT.SphereMode {
-			t.Errorf("Expected SphereMode to be %v, got %v", expectedT.SphereMode, m.SphereMode)
+		if material.SphereMode != expectedT.SphereMode {
+			t.Errorf("Expected SphereMode to be %v, got %v", expectedT.SphereMode, material.SphereMode)
 		}
-		if m.ToonSharingFlag != expectedT.ToonSharingFlag {
-			t.Errorf("Expected ToonSharingFlag to be %v, got %v", expectedT.ToonSharingFlag, m.ToonSharingFlag)
+		if material.ToonSharingFlag != expectedT.ToonSharingFlag {
+			t.Errorf("Expected ToonSharingFlag to be %v, got %v", expectedT.ToonSharingFlag, material.ToonSharingFlag)
 		}
-		if m.VerticesCount != expectedT.VerticesCount {
-			t.Errorf("Expected VerticesCount to be %v, got %v", expectedT.VerticesCount, m.VerticesCount)
+		if material.VerticesCount != expectedT.VerticesCount {
+			t.Errorf("Expected VerticesCount to be %v, got %v", expectedT.VerticesCount, material.VerticesCount)
 		}
-	}
+	})
 
 }
 
@@ -123,21 +120,19 @@ func TestXRepository_Load2(t *testing.T) {
 	expectedData, _ := pmxRep.Load(pmxPath)
 	expectedModel := expectedData.(*pmx.PmxModel)
 
-	for vt := range model.Vertices.Iterator() {
-		v := vt.Value
-		expectedV, _ := expectedModel.Vertices.Get(v.Index())
-		if !v.Position.NearEquals(expectedV.Position, 1e-5) {
-			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, v.Position)
+	model.Vertices.ForEach(func(index int, vertex *pmx.Vertex) {
+		expectedV, _ := expectedModel.Vertices.Get(vertex.Index())
+		if !vertex.Position.NearEquals(expectedV.Position, 1e-5) {
+			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, vertex.Position)
 		}
-	}
+	})
 
-	for ft := range model.Faces.Iterator() {
-		f := ft.Value
-		expectedF, _ := expectedModel.Faces.Get(f.Index())
-		if f.VertexIndexes[0] != expectedF.VertexIndexes[0] || f.VertexIndexes[1] != expectedF.VertexIndexes[1] || f.VertexIndexes[2] != expectedF.VertexIndexes[2] {
-			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", f.Index(), expectedF.VertexIndexes, f.VertexIndexes)
+	model.Faces.ForEach(func(index int, face *pmx.Face) {
+		expectedF, _ := expectedModel.Faces.Get(face.Index())
+		if face.VertexIndexes[0] != expectedF.VertexIndexes[0] || face.VertexIndexes[1] != expectedF.VertexIndexes[1] || face.VertexIndexes[2] != expectedF.VertexIndexes[2] {
+			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", face.Index(), expectedF.VertexIndexes, face.VertexIndexes)
 		}
-	}
+	})
 
 	for _, is := range [][]int{{0, 0}, {1, 1}, {2, 2}, {3, 4}} {
 		expectIndex, materialIndex := is[0], is[1]
@@ -217,63 +212,59 @@ func TestXRepository_Load4(t *testing.T) {
 	expectedData, _ := pmxRep.Load(pmxPath)
 	expectedModel := expectedData.(*pmx.PmxModel)
 
-	for vt := range model.Vertices.Iterator() {
-		v := vt.Value
-		expectedV, _ := expectedModel.Vertices.Get(v.Index())
-		if !v.Position.NearEquals(expectedV.Position, 1e-5) {
-			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, v.Position)
+	model.Vertices.ForEach(func(index int, vertex *pmx.Vertex) {
+		expectedV, _ := expectedModel.Vertices.Get(vertex.Index())
+		if !vertex.Position.NearEquals(expectedV.Position, 1e-5) {
+			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, vertex.Position)
 		}
-	}
+	})
 
-	for ft := range model.Faces.Iterator() {
-		f := ft.Value
-		expectedF, _ := expectedModel.Faces.Get(f.Index())
-		if f.VertexIndexes[0] != expectedF.VertexIndexes[0] || f.VertexIndexes[1] != expectedF.VertexIndexes[1] || f.VertexIndexes[2] != expectedF.VertexIndexes[2] {
-			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", f.Index(), expectedF.VertexIndexes, f.VertexIndexes)
+	model.Faces.ForEach(func(index int, face *pmx.Face) {
+		expectedF, _ := expectedModel.Faces.Get(face.Index())
+		if face.VertexIndexes[0] != expectedF.VertexIndexes[0] || face.VertexIndexes[1] != expectedF.VertexIndexes[1] || face.VertexIndexes[2] != expectedF.VertexIndexes[2] {
+			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", face.Index(), expectedF.VertexIndexes, face.VertexIndexes)
 		}
-	}
+	})
 
-	for mt := range model.Materials.Iterator() {
-		m := mt.Value
-		expectedT, _ := expectedModel.Materials.Get(m.Index())
-		if !m.Diffuse.NearEquals(expectedT.Diffuse, 1e-5) {
-			t.Errorf("Expected Diffuse to be %v, got %v", expectedT.Diffuse, m.Diffuse)
+	model.Materials.ForEach(func(index int, material *pmx.Material) {
+		expectedT, _ := expectedModel.Materials.Get(material.Index())
+		if !material.Diffuse.NearEquals(expectedT.Diffuse, 1e-5) {
+			t.Errorf("Expected Diffuse to be %v, got %v", expectedT.Diffuse, material.Diffuse)
 		}
-		if !m.Ambient.NearEquals(expectedT.Ambient, 1e-5) {
-			t.Errorf("Expected Ambient to be %v, got %v", expectedT.Ambient, m.Ambient)
+		if !material.Ambient.NearEquals(expectedT.Ambient, 1e-5) {
+			t.Errorf("Expected Ambient to be %v, got %v", expectedT.Ambient, material.Ambient)
 		}
-		if !m.Specular.NearEquals(expectedT.Specular, 1e-5) {
-			t.Errorf("Expected Specular to be %v, got %v", expectedT.Specular, m.Specular)
+		if !material.Specular.NearEquals(expectedT.Specular, 1e-5) {
+			t.Errorf("Expected Specular to be %v, got %v", expectedT.Specular, material.Specular)
 		}
-		if !m.Edge.NearEquals(expectedT.Edge, 1e-5) {
-			t.Errorf("Expected EdgeColor to be %v, got %v", expectedT.Edge, m.Edge)
+		if !material.Edge.NearEquals(expectedT.Edge, 1e-5) {
+			t.Errorf("Expected EdgeColor to be %v, got %v", expectedT.Edge, material.Edge)
 		}
-		if m.DrawFlag != expectedT.DrawFlag {
-			t.Errorf("Expected DrawFlag to be %v, got %v", expectedT.DrawFlag, m.DrawFlag)
+		if material.DrawFlag != expectedT.DrawFlag {
+			t.Errorf("Expected DrawFlag to be %v, got %v", expectedT.DrawFlag, material.DrawFlag)
 		}
-		if m.EdgeSize != expectedT.EdgeSize {
-			t.Errorf("Expected EdgeSize to be %v, got %v", expectedT.EdgeSize, m.EdgeSize)
+		if material.EdgeSize != expectedT.EdgeSize {
+			t.Errorf("Expected EdgeSize to be %v, got %v", expectedT.EdgeSize, material.EdgeSize)
 		}
-		if m.TextureIndex != expectedT.TextureIndex {
-			t.Errorf("Expected TextureIndex to be %v, got %v", expectedT.TextureIndex, m.TextureIndex)
+		if material.TextureIndex != expectedT.TextureIndex {
+			t.Errorf("Expected TextureIndex to be %v, got %v", expectedT.TextureIndex, material.TextureIndex)
 		}
-		if m.SphereTextureIndex != expectedT.SphereTextureIndex {
-			t.Errorf("Expected SphereTextureIndex to be %v, got %v", expectedT.SphereTextureIndex, m.SphereTextureIndex)
+		if material.SphereTextureIndex != expectedT.SphereTextureIndex {
+			t.Errorf("Expected SphereTextureIndex to be %v, got %v", expectedT.SphereTextureIndex, material.SphereTextureIndex)
 		}
-		if m.ToonTextureIndex != expectedT.ToonTextureIndex {
-			t.Errorf("Expected ToonTextureIndex to be %v, got %v", expectedT.ToonTextureIndex, m.ToonTextureIndex)
+		if material.ToonTextureIndex != expectedT.ToonTextureIndex {
+			t.Errorf("Expected ToonTextureIndex to be %v, got %v", expectedT.ToonTextureIndex, material.ToonTextureIndex)
 		}
-		if m.SphereMode != expectedT.SphereMode {
-			t.Errorf("Expected SphereMode to be %v, got %v", expectedT.SphereMode, m.SphereMode)
+		if material.SphereMode != expectedT.SphereMode {
+			t.Errorf("Expected SphereMode to be %v, got %v", expectedT.SphereMode, material.SphereMode)
 		}
-		if m.ToonSharingFlag != expectedT.ToonSharingFlag {
-			t.Errorf("Expected ToonSharingFlag to be %v, got %v", expectedT.ToonSharingFlag, m.ToonSharingFlag)
+		if material.ToonSharingFlag != expectedT.ToonSharingFlag {
+			t.Errorf("Expected ToonSharingFlag to be %v, got %v", expectedT.ToonSharingFlag, material.ToonSharingFlag)
 		}
-		if m.VerticesCount != expectedT.VerticesCount {
-			t.Errorf("Expected VerticesCount to be %v, got %v", expectedT.VerticesCount, m.VerticesCount)
+		if material.VerticesCount != expectedT.VerticesCount {
+			t.Errorf("Expected VerticesCount to be %v, got %v", expectedT.VerticesCount, material.VerticesCount)
 		}
-	}
-
+	})
 }
 
 func TestXRepository_Load5(t *testing.T) {
@@ -298,62 +289,59 @@ func TestXRepository_Load5(t *testing.T) {
 	expectedData, _ := pmxRep.Load(pmxPath)
 	expectedModel := expectedData.(*pmx.PmxModel)
 
-	for vt := range model.Vertices.Iterator() {
-		v := vt.Value
-		expectedV, _ := expectedModel.Vertices.Get(v.Index())
-		if !v.Position.NearEquals(expectedV.Position, 1e-5) {
-			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, v.Position)
+	model.Vertices.ForEach(func(index int, vertex *pmx.Vertex) {
+		expectedV, _ := expectedModel.Vertices.Get(vertex.Index())
+		if !vertex.Position.NearEquals(expectedV.Position, 1e-5) {
+			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, vertex.Position)
 		}
-	}
+	})
 
-	for ft := range model.Faces.Iterator() {
-		f := ft.Value
-		expectedF, _ := expectedModel.Faces.Get(f.Index())
-		if f.VertexIndexes[0] != expectedF.VertexIndexes[0] || f.VertexIndexes[1] != expectedF.VertexIndexes[1] || f.VertexIndexes[2] != expectedF.VertexIndexes[2] {
-			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", f.Index(), expectedF.VertexIndexes, f.VertexIndexes)
+	model.Faces.ForEach(func(index int, face *pmx.Face) {
+		expectedF, _ := expectedModel.Faces.Get(face.Index())
+		if face.VertexIndexes[0] != expectedF.VertexIndexes[0] || face.VertexIndexes[1] != expectedF.VertexIndexes[1] || face.VertexIndexes[2] != expectedF.VertexIndexes[2] {
+			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", face.Index(), expectedF.VertexIndexes, face.VertexIndexes)
 		}
-	}
+	})
 
-	for mt := range model.Materials.Iterator() {
-		m := mt.Value
-		expectedT, _ := expectedModel.Materials.Get(m.Index())
-		if !m.Diffuse.NearEquals(expectedT.Diffuse, 1e-5) {
-			t.Errorf("Expected Diffuse to be %v, got %v", expectedT.Diffuse, m.Diffuse)
+	model.Materials.ForEach(func(index int, material *pmx.Material) {
+		expectedT, _ := expectedModel.Materials.Get(material.Index())
+		if !material.Diffuse.NearEquals(expectedT.Diffuse, 1e-5) {
+			t.Errorf("Expected Diffuse to be %v, got %v", expectedT.Diffuse, material.Diffuse)
 		}
-		if !m.Ambient.NearEquals(expectedT.Ambient, 1e-5) {
-			t.Errorf("Expected Ambient to be %v, got %v", expectedT.Ambient, m.Ambient)
+		if !material.Ambient.NearEquals(expectedT.Ambient, 1e-5) {
+			t.Errorf("Expected Ambient to be %v, got %v", expectedT.Ambient, material.Ambient)
 		}
-		if !m.Specular.NearEquals(expectedT.Specular, 1e-5) {
-			t.Errorf("Expected Specular to be %v, got %v", expectedT.Specular, m.Specular)
+		if !material.Specular.NearEquals(expectedT.Specular, 1e-5) {
+			t.Errorf("Expected Specular to be %v, got %v", expectedT.Specular, material.Specular)
 		}
-		if !m.Edge.NearEquals(expectedT.Edge, 1e-5) {
-			t.Errorf("Expected EdgeColor to be %v, got %v", expectedT.Edge, m.Edge)
+		if !material.Edge.NearEquals(expectedT.Edge, 1e-5) {
+			t.Errorf("Expected EdgeColor to be %v, got %v", expectedT.Edge, material.Edge)
 		}
-		if m.DrawFlag != expectedT.DrawFlag {
-			t.Errorf("Expected DrawFlag to be %v, got %v", expectedT.DrawFlag, m.DrawFlag)
+		if material.DrawFlag != expectedT.DrawFlag {
+			t.Errorf("Expected DrawFlag to be %v, got %v", expectedT.DrawFlag, material.DrawFlag)
 		}
-		if m.EdgeSize != expectedT.EdgeSize {
-			t.Errorf("Expected EdgeSize to be %v, got %v", expectedT.EdgeSize, m.EdgeSize)
+		if material.EdgeSize != expectedT.EdgeSize {
+			t.Errorf("Expected EdgeSize to be %v, got %v", expectedT.EdgeSize, material.EdgeSize)
 		}
-		if m.TextureIndex != expectedT.TextureIndex {
-			t.Errorf("Expected TextureIndex to be %v, got %v", expectedT.TextureIndex, m.TextureIndex)
+		if material.TextureIndex != expectedT.TextureIndex {
+			t.Errorf("Expected TextureIndex to be %v, got %v", expectedT.TextureIndex, material.TextureIndex)
 		}
-		if m.SphereTextureIndex != expectedT.SphereTextureIndex {
-			t.Errorf("Expected SphereTextureIndex to be %v, got %v", expectedT.SphereTextureIndex, m.SphereTextureIndex)
+		if material.SphereTextureIndex != expectedT.SphereTextureIndex {
+			t.Errorf("Expected SphereTextureIndex to be %v, got %v", expectedT.SphereTextureIndex, material.SphereTextureIndex)
 		}
-		if m.ToonTextureIndex != expectedT.ToonTextureIndex {
-			t.Errorf("Expected ToonTextureIndex to be %v, got %v", expectedT.ToonTextureIndex, m.ToonTextureIndex)
+		if material.ToonTextureIndex != expectedT.ToonTextureIndex {
+			t.Errorf("Expected ToonTextureIndex to be %v, got %v", expectedT.ToonTextureIndex, material.ToonTextureIndex)
 		}
-		if m.SphereMode != expectedT.SphereMode {
-			t.Errorf("Expected SphereMode to be %v, got %v", expectedT.SphereMode, m.SphereMode)
+		if material.SphereMode != expectedT.SphereMode {
+			t.Errorf("Expected SphereMode to be %v, got %v", expectedT.SphereMode, material.SphereMode)
 		}
-		if m.ToonSharingFlag != expectedT.ToonSharingFlag {
-			t.Errorf("Expected ToonSharingFlag to be %v, got %v", expectedT.ToonSharingFlag, m.ToonSharingFlag)
+		if material.ToonSharingFlag != expectedT.ToonSharingFlag {
+			t.Errorf("Expected ToonSharingFlag to be %v, got %v", expectedT.ToonSharingFlag, material.ToonSharingFlag)
 		}
-		if m.VerticesCount != expectedT.VerticesCount {
-			t.Errorf("Expected VerticesCount to be %v, got %v", expectedT.VerticesCount, m.VerticesCount)
+		if material.VerticesCount != expectedT.VerticesCount {
+			t.Errorf("Expected VerticesCount to be %v, got %v", expectedT.VerticesCount, material.VerticesCount)
 		}
-	}
+	})
 
 }
 
@@ -379,61 +367,58 @@ func TestXRepository_Load6(t *testing.T) {
 	expectedData, _ := pmxRep.Load(pmxPath)
 	expectedModel := expectedData.(*pmx.PmxModel)
 
-	for vt := range model.Vertices.Iterator() {
-		v := vt.Value
-		expectedV, _ := expectedModel.Vertices.Get(v.Index())
-		if !v.Position.NearEquals(expectedV.Position, 1e-5) {
-			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, v.Position)
+	model.Vertices.ForEach(func(index int, vertex *pmx.Vertex) {
+		expectedV, _ := expectedModel.Vertices.Get(vertex.Index())
+		if !vertex.Position.NearEquals(expectedV.Position, 1e-5) {
+			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, vertex.Position)
 		}
-	}
+	})
 
-	for ft := range model.Faces.Iterator() {
-		f := ft.Value
-		expectedF, _ := expectedModel.Faces.Get(f.Index())
-		if f.VertexIndexes[0] != expectedF.VertexIndexes[0] || f.VertexIndexes[1] != expectedF.VertexIndexes[1] || f.VertexIndexes[2] != expectedF.VertexIndexes[2] {
-			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", f.Index(), expectedF.VertexIndexes, f.VertexIndexes)
+	model.Faces.ForEach(func(index int, face *pmx.Face) {
+		expectedF, _ := expectedModel.Faces.Get(face.Index())
+		if face.VertexIndexes[0] != expectedF.VertexIndexes[0] || face.VertexIndexes[1] != expectedF.VertexIndexes[1] || face.VertexIndexes[2] != expectedF.VertexIndexes[2] {
+			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", face.Index(), expectedF.VertexIndexes, face.VertexIndexes)
 		}
-	}
+	})
 
-	for mt := range model.Materials.Iterator() {
-		m := mt.Value
-		expectedT, _ := expectedModel.Materials.Get(m.Index())
-		if !m.Diffuse.NearEquals(expectedT.Diffuse, 1e-5) {
-			t.Errorf("Expected Diffuse to be %v, got %v", expectedT.Diffuse, m.Diffuse)
+	model.Materials.ForEach(func(index int, material *pmx.Material) {
+		expectedT, _ := expectedModel.Materials.Get(material.Index())
+		if !material.Diffuse.NearEquals(expectedT.Diffuse, 1e-5) {
+			t.Errorf("Expected Diffuse to be %v, got %v", expectedT.Diffuse, material.Diffuse)
 		}
-		if !m.Ambient.NearEquals(expectedT.Ambient, 1e-5) {
-			t.Errorf("Expected Ambient to be %v, got %v", expectedT.Ambient, m.Ambient)
+		if !material.Ambient.NearEquals(expectedT.Ambient, 1e-5) {
+			t.Errorf("Expected Ambient to be %v, got %v", expectedT.Ambient, material.Ambient)
 		}
-		if !m.Specular.NearEquals(expectedT.Specular, 1e-5) {
-			t.Errorf("Expected Specular to be %v, got %v", expectedT.Specular, m.Specular)
+		if !material.Specular.NearEquals(expectedT.Specular, 1e-5) {
+			t.Errorf("Expected Specular to be %v, got %v", expectedT.Specular, material.Specular)
 		}
-		if !m.Edge.NearEquals(expectedT.Edge, 1e-5) {
-			t.Errorf("Expected EdgeColor to be %v, got %v", expectedT.Edge, m.Edge)
+		if !material.Edge.NearEquals(expectedT.Edge, 1e-5) {
+			t.Errorf("Expected EdgeColor to be %v, got %v", expectedT.Edge, material.Edge)
 		}
-		if m.DrawFlag != expectedT.DrawFlag {
-			t.Errorf("Expected DrawFlag to be %v, got %v", expectedT.DrawFlag, m.DrawFlag)
+		if material.DrawFlag != expectedT.DrawFlag {
+			t.Errorf("Expected DrawFlag to be %v, got %v", expectedT.DrawFlag, material.DrawFlag)
 		}
-		if m.EdgeSize != expectedT.EdgeSize {
-			t.Errorf("Expected EdgeSize to be %v, got %v", expectedT.EdgeSize, m.EdgeSize)
+		if material.EdgeSize != expectedT.EdgeSize {
+			t.Errorf("Expected EdgeSize to be %v, got %v", expectedT.EdgeSize, material.EdgeSize)
 		}
-		if m.TextureIndex != expectedT.TextureIndex {
-			t.Errorf("Expected TextureIndex to be %v, got %v", expectedT.TextureIndex, m.TextureIndex)
+		if material.TextureIndex != expectedT.TextureIndex {
+			t.Errorf("Expected TextureIndex to be %v, got %v", expectedT.TextureIndex, material.TextureIndex)
 		}
-		if m.SphereTextureIndex != expectedT.SphereTextureIndex {
-			t.Errorf("Expected SphereTextureIndex to be %v, got %v", expectedT.SphereTextureIndex, m.SphereTextureIndex)
+		if material.SphereTextureIndex != expectedT.SphereTextureIndex {
+			t.Errorf("Expected SphereTextureIndex to be %v, got %v", expectedT.SphereTextureIndex, material.SphereTextureIndex)
 		}
-		if m.ToonTextureIndex != expectedT.ToonTextureIndex {
-			t.Errorf("Expected ToonTextureIndex to be %v, got %v", expectedT.ToonTextureIndex, m.ToonTextureIndex)
+		if material.ToonTextureIndex != expectedT.ToonTextureIndex {
+			t.Errorf("Expected ToonTextureIndex to be %v, got %v", expectedT.ToonTextureIndex, material.ToonTextureIndex)
 		}
-		if m.SphereMode != expectedT.SphereMode {
-			t.Errorf("Expected SphereMode to be %v, got %v", expectedT.SphereMode, m.SphereMode)
+		if material.SphereMode != expectedT.SphereMode {
+			t.Errorf("Expected SphereMode to be %v, got %v", expectedT.SphereMode, material.SphereMode)
 		}
-		if m.ToonSharingFlag != expectedT.ToonSharingFlag {
-			t.Errorf("Expected ToonSharingFlag to be %v, got %v", expectedT.ToonSharingFlag, m.ToonSharingFlag)
+		if material.ToonSharingFlag != expectedT.ToonSharingFlag {
+			t.Errorf("Expected ToonSharingFlag to be %v, got %v", expectedT.ToonSharingFlag, material.ToonSharingFlag)
 		}
-		if m.VerticesCount != expectedT.VerticesCount {
-			t.Errorf("Expected VerticesCount to be %v, got %v", expectedT.VerticesCount, m.VerticesCount)
+		if material.VerticesCount != expectedT.VerticesCount {
+			t.Errorf("Expected VerticesCount to be %v, got %v", expectedT.VerticesCount, material.VerticesCount)
 		}
-	}
+	})
 
 }

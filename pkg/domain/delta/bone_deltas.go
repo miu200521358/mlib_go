@@ -52,24 +52,10 @@ func (bds *BoneDeltas) Update(bd *BoneDelta) {
 func (bds *BoneDeltas) Contains(boneIndex int) bool {
 	return boneIndex >= 0 && boneIndex < len(bds.data) && bds.data[boneIndex] != nil
 }
-func (bds *BoneDeltas) Iterator() <-chan struct {
-	Index int
-	Value *BoneDelta
-} {
-	ch := make(chan struct {
-		Index int
-		Value *BoneDelta
-	})
-	go func() {
-		for i, bd := range bds.data {
-			if bd != nil {
-				ch <- struct {
-					Index int
-					Value *BoneDelta
-				}{Index: i, Value: bd}
-			}
-		}
-		close(ch)
-	}()
-	return ch
+
+// ForEach は全ての値をコールバック関数に渡します
+func (bds *BoneDeltas) ForEach(callback func(index int, value *BoneDelta)) {
+	for i, v := range bds.data {
+		callback(i, v)
+	}
 }

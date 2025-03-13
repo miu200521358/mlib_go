@@ -74,23 +74,9 @@ func (im *IndexModels[T]) Contains(index int) bool {
 	return !reflect.ValueOf(im.values[index]).IsNil()
 }
 
-// Iterator はコレクションの添字と値をペアで提供するイテレータを提供します
-func (im *IndexModels[T]) Iterator() <-chan struct {
-	Index int
-	Value T
-} {
-	ch := make(chan struct {
-		Index int
-		Value T
-	})
-	go func() {
-		for i, value := range im.values {
-			ch <- struct {
-				Index int
-				Value T
-			}{Index: i, Value: value}
-		}
-		close(ch)
-	}()
-	return ch
+// ForEach は全ての値をコールバック関数に渡します
+func (im *IndexModels[T]) ForEach(callback func(index int, value T)) {
+	for i, v := range im.values {
+		callback(i, v)
+	}
 }
