@@ -99,8 +99,8 @@ func (mr *ModelRenderer) Render(shader rendering.IShader, shared *state.SharedSt
 	mr.bufferHandle.Bind()
 	defer mr.bufferHandle.Unbind()
 
-	// // モーフの変更情報をもとに、頂点バッファを更新
-	// mr.bufferHandle.UpdateVertexDeltas(vmdDeltas.Morphs.Vertices)
+	// モーフの変更情報をもとに、頂点バッファを更新
+	mr.bufferHandle.UpdateVertexDeltas(vmdDeltas.Morphs.Vertices)
 
 	paddedMatrixes, matrixWidth, matrixHeight, err := createBoneMatrixes(vmdDeltas.Bones)
 	if err != nil {
