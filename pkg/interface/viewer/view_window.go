@@ -4,7 +4,6 @@
 package viewer
 
 import (
-	"fmt"
 	"image"
 	"math"
 
@@ -71,16 +70,11 @@ func newViewWindow(
 	glWindow.MakeContextCurrent()
 	glWindow.SetInputMode(glfw.StickyKeysMode, glfw.True)
 	glWindow.SetIcon([]image.Image{icon})
-	glfw.SwapInterval(0) // 0=VSync無効, 1=VSync有効
+	// glfw.SwapInterval(0) // 0=VSync無効, 1=VSync有効
 
 	// OpenGL の初期化
 	if err := gl.Init(); err != nil {
 		return nil, err
-	}
-
-	// エラーチェックを追加
-	if err := gl.GetError(); err != gl.NO_ERROR {
-		return nil, fmt.Errorf("OpenGL error before shader compilation: %v", err)
 	}
 
 	// シェーダー初期化

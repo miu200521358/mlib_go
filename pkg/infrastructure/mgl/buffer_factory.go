@@ -19,60 +19,59 @@ func NewBufferFactory() *BufferFactory {
 }
 
 // CreateVertexBuffer は標準的なモデル用頂点バッファを作成
-func (f *BufferFactory) CreateVertexBuffer(ptr unsafe.Pointer, count int) *VertexBufferHandle {
+func (f *BufferFactory) CreateVertexBuffer(ptr unsafe.Pointer, arrayCount int) *VertexBufferHandle {
 	builder := NewVertexBufferBuilder()
 	return builder.
 		AddStandardVertexAttributes().
-		SetData(ptr, count).
+		SetData(ptr, arrayCount).
 		Build()
 }
 
 // CreateBoneBuffer はボーン表示用バッファを作成
-func (f *BufferFactory) CreateBoneBuffer(ptr unsafe.Pointer, count int) *VertexBufferHandle {
+func (f *BufferFactory) CreateBoneBuffer(ptr unsafe.Pointer, arrayCount int) *VertexBufferHandle {
 	builder := NewVertexBufferBuilder()
 	return builder.
 		AddBoneAttributes().
-		SetData(ptr, count).
+		SetData(ptr, arrayCount).
 		Build()
 }
 
 // CreateDebugBuffer はデバッグ表示用バッファを作成
-func (f *BufferFactory) CreateDebugBuffer(ptr unsafe.Pointer, count int) *VertexBufferHandle {
+func (f *BufferFactory) CreateDebugBuffer(ptr unsafe.Pointer, arrayCount int) *VertexBufferHandle {
 	builder := NewVertexBufferBuilder()
 	return builder.
 		AddPositionColorAttributes().
-		SetData(ptr, count).
+		SetData(ptr, arrayCount).
 		Build()
 }
 
 // UpdateDebugBuffer はデバッグバッファのデータを更新
-func (f *BufferFactory) UpdateDebugBuffer(handle *VertexBufferHandle, vertices []float32) {
+func (f *BufferFactory) UpdateDebugBuffer(handle *VertexBufferHandle, vertices []float32, fieldCount int) {
 	handle.VAO.Bind()
 	handle.VBO.Bind()
 
-	size := len(vertices) * 4 // float32のサイズ
-	handle.VBO.BufferData(size, gl.Ptr(&vertices[0]), rendering.BufferUsageStatic)
+	handle.VBO.BufferData(len(vertices), fieldCount, handle.FloatSize, gl.Ptr(&vertices[0]), rendering.BufferUsageStatic)
 
 	handle.VBO.Unbind()
 	handle.VAO.Unbind()
 }
 
 // CreateOverrideBuffer はオーバーライド用バッファを作成
-func (f *BufferFactory) CreateOverrideBuffer(ptr unsafe.Pointer, count int) *VertexBufferHandle {
+func (f *BufferFactory) CreateOverrideBuffer(ptr unsafe.Pointer, arrayCount, fieldCount int) *VertexBufferHandle {
 	builder := NewVertexBufferBuilder()
 	return builder.
 		AddOverrideAttributes().
-		SetData(ptr, count).
+		SetData(ptr, arrayCount).
 		Build()
 }
 
 // CreateElementBuffer はインデックスバッファを作成
-func (f *BufferFactory) CreateElementBuffer(ptr unsafe.Pointer, count int) *ElementBuffer {
+func (f *BufferFactory) CreateElementBuffer(ptr unsafe.Pointer, arrayCount int) *ElementBuffer {
 	ebo := newElementBuffer()
 
 	ebo.Bind()
 
-	size := count * 4 // uint32のサイズ
+	size := arrayCount * 4 // uint32のサイズ
 	ebo.BufferData(size, ptr, rendering.BufferUsageStatic)
 
 	ebo.Unbind()
@@ -81,10 +80,10 @@ func (f *BufferFactory) CreateElementBuffer(ptr unsafe.Pointer, count int) *Elem
 }
 
 // CreateFloorBuffer は床表示用バッファを作成
-func (f *BufferFactory) CreateFloorBuffer(floorVertices []float32, size int) *VertexBufferHandle {
+func (f *BufferFactory) CreateFloorBuffer(floorVertices []float32, fieldCount int) *VertexBufferHandle {
 	builder := NewVertexBufferBuilder()
 	return builder.
 		AddPositionColorAttributes().
-		SetData(unsafe.Pointer(&floorVertices[0]), size).
+		SetData(unsafe.Pointer(&floorVertices[0]), len(floorVertices)).
 		Build()
 }

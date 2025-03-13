@@ -117,7 +117,7 @@ func NewMsaa(config rendering.MSAAConfig) *Msaa {
 
 	// 新しいバッファ抽象化を使用する
 	factory := NewBufferFactory()
-	msaa.overrideBuffer = factory.CreateOverrideBuffer(gl.Ptr(overrideVertices), len(overrideVertices)/5)
+	msaa.overrideBuffer = factory.CreateOverrideBuffer(gl.Ptr(overrideVertices), len(overrideVertices), 5)
 
 	// アンバインド
 	msaa.Unbind()

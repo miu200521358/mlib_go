@@ -62,6 +62,7 @@ func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, model *pm
 
 	// 法線表示用のインデックスバッファ
 	normalIndexes := createNormalIndexesData(model)
+
 	md.normalIbo = factory.CreateElementBuffer(gl.Ptr(normalIndexes), len(normalIndexes))
 
 	// ボーンラインバッファの設定

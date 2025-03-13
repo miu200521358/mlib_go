@@ -228,7 +228,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 
 	mr.selectedVertexBufferHandle.Bind()
 	mr.selectedVertexBufferHandle.VBO.Bind()
-	mr.selectedVertexBufferHandle.VBO.BufferData(len(vertexData)*4, gl.Ptr(vertexData), rendering.BufferUsageStatic)
+	mr.selectedVertexBufferHandle.VBO.BufferData(len(vertexData), 3+4+4+3, 4, gl.Ptr(vertexData), rendering.BufferUsageStatic)
 	mr.selectedVertexBufferHandle.VBO.Unbind()
 	mr.selectedVertexIbo.Bind()
 

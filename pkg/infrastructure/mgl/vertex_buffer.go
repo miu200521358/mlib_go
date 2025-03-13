@@ -19,8 +19,12 @@ var usageMap = map[rendering.BufferUsage]uint32{
 
 // VertexBuffer はOpenGLの頂点バッファ実装
 type VertexBuffer struct {
-	id     uint32
-	target uint32
+	id         uint32
+	target     uint32
+	itemCount  int            // 項目数（頂点の個数など）
+	fieldCount int            // 1項目ごとの要素数（位置(vec3)、法線(vec3)、UV(vec2)の場合、8）
+	size       int            // バッファサイズ(項目数*1項目ごとの要素数*要素サイズ(Float:4))
+	ptr        unsafe.Pointer // verticesPtr
 }
 
 // newVertexBuffer は新しい頂点バッファを作成
@@ -41,8 +45,12 @@ func (vb *VertexBuffer) Unbind() {
 	gl.BindBuffer(vb.target, 0)
 }
 
-func (vb *VertexBuffer) BufferData(size int, data unsafe.Pointer, usage rendering.BufferUsage) {
-	gl.BufferData(vb.target, size, data, usageMap[usage])
+func (vb *VertexBuffer) BufferData(arrayCount, fieldCount, floatSize int, data unsafe.Pointer, usage rendering.BufferUsage) {
+	vb.itemCount = arrayCount / fieldCount
+	vb.fieldCount = fieldCount
+	vb.size = arrayCount * floatSize
+	vb.ptr = data
+	gl.BufferData(vb.target, vb.size, data, usageMap[usage])
 }
 
 func (vb *VertexBuffer) BufferSubData(offset int, size int, data unsafe.Pointer) {
