@@ -7,11 +7,9 @@ import (
 	"embed"
 	"fmt"
 	"runtime"
-	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/walk/pkg/walk"
-	"github.com/pkg/profile"
 
 	"github.com/miu200521358/mlib_go/cmd/ui"
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
@@ -45,7 +43,7 @@ func main() {
 	// defer profile.Start(profile.MemProfileHeap, profile.ProfilePath(time.Now().Format("20060102_150405"))).Stop()
 	// defer profile.Start(profile.MemProfile, profile.ProfilePath(time.Now().Format("20060102_150405"))).Stop()
 	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(fmt.Sprintf("cpu_%s", time.Now().Format("20060102_150405")))).Stop()
-	defer profile.Start(profile.CPUProfile, profile.ProfilePath(fmt.Sprintf("cpu_%s", time.Now().Format("20060102_150405")))).Stop()
+	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(fmt.Sprintf("cpu_%s", time.Now().Format("20060102_150405")))).Stop()
 
 	viewerCount := 2
 

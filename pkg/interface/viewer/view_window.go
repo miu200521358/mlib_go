@@ -179,68 +179,13 @@ func (vw *ViewWindow) render() {
 	// 床描画
 	vw.shader.DrawFloor()
 
-	// vw.loadModelRenderers(vw.list.shared)
-	// vw.loadMotions(vw.list.shared)
-
-	// for i := range vw.modelRenderers {
-	// 	if vw.list.shared.IsChangedEnableDropFrame() {
-	// 		// ドロップフレーム設定が変わったらキャッシュもリセット
-	// 		vw.speculativeCaches[i].Reset()
-	// 		vw.list.shared.SetChangedEnableDropFrame(false)
-	// 		vw.avgElapsedTime = 1.0 / 30.0
-	// 		vw.elapsedSamples = 0
-	// 	}
-	// }
-
-	// // 経過時間の平均計算を更新
-	// vw.updateAverageElapsedTime(float32(timeStep))
-
-	// currentFrame := vw.list.shared.Frame()
-
-	// // 改良された予測関数を使用
-	// nextFrame := vw.predictNextFrame(currentFrame, timeStep)
-
-	// vw.list.deform(vw.windowIndex, vw, timeStep)
-
 	for i, modelRenderer := range vw.modelRenderers {
 		if modelRenderer == nil || vw.vmdDeltas[i] == nil {
 			continue
 		}
 
-		// // スキップ条件を先に確認
-		// if i >= len(vw.speculativeCaches) || vw.speculativeCaches[i] == nil {
-		// 	// 通常通り計算
-		// 	vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
-		// } else {
-		// 	// キャッシュから結果を取得を試みる
-		// 	modelHash := modelRenderer.Model.Hash()
-		// 	motionHash := vw.motions[i].Hash()
-		// 	cachedDeltas := vw.speculativeCaches[i].GetResult(currentFrame, modelHash, motionHash)
-
-		// 	if cachedDeltas != nil {
-		// 		// キャッシュヒット - キャッシュされた結果を使用
-		// 		vw.vmdDeltas[i] = cachedDeltas
-		// 		vw.vmdDeltas[i] = deform.DeformPhysics(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
-		// 	} else {
-		// 		// キャッシュミス - 通常通り計算
-		// 		vw.vmdDeltas[i] = deform.Deform(vw.list.shared, vw.physics, modelRenderer.Model, vw.motions[i], vw.vmdDeltas[i], timeStep)
-		// 	}
-		// }
-
 		// モデルをレンダリング
 		modelRenderer.Render(vw.shader, vw.list.shared, vw.vmdDeltas[i])
-
-		// // 次のフレームの投機的計算を開始
-		// deform.SpeculativeDeform(
-		// 	vw.list.shared,
-		// 	vw.physics,
-		// 	modelRenderer.Model,
-		// 	vw.motions[i],
-		// 	vw.vmdDeltas[i],
-		// 	vw.speculativeCaches[i],
-		// 	timeStep,
-		// 	nextFrame,
-		// )
 	}
 
 	// 物理デバッグ描画
@@ -256,68 +201,4 @@ func (vw *ViewWindow) render() {
 	vw.shader.Msaa().Unbind()
 
 	vw.SwapBuffers()
-}
-
-// predictNextFrame フレーム予測部分を修正
-func (vw *ViewWindow) predictNextFrame(currentFrame, timeStep float32) float32 {
-	if !vw.list.shared.Playing() {
-		return currentFrame // 停止中は同じフレーム
-	}
-
-	// 直近のフレーム間隔を使用して次のフレームを予測
-	frameAdvanceRate := float32(30.0) // 基準フレームレート
-
-	// 実際のフレームレートに対する適応処理
-	actualFrameRate := 1.0 / vw.avgElapsedTime
-	frameRateRatio := actualFrameRate / 30.0
-
-	// フレームレート比に基づいて調整（より正確なフレーム進行を実現）
-	adjustedAdvance := (timeStep * frameAdvanceRate) * frameRateRatio
-
-	// 整数フレームに合わせる補正（オプション）
-	nextFrameRaw := currentFrame + adjustedAdvance
-	nextFrameInt := float32(int(nextFrameRaw))
-	nextFrameFrac := nextFrameRaw - nextFrameInt
-
-	// 端数が0.5に近づかないように補正
-	var nextFrame float32
-	if nextFrameFrac < 0.3 {
-		nextFrame = nextFrameInt
-	} else if nextFrameFrac > 0.7 {
-		nextFrame = nextFrameInt + 1.0
-	} else {
-		nextFrame = nextFrameRaw
-	}
-
-	// 最大フレームを超えないようにする
-	if nextFrame > vw.list.shared.MaxFrame() {
-		nextFrame = 0.0
-	}
-
-	return nextFrame
-}
-
-// 平均経過時間を更新するヘルパーメソッド
-// 平均経過時間更新メソッドを改良
-
-func (vw *ViewWindow) updateAverageElapsedTime(elapsed float32) {
-	const maxSamples = 30          // サンプル数を減らしてより最近の値に重みを
-	const minElapsed = 1.0 / 120.0 // 最小値制限（異常な値を除外）
-	const maxElapsed = 1.0 / 15.0  // 最大値制限（極端な遅延を除外）
-
-	// 異常値のフィルタリング
-	if elapsed < minElapsed || elapsed > maxElapsed {
-		// 極端な値は平均計算から除外
-		return
-	}
-
-	if vw.elapsedSamples < maxSamples {
-		// 初期サンプル集計
-		vw.avgElapsedTime = ((vw.avgElapsedTime * float32(vw.elapsedSamples)) + elapsed) / float32(vw.elapsedSamples+1)
-		vw.elapsedSamples++
-	} else {
-		// 動的な重み係数を使用（より迅速に変化に対応）
-		alpha := float32(0.2) // 新しいサンプルの重み（大きくすると反応が早く、小さくすると安定）
-		vw.avgElapsedTime = (alpha * elapsed) + ((1.0 - alpha) * vw.avgElapsedTime)
-	}
 }
