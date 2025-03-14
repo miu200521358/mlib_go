@@ -87,7 +87,7 @@ func NewControlWindow(
 		declarative.Action{
 			Text:        mi18n.T("&画面移動連結"),
 			Checkable:   true,
-			OnTriggered: cw.triggerLinkWindow,
+			OnTriggered: cw.triggerWindowLinkage,
 			AssignTo:    &cw.linkWindowAction,
 		},
 		declarative.Separator{},
@@ -428,11 +428,31 @@ func NewControlWindow(
 	// 初期設定
 	cw.shared.SetFrame(0.0)                  // フレーム初期化
 	cw.shared.SetMaxFrame(1.0)               // 最大フレーム初期化
-	cw.TriggerFps60Limit()                   // 60fps制限 (MMDの物理に近い感じ)
 	cw.enabledPhysicsAction.SetChecked(true) // 物理ON
 	cw.TriggerEnabledPhysics()
-	cw.enabledFrameDropAction.SetChecked(true) // フレームドロップON
-	cw.TriggerEnabledFrameDrop()
+
+	// ウィンドウ移動同期
+	if mconfig.LoadUserConfigBool(mconfig.KeyWindowLinkage, true) {
+		cw.linkWindowAction.SetChecked(true)
+		cw.triggerWindowLinkage()
+	}
+
+	//FPS制限
+	fpsLimit := mconfig.LoadUserConfigInt(mconfig.KeyFpsLimit, 60)
+	switch fpsLimit {
+	case 30:
+		cw.TriggerFps30Limit()
+	case 60:
+		cw.TriggerFps60Limit()
+	case 0:
+		cw.TriggerUnLimitFps()
+	}
+
+	// フレームドロップ
+	if mconfig.LoadUserConfigBool(mconfig.KeyFrameDrop, true) {
+		cw.enabledFrameDropAction.SetChecked(true)
+		cw.TriggerEnabledFrameDrop()
+	}
 
 	// コンソールを追加で作成
 	if cv, err := NewConsoleView(cw, width/10, height/10); err != nil {
@@ -529,8 +549,9 @@ func (cw *ControlWindow) triggerLogLevel() {
 	}
 }
 
-func (cw *ControlWindow) triggerLinkWindow() {
+func (cw *ControlWindow) triggerWindowLinkage() {
 	cw.shared.SetWindowLinkage(cw.linkWindowAction.Checked())
+	mconfig.SaveUserConfigBool(mconfig.KeyWindowLinkage, cw.linkWindowAction.Checked())
 }
 
 // ------- 以下、再生状態の取得・設定メソッド -------
@@ -596,6 +617,7 @@ func (cw *ControlWindow) TriggerFps30Limit() {
 	cw.limitFps60Action.SetChecked(false)
 	cw.limitFpsUnLimitAction.SetChecked(false)
 	cw.shared.SetFrameInterval(1.0 / 30.0)
+	mconfig.SaveUserConfigInt(mconfig.KeyFpsLimit, 30)
 }
 
 func (cw *ControlWindow) TriggerFps60Limit() {
@@ -603,6 +625,7 @@ func (cw *ControlWindow) TriggerFps60Limit() {
 	cw.limitFps60Action.SetChecked(true)
 	cw.limitFpsUnLimitAction.SetChecked(false)
 	cw.shared.SetFrameInterval(1.0 / 60.0)
+	mconfig.SaveUserConfigInt(mconfig.KeyFpsLimit, 60)
 }
 
 func (cw *ControlWindow) TriggerUnLimitFps() {
@@ -610,11 +633,13 @@ func (cw *ControlWindow) TriggerUnLimitFps() {
 	cw.limitFps60Action.SetChecked(false)
 	cw.limitFpsUnLimitAction.SetChecked(true)
 	cw.shared.SetFrameInterval(0)
+	mconfig.SaveUserConfigInt(mconfig.KeyFpsLimit, 0)
 }
 
 func (cw *ControlWindow) TriggerEnabledFrameDrop() {
 	cw.shared.SetEnabledFrameDrop(cw.enabledFrameDropAction.Checked())
 	cw.shared.SetChangedEnableDropFrame(true)
+	mconfig.SaveUserConfigBool(mconfig.KeyFrameDrop, cw.enabledFrameDropAction.Checked())
 }
 
 func (cw *ControlWindow) TriggerShowNormal() {

@@ -4,12 +4,19 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 )
 
-const USER_CONFIG_FILE_NAME = "user_config.json"
-const USER_CONFIG_OLD_FILE_NAME = "history.json"
+const (
+	USER_CONFIG_FILE_NAME     = "user_config.json"
+	USER_CONFIG_OLD_FILE_NAME = "history.json"
+	KeyFpsLimit               = "fps_limit"
+	KeyLang                   = "lang"
+	KeyWindowLinkage          = "window_linkage"
+	KeyFrameDrop              = "frame_drop"
+)
 
 // 設定の保存
 func SaveUserConfig(key string, value string, limit int) error {
@@ -65,11 +72,40 @@ func LoadUserConfig(key string) []string {
 	return existingValues
 }
 
+func LoadUserConfigBool(key string, defaultValue bool) bool {
+	existingValues, _ := LoadUserConfigAll(key)
+	if len(existingValues) == 0 {
+		return defaultValue
+	}
+	return existingValues[0] == "ON"
+}
+
+func SaveUserConfigBool(key string, value bool) error {
+	if value {
+		return SaveUserConfig(key, "ON", 1)
+	} else {
+		return SaveUserConfig(key, "OFF", 1)
+	}
+}
+
+func LoadUserConfigInt(key string, defaultValue int) int {
+	existingValues, _ := LoadUserConfigAll(key)
+	if len(existingValues) == 0 {
+		return defaultValue
+	}
+	v, _ := strconv.Atoi(existingValues[0])
+	return v
+}
+
+func SaveUserConfigInt(key string, value int) error {
+	return SaveUserConfig(key, strconv.Itoa(value), 1)
+}
+
 // 設定の読み込み
 func LoadUserConfigAll(key string) ([]string, map[string]interface{}) {
 	// Configファイルのフルパスを取得
 	configFilePath := filepath.Join(GetAppRootDir(), USER_CONFIG_FILE_NAME)
-	mlog.D("LoadConfig: %s: %s", key, configFilePath)
+	mlog.D("LoadUserConfig: %s: %s", key, configFilePath)
 
 	// Read the config.json file
 	data, err := os.ReadFile(configFilePath)
