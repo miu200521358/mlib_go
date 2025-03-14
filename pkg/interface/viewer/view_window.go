@@ -6,6 +6,7 @@ package viewer
 import (
 	"image"
 	"math"
+	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -18,31 +19,29 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/render"
-	"github.com/miu200521358/mlib_go/pkg/usecase/deform"
 )
 
 type ViewWindow struct {
 	*glfw.Window
-	windowIndex         int                              // ウィンドウインデックス
-	title               string                           // ウィンドウタイトル
-	leftButtonPressed   bool                             // 左ボタン押下フラグ
-	middleButtonPressed bool                             // 中ボタン押下フラグ
-	rightButtonPressed  bool                             // 右ボタン押下フラグ
-	shiftPressed        bool                             // Shiftキー押下フラグ
-	ctrlPressed         bool                             // Ctrlキー押下フラグ
-	updatedPrevCursor   bool                             // 前回のカーソル位置更新フラグ
-	prevCursorPos       *mmath.MVec2                     // 前回のカーソル位置
-	yaw                 float64                          // カメラyaw
-	pitch               float64                          // カメラpitch
-	list                *ViewerList                      // ビューワーリスト
-	shader              rendering.IShader                // シェーダー
-	physics             physics.IPhysics                 // 物理エンジン
-	modelRenderers      []*render.ModelRenderer          // モデル描画オブジェクト
-	motions             []*vmd.VmdMotion                 // モーションデータ
-	vmdDeltas           []*delta.VmdDeltas               // 変形情報
-	speculativeCaches   []*deform.SpeculativeDeformCache // 追加: 投機実行キャッシュ
-	avgElapsedTime      float32                          // 追加: 平均経過時間
-	elapsedSamples      int                              // 追加: 経過時間サンプル数
+	windowIndex         int                     // ウィンドウインデックス
+	title               string                  // ウィンドウタイトル
+	leftButtonPressed   bool                    // 左ボタン押下フラグ
+	middleButtonPressed bool                    // 中ボタン押下フラグ
+	rightButtonPressed  bool                    // 右ボタン押下フラグ
+	shiftPressed        bool                    // Shiftキー押下フラグ
+	ctrlPressed         bool                    // Ctrlキー押下フラグ
+	updatedPrevCursor   bool                    // 前回のカーソル位置更新フラグ
+	prevCursorPos       *mmath.MVec2            // 前回のカーソル位置
+	yaw                 float64                 // カメラyaw
+	pitch               float64                 // カメラpitch
+	list                *ViewerList             // ビューワーリスト
+	shader              rendering.IShader       // シェーダー
+	physics             physics.IPhysics        // 物理エンジン
+	modelRenderers      []*render.ModelRenderer // モデル描画オブジェクト
+	motions             []*vmd.VmdMotion        // モーションデータ
+	vmdDeltas           []*delta.VmdDeltas      // 変形情報
+	avgElapsedTime      float32                 // 追加: 平均経過時間
+	elapsedSamples      int                     // 追加: 経過時間サンプル数
 }
 
 func newViewWindow(
@@ -70,7 +69,6 @@ func newViewWindow(
 	glWindow.MakeContextCurrent()
 	glWindow.SetInputMode(glfw.StickyKeysMode, glfw.True)
 	glWindow.SetIcon([]image.Image{icon})
-	glfw.SwapInterval(0) // 0=VSync無効, 1=VSync有効
 
 	// OpenGL の初期化
 	if err := gl.Init(); err != nil {
@@ -87,16 +85,15 @@ func newViewWindow(
 	gl.Viewport(0, 0, int32(width), int32(height))
 
 	vw := &ViewWindow{
-		Window:            glWindow,
-		windowIndex:       windowIndex,
-		title:             title,
-		list:              list,
-		shader:            shader,
-		physics:           mbt.NewMPhysics(),
-		prevCursorPos:     mmath.NewMVec2(),
-		speculativeCaches: make([]*deform.SpeculativeDeformCache, 0), // 投機実行キャッシュの初期化
-		avgElapsedTime:    1.0 / 30.0,                                // デフォルトは30FPS想定
-		elapsedSamples:    0,
+		Window:         glWindow,
+		windowIndex:    windowIndex,
+		title:          title,
+		list:           list,
+		shader:         shader,
+		physics:        mbt.NewMPhysics(),
+		prevCursorPos:  mmath.NewMVec2(),
+		avgElapsedTime: 1.0 / 30.0, // デフォルトは30FPS想定
+		elapsedSamples: 0,
 	}
 
 	glWindow.SetCloseCallback(vw.closeCallback)
@@ -104,7 +101,8 @@ func newViewWindow(
 	glWindow.SetKeyCallback(vw.keyCallback)
 	glWindow.SetMouseButtonCallback(vw.mouseCallback)
 	glWindow.SetCursorPosCallback(vw.cursorPosCallback)
-	// glWindow.SetFocusCallback(vw.focusCallback)
+	glWindow.SetFocusCallback(vw.focusCallback)
+	glWindow.SetIconifyCallback(vw.iconifyCallback)
 
 	if !isProd {
 		gl.Enable(gl.DEBUG_OUTPUT)
@@ -114,14 +112,22 @@ func newViewWindow(
 
 	// ウィンドウの位置を設定
 	vw.SetPos(positionX, positionY)
-	vw.list.shared.SetActivateViewWindow(windowIndex, true)
+	// 設定保持
 	vw.list.shared.SetInitializedViewWindow(windowIndex, true)
+	// ウィンドウハンドルを保持
+	handle := int32(uintptr(unsafe.Pointer(glfw.GetCurrentContext().GetWin32Window())))
+	vw.list.shared.SetViewerWindowHandle(windowIndex, handle)
 
 	return vw, nil
 }
 
 func (vw *ViewWindow) Title() string {
 	return vw.title
+}
+
+func (vw *ViewWindow) SetTitle(title string) {
+	vw.title = title
+	vw.Window.SetTitle(title)
 }
 
 func (vw *ViewWindow) resetCameraPosition(yaw, pitch float64) {

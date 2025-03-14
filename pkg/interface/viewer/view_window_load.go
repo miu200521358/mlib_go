@@ -3,7 +3,6 @@ package viewer
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/render"
-	"github.com/miu200521358/mlib_go/pkg/usecase/deform"
 )
 
 // loadModelRenderersメソッドを拡張
@@ -17,10 +16,6 @@ func (vw *ViewWindow) loadModelRenderers(shared *state.SharedState) {
 			vw.modelRenderers[i].Delete()
 			vw.modelRenderers[i] = nil
 			vw.vmdDeltas[i] = nil
-			// モデルが変わったらキャッシュもリセット
-			if i < len(vw.speculativeCaches) && vw.speculativeCaches[i] != nil {
-				vw.speculativeCaches[i].Reset()
-			}
 		}
 		if vw.modelRenderers[i] == nil {
 			vw.modelRenderers[i] = render.NewModelRenderer(vw.windowIndex, model)
@@ -37,10 +32,6 @@ func (vw *ViewWindow) loadMotions(shared *state.SharedState) {
 		motion := shared.LoadMotion(vw.windowIndex, i)
 		if vw.motions[i] != nil && vw.motions[i].Hash() != motion.Hash() {
 			vw.motions[i] = nil
-			// モーションが変わったらキャッシュもリセット
-			if i < len(vw.speculativeCaches) && vw.speculativeCaches[i] != nil {
-				vw.speculativeCaches[i].Reset()
-			}
 		}
 		if vw.motions[i] == nil {
 			vw.motions[i] = motion
@@ -58,9 +49,6 @@ func (vw *ViewWindow) extendModelRenderers(shared *state.SharedState) {
 		}
 		for i >= len(vw.vmdDeltas) {
 			vw.vmdDeltas = append(vw.vmdDeltas, nil)
-		}
-		for i >= len(vw.speculativeCaches) {
-			vw.speculativeCaches = append(vw.speculativeCaches, deform.NewSpeculativeDeformCache())
 		}
 	}
 }

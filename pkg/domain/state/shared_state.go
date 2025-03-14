@@ -5,10 +5,12 @@ package state
 
 import (
 	"sync/atomic"
+	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
+	"github.com/miu200521358/win"
 )
 
 type SharedState struct {
@@ -16,14 +18,17 @@ type SharedState struct {
 	frameValue                 atomic.Value     // 現在フレーム
 	maxFrameValue              atomic.Value     // 最大フレーム
 	frameIntervalValue         atomic.Value     // FPS制限
+	linkingFocus               atomic.Bool      // 連動フォーカス中かどうかのフラグ
 	controlWindowPosition      atomic.Value     // コントロールウィンドウの位置
-	isActiveControlWindow      atomic.Bool      // コントロールウィンドウのアクティブ状態
-	isActiveViewWindow         []atomic.Bool    // ビューウィンドウのアクティブ状態
+	controlWindowHandle        atomic.Int32     // コントロールウィンドウのハンドル
+	viewerWindowHandles        []atomic.Int32   // ビューウィンドウのハンドル
+	focusedWindowHandle        atomic.Int32     // フォーカス中のウィンドウのハンドル
 	isInitializedControlWindow atomic.Bool      // コントロールウィンドウの初期化状態
 	isInitializedViewWindow    []atomic.Bool    // ビューウィンドウの初期化状態
 	focusControlWindow         atomic.Bool      // コントロールウィンドウのフォーカス状態
-	focusViewWindow            atomic.Bool      // ビューウィンドウのフォーカス状態
+	focusViewWindow            []atomic.Bool    // ビューウィンドウのフォーカス状態
 	movedControlWindow         atomic.Bool      // コントロールウィンドウの移動状態
+	isClosed                   atomic.Bool      // ウィンドウのクローズ状態
 	models                     [][]atomic.Value // モデルデータ(ウィンドウ/モデルインデックス)
 	motions                    [][]atomic.Value // モーションデータ(ウィンドウ/モデルインデックス)
 }
@@ -32,8 +37,9 @@ type SharedState struct {
 func NewSharedState(viewerCount int) *SharedState {
 	return &SharedState{
 		flags:                   0,
-		isActiveViewWindow:      make([]atomic.Bool, viewerCount),
+		viewerWindowHandles:     make([]atomic.Int32, viewerCount),
 		isInitializedViewWindow: make([]atomic.Bool, viewerCount),
+		focusViewWindow:         make([]atomic.Bool, viewerCount),
 		models:                  make([][]atomic.Value, viewerCount),
 		motions:                 make([][]atomic.Value, viewerCount),
 	}
@@ -52,29 +58,28 @@ type frameIntervalState struct {
 }
 
 const (
-	flagEnabledFrameDrop         = 1 << iota // フレームドロップON/OFF
-	flagEnabledPhysics                       // 物理ON/OFF
-	flagPhysicsReset                         // 物理リセット
-	flagShowNormal                           // ボーンデバッグ表示
-	flagShowWire                             // ワイヤーフレームデバッグ表示
-	flagShowOverride                         // オーバーライドデバッグ表示
-	flagShowSelectedVertex                   // 選択頂点デバッグ表示
-	flagShowBoneAll                          // 全ボーンデバッグ表示
-	flagShowBoneIk                           // IKボーンデバッグ表示
-	flagShowBoneEffector                     // 付与親ボーンデバッグ表示
-	flagShowBoneFixed                        // 軸制限ボーンデバッグ表示
-	flagShowBoneRotate                       // 回転ボーンデバッグ表示
-	flagShowBoneTranslate                    // 移動ボーンデバッグ表示
-	flagShowBoneVisible                      // 表示ボーンデバッグ表示
-	flagShowRigidBodyFront                   // 剛体デバッグ表示(前面)
-	flagShowRigidBodyBack                    // 剛体デバッグ表示(埋め込み)
-	flagShowJoint                            // ジョイントデバッグ表示
-	flagShowInfo                             // 情報デバッグ表示
-	flagCameraSync                           // カメラ同期
-	flagPlaying                              // 再生中フラグ
-	flagClosed                               // 描画ウィンドウクローズ
-	flagWindowLinkage                        // ウィンドウリンクフラグ
-	flagIsChangedEnableDropFrame             // フレームドロップON/OFF変更フラグ
+	FlagEnabledFrameDrop         = 1 << iota // フレームドロップON/OFF
+	FlagEnabledPhysics                       // 物理ON/OFF
+	FlagPhysicsReset                         // 物理リセット
+	FlagShowNormal                           // ボーンデバッグ表示
+	FlagShowWire                             // ワイヤーフレームデバッグ表示
+	FlagShowOverride                         // オーバーライドデバッグ表示
+	FlagShowSelectedVertex                   // 選択頂点デバッグ表示
+	FlagShowBoneAll                          // 全ボーンデバッグ表示
+	FlagShowBoneIk                           // IKボーンデバッグ表示
+	FlagShowBoneEffector                     // 付与親ボーンデバッグ表示
+	FlagShowBoneFixed                        // 軸制限ボーンデバッグ表示
+	FlagShowBoneRotate                       // 回転ボーンデバッグ表示
+	FlagShowBoneTranslate                    // 移動ボーンデバッグ表示
+	FlagShowBoneVisible                      // 表示ボーンデバッグ表示
+	FlagShowRigidBodyFront                   // 剛体デバッグ表示(前面)
+	FlagShowRigidBodyBack                    // 剛体デバッグ表示(埋め込み)
+	FlagShowJoint                            // ジョイントデバッグ表示
+	FlagShowInfo                             // 情報デバッグ表示
+	FlagCameraSync                           // カメラ同期
+	FlagPlaying                              // 再生中フラグ
+	FlagWindowLinkage                        // ウィンドウリンクフラグ
+	FlagIsChangedEnableDropFrame             // フレームドロップON/OFF変更フラグ
 )
 
 func (ss *SharedState) ModelCount(windowIndex int) int {
@@ -145,16 +150,25 @@ func (ss *SharedState) loadFlag() uint32 {
 	return atomic.LoadUint32(&ss.flags)
 }
 
-// 特定ビットをON/OFFにする
-func (ss *SharedState) setBit(bitMask uint32, enable bool) {
+// 新しいフラグ値を計算する（ビット操作のみ）
+func (ss *SharedState) setBit(currentFlag uint32, bitMask uint32, enable bool) uint32 {
+	if enable {
+		return currentFlag | bitMask
+	}
+	return currentFlag &^ bitMask
+}
+
+// 複数フラグ一括更新用の関数
+func (ss *SharedState) UpdateFlags(changes map[uint32]bool) {
 	for {
 		oldVal := ss.loadFlag()
 		newVal := oldVal
-		if enable {
-			newVal |= bitMask
-		} else {
-			newVal &= ^bitMask
+
+		// すべての変更を適用
+		for bitMask, enable := range changes {
+			newVal = ss.setBit(newVal, bitMask, enable)
 		}
+
 		if atomic.CompareAndSwapUint32(&ss.flags, oldVal, newVal) {
 			return
 		}
@@ -167,187 +181,179 @@ func (ss *SharedState) isBitSet(bitMask uint32) bool {
 }
 
 func (ss *SharedState) IsChangedEnableDropFrame() bool {
-	return ss.isBitSet(flagIsChangedEnableDropFrame)
+	return ss.isBitSet(FlagIsChangedEnableDropFrame)
 }
 
 func (ss *SharedState) SetChangedEnableDropFrame(changed bool) {
-	ss.setBit(flagIsChangedEnableDropFrame, changed)
+	ss.UpdateFlags(map[uint32]bool{FlagIsChangedEnableDropFrame: changed})
 }
 
 func (ss *SharedState) IsEnabledFrameDrop() bool {
-	return ss.isBitSet(flagEnabledFrameDrop)
+	return ss.isBitSet(FlagEnabledFrameDrop)
 }
 
 func (ss *SharedState) SetEnabledFrameDrop(enabled bool) {
-	ss.setBit(flagEnabledFrameDrop, enabled)
+	ss.UpdateFlags(map[uint32]bool{FlagEnabledFrameDrop: enabled})
 }
 
 func (ss *SharedState) IsEnabledPhysics() bool {
-	return ss.isBitSet(flagEnabledPhysics)
+	return ss.isBitSet(FlagEnabledPhysics)
 }
 
 func (ss *SharedState) SetEnabledPhysics(enabled bool) {
-	ss.setBit(flagEnabledPhysics, enabled)
+	ss.UpdateFlags(map[uint32]bool{FlagEnabledPhysics: enabled})
 }
 
 func (ss *SharedState) IsPhysicsReset() bool {
-	return ss.isBitSet(flagPhysicsReset)
+	return ss.isBitSet(FlagPhysicsReset)
 }
 
 func (ss *SharedState) SetPhysicsReset(reset bool) {
-	ss.setBit(flagPhysicsReset, reset)
+	ss.UpdateFlags(map[uint32]bool{FlagPhysicsReset: reset})
 }
 
 func (ss *SharedState) IsShowNormal() bool {
-	return ss.isBitSet(flagShowNormal)
+	return ss.isBitSet(FlagShowNormal)
 }
 
 func (ss *SharedState) SetShowNormal(show bool) {
-	ss.setBit(flagShowNormal, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowNormal: show})
 }
 
 func (ss *SharedState) IsShowWire() bool {
-	return ss.isBitSet(flagShowWire)
+	return ss.isBitSet(FlagShowWire)
 }
 
 func (ss *SharedState) SetShowWire(show bool) {
-	ss.setBit(flagShowWire, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowWire: show})
 }
 
 func (ss *SharedState) IsShowOverride() bool {
-	return ss.isBitSet(flagShowOverride)
+	return ss.isBitSet(FlagShowOverride)
 }
 
 func (ss *SharedState) SetShowOverride(show bool) {
-	ss.setBit(flagShowOverride, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowOverride: show})
 }
 
 func (ss *SharedState) IsShowSelectedVertex() bool {
-	return ss.isBitSet(flagShowSelectedVertex)
+	return ss.isBitSet(FlagShowSelectedVertex)
 }
 
 func (ss *SharedState) SetShowSelectedVertex(show bool) {
-	ss.setBit(flagShowSelectedVertex, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowSelectedVertex: show})
 }
 
 func (ss *SharedState) IsShowBoneAll() bool {
-	return ss.isBitSet(flagShowBoneAll)
+	return ss.isBitSet(FlagShowBoneAll)
 }
 
 func (ss *SharedState) SetShowBoneAll(show bool) {
-	ss.setBit(flagShowBoneAll, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowBoneAll: show})
 }
 
 func (ss *SharedState) IsShowBoneIk() bool {
-	return ss.isBitSet(flagShowBoneIk)
+	return ss.isBitSet(FlagShowBoneIk)
 }
 
 func (ss *SharedState) SetShowBoneIk(show bool) {
-	ss.setBit(flagShowBoneIk, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowBoneIk: show})
 }
 
 func (ss *SharedState) IsShowBoneEffector() bool {
-	return ss.isBitSet(flagShowBoneEffector)
+	return ss.isBitSet(FlagShowBoneEffector)
 }
 
 func (ss *SharedState) SetShowBoneEffector(show bool) {
-	ss.setBit(flagShowBoneEffector, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowBoneEffector: show})
 }
 
 func (ss *SharedState) IsShowBoneFixed() bool {
-	return ss.isBitSet(flagShowBoneFixed)
+	return ss.isBitSet(FlagShowBoneFixed)
 }
 
 func (ss *SharedState) SetShowBoneFixed(show bool) {
-	ss.setBit(flagShowBoneFixed, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowBoneFixed: show})
 }
 
 func (ss *SharedState) IsShowBoneRotate() bool {
-	return ss.isBitSet(flagShowBoneRotate)
+	return ss.isBitSet(FlagShowBoneRotate)
 }
 
 func (ss *SharedState) SetShowBoneRotate(show bool) {
-	ss.setBit(flagShowBoneRotate, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowBoneRotate: show})
 }
 
 func (ss *SharedState) IsShowBoneTranslate() bool {
-	return ss.isBitSet(flagShowBoneTranslate)
+	return ss.isBitSet(FlagShowBoneTranslate)
 }
 
 func (ss *SharedState) SetShowBoneTranslate(show bool) {
-	ss.setBit(flagShowBoneTranslate, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowBoneTranslate: show})
 }
 
 func (ss *SharedState) IsShowBoneVisible() bool {
-	return ss.isBitSet(flagShowBoneVisible)
+	return ss.isBitSet(FlagShowBoneVisible)
 }
 
 func (ss *SharedState) SetShowBoneVisible(show bool) {
-	ss.setBit(flagShowBoneVisible, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowBoneVisible: show})
 }
 
 func (ss *SharedState) IsShowRigidBodyFront() bool {
-	return ss.isBitSet(flagShowRigidBodyFront)
+	return ss.isBitSet(FlagShowRigidBodyFront)
 }
 
 func (ss *SharedState) SetShowRigidBodyFront(show bool) {
-	ss.setBit(flagShowRigidBodyFront, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowRigidBodyFront: show})
 }
 
 func (ss *SharedState) IsShowRigidBodyBack() bool {
-	return ss.isBitSet(flagShowRigidBodyBack)
+	return ss.isBitSet(FlagShowRigidBodyBack)
 }
 
 func (ss *SharedState) SetShowRigidBodyBack(show bool) {
-	ss.setBit(flagShowRigidBodyBack, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowRigidBodyBack: show})
 }
 
 func (ss *SharedState) IsShowJoint() bool {
-	return ss.isBitSet(flagShowJoint)
+	return ss.isBitSet(FlagShowJoint)
 }
 
 func (ss *SharedState) SetShowJoint(show bool) {
-	ss.setBit(flagShowJoint, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowJoint: show})
 }
 
 func (ss *SharedState) IsShowInfo() bool {
-	return ss.isBitSet(flagShowInfo)
+	return ss.isBitSet(FlagShowInfo)
 }
 
 func (ss *SharedState) SetShowInfo(show bool) {
-	ss.setBit(flagShowInfo, show)
+	ss.UpdateFlags(map[uint32]bool{FlagShowInfo: show})
 }
 
 func (ss *SharedState) IsCameraSync() bool {
-	return ss.isBitSet(flagCameraSync)
+	return ss.isBitSet(FlagCameraSync)
 }
 
 func (ss *SharedState) SetCameraSync(sync bool) {
-	ss.setBit(flagCameraSync, sync)
+	ss.UpdateFlags(map[uint32]bool{FlagCameraSync: sync})
 }
 
 func (ss *SharedState) Playing() bool {
-	return ss.isBitSet(flagPlaying)
+	return ss.isBitSet(FlagPlaying)
 }
 
 func (ss *SharedState) SetPlaying(p bool) {
-	ss.setBit(flagPlaying, p)
-}
-
-func (ss *SharedState) IsClosed() bool {
-	return ss.isBitSet(flagClosed)
-}
-
-func (ss *SharedState) SetClosed(closed bool) {
-	ss.setBit(flagClosed, closed)
+	ss.UpdateFlags(map[uint32]bool{FlagPlaying: p})
 }
 
 func (ss *SharedState) IsWindowLinkage() bool {
-	return ss.isBitSet(flagWindowLinkage)
+	return ss.isBitSet(FlagWindowLinkage)
 }
 
 func (ss *SharedState) SetWindowLinkage(link bool) {
-	ss.setBit(flagWindowLinkage, link)
+	ss.UpdateFlags(map[uint32]bool{FlagWindowLinkage: link})
 }
 
 func (ss *SharedState) Frame() float32 {
@@ -360,12 +366,6 @@ func (ss *SharedState) SetFrame(frame float32) {
 
 func (ss *SharedState) MaxFrame() float32 {
 	return ss.maxFrameValue.Load().(maxFrameState).maxFrame
-}
-
-func (ss *SharedState) UpdateMaxFrame(maxFrame float32) {
-	if ss.MaxFrame() < maxFrame {
-		ss.SetMaxFrame(maxFrame)
-	}
 }
 
 func (ss *SharedState) SetMaxFrame(maxFrame float32) {
@@ -389,33 +389,41 @@ func (ss *SharedState) SetControlWindowPosition(x, y, diffX, diffY int) {
 	ss.controlWindowPosition.Store(mmath.MVec4{X: float64(x), Y: float64(y), Z: float64(diffX), W: float64(diffY)})
 }
 
-func (ss *SharedState) IsActiveControlWindow() bool {
-	return ss.isActiveControlWindow.Load()
+func (ss *SharedState) ControlWindowHandle() int32 {
+	return ss.controlWindowHandle.Load()
 }
 
-func (ss *SharedState) SetActiveControlWindow(active bool) {
-	ss.isActiveControlWindow.Store(active)
+func (ss *SharedState) SetControlWindowHandle(handle int32) {
+	ss.controlWindowHandle.Store(handle)
 }
 
-func (ss *SharedState) IsActivateViewWindow(windowIndex int) bool {
-	return ss.isActiveViewWindow[windowIndex].Load()
+func (ss *SharedState) ViewerWindowHandle(windowIndex int) int32 {
+	return ss.viewerWindowHandles[windowIndex].Load()
 }
 
-func (ss *SharedState) SetActivateViewWindow(windowIndex int, active bool) {
-	ss.isActiveViewWindow[windowIndex].Store(active)
+func (ss *SharedState) SetViewerWindowHandle(windowIndex int, handle int32) {
+	ss.viewerWindowHandles[windowIndex].Store(handle)
 }
 
-func (ss *SharedState) IsInactiveALlViewWindows() bool {
-	for i := range ss.isActiveViewWindow {
-		if ss.isActiveViewWindow[i].Load() {
-			return false
+func (ss *SharedState) IsHitWindowHandle(handle int32) bool {
+	if ss.ControlWindowHandle() == handle {
+		return true
+	}
+
+	for i := range ss.viewerWindowHandles {
+		if ss.viewerWindowHandles[i].Load() == handle {
+			return true
 		}
 	}
-	return true
+	return false
 }
 
-func (ss *SharedState) IsInactiveAllWindows() bool {
-	return !ss.IsActiveControlWindow() && ss.IsInactiveALlViewWindows()
+func (ss *SharedState) FocusedWindowHandle() int32 {
+	return ss.focusedWindowHandle.Load()
+}
+
+func (ss *SharedState) SetFocusedWindowHandle(handle int32) {
+	ss.focusedWindowHandle.Store(handle)
 }
 
 func (ss *SharedState) IsInitializedControlWindow() bool {
@@ -455,12 +463,18 @@ func (ss *SharedState) SetFocusControlWindow(focus bool) {
 	ss.focusControlWindow.Store(focus)
 }
 
-func (ss *SharedState) IsFocusViewWindow() bool {
-	return ss.focusViewWindow.Load()
+func (ss *SharedState) IsFocusViewWindow(windowIndex int) bool {
+	return ss.focusViewWindow[windowIndex].Load()
 }
 
-func (ss *SharedState) SetFocusViewWindow(focus bool) {
-	ss.focusViewWindow.Store(focus)
+func (ss *SharedState) SetFocusViewWindow(windowIndex int, focus bool) {
+	ss.focusViewWindow[windowIndex].Store(focus)
+}
+
+func (ss *SharedState) SetFocusAllViewWindows(focus bool) {
+	for i := range ss.focusViewWindow {
+		ss.focusViewWindow[i].Store(focus)
+	}
 }
 
 func (ss *SharedState) IsMovedControlWindow() bool {
@@ -469,4 +483,92 @@ func (ss *SharedState) IsMovedControlWindow() bool {
 
 func (ss *SharedState) SetMovedControlWindow(moving bool) {
 	ss.movedControlWindow.Store(moving)
+}
+
+func (ss *SharedState) IsClosed() bool {
+	return ss.isClosed.Load()
+}
+
+func (ss *SharedState) SetClosed(closed bool) {
+	ss.isClosed.Store(closed)
+}
+
+func (ss *SharedState) IsLinkingFocus() bool {
+	return ss.linkingFocus.Load()
+}
+
+func (ss *SharedState) SetLinkingFocus(val bool) {
+	ss.linkingFocus.Store(val)
+}
+
+// 任意ビューワーでフォーカスが発生した際に呼び出す共通関数
+// viewerIndex: フォーカスが発生したビューワーのインデックス(-1: コントロールウィンドウ)
+func (ss *SharedState) TriggerLinkedFocus(viewerIndex int) {
+	// すでに連動処理中なら再発火を防止
+	if ss.linkingFocus.CompareAndSwap(false, true) {
+		// コントロールウィンドウの前面化要求はそのまま行い、
+		// 連動対象は発生元のViewer以外に限定する
+		if viewerIndex == -1 {
+			// コントローラーウィンドウをフォーカスして発火した場合、コントローラーウィンドウのハンドルを保持
+			ss.SetFocusedWindowHandle(ss.ControlWindowHandle())
+		} else {
+			// ビューアウィンドウをフォーカスして発火した場合、ビューアウィンドウのハンドルを保持
+			ss.SetFocusedWindowHandle(ss.ViewerWindowHandle(viewerIndex))
+		}
+
+		if viewerIndex >= 0 && win.IsWindowCenterObscured(win.HWND(ss.ControlWindowHandle())) {
+			// コントロールウィンドウが前面にない場合は前面化
+			ss.SetFocusControlWindow(true)
+		}
+		for i := range ss.focusViewWindow {
+			if win.IsWindowCenterObscured(win.HWND(ss.ViewerWindowHandle(i))) {
+				// Viewerが前面にない場合は前面化
+				ss.SetFocusViewWindow(i, i != viewerIndex)
+			}
+		}
+
+		// 連動中フラグを一定時間後に解除（例: 200ms）
+		go func() {
+			time.Sleep(200 * time.Millisecond)
+			ss.SetLinkingFocus(false)
+			// フォーカスを解除
+			ss.SetFocusedWindowHandle(0)
+		}()
+	}
+}
+
+func (ss *SharedState) KeepFocus() {
+	// 連動処理中の場合のみ処理を行う
+	if ss.IsLinkingFocus() {
+		// 対象ウィンドウの前面化要求
+		win.SetForegroundWindow(win.HWND(ss.FocusedWindowHandle()))
+	}
+}
+
+// SyncMinimize は全ウィンドウを最小化する
+// viewerIndex: フォーカスが発生したビューワーのインデックス(-1: コントロールウィンドウ)
+func (ss *SharedState) SyncMinimize(viewerIndex int) {
+	// 対象ウィンドウの最小化
+	if viewerIndex >= 0 {
+		win.ShowWindow(win.HWND(ss.ControlWindowHandle()), win.SW_MINIMIZE)
+	}
+	for i := range ss.viewerWindowHandles {
+		if i != viewerIndex {
+			win.ShowWindow(win.HWND(ss.ViewerWindowHandle(i)), win.SW_MINIMIZE)
+		}
+	}
+}
+
+// SyncRestore は全ウィンドウの最小化を解除する
+// viewerIndex: フォーカスが発生したビューワーのインデックス(-1: コントロールウィンドウ)
+func (ss *SharedState) SyncRestore(viewerIndex int) {
+	// 対象ウィンドウの最小化を解除
+	if viewerIndex >= 0 {
+		win.ShowWindow(win.HWND(ss.ControlWindowHandle()), win.SW_RESTORE)
+	}
+	for i := range ss.viewerWindowHandles {
+		if i != viewerIndex {
+			win.ShowWindow(win.HWND(ss.ViewerWindowHandle(i)), win.SW_RESTORE)
+		}
+	}
 }

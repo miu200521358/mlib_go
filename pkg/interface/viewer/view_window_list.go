@@ -67,7 +67,7 @@ func (vl *ViewerList) Run() {
 	prevTime := glfw.GetTime()
 	prevShowTime := prevTime
 
-	elapsedList := make([]float64, 0, 120)
+	elapsedList := make([]float64, 0, 1200)
 
 	for !vl.shared.IsClosed() {
 		// ウィンドウリンケージ処理
@@ -108,7 +108,7 @@ func (vl *ViewerList) Run() {
 	}
 }
 
-// ウィンドウリンケージ処理を分離
+// ウィンドウリンケージ処理を
 func (vl *ViewerList) handleWindowLinkage() {
 	if vl.shared.IsWindowLinkage() && vl.shared.IsMovedControlWindow() {
 		_, _, diffX, diffY := vl.shared.ControlWindowPosition()
@@ -120,13 +120,19 @@ func (vl *ViewerList) handleWindowLinkage() {
 	}
 }
 
-// ウィンドウフォーカス処理を分離
+// ウィンドウフォーカス処理
 func (vl *ViewerList) handleWindowFocus() {
-	if vl.shared.IsFocusViewWindow() {
-		for _, vw := range vl.windowList {
+	if !vl.shared.IsInitializedAllWindows() {
+		// 初期化が終わってない場合、スルー
+		return
+	}
+
+	for i, vw := range vl.windowList {
+		if vl.shared.IsFocusViewWindow(i) {
 			vw.Focus()
+			vl.shared.KeepFocus()
+			vl.shared.SetFocusViewWindow(i, false)
 		}
-		vl.shared.SetFocusViewWindow(false)
 	}
 }
 

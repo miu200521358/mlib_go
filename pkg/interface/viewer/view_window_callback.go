@@ -213,14 +213,35 @@ func (vw *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64)
 }
 
 func (vw *ViewWindow) focusCallback(w *glfw.Window, focused bool) {
-	// mlog.IS("4) [%d] focusCallback: SetActivateViewWindow (%v)", vw.windowIndex, focused)
-	vw.list.shared.SetActivateViewWindow(vw.windowIndex, focused)
+	if !vw.list.shared.IsInitializedAllWindows() {
+		// 初期化が終わってない場合、スルー
+		return
+	}
 
-	// mlog.IS("5) [%d] focusCallback: focused[%v] inactive[%v] forceFocus[%v]",
-	// 	vw.windowIndex, focused, vw.list.shared.IsInactiveAllWindows(), vw.list.shared.IsFocusViewWindow())
-	if focused && vw.list.shared.IsInactiveAllWindows() && !vw.list.shared.IsFocusViewWindow() {
-		// mlog.IS("6) [%d] focusCallback: SetFocusControlWindow(true)", vw.windowIndex)
-		vw.list.shared.SetFocusControlWindow(true)
+	if focused {
+		// ユーザー操作等でウィンドウが前面になった場合に連動フォーカスを発火
+		vw.list.shared.TriggerLinkedFocus(vw.windowIndex)
+	}
+
+	// vw.list.shared.SetFocusViewWindow(vw.windowIndex, false)
+
+	// mlog.IS("(5) [%d] focusCallback: focused[%v] controlActive[%v] focusControl[%v]",
+	// 	vw.windowIndex, focused, vw.list.shared.IsFocusControlWindow())
+	// if focused && !vw.list.shared.IsFocusControlWindow() {
+	// 	vw.list.shared.SetFocusControlWindow(true)
+	// }
+}
+
+func (vw *ViewWindow) iconifyCallback(w *glfw.Window, iconified bool) {
+	if !vw.list.shared.IsInitializedAllWindows() {
+		// 初期化が終わってない場合、スルー
+		return
+	}
+
+	if iconified {
+		vw.list.shared.SyncMinimize(vw.windowIndex)
+	} else {
+		vw.list.shared.SyncRestore(vw.windowIndex)
 	}
 }
 

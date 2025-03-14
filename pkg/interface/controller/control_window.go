@@ -371,21 +371,22 @@ func NewControlWindow(
 				}
 			}
 		},
-		OnActivate: func() {
-			// コントローラウィンドウがアクティブ状態
-			if cw.shared.IsInitializedAllWindows() && cw.shared.IsInactiveAllWindows() {
-				// 全背面からのアクティブ化の場合、全ウィンドウをアクティブ化
-				// mlog.IS("1) ControlWindow activate: all windows")
-				cw.shared.SetFocusViewWindow(true)
+		OnClickActivate: func() {
+			if !cw.shared.IsInitializedAllWindows() {
+				// 初期化が終わってない場合、スルー
+				return
 			}
-			// mlog.IS("2) ControlWindow activate: control window")
-			cw.shared.SetActiveControlWindow(true)
+			cw.shared.TriggerLinkedFocus(-1)
 		},
-		OnDeactivate: func() {
-			// コントローラウィンドウが非アクティブ状態
-			// mlog.IS("3) ControlWindow deactivate")
-			cw.shared.SetActiveControlWindow(false)
-		},
+		// OnDeactivate: func() {
+		// 	if !cw.shared.IsInitializedAllWindows() {
+		// 		// 初期化が終わってない場合、スルー
+		// 		return
+		// 	}
+
+		// 	// コントローラウィンドウが非アクティブ状態
+		// 	mlog.IS("(C.2) ControlWindow deactivate")
+		// },
 		OnEnterSizeMove: func() {
 			// 移動サイズ変更開始
 			if cw.shared.IsWindowLinkage() {
@@ -404,22 +405,34 @@ func NewControlWindow(
 				cw.shared.SetControlWindowPosition(x, y, diffX, diffY)
 			}
 		},
+		OnMinimize: func() {
+			if !cw.shared.IsInitializedAllWindows() {
+				// 初期化が終わってない場合、スルー
+				return
+			}
+
+			cw.shared.SyncMinimize(-1)
+		},
+		OnRestore: func() {
+			if !cw.shared.IsInitializedAllWindows() {
+				// 初期化が終わってない場合、スルー
+				return
+			}
+
+			cw.shared.SyncRestore(-1)
+		},
 	}).Create(); err != nil {
 		return nil, err
 	}
 
-	// cw.checkFocus()
-
 	// 初期設定
 	cw.shared.SetFrame(0.0)                  // フレーム初期化
 	cw.shared.SetMaxFrame(1.0)               // 最大フレーム初期化
-	cw.TriggerFps30Limit()                   // 30fps物理ON
+	cw.TriggerFps60Limit()                   // 60fps制限 (MMDの物理に近い感じ)
 	cw.enabledPhysicsAction.SetChecked(true) // 物理ON
 	cw.TriggerEnabledPhysics()
 	cw.enabledFrameDropAction.SetChecked(true) // フレームドロップON
 	cw.TriggerEnabledFrameDrop()
-	cw.shared.SetActiveControlWindow(true) // コントローラウィンドウがアクティブ状態
-	cw.shared.SetControlWindowPosition(positionX, positionY, 0, 0)
 
 	// コンソールを追加で作成
 	if cv, err := NewConsoleView(cw, width/10, height/10); err != nil {
@@ -432,6 +445,13 @@ func NewControlWindow(
 
 	cw.SetPosition(positionX, positionY)
 	cw.shared.SetInitializedControlWindow(true)
+	// コントローラウィンドウハンドルを保持
+	cw.shared.SetControlWindowHandle(int32(cw.Handle()))
+	// コントローラウィンドウ位置を保持
+	cw.shared.SetControlWindowPosition(positionX, positionY, 0, 0)
+
+	// フォーカスチェック
+	cw.checkFocus()
 
 	return cw, nil
 }
@@ -439,15 +459,13 @@ func NewControlWindow(
 func (cw *ControlWindow) checkFocus() {
 	go func() {
 		for {
-			// ビューワーがまだアクティブな場合、コントローラウィンドウをアクティブにする
 			if cw.shared.IsFocusControlWindow() {
 				cw.Synchronize(func() {
-					// スレッドセーフ
 					cw.SetForegroundWindow()
 				})
+				cw.shared.KeepFocus()
 				cw.shared.SetFocusControlWindow(false)
 			}
-
 			time.Sleep(100 * time.Millisecond)
 		}
 	}()
@@ -616,13 +634,17 @@ func (cw *ControlWindow) TriggerShowSelectedVertex() {
 }
 
 func (cw *ControlWindow) updateShowBoneFlag() {
-	cw.shared.SetShowBoneAll(cw.showBoneAllAction.Checked())
-	cw.shared.SetShowBoneIk(cw.showBoneIkAction.Checked())
-	cw.shared.SetShowBoneEffector(cw.showBoneEffectorAction.Checked())
-	cw.shared.SetShowBoneFixed(cw.showBoneFixedAction.Checked())
-	cw.shared.SetShowBoneRotate(cw.showBoneRotateAction.Checked())
-	cw.shared.SetShowBoneTranslate(cw.showBoneTranslateAction.Checked())
-	cw.shared.SetShowBoneVisible(cw.showBoneVisibleAction.Checked())
+	cw.shared.UpdateFlags(
+		map[uint32]bool{
+			state.FlagShowBoneAll:       cw.showBoneAllAction.Checked(),
+			state.FlagShowBoneIk:        cw.showBoneIkAction.Checked(),
+			state.FlagShowBoneEffector:  cw.showBoneEffectorAction.Checked(),
+			state.FlagShowBoneFixed:     cw.showBoneFixedAction.Checked(),
+			state.FlagShowBoneRotate:    cw.showBoneRotateAction.Checked(),
+			state.FlagShowBoneTranslate: cw.showBoneTranslateAction.Checked(),
+			state.FlagShowBoneVisible:   cw.showBoneVisibleAction.Checked(),
+		},
+	)
 }
 
 func (cw *ControlWindow) TriggerShowBoneAll() {
