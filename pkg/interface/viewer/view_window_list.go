@@ -171,12 +171,22 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 
 	// デフォーム処理
 	for _, vw := range vl.windowList {
-		vl.deform(vw, timeStep)
+		vl.deform(vw, timeStep, false)
 	}
 
 	// レンダリング処理
 	for _, vw := range vl.windowList {
 		vw.render()
+	}
+
+	if vl.shared.IsPhysicsReset() {
+		// 物理リセット
+		for _, vw := range vl.windowList {
+			vl.resetPhysics(vw, timeStep)
+		}
+
+		// リセット完了
+		vl.shared.SetPhysicsReset(false)
 	}
 
 	// フレーム更新
@@ -191,7 +201,37 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	return true, timeStep
 }
 
-func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
+func (vl *ViewerList) resetPhysics(vw *ViewWindow, timeStep float32) {
+	// 物理リセット用のデフォーム処理
+	vl.deform(vw, timeStep, true)
+
+	for _, model := range vw.modelRenderers {
+		// モデルの物理削除
+		vw.physics.DeleteModel(model.Model.Index())
+	}
+
+	// ワールド作り直し
+	vw.physics.ResetWorld()
+
+	for n, model := range vw.modelRenderers {
+		if model == nil || vw.vmdDeltas[n] == nil {
+			continue
+		}
+
+		// モデルの物理追加
+		vw.physics.AddModelByBoneDeltas(n, model.Model, vw.vmdDeltas[n].Bones)
+
+		// 物理再設定
+		vw.vmdDeltas[n] = deform.DeformForPhysics(
+			vl.shared,
+			vw.physics,
+			vw.modelRenderers[n].Model,
+			vw.vmdDeltas[n],
+		)
+	}
+}
+
+func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32, isReset bool) {
 	vw.MakeContextCurrent()
 
 	vw.loadModelRenderers(vl.shared)
@@ -209,16 +249,18 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 			frame,
 		)
 
-		// 物理変形のための事前処理
-		vw.vmdDeltas[n] = deform.DeformForPhysics(
-			vl.shared,
-			vw.physics,
-			vw.modelRenderers[n].Model,
-			vw.vmdDeltas[n],
-		)
+		if !isReset {
+			// 物理変形のための事前処理
+			vw.vmdDeltas[n] = deform.DeformForPhysics(
+				vl.shared,
+				vw.physics,
+				vw.modelRenderers[n].Model,
+				vw.vmdDeltas[n],
+			)
+		}
 	}
 
-	if vl.shared.IsEnabledPhysics() || vl.shared.IsPhysicsReset() {
+	if !isReset && (vl.shared.IsEnabledPhysics() || vl.shared.IsPhysicsReset()) {
 		// 物理更新
 		vw.physics.StepSimulation(timeStep)
 	}
