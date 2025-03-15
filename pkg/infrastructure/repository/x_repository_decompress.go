@@ -13,10 +13,10 @@ import (
 // 解凍後のデータをバイナリパーサーへ渡します。
 func (rep *XRepository) parseCompressedBinaryXFile(model *pmx.PmxModel) error {
 	var err error
-	var fileSize uint64
-
 	var xHandle win.HWND
-	if xHandle, err = win.CreateFile(
+
+	// ファイルを開く
+	xHandle, err = win.CreateFile(
 		rep.path,
 		win.GENERIC_READ,
 		win.FILE_SHARE_READ,
@@ -24,23 +24,27 @@ func (rep *XRepository) parseCompressedBinaryXFile(model *pmx.PmxModel) error {
 		win.OPEN_EXISTING,
 		win.FILE_ATTRIBUTE_NORMAL,
 		0,
-	); err != windows.DS_S_SUCCESS {
+	)
+	if err != windows.DS_S_SUCCESS {
 		return fmt.Errorf("CreateFile failed: %v", err)
 	}
+	defer win.CloseHandle(win.HANDLE(xHandle))
 
+	// ファイルサイズを取得
+	var fileSize uint64
 	if ret, err := win.GetFileSizeEx(xHandle, &fileSize); !ret {
 		return fmt.Errorf("GetFileSizeEx failed: %v", err)
 	}
 	inputFileSize := uint32(fileSize)
 
+	// 圧縮データを読み込む
 	compressedBuffer := make([]byte, inputFileSize)
-	var compressedByteRead uint32
-
+	var bytesRead uint32
 	if _, err := win.ReadFile(
 		xHandle,
 		&compressedBuffer[0],
 		inputFileSize,
-		&compressedByteRead,
+		&bytesRead,
 		0,
 	); err != windows.DS_S_SUCCESS {
 		return fmt.Errorf("ReadFile failed: %v", err)
@@ -51,14 +55,12 @@ func (rep *XRepository) parseCompressedBinaryXFile(model *pmx.PmxModel) error {
 	if _, err := win.CreateDecompressor(win.COMPRESS_ALGORITHM_MSZIP|win.COMPRESS_RAW, &decompressorHandle); err != windows.DS_S_SUCCESS {
 		return fmt.Errorf("CreateDecompressor failed: %v", err)
 	}
+	defer win.CloseDecompressor(decompressorHandle)
 
 	// MSZIP 圧縮データを解凍
-	if err := decompressMSZipXFile(compressedBuffer, inputFileSize, decompressorHandle); err != nil {
+	if err := decompressMSZipXFile(compressedBuffer, bytesRead, decompressorHandle); err != nil {
 		return fmt.Errorf("decompressMSZipXFile failed: %v", err)
 	}
-
-	// ハンドルを解放
-	win.CloseDecompressor(decompressorHandle)
 
 	return nil
 }
