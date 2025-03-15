@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/win"
 	"golang.org/x/sys/windows"
 )
@@ -27,9 +26,9 @@ func init() {
 	fixedHuffmanTreeInstance.codes = fixedCodeSorted
 }
 
-// parseCompressedBinaryXFile は、圧縮バイナリ形式の X ファイルを解凍し、
+// decompressedBinaryXFile は、圧縮バイナリ形式の X ファイルを解凍し、
 // 解凍後のデータをバイナリパーサーへ渡します。
-func (rep *XRepository) parseCompressedBinaryXFile(model *pmx.PmxModel) error {
+func (rep *XRepository) decompressedBinaryXFile() ([]byte, error) {
 	var err error
 	var xHandle win.HWND
 
@@ -44,14 +43,14 @@ func (rep *XRepository) parseCompressedBinaryXFile(model *pmx.PmxModel) error {
 		0,
 	)
 	if err != windows.DS_S_SUCCESS {
-		return fmt.Errorf("CreateFile failed: %v", err)
+		return nil, fmt.Errorf("CreateFile failed: %v", err)
 	}
 	defer win.CloseHandle(win.HANDLE(xHandle))
 
 	// ファイルサイズを取得
 	var fileSize uint64
 	if ret, err := win.GetFileSizeEx(xHandle, &fileSize); !ret {
-		return fmt.Errorf("GetFileSizeEx failed: %v", err)
+		return nil, fmt.Errorf("GetFileSizeEx failed: %v", err)
 	}
 	inputFileSize := uint32(fileSize)
 
@@ -65,22 +64,23 @@ func (rep *XRepository) parseCompressedBinaryXFile(model *pmx.PmxModel) error {
 		&bytesRead,
 		0,
 	); err != windows.DS_S_SUCCESS {
-		return fmt.Errorf("ReadFile failed: %v", err)
+		return nil, fmt.Errorf("ReadFile failed: %v", err)
 	}
 
 	// MSZIP 圧縮アルゴリズムでデコンプレッサを作成
 	var decompressorHandle win.HWND
 	if _, err := win.CreateDecompressor(win.COMPRESS_ALGORITHM_MSZIP|win.COMPRESS_RAW, &decompressorHandle); err != windows.DS_S_SUCCESS {
-		return fmt.Errorf("CreateDecompressor failed: %v", err)
+		return nil, fmt.Errorf("CreateDecompressor failed: %v", err)
 	}
 	defer win.CloseDecompressor(decompressorHandle)
 
 	// MSZIP 圧縮データを解凍
-	if err := rep.decompressMSZipXFile(compressedBuffer, bytesRead, decompressorHandle); err != nil {
-		return fmt.Errorf("decompressMSZipXFile failed: %v", err)
+	var decompressedBuffer []byte
+	if decompressedBuffer, err = rep.decompressMSZipXFile(compressedBuffer, bytesRead, decompressorHandle); err != nil {
+		return nil, fmt.Errorf("decompressMSZipXFile failed: %v", err)
 	}
 
-	return nil
+	return decompressedBuffer, nil
 }
 
 // decompressMSZipXFile は、MSZIP形式の圧縮ブロックを解凍します
@@ -88,7 +88,7 @@ func (rep *XRepository) decompressMSZipXFile(
 	compressedBuffer []byte,
 	inputFileSize uint32,
 	decompressorHandle win.HWND,
-) error {
+) ([]byte, error) {
 	// ヘッダーサイズ定数
 	const (
 		headerSize      = 16
@@ -98,13 +98,13 @@ func (rep *XRepository) decompressMSZipXFile(
 
 	// ファイルサイズ検証
 	if inputFileSize < totalHeaderSize {
-		return fmt.Errorf("ファイルが小さすぎるか破損しています: 入力サイズ=%d < 必要最小サイズ=%d", inputFileSize, totalHeaderSize)
+		return nil, fmt.Errorf("ファイルが小さすぎるか破損しています: 入力サイズ=%d < 必要最小サイズ=%d", inputFileSize, totalHeaderSize)
 	}
 
 	// 伸長後のファイルサイズを取得
 	finalSize := binary.LittleEndian.Uint32(compressedBuffer[headerSize : headerSize+sizeFieldSize])
 	if finalSize < headerSize {
-		return fmt.Errorf("無効な最終サイズ: %d (最小値 %d より小さい)", finalSize, headerSize)
+		return nil, fmt.Errorf("無効な最終サイズ: %d (最小値 %d より小さい)", finalSize, headerSize)
 	}
 
 	// 出力バッファの準備
@@ -121,7 +121,7 @@ func (rep *XRepository) decompressMSZipXFile(
 	// バッファ長チェック
 	compressedLen := len(compressedBuffer)
 	if srcOffset > compressedLen {
-		return fmt.Errorf("圧縮データ開始位置がバッファサイズを超えています: 開始位置=%d > バッファ長=%d",
+		return nil, fmt.Errorf("圧縮データ開始位置がバッファサイズを超えています: 開始位置=%d > バッファ長=%d",
 			srcOffset, compressedLen)
 	}
 
@@ -133,21 +133,21 @@ func (rep *XRepository) decompressMSZipXFile(
 
 		// ブロック非圧縮サイズの読み取り
 		if srcOffset+2 > compressedLen {
-			return fmt.Errorf("ブロック#%d: 非圧縮サイズを読み取るのに十分なデータがありません", blockIndex)
+			return nil, fmt.Errorf("ブロック#%d: 非圧縮サイズを読み取るのに十分なデータがありません", blockIndex)
 		}
 		blockUncompressedSize := binary.LittleEndian.Uint16(compressedBuffer[srcOffset : srcOffset+2])
 		srcOffset += 2
 
 		// ブロック圧縮サイズの読み取り
 		if srcOffset+2 > compressedLen {
-			return fmt.Errorf("ブロック#%d: 圧縮サイズを読み取るのに十分なデータがありません", blockIndex)
+			return nil, fmt.Errorf("ブロック#%d: 圧縮サイズを読み取るのに十分なデータがありません", blockIndex)
 		}
 		blockCompressedSize := binary.LittleEndian.Uint16(compressedBuffer[srcOffset : srcOffset+2])
 		srcOffset += 2
 
 		// ブロックデータ範囲の検証
 		if srcOffset+int(blockCompressedSize) > compressedLen {
-			return fmt.Errorf("ブロック#%d: 圧縮データが不足しています (必要=%d, 残り=%d)",
+			return nil, fmt.Errorf("ブロック#%d: 圧縮データが不足しています (必要=%d, 残り=%d)",
 				blockIndex, blockCompressedSize, compressedLen-srcOffset)
 		}
 
@@ -164,14 +164,14 @@ func (rep *XRepository) decompressMSZipXFile(
 			nil,
 		)
 		if !success {
-			return fmt.Errorf("ブロック#%d の解凍に失敗: 非圧縮サイズ=%d, 圧縮サイズ=%d, エラー=%v",
+			return nil, fmt.Errorf("ブロック#%d の解凍に失敗: 非圧縮サイズ=%d, 圧縮サイズ=%d, エラー=%v",
 				blockIndex, blockUncompressedSize, blockCompressedSize, err)
 		}
 
 		// RFC1951形式のブロック解凍
 		bytesDecompressed, err := rep.decompressRFC1951Block(blockData[2:], newBuffer, prevBytesDecompressed)
 		if err != nil {
-			return fmt.Errorf("RFC1951ブロック#%d の解凍に失敗: 非圧縮サイズ=%d, 圧縮サイズ=%d, 解凍バイト数=%d, エラー=%v",
+			return nil, fmt.Errorf("RFC1951ブロック#%d の解凍に失敗: 非圧縮サイズ=%d, 圧縮サイズ=%d, 解凍バイト数=%d, エラー=%v",
 				blockIndex, blockUncompressedSize, blockCompressedSize, bytesDecompressed, err)
 		}
 		prevBytesDecompressed = bytesDecompressed
@@ -182,7 +182,7 @@ func (rep *XRepository) decompressMSZipXFile(
 		srcOffset += int(blockCompressedSize)
 	}
 
-	return nil
+	return newBuffer, nil
 }
 
 // decompressRFC1951Block は圧縮データを復号化します。
