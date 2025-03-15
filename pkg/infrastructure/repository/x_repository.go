@@ -21,9 +21,17 @@ import (
 	"golang.org/x/text/transform"
 )
 
+type xFormat int
+
+const (
+	xFormatText             xFormat = iota // テキスト形式
+	xFormatCompressedBinary                // 圧縮バイナリ形式
+	xFormatInvalid                         // 無効な形式
+)
+
 type XRepository struct {
 	*baseRepository[*pmx.PmxModel]
-	tokens []token
+	tokens []textToken
 	pos    int
 }
 
@@ -61,6 +69,9 @@ func (rep *XRepository) Load(path string) (core.IHashModel, error) {
 
 	mlog.IL("%s", mi18n.T("読み込み開始", map[string]interface{}{"Type": "Pmx", "Path": path}))
 	defer mlog.I("%s", mi18n.T("読み込み終了", map[string]interface{}{"Type": "X"}))
+
+	// パスを設定
+	rep.path = path
 
 	// モデルを新規作成
 	model := rep.newFunc(path)
@@ -109,34 +120,73 @@ func (rep *XRepository) LoadName(path string) string {
 	return ""
 }
 
+// loadModel はファイル形式に応じたパース処理を行います
 func (rep *XRepository) loadModel(model *pmx.PmxModel) error {
-	tok := newTokenizer(rep.reader)
-	var tokens []token
-	for {
-		t := tok.nextToken()
-		tokens = append(tokens, t)
-		if t.typ == tokEOF {
-			break
-		}
-	}
-	rep.tokens = tokens
-
-	err := rep.parseXFile(model)
-	if err != nil {
-		// エラーメッセージとスタックトレースを出力
+	// 形式判定：ファイル先頭16バイトから "txt" / "bin" / "zip" を判別
+	var format xFormat
+	var err error
+	if format, err = rep.detectFormat(); err != nil {
 		return err
 	}
 
-	// ボーンを一本追加
+	switch format {
+	case xFormatText:
+		// テキスト形式：既存のトークナイザーを使用
+		tok := newTokenizer(rep.reader)
+		var tokens []textToken
+		for {
+			t := tok.nextToken()
+			tokens = append(tokens, t)
+			if t.typ == tokEOF {
+				break
+			}
+		}
+		rep.tokens = tokens
+		if err := rep.parseTextXFile(model); err != nil {
+			return err
+		}
+	case xFormatCompressedBinary:
+		// 圧縮バイナリ形式：ここで MSZip のデータブロックを順次解凍 → 解凍したバイト列を parseBinaryXFile に渡す
+		if err := rep.parseCompressedBinaryXFile(model); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("unsupported X file format: %v", format)
+	}
+
+	// ボーン「センター」を追加し、モデルのハッシュ更新
 	bone := pmx.NewBoneByName("センター")
 	bone.BoneFlag = pmx.BONE_FLAG_CAN_MANIPULATE | pmx.BONE_FLAG_CAN_ROTATE | pmx.BONE_FLAG_CAN_TRANSLATE | pmx.BONE_FLAG_IS_VISIBLE
 	bone.IsSystem = false
 	model.Bones.Append(bone)
-
-	// モデルのハッシュを更新
 	model.UpdateHash()
 
 	return nil
+}
+
+// detectFormat は rep.reader の先頭16バイトからファイル形式を判定し、
+// rep.format に "txt", "bin", "zip" のいずれかを設定します。
+// ※ テキスト形式の場合はヘッダーをそのまま残し、バイナリ系は後続処理で破棄します。
+func (rep *XRepository) detectFormat() (xFormat, error) {
+	// 先頭16バイトをPeek
+	header, err := rep.reader.Peek(16)
+	if err != nil {
+		return xFormatInvalid, err
+	}
+	if len(header) < 12 {
+		return xFormatInvalid, fmt.Errorf("Invalid X file header")
+	}
+	headerStr := string(header)
+	// 例: "xof 0303txt 0032", "xof 0303bin 0032", "xof 0303zip 0032"
+	formatIndicator := headerStr[8:12]
+	switch formatIndicator {
+	case "txt ":
+		return xFormatText, nil
+	case "bzip":
+		return xFormatCompressedBinary, nil
+	default:
+		return xFormatInvalid, fmt.Errorf("Unknown X file format: %s", formatIndicator)
+	}
 }
 
 type tokenType int
@@ -152,7 +202,7 @@ const (
 	tokAngleBracketed
 )
 
-type token struct {
+type textToken struct {
 	typ tokenType
 	val string
 }
@@ -174,10 +224,10 @@ func newTokenizer(r io.Reader) *tokenizer {
 	return &tokenizer{runes: []rune(strings.Join(lines, "\n"))}
 }
 
-func (t *tokenizer) nextToken() token {
+func (t *tokenizer) nextToken() textToken {
 	t.skipWhitespaceAndComments()
 	if t.pos >= len(t.runes) {
-		return token{typ: tokEOF}
+		return textToken{typ: tokEOF}
 	}
 	c := t.runes[t.pos]
 
@@ -185,13 +235,13 @@ func (t *tokenizer) nextToken() token {
 	switch c {
 	case '{':
 		t.pos++
-		return token{typ: tokLCurly, val: "{"}
+		return textToken{typ: tokLCurly, val: "{"}
 	case '}':
 		t.pos++
-		return token{typ: tokRCurly, val: "}"}
+		return textToken{typ: tokRCurly, val: "}"}
 	case ';':
 		t.pos++
-		return token{typ: tokSemicolon, val: ";"}
+		return textToken{typ: tokSemicolon, val: ";"}
 	case '<':
 		// Parse GUID or bracketed token
 		return t.readAngleBracketedToken()
@@ -214,7 +264,7 @@ func (t *tokenizer) nextToken() token {
 }
 
 // This new function handles tokens enclosed by < and >
-func (t *tokenizer) readAngleBracketedToken() token {
+func (t *tokenizer) readAngleBracketedToken() textToken {
 	// consume '<'
 	start := t.pos
 	t.pos++
@@ -229,7 +279,7 @@ func (t *tokenizer) readAngleBracketedToken() token {
 	t.pos++                                 // skip the closing '>'
 
 	// We can treat this as a GUID token or similar
-	return token{typ: tokAngleBracketed, val: val}
+	return textToken{typ: tokAngleBracketed, val: val}
 }
 
 func (t *tokenizer) skipWhitespaceAndComments() {
@@ -259,7 +309,7 @@ func (t *tokenizer) skipWhitespaceAndComments() {
 	}
 }
 
-func (t *tokenizer) readString() token {
+func (t *tokenizer) readString() textToken {
 	// we are at '"'
 	start := t.pos
 	t.pos++
@@ -268,25 +318,25 @@ func (t *tokenizer) readString() token {
 	}
 	val := string(t.runes[start+1 : t.pos])
 	t.pos++ // skip closing "
-	return token{typ: tokString, val: val}
+	return textToken{typ: tokString, val: val}
 }
 
-func (t *tokenizer) readNumber() token {
+func (t *tokenizer) readNumber() textToken {
 	start := t.pos
 	for t.pos < len(t.runes) && (isDigit(t.runes[t.pos]) || t.runes[t.pos] == '.' || t.runes[t.pos] == '-' || t.runes[t.pos] == '+') {
 		t.pos++
 	}
 	val := string(t.runes[start:t.pos])
-	return token{typ: tokNumber, val: val}
+	return textToken{typ: tokNumber, val: val}
 }
 
-func (t *tokenizer) readIdentifier() token {
+func (t *tokenizer) readIdentifier() textToken {
 	start := t.pos
 	for t.pos < len(t.runes) && isIdentChar(t.runes[t.pos]) {
 		t.pos++
 	}
 	val := string(t.runes[start:t.pos])
-	return token{typ: tokIdentifier, val: val}
+	return textToken{typ: tokIdentifier, val: val}
 }
 
 func isDigit(c rune) bool {
@@ -303,20 +353,20 @@ func isIdentChar(c rune) bool {
 
 // -------------------- PARSER --------------------
 
-func (rep *XRepository) peek() token {
+func (rep *XRepository) peek() textToken {
 	if rep.pos < len(rep.tokens) {
 		return rep.tokens[rep.pos]
 	}
-	return token{typ: tokEOF}
+	return textToken{typ: tokEOF}
 }
 
-func (rep *XRepository) next() token {
+func (rep *XRepository) next() textToken {
 	t := rep.peek()
 	rep.pos++
 	return t
 }
 
-func (rep *XRepository) expect(typ tokenType) (token, error) {
+func (rep *XRepository) expect(typ tokenType) (textToken, error) {
 	t := rep.next()
 	if t.typ != typ {
 		return t, fmt.Errorf("expected %v got %v (%s)\n\n%v", typ, t.typ, t.val, mstring.GetStackTrace())
@@ -331,7 +381,7 @@ func (rep *XRepository) expect(typ tokenType) (token, error) {
 // 	}
 // }
 
-func (rep *XRepository) parseXFile(model *pmx.PmxModel) error {
+func (rep *XRepository) parseTextXFile(model *pmx.PmxModel) error {
 	// Parse until EOF
 	for rep.peek().typ != tokEOF {
 		t := rep.peek()
@@ -339,17 +389,17 @@ func (rep *XRepository) parseXFile(model *pmx.PmxModel) error {
 		if t.typ == tokIdentifier && t.val == "template" {
 			// We are encountering a template definition
 			rep.next() // consume 'template'
-			if err := rep.parseTemplateDefinition(); err != nil {
+			if err := rep.parseTextTemplateDefinition(); err != nil {
 				return err
 			}
 		} else if t.typ == tokIdentifier && t.val == "Header" {
 			rep.next()
-			if err := rep.parseHeader(model); err != nil {
+			if err := rep.parseTextHeader(model); err != nil {
 				return err
 			}
 		} else if t.typ == tokIdentifier && t.val == "Mesh" {
 			rep.next()
-			if err := rep.parseMesh(model); err != nil {
+			if err := rep.parseTextMesh(model); err != nil {
 				return err
 			}
 		} else if t.typ == tokIdentifier {
@@ -358,13 +408,13 @@ func (rep *XRepository) parseXFile(model *pmx.PmxModel) error {
 			if rep.peek().typ == tokLCurly {
 				// Known template name followed by '{' means instance block
 				// Parse as an instance of that template
-				if err := rep.parseTemplateInstance(); err != nil {
+				if err := rep.parseTextTemplateInstance(); err != nil {
 					return err
 				}
 			} else {
 				// If not '{', it's not a valid instance block,
 				// possibly skip or handle error.
-				if err := rep.skipUnknownTemplate(); err != nil {
+				if err := rep.skipTextUnknownTemplate(); err != nil {
 					return err
 				}
 			}
@@ -376,14 +426,14 @@ func (rep *XRepository) parseXFile(model *pmx.PmxModel) error {
 	return nil
 }
 
-// parseTemplateDefinition parses a template definition block like:
+// parseTextTemplateDefinition parses a template definition block like:
 //
 //	template Mesh {
 //	   <...GUID...>
 //	   DWORD nVertices;
 //	   ...
 //	}
-func (rep *XRepository) parseTemplateDefinition() error {
+func (rep *XRepository) parseTextTemplateDefinition() error {
 	// expect template name
 	nameTok, err := rep.expect(tokIdentifier)
 	if err != nil {
@@ -428,9 +478,9 @@ func (rep *XRepository) parseTemplateDefinition() error {
 	return nil
 }
 
-// parseTemplateInstance parses an instance of a previously defined template:
+// parseTextTemplateInstance parses an instance of a previously defined template:
 // e.g. Mesh { ... actual data ... }
-func (rep *XRepository) parseTemplateInstance() error {
+func (rep *XRepository) parseTextTemplateInstance() error {
 	// We already consumed the templateName and peeked '{'
 	if _, err := rep.expect(tokLCurly); err != nil {
 		return err
@@ -478,7 +528,7 @@ func (rep *XRepository) parseTemplateInstance() error {
 // 	}
 // }
 
-func (rep *XRepository) parseHeader(model *pmx.PmxModel) error {
+func (rep *XRepository) parseTextHeader(model *pmx.PmxModel) error {
 	if _, err := rep.expect(tokLCurly); err != nil {
 		return err
 	}
@@ -649,7 +699,7 @@ func (rep *XRepository) parseColorRGB() (*mmath.MVec3, error) {
 	return &mmath.MVec3{X: r, Y: g, Z: b}, nil
 }
 
-func (rep *XRepository) parseMaterial(model *pmx.PmxModel) error {
+func (rep *XRepository) parseMaterialText(model *pmx.PmxModel) error {
 	var err error
 
 	// Material定義の中に文字列（材質名）がある場合があるが、スルー
@@ -900,11 +950,11 @@ func (rep *XRepository) parseMeshMaterialList(
 	for i := 0; i < nMat; i++ {
 		if rep.peek().typ == tokIdentifier && rep.peek().val == "Material" {
 			rep.next()
-			rep.parseMaterial(model)
+			rep.parseMaterialText(model)
 		} else {
 			// could be a reference (string) or skip
 			// Just skip if unknown
-			rep.skipUnknownTemplate()
+			rep.skipTextUnknownTemplate()
 			continue
 		}
 
@@ -932,7 +982,7 @@ func (rep *XRepository) parseMeshMaterialList(
 	return nil
 }
 
-func (rep *XRepository) parseMesh(model *pmx.PmxModel) error {
+func (rep *XRepository) parseTextMesh(model *pmx.PmxModel) error {
 
 	// 定義の中に文字列（メッシュ名）がある場合があるが、スルー
 	if _, err := rep.parseString(); err == nil {
@@ -1006,7 +1056,7 @@ func (rep *XRepository) parseMesh(model *pmx.PmxModel) error {
 		default:
 			// skip unknown sub-template
 			rep.next()
-			rep.skipUnknownTemplate()
+			rep.skipTextUnknownTemplate()
 		}
 	}
 
@@ -1017,7 +1067,7 @@ func (rep *XRepository) parseMesh(model *pmx.PmxModel) error {
 	return nil
 }
 
-func (rep *XRepository) skipUnknownTemplate() error {
+func (rep *XRepository) skipTextUnknownTemplate() error {
 	// すでに "templateName" のような識別子を読んだあとで呼び出されることを想定
 	// 次のトークンは "{" のはず
 	t := rep.next()

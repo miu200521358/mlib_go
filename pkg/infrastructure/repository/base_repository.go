@@ -33,6 +33,7 @@ type baseRepository[T core.IHashModel] struct {
 	encoding encoding.Encoding
 	readText func() string
 	newFunc  func(path string) T
+	path     string
 }
 
 type LoadResult struct {
