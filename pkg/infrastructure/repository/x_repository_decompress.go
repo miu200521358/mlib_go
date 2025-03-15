@@ -297,6 +297,10 @@ func (rep *XRepository) buildCodeLengthsTree(ctx *decompressionContext, numCodeL
 	// コード長のコード値を初期化（19個まで）
 	codeLengths := make([]byte, 19)
 	for i := 0; i < int(numCodeLengthCodes); i++ {
+		if i >= len(canonicalOrder) {
+			// インデックス範囲外アクセスを防止
+			return nil, false
+		}
 		codeLengths[canonicalOrder[i]] = byte(rep.getBits(ctx, 3))
 	}
 
@@ -554,13 +558,26 @@ func (rep *XRepository) copyBackReference(ctx *decompressionContext, lengthCode 
 
 	// 短いコピーはインライン展開
 	if length <= 16 {
-		// 最適化：小さなループはアンロール
-		for i := 0; i < length; i++ {
+		// 4バイト単位でアンロール
+		i := 0
+		for ; i+4 <= length; i += 4 {
+			ctx.dest[destPos+i] = ctx.dest[sourcePos+i]
+			ctx.dest[destPos+i+1] = ctx.dest[sourcePos+i+1]
+			ctx.dest[destPos+i+2] = ctx.dest[sourcePos+i+2]
+			ctx.dest[destPos+i+3] = ctx.dest[sourcePos+i+3]
+		}
+		// 残りのバイト
+		for ; i < length; i++ {
 			ctx.dest[destPos+i] = ctx.dest[sourcePos+i]
 		}
-	} else {
-		// 大きなコピーは組み込み関数を使用
+	} else if sourcePos+length <= destPos {
+		// ソースとデスティネーションが重ならない場合、組み込み関数を使用
 		copy(ctx.dest[destPos:destPos+length], ctx.dest[sourcePos:sourcePos+length])
+	} else {
+		// 重なる可能性がある場合は1バイトずつ安全にコピー
+		for i := range length {
+			ctx.dest[destPos+i] = ctx.dest[sourcePos+i]
+		}
 	}
 
 	// バイト数を更新
@@ -576,44 +593,26 @@ func (rep *XRepository) copyBackReference(ctx *decompressionContext, lengthCode 
 // - 285: 固定値258を返す
 // - 286以上: 不正な値として0xffffを返す
 func (rep *XRepository) decodeLength(ctx *decompressionContext, baseCode uint16) int {
-	// RFC1951の仕様に基づく定数
-	const (
-		minCode     = 257    // 最小有効コード
-		midCode     = 264    // 短い長さコードの最大値
-		maxCode     = 285    // 最大有効コード
-		baseLength  = 3      // 最小長さ値
-		fixedLength = 258    // コード285の固定長さ
-		errorCode   = 0xffff // エラー時の戻り値
-		adjBase     = 265    // 中間コード計算の基準値
-	)
-
-	// 短いコード (257-264): 長さ = ベースコード - 257 + 3
-	if baseCode <= midCode {
-		return int(baseCode) - minCode + baseLength
+	// 基本チェック
+	if baseCode < 257 || baseCode > 285 {
+		return 0xffff // エラー値
 	}
 
-	// 特殊ケース: 285は常に258を返す
-	if baseCode == maxCode {
-		return fixedLength
+	// テーブル参照のために調整したインデックス
+	idx := baseCode - 257
+
+	// 基本値を取得
+	baseValue := int(lengthBaseValues[idx])
+
+	// 追加ビット数を取得
+	extraBits := int(lengthBitOffsets[idx])
+
+	// 追加ビットがある場合は読み取って加算
+	if extraBits > 0 {
+		baseValue += int(rep.getBits(ctx, extraBits))
 	}
 
-	// エラーケース: 286以上は無効
-	if baseCode > maxCode {
-		return errorCode
-	}
-
-	// 中間コード (265-284): 追加ビットを使用して長さを計算
-	codeDiff := baseCode - adjBase   // 265からの差分
-	extraBits := (codeDiff >> 2) + 1 // 追加ビット数
-
-	// 基本値の計算
-	baseVal := (4 << int(extraBits)) + 3
-	baseVal += int((codeDiff & 3) << extraBits)
-
-	// 追加ビットを読み取り、最終的な長さを計算
-	additionalValue := int(rep.getBits(ctx, int(extraBits)))
-
-	return baseVal + additionalValue
+	return baseValue
 }
 
 // decodeDistance はRFC1951規格に基づき、距離コード(baseCode)から実際の距離値を算出します。
@@ -622,36 +621,23 @@ func (rep *XRepository) decodeLength(ctx *decompressionContext, baseCode uint16)
 // - 4-29: 追加ビットを使用した複雑な計算
 // - 30以上: 無効なコード (0を返す)
 func (rep *XRepository) decodeDistance(ctx *decompressionContext, baseCode uint16) int {
-	// RFC1951の距離コードに関する定数
-	const (
-		smallCodeMax = 3  // 小さい距離コードの最大値
-		validCodeMax = 29 // 有効な距離コードの最大値
-		baseAdjust   = 4  // 中間計算用の基準値
-		errorValue   = 0  // エラー時の戻り値
-	)
-
-	// 小さい距離コード (0-3): 直接距離に変換
-	if baseCode <= smallCodeMax {
-		return int(baseCode) + 1
+	// 範囲チェック
+	if baseCode > 29 {
+		return 0 // エラー値
 	}
 
-	// 無効なコード (30以上): エラー値を返す
-	if baseCode > validCodeMax {
-		return errorValue
+	// 基本距離値を取得
+	baseValue := int(distanceBaseValues[baseCode])
+
+	// 追加ビット数を取得
+	extraBits := int(distanceBitOffsets[baseCode])
+
+	// 追加ビットがある場合は読み取って加算
+	if extraBits > 0 {
+		baseValue += int(rep.getBits(ctx, extraBits))
 	}
 
-	// 通常の距離コード (4-29): 追加ビットを使用した計算
-	offsetCode := baseCode - baseAdjust
-	extraBits := (offsetCode >> 1) + 1 // 追加ビット数
-
-	// 基本距離値の計算
-	baseDistance := (2 << int(extraBits)) + 1
-	baseDistance += int((offsetCode & 1) << extraBits)
-
-	// 追加ビットを読み取り、最終的な距離を計算
-	extraDistance := int(rep.getBits(ctx, int(extraBits)))
-
-	return baseDistance + extraDistance
+	return baseValue
 }
 
 // compareHuffmanCode は、ハフマンコードのバイナリサーチのための比較関数です。
@@ -816,60 +802,62 @@ func (rep *XRepository) setupFixedHuffmanTree(ctx *decompressionContext) {
 // 例: input=0b1011, n=4 の場合、反転結果は 0b1101 となります。
 // この関数はRFC1951圧縮形式で使用されるビット反転操作を実装しています。
 func (rep *XRepository) reverseBits(input int, n int) uint16 {
-	var result uint16 = 0
-
-	for range n {
-		// 1ビット左シフトして、新しいビット用のスペースを空ける
-		result <<= 1
-
-		// 入力の最下位ビットを取得
-		lsb := input & 1
-
-		// 結果に取得したビットを追加
-		result |= uint16(lsb)
-
-		// 入力を1ビット右シフトして次のビットを処理
-		input >>= 1
+	// 小さな値のための高速パス
+	if n <= 8 {
+		// 8ビットまでのルックアップテーブルを使用
+		switch n {
+		case 1:
+			return uint16(input & 1)
+		case 2:
+			return uint16(((input & 1) << 1) | ((input >> 1) & 1))
+		case 3:
+			return uint16(((input & 1) << 2) | ((input & 2) << 0) | ((input & 4) >> 2))
+		case 5: // 距離コードで特に使用される
+			// 5ビット専用の高速ルックアップ
+			return uint16((input&1)<<4 | (input&2)<<2 | (input&4)<<0 | (input&8)>>2 | (input&16)>>4)
+		}
 	}
 
+	// 通常の反転処理
+	var result uint16 = 0
+	for i := 0; i < n; i++ {
+		result = (result << 1) | uint16(input&1)
+		input >>= 1
+	}
 	return result
 }
 
+// decodeLength および decodeDistance 関数をテーブル参照で高速化
 // readNextBit はバッファから1ビットを読み取ります。
 // バッファが空の場合は新たにバイトを読み込みます。
 func (rep *XRepository) readNextBit(ctx *decompressionContext) uint16 {
-	// バッファが空の場合、新しいバイトを読み込む
+	// バッファが空の場合、32/16/8ビット単位で効率的に読み込む
 	if ctx.bitCount == 0 {
 		byteIndex := ctx.bitsRead >> 3
 		if int(byteIndex) >= len(ctx.src) {
 			return 0
 		}
 
-		// 最適化：一度に複数バイト読み込む
+		// 残りバイト数に応じて最適な読み込み方を選択
 		remainingBytes := len(ctx.src) - int(byteIndex)
 		if remainingBytes >= 4 {
-			// 4バイト一括読み込み
+			// 4バイト一括読み込み - アラインメント考慮なし（速度優先）
 			ctx.bitBuffer = uint32(ctx.src[byteIndex]) |
 				uint32(ctx.src[byteIndex+1])<<8 |
 				uint32(ctx.src[byteIndex+2])<<16 |
 				uint32(ctx.src[byteIndex+3])<<24
 			ctx.bitCount = 32
 		} else if remainingBytes >= 2 {
-			// 2バイト読み込み
-			ctx.bitBuffer = uint32(ctx.src[byteIndex]) |
-				uint32(ctx.src[byteIndex+1])<<8
+			ctx.bitBuffer = uint32(ctx.src[byteIndex]) | uint32(ctx.src[byteIndex+1])<<8
 			ctx.bitCount = 16
 		} else {
-			// 1バイト読み込み
 			ctx.bitBuffer = uint32(ctx.src[byteIndex])
 			ctx.bitCount = 8
 		}
 	}
 
-	// バッファから1ビット取得
+	// LSBを抽出（最適化：ビット操作を最小化）
 	bit := ctx.bitBuffer & 1
-
-	// バッファを更新
 	ctx.bitBuffer >>= 1
 	ctx.bitCount--
 	ctx.bitsRead++
@@ -878,142 +866,104 @@ func (rep *XRepository) readNextBit(ctx *decompressionContext) uint16 {
 }
 
 func (rep *XRepository) getBits(ctx *decompressionContext, size int) uint16 {
-	// サイズが0の場合は早期リターン
-	if size <= 0 {
+	// サイズが0または無効な場合は早期リターン
+	if size <= 0 || size > 16 {
 		return 0
 	}
 
-	// 結果となるビット値
-	var result uint16 = 0
-
-	// 最適化：ビットバッファに十分なビットがある場合
+	// 最適化：全てのビットがバッファにある場合はマスク1回で処理
 	if ctx.bitCount >= size {
-		// バッファから直接ビットを取得
-		result = uint16(ctx.bitBuffer & ((1 << size) - 1))
-
-		// バッファを更新
+		result := uint16(ctx.bitBuffer & bitMasks[size])
 		ctx.bitBuffer >>= size
 		ctx.bitCount -= size
 		ctx.bitsRead += int64(size)
-
 		return result
 	}
 
-	// バッファに残っているビットを取り込む
+	// 部分的なビットを取得して結合する必要がある場合
+	result := uint16(0)
+
+	// バッファに残っているビットを使用
 	if ctx.bitCount > 0 {
-		result = uint16(ctx.bitBuffer & ((1 << ctx.bitCount) - 1))
+		result = uint16(ctx.bitBuffer & bitMasks[ctx.bitCount])
 		size -= ctx.bitCount
 		ctx.bitsRead += int64(ctx.bitCount)
 		ctx.bitCount = 0
-	}
 
-	// バイト境界に合わせて読み込み（最適化）
-	// 32ビットのバッファを最大限活用
-	bytesToRead := (size + 7) >> 3 // 必要バイト数の切り上げ
-	bytePos := ctx.bitsRead >> 3
+		// バイト境界からの読み込み
+		byteIndex := ctx.bitsRead >> 3
+		if int(byteIndex) >= len(ctx.src) {
+			return result
+		}
 
-	if int(bytePos)+bytesToRead <= len(ctx.src) {
-		// 32ビットバッファに複数バイトを一度に読み込む
-		switch {
-		case bytesToRead >= 4 && int(bytePos)+4 <= len(ctx.src):
-			// 4バイト一括読み込み
-			ctx.bitBuffer = uint32(ctx.src[bytePos]) |
-				uint32(ctx.src[bytePos+1])<<8 |
-				uint32(ctx.src[bytePos+2])<<16 |
-				uint32(ctx.src[bytePos+3])<<24
+		// 最適化: サイズに応じて一度に読み込むバイト数を調整
+		if int(byteIndex)+4 <= len(ctx.src) && size > 8 {
+			// 4バイト読み込み
+			ctx.bitBuffer = uint32(ctx.src[byteIndex]) |
+				uint32(ctx.src[byteIndex+1])<<8 |
+				uint32(ctx.src[byteIndex+2])<<16 |
+				uint32(ctx.src[byteIndex+3])<<24
 
-			// 必要なビットを抽出
+			// 必要なビット数だけ取得
+			additionalBits := uint16(ctx.bitBuffer & bitMasks[size])
+			result |= additionalBits << uint16(ctx.bitCount)
+
+			// バッファを更新
+			ctx.bitBuffer >>= size
+			ctx.bitCount = 32 - size
+			ctx.bitsRead += int64(size)
+			return result
+		} else if int(byteIndex)+2 <= len(ctx.src) && size > 8 {
+			// 2バイト読み込み
+			ctx.bitBuffer = uint32(ctx.src[byteIndex]) | uint32(ctx.src[byteIndex+1])<<8
 			if size <= 16 {
-				result |= uint16(ctx.bitBuffer & ((1 << size) - 1))
-				ctx.bitBuffer >>= size
-				ctx.bitCount = 32 - size
-				ctx.bitsRead += int64(size)
-				return result
-			}
-
-			// 16ビット以上必要な場合
-			result = uint16(ctx.bitBuffer & 0xFFFF)
-			if size <= 32 {
-				result |= uint16((ctx.bitBuffer >> 16) & ((1 << (size - 16)) - 1))
-				ctx.bitBuffer >>= size
-				ctx.bitCount = 32 - size
-				ctx.bitsRead += int64(size)
-				return result
-			}
-
-			// 32ビット以上必要（特殊ケース）
-			ctx.bitsRead += 32
-			size -= 32
-
-		case bytesToRead >= 2 && int(bytePos)+2 <= len(ctx.src):
-			// 2バイト一括読み込み
-			ctx.bitBuffer = uint32(ctx.src[bytePos]) | uint32(ctx.src[bytePos+1])<<8
-			ctx.bitCount = 16
-
-			if size <= 16 {
-				result |= uint16(ctx.bitBuffer & ((1 << size) - 1))
+				additionalBits := uint16(ctx.bitBuffer & bitMasks[size])
+				result |= additionalBits << uint16(ctx.bitCount)
 				ctx.bitBuffer >>= size
 				ctx.bitCount = 16 - size
 				ctx.bitsRead += int64(size)
 				return result
 			}
-
-			result |= uint16(ctx.bitBuffer)
-			ctx.bitsRead += 16
-			size -= 16
-			ctx.bitCount = 0
-
-		default:
+		} else if int(byteIndex) < len(ctx.src) {
 			// 1バイト読み込み
-			ctx.bitBuffer = uint32(ctx.src[bytePos])
-			ctx.bitCount = 8
-
+			ctx.bitBuffer = uint32(ctx.src[byteIndex])
 			if size <= 8 {
-				result |= uint16(ctx.bitBuffer & ((1 << size) - 1))
+				additionalBits := uint16(ctx.bitBuffer & bitMasks[size])
+				result |= additionalBits << uint16(ctx.bitCount)
 				ctx.bitBuffer >>= size
 				ctx.bitCount = 8 - size
 				ctx.bitsRead += int64(size)
 				return result
 			}
-
-			result |= uint16(ctx.bitBuffer)
-			ctx.bitsRead += 8
-			size -= 8
-			ctx.bitCount = 0
 		}
 	}
 
-	// 残りのビットを1バイトずつ処理
+	// バイト単位での読み込みが必要な場合
 	for size >= 8 {
 		byteIndex := ctx.bitsRead >> 3
 		if int(byteIndex) >= len(ctx.src) {
-			return result // バッファ終端
+			return result
 		}
 
-		// 1バイト読み込み
 		byteValue := ctx.src[byteIndex]
-		result |= uint16(byteValue) << (16 - size)
-
+		result = (result << 8) | uint16(byteValue)
 		size -= 8
 		ctx.bitsRead += 8
 	}
 
-	// 残りの数ビットを処理
+	// 残りのビット
 	if size > 0 {
 		byteIndex := ctx.bitsRead >> 3
 		if int(byteIndex) >= len(ctx.src) {
-			return result // バッファ終端
+			return result
 		}
 
-		// 新しいバイトをバッファに読み込み
 		ctx.bitBuffer = uint32(ctx.src[byteIndex])
 		ctx.bitCount = 8
 
-		// 必要なビットだけ取得
-		mask := uint32((1 << size) - 1)
-		result |= uint16((ctx.bitBuffer & mask)) << (16 - size)
+		mask := bitMasks[size]
+		result = (result << size) | uint16(ctx.bitBuffer&mask)
 
-		// バッファを更新
 		ctx.bitBuffer >>= size
 		ctx.bitCount -= size
 		ctx.bitsRead += int64(size)
@@ -1133,6 +1083,22 @@ type decompressionContext struct {
 	bitBuffer           uint32 // 現在のビットバッファ
 	bitCount            int    // バッファ内の有効ビット数
 }
+
+// 使用頻度の高いビットオペレーション定数をプリコンパイル
+var (
+	// ビットマスクテーブル (上記で定義済み)
+	bitMasks = [33]uint32{
+		0, 0x1, 0x3, 0x7, 0xF, 0x1F, 0x3F, 0x7F, 0xFF,
+		0x1FF, 0x3FF, 0x7FF, 0xFFF, 0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF,
+		0x1FFFF, 0x3FFFF, 0x7FFFF, 0xFFFFF, 0x1FFFFF, 0x3FFFFF, 0x7FFFFF, 0xFFFFFF,
+		0x1FFFFFF, 0x3FFFFFF, 0x7FFFFFF, 0xFFFFFFF, 0x1FFFFFFF, 0x3FFFFFFF, 0x7FFFFFFF, 0xFFFFFFFF,
+	}
+	// オペレーションごとの共通パターン用のテーブル
+	lengthBitOffsets   = [29]uint16{0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0}
+	distanceBitOffsets = [30]uint16{0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13}
+	lengthBaseValues   = [29]uint16{3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258}
+	distanceBaseValues = [30]uint16{1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577}
+)
 
 // fixedHuffmanMap は固定ハフマンコードの高速検索用マップ
 // キーは (length << 16 | huffmanCode) の形式で、値はbinCode
