@@ -447,6 +447,10 @@ func TestXRepository_Load7(t *testing.T) {
 	expectedData, _ := pmxRep.Load(pmxPath)
 	expectedModel := expectedData.(*pmx.PmxModel)
 
+	if model.Vertices.Length() != expectedModel.Vertices.Length() {
+		t.Errorf("Expected Vertices Count to be %v, got %v", expectedModel.Vertices.Length(), model.Vertices.Length())
+	}
+
 	model.Vertices.ForEach(func(index int, vertex *pmx.Vertex) {
 		expectedV, _ := expectedModel.Vertices.Get(vertex.Index())
 		if !vertex.Position.NearEquals(expectedV.Position, 1e-5) {
@@ -454,12 +458,20 @@ func TestXRepository_Load7(t *testing.T) {
 		}
 	})
 
+	if model.Faces.Length() != expectedModel.Faces.Length() {
+		t.Errorf("Expected Faces Count to be %v, got %v", expectedModel.Faces.Length(), model.Faces.Length())
+	}
+
 	model.Faces.ForEach(func(index int, face *pmx.Face) {
 		expectedF, _ := expectedModel.Faces.Get(face.Index())
 		if face.VertexIndexes[0] != expectedF.VertexIndexes[0] || face.VertexIndexes[1] != expectedF.VertexIndexes[1] || face.VertexIndexes[2] != expectedF.VertexIndexes[2] {
 			t.Errorf("Expected Face[%d] VertexIndexes to be %v, got %v", face.Index(), expectedF.VertexIndexes, face.VertexIndexes)
 		}
 	})
+
+	if model.Materials.Length() != expectedModel.Materials.Length() {
+		t.Errorf("Expected Materials Count to be %v, got %v", expectedModel.Materials.Length(), model.Materials.Length())
+	}
 
 	model.Materials.ForEach(func(index int, material *pmx.Material) {
 		expectedT, _ := expectedModel.Materials.Get(material.Index())
