@@ -31,6 +31,9 @@ type IMsaa interface {
 
 	// Resize はMSAAバッファのサイズを変更する
 	Resize(width, height int)
+
+	// SaveImage は画像を保存する
+	SaveImage(imgPath string) error
 }
 
 // MSAAConfig はMSAA設定を保持する構造体

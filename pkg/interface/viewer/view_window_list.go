@@ -169,14 +169,22 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 		return false, timeStep
 	}
 
-	// デフォーム処理
 	for _, vw := range vl.windowList {
+		// デフォーム処理
 		vl.deform(vw, timeStep, false)
+
+		// 重複描画
+		if vl.shared.IsShowOverride() {
+			vw.shader.Msaa().SetOverrideTargetTexture(vl.windowList[0].shader.Msaa().OverrideTargetTexture())
+		} else {
+			vw.shader.Msaa().SetOverrideTargetTexture(0)
+		}
 	}
 
 	// レンダリング処理
-	for _, vw := range vl.windowList {
-		vw.render()
+	for n := len(vl.windowList); n > 0; n-- {
+		// サブビューワーオーバーレイのため、逆順でレンダリング
+		vl.windowList[n-1].render()
 	}
 
 	if vl.shared.IsPhysicsReset() {

@@ -53,6 +53,63 @@ func NewPmxLoadFilePicker(
 	)
 }
 
+func NewPmxXLoadFilePicker(
+	historyKey string,
+	title string,
+	tooltip string,
+	onPathChanged func(*controller.ControlWindow, repository.IRepository, string),
+) *FilePicker {
+	return newFilePicker(
+		historyKey,
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.pmx;*.x", description: "Pmx/X Files (*.pmx,*.x)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		repository.NewPmxXRepository(),
+	)
+}
+
+func NewPmxJsonLoadFilePicker(
+	historyKey string,
+	title string,
+	tooltip string,
+	onPathChanged func(*controller.ControlWindow, repository.IRepository, string),
+) *FilePicker {
+	return newFilePicker(
+		historyKey,
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.pmx;*.json", description: "Pmx/Json Files (*.pmx,*.json)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		repository.NewPmxJsonRepository(),
+	)
+}
+
+func NewCsvLoadFilePicker(
+	historyKey string,
+	title string,
+	tooltip string,
+	onPathChanged func(*controller.ControlWindow, repository.IRepository, string),
+) *FilePicker {
+	return newFilePicker(
+		historyKey,
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.csv", description: "Csv Files (*.csv)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		repository.NewCsvRepository(),
+	)
+}
+
 func NewVmdVpdLoadFilePicker(
 	historyKey string,
 	title string,
@@ -69,6 +126,78 @@ func NewVmdVpdLoadFilePicker(
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
 		repository.NewVmdVpdRepository(),
+	)
+}
+
+func NewPmxSaveFilePicker(
+	title string,
+	tooltip string,
+	onPathChanged func(*controller.ControlWindow, repository.IRepository, string),
+) *FilePicker {
+	return newFilePicker(
+		"",
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.pmx", description: "Pmx Files (*.pmx)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		repository.NewPmxRepository(),
+	)
+}
+
+func NewPmxJsonSaveFilePicker(
+	title string,
+	tooltip string,
+	onPathChanged func(*controller.ControlWindow, repository.IRepository, string),
+) *FilePicker {
+	return newFilePicker(
+		"",
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.json", description: "Json Files (*.json)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		repository.NewPmxJsonRepository(),
+	)
+}
+
+func NewVmdSaveFilePicker(
+	title string,
+	tooltip string,
+	onPathChanged func(*controller.ControlWindow, repository.IRepository, string),
+) *FilePicker {
+	return newFilePicker(
+		"",
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.vmd", description: "Vmd Files (*.vmd)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		repository.NewVmdRepository(),
+	)
+}
+
+func NewCsvSaveFilePicker(
+	title string,
+	tooltip string,
+	onPathChanged func(*controller.ControlWindow, repository.IRepository, string),
+) *FilePicker {
+	return newFilePicker(
+		"",
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.csv", description: "Csv Files (*.csv)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		repository.NewCsvRepository(),
 	)
 }
 

@@ -17,7 +17,7 @@ func NewTabPages(mWidgets *controller.MWidgets) []declarative.TabPage {
 
 	player := widget.NewMotionPlayer()
 
-	pmxLoad11Picker := widget.NewPmxLoadFilePicker(
+	pmxLoad11Picker := widget.NewPmxXLoadFilePicker(
 		"pmx",
 		"モデルファイル1-1",
 		"モデルファイルを選択してください",
@@ -45,7 +45,7 @@ func NewTabPages(mWidgets *controller.MWidgets) []declarative.TabPage {
 		},
 	)
 
-	pmxLoad21Picker := widget.NewPmxLoadFilePicker(
+	pmxLoad21Picker := widget.NewPmxXLoadFilePicker(
 		"pmx",
 		"モデルファイル2-1",
 		"モデルファイルを選択してください",

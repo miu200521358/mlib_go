@@ -4,6 +4,12 @@
 package mgl
 
 import (
+	"image"
+	"image/color"
+	"image/png"
+	"os"
+	"path/filepath"
+
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
@@ -78,7 +84,7 @@ func NewMsaa(config rendering.MSAAConfig) *Msaa {
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, msaa.depthBufferMS)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		mlog.F("MSAA生成失敗")
+		panic("MSAA生成失敗")
 	}
 
 	// 解決フレームバッファの作成
@@ -101,7 +107,7 @@ func NewMsaa(config rendering.MSAAConfig) *Msaa {
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, msaa.width, msaa.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		mlog.F("解決フレームバッファ生成失敗")
+		panic("解決フレームバッファ生成失敗")
 	}
 
 	// 透過描画用に四角形の頂点とテクスチャ座標を定義
@@ -145,9 +151,45 @@ func (m *Msaa) ReadDepthAt(x, y int) float32 {
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
-	mlog.V("ReadDepthAt: %v, %v, depth: %.5f", x, y, depth)
-
 	return depth
+}
+
+// SaveImage は画像を保存する
+func (m *Msaa) SaveImage(imgPath string) error {
+	w := m.width
+	h := m.height
+
+	pixels := make([]byte, int(w*h)*4) // RGBA形式で4バイト/ピクセル
+	gl.ReadPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pixels))
+
+	img := image.NewRGBA(image.Rect(0, 0, int(w), int(h)))
+	for y := int32(0); y < h; y++ {
+		for x := int32(0); x < w; x++ {
+			i := (y*w + x) * 4
+			r := pixels[i]
+			g := pixels[i+1]
+			b := pixels[i+2]
+			a := pixels[i+3]
+			img.SetRGBA(int(x), int(h-y-1), color.RGBA{r, g, b, a}) // 画像の上下を反転
+		}
+	}
+
+	if err := os.MkdirAll(filepath.Dir(imgPath), os.ModePerm); err != nil {
+		mlog.VV("Failed to create directory: %v [%s]", err, imgPath)
+		return err
+	}
+	if file, err := os.Create(imgPath); err != nil {
+		mlog.VV("Failed to create file: %v [%s]", err, imgPath)
+		return err
+	} else {
+		if err := png.Encode(file, img); err != nil {
+			mlog.VV("Failed to encode PNG: %v [%s]", err, imgPath)
+			return err
+		}
+		defer file.Close()
+	}
+
+	return nil
 }
 
 // Bind はMSAAフレームバッファをバインドする
