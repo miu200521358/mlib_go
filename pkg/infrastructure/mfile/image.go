@@ -23,21 +23,15 @@ import (
 
 // 指定されたパスから画像を読み込む
 func LoadImage(path string) (image.Image, error) {
-	// // ファイルをバイト配列として一度に読み込む
-	// fileData, err := os.ReadFile(path)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// reader := bytes.NewReader(fileData)
-	// return loadImage(path, reader)
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	return loadImage(path, file)
+	return loadImage(path, func(path string) (io.Reader, error) {
+		file, err := os.Open(path)
+		if err != nil {
+			return nil, err
+		}
+		return file, nil
+	}, func(file io.Reader) {
+		file.(io.Closer).Close()
+	})
 }
 
 // 指定された画像を反転させる
@@ -61,13 +55,13 @@ func FlipImage(img *image.RGBA) *image.RGBA {
 
 // ReadIconFile アイコンファイルの読み込み
 func LoadImageFromResources(resources embed.FS, fileName string) (image.Image, error) {
-	fileData, err := fs.ReadFile(resources, fileName)
-	if err != nil {
-		return nil, fmt.Errorf("image not found: %v", err)
-	}
-	file := bytes.NewReader(fileData)
-
-	return loadImage(fileName, file)
+	return loadImage(fileName, func(path string) (io.Reader, error) {
+		fileData, err := fs.ReadFile(resources, fileName)
+		if err != nil {
+			return nil, fmt.Errorf("image not found: %v", err)
+		}
+		return bytes.NewReader(fileData), nil
+	}, func(file io.Reader) {})
 }
 
 func ConvertToNRGBA(img image.Image) *image.NRGBA {
@@ -84,71 +78,46 @@ func ConvertToNRGBA(img image.Image) *image.NRGBA {
 	return rgba
 }
 
-func loadImage(path string, file io.Reader) (image.Image, error) {
+func loadImage(path string, loadFunc func(path string) (io.Reader, error), closeFunc func(file io.Reader)) (image.Image, error) {
 	paths := strings.Split(path, ".")
 	if len(paths) < 2 {
 		return nil, fmt.Errorf("invalid file path: %s", path)
 	}
 
+	extensions := []string{}
+
 	switch strings.ToLower(paths[len(paths)-1]) {
 	case "png":
-		img, err := png.Decode(file)
-		if err != nil {
-			return nil, err
-		}
-
-		return img, nil
+		extensions = append(extensions, "png", "gif", "jpg", "bmp", "tga", "dds")
 	case "tga":
-		img, err := tga.Decode(file)
-		if err != nil {
-			return nil, err
-		}
-
-		return img, nil
+		extensions = append(extensions, "tga", "png", "gif", "jpg", "bmp", "dds")
 	case "gif":
-		img, err := gif.Decode(file)
-		if err != nil {
-			return nil, err
-		}
-
-		return img, nil
+		extensions = append(extensions, "gif", "png", "jpg", "bmp", "tga", "dds")
 	case "dds":
-		img, err := dds.Decode(file)
-		if err != nil {
-			return nil, err
-		}
-
-		return img, nil
+		extensions = append(extensions, "dds", "png", "gif", "jpg", "bmp", "tga")
 	case "jpg", "jpeg":
-		img, err := jpeg.Decode(file)
-		if err != nil {
-			return nil, err
-		}
-
-		return img, nil
-
+		extensions = append(extensions, "jpg", "png", "gif", "bmp", "tga", "dds")
 	case "bmp":
-		img, err := bmp.Decode(file)
-		if err != nil {
-			return nil, err
-		}
-
-		return img, nil
+		extensions = append(extensions, "bmp", "png", "gif", "jpg", "tga", "dds")
 	case "spa", "sph":
 		// スフィアファイルはまずbmpとして読み込む
-		img, err := bmp.Decode(file)
-		if err != nil {
-			file, err = os.Open(path)
-			img, err = png.Decode(file)
-			if err != nil {
-				return nil, err
-			} else {
-				return img, nil
-			}
-		}
-
-		return img, nil
+		extensions = append(extensions, "bmp", "png", "gif", "jpg", "tga", "dds")
 	}
+
+	// 拡張子に合わせて画像を読み込む
+	for _, extension := range extensions {
+		img, err := loadImageByExtension(path, extension, loadFunc, closeFunc)
+		if err == nil {
+			return img, nil
+		}
+	}
+
+	// どの拡張子にも合致しなかった場合はとりあえずそのまま呼んでみる
+	file, err := loadFunc(path)
+	if err != nil {
+		return nil, err
+	}
+	defer closeFunc(file)
 
 	img, _, err := image.Decode(file)
 	if err != nil {
@@ -156,4 +125,54 @@ func loadImage(path string, file io.Reader) (image.Image, error) {
 	}
 
 	return img, nil
+}
+
+// loadImageByExtension 拡張子に合わせて画像を読み込む
+func loadImageByExtension(path, extension string, loadFunc func(path string) (io.Reader, error), closeFunc func(file io.Reader)) (image.Image, error) {
+	file, err := loadFunc(path)
+	if err != nil {
+		return nil, err
+	}
+	defer closeFunc(file)
+
+	switch extension {
+	case "png":
+		if img, err := png.Decode(file); err == nil {
+			return img, nil
+		} else {
+			return nil, err
+		}
+	case "tga":
+		if img, err := tga.Decode(file); err == nil {
+			return img, nil
+		} else {
+			return nil, err
+		}
+	case "gif":
+		if img, err := gif.Decode(file); err == nil {
+			return img, nil
+		} else {
+			return nil, err
+		}
+	case "dds":
+		if img, err := dds.Decode(file); err == nil {
+			return img, nil
+		} else {
+			return nil, err
+		}
+	case "jpg":
+		if img, err := jpeg.Decode(file); err == nil {
+			return img, nil
+		} else {
+			return nil, err
+		}
+	case "bmp":
+		if img, err := bmp.Decode(file); err == nil {
+			return img, nil
+		} else {
+			return nil, err
+		}
+	}
+
+	return nil, fmt.Errorf("unsupported image format: %s", extension)
 }
