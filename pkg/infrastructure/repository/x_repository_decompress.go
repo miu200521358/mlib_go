@@ -109,7 +109,7 @@ func (rep *XRepository) decompressMSZipXFile(
 
 	// ブロック単位のループ処理
 	blockIndex := 0
-	prevBytesDecompressed := uint32(0)
+	prevBytesDecompressed := uint32(headerSize)
 	for srcOffset < compressedLen && uncompressedSum < finalSize {
 		blockIndex++
 

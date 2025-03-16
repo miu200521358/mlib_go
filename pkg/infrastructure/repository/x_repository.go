@@ -2,6 +2,7 @@ package repository
 
 import (
 	"bufio"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"io/fs"
@@ -25,14 +26,18 @@ type xFormat int
 
 const (
 	xFormatText             xFormat = iota // テキスト形式
+	xFormatBinary                          // 未圧縮バイナリ形式
 	xFormatCompressedBinary                // 圧縮バイナリ形式
 	xFormatInvalid                         // 無効な形式
 )
 
 type XRepository struct {
 	*baseRepository[*pmx.PmxModel]
-	tokens []textToken
+	tokens []textToken // テキスト形式のトークン
 	pos    int
+
+	buffers   []byte // バイナリ形式のバッファ
+	floatSize int    // バイナリ形式の浮動小数点数のサイズ
 }
 
 func NewXRepository() *XRepository {
@@ -145,6 +150,15 @@ func (rep *XRepository) loadModel(model *pmx.PmxModel) error {
 		if err := rep.parseTextXFile(model); err != nil {
 			return err
 		}
+	case xFormatBinary:
+		// 未圧縮バイナリ形式：バイナリデータをそのまま parseBinaryXFile に渡す
+		// ファイルからバイナリデータを読み込む
+		if err := binary.Read(rep.reader, binary.LittleEndian, &rep.buffers); err != nil {
+			return err
+		}
+		if err := rep.parseBinaryXFile(model); err != nil {
+			return err
+		}
 	case xFormatCompressedBinary:
 		// 圧縮バイナリ形式：ここで MSZip のデータブロックを順次解凍 → 解凍したバイト列を parseBinaryXFile に渡す
 		if err := rep.parseCompressedBinaryXFile(model); err != nil {
@@ -182,6 +196,8 @@ func (rep *XRepository) detectFormat() (xFormat, error) {
 	switch formatIndicator {
 	case "txt ":
 		return xFormatText, nil
+	case "tzip":
+		return xFormatBinary, nil
 	case "bzip":
 		return xFormatCompressedBinary, nil
 	default:
