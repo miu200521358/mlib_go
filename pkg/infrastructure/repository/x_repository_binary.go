@@ -32,16 +32,6 @@ func (rep *XRepository) parseCompressedBinaryXFile(model *pmx.PmxModel) error {
 func (rep *XRepository) parseBinaryXFile(model *pmx.PmxModel, buffer []byte) error {
 	r := bytes.NewReader(buffer)
 
-	// ヘッダー読み出し（例："xof 0303bin 0032" を想定）
-	header := make([]byte, 16)
-	if err := binary.Read(r, binary.LittleEndian, &header); err != nil {
-		return fmt.Errorf("failed to read header: %w", err)
-	}
-	headerStr := string(header)
-	if len(headerStr) < 12 || headerStr[8:12] != "bin " {
-		return fmt.Errorf("invalid binary X file header: %s", headerStr)
-	}
-
 	// 各セクションを別関数でパース
 	if err := parseVertices(r, model); err != nil {
 		return fmt.Errorf("failed to parse vertices: %w", err)
