@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
@@ -906,7 +906,7 @@ func (rep *XRepository) readString() (string, error) {
 
 	// Shift-JIS から UTF-8 への変換
 	reader := transform.NewReader(bytes.NewReader(stringBytes), japanese.ShiftJIS.NewDecoder())
-	decodedBytes, err := ioutil.ReadAll(reader)
+	decodedBytes, err := io.ReadAll(reader)
 	if err != nil {
 		return "", fmt.Errorf("[readString] failed to decode string: %w", err)
 	}
