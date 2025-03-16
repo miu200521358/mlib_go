@@ -23,6 +23,14 @@ import (
 
 // 指定されたパスから画像を読み込む
 func LoadImage(path string) (image.Image, error) {
+	// // ファイルをバイト配列として一度に読み込む
+	// fileData, err := os.ReadFile(path)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// reader := bytes.NewReader(fileData)
+	// return loadImage(path, reader)
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -118,11 +126,25 @@ func loadImage(path string, file io.Reader) (image.Image, error) {
 		}
 
 		return img, nil
-	case "spa", "bmp":
-		// スフィアファイルはbmpとして読み込む
+
+	case "bmp":
 		img, err := bmp.Decode(file)
 		if err != nil {
 			return nil, err
+		}
+
+		return img, nil
+	case "spa", "sph":
+		// スフィアファイルはまずbmpとして読み込む
+		img, err := bmp.Decode(file)
+		if err != nil {
+			file, err = os.Open(path)
+			img, err = png.Decode(file)
+			if err != nil {
+				return nil, err
+			} else {
+				return img, nil
+			}
 		}
 
 		return img, nil
