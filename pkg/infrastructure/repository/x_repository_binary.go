@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -35,6 +36,10 @@ func (rep *XRepository) parseCompressedBinaryXFile(model *pmx.PmxModel) error {
 	if err := rep.parseBinaryXFile(model); err != nil {
 		return fmt.Errorf("failed to parse binary X file: %w", err)
 	}
+
+	// 一旦解凍後のバイナリデータをファイルに出力
+	path := strings.Replace(rep.path, ".x", "_decompressed.pmx", 1)
+	NewPmxRepository().Save(path, model, false)
 
 	return nil
 }
@@ -1126,7 +1131,7 @@ func (rep *XRepository) parseStringList(model *pmx.PmxModel, objectName string) 
 
 	switch objectName {
 	case "TextureFilename":
-		for i, texName := range texts {
+		for _, texName := range texts {
 			var tex *pmx.Texture
 			model.Textures.ForEach(func(i int, t *pmx.Texture) {
 				if t.Name() == texName {
@@ -1139,15 +1144,12 @@ func (rep *XRepository) parseStringList(model *pmx.PmxModel, objectName string) 
 				model.Textures.Append(tex)
 			}
 
-			m, err := model.Materials.Get(rep.materialTokenCount - 1)
-			if err == nil {
-				switch i {
-				case 0:
-					m.TextureIndex = tex.Index()
-				case 1:
+			mlog.D("Parsed string list: [%s] matIdx=%d %v\n", objectName, rep.materialTokenCount, texName)
+			if m, err := model.Materials.Get(rep.materialTokenCount - 1); err == nil {
+				if strings.LastIndex(texName, ".sph") > 0 {
 					m.SphereTextureIndex = tex.Index()
-				case 2:
-					m.ToonTextureIndex = tex.Index()
+				} else {
+					m.TextureIndex = tex.Index()
 				}
 
 				if m.TextureIndex >= 0 && m.SphereTextureIndex < 0 {

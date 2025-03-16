@@ -76,6 +76,12 @@ func (rep *XRepository) Load(path string) (core.IHashModel, error) {
 	mlog.IL("%s", mi18n.T("読み込み開始", map[string]interface{}{"Type": "Pmx", "Path": path}))
 	defer mlog.I("%s", mi18n.T("読み込み終了", map[string]interface{}{"Type": "X"}))
 
+	// 変数を初期化
+	rep.pos = 0
+	rep.buffers = nil
+	rep.floatSize = 0
+	rep.materialTokenCount = 0
+
 	// パスを設定
 	rep.path = path
 
