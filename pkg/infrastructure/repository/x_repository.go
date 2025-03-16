@@ -36,8 +36,9 @@ type XRepository struct {
 	tokens []textToken // テキスト形式のトークン
 	pos    int
 
-	buffers   []byte // バイナリ形式のバッファ
-	floatSize int    // バイナリ形式の浮動小数点数のサイズ
+	buffers            []byte // バイナリ形式のバッファ
+	floatSize          int    // バイナリ形式の浮動小数点数のサイズ
+	materialTokenCount int    // マテリアルトークンの出現数
 }
 
 func NewXRepository() *XRepository {
@@ -1043,7 +1044,7 @@ func (rep *XRepository) parseTextMesh(model *pmx.PmxModel) error {
 	}
 	facesList := make([][]*pmx.Face, 0, nFaces)
 	faceTotalCount := 0
-	for i := 0; i < nFaces; i++ {
+	for range nFaces {
 		fs, err := rep.parseMeshFace()
 		if err != nil {
 			return err

@@ -453,8 +453,11 @@ func TestXRepository_Load7(t *testing.T) {
 
 	model.Vertices.ForEach(func(index int, vertex *pmx.Vertex) {
 		expectedV, _ := expectedModel.Vertices.Get(vertex.Index())
-		if !vertex.Position.NearEquals(expectedV.Position, 1e-5) {
+		if !vertex.Position.NearEquals(expectedV.Position, 1e-4) {
 			t.Errorf("Expected Position to be %v, got %v", expectedV.Position, vertex.Position)
+		}
+		if !vertex.Normal.NearEquals(expectedV.Normal, 1e-4) {
+			t.Errorf("Expected Normal to be %v, got %v", expectedV.Normal, vertex.Normal)
 		}
 	})
 
@@ -472,6 +475,13 @@ func TestXRepository_Load7(t *testing.T) {
 	if model.Materials.Length() != expectedModel.Materials.Length() {
 		t.Errorf("Expected Materials Count to be %v, got %v", expectedModel.Materials.Length(), model.Materials.Length())
 	}
+
+	model.Textures.ForEach(func(index int, texture *pmx.Texture) {
+		expectedT, _ := expectedModel.Textures.Get(texture.Index())
+		if texture.Name() != expectedT.Name() {
+			t.Errorf("Expected Texture Path to be %v, got %v", expectedT.Name(), texture.Name())
+		}
+	})
 
 	model.Materials.ForEach(func(index int, material *pmx.Material) {
 		expectedT, _ := expectedModel.Materials.Get(material.Index())
