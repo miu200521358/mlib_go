@@ -86,7 +86,10 @@ func (rep *CsvRepository) Load(path string) (core.IHashModel, error) {
 		return nil, err
 	}
 
-	return mcsv.NewCsvModel(records), nil
+	csvData := mcsv.NewCsvModel(records)
+	csvData.SetPath(path)
+
+	return csvData, nil
 }
 
 func (rep *CsvRepository) CanLoad(path string) (bool, error) {
