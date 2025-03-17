@@ -72,6 +72,7 @@ func main() {
 			}
 
 			widgets.SetWindow(controlWindow)
+			widgets.OnLoaded()
 
 			controlWindow.Run()
 		})

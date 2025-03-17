@@ -9,7 +9,8 @@ type IMWidget interface {
 }
 
 type MWidgets struct {
-	Widgets []IMWidget
+	Widgets      []IMWidget
+	onLoadedFunc func()
 }
 
 func (mw *MWidgets) SetWindow(window *ControlWindow) {
@@ -22,4 +23,14 @@ func (mw *MWidgets) EnabledInPlaying(enable bool) {
 	for _, w := range mw.Widgets {
 		w.EnabledInPlaying(enable)
 	}
+}
+
+func (mw *MWidgets) OnLoaded() {
+	if mw.onLoadedFunc != nil {
+		mw.onLoadedFunc()
+	}
+}
+
+func (mw *MWidgets) SetOnLoaded(f func()) {
+	mw.onLoadedFunc = f
 }

@@ -467,3 +467,8 @@ func (fp *FilePicker) EnabledInPlaying(enable bool) {
 		fp.historyPushButton.SetEnabled(enable)
 	}
 }
+
+func (fp *FilePicker) SetPath(path string) {
+	fp.pathEdit.SetText(path)
+	fp.onChanged(path)
+}
