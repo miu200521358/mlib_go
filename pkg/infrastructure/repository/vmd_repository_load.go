@@ -188,7 +188,7 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 	}
 
 	bfValues := make([]float64, 7)
-	for i := 0; i < int(totalCount); i++ {
+	for i := range int(totalCount) {
 		if i%10000 == 0 && i > 0 {
 			mlog.I("%s", mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("ボーン"), "Index": i, "Total": totalCount}))
 		}
@@ -247,7 +247,7 @@ func (rep *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
 		return err
 	}
 
-	for i := 0; i < int(totalCount); i++ {
+	for i := range int(totalCount) {
 		if i%10000 == 0 && i > 0 {
 			mlog.I("%s", mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("モーフ"), "Index": i, "Total": totalCount}))
 		}
@@ -291,7 +291,7 @@ func (rep *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 		return err
 	}
 
-	for i := 0; i < int(totalCount); i++ {
+	for i := range int(totalCount) {
 		cf := vmd.NewCameraFrame(0)
 		cf.Registered = true
 		cf.Read = true
@@ -362,7 +362,7 @@ func (rep *VmdRepository) loadLights(motion *vmd.VmdMotion) error {
 		return err
 	}
 
-	for i := 0; i < int(totalCount); i++ {
+	for i := range int(totalCount) {
 		lf := vmd.NewLightFrame(0)
 		lf.Registered = true
 		lf.Read = true
@@ -402,7 +402,7 @@ func (rep *VmdRepository) loadShadows(motion *vmd.VmdMotion) error {
 		return err
 	}
 
-	for i := 0; i < int(totalCount); i++ {
+	for i := range int(totalCount) {
 		sf := vmd.NewShadowFrame(0)
 		sf.Registered = true
 		sf.Read = true
@@ -443,7 +443,7 @@ func (rep *VmdRepository) loadIks(motion *vmd.VmdMotion) error {
 		return err
 	}
 
-	for i := 0; i < int(totalCount); i++ {
+	for i := range int(totalCount) {
 		ikf := vmd.NewIkFrame(0)
 		ikf.Registered = true
 		ikf.Read = true

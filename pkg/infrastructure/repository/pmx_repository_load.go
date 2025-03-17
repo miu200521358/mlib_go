@@ -272,8 +272,8 @@ func (rep *PmxRepository) loadVertices(model *pmx.PmxModel) error {
 	extendedUvs := make([]float64, model.ExtendedUVCount*4)
 	bdef4Weights := make([]float64, 4)
 	sdefWeights := make([]float64, 10)
-	for i := 0; i < totalVertexCount; i++ {
-		if i%10000 == 0 && i > 0 {
+	for i := range totalVertexCount {
+		if i%20000 == 0 && i > 0 {
 			mlog.I("%s", mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("頂点"), "Index": i, "Total": totalVertexCount}))
 		}
 
@@ -427,7 +427,7 @@ func (rep *PmxRepository) loadFaces(model *pmx.PmxModel) error {
 	}
 
 	for i := 0; i < totalFaceCount; i += 3 {
-		if i%10000 == 0 && i > 0 {
+		if i%60000 == 0 && i > 0 {
 			mlog.I("%s", mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("面"), "Index": i, "Total": totalFaceCount}))
 		}
 
@@ -458,7 +458,7 @@ func (rep *PmxRepository) loadTextures(model *pmx.PmxModel) error {
 
 	textures := pmx.NewTextures(totalTextureCount)
 
-	for i := 0; i < totalTextureCount; i++ {
+	for i := range totalTextureCount {
 		// 4 + n : TextBuf	| テクスチャパス
 		tex := &pmx.Texture{}
 		tex.SetIndex(i)
@@ -484,7 +484,7 @@ func (rep *PmxRepository) loadMaterials(model *pmx.PmxModel) error {
 
 	materialValues := make([]float64, 11)
 	edgeValues := make([]float64, 5)
-	for i := 0; i < totalMaterialCount; i++ {
+	for i := range totalMaterialCount {
 		material := &pmx.Material{}
 		material.SetIndex(i)
 		// 4 + n : TextBuf	| 材質名
@@ -594,7 +594,7 @@ func (rep *PmxRepository) loadBones(model *pmx.PmxModel) error {
 
 	bones := pmx.NewBones(totalBoneCount)
 
-	for i := 0; i < totalBoneCount; i++ {
+	for i := range totalBoneCount {
 		bone := &pmx.Bone{}
 		bone.SetIndex(i)
 		// 4 + n : TextBuf	| ボーン名
@@ -774,7 +774,7 @@ func (rep *PmxRepository) loadMorphs(model *pmx.PmxModel) error {
 
 	boneOffsetValues := make([]float64, 7)
 	materialOffsetValues := make([]float64, 28)
-	for i := 0; i < totalMorphCount; i++ {
+	for i := range totalMorphCount {
 		morph := &pmx.Morph{}
 		morph.SetIndex(i)
 		// 4 + n : TextBuf	| モーフ名
@@ -912,7 +912,7 @@ func (rep *PmxRepository) loadDisplaySlots(model *pmx.PmxModel) error {
 
 	displaySlots := pmx.NewDisplaySlots(totalDisplaySlotCount)
 
-	for i := 0; i < totalDisplaySlotCount; i++ {
+	for i := range totalDisplaySlotCount {
 		displaySlot := &pmx.DisplaySlot{
 			References: make([]*pmx.Reference, 0),
 		}
@@ -982,7 +982,7 @@ func (rep *PmxRepository) loadRigidBodies(model *pmx.PmxModel) error {
 	rigidBodies := pmx.NewRigidBodies(totalRigidBodyCount)
 
 	rigidBodyValues := make([]float64, 14)
-	for i := 0; i < totalRigidBodyCount; i++ {
+	for i := range totalRigidBodyCount {
 		rigidBody := &pmx.RigidBody{
 			RigidBodyParam: pmx.NewRigidBodyParam(),
 		}
@@ -1065,7 +1065,7 @@ func (rep *PmxRepository) loadJoints(model *pmx.PmxModel) error {
 	joints := pmx.NewJoints(totalJointCount)
 
 	jointValues := make([]float64, 24)
-	for i := 0; i < totalJointCount; i++ {
+	for i := range totalJointCount {
 		joint := &pmx.Joint{
 			JointParam: &pmx.JointParam{},
 		}
