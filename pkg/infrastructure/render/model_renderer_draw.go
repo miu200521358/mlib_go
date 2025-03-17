@@ -96,7 +96,7 @@ func (mr *ModelRenderer) drawNormal(windowIndex int, shader rendering.IShader, p
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
 	defer unbindBoneMatrixes()
 
-	normalColor := mgl32.Vec4{0.3, 0.3, 0.7, 0.5}
+	normalColor := mgl32.Vec4{0.3, 0.3, 0.6, 0.4}
 	colorUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderColor))
 	gl.Uniform4fv(colorUniform, 1, &normalColor[0])
 
