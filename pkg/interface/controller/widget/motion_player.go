@@ -79,30 +79,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 				MaxSize:  declarative.Size{Width: 90, Height: 20},
 				OnClicked: func() {
 					playing := !mp.window.Playing()
-					mp.window.SetPlaying(playing)
-					mp.window.EnabledInPlaying(!playing)
-
-					// 再生中のみ、Ticker で定期的にフレーム情報を監視・更新する
-					if playing {
-						go func() {
-							ticker := time.NewTicker(time.Second / 60)
-							defer ticker.Stop()
-
-							var prevFrame float32
-							for range ticker.C {
-								// 再生が停止されたらループを抜ける
-								if !mp.window.Playing() {
-									break
-								}
-								currentFrame := mp.window.Frame()
-								// 前回のフレームと異なる場合に更新する
-								if currentFrame != prevFrame {
-									mp.ChangeValue(currentFrame)
-									prevFrame = currentFrame
-								}
-							}
-						}()
-					}
+					mp.SetPlaying(playing)
 
 					if mp.onTriggerPlay != nil {
 						mp.onTriggerPlay(playing)
@@ -141,4 +118,31 @@ func (mp *MotionPlayer) EnabledInPlaying(enable bool) {
 	mp.frameSlider.SetEnabled(enable)
 	// 再生ボタンは常に有効
 	mp.playButton.SetEnabled(true)
+}
+
+func (mp *MotionPlayer) SetPlaying(playing bool) {
+	mp.window.SetPlaying(playing)
+	mp.window.EnabledInPlaying(!playing)
+
+	// 再生中のみ、Ticker で定期的にフレーム情報を監視・更新する
+	if playing {
+		go func() {
+			ticker := time.NewTicker(time.Second / 60)
+			defer ticker.Stop()
+
+			var prevFrame float32
+			for range ticker.C {
+				// 再生が停止されたらループを抜ける
+				if !mp.window.Playing() {
+					break
+				}
+				currentFrame := mp.window.Frame()
+				// 前回のフレームと異なる場合に更新する
+				if currentFrame != prevFrame {
+					mp.ChangeValue(currentFrame)
+					prevFrame = currentFrame
+				}
+			}
+		}()
+	}
 }
