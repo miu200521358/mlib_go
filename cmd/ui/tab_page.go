@@ -12,7 +12,7 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 )
 
-func NewTabPages(mWidgets *controller.MWidgets) []declarative.TabPage {
+func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 	var fileTab *walk.TabPage
 
 	player := widget.NewMotionPlayer()
@@ -76,30 +76,28 @@ func NewTabPages(mWidgets *controller.MWidgets) []declarative.TabPage {
 	mWidgets.Widgets = append(mWidgets.Widgets, player, pmxLoad11Picker, vmdLoader11Picker,
 		pmxLoad21Picker, vmdLoader21Picker)
 
-	return []declarative.TabPage{
-		{
-			Title:    "ファイル",
-			AssignTo: &fileTab,
-			Layout:   declarative.VBox{},
-			Background: declarative.SystemColorBrush{
-				Color: walk.SysColorInactiveCaption,
-			},
-			Children: []declarative.Widget{
-				declarative.Composite{
-					Layout: declarative.VBox{},
-					Children: []declarative.Widget{
-						declarative.TextLabel{
-							Text: "表示用モデル設定説明",
-						},
-						pmxLoad11Picker.Widgets(),
-						vmdLoader11Picker.Widgets(),
-						declarative.VSeparator{},
-						pmxLoad21Picker.Widgets(),
-						vmdLoader21Picker.Widgets(),
-						declarative.VSeparator{},
-						player.Widgets(),
-						declarative.VSpacer{},
+	return declarative.TabPage{
+		Title:    "ファイル",
+		AssignTo: &fileTab,
+		Layout:   declarative.VBox{},
+		Background: declarative.SystemColorBrush{
+			Color: walk.SysColorInactiveCaption,
+		},
+		Children: []declarative.Widget{
+			declarative.Composite{
+				Layout: declarative.VBox{},
+				Children: []declarative.Widget{
+					declarative.TextLabel{
+						Text: "表示用モデル設定説明",
 					},
+					pmxLoad11Picker.Widgets(),
+					vmdLoader11Picker.Widgets(),
+					declarative.VSeparator{},
+					pmxLoad21Picker.Widgets(),
+					vmdLoader21Picker.Widgets(),
+					declarative.VSeparator{},
+					player.Widgets(),
+					declarative.VSpacer{},
 				},
 			},
 		},
