@@ -65,13 +65,6 @@ func (rep *XRepository) decompressBinaryXFile() ([]byte, error) {
 	return decompressedBuffer, nil
 }
 
-// ヘッダーサイズ定数
-const (
-	headerSize      = 16
-	sizeFieldSize   = 4
-	totalHeaderSize = headerSize + sizeFieldSize // 20バイト
-)
-
 // decompressMSZipData は、MSZIP形式の圧縮ブロックを解凍します
 func (rep *XRepository) decompressMSZipData(
 	compressedBuffer []byte,
@@ -108,25 +101,27 @@ func (rep *XRepository) decompressMSZipData(
 			inputOffset, compressedLen)
 	}
 
-	// ブロック単位のループ処理
+	// ブロック単位のループ処理の効率化
 	blockIndex := 0
 	prevBytesDecompressed := uint32(headerSize)
+
+	// ループ内での頻繁なアクセス変数のキャッシュ
+	var blockUncompressedSize, blockCompressedSize uint16
+
 	for inputOffset < compressedLen && uncompressedSum < finalSize {
 		blockIndex++
 
-		// ブロック非圧縮サイズの読み取り
-		if inputOffset+2 > compressedLen {
-			return nil, fmt.Errorf("ブロック#%d: 非圧縮サイズを読み取るのに十分なデータがありません", blockIndex)
+		// 最低必要なデータサイズのチェックを一度にまとめる
+		remainingBytes := compressedLen - inputOffset
+		if remainingBytes < 4 { // 4バイト = 非圧縮サイズ(2) + 圧縮サイズ(2)
+			return nil, fmt.Errorf("ブロック#%d: サイズフィールドを読み取るのに十分なデータがありません (残り=%d)",
+				blockIndex, remainingBytes)
 		}
-		blockUncompressedSize := binary.LittleEndian.Uint16(compressedBuffer[inputOffset : inputOffset+2])
-		inputOffset += 2
 
-		// ブロック圧縮サイズの読み取り
-		if inputOffset+2 > compressedLen {
-			return nil, fmt.Errorf("ブロック#%d: 圧縮サイズを読み取るのに十分なデータがありません", blockIndex)
-		}
-		blockCompressedSize := binary.LittleEndian.Uint16(compressedBuffer[inputOffset : inputOffset+2])
-		inputOffset += 2
+		// ブロックサイズの読み取り（オフセット計算を最小化）
+		blockUncompressedSize = binary.LittleEndian.Uint16(compressedBuffer[inputOffset:])
+		blockCompressedSize = binary.LittleEndian.Uint16(compressedBuffer[inputOffset+2:])
+		inputOffset += 4
 
 		// ブロックデータ範囲の検証
 		if inputOffset+int(blockCompressedSize) > compressedLen {
@@ -134,10 +129,11 @@ func (rep *XRepository) decompressMSZipData(
 				blockIndex, blockCompressedSize, compressedLen-inputOffset)
 		}
 
-		// ブロックデータの取得
+		// ブロックデータの取得（スライスの再割り当てなし）
 		blockData := compressedBuffer[inputOffset : inputOffset+int(blockCompressedSize)]
 
 		// Windowsの解凍API呼び出し
+		// ポインタ操作の効率化（スライスの基底配列のアドレスを直接使用）
 		success, err := win.Decompress(
 			decompressorHandle,
 			&blockData[0],
@@ -222,12 +218,10 @@ func (rep *XRepository) decompressRFC1951Block(compressed []byte, decompressed [
 }
 
 // processDynamicHuffmanBlock は、動的ハフマン圧縮ブロックの復号処理を行います。
-// まず、CreateHuffmanTreeTable によりカスタムハフマンツリー（リテラル／長さツリーおよび距離ツリー）を構築し、
-// その後、DecodeWithHuffmanTree によりブロックを復号します。
-// 最後に、DisposeCustomHuffmanTree で構築したツリーを解放します。
-// 復号処理が正常に完了した場合は true を、エラーがあれば false を返します。
+// まず、BuildDynamicHuffmanTrees によりカスタムハフマンツリー（リテラル／長さツリーおよび距離ツリー）を構築し、
+// 次に DecodeWithHuffmanTree を用いて復号処理を行います。
 func (rep *XRepository) processDynamicHuffmanBlock(ctx *deflateState) bool {
-	// カスタムハフマンツリーの構築
+	// 動的ハフマンツリーの構築
 	if !rep.buildDynamicHuffmanTrees(ctx) {
 		return false
 	}
@@ -242,6 +236,13 @@ func (rep *XRepository) processDynamicHuffmanBlock(ctx *deflateState) bool {
 	rep.clearDynamicHuffmanTrees(ctx)
 	return true
 }
+
+// ヘッダーサイズ定数
+const (
+	headerSize      = 16
+	sizeFieldSize   = 4
+	totalHeaderSize = headerSize + sizeFieldSize // 20バイト
+)
 
 // buildDynamicHuffmanTrees は、動的ハフマン圧縮ブロックにおける
 // リテラル／長さツリーおよび距離ツリーを構築します。
