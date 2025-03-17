@@ -133,7 +133,6 @@ func (rep *XRepository) decompressMSZipData(
 		blockData := compressedBuffer[inputOffset : inputOffset+int(blockCompressedSize)]
 
 		// Windowsの解凍API呼び出し
-		// ポインタ操作の効率化（スライスの基底配列のアドレスを直接使用）
 		success, err := win.Decompress(
 			decompressorHandle,
 			&blockData[0],
@@ -257,11 +256,10 @@ func (rep *XRepository) buildDynamicHuffmanTrees(state *deflateState) bool {
 	numDistanceCodes := uint16(((headerBits >> 5) & 0x1F)) + 1   // 次の5ビット
 	numCodeLengthCode := uint16(((headerBits >> 10) & 0x0F)) + 4 // 上位4ビット
 
-	// 2. コード長のコード値の配列 - Goではゼロ値で初期化されるため、明示的な初期化は不要
+	// 2. コード長のコード値の配列
 	var codeLengthsOfTheCodeLength [20]byte
 
 	// numCodeLengthCode 個分のコード長を、その順序に従って取得
-	// ビット読み込みをバッチ処理して効率化
 	for i := 0; i < int(numCodeLengthCode); {
 		// 可能な限り一度に3ビット×3コード（9ビット）を読み取る
 		if i+3 <= int(numCodeLengthCode) {
@@ -452,7 +450,7 @@ func (rep *XRepository) buildDynamicHuffmanTrees(state *deflateState) bool {
 		}
 	}
 
-	// CodeLengthsTree のリソース解放（Go では不要なので、参照をクリア）
+	// CodeLengthsTree のリソース解放
 	codeLengthsTree.codes = nil
 
 	if !bSuccess {
@@ -574,21 +572,6 @@ func (rep *XRepository) decodeWithHuffmanTree(state *deflateState, literalLength
 }
 
 // decodeLength は、baseCode（リテラル/長さコード）から実際の長さを復号します。
-// C++実装:
-//
-//	if (baseCode <= 264)
-//	   return baseCode - 257 + 3;
-//	if (baseCode == 285)
-//	   return 258;
-//	if (baseCode > 285)
-//	   return 0xffff;  // error
-//	w = baseCode - 265;
-//	x = w >> 2;
-//	numExtraBits = x + 1;
-//	y = (4 << numExtraBits) + 3;
-//	y += (w & 3) << numExtraBits;
-//	extra = GetBits(state, numExtraBits);
-//	return y + extra;
 func (rep *XRepository) decodeLength(state *deflateState, baseCode uint16) int {
 	if baseCode <= 264 {
 		val := int(baseCode) - 257 + 3
@@ -614,19 +597,6 @@ func (rep *XRepository) decodeLength(state *deflateState, baseCode uint16) int {
 }
 
 // decodeDistance は、baseCode（距離コード）から実際の距離を復号します。
-// C++実装:
-//
-//	if (baseCode <= 3)
-//	   return baseCode + 1;
-//	if (baseCode > 29)
-//	   return 0;  // error
-//	w = baseCode - 4;
-//	x = w >> 1;
-//	numExtraBits = x + 1;
-//	y = (2 << numExtraBits) + 1;
-//	y += (w & 1) << numExtraBits;
-//	extra = GetBits(state, numExtraBits);
-//	return y + extra;
 func (rep *XRepository) decodeDistance(state *deflateState, baseCode uint16) int {
 	if baseCode <= 3 {
 		val := int(baseCode) + 1
