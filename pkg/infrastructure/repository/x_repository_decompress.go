@@ -151,7 +151,7 @@ func (rep *XRepository) decompressMSZipXFile(
 		}
 
 		// RFC1951形式のブロック解凍
-		bytesDecompressed, err := DecompressRFC1951Block(blockData[2:], newBuffer, prevBytesDecompressed)
+		bytesDecompressed, err := rep.decompressRFC1951Block(blockData[2:], newBuffer, prevBytesDecompressed)
 		if err != nil {
 			return nil, fmt.Errorf("RFC1951ブロック#%d の解凍に失敗: 非圧縮サイズ=%d, 圧縮サイズ=%d, 解凍バイト数=%d, エラー=%v",
 				blockIndex, blockUncompressedSize, blockCompressedSize, bytesDecompressed, err)
@@ -167,11 +167,11 @@ func (rep *XRepository) decompressMSZipXFile(
 	return newBuffer, nil
 }
 
-// DecompressRFC1951Block は、圧縮データ compressed を元に展開先のバッファ decompressed に展開を行い、
+// decompressRFC1951Block は、圧縮データ compressed を元に展開先のバッファ decompressed に展開を行い、
 // 展開したバイト数を返します。展開中、ブロックごとに最終ブロックフラグおよびブロック種別（非圧縮／固定ハフマン／動的ハフマン）に基づいて処理を行います。
-func DecompressRFC1951Block(compressed []byte, decompressed []byte, prevBytesDecompressed uint32) (uint32, error) {
-	var ctx DecompressionContext
-	ClearContext(&ctx)
+func (rep *XRepository) decompressRFC1951Block(compressed []byte, decompressed []byte, prevBytesDecompressed uint32) (uint32, error) {
+	var ctx decompressionContext
+	rep.clearContext(&ctx)
 	// 前回の展開バイト数を設定
 	ctx.BytesDecompressed = uint32(prevBytesDecompressed)
 
@@ -183,33 +183,33 @@ func DecompressRFC1951Block(compressed []byte, decompressed []byte, prevBytesDec
 	// 通常、バイト数 × 8 で全ビット数となる
 	ctx.SizeInBits = int64(len(compressed)) * 8
 
-	// 固定ハフマンツリーのセットアップ
-	SetupFixedHuffmanTree(&ctx)
+	// 事前に初期化された固定ハフマンツリーを使用
+	ctx.Fixed = globalFixedHuffmanTree
 
 	final := false
 	// 圧縮データ全体を処理するループ
 	for !final && ctx.BitsRead < ctx.SizeInBits {
 		// 最初の1ビットが最終ブロックフラグとなる
-		wTmp := getBits(&ctx, 1)
+		wTmp := rep.getBits(&ctx, 1)
 		if wTmp == 1 {
 			final = true
 		}
 		// 次の2ビットでブロックの種類を取得
-		blockType := getBits(&ctx, 2)
+		blockType := rep.getBits(&ctx, 2)
 		switch blockType {
 		case 0:
 			// 非圧縮ブロック
-			if !ProcessUncompressed(&ctx) {
+			if !rep.processUncompressed(&ctx) {
 				return 0, fmt.Errorf("ProcessUncompressed に失敗")
 			}
 		case 1:
 			// 固定ハフマン圧縮ブロック
-			if !ProcessHuffmanFixed(&ctx) {
+			if !rep.processHuffmanFixed(&ctx) {
 				return 0, fmt.Errorf("ProcessHuffmanFixed に失敗")
 			}
 		case 2:
 			// 動的ハフマン圧縮ブロック
-			if !ProcessHuffmanCustom(&ctx) {
+			if !rep.processHuffmanCustom(&ctx) {
 				return 0, fmt.Errorf("ProcessHuffmanCustom に失敗")
 			}
 		default:
@@ -220,36 +220,36 @@ func DecompressRFC1951Block(compressed []byte, decompressed []byte, prevBytesDec
 	return ctx.BytesDecompressed, nil
 }
 
-// ProcessHuffmanCustom は、動的ハフマン圧縮ブロックの復号処理を行います。
+// processHuffmanCustom は、動的ハフマン圧縮ブロックの復号処理を行います。
 // まず、CreateHuffmanTreeTable によりカスタムハフマンツリー（リテラル／長さツリーおよび距離ツリー）を構築し、
 // その後、DecodeWithHuffmanTree によりブロックを復号します。
 // 最後に、DisposeCustomHuffmanTree で構築したツリーを解放します。
 // 復号処理が正常に完了した場合は true を、エラーがあれば false を返します。
-func ProcessHuffmanCustom(ctx *DecompressionContext) bool {
+func (rep *XRepository) processHuffmanCustom(ctx *decompressionContext) bool {
 	// カスタムハフマンツリーの構築
-	if !CreateHuffmanTreeTable(ctx) {
+	if !rep.createHuffmanTreeTable(ctx) {
 		return false
 	}
 
 	// ハフマンツリーを用いて復号処理
-	if !DecodeWithHuffmanTree(ctx, &ctx.CustomLiteralLength, &ctx.CustomDistance) {
-		DisposeCustomHuffmanTree(ctx)
+	if !rep.decodeWithHuffmanTree(ctx, &ctx.CustomLiteralLength, &ctx.CustomDistance) {
+		rep.disposeCustomHuffmanTree(ctx)
 		return false
 	}
 
 	// 後片付け
-	DisposeCustomHuffmanTree(ctx)
+	rep.disposeCustomHuffmanTree(ctx)
 	return true
 }
 
-// CreateHuffmanTreeTable は、動的ハフマン圧縮ブロックにおける
+// createHuffmanTreeTable は、動的ハフマン圧縮ブロックにおける
 // リテラル／長さツリーおよび距離ツリーを構築します。
 // 正常に構築できた場合は true を、エラーがあれば false を返します。
-func CreateHuffmanTreeTable(ctx *DecompressionContext) bool {
+func (rep *XRepository) createHuffmanTreeTable(ctx *decompressionContext) bool {
 	// 1. パラメータ読み出し
-	numLiteralLengthCodes := uint16(getBits(ctx, 5)) + 257
-	numDistanceCodes := uint16(getBits(ctx, 5)) + 1
-	numCodeLengthCode := uint16(getBits(ctx, 4)) + 4
+	numLiteralLengthCodes := uint16(rep.getBits(ctx, 5)) + 257
+	numDistanceCodes := uint16(rep.getBits(ctx, 5)) + 1
+	numCodeLengthCode := uint16(rep.getBits(ctx, 4)) + 4
 
 	// 2. コード長のコード値の配列を初期化（長さ20）
 	var codeLengthsOfTheCodeLength [20]byte
@@ -259,14 +259,14 @@ func CreateHuffmanTreeTable(ctx *DecompressionContext) bool {
 	itsOrder := []int{16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15}
 	// numCodeLengthCode 個分のコード長を、その順序に従って取得
 	for i := 0; i < int(numCodeLengthCode); i++ {
-		codeLengthsOfTheCodeLength[itsOrder[i]] = byte(getBits(ctx, 3))
+		codeLengthsOfTheCodeLength[itsOrder[i]] = byte(rep.getBits(ctx, 3))
 	}
 
 	// 3. CodeLengthsTree の作成
-	var codeLengthsTree HuffmanTree
+	var codeLengthsTree huffmanTree
 	bitLengths := make([]int, 20)
 	nextCodes := make([]int, 20)
-	node := make([]HuffmanCode, 19)
+	node := make([]huffmanCode, 19)
 	maxBits := -1
 	// node 配列（サイズ19）に、各コード長を設定し、bitLengths 配列でカウント
 	for i := 0; i < 19; i++ {
@@ -294,12 +294,12 @@ func CreateHuffmanTreeTable(ctx *DecompressionContext) bool {
 		}
 	}
 	// CodeLengthsTree の構築
-	if !SetupHuffmanTree(&codeLengthsTree, node) {
+	if !rep.setupHuffmanTree(&codeLengthsTree, node) {
 		return false
 	}
 
 	// 4. リテラル／長さツリーの作成
-	literalLengthTree := make([]HuffmanCode, numLiteralLengthCodes)
+	literalLengthTree := make([]huffmanCode, numLiteralLengthCodes)
 	var prev uint16 = 0xffff
 	var repeat uint16 = 0
 	n := 0
@@ -315,16 +315,16 @@ func CreateHuffmanTreeTable(ctx *DecompressionContext) bool {
 			repeat--
 		} else {
 			// GetACodeWithHuffmanTree を用いてコード長を取得
-			lenVal := int(GetACodeWithHuffmanTree(ctx, &codeLengthsTree))
+			lenVal := int(rep.getACodeWithHuffmanTree(ctx, &codeLengthsTree))
 			switch lenVal {
 			case 16: // 前回のコード長を 3～6 回コピー
-				repeat = uint16(getBits(ctx, 2)) + 3
+				repeat = uint16(rep.getBits(ctx, 2)) + 3
 			case 17: // 0 を 3～10 回繰り返す
 				prev = 0
-				repeat = uint16(getBits(ctx, 3)) + 3
+				repeat = uint16(rep.getBits(ctx, 3)) + 3
 			case 18: // 0 を 11～138 回繰り返す
 				prev = 0
-				repeat = uint16(getBits(ctx, 7)) + 11
+				repeat = uint16(rep.getBits(ctx, 7)) + 11
 			default:
 				if repeat > 0 {
 					return false
@@ -362,14 +362,14 @@ func CreateHuffmanTreeTable(ctx *DecompressionContext) bool {
 			nextCodes[l]++
 		}
 	}
-	bSuccess := SetupHuffmanTree(&ctx.CustomLiteralLength, literalLengthTree)
+	bSuccess := rep.setupHuffmanTree(&ctx.CustomLiteralLength, literalLengthTree)
 	if !bSuccess {
 		return false
 	}
 
 	// 5. 距離ツリーの作成
 	if bSuccess {
-		distanceTree := make([]HuffmanCode, numDistanceCodes)
+		distanceTree := make([]huffmanCode, numDistanceCodes)
 		maxBits = -1
 		prev = 0xffff
 		repeat = 0
@@ -381,16 +381,16 @@ func CreateHuffmanTreeTable(ctx *DecompressionContext) bool {
 				n++
 				repeat--
 			} else {
-				lenVal := int(GetACodeWithHuffmanTree(ctx, &codeLengthsTree))
+				lenVal := int(rep.getACodeWithHuffmanTree(ctx, &codeLengthsTree))
 				switch lenVal {
 				case 16:
-					repeat = uint16(getBits(ctx, 2)) + 3
+					repeat = uint16(rep.getBits(ctx, 2)) + 3
 				case 17:
 					prev = 0
-					repeat = uint16(getBits(ctx, 3)) + 3
+					repeat = uint16(rep.getBits(ctx, 3)) + 3
 				case 18:
 					prev = 0
-					repeat = uint16(getBits(ctx, 7)) + 11
+					repeat = uint16(rep.getBits(ctx, 7)) + 11
 				default:
 					if repeat > 0 {
 						return false
@@ -426,7 +426,7 @@ func CreateHuffmanTreeTable(ctx *DecompressionContext) bool {
 				nextCodes[l]++
 			}
 		}
-		bSuccess = SetupHuffmanTree(&ctx.CustomDistance, distanceTree)
+		bSuccess = rep.setupHuffmanTree(&ctx.CustomDistance, distanceTree)
 		if !bSuccess {
 		}
 	}
@@ -435,15 +435,15 @@ func CreateHuffmanTreeTable(ctx *DecompressionContext) bool {
 	codeLengthsTree.Codes = nil
 
 	if !bSuccess {
-		DisposeCustomHuffmanTree(ctx)
+		rep.disposeCustomHuffmanTree(ctx)
 	}
 	return bSuccess
 }
 
-// DisposeCustomHuffmanTree は、DecompressionContext 内のカスタムハフマンツリー
+// disposeCustomHuffmanTree は、DecompressionContext 内のカスタムハフマンツリー
 // （CustomDistance と CustomLiteralLength）のリソースを解放（nil に設定）し、
 // フィールドの値をリセットします。
-func DisposeCustomHuffmanTree(ctx *DecompressionContext) {
+func (rep *XRepository) disposeCustomHuffmanTree(ctx *decompressionContext) {
 	// CustomDistance のリソース解放
 	ctx.CustomDistance.Codes = nil
 	ctx.CustomDistance.NumMaxBits = 0
@@ -455,26 +455,27 @@ func DisposeCustomHuffmanTree(ctx *DecompressionContext) {
 	ctx.CustomLiteralLength.NumCodes = 0
 }
 
-// ProcessHuffmanFixed は、固定ハフマンブロックの復号処理を行います。
+// processHuffmanFixed は、固定ハフマンブロックの復号処理を行います。
 // 固定ハフマンツリー (ctx.Fixed) を用いて、DecodeWithHuffmanTree を呼び出し、
 // 復号処理の成否を返します。
-func ProcessHuffmanFixed(ctx *DecompressionContext) bool {
-	result := DecodeWithHuffmanTree(ctx, &ctx.Fixed, nil)
+func (rep *XRepository) processHuffmanFixed(ctx *decompressionContext) bool {
+	// 固定ハフマンツリーはすでに設定されているため、初期化不要
+	result := rep.decodeWithHuffmanTree(ctx, &ctx.Fixed, nil)
 	return result
 }
 
-// ProcessUncompressed は、非圧縮ブロックのデータを処理し、
+// processUncompressed は、非圧縮ブロックのデータを処理し、
 // チェックサム検証後、サイズ分のバイトを出力バッファへコピーします。
 // 正常終了の場合は true を、エラー時は false を返します。
-func ProcessUncompressed(ctx *DecompressionContext) bool {
+func (rep *XRepository) processUncompressed(ctx *decompressionContext) bool {
 	// サイズ（16bit）を読み出す
-	sizeLow := getBits(ctx, 8) & 0xff
-	sizeHigh := getBits(ctx, 8) & 0xff
+	sizeLow := rep.getBits(ctx, 8) & 0xff
+	sizeHigh := rep.getBits(ctx, 8) & 0xff
 	size := uint16(sizeLow) | (uint16(sizeHigh) << 8)
 
 	// チェックサム用の値（16bit）を読み出し、反転してサイズと一致するか検証
-	tmpLow := getBits(ctx, 8) & 0xff
-	tmpHigh := getBits(ctx, 8) & 0xff
+	tmpLow := rep.getBits(ctx, 8) & 0xff
+	tmpHigh := rep.getBits(ctx, 8) & 0xff
 	wTmp := uint16(tmpLow) | (uint16(tmpHigh) << 8)
 
 	// ビット反転（Go では ^ 演算子でビットごとのNOT）
@@ -486,7 +487,7 @@ func ProcessUncompressed(ctx *DecompressionContext) bool {
 
 	// size バイト分のデータを出力先バッファにコピーする
 	for i := 0; i < int(size); i++ {
-		b := getBits(ctx, 8) & 0xff
+		b := rep.getBits(ctx, 8) & 0xff
 		if int(ctx.BytesDecompressed) >= len(ctx.Dest) {
 			return false
 		}
@@ -497,13 +498,13 @@ func ProcessUncompressed(ctx *DecompressionContext) bool {
 	return true
 }
 
-// DecodeWithHuffmanTree は、literalLengthTree および distanceTree を用いて
+// decodeWithHuffmanTree は、literalLengthTree および distanceTree を用いて
 // 圧縮データからリテラルおよび長さ・距離ペアを復号し、ctx.Dest に展開します。
 // 終端コード（256）が現れた場合に処理を終了し、正常終了なら true を、エラー時は false を返します。
-func DecodeWithHuffmanTree(ctx *DecompressionContext, literalLengthTree *HuffmanTree, distanceTree *HuffmanTree) bool {
+func (rep *XRepository) decodeWithHuffmanTree(ctx *decompressionContext, literalLengthTree *huffmanTree, distanceTree *huffmanTree) bool {
 	for {
 		// リテラル/長さコードの取得
-		w := GetACodeWithHuffmanTree(ctx, literalLengthTree)
+		w := rep.getACodeWithHuffmanTree(ctx, literalLengthTree)
 
 		if w == 0xffff {
 			return false
@@ -521,16 +522,16 @@ func DecodeWithHuffmanTree(ctx *DecompressionContext, literalLengthTree *Huffman
 			ctx.BytesDecompressed++
 		} else {
 			// 長さ/距離ペアの場合
-			length := DecodeLength(ctx, w)
+			length := rep.decodeLength(ctx, w)
 			var distCode uint16
 			if distanceTree != nil {
-				distCode = GetACodeWithHuffmanTree(ctx, distanceTree)
+				distCode = rep.getACodeWithHuffmanTree(ctx, distanceTree)
 			} else {
-				distCode = getBits(ctx, 5)
-				distCode = binreverse(int(distCode), 5)
+				distCode = rep.getBits(ctx, 5)
+				distCode = rep.binreverse(int(distCode), 5)
 			}
 
-			distance := DecodeDistance(ctx, distCode)
+			distance := rep.decodeDistance(ctx, distCode)
 
 			// コピー元インデックスは、現在の出力位置から distance 分戻った位置
 			start := int(ctx.BytesDecompressed) - distance
@@ -551,7 +552,7 @@ func DecodeWithHuffmanTree(ctx *DecompressionContext, literalLengthTree *Huffman
 	return true
 }
 
-// DecodeLength は、baseCode（リテラル/長さコード）から実際の長さを復号します。
+// decodeLength は、baseCode（リテラル/長さコード）から実際の長さを復号します。
 // C++実装:
 //
 //	if (baseCode <= 264)
@@ -567,7 +568,7 @@ func DecodeWithHuffmanTree(ctx *DecompressionContext, literalLengthTree *Huffman
 //	y += (w & 3) << numExtraBits;
 //	extra = GetBits(ctx, numExtraBits);
 //	return y + extra;
-func DecodeLength(ctx *DecompressionContext, baseCode uint16) int {
+func (rep *XRepository) decodeLength(ctx *decompressionContext, baseCode uint16) int {
 	if baseCode <= 264 {
 		val := int(baseCode) - 257 + 3
 		return val
@@ -586,12 +587,12 @@ func DecodeLength(ctx *DecompressionContext, baseCode uint16) int {
 	y := uint16((4 << int(numExtraBits)) + 3)
 	// y += (w & 3) << numExtraBits;
 	y += uint16((int(w & 3)) << int(numExtraBits))
-	extra := getBits(ctx, int(numExtraBits))
+	extra := rep.getBits(ctx, int(numExtraBits))
 	result := int(y) + int(extra)
 	return result
 }
 
-// DecodeDistance は、baseCode（距離コード）から実際の距離を復号します。
+// decodeDistance は、baseCode（距離コード）から実際の距離を復号します。
 // C++実装:
 //
 //	if (baseCode <= 3)
@@ -605,7 +606,7 @@ func DecodeLength(ctx *DecompressionContext, baseCode uint16) int {
 //	y += (w & 1) << numExtraBits;
 //	extra = GetBits(ctx, numExtraBits);
 //	return y + extra;
-func DecodeDistance(ctx *DecompressionContext, baseCode uint16) int {
+func (rep *XRepository) decodeDistance(ctx *decompressionContext, baseCode uint16) int {
 	if baseCode <= 3 {
 		val := int(baseCode) + 1
 		return val
@@ -618,7 +619,7 @@ func DecodeDistance(ctx *DecompressionContext, baseCode uint16) int {
 	numExtraBits := x + 1
 	y := uint16((2 << int(numExtraBits)) + 1)
 	y += uint16((int(w & 1)) << int(numExtraBits))
-	extra := getBits(ctx, int(numExtraBits))
+	extra := rep.getBits(ctx, int(numExtraBits))
 	result := int(y) + int(extra)
 	return result
 }
@@ -626,7 +627,7 @@ func DecodeDistance(ctx *DecompressionContext, baseCode uint16) int {
 // compareCode は、HuffmanCode a のビット長とコード値と、指定された length および code を比較します。
 // a.Length が length より小さい場合は -1、大きい場合は 1、等しい場合は
 // a.HuffmanCode と code の大小で比較し、等しければ 0 を返します。
-func compareCode(a HuffmanCode, length int, code uint16) int {
+func (rep *XRepository) compareCode(a huffmanCode, length int, code uint16) int {
 	if int(a.Length) < length {
 		return -1
 	}
@@ -642,11 +643,11 @@ func compareCode(a HuffmanCode, length int, code uint16) int {
 	return 1
 }
 
-// GetACodeWithHuffmanTree は、ctx.Src からビットを順次読み出し、
+// getACodeWithHuffmanTree は、ctx.Src からビットを順次読み出し、
 // tree 内のハフマンコードと照合して該当するシンボル（binCode）を返します。
 // 照合処理は、入力の最小ビット長から始まり、ビット数を増加させながらバイナリサーチで行います。
 // 該当が見つからなかった場合は 0xffff を返します。
-func GetACodeWithHuffmanTree(ctx *DecompressionContext, tree *HuffmanTree) uint16 {
+func (rep *XRepository) getACodeWithHuffmanTree(ctx *decompressionContext, tree *huffmanTree) uint16 {
 	if tree.Codes == nil || len(tree.Codes) == 0 {
 		return 0xffff
 	}
@@ -657,7 +658,7 @@ func GetACodeWithHuffmanTree(ctx *DecompressionContext, tree *HuffmanTree) uint1
 	// 初期の minBits 分のビットを取得
 	for bits := 0; bits < minBits; bits++ {
 		w <<= 1
-		w |= getABit(ctx)
+		w |= rep.getABit(ctx)
 	}
 
 	// 現在のビット数 (minBits) から最大ビット長まで拡張しながら検索
@@ -668,7 +669,7 @@ func GetACodeWithHuffmanTree(ctx *DecompressionContext, tree *HuffmanTree) uint1
 		// バイナリサーチで該当コードを探す
 		for left < right {
 			mid := (left + right) / 2
-			comp := compareCode(tree.Codes[mid], bits, w)
+			comp := rep.compareCode(tree.Codes[mid], bits, w)
 			if comp == 0 {
 				return tree.Codes[mid].BinCode
 			} else if comp < 0 {
@@ -679,19 +680,19 @@ func GetACodeWithHuffmanTree(ctx *DecompressionContext, tree *HuffmanTree) uint1
 		}
 		// 該当が見つからなかったので、1ビット追加して再検索
 		w <<= 1
-		addedBit := getABit(ctx)
+		addedBit := rep.getABit(ctx)
 		w |= addedBit
 		bits++
 	}
 	return 0xffff
 }
 
-// SetupHuffmanTree は、入力の HuffmanCode 配列 codes から
+// setupHuffmanTree は、入力の HuffmanCode 配列 codes から
 // 有効なコードを抽出し、挿入ソートにより順序付けた結果を
 // tree の Codes にセットし、NumCodes および NumMaxBits を設定します。
-func SetupHuffmanTree(tree *HuffmanTree, codes []HuffmanCode) bool {
+func (rep *XRepository) setupHuffmanTree(tree *huffmanTree, codes []huffmanCode) bool {
 	// 一時的なスライスを確保（最大長は入力数と同じ）
-	dest := make([]HuffmanCode, len(codes))
+	dest := make([]huffmanCode, len(codes))
 	numCodes := 0
 	maxBits := 0
 
@@ -730,19 +731,15 @@ func SetupHuffmanTree(tree *HuffmanTree, codes []HuffmanCode) bool {
 	return true
 }
 
-// SetupFixedHuffmanTree は、固定ハフマンテーブル fixedCodeSorted を用いて
+// setupFixedHuffmanTree は、固定ハフマンテーブル fixedCodeSorted を用いて
 // DecompressionContext の Fixed フィールドを初期化します。
-func SetupFixedHuffmanTree(ctx *DecompressionContext) {
-	// 固定テーブルの要素数は 288 に固定（C++実装に合わせる）
-	ctx.Fixed.NumCodes = 288
-	// 最大ビット長は 9
-	ctx.Fixed.NumMaxBits = 9
-	// 固定ハフマンコードテーブルを割り当てる
-	ctx.Fixed.Codes = fixedCodeSorted
+func (rep *XRepository) setupFixedHuffmanTree(ctx *decompressionContext) {
+	// 事前に初期化された固定ハフマンツリーを使用
+	ctx.Fixed = globalFixedHuffmanTree
 }
 
-// ClearContext は、DecompressionContext のフィールドを初期状態にリセットします。
-func ClearContext(ctx *DecompressionContext) {
+// clearContext は、DecompressionContext のフィールドを初期状態にリセットします。
+func (rep *XRepository) clearContext(ctx *decompressionContext) {
 	// ソース／デスティネーション関連のフィールドをリセット
 	ctx.Src = nil
 	ctx.BitsRead = 0
@@ -770,7 +767,7 @@ func ClearContext(ctx *DecompressionContext) {
 
 // binreverse は、引数 code の下位 length ビットを反転した結果を返します。
 // 例: code=0b1011, length=4 の場合、反転結果は 0b1101 となります。
-func binreverse(code int, length int) uint16 {
+func (rep *XRepository) binreverse(code int, length int) uint16 {
 	var w uint16 = 0
 	for i := 0; i < length; i++ {
 		w <<= 1
@@ -782,7 +779,7 @@ func binreverse(code int, length int) uint16 {
 }
 
 // getABit は、DecompressionContext のSrcから現在のビット位置の1ビットを読み出します。
-func getABit(ctx *DecompressionContext) uint16 {
+func (rep *XRepository) getABit(ctx *decompressionContext) uint16 {
 	// 現在のビット位置からバイト配列上のインデックスとビット位置を算出
 	index := ctx.BitsRead >> 3
 	if int(index) >= len(ctx.Src) {
@@ -797,7 +794,7 @@ func getABit(ctx *DecompressionContext) uint16 {
 }
 
 // getBits は、DecompressionContext のSrcから指定されたsizeビット分を読み出します。
-func getBits(ctx *DecompressionContext, size int) uint16 {
+func (rep *XRepository) getBits(ctx *decompressionContext, size int) uint16 {
 	if size <= 0 {
 		return 0
 	}
@@ -823,35 +820,35 @@ func getBits(ctx *DecompressionContext, size int) uint16 {
 	return result
 }
 
-// HuffmanCode 構造体
+// huffmanCode 構造体
 // C++:
 //
 //	typedef struct _customhuffmantable{
 //	    WORD    binCode;
 //	    WORD    length;
 //	    WORD    huffmanCode;
-//	} HuffmanCode;
-type HuffmanCode struct {
+//	} huffmanCode;
+type huffmanCode struct {
 	BinCode     uint16
 	Length      uint16
 	HuffmanCode uint16
 }
 
-// HuffmanTree 構造体
+// huffmanTree 構造体
 // C++:
 //
 //	typedef struct{
 //	    WORD numMaxBits;
 //	    HuffmanCode *pCode;
 //	    WORD numCodes;
-//	} HuffmanTree;
-type HuffmanTree struct {
+//	} huffmanTree;
+type huffmanTree struct {
 	NumMaxBits uint16
-	Codes      []HuffmanCode
+	Codes      []huffmanCode
 	NumCodes   uint16
 }
 
-// CustomHuffmanTree 構造体
+// customHuffmanTree 構造体
 // C++:
 //
 //	typedef struct{
@@ -861,8 +858,8 @@ type HuffmanTree struct {
 //	    WORD numElementsOfLiteralLengthTree;
 //	    WORD *pDistanceTree;
 //	    WORD numElementsOfDistanceTree;
-//	} CustomHuffmanTree;
-type CustomHuffmanTree struct {
+//	} customHuffmanTree;
+type customHuffmanTree struct {
 	NumLiteralLengthCodes          uint16
 	NumDistanceCodes               uint16
 	LiteralLengthTree              []uint16
@@ -871,7 +868,7 @@ type CustomHuffmanTree struct {
 	NumElementsOfDistanceTree      uint16
 }
 
-// DecompressionContext 構造体
+// decompressionContext 構造体
 // C++:
 //
 //	typedef struct _context{
@@ -885,8 +882,8 @@ type CustomHuffmanTree struct {
 //	    HuffmanTree customLiteralLength;
 //	    HuffmanTree customDistance;
 //	    HuffmanTree fixed;
-//	} DecompressionContext;
-type DecompressionContext struct {
+//	} decompressionContext;
+type decompressionContext struct {
 	Src                 []byte
 	BitsRead            int64
 	SizeInBits          int64
@@ -894,299 +891,55 @@ type DecompressionContext struct {
 	Dest                []byte
 	DestSize            uint32
 	BytesDecompressed   uint32
-	CustomLiteralLength HuffmanTree
-	CustomDistance      HuffmanTree
-	Fixed               HuffmanTree
+	CustomLiteralLength huffmanTree
+	CustomDistance      huffmanTree
+	Fixed               huffmanTree
 }
 
-var fixedCodeSorted = []HuffmanCode{
-	{BinCode: 0x100, Length: 7, HuffmanCode: 0x0},
-	{BinCode: 0x101, Length: 7, HuffmanCode: 0x1},
-	{BinCode: 0x102, Length: 7, HuffmanCode: 0x2},
-	{BinCode: 0x103, Length: 7, HuffmanCode: 0x3},
-	{BinCode: 0x104, Length: 7, HuffmanCode: 0x4},
-	{BinCode: 0x105, Length: 7, HuffmanCode: 0x5},
-	{BinCode: 0x106, Length: 7, HuffmanCode: 0x6},
-	{BinCode: 0x107, Length: 7, HuffmanCode: 0x7},
-	{BinCode: 0x108, Length: 7, HuffmanCode: 0x8},
-	{BinCode: 0x109, Length: 7, HuffmanCode: 0x9},
-	{BinCode: 0x10a, Length: 7, HuffmanCode: 0xa},
-	{BinCode: 0x10b, Length: 7, HuffmanCode: 0xb},
-	{BinCode: 0x10c, Length: 7, HuffmanCode: 0xc},
-	{BinCode: 0x10d, Length: 7, HuffmanCode: 0xd},
-	{BinCode: 0x10e, Length: 7, HuffmanCode: 0xe},
-	{BinCode: 0x10f, Length: 7, HuffmanCode: 0xf},
-	{BinCode: 0x110, Length: 7, HuffmanCode: 0x10},
-	{BinCode: 0x111, Length: 7, HuffmanCode: 0x11},
-	{BinCode: 0x112, Length: 7, HuffmanCode: 0x12},
-	{BinCode: 0x113, Length: 7, HuffmanCode: 0x13},
-	{BinCode: 0x114, Length: 7, HuffmanCode: 0x14},
-	{BinCode: 0x115, Length: 7, HuffmanCode: 0x15},
-	{BinCode: 0x116, Length: 7, HuffmanCode: 0x16},
-	{BinCode: 0x117, Length: 7, HuffmanCode: 0x17},
+var fixedCodeSorted []huffmanCode
+var globalFixedHuffmanTree huffmanTree
 
-	{BinCode: 0x0, Length: 8, HuffmanCode: 0x30},
-	{BinCode: 0x1, Length: 8, HuffmanCode: 0x31},
-	{BinCode: 0x2, Length: 8, HuffmanCode: 0x32},
-	{BinCode: 0x3, Length: 8, HuffmanCode: 0x33},
-	{BinCode: 0x4, Length: 8, HuffmanCode: 0x34},
-	{BinCode: 0x5, Length: 8, HuffmanCode: 0x35},
-	{BinCode: 0x6, Length: 8, HuffmanCode: 0x36},
-	{BinCode: 0x7, Length: 8, HuffmanCode: 0x37},
-	{BinCode: 0x8, Length: 8, HuffmanCode: 0x38},
-	{BinCode: 0x9, Length: 8, HuffmanCode: 0x39},
-	{BinCode: 0xa, Length: 8, HuffmanCode: 0x3a},
-	{BinCode: 0xb, Length: 8, HuffmanCode: 0x3b},
-	{BinCode: 0xc, Length: 8, HuffmanCode: 0x3c},
-	{BinCode: 0xd, Length: 8, HuffmanCode: 0x3d},
-	{BinCode: 0xe, Length: 8, HuffmanCode: 0x3e},
-	{BinCode: 0xf, Length: 8, HuffmanCode: 0x3f},
-	{BinCode: 0x10, Length: 8, HuffmanCode: 0x40},
-	{BinCode: 0x11, Length: 8, HuffmanCode: 0x41},
-	{BinCode: 0x12, Length: 8, HuffmanCode: 0x42},
-	{BinCode: 0x13, Length: 8, HuffmanCode: 0x43},
-	{BinCode: 0x14, Length: 8, HuffmanCode: 0x44},
-	{BinCode: 0x15, Length: 8, HuffmanCode: 0x45},
-	{BinCode: 0x16, Length: 8, HuffmanCode: 0x46},
-	{BinCode: 0x17, Length: 8, HuffmanCode: 0x47},
-	{BinCode: 0x18, Length: 8, HuffmanCode: 0x48},
-	{BinCode: 0x19, Length: 8, HuffmanCode: 0x49},
-	{BinCode: 0x1a, Length: 8, HuffmanCode: 0x4a},
-	{BinCode: 0x1b, Length: 8, HuffmanCode: 0x4b},
-	{BinCode: 0x1c, Length: 8, HuffmanCode: 0x4c},
-	{BinCode: 0x1d, Length: 8, HuffmanCode: 0x4d},
-	{BinCode: 0x1e, Length: 8, HuffmanCode: 0x4e},
-	{BinCode: 0x1f, Length: 8, HuffmanCode: 0x4f},
-	{BinCode: 0x20, Length: 8, HuffmanCode: 0x50},
-	{BinCode: 0x21, Length: 8, HuffmanCode: 0x51},
-	{BinCode: 0x22, Length: 8, HuffmanCode: 0x52},
-	{BinCode: 0x23, Length: 8, HuffmanCode: 0x53},
-	{BinCode: 0x24, Length: 8, HuffmanCode: 0x54},
-	{BinCode: 0x25, Length: 8, HuffmanCode: 0x55},
-	{BinCode: 0x26, Length: 8, HuffmanCode: 0x56},
-	{BinCode: 0x27, Length: 8, HuffmanCode: 0x57},
-	{BinCode: 0x28, Length: 8, HuffmanCode: 0x58},
-	{BinCode: 0x29, Length: 8, HuffmanCode: 0x59},
-	{BinCode: 0x2a, Length: 8, HuffmanCode: 0x5a},
-	{BinCode: 0x2b, Length: 8, HuffmanCode: 0x5b},
-	{BinCode: 0x2c, Length: 8, HuffmanCode: 0x5c},
-	{BinCode: 0x2d, Length: 8, HuffmanCode: 0x5d},
-	{BinCode: 0x2e, Length: 8, HuffmanCode: 0x5e},
-	{BinCode: 0x2f, Length: 8, HuffmanCode: 0x5f},
-	{BinCode: 0x30, Length: 8, HuffmanCode: 0x60},
-	{BinCode: 0x31, Length: 8, HuffmanCode: 0x61},
-	{BinCode: 0x32, Length: 8, HuffmanCode: 0x62},
-	{BinCode: 0x33, Length: 8, HuffmanCode: 0x63},
-	{BinCode: 0x34, Length: 8, HuffmanCode: 0x64},
-	{BinCode: 0x35, Length: 8, HuffmanCode: 0x65},
-	{BinCode: 0x36, Length: 8, HuffmanCode: 0x66},
-	{BinCode: 0x37, Length: 8, HuffmanCode: 0x67},
-	{BinCode: 0x38, Length: 8, HuffmanCode: 0x68},
-	{BinCode: 0x39, Length: 8, HuffmanCode: 0x69},
-	{BinCode: 0x3a, Length: 8, HuffmanCode: 0x6a},
-	{BinCode: 0x3b, Length: 8, HuffmanCode: 0x6b},
-	{BinCode: 0x3c, Length: 8, HuffmanCode: 0x6c},
-	{BinCode: 0x3d, Length: 8, HuffmanCode: 0x6d},
-	{BinCode: 0x3e, Length: 8, HuffmanCode: 0x6e},
-	{BinCode: 0x3f, Length: 8, HuffmanCode: 0x6f},
-	{BinCode: 0x40, Length: 8, HuffmanCode: 0x70},
-	{BinCode: 0x41, Length: 8, HuffmanCode: 0x71},
-	{BinCode: 0x42, Length: 8, HuffmanCode: 0x72},
-	{BinCode: 0x43, Length: 8, HuffmanCode: 0x73},
-	{BinCode: 0x44, Length: 8, HuffmanCode: 0x74},
-	{BinCode: 0x45, Length: 8, HuffmanCode: 0x75},
-	{BinCode: 0x46, Length: 8, HuffmanCode: 0x76},
-	{BinCode: 0x47, Length: 8, HuffmanCode: 0x77},
-	{BinCode: 0x48, Length: 8, HuffmanCode: 0x78},
-	{BinCode: 0x49, Length: 8, HuffmanCode: 0x79},
-	{BinCode: 0x4a, Length: 8, HuffmanCode: 0x7a},
-	{BinCode: 0x4b, Length: 8, HuffmanCode: 0x7b},
-	{BinCode: 0x4c, Length: 8, HuffmanCode: 0x7c},
-	{BinCode: 0x4d, Length: 8, HuffmanCode: 0x7d},
-	{BinCode: 0x4e, Length: 8, HuffmanCode: 0x7e},
-	{BinCode: 0x4f, Length: 8, HuffmanCode: 0x7f},
-	{BinCode: 0x50, Length: 8, HuffmanCode: 0x80},
-	{BinCode: 0x51, Length: 8, HuffmanCode: 0x81},
-	{BinCode: 0x52, Length: 8, HuffmanCode: 0x82},
-	{BinCode: 0x53, Length: 8, HuffmanCode: 0x83},
-	{BinCode: 0x54, Length: 8, HuffmanCode: 0x84},
-	{BinCode: 0x55, Length: 8, HuffmanCode: 0x85},
-	{BinCode: 0x56, Length: 8, HuffmanCode: 0x86},
-	{BinCode: 0x57, Length: 8, HuffmanCode: 0x87},
-	{BinCode: 0x58, Length: 8, HuffmanCode: 0x88},
-	{BinCode: 0x59, Length: 8, HuffmanCode: 0x89},
-	{BinCode: 0x5a, Length: 8, HuffmanCode: 0x8a},
-	{BinCode: 0x5b, Length: 8, HuffmanCode: 0x8b},
-	{BinCode: 0x5c, Length: 8, HuffmanCode: 0x8c},
-	{BinCode: 0x5d, Length: 8, HuffmanCode: 0x8d},
-	{BinCode: 0x5e, Length: 8, HuffmanCode: 0x8e},
-	{BinCode: 0x5f, Length: 8, HuffmanCode: 0x8f},
-	{BinCode: 0x60, Length: 8, HuffmanCode: 0x90},
-	{BinCode: 0x61, Length: 8, HuffmanCode: 0x91},
-	{BinCode: 0x62, Length: 8, HuffmanCode: 0x92},
-	{BinCode: 0x63, Length: 8, HuffmanCode: 0x93},
-	{BinCode: 0x64, Length: 8, HuffmanCode: 0x94},
-	{BinCode: 0x65, Length: 8, HuffmanCode: 0x95},
-	{BinCode: 0x66, Length: 8, HuffmanCode: 0x96},
-	{BinCode: 0x67, Length: 8, HuffmanCode: 0x97},
-	{BinCode: 0x68, Length: 8, HuffmanCode: 0x98},
-	{BinCode: 0x69, Length: 8, HuffmanCode: 0x99},
-	{BinCode: 0x6a, Length: 8, HuffmanCode: 0x9a},
-	{BinCode: 0x6b, Length: 8, HuffmanCode: 0x9b},
-	{BinCode: 0x6c, Length: 8, HuffmanCode: 0x9c},
-	{BinCode: 0x6d, Length: 8, HuffmanCode: 0x9d},
-	{BinCode: 0x6e, Length: 8, HuffmanCode: 0x9e},
-	{BinCode: 0x6f, Length: 8, HuffmanCode: 0x9f},
-	{BinCode: 0x70, Length: 8, HuffmanCode: 0xa0},
-	{BinCode: 0x71, Length: 8, HuffmanCode: 0xa1},
-	{BinCode: 0x72, Length: 8, HuffmanCode: 0xa2},
-	{BinCode: 0x73, Length: 8, HuffmanCode: 0xa3},
-	{BinCode: 0x74, Length: 8, HuffmanCode: 0xa4},
-	{BinCode: 0x75, Length: 8, HuffmanCode: 0xa5},
-	{BinCode: 0x76, Length: 8, HuffmanCode: 0xa6},
-	{BinCode: 0x77, Length: 8, HuffmanCode: 0xa7},
-	{BinCode: 0x78, Length: 8, HuffmanCode: 0xa8},
-	{BinCode: 0x79, Length: 8, HuffmanCode: 0xa9},
-	{BinCode: 0x7a, Length: 8, HuffmanCode: 0xaa},
-	{BinCode: 0x7b, Length: 8, HuffmanCode: 0xab},
-	{BinCode: 0x7c, Length: 8, HuffmanCode: 0xac},
-	{BinCode: 0x7d, Length: 8, HuffmanCode: 0xad},
-	{BinCode: 0x7e, Length: 8, HuffmanCode: 0xae},
-	{BinCode: 0x7f, Length: 8, HuffmanCode: 0xaf},
-	{BinCode: 0x80, Length: 8, HuffmanCode: 0xb0},
-	{BinCode: 0x81, Length: 8, HuffmanCode: 0xb1},
-	{BinCode: 0x82, Length: 8, HuffmanCode: 0xb2},
-	{BinCode: 0x83, Length: 8, HuffmanCode: 0xb3},
-	{BinCode: 0x84, Length: 8, HuffmanCode: 0xb4},
-	{BinCode: 0x85, Length: 8, HuffmanCode: 0xb5},
-	{BinCode: 0x86, Length: 8, HuffmanCode: 0xb6},
-	{BinCode: 0x87, Length: 8, HuffmanCode: 0xb7},
-	{BinCode: 0x88, Length: 8, HuffmanCode: 0xb8},
-	{BinCode: 0x89, Length: 8, HuffmanCode: 0xb9},
-	{BinCode: 0x8a, Length: 8, HuffmanCode: 0xba},
-	{BinCode: 0x8b, Length: 8, HuffmanCode: 0xbb},
-	{BinCode: 0x8c, Length: 8, HuffmanCode: 0xbc},
-	{BinCode: 0x8d, Length: 8, HuffmanCode: 0xbd},
-	{BinCode: 0x8e, Length: 8, HuffmanCode: 0xbe},
-	{BinCode: 0x8f, Length: 8, HuffmanCode: 0xbf},
-	{BinCode: 0x118, Length: 8, HuffmanCode: 0xc0},
-	{BinCode: 0x119, Length: 8, HuffmanCode: 0xc1},
-	{BinCode: 0x11a, Length: 8, HuffmanCode: 0xc2},
-	{BinCode: 0x11b, Length: 8, HuffmanCode: 0xc3},
-	{BinCode: 0x11c, Length: 8, HuffmanCode: 0xc4},
-	{BinCode: 0x11d, Length: 8, HuffmanCode: 0xc5},
-	{BinCode: 0x11e, Length: 8, HuffmanCode: 0xc6},
-	{BinCode: 0x11f, Length: 8, HuffmanCode: 0xc7},
-	{BinCode: 0x90, Length: 9, HuffmanCode: 0x190},
-	{BinCode: 0x91, Length: 9, HuffmanCode: 0x191},
-	{BinCode: 0x92, Length: 9, HuffmanCode: 0x192},
-	{BinCode: 0x93, Length: 9, HuffmanCode: 0x193},
-	{BinCode: 0x94, Length: 9, HuffmanCode: 0x194},
-	{BinCode: 0x95, Length: 9, HuffmanCode: 0x195},
-	{BinCode: 0x96, Length: 9, HuffmanCode: 0x196},
-	{BinCode: 0x97, Length: 9, HuffmanCode: 0x197},
-	{BinCode: 0x98, Length: 9, HuffmanCode: 0x198},
-	{BinCode: 0x99, Length: 9, HuffmanCode: 0x199},
-	{BinCode: 0x9a, Length: 9, HuffmanCode: 0x19a},
-	{BinCode: 0x9b, Length: 9, HuffmanCode: 0x19b},
-	{BinCode: 0x9c, Length: 9, HuffmanCode: 0x19c},
-	{BinCode: 0x9d, Length: 9, HuffmanCode: 0x19d},
-	{BinCode: 0x9e, Length: 9, HuffmanCode: 0x19e},
-	{BinCode: 0x9f, Length: 9, HuffmanCode: 0x19f},
-	{BinCode: 0xa0, Length: 9, HuffmanCode: 0x1a0},
-	{BinCode: 0xa1, Length: 9, HuffmanCode: 0x1a1},
-	{BinCode: 0xa2, Length: 9, HuffmanCode: 0x1a2},
-	{BinCode: 0xa3, Length: 9, HuffmanCode: 0x1a3},
-	{BinCode: 0xa4, Length: 9, HuffmanCode: 0x1a4},
-	{BinCode: 0xa5, Length: 9, HuffmanCode: 0x1a5},
-	{BinCode: 0xa6, Length: 9, HuffmanCode: 0x1a6},
-	{BinCode: 0xa7, Length: 9, HuffmanCode: 0x1a7},
-	{BinCode: 0xa8, Length: 9, HuffmanCode: 0x1a8},
-	{BinCode: 0xa9, Length: 9, HuffmanCode: 0x1a9},
-	{BinCode: 0xaa, Length: 9, HuffmanCode: 0x1aa},
-	{BinCode: 0xab, Length: 9, HuffmanCode: 0x1ab},
-	{BinCode: 0xac, Length: 9, HuffmanCode: 0x1ac},
-	{BinCode: 0xad, Length: 9, HuffmanCode: 0x1ad},
-	{BinCode: 0xae, Length: 9, HuffmanCode: 0x1ae},
-	{BinCode: 0xaf, Length: 9, HuffmanCode: 0x1af},
-	{BinCode: 0xb0, Length: 9, HuffmanCode: 0x1b0},
-	{BinCode: 0xb1, Length: 9, HuffmanCode: 0x1b1},
-	{BinCode: 0xb2, Length: 9, HuffmanCode: 0x1b2},
-	{BinCode: 0xb3, Length: 9, HuffmanCode: 0x1b3},
-	{BinCode: 0xb4, Length: 9, HuffmanCode: 0x1b4},
-	{BinCode: 0xb5, Length: 9, HuffmanCode: 0x1b5},
-	{BinCode: 0xb6, Length: 9, HuffmanCode: 0x1b6},
-	{BinCode: 0xb7, Length: 9, HuffmanCode: 0x1b7},
-	{BinCode: 0xb8, Length: 9, HuffmanCode: 0x1b8},
-	{BinCode: 0xb9, Length: 9, HuffmanCode: 0x1b9},
-	{BinCode: 0xba, Length: 9, HuffmanCode: 0x1ba},
-	{BinCode: 0xbb, Length: 9, HuffmanCode: 0x1bb},
-	{BinCode: 0xbc, Length: 9, HuffmanCode: 0x1bc},
-	{BinCode: 0xbd, Length: 9, HuffmanCode: 0x1bd},
-	{BinCode: 0xbe, Length: 9, HuffmanCode: 0x1be},
-	{BinCode: 0xbf, Length: 9, HuffmanCode: 0x1bf},
-	{BinCode: 0xc0, Length: 9, HuffmanCode: 0x1c0},
-	{BinCode: 0xc1, Length: 9, HuffmanCode: 0x1c1},
-	{BinCode: 0xc2, Length: 9, HuffmanCode: 0x1c2},
-	{BinCode: 0xc3, Length: 9, HuffmanCode: 0x1c3},
-	{BinCode: 0xc4, Length: 9, HuffmanCode: 0x1c4},
-	{BinCode: 0xc5, Length: 9, HuffmanCode: 0x1c5},
-	{BinCode: 0xc6, Length: 9, HuffmanCode: 0x1c6},
-	{BinCode: 0xc7, Length: 9, HuffmanCode: 0x1c7},
-	{BinCode: 0xc8, Length: 9, HuffmanCode: 0x1c8},
-	{BinCode: 0xc9, Length: 9, HuffmanCode: 0x1c9},
-	{BinCode: 0xca, Length: 9, HuffmanCode: 0x1ca},
-	{BinCode: 0xcb, Length: 9, HuffmanCode: 0x1cb},
-	{BinCode: 0xcc, Length: 9, HuffmanCode: 0x1cc},
-	{BinCode: 0xcd, Length: 9, HuffmanCode: 0x1cd},
-	{BinCode: 0xce, Length: 9, HuffmanCode: 0x1ce},
-	{BinCode: 0xcf, Length: 9, HuffmanCode: 0x1cf},
-	{BinCode: 0xd0, Length: 9, HuffmanCode: 0x1d0},
-	{BinCode: 0xd1, Length: 9, HuffmanCode: 0x1d1},
-	{BinCode: 0xd2, Length: 9, HuffmanCode: 0x1d2},
-	{BinCode: 0xd3, Length: 9, HuffmanCode: 0x1d3},
-	{BinCode: 0xd4, Length: 9, HuffmanCode: 0x1d4},
-	{BinCode: 0xd5, Length: 9, HuffmanCode: 0x1d5},
-	{BinCode: 0xd6, Length: 9, HuffmanCode: 0x1d6},
-	{BinCode: 0xd7, Length: 9, HuffmanCode: 0x1d7},
-	{BinCode: 0xd8, Length: 9, HuffmanCode: 0x1d8},
-	{BinCode: 0xd9, Length: 9, HuffmanCode: 0x1d9},
-	{BinCode: 0xda, Length: 9, HuffmanCode: 0x1da},
-	{BinCode: 0xdb, Length: 9, HuffmanCode: 0x1db},
-	{BinCode: 0xdc, Length: 9, HuffmanCode: 0x1dc},
-	{BinCode: 0xdd, Length: 9, HuffmanCode: 0x1dd},
-	{BinCode: 0xde, Length: 9, HuffmanCode: 0x1de},
-	{BinCode: 0xdf, Length: 9, HuffmanCode: 0x1df},
-	{BinCode: 0xe0, Length: 9, HuffmanCode: 0x1e0},
-	{BinCode: 0xe1, Length: 9, HuffmanCode: 0x1e1},
-	{BinCode: 0xe2, Length: 9, HuffmanCode: 0x1e2},
-	{BinCode: 0xe3, Length: 9, HuffmanCode: 0x1e3},
-	{BinCode: 0xe4, Length: 9, HuffmanCode: 0x1e4},
-	{BinCode: 0xe5, Length: 9, HuffmanCode: 0x1e5},
-	{BinCode: 0xe6, Length: 9, HuffmanCode: 0x1e6},
-	{BinCode: 0xe7, Length: 9, HuffmanCode: 0x1e7},
-	{BinCode: 0xe8, Length: 9, HuffmanCode: 0x1e8},
-	{BinCode: 0xe9, Length: 9, HuffmanCode: 0x1e9},
-	{BinCode: 0xea, Length: 9, HuffmanCode: 0x1ea},
-	{BinCode: 0xeb, Length: 9, HuffmanCode: 0x1eb},
-	{BinCode: 0xec, Length: 9, HuffmanCode: 0x1ec},
-	{BinCode: 0xed, Length: 9, HuffmanCode: 0x1ed},
-	{BinCode: 0xee, Length: 9, HuffmanCode: 0x1ee},
-	{BinCode: 0xef, Length: 9, HuffmanCode: 0x1ef},
-	{BinCode: 0xf0, Length: 9, HuffmanCode: 0x1f0},
-	{BinCode: 0xf1, Length: 9, HuffmanCode: 0x1f1},
-	{BinCode: 0xf2, Length: 9, HuffmanCode: 0x1f2},
-	{BinCode: 0xf3, Length: 9, HuffmanCode: 0x1f3},
-	{BinCode: 0xf4, Length: 9, HuffmanCode: 0x1f4},
-	{BinCode: 0xf5, Length: 9, HuffmanCode: 0x1f5},
-	{BinCode: 0xf6, Length: 9, HuffmanCode: 0x1f6},
-	{BinCode: 0xf7, Length: 9, HuffmanCode: 0x1f7},
-	{BinCode: 0xf8, Length: 9, HuffmanCode: 0x1f8},
-	{BinCode: 0xf9, Length: 9, HuffmanCode: 0x1f9},
-	{BinCode: 0xfa, Length: 9, HuffmanCode: 0x1fa},
-	{BinCode: 0xfb, Length: 9, HuffmanCode: 0x1fb},
-	{BinCode: 0xfc, Length: 9, HuffmanCode: 0x1fc},
-	{BinCode: 0xfd, Length: 9, HuffmanCode: 0x1fd},
-	{BinCode: 0xfe, Length: 9, HuffmanCode: 0x1fe},
-	{BinCode: 0xff, Length: 9, HuffmanCode: 0x1ff},
+func init() {
+	// 初期化時にfixedCodeSorted配列を構築する
+
+	// グループ1: BinCode 0x100-0x117, Length 7, HuffmanCode 0x0-0x17
+	for i := uint16(0x100); i <= uint16(0x117); i++ {
+		fixedCodeSorted = append(fixedCodeSorted, huffmanCode{
+			BinCode:     i,
+			Length:      uint16(7),
+			HuffmanCode: i - uint16(0x100),
+		})
+	}
+
+	// グループ2: BinCode 0x0-0x8f, Length 8, HuffmanCode 0x30-0xbf
+	for i := uint16(0x0); i <= uint16(0x8f); i++ {
+		fixedCodeSorted = append(fixedCodeSorted, huffmanCode{
+			BinCode:     i,
+			Length:      uint16(8),
+			HuffmanCode: i + uint16(0x30),
+		})
+	}
+
+	// グループ3: BinCode 0x118-0x11f, Length 8, HuffmanCode 0xc0-0xc7
+	for i := uint16(0x118); i <= uint16(0x11f); i++ {
+		fixedCodeSorted = append(fixedCodeSorted, huffmanCode{
+			BinCode:     i,
+			Length:      uint16(8),
+			HuffmanCode: i - uint16(0x118) + uint16(0xc0),
+		})
+	}
+
+	// グループ4: BinCode 0x90-0xff, Length 9, HuffmanCode 0x190-0x1ff
+	for i := uint16(0x90); i <= uint16(0xff); i++ {
+		fixedCodeSorted = append(fixedCodeSorted, huffmanCode{
+			BinCode:     i,
+			Length:      uint16(9),
+			HuffmanCode: i + uint16(0x100),
+		})
+	}
+
+	// グローバルな固定ハフマンツリーの初期化
+	globalFixedHuffmanTree.NumCodes = 288
+	globalFixedHuffmanTree.NumMaxBits = 9
+	globalFixedHuffmanTree.Codes = fixedCodeSorted
 }
