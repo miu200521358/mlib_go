@@ -1,6 +1,9 @@
 package controller
 
-import "github.com/miu200521358/walk/pkg/declarative"
+import (
+	"github.com/miu200521358/walk/pkg/declarative"
+	"github.com/miu200521358/walk/pkg/walk"
+)
 
 type IMWidget interface {
 	Widgets() declarative.Composite
@@ -12,12 +15,18 @@ type MWidgets struct {
 	Widgets             []IMWidget
 	onLoadedFunc        func()
 	onChangePlayingFunc func(playing bool)
+	window              *ControlWindow
+	Position            *walk.Point
 }
 
 func (mw *MWidgets) SetWindow(window *ControlWindow) {
 	for _, w := range mw.Widgets {
 		w.SetWindow(window)
 	}
+}
+
+func (mw *MWidgets) Window() *ControlWindow {
+	return mw.window
 }
 
 func (mw *MWidgets) EnabledInPlaying(enable bool) {
