@@ -45,9 +45,17 @@ func (ac *AppConfig) IsEnvProd() bool {
 
 func (ac *AppConfig) IsEnvDev() bool {
 	if ac == nil {
-		return false
+		// ローカル起動時もDevとみなす
+		return true
 	}
 	return ac.Env == "dev"
+}
+
+func (ac *AppConfig) IsEnvStg() bool {
+	if ac == nil {
+		return false
+	}
+	return ac.Env == "stg"
 }
 
 func (ac *AppConfig) IsCloseConfirm() bool {

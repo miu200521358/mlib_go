@@ -99,7 +99,7 @@ func NewControlWindow(
 		},
 	}
 
-	if !appConfig.IsEnvProd() {
+	if appConfig.IsEnvDev() {
 		// 開発時のみ冗長ログ表示を追加
 		logMenuItems = append(logMenuItems,
 			declarative.Action{
@@ -198,38 +198,38 @@ func NewControlWindow(
 						AssignTo:    &cw.showWireAction,
 					},
 					declarative.Separator{},
-					declarative.Action{
-						Text:        mi18n.T("&頂点ライン選択"),
-						Checkable:   true,
-						OnTriggered: cw.TriggerShowSelectedVertex,
-						AssignTo:    &cw.showSelectedVertexAction,
-					},
-					declarative.Action{
-						Text: mi18n.T("&頂点ライン選択使い方"),
-						OnTriggered: func() {
-							mlog.ILT(mi18n.T("&頂点ライン選択使い方"), mi18n.T("頂点ライン選択使い方メッセージ"))
-						},
-					},
-					declarative.Separator{},
-					declarative.Action{
-						Text:        mi18n.T("&カメラ同期"),
-						Checkable:   true,
-						OnTriggered: cw.TriggerCameraSync,
-						AssignTo:    &cw.cameraSyncAction,
-					},
-					declarative.Action{
-						Text:        mi18n.T("&サブビューワーオーバーレイ"),
-						Checkable:   true,
-						OnTriggered: cw.TriggerShowOverride,
-						AssignTo:    &cw.showOverrideAction,
-					},
-					declarative.Action{
-						Text: mi18n.T("&サブビューワーオーバーレイの使い方"),
-						OnTriggered: func() {
-							mlog.ILT(mi18n.T("&サブビューワーオーバーレイの使い方"),
-								mi18n.T("サブビューワーオーバーレイの使い方メッセージ"))
-						},
-					},
+					// declarative.Action{
+					// 	Text:        mi18n.T("&頂点ライン選択"),
+					// 	Checkable:   true,
+					// 	OnTriggered: cw.TriggerShowSelectedVertex,
+					// 	AssignTo:    &cw.showSelectedVertexAction,
+					// },
+					// declarative.Action{
+					// 	Text: mi18n.T("&頂点ライン選択使い方"),
+					// 	OnTriggered: func() {
+					// 		mlog.ILT(mi18n.T("&頂点ライン選択使い方"), mi18n.T("頂点ライン選択使い方メッセージ"))
+					// 	},
+					// },
+					// declarative.Separator{},
+					// declarative.Action{
+					// 	Text:        mi18n.T("&カメラ同期"),
+					// 	Checkable:   true,
+					// 	OnTriggered: cw.TriggerCameraSync,
+					// 	AssignTo:    &cw.cameraSyncAction,
+					// },
+					// declarative.Action{
+					// 	Text:        mi18n.T("&サブビューワーオーバーレイ"),
+					// 	Checkable:   true,
+					// 	OnTriggered: cw.TriggerShowOverride,
+					// 	AssignTo:    &cw.showOverrideAction,
+					// },
+					// declarative.Action{
+					// 	Text: mi18n.T("&サブビューワーオーバーレイの使い方"),
+					// 	OnTriggered: func() {
+					// 		mlog.ILT(mi18n.T("&サブビューワーオーバーレイの使い方"),
+					// 			mi18n.T("サブビューワーオーバーレイの使い方メッセージ"))
+					// 	},
+					// },
 					declarative.Separator{},
 					declarative.Menu{
 						Text: mi18n.T("&ボーン表示"),
