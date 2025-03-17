@@ -68,14 +68,6 @@
         "translation": "&Language"
     },
     {
-        "id": "LanguageChanged.Title",
-        "translation": "Language Change"
-    },
-    {
-        "id": "LanguageChanged.Message",
-        "translation": "The language change will take effect after restarting\nThe app will now close"
-    },
-    {
         "id": "未設定",
         "translation": "Not Set"
     },
@@ -420,18 +412,6 @@
         "translation": "・Clicking the playback button allows you to play the motion.\n・Other buttons or operations cannot be used during playback."
     },
     {
-        "id": "再生キーフレ説明",
-        "translation": "・The frame number field displays the currently rendered frame number.\n・You can increase or decrease the frame number by using the mouse wheel in the field or pressing the button to the right of the field."
-    },
-    {
-        "id": "再生スライダー説明",
-        "translation": "・The playback slider shows the corresponding position of the currently rendered frame number.\n・You can increase or decrease the frame number by using the mouse wheel over the slider."
-    },
-    {
-        "id": "再生ボタン説明",
-        "translation": "・Clicking the playback button allows you to play the motion.\n・Other buttons or operations cannot be used during playback."
-    },
-    {
         "id": "ファイル存在エラー",
         "translation": "The file does not exist\nInput file path: {{.Path}}"
     },
@@ -444,7 +424,71 @@
         "translation": "&Viewer Verbose Log Display"
     },
     {
+        "id": "保存開始",
+        "translation": "Start saving {{.Type}}\nOutput file path: {{.Path}}"
+    },
+    {
+        "id": "保存終了",
+        "translation": "Finished saving {{.Type}}"
+    },
+    {
+        "id": "読み込み開始",
+        "translation": "Start loading {{.Type}}\nInput file path: {{.Path}}"
+    },
+    {
+        "id": "読み込み終了",
+        "translation": "Finished loading {{.Type}}"
+    },
+    {
+        "id": "読み込み途中完了",
+        "translation": "-- 【{{.Type}}】Loading complete"
+    },
+    {
+        "id": "読み込み途中",
+        "translation": "---- 【{{.Type}}】Loading [{{.Index}}/{{.Total}}]"
+    },
+    {
+        "id": "保存途中完了",
+        "translation": "-- 【{{.Type}}】Saving complete"
+    },
+    {
+        "id": "保存途中",
+        "translation": "---- 【{{.Type}}】Saving [{{.Index}}/{{.Total}}]"
+    },
+    {
+        "id": "頂点",
+        "translation": "Vertex"
+    },
+    {
+        "id": "面",
+        "translation": "Face"
+    },
+    {
+        "id": "材質",
+        "translation": "Material"
+    },
+    {
+        "id": "ボーン",
+        "translation": "Bone"
+    },
+    {
+        "id": "モーフ",
+        "translation": "Morph"
+    },
+    {
+        "id": "表示枠",
+        "translation": "Display frame"
+    },
+    {
+        "id": "剛体",
+        "translation": "Rigid body"
+    },
+    {
+        "id": "ジョイント",
+        "translation": "Joint"
+    },
+    {
         "id": "&画面移動連結",
-        "translation": "&Screen transition link"
+        "translation": "&Screen movement link"
     }
 ]

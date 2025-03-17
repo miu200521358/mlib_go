@@ -68,14 +68,6 @@
         "translation": "&언어"
     },
     {
-        "id": "LanguageChanged.Title",
-        "translation": "언어 변경"
-    },
-    {
-        "id": "LanguageChanged.Message",
-        "translation": "화면의 언어 변경은 재시작 후 적용됩니다\n앱을 종료합니다"
-    },
-    {
         "id": "未設定",
         "translation": "미설정"
     },
@@ -432,7 +424,71 @@
         "translation": "&뷰어 자세한 로그 표시"
     },
     {
+        "id": "保存開始",
+        "translation": "{{.Type}} 저장 시작\n출력 파일 경로: {{.Path}}"
+    },
+    {
+        "id": "保存終了",
+        "translation": "{{.Type}} 저장 완료"
+    },
+    {
+        "id": "読み込み開始",
+        "translation": "{{.Type}} 로딩 시작\n입력 파일 경로: {{.Path}}"
+    },
+    {
+        "id": "読み込み終了",
+        "translation": "{{.Type}} 로딩 완료"
+    },
+    {
+        "id": "読み込み途中完了",
+        "translation": "-- 【{{.Type}}】 로딩 완료"
+    },
+    {
+        "id": "読み込み途中",
+        "translation": "---- 【{{.Type}}】 로딩 [{{.Index}}/{{.Total}}]"
+    },
+    {
+        "id": "保存途中完了",
+        "translation": "-- 【{{.Type}}】 저장 완료"
+    },
+    {
+        "id": "保存途中",
+        "translation": "---- 【{{.Type}}】 저장 [{{.Index}}/{{.Total}}]"
+    },
+    {
+        "id": "頂点",
+        "translation": "정점"
+    },
+    {
+        "id": "面",
+        "translation": "면"
+    },
+    {
+        "id": "材質",
+        "translation": "재질"
+    },
+    {
+        "id": "ボーン",
+        "translation": "본"
+    },
+    {
+        "id": "モーフ",
+        "translation": "모프"
+    },
+    {
+        "id": "表示枠",
+        "translation": "표시 프레임"
+    },
+    {
+        "id": "剛体",
+        "translation": "강체"
+    },
+    {
+        "id": "ジョイント",
+        "translation": "조인트"
+    },
+    {
         "id": "&画面移動連結",
-        "translation": "&화면 이동 링크"
+        "translation": "&화면 이동 연결"
     }
 ]

@@ -472,3 +472,18 @@ func (fp *FilePicker) SetPath(path string) {
 	fp.pathEdit.SetText(path)
 	fp.onChanged(path)
 }
+
+func (fp *FilePicker) Path() string {
+	return fp.pathEdit.Text()
+}
+
+func (fp *FilePicker) CanLoad() bool {
+	if fp.repository == nil {
+		return false
+	}
+	canLoad, err := fp.repository.CanLoad(fp.pathEdit.Text())
+	if !canLoad || err != nil {
+		return false
+	}
+	return true
+}

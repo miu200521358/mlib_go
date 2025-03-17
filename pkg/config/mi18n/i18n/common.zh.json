@@ -68,14 +68,6 @@
         "translation": "&语言"
     },
     {
-        "id": "LanguageChanged.Title",
-        "translation": "语言更改"
-    },
-    {
-        "id": "LanguageChanged.Message",
-        "translation": "屏幕上的语言更改将在重新启动后生效\n现在将关闭应用程序"
-    },
-    {
         "id": "未設定",
         "translation": "未设置"
     },
@@ -432,7 +424,71 @@
         "translation": "&查看器详细日志显示"
     },
     {
+        "id": "保存開始",
+        "translation": "开始保存 {{.Type}}\n输出文件路径: {{.Path}}"
+    },
+    {
+        "id": "保存終了",
+        "translation": "完成保存 {{.Type}}"
+    },
+    {
+        "id": "読み込み開始",
+        "translation": "开始加载 {{.Type}}\n输入文件路径: {{.Path}}"
+    },
+    {
+        "id": "読み込み終了",
+        "translation": "完成加载 {{.Type}}"
+    },
+    {
+        "id": "読み込み途中完了",
+        "translation": "-- 【{{.Type}}】加载完成"
+    },
+    {
+        "id": "読み込み途中",
+        "translation": "---- 【{{.Type}}】加载 [{{.Index}}/{{.Total}}]"
+    },
+    {
+        "id": "保存途中完了",
+        "translation": "-- 【{{.Type}}】保存完成"
+    },
+    {
+        "id": "保存途中",
+        "translation": "---- 【{{.Type}}】保存 [{{.Index}}/{{.Total}}]"
+    },
+    {
+        "id": "頂点",
+        "translation": "顶点"
+    },
+    {
+        "id": "面",
+        "translation": "面"
+    },
+    {
+        "id": "材質",
+        "translation": "材质"
+    },
+    {
+        "id": "ボーン",
+        "translation": "骨骼"
+    },
+    {
+        "id": "モーフ",
+        "translation": "变形"
+    },
+    {
+        "id": "表示枠",
+        "translation": "显示框"
+    },
+    {
+        "id": "剛体",
+        "translation": "刚体"
+    },
+    {
+        "id": "ジョイント",
+        "translation": "关节"
+    },
+    {
         "id": "&画面移動連結",
-        "translation": "&屏幕跳转链接"
+        "translation": "&屏幕移动连接"
     }
 ]
