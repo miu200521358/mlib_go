@@ -21,7 +21,7 @@ func (rep *XRepository) parseCompressedBinaryXFile(model *pmx.PmxModel) error {
 	var err error
 
 	// 圧縮バイナリ形式の X ファイルを解凍します。
-	if decompressedBuffer, err = rep.decompressedBinaryXFile(); err != nil {
+	if decompressedBuffer, err = rep.decompressBinaryXFile(); err != nil {
 		return fmt.Errorf("failed to decompress binary X file: %w", err)
 	}
 
