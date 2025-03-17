@@ -86,7 +86,7 @@ func (md *ModelDrawer) delete() {
 
 // drawNormal 描画処理：法線表示
 func (mr *ModelRenderer) drawNormal(windowIndex int, shader rendering.IShader, paddedMatrixes []float32, width, height int) {
-	program := shader.Program(rendering.ProgramTypeModel)
+	program := shader.Program(rendering.ProgramTypeNormal)
 	gl.UseProgram(program)
 
 	mr.normalBufferHandle.Bind()
