@@ -118,15 +118,11 @@ func (li *LlrbIndexes[T]) Length() int {
 	return li.LLRB.Len()
 }
 
-// Iterator はコレクションのイテレータを提供します
-func (li *LlrbIndexes[T]) Iterator() <-chan T {
-	ch := make(chan T)
-	go func() {
-		li.LLRB.AscendGreaterOrEqual(li.LLRB.Min(), func(item llrb.Item) bool {
-			ch <- item.(*LlrbItem[T]).Value()
-			return true
-		})
-		close(ch)
-	}()
-	return ch
+// ForEach はコレクションのイテレータを提供します
+func (li *LlrbIndexes[T]) ForEach(callback func(item T)) {
+	li.LLRB.AscendGreaterOrEqual(li.LLRB.Min(), func(item llrb.Item) bool {
+		index := item.(*LlrbItem[T]).Value()
+		callback(index)
+		return true
+	})
 }

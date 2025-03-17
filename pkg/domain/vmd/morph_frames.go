@@ -90,9 +90,9 @@ func (morphFrames *MorphFrames) Clean() {
 func (morphFrames *MorphFrames) Indexes() []int {
 	indexes := make([]int, 0)
 	for _, morphFrames := range morphFrames.data {
-		for bf := range morphFrames.Iterator() {
-			indexes = append(indexes, int(bf.Index()))
-		}
+		morphFrames.Indexes.ForEach(func(index float32) {
+			indexes = append(indexes, int(index))
+		})
 	}
 	mmath.Unique(indexes)
 	mmath.Sort(indexes)
@@ -102,22 +102,17 @@ func (morphFrames *MorphFrames) Indexes() []int {
 func (morphFrames *MorphFrames) RegisteredIndexes() []int {
 	indexes := make([]int, 0)
 	for _, morphFrames := range morphFrames.data {
-		for index := range morphFrames.RegisteredIndexes.Iterator() {
+		morphFrames.RegisteredIndexes.ForEach(func(index float32) {
 			indexes = append(indexes, int(index))
-		}
+		})
 	}
 	mmath.Unique(indexes)
 	mmath.Sort(indexes)
 	return indexes
 }
 
-func (morphFrames *MorphFrames) Iterator() <-chan *MorphNameFrames {
-	ch := make(chan *MorphNameFrames)
-	go func() {
-		for _, morphNameFrames := range morphFrames.data {
-			ch <- morphNameFrames
-		}
-		close(ch)
-	}()
-	return ch
+func (morphFrames *MorphFrames) ForEach(f func(morphName string, morphNameFrames *MorphNameFrames)) {
+	for morphName, morphNameFrames := range morphFrames.data {
+		f(morphName, morphNameFrames)
+	}
 }

@@ -116,13 +116,13 @@ func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includ
 func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) error {
 	names := make([]string, 0, motion.BoneFrames.Length())
 	count := 0
-	for boneNameFrames := range motion.BoneFrames.Iterator() {
+	motion.BoneFrames.ForEach(func(name string, boneNameFrames *vmd.BoneNameFrames) {
 		if !boneNameFrames.ContainsActive() {
-			continue
+			return
 		}
 		names = append(names, boneNameFrames.Name)
 		count += boneNameFrames.Length()
-	}
+	})
 
 	rep.writeNumber(fout, binaryType_unsignedInt, float64(count), 0.0, true)
 	n := 0
@@ -149,15 +149,15 @@ func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) e
 		maxFno := fs.RegisteredIndexes.Max()
 		if fs.Length() > 1 {
 			// 普通のキーフレをそのまま出力する
-			for fno := range fs.RegisteredIndexes.Iterator() {
+			fs.RegisteredIndexes.ForEach(func(fno float32) {
 				if fno < maxFno {
 					bf := fs.Get(fno)
 					err := rep.saveBoneFrame(fout, name, bf)
 					if err != nil {
-						return err
+						return
 					}
 				}
-			}
+			})
 		}
 	}
 
@@ -215,13 +215,13 @@ func (rep *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.Bone
 func (rep *VmdRepository) saveMorphFrames(fout *os.File, motion *vmd.VmdMotion) error {
 	names := make([]string, 0, motion.MorphFrames.Length())
 	count := 0
-	for morphNameFrames := range motion.MorphFrames.Iterator() {
+	motion.MorphFrames.ForEach(func(name string, morphNameFrames *vmd.MorphNameFrames) {
 		if !morphNameFrames.ContainsActive() {
-			continue
+			return
 		}
 		names = append(names, morphNameFrames.Name)
 		count += morphNameFrames.Length()
-	}
+	})
 
 	rep.writeNumber(fout, binaryType_unsignedInt, float64(count), 0.0, true)
 	n := 0
@@ -229,13 +229,13 @@ func (rep *VmdRepository) saveMorphFrames(fout *os.File, motion *vmd.VmdMotion) 
 		morphFrames := motion.MorphFrames.Get(name)
 		if morphFrames.RegisteredIndexes.Len() > 0 {
 			// 普通のキーフレをそのまま出力する
-			for fno := range morphFrames.RegisteredIndexes.Iterator() {
+			morphFrames.RegisteredIndexes.ForEach(func(fno float32) {
 				mf := morphFrames.Get(fno)
 				err := rep.saveMorphFrame(fout, name, mf)
 				if err != nil {
-					return err
+					return
 				}
-			}
+			})
 		}
 
 		if n%10000 == 0 && n > 0 {
@@ -271,13 +271,13 @@ func (rep *VmdRepository) saveCameraFrames(fout *os.File, motion *vmd.VmdMotion)
 	cameraFrames := motion.CameraFrames
 	if cameraFrames.RegisteredIndexes.Len() > 0 {
 		// 普通のキーフレをそのまま出力する
-		for fno := range cameraFrames.RegisteredIndexes.Iterator() {
+		cameraFrames.RegisteredIndexes.ForEach(func(fno float32) {
 			cf := cameraFrames.Get(fno)
 			err := rep.saveCameraFrame(fout, cf)
 			if err != nil {
-				return err
+				return
 			}
-		}
+		})
 	}
 
 	return nil
@@ -330,13 +330,13 @@ func (rep *VmdRepository) saveLightFrames(fout *os.File, motion *vmd.VmdMotion) 
 	lightFrames := motion.LightFrames
 	if lightFrames.RegisteredIndexes.Len() > 0 {
 		// 普通のキーフレをそのまま出力する
-		for fno := range lightFrames.RegisteredIndexes.Iterator() {
+		lightFrames.RegisteredIndexes.ForEach(func(fno float32) {
 			lf := lightFrames.Get(fno)
 			err := rep.saveLightFrame(fout, lf)
 			if err != nil {
-				return err
+				return
 			}
-		}
+		})
 	}
 
 	return nil
@@ -380,13 +380,13 @@ func (rep *VmdRepository) saveShadowFrames(fout *os.File, motion *vmd.VmdMotion)
 	shadowFrames := motion.ShadowFrames
 	if shadowFrames.RegisteredIndexes.Len() > 0 {
 		// 普通のキーフレをそのまま出力する
-		for fno := range shadowFrames.RegisteredIndexes.Iterator() {
+		shadowFrames.RegisteredIndexes.ForEach(func(fno float32) {
 			sf := shadowFrames.Get(fno)
 			err := rep.sveShadowFrame(fout, sf)
 			if err != nil {
-				return err
+				return
 			}
-		}
+		})
 	}
 
 	return nil
@@ -411,13 +411,13 @@ func (rep *VmdRepository) saveIkFrames(fout *os.File, motion *vmd.VmdMotion) err
 	ikFrames := motion.IkFrames
 	if ikFrames.RegisteredIndexes.Len() > 0 {
 		// 普通のキーフレをそのまま出力する
-		for fno := range ikFrames.RegisteredIndexes.Iterator() {
+		ikFrames.RegisteredIndexes.ForEach(func(fno float32) {
 			ikf := ikFrames.Get(fno)
 			err := rep.saveIkFrame(fout, ikf)
 			if err != nil {
-				return err
+				return
 			}
-		}
+		})
 	}
 
 	return nil

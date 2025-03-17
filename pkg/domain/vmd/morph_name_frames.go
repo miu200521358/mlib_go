@@ -24,25 +24,28 @@ func (morphNameFrames *MorphNameFrames) ContainsActive() bool {
 		return false
 	}
 
-	for mf := range morphNameFrames.Iterator() {
-		if mf == nil {
-			return false
+	isActive := false
+	morphNameFrames.ForEach(func(index float32, bf *MorphFrame) {
+		if bf == nil {
+			return
 		}
 
-		if !mmath.NearEquals(mf.Ratio, 0.0, 1e-2) {
-			return true
+		if !mmath.NearEquals(bf.Ratio, 0.0, 1e-2) {
+			isActive = true
+			return
 		}
 
-		nextMf := morphNameFrames.Get(morphNameFrames.NextFrame(mf.Index()))
+		nextBf := morphNameFrames.Get(morphNameFrames.NextFrame(bf.Index()))
 
-		if nextMf == nil {
-			return false
+		if nextBf == nil {
+			return
 		}
 
-		if !mmath.NearEquals(nextMf.Ratio, 0.0, 1e-2) {
-			return true
+		if !mmath.NearEquals(bf.Ratio, 0.0, 1e-2) {
+			isActive = true
+			return
 		}
-	}
+	})
 
-	return false
+	return isActive
 }

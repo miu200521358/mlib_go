@@ -52,9 +52,9 @@ func (boneFrames *BoneFrames) Names() []string {
 func (boneFrames *BoneFrames) Indexes() []int {
 	indexes := make([]int, 0)
 	for _, boneFrames := range boneFrames.data {
-		for bf := range boneFrames.Iterator() {
-			indexes = append(indexes, int(bf.Index()))
-		}
+		boneFrames.Indexes.ForEach(func(index float32) {
+			indexes = append(indexes, int(index))
+		})
 	}
 	mmath.Unique(indexes)
 	mmath.Sort(indexes)
@@ -64,9 +64,9 @@ func (boneFrames *BoneFrames) Indexes() []int {
 func (boneFrames *BoneFrames) RegisteredIndexes() []int {
 	indexes := make([]int, 0)
 	for _, boneFrames := range boneFrames.data {
-		for index := range boneFrames.RegisteredIndexes.Iterator() {
+		boneFrames.RegisteredIndexes.ForEach(func(index float32) {
 			indexes = append(indexes, int(index))
-		}
+		})
 	}
 	mmath.Unique(indexes)
 	mmath.Sort(indexes)
@@ -125,13 +125,8 @@ func (boneFrames *BoneFrames) Reduce() *BoneFrames {
 	return reduced
 }
 
-func (boneFrames *BoneFrames) Iterator() <-chan *BoneNameFrames {
-	ch := make(chan *BoneNameFrames)
-	go func() {
-		for _, boneNameFrames := range boneFrames.data {
-			ch <- boneNameFrames
-		}
-		close(ch)
-	}()
-	return ch
+func (boneFrames *BoneFrames) ForEach(fn func(boneName string, boneNameFrames *BoneNameFrames)) {
+	for boneName, boneNameFrames := range boneFrames.data {
+		fn(boneName, boneNameFrames)
+	}
 }

@@ -129,15 +129,10 @@ func (baseFrames *BaseFrames[T]) NextFrame(index float32) float32 {
 	return baseFrames.Indexes.Next(index)
 }
 
-func (baseFrames *BaseFrames[T]) Iterator() <-chan T {
-	ch := make(chan T)
-	go func() {
-		for v := range baseFrames.Indexes.Iterator() {
-			ch <- baseFrames.Get(v)
-		}
-		close(ch)
-	}()
-	return ch
+func (baseFrames *BaseFrames[T]) ForEach(callback func(index float32, value T)) {
+	baseFrames.Indexes.ForEach(func(index float32) {
+		callback(index, baseFrames.Get(index))
+	})
 }
 
 func (baseFrames *BaseFrames[T]) appendFrame(v T) {
