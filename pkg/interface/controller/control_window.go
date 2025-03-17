@@ -602,6 +602,14 @@ func (cw *ControlWindow) LoadMotion(windowIndex int, modelIndex int) *vmd.VmdMot
 	return cw.shared.LoadMotion(windowIndex, modelIndex)
 }
 
+func (cw *ControlWindow) StoreSelectedMaterialIndexes(windowIndex int, modelIndex int, indexes []int) {
+	cw.shared.StoreSelectedMaterialIndexes(windowIndex, modelIndex, indexes)
+}
+
+func (cw *ControlWindow) LoadSelectedMaterialIndexes(windowIndex int, modelIndex int) []int {
+	return cw.shared.LoadSelectedMaterialIndexes(windowIndex, modelIndex)
+}
+
 // ------- 以下、メニューから呼ばれるトリガーメソッド -------
 
 func (cw *ControlWindow) TriggerEnabledPhysics() {

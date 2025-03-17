@@ -4,6 +4,8 @@
 package render
 
 import (
+	"slices"
+
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
@@ -27,23 +29,15 @@ type ModelRenderer struct {
 
 	// 各材質ごとのメッシュ描画オブジェクト
 	meshes []*MeshRenderer
-
-	// UI・選択情報管理（非表示材質、選択頂点など）
-	invisibleMaterialIndexes map[int]struct{}
-	selectedVertexes         map[int]struct{}
-	noSelectedVertexes       map[int]struct{}
 }
 
 // NewModelRenderer は、新しい ModelRenderer を生成します。
 // ここでは、モデルのバッファ初期化や各材質ごとの MeshRenderer の生成も行います。
 func NewModelRenderer(windowIndex int, model *pmx.PmxModel) *ModelRenderer {
 	mr := &ModelRenderer{
-		ModelDrawer:              &ModelDrawer{},
-		windowIndex:              windowIndex,
-		Model:                    model,
-		invisibleMaterialIndexes: make(map[int]struct{}),
-		selectedVertexes:         make(map[int]struct{}),
-		noSelectedVertexes:       make(map[int]struct{}),
+		ModelDrawer: &ModelDrawer{},
+		windowIndex: windowIndex,
+		Model:       model,
 	}
 
 	tm := NewTextureManager()
@@ -105,8 +99,15 @@ func (mr *ModelRenderer) Render(shader rendering.IShader, shared *state.SharedSt
 		return
 	}
 
+	selectedMaterialIndexes := shared.LoadSelectedMaterialIndexes(mr.windowIndex, mr.Model.Index())
+
 	// 各材質（メッシュ）ごとの描画
 	for i, mesh := range mr.meshes {
+		if !slices.Contains(selectedMaterialIndexes, i) {
+			// 選択されていない材質は描画しない
+			continue
+		}
+
 		mesh.elemBuffer.Bind()
 
 		// ここで、delta.NewMeshDelta を用いて材質ごとの変形情報を生成
@@ -119,7 +120,7 @@ func (mr *ModelRenderer) Render(shader rendering.IShader, shared *state.SharedSt
 		}
 
 		// ワイヤーフレーム描画（UI状態に応じて）
-		if shared.IsShowWire() && !mr.existInvisibleMaterial(mesh.material.Index()) {
+		if shared.IsShowWire() {
 			mesh.drawWire(mr.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight, false)
 		}
 
@@ -137,10 +138,4 @@ func (mr *ModelRenderer) Render(shader rendering.IShader, shared *state.SharedSt
 		shared.IsShowBoneVisible() {
 		mr.drawBone(mr.windowIndex, shader, mr.Model.Bones, shared, paddedMatrixes, matrixWidth, matrixHeight)
 	}
-}
-
-// existInvisibleMaterial は、指定された材質インデックスが非表示設定になっているかを返します。
-func (mr *ModelRenderer) existInvisibleMaterial(index int) bool {
-	_, ok := mr.invisibleMaterialIndexes[index]
-	return ok
 }

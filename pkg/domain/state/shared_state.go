@@ -31,6 +31,7 @@ type SharedState struct {
 	isClosed                   atomic.Bool      // ウィンドウのクローズ状態
 	models                     [][]atomic.Value // モデルデータ(ウィンドウ/モデルインデックス)
 	motions                    [][]atomic.Value // モーションデータ(ウィンドウ/モデルインデックス)
+	selectedMaterialIndexes    [][]atomic.Value // 選択中のマテリアルインデックス(ウィンドウ/モデルインデックス)
 }
 
 // NewSharedState は2つのStateを注入して生成するコンストラクタ
@@ -42,6 +43,7 @@ func NewSharedState(viewerCount int) *SharedState {
 		focusViewWindow:         make([]atomic.Bool, viewerCount),
 		models:                  make([][]atomic.Value, viewerCount),
 		motions:                 make([][]atomic.Value, viewerCount),
+		selectedMaterialIndexes: make([][]atomic.Value, viewerCount),
 	}
 }
 
@@ -105,9 +107,11 @@ func (ss *SharedState) StoreModel(windowIndex, modelIndex int, model *pmx.PmxMod
 	if len(ss.models[windowIndex]) <= modelIndex {
 		for i := len(ss.models[windowIndex]); i <= modelIndex; i++ {
 			ss.models[windowIndex] = append(ss.models[windowIndex], atomic.Value{})
+			ss.selectedMaterialIndexes[windowIndex] = append(ss.selectedMaterialIndexes[windowIndex], atomic.Value{})
 		}
 	}
 	ss.models[windowIndex][modelIndex].Store(model)
+	ss.selectedMaterialIndexes[windowIndex][modelIndex].Store(model.Materials.Indexes())
 }
 
 // LoadModel は指定されたウィンドウとモデルインデックスのモデルを取得
@@ -143,6 +147,30 @@ func (ss *SharedState) LoadMotion(windowIndex, modelIndex int) *vmd.VmdMotion {
 		return vmd.NewVmdMotion("")
 	}
 	return ss.motions[windowIndex][modelIndex].Load().(*vmd.VmdMotion)
+}
+
+// LoadSelectedMaterialIndexes は選択中のマテリアルインデックスを取得
+func (ss *SharedState) LoadSelectedMaterialIndexes(windowIndex, modelIndex int) []int {
+	if len(ss.selectedMaterialIndexes) <= windowIndex {
+		return nil
+	}
+	if len(ss.selectedMaterialIndexes[windowIndex]) <= modelIndex {
+		return nil
+	}
+	return ss.selectedMaterialIndexes[windowIndex][modelIndex].Load().([]int)
+}
+
+// StoreSelectedMaterialIndexes は選択中のマテリアルインデックスを格納
+func (ss *SharedState) StoreSelectedMaterialIndexes(windowIndex, modelIndex int, indexes []int) {
+	if len(ss.selectedMaterialIndexes) <= windowIndex {
+		return
+	}
+	if len(ss.selectedMaterialIndexes[windowIndex]) <= modelIndex {
+		for i := len(ss.selectedMaterialIndexes[windowIndex]); i <= modelIndex; i++ {
+			ss.selectedMaterialIndexes[windowIndex] = append(ss.selectedMaterialIndexes[windowIndex], atomic.Value{})
+		}
+	}
+	ss.selectedMaterialIndexes[windowIndex][modelIndex].Store(indexes)
 }
 
 // アトミックに取得
