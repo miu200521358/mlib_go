@@ -167,46 +167,46 @@ func (rep *XRepository) decompressMSZipData(
 // decompressRFC1951Block は、圧縮データ compressed を元に展開先のバッファ decompressed に展開を行い、
 // 展開したバイト数を返します。展開中、ブロックごとに最終ブロックフラグおよびブロック種別（非圧縮／固定ハフマン／動的ハフマン）に基づいて処理を行います。
 func (rep *XRepository) decompressRFC1951Block(compressed []byte, decompressed []byte, prevBytesDecompressed uint32) (uint32, error) {
-	var ctx deflateState
-	rep.resetDecompressionState(&ctx)
+	var state deflateState
+	rep.resetDecompressionState(&state)
 	// 前回の展開バイト数を設定
-	ctx.bytesDecompressed = uint32(prevBytesDecompressed)
+	state.bytesDecompressed = uint32(prevBytesDecompressed)
 
 	// 入力／出力バッファおよびサイズ情報の設定
-	ctx.inputBuffer = compressed
-	ctx.outputBuffer = decompressed
-	ctx.sizeInBytes = uint32(len(compressed))
-	ctx.outputSize = uint32(len(decompressed))
+	state.inputBuffer = compressed
+	state.outputBuffer = decompressed
+	state.sizeInBytes = uint32(len(compressed))
+	state.outputSize = uint32(len(decompressed))
 	// 通常、バイト数 × 8 で全ビット数となる
-	ctx.sizeInBits = int64(len(compressed)) * 8
+	state.sizeInBits = int64(len(compressed)) * 8
 
 	// 事前に初期化された固定ハフマンツリーを使用
-	ctx.fixedHuffmanTree = globalFixedHuffmanTree
+	state.fixedHuffmanTree = globalFixedHuffmanTree
 
 	final := false
 	// 圧縮データ全体を処理するループ
-	for !final && ctx.readBitCount < ctx.sizeInBits {
+	for !final && state.readBitCount < state.sizeInBits {
 		// 最初の1ビットが最終ブロックフラグとなる
-		wTmp := rep.readBits(&ctx, 1)
+		wTmp := rep.readBits(&state, 1)
 		if wTmp == 1 {
 			final = true
 		}
 		// 次の2ビットでブロックの種類を取得
-		blockType := rep.readBits(&ctx, 2)
+		blockType := rep.readBits(&state, 2)
 		switch blockType {
 		case 0:
 			// 非圧縮ブロック
-			if !rep.processUncompressed(&ctx) {
+			if !rep.processUncompressed(&state) {
 				return 0, fmt.Errorf("ProcessUncompressed に失敗")
 			}
 		case 1:
 			// 固定ハフマン圧縮ブロック
-			if !rep.processHuffmanFixed(&ctx) {
+			if !rep.processHuffmanFixed(&state) {
 				return 0, fmt.Errorf("ProcessHuffmanFixed に失敗")
 			}
 		case 2:
 			// 動的ハフマン圧縮ブロック
-			if !rep.processDynamicHuffmanBlock(&ctx) {
+			if !rep.processDynamicHuffmanBlock(&state) {
 				return 0, fmt.Errorf("ProcessHuffmanCustom に失敗")
 			}
 		default:
@@ -214,26 +214,26 @@ func (rep *XRepository) decompressRFC1951Block(compressed []byte, decompressed [
 		}
 	}
 
-	return ctx.bytesDecompressed, nil
+	return state.bytesDecompressed, nil
 }
 
 // processDynamicHuffmanBlock は、動的ハフマン圧縮ブロックの復号処理を行います。
 // まず、BuildDynamicHuffmanTrees によりカスタムハフマンツリー（リテラル／長さツリーおよび距離ツリー）を構築し、
 // 次に DecodeWithHuffmanTree を用いて復号処理を行います。
-func (rep *XRepository) processDynamicHuffmanBlock(ctx *deflateState) bool {
+func (rep *XRepository) processDynamicHuffmanBlock(state *deflateState) bool {
 	// 動的ハフマンツリーの構築
-	if !rep.buildDynamicHuffmanTrees(ctx) {
+	if !rep.buildDynamicHuffmanTrees(state) {
 		return false
 	}
 
 	// ハフマンツリーを用いて復号処理
-	if !rep.decodeWithHuffmanTree(ctx, &ctx.literalLengthTree, &ctx.customDistance) {
-		rep.clearDynamicHuffmanTrees(ctx)
+	if !rep.decodeWithHuffmanTree(state, &state.literalLengthTree, &state.customDistance) {
+		rep.clearDynamicHuffmanTrees(state)
 		return false
 	}
 
 	// 後片付け
-	rep.clearDynamicHuffmanTrees(ctx)
+	rep.clearDynamicHuffmanTrees(state)
 	return true
 }
 
@@ -244,24 +244,43 @@ const (
 	totalHeaderSize = headerSize + sizeFieldSize // 20バイト
 )
 
+// RFC1951で定義された固定順序テーブル - 静的に定義して再利用
+var huffmanCodeOrder = []int{16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15}
+
 // buildDynamicHuffmanTrees は、動的ハフマン圧縮ブロックにおける
 // リテラル／長さツリーおよび距離ツリーを構築します。
 // 正常に構築できた場合は true を、エラーがあれば false を返します。
-func (rep *XRepository) buildDynamicHuffmanTrees(ctx *deflateState) bool {
-	// 1. パラメータ読み出し
-	numLiteralLengthCodes := uint16(rep.readBits(ctx, 5)) + 257
-	numDistanceCodes := uint16(rep.readBits(ctx, 5)) + 1
-	numCodeLengthCode := uint16(rep.readBits(ctx, 4)) + 4
+func (rep *XRepository) buildDynamicHuffmanTrees(state *deflateState) bool {
+	// 1. パラメータ読み出し - 一度に複数ビットを読み取ってから計算
+	headerBits := rep.readBits(state, 14)
+	numLiteralLengthCodes := uint16((headerBits & 0x1F)) + 257   // 下位5ビット
+	numDistanceCodes := uint16(((headerBits >> 5) & 0x1F)) + 1   // 次の5ビット
+	numCodeLengthCode := uint16(((headerBits >> 10) & 0x0F)) + 4 // 上位4ビット
 
-	// 2. コード長のコード値の配列を初期化（長さ20）
+	// 2. コード長のコード値の配列 - Goではゼロ値で初期化されるため、明示的な初期化は不要
 	var codeLengthsOfTheCodeLength [20]byte
-	for i := range codeLengthsOfTheCodeLength {
-		codeLengthsOfTheCodeLength[i] = 0
-	}
-	itsOrder := []int{16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15}
+
 	// numCodeLengthCode 個分のコード長を、その順序に従って取得
-	for i := 0; i < int(numCodeLengthCode); i++ {
-		codeLengthsOfTheCodeLength[itsOrder[i]] = byte(rep.readBits(ctx, 3))
+	// ビット読み込みをバッチ処理して効率化
+	for i := 0; i < int(numCodeLengthCode); {
+		// 可能な限り一度に3ビット×3コード（9ビット）を読み取る
+		if i+3 <= int(numCodeLengthCode) {
+			bits9 := rep.readBits(state, 9)
+			codeLengthsOfTheCodeLength[huffmanCodeOrder[i]] = byte(bits9 & 0x07)
+			codeLengthsOfTheCodeLength[huffmanCodeOrder[i+1]] = byte((bits9 >> 3) & 0x07)
+			codeLengthsOfTheCodeLength[huffmanCodeOrder[i+2]] = byte((bits9 >> 6) & 0x07)
+			i += 3
+		} else if i+2 <= int(numCodeLengthCode) {
+			// 6ビット読み取り (2コード分)
+			bits6 := rep.readBits(state, 6)
+			codeLengthsOfTheCodeLength[huffmanCodeOrder[i]] = byte(bits6 & 0x07)
+			codeLengthsOfTheCodeLength[huffmanCodeOrder[i+1]] = byte((bits6 >> 3) & 0x07)
+			i += 2
+		} else {
+			// 残り1コード分
+			codeLengthsOfTheCodeLength[huffmanCodeOrder[i]] = byte(rep.readBits(state, 3))
+			i++
+		}
 	}
 
 	// 3. CodeLengthsTree の作成
@@ -305,7 +324,7 @@ func (rep *XRepository) buildDynamicHuffmanTrees(ctx *deflateState) bool {
 	var prev uint16 = 0xffff
 	var repeat uint16 = 0
 	n := 0
-	indvCount := 0
+	individualCount := 0
 	repeatCount := 0
 	maxBits = -1
 	for n < int(numLiteralLengthCodes) {
@@ -317,16 +336,16 @@ func (rep *XRepository) buildDynamicHuffmanTrees(ctx *deflateState) bool {
 			repeat--
 		} else {
 			// GetACodeWithHuffmanTree を用いてコード長を取得
-			lenVal := int(rep.decodeHuffmanSymbol(ctx, &codeLengthsTree))
+			lenVal := int(rep.decodeHuffmanSymbol(state, &codeLengthsTree))
 			switch lenVal {
 			case 16: // 前回のコード長を 3～6 回コピー
-				repeat = uint16(rep.readBits(ctx, 2)) + 3
+				repeat = uint16(rep.readBits(state, 2)) + 3
 			case 17: // 0 を 3～10 回繰り返す
 				prev = 0
-				repeat = uint16(rep.readBits(ctx, 3)) + 3
+				repeat = uint16(rep.readBits(state, 3)) + 3
 			case 18: // 0 を 11～138 回繰り返す
 				prev = 0
-				repeat = uint16(rep.readBits(ctx, 7)) + 11
+				repeat = uint16(rep.readBits(state, 7)) + 11
 			default:
 				if repeat > 0 {
 					return false
@@ -335,7 +354,7 @@ func (rep *XRepository) buildDynamicHuffmanTrees(ctx *deflateState) bool {
 				repeat = 0
 				literalLengthTree[n].length = uint16(lenVal)
 				n++
-				indvCount++
+				individualCount++
 				if lenVal > maxBits {
 					maxBits = lenVal
 				}
@@ -364,7 +383,7 @@ func (rep *XRepository) buildDynamicHuffmanTrees(ctx *deflateState) bool {
 			nextCodes[l]++
 		}
 	}
-	bSuccess := rep.buildHuffmanTree(&ctx.literalLengthTree, literalLengthTree)
+	bSuccess := rep.buildHuffmanTree(&state.literalLengthTree, literalLengthTree)
 	if !bSuccess {
 		return false
 	}
@@ -383,16 +402,16 @@ func (rep *XRepository) buildDynamicHuffmanTrees(ctx *deflateState) bool {
 				n++
 				repeat--
 			} else {
-				lenVal := int(rep.decodeHuffmanSymbol(ctx, &codeLengthsTree))
+				lenVal := int(rep.decodeHuffmanSymbol(state, &codeLengthsTree))
 				switch lenVal {
 				case 16:
-					repeat = uint16(rep.readBits(ctx, 2)) + 3
+					repeat = uint16(rep.readBits(state, 2)) + 3
 				case 17:
 					prev = 0
-					repeat = uint16(rep.readBits(ctx, 3)) + 3
+					repeat = uint16(rep.readBits(state, 3)) + 3
 				case 18:
 					prev = 0
-					repeat = uint16(rep.readBits(ctx, 7)) + 11
+					repeat = uint16(rep.readBits(state, 7)) + 11
 				default:
 					if repeat > 0 {
 						return false
@@ -428,7 +447,7 @@ func (rep *XRepository) buildDynamicHuffmanTrees(ctx *deflateState) bool {
 				nextCodes[l]++
 			}
 		}
-		bSuccess = rep.buildHuffmanTree(&ctx.customDistance, distanceTree)
+		bSuccess = rep.buildHuffmanTree(&state.customDistance, distanceTree)
 		if !bSuccess {
 		}
 	}
@@ -437,7 +456,7 @@ func (rep *XRepository) buildDynamicHuffmanTrees(ctx *deflateState) bool {
 	codeLengthsTree.codes = nil
 
 	if !bSuccess {
-		rep.clearDynamicHuffmanTrees(ctx)
+		rep.clearDynamicHuffmanTrees(state)
 	}
 	return bSuccess
 }
@@ -445,39 +464,39 @@ func (rep *XRepository) buildDynamicHuffmanTrees(ctx *deflateState) bool {
 // clearDynamicHuffmanTrees は、DecompressionContext 内のカスタムハフマンツリー
 // （CustomDistance と CustomLiteralLength）のリソースを解放（nil に設定）し、
 // フィールドの値をリセットします。
-func (rep *XRepository) clearDynamicHuffmanTrees(ctx *deflateState) {
+func (rep *XRepository) clearDynamicHuffmanTrees(state *deflateState) {
 	// CustomDistance のリソース解放
-	ctx.customDistance.codes = nil
-	ctx.customDistance.numMaxBits = 0
-	ctx.customDistance.numCodes = 0
+	state.customDistance.codes = nil
+	state.customDistance.numMaxBits = 0
+	state.customDistance.numCodes = 0
 
 	// CustomLiteralLength のリソース解放
-	ctx.literalLengthTree.codes = nil
-	ctx.literalLengthTree.numMaxBits = 0
-	ctx.literalLengthTree.numCodes = 0
+	state.literalLengthTree.codes = nil
+	state.literalLengthTree.numMaxBits = 0
+	state.literalLengthTree.numCodes = 0
 }
 
 // processHuffmanFixed は、固定ハフマンブロックの復号処理を行います。
-// 固定ハフマンツリー (ctx.Fixed) を用いて、DecodeWithHuffmanTree を呼び出し、
+// 固定ハフマンツリー (state.Fixed) を用いて、DecodeWithHuffmanTree を呼び出し、
 // 復号処理の成否を返します。
-func (rep *XRepository) processHuffmanFixed(ctx *deflateState) bool {
+func (rep *XRepository) processHuffmanFixed(state *deflateState) bool {
 	// 固定ハフマンツリーはすでに設定されているため、初期化不要
-	result := rep.decodeWithHuffmanTree(ctx, &ctx.fixedHuffmanTree, nil)
+	result := rep.decodeWithHuffmanTree(state, &state.fixedHuffmanTree, nil)
 	return result
 }
 
 // processUncompressed は、非圧縮ブロックのデータを処理し、
 // チェックサム検証後、サイズ分のバイトを出力バッファへコピーします。
 // 正常終了の場合は true を、エラー時は false を返します。
-func (rep *XRepository) processUncompressed(ctx *deflateState) bool {
+func (rep *XRepository) processUncompressed(state *deflateState) bool {
 	// サイズ（16bit）を読み出す
-	sizeLow := rep.readBits(ctx, 8) & 0xff
-	sizeHigh := rep.readBits(ctx, 8) & 0xff
+	sizeLow := rep.readBits(state, 8) & 0xff
+	sizeHigh := rep.readBits(state, 8) & 0xff
 	size := uint16(sizeLow) | (uint16(sizeHigh) << 8)
 
 	// チェックサム用の値（16bit）を読み出し、反転してサイズと一致するか検証
-	tmpLow := rep.readBits(ctx, 8) & 0xff
-	tmpHigh := rep.readBits(ctx, 8) & 0xff
+	tmpLow := rep.readBits(state, 8) & 0xff
+	tmpHigh := rep.readBits(state, 8) & 0xff
 	wTmp := uint16(tmpLow) | (uint16(tmpHigh) << 8)
 
 	// ビット反転（Go では ^ 演算子でビットごとのNOT）
@@ -489,24 +508,24 @@ func (rep *XRepository) processUncompressed(ctx *deflateState) bool {
 
 	// size バイト分のデータを出力先バッファにコピーする
 	for i := 0; i < int(size); i++ {
-		b := rep.readBits(ctx, 8) & 0xff
-		if int(ctx.bytesDecompressed) >= len(ctx.outputBuffer) {
+		b := rep.readBits(state, 8) & 0xff
+		if int(state.bytesDecompressed) >= len(state.outputBuffer) {
 			return false
 		}
-		ctx.outputBuffer[ctx.bytesDecompressed] = byte(b)
-		ctx.bytesDecompressed++
+		state.outputBuffer[state.bytesDecompressed] = byte(b)
+		state.bytesDecompressed++
 	}
 
 	return true
 }
 
 // decodeWithHuffmanTree は、literalLengthTree および distanceTree を用いて
-// 圧縮データからリテラルおよび長さ・距離ペアを復号し、ctx.Dest に展開します。
+// 圧縮データからリテラルおよび長さ・距離ペアを復号し、state.output に展開します。
 // 終端コード（256）が現れた場合に処理を終了し、正常終了なら true を、エラー時は false を返します。
-func (rep *XRepository) decodeWithHuffmanTree(ctx *deflateState, literalLengthTree *huffmanTree, distanceTree *huffmanTree) bool {
+func (rep *XRepository) decodeWithHuffmanTree(state *deflateState, literalLengthTree *huffmanTree, distanceTree *huffmanTree) bool {
 	for {
 		// リテラル/長さコードの取得
-		w := rep.decodeHuffmanSymbol(ctx, literalLengthTree)
+		w := rep.decodeHuffmanSymbol(state, literalLengthTree)
 
 		if w == 0xffff {
 			return false
@@ -517,37 +536,37 @@ func (rep *XRepository) decodeWithHuffmanTree(ctx *deflateState, literalLengthTr
 		}
 		if w < 256 {
 			// リテラルバイトの場合、そのまま出力
-			if int(ctx.bytesDecompressed) >= len(ctx.outputBuffer) {
+			if int(state.bytesDecompressed) >= len(state.outputBuffer) {
 				return false
 			}
-			ctx.outputBuffer[ctx.bytesDecompressed] = byte(w)
-			ctx.bytesDecompressed++
+			state.outputBuffer[state.bytesDecompressed] = byte(w)
+			state.bytesDecompressed++
 		} else {
 			// 長さ/距離ペアの場合
-			length := rep.decodeLength(ctx, w)
+			length := rep.decodeLength(state, w)
 			var distCode uint16
 			if distanceTree != nil {
-				distCode = rep.decodeHuffmanSymbol(ctx, distanceTree)
+				distCode = rep.decodeHuffmanSymbol(state, distanceTree)
 			} else {
-				distCode = rep.readBits(ctx, 5)
+				distCode = rep.readBits(state, 5)
 				distCode = rep.reverseBits(int(distCode), 5)
 			}
 
-			distance := rep.decodeDistance(ctx, distCode)
+			distance := rep.decodeDistance(state, distCode)
 
 			// コピー元インデックスは、現在の出力位置から distance 分戻った位置
-			start := int(ctx.bytesDecompressed) - distance
+			start := int(state.bytesDecompressed) - distance
 
 			if start < 0 {
 				return false
 			}
 			// length バイト分、過去の出力からコピーする
 			for i := range length {
-				if int(ctx.bytesDecompressed) >= len(ctx.outputBuffer) || start+i >= len(ctx.outputBuffer) {
+				if int(state.bytesDecompressed) >= len(state.outputBuffer) || start+i >= len(state.outputBuffer) {
 					return false
 				}
-				ctx.outputBuffer[ctx.bytesDecompressed] = ctx.outputBuffer[start+i]
-				ctx.bytesDecompressed++
+				state.outputBuffer[state.bytesDecompressed] = state.outputBuffer[start+i]
+				state.bytesDecompressed++
 			}
 		}
 	}
@@ -568,9 +587,9 @@ func (rep *XRepository) decodeWithHuffmanTree(ctx *deflateState, literalLengthTr
 //	numExtraBits = x + 1;
 //	y = (4 << numExtraBits) + 3;
 //	y += (w & 3) << numExtraBits;
-//	extra = GetBits(ctx, numExtraBits);
+//	extra = GetBits(state, numExtraBits);
 //	return y + extra;
-func (rep *XRepository) decodeLength(ctx *deflateState, baseCode uint16) int {
+func (rep *XRepository) decodeLength(state *deflateState, baseCode uint16) int {
 	if baseCode <= 264 {
 		val := int(baseCode) - 257 + 3
 		return val
@@ -589,7 +608,7 @@ func (rep *XRepository) decodeLength(ctx *deflateState, baseCode uint16) int {
 	y := uint16((4 << int(numExtraBits)) + 3)
 	// y += (w & 3) << numExtraBits;
 	y += uint16((int(w & 3)) << int(numExtraBits))
-	extra := rep.readBits(ctx, int(numExtraBits))
+	extra := rep.readBits(state, int(numExtraBits))
 	result := int(y) + int(extra)
 	return result
 }
@@ -606,9 +625,9 @@ func (rep *XRepository) decodeLength(ctx *deflateState, baseCode uint16) int {
 //	numExtraBits = x + 1;
 //	y = (2 << numExtraBits) + 1;
 //	y += (w & 1) << numExtraBits;
-//	extra = GetBits(ctx, numExtraBits);
+//	extra = GetBits(state, numExtraBits);
 //	return y + extra;
-func (rep *XRepository) decodeDistance(ctx *deflateState, baseCode uint16) int {
+func (rep *XRepository) decodeDistance(state *deflateState, baseCode uint16) int {
 	if baseCode <= 3 {
 		val := int(baseCode) + 1
 		return val
@@ -621,7 +640,7 @@ func (rep *XRepository) decodeDistance(ctx *deflateState, baseCode uint16) int {
 	numExtraBits := x + 1
 	y := uint16((2 << int(numExtraBits)) + 1)
 	y += uint16((int(w & 1)) << int(numExtraBits))
-	extra := rep.readBits(ctx, int(numExtraBits))
+	extra := rep.readBits(state, int(numExtraBits))
 	result := int(y) + int(extra)
 	return result
 }
@@ -645,11 +664,11 @@ func (rep *XRepository) compareCode(a huffmanSymbol, length int, code uint16) in
 	return 1
 }
 
-// decodeHuffmanSymbol は、ctx.Src からビットを順次読み出し、
+// decodeHuffmanSymbol は、state.input からビットを順次読み出し、
 // tree 内のハフマンコードと照合して該当するシンボル（binCode）を返します。
 // 照合処理は、入力の最小ビット長から始まり、ビット数を増加させながらバイナリサーチで行います。
 // 該当が見つからなかった場合は 0xffff を返します。
-func (rep *XRepository) decodeHuffmanSymbol(ctx *deflateState, tree *huffmanTree) uint16 {
+func (rep *XRepository) decodeHuffmanSymbol(state *deflateState, tree *huffmanTree) uint16 {
 	if tree.codes == nil || len(tree.codes) == 0 {
 		return 0xffff
 	}
@@ -660,7 +679,7 @@ func (rep *XRepository) decodeHuffmanSymbol(ctx *deflateState, tree *huffmanTree
 	// 初期の minBits 分のビットを取得
 	for bits := 0; bits < minBits; bits++ {
 		w <<= 1
-		w |= rep.readBit(ctx)
+		w |= rep.readBit(state)
 	}
 
 	// 現在のビット数 (minBits) から最大ビット長まで拡張しながら検索
@@ -682,7 +701,7 @@ func (rep *XRepository) decodeHuffmanSymbol(ctx *deflateState, tree *huffmanTree
 		}
 		// 該当が見つからなかったので、1ビット追加して再検索
 		w <<= 1
-		addedBit := rep.readBit(ctx)
+		addedBit := rep.readBit(state)
 		w |= addedBit
 		bits++
 	}
@@ -734,30 +753,30 @@ func (rep *XRepository) buildHuffmanTree(tree *huffmanTree, codes []huffmanSymbo
 }
 
 // resetDecompressionState は、DecompressionContext のフィールドを初期状態にリセットします。
-func (rep *XRepository) resetDecompressionState(ctx *deflateState) {
+func (rep *XRepository) resetDecompressionState(state *deflateState) {
 	// ソース／デスティネーション関連のフィールドをリセット
-	ctx.inputBuffer = nil
-	ctx.readBitCount = 0
-	ctx.sizeInBits = 0
-	ctx.sizeInBytes = 0
-	ctx.outputBuffer = nil
-	ctx.outputSize = 0
-	ctx.bytesDecompressed = 0
+	state.inputBuffer = nil
+	state.readBitCount = 0
+	state.sizeInBits = 0
+	state.sizeInBytes = 0
+	state.outputBuffer = nil
+	state.outputSize = 0
+	state.bytesDecompressed = 0
 
 	// カスタム距離ツリーの初期化
-	ctx.customDistance.numMaxBits = 0
-	ctx.customDistance.codes = nil
-	ctx.customDistance.numCodes = 0
+	state.customDistance.numMaxBits = 0
+	state.customDistance.codes = nil
+	state.customDistance.numCodes = 0
 
 	// カスタムリテラル/長さツリーの初期化
-	ctx.literalLengthTree.numMaxBits = 0
-	ctx.literalLengthTree.codes = nil
-	ctx.literalLengthTree.numCodes = 0
+	state.literalLengthTree.numMaxBits = 0
+	state.literalLengthTree.codes = nil
+	state.literalLengthTree.numCodes = 0
 
 	// 固定ハフマンツリーの初期化
-	ctx.fixedHuffmanTree.numMaxBits = 0
-	ctx.fixedHuffmanTree.codes = nil
-	ctx.fixedHuffmanTree.numCodes = 0
+	state.fixedHuffmanTree.numMaxBits = 0
+	state.fixedHuffmanTree.codes = nil
+	state.fixedHuffmanTree.numCodes = 0
 }
 
 // reverseBits は、引数 code の下位 length ビットを反転した結果を返します。
@@ -773,30 +792,30 @@ func (rep *XRepository) reverseBits(code int, length int) uint16 {
 	return w
 }
 
-// readBit は、DecompressionContext のSrcから現在のビット位置の1ビットを読み出します。
-func (rep *XRepository) readBit(ctx *deflateState) uint16 {
+// readBit は、DecompressionContext のinputから現在のビット位置の1ビットを読み出します。
+func (rep *XRepository) readBit(state *deflateState) uint16 {
 	// 現在のビット位置からバイト配列上のインデックスとビット位置を算出
-	index := ctx.readBitCount >> 3
-	if int(index) >= len(ctx.inputBuffer) {
+	index := state.readBitCount >> 3
+	if int(index) >= len(state.inputBuffer) {
 		return 0
 	}
-	byteVal := ctx.inputBuffer[index]
-	bitIndex := ctx.readBitCount & 7
+	byteVal := state.inputBuffer[index]
+	bitIndex := state.readBitCount & 7
 	// 対象のビットを取得
 	bit := (byteVal >> bitIndex) & 1
-	ctx.readBitCount++ // 読み出し後にカウンタをインクリメント
+	state.readBitCount++ // 読み出し後にカウンタをインクリメント
 	return uint16(bit)
 }
 
-// readBits は、DecompressionContext のSrcから指定されたsizeビット分を読み出します。
-func (rep *XRepository) readBits(ctx *deflateState, size int) uint16 {
+// readBits は、DecompressionContext のinputから指定されたsizeビット分を読み出します。
+func (rep *XRepository) readBits(state *deflateState, size int) uint16 {
 	if size <= 0 {
 		return 0
 	}
 
 	// 一度に処理するためビット位置をサイズ分進める
-	ctx.readBitCount += int64(size)
-	current := ctx.readBitCount
+	state.readBitCount += int64(size)
+	current := state.readBitCount
 	var result uint16 = 0
 
 	// 最適化: サイズに応じて一度に複数ビットを処理
@@ -804,10 +823,10 @@ func (rep *XRepository) readBits(ctx *deflateState, size int) uint16 {
 		result <<= 1
 		current-- // 読み出すビット位置を後ろにずらす
 		index := current >> 3
-		if int(index) >= len(ctx.inputBuffer) {
+		if int(index) >= len(state.inputBuffer) {
 			return result
 		}
-		byteVal := ctx.inputBuffer[index]
+		byteVal := state.inputBuffer[index]
 		bitIndex := current & 7
 		bit := (byteVal >> bitIndex) & 1
 		result |= uint16(bit)
@@ -816,13 +835,6 @@ func (rep *XRepository) readBits(ctx *deflateState, size int) uint16 {
 }
 
 // huffmanSymbol 構造体
-// C++:
-//
-//	typedef struct _customhuffmantable{
-//	    WORD    binCode;
-//	    WORD    length;
-//	    WORD    huffmanSymbol;
-//	} huffmanSymbol;
 type huffmanSymbol struct {
 	binCode     uint16
 	length      uint16
@@ -830,13 +842,6 @@ type huffmanSymbol struct {
 }
 
 // huffmanTree 構造体
-// C++:
-//
-//	typedef struct{
-//	    WORD numMaxBits;
-//	    HuffmanCode *pCode;
-//	    WORD numCodes;
-//	} huffmanTree;
 type huffmanTree struct {
 	numMaxBits uint16
 	codes      []huffmanSymbol
@@ -844,16 +849,6 @@ type huffmanTree struct {
 }
 
 // customHuffmanTree 構造体
-// C++:
-//
-//	typedef struct{
-//	    WORD numLiteralLengthCodes;
-//	    WORD numDistanceCodes;
-//	    WORD *pLiteralLengthTree;
-//	    WORD numElementsOfLiteralLengthTree;
-//	    WORD *pDistanceTree;
-//	    WORD numElementsOfDistanceTree;
-//	} customHuffmanTree;
 type customHuffmanTree struct {
 	numLiteralLengthCodes          uint16
 	numDistanceCodes               uint16
@@ -864,20 +859,6 @@ type customHuffmanTree struct {
 }
 
 // deflateState 構造体
-// C++:
-//
-//	typedef struct _context{
-//	    BYTE    *pSrc;
-//	    __int64 i64BitsRead;
-//	    __int64 i64SizeInBits;
-//	    DWORD   dwSizeInBytes;
-//	    BYTE    *pDest;
-//	    DWORD   dwDestSize;
-//	    DWORD   dwBytesDecompressed;
-//	    HuffmanTree customLiteralLength;
-//	    HuffmanTree customDistance;
-//	    HuffmanTree fixed;
-//	} deflateState;
 type deflateState struct {
 	inputBuffer       []byte
 	readBitCount      int64
