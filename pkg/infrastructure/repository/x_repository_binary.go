@@ -8,7 +8,6 @@ import (
 	"math"
 	"strings"
 
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"golang.org/x/text/encoding/japanese"
@@ -37,9 +36,9 @@ func (rep *XRepository) parseCompressedBinaryXFile(model *pmx.PmxModel) error {
 		return fmt.Errorf("failed to parse binary X file: %w", err)
 	}
 
-	// 一旦解凍後のバイナリデータをファイルに出力
-	path := strings.Replace(rep.path, ".x", "_decompressed.pmx", 1)
-	NewPmxRepository().Save(path, model, false)
+	// // 一旦解凍後のバイナリデータをファイルに出力
+	// path := strings.Replace(rep.path, ".x", "_decompressed.pmx", 1)
+	// NewPmxRepository().Save(path, model, false)
 
 	return nil
 }
@@ -118,7 +117,7 @@ func (rep *XRepository) parseBinaryXFile(model *pmx.PmxModel) error {
 				return fmt.Errorf("[parseBinaryXFile][%04d] failed to read object identifier: %w", n, err)
 			}
 
-			mlog.V("Processing object with identifier: %s\n", identifier)
+			// mlog.V("Processing object with identifier: %s\n", identifier)
 
 			// オブジェクト処理
 			if err := rep.parseObject(model, ""); err != nil {
@@ -128,7 +127,7 @@ func (rep *XRepository) parseBinaryXFile(model *pmx.PmxModel) error {
 		case tokenWord, tokenDword, tokenFloat, tokenDouble, tokenChar, tokenUchar,
 			tokenSword, tokenSdword, tokenLpstr, tokenUnicode, tokenCstring:
 			// プリミティブ型をオブジェクト識別子として処理
-			mlog.V("[%04d] Processing object with primitive type identifier: %d\n", n, tokenType)
+			// mlog.V("[%04d] Processing object with primitive type identifier: %d\n", n, tokenType)
 
 			// オブジェクト処理
 			if err := rep.parseObject(model, ""); err != nil {
@@ -146,31 +145,31 @@ func (rep *XRepository) parseBinaryXFile(model *pmx.PmxModel) error {
 
 func (rep *XRepository) parseHeader() error {
 	// ヘッダーのマジックナンバーを読み取る
-	if formatMagic, err := rep.readBytes(4); err != nil {
+	if _, err := rep.readBytes(4); err != nil {
 		return fmt.Errorf("[parseBinaryXFile] failed to read format magic: %w", err)
-	} else {
-		mlog.V("Format magic: %s\n", string(formatMagic))
+		// } else {
+		// 	mlog.V("Format magic: %s\n", string(formatMagic))
 	}
 
 	// バージョン番号を読み取る
-	if version, err := rep.readBytes(4); err != nil {
+	if _, err := rep.readBytes(4); err != nil {
 		return fmt.Errorf("[parseBinaryXFile] failed to read version number: %w", err)
-	} else {
-		mlog.V("Version number: %s\n", string(version))
+		// } else {
+		// 	mlog.V("Version number: %s\n", string(version))
 	}
 
 	// ファイルの種類を読み取る
-	if fileType, err := rep.readBytes(4); err != nil {
+	if _, err := rep.readBytes(4); err != nil {
 		return fmt.Errorf("[parseBinaryXFile] failed to read file type: %w", err)
-	} else {
-		mlog.V("File type: %s\n", string(fileType))
+		// } else {
+		// 	mlog.V("File type: %s\n", string(fileType))
 	}
 
 	// ファイルのFloatサイズを読み取る
 	if floatSize, err := rep.readBytes(4); err != nil {
 		return fmt.Errorf("[parseBinaryXFile] failed to read float size: %w", err)
 	} else {
-		mlog.V("Float size: %s\n", string(floatSize))
+		// mlog.V("Float size: %s\n", string(floatSize))
 		if string(floatSize) == "0032" {
 			rep.floatSize = 4 // 32bit
 		} else {
@@ -183,7 +182,7 @@ func (rep *XRepository) parseHeader() error {
 
 func (rep *XRepository) parseTemplate() error {
 	// テンプレート名を読み取る
-	templateName, err := rep.readName()
+	_, err := rep.readName()
 	if err != nil {
 		return fmt.Errorf("[parseTemplate] failed to read template name: %w", err)
 	}
@@ -198,13 +197,13 @@ func (rep *XRepository) parseTemplate() error {
 	}
 
 	// GUID（クラスID）を読み取る
-	guid, err := rep.readGuid()
+	_, err = rep.readGuid()
 	if err != nil {
 		return fmt.Errorf("[parseTemplate] failed to read template GUID: %w", err)
 	}
 
 	// template_parts の解析
-	if err := rep.parseTemplateParts(templateName); err != nil {
+	if err := rep.parseTemplateParts(); err != nil {
 		return fmt.Errorf("[parseTemplate] failed to parse template parts: %w", err)
 	}
 
@@ -218,12 +217,12 @@ func (rep *XRepository) parseTemplate() error {
 	}
 
 	// テンプレート情報をログに出力
-	mlog.V("Parsed template: name=%s, guid=%d\n", templateName, guid)
+	// mlog.V("Parsed template: name=%s, guid=%d\n", templateName, guid)
 	return nil
 }
 
 // parseTemplateParts は、テンプレートの本体部分を解析します
-func (rep *XRepository) parseTemplateParts(templateName string) error {
+func (rep *XRepository) parseTemplateParts() error {
 	// 次のトークンを先読みして形式を判断
 	peekToken, err := rep.getToken()
 	if err != nil {
@@ -244,7 +243,7 @@ func (rep *XRepository) parseTemplateParts(templateName string) error {
 
 		// 次のトークンがOBracketでない場合は、template_members_listがある
 		if nextPeek != tokenOBracket {
-			if err := rep.parseTemplateMembersList(templateName); err != nil {
+			if err := rep.parseTemplateMembersList(); err != nil {
 				return fmt.Errorf("[parseTemplateParts] failed to parse template members part: %w", err)
 			}
 		}
@@ -273,7 +272,7 @@ func (rep *XRepository) parseTemplateParts(templateName string) error {
 		}
 	} else {
 		// template_members_list の形式
-		if err := rep.parseTemplateMembersList(templateName); err != nil {
+		if err := rep.parseTemplateMembersList(); err != nil {
 			return fmt.Errorf("[parseTemplateParts] failed to parse template members list: %w", err)
 		}
 
@@ -283,7 +282,7 @@ func (rep *XRepository) parseTemplateParts(templateName string) error {
 			return fmt.Errorf("[parseTemplateParts] failed to read opening bracket token: %w", err)
 		}
 		if bracketToken == tokenOBracket {
-			return rep.parseTemplateParts(templateName)
+			return rep.parseTemplateParts()
 		}
 	}
 
@@ -291,7 +290,7 @@ func (rep *XRepository) parseTemplateParts(templateName string) error {
 }
 
 // parseTemplateMembersList は、テンプレートメンバーのリストを解析します
-func (rep *XRepository) parseTemplateMembersList(templateName string) error {
+func (rep *XRepository) parseTemplateMembersList() error {
 	for n := range maxLoopCount {
 		// 先読みして次のトークンが有効なtemplate_membersの開始かどうかを確認
 		peekToken, err := rep.getToken()
@@ -307,7 +306,7 @@ func (rep *XRepository) parseTemplateMembersList(templateName string) error {
 		}
 
 		// template_membersの処理
-		if err := rep.parseTemplateMembers(templateName); err != nil {
+		if err := rep.parseTemplateMembers(); err != nil {
 			return fmt.Errorf("[parseTemplateMembersList][%04d] failed to parse template members: %w", n, err)
 		}
 	}
@@ -316,7 +315,7 @@ func (rep *XRepository) parseTemplateMembersList(templateName string) error {
 }
 
 // parseTemplateMembers は、単一のテンプレートメンバーを解析します
-func (rep *XRepository) parseTemplateMembers(templateName string) error {
+func (rep *XRepository) parseTemplateMembers() error {
 	token, err := rep.getToken()
 	if err != nil {
 		return fmt.Errorf("[parseTemplateMembers] failed to read template member token: %w", err)
@@ -326,14 +325,14 @@ func (rep *XRepository) parseTemplateMembers(templateName string) error {
 	case tokenWord, tokenDword, tokenFloat, tokenDouble, tokenChar, tokenUchar,
 		tokenSword, tokenSdword, tokenLpstr, tokenUnicode, tokenCstring:
 		// プリミティブ型の処理
-		if primitiveName, err := rep.parsePrimitive(templateName); err != nil {
+		if err := rep.parsePrimitive(); err != nil {
 			return fmt.Errorf("[parseTemplateMembers] failed to parse primitive type: %w", err)
-		} else {
-			mlog.V("[parseTemplateMembers] Parsed primitive type: %s\n", primitiveName)
+			// } else {
+			// 	mlog.V("[parseTemplateMembers] Parsed primitive type: %s\n", primitiveName)
 		}
 	case tokenArray:
 		// 配列の処理
-		if err := rep.parseArray(templateName); err != nil {
+		if err := rep.parseArray(); err != nil {
 			return fmt.Errorf("[parseTemplateMembers] failed to parse array: %w", err)
 		}
 	case tokenName:
@@ -393,7 +392,7 @@ func (rep *XRepository) parseTemplateOptionInfo() error {
 				return fmt.Errorf("[parseTemplateOptionInfo] expected dot token in ellipsis, got token %d", dotToken)
 			}
 		}
-		mlog.V("Parsed ellipsis in template option info")
+		// mlog.V("Parsed ellipsis in template option info")
 	} else {
 		// template_option_list の処理
 		rep.pos -= 2 // 先読みしたトークンを戻す
@@ -417,11 +416,11 @@ func (rep *XRepository) parseObject(model *pmx.PmxModel, parentObjectName string
 
 	if nextToken == tokenName {
 		rep.pos -= 2
-		objectName, err := rep.readName() // オブジェクト名を読み飛ばす
+		_, err := rep.readName() // オブジェクト名を読み飛ばす
 		if err != nil {
 			return fmt.Errorf("[parseObject] failed to read object name: %w", err)
 		}
-		mlog.V("Parsed object name: %s at position %d (0x%08X)\n", objectName, rep.pos, rep.pos)
+		// mlog.V("Parsed object name: %s at position %d (0x%08X)\n", objectName, rep.pos, rep.pos)
 	} else {
 		rep.pos -= 2 // トークンを戻す
 	}
@@ -489,7 +488,7 @@ func (rep *XRepository) parseObject(model *pmx.PmxModel, parentObjectName string
 						return fmt.Errorf("[parseObject][%04d] failed to read object identifier: %w", n, err)
 					}
 
-					mlog.D("Processing object with identifier: %s\n", objectName)
+					// mlog.D("Processing object with identifier: %s\n", objectName)
 				}
 
 				if err := rep.parseObject(model, objectName); err != nil {
@@ -668,18 +667,18 @@ func (rep *XRepository) parseTemplateOptionList() error {
 }
 
 // プリミティブ型の処理
-func (rep *XRepository) parsePrimitive(templateName string) (primitiveName string, err error) {
+func (rep *XRepository) parsePrimitive() error {
 	// オプショナルな名前があるかチェック
 	nextToken, err := rep.getToken()
 	if err != nil {
-		return "", fmt.Errorf("[parsePrimitive] failed to read token after primitive type: %w", err)
+		return fmt.Errorf("[parsePrimitive] failed to read token after primitive type: %w", err)
 	}
 
 	if nextToken == tokenName {
 		rep.pos -= 2
-		primitiveName, err = rep.readName() // 名前を読み飛ばす
+		_, err = rep.readName() // 名前を読み飛ばす
 		if err != nil {
-			return "", fmt.Errorf("[parsePrimitive] failed to read primitive name: %w", err)
+			return fmt.Errorf("[parsePrimitive] failed to read primitive name: %w", err)
 		}
 	} else {
 		rep.pos -= 2 // トークンを戻す
@@ -688,17 +687,17 @@ func (rep *XRepository) parsePrimitive(templateName string) (primitiveName strin
 	// セミコロンを期待
 	nextToken, err = rep.getToken()
 	if err != nil {
-		return "", fmt.Errorf("[parsePrimitive] failed to read token after primitive: %w", err)
+		return fmt.Errorf("[parsePrimitive] failed to read token after primitive: %w", err)
 	}
 	if nextToken != tokenSemicolon {
-		return "", fmt.Errorf("[parsePrimitive] expected semicolon after primitive, got token %d", nextToken)
+		return fmt.Errorf("[parsePrimitive] expected semicolon after primitive, got token %d", nextToken)
 	}
 
-	return primitiveName, nil
+	return nil
 }
 
 // 配列の処理
-func (rep *XRepository) parseArray(templateName string) error {
+func (rep *XRepository) parseArray() error {
 	// 配列データ型を読み取る
 	arrayDataType, err := rep.getToken()
 	if err != nil {
@@ -875,7 +874,7 @@ func (rep *XRepository) readName() (string, error) {
 	// NULL文字を削除（ASCII名はNULL終端の可能性がある）
 	nameBytes = bytes.TrimRight(nameBytes, "\x00")
 	name := string(nameBytes)
-	mlog.D("Read name: %s\n", name)
+	// mlog.D("Read name: %s\n", name)
 	return name, nil
 }
 
@@ -917,14 +916,14 @@ func (rep *XRepository) readString() (string, error) {
 	}
 
 	str := string(decodedBytes)
-	mlog.D("Read string: %s\n", str)
+	// mlog.D("Read string: %s\n", str)
 	return str, nil
 }
 
 // INTEGER トークンの処理
 func (rep *XRepository) readInteger() (uint32, error) {
 	val, err := rep.readDWORD()
-	mlog.D("Read integer: %d\n", val)
+	// mlog.D("Read integer: %d\n", val)
 	return val, err
 }
 
@@ -972,7 +971,7 @@ func (rep *XRepository) readGuid() ([16]byte, error) {
 	copy(guid[6:8], data3Bytes)
 	copy(guid[8:16], data4Bytes)
 
-	mlog.V("Read GUID: %v\n", guid)
+	// mlog.V("Read GUID: %v\n", guid)
 	return guid, nil
 }
 
@@ -1024,7 +1023,7 @@ func (rep *XRepository) readIntegerList(model *pmx.PmxModel, objectName string) 
 		}
 	}
 
-	mlog.D("Read integer list: [%s] (%d) %v\n", objectName, len(list), list[:min(10, len(list))])
+	// mlog.D("Read integer list: [%s] (%d) %v\n", objectName, len(list), list[:min(10, len(list))])
 	return list, nil
 }
 
@@ -1092,7 +1091,7 @@ func (rep *XRepository) readFloatList(model *pmx.PmxModel, objectName string) ([
 		}
 	}
 
-	mlog.D("Read float list: [%s] (%d) %v\n", objectName, len(list), list[:min(10, len(list))])
+	// mlog.D("Read float list: [%s] (%d) %v\n", objectName, len(list), list[:min(10, len(list))])
 	return list, nil
 }
 
@@ -1144,7 +1143,7 @@ func (rep *XRepository) parseStringList(model *pmx.PmxModel, objectName string) 
 				model.Textures.Append(tex)
 			}
 
-			mlog.D("Parsed string list: [%s] matIdx=%d %v\n", objectName, rep.materialTokenCount, texName)
+			// mlog.D("Parsed string list: [%s] matIdx=%d %v\n", objectName, rep.materialTokenCount, texName)
 			if m, err := model.Materials.Get(rep.materialTokenCount - 1); err == nil {
 				if strings.LastIndex(texName, ".sph") > 0 {
 					m.SphereTextureIndex = tex.Index()
@@ -1165,6 +1164,6 @@ func (rep *XRepository) parseStringList(model *pmx.PmxModel, objectName string) 
 		}
 	}
 
-	mlog.D("Parsed string list: [%s] %d %v\n", objectName, len(texts), texts)
+	// mlog.D("Parsed string list: [%s] %d %v\n", objectName, len(texts), texts)
 	return nil
 }
