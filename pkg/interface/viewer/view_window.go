@@ -130,7 +130,6 @@ func (vw *ViewWindow) Title() string {
 }
 
 func (vw *ViewWindow) SetTitle(title string) {
-	vw.title = title
 	vw.Window.SetTitle(title)
 }
 
