@@ -16,8 +16,41 @@ https://github.com/miu200521358/mlib_go/tree/develop
 
 ご査収の程よろしくお願いいたします。
 
+----------------------
+MuModelViewer
+
+This software was developed by me, and it does not contain any malware-related code.
+
+The code is publicly available on GitHub.
+
+Main repository
+https://github.com/miu200521358/mu_model_viewer/
+
+Dependencies library
+https://github.com/miu200521358/mlib_go/tree/develop
+
+Thank you for your consideration.
+
+
 
 ----------------------
+MuMotionViewer
+
+This software was developed by me, and it does not contain any malware-related code.
+
+The code is publicly available on GitHub.
+
+Main repository
+https://github.com/miu200521358/mu_motion_viewer/
+
+Dependencies library
+https://github.com/miu200521358/mlib_go/tree/develop
+
+Thank you for your consideration.
+
+
+----------------------
+VMDサイジング
 
 This software was developed by me, and it does not contain any malware-related code.
 
@@ -26,6 +59,21 @@ The code is publicly available on GitHub.
 Main repository
 https://github.com/miu200521358/vmd_sizing_t3/tree/develop
 
+Dependencies library
+https://github.com/miu200521358/mlib_go/tree/develop
+
+Thank you for your consideration.
+
+
+----------------------
+PmxTranslator
+
+This software was developed by me, and it does not contain any malware-related code.
+
+The code is publicly available on GitHub.
+
+Main repository
+https://github.com/miu200521358/pmx_translator
 Dependencies library
 https://github.com/miu200521358/mlib_go/tree/develop
 

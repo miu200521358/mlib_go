@@ -31,4 +31,8 @@ cmd/user_config.json
 *.pmx
 *.pprof
 *.log
-cmd/framebuffer_output.png
+framebuffer_output.png
+mlib.json
+test_resources/
+cmd/viewerPng/
+cmd/log_*.txt
