@@ -142,6 +142,7 @@ func (tm *TextureManager) LoadToonTextures(windowIndex int) error {
 		toonGl.Texture.SetIndex(i)       // インデックスは 0〜9
 		toonGl.Texture.SetName(filePath) // ファイル名
 		toonGl.Texture.SetEnglishName(filePath)
+		toonGl.Texture.SetValid(true) // 有効
 
 		// OpenGLテクスチャ生成
 		gl.GenTextures(1, &toonGl.Id)
