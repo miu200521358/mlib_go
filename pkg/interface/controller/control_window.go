@@ -211,25 +211,25 @@ func NewControlWindow(
 					// 	},
 					// },
 					// declarative.Separator{},
-					// declarative.Action{
-					// 	Text:        mi18n.T("&カメラ同期"),
-					// 	Checkable:   true,
-					// 	OnTriggered: cw.TriggerCameraSync,
-					// 	AssignTo:    &cw.cameraSyncAction,
-					// },
-					// declarative.Action{
-					// 	Text:        mi18n.T("&サブビューワーオーバーレイ"),
-					// 	Checkable:   true,
-					// 	OnTriggered: cw.TriggerShowOverride,
-					// 	AssignTo:    &cw.showOverrideAction,
-					// },
-					// declarative.Action{
-					// 	Text: mi18n.T("&サブビューワーオーバーレイの使い方"),
-					// 	OnTriggered: func() {
-					// 		mlog.ILT(mi18n.T("&サブビューワーオーバーレイの使い方"),
-					// 			mi18n.T("サブビューワーオーバーレイの使い方メッセージ"))
-					// 	},
-					// },
+					declarative.Action{
+						Text:        mi18n.T("&カメラ同期"),
+						Checkable:   true,
+						OnTriggered: cw.TriggerCameraSync,
+						AssignTo:    &cw.cameraSyncAction,
+					},
+					declarative.Action{
+						Text:        mi18n.T("&サブビューワーオーバーレイ"),
+						Checkable:   true,
+						OnTriggered: cw.TriggerShowOverride,
+						AssignTo:    &cw.showOverrideAction,
+					},
+					declarative.Action{
+						Text: mi18n.T("&サブビューワーオーバーレイの使い方"),
+						OnTriggered: func() {
+							mlog.ILT(mi18n.T("&サブビューワーオーバーレイの使い方"),
+								mi18n.T("サブビューワーオーバーレイの使い方メッセージ"))
+						},
+					},
 					declarative.Separator{},
 					declarative.Menu{
 						Text: mi18n.T("&ボーン表示"),
@@ -444,7 +444,7 @@ func NewControlWindow(
 		cw.TriggerFps30Limit()
 	case 60:
 		cw.TriggerFps60Limit()
-	case 0:
+	case -1:
 		cw.TriggerUnLimitFps()
 	}
 
@@ -640,8 +640,8 @@ func (cw *ControlWindow) TriggerUnLimitFps() {
 	cw.limitFps30Action.SetChecked(false)
 	cw.limitFps60Action.SetChecked(false)
 	cw.limitFpsUnLimitAction.SetChecked(true)
-	cw.shared.SetFrameInterval(0)
-	mconfig.SaveUserConfigInt(mconfig.KeyFpsLimit, 0)
+	cw.shared.SetFrameInterval(-1)
+	mconfig.SaveUserConfigInt(mconfig.KeyFpsLimit, -1)
 }
 
 func (cw *ControlWindow) TriggerEnabledFrameDrop() {
