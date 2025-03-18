@@ -5,7 +5,6 @@ package viewer
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
@@ -153,17 +152,18 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 		elapsed = float32(mmath.Clamped(originalElapsed, 0.0, deformDefaultSpf))
 	}
 
-	if elapsed < vl.shared.FrameInterval() {
+	if vl.shared.FrameInterval() > 0 && elapsed < vl.shared.FrameInterval() {
 		// fps制限は描画fpsにのみ依存
 
-		// 待機時間(残り時間の9割)
-		waitDuration := (vl.shared.FrameInterval() - elapsed) * 0.9
+		// // 待機時間(残り時間の9割)
+		// waitDuration := (vl.shared.FrameInterval() - elapsed) * 0.9
 
-		// waitDurationが1ms以上なら、1ms未満になるまで待つ
-		if waitDuration >= 0.001 {
-			// あえて1000倍にしないで900倍にしているのは、time.Durationの最大値を超えないため
-			time.Sleep(time.Duration(waitDuration*900) * time.Millisecond)
-		}
+		// // waitDurationが1ms以上なら、1ms未満になるまで待つ
+		// if waitDuration >= 0.001 {
+		// 	// あえて1000倍にしないで900倍にしているのは、time.Durationの最大値を超えないため
+		// 	time.Sleep(time.Duration(waitDuration*900) * time.Millisecond)
+		// }
+		// mlog.I("Elapsed: %.5f, timeStep: %.5f", originalElapsed, timeStep)
 
 		// 経過時間が1フレームの時間未満の場合はもう少し待つ
 		return false, timeStep
@@ -202,6 +202,8 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 		frame := vl.shared.Frame() + (elapsed * deformDefaultFps)
 		if frame > vl.shared.MaxFrame() {
 			frame = 0.0
+			// 物理リセットON
+			vl.shared.SetPhysicsReset(true)
 		}
 		vl.shared.SetFrame(frame)
 	}

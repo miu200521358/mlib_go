@@ -16,10 +16,10 @@ type FloorRenderer struct {
 // NewFloorRenderer は新しい床レンダラーを作成
 func NewFloorRenderer() *FloorRenderer {
 	// 床のラインの頂点データ
-	vertices, size := generateFloorVertices()
+	vertices := generateFloorVertices()
 
 	factory := NewBufferFactory()
-	bufferHandle := factory.CreateFloorBuffer(vertices, size)
+	bufferHandle := factory.CreateFloorBuffer(vertices)
 
 	return &FloorRenderer{
 		bufferHandle: bufferHandle,
@@ -48,7 +48,7 @@ func (f *FloorRenderer) Delete() {
 }
 
 // generateFloorVertices は床描画用の頂点データを生成
-func generateFloorVertices() ([]float32, int) {
+func generateFloorVertices() []float32 {
 	// 結果格納用の配列
 	vertices := make([]float32, 0)
 
@@ -114,5 +114,5 @@ func generateFloorVertices() ([]float32, int) {
 	addLine(0, 0, 0, 0, float32(gridSize), 0, yColor[0], yColor[1], yColor[2], yColor[3])
 
 	// 1要素の構成は位置(3) + 色(4) = 7
-	return vertices, len(vertices)
+	return vertices
 }

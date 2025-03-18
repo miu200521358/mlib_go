@@ -121,9 +121,8 @@ func NewMsaa(config rendering.MSAAConfig) *Msaa {
 		1.0, 1.0, 0.0, 1.0, 1.0,
 	}
 
-	// 新しいバッファ抽象化を使用する
 	factory := NewBufferFactory()
-	msaa.overrideBuffer = factory.CreateOverrideBuffer(gl.Ptr(overrideVertices), len(overrideVertices), 5)
+	msaa.overrideBuffer = factory.CreateOverrideBuffer(overrideVertices)
 
 	// アンバインド
 	msaa.Unbind()
@@ -264,8 +263,6 @@ func (m *Msaa) BindOverrideTexture(windowIndex int, program uint32) {
 		textureUnit = gl.TEXTURE24
 	case 2:
 		textureUnit = gl.TEXTURE25
-	default:
-		textureUnit = gl.TEXTURE23
 	}
 
 	// テクスチャをアクティブにする
