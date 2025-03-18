@@ -36,7 +36,7 @@ type SharedState struct {
 
 // NewSharedState は2つのStateを注入して生成するコンストラクタ
 func NewSharedState(viewerCount int) *SharedState {
-	return &SharedState{
+	shared := &SharedState{
 		flags:                   0,
 		viewerWindowHandles:     make([]atomic.Int32, viewerCount),
 		isInitializedViewWindow: make([]atomic.Bool, viewerCount),
@@ -45,18 +45,20 @@ func NewSharedState(viewerCount int) *SharedState {
 		motions:                 make([][]atomic.Value, viewerCount),
 		selectedMaterialIndexes: make([][]atomic.Value, viewerCount),
 	}
-}
 
-type frameState struct {
-	frame float32
-}
+	shared.SetFrame(0)
+	shared.SetMaxFrame(0)
+	shared.SetFrameInterval(-1)
+	shared.SetControlWindowPosition(0, 0, 0, 0)
+	shared.SetControlWindowHandle(0)
+	shared.SetFocusedWindowHandle(0)
+	shared.SetInitializedControlWindow(false)
+	shared.SetFocusedWindowHandle(0)
+	shared.SetFocusControlWindow(false)
+	shared.SetMovedControlWindow(false)
+	shared.SetClosed(false)
 
-type maxFrameState struct {
-	maxFrame float32
-}
-
-type frameIntervalState struct {
-	frameInterval float32
+	return shared
 }
 
 const (
@@ -385,27 +387,27 @@ func (ss *SharedState) SetWindowLinkage(link bool) {
 }
 
 func (ss *SharedState) Frame() float32 {
-	return ss.frameValue.Load().(frameState).frame
+	return ss.frameValue.Load().(float32)
 }
 
 func (ss *SharedState) SetFrame(frame float32) {
-	ss.frameValue.Store(frameState{frame: frame})
+	ss.frameValue.Store(frame)
 }
 
 func (ss *SharedState) MaxFrame() float32 {
-	return ss.maxFrameValue.Load().(maxFrameState).maxFrame
+	return ss.maxFrameValue.Load().(float32)
 }
 
 func (ss *SharedState) SetMaxFrame(maxFrame float32) {
-	ss.maxFrameValue.Store(maxFrameState{maxFrame: maxFrame})
+	ss.maxFrameValue.Store(maxFrame)
 }
 
 func (ss *SharedState) FrameInterval() float32 {
-	return ss.frameIntervalValue.Load().(frameIntervalState).frameInterval
+	return ss.frameIntervalValue.Load().(float32)
 }
 
 func (ss *SharedState) SetFrameInterval(spf float32) {
-	ss.frameIntervalValue.Store(frameIntervalState{frameInterval: spf})
+	ss.frameIntervalValue.Store(spf)
 }
 
 func (ss *SharedState) ControlWindowPosition() (x, y, diffX, diffY int) {
