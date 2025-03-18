@@ -179,6 +179,10 @@ func DeformForPhysics(
 	model *pmx.PmxModel,
 	deltas *delta.VmdDeltas,
 ) *delta.VmdDeltas {
+	if model == nil {
+		return deltas
+	}
+
 	// 物理剛体位置を更新
 	if err := miter.IterParallelByCount(model.RigidBodies.Length(), 100, func(i int) {
 		rigidBody, err := model.RigidBodies.Get(i)
