@@ -18,6 +18,7 @@ type Texture struct {
 	name        string      // テクスチャ名
 	englishName string      // テクスチャ英名
 	TextureType TextureType // テクスチャ種別
+	valid       bool        // 有効フラグ
 }
 
 func NewTexture() *Texture {
@@ -25,6 +26,7 @@ func NewTexture() *Texture {
 		index:       -1,
 		name:        "",
 		englishName: "",
+		valid:       false,
 	}
 }
 
@@ -53,7 +55,11 @@ func (tex *Texture) SetEnglishName(englishName string) {
 }
 
 func (tex *Texture) IsValid() bool {
-	return tex != nil && tex.index >= 0
+	return tex.valid
+}
+
+func (tex *Texture) SetValid(valid bool) {
+	tex.valid = valid
 }
 
 func (tex *Texture) Copy() core.IIndexModel {
