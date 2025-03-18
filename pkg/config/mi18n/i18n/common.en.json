@@ -490,5 +490,33 @@
     {
         "id": "&画面移動連結",
         "translation": "&Screen movement link"
+    },
+    {
+        "id": "日本語名称",
+        "translation": "Japanese Name"
+    },
+    {
+        "id": "英語名称",
+        "translation": "English Name"
+    },
+    {
+        "id": "有効テクスチャ",
+        "translation": "Enable Texture"
+    },
+    {
+        "id": "テクスチャ",
+        "translation": "Texture"
+    },
+    {
+        "id": "有効Toon",
+        "translation": "Enable Toon"
+    },
+    {
+        "id": "有効スフィア",
+        "translation": "Enable Sphere"
+    },
+    {
+        "id": "スフィア",
+        "translation": "Sphere"
     }
 ]

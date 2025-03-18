@@ -490,5 +490,33 @@
     {
         "id": "&画面移動連結",
         "translation": "&화면 이동 연결"
+    },
+    {
+        "id": "日本語名称",
+        "translation": "일본어 이름"
+    },
+    {
+        "id": "英語名称",
+        "translation": "영어 이름"
+    },
+    {
+        "id": "有効テクスチャ",
+        "translation": "텍스처 활성화"
+    },
+    {
+        "id": "テクスチャ",
+        "translation": "텍스처"
+    },
+    {
+        "id": "有効Toon",
+        "translation": "툰 활성화"
+    },
+    {
+        "id": "有効スフィア",
+        "translation": "스피어 활성화"
+    },
+    {
+        "id": "スフィア",
+        "translation": "스피어"
     }
 ]
