@@ -42,7 +42,10 @@ func NewMeshRenderer(
 	faces := allFaces[prevVerticesCount : prevVerticesCount+material.VerticesCount]
 
 	// ElementBuffer を生成して、faces のデータを転送する
-	elemBuf := factory.CreateElementBuffer(gl.Ptr(faces), len(faces))
+	var elemBuf *mgl.ElementBuffer
+	if len(faces) > 0 {
+		elemBuf = factory.CreateElementBuffer(gl.Ptr(faces), len(faces))
+	}
 
 	return &MeshRenderer{
 		material:          *material,

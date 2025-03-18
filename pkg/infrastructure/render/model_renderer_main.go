@@ -103,8 +103,8 @@ func (mr *ModelRenderer) Render(shader rendering.IShader, shared *state.SharedSt
 
 	// 各材質（メッシュ）ごとの描画
 	for i, mesh := range mr.meshes {
-		if !slices.Contains(selectedMaterialIndexes, i) {
-			// 選択されていない材質は描画しない
+		if mesh == nil || mesh.elemBuffer == nil || !slices.Contains(selectedMaterialIndexes, i) {
+			// 頂点を持たない材質、選択されていない材質は描画しない
 			continue
 		}
 
