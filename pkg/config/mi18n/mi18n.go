@@ -65,9 +65,18 @@ func T(key string, params ...map[string]interface{}) string {
 		return key
 	}
 	if len(params) == 0 {
-		return localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: key})
+		if translated, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: key}); err == nil {
+			return translated
+		} else {
+			return key
+		}
 	}
-	return localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: key, TemplateData: params[0]})
+
+	if translated, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: key}); err == nil {
+		return translated
+	} else {
+		return key
+	}
 }
 
 // TWithLocale メッセージIDを元に指定ロケールでメッセージを取得する
