@@ -6,7 +6,6 @@ package mgl
 import (
 	"unsafe"
 
-	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 )
 
@@ -43,17 +42,6 @@ func (f *BufferFactory) CreateDebugBuffer(ptr unsafe.Pointer, arrayCount int) *V
 		AddPositionColorAttributes().
 		SetData(ptr, arrayCount).
 		Build()
-}
-
-// UpdateDebugBuffer はデバッグバッファのデータを更新
-func (f *BufferFactory) UpdateDebugBuffer(handle *VertexBufferHandle, vertices []float32, fieldCount int) {
-	handle.VAO.Bind()
-	handle.VBO.Bind()
-
-	handle.VBO.BufferData(len(vertices), fieldCount, handle.FloatSize, gl.Ptr(&vertices[0]), rendering.BufferUsageStatic)
-
-	handle.VBO.Unbind()
-	handle.VAO.Unbind()
 }
 
 // CreateOverrideBuffer はオーバーライド用バッファを作成
