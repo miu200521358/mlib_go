@@ -1,3 +1,4 @@
+///go:build windows
 //go:build windows
 // +build windows
 
@@ -236,10 +237,6 @@ func (h *VertexBufferHandle) Unbind() {
 func (h *VertexBufferHandle) Delete() {
 	h.VBO.Delete()
 	h.VAO.Delete()
-}
-
-func (h *VertexBufferHandle) BufferData() {
-	gl.BufferData(h.VBO.target, h.VBO.size, h.VBO.ptr, gl.STATIC_DRAW)
 }
 
 // バッチ処理に必要な情報を収集

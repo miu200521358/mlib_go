@@ -40,11 +40,14 @@ func (f *MShaderFactory) CreateShader(width, height int) (rendering.IShader, err
 	cam := rendering.NewDefaultCamera(width, height)
 
 	// MSAAの作成
+	msaaFactory := NewMsaaFactory()
+	msaa := msaaFactory.CreateMsaa(width, height)
+
 	shader := &MShader{
 		width:         width,
 		height:        height,
 		lightPosition: &mmath.MVec3{X: -0.5, Y: -1.0, Z: 0.5},
-		msaa:          NewMsaa(width, height),
+		msaa:          msaa,
 		floor:         NewFloorRenderer(),
 		programs:      make(map[rendering.ProgramType]uint32),
 		shaderLoader:  NewShaderLoader(),
@@ -154,7 +157,7 @@ func (s *MShader) BoneTextureID() uint32 {
 }
 
 func (s *MShader) OverrideTextureID() uint32 {
-	return 0
+	return s.msaa.OverrideTargetTexture()
 }
 
 func (s *MShader) SetCamera(cam *rendering.Camera) {
@@ -227,7 +230,7 @@ func (s *MShader) BoneTextureId() uint32 {
 }
 
 func (s *MShader) OverrideTextureId() uint32 {
-	return 0
+	return s.msaa.OverrideTargetTexture()
 }
 
 // DrawFloor は床を描画する

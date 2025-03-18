@@ -4,13 +4,17 @@
 package viewer
 
 import (
+	"fmt"
 	"image"
 	"math"
+	"time"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl64"
+	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
+	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
@@ -206,11 +210,11 @@ func (vw *ViewWindow) render() {
 
 	vw.SwapBuffers()
 
-	// if mlog.IsViewerVerbose() {
-	// 	// フレームバッファの内容を保存
-	// 	vw.shader.Msaa().SaveImage(fmt.Sprintf("%s/viewerPng/%02d/%04.2f_%s.png", mconfig.GetAppRootDir(),
-	// 		vw.windowIndex, vw.list.shared.Frame(), time.Now().Format("20060102_150405.000")))
-	// }
+	if mlog.IsViewerVerbose() {
+		// フレームバッファの内容を保存
+		vw.shader.Msaa().SaveImage(fmt.Sprintf("%s/viewerPng/%02d/%04.2f_%s.png", mconfig.GetAppRootDir(),
+			vw.windowIndex, vw.list.shared.Frame(), time.Now().Format("20060102_150405.000")))
+	}
 }
 
 // renderOverride はオーバーレイ描画を行う
@@ -219,20 +223,20 @@ func (vw *ViewWindow) renderOverride() {
 		return
 	}
 
-	// // オーバーレイ描画
-	// gl.Enable(gl.DEPTH_TEST)
-	// gl.DepthFunc(gl.ALWAYS)
+	// オーバーレイ描画
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.ALWAYS)
 
-	// program := vw.shader.Program(rendering.ProgramTypeOverride)
-	// gl.UseProgram(program)
+	program := vw.shader.Program(rendering.ProgramTypeOverride)
+	gl.UseProgram(program)
 
-	// vw.shader.Msaa().BindOverrideTexture(vw.windowIndex, program)
+	vw.shader.Msaa().BindOverrideTexture(vw.windowIndex, program)
 
-	// gl.DrawArrays(gl.TRIANGLES, 0, 6)
+	gl.DrawArrays(gl.TRIANGLES, 0, 6)
 
-	// vw.shader.Msaa().UnbindOverrideTexture()
+	vw.shader.Msaa().UnbindOverrideTexture()
 
-	// gl.UseProgram(0)
+	gl.UseProgram(0)
 
 	// 深度テストを有効に戻す
 	gl.Enable(gl.DEPTH_TEST)
