@@ -168,77 +168,30 @@ func createAllVertexData(model *pmx.PmxModel) ([]float32, []float32, []float32) 
 
 // createAllBoneDebugData はボーンライン・ポイントデータを一括生成します
 func createAllBoneDebugData(model *pmx.PmxModel) ([]float32, []uint32, []int, []float32, []uint32, []int) {
-	// ボーン情報の要素数
-	boneElementCount := 3 + 4 + 4 + 4 // 位置 + デフォーム + ウェイト + 色
+	// ボーン情報の並列処理
+	boneLines := make([]float32, 0)
+	boneLineFaces := make([]uint32, 0, model.Bones.Length()*2)
+	boneLineIndexes := make([]int, model.Bones.Length()*2)
 
-	boneCount := model.Bones.Length()
-	boneLines := make([]float32, boneCount*boneElementCount*2) // 線の始点と終点
-	bonePoints := make([]float32, boneCount*boneElementCount)  // ボーン位置のみ
-	boneLineFaces := make([]uint32, boneCount*2)
-	bonePointFaces := make([]uint32, boneCount)
-	boneLineIndexes := make([]int, boneCount*2)
-	bonePointIndexes := make([]int, boneCount)
+	bonePoints := make([]float32, 0)
+	bonePointFaces := make([]uint32, model.Bones.Length())
+	bonePointIndexes := make([]int, model.Bones.Length())
 
-	var wg sync.WaitGroup
+	n := 0
+	model.Bones.ForEach(func(index int, bone *pmx.Bone) {
+		boneLines = append(boneLines, newBoneGl(bone)...)
+		boneLines = append(boneLines, newTailBoneGl(bone)...)
+		boneLineFaces = append(boneLineFaces, uint32(n), uint32(n+1))
+		boneLineIndexes[n] = bone.Index()
+		boneLineIndexes[n+1] = bone.Index()
 
-	// 並列処理のためのバッチサイズ
-	batchSize := 500
-	batches := (boneCount + batchSize - 1) / batchSize
+		bonePoints = append(bonePoints, newBoneGl(bone)...)
+		bonePointFaces[bone.Index()] = uint32(bone.Index())
+		bonePointIndexes[bone.Index()] = bone.Index()
 
-	for b := range batches {
-		wg.Add(1)
-		go func(batchIndex int) {
-			defer wg.Done()
-			start := batchIndex * batchSize
-			end := min(start+batchSize, boneCount)
+		n += 2
+	})
 
-			// 各バッチが担当する位置を計算
-			lineOffset := start * boneElementCount * 2 // 始点と終点で2頂点分
-			pointOffset := start * boneElementCount    // ボーン位置1点分
-			lineFaceOffset := start * 2                // 線の2頂点分
-
-			for i := start; i < end; i++ {
-				var bone *pmx.Bone
-				if b, err := model.Bones.Get(i); err == nil {
-					bone = b
-				} else {
-					bone = pmx.NewBone()
-				}
-
-				// バッチ内でのインデックス計算
-				localIdx := i - start
-				lineLocalOffset := localIdx * boneElementCount * 2
-				pointLocalOffset := localIdx * boneElementCount
-				lineFaceLocalOffset := localIdx * 2
-
-				n := i * 2 // 元のボーンインデックス計算
-
-				// ボーンラインデータ
-				boneStartGL := newBoneGl(bone)
-				copy(boneLines[lineOffset+lineLocalOffset:], boneStartGL)
-
-				boneEndGL := newTailBoneGl(bone)
-				copy(boneLines[lineOffset+lineLocalOffset+boneElementCount:], boneEndGL)
-
-				// ボーンラインフェイスデータ
-				boneLineFaces[lineFaceOffset+lineFaceLocalOffset] = uint32(n)
-				boneLineFaces[lineFaceOffset+lineFaceLocalOffset+1] = uint32(n + 1)
-
-				// ボーンラインインデックスデータ
-				boneLineIndexes[n] = bone.Index()
-				boneLineIndexes[n+1] = bone.Index()
-
-				// ボーンポイントデータ (始点のみ)
-				copy(bonePoints[pointOffset+pointLocalOffset:], boneStartGL)
-
-				// ボーンポイントフェイスとインデックスデータ
-				bonePointFaces[i] = uint32(bone.Index())
-				bonePointIndexes[i] = bone.Index()
-			}
-		}(b)
-	}
-
-	wg.Wait()
 	return boneLines, boneLineFaces, boneLineIndexes, bonePoints, bonePointFaces, bonePointIndexes
 }
 

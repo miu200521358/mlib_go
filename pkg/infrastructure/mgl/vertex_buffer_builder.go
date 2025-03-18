@@ -269,19 +269,17 @@ func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDelta
 	defer gl.UnmapBuffer(h.VBO.target) // 関数終了時にアンマップ
 
 	// mappedPtr を []float32 に変換する
-	mappedSlice := unsafe.Slice((*float32)(mappedPtr), h.VBO.size/4)
+	mappedSlice := unsafe.Slice((*float32)(mappedPtr), h.VBO.size/h.FloatSize)
 
 	// もし「元データをベースにして、その上にモーフの差分を適用する」場合は、
 	// まず mappedSlice に元の頂点配列 h.VBO.ptr をコピーしてから差分適用します。
 	// (h.VBO.ptr が []float32 であることを仮定した例)
-	baseSlice := unsafe.Slice((*float32)(h.VBO.ptr), h.VBO.size/4)
+	baseSlice := unsafe.Slice((*float32)(h.VBO.ptr), h.VBO.size/h.FloatSize)
 	copy(mappedSlice, baseSlice)
 
 	// 以下、頂点モーフの差分を書き込む
-	// (3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3) は頂点データの構造に合わせたサイズ
 	vboVertexSize := 3 + 3 + 2 + 2 + 1 + 4 + 4 + 1 + 3 + 3 + 3
 
-	// イテレーターの代わりにForEachを使用
 	vertices.ForEach(func(vidx int, vertexDelta *delta.VertexMorphDelta) {
 		if vertexDelta.IsZero() {
 			return
@@ -303,9 +301,6 @@ func (h *VertexBufferHandle) UpdateBoneDeltas(boneIndexes []int, boneDeltas [][]
 		return
 	}
 
-	// ボーン変形の領域開始位置 (float 要素数)
-	vboVertexSize := (3 + 4 + 4)
-
 	// 対象の VBO をバインド
 	h.VBO.Bind()
 
@@ -324,6 +319,12 @@ func (h *VertexBufferHandle) UpdateBoneDeltas(boneIndexes []int, boneDeltas [][]
 
 	// マップしたメモリを []float32 に変換する
 	mappedSlice := unsafe.Slice((*float32)(mappedPtr), numFloats)
+
+	baseSlice := unsafe.Slice((*float32)(h.VBO.ptr), h.VBO.size/h.FloatSize)
+	copy(mappedSlice, baseSlice)
+
+	// ボーン変形の領域開始位置 (float 要素数)
+	vboVertexSize := (3 + 4 + 4)
 
 	// 各ボーンごとに、対象の領域に boneDelta をコピーする
 	// ここで、各頂点の先頭から (vidx * StrideSize) の後に、さらにボーン変形用領域 vboVertexSize があると想定
