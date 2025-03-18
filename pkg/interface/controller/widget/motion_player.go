@@ -79,6 +79,11 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 				MaxSize:  declarative.Size{Width: 90, Height: 20},
 				OnClicked: func() {
 					playing := !mp.window.Playing()
+					if playing {
+						mp.playButton.SetText(mi18n.T("停止"))
+					} else {
+						mp.playButton.SetText(mi18n.T("再生"))
+					}
 					mp.SetPlaying(playing)
 
 					if mp.onTriggerPlay != nil {
