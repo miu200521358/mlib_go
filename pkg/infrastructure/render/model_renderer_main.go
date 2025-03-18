@@ -31,6 +31,13 @@ type ModelRenderer struct {
 	meshes []*MeshRenderer
 }
 
+func NewModelRendererEmpty() *ModelRenderer {
+	return &ModelRenderer{
+		ModelDrawer: &ModelDrawer{},
+		meshes:      make([]*MeshRenderer, 0),
+	}
+}
+
 // NewModelRenderer は、新しい ModelRenderer を生成します。
 // ここでは、モデルのバッファ初期化や各材質ごとの MeshRenderer の生成も行います。
 func NewModelRenderer(windowIndex int, model *pmx.PmxModel) *ModelRenderer {

@@ -40,9 +40,9 @@ func (vw *ViewWindow) loadMotions(shared *state.SharedState) {
 }
 
 func (vw *ViewWindow) extendModelRenderers(shared *state.SharedState) {
-	for i := range shared.ModelCount(vw.windowIndex) {
+	for i := range max(shared.ModelCount(vw.windowIndex), shared.MotionCount(vw.windowIndex)) {
 		for i >= len(vw.modelRenderers) {
-			vw.modelRenderers = append(vw.modelRenderers, nil)
+			vw.modelRenderers = append(vw.modelRenderers, render.NewModelRendererEmpty())
 		}
 		for i >= len(vw.motions) {
 			vw.motions = append(vw.motions, nil)
