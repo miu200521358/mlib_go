@@ -104,14 +104,12 @@ type RigidBody struct {
 	Rotation                *mmath.MVec3    // 回転(x,y,z) -> ラジアン角
 	RigidBodyParam          *RigidBodyParam // 剛体パラ
 	PhysicsType             PhysicsType     // 剛体の物理演算
-	// CorrectPhysicsType      PhysicsType      // 剛体の物理演算(補正後)
-	XDirection  *mmath.MVec3 // X軸方向
-	YDirection  *mmath.MVec3 // Y軸方向
-	ZDirection  *mmath.MVec3 // Z軸方向
-	IsSystem    bool         // システムで追加した剛体か
-	Matrix      *mmath.MMat4 // 剛体の行列
-	Bone        *Bone        // 繋がっているボーン
-	JointedBone *Bone        // ジョイントで繋がってるボーン
+	XDirection              *mmath.MVec3    // X軸方向
+	YDirection              *mmath.MVec3    // Y軸方向
+	ZDirection              *mmath.MVec3    // Z軸方向
+	IsSystem                bool            // システムで追加した剛体か
+	Matrix                  *mmath.MMat4    // 剛体の行列
+	Bone                    *Bone           // 繋がっているボーン
 }
 
 // NewRigidBody creates a new rigid body.
@@ -136,7 +134,6 @@ func NewRigidBody() *RigidBody {
 		IsSystem:                false,
 		Matrix:                  mmath.NewMMat4(),
 		Bone:                    nil,
-		JointedBone:             nil,
 	}
 }
 
@@ -189,6 +186,5 @@ func (rigidBody *RigidBody) Copy() core.IIndexNameModel {
 		IsSystem:                rigidBody.IsSystem,
 		Matrix:                  rigidBody.Matrix.Copy(),
 		Bone:                    nil,
-		JointedBone:             nil,
 	}
 }

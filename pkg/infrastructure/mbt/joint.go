@@ -66,16 +66,12 @@ func (physics *MPhysics) findReferenceBone(joint *pmx.Joint, rigidBodies *pmx.Ri
 	if rb, err := rigidBodies.Get(joint.RigidbodyIndexA); err == nil {
 		if rb.Bone != nil {
 			return rb.Bone
-		} else if rb.JointedBone != nil {
-			return rb.JointedBone
 		}
 	}
 
 	if rb, err := rigidBodies.Get(joint.RigidbodyIndexB); err == nil {
 		if rb.Bone != nil {
 			return rb.Bone
-		} else if rb.JointedBone != nil {
-			return rb.JointedBone
 		}
 	}
 

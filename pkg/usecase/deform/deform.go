@@ -191,20 +191,15 @@ func DeformForPhysics(
 		}
 
 		// 現在のボーン変形情報を保持
-		rigidBodyBone := rigidBody.Bone
-		if rigidBodyBone == nil {
-			rigidBodyBone = rigidBody.JointedBone
-		}
-
-		if rigidBodyBone == nil || deltas.Bones.Get(rigidBodyBone.Index()) == nil {
+		if rigidBody.Bone == nil || deltas.Bones.Get(rigidBody.Bone.Index()) == nil {
 			return
 		}
 
 		if (shared.IsEnabledPhysics() && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC) ||
 			shared.IsPhysicsReset() {
 			// 通常はボーン追従剛体・物理＋ボーン剛体だけ。物理リセット時は全部更新
-			physics.UpdateTransform(model.Index(), rigidBodyBone,
-				deltas.Bones.Get(rigidBodyBone.Index()).FilledGlobalMatrix(), rigidBody)
+			physics.UpdateTransform(model.Index(), rigidBody.Bone,
+				deltas.Bones.Get(rigidBody.Bone.Index()).FilledGlobalMatrix(), rigidBody)
 		}
 	}); err != nil {
 		return deltas

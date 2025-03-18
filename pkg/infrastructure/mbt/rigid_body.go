@@ -46,8 +46,6 @@ func (physics *MPhysics) initRigidBodiesByBoneDeltas(
 		var bone *pmx.Bone
 		if rigidBody.Bone != nil {
 			bone = rigidBody.Bone
-		} else if rigidBody.JointedBone != nil {
-			bone = rigidBody.JointedBone
 		}
 
 		// 剛体の初期位置と回転
@@ -65,6 +63,7 @@ func (physics *MPhysics) initRigidBodiesByBoneDeltas(
 		rigidBodyLocalPos := rigidBody.Position.Subed(bone.Position)
 		btRigidBodyLocalTransform := bt.NewBtTransform(newBulletFromRad(rigidBody.Rotation),
 			newBulletFromVec(rigidBodyLocalPos))
+		defer bt.DeleteBtTransform(btRigidBodyLocalTransform)
 
 		btRigidBodyTransform.Mult(boneTransform, btRigidBodyLocalTransform)
 
@@ -154,8 +153,6 @@ func (physics *MPhysics) calculateMassAndInertia(rigidBody *pmx.RigidBody, btCol
 func (physics *MPhysics) getBonePosition(rigidBody *pmx.RigidBody) *mmath.MVec3 {
 	if rigidBody.Bone != nil {
 		return rigidBody.Bone.Position
-	} else if rigidBody.JointedBone != nil {
-		return rigidBody.JointedBone.Position
 	}
 	return mmath.NewMVec3()
 }
