@@ -26,7 +26,7 @@ var env string
 func init() {
 	runtime.LockOSThread()
 
-	// システム上の半分の論理プロセッサを使用させる
+	// システム上の1/4の論理プロセッサを使用させる
 	runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
 
 	walk.AppendToWalkInit(func() {
