@@ -72,7 +72,7 @@ func T(key string, params ...map[string]interface{}) string {
 		}
 	}
 
-	if translated, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: key}); err == nil {
+	if translated, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: key, TemplateData: params[0]}); err == nil {
 		return translated
 	} else {
 		return key

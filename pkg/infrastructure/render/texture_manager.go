@@ -109,8 +109,7 @@ func (tm *TextureManager) LoadAllTextures(windowIndex int, textures *pmx.Texture
 	textures.ForEach(func(index int, texture *pmx.Texture) {
 		texGl, err := tm.loadTextureGl(windowIndex, texture, modelPath)
 		if err != nil {
-			// 読み込み失敗しても動作継続したい場合はログ出力のみにする等、要件次第
-			mlog.D(fmt.Sprintf("texture error: %s", err))
+			mlog.W(fmt.Sprintf("texture initialize error: %s", err))
 			return
 		}
 		// インデックス位置に格納
@@ -232,13 +231,13 @@ func (tm *TextureManager) loadTextureGl(
 	valid, err := mfile.ExistsFile(texPath)
 	if !valid || err != nil {
 		texGl.Initialized = false
-		return texGl, fmt.Errorf("not found texture file: %s", texPath)
+		return texGl, fmt.Errorf("not found texture file: %s, error: %s", texPath, err.Error())
 	}
 
 	// 画像を読み込み
 	img, err := mfile.LoadImage(texPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to load image: %s, error: %s", texPath, err.Error())
 	}
 	image := mfile.ConvertToNRGBA(img)
 
