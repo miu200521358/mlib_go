@@ -91,17 +91,6 @@ func (lb *MaterialTableView) EnabledInPlaying(enable bool) {
 
 func (lb *MaterialTableView) SetWindow(window *controller.ControlWindow) {
 	lb.window = window
-	lb.TableView.SelectedIndexesChanged().Attach(func() {
-		if lb.changeFunc != nil {
-			selectedIndexes := make([]int, 0, lb.TableModel().RowCount())
-			for i := range lb.TableModel().RowCount() {
-				if lb.TableModel().(*MaterialModel).Checked(i) {
-					selectedIndexes = append(selectedIndexes, i)
-				}
-			}
-			lb.changeFunc(lb.window, selectedIndexes)
-		}
-	})
 }
 
 // ---------------------------------------
@@ -293,6 +282,7 @@ func (m *MaterialModel) ResetRows(model *pmx.PmxModel) {
 		if mat.ToonSharingFlag == pmx.TOON_SHARING_SHARING {
 			toon = pmx.NewTexture()
 			toon.SetName(fmt.Sprintf("toon/toon%02d.bmp", mat.ToonTextureIndex))
+			toon.SetValid(true)
 		}
 		sphere, _ := model.Textures.Get(mat.SphereTextureIndex)
 
