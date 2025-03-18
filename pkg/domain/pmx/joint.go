@@ -1,6 +1,8 @@
 package pmx
 
 import (
+	"fmt"
+
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
@@ -23,6 +25,12 @@ func NewJointParam() *JointParam {
 		SpringConstantTranslation: mmath.NewMVec3(),
 		SpringConstantRotation:    mmath.NewMVec3(),
 	}
+}
+
+func (param *JointParam) String() string {
+	return fmt.Sprintf("TranslationLimitMin: %v, TranslationLimitMax: %v, RotationLimitMin: %v, RotationLimitMax: %v, SpringConstantTranslation: %v, SpringConstantRotation: %v",
+		param.TranslationLimitMin, param.TranslationLimitMax, param.RotationLimitMin, param.RotationLimitMax, param.SpringConstantTranslation, param.SpringConstantRotation)
+
 }
 
 type Joint struct {

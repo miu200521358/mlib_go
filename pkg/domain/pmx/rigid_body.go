@@ -1,6 +1,8 @@
 package pmx
 
 import (
+	"fmt"
+
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
@@ -21,6 +23,11 @@ func NewRigidBodyParam() *RigidBodyParam {
 		Restitution:    0,
 		Friction:       0,
 	}
+}
+
+func (param *RigidBodyParam) String() string {
+	return fmt.Sprintf("Mass: %.5f, LinearDamping: %.5f, AngularDamping: %.5f, Restitution: %.5f, Friction: %.5f",
+		param.Mass, param.LinearDamping, param.AngularDamping, param.Restitution, param.Friction)
 }
 
 // 剛体の形状

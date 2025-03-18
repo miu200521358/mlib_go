@@ -171,7 +171,7 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 
 	for _, vw := range vl.windowList {
 		// デフォーム処理
-		vl.deform(vw, timeStep, false)
+		vl.deform(vw, timeStep)
 
 		// 重複描画
 		if vl.shared.IsShowOverride() {
@@ -213,7 +213,7 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 
 func (vl *ViewerList) resetPhysics(vw *ViewWindow, timeStep float32) {
 	// 物理リセット用のデフォーム処理
-	vl.deform(vw, timeStep, true)
+	vl.deformForReset(vw)
 
 	for _, model := range vw.modelRenderers {
 		// モデルの物理削除
@@ -229,6 +229,7 @@ func (vl *ViewerList) resetPhysics(vw *ViewWindow, timeStep float32) {
 		}
 
 		// モデルの物理追加
+		// vw.physics.AddModel(n, model.Model)
 		vw.physics.AddModelByBoneDeltas(n, model.Model, vw.vmdDeltas[n].Bones)
 
 		// 物理再設定
@@ -241,7 +242,27 @@ func (vl *ViewerList) resetPhysics(vw *ViewWindow, timeStep float32) {
 	}
 }
 
-func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32, isReset bool) {
+func (vl *ViewerList) deformForReset(vw *ViewWindow) {
+	vw.MakeContextCurrent()
+
+	vw.loadModelRenderers(vl.shared)
+	vw.loadMotions(vl.shared)
+
+	frame := vl.shared.Frame()
+
+	// デフォーム処理
+	for n := range vw.modelRenderers {
+		// 物理前変形
+		vw.vmdDeltas[n] = deform.DeformBeforePhysicsReset(
+			vw.modelRenderers[n].Model,
+			vw.motions[n],
+			vw.vmdDeltas[n],
+			frame,
+		)
+	}
+}
+
+func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 	vw.MakeContextCurrent()
 
 	vw.loadModelRenderers(vl.shared)
@@ -259,18 +280,16 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32, isReset bool) {
 			frame,
 		)
 
-		if !isReset {
-			// 物理変形のための事前処理
-			vw.vmdDeltas[n] = deform.DeformForPhysics(
-				vl.shared,
-				vw.physics,
-				vw.modelRenderers[n].Model,
-				vw.vmdDeltas[n],
-			)
-		}
+		// 物理変形のための事前処理
+		vw.vmdDeltas[n] = deform.DeformForPhysics(
+			vl.shared,
+			vw.physics,
+			vw.modelRenderers[n].Model,
+			vw.vmdDeltas[n],
+		)
 	}
 
-	if !isReset && (vl.shared.IsEnabledPhysics() || vl.shared.IsPhysicsReset()) {
+	if vl.shared.IsEnabledPhysics() || vl.shared.IsPhysicsReset() {
 		// 物理更新
 		vw.physics.StepSimulation(timeStep)
 	}

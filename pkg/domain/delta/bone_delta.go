@@ -65,7 +65,6 @@ func NewBoneDeltaByGlobalMatrix(bone *pmx.Bone, frame float32, globalMatrix *mma
 	}
 }
 
-// 各種 Filled◯◯ メソッドは、 nil の場合に初期化して返す “getter + lazy init” 的な役割です。
 func (bd *BoneDelta) FilledGlobalMatrix() *mmath.MMat4 {
 	if bd.GlobalMatrix == nil {
 		bd.GlobalMatrix = mmath.NewMMat4()
