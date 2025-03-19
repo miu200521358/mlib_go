@@ -112,7 +112,7 @@ func (b *VertexBufferBuilder) AddAttribute(attrType AttributeType) *VertexBuffer
 	return b
 }
 
-// AddAttributeWithSize は頂点属性をカスタムサイズで追加（後方互換性用）
+// AddAttributeWithSize は頂点属性をカスタムサイズで追加
 func (b *VertexBufferBuilder) AddAttributeWithSize(attrType AttributeType, size int) *VertexBufferBuilder {
 	offset := b.strideSize * b.floatSize
 

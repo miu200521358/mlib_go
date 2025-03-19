@@ -77,7 +77,7 @@ func newViewWindow(
 
 	// シェーダー初期化
 	shaderFactory := mgl.NewMShaderFactory()
-	shader, err := shaderFactory.CreateShader(width, height, windowIndex)
+	shader, err := shaderFactory.CreateShader(windowIndex, width, height)
 	if err != nil {
 		return nil, err
 	}
@@ -163,6 +163,15 @@ func (vw *ViewWindow) render() {
 	// リサイズ（サイズが変わってなければ何もしない）
 	vw.shader.Resize(w, h)
 
+	// 描画先のFBOの選択
+	if vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
+		// サブウィンドウの場合、override 表示が有効なら OverrideRenderer のFBOへ描画
+		vw.shader.OverrideRenderer().Bind()
+	} else {
+		// メインウィンドウや override が無効の場合は MSAA FBO へ描画
+		vw.shader.Msaa().Bind()
+	}
+
 	// MSAAフレームバッファをバインド
 	vw.shader.Msaa().Bind()
 
@@ -197,21 +206,20 @@ func (vw *ViewWindow) render() {
 	vw.physics.DrawDebugLines(vw.shader, vw.list.shared.IsShowRigidBodyFront() || vw.list.shared.IsShowRigidBodyBack(),
 		vw.list.shared.IsShowJoint(), vw.list.shared.IsShowRigidBodyFront())
 
-	// 深度解決
-	vw.shader.Msaa().Resolve()
-	vw.shader.Msaa().Unbind()
+	// 描画終了後のFBO解除
+	if vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
+		// サブウィンドウの場合、override FBO のアンバインド後にその内容をファイル出力
+		vw.shader.OverrideRenderer().Unbind()
+		vw.shader.OverrideRenderer().Render()
+	} else {
+		// メインウィンドウの場合は MSAA FBO の解決とアンバインド
+		vw.shader.Msaa().Resolve()
+		vw.shader.Msaa().Unbind()
+	}
 
-	// サブウィンドウをメインウィンドウに描画または
-	// サブウィンドウの内容をテクスチャに保存
-	if vw.list.shared.IsShowOverride() {
-		switch vw.windowIndex {
-		case 0:
-			// メインウィンドウの場合、サブウィンドウの内容を半透明で描画
-			vw.resolveOverride()
-		default:
-			// サブウィンドウの場合、現在の描画内容をテクスチャに保存
-			vw.renderToOverrideTexture()
-		}
+	// メインウィンドウでは、サブウィンドウの描画内容（overrideテクスチャ）を半透明合成して描画
+	if vw.list.shared.IsShowOverride() && vw.windowIndex == 0 {
+		vw.resolveOverride()
 	}
 
 	vw.SwapBuffers()
@@ -222,18 +230,6 @@ func (vw *ViewWindow) renderFloor() {
 	vw.shader.FloorRenderer().Bind()
 	vw.shader.FloorRenderer().Render()
 	vw.shader.FloorRenderer().Unbind()
-
-	gl.UseProgram(0)
-}
-
-// サブウィンドウ描画内容をテクスチャに保存
-func (vw *ViewWindow) renderToOverrideTexture() {
-	vw.shader.UseProgram(rendering.ProgramTypeOverride)
-
-	// 現在の描画内容をテクスチャにコピー
-	vw.shader.OverrideRenderer().Bind()
-	vw.shader.OverrideRenderer().Render()
-	vw.shader.OverrideRenderer().Unbind()
 
 	gl.UseProgram(0)
 }

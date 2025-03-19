@@ -1,0 +1,248 @@
+package mgl
+
+import (
+	"fmt"
+	"image"
+	"image/png"
+	"os"
+	"time"
+	"unsafe"
+
+	"github.com/go-gl/gl/v4.4-core/gl"
+	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
+)
+
+// MOverrideRenderer は、IOverrideRenderer を実装し、
+// サブウィンドウの描画内容をテクスチャに書き込み、
+// メインウィンドウで半透明合成して描画するためのレンダラーです。
+type MOverrideRenderer struct {
+	width           int
+	height          int
+	program         uint32
+	isMainWindow    bool
+	sharedTextureID *uint32
+
+	fbo     uint32
+	texture uint32
+
+	// VertexBufferHandle を活用したフルスクリーンクアッド用バッファ
+	quadBuffer *VertexBufferHandle
+}
+
+// NewOverrideRenderer は新しい MOverrideRenderer を作成します。
+// isMainWindow が true の場合、メインウィンドウ用として動作し、
+// そうでない場合はサブウィンドウ用として共有テクスチャを設定します。
+func NewOverrideRenderer(width, height int, program uint32, isMainWindow bool, sharedTextureID *uint32) rendering.IOverrideRenderer {
+	renderer := &MOverrideRenderer{
+		width:           width,
+		height:          height,
+		program:         program,
+		isMainWindow:    isMainWindow,
+		sharedTextureID: sharedTextureID,
+	}
+
+	// オフスクリーンレンダリング用の FBO とテクスチャを初期化
+	renderer.initFBOAndTexture()
+	// フルスクリーンクアッドのバッファを VertexBufferHandle を使って生成
+	renderer.initScreenQuad()
+
+	// サブウィンドウの場合は共有テクスチャとして外部にテクスチャIDを渡す
+	if !isMainWindow {
+		*sharedTextureID = renderer.texture
+	}
+
+	return renderer
+}
+
+// initFBOAndTexture はレンダリング結果を受け取るための FBO とテクスチャを初期化します。
+func (m *MOverrideRenderer) initFBOAndTexture() {
+	// テクスチャ生成
+	gl.GenTextures(1, &m.texture)
+	gl.BindTexture(gl.TEXTURE_2D, m.texture)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, int32(m.width), int32(m.height), 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.BindTexture(gl.TEXTURE_2D, 0)
+
+	// FBO 生成
+	gl.GenFramebuffers(1, &m.fbo)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, m.fbo)
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, m.texture, 0)
+
+	// FBO の状態チェック
+	status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER)
+	if status != gl.FRAMEBUFFER_COMPLETE {
+		panic(fmt.Sprintf("Error: Framebuffer is not complete: %s", getFrameBufferStatusString(status)))
+	}
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+}
+
+// initScreenQuad は、VertexBufferBuilder を利用してフルスクリーンクアッド用の頂点バッファを生成します。
+// ここでは、2次元の位置（2要素）とテクスチャ座標（2要素）の頂点データを設定しています。
+func (m *MOverrideRenderer) initScreenQuad() {
+	quadVertices := []float32{
+		// position(x,y), texCoords(x,y)
+		-1.0, 1.0, 0.0, 1.0,
+		-1.0, -1.0, 0.0, 0.0,
+		1.0, -1.0, 1.0, 0.0,
+
+		-1.0, 1.0, 0.0, 1.0,
+		1.0, -1.0, 1.0, 0.0,
+		1.0, 1.0, 1.0, 1.0,
+	}
+	// VertexBufferBuilder を使用して、2次元位置（2要素）とテクスチャ座標（2要素）の属性を設定
+	builder := NewVertexBufferBuilder().
+		AddOverrideAttributes()
+	builder.SetData(unsafe.Pointer(&quadVertices[0]), len(quadVertices))
+	m.quadBuffer = builder.Build()
+}
+
+// Bind はレンダリング先をオフスクリーン FBO に設定します。
+func (m *MOverrideRenderer) Bind() {
+	gl.UseProgram(m.program)
+
+	gl.BindFramebuffer(gl.FRAMEBUFFER, m.fbo)
+	gl.Viewport(0, 0, int32(m.width), int32(m.height))
+	gl.ClearColor(0, 0, 0, 0)
+	gl.Clear(gl.COLOR_BUFFER_BIT)
+}
+
+// Unbind は FBO のバインドを解除し、デフォルトのフレームバッファに戻します。
+func (m *MOverrideRenderer) Unbind() {
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
+	gl.UseProgram(0)
+}
+
+// Render は、サブウィンドウの描画内容をオフスクリーン FBO に書き込み、
+func (m *MOverrideRenderer) Render() {
+	// 現在時刻からファイル名生成
+	timestamp := time.Now().Format("150405.000")
+	filename := fmt.Sprintf("1_render_%s.png", timestamp)
+	if err := m.saveTextureToFile(m.texture, filename); err != nil {
+		mlog.E("Error saving render texture: %s", err)
+	}
+}
+
+// Resolve は、メインウィンドウでサブウィンドウの描画結果が書き込まれたテクスチャを読み込み、
+func (m *MOverrideRenderer) Resolve() {
+	textureToUse := m.texture
+	if m.isMainWindow {
+		textureToUse = *m.sharedTextureID
+	}
+
+	// 現在時刻からファイル名生成
+	timestamp := time.Now().Format("150405.000")
+	filename := fmt.Sprintf("2_resolve_%s.png", timestamp)
+	if err := m.saveTextureToFile(textureToUse, filename); err != nil {
+		mlog.E("Error saving resolve texture: %s", err)
+	}
+
+	// 半透明合成のためブレンドを有効化
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	gl.UseProgram(m.program)
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D, textureToUse)
+	location := gl.GetUniformLocation(m.program, gl.Str("overrideTexture\x00"))
+	gl.Uniform1i(location, 0)
+
+	// VertexBufferHandle を活用してフルスクリーンクアッドを描画
+	m.quadBuffer.Bind()
+	gl.DrawArrays(gl.TRIANGLES, 0, 6)
+	m.quadBuffer.Unbind()
+
+	gl.BindTexture(gl.TEXTURE_2D, 0)
+	gl.UseProgram(0)
+	gl.Disable(gl.BLEND)
+}
+
+// Resize は、レンダリング対象のサイズ変更に伴い FBO とテクスチャを再生成します。
+func (m *MOverrideRenderer) Resize(width, height int) {
+	m.width = width
+	m.height = height
+
+	if m.fbo != 0 {
+		gl.DeleteFramebuffers(1, &m.fbo)
+	}
+	if m.texture != 0 {
+		gl.DeleteTextures(1, &m.texture)
+	}
+	m.initFBOAndTexture()
+
+	// サブウィンドウの場合は共有テクスチャも更新
+	if !m.isMainWindow {
+		*m.sharedTextureID = m.texture
+	}
+}
+
+// Delete は、FBO、テクスチャ、VertexBufferHandle などのリソースを解放します。
+func (m *MOverrideRenderer) Delete() {
+	if m.fbo != 0 {
+		gl.DeleteFramebuffers(1, &m.fbo)
+	}
+	if m.texture != 0 {
+		gl.DeleteTextures(1, &m.texture)
+	}
+	if m.quadBuffer != nil {
+		m.quadBuffer.Delete()
+	}
+}
+
+// saveTextureToFile は、指定されたテクスチャからピクセルデータを読み出し、
+// 上下反転した画像を PNG 形式でファイルに保存します。
+func (m *MOverrideRenderer) saveTextureToFile(texture uint32, filename string) error {
+	// 一時的なFBO を生成してテクスチャをアタッチ
+	var tempFBO uint32
+	gl.GenFramebuffers(1, &tempFBO)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, tempFBO)
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0)
+
+	gl.DrawBuffer(gl.COLOR_ATTACHMENT0)
+	gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
+
+	// FBOの状態をチェック
+	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+		gl.DeleteFramebuffers(1, &tempFBO)
+		return fmt.Errorf("temporary framebuffer is not complete")
+	}
+
+	width := int32(m.width)
+	height := int32(m.height)
+	pixels := make([]uint8, width*height*4)
+	gl.ReadPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, unsafe.Pointer(&pixels[0]))
+
+	// 画像データの生成（上下反転）
+	img := image.NewRGBA(image.Rect(0, 0, int(width), int(height)))
+	for y := 0; y < int(height); y++ {
+		for x := 0; x < int(width); x++ {
+			i := (y*int(width) + x) * 4
+			flippedY := int(height) - 1 - y
+			j := (flippedY*int(width) + x) * 4
+			img.Pix[j+0] = pixels[i+0]
+			img.Pix[j+1] = pixels[i+1]
+			img.Pix[j+2] = pixels[i+2]
+			img.Pix[j+3] = pixels[i+3]
+		}
+	}
+
+	file, err := os.Create(filename)
+	if err != nil {
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+		gl.DeleteFramebuffers(1, &tempFBO)
+		return err
+	}
+	defer file.Close()
+	if err := png.Encode(file, img); err != nil {
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+		gl.DeleteFramebuffers(1, &tempFBO)
+		return err
+	}
+
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	gl.DeleteFramebuffers(1, &tempFBO)
+	return nil
+}

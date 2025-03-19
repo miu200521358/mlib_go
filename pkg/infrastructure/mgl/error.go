@@ -10,7 +10,31 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
-func GetOpenGLErrorString(errCode uint32) string {
+// getFrameBufferStatusString はフレームバッファステータスコードを文字列に変換
+func getFrameBufferStatusString(status uint32) string {
+	switch status {
+	case gl.FRAMEBUFFER_COMPLETE:
+		return "FRAMEBUFFER_COMPLETE"
+	case gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+		return "FRAMEBUFFER_INCOMPLETE_ATTACHMENT"
+	case gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+		return "FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT"
+	case gl.FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+		return "FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER"
+	case gl.FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+		return "FRAMEBUFFER_INCOMPLETE_READ_BUFFER"
+	case gl.FRAMEBUFFER_UNSUPPORTED:
+		return "FRAMEBUFFER_UNSUPPORTED"
+	case gl.FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+		return "FRAMEBUFFER_INCOMPLETE_MULTISAMPLE"
+	case gl.FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+		return "FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS"
+	default:
+		return "UNKNOWN_ERROR"
+	}
+}
+
+func getOpenGLErrorString(errCode uint32) string {
 	switch errCode {
 	case gl.NO_ERROR:
 		return "No error"
@@ -35,7 +59,7 @@ func GetOpenGLErrorString(errCode uint32) string {
 
 func CheckGLError() error {
 	if errCode := gl.GetError(); errCode != gl.NO_ERROR {
-		return fmt.Errorf("OpenGL error: %v - %s", errCode, GetOpenGLErrorString(errCode))
+		return fmt.Errorf("OpenGL error: %v - %s", errCode, getOpenGLErrorString(errCode))
 	}
 	return nil
 }
