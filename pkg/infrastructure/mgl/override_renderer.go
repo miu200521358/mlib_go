@@ -57,7 +57,7 @@ func NewOverrideRenderer(width, height int, program uint32, isMainWindow bool, s
 
 // initFBOAndTexture はレンダリング結果を受け取るための FBO とテクスチャを初期化します。
 func (m *MOverrideRenderer) initFBOAndTexture() {
-	// テクスチャ生成
+	// カラー用テクスチャ生成
 	gl.GenTextures(1, &m.texture)
 	gl.BindTexture(gl.TEXTURE_2D, m.texture)
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, int32(m.width), int32(m.height), 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
@@ -69,6 +69,15 @@ func (m *MOverrideRenderer) initFBOAndTexture() {
 	gl.GenFramebuffers(1, &m.fbo)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.fbo)
 	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, m.texture, 0)
+
+	// 深度レンダーバッファの作成と添付
+	var depthRenderbuffer uint32
+	gl.GenRenderbuffers(1, &depthRenderbuffer)
+	gl.BindRenderbuffer(gl.RENDERBUFFER, depthRenderbuffer)
+	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, int32(m.width), int32(m.height))
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthRenderbuffer)
+	// レンダーバッファのバインド解除
+	gl.BindRenderbuffer(gl.RENDERBUFFER, 0)
 
 	// FBO の状態チェック
 	status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER)
@@ -101,11 +110,11 @@ func (m *MOverrideRenderer) initScreenQuad() {
 // Bind はレンダリング先をオフスクリーン FBO に設定します。
 func (m *MOverrideRenderer) Bind() {
 	gl.UseProgram(m.program)
-
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.fbo)
 	gl.Viewport(0, 0, int32(m.width), int32(m.height))
+	// カラーと深度の両方をクリアする
 	gl.ClearColor(0, 0, 0, 0)
-	gl.Clear(gl.COLOR_BUFFER_BIT)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 }
 
 // Unbind は FBO のバインドを解除し、デフォルトのフレームバッファに戻します。
@@ -127,9 +136,15 @@ func (m *MOverrideRenderer) Render() {
 
 // Resolve は、メインウィンドウでサブウィンドウの描画結果が書き込まれたテクスチャを読み込み、
 func (m *MOverrideRenderer) Resolve() {
-	textureToUse := m.texture
+	var textureToUse uint32
 	if m.isMainWindow {
-		textureToUse = *m.sharedTextureID
+		if *m.sharedTextureID != 0 {
+			textureToUse = *m.sharedTextureID
+		} else {
+			textureToUse = m.texture
+		}
+	} else {
+		textureToUse = m.texture
 	}
 
 	// 現在時刻からファイル名生成
@@ -194,24 +209,39 @@ func (m *MOverrideRenderer) Delete() {
 // saveTextureToFile は、指定されたテクスチャからピクセルデータを読み出し、
 // 上下反転した画像を PNG 形式でファイルに保存します。
 func (m *MOverrideRenderer) saveTextureToFile(texture uint32, filename string) error {
+	// テクスチャが有効かチェック
+	if texture == 0 {
+		return fmt.Errorf("invalid texture ID 0")
+	}
+
 	// 一時的なFBO を生成してテクスチャをアタッチ
 	var tempFBO uint32
 	gl.GenFramebuffers(1, &tempFBO)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, tempFBO)
 	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0)
 
+	// 読み書きバッファを設定
 	gl.DrawBuffer(gl.COLOR_ATTACHMENT0)
 	gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
 
 	// FBOの状態をチェック
-	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+	status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER)
+	if status != gl.FRAMEBUFFER_COMPLETE {
 		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 		gl.DeleteFramebuffers(1, &tempFBO)
-		return fmt.Errorf("temporary framebuffer is not complete")
+		return fmt.Errorf("temporary framebuffer is not complete: %s", getFrameBufferStatusString(status))
 	}
 
 	width := int32(m.width)
 	height := int32(m.height)
+
+	// サイズが0の場合はエラー
+	if width <= 0 || height <= 0 {
+		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+		gl.DeleteFramebuffers(1, &tempFBO)
+		return fmt.Errorf("invalid texture dimensions: %dx%d", width, height)
+	}
+
 	pixels := make([]uint8, width*height*4)
 	gl.ReadPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, unsafe.Pointer(&pixels[0]))
 

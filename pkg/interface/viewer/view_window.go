@@ -172,9 +172,6 @@ func (vw *ViewWindow) render() {
 		vw.shader.Msaa().Bind()
 	}
 
-	// MSAAフレームバッファをバインド
-	vw.shader.Msaa().Bind()
-
 	// 深度バッファのクリア
 	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
