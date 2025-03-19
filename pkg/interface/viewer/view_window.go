@@ -207,7 +207,6 @@ func (vw *ViewWindow) render() {
 	if vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
 		// サブウィンドウの場合、override FBO のアンバインド後にその内容をファイル出力
 		vw.shader.OverrideRenderer().Unbind()
-		vw.shader.OverrideRenderer().Render()
 	} else {
 		// メインウィンドウの場合は MSAA FBO の解決とアンバインド
 		vw.shader.Msaa().Resolve()
@@ -216,7 +215,7 @@ func (vw *ViewWindow) render() {
 
 	// メインウィンドウでは、サブウィンドウの描画内容（overrideテクスチャ）を半透明合成して描画
 	if vw.list.shared.IsShowOverride() && vw.windowIndex == 0 {
-		vw.resolveOverride()
+		vw.shader.OverrideRenderer().Resolve()
 	}
 
 	vw.SwapBuffers()
@@ -227,15 +226,6 @@ func (vw *ViewWindow) renderFloor() {
 	vw.shader.FloorRenderer().Bind()
 	vw.shader.FloorRenderer().Render()
 	vw.shader.FloorRenderer().Unbind()
-
-	gl.UseProgram(0)
-}
-
-// メインウィンドウでサブウィンドウのテクスチャを半透明で描画
-func (vw *ViewWindow) resolveOverride() {
-	vw.shader.UseProgram(rendering.ProgramTypeOverride)
-
-	vw.shader.OverrideRenderer().Resolve()
 
 	gl.UseProgram(0)
 }

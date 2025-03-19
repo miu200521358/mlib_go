@@ -254,18 +254,6 @@ func (s *MShader) OverrideRenderer() rendering.IOverrideRenderer {
 	return s.overrideRenderer
 }
 
-func (s *MShader) RenderSubWindow() {
-	program := s.programs[rendering.ProgramTypeOverride]
-
-	if s.overrideRenderer != nil {
-		gl.UseProgram(program)
-
-		s.overrideRenderer.Render()
-
-		gl.UseProgram(0)
-	}
-}
-
 // Msaa はMSAA機能を取得
 func (s *MShader) Msaa() rendering.IMsaa {
 	return s.msaa

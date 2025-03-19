@@ -2,14 +2,9 @@ package mgl
 
 import (
 	"fmt"
-	"image"
-	"image/png"
-	"os"
-	"time"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 )
 
@@ -53,8 +48,12 @@ func (m *MOverrideRenderer) SetSharedTextureID(sharedTextureID *uint32) {
 	m.sharedTextureID = sharedTextureID
 }
 
-func (m *MOverrideRenderer) TextureID() uint32 {
-	return m.texture
+func (m *MOverrideRenderer) SharedTextureIDPtr() *uint32 {
+	return m.sharedTextureID
+}
+
+func (m *MOverrideRenderer) TextureIDPtr() *uint32 {
+	return &m.texture
 }
 
 // initFBOAndTexture はレンダリング結果を受け取るための FBO とテクスチャを初期化します。
@@ -93,14 +92,13 @@ func (m *MOverrideRenderer) initFBOAndTexture() {
 // ここでは、2次元の位置（2要素）とテクスチャ座標（2要素）の頂点データを設定しています。
 func (m *MOverrideRenderer) initScreenQuad() {
 	quadVertices := []float32{
-		// position(x,y), texCoords(x,y)
-		-1.0, 1.0, 0.0, 1.0,
-		-1.0, -1.0, 0.0, 0.0,
-		1.0, -1.0, 1.0, 0.0,
-
-		-1.0, 1.0, 0.0, 1.0,
-		1.0, -1.0, 1.0, 0.0,
-		1.0, 1.0, 1.0, 1.0,
+		// positions   // texCoords
+		1.0, 1.0, 0.0, 1.0, 1.0,
+		1.0, -1.0, 0.0, 1.0, 0.0,
+		-1.0, -1.0, 0.0, 0.0, 0.0,
+		-1.0, -1.0, 0.0, 0.0, 0.0,
+		-1.0, 1.0, 0.0, 0.0, 1.0,
+		1.0, 1.0, 0.0, 1.0, 1.0,
 	}
 	// VertexBufferBuilder を使用して、2次元位置（2要素）とテクスチャ座標（2要素）の属性を設定
 	builder := NewVertexBufferBuilder().
@@ -126,16 +124,6 @@ func (m *MOverrideRenderer) Unbind() {
 	gl.UseProgram(0)
 }
 
-// Render は、サブウィンドウの描画内容をオフスクリーン FBO に書き込み、
-func (m *MOverrideRenderer) Render() {
-	// 現在時刻からファイル名生成
-	timestamp := time.Now().Format("150405.000")
-	filename := fmt.Sprintf("1_render_%s.png", timestamp)
-	if err := m.saveDefaultFramebufferToFile(filename); err != nil {
-		mlog.E("Error saving render texture: %s", err)
-	}
-}
-
 // Resolve は、メインウィンドウ側で、subwindow で更新された共有テクスチャを元に、
 // 半透明合成（フルスクリーンクアッド描画）を default フレームバッファ上に行い、
 // その最終結果をファイルに保存します。
@@ -143,6 +131,8 @@ func (m *MOverrideRenderer) Resolve() {
 	// 合成描画
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	// 深度テストを無効化
+	gl.Disable(gl.DEPTH_TEST)
 
 	gl.UseProgram(m.program)
 	gl.ActiveTexture(gl.TEXTURE0)
@@ -154,16 +144,13 @@ func (m *MOverrideRenderer) Resolve() {
 	gl.DrawArrays(gl.TRIANGLES, 0, 6)
 	m.quadBuffer.Unbind()
 
+	// テクスチャのバインド解除
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 	gl.UseProgram(0)
-	gl.Disable(gl.BLEND)
 
-	// 描画された合成結果は default フレームバッファにあるので、それをキャプチャして保存する
-	timestamp := time.Now().Format("150405.000")
-	filename := fmt.Sprintf("2_resolve_%s.png", timestamp)
-	if err := m.saveDefaultFramebufferToFile(filename); err != nil {
-		mlog.E("Error saving composite resolve texture: %s", err)
-	}
+	// 深度テストを有効化
+	gl.Enable(gl.DEPTH_TEST)
+	gl.Disable(gl.BLEND)
 }
 
 // Resize は、レンダリング対象のサイズ変更に伴い FBO とテクスチャを再生成します。
@@ -196,33 +183,4 @@ func (m *MOverrideRenderer) Delete() {
 	if m.quadBuffer != nil {
 		m.quadBuffer.Delete()
 	}
-}
-
-// saveDefaultFramebufferToFile は、default フレームバッファからピクセルを読み出し、
-// 上下反転した画像を PNG 形式で保存するヘルパー関数です。
-func (m *MOverrideRenderer) saveDefaultFramebufferToFile(filename string) error {
-	// フレームバッファからピクセルを読み出す
-	pixels := make([]uint8, m.width*m.height*4)
-	gl.ReadPixels(0, 0, int32(m.width), int32(m.height), gl.RGBA, gl.UNSIGNED_BYTE, unsafe.Pointer(&pixels[0]))
-
-	// 画像生成（上下反転）
-	img := image.NewRGBA(image.Rect(0, 0, m.width, m.height))
-	for y := 0; y < m.height; y++ {
-		for x := 0; x < m.width; x++ {
-			i := (y*m.width + x) * 4
-			flippedY := m.height - 1 - y
-			j := (flippedY*m.width + x) * 4
-			img.Pix[j+0] = pixels[i+0]
-			img.Pix[j+1] = pixels[i+1]
-			img.Pix[j+2] = pixels[i+2]
-			img.Pix[j+3] = pixels[i+3]
-		}
-	}
-
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	return png.Encode(file, img)
 }

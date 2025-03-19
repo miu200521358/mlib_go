@@ -5,9 +5,6 @@ type IOverrideRenderer interface {
 
 	Unbind()
 
-	// サブウィンドウの描画内容をテクスチャに書き込む
-	Render()
-
 	// メインウィンドウでサブウィンドウの描画内容を書き込んだテクスチャを描画する
 	Resolve()
 
@@ -17,5 +14,7 @@ type IOverrideRenderer interface {
 
 	SetSharedTextureID(sharedTextureID *uint32)
 
-	TextureID() uint32
+	SharedTextureIDPtr() *uint32
+
+	TextureIDPtr() *uint32
 }
