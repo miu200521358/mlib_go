@@ -62,6 +62,13 @@ const (
 	deformDefaultFps  = float32(30.0)       // デフォルトのデフォームfps
 )
 
+func (vl *ViewerList) InitOverride() {
+	if len(vl.windowList) > 1 {
+		subTextureID := vl.windowList[1].shader.OverrideRenderer().TextureID()
+		vl.windowList[0].shader.OverrideRenderer().SetSharedTextureID(&subTextureID)
+	}
+}
+
 func (vl *ViewerList) Run() {
 	prevTime := glfw.GetTime()
 	prevShowTime := prevTime

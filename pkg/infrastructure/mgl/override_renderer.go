@@ -33,13 +33,12 @@ type MOverrideRenderer struct {
 // NewOverrideRenderer は新しい MOverrideRenderer を作成します。
 // isMainWindow が true の場合、メインウィンドウ用として動作し、
 // そうでない場合はサブウィンドウ用として共有テクスチャを設定します。
-func NewOverrideRenderer(width, height int, program uint32, isMainWindow bool, sharedTextureID *uint32) rendering.IOverrideRenderer {
+func NewOverrideRenderer(width, height int, program uint32, isMainWindow bool) rendering.IOverrideRenderer {
 	renderer := &MOverrideRenderer{
-		width:           width,
-		height:          height,
-		program:         program,
-		isMainWindow:    isMainWindow,
-		sharedTextureID: sharedTextureID,
+		width:        width,
+		height:       height,
+		program:      program,
+		isMainWindow: isMainWindow,
 	}
 
 	// オフスクリーンレンダリング用の FBO とテクスチャを初期化
@@ -47,12 +46,15 @@ func NewOverrideRenderer(width, height int, program uint32, isMainWindow bool, s
 	// フルスクリーンクアッドのバッファを VertexBufferHandle を使って生成
 	renderer.initScreenQuad()
 
-	// サブウィンドウの場合は共有テクスチャとして外部にテクスチャIDを渡す
-	if !isMainWindow {
-		*sharedTextureID = renderer.texture
-	}
-
 	return renderer
+}
+
+func (m *MOverrideRenderer) SetSharedTextureID(sharedTextureID *uint32) {
+	m.sharedTextureID = sharedTextureID
+}
+
+func (m *MOverrideRenderer) TextureID() uint32 {
+	return m.texture
 }
 
 // initFBOAndTexture はレンダリング結果を受け取るための FBO とテクスチャを初期化します。
@@ -129,42 +131,25 @@ func (m *MOverrideRenderer) Render() {
 	// 現在時刻からファイル名生成
 	timestamp := time.Now().Format("150405.000")
 	filename := fmt.Sprintf("1_render_%s.png", timestamp)
-	if err := m.saveTextureToFile(m.texture, filename); err != nil {
+	if err := m.saveDefaultFramebufferToFile(filename); err != nil {
 		mlog.E("Error saving render texture: %s", err)
 	}
 }
 
-// Resolve は、メインウィンドウでサブウィンドウの描画結果が書き込まれたテクスチャを読み込み、
+// Resolve は、メインウィンドウ側で、subwindow で更新された共有テクスチャを元に、
+// 半透明合成（フルスクリーンクアッド描画）を default フレームバッファ上に行い、
+// その最終結果をファイルに保存します。
 func (m *MOverrideRenderer) Resolve() {
-	var textureToUse uint32
-	if m.isMainWindow {
-		if *m.sharedTextureID != 0 {
-			textureToUse = *m.sharedTextureID
-		} else {
-			textureToUse = m.texture
-		}
-	} else {
-		textureToUse = m.texture
-	}
-
-	// 現在時刻からファイル名生成
-	timestamp := time.Now().Format("150405.000")
-	filename := fmt.Sprintf("2_resolve_%s.png", timestamp)
-	if err := m.saveTextureToFile(textureToUse, filename); err != nil {
-		mlog.E("Error saving resolve texture: %s", err)
-	}
-
-	// 半透明合成のためブレンドを有効化
+	// 合成描画
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
 	gl.UseProgram(m.program)
 	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, textureToUse)
+	gl.BindTexture(gl.TEXTURE_2D, *m.sharedTextureID)
 	location := gl.GetUniformLocation(m.program, gl.Str("overrideTexture\x00"))
 	gl.Uniform1i(location, 0)
 
-	// VertexBufferHandle を活用してフルスクリーンクアッドを描画
 	m.quadBuffer.Bind()
 	gl.DrawArrays(gl.TRIANGLES, 0, 6)
 	m.quadBuffer.Unbind()
@@ -172,6 +157,13 @@ func (m *MOverrideRenderer) Resolve() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 	gl.UseProgram(0)
 	gl.Disable(gl.BLEND)
+
+	// 描画された合成結果は default フレームバッファにあるので、それをキャプチャして保存する
+	timestamp := time.Now().Format("150405.000")
+	filename := fmt.Sprintf("2_resolve_%s.png", timestamp)
+	if err := m.saveDefaultFramebufferToFile(filename); err != nil {
+		mlog.E("Error saving composite resolve texture: %s", err)
+	}
 }
 
 // Resize は、レンダリング対象のサイズ変更に伴い FBO とテクスチャを再生成します。
@@ -206,52 +198,20 @@ func (m *MOverrideRenderer) Delete() {
 	}
 }
 
-// saveTextureToFile は、指定されたテクスチャからピクセルデータを読み出し、
-// 上下反転した画像を PNG 形式でファイルに保存します。
-func (m *MOverrideRenderer) saveTextureToFile(texture uint32, filename string) error {
-	// テクスチャが有効かチェック
-	if texture == 0 {
-		return fmt.Errorf("invalid texture ID 0")
-	}
+// saveDefaultFramebufferToFile は、default フレームバッファからピクセルを読み出し、
+// 上下反転した画像を PNG 形式で保存するヘルパー関数です。
+func (m *MOverrideRenderer) saveDefaultFramebufferToFile(filename string) error {
+	// フレームバッファからピクセルを読み出す
+	pixels := make([]uint8, m.width*m.height*4)
+	gl.ReadPixels(0, 0, int32(m.width), int32(m.height), gl.RGBA, gl.UNSIGNED_BYTE, unsafe.Pointer(&pixels[0]))
 
-	// 一時的なFBO を生成してテクスチャをアタッチ
-	var tempFBO uint32
-	gl.GenFramebuffers(1, &tempFBO)
-	gl.BindFramebuffer(gl.FRAMEBUFFER, tempFBO)
-	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0)
-
-	// 読み書きバッファを設定
-	gl.DrawBuffer(gl.COLOR_ATTACHMENT0)
-	gl.ReadBuffer(gl.COLOR_ATTACHMENT0)
-
-	// FBOの状態をチェック
-	status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER)
-	if status != gl.FRAMEBUFFER_COMPLETE {
-		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-		gl.DeleteFramebuffers(1, &tempFBO)
-		return fmt.Errorf("temporary framebuffer is not complete: %s", getFrameBufferStatusString(status))
-	}
-
-	width := int32(m.width)
-	height := int32(m.height)
-
-	// サイズが0の場合はエラー
-	if width <= 0 || height <= 0 {
-		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-		gl.DeleteFramebuffers(1, &tempFBO)
-		return fmt.Errorf("invalid texture dimensions: %dx%d", width, height)
-	}
-
-	pixels := make([]uint8, width*height*4)
-	gl.ReadPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, unsafe.Pointer(&pixels[0]))
-
-	// 画像データの生成（上下反転）
-	img := image.NewRGBA(image.Rect(0, 0, int(width), int(height)))
-	for y := 0; y < int(height); y++ {
-		for x := 0; x < int(width); x++ {
-			i := (y*int(width) + x) * 4
-			flippedY := int(height) - 1 - y
-			j := (flippedY*int(width) + x) * 4
+	// 画像生成（上下反転）
+	img := image.NewRGBA(image.Rect(0, 0, m.width, m.height))
+	for y := 0; y < m.height; y++ {
+		for x := 0; x < m.width; x++ {
+			i := (y*m.width + x) * 4
+			flippedY := m.height - 1 - y
+			j := (flippedY*m.width + x) * 4
 			img.Pix[j+0] = pixels[i+0]
 			img.Pix[j+1] = pixels[i+1]
 			img.Pix[j+2] = pixels[i+2]
@@ -261,18 +221,8 @@ func (m *MOverrideRenderer) saveTextureToFile(texture uint32, filename string) e
 
 	file, err := os.Create(filename)
 	if err != nil {
-		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-		gl.DeleteFramebuffers(1, &tempFBO)
 		return err
 	}
 	defer file.Close()
-	if err := png.Encode(file, img); err != nil {
-		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-		gl.DeleteFramebuffers(1, &tempFBO)
-		return err
-	}
-
-	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-	gl.DeleteFramebuffers(1, &tempFBO)
-	return nil
+	return png.Encode(file, img)
 }

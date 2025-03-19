@@ -67,7 +67,6 @@ func (f *MShaderFactory) CreateShader(windowIndex, width, height int) (rendering
 		height,
 		shader.programs[rendering.ProgramTypeOverride],
 		isMainWindow,
-		&shader.sharedTextureId,
 	)
 
 	return shader, nil

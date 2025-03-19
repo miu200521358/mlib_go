@@ -14,4 +14,8 @@ type IOverrideRenderer interface {
 	Resize(width, height int)
 
 	Delete()
+
+	SetSharedTextureID(sharedTextureID *uint32)
+
+	TextureID() uint32
 }
