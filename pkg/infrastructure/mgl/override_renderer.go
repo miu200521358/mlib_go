@@ -119,8 +119,20 @@ func (m *MOverrideRenderer) Bind() {
 
 // Unbind は FBO のバインドを解除し、デフォルトのフレームバッファに戻します。
 func (m *MOverrideRenderer) Unbind() {
-	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	// FBOからデフォルトフレームバッファへ内容をブリット（サブウィンドウ表示用）
+	if !m.isMainWindow {
+		gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.fbo)
+		gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
+		gl.BlitFramebuffer(
+			0, 0, int32(m.width), int32(m.height),
+			0, 0, int32(m.width), int32(m.height),
+			gl.COLOR_BUFFER_BIT, gl.NEAREST,
+		)
+		gl.BindFramebuffer(gl.READ_FRAMEBUFFER, 0)
+	}
 
+	// FBOのバインドを解除
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	gl.UseProgram(0)
 }
 

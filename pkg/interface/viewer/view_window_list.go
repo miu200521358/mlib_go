@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/usecase/deform"
@@ -65,20 +64,20 @@ const (
 
 func (vl *ViewerList) InitOverride() {
 	if len(vl.windowList) > 1 {
-		mlog.I("[BEFORE] OverrideRenderer: [0] shared:%d texture: %d, -> [1] shared: %d, texture: %d",
-			vl.windowList[0].shader.OverrideRenderer().SharedTextureIDPtr(),
-			vl.windowList[0].shader.OverrideRenderer().TextureIDPtr(),
-			vl.windowList[1].shader.OverrideRenderer().SharedTextureIDPtr(),
-			vl.windowList[1].shader.OverrideRenderer().TextureIDPtr())
+		// mlog.I("[BEFORE] OverrideRenderer: [0] shared:%d texture: %d, -> [1] shared: %d, texture: %d",
+		// 	vl.windowList[0].shader.OverrideRenderer().SharedTextureIDPtr(),
+		// 	vl.windowList[0].shader.OverrideRenderer().TextureIDPtr(),
+		// 	vl.windowList[1].shader.OverrideRenderer().SharedTextureIDPtr(),
+		// 	vl.windowList[1].shader.OverrideRenderer().TextureIDPtr())
 
 		vl.windowList[0].shader.OverrideRenderer().SetSharedTextureID(
 			vl.windowList[1].shader.OverrideRenderer().TextureIDPtr())
 
-		mlog.I("[AFTER] OverrideRenderer: [0] shared:%d texture: %d, -> [1] shared: %d, texture: %d",
-			vl.windowList[0].shader.OverrideRenderer().SharedTextureIDPtr(),
-			vl.windowList[0].shader.OverrideRenderer().TextureIDPtr(),
-			vl.windowList[1].shader.OverrideRenderer().SharedTextureIDPtr(),
-			vl.windowList[1].shader.OverrideRenderer().TextureIDPtr())
+		// mlog.I("[AFTER] OverrideRenderer: [0] shared:%d texture: %d, -> [1] shared: %d, texture: %d",
+		// 	vl.windowList[0].shader.OverrideRenderer().SharedTextureIDPtr(),
+		// 	vl.windowList[0].shader.OverrideRenderer().TextureIDPtr(),
+		// 	vl.windowList[1].shader.OverrideRenderer().SharedTextureIDPtr(),
+		// 	vl.windowList[1].shader.OverrideRenderer().TextureIDPtr())
 	}
 }
 
