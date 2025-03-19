@@ -89,7 +89,6 @@ func (m *MOverrideRenderer) initFBOAndTexture() {
 }
 
 // initScreenQuad は、VertexBufferBuilder を利用してフルスクリーンクアッド用の頂点バッファを生成します。
-// ここでは、2次元の位置（2要素）とテクスチャ座標（2要素）の頂点データを設定しています。
 func (m *MOverrideRenderer) initScreenQuad() {
 	quadVertices := []float32{
 		// positions   // texCoords
@@ -100,7 +99,7 @@ func (m *MOverrideRenderer) initScreenQuad() {
 		-1.0, 1.0, 0.0, 0.0, 1.0,
 		1.0, 1.0, 0.0, 1.0, 1.0,
 	}
-	// VertexBufferBuilder を使用して、2次元位置（2要素）とテクスチャ座標（2要素）の属性を設定
+	// VertexBufferBuilder を使用して、3次元位置（3要素）とテクスチャ座標（2要素）の属性を設定
 	builder := NewVertexBufferBuilder().
 		AddOverrideAttributes()
 	builder.SetData(unsafe.Pointer(&quadVertices[0]), len(quadVertices))
