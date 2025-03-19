@@ -38,11 +38,10 @@ type IShader interface {
 	SetCamera(*Camera)
 	UpdateCamera()
 
-	// 床描画機能
-	DrawFloor()
-
 	// MSAA関連
 	Msaa() IMsaa
+	FloorRenderer() IFloorRenderer
+	OverrideRenderer() IOverrideRenderer
 }
 
 // IShaderFactory はシェーダー生成の抽象ファクトリー

@@ -173,12 +173,12 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 		// デフォーム処理
 		vl.deform(vw, timeStep)
 
-		// 重複描画
-		if vl.shared.IsShowOverride() {
-			vw.shader.Msaa().SetOverrideTargetTexture(vl.windowList[0].shader.Msaa().OverrideTargetTexture())
-		} else {
-			vw.shader.Msaa().SetOverrideTargetTexture(0)
-		}
+		// // 重複描画
+		// if vl.shared.IsShowOverride() {
+		// 	vw.shader.Msaa().SetOverrideTargetTexture(vl.windowList[0].shader.Msaa().OverrideTargetTexture())
+		// } else {
+		// 	vw.shader.Msaa().SetOverrideTargetTexture(0)
+		// }
 	}
 
 	// レンダリング処理

@@ -4,17 +4,13 @@
 package viewer
 
 import (
-	"fmt"
 	"image"
 	"math"
-	"time"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl64"
-	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
@@ -81,7 +77,7 @@ func newViewWindow(
 
 	// シェーダー初期化
 	shaderFactory := mgl.NewMShaderFactory()
-	shader, err := shaderFactory.CreateShader(width, height)
+	shader, err := shaderFactory.CreateShader(width, height, windowIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +182,7 @@ func (vw *ViewWindow) render() {
 	vw.shader.UpdateCamera()
 
 	// 床描画
-	vw.shader.DrawFloor()
+	vw.renderFloor()
 
 	for i, modelRenderer := range vw.modelRenderers {
 		if modelRenderer == nil || vw.vmdDeltas[i] == nil {
@@ -203,42 +199,50 @@ func (vw *ViewWindow) render() {
 
 	// 深度解決
 	vw.shader.Msaa().Resolve()
-	// 重複描画
-	vw.renderOverride()
-	// フレームバッファのバインド解除
 	vw.shader.Msaa().Unbind()
 
-	vw.SwapBuffers()
-
-	if mlog.IsViewerVerbose() {
-		// フレームバッファの内容を保存
-		vw.shader.Msaa().SaveImage(fmt.Sprintf("%s/viewerPng/%02d/%04.2f_%s.png", mconfig.GetAppRootDir(),
-			vw.windowIndex, vw.list.shared.Frame(), time.Now().Format("20060102_150405.000")))
+	// サブウィンドウをメインウィンドウに描画または
+	// サブウィンドウの内容をテクスチャに保存
+	if vw.list.shared.IsShowOverride() {
+		switch vw.windowIndex {
+		case 0:
+			// メインウィンドウの場合、サブウィンドウの内容を半透明で描画
+			vw.resolveOverride()
+		default:
+			// サブウィンドウの場合、現在の描画内容をテクスチャに保存
+			vw.renderToOverrideTexture()
+		}
 	}
+
+	vw.SwapBuffers()
 }
 
-// renderOverride はオーバーレイ描画を行う
-func (vw *ViewWindow) renderOverride() {
-	if !vw.list.shared.IsShowOverride() || vw.windowIndex != 0 {
-		return
-	}
-
-	// オーバーレイ描画
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.ALWAYS)
-
-	program := vw.shader.Program(rendering.ProgramTypeOverride)
-	gl.UseProgram(program)
-
-	vw.shader.Msaa().BindOverrideTexture(vw.windowIndex, program)
-
-	gl.DrawArrays(gl.TRIANGLES, 0, 6)
-
-	vw.shader.Msaa().UnbindOverrideTexture()
+func (vw *ViewWindow) renderFloor() {
+	vw.shader.UseProgram(rendering.ProgramTypeFloor)
+	vw.shader.FloorRenderer().Bind()
+	vw.shader.FloorRenderer().Render()
+	vw.shader.FloorRenderer().Unbind()
 
 	gl.UseProgram(0)
+}
 
-	// 深度テストを有効に戻す
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.LEQUAL)
+// サブウィンドウ描画内容をテクスチャに保存
+func (vw *ViewWindow) renderToOverrideTexture() {
+	vw.shader.UseProgram(rendering.ProgramTypeOverride)
+
+	// 現在の描画内容をテクスチャにコピー
+	vw.shader.OverrideRenderer().Bind()
+	vw.shader.OverrideRenderer().Render()
+	vw.shader.OverrideRenderer().Unbind()
+
+	gl.UseProgram(0)
+}
+
+// メインウィンドウでサブウィンドウのテクスチャを半透明で描画
+func (vw *ViewWindow) resolveOverride() {
+	vw.shader.UseProgram(rendering.ProgramTypeOverride)
+
+	vw.shader.OverrideRenderer().Resolve()
+
+	gl.UseProgram(0)
 }

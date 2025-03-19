@@ -4,305 +4,133 @@
 package mgl
 
 import (
-	"image"
-	"image/color"
-	"image/png"
-	"os"
-	"path/filepath"
+	"fmt"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 )
 
-// MsaaFactory はMSAAオブジェクトのファクトリー
-type MsaaFactory struct{}
-
-// NewMsaaFactory は新しいMSAAファクトリーを作成する
-func NewMsaaFactory() *MsaaFactory {
-	return &MsaaFactory{}
+// msaaImpl は IMsaa インターフェースの実装
+type msaaImpl struct {
+	config      rendering.MSAAConfig
+	fbo         uint32 // マルチサンプル用のフレームバッファオブジェクト
+	colorBuffer uint32 // カラー用マルチサンプルレンダーバッファ
+	depthBuffer uint32 // 深度/ステンシル用マルチサンプルレンダーバッファ
 }
 
-// CreateMsaa は新しいMSAAオブジェクトを作成する
-func (f *MsaaFactory) CreateMsaa(width, height int) rendering.IMsaa {
+// NewMsaa は指定されたサイズで MSAA を初期化し、IMsaa を返す関数です。
+// sampleCount はここでは 4 をデフォルトとしていますが、必要に応じて変更可能です。
+func NewMsaa(width, height int) rendering.IMsaa {
 	config := rendering.MSAAConfig{
 		Width:       width,
 		Height:      height,
-		SampleCount: 4, // デフォルトのサンプル数
+		SampleCount: 4, // サンプル数（例: 4xMSAA）
 	}
-	return NewMsaa(config)
-}
-
-// CreateMsaaWithConfig は指定された設定でMSAAオブジェクトを作成する
-func (f *MsaaFactory) CreateMsaaWithConfig(config rendering.MSAAConfig) rendering.IMsaa {
-	return NewMsaa(config)
-}
-
-// --------------------------------------------------
-
-// Msaa はOpenGLを使用したMSAA実装
-type Msaa struct {
-	width                 int32
-	height                int32
-	sampleCount           int32
-	msFBO                 uint32
-	resolveFBO            uint32
-	colorBuffer           uint32
-	depthBuffer           uint32
-	colorBufferMS         uint32
-	depthBufferMS         uint32
-	overrideTexture       uint32
-	overrideTargetTexture uint32
-	overrideBuffer        *VertexBufferHandle
-}
-
-// NewMsaa は新しいMSAAオブジェクトを作成する
-func NewMsaa(config rendering.MSAAConfig) *Msaa {
-	msaa := &Msaa{
-		width:       int32(config.Width),
-		height:      int32(config.Height),
-		sampleCount: int32(config.SampleCount),
+	msaa := &msaaImpl{
+		config: config,
 	}
-
-	// 深度テストの有効化
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.LEQUAL)
-
-	// マルチサンプルフレームバッファの作成
-	gl.GenFramebuffers(1, &msaa.msFBO)
-	gl.BindFramebuffer(gl.FRAMEBUFFER, msaa.msFBO)
-
-	// マルチサンプルカラーおよび深度バッファの作成
-	gl.GenRenderbuffers(1, &msaa.colorBufferMS)
-	gl.BindRenderbuffer(gl.RENDERBUFFER, msaa.colorBufferMS)
-	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, msaa.sampleCount, gl.RGBA8, msaa.width, msaa.height)
-	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, msaa.colorBufferMS)
-
-	gl.GenRenderbuffers(1, &msaa.depthBufferMS)
-	gl.BindRenderbuffer(gl.RENDERBUFFER, msaa.depthBufferMS)
-	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, msaa.sampleCount, gl.DEPTH_COMPONENT24, msaa.width, msaa.height)
-	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, msaa.depthBufferMS)
-
-	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		panic("MSAA生成失敗")
-	}
-
-	// 解決フレームバッファの作成
-	gl.GenFramebuffers(1, &msaa.resolveFBO)
-	gl.BindFramebuffer(gl.FRAMEBUFFER, msaa.resolveFBO)
-
-	// 解決フレームバッファのカラーおよび深度バッファの作成
-	gl.GenRenderbuffers(1, &msaa.colorBuffer)
-	gl.BindRenderbuffer(gl.RENDERBUFFER, msaa.colorBuffer)
-	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.RGBA8, msaa.width, msaa.height)
-	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, msaa.colorBuffer)
-
-	gl.GenRenderbuffers(1, &msaa.depthBuffer)
-	gl.BindRenderbuffer(gl.RENDERBUFFER, msaa.depthBuffer)
-	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, msaa.width, msaa.height)
-	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, msaa.depthBuffer)
-
-	gl.GenTextures(1, &msaa.overrideTexture)
-	gl.BindTexture(gl.TEXTURE_2D, msaa.overrideTexture)
-	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, msaa.width, msaa.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, nil)
-
-	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		panic("解決フレームバッファ生成失敗")
-	}
-
-	// 透過描画用に四角形の頂点とテクスチャ座標を定義
-	overrideVertices := []float32{
-		// positions   // texCoords
-		1.0, 1.0, 0.0, 1.0, 1.0,
-		1.0, -1.0, 0.0, 1.0, 0.0,
-		-1.0, -1.0, 0.0, 0.0, 0.0,
-		-1.0, -1.0, 0.0, 0.0, 0.0,
-		-1.0, 1.0, 0.0, 0.0, 1.0,
-		1.0, 1.0, 0.0, 1.0, 1.0,
-	}
-
-	factory := NewBufferFactory()
-	msaa.overrideBuffer = factory.CreateOverrideBuffer(overrideVertices)
-
-	// アンバインド
-	msaa.Unbind()
-
+	msaa.init()
 	return msaa
 }
 
-// ReadDepthAt は指定座標の深度値を読み取る
-func (m *Msaa) ReadDepthAt(x, y int) float32 {
-	// シングルサンプルFBOから読み取る
-	gl.BindFramebuffer(gl.FRAMEBUFFER, m.resolveFBO)
-	if status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); status != gl.FRAMEBUFFER_COMPLETE {
-		mlog.E("Framebuffer is not complete: %v", status)
-	}
+// init は MSAA 用の FBO とレンダーバッファを初期化します。
+func (m *msaaImpl) init() {
+	// FBO の生成
+	gl.GenFramebuffers(1, &m.fbo)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, m.fbo)
 
-	var depth float32
-	// yは下が0なので、上下反転
-	gl.ReadPixels(int32(x), m.height-int32(y), 1, 1, gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth))
+	// カラー用マルチサンプルレンダーバッファの生成と設定
+	gl.GenRenderbuffers(1, &m.colorBuffer)
+	gl.BindRenderbuffer(gl.RENDERBUFFER, m.colorBuffer)
+	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, int32(m.config.SampleCount), gl.RGBA8, int32(m.config.Width), int32(m.config.Height))
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, m.colorBuffer)
 
-	// エラーが発生していないかチェック
-	if err := gl.GetError(); err != gl.NO_ERROR {
-		mlog.E("OpenGL Error after ReadPixels: %v", err)
-		return -1
+	// 深度／ステンシル用マルチサンプルレンダーバッファの生成と設定
+	gl.GenRenderbuffers(1, &m.depthBuffer)
+	gl.BindRenderbuffer(gl.RENDERBUFFER, m.depthBuffer)
+	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, int32(m.config.SampleCount), gl.DEPTH24_STENCIL8, int32(m.config.Width), int32(m.config.Height))
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, m.depthBuffer)
+
+	// FBO の状態確認
+	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+		fmt.Println("MSAA framebuffer is not complete")
 	}
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-
-	return depth
 }
 
-// SaveImage は画像を保存する
-func (m *Msaa) SaveImage(imgPath string) error {
-	w := m.width
-	h := m.height
-
-	pixels := make([]byte, int(w*h)*4) // RGBA形式で4バイト/ピクセル
-	gl.ReadPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pixels))
-
-	img := image.NewRGBA(image.Rect(0, 0, int(w), int(h)))
-	for y := int32(0); y < h; y++ {
-		for x := int32(0); x < w; x++ {
-			i := (y*w + x) * 4
-			r := pixels[i]
-			g := pixels[i+1]
-			b := pixels[i+2]
-			a := pixels[i+3]
-			img.SetRGBA(int(x), int(h-y-1), color.RGBA{r, g, b, a}) // 画像の上下を反転
-		}
-	}
-
-	if err := os.MkdirAll(filepath.Dir(imgPath), os.ModePerm); err != nil {
-		mlog.VV("Failed to create directory: %v [%s]", err, imgPath)
-		return err
-	}
-	if file, err := os.Create(imgPath); err != nil {
-		mlog.VV("Failed to create file: %v [%s]", err, imgPath)
-		return err
-	} else {
-		if err := png.Encode(file, img); err != nil {
-			mlog.VV("Failed to encode PNG: %v [%s]", err, imgPath)
-			return err
-		}
-		defer file.Close()
-	}
-
-	return nil
+// Bind は MSAA FBO をバインドし、描画先を MSAA に切り替えます。
+func (m *msaaImpl) Bind() {
+	gl.BindFramebuffer(gl.FRAMEBUFFER, m.fbo)
 }
 
-// Bind はMSAAフレームバッファをバインドする
-func (m *Msaa) Bind() {
-	gl.BindFramebuffer(gl.FRAMEBUFFER, m.msFBO)
-	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-}
-
-// Unbind はMSAAフレームバッファをアンバインドする
-func (m *Msaa) Unbind() {
+// Unbind は FBO のバインドを解除し、デフォルトのフレームバッファに戻します。
+func (m *msaaImpl) Unbind() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+}
+
+// Resolve はマルチサンプルの結果をデフォルトフレームバッファに解決（ブリット）します。
+func (m *msaaImpl) Resolve() {
+	// MSAA FBO からデフォルト FBO にカラー情報をコピー
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.fbo)
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
+	gl.BlitFramebuffer(
+		0, 0, int32(m.config.Width), int32(m.config.Height),
+		0, 0, int32(m.config.Width), int32(m.config.Height),
+		gl.COLOR_BUFFER_BIT, gl.NEAREST,
+	)
+	// 解除
 	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, 0)
-	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
-	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 
-// Resolve はMSAAの結果をデフォルトフレームバッファに解決する
-func (m *Msaa) Resolve() {
-	// マルチサンプルフレームバッファの内容を解決フレームバッファにコピー
-	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.msFBO)
-	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, m.resolveFBO)
-	gl.BlitFramebuffer(0, 0, m.width, m.height, 0, 0, m.width, m.height,
-		gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT, gl.NEAREST)
-
-	// 解決フレームバッファの内容をウィンドウのデフォルトフレームバッファにコピー
-	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.resolveFBO)
-	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
-	gl.BlitFramebuffer(0, 0, m.width, m.height, 0, 0, m.width, m.height, gl.COLOR_BUFFER_BIT, gl.NEAREST)
-
-	if m.overrideTargetTexture != 0 {
-		gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.resolveFBO)
-		gl.BindTexture(gl.TEXTURE_2D, m.overrideTargetTexture)
-		gl.CopyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, m.width, m.height, 0)
+// Delete は MSAA 関連のリソース（FBO とレンダーバッファ）を解放します。
+func (m *msaaImpl) Delete() {
+	if m.fbo != 0 {
+		gl.DeleteFramebuffers(1, &m.fbo)
+		m.fbo = 0
+	}
+	if m.colorBuffer != 0 {
+		gl.DeleteRenderbuffers(1, &m.colorBuffer)
+		m.colorBuffer = 0
+	}
+	if m.depthBuffer != 0 {
+		gl.DeleteRenderbuffers(1, &m.depthBuffer)
+		m.depthBuffer = 0
 	}
 }
 
-// Delete はMSAAリソースを解放する
-func (m *Msaa) Delete() {
-	gl.DeleteFramebuffers(1, &m.msFBO)
-	gl.DeleteFramebuffers(1, &m.resolveFBO)
-	gl.DeleteRenderbuffers(1, &m.colorBuffer)
-	gl.DeleteRenderbuffers(1, &m.depthBuffer)
-	gl.DeleteRenderbuffers(1, &m.colorBufferMS)
-	gl.DeleteRenderbuffers(1, &m.depthBufferMS)
-	gl.DeleteTextures(1, &m.overrideTexture)
+// Resize は MSAA のレンダーバッファサイズを更新します。
+// ウィンドウサイズの変更に合わせ、レンダーバッファを再生成します。
+func (m *msaaImpl) Resize(width, height int) {
+	m.config.Width = width
+	m.config.Height = height
 
-	if m.overrideBuffer != nil {
-		m.overrideBuffer.Delete()
+	// 既存のレンダーバッファを削除
+	if m.colorBuffer != 0 {
+		gl.DeleteRenderbuffers(1, &m.colorBuffer)
 	}
-}
-
-// SetOverrideTargetTexture はオーバーライドターゲットテクスチャを設定する
-func (m *Msaa) SetOverrideTargetTexture(texture uint32) {
-	m.overrideTargetTexture = texture
-}
-
-// OverrideTargetTexture はオーバーライドターゲットテクスチャのIDを取得する
-func (m *Msaa) OverrideTargetTexture() uint32 {
-	return m.overrideTargetTexture
-}
-
-// BindOverrideTexture はオーバーライドテクスチャをバインドする
-func (m *Msaa) BindOverrideTexture(windowIndex int, program uint32) {
-	m.overrideBuffer.Bind()
-
-	// テクスチャユニットの選択
-	var textureUnit uint32
-	switch windowIndex {
-	case 0:
-		textureUnit = gl.TEXTURE23
-	case 1:
-		textureUnit = gl.TEXTURE24
-	case 2:
-		textureUnit = gl.TEXTURE25
+	if m.depthBuffer != 0 {
+		gl.DeleteRenderbuffers(1, &m.depthBuffer)
 	}
 
-	// テクスチャをアクティブにする
-	gl.ActiveTexture(textureUnit)
+	// 再度 FBO にバインド
+	gl.BindFramebuffer(gl.FRAMEBUFFER, m.fbo)
 
-	// テクスチャをバインドする
-	gl.BindTexture(gl.TEXTURE_2D, m.overrideTexture)
+	// 新しいカラー用マルチサンプルレンダーバッファの作成
+	gl.GenRenderbuffers(1, &m.colorBuffer)
+	gl.BindRenderbuffer(gl.RENDERBUFFER, m.colorBuffer)
+	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, int32(m.config.SampleCount), gl.RGBA8, int32(width), int32(height))
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, m.colorBuffer)
 
-	// テクスチャのパラメーターの設定
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	// 新しい深度／ステンシル用レンダーバッファの作成
+	gl.GenRenderbuffers(1, &m.depthBuffer)
+	gl.BindRenderbuffer(gl.RENDERBUFFER, m.depthBuffer)
+	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, int32(m.config.SampleCount), gl.DEPTH24_STENCIL8, int32(width), int32(height))
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, m.depthBuffer)
 
-	// シェーダーにテクスチャユニットを設定
-	uniform := gl.GetUniformLocation(program, gl.Str("overrideTexture\x00"))
-	gl.Uniform1i(uniform, int32(windowIndex+23))
-}
-
-// UnbindOverrideTexture はオーバーライドテクスチャをアンバインドする
-func (m *Msaa) UnbindOverrideTexture() {
-	gl.BindTexture(gl.TEXTURE_2D, 0)
-	m.overrideBuffer.Unbind()
-}
-
-// Resize はMSAAバッファのサイズを変更する
-func (m *Msaa) Resize(width, height int) {
-	// 既存のリソースを削除
-	m.Delete()
-
-	// 新しいサイズで再作成
-	newConfig := rendering.MSAAConfig{
-		Width:       width,
-		Height:      height,
-		SampleCount: int(m.sampleCount),
+	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+		fmt.Println("Resized MSAA framebuffer is not complete")
 	}
 
-	newMsaa := NewMsaa(newConfig)
-
-	// フィールドをコピー
-	*m = *newMsaa
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }

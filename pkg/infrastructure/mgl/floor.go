@@ -27,17 +27,22 @@ func NewFloorRenderer() *FloorRenderer {
 	}
 }
 
-// Render は床を描画
-func (f *FloorRenderer) Render(programID uint32) {
-	gl.UseProgram(programID)
+func (f *FloorRenderer) Bind() {
+	f.bufferHandle.Bind()
+}
 
+func (f *FloorRenderer) Unbind() {
+	f.bufferHandle.Unbind()
+}
+
+// Render は床を描画
+func (f *FloorRenderer) Render() {
 	f.bufferHandle.Bind()
 
 	// LINESモードで描画
 	gl.DrawArrays(gl.LINES, 0, f.vertexCount)
 
 	f.bufferHandle.Unbind()
-	gl.UseProgram(0)
 }
 
 // Delete はリソースを解放

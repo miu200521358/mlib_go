@@ -15,16 +15,18 @@ import (
 
 // MShader はOpenGLを使用したシェーダー実装
 type MShader struct {
-	camera         atomic.Value
-	width          int
-	height         int
-	lightPosition  *mmath.MVec3
-	lightDirection *mmath.MVec3
-	msaa           rendering.IMsaa
-	floor          *FloorRenderer // 床レンダラー
-	programs       map[rendering.ProgramType]uint32
-	boneTextureId  uint32
-	shaderLoader   *ShaderLoader
+	camera           atomic.Value
+	width            int
+	height           int
+	lightPosition    *mmath.MVec3
+	lightDirection   *mmath.MVec3
+	msaa             rendering.IMsaa
+	floorRenderer    rendering.IFloorRenderer
+	overrideRenderer rendering.IOverrideRenderer
+	programs         map[rendering.ProgramType]uint32
+	boneTextureId    uint32
+	sharedTextureId  uint32 // サブウィンドウ共有テクスチャID
+	shaderLoader     *ShaderLoader
 }
 
 // MShaderFactory はOpenGLシェーダーのファクトリー
@@ -36,19 +38,15 @@ func NewMShaderFactory() *MShaderFactory {
 }
 
 // CreateShader は新しいOpenGLShaderを作成
-func (f *MShaderFactory) CreateShader(width, height int) (rendering.IShader, error) {
+func (f *MShaderFactory) CreateShader(windowIndex, width, height int) (rendering.IShader, error) {
 	cam := rendering.NewDefaultCamera(width, height)
-
-	// MSAAの作成
-	msaaFactory := NewMsaaFactory()
-	msaa := msaaFactory.CreateMsaa(width, height)
 
 	shader := &MShader{
 		width:         width,
 		height:        height,
 		lightPosition: &mmath.MVec3{X: -0.5, Y: -1.0, Z: 0.5},
-		msaa:          msaa,
-		floor:         NewFloorRenderer(),
+		msaa:          NewMsaa(width, height),
+		floorRenderer: NewFloorRenderer(),
 		programs:      make(map[rendering.ProgramType]uint32),
 		shaderLoader:  NewShaderLoader(),
 	}
@@ -60,6 +58,17 @@ func (f *MShaderFactory) CreateShader(width, height int) (rendering.IShader, err
 	if err != nil {
 		return nil, err
 	}
+
+	// ウィンドウ番号0（メイン）は isMainWindow = true、それ以外は false
+	// initializePrograms() の後に呼ぶ必要がある（ProgramTypeOverrideが必要なため）
+	isMainWindow := windowIndex == 0
+	shader.overrideRenderer = NewOverrideRenderer(
+		width,
+		height,
+		shader.programs[rendering.ProgramTypeOverride],
+		isMainWindow,
+		&shader.sharedTextureId,
+	)
 
 	return shader, nil
 }
@@ -157,7 +166,7 @@ func (s *MShader) BoneTextureID() uint32 {
 }
 
 func (s *MShader) OverrideTextureID() uint32 {
-	return s.msaa.OverrideTargetTexture()
+	return s.sharedTextureId
 }
 
 func (s *MShader) SetCamera(cam *rendering.Camera) {
@@ -205,13 +214,18 @@ func (s *MShader) Cleanup() {
 	s.cleanupPrograms()
 
 	// 床のリソース解放
-	if s.floor != nil {
-		s.floor.Delete()
+	if s.floorRenderer != nil {
+		s.floorRenderer.Delete()
 	}
 
 	// MSAAリソースの解放
 	if s.msaa != nil {
 		s.msaa.Delete()
+	}
+
+	// サブウィンドウのリソース解放
+	if s.overrideRenderer != nil {
+		s.overrideRenderer.Delete()
 	}
 
 	// シェーダープログラム解放
@@ -230,17 +244,26 @@ func (s *MShader) BoneTextureId() uint32 {
 }
 
 func (s *MShader) OverrideTextureId() uint32 {
-	return s.msaa.OverrideTargetTexture()
+	return s.sharedTextureId
 }
 
-// DrawFloor は床を描画する
-func (s *MShader) DrawFloor() {
-	// 床描画用のプログラム取得
-	program := s.programs[rendering.ProgramTypeFloor]
+func (s *MShader) FloorRenderer() rendering.IFloorRenderer {
+	return s.floorRenderer
+}
 
-	// 床レンダラーを使用して描画
-	if s.floor != nil {
-		s.floor.Render(program)
+func (s *MShader) OverrideRenderer() rendering.IOverrideRenderer {
+	return s.overrideRenderer
+}
+
+func (s *MShader) RenderSubWindow() {
+	program := s.programs[rendering.ProgramTypeOverride]
+
+	if s.overrideRenderer != nil {
+		gl.UseProgram(program)
+
+		s.overrideRenderer.Render()
+
+		gl.UseProgram(0)
 	}
 }
 
