@@ -522,5 +522,13 @@
     {
         "id": "システム用ボーン追加失敗",
         "translation": "Failed to add system bone"
+    },
+    {
+        "id": "&上半身合わせ",
+        "translation": "&Upper Body Alignment"
+    },
+    {
+        "id": "&下半身合わせ",
+        "translation": "&Lower Body Alignment"
     }
 ]

@@ -224,39 +224,73 @@ func (vw *ViewWindow) adjustCameraForOverride() {
 	if len(mainVW.vmdDeltas) == 0 || len(vw.vmdDeltas) == 0 {
 		return
 	}
-	// 対象ボーンが存在しているか確認
-	if !mainVW.vmdDeltas[0].Bones.ContainsByName(pmx.TRUNK_ROOT.String()) ||
-		!mainVW.vmdDeltas[0].Bones.ContainsByName(pmx.NECK_ROOT.String()) ||
-		!vw.vmdDeltas[0].Bones.ContainsByName(pmx.TRUNK_ROOT.String()) ||
-		!vw.vmdDeltas[0].Bones.ContainsByName(pmx.NECK_ROOT.String()) {
-		return
+
+	// 合わせるボーン名
+	targetBoneNames := []string{pmx.TRUNK_ROOT.String()}
+	if vw.list.shared.IsShowOverrideUpper() {
+		// 上半身合わせ
+		targetBoneNames = append(targetBoneNames, pmx.NECK_ROOT.String(), pmx.ARM.Left(), pmx.ARM.Right(), pmx.WRIST.Left(), pmx.WRIST.Right())
+	} else if vw.list.shared.IsShowOverrideLower() {
+		// 下半身合わせ
+		targetBoneNames = append(targetBoneNames, pmx.LEG_CENTER.String(), pmx.LEG.Left(), pmx.LEG.Right(), pmx.ANKLE.Left(), pmx.ANKLE.Right())
 	}
 
-	// メインウィンドウ側の各骨のワールド座標を取得
-	mainNeckPos := mainVW.vmdDeltas[0].Bones.GetByName(pmx.NECK_ROOT.String()).FilledGlobalPosition()
-	mainTrunkPos := mainVW.vmdDeltas[0].Bones.GetByName(pmx.TRUNK_ROOT.String()).FilledGlobalPosition()
-	// サブウィンドウ側の各骨のワールド座標を取得
-	subNeckPos := vw.vmdDeltas[0].Bones.GetByName(pmx.NECK_ROOT.String()).FilledGlobalPosition()
-	subTrunkPos := vw.vmdDeltas[0].Bones.GetByName(pmx.TRUNK_ROOT.String()).FilledGlobalPosition()
+	// 合わせる対象のボーンが1つでもなかった場合は処理しない
+	for _, boneName := range targetBoneNames {
+		if !mainVW.vmdDeltas[0].Bones.ContainsByName(boneName) || !vw.vmdDeltas[0].Bones.ContainsByName(boneName) {
+			return
+		}
+	}
 
-	// ウィンドウサイズを取得
-	mainW, mainH := mainVW.GetSize()
-	subW, subH := vw.GetSize()
+	boneProjections := make([][]*mmath.MVec3, 0, 2)
+	boneNDCs := make([][]*mmath.MVec3, 0, 2)
+	boneDistances := make([][]float64, 0, 2)
 
-	// メインウィンドウでのボーン位置をNDCに変換
-	mainNeckNDC := projectPoint(mainNeckPos, mainVW.shader.Camera(), mainW, mainH)
-	mainTrunkNDC := projectPoint(mainTrunkPos, mainVW.shader.Camera(), mainW, mainH)
+	for n, w := range []*ViewWindow{mainVW, vw} {
+		boneProjections = append(boneProjections, make([]*mmath.MVec3, 0, len(targetBoneNames)))
+		boneNDCs = append(boneNDCs, make([]*mmath.MVec3, 0, len(targetBoneNames)))
+		boneDistances = append(boneDistances, make([]float64, 0, len(targetBoneNames)-1))
 
-	// サブウィンドウでのボーン位置をNDCに変換
-	subNeckNDC := projectPoint(subNeckPos, vw.shader.Camera(), subW, subH)
-	subTrunkNDC := projectPoint(subTrunkPos, vw.shader.Camera(), subW, subH)
+		// ウィンドウサイズを取得
+		width, height := w.GetSize()
 
-	// モデル間のスケール比を計算
-	mainScale := mainNeckPos.Distance(mainTrunkPos)
-	subScale := subNeckPos.Distance(subTrunkPos)
-	scaleRatio := 1.0
-	if !mmath.NearEquals(mainScale, 0.0, 1e-3) {
-		scaleRatio = subScale / mainScale
+		for _, boneName := range targetBoneNames {
+			// ボーンのワールド座標を取得
+			bonePos := w.vmdDeltas[0].Bones.GetByName(boneName).FilledGlobalPosition()
+			// ボーン位置を NDC に変換
+			projectionPoint, ndcPoint := projectPoint(bonePos, w.shader.Camera(), width, height)
+			boneProjections[n] = append(boneProjections[n], projectionPoint)
+			boneNDCs[n] = append(boneNDCs[n], ndcPoint)
+		}
+
+		boneDistances[n] = boneNDCs[n][0].Distances(boneNDCs[n][1:])
+	}
+
+	// 縮尺の中央値
+	boneScales := make([]float64, 0, len(boneDistances[0]))
+	for m := range len(boneDistances[0]) {
+		if !mmath.NearEquals(boneDistances[0][m], 0.0, 1e-3) {
+			boneScales = append(boneScales, boneDistances[1][m]/boneDistances[0][m])
+		}
+	}
+
+	scaleRatio := mmath.Median(boneScales)
+
+	// ボーン間の差分を取得
+	boneDiffXs := make([]float64, 0, len(targetBoneNames))
+	boneDiffYs := make([]float64, 0, len(targetBoneNames))
+	for m := range len(boneNDCs[0]) {
+		boneDiffXs = append(boneDiffXs, boneNDCs[0][m].X-boneNDCs[1][m].X)
+		boneDiffYs = append(boneDiffYs, boneNDCs[0][m].Y-boneNDCs[1][m].Y)
+	}
+
+	// 差分の中央値を取る
+	avgDiffX := mmath.Median(boneDiffXs)
+	avgDiffY := mmath.Median(boneDiffYs)
+
+	// 差分が十分小さければ調整は不要
+	if mmath.NearEquals(avgDiffX, 0.0, 1e-5) && mmath.NearEquals(avgDiffY, 0.0, 1e-5) {
+		return
 	}
 
 	// カメラ設定を取得
@@ -264,23 +298,7 @@ func (vw *ViewWindow) adjustCameraForOverride() {
 
 	// 1. ベースとなるカメラ設定をメインウィンドウと同期
 	mainCam := mainVW.shader.Camera()
-	cam.FieldOfView = max(mainCam.FieldOfView*float32(scaleRatio), 1.0)
-
-	// 2. NDCの差分を計算して位置調整
-	// X軸とY軸の差分（スクリーン座標での差）
-	neckDiffX := mainNeckNDC.X() - subNeckNDC.X()
-	neckDiffY := mainNeckNDC.Y() - subNeckNDC.Y()
-	trunkDiffX := mainTrunkNDC.X() - subTrunkNDC.X()
-	trunkDiffY := mainTrunkNDC.Y() - subTrunkNDC.Y()
-
-	// 差分の平均を取る
-	avgDiffX := (neckDiffX + trunkDiffX) / 2
-	avgDiffY := (neckDiffY + trunkDiffY) / 2
-
-	// 差分が十分小さければ調整は不要
-	if mmath.NearEquals(avgDiffX, 0.0, 1e-2) && mmath.NearEquals(avgDiffY, 0.0, 1e-2) {
-		return
-	}
+	cam.FieldOfView += mainCam.FieldOfView - max(mainCam.FieldOfView/float32(scaleRatio), 1.0)
 
 	// カメラの視点ベクトルを取得
 	viewVector := cam.LookAtCenter.Subed(cam.Position).Normalize()
@@ -289,17 +307,16 @@ func (vw *ViewWindow) adjustCameraForOverride() {
 	// 上方向ベクトルを取得
 	upVector := rightVector.Cross(viewVector).Normalize()
 
-	// カメラ距離を元に調整量を計算
-	camDistance := cam.Position.Distance(cam.LookAtCenter)
-	adjustFactor := camDistance * 0.05 // 調整係数（必要に応じて変更）
-
 	// 右方向と上方向への移動量を計算
-	rightMove := rightVector.MulScalar(float64(avgDiffX) * adjustFactor)
-	upMove := upVector.MulScalar(-float64(avgDiffY) * adjustFactor)
+	rightMove := rightVector.MulScalar(float64(avgDiffX) * scaleRatio)
+	upMove := upVector.MulScalar(-float64(avgDiffY) * scaleRatio)
 
 	// カメラ位置と注視点を調整
 	cam.Position.Add(rightMove).Add(upMove)
 	cam.LookAtCenter.Add(rightMove).Add(upMove)
+
+	// カメラ位置を角度から再計算
+	cam.ResetPosition(mainCam.Yaw, mainCam.Pitch)
 
 	// 更新したカメラ設定を適用
 	vw.shader.SetCamera(cam)
@@ -307,7 +324,7 @@ func (vw *ViewWindow) adjustCameraForOverride() {
 
 // projectPoint は、与えられたワールド座標 point を、指定されたカメラ(cam)とウィンドウサイズ(w,h)に基づき
 // 正規化デバイス座標（NDC）に変換して返します。
-func projectPoint(point *mmath.MVec3, cam *rendering.Camera, w, h int) mgl32.Vec3 {
+func projectPoint(point *mmath.MVec3, cam *rendering.Camera, w, h int) (projectionPoint, ndcPoint *mmath.MVec3) {
 	// プロジェクション行列とビュー行列を取得（mgl32.Mat4）
 	proj := cam.GetProjectionMatrix(w, h)
 	view := cam.GetViewMatrix()
@@ -323,5 +340,8 @@ func projectPoint(point *mmath.MVec3, cam *rendering.Camera, w, h int) mgl32.Vec
 	clip := proj.Mul4(view).Mul4x1(p)
 	// パースペクティブ除算により NDC を算出
 	ndc := clip.Mul(1.0 / clip.W())
-	return ndc.Vec3()
+
+	projectionPoint = &mmath.MVec3{X: float64(ndc.X()) * float64(w), Y: float64(ndc.Y()) * float64(h), Z: float64(ndc.Z())}
+	ndcPoint = &mmath.MVec3{X: float64(ndc.X()), Y: float64(ndc.Y()), Z: float64(ndc.Z())}
+	return projectionPoint, ndcPoint
 }

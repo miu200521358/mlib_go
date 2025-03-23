@@ -37,7 +37,8 @@ type ControlWindow struct {
 	physicsResetAction          *walk.Action // 物理リセット
 	showNormalAction            *walk.Action // ボーンデバッグ表示
 	showWireAction              *walk.Action // ワイヤーフレームデバッグ表示
-	showOverrideAction          *walk.Action // オーバーライドデバッグ表示
+	showOverrideUpperAction     *walk.Action // オーバーライドデバッグ(上半身)表示
+	showOverrideLowerAction     *walk.Action // オーバーライドデバッグ(下半身)表示
 	showSelectedVertexAction    *walk.Action // 選択頂点デバッグ表示
 	showBoneAllAction           *walk.Action // 全ボーンデバッグ表示
 	showBoneIkAction            *walk.Action // IKボーンデバッグ表示
@@ -217,11 +218,22 @@ func NewControlWindow(
 						OnTriggered: cw.TriggerCameraSync,
 						AssignTo:    &cw.cameraSyncAction,
 					},
-					declarative.Action{
-						Text:        mi18n.T("&サブビューワーオーバーレイ"),
-						Checkable:   true,
-						OnTriggered: cw.TriggerShowOverride,
-						AssignTo:    &cw.showOverrideAction,
+					declarative.Menu{
+						Text: mi18n.T("&サブビューワーオーバーレイ"),
+						Items: []declarative.MenuItem{
+							declarative.Action{
+								Text:        mi18n.T("&上半身合わせ"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerShowOverrideUpper,
+								AssignTo:    &cw.showOverrideUpperAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&下半身合わせ"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerShowOverrideLower,
+								AssignTo:    &cw.showOverrideLowerAction,
+							},
+						},
 					},
 					declarative.Action{
 						Text: mi18n.T("&サブビューワーオーバーレイの使い方"),
@@ -658,8 +670,28 @@ func (cw *ControlWindow) TriggerShowWire() {
 	cw.shared.SetShowWire(cw.showWireAction.Checked())
 }
 
-func (cw *ControlWindow) TriggerShowOverride() {
-	cw.shared.SetShowOverride(cw.showOverrideAction.Checked())
+func (cw *ControlWindow) TriggerShowOverrideUpper() {
+	if cw.showOverrideUpperAction.Checked() {
+		cw.showOverrideLowerAction.SetChecked(false)
+	}
+	cw.shared.UpdateFlags(
+		map[uint32]bool{
+			state.FlagShowOverrideUpper: cw.showOverrideUpperAction.Checked(),
+			state.FlagShowOverrideLower: cw.showOverrideLowerAction.Checked(),
+		},
+	)
+}
+
+func (cw *ControlWindow) TriggerShowOverrideLower() {
+	if cw.showOverrideLowerAction.Checked() {
+		cw.showOverrideUpperAction.SetChecked(false)
+	}
+	cw.shared.UpdateFlags(
+		map[uint32]bool{
+			state.FlagShowOverrideUpper: cw.showOverrideUpperAction.Checked(),
+			state.FlagShowOverrideLower: cw.showOverrideLowerAction.Checked(),
+		},
+	)
 }
 
 func (cw *ControlWindow) TriggerShowSelectedVertex() {

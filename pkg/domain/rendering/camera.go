@@ -4,6 +4,7 @@
 package rendering
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -44,6 +45,11 @@ func NewDefaultCamera(width, height int) *Camera {
 		FarPlane:     1000.0,
 	}
 	return defaultCam
+}
+
+func (c *Camera) String() string {
+	return fmt.Sprintf("Camera: Position: %v, LookAtCenter: %v, Up: %v, FieldOfView: %.5f, AspectRatio: %.5f, NearPlane: %.5f, FarPlane: %.5f, Yaw: %.5f, Pitch: %.5f",
+		c.Position, c.LookAtCenter, c.Up, c.FieldOfView, c.AspectRatio, c.NearPlane, c.FarPlane, c.Yaw, c.Pitch)
 }
 
 // UpdateAspectRatio はアスペクト比を更新する
