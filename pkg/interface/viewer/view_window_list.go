@@ -191,13 +191,6 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	for _, vw := range vl.windowList {
 		// デフォーム処理
 		vl.deform(vw, timeStep)
-
-		// // 重複描画
-		// if vl.shared.IsShowOverride() {
-		// 	vw.shader.Msaa().SetOverrideTargetTexture(vl.windowList[0].shader.Msaa().OverrideTargetTexture())
-		// } else {
-		// 	vw.shader.Msaa().SetOverrideTargetTexture(0)
-		// }
 	}
 
 	// レンダリング処理
@@ -248,7 +241,6 @@ func (vl *ViewerList) resetPhysics(vw *ViewWindow, timeStep float32) {
 		}
 
 		// モデルの物理追加
-		// vw.physics.AddModel(n, model.Model)
 		vw.physics.AddModelByBoneDeltas(n, model.Model, vw.vmdDeltas[n].Bones)
 
 		// 物理再設定

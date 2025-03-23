@@ -187,6 +187,41 @@ func (vw *ViewWindow) updateCameraPositionByCursor(xpos float64, ypos float64) {
 	cam.LookAtCenter.Add(movement)
 
 	vw.shader.SetCamera(cam)
+	// カメラ同期が有効なら、他のウィンドウへも同じカメラ設定を反映
+	vw.syncCameraToOthers()
+}
+
+// syncCameraToOthers は、現在のウィンドウのカメラ設定を他のウィンドウに反映する
+func (vw *ViewWindow) syncCameraToOthers() {
+	// shared 側にカメラ同期のフラグがあると仮定
+	if !vw.list.shared.IsCameraSync() {
+		return
+	}
+
+	currentCam := vw.shader.Camera()
+	for _, otherVW := range vw.list.windowList {
+		if otherVW.windowIndex != vw.windowIndex {
+			// ここで yaw と pitch も同期する
+			otherVW.yaw = vw.yaw
+			otherVW.pitch = vw.pitch
+
+			otherCam := otherVW.shader.Camera()
+			otherCam.Position.X = currentCam.Position.X
+			otherCam.Position.Y = currentCam.Position.Y
+			otherCam.Position.Z = currentCam.Position.Z
+			otherCam.LookAtCenter.X = currentCam.LookAtCenter.X
+			otherCam.LookAtCenter.Y = currentCam.LookAtCenter.Y
+			otherCam.LookAtCenter.Z = currentCam.LookAtCenter.Z
+			otherCam.Up.X = currentCam.Up.X
+			otherCam.Up.Y = currentCam.Up.Y
+			otherCam.Up.Z = currentCam.Up.Z
+			otherCam.FieldOfView = currentCam.FieldOfView
+			otherCam.AspectRatio = currentCam.AspectRatio
+			otherCam.NearPlane = currentCam.NearPlane
+			otherCam.FarPlane = currentCam.FarPlane
+			otherVW.shader.SetCamera(otherCam)
+		}
+	}
 }
 
 // scrollCallback はマウスホイールのスクロールイベントを処理する
@@ -210,6 +245,8 @@ func (vw *ViewWindow) scrollCallback(w *glfw.Window, xoff float64, yoff float64)
 	}
 
 	vw.shader.SetCamera(cam)
+	// カメラ同期が有効なら、他のウィンドウへも同じカメラ設定を反映
+	vw.syncCameraToOthers()
 }
 
 func (vw *ViewWindow) focusCallback(w *glfw.Window, focused bool) {
@@ -222,14 +259,6 @@ func (vw *ViewWindow) focusCallback(w *glfw.Window, focused bool) {
 		// ユーザー操作等でウィンドウが前面になった場合に連動フォーカスを発火
 		vw.list.shared.TriggerLinkedFocus(vw.windowIndex)
 	}
-
-	// vw.list.shared.SetFocusViewWindow(vw.windowIndex, false)
-
-	// mlog.IS("(5) [%d] focusCallback: focused[%v] controlActive[%v] focusControl[%v]",
-	// 	vw.windowIndex, focused, vw.list.shared.IsFocusControlWindow())
-	// if focused && !vw.list.shared.IsFocusControlWindow() {
-	// 	vw.list.shared.SetFocusControlWindow(true)
-	// }
 }
 
 func (vw *ViewWindow) iconifyCallback(w *glfw.Window, iconified bool) {

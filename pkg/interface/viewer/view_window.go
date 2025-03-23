@@ -149,6 +149,9 @@ func (vw *ViewWindow) resetCameraPosition(yaw, pitch float64) {
 	cam.Position.Y = rendering.InitialCameraPositionY + forwardXYZ.Y
 	cam.Position.Z = forwardXYZ.Z
 	vw.shader.SetCamera(cam)
+
+	// カメラ同期が有効なら、他のウィンドウへも同じカメラ設定を反映
+	vw.syncCameraToOthers()
 }
 
 func (vw *ViewWindow) render() {
