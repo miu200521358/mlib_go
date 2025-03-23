@@ -393,7 +393,7 @@
     },
     {
         "id": "サブビューワーオーバーレイの使い方メッセージ",
-        "translation": "When checked, the drawing of the sub-window is overlaid on the main window.\nWhile checked, operating the main window will also synchronize the movements of the sub-window.\nIn the sub-window alone, only the field of view can be operated."
+        "translation": "When checked, the sub-window rendering will be overlaid on the main window.\nWhile checked, operating the main window will also synchronize the movement of the sub-window.\nThe size of the character model in the sub-window will be approximately matched to the character model in the main window.\nYou can switch whether to use the upper body or lower body as the alignment reference."
     },
     {
         "id": "&カメラ同期",
