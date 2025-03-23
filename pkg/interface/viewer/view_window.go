@@ -99,6 +99,7 @@ func newViewWindow(
 	glWindow.SetCursorPosCallback(vw.cursorPosCallback)
 	glWindow.SetFocusCallback(vw.focusCallback)
 	glWindow.SetIconifyCallback(vw.iconifyCallback)
+	glWindow.SetSizeCallback(vw.sizeCallback)
 
 	if !isProd {
 		gl.Enable(gl.DEBUG_OUTPUT)

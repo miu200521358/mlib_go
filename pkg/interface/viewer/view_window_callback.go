@@ -193,7 +193,6 @@ func (vw *ViewWindow) updateCameraPositionByCursor(xpos float64, ypos float64) {
 
 // syncCameraToOthers は、現在のウィンドウのカメラ設定を他のウィンドウに反映する
 func (vw *ViewWindow) syncCameraToOthers() {
-	// shared 側にカメラ同期のフラグがあると仮定
 	if !vw.list.shared.IsCameraSync() {
 		return
 	}
@@ -256,6 +255,29 @@ func (vw *ViewWindow) focusCallback(w *glfw.Window, focused bool) {
 	if focused {
 		// ユーザー操作等でウィンドウが前面になった場合に連動フォーカスを発火
 		vw.list.shared.TriggerLinkedFocus(vw.windowIndex)
+	}
+}
+
+func (vw *ViewWindow) sizeCallback(w *glfw.Window, width int, height int) {
+	if !vw.list.shared.IsInitializedAllWindows() {
+		// 初期化が終わってない場合、スルー
+		return
+	}
+
+	vw.syncSizeToOthers(width, height)
+}
+
+// syncCameraToOthers は、現在のウィンドウのカメラ設定を他のウィンドウに反映する
+func (vw *ViewWindow) syncSizeToOthers(width, height int) {
+	if !vw.list.shared.IsShowOverride() {
+		// オーバーライドが無効ならスルー
+		return
+	}
+
+	for _, otherVW := range vw.list.windowList {
+		if otherVW.windowIndex != vw.windowIndex {
+			otherVW.SetSize(width, height)
+		}
 	}
 }
 

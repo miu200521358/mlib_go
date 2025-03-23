@@ -139,6 +139,9 @@ func (s *MShader) Resize(width, height int) {
 		// MSAAのリサイズ
 		s.msaa.Resize(width, height)
 
+		// サブウィンドウのリソース作り直し
+		s.overrideRenderer.Resize(width, height)
+
 		cam := s.Camera()
 		cam.UpdateAspectRatio(width, height)
 		s.SetCamera(cam)

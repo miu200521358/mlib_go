@@ -178,7 +178,7 @@ func (m *MOverrideRenderer) Resize(width, height int) {
 	m.initFBOAndTexture()
 
 	// サブウィンドウの場合は共有テクスチャも更新
-	if !m.isMainWindow {
+	if !m.isMainWindow && m.sharedTextureID != nil {
 		*m.sharedTextureID = m.texture
 	}
 }
