@@ -68,19 +68,19 @@ func (bones *Bones) getInsertAfterIndex(bone *Bone) int {
 	return -1
 }
 
-func (bones *Bones) Insert(bone *Bone) {
-	afterIndex := bones.getInsertAfterIndex(bone)
+func (bones *Bones) Insert(bone *Bone) error {
+	afterBoneIndex := bones.getInsertAfterIndex(bone)
 
 	// 挿入位置を探す
 	insertPos := -1
 
-	if afterIndex < 0 {
+	if afterBoneIndex < 0 {
 		// afterIndexが-1の場合、ルートに挿入
 		bone.Layer = 0
 		insertPos = len(bones.LayerSortedIndexes)
 	} else {
 		for i, boneIndex := range bones.LayerSortedIndexes {
-			if boneIndex == afterIndex {
+			if boneIndex == afterBoneIndex {
 				insertPos = i + 1
 				break
 			}
@@ -93,7 +93,7 @@ func (bones *Bones) Insert(bone *Bone) {
 			bone.Layer = lastBone.Layer
 			bones.Append(bone)
 		}
-		return
+		return nil
 	}
 
 	// 新しい要素のLayerを決定
@@ -101,7 +101,7 @@ func (bones *Bones) Insert(bone *Bone) {
 	if insertPos == len(bones.LayerSortedIndexes) {
 		// 挿入位置が最後の場合
 		if boneAtPrevPos, err := bones.Get(bones.LayerSortedIndexes[insertPos-1]); err == nil {
-			if afterIndex >= 0 {
+			if afterBoneIndex >= 0 {
 				newLayer = boneAtPrevPos.Layer
 			} else {
 				// ルートに挿入の場合、全てのLayerをインクリメント
@@ -117,12 +117,12 @@ func (bones *Bones) Insert(bone *Bone) {
 		// 挿入位置が途中の場合
 		boneAtPrevPos, err := bones.Get(bones.LayerSortedIndexes[insertPos-1])
 		if err != nil {
-			return
+			return err
 		}
 		currentLayer := boneAtPrevPos.Layer
 		boneAtNextPos, err := bones.Get(bones.LayerSortedIndexes[insertPos])
 		if err != nil {
-			return
+			return err
 		}
 		nextLayer := boneAtNextPos.Layer
 
@@ -152,6 +152,8 @@ func (bones *Bones) Insert(bone *Bone) {
 
 	bone.Layer = newLayer
 	bones.Append(bone)
+
+	return nil
 }
 
 func (bones *Bones) GetIkTarget(ikBoneName string) *Bone {

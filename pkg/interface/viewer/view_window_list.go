@@ -5,6 +5,7 @@ package viewer
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
@@ -64,20 +65,8 @@ const (
 
 func (vl *ViewerList) InitOverride() {
 	if len(vl.windowList) > 1 {
-		// mlog.I("[BEFORE] OverrideRenderer: [0] shared:%d texture: %d, -> [1] shared: %d, texture: %d",
-		// 	vl.windowList[0].shader.OverrideRenderer().SharedTextureIDPtr(),
-		// 	vl.windowList[0].shader.OverrideRenderer().TextureIDPtr(),
-		// 	vl.windowList[1].shader.OverrideRenderer().SharedTextureIDPtr(),
-		// 	vl.windowList[1].shader.OverrideRenderer().TextureIDPtr())
-
 		vl.windowList[0].shader.OverrideRenderer().SetSharedTextureID(
 			vl.windowList[1].shader.OverrideRenderer().TextureIDPtr())
-
-		// mlog.I("[AFTER] OverrideRenderer: [0] shared:%d texture: %d, -> [1] shared: %d, texture: %d",
-		// 	vl.windowList[0].shader.OverrideRenderer().SharedTextureIDPtr(),
-		// 	vl.windowList[0].shader.OverrideRenderer().TextureIDPtr(),
-		// 	vl.windowList[1].shader.OverrideRenderer().SharedTextureIDPtr(),
-		// 	vl.windowList[1].shader.OverrideRenderer().TextureIDPtr())
 	}
 }
 
@@ -174,14 +163,14 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	if vl.shared.FrameInterval() > 0 && elapsed < vl.shared.FrameInterval() {
 		// fps制限は描画fpsにのみ依存
 
-		// // 待機時間(残り時間の9割)
-		// waitDuration := (vl.shared.FrameInterval() - elapsed) * 0.9
+		// 待機時間(残り時間の9割)
+		waitDuration := (vl.shared.FrameInterval() - elapsed) * 0.9
 
-		// // waitDurationが1ms以上なら、1ms未満になるまで待つ
-		// if waitDuration >= 0.001 {
-		// 	// あえて1000倍にしないで900倍にしているのは、time.Durationの最大値を超えないため
-		// 	time.Sleep(time.Duration(waitDuration*900) * time.Millisecond)
-		// }
+		// waitDurationが1ms以上なら、1ms未満になるまで待つ
+		if waitDuration >= 0.001 {
+			// あえて1000倍にしないで900倍にしているのは、time.Durationの最大値を超えないため
+			time.Sleep(time.Duration(waitDuration*900) * time.Millisecond)
+		}
 		// mlog.I("Elapsed: %.5f, timeStep: %.5f", originalElapsed, timeStep)
 
 		// 経過時間が1フレームの時間未満の場合はもう少し待つ
@@ -202,7 +191,7 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	if vl.shared.IsPhysicsReset() {
 		// 物理リセット
 		for _, vw := range vl.windowList {
-			vl.resetPhysics(vw, timeStep)
+			vl.resetPhysics(vw)
 		}
 
 		// リセット完了
@@ -223,7 +212,7 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	return true, timeStep
 }
 
-func (vl *ViewerList) resetPhysics(vw *ViewWindow, timeStep float32) {
+func (vl *ViewerList) resetPhysics(vw *ViewWindow) {
 	// 物理リセット用のデフォーム処理
 	vl.deformForReset(vw)
 

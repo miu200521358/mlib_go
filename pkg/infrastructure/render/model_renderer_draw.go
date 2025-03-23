@@ -148,7 +148,7 @@ func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bon
 	mr.bonePointBufferHandle.Bind()
 	// 取得したデバッグカラー情報で更新
 	bonePointIndexes, bonePointDeltas := mr.fetchBonePointDeltas(bones, shared)
-	mr.boneLineBufferHandle.UpdateBoneDeltas(bonePointIndexes, bonePointDeltas)
+	mr.bonePointBufferHandle.UpdateBoneDeltas(bonePointIndexes, bonePointDeltas)
 
 	mr.bonePointIbo.Bind()
 

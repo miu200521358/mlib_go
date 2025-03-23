@@ -518,5 +518,9 @@
     {
         "id": "スフィア",
         "translation": "Sphere"
+    },
+    {
+        "id": "システム用ボーン追加失敗",
+        "translation": "Failed to add system bone"
     }
 ]

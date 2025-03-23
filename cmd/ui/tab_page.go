@@ -23,7 +23,12 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 		"モデルファイルを選択してください",
 		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
 			if data, err := rep.Load(path); err == nil {
-				cw.StoreModel(0, 0, data.(*pmx.PmxModel))
+				model := data.(*pmx.PmxModel)
+				if err := model.Bones.InsertShortageBones(); err != nil {
+					mlog.ET(mi18n.T("システム用ボーン追加失敗"), err.Error())
+				} else {
+					cw.StoreModel(0, 0, model)
+				}
 			} else {
 				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
 			}
@@ -51,7 +56,12 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 		"モデルファイルを選択してください",
 		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
 			if data, err := rep.Load(path); err == nil {
-				cw.StoreModel(1, 0, data.(*pmx.PmxModel))
+				model := data.(*pmx.PmxModel)
+				if err := model.Bones.InsertShortageBones(); err != nil {
+					mlog.ET(mi18n.T("システム用ボーン追加失敗"), err.Error())
+				} else {
+					cw.StoreModel(1, 0, model)
+				}
 			} else {
 				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
 			}

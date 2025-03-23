@@ -153,7 +153,7 @@ func (vw *ViewWindow) updateCameraAngleByCursor(xpos, ypos float64) {
 	yOffset := (ypos - vw.prevCursorPos.Y) * ratio
 
 	// 方位角と仰角を更新
-	vw.resetCameraPosition(vw.yaw+xOffset, vw.pitch+yOffset)
+	vw.resetCameraPosition(vw.shader.Camera().Yaw+xOffset, vw.shader.Camera().Pitch+yOffset)
 }
 
 // updateCameraPositionByCursor はカメラ位置と中心をカーソル位置に基づいて更新する
@@ -201,10 +201,6 @@ func (vw *ViewWindow) syncCameraToOthers() {
 	currentCam := vw.shader.Camera()
 	for _, otherVW := range vw.list.windowList {
 		if otherVW.windowIndex != vw.windowIndex {
-			// ここで yaw と pitch も同期する
-			otherVW.yaw = vw.yaw
-			otherVW.pitch = vw.pitch
-
 			otherCam := otherVW.shader.Camera()
 			otherCam.Position.X = currentCam.Position.X
 			otherCam.Position.Y = currentCam.Position.Y
@@ -219,6 +215,8 @@ func (vw *ViewWindow) syncCameraToOthers() {
 			otherCam.AspectRatio = currentCam.AspectRatio
 			otherCam.NearPlane = currentCam.NearPlane
 			otherCam.FarPlane = currentCam.FarPlane
+			otherCam.Yaw = currentCam.Yaw
+			otherCam.Pitch = currentCam.Pitch
 			otherVW.shader.SetCamera(otherCam)
 		}
 	}

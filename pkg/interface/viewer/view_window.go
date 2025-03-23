@@ -5,15 +5,15 @@ package viewer
 
 import (
 	"image"
-	"math"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/go-gl/mathgl/mgl64"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mbt"
@@ -32,16 +32,13 @@ type ViewWindow struct {
 	ctrlPressed         bool                    // Ctrlキー押下フラグ
 	updatedPrevCursor   bool                    // 前回のカーソル位置更新フラグ
 	prevCursorPos       *mmath.MVec2            // 前回のカーソル位置
-	yaw                 float64                 // カメラyaw
-	pitch               float64                 // カメラpitch
 	list                *ViewerList             // ビューワーリスト
 	shader              rendering.IShader       // シェーダー
 	physics             physics.IPhysics        // 物理エンジン
 	modelRenderers      []*render.ModelRenderer // モデル描画オブジェクト
 	motions             []*vmd.VmdMotion        // モーションデータ
 	vmdDeltas           []*delta.VmdDeltas      // 変形情報
-	avgElapsedTime      float32                 // 追加: 平均経過時間
-	elapsedSamples      int                     // 追加: 経過時間サンプル数
+	overrideOffset      *mmath.MVec3            // オーバーライド補正オフセット
 }
 
 func newViewWindow(
@@ -92,8 +89,7 @@ func newViewWindow(
 		shader:         shader,
 		physics:        mbt.NewMPhysics(),
 		prevCursorPos:  mmath.NewMVec2(),
-		avgElapsedTime: 1.0 / 30.0, // デフォルトは30FPS想定
-		elapsedSamples: 0,
+		overrideOffset: mmath.NewMVec3(),
 	}
 
 	glWindow.SetCloseCallback(vw.closeCallback)
@@ -130,25 +126,7 @@ func (vw *ViewWindow) SetTitle(title string) {
 }
 
 func (vw *ViewWindow) resetCameraPosition(yaw, pitch float64) {
-	vw.yaw = yaw
-	vw.pitch = pitch
-
-	// 球面座標系をデカルト座標系に変換
-	radius := math.Abs(float64(rendering.InitialCameraPositionZ))
-
-	// 四元数を使ってカメラの方向を計算
-	yawRad := mgl64.DegToRad(yaw)
-	pitchRad := mgl64.DegToRad(pitch)
-	orientation := mmath.NewMQuaternionFromAxisAngles(mmath.MVec3UnitY, yawRad).Mul(
-		mmath.NewMQuaternionFromAxisAngles(mmath.MVec3UnitX, pitchRad))
-	forwardXYZ := orientation.MulVec3(mmath.MVec3UnitZNeg).MulScalar(radius)
-
-	// カメラ位置を更新
-	cam := vw.shader.Camera()
-	cam.Position.X = forwardXYZ.X
-	cam.Position.Y = rendering.InitialCameraPositionY + forwardXYZ.Y
-	cam.Position.Z = forwardXYZ.Z
-	vw.shader.SetCamera(cam)
+	vw.shader.Camera().ResetPosition(yaw, pitch)
 
 	// カメラ同期が有効なら、他のウィンドウへも同じカメラ設定を反映
 	vw.syncCameraToOthers()
@@ -166,9 +144,10 @@ func (vw *ViewWindow) render() {
 	// リサイズ（サイズが変わってなければ何もしない）
 	vw.shader.Resize(w, h)
 
-	// 描画先のFBOの選択
+	// override が有効かつサブウィンドウの場合、カメラを調整してオーバーライド描画
 	if vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
-		// サブウィンドウの場合、override 表示が有効なら OverrideRenderer のFBOへ描画
+		// サブウィンドウ側のカメラを調整（調整後の状態でレンダリングする）
+		vw.adjustCameraForOverride()
 		vw.shader.OverrideRenderer().Bind()
 	} else {
 		// メインウィンドウや override が無効の場合は MSAA FBO へ描画
@@ -231,4 +210,118 @@ func (vw *ViewWindow) renderFloor() {
 	vw.shader.FloorRenderer().Unbind()
 
 	gl.UseProgram(0)
+}
+
+// adjustCameraForOverride は、サブウィンドウのカメラを
+// メインウィンドウ側の人物モデルの NECK_ROOT と TRUNK_ROOT の位置に合わせる補正を行います。
+// 体格が異なる場合でも、各骨間距離に応じたスケール補正を導入しています。
+func (vw *ViewWindow) adjustCameraForOverride() {
+	// サブウィンドウのみ対象
+	if vw.windowIndex == 0 {
+		return
+	}
+	mainVW := vw.list.windowList[0]
+	if len(mainVW.vmdDeltas) == 0 || len(vw.vmdDeltas) == 0 {
+		return
+	}
+	// 対象ボーンが存在しているか確認
+	if !mainVW.vmdDeltas[0].Bones.ContainsByName(pmx.TRUNK_ROOT.String()) ||
+		!mainVW.vmdDeltas[0].Bones.ContainsByName(pmx.NECK_ROOT.String()) ||
+		!vw.vmdDeltas[0].Bones.ContainsByName(pmx.TRUNK_ROOT.String()) ||
+		!vw.vmdDeltas[0].Bones.ContainsByName(pmx.NECK_ROOT.String()) {
+		return
+	}
+
+	// メインウィンドウ側の各骨のワールド座標を取得
+	mainNeckPos := mainVW.vmdDeltas[0].Bones.GetByName(pmx.NECK_ROOT.String()).FilledGlobalPosition()
+	mainTrunkPos := mainVW.vmdDeltas[0].Bones.GetByName(pmx.TRUNK_ROOT.String()).FilledGlobalPosition()
+	// サブウィンドウ側の各骨のワールド座標を取得
+	subNeckPos := vw.vmdDeltas[0].Bones.GetByName(pmx.NECK_ROOT.String()).FilledGlobalPosition()
+	subTrunkPos := vw.vmdDeltas[0].Bones.GetByName(pmx.TRUNK_ROOT.String()).FilledGlobalPosition()
+
+	// ウィンドウサイズを取得
+	mainW, mainH := mainVW.GetSize()
+	subW, subH := vw.GetSize()
+
+	// メインウィンドウでのボーン位置をNDCに変換
+	mainNeckNDC := projectPoint(mainNeckPos, mainVW.shader.Camera(), mainW, mainH)
+	mainTrunkNDC := projectPoint(mainTrunkPos, mainVW.shader.Camera(), mainW, mainH)
+
+	// サブウィンドウでのボーン位置をNDCに変換
+	subNeckNDC := projectPoint(subNeckPos, vw.shader.Camera(), subW, subH)
+	subTrunkNDC := projectPoint(subTrunkPos, vw.shader.Camera(), subW, subH)
+
+	// モデル間のスケール比を計算
+	mainScale := mainNeckPos.Distance(mainTrunkPos)
+	subScale := subNeckPos.Distance(subTrunkPos)
+	scaleRatio := 1.0
+	if !mmath.NearEquals(mainScale, 0.0, 1e-3) {
+		scaleRatio = subScale / mainScale
+	}
+
+	// カメラ設定を取得
+	cam := vw.shader.Camera()
+
+	// 1. ベースとなるカメラ設定をメインウィンドウと同期
+	mainCam := mainVW.shader.Camera()
+	cam.FieldOfView = max(mainCam.FieldOfView*float32(scaleRatio), 1.0)
+
+	// 2. NDCの差分を計算して位置調整
+	// X軸とY軸の差分（スクリーン座標での差）
+	neckDiffX := mainNeckNDC.X() - subNeckNDC.X()
+	neckDiffY := mainNeckNDC.Y() - subNeckNDC.Y()
+	trunkDiffX := mainTrunkNDC.X() - subTrunkNDC.X()
+	trunkDiffY := mainTrunkNDC.Y() - subTrunkNDC.Y()
+
+	// 差分の平均を取る
+	avgDiffX := (neckDiffX + trunkDiffX) / 2
+	avgDiffY := (neckDiffY + trunkDiffY) / 2
+
+	// 差分が十分小さければ調整は不要
+	if mmath.NearEquals(avgDiffX, 0.0, 1e-2) && mmath.NearEquals(avgDiffY, 0.0, 1e-2) {
+		return
+	}
+
+	// カメラの視点ベクトルを取得
+	viewVector := cam.LookAtCenter.Subed(cam.Position).Normalize()
+	// 右方向ベクトルを取得
+	rightVector := viewVector.Cross(cam.Up).Normalize()
+	// 上方向ベクトルを取得
+	upVector := rightVector.Cross(viewVector).Normalize()
+
+	// カメラ距離を元に調整量を計算
+	camDistance := cam.Position.Distance(cam.LookAtCenter)
+	adjustFactor := camDistance * 0.05 // 調整係数（必要に応じて変更）
+
+	// 右方向と上方向への移動量を計算
+	rightMove := rightVector.MulScalar(float64(avgDiffX) * adjustFactor)
+	upMove := upVector.MulScalar(-float64(avgDiffY) * adjustFactor)
+
+	// カメラ位置と注視点を調整
+	cam.Position.Add(rightMove).Add(upMove)
+	cam.LookAtCenter.Add(rightMove).Add(upMove)
+
+	// 更新したカメラ設定を適用
+	vw.shader.SetCamera(cam)
+}
+
+// projectPoint は、与えられたワールド座標 point を、指定されたカメラ(cam)とウィンドウサイズ(w,h)に基づき
+// 正規化デバイス座標（NDC）に変換して返します。
+func projectPoint(point *mmath.MVec3, cam *rendering.Camera, w, h int) mgl32.Vec3 {
+	// プロジェクション行列とビュー行列を取得（mgl32.Mat4）
+	proj := cam.GetProjectionMatrix(w, h)
+	view := cam.GetViewMatrix()
+
+	// mgl64.Vec3 を mgl32.Vec4 に変換（w=1）
+	p := mgl32.Vec4{
+		float32(point.X),
+		float32(point.Y),
+		float32(point.Z),
+		1.0,
+	}
+	// クリップ座標を計算
+	clip := proj.Mul4(view).Mul4x1(p)
+	// パースペクティブ除算により NDC を算出
+	ndc := clip.Mul(1.0 / clip.W())
+	return ndc.Vec3()
 }

@@ -3,6 +3,7 @@ package pmx
 import (
 	"errors"
 
+	"github.com/miu200521358/mlib_go/pkg/config/merr"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
@@ -21,6 +22,23 @@ func (bones *Bones) CreateRoot() (*Bone, error) {
 // GetCenter センター取得
 func (bones *Bones) GetCenter() (*Bone, error) {
 	return bones.GetByName(CENTER.String())
+}
+
+func (bones *Bones) CreateCenter() (*Bone, error) {
+	bone := NewBoneByName(CENTER.String())
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
+
+	// 位置
+	if upper, err := bones.GetUpper(); err == nil {
+		bone.Position.Y = upper.Position.Y * 0.6
+	}
+
+	// 親ボーン
+	if root, err := bones.GetRoot(); err == nil {
+		bone.ParentIndex = root.Index()
+	}
+
+	return bone, nil
 }
 
 // GetGroove グルーブ取得
@@ -1443,4 +1461,106 @@ func (bones *Bones) GetLegIk(direction BoneDirection) (*Bone, error) {
 // GetToeIK つま先IK取得
 func (bones *Bones) GetToeIK(direction BoneDirection) (*Bone, error) {
 	return bones.GetByName(TOE_IK.StringFromDirection(direction.String()))
+}
+
+// InsertShortageBones 不足ボーン作成
+func (bones *Bones) InsertShortageBones() error {
+
+	// 体幹系
+	for _, funcs := range [][]func() (*Bone, error){
+		{bones.GetRoot, bones.CreateRoot},
+		{bones.GetCenter, bones.CreateCenter},
+		{bones.GetGroove, bones.GetGroove},
+		{bones.GetWaist, bones.CreateWaist},
+		{bones.GetTrunkRoot, bones.CreateTrunkRoot},
+		{bones.GetLowerRoot, bones.CreateLowerRoot},
+		{bones.GetLegCenter, bones.CreateLegCenter},
+		{bones.GetUpperRoot, bones.CreateUpperRoot},
+		{bones.GetUpper2, bones.CreateUpper2},
+		{bones.GetNeckRoot, bones.CreateNeckRoot},
+		{bones.GetNeck, bones.CreateNeck},
+		{bones.GetHead, bones.CreateHead},
+		{bones.GetHeadTail, bones.CreateHeadTail},
+		{bones.GetEyes, bones.CreateEyes},
+	} {
+		getFunc := funcs[0]
+		createFunc := funcs[1]
+
+		if bone, err := getFunc(); err != nil && err == merr.NameNotFoundError && bone == nil {
+			if bone, err := createFunc(); err == nil && bone != nil {
+				if err := bones.Insert(bone); err != nil {
+					return err
+				} else {
+					bones.Setup()
+				}
+			} else {
+				return err
+			}
+		} else if err != nil {
+			return err
+		}
+	}
+
+	// 左右系
+	for _, direction := range []BoneDirection{BONE_DIRECTION_LEFT, BONE_DIRECTION_RIGHT} {
+		for _, funcs := range [][]func(direction BoneDirection) (*Bone, error){
+			{bones.GetEye, bones.CreateEye},
+			{bones.GetShoulderRoot, bones.CreateShoulderRoot},
+			{bones.GetShoulderP, bones.CreateShoulderP},
+			{bones.GetShoulderC, bones.CreateShoulderC},
+			{bones.GetArmTwist, bones.CreateArmTwist},
+			{bones.GetWristTwist, bones.CreateWristTwist},
+			{bones.GetWristTail, bones.CreateWristTail},
+			{bones.GetThumbTail, bones.CreateThumbTail},
+			{bones.GetIndexTail, bones.CreateIndexTail},
+			{bones.GetMiddleTail, bones.CreateMiddleTail},
+			{bones.GetRingTail, bones.CreateRingTail},
+			{bones.GetPinkyTail, bones.CreatePinkyTail},
+			{bones.GetLegRoot, bones.CreateLegRoot},
+			{bones.GetWaistCancel, bones.CreateWaistCancel},
+			{bones.GetLegD, bones.CreateLegD},
+			{bones.GetKneeD, bones.CreateKneeD},
+			{bones.GetAnkleD, bones.CreateAnkleD},
+			{bones.GetHeelD, bones.CreateHeelD},
+			{bones.GetToeEx, bones.CreateToeEx},
+			{bones.GetToeTD, bones.CreateToeTD},
+			{bones.GetToePD, bones.CreateToePD},
+			{bones.GetToeCD, bones.CreateToeCD},
+			{bones.GetLegIkParent, bones.CreateLegIkParent},
+		} {
+			getFunc := funcs[0]
+			createFunc := funcs[1]
+
+			if bone, err := getFunc(direction); err != nil && err == merr.NameNotFoundError && bone == nil {
+				if bone, err := createFunc(direction); err == nil && bone != nil {
+					if err := bones.Insert(bone); err != nil {
+						return err
+					} else {
+						bones.Setup()
+					}
+				} else {
+					return err
+				}
+			} else if err != nil {
+				return err
+			}
+		}
+
+		{
+			// 親指0
+			if bone, err := bones.GetThumb(direction, 0); err != nil && err == merr.NameNotFoundError && bone == nil {
+				if bone, err := bones.CreateThumb0(direction); err == nil && bone != nil {
+					if err := bones.Insert(bone); err != nil {
+						return err
+					}
+				} else {
+					return err
+				}
+			} else if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

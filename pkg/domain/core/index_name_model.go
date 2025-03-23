@@ -4,6 +4,8 @@ import (
 	"errors"
 	"reflect"
 	"sort"
+
+	"github.com/miu200521358/mlib_go/pkg/config/merr"
 )
 
 type IIndexNameModel interface {
@@ -113,7 +115,7 @@ func (im *IndexNameModels[T]) GetByName(name string) (T, error) {
 	if index, ok := im.nameIndexes[name]; ok {
 		return im.values[index], nil
 	}
-	return *new(T), errors.New("name not found")
+	return *new(T), merr.NameNotFoundError
 }
 
 func (im *IndexNameModels[T]) ContainsByName(name string) bool {
@@ -128,7 +130,7 @@ func (im *IndexNameModels[T]) RemoveByName(name string) error {
 		delete(im.nameIndexes, name)
 		return nil
 	}
-	return errors.New("name not found")
+	return merr.NameNotFoundError
 }
 
 // ForEach は全ての値をコールバック関数に渡します

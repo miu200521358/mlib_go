@@ -53,6 +53,13 @@ func (bds *BoneDeltas) Contains(boneIndex int) bool {
 	return boneIndex >= 0 && boneIndex < len(bds.data) && bds.data[boneIndex] != nil
 }
 
+func (bds *BoneDeltas) ContainsByName(boneName string) bool {
+	if bone, err := bds.bones.GetByName(boneName); err == nil {
+		return bds.Contains(bone.Index())
+	}
+	return false
+}
+
 // ForEach は全ての値をコールバック関数に渡します
 func (bds *BoneDeltas) ForEach(callback func(index int, value *BoneDelta)) {
 	for i, v := range bds.data {

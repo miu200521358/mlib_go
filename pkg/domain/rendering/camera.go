@@ -4,7 +4,10 @@
 package rendering
 
 import (
+	"math"
+
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/go-gl/mathgl/mgl64"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
@@ -25,6 +28,8 @@ type Camera struct {
 	AspectRatio  float32
 	NearPlane    float32
 	FarPlane     float32
+	Yaw          float64
+	Pitch        float64
 }
 
 // NewDefaultCamera はデフォルト設定のカメラを作成する
@@ -72,4 +77,24 @@ func (c *Camera) GetViewMatrix() mgl32.Mat4 {
 	lookAtCenter := mmath.NewGlVec3(c.LookAtCenter)
 	up := mmath.NewGlVec3(c.Up)
 	return mgl32.LookAtV(cameraPosition, lookAtCenter, up)
+}
+
+func (c *Camera) ResetPosition(yaw, pitch float64) {
+	c.Yaw = yaw
+	c.Pitch = pitch
+
+	// 球面座標系をデカルト座標系に変換
+	radius := math.Abs(float64(InitialCameraPositionZ))
+
+	// 四元数を使ってカメラの方向を計算
+	yawRad := mgl64.DegToRad(yaw)
+	pitchRad := mgl64.DegToRad(pitch)
+	orientation := mmath.NewMQuaternionFromAxisAngles(mmath.MVec3UnitY, yawRad).Mul(
+		mmath.NewMQuaternionFromAxisAngles(mmath.MVec3UnitX, pitchRad))
+	forwardXYZ := orientation.MulVec3(mmath.MVec3UnitZNeg).MulScalar(radius)
+
+	// カメラ位置を更新
+	c.Position.X = forwardXYZ.X
+	c.Position.Y = InitialCameraPositionY + forwardXYZ.Y
+	c.Position.Z = forwardXYZ.Z
 }
