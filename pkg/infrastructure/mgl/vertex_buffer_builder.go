@@ -334,3 +334,10 @@ func (h *VertexBufferHandle) UpdateBoneDeltas(boneIndexes []int, boneDeltas [][]
 		copy(mappedSlice[offset:offset+len(vd)], vd)
 	}
 }
+
+// UpdateDebugBuffer はデバッグバッファのデータを更新
+func (h *VertexBufferHandle) UpdateDebugBuffer(vertices []float32) {
+	// 位置, 色, 透明度
+	fieldCount := 3 + 3 + 1
+	h.VBO.BufferData(len(vertices), fieldCount, h.FloatSize, gl.Ptr(&vertices[0]), rendering.BufferUsageStatic)
+}

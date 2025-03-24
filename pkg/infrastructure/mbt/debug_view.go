@@ -27,13 +27,15 @@ func newConstBtMDefaultColors() bt.BtMDefaultColors {
 // mDebugDrawLiner はデバッグ描画のためのラインレンダラーです
 type mDebugDrawLiner struct {
 	bt.BtMDebugDrawLiner
-	vertices []float32
+	vertices          []float32
+	debugBufferHandle *mgl.VertexBufferHandle
 }
 
 // newMDebugDrawLiner は新しいデバッグドローラインを作成します
 func newMDebugDrawLiner() *mDebugDrawLiner {
 	ddl := &mDebugDrawLiner{
-		vertices: make([]float32, 0),
+		vertices:          make([]float32, 0),
+		debugBufferHandle: nil,
 	}
 
 	// Bulletのドローラインインターフェースを実装
@@ -45,12 +47,12 @@ func newMDebugDrawLiner() *mDebugDrawLiner {
 // DrawLine は3D空間に線を描画します
 func (ddl *mDebugDrawLiner) DrawLine(from bt.BtVector3, to bt.BtVector3, color bt.BtVector3) {
 	// 始点の座標と色
-	ddl.vertices = append(ddl.vertices, from.GetX(), from.GetY(), from.GetZ())
-	ddl.vertices = append(ddl.vertices, color.GetX(), color.GetY(), color.GetZ(), 0.6)
+	ddl.vertices = append(ddl.vertices, from.GetX(), from.GetY(), from.GetZ(),
+		color.GetX(), color.GetY(), color.GetZ(), 0.6)
 
 	// 終点の座標と色
-	ddl.vertices = append(ddl.vertices, to.GetX(), to.GetY(), to.GetZ())
-	ddl.vertices = append(ddl.vertices, color.GetX(), color.GetY(), color.GetZ(), 0.6)
+	ddl.vertices = append(ddl.vertices, to.GetX(), to.GetY(), to.GetZ(),
+		color.GetX(), color.GetY(), color.GetZ(), 0.6)
 }
 
 // drawDebugLines はデバッグ線を描画します
@@ -76,7 +78,7 @@ func (ddl *mDebugDrawLiner) drawDebugLines(shader rendering.IShader, isDrawRigid
 	gl.UseProgram(0)
 
 	// 頂点データをクリア
-	ddl.vertices = make([]float32, 0)
+	ddl.vertices = ddl.vertices[:0]
 }
 
 // configureDepthTest は深度テストを設定します
@@ -99,13 +101,20 @@ func (ddl *mDebugDrawLiner) restoreDepthTest(isDrawRigidBodyFront bool) {
 // renderLines は線を描画します
 func (ddl *mDebugDrawLiner) renderLines() {
 	// OpenGLのバッファを初期化
-	debugBufferHandle := mgl.NewBufferFactory().CreateDebugBuffer(gl.Ptr(&ddl.vertices[0]), len(ddl.vertices))
-	debugBufferHandle.Bind()
+	if ddl.debugBufferHandle == nil {
+		// 初回のみバッファを生成
+		ddl.debugBufferHandle = mgl.NewBufferFactory().CreateDebugBuffer(gl.Ptr(&ddl.vertices[0]), len(ddl.vertices))
+		ddl.debugBufferHandle.Bind()
+	} else {
+		// 2回目以降はバッファを更新
+		ddl.debugBufferHandle.Bind()
+		ddl.debugBufferHandle.UpdateDebugBuffer(ddl.vertices)
+	}
 
 	// ライン描画
 	gl.DrawArrays(gl.LINES, 0, int32(len(ddl.vertices)/7))
 
-	debugBufferHandle.Unbind()
+	ddl.debugBufferHandle.Unbind()
 }
 
 // DrawDebugLines は物理デバッグ情報を描画します
