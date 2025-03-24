@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"runtime/debug"
 	"sync"
+
+	"github.com/miu200521358/mlib_go/pkg/config/mproc"
 )
 
 // IterParallelByCount は指定された全件数に対して、引数で指定された処理を並列または直列で実行する関数です。
@@ -62,8 +64,8 @@ func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
 	processFunc func(data T, index int) error, logFunc func(iterIndex, allCount int)) error {
 	numCPU := runtime.NumCPU()
 
-	runtime.GOMAXPROCS(numCPU)
-	defer runtime.GOMAXPROCS(int(numCPU / 4))
+	mproc.SetMaxProcess(true)
+	defer mproc.SetMaxProcess(false)
 
 	if blockSize <= 1 || blockSize >= len(allData) {
 		// ブロックサイズが1以下、もしくは全件数より大きい場合は直列処理
@@ -145,7 +147,6 @@ func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
 // CPUコア数を元に、ブロックサイズを計算
 func GetBlockSize(totalTasks int) (blockSize int, blockCount int) {
 	blockCount = runtime.NumCPU()
-	runtime.GOMAXPROCS(blockCount)
 
 	// ブロックサイズを切り上げで計算
 	blockSize = (totalTasks + blockCount - 1) / blockCount

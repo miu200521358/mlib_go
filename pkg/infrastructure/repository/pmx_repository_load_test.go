@@ -37,7 +37,7 @@ func TestPmxReader_LoadName_NotExist(t *testing.T) {
 
 	modelName := r.LoadName("../../../test_resources/サンプルモデル_Nothing.pmx")
 
-	expectedName := "読み込み失敗"
+	expectedName := "●●読み込み失敗●●"
 	if modelName != expectedName {
 		t.Errorf("Expected Name to be %q, got %q", expectedName, modelName)
 	}

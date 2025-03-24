@@ -7,13 +7,13 @@ import (
 	"io"
 	"math"
 	"os"
-	"runtime"
 
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/config/mproc"
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
@@ -21,8 +21,8 @@ import (
 )
 
 func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
-	runtime.GOMAXPROCS(int(runtime.NumCPU()))
-	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
+	mproc.SetMaxProcess(true)
+	defer mproc.SetMaxProcess(false)
 
 	mlog.IL("%s", mi18n.T("読み込み開始", map[string]interface{}{"Type": "Vmd", "Path": overridePath}))
 	defer mlog.I("%s", mi18n.T("読み込み終了", map[string]interface{}{"Type": "Vmd"}))

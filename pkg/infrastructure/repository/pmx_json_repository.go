@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"runtime"
 	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/config/mproc"
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
@@ -116,8 +116,8 @@ func (rep *PmxJsonRepository) CanLoad(path string) (bool, error) {
 }
 
 func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
-	runtime.GOMAXPROCS(int(runtime.NumCPU()))
-	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
+	mproc.SetMaxProcess(true)
+	defer mproc.SetMaxProcess(false)
 
 	mlog.IL("%s", mi18n.T("保存開始", map[string]interface{}{"Type": "Json", "Path": overridePath}))
 	defer mlog.I("%s", mi18n.T("保存終了", map[string]interface{}{"Type": "Json"}))
@@ -257,8 +257,8 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 
 // 指定されたパスのファイルからデータを読み込む
 func (rep *PmxJsonRepository) Load(path string) (core.IHashModel, error) {
-	runtime.GOMAXPROCS(int(runtime.NumCPU()))
-	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
+	mproc.SetMaxProcess(true)
+	defer mproc.SetMaxProcess(false)
 
 	mlog.IL("%s", mi18n.T("読み込み開始", map[string]interface{}{"Type": "Json", "Path": path}))
 	defer mlog.I("%s", mi18n.T("読み込み終了", map[string]interface{}{"Type": "Json"}))

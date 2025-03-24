@@ -5,19 +5,19 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
-	"runtime"
 	"unicode/utf16"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/config/mproc"
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mfile"
 )
 
 func (rep *PmxRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
-	runtime.GOMAXPROCS(int(runtime.NumCPU()))
-	defer runtime.GOMAXPROCS(max(1, int(runtime.NumCPU()/4)))
+	mproc.SetMaxProcess(true)
+	defer mproc.SetMaxProcess(false)
 
 	mlog.IL("%s", mi18n.T("保存開始", map[string]interface{}{"Type": "Pmx", "Path": overridePath}))
 	defer mlog.I("%s", mi18n.T("保存終了", map[string]interface{}{"Type": "Pmx"}))
