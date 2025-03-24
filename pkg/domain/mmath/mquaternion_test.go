@@ -340,7 +340,7 @@ func TestMQuaternionFromDirection(t *testing.T) {
 	}
 
 	expected2 := NewMQuaternionByValues(
-		0.543212292317204, 0.6953153333136457, 0.20212324833235548, -0.42497433477564167)
+		-0.543212292317204, -0.6953153333136457, -0.20212324833235548, 0.42497433477564167)
 	result2 := NewMQuaternionFromDirection(&MVec3{-10, 20, -15}, &MVec3{40, -5, 6})
 
 	if !result2.NearEquals(expected2, 1e-7) {

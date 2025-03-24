@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
+	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/usecase/deform"
@@ -90,8 +91,20 @@ func (vl *ViewerList) Run() {
 		frameTime := glfw.GetTime()
 		originalElapsed := frameTime - prevTime
 
+		if vl.shared.Playing() {
+			t := glfw.GetTime()
+			mlog.L()
+			mlog.I(fmt.Sprintf("1) time: %.5f, diff: %.5f", t, t-prevTime))
+		}
+
 		// フレームレート制御と描画処理
-		if isRendered, timeStep := vl.processFrame(originalElapsed); isRendered {
+		if isRendered, timeStep := vl.processFrame(originalElapsed, prevTime); isRendered {
+
+			if vl.shared.Playing() {
+				t := glfw.GetTime()
+				mlog.I(fmt.Sprintf("2) time: %.5f, diff: %.5f", t, t-prevTime))
+			}
+
 			// 描画にかかった時間を計測
 			elapsedList = append(elapsedList, originalElapsed)
 
@@ -144,7 +157,7 @@ func (vl *ViewerList) handleWindowFocus() {
 }
 
 // processFrame フレーム処理ロジック
-func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, timeStep float32) {
+func (vl *ViewerList) processFrame(originalElapsed, prevTime float64) (isRendered bool, timeStep float32) {
 	var elapsed float32
 
 	if vl.shared.IsEnabledFrameDrop() {
@@ -158,6 +171,11 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 		timeStep = physicsDefaultSpf
 		// デフォームfpsはspf上限の経過時間
 		elapsed = float32(mmath.Clamped(originalElapsed, 0.0, deformDefaultSpf))
+	}
+
+	if vl.shared.Playing() {
+		t := glfw.GetTime()
+		mlog.I(fmt.Sprintf("3) time: %.5f, diff: %.5f", t, t-prevTime))
 	}
 
 	if vl.shared.FrameInterval() > 0 && elapsed < vl.shared.FrameInterval() {
@@ -177,15 +195,30 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 		return false, timeStep
 	}
 
+	if vl.shared.Playing() {
+		t := glfw.GetTime()
+		mlog.I(fmt.Sprintf("4) time: %.5f, diff: %.5f", t, t-prevTime))
+	}
+
 	for _, vw := range vl.windowList {
 		// デフォーム処理
-		vl.deform(vw, timeStep)
+		vl.deform(vw, timeStep, prevTime)
+	}
+
+	if vl.shared.Playing() {
+		t := glfw.GetTime()
+		mlog.I(fmt.Sprintf("5) time: %.5f, diff: %.5f", t, t-prevTime))
 	}
 
 	// レンダリング処理
 	for n := len(vl.windowList); n > 0; n-- {
 		// サブビューワーオーバーレイのため、逆順でレンダリング
 		vl.windowList[n-1].render()
+	}
+
+	if vl.shared.Playing() {
+		t := glfw.GetTime()
+		mlog.I(fmt.Sprintf("6) time: %.5f, diff: %.5f", t, t-prevTime))
 	}
 
 	if vl.shared.IsPhysicsReset() {
@@ -207,6 +240,11 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 			vl.shared.SetPhysicsReset(true)
 		}
 		vl.shared.SetFrame(frame)
+	}
+
+	if vl.shared.Playing() {
+		t := glfw.GetTime()
+		mlog.I(fmt.Sprintf("7) time: %.5f, diff: %.5f", t, t-prevTime))
 	}
 
 	return true, timeStep
@@ -262,13 +300,18 @@ func (vl *ViewerList) deformForReset(vw *ViewWindow) {
 	}
 }
 
-func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
+func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32, prevTime float64) {
 	vw.MakeContextCurrent()
 
 	vw.loadModelRenderers(vl.shared)
 	vw.loadMotions(vl.shared)
 
 	frame := vl.shared.Frame()
+
+	if vl.shared.Playing() {
+		t := glfw.GetTime()
+		mlog.I(fmt.Sprintf("4.1) time: %.5f, diff: %.5f", t, t-prevTime))
+	}
 
 	// デフォーム処理
 	for n := range vw.modelRenderers {
@@ -280,6 +323,11 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 			frame,
 		)
 
+		if vl.shared.Playing() {
+			t := glfw.GetTime()
+			mlog.I(fmt.Sprintf("4.2.%d) time: %.5f, diff: %.5f", n, t, t-prevTime))
+		}
+
 		// 物理変形のための事前処理
 		vw.vmdDeltas[n] = deform.DeformForPhysics(
 			vl.shared,
@@ -289,9 +337,19 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 		)
 	}
 
+	if vl.shared.Playing() {
+		t := glfw.GetTime()
+		mlog.I(fmt.Sprintf("4.3) time: %.5f, diff: %.5f", t, t-prevTime))
+	}
+
 	if vl.shared.IsEnabledPhysics() || vl.shared.IsPhysicsReset() {
 		// 物理更新
 		vw.physics.StepSimulation(timeStep)
+	}
+
+	if vl.shared.Playing() {
+		t := glfw.GetTime()
+		mlog.I(fmt.Sprintf("4.4) time: %.5f, diff: %.5f", t, t-prevTime))
 	}
 
 	for n := range vw.modelRenderers {
@@ -304,6 +362,16 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 			vw.vmdDeltas[n],
 			frame,
 		)
+
+		if vl.shared.Playing() {
+			t := glfw.GetTime()
+			mlog.I(fmt.Sprintf("4.5.%d) time: %.5f, diff: %.5f", n, t, t-prevTime))
+		}
+	}
+
+	if vl.shared.Playing() {
+		t := glfw.GetTime()
+		mlog.I(fmt.Sprintf("4.6) time: %.5f, diff: %.5f", t, t-prevTime))
 	}
 }
 

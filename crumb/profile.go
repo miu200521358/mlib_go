@@ -1,4 +1,5 @@
 // go run crumb/profile.go
+// go tool pprof -http=:8080
 package main
 
 import (
