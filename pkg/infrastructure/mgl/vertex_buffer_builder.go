@@ -90,8 +90,6 @@ func NewVertexBufferBuilder() *VertexBufferBuilder {
 func (b *VertexBufferBuilder) AddAttribute(attrType AttributeType) *VertexBufferBuilder {
 	info, exists := attributeInfoMap[attrType]
 	if !exists {
-		// 未定義の属性タイプの場合のエラー処理
-		// ログ出力するか、パニックを起こすかは要件による
 		return b
 	}
 

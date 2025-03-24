@@ -58,6 +58,10 @@ func (vb *VertexBuffer) BufferSubData(offset int, size int, data unsafe.Pointer)
 }
 
 func (vb *VertexBuffer) Delete() {
+	if vb == nil || vb.id == 0 {
+		return
+	}
+
 	gl.DeleteBuffers(1, &vb.id)
 }
 
@@ -106,6 +110,9 @@ func (eb *ElementBuffer) BufferData(size int, data unsafe.Pointer, usage renderi
 }
 
 func (eb *ElementBuffer) Delete() {
+	if eb == nil || eb.id == 0 {
+		return
+	}
 	gl.DeleteBuffers(1, &eb.id)
 }
 
@@ -134,6 +141,10 @@ func (va *VertexArray) Unbind() {
 }
 
 func (va *VertexArray) Delete() {
+	if va == nil || va.id == 0 {
+		return
+	}
+
 	gl.DeleteVertexArrays(1, &va.id)
 }
 
