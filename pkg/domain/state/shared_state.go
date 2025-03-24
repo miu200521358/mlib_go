@@ -108,14 +108,16 @@ func (ss *SharedState) StoreModel(windowIndex, modelIndex int, model *pmx.PmxMod
 	if len(ss.models) <= windowIndex {
 		return
 	}
-	if len(ss.models[windowIndex]) <= modelIndex {
-		for i := len(ss.models[windowIndex]); i <= modelIndex; i++ {
-			ss.models[windowIndex] = append(ss.models[windowIndex], atomic.Value{})
-			ss.selectedMaterialIndexes[windowIndex] = append(ss.selectedMaterialIndexes[windowIndex], atomic.Value{})
-		}
+	for modelIndex >= len(ss.models[windowIndex]) {
+		ss.models[windowIndex] = append(ss.models[windowIndex], atomic.Value{})
+		ss.selectedMaterialIndexes[windowIndex] = append(ss.selectedMaterialIndexes[windowIndex], atomic.Value{})
 	}
 	ss.models[windowIndex][modelIndex].Store(model)
-	ss.selectedMaterialIndexes[windowIndex][modelIndex].Store(model.Materials.Indexes())
+	if model != nil {
+		ss.selectedMaterialIndexes[windowIndex][modelIndex].Store(model.Materials.Indexes())
+	} else {
+		ss.selectedMaterialIndexes[windowIndex][modelIndex].Store([]int{})
+	}
 }
 
 // LoadModel は指定されたウィンドウとモデルインデックスのモデルを取得
@@ -134,12 +136,14 @@ func (ss *SharedState) StoreMotion(windowIndex, modelIndex int, motion *vmd.VmdM
 	if len(ss.motions) <= windowIndex {
 		return
 	}
-	if len(ss.motions[windowIndex]) <= modelIndex {
-		for i := len(ss.motions[windowIndex]); i <= modelIndex; i++ {
-			ss.motions[windowIndex] = append(ss.motions[windowIndex], atomic.Value{})
-		}
+	for modelIndex >= len(ss.motions[windowIndex]) {
+		ss.motions[windowIndex] = append(ss.motions[windowIndex], atomic.Value{})
 	}
-	ss.motions[windowIndex][modelIndex].Store(motion)
+	if motion != nil {
+		ss.motions[windowIndex][modelIndex].Store(motion)
+	} else {
+		ss.motions[windowIndex][modelIndex].Store(vmd.NewVmdMotion(""))
+	}
 }
 
 // LoadMotion は指定されたウィンドウとモデルインデックスのモーションを取得

@@ -2,6 +2,7 @@ package widget
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
@@ -259,7 +260,7 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 		declarative.LineEdit{
 			AssignTo:    &fp.pathEdit,
 			ToolTipText: fp.tooltip,
-			OnTextChanged: func() {
+			OnEditingFinished: func() {
 				fp.onChanged(fp.pathEdit.Text())
 			},
 			OnDropFiles: func(files []string) {
@@ -324,12 +325,23 @@ func (fp *FilePicker) onChanged(path string) {
 
 	if path == "" {
 		fp.nameEdit.SetText(mi18n.T("未設定"))
+
+		if fp.onPathChanged != nil {
+			// コールバックを呼び出し
+			fp.onPathChanged(fp.window, fp.repository, path)
+		}
+
 		return
 	}
 
+	// パスにダブルクォーテーションが含まれている場合、先頭と末尾だけを取り除く
+	path = filepath.Clean(path)
+	path = strings.Trim(path, "\"")
+
+	fp.pathEdit.ChangeText(path)
 	fp.nameEdit.SetText(fp.repository.LoadName(path))
 
-	if ok, err := fp.repository.CanLoad(fp.pathEdit.Text()); ok && err == nil {
+	if ok, err := fp.repository.CanLoad(path); ok && err == nil {
 		// ロード系のみ履歴用キーを指定して履歴リストを保存
 		mconfig.SaveUserConfig(fp.historyKey, path, 50)
 
@@ -337,9 +349,6 @@ func (fp *FilePicker) onChanged(path string) {
 			// コールバックを呼び出し
 			fp.onPathChanged(fp.window, fp.repository, path)
 		}
-	} else {
-		// 読み込めない場合、拒否
-		fp.pathEdit.ChangeText("")
 	}
 }
 

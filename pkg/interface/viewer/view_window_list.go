@@ -291,8 +291,12 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 	frame := vl.shared.Frame()
 
 	// デフォーム処理
-	// TODO 並列化
 	for n := range vw.modelRenderers {
+		if vw.modelRenderers[n] == nil {
+			vw.vmdDeltas[n] = nil
+			continue
+		}
+
 		// 物理前変形
 		vw.vmdDeltas[n] = deform.DeformBeforePhysics(
 			vw.modelRenderers[n].Model,
@@ -303,6 +307,10 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 	}
 
 	for n := range vw.modelRenderers {
+		if vw.modelRenderers[n] == nil {
+			continue
+		}
+
 		// 物理変形のための事前処理
 		vw.vmdDeltas[n] = deform.DeformForPhysics(
 			vl.shared,
@@ -318,6 +326,10 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 	}
 
 	for n := range vw.modelRenderers {
+		if vw.modelRenderers[n] == nil {
+			continue
+		}
+
 		// 物理後変形
 		vw.vmdDeltas[n] = deform.DeformAfterPhysics(
 			vl.shared,

@@ -11,13 +11,13 @@ func (vw *ViewWindow) loadModelRenderers(shared *state.SharedState) {
 		vw.extendModelRenderers(shared)
 
 		model := shared.LoadModel(vw.windowIndex, i)
-		if vw.modelRenderers[i] != nil && vw.modelRenderers[i].Hash() != model.Hash() {
+		if vw.modelRenderers[i] != nil && (model == nil || vw.modelRenderers[i].Hash() != model.Hash()) {
 			vw.physics.DeleteModel(i)
 			vw.modelRenderers[i].Delete()
 			vw.modelRenderers[i] = nil
 			vw.vmdDeltas[i] = nil
 		}
-		if vw.modelRenderers[i] == nil {
+		if vw.modelRenderers[i] == nil && model != nil {
 			vw.modelRenderers[i] = render.NewModelRenderer(vw.windowIndex, model)
 			vw.physics.AddModel(i, model)
 		}
@@ -30,10 +30,10 @@ func (vw *ViewWindow) loadMotions(shared *state.SharedState) {
 		vw.extendModelRenderers(shared)
 
 		motion := shared.LoadMotion(vw.windowIndex, i)
-		if vw.motions[i] != nil && vw.motions[i].Hash() != motion.Hash() {
+		if vw.motions[i] != nil && (motion == nil || vw.motions[i].Hash() != motion.Hash()) {
 			vw.motions[i] = nil
 		}
-		if vw.motions[i] == nil {
+		if vw.motions[i] == nil && motion != nil {
 			vw.motions[i] = motion
 		}
 	}

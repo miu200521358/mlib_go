@@ -22,6 +22,11 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 		"モデルファイル1-1",
 		"モデルファイルを選択してください",
 		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
+			if path == "" {
+				cw.StoreModel(0, 0, nil)
+				return
+			}
+
 			if data, err := rep.Load(path); err == nil {
 				model := data.(*pmx.PmxModel)
 				if err := model.Bones.InsertShortageBones(); err != nil {
@@ -35,6 +40,7 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 				}
 			} else {
 				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
+				cw.StoreModel(0, 0, nil)
 			}
 		},
 	)
@@ -44,6 +50,11 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 		"モーションファイル1-1",
 		"モーションファイルを選択してください",
 		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
+			if path == "" {
+				cw.StoreMotion(0, 0, nil)
+				return
+			}
+
 			if data, err := rep.Load(path); err == nil {
 				motion := data.(*vmd.VmdMotion)
 				player.Reset(motion.MaxFrame())
@@ -59,6 +70,11 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 		"モデルファイル2-1",
 		"モデルファイルを選択してください",
 		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
+			if path == "" {
+				cw.StoreModel(1, 0, nil)
+				return
+			}
+
 			if data, err := rep.Load(path); err == nil {
 				model := data.(*pmx.PmxModel)
 				if err := model.Bones.InsertShortageBones(); err != nil {
@@ -77,6 +93,11 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 		"モーションファイル2-1",
 		"モーションファイルを選択してください",
 		func(cw *controller.ControlWindow, rep repository.IRepository, path string) {
+			if path == "" {
+				cw.StoreMotion(1, 0, nil)
+				return
+			}
+
 			if data, err := rep.Load(path); err == nil {
 				motion := data.(*vmd.VmdMotion)
 				player.Reset(motion.MaxFrame())
