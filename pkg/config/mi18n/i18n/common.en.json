@@ -530,5 +530,9 @@
     {
         "id": "&下半身合わせ",
         "translation": "&Lower Body Alignment"
+    },
+    {
+        "id": "&ツールについて",
+        "translation": "&About the Tool"
     }
 ]

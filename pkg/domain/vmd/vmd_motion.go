@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"math/rand"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
@@ -33,6 +34,10 @@ func NewVmdMotion(path string) *VmdMotion {
 		ShadowFrames: NewShadowFrames(),
 		IkFrames:     NewIkFrames(),
 	}
+}
+
+func (motion *VmdMotion) IsVpd() bool {
+	return strings.Contains(strings.ToLower(motion.path), ".vpd")
 }
 
 func (motion *VmdMotion) Path() string {

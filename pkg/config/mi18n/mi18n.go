@@ -3,6 +3,7 @@ package mi18n
 import (
 	"embed"
 	"encoding/json"
+	"fmt"
 
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
@@ -61,31 +62,30 @@ func SetLang(lang string) {
 
 // T メッセージIDを元にメッセージを取得する
 func T(key string, params ...map[string]interface{}) string {
-	if localizer == nil {
-		return key
-	}
-	if len(params) == 0 {
-		if translated, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: key}); err == nil {
-			return translated
-		} else {
-			return key
-		}
-	}
-
-	if translated, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: key, TemplateData: params[0]}); err == nil {
-		return translated
-	} else {
-		return key
-	}
+	return t(localizer, key, params...)
 }
 
 // TWithLocale メッセージIDを元に指定ロケールでメッセージを取得する
 func TWithLocale(lang string, key string, params ...map[string]interface{}) string {
-	if bundle == nil {
-		return key
+	return t(i18n.NewLocalizer(bundle, lang), key, params...)
+}
+
+func t(l *i18n.Localizer, key string, params ...map[string]interface{}) string {
+	if l == nil {
+		return fmt.Sprintf("●●%s●●", key)
 	}
+
 	if len(params) == 0 {
-		return i18n.NewLocalizer(bundle, lang).MustLocalize(&i18n.LocalizeConfig{MessageID: key})
+		if translated, err := l.Localize(&i18n.LocalizeConfig{MessageID: key}); err == nil {
+			return translated
+		} else {
+			return fmt.Sprintf("●●%s●●", key)
+		}
 	}
-	return i18n.NewLocalizer(bundle, lang).MustLocalize(&i18n.LocalizeConfig{MessageID: key, TemplateData: params})
+
+	if translated, err := l.Localize(&i18n.LocalizeConfig{MessageID: key, TemplateData: params[0]}); err == nil {
+		return translated
+	} else {
+		return fmt.Sprintf("●●%s●●", key)
+	}
 }

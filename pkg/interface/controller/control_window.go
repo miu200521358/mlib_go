@@ -328,7 +328,7 @@ func NewControlWindow(
 				Items: logMenuItems,
 			},
 			declarative.Menu{
-				Text:  mi18n.T("&使い方"),
+				Text:  mi18n.T("&ツールについて"),
 				Items: helpMenuItems,
 			},
 			declarative.Menu{
