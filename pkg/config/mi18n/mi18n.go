@@ -61,16 +61,16 @@ func SetLang(lang string) {
 }
 
 // T メッセージIDを元にメッセージを取得する
-func T(key string, params ...map[string]interface{}) string {
+func T(key string, params ...map[string]any) string {
 	return t(localizer, key, params...)
 }
 
 // TWithLocale メッセージIDを元に指定ロケールでメッセージを取得する
-func TWithLocale(lang string, key string, params ...map[string]interface{}) string {
+func TWithLocale(lang string, key string, params ...map[string]any) string {
 	return t(i18n.NewLocalizer(bundle, lang), key, params...)
 }
 
-func t(l *i18n.Localizer, key string, params ...map[string]interface{}) string {
+func t(l *i18n.Localizer, key string, params ...map[string]any) string {
 	if l == nil {
 		return fmt.Sprintf("●●%s●●", key)
 	}
@@ -79,13 +79,13 @@ func t(l *i18n.Localizer, key string, params ...map[string]interface{}) string {
 		if translated, err := l.Localize(&i18n.LocalizeConfig{MessageID: key}); err == nil {
 			return translated
 		} else {
-			return fmt.Sprintf("●●%s●●", key)
+			return fmt.Sprintf("▼▼%s▼▼", key)
 		}
 	}
 
 	if translated, err := l.Localize(&i18n.LocalizeConfig{MessageID: key, TemplateData: params[0]}); err == nil {
 		return translated
 	} else {
-		return fmt.Sprintf("●●%s●●", key)
+		return fmt.Sprintf("★★%s★★", key)
 	}
 }
