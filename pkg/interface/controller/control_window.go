@@ -5,6 +5,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
@@ -471,8 +472,8 @@ func NewControlWindow(
 	} else {
 		cw.consoleView = cv
 	}
-	// // ログ出力先をコンソールビューに設定
-	// log.SetOutput(cw.consoleView)
+	// ログ出力先をコンソールビューに設定
+	log.SetOutput(cw.consoleView)
 
 	cw.SetPosition(positionX, positionY)
 	cw.shared.SetInitializedControlWindow(true)
@@ -636,6 +637,7 @@ func (cw *ControlWindow) TriggerFps30Limit() {
 	cw.limitFps60Action.SetChecked(false)
 	cw.limitFpsUnLimitAction.SetChecked(false)
 	cw.shared.SetFrameInterval(1.0 / 30.0)
+	cw.shared.SetTriggeredFpsLimit(true)
 	mconfig.SaveUserConfigInt(mconfig.KeyFpsLimit, 30)
 }
 
@@ -644,6 +646,7 @@ func (cw *ControlWindow) TriggerFps60Limit() {
 	cw.limitFps60Action.SetChecked(true)
 	cw.limitFpsUnLimitAction.SetChecked(false)
 	cw.shared.SetFrameInterval(1.0 / 60.0)
+	cw.shared.SetTriggeredFpsLimit(true)
 	mconfig.SaveUserConfigInt(mconfig.KeyFpsLimit, 60)
 }
 
@@ -652,6 +655,7 @@ func (cw *ControlWindow) TriggerUnLimitFps() {
 	cw.limitFps60Action.SetChecked(false)
 	cw.limitFpsUnLimitAction.SetChecked(true)
 	cw.shared.SetFrameInterval(-1)
+	cw.shared.SetTriggeredFpsLimit(true)
 	mconfig.SaveUserConfigInt(mconfig.KeyFpsLimit, -1)
 }
 

@@ -27,6 +27,7 @@ type SharedState struct {
 	isInitializedViewWindow    []atomic.Bool    // ビューウィンドウの初期化状態
 	focusControlWindow         atomic.Bool      // コントロールウィンドウのフォーカス状態
 	focusViewWindow            []atomic.Bool    // ビューウィンドウのフォーカス状態
+	isTriggeredFpsLimit        atomic.Bool      // FPS制限トリガー
 	movedControlWindow         atomic.Bool      // コントロールウィンドウの移動状態
 	isClosed                   atomic.Bool      // ウィンドウのクローズ状態
 	models                     [][]atomic.Value // モデルデータ(ウィンドウ/モデルインデックス)
@@ -504,6 +505,14 @@ func (ss *SharedState) IsFocusControlWindow() bool {
 
 func (ss *SharedState) SetFocusControlWindow(focus bool) {
 	ss.focusControlWindow.Store(focus)
+}
+
+func (ss *SharedState) IsTriggeredFpsLimit() bool {
+	return ss.isTriggeredFpsLimit.Load()
+}
+
+func (ss *SharedState) SetTriggeredFpsLimit(triggered bool) {
+	ss.isTriggeredFpsLimit.Store(triggered)
 }
 
 func (ss *SharedState) IsFocusViewWindow(windowIndex int) bool {
