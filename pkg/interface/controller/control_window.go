@@ -452,12 +452,12 @@ func NewControlWindow(
 	//FPS制限
 	fpsLimit := mconfig.LoadUserConfigInt(mconfig.KeyFpsLimit, 30)
 	switch fpsLimit {
-	case 30:
-		cw.TriggerFps30Limit()
-	case 60:
-		cw.TriggerFps60Limit()
 	case -1:
 		cw.TriggerUnLimitFps()
+	case 60:
+		cw.TriggerFps60Limit()
+	default:
+		cw.TriggerFps30Limit()
 	}
 
 	// フレームドロップ
