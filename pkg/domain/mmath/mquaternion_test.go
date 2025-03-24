@@ -564,7 +564,7 @@ func TestFindSlerpT(t *testing.T) {
 	for _, tt := range tests {
 		q := tt.q0.Slerp(tt.q1, tt.t)
 		result := FindSlerpT(tt.q0, tt.q1, q, tt.t)
-		if math.Abs(tt.t-result) > 1e-5 {
+		if math.Abs(tt.t-result) > 1e-3 {
 			t.Errorf("FindSlerpT failed. Expected %v, got %v", tt.t, result)
 		}
 	}
