@@ -357,9 +357,62 @@ func (quat *MQuaternion) MuledScalar(factor float64) *MQuaternion {
 		return quat.Inverted()
 	}
 
-	// 特殊なケースでなければ、軸角度の表現を使って効率的に計算
-	axis, angle := quat.ToAxisAngle()
-	return NewMQuaternionFromAxisAngles(axis, angle*factor)
+	return MQuaternionIdent.SlerpExtended(quat, factor)
+}
+
+// SlerpExtended は、任意のt値における球面線形補間クォータニオンを返します。
+// tが[0,1]の範囲外でも、補間の延長線上のクォータニオンを計算します。
+func (quat *MQuaternion) SlerpExtended(other *MQuaternion, t float64) *MQuaternion {
+	// 特別なケース：同一のクォータニオン
+	if quat.NearEquals(other, 1e-8) {
+		return quat.Copy()
+	}
+
+	// コサイン値を計算
+	cosOmega := quat.X*other.X + quat.Y*other.Y + quat.Z*other.Z + quat.W*other.W
+
+	// 最短経路補間のため、必要に応じて符号を反転
+	q2x, q2y, q2z, q2w := other.X, other.Y, other.Z, other.W
+	if cosOmega < 0.0 {
+		cosOmega = -cosOmega
+		q2x = -q2x
+		q2y = -q2y
+		q2z = -q2z
+		q2w = -q2w
+	}
+
+	// 角度の補間方法を決定
+	var result *MQuaternion
+	if cosOmega > 0.9999 {
+		// 角度が非常に小さい場合、線形補間を使用
+		result = &MQuaternion{
+			quat.X*(1-t) + q2x*t,
+			quat.Y*(1-t) + q2y*t,
+			quat.Z*(1-t) + q2z*t,
+			quat.W*(1-t) + q2w*t,
+		}
+	} else {
+		// 球面線形補間の計算
+		omega := math.Acos(cosOmega)
+		sinOmega := math.Sin(omega)
+
+		// tをスケーリングした角度（制限なし）
+		angle := t * omega
+
+		// 補間係数を計算
+		s1 := math.Sin(omega-angle) / sinOmega
+		s2 := math.Sin(angle) / sinOmega
+
+		result = &MQuaternion{
+			s1*quat.X + s2*q2x,
+			s1*quat.Y + s2*q2y,
+			s1*quat.Z + s2*q2z,
+			s1*quat.W + s2*q2w,
+		}
+	}
+
+	// 正規化して単位クォータニオンを維持
+	return result.Normalize()
 }
 
 // ToAxisAngleは、クォータニオンを軸と角度に変換します。
