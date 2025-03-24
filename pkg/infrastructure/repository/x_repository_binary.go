@@ -88,6 +88,7 @@ const (
 
 // parseBinaryXFile は、バイナリ形式の X ファイルを解析します。
 // https://learn.microsoft.com/ja-jp/previous-versions/direct-x/cc371722(v=msdn.10)
+// https://mrkk.ciao.jp/dx11/xfile.html
 func (rep *XRepository) parseBinaryXFile(model *pmx.PmxModel) error {
 	// ヘッダーの解析
 	if err := rep.parseHeader(); err != nil {
