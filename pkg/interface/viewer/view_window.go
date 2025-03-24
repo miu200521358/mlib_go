@@ -66,6 +66,7 @@ func newViewWindow(
 	glWindow.MakeContextCurrent()
 	glWindow.SetInputMode(glfw.StickyKeysMode, glfw.True)
 	glWindow.SetIcon([]image.Image{icon})
+	glfw.SwapInterval(0) // VSync無効
 
 	// OpenGL の初期化
 	if err := gl.Init(); err != nil {

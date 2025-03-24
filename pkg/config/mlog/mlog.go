@@ -107,7 +107,7 @@ func IL(message string, param ...interface{}) {
 
 // IS 情報ログ（タイムスタンプ付き）
 func IS(message string, param ...interface{}) {
-	I("[%s]"+message, append([]interface{}{time.Now().Format("15:04:05.000")}, param...)...)
+	I("[%s]"+message, append([]interface{}{time.Now().Format("15:04:05.999999999")}, param...)...)
 }
 
 // IT 情報ログ（タイトル付き）
