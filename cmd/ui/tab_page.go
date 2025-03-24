@@ -27,6 +27,10 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 				if err := model.Bones.InsertShortageBones(); err != nil {
 					mlog.ET(mi18n.T("システム用ボーン追加失敗"), err.Error())
 				} else {
+
+					// pmxRep := repository.NewPmxRepository()
+					// pmxRep.Save("C:/MMD/mlib_go/test_resources/test.pmx", model, true)
+
 					cw.StoreModel(0, 0, model)
 				}
 			} else {

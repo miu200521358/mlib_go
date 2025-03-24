@@ -450,7 +450,7 @@ func NewControlWindow(
 	}
 
 	//FPS制限
-	fpsLimit := mconfig.LoadUserConfigInt(mconfig.KeyFpsLimit, 60)
+	fpsLimit := mconfig.LoadUserConfigInt(mconfig.KeyFpsLimit, 30)
 	switch fpsLimit {
 	case 30:
 		cw.TriggerFps30Limit()
@@ -676,11 +676,13 @@ func (cw *ControlWindow) TriggerShowWire() {
 func (cw *ControlWindow) TriggerShowOverrideUpper() {
 	if cw.showOverrideUpperAction.Checked() {
 		cw.showOverrideLowerAction.SetChecked(false)
+		cw.cameraSyncAction.SetChecked(false)
 	}
 	cw.shared.UpdateFlags(
 		map[uint32]bool{
 			state.FlagShowOverrideUpper: cw.showOverrideUpperAction.Checked(),
 			state.FlagShowOverrideLower: cw.showOverrideLowerAction.Checked(),
+			state.FlagCameraSync:        cw.cameraSyncAction.Checked(),
 		},
 	)
 }
@@ -688,11 +690,13 @@ func (cw *ControlWindow) TriggerShowOverrideUpper() {
 func (cw *ControlWindow) TriggerShowOverrideLower() {
 	if cw.showOverrideLowerAction.Checked() {
 		cw.showOverrideUpperAction.SetChecked(false)
+		cw.cameraSyncAction.SetChecked(false)
 	}
 	cw.shared.UpdateFlags(
 		map[uint32]bool{
 			state.FlagShowOverrideUpper: cw.showOverrideUpperAction.Checked(),
 			state.FlagShowOverrideLower: cw.showOverrideLowerAction.Checked(),
+			state.FlagCameraSync:        cw.cameraSyncAction.Checked(),
 		},
 	)
 }
@@ -786,5 +790,15 @@ func (cw *ControlWindow) TriggerShowInfo() {
 }
 
 func (cw *ControlWindow) TriggerCameraSync() {
-	cw.shared.SetCameraSync(cw.cameraSyncAction.Checked())
+	if cw.cameraSyncAction.Checked() {
+		cw.showOverrideUpperAction.SetChecked(false)
+		cw.showOverrideLowerAction.SetChecked(false)
+	}
+	cw.shared.UpdateFlags(
+		map[uint32]bool{
+			state.FlagShowOverrideUpper: cw.showOverrideUpperAction.Checked(),
+			state.FlagShowOverrideLower: cw.showOverrideLowerAction.Checked(),
+			state.FlagCameraSync:        cw.cameraSyncAction.Checked(),
+		},
+	)
 }

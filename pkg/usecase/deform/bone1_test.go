@@ -4904,3 +4904,41 @@ func TestVmdMotion_AdjustBones(t *testing.T) {
 		}
 	}
 }
+
+func TestVmdMotion_Neck(t *testing.T) {
+	// mlog.SetLevel(mlog.IK_VERBOSE)
+
+	vr := repository.NewVmdRepository()
+	motionData, err := vr.Load("../../../test_resources/くるりん_150F.vmd")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	motion := motionData.(*vmd.VmdMotion)
+
+	pr := repository.NewPmxRepository()
+	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4.pmx")
+
+	if err != nil {
+		t.Errorf("Expected error to be nil, got %q", err)
+	}
+
+	model := modelData.(*pmx.PmxModel)
+
+	boneDeltas := DeformBone(model, motion, true, 0, []string{"頭"})
+	{
+		boneName := pmx.NECK.String()
+		expectedPosition := &mmath.MVec3{X: 0.883310, Y: 17.340812, Z: -1.313977}
+		if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
+		}
+	}
+	{
+		boneName := pmx.HEAD.String()
+		expectedPosition := &mmath.MVec3{X: 0.812887, Y: 18.080100, Z: -1.292382}
+		if !boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD().NearEquals(expectedPosition, 0.03) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD(), expectedPosition.Distance(boneDeltas.GetByName(boneName).FilledGlobalPosition().MMD()))
+		}
+	}
+}

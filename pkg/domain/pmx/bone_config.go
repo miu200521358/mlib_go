@@ -49,6 +49,8 @@ const (
 	BONE_DIRECTION_RIGHT BoneDirection = "右"
 	// 左
 	BONE_DIRECTION_LEFT BoneDirection = "左"
+	// 体幹
+	BONE_DIRECTION_TRUNK BoneDirection = ""
 )
 
 func (d BoneDirection) String() string {
@@ -210,12 +212,12 @@ func (s StandardBoneName) String() string {
 	return string(s)
 }
 
-func (s StandardBoneName) StringFromDirection(direction string) string {
-	return strings.ReplaceAll(string(s), "{d}", direction)
+func (s StandardBoneName) StringFromDirection(direction BoneDirection) string {
+	return strings.ReplaceAll(string(s), "{d}", string(direction))
 }
 
-func (s StandardBoneName) StringFromDirectionAndIdx(direction string, idx int) string {
-	return strings.ReplaceAll(string(s), "{d}", direction) + strconv.Itoa(idx)
+func (s StandardBoneName) StringFromDirectionAndIdx(direction BoneDirection, idx int) string {
+	return strings.ReplaceAll(string(s), "{d}", string(direction)) + strconv.Itoa(idx)
 }
 
 func (s StandardBoneName) Right() string {

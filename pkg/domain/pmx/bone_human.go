@@ -34,9 +34,7 @@ func (bones *Bones) CreateCenter() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if root, err := bones.GetRoot(); err == nil {
-		bone.ParentIndex = root.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(ROOT, BONE_DIRECTION_TRUNK)
 
 	return bone, nil
 }
@@ -57,9 +55,7 @@ func (bones *Bones) CreateGroove() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if center, err := bones.GetCenter(); err == nil {
-		bone.ParentIndex = center.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(GROOVE, BONE_DIRECTION_TRUNK)
 
 	return bone, nil
 }
@@ -90,9 +86,7 @@ func (bones *Bones) CreateWaist() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if groove, err := bones.GetGroove(); err == nil {
-		bone.ParentIndex = groove.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(WAIST, BONE_DIRECTION_TRUNK)
 
 	return bone, nil
 }
@@ -122,9 +116,7 @@ func (bones *Bones) CreateTrunkRoot() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if waist, err := bones.GetWaist(); err == nil {
-		bone.ParentIndex = waist.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(TRUNK_ROOT, BONE_DIRECTION_TRUNK)
 
 	return bone, nil
 }
@@ -154,9 +146,7 @@ func (bones *Bones) CreateLowerRoot() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if trunkRoot, err := bones.GetTrunkRoot(); err == nil {
-		bone.ParentIndex = trunkRoot.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(LOWER_ROOT, BONE_DIRECTION_TRUNK)
 
 	return bone, nil
 }
@@ -187,9 +177,7 @@ func (bones *Bones) CreateLegCenter() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if lower, err := bones.GetLower(); err == nil {
-		bone.ParentIndex = lower.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(LEG_CENTER, BONE_DIRECTION_TRUNK)
 
 	return bone, nil
 }
@@ -219,9 +207,7 @@ func (bones *Bones) CreateUpperRoot() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if trunkRoot, err := bones.GetTrunkRoot(); err == nil {
-		bone.ParentIndex = trunkRoot.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(UPPER_ROOT, BONE_DIRECTION_TRUNK)
 
 	return bone, nil
 }
@@ -253,9 +239,7 @@ func (bones *Bones) CreateUpper2() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if upper, err := bones.GetUpper(); err == nil {
-		bone.ParentIndex = upper.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(UPPER2, BONE_DIRECTION_TRUNK)
 
 	// 表示先ボーン
 	if neck, err := bones.GetNeck(); err == nil {
@@ -287,9 +271,7 @@ func (bones *Bones) CreateNeckRoot() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if upper2, err := bones.GetUpper2(); err == nil {
-		bone.ParentIndex = upper2.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(NECK_ROOT, BONE_DIRECTION_TRUNK)
 
 	return bone, nil
 }
@@ -316,9 +298,7 @@ func (bones *Bones) CreateNeck() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if neckRoot, err := bones.GetNeckRoot(); err == nil {
-		bone.ParentIndex = neckRoot.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(NECK, BONE_DIRECTION_TRUNK)
 
 	// 表示先ボーン
 	if head, err := bones.GetHead(); err == nil {
@@ -349,9 +329,7 @@ func (bones *Bones) CreateHead() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if neck, err := bones.GetNeck(); err == nil {
-		bone.ParentIndex = neck.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(HEAD, BONE_DIRECTION_TRUNK)
 
 	// 表示先位置
 	bone.TailPosition = &mmath.MVec3{X: 0, Y: 0.5, Z: 0}
@@ -380,9 +358,7 @@ func (bones *Bones) CreateHeadTail() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if head, err := bones.GetHead(); err == nil {
-		bone.ParentIndex = head.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(HEAD_TAIL, BONE_DIRECTION_TRUNK)
 
 	return bone, nil
 }
@@ -407,21 +383,19 @@ func (bones *Bones) CreateEyes() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if head, err := bones.GetHead(); err == nil {
-		bone.ParentIndex = head.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(EYES, BONE_DIRECTION_TRUNK)
 
 	return bone, nil
 }
 
 // GetEye 目取得
 func (bones *Bones) GetEye(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(EYE.StringFromDirection(direction.String()))
+	return bones.GetByName(EYE.StringFromDirection(direction))
 }
 
 // CreateEye 目取得or作成
 func (bones *Bones) CreateEye(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(EYE.StringFromDirection(direction.String()))
+	bone := NewBoneByName(EYE.StringFromDirection(direction))
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE
 
 	// 位置
@@ -448,21 +422,19 @@ func (bones *Bones) CreateEye(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if eyes, err := bones.GetEyes(); err == nil {
-		bone.ParentIndex = eyes.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(EYE, direction)
 
 	return bone, nil
 }
 
 // GetShoulderRoot 肩根元取得
 func (bones *Bones) GetShoulderRoot(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(SHOULDER_ROOT.StringFromDirection(direction.String()))
+	return bones.GetByName(SHOULDER_ROOT.StringFromDirection(direction))
 }
 
 // CreateShoulderRoot 肩根元取得or作成
 func (bones *Bones) CreateShoulderRoot(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(SHOULDER_ROOT.StringFromDirection(direction.String()))
+	bone := NewBoneByName(SHOULDER_ROOT.StringFromDirection(direction))
 
 	// 位置
 	shoulderLeft, _ := bones.GetShoulder(BONE_DIRECTION_LEFT)
@@ -476,21 +448,19 @@ func (bones *Bones) CreateShoulderRoot(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if neckRoot, err := bones.GetNeckRoot(); err == nil {
-		bone.ParentIndex = neckRoot.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(SHOULDER_ROOT, direction)
 
 	return bone, nil
 }
 
 // GetShoulderP 肩P取得
 func (bones *Bones) GetShoulderP(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(SHOULDER_P.StringFromDirection(direction.String()))
+	return bones.GetByName(SHOULDER_P.StringFromDirection(direction))
 }
 
 // CreateShoulderP 肩P取得or作成
 func (bones *Bones) CreateShoulderP(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(SHOULDER_P.StringFromDirection(direction.String()))
+	bone := NewBoneByName(SHOULDER_P.StringFromDirection(direction))
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE
 
 	// 位置
@@ -499,26 +469,24 @@ func (bones *Bones) CreateShoulderP(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if shoulderRoot, err := bones.GetShoulderRoot(direction); err == nil {
-		bone.ParentIndex = shoulderRoot.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(SHOULDER_P, direction)
 
 	return bone, nil
 }
 
 // GetShoulder 肩取得
 func (bones *Bones) GetShoulder(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(SHOULDER.StringFromDirection(direction.String()))
+	return bones.GetByName(SHOULDER.StringFromDirection(direction))
 }
 
 // GetShoulderC 肩C取得
 func (bones *Bones) GetShoulderC(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(SHOULDER_C.StringFromDirection(direction.String()))
+	return bones.GetByName(SHOULDER_C.StringFromDirection(direction))
 }
 
 // CreateShoulderC 肩C取得or作成
 func (bones *Bones) CreateShoulderC(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(SHOULDER_C.StringFromDirection(direction.String()))
+	bone := NewBoneByName(SHOULDER_C.StringFromDirection(direction))
 
 	// 位置
 	if arm, err := bones.GetArm(direction); err == nil {
@@ -526,9 +494,7 @@ func (bones *Bones) CreateShoulderC(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if shoulder, err := bones.GetShoulder(direction); err == nil {
-		bone.ParentIndex = shoulder.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(SHOULDER_C, direction)
 
 	// 付与親
 	if shoulderP, err := bones.GetShoulderP(direction); err == nil {
@@ -542,17 +508,17 @@ func (bones *Bones) CreateShoulderC(direction BoneDirection) (*Bone, error) {
 
 // GetArm 腕取得
 func (bones *Bones) GetArm(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(ARM.StringFromDirection(direction.String()))
+	return bones.GetByName(ARM.StringFromDirection(direction))
 }
 
 // GetArmTwist 腕捩取得
 func (bones *Bones) GetArmTwist(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(ARM_TWIST.StringFromDirection(direction.String()))
+	return bones.GetByName(ARM_TWIST.StringFromDirection(direction))
 }
 
 // CreateArmTwist 腕捩取得or作成
 func (bones *Bones) CreateArmTwist(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(ARM_TWIST.StringFromDirection(direction.String()))
+	bone := NewBoneByName(ARM_TWIST.StringFromDirection(direction))
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE
 
 	// 位置
@@ -567,9 +533,7 @@ func (bones *Bones) CreateArmTwist(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if arm != nil {
-		bone.ParentIndex = arm.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(ARM_TWIST, direction)
 
 	if elbow != nil {
 		// 固定軸
@@ -587,12 +551,12 @@ func (bones *Bones) CreateArmTwist(direction BoneDirection) (*Bone, error) {
 
 // GetArmTwistChild 腕捩分割取得
 func (bones *Bones) GetArmTwistChild(direction BoneDirection, idx int) (*Bone, error) {
-	return bones.GetByName(ARM_TWIST.StringFromDirectionAndIdx(direction.String(), idx+1))
+	return bones.GetByName(ARM_TWIST.StringFromDirectionAndIdx(direction, idx+1))
 }
 
 // CreateArmTwistChild 腕捩分割取得or作成
 func (bones *Bones) CreateArmTwistChild(direction BoneDirection, idx int) (*Bone, error) {
-	bone := NewBoneByName(ARM_TWIST.StringFromDirectionAndIdx(direction.String(), idx+1))
+	bone := NewBoneByName(ARM_TWIST.StringFromDirectionAndIdx(direction, idx+1))
 
 	var ratio float64
 	switch idx {
@@ -616,9 +580,7 @@ func (bones *Bones) CreateArmTwistChild(direction BoneDirection, idx int) (*Bone
 	}
 
 	// 親ボーン
-	if arm != nil {
-		bone.ParentIndex = arm.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(ARM_TWIST, direction)
 
 	// 付与親
 	if armTwist, err := bones.GetArmTwist(direction); err == nil {
@@ -632,17 +594,17 @@ func (bones *Bones) CreateArmTwistChild(direction BoneDirection, idx int) (*Bone
 
 // GetElbowRoot ひじ取得
 func (bones *Bones) GetElbow(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(ELBOW.StringFromDirection(direction.String()))
+	return bones.GetByName(ELBOW.StringFromDirection(direction))
 }
 
 // GetWristTwist 腕捩取得
 func (bones *Bones) GetWristTwist(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(WRIST_TWIST.StringFromDirection(direction.String()))
+	return bones.GetByName(WRIST_TWIST.StringFromDirection(direction))
 }
 
 // CreateWristTwist 腕捩取得or作成
 func (bones *Bones) CreateWristTwist(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(WRIST_TWIST.StringFromDirection(direction.String()))
+	bone := NewBoneByName(WRIST_TWIST.StringFromDirection(direction))
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE
 
 	// 位置
@@ -657,9 +619,7 @@ func (bones *Bones) CreateWristTwist(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if elbow != nil {
-		bone.ParentIndex = elbow.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(WRIST_TWIST, direction)
 
 	if wrist != nil {
 		// 固定軸
@@ -677,12 +637,12 @@ func (bones *Bones) CreateWristTwist(direction BoneDirection) (*Bone, error) {
 
 // GetWristTwistChild 腕捩分割取得
 func (bones *Bones) GetWristTwistChild(direction BoneDirection, idx int) (*Bone, error) {
-	return bones.GetByName(WRIST_TWIST.StringFromDirectionAndIdx(direction.String(), idx+1))
+	return bones.GetByName(WRIST_TWIST.StringFromDirectionAndIdx(direction, idx+1))
 }
 
 // CreateWristTwistChild 腕捩分割取得or作成
 func (bones *Bones) CreateWristTwistChild(direction BoneDirection, idx int) (*Bone, error) {
-	bone := NewBoneByName(WRIST_TWIST.StringFromDirectionAndIdx(direction.String(), idx+1))
+	bone := NewBoneByName(WRIST_TWIST.StringFromDirectionAndIdx(direction, idx+1))
 
 	var ratio float64
 	switch idx {
@@ -706,9 +666,7 @@ func (bones *Bones) CreateWristTwistChild(direction BoneDirection, idx int) (*Bo
 	}
 
 	// 親ボーン
-	if elbow != nil {
-		bone.ParentIndex = elbow.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(WRIST_TWIST, direction)
 
 	// 付与親
 	if wristTwist, err := bones.GetWristTwist(direction); err == nil {
@@ -722,17 +680,17 @@ func (bones *Bones) CreateWristTwistChild(direction BoneDirection, idx int) (*Bo
 
 // GetWrist 手首取得
 func (bones *Bones) GetWrist(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(WRIST.StringFromDirection(direction.String()))
+	return bones.GetByName(WRIST.StringFromDirection(direction))
 }
 
 // GetWristTail 手首先先取得
 func (bones *Bones) GetWristTail(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(WRIST_TAIL.StringFromDirection(direction.String()))
+	return bones.GetByName(WRIST_TAIL.StringFromDirection(direction))
 }
 
 // CreateWristTail 手首先先取得or作成
 func (bones *Bones) CreateWristTail(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(WRIST_TAIL.StringFromDirection(direction.String()))
+	bone := NewBoneByName(WRIST_TAIL.StringFromDirection(direction))
 
 	if wrist, err := bones.GetWrist(direction); err == nil {
 		switch direction {
@@ -752,9 +710,7 @@ func (bones *Bones) CreateWristTail(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if wrist, err := bones.GetWrist(direction); err == nil {
-		bone.ParentIndex = wrist.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(WRIST_TAIL, direction)
 
 	return bone, nil
 }
@@ -763,11 +719,11 @@ func (bones *Bones) CreateWristTail(direction BoneDirection) (*Bone, error) {
 func (bones *Bones) GetThumb(direction BoneDirection, idx int) (*Bone, error) {
 	switch idx {
 	case 0:
-		return bones.GetByName(THUMB0.StringFromDirection(direction.String()))
+		return bones.GetByName(THUMB0.StringFromDirection(direction))
 	case 1:
-		return bones.GetByName(THUMB1.StringFromDirection(direction.String()))
+		return bones.GetByName(THUMB1.StringFromDirection(direction))
 	case 2:
-		return bones.GetByName(THUMB2.StringFromDirection(direction.String()))
+		return bones.GetByName(THUMB2.StringFromDirection(direction))
 	}
 
 	return nil, errors.New("invalid idx")
@@ -775,7 +731,7 @@ func (bones *Bones) GetThumb(direction BoneDirection, idx int) (*Bone, error) {
 
 // CreateThumb0 親指0取得or作成
 func (bones *Bones) CreateThumb0(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(THUMB0.StringFromDirection(direction.String()))
+	bone := NewBoneByName(THUMB0.StringFromDirection(direction))
 
 	// 位置
 	wrist, _ := bones.GetWrist(direction)
@@ -789,21 +745,19 @@ func (bones *Bones) CreateThumb0(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if wrist, err := bones.GetWrist(direction); err == nil {
-		bone.ParentIndex = wrist.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(THUMB0, direction)
 
 	return bone, nil
 }
 
 // GetThumbTail 親指先先取得
 func (bones *Bones) GetThumbTail(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(THUMB_TAIL.StringFromDirection(direction.String()))
+	return bones.GetByName(THUMB_TAIL.StringFromDirection(direction))
 }
 
 // CreateThumbTail 親指先先取得or作成
 func (bones *Bones) CreateThumbTail(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(THUMB_TAIL.StringFromDirection(direction.String()))
+	bone := NewBoneByName(THUMB_TAIL.StringFromDirection(direction))
 
 	// 位置
 	thumb1, _ := bones.GetThumb(direction, 1)
@@ -817,9 +771,7 @@ func (bones *Bones) CreateThumbTail(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if thumb2, err := bones.GetThumb(direction, 2); err == nil {
-		bone.ParentIndex = thumb2.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(THUMB_TAIL, direction)
 
 	return bone, nil
 }
@@ -828,11 +780,11 @@ func (bones *Bones) CreateThumbTail(direction BoneDirection) (*Bone, error) {
 func (bones *Bones) GetIndex(direction BoneDirection, idx int) (*Bone, error) {
 	switch idx {
 	case 0:
-		return bones.GetByName(INDEX1.StringFromDirection(direction.String()))
+		return bones.GetByName(INDEX1.StringFromDirection(direction))
 	case 1:
-		return bones.GetByName(INDEX2.StringFromDirection(direction.String()))
+		return bones.GetByName(INDEX2.StringFromDirection(direction))
 	case 2:
-		return bones.GetByName(INDEX3.StringFromDirection(direction.String()))
+		return bones.GetByName(INDEX3.StringFromDirection(direction))
 	}
 
 	return nil, errors.New("invalid idx")
@@ -840,12 +792,12 @@ func (bones *Bones) GetIndex(direction BoneDirection, idx int) (*Bone, error) {
 
 // GetIndexTail 人差し指先先取得
 func (bones *Bones) GetIndexTail(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(INDEX_TAIL.StringFromDirection(direction.String()))
+	return bones.GetByName(INDEX_TAIL.StringFromDirection(direction))
 }
 
 // CreateIndexTail 親指先先取得or作成
 func (bones *Bones) CreateIndexTail(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(INDEX_TAIL.StringFromDirection(direction.String()))
+	bone := NewBoneByName(INDEX_TAIL.StringFromDirection(direction))
 
 	// 位置
 	index1, _ := bones.GetIndex(direction, 1)
@@ -859,9 +811,7 @@ func (bones *Bones) CreateIndexTail(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if index2, err := bones.GetIndex(direction, 2); err == nil {
-		bone.ParentIndex = index2.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(INDEX_TAIL, direction)
 
 	return bone, nil
 }
@@ -870,11 +820,11 @@ func (bones *Bones) CreateIndexTail(direction BoneDirection) (*Bone, error) {
 func (bones *Bones) GetMiddle(direction BoneDirection, idx int) (*Bone, error) {
 	switch idx {
 	case 0:
-		return bones.GetByName(MIDDLE1.StringFromDirection(direction.String()))
+		return bones.GetByName(MIDDLE1.StringFromDirection(direction))
 	case 1:
-		return bones.GetByName(MIDDLE2.StringFromDirection(direction.String()))
+		return bones.GetByName(MIDDLE2.StringFromDirection(direction))
 	case 2:
-		return bones.GetByName(MIDDLE3.StringFromDirection(direction.String()))
+		return bones.GetByName(MIDDLE3.StringFromDirection(direction))
 	}
 
 	return nil, errors.New("invalid idx")
@@ -882,12 +832,12 @@ func (bones *Bones) GetMiddle(direction BoneDirection, idx int) (*Bone, error) {
 
 // GetMiddleTail 中指先先取得
 func (bones *Bones) GetMiddleTail(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(MIDDLE_TAIL.StringFromDirection(direction.String()))
+	return bones.GetByName(MIDDLE_TAIL.StringFromDirection(direction))
 }
 
 // CreateMiddleTail 親指先先取得or作成
 func (bones *Bones) CreateMiddleTail(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(MIDDLE_TAIL.StringFromDirection(direction.String()))
+	bone := NewBoneByName(MIDDLE_TAIL.StringFromDirection(direction))
 
 	// 位置
 	middle1, _ := bones.GetMiddle(direction, 1)
@@ -901,9 +851,7 @@ func (bones *Bones) CreateMiddleTail(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if middle2, err := bones.GetMiddle(direction, 2); err == nil {
-		bone.ParentIndex = middle2.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(MIDDLE_TAIL, direction)
 
 	return bone, nil
 }
@@ -912,11 +860,11 @@ func (bones *Bones) CreateMiddleTail(direction BoneDirection) (*Bone, error) {
 func (bones *Bones) GetRing(direction BoneDirection, idx int) (*Bone, error) {
 	switch idx {
 	case 0:
-		return bones.GetByName(RING1.StringFromDirection(direction.String()))
+		return bones.GetByName(RING1.StringFromDirection(direction))
 	case 1:
-		return bones.GetByName(RING2.StringFromDirection(direction.String()))
+		return bones.GetByName(RING2.StringFromDirection(direction))
 	case 2:
-		return bones.GetByName(RING3.StringFromDirection(direction.String()))
+		return bones.GetByName(RING3.StringFromDirection(direction))
 	}
 
 	return nil, errors.New("invalid idx")
@@ -924,12 +872,12 @@ func (bones *Bones) GetRing(direction BoneDirection, idx int) (*Bone, error) {
 
 // GetRingTail 薬指先先取得
 func (bones *Bones) GetRingTail(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(RING_TAIL.StringFromDirection(direction.String()))
+	return bones.GetByName(RING_TAIL.StringFromDirection(direction))
 }
 
 // CreateRingTail 親指先先取得or作成
 func (bones *Bones) CreateRingTail(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(RING_TAIL.StringFromDirection(direction.String()))
+	bone := NewBoneByName(RING_TAIL.StringFromDirection(direction))
 
 	// 位置
 	ring1, _ := bones.GetRing(direction, 1)
@@ -943,9 +891,7 @@ func (bones *Bones) CreateRingTail(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if ring2, err := bones.GetRing(direction, 2); err == nil {
-		bone.ParentIndex = ring2.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(RING_TAIL, direction)
 
 	return bone, nil
 }
@@ -954,11 +900,11 @@ func (bones *Bones) CreateRingTail(direction BoneDirection) (*Bone, error) {
 func (bones *Bones) GetPinky(direction BoneDirection, idx int) (*Bone, error) {
 	switch idx {
 	case 0:
-		return bones.GetByName(PINKY1.StringFromDirection(direction.String()))
+		return bones.GetByName(PINKY1.StringFromDirection(direction))
 	case 1:
-		return bones.GetByName(PINKY2.StringFromDirection(direction.String()))
+		return bones.GetByName(PINKY2.StringFromDirection(direction))
 	case 2:
-		return bones.GetByName(PINKY3.StringFromDirection(direction.String()))
+		return bones.GetByName(PINKY3.StringFromDirection(direction))
 	}
 
 	return nil, errors.New("invalid idx")
@@ -966,12 +912,12 @@ func (bones *Bones) GetPinky(direction BoneDirection, idx int) (*Bone, error) {
 
 // GetPinkyTail 小指先先取得
 func (bones *Bones) GetPinkyTail(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(PINKY_TAIL.StringFromDirection(direction.String()))
+	return bones.GetByName(PINKY_TAIL.StringFromDirection(direction))
 }
 
 // CreateLittleTail 親指先先取得or作成
 func (bones *Bones) CreatePinkyTail(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(PINKY_TAIL.StringFromDirection(direction.String()))
+	bone := NewBoneByName(PINKY_TAIL.StringFromDirection(direction))
 
 	// 位置
 	pinky1, _ := bones.GetPinky(direction, 1)
@@ -985,21 +931,19 @@ func (bones *Bones) CreatePinkyTail(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if pinky2, err := bones.GetPinky(direction, 2); err == nil {
-		bone.ParentIndex = pinky2.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(PINKY_TAIL, direction)
 
 	return bone, nil
 }
 
 // GetLegRoot 足根元取得
 func (bones *Bones) GetLegRoot(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(LEG_ROOT.StringFromDirection(direction.String()))
+	return bones.GetByName(LEG_ROOT.StringFromDirection(direction))
 }
 
 // CreateLegRoot 足根元取得or作成
 func (bones *Bones) CreateLegRoot(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(LEG_ROOT.StringFromDirection(direction.String()))
+	bone := NewBoneByName(LEG_ROOT.StringFromDirection(direction))
 
 	// 位置
 	legLeft, _ := bones.GetLeg(BONE_DIRECTION_LEFT)
@@ -1013,23 +957,19 @@ func (bones *Bones) CreateLegRoot(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if legCenter, err := bones.GetLegCenter(); err == nil {
-		bone.ParentIndex = legCenter.Index()
-	} else if lower, err := bones.GetLower(); err == nil {
-		bone.ParentIndex = lower.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(LEG_ROOT, direction)
 
 	return bone, nil
 }
 
 // GetWaistCancel 腰キャンセル取得
 func (bones *Bones) GetWaistCancel(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(WAIST_CANCEL.StringFromDirection(direction.String()))
+	return bones.GetByName(WAIST_CANCEL.StringFromDirection(direction))
 }
 
 // CreateWaistCancel 腰キャンセル取得or作成
 func (bones *Bones) CreateWaistCancel(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(WAIST_CANCEL.StringFromDirection(direction.String()))
+	bone := NewBoneByName(WAIST_CANCEL.StringFromDirection(direction))
 
 	// 位置
 	if leg, err := bones.GetLeg(direction); err == nil {
@@ -1037,13 +977,7 @@ func (bones *Bones) CreateWaistCancel(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if legRoot, err := bones.GetLegRoot(direction); err == nil {
-		bone.ParentIndex = legRoot.Index()
-	} else if legCenter, err := bones.GetLegCenter(); err == nil {
-		bone.ParentIndex = legCenter.Index()
-	} else if lower, err := bones.GetLower(); err == nil {
-		bone.ParentIndex = lower.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(WAIST_CANCEL, direction)
 
 	// 付与親
 	if waist, err := bones.GetWaist(); err == nil {
@@ -1057,27 +991,27 @@ func (bones *Bones) CreateWaistCancel(direction BoneDirection) (*Bone, error) {
 
 // GetLeg 足取得
 func (bones *Bones) GetLeg(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(LEG.StringFromDirection(direction.String()))
+	return bones.GetByName(LEG.StringFromDirection(direction))
 }
 
 // GetKnee ひざ取得
 func (bones *Bones) GetKnee(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(KNEE.StringFromDirection(direction.String()))
+	return bones.GetByName(KNEE.StringFromDirection(direction))
 }
 
 // GetAnkle 足首取得
 func (bones *Bones) GetAnkle(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(ANKLE.StringFromDirection(direction.String()))
+	return bones.GetByName(ANKLE.StringFromDirection(direction))
 }
 
 // GetHeel かかと取得
 func (bones *Bones) GetHeel(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(HEEL.StringFromDirection(direction.String()))
+	return bones.GetByName(HEEL.StringFromDirection(direction))
 }
 
 // CreateHeel かかと取得or作成
 func (bones *Bones) CreateHeel(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(HEEL.StringFromDirection(direction.String()))
+	bone := NewBoneByName(HEEL.StringFromDirection(direction))
 
 	// 位置
 	// 親ボーン
@@ -1096,12 +1030,12 @@ func (bones *Bones) CreateHeel(direction BoneDirection) (*Bone, error) {
 
 // GetToeT つま先先取得
 func (bones *Bones) GetToeT(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(TOE_T.StringFromDirection(direction.String()))
+	return bones.GetByName(TOE_T.StringFromDirection(direction))
 }
 
 // CreateToeT つま先先取得or作成
 func (bones *Bones) CreateToeT(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(TOE_T.StringFromDirection(direction.String()))
+	bone := NewBoneByName(TOE_T.StringFromDirection(direction))
 
 	// 位置
 	if toeIK, err := bones.GetToeIK(direction); err == nil {
@@ -1119,12 +1053,12 @@ func (bones *Bones) CreateToeT(direction BoneDirection) (*Bone, error) {
 
 // GetToeP つま先親取得
 func (bones *Bones) GetToeP(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(TOE_P.StringFromDirection(direction.String()))
+	return bones.GetByName(TOE_P.StringFromDirection(direction))
 }
 
 // CreateToeP つま先親取得or作成
 func (bones *Bones) CreateToeP(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(TOE_P.StringFromDirection(direction.String()))
+	bone := NewBoneByName(TOE_P.StringFromDirection(direction))
 
 	// 位置
 	// 親ボーン
@@ -1152,12 +1086,12 @@ func (bones *Bones) CreateToeP(direction BoneDirection) (*Bone, error) {
 
 // GetToeC つま先子取得
 func (bones *Bones) GetToeC(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(TOE_C.StringFromDirection(direction.String()))
+	return bones.GetByName(TOE_C.StringFromDirection(direction))
 }
 
 // CreateToeC つま先子取得or作成
 func (bones *Bones) CreateToeC(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(TOE_C.StringFromDirection(direction.String()))
+	bone := NewBoneByName(TOE_C.StringFromDirection(direction))
 
 	// 位置
 	if toeT, err := bones.GetToeT(direction); err == nil {
@@ -1178,21 +1112,19 @@ func (bones *Bones) CreateToeC(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if toeP, err := bones.GetToeP(direction); err == nil {
-		bone.ParentIndex = toeP.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(TOE_C, direction)
 
 	return bone, nil
 }
 
 // GetLegD 足D取得
 func (bones *Bones) GetLegD(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(LEG_D.StringFromDirection(direction.String()))
+	return bones.GetByName(LEG_D.StringFromDirection(direction))
 }
 
 // CreateLegD 足D取得or作成
 func (bones *Bones) CreateLegD(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(LEG_D.StringFromDirection(direction.String()))
+	bone := NewBoneByName(LEG_D.StringFromDirection(direction))
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE
 
 	// 位置
@@ -1201,15 +1133,7 @@ func (bones *Bones) CreateLegD(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if waistCancel, err := bones.GetWaistCancel(direction); err == nil {
-		bone.ParentIndex = waistCancel.Index()
-	} else if legRoot, err := bones.GetLegRoot(direction); err == nil {
-		bone.ParentIndex = legRoot.Index()
-	} else if legCenter, err := bones.GetLegCenter(); err == nil {
-		bone.ParentIndex = legCenter.Index()
-	} else if lower, err := bones.GetLower(); err == nil {
-		bone.ParentIndex = lower.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(LEG_D, direction)
 
 	// 付与親
 	if leg, err := bones.GetLeg(direction); err == nil {
@@ -1223,12 +1147,12 @@ func (bones *Bones) CreateLegD(direction BoneDirection) (*Bone, error) {
 
 // GetKneeD ひざD取得
 func (bones *Bones) GetKneeD(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(KNEE_D.StringFromDirection(direction.String()))
+	return bones.GetByName(KNEE_D.StringFromDirection(direction))
 }
 
 // CreateKneeD ひざD取得or作成
 func (bones *Bones) CreateKneeD(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(KNEE_D.StringFromDirection(direction.String()))
+	bone := NewBoneByName(KNEE_D.StringFromDirection(direction))
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE
 
 	// 位置
@@ -1237,9 +1161,7 @@ func (bones *Bones) CreateKneeD(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if legD, err := bones.GetLegD(direction); err == nil {
-		bone.ParentIndex = legD.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(KNEE_D, direction)
 
 	// 付与親
 	if knee, err := bones.GetKnee(direction); err == nil {
@@ -1253,12 +1175,12 @@ func (bones *Bones) CreateKneeD(direction BoneDirection) (*Bone, error) {
 
 // GetAnkleD 足首D取得
 func (bones *Bones) GetAnkleD(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(ANKLE_D.StringFromDirection(direction.String()))
+	return bones.GetByName(ANKLE_D.StringFromDirection(direction))
 }
 
 // CreateAnkleD 足首D取得or作成
 func (bones *Bones) CreateAnkleD(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(ANKLE_D.StringFromDirection(direction.String()))
+	bone := NewBoneByName(ANKLE_D.StringFromDirection(direction))
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE
 
 	// 位置
@@ -1267,9 +1189,7 @@ func (bones *Bones) CreateAnkleD(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if kneeD, err := bones.GetKneeD(direction); err == nil {
-		bone.ParentIndex = kneeD.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(ANKLE_D, direction)
 
 	// 付与親
 	if ankle, err := bones.GetAnkle(direction); err == nil {
@@ -1283,12 +1203,12 @@ func (bones *Bones) CreateAnkleD(direction BoneDirection) (*Bone, error) {
 
 // GetHeelD かかとD取得
 func (bones *Bones) GetHeelD(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(HEEL_D.StringFromDirection(direction.String()))
+	return bones.GetByName(HEEL_D.StringFromDirection(direction))
 }
 
 // CreateHeelD かかとD取得or作成
 func (bones *Bones) CreateHeelD(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(HEEL_D.StringFromDirection(direction.String()))
+	bone := NewBoneByName(HEEL_D.StringFromDirection(direction))
 
 	// 位置
 	if heel, err := bones.GetHeel(direction); err == nil {
@@ -1296,9 +1216,7 @@ func (bones *Bones) CreateHeelD(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if ankleD, err := bones.GetAnkleD(direction); err == nil {
-		bone.ParentIndex = ankleD.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(HEEL_D, direction)
 
 	// 付与親
 	if heel, err := bones.GetHeel(direction); err == nil {
@@ -1312,12 +1230,12 @@ func (bones *Bones) CreateHeelD(direction BoneDirection) (*Bone, error) {
 
 // GetToeEx 足先EX取得
 func (bones *Bones) GetToeEx(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(TOE_EX.StringFromDirection(direction.String()))
+	return bones.GetByName(TOE_EX.StringFromDirection(direction))
 }
 
 // CreateToeEx 足先EX取得or作成
 func (bones *Bones) CreateToeEx(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(TOE_EX.StringFromDirection(direction.String()))
+	bone := NewBoneByName(TOE_EX.StringFromDirection(direction))
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE
 
 	// 位置
@@ -1332,21 +1250,19 @@ func (bones *Bones) CreateToeEx(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if ankleD, err := bones.GetAnkleD(direction); err == nil {
-		bone.ParentIndex = ankleD.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(TOE_EX, direction)
 
 	return bone, nil
 }
 
 // GetToeTD つま先先D取得
 func (bones *Bones) GetToeTD(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(TOE_T_D.StringFromDirection(direction.String()))
+	return bones.GetByName(TOE_T_D.StringFromDirection(direction))
 }
 
 // CreateToeTD つま先先D取得or作成
 func (bones *Bones) CreateToeTD(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(TOE_T_D.StringFromDirection(direction.String()))
+	bone := NewBoneByName(TOE_T_D.StringFromDirection(direction))
 
 	// 位置
 	if toeT, err := bones.GetToeT(direction); err == nil {
@@ -1354,9 +1270,7 @@ func (bones *Bones) CreateToeTD(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if toeEx, err := bones.GetToeEx(direction); err == nil {
-		bone.ParentIndex = toeEx.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(TOE_T_D, direction)
 
 	// 付与親
 	if toeT, err := bones.GetToeT(direction); err == nil {
@@ -1370,12 +1284,12 @@ func (bones *Bones) CreateToeTD(direction BoneDirection) (*Bone, error) {
 
 // GetToePD つま先親D取得
 func (bones *Bones) GetToePD(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(TOE_P_D.StringFromDirection(direction.String()))
+	return bones.GetByName(TOE_P_D.StringFromDirection(direction))
 }
 
 // CreateToePD つま先親D取得or作成
 func (bones *Bones) CreateToePD(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(TOE_P_D.StringFromDirection(direction.String()))
+	bone := NewBoneByName(TOE_P_D.StringFromDirection(direction))
 
 	// 位置
 	if toeP, err := bones.GetToeP(direction); err == nil {
@@ -1383,9 +1297,7 @@ func (bones *Bones) CreateToePD(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if toeTD, err := bones.GetToeTD(direction); err == nil {
-		bone.ParentIndex = toeTD.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(TOE_P_D, direction)
 
 	// 付与親
 	if toeP, err := bones.GetToeP(direction); err == nil {
@@ -1399,12 +1311,12 @@ func (bones *Bones) CreateToePD(direction BoneDirection) (*Bone, error) {
 
 // GetToeCD つま先子D取得
 func (bones *Bones) GetToeCD(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(TOE_C_D.StringFromDirection(direction.String()))
+	return bones.GetByName(TOE_C_D.StringFromDirection(direction))
 }
 
 // CreateToeCD つま先子D取得or作成
 func (bones *Bones) CreateToeCD(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(TOE_C_D.StringFromDirection(direction.String()))
+	bone := NewBoneByName(TOE_C_D.StringFromDirection(direction))
 
 	// 位置
 	if toeC, err := bones.GetToeC(direction); err == nil {
@@ -1412,9 +1324,7 @@ func (bones *Bones) CreateToeCD(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if toePD, err := bones.GetToePD(direction); err == nil {
-		bone.ParentIndex = toePD.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(TOE_C_D, direction)
 
 	// 付与親
 	if toeC, err := bones.GetToeC(direction); err == nil {
@@ -1428,12 +1338,12 @@ func (bones *Bones) CreateToeCD(direction BoneDirection) (*Bone, error) {
 
 // GetLegIkParent 足IK親取得
 func (bones *Bones) GetLegIkParent(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(LEG_IK_PARENT.StringFromDirection(direction.String()))
+	return bones.GetByName(LEG_IK_PARENT.StringFromDirection(direction))
 }
 
 // CreateLegIkParent 足IK親取得or作成
 func (bones *Bones) CreateLegIkParent(direction BoneDirection) (*Bone, error) {
-	bone := NewBoneByName(LEG_IK_PARENT.StringFromDirection(direction.String()))
+	bone := NewBoneByName(LEG_IK_PARENT.StringFromDirection(direction))
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
@@ -1446,21 +1356,35 @@ func (bones *Bones) CreateLegIkParent(direction BoneDirection) (*Bone, error) {
 	}
 
 	// 親ボーン
-	if root, err := bones.GetRoot(); err == nil {
-		bone.ParentIndex = root.Index()
-	}
+	bone.ParentIndex = bones.getParentBoneIndexByConfigChildren(LEG_IK_PARENT, direction)
 
 	return bone, nil
 }
 
 // GetLegIk 足IK取得
 func (bones *Bones) GetLegIk(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(LEG_IK.StringFromDirection(direction.String()))
+	return bones.GetByName(LEG_IK.StringFromDirection(direction))
 }
 
 // GetToeIK つま先IK取得
 func (bones *Bones) GetToeIK(direction BoneDirection) (*Bone, error) {
-	return bones.GetByName(TOE_IK.StringFromDirection(direction.String()))
+	return bones.GetByName(TOE_IK.StringFromDirection(direction))
+}
+
+func (bones *Bones) getParentBoneIndexByConfigChildren(boneName StandardBoneName, direction BoneDirection) int {
+	boneConfig := getStandardBoneConfigs()[boneName]
+	for _, tailBoneName := range boneConfig.ChildBoneNames {
+		if bones.ContainsByName(tailBoneName.StringFromDirection(direction)) {
+			if bone, err := bones.GetByName(tailBoneName.Right()); bone != nil && err == nil {
+				return bone.ParentIndex
+			}
+		} else if bones.ContainsByName(tailBoneName.String()) {
+			if bone, err := bones.GetByName(tailBoneName.String()); bone != nil && err == nil {
+				return bone.ParentIndex
+			}
+		}
+	}
+	return -1
 }
 
 // InsertShortageBones 不足ボーン作成
