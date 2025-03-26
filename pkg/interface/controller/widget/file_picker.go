@@ -241,8 +241,8 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 				},
 				declarative.LineEdit{
 					ReadOnly: true,
-					Background: declarative.SystemColorBrush{
-						Color: walk.SysColorInactiveCaption,
+					Background: declarative.SolidColorBrush{
+						Color: controller.ColorTabBackground,
 					},
 					Text:        mi18n.T("未設定"),
 					ToolTipText: fp.tooltip,

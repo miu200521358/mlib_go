@@ -115,8 +115,8 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 		Title:    "ファイル",
 		AssignTo: &fileTab,
 		Layout:   declarative.VBox{},
-		Background: declarative.SystemColorBrush{
-			Color: walk.SysColorInactiveCaption,
+		Background: declarative.SolidColorBrush{
+			Color: walk.RGB(0, 0, 0),
 		},
 		Children: []declarative.Widget{
 			declarative.Composite{

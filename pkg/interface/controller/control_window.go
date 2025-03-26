@@ -130,8 +130,8 @@ func NewControlWindow(
 		Title:    fmt.Sprintf("%s %s", appConfig.Name, appConfig.Version),
 		Size:     declarative.Size{Width: width, Height: height},
 		Layout:   declarative.VBox{Alignment: declarative.AlignHNearVNear, MarginsZero: true, SpacingZero: true},
-		Background: declarative.SystemColorBrush{
-			Color: walk.SysColor3DShadow,
+		Background: declarative.SolidColorBrush{
+			Color: ColorWindowBackground,
 		},
 		Icon: appConfig.Icon,
 		MenuItems: []declarative.MenuItem{
