@@ -113,9 +113,9 @@ func (mp *MotionPlayer) ChangeValue(frame float32) {
 	mp.frameSlider.ChangeValue(int(frame))
 }
 
-func (mp *MotionPlayer) EnabledInPlaying(enable bool) {
-	mp.frameEdit.SetEnabled(enable)
-	mp.frameSlider.SetEnabled(enable)
+func (mp *MotionPlayer) EnabledInPlaying(playing bool) {
+	mp.frameEdit.SetEnabled(!playing)
+	mp.frameSlider.SetEnabled(!playing)
 	// 再生ボタンは常に有効
 	mp.playButton.SetEnabled(true)
 }
@@ -128,7 +128,7 @@ func (mp *MotionPlayer) SetPlaying(playing bool) {
 	}
 
 	mp.window.SetPlaying(playing)
-	mp.window.EnabledInPlaying(!playing)
+	mp.window.EnabledInPlaying(playing)
 
 	// 再生中のみ、Ticker で定期的にフレーム情報を監視・更新する
 	if playing {

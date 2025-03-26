@@ -73,7 +73,7 @@ func NewPmxXLoadFilePicker(
 	)
 }
 
-func NewPmxJsonLoadFilePicker(
+func NewPmxPmxJsonLoadFilePicker(
 	historyKey string,
 	title string,
 	tooltip string,
@@ -88,7 +88,7 @@ func NewPmxJsonLoadFilePicker(
 			{extension: "*.pmx;*.json", description: "Pmx/Json Files (*.pmx,*.json)"},
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
-		repository.NewPmxJsonRepository(),
+		repository.NewPmxPmxJsonRepository(),
 	)
 }
 
@@ -379,7 +379,12 @@ func (fp *FilePicker) onClickOpenButton() walk.EventHandler {
 			FilterIndex:    1,
 			InitialDirPath: fp.initialDirPath,
 		}
-		if ok, err := dlg.ShowOpen(nil); err != nil {
+		openMethod := dlg.ShowOpen
+		if fp.historyKey == "" {
+			openMethod = dlg.ShowSave
+		}
+
+		if ok, err := openMethod(nil); err != nil {
 			walk.MsgBox(nil, mi18n.T("ファイル選択ダイアログ選択エラー"), err.Error(), walk.MsgBoxIconError)
 		} else if ok {
 			// パスを入力欄に設定
@@ -469,17 +474,21 @@ func (fp *FilePicker) SetWindow(window *controller.ControlWindow) {
 	fp.window = window
 }
 
-func (fp *FilePicker) EnabledInPlaying(enable bool) {
-	fp.pathEdit.SetEnabled(enable)
-	fp.openPushButton.SetEnabled(enable)
+func (fp *FilePicker) EnabledInPlaying(playing bool) {
+	fp.pathEdit.SetEnabled(!playing)
+	fp.openPushButton.SetEnabled(!playing)
 	if fp.historyKey != "" {
-		fp.historyPushButton.SetEnabled(enable)
+		fp.historyPushButton.SetEnabled(!playing)
 	}
 }
 
 func (fp *FilePicker) SetPath(path string) {
 	fp.pathEdit.SetText(path)
 	fp.onChanged(path)
+}
+
+func (fp *FilePicker) ChangePath(path string) {
+	fp.pathEdit.ChangeText(path)
 }
 
 func (fp *FilePicker) Path() string {

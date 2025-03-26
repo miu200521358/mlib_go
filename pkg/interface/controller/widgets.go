@@ -8,7 +8,7 @@ import (
 type IMWidget interface {
 	Widgets() declarative.Composite
 	SetWindow(window *ControlWindow)
-	EnabledInPlaying(enable bool)
+	EnabledInPlaying(playing bool)
 }
 
 type MWidgets struct {
@@ -20,6 +20,7 @@ type MWidgets struct {
 }
 
 func (mw *MWidgets) SetWindow(window *ControlWindow) {
+	mw.window = window
 	for _, w := range mw.Widgets {
 		w.SetWindow(window)
 	}
@@ -29,12 +30,12 @@ func (mw *MWidgets) Window() *ControlWindow {
 	return mw.window
 }
 
-func (mw *MWidgets) EnabledInPlaying(enable bool) {
+func (mw *MWidgets) EnabledInPlaying(playing bool) {
 	for _, w := range mw.Widgets {
-		w.EnabledInPlaying(enable)
+		w.EnabledInPlaying(playing)
 	}
 	if mw.onChangePlayingFunc != nil {
-		mw.onChangePlayingFunc(enable)
+		mw.onChangePlayingFunc(playing)
 	}
 }
 

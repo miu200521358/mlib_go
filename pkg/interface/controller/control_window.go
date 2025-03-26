@@ -27,7 +27,7 @@ type ControlWindow struct {
 
 	tabWidget        *walk.TabWidget    // タブウィジェット
 	consoleView      *ConsoleView       // コンソールビュー
-	enabledInPlaying func(enabled bool) // 再生中に無効化するウィジェット
+	enabledInPlaying func(playing bool) // 再生中に無効化するウィジェット
 
 	leftButtonPressed bool // 左ボタン押下フラグ
 
@@ -592,13 +592,16 @@ func (cw *ControlWindow) MaxFrame() float32 {
 	return cw.shared.MaxFrame()
 }
 
-func (cw *ControlWindow) EnabledInPlaying(enabled bool) {
-	cw.enabledInPlaying(enabled)
+func (cw *ControlWindow) EnabledInPlaying(playing bool) {
+	cw.enabledInPlaying(playing)
 }
 
 // ------- 以下、モデルやモーションの格納・取得メソッド -------
 
 func (cw *ControlWindow) StoreModel(windowIndex int, modelIndex int, model *pmx.PmxModel) {
+	if model != nil {
+		model.SetIndex(modelIndex)
+	}
 	cw.shared.StoreModel(windowIndex, modelIndex, model)
 }
 

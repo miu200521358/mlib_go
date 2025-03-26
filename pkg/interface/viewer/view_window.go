@@ -198,7 +198,8 @@ func (vw *ViewWindow) render() {
 	}
 
 	// メインウィンドウでは、サブウィンドウの描画内容（overrideテクスチャ）を半透明合成して描画
-	if vw.list.shared.IsShowOverride() && vw.windowIndex == 0 {
+	if vw.list.shared.IsShowOverride() && vw.windowIndex == 0 &&
+		vw.shader.OverrideRenderer().SharedTextureIDPtr() != nil {
 		vw.shader.OverrideRenderer().Resolve()
 	}
 
@@ -239,7 +240,8 @@ func (vw *ViewWindow) adjustCameraForOverride() {
 
 	// 合わせる対象のボーンが1つでもなかった場合は処理しない
 	for _, boneName := range targetBoneNames {
-		if !mainVW.vmdDeltas[0].Bones.ContainsByName(boneName) || !vw.vmdDeltas[0].Bones.ContainsByName(boneName) {
+		if len(mainVW.vmdDeltas) == 0 || mainVW.vmdDeltas[0] == nil || !mainVW.vmdDeltas[0].Bones.ContainsByName(boneName) ||
+			len(vw.vmdDeltas) == 0 || vw.vmdDeltas[0] == nil || !vw.vmdDeltas[0].Bones.ContainsByName(boneName) {
 			return
 		}
 	}

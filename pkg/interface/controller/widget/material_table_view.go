@@ -85,8 +85,8 @@ func (lb *MaterialTableView) Widgets() declarative.Composite {
 	}
 }
 
-func (lb *MaterialTableView) EnabledInPlaying(enable bool) {
-	lb.TableView.SetEnabled(enable)
+func (lb *MaterialTableView) EnabledInPlaying(playing bool) {
+	lb.TableView.SetEnabled(!playing)
 }
 
 func (lb *MaterialTableView) SetWindow(window *controller.ControlWindow) {
