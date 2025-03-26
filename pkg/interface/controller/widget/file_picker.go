@@ -261,7 +261,7 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 			AssignTo:    &fp.pathEdit,
 			ToolTipText: fp.tooltip,
 			OnEditingFinished: func() {
-				fp.onChanged(fp.pathEdit.Text())
+				fp.onChanged(fp.pathEdit.Text(), true)
 			},
 			OnDropFiles: func(files []string) {
 				if len(files) > 0 {
@@ -269,7 +269,7 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 					// パスを入力欄に設定
 					fp.pathEdit.ChangeText(path)
 					// コールバックを呼び出し
-					fp.onChanged(path)
+					fp.onChanged(path, true)
 				}
 			},
 		},
@@ -293,7 +293,7 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 				if fp.historyDialog, err = fp.newHistoryDialog(); fp.historyDialog != nil && err == nil {
 					if ok := fp.historyDialog.Run(); ok == walk.DlgCmdOK {
 						// コールバックを呼び出し
-						fp.onChanged(fp.pathEdit.Text())
+						fp.onChanged(fp.pathEdit.Text(), true)
 					}
 					fp.historyDialog.Dispose()
 				}
@@ -318,7 +318,7 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 	}
 }
 
-func (fp *FilePicker) onChanged(path string) {
+func (fp *FilePicker) onChanged(path string, isCallBack bool) {
 	if fp.repository == nil || fp.historyKey == "" {
 		return
 	}
@@ -326,7 +326,7 @@ func (fp *FilePicker) onChanged(path string) {
 	if path == "" {
 		fp.nameEdit.SetText(mi18n.T("未設定"))
 
-		if fp.onPathChanged != nil {
+		if fp.onPathChanged != nil && isCallBack {
 			// コールバックを呼び出し
 			fp.onPathChanged(fp.window, fp.repository, path)
 		}
@@ -345,7 +345,7 @@ func (fp *FilePicker) onChanged(path string) {
 		// ロード系のみ履歴用キーを指定して履歴リストを保存
 		mconfig.SaveUserConfig(fp.historyKey, path, 50)
 
-		if fp.onPathChanged != nil {
+		if fp.onPathChanged != nil && isCallBack {
 			// コールバックを呼び出し
 			fp.onPathChanged(fp.window, fp.repository, path)
 		}
@@ -390,7 +390,7 @@ func (fp *FilePicker) onClickOpenButton() walk.EventHandler {
 			// パスを入力欄に設定
 			fp.pathEdit.ChangeText(dlg.FilePath)
 			// コールバックを呼び出し
-			fp.onChanged(dlg.FilePath)
+			fp.onChanged(dlg.FilePath, true)
 		}
 	}
 }
@@ -484,11 +484,12 @@ func (fp *FilePicker) EnabledInPlaying(playing bool) {
 
 func (fp *FilePicker) SetPath(path string) {
 	fp.pathEdit.SetText(path)
-	fp.onChanged(path)
+	fp.onChanged(path, true)
 }
 
 func (fp *FilePicker) ChangePath(path string) {
 	fp.pathEdit.ChangeText(path)
+	fp.onChanged(path, false)
 }
 
 func (fp *FilePicker) Path() string {

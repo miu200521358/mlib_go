@@ -3,9 +3,9 @@ package core
 import (
 	"errors"
 	"reflect"
-	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/config/merr"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 type IIndexNameModel interface {
@@ -64,14 +64,7 @@ func (im *IndexNameModels[T]) Append(value T) error {
 }
 
 func (im *IndexNameModels[T]) Indexes() []int {
-	indexes := make([]int, len(im.nameIndexes))
-	i := 0
-	for _, index := range im.nameIndexes {
-		indexes[i] = index
-		i++
-	}
-	sort.Ints(indexes)
-	return indexes
+	return mmath.IntRanges(len(im.values))
 }
 
 func (im *IndexNameModels[T]) Names() []string {
