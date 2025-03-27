@@ -149,6 +149,8 @@ func (vw *ViewWindow) render() {
 	// override が有効かつサブウィンドウの場合、カメラを調整してオーバーライド描画
 	if vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
 		// サブウィンドウ側のカメラを調整（調整後の状態でレンダリングする）
+		vw.syncSizeToOthers(vw.list.windowList[0].GetSize())
+
 		vw.adjustCameraForOverride()
 		vw.shader.OverrideRenderer().Bind()
 	} else {

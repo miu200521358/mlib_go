@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/miu200521358/mlib_go/pkg/config/merr"
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
@@ -156,16 +157,16 @@ func (bones *Bones) Insert(bone *Bone) error {
 	return nil
 }
 
-func (bones *Bones) GetIkTarget(ikBoneName string) *Bone {
+func (bones *Bones) GetIkTarget(ikBoneName string) (*Bone, error) {
 	if ikBoneName == "" || !bones.ContainsByName(ikBoneName) {
-		return nil
+		return nil, merr.NameNotFoundError
 	}
 
 	if ikBone, err := bones.GetByName(ikBoneName); err != nil ||
 		!ikBone.IsIK() || !bones.Contains(ikBone.Ik.BoneIndex) {
-		return nil
+		return nil, merr.NameNotFoundError
 	} else {
-		return ikBone
+		return ikBone, nil
 	}
 }
 

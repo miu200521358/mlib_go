@@ -155,7 +155,8 @@ func (vl *ViewerList) handleWindowFocus() {
 		return
 	}
 
-	for i, vw := range vl.windowList {
+	for i := len(vl.windowList) - 1; i >= 0; i-- {
+		vw := vl.windowList[i]
 		if vl.shared.IsFocusViewWindow(i) {
 			vw.Focus()
 			vl.shared.KeepFocus()

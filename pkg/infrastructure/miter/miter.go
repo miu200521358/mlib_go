@@ -61,7 +61,7 @@ func IterParallelByCount(allCount int, blockSize int, processFunc func(index int
 
 // IterParallelByList は指定された全リストに対して、引数で指定された処理を並列または直列で実行する関数です。
 func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
-	processFunc func(data T, index int) error, logFunc func(iterIndex, allCount int)) error {
+	processFunc func(index int, data T) error, logFunc func(iterIndex, allCount int)) error {
 	numCPU := runtime.NumCPU()
 
 	mproc.SetMaxProcess(true)
@@ -70,7 +70,7 @@ func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
 	if blockSize <= 1 || blockSize >= len(allData) {
 		// ブロックサイズが1以下、もしくは全件数より大きい場合は直列処理
 		for i := 0; i < len(allData); i++ {
-			if err := processFunc(allData[i], i); err != nil {
+			if err := processFunc(i, allData[i]); err != nil {
 				return err
 			}
 		}
@@ -107,7 +107,7 @@ func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
 					endIndex = len(allData)
 				}
 				for j := startIndex; j < endIndex; j++ {
-					if err := processFunc(allData[j], j); err != nil {
+					if err := processFunc(j, allData[j]); err != nil {
 						// エラー発生時にキャンセルをかける
 						cancel()
 						errorChan <- err

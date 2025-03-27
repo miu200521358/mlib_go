@@ -252,7 +252,7 @@ func (vw *ViewWindow) focusCallback(w *glfw.Window, focused bool) {
 		return
 	}
 
-	if focused {
+	if focused && !vw.list.shared.IsLinkingFocus() {
 		// ユーザー操作等でウィンドウが前面になった場合に連動フォーカスを発火
 		vw.list.shared.TriggerLinkedFocus(vw.windowIndex)
 	}

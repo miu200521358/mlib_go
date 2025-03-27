@@ -2,6 +2,7 @@ package vmd
 
 import (
 	"math"
+	"slices"
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -64,6 +65,21 @@ func (boneFrames *BoneFrames) Indexes() []int {
 func (boneFrames *BoneFrames) RegisteredIndexes() []int {
 	indexes := make([]int, 0)
 	for _, boneFrames := range boneFrames.data {
+		boneFrames.RegisteredIndexes.ForEach(func(index float32) {
+			indexes = append(indexes, int(index))
+		})
+	}
+	mmath.Unique(indexes)
+	mmath.Sort(indexes)
+	return indexes
+}
+
+func (boneFrames *BoneFrames) RegisteredIndexesByNames(names []string) []int {
+	indexes := make([]int, 0)
+	for boneName, boneFrames := range boneFrames.data {
+		if !slices.Contains(names, boneName) {
+			continue
+		}
 		boneFrames.RegisteredIndexes.ForEach(func(index float32) {
 			indexes = append(indexes, int(index))
 		})

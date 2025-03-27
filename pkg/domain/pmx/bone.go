@@ -197,13 +197,13 @@ func (bone *Bone) SetEnglishName(englishName string) {
 	bone.englishName = englishName
 }
 
-func (bone *Bone) Direction() string {
+func (bone *Bone) Direction() BoneDirection {
 	if strings.Contains(bone.name, "左") {
-		return "左"
+		return BONE_DIRECTION_LEFT
 	} else if strings.Contains(bone.name, "右") {
-		return "右"
+		return BONE_DIRECTION_RIGHT
 	}
-	return ""
+	return BONE_DIRECTION_TRUNK
 }
 
 func (bone *Bone) IsValid() bool {

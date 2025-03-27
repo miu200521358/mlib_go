@@ -560,6 +560,10 @@ func (ss *SharedState) SetLinkingFocus(val bool) {
 // 任意ビューワーでフォーカスが発生した際に呼び出す共通関数
 // viewerIndex: フォーカスが発生したビューワーのインデックス(-1: コントロールウィンドウ)
 func (ss *SharedState) TriggerLinkedFocus(viewerIndex int) {
+	if ss.IsLinkingFocus() {
+		return
+	}
+
 	// すでに連動処理中なら再発火を防止
 	if ss.linkingFocus.CompareAndSwap(false, true) {
 		// コントロールウィンドウの前面化要求はそのまま行い、
@@ -583,9 +587,9 @@ func (ss *SharedState) TriggerLinkedFocus(viewerIndex int) {
 			}
 		}
 
-		// 連動中フラグを一定時間後に解除（例: 200ms）
+		// 連動中フラグを一定時間後に解除
 		go func() {
-			time.Sleep(200 * time.Millisecond)
+			time.Sleep(300 * time.Millisecond)
 			ss.SetLinkingFocus(false)
 			// フォーカスを解除
 			ss.SetFocusedWindowHandle(0)
