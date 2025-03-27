@@ -35,7 +35,7 @@ func (b *MPushButton) SetOnClicked(onClicked func(cw *controller.ControlWindow))
 	b.onClicked = onClicked
 }
 
-func (b *MPushButton) EnabledInPlaying(playing bool) {
+func (b *MPushButton) SetEnabledInPlaying(playing bool) {
 	b.PushButton.SetEnabled(!playing)
 }
 

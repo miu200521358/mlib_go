@@ -474,11 +474,19 @@ func (fp *FilePicker) SetWindow(window *controller.ControlWindow) {
 	fp.window = window
 }
 
-func (fp *FilePicker) EnabledInPlaying(playing bool) {
+func (fp *FilePicker) SetEnabledInPlaying(playing bool) {
 	fp.pathEdit.SetEnabled(!playing)
 	fp.openPushButton.SetEnabled(!playing)
 	if fp.historyKey != "" {
 		fp.historyPushButton.SetEnabled(!playing)
+	}
+}
+
+func (fp *FilePicker) SetEnabled(enabled bool) {
+	fp.pathEdit.SetEnabled(enabled)
+	fp.openPushButton.SetEnabled(enabled)
+	if fp.historyKey != "" {
+		fp.historyPushButton.SetEnabled(enabled)
 	}
 }
 

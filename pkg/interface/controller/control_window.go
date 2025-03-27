@@ -25,9 +25,9 @@ type ControlWindow struct {
 	shared    *state.SharedState // SharedState への参照
 	appConfig *mconfig.AppConfig // アプリケーション設定
 
-	tabWidget        *walk.TabWidget    // タブウィジェット
-	consoleView      *ConsoleView       // コンソールビュー
-	enabledInPlaying func(playing bool) // 再生中に無効化するウィジェット
+	tabWidget           *walk.TabWidget    // タブウィジェット
+	consoleView         *ConsoleView       // コンソールビュー
+	setEnabledInPlaying func(playing bool) // 再生中に無効化するウィジェット
 
 	leftButtonPressed bool // 左ボタン押下フラグ
 
@@ -68,13 +68,13 @@ func NewControlWindow(
 	appConfig *mconfig.AppConfig,
 	helpMenuItems []declarative.MenuItem,
 	tabPages []declarative.TabPage,
-	enabledInPlaying func(enabled bool),
+	setEnabledInPlaying func(enabled bool),
 	width, height, positionX, positionY int,
 ) (*ControlWindow, error) {
 	cw := &ControlWindow{
-		shared:           shared,
-		appConfig:        appConfig,
-		enabledInPlaying: enabledInPlaying,
+		shared:              shared,
+		appConfig:           appConfig,
+		setEnabledInPlaying: setEnabledInPlaying,
 	}
 
 	logMenuItems := []declarative.MenuItem{
@@ -592,8 +592,8 @@ func (cw *ControlWindow) MaxFrame() float32 {
 	return cw.shared.MaxFrame()
 }
 
-func (cw *ControlWindow) EnabledInPlaying(playing bool) {
-	cw.enabledInPlaying(playing)
+func (cw *ControlWindow) SetEnabledInPlaying(enabled bool) {
+	cw.setEnabledInPlaying(enabled)
 }
 
 // ------- 以下、モデルやモーションの格納・取得メソッド -------

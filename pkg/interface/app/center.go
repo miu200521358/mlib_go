@@ -6,9 +6,11 @@ package app
 import (
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"golang.org/x/sys/windows"
 )
 
 var (
+	user32               = windows.NewLazySystemDLL("user32.dll")
 	procGetSystemMetrics = user32.NewProc("GetSystemMetrics")
 )
 

@@ -13,18 +13,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
-	"golang.org/x/sys/windows"
 )
-
-var (
-	user32          = windows.NewLazySystemDLL("user32.dll")
-	procMessageBeep = user32.NewProc("MessageBeep")
-	MB_ICONASTERISK = 0x00000040
-)
-
-func Beep() {
-	procMessageBeep.Call(uintptr(MB_ICONASTERISK))
-}
 
 func ShowErrorDialog(isSetEnv bool, err error) {
 	errMsg := err.Error()
