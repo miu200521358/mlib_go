@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"hash/fnv"
 	"math/rand"
+
+	"github.com/tiendc/go-deepcopy"
 )
 
 type PmxModel struct {
@@ -151,4 +153,10 @@ func (model *PmxModel) Setup() {
 	})
 
 	model.UpdateHash()
+}
+
+func (model *PmxModel) Copy() *PmxModel {
+	copied := new(PmxModel)
+	_ = deepcopy.Copy(copied, model)
+	return copied
 }

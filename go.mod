@@ -23,6 +23,7 @@ require (
 	github.com/gonum/internal v0.0.0-20181124074243-f884aa714029 // indirect
 	github.com/gonum/lapack v0.0.0-20181123203213-e4cdc5a0bff9 // indirect
 	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd // indirect
+	github.com/tiendc/go-deepcopy v1.5.1 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 )
 

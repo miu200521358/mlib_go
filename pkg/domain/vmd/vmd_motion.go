@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/tiendc/go-deepcopy"
 )
 
 type VmdMotion struct {
@@ -183,4 +184,10 @@ func (motion *VmdMotion) Clean() {
 	motion.LightFrames.Clean()
 	motion.ShadowFrames.Clean()
 	motion.IkFrames.Clean()
+}
+
+func (motion *VmdMotion) Copy() *VmdMotion {
+	copied := new(VmdMotion)
+	_ = deepcopy.Copy(copied, motion)
+	return copied
 }
