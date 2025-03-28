@@ -8,7 +8,7 @@ import (
 )
 
 func TestPmxJsonRepository_Save1(t *testing.T) {
-	pmxRep := NewPmxRepository()
+	pmxRep := NewPmxRepository(true)
 
 	model, err := pmxRep.Load("C:/MMD/vmd_sizing_t3/pkg/usecase/base_model/model.pmx")
 	if err != nil {
@@ -44,7 +44,7 @@ func TestPmxJsonRepository_Save1(t *testing.T) {
 }
 
 func TestPmxJsonRepository_Save2(t *testing.T) {
-	pmxRep := NewPmxRepository()
+	pmxRep := NewPmxRepository(true)
 
 	// model, err := pmxRep.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/ゲーム/ウマ娘/ヨッシー式_メジロブライト/ヨッシー式メジロブライト.pmx")
 	// model, err := pmxRep.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式/カイト.pmx")

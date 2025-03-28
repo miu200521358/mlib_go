@@ -9,7 +9,7 @@ import (
 )
 
 func TestPmxWriter_Save1(t *testing.T) {
-	r := NewPmxRepository()
+	r := NewPmxRepository(true)
 
 	data, err := r.Load("../../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
 	originalModel := data.(*pmx.PmxModel)

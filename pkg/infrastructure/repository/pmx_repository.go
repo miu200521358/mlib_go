@@ -6,14 +6,16 @@ import (
 
 type PmxRepository struct {
 	*baseRepository[*pmx.PmxModel]
+	isLog bool
 }
 
-func NewPmxRepository() *PmxRepository {
+func NewPmxRepository(isLog bool) *PmxRepository {
 	return &PmxRepository{
 		baseRepository: &baseRepository[*pmx.PmxModel]{
 			newFunc: func(path string) *pmx.PmxModel {
 				return pmx.NewPmxModel(path)
 			},
 		},
+		isLog: isLog,
 	}
 }

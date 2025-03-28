@@ -745,13 +745,13 @@ func deformIk(
 	defer func() {
 		mlog.IV("[IK計算終了][%.3f][%s]", frame, ikBone.Name())
 		if ikMotion != nil {
-			r := repository.NewVmdRepository()
+			r := repository.NewVmdRepository(true)
 			if saveErr := r.Save("", ikMotion, true); saveErr != nil {
 				mlog.E("[IK計算出力失敗][%.3f][%s] %s", frame, ikBone.Name(), saveErr)
 			}
 		}
 		if globalMotion != nil {
-			r := repository.NewVmdRepository()
+			r := repository.NewVmdRepository(true)
 			if saveErr := r.Save("", globalMotion, true); saveErr != nil {
 				mlog.E("[IK計算出力失敗][%.3f][%s] %s", frame, ikBone.Name(), saveErr)
 			}

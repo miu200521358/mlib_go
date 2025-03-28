@@ -10,7 +10,7 @@ import (
 )
 
 func TestVmdMotion_Deform_Exists(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/サンプルモーション.vmd")
 
 	if err != nil {
@@ -19,7 +19,7 @@ func TestVmdMotion_Deform_Exists(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -137,7 +137,7 @@ func TestVmdMotion_Deform_Exists(t *testing.T) {
 }
 
 func TestVmdMotion_Deform_Lerp(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/サンプルモーション.vmd")
 
 	if err != nil {
@@ -146,7 +146,7 @@ func TestVmdMotion_Deform_Lerp(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -264,7 +264,7 @@ func TestVmdMotion_Deform_Lerp(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk1_Matsu(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/サンプルモーション.vmd")
 
 	if err != nil {
@@ -273,7 +273,7 @@ func TestVmdMotion_DeformLegIk1_Matsu(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -324,7 +324,7 @@ func TestVmdMotion_DeformLegIk1_Matsu(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk2_Matsu(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/サンプルモーション.vmd")
 
 	if err != nil {
@@ -333,7 +333,7 @@ func TestVmdMotion_DeformLegIk2_Matsu(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -385,7 +385,7 @@ func TestVmdMotion_DeformLegIk2_Matsu(t *testing.T) {
 
 func TestVmdMotion_DeformLegIk3_Matsu(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/腰元.vmd")
 
 	if err != nil {
@@ -394,7 +394,7 @@ func TestVmdMotion_DeformLegIk3_Matsu(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -459,7 +459,7 @@ func TestVmdMotion_DeformLegIk3_Matsu(t *testing.T) {
 func TestVmdMotion_DeformLegIk4_Snow(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/好き雪_2794.vmd")
 
 	if err != nil {
@@ -468,7 +468,7 @@ func TestVmdMotion_DeformLegIk4_Snow(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -517,7 +517,7 @@ func TestVmdMotion_DeformLegIk4_Snow(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk5_Koshi(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/腰元.vmd")
 
 	if err != nil {
@@ -526,7 +526,7 @@ func TestVmdMotion_DeformLegIk5_Koshi(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -575,7 +575,7 @@ func TestVmdMotion_DeformLegIk5_Koshi(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk6_KoshiOff(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/腰元.vmd")
 
 	if err != nil {
@@ -584,7 +584,7 @@ func TestVmdMotion_DeformLegIk6_KoshiOff(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -611,7 +611,7 @@ func TestVmdMotion_DeformLegIk6_KoshiOff(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk6_KoshiOn(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/腰元.vmd")
 
 	if err != nil {
@@ -620,7 +620,7 @@ func TestVmdMotion_DeformLegIk6_KoshiOn(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -647,7 +647,7 @@ func TestVmdMotion_DeformLegIk6_KoshiOn(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk6_KoshiIkOn(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/腰元.vmd")
 
 	if err != nil {
@@ -656,7 +656,7 @@ func TestVmdMotion_DeformLegIk6_KoshiIkOn(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -693,7 +693,7 @@ func TestVmdMotion_DeformLegIk6_KoshiIkOn(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk6_KoshiIkOff(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/腰元.vmd")
 
 	if err != nil {
@@ -702,7 +702,7 @@ func TestVmdMotion_DeformLegIk6_KoshiIkOff(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -740,7 +740,7 @@ func TestVmdMotion_DeformLegIk6_KoshiIkOff(t *testing.T) {
 func TestVmdMotion_DeformLegIk7_Syou_ISAO(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("C:/MMD/mmd_base/tests/resources/唱(ダンスのみ)_0274F.vmd")
 
 	if err != nil {
@@ -749,7 +749,7 @@ func TestVmdMotion_DeformLegIk7_Syou_ISAO(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4_準標準.pmx")
 
 	if err != nil {
@@ -922,7 +922,7 @@ func TestVmdMotion_DeformLegIk7_Syou_ISAO(t *testing.T) {
 func TestVmdMotion_DeformLegIk7_Syou(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0278F.vmd")
 
 	if err != nil {
@@ -931,7 +931,7 @@ func TestVmdMotion_DeformLegIk7_Syou(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -981,7 +981,7 @@ func TestVmdMotion_DeformLegIk7_Syou(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk8_Syou(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
@@ -990,7 +990,7 @@ func TestVmdMotion_DeformLegIk8_Syou(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -1039,7 +1039,7 @@ func TestVmdMotion_DeformLegIk8_Syou(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou1(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
@@ -1048,7 +1048,7 @@ func TestVmdMotion_DeformLegIk10_Syou1(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -1098,7 +1098,7 @@ func TestVmdMotion_DeformLegIk10_Syou1(t *testing.T) {
 
 func TestVmdMotion_DeformLegIk10_Syou2(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
@@ -1107,7 +1107,7 @@ func TestVmdMotion_DeformLegIk10_Syou2(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -1158,7 +1158,7 @@ func TestVmdMotion_DeformLegIk10_Syou2(t *testing.T) {
 
 func TestVmdMotion_DeformLegIk10_Syou3(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
@@ -1167,7 +1167,7 @@ func TestVmdMotion_DeformLegIk10_Syou3(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -1217,7 +1217,7 @@ func TestVmdMotion_DeformLegIk10_Syou3(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou4(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
@@ -1226,7 +1226,7 @@ func TestVmdMotion_DeformLegIk10_Syou4(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -1276,7 +1276,7 @@ func TestVmdMotion_DeformLegIk10_Syou4(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou5(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
@@ -1285,7 +1285,7 @@ func TestVmdMotion_DeformLegIk10_Syou5(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -1335,7 +1335,7 @@ func TestVmdMotion_DeformLegIk10_Syou5(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou6(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
@@ -1344,7 +1344,7 @@ func TestVmdMotion_DeformLegIk10_Syou6(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -1395,7 +1395,7 @@ func TestVmdMotion_DeformLegIk10_Syou6(t *testing.T) {
 
 func TestVmdMotion_DeformLegIk11_Shining_Miku(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/シャイニングミラクル_50F.vmd")
 
 	if err != nil {
@@ -1404,7 +1404,7 @@ func TestVmdMotion_DeformLegIk11_Shining_Miku(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式初音ミク_盗賊つばき流Ｍトレースモデル配布 v1.07/Tda式初音ミク_盗賊つばき流Mトレースモデルv1.07_かかと.pmx")
 
 	if err != nil {
@@ -1485,7 +1485,7 @@ func TestVmdMotion_DeformLegIk11_Shining_Miku(t *testing.T) {
 func TestVmdMotion_DeformLegIk11_Shining_Vroid(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/シャイニングミラクル_50F.vmd")
 
 	if err != nil {
@@ -1494,7 +1494,7 @@ func TestVmdMotion_DeformLegIk11_Shining_Vroid(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -1545,7 +1545,7 @@ func TestVmdMotion_DeformLegIk11_Shining_Vroid(t *testing.T) {
 
 func TestVmdMotion_DeformLegIk12_Down_Miku(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/しゃがむ.vmd")
 
 	if err != nil {
@@ -1554,7 +1554,7 @@ func TestVmdMotion_DeformLegIk12_Down_Miku(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式初音ミク_盗賊つばき流Ｍトレースモデル配布 v1.07/Tda式初音ミク_盗賊つばき流Mトレースモデルv1.07_かかと.pmx")
 
 	if err != nil {
@@ -1609,7 +1609,7 @@ func TestVmdMotion_DeformLegIk12_Down_Miku(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk13_Lamb(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/Lamb_2689F.vmd")
 
 	if err != nil {
@@ -1618,7 +1618,7 @@ func TestVmdMotion_DeformLegIk13_Lamb(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/ゲーム/戦国BASARA/幸村 たぬき式 ver.1.24/真田幸村没第二衣装1.24軽量版.pmx")
 
 	if err != nil {
@@ -1709,7 +1709,7 @@ func TestVmdMotion_DeformLegIk13_Lamb(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk14_Ballet(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/ミク用バレリーコ_1069.vmd")
 
 	if err != nil {
@@ -1718,7 +1718,7 @@ func TestVmdMotion_DeformLegIk14_Ballet(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式/初音ミク_準標準.pmx")
 
 	if err != nil {
@@ -1775,7 +1775,7 @@ func TestVmdMotion_DeformLegIk14_Ballet(t *testing.T) {
 func TestVmdMotion_DeformLegIk15_Bottom(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/●ボトム_0-300.vmd")
 
 	if err != nil {
@@ -1784,7 +1784,7 @@ func TestVmdMotion_DeformLegIk15_Bottom(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式初音ミク_盗賊つばき流Ｍトレースモデル配布 v1.07/Tda式初音ミク_盗賊つばき流Mトレースモデルv1.07_かかと.pmx")
 
 	if err != nil {
@@ -1839,7 +1839,7 @@ func TestVmdMotion_DeformLegIk15_Bottom(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk16_Lamb(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/Lamb_2689F.vmd")
 
 	if err != nil {
@@ -1848,7 +1848,7 @@ func TestVmdMotion_DeformLegIk16_Lamb(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/ゲーム/戦国BASARA/幸村 たぬき式 ver.1.24/真田幸村没第二衣装1.24軽量版.pmx")
 
 	if err != nil {
@@ -1900,7 +1900,7 @@ func TestVmdMotion_DeformLegIk16_Lamb(t *testing.T) {
 func TestVmdMotion_DeformLegIk17_Snow(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/好き雪_1075.vmd")
 
 	if err != nil {
@@ -1909,7 +1909,7 @@ func TestVmdMotion_DeformLegIk17_Snow(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Lat式ミクVer2.31/Lat式ミクVer2.31_White_準標準.pmx")
 
 	if err != nil {
@@ -1959,7 +1959,7 @@ func TestVmdMotion_DeformLegIk17_Snow(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk18_Syou(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
@@ -1968,7 +1968,7 @@ func TestVmdMotion_DeformLegIk18_Syou(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -2018,7 +2018,7 @@ func TestVmdMotion_DeformLegIk18_Syou(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk19_Wa(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/129cm_001_10F.vmd")
 
 	if err != nil {
@@ -2027,7 +2027,7 @@ func TestVmdMotion_DeformLegIk19_Wa(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_bone-structure.pmx")
 
 	if err != nil {
@@ -2070,7 +2070,7 @@ func TestVmdMotion_DeformLegIk19_Wa(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk20_Syou(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
 
 	if err != nil {
@@ -2079,7 +2079,7 @@ func TestVmdMotion_DeformLegIk20_Syou(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル.pmx")
 
 	if err != nil {
@@ -2128,7 +2128,7 @@ func TestVmdMotion_DeformLegIk20_Syou(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk21_FK(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/足FK.vmd")
 
 	if err != nil {
@@ -2137,7 +2137,7 @@ func TestVmdMotion_DeformLegIk21_FK(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル_ひざ制限なし.pmx")
 
 	if err != nil {
@@ -2162,7 +2162,7 @@ func TestVmdMotion_DeformLegIk21_FK(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk22_Bake(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/足FK焼き込み.vmd")
 
 	if err != nil {
@@ -2171,7 +2171,7 @@ func TestVmdMotion_DeformLegIk22_Bake(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル_ひざ制限なし.pmx")
 
 	if err != nil {
@@ -2196,7 +2196,7 @@ func TestVmdMotion_DeformLegIk22_Bake(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk22_NoLimit(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/足FK.vmd")
 
 	if err != nil {
@@ -2205,7 +2205,7 @@ func TestVmdMotion_DeformLegIk22_NoLimit(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/サンプルモデル_ひざ制限なし.pmx")
 
 	if err != nil {
@@ -2230,7 +2230,7 @@ func TestVmdMotion_DeformLegIk22_NoLimit(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk23_Addiction(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/[A]ddiction_Lat式_0171F.vmd")
 
 	if err != nil {
@@ -2239,7 +2239,7 @@ func TestVmdMotion_DeformLegIk23_Addiction(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式ミクワンピース/Tda式ミクワンピースRSP.pmx")
 
 	if err != nil {
@@ -2297,7 +2297,7 @@ func TestVmdMotion_DeformLegIk23_Addiction(t *testing.T) {
 func TestVmdMotion_DeformLegIk24_Positive(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/ポジティブパレード_0526.vmd")
 
 	if err != nil {
@@ -2306,7 +2306,7 @@ func TestVmdMotion_DeformLegIk24_Positive(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
 
 	if err != nil {
@@ -2432,7 +2432,7 @@ func TestVmdMotion_DeformLegIk24_Positive(t *testing.T) {
 }
 
 func TestVmdMotion_DeformArmIk(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/サンプルモーション.vmd")
 
 	if err != nil {
@@ -2441,7 +2441,7 @@ func TestVmdMotion_DeformArmIk(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/ボーンツリーテストモデル.pmx")
 
 	if err != nil {
@@ -2556,7 +2556,7 @@ func TestVmdMotion_DeformArmIk(t *testing.T) {
 }
 
 func TestVmdMotion_DeformArmIk3(t *testing.T) {
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("C:/MMD/mlib_go/test_resources/Addiction_0F.vmd")
 
 	if err != nil {
@@ -2565,7 +2565,7 @@ func TestVmdMotion_DeformArmIk3(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Sour式初音ミクVer.1.02/Black_全表示.pmx")
 
 	if err != nil {
@@ -2616,7 +2616,7 @@ func TestVmdMotion_DeformArmIk3(t *testing.T) {
 func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/青江バレリーコ_1543F.vmd")
 
 	if err != nil {
@@ -2625,7 +2625,7 @@ func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/019_にっかり青江/にっかり青江 帽子屋式 ver2.1/帽子屋式にっかり青江（戦装束）_表示枠.pmx")
 
 	if err != nil {
@@ -2701,7 +2701,7 @@ func TestVmdMotion_DeformLegIk25_Ballet(t *testing.T) {
 func TestVmdMotion_DeformLegIk26_Far(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/足IK乖離.vmd")
 
 	if err != nil {
@@ -2710,7 +2710,7 @@ func TestVmdMotion_DeformLegIk26_Far(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式ミク準標準見せパン/初音ミクVer2 準標準 見せパン 3.pmx")
 
 	if err != nil {
@@ -2761,7 +2761,7 @@ func TestVmdMotion_DeformLegIk26_Far(t *testing.T) {
 func TestVmdMotion_DeformLegIk27_Addiction_Shoes(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/[A]ddiction_和洋_1074-1078F.vmd")
 
 	if err != nil {
@@ -2770,7 +2770,7 @@ func TestVmdMotion_DeformLegIk27_Addiction_Shoes(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
 
 	if err != nil {
@@ -3007,7 +3007,7 @@ func TestVmdMotion_DeformLegIk27_Addiction_Shoes(t *testing.T) {
 func TestVmdMotion_DeformLegIk28_Gimme_Mitsu(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
 
 	if err != nil {
@@ -3016,7 +3016,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Mitsu(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/オリジナル/折岸みつ つみだんご/折岸みつ.pmx")
 
 	if err != nil {
@@ -3068,7 +3068,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Mitsu(t *testing.T) {
 func TestVmdMotion_DeformLegIk28_Gimme_Mitsu_loop3(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
 
 	if err != nil {
@@ -3077,7 +3077,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Mitsu_loop3(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/オリジナル/折岸みつ つみだんご/折岸みつ_つま先IKループ3.pmx")
 
 	if err != nil {
@@ -3129,7 +3129,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Mitsu_loop3(t *testing.T) {
 func TestVmdMotion_DeformLegIk28_Gimme_Mitsu_toe_order(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
 
 	if err != nil {
@@ -3138,7 +3138,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Mitsu_toe_order(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/オリジナル/折岸みつ つみだんご/折岸みつ_つま先計算順前.pmx")
 
 	if err != nil {
@@ -3190,7 +3190,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Mitsu_toe_order(t *testing.T) {
 func TestVmdMotion_DeformLegIk28_Gimme_Miku(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
 
 	if err != nil {
@@ -3199,7 +3199,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Miku(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式ミク準標準見せパン/初音ミクVer2 準標準 見せパン 3.pmx")
 
 	if err != nil {
@@ -3257,7 +3257,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Miku(t *testing.T) {
 func TestVmdMotion_DeformLegIk28_Gimme_Miku_toe_order(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
 
 	if err != nil {
@@ -3266,7 +3266,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Miku_toe_order(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式ミク準標準見せパン/初音ミクVer2 準標準 見せパン 3_つま先計算順後.pmx")
 
 	if err != nil {
@@ -3324,7 +3324,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Miku_toe_order(t *testing.T) {
 func TestVmdMotion_DeformLegIk28_Gimme_Tda(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
 
 	if err != nil {
@@ -3333,7 +3333,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Tda(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Tda式初音ミク_盗賊つばき流Ｍトレースモデル配布 v1.07/Tda式初音ミク_盗賊つばき流Mトレースモデルv1.07_かかと.pmx")
 
 	if err != nil {
@@ -3386,7 +3386,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Tda(t *testing.T) {
 func TestVmdMotion_DeformLegIk28_Gimme_Wa(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
 
 	if err != nil {
@@ -3395,7 +3395,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Wa(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
 
 	if err != nil {
@@ -3447,7 +3447,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Wa(t *testing.T) {
 func TestVmdMotion_DeformLegIk28_Gimme_Rin(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/ぎみぎみ_498F.vmd")
 
 	if err != nil {
@@ -3456,7 +3456,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Rin(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/鏡音リン/つみ式鏡音リン/つみ式鏡音リン.pmx")
 
 	if err != nil {
@@ -3508,7 +3508,7 @@ func TestVmdMotion_DeformLegIk28_Gimme_Rin(t *testing.T) {
 func TestVmdMotion_DeformIk28_Simple(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/IKの挙動を見たい_020.vmd")
 
 	if err != nil {
@@ -3517,7 +3517,7 @@ func TestVmdMotion_DeformIk28_Simple(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/IKの挙動を見たい.pmx")
 
 	if err != nil {
@@ -3568,7 +3568,7 @@ func TestVmdMotion_DeformIk28_Simple(t *testing.T) {
 func TestVmdMotion_DeformIk29_Simple(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/IKの挙動を見たい2_040.vmd")
 
 	if err != nil {
@@ -3577,7 +3577,7 @@ func TestVmdMotion_DeformIk29_Simple(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("../../../test_resources/IKの挙動を見たい2.pmx")
 
 	if err != nil {
@@ -3633,7 +3633,7 @@ func TestVmdMotion_DeformIk29_Simple(t *testing.T) {
 func TestVmdMotion_DeformArmIk2(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("C:/MMD/mmd_base/tests/resources/唱(ダンスのみ)_0274F.vmd")
 
 	if err != nil {
@@ -3642,7 +3642,7 @@ func TestVmdMotion_DeformArmIk2(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4_準標準.pmx")
 
 	if err != nil {
@@ -4017,7 +4017,7 @@ func TestVmdMotion_DeformArmIk2(t *testing.T) {
 func TestVmdMotion_DeformLegIk25_Addiction_Wa_Right(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/[A]ddiction_和洋_0126F.vmd")
 
 	if err != nil {
@@ -4026,7 +4026,7 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Right(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
 
 	if err != nil {
@@ -4149,7 +4149,7 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Right(t *testing.T) {
 func TestVmdMotion_DeformIk_Down(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/センター下げる.vmd")
 
 	if err != nil {
@@ -4158,7 +4158,7 @@ func TestVmdMotion_DeformIk_Down(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式/MEIKO準標準_400.pmx")
 
 	if err != nil {
@@ -4172,7 +4172,7 @@ func TestVmdMotion_DeformIk_Down(t *testing.T) {
 func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/nac_dmf_601.vmd")
 
 	if err != nil {
@@ -4181,7 +4181,7 @@ func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4.pmx")
 
 	if err != nil {
@@ -4545,7 +4545,7 @@ func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 func TestVmdMotion_DeformLegIk25_Addiction_Wa_Left(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/[A]ddiction_和洋_0126F.vmd")
 
 	if err != nil {
@@ -4554,7 +4554,7 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Left(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
 
 	if err != nil {
@@ -4679,7 +4679,7 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Left(t *testing.T) {
 func TestVmdMotion_DeformArmIk_Mahoujin_02(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/arm_ik_mahoujin_006F.vmd")
 
 	if err != nil {
@@ -4688,7 +4688,7 @@ func TestVmdMotion_DeformArmIk_Mahoujin_02(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/107_髭切/髭切mkmk009c 刀剣乱舞/髭切mkmk009c/髭切上着無mkmk009b_腕ＩＫ2.pmx")
 
 	if err != nil {
@@ -4731,7 +4731,7 @@ func TestVmdMotion_DeformArmIk_Mahoujin_02(t *testing.T) {
 func TestVmdMotion_DeformArmIk_Mahoujin_03(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/arm_ik_mahoujin_060F.vmd")
 
 	if err != nil {
@@ -4740,7 +4740,7 @@ func TestVmdMotion_DeformArmIk_Mahoujin_03(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/107_髭切/髭切mkmk009c 刀剣乱舞/髭切mkmk009c/髭切上着無mkmk009b_腕ＩＫ2.pmx")
 
 	if err != nil {
@@ -4783,7 +4783,7 @@ func TestVmdMotion_DeformArmIk_Mahoujin_03(t *testing.T) {
 func TestVmdMotion_DeformArmIk_Choco_01(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/ビタチョコ_0676F.vmd")
 
 	if err != nil {
@@ -4792,7 +4792,7 @@ func TestVmdMotion_DeformArmIk_Choco_01(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/ゲーム/Fate/眞白式ロマニ・アーキマン ver.1.01/眞白式ロマニ・アーキマン_ビタチョコ.pmx")
 
 	if err != nil {
@@ -4863,7 +4863,7 @@ func TestVmdMotion_DeformArmIk_Choco_01(t *testing.T) {
 func TestVmdMotion_AdjustBones(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/調整用ボーン移動.vmd")
 
 	if err != nil {
@@ -4872,7 +4872,7 @@ func TestVmdMotion_AdjustBones(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_あにまさ式ミク準標準見せパン/初音ミクVer2 準標準 見せパン 3_調整用ボーン追加.pmx")
 
 	if err != nil {
@@ -4908,7 +4908,7 @@ func TestVmdMotion_AdjustBones(t *testing.T) {
 func TestVmdMotion_Neck(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/くるりん_150F.vmd")
 
 	if err != nil {
@@ -4917,7 +4917,7 @@ func TestVmdMotion_Neck(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4.pmx")
 
 	if err != nil {

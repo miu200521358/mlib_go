@@ -34,8 +34,10 @@ func (rep *VmdRepository) Load(path string) (core.IHashModel, error) {
 	mproc.SetMaxProcess(true)
 	defer mproc.SetMaxProcess(false)
 
-	mlog.IL("%s", mi18n.T("読み込み開始", map[string]interface{}{"Type": "Vmd", "Path": path}))
-	defer mlog.I("%s", mi18n.T("読み込み終了", map[string]interface{}{"Type": "Vmd"}))
+	if rep.isLog {
+		mlog.IL("%s", mi18n.T("読み込み開始", map[string]interface{}{"Type": "Vmd", "Path": path}))
+		defer mlog.I("%s", mi18n.T("読み込み終了", map[string]interface{}{"Type": "Vmd"}))
+	}
 
 	// モデルを新規作成
 	motion := rep.newFunc(path)
@@ -179,7 +181,9 @@ func (rep *VmdRepository) loadModel(motion *vmd.VmdMotion) error {
 }
 
 func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
-	defer mlog.I("%s", mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("ボーン")}))
+	if rep.isLog {
+		defer mlog.I("%s", mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("ボーン")}))
+	}
 
 	totalCount, err := rep.unpackUInt()
 	if err != nil {
@@ -189,7 +193,7 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 
 	bfValues := make([]float64, 7)
 	for i := range int(totalCount) {
-		if i%10000 == 0 && i > 0 {
+		if i%10000 == 0 && i > 0 && rep.isLog {
 			mlog.I("%s", mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("ボーン"), "Index": i, "Total": totalCount}))
 		}
 
@@ -239,7 +243,9 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 }
 
 func (rep *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
-	defer mlog.I("%s", mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("モーフ")}))
+	if rep.isLog {
+		defer mlog.I("%s", mi18n.T("読み込み途中完了", map[string]interface{}{"Type": mi18n.T("モーフ")}))
+	}
 
 	totalCount, err := rep.unpackUInt()
 	if err != nil {
@@ -248,7 +254,7 @@ func (rep *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
 	}
 
 	for i := range int(totalCount) {
-		if i%10000 == 0 && i > 0 {
+		if i%10000 == 0 && i > 0 && rep.isLog {
 			mlog.I("%s", mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("モーフ"), "Index": i, "Total": totalCount}))
 		}
 

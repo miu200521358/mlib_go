@@ -9,7 +9,7 @@ import (
 )
 
 func TestVmdMotionReader_LoadName(t *testing.T) {
-	r := NewVmdRepository()
+	r := NewVmdRepository(true)
 
 	// Test case 1: Successful read
 	path := "../../../test_resources/サンプルモーション_0046.vmd"
@@ -22,7 +22,7 @@ func TestVmdMotionReader_LoadName(t *testing.T) {
 }
 
 func TestVmdMotionReader_Load(t *testing.T) {
-	r := NewVmdRepository()
+	r := NewVmdRepository(true)
 
 	// Test case 2: File not found
 	invalidPath := "../../../test_resources/nonexistent.vmd"

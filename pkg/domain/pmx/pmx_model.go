@@ -155,8 +155,8 @@ func (model *PmxModel) Setup() {
 	model.UpdateHash()
 }
 
-func (model *PmxModel) Copy() *PmxModel {
+func (model *PmxModel) Copy() (*PmxModel, error) {
 	copied := new(PmxModel)
-	_ = deepcopy.Copy(copied, model)
-	return copied
+	err := deepcopy.Copy(copied, model)
+	return copied, err
 }

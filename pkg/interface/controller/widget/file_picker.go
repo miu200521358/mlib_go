@@ -50,7 +50,7 @@ func NewPmxLoadFilePicker(
 			{extension: "*.pmx", description: "Pmx Files (*.pmx)"},
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
-		repository.NewPmxRepository(),
+		repository.NewPmxRepository(true),
 	)
 }
 
@@ -126,7 +126,7 @@ func NewVmdVpdLoadFilePicker(
 			{extension: "*.vmd;*.vpd", description: "Vmd/Vpd Files (*.vmd;*.vpd)"},
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
-		repository.NewVmdVpdRepository(),
+		repository.NewVmdVpdRepository(true),
 	)
 }
 
@@ -144,7 +144,7 @@ func NewPmxSaveFilePicker(
 			{extension: "*.pmx", description: "Pmx Files (*.pmx)"},
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
-		repository.NewPmxRepository(),
+		repository.NewPmxRepository(true),
 	)
 }
 
@@ -180,7 +180,7 @@ func NewVmdSaveFilePicker(
 			{extension: "*.vmd", description: "Vmd Files (*.vmd)"},
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
-		repository.NewVmdRepository(),
+		repository.NewVmdRepository(true),
 	)
 }
 

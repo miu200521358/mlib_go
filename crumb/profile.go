@@ -22,7 +22,7 @@ func main() {
 
 	// --------------------------------------------
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Motion/ダンス_1人/[A]ddiction_モーション hino/[A]ddiction_Lat式.vmd")
 	// motionData, err := vr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Motion/ダンス_1人/CH4NGE mobiusP/CH4NGE.vmd")
 
@@ -32,7 +32,7 @@ func main() {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	// modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/mlibkiller/mlibkiller.pmx")
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4チャイナ/Miku_V4_チャイナ.pmx")
 

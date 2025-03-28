@@ -17,7 +17,7 @@ type PmxXRepository struct {
 
 func NewPmxXRepository() *PmxXRepository {
 	rep := new(PmxXRepository)
-	rep.pmxRepository = NewPmxRepository()
+	rep.pmxRepository = NewPmxRepository(true)
 	rep.xRepository = NewXRepository()
 	return rep
 }

@@ -315,7 +315,7 @@ func (bone *Bone) IsEffectorParentDeform() bool {
 }
 
 func (bone *Bone) Config() *BoneConfig {
-	for boneConfigName, boneConfig := range getStandardBoneConfigs() {
+	for boneConfigName, boneConfig := range GetStandardBoneConfigs() {
 		if boneConfigName.String() == bone.Name() ||
 			boneConfigName.Right() == bone.Name() ||
 			boneConfigName.Left() == bone.Name() {
@@ -327,7 +327,7 @@ func (bone *Bone) Config() *BoneConfig {
 
 // 定義上の親ボーン名
 func (bone *Bone) ConfigParentBoneNames() []string {
-	for boneConfigName, boneConfig := range getStandardBoneConfigs() {
+	for boneConfigName, boneConfig := range GetStandardBoneConfigs() {
 		if boneConfigName.String() == bone.Name() ||
 			boneConfigName.Right() == bone.Name() ||
 			boneConfigName.Left() == bone.Name() {
@@ -350,7 +350,7 @@ func (bone *Bone) ConfigParentBoneNames() []string {
 
 // 定義上の子ボーン名
 func (bone *Bone) ConfigChildBoneNames() []string {
-	for boneConfigName, boneConfig := range getStandardBoneConfigs() {
+	for boneConfigName, boneConfig := range GetStandardBoneConfigs() {
 		if boneConfigName.String() == bone.Name() ||
 			boneConfigName.Right() == bone.Name() ||
 			boneConfigName.Left() == bone.Name() {

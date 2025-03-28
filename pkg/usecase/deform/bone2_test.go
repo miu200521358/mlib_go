@@ -12,7 +12,7 @@ import (
 func TestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/[A]ddiction_和洋_1037F.vmd")
 
 	if err != nil {
@@ -21,7 +21,7 @@ func TestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/wa_129cm 20231028/wa_129cm_20240406.pmx")
 
 	if err != nil {
@@ -259,7 +259,7 @@ func TestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
 func TestVmdMotion_DeformArmIk_Mahoujin_01(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/arm_ik_mahoujin_001F.vmd")
 
 	if err != nil {
@@ -268,7 +268,7 @@ func TestVmdMotion_DeformArmIk_Mahoujin_01(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/107_髭切/髭切mkmk009c 刀剣乱舞/髭切mkmk009c/髭切上着無mkmk009b_腕ＩＫ2.pmx")
 
 	if err != nil {
@@ -311,7 +311,7 @@ func TestVmdMotion_DeformArmIk_Mahoujin_01(t *testing.T) {
 func TestVmdMotion_DeformArmIk_Mahoujin_04(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/arm_ik_mahoujin_090F.vmd")
 
 	if err != nil {
@@ -320,7 +320,7 @@ func TestVmdMotion_DeformArmIk_Mahoujin_04(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/107_髭切/髭切mkmk009c 刀剣乱舞/髭切mkmk009c/髭切上着無mkmk009b_腕ＩＫ2.pmx")
 
 	if err != nil {
@@ -363,7 +363,7 @@ func TestVmdMotion_DeformArmIk_Mahoujin_04(t *testing.T) {
 func TestVmdMotion_DeformLegIk_Up(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	vr := repository.NewVmdRepository()
+	vr := repository.NewVmdRepository(true)
 	motionData, err := vr.Load("../../../test_resources/左足あげ.vmd")
 
 	if err != nil {
@@ -372,7 +372,7 @@ func TestVmdMotion_DeformLegIk_Up(t *testing.T) {
 
 	motion := motionData.(*vmd.VmdMotion)
 
-	pr := repository.NewPmxRepository()
+	pr := repository.NewPmxRepository(true)
 	modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Costume/モノクロストリート風衣装 夜/ストリート風白_3.pmx")
 	// modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Costume/モノクロストリート風衣装 夜/ストリート風白.pmx")
 	// modelData, err := pr.Load("D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/紲星☆あかり20180430 お宮/お宮式紲星☆あかりv1.00.pmx")

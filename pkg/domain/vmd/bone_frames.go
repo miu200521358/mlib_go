@@ -26,7 +26,7 @@ func (boneFrames *BoneFrames) Contains(boneName string) bool {
 	return false
 }
 
-func (boneFrames *BoneFrames) Append(boneNameFrames *BoneNameFrames) {
+func (boneFrames *BoneFrames) Update(boneNameFrames *BoneNameFrames) {
 	boneFrames.data[boneNameFrames.Name] = boneNameFrames
 }
 
@@ -36,7 +36,7 @@ func (boneFrames *BoneFrames) Delete(boneName string) {
 
 func (boneFrames *BoneFrames) Get(boneName string) *BoneNameFrames {
 	if !boneFrames.Contains(boneName) {
-		boneFrames.Append(NewBoneNameFrames(boneName))
+		boneFrames.Update(NewBoneNameFrames(boneName))
 	}
 
 	return boneFrames.data[boneName]
@@ -134,7 +134,7 @@ func (boneFrames *BoneFrames) Reduce() *BoneFrames {
 		wg.Add(1)
 		go func(bnf *BoneNameFrames) {
 			defer wg.Done()
-			reduced.Append(bnf.Reduce())
+			reduced.Update(bnf.Reduce())
 		}(boneNameFrames)
 	}
 	wg.Wait()

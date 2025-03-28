@@ -19,7 +19,7 @@ func TestVmdWriter_Write1(t *testing.T) {
 	bf.Rotation = mmath.NewMQuaternionFromDegrees(10, 20, 30)
 	motion.AppendRegisteredBoneFrame("センター", bf)
 
-	r := NewVmdRepository()
+	r := NewVmdRepository(true)
 
 	// Create a VmdWriter instance
 	err := r.Save("", motion, false)
@@ -56,7 +56,7 @@ func TestVmdWriter_Write2(t *testing.T) {
 	// Test case 1: Successful read
 	readPath := "../../../test_resources/サンプルモーション.vmd"
 
-	r := NewVmdRepository()
+	r := NewVmdRepository(true)
 	data, err := r.Load(readPath)
 
 	if err != nil {
@@ -89,7 +89,7 @@ func TestVmdWriter_Write3(t *testing.T) {
 	// Test case 1: Successful read
 	readPath := "../../../test_resources/ドクヘビ_178cmカメラ.vmd"
 
-	r := NewVmdRepository()
+	r := NewVmdRepository(true)
 	model, err := r.Load(readPath)
 
 	if err != nil {
@@ -121,7 +121,7 @@ func TestVmdWriter_Write4(t *testing.T) {
 	// Test case 1: Successful read
 	readPath := "../../../test_resources/モーフ_まばたき.vmd"
 
-	r := NewVmdRepository()
+	r := NewVmdRepository(true)
 	model, err := r.Load(readPath)
 
 	if err != nil {

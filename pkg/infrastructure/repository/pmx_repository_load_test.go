@@ -9,7 +9,7 @@ import (
 )
 
 func TestPmxReader_LoadName(t *testing.T) {
-	r := NewPmxRepository()
+	r := NewPmxRepository(true)
 
 	modelName := r.LoadName("../../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
 
@@ -21,7 +21,7 @@ func TestPmxReader_LoadName(t *testing.T) {
 }
 
 func TestPmxReader_LoadName_2_1(t *testing.T) {
-	r := NewPmxRepository()
+	r := NewPmxRepository(true)
 
 	modelName := r.LoadName("../../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
 
@@ -33,7 +33,7 @@ func TestPmxReader_LoadName_2_1(t *testing.T) {
 }
 
 func TestPmxReader_LoadName_NotExist(t *testing.T) {
-	r := NewPmxRepository()
+	r := NewPmxRepository(true)
 
 	modelName := r.LoadName("../../../test_resources/サンプルモデル_Nothing.pmx")
 
@@ -44,7 +44,7 @@ func TestPmxReader_LoadName_NotExist(t *testing.T) {
 }
 
 func TestPmxReader_Load(t *testing.T) {
-	r := NewPmxRepository()
+	r := NewPmxRepository(true)
 
 	data, err := r.Load("../../../test_resources/サンプルモデル_PMX読み取り確認用.pmx")
 	model := data.(*pmx.PmxModel)
@@ -819,7 +819,7 @@ func TestPmxReader_Load(t *testing.T) {
 }
 
 func TestPmxReader_Load_2_1(t *testing.T) {
-	r := NewPmxRepository()
+	r := NewPmxRepository(true)
 
 	data, err := r.Load("../../../test_resources/サンプルモデル_PMX2.1_UTF-8.pmx")
 	model := data.(*pmx.PmxModel)

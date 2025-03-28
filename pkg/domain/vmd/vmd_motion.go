@@ -186,8 +186,8 @@ func (motion *VmdMotion) Clean() {
 	motion.IkFrames.Clean()
 }
 
-func (motion *VmdMotion) Copy() *VmdMotion {
+func (motion *VmdMotion) Copy() (*VmdMotion, error) {
 	copied := new(VmdMotion)
-	_ = deepcopy.Copy(copied, motion)
-	return copied
+	err := deepcopy.Copy(copied, motion)
+	return copied, err
 }

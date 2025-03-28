@@ -36,7 +36,7 @@ func TestXRepository_Load1(t *testing.T) {
 	}
 	model := data.(*pmx.PmxModel)
 
-	pmxRep := NewPmxRepository()
+	pmxRep := NewPmxRepository(true)
 	pmxRep.Save("../../../test_resources/test.pmx", model, false)
 
 	pmxPath := strings.Replace(path, ".x", ".pmx", -1)
@@ -114,7 +114,7 @@ func TestXRepository_Load2(t *testing.T) {
 	}
 	model := data.(*pmx.PmxModel)
 
-	pmxRep := NewPmxRepository()
+	pmxRep := NewPmxRepository(true)
 	pmxRep.Save("../../../test_resources/test.pmx", model, false)
 
 	pmxPath := strings.Replace(path, ".x", ".pmx", -1)
@@ -206,7 +206,7 @@ func TestXRepository_Load4(t *testing.T) {
 	}
 	model := data.(*pmx.PmxModel)
 
-	pmxRep := NewPmxRepository()
+	pmxRep := NewPmxRepository(true)
 	pmxRep.Save("../../../test_resources/test.pmx", model, false)
 
 	pmxPath := strings.Replace(path, ".x", ".pmx", -1)
@@ -283,7 +283,7 @@ func TestXRepository_Load5(t *testing.T) {
 	}
 	model := data.(*pmx.PmxModel)
 
-	pmxRep := NewPmxRepository()
+	pmxRep := NewPmxRepository(true)
 	pmxRep.Save("../../../test_resources/test.pmx", model, false)
 
 	pmxPath := strings.Replace(path, ".x", ".pmx", -1)
@@ -361,7 +361,7 @@ func TestXRepository_Load6(t *testing.T) {
 	}
 	model := data.(*pmx.PmxModel)
 
-	pmxRep := NewPmxRepository()
+	pmxRep := NewPmxRepository(true)
 	pmxRep.Save("../../../test_resources/test.pmx", model, false)
 
 	pmxPath := strings.Replace(path, ".x", ".pmx", -1)
@@ -440,7 +440,7 @@ func TestXRepository_Load7(t *testing.T) {
 	}
 	model := data.(*pmx.PmxModel)
 
-	pmxRep := NewPmxRepository()
+	pmxRep := NewPmxRepository(true)
 	pmxRep.Save("../../../test_resources/test.pmx", model, false)
 
 	pmxPath := strings.Replace(path, ".x", ".pmx", -1)
@@ -541,7 +541,7 @@ func TestXRepository_Load8(t *testing.T) {
 	}
 	model := data.(*pmx.PmxModel)
 
-	pmxRep := NewPmxRepository()
+	pmxRep := NewPmxRepository(true)
 	pmxRep.Save("../../../test_resources/test.pmx", model, false)
 
 	pmxPath := strings.Replace(path, ".x", ".pmx", -1)

@@ -17,7 +17,7 @@ type PmxPmxJsonRepository struct {
 
 func NewPmxPmxJsonRepository() *PmxPmxJsonRepository {
 	rep := new(PmxPmxJsonRepository)
-	rep.pmxRepository = NewPmxRepository()
+	rep.pmxRepository = NewPmxRepository(true)
 	rep.pmxJsonRepository = NewPmxJsonRepository()
 	return rep
 }

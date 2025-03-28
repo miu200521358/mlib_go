@@ -15,9 +15,9 @@ type VmdVpdRepository struct {
 	vpdRepository *VpdRepository
 }
 
-func NewVmdVpdRepository() *VmdVpdRepository {
+func NewVmdVpdRepository(isLog bool) *VmdVpdRepository {
 	rep := new(VmdVpdRepository)
-	rep.vmdRepository = NewVmdRepository()
+	rep.vmdRepository = NewVmdRepository(isLog)
 	rep.vpdRepository = NewVpdRepository()
 	return rep
 }

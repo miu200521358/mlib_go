@@ -231,7 +231,7 @@ func (s StandardBoneName) Left() string {
 var configOnce sync.Once
 var standardBoneConfigs map[StandardBoneName]*BoneConfig
 
-func getStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
+func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 	configOnce.Do(func() {
 		standardBoneConfigs = map[StandardBoneName]*BoneConfig{
 			ROOT: {
@@ -254,21 +254,21 @@ func getStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      DISPLAY_SLOT_CENTER,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
-			WAIST: {
+			TRUNK_ROOT: {
 				ParentBoneNames:  []StandardBoneName{GROOVE, CENTER},
-				ChildBoneNames:   []StandardBoneName{TRUNK_ROOT, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
+				ChildBoneNames:   []StandardBoneName{WAIST, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
+				Categories:       []BoneCategory{CATEGORY_ROOT},
+				BoundingBoxShape: SHAPE_NONE,
+				IsStandard:       false},
+			WAIST: {
+				ParentBoneNames:  []StandardBoneName{TRUNK_ROOT, GROOVE, CENTER},
+				ChildBoneNames:   []StandardBoneName{UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      DISPLAY_SLOT_TRUNK,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
-			TRUNK_ROOT: {
-				ParentBoneNames:  []StandardBoneName{WAIST, GROOVE, CENTER},
-				ChildBoneNames:   []StandardBoneName{UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
-				Categories:       []BoneCategory{CATEGORY_ROOT},
-				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
 			LOWER_ROOT: {
-				ParentBoneNames:          []StandardBoneName{TRUNK_ROOT, WAIST, GROOVE, CENTER},
+				ParentBoneNames:          []StandardBoneName{WAIST, TRUNK_ROOT, GROOVE, CENTER},
 				ChildBoneNames:           []StandardBoneName{LOWER},
 				Categories:               []BoneCategory{CATEGORY_TRUNK, CATEGORY_LOWER},
 				BoundingBoxShape:         SHAPE_NONE,
@@ -276,14 +276,14 @@ func getStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				CenterOfGravityBoneNames: []StandardBoneName{LEG_CENTER},
 				IsStandard:               false},
 			LOWER: {
-				ParentBoneNames:  []StandardBoneName{LOWER_ROOT, TRUNK_ROOT, WAIST, GROOVE, CENTER},
+				ParentBoneNames:  []StandardBoneName{LOWER_ROOT, WAIST, TRUNK_ROOT, GROOVE, CENTER},
 				ChildBoneNames:   []StandardBoneName{LEG_CENTER, LEG_ROOT, WAIST_CANCEL, LEG},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_LOWER},
 				DisplaySlot:      DISPLAY_SLOT_TRUNK,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			UPPER_ROOT: {
-				ParentBoneNames:          []StandardBoneName{TRUNK_ROOT, WAIST, GROOVE, CENTER},
+				ParentBoneNames:          []StandardBoneName{WAIST, TRUNK_ROOT, GROOVE, CENTER},
 				ChildBoneNames:           []StandardBoneName{UPPER},
 				Categories:               []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER},
 				BoundingBoxShape:         SHAPE_NONE,
@@ -291,7 +291,7 @@ func getStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				CenterOfGravityBoneNames: []StandardBoneName{NECK_ROOT},
 				IsStandard:               false},
 			UPPER: {
-				ParentBoneNames:  []StandardBoneName{UPPER_ROOT, TRUNK_ROOT, WAIST, GROOVE, CENTER},
+				ParentBoneNames:  []StandardBoneName{UPPER_ROOT, WAIST, TRUNK_ROOT, GROOVE, CENTER},
 				ChildBoneNames:   []StandardBoneName{UPPER2},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER},
 				DisplaySlot:      DISPLAY_SLOT_TRUNK,
@@ -347,8 +347,8 @@ func getStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				BoundingBoxShape: SHAPE_SPHERE,
 				IsStandard:       true},
 			SHOULDER_ROOT: {
-				ParentBoneNames:  []StandardBoneName{NECK_ROOT},
-				ChildBoneNames:   []StandardBoneName{SHOULDER},
+				ParentBoneNames:  []StandardBoneName{NECK_ROOT, UPPER2, UPPER},
+				ChildBoneNames:   []StandardBoneName{SHOULDER_P, SHOULDER},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_SHOULDER},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
@@ -629,7 +629,7 @@ func getStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				IsStandard:       true},
 			HEEL: {
 				ParentBoneNames:  []StandardBoneName{ANKLE},
-				ChildBoneNames:   []StandardBoneName{TOE_T},
+				ChildBoneNames:   []StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE, CATEGORY_SOLE},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
@@ -678,7 +678,7 @@ func getStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				IsStandard:       true},
 			HEEL_D: {
 				ParentBoneNames:  []StandardBoneName{ANKLE_D},
-				ChildBoneNames:   []StandardBoneName{TOE_T_D},
+				ChildBoneNames:   []StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_SOLE},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
