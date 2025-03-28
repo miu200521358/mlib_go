@@ -18,7 +18,7 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 )
 
-// ControlWindow は操作画面(コントローラウィンドウ)を管理する
+// ControlWindow はコントローラーウィンドウ(コントローラウィンドウ)を管理する
 type ControlWindow struct {
 	*walk.MainWindow
 
@@ -81,7 +81,8 @@ func NewControlWindow(
 		declarative.Action{
 			Text: mi18n.T("&使い方"),
 			OnTriggered: func() {
-				mlog.ILT(mi18n.T("メイン画面の使い方"), "%s", mi18n.T("メイン画面の使い方メッセージ"))
+				mlog.ILT(mi18n.T("コントローラーウィンドウの使い方"),
+					"%s", mi18n.T("コントローラーウィンドウの使い方メッセージ"))
 			},
 		},
 		declarative.Separator{},
@@ -324,7 +325,7 @@ func NewControlWindow(
 				},
 			},
 			declarative.Menu{
-				Text:  mi18n.T("&操作画面"),
+				Text:  mi18n.T("&コントローラーウィンドウ"),
 				Items: logMenuItems,
 			},
 			declarative.Menu{

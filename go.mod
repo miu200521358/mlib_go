@@ -11,6 +11,7 @@ require (
 	github.com/miu200521358/walk v0.0.4
 	github.com/miu200521358/win v0.0.1
 	github.com/pkg/profile v1.7.0
+	github.com/tiendc/go-deepcopy v1.5.1
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	golang.org/x/image v0.21.0
 	golang.org/x/text v0.19.0
@@ -23,7 +24,6 @@ require (
 	github.com/gonum/internal v0.0.0-20181124074243-f884aa714029 // indirect
 	github.com/gonum/lapack v0.0.0-20181123203213-e4cdc5a0bff9 // indirect
 	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd // indirect
-	github.com/tiendc/go-deepcopy v1.5.1 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 )
 

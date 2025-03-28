@@ -48,7 +48,7 @@ func (ac *AppConfig) IsEnvDev() bool {
 		// ローカル起動時もDevとみなす
 		return true
 	}
-	return ac.Env == "dev"
+	return ac.Env == "dev" || ac.Env == "debug" || ac.Env == ""
 }
 
 func (ac *AppConfig) IsEnvStg() bool {

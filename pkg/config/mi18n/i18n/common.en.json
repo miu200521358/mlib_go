@@ -188,8 +188,8 @@
         "translation": "Viewer"
     },
     {
-        "id": "&操作画面",
-        "translation": "&Message"
+        "id": "&コントローラーウィンドウ",
+        "translation": "&Controller Window"
     },
     {
         "id": "&デバッグログ表示",
@@ -232,12 +232,12 @@
         "translation": "・The 'Play' button becomes clickable when a PMX model is set\n・Setting a VMD motion is optional\n・Clicking the 'Play' button starts the rendering. The button label changes to 'Pause'\n・Clicking the 'Pause' button pauses the rendering. The button label changes to 'Play'\n・While paused, you can change the keyframe position with the keyframe number field or slider\n・The keyframe number field and slider can adjust the number up and down with the middle mouse wheel"
     },
     {
-        "id": "メイン画面の使い方",
-        "translation": "How to use the main screen"
+        "id": "コントローラーウィンドウの使い方",
+        "translation": "How to use the Controller Window"
     },
     {
-        "id": "メイン画面の使い方メッセージ",
-        "translation": "・Clicking above the name of each form part outputs how to use that part in the message field"
+        "id": "コントローラーウィンドウの使い方メッセージ",
+        "translation": "・Click on the name of each form part to display how to use that part in the message area."
     },
     {
         "id": "予期せぬエラーヘッダー",
