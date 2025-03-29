@@ -67,8 +67,8 @@ func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
 	mproc.SetMaxProcess(true)
 	defer mproc.SetMaxProcess(false)
 
-	if blockSize <= 1 || blockSize >= len(allData) {
-		// ブロックサイズが1以下、もしくは全件数より大きい場合は直列処理
+	if blockSize >= len(allData) {
+		// ブロックサイズが全件数より大きい場合は直列処理
 		for i := 0; i < len(allData); i++ {
 			if err := processFunc(i, allData[i]); err != nil {
 				return err

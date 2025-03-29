@@ -182,8 +182,16 @@ func Min[T Number](arr []T) T {
 
 // IntRanges 0からmax-1までの整数スライスを返します
 func IntRanges(max int) []int {
+	return IntRangesByStep(0, max, 1)
+}
+
+// IntRanges 0からmax-1までの整数スライスを返します
+func IntRangesByStep(min, max, step int) []int {
 	ranges := make([]int, max)
-	for i := 0; i < max; i++ {
+	for i := min; i < max; i += step {
+		if i >= max {
+			break
+		}
 		ranges[i] = i
 	}
 	return ranges
