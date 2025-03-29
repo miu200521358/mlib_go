@@ -23,6 +23,8 @@ type VmdMotion struct {
 	IkFrames     *IkFrames
 }
 
+var InitialMotion = NewVmdMotion("")
+
 func NewVmdMotion(path string) *VmdMotion {
 	return &VmdMotion{
 		name:         "",
