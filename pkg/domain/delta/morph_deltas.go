@@ -1,15 +1,17 @@
 package delta
 
-import "github.com/miu200521358/mlib_go/pkg/domain/pmx"
+import (
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+)
 
 type VertexMorphDeltas struct {
-	data     map[int]*VertexMorphDelta
+	data     []*VertexMorphDelta
 	vertices *pmx.Vertices
 }
 
 func NewVertexMorphDeltas(vertices *pmx.Vertices) *VertexMorphDeltas {
 	return &VertexMorphDeltas{
-		data:     make(map[int]*VertexMorphDelta),
+		data:     make([]*VertexMorphDelta, vertices.Length()),
 		vertices: vertices,
 	}
 }
@@ -19,10 +21,11 @@ func (vertexMorphDeltas *VertexMorphDeltas) Length() int {
 }
 
 func (vertexMorphDeltas *VertexMorphDeltas) Get(index int) *VertexMorphDelta {
-	if v, ok := vertexMorphDeltas.data[index]; ok {
-		return v
+	if index < 0 || index >= len(vertexMorphDeltas.data) {
+		return nil
 	}
-	return nil
+
+	return vertexMorphDeltas.data[index]
 }
 
 func (vertexMorphDeltas *VertexMorphDeltas) Update(v *VertexMorphDelta) {
@@ -49,13 +52,13 @@ func NewWireVertexMorphDeltas(vertices *pmx.Vertices) *WireVertexMorphDeltas {
 // ----------------------------
 
 type BoneMorphDeltas struct {
-	data  map[int]*BoneMorphDelta
+	data  []*BoneMorphDelta
 	bones *pmx.Bones
 }
 
 func NewBoneMorphDeltas(bones *pmx.Bones) *BoneMorphDeltas {
 	return &BoneMorphDeltas{
-		data:  make(map[int]*BoneMorphDelta),
+		data:  make([]*BoneMorphDelta, bones.Length()),
 		bones: bones,
 	}
 }
@@ -65,10 +68,10 @@ func (boneMorphDeltas *BoneMorphDeltas) Length() int {
 }
 
 func (boneMorphDeltas *BoneMorphDeltas) Get(boneIndex int) *BoneMorphDelta {
-	if v, ok := boneMorphDeltas.data[boneIndex]; ok {
-		return v
+	if boneIndex < 0 || boneIndex >= len(boneMorphDeltas.data) {
+		return nil
 	}
-	return nil
+	return boneMorphDeltas.data[boneIndex]
 }
 
 func (boneMorphDeltas *BoneMorphDeltas) Update(b *BoneMorphDelta) {
@@ -85,12 +88,12 @@ func (bd *BoneMorphDeltas) ForEach(callback func(index int, value *BoneMorphDelt
 // ----------------------------
 
 type MaterialMorphDeltas struct {
-	data      map[int]*MaterialMorphDelta
+	data      []*MaterialMorphDelta
 	materials *pmx.Materials
 }
 
 func NewMaterialMorphDeltas(materials *pmx.Materials) *MaterialMorphDeltas {
-	deltas := make(map[int]*MaterialMorphDelta)
+	deltas := make([]*MaterialMorphDelta, materials.Length())
 	materials.ForEach(func(i int, m *pmx.Material) {
 		deltas[i] = NewMaterialMorphDelta(m)
 	})
@@ -106,10 +109,11 @@ func (materialMorphDeltas *MaterialMorphDeltas) Length() int {
 }
 
 func (materialMorphDeltas *MaterialMorphDeltas) Get(index int) *MaterialMorphDelta {
-	if v, ok := materialMorphDeltas.data[index]; ok {
-		return v
+	if index < 0 || index >= len(materialMorphDeltas.data) {
+		return nil
 	}
-	return nil
+
+	return materialMorphDeltas.data[index]
 }
 
 func (materialMorphDeltas *MaterialMorphDeltas) Update(m *MaterialMorphDelta) {

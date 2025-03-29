@@ -81,6 +81,55 @@ func DeformMorph(
 	return mds
 }
 
+func DeformBoneMorph(
+	model *pmx.PmxModel,
+	mfs *vmd.MorphFrames,
+	frame float32,
+	morphNames []string,
+) *delta.MorphDeltas {
+	if morphNames == nil {
+		// モーフの指定がなければ全モーフチェック
+		morphNames = make([]string, 0)
+		model.Morphs.ForEach(func(index int, morph *pmx.Morph) {
+			morphNames = append(morphNames, morph.Name())
+		})
+	}
+
+	mds := delta.NewMorphDeltas(pmx.NewVertices(0), pmx.NewMaterials(0), model.Bones)
+	for _, morphName := range morphNames {
+		if !mfs.Contains(morphName) || !model.Morphs.ContainsByName(morphName) {
+			continue
+		}
+
+		mf := mfs.Get(morphName).Get(frame)
+		if mf == nil {
+			continue
+		}
+
+		morph, _ := model.Morphs.GetByName(morphName)
+		switch morph.MorphType {
+		case pmx.MORPH_TYPE_BONE:
+			mds.Bones = deformBone(morphName, model, mds.Bones, mf.Ratio)
+		case pmx.MORPH_TYPE_GROUP:
+			// グループモーフは細分化
+			for _, offset := range morph.Offsets {
+				groupOffset := offset.(*pmx.GroupMorphOffset)
+				groupMorph, err := model.Morphs.Get(groupOffset.MorphIndex)
+				if err != nil {
+					continue
+				}
+				switch groupMorph.MorphType {
+				case pmx.MORPH_TYPE_BONE:
+					mds.Bones = deformBone(
+						groupMorph.Name(), model, mds.Bones, mf.Ratio*groupOffset.MorphFactor)
+				}
+			}
+		}
+	}
+
+	return mds
+}
+
 func deformVertex(
 	morphName string,
 	model *pmx.PmxModel,

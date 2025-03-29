@@ -793,6 +793,21 @@ MlibSample 1.0.0_beta_136
 - 文字列のコピペなどでもモデルの読み込みを行うよう修正
 - FPS制限の選択肢が無制限になっていて、かつそのフラグ値が過去の「0」であった場合、30fpsで制限しなおすよう修正
 
+MlibSample 1.0.0_beta_137
+- Windows Presentation Foundation の色定義追加
+- 同名材質の場合に名前先勝ちでうまく読み込めてない無かったのを修正
+- ボーンの登録インデックス取得機能の追加
+- 準標準＋処理用システムボーンの追加処理追加(サイジング用)
+- deepcopy 追加（github.com/tiendc/go-deepcopy）
+- Copyメソッドにエラーハンドリングを追加
+- リポジトリの初期化時にログオプションを有効化
+- GetIkTarget：取得対象を間違えていたのを修正
+- RegisteredIndexesByNamesメソッドで unique 結果を受け取ってなかったのを修正
+- オーバーレイ時に自動で合わせない方法を追加
+- IntRanges関数をステップを指定できるIntRangesByStep関数を追加
+- サイジング用にボーンモーフのみのデフォームを行う deform.DeformBoneMorph 関数を追加
+- モーフデルタのmapを撲滅
+
 TODO
 ・物理後ボーンの挙動が変
 ・キーフレを動かすと一瞬暴れる
