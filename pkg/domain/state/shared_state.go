@@ -70,6 +70,7 @@ const (
 	FlagShowWire                             // ワイヤーフレームデバッグ表示
 	FlagShowOverrideUpper                    // オーバーライドデバッグ(上半身)表示
 	FlagShowOverrideLower                    // オーバーライドデバッグ(下半身)表示
+	FlagShowOverrideNone                     // オーバーライドデバッグ(カメラ合わせなし)表示
 	FlagShowSelectedVertex                   // 選択頂点デバッグ表示
 	FlagShowBoneAll                          // 全ボーンデバッグ表示
 	FlagShowBoneIk                           // IKボーンデバッグ表示
@@ -265,7 +266,7 @@ func (ss *SharedState) SetShowWire(show bool) {
 }
 
 func (ss *SharedState) IsShowOverride() bool {
-	return ss.IsShowOverrideUpper() || ss.IsShowOverrideLower()
+	return ss.IsShowOverrideUpper() || ss.IsShowOverrideLower() || ss.IsShowOverrideNone()
 }
 
 func (ss *SharedState) IsShowOverrideUpper() bool {
@@ -282,6 +283,14 @@ func (ss *SharedState) IsShowOverrideLower() bool {
 
 func (ss *SharedState) SetShowOverrideLower(show bool) {
 	ss.UpdateFlags(map[uint32]bool{FlagShowOverrideLower: show})
+}
+
+func (ss *SharedState) IsShowOverrideNone() bool {
+	return ss.isBitSet(FlagShowOverrideNone)
+}
+
+func (ss *SharedState) SetShowOverrideNone(show bool) {
+	ss.UpdateFlags(map[uint32]bool{FlagShowOverrideNone: show})
 }
 
 func (ss *SharedState) IsShowSelectedVertex() bool {

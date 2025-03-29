@@ -39,6 +39,7 @@ type ControlWindow struct {
 	showWireAction              *walk.Action // ワイヤーフレームデバッグ表示
 	showOverrideUpperAction     *walk.Action // オーバーライドデバッグ(上半身)表示
 	showOverrideLowerAction     *walk.Action // オーバーライドデバッグ(下半身)表示
+	showOverrideNoneAction      *walk.Action // オーバーライドデバッグ(下半身)表示
 	showSelectedVertexAction    *walk.Action // 選択頂点デバッグ表示
 	showBoneAllAction           *walk.Action // 全ボーンデバッグ表示
 	showBoneIkAction            *walk.Action // IKボーンデバッグ表示
@@ -233,6 +234,12 @@ func NewControlWindow(
 								Checkable:   true,
 								OnTriggered: cw.TriggerShowOverrideLower,
 								AssignTo:    &cw.showOverrideLowerAction,
+							},
+							declarative.Action{
+								Text:        mi18n.T("&カメラ合わせなし"),
+								Checkable:   true,
+								OnTriggered: cw.TriggerShowOverrideNone,
+								AssignTo:    &cw.showOverrideNoneAction,
 							},
 						},
 					},
@@ -680,26 +687,36 @@ func (cw *ControlWindow) TriggerShowWire() {
 func (cw *ControlWindow) TriggerShowOverrideUpper() {
 	if cw.showOverrideUpperAction.Checked() {
 		cw.showOverrideLowerAction.SetChecked(false)
+		cw.showOverrideNoneAction.SetChecked(false)
 		cw.cameraSyncAction.SetChecked(false)
 	}
-	cw.shared.UpdateFlags(
-		map[uint32]bool{
-			state.FlagShowOverrideUpper: cw.showOverrideUpperAction.Checked(),
-			state.FlagShowOverrideLower: cw.showOverrideLowerAction.Checked(),
-			state.FlagCameraSync:        cw.cameraSyncAction.Checked(),
-		},
-	)
+	cw.updateShowOverride()
 }
 
 func (cw *ControlWindow) TriggerShowOverrideLower() {
 	if cw.showOverrideLowerAction.Checked() {
 		cw.showOverrideUpperAction.SetChecked(false)
+		cw.showOverrideNoneAction.SetChecked(false)
 		cw.cameraSyncAction.SetChecked(false)
 	}
+	cw.updateShowOverride()
+}
+
+func (cw *ControlWindow) TriggerShowOverrideNone() {
+	if cw.showOverrideNoneAction.Checked() {
+		cw.showOverrideUpperAction.SetChecked(false)
+		cw.showOverrideLowerAction.SetChecked(false)
+		cw.cameraSyncAction.SetChecked(false)
+	}
+	cw.updateShowOverride()
+}
+
+func (cw *ControlWindow) updateShowOverride() {
 	cw.shared.UpdateFlags(
 		map[uint32]bool{
 			state.FlagShowOverrideUpper: cw.showOverrideUpperAction.Checked(),
 			state.FlagShowOverrideLower: cw.showOverrideLowerAction.Checked(),
+			state.FlagShowOverrideNone:  cw.showOverrideNoneAction.Checked(),
 			state.FlagCameraSync:        cw.cameraSyncAction.Checked(),
 		},
 	)

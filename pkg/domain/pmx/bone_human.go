@@ -1410,8 +1410,56 @@ func (bones *Bones) findParentIndexByConfig(boneName StandardBoneName, direction
 	return -1
 }
 
-// InsertShortageBones 不足ボーン作成
-func (bones *Bones) InsertShortageBones() error {
+// InsertShortageOverrideBones 不足ボーン作成
+func (bones *Bones) InsertShortageOverrideBones() error {
+
+	// 体幹系
+	for _, funcs := range [][]func() (*Bone, error){
+		{bones.GetTrunkRoot, bones.CreateTrunkRoot},
+		{bones.GetLegCenter, bones.CreateLegCenter},
+		{bones.GetNeckRoot, bones.CreateNeckRoot},
+	} {
+		getFunc := funcs[0]
+		createFunc := funcs[1]
+
+		if bone, err := getFunc(); err != nil && err == merr.NameNotFoundError && bone == nil {
+			if bone, err := createFunc(); err == nil && bone != nil {
+				if err := bones.Insert(bone); err != nil {
+					return err
+				} else {
+					// 追加したボーンの親ボーンを、同じく親ボーンに設定しているボーンの親ボーンを追加ボーンに置き換える
+					bones.ForEach(func(i int, b *Bone) {
+						if b.ParentIndex == bone.ParentIndex && b.Index() != bone.Index() &&
+							((strings.Contains(bone.Name(), "上") && !strings.Contains(b.Name(), "下") &&
+								!strings.Contains(b.Name(), "左") && !strings.Contains(b.Name(), "右")) ||
+								(strings.Contains(bone.Name(), "下") && !strings.Contains(b.Name(), "上") &&
+									!strings.Contains(b.Name(), "左") && !strings.Contains(b.Name(), "右"))) {
+							b.ParentIndex = bone.Index()
+						}
+					})
+					// セットアップしなおし
+					bones.Setup()
+				}
+			} else {
+				return err
+			}
+		} else if err != nil {
+			return err
+		} else {
+			switch bone.Name() {
+			case NECK.String():
+				if neckRoot, err := bones.GetNeckRoot(); err == nil {
+					bone.ParentIndex = neckRoot.Index()
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+// InsertShortageConfigBones 不足ボーン作成
+func (bones *Bones) InsertShortageConfigBones() error {
 
 	// 体幹系
 	for _, funcs := range [][]func() (*Bone, error){

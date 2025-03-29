@@ -238,6 +238,9 @@ func (vw *ViewWindow) adjustCameraForOverride() {
 	} else if vw.list.shared.IsShowOverrideLower() {
 		// 下半身合わせ
 		targetBoneNames = append(targetBoneNames, pmx.LEG_CENTER.String(), pmx.LEG.Left(), pmx.LEG.Right(), pmx.ANKLE.Left(), pmx.ANKLE.Right())
+	} else {
+		// 合わせない場合、そのまま返す
+		return
 	}
 
 	// 合わせる対象のボーンが1つでもなかった場合は処理しない
