@@ -166,7 +166,11 @@ func (bones *Bones) GetIkTarget(ikBoneName string) (*Bone, error) {
 		!ikBone.IsIK() || !bones.Contains(ikBone.Ik.BoneIndex) {
 		return nil, merr.NameNotFoundError
 	} else {
-		return ikBone, nil
+		if ikTargetBone, err := bones.Get(ikBone.Ik.BoneIndex); err != nil {
+			return nil, merr.NameNotFoundError
+		} else {
+			return ikTargetBone, nil
+		}
 	}
 }
 

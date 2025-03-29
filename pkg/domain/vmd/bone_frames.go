@@ -84,7 +84,7 @@ func (boneFrames *BoneFrames) RegisteredIndexesByNames(names []string) []int {
 			indexes = append(indexes, int(index))
 		})
 	}
-	mmath.Unique(indexes)
+	indexes = mmath.Unique(indexes)
 	mmath.Sort(indexes)
 	return indexes
 }
