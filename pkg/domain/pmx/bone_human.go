@@ -1543,7 +1543,6 @@ func (bones *Bones) InsertShortageConfigBones() error {
 			{bones.GetToeCD, bones.CreateToeCD},
 			{bones.GetHeel, bones.CreateHeel},
 			{bones.GetHeelD, bones.CreateHeelD},
-			{bones.GetLegIkParent, bones.CreateLegIkParent},
 		} {
 			getFunc := funcs[0]
 			createFunc := funcs[1]
