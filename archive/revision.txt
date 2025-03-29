@@ -805,6 +805,8 @@ MlibSample 1.0.0_beta_137
 - RegisteredIndexesByNamesメソッドで unique 結果を受け取ってなかったのを修正
 - オーバーレイ時に自動で合わせない方法を追加
 - IntRanges関数をステップを指定できるIntRangesByStep関数を追加
+
+MlibSample 1.0.0_beta_139
 - サイジング用にボーンモーフのみのデフォームを行う deform.DeformBoneMorph 関数を追加
 - モーフデルタのmapを撲滅
 
