@@ -30,6 +30,14 @@ func NewBones(capacity int) *Bones {
 	}
 }
 
+// 指定された範囲のボーンの範囲のINDEXを取得
+func (bones *Bones) Range(fromBoneIndex, toBoneIndex int) []int {
+	fromIndex := slices.Index(bones.LayerSortedIndexes, fromBoneIndex)
+	toIndex := slices.Index(bones.LayerSortedIndexes, toBoneIndex)
+
+	return bones.LayerSortedIndexes[fromIndex : toIndex+1]
+}
+
 func (bones *Bones) getInsertAfterIndex(bone *Bone) int {
 	parentLayerIndex := slices.Index(bones.LayerSortedIndexes, bone.ParentIndex)
 	ikBoneIndex := -1
