@@ -10,16 +10,17 @@ import (
 	"os/exec"
 	"runtime/debug"
 
+	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 )
 
-func ShowErrorDialog(isSetEnv bool, err error) {
+func ShowErrorDialog(appConfig *mconfig.AppConfig, err error) {
 	errMsg := err.Error()
 	stackTrace := debug.Stack()
 
-	if !isSetEnv {
+	if !appConfig.IsSetEnv() {
 		panic(err)
 	}
 
@@ -32,7 +33,7 @@ func ShowErrorDialog(isSetEnv bool, err error) {
 		Layout:  declarative.VBox{},
 		Children: []declarative.Widget{
 			declarative.TextLabel{
-				Text: mi18n.T("予期せぬエラーヘッダー"),
+				Text: mi18n.T("予期せぬエラーヘッダー", map[string]any{"AppName": appConfig.Name, "AppVersion": appConfig.Version}),
 			},
 			declarative.TextEdit{
 				Text: string("```") +
@@ -69,7 +70,7 @@ func ShowErrorDialog(isSetEnv bool, err error) {
 }
 
 // SafeExecute は関数でpanicが発生した場合にダイアログを表示する
-func SafeExecute(isSetEnv bool, f func()) {
+func SafeExecute(appConfig *mconfig.AppConfig, f func()) {
 	defer func() {
 		if r := recover(); r != nil {
 			stackTrace := debug.Stack()
@@ -80,7 +81,7 @@ func SafeExecute(isSetEnv bool, f func()) {
 				errMsg = fmt.Sprintf("%v", r)
 			}
 			err := fmt.Errorf("panic: %s\n%s", errMsg, stackTrace)
-			ShowErrorDialog(isSetEnv, err)
+			ShowErrorDialog(appConfig, err)
 		}
 	}()
 
