@@ -18,7 +18,7 @@ func ExistsFile(path string) (bool, error) {
 	if os.IsNotExist(err) {
 		return false, err
 	}
-	return !info.IsDir(), nil
+	return info != nil && !info.IsDir(), nil
 }
 
 // テキストファイルの全文を読み込んでひとつの文字列で返す

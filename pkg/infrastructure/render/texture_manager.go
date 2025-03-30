@@ -231,7 +231,11 @@ func (tm *TextureManager) loadTextureGl(
 	valid, err := mfile.ExistsFile(texPath)
 	if !valid || err != nil {
 		texGl.Initialized = false
-		return texGl, fmt.Errorf("not found texture file: %s, error: %s", texPath, err.Error())
+		errMsg := ""
+		if err != nil {
+			errMsg = err.Error()
+		}
+		return texGl, fmt.Errorf("not found texture file: %s, error: %s", texPath, errMsg)
 	}
 
 	// 画像を読み込み
