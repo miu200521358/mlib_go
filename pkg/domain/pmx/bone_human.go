@@ -1072,13 +1072,13 @@ func (bones *Bones) CreateToeP(direction BoneDirection) (*Bone, error) {
 		switch direction {
 		case BONE_DIRECTION_LEFT:
 			bone.Position = &mmath.MVec3{
-				X: toeT.Position.X - 0.3,
+				X: toeT.Position.X - 0.8,
 				Y: toeT.Position.Y,
 				Z: toeT.Position.Z,
 			}
 		case BONE_DIRECTION_RIGHT:
 			bone.Position = &mmath.MVec3{
-				X: toeT.Position.X + 0.3,
+				X: toeT.Position.X + 0.8,
 				Y: toeT.Position.Y,
 				Z: toeT.Position.Z,
 			}
@@ -1104,13 +1104,13 @@ func (bones *Bones) CreateToeC(direction BoneDirection) (*Bone, error) {
 		switch direction {
 		case BONE_DIRECTION_LEFT:
 			bone.Position = &mmath.MVec3{
-				X: toeT.Position.X + 0.3,
+				X: toeT.Position.X + 0.8,
 				Y: toeT.Position.Y,
 				Z: toeT.Position.Z,
 			}
 		case BONE_DIRECTION_RIGHT:
 			bone.Position = &mmath.MVec3{
-				X: toeT.Position.X - 0.3,
+				X: toeT.Position.X - 0.8,
 				Y: toeT.Position.Y,
 				Z: toeT.Position.Z,
 			}
