@@ -120,6 +120,12 @@ func (mp *MotionPlayer) SetEnabledInPlaying(playing bool) {
 	mp.playButton.SetEnabled(true)
 }
 
+func (mp *MotionPlayer) SetEnabled(enabled bool) {
+	mp.frameEdit.SetEnabled(enabled)
+	mp.frameSlider.SetEnabled(enabled)
+	mp.playButton.SetEnabled(enabled)
+}
+
 func (mp *MotionPlayer) SetPlaying(playing bool) {
 	if playing {
 		mp.playButton.SetText(mi18n.T("一時停止"))
