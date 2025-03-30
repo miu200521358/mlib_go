@@ -27,6 +27,7 @@ type ControlWindow struct {
 
 	tabWidget           *walk.TabWidget    // タブウィジェット
 	consoleView         *ConsoleView       // コンソールビュー
+	progressBar         *MProgressBar      // プログレスバー
 	setEnabledInPlaying func(playing bool) // 再生中に無効化するウィジェット
 
 	leftButtonPressed bool // 左ボタン押下フラグ
@@ -483,6 +484,12 @@ func NewControlWindow(
 	// ログ出力先をコンソールビューに設定
 	log.SetOutput(cw.consoleView)
 
+	var err error
+	cw.progressBar, err = NewMProgressBar(cw)
+	if err != nil {
+		return nil, err
+	}
+
 	cw.SetPosition(positionX, positionY)
 	cw.shared.SetInitializedControlWindow(true)
 	// コントローラウィンドウハンドルを保持
@@ -494,6 +501,10 @@ func NewControlWindow(
 	cw.checkFocus()
 
 	return cw, nil
+}
+
+func (cw *ControlWindow) ProgressBar() *MProgressBar {
+	return cw.progressBar
 }
 
 func (cw *ControlWindow) checkFocus() {
@@ -822,4 +833,8 @@ func (cw *ControlWindow) TriggerCameraSync() {
 			state.FlagCameraSync:        cw.cameraSyncAction.Checked(),
 		},
 	)
+}
+
+func (cw *ControlWindow) AppConfig() *mconfig.AppConfig {
+	return cw.appConfig
 }
