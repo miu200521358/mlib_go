@@ -1463,8 +1463,8 @@ func (bones *Bones) InsertShortageOverrideBones() error {
 	return nil
 }
 
-// InsertShortageConfigBones 不足ボーン作成
-func (bones *Bones) InsertShortageConfigBones() error {
+// InsertShortageSizingConfigBones サイジング用不足ボーン作成
+func (bones *Bones) InsertShortageSizingConfigBones() error {
 
 	// 体幹系
 	for _, funcs := range [][]func() (*Bone, error){
