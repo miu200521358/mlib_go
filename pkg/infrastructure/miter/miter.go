@@ -69,7 +69,7 @@ func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
 
 	if blockSize >= len(allData) {
 		// ブロックサイズが全件数より大きい場合は直列処理
-		for i := 0; i < len(allData); i++ {
+		for i := range allData {
 			if err := processFunc(i, allData[i]); err != nil {
 				return err
 			}
