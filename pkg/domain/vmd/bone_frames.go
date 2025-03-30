@@ -16,11 +16,13 @@ type BoneFrames struct {
 func NewBoneFrames() *BoneFrames {
 	return &BoneFrames{
 		data: make(map[string]*BoneNameFrames, 0),
-		lock: sync.RWMutex{},
 	}
 }
 
 func (boneFrames *BoneFrames) Contains(boneName string) bool {
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
+
 	if _, ok := boneFrames.data[boneName]; ok {
 		return true
 	}
