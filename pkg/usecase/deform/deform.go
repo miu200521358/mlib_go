@@ -79,6 +79,7 @@ func DeformIk(
 	ikBone *pmx.Bone,
 	ikGlobalPosition *mmath.MVec3,
 	boneNames []string,
+	isForceDebug bool,
 ) *delta.VmdDeltas {
 	if boneNames == nil {
 		boneNames = make([]string, 0)
@@ -92,7 +93,7 @@ func DeformIk(
 
 	deformBoneIndexes, deltas := newVmdDeltas(model, motion, deltas, frame, boneNames, false)
 
-	deformIk(model, motion, deltas, frame, false, ikBone, ikGlobalPosition, deformBoneIndexes, 0)
+	deformIk(model, motion, deltas, frame, false, ikBone, ikGlobalPosition, deformBoneIndexes, 0, isForceDebug)
 
 	updateGlobalMatrix(deltas.Bones, deformBoneIndexes)
 

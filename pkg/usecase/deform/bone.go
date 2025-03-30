@@ -590,6 +590,7 @@ func fillBoneDeform(
 				ikGlobalPosition,
 				ikTargetDeformBoneIndexes,
 				i, // deformIndex
+				false,
 			)
 		}
 	}
@@ -694,6 +695,7 @@ func deformIk(
 	ikGlobalPosition *mmath.MVec3,
 	ikTargetDeformBoneIndexes []int,
 	deformIndex int,
+	isForceDebug bool,
 ) *delta.BoneDeltas {
 
 	// IKリンクが無ければスルー
@@ -702,7 +704,7 @@ func deformIk(
 	}
 
 	// デバッグ関連設定
-	isDebug := mlog.IsIkVerbose()
+	isDebug := mlog.IsIkVerbose() || isForceDebug
 	var prefixPath string
 	var ikFile *os.File
 	var ikMotion, globalMotion *vmd.VmdMotion
