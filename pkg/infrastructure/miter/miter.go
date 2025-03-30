@@ -139,7 +139,7 @@ func GetBlockSize(totalTasks int) (blockSize int, blockCount int) {
 	blockCount = runtime.NumCPU()
 
 	// ブロックサイズを切り上げで計算
-	blockSize = (totalTasks + blockCount - 1) / blockCount
+	blockSize = max(1, (totalTasks+blockCount-1)/blockCount)
 
 	return blockSize, blockCount
 }
