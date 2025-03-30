@@ -241,7 +241,7 @@
     },
     {
         "id": "予期せぬエラーヘッダー",
-        "translation": "The app will close due to an unexpected error.\nPlease contact the community if this happens again."
+        "translation": "An unexpected error has occurred. The app will now close.\nIf the issue persists, please contact us through the community.\n    App Name: {{.AppName}}, App Version: {{.AppVersion}}"
     },
     {
         "id": "コミュニティ報告",
@@ -530,6 +530,10 @@
     {
         "id": "&下半身合わせ",
         "translation": "&Lower Body Alignment"
+    },
+    {
+        "id": "&カメラ合わせなし",
+        "translation": "&No Camera Alignment"
     },
     {
         "id": "&ツールについて",
