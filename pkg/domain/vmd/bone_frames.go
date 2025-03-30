@@ -10,11 +10,13 @@ import (
 
 type BoneFrames struct {
 	data map[string]*BoneNameFrames
+	lock sync.RWMutex
 }
 
 func NewBoneFrames() *BoneFrames {
 	return &BoneFrames{
 		data: make(map[string]*BoneNameFrames, 0),
+		lock: sync.RWMutex{},
 	}
 }
 
@@ -27,6 +29,9 @@ func (boneFrames *BoneFrames) Contains(boneName string) bool {
 }
 
 func (boneFrames *BoneFrames) Update(boneNameFrames *BoneNameFrames) {
+	boneFrames.lock.Lock()
+	defer boneFrames.lock.Unlock()
+
 	boneFrames.data[boneNameFrames.Name] = boneNameFrames
 }
 
