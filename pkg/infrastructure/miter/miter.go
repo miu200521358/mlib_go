@@ -10,55 +10,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mproc"
 )
 
-// IterParallelByCount は指定された全件数に対して、引数で指定された処理を並列または直列で実行する関数です。
-func IterParallelByCount(allCount int, blockSize int, processFunc func(index int)) error {
-	if blockSize <= 1 || blockSize >= allCount {
-		// ブロックサイズが1以下、もしくは全件数より大きい場合は直列処理
-		for i := 0; i < allCount; i++ {
-			processFunc(i)
-		}
-	} else {
-		numCPU := runtime.NumCPU()
-		errorChan := make(chan error, numCPU)
-
-		// ブロックサイズが全件数より小さい場合は並列処理
-		var wg sync.WaitGroup
-		for startIndex := 0; startIndex < allCount; startIndex += blockSize {
-			wg.Add(1)
-			go func(startIndex int) {
-				defer func() {
-					if err := GetError(); err != nil {
-						errorChan <- err
-					}
-					wg.Done()
-				}()
-
-				endIndex := startIndex + blockSize
-				if endIndex > allCount {
-					endIndex = allCount
-				}
-				for j := startIndex; j < endIndex; j++ {
-					processFunc(j)
-				}
-			}(startIndex)
-		}
-
-		go func() {
-			wg.Wait()
-			close(errorChan)
-		}()
-
-		// エラーを処理
-		for err := range errorChan {
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
 // IterParallelByList は指定された全リストに対して、引数で指定された処理を並列または直列で実行する関数です。
 func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
 	processFunc func(index int, data T) error, logFunc func(iterIndex, allCount int)) error {
@@ -69,49 +20,84 @@ func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
 
 	if blockSize >= len(allData) {
 		// ブロックサイズが全件数より大きい場合は直列処理
-		for i := range allData {
-			if err := processFunc(i, allData[i]); err != nil {
-				return err
+		// パニックをキャッチするためにdeferとrecoverを使用
+		var err error
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					stackTrace := debug.Stack()
+					errMsg := fmt.Sprintf("%v", r)
+					if e, ok := r.(error); ok {
+						errMsg = e.Error()
+					}
+					err = fmt.Errorf("パニックが発生しました: %s\n%s", errMsg, stackTrace)
+				}
+			}()
+
+			for i := range allData {
+				if processErr := processFunc(i, allData[i]); processErr != nil {
+					err = processErr
+					return
+				}
 			}
+		}()
+
+		if err != nil {
+			return err
 		}
 	} else {
-		errorChan := make(chan error, numCPU)
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel() // 最終的なクリーンアップ
-
 		// ブロックサイズが全件数より小さい場合は並列処理
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		errChan := make(chan error, numCPU)
 		var wg sync.WaitGroup
 		var mu sync.Mutex
-
 		iterIndex := 0
+
 		for startIndex := 0; startIndex < len(allData); startIndex += blockSize {
 			wg.Add(1)
-			go func(startIndex int) error {
+			go func(startIndex int) {
+				// 最初にパニックハンドリングのためのdeferを設置
 				defer func() {
-					if err := GetError(); err != nil {
-						errorChan <- err
+					if r := recover(); r != nil {
+						stackTrace := debug.Stack()
+						errMsg := fmt.Sprintf("%v", r)
+						if e, ok := r.(error); ok {
+							errMsg = e.Error()
+						}
+						errChan <- fmt.Errorf("panic: %s\n%s", errMsg, stackTrace)
+						cancel() // 他のゴルーチンも停止させる
 					}
 					wg.Done()
 				}()
 
-				// コンテキストが既にキャンセルされていないかチェック
+				// コンテキストがキャンセルされていないか確認
 				select {
 				case <-ctx.Done():
-					// 他のゴルーチンでエラーが出たので終了
-					return nil
+					return
 				default:
+					// 処理続行
 				}
 
 				endIndex := startIndex + blockSize
 				if endIndex > len(allData) {
 					endIndex = len(allData)
 				}
+
 				for j := startIndex; j < endIndex; j++ {
+					// 定期的にコンテキストをチェック
+					select {
+					case <-ctx.Done():
+						return
+					default:
+						// 処理続行
+					}
+
 					if err := processFunc(j, allData[j]); err != nil {
-						// エラー発生時にキャンセルをかける
-						cancel()
-						errorChan <- err
-						return err
+						errChan <- err
+						cancel() // エラー発生時は他の処理も中断
+						return
 					}
 
 					if logFunc != nil && logBlockSize > 0 {
@@ -123,21 +109,25 @@ func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
 						mu.Unlock()
 					}
 				}
-
-				return nil
 			}(startIndex)
 		}
 
+		// エラー収集用ゴルーチン
+		var firstErr error
 		go func() {
-			wg.Wait()
-			close(errorChan)
+			for err := range errChan {
+				if firstErr == nil {
+					firstErr = err
+				}
+				cancel() // 何かエラーが発生したら即座に他の処理をキャンセル
+			}
 		}()
 
-		// チャネルからエラーを受け取る
-		for err := range errorChan {
-			if err != nil {
-				return err
-			}
+		wg.Wait()
+		close(errChan)
+
+		if firstErr != nil {
+			return firstErr
 		}
 	}
 
@@ -152,24 +142,4 @@ func GetBlockSize(totalTasks int) (blockSize int, blockCount int) {
 	blockSize = (totalTasks + blockCount - 1) / blockCount
 
 	return blockSize, blockCount
-}
-
-func GetError() error {
-	// recoverによるpanicキャッチ
-	if r := recover(); r != nil {
-		stackTrace := debug.Stack()
-
-		var errMsg string
-		// パニックの値がerror型である場合、エラーメッセージを取得
-		if err, ok := r.(error); ok {
-			errMsg = err.Error()
-		} else {
-			// それ以外の型の場合は、文字列に変換
-			errMsg = fmt.Sprintf("%v", r)
-		}
-
-		return fmt.Errorf("panic: %s\n%s", errMsg, stackTrace)
-	}
-
-	return nil
 }
