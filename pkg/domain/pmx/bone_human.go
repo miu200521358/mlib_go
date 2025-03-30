@@ -1009,6 +1009,10 @@ func (bones *Bones) GetAnkle(direction BoneDirection) (*Bone, error) {
 	return bones.GetByName(ANKLE.StringFromDirection(direction))
 }
 
+func (bones *Bones) GetToeIk(direction BoneDirection) (*Bone, error) {
+	return bones.GetByName(TOE_IK.StringFromDirection(direction))
+}
+
 // GetHeel かかと取得
 func (bones *Bones) GetHeel(direction BoneDirection) (*Bone, error) {
 	return bones.GetByName(HEEL.StringFromDirection(direction))
@@ -1464,20 +1468,12 @@ func (bones *Bones) InsertShortageConfigBones() error {
 
 	// 体幹系
 	for _, funcs := range [][]func() (*Bone, error){
-		{bones.GetRoot, bones.CreateRoot},
-		{bones.GetCenter, bones.CreateCenter},
-		{bones.GetGroove, bones.GetGroove},
 		{bones.GetTrunkRoot, bones.CreateTrunkRoot},
-		{bones.GetWaist, bones.CreateWaist},
 		{bones.GetLowerRoot, bones.CreateLowerRoot},
 		{bones.GetLegCenter, bones.CreateLegCenter},
 		{bones.GetUpperRoot, bones.CreateUpperRoot},
-		{bones.GetUpper2, bones.CreateUpper2},
 		{bones.GetNeckRoot, bones.CreateNeckRoot},
-		{bones.GetNeck, bones.CreateNeck},
-		{bones.GetHead, bones.CreateHead},
 		{bones.GetHeadTail, bones.CreateHeadTail},
-		{bones.GetEyes, bones.CreateEyes},
 	} {
 		getFunc := funcs[0]
 		createFunc := funcs[1]
@@ -1519,12 +1515,7 @@ func (bones *Bones) InsertShortageConfigBones() error {
 	// 左右系
 	for _, direction := range []BoneDirection{BONE_DIRECTION_LEFT, BONE_DIRECTION_RIGHT} {
 		for _, funcs := range [][]func(direction BoneDirection) (*Bone, error){
-			{bones.GetEye, bones.CreateEye},
 			{bones.GetShoulderRoot, bones.CreateShoulderRoot},
-			{bones.GetShoulderP, bones.CreateShoulderP},
-			{bones.GetShoulderC, bones.CreateShoulderC},
-			{bones.GetArmTwist, bones.CreateArmTwist},
-			{bones.GetWristTwist, bones.CreateWristTwist},
 			{bones.GetWristTail, bones.CreateWristTail},
 			{bones.GetThumbTail, bones.CreateThumbTail},
 			{bones.GetIndexTail, bones.CreateIndexTail},
@@ -1532,7 +1523,6 @@ func (bones *Bones) InsertShortageConfigBones() error {
 			{bones.GetRingTail, bones.CreateRingTail},
 			{bones.GetPinkyTail, bones.CreatePinkyTail},
 			{bones.GetLegRoot, bones.CreateLegRoot},
-			{bones.GetWaistCancel, bones.CreateWaistCancel},
 			{bones.GetToeT, bones.CreateToeT},
 			{bones.GetToeP, bones.CreateToeP},
 			{bones.GetToeC, bones.CreateToeC},
