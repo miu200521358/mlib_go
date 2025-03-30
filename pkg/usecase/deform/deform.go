@@ -216,15 +216,15 @@ func DeformForPhysics(
 	}
 
 	// 物理剛体位置を更新
-	if err := miter.IterParallelByCount(model.RigidBodies.Length(), 100, func(i int) {
-		rigidBody, err := model.RigidBodies.Get(i)
+	if err := miter.IterParallelByList(mmath.IntRanges(model.RigidBodies.Length()), 100, 0, func(i int, rigidBodyIndex int) error {
+		rigidBody, err := model.RigidBodies.Get(rigidBodyIndex)
 		if err != nil {
-			return
+			return err
 		}
 
 		// 現在のボーン変形情報を保持
 		if rigidBody.Bone == nil || deltas.Bones.Get(rigidBody.Bone.Index()) == nil {
-			return
+			return nil
 		}
 
 		if (shared.IsEnabledPhysics() && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC) ||
@@ -233,7 +233,9 @@ func DeformForPhysics(
 			physics.UpdateTransform(model.Index(), rigidBody.Bone,
 				deltas.Bones.Get(rigidBody.Bone.Index()).FilledGlobalMatrix(), rigidBody)
 		}
-	}); err != nil {
+
+		return nil
+	}, nil); err != nil {
 		return deltas
 	}
 
