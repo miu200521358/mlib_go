@@ -77,7 +77,7 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 
 			if data, err := rep.Load(path); err == nil {
 				model := data.(*pmx.PmxModel)
-				if err := model.Bones.InsertShortageSizingConfigBones(); err != nil {
+				if err := model.Bones.InsertShortageOverrideBones(); err != nil {
 					mlog.ET(mi18n.T("システム用ボーン追加失敗"), err.Error())
 				} else {
 					cw.StoreModel(1, 0, model)
