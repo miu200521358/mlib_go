@@ -238,6 +238,10 @@ func (vl *ViewerList) resetPhysics(vw *ViewWindow) {
 	vl.deformForReset(vw)
 
 	for _, model := range vw.modelRenderers {
+		if model == nil || model.Model == nil {
+			continue
+		}
+
 		// モデルの物理削除
 		vw.physics.DeleteModel(model.Model.Index())
 	}
@@ -246,7 +250,7 @@ func (vl *ViewerList) resetPhysics(vw *ViewWindow) {
 	vw.physics.ResetWorld()
 
 	for n, model := range vw.modelRenderers {
-		if model == nil || vw.vmdDeltas[n] == nil {
+		if model == nil || model.Model == nil || vw.vmdDeltas[n] == nil {
 			continue
 		}
 
