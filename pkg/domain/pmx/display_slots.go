@@ -15,6 +15,17 @@ func NewDisplaySlots(capacity int) *DisplaySlots {
 	}
 }
 
+func NewInitialDisplaySlots() *DisplaySlots {
+	displaySlots := &DisplaySlots{
+		IndexNameModels: core.NewIndexNameModels[*DisplaySlot](0),
+	}
+
+	displaySlots.Append(NewRootDisplaySlot())
+	displaySlots.Append(NewMorphDisplaySlot())
+
+	return displaySlots
+}
+
 func (displaySlots *DisplaySlots) GetByBoneIndex(boneIndex int) *DisplaySlot {
 	var result *DisplaySlot
 	displaySlots.ForEach(func(index int, value *DisplaySlot) {
