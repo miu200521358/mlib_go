@@ -1133,10 +1133,12 @@ func (rep *XRepository) parseStringList(model *pmx.PmxModel, objectName string) 
 	case "TextureFilename":
 		for _, texName := range texts {
 			var tex *pmx.Texture
-			model.Textures.ForEach(func(i int, t *pmx.Texture) {
+			model.Textures.ForEach(func(i int, t *pmx.Texture) bool {
 				if t.Name() == texName {
 					tex = t
+					return false
 				}
+				return true
 			})
 			if tex == nil {
 				tex = pmx.NewTexture()

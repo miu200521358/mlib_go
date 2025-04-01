@@ -1432,7 +1432,7 @@ func (bones *Bones) InsertShortageOverrideBones() error {
 					return err
 				} else {
 					// 追加したボーンの親ボーンを、同じく親ボーンに設定しているボーンの親ボーンを追加ボーンに置き換える
-					bones.ForEach(func(i int, b *Bone) {
+					bones.ForEach(func(i int, b *Bone) bool {
 						if b.ParentIndex == bone.ParentIndex && b.Index() != bone.Index() &&
 							b.EffectIndex != bone.Index() && bone.EffectIndex != b.Index() &&
 							((strings.Contains(bone.Name(), "上") && !strings.Contains(b.Name(), "下") &&
@@ -1441,6 +1441,7 @@ func (bones *Bones) InsertShortageOverrideBones() error {
 									!strings.Contains(b.Name(), "左") && !strings.Contains(b.Name(), "右"))) {
 							b.ParentIndex = bone.Index()
 						}
+						return true
 					})
 					// セットアップしなおし
 					bones.Setup()

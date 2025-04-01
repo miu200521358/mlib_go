@@ -60,12 +60,13 @@ func NewModelRenderer(windowIndex int, model *pmx.PmxModel) *ModelRenderer {
 	// 各材質ごとに MeshRenderer を生成
 	mr.meshes = make([]*MeshRenderer, model.Materials.Length())
 	prevVerticesCount := 0
-	model.Materials.ForEach(func(index int, material *pmx.Material) {
+	model.Materials.ForEach(func(index int, material *pmx.Material) bool {
 		// newMaterialGL は、pmx.Material から描画用拡張情報 materialGL を生成する関数
 		materialExt := newMaterialGL(material, prevVerticesCount, tm)
 		// MeshRenderer の生成 (実装は mesh_renderer.go)
 		mr.meshes[index] = NewMeshRenderer(factory, mr.faces, materialExt, prevVerticesCount)
 		prevVerticesCount += material.VerticesCount
+		return true
 	})
 
 	// モデルのハッシュ値を設定

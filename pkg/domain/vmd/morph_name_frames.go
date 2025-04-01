@@ -25,26 +25,28 @@ func (morphNameFrames *MorphNameFrames) ContainsActive() bool {
 	}
 
 	isActive := false
-	morphNameFrames.ForEach(func(index float32, bf *MorphFrame) {
+	morphNameFrames.ForEach(func(index float32, bf *MorphFrame) bool {
 		if bf == nil {
-			return
+			return true
 		}
 
 		if !mmath.NearEquals(bf.Ratio, 0.0, 1e-2) {
 			isActive = true
-			return
+			return false
 		}
 
 		nextBf := morphNameFrames.Get(morphNameFrames.NextFrame(bf.Index()))
 
 		if nextBf == nil {
-			return
+			return true
 		}
 
 		if !mmath.NearEquals(bf.Ratio, 0.0, 1e-2) {
 			isActive = true
-			return
+			return false
 		}
+
+		return true
 	})
 
 	return isActive

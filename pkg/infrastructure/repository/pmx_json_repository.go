@@ -134,7 +134,7 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 	// 頂点をボーンINDEX別に纏める
 	allBoneVertices := model.Vertices.GetMapByBoneIndex(0.0)
 
-	model.Bones.ForEach(func(index int, bone *pmx.Bone) {
+	model.Bones.ForEach(func(index int, bone *pmx.Bone) bool {
 		boneData := boneJson{
 			Index:        bone.Index(),
 			Name:         bone.Name(),
@@ -188,10 +188,12 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 				}
 			}
 		}
+
+		return true
 	})
 
 	// 表示枠をJSONに変換
-	model.DisplaySlots.ForEach(func(index int, displaySlot *pmx.DisplaySlot) {
+	model.DisplaySlots.ForEach(func(index int, displaySlot *pmx.DisplaySlot) bool {
 		displaySlotData := displaySlotJson{
 			Index:       displaySlot.Index(),
 			Name:        displaySlot.Name(),
@@ -209,12 +211,13 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 		}
 
 		jsonData.DisplaySlots = append(jsonData.DisplaySlots, &displaySlotData)
+		return true
 	})
 
 	// システム用剛体をJSONに変換
-	model.RigidBodies.ForEach(func(index int, rb *pmx.RigidBody) {
+	model.RigidBodies.ForEach(func(index int, rb *pmx.RigidBody) bool {
 		if !strings.Contains(rb.Name(), pmx.MLIB_PREFIX) {
-			return
+			return true
 		}
 
 		rigidBody := &rigidBodyJson{
@@ -237,6 +240,8 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 		}
 
 		jsonData.RigidBodies = append(jsonData.RigidBodies, rigidBody)
+
+		return true
 	})
 
 	// JSONに変換

@@ -127,8 +127,10 @@ func (im *IndexNameModels[T]) RemoveByName(name string) error {
 }
 
 // ForEach は全ての値をコールバック関数に渡します
-func (im *IndexNameModels[T]) ForEach(callback func(index int, value T)) {
+func (im *IndexNameModels[T]) ForEach(callback func(index int, value T) bool) {
 	for i, v := range im.values {
-		callback(i, v)
+		if !callback(i, v) {
+			break
+		}
 	}
 }

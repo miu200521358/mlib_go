@@ -178,7 +178,7 @@ func createAllBoneDebugData(model *pmx.PmxModel) ([]float32, []uint32, []int, []
 	bonePointIndexes := make([]int, model.Bones.Length())
 
 	n := 0
-	model.Bones.ForEach(func(index int, bone *pmx.Bone) {
+	model.Bones.ForEach(func(index int, bone *pmx.Bone) bool {
 		boneLines = append(boneLines, newBoneGl(bone)...)
 		boneLines = append(boneLines, newTailBoneGl(bone)...)
 		boneLineFaces = append(boneLineFaces, uint32(n), uint32(n+1))
@@ -190,6 +190,7 @@ func createAllBoneDebugData(model *pmx.PmxModel) ([]float32, []uint32, []int, []
 		bonePointIndexes[bone.Index()] = bone.Index()
 
 		n += 2
+		return true
 	})
 
 	return boneLines, boneLineFaces, boneLineIndexes, bonePoints, bonePointFaces, bonePointIndexes

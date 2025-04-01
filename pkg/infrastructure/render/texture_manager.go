@@ -106,14 +106,15 @@ func (tm *TextureManager) LoadAllTextures(windowIndex int, textures *pmx.Texture
 	// まず textures の長さに応じてスライスを確保
 	tm.textures = make([]*textureGl, textures.Length())
 
-	textures.ForEach(func(index int, texture *pmx.Texture) {
+	textures.ForEach(func(index int, texture *pmx.Texture) bool {
 		texGl, err := tm.loadTextureGl(windowIndex, texture, modelPath)
 		if err != nil {
 			mlog.W(fmt.Sprintf("texture initialize error: %s", err))
-			return
+			return false
 		}
 		// インデックス位置に格納
 		tm.textures[texture.Index()] = texGl
+		return true
 	})
 
 	return nil

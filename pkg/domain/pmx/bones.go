@@ -189,7 +189,7 @@ func (bones *Bones) Setup() {
 	bones.LayerSortedBoneIndexes = make(map[bool][]int)
 	bones.DeformBoneIndexes = make(map[int][]int)
 
-	bones.ForEach(func(index int, bone *Bone) {
+	bones.ForEach(func(index int, bone *Bone) bool {
 		// 関係ボーンリストを一旦クリア
 		bone.IkLinkBoneIndexes = make([]int, 0)
 		bone.IkTargetBoneIndexes = make([]int, 0)
@@ -199,6 +199,8 @@ func (bones *Bones) Setup() {
 		bone.ParentBoneIndexes = make([]int, 0)
 		bone.ParentBoneNames = make([]string, 0)
 		bone.TreeBoneIndexes = make([]int, 0)
+
+		return true
 	})
 
 	// 関連ボーンINDEX情報を設定
@@ -272,9 +274,10 @@ func (bones *Bones) Setup() {
 	// 変形前と変形後に分けてINDEXリストを生成
 	bones.createLayerIndexes()
 
-	bones.ForEach(func(index int, bone *Bone) {
+	bones.ForEach(func(index int, bone *Bone) bool {
 		// ボーンのデフォームINDEXリストを取得
 		bones.createLayerSortedBones(bone)
+		return true
 	})
 }
 
@@ -299,9 +302,10 @@ func (bones *Bones) createLayerIndexes() {
 	bones.LayerSortedBoneIndexes[true] = make([]int, 0)
 
 	layerIndexes := make(layerIndexes, 0, bones.Length())
-	bones.ForEach(func(index int, bone *Bone) {
+	bones.ForEach(func(index int, bone *Bone) bool {
 		layerIndexes = append(layerIndexes,
 			layerIndex{isAfterPhysics: bone.IsAfterPhysicsDeform(), layer: bone.Layer, index: index})
+		return true
 	})
 	sort.Sort(layerIndexes)
 

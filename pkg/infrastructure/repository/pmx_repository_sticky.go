@@ -62,32 +62,34 @@ func (rep *PmxRepository) createStickBones(model *pmx.PmxModel) error {
 		return err
 	}
 
-	model.Bones.ForEach(func(index int, bone *pmx.Bone) {
+	model.Bones.ForEach(func(index int, bone *pmx.Bone) bool {
 		if !bone.IsVisible() {
-			return
+			return true
 		}
 
 		// システムボーンの場合、原点の直方体を作成
 		if bone.IsSystem {
 			rep.createStickRoot(model, bone)
-			return
+			return true
 		}
 
 		if bone.ParentIndex < 0 {
-			return
+			return true
 		}
 
 		parentBone, err := model.Bones.Get(bone.ParentIndex)
 		if err != nil {
-			return
+			return true
 		}
 
 		if parentBone == nil || parentBone.Index() == rootBone.Index() {
-			return
+			return true
 		}
 
 		// ボーンの位置に合わせた直方体を作成
 		rep.createStickBone(model, bone, parentBone, boneMaterial)
+
+		return true
 	})
 
 	return nil

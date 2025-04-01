@@ -16,8 +16,9 @@ func DeformMorph(
 	if morphNames == nil {
 		// モーフの指定がなければ全モーフチェック
 		morphNames = make([]string, 0)
-		model.Morphs.ForEach(func(index int, morph *pmx.Morph) {
+		model.Morphs.ForEach(func(index int, morph *pmx.Morph) bool {
 			morphNames = append(morphNames, morph.Name())
+			return true
 		})
 	}
 
@@ -90,8 +91,9 @@ func DeformBoneMorph(
 	if morphNames == nil {
 		// モーフの指定がなければ全モーフチェック
 		morphNames = make([]string, 0)
-		model.Morphs.ForEach(func(index int, morph *pmx.Morph) {
+		model.Morphs.ForEach(func(index int, morph *pmx.Morph) bool {
 			morphNames = append(morphNames, morph.Name())
+			return true
 		})
 	}
 

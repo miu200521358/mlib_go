@@ -119,10 +119,9 @@ func (li *LlrbIndexes[T]) Length() int {
 }
 
 // ForEach はコレクションのイテレータを提供します
-func (li *LlrbIndexes[T]) ForEach(callback func(item T)) {
+func (li *LlrbIndexes[T]) ForEach(callback func(item T) bool) {
 	li.LLRB.AscendGreaterOrEqual(li.LLRB.Min(), func(item llrb.Item) bool {
 		index := item.(*LlrbItem[T]).Value()
-		callback(index)
-		return true
+		return callback(index)
 	})
 }

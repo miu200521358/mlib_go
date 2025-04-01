@@ -20,13 +20,14 @@ type jointValue struct {
 func (physics *MPhysics) initJoints(modelIndex int, rigidBodies *pmx.RigidBodies, j *pmx.Joints) {
 	// ジョイントを順番に剛体と紐付けていく
 	physics.joints[modelIndex] = make([]*jointValue, j.Length())
-	j.ForEach(func(index int, joint *pmx.Joint) {
+	j.ForEach(func(index int, joint *pmx.Joint) bool {
 		if rigidBodies.Contains(joint.RigidbodyIndexA) && rigidBodies.Contains(joint.RigidbodyIndexB) {
 			// ジョイントの位置と向き
 			jointTransform := bt.NewBtTransform(newBulletFromRad(joint.Rotation), newBulletFromVec(joint.Position))
 
 			physics.initJoint(modelIndex, joint, jointTransform)
 		}
+		return true
 	})
 }
 
@@ -36,15 +37,15 @@ func (physics *MPhysics) initJointsByBoneDeltas(
 ) {
 	// ジョイントを順番に剛体と紐付けていく
 	physics.joints[modelIndex] = make([]*jointValue, j.Length())
-	j.ForEach(func(index int, joint *pmx.Joint) {
+	j.ForEach(func(index int, joint *pmx.Joint) bool {
 		if !physics.canCreateJoint(joint, rigidBodies) {
-			return
+			return true
 		}
 
 		// ボーン情報の取得
 		bone := physics.findReferenceBone(joint, rigidBodies)
 		if bone == nil || !boneDeltas.Contains(bone.Index()) {
-			return
+			return true
 		}
 
 		// ジョイントのグローバル変換を計算
@@ -52,6 +53,8 @@ func (physics *MPhysics) initJointsByBoneDeltas(
 
 		// ジョイント初期化
 		physics.initJoint(modelIndex, joint, jointTransform)
+
+		return true
 	})
 }
 

@@ -129,9 +129,9 @@ func (baseFrames *BaseFrames[T]) NextFrame(index float32) float32 {
 	return baseFrames.Indexes.Next(index)
 }
 
-func (baseFrames *BaseFrames[T]) ForEach(callback func(index float32, value T)) {
-	baseFrames.Indexes.ForEach(func(index float32) {
-		callback(index, baseFrames.Get(index))
+func (baseFrames *BaseFrames[T]) ForEach(callback func(index float32, value T) bool) {
+	baseFrames.Indexes.ForEach(func(index float32) bool {
+		return callback(index, baseFrames.Get(index))
 	})
 }
 

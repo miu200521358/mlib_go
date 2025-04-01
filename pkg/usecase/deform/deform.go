@@ -20,7 +20,7 @@ func DeformModel(
 	vmdDeltas = deformBoneByPhysicsFlag(model, motion, vmdDeltas, false, float32(frame), nil, false)
 
 	// 頂点にボーン変形を適用
-	model.Vertices.ForEach(func(index int, vertex *pmx.Vertex) {
+	model.Vertices.ForEach(func(index int, vertex *pmx.Vertex) bool {
 		mat := &mmath.MMat4{}
 		for j := range vertex.Deform.Indexes() {
 			boneIndex := vertex.Deform.Indexes()[j]
@@ -59,13 +59,17 @@ func DeformModel(
 			// SDEF-R1: 1番目のボーンとSDEF-Cの中点
 			sdef.SdefR1 = vmdDeltas.Bones.Get(sdef.Indexes()[1]).GlobalPosition.Added(sdef.SdefC).MuledScalar(0.5)
 		}
+
+		return true
 	})
 
 	// ボーンの位置を更新
-	model.Bones.ForEach(func(index int, bone *pmx.Bone) {
+	model.Bones.ForEach(func(index int, bone *pmx.Bone) bool {
 		if vmdDeltas.Bones.Get(index) != nil {
 			bone.Position = vmdDeltas.Bones.Get(index).FilledGlobalPosition()
 		}
+
+		return true
 	})
 
 	return model

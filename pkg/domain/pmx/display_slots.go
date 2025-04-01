@@ -28,13 +28,14 @@ func NewInitialDisplaySlots() *DisplaySlots {
 
 func (displaySlots *DisplaySlots) GetByBoneIndex(boneIndex int) *DisplaySlot {
 	var result *DisplaySlot
-	displaySlots.ForEach(func(index int, value *DisplaySlot) {
+	displaySlots.ForEach(func(index int, value *DisplaySlot) bool {
 		for _, reference := range value.References {
 			if reference.DisplayType == DISPLAY_TYPE_BONE && reference.DisplayIndex == boneIndex {
 				result = value
-				return
+				return false
 			}
 		}
+		return true
 	})
 	return result
 }

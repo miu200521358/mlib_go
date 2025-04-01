@@ -94,8 +94,9 @@ type MaterialMorphDeltas struct {
 
 func NewMaterialMorphDeltas(materials *pmx.Materials) *MaterialMorphDeltas {
 	deltas := make([]*MaterialMorphDelta, materials.Length())
-	materials.ForEach(func(i int, m *pmx.Material) {
+	materials.ForEach(func(i int, m *pmx.Material) bool {
 		deltas[i] = NewMaterialMorphDelta(m)
+		return true
 	})
 
 	return &MaterialMorphDeltas{

@@ -75,8 +75,10 @@ func (im *IndexModels[T]) Contains(index int) bool {
 }
 
 // ForEach は全ての値をコールバック関数に渡します
-func (im *IndexModels[T]) ForEach(callback func(index int, value T)) {
+func (im *IndexModels[T]) ForEach(callback func(index int, value T) bool) {
 	for i, v := range im.values {
-		callback(i, v)
+		if !callback(i, v) {
+			break
+		}
 	}
 }

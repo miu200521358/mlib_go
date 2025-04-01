@@ -295,32 +295,34 @@ func (boneNameFrames *BoneNameFrames) ContainsActive() bool {
 	}
 
 	isActive := false
-	boneNameFrames.ForEach(func(index float32, bf *BoneFrame) {
+	boneNameFrames.ForEach(func(index float32, bf *BoneFrame) bool {
 		if bf == nil {
-			return
+			return true
 		}
 
 		if (bf.Position != nil && !bf.Position.NearEquals(mmath.MVec3Zero, 1e-2)) ||
 			(bf.Rotation != nil && !bf.Rotation.NearEquals(mmath.MQuaternionIdent, 1e-2)) {
 			isActive = true
-			return
+			return false
 		}
 
 		nextBf := boneNameFrames.Get(boneNameFrames.NextFrame(bf.Index()))
 
 		if nextBf == nil {
-			return
+			return true
 		}
 
 		if bf.Position != nil && nextBf.Position != nil && !bf.Position.NearEquals(nextBf.Position, 1e-2) {
 			isActive = true
-			return
+			return false
 		}
 
 		if bf.Rotation != nil && nextBf.Rotation != nil && !bf.Rotation.NearEquals(nextBf.Rotation, 1e-2) {
 			isActive = true
-			return
+			return false
 		}
+
+		return true
 	})
 
 	return isActive

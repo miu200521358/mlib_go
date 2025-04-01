@@ -191,7 +191,7 @@ func (rep *PmxRepository) saveVertices(fout *os.File, model *pmx.PmxModel, boneI
 		return err
 	}
 
-	model.Vertices.ForEach(func(index int, vertex *pmx.Vertex) {
+	model.Vertices.ForEach(func(index int, vertex *pmx.Vertex) bool {
 		rep.writeNumber(fout, binaryType_float, vertex.Position.X, 0.0, false)
 		rep.writeNumber(fout, binaryType_float, vertex.Position.Y, 0.0, false)
 		rep.writeNumber(fout, binaryType_float, vertex.Position.Z, 0.0, false)
@@ -253,6 +253,8 @@ func (rep *PmxRepository) saveVertices(fout *os.File, model *pmx.PmxModel, boneI
 		}
 
 		rep.writeNumber(fout, binaryType_float, vertex.EdgeFactor, 0.0, true)
+
+		return true
 	})
 
 	return nil
@@ -267,13 +269,14 @@ func (rep *PmxRepository) saveFaces(fout *os.File, model *pmx.PmxModel, vertexId
 		return err
 	}
 
-	model.Faces.ForEach(func(index int, face *pmx.Face) {
+	model.Faces.ForEach(func(index int, face *pmx.Face) bool {
 		for _, vidx := range face.VertexIndexes {
 			err = rep.writeNumber(fout, vertexIdxType, float64(vidx), 0.0, true)
 			if err != nil {
-				return
+				return false
 			}
 		}
+		return true
 	})
 
 	return nil
@@ -286,11 +289,12 @@ func (rep *PmxRepository) saveTextures(fout *os.File, model *pmx.PmxModel) error
 		return err
 	}
 
-	model.Textures.ForEach(func(index int, texture *pmx.Texture) {
+	model.Textures.ForEach(func(index int, texture *pmx.Texture) bool {
 		err = rep.writeText(fout, texture.Name(), "")
 		if err != nil {
-			return
+			return false
 		}
+		return true
 	})
 
 	return nil
@@ -305,98 +309,98 @@ func (rep *PmxRepository) saveMaterials(fout *os.File, model *pmx.PmxModel, text
 		return err
 	}
 
-	model.Materials.ForEach(func(index int, material *pmx.Material) {
+	model.Materials.ForEach(func(index int, material *pmx.Material) bool {
 		err = rep.writeText(fout, material.Name(), fmt.Sprintf("Material %d", material.Index()))
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeText(fout, material.EnglishName(), fmt.Sprintf("Material %d", material.Index()))
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Diffuse.X, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Diffuse.Y, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Diffuse.Z, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Diffuse.W, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Specular.X, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Specular.Y, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Specular.Z, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Specular.W, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Ambient.X, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Ambient.Y, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Ambient.Z, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeByte(fout, int(material.DrawFlag), true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Edge.X, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Edge.Y, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Edge.Z, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.Edge.W, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, material.EdgeSize, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, textureIdxType, float64(material.TextureIndex), 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, textureIdxType, float64(material.SphereTextureIndex), 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeByte(fout, int(material.SphereMode), true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeByte(fout, int(material.ToonSharingFlag), true)
 		if err != nil {
-			return
+			return false
 		}
 		if material.ToonSharingFlag == pmx.TOON_SHARING_SHARING {
 			err = rep.writeNumber(fout, textureIdxType, float64(material.ToonTextureIndex), 0.0, false)
@@ -404,16 +408,17 @@ func (rep *PmxRepository) saveMaterials(fout *os.File, model *pmx.PmxModel, text
 			err = rep.writeByte(fout, int(material.ToonTextureIndex), true)
 		}
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeText(fout, material.Memo, "")
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_int, float64(material.VerticesCount), 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
+		return true
 	})
 
 	return nil
@@ -849,28 +854,28 @@ func (rep *PmxRepository) saveDisplaySlots(fout *os.File, model *pmx.PmxModel, b
 		return err
 	}
 
-	model.DisplaySlots.ForEach(func(index int, displaySlot *pmx.DisplaySlot) {
+	model.DisplaySlots.ForEach(func(index int, displaySlot *pmx.DisplaySlot) bool {
 		err = rep.writeText(fout, displaySlot.Name(), fmt.Sprintf("Display %d", displaySlot.Index()))
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeText(fout, displaySlot.EnglishName(), fmt.Sprintf("Display %d", displaySlot.Index()))
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeByte(fout, int(displaySlot.SpecialFlag), true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_int, float64(len(displaySlot.References)), 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 
 		for _, reference := range displaySlot.References {
 			err = rep.writeByte(fout, int(reference.DisplayType), true)
 			if err != nil {
-				return
+				return false
 			}
 			if reference.DisplayType == pmx.DISPLAY_TYPE_BONE {
 				err = rep.writeNumber(fout, boneIdxType, float64(reference.DisplayIndex), 0.0, false)
@@ -878,9 +883,11 @@ func (rep *PmxRepository) saveDisplaySlots(fout *os.File, model *pmx.PmxModel, b
 				err = rep.writeNumber(fout, morphIdxType, float64(reference.DisplayIndex), 0.0, false)
 			}
 			if err != nil {
-				return
+				return false
 			}
 		}
+
+		return true
 	})
 
 	return nil
@@ -895,91 +902,92 @@ func (rep *PmxRepository) saveRigidBodies(fout *os.File, model *pmx.PmxModel, bo
 		return err
 	}
 
-	model.RigidBodies.ForEach(func(index int, rigidbody *pmx.RigidBody) {
+	model.RigidBodies.ForEach(func(index int, rigidbody *pmx.RigidBody) bool {
 		err = rep.writeText(fout, rigidbody.Name(), fmt.Sprintf("Rigidbody %d", rigidbody.Index()))
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeText(fout, rigidbody.EnglishName(), fmt.Sprintf("Rigidbody %d", rigidbody.Index()))
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, boneIdxType, float64(rigidbody.BoneIndex), 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeByte(fout, int(rigidbody.CollisionGroup), true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeShort(fout, uint16(rigidbody.CollisionGroupMaskValue))
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeByte(fout, int(rigidbody.ShapeType), true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Size.X, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Size.Y, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Size.Z, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Position.X, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Position.Y, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Position.Z, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Rotation.X, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Rotation.Y, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Rotation.Z, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.RigidBodyParam.Mass, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.RigidBodyParam.LinearDamping, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.RigidBodyParam.AngularDamping, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.RigidBodyParam.Restitution, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.RigidBodyParam.Friction, 0.0, true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeByte(fout, int(rigidbody.PhysicsType), true)
 		if err != nil {
-			return
+			return false
 		}
+		return true
 	})
 
 	return nil
@@ -994,123 +1002,124 @@ func (rep *PmxRepository) saveJoints(fout *os.File, model *pmx.PmxModel, rigidbo
 		return err
 	}
 
-	model.Joints.ForEach(func(index int, joint *pmx.Joint) {
+	model.Joints.ForEach(func(index int, joint *pmx.Joint) bool {
 		err = rep.writeText(fout, joint.Name(), fmt.Sprintf("Joint %d", joint.Index()))
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeText(fout, joint.EnglishName(), fmt.Sprintf("Joint %d", joint.Index()))
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeByte(fout, int(joint.JointType), true)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, rigidbodyIdxType, float64(joint.RigidbodyIndexA), 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, rigidbodyIdxType, float64(joint.RigidbodyIndexB), 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.Position.X, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.Position.Y, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.Position.Z, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.Rotation.X, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.Rotation.Y, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.Rotation.Z, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMin.X, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMin.Y, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMin.Z, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMax.X, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMax.Y, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.TranslationLimitMax.Z, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.X, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.Y, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMin.Z, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.X, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.Y, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.RotationLimitMax.Z, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantTranslation.X, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantTranslation.Y, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantTranslation.Z, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.X, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.Y, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
 		err = rep.writeNumber(fout, binaryType_float, joint.JointParam.SpringConstantRotation.Z, 0.0, false)
 		if err != nil {
-			return
+			return false
 		}
+		return true
 	})
 
 	return nil

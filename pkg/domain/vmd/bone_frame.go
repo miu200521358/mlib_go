@@ -21,6 +21,20 @@ func NewBoneFrame(index float32) *BoneFrame {
 	}
 }
 
+func (bf *BoneFrame) FilledPosition() *mmath.MVec3 {
+	if bf.Position == nil {
+		bf.Position = mmath.NewMVec3()
+	}
+	return bf.Position
+}
+
+func (bf *BoneFrame) FilledRotation() *mmath.MQuaternion {
+	if bf.Rotation == nil {
+		bf.Rotation = mmath.NewMQuaternion()
+	}
+	return bf.Rotation
+}
+
 func (bf *BoneFrame) Add(v *BoneFrame) *BoneFrame {
 	if bf.Position != nil || v.Position != nil {
 		if bf.Position == nil {

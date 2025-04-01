@@ -90,8 +90,9 @@ func (morphFrames *MorphFrames) Clean() {
 func (morphFrames *MorphFrames) Indexes() []int {
 	indexes := make([]int, 0)
 	for _, morphFrames := range morphFrames.data {
-		morphFrames.Indexes.ForEach(func(index float32) {
+		morphFrames.Indexes.ForEach(func(index float32) bool {
 			indexes = append(indexes, int(index))
+			return true
 		})
 	}
 	mmath.Unique(indexes)
@@ -102,8 +103,9 @@ func (morphFrames *MorphFrames) Indexes() []int {
 func (morphFrames *MorphFrames) RegisteredIndexes() []int {
 	indexes := make([]int, 0)
 	for _, morphFrames := range morphFrames.data {
-		morphFrames.RegisteredIndexes.ForEach(func(index float32) {
+		morphFrames.RegisteredIndexes.ForEach(func(index float32) bool {
 			indexes = append(indexes, int(index))
+			return true
 		})
 	}
 	mmath.Unique(indexes)

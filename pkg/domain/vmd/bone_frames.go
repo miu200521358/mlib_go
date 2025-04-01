@@ -60,8 +60,9 @@ func (boneFrames *BoneFrames) Names() []string {
 func (boneFrames *BoneFrames) Indexes() []int {
 	indexes := make([]int, 0)
 	for _, boneFrames := range boneFrames.data {
-		boneFrames.Indexes.ForEach(func(index float32) {
+		boneFrames.Indexes.ForEach(func(index float32) bool {
 			indexes = append(indexes, int(index))
+			return true
 		})
 	}
 	mmath.Unique(indexes)
@@ -72,8 +73,9 @@ func (boneFrames *BoneFrames) Indexes() []int {
 func (boneFrames *BoneFrames) RegisteredIndexes() []int {
 	indexes := make([]int, 0)
 	for _, boneFrames := range boneFrames.data {
-		boneFrames.RegisteredIndexes.ForEach(func(index float32) {
+		boneFrames.RegisteredIndexes.ForEach(func(index float32) bool {
 			indexes = append(indexes, int(index))
+			return true
 		})
 	}
 	mmath.Unique(indexes)
@@ -87,8 +89,9 @@ func (boneFrames *BoneFrames) RegisteredIndexesByNames(names []string) []int {
 		if !slices.Contains(names, boneName) {
 			continue
 		}
-		boneFrames.RegisteredIndexes.ForEach(func(index float32) {
+		boneFrames.RegisteredIndexes.ForEach(func(index float32) bool {
 			indexes = append(indexes, int(index))
+			return true
 		})
 	}
 	indexes = mmath.Unique(indexes)

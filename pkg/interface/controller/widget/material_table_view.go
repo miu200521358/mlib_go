@@ -276,7 +276,7 @@ func (m *MaterialModel) ResetRows(model *pmx.PmxModel) {
 		return
 	}
 
-	model.Materials.ForEach(func(i int, mat *pmx.Material) {
+	model.Materials.ForEach(func(i int, mat *pmx.Material) bool {
 		texture, _ := model.Textures.Get(mat.TextureIndex)
 		toon, _ := model.Textures.Get(mat.ToonTextureIndex)
 		if mat.ToonSharingFlag == pmx.TOON_SHARING_SHARING {
@@ -287,6 +287,8 @@ func (m *MaterialModel) ResetRows(model *pmx.PmxModel) {
 		sphere, _ := model.Textures.Get(mat.SphereTextureIndex)
 
 		m.AddRecord(mat, texture, toon, sphere)
+
+		return true
 	})
 
 	m.PublishRowsReset()
