@@ -63,7 +63,8 @@ func (rep *PmxRepository) createStickBones(model *pmx.PmxModel) error {
 	}
 
 	model.Bones.ForEach(func(index int, bone *pmx.Bone) bool {
-		if !bone.IsVisible() {
+		if !bone.IsVisible() || bone.RigidBody != nil {
+			// 非表示ボーン、物理ボーンはスルー
 			return true
 		}
 

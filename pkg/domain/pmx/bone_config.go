@@ -242,14 +242,14 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				IsStandard:       true},
 			CENTER: {
 				ParentBoneNames:  []StandardBoneName{ROOT},
-				ChildBoneNames:   []StandardBoneName{GROOVE, WAIST, TRUNK_ROOT, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
+				ChildBoneNames:   []StandardBoneName{GROOVE, TRUNK_ROOT, WAIST, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      DISPLAY_SLOT_CENTER,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
 			GROOVE: {
 				ParentBoneNames:  []StandardBoneName{CENTER},
-				ChildBoneNames:   []StandardBoneName{WAIST, TRUNK_ROOT, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
+				ChildBoneNames:   []StandardBoneName{TRUNK_ROOT, WAIST, UPPER_ROOT, LOWER_ROOT, UPPER, LOWER},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      DISPLAY_SLOT_CENTER,
 				BoundingBoxShape: SHAPE_NONE,
