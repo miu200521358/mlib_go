@@ -71,7 +71,7 @@ func NewControlWindow(
 	helpMenuItems []declarative.MenuItem,
 	tabPages []declarative.TabPage,
 	setEnabledInPlaying func(enabled bool),
-	width, height, positionX, positionY int,
+	width, height, positionX, positionY, viewerCount int,
 ) (*ControlWindow, error) {
 	cw := &ControlWindow{
 		shared:              shared,
@@ -220,9 +220,11 @@ func NewControlWindow(
 						Checkable:   true,
 						OnTriggered: cw.TriggerCameraSync,
 						AssignTo:    &cw.cameraSyncAction,
+						Enabled:     viewerCount > 1,
 					},
 					declarative.Menu{
-						Text: mi18n.T("&サブビューワーオーバーレイ"),
+						Text:    mi18n.T("&サブビューワーオーバーレイ"),
+						Enabled: viewerCount > 1,
 						Items: []declarative.MenuItem{
 							declarative.Action{
 								Text:        mi18n.T("&上半身合わせ"),
@@ -245,7 +247,8 @@ func NewControlWindow(
 						},
 					},
 					declarative.Action{
-						Text: mi18n.T("&サブビューワーオーバーレイの使い方"),
+						Text:    mi18n.T("&サブビューワーオーバーレイの使い方"),
+						Enabled: viewerCount > 1,
 						OnTriggered: func() {
 							mlog.ILT(mi18n.T("&サブビューワーオーバーレイの使い方"),
 								mi18n.T("サブビューワーオーバーレイの使い方メッセージ"))
