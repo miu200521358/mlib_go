@@ -40,6 +40,7 @@ type IShader interface {
 
 	// MSAA関連
 	Msaa() IMsaa
+	SetMsaa(IMsaa)
 	FloorRenderer() IFloorRenderer
 	OverrideRenderer() IOverrideRenderer
 }

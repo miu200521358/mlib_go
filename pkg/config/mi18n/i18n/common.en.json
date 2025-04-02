@@ -538,5 +538,9 @@
     {
         "id": "&ツールについて",
         "translation": "&About the Tool"
+    },
+    {
+        "id": "中間MSAA差し替え",
+        "translation": "Since the default FBO sample count is not 4, MSAA is replaced with a type using an intermediate FBO"
     }
 ]

@@ -261,3 +261,7 @@ func (s *MShader) OverrideRenderer() rendering.IOverrideRenderer {
 func (s *MShader) Msaa() rendering.IMsaa {
 	return s.msaa
 }
+
+func (s *MShader) SetMsaa(msaa rendering.IMsaa) {
+	s.msaa = msaa
+}

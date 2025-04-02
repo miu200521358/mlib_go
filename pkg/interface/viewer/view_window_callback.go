@@ -5,12 +5,14 @@ package viewer
 
 import (
 	"fmt"
+	"strings"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/walk/pkg/walk"
 )
 
@@ -306,6 +308,18 @@ func (vw *ViewWindow) debugMessageCallback(
 ) {
 	switch severity {
 	case gl.DEBUG_SEVERITY_HIGH:
+		// 対象のエラーメッセージを検出
+		if strings.Contains(message, "glBlitFramebuffer failed because the framebuffer configurations require that the source and destination sample counts match") {
+			// 現在のウィンドウサイズを取得
+			width, height := vw.GetSize()
+			// middleMsaa を生成
+			newMsaa := mgl.NewMiddleMsaa(width, height)
+			// shader.SetMsaa() で差し替え
+			vw.shader.SetMsaa(newMsaa)
+			mlog.W(mi18n.T("中間MSAA差し替え"), message)
+			return
+		}
+
 		panic(fmt.Errorf("[HIGH] GL CRITICAL ERROR: %v type = 0x%x, severity = 0x%x, message = %s",
 			source, glType, severity, message))
 	case gl.DEBUG_SEVERITY_MEDIUM:
