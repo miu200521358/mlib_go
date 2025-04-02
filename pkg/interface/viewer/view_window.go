@@ -51,6 +51,7 @@ func newViewWindow(
 	list *ViewerList,
 ) (*ViewWindow, error) {
 	glfw.WindowHint(glfw.Resizable, glfw.True)
+	glfw.WindowHint(glfw.Samples, 4)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
 	glfw.WindowHint(glfw.ContextVersionMinor, 4)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
@@ -147,7 +148,7 @@ func (vw *ViewWindow) render() {
 	vw.shader.Resize(w, h)
 
 	// override が有効かつサブウィンドウの場合、カメラを調整してオーバーライド描画
-	if vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
+	if len(vw.list.windowList) > 1 && vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
 		// サブウィンドウ側のカメラを調整（調整後の状態でレンダリングする）
 		vw.syncSizeToOthers(vw.list.windowList[0].GetSize())
 
@@ -170,6 +171,9 @@ func (vw *ViewWindow) render() {
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
+	// マルチサンプル有効化
+	gl.Enable(gl.MULTISAMPLE)
+
 	// シェーダーのカメラ設定更新
 	vw.shader.UpdateCamera()
 
@@ -190,7 +194,7 @@ func (vw *ViewWindow) render() {
 		vw.list.shared.IsShowJoint(), vw.list.shared.IsShowRigidBodyFront())
 
 	// 描画終了後のFBO解除
-	if vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
+	if len(vw.list.windowList) > 1 && vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
 		// サブウィンドウの場合、override FBO のアンバインド後にその内容をファイル出力
 		vw.shader.OverrideRenderer().Unbind()
 	} else {
@@ -200,8 +204,8 @@ func (vw *ViewWindow) render() {
 	}
 
 	// メインウィンドウでは、サブウィンドウの描画内容（overrideテクスチャ）を半透明合成して描画
-	if vw.list.shared.IsShowOverride() && vw.windowIndex == 0 &&
-		vw.shader.OverrideRenderer().SharedTextureIDPtr() != nil {
+	if len(vw.list.windowList) > 1 && vw.list.shared.IsShowOverride() &&
+		vw.windowIndex == 0 && vw.shader.OverrideRenderer().SharedTextureIDPtr() != nil {
 		vw.shader.OverrideRenderer().Resolve()
 	}
 

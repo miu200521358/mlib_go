@@ -10,8 +10,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 )
 
-// msaaImpl は IMsaa インターフェースの実装
-type msaaImpl struct {
+// msaa は IMsaa インターフェースの実装
+type msaa struct {
 	config      rendering.MSAAConfig
 	fbo         uint32 // マルチサンプル用のフレームバッファオブジェクト
 	colorBuffer uint32 // カラー用マルチサンプルレンダーバッファ
@@ -26,7 +26,7 @@ func NewMsaa(width, height int) rendering.IMsaa {
 		Height:      height,
 		SampleCount: 4, // サンプル数（例: 4xMSAA）
 	}
-	msaa := &msaaImpl{
+	msaa := &msaa{
 		config: config,
 	}
 	msaa.init()
@@ -34,7 +34,7 @@ func NewMsaa(width, height int) rendering.IMsaa {
 }
 
 // init は MSAA 用の FBO とレンダーバッファを初期化します。
-func (m *msaaImpl) init() {
+func (m *msaa) init() {
 	// FBO の生成
 	gl.GenFramebuffers(1, &m.fbo)
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.fbo)
@@ -60,17 +60,17 @@ func (m *msaaImpl) init() {
 }
 
 // Bind は MSAA FBO をバインドし、描画先を MSAA に切り替えます。
-func (m *msaaImpl) Bind() {
+func (m *msaa) Bind() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.fbo)
 }
 
 // Unbind は FBO のバインドを解除し、デフォルトのフレームバッファに戻します。
-func (m *msaaImpl) Unbind() {
+func (m *msaa) Unbind() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }
 
 // Resolve はマルチサンプルの結果をデフォルトフレームバッファに解決（ブリット）します。
-func (m *msaaImpl) Resolve() {
+func (m *msaa) Resolve() {
 	// MSAA FBO からデフォルト FBO にカラー情報をコピー
 	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.fbo)
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, 0)
@@ -84,7 +84,7 @@ func (m *msaaImpl) Resolve() {
 }
 
 // Delete は MSAA 関連のリソース（FBO とレンダーバッファ）を解放します。
-func (m *msaaImpl) Delete() {
+func (m *msaa) Delete() {
 	if m.fbo != 0 {
 		gl.DeleteFramebuffers(1, &m.fbo)
 		m.fbo = 0
@@ -101,7 +101,7 @@ func (m *msaaImpl) Delete() {
 
 // Resize は MSAA のレンダーバッファサイズを更新します。
 // ウィンドウサイズの変更に合わせ、レンダーバッファを再生成します。
-func (m *msaaImpl) Resize(width, height int) {
+func (m *msaa) Resize(width, height int) {
 	m.config.Width = width
 	m.config.Height = height
 
