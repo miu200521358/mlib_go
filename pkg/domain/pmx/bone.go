@@ -115,6 +115,7 @@ type Bone struct {
 	AxisSign               int          // ボーンの軸ベクトル(左は-1, 右は1)
 	RigidBody              *RigidBody   // 物理演算用剛体
 	OriginalLayer          int          // 元の変形階層
+	ParentBone             *Bone        // 親ボーン
 }
 
 func NewBone() *Bone {

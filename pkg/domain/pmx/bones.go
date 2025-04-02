@@ -30,6 +30,17 @@ func NewBones(capacity int) *Bones {
 	}
 }
 
+func (b *Bones) GetStandardBoneNames() []string {
+	boneNames := make([]string, 0)
+	b.ForEach(func(index int, bone *Bone) bool {
+		if bone.Config() != nil {
+			boneNames = append(boneNames, bone.Name())
+		}
+		return true
+	})
+	return boneNames
+}
+
 // 指定された範囲のボーンの範囲のINDEXを取得
 func (bones *Bones) Range(fromBoneIndex, toBoneIndex int) []int {
 	fromIndex := slices.Index(bones.LayerSortedIndexes, fromBoneIndex)
@@ -257,9 +268,11 @@ func (bones *Bones) Setup() {
 			}
 		}
 
-		// 親ボーンに子ボーンとして登録する
-		if parentBone, err := bones.Get(bone.ParentIndex); err == nil {
+		if parentBone, err := bones.Get(bone.ParentIndex); err == nil && parentBone != nil {
+			// 親ボーンに子ボーンとして登録する
 			parentBone.ChildBoneIndexes = append(parentBone.ChildBoneIndexes, bone.Index())
+			// 親ボーンを登録
+			bone.ParentBone = parentBone
 		}
 		// 親からの相対位置
 		bone.ParentRelativePosition = bones.getParentRelativePosition(bone.Index())
