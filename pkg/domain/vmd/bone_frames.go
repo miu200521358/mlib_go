@@ -46,6 +46,9 @@ func (boneFrames *BoneFrames) Get(boneName string) *BoneNameFrames {
 		boneFrames.Update(NewBoneNameFrames(boneName))
 	}
 
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
+
 	return boneFrames.data[boneName]
 }
 
