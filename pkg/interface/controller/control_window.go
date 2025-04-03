@@ -567,10 +567,16 @@ func (cw *ControlWindow) onChangeLanguage(lang string) {
 }
 
 func (cw *ControlWindow) triggerLogLevelVerbose() {
-	cw.logLevelDebugAction.SetChecked(false)
-	cw.logLevelIkVerboseAction.SetChecked(false)
-	cw.logLevelViewerVerboseAction.SetChecked(false)
-	if cw.logLevelVerboseAction.Checked() {
+	if cw.logLevelDebugAction != nil {
+		cw.logLevelDebugAction.SetChecked(false)
+	}
+	if cw.logLevelIkVerboseAction != nil {
+		cw.logLevelIkVerboseAction.SetChecked(false)
+	}
+	if cw.logLevelViewerVerboseAction != nil {
+		cw.logLevelViewerVerboseAction.SetChecked(false)
+	}
+	if cw.logLevelVerboseAction != nil && cw.logLevelVerboseAction.Checked() {
 		mlog.SetLevel(mlog.VERBOSE)
 	} else {
 		mlog.SetLevel(mlog.INFO)
@@ -578,10 +584,16 @@ func (cw *ControlWindow) triggerLogLevelVerbose() {
 }
 
 func (cw *ControlWindow) triggerLogLevelIkVerbose() {
-	cw.logLevelDebugAction.SetChecked(false)
-	cw.logLevelViewerVerboseAction.SetChecked(false)
-	cw.logLevelVerboseAction.SetChecked(false)
-	if cw.logLevelIkVerboseAction.Checked() {
+	if cw.logLevelDebugAction != nil {
+		cw.logLevelDebugAction.SetChecked(false)
+	}
+	if cw.logLevelViewerVerboseAction != nil {
+		cw.logLevelViewerVerboseAction.SetChecked(false)
+	}
+	if cw.logLevelVerboseAction != nil {
+		cw.logLevelVerboseAction.SetChecked(false)
+	}
+	if cw.logLevelIkVerboseAction != nil && cw.logLevelIkVerboseAction.Checked() {
 		mlog.SetLevel(mlog.IK_VERBOSE)
 	} else {
 		mlog.SetLevel(mlog.INFO)
@@ -591,11 +603,17 @@ func (cw *ControlWindow) triggerLogLevelIkVerbose() {
 func (cw *ControlWindow) triggerLogLevelViewerVerbose() {
 	mlog.I("exe階層に「viewerPng」フォルダを作成し、画面描画中の連番pngを出力し続けます\n画面サイズ: 1920x1080、視野角: 40.0、カメラ位置: (0, 10, 45)、カメラ角度: (0, 0, 0) ")
 
-	cw.logLevelDebugAction.SetChecked(false)
-	cw.logLevelIkVerboseAction.SetChecked(false)
-	cw.logLevelVerboseAction.SetChecked(false)
+	if cw.logLevelDebugAction != nil {
+		cw.logLevelDebugAction.SetChecked(false)
+	}
+	if cw.logLevelVerboseAction != nil {
+		cw.logLevelIkVerboseAction.SetChecked(false)
+	}
+	if cw.logLevelIkVerboseAction != nil {
+		cw.logLevelVerboseAction.SetChecked(false)
+	}
 
-	if cw.logLevelViewerVerboseAction.Checked() {
+	if cw.logLevelViewerVerboseAction != nil && cw.logLevelViewerVerboseAction.Checked() {
 		mlog.SetLevel(mlog.VIEWER_VERBOSE)
 	} else {
 		mlog.SetLevel(mlog.INFO)
@@ -603,11 +621,17 @@ func (cw *ControlWindow) triggerLogLevelViewerVerbose() {
 }
 
 func (cw *ControlWindow) triggerLogLevelDebug() {
-	cw.logLevelIkVerboseAction.SetChecked(false)
-	cw.logLevelViewerVerboseAction.SetChecked(false)
-	cw.logLevelVerboseAction.SetChecked(false)
+	if cw.logLevelVerboseAction != nil {
+		cw.logLevelIkVerboseAction.SetChecked(false)
+	}
+	if cw.logLevelIkVerboseAction != nil {
+		cw.logLevelViewerVerboseAction.SetChecked(false)
+	}
+	if cw.logLevelViewerVerboseAction != nil {
+		cw.logLevelVerboseAction.SetChecked(false)
+	}
 
-	if cw.logLevelDebugAction.Checked() {
+	if cw.logLevelDebugAction != nil && cw.logLevelDebugAction.Checked() {
 		mlog.SetLevel(mlog.DEBUG)
 	} else {
 		mlog.SetLevel(mlog.INFO)
