@@ -110,7 +110,7 @@ func (tm *TextureManager) LoadAllTextures(windowIndex int, textures *pmx.Texture
 		texGl, err := tm.loadTextureGl(windowIndex, texture, modelPath)
 		if err != nil {
 			mlog.W(fmt.Sprintf("texture initialize error: %s", err))
-			return false
+			return true // エラーでも次のテクスチャを処理する
 		}
 		// インデックス位置に格納
 		tm.textures[texture.Index()] = texGl
