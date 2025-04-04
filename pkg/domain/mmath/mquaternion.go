@@ -650,7 +650,9 @@ func (quat *MQuaternion) SeparateTwistByAxis(globalAxis *MVec3) (twistQQ *MQuate
 }
 
 // SeparateByAxisは、グローバル軸に基づいてクォータニオンを3つのクォータニオン(x, y, z)に分割します。
-func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuaternion, *MQuaternion) {
+// x: 捩れ成分, y: Z成分, z: X成分
+// MMDの合成順は「YXZ」
+func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (xQQ, yQQ, zQQ *MQuaternion) {
 	localZAxis := MVec3{0, 0, -1}
 	globalXAxis := globalAxis.Normalize()
 	globalYAxis := localZAxis.Cross(globalXAxis)
@@ -669,7 +671,7 @@ func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuat
 	// YZの回転量（自身のねじれを無視する）
 	yzQQ := NewMQuaternionRotate(globalXAxis, globalXVec.Normalize())
 	// 元々の回転量 から YZ回転 を除去して、除去されたX成分を求める
-	xQQ := yzQQ.Inverse().Mul(quat)
+	xQQ = yzQQ.Inverse().Mul(quat)
 
 	// Y成分を抽出する ------------
 	// グローバル軸方向に伸ばす
@@ -677,7 +679,7 @@ func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuat
 	// XZの回転量（自身のねじれを無視する）
 	xzQQ := NewMQuaternionRotate(globalYAxis, globalYVec.Normalize())
 	// 元々の回転量 から XZ回転 を除去して、除去されたY成分を求める
-	yQQ := xzQQ.Inverse().Mul(quat)
+	yQQ = xzQQ.Inverse().Mul(quat)
 
 	// Z成分を抽出する ------------
 	// グローバル軸方向に伸ばす
@@ -685,7 +687,7 @@ func (quat *MQuaternion) SeparateByAxis(globalAxis *MVec3) (*MQuaternion, *MQuat
 	// XYの回転量（自身のねじれを無視する）
 	xyQQ := NewMQuaternionRotate(globalZAxis, globalZVec.Normalize())
 	// 元々の回転量 から XY回転 を除去して、除去されたZ成分を求める
-	zQQ := xyQQ.Inverse().Mul(quat)
+	zQQ = xyQQ.Inverse().Mul(quat)
 
 	return xQQ, yQQ, zQQ
 }
