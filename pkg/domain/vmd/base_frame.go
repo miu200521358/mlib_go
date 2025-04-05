@@ -1,6 +1,8 @@
 package vmd
 
 import (
+	"sync"
+
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/petar/GoLLRB/llrb"
 )
@@ -75,6 +77,7 @@ type BaseFrames[T IBaseFrame] struct {
 	RegisteredIndexes *mmath.LlrbIndexes[float32] // 登録対象キーフレリスト
 	newFunc           func(index float32) T       // キーフレ生成関数
 	nullFunc          func() T                    // 空キーフレ生成関数
+	lock              sync.RWMutex
 }
 
 func NewBaseFrames[T IBaseFrame](newFunc func(index float32) T, nullFunc func() T) *BaseFrames[T] {
@@ -84,6 +87,7 @@ func NewBaseFrames[T IBaseFrame](newFunc func(index float32) T, nullFunc func() 
 		RegisteredIndexes: &mmath.LlrbIndexes[float32]{LLRB: llrb.New()},
 		newFunc:           newFunc,
 		nullFunc:          nullFunc,
+		lock:              sync.RWMutex{},
 	}
 }
 
@@ -92,7 +96,10 @@ func (baseFrames *BaseFrames[T]) NewFrame(index float32) T {
 }
 
 func (baseFrames *BaseFrames[T]) Get(index float32) T {
-	if _, ok := baseFrames.values[index]; ok {
+	if baseFrames.Contains(index) {
+		baseFrames.lock.RLock()
+		defer baseFrames.lock.RUnlock()
+
 		return baseFrames.values[index]
 	}
 
@@ -109,6 +116,10 @@ func (baseFrames *BaseFrames[T]) Get(index float32) T {
 			// 存在しない場合nilを返す
 			return baseFrames.nullFunc()
 		}
+
+		baseFrames.lock.RLock()
+		defer baseFrames.lock.RUnlock()
+
 		copied := baseFrames.values[baseFrames.Indexes.Max()].Copy()
 		copied.SetIndex(index)
 		return copied.(T)
@@ -130,9 +141,15 @@ func (baseFrames *BaseFrames[T]) NextFrame(index float32) float32 {
 }
 
 func (baseFrames *BaseFrames[T]) ForEach(callback func(index float32, value T) bool) {
-	baseFrames.Indexes.ForEach(func(index float32) bool {
-		return callback(index, baseFrames.Get(index))
-	})
+	for _, v := range baseFrames.values {
+		if !callback(v.Index(), v) {
+			return
+		}
+	}
+
+	// baseFrames.Indexes.ForEach(func(index float32) bool {
+	// 	return callback(index, baseFrames.Get(index))
+	// })
 }
 
 func (baseFrames *BaseFrames[T]) appendFrame(v T) {
@@ -140,8 +157,12 @@ func (baseFrames *BaseFrames[T]) appendFrame(v T) {
 		baseFrames.RegisteredIndexes.ReplaceOrInsert(mmath.NewLlrbItem(v.Index()))
 	}
 
-	baseFrames.values[v.Index()] = v
 	baseFrames.Indexes.ReplaceOrInsert(mmath.NewLlrbItem(v.Index()))
+
+	baseFrames.lock.Lock()
+	defer baseFrames.lock.Unlock()
+
+	baseFrames.values[v.Index()] = v
 }
 
 func (baseFrames *BaseFrames[T]) MaxFrame() float32 {
@@ -163,11 +184,17 @@ func (baseFrames *BaseFrames[T]) ContainsRegistered(index float32) bool {
 }
 
 func (baseFrames *BaseFrames[T]) Contains(index float32) bool {
+	baseFrames.lock.RLock()
+	defer baseFrames.lock.RUnlock()
+
 	_, ok := baseFrames.values[index]
 	return ok
 }
 
 func (baseFrames *BaseFrames[T]) Delete(index float32) {
+	baseFrames.lock.Lock()
+	defer baseFrames.lock.Unlock()
+
 	if _, ok := baseFrames.values[index]; ok {
 		delete(baseFrames.values, index)
 		baseFrames.Indexes.Delete(mmath.NewLlrbItem(index))
@@ -190,6 +217,9 @@ func (baseFrames *BaseFrames[T]) Insert(f T) {
 
 // Update 登録済みのキーフレームを更新する
 func (baseFrames *BaseFrames[T]) Update(f T) {
+	baseFrames.lock.Lock()
+	defer baseFrames.lock.Unlock()
+
 	baseFrames.values[f.Index()] = f
 }
 
