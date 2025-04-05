@@ -621,3 +621,16 @@ func SortVec3(vectors []MVec3) []MVec3 {
 
 	return vectors
 }
+
+func MeanVec3(vectors []*MVec3) *MVec3 {
+	if len(vectors) == 0 {
+		return &MVec3{0, 0, 0}
+	}
+
+	sum := &MVec3{0, 0, 0}
+	for _, v := range vectors {
+		sum.Add(v)
+	}
+
+	return sum.MuledScalar(1.0 / float64(len(vectors)))
+}
