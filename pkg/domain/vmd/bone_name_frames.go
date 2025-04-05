@@ -4,6 +4,7 @@ import (
 	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/tiendc/go-deepcopy"
 )
 
 type BoneNameFrames struct {
@@ -326,4 +327,10 @@ func (boneNameFrames *BoneNameFrames) ContainsActive() bool {
 	})
 
 	return isActive
+}
+
+func (boneNameFrames *BoneNameFrames) Copy() (*BoneNameFrames, error) {
+	copied := new(BoneNameFrames)
+	err := deepcopy.Copy(copied, boneNameFrames)
+	return copied, err
 }
