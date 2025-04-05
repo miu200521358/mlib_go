@@ -697,21 +697,23 @@ func (bones *Bones) GetWristTail(direction BoneDirection) (*Bone, error) {
 func (bones *Bones) CreateWristTail(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(WRIST_TAIL.StringFromDirection(direction))
 
-	if wrist, err := bones.GetWrist(direction); err == nil {
-		switch direction {
-		case BONE_DIRECTION_LEFT:
-			bone.Position = &mmath.MVec3{
-				X: wrist.Position.X + 0.2,
-				Y: wrist.Position.Y - 0.5,
-				Z: wrist.Position.Z - 0.2,
-			}
-		case BONE_DIRECTION_RIGHT:
-			bone.Position = &mmath.MVec3{
-				X: wrist.Position.X - 0.2,
-				Y: wrist.Position.Y - 0.5,
-				Z: wrist.Position.Z - 0.2,
+	switch direction {
+	case BONE_DIRECTION_LEFT:
+		bonePositions := make([]*mmath.MVec3, 0)
+		for _, boneName := range []string{THUMB1.Left(), INDEX1.Left(), MIDDLE1.Left(), RING1.Left(), PINKY1.Left()} {
+			if bone, err := bones.GetByName(boneName); err == nil {
+				bonePositions = append(bonePositions, bone.Position)
 			}
 		}
+		bone.Position = mmath.MeanVec3(bonePositions)
+	case BONE_DIRECTION_RIGHT:
+		bonePositions := make([]*mmath.MVec3, 0)
+		for _, boneName := range []string{THUMB1.Right(), INDEX1.Right(), MIDDLE1.Right(), RING1.Right(), PINKY1.Right()} {
+			if bone, err := bones.GetByName(boneName); err == nil {
+				bonePositions = append(bonePositions, bone.Position)
+			}
+		}
+		bone.Position = mmath.MeanVec3(bonePositions)
 	}
 
 	// 親ボーン
