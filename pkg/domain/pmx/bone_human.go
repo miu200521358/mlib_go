@@ -771,9 +771,9 @@ func (bones *Bones) CreateThumbTail(direction BoneDirection) (*Bone, error) {
 	thumb2, _ := bones.GetThumb(direction, 2)
 	if thumb1 != nil && thumb2 != nil {
 		bone.Position = &mmath.MVec3{
-			X: thumb2.Position.X + (thumb2.Position.X - thumb2.Position.X),
-			Y: thumb2.Position.Y + (thumb2.Position.Y - thumb2.Position.Y),
-			Z: thumb2.Position.Z + (thumb2.Position.Z - thumb2.Position.Z),
+			X: thumb2.Position.X + (thumb2.Position.X - thumb1.Position.X),
+			Y: thumb2.Position.Y + (thumb2.Position.Y - thumb1.Position.Y),
+			Z: thumb2.Position.Z + (thumb2.Position.Z - thumb1.Position.Z),
 		}
 	}
 
@@ -811,9 +811,9 @@ func (bones *Bones) CreateIndexTail(direction BoneDirection) (*Bone, error) {
 	index2, _ := bones.GetIndex(direction, 2)
 	if index1 != nil && index2 != nil {
 		bone.Position = &mmath.MVec3{
-			X: index2.Position.X + (index2.Position.X - index2.Position.X),
-			Y: index2.Position.Y + (index2.Position.Y - index2.Position.Y),
-			Z: index2.Position.Z + (index2.Position.Z - index2.Position.Z),
+			X: index2.Position.X + (index2.Position.X - index1.Position.X),
+			Y: index2.Position.Y + (index2.Position.Y - index1.Position.Y),
+			Z: index2.Position.Z + (index2.Position.Z - index1.Position.Z),
 		}
 	}
 
@@ -851,9 +851,9 @@ func (bones *Bones) CreateMiddleTail(direction BoneDirection) (*Bone, error) {
 	middle2, _ := bones.GetMiddle(direction, 2)
 	if middle1 != nil && middle2 != nil {
 		bone.Position = &mmath.MVec3{
-			X: middle2.Position.X + (middle2.Position.X - middle2.Position.X),
-			Y: middle2.Position.Y + (middle2.Position.Y - middle2.Position.Y),
-			Z: middle2.Position.Z + (middle2.Position.Z - middle2.Position.Z),
+			X: middle2.Position.X + (middle2.Position.X - middle1.Position.X),
+			Y: middle2.Position.Y + (middle2.Position.Y - middle1.Position.Y),
+			Z: middle2.Position.Z + (middle2.Position.Z - middle1.Position.Z),
 		}
 	}
 
@@ -891,9 +891,9 @@ func (bones *Bones) CreateRingTail(direction BoneDirection) (*Bone, error) {
 	ring2, _ := bones.GetRing(direction, 2)
 	if ring1 != nil && ring2 != nil {
 		bone.Position = &mmath.MVec3{
-			X: ring2.Position.X + (ring2.Position.X - ring2.Position.X),
-			Y: ring2.Position.Y + (ring2.Position.Y - ring2.Position.Y),
-			Z: ring2.Position.Z + (ring2.Position.Z - ring2.Position.Z),
+			X: ring2.Position.X + (ring2.Position.X - ring1.Position.X),
+			Y: ring2.Position.Y + (ring2.Position.Y - ring1.Position.Y),
+			Z: ring2.Position.Z + (ring2.Position.Z - ring1.Position.Z),
 		}
 	}
 
@@ -931,9 +931,9 @@ func (bones *Bones) CreatePinkyTail(direction BoneDirection) (*Bone, error) {
 	pinky2, _ := bones.GetPinky(direction, 2)
 	if pinky1 != nil && pinky2 != nil {
 		bone.Position = &mmath.MVec3{
-			X: pinky2.Position.X + (pinky2.Position.X - pinky2.Position.X),
-			Y: pinky2.Position.Y + (pinky2.Position.Y - pinky2.Position.Y),
-			Z: pinky2.Position.Z + (pinky2.Position.Z - pinky2.Position.Z),
+			X: pinky2.Position.X + (pinky2.Position.X - pinky1.Position.X),
+			Y: pinky2.Position.Y + (pinky2.Position.Y - pinky1.Position.Y),
+			Z: pinky2.Position.Z + (pinky2.Position.Z - pinky1.Position.Z),
 		}
 	}
 
