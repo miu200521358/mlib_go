@@ -32,6 +32,7 @@ type FilePicker struct {
 	historyPushButton *walk.PushButton                                                // 履歴ボタン
 	historyDialog     *walk.Dialog                                                    // 履歴ダイアログ
 	historyListBox    *walk.ListBox                                                   // 履歴リスト
+	prevPath          string                                                          // 前回のパス
 	onPathChanged     func(*controller.ControlWindow, repository.IRepository, string) // パス変更時のコールバック
 }
 
@@ -322,6 +323,13 @@ func (fp *FilePicker) onChanged(path string, isCallBack bool) {
 	if fp.repository == nil || fp.historyKey == "" {
 		return
 	}
+
+	if fp.prevPath == path {
+		// パスが変更されていない場合は何もしない
+		return
+	}
+
+	fp.prevPath = fp.pathEdit.Text()
 
 	if path == "" {
 		fp.nameEdit.SetText(mi18n.T("未設定"))
