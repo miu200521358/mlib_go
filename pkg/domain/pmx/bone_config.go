@@ -1,6 +1,7 @@
 package pmx
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -731,4 +732,12 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 		}
 	})
 	return standardBoneConfigs
+}
+
+func (c *BoneConfig) IsFinger() bool {
+	return slices.Contains(c.Categories, CATEGORY_FINGER)
+}
+
+func (c *BoneConfig) IsArm() bool {
+	return slices.Contains(c.Categories, CATEGORY_ARM)
 }
