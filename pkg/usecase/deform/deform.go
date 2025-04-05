@@ -115,6 +115,18 @@ func DeformBone(
 	return deformBoneByPhysicsFlag(model, motion, nil, isCalcIk, float32(frame), boneNames, false).Bones
 }
 
+// DeformBone 前回情報ありでボーンデフォーム処理を実行する
+func DeformBoneWithDeltas(
+	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
+	deltas *delta.VmdDeltas,
+	isCalcIk bool,
+	frame int,
+	boneNames []string,
+) *delta.BoneDeltas {
+	return deformBoneByPhysicsFlag(model, motion, deltas, isCalcIk, float32(frame), boneNames, false).Bones
+}
+
 // deformBoneByPhysicsFlag ボーンデフォーム処理を実行する
 func deformBoneByPhysicsFlag(
 	model *pmx.PmxModel,
