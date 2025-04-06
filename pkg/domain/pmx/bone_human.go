@@ -178,9 +178,7 @@ func (bones *Bones) CreateLegCenter() (*Bone, error) {
 	}
 
 	// 親ボーン
-	if lower, err := bones.GetLower(); err == nil {
-		bone.ParentIndex = lower.Index()
-	}
+	bone.ParentIndex = bones.findParentIndexByConfig(LEG_CENTER, BONE_DIRECTION_TRUNK)
 
 	return bone, nil
 }
@@ -1396,6 +1394,28 @@ func (bones *Bones) findParentIndexByConfig(boneName StandardBoneName, direction
 		} else if bones.ContainsByName(tailBoneName.String()) {
 			if bone, err := bones.GetByName(tailBoneName.String()); bone != nil && err == nil {
 				return bone.ParentIndex
+			}
+		} else if bones.ContainsByName(tailBoneName.Left()) {
+			// 左右ボーンの親が左右の場合、その親までは辿る
+			if bone, err := bones.GetByName(tailBoneName.Left()); bone != nil && err == nil {
+				parentBone := bone.ParentBone
+				for range 5 {
+					if parentBone != nil && parentBone.Direction() == direction {
+						return parentBone.Index()
+					}
+					parentBone = parentBone.ParentBone
+				}
+			}
+		} else if bones.ContainsByName(tailBoneName.Right()) {
+			// 左右ボーンの親が左右の場合、その親までは辿る
+			if bone, err := bones.GetByName(tailBoneName.Right()); bone != nil && err == nil {
+				parentBone := bone.ParentBone
+				for range 5 {
+					if parentBone != nil && parentBone.Direction() == direction {
+						return parentBone.Index()
+					}
+					parentBone = parentBone.ParentBone
+				}
 			}
 		}
 	}
