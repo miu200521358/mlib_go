@@ -11,7 +11,7 @@ import (
 
 func (rep *PmxRepository) CreateSticky(
 	model *pmx.PmxModel,
-	insertBoneFunc func(bones *pmx.Bones) error,
+	insertBoneFunc func(vertices *pmx.Vertices, bones *pmx.Bones) error,
 	insertDebugFunc func(bones *pmx.Bones, displaySlots *pmx.DisplaySlots) error,
 ) error {
 
@@ -31,7 +31,7 @@ func (rep *PmxRepository) CreateSticky(
 
 	// 設定ボーンを追加
 	if insertBoneFunc != nil {
-		if err := insertBoneFunc(model.Bones); err != nil {
+		if err := insertBoneFunc(model.Vertices, model.Bones); err != nil {
 			return err
 		}
 	}
@@ -63,8 +63,9 @@ func (rep *PmxRepository) createStickBones(model *pmx.PmxModel) error {
 	}
 
 	model.Bones.ForEach(func(index int, bone *pmx.Bone) bool {
-		if !bone.IsVisible() || (bone.RigidBody != nil && bone.RigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC) {
-			// 非表示ボーン、物理ボーンはスルー
+		if !bone.IsVisible() || (bone.RigidBody != nil && bone.RigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC) ||
+			bone.Name() == pmx.LEG_IK_PARENT.Left() || bone.Name() == pmx.LEG_IK_PARENT.Right() || bone.IsIK() {
+			// 非表示ボーン、物理ボーン、IKはスルー
 			return true
 		}
 
