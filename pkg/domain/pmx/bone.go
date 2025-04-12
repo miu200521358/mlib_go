@@ -225,18 +225,28 @@ func (bone *Bone) Copy() core.IIndexNameModel {
 		ParentIndex:  bone.ParentIndex,
 		Layer:        bone.Layer,
 		BoneFlag:     bone.BoneFlag,
-		TailPosition: bone.TailPosition.Copy(),
 		TailIndex:    bone.TailIndex,
 		EffectIndex:  bone.EffectIndex,
 		EffectFactor: bone.EffectFactor,
-		FixedAxis:    bone.FixedAxis.Copy(),
-		LocalAxisX:   bone.LocalAxisX.Copy(),
-		LocalAxisZ:   bone.LocalAxisZ.Copy(),
 		EffectorKey:  bone.EffectorKey,
 		Ik:           copiedIk,
 		DisplaySlot:  bone.DisplaySlot,
 		IsSystem:     bone.IsSystem,
 	}
+
+	if bone.TailPosition != nil {
+		copied.TailPosition = bone.TailPosition.Copy()
+	}
+	if bone.FixedAxis != nil {
+		copied.FixedAxis = bone.FixedAxis.Copy()
+	}
+	if bone.LocalAxisX != nil {
+		copied.LocalAxisX = bone.LocalAxisX.Copy()
+	}
+	if bone.LocalAxisZ != nil {
+		copied.LocalAxisZ = bone.LocalAxisZ.Copy()
+	}
+
 	return copied
 }
 
