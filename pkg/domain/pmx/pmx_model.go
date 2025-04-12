@@ -49,7 +49,7 @@ func NewPmxModel(path string) *PmxModel {
 	model.Materials = NewMaterials(0)
 	model.Bones = NewBones(0)
 	model.Morphs = NewMorphs(0)
-	model.DisplaySlots = NewDisplaySlots(0)
+	model.DisplaySlots = NewInitialDisplaySlots()
 	model.RigidBodies = NewRigidBodies(0)
 	model.Joints = NewJoints(0)
 
