@@ -1,6 +1,7 @@
 package mmath
 
 import (
+	"fmt"
 	"math"
 	"slices"
 )
@@ -289,4 +290,20 @@ func BoolToFlag(b bool) float64 {
 		return 1.0
 	}
 	return -1.0
+}
+
+// calculateX は与えられたベクトルの長さ length と既知の y, z から
+// x の正負両方の候補を返す関数です。
+// ベクトルの長さ L と座標 y, z に対して、
+// x^2 = L^2 - y^2 - z^2
+// の解を計算します。
+func CalculateX(length, y, z float64) (float64, error) {
+	// ルートの中身となる項を計算
+	squareTerm := length*length - y*y - z*z
+	if squareTerm < 0 {
+		return 0, fmt.Errorf("与えられた値では実数解が存在しません")
+	}
+	// 正の解と負の解を計算
+	xPos := math.Sqrt(squareTerm)
+	return xPos, nil
 }
