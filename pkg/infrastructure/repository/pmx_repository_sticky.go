@@ -63,14 +63,16 @@ func (rep *PmxRepository) createStickBones(model *pmx.PmxModel) error {
 	}
 
 	model.Bones.ForEach(func(index int, bone *pmx.Bone) bool {
-		if !bone.IsVisible() || (bone.RigidBody != nil && bone.RigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC) ||
-			bone.Name() == pmx.LEG_IK_PARENT.Left() || bone.Name() == pmx.LEG_IK_PARENT.Right() || bone.IsIK() {
-			// 非表示ボーン、物理ボーン、IKはスルー
+		if (bone.Config() == nil && !bone.IsVisible()) ||
+			(bone.RigidBody != nil && bone.RigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC) ||
+			bone.Name() == pmx.LEG_IK_PARENT.Left() || bone.Name() == pmx.LEG_IK_PARENT.Right() ||
+			bone.Name() == pmx.LEG_IK.Left() || bone.Name() == pmx.LEG_IK.Right() {
+			// 設定外の非表示ボーン、物理ボーン、IKはスルー
 			return true
 		}
 
-		// システムボーンの場合、原点の直方体を作成
-		if bone.IsSystem {
+		// 原点に繋がるシステムボーンの場合、原点の直方体を作成
+		if bone.IsSystem && bone.ParentBone != nil && bone.ParentBone.Index() == rootBone.Index() {
 			rep.createStickRoot(model, bone)
 			return true
 		}
