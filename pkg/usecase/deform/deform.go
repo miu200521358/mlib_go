@@ -83,7 +83,8 @@ func DeformIk(
 	ikBone *pmx.Bone,
 	ikGlobalPosition *mmath.MVec3,
 	boneNames []string,
-	isForceDebug bool,
+	isRemoveTwist bool, // IKの捻りを除去するかどうか
+	isForceDebug bool, // IKのデバッグを強制的に有効にするかどうか
 ) *delta.VmdDeltas {
 	if boneNames == nil {
 		boneNames = make([]string, 0)
@@ -97,7 +98,73 @@ func DeformIk(
 
 	deformBoneIndexes, deltas := newVmdDeltas(model, motion, deltas, frame, boneNames, false)
 
-	deformIk(model, motion, deltas, frame, false, ikBone, ikGlobalPosition, deformBoneIndexes, 0, isForceDebug)
+	deformIk(model, motion, deltas, frame, false, ikBone, ikGlobalPosition, deformBoneIndexes, 0, isRemoveTwist, isForceDebug)
+
+	updateGlobalMatrix(deltas.Bones, deformBoneIndexes)
+
+	return deltas
+}
+
+func DeformIks(
+	model *pmx.PmxModel,
+	motion *vmd.VmdMotion,
+	deltas *delta.VmdDeltas,
+	frame float32,
+	ikBones []*pmx.Bone,
+	ikTargetBones []*pmx.Bone,
+	ikGlobalPositions []*mmath.MVec3,
+	boneNames []string,
+	loopCount int, // IKのループ回数
+	isRemoveTwist bool, // IKの捻りを除去するかどうか
+	isForceDebug bool, // IKのデバッグを強制的に有効にするかどうか
+) *delta.VmdDeltas {
+	if boneNames == nil {
+		boneNames = make([]string, 0)
+	}
+	for _, ikBone := range ikBones {
+		ikTargetBone, _ := model.Bones.Get(ikBone.Ik.BoneIndex)
+		boneNames = append(boneNames, ikTargetBone.Name())
+		for _, link := range ikBone.Ik.Links {
+			linkBone, _ := model.Bones.Get(link.BoneIndex)
+			boneNames = append(boneNames, linkBone.Name())
+		}
+	}
+
+	deformBoneIndexes, deltas := newVmdDeltas(model, motion, deltas, frame, boneNames, false)
+
+	for range loopCount {
+		for i, ikBone := range ikBones {
+			// IK変形リスト（IKのターゲットで代用して、ボーンの子孫にあたるボーンインデックス一覧）
+			ikTargetDeformBoneIndexes := model.Bones.DeformBoneIndexes[ikTargetBones[i].Index()]
+
+			// 変形リストを再帰的に更新 (IKの前に対象ボーンを先に最新化)
+			// IK対象ボーンの子階層がまだ最新でない場合、先に更新する
+			deltas.Bones = fillBoneDeform(
+				model,
+				motion,
+				deltas,
+				frame,
+				ikTargetDeformBoneIndexes,
+				false, // IK再帰呼び出ししない
+				false,
+			)
+
+			// 親→子の順にグローバル行列を再更新
+			updateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
+
+			// IK適用前のグローバル行列を保存
+			for _, idx := range ikTargetDeformBoneIndexes {
+				linkD := deltas.Bones.Get(idx)
+				if linkD != nil {
+					linkD.GlobalIkOffMatrix = linkD.GlobalMatrix.Copy()
+					deltas.Bones.Update(linkD)
+				}
+			}
+
+			deformIk(model, motion, deltas, frame, false, ikBone, ikGlobalPositions[i],
+				ikTargetDeformBoneIndexes, 0, isRemoveTwist, isForceDebug)
+		}
+	}
 
 	updateGlobalMatrix(deltas.Bones, deformBoneIndexes)
 
