@@ -322,6 +322,13 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 }
 
 func (fp *FilePicker) onChanged(path string, isCallBack bool) {
+	path = filepath.Clean(path)
+	path = strings.Trim(path, "\"") // ダブルクォーテーションも取り除く
+	path = strings.Trim(path, "'")  // シングルクォーテーションも取り除く
+	path = strings.Trim(path, " ")  // 先頭と末尾の空白を取り除く
+	path = strings.Trim(path, ".")  // 先頭と末尾のドットを取り除く
+	fp.pathEdit.ChangeText(path)
+
 	if fp.repository == nil || fp.historyKey == "" {
 		return
 	}
@@ -344,11 +351,6 @@ func (fp *FilePicker) onChanged(path string, isCallBack bool) {
 		return
 	}
 
-	// パスにダブルクォーテーションが含まれている場合、先頭と末尾だけを取り除く
-	path = filepath.Clean(path)
-	path = strings.Trim(path, "\"")
-
-	fp.pathEdit.ChangeText(path)
 	fp.nameEdit.SetText(fp.repository.LoadName(path))
 
 	if ok, err := fp.repository.CanLoad(path); ok && err == nil {
