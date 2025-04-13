@@ -591,6 +591,7 @@ func fillBoneDeform(
 				ikTargetDeformBoneIndexes,
 				i, // deformIndex
 				false,
+				false,
 			)
 		}
 	}
@@ -695,6 +696,7 @@ func deformIk(
 	ikGlobalPosition *mmath.MVec3,
 	ikTargetDeformBoneIndexes []int,
 	deformIndex int,
+	isRemoveTwist bool,
 	isForceDebug bool,
 ) *delta.BoneDeltas {
 
@@ -816,12 +818,12 @@ ikLoop:
 			linkBone, _ := model.Bones.Get(ikLink.BoneIndex)
 
 			// 角度制限が完全0の場合はスキップ
-			if (linkBone.AngleLimit &&
-				linkBone.MinAngleLimit.IsZero() &&
-				linkBone.MaxAngleLimit.IsZero()) ||
-				(linkBone.LocalAngleLimit &&
-					linkBone.LocalMinAngleLimit.IsZero() &&
-					linkBone.LocalMaxAngleLimit.IsZero()) {
+			if (ikLink.AngleLimit &&
+				ikLink.MinAngleLimit.IsZero() &&
+				ikLink.MaxAngleLimit.IsZero()) ||
+				(ikLink.LocalAngleLimit &&
+					ikLink.LocalMinAngleLimit.IsZero() &&
+					ikLink.LocalMaxAngleLimit.IsZero()) {
 				continue
 			}
 
@@ -996,6 +998,10 @@ ikLoop:
 				}
 			} else {
 				ikQuat = mmath.NewMQuaternionFromAxisAnglesRotate(axisLimited, linkAngle)
+				if isRemoveTwist {
+					// 軸回転成分除去指示の場合、分解して除去
+					_, ikQuat = ikQuat.SeparateTwistByAxis(linkBone.ChildRelativePosition.Normalized())
+				}
 			}
 
 			originalTotalIkQuat := linkQuat.Muled(originalIkQuat)
