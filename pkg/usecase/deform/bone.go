@@ -800,7 +800,7 @@ func deformIk(
 		if isGlobalDebug {
 			bf := vmd.NewBoneFrame(float32(count))
 			bf.Position = ikGlobalPosition
-			globalMotion.AppendRegisteredBoneFrame(ikBone.Name(), bf)
+			globalMotion.AppendBoneFrame(ikBone.Name(), bf)
 			count++
 		}
 	}
@@ -841,7 +841,7 @@ ikLoop:
 			if isFullDebug {
 				bf := vmd.NewBoneFrame(float32(count))
 				bf.Rotation = linkQuat.Copy()
-				ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
+				ikMotion.AppendBoneFrame(linkBone.Name(), bf)
 				count++
 				fmt.Fprintf(ikFile,
 					"[%.3f][%03d][%s][%05d][linkQuat] %s(%s)\n",
@@ -860,11 +860,11 @@ ikLoop:
 				// 位置をそれぞれ出力
 				bfIk := vmd.NewBoneFrame(float32(count))
 				bfIk.Position = ikGlobalPosition
-				globalMotion.AppendRegisteredBoneFrame(ikBone.Name(), bfIk)
+				globalMotion.AppendBoneFrame(ikBone.Name(), bfIk)
 
 				bfTgt := vmd.NewBoneFrame(float32(count))
 				bfTgt.Position = ikTargetGlobalPos
-				globalMotion.AppendRegisteredBoneFrame(ikTargetBone.Name(), bfTgt)
+				globalMotion.AppendBoneFrame(ikTargetBone.Name(), bfTgt)
 
 				count++
 			}
@@ -875,15 +875,15 @@ ikLoop:
 				if isGlobalDebug {
 					bfLink := vmd.NewBoneFrame(float32(count))
 					bfLink.Position = deltas.Bones.Get(linkBone.Index()).FilledGlobalPosition()
-					globalMotion.AppendRegisteredBoneFrame(linkBone.Name(), bfLink)
+					globalMotion.AppendBoneFrame(linkBone.Name(), bfLink)
 
 					bfIk := vmd.NewBoneFrame(float32(count))
 					bfIk.Position = ikGlobalPosition
-					globalMotion.AppendRegisteredBoneFrame(ikBone.Name(), bfIk)
+					globalMotion.AppendBoneFrame(ikBone.Name(), bfIk)
 
 					bfTgt := vmd.NewBoneFrame(float32(count))
 					bfTgt.Position = ikTargetGlobalPos
-					globalMotion.AppendRegisteredBoneFrame(ikTargetBone.Name(), bfTgt)
+					globalMotion.AppendBoneFrame(ikTargetBone.Name(), bfTgt)
 					count++
 				}
 			}
@@ -1005,7 +1005,7 @@ ikLoop:
 				// originalTotalIkQuat
 				bfOrig := vmd.NewBoneFrame(float32(count))
 				bfOrig.Rotation = originalTotalIkQuat.Copy()
-				ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bfOrig)
+				ikMotion.AppendBoneFrame(linkBone.Name(), bfOrig)
 				count++
 				fmt.Fprintf(ikFile,
 					"[%.3f][%03d][%s][%05d][originalTotalIkQuat] %s(%s)\n",
@@ -1021,7 +1021,7 @@ ikLoop:
 				// totalIkQuat
 				bfTotal := vmd.NewBoneFrame(float32(count))
 				bfTotal.Rotation = totalIkQuat.Copy()
-				ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bfTotal)
+				ikMotion.AppendBoneFrame(linkBone.Name(), bfTotal)
 				count++
 				fmt.Fprintf(ikFile,
 					"[%.3f][%03d][%s][%05d][totalIkQuat] %s(%s)\n",
@@ -1080,7 +1080,7 @@ ikLoop:
 				if isFullDebug {
 					bf := vmd.NewBoneFrame(float32(count))
 					bf.Rotation = resultIkQuat.Copy()
-					ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), bf)
+					ikMotion.AppendBoneFrame(linkBone.Name(), bf)
 					count++
 					fmt.Fprintf(ikFile,
 						"[%.3f][%03d][%s][%05d][軸制限後] resultIkQuat: %s(%s)\n",
@@ -1097,7 +1097,7 @@ ikLoop:
 			if isFullDebug {
 				linkBf := vmd.NewBoneFrame(float32(count))
 				linkBf.Rotation = linkDelta.FilledTotalRotation().Copy()
-				ikMotion.AppendRegisteredBoneFrame(linkBone.Name(), linkBf)
+				ikMotion.AppendBoneFrame(linkBone.Name(), linkBf)
 				count++
 				fmt.Fprintf(ikFile,
 					"[%.3f][%03d][%s][%05d][結果] linkBf.Rotation: %s(%s)\n",

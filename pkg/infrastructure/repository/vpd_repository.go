@@ -213,7 +213,7 @@ func (rep *VpdRepository) loadModel(motion *vmd.VmdMotion) error {
 				w, _ := strconv.ParseFloat(matches[4], 64)
 				bf.Rotation = mmath.NewMQuaternionByValues(x, y, z, w)
 
-				motion.AppendRegisteredBoneFrame(boneName, bf)
+				motion.AppendBoneFrame(boneName, bf)
 				continue
 			}
 		}

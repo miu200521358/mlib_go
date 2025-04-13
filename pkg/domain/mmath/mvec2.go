@@ -344,7 +344,7 @@ func (v1 *MVec2) Lerp(v2 *MVec2, t float64) *MVec2 {
 		return v1.Copy()
 	}
 
-	return (v2.Sub(v1)).MulScalar(t).Added(v1)
+	return (v2.Subed(v1)).MuledScalar(t).Added(v1)
 }
 
 func (vec2 *MVec2) Round() *MVec2 {

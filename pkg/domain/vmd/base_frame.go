@@ -10,7 +10,6 @@ import (
 type IBaseFrame interface {
 	Index() float32
 	SetIndex(index float32)
-	IsRegistered() bool
 	IsRead() bool
 	Less(than llrb.Item) bool
 	lerpFrame(prevFrame IBaseFrame, index float32) IBaseFrame
@@ -19,16 +18,14 @@ type IBaseFrame interface {
 }
 
 type BaseFrame struct {
-	index      *mmath.LlrbItem[float32]
-	Registered bool // 登録対象のキーフレであるか
-	Read       bool // VMDファイルから読み込んだキーフレであるか
+	index *mmath.LlrbItem[float32]
+	Read  bool // VMDファイルから読み込んだキーフレであるか
 }
 
 func NewFrame(index float32) IBaseFrame {
 	return &BaseFrame{
-		index:      mmath.NewLlrbItem(index),
-		Registered: false,
-		Read:       false,
+		index: mmath.NewLlrbItem(index),
+		Read:  false,
 	}
 }
 
@@ -38,10 +35,6 @@ func (baseFrame *BaseFrame) Index() float32 {
 
 func (baseFrame *BaseFrame) SetIndex(index float32) {
 	baseFrame.index = mmath.NewLlrbItem(index)
-}
-
-func (baseFrame *BaseFrame) IsRegistered() bool {
-	return baseFrame.Registered
 }
 
 func (baseFrame *BaseFrame) IsRead() bool {
@@ -58,9 +51,8 @@ func (baseFrame *BaseFrame) Less(than llrb.Item) bool {
 
 func (baseFrame *BaseFrame) Copy() IBaseFrame {
 	return &BaseFrame{
-		index:      baseFrame.index,
-		Registered: baseFrame.Registered,
-		Read:       baseFrame.Read,
+		index: baseFrame.index,
+		Read:  baseFrame.Read,
 	}
 }
 
@@ -72,22 +64,20 @@ func (baseFrame *BaseFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFram
 }
 
 type BaseFrames[T IBaseFrame] struct {
-	values            map[float32]T               // キーフレリスト
-	Indexes           *mmath.LlrbIndexes[float32] // 全キーフレリスト
-	RegisteredIndexes *mmath.LlrbIndexes[float32] // 登録対象キーフレリスト
-	newFunc           func(index float32) T       // キーフレ生成関数
-	nullFunc          func() T                    // 空キーフレ生成関数
-	lock              sync.RWMutex
+	values   map[float32]T               // キーフレリスト
+	Indexes  *mmath.LlrbIndexes[float32] // 全キーフレリスト
+	newFunc  func(index float32) T       // キーフレ生成関数
+	nullFunc func() T                    // 空キーフレ生成関数
+	lock     sync.RWMutex
 }
 
 func NewBaseFrames[T IBaseFrame](newFunc func(index float32) T, nullFunc func() T) *BaseFrames[T] {
 	return &BaseFrames[T]{
-		values:            make(map[float32]T),
-		Indexes:           &mmath.LlrbIndexes[float32]{LLRB: llrb.New()},
-		RegisteredIndexes: &mmath.LlrbIndexes[float32]{LLRB: llrb.New()},
-		newFunc:           newFunc,
-		nullFunc:          nullFunc,
-		lock:              sync.RWMutex{},
+		values:   make(map[float32]T),
+		Indexes:  &mmath.LlrbIndexes[float32]{LLRB: llrb.New()},
+		newFunc:  newFunc,
+		nullFunc: nullFunc,
+		lock:     sync.RWMutex{},
 	}
 }
 
@@ -153,10 +143,6 @@ func (baseFrames *BaseFrames[T]) ForEach(callback func(index float32, value T) b
 }
 
 func (baseFrames *BaseFrames[T]) appendFrame(v T) {
-	if v.IsRegistered() {
-		baseFrames.RegisteredIndexes.ReplaceOrInsert(mmath.NewLlrbItem(v.Index()))
-	}
-
 	baseFrames.Indexes.ReplaceOrInsert(mmath.NewLlrbItem(v.Index()))
 
 	baseFrames.lock.Lock()
@@ -166,21 +152,21 @@ func (baseFrames *BaseFrames[T]) appendFrame(v T) {
 }
 
 func (baseFrames *BaseFrames[T]) MaxFrame() float32 {
-	if baseFrames.RegisteredIndexes.Len() == 0 {
+	if baseFrames.Indexes.Len() == 0 {
 		return 0
 	}
-	return baseFrames.RegisteredIndexes.Max()
+	return baseFrames.Indexes.Max()
 }
 
 func (baseFrames *BaseFrames[T]) MinFrame() float32 {
-	if baseFrames.RegisteredIndexes.Len() == 0 {
+	if baseFrames.Indexes.Len() == 0 {
 		return 0
 	}
-	return baseFrames.RegisteredIndexes.Min()
+	return baseFrames.Indexes.Min()
 }
 
 func (baseFrames *BaseFrames[T]) ContainsRegistered(index float32) bool {
-	return baseFrames.RegisteredIndexes.Has(index)
+	return baseFrames.Indexes.Has(index)
 }
 
 func (baseFrames *BaseFrames[T]) Contains(index float32) bool {
@@ -200,8 +186,8 @@ func (baseFrames *BaseFrames[T]) Delete(index float32) {
 		baseFrames.Indexes.Delete(mmath.NewLlrbItem(index))
 	}
 
-	if baseFrames.RegisteredIndexes.Has(index) {
-		baseFrames.RegisteredIndexes.Delete(mmath.NewLlrbItem(index))
+	if baseFrames.Indexes.Has(index) {
+		baseFrames.Indexes.Delete(mmath.NewLlrbItem(index))
 	}
 }
 
@@ -224,23 +210,21 @@ func (baseFrames *BaseFrames[T]) Update(f T) {
 }
 
 func (baseFrames *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {
-	if f.IsRegistered() {
-		if baseFrames.RegisteredIndexes.Len() == 0 {
-			// フレームがない場合、何もしない
-			baseFrames.appendFrame(f)
-			return
-		}
+	if baseFrames.Indexes.Len() == 0 {
+		// フレームがない場合、何もしない
+		baseFrames.appendFrame(f)
+		return
+	}
 
-		if isSplitCurve {
-			// 補間曲線を分割する
-			prevF := baseFrames.Get(baseFrames.PrevFrame(f.Index()))
-			nextF := baseFrames.Get(baseFrames.NextFrame(f.Index()))
+	if isSplitCurve {
+		// 補間曲線を分割する
+		prevF := baseFrames.Get(baseFrames.PrevFrame(f.Index()))
+		nextF := baseFrames.Get(baseFrames.NextFrame(f.Index()))
 
-			// 補間曲線を分割する
-			if nextF.Index() > f.Index() && prevF.Index() < f.Index() {
-				index := f.Index()
-				f.splitCurve(prevF, nextF, index)
-			}
+		// 補間曲線を分割する
+		if nextF.Index() > f.Index() && prevF.Index() < f.Index() {
+			index := f.Index()
+			f.splitCurve(prevF, nextF, index)
 		}
 	}
 
@@ -248,5 +232,5 @@ func (baseFrames *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {
 }
 
 func (baseFrames *BaseFrames[T]) Length() int {
-	return baseFrames.RegisteredIndexes.Length()
+	return baseFrames.Indexes.Length()
 }

@@ -236,7 +236,7 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 		}
 		bf.Curves = vmd.NewBoneCurvesByValues(curves)
 
-		motion.AppendRegisteredBoneFrame(boneName, bf)
+		motion.AppendBoneFrame(boneName, bf)
 	}
 
 	return nil
@@ -259,7 +259,6 @@ func (rep *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
 		}
 
 		mf := vmd.NewMorphFrame(0)
-		mf.Registered = true
 		mf.Read = true
 
 		// モーフ名
@@ -299,7 +298,6 @@ func (rep *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 
 	for i := range int(totalCount) {
 		cf := vmd.NewCameraFrame(0)
-		cf.Registered = true
 		cf.Read = true
 
 		// キーフレ番号
@@ -370,7 +368,6 @@ func (rep *VmdRepository) loadLights(motion *vmd.VmdMotion) error {
 
 	for i := range int(totalCount) {
 		lf := vmd.NewLightFrame(0)
-		lf.Registered = true
 		lf.Read = true
 
 		// キーフレ番号
@@ -410,7 +407,6 @@ func (rep *VmdRepository) loadShadows(motion *vmd.VmdMotion) error {
 
 	for i := range int(totalCount) {
 		sf := vmd.NewShadowFrame(0)
-		sf.Registered = true
 		sf.Read = true
 
 		// キーフレ番号
@@ -451,7 +447,6 @@ func (rep *VmdRepository) loadIks(motion *vmd.VmdMotion) error {
 
 	for i := range int(totalCount) {
 		ikf := vmd.NewIkFrame(0)
-		ikf.Registered = true
 		ikf.Read = true
 
 		// キーフレ番号

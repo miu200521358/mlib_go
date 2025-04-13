@@ -425,7 +425,7 @@ func (vec3 *MVec3) Lerp(other *MVec3, t float64) *MVec3 {
 			return vec3.Copy()
 		}
 
-		return vec3.Add((other.Subed(vec3)).MulScalar(t))
+		return vec3.Added((other.Subed(vec3)).MuledScalar(t))
 	}
 }
 

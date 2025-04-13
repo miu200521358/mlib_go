@@ -74,7 +74,7 @@ func (morphFrames *MorphFrames) MinFrame() float32 {
 func (morphFrames *MorphFrames) Length() int {
 	count := 0
 	for _, fs := range morphFrames.data {
-		count += fs.RegisteredIndexes.Length()
+		count += fs.Indexes.Length()
 	}
 	return count
 }
@@ -91,19 +91,6 @@ func (morphFrames *MorphFrames) Indexes() []int {
 	indexes := make([]int, 0)
 	for _, morphFrames := range morphFrames.data {
 		morphFrames.Indexes.ForEach(func(index float32) bool {
-			indexes = append(indexes, int(index))
-			return true
-		})
-	}
-	mmath.Unique(indexes)
-	mmath.Sort(indexes)
-	return indexes
-}
-
-func (morphFrames *MorphFrames) RegisteredIndexes() []int {
-	indexes := make([]int, 0)
-	for _, morphFrames := range morphFrames.data {
-		morphFrames.RegisteredIndexes.ForEach(func(index float32) bool {
 			indexes = append(indexes, int(index))
 			return true
 		})

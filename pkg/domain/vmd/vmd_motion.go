@@ -5,6 +5,7 @@ import (
 	"hash/fnv"
 	"math/rand"
 	"strings"
+	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/tiendc/go-deepcopy"
@@ -21,6 +22,7 @@ type VmdMotion struct {
 	LightFrames  *LightFrames
 	ShadowFrames *ShadowFrames
 	IkFrames     *IkFrames
+	lock         sync.Mutex // スレッドセーフ用のロック
 }
 
 var InitialMotion = NewVmdMotion("")
@@ -36,6 +38,7 @@ func NewVmdMotion(path string) *VmdMotion {
 		LightFrames:  NewLightFrames(),
 		ShadowFrames: NewShadowFrames(),
 		IkFrames:     NewIkFrames(),
+		lock:         sync.Mutex{},
 	}
 }
 
@@ -98,9 +101,9 @@ func (motion *VmdMotion) MinFrame() float32 {
 	return min(motion.BoneFrames.MinFrame(), motion.MorphFrames.MinFrame())
 }
 
-func (motion *VmdMotion) RegisteredIndexes() []int {
-	boneFrames := motion.BoneFrames.RegisteredIndexes()
-	morphFrames := motion.MorphFrames.RegisteredIndexes()
+func (motion *VmdMotion) Indexes() []int {
+	boneFrames := motion.BoneFrames.Indexes()
+	morphFrames := motion.MorphFrames.Indexes()
 
 	frames := make([]int, 0, len(boneFrames)+len(morphFrames))
 	for f := range boneFrames {
@@ -120,17 +123,7 @@ func (motion *VmdMotion) AppendBoneFrame(boneName string, bf *BoneFrame) {
 	motion.BoneFrames.Get(boneName).Append(bf)
 }
 
-func (motion *VmdMotion) AppendRegisteredBoneFrame(boneName string, bf *BoneFrame) {
-	bf.Registered = true
-	motion.BoneFrames.Get(boneName).Append(bf)
-}
-
 func (motion *VmdMotion) AppendMorphFrame(morphName string, mf *MorphFrame) {
-	motion.MorphFrames.Get(morphName).Append(mf)
-}
-
-func (motion *VmdMotion) AppendRegisteredMorphFrame(morphName string, mf *MorphFrame) {
-	mf.Registered = true
 	motion.MorphFrames.Get(morphName).Append(mf)
 }
 
@@ -151,11 +144,6 @@ func (motion *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 }
 
 func (motion *VmdMotion) InsertBoneFrame(boneName string, bf *BoneFrame) {
-	motion.BoneFrames.Get(boneName).Insert(bf)
-}
-
-func (motion *VmdMotion) InsertRegisteredBoneFrame(boneName string, bf *BoneFrame) {
-	bf.Registered = true
 	motion.BoneFrames.Get(boneName).Insert(bf)
 }
 
@@ -189,6 +177,9 @@ func (motion *VmdMotion) Clean() {
 }
 
 func (motion *VmdMotion) Copy() (*VmdMotion, error) {
+	motion.lock.Lock()
+	defer motion.lock.Unlock()
+
 	copied := new(VmdMotion)
 	err := deepcopy.Copy(copied, motion)
 	return copied, err

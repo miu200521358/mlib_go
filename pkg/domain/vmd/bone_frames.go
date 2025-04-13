@@ -73,26 +73,13 @@ func (boneFrames *BoneFrames) Indexes() []int {
 	return indexes
 }
 
-func (boneFrames *BoneFrames) RegisteredIndexes() []int {
-	indexes := make([]int, 0)
-	for _, boneFrames := range boneFrames.values {
-		boneFrames.RegisteredIndexes.ForEach(func(index float32) bool {
-			indexes = append(indexes, int(index))
-			return true
-		})
-	}
-	mmath.Unique(indexes)
-	mmath.Sort(indexes)
-	return indexes
-}
-
-func (boneFrames *BoneFrames) RegisteredIndexesByNames(names []string) []int {
+func (boneFrames *BoneFrames) IndexesByNames(names []string) []int {
 	indexes := make([]int, 0)
 	for boneName, boneFrames := range boneFrames.values {
 		if !slices.Contains(names, boneName) {
 			continue
 		}
-		boneFrames.RegisteredIndexes.ForEach(func(index float32) bool {
+		boneFrames.Indexes.ForEach(func(index float32) bool {
 			indexes = append(indexes, int(index))
 			return true
 		})
@@ -105,7 +92,7 @@ func (boneFrames *BoneFrames) RegisteredIndexesByNames(names []string) []int {
 func (boneFrames *BoneFrames) Length() int {
 	count := 0
 	for _, boneFrames := range boneFrames.values {
-		count += boneFrames.RegisteredIndexes.Len()
+		count += boneFrames.Indexes.Len()
 	}
 	return count
 }

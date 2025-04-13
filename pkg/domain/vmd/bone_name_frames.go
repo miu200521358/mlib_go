@@ -86,7 +86,6 @@ func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
 		// 最初のフレームを登録
 		bf := boneNameFrames.Get(inflectionFrames[0])
 		reduceBf := NewBoneFrame(inflectionFrames[0])
-		reduceBf.Registered = true
 		reduceBf.Position = bf.Position.Copy()
 		reduceBf.Rotation = bf.Rotation.Copy()
 		if bf.Curves != nil {
@@ -217,7 +216,6 @@ func (boneNameFrames *BoneNameFrames) reduceRange(
 			bf := boneNameFrames.Get(endFrame)
 
 			reduceBf := NewBoneFrame(endFrame)
-			reduceBf.Registered = true
 			reduceBf.Position = bf.Position.Copy()
 			reduceBf.Rotation = bf.Rotation.Copy()
 			reduceBf.Curves = &BoneCurves{
@@ -243,7 +241,6 @@ func (boneNameFrames *BoneNameFrames) reduceRange(
 			bf := boneNameFrames.Get(startFrame)
 
 			reduceBf := NewBoneFrame(startFrame)
-			reduceBf.Registered = true
 			reduceBf.Position = bf.Position.Copy()
 			reduceBf.Rotation = bf.Rotation.Copy()
 			if bf.Curves != nil {

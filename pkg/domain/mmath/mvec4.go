@@ -374,7 +374,7 @@ func (vec4 *MVec4) Lerp(other *MVec4, t float64) *MVec4 {
 		return vec4.Copy()
 	}
 
-	return (other.Subed(vec4)).MulScalar(t).Add(vec4)
+	return (other.Subed(vec4)).MuledScalar(t).Added(vec4)
 }
 
 // Vec3DividedByW returns a vec3.T version of the vector by dividing the first three vector components (XYZ) by the last one (W).
