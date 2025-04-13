@@ -42,8 +42,10 @@ func (rep *PmxPmxJsonRepository) CanLoad(path string) (bool, error) {
 // 指定されたパスのファイルからデータを読み込む
 func (rep *PmxPmxJsonRepository) Load(path string) (core.IHashModel, error) {
 	if strings.HasSuffix(strings.ToLower(path), ".json") {
+		rep.pmxJsonRepository = NewPmxJsonRepository()
 		return rep.pmxJsonRepository.Load(path)
 	} else {
+		rep.pmxRepository = NewPmxRepository(true)
 		return rep.pmxRepository.Load(path)
 	}
 }
@@ -54,8 +56,10 @@ func (rep *PmxPmxJsonRepository) LoadName(path string) string {
 	}
 
 	if strings.HasSuffix(strings.ToLower(path), ".json") {
+		rep.pmxJsonRepository = NewPmxJsonRepository()
 		return rep.pmxJsonRepository.LoadName(path)
 	} else {
+		rep.pmxRepository = NewPmxRepository(false)
 		return rep.pmxRepository.LoadName(path)
 	}
 }

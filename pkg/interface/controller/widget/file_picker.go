@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"fmt"
-	"math/rand"
 	"path/filepath"
 	"strings"
 
@@ -503,12 +501,10 @@ func (fp *FilePicker) SetEnabled(enabled bool) {
 }
 
 func (fp *FilePicker) SetPath(path string) {
-	fp.prevPath = fmt.Sprintf("%f", rand.Float64()) // ランダムな値を設定して変更を検知
 	fp.onChanged(path, true)
 }
 
 func (fp *FilePicker) ChangePath(path string) {
-	fp.prevPath = fmt.Sprintf("%.f", rand.Float64()) // ランダムな値を設定して変更を検知
 	fp.onChanged(path, false)
 }
 

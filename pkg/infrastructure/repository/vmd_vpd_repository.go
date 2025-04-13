@@ -42,16 +42,20 @@ func (rep *VmdVpdRepository) CanLoad(path string) (bool, error) {
 // 指定されたパスのファイルからデータを読み込む
 func (rep *VmdVpdRepository) Load(path string) (core.IHashModel, error) {
 	if strings.HasSuffix(strings.ToLower(path), ".vpd") {
+		rep.vpdRepository = NewVpdRepository()
 		return rep.vpdRepository.Load(path)
 	} else {
+		rep.vmdRepository = NewVmdRepository(true)
 		return rep.vmdRepository.Load(path)
 	}
 }
 
 func (rep *VmdVpdRepository) LoadName(path string) string {
 	if strings.HasSuffix(strings.ToLower(path), ".vpd") {
+		rep.vpdRepository = NewVpdRepository()
 		return rep.vpdRepository.LoadName(path)
 	} else {
+		rep.vmdRepository = NewVmdRepository(false)
 		return rep.vmdRepository.LoadName(path)
 	}
 }

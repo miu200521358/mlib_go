@@ -42,8 +42,10 @@ func (rep *PmxXRepository) CanLoad(path string) (bool, error) {
 // 指定されたパスのファイルからデータを読み込む
 func (rep *PmxXRepository) Load(path string) (core.IHashModel, error) {
 	if strings.HasSuffix(strings.ToLower(path), ".x") {
+		rep.xRepository = NewXRepository()
 		return rep.xRepository.Load(path)
 	} else {
+		rep.pmxRepository = NewPmxRepository(true)
 		return rep.pmxRepository.Load(path)
 	}
 }
@@ -54,8 +56,10 @@ func (rep *PmxXRepository) LoadName(path string) string {
 	}
 
 	if strings.HasSuffix(strings.ToLower(path), ".x") {
+		rep.xRepository = NewXRepository()
 		return rep.xRepository.LoadName(path)
 	} else {
+		rep.pmxRepository = NewPmxRepository(false)
 		return rep.pmxRepository.LoadName(path)
 	}
 }
