@@ -115,7 +115,7 @@ func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int, erro
 	height := int(math.Ceil((float64(numBones) * 4) / float64(width)))
 
 	paddedMatrixes := make([]float32, height*width*4)
-	boneDeltas.ForEach(func(index int, d *delta.BoneDelta) {
+	boneDeltas.ForEach(func(index int, d *delta.BoneDelta) bool {
 		var m mgl32.Mat4
 		if d == nil {
 			m = mgl32.Ident4()
@@ -123,6 +123,7 @@ func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int, erro
 			m = mmath.NewGlMat4(d.FilledLocalMatrix())
 		}
 		copy(paddedMatrixes[index*16:], m[:])
+		return true
 	})
 
 	return paddedMatrixes, width, height, nil

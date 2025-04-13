@@ -61,8 +61,10 @@ func (bds *BoneDeltas) ContainsByName(boneName string) bool {
 }
 
 // ForEach は全ての値をコールバック関数に渡します
-func (bds *BoneDeltas) ForEach(callback func(index int, value *BoneDelta)) {
+func (bds *BoneDeltas) ForEach(callback func(index int, value *BoneDelta) bool) {
 	for i, v := range bds.data {
-		callback(i, v)
+		if !callback(i, v) {
+			break
+		}
 	}
 }
