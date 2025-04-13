@@ -53,6 +53,9 @@ func (boneFrames *BoneFrames) Get(boneName string) *BoneNameFrames {
 }
 
 func (boneFrames *BoneFrames) Names() []string {
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
+
 	names := make([]string, 0, len(boneFrames.values))
 	for name := range boneFrames.values {
 		names = append(names, name)
@@ -61,6 +64,9 @@ func (boneFrames *BoneFrames) Names() []string {
 }
 
 func (boneFrames *BoneFrames) Indexes() []int {
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
+
 	indexes := make([]int, 0)
 	for _, boneFrames := range boneFrames.values {
 		boneFrames.Indexes.ForEach(func(index float32) bool {
@@ -74,6 +80,9 @@ func (boneFrames *BoneFrames) Indexes() []int {
 }
 
 func (boneFrames *BoneFrames) IndexesByNames(names []string) []int {
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
+
 	indexes := make([]int, 0)
 	for boneName, boneFrames := range boneFrames.values {
 		if !slices.Contains(names, boneName) {
@@ -98,6 +107,9 @@ func (boneFrames *BoneFrames) Length() int {
 }
 
 func (boneFrames *BoneFrames) MaxFrame() float32 {
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
+
 	maxFno := float32(0)
 	for _, boneFrames := range boneFrames.values {
 		fno := float32(boneFrames.MaxFrame())
@@ -109,6 +121,9 @@ func (boneFrames *BoneFrames) MaxFrame() float32 {
 }
 
 func (boneFrames *BoneFrames) MinFrame() float32 {
+	boneFrames.lock.RLock()
+	defer boneFrames.lock.RUnlock()
+
 	minFno := float32(math.MaxFloat32)
 	for _, boneFrames := range boneFrames.values {
 		fno := float32(boneFrames.MinFrame())
