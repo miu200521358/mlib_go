@@ -75,36 +75,6 @@ func DeformModel(
 	return model
 }
 
-func DeformIk(
-	model *pmx.PmxModel,
-	motion *vmd.VmdMotion,
-	deltas *delta.VmdDeltas,
-	frame float32,
-	ikBone *pmx.Bone,
-	ikGlobalPosition *mmath.MVec3,
-	boneNames []string,
-	isRemoveTwist bool, // IKの捻りを除去するかどうか
-	isForceDebug bool, // IKのデバッグを強制的に有効にするかどうか
-) *delta.VmdDeltas {
-	if boneNames == nil {
-		boneNames = make([]string, 0)
-	}
-	ikTargetBone, _ := model.Bones.Get(ikBone.Ik.BoneIndex)
-	boneNames = append(boneNames, ikTargetBone.Name())
-	for _, link := range ikBone.Ik.Links {
-		linkBone, _ := model.Bones.Get(link.BoneIndex)
-		boneNames = append(boneNames, linkBone.Name())
-	}
-
-	deformBoneIndexes, deltas := newVmdDeltas(model, motion, deltas, frame, boneNames, false)
-
-	deformIk(model, motion, deltas, frame, false, ikBone, ikGlobalPosition, deformBoneIndexes, 0, isRemoveTwist, isForceDebug)
-
-	updateGlobalMatrix(deltas.Bones, deformBoneIndexes)
-
-	return deltas
-}
-
 func DeformIks(
 	model *pmx.PmxModel,
 	motion *vmd.VmdMotion,
