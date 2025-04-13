@@ -241,7 +241,7 @@ func (vec3 *MVec3) Hash() uint64 {
 
 // IsZero ベクトルがゼロベクトルかどうかをチェックします
 func (vec3 *MVec3) IsZero() bool {
-	return vec3.NearEquals(MVec3Zero, 1e-10)
+	return vec3 == nil || vec3.NearEquals(MVec3Zero, 1e-10)
 }
 
 // IsZero ベクトルが1ベクトルかどうかをチェックします
