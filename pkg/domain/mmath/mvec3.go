@@ -429,6 +429,48 @@ func (vec3 *MVec3) Lerp(other *MVec3, t float64) *MVec3 {
 	}
 }
 
+// Slerp 球面線形補間（Spherical Linear Interpolation）を行います
+func (vec3 *MVec3) Slerp(other *MVec3, t float64) *MVec3 {
+	switch {
+	case t <= 0:
+		return vec3
+	case t >= 1:
+		return other
+	default:
+		// ベクトルがほぼ同じ場合は単純にコピーを返す
+		if vec3.NearEquals(other, 1e-8) {
+			return vec3.Copy()
+		}
+
+		v0 := vec3.Normalized()
+		v1 := other.Normalized()
+
+		// 2つのベクトル間の角度（コサイン）を計算
+		dot := v0.Dot(v1)
+
+		// 数値の安定性のために、dotを[-1, 1]の範囲に制限
+		if dot > 1.0 {
+			dot = 1.0
+		} else if dot < -1.0 {
+			dot = -1.0
+		}
+
+		// 角度（ラジアン）を計算
+		theta := math.Acos(dot)
+		sinTheta := math.Sin(theta)
+
+		// tに応じた重みを計算
+		s0 := math.Sin((1-t)*theta) / sinTheta
+		s1 := math.Sin(t*theta) / sinTheta
+
+		// 球面線形補間を計算
+		result := v0.MuledScalar(s0).Add(v1.MuledScalar(s1))
+
+		// 元のベクトルの長さを保持
+		return result.MuledScalar(vec3.Length())
+	}
+}
+
 // ToLocalMat 自身をローカル軸とした場合の回転行列を取得します
 func (vec3 *MVec3) ToLocalMat() *MMat4 {
 	if vec3.IsZero() {
