@@ -519,8 +519,8 @@ func (vec3 *MVec3) ToScaleLocalMat(scales *MVec3) *MMat4 {
 // One 0を1に変える
 func (vec3 *MVec3) One() *MVec3 {
 	vec := vec3.Vector()
-	epsilon := 1e-14
-	for i := 0; i < len(vec); i++ {
+	epsilon := 1e-3
+	for i := range vec {
 		if math.Abs(vec[i]) < epsilon {
 			vec[i] = 1
 		}
