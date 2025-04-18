@@ -5,7 +5,6 @@ package state
 
 import (
 	"sync/atomic"
-	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
@@ -573,37 +572,37 @@ func (ss *SharedState) TriggerLinkedFocus(viewerIndex int) {
 		return
 	}
 
-	// すでに連動処理中なら再発火を防止
-	if ss.linkingFocus.CompareAndSwap(false, true) {
-		// コントロールウィンドウの前面化要求はそのまま行い、
-		// 連動対象は発生元のViewer以外に限定する
-		if viewerIndex == -1 {
-			// コントローラーウィンドウをフォーカスして発火した場合、コントローラーウィンドウのハンドルを保持
-			ss.SetFocusedWindowHandle(ss.ControlWindowHandle())
-		} else {
-			// ビューアウィンドウをフォーカスして発火した場合、ビューアウィンドウのハンドルを保持
-			ss.SetFocusedWindowHandle(ss.ViewerWindowHandle(viewerIndex))
-		}
+	// // すでに連動処理中なら再発火を防止
+	// if ss.linkingFocus.CompareAndSwap(false, true) {
+	// 	// コントロールウィンドウの前面化要求はそのまま行い、
+	// 	// 連動対象は発生元のViewer以外に限定する
+	// 	if viewerIndex == -1 {
+	// 		// コントローラーウィンドウをフォーカスして発火した場合、コントローラーウィンドウのハンドルを保持
+	// 		ss.SetFocusedWindowHandle(ss.ControlWindowHandle())
+	// 	} else {
+	// 		// ビューアウィンドウをフォーカスして発火した場合、ビューアウィンドウのハンドルを保持
+	// 		ss.SetFocusedWindowHandle(ss.ViewerWindowHandle(viewerIndex))
+	// 	}
 
-		if viewerIndex >= 0 && win.IsWindowCenterObscured(win.HWND(ss.ControlWindowHandle())) {
-			// コントロールウィンドウが前面にない場合は前面化
-			ss.SetFocusControlWindow(true)
-		}
-		for i := range ss.focusViewWindow {
-			if win.IsWindowCenterObscured(win.HWND(ss.ViewerWindowHandle(i))) {
-				// Viewerが前面にない場合は前面化
-				ss.SetFocusViewWindow(i, i != viewerIndex)
-			}
-		}
+	// 	if viewerIndex >= 0 && win.IsWindowCenterObscured(win.HWND(ss.ControlWindowHandle())) {
+	// 		// コントロールウィンドウが前面にない場合は前面化
+	// 		ss.SetFocusControlWindow(true)
+	// 	}
+	// 	for i := range ss.focusViewWindow {
+	// 		if win.IsWindowCenterObscured(win.HWND(ss.ViewerWindowHandle(i))) {
+	// 			// Viewerが前面にない場合は前面化
+	// 			ss.SetFocusViewWindow(i, i != viewerIndex)
+	// 		}
+	// 	}
 
-		// 連動中フラグを一定時間後に解除
-		go func() {
-			time.Sleep(300 * time.Millisecond)
-			ss.SetLinkingFocus(false)
-			// フォーカスを解除
-			ss.SetFocusedWindowHandle(0)
-		}()
-	}
+	// 	// 連動中フラグを一定時間後に解除
+	// 	go func() {
+	// 		time.Sleep(300 * time.Millisecond)
+	// 		ss.SetLinkingFocus(false)
+	// 		// フォーカスを解除
+	// 		ss.SetFocusedWindowHandle(0)
+	// 	}()
+	// }
 }
 
 func (ss *SharedState) KeepFocus() {
