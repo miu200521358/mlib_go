@@ -457,9 +457,11 @@ func newVmdDeltas(
 
 			// 関連するボーンの追加
 			for _, index := range bone.RelativeBoneIndexes {
-				if _, ok := relativeBoneIndexes[index]; !ok {
-					relativeBoneIndexes[index] = struct{}{}
-				}
+				relativeBoneIndexes[index] = struct{}{}
+			}
+			// 親ボーンの追加
+			for _, index := range bone.ParentBoneIndexes {
+				relativeBoneIndexes[index] = struct{}{}
 			}
 		}
 	} else {
