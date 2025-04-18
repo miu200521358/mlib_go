@@ -1,7 +1,7 @@
 package vmd
 
 import (
-	"sync"
+	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/petar/GoLLRB/llrb"
@@ -64,20 +64,20 @@ func (baseFrame *BaseFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFram
 }
 
 type BaseFrames[T IBaseFrame] struct {
-	values   map[float32]T               // キーフレリスト
-	Indexes  *mmath.LlrbIndexes[float32] // 全キーフレリスト
-	newFunc  func(index float32) T       // キーフレ生成関数
-	nullFunc func() T                    // 空キーフレ生成関数
-	lock     sync.RWMutex
+	values       []T                         // キーフレームの値
+	valueIndexes []float32                   // キーフレームのフレーム番号
+	Indexes      *mmath.LlrbIndexes[float32] // 全キーフレリスト
+	newFunc      func(index float32) T       // キーフレ生成関数
+	nullFunc     func() T                    // 空キーフレ生成関数
 }
 
 func NewBaseFrames[T IBaseFrame](newFunc func(index float32) T, nullFunc func() T) *BaseFrames[T] {
 	return &BaseFrames[T]{
-		values:   make(map[float32]T),
-		Indexes:  &mmath.LlrbIndexes[float32]{LLRB: llrb.New()},
-		newFunc:  newFunc,
-		nullFunc: nullFunc,
-		lock:     sync.RWMutex{},
+		values:       make([]T, 0),
+		valueIndexes: make([]float32, 0),
+		Indexes:      &mmath.LlrbIndexes[float32]{LLRB: llrb.New()},
+		newFunc:      newFunc,
+		nullFunc:     nullFunc,
 	}
 }
 
@@ -85,33 +85,29 @@ func (baseFrames *BaseFrames[T]) NewFrame(index float32) T {
 	return NewFrame(index).(T)
 }
 
-func (baseFrames *BaseFrames[T]) Get(index float32) T {
-	if baseFrames.Contains(index) {
-		baseFrames.lock.RLock()
-		defer baseFrames.lock.RUnlock()
-
+func (baseFrames *BaseFrames[T]) Get(frame float32) T {
+	index := slices.Index(baseFrames.valueIndexes, frame)
+	if index >= 0 {
 		return baseFrames.values[index]
 	}
 
 	if len(baseFrames.values) <= 1 {
 		// 指定INDEXで新フレームを作成
-		return baseFrames.newFunc(index)
+		return baseFrames.newFunc(frame)
 	}
 
-	prevFrame := baseFrames.PrevFrame(index)
-	nextFrame := baseFrames.NextFrame(index)
-	if nextFrame == index {
+	prevFrame := baseFrames.PrevFrame(frame)
+	nextFrame := baseFrames.NextFrame(frame)
+	if nextFrame == frame {
 		// 次のキーフレが無い場合、最大キーフレのコピーを返す
 		if baseFrames.Indexes.Len() == 0 {
 			// 存在しない場合nilを返す
 			return baseFrames.nullFunc()
 		}
 
-		baseFrames.lock.RLock()
-		defer baseFrames.lock.RUnlock()
-
-		copied := baseFrames.values[baseFrames.Indexes.Max()].Copy()
-		copied.SetIndex(index)
+		index := slices.Index(baseFrames.valueIndexes, baseFrames.Indexes.Max())
+		copied := baseFrames.values[index].Copy()
+		copied.SetIndex(frame)
 		return copied.(T)
 	}
 
@@ -119,7 +115,7 @@ func (baseFrames *BaseFrames[T]) Get(index float32) T {
 	nextF := baseFrames.Get(nextFrame)
 
 	// 該当キーフレが無い場合、補間結果を返す
-	return nextF.lerpFrame(prevF, index).(T)
+	return nextF.lerpFrame(prevF, frame).(T)
 }
 
 func (baseFrames *BaseFrames[T]) PrevFrame(index float32) float32 {
@@ -144,11 +140,8 @@ func (baseFrames *BaseFrames[T]) ForEach(callback func(index float32, value T) b
 
 func (baseFrames *BaseFrames[T]) appendFrame(v T) {
 	baseFrames.Indexes.ReplaceOrInsert(mmath.NewLlrbItem(v.Index()))
-
-	baseFrames.lock.Lock()
-	defer baseFrames.lock.Unlock()
-
-	baseFrames.values[v.Index()] = v
+	baseFrames.valueIndexes = append(baseFrames.valueIndexes, v.Index())
+	baseFrames.values = append(baseFrames.values, v)
 }
 
 func (baseFrames *BaseFrames[T]) MaxFrame() float32 {
@@ -169,25 +162,22 @@ func (baseFrames *BaseFrames[T]) ContainsRegistered(index float32) bool {
 	return baseFrames.Indexes.Has(index)
 }
 
-func (baseFrames *BaseFrames[T]) Contains(index float32) bool {
-	baseFrames.lock.RLock()
-	defer baseFrames.lock.RUnlock()
-
-	_, ok := baseFrames.values[index]
-	return ok
+func (baseFrames *BaseFrames[T]) Contains(frame float32) bool {
+	index := slices.Index(baseFrames.valueIndexes, frame)
+	return index >= 0
 }
 
-func (baseFrames *BaseFrames[T]) Delete(index float32) {
-	baseFrames.lock.Lock()
-	defer baseFrames.lock.Unlock()
-
-	if _, ok := baseFrames.values[index]; ok {
-		delete(baseFrames.values, index)
-		baseFrames.Indexes.Delete(mmath.NewLlrbItem(index))
+func (baseFrames *BaseFrames[T]) Delete(frame float32) {
+	index := slices.Index(baseFrames.valueIndexes, frame)
+	if index < 0 {
+		return
 	}
 
-	if baseFrames.Indexes.Has(index) {
-		baseFrames.Indexes.Delete(mmath.NewLlrbItem(index))
+	baseFrames.valueIndexes = append(baseFrames.valueIndexes[:index], baseFrames.valueIndexes[index+1:]...)
+	baseFrames.values = append(baseFrames.values[:index], baseFrames.values[index+1:]...)
+
+	if baseFrames.Indexes.Has(frame) {
+		baseFrames.Indexes.Delete(mmath.NewLlrbItem(frame))
 	}
 }
 
@@ -203,10 +193,8 @@ func (baseFrames *BaseFrames[T]) Insert(f T) {
 
 // Update 登録済みのキーフレームを更新する
 func (baseFrames *BaseFrames[T]) Update(f T) {
-	baseFrames.lock.Lock()
-	defer baseFrames.lock.Unlock()
-
-	baseFrames.values[f.Index()] = f
+	index := slices.Index(baseFrames.valueIndexes, f.Index())
+	baseFrames.values[index] = f
 }
 
 func (baseFrames *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {

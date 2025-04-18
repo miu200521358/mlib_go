@@ -9,7 +9,7 @@ type MorphNameFrames struct {
 
 func NewMorphNameFrames(name string) *MorphNameFrames {
 	return &MorphNameFrames{
-		BaseFrames: NewBaseFrames[*MorphFrame](NewMorphFrame, nilMorphFrame),
+		BaseFrames: NewBaseFrames(NewMorphFrame, nilMorphFrame),
 		Name:       name,
 	}
 }

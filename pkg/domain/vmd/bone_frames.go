@@ -9,21 +9,19 @@ import (
 )
 
 type BoneFrames struct {
-	values map[string]*BoneNameFrames
-	lock   sync.RWMutex
+	names  []string
+	values []*BoneNameFrames
 }
 
 func NewBoneFrames() *BoneFrames {
 	return &BoneFrames{
-		values: make(map[string]*BoneNameFrames, 0),
+		names:  make([]string, 0),
+		values: make([]*BoneNameFrames, 0),
 	}
 }
 
 func (boneFrames *BoneFrames) Contains(boneName string) bool {
-	boneFrames.lock.RLock()
-	defer boneFrames.lock.RUnlock()
-
-	if _, ok := boneFrames.values[boneName]; ok {
+	if slices.Contains(boneFrames.names, boneName) {
 		return true
 	}
 
@@ -31,42 +29,43 @@ func (boneFrames *BoneFrames) Contains(boneName string) bool {
 }
 
 func (boneFrames *BoneFrames) Update(boneNameFrames *BoneNameFrames) {
-	boneFrames.lock.Lock()
-	defer boneFrames.lock.Unlock()
-
-	boneFrames.values[boneNameFrames.Name] = boneNameFrames
+	index := slices.Index(boneFrames.names, boneNameFrames.Name)
+	if index < 0 {
+		boneFrames.names = append(boneFrames.names, boneNameFrames.Name)
+		boneFrames.values = append(boneFrames.values, boneNameFrames)
+	} else {
+		boneFrames.names[index] = boneNameFrames.Name
+		boneFrames.values[index] = boneNameFrames
+	}
 }
 
 func (boneFrames *BoneFrames) Delete(boneName string) {
-	delete(boneFrames.values, boneName)
+	index := slices.Index(boneFrames.names, boneName)
+	if index < 0 {
+		return
+	}
+	boneFrames.names = append(boneFrames.names[:index], boneFrames.names[index+1:]...)
+	boneFrames.values = append(boneFrames.values[:index], boneFrames.values[index+1:]...)
 }
 
 func (boneFrames *BoneFrames) Get(boneName string) *BoneNameFrames {
-	if !boneFrames.Contains(boneName) {
-		boneFrames.Update(NewBoneNameFrames(boneName))
+	index := slices.Index(boneFrames.names, boneName)
+
+	if index < 0 {
+		boneNameFrames := NewBoneNameFrames(boneName)
+		boneFrames.names = append(boneFrames.names, boneNameFrames.Name)
+		boneFrames.values = append(boneFrames.values, boneNameFrames)
+		return boneNameFrames
 	}
 
-	boneFrames.lock.RLock()
-	defer boneFrames.lock.RUnlock()
-
-	return boneFrames.values[boneName]
+	return boneFrames.values[index]
 }
 
 func (boneFrames *BoneFrames) Names() []string {
-	boneFrames.lock.RLock()
-	defer boneFrames.lock.RUnlock()
-
-	names := make([]string, 0, len(boneFrames.values))
-	for name := range boneFrames.values {
-		names = append(names, name)
-	}
-	return names
+	return boneFrames.names
 }
 
 func (boneFrames *BoneFrames) Indexes() []int {
-	boneFrames.lock.RLock()
-	defer boneFrames.lock.RUnlock()
-
 	indexes := make([]int, 0)
 	for _, boneFrames := range boneFrames.values {
 		boneFrames.Indexes.ForEach(func(index float32) bool {
@@ -80,15 +79,12 @@ func (boneFrames *BoneFrames) Indexes() []int {
 }
 
 func (boneFrames *BoneFrames) IndexesByNames(names []string) []int {
-	boneFrames.lock.RLock()
-	defer boneFrames.lock.RUnlock()
-
 	indexes := make([]int, 0)
-	for boneName, boneFrames := range boneFrames.values {
+	for _, boneName := range boneFrames.names {
 		if !slices.Contains(names, boneName) {
 			continue
 		}
-		boneFrames.Indexes.ForEach(func(index float32) bool {
+		boneFrames.Get(boneName).Indexes.ForEach(func(index float32) bool {
 			indexes = append(indexes, int(index))
 			return true
 		})
@@ -107,9 +103,6 @@ func (boneFrames *BoneFrames) Length() int {
 }
 
 func (boneFrames *BoneFrames) MaxFrame() float32 {
-	boneFrames.lock.RLock()
-	defer boneFrames.lock.RUnlock()
-
 	maxFno := float32(0)
 	for _, boneFrames := range boneFrames.values {
 		fno := float32(boneFrames.MaxFrame())
@@ -121,9 +114,6 @@ func (boneFrames *BoneFrames) MaxFrame() float32 {
 }
 
 func (boneFrames *BoneFrames) MinFrame() float32 {
-	boneFrames.lock.RLock()
-	defer boneFrames.lock.RUnlock()
-
 	minFno := float32(math.MaxFloat32)
 	for _, boneFrames := range boneFrames.values {
 		fno := float32(boneFrames.MinFrame())
@@ -135,8 +125,8 @@ func (boneFrames *BoneFrames) MinFrame() float32 {
 }
 
 func (boneFrames *BoneFrames) Clean() {
-	for boneName, boneNameFrames := range boneFrames.values {
-		if !boneNameFrames.ContainsActive() {
+	for _, boneName := range boneFrames.names {
+		if !boneFrames.Get(boneName).ContainsActive() {
 			boneFrames.Delete(boneName)
 		}
 	}
@@ -157,7 +147,7 @@ func (boneFrames *BoneFrames) Reduce() *BoneFrames {
 }
 
 func (boneFrames *BoneFrames) ForEach(fn func(boneName string, boneNameFrames *BoneNameFrames)) {
-	for boneName, boneNameFrames := range boneFrames.values {
-		fn(boneName, boneNameFrames)
+	for _, boneName := range boneFrames.names {
+		fn(boneName, boneFrames.Get(boneName))
 	}
 }
