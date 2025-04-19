@@ -3,24 +3,37 @@ package vmd
 import (
 	"math"
 	"slices"
+	"sync/atomic"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 type MorphFrames struct {
-	names  []string
+	names  atomic.Value
 	values []*MorphNameFrames
 }
 
 func NewMorphFrames() *MorphFrames {
 	return &MorphFrames{
-		names:  make([]string, 0),
+		names:  atomic.Value{},
 		values: make([]*MorphNameFrames, 0),
 	}
 }
 
+func (morphFrames *MorphFrames) getNames() []string {
+	names := morphFrames.names.Load()
+	if names == nil {
+		return make([]string, 0)
+	}
+	return names.([]string)
+}
+
+func (morphFrames *MorphFrames) setNames(names []string) {
+	morphFrames.names.Store(names)
+}
+
 func (morphFrames *MorphFrames) Contains(morphName string) bool {
-	if slices.Contains(morphFrames.names, morphName) {
+	if slices.Contains(morphFrames.getNames(), morphName) {
 		return true
 	}
 
@@ -28,31 +41,31 @@ func (morphFrames *MorphFrames) Contains(morphName string) bool {
 }
 
 func (morphFrames *MorphFrames) Update(morphNameFrames *MorphNameFrames) {
-	index := slices.Index(morphFrames.names, morphNameFrames.Name)
+	index := slices.Index(morphFrames.getNames(), morphNameFrames.Name)
 	if index < 0 {
-		morphFrames.names = append(morphFrames.names, morphNameFrames.Name)
+		morphFrames.setNames(append(morphFrames.getNames(), morphNameFrames.Name))
 		morphFrames.values = append(morphFrames.values, morphNameFrames)
 	} else {
-		morphFrames.names[index] = morphNameFrames.Name
+		morphFrames.getNames()[index] = morphNameFrames.Name
 		morphFrames.values[index] = morphNameFrames
 	}
 }
 
 func (morphFrames *MorphFrames) Delete(morphName string) {
-	index := slices.Index(morphFrames.names, morphName)
+	index := slices.Index(morphFrames.getNames(), morphName)
 	if index < 0 {
 		return
 	}
-	morphFrames.names = append(morphFrames.names[:index], morphFrames.names[index+1:]...)
+	morphFrames.setNames(append(morphFrames.getNames()[:index], morphFrames.getNames()[index+1:]...))
 	morphFrames.values = append(morphFrames.values[:index], morphFrames.values[index+1:]...)
 }
 
 func (morphFrames *MorphFrames) Get(morphName string) *MorphNameFrames {
-	index := slices.Index(morphFrames.names, morphName)
+	index := slices.Index(morphFrames.getNames(), morphName)
 
-	if index < 0 {
+	if index < 0 || index >= len(morphFrames.values) {
 		morphNameFrames := NewMorphNameFrames(morphName)
-		morphFrames.names = append(morphFrames.names, morphNameFrames.Name)
+		morphFrames.setNames(append(morphFrames.getNames(), morphNameFrames.Name))
 		morphFrames.values = append(morphFrames.values, morphNameFrames)
 		return morphNameFrames
 	}
@@ -61,7 +74,7 @@ func (morphFrames *MorphFrames) Get(morphName string) *MorphNameFrames {
 }
 
 func (morphFrames *MorphFrames) Names() []string {
-	return morphFrames.names
+	return morphFrames.getNames()
 }
 
 func (morphFrames *MorphFrames) Indexes() []int {
@@ -79,7 +92,7 @@ func (morphFrames *MorphFrames) Indexes() []int {
 
 func (morphFrames *MorphFrames) IndexesByNames(names []string) []int {
 	indexes := make([]int, 0)
-	for _, morphName := range morphFrames.names {
+	for _, morphName := range morphFrames.getNames() {
 		if !slices.Contains(names, morphName) {
 			continue
 		}
@@ -124,7 +137,7 @@ func (morphFrames *MorphFrames) MinFrame() float32 {
 }
 
 func (morphFrames *MorphFrames) Clean() {
-	for _, morphName := range morphFrames.names {
+	for _, morphName := range morphFrames.getNames() {
 		if !morphFrames.Get(morphName).ContainsActive() {
 			morphFrames.Delete(morphName)
 		}
@@ -132,7 +145,7 @@ func (morphFrames *MorphFrames) Clean() {
 }
 
 func (morphFrames *MorphFrames) ForEach(fn func(morphName string, morphNameFrames *MorphNameFrames)) {
-	for _, morphName := range morphFrames.names {
+	for _, morphName := range morphFrames.getNames() {
 		fn(morphName, morphFrames.Get(morphName))
 	}
 }

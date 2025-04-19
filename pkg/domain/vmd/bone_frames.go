@@ -4,24 +4,37 @@ import (
 	"math"
 	"slices"
 	"sync"
+	"sync/atomic"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 type BoneFrames struct {
-	names  []string
+	names  atomic.Value
 	values []*BoneNameFrames
 }
 
 func NewBoneFrames() *BoneFrames {
 	return &BoneFrames{
-		names:  make([]string, 0),
+		names:  atomic.Value{},
 		values: make([]*BoneNameFrames, 0),
 	}
 }
 
+func (boneFrames *BoneFrames) getNames() []string {
+	names := boneFrames.names.Load()
+	if names == nil {
+		return make([]string, 0)
+	}
+	return names.([]string)
+}
+
+func (boneFrames *BoneFrames) setNames(names []string) {
+	boneFrames.names.Store(names)
+}
+
 func (boneFrames *BoneFrames) Contains(boneName string) bool {
-	if slices.Contains(boneFrames.names, boneName) {
+	if slices.Contains(boneFrames.getNames(), boneName) {
 		return true
 	}
 
@@ -29,31 +42,31 @@ func (boneFrames *BoneFrames) Contains(boneName string) bool {
 }
 
 func (boneFrames *BoneFrames) Update(boneNameFrames *BoneNameFrames) {
-	index := slices.Index(boneFrames.names, boneNameFrames.Name)
+	index := slices.Index(boneFrames.getNames(), boneNameFrames.Name)
 	if index < 0 {
-		boneFrames.names = append(boneFrames.names, boneNameFrames.Name)
+		boneFrames.setNames(append(boneFrames.getNames(), boneNameFrames.Name))
 		boneFrames.values = append(boneFrames.values, boneNameFrames)
 	} else {
-		boneFrames.names[index] = boneNameFrames.Name
+		boneFrames.getNames()[index] = boneNameFrames.Name
 		boneFrames.values[index] = boneNameFrames
 	}
 }
 
 func (boneFrames *BoneFrames) Delete(boneName string) {
-	index := slices.Index(boneFrames.names, boneName)
+	index := slices.Index(boneFrames.getNames(), boneName)
 	if index < 0 {
 		return
 	}
-	boneFrames.names = append(boneFrames.names[:index], boneFrames.names[index+1:]...)
+	boneFrames.setNames(append(boneFrames.getNames()[:index], boneFrames.getNames()[index+1:]...))
 	boneFrames.values = append(boneFrames.values[:index], boneFrames.values[index+1:]...)
 }
 
 func (boneFrames *BoneFrames) Get(boneName string) *BoneNameFrames {
-	index := slices.Index(boneFrames.names, boneName)
+	index := slices.Index(boneFrames.getNames(), boneName)
 
-	if index < 0 {
+	if index < 0 || index >= len(boneFrames.values) {
 		boneNameFrames := NewBoneNameFrames(boneName)
-		boneFrames.names = append(boneFrames.names, boneNameFrames.Name)
+		boneFrames.setNames(append(boneFrames.getNames(), boneNameFrames.Name))
 		boneFrames.values = append(boneFrames.values, boneNameFrames)
 		return boneNameFrames
 	}
@@ -62,7 +75,7 @@ func (boneFrames *BoneFrames) Get(boneName string) *BoneNameFrames {
 }
 
 func (boneFrames *BoneFrames) Names() []string {
-	return boneFrames.names
+	return boneFrames.getNames()
 }
 
 func (boneFrames *BoneFrames) Indexes() []int {
@@ -80,7 +93,7 @@ func (boneFrames *BoneFrames) Indexes() []int {
 
 func (boneFrames *BoneFrames) IndexesByNames(names []string) []int {
 	indexes := make([]int, 0)
-	for _, boneName := range boneFrames.names {
+	for _, boneName := range boneFrames.getNames() {
 		if !slices.Contains(names, boneName) {
 			continue
 		}
@@ -125,7 +138,7 @@ func (boneFrames *BoneFrames) MinFrame() float32 {
 }
 
 func (boneFrames *BoneFrames) Clean() {
-	for _, boneName := range boneFrames.names {
+	for _, boneName := range boneFrames.getNames() {
 		if !boneFrames.Get(boneName).ContainsActive() {
 			boneFrames.Delete(boneName)
 		}
@@ -147,7 +160,7 @@ func (boneFrames *BoneFrames) Reduce() *BoneFrames {
 }
 
 func (boneFrames *BoneFrames) ForEach(fn func(boneName string, boneNameFrames *BoneNameFrames)) {
-	for _, boneName := range boneFrames.names {
+	for _, boneName := range boneFrames.getNames() {
 		fn(boneName, boneFrames.Get(boneName))
 	}
 }

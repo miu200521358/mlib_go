@@ -127,11 +127,15 @@ func (baseFrames *BaseFrames[T]) NextFrame(index float32) float32 {
 }
 
 func (baseFrames *BaseFrames[T]) ForEach(callback func(index float32, value T) bool) {
-	for _, v := range baseFrames.values {
-		if !callback(v.Index(), v) {
-			return
-		}
-	}
+	baseFrames.Indexes.ForEach(func(index float32) bool {
+		return callback(index, baseFrames.Get(index))
+	})
+
+	// for _, v := range  {
+	// 	if !callback(v.Index(), v) {
+	// 		return
+	// 	}
+	// }
 
 	// baseFrames.Indexes.ForEach(func(index float32) bool {
 	// 	return callback(index, baseFrames.Get(index))
