@@ -244,12 +244,25 @@ func (bones *Bones) SetParentFromConfig(bone *Bone) {
 	}
 }
 
-func (bones *Bones) GetIkTarget(ikBoneName string) (*Bone, error) {
+func (bones *Bones) GetIkTargetByName(ikBoneName string) (*Bone, error) {
 	if ikBoneName == "" || !bones.ContainsByName(ikBoneName) {
 		return nil, merr.NameNotFoundError
 	}
 
 	if ikBone, err := bones.GetByName(ikBoneName); err != nil ||
+		!ikBone.IsIK() || !bones.Contains(ikBone.Ik.BoneIndex) {
+		return nil, merr.NameNotFoundError
+	} else {
+		if ikTargetBone, err := bones.Get(ikBone.Ik.BoneIndex); err != nil {
+			return nil, merr.NameNotFoundError
+		} else {
+			return ikTargetBone, nil
+		}
+	}
+}
+
+func (bones *Bones) GetIkTarget(ikBoneIndex int) (*Bone, error) {
+	if ikBone, err := bones.Get(ikBoneIndex); err != nil ||
 		!ikBone.IsIK() || !bones.Contains(ikBone.Ik.BoneIndex) {
 		return nil, merr.NameNotFoundError
 	} else {

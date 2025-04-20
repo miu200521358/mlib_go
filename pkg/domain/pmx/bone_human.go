@@ -1050,6 +1050,7 @@ func (bones *Bones) CreateToeT(direction BoneDirection) (*Bone, error) {
 			bone.Position = toe.Position.Copy()
 		}
 	}
+	bone.Position.Y = 0.0
 
 	if ankle, err := bones.GetAnkle(direction); err == nil {
 		bone.ParentIndex = ankle.Index()
@@ -1073,14 +1074,14 @@ func (bones *Bones) CreateToeP(direction BoneDirection) (*Bone, error) {
 		switch direction {
 		case BONE_DIRECTION_LEFT:
 			bone.Position = &mmath.MVec3{
-				X: toeT.Position.X - 0.8,
-				Y: toeT.Position.Y,
+				X: toeT.Position.X - 1.0,
+				Y: 0.0,
 				Z: toeT.Position.Z,
 			}
 		case BONE_DIRECTION_RIGHT:
 			bone.Position = &mmath.MVec3{
-				X: toeT.Position.X + 0.8,
-				Y: toeT.Position.Y,
+				X: toeT.Position.X + 1.0,
+				Y: 0.0,
 				Z: toeT.Position.Z,
 			}
 		}
@@ -1105,14 +1106,14 @@ func (bones *Bones) CreateToeC(direction BoneDirection) (*Bone, error) {
 		switch direction {
 		case BONE_DIRECTION_LEFT:
 			bone.Position = &mmath.MVec3{
-				X: toeT.Position.X + 0.8,
-				Y: toeT.Position.Y,
+				X: toeT.Position.X + 1.0,
+				Y: 0.0,
 				Z: toeT.Position.Z,
 			}
 		case BONE_DIRECTION_RIGHT:
 			bone.Position = &mmath.MVec3{
-				X: toeT.Position.X - 0.8,
-				Y: toeT.Position.Y,
+				X: toeT.Position.X - 1.0,
+				Y: 0.0,
 				Z: toeT.Position.Z,
 			}
 		}
@@ -1300,6 +1301,7 @@ func (bones *Bones) CreateToeTD(direction BoneDirection) (*Bone, error) {
 	if toeT, err := bones.GetToeT(direction); err == nil {
 		bone.Position = toeT.Position.Copy()
 	}
+	bone.Position.Y = 0.0
 
 	// 親ボーン
 	bone.ParentIndex = bones.findParentIndexByConfig(TOE_T_D, direction)
@@ -1327,6 +1329,7 @@ func (bones *Bones) CreateToePD(direction BoneDirection) (*Bone, error) {
 	if toeP, err := bones.GetToeP(direction); err == nil {
 		bone.Position = toeP.Position.Copy()
 	}
+	bone.Position.Y = 0.0
 
 	// 親ボーン
 	bone.ParentIndex = bones.findParentIndexByConfig(TOE_P_D, direction)
@@ -1354,6 +1357,7 @@ func (bones *Bones) CreateToeCD(direction BoneDirection) (*Bone, error) {
 	if toeC, err := bones.GetToeC(direction); err == nil {
 		bone.Position = toeC.Position.Copy()
 	}
+	bone.Position.Y = 0.0
 
 	// 親ボーン
 	bone.ParentIndex = bones.findParentIndexByConfig(TOE_C_D, direction)

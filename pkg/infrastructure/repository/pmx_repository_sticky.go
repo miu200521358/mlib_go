@@ -15,20 +15,6 @@ func (rep *PmxRepository) CreateSticky(
 	insertDebugFunc func(bones *pmx.Bones, displaySlots *pmx.DisplaySlots) error,
 ) error {
 
-	// ボーン以外を一回削除
-	model.SetName(fmt.Sprintf("棒人間_%s", model.Name()))
-	model.Vertices = pmx.NewVertices(0)
-	model.Faces = pmx.NewFaces(0)
-	model.Materials = pmx.NewMaterials(0)
-	model.Morphs = pmx.NewMorphs(0)
-	model.RigidBodies = pmx.NewRigidBodies(0)
-	model.Joints = pmx.NewJoints(0)
-
-	// モーフ表示枠クリア
-	if displaySlot, err := model.DisplaySlots.GetMorphDisplaySlot(); err == nil {
-		displaySlot.References = make([]*pmx.Reference, 0)
-	}
-
 	// 設定ボーンを追加
 	if insertBoneFunc != nil {
 		if err := insertBoneFunc(model.Vertices, model.Bones); err != nil {
@@ -41,6 +27,20 @@ func (rep *PmxRepository) CreateSticky(
 		if err := insertDebugFunc(model.Bones, model.DisplaySlots); err != nil {
 			return err
 		}
+	}
+
+	// ボーン以外を削除
+	model.SetName(fmt.Sprintf("棒人間_%s", model.Name()))
+	model.Vertices = pmx.NewVertices(0)
+	model.Faces = pmx.NewFaces(0)
+	model.Materials = pmx.NewMaterials(0)
+	model.Morphs = pmx.NewMorphs(0)
+	model.RigidBodies = pmx.NewRigidBodies(0)
+	model.Joints = pmx.NewJoints(0)
+
+	// モーフ表示枠クリア
+	if displaySlot, err := model.DisplaySlots.GetMorphDisplaySlot(); err == nil {
+		displaySlot.References = make([]*pmx.Reference, 0)
 	}
 
 	// 棒人間情報を追加
