@@ -2,6 +2,7 @@ package vmd
 
 import (
 	"slices"
+	"sync/atomic"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/petar/GoLLRB/llrb"
@@ -65,7 +66,7 @@ func (baseFrame *BaseFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFram
 
 type BaseFrames[T IBaseFrame] struct {
 	values       []T                         // キーフレームの値
-	valueIndexes []float32                   // キーフレームのフレーム番号
+	valueIndexes atomic.Value                // キーフレームのフレーム番号
 	Indexes      *mmath.LlrbIndexes[float32] // 全キーフレリスト
 	newFunc      func(index float32) T       // キーフレ生成関数
 	nullFunc     func() T                    // 空キーフレ生成関数
@@ -74,7 +75,7 @@ type BaseFrames[T IBaseFrame] struct {
 func NewBaseFrames[T IBaseFrame](newFunc func(index float32) T, nullFunc func() T) *BaseFrames[T] {
 	return &BaseFrames[T]{
 		values:       make([]T, 0),
-		valueIndexes: make([]float32, 0),
+		valueIndexes: atomic.Value{},
 		Indexes:      &mmath.LlrbIndexes[float32]{LLRB: llrb.New()},
 		newFunc:      newFunc,
 		nullFunc:     nullFunc,
@@ -85,9 +86,29 @@ func (baseFrames *BaseFrames[T]) NewFrame(index float32) T {
 	return NewFrame(index).(T)
 }
 
+func (baseFrames *BaseFrames[T]) getIndex(frame float32) int {
+	index := slices.Index(baseFrames.getValueIndexes(), frame)
+	if index < 0 {
+		return -1
+	}
+	return index
+}
+
+func (baseFrames *BaseFrames[T]) getValueIndexes() []float32 {
+	valueIndexes := baseFrames.valueIndexes.Load()
+	if valueIndexes == nil {
+		return make([]float32, 0)
+	}
+	return valueIndexes.([]float32)
+}
+
+func (baseFrames *BaseFrames[T]) setValueIndexes(indexes []float32) {
+	baseFrames.valueIndexes.Store(indexes)
+}
+
 func (baseFrames *BaseFrames[T]) Get(frame float32) T {
-	index := slices.Index(baseFrames.valueIndexes, frame)
-	if index >= 0 {
+	index := baseFrames.getIndex(frame)
+	if index >= 0 && index < len(baseFrames.values) {
 		return baseFrames.values[index]
 	}
 
@@ -105,7 +126,7 @@ func (baseFrames *BaseFrames[T]) Get(frame float32) T {
 			return baseFrames.nullFunc()
 		}
 
-		index := slices.Index(baseFrames.valueIndexes, baseFrames.Indexes.Max())
+		index := baseFrames.getIndex(baseFrames.MaxFrame())
 		copied := baseFrames.values[index].Copy()
 		copied.SetIndex(frame)
 		return copied.(T)
@@ -130,21 +151,11 @@ func (baseFrames *BaseFrames[T]) ForEach(callback func(index float32, value T) b
 	baseFrames.Indexes.ForEach(func(index float32) bool {
 		return callback(index, baseFrames.Get(index))
 	})
-
-	// for _, v := range  {
-	// 	if !callback(v.Index(), v) {
-	// 		return
-	// 	}
-	// }
-
-	// baseFrames.Indexes.ForEach(func(index float32) bool {
-	// 	return callback(index, baseFrames.Get(index))
-	// })
 }
 
 func (baseFrames *BaseFrames[T]) appendFrame(v T) {
 	baseFrames.Indexes.ReplaceOrInsert(mmath.NewLlrbItem(v.Index()))
-	baseFrames.valueIndexes = append(baseFrames.valueIndexes, v.Index())
+	baseFrames.setValueIndexes(append(baseFrames.getValueIndexes(), v.Index()))
 	baseFrames.values = append(baseFrames.values, v)
 }
 
@@ -167,17 +178,17 @@ func (baseFrames *BaseFrames[T]) ContainsRegistered(index float32) bool {
 }
 
 func (baseFrames *BaseFrames[T]) Contains(frame float32) bool {
-	index := slices.Index(baseFrames.valueIndexes, frame)
-	return index >= 0
+	index := baseFrames.getIndex(frame)
+	return index >= 0 && index < len(baseFrames.values)
 }
 
 func (baseFrames *BaseFrames[T]) Delete(frame float32) {
-	index := slices.Index(baseFrames.valueIndexes, frame)
+	index := baseFrames.getIndex(frame)
 	if index < 0 {
 		return
 	}
 
-	baseFrames.valueIndexes = append(baseFrames.valueIndexes[:index], baseFrames.valueIndexes[index+1:]...)
+	baseFrames.setValueIndexes(append(baseFrames.getValueIndexes()[:index], baseFrames.getValueIndexes()[index+1:]...))
 	baseFrames.values = append(baseFrames.values[:index], baseFrames.values[index+1:]...)
 
 	if baseFrames.Indexes.Has(frame) {
@@ -197,7 +208,7 @@ func (baseFrames *BaseFrames[T]) Insert(f T) {
 
 // Update 登録済みのキーフレームを更新する
 func (baseFrames *BaseFrames[T]) Update(f T) {
-	index := slices.Index(baseFrames.valueIndexes, f.Index())
+	index := baseFrames.getIndex(f.Index())
 	baseFrames.values[index] = f
 }
 
