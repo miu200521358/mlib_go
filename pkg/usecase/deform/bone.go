@@ -1100,6 +1100,14 @@ ikLoop:
 			// IK 結果反映
 			linkDelta.FrameRotation = resultIkQuat
 			updateBoneDelta(deltas.Bones, linkDelta, linkBone)
+			for _, bIdx := range linkBone.EffectiveBoneIndexes {
+				// リンクボーンを付与親にしているボーンにも適用
+				effectBone, _ := model.Bones.Get(bIdx)
+				effectDelta := deltas.Bones.Get(bIdx)
+				if effectBone != nil && effectDelta != nil {
+					updateBoneDelta(deltas.Bones, effectDelta, effectBone)
+				}
+			}
 			updateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
 
 			if isFullDebug {
