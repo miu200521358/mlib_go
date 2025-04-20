@@ -367,13 +367,15 @@ func (bone *Bone) ConfigChildBoneNames() []string {
 			boneConfigName.Left() == bone.Name() {
 
 			boneNames := make([]string, 0)
-			for _, tailBoneName := range boneConfig.ChildBoneNames {
-				if boneConfigName.Right() == bone.Name() {
-					boneNames = append(boneNames, tailBoneName.Right())
-				} else if boneConfigName.Left() == bone.Name() {
-					boneNames = append(boneNames, tailBoneName.Left())
-				} else {
-					boneNames = append(boneNames, tailBoneName.String())
+			for _, tailBoneNames := range boneConfig.ChildBoneNames {
+				for _, tailBoneName := range tailBoneNames {
+					if boneConfigName.Right() == bone.Name() {
+						boneNames = append(boneNames, tailBoneName.Right())
+					} else if boneConfigName.Left() == bone.Name() {
+						boneNames = append(boneNames, tailBoneName.Left())
+					} else {
+						boneNames = append(boneNames, tailBoneName.String())
+					}
 				}
 			}
 			return boneNames

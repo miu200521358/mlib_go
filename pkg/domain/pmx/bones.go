@@ -176,6 +176,74 @@ func (bones *Bones) Insert(bone *Bone) error {
 	return nil
 }
 
+func (bones *Bones) SetParentFromConfig(bone *Bone) {
+	// 設定上の子どもボーンで最初に取得できたボーンを子ルートボーンとする
+	isBreak := false
+	for _, childNames := range bone.Config().ChildBoneNames {
+		// 兄弟（並列の子ども）は全部処理する
+		for _, childName := range childNames {
+			var childRootBone *Bone
+			var err error
+			if childRootBone, err = bones.GetByName(childName.StringFromDirection(bone.Direction())); err != nil && childRootBone == nil {
+				continue
+			}
+
+			// 親ボーンの子ども
+			var parentBone *Bone
+			if parentBone, err = bones.Get(bone.ParentIndex); err != nil && parentBone == nil {
+				continue
+			}
+
+			for _, childIndex := range parentBone.ChildBoneIndexes {
+				if childIndex == bone.Index() {
+					continue
+				}
+
+				var childBone *Bone
+				if childBone, err = bones.Get(childIndex); err != nil && childBone == nil {
+					continue
+				}
+
+				if slices.Contains(childBone.RelativeBoneIndexes, childRootBone.Index()) ||
+					childBone.index == childRootBone.Index() {
+					// 子どもの関連ボーンに子ルートボーンがいる場合のみ対象
+					childBone.ParentIndex = bone.Index()
+					isBreak = true
+				}
+			}
+
+			if !isBreak {
+				childRootBone.ParentIndex = bone.Index()
+				isBreak = true
+			}
+
+			// isInParent := false
+			// for _, boneIndex := range bones.LayerSortedIndexes {
+			// 	if boneIndex == parentBone.Index() {
+			// 		isInParent = true
+			// 		continue
+			// 	}
+			// 	if boneIndex == childRootBone.Index() {
+			// 		break
+			// 	}
+
+			// 	if isInParent {
+			// 		if b, err := bones.Get(boneIndex); err == nil && b != nil {
+			// 			if b.ParentIndex == parentBone.Index() {
+			// 				b.ParentIndex = bone.Index()
+			// 				continue
+			// 			}
+			// 		}
+			// 	}
+			// }
+		}
+		if isBreak {
+			// 子ボーンの親が設定できたら、全部のループを抜ける
+			break
+		}
+	}
+}
+
 func (bones *Bones) GetIkTarget(ikBoneName string) (*Bone, error) {
 	if ikBoneName == "" || !bones.ContainsByName(ikBoneName) {
 		return nil, merr.NameNotFoundError
