@@ -239,6 +239,51 @@ func (vec3 *MVec3) Hash() uint64 {
 	return h.Sum64()
 }
 
+func (vec3 *MVec3) Truncate(epsilon float64) *MVec3 {
+	if math.Abs(vec3.X) < epsilon {
+		vec3.X = 0
+	}
+	if math.Abs(vec3.Y) < epsilon {
+		vec3.Y = 0
+	}
+	if math.Abs(vec3.Z) < epsilon {
+		vec3.Z = 0
+	}
+	return vec3
+}
+
+func (vec3 *MVec3) Truncated(epsilon float64) *MVec3 {
+	vec := vec3.Copy()
+	vec.Truncate(epsilon)
+	return vec
+}
+
+func (vec3 *MVec3) MergeIfZero(v float64) *MVec3 {
+	if vec3.X == 0 {
+		vec3.X = v
+	}
+	if vec3.Y == 0 {
+		vec3.Y = v
+	}
+	if vec3.Z == 0 {
+		vec3.Z = v
+	}
+	return vec3
+}
+
+func (vec3 *MVec3) MergeIfZeros(v *MVec3) *MVec3 {
+	if vec3.X == 0 {
+		vec3.X = v.X
+	}
+	if vec3.Y == 0 {
+		vec3.Y = v.Y
+	}
+	if vec3.Z == 0 {
+		vec3.Z = v.Z
+	}
+	return vec3
+}
+
 // IsZero ベクトルがゼロベクトルかどうかをチェックします
 func (vec3 *MVec3) IsZero() bool {
 	return vec3 == nil || vec3.NearEquals(MVec3Zero, 1e-10)
