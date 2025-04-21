@@ -135,8 +135,9 @@ const (
 	ROOT           StandardBoneName = "全ての親"
 	CENTER         StandardBoneName = "センター"
 	GROOVE         StandardBoneName = "グルーブ"
-	WAIST          StandardBoneName = "腰"
+	BODY_AXIS      StandardBoneName = "軸中心"
 	TRUNK_ROOT     StandardBoneName = "体幹中心"
+	WAIST          StandardBoneName = "腰"
 	LOWER_ROOT     StandardBoneName = "下半身根元"
 	LOWER          StandardBoneName = "下半身"
 	LEG_CENTER     StandardBoneName = "足中心"
@@ -243,54 +244,61 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				IsStandard:       true},
 			CENTER: {
 				ParentBoneNames:  []StandardBoneName{ROOT},
-				ChildBoneNames:   [][]StandardBoneName{{GROOVE}, {TRUNK_ROOT}, {WAIST}, {UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
+				ChildBoneNames:   [][]StandardBoneName{{GROOVE}, {BODY_AXIS}, {TRUNK_ROOT}, {WAIST}, {UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      DISPLAY_SLOT_CENTER,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
 			GROOVE: {
 				ParentBoneNames:  []StandardBoneName{CENTER},
-				ChildBoneNames:   [][]StandardBoneName{{TRUNK_ROOT}, {WAIST}, {UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
+				ChildBoneNames:   [][]StandardBoneName{{BODY_AXIS}, {TRUNK_ROOT}, {WAIST}, {UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      DISPLAY_SLOT_CENTER,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
+			BODY_AXIS: {
+				ParentBoneNames:  []StandardBoneName{CENTER, GROOVE},
+				ChildBoneNames:   [][]StandardBoneName{{TRUNK_ROOT}, {WAIST}, {UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
+				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
+				DisplaySlot:      DISPLAY_SLOT_CENTER,
+				BoundingBoxShape: SHAPE_NONE,
+				IsStandard:       false},
 			TRUNK_ROOT: {
-				ParentBoneNames:  []StandardBoneName{GROOVE, CENTER},
+				ParentBoneNames:  []StandardBoneName{BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:   [][]StandardBoneName{{WAIST}, {UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
 				Categories:       []BoneCategory{CATEGORY_ROOT},
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false},
 			WAIST: {
-				ParentBoneNames:  []StandardBoneName{TRUNK_ROOT, GROOVE, CENTER},
+				ParentBoneNames:  []StandardBoneName{TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:   [][]StandardBoneName{{UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      DISPLAY_SLOT_TRUNK,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true},
 			LOWER_ROOT: {
-				ParentBoneNames:       []StandardBoneName{WAIST, TRUNK_ROOT, GROOVE, CENTER},
+				ParentBoneNames:       []StandardBoneName{WAIST, TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:        [][]StandardBoneName{{LOWER}},
 				Categories:            []BoneCategory{CATEGORY_TRUNK, CATEGORY_LOWER},
 				BoundingBoxShape:      SHAPE_NONE,
 				IsStandard:            false,
 				GravityTargetBoneName: LEG_CENTER},
 			LOWER: {
-				ParentBoneNames:  []StandardBoneName{LOWER_ROOT, WAIST, TRUNK_ROOT, GROOVE, CENTER},
+				ParentBoneNames:  []StandardBoneName{LOWER_ROOT, WAIST, TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:   [][]StandardBoneName{{LEG_CENTER}, {LEG_ROOT}, {WAIST_CANCEL}, {LEG, LEG_D}},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_LOWER},
 				DisplaySlot:      DISPLAY_SLOT_TRUNK,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true},
 			UPPER_ROOT: {
-				ParentBoneNames:       []StandardBoneName{WAIST, TRUNK_ROOT, GROOVE, CENTER},
+				ParentBoneNames:       []StandardBoneName{WAIST, TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:        [][]StandardBoneName{{UPPER}},
 				Categories:            []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER},
 				BoundingBoxShape:      SHAPE_NONE,
 				IsStandard:            false,
 				GravityTargetBoneName: NECK_ROOT},
 			UPPER: {
-				ParentBoneNames:  []StandardBoneName{UPPER_ROOT, WAIST, TRUNK_ROOT, GROOVE, CENTER},
+				ParentBoneNames:  []StandardBoneName{UPPER_ROOT, WAIST, TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:   [][]StandardBoneName{{UPPER2}},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER},
 				DisplaySlot:      DISPLAY_SLOT_TRUNK,

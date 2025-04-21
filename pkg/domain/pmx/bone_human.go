@@ -61,6 +61,31 @@ func (bones *Bones) CreateGroove() (*Bone, error) {
 	return bone, nil
 }
 
+func (bones *Bones) GetBodyAxis() (*Bone, error) {
+	return bones.GetByName(BODY_AXIS.String())
+}
+
+func (bones *Bones) CreateBodyAxis() (*Bone, error) {
+	bone := NewBoneByName(BODY_AXIS.String())
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
+
+	// 位置
+	legLeft, _ := bones.GetLeg(BONE_DIRECTION_LEFT)
+	legRight, _ := bones.GetLeg(BONE_DIRECTION_RIGHT)
+	if legLeft != nil && legRight != nil {
+		bone.Position = &mmath.MVec3{
+			X: 0.0,
+			Y: (legLeft.Position.Y + legRight.Position.Y) * 0.5,
+			Z: 0.0,
+		}
+	}
+
+	// 親ボーン
+	bone.ParentIndex = bones.findParentIndexByConfig(GROOVE, BONE_DIRECTION_TRUNK)
+
+	return bone, nil
+}
+
 // GetWaist 腰取得
 func (bones *Bones) GetWaist() (*Bone, error) {
 	return bones.GetByName(WAIST.String())
