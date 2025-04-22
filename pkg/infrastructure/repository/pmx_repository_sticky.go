@@ -34,14 +34,8 @@ func (rep *PmxRepository) CreateSticky(
 	model.Vertices = pmx.NewVertices(0)
 	model.Faces = pmx.NewFaces(0)
 	model.Materials = pmx.NewMaterials(0)
-	model.Morphs = pmx.NewMorphs(0)
 	model.RigidBodies = pmx.NewRigidBodies(0)
 	model.Joints = pmx.NewJoints(0)
-
-	// モーフ表示枠クリア
-	if displaySlot, err := model.DisplaySlots.GetMorphDisplaySlot(); err == nil {
-		displaySlot.References = make([]*pmx.Reference, 0)
-	}
 
 	// 棒人間情報を追加
 	if err := rep.createStickBones(model); err != nil {
