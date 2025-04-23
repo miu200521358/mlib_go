@@ -5,6 +5,7 @@ package controller
 
 import (
 	"bytes"
+	"math"
 	"sync"
 	"syscall"
 	"unsafe"
@@ -49,7 +50,7 @@ func NewConsoleView(parent walk.Container, minWidth int, minHeight int) (*Consol
 		walk.Size{Width: minWidth * 100, Height: minHeight * 100})
 	cv.Console = te
 	cv.Console.SetReadOnly(true)
-	cv.Console.SendMessage(win.EM_SETLIMITTEXT, 4294967295, 0)
+	cv.Console.SendMessage(win.EM_SETLIMITTEXT, math.MaxInt, 0)
 
 	return cv, nil
 }
