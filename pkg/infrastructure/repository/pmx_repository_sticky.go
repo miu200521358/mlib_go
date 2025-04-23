@@ -62,6 +62,11 @@ func (rep *PmxRepository) createStickBones(model *pmx.PmxModel) error {
 			bone.Name() == pmx.LEG_IK_PARENT.Left() || bone.Name() == pmx.LEG_IK_PARENT.Right() ||
 			bone.Name() == pmx.LEG_IK.Left() || bone.Name() == pmx.LEG_IK.Right() {
 			// 設定外の非表示ボーン、物理ボーン、IKはスルー
+			// 操作と表示のフラグをOFFにする
+			bone.BoneFlag &= ^pmx.BONE_FLAG_CAN_MANIPULATE
+			bone.BoneFlag &= ^pmx.BONE_FLAG_IS_VISIBLE
+			model.Bones.Update(bone)
+
 			return true
 		}
 
