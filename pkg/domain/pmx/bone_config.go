@@ -135,7 +135,7 @@ const (
 	ROOT           StandardBoneName = "全ての親"
 	CENTER         StandardBoneName = "センター"
 	GROOVE         StandardBoneName = "グルーブ"
-	BODY_AXIS      StandardBoneName = "軸中心"
+	BODY_AXIS      StandardBoneName = "体軸"
 	TRUNK_ROOT     StandardBoneName = "体幹中心"
 	WAIST          StandardBoneName = "腰"
 	LOWER_ROOT     StandardBoneName = "下半身根元"
