@@ -112,7 +112,7 @@ func (baseFrames *BaseFrames[T]) Get(frame float32) T {
 		return baseFrames.values[index]
 	}
 
-	if len(baseFrames.values) <= 1 {
+	if len(baseFrames.values) == 0 {
 		// 指定INDEXで新フレームを作成
 		return baseFrames.newFunc(frame)
 	}
