@@ -37,6 +37,15 @@ func (rep *PmxRepository) CreateSticky(
 	model.RigidBodies = pmx.NewRigidBodies(0)
 	model.Joints = pmx.NewJoints(0)
 
+	model.Morphs.ForEach(func(index int, morph *pmx.Morph) bool {
+		if !(morph.MorphType == pmx.MORPH_TYPE_GROUP || morph.MorphType == pmx.MORPH_TYPE_BONE) {
+			// グループモーフとボーンモーフ以外は削除
+			morph.Offsets = make([]pmx.IMorphOffset, 0)
+			model.Morphs.Update(morph)
+		}
+		return true
+	})
+
 	// 棒人間情報を追加
 	if err := rep.createStickBones(model); err != nil {
 		return err
