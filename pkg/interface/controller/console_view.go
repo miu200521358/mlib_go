@@ -28,7 +28,7 @@ const (
 )
 
 func NewConsoleView(parent walk.Container, minWidth int, minHeight int) (*ConsoleView, error) {
-	lc := make(chan string, 512)
+	lc := make(chan string, 12)
 	cv := &ConsoleView{logChan: lc}
 
 	if err := walk.InitWidget(
@@ -79,7 +79,19 @@ func (controlView *ConsoleView) PostAppendText(value string) {
 	controlView.mutex.Lock()
 	defer controlView.mutex.Unlock()
 
-	controlView.logChan <- value
+	select {
+	case controlView.logChan <- value: // チャネルに送信を試みる
+		// 送信成功
+	default:
+		// チャネルがいっぱいの場合、古いメッセージを1つ捨てて新しいメッセージを挿入
+		select {
+		case <-controlView.logChan: // 古いメッセージを1つ読み取って捨てる
+			controlView.logChan <- value // 新しいメッセージを送信
+		default:
+			// ここには到達しないはず（バッファがいっぱいなら必ず1つは読み取れる）
+		}
+	}
+
 	win.PostMessage(controlView.Handle(), TEM_APPENDTEXT, 0, 0)
 }
 
@@ -92,11 +104,15 @@ func (controlView *ConsoleView) WndProc(hwnd win.HWND, msg uint32, wParam, lPara
 
 		return win.DLGC_HASSETSEL | win.DLGC_WANTARROWS | win.DLGC_WANTCHARS
 	case TEM_APPENDTEXT:
-		select {
-		case value := <-controlView.logChan:
-			controlView.AppendText(value)
-		default:
-			return 0
+		// チャネルにメッセージがある限り、すべて処理する
+		for {
+			select {
+			case value := <-controlView.logChan:
+				controlView.AppendText(value)
+			default:
+				// チャネルが空になったら終了
+				return 0
+			}
 		}
 	}
 
