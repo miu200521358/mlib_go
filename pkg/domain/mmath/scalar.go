@@ -181,21 +181,21 @@ func Min[T Number](arr []T) T {
 	return min
 }
 
-// IntRanges 0からmax-1までの整数スライスを返します
+// IntRanges 0からmaxまでの整数スライスを返します
 func IntRanges(max int) []int {
 	return IntRangesByStep(0, max, 1)
 }
 
-// IntRanges 0からmax-1までの整数スライスを返します
+// IntRanges 0からmaxまでの整数スライスを返します
 func IntRangesByStep(min, max, step int) []int {
-	ranges := make([]int, max)
-	for i := min; i < max; i += step {
-		if i >= max {
+	values := make([]int, 0, int(max/step)+step)
+	for i := min; i <= max; i += step {
+		if i > max {
 			break
 		}
-		ranges[i] = i
+		values = append(values, i)
 	}
-	return ranges
+	return values
 }
 
 // 二次元配列の平均値計算(列基準)
