@@ -270,7 +270,7 @@ func DeformForPhysics(
 	}
 
 	// 物理剛体位置を更新
-	if err := miter.IterParallelByList(mmath.IntRanges(model.RigidBodies.Length()), 100, 0, func(i int, rigidBodyIndex int) error {
+	if err := miter.IterParallelByList(mmath.IntRanges(model.RigidBodies.Length()-1), 100, 0, func(i int, rigidBodyIndex int) error {
 		rigidBody, err := model.RigidBodies.Get(rigidBodyIndex)
 		if err != nil {
 			return err

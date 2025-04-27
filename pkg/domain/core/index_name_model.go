@@ -64,7 +64,7 @@ func (im *IndexNameModels[T]) Append(value T) error {
 }
 
 func (im *IndexNameModels[T]) Indexes() []int {
-	return mmath.IntRanges(len(im.values))
+	return mmath.IntRanges(len(im.values) - 1)
 }
 
 func (im *IndexNameModels[T]) Names() []string {
