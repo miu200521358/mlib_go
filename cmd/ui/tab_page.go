@@ -30,7 +30,7 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 			if data, err := rep.Load(path); err == nil {
 				model := data.(*pmx.PmxModel)
 				if err := model.Bones.InsertShortageOverrideBones(); err != nil {
-					mlog.ET(mi18n.T("システム用ボーン追加失敗"), err.Error())
+					mlog.ET(mi18n.T("システム用ボーン追加失敗"), err, "")
 				} else {
 
 					// pmxRep := repository.NewPmxRepository()
@@ -39,7 +39,7 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 					cw.StoreModel(0, 0, model)
 				}
 			} else {
-				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
+				mlog.ET(mi18n.T("読み込み失敗"), err, "")
 				cw.StoreModel(0, 0, nil)
 			}
 		},
@@ -60,7 +60,7 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 				player.Reset(motion.MaxFrame())
 				cw.StoreMotion(0, 0, motion)
 			} else {
-				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
+				mlog.ET(mi18n.T("読み込み失敗"), err, "")
 			}
 		},
 	)
@@ -78,12 +78,12 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 			if data, err := rep.Load(path); err == nil {
 				model := data.(*pmx.PmxModel)
 				if err := model.Bones.InsertShortageOverrideBones(); err != nil {
-					mlog.ET(mi18n.T("システム用ボーン追加失敗"), err.Error())
+					mlog.ET(mi18n.T("システム用ボーン追加失敗"), err, "")
 				} else {
 					cw.StoreModel(1, 0, model)
 				}
 			} else {
-				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
+				mlog.ET(mi18n.T("読み込み失敗"), err, "")
 			}
 		},
 	)
@@ -103,7 +103,7 @@ func NewTabPage(mWidgets *controller.MWidgets) declarative.TabPage {
 				player.Reset(motion.MaxFrame())
 				cw.StoreMotion(1, 0, motion)
 			} else {
-				mlog.ET(mi18n.T("読み込み失敗"), err.Error())
+				mlog.ET(mi18n.T("読み込み失敗"), err, "")
 			}
 		},
 	)

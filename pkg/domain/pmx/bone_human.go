@@ -32,6 +32,8 @@ func (bones *Bones) CreateCenter() (*Bone, error) {
 	// 位置
 	if upper, err := bones.GetUpper(); err == nil {
 		bone.Position.Y = upper.Position.Y * 0.6
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -53,6 +55,8 @@ func (bones *Bones) CreateGroove() (*Bone, error) {
 	// 位置
 	if upper, err := bones.GetUpper(); err == nil {
 		bone.Position.Y = upper.Position.Y * 0.7
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -78,6 +82,8 @@ func (bones *Bones) CreateBodyAxis() (*Bone, error) {
 			Y: (legLeft.Position.Y + legRight.Position.Y) * 0.5,
 			Z: 0.0,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -105,10 +111,8 @@ func (bones *Bones) CreateWaist() (*Bone, error) {
 			Y: (upper.Position.Y + lower.Position.Y) * 0.5,
 			Z: (upper.Position.Z + lower.Position.Z) * 0.5,
 		}
-	} else if upper != nil {
-		bone.Position = upper.Position.Copy()
-	} else if lower != nil {
-		bone.Position = lower.Position.Copy()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -136,10 +140,8 @@ func (bones *Bones) CreateTrunkRoot() (*Bone, error) {
 			Y: (upper.Position.Y + lower.Position.Y) * 0.5,
 			Z: (upper.Position.Z + lower.Position.Z) * 0.5,
 		}
-	} else if upper != nil {
-		bone.Position = upper.Position.Copy()
-	} else if lower != nil {
-		bone.Position = lower.Position.Copy()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -167,10 +169,8 @@ func (bones *Bones) CreateLowerRoot() (*Bone, error) {
 			Y: (upper.Position.Y + lower.Position.Y) * 0.5,
 			Z: (upper.Position.Z + lower.Position.Z) * 0.5,
 		}
-	} else if upper != nil {
-		bone.Position = upper.Position.Copy()
-	} else if lower != nil {
-		bone.Position = lower.Position.Copy()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -208,6 +208,8 @@ func (bones *Bones) CreateLegCenter() (*Bone, error) {
 			Y: (legLeft.Position.Y + legRight.Position.Y) * 0.5,
 			Z: (legLeft.Position.Z + legRight.Position.Z) * 0.5,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -235,10 +237,8 @@ func (bones *Bones) CreateUpperRoot() (*Bone, error) {
 			Y: (upper.Position.Y + lower.Position.Y) * 0.5,
 			Z: (upper.Position.Z + lower.Position.Z) * 0.5,
 		}
-	} else if upper != nil {
-		bone.Position = upper.Position.Copy()
-	} else if lower != nil {
-		bone.Position = lower.Position.Copy()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -276,6 +276,8 @@ func (bones *Bones) CreateUpper2() (*Bone, error) {
 			Y: (upper.Position.Y + neck.Position.Y) * 0.5,
 			Z: (upper.Position.Z + neck.Position.Z) * 0.5,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -309,6 +311,8 @@ func (bones *Bones) CreateNeckRoot() (*Bone, error) {
 			Y: (armLeft.Position.Y + armRight.Position.Y) * 0.5,
 			Z: (armLeft.Position.Z + armRight.Position.Z) * 0.5,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -336,6 +340,8 @@ func (bones *Bones) CreateNeck() (*Bone, error) {
 			Y: (armLeft.Position.Y + armRight.Position.Y) * 0.5,
 			Z: (armLeft.Position.Z + armRight.Position.Z) * 0.5,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -367,6 +373,8 @@ func (bones *Bones) CreateHead() (*Bone, error) {
 			Y: neck.Position.Y * 1.1,
 			Z: neck.Position.Z,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -397,6 +405,8 @@ func (bones *Bones) CreateHeadTail() (*Bone, error) {
 			Y: head.Position.Y + (head.Position.Y - neck.Position.Y),
 			Z: head.Position.Z,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -422,6 +432,8 @@ func (bones *Bones) CreateEyes() (*Bone, error) {
 			Y: head.Position.Y + 0.1,
 			Z: head.Position.Z,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -461,6 +473,8 @@ func (bones *Bones) CreateEye(direction BoneDirection) (*Bone, error) {
 		bone.BoneFlag |= BONE_FLAG_IS_EXTERNAL_ROTATION
 		bone.EffectFactor = 0.3
 		bone.EffectIndex = eyes.Index()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -482,6 +496,8 @@ func (bones *Bones) CreateShoulderRoot(direction BoneDirection) (*Bone, error) {
 	// 位置
 	if shoulderBone, err := bones.GetShoulder(direction); err == nil && shoulderBone != nil {
 		bone.Position = shoulderBone.Position.Copy()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -505,6 +521,8 @@ func (bones *Bones) CreateShoulderP(direction BoneDirection) (*Bone, error) {
 	// 位置
 	if shoulder, err := bones.GetShoulder(direction); err == nil {
 		bone.Position = shoulder.Position.Copy()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -530,6 +548,8 @@ func (bones *Bones) CreateShoulderC(direction BoneDirection) (*Bone, error) {
 	// 位置
 	if arm, err := bones.GetArm(direction); err == nil {
 		bone.Position = arm.Position.Copy()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -569,6 +589,8 @@ func (bones *Bones) CreateArmTwist(direction BoneDirection) (*Bone, error) {
 			Y: (arm.Position.Y + elbow.Position.Y) * 0.5,
 			Z: (arm.Position.Z + elbow.Position.Z) * 0.5,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -616,6 +638,8 @@ func (bones *Bones) CreateArmTwistChild(direction BoneDirection, idx int) (*Bone
 			Y: arm.Position.Y + ((elbow.Position.Y - arm.Position.Y) * ratio),
 			Z: arm.Position.Z + ((elbow.Position.Z - arm.Position.Z) * ratio),
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -655,21 +679,21 @@ func (bones *Bones) CreateWristTwist(direction BoneDirection) (*Bone, error) {
 			Y: (elbow.Position.Y + wrist.Position.Y) * 0.5,
 			Z: (elbow.Position.Z + wrist.Position.Z) * 0.5,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
 	bone.ParentIndex = bones.findParentIndexByConfig(WRIST_TWIST, direction)
 
-	if wrist != nil {
-		// 固定軸
-		bone.FixedAxis = wrist.Position.Subed(bone.Position).Normalize()
-		bone.BoneFlag |= BONE_FLAG_HAS_FIXED_AXIS
+	// 固定軸
+	bone.FixedAxis = wrist.Position.Subed(bone.Position).Normalize()
+	bone.BoneFlag |= BONE_FLAG_HAS_FIXED_AXIS
 
-		// ローカル軸
-		bone.LocalAxisX = wrist.Position.Subed(bone.Position).Normalize()
-		bone.LocalAxisZ = mmath.MVec3UnitYNeg.Cross(bone.LocalAxisX).Normalize()
-		bone.BoneFlag |= BONE_FLAG_HAS_LOCAL_AXIS
-	}
+	// ローカル軸
+	bone.LocalAxisX = wrist.Position.Subed(bone.Position).Normalize()
+	bone.LocalAxisZ = mmath.MVec3UnitYNeg.Cross(bone.LocalAxisX).Normalize()
+	bone.BoneFlag |= BONE_FLAG_HAS_LOCAL_AXIS
 
 	return bone, nil
 }
@@ -702,6 +726,8 @@ func (bones *Bones) CreateWristTwistChild(direction BoneDirection, idx int) (*Bo
 			Y: elbow.Position.Y + ((wrist.Position.Y - elbow.Position.Y) * ratio),
 			Z: elbow.Position.Z + ((wrist.Position.Z - elbow.Position.Z) * ratio),
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -732,23 +758,27 @@ func (bones *Bones) CreateWristTail(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(WRIST_TAIL.StringFromDirection(direction))
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
-	switch direction {
-	case BONE_DIRECTION_LEFT:
-		bonePositions := make([]*mmath.MVec3, 0)
-		for _, boneName := range []string{THUMB1.Left(), INDEX1.Left(), MIDDLE1.Left(), RING1.Left(), PINKY1.Left()} {
-			if bone, err := bones.GetByName(boneName); err == nil {
-				bonePositions = append(bonePositions, bone.Position)
+	bonePositions := make([]*mmath.MVec3, 0)
+	for _, boneName := range []string{THUMB1.StringFromDirection(direction),
+		INDEX1.StringFromDirection(direction), MIDDLE1.StringFromDirection(direction),
+		RING1.StringFromDirection(direction), PINKY1.StringFromDirection(direction)} {
+		if bone, err := bones.GetByName(boneName); err == nil {
+			bonePositions = append(bonePositions, bone.Position)
+		}
+	}
+	bone.Position = mmath.MeanVec3(bonePositions)
+	if bone.Position.IsZero() {
+		// 指がなくて位置が取れなかった場合、ひじからの相対位置を利用する
+		if elbow, err := bones.GetElbow(direction); err == nil && elbow != nil {
+			wrist, _ := bones.GetWrist(direction)
+			if wrist != nil {
+				bone.Position = &mmath.MVec3{
+					X: elbow.Position.X + (wrist.Position.X-elbow.Position.X)*0.5,
+					Y: elbow.Position.Y + (wrist.Position.Y-elbow.Position.Y)*0.5,
+					Z: elbow.Position.Z + (wrist.Position.Z-elbow.Position.Z)*0.5,
+				}
 			}
 		}
-		bone.Position = mmath.MeanVec3(bonePositions)
-	case BONE_DIRECTION_RIGHT:
-		bonePositions := make([]*mmath.MVec3, 0)
-		for _, boneName := range []string{THUMB1.Right(), INDEX1.Right(), MIDDLE1.Right(), RING1.Right(), PINKY1.Right()} {
-			if bone, err := bones.GetByName(boneName); err == nil {
-				bonePositions = append(bonePositions, bone.Position)
-			}
-		}
-		bone.Position = mmath.MeanVec3(bonePositions)
 	}
 
 	// 親ボーン
@@ -784,6 +814,8 @@ func (bones *Bones) CreateThumb0(direction BoneDirection) (*Bone, error) {
 			Y: wrist.Position.Y + (thumb1.Position.Y-wrist.Position.Y)*0.5,
 			Z: wrist.Position.Z + (thumb1.Position.Z-wrist.Position.Z)*0.5,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -811,6 +843,8 @@ func (bones *Bones) CreateThumbTail(direction BoneDirection) (*Bone, error) {
 			Y: thumb2.Position.Y + (thumb2.Position.Y - thumb1.Position.Y),
 			Z: thumb2.Position.Z + (thumb2.Position.Z - thumb1.Position.Z),
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -852,6 +886,8 @@ func (bones *Bones) CreateIndexTail(direction BoneDirection) (*Bone, error) {
 			Y: index2.Position.Y + (index2.Position.Y - index1.Position.Y),
 			Z: index2.Position.Z + (index2.Position.Z - index1.Position.Z),
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -893,6 +929,8 @@ func (bones *Bones) CreateMiddleTail(direction BoneDirection) (*Bone, error) {
 			Y: middle2.Position.Y + (middle2.Position.Y - middle1.Position.Y),
 			Z: middle2.Position.Z + (middle2.Position.Z - middle1.Position.Z),
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -934,6 +972,8 @@ func (bones *Bones) CreateRingTail(direction BoneDirection) (*Bone, error) {
 			Y: ring2.Position.Y + (ring2.Position.Y - ring1.Position.Y),
 			Z: ring2.Position.Z + (ring2.Position.Z - ring1.Position.Z),
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -975,6 +1015,8 @@ func (bones *Bones) CreatePinkyTail(direction BoneDirection) (*Bone, error) {
 			Y: pinky2.Position.Y + (pinky2.Position.Y - pinky1.Position.Y),
 			Z: pinky2.Position.Z + (pinky2.Position.Z - pinky1.Position.Z),
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -1005,6 +1047,8 @@ func (bones *Bones) CreateWaistCancel(direction BoneDirection) (*Bone, error) {
 		bone.EffectIndex = waist.Index()
 		bone.EffectFactor = -1.0
 		bone.BoneFlag |= BONE_FLAG_IS_EXTERNAL_ROTATION
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	return bone, nil
@@ -1021,8 +1065,11 @@ func (bones *Bones) CreateLegRoot(direction BoneDirection) (*Bone, error) {
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
-	legBone, _ := bones.GetLeg(direction)
-	bone.Position = legBone.Position.Copy()
+	if legBone, err := bones.GetLeg(direction); err == nil && legBone != nil {
+		bone.Position = legBone.Position.Copy()
+	} else {
+		return nil, merr.ParentNotFoundError
+	}
 
 	// 親ボーン
 	bone.ParentIndex = bones.findParentIndexByConfig(LEG_ROOT, direction)
@@ -1069,6 +1116,8 @@ func (bones *Bones) CreateHeel(direction BoneDirection) (*Bone, error) {
 		}
 
 		bone.ParentIndex = ankle.Index()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	return bone, nil
@@ -1090,7 +1139,10 @@ func (bones *Bones) CreateToeT(direction BoneDirection) (*Bone, error) {
 			// つま先IKのターゲットと同位置
 			bone.Position = toe.Position.Copy()
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
+
 	bone.Position.Y = 0.0
 
 	if ankle, err := bones.GetAnkle(direction); err == nil {
@@ -1129,6 +1181,8 @@ func (bones *Bones) CreateToeP(direction BoneDirection) (*Bone, error) {
 		}
 
 		bone.ParentIndex = toeT.Index()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	return bone, nil
@@ -1160,6 +1214,8 @@ func (bones *Bones) CreateToeC(direction BoneDirection) (*Bone, error) {
 				Z: toeT.Position.Z,
 			}
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -1181,6 +1237,8 @@ func (bones *Bones) CreateLegD(direction BoneDirection) (*Bone, error) {
 	// 位置
 	if leg, err := bones.GetLeg(direction); err == nil {
 		bone.Position = leg.Position.Copy()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -1209,6 +1267,8 @@ func (bones *Bones) CreateKneeD(direction BoneDirection) (*Bone, error) {
 	// 位置
 	if knee, err := bones.GetKnee(direction); err == nil {
 		bone.Position = knee.Position.Copy()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -1237,6 +1297,8 @@ func (bones *Bones) CreateAnkleD(direction BoneDirection) (*Bone, error) {
 	// 位置
 	if ankle, err := bones.GetAnkle(direction); err == nil {
 		bone.Position = ankle.Position.Copy()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -1271,6 +1333,8 @@ func (bones *Bones) CreateAnkleDGround(direction BoneDirection) (*Bone, error) {
 		}
 
 		bone.ParentIndex = ankle.Index()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	return bone, nil
@@ -1301,6 +1365,8 @@ func (bones *Bones) CreateHeelD(direction BoneDirection) (*Bone, error) {
 		bone.EffectIndex = heel.Index()
 		bone.EffectFactor = 1.0
 		bone.BoneFlag |= BONE_FLAG_IS_EXTERNAL_ROTATION
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	return bone, nil
@@ -1325,6 +1391,8 @@ func (bones *Bones) CreateToeEx(direction BoneDirection) (*Bone, error) {
 			Y: (ankle.Position.Y + toeT.Position.Y) * 0.5,
 			Z: (ankle.Position.Z + toeT.Position.Z) * 0.5,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン
@@ -1357,6 +1425,8 @@ func (bones *Bones) CreateToeTD(direction BoneDirection) (*Bone, error) {
 		bone.EffectIndex = toeT.Index()
 		bone.EffectFactor = 1.0
 		bone.BoneFlag |= BONE_FLAG_IS_EXTERNAL_ROTATION
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	return bone, nil
@@ -1386,6 +1456,8 @@ func (bones *Bones) CreateToePD(direction BoneDirection) (*Bone, error) {
 		bone.EffectIndex = toeP.Index()
 		bone.EffectFactor = 1.0
 		bone.BoneFlag |= BONE_FLAG_IS_EXTERNAL_ROTATION
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	return bone, nil
@@ -1404,6 +1476,8 @@ func (bones *Bones) CreateToeCD(direction BoneDirection) (*Bone, error) {
 	// 位置
 	if toeC, err := bones.GetToeC(direction); err == nil {
 		bone.Position = toeC.Position.Copy()
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 	bone.Position.Y = 0.0
 
@@ -1437,6 +1511,8 @@ func (bones *Bones) CreateLegIkParent(direction BoneDirection) (*Bone, error) {
 			Y: 0.0,
 			Z: legIk.Position.Z,
 		}
+	} else {
+		return nil, merr.ParentNotFoundError
 	}
 
 	// 親ボーン

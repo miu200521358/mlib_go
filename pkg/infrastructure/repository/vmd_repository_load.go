@@ -205,14 +205,14 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 		// ボーン名
 		boneName, err := rep.readText(15)
 		if err != nil {
-			mlog.E("[%d] readBones.boneName error: %v", i, err)
+			mlog.E("[%d] readBones.boneName error: %v", err, i)
 			return err
 		}
 
 		// キーフレ番号
 		index, err := rep.unpackUInt()
 		if err != nil {
-			mlog.E("[%d] readBones.index error: %v", i, err)
+			mlog.E("[%d] readBones.index error: %v", err, i)
 			return err
 		}
 		bf.SetIndex(float32(index))
@@ -221,7 +221,7 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 		// 回転X,Y,Z,W
 		bfValues, err = rep.unpackFloats(bfValues, 7)
 		if err != nil {
-			mlog.E("[%d] readBones.bfValues error: %v", i, err)
+			mlog.E("[%d] readBones.bfValues error: %v", err, i)
 			return err
 		}
 
@@ -231,7 +231,7 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 		// 補間曲線
 		curves, err := rep.unpackBytes(64)
 		if err != nil {
-			mlog.E("[%d] readBones.Curves error: %v", i, err)
+			mlog.E("[%d] readBones.Curves error: %v", err, i)
 			return err
 		}
 		bf.Curves = vmd.NewBoneCurvesByValues(curves)
@@ -264,14 +264,14 @@ func (rep *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
 		// モーフ名
 		morphName, err := rep.readText(15)
 		if err != nil {
-			mlog.E("[%d] readMorphs.morphName error: %v", i, err)
+			mlog.E("[%d] readMorphs.morphName error: %v", err, i)
 			return err
 		}
 
 		// キーフレ番号
 		index, err := rep.unpackUInt()
 		if err != nil {
-			mlog.E("[%d] readMorphs.index error: %v", i, err)
+			mlog.E("[%d] readMorphs.index error: %v", err, i)
 			return err
 		}
 		mf.SetIndex(float32(index))
@@ -279,7 +279,7 @@ func (rep *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
 		// ratio
 		mf.Ratio, err = rep.unpackFloat()
 		if err != nil {
-			mlog.E("[%d] readMorphs.Ratio error: %v", i, err)
+			mlog.E("[%d] readMorphs.Ratio error: %v", err, i)
 			return err
 		}
 
@@ -303,7 +303,7 @@ func (rep *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 		// キーフレ番号
 		index, err := rep.unpackUInt()
 		if err != nil {
-			mlog.E("[%d] readCameras.index error: %v", i, err)
+			mlog.E("[%d] readCameras.index error: %v", err, i)
 			return err
 		}
 		cf.SetIndex(float32(index))
@@ -311,28 +311,28 @@ func (rep *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 		// 距離
 		cf.Distance, err = rep.unpackFloat()
 		if err != nil {
-			mlog.E("[%d] readCameras.Distance error: %v", i, err)
+			mlog.E("[%d] readCameras.Distance error: %v", err, i)
 			return err
 		}
 
 		// 位置X,Y,Z
 		cf.Position, err = rep.unpackVec3()
 		if err != nil {
-			mlog.E("[%d] readCameras.Position error: %v", i, err)
+			mlog.E("[%d] readCameras.Position error: %v", err, i)
 			return err
 		}
 
 		// 回転(オイラー角度)
 		cf.Degrees, err = rep.unpackVec3()
 		if err != nil {
-			mlog.E("[%d] readCameras.Degrees error: %v", i, err)
+			mlog.E("[%d] readCameras.Degrees error: %v", err, i)
 			return err
 		}
 
 		// 補間曲線
 		curves, err := rep.unpackBytes(24)
 		if err != nil {
-			mlog.E("[%d] readCameras.Curves error: %v", i, err)
+			mlog.E("[%d] readCameras.Curves error: %v", err, i)
 			return err
 		}
 		cf.Curves = vmd.NewCameraCurvesByValues(curves)
@@ -340,7 +340,7 @@ func (rep *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 		// 視野角
 		viewOfAngle, err := rep.unpackUInt()
 		if err != nil {
-			mlog.E("[%d] readCameras.ViewOfAngle error: %v", i, err)
+			mlog.E("[%d] readCameras.ViewOfAngle error: %v", err, i)
 			return err
 		}
 		cf.ViewOfAngle = int(viewOfAngle)
@@ -348,7 +348,7 @@ func (rep *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 		// パースOFF
 		perspective, err := rep.unpackByte()
 		if err != nil {
-			mlog.E("[%d] readCameras.Perspective error: %v", i, err)
+			mlog.E("[%d] readCameras.Perspective error: %v", err, i)
 			return err
 		}
 		cf.IsPerspectiveOff = perspective == 1
@@ -373,7 +373,7 @@ func (rep *VmdRepository) loadLights(motion *vmd.VmdMotion) error {
 		// キーフレ番号
 		index, err := rep.unpackUInt()
 		if err != nil {
-			mlog.E("[%d] readLights.index error: %v", i, err)
+			mlog.E("[%d] readLights.index error: %v", err, i)
 			return err
 		}
 		lf.SetIndex(float32(index))
@@ -381,14 +381,14 @@ func (rep *VmdRepository) loadLights(motion *vmd.VmdMotion) error {
 		// 照明色
 		lf.Color, err = rep.unpackVec3()
 		if err != nil {
-			mlog.E("[%d] readLights.Color error: %v", i, err)
+			mlog.E("[%d] readLights.Color error: %v", err, i)
 			return err
 		}
 
 		// 位置X,Y,Z
 		lf.Position, err = rep.unpackVec3()
 		if err != nil {
-			mlog.E("[%d] readLights.Position error: %v", i, err)
+			mlog.E("[%d] readLights.Position error: %v", err, i)
 			return err
 		}
 
@@ -412,7 +412,7 @@ func (rep *VmdRepository) loadShadows(motion *vmd.VmdMotion) error {
 		// キーフレ番号
 		index, err := rep.unpackUInt()
 		if err != nil {
-			mlog.E("[%d] readShadows.index error: %v", i, err)
+			mlog.E("[%d] readShadows.index error: %v", err, i)
 			return err
 		}
 		sf.SetIndex(float32(index))
@@ -420,7 +420,7 @@ func (rep *VmdRepository) loadShadows(motion *vmd.VmdMotion) error {
 		// セルフ影タイプ
 		shadowMode, err := rep.unpackByte()
 		if err != nil {
-			mlog.E("[%d] readShadows.ShadowMode error: %v", i, err)
+			mlog.E("[%d] readShadows.ShadowMode error: %v", err, i)
 			return err
 		}
 		sf.ShadowMode = int(shadowMode)
@@ -428,7 +428,7 @@ func (rep *VmdRepository) loadShadows(motion *vmd.VmdMotion) error {
 		// 距離
 		sf.Distance, err = rep.unpackFloat()
 		if err != nil {
-			mlog.E("[%d] readShadows.Distance error: %v", i, err)
+			mlog.E("[%d] readShadows.Distance error: %v", err, i)
 			return err
 		}
 
@@ -452,7 +452,7 @@ func (rep *VmdRepository) loadIks(motion *vmd.VmdMotion) error {
 		// キーフレ番号
 		index, err := rep.unpackUInt()
 		if err != nil {
-			mlog.E("[%d] readIks.index error: %v", i, err)
+			mlog.E("[%d] readIks.index error: %v", err, i)
 			return err
 		}
 		ikf.SetIndex(float32(index))
@@ -460,7 +460,7 @@ func (rep *VmdRepository) loadIks(motion *vmd.VmdMotion) error {
 		// モデル表示
 		visible, err := rep.unpackByte()
 		if err != nil {
-			mlog.E("[%d] readIks.Visible error: %v", i, err)
+			mlog.E("[%d] readIks.Visible error: %v", err, i)
 			return err
 		}
 		ikf.Visible = visible == 1
@@ -468,7 +468,7 @@ func (rep *VmdRepository) loadIks(motion *vmd.VmdMotion) error {
 		// IKリストの数
 		ikCount, err := rep.unpackUInt()
 		if err != nil {
-			mlog.E("[%d] readIks.IkCount error: %v", i, err)
+			mlog.E("[%d] readIks.IkCount error: %v", err, i)
 			return err
 		}
 		for j := 0; j < int(ikCount); j++ {
@@ -477,14 +477,14 @@ func (rep *VmdRepository) loadIks(motion *vmd.VmdMotion) error {
 			// IKボーン名
 			ik.BoneName, err = rep.readText(20)
 			if err != nil {
-				mlog.E("[%d][%d] readIks.Ik.BoneName error: %v", i, j, err)
+				mlog.E("[%d][%d] readIks.Ik.BoneName error: %v", err, i, j)
 				return err
 			}
 
 			// IK有効無効
 			enabled, err := rep.unpackByte()
 			if err != nil {
-				mlog.E("[%d][%d] readIks.Ik.Enabled error: %v", i, j, err)
+				mlog.E("[%d][%d] readIks.Ik.Enabled error: %v", err, i, j)
 				return err
 			}
 			ik.Enabled = enabled == 1

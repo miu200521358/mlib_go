@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
@@ -65,6 +66,18 @@ func (rep *PmxRepository) createStickBones(model *pmx.PmxModel) error {
 		return err
 	}
 
+	noStickyBoneNames := []string{
+		pmx.ROOT.String(),
+	}
+	for _, direction := range []pmx.BoneDirection{pmx.BONE_DIRECTION_LEFT, pmx.BONE_DIRECTION_RIGHT} {
+		noStickyBoneNames = append(noStickyBoneNames, pmx.LEG_IK_PARENT.StringFromDirection(direction))
+		noStickyBoneNames = append(noStickyBoneNames, pmx.LEG_IK.StringFromDirection(direction))
+		noStickyBoneNames = append(noStickyBoneNames, pmx.TOE_T.StringFromDirection(direction))
+		noStickyBoneNames = append(noStickyBoneNames, pmx.TOE_C.StringFromDirection(direction))
+		noStickyBoneNames = append(noStickyBoneNames, pmx.TOE_P.StringFromDirection(direction))
+		noStickyBoneNames = append(noStickyBoneNames, pmx.HEEL.StringFromDirection(direction))
+	}
+
 	model.Bones.ForEach(func(index int, bone *pmx.Bone) bool {
 		if (bone.Config() == nil && !bone.IsVisible()) ||
 			(bone.RigidBody != nil && bone.RigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC) {
@@ -77,9 +90,8 @@ func (rep *PmxRepository) createStickBones(model *pmx.PmxModel) error {
 			return true
 		}
 
-		if bone.Name() == pmx.LEG_IK_PARENT.Left() || bone.Name() == pmx.LEG_IK_PARENT.Right() ||
-			bone.Name() == pmx.LEG_IK.Left() || bone.Name() == pmx.LEG_IK.Right() {
-			// IK親、IKはフラグは変更せずに、棒を作らない
+		if slices.Contains(noStickyBoneNames, bone.Name()) {
+			// 棒を作らないボーンはスルー
 			return true
 		}
 

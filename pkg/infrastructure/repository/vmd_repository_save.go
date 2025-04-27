@@ -64,49 +64,49 @@ func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includ
 	// Write the bone frames
 	err = rep.saveBoneFrames(fout, motion)
 	if err != nil {
-		mlog.E("%s", mi18n.T("ボーンフレーム書き込みエラー"))
+		mlog.E("%s", err, mi18n.T("ボーンフレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the morph frames
 	err = rep.saveMorphFrames(fout, motion)
 	if err != nil {
-		mlog.E("%s", mi18n.T("モーフフレーム書き込みエラー"))
+		mlog.E("%s", err, mi18n.T("モーフフレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the camera frames
 	err = rep.saveCameraFrames(fout, motion)
 	if err != nil {
-		mlog.E("%s", mi18n.T("カメラフレーム書き込みエラー"))
+		mlog.E("%s", err, mi18n.T("カメラフレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the Light frames
 	err = rep.saveLightFrames(fout, motion)
 	if err != nil {
-		mlog.E("%s", mi18n.T("照明フレーム書き込みエラー"))
+		mlog.E("%s", err, mi18n.T("照明フレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the Shadow frames
 	err = rep.saveShadowFrames(fout, motion)
 	if err != nil {
-		mlog.E("%s", mi18n.T("照明フレーム書き込みエラー"))
+		mlog.E("%s", err, mi18n.T("照明フレーム書き込みエラー"))
 		return err
 	}
 
 	// Write the IK frames
 	err = rep.saveIkFrames(fout, motion)
 	if err != nil {
-		mlog.E("%s", mi18n.T("IKフレーム書き込みエラー"))
+		mlog.E("%s", err, mi18n.T("IKフレーム書き込みエラー"))
 		return err
 	}
 
 	// foutを書き込んで終了する
 	err = fout.Close()
 	if err != nil {
-		mlog.E("%s", mi18n.T("ファイルクローズエラー", map[string]interface{}{"Path": motion.Path()}))
+		mlog.E("%s", err, mi18n.T("ファイルクローズエラー", map[string]interface{}{"Path": motion.Path()}))
 		return err
 	}
 

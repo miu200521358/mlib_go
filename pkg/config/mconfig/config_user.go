@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 )
 
 const (
@@ -105,7 +103,6 @@ func SaveUserConfigInt(key string, value int) error {
 func LoadUserConfigAll(key string) ([]string, map[string]interface{}) {
 	// Configファイルのフルパスを取得
 	configFilePath := filepath.Join(GetAppRootDir(), USER_CONFIG_FILE_NAME)
-	mlog.D("LoadUserConfig: %s: %s", key, configFilePath)
 
 	// Read the config.json file
 	data, err := os.ReadFile(configFilePath)

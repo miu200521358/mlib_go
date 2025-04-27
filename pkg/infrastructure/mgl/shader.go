@@ -77,7 +77,7 @@ func (s *MShader) initializePrograms() error {
 	for programType, config := range ShaderProgramConfigs {
 		program, err := s.shaderLoader.CreateProgram(config.VertexShader, config.FragmentShader)
 		if err != nil {
-			mlog.E("Failed to create %v program: %v", programType, err)
+			mlog.E("Failed to create %v program:", err, programType)
 			s.cleanupPrograms()
 			return err
 		}
