@@ -29,7 +29,7 @@ func TestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
 	}
 
 	model := modelData.(*pmx.PmxModel)
-	boneDeltas := DeformBone(model, motion, true, 0, nil)
+	boneDeltas := DeformBone(model, motion, motion, true, 0, nil).Bones
 
 	{
 		expectedPosition := &mmath.MVec3{X: 0, Y: 0, Z: 0}
@@ -277,7 +277,7 @@ func TestVmdMotion_DeformArmIk_Mahoujin_01(t *testing.T) {
 
 	model := modelData.(*pmx.PmxModel)
 
-	boneDeltas := DeformBone(model, motion, true, 0, nil)
+	boneDeltas := DeformBone(model, motion, motion, true, 0, nil).Bones
 	{
 		boneName := pmx.ARM.Right()
 		expectedPosition := &mmath.MVec3{X: -1.801768, Y: 18.555544, Z: 0.482812}
@@ -329,7 +329,7 @@ func TestVmdMotion_DeformArmIk_Mahoujin_04(t *testing.T) {
 
 	model := modelData.(*pmx.PmxModel)
 
-	boneDeltas := DeformBone(model, motion, true, 0, nil)
+	boneDeltas := DeformBone(model, motion, motion, true, 0, nil).Bones
 	{
 		boneName := pmx.ARM.Left()
 		expectedPosition := &mmath.MVec3{X: 1.830244, Y: 18.596258, Z: 0.482812}
@@ -383,5 +383,5 @@ func TestVmdMotion_DeformLegIk_Up(t *testing.T) {
 
 	model := modelData.(*pmx.PmxModel)
 
-	DeformBone(model, motion, true, 0, nil)
+	DeformBone(model, motion, motion, true, 0, nil)
 }

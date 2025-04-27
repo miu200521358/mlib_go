@@ -82,7 +82,7 @@ func DeformMorph(
 	return mds
 }
 
-func DeformBoneMorph(
+func deformBoneMorph(
 	model *pmx.PmxModel,
 	mfs *vmd.MorphFrames,
 	frame float32,

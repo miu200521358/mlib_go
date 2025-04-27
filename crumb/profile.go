@@ -46,6 +46,6 @@ func main() {
 		if i%100 == 0 {
 			log.Printf("i: %d", i)
 		}
-		deform.DeformBone(model, motion, true, i, nil)
+		deform.DeformBone(model, motion, motion, true, i, nil)
 	}
 }

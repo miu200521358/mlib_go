@@ -144,12 +144,17 @@ func DeformIks(
 // DeformBone 前回情報なしでボーンデフォーム処理を実行する
 func DeformBone(
 	model *pmx.PmxModel,
-	motion *vmd.VmdMotion,
+	morphMotion *vmd.VmdMotion,
+	boneMotion *vmd.VmdMotion,
 	isCalcIk bool,
-	frame int,
+	iFrame int,
 	boneNames []string,
-) *delta.BoneDeltas {
-	return deformBoneByPhysicsFlag(model, motion, nil, isCalcIk, float32(frame), boneNames, false).Bones
+) *delta.VmdDeltas {
+	frame := float32(iFrame)
+
+	vmdDeltas := delta.NewVmdDeltas(frame, model.Bones, model.Hash(), morphMotion.Hash())
+	vmdDeltas.Morphs = deformBoneMorph(model, morphMotion.MorphFrames, frame, nil)
+	return deformBoneByPhysicsFlag(model, boneMotion, vmdDeltas, isCalcIk, float32(frame), boneNames, false)
 }
 
 // DeformBone 前回情報ありでボーンデフォーム処理を実行する
