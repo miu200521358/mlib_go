@@ -30,7 +30,7 @@ func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
 					if e, ok := r.(error); ok {
 						errMsg = e.Error()
 					}
-					err = fmt.Errorf("パニックが発生しました: %s\n%s", errMsg, stackTrace)
+					err = fmt.Errorf("panic: %s\n%s", errMsg, stackTrace)
 				}
 			}()
 
