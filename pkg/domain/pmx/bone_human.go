@@ -125,6 +125,7 @@ func (bones *Bones) GetTrunkRoot() (*Bone, error) {
 // CreateTrunkRoot 体幹中心作成
 func (bones *Bones) CreateTrunkRoot() (*Bone, error) {
 	bone := NewBoneByName(TRUNK_ROOT.String())
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	upper, _ := bones.GetUpper()
@@ -155,6 +156,7 @@ func (bones *Bones) GetLowerRoot() (*Bone, error) {
 // CreateLowerRoot 下半身根元作成
 func (bones *Bones) CreateLowerRoot() (*Bone, error) {
 	bone := NewBoneByName(LOWER_ROOT.String())
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	upper, _ := bones.GetUpper()
@@ -195,6 +197,7 @@ func (bones *Bones) GetLegCenter() (*Bone, error) {
 // CreateLegCenter 足中心作成
 func (bones *Bones) CreateLegCenter() (*Bone, error) {
 	bone := NewBoneByName(LEG_CENTER.String())
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	legLeft, _ := bones.GetLeg(BONE_DIRECTION_LEFT)
@@ -221,6 +224,7 @@ func (bones *Bones) GetUpperRoot() (*Bone, error) {
 // CreateUpperRoot 上半身根元作成
 func (bones *Bones) CreateUpperRoot() (*Bone, error) {
 	bone := NewBoneByName(UPPER_ROOT.String())
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	upper, _ := bones.GetUpper()
@@ -294,6 +298,7 @@ func (bones *Bones) GetNeckRoot() (*Bone, error) {
 // CreateNeckRoot 首根元作成
 func (bones *Bones) CreateNeckRoot() (*Bone, error) {
 	bone := NewBoneByName(NECK_ROOT.String())
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	armLeft, _ := bones.GetArm(BONE_DIRECTION_LEFT)
@@ -381,6 +386,7 @@ func (bones *Bones) GetHeadTail() (*Bone, error) {
 // CreateHeadTail 頭先作成
 func (bones *Bones) CreateHeadTail() (*Bone, error) {
 	bone := NewBoneByName(HEAD_TAIL.String())
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	neck, _ := bones.GetNeck()
@@ -471,6 +477,7 @@ func (bones *Bones) GetShoulderRoot(direction BoneDirection) (*Bone, error) {
 // CreateShoulderRoot 肩根元作成
 func (bones *Bones) CreateShoulderRoot(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(SHOULDER_ROOT.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	if shoulderBone, err := bones.GetShoulder(direction); err == nil && shoulderBone != nil {
@@ -723,6 +730,7 @@ func (bones *Bones) GetWristTail(direction BoneDirection) (*Bone, error) {
 // CreateWristTail 手首先先作成
 func (bones *Bones) CreateWristTail(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(WRIST_TAIL.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	switch direction {
 	case BONE_DIRECTION_LEFT:
@@ -792,6 +800,7 @@ func (bones *Bones) GetThumbTail(direction BoneDirection) (*Bone, error) {
 // CreateThumbTail 親指先先作成
 func (bones *Bones) CreateThumbTail(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(THUMB_TAIL.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	thumb1, _ := bones.GetThumb(direction, 1)
@@ -832,6 +841,7 @@ func (bones *Bones) GetIndexTail(direction BoneDirection) (*Bone, error) {
 // CreateIndexTail 親指先先作成
 func (bones *Bones) CreateIndexTail(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(INDEX_TAIL.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	index1, _ := bones.GetIndex(direction, 1)
@@ -872,6 +882,7 @@ func (bones *Bones) GetMiddleTail(direction BoneDirection) (*Bone, error) {
 // CreateMiddleTail 親指先先作成
 func (bones *Bones) CreateMiddleTail(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(MIDDLE_TAIL.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	middle1, _ := bones.GetMiddle(direction, 1)
@@ -912,6 +923,7 @@ func (bones *Bones) GetRingTail(direction BoneDirection) (*Bone, error) {
 // CreateRingTail 親指先先作成
 func (bones *Bones) CreateRingTail(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(RING_TAIL.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	ring1, _ := bones.GetRing(direction, 1)
@@ -952,6 +964,7 @@ func (bones *Bones) GetPinkyTail(direction BoneDirection) (*Bone, error) {
 // CreateLittleTail 親指先先作成
 func (bones *Bones) CreatePinkyTail(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(PINKY_TAIL.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	pinky1, _ := bones.GetPinky(direction, 1)
@@ -1005,6 +1018,7 @@ func (bones *Bones) GetLegRoot(direction BoneDirection) (*Bone, error) {
 // CreateLegRoot 足根元作成
 func (bones *Bones) CreateLegRoot(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(LEG_ROOT.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	legBone, _ := bones.GetLeg(direction)
@@ -1043,6 +1057,7 @@ func (bones *Bones) GetHeel(direction BoneDirection) (*Bone, error) {
 // CreateHeel かかと作成
 func (bones *Bones) CreateHeel(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(HEEL.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	// 親ボーン
@@ -1067,6 +1082,7 @@ func (bones *Bones) GetToeT(direction BoneDirection) (*Bone, error) {
 // CreateToeT つま先先作成
 func (bones *Bones) CreateToeT(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(TOE_T.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	if toeIK, err := bones.GetToeIK(direction); err == nil {
@@ -1092,6 +1108,7 @@ func (bones *Bones) GetToeP(direction BoneDirection) (*Bone, error) {
 // CreateToeP つま先親作成
 func (bones *Bones) CreateToeP(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(TOE_P.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	// 親ボーン
@@ -1125,6 +1142,7 @@ func (bones *Bones) GetToeC(direction BoneDirection) (*Bone, error) {
 // CreateToeC つま先子作成
 func (bones *Bones) CreateToeC(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(TOE_C.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	if toeT, err := bones.GetToeT(direction); err == nil {
@@ -1242,6 +1260,7 @@ func (bones *Bones) GetAnkleDGround(direction BoneDirection) (*Bone, error) {
 // CreateAnkleDGround 足首地面作成
 func (bones *Bones) CreateAnkleDGround(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(ANKLE_D_GROUND.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	if ankle, err := bones.GetAnkleD(direction); err == nil {
@@ -1265,6 +1284,7 @@ func (bones *Bones) GetHeelD(direction BoneDirection) (*Bone, error) {
 // CreateHeelD かかとD作成
 func (bones *Bones) CreateHeelD(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(HEEL_D.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	if heel, err := bones.GetHeel(direction); err == nil {
@@ -1321,6 +1341,7 @@ func (bones *Bones) GetToeTD(direction BoneDirection) (*Bone, error) {
 // CreateToeTD つま先先D作成
 func (bones *Bones) CreateToeTD(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(TOE_T_D.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	if toeT, err := bones.GetToeT(direction); err == nil {
@@ -1349,6 +1370,7 @@ func (bones *Bones) GetToePD(direction BoneDirection) (*Bone, error) {
 // CreateToePD つま先親D作成
 func (bones *Bones) CreateToePD(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(TOE_P_D.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	if toeP, err := bones.GetToeP(direction); err == nil {
@@ -1377,6 +1399,7 @@ func (bones *Bones) GetToeCD(direction BoneDirection) (*Bone, error) {
 // CreateToeCD つま先子D作成
 func (bones *Bones) CreateToeCD(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(TOE_C_D.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
 
 	// 位置
 	if toeC, err := bones.GetToeC(direction); err == nil {

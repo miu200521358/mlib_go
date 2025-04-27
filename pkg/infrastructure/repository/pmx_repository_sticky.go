@@ -11,13 +11,13 @@ import (
 
 func (rep *PmxRepository) CreateSticky(
 	model *pmx.PmxModel,
-	insertBoneFunc func(vertices *pmx.Vertices, bones *pmx.Bones) error,
+	insertBoneFunc func(vertices *pmx.Vertices, bones *pmx.Bones, displaySlots *pmx.DisplaySlots) error,
 	insertDebugFunc func(bones *pmx.Bones, displaySlots *pmx.DisplaySlots) error,
 ) error {
 
 	// 設定ボーンを追加
 	if insertBoneFunc != nil {
-		if err := insertBoneFunc(model.Vertices, model.Bones); err != nil {
+		if err := insertBoneFunc(model.Vertices, model.Bones, model.DisplaySlots); err != nil {
 			return err
 		}
 	}
@@ -67,15 +67,19 @@ func (rep *PmxRepository) createStickBones(model *pmx.PmxModel) error {
 
 	model.Bones.ForEach(func(index int, bone *pmx.Bone) bool {
 		if (bone.Config() == nil && !bone.IsVisible()) ||
-			(bone.RigidBody != nil && bone.RigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC) ||
-			bone.Name() == pmx.LEG_IK_PARENT.Left() || bone.Name() == pmx.LEG_IK_PARENT.Right() ||
-			bone.Name() == pmx.LEG_IK.Left() || bone.Name() == pmx.LEG_IK.Right() {
-			// 設定外の非表示ボーン、物理ボーン、IKはスルー
+			(bone.RigidBody != nil && bone.RigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC) {
 			// 操作と表示のフラグをOFFにする
 			bone.BoneFlag &= ^pmx.BONE_FLAG_CAN_MANIPULATE
 			bone.BoneFlag &= ^pmx.BONE_FLAG_IS_VISIBLE
 			model.Bones.Update(bone)
 
+			// 設定外の非表示ボーン、物理ボーンスルー
+			return true
+		}
+
+		if bone.Name() == pmx.LEG_IK_PARENT.Left() || bone.Name() == pmx.LEG_IK_PARENT.Right() ||
+			bone.Name() == pmx.LEG_IK.Left() || bone.Name() == pmx.LEG_IK.Right() {
+			// IK親、IKはフラグは変更せずに、棒を作らない
 			return true
 		}
 
