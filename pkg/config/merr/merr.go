@@ -32,9 +32,9 @@ func showErrorDialog(appConfig *mconfig.AppConfig, err error, titleKey, msgKey, 
 	errMsg := err.Error()
 	stackTrace := dumpAllGoroutines()
 
-	if !appConfig.IsSetEnv() {
-		panic(err)
-	}
+	// if !appConfig.IsSetEnv() {
+	// 	panic(err)
+	// }
 
 	var errT *walk.TextEdit
 	var mw *walk.MainWindow
