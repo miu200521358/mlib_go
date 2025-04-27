@@ -773,9 +773,9 @@ func (bones *Bones) CreateWristTail(direction BoneDirection) (*Bone, error) {
 			wrist, _ := bones.GetWrist(direction)
 			if wrist != nil {
 				bone.Position = &mmath.MVec3{
-					X: elbow.Position.X + (wrist.Position.X-elbow.Position.X)*0.5,
-					Y: elbow.Position.Y + (wrist.Position.Y-elbow.Position.Y)*0.5,
-					Z: elbow.Position.Z + (wrist.Position.Z-elbow.Position.Z)*0.5,
+					X: wrist.Position.X + (wrist.Position.X-elbow.Position.X)*0.5,
+					Y: wrist.Position.Y + (wrist.Position.Y-elbow.Position.Y)*0.5,
+					Z: wrist.Position.Z + (wrist.Position.Z-elbow.Position.Z)*0.5,
 				}
 			}
 		}
