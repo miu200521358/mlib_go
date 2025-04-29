@@ -270,7 +270,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      CENTER,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false,
-				Abbreviation:     StandardBoneName("軸")},
+				Abbreviation:     StandardBoneName("体軸")},
 			TRUNK_ROOT: {
 				ParentBoneNames:  []StandardBoneName{BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:   [][]StandardBoneName{{WAIST}, {UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
@@ -278,7 +278,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      CENTER,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false,
-				Abbreviation:     StandardBoneName("幹")},
+				Abbreviation:     StandardBoneName("体幹")},
 			WAIST: {
 				ParentBoneNames:  []StandardBoneName{TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:   [][]StandardBoneName{{UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
@@ -295,7 +295,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				BoundingBoxShape:      SHAPE_NONE,
 				IsStandard:            false,
 				GravityTargetBoneName: LEG_CENTER,
-				Abbreviation:          StandardBoneName("下")},
+				Abbreviation:          StandardBoneName("下根")},
 			LOWER: {
 				ParentBoneNames:  []StandardBoneName{LOWER_ROOT, WAIST, TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:   [][]StandardBoneName{{LEG_CENTER, HIP}, {LEG_ROOT}, {WAIST_CANCEL}, {LEG, LEG_D}},
@@ -320,7 +320,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				BoundingBoxShape:      SHAPE_NONE,
 				IsStandard:            false,
 				GravityTargetBoneName: NECK_ROOT,
-				Abbreviation:          StandardBoneName("上")},
+				Abbreviation:          StandardBoneName("上根")},
 			UPPER: {
 				ParentBoneNames:  []StandardBoneName{UPPER_ROOT, WAIST, TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:   [][]StandardBoneName{{UPPER2}},
@@ -344,7 +344,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:           UPPER,
 				IsStandard:            false,
 				GravityTargetBoneName: HEAD,
-				Abbreviation:          StandardBoneName("鎖")},
+				Abbreviation:          StandardBoneName("首根")},
 			NECK: {
 				ParentBoneNames:  []StandardBoneName{NECK_ROOT, UPPER2, UPPER},
 				ChildBoneNames:   [][]StandardBoneName{{HEAD}},
@@ -500,7 +500,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				BoundingBoxShape:      SHAPE_CAPSULE,
 				IsStandard:            true,
 				GravityTargetBoneName: WRIST_TAIL,
-				Abbreviation:          StandardBoneName("{d}首")},
+				Abbreviation:          StandardBoneName("{d}手首")},
 			WRIST_TAIL: {
 				ParentBoneNames:  []StandardBoneName{WRIST},
 				ChildBoneNames:   [][]StandardBoneName{},
@@ -715,7 +715,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true,
-				Abbreviation:     StandardBoneName("{d}首")},
+				Abbreviation:     StandardBoneName("{d}足首")},
 			ANKLE_GROUND: {
 				ParentBoneNames:  []StandardBoneName{ANKLE},
 				ChildBoneNames:   [][]StandardBoneName{},
