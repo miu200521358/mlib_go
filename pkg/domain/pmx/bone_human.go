@@ -1077,6 +1077,36 @@ func (bones *Bones) CreateLegRoot(direction BoneDirection) (*Bone, error) {
 	return bone, nil
 }
 
+// GetHip 腰骨取得
+func (bones *Bones) GetHip(direction BoneDirection) (*Bone, error) {
+	return bones.GetByName(HIP.StringFromDirection(direction))
+}
+
+// CreateHip 腰骨作成
+func (bones *Bones) CreateHip(direction BoneDirection) (*Bone, error) {
+	bone := NewBoneByName(HIP.StringFromDirection(direction))
+	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
+
+	// 位置
+	// 親ボーン
+	if lower, err := bones.GetLower(); err == nil && lower != nil {
+		if leg, err := bones.GetLeg(direction); err == nil {
+			bone.Position = &mmath.MVec3{
+				X: leg.Position.X,
+				Y: lower.Position.Y,
+				Z: lower.Position.Z,
+			}
+		}
+	} else {
+		return nil, merr.ParentNotFoundError
+	}
+
+	// 親ボーン
+	bone.ParentIndex = bones.findParentIndexByConfig(HIP, direction)
+
+	return bone, nil
+}
+
 // GetLeg 足取得
 func (bones *Bones) GetLeg(direction BoneDirection) (*Bone, error) {
 	return bones.GetByName(LEG.StringFromDirection(direction))

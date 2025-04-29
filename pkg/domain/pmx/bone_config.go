@@ -9,6 +9,7 @@ import (
 
 // MLIB_PREFIX システム用接頭辞
 const MLIB_PREFIX string = "[mlib]"
+const BONE_DIRECTION_PREFIX string = "{d}"
 
 type BoneFlag uint16
 
@@ -101,17 +102,6 @@ const (
 	CATEGORY_FITTING_ONLY_MOVE BoneCategory = iota
 )
 
-type DisplaySlotName string
-
-const (
-	DISPLAY_SLOT_CENTER DisplaySlotName = "センター"
-	DISPLAY_SLOT_TRUNK  DisplaySlotName = "体幹"
-	DISPLAY_SLOT_HEAD   DisplaySlotName = "頭"
-	DISPLAY_SLOT_HAND   DisplaySlotName = "{d}手"
-	DISPLAY_SLOT_FINGER DisplaySlotName = "{d}指"
-	DISPLAY_SLOT_LEG    DisplaySlotName = "{d}足"
-)
-
 type BoneConfig struct {
 	// 親ボーン名候補リスト
 	ParentBoneNames []StandardBoneName
@@ -127,6 +117,8 @@ type BoneConfig struct {
 	IsStandard bool
 	// 重心先ボーン名
 	GravityTargetBoneName StandardBoneName
+	// 略称
+	Abbreviation StandardBoneName
 }
 
 type StandardBoneName string
@@ -140,6 +132,7 @@ const (
 	WAIST          StandardBoneName = "腰"
 	LOWER_ROOT     StandardBoneName = "下半身根元"
 	LOWER          StandardBoneName = "下半身"
+	HIP            StandardBoneName = "{d}腰骨"
 	LEG_CENTER     StandardBoneName = "足中心"
 	UPPER_ROOT     StandardBoneName = "上半身根元"
 	UPPER          StandardBoneName = "上半身"
@@ -215,19 +208,30 @@ func (s StandardBoneName) String() string {
 }
 
 func (s StandardBoneName) StringFromDirection(direction BoneDirection) string {
-	return strings.ReplaceAll(string(s), "{d}", string(direction))
+	return strings.ReplaceAll(string(s), BONE_DIRECTION_PREFIX, string(direction))
 }
 
 func (s StandardBoneName) StringFromDirectionAndIdx(direction BoneDirection, idx int) string {
-	return strings.ReplaceAll(string(s), "{d}", string(direction)) + strconv.Itoa(idx)
+	return strings.ReplaceAll(string(s), BONE_DIRECTION_PREFIX, string(direction)) + strconv.Itoa(idx)
 }
 
 func (s StandardBoneName) Right() string {
-	return strings.ReplaceAll(string(s), "{d}", "右")
+	return strings.ReplaceAll(string(s), BONE_DIRECTION_PREFIX, "右")
 }
 
 func (s StandardBoneName) Left() string {
-	return strings.ReplaceAll(string(s), "{d}", "左")
+	return strings.ReplaceAll(string(s), BONE_DIRECTION_PREFIX, "左")
+}
+
+func BoneConfigFromName(name string) *BoneConfig {
+	for _, direction := range []BoneDirection{BONE_DIRECTION_TRUNK, BONE_DIRECTION_RIGHT, BONE_DIRECTION_LEFT} {
+		for boneName, v := range standardBoneConfigs {
+			if boneName.StringFromDirection(direction) == name {
+				return v
+			}
+		}
+	}
+	return nil
 }
 
 var configOnce sync.Once
@@ -241,42 +245,48 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				ChildBoneNames:   [][]StandardBoneName{{CENTER}, {LEG_IK_PARENT}, {LEG_IK}},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("全")},
 			CENTER: {
 				ParentBoneNames:  []StandardBoneName{ROOT},
 				ChildBoneNames:   [][]StandardBoneName{{GROOVE}, {BODY_AXIS}, {TRUNK_ROOT}, {WAIST}, {UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      CENTER,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("C")},
 			GROOVE: {
 				ParentBoneNames:  []StandardBoneName{CENTER},
 				ChildBoneNames:   [][]StandardBoneName{{BODY_AXIS}, {TRUNK_ROOT}, {WAIST}, {UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      CENTER,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("G")},
 			BODY_AXIS: {
 				ParentBoneNames:  []StandardBoneName{CENTER, GROOVE},
 				ChildBoneNames:   [][]StandardBoneName{{TRUNK_ROOT}, {WAIST}, {UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      CENTER,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("軸")},
 			TRUNK_ROOT: {
 				ParentBoneNames:  []StandardBoneName{BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:   [][]StandardBoneName{{WAIST}, {UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
 				Categories:       []BoneCategory{CATEGORY_ROOT},
 				DisplaySlot:      CENTER,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("幹")},
 			WAIST: {
 				ParentBoneNames:  []StandardBoneName{TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:   [][]StandardBoneName{{UPPER_ROOT, LOWER_ROOT}, {UPPER, LOWER}},
 				Categories:       []BoneCategory{CATEGORY_ROOT, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      CENTER,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("腰")},
 			LOWER_ROOT: {
 				ParentBoneNames:       []StandardBoneName{WAIST, TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:        [][]StandardBoneName{{LOWER}},
@@ -284,14 +294,24 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:           LOWER,
 				BoundingBoxShape:      SHAPE_NONE,
 				IsStandard:            false,
-				GravityTargetBoneName: LEG_CENTER},
+				GravityTargetBoneName: LEG_CENTER,
+				Abbreviation:          StandardBoneName("下")},
 			LOWER: {
 				ParentBoneNames:  []StandardBoneName{LOWER_ROOT, WAIST, TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
-				ChildBoneNames:   [][]StandardBoneName{{LEG_CENTER}, {LEG_ROOT}, {WAIST_CANCEL}, {LEG, LEG_D}},
+				ChildBoneNames:   [][]StandardBoneName{{LEG_CENTER, HIP}, {LEG_ROOT}, {WAIST_CANCEL}, {LEG, LEG_D}},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_LOWER},
 				DisplaySlot:      LOWER,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("下")},
+			HIP: {
+				ParentBoneNames:  []StandardBoneName{LOWER, LOWER_ROOT, WAIST, TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
+				ChildBoneNames:   [][]StandardBoneName{{LEG_CENTER}, {LEG_ROOT}, {WAIST_CANCEL}, {LEG, LEG_D}},
+				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_LOWER},
+				DisplaySlot:      LEG,
+				BoundingBoxShape: SHAPE_CAPSULE,
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}腰")},
 			UPPER_ROOT: {
 				ParentBoneNames:       []StandardBoneName{WAIST, TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:        [][]StandardBoneName{{UPPER}},
@@ -299,90 +319,103 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:           UPPER,
 				BoundingBoxShape:      SHAPE_NONE,
 				IsStandard:            false,
-				GravityTargetBoneName: NECK_ROOT},
+				GravityTargetBoneName: NECK_ROOT,
+				Abbreviation:          StandardBoneName("上")},
 			UPPER: {
 				ParentBoneNames:  []StandardBoneName{UPPER_ROOT, WAIST, TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:   [][]StandardBoneName{{UPPER2}},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER},
 				DisplaySlot:      UPPER,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("上")},
 			UPPER2: {
 				ParentBoneNames:  []StandardBoneName{UPPER},
 				ChildBoneNames:   [][]StandardBoneName{{NECK_ROOT}},
 				Categories:       []BoneCategory{CATEGORY_TRUNK, CATEGORY_UPPER},
 				DisplaySlot:      UPPER,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("上2")},
 			NECK_ROOT: {
 				ParentBoneNames:       []StandardBoneName{UPPER2, UPPER},
 				ChildBoneNames:        [][]StandardBoneName{{NECK, SHOULDER_ROOT}, {SHOULDER_P}, {SHOULDER}},
 				Categories:            []BoneCategory{CATEGORY_UPPER},
 				DisplaySlot:           UPPER,
 				IsStandard:            false,
-				GravityTargetBoneName: HEAD},
+				GravityTargetBoneName: HEAD,
+				Abbreviation:          StandardBoneName("鎖")},
 			NECK: {
 				ParentBoneNames:  []StandardBoneName{NECK_ROOT, UPPER2, UPPER},
 				ChildBoneNames:   [][]StandardBoneName{{HEAD}},
 				Categories:       []BoneCategory{CATEGORY_UPPER},
 				DisplaySlot:      UPPER,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("首")},
 			HEAD: {
 				ParentBoneNames:  []StandardBoneName{NECK},
 				ChildBoneNames:   [][]StandardBoneName{{HEAD_TAIL}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD},
 				DisplaySlot:      HEAD,
 				BoundingBoxShape: SHAPE_SPHERE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("頭")},
 			HEAD_TAIL: {
 				ParentBoneNames:  []StandardBoneName{HEAD},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD, CATEGORY_TAIL},
 				DisplaySlot:      HEAD,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("頭先")},
 			EYES: {
 				ParentBoneNames:  []StandardBoneName{HEAD},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD},
 				DisplaySlot:      HEAD,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("両目")},
 			EYE: {
 				ParentBoneNames:  []StandardBoneName{HEAD},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD},
 				DisplaySlot:      HEAD,
 				BoundingBoxShape: SHAPE_SPHERE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}目")},
 			SHOULDER_ROOT: {
 				ParentBoneNames:  []StandardBoneName{NECK_ROOT, UPPER2, UPPER},
 				ChildBoneNames:   [][]StandardBoneName{{SHOULDER_P}, {SHOULDER}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_SHOULDER},
 				DisplaySlot:      SHOULDER,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}肩根")},
 			SHOULDER_P: {
 				ParentBoneNames:  []StandardBoneName{SHOULDER_ROOT, NECK_ROOT, UPPER2, UPPER},
 				ChildBoneNames:   [][]StandardBoneName{{SHOULDER}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_SHOULDER},
 				DisplaySlot:      SHOULDER,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}肩P")},
 			SHOULDER: {
 				ParentBoneNames:  []StandardBoneName{SHOULDER_P, SHOULDER_ROOT, NECK_ROOT, UPPER2, UPPER},
 				ChildBoneNames:   [][]StandardBoneName{{SHOULDER_C}, {ARM}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_SHOULDER},
 				DisplaySlot:      SHOULDER,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}肩")},
 			SHOULDER_C: {
 				ParentBoneNames:  []StandardBoneName{SHOULDER, SHOULDER_P, SHOULDER_ROOT, NECK_ROOT, UPPER2, UPPER},
 				ChildBoneNames:   [][]StandardBoneName{{ARM}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_SHOULDER},
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}肩C")},
 			ARM: {
 				ParentBoneNames:       []StandardBoneName{SHOULDER},
 				ChildBoneNames:        [][]StandardBoneName{{ARM_TWIST}, {ELBOW}},
@@ -390,32 +423,37 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:           ARM,
 				BoundingBoxShape:      SHAPE_CAPSULE,
 				IsStandard:            true,
-				GravityTargetBoneName: ELBOW},
+				GravityTargetBoneName: ELBOW,
+				Abbreviation:          StandardBoneName("{d}腕")},
 			ARM_TWIST: {
 				ParentBoneNames:  []StandardBoneName{ARM},
 				ChildBoneNames:   [][]StandardBoneName{{ELBOW}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ARM, CATEGORY_TWIST},
 				DisplaySlot:      ARM,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}腕捩")},
 			ARM_TWIST1: {
 				ParentBoneNames:  []StandardBoneName{ARM},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_TWIST},
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}腕捩1")},
 			ARM_TWIST2: {
 				ParentBoneNames:  []StandardBoneName{ARM},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_TWIST},
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}腕捩2")},
 			ARM_TWIST3: {
 				ParentBoneNames:  []StandardBoneName{ARM},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_TWIST},
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}腕捩3")},
 			ELBOW: {
 				ParentBoneNames:       []StandardBoneName{ARM_TWIST, ARM},
 				ChildBoneNames:        [][]StandardBoneName{{WRIST_TWIST}},
@@ -423,32 +461,37 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:           ELBOW,
 				BoundingBoxShape:      SHAPE_CAPSULE,
 				IsStandard:            true,
-				GravityTargetBoneName: WRIST},
+				GravityTargetBoneName: WRIST,
+				Abbreviation:          StandardBoneName("{d}肘")},
 			WRIST_TWIST: {
 				ParentBoneNames:  []StandardBoneName{ELBOW},
 				ChildBoneNames:   [][]StandardBoneName{{WRIST}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TWIST, CATEGORY_ARM},
 				DisplaySlot:      ELBOW,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}手捩")},
 			WRIST_TWIST1: {
 				ParentBoneNames:  []StandardBoneName{ELBOW},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TWIST},
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}手捩1")},
 			WRIST_TWIST2: {
 				ParentBoneNames:  []StandardBoneName{ELBOW},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TWIST},
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}手捩2")},
 			WRIST_TWIST3: {
 				ParentBoneNames:  []StandardBoneName{ELBOW},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TWIST},
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}手捩3")},
 			WRIST: {
 				ParentBoneNames:       []StandardBoneName{WRIST_TWIST, ELBOW},
 				ChildBoneNames:        [][]StandardBoneName{{WRIST_TAIL}},
@@ -456,230 +499,263 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:           WRIST,
 				BoundingBoxShape:      SHAPE_CAPSULE,
 				IsStandard:            true,
-				GravityTargetBoneName: WRIST_TAIL},
+				GravityTargetBoneName: WRIST_TAIL,
+				Abbreviation:          StandardBoneName("{d}首")},
 			WRIST_TAIL: {
 				ParentBoneNames:  []StandardBoneName{WRIST},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_ELBOW, CATEGORY_TAIL},
 				DisplaySlot:      WRIST,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}手先")},
 			THUMB0: {
 				ParentBoneNames:  []StandardBoneName{WRIST},
 				ChildBoneNames:   [][]StandardBoneName{{THUMB1}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      THUMB1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}親0")},
 			THUMB1: {
 				ParentBoneNames:  []StandardBoneName{THUMB0},
 				ChildBoneNames:   [][]StandardBoneName{{THUMB2}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      THUMB1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}親1")},
 			THUMB2: {
 				ParentBoneNames:  []StandardBoneName{THUMB1},
 				ChildBoneNames:   [][]StandardBoneName{{THUMB_TAIL}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      THUMB1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}親2")},
 			THUMB_TAIL: {
 				ParentBoneNames:  []StandardBoneName{THUMB2},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_TAIL},
 				DisplaySlot:      THUMB1,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}親先")},
 			INDEX1: {
 				ParentBoneNames:  []StandardBoneName{WRIST},
 				ChildBoneNames:   [][]StandardBoneName{{INDEX2}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      INDEX1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}人1")},
 			INDEX2: {
 				ParentBoneNames:  []StandardBoneName{INDEX1},
 				ChildBoneNames:   [][]StandardBoneName{{INDEX3}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      INDEX1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}人2")},
 			INDEX3: {
 				ParentBoneNames:  []StandardBoneName{INDEX2},
 				ChildBoneNames:   [][]StandardBoneName{{INDEX_TAIL}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      INDEX1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}人3")},
 			INDEX_TAIL: {
 				ParentBoneNames:  []StandardBoneName{INDEX3},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_TAIL},
 				DisplaySlot:      INDEX1,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}人先")},
 			MIDDLE1: {
 				ParentBoneNames:  []StandardBoneName{WRIST},
 				ChildBoneNames:   [][]StandardBoneName{{MIDDLE2}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      MIDDLE1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}中1")},
 			MIDDLE2: {
 				ParentBoneNames:  []StandardBoneName{MIDDLE1},
 				ChildBoneNames:   [][]StandardBoneName{{MIDDLE3}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      MIDDLE1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}中2")},
 			MIDDLE3: {
 				ParentBoneNames:  []StandardBoneName{MIDDLE2},
 				ChildBoneNames:   [][]StandardBoneName{{MIDDLE_TAIL}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      MIDDLE1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}中3")},
 			MIDDLE_TAIL: {
 				ParentBoneNames:  []StandardBoneName{MIDDLE3},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_TAIL},
 				DisplaySlot:      MIDDLE1,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}中先")},
 			RING1: {
 				ParentBoneNames:  []StandardBoneName{WRIST},
 				ChildBoneNames:   [][]StandardBoneName{{RING2}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      RING1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}薬1")},
 			RING2: {
 				ParentBoneNames:  []StandardBoneName{RING1},
 				ChildBoneNames:   [][]StandardBoneName{{RING3}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      RING1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}薬2")},
 			RING3: {
 				ParentBoneNames:  []StandardBoneName{RING2},
 				ChildBoneNames:   [][]StandardBoneName{{RING_TAIL}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      RING1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}薬3")},
 			RING_TAIL: {
 				ParentBoneNames:  []StandardBoneName{RING3},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_TAIL},
 				DisplaySlot:      RING1,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}薬先")},
 			PINKY1: {
 				ParentBoneNames:  []StandardBoneName{WRIST},
 				ChildBoneNames:   [][]StandardBoneName{{PINKY2}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      PINKY1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}小1")},
 			PINKY2: {
 				ParentBoneNames:  []StandardBoneName{PINKY1},
 				ChildBoneNames:   [][]StandardBoneName{{PINKY3}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      PINKY1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}小2")},
 			PINKY3: {
 				ParentBoneNames:  []StandardBoneName{PINKY2},
 				ChildBoneNames:   [][]StandardBoneName{{PINKY_TAIL}},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER},
 				DisplaySlot:      PINKY1,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}小3")},
 			PINKY_TAIL: {
 				ParentBoneNames:  []StandardBoneName{PINKY3},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_FINGER, CATEGORY_TAIL},
 				DisplaySlot:      PINKY1,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}小先")},
 			LEG_CENTER: {
 				ParentBoneNames:  []StandardBoneName{LOWER, LOWER_ROOT},
 				ChildBoneNames:   [][]StandardBoneName{{LEG_ROOT}, {WAIST_CANCEL}, {LEG}},
 				Categories:       []BoneCategory{CATEGORY_LOWER},
 				DisplaySlot:      LOWER,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("足中")},
 			WAIST_CANCEL: {
 				ParentBoneNames:  []StandardBoneName{LEG_CENTER, LOWER, LOWER_ROOT},
 				ChildBoneNames:   [][]StandardBoneName{{LEG_ROOT}, {LEG}, {KNEE}},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG},
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}腰C")},
 			LEG_ROOT: {
 				ParentBoneNames:  []StandardBoneName{WAIST_CANCEL, LEG_CENTER, LOWER, LOWER_ROOT},
 				ChildBoneNames:   [][]StandardBoneName{{LEG, LEG_D}},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG},
 				DisplaySlot:      LEG,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}足根")},
 			LEG: {
 				ParentBoneNames:  []StandardBoneName{WAIST_CANCEL, LEG_ROOT, LEG_CENTER, LOWER},
 				ChildBoneNames:   [][]StandardBoneName{{KNEE}},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_FK},
 				DisplaySlot:      LEG,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}足")},
 			KNEE: {
 				ParentBoneNames:  []StandardBoneName{LEG},
 				ChildBoneNames:   [][]StandardBoneName{{ANKLE}},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_FK},
 				DisplaySlot:      KNEE,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}膝")},
 			ANKLE: {
 				ParentBoneNames:  []StandardBoneName{KNEE},
 				ChildBoneNames:   [][]StandardBoneName{{ANKLE_GROUND, TOE_T, HEEL}},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_FK, CATEGORY_ANKLE},
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}首")},
 			ANKLE_GROUND: {
 				ParentBoneNames:  []StandardBoneName{ANKLE},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_FK, CATEGORY_ANKLE},
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}首地")},
 			HEEL: {
 				ParentBoneNames:  []StandardBoneName{ANKLE},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE, CATEGORY_SOLE},
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}踵")},
 			TOE_T: {
 				ParentBoneNames:  []StandardBoneName{ANKLE},
 				ChildBoneNames:   [][]StandardBoneName{{TOE_P}},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_SOLE, CATEGORY_TAIL},
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}先")},
 			TOE_P: {
 				ParentBoneNames:  []StandardBoneName{TOE_T},
 				ChildBoneNames:   [][]StandardBoneName{{TOE_C}},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_SOLE},
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}先P")},
 			TOE_C: {
 				ParentBoneNames:  []StandardBoneName{TOE_P},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_SOLE},
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}先C")},
 			LEG_D: {
 				ParentBoneNames:       []StandardBoneName{WAIST_CANCEL, LEG_ROOT, LEG_CENTER, LOWER},
 				ChildBoneNames:        [][]StandardBoneName{{KNEE_D}},
@@ -687,7 +763,8 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:           LEG,
 				BoundingBoxShape:      SHAPE_CAPSULE,
 				IsStandard:            true,
-				GravityTargetBoneName: KNEE_D},
+				GravityTargetBoneName: KNEE_D,
+				Abbreviation:          StandardBoneName("{d}足D")},
 			KNEE_D: {
 				ParentBoneNames:       []StandardBoneName{LEG_D},
 				ChildBoneNames:        [][]StandardBoneName{{ANKLE_D}},
@@ -695,7 +772,8 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:           KNEE,
 				BoundingBoxShape:      SHAPE_CAPSULE,
 				IsStandard:            true,
-				GravityTargetBoneName: ANKLE_D},
+				GravityTargetBoneName: ANKLE_D,
+				Abbreviation:          StandardBoneName("{d}膝D")},
 			ANKLE_D: {
 				ParentBoneNames:       []StandardBoneName{KNEE_D},
 				ChildBoneNames:        [][]StandardBoneName{{ANKLE_D_GROUND, TOE_EX, HEEL_D}},
@@ -703,70 +781,80 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:           ANKLE,
 				BoundingBoxShape:      SHAPE_CAPSULE,
 				IsStandard:            true,
-				GravityTargetBoneName: TOE_T_D},
+				GravityTargetBoneName: TOE_T_D,
+				Abbreviation:          StandardBoneName("{d}首D")},
 			ANKLE_D_GROUND: {
 				ParentBoneNames:  []StandardBoneName{ANKLE_D},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE},
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}首地D")},
 			HEEL_D: {
 				ParentBoneNames:  []StandardBoneName{ANKLE_D},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_SOLE},
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}踵D")},
 			TOE_EX: {
 				ParentBoneNames:  []StandardBoneName{ANKLE_D},
 				ChildBoneNames:   [][]StandardBoneName{{TOE_T_D}},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_LEG_D, CATEGORY_ANKLE},
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_CAPSULE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}EX")},
 			TOE_T_D: {
 				ParentBoneNames:  []StandardBoneName{TOE_EX},
 				ChildBoneNames:   [][]StandardBoneName{{TOE_P_D}},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_SOLE},
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}先D")},
 			TOE_P_D: {
 				ParentBoneNames:  []StandardBoneName{TOE_T_D},
 				ChildBoneNames:   [][]StandardBoneName{{TOE_C_D}},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_SOLE},
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}先PD")},
 			TOE_C_D: {
 				ParentBoneNames:  []StandardBoneName{TOE_P_D},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_LOWER, CATEGORY_LEG, CATEGORY_SOLE},
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       false},
+				IsStandard:       false,
+				Abbreviation:     StandardBoneName("{d}先CD")},
 			LEG_IK_PARENT: {
 				ParentBoneNames:  []StandardBoneName{ROOT},
 				ChildBoneNames:   [][]StandardBoneName{{LEG_IK}},
 				Categories:       []BoneCategory{CATEGORY_LEG_IK, CATEGORY_SOLE, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      LEG_IK,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}足K親")},
 			LEG_IK: {
 				ParentBoneNames:  []StandardBoneName{LEG_IK_PARENT, ROOT},
 				ChildBoneNames:   [][]StandardBoneName{{TOE_IK}},
 				Categories:       []BoneCategory{CATEGORY_LEG_IK, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      LEG_IK,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}足K")},
 			TOE_IK: {
 				ParentBoneNames:  []StandardBoneName{LEG_IK},
 				ChildBoneNames:   [][]StandardBoneName{},
 				Categories:       []BoneCategory{CATEGORY_LEG_IK, CATEGORY_FITTING_ONLY_MOVE},
 				DisplaySlot:      LEG_IK,
 				BoundingBoxShape: SHAPE_NONE,
-				IsStandard:       true},
+				IsStandard:       true,
+				Abbreviation:     StandardBoneName("{d}先K")},
 		}
 	})
 	return standardBoneConfigs
