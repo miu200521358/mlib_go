@@ -739,7 +739,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false,
-				Abbreviation:     StandardBoneName("{d}先")},
+				Abbreviation:     StandardBoneName("{d}爪先")},
 			TOE_P: {
 				ParentBoneNames:  []StandardBoneName{TOE_T},
 				ChildBoneNames:   [][]StandardBoneName{{TOE_C}},
@@ -747,7 +747,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false,
-				Abbreviation:     StandardBoneName("{d}先P")},
+				Abbreviation:     StandardBoneName("{d}爪先P")},
 			TOE_C: {
 				ParentBoneNames:  []StandardBoneName{TOE_P},
 				ChildBoneNames:   [][]StandardBoneName{},
@@ -755,7 +755,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false,
-				Abbreviation:     StandardBoneName("{d}先C")},
+				Abbreviation:     StandardBoneName("{d}爪先C")},
 			LEG_D: {
 				ParentBoneNames:       []StandardBoneName{WAIST_CANCEL, LEG_ROOT, LEG_CENTER, LOWER},
 				ChildBoneNames:        [][]StandardBoneName{{KNEE_D}},
@@ -782,7 +782,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				BoundingBoxShape:      SHAPE_CAPSULE,
 				IsStandard:            true,
 				GravityTargetBoneName: TOE_T_D,
-				Abbreviation:          StandardBoneName("{d}首D")},
+				Abbreviation:          StandardBoneName("{d}足首D")},
 			ANKLE_D_GROUND: {
 				ParentBoneNames:  []StandardBoneName{ANKLE_D},
 				ChildBoneNames:   [][]StandardBoneName{},
@@ -814,7 +814,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false,
-				Abbreviation:     StandardBoneName("{d}先D")},
+				Abbreviation:     StandardBoneName("{d}爪先D")},
 			TOE_P_D: {
 				ParentBoneNames:  []StandardBoneName{TOE_T_D},
 				ChildBoneNames:   [][]StandardBoneName{{TOE_C_D}},
@@ -822,7 +822,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false,
-				Abbreviation:     StandardBoneName("{d}先PD")},
+				Abbreviation:     StandardBoneName("{d}爪先PD")},
 			TOE_C_D: {
 				ParentBoneNames:  []StandardBoneName{TOE_P_D},
 				ChildBoneNames:   [][]StandardBoneName{},
@@ -830,7 +830,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       false,
-				Abbreviation:     StandardBoneName("{d}先CD")},
+				Abbreviation:     StandardBoneName("{d}爪先CD")},
 			LEG_IK_PARENT: {
 				ParentBoneNames:  []StandardBoneName{ROOT},
 				ChildBoneNames:   [][]StandardBoneName{{LEG_IK}},
