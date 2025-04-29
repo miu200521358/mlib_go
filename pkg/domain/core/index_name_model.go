@@ -108,7 +108,7 @@ func (im *IndexNameModels[T]) GetByName(name string) (T, error) {
 	if index, ok := im.nameIndexes[name]; ok {
 		return im.values[index], nil
 	}
-	return *new(T), merr.NameNotFoundError
+	return *new(T), merr.NewNameNotFoundError(name, "Name not found")
 }
 
 func (im *IndexNameModels[T]) ContainsByName(name string) bool {
@@ -123,7 +123,7 @@ func (im *IndexNameModels[T]) RemoveByName(name string) error {
 		delete(im.nameIndexes, name)
 		return nil
 	}
-	return merr.NameNotFoundError
+	return merr.NewNameNotFoundError(name, "Name not found")
 }
 
 // ForEach は全ての値をコールバック関数に渡します

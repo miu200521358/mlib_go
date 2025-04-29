@@ -5,6 +5,8 @@ import (
 	"sort"
 	"strings"
 
+	"fmt"
+
 	"github.com/miu200521358/mlib_go/pkg/config/merr"
 	"github.com/miu200521358/mlib_go/pkg/domain/core"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -246,15 +248,15 @@ func (bones *Bones) SetParentFromConfig(bone *Bone) {
 
 func (bones *Bones) GetIkTargetByName(ikBoneName string) (*Bone, error) {
 	if ikBoneName == "" || !bones.ContainsByName(ikBoneName) {
-		return nil, merr.NameNotFoundError
+		return nil, merr.NewNameNotFoundError(ikBoneName, "ik target not found from name")
 	}
 
 	if ikBone, err := bones.GetByName(ikBoneName); err != nil ||
 		!ikBone.IsIK() || !bones.Contains(ikBone.Ik.BoneIndex) {
-		return nil, merr.NameNotFoundError
+		return nil, merr.NewNameNotFoundError(ikBoneName, "ik target not found from name")
 	} else {
 		if ikTargetBone, err := bones.Get(ikBone.Ik.BoneIndex); err != nil {
-			return nil, merr.NameNotFoundError
+			return nil, merr.NewNameNotFoundError(ikBoneName, "ik target not found from name")
 		} else {
 			return ikTargetBone, nil
 		}
@@ -264,10 +266,10 @@ func (bones *Bones) GetIkTargetByName(ikBoneName string) (*Bone, error) {
 func (bones *Bones) GetIkTarget(ikBoneIndex int) (*Bone, error) {
 	if ikBone, err := bones.Get(ikBoneIndex); err != nil ||
 		!ikBone.IsIK() || !bones.Contains(ikBone.Ik.BoneIndex) {
-		return nil, merr.NameNotFoundError
+		return nil, merr.NewNameNotFoundError(fmt.Sprint(ikBoneIndex), "ik target not found from index")
 	} else {
 		if ikTargetBone, err := bones.Get(ikBone.Ik.BoneIndex); err != nil {
-			return nil, merr.NameNotFoundError
+			return nil, merr.NewNameNotFoundError(fmt.Sprint(ikBoneIndex), "ik target not found from index")
 		} else {
 			return ikTargetBone, nil
 		}
