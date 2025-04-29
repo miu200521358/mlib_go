@@ -87,7 +87,7 @@ func DeformIks(
 	loopCount int, // IKのループ回数
 	isRemoveTwist bool, // IKの捻りを除去するかどうか
 	isForceDebug bool, // IKのデバッグを強制的に有効にするかどうか
-) *delta.VmdDeltas {
+) (*delta.VmdDeltas, []int) {
 	if boneNames == nil {
 		boneNames = make([]string, 0)
 	}
@@ -120,7 +120,7 @@ func DeformIks(
 			)
 
 			// 親→子の順にグローバル行列を再更新
-			updateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
+			UpdateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
 
 			// IK適用前のグローバル行列を保存
 			for _, idx := range ikTargetDeformBoneIndexes {
@@ -136,9 +136,9 @@ func DeformIks(
 		}
 	}
 
-	updateGlobalMatrix(deltas.Bones, deformBoneIndexes)
+	UpdateGlobalMatrix(deltas.Bones, deformBoneIndexes)
 
-	return deltas
+	return deltas, deformBoneIndexes
 }
 
 // DeformBone 前回情報なしでボーンデフォーム処理を実行する
@@ -189,7 +189,7 @@ func deformBoneByPhysicsFlag(
 	deltas.Bones = fillBoneDeform(model, motion, deltas, frame, deformBoneIndexes, isCalcIk, isAfterPhysics)
 
 	// ボーンデフォーム情報を更新する
-	updateGlobalMatrix(deltas.Bones, deformBoneIndexes)
+	UpdateGlobalMatrix(deltas.Bones, deformBoneIndexes)
 
 	return deltas
 }
@@ -221,7 +221,7 @@ func DeformBeforePhysicsReset(
 	deltas.Bones = fillBoneDeform(model, motion, deltas, frame, model.Bones.LayerSortedBoneIndexes[true], true, true)
 
 	// ボーンデフォーム情報を更新する
-	updateGlobalMatrix(deltas.Bones, model.Bones.LayerSortedIndexes)
+	UpdateGlobalMatrix(deltas.Bones, model.Bones.LayerSortedIndexes)
 
 	return deltas
 }
@@ -258,7 +258,7 @@ func DeformBeforePhysics(
 	deltas.Bones = fillBoneDeform(model, motion, deltas, frame, model.Bones.LayerSortedIndexes, true, false)
 
 	// ボーンデフォーム情報を更新する
-	updateGlobalMatrix(deltas.Bones, model.Bones.LayerSortedIndexes)
+	UpdateGlobalMatrix(deltas.Bones, model.Bones.LayerSortedIndexes)
 
 	return deltas
 }
@@ -335,7 +335,7 @@ func DeformAfterPhysics(
 		model.Bones.LayerSortedBoneIndexes[true], true, true)
 
 	// ボーンデフォーム情報を更新する
-	updateGlobalMatrix(vmdDeltas.Bones, model.Bones.LayerSortedBoneIndexes[true])
+	UpdateGlobalMatrix(vmdDeltas.Bones, model.Bones.LayerSortedBoneIndexes[true])
 
 	return vmdDeltas
 }

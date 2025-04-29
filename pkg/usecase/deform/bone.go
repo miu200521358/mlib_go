@@ -563,7 +563,7 @@ func fillBoneDeform(
 			)
 
 			// 親→子の順にグローバル行列を再更新
-			updateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
+			UpdateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
 
 			// IK適用前のグローバル行列を保存
 			for _, idx := range ikTargetDeformBoneIndexes {
@@ -643,7 +643,7 @@ func updateBoneDelta(
 	boneDeltas.Update(d)
 }
 
-func updateGlobalMatrix(
+func UpdateGlobalMatrix(
 	boneDeltas *delta.BoneDeltas,
 	deformBoneIndexes []int,
 ) {
@@ -1108,7 +1108,7 @@ ikLoop:
 					updateBoneDelta(deltas.Bones, effectDelta, effectBone)
 				}
 			}
-			updateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
+			UpdateGlobalMatrix(deltas.Bones, ikTargetDeformBoneIndexes)
 
 			if isFullDebug {
 				linkBf := vmd.NewBoneFrame(float32(count))
