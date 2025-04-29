@@ -154,7 +154,7 @@ func DeformBone(
 
 	vmdDeltas := delta.NewVmdDeltas(frame, model.Bones, model.Hash(), morphMotion.Hash())
 	vmdDeltas.Morphs = deformBoneMorph(model, morphMotion.MorphFrames, frame, nil)
-	return deformBoneByPhysicsFlag(model, boneMotion, vmdDeltas, isCalcIk, float32(frame), boneNames, false)
+	return deformBoneByPhysicsFlag(model, boneMotion, vmdDeltas, isCalcIk, frame, boneNames, false)
 }
 
 // DeformBone 前回情報ありでボーンデフォーム処理を実行する
@@ -163,10 +163,12 @@ func DeformBoneWithDeltas(
 	motion *vmd.VmdMotion,
 	deltas *delta.VmdDeltas,
 	isCalcIk bool,
-	frame int,
+	iFrame int,
 	boneNames []string,
-) *delta.BoneDeltas {
-	return deformBoneByPhysicsFlag(model, motion, deltas, isCalcIk, float32(frame), boneNames, false).Bones
+) *delta.VmdDeltas {
+	frame := float32(iFrame)
+
+	return deformBoneByPhysicsFlag(model, motion, deltas, isCalcIk, frame, boneNames, false)
 }
 
 // deformBoneByPhysicsFlag ボーンデフォーム処理を実行する
