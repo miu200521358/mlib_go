@@ -311,7 +311,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      LEG,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       false,
-				Abbreviation:     StandardBoneName("{d}腰")},
+				Abbreviation:     StandardBoneName("{d}尻")},
 			UPPER_ROOT: {
 				ParentBoneNames:       []StandardBoneName{WAIST, TRUNK_ROOT, BODY_AXIS, GROOVE, CENTER},
 				ChildBoneNames:        [][]StandardBoneName{{UPPER}},
