@@ -854,7 +854,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      LEG_IK,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true,
-				Abbreviation:     StandardBoneName("{d}先K")},
+				Abbreviation:     StandardBoneName("{d}爪K")},
 		}
 	})
 	return standardBoneConfigs
