@@ -91,7 +91,12 @@ func NewBaseFrames[T IBaseFrame](newFunc func(index float32) T, nullFunc func() 
 func (baseFrames *BaseFrames[T]) Get(frame float32) T {
 	if baseFrames.values.Has(frame) {
 		// キーフレが登録済みの場合、値を返す
-		return baseFrames.values.Get(NewFrame(frame)).(T)
+		v := baseFrames.values.Get(NewFrame(frame))
+		if v == nil {
+			// 存在しない場合新規を返す
+			return baseFrames.nullFunc()
+		}
+		return v.(T)
 	}
 
 	if baseFrames.values.Len() == 0 {
