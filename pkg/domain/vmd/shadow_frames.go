@@ -18,7 +18,7 @@ func (shadowFrames *ShadowFrames) Clean() {
 	if shadowFrames.Length() > 1 {
 		return
 	} else {
-		cf := shadowFrames.Get(shadowFrames.Indexes.Min())
+		cf := shadowFrames.Get(shadowFrames.values.Min())
 		if cf.Distance != 0 {
 			return
 		}

@@ -197,11 +197,6 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 			mlog.I("%s", mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("ボーン"), "Index": i, "Total": totalCount}))
 		}
 
-		bf := &vmd.BoneFrame{
-			BaseFrame: vmd.NewFrame(float32(i)).(*vmd.BaseFrame),
-		}
-		bf.Read = true
-
 		// ボーン名
 		boneName, err := rep.readText(15)
 		if err != nil {
@@ -215,7 +210,11 @@ func (rep *VmdRepository) loadBones(motion *vmd.VmdMotion) error {
 			mlog.E("[%d] readBones.index error: %v", err, i)
 			return err
 		}
-		bf.SetIndex(float32(index))
+
+		bf := &vmd.BoneFrame{
+			BaseFrame: vmd.NewFrame(float32(index)).(*vmd.BaseFrame),
+		}
+		bf.Read = true
 
 		// 位置X,Y,Z
 		// 回転X,Y,Z,W
@@ -258,9 +257,6 @@ func (rep *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
 			mlog.I("%s", mi18n.T("読み込み途中", map[string]interface{}{"Type": mi18n.T("モーフ"), "Index": i, "Total": totalCount}))
 		}
 
-		mf := vmd.NewMorphFrame(0)
-		mf.Read = true
-
 		// モーフ名
 		morphName, err := rep.readText(15)
 		if err != nil {
@@ -274,7 +270,9 @@ func (rep *VmdRepository) loadMorphs(motion *vmd.VmdMotion) error {
 			mlog.E("[%d] readMorphs.index error: %v", err, i)
 			return err
 		}
-		mf.SetIndex(float32(index))
+
+		mf := vmd.NewMorphFrame(float32(index))
+		mf.Read = true
 
 		// ratio
 		mf.Ratio, err = rep.unpackFloat()
@@ -297,16 +295,15 @@ func (rep *VmdRepository) loadCameras(motion *vmd.VmdMotion) error {
 	}
 
 	for i := range int(totalCount) {
-		cf := vmd.NewCameraFrame(0)
-		cf.Read = true
-
 		// キーフレ番号
 		index, err := rep.unpackUInt()
 		if err != nil {
 			mlog.E("[%d] readCameras.index error: %v", err, i)
 			return err
 		}
-		cf.SetIndex(float32(index))
+
+		cf := vmd.NewCameraFrame(float32(index))
+		cf.Read = true
 
 		// 距離
 		cf.Distance, err = rep.unpackFloat()
@@ -367,16 +364,15 @@ func (rep *VmdRepository) loadLights(motion *vmd.VmdMotion) error {
 	}
 
 	for i := range int(totalCount) {
-		lf := vmd.NewLightFrame(0)
-		lf.Read = true
-
 		// キーフレ番号
 		index, err := rep.unpackUInt()
 		if err != nil {
 			mlog.E("[%d] readLights.index error: %v", err, i)
 			return err
 		}
-		lf.SetIndex(float32(index))
+
+		lf := vmd.NewLightFrame(float32(index))
+		lf.Read = true
 
 		// 照明色
 		lf.Color, err = rep.unpackVec3()
@@ -406,16 +402,15 @@ func (rep *VmdRepository) loadShadows(motion *vmd.VmdMotion) error {
 	}
 
 	for i := range int(totalCount) {
-		sf := vmd.NewShadowFrame(0)
-		sf.Read = true
-
 		// キーフレ番号
 		index, err := rep.unpackUInt()
 		if err != nil {
 			mlog.E("[%d] readShadows.index error: %v", err, i)
 			return err
 		}
-		sf.SetIndex(float32(index))
+
+		sf := vmd.NewShadowFrame(float32(index))
+		sf.Read = true
 
 		// セルフ影タイプ
 		shadowMode, err := rep.unpackByte()
@@ -446,16 +441,15 @@ func (rep *VmdRepository) loadIks(motion *vmd.VmdMotion) error {
 	}
 
 	for i := range int(totalCount) {
-		ikf := vmd.NewIkFrame(0)
-		ikf.Read = true
-
 		// キーフレ番号
 		index, err := rep.unpackUInt()
 		if err != nil {
 			mlog.E("[%d] readIks.index error: %v", err, i)
 			return err
 		}
-		ikf.SetIndex(float32(index))
+
+		ikf := vmd.NewIkFrame(float32(index))
+		ikf.Read = true
 
 		// モデル表示
 		visible, err := rep.unpackByte()

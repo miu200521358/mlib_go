@@ -18,7 +18,7 @@ func (ikFrames *IkFrames) Clean() {
 	if ikFrames.Length() > 1 {
 		return
 	} else {
-		cf := ikFrames.Get(ikFrames.Indexes.Min())
+		cf := ikFrames.Get(ikFrames.values.Min())
 		if !(cf.IkList == nil || len(cf.IkList) == 0) {
 			return
 		}

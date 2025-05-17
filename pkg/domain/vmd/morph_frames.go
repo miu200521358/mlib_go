@@ -80,7 +80,7 @@ func (morphFrames *MorphFrames) Names() []string {
 func (morphFrames *MorphFrames) Indexes() []int {
 	indexes := make([]int, 0)
 	for _, morphFrames := range morphFrames.values {
-		morphFrames.Indexes.ForEach(func(index float32) bool {
+		morphFrames.values.ForEach(func(index float32) bool {
 			indexes = append(indexes, int(index))
 			return true
 		})
@@ -96,7 +96,7 @@ func (morphFrames *MorphFrames) IndexesByNames(names []string) []int {
 		if !slices.Contains(names, morphName) {
 			continue
 		}
-		morphFrames.Get(morphName).Indexes.ForEach(func(index float32) bool {
+		morphFrames.Get(morphName).values.ForEach(func(index float32) bool {
 			indexes = append(indexes, int(index))
 			return true
 		})
@@ -109,7 +109,7 @@ func (morphFrames *MorphFrames) IndexesByNames(names []string) []int {
 func (morphFrames *MorphFrames) Length() int {
 	count := 0
 	for _, morphFrames := range morphFrames.values {
-		count += morphFrames.Indexes.Len()
+		count += morphFrames.values.Len()
 	}
 	return count
 }

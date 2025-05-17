@@ -24,7 +24,7 @@ func nilBoneFrame() *BoneFrame {
 }
 
 func (boneNameFrames *BoneNameFrames) Reduce() *BoneNameFrames {
-	maxFrame := boneNameFrames.Indexes.Max()
+	maxFrame := boneNameFrames.values.Max()
 	maxIFrame := int(maxFrame) + 1
 
 	frames := make([]float32, 0, maxIFrame)

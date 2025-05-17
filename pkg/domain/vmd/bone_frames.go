@@ -81,7 +81,7 @@ func (boneFrames *BoneFrames) Names() []string {
 func (boneFrames *BoneFrames) Indexes() []int {
 	indexes := make([]int, 0)
 	for _, boneFrames := range boneFrames.values {
-		boneFrames.Indexes.ForEach(func(index float32) bool {
+		boneFrames.values.ForEach(func(index float32) bool {
 			indexes = append(indexes, int(index))
 			return true
 		})
@@ -97,7 +97,7 @@ func (boneFrames *BoneFrames) IndexesByNames(names []string) []int {
 		if !slices.Contains(names, boneName) {
 			continue
 		}
-		boneFrames.Get(boneName).Indexes.ForEach(func(index float32) bool {
+		boneFrames.Get(boneName).values.ForEach(func(index float32) bool {
 			indexes = append(indexes, int(index))
 			return true
 		})
@@ -110,7 +110,7 @@ func (boneFrames *BoneFrames) IndexesByNames(names []string) []int {
 func (boneFrames *BoneFrames) Length() int {
 	count := 0
 	for _, boneFrames := range boneFrames.values {
-		count += boneFrames.Indexes.Len()
+		count += boneFrames.values.Len()
 	}
 	return count
 }

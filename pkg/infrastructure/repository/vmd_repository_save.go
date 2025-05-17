@@ -131,7 +131,7 @@ func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) e
 
 		if boneFrames.Length() > 0 {
 			// 各ボーンの最大キーフレを先に出力する
-			bf := motion.BoneFrames.Get(name).Get(boneFrames.Indexes.Max())
+			bf := motion.BoneFrames.Get(name).Get(boneFrames.MaxFrame())
 			err := rep.saveBoneFrame(fout, name, bf)
 			if err != nil {
 				return err
@@ -146,12 +146,11 @@ func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) e
 
 	for _, name := range names {
 		fs := motion.BoneFrames.Get(name)
-		maxFno := fs.Indexes.Max()
+		maxFno := fs.MaxFrame()
 		if fs.Length() > 1 {
 			// 普通のキーフレをそのまま出力する
-			fs.Indexes.ForEach(func(fno float32) bool {
+			fs.ForEach(func(fno float32, bf *vmd.BoneFrame) bool {
 				if fno < maxFno {
-					bf := fs.Get(fno)
 					err := rep.saveBoneFrame(fout, name, bf)
 					if err != nil {
 						return false
@@ -229,10 +228,9 @@ func (rep *VmdRepository) saveMorphFrames(fout *os.File, motion *vmd.VmdMotion) 
 	n := 0
 	for _, name := range names {
 		morphFrames := motion.MorphFrames.Get(name)
-		if morphFrames.Indexes.Len() > 0 {
+		if morphFrames.Length() > 0 {
 			// 普通のキーフレをそのまま出力する
-			morphFrames.Indexes.ForEach(func(fno float32) bool {
-				mf := morphFrames.Get(fno)
+			morphFrames.ForEach(func(fno float32, mf *vmd.MorphFrame) bool {
 				err := rep.saveMorphFrame(fout, name, mf)
 				if err != nil {
 					return false
@@ -273,10 +271,9 @@ func (rep *VmdRepository) saveCameraFrames(fout *os.File, motion *vmd.VmdMotion)
 	rep.writeNumber(fout, binaryType_unsignedInt, float64(motion.CameraFrames.Length()), 0.0, true)
 
 	cameraFrames := motion.CameraFrames
-	if cameraFrames.Indexes.Len() > 0 {
+	if cameraFrames.Length() > 0 {
 		// 普通のキーフレをそのまま出力する
-		cameraFrames.Indexes.ForEach(func(fno float32) bool {
-			cf := cameraFrames.Get(fno)
+		cameraFrames.ForEach(func(fno float32, cf *vmd.CameraFrame) bool {
 			err := rep.saveCameraFrame(fout, cf)
 			if err != nil {
 				return false
@@ -333,10 +330,9 @@ func (rep *VmdRepository) saveLightFrames(fout *os.File, motion *vmd.VmdMotion) 
 	rep.writeNumber(fout, binaryType_unsignedInt, float64(motion.LightFrames.Length()), 0.0, true)
 
 	lightFrames := motion.LightFrames
-	if lightFrames.Indexes.Len() > 0 {
+	if lightFrames.Length() > 0 {
 		// 普通のキーフレをそのまま出力する
-		lightFrames.Indexes.ForEach(func(fno float32) bool {
-			lf := lightFrames.Get(fno)
+		lightFrames.ForEach(func(fno float32, lf *vmd.LightFrame) bool {
 			err := rep.saveLightFrame(fout, lf)
 			if err != nil {
 				return false
@@ -384,10 +380,9 @@ func (rep *VmdRepository) saveShadowFrames(fout *os.File, motion *vmd.VmdMotion)
 	rep.writeNumber(fout, binaryType_unsignedInt, float64(motion.ShadowFrames.Length()), 0.0, true)
 
 	shadowFrames := motion.ShadowFrames
-	if shadowFrames.Indexes.Len() > 0 {
+	if shadowFrames.Length() > 0 {
 		// 普通のキーフレをそのまま出力する
-		shadowFrames.Indexes.ForEach(func(fno float32) bool {
-			sf := shadowFrames.Get(fno)
+		shadowFrames.ForEach(func(fno float32, sf *vmd.ShadowFrame) bool {
 			err := rep.sveShadowFrame(fout, sf)
 			if err != nil {
 				return false
@@ -416,10 +411,9 @@ func (rep *VmdRepository) saveIkFrames(fout *os.File, motion *vmd.VmdMotion) err
 	rep.writeNumber(fout, binaryType_unsignedInt, float64(motion.IkFrames.Length()), 0.0, true)
 
 	ikFrames := motion.IkFrames
-	if ikFrames.Indexes.Len() > 0 {
+	if ikFrames.Length() > 0 {
 		// 普通のキーフレをそのまま出力する
-		ikFrames.Indexes.ForEach(func(fno float32) bool {
-			ikf := ikFrames.Get(fno)
+		ikFrames.ForEach(func(fno float32, ikf *vmd.IkFrame) bool {
 			err := rep.saveIkFrame(fout, ikf)
 			if err != nil {
 				return false

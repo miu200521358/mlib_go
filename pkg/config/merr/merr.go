@@ -35,7 +35,7 @@ func (e *BaseError) StackTrace() string {
 // captureStackTrace はエラー発生時のスタックトレースを取得する
 func captureStackTrace() string {
 	buf := make([]byte, 1<<20) // 1MB のバッファを確保
-	n := runtime.Stack(buf, false)
+	n := runtime.Stack(buf, true)
 	return string(bytes.ReplaceAll(buf[:n], []byte("\n"), []byte("\r\n")))
 }
 

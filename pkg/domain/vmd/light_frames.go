@@ -18,7 +18,7 @@ func (lightFrames *LightFrames) Clean() {
 	if lightFrames.Length() > 1 {
 		return
 	} else {
-		cf := lightFrames.Get(lightFrames.Indexes.Min())
+		cf := lightFrames.Get(lightFrames.values.Min())
 		if !(cf.Position == nil || cf.Position.Length() == 0 ||
 			cf.Color == nil || cf.Color.Length() == 0) {
 			return
