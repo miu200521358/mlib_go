@@ -37,6 +37,14 @@ func (bds *BoneDeltas) GetByName(boneName string) *BoneDelta {
 	return nil
 }
 
+// Delete は指定のインデックスの BoneDelta を削除する
+func (bds *BoneDeltas) Delete(boneIndex int) {
+	if boneIndex < 0 || boneIndex >= len(bds.data) {
+		return
+	}
+	bds.data[boneIndex] = nil
+}
+
 // Update は BoneDelta をデータにセットする
 func (bds *BoneDeltas) Update(bd *BoneDelta) {
 	if bd == nil || bd.Bone == nil {
