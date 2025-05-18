@@ -565,16 +565,14 @@ func (bones *Bones) CreateArmTwist(direction BoneDirection) (*Bone, error) {
 	// 親ボーン
 	bone.ParentIndex = bones.findParentIndexByConfig(ARM_TWIST, direction)
 
-	if elbow != nil {
-		// 固定軸
-		bone.FixedAxis = elbow.Position.Subed(bone.Position).Normalize()
-		bone.BoneFlag |= BONE_FLAG_HAS_FIXED_AXIS
+	// 固定軸
+	bone.FixedAxis = elbow.Position.Subed(bone.Position).Normalize()
+	bone.BoneFlag |= BONE_FLAG_HAS_FIXED_AXIS
 
-		// ローカル軸
-		bone.LocalAxisX = elbow.Position.Subed(bone.Position).Normalize()
-		bone.LocalAxisZ = mmath.MVec3UnitYNeg.Cross(bone.LocalAxisX).Normalize()
-		bone.BoneFlag |= BONE_FLAG_HAS_LOCAL_AXIS
-	}
+	// ローカル軸
+	bone.LocalAxisX = elbow.Position.Subed(bone.Position).Normalize()
+	bone.LocalAxisZ = mmath.MVec3UnitYNeg.Cross(bone.LocalAxisX).Normalize()
+	bone.BoneFlag |= BONE_FLAG_HAS_LOCAL_AXIS
 
 	return bone, nil
 }
