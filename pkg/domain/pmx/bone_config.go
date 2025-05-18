@@ -806,7 +806,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 				DisplaySlot:      ANKLE,
 				BoundingBoxShape: SHAPE_CAPSULE,
 				IsStandard:       true,
-				Abbreviation:     StandardBoneName("{d}EX")},
+				Abbreviation:     StandardBoneName("{d}足EX")},
 			TOE_T_D: {
 				ParentBoneNames:  []StandardBoneName{TOE_EX},
 				ChildBoneNames:   [][]StandardBoneName{{TOE_P_D}},
