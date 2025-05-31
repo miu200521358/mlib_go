@@ -59,6 +59,17 @@ func (d BoneDirection) String() string {
 	return string(d)
 }
 
+func (d BoneDirection) Sign() float64 {
+	switch d {
+	case BONE_DIRECTION_LEFT:
+		return -1.0
+	case BONE_DIRECTION_RIGHT:
+		return 1.0
+	}
+
+	return 0.0
+}
+
 type BoneCategory int
 
 const (
