@@ -1,6 +1,7 @@
 package deform
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
@@ -84,7 +85,7 @@ func DeformIks(
 	ikTargetBones []*pmx.Bone,
 	ikGlobalPositions []*mmath.MVec3,
 	boneNames []string,
-	loopCount int, // IKのループ回数
+	loopThreshold float64, // IKのループを抜ける閾値
 	isRemoveTwist bool, // IKの捻りを除去するかどうか
 	isForceDebug bool, // IKのデバッグを強制的に有効にするかどうか
 ) (*delta.VmdDeltas, []int) {
@@ -101,11 +102,13 @@ func DeformIks(
 	}
 
 	deformBoneIndexes, deltas := newVmdDeltas(model, motion, deltas, frame, boneNames, false)
+	thresholds := make([]float64, 0, 50)
+	ikDeltas := make([]delta.VmdDeltas, 0, 50)
 
-	for range loopCount {
-		for i, ikBone := range ikBones {
+	for i := range 20 {
+		for j, ikBone := range ikBones {
 			// IK変形リスト（IKのターゲットで代用して、ボーンの子孫にあたるボーンインデックス一覧）
-			ikTargetDeformBoneIndexes := model.Bones.DeformBoneIndexes[ikTargetBones[i].Index()]
+			ikTargetDeformBoneIndexes := model.Bones.DeformBoneIndexes[ikTargetBones[j].Index()]
 
 			// 変形リストを再帰的に更新 (IKの前に対象ボーンを先に最新化)
 			// IK対象ボーンの子階層がまだ最新でない場合、先に更新する
@@ -131,14 +134,33 @@ func DeformIks(
 				}
 			}
 
-			deformIk(model, motion, deltas, frame, false, ikBone, ikGlobalPositions[i],
+			deformIk(model, motion, deltas, frame, false, ikBone, ikGlobalPositions[j],
 				ikTargetDeformBoneIndexes, 0, isRemoveTwist, isForceDebug)
+		}
+
+		threshold := 0.0
+		for j, ikTargetBone := range ikTargetBones {
+			threshold += deltas.Bones.Get(ikTargetBone.Index()).FilledGlobalPosition().Distance(ikGlobalPositions[j])
+		}
+		thresholds = append(thresholds, threshold)
+		ikDeltas = append(ikDeltas, *deltas)
+
+		mlog.V("DeformIks: IKループ回数=%d, 閾値=%.7f(%.7f)", i, threshold, loopThreshold)
+
+		if threshold <= loopThreshold {
+			// IKのループを抜ける閾値を下回ったら終了
+			break
 		}
 	}
 
-	UpdateGlobalMatrix(deltas.Bones, deformBoneIndexes)
+	thresholdIndex := mmath.ArgMin(thresholds)
+	resultDeltas := &ikDeltas[thresholdIndex]
 
-	return deltas, deformBoneIndexes
+	mlog.D("DeformIks: IKループ終了, 最小閾値=%.7f, 最小閾値Index=%d", thresholds[thresholdIndex], thresholdIndex)
+
+	UpdateGlobalMatrix(resultDeltas.Bones, deformBoneIndexes)
+
+	return resultDeltas, deformBoneIndexes
 }
 
 // DeformBone 前回情報なしでボーンデフォーム処理を実行する
