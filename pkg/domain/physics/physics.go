@@ -17,7 +17,7 @@ type PhysicsConfig struct {
 type IPhysics interface {
 	// シミュレーション関連
 	StepSimulation(timeStep float32)
-	ResetWorld()
+	ResetWorld(gravity *mmath.MVec3)
 
 	// モデル管理
 	AddModel(modelIndex int, model *pmx.PmxModel)

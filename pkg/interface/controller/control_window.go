@@ -11,6 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
@@ -671,6 +672,10 @@ func (cw *ControlWindow) MaxFrame() float32 {
 
 func (cw *ControlWindow) SetEnabledInPlaying(enabled bool) {
 	cw.setEnabledInPlaying(enabled)
+}
+
+func (cw *ControlWindow) SetGravity(gravity *mmath.MVec3) {
+	cw.shared.SetGravity(gravity)
 }
 
 // ------- 以下、モデルやモーションの格納・取得メソッド -------

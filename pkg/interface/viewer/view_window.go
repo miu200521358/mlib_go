@@ -82,6 +82,7 @@ func newViewWindow(
 	}
 
 	gl.Viewport(0, 0, int32(width), int32(height))
+	gravity := list.shared.Gravity()
 
 	vw := &ViewWindow{
 		Window:         glWindow,
@@ -89,7 +90,7 @@ func newViewWindow(
 		title:          title,
 		list:           list,
 		shader:         shader,
-		physics:        mbt.NewMPhysics(),
+		physics:        mbt.NewMPhysics(gravity),
 		prevCursorPos:  mmath.NewMVec2(),
 		overrideOffset: mmath.NewMVec3(),
 	}

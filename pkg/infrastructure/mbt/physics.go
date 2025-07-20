@@ -5,6 +5,7 @@ package mbt
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
@@ -23,8 +24,8 @@ type MPhysics struct {
 }
 
 // NewMPhysics は物理エンジンのインスタンスを生成します
-func NewMPhysics() physics.IPhysics {
-	world := createWorld()
+func NewMPhysics(gravity *mmath.MVec3) physics.IPhysics {
+	world := createWorld(gravity)
 
 	// デフォルト設定
 	physics := &MPhysics{
@@ -56,11 +57,11 @@ func (physics *MPhysics) initDebugDrawer() {
 }
 
 // ResetWorld はワールドをリセットします
-func (physics *MPhysics) ResetWorld() {
+func (physics *MPhysics) ResetWorld(gravity *mmath.MVec3) {
 	// ワールド削除
 	bt.DeleteBtDynamicsWorld(physics.world)
 	// ワールド作成
-	world := createWorld()
+	world := createWorld(gravity)
 	world.SetDebugDrawer(physics.drawer)
 	physics.world = world
 }
@@ -91,14 +92,14 @@ func (physics *MPhysics) StepSimulation(timeStep float32) {
 	physics.world.StepSimulation(timeStep, physics.config.MaxSubSteps, physics.config.FixedTimeStep)
 }
 
-func createWorld() bt.BtDiscreteDynamicsWorld {
+func createWorld(gravity *mmath.MVec3) bt.BtDiscreteDynamicsWorld {
 	broadphase := bt.NewBtDbvtBroadphase()
 	collisionConfiguration := bt.NewBtDefaultCollisionConfiguration()
 	dispatcher := bt.NewBtCollisionDispatcher(collisionConfiguration)
 	solver := bt.NewBtSequentialImpulseConstraintSolver()
 	// solver.GetM_analyticsData().SetM_numIterationsUsed(200)
 	world := bt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
-	world.SetGravity(bt.NewBtVector3(float32(0), float32(-9.8*10), float32(0)))
+	world.SetGravity(bt.NewBtVector3(float32(gravity.X), float32(gravity.Y*10), float32(gravity.Z)))
 	// world.GetSolverInfo().(bt.BtContactSolverInfo).SetM_numIterations(100)
 	// world.GetSolverInfo().(bt.BtContactSolverInfo).SetM_splitImpulse(1)
 

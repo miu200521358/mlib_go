@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"math"
 	"strconv"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
@@ -20,6 +21,7 @@ type TextSlider struct {
 	sliderMin      float32                         // スライダーの最小値
 	sliderMax      float32                         // スライダーの最大値
 	initialValue   float32                         // スライダーの初期値
+	amplification  float32                         // 増幅値
 	onValueChanged func(*controller.ControlWindow) // パス変更時のコールバック
 }
 
@@ -28,12 +30,20 @@ func NewTextSlider(title, tooltip string,
 	gridColumns, sliderColumns int,
 	onValueChanged func(*controller.ControlWindow),
 ) *TextSlider {
+	// 範囲の差分を計算
+	rangeDiff := sliderMax - sliderMin
+
+	// 桁数を計算してamplificationを決定
+	digits := int(math.Log10(float64(rangeDiff))) + 1
+	amplification := float32(math.Pow10(digits))
+
 	return &TextSlider{
 		title:          title,
 		tooltip:        tooltip,
 		sliderMin:      sliderMin,
 		sliderMax:      sliderMax,
 		initialValue:   initialValue,
+		amplification:  amplification,
 		onValueChanged: onValueChanged,
 		sliderColumns:  sliderColumns,
 		gridColumns:    gridColumns,
@@ -60,22 +70,23 @@ func (ts *TextSlider) Widgets() declarative.Composite {
 					declarative.TextEdit{
 						AssignTo: &ts.valueEdit,
 						OnTextChanged: func() {
-							ts.slider.ChangeValue(int(ts.Value() * ts.sliderMax))
-							ts.onValueChanged(ts.window)
+							ts.slider.SetValue(int(ts.Value() * ts.amplification))
 						},
 						MinSize: declarative.Size{Width: 40, Height: 5},
 						MaxSize: declarative.Size{Width: 40, Height: 5},
-						Text:    strconv.FormatFloat(float64(ts.initialValue), 'f', 2, 32),
+						Text:    strconv.FormatFloat(float64(ts.initialValue), 'f', 1, 32),
 					},
 					declarative.Slider{
 						AssignTo:    &ts.slider,
 						ToolTipText: ts.tooltip,
-						MinValue:    int(ts.sliderMin * ts.sliderMax),
-						MaxValue:    int(ts.sliderMax * ts.sliderMax),
-						Value:       int(ts.initialValue * ts.sliderMax),
+						MinValue:    int(ts.sliderMin * ts.amplification),
+						MaxValue:    int(ts.sliderMax * ts.amplification),
+						Value:       int(ts.initialValue * ts.amplification),
 						OnValueChanged: func() {
-							v := float32(ts.slider.Value()) / ts.sliderMax
-							ts.valueEdit.ChangeText(strconv.FormatFloat(float64(v), 'f', 2, 32))
+							v := float32(ts.slider.Value()) / ts.amplification
+							ts.valueEdit.ChangeText(strconv.FormatFloat(float64(v), 'f', 1, 32))
+						},
+						OnMouseUp: func(x, y int, button walk.MouseButton) {
 							ts.onValueChanged(ts.window)
 						},
 					},
@@ -113,5 +124,5 @@ func (ts *TextSlider) Value() float32 {
 }
 
 func (ts *TextSlider) SetValue(v float32) {
-	ts.slider.SetValue(int(v * float32(ts.sliderMax)))
+	ts.slider.SetValue(int(v * float32(ts.amplification)))
 }

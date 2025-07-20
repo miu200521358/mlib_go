@@ -32,6 +32,7 @@ type SharedState struct {
 	models                     [][]atomic.Value // モデルデータ(ウィンドウ/モデルインデックス)
 	motions                    [][]atomic.Value // モーションデータ(ウィンドウ/モデルインデックス)
 	selectedMaterialIndexes    [][]atomic.Value // 選択中のマテリアルインデックス(ウィンドウ/モデルインデックス)
+	gravity                    atomic.Value     // 重力ベクトル
 }
 
 // NewSharedState は2つのStateを注入して生成するコンストラクタ
@@ -603,6 +604,18 @@ func (ss *SharedState) TriggerLinkedFocus(viewerIndex int) {
 	// 		ss.SetFocusedWindowHandle(0)
 	// 	}()
 	// }
+}
+
+func (ss *SharedState) Gravity() *mmath.MVec3 {
+	gravity := ss.gravity.Load()
+	if gravity == nil {
+		return &mmath.MVec3{X: 0, Y: -9.8, Z: 0} // デフォルトの重力ベクトル
+	}
+	return gravity.(*mmath.MVec3)
+}
+
+func (ss *SharedState) SetGravity(gravity *mmath.MVec3) {
+	ss.gravity.Store(gravity)
 }
 
 func (ss *SharedState) KeepFocus() {

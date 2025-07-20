@@ -247,7 +247,8 @@ func (vl *ViewerList) resetPhysics(vw *ViewWindow) {
 	}
 
 	// ワールド作り直し
-	vw.physics.ResetWorld()
+	gravity := vl.shared.Gravity()
+	vw.physics.ResetWorld(gravity)
 
 	for n, model := range vw.modelRenderers {
 		if model == nil || model.Model == nil || vw.vmdDeltas[n] == nil {
