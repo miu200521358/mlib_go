@@ -678,6 +678,10 @@ func (cw *ControlWindow) SetGravity(gravity *mmath.MVec3) {
 	cw.shared.SetGravity(gravity)
 }
 
+func (cw *ControlWindow) SetSaveDelta(isSave bool) {
+	cw.shared.SetSaveDelta(isSave)
+}
+
 // ------- 以下、モデルやモーションの格納・取得メソッド -------
 
 func (cw *ControlWindow) StoreModel(windowIndex int, modelIndex int, model *pmx.PmxModel) {
@@ -705,6 +709,10 @@ func (cw *ControlWindow) StoreSelectedMaterialIndexes(windowIndex int, modelInde
 
 func (cw *ControlWindow) LoadSelectedMaterialIndexes(windowIndex int, modelIndex int) []int {
 	return cw.shared.LoadSelectedMaterialIndexes(windowIndex, modelIndex)
+}
+
+func (cw *ControlWindow) LoadDeltaMotion(windowIndex int, modelIndex int) *vmd.VmdMotion {
+	return cw.shared.LoadDeltaMotion(windowIndex, modelIndex)
 }
 
 // ------- 以下、メニューから呼ばれるトリガーメソッド -------

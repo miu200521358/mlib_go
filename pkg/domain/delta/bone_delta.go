@@ -79,6 +79,13 @@ func (bd *BoneDelta) FilledLocalMatrix() *mmath.MMat4 {
 	return bd.LocalMatrix
 }
 
+func (bd *BoneDelta) FilledUnitMatrix() *mmath.MMat4 {
+	if bd.UnitMatrix == nil {
+		return mmath.NewMMat4()
+	}
+	return bd.UnitMatrix
+}
+
 func (bd *BoneDelta) FilledGlobalPosition() *mmath.MVec3 {
 	if bd.GlobalPosition == nil {
 		bd.GlobalPosition = bd.FilledGlobalMatrix().Translation()

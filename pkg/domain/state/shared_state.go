@@ -33,6 +33,8 @@ type SharedState struct {
 	motions                    [][]atomic.Value // モーションデータ(ウィンドウ/モデルインデックス)
 	selectedMaterialIndexes    [][]atomic.Value // 選択中のマテリアルインデックス(ウィンドウ/モデルインデックス)
 	gravity                    atomic.Value     // 重力ベクトル
+	saveDelta                  atomic.Bool      // 変形情報保存フラグ
+	deltaMotions               [][]atomic.Value // 変形情報の保存(ウィンドウ/モデルインデックス)
 }
 
 // NewSharedState は2つのStateを注入して生成するコンストラクタ
@@ -45,6 +47,7 @@ func NewSharedState(viewerCount int) *SharedState {
 		models:                  make([][]atomic.Value, viewerCount),
 		motions:                 make([][]atomic.Value, viewerCount),
 		selectedMaterialIndexes: make([][]atomic.Value, viewerCount),
+		deltaMotions:            make([][]atomic.Value, viewerCount),
 	}
 
 	shared.SetFrame(0)
@@ -616,6 +619,40 @@ func (ss *SharedState) Gravity() *mmath.MVec3 {
 
 func (ss *SharedState) SetGravity(gravity *mmath.MVec3) {
 	ss.gravity.Store(gravity)
+}
+
+func (ss *SharedState) IsSaveDelta() bool {
+	return ss.saveDelta.Load()
+}
+
+func (ss *SharedState) SetSaveDelta(save bool) {
+	ss.saveDelta.Store(save)
+}
+
+// StoreDeltaMotion は指定されたウィンドウとモデルインデックスに変形情報モーションを格納
+func (ss *SharedState) StoreDeltaMotion(windowIndex, modelIndex int, motion *vmd.VmdMotion) {
+	if len(ss.deltaMotions) <= windowIndex {
+		return
+	}
+	for modelIndex >= len(ss.deltaMotions[windowIndex]) {
+		ss.deltaMotions[windowIndex] = append(ss.deltaMotions[windowIndex], atomic.Value{})
+	}
+	if motion != nil {
+		ss.deltaMotions[windowIndex][modelIndex].Store(motion)
+	} else {
+		ss.deltaMotions[windowIndex][modelIndex].Store(vmd.NewVmdMotion(""))
+	}
+}
+
+// LoadDeltaMotion は指定されたウィンドウとモデルインデックスの変形情報モーションを取得
+func (ss *SharedState) LoadDeltaMotion(windowIndex, modelIndex int) *vmd.VmdMotion {
+	if len(ss.deltaMotions) <= windowIndex {
+		return nil
+	}
+	if len(ss.deltaMotions[windowIndex]) <= modelIndex {
+		return vmd.NewVmdMotion("")
+	}
+	return ss.deltaMotions[windowIndex][modelIndex].Load().(*vmd.VmdMotion)
 }
 
 func (ss *SharedState) KeepFocus() {

@@ -345,6 +345,9 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 			vw.vmdDeltas[n],
 			frame,
 		)
+
+		// モデルのデフォーム更新
+		vw.saveDeltaMotions(frame)
 	}
 }
 

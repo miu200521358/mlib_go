@@ -202,9 +202,13 @@ func (rep *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.Bone
 	var curves []byte
 	if bf.Curves == nil {
 		curves = vmd.InitialBoneCurves
+		if !bf.EnablePhysics {
+			curves[2] = 99 // TranslateZ
+			curves[3] = 15 // Rotate
+		}
 	} else {
 		curves = make([]byte, len(vmd.InitialBoneCurves))
-		for i, x := range bf.Curves.Merge() {
+		for i, x := range bf.Curves.Merge(bf.EnablePhysics) {
 			curves[i] = byte(math.Min(255, math.Max(0, float64(x))))
 		}
 	}

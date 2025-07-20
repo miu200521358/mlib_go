@@ -38,6 +38,7 @@ type ViewWindow struct {
 	modelRenderers      []*render.ModelRenderer // モデル描画オブジェクト
 	motions             []*vmd.VmdMotion        // モーションデータ
 	vmdDeltas           []*delta.VmdDeltas      // 変形情報
+	deltaMotions        []*vmd.VmdMotion        // 変形情報モーション
 	overrideOffset      *mmath.MVec3            // オーバーライド補正オフセット
 }
 
@@ -93,6 +94,10 @@ func newViewWindow(
 		physics:        mbt.NewMPhysics(gravity),
 		prevCursorPos:  mmath.NewMVec2(),
 		overrideOffset: mmath.NewMVec3(),
+		modelRenderers: make([]*render.ModelRenderer, 0),
+		motions:        make([]*vmd.VmdMotion, 0),
+		vmdDeltas:      make([]*delta.VmdDeltas, 0),
+		deltaMotions:   make([]*vmd.VmdMotion, 0),
 	}
 
 	glWindow.SetCloseCallback(vw.closeCallback)
@@ -358,4 +363,37 @@ func projectPoint(point *mmath.MVec3, cam *rendering.Camera, w, h int) (projecti
 	projectionPoint = &mmath.MVec3{X: float64(ndc.X()) * float64(w), Y: float64(ndc.Y()) * float64(h), Z: float64(ndc.Z())}
 	ndcPoint = &mmath.MVec3{X: float64(ndc.X()), Y: float64(ndc.Y()), Z: float64(ndc.Z())}
 	return projectionPoint, ndcPoint
+}
+
+func (vw *ViewWindow) saveDeltaMotions(frame float32) {
+	if !vw.list.shared.IsSaveDelta() {
+		return
+	}
+
+	for n := range vw.modelRenderers {
+		if len(vw.deltaMotions) <= n {
+			vw.deltaMotions = append(vw.deltaMotions, vmd.NewVmdMotion(""))
+		}
+
+		if vw.vmdDeltas[n] == nil {
+			continue
+		}
+
+		vw.vmdDeltas[n].Bones.ForEach(func(index int, value *delta.BoneDelta) bool {
+			if value == nil || value.Bone == nil {
+				return true // 続行
+			}
+
+			// 変形情報をモーションに保存
+			bf := vmd.NewBoneFrame(frame)
+			bf.Position = value.FilledUnitMatrix().Translation().Subed(value.Bone.ParentRelativePosition)
+			bf.Rotation = value.FilledUnitMatrix().Quaternion()
+			bf.EnablePhysics = false // 物理演算を無効にする
+			vw.deltaMotions[n].AppendBoneFrame(value.Bone.Name(), bf)
+
+			return true // 続行
+		})
+
+		vw.list.shared.StoreDeltaMotion(vw.windowIndex, n, vw.deltaMotions[n])
+	}
 }

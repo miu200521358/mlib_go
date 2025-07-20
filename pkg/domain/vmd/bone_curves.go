@@ -175,7 +175,9 @@ func (boneCurves *BoneCurves) Evaluate(prevIndex, nowIndex, nextIndex float32) (
 	return xy, yy, zy, ry
 }
 
-func (boneCurves *BoneCurves) Merge() []byte {
+func (boneCurves *BoneCurves) Merge(enablePhysics bool) []byte {
+	c02 := byte(1)
+	c03 := byte(1)
 	c31 := byte(1)
 	c46 := byte(1)
 	c47 := byte(0)
@@ -191,11 +193,19 @@ func (boneCurves *BoneCurves) Merge() []byte {
 		c63 = boneCurves.Values[63]
 	}
 
+	if enablePhysics {
+		c02 = byte(boneCurves.TranslateZ.Start.X)
+		c03 = byte(boneCurves.Rotate.Start.X)
+	} else {
+		c02 = byte(99)
+		c03 = byte(15)
+	}
+
 	return []byte{
 		byte(boneCurves.TranslateX.Start.X),
 		byte(boneCurves.TranslateY.Start.X),
-		byte(boneCurves.TranslateZ.Start.X),
-		byte(boneCurves.Rotate.Start.X),
+		c02,
+		c03,
 		byte(boneCurves.TranslateX.Start.Y),
 		byte(boneCurves.TranslateY.Start.Y),
 		byte(boneCurves.TranslateZ.Start.Y),
