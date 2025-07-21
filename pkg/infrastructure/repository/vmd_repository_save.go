@@ -18,6 +18,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mfile"
+	"github.com/tiendc/go-deepcopy"
 )
 
 func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includeSystem bool) error {
@@ -132,7 +133,7 @@ func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) e
 		if boneFrames.Length() > 0 {
 			// 各ボーンの最大キーフレを先に出力する
 			bf := motion.BoneFrames.Get(name).Get(boneFrames.MaxFrame())
-			err := rep.saveBoneFrame(fout, name, bf, motion.BoneFrames.DisablePhysics())
+			err := rep.saveBoneFrame(fout, name, bf)
 			if err != nil {
 				return err
 			}
@@ -151,7 +152,7 @@ func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) e
 			// 普通のキーフレをそのまま出力する
 			fs.ForEach(func(fno float32, bf *vmd.BoneFrame) bool {
 				if fno < maxFno {
-					err := rep.saveBoneFrame(fout, name, bf, motion.BoneFrames.DisablePhysics())
+					err := rep.saveBoneFrame(fout, name, bf)
 					if err != nil {
 						return false
 					}
@@ -165,7 +166,7 @@ func (rep *VmdRepository) saveBoneFrames(fout *os.File, motion *vmd.VmdMotion) e
 	return nil
 }
 
-func (rep *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.BoneFrame, disablePhysics bool) error {
+func (rep *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.BoneFrame) error {
 	if bf == nil {
 		return fmt.Errorf("BoneFrame is nil")
 	}
@@ -201,14 +202,17 @@ func (rep *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.Bone
 
 	var curves []byte
 	if bf.Curves == nil {
-		curves = vmd.InitialBoneCurves
-		if disablePhysics {
+		err := deepcopy.Copy(vmd.InitialBoneCurves, &curves)
+		if err != nil {
+			curves = vmd.InitialBoneCurves
+		}
+		if bf.DisablePhysics {
 			curves[2] = 99 // TranslateZ
 			curves[3] = 15 // Rotate
 		}
 	} else {
 		curves = make([]byte, len(vmd.InitialBoneCurves))
-		for i, x := range bf.Curves.Merge(disablePhysics) {
+		for i, x := range bf.Curves.Merge(bf.DisablePhysics) {
 			curves[i] = byte(math.Min(255, math.Max(0, float64(x))))
 		}
 	}

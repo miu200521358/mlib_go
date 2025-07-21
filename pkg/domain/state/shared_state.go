@@ -670,7 +670,6 @@ func (ss *SharedState) LoadDeltaMotion(windowIndex, modelIndex, deltaIndex int) 
 
 	for deltaIndex >= len(ss.deltaMotions[windowIndex][modelIndex]) {
 		deltaMotion := vmd.NewVmdMotion("")
-		deltaMotion.BoneFrames.SetDisablePhysics(true)
 		ss.deltaMotions[windowIndex][modelIndex] = append(ss.deltaMotions[windowIndex][modelIndex], atomic.Value{})
 		ss.deltaMotions[windowIndex][modelIndex][len(ss.deltaMotions[windowIndex][modelIndex])-1].Store(deltaMotion)
 	}
@@ -678,7 +677,6 @@ func (ss *SharedState) LoadDeltaMotion(windowIndex, modelIndex, deltaIndex int) 
 	data := ss.deltaMotions[windowIndex][modelIndex][deltaIndex].Load()
 	if data == nil {
 		deltaMotion := vmd.NewVmdMotion("")
-		deltaMotion.BoneFrames.SetDisablePhysics(true)
 		ss.deltaMotions[windowIndex][modelIndex] = append(ss.deltaMotions[windowIndex][modelIndex], atomic.Value{})
 		ss.deltaMotions[windowIndex][modelIndex][len(ss.deltaMotions[windowIndex][modelIndex])-1].Store(deltaMotion)
 		return deltaMotion

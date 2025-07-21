@@ -13,6 +13,7 @@ type BoneFrame struct {
 	Rotation           *mmath.MQuaternion // 回転
 	CancelableRotation *mmath.MQuaternion // 親キャンセル回転
 	Curves             *BoneCurves        // 補間曲線
+	DisablePhysics     bool               // 物理演算を無効にするかどうか
 }
 
 func NewBoneFrame(index float32) *BoneFrame {
