@@ -739,6 +739,10 @@ func (cw *ControlWindow) GetDeltaMotionCount(windowIndex, modelIndex int) int {
 	return cw.shared.GetDeltaMotionCount(windowIndex, modelIndex)
 }
 
+func (cw *ControlWindow) ClearDeltaMotion(windowIndex, modelIndex int) {
+	cw.shared.ClearDeltaMotion(windowIndex, modelIndex)
+}
+
 // ------- 以下、メニューから呼ばれるトリガーメソッド -------
 
 func (cw *ControlWindow) TriggerEnabledPhysics() {

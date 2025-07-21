@@ -700,6 +700,18 @@ func (ss *SharedState) LoadDeltaMotion(windowIndex, modelIndex, deltaIndex int) 
 	return data.(*vmd.VmdMotion)
 }
 
+func (ss *SharedState) ClearDeltaMotion(windowIndex, modelIndex int) {
+	if len(ss.deltaMotions) <= windowIndex {
+		return
+	}
+	if len(ss.deltaMotions[windowIndex]) <= modelIndex {
+		return
+	}
+
+	// モーションをクリア
+	ss.deltaMotions[windowIndex][modelIndex] = append(ss.deltaMotions[windowIndex][modelIndex], atomic.Value{})
+}
+
 // LoadDeltaMotion は指定されたウィンドウとモデルインデックスの最新の変形情報モーションを取得
 func (ss *SharedState) GetDeltaMotionCount(windowIndex, modelIndex int) int {
 	if len(ss.deltaMotions) <= windowIndex {
