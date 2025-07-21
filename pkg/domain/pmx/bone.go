@@ -401,3 +401,7 @@ func (bone *Bone) setup() {
 	// 逆オフセット行列は親ボーンからの相対位置分
 	bone.RevertOffsetMatrix = bone.ParentRelativePosition.ToMat4()
 }
+
+func (bone *Bone) HasPhysics() bool {
+	return bone.RigidBody != nil && bone.RigidBody.PhysicsType != PHYSICS_TYPE_STATIC
+}
