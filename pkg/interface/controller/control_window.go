@@ -682,12 +682,20 @@ func (cw *ControlWindow) Gravity() *mmath.MVec3 {
 	return cw.shared.Gravity()
 }
 
-func (cw *ControlWindow) SetSaveDelta(isSave bool) {
-	cw.shared.SetSaveDelta(isSave)
+func (cw *ControlWindow) SetMaxSubSteps(maxSubSteps int) {
+	cw.shared.SetMaxSubSteps(maxSubSteps)
 }
 
-func (cw *ControlWindow) SetSaveDeltaIndex(index int) {
-	cw.shared.SetSaveDeltaIndex(index)
+func (cw *ControlWindow) MaxSubSteps() int {
+	return cw.shared.MaxSubSteps()
+}
+
+func (cw *ControlWindow) SetSaveDelta(windowIndex int, isSave bool) {
+	cw.shared.SetSaveDelta(windowIndex, isSave)
+}
+
+func (cw *ControlWindow) SetSaveDeltaIndex(windowIndex int, index int) {
+	cw.shared.SetSaveDeltaIndex(windowIndex, index)
 }
 
 // ------- 以下、モデルやモーションの格納・取得メソッド -------

@@ -224,18 +224,19 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 		frame := vl.shared.Frame() + (elapsed * deformDefaultFps)
 		if frame > vl.shared.MaxFrame() {
 			// フレームが最大フレームを超えた場合、かつ変形情報保存中はINDEXを増やす
-			if vl.shared.IsSaveDelta() && vl.shared.MaxFrame() > 0 {
-				// 変形情報のインデックスを増やす
-				vl.shared.SetSaveDeltaIndex(vl.shared.SaveDeltaIndex() + 1)
-				for windowIndex, vw := range vl.windowList {
-					for modelIndex := range vw.modelRenderers {
-						motion := vl.shared.LoadMotion(windowIndex, modelIndex)
-						if motion != nil {
-							copiedMotion, _ := motion.Copy()
-							vl.shared.StoreDeltaMotion(
-								windowIndex, modelIndex, vl.shared.SaveDeltaIndex(), copiedMotion)
-						}
-					}
+			for windowIndex, vw := range vl.windowList {
+				if vl.shared.IsSaveDelta(windowIndex) && vl.shared.MaxFrame() > 0 {
+					// 変形情報のインデックスを増やす
+					deltaIndex := vw.list.shared.SaveDeltaIndex(vw.windowIndex)
+					deltaIndex += 1
+					// for modelIndex := range vw.modelRenderers {
+					// 	if motion := vl.shared.LoadMotion(0, modelIndex); motion != nil {
+					// 		if copiedMotion, err := motion.Copy(); err == nil {
+					// 			vl.shared.StoreDeltaMotion(windowIndex, modelIndex, deltaIndex, copiedMotion)
+					// 		}
+					// 	}
+					// }
+					vl.shared.SetSaveDeltaIndex(vw.windowIndex, deltaIndex)
 				}
 			}
 
@@ -344,7 +345,7 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 
 	if vl.shared.IsEnabledPhysics() || vl.shared.IsPhysicsReset() {
 		// 物理更新
-		vw.physics.StepSimulation(timeStep)
+		vw.physics.StepSimulation(timeStep, vl.shared.MaxSubSteps())
 	}
 
 	for n := range vw.modelRenderers {

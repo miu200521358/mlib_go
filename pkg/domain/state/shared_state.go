@@ -33,8 +33,9 @@ type SharedState struct {
 	motions                    [][]atomic.Value   // モーションデータ(ウィンドウ/モデルインデックス)
 	selectedMaterialIndexes    [][]atomic.Value   // 選択中のマテリアルインデックス(ウィンドウ/モデルインデックス)
 	gravity                    atomic.Value       // 重力ベクトル
-	saveDelta                  atomic.Bool        // 変形情報保存フラグ
-	saveDeltaIndex             atomic.Int32       // 変形情報のインデックス
+	maxSubSteps                atomic.Int32       // 最大サブステップ数
+	saveDeltas                 []atomic.Bool      // 変形情報保存フラグ
+	saveDeltaIndexes           []atomic.Int32     // 変形情報のインデックス
 	deltaMotions               [][][]atomic.Value // 変形情報の保存(ウィンドウ/モデルインデックス/モーションインデックス)
 }
 
@@ -48,6 +49,8 @@ func NewSharedState(viewerCount int) *SharedState {
 		models:                  make([][]atomic.Value, viewerCount),
 		motions:                 make([][]atomic.Value, viewerCount),
 		selectedMaterialIndexes: make([][]atomic.Value, viewerCount),
+		saveDeltas:              make([]atomic.Bool, viewerCount),
+		saveDeltaIndexes:        make([]atomic.Int32, viewerCount),
 		deltaMotions:            make([][][]atomic.Value, viewerCount),
 	}
 
@@ -622,22 +625,34 @@ func (ss *SharedState) SetGravity(gravity *mmath.MVec3) {
 	ss.gravity.Store(gravity)
 }
 
-func (ss *SharedState) IsSaveDelta() bool {
-	return ss.saveDelta.Load()
+func (ss *SharedState) MaxSubSteps() int {
+	maxSubSteps := ss.maxSubSteps.Load()
+	if maxSubSteps == 0 {
+		return 2 // デフォルトの最大サブステップ数
+	}
+	return int(maxSubSteps)
 }
 
-func (ss *SharedState) SetSaveDelta(save bool) {
-	ss.saveDelta.Store(save)
+func (ss *SharedState) SetMaxSubSteps(maxSubSteps int) {
+	ss.maxSubSteps.Store(int32(maxSubSteps))
+}
+
+func (ss *SharedState) IsSaveDelta(windowIndex int) bool {
+	return ss.saveDeltas[windowIndex].Load()
+}
+
+func (ss *SharedState) SetSaveDelta(windowIndex int, save bool) {
+	ss.saveDeltas[windowIndex].Store(save)
 }
 
 // SaveDeltaIndex は変形情報のインデックスを取得
-func (ss *SharedState) SaveDeltaIndex() int {
-	return int(ss.saveDeltaIndex.Load())
+func (ss *SharedState) SaveDeltaIndex(windowIndex int) int {
+	return int(ss.saveDeltaIndexes[windowIndex].Load())
 }
 
 // SetSaveDeltaIndex は変形情報のインデックスを設定
-func (ss *SharedState) SetSaveDeltaIndex(index int) {
-	ss.saveDeltaIndex.Store(int32(index))
+func (ss *SharedState) SetSaveDeltaIndex(windowIndex int, index int) {
+	ss.saveDeltaIndexes[windowIndex].Store(int32(index))
 }
 
 // StoreDeltaMotion は指定されたウィンドウとモデルインデックスに変形情報モーションを格納

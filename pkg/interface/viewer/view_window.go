@@ -364,11 +364,11 @@ func projectPoint(point *mmath.MVec3, cam *rendering.Camera, w, h int) (projecti
 }
 
 func (vw *ViewWindow) saveDeltaMotions(frame float32) {
-	if !vw.list.shared.IsSaveDelta() {
+	if !vw.list.shared.IsSaveDelta(vw.windowIndex) {
 		return
 	}
 
-	deltaIndex := vw.list.shared.SaveDeltaIndex()
+	deltaIndex := vw.list.shared.SaveDeltaIndex(vw.windowIndex)
 
 	for n := range vw.modelRenderers {
 		if vw.vmdDeltas[n] == nil {
@@ -391,6 +391,6 @@ func (vw *ViewWindow) saveDeltaMotions(frame float32) {
 			return true // 続行
 		})
 
-		vw.list.shared.StoreDeltaMotion(vw.windowIndex, n, vw.list.shared.SaveDeltaIndex(), deltaMotion)
+		vw.list.shared.StoreDeltaMotion(vw.windowIndex, n, deltaIndex, deltaMotion)
 	}
 }

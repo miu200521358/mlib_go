@@ -16,7 +16,7 @@ type PhysicsConfig struct {
 // IPhysics 物理エンジンのインターフェース
 type IPhysics interface {
 	// シミュレーション関連
-	StepSimulation(timeStep float32)
+	StepSimulation(timeStep float32, maxSubSteps int) // 物理シミュレーションを1ステップ進める
 	ResetWorld(gravity *mmath.MVec3)
 
 	// モデル管理

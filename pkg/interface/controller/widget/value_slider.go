@@ -43,6 +43,18 @@ func (ts *ValueSliders) SetEnabled(enabled bool) {
 	}
 }
 
+func (ts *ValueSliders) Widgets() declarative.Composite {
+	sliderWidgets := make([]declarative.Widget, 0)
+	for _, slider := range ts.sliders {
+		sliderWidgets = append(sliderWidgets, slider.widgets()...)
+	}
+
+	return declarative.Composite{
+		Layout:   declarative.VBox{MarginsZero: true, SpacingZero: true},
+		Children: sliderWidgets,
+	}
+}
+
 // -----------------------------
 
 type ValueSlider struct {
@@ -90,18 +102,6 @@ func NewValueSlider(title, tooltip string,
 	}
 }
 
-func (ts *ValueSliders) Widgets() declarative.Composite {
-	sliderWidgets := make([]declarative.Widget, 0, len(ts.sliders)*3)
-	for _, slider := range ts.sliders {
-		sliderWidgets = append(sliderWidgets, slider.widgets()...)
-	}
-
-	return declarative.Composite{
-		Layout:   declarative.Grid{Columns: 3},
-		Children: sliderWidgets,
-	}
-}
-
 func (slider *ValueSlider) Value() float64 {
 	return slider.valueEdit.Value()
 }
@@ -144,6 +144,7 @@ func (slider *ValueSlider) widgets() []declarative.Widget {
 			MinValue:      int(slider.sliderMin * slider.amplification),
 			MaxValue:      int(slider.sliderMax * slider.amplification),
 			Value:         int(slider.initialValue * slider.amplification),
+			Increment:     int(slider.increment * slider.amplification),
 			OnValueChanged: func() {
 				v := float64(slider.slider.Value()) / slider.amplification
 				slider.valueEdit.ChangeValue(v)

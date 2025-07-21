@@ -31,7 +31,6 @@ func NewMPhysics(gravity *mmath.MVec3) physics.IPhysics {
 	physics := &MPhysics{
 		world: world,
 		config: physics.PhysicsConfig{
-			MaxSubSteps:   2,
 			FixedTimeStep: 1 / 60.0,
 		},
 		rigidBodies: make(map[int][]*rigidbodyValue),
@@ -88,8 +87,8 @@ func (physics *MPhysics) DeleteModel(modelIndex int) {
 }
 
 // StepSimulation は物理シミュレーションを1ステップ進めます
-func (physics *MPhysics) StepSimulation(timeStep float32) {
-	physics.world.StepSimulation(timeStep, physics.config.MaxSubSteps, physics.config.FixedTimeStep)
+func (physics *MPhysics) StepSimulation(timeStep float32, maxSubSteps int) {
+	physics.world.StepSimulation(timeStep, maxSubSteps, physics.config.FixedTimeStep)
 }
 
 func createWorld(gravity *mmath.MVec3) bt.BtDiscreteDynamicsWorld {
