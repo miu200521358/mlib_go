@@ -10,8 +10,9 @@ import (
 )
 
 type BoneFrames struct {
-	names  atomic.Value
-	values []*BoneNameFrames
+	names          atomic.Value
+	values         []*BoneNameFrames
+	disablePhysics bool // 物理演算を無効にするかどうか
 }
 
 func NewBoneFrames() *BoneFrames {
@@ -163,4 +164,20 @@ func (boneFrames *BoneFrames) ForEach(fn func(boneName string, boneNameFrames *B
 	for _, boneName := range boneFrames.getNames() {
 		fn(boneName, boneFrames.Get(boneName))
 	}
+}
+
+func (boneFrames *BoneFrames) SetDisablePhysics(enable bool) {
+	if boneFrames == nil {
+		return
+	}
+
+	boneFrames.disablePhysics = enable
+}
+
+func (boneFrames *BoneFrames) DisablePhysics() bool {
+	if boneFrames == nil || boneFrames.Length() == 0 {
+		return false
+	}
+
+	return boneFrames.disablePhysics
 }

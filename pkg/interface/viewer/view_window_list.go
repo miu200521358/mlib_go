@@ -223,6 +223,22 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	if vl.shared.Playing() && !vl.shared.IsClosed() {
 		frame := vl.shared.Frame() + (elapsed * deformDefaultFps)
 		if frame > vl.shared.MaxFrame() {
+			// フレームが最大フレームを超えた場合、かつ変形情報保存中はINDEXを増やす
+			if vl.shared.IsSaveDelta() && vl.shared.MaxFrame() > 0 {
+				// 変形情報のインデックスを増やす
+				vl.shared.SetSaveDeltaIndex(vl.shared.SaveDeltaIndex() + 1)
+				for windowIndex, vw := range vl.windowList {
+					for modelIndex := range vw.modelRenderers {
+						motion := vl.shared.LoadMotion(windowIndex, modelIndex)
+						if motion != nil {
+							copiedMotion, _ := motion.Copy()
+							vl.shared.StoreDeltaMotion(
+								windowIndex, modelIndex, vl.shared.SaveDeltaIndex(), copiedMotion)
+						}
+					}
+				}
+			}
+
 			frame = 0.0
 			// 物理リセットON
 			vl.shared.SetPhysicsReset(true)

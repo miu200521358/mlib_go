@@ -15,12 +15,21 @@ type MotionPlayer struct {
 	frameEdit     *walk.NumberEdit          // フレーム番号入力欄
 	frameSlider   *walk.Slider              // フレームスライダー
 	playButton    *walk.PushButton          // 一時停止ボタン
+	playingText   string                    // 再生中のテキスト
+	stoppedText   string                    // 停止中のテキスト
 	onTriggerPlay func(playing bool)        // 再生トリガー
 }
 
 func NewMotionPlayer() *MotionPlayer {
 	player := new(MotionPlayer)
+	player.playingText = mi18n.T("一時停止")
+	player.stoppedText = mi18n.T("再生")
 	return player
+}
+
+func (mp *MotionPlayer) SetLabelTexts(playingText, stoppedText string) {
+	mp.playingText = playingText
+	mp.stoppedText = stoppedText
 }
 
 func (mp *MotionPlayer) SetWindow(window *controller.ControlWindow) {
@@ -74,7 +83,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 			// 再生ボタン
 			declarative.PushButton{
 				AssignTo: &mp.playButton,
-				Text:     mi18n.T("再生"),
+				Text:     mp.stoppedText,
 				MinSize:  declarative.Size{Width: 90, Height: 20},
 				MaxSize:  declarative.Size{Width: 90, Height: 20},
 				OnClicked: func() {
@@ -128,9 +137,9 @@ func (mp *MotionPlayer) SetEnabled(enabled bool) {
 
 func (mp *MotionPlayer) SetPlaying(playing bool) {
 	if playing {
-		mp.playButton.SetText(mi18n.T("一時停止"))
+		mp.playButton.SetText(mp.playingText)
 	} else {
-		mp.playButton.SetText(mi18n.T("再生"))
+		mp.playButton.SetText(mp.stoppedText)
 	}
 
 	mp.window.SetPlaying(playing)

@@ -38,7 +38,6 @@ type ViewWindow struct {
 	modelRenderers      []*render.ModelRenderer // モデル描画オブジェクト
 	motions             []*vmd.VmdMotion        // モーションデータ
 	vmdDeltas           []*delta.VmdDeltas      // 変形情報
-	deltaMotions        []*vmd.VmdMotion        // 変形情報モーション
 	overrideOffset      *mmath.MVec3            // オーバーライド補正オフセット
 }
 
@@ -97,7 +96,6 @@ func newViewWindow(
 		modelRenderers: make([]*render.ModelRenderer, 0),
 		motions:        make([]*vmd.VmdMotion, 0),
 		vmdDeltas:      make([]*delta.VmdDeltas, 0),
-		deltaMotions:   make([]*vmd.VmdMotion, 0),
 	}
 
 	glWindow.SetCloseCallback(vw.closeCallback)
@@ -370,14 +368,14 @@ func (vw *ViewWindow) saveDeltaMotions(frame float32) {
 		return
 	}
 
-	for n := range vw.modelRenderers {
-		if len(vw.deltaMotions) <= n {
-			vw.deltaMotions = append(vw.deltaMotions, vmd.NewVmdMotion(""))
-		}
+	deltaIndex := vw.list.shared.SaveDeltaIndex()
 
+	for n := range vw.modelRenderers {
 		if vw.vmdDeltas[n] == nil {
 			continue
 		}
+
+		deltaMotion := vw.list.shared.LoadDeltaMotion(vw.windowIndex, n, deltaIndex)
 
 		vw.vmdDeltas[n].Bones.ForEach(func(index int, value *delta.BoneDelta) bool {
 			if value == nil || value.Bone == nil {
@@ -388,12 +386,11 @@ func (vw *ViewWindow) saveDeltaMotions(frame float32) {
 			bf := vmd.NewBoneFrame(frame)
 			bf.Position = value.FilledUnitMatrix().Translation().Subed(value.Bone.ParentRelativePosition)
 			bf.Rotation = value.FilledUnitMatrix().Quaternion()
-			bf.EnablePhysics = false // 物理演算を無効にする
-			vw.deltaMotions[n].AppendBoneFrame(value.Bone.Name(), bf)
+			deltaMotion.AppendBoneFrame(value.Bone.Name(), bf)
 
 			return true // 続行
 		})
 
-		vw.list.shared.StoreDeltaMotion(vw.windowIndex, n, vw.deltaMotions[n])
+		vw.list.shared.StoreDeltaMotion(vw.windowIndex, n, vw.list.shared.SaveDeltaIndex(), deltaMotion)
 	}
 }

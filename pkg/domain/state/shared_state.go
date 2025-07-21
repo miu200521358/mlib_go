@@ -13,28 +13,29 @@ import (
 )
 
 type SharedState struct {
-	flags                      uint32           // 32ビット分のフラグを格納
-	frameValue                 atomic.Value     // 現在フレーム
-	maxFrameValue              atomic.Value     // 最大フレーム
-	frameIntervalValue         atomic.Value     // FPS制限
-	linkingFocus               atomic.Bool      // 連動フォーカス中かどうかのフラグ
-	controlWindowPosition      atomic.Value     // コントロールウィンドウの位置
-	controlWindowHandle        atomic.Int32     // コントロールウィンドウのハンドル
-	viewerWindowHandles        []atomic.Int32   // ビューウィンドウのハンドル
-	focusedWindowHandle        atomic.Int32     // フォーカス中のウィンドウのハンドル
-	isInitializedControlWindow atomic.Bool      // コントロールウィンドウの初期化状態
-	isInitializedViewWindow    []atomic.Bool    // ビューウィンドウの初期化状態
-	focusControlWindow         atomic.Bool      // コントロールウィンドウのフォーカス状態
-	focusViewWindow            []atomic.Bool    // ビューウィンドウのフォーカス状態
-	isTriggeredFpsLimit        atomic.Bool      // FPS制限トリガー
-	movedControlWindow         atomic.Bool      // コントロールウィンドウの移動状態
-	isClosed                   atomic.Bool      // ウィンドウのクローズ状態
-	models                     [][]atomic.Value // モデルデータ(ウィンドウ/モデルインデックス)
-	motions                    [][]atomic.Value // モーションデータ(ウィンドウ/モデルインデックス)
-	selectedMaterialIndexes    [][]atomic.Value // 選択中のマテリアルインデックス(ウィンドウ/モデルインデックス)
-	gravity                    atomic.Value     // 重力ベクトル
-	saveDelta                  atomic.Bool      // 変形情報保存フラグ
-	deltaMotions               [][]atomic.Value // 変形情報の保存(ウィンドウ/モデルインデックス)
+	flags                      uint32             // 32ビット分のフラグを格納
+	frameValue                 atomic.Value       // 現在フレーム
+	maxFrameValue              atomic.Value       // 最大フレーム
+	frameIntervalValue         atomic.Value       // FPS制限
+	linkingFocus               atomic.Bool        // 連動フォーカス中かどうかのフラグ
+	controlWindowPosition      atomic.Value       // コントロールウィンドウの位置
+	controlWindowHandle        atomic.Int32       // コントロールウィンドウのハンドル
+	viewerWindowHandles        []atomic.Int32     // ビューウィンドウのハンドル
+	focusedWindowHandle        atomic.Int32       // フォーカス中のウィンドウのハンドル
+	isInitializedControlWindow atomic.Bool        // コントロールウィンドウの初期化状態
+	isInitializedViewWindow    []atomic.Bool      // ビューウィンドウの初期化状態
+	focusControlWindow         atomic.Bool        // コントロールウィンドウのフォーカス状態
+	focusViewWindow            []atomic.Bool      // ビューウィンドウのフォーカス状態
+	isTriggeredFpsLimit        atomic.Bool        // FPS制限トリガー
+	movedControlWindow         atomic.Bool        // コントロールウィンドウの移動状態
+	isClosed                   atomic.Bool        // ウィンドウのクローズ状態
+	models                     [][]atomic.Value   // モデルデータ(ウィンドウ/モデルインデックス)
+	motions                    [][]atomic.Value   // モーションデータ(ウィンドウ/モデルインデックス)
+	selectedMaterialIndexes    [][]atomic.Value   // 選択中のマテリアルインデックス(ウィンドウ/モデルインデックス)
+	gravity                    atomic.Value       // 重力ベクトル
+	saveDelta                  atomic.Bool        // 変形情報保存フラグ
+	saveDeltaIndex             atomic.Int32       // 変形情報のインデックス
+	deltaMotions               [][][]atomic.Value // 変形情報の保存(ウィンドウ/モデルインデックス/モーションインデックス)
 }
 
 // NewSharedState は2つのStateを注入して生成するコンストラクタ
@@ -47,7 +48,7 @@ func NewSharedState(viewerCount int) *SharedState {
 		models:                  make([][]atomic.Value, viewerCount),
 		motions:                 make([][]atomic.Value, viewerCount),
 		selectedMaterialIndexes: make([][]atomic.Value, viewerCount),
-		deltaMotions:            make([][]atomic.Value, viewerCount),
+		deltaMotions:            make([][][]atomic.Value, viewerCount),
 	}
 
 	shared.SetFrame(0)
@@ -629,30 +630,73 @@ func (ss *SharedState) SetSaveDelta(save bool) {
 	ss.saveDelta.Store(save)
 }
 
+// SaveDeltaIndex は変形情報のインデックスを取得
+func (ss *SharedState) SaveDeltaIndex() int {
+	return int(ss.saveDeltaIndex.Load())
+}
+
+// SetSaveDeltaIndex は変形情報のインデックスを設定
+func (ss *SharedState) SetSaveDeltaIndex(index int) {
+	ss.saveDeltaIndex.Store(int32(index))
+}
+
 // StoreDeltaMotion は指定されたウィンドウとモデルインデックスに変形情報モーションを格納
-func (ss *SharedState) StoreDeltaMotion(windowIndex, modelIndex int, motion *vmd.VmdMotion) {
+func (ss *SharedState) StoreDeltaMotion(windowIndex, modelIndex, motionIndex int, motion *vmd.VmdMotion) {
 	if len(ss.deltaMotions) <= windowIndex {
 		return
 	}
 	for modelIndex >= len(ss.deltaMotions[windowIndex]) {
-		ss.deltaMotions[windowIndex] = append(ss.deltaMotions[windowIndex], atomic.Value{})
+		ss.deltaMotions[windowIndex] = append(ss.deltaMotions[windowIndex], make([]atomic.Value, 0))
 	}
+	for motionIndex >= len(ss.deltaMotions[windowIndex][modelIndex]) {
+		ss.deltaMotions[windowIndex][modelIndex] = append(ss.deltaMotions[windowIndex][modelIndex], atomic.Value{})
+	}
+
 	if motion != nil {
-		ss.deltaMotions[windowIndex][modelIndex].Store(motion)
+		ss.deltaMotions[windowIndex][modelIndex][motionIndex].Store(motion)
 	} else {
-		ss.deltaMotions[windowIndex][modelIndex].Store(vmd.NewVmdMotion(""))
+		ss.deltaMotions[windowIndex][modelIndex][motionIndex].Store(vmd.NewVmdMotion(""))
 	}
 }
 
-// LoadDeltaMotion は指定されたウィンドウとモデルインデックスの変形情報モーションを取得
-func (ss *SharedState) LoadDeltaMotion(windowIndex, modelIndex int) *vmd.VmdMotion {
+// LoadDeltaMotion は指定されたウィンドウとモデルインデックスの最新の変形情報モーションを取得
+func (ss *SharedState) LoadDeltaMotion(windowIndex, modelIndex, deltaIndex int) *vmd.VmdMotion {
 	if len(ss.deltaMotions) <= windowIndex {
 		return nil
 	}
-	if len(ss.deltaMotions[windowIndex]) <= modelIndex {
-		return vmd.NewVmdMotion("")
+	for modelIndex >= len(ss.deltaMotions[windowIndex]) {
+		ss.deltaMotions[windowIndex] = append(ss.deltaMotions[windowIndex], make([]atomic.Value, 0))
 	}
-	return ss.deltaMotions[windowIndex][modelIndex].Load().(*vmd.VmdMotion)
+
+	for deltaIndex >= len(ss.deltaMotions[windowIndex][modelIndex]) {
+		deltaMotion := vmd.NewVmdMotion("")
+		deltaMotion.BoneFrames.SetDisablePhysics(true)
+		ss.deltaMotions[windowIndex][modelIndex] = append(ss.deltaMotions[windowIndex][modelIndex], atomic.Value{})
+		ss.deltaMotions[windowIndex][modelIndex][len(ss.deltaMotions[windowIndex][modelIndex])-1].Store(deltaMotion)
+	}
+
+	data := ss.deltaMotions[windowIndex][modelIndex][deltaIndex].Load()
+	if data == nil {
+		deltaMotion := vmd.NewVmdMotion("")
+		deltaMotion.BoneFrames.SetDisablePhysics(true)
+		ss.deltaMotions[windowIndex][modelIndex] = append(ss.deltaMotions[windowIndex][modelIndex], atomic.Value{})
+		ss.deltaMotions[windowIndex][modelIndex][len(ss.deltaMotions[windowIndex][modelIndex])-1].Store(deltaMotion)
+		return deltaMotion
+	}
+
+	return data.(*vmd.VmdMotion)
+}
+
+// LoadDeltaMotion は指定されたウィンドウとモデルインデックスの最新の変形情報モーションを取得
+func (ss *SharedState) GetDeltaMotionCount(windowIndex, modelIndex int) int {
+	if len(ss.deltaMotions) <= windowIndex {
+		return 0
+	}
+	if len(ss.deltaMotions[windowIndex]) <= modelIndex {
+		return 0
+	}
+
+	return len(ss.deltaMotions[windowIndex][modelIndex])
 }
 
 func (ss *SharedState) KeepFocus() {

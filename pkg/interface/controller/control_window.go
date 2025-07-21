@@ -678,8 +678,16 @@ func (cw *ControlWindow) SetGravity(gravity *mmath.MVec3) {
 	cw.shared.SetGravity(gravity)
 }
 
+func (cw *ControlWindow) Gravity() *mmath.MVec3 {
+	return cw.shared.Gravity()
+}
+
 func (cw *ControlWindow) SetSaveDelta(isSave bool) {
 	cw.shared.SetSaveDelta(isSave)
+}
+
+func (cw *ControlWindow) SetSaveDeltaIndex(index int) {
+	cw.shared.SetSaveDeltaIndex(index)
 }
 
 // ------- 以下、モデルやモーションの格納・取得メソッド -------
@@ -711,8 +719,16 @@ func (cw *ControlWindow) LoadSelectedMaterialIndexes(windowIndex int, modelIndex
 	return cw.shared.LoadSelectedMaterialIndexes(windowIndex, modelIndex)
 }
 
-func (cw *ControlWindow) LoadDeltaMotion(windowIndex int, modelIndex int) *vmd.VmdMotion {
-	return cw.shared.LoadDeltaMotion(windowIndex, modelIndex)
+func (cw *ControlWindow) StoreDeltaMotion(windowIndex, modelIndex, deltaIndex int, motion *vmd.VmdMotion) {
+	cw.shared.StoreDeltaMotion(windowIndex, modelIndex, deltaIndex, motion)
+}
+
+func (cw *ControlWindow) LoadDeltaMotion(windowIndex, modelIndex, deltaIndex int) *vmd.VmdMotion {
+	return cw.shared.LoadDeltaMotion(windowIndex, modelIndex, deltaIndex)
+}
+
+func (cw *ControlWindow) GetDeltaMotionCount(windowIndex, modelIndex int) int {
+	return cw.shared.GetDeltaMotionCount(windowIndex, modelIndex)
 }
 
 // ------- 以下、メニューから呼ばれるトリガーメソッド -------
