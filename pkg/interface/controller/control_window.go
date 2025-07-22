@@ -690,12 +690,21 @@ func (cw *ControlWindow) MaxSubSteps() int {
 	return cw.shared.MaxSubSteps()
 }
 
+func (cw *ControlWindow) SetFixedTimeStep(fixedTimeStep int) {
+	cw.shared.SetFixedTimeStep(fixedTimeStep)
+}
+
 func (cw *ControlWindow) SetSaveDelta(windowIndex int, isSave bool) {
 	cw.shared.SetSaveDelta(windowIndex, isSave)
 }
 
 func (cw *ControlWindow) SetSaveDeltaIndex(windowIndex int, index int) {
 	cw.shared.SetSaveDeltaIndex(windowIndex, index)
+}
+
+func (cw *ControlWindow) SetFrameDropEnabled(enabled bool) {
+	cw.shared.SetEnabledFrameDrop(cw.enabledFrameDropAction.Checked())
+	cw.shared.SetChangedEnableDropFrame(true)
 }
 
 // ------- 以下、モデルやモーションの格納・取得メソッド -------

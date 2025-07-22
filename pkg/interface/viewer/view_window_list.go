@@ -225,7 +225,7 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 		if frame > vl.shared.MaxFrame() {
 			// フレームが最大フレームを超えた場合、かつ変形情報保存中はINDEXを増やす
 			for windowIndex, vw := range vl.windowList {
-				if vl.shared.IsSaveDelta(windowIndex) && vl.shared.MaxFrame() > 0 {
+				if vl.shared.IsSaveDelta(windowIndex) && vl.shared.MaxFrame() > 1.0 {
 					// 変形情報のインデックスを増やす
 					deltaIndex := vw.list.shared.SaveDeltaIndex(vw.windowIndex)
 					deltaIndex += 1
@@ -345,7 +345,7 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 
 	if vl.shared.IsEnabledPhysics() || vl.shared.IsPhysicsReset() {
 		// 物理更新
-		vw.physics.StepSimulation(timeStep, vl.shared.MaxSubSteps())
+		vw.physics.StepSimulation(timeStep, vl.shared.MaxSubSteps(), vl.shared.FixedTimeStep())
 	}
 
 	for n := range vw.modelRenderers {

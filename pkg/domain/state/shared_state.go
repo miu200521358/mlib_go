@@ -34,6 +34,7 @@ type SharedState struct {
 	selectedMaterialIndexes    [][]atomic.Value   // 選択中のマテリアルインデックス(ウィンドウ/モデルインデックス)
 	gravity                    atomic.Value       // 重力ベクトル
 	maxSubSteps                atomic.Int32       // 最大サブステップ数
+	fixedTimeStep              atomic.Int32       // 固定タイムステップ(fps)
 	saveDeltas                 []atomic.Bool      // 変形情報保存フラグ
 	saveDeltaIndexes           []atomic.Int32     // 変形情報のインデックス
 	deltaMotions               [][][]atomic.Value // 変形情報の保存(ウィンドウ/モデルインデックス/モーションインデックス)
@@ -65,6 +66,9 @@ func NewSharedState(viewerCount int) *SharedState {
 	shared.SetFocusControlWindow(false)
 	shared.SetMovedControlWindow(false)
 	shared.SetClosed(false)
+	shared.SetGravity(&mmath.MVec3{X: 0, Y: -9.8, Z: 0}) // 初期重力値
+	shared.SetMaxSubSteps(2)                             // 初期最大サブステップ数
+	shared.SetFixedTimeStep(60)                          // 初期固定タイムステップ(fps)
 
 	return shared
 }
@@ -635,6 +639,18 @@ func (ss *SharedState) MaxSubSteps() int {
 
 func (ss *SharedState) SetMaxSubSteps(maxSubSteps int) {
 	ss.maxSubSteps.Store(int32(maxSubSteps))
+}
+
+func (ss *SharedState) FixedTimeStep() float32 {
+	fixedTimeStep := ss.fixedTimeStep.Load()
+	if fixedTimeStep == 0 {
+		return 60 // デフォルトの固定タイムステップ(fps)
+	}
+	return float32(1.0) / float32(fixedTimeStep)
+}
+
+func (ss *SharedState) SetFixedTimeStep(fixedTimeStep int) {
+	ss.fixedTimeStep.Store(int32(fixedTimeStep))
 }
 
 func (ss *SharedState) IsSaveDelta(windowIndex int) bool {

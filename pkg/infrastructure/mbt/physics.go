@@ -87,8 +87,8 @@ func (physics *MPhysics) DeleteModel(modelIndex int) {
 }
 
 // StepSimulation は物理シミュレーションを1ステップ進めます
-func (physics *MPhysics) StepSimulation(timeStep float32, maxSubSteps int) {
-	physics.world.StepSimulation(timeStep, maxSubSteps, physics.config.FixedTimeStep)
+func (physics *MPhysics) StepSimulation(timeStep float32, maxSubSteps int, fixedTimeStep float32) {
+	physics.world.StepSimulation(timeStep, maxSubSteps, fixedTimeStep)
 }
 
 func createWorld(gravity *mmath.MVec3) bt.BtDiscreteDynamicsWorld {

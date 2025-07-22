@@ -31,7 +31,7 @@ func NewVmdMotion(path string) *VmdMotion {
 	return &VmdMotion{
 		name:         "",
 		path:         path,
-		hash:         "",
+		hash:         fmt.Sprintf("%d", rand.Intn(10000)), // 初期ハッシュ値
 		BoneFrames:   NewBoneFrames(),
 		MorphFrames:  NewMorphFrames(),
 		CameraFrames: NewCameraFrames(),
@@ -182,5 +182,11 @@ func (motion *VmdMotion) Copy() (*VmdMotion, error) {
 
 	copied := new(VmdMotion)
 	err := deepcopy.Copy(copied, motion)
+
+	// コピーに成功したらハッシ変更する
+	if err == nil {
+		copied.SetRandHash()
+	}
+
 	return copied, err
 }
