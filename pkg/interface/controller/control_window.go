@@ -707,6 +707,16 @@ func (cw *ControlWindow) SetFrameDropEnabled(enabled bool) {
 	cw.shared.SetChangedEnableDropFrame(true)
 }
 
+func (cw *ControlWindow) SetCheckedFrameDropEnabled(enabled bool) {
+	cw.enabledFrameDropAction.SetChecked(enabled)
+	cw.TriggerEnabledFrameDrop()
+}
+
+func (cw *ControlWindow) SetCheckedShowInfoEnabled(enabled bool) {
+	cw.showInfoAction.SetChecked(enabled)
+	cw.TriggerShowInfo()
+}
+
 // ------- 以下、モデルやモーションの格納・取得メソッド -------
 
 func (cw *ControlWindow) StoreModel(windowIndex int, modelIndex int, model *pmx.PmxModel) {
