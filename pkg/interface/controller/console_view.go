@@ -17,10 +17,12 @@ import (
 // ConsoleView は、walk.WidgetBaseを埋め込んでカスタムウィジェットを作成します。
 type ConsoleView struct {
 	walk.WidgetBase
-	Console   *walk.TextEdit
-	logChan   chan string
-	mutex     sync.Mutex
-	lineCount int // 現在の行数をカウント
+	Console       *walk.TextEdit
+	logChan       chan string
+	mutex         sync.Mutex
+	lineCount     int    // 現在の行数をカウント
+	uiThreadID    uint32 // UIスレッドのID
+	immediateMode bool   // 即座出力モード
 }
 
 const (
@@ -31,7 +33,12 @@ const (
 
 func NewConsoleView(parent walk.Container, minWidth int, minHeight int) (*ConsoleView, error) {
 	lc := make(chan string, 10000) // バッファサイズを10000に増加
-	cv := &ConsoleView{logChan: lc, lineCount: 0}
+	cv := &ConsoleView{
+		logChan:       lc,
+		lineCount:     0,
+		uiThreadID:    win.GetCurrentThreadId(), // UIスレッドIDを保存
+		immediateMode: true,                     // 即座出力モードを有効に
+	}
 
 	if err := walk.InitWidget(
 		cv,
@@ -80,14 +87,27 @@ func (controlView *ConsoleView) AppendText(value string) {
 		controlView.Console.SendMessage(win.EM_REPLACESEL, 0, uintptr(unsafe.Pointer(uv)))
 	}
 
-	// 行数制限のチェック（100行ごとに実行してパフォーマンスを保つ）
-	if controlView.lineCount%100 == 0 && controlView.lineCount > MaxLines {
+	// 毎回行数制限をチェック（厳密に10000行を保つ）
+	if controlView.lineCount > MaxLines {
 		controlView.trimLines()
 	}
+
+	// 画面更新を強制してリアルタイム表示を保証
+	win.InvalidateRect(controlView.Console.Handle(), nil, false)
+	win.UpdateWindow(controlView.Console.Handle())
+
+	// 自動スクロールを最下部に移動
+	controlView.Console.SendMessage(win.EM_SCROLLCARET, 0, 0)
 }
 func (controlView *ConsoleView) PostAppendText(value string) {
 	controlView.mutex.Lock()
 	defer controlView.mutex.Unlock()
+
+	// 即座出力モードで、かつUIスレッドからの呼び出しの場合は直接表示
+	if controlView.immediateMode && win.GetCurrentThreadId() == controlView.uiThreadID {
+		controlView.AppendText(value)
+		return
+	}
 
 	// 非ブロッキング送信：チャンネルがフルの場合は古いメッセージを破棄
 	select {
@@ -109,6 +129,20 @@ func (controlView *ConsoleView) PostAppendText(value string) {
 			// それでも送信できない場合は諦める
 		}
 	}
+}
+
+// SetImmediateMode は即座出力モードの有効/無効を設定します
+func (controlView *ConsoleView) SetImmediateMode(enabled bool) {
+	controlView.mutex.Lock()
+	defer controlView.mutex.Unlock()
+	controlView.immediateMode = enabled
+}
+
+// GetImmediateMode は現在の即座出力モードの状態を返します
+func (controlView *ConsoleView) GetImmediateMode() bool {
+	controlView.mutex.Lock()
+	defer controlView.mutex.Unlock()
+	return controlView.immediateMode
 }
 
 // trimLines は、行数が上限を超えた場合に古い行を削除します
