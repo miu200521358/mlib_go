@@ -202,7 +202,7 @@ func (rep *VmdRepository) saveBoneFrame(fout *os.File, name string, bf *vmd.Bone
 
 	var curves []byte
 	if bf.Curves == nil {
-		err := deepcopy.Copy(vmd.InitialBoneCurves, &curves)
+		err := deepcopy.Copy(&curves, &vmd.InitialBoneCurves)
 		if err != nil {
 			curves = vmd.InitialBoneCurves
 		}
