@@ -16,6 +16,8 @@ type IBaseFrame interface {
 	Copy() IBaseFrame
 }
 
+const MAX_BONE_FRAMES = 600000 // 最大キーフレーム数
+
 // ----------------------------------------------------------
 
 type BaseFrame struct {

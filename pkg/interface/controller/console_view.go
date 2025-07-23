@@ -28,7 +28,7 @@ const (
 )
 
 func NewConsoleView(parent walk.Container, minWidth int, minHeight int) (*ConsoleView, error) {
-	lc := make(chan string, 12)
+	lc := make(chan string, 1000)
 	cv := &ConsoleView{logChan: lc}
 
 	if err := walk.InitWidget(
@@ -83,12 +83,23 @@ func (controlView *ConsoleView) PostAppendText(value string) {
 	case controlView.logChan <- value: // チャネルに送信を試みる
 		// 送信成功
 	default:
-		// チャネルがいっぱいの場合、古いメッセージを1つ捨てて新しいメッセージを挿入
+		// チャネルがいっぱいの場合、複数の古いメッセージを捨てて新しいメッセージを挿入
+		// バッファの半分程度を空にして、新しいメッセージのためのスペースを確保
+		dropCount := cap(controlView.logChan) / 4 // 1/4のメッセージを破棄
+		for range dropCount {
+			select {
+			case <-controlView.logChan:
+				// 古いメッセージを破棄
+			default:
+				break
+			}
+		}
+		// 新しいメッセージを送信（通常は成功するはず）
 		select {
-		case <-controlView.logChan: // 古いメッセージを1つ読み取って捨てる
-			controlView.logChan <- value // 新しいメッセージを送信
+		case controlView.logChan <- value:
+			// 送信成功
 		default:
-			// ここには到達しないはず（バッファがいっぱいなら必ず1つは読み取れる）
+			// それでも送信できない場合は諦める（まれなケース）
 		}
 	}
 
@@ -104,16 +115,34 @@ func (controlView *ConsoleView) WndProc(hwnd win.HWND, msg uint32, wParam, lPara
 
 		return win.DLGC_HASSETSEL | win.DLGC_WANTARROWS | win.DLGC_WANTCHARS
 	case TEM_APPENDTEXT:
-		// チャネルにメッセージがある限り、すべて処理する
-		for {
+		// チャネルにメッセージがある限り、バッチで処理する
+		// 一度に処理するメッセージ数を制限してUIの応答性を保つ
+		const maxBatchSize = 50
+		processedCount := 0
+
+		for processedCount < maxBatchSize {
 			select {
 			case value := <-controlView.logChan:
 				controlView.AppendText(value)
+				processedCount++
 			default:
 				// チャネルが空になったら終了
 				return 0
 			}
 		}
+
+		// まだメッセージが残っているかチェック
+		select {
+		case value := <-controlView.logChan:
+			// メッセージがまだあるので、それを処理
+			controlView.AppendText(value)
+			// 次の処理のためにPostMessageを再送信
+			win.PostMessage(controlView.Handle(), TEM_APPENDTEXT, 0, 0)
+		default:
+			// メッセージがなければ何もしない
+		}
+
+		return 0
 	}
 
 	return controlView.WidgetBase.WndProc(hwnd, msg, wParam, lParam)
@@ -121,10 +150,9 @@ func (controlView *ConsoleView) WndProc(hwnd win.HWND, msg uint32, wParam, lPara
 
 // Write はio.Writerインターフェースを実装し、logの出力をConsoleViewにリダイレクトします。
 func (controlView *ConsoleView) Write(p []byte) (n int, err error) {
-
 	// 改行が文字列内にある場合、コンソール内で改行が行われるよう置換する
 	p = bytes.ReplaceAll(p, []byte("\n"), []byte("\r\n"))
 	controlView.PostAppendText(string(p))
 
-	return n, nil
+	return len(p), nil
 }
