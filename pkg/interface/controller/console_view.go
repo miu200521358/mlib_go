@@ -5,7 +5,6 @@ package controller
 
 import (
 	"bytes"
-	"math"
 	"sync"
 	"syscall"
 	"unsafe"
@@ -28,7 +27,7 @@ const (
 )
 
 func NewConsoleView(parent walk.Container, minWidth int, minHeight int) (*ConsoleView, error) {
-	lc := make(chan string, 1000)
+	lc := make(chan string, 512)
 	cv := &ConsoleView{logChan: lc}
 
 	if err := walk.InitWidget(
@@ -50,7 +49,7 @@ func NewConsoleView(parent walk.Container, minWidth int, minHeight int) (*Consol
 		walk.Size{Width: minWidth * 100, Height: minHeight * 100})
 	cv.Console = te
 	cv.Console.SetReadOnly(true)
-	cv.Console.SendMessage(win.EM_SETLIMITTEXT, math.MaxInt, 0)
+	cv.Console.SendMessage(win.EM_SETLIMITTEXT, 4294967295, 0)
 
 	return cv, nil
 }
@@ -79,30 +78,7 @@ func (controlView *ConsoleView) PostAppendText(value string) {
 	controlView.mutex.Lock()
 	defer controlView.mutex.Unlock()
 
-	select {
-	case controlView.logChan <- value: // チャネルに送信を試みる
-		// 送信成功
-	default:
-		// チャネルがいっぱいの場合、複数の古いメッセージを捨てて新しいメッセージを挿入
-		// バッファの半分程度を空にして、新しいメッセージのためのスペースを確保
-		dropCount := cap(controlView.logChan) / 4 // 1/4のメッセージを破棄
-		for range dropCount {
-			select {
-			case <-controlView.logChan:
-				// 古いメッセージを破棄
-			default:
-				break
-			}
-		}
-		// 新しいメッセージを送信（通常は成功するはず）
-		select {
-		case controlView.logChan <- value:
-			// 送信成功
-		default:
-			// それでも送信できない場合は諦める（まれなケース）
-		}
-	}
-
+	controlView.logChan <- value
 	win.PostMessage(controlView.Handle(), TEM_APPENDTEXT, 0, 0)
 }
 
@@ -115,34 +91,12 @@ func (controlView *ConsoleView) WndProc(hwnd win.HWND, msg uint32, wParam, lPara
 
 		return win.DLGC_HASSETSEL | win.DLGC_WANTARROWS | win.DLGC_WANTCHARS
 	case TEM_APPENDTEXT:
-		// チャネルにメッセージがある限り、バッチで処理する
-		// 一度に処理するメッセージ数を制限してUIの応答性を保つ
-		const maxBatchSize = 50
-		processedCount := 0
-
-		for processedCount < maxBatchSize {
-			select {
-			case value := <-controlView.logChan:
-				controlView.AppendText(value)
-				processedCount++
-			default:
-				// チャネルが空になったら終了
-				return 0
-			}
-		}
-
-		// まだメッセージが残っているかチェック
 		select {
 		case value := <-controlView.logChan:
-			// メッセージがまだあるので、それを処理
 			controlView.AppendText(value)
-			// 次の処理のためにPostMessageを再送信
-			win.PostMessage(controlView.Handle(), TEM_APPENDTEXT, 0, 0)
 		default:
-			// メッセージがなければ何もしない
+			return 0
 		}
-
-		return 0
 	}
 
 	return controlView.WidgetBase.WndProc(hwnd, msg, wParam, lParam)
@@ -150,9 +104,10 @@ func (controlView *ConsoleView) WndProc(hwnd win.HWND, msg uint32, wParam, lPara
 
 // Write はio.Writerインターフェースを実装し、logの出力をConsoleViewにリダイレクトします。
 func (controlView *ConsoleView) Write(p []byte) (n int, err error) {
+
 	// 改行が文字列内にある場合、コンソール内で改行が行われるよう置換する
 	p = bytes.ReplaceAll(p, []byte("\n"), []byte("\r\n"))
 	controlView.PostAppendText(string(p))
 
-	return len(p), nil
+	return n, nil
 }
