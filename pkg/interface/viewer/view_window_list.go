@@ -59,9 +59,8 @@ func (vl *ViewerList) Add(title string, width, height, positionX, positionY int)
 }
 
 const (
-	physicsDefaultSpf = float32(1.0 / 60.0) // デフォルトの物理spf
-	deformDefaultSpf  = 1.0 / 30.0          // デフォルトのデフォームspf
-	deformDefaultFps  = float32(30.0)       // デフォルトのデフォームfps
+	deformDefaultSpf = 1.0 / 30.0    // デフォルトのデフォームspf
+	deformDefaultFps = float32(30.0) // デフォルトのデフォームfps
 )
 
 func (vl *ViewerList) InitOverride() {
@@ -169,15 +168,15 @@ func (vl *ViewerList) handleWindowFocus() {
 func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, timeStep float32) {
 	var elapsed float32
 
-	if vl.shared.IsEnabledFrameDrop() {
-		// フレームドロップON
+	if vl.shared.IsEnabledFrameDrop() || !vl.shared.Playing() {
+		// フレームドロップON (再生なし時は常にフレームドロップON)
 		// 物理fpsは経過時間
 		timeStep = float32(originalElapsed)
 		elapsed = float32(originalElapsed)
 	} else {
 		// フレームドロップOFF
-		// 物理fpsは60fps固定
-		timeStep = physicsDefaultSpf
+		// 物理fpsは固定時間ステップ
+		timeStep = vl.shared.FixedTimeStep()
 		// デフォームfpsはspf上限の経過時間
 		elapsed = float32(mmath.Clamped(originalElapsed, 0.0, deformDefaultSpf))
 	}
