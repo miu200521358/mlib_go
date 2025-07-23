@@ -19,9 +19,6 @@ func (rep *PmxRepository) Save(overridePath string, data core.IHashModel, includ
 	mproc.SetMaxProcess(true)
 	defer mproc.SetMaxProcess(false)
 
-	mlog.IL("%s", mi18n.T("保存開始", map[string]interface{}{"Type": "Pmx", "Path": overridePath}))
-	defer mlog.I("%s", mi18n.T("保存終了", map[string]interface{}{"Type": "Pmx"}))
-
 	model := data.(*pmx.PmxModel)
 
 	path := model.Path()
@@ -29,6 +26,9 @@ func (rep *PmxRepository) Save(overridePath string, data core.IHashModel, includ
 	if mfile.CanSave(overridePath) {
 		path = overridePath
 	}
+
+	mlog.IL("%s", mi18n.T("保存開始", map[string]interface{}{"Type": "Pmx", "Path": path}))
+	defer mlog.I("%s", mi18n.T("保存終了", map[string]interface{}{"Type": "Pmx"}))
 
 	// Open the output file
 	fout, err := os.Create(path)

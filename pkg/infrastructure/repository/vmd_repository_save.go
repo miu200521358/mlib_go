@@ -25,9 +25,6 @@ func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includ
 	mproc.SetMaxProcess(true)
 	defer mproc.SetMaxProcess(false)
 
-	mlog.IL("%s", mi18n.T("保存開始", map[string]interface{}{"Type": "Vmd", "Path": overridePath}))
-	defer mlog.I("%s", mi18n.T("保存終了", map[string]interface{}{"Type": "Vmd"}))
-
 	motion := data.(*vmd.VmdMotion)
 
 	path := motion.Path()
@@ -35,6 +32,9 @@ func (rep *VmdRepository) Save(overridePath string, data core.IHashModel, includ
 	if mfile.CanSave(overridePath) {
 		path = overridePath
 	}
+
+	mlog.IL("%s", mi18n.T("保存開始", map[string]interface{}{"Type": "Vmd", "Path": path}))
+	defer mlog.I("%s", mi18n.T("保存終了", map[string]interface{}{"Type": "Vmd"}))
 
 	// Open the output file
 	fout, err := os.Create(path)
