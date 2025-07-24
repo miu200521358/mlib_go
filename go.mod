@@ -8,7 +8,7 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240118000515-a250818d05e3
 	github.com/go-gl/mathgl v1.1.0
 	github.com/gonum/matrix v0.0.0-20181209220409-c518dec07be9
-	github.com/miu200521358/walk v0.0.5
+	github.com/miu200521358/walk v0.0.6
 	github.com/miu200521358/win v0.0.2
 	github.com/nicksnyder/go-i18n/v2 v2.4.0
 	github.com/petar/GoLLRB v0.0.0-20210522233825-ae3b015fd3e9
@@ -33,8 +33,8 @@ require (
 	gopkg.in/Knetic/govaluate.v3 v3.0.0 // indirect
 )
 
-replace github.com/miu200521358/walk => ../walk
+// replace github.com/miu200521358/walk => ../walk
 
-replace github.com/miu200521358/win => ../win
+// replace github.com/miu200521358/win => ../win
 
-replace github.com/miu200521358/dds => ../dds
+// replace github.com/miu200521358/dds => ../dds
