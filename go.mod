@@ -33,8 +33,8 @@ require (
 	gopkg.in/Knetic/govaluate.v3 v3.0.0 // indirect
 )
 
-replace github.com/miu200521358/walk => ../walk
+// replace github.com/miu200521358/walk => ../walk
 
-replace github.com/miu200521358/win => ../win
+// replace github.com/miu200521358/win => ../win
 
-replace github.com/miu200521358/dds => ../dds
+// replace github.com/miu200521358/dds => ../dds

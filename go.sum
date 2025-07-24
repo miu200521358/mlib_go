@@ -29,6 +29,12 @@ github.com/gonum/matrix v0.0.0-20181209220409-c518dec07be9/go.mod h1:0EXg4mc1CNP
 github.com/google/pprof v0.0.0-20211214055906-6f57359322fd h1:1FjCyPC+syAzJ5/2S8fqdZK1R22vvA0J7JZKcuOIQ7Y=
 github.com/google/pprof v0.0.0-20211214055906-6f57359322fd/go.mod h1:KgnwoLYCZ8IQu3XUZ8Nc/bM9CCZFOyjUNOSygVozoDg=
 github.com/ianlancetaylor/demangle v0.0.0-20210905161508-09a460cdf81d/go.mod h1:aYm2/VgdVmcIU8iMfdMvDMsRAQjcfZSKFby6HOFvi/w=
+github.com/miu200521358/dds v0.0.1 h1:Vn+vTrVcJmAknKzdZhziO6KcW3KjG4iCre5T5VkIl4M=
+github.com/miu200521358/dds v0.0.1/go.mod h1:e31d6ajQP2wxVcNfaeYhFKPMO1WJyTnHtKgTPf8S0cQ=
+github.com/miu200521358/walk v0.0.5 h1:yTrjiSRkJnWzFxUlFJ3i5V5iAaQylQan0JVaxpxmEXc=
+github.com/miu200521358/walk v0.0.5/go.mod h1:nMewi5LIMQpxyBWPYQjYCXRJ5fTJjEzmhb20R5vTRLU=
+github.com/miu200521358/win v0.0.2 h1:ep138pJk2+SaLGeKZdXg8kQQBOdq3brHMImCbdOLSyI=
+github.com/miu200521358/win v0.0.2/go.mod h1:blMY2DsLmjDMCkbu+gLsUtfoVK7D8A7KSjZlL3vdEbE=
 github.com/nicksnyder/go-i18n/v2 v2.4.0 h1:3IcvPOAvnCKwNm0TB0dLDTuawWEj+ax/RERNC+diLMM=
 github.com/nicksnyder/go-i18n/v2 v2.4.0/go.mod h1:nxYSZE9M0bf3Y70gPQjN9ha7XNHX7gMc814+6wVyEI4=
 github.com/petar/GoLLRB v0.0.0-20210522233825-ae3b015fd3e9 h1:1/WtZae0yGtPq+TI6+Tv1WTxkukpXeMlviSxvL7SRgk=

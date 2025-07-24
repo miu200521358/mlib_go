@@ -80,6 +80,14 @@ https://rinatz.github.io/swigdoc/abstract.html
 (mtool) C:\MMD\mlib_go\pkg\bt>swig -c++ -go -cgo -I"C:\MMD\mlib_go\pkg\bt\bullet\src" -I"C:\development\TDM-GCC-64\lib\gcc\x86_64-w64-mingw32\10.3.0\include\c++\x86_64-w64-mingw32" -I"C:\development\TDM-GCC-64\x86_64-w64-mingw32\include" -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include" -cpperraswarn -o "C:\MMD\mlib_go\pkg\bt\bt.cxx" "C:\MMD\mlib_go\pkg\bt\bullet.i"
 ```
 
+## バージョン反映
+
+```
+go list -m -mod=mod -versions github.com/miu200521358/dds
+go list -m -mod=mod -versions github.com/miu200521358/win
+go list -m -mod=mod -versions github.com/miu200521358/walk
+```
+
 ---------
 
 
