@@ -307,3 +307,12 @@ func CalculateX(length, y, z float64) (float64, error) {
 	xPos := math.Sqrt(squareTerm)
 	return xPos, nil
 }
+
+func Flatten[T any](slices [][]T) []T {
+	// 二次元スライスを一次元にフラット化
+	flattened := make([]T, 0, len(slices)*len(slices[0]))
+	for _, slice := range slices {
+		flattened = append(flattened, slice...)
+	}
+	return flattened
+}
