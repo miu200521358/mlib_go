@@ -285,11 +285,11 @@ func (vl *ViewerList) resetPhysics(vw *ViewWindow, isPhysicsReset bool) {
 		for frame := float32(0); frame < iterationFinishFrame+physicsInitialFrame+10; frame++ {
 			vl.deform(vw, physicsResetMotions, frame, vl.shared.FixedTimeStep(), isPhysicsReset)
 
-			// レンダリング処理
-			for n := len(vl.windowList); n > 0; n-- {
-				// サブビューワーオーバーレイのため、逆順でレンダリング
-				vl.windowList[n-1].render()
-			}
+			// // レンダリング処理
+			// for n := len(vl.windowList); n > 0; n-- {
+			// 	// サブビューワーオーバーレイのため、逆順でレンダリング
+			// 	vl.windowList[n-1].render()
+			// }
 		}
 	}
 }

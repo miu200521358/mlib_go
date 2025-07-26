@@ -140,7 +140,11 @@ func (ss *SharedState) LoadModel(windowIndex, modelIndex int) *pmx.PmxModel {
 	if len(ss.models[windowIndex]) <= modelIndex {
 		return nil
 	}
-	return ss.models[windowIndex][modelIndex].Load().(*pmx.PmxModel)
+	v := ss.models[windowIndex][modelIndex].Load()
+	if v == nil {
+		return nil
+	}
+	return v.(*pmx.PmxModel)
 }
 
 // StoreMotion は指定されたウィンドウとモデルインデックスにモーションを格納
@@ -166,7 +170,13 @@ func (ss *SharedState) LoadMotion(windowIndex, modelIndex int) *vmd.VmdMotion {
 	if len(ss.motions[windowIndex]) <= modelIndex {
 		return vmd.NewVmdMotion("")
 	}
-	return ss.motions[windowIndex][modelIndex].Load().(*vmd.VmdMotion)
+
+	v := ss.motions[windowIndex][modelIndex].Load()
+	if v == nil {
+		return vmd.NewVmdMotion("")
+	}
+
+	return v.(*vmd.VmdMotion)
 }
 
 // LoadSelectedMaterialIndexes は選択中のマテリアルインデックスを取得
@@ -177,7 +187,12 @@ func (ss *SharedState) LoadSelectedMaterialIndexes(windowIndex, modelIndex int) 
 	if len(ss.selectedMaterialIndexes[windowIndex]) <= modelIndex {
 		return nil
 	}
-	return ss.selectedMaterialIndexes[windowIndex][modelIndex].Load().([]int)
+	v := ss.selectedMaterialIndexes[windowIndex][modelIndex].Load()
+	if v == nil {
+		return nil
+	}
+
+	return v.([]int)
 }
 
 // StoreSelectedMaterialIndexes は選択中のマテリアルインデックスを格納
