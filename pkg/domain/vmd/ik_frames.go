@@ -1,5 +1,7 @@
 package vmd
 
+import "github.com/tiendc/go-deepcopy"
+
 type IkFrames struct {
 	*BaseFrames[*IkFrame]
 }
@@ -24,4 +26,10 @@ func (ikFrames *IkFrames) Clean() {
 		}
 		ikFrames.Delete(cf.Index())
 	}
+}
+
+func (ikFrames *IkFrames) Copy() (*IkFrames, error) {
+	copied := new(IkFrames)
+	err := deepcopy.Copy(copied, ikFrames)
+	return copied, err
 }

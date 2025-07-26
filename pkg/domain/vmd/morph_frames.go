@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/tiendc/go-deepcopy"
 )
 
 type MorphFrames struct {
@@ -148,4 +149,10 @@ func (morphFrames *MorphFrames) ForEach(fn func(morphName string, morphNameFrame
 	for _, morphName := range morphFrames.getNames() {
 		fn(morphName, morphFrames.Get(morphName))
 	}
+}
+
+func (morphFrames *MorphFrames) Copy() (*MorphFrames, error) {
+	copied := new(MorphFrames)
+	err := deepcopy.Copy(copied, morphFrames)
+	return copied, err
 }

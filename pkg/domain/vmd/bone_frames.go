@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/tiendc/go-deepcopy"
 )
 
 type BoneFrames struct {
@@ -163,4 +164,10 @@ func (boneFrames *BoneFrames) ForEach(fn func(boneName string, boneNameFrames *B
 	for _, boneName := range boneFrames.getNames() {
 		fn(boneName, boneFrames.Get(boneName))
 	}
+}
+
+func (boneFrames *BoneFrames) Copy() (*BoneFrames, error) {
+	copied := new(BoneFrames)
+	err := deepcopy.Copy(copied, boneFrames)
+	return copied, err
 }

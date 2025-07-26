@@ -1,5 +1,7 @@
 package vmd
 
+import "github.com/tiendc/go-deepcopy"
+
 type LightFrames struct {
 	*BaseFrames[*LightFrame]
 }
@@ -25,4 +27,10 @@ func (lightFrames *LightFrames) Clean() {
 		}
 		lightFrames.Delete(cf.Index())
 	}
+}
+
+func (lightFrames *LightFrames) Copy() (*LightFrames, error) {
+	copied := new(LightFrames)
+	err := deepcopy.Copy(copied, lightFrames)
+	return copied, err
 }

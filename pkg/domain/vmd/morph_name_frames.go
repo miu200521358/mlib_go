@@ -1,6 +1,9 @@
 package vmd
 
-import "github.com/miu200521358/mlib_go/pkg/domain/mmath"
+import (
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/tiendc/go-deepcopy"
+)
 
 type MorphNameFrames struct {
 	*BaseFrames[*MorphFrame]
@@ -50,4 +53,10 @@ func (morphNameFrames *MorphNameFrames) ContainsActive() bool {
 	})
 
 	return isActive
+}
+
+func (morphNameFrames *MorphNameFrames) Copy() (*MorphNameFrames, error) {
+	copied := new(MorphNameFrames)
+	err := deepcopy.Copy(copied, morphNameFrames)
+	return copied, err
 }

@@ -104,6 +104,15 @@ func (im *IndexNameModels[T]) Contains(index int) bool {
 	return index >= 0 && index < len(im.values) && !reflect.ValueOf(im.values[index]).IsNil()
 }
 
+func (im *IndexNameModels[T]) UpdateNameIndexes() {
+	im.nameIndexes = make(map[string]int, len(im.values))
+	for i, value := range im.values {
+		if value.IsValid() {
+			im.nameIndexes[value.Name()] = i
+		}
+	}
+}
+
 func (im *IndexNameModels[T]) GetByName(name string) (T, error) {
 	if index, ok := im.nameIndexes[name]; ok {
 		return im.values[index], nil

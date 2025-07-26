@@ -1,5 +1,7 @@
 package vmd
 
+import "github.com/tiendc/go-deepcopy"
+
 type CameraFrames struct {
 	*BaseFrames[*CameraFrame]
 }
@@ -26,4 +28,10 @@ func (cameraFrames *CameraFrames) Clean() {
 		}
 		cameraFrames.Delete(cf.Index())
 	}
+}
+
+func (cameraFrames *CameraFrames) Copy() (*CameraFrames, error) {
+	copied := new(CameraFrames)
+	err := deepcopy.Copy(copied, cameraFrames)
+	return copied, err
 }

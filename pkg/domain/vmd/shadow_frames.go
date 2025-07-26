@@ -1,5 +1,7 @@
 package vmd
 
+import "github.com/tiendc/go-deepcopy"
+
 type ShadowFrames struct {
 	*BaseFrames[*ShadowFrame]
 }
@@ -24,4 +26,10 @@ func (shadowFrames *ShadowFrames) Clean() {
 		}
 		shadowFrames.Delete(cf.Index())
 	}
+}
+
+func (shadowFrames *ShadowFrames) Copy() (*ShadowFrames, error) {
+	copied := new(ShadowFrames)
+	err := deepcopy.Copy(copied, shadowFrames)
+	return copied, err
 }
