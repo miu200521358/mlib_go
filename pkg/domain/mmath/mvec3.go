@@ -63,6 +63,12 @@ func (vec3 *MVec3) String() string {
 	return fmt.Sprintf("[x=%.7f, y=%.7f, z=%.7f]", vec3.X, vec3.Y, vec3.Z)
 }
 
+// String T の文字列表現を返します。
+func (vec3 *MVec3) StringByDigits(digits int) string {
+	format := fmt.Sprintf("[x=%%.%df, y=%%.%df, z=%%.%df]", digits, digits, digits)
+	return fmt.Sprintf(format, vec3.X, vec3.Y, vec3.Z)
+}
+
 // MMD MMD(MikuMikuDance)座標系に変換された3次元ベクトルを返します
 func (vec3 *MVec3) MMD() *MVec3 {
 	return &MVec3{vec3.X, vec3.Y, vec3.Z}
