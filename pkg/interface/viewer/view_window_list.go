@@ -446,6 +446,10 @@ func (vl *ViewerList) deform(vw *ViewWindow, motions []*vmd.VmdMotion, frame, ti
 	vw.MakeContextCurrent()
 
 	vw.loadModelRenderers(vl.shared)
+	if len(motions) == 0 {
+		// モーションがない場合は何もしない
+		return
+	}
 
 	// デフォーム処理
 	for n := range vw.modelRenderers {
