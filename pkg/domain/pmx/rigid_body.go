@@ -172,6 +172,10 @@ func (rigidBody *RigidBody) IsValid() bool {
 	return rigidBody != nil && rigidBody.index >= 0
 }
 
+func (rigidBody *RigidBody) AsDynamic() bool {
+	return rigidBody.PhysicsType == PHYSICS_TYPE_DYNAMIC || rigidBody.PhysicsType == PHYSICS_TYPE_DYNAMIC_BONE
+}
+
 func (rigidBody *RigidBody) Copy() core.IIndexNameModel {
 	return &RigidBody{
 		index:                   rigidBody.index,

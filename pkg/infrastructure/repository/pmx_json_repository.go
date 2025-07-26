@@ -176,8 +176,7 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 
 		jsonData.Bones = append(jsonData.Bones, &boneData)
 
-		if bone.Config() == nil &&
-			(bone.RigidBody == nil || bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC) {
+		if bone.Config() == nil && bone.HasDynamicPhysics() {
 			// 準標準ボーンではなく、物理剛体に紐付いていない場合、親の中で最も近い準標準ボーンに頂点INDEXリストを載せ替える
 			for _, parentIndex := range bone.ParentBoneIndexes {
 				parentBone, _ := model.Bones.Get(parentIndex)
@@ -187,6 +186,7 @@ func (rep *PmxJsonRepository) Save(overridePath string, data core.IHashModel, in
 					break
 				}
 			}
+
 		}
 
 		return true

@@ -342,14 +342,19 @@ func DeformAfterPhysics(
 		// 物理剛体位置を更新
 		for _, boneIndex := range model.Bones.LayerSortedIndexes {
 			bone, err := model.Bones.Get(boneIndex)
-			if err != nil || bone == nil || bone.RigidBody == nil || bone.RigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
+			if err != nil || bone == nil || !bone.HasDynamicPhysics() {
 				continue
 			}
-			bonePhysicsGlobalMatrix := physics.GetRigidBodyBoneMatrix(model.Index(), bone.RigidBody)
-			if vmdDeltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
-				bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame,
-					bonePhysicsGlobalMatrix, vmdDeltas.Bones.Get(bone.ParentIndex))
-				vmdDeltas.Bones.Update(bd)
+			for _, rigidBody := range bone.RigidBodies {
+				if rigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
+					continue
+				}
+				bonePhysicsGlobalMatrix := physics.GetRigidBodyBoneMatrix(model.Index(), rigidBody)
+				if vmdDeltas.Bones != nil && bonePhysicsGlobalMatrix != nil {
+					bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame,
+						bonePhysicsGlobalMatrix, vmdDeltas.Bones.Get(bone.ParentIndex))
+					vmdDeltas.Bones.Update(bd)
+				}
 			}
 		}
 	}

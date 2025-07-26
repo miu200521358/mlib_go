@@ -113,7 +113,7 @@ type Bone struct {
 	LocalMinAngleLimit     *mmath.MVec3 // 自分がIKリンクボーンのローカル軸角度制限の下限
 	LocalMaxAngleLimit     *mmath.MVec3 // 自分がIKリンクボーンのローカル軸角度制限の上限
 	AxisSign               int          // ボーンの軸ベクトル(左は-1, 右は1)
-	RigidBody              *RigidBody   // 物理演算用剛体
+	RigidBodies            []*RigidBody // 物理演算用剛体
 	OriginalLayer          int          // 元の変形階層
 	ParentBone             *Bone        // 親ボーン
 }
@@ -162,7 +162,7 @@ func NewBone() *Bone {
 		LocalMinAngleLimit:     nil,
 		LocalMaxAngleLimit:     nil,
 		AxisSign:               1,
-		RigidBody:              nil,
+		RigidBodies:            make([]*RigidBody, 0),
 		OriginalLayer:          -1,
 	}
 	return bone
@@ -402,6 +402,20 @@ func (bone *Bone) setup() {
 	bone.RevertOffsetMatrix = bone.ParentRelativePosition.ToMat4()
 }
 
+func (bone *Bone) HasDynamicPhysics() bool {
+	if bone.RigidBodies == nil {
+		return false
+	}
+
+	for _, rigidBody := range bone.RigidBodies {
+		if rigidBody != nil && rigidBody.AsDynamic() {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (bone *Bone) HasPhysics() bool {
-	return bone.RigidBody != nil && bone.RigidBody.PhysicsType != PHYSICS_TYPE_STATIC
+	return len(bone.RigidBodies) > 0
 }

@@ -146,7 +146,7 @@ func (model *PmxModel) Setup() {
 		if rb.BoneIndex >= 0 && model.Bones.Contains(rb.BoneIndex) {
 			// 剛体に関連付けられたボーンが存在する場合、剛体とボーンを関連付ける
 			if bone, err := model.Bones.Get(rb.BoneIndex); err == nil {
-				bone.RigidBody = rb
+				bone.RigidBodies = append(bone.RigidBodies, rb)
 				rb.Bone = bone
 			}
 		}
