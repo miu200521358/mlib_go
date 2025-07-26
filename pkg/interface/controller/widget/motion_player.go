@@ -93,6 +93,8 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 					if mp.onTriggerPlay != nil {
 						mp.onTriggerPlay(playing)
 					}
+
+					mp.window.TriggerPhysicsReset()
 				},
 				ToolTipText:   mi18n.T("再生ボタン説明"),
 				StretchFactor: 2,

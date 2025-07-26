@@ -11,7 +11,9 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mproc"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/usecase/deform"
 )
 
@@ -59,8 +61,9 @@ func (vl *ViewerList) Add(title string, width, height, positionX, positionY int)
 }
 
 const (
-	deformDefaultSpf = 1.0 / 30.0    // デフォルトのデフォームspf
-	deformDefaultFps = float32(30.0) // デフォルトのデフォームfps
+	physicsInitialFrame = float32(120.0)
+	deformDefaultSpf    = 1.0 / 30.0    // デフォルトのデフォームspf
+	deformDefaultFps    = float32(30.0) // デフォルトのデフォームfps
 )
 
 func (vl *ViewerList) InitOverride() {
@@ -77,6 +80,8 @@ func (vl *ViewerList) Run() {
 	elapsedList := make([]float64, 0, 1200)
 
 	for !vl.shared.IsClosed() {
+		isPhysicsReset := vl.shared.IsPhysicsReset()
+
 		// ウィンドウリンケージ処理
 		vl.handleWindowLinkage()
 
@@ -94,7 +99,7 @@ func (vl *ViewerList) Run() {
 		originalElapsed := frameTime - prevTime
 
 		// フレームレート制御と描画処理
-		if isRendered, timeStep := vl.processFrame(originalElapsed); isRendered {
+		if isRendered, timeStep := vl.processFrame(originalElapsed, isPhysicsReset); isRendered {
 			// 描画にかかった時間を計測
 			elapsedList = append(elapsedList, originalElapsed)
 
@@ -165,7 +170,7 @@ func (vl *ViewerList) handleWindowFocus() {
 }
 
 // processFrame フレーム処理ロジック
-func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, timeStep float32) {
+func (vl *ViewerList) processFrame(originalElapsed float64, isPhysicsReset bool) (isRendered bool, timeStep float32) {
 	var elapsed float32
 
 	if vl.shared.IsEnabledFrameDrop() || !vl.shared.Playing() {
@@ -198,8 +203,9 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	}
 
 	for _, vw := range vl.windowList {
+		vw.loadMotions(vl.shared)
 		// デフォーム処理
-		vl.deform(vw, timeStep)
+		vl.deform(vw, vw.motions, vl.shared.Frame(), timeStep, isPhysicsReset)
 	}
 
 	// レンダリング処理
@@ -208,10 +214,10 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 		vl.windowList[n-1].render()
 	}
 
-	if vl.shared.IsPhysicsReset() {
+	if isPhysicsReset {
 		// 物理リセット
 		for _, vw := range vl.windowList {
-			vl.resetPhysics(vw)
+			vl.resetPhysics(vw, isPhysicsReset)
 		}
 
 		// リセット完了
@@ -226,16 +232,7 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 			for windowIndex, vw := range vl.windowList {
 				if vl.shared.IsSaveDelta(windowIndex) && vl.shared.MaxFrame() > 1.0 {
 					// 変形情報のインデックスを増やす
-					deltaIndex := vw.list.shared.SaveDeltaIndex(vw.windowIndex)
-					deltaIndex += 1
-					// for modelIndex := range vw.modelRenderers {
-					// 	if motion := vl.shared.LoadMotion(0, modelIndex); motion != nil {
-					// 		if copiedMotion, err := motion.Copy(); err == nil {
-					// 			vl.shared.StoreDeltaMotion(windowIndex, modelIndex, deltaIndex, copiedMotion)
-					// 		}
-					// 	}
-					// }
-					vl.shared.SetSaveDeltaIndex(vw.windowIndex, deltaIndex)
+					vl.shared.SetSaveDeltaIndex(vw.windowIndex, vw.list.shared.SaveDeltaIndex(vw.windowIndex)+1)
 				}
 			}
 
@@ -249,9 +246,9 @@ func (vl *ViewerList) processFrame(originalElapsed float64) (isRendered bool, ti
 	return true, timeStep
 }
 
-func (vl *ViewerList) resetPhysics(vw *ViewWindow) {
+func (vl *ViewerList) resetPhysics(vw *ViewWindow, isPhysicsReset bool) {
 	// 物理リセット用のデフォーム処理
-	vl.deformForReset(vw)
+	iterationFinishFrame, physicsResetMotions := vl.deformForReset(vw)
 
 	for _, model := range vw.modelRenderers {
 		if model == nil || model.Model == nil {
@@ -282,35 +279,173 @@ func (vl *ViewerList) resetPhysics(vw *ViewWindow) {
 			vw.vmdDeltas[n],
 		)
 	}
-}
 
-func (vl *ViewerList) deformForReset(vw *ViewWindow) {
-	vw.MakeContextCurrent()
+	// 物理リセット変形を適用（描画は変更しない）
+	if vw.list.shared.IsSaveDelta(vw.windowIndex) && vl.shared.IsEnabledPhysics() {
+		for frame := float32(0); frame < iterationFinishFrame+physicsInitialFrame+10; frame++ {
+			vl.deform(vw, physicsResetMotions, frame, vl.shared.FixedTimeStep(), isPhysicsReset)
 
-	vw.loadModelRenderers(vl.shared)
-	vw.loadMotions(vl.shared)
-
-	frame := vl.shared.Frame()
-
-	// デフォーム処理
-	for n := range vw.modelRenderers {
-		// 物理前変形
-		vw.vmdDeltas[n] = deform.DeformBeforePhysicsReset(
-			vw.modelRenderers[n].Model,
-			vw.motions[n],
-			vw.vmdDeltas[n],
-			frame,
-		)
+			// レンダリング処理
+			for n := len(vl.windowList); n > 0; n-- {
+				// サブビューワーオーバーレイのため、逆順でレンダリング
+				vl.windowList[n-1].render()
+			}
+		}
 	}
 }
 
-func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
+func (vl *ViewerList) deformForReset(vw *ViewWindow) (float32, []*vmd.VmdMotion) {
 	vw.MakeContextCurrent()
 
 	vw.loadModelRenderers(vl.shared)
 	vw.loadMotions(vl.shared)
 
 	frame := vl.shared.Frame()
+
+	// 物理リセット変形用モーション
+	physicsResetMotions := make([]*vmd.VmdMotion, len(vw.modelRenderers))
+
+	if !(vw.list.shared.IsSaveDelta(vw.windowIndex) && vl.shared.IsEnabledPhysics()) {
+		// 焼き込みしない場合は、そのままデフォームして開始する
+
+		// デフォーム処理
+		for n := range vw.modelRenderers {
+			// 物理前変形
+			vw.vmdDeltas[n] = deform.DeformBeforePhysicsReset(
+				vw.modelRenderers[n].Model,
+				vw.motions[n],
+				vw.vmdDeltas[n],
+				frame,
+			)
+		}
+
+		return 0, physicsResetMotions
+	}
+
+	// モデルごとに0F目の変形量を保持
+	deformMaxTranslations := make([][]float64, len(vw.modelRenderers))
+	deformMaxRotations := make([][]float64, len(vw.modelRenderers))
+
+	for n := range vw.modelRenderers {
+		model := vw.modelRenderers[n].Model
+		if model == nil {
+			continue
+		}
+
+		if deformMaxRotations[n] == nil {
+			// 各ボーンの変形量を初期化
+			deformMaxRotations[n] = make([]float64, model.Bones.Length())
+			deformMaxTranslations[n] = make([]float64, model.Bones.Length())
+
+			model.Bones.ForEach(func(boneIndex int, bone *pmx.Bone) bool {
+				// リセットフレームの変形量を取得
+				bf := vw.motions[n].BoneFrames.Get(bone.Name()).Get(frame)
+
+				if bf.Position != nil {
+					deformMaxTranslations[n][boneIndex] = bf.Position.Length()
+				}
+				if bf.Rotation != nil {
+					deformMaxRotations[n][boneIndex] = bf.Rotation.ToDegree()
+				}
+
+				return true
+			})
+		}
+	}
+
+	// 変形量(各フレームの最大移動量を0.5、最大回転量を2度に制限した場合の変形用反復回数)
+	iterationFinishFrame := float32(max(
+		mmath.Max(mmath.Flatten(deformMaxTranslations))/0.5,
+		mmath.Max(mmath.Flatten(deformMaxRotations))/2.0,
+		60.0)) // 60.0はデフォルトの反復回数
+
+	// 物理リセット変形用モーションを作成する
+	for n := range vw.modelRenderers {
+		model := vw.modelRenderers[n].Model
+		if model == nil {
+			continue
+		}
+
+		if physicsResetMotions[n] == nil {
+			// モーションが未設定の場合、空のモーションを作成
+			physicsResetMotions[n] = vmd.NewVmdMotion("")
+		}
+
+		model.Bones.ForEach(func(boneIndex int, bone *pmx.Bone) bool {
+			// 0F目の変形量をリセット変形用モーションに全部初期化
+			bf := vmd.NewBoneFrame(0)
+			if bf.Position == nil {
+				bf.Position = mmath.NewMVec3()
+			}
+			if bf.Rotation == nil {
+				bf.Rotation = mmath.NewMQuaternion()
+			}
+
+			physicsResetMotions[n].AppendBoneFrame(bone.Name(), bf)
+			return true
+		})
+
+		// モデルに右腕と左腕がある場合、Yスタンスに変形させる
+		for _, direction := range []pmx.BoneDirection{pmx.BONE_DIRECTION_RIGHT, pmx.BONE_DIRECTION_LEFT} {
+			armBone, err := model.Bones.GetArm(direction)
+			if err != nil {
+				continue
+			}
+
+			// 腕の現在のベクトルを取得
+			armVector := armBone.ChildRelativePosition.Normalized()
+
+			// Yスタンスに変形させるためのベクトルを計算
+			yStanceVector := &mmath.MVec3{X: -1 * direction.Sign(), Y: 1.3, Z: 0}
+
+			// モーションに回転情報を追加
+			bf := vmd.NewBoneFrame(0)
+			// 腕のベクトルをYスタンスに変形させる回転情報を追加
+			bf.Rotation = mmath.NewMQuaternionRotate(armVector, yStanceVector.Normalized())
+			physicsResetMotions[n].AppendBoneFrame(armBone.Name(), bf)
+		}
+
+		model.Bones.ForEach(func(boneIndex int, bone *pmx.Bone) bool {
+			{
+				// 初期位置を保持して物理を動かす
+				bf := physicsResetMotions[n].BoneFrames.Get(bone.Name()).Get(physicsInitialFrame)
+				physicsResetMotions[n].AppendBoneFrame(bone.Name(), bf)
+			}
+
+			{
+				// リセットタイミングフレームの変形を保持して、物理変形を適用させる
+				v := vw.motions[n].BoneFrames.Get(bone.Name()).Get(frame).Copy()
+				bf := v.(*vmd.BoneFrame)
+				bf.SetIndex(physicsInitialFrame + iterationFinishFrame)
+				if bf.Position == nil {
+					bf.Position = mmath.NewMVec3()
+				}
+				if bf.Rotation == nil {
+					bf.Rotation = mmath.NewMQuaternion()
+				}
+				physicsResetMotions[n].AppendBoneFrame(bone.Name(), bf)
+			}
+			return true
+		})
+	}
+
+	for n := range vw.modelRenderers {
+		// 初回の物理前変形
+		vw.vmdDeltas[n] = deform.DeformBeforePhysicsReset(
+			vw.modelRenderers[n].Model,
+			physicsResetMotions[n],
+			nil,
+			0.0,
+		)
+	}
+
+	return iterationFinishFrame, physicsResetMotions
+}
+
+func (vl *ViewerList) deform(vw *ViewWindow, motions []*vmd.VmdMotion, frame, timeStep float32, isPhysicsReset bool) {
+	vw.MakeContextCurrent()
+
+	vw.loadModelRenderers(vl.shared)
 
 	// デフォーム処理
 	for n := range vw.modelRenderers {
@@ -322,7 +457,7 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 		// 物理前変形
 		vw.vmdDeltas[n] = deform.DeformBeforePhysics(
 			vw.modelRenderers[n].Model,
-			vw.motions[n],
+			motions[n],
 			vw.vmdDeltas[n],
 			frame,
 		)
@@ -342,7 +477,7 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 		)
 	}
 
-	if vl.shared.IsEnabledPhysics() || vl.shared.IsPhysicsReset() {
+	if vl.shared.IsEnabledPhysics() || isPhysicsReset {
 		// 物理更新
 		vw.physics.StepSimulation(timeStep, vl.shared.MaxSubSteps(), vl.shared.FixedTimeStep())
 	}
@@ -357,13 +492,15 @@ func (vl *ViewerList) deform(vw *ViewWindow, timeStep float32) {
 			vl.shared,
 			vw.physics,
 			vw.modelRenderers[n].Model,
-			vw.motions[n],
+			motions[n],
 			vw.vmdDeltas[n],
 			frame,
 		)
 
-		// モデルのデフォーム更新
-		vw.saveDeltaMotions(frame)
+		if vw.list.shared.IsSaveDelta(vw.windowIndex) && vl.shared.IsEnabledPhysics() && !isPhysicsReset {
+			// モデルのデフォーム更新
+			vw.saveDeltaMotions(frame)
+		}
 	}
 }
 

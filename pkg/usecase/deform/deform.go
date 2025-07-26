@@ -338,7 +338,7 @@ func DeformAfterPhysics(
 		return vmdDeltas
 	}
 
-	if shared.IsEnabledPhysics() && !shared.IsPhysicsReset() {
+	if shared.IsEnabledPhysics() {
 		// 物理剛体位置を更新
 		for _, boneIndex := range model.Bones.LayerSortedIndexes {
 			bone, err := model.Bones.Get(boneIndex)
