@@ -318,7 +318,12 @@ func (vl *ViewerList) resetPhysics(
 	physicsResetType vmd.PhysicsResetType,
 ) {
 	// 物理リセット用のデフォーム処理
-	iterationFinishFrame, physicsResetMotions := vl.deformForReset(vw, frame, physicsResetType)
+	var iterationFinishFrame float32
+	var physicsResetMotions []*vmd.VmdMotion
+
+	if physicsResetType != vmd.PHYSICS_RESET_TYPE_CONTINUE_FRAME {
+		iterationFinishFrame, physicsResetMotions = vl.deformForReset(vw, frame, physicsResetType)
+	}
 
 	for _, model := range vw.modelRenderers {
 		if model == nil || model.Model == nil {
