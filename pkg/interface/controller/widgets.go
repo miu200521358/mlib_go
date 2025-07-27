@@ -40,11 +40,10 @@ type IMWidget interface {
 }
 
 type MWidgets struct {
-	Widgets             []IMWidget
-	onLoadedFunc        func()
-	onChangePlayingFunc func(playing bool)
-	window              *ControlWindow
-	Position            *walk.Point
+	Widgets      []IMWidget
+	onLoadedFunc func()
+	window       *ControlWindow
+	Position     *walk.Point
 }
 
 func (mw *MWidgets) SetWindow(window *ControlWindow) {
@@ -58,15 +57,6 @@ func (mw *MWidgets) Window() *ControlWindow {
 	return mw.window
 }
 
-func (mw *MWidgets) SetEnabledInPlaying(playing bool) {
-	for _, w := range mw.Widgets {
-		w.SetEnabledInPlaying(playing)
-	}
-	if mw.onChangePlayingFunc != nil {
-		mw.onChangePlayingFunc(playing)
-	}
-}
-
 func (mw *MWidgets) OnLoaded() {
 	if mw.onLoadedFunc != nil {
 		mw.onLoadedFunc()
@@ -75,8 +65,4 @@ func (mw *MWidgets) OnLoaded() {
 
 func (mw *MWidgets) SetOnLoaded(f func()) {
 	mw.onLoadedFunc = f
-}
-
-func (mw *MWidgets) SetOnChangePlaying(f func(playing bool)) {
-	mw.onChangePlayingFunc = f
 }

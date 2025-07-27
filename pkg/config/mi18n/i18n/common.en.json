@@ -542,5 +542,9 @@
     {
         "id": "中間MSAA差し替え",
         "translation": "Since the default FBO sample count is not 4, MSAA is replaced with a type using an intermediate FBO"
+    },
+    {
+        "id": "焼き込み再生ループ再開: 焼き込み履歴INDEX[%d]",
+        "translation": "Resume Bake Playback Loop: Bake History INDEX [%d]"
     }
 ]

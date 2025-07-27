@@ -32,12 +32,11 @@ type SharedState struct {
 	models                     [][]atomic.Value   // モデルデータ(ウィンドウ/モデルインデックス)
 	motions                    [][]atomic.Value   // モーションデータ(ウィンドウ/モデルインデックス)
 	selectedMaterialIndexes    [][]atomic.Value   // 選択中のマテリアルインデックス(ウィンドウ/モデルインデックス)
-	gravity                    atomic.Value       // 重力ベクトル
-	maxSubSteps                atomic.Int32       // 最大サブステップ数
-	fixedTimeStep              atomic.Int32       // 固定タイムステップ(fps)
 	saveDeltas                 []atomic.Bool      // 変形情報保存フラグ
 	saveDeltaIndexes           []atomic.Int32     // 変形情報のインデックス
 	deltaMotions               [][][]atomic.Value // 変形情報の保存(ウィンドウ/モデルインデックス/モーションインデックス)
+	physicsMotions             []atomic.Value     // 物理モーションデータ(ウィンドウ)
+	physicsResetType           atomic.Int32       // 物理リセットの種類
 }
 
 // NewSharedState は2つのStateを注入して生成するコンストラクタ
@@ -53,6 +52,7 @@ func NewSharedState(viewerCount int) *SharedState {
 		saveDeltas:              make([]atomic.Bool, viewerCount),
 		saveDeltaIndexes:        make([]atomic.Int32, viewerCount),
 		deltaMotions:            make([][][]atomic.Value, viewerCount),
+		physicsMotions:          make([]atomic.Value, viewerCount),
 	}
 
 	shared.SetFrame(0)
@@ -66,9 +66,10 @@ func NewSharedState(viewerCount int) *SharedState {
 	shared.SetFocusControlWindow(false)
 	shared.SetMovedControlWindow(false)
 	shared.SetClosed(false)
-	shared.SetGravity(&mmath.MVec3{X: 0, Y: -9.8, Z: 0}) // 初期重力値
-	shared.SetMaxSubSteps(2)                             // 初期最大サブステップ数
-	shared.SetFixedTimeStep(60)                          // 初期固定タイムステップ(fps)
+
+	for i := range viewerCount {
+		shared.StorePhysicsMotion(i, nil)
+	}
 
 	return shared
 }
@@ -76,7 +77,6 @@ func NewSharedState(viewerCount int) *SharedState {
 const (
 	FlagEnabledFrameDrop         = 1 << iota // フレームドロップON/OFF
 	FlagEnabledPhysics                       // 物理ON/OFF
-	FlagPhysicsReset                         // 物理リセット
 	FlagShowNormal                           // ボーンデバッグ表示
 	FlagShowWire                             // ワイヤーフレームデバッグ表示
 	FlagShowOverrideUpper                    // オーバーライドデバッグ(上半身)表示
@@ -238,6 +238,38 @@ func (ss *SharedState) UpdateFlags(changes map[uint32]bool) {
 	}
 }
 
+// StoreMotion は指定されたウィンドウとモデルインデックスにモーションを格納
+func (ss *SharedState) StorePhysicsMotion(windowIndex int, motion *vmd.VmdMotion) {
+	if len(ss.physicsMotions) <= windowIndex {
+		return
+	}
+
+	if motion != nil {
+		ss.physicsMotions[windowIndex].Store(motion)
+	} else {
+		physicsMotion := vmd.NewVmdMotion("")
+		physicsMotion.AppendGravityFrame(vmd.NewGravityFrameByValue(0, &mmath.MVec3{X: 0, Y: -9.8, Z: 0}))
+		physicsMotion.AppendMaxSubStepsFrame(vmd.NewMaxSubStepsFrameByValue(0, 2))
+		physicsMotion.AppendFixedTimeStepFrame(vmd.NewFixedTimeStepFrameByValue(0, 60.0))
+		ss.physicsMotions[windowIndex].Store(physicsMotion)
+	}
+}
+
+// LoadMotion は指定されたウィンドウとモデルインデックスのモーションを取得
+func (ss *SharedState) LoadPhysicsMotion(windowIndex int) *vmd.VmdMotion {
+	if len(ss.physicsMotions) <= windowIndex {
+		return nil
+	}
+
+	v := ss.physicsMotions[windowIndex].Load()
+	if v == nil {
+		ss.StorePhysicsMotion(windowIndex, nil)
+		return ss.LoadPhysicsMotion(windowIndex)
+	}
+
+	return v.(*vmd.VmdMotion)
+}
+
 // ビットが立っているかどうか
 func (ss *SharedState) isBitSet(bitMask uint32) bool {
 	return (ss.loadFlag() & bitMask) != 0
@@ -265,14 +297,6 @@ func (ss *SharedState) IsEnabledPhysics() bool {
 
 func (ss *SharedState) SetEnabledPhysics(enabled bool) {
 	ss.UpdateFlags(map[uint32]bool{FlagEnabledPhysics: enabled})
-}
-
-func (ss *SharedState) IsPhysicsReset() bool {
-	return ss.isBitSet(FlagPhysicsReset)
-}
-
-func (ss *SharedState) SetPhysicsReset(reset bool) {
-	ss.UpdateFlags(map[uint32]bool{FlagPhysicsReset: reset})
 }
 
 func (ss *SharedState) IsShowNormal() bool {
@@ -632,42 +656,6 @@ func (ss *SharedState) TriggerLinkedFocus(viewerIndex int) {
 	// }
 }
 
-func (ss *SharedState) Gravity() *mmath.MVec3 {
-	gravity := ss.gravity.Load()
-	if gravity == nil {
-		return &mmath.MVec3{X: 0, Y: -9.8, Z: 0} // デフォルトの重力ベクトル
-	}
-	return gravity.(*mmath.MVec3)
-}
-
-func (ss *SharedState) SetGravity(gravity *mmath.MVec3) {
-	ss.gravity.Store(gravity)
-}
-
-func (ss *SharedState) MaxSubSteps() int {
-	maxSubSteps := ss.maxSubSteps.Load()
-	if maxSubSteps == 0 {
-		return 2 // デフォルトの最大サブステップ数
-	}
-	return int(maxSubSteps)
-}
-
-func (ss *SharedState) SetMaxSubSteps(maxSubSteps int) {
-	ss.maxSubSteps.Store(int32(maxSubSteps))
-}
-
-func (ss *SharedState) FixedTimeStep() float32 {
-	fixedTimeStep := ss.fixedTimeStep.Load()
-	if fixedTimeStep == 0 {
-		return 60 // デフォルトの固定タイムステップ(fps)
-	}
-	return float32(1.0) / float32(fixedTimeStep)
-}
-
-func (ss *SharedState) SetFixedTimeStep(fixedTimeStep int) {
-	ss.fixedTimeStep.Store(int32(fixedTimeStep))
-}
-
 func (ss *SharedState) IsSaveDelta(windowIndex int) bool {
 	return ss.saveDeltas[windowIndex].Load()
 }
@@ -753,6 +741,14 @@ func (ss *SharedState) GetDeltaMotionCount(windowIndex, modelIndex int) int {
 	}
 
 	return len(ss.deltaMotions[windowIndex][modelIndex])
+}
+
+func (ss *SharedState) PhysicsResetType() vmd.PhysicsResetType {
+	return vmd.PhysicsResetType(ss.physicsResetType.Load())
+}
+
+func (ss *SharedState) SetPhysicsReset(physicsResetType vmd.PhysicsResetType) {
+	ss.physicsResetType.Store(int32(physicsResetType))
 }
 
 func (ss *SharedState) KeepFocus() {

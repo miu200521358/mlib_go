@@ -542,5 +542,9 @@
     {
         "id": "中間MSAA差し替え",
         "translation": "由于默认FBO的采样数不是4，将MSAA替换为使用中间FBO的类型"
+    },
+    {
+        "id": "焼き込み再生ループ再開: 焼き込み履歴INDEX[%d]",
+        "translation": "恢复烘焙播放循环：烘焙历史 INDEX [%d]"
     }
 ]

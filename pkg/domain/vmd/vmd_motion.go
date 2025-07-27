@@ -12,33 +12,41 @@ import (
 )
 
 type VmdMotion struct {
-	name         string
-	path         string
-	hash         string
-	Signature    string // vmdバージョン
-	BoneFrames   *BoneFrames
-	MorphFrames  *MorphFrames
-	CameraFrames *CameraFrames
-	LightFrames  *LightFrames
-	ShadowFrames *ShadowFrames
-	IkFrames     *IkFrames
-	lock         sync.Mutex // スレッドセーフ用のロック
+	name                string
+	path                string
+	hash                string
+	Signature           string // vmdバージョン
+	BoneFrames          *BoneFrames
+	MorphFrames         *MorphFrames
+	CameraFrames        *CameraFrames
+	LightFrames         *LightFrames
+	ShadowFrames        *ShadowFrames
+	IkFrames            *IkFrames
+	MaxSubStepsFrames   *MaxSubStepsFrames
+	FixedTimeStepFrames *FixedTimeStepFrames
+	GravityFrames       *GravityFrames
+	PhysicsResetFrames  *PhysicsResetFrames
+	lock                sync.Mutex // スレッドセーフ用のロック
 }
 
 var InitialMotion = NewVmdMotion("")
 
 func NewVmdMotion(path string) *VmdMotion {
 	return &VmdMotion{
-		name:         "",
-		path:         path,
-		hash:         fmt.Sprintf("%d", rand.Intn(10000)), // 初期ハッシュ値
-		BoneFrames:   NewBoneFrames(),
-		MorphFrames:  NewMorphFrames(),
-		CameraFrames: NewCameraFrames(),
-		LightFrames:  NewLightFrames(),
-		ShadowFrames: NewShadowFrames(),
-		IkFrames:     NewIkFrames(),
-		lock:         sync.Mutex{},
+		name:                "",
+		path:                path,
+		hash:                fmt.Sprintf("%d", rand.Intn(10000)), // 初期ハッシュ値
+		BoneFrames:          NewBoneFrames(),
+		MorphFrames:         NewMorphFrames(),
+		CameraFrames:        NewCameraFrames(),
+		LightFrames:         NewLightFrames(),
+		ShadowFrames:        NewShadowFrames(),
+		IkFrames:            NewIkFrames(),
+		MaxSubStepsFrames:   NewMaxSubStepsFrames(),
+		FixedTimeStepFrames: NewFixedTimeStepFrames(),
+		GravityFrames:       NewGravityFrames(),
+		PhysicsResetFrames:  NewPhysicsResetFrames(),
+		lock:                sync.Mutex{},
 	}
 }
 
@@ -141,6 +149,22 @@ func (motion *VmdMotion) AppendShadowFrame(sf *ShadowFrame) {
 
 func (motion *VmdMotion) AppendIkFrame(ikf *IkFrame) {
 	motion.IkFrames.Append(ikf)
+}
+
+func (motion *VmdMotion) AppendMaxSubStepsFrame(mf *MaxSubStepsFrame) {
+	motion.MaxSubStepsFrames.Append(mf)
+}
+
+func (motion *VmdMotion) AppendFixedTimeStepFrame(ff *FixedTimeStepFrame) {
+	motion.FixedTimeStepFrames.Append(ff)
+}
+
+func (motion *VmdMotion) AppendGravityFrame(gf *GravityFrame) {
+	motion.GravityFrames.Append(gf)
+}
+
+func (motion *VmdMotion) AppendPhysicsResetFrame(prf *PhysicsResetFrame) {
+	motion.PhysicsResetFrames.Append(prf)
 }
 
 func (motion *VmdMotion) InsertBoneFrame(boneName string, bf *BoneFrame) {

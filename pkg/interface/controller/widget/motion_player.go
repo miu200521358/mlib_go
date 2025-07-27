@@ -11,13 +11,15 @@ import (
 
 type MotionPlayer struct {
 	walk.WidgetBase
-	window        *controller.ControlWindow // メインウィンドウ
-	frameEdit     *walk.NumberEdit          // フレーム番号入力欄
-	frameSlider   *walk.Slider              // フレームスライダー
-	playButton    *walk.PushButton          // 一時停止ボタン
-	playingText   string                    // 再生中のテキスト
-	stoppedText   string                    // 停止中のテキスト
-	onTriggerPlay func(playing bool)        // 再生トリガー
+	window              *controller.ControlWindow // メインウィンドウ
+	frameEdit           *walk.NumberEdit          // フレーム番号入力欄
+	frameSlider         *walk.Slider              // フレームスライダー
+	playButton          *walk.PushButton          // 一時停止ボタン
+	playingText         string                    // 再生中のテキスト
+	stoppedText         string                    // 停止中のテキスト
+	onEnabledInPlaying  func(playing bool)        // 再生中に操作可能なウィジェットを有効化する
+	onChangePlayingPre  func(playing bool)        // 再生前に呼ばれるコールバック
+	onChangePlayingPost func(playing bool)        // 再生後に呼ばれるコールバック
 }
 
 func NewMotionPlayer() *MotionPlayer {
@@ -89,12 +91,6 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 				OnClicked: func() {
 					playing := !mp.window.Playing()
 					mp.SetPlaying(playing)
-
-					if mp.onTriggerPlay != nil {
-						mp.onTriggerPlay(playing)
-					}
-
-					mp.window.TriggerPhysicsReset()
 				},
 				ToolTipText:   mi18n.T("再生ボタン説明"),
 				StretchFactor: 2,
@@ -104,14 +100,11 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 }
 
 func (mp *MotionPlayer) Reset(maxFrame float32) {
-	oldMaxFrame := mp.window.MaxFrame()
-	newMaxFrame := max(oldMaxFrame, maxFrame)
-
 	mp.ChangeValue(0.0)
-	mp.frameEdit.SetRange(0, float64(newMaxFrame))
-	mp.frameSlider.SetRange(0, int(newMaxFrame))
+	mp.frameEdit.SetRange(0, float64(maxFrame))
+	mp.frameSlider.SetRange(0, int(maxFrame))
 	mp.window.SetFrame(0.0)
-	mp.window.SetMaxFrame(newMaxFrame)
+	mp.window.SetMaxFrame(maxFrame)
 }
 
 func (mp *MotionPlayer) SetValue(frame float32) {
@@ -144,8 +137,16 @@ func (mp *MotionPlayer) SetPlaying(playing bool) {
 		mp.playButton.SetText(mp.stoppedText)
 	}
 
+	// 再生前処理
+	mp.window.TriggerPhysicsReset()
+	mp.EnabledInPlaying(playing)
+	mp.OnChangePlayingPre(playing)
+
+	// 再生
 	mp.window.SetPlaying(playing)
-	mp.window.SetEnabledInPlaying(playing)
+
+	// 再生後処理
+	mp.OnChangePlayingPost(playing)
 
 	// 再生中のみ、Ticker で定期的にフレーム情報を監視・更新する
 	if playing {
@@ -167,5 +168,35 @@ func (mp *MotionPlayer) SetPlaying(playing bool) {
 				}
 			}
 		}()
+	}
+}
+
+func (mp *MotionPlayer) SetOnEnabledInPlaying(f func(playing bool)) {
+	mp.onEnabledInPlaying = f
+}
+
+func (mp *MotionPlayer) EnabledInPlaying(playing bool) {
+	if mp.onEnabledInPlaying != nil {
+		mp.onEnabledInPlaying(playing)
+	}
+}
+
+func (mp *MotionPlayer) SetOnChangePlayingPre(f func(playing bool)) {
+	mp.onChangePlayingPre = f
+}
+
+func (mp *MotionPlayer) OnChangePlayingPre(playing bool) {
+	if mp.onChangePlayingPre != nil {
+		mp.onChangePlayingPre(playing)
+	}
+}
+
+func (mp *MotionPlayer) SetOnChangePlayingPost(f func(playing bool)) {
+	mp.onChangePlayingPost = f
+}
+
+func (mp *MotionPlayer) OnChangePlayingPost(playing bool) {
+	if mp.onChangePlayingPost != nil {
+		mp.onChangePlayingPost(playing)
 	}
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
-	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
@@ -29,7 +28,9 @@ type ControlWindow struct {
 	tabWidget           *walk.TabWidget    // タブウィジェット
 	consoleView         *ConsoleView       // コンソールビュー
 	progressBar         *MProgressBar      // プログレスバー
-	setEnabledInPlaying func(playing bool) // 再生中に無効化するウィジェット
+	setEnabledInPlaying func(playing bool) // 再生中の有効化設定コールバック
+	onChangePlayingPre  func(playing bool) // 再生直前コールバック
+	onChangePlayingPost func(playing bool) // 再生直後コールバック
 
 	leftButtonPressed bool // 左ボタン押下フラグ
 
@@ -71,13 +72,11 @@ func NewControlWindow(
 	appConfig *mconfig.AppConfig,
 	helpMenuItems []declarative.MenuItem,
 	tabPages []declarative.TabPage,
-	setEnabledInPlaying func(enabled bool),
 	width, height, positionX, positionY, viewerCount int,
 ) (*ControlWindow, error) {
 	cw := &ControlWindow{
-		shared:              shared,
-		appConfig:           appConfig,
-		setEnabledInPlaying: setEnabledInPlaying,
+		shared:    shared,
+		appConfig: appConfig,
 	}
 
 	logMenuItems := []declarative.MenuItem{
@@ -674,24 +673,24 @@ func (cw *ControlWindow) SetEnabledInPlaying(enabled bool) {
 	cw.setEnabledInPlaying(enabled)
 }
 
-func (cw *ControlWindow) SetGravity(gravity *mmath.MVec3) {
-	cw.shared.SetGravity(gravity)
+func (cw *ControlWindow) SetOnChangePlayingPre(callback func(playing bool)) {
+	cw.onChangePlayingPre = callback
 }
 
-func (cw *ControlWindow) Gravity() *mmath.MVec3 {
-	return cw.shared.Gravity()
+func (cw *ControlWindow) SetOnChangePlayingPost(callback func(playing bool)) {
+	cw.onChangePlayingPost = callback
 }
 
-func (cw *ControlWindow) SetMaxSubSteps(maxSubSteps int) {
-	cw.shared.SetMaxSubSteps(maxSubSteps)
+func (cw *ControlWindow) OnChangePlayingPre(playing bool) {
+	if cw.onChangePlayingPre != nil {
+		cw.onChangePlayingPre(playing)
+	}
 }
 
-func (cw *ControlWindow) MaxSubSteps() int {
-	return cw.shared.MaxSubSteps()
-}
-
-func (cw *ControlWindow) SetFixedTimeStep(fixedTimeStep int) {
-	cw.shared.SetFixedTimeStep(fixedTimeStep)
+func (cw *ControlWindow) OnChangePlayingPost(playing bool) {
+	if cw.onChangePlayingPost != nil {
+		cw.onChangePlayingPost(playing)
+	}
 }
 
 func (cw *ControlWindow) SetSaveDelta(windowIndex int, isSave bool) {
@@ -715,6 +714,14 @@ func (cw *ControlWindow) SetCheckedFrameDropEnabled(enabled bool) {
 func (cw *ControlWindow) SetCheckedShowInfoEnabled(enabled bool) {
 	cw.showInfoAction.SetChecked(enabled)
 	cw.TriggerShowInfo()
+}
+
+func (cw *ControlWindow) StorePhysicsMotion(windowIndex int, physicsMotion *vmd.VmdMotion) {
+	cw.shared.StorePhysicsMotion(windowIndex, physicsMotion)
+}
+
+func (cw *ControlWindow) LoadPhysicsMotion(windowIndex int) *vmd.VmdMotion {
+	return cw.shared.LoadPhysicsMotion(windowIndex)
 }
 
 // ------- 以下、モデルやモーションの格納・取得メソッド -------
@@ -769,7 +776,12 @@ func (cw *ControlWindow) TriggerEnabledPhysics() {
 }
 
 func (cw *ControlWindow) TriggerPhysicsReset() {
-	cw.shared.SetPhysicsReset(true)
+	cw.shared.SetPhysicsReset(vmd.PHYSICS_RESET_TYPE_START_FRAME)
+}
+
+func (cw *ControlWindow) StorePhysicsReset(physicsType vmd.PhysicsResetType) {
+	// mlog.I("StorePhysicsReset: %d", physicsType)
+	cw.shared.SetPhysicsReset(physicsType)
 }
 
 func (cw *ControlWindow) TriggerFps30Limit() {

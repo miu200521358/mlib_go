@@ -5,10 +5,13 @@ package viewer
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
+	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
+	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/config/mproc"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
@@ -76,12 +79,11 @@ func (vl *ViewerList) InitOverride() {
 func (vl *ViewerList) Run() {
 	prevTime := glfw.GetTime()
 	prevShowTime := prevTime
+	isPrevPhysicsFitReset := false
 
 	elapsedList := make([]float64, 0, 1200)
 
 	for !vl.shared.IsClosed() {
-		isPhysicsReset := vl.shared.IsPhysicsReset()
-
 		// ウィンドウリンケージ処理
 		vl.handleWindowLinkage()
 
@@ -97,9 +99,16 @@ func (vl *ViewerList) Run() {
 		// フレームタイミング計算
 		frameTime := glfw.GetTime()
 		originalElapsed := frameTime - prevTime
+		if isPrevPhysicsFitReset {
+			// 物理リセット中はフレームタイミングを無視
+			originalElapsed = deformDefaultSpf
+			isPrevPhysicsFitReset = false
+		}
+
+		physicsResetType := vl.shared.PhysicsResetType()
 
 		// フレームレート制御と描画処理
-		if isRendered, timeStep := vl.processFrame(originalElapsed, isPhysicsReset); isRendered {
+		if isRendered, isPhysicsFitResetFrame, timeSteps := vl.processFrame(originalElapsed, physicsResetType); isRendered {
 			// 描画にかかった時間を計測
 			elapsedList = append(elapsedList, originalElapsed)
 
@@ -107,13 +116,14 @@ func (vl *ViewerList) Run() {
 			if vl.shared.IsShowInfo() {
 				currentTime := glfw.GetTime()
 				if currentTime-prevShowTime >= 1.0 {
-					vl.updateFpsDisplay(mmath.Mean(elapsedList), timeStep)
+					vl.updateFpsDisplay(mmath.Mean(elapsedList), float32(mmath.Mean(timeSteps)))
 					prevShowTime = currentTime
 					elapsedList = elapsedList[:0]
 				}
 			}
 
 			prevTime = frameTime
+			isPrevPhysicsFitReset = isPhysicsFitResetFrame
 		}
 	}
 
@@ -170,42 +180,67 @@ func (vl *ViewerList) handleWindowFocus() {
 }
 
 // processFrame フレーム処理ロジック
-func (vl *ViewerList) processFrame(originalElapsed float64, isPhysicsReset bool) (isRendered bool, timeStep float32) {
+func (vl *ViewerList) processFrame(
+	originalElapsed float64, physicsResetType vmd.PhysicsResetType,
+) (isRendered, isPhysicsFitReset bool, timeSteps []float32) {
 	var elapsed float32
+	frame := vl.shared.Frame()
 
-	if vl.shared.IsEnabledFrameDrop() || !vl.shared.Playing() {
-		// フレームドロップON (再生なし時は常にフレームドロップON)
-		// 物理fpsは経過時間
-		timeStep = float32(originalElapsed)
-		elapsed = float32(originalElapsed)
-	} else {
-		// フレームドロップOFF
-		// 物理fpsは固定時間ステップ
-		timeStep = vl.shared.FixedTimeStep()
-		// デフォームfpsはspf上限の経過時間
-		elapsed = float32(mmath.Clamped(originalElapsed, 0.0, deformDefaultSpf))
+	allRendering := make([]bool, len(vl.windowList))
+	timeSteps = make([]float32, len(vl.windowList))
+	physicsMotions := make([]*vmd.VmdMotion, len(vl.windowList))
+	for i := range vl.windowList {
+		physicsMotions[i] = vl.shared.LoadPhysicsMotion(i)
 	}
 
-	if vl.shared.FrameInterval() > 0 && elapsed < vl.shared.FrameInterval() {
-		// fps制限は描画fpsにのみ依存
+	isPhysicsFitReset = physicsResetType == vmd.PHYSICS_RESET_TYPE_START_FIT_FRAME
 
-		// 待機時間(残り時間の9割)
-		waitDuration := (vl.shared.FrameInterval() - elapsed) * 0.9
-
-		// waitDurationが1ms以上なら、1ms未満になるまで待つ
-		if waitDuration >= 0.001 {
-			// あえて1000倍にしないで900倍にしているのは、time.Durationの最大値を超えないため
-			time.Sleep(time.Duration(waitDuration*900) * time.Millisecond)
+	for i := range vl.windowList {
+		if vl.shared.IsEnabledFrameDrop() || !vl.shared.Playing() {
+			// フレームドロップON (再生なし時は常にフレームドロップON)
+			// 物理fpsは経過時間
+			timeSteps[i] = float32(originalElapsed)
+			elapsed = float32(originalElapsed)
+		} else {
+			// フレームドロップOFF
+			// 物理fpsは固定時間ステップ
+			timeSteps[i] = physicsMotions[i].FixedTimeStepFrames.Get(frame).FixedTimeStep()
+			// デフォームfpsはspf上限の経過時間
+			elapsed = float32(mmath.Clamped(originalElapsed, 0.0, deformDefaultSpf))
 		}
 
-		// 経過時間が1フレームの時間未満の場合はもう少し待つ
-		return false, timeStep
+		if vl.shared.FrameInterval() > 0 && elapsed < vl.shared.FrameInterval() {
+			// fps制限は描画fpsにのみ依存
+
+			// 待機時間(残り時間の9割)
+			waitDuration := (vl.shared.FrameInterval() - elapsed) * 0.9
+
+			// waitDurationが1ms以上なら、1ms未満になるまで待つ
+			if waitDuration >= 0.001 {
+				// あえて1000倍にしないで900倍にしているのは、time.Durationの最大値を超えないため
+				time.Sleep(time.Duration(waitDuration*900) * time.Millisecond)
+			}
+
+			// 経過時間が1フレームの時間未満の場合はもう少し待つ
+			allRendering[i] = false
+		} else {
+			allRendering[i] = true
+		}
 	}
 
-	for _, vw := range vl.windowList {
+	if !slices.Contains(allRendering, true) {
+		return false, false, timeSteps
+	}
+
+	for i, vw := range vl.windowList {
 		vw.loadMotions(vl.shared)
+
 		// デフォーム処理
-		vl.deform(vw, vw.motions, vl.shared.Frame(), timeStep, isPhysicsReset)
+		vl.deform(vw, vw.motions, frame, timeSteps[i],
+			physicsMotions[i].MaxSubStepsFrames.Get(frame).MaxSubSteps,
+			physicsMotions[i].FixedTimeStepFrames.Get(frame).FixedTimeStep(),
+			physicsResetType,
+		)
 	}
 
 	// レンダリング処理
@@ -214,41 +249,71 @@ func (vl *ViewerList) processFrame(originalElapsed float64, isPhysicsReset bool)
 		vl.windowList[n-1].render()
 	}
 
-	if isPhysicsReset {
-		// 物理リセット
-		for _, vw := range vl.windowList {
-			vl.resetPhysics(vw, isPhysicsReset)
-		}
+	// 物理リセット
+	if physicsResetType != vmd.PHYSICS_RESET_TYPE_NONE {
+		// mlog.I("[%0.2f] Physics reset type: %d", frame, physicsResetType)
 
-		// リセット完了
-		vl.shared.SetPhysicsReset(false)
+		for i, vw := range vl.windowList {
+			vl.resetPhysics(vw, frame,
+				physicsMotions[i].GravityFrames.Get(frame).Gravity,
+				physicsMotions[i].MaxSubStepsFrames.Get(frame).MaxSubSteps,
+				physicsMotions[i].FixedTimeStepFrames.Get(frame).FixedTimeStep(),
+				physicsResetType,
+			)
+		}
+		vl.shared.SetPhysicsReset(vmd.PHYSICS_RESET_TYPE_NONE)
 	}
 
 	// フレーム更新
 	if vl.shared.Playing() && !vl.shared.IsClosed() {
-		frame := vl.shared.Frame() + (elapsed * deformDefaultFps)
+		frame := vl.shared.Frame()
+
+		primaryPhysicsType := physicsMotions[0].PhysicsResetFrames.Get(frame).PhysicsResetType
+		if primaryPhysicsType == vmd.PHYSICS_RESET_TYPE_START_FIT_FRAME {
+			// 現在のフレームで物理フィットリセットがある場合、固定で進める
+			frame += 1
+		} else {
+			// 通常のフレーム進行
+			frame += (elapsed * deformDefaultFps)
+		}
+
 		if frame > vl.shared.MaxFrame() {
 			// フレームが最大フレームを超えた場合、かつ変形情報保存中はINDEXを増やす
 			for windowIndex, vw := range vl.windowList {
 				if vl.shared.IsSaveDelta(windowIndex) && vl.shared.MaxFrame() > 1.0 {
 					// 変形情報のインデックスを増やす
-					vl.shared.SetSaveDeltaIndex(vw.windowIndex, vw.list.shared.SaveDeltaIndex(vw.windowIndex)+1)
+					deltaIndex := vw.list.shared.SaveDeltaIndex(vw.windowIndex) + 1
+					vl.shared.SetSaveDeltaIndex(vw.windowIndex, deltaIndex)
+					mlog.IL(mi18n.T("焼き込み再生ループ再開: 焼き込み履歴INDEX[%d]"), deltaIndex+1)
+
+					// 物理リセット設定
+					vl.shared.SetPhysicsReset(max(
+						vmd.PHYSICS_RESET_TYPE_START_FIT_FRAME,
+						physicsMotions[windowIndex].PhysicsResetFrames.Get(0).PhysicsResetType))
+				} else {
+					// 物理リセットON
+					vl.shared.SetPhysicsReset(max(
+						vl.shared.PhysicsResetType(),
+						vmd.PHYSICS_RESET_TYPE_START_FRAME))
 				}
 			}
 
+			// フレームを0に戻す
 			frame = 0.0
-			// 物理リセットON
-			vl.shared.SetPhysicsReset(true)
 		}
+
 		vl.shared.SetFrame(frame)
 	}
 
-	return true, timeStep
+	return true, isPhysicsFitReset, timeSteps
 }
 
-func (vl *ViewerList) resetPhysics(vw *ViewWindow, isPhysicsReset bool) {
+func (vl *ViewerList) resetPhysics(
+	vw *ViewWindow, frame float32, gravity *mmath.MVec3, maxSubSteps int, fixedTimeStep float32,
+	physicsResetType vmd.PhysicsResetType,
+) {
 	// 物理リセット用のデフォーム処理
-	iterationFinishFrame, physicsResetMotions := vl.deformForReset(vw)
+	iterationFinishFrame, physicsResetMotions := vl.deformForReset(vw, frame, physicsResetType)
 
 	for _, model := range vw.modelRenderers {
 		if model == nil || model.Model == nil {
@@ -260,7 +325,6 @@ func (vl *ViewerList) resetPhysics(vw *ViewWindow, isPhysicsReset bool) {
 	}
 
 	// ワールド作り直し
-	gravity := vl.shared.Gravity()
 	vw.physics.ResetWorld(gravity)
 
 	for n, model := range vw.modelRenderers {
@@ -273,17 +337,26 @@ func (vl *ViewerList) resetPhysics(vw *ViewWindow, isPhysicsReset bool) {
 
 		// 物理再設定
 		vw.vmdDeltas[n] = deform.DeformForPhysics(
-			vl.shared,
 			vw.physics,
 			vw.modelRenderers[n].Model,
 			vw.vmdDeltas[n],
+			vl.shared.IsEnabledPhysics(),
+			physicsResetType,
 		)
 	}
 
-	// 物理リセット変形を適用（描画は変更しない）
-	if vw.list.shared.IsSaveDelta(vw.windowIndex) && vl.shared.IsEnabledPhysics() {
+	// 開始フレーム用物理リセット変形を適用（描画は変更しない）
+	if physicsResetType == vmd.PHYSICS_RESET_TYPE_START_FIT_FRAME {
 		for frame := float32(0); frame < iterationFinishFrame+physicsInitialFrame+10; frame++ {
-			vl.deform(vw, physicsResetMotions, frame, vl.shared.FixedTimeStep(), isPhysicsReset)
+			vl.deform(
+				vw,
+				physicsResetMotions,
+				frame,
+				fixedTimeStep,
+				maxSubSteps,
+				fixedTimeStep,
+				physicsResetType,
+			)
 
 			// // レンダリング処理
 			// for n := len(vl.windowList); n > 0; n-- {
@@ -294,33 +367,36 @@ func (vl *ViewerList) resetPhysics(vw *ViewWindow, isPhysicsReset bool) {
 	}
 }
 
-func (vl *ViewerList) deformForReset(vw *ViewWindow) (float32, []*vmd.VmdMotion) {
+func (vl *ViewerList) deformForReset(vw *ViewWindow, frame float32, physicsResetType vmd.PhysicsResetType) (float32, []*vmd.VmdMotion) {
 	vw.MakeContextCurrent()
 
 	vw.loadModelRenderers(vl.shared)
 	vw.loadMotions(vl.shared)
 
-	frame := vl.shared.Frame()
-
 	// 物理リセット変形用モーション
 	physicsResetMotions := make([]*vmd.VmdMotion, len(vw.modelRenderers))
 
-	if !(vw.list.shared.IsSaveDelta(vw.windowIndex) && vl.shared.IsEnabledPhysics()) {
-		// 焼き込みしない場合は、そのままデフォームして開始する
-
-		// デフォーム処理
-		for n := range vw.modelRenderers {
-			// 物理前変形
-			vw.vmdDeltas[n] = deform.DeformBeforePhysicsReset(
-				vw.modelRenderers[n].Model,
-				vw.motions[n],
-				vw.vmdDeltas[n],
-				frame,
-			)
-		}
-
-		return 0, physicsResetMotions
+	if physicsResetType == vmd.PHYSICS_RESET_TYPE_START_FIT_FRAME {
+		return vl.deformForResetFit(vw, frame, physicsResetMotions)
 	}
+
+	// デフォーム処理
+	for n := range vw.modelRenderers {
+		// 物理前変形
+		vw.vmdDeltas[n] = deform.DeformBeforePhysicsReset(
+			vw.modelRenderers[n].Model,
+			vw.motions[n],
+			vw.vmdDeltas[n],
+			frame,
+		)
+	}
+
+	return 0, physicsResetMotions
+}
+
+func (vl *ViewerList) deformForResetFit(
+	vw *ViewWindow, frame float32, physicsResetMotions []*vmd.VmdMotion,
+) (float32, []*vmd.VmdMotion) {
 
 	// モデルごとに0F目の変形量を保持
 	deformMaxTranslations := make([][]float64, len(vw.modelRenderers))
@@ -442,7 +518,14 @@ func (vl *ViewerList) deformForReset(vw *ViewWindow) (float32, []*vmd.VmdMotion)
 	return iterationFinishFrame, physicsResetMotions
 }
 
-func (vl *ViewerList) deform(vw *ViewWindow, motions []*vmd.VmdMotion, frame, timeStep float32, isPhysicsReset bool) {
+func (vl *ViewerList) deform(
+	vw *ViewWindow,
+	motions []*vmd.VmdMotion,
+	frame, timeStep float32,
+	maxSubSteps int,
+	fixedTimeStep float32,
+	physicsResetType vmd.PhysicsResetType,
+) {
 	vw.MakeContextCurrent()
 
 	vw.loadModelRenderers(vl.shared)
@@ -474,16 +557,21 @@ func (vl *ViewerList) deform(vw *ViewWindow, motions []*vmd.VmdMotion, frame, ti
 
 		// 物理変形のための事前処理
 		vw.vmdDeltas[n] = deform.DeformForPhysics(
-			vl.shared,
 			vw.physics,
 			vw.modelRenderers[n].Model,
 			vw.vmdDeltas[n],
+			vl.shared.IsEnabledPhysics(),
+			physicsResetType,
 		)
 	}
 
-	if vl.shared.IsEnabledPhysics() || isPhysicsReset {
+	if vl.shared.IsEnabledPhysics() || physicsResetType != vmd.PHYSICS_RESET_TYPE_NONE {
 		// 物理更新
-		vw.physics.StepSimulation(timeStep, vl.shared.MaxSubSteps(), vl.shared.FixedTimeStep())
+		vw.physics.StepSimulation(
+			timeStep,
+			maxSubSteps,
+			fixedTimeStep,
+		)
 	}
 
 	for n := range vw.modelRenderers {
@@ -501,7 +589,7 @@ func (vl *ViewerList) deform(vw *ViewWindow, motions []*vmd.VmdMotion, frame, ti
 			frame,
 		)
 
-		if vw.list.shared.IsSaveDelta(vw.windowIndex) && vl.shared.IsEnabledPhysics() && !isPhysicsReset {
+		if vw.list.shared.IsSaveDelta(vw.windowIndex) && physicsResetType == vmd.PHYSICS_RESET_TYPE_NONE {
 			// モデルのデフォーム更新
 			vw.saveDeltaMotions(frame)
 		}

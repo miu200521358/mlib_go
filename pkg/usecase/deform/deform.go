@@ -289,10 +289,11 @@ func DeformBeforePhysics(
 
 // DeformForPhysics 物理剛体位置を更新する
 func DeformForPhysics(
-	shared *state.SharedState,
 	physics physics.IPhysics,
 	model *pmx.PmxModel,
 	deltas *delta.VmdDeltas,
+	isEnabledPhysics bool,
+	physicsResetType vmd.PhysicsResetType,
 ) *delta.VmdDeltas {
 	if model == nil {
 		return deltas
@@ -310,8 +311,8 @@ func DeformForPhysics(
 			return nil
 		}
 
-		if (shared.IsEnabledPhysics() && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC) ||
-			shared.IsPhysicsReset() {
+		if (isEnabledPhysics && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC) ||
+			physicsResetType != vmd.PHYSICS_RESET_TYPE_NONE {
 			// 通常はボーン追従剛体・物理＋ボーン剛体だけ。物理リセット時は全部更新
 			physics.UpdateTransform(model.Index(), rigidBody.Bone,
 				deltas.Bones.Get(rigidBody.Bone.Index()).FilledGlobalMatrix(), rigidBody)
