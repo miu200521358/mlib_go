@@ -302,6 +302,11 @@ func (vl *ViewerList) processFrame(
 			frame = 0.0
 		}
 
+		// 物理リセット設定
+		vl.shared.SetPhysicsReset(max(
+			vl.shared.PhysicsResetType(),
+			physicsMotions[0].PhysicsResetFrames.Get(frame).PhysicsResetType))
+
 		vl.shared.SetFrame(frame)
 	}
 
