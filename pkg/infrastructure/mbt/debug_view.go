@@ -118,7 +118,7 @@ func (ddl *mDebugDrawLiner) renderLines() {
 }
 
 // DrawDebugLines は物理デバッグ情報を描画します
-func (physics *MPhysics) DrawDebugLines(
+func (mp *MPhysics) DrawDebugLines(
 	shader rendering.IShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool,
 ) {
 	if !(visibleRigidBody || visibleJoint) {
@@ -126,18 +126,18 @@ func (physics *MPhysics) DrawDebugLines(
 	}
 
 	// デバッグモードの設定
-	physics.configureDebugDrawMode(visibleRigidBody, visibleJoint)
+	mp.configureDebugDrawMode(visibleRigidBody, visibleJoint)
 
 	// デバッグ情報取得
-	physics.world.DebugDrawWorld()
+	mp.world.DebugDrawWorld()
 
 	// デバッグ描画
-	physics.liner.drawDebugLines(shader, isDrawRigidBodyFront)
+	mp.liner.drawDebugLines(shader, isDrawRigidBodyFront)
 }
 
 // configureDebugDrawMode はデバッグ描画モードを設定します
-func (physics *MPhysics) configureDebugDrawMode(visibleRigidBody, visibleJoint bool) {
-	debugMode := physics.world.GetDebugDrawer().GetDebugMode()
+func (mp *MPhysics) configureDebugDrawMode(visibleRigidBody, visibleJoint bool) {
+	debugMode := mp.world.GetDebugDrawer().GetDebugMode()
 
 	if visibleRigidBody {
 		debugMode |= int(bt.BtIDebugDrawDBG_DrawWireframe | bt.BtIDebugDrawDBG_DrawContactPoints)
@@ -151,5 +151,5 @@ func (physics *MPhysics) configureDebugDrawMode(visibleRigidBody, visibleJoint b
 		debugMode &= ^int(bt.BtIDebugDrawDBG_DrawConstraints | bt.BtIDebugDrawDBG_DrawConstraintLimits)
 	}
 
-	physics.world.GetDebugDrawer().SetDebugMode(debugMode)
+	mp.world.GetDebugDrawer().SetDebugMode(debugMode)
 }

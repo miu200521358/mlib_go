@@ -17,54 +17,60 @@ type jointValue struct {
 }
 
 // initJoints はモデルのジョイントを初期化します
-func (physics *MPhysics) initJoints(modelIndex int, rigidBodies *pmx.RigidBodies, j *pmx.Joints) {
+func (mp *MPhysics) initJoints(modelIndex int, rigidBodies *pmx.RigidBodies, j *pmx.Joints) {
 	// ジョイントを順番に剛体と紐付けていく
-	physics.joints[modelIndex] = make([]*jointValue, j.Length())
+	mp.joints[modelIndex] = make([]*jointValue, j.Length())
 	j.ForEach(func(index int, joint *pmx.Joint) bool {
 		if rigidBodies.Contains(joint.RigidbodyIndexA) && rigidBodies.Contains(joint.RigidbodyIndexB) {
 			// ジョイントの位置と向き
 			jointTransform := bt.NewBtTransform(newBulletFromRad(joint.Rotation), newBulletFromVec(joint.Position))
 
-			physics.initJoint(modelIndex, joint, jointTransform)
+			mp.initJoint(modelIndex, joint, jointTransform, nil)
 		}
 		return true
 	})
 }
 
 // initJointsByBoneDeltas はボーンデルタ情報を使用してジョイントを初期化します
-func (physics *MPhysics) initJointsByBoneDeltas(
-	modelIndex int, rigidBodies *pmx.RigidBodies, j *pmx.Joints, boneDeltas *delta.BoneDeltas,
+func (mp *MPhysics) initJointsByBoneDeltas(
+	modelIndex int, rigidBodies *pmx.RigidBodies, j *pmx.Joints,
+	boneDeltas *delta.BoneDeltas, jointDeltas *delta.JointDeltas,
 ) {
 	// ジョイントを順番に剛体と紐付けていく
-	physics.joints[modelIndex] = make([]*jointValue, j.Length())
+	mp.joints[modelIndex] = make([]*jointValue, j.Length())
 	j.ForEach(func(index int, joint *pmx.Joint) bool {
-		if !physics.canCreateJoint(joint, rigidBodies) {
+		if !mp.canCreateJoint(joint, rigidBodies) {
 			return true
 		}
 
 		// ボーン情報の取得
-		bone := physics.findReferenceBone(joint, rigidBodies)
+		bone := mp.findReferenceBone(joint, rigidBodies)
 		if bone == nil || !boneDeltas.Contains(bone.Index()) {
 			return true
 		}
 
 		// ジョイントのグローバル変換を計算
-		jointTransform := physics.calculateJointTransform(joint, bone, boneDeltas)
+		jointTransform := mp.calculateJointTransform(joint, bone, boneDeltas)
+
+		var jointDelta *delta.JointDelta
+		if jointDeltas != nil {
+			jointDelta = jointDeltas.Get(joint.Index())
+		}
 
 		// ジョイント初期化
-		physics.initJoint(modelIndex, joint, jointTransform)
+		mp.initJoint(modelIndex, joint, jointTransform, jointDelta)
 
 		return true
 	})
 }
 
 // canCreateJoint はジョイントが作成可能かチェックします
-func (physics *MPhysics) canCreateJoint(joint *pmx.Joint, rigidBodies *pmx.RigidBodies) bool {
+func (mp *MPhysics) canCreateJoint(joint *pmx.Joint, rigidBodies *pmx.RigidBodies) bool {
 	return rigidBodies.Contains(joint.RigidbodyIndexA) && rigidBodies.Contains(joint.RigidbodyIndexB)
 }
 
 // findReferenceBone はジョイントの参照ボーンを検索します
-func (physics *MPhysics) findReferenceBone(joint *pmx.Joint, rigidBodies *pmx.RigidBodies) *pmx.Bone {
+func (mp *MPhysics) findReferenceBone(joint *pmx.Joint, rigidBodies *pmx.RigidBodies) *pmx.Bone {
 	// 剛体AまたはBに関連するボーンを検索
 	if rb, err := rigidBodies.Get(joint.RigidbodyIndexA); err == nil {
 		if rb.Bone != nil {
@@ -82,7 +88,7 @@ func (physics *MPhysics) findReferenceBone(joint *pmx.Joint, rigidBodies *pmx.Ri
 }
 
 // calculateJointTransform はジョイントの変換行列を計算します
-func (physics *MPhysics) calculateJointTransform(
+func (mp *MPhysics) calculateJointTransform(
 	joint *pmx.Joint, bone *pmx.Bone, boneDeltas *delta.BoneDeltas,
 ) bt.BtTransform {
 	jointTransform := bt.NewBtTransform()
@@ -107,45 +113,46 @@ func (physics *MPhysics) calculateJointTransform(
 }
 
 // initJoint は個別のジョイントを初期化します
-func (physics *MPhysics) initJoint(
+func (mp *MPhysics) initJoint(
 	modelIndex int, joint *pmx.Joint, jointTransform bt.BtTransform,
+	jointDelta *delta.JointDelta,
 ) {
 	// 関連する剛体が存在するか確認
-	if !physics.validateJointRigidBodies(modelIndex, joint) {
+	if !mp.validateJointRigidBodies(modelIndex, joint) {
 		return
 	}
 
 	// 剛体の取得
-	rigidBodyB := physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody
-	btRigidBodyA := physics.rigidBodies[modelIndex][joint.RigidbodyIndexA].btRigidBody
-	btRigidBodyB := physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].btRigidBody
+	rigidBodyB := mp.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody
+	btRigidBodyA := mp.rigidBodies[modelIndex][joint.RigidbodyIndexA].btRigidBody
+	btRigidBodyB := mp.rigidBodies[modelIndex][joint.RigidbodyIndexB].btRigidBody
 
 	// 剛体ローカル座標系におけるジョイント変換を計算
-	jointLocalTransforms := physics.calculateJointLocalTransforms(btRigidBodyA, btRigidBodyB, jointTransform)
+	jointLocalTransforms := mp.calculateJointLocalTransforms(btRigidBodyA, btRigidBodyB, jointTransform)
 	jointLocalTransformA := jointLocalTransforms[0]
 	jointLocalTransformB := jointLocalTransforms[1]
 
 	// ジョイント拘束の作成
-	constraint := physics.createJointConstraint(btRigidBodyA, btRigidBodyB, jointLocalTransformA, jointLocalTransformB)
+	constraint := mp.createJointConstraint(btRigidBodyA, btRigidBodyB, jointLocalTransformA, jointLocalTransformB)
 
 	// ジョイントのパラメータ設定
-	physics.configureJointConstraint(constraint, joint, rigidBodyB)
+	mp.configureJointConstraint(constraint, joint, rigidBodyB, jointDelta)
 
 	// 物理ワールドにジョイントを追加
-	physics.world.AddConstraint(constraint)
-	physics.joints[modelIndex][joint.Index()] = &jointValue{pmxJoint: joint, btJoint: constraint}
+	mp.world.AddConstraint(constraint)
+	mp.joints[modelIndex][joint.Index()] = &jointValue{pmxJoint: joint, btJoint: constraint}
 }
 
 // validateJointRigidBodies はジョイントに関連する剛体が有効か検証します
-func (physics *MPhysics) validateJointRigidBodies(modelIndex int, joint *pmx.Joint) bool {
-	return physics.rigidBodies[modelIndex][joint.RigidbodyIndexB] != nil &&
-		physics.rigidBodies[modelIndex][joint.RigidbodyIndexA] != nil &&
-		physics.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody != nil &&
-		physics.rigidBodies[modelIndex][joint.RigidbodyIndexA].pmxRigidBody != nil
+func (mp *MPhysics) validateJointRigidBodies(modelIndex int, joint *pmx.Joint) bool {
+	return mp.rigidBodies[modelIndex][joint.RigidbodyIndexB] != nil &&
+		mp.rigidBodies[modelIndex][joint.RigidbodyIndexA] != nil &&
+		mp.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody != nil &&
+		mp.rigidBodies[modelIndex][joint.RigidbodyIndexA].pmxRigidBody != nil
 }
 
 // calculateJointLocalTransforms は剛体のローカル座標系におけるジョイント変換を計算します
-func (physics *MPhysics) calculateJointLocalTransforms(
+func (mp *MPhysics) calculateJointLocalTransforms(
 	btRigidBodyA bt.BtRigidBody,
 	btRigidBodyB bt.BtRigidBody,
 	jointTransform bt.BtTransform,
@@ -166,7 +173,7 @@ func (physics *MPhysics) calculateJointLocalTransforms(
 }
 
 // createJointConstraint はジョイント拘束を作成します
-func (physics *MPhysics) createJointConstraint(
+func (mp *MPhysics) createJointConstraint(
 	btRigidBodyA bt.BtRigidBody,
 	btRigidBodyB bt.BtRigidBody,
 	jointLocalTransformA bt.BtTransform,
@@ -177,11 +184,21 @@ func (physics *MPhysics) createJointConstraint(
 }
 
 // configureJointConstraint はジョイント拘束のパラメータを設定します
-func (physics *MPhysics) configureJointConstraint(
+func (mp *MPhysics) configureJointConstraint(
 	constraint bt.BtGeneric6DofSpringConstraint,
 	joint *pmx.Joint,
 	rigidBodyB *pmx.RigidBody,
+	jointDelta *delta.JointDelta,
 ) {
+	var rotationLimitMin, rotationLimitMax *mmath.MVec3
+	if jointDelta == nil {
+		rotationLimitMin = joint.JointParam.RotationLimitMin.Copy()
+		rotationLimitMax = joint.JointParam.RotationLimitMax.Copy()
+	} else {
+		rotationLimitMin = jointDelta.RotationLimitMin.Copy()
+		rotationLimitMax = jointDelta.RotationLimitMax.Copy()
+	}
+
 	// 平行移動制限設定
 	constraint.SetLinearLowerLimit(bt.NewBtVector3(
 		float32(joint.JointParam.TranslationLimitMin.X),
@@ -194,27 +211,35 @@ func (physics *MPhysics) configureJointConstraint(
 
 	// 回転制限設定
 	constraint.SetAngularLowerLimit(bt.NewBtVector3(
-		float32(joint.JointParam.RotationLimitMin.X),
-		float32(joint.JointParam.RotationLimitMin.Y),
-		float32(joint.JointParam.RotationLimitMin.Z)))
+		float32(rotationLimitMin.X),
+		float32(rotationLimitMin.Y),
+		float32(rotationLimitMin.Z)))
 	constraint.SetAngularUpperLimit(bt.NewBtVector3(
-		float32(joint.JointParam.RotationLimitMax.X),
-		float32(joint.JointParam.RotationLimitMax.Y),
-		float32(joint.JointParam.RotationLimitMax.Z)))
+		float32(rotationLimitMax.X),
+		float32(rotationLimitMax.Y),
+		float32(rotationLimitMax.Z)))
 
 	// バネパラメータ設定
-	physics.configureJointSprings(constraint, joint, rigidBodyB)
+	mp.configureJointSprings(constraint, joint, rigidBodyB, jointDelta)
 
 	// 基本パラメータ設定
-	physics.configureBasicJointParams(constraint)
+	mp.configureBasicJointParams(constraint)
 }
 
 // configureJointSprings はジョイントのバネパラメータを設定します
-func (physics *MPhysics) configureJointSprings(
+func (mp *MPhysics) configureJointSprings(
 	constraint bt.BtGeneric6DofSpringConstraint,
 	joint *pmx.Joint,
 	rigidBodyB *pmx.RigidBody,
+	jointDelta *delta.JointDelta,
 ) {
+	var springConstantRotation *mmath.MVec3
+	if jointDelta == nil {
+		springConstantRotation = joint.JointParam.SpringConstantRotation.Copy()
+	} else {
+		springConstantRotation = jointDelta.SpringConstantRotation.Copy()
+	}
+
 	if rigidBodyB.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
 		// 剛体Bがボーン追従剛体の場合は、バネの値を設定しない
 		// 平行移動バネ設定
@@ -227,16 +252,16 @@ func (physics *MPhysics) configureJointSprings(
 
 		// 回転バネ設定
 		constraint.EnableSpring(3, true)
-		constraint.SetStiffness(3, float32(joint.JointParam.SpringConstantRotation.X))
+		constraint.SetStiffness(3, float32(springConstantRotation.X))
 		constraint.EnableSpring(4, true)
-		constraint.SetStiffness(4, float32(joint.JointParam.SpringConstantRotation.Y))
+		constraint.SetStiffness(4, float32(springConstantRotation.Y))
 		constraint.EnableSpring(5, true)
-		constraint.SetStiffness(5, float32(joint.JointParam.SpringConstantRotation.Z))
+		constraint.SetStiffness(5, float32(springConstantRotation.Z))
 	}
 }
 
 // configureBasicJointParams はジョイントの基本パラメータを設定します
-func (physics *MPhysics) configureBasicJointParams(constraint bt.BtTypedConstraint) {
+func (mp *MPhysics) configureBasicJointParams(constraint bt.BtTypedConstraint) {
 	constraint.SetParam(int(bt.BT_CONSTRAINT_ERP), float32(0.5), 0)
 	constraint.SetParam(int(bt.BT_CONSTRAINT_STOP_ERP), float32(0.5), 0)
 	constraint.SetParam(int(bt.BT_CONSTRAINT_CFM), float32(0.1), 0)
@@ -250,13 +275,13 @@ func (physics *MPhysics) configureBasicJointParams(constraint bt.BtTypedConstrai
 }
 
 // deleteJoints はモデルの全ジョイントを削除します
-func (physics *MPhysics) deleteJoints(modelIndex int) {
-	for _, j := range physics.joints[modelIndex] {
+func (mp *MPhysics) deleteJoints(modelIndex int) {
+	for _, j := range mp.joints[modelIndex] {
 		if j == nil || j.btJoint == nil {
 			continue
 		}
-		physics.world.RemoveConstraint(j.btJoint)
+		mp.world.RemoveConstraint(j.btJoint)
 		bt.DeleteBtTypedConstraint(j.btJoint)
 	}
-	physics.joints[modelIndex] = nil
+	mp.joints[modelIndex] = nil
 }

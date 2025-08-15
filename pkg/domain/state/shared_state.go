@@ -35,7 +35,8 @@ type SharedState struct {
 	saveDeltas                 []atomic.Bool      // 変形情報保存フラグ
 	saveDeltaIndexes           []atomic.Int32     // 変形情報のインデックス
 	deltaMotions               [][][]atomic.Value // 変形情報の保存(ウィンドウ/モデルインデックス/モーションインデックス)
-	physicsMotions             []atomic.Value     // 物理モーションデータ(ウィンドウ)
+	physicsWorldMotions        []atomic.Value     // 物理ワールド用モーションデータ(ウィンドウ)
+	physicsModelMotions        [][]atomic.Value   // 物理モデル用モーションデータ(ウィンドウ)
 	physicsResetType           atomic.Int32       // 物理リセットの種類
 }
 
@@ -52,7 +53,8 @@ func NewSharedState(viewerCount int) *SharedState {
 		saveDeltas:              make([]atomic.Bool, viewerCount),
 		saveDeltaIndexes:        make([]atomic.Int32, viewerCount),
 		deltaMotions:            make([][][]atomic.Value, viewerCount),
-		physicsMotions:          make([]atomic.Value, viewerCount),
+		physicsWorldMotions:     make([]atomic.Value, viewerCount),
+		physicsModelMotions:     make([][]atomic.Value, viewerCount),
 	}
 
 	shared.SetFrame(0)
@@ -68,7 +70,7 @@ func NewSharedState(viewerCount int) *SharedState {
 	shared.SetClosed(false)
 
 	for i := range viewerCount {
-		shared.StorePhysicsMotion(i, nil)
+		shared.StorePhysicsWorldMotion(i, nil)
 	}
 
 	return shared
@@ -123,12 +125,15 @@ func (ss *SharedState) StoreModel(windowIndex, modelIndex int, model *pmx.PmxMod
 	for modelIndex >= len(ss.models[windowIndex]) {
 		ss.models[windowIndex] = append(ss.models[windowIndex], atomic.Value{})
 		ss.selectedMaterialIndexes[windowIndex] = append(ss.selectedMaterialIndexes[windowIndex], atomic.Value{})
+		ss.physicsModelMotions[windowIndex] = append(ss.physicsModelMotions[windowIndex], atomic.Value{})
 	}
 	ss.models[windowIndex][modelIndex].Store(model)
 	if model != nil {
 		ss.selectedMaterialIndexes[windowIndex][modelIndex].Store(model.Materials.Indexes())
+		ss.physicsModelMotions[windowIndex][modelIndex].Store(vmd.NewVmdMotion(""))
 	} else {
 		ss.selectedMaterialIndexes[windowIndex][modelIndex].Store([]int{})
+		ss.physicsModelMotions[windowIndex][modelIndex].Store(nil)
 	}
 }
 
@@ -239,32 +244,65 @@ func (ss *SharedState) UpdateFlags(changes map[uint32]bool) {
 }
 
 // StoreMotion は指定されたウィンドウとモデルインデックスにモーションを格納
-func (ss *SharedState) StorePhysicsMotion(windowIndex int, motion *vmd.VmdMotion) {
-	if len(ss.physicsMotions) <= windowIndex {
+func (ss *SharedState) StorePhysicsWorldMotion(windowIndex int, motion *vmd.VmdMotion) {
+	if len(ss.physicsWorldMotions) <= windowIndex {
 		return
 	}
 
 	if motion != nil {
-		ss.physicsMotions[windowIndex].Store(motion)
+		ss.physicsWorldMotions[windowIndex].Store(motion)
 	} else {
 		physicsMotion := vmd.NewVmdMotion("")
 		physicsMotion.AppendGravityFrame(vmd.NewGravityFrameByValue(0, &mmath.MVec3{X: 0, Y: -9.8, Z: 0}))
 		physicsMotion.AppendMaxSubStepsFrame(vmd.NewMaxSubStepsFrameByValue(0, 2))
 		physicsMotion.AppendFixedTimeStepFrame(vmd.NewFixedTimeStepFrameByValue(0, 60.0))
-		ss.physicsMotions[windowIndex].Store(physicsMotion)
+		ss.physicsWorldMotions[windowIndex].Store(physicsMotion)
 	}
 }
 
 // LoadMotion は指定されたウィンドウとモデルインデックスのモーションを取得
-func (ss *SharedState) LoadPhysicsMotion(windowIndex int) *vmd.VmdMotion {
-	if len(ss.physicsMotions) <= windowIndex {
+func (ss *SharedState) LoadPhysicsWorldMotion(windowIndex int) *vmd.VmdMotion {
+	if len(ss.physicsWorldMotions) <= windowIndex {
 		return nil
 	}
 
-	v := ss.physicsMotions[windowIndex].Load()
+	v := ss.physicsWorldMotions[windowIndex].Load()
 	if v == nil {
-		ss.StorePhysicsMotion(windowIndex, nil)
-		return ss.LoadPhysicsMotion(windowIndex)
+		ss.StorePhysicsWorldMotion(windowIndex, nil)
+		return ss.LoadPhysicsWorldMotion(windowIndex)
+	}
+
+	return v.(*vmd.VmdMotion)
+}
+
+// StorePhysicsModelMotion は指定されたウィンドウとモデルインデックスに物理モデル用モーションを格納
+func (ss *SharedState) StorePhysicsModelMotion(windowIndex, modelIndex int, physicsMotion *vmd.VmdMotion) {
+	if len(ss.physicsModelMotions) <= windowIndex {
+		return
+	}
+	for modelIndex >= len(ss.physicsModelMotions[windowIndex]) {
+		ss.physicsModelMotions[windowIndex] = append(ss.physicsModelMotions[windowIndex], atomic.Value{})
+	}
+	if physicsMotion != nil {
+		ss.physicsModelMotions[windowIndex][modelIndex].Store(physicsMotion)
+	} else {
+		ss.physicsModelMotions[windowIndex][modelIndex].Store(nil)
+	}
+}
+
+// LoadPhysicsModelMotion は指定されたウィンドウとモデルインデックスの物理モデル用モーションを取得
+func (ss *SharedState) LoadPhysicsModelMotion(windowIndex, modelIndex int) *vmd.VmdMotion {
+	if len(ss.physicsModelMotions) <= windowIndex {
+		return nil
+	}
+	if len(ss.physicsModelMotions[windowIndex]) <= modelIndex {
+		return nil
+	}
+
+	v := ss.physicsModelMotions[windowIndex][modelIndex].Load()
+	if v == nil {
+		ss.StorePhysicsModelMotion(windowIndex, modelIndex, nil)
+		return ss.LoadPhysicsModelMotion(windowIndex, modelIndex)
 	}
 
 	return v.(*vmd.VmdMotion)

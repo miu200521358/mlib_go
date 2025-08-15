@@ -1,0 +1,52 @@
+package vmd
+
+import (
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/tiendc/go-deepcopy"
+)
+
+type RigidBodyFrame struct {
+	*BaseFrame              // キーフレ
+	Size       *mmath.MVec3 // サイズ
+	Mass       float64      // 質量
+}
+
+func NewRigidBodyFrame(index float32) *RigidBodyFrame {
+	return &RigidBodyFrame{
+		BaseFrame: NewFrame(index).(*BaseFrame),
+		Size:      &mmath.MVec3{X: 1, Y: 1, Z: 1}, // デフォルトサイズ
+		Mass:      1.0,                            // デフォルト質量
+	}
+}
+
+func NewRigidBodyFrameByValues(index float32, size *mmath.MVec3, mass float64) *RigidBodyFrame {
+	return &RigidBodyFrame{
+		BaseFrame: NewFrame(index).(*BaseFrame),
+		Size:      size, // サイズ
+		Mass:      mass, // 質量
+	}
+}
+
+func (mf *RigidBodyFrame) Copy() IBaseFrame {
+	copied := new(RigidBodyFrame)
+	deepcopy.Copy(mf, copied)
+	return copied
+}
+
+func (nextMf *RigidBodyFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFrame {
+	prevMf := prevFrame.(*RigidBodyFrame)
+
+	prevIndex := prevMf.Index()
+	nextIndex := nextMf.Index()
+
+	mf := NewRigidBodyFrame(index)
+
+	ry := float64(index-prevIndex) / float64(nextIndex-prevIndex)
+	mf.Size = prevMf.Size.Lerp(nextMf.Size, ry)
+	mf.Mass = mmath.Lerp(prevMf.Mass, nextMf.Mass, ry)
+
+	return mf
+}
+
+func (mf *RigidBodyFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float32) {
+}

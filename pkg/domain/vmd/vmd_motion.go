@@ -26,7 +26,9 @@ type VmdMotion struct {
 	FixedTimeStepFrames *FixedTimeStepFrames
 	GravityFrames       *GravityFrames
 	PhysicsResetFrames  *PhysicsResetFrames
-	lock                sync.Mutex // スレッドセーフ用のロック
+	RigidBodyFrames     *RigidBodyFrames // 物理演算用の剛体フレーム
+	JointFrames         *JointFrames     // 物理演算用のジョイントフレーム
+	lock                sync.Mutex       // スレッドセーフ用のロック
 }
 
 var InitialMotion = NewVmdMotion("")
@@ -46,6 +48,8 @@ func NewVmdMotion(path string) *VmdMotion {
 		FixedTimeStepFrames: NewFixedTimeStepFrames(),
 		GravityFrames:       NewGravityFrames(),
 		PhysicsResetFrames:  NewPhysicsResetFrames(),
+		RigidBodyFrames:     NewRigidBodyFrames(),
+		JointFrames:         NewJointFrames(),
 		lock:                sync.Mutex{},
 	}
 }
@@ -165,6 +169,14 @@ func (motion *VmdMotion) AppendGravityFrame(gf *GravityFrame) {
 
 func (motion *VmdMotion) AppendPhysicsResetFrame(prf *PhysicsResetFrame) {
 	motion.PhysicsResetFrames.Append(prf)
+}
+
+func (motion *VmdMotion) AppendRigidBodyFrame(rigidBodyName string, rbf *RigidBodyFrame) {
+	motion.RigidBodyFrames.Get(rigidBodyName).Append(rbf)
+}
+
+func (motion *VmdMotion) AppendJointFrame(jointName string, jf *JointFrame) {
+	motion.JointFrames.Get(jointName).Append(jf)
 }
 
 func (motion *VmdMotion) InsertBoneFrame(boneName string, bf *BoneFrame) {

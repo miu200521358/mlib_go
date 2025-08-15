@@ -82,7 +82,7 @@ func newViewWindow(
 	}
 
 	gl.Viewport(0, 0, int32(width), int32(height))
-	gravity := list.shared.LoadPhysicsMotion(windowIndex).GravityFrames.Get(0).Gravity
+	gravity := list.shared.LoadPhysicsWorldMotion(windowIndex).GravityFrames.Get(0).Gravity
 
 	vw := &ViewWindow{
 		Window:         glWindow,

@@ -111,6 +111,10 @@ func (baseFrames *BaseFrames[T]) Get(frame float32) T {
 		}
 
 		copied := baseFrames.Get(baseFrames.MaxFrame()).Copy()
+		if copied == nil {
+			// 空のキーフレを返す
+			return baseFrames.newFunc(frame)
+		}
 		copied.SetIndex(frame)
 		return copied.(T)
 	}

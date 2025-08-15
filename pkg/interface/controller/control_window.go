@@ -716,12 +716,20 @@ func (cw *ControlWindow) SetCheckedShowInfoEnabled(enabled bool) {
 	cw.TriggerShowInfo()
 }
 
-func (cw *ControlWindow) StorePhysicsMotion(windowIndex int, physicsMotion *vmd.VmdMotion) {
-	cw.shared.StorePhysicsMotion(windowIndex, physicsMotion)
+func (cw *ControlWindow) StorePhysicsWorldMotion(windowIndex int, physicsMotion *vmd.VmdMotion) {
+	cw.shared.StorePhysicsWorldMotion(windowIndex, physicsMotion)
 }
 
-func (cw *ControlWindow) LoadPhysicsMotion(windowIndex int) *vmd.VmdMotion {
-	return cw.shared.LoadPhysicsMotion(windowIndex)
+func (cw *ControlWindow) LoadPhysicsWorldMotion(windowIndex int) *vmd.VmdMotion {
+	return cw.shared.LoadPhysicsWorldMotion(windowIndex)
+}
+
+func (cw *ControlWindow) StorePhysicsModelMotion(windowIndex int, modelIndex int, physicsMotion *vmd.VmdMotion) {
+	cw.shared.StorePhysicsModelMotion(windowIndex, modelIndex, physicsMotion)
+}
+
+func (cw *ControlWindow) LoadPhysicsModelMotion(windowIndex int, modelIndex int) *vmd.VmdMotion {
+	return cw.shared.LoadPhysicsModelMotion(windowIndex, modelIndex)
 }
 
 // ------- 以下、モデルやモーションの格納・取得メソッド -------
