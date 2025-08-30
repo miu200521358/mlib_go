@@ -109,6 +109,8 @@ const (
 	CATEGORY_TWIST BoneCategory = iota
 	// 頭
 	CATEGORY_HEAD BoneCategory = iota
+	// 目
+	CATEGORY_EYE BoneCategory = iota
 	// フィッティングの時に移動だけさせるか
 	CATEGORY_FITTING_ONLY_MOVE BoneCategory = iota
 )
@@ -383,7 +385,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 			EYES: {
 				ParentBoneNames:  []StandardBoneName{HEAD},
 				ChildBoneNames:   [][]StandardBoneName{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD, CATEGORY_EYE},
 				DisplaySlot:      HEAD,
 				BoundingBoxShape: SHAPE_NONE,
 				IsStandard:       true,
@@ -391,7 +393,7 @@ func GetStandardBoneConfigs() map[StandardBoneName]*BoneConfig {
 			EYE: {
 				ParentBoneNames:  []StandardBoneName{HEAD},
 				ChildBoneNames:   [][]StandardBoneName{},
-				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD},
+				Categories:       []BoneCategory{CATEGORY_UPPER, CATEGORY_HEAD, CATEGORY_EYE},
 				DisplaySlot:      HEAD,
 				BoundingBoxShape: SHAPE_SPHERE,
 				IsStandard:       true,
@@ -877,4 +879,16 @@ func (c *BoneConfig) IsFinger() bool {
 
 func (c *BoneConfig) IsArm() bool {
 	return slices.Contains(c.Categories, CATEGORY_ARM)
+}
+
+func (c *BoneConfig) IsLegD() bool {
+	return slices.Contains(c.Categories, CATEGORY_LEG_D)
+}
+
+func (c *BoneConfig) IsEye() bool {
+	return slices.Contains(c.Categories, CATEGORY_EYE)
+}
+
+func (c *BoneConfig) IsRoot() bool {
+	return c.Abbreviation == StandardBoneName("全")
 }
