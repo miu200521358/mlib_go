@@ -133,7 +133,7 @@ func (ss *SharedState) StoreModel(windowIndex, modelIndex int, model *pmx.PmxMod
 		ss.physicsModelMotions[windowIndex][modelIndex].Store(vmd.NewVmdMotion(""))
 	} else {
 		ss.selectedMaterialIndexes[windowIndex][modelIndex].Store([]int{})
-		ss.physicsModelMotions[windowIndex][modelIndex].Store(nil)
+		ss.physicsModelMotions[windowIndex][modelIndex].Store(vmd.NewVmdMotion(""))
 	}
 }
 
