@@ -382,6 +382,7 @@ func (vw *ViewWindow) saveDeltaMotions(frame float32) {
 			bf := vmd.NewBoneFrame(frame)
 			bf.Position = value.FramePosition
 			bf.Rotation = value.FrameRotation
+			bf.UnitRotation = value.FilledUnitMatrix().Quaternion() // (モーフ含む)トータル回転も保存
 			deltaMotion.AppendBoneFrame(value.Bone.Name(), bf)
 
 			return true // 続行

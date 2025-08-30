@@ -12,6 +12,7 @@ type BoneFrame struct {
 	CancelablePosition *mmath.MVec3       // 親キャンセル位置
 	Rotation           *mmath.MQuaternion // 回転
 	CancelableRotation *mmath.MQuaternion // 親キャンセル回転
+	UnitRotation       *mmath.MQuaternion // このボーン単体のトータル回転
 	Curves             *BoneCurves        // 補間曲線
 	DisablePhysics     bool               // 物理演算を無効にするかどうか
 }
@@ -34,6 +35,13 @@ func (bf *BoneFrame) FilledRotation() *mmath.MQuaternion {
 		bf.Rotation = mmath.NewMQuaternion()
 	}
 	return bf.Rotation
+}
+
+func (bf *BoneFrame) FilledUnitRotation() *mmath.MQuaternion {
+	if bf.UnitRotation == nil {
+		bf.UnitRotation = mmath.NewMQuaternion()
+	}
+	return bf.UnitRotation
 }
 
 func (bf *BoneFrame) Add(v *BoneFrame) *BoneFrame {
@@ -156,6 +164,23 @@ func (nextBf *BoneFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFra
 		bf.Rotation = prevRotation.Copy()
 	} else {
 		bf.Rotation = prevRotation.Slerp(nextRotation, ry)
+	}
+
+	var prevUnitRotation, nextUnitRotation *mmath.MQuaternion
+	if prevBf.UnitRotation != nil {
+		prevUnitRotation = prevBf.UnitRotation
+	}
+	if nextBf.UnitRotation != nil {
+		nextUnitRotation = nextBf.UnitRotation
+	}
+	if prevUnitRotation == nil && nextUnitRotation == nil {
+		bf.UnitRotation = mmath.NewMQuaternion()
+	} else if prevUnitRotation == nil {
+		bf.UnitRotation = nextUnitRotation.Copy()
+	} else if nextUnitRotation == nil {
+		bf.UnitRotation = prevUnitRotation.Copy()
+	} else {
+		bf.UnitRotation = prevUnitRotation.Slerp(nextUnitRotation, ry)
 	}
 
 	ppx := 0.0
