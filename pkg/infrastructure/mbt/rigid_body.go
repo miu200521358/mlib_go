@@ -127,7 +127,7 @@ func (mp *MPhysics) createCollisionShape(
 	// マイナスサイズは許容しない
 	size := rigidBody.Size
 	if rigidBodyDelta != nil {
-		size = rigidBodyDelta.Size
+		size = rigidBody.Size.Muled(rigidBodyDelta.Size)
 	}
 	size.Clamp(mmath.MVec3Zero, mmath.MVec3MaxVal)
 
@@ -345,6 +345,26 @@ func (mp *MPhysics) RestoreRigidBodyStates(modelIndex int, states map[int]*physi
 
 		btRigidBody := r.btRigidBody
 		pmxRigidBody := r.pmxRigidBody
+
+		// サイズ変更後の慣性テンソル再計算（物理剛体のみ）
+		if pmxRigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
+			currentShape := btRigidBody.GetCollisionShape().(bt.BtCollisionShape)
+
+			// 現在の質量を取得
+			var currentMass float32
+			if btRigidBody.GetInvMass() != 0 {
+				currentMass = 1.0 / btRigidBody.GetInvMass()
+			}
+
+			if currentMass > 0 {
+				// 新しい慣性テンソル計算
+				currentShape.CalculateLocalInertia(currentMass,
+					bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0)))
+				// 質量と慣性を再設定
+				btRigidBody.SetMassProps(currentMass,
+					bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0)))
+			}
+		}
 
 		// ボーン追従剛体は位置のみ復元、速度はゼロに
 		if pmxRigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
