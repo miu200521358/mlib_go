@@ -252,7 +252,7 @@ func (vl *ViewerList) processFrame(
 
 	// 物理リセット
 	if physicsResetType != vmd.PHYSICS_RESET_TYPE_NONE {
-		mlog.I("[%0.2f] Physics reset type: %d", frame, physicsResetType)
+		mlog.D("[%0.2f] Physics reset type: %d", frame, physicsResetType)
 
 		for i, vw := range vl.windowList {
 			physicsDeltas := make([]*delta.PhysicsDeltas, len(vw.modelRenderers))
