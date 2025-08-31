@@ -140,19 +140,7 @@ func (model *PmxModel) Setup() {
 	// セットアップ
 	model.Materials.Setup(model.Vertices, model.Faces, model.Textures)
 	model.Bones.Setup()
-
-	// 剛体
-	model.RigidBodies.ForEach(func(index int, rb *RigidBody) bool {
-		if rb.BoneIndex >= 0 && model.Bones.Contains(rb.BoneIndex) {
-			// 剛体に関連付けられたボーンが存在する場合、剛体とボーンを関連付ける
-			if bone, err := model.Bones.Get(rb.BoneIndex); err == nil {
-				bone.RigidBodies = append(bone.RigidBodies, rb)
-				rb.Bone = bone
-			}
-		}
-		return true
-	})
-
+	model.RigidBodies.Setup(model.Bones)
 	model.UpdateHash()
 }
 
