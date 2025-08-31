@@ -53,6 +53,14 @@ func (rep *PmxRepository) Save(overridePath string, data core.IHashModel, includ
 		}
 	}
 
+	filteredRigidBodies := []*pmx.RigidBody{}
+	for i := range model.RigidBodies.Length() {
+		rigidBody, _ := model.RigidBodies.Get(i)
+		if (!includeSystem && !rigidBody.IsSystem) || includeSystem {
+			filteredRigidBodies = append(filteredRigidBodies, rigidBody)
+		}
+	}
+
 	_, err = fout.Write([]byte("PMX "))
 	if err != nil {
 		return fmt.Errorf("failed to write PMX signature: %v", err)
@@ -108,7 +116,7 @@ func (rep *PmxRepository) Save(overridePath string, data core.IHashModel, includ
 		return err
 	}
 
-	rigidbodyIdxSize, rigidbodyIdxType := rep.defineWriteIndexForOthers(model.RigidBodies.Length())
+	rigidbodyIdxSize, rigidbodyIdxType := rep.defineWriteIndexForOthers(len(filteredRigidBodies))
 	err = rep.writeByte(fout, rigidbodyIdxSize, true)
 	if err != nil {
 		return err
@@ -169,7 +177,7 @@ func (rep *PmxRepository) Save(overridePath string, data core.IHashModel, includ
 		return err
 	}
 
-	err = rep.saveRigidBodies(fout, model, boneIdxType)
+	err = rep.saveRigidBodies(fout, filteredRigidBodies, boneIdxType)
 	if err != nil {
 		return err
 	}
@@ -894,101 +902,100 @@ func (rep *PmxRepository) saveDisplaySlots(fout *os.File, model *pmx.PmxModel, b
 }
 
 // saveRigidBodies 剛体データの書き込み
-func (rep *PmxRepository) saveRigidBodies(fout *os.File, model *pmx.PmxModel, boneIdxType binaryType) error {
+func (rep *PmxRepository) saveRigidBodies(fout *os.File, rigidBodies []*pmx.RigidBody, boneIdxType binaryType) error {
 	defer mlog.I("%s", mi18n.T("保存途中完了", map[string]interface{}{"Type": mi18n.T("剛体")}))
 
-	err := rep.writeNumber(fout, binaryType_int, float64(model.RigidBodies.Length()), 0.0, true)
+	err := rep.writeNumber(fout, binaryType_int, float64(len(rigidBodies)), 0.0, true)
 	if err != nil {
 		return err
 	}
 
-	model.RigidBodies.ForEach(func(index int, rigidbody *pmx.RigidBody) bool {
+	for _, rigidbody := range rigidBodies {
 		err = rep.writeText(fout, rigidbody.Name(), fmt.Sprintf("Rigidbody %d", rigidbody.Index()))
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeText(fout, rigidbody.EnglishName(), fmt.Sprintf("Rigidbody %d", rigidbody.Index()))
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, boneIdxType, float64(rigidbody.BoneIndex), 0.0, false)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeByte(fout, int(rigidbody.CollisionGroup), true)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeShort(fout, uint16(rigidbody.CollisionGroupMaskValue))
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeByte(fout, int(rigidbody.ShapeType), true)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Size.X, 0.0, true)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Size.Y, 0.0, true)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Size.Z, 0.0, true)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Position.X, 0.0, false)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Position.Y, 0.0, false)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Position.Z, 0.0, false)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Rotation.X, 0.0, false)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Rotation.Y, 0.0, false)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.Rotation.Z, 0.0, false)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.RigidBodyParam.Mass, 0.0, true)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.RigidBodyParam.LinearDamping, 0.0, true)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.RigidBodyParam.AngularDamping, 0.0, true)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.RigidBodyParam.Restitution, 0.0, true)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeNumber(fout, binaryType_float, rigidbody.RigidBodyParam.Friction, 0.0, true)
 		if err != nil {
-			return false
+			return err
 		}
 		err = rep.writeByte(fout, int(rigidbody.PhysicsType), true)
 		if err != nil {
-			return false
+			return err
 		}
-		return true
-	})
+	}
 
 	return nil
 }
