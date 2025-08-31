@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
+	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
 	"github.com/miu200521358/mlib_go/pkg/interface/controller"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
@@ -11,15 +12,16 @@ import (
 
 type MotionPlayer struct {
 	walk.WidgetBase
-	window              *controller.ControlWindow // メインウィンドウ
-	frameEdit           *walk.NumberEdit          // フレーム番号入力欄
-	frameSlider         *walk.Slider              // フレームスライダー
-	playButton          *walk.PushButton          // 一時停止ボタン
-	playingText         string                    // 再生中のテキスト
-	stoppedText         string                    // 停止中のテキスト
-	onEnabledInPlaying  func(playing bool)        // 再生中に操作可能なウィジェットを有効化する
-	onChangePlayingPre  func(playing bool)        // 再生前に呼ばれるコールバック
-	onChangePlayingPost func(playing bool)        // 再生後に呼ばれるコールバック
+	window                *controller.ControlWindow   // メインウィンドウ
+	frameEdit             *walk.NumberEdit            // フレーム番号入力欄
+	frameSlider           *walk.Slider                // フレームスライダー
+	playButton            *walk.PushButton            // 一時停止ボタン
+	playingText           string                      // 再生中のテキスト
+	stoppedText           string                      // 停止中のテキスト
+	onEnabledInPlaying    func(playing bool)          // 再生中に操作可能なウィジェットを有効化する
+	onChangePlayingPre    func(playing bool)          // 再生前に呼ばれるコールバック
+	onChangePlayingPost   func(playing bool)          // 再生後に呼ばれるコールバック
+	startPlayingResetType func() vmd.PhysicsResetType // 再生開始時に設定する物理リセットタイプを返す関数
 }
 
 func NewMotionPlayer() *MotionPlayer {
@@ -138,7 +140,7 @@ func (mp *MotionPlayer) SetPlaying(playing bool) {
 	}
 
 	// 再生前処理
-	mp.window.TriggerPhysicsReset()
+	mp.window.StorePhysicsReset(mp.GetStartPlayingResetType())
 	mp.EnabledInPlaying(playing)
 	mp.OnChangePlayingPre(playing)
 
@@ -199,4 +201,15 @@ func (mp *MotionPlayer) OnChangePlayingPost(playing bool) {
 	if mp.onChangePlayingPost != nil {
 		mp.onChangePlayingPost(playing)
 	}
+}
+
+func (mp *MotionPlayer) SetStartPlayingResetType(f func() vmd.PhysicsResetType) {
+	mp.startPlayingResetType = f
+}
+
+func (mp *MotionPlayer) GetStartPlayingResetType() vmd.PhysicsResetType {
+	if mp.startPlayingResetType != nil {
+		return mp.startPlayingResetType()
+	}
+	return vmd.PHYSICS_RESET_TYPE_START_FRAME
 }
