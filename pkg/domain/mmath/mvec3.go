@@ -727,3 +727,58 @@ func MeanVec3(vectors []*MVec3) *MVec3 {
 
 	return sum.MuledScalar(1.0 / float64(len(vectors)))
 }
+
+func MinVec3(vectors []*MVec3) *MVec3 {
+	if len(vectors) == 0 {
+		return &MVec3{0, 0, 0}
+	}
+
+	min := vectors[0].Copy()
+	for _, v := range vectors[1:] {
+		min.X = math.Min(min.X, v.X)
+		min.Y = math.Min(min.Y, v.Y)
+		min.Z = math.Min(min.Z, v.Z)
+	}
+
+	return min
+}
+
+func MaxVec3(vectors []*MVec3) *MVec3 {
+	if len(vectors) == 0 {
+		return &MVec3{0, 0, 0}
+	}
+
+	max := vectors[0].Copy()
+	for _, v := range vectors[1:] {
+		max.X = math.Max(max.X, v.X)
+		max.Y = math.Max(max.Y, v.Y)
+		max.Z = math.Max(max.Z, v.Z)
+	}
+
+	return max
+}
+
+func MedianVec3(vectors []*MVec3) *MVec3 {
+	if len(vectors) == 0 {
+		return &MVec3{0, 0, 0}
+	}
+
+	// X, Y, Zの中央値を計算
+	xValues := make([]float64, len(vectors))
+	yValues := make([]float64, len(vectors))
+	zValues := make([]float64, len(vectors))
+	for i, v := range vectors {
+		xValues[i] = v.X
+		yValues[i] = v.Y
+		zValues[i] = v.Z
+	}
+	sort.Float64s(xValues)
+	sort.Float64s(yValues)
+	sort.Float64s(zValues)
+
+	return &MVec3{
+		X: xValues[len(xValues)/2],
+		Y: yValues[len(yValues)/2],
+		Z: zValues[len(zValues)/2],
+	}
+}
