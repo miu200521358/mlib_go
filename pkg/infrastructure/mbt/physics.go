@@ -20,7 +20,7 @@ type MPhysics struct {
 	DeformSpf   float32                    // デフォームspf
 	PhysicsSpf  float32                    // 物理spf
 	joints      map[int][]*jointValue      // ジョイント
-	rigidBodies map[int][]*rigidbodyValue  // 剛体
+	rigidBodies map[int][]*rigidBodyValue  // 剛体
 }
 
 // NewMPhysics は物理エンジンのインスタンスを生成します
@@ -33,7 +33,7 @@ func NewMPhysics(gravity *mmath.MVec3) physics.IPhysics {
 		config: physics.PhysicsConfig{
 			FixedTimeStep: 1 / 60.0,
 		},
-		rigidBodies: make(map[int][]*rigidbodyValue),
+		rigidBodies: make(map[int][]*rigidBodyValue),
 		joints:      make(map[int][]*jointValue),
 	}
 

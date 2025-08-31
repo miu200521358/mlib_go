@@ -295,8 +295,41 @@ func DeformForPhysics(
 	isEnabledPhysics bool,
 	physicsResetType vmd.PhysicsResetType,
 ) *delta.VmdDeltas {
+	return DeformForPhysicsWithPhysicsDeltas(physics, model, deltas, nil, isEnabledPhysics, physicsResetType)
+}
+
+// DeformForPhysicsWithPhysicsDeltas 物理剛体位置を更新する（物理デルタ情報付き）
+func DeformForPhysicsWithPhysicsDeltas(
+	physics physics.IPhysics,
+	model *pmx.PmxModel,
+	deltas *delta.VmdDeltas,
+	physicsDeltas *delta.PhysicsDeltas,
+	isEnabledPhysics bool,
+	physicsResetType vmd.PhysicsResetType,
+) *delta.VmdDeltas {
 	if model == nil {
 		return deltas
+	}
+
+	// 物理剛体のサイズ・形状更新（物理デルタがある場合）
+	if physicsDeltas != nil && physicsDeltas.RigidBodies != nil {
+		if err := miter.IterParallelByList(mmath.IntRanges(model.RigidBodies.Length()-1), 100, 0, func(i int, rigidBodyIndex int) error {
+			rigidBody, err := model.RigidBodies.Get(rigidBodyIndex)
+			if err != nil {
+				return err
+			}
+
+			// 剛体デルタを確認
+			rigidBodyDelta := physicsDeltas.RigidBodies.Get(rigidBodyIndex)
+			if rigidBodyDelta != nil && rigidBodyDelta.Size != nil {
+				// サイズ変更があった場合、剛体の形状を更新
+				physics.UpdateRigidBodyShape(model.Index(), rigidBody, rigidBodyDelta)
+			}
+
+			return nil
+		}, nil); err != nil {
+			return deltas
+		}
 	}
 
 	// 物理剛体位置を更新

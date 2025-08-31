@@ -15,7 +15,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mproc"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
@@ -323,21 +322,57 @@ func (vl *ViewerList) processFrame(
 	return true, isPhysicsFitReset, timeSteps
 }
 
+// updatePhysicsSelectively 継続フレーム用の選択的物理更新
+func (vl *ViewerList) updatePhysicsSelectively(vw *ViewWindow, frame float32, physicsDeltas []*delta.PhysicsDeltas) {
+	// 現在のフレームでのボーン位置を正確に設定
+	for n := range vw.modelRenderers {
+		if vw.modelRenderers[n] == nil {
+			continue
+		}
+
+		// 物理前変形を実行して、ボーン位置を更新
+		vw.vmdDeltas[n] = deform.DeformBeforePhysics(
+			vw.modelRenderers[n].Model,
+			vw.motions[n],
+			vw.vmdDeltas[n],
+			frame,
+		)
+	}
+
+	// 剛体の選択的更新
+	for n, model := range vw.modelRenderers {
+		if model == nil || model.Model == nil || physicsDeltas[n] == nil {
+			continue
+		}
+
+		// 剛体デルタがある場合のみ選択的更新を実行
+		if physicsDeltas[n].RigidBodies != nil {
+			vw.physics.UpdateRigidBodiesSelectively(model.Model.Index(), model.Model, physicsDeltas[n].RigidBodies)
+		}
+
+		// 物理再設定（物理デルタ情報を含む）
+		vw.vmdDeltas[n] = deform.DeformForPhysicsWithPhysicsDeltas(
+			vw.physics,
+			vw.modelRenderers[n].Model,
+			vw.vmdDeltas[n],
+			physicsDeltas[n],
+			vl.shared.IsEnabledPhysics(),
+			vmd.PHYSICS_RESET_TYPE_CONTINUE_FRAME,
+		)
+	}
+}
+
 func (vl *ViewerList) resetPhysics(
 	vw *ViewWindow, frame float32, timeStep float32, maxSubSteps int, fixedTimeStep float32, gravity *mmath.MVec3,
 	physicsResetType vmd.PhysicsResetType, physicsDeltas []*delta.PhysicsDeltas,
 ) {
-	// 継続フレーム用の場合、物理状態を保存
-	var savedStates []map[int]*physics.RigidbodyState
+	// 継続フレームの場合は選択的更新を使用
 	if physicsResetType == vmd.PHYSICS_RESET_TYPE_CONTINUE_FRAME {
-		savedStates = make([]map[int]*physics.RigidbodyState, len(vw.modelRenderers))
-		for n, model := range vw.modelRenderers {
-			if model == nil || model.Model == nil {
-				continue
-			}
-			savedStates[n] = vw.physics.SaveRigidBodyStates(model.Model.Index())
-		}
+		vl.updatePhysicsSelectively(vw, frame, physicsDeltas)
+		return
 	}
+
+	// 継続フレーム以外の場合は従来通りフルリセット
 
 	// 物理リセット用のデフォーム処理
 	var iterationFinishFrame float32
@@ -366,24 +401,15 @@ func (vl *ViewerList) resetPhysics(
 		// モデルの物理追加
 		vw.physics.AddModelByDeltas(n, model.Model, vw.vmdDeltas[n].Bones, physicsDeltas[n])
 
-		// 物理再設定
-		vw.vmdDeltas[n] = deform.DeformForPhysics(
+		// 物理再設定（物理デルタ情報を含む）
+		vw.vmdDeltas[n] = deform.DeformForPhysicsWithPhysicsDeltas(
 			vw.physics,
 			vw.modelRenderers[n].Model,
 			vw.vmdDeltas[n],
+			physicsDeltas[n],
 			vl.shared.IsEnabledPhysics(),
 			physicsResetType,
 		)
-	}
-
-	// 継続フレーム用の場合、物理状態を復元
-	if physicsResetType == vmd.PHYSICS_RESET_TYPE_CONTINUE_FRAME && savedStates != nil {
-		for n, model := range vw.modelRenderers {
-			if model == nil || model.Model == nil || savedStates[n] == nil {
-				continue
-			}
-			vw.physics.RestoreRigidBodyStates(model.Model.Index(), savedStates[n])
-		}
 	}
 
 	// 開始フレーム用物理リセット変形を適用（描画は変更しない）
@@ -439,7 +465,7 @@ func (vl *ViewerList) deformForReset(
 
 		return 0, physicsResetMotions
 	case vmd.PHYSICS_RESET_TYPE_START_FIT_FRAME:
-		return vl.deformForResetFit(vw, frame, physicsResetMotions)
+		return vl.deformForResetStartFit(vw, frame, physicsResetMotions)
 	}
 
 	// デフォーム処理
@@ -456,7 +482,7 @@ func (vl *ViewerList) deformForReset(
 	return 0, physicsResetMotions
 }
 
-func (vl *ViewerList) deformForResetFit(
+func (vl *ViewerList) deformForResetStartFit(
 	vw *ViewWindow, frame float32, physicsResetMotions []*vmd.VmdMotion,
 ) (float32, []*vmd.VmdMotion) {
 

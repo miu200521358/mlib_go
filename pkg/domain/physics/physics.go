@@ -13,14 +13,6 @@ type PhysicsConfig struct {
 	FixedTimeStep float32 // 固定タイムステップ
 }
 
-// RigidbodyState は剛体の物理状態を保存する構造体
-type RigidbodyState struct {
-	LinearVelocity  *mmath.MVec3
-	AngularVelocity *mmath.MVec3
-	WorldTransform  *mmath.MMat4
-	IsActive        bool
-}
-
 // IPhysics 物理エンジンのインターフェース
 type IPhysics interface {
 	// シミュレーション関連
@@ -34,9 +26,9 @@ type IPhysics interface {
 
 	// トランスフォーム関連
 	UpdateTransform(modelIndex int, rigidBodyBone *pmx.Bone, boneGlobalMatrix *mmath.MMat4, rigidBody *pmx.RigidBody)
+	UpdateRigidBodyShape(modelIndex int, rigidBody *pmx.RigidBody, rigidBodyDelta *delta.RigidBodyDelta)
+	UpdateRigidBodiesSelectively(modelIndex int, model *pmx.PmxModel, rigidBodyDeltas *delta.RigidBodyDeltas)
 	GetRigidBodyBoneMatrix(modelIndex int, rigidBody *pmx.RigidBody) *mmath.MMat4
-	SaveRigidBodyStates(modelIndex int) map[int]*RigidbodyState
-	RestoreRigidBodyStates(modelIndex int, states map[int]*RigidbodyState)
 
 	// デバッグ表示
 	DrawDebugLines(shader rendering.IShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool)

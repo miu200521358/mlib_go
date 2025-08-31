@@ -9,13 +9,12 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
 
-// rigidbodyValue は剛体の物理エンジン内部表現を格納する構造体です
-type rigidbodyValue struct {
+// rigidBodyValue は剛体の物理エンジン内部表現を格納する構造体です
+type rigidBodyValue struct {
 	pmxRigidBody     *pmx.RigidBody  // PMXモデルの剛体定義
 	btRigidBody      bt.BtRigidBody  // Bullet物理エンジンの剛体
 	btLocalTransform *bt.BtTransform // 剛体のローカルトランスフォーム
@@ -26,7 +25,7 @@ type rigidbodyValue struct {
 // initRigidBodies はモデルの剛体を初期化します
 func (mp *MPhysics) initRigidBodies(modelIndex int, rigidBodies *pmx.RigidBodies) {
 	// 剛体を順番にボーンと紐付けていく
-	mp.rigidBodies[modelIndex] = make([]*rigidbodyValue, rigidBodies.Length())
+	mp.rigidBodies[modelIndex] = make([]*rigidBodyValue, rigidBodies.Length())
 	rigidBodies.ForEach(func(index int, rigidBody *pmx.RigidBody) bool {
 		// 剛体の初期位置と回転
 		btRigidBodyTransform := bt.NewBtTransform(newBulletFromRad(rigidBody.Rotation), newBulletFromVec(rigidBody.Position))
@@ -44,7 +43,7 @@ func (mp *MPhysics) initRigidBodiesByBoneDeltas(
 	boneDeltas *delta.BoneDeltas, rigidBodyDeltas *delta.RigidBodyDeltas,
 ) {
 	// 剛体を順番にボーンと紐付けていく
-	mp.rigidBodies[modelIndex] = make([]*rigidbodyValue, rigidBodies.Length())
+	mp.rigidBodies[modelIndex] = make([]*rigidBodyValue, rigidBodies.Length())
 	rigidBodies.ForEach(func(index int, rigidBody *pmx.RigidBody) bool {
 		// ボーンから見た剛体の初期位置
 		var bone *pmx.Bone
@@ -112,7 +111,7 @@ func (mp *MPhysics) initRigidBody(
 	// 剛体・剛体グループ・非衝突グループを追加
 	group := 1 << rigidBody.CollisionGroup
 	mp.world.AddRigidBody(btRigidBody, group, rigidBody.CollisionGroupMaskValue)
-	mp.rigidBodies[modelIndex][rigidBody.Index()] = &rigidbodyValue{
+	mp.rigidBodies[modelIndex][rigidBody.Index()] = &rigidBodyValue{
 		pmxRigidBody: rigidBody, btRigidBody: btRigidBody, btLocalTransform: &btRigidBodyLocalTransform,
 		mask: rigidBody.CollisionGroupMaskValue, group: group}
 
@@ -283,133 +282,89 @@ func (mp *MPhysics) GetRigidBodyBoneMatrix(
 	return newMMat4ByMgl(&boneGlobalMatrixGL)
 }
 
-// SaveRigidBodyStates は全剛体の物理状態を保存します
-func (mp *MPhysics) SaveRigidBodyStates(modelIndex int) map[int]*physics.RigidbodyState {
-	states := make(map[int]*physics.RigidbodyState)
-
-	for rigidBodyIndex, r := range mp.rigidBodies[modelIndex] {
-		if r == nil || r.btRigidBody == nil {
-			continue
-		}
-
-		btRigidBody := r.btRigidBody
-
-		// 線形速度取得
-		linearVel := btRigidBody.GetLinearVelocity()
-		linearVelocity := &mmath.MVec3{
-			X: float64(linearVel.X()),
-			Y: float64(linearVel.Y()),
-			Z: float64(linearVel.Z()),
-		}
-
-		// 角速度取得
-		angularVel := btRigidBody.GetAngularVelocity()
-		angularVelocity := &mmath.MVec3{
-			X: float64(angularVel.X()),
-			Y: float64(angularVel.Y()),
-			Z: float64(angularVel.Z()),
-		}
-
-		// ワールド変換行列取得
-		motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
-		worldTransform := bt.NewBtTransform()
-		defer bt.DeleteBtTransform(worldTransform)
-		motionState.GetWorldTransform(worldTransform)
-
-		worldMatrixGL := mgl32.Mat4{}
-		worldTransform.GetOpenGLMatrix(&worldMatrixGL[0])
-		worldMatrix := newMMat4ByMgl(&worldMatrixGL)
-
-		states[rigidBodyIndex] = &physics.RigidbodyState{
-			LinearVelocity:  linearVelocity,
-			AngularVelocity: angularVelocity,
-			WorldTransform:  worldMatrix,
-			IsActive:        btRigidBody.IsActive(),
-		}
+// UpdateRigidBodiesSelectively は変更が必要な剛体のみを選択的に更新します
+func (mp *MPhysics) UpdateRigidBodiesSelectively(
+	modelIndex int,
+	model *pmx.PmxModel,
+	rigidBodyDeltas *delta.RigidBodyDeltas,
+) {
+	if rigidBodyDeltas == nil {
+		return
 	}
 
-	return states
+	// 変更がある剛体のみ更新
+	rigidBodyDeltas.ForEach(func(index int, rigidBodyDelta *delta.RigidBodyDelta) bool {
+		if rigidBodyDelta == nil {
+			return true
+		}
+
+		rigidBody, err := model.RigidBodies.Get(index)
+		if err != nil || rigidBody == nil {
+			return true
+		}
+
+		// 個別剛体の形状を更新
+		mp.UpdateRigidBodyShape(modelIndex, rigidBody, rigidBodyDelta)
+
+		return true
+	})
 }
 
-// RestoreRigidBodyStates は保存された剛体の物理状態を復元します
-func (mp *MPhysics) RestoreRigidBodyStates(modelIndex int, states map[int]*physics.RigidbodyState) {
-	for rigidBodyIndex, state := range states {
-		if rigidBodyIndex >= len(mp.rigidBodies[modelIndex]) {
-			continue
-		}
-
-		r := mp.rigidBodies[modelIndex][rigidBodyIndex]
-		if r == nil || r.btRigidBody == nil {
-			continue
-		}
-
-		btRigidBody := r.btRigidBody
-		pmxRigidBody := r.pmxRigidBody
-
-		// サイズ変更後の慣性テンソル再計算（物理剛体のみ）
-		if pmxRigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
-			currentShape := btRigidBody.GetCollisionShape().(bt.BtCollisionShape)
-
-			// 現在の質量を取得
-			var currentMass float32
-			if btRigidBody.GetInvMass() != 0 {
-				currentMass = 1.0 / btRigidBody.GetInvMass()
-			}
-
-			if currentMass > 0 {
-				// 新しい慣性テンソル計算
-				currentShape.CalculateLocalInertia(currentMass,
-					bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0)))
-				// 質量と慣性を再設定
-				btRigidBody.SetMassProps(currentMass,
-					bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0)))
-			}
-		}
-
-		// ボーン追従剛体は位置のみ復元、速度はゼロに
-		if pmxRigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
-			// 位置復元
-			mat := mmath.NewGlMat4(state.WorldTransform)
-			worldTransform := bt.NewBtTransform()
-			defer bt.DeleteBtTransform(worldTransform)
-			worldTransform.SetFromOpenGLMatrix(&mat[0])
-
-			motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
-			motionState.SetWorldTransform(worldTransform)
-
-			// 速度をゼロに設定
-			btRigidBody.SetLinearVelocity(bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0)))
-			btRigidBody.SetAngularVelocity(bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0)))
-
-			// 強制的に非アクティブにして物理演算の影響を受けないようにする
-			btRigidBody.ForceActivationState(bt.DISABLE_SIMULATION)
-		} else {
-			// 物理剛体は全状態を復元
-			// 位置復元
-			mat := mmath.NewGlMat4(state.WorldTransform)
-			worldTransform := bt.NewBtTransform()
-			defer bt.DeleteBtTransform(worldTransform)
-			worldTransform.SetFromOpenGLMatrix(&mat[0])
-
-			motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
-			motionState.SetWorldTransform(worldTransform)
-
-			// 速度復元
-			btRigidBody.SetLinearVelocity(bt.NewBtVector3(
-				float32(state.LinearVelocity.X),
-				float32(state.LinearVelocity.Y),
-				float32(state.LinearVelocity.Z),
-			))
-			btRigidBody.SetAngularVelocity(bt.NewBtVector3(
-				float32(state.AngularVelocity.X),
-				float32(state.AngularVelocity.Y),
-				float32(state.AngularVelocity.Z),
-			))
-
-			// アクティブ状態復元
-			if state.IsActive {
-				btRigidBody.SetActivationState(bt.ACTIVE_TAG)
-			}
-		}
+// UpdateRigidBodyShape はサイズ変更時に剛体の形状を更新します
+func (mp *MPhysics) UpdateRigidBodyShape(
+	modelIndex int,
+	rigidBody *pmx.RigidBody,
+	rigidBodyDelta *delta.RigidBodyDelta,
+) {
+	if rigidBodyDelta == nil || rigidBodyDelta.Size == nil {
+		return
 	}
+
+	r := mp.rigidBodies[modelIndex][rigidBody.Index()]
+	if r == nil || r.btRigidBody == nil {
+		return
+	}
+
+	btRigidBody := r.btRigidBody
+
+	// 現在の状態を保存
+	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
+	currentTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(currentTransform)
+	motionState.GetWorldTransform(currentTransform)
+
+	// 現在の物理パラメータを保存
+	currentLinearVel := btRigidBody.GetLinearVelocity()
+	currentAngularVel := btRigidBody.GetAngularVelocity()
+	currentMass := float32(0.0)
+	if btRigidBody.GetInvMass() != 0 {
+		currentMass = 1.0 / btRigidBody.GetInvMass()
+	}
+
+	// 一旦物理世界から削除
+	mp.world.RemoveRigidBody(btRigidBody)
+
+	// 新しい形状を作成
+	newShape := mp.createCollisionShape(rigidBody, rigidBodyDelta)
+
+	// 新しい慣性テンソルを計算
+	newInertia := bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
+	if currentMass > 0 && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
+		newShape.CalculateLocalInertia(currentMass, newInertia)
+	}
+
+	// 剛体の形状を更新
+	btRigidBody.SetCollisionShape(newShape)
+	btRigidBody.SetMassProps(currentMass, newInertia)
+
+	// 位置と速度を復元
+	motionState.SetWorldTransform(currentTransform)
+	btRigidBody.SetLinearVelocity(currentLinearVel)
+	btRigidBody.SetAngularVelocity(currentAngularVel)
+
+	// 物理世界に再追加
+	mp.world.AddRigidBody(btRigidBody, r.group, r.mask)
+
+	// 物理フラグを更新
+	mp.updateFlag(modelIndex, rigidBody)
 }
