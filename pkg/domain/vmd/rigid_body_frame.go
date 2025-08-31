@@ -2,7 +2,6 @@ package vmd
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/tiendc/go-deepcopy"
 )
 
 type RigidBodyFrame struct {
@@ -20,9 +19,7 @@ func NewRigidBodyFrameByValues(index float32, size *mmath.MVec3, mass float64) *
 }
 
 func (mf *RigidBodyFrame) Copy() IBaseFrame {
-	copied := new(RigidBodyFrame)
-	deepcopy.Copy(mf, copied)
-	return copied
+	return NewRigidBodyFrameByValues(mf.Index(), mf.Size.Copy(), mf.Mass)
 }
 
 func (nextMf *RigidBodyFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFrame {
