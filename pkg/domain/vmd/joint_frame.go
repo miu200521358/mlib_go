@@ -2,7 +2,6 @@ package vmd
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/tiendc/go-deepcopy"
 )
 
 type JointFrame struct {
@@ -28,9 +27,15 @@ func NewJointFrameByValues(index float32, translationLimitMin, translationLimitM
 }
 
 func (mf *JointFrame) Copy() IBaseFrame {
-	copied := new(JointFrame)
-	deepcopy.Copy(mf, copied)
-	return copied
+	return NewJointFrameByValues(
+		mf.Index(),
+		mf.TranslationLimitMin.Copy(),
+		mf.TranslationLimitMax.Copy(),
+		mf.RotationLimitMin.Copy(),
+		mf.RotationLimitMax.Copy(),
+		mf.SpringConstantTranslation.Copy(),
+		mf.SpringConstantRotation.Copy(),
+	)
 }
 
 func (nextMf *JointFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFrame {
