@@ -65,7 +65,7 @@ func (vl *ViewerList) Add(title string, width, height, positionX, positionY int)
 }
 
 const (
-	physicsInitialFrame = float32(120.0)
+	physicsInitialFrame = float32(60.0)
 	deformDefaultSpf    = 1.0 / 30.0    // デフォルトのデフォームspf
 	deformDefaultFps    = float32(30.0) // デフォルトのデフォームfps
 )
@@ -410,9 +410,9 @@ func (vl *ViewerList) resetPhysics(
 		)
 	}
 
-	// 開始フレーム用物理リセット変形を適用（描画は変更しない）
+	// 開始フレーム用物理リセット変形を適用
 	if physicsResetType == vmd.PHYSICS_RESET_TYPE_START_FIT_FRAME {
-		for frame := float32(0); frame < iterationFinishFrame+physicsInitialFrame+10; frame++ {
+		for frame := float32(0); frame < iterationFinishFrame+physicsInitialFrame+3; frame++ {
 			vl.deform(
 				vw,
 				physicsResetMotions,
@@ -515,10 +515,10 @@ func (vl *ViewerList) deformForResetStartFit(
 		}
 	}
 
-	// 変形量(各フレームの最大移動量を0.5、最大回転量を2度に制限した場合の変形用反復回数)
+	// 変形量(各フレームの最大移動量を0.5、最大回転量を1度に制限した場合の変形用反復回数)
 	iterationFinishFrame := float32(max(
 		mmath.Max(mmath.Flatten(deformMaxTranslations))/0.5,
-		mmath.Max(mmath.Flatten(deformMaxRotations))/2.0,
+		mmath.Max(mmath.Flatten(deformMaxRotations))/1.0,
 		60.0)) // 60.0はデフォルトの反復回数
 
 	// 物理リセット変形用モーションを作成する
