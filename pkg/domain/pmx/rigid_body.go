@@ -17,11 +17,11 @@ type RigidBodyParam struct {
 
 func NewRigidBodyParam() *RigidBodyParam {
 	return &RigidBodyParam{
-		Mass:           0,
-		LinearDamping:  0,
-		AngularDamping: 0,
+		Mass:           1,
+		LinearDamping:  0.5,
+		AngularDamping: 0.5,
 		Restitution:    0,
-		Friction:       0,
+		Friction:       0.5,
 	}
 }
 
