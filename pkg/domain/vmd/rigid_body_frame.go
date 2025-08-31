@@ -11,14 +11,6 @@ type RigidBodyFrame struct {
 	Mass       float64      // 質量
 }
 
-func NewRigidBodyFrame(index float32) *RigidBodyFrame {
-	return &RigidBodyFrame{
-		BaseFrame: NewFrame(index).(*BaseFrame),
-		Size:      &mmath.MVec3{X: 1, Y: 1, Z: 1}, // デフォルトサイズ
-		Mass:      1.0,                            // デフォルト質量
-	}
-}
-
 func NewRigidBodyFrameByValues(index float32, size *mmath.MVec3, mass float64) *RigidBodyFrame {
 	return &RigidBodyFrame{
 		BaseFrame: NewFrame(index).(*BaseFrame),
@@ -39,13 +31,11 @@ func (nextMf *RigidBodyFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBa
 	prevIndex := prevMf.Index()
 	nextIndex := nextMf.Index()
 
-	mf := NewRigidBodyFrame(index)
-
 	ry := float64(index-prevIndex) / float64(nextIndex-prevIndex)
-	mf.Size = prevMf.Size.Lerp(nextMf.Size, ry)
-	mf.Mass = mmath.Lerp(prevMf.Mass, nextMf.Mass, ry)
+	size := prevMf.Size.Lerp(nextMf.Size, ry)
+	mass := mmath.Lerp(prevMf.Mass, nextMf.Mass, ry)
 
-	return mf
+	return NewRigidBodyFrameByValues(index, size, mass)
 }
 
 func (mf *RigidBodyFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float32) {

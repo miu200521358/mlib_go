@@ -11,9 +11,14 @@ type RigidBodyNameFrames struct {
 
 func NewRigidBodyNameFrames(name string) *RigidBodyNameFrames {
 	return &RigidBodyNameFrames{
-		BaseFrames: NewBaseFrames(NewRigidBodyFrame, nilRigidBodyFrame),
+		BaseFrames: NewBaseFrames(newRigidBodyFrame, nilRigidBodyFrame),
 		Name:       name,
 	}
+}
+
+func newRigidBodyFrame(index float32) *RigidBodyFrame {
+	// デフォルト値とかを入れないよう、nilを返す
+	return nil
 }
 
 func nilRigidBodyFrame() *RigidBodyFrame {

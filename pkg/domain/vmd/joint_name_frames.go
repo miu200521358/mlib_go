@@ -11,9 +11,13 @@ type JointNameFrames struct {
 
 func NewJointNameFrames(name string) *JointNameFrames {
 	return &JointNameFrames{
-		BaseFrames: NewBaseFrames(NewJointFrame, nilJointFrame),
+		BaseFrames: NewBaseFrames(newJointFrame, nilJointFrame),
 		Name:       name,
 	}
+}
+
+func newJointFrame(index float32) *JointFrame {
+	return nil
 }
 
 func nilJointFrame() *JointFrame {

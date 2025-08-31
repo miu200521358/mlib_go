@@ -15,18 +15,6 @@ type JointFrame struct {
 	SpringConstantRotation    *mmath.MVec3 // バネ定数-回転(x,y,z)
 }
 
-func NewJointFrame(index float32) *JointFrame {
-	return &JointFrame{
-		BaseFrame:                 NewFrame(index).(*BaseFrame),
-		TranslationLimitMin:       nil,
-		TranslationLimitMax:       nil,
-		RotationLimitMin:          nil,
-		RotationLimitMax:          nil,
-		SpringConstantTranslation: nil,
-		SpringConstantRotation:    nil,
-	}
-}
-
 func NewJointFrameByValues(index float32, translationLimitMin, translationLimitMax, rotationLimitMin, rotationLimitMax, springConstantTranslation, springConstantRotation *mmath.MVec3) *JointFrame {
 	return &JointFrame{
 		BaseFrame:                 NewFrame(index).(*BaseFrame),
@@ -51,17 +39,15 @@ func (nextMf *JointFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBaseFr
 	prevIndex := prevMf.Index()
 	nextIndex := nextMf.Index()
 
-	mf := NewJointFrame(index)
-
 	ry := float64(index-prevIndex) / float64(nextIndex-prevIndex)
-	mf.TranslationLimitMin = prevMf.TranslationLimitMin.Lerp(nextMf.TranslationLimitMin, ry)
-	mf.TranslationLimitMax = prevMf.TranslationLimitMax.Lerp(nextMf.TranslationLimitMax, ry)
-	mf.RotationLimitMin = prevMf.RotationLimitMin.Lerp(nextMf.RotationLimitMin, ry)
-	mf.RotationLimitMax = prevMf.RotationLimitMax.Lerp(nextMf.RotationLimitMax, ry)
-	mf.SpringConstantTranslation = prevMf.SpringConstantTranslation.Lerp(nextMf.SpringConstantTranslation, ry)
-	mf.SpringConstantRotation = prevMf.SpringConstantRotation.Lerp(nextMf.SpringConstantRotation, ry)
+	translationLimitMin := prevMf.TranslationLimitMin.Lerp(nextMf.TranslationLimitMin, ry)
+	translationLimitMax := prevMf.TranslationLimitMax.Lerp(nextMf.TranslationLimitMax, ry)
+	rotationLimitMin := prevMf.RotationLimitMin.Lerp(nextMf.RotationLimitMin, ry)
+	rotationLimitMax := prevMf.RotationLimitMax.Lerp(nextMf.RotationLimitMax, ry)
+	springConstantTranslation := prevMf.SpringConstantTranslation.Lerp(nextMf.SpringConstantTranslation, ry)
+	springConstantRotation := prevMf.SpringConstantRotation.Lerp(nextMf.SpringConstantRotation, ry)
 
-	return mf
+	return NewJointFrameByValues(index, translationLimitMin, translationLimitMax, rotationLimitMin, rotationLimitMax, springConstantTranslation, springConstantRotation)
 }
 
 func (mf *JointFrame) splitCurve(prevFrame IBaseFrame, nextFrame IBaseFrame, index float32) {

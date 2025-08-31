@@ -126,8 +126,8 @@ func (mp *MPhysics) createCollisionShape(
 ) bt.BtCollisionShape {
 	// マイナスサイズは許容しない
 	size := rigidBody.Size
-	if rigidBodyDelta != nil {
-		size = rigidBody.Size.Muled(rigidBodyDelta.Size)
+	if rigidBodyDelta != nil && rigidBodyDelta.Size != nil {
+		size = rigidBodyDelta.Size.Copy()
 	}
 	size.Clamp(mmath.MVec3Zero, mmath.MVec3MaxVal)
 
@@ -158,7 +158,7 @@ func (mp *MPhysics) calculateMassAndInertia(
 
 	if rigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
 		// ボーン追従ではない場合そのまま設定
-		if rigidBodyDelta != nil {
+		if rigidBodyDelta != nil && rigidBodyDelta.Mass != 0.0 {
 			// 剛体デルタがある場合はその値を使用
 			mass = float32(mmath.Clamped(rigidBodyDelta.Mass, 0, math.MaxFloat64))
 		} else {
