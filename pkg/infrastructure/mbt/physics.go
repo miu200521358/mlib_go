@@ -120,3 +120,24 @@ func createWorld(gravity *mmath.MVec3) bt.BtDiscreteDynamicsWorld {
 
 	return world
 }
+
+// UpdatePhysicsSelectively は変更が必要な剛体・ジョイントのみを選択的に更新します
+func (mp *MPhysics) UpdatePhysicsSelectively(
+	modelIndex int,
+	model *pmx.PmxModel,
+	physicsDeltas *delta.PhysicsDeltas,
+) {
+	if physicsDeltas == nil {
+		return
+	}
+
+	// 剛体の選択的更新
+	if physicsDeltas.RigidBodies != nil {
+		mp.UpdateRigidBodiesSelectively(modelIndex, model, physicsDeltas.RigidBodies)
+	}
+
+	// ジョイントの選択的更新
+	if physicsDeltas.Joints != nil {
+		mp.UpdateJointsSelectively(modelIndex, model, physicsDeltas.Joints)
+	}
+}

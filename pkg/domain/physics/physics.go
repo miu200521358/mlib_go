@@ -25,8 +25,9 @@ type IPhysics interface {
 	DeleteModel(modelIndex int)
 
 	// トランスフォーム関連
+	UpdatePhysicsSelectively(modelIndex int, model *pmx.PmxModel, physicsDeltas *delta.PhysicsDeltas)
 	UpdateTransform(modelIndex int, rigidBodyBone *pmx.Bone, boneGlobalMatrix *mmath.MMat4, rigidBody *pmx.RigidBody)
-	UpdateRigidBodyShape(modelIndex int, rigidBody *pmx.RigidBody, rigidBodyDelta *delta.RigidBodyDelta)
+	UpdateRigidBodyShapeMass(modelIndex int, rigidBody *pmx.RigidBody, rigidBodyDelta *delta.RigidBodyDelta)
 	UpdateRigidBodiesSelectively(modelIndex int, model *pmx.PmxModel, rigidBodyDeltas *delta.RigidBodyDeltas)
 	GetRigidBodyBoneMatrix(modelIndex int, rigidBody *pmx.RigidBody) *mmath.MMat4
 

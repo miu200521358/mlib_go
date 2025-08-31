@@ -346,7 +346,7 @@ func (vl *ViewerList) updatePhysicsSelectively(vw *ViewWindow, frame float32, ph
 		}
 
 		// 剛体デルタがある場合のみ選択的更新を実行
-		vw.physics.UpdateRigidBodiesSelectively(model.Model.Index(), model.Model, physicsDeltas[n].RigidBodies)
+		vw.physics.UpdatePhysicsSelectively(model.Model.Index(), model.Model, physicsDeltas[n])
 
 		// 物理再設定（物理デルタ情報を含む）
 		vw.vmdDeltas[n] = deform.DeformForPhysicsWithPhysicsDeltas(
@@ -423,11 +423,11 @@ func (vl *ViewerList) resetPhysics(
 				physicsResetType,
 			)
 
-			// // レンダリング処理
-			// for n := len(vl.windowList); n > 0; n-- {
-			// 	// サブビューワーオーバーレイのため、逆順でレンダリング
-			// 	vl.windowList[n-1].render()
-			// }
+			// レンダリング処理
+			for n := len(vl.windowList); n > 0; n-- {
+				// サブビューワーオーバーレイのため、逆順でレンダリング
+				vl.windowList[n-1].render()
+			}
 		}
 	}
 }

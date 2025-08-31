@@ -274,6 +274,112 @@ func (mp *MPhysics) configureBasicJointParams(constraint bt.BtTypedConstraint) {
 	}
 }
 
+// UpdateJointParameters はジョイントパラメーターを動的に更新します
+func (mp *MPhysics) UpdateJointParameters(
+	modelIndex int,
+	joint *pmx.Joint,
+	jointDelta *delta.JointDelta,
+) {
+	if jointDelta == nil {
+		return
+	}
+
+	// ジョイントが存在するか確認
+	j := mp.joints[modelIndex][joint.Index()]
+	if j == nil || j.btJoint == nil {
+		return
+	}
+
+	// Generic6DofSpringConstraintとして取得
+	constraint, ok := j.btJoint.(bt.BtGeneric6DofSpringConstraint)
+	if !ok {
+		return
+	}
+
+	// 剛体Bの取得（バネ設定に必要）
+	rigidBodyB := mp.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody
+	if rigidBodyB == nil {
+		return
+	}
+
+	// 移動制限の更新
+	if jointDelta.TranslationLimitMin != nil && jointDelta.TranslationLimitMax != nil {
+		constraint.SetLinearLowerLimit(bt.NewBtVector3(
+			float32(jointDelta.TranslationLimitMin.X),
+			float32(jointDelta.TranslationLimitMin.Y),
+			float32(jointDelta.TranslationLimitMin.Z)))
+		constraint.SetLinearUpperLimit(bt.NewBtVector3(
+			float32(jointDelta.TranslationLimitMax.X),
+			float32(jointDelta.TranslationLimitMax.Y),
+			float32(jointDelta.TranslationLimitMax.Z)))
+	}
+
+	// 回転制限の更新
+	if jointDelta.RotationLimitMin != nil && jointDelta.RotationLimitMax != nil {
+		constraint.SetAngularLowerLimit(bt.NewBtVector3(
+			float32(jointDelta.RotationLimitMin.X),
+			float32(jointDelta.RotationLimitMin.Y),
+			float32(jointDelta.RotationLimitMin.Z)))
+		constraint.SetAngularUpperLimit(bt.NewBtVector3(
+			float32(jointDelta.RotationLimitMax.X),
+			float32(jointDelta.RotationLimitMax.Y),
+			float32(jointDelta.RotationLimitMax.Z)))
+	}
+
+	// バネ定数の更新
+	if jointDelta.SpringConstantTranslation != nil && rigidBodyB.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
+		// 平行移動バネ設定
+		constraint.EnableSpring(0, true)
+		constraint.SetStiffness(0, float32(jointDelta.SpringConstantTranslation.X))
+		constraint.EnableSpring(1, true)
+		constraint.SetStiffness(1, float32(jointDelta.SpringConstantTranslation.Y))
+		constraint.EnableSpring(2, true)
+		constraint.SetStiffness(2, float32(jointDelta.SpringConstantTranslation.Z))
+	}
+
+	if jointDelta.SpringConstantRotation != nil && rigidBodyB.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
+		// 回転バネ設定
+		constraint.EnableSpring(3, true)
+		constraint.SetStiffness(3, float32(jointDelta.SpringConstantRotation.X))
+		constraint.EnableSpring(4, true)
+		constraint.SetStiffness(4, float32(jointDelta.SpringConstantRotation.Y))
+		constraint.EnableSpring(5, true)
+		constraint.SetStiffness(5, float32(jointDelta.SpringConstantRotation.Z))
+	}
+
+	// 拘束の再アクティブ化
+	mp.world.RemoveConstraint(constraint)
+	mp.world.AddConstraint(constraint)
+}
+
+// UpdateJointsSelectively は変更が必要なジョイントのみを選択的に更新します
+func (mp *MPhysics) UpdateJointsSelectively(
+	modelIndex int,
+	model *pmx.PmxModel,
+	jointDeltas *delta.JointDeltas,
+) {
+	if jointDeltas == nil {
+		return
+	}
+
+	// 変更があるジョイントのみ更新
+	jointDeltas.ForEach(func(index int, jointDelta *delta.JointDelta) bool {
+		if jointDelta == nil {
+			return true
+		}
+
+		joint, err := model.Joints.Get(index)
+		if err != nil || joint == nil {
+			return true
+		}
+
+		// 個別ジョイントのパラメーター更新
+		mp.UpdateJointParameters(modelIndex, joint, jointDelta)
+
+		return true
+	})
+}
+
 // deleteJoints はモデルの全ジョイントを削除します
 func (mp *MPhysics) deleteJoints(modelIndex int) {
 	for _, j := range mp.joints[modelIndex] {

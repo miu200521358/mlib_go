@@ -8,7 +8,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
 	"github.com/miu200521358/mlib_go/pkg/domain/vmd"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/miter"
 )
 
 func DeformModel(
@@ -313,47 +312,26 @@ func DeformForPhysicsWithPhysicsDeltas(
 
 	// 物理剛体のサイズ・形状更新（物理デルタがある場合）
 	if physicsDeltas != nil && physicsDeltas.RigidBodies != nil {
-		if err := miter.IterParallelByList(mmath.IntRanges(model.RigidBodies.Length()-1), 100, 0, func(i int, rigidBodyIndex int) error {
-			rigidBody, err := model.RigidBodies.Get(rigidBodyIndex)
-			if err != nil {
-				return err
-			}
-
+		model.RigidBodies.ForEach(func(rigidBodyIndex int, rigidBody *pmx.RigidBody) bool {
 			// 剛体デルタを確認
 			rigidBodyDelta := physicsDeltas.RigidBodies.Get(rigidBodyIndex)
-			if rigidBodyDelta != nil && rigidBodyDelta.Size != nil {
-				// サイズ変更があった場合、剛体の形状を更新
-				physics.UpdateRigidBodyShape(model.Index(), rigidBody, rigidBodyDelta)
+			if rigidBodyDelta != nil && (rigidBodyDelta.Size != nil || rigidBodyDelta.Mass != 0.0) {
+				// サイズ変更があった場合、剛体の形状・質量を更新
+				physics.UpdateRigidBodyShapeMass(model.Index(), rigidBody, rigidBodyDelta)
 			}
 
-			return nil
-		}, nil); err != nil {
-			return deltas
-		}
-	}
+			// 物理剛体位置を更新
+			if rigidBody.Bone != nil {
+				if (isEnabledPhysics && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC) ||
+					physicsResetType != vmd.PHYSICS_RESET_TYPE_NONE {
+					// 通常はボーン追従剛体・物理＋ボーン剛体だけ。物理リセット時は全部更新
+					physics.UpdateTransform(model.Index(), rigidBody.Bone,
+						deltas.Bones.Get(rigidBody.Bone.Index()).FilledGlobalMatrix(), rigidBody)
+				}
+			}
 
-	// 物理剛体位置を更新
-	if err := miter.IterParallelByList(mmath.IntRanges(model.RigidBodies.Length()-1), 100, 0, func(i int, rigidBodyIndex int) error {
-		rigidBody, err := model.RigidBodies.Get(rigidBodyIndex)
-		if err != nil {
-			return err
-		}
-
-		// 現在のボーン変形情報を保持
-		if rigidBody.Bone == nil || deltas.Bones.Get(rigidBody.Bone.Index()) == nil {
-			return nil
-		}
-
-		if (isEnabledPhysics && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_DYNAMIC) ||
-			physicsResetType != vmd.PHYSICS_RESET_TYPE_NONE {
-			// 通常はボーン追従剛体・物理＋ボーン剛体だけ。物理リセット時は全部更新
-			physics.UpdateTransform(model.Index(), rigidBody.Bone,
-				deltas.Bones.Get(rigidBody.Bone.Index()).FilledGlobalMatrix(), rigidBody)
-		}
-
-		return nil
-	}, nil); err != nil {
-		return deltas
+			return true
+		})
 	}
 
 	return deltas

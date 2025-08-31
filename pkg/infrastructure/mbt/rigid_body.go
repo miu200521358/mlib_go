@@ -304,19 +304,19 @@ func (mp *MPhysics) UpdateRigidBodiesSelectively(
 		}
 
 		// 個別剛体の形状を更新
-		mp.UpdateRigidBodyShape(modelIndex, rigidBody, rigidBodyDelta)
+		mp.UpdateRigidBodyShapeMass(modelIndex, rigidBody, rigidBodyDelta)
 
 		return true
 	})
 }
 
-// UpdateRigidBodyShape はサイズ変更時に剛体の形状を更新します
-func (mp *MPhysics) UpdateRigidBodyShape(
+// UpdateRigidBodyShapeMass はサイズ・質量変更時に剛体の形状を更新します
+func (mp *MPhysics) UpdateRigidBodyShapeMass(
 	modelIndex int,
 	rigidBody *pmx.RigidBody,
 	rigidBodyDelta *delta.RigidBodyDelta,
 ) {
-	if rigidBodyDelta == nil || rigidBodyDelta.Size == nil {
+	if rigidBodyDelta == nil || (rigidBodyDelta.Size == nil && rigidBodyDelta.Mass == 0.0) {
 		return
 	}
 
@@ -341,29 +341,45 @@ func (mp *MPhysics) UpdateRigidBodyShape(
 		currentMass = 1.0 / btRigidBody.GetInvMass()
 	}
 
-	// 一旦物理世界から削除
-	mp.world.RemoveRigidBody(btRigidBody)
-
-	// 古い形状を取得して削除
-	oldShape := btRigidBody.GetCollisionShape()
-	if oldShape != nil {
-		if collisionShape, ok := oldShape.(bt.BtCollisionShape); ok {
-			bt.DeleteBtCollisionShape(collisionShape)
-		}
+	// 新しい質量を決定
+	newMass := currentMass
+	if rigidBodyDelta.Mass != 0.0 && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
+		newMass = float32(mmath.Clamped(rigidBodyDelta.Mass, 0, math.MaxFloat64))
 	}
 
-	// 新しい形状を作成
-	newShape := mp.createCollisionShape(rigidBody, rigidBodyDelta)
+	// サイズが変更される場合は形状を再作成
+	needShapeUpdate := rigidBodyDelta.Size != nil
+	var newShape bt.BtCollisionShape
+	if needShapeUpdate {
+		// 一旦物理世界から削除
+		mp.world.RemoveRigidBody(btRigidBody)
+
+		// 古い形状を取得して削除
+		oldShape := btRigidBody.GetCollisionShape()
+		if oldShape != nil {
+			if collisionShape, ok := oldShape.(bt.BtCollisionShape); ok {
+				bt.DeleteBtCollisionShape(collisionShape)
+			}
+		}
+
+		// 新しい形状を作成
+		newShape = mp.createCollisionShape(rigidBody, rigidBodyDelta)
+		btRigidBody.SetCollisionShape(newShape)
+	}
 
 	// 新しい慣性テンソルを計算
 	newInertia := bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
-	if currentMass > 0 && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
-		newShape.CalculateLocalInertia(currentMass, newInertia)
+	if newMass > 0 && rigidBody.PhysicsType != pmx.PHYSICS_TYPE_STATIC {
+		currentShape := btRigidBody.GetCollisionShape()
+		if currentShape != nil {
+			if collisionShape, ok := currentShape.(bt.BtCollisionShape); ok {
+				collisionShape.CalculateLocalInertia(newMass, newInertia)
+			}
+		}
 	}
 
-	// 剛体の形状を更新
-	btRigidBody.SetCollisionShape(newShape)
-	btRigidBody.SetMassProps(currentMass, newInertia)
+	// 質量と慣性を更新
+	btRigidBody.SetMassProps(newMass, newInertia)
 
 	// 内部状態を更新
 	btRigidBody.UpdateInertiaTensor()
@@ -373,8 +389,10 @@ func (mp *MPhysics) UpdateRigidBodyShape(
 	btRigidBody.SetLinearVelocity(currentLinearVel)
 	btRigidBody.SetAngularVelocity(currentAngularVel)
 
-	// 物理世界に再追加
-	mp.world.AddRigidBody(btRigidBody, r.group, r.mask)
+	// サイズが変更された場合は物理世界に再追加
+	if needShapeUpdate {
+		mp.world.AddRigidBody(btRigidBody, r.group, r.mask)
+	}
 
 	// 物理フラグを更新
 	mp.updateFlag(modelIndex, rigidBody)
