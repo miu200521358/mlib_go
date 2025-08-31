@@ -140,7 +140,7 @@ func (mp *MotionPlayer) SetPlaying(playing bool) {
 	}
 
 	// 再生前処理
-	mp.window.StorePhysicsReset(mp.GetStartPlayingResetType())
+	mp.window.StorePhysicsReset(mp.GetStartPlayingResetType(playing))
 	mp.EnabledInPlaying(playing)
 	mp.OnChangePlayingPre(playing)
 
@@ -207,7 +207,11 @@ func (mp *MotionPlayer) SetStartPlayingResetType(f func() vmd.PhysicsResetType) 
 	mp.startPlayingResetType = f
 }
 
-func (mp *MotionPlayer) GetStartPlayingResetType() vmd.PhysicsResetType {
+func (mp *MotionPlayer) GetStartPlayingResetType(playing bool) vmd.PhysicsResetType {
+	if !playing {
+		// 再生でなければリセットしない
+		return vmd.PHYSICS_RESET_TYPE_NONE
+	}
 	if mp.startPlayingResetType != nil {
 		return mp.startPlayingResetType()
 	}
