@@ -423,11 +423,8 @@ func (vl *ViewerList) resetPhysics(
 				physicsResetType,
 			)
 
-			// レンダリング処理
-			for n := len(vl.windowList); n > 0; n-- {
-				// サブビューワーオーバーレイのため、逆順でレンダリング
-				vl.windowList[n-1].render()
-			}
+			// 1枚目だけレンダリング処理
+			vl.windowList[0].render()
 		}
 	}
 }
