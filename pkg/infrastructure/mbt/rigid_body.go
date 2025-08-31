@@ -344,6 +344,14 @@ func (mp *MPhysics) UpdateRigidBodyShape(
 	// 一旦物理世界から削除
 	mp.world.RemoveRigidBody(btRigidBody)
 
+	// 古い形状を取得して削除
+	oldShape := btRigidBody.GetCollisionShape()
+	if oldShape != nil {
+		if collisionShape, ok := oldShape.(bt.BtCollisionShape); ok {
+			bt.DeleteBtCollisionShape(collisionShape)
+		}
+	}
+
 	// 新しい形状を作成
 	newShape := mp.createCollisionShape(rigidBody, rigidBodyDelta)
 
@@ -357,6 +365,9 @@ func (mp *MPhysics) UpdateRigidBodyShape(
 	btRigidBody.SetCollisionShape(newShape)
 	btRigidBody.SetMassProps(currentMass, newInertia)
 
+	// 内部状態を更新
+	btRigidBody.UpdateInertiaTensor()
+
 	// 位置と速度を復元
 	motionState.SetWorldTransform(currentTransform)
 	btRigidBody.SetLinearVelocity(currentLinearVel)
@@ -367,4 +378,7 @@ func (mp *MPhysics) UpdateRigidBodyShape(
 
 	// 物理フラグを更新
 	mp.updateFlag(modelIndex, rigidBody)
+
+	// 剛体をアクティブにしてワールドの再計算を促す
+	btRigidBody.Activate(true)
 }
