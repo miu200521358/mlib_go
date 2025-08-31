@@ -346,9 +346,7 @@ func (vl *ViewerList) updatePhysicsSelectively(vw *ViewWindow, frame float32, ph
 		}
 
 		// 剛体デルタがある場合のみ選択的更新を実行
-		if physicsDeltas[n].RigidBodies != nil {
-			vw.physics.UpdateRigidBodiesSelectively(model.Model.Index(), model.Model, physicsDeltas[n].RigidBodies)
-		}
+		vw.physics.UpdateRigidBodiesSelectively(model.Model.Index(), model.Model, physicsDeltas[n].RigidBodies)
 
 		// 物理再設定（物理デルタ情報を含む）
 		vw.vmdDeltas[n] = deform.DeformForPhysicsWithPhysicsDeltas(
