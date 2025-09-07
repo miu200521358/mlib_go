@@ -21,7 +21,7 @@ func (mp *MPhysics) initJoints(modelIndex int, rigidBodies *pmx.RigidBodies, j *
 	// ジョイントを順番に剛体と紐付けていく
 	mp.joints[modelIndex] = make([]*jointValue, j.Length())
 	j.ForEach(func(index int, joint *pmx.Joint) bool {
-		if rigidBodies.Contains(joint.RigidbodyIndexA) && rigidBodies.Contains(joint.RigidbodyIndexB) {
+		if rigidBodies.Contains(joint.RigidBodyIndexA) && rigidBodies.Contains(joint.RigidBodyIndexB) {
 			// ジョイントの位置と向き
 			jointTransform := bt.NewBtTransform(newBulletFromRad(joint.Rotation), newBulletFromVec(joint.Position))
 
@@ -66,19 +66,19 @@ func (mp *MPhysics) initJointsByBoneDeltas(
 
 // canCreateJoint はジョイントが作成可能かチェックします
 func (mp *MPhysics) canCreateJoint(joint *pmx.Joint, rigidBodies *pmx.RigidBodies) bool {
-	return rigidBodies.Contains(joint.RigidbodyIndexA) && rigidBodies.Contains(joint.RigidbodyIndexB)
+	return rigidBodies.Contains(joint.RigidBodyIndexA) && rigidBodies.Contains(joint.RigidBodyIndexB)
 }
 
 // findReferenceBone はジョイントの参照ボーンを検索します
 func (mp *MPhysics) findReferenceBone(joint *pmx.Joint, rigidBodies *pmx.RigidBodies) *pmx.Bone {
 	// 剛体AまたはBに関連するボーンを検索
-	if rb, err := rigidBodies.Get(joint.RigidbodyIndexA); err == nil {
+	if rb, err := rigidBodies.Get(joint.RigidBodyIndexA); err == nil {
 		if rb.Bone != nil {
 			return rb.Bone
 		}
 	}
 
-	if rb, err := rigidBodies.Get(joint.RigidbodyIndexB); err == nil {
+	if rb, err := rigidBodies.Get(joint.RigidBodyIndexB); err == nil {
 		if rb.Bone != nil {
 			return rb.Bone
 		}
@@ -123,9 +123,9 @@ func (mp *MPhysics) initJoint(
 	}
 
 	// 剛体の取得
-	rigidBodyB := mp.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody
-	btRigidBodyA := mp.rigidBodies[modelIndex][joint.RigidbodyIndexA].btRigidBody
-	btRigidBodyB := mp.rigidBodies[modelIndex][joint.RigidbodyIndexB].btRigidBody
+	rigidBodyB := mp.rigidBodies[modelIndex][joint.RigidBodyIndexB].pmxRigidBody
+	btRigidBodyA := mp.rigidBodies[modelIndex][joint.RigidBodyIndexA].btRigidBody
+	btRigidBodyB := mp.rigidBodies[modelIndex][joint.RigidBodyIndexB].btRigidBody
 
 	// 剛体ローカル座標系におけるジョイント変換を計算
 	jointLocalTransforms := mp.calculateJointLocalTransforms(btRigidBodyA, btRigidBodyB, jointTransform)
@@ -145,10 +145,10 @@ func (mp *MPhysics) initJoint(
 
 // validateJointRigidBodies はジョイントに関連する剛体が有効か検証します
 func (mp *MPhysics) validateJointRigidBodies(modelIndex int, joint *pmx.Joint) bool {
-	return mp.rigidBodies[modelIndex][joint.RigidbodyIndexB] != nil &&
-		mp.rigidBodies[modelIndex][joint.RigidbodyIndexA] != nil &&
-		mp.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody != nil &&
-		mp.rigidBodies[modelIndex][joint.RigidbodyIndexA].pmxRigidBody != nil
+	return mp.rigidBodies[modelIndex][joint.RigidBodyIndexB] != nil &&
+		mp.rigidBodies[modelIndex][joint.RigidBodyIndexA] != nil &&
+		mp.rigidBodies[modelIndex][joint.RigidBodyIndexB].pmxRigidBody != nil &&
+		mp.rigidBodies[modelIndex][joint.RigidBodyIndexA].pmxRigidBody != nil
 }
 
 // calculateJointLocalTransforms は剛体のローカル座標系におけるジョイント変換を計算します
@@ -297,7 +297,7 @@ func (mp *MPhysics) UpdateJointParameters(
 	}
 
 	// 剛体Bの取得（バネ設定に必要）
-	rigidBodyB := mp.rigidBodies[modelIndex][joint.RigidbodyIndexB].pmxRigidBody
+	rigidBodyB := mp.rigidBodies[modelIndex][joint.RigidBodyIndexB].pmxRigidBody
 	if rigidBodyB == nil {
 		return
 	}

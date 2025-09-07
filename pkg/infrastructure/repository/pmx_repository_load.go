@@ -1099,12 +1099,12 @@ func (rep *PmxRepository) loadJoints(model *pmx.PmxModel) error {
 			return err
 		}
 		// n  : 剛体Indexサイズ  | 関連剛体AのIndex - 関連なしの場合は-1
-		joint.RigidbodyIndexA, err = rep.unpackRigidBodyIndex(model)
+		joint.RigidBodyIndexA, err = rep.unpackRigidBodyIndex(model)
 		if err != nil {
 			return err
 		}
 		// n  : 剛体Indexサイズ  | 関連剛体BのIndex - 関連なしの場合は-1
-		joint.RigidbodyIndexB, err = rep.unpackRigidBodyIndex(model)
+		joint.RigidBodyIndexB, err = rep.unpackRigidBodyIndex(model)
 		if err != nil {
 			return err
 		}

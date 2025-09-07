@@ -38,8 +38,8 @@ type Joint struct {
 	name            string       // ジョイント名
 	englishName     string       // ジョイント英名
 	JointType       byte         // Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
-	RigidbodyIndexA int          // 関連剛体AのIndex
-	RigidbodyIndexB int          // 関連剛体BのIndex
+	RigidBodyIndexA int          // 関連剛体AのIndex
+	RigidBodyIndexB int          // 関連剛体BのIndex
 	Position        *mmath.MVec3 // 位置(x,y,z)
 	Rotation        *mmath.MVec3 // 回転
 	JointParam      *JointParam  // ジョイントパラメーター
@@ -53,8 +53,8 @@ func NewJoint() *Joint {
 		englishName: "",
 		// Joint種類 - 0:スプリング6DOF   | PMX2.0では 0 のみ(拡張用)
 		JointType:       0,
-		RigidbodyIndexA: -1,
-		RigidbodyIndexB: -1,
+		RigidBodyIndexA: -1,
+		RigidBodyIndexB: -1,
 		Position:        mmath.NewMVec3(),
 		Rotation:        mmath.NewMVec3(),
 		JointParam:      NewJointParam(),
@@ -96,8 +96,8 @@ func (joint *Joint) Copy() core.IIndexNameModel {
 		name:            joint.name,
 		englishName:     joint.englishName,
 		JointType:       joint.JointType,
-		RigidbodyIndexA: joint.RigidbodyIndexA,
-		RigidbodyIndexB: joint.RigidbodyIndexB,
+		RigidBodyIndexA: joint.RigidBodyIndexA,
+		RigidBodyIndexB: joint.RigidBodyIndexB,
 		Position:        joint.Position.Copy(),
 		Rotation:        joint.Rotation.Copy(),
 		JointParam:      joint.JointParam,

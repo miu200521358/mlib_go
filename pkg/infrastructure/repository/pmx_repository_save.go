@@ -1022,11 +1022,11 @@ func (rep *PmxRepository) saveJoints(fout *os.File, model *pmx.PmxModel, rigidbo
 		if err != nil {
 			return false
 		}
-		err = rep.writeNumber(fout, rigidbodyIdxType, float64(joint.RigidbodyIndexA), 0.0, false)
+		err = rep.writeNumber(fout, rigidbodyIdxType, float64(joint.RigidBodyIndexA), 0.0, false)
 		if err != nil {
 			return false
 		}
-		err = rep.writeNumber(fout, rigidbodyIdxType, float64(joint.RigidbodyIndexB), 0.0, false)
+		err = rep.writeNumber(fout, rigidbodyIdxType, float64(joint.RigidBodyIndexB), 0.0, false)
 		if err != nil {
 			return false
 		}
