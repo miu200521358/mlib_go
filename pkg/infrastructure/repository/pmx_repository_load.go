@@ -605,7 +605,9 @@ func (rep *PmxRepository) loadBones(model *pmx.PmxModel) error {
 	bones := pmx.NewBones(totalBoneCount)
 
 	for i := range totalBoneCount {
-		bone := &pmx.Bone{}
+		bone := &pmx.Bone{
+			DisplaySlotIndex: -1,
+		}
 		bone.SetIndex(i)
 		// 4 + n : TextBuf	| ボーン名
 		bone.SetName(rep.readText())

@@ -47,3 +47,20 @@ func (displaySlots *DisplaySlots) GetRootDisplaySlot() (*DisplaySlot, error) {
 func (displaySlots *DisplaySlots) GetMorphDisplaySlot() (*DisplaySlot, error) {
 	return displaySlots.GetByName("表情")
 }
+
+func (displaySlots *DisplaySlots) Setup(bones *Bones) {
+	bones.ForEach(func(boneIndex int, bone *Bone) bool {
+		displaySlots.ForEach(func(index int, slot *DisplaySlot) bool {
+			for _, reference := range slot.References {
+				if reference.DisplayType == DISPLAY_TYPE_BONE && reference.DisplayIndex == boneIndex {
+					// 該当ボーンの表示枠を設定
+					bone.DisplaySlotIndex = slot.Index()
+					return false
+				}
+			}
+			return true
+		})
+
+		return true
+	})
+}

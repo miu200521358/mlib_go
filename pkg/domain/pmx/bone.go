@@ -87,7 +87,7 @@ type Bone struct {
 	LocalAxisZ             *mmath.MVec3 // ローカル軸:1 の場合 Z軸の方向ベクトル
 	EffectorKey            int          // 外部親変形:1 の場合 Key値
 	Ik                     *Ik          // IK:1 の場合 IKデータを格納
-	DisplaySlot            int          // 該当表示枠
+	DisplaySlotIndex       int          // 該当表示枠
 	IsSystem               bool         // システム計算用追加ボーン の場合 true
 	NormalizedLocalAxisX   *mmath.MVec3 // 計算済みのX軸の方向ベクトル
 	NormalizedLocalAxisY   *mmath.MVec3 // 計算済みのY軸の方向ベクトル
@@ -136,7 +136,7 @@ func NewBone() *Bone {
 		LocalAxisZ:             nil,
 		EffectorKey:            -1,
 		Ik:                     nil,
-		DisplaySlot:            -1,
+		DisplaySlotIndex:       -1,
 		IsSystem:               false,
 		NormalizedLocalAxisX:   &mmath.MVec3{X: 1, Y: 0, Z: 0},
 		NormalizedLocalAxisY:   &mmath.MVec3{X: 0, Y: 1, Z: 0},
@@ -218,20 +218,20 @@ func (bone *Bone) Copy() core.IIndexNameModel {
 	}
 
 	copied := &Bone{
-		index:        bone.index,
-		name:         bone.name,
-		englishName:  bone.englishName,
-		Position:     bone.Position.Copy(),
-		ParentIndex:  bone.ParentIndex,
-		Layer:        bone.Layer,
-		BoneFlag:     bone.BoneFlag,
-		TailIndex:    bone.TailIndex,
-		EffectIndex:  bone.EffectIndex,
-		EffectFactor: bone.EffectFactor,
-		EffectorKey:  bone.EffectorKey,
-		Ik:           copiedIk,
-		DisplaySlot:  bone.DisplaySlot,
-		IsSystem:     bone.IsSystem,
+		index:            bone.index,
+		name:             bone.name,
+		englishName:      bone.englishName,
+		Position:         bone.Position.Copy(),
+		ParentIndex:      bone.ParentIndex,
+		Layer:            bone.Layer,
+		BoneFlag:         bone.BoneFlag,
+		TailIndex:        bone.TailIndex,
+		EffectIndex:      bone.EffectIndex,
+		EffectFactor:     bone.EffectFactor,
+		EffectorKey:      bone.EffectorKey,
+		Ik:               copiedIk,
+		DisplaySlotIndex: bone.DisplaySlotIndex,
+		IsSystem:         bone.IsSystem,
 	}
 
 	if bone.TailPosition != nil {

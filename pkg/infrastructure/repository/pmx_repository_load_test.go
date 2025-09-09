@@ -776,12 +776,12 @@ func TestPmxReader_Load(t *testing.T) {
 			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, j.EnglishName())
 		}
 		expectedRigidBodyIndexA := 5
-		if j.RigidbodyIndexA != expectedRigidBodyIndexA {
-			t.Errorf("Expected RigidBodyIndexA to be %v, got %v", expectedRigidBodyIndexA, j.RigidbodyIndexA)
+		if j.RigidBodyIndexA != expectedRigidBodyIndexA {
+			t.Errorf("Expected RigidBodyIndexA to be %v, got %v", expectedRigidBodyIndexA, j.RigidBodyIndexA)
 		}
 		expectedRigidBodyIndexB := 45
-		if j.RigidbodyIndexB != expectedRigidBodyIndexB {
-			t.Errorf("Expected RigidBodyIndexB to be %v, got %v", expectedRigidBodyIndexB, j.RigidbodyIndexB)
+		if j.RigidBodyIndexB != expectedRigidBodyIndexB {
+			t.Errorf("Expected RigidBodyIndexB to be %v, got %v", expectedRigidBodyIndexB, j.RigidBodyIndexB)
 		}
 		expectedPosition := &mmath.MVec3{X: -1.189768, Y: 18.56266, Z: 0.07277258}
 		if !j.Position.MMD().NearEquals(expectedPosition, 1e-5) {

@@ -140,6 +140,7 @@ func (model *PmxModel) Setup() {
 	// セットアップ
 	model.Materials.Setup(model.Vertices, model.Faces, model.Textures)
 	model.Bones.Setup()
+	model.DisplaySlots.Setup(model.Bones)
 	model.RigidBodies.Setup(model.Bones)
 	model.UpdateHash()
 }
