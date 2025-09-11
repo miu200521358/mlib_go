@@ -188,12 +188,6 @@ func (baseFrames *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {
 		return
 	}
 
-	if baseFrames.values.Has(f.Index()) {
-		// 既に登録済みの場合、更新
-		baseFrames.Update(f)
-		return
-	}
-
 	if isSplitCurve {
 		// 補間曲線を分割する
 		prevF := baseFrames.Get(baseFrames.PrevFrame(f.Index()))
@@ -204,6 +198,12 @@ func (baseFrames *BaseFrames[T]) appendOrInsert(f T, isSplitCurve bool) {
 			index := f.Index()
 			f.splitCurve(prevF, nextF, index)
 		}
+	}
+
+	if baseFrames.values.Has(f.Index()) {
+		// 既に登録済みの場合、更新
+		baseFrames.Update(f)
+		return
 	}
 
 	baseFrames.appendFrame(f)
