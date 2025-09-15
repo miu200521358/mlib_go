@@ -43,15 +43,16 @@ func NewMPhysics(gravity *mmath.MVec3) physics.IPhysics {
 		joints:      make(map[int][]*jointValue),
 
 		// 風のデフォルト設定（無効）
-		windCfg: physics.WindConfig{
-			Enabled:          false,
-			Direction:        &mmath.MVec3{X: 1, Y: 0, Z: 0},
-			Speed:            0,
-			Randomness:       0,
-			TurbulenceFreqHz: 0.5,
-			DragCoeff:        1.0,
-			LiftCoeff:        0.2,
-		},
+        windCfg: physics.WindConfig{
+            Enabled:          false,
+            Direction:        &mmath.MVec3{X: 1, Y: 0, Z: 0},
+            Speed:            0,
+            Randomness:       0,
+            TurbulenceFreqHz: 0.5,
+            DragCoeff:        1.0,
+            LiftCoeff:        0.2,
+            MaxAcceleration:  80.0,
+        },
 		simTimeAcc: 0,
 	}
 
@@ -216,51 +217,69 @@ func (mp *MPhysics) applyWindForces(dt float32) {
 			// 断面積の近似（MMD座標系でOK: 絶対値なので X 反転の影響なし）
 			area := mp.approxCrossSectionArea(rb.pmxRigidBody, dir)
 
+			// 相対速度の単位ベクトル
+			invSpeed := 1.0 / speed
+			nrx := relX * invSpeed
+			nry := relY * invSpeed
+			nrz := relZ * invSpeed
+
 			// 抵抗（風に合わせる方向: -v_rel = v_wind - v_body）
 			// Fd = k_d * A * |v_rel|^2
 			kd := float64(mp.windCfg.DragCoeff)
-			forceMagD := kd * float64(area) * speed2
-			invSpeed := 1.0 / speed
-			dragX := float32(forceMagD * (-relX * invSpeed))
-			dragY := float32(forceMagD * (-relY * invSpeed))
-			dragZ := float32(forceMagD * (-relZ * invSpeed))
+			magD := kd * float64(area) * speed2
+			fDx := float32(-magD * nrx)
+			fDy := float32(-magD * nry)
+			fDz := float32(-magD * nrz)
 
-			fDrag := bt.NewBtVector3(dragX, dragY, dragZ)
-			rb.btRigidBody.ApplyCentralForce(fDrag)
-			bt.DeleteBtVector3(fDrag)
-
-			// 簡易揚力（v_rel と世界Up から垂直成分を作る）
+			// 簡易揚力: up を v_rel に直交な平面へ正射影した方向
 			kl := float64(mp.windCfg.LiftCoeff)
+			fLx, fLy, fLz := float32(0), float32(0), float32(0)
 			if kl > 0 {
-				// world up (Bullet座標)
-				up := bt.NewBtVector3(float32(0), float32(1), float32(0))
-				vRel := bt.NewBtVector3(float32(relX), float32(relY), float32(relZ))
-				// 側方ベクトル = up x v_rel
-				side := up.Cross(vRel)
-				sideLen := float64(side.Length())
-				if sideLen > 1.0e-6 {
-					// 揚力方向 = v_rel x side（v_rel に直交、かつ up にも依存）
-					liftDir := vRel.Cross(side)
-					ldLen := float64(liftDir.Length())
-					if ldLen > 1.0e-6 {
-						invLd := float32(1.0 / ldLen)
-						liftDir.SetX(liftDir.GetX() * invLd)
-						liftDir.SetY(liftDir.GetY() * invLd)
-						liftDir.SetZ(liftDir.GetZ() * invLd)
-
-						forceMagL := float32(kl * float64(area) * speed2)
-						liftDir.SetX(liftDir.GetX() * forceMagL)
-						liftDir.SetY(liftDir.GetY() * forceMagL)
-						liftDir.SetZ(liftDir.GetZ() * forceMagL)
-
-						rb.btRigidBody.ApplyCentralForce(liftDir)
-					}
-					bt.DeleteBtVector3(liftDir)
+				ux, uy, uz := 0.0, 1.0, 0.0
+				dotUn := ux*nrx + uy*nry + uz*nrz
+				lx := ux - dotUn*nrx
+				ly := uy - dotUn*nry
+				lz := uz - dotUn*nrz
+				l2 := lx*lx + ly*ly + lz*lz
+				if l2 > 1.0e-8 {
+					invL := 1.0 / math.Sqrt(l2)
+					lx *= invL
+					ly *= invL
+					lz *= invL
+					magL := kl * float64(area) * speed2
+					fLx = float32(magL * lx)
+					fLy = float32(magL * ly)
+					fLz = float32(magL * lz)
 				}
-				bt.DeleteBtVector3(side)
-				bt.DeleteBtVector3(vRel)
-				bt.DeleteBtVector3(up)
 			}
+
+			// 合力
+			fTx := fDx + fLx
+			fTy := fDy + fLy
+			fTz := fDz + fLz
+
+			// 安定化: 最大加速度でクランプ
+			maxA := float64(mp.windCfg.MaxAcceleration)
+			if maxA > 0 {
+				mass := float64(rb.btRigidBody.GetMass())
+				if mass > 0 {
+					f2 := float64(fTx)*float64(fTx) + float64(fTy)*float64(fTy) + float64(fTz)*float64(fTz)
+					if f2 > 0 {
+						fmag := math.Sqrt(f2)
+						a := fmag / mass
+						if a > maxA {
+							scale := float32((mass * maxA) / fmag)
+							fTx *= scale
+							fTy *= scale
+							fTz *= scale
+						}
+					}
+				}
+			}
+
+			fTotal := bt.NewBtVector3(fTx, fTy, fTz)
+			rb.btRigidBody.ApplyCentralForce(fTotal)
+			bt.DeleteBtVector3(fTotal)
 
 			// 剛体をアクティブ化
 			rb.btRigidBody.Activate(true)

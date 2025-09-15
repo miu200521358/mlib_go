@@ -22,6 +22,7 @@ type WindConfig struct {
 	TurbulenceFreqHz float32      // 乱流の周波数[Hz]
 	DragCoeff        float32      // 抵抗係数（0.5*rho*Cd*A を吸収）
 	LiftCoeff        float32      // 揚力係数（0.5*rho*Cl*A を吸収）
+	MaxAcceleration  float32      // 風力による最大加速度の上限 [unit/s^2]
 }
 
 // IPhysics 物理エンジンのインターフェース
