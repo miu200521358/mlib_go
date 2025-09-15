@@ -53,6 +53,16 @@ type CollisionGroup struct {
 	IsCollisions []uint16
 }
 
+func (cg CollisionGroup) Value() int {
+	var value uint16 = 0
+	for i, v := range cg.IsCollisions {
+		if v == 1 {
+			value |= CollisionGroupFlags[i]
+		}
+	}
+	return int(value)
+}
+
 var CollisionGroupFlags = []uint16{
 	0x0001, // 0:グループ1
 	0x0002, // 1:グループ2
@@ -76,6 +86,19 @@ func NewCollisionGroupFromSlice(collisionGroup []uint16) CollisionGroup {
 	groups := CollisionGroup{}
 	collisionGroupMask := uint16(0)
 	for i, v := range collisionGroup {
+		if v == 1 {
+			collisionGroupMask |= CollisionGroupFlags[i]
+		}
+	}
+	groups.IsCollisions = NewCollisionGroup(collisionGroupMask)
+
+	return groups
+}
+
+func NewCollisionGroupAll() CollisionGroup {
+	groups := CollisionGroup{}
+	collisionGroupMask := uint16(0)
+	for i, v := range []uint16{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1} {
 		if v == 1 {
 			collisionGroupMask |= CollisionGroupFlags[i]
 		}
