@@ -68,6 +68,14 @@ func (bf *BoneFrame) Add(v *BoneFrame) *BoneFrame {
 		}
 	}
 
+	if bf.UnitRotation != nil || v.UnitRotation != nil {
+		if bf.UnitRotation == nil {
+			bf.UnitRotation = v.UnitRotation.Copy()
+		} else if v.UnitRotation != nil {
+			bf.UnitRotation.Mul(v.UnitRotation)
+		}
+	}
+
 	if bf.CancelableRotation != nil || v.CancelableRotation != nil {
 		if bf.CancelableRotation == nil {
 			bf.CancelableRotation = v.CancelableRotation.Copy()
