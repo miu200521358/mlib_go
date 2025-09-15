@@ -1722,3 +1722,48 @@ func (bones *Bones) InsertShortageOverrideBones() error {
 
 	return nil
 }
+
+// InsertSystemTailBones システム用不足ボーン作成
+func (bones *Bones) InsertSystemTailBones() error {
+
+	// 体幹系
+	for _, funcs := range [][]func(direction BoneDirection) (*Bone, error){
+		{bones.GetToeT, bones.CreateToeT},
+		{bones.GetHeel, bones.CreateHeel},
+		{bones.GetWristTail, bones.CreateWristTail},
+	} {
+		getFunc := funcs[0]
+		createFunc := funcs[1]
+
+		for _, direction := range []BoneDirection{BONE_DIRECTION_LEFT, BONE_DIRECTION_RIGHT} {
+			if bone, err := getFunc(direction); err != nil && merr.IsNameNotFoundError(err) && bone == nil {
+				if bone, err := createFunc(direction); err == nil && bone != nil {
+					if err := bones.Insert(bone); err != nil {
+						return err
+					} else {
+						// 追加したボーンの親ボーンを、同じく親ボーンに設定しているボーンの親ボーンを追加ボーンに置き換える
+						bones.ForEach(func(i int, b *Bone) bool {
+							if b.ParentIndex == bone.ParentIndex && b.Index() != bone.Index() &&
+								b.EffectIndex != bone.Index() && bone.EffectIndex != b.Index() &&
+								((strings.Contains(bone.Name(), "上") && !strings.Contains(b.Name(), "下") &&
+									!strings.Contains(b.Name(), "左") && !strings.Contains(b.Name(), "右")) ||
+									(strings.Contains(bone.Name(), "下") && !strings.Contains(b.Name(), "上") &&
+										!strings.Contains(b.Name(), "左") && !strings.Contains(b.Name(), "右"))) {
+								b.ParentIndex = bone.Index()
+							}
+							return true
+						})
+						// セットアップしなおし
+						bones.Setup()
+					}
+				} else {
+					return err
+				}
+			} else if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
