@@ -4,6 +4,8 @@
 package mbt
 
 import (
+	"math"
+
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
@@ -21,6 +23,10 @@ type MPhysics struct {
 	PhysicsSpf  float32                    // 物理spf
 	joints      map[int][]*jointValue      // ジョイント
 	rigidBodies map[int][]*rigidBodyValue  // 剛体
+
+	// 風の設定
+	windCfg    physics.WindConfig
+	simTimeAcc float32 // 経過時間[秒]
 }
 
 // NewMPhysics は物理エンジンのインスタンスを生成します
@@ -35,6 +41,18 @@ func NewMPhysics(gravity *mmath.MVec3) physics.IPhysics {
 		},
 		rigidBodies: make(map[int][]*rigidBodyValue),
 		joints:      make(map[int][]*jointValue),
+
+		// 風のデフォルト設定（無効）
+		windCfg: physics.WindConfig{
+			Enabled:          false,
+			Direction:        &mmath.MVec3{X: 1, Y: 0, Z: 0},
+			Speed:            0,
+			Randomness:       0,
+			TurbulenceFreqHz: 0.5,
+			DragCoeff:        1.0,
+			LiftCoeff:        0.2,
+		},
+		simTimeAcc: 0,
 	}
 
 	// デバッグビューワーの初期化
@@ -95,7 +113,199 @@ func (mp *MPhysics) DeleteModel(modelIndex int) {
 
 // StepSimulation は物理シミュレーションを1ステップ進めます
 func (mp *MPhysics) StepSimulation(timeStep float32, maxSubSteps int, fixedTimeStep float32) {
+	// 風力の適用（物理更新の直前）
+	mp.applyWindForces(timeStep)
 	mp.world.StepSimulation(timeStep, maxSubSteps, fixedTimeStep)
+}
+
+// EnableWind 風の有効/無効を切り替える
+func (mp *MPhysics) EnableWind(enable bool) {
+	mp.windCfg.Enabled = enable
+}
+
+// SetWind 風向き・風速・ランダム性を設定する
+//
+//	direction: MMD座標系の風向ベクトル（正規化されていなくてもOK）
+//	speed: 風速の基本値（単位/秒）
+//	randomness: 0..1 程度の乱れの強さ
+func (mp *MPhysics) SetWind(direction *mmath.MVec3, speed float32, randomness float32) {
+	if direction != nil {
+		mp.windCfg.Direction = direction.Copy()
+	}
+	mp.windCfg.Speed = speed
+	if randomness < 0 {
+		randomness = 0
+	}
+	mp.windCfg.Randomness = randomness
+}
+
+// SetWindAdvanced 風の詳細パラメータを設定する
+//
+//	dragCoeff, liftCoeff は 0.5*rho*Cd*A, 0.5*rho*Cl*A を吸収した係数として扱う
+//	turbulenceFreqHz はガストの周波数[Hz]
+func (mp *MPhysics) SetWindAdvanced(dragCoeff, liftCoeff, turbulenceFreqHz float32) {
+	if dragCoeff >= 0 {
+		mp.windCfg.DragCoeff = dragCoeff
+	}
+	if liftCoeff >= 0 {
+		mp.windCfg.LiftCoeff = liftCoeff
+	}
+	if turbulenceFreqHz > 0 {
+		mp.windCfg.TurbulenceFreqHz = turbulenceFreqHz
+	}
+}
+
+// applyWindForces 風の力（抵抗 + 簡易揚力）を動的剛体に付与する
+func (mp *MPhysics) applyWindForces(dt float32) {
+	if !mp.windCfg.Enabled {
+		return
+	}
+	if mp.windCfg.Speed == 0 {
+		return
+	}
+
+	mp.simTimeAcc += dt
+
+	// 乱流係数: 1 + r*sin + r*0.5*sin
+	r := float64(mmath.Clamped(float64(mp.windCfg.Randomness), 0, 1))
+	f := math.Max(0.0001, float64(mp.windCfg.TurbulenceFreqHz))
+	t := float64(mp.simTimeAcc)
+	gust := 1.0 + r*(0.6*math.Sin(2*math.Pi*f*t)+0.4*math.Sin(2*math.Pi*1.73*f*t+0.9))
+
+	// 風速（MMD座標系）→ Bullet座標系ベクトル
+	dir := mp.windCfg.Direction.Copy().Normalized()
+	windSpeed := float64(mp.windCfg.Speed) * gust
+	windVecMmd := dir.MuledScalar(windSpeed)
+	windVecBt := newBulletFromVec(windVecMmd)
+
+	// Bullet座標の風の各成分
+	windX := float64(windVecBt.GetX())
+	windY := float64(windVecBt.GetY())
+	windZ := float64(windVecBt.GetZ())
+
+	// 各モデル・各剛体に適用
+	for _, bodies := range mp.rigidBodies {
+		if bodies == nil {
+			continue
+		}
+		for _, rb := range bodies {
+			if rb == nil || rb.btRigidBody == nil || rb.pmxRigidBody == nil {
+				continue
+			}
+			// 静的剛体はスキップ
+			if rb.pmxRigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
+				continue
+			}
+
+			// 相対速度 v_rel = v_body - v_wind
+			v := rb.btRigidBody.GetLinearVelocity()
+			vx := float64(v.GetX())
+			vy := float64(v.GetY())
+			vz := float64(v.GetZ())
+
+			relX := vx - windX
+			relY := vy - windY
+			relZ := vz - windZ
+			speed2 := relX*relX + relY*relY + relZ*relZ
+			if speed2 < 1.0e-12 {
+				continue
+			}
+
+			speed := math.Sqrt(speed2)
+
+			// 断面積の近似（MMD座標系でOK: 絶対値なので X 反転の影響なし）
+			area := mp.approxCrossSectionArea(rb.pmxRigidBody, dir)
+
+			// 抵抗（風に合わせる方向: -v_rel = v_wind - v_body）
+			// Fd = k_d * A * |v_rel|^2
+			kd := float64(mp.windCfg.DragCoeff)
+			forceMagD := kd * float64(area) * speed2
+			invSpeed := 1.0 / speed
+			dragX := float32(forceMagD * (-relX * invSpeed))
+			dragY := float32(forceMagD * (-relY * invSpeed))
+			dragZ := float32(forceMagD * (-relZ * invSpeed))
+
+			fDrag := bt.NewBtVector3(dragX, dragY, dragZ)
+			rb.btRigidBody.ApplyCentralForce(fDrag)
+			bt.DeleteBtVector3(fDrag)
+
+			// 簡易揚力（v_rel と世界Up から垂直成分を作る）
+			kl := float64(mp.windCfg.LiftCoeff)
+			if kl > 0 {
+				// world up (Bullet座標)
+				up := bt.NewBtVector3(0, 1, 0)
+				vRel := bt.NewBtVector3(float32(relX), float32(relY), float32(relZ))
+				// 側方ベクトル = up x v_rel
+				side := up.Cross(vRel)
+				sideLen := float64(side.Length())
+				if sideLen > 1.0e-6 {
+					// 揚力方向 = v_rel x side（v_rel に直交、かつ up にも依存）
+					liftDir := vRel.Cross(side)
+					ldLen := float64(liftDir.Length())
+					if ldLen > 1.0e-6 {
+						invLd := float32(1.0 / ldLen)
+						liftDir.SetX(liftDir.GetX() * invLd)
+						liftDir.SetY(liftDir.GetY() * invLd)
+						liftDir.SetZ(liftDir.GetZ() * invLd)
+
+						forceMagL := float32(kl * float64(area) * speed2)
+						liftDir.SetX(liftDir.GetX() * forceMagL)
+						liftDir.SetY(liftDir.GetY() * forceMagL)
+						liftDir.SetZ(liftDir.GetZ() * forceMagL)
+
+						rb.btRigidBody.ApplyCentralForce(liftDir)
+					}
+					bt.DeleteBtVector3(liftDir)
+				}
+				bt.DeleteBtVector3(side)
+				bt.DeleteBtVector3(vRel)
+				bt.DeleteBtVector3(up)
+			}
+
+			// 剛体をアクティブ化
+			rb.btRigidBody.Activate(true)
+		}
+	}
+}
+
+// approxCrossSectionArea 風向きに対する見かけの断面積を近似計算する
+// shape の回転は無視し，ボックスは各面の面積を風向の各軸の寄与で線形補間
+func (mp *MPhysics) approxCrossSectionArea(r *pmx.RigidBody, dir *mmath.MVec3) float32 {
+	if r == nil || dir == nil {
+		return 1.0
+	}
+	d := dir.Normalized()
+	absX := math.Abs(d.X)
+	absY := math.Abs(d.Y)
+	absZ := math.Abs(d.Z)
+
+	switch r.ShapeType {
+	case pmx.SHAPE_SPHERE:
+		// size.X を半径として使用
+		rads := float64(r.Size.X)
+		return float32(math.Pi * rads * rads)
+	case pmx.SHAPE_BOX:
+		// Bullet では半径系。フルサイズ = 2*size
+		wx := float64(2.0 * r.Size.X)
+		wy := float64(2.0 * r.Size.Y)
+		wz := float64(2.0 * r.Size.Z)
+		area := absX*(wy*wz) + absY*(wx*wz) + absZ*(wx*wy)
+		return float32(area)
+	case pmx.SHAPE_CAPSULE:
+		// Y軸キャップスル形状を想定
+		rad := float64(r.Size.X)
+		h := float64(r.Size.Y)
+		// 軸方向と垂直方向の断面積を補間（スタジアム断面を近似）
+		aAxis := math.Pi * rad * rad
+		aPerp := 2*rad*h + math.Pi*rad*rad
+		// 寄与: Y 成分が大きいほど軸方向の断面に近い
+		w := absY
+		return float32(w*aAxis + (1.0-w)*aPerp)
+	default:
+		// デフォルトは球と同様に扱う
+		rads := float64(r.Size.X)
+		return float32(math.Pi * rads * rads)
+	}
 }
 
 func createWorld(gravity *mmath.MVec3) bt.BtDiscreteDynamicsWorld {
