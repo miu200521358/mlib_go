@@ -672,7 +672,7 @@ func (vl *ViewerList) deform(
 			frame,
 		)
 
-		if vw.list.shared.IsSaveDelta(vw.windowIndex) && physicsResetType == vmd.PHYSICS_RESET_TYPE_NONE {
+		if vw.list.shared.IsSaveDelta(vw.windowIndex) {
 			// モデルのデフォーム更新
 			vw.saveDeltaMotions(frame)
 		}
