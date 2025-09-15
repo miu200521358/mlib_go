@@ -12,45 +12,59 @@ import (
 )
 
 type VmdMotion struct {
-	name                string
-	path                string
-	hash                string
-	Signature           string // vmdバージョン
-	BoneFrames          *BoneFrames
-	MorphFrames         *MorphFrames
-	CameraFrames        *CameraFrames
-	LightFrames         *LightFrames
-	ShadowFrames        *ShadowFrames
-	IkFrames            *IkFrames
-	MaxSubStepsFrames   *MaxSubStepsFrames
-	FixedTimeStepFrames *FixedTimeStepFrames
-	GravityFrames       *GravityFrames
-	PhysicsResetFrames  *PhysicsResetFrames
-	RigidBodyFrames     *RigidBodyFrames // 物理演算用の剛体フレーム
-	JointFrames         *JointFrames     // 物理演算用のジョイントフレーム
-	lock                sync.Mutex       // スレッドセーフ用のロック
+	name                       string
+	path                       string
+	hash                       string
+	Signature                  string // vmdバージョン
+	BoneFrames                 *BoneFrames
+	MorphFrames                *MorphFrames
+	CameraFrames               *CameraFrames
+	LightFrames                *LightFrames
+	ShadowFrames               *ShadowFrames
+	IkFrames                   *IkFrames
+	MaxSubStepsFrames          *MaxSubStepsFrames
+	FixedTimeStepFrames        *FixedTimeStepFrames
+	GravityFrames              *GravityFrames
+	PhysicsResetFrames         *PhysicsResetFrames
+	RigidBodyFrames            *RigidBodyFrames            // 物理演算用の剛体フレーム
+	JointFrames                *JointFrames                // 物理演算用のジョイントフレーム
+	WindEnabledFrames          *WindEnabledFrames          // 風有効フレーム
+	WindDirectionFrames        *WindDirectionFrames        // 風向きフレーム
+	WindLiftCoeffFrames        *WindLiftCoeffFrames        // 風揚力係数フレーム
+	WindDragCoeffFrames        *WindDragCoeffFrames        // 風抗力係数フレーム
+	WindRandomnessFrames       *WindRandomnessFrames       // 風乱流係数フレーム
+	WindSpeedFrames            *WindSpeedFrames            // 風速フレーム
+	WindTurbulenceFreqHzFrames *WindTurbulenceFreqHzFrames // 風乱流周波数フレーム
+	lock                       sync.Mutex                  // スレッドセーフ用のロック
 }
 
 var InitialMotion = NewVmdMotion("")
 
 func NewVmdMotion(path string) *VmdMotion {
 	return &VmdMotion{
-		name:                "",
-		path:                path,
-		hash:                fmt.Sprintf("%d", rand.Intn(10000)), // 初期ハッシュ値
-		BoneFrames:          NewBoneFrames(),
-		MorphFrames:         NewMorphFrames(),
-		CameraFrames:        NewCameraFrames(),
-		LightFrames:         NewLightFrames(),
-		ShadowFrames:        NewShadowFrames(),
-		IkFrames:            NewIkFrames(),
-		MaxSubStepsFrames:   NewMaxSubStepsFrames(),
-		FixedTimeStepFrames: NewFixedTimeStepFrames(),
-		GravityFrames:       NewGravityFrames(),
-		PhysicsResetFrames:  NewPhysicsResetFrames(),
-		RigidBodyFrames:     NewRigidBodyFrames(),
-		JointFrames:         NewJointFrames(),
-		lock:                sync.Mutex{},
+		name:                       "",
+		path:                       path,
+		hash:                       fmt.Sprintf("%d", rand.Intn(10000)), // 初期ハッシュ値
+		BoneFrames:                 NewBoneFrames(),
+		MorphFrames:                NewMorphFrames(),
+		CameraFrames:               NewCameraFrames(),
+		LightFrames:                NewLightFrames(),
+		ShadowFrames:               NewShadowFrames(),
+		IkFrames:                   NewIkFrames(),
+		MaxSubStepsFrames:          NewMaxSubStepsFrames(),
+		FixedTimeStepFrames:        NewFixedTimeStepFrames(),
+		GravityFrames:              NewGravityFrames(),
+		PhysicsResetFrames:         NewPhysicsResetFrames(),
+		RigidBodyFrames:            NewRigidBodyFrames(),
+		JointFrames:                NewJointFrames(),
+		WindEnabledFrames:          NewWindEnabledFrames(),
+		WindDirectionFrames:        NewWindDirectionFrames(),
+		WindLiftCoeffFrames:        NewWindLiftCoeffFrames(),
+		WindDragCoeffFrames:        NewWindDragCoeffFrames(),
+		WindRandomnessFrames:       NewWindRandomnessFrames(),
+		WindSpeedFrames:            NewWindSpeedFrames(),
+		WindTurbulenceFreqHzFrames: NewWindTurbulenceFreqHzFrames(),
+		lock:                       sync.Mutex{},
 	}
 }
 
@@ -217,6 +231,34 @@ func (motion *VmdMotion) InsertShadowFrame(sf *ShadowFrame) {
 
 func (motion *VmdMotion) InsertIkFrame(ikf *IkFrame) {
 	motion.IkFrames.Insert(ikf)
+}
+
+func (motion *VmdMotion) AppendWindEnabledFrame(wef *WindEnabledFrame) {
+	motion.WindEnabledFrames.Append(wef)
+}
+
+func (motion *VmdMotion) AppendWindDirectionFrame(wdf *WindDirectionFrame) {
+	motion.WindDirectionFrames.Append(wdf)
+}
+
+func (motion *VmdMotion) AppendWindLiftCoeffFrame(wlcf *WindLiftCoeffFrame) {
+	motion.WindLiftCoeffFrames.Append(wlcf)
+}
+
+func (motion *VmdMotion) AppendWindDragCoeffFrame(wdcf *WindDragCoeffFrame) {
+	motion.WindDragCoeffFrames.Append(wdcf)
+}
+
+func (motion *VmdMotion) AppendWindRandomnessFrame(wrf *WindRandomnessFrame) {
+	motion.WindRandomnessFrames.Append(wrf)
+}
+
+func (motion *VmdMotion) AppendWindSpeedFrame(wsf *WindSpeedFrame) {
+	motion.WindSpeedFrames.Append(wsf)
+}
+
+func (motion *VmdMotion) AppendWindTurbulenceFreqHzFrame(wtff *WindTurbulenceFreqHzFrame) {
+	motion.WindTurbulenceFreqHzFrames.Append(wtff)
 }
 
 func (motion *VmdMotion) Clean() {

@@ -649,6 +649,9 @@ func (vl *ViewerList) deform(
 	}
 
 	if vl.shared.IsEnabledPhysics() || physicsResetType != vmd.PHYSICS_RESET_TYPE_NONE {
+		// 風設定
+		vw.updateWind(frame)
+
 		// 物理更新
 		vw.physics.StepSimulation(
 			timeStep,

@@ -716,6 +716,10 @@ func (cw *ControlWindow) SetCheckedShowInfoEnabled(enabled bool) {
 	cw.TriggerShowInfo()
 }
 
+func (cw *ControlWindow) StoreWindMotion(windowIndex int, windMotion *vmd.VmdMotion) {
+	cw.shared.StoreWindMotion(windowIndex, windMotion)
+}
+
 func (cw *ControlWindow) StorePhysicsWorldMotion(windowIndex int, physicsMotion *vmd.VmdMotion) {
 	cw.shared.StorePhysicsWorldMotion(windowIndex, physicsMotion)
 }

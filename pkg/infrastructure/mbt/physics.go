@@ -233,7 +233,7 @@ func (mp *MPhysics) applyWindForces(dt float32) {
 			kl := float64(mp.windCfg.LiftCoeff)
 			if kl > 0 {
 				// world up (Bullet座標)
-				up := bt.NewBtVector3(0, 1, 0)
+				up := bt.NewBtVector3(float32(0), float32(1), float32(0))
 				vRel := bt.NewBtVector3(float32(relX), float32(relY), float32(relZ))
 				// 側方ベクトル = up x v_rel
 				side := up.Cross(vRel)

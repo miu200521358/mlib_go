@@ -37,6 +37,7 @@ type SharedState struct {
 	deltaMotions               [][][]atomic.Value // 変形情報の保存(ウィンドウ/モデルインデックス/モーションインデックス)
 	physicsWorldMotions        []atomic.Value     // 物理ワールド用モーションデータ(ウィンドウ)
 	physicsModelMotions        [][]atomic.Value   // 物理モデル用モーションデータ(ウィンドウ)
+	windMotions                []atomic.Value     // 風用モーションデータ(ウィンドウ)
 	physicsResetType           atomic.Int32       // 物理リセットの種類
 }
 
@@ -55,6 +56,7 @@ func NewSharedState(viewerCount int) *SharedState {
 		deltaMotions:            make([][][]atomic.Value, viewerCount),
 		physicsWorldMotions:     make([]atomic.Value, viewerCount),
 		physicsModelMotions:     make([][]atomic.Value, viewerCount),
+		windMotions:             make([]atomic.Value, viewerCount),
 	}
 
 	shared.SetFrame(0)
@@ -303,6 +305,37 @@ func (ss *SharedState) LoadPhysicsModelMotion(windowIndex, modelIndex int) *vmd.
 	if v == nil {
 		ss.StorePhysicsModelMotion(windowIndex, modelIndex, nil)
 		return ss.LoadPhysicsModelMotion(windowIndex, modelIndex)
+	}
+
+	return v.(*vmd.VmdMotion)
+}
+
+// StoreWindMotion は指定されたウィンドウとモデルインデックスにモーションを格納
+func (ss *SharedState) StoreWindMotion(windowIndex int, motion *vmd.VmdMotion) {
+	if len(ss.windMotions) <= windowIndex {
+		return
+	}
+
+	if motion != nil {
+		ss.windMotions[windowIndex].Store(motion)
+	} else {
+		physicsMotion := vmd.NewVmdMotion("")
+		physicsMotion.AppendWindEnabledFrame(vmd.NewWindEnabledFrameByValue(0, false))
+		physicsMotion.AppendWindDirectionFrame(vmd.NewWindDirectionFrameByValue(0, mmath.NewMVec3()))
+		ss.windMotions[windowIndex].Store(physicsMotion)
+	}
+}
+
+// LoadWindMotion は指定されたウィンドウとモデルインデックスのモーションを取得
+func (ss *SharedState) LoadWindMotion(windowIndex int) *vmd.VmdMotion {
+	if len(ss.windMotions) <= windowIndex {
+		return nil
+	}
+
+	v := ss.windMotions[windowIndex].Load()
+	if v == nil {
+		ss.StoreWindMotion(windowIndex, nil)
+		return ss.LoadWindMotion(windowIndex)
 	}
 
 	return v.(*vmd.VmdMotion)

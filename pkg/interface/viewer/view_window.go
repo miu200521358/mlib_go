@@ -391,3 +391,23 @@ func (vw *ViewWindow) saveDeltaMotions(frame float32) {
 		vw.list.shared.StoreDeltaMotion(vw.windowIndex, n, deltaIndex, deltaMotion)
 	}
 }
+
+func (vw *ViewWindow) updateWind(frame float32) {
+	windMotion := vw.list.shared.LoadWindMotion(vw.windowIndex)
+
+	if windMotion == nil {
+		return
+	}
+
+	enabledF := windMotion.WindEnabledFrames.Get(frame)
+	directionF := windMotion.WindDirectionFrames.Get(frame)
+	speedF := windMotion.WindSpeedFrames.Get(frame)
+	liftCoeffF := windMotion.WindLiftCoeffFrames.Get(frame)
+	dragCoeffF := windMotion.WindDragCoeffFrames.Get(frame)
+	randomnessF := windMotion.WindRandomnessFrames.Get(frame)
+	turbulenceFreqHzF := windMotion.WindTurbulenceFreqHzFrames.Get(frame)
+
+	vw.physics.EnableWind(enabledF.Enabled)
+	vw.physics.SetWind(directionF.Direction, speedF.Speed, randomnessF.Randomness)
+	vw.physics.SetWindAdvanced(dragCoeffF.DragCoeff, liftCoeffF.LiftCoeff, turbulenceFreqHzF.TurbulenceFreqHz)
+}
