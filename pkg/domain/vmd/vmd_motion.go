@@ -106,10 +106,26 @@ func (motion *VmdMotion) UpdateHash() {
 }
 
 func (motion *VmdMotion) MaxFrame() float32 {
+	if motion.BoneFrames == nil {
+		if motion.MorphFrames == nil {
+			return 0
+		}
+		return motion.MorphFrames.MaxFrame()
+	} else if motion.MorphFrames == nil {
+		return motion.BoneFrames.MaxFrame()
+	}
 	return max(motion.BoneFrames.MaxFrame(), motion.MorphFrames.MaxFrame())
 }
 
 func (motion *VmdMotion) MinFrame() float32 {
+	if motion.BoneFrames == nil {
+		if motion.MorphFrames == nil {
+			return 0
+		}
+		return motion.MorphFrames.MinFrame()
+	} else if motion.MorphFrames == nil {
+		return motion.BoneFrames.MinFrame()
+	}
 	return min(motion.BoneFrames.MinFrame(), motion.MorphFrames.MinFrame())
 }
 
