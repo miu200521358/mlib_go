@@ -150,7 +150,7 @@ func NewRigidBody() *RigidBody {
 		englishName:             "",
 		BoneIndex:               -1,
 		CollisionGroup:          0,
-		CollisionGroupMask:      NewCollisionGroupFromSlice([]uint16{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
+		CollisionGroupMask:      NewCollisionGroupAll(),
 		CollisionGroupMaskValue: 0,
 		ShapeType:               SHAPE_BOX,
 		Size:                    mmath.NewMVec3(),
