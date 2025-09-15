@@ -65,8 +65,9 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 						mp.frameSlider.ChangeValue(int(mp.frameEdit.Value()))
 					}
 				},
-				ToolTipText:   mi18n.T("再生キーフレ説明"),
-				StretchFactor: 3,
+				ToolTipText:            mi18n.T("再生キーフレ説明"),
+				StretchFactor:          3,
+				ChangedBackgroundColor: walk.ColorWhite,
 			},
 			// フレームスライダー
 			declarative.Slider{
