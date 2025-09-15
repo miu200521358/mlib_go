@@ -1,7 +1,6 @@
 package vmd
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
@@ -36,12 +35,12 @@ func (nextMf *RigidBodyFrame) lerpFrame(prevFrame IBaseFrame, index float32) IBa
 	size := prevMf.Size.Lerp(nextMf.Size, ry)
 	mass := mmath.Lerp(prevMf.Mass, nextMf.Mass, ry)
 
-	mlog.I("RigidBodyFrame Lerp: prevIndex=%.2f, nextIndex=%.2f, index=%.2f, ry=%.2f => pos=(%.2f, %.2f, %.2f), size=(%.2f, %.2f, %.2f), mass=%.2f",
-		prevIndex, nextIndex, index, ry,
-		position.X, position.Y, position.Z,
-		size.X, size.Y, size.Z,
-		mass,
-	)
+	// mlog.I("RigidBodyFrame Lerp: prevIndex=%.2f, nextIndex=%.2f, index=%.2f, ry=%.2f => pos=(%.2f, %.2f, %.2f), size=(%.2f, %.2f, %.2f), mass=%.2f",
+	// 	prevIndex, nextIndex, index, ry,
+	// 	position.X, position.Y, position.Z,
+	// 	size.X, size.Y, size.Z,
+	// 	mass,
+	// )
 
 	return NewRigidBodyFrameByValues(index, position, size, mass)
 }
