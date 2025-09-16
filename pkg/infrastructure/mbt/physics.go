@@ -43,16 +43,16 @@ func NewMPhysics(gravity *mmath.MVec3) physics.IPhysics {
 		joints:      make(map[int][]*jointValue),
 
 		// 風のデフォルト設定（無効）
-        windCfg: physics.WindConfig{
-            Enabled:          false,
-            Direction:        &mmath.MVec3{X: 1, Y: 0, Z: 0},
-            Speed:            0,
-            Randomness:       0,
-            TurbulenceFreqHz: 0.5,
-            DragCoeff:        1.0,
-            LiftCoeff:        0.2,
-            MaxAcceleration:  80.0,
-        },
+		windCfg: physics.WindConfig{
+			Enabled:          false,
+			Direction:        &mmath.MVec3{X: 1, Y: 0, Z: 0},
+			Speed:            0,
+			Randomness:       0,
+			TurbulenceFreqHz: 0.5,
+			DragCoeff:        0.8,
+			LiftCoeff:        0.2,
+			MaxAcceleration:  80.0,
+		},
 		simTimeAcc: 0,
 	}
 
