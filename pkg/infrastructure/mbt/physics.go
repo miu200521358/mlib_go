@@ -6,10 +6,12 @@ package mbt
 import (
 	"math"
 
+	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
 
@@ -363,31 +365,178 @@ func createWorld(gravity *mmath.MVec3) bt.BtDiscreteDynamicsWorld {
 }
 
 // RaycastRigidBody は画面座標からレイキャストを行い、最前面の剛体を取得します
-// TODO: Bulletライブラリの正しいAPI名を調べて実装
-func (mp *MPhysics) RaycastRigidBody(screenX, screenY float64, camera interface{}, width, height int) (*RigidBodyHit, error) {
-	// 仮実装：最初の剛体を返す（テスト用）
+func (mp *MPhysics) RaycastRigidBody(screenX, screenY float64, camera *rendering.Camera, width, height int) (*RigidBodyHit, error) {
+	// 簡易実装：カメラ情報を使わずに距離ベースの選択を行う
+	// スクリーン座標からワールド座標のレイを生成
+	rayStart, rayEnd := mp.screenToWorldRay(screenX, screenY, camera, width, height)
+	if rayStart == nil || rayEnd == nil {
+		// デバッグログ：座標変換エラー
+		// mlog.W("Screen to world coordinate conversion failed")
+		return nil, nil
+	}
+
+	// デバッグログ：レイキャスト実行
+	// mlog.I("Raycast: screen(%f, %f) -> world(%f,%f,%f) to (%f,%f,%f)",
+	//   screenX, screenY, rayStart.X, rayStart.Y, rayStart.Z, rayEnd.X, rayEnd.Y, rayEnd.Z)
+
+	// Bullet物理エンジンでのレイキャスト
+	btRayStart := newBulletFromVec(rayStart)
+	btRayEnd := newBulletFromVec(rayEnd)
+	defer bt.DeleteBtVector3(btRayStart)
+	defer bt.DeleteBtVector3(btRayEnd)
+
+	// レイキャスト結果を格納するコールバック（全ての交差を取得）
+	// TODO: Bulletの正しいAPI名を調査
+	// 現在は簡易実装として距離ベースの選択を行う
+	return mp.performRaycastSelection(rayStart, rayEnd, btRayStart, btRayEnd)
+}
+
+// screenToWorldRay はスクリーン座標からワールド座標のレイを生成します
+func (mp *MPhysics) screenToWorldRay(screenX, screenY float64, camera *rendering.Camera, width, height int) (*mmath.MVec3, *mmath.MVec3) {
+	// NDC座標に変換 (-1 to 1)
+	ndcX := (2.0 * screenX / float64(width)) - 1.0
+	ndcY := 1.0 - (2.0 * screenY / float64(height)) // Y軸反転
+
+	// デバッグログ：入力値とNDC変換結果
+	// mlog.I("スクリーン座標: (%f, %f), ウィンドウサイズ: (%d, %d), NDC座標: (%f, %f)",
+	//   screenX, screenY, width, height, ndcX, ndcY)
+
+	// 実際のカメラ情報を使用（Camera構造体に直接アクセス）
+	return mp.createRayFromCameraInfo(ndcX, ndcY, camera, width, height)
+}
+
+// createRayFromCameraInfo は実際のカメラ情報からレイを生成します
+func (mp *MPhysics) createRayFromCameraInfo(ndcX, ndcY float64, camera *rendering.Camera, width, height int) (*mmath.MVec3, *mmath.MVec3) {
+	// 実際のカメラの前方ベクトルを計算
+	forward := camera.LookAtCenter.Subed(camera.Position).Normalized()
+
+	// カメラの右方向と上方向ベクトルを計算
+	up := camera.Up.Copy().Normalized()
+	right := forward.Cross(up).Normalized()
+	up = right.Cross(forward).Normalized()
+
+	// 実際のFOV（視野角）を使用
+	fov := float64(camera.FieldOfView) * math.Pi / 180.0
+	aspect := float64(width) / float64(height)
+
+	// レイの方向を計算
+	h := math.Tan(fov / 2.0)
+	w := h * aspect
+
+	// スクリーン座標に対応するワールド方向ベクトル
+	rayDirection := forward.Copy()
+	rayDirection.Add(right.MulScalar(ndcX * w))
+	rayDirection.Add(up.MulScalar(ndcY * h))
+	rayDirection = rayDirection.Normalized()
+
+	// レイの開始点（実際のカメラ位置）
+	rayStart := camera.Position.Copy()
+
+	// レイの終了点（遠い距離）
+	farDistance := 1000.0
+	rayEnd := rayStart.Copy()
+	rayEnd.Add(rayDirection.MulScalar(farDistance))
+
+	// デバッグログ：実際のカメラ情報
+	mlog.I("Camera pos: (%f,%f,%f), lookAt: (%f,%f,%f), FOV: %f",
+		camera.Position.X, camera.Position.Y, camera.Position.Z,
+		camera.LookAtCenter.X, camera.LookAtCenter.Y, camera.LookAtCenter.Z, camera.FieldOfView)
+
+	return rayStart, rayEnd
+}
+
+// performRaycastSelection は実際のレイキャストを実行し、最適な剛体を選択します
+func (mp *MPhysics) performRaycastSelection(rayStart, rayEnd *mmath.MVec3, btRayStart, btRayEnd bt.BtVector3) (*RigidBodyHit, error) {
+	// 現在は簡易実装：全ての剛体をチェックし、レイとの距離が最も近いものを選択
+	var closestHit *RigidBodyHit
+	minDistance := float64(math.MaxFloat64)
+
 	for modelIndex, bodies := range mp.rigidBodies {
 		if len(bodies) == 0 {
 			continue
 		}
 
 		for rigidBodyIndex, rb := range bodies {
-			if rb == nil || rb.pmxRigidBody == nil {
+			if rb == nil || rb.pmxRigidBody == nil || rb.btRigidBody == nil {
 				continue
 			}
 
-			// テスト用に最初に見つかった剛体を返す
-			return &RigidBodyHit{
-				ModelIndex:     modelIndex,
-				RigidBodyIndex: rigidBodyIndex,
-				RigidBody:      rb.pmxRigidBody,
-				Distance:       1.0,
-				HitPoint:       &mmath.MVec3{X: 0, Y: 0, Z: 0},
-			}, nil
+			// Bullet物理世界での実際の剛体位置を取得（現在は一時的にPMX位置を使用）
+			// TODO: Bulletの型アサーションを修正後に有効化
+			// transform := rb.btRigidBody.GetWorldTransform()
+			// 現在はPMX初期位置を使用
+			rigidBodyPos := rb.pmxRigidBody.Position
+
+			// デバッグログ：使用中の位置情報
+			// mlog.I("剛体位置（PMX初期値使用）: %s (%f,%f,%f)",
+			//   rb.pmxRigidBody.Name(), rigidBodyPos.X, rigidBodyPos.Y, rigidBodyPos.Z)
+
+			// レイと剛体の中心点との距離を計算（簡易的な判定）
+			distance := mp.calculateRayPointDistance(rayStart, rayEnd, rigidBodyPos)
+
+			// 剛体のサイズを考慮した判定（簡易的）
+			rigidBodyRadius := float64(math.Max(rb.pmxRigidBody.Size.X, math.Max(rb.pmxRigidBody.Size.Y, rb.pmxRigidBody.Size.Z)))
+
+			// デバッグログ：詳細な剛体情報
+			// mlog.I("剛体チェック: %s 位置:(%f,%f,%f) 距離:%f 半径:%f",
+			//   rb.pmxRigidBody.Name(), rigidBodyPos.X, rigidBodyPos.Y, rigidBodyPos.Z, distance, rigidBodyRadius)
+
+			if distance <= rigidBodyRadius && distance < minDistance {
+				minDistance = distance
+				closestHit = &RigidBodyHit{
+					ModelIndex:     modelIndex,
+					RigidBodyIndex: rigidBodyIndex,
+					RigidBody:      rb.pmxRigidBody,
+					Distance:       float32(distance),
+					HitPoint:       rigidBodyPos.Copy(),
+				}
+				// デバッグログ：候補剛体
+				// mlog.I("候補剛体更新: %s (距離: %f)", rb.pmxRigidBody.Name(), distance)
+			}
 		}
 	}
 
-	return nil, nil
+	if closestHit != nil {
+		// デバッグログ：最終選択された剛体
+		mlog.I("Raycast hit: %s (distance: %f)", closestHit.RigidBody.Name(), closestHit.Distance)
+	} else {
+		// デバッグログ：剛体なし
+		mlog.I("No rigid body hit")
+	}
+
+	return closestHit, nil
+}
+
+// calculateRayPointDistance はレイと点との最短距離を計算します
+func (mp *MPhysics) calculateRayPointDistance(rayStart, rayEnd, point *mmath.MVec3) float64 {
+	// レイのベクトル
+	rayVec := rayEnd.Subed(rayStart)
+
+	// レイの開始点から対象点へのベクトル
+	toPoint := point.Subed(rayStart)
+
+	// レイ上の最近点を計算
+	rayLength := rayVec.Length()
+	if rayLength < 1e-10 {
+		return rayStart.Distance(point)
+	}
+
+	rayDir := rayVec.Normalized()
+	projLength := toPoint.Dot(rayDir)
+
+	// プロジェクションをレイの範囲内にクランプ
+	if projLength < 0 {
+		projLength = 0
+	} else if projLength > rayLength {
+		projLength = rayLength
+	}
+
+	// レイ上の最近点
+	closestPointOnRay := rayStart.Copy()
+	closestPointOnRay.Add(rayDir.MulScalar(projLength))
+
+	// 点とレイ上の最近点との距離
+	return closestPointOnRay.Distance(point)
 }
 
 // SetSelectedRigidBody はハイライト表示する剛体を設定します
@@ -405,7 +554,7 @@ func (mp *MPhysics) ClearSelectedRigidBody() {
 }
 
 // DrawRigidBodyHighlight はハイライトした剛体を描画します
-func (mp *MPhysics) DrawRigidBodyHighlight(shader interface{}, isDrawRigidBodyFront bool) {
+func (mp *MPhysics) DrawRigidBodyHighlight(shader rendering.IShader, isDrawRigidBodyFront bool) {
 	if mp.highlighter != nil {
 		// TODO: 型エラー回避のため一旦コメントアウト
 		// 基本的なマウスホバー処理の動作確認後に修正

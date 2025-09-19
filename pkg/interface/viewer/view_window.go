@@ -427,11 +427,10 @@ func (vw *ViewWindow) drawRigidBodyHighlight() {
 
 	// 物理エンジンからハイライト描画を呼び出し
 	if vw.physics != nil {
-		if physicsImpl, ok := vw.physics.(*mbt.MPhysics); ok {
-			// デバッグログ：ハイライト描画呼び出し
-			// mlog.D("Drawing rigid body highlight")
-			physicsImpl.DrawRigidBodyHighlight(vw.shader, vw.list.shared.IsShowRigidBodyFront())
-		}
+		// 物理エンジンのインターフェースを直接使用
+		// TODO: DrawRigidBodyHighlightメソッドをIPhysicsインターフェースに追加する必要あり
+		// 現在は一時的にコメントアウト
+		// vw.physics.DrawRigidBodyHighlight(vw.shader, vw.list.shared.IsShowRigidBodyFront())
 	}
 }
 
@@ -451,7 +450,7 @@ func (vw *ViewWindow) handleRigidBodyHover(xpos, ypos float64) {
 	}
 
 	// デバッグログ：マウス位置
-	// mlog.I("Mouse hover at: %f, %f (Debug view enabled: %v)", xpos, ypos, isRigidBodyVisible)
+	mlog.I("マウスホバー: 座標(%f, %f) デバッグビュー有効=%v", xpos, ypos, isRigidBodyVisible)
 
 	// ウィンドウサイズを取得
 	width, height := vw.GetSize()
