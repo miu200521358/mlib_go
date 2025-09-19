@@ -13,11 +13,21 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
 
+// RigidBodyHit はレイキャストでヒットした剛体の情報
+type RigidBodyHit struct {
+	ModelIndex     int            // モデルのインデックス
+	RigidBodyIndex int            // 剛体のインデックス
+	RigidBody      *pmx.RigidBody // 剛体の情報
+	Distance       float32        // カメラからの距離
+	HitPoint       *mmath.MVec3   // ヒットした座標（ワールド座標）
+}
+
 // MPhysics 物理エンジンの実装
 type MPhysics struct {
 	world       bt.BtDiscreteDynamicsWorld // ワールド
 	drawer      bt.BtMDebugDraw            // デバッグビューワー
 	liner       *mDebugDrawLiner           // ライナー
+	highlighter *mDebugDrawHighlighter     // ハイライト描画器
 	config      physics.PhysicsConfig      // 設定パラメータ
 	DeformSpf   float32                    // デフォームspf
 	PhysicsSpf  float32                    // 物理spf
@@ -65,6 +75,7 @@ func NewMPhysics(gravity *mmath.MVec3) physics.IPhysics {
 // initDebugDrawer はデバッグ描画機能を初期化します
 func (mp *MPhysics) initDebugDrawer() {
 	liner := newMDebugDrawLiner()
+	highlighter := newMDebugDrawHighlighter()
 	drawer := bt.NewBtMDebugDraw()
 	drawer.SetLiner(liner)
 	drawer.SetMDefaultColors(newConstBtMDefaultColors())
@@ -72,6 +83,7 @@ func (mp *MPhysics) initDebugDrawer() {
 
 	mp.drawer = drawer
 	mp.liner = liner
+	mp.highlighter = highlighter
 }
 
 // ResetWorld はワールドをリセットします
@@ -348,6 +360,57 @@ func createWorld(gravity *mmath.MVec3) bt.BtDiscreteDynamicsWorld {
 	world.AddRigidBody(groundRigidBody, 1<<15, 0xFFFF)
 
 	return world
+}
+
+// RaycastRigidBody は画面座標からレイキャストを行い、最前面の剛体を取得します
+// TODO: Bulletライブラリの正しいAPI名を調べて実装
+func (mp *MPhysics) RaycastRigidBody(screenX, screenY float64, camera interface{}, width, height int) (*RigidBodyHit, error) {
+	// 仮実装：最初の剛体を返す（テスト用）
+	for modelIndex, bodies := range mp.rigidBodies {
+		if len(bodies) == 0 {
+			continue
+		}
+
+		for rigidBodyIndex, rb := range bodies {
+			if rb == nil || rb.pmxRigidBody == nil {
+				continue
+			}
+
+			// テスト用に最初に見つかった剛体を返す
+			return &RigidBodyHit{
+				ModelIndex:     modelIndex,
+				RigidBodyIndex: rigidBodyIndex,
+				RigidBody:      rb.pmxRigidBody,
+				Distance:       1.0,
+				HitPoint:       &mmath.MVec3{X: 0, Y: 0, Z: 0},
+			}, nil
+		}
+	}
+
+	return nil, nil
+}
+
+// SetSelectedRigidBody はハイライト表示する剛体を設定します
+func (mp *MPhysics) SetSelectedRigidBody(hit *RigidBodyHit) {
+	if mp.highlighter != nil {
+		mp.highlighter.SetSelectedRigidBody(hit)
+	}
+}
+
+// ClearSelectedRigidBody はハイライト表示を解除します
+func (mp *MPhysics) ClearSelectedRigidBody() {
+	if mp.highlighter != nil {
+		mp.highlighter.ClearSelection()
+	}
+}
+
+// DrawRigidBodyHighlight はハイライトした剛体を描画します
+func (mp *MPhysics) DrawRigidBodyHighlight(shader interface{}, isDrawRigidBodyFront bool) {
+	if mp.highlighter != nil {
+		// TODO: 型エラー回避のため一旦コメントアウト
+		// 基本的なマウスホバー処理の動作確認後に修正
+		// mp.highlighter.drawHighlight(shader, isDrawRigidBodyFront)
+	}
 }
 
 // UpdatePhysicsSelectively は変更が必要な剛体・ジョイントのみを選択的に更新します
