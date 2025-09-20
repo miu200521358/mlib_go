@@ -427,10 +427,9 @@ func (vw *ViewWindow) drawRigidBodyHighlight() {
 
 	// 物理エンジンからハイライト描画を呼び出し
 	if vw.physics != nil {
-		// 物理エンジンのインターフェースを直接使用
-		// TODO: DrawRigidBodyHighlightメソッドをIPhysicsインターフェースに追加する必要あり
-		// 現在は一時的にコメントアウト
-		// vw.physics.DrawRigidBodyHighlight(vw.shader, vw.list.shared.IsShowRigidBodyFront())
+		if physicsImpl, ok := vw.physics.(*mbt.MPhysics); ok {
+			physicsImpl.DrawRigidBodyHighlight(vw.shader, vw.list.shared.IsShowRigidBodyFront())
+		}
 	}
 }
 
@@ -473,8 +472,8 @@ func (vw *ViewWindow) handleRigidBodyHover(xpos, ypos float64) {
 				// ハイライト設定
 				physicsImpl.SetSelectedRigidBody(hit)
 
-				// ツールチップ用ログ（コンソールに剛体名を表示）
-				mlog.I("剛体ホバー: %s", hit.RigidBody.Name())
+				// ツールチップ用ログ（剛体名とグループをコンソールに表示）
+				mlog.I("剛体ホバー: %s (グループ: %d)", hit.RigidBody.Name(), hit.RigidBody.CollisionGroup)
 			} else {
 				// ヒットしなかった場合、選択をクリア
 				// mlog.D("No rigid body hit")

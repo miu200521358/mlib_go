@@ -364,20 +364,63 @@ func createWorld(gravity *mmath.MVec3) bt.BtDiscreteDynamicsWorld {
 	return world
 }
 
+// rayTestCallback はレイキャストのコールバック処理を行います
+type rayTestCallback struct {
+	mp              *MPhysics
+	closestHit      *RigidBodyHit
+	closestDistance float32
+	rayStart        *mmath.MVec3
+	rayEnd          *mmath.MVec3
+}
+
+// newRayTestCallback は新しいレイテストコールバックを作成します
+func (mp *MPhysics) newRayTestCallback(rayStart, rayEnd *mmath.MVec3) *rayTestCallback {
+	return &rayTestCallback{
+		mp:              mp,
+		closestHit:      nil,
+		closestDistance: 1.0, // 最大距離（0.0〜1.0の範囲）
+		rayStart:        rayStart,
+		rayEnd:          rayEnd,
+	}
+}
+
+// processRayHit はレイヒット結果を処理します
+func (rtc *rayTestCallback) processRayHit(rigidBody bt.BtRigidBody, hitFraction float32, hitPoint *mmath.MVec3) {
+	if hitFraction < rtc.closestDistance {
+		// ユーザーインデックスから剛体情報を取得
+		userIndex := rigidBody.GetUserIndex()
+
+		// 全モデルから該当する剛体を検索
+		for modelIndex, bodies := range rtc.mp.rigidBodies {
+			if len(bodies) <= userIndex || userIndex < 0 {
+				continue
+			}
+
+			rigidBodyValue := bodies[userIndex]
+			if rigidBodyValue != nil && rigidBodyValue.btRigidBody != nil &&
+				rigidBodyValue.btRigidBody.GetUserIndex() == userIndex {
+
+				rtc.closestDistance = hitFraction
+				rtc.closestHit = &RigidBodyHit{
+					ModelIndex:     modelIndex,
+					RigidBodyIndex: userIndex,
+					RigidBody:      rigidBodyValue.pmxRigidBody,
+					Distance:       hitFraction,
+					HitPoint:       hitPoint,
+				}
+				break
+			}
+		}
+	}
+}
+
 // RaycastRigidBody は画面座標からレイキャストを行い、最前面の剛体を取得します
 func (mp *MPhysics) RaycastRigidBody(screenX, screenY float64, camera *rendering.Camera, width, height int) (*RigidBodyHit, error) {
-	// 簡易実装：カメラ情報を使わずに距離ベースの選択を行う
 	// スクリーン座標からワールド座標のレイを生成
 	rayStart, rayEnd := mp.screenToWorldRay(screenX, screenY, camera, width, height)
 	if rayStart == nil || rayEnd == nil {
-		// デバッグログ：座標変換エラー
-		// mlog.W("Screen to world coordinate conversion failed")
 		return nil, nil
 	}
-
-	// デバッグログ：レイキャスト実行
-	// mlog.I("Raycast: screen(%f, %f) -> world(%f,%f,%f) to (%f,%f,%f)",
-	//   screenX, screenY, rayStart.X, rayStart.Y, rayStart.Z, rayEnd.X, rayEnd.Y, rayEnd.Z)
 
 	// Bullet物理エンジンでのレイキャスト
 	btRayStart := newBulletFromVec(rayStart)
@@ -385,9 +428,11 @@ func (mp *MPhysics) RaycastRigidBody(screenX, screenY float64, camera *rendering
 	defer bt.DeleteBtVector3(btRayStart)
 	defer bt.DeleteBtVector3(btRayEnd)
 
-	// レイキャスト結果を格納するコールバック（全ての交差を取得）
-	// TODO: Bulletの正しいAPI名を調査
-	// 現在は簡易実装として距離ベースの選択を行う
+	// 簡易実装：全ての剛体をチェックしてレイとの交差を判定
+	// TODO: 実際のbtDynamicsWorld::rayTest()を使用する場合は以下のコードに置き換え
+	// callback := mp.newRayTestCallback(rayStart, rayEnd)
+	// mp.world.RayTest(btRayStart, btRayEnd, callback)
+
 	return mp.performRaycastSelection(rayStart, rayEnd, btRayStart, btRayEnd)
 }
 
@@ -433,7 +478,7 @@ func (mp *MPhysics) createRayFromCameraInfo(ndcX, ndcY float64, camera *renderin
 	rayStart := camera.Position.Copy()
 
 	// レイの終了点（遠い距離）
-	farDistance := 1000.0
+	farDistance := float64(camera.FarPlane)
 	rayEnd := rayStart.Copy()
 	rayEnd.Add(rayDirection.MulScalar(farDistance))
 
@@ -556,9 +601,7 @@ func (mp *MPhysics) ClearSelectedRigidBody() {
 // DrawRigidBodyHighlight はハイライトした剛体を描画します
 func (mp *MPhysics) DrawRigidBodyHighlight(shader rendering.IShader, isDrawRigidBodyFront bool) {
 	if mp.highlighter != nil {
-		// TODO: 型エラー回避のため一旦コメントアウト
-		// 基本的なマウスホバー処理の動作確認後に修正
-		// mp.highlighter.drawHighlight(shader, isDrawRigidBodyFront)
+		mp.highlighter.drawHighlight(shader, isDrawRigidBodyFront)
 	}
 }
 
