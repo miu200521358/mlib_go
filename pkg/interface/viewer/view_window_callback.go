@@ -135,9 +135,6 @@ func (vw *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
 		// } else {
 		// 	vw.leftCursorWindowPositions[mgl32.Vec2{float32(xpos), float32(ypos)}] = 0.0
 		// }
-	} else {
-		// マウスホバー時の剛体検出処理
-		vw.handleRigidBodyHover(xpos, ypos)
 	}
 
 	vw.prevCursorPos.X = xpos

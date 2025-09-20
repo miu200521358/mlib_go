@@ -10,7 +10,6 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
@@ -197,9 +196,6 @@ func (vw *ViewWindow) render() {
 	// 物理デバッグ描画
 	vw.physics.DrawDebugLines(vw.shader, vw.list.shared.IsShowRigidBodyFront() || vw.list.shared.IsShowRigidBodyBack(),
 		vw.list.shared.IsShowJoint(), vw.list.shared.IsShowRigidBodyFront())
-
-	// 剛体ハイライト描画
-	vw.drawRigidBodyHighlight()
 
 	// 描画終了後のFBO解除
 	if len(vw.list.windowList) > 1 && vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
@@ -414,71 +410,4 @@ func (vw *ViewWindow) updateWind(frame float32) {
 	vw.physics.EnableWind(enabledF.Enabled)
 	vw.physics.SetWind(directionF.Direction, speedF.Speed, randomnessF.Randomness)
 	vw.physics.SetWindAdvanced(dragCoeffF.DragCoeff, liftCoeffF.LiftCoeff, turbulenceFreqHzF.TurbulenceFreqHz)
-}
-
-// drawRigidBodyHighlight は剛体のハイライト描画を行います
-func (vw *ViewWindow) drawRigidBodyHighlight() {
-	// デバッグビューが有効な場合のみ描画
-	isRigidBodyVisible := vw.list.shared.IsShowRigidBodyFront() || vw.list.shared.IsShowRigidBodyBack()
-
-	if !isRigidBodyVisible {
-		return
-	}
-
-	// 物理エンジンからハイライト描画を呼び出し
-	if vw.physics != nil {
-		if physicsImpl, ok := vw.physics.(*mbt.MPhysics); ok {
-			physicsImpl.DrawRigidBodyHighlight(vw.shader, vw.list.shared.IsShowRigidBodyFront())
-		}
-	}
-}
-
-// handleRigidBodyHover はマウスホバー時の剛体検出処理を行います
-func (vw *ViewWindow) handleRigidBodyHover(xpos, ypos float64) {
-	// デバッグビューが有効な場合のみ処理
-	isRigidBodyVisible := vw.list.shared.IsShowRigidBodyFront() || vw.list.shared.IsShowRigidBodyBack()
-
-	if !isRigidBodyVisible {
-		// デバッグビューが無効の場合、選択をクリア
-		if vw.physics != nil {
-			if physicsImpl, ok := vw.physics.(*mbt.MPhysics); ok {
-				physicsImpl.ClearSelectedRigidBody()
-			}
-		}
-		return
-	}
-
-	// デバッグログ：マウス位置
-	mlog.I("マウスホバー: 座標(%f, %f) デバッグビュー有効=%v", xpos, ypos, isRigidBodyVisible)
-
-	// ウィンドウサイズを取得
-	width, height := vw.GetSize()
-
-	// レイキャストを実行
-	if vw.physics != nil {
-		if physicsImpl, ok := vw.physics.(*mbt.MPhysics); ok {
-			hit, err := physicsImpl.RaycastRigidBody(xpos, ypos, vw.shader.Camera(), width, height)
-
-			if err != nil {
-				// mlog.W("Raycast error: %v", err)
-				return
-			}
-
-			if hit != nil {
-				// デバッグログ：剛体ヒット
-				// mlog.I("Raycast hit rigid body: %s (ModelIndex: %d, RigidBodyIndex: %d)",
-				//	hit.RigidBody.Name(), hit.ModelIndex, hit.RigidBodyIndex)
-
-				// ハイライト設定
-				physicsImpl.SetSelectedRigidBody(hit)
-
-				// ツールチップ用ログ（剛体名とグループをコンソールに表示）
-				mlog.I("剛体ホバー: %s (グループ: %d)", hit.RigidBody.Name(), hit.RigidBody.CollisionGroup)
-			} else {
-				// ヒットしなかった場合、選択をクリア
-				// mlog.D("No rigid body hit")
-				physicsImpl.ClearSelectedRigidBody()
-			}
-		}
-	}
 }
